@@ -46,12 +46,16 @@ class ImageView;
 
 /** @brief %Image format.
 */
-class PT_GFX_API ImageFormat
+class ImageFormat
 {
     public:
-        ImageFormat(size_t pixelSize, size_t channels);
+        ImageFormat(size_t pixelStride, size_t channels)
+        : _pixelStride(pixelStride)
+        , _channels(channels)
+        { }
 
-        virtual ~ImageFormat();
+        virtual ~ImageFormat()
+        {}
     
         /** @brief Returns distance in bytes between two pixel base pointers.
         */
@@ -75,11 +79,11 @@ class PT_GFX_API ImageFormat
           return _pixelStride != a._pixelStride || _channels != a._channels;
         }
 
-        static const ImageFormat& rgb565();
+        PT_GFX_API static const ImageFormat& rgb565();
     
-        static const ImageFormat& rgb888();
+        PT_GFX_API static const ImageFormat& rgb888();
     
-        static const ImageFormat& argb32();
+        PT_GFX_API static const ImageFormat& argb32();
 
     public:
         /** @brief Sets the pixel color.
@@ -124,7 +128,7 @@ class PT_GFX_API ImageFormat
         
         /** @brief Copies an area of pixels.
         */
-        void copy(ImageView& to, const Point& toPoint,
+        PT_GFX_API void copy(ImageView& to, const Point& toPoint,
                   const ImageView& from, const Rect& fromRect,
                   CompositionMode mode) const;
 

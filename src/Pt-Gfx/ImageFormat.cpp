@@ -37,18 +37,6 @@ namespace Pt {
 
 namespace Gfx {
 
-ImageFormat::ImageFormat( size_t pixelStride, size_t channels)
-: _pixelStride(pixelStride)
-, _channels(channels)
-{
-}
-
-
-ImageFormat::~ImageFormat()
-{
-}
-
-
 void ImageFormat::copy(ImageView& to, const Point& toPos,
                        const ImageView& from, const Rect& fromRect,
                        CompositionMode mode) const
