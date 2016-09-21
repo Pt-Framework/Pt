@@ -1857,6 +1857,11 @@ void Rasterizer::stroke( const Point& pixel)
 void Rasterizer::setFont( const Font& font )
 {
   _font = font;
+
+  if(_font.name().empty() )
+      _font = Font(defaultFont(), font.size(), font.fontStyle(), 
+                   font.angle(), font.direction() );
+  
   _text->setFont( _font );
 }
 
@@ -3636,6 +3641,22 @@ FontMetrics Rasterizer::fontMetrics( const Font& font, const Pt::String& text )
 
   return textRender.fontMetrics(text);
 }
+
+
+std::string Rasterizer::defaultFont()
+{
+    return "DejaVu-Sans";
+}
+
+
+std::list<std::string> Rasterizer::fontFamilyNames()
+{
+    std::list<std::string> fonts;
+    fonts.push_back("DejaVu-Sans");
+
+    return std::list<std::string>();
+}
+
 
 void Rasterizer::clear( const Color& color)
 {  

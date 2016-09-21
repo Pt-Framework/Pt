@@ -119,9 +119,11 @@ class Rasterizer
 
     void clear( const Color& color = Color(1,1,1) );
 
-    
-
     static FontMetrics fontMetrics( const Font& font, const Pt::String& text );
+    
+    static std::string defaultFont();
+
+    static std::list<std::string> fontFamilyNames(); 
 
   //Output algo.
   protected:   

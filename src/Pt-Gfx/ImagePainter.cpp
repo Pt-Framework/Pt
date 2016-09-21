@@ -236,13 +236,13 @@ void ImagePainter::clear( const Gfx::Color& color )
 
 std::string ImagePainter::defaultFont()
 {
-    return "Vera";
+    return Rasterizer::defaultFont();
 }
 
 
 std::list<std::string> ImagePainter::fontFamilyNames()
 {
-    return std::list<std::string>();
+    return Rasterizer::fontFamilyNames();
 }
 
 } // namespace

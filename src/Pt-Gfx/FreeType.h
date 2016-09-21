@@ -34,6 +34,7 @@
 #include FT_GLYPH_H
 #include FT_CACHE_H
 
+#include <Pt/Gfx/Font.h>
 #include <Pt/Singleton.h>
 #include <string>
 
@@ -60,7 +61,7 @@ class FreeType : public Pt::Singleton<FreeType>
         static FT_Error fontRequest(FTC_FaceID face_id, FT_Library library, 
                                     FT_Pointer request_data, FT_Face* face);
 
-        FTC_FaceID findFaceId(const std::string& name);
+        FTC_FaceID findFaceId(const Font& font);
 
         FT_Error findFace(FTC_FaceID faceId, FT_Face* face);
 
@@ -88,7 +89,10 @@ class FreeType : public Pt::Singleton<FreeType>
         FTC_CMapCache     _charMapCache;
         FTC_SBitCache     _bitmapCache;
         
-        static FTC_FaceID _veraId;
+        static FTC_FaceID _dejavuSans;
+        static FTC_FaceID _dejavuSansBold;
+        static FTC_FaceID _dejavuSansItalic;
+        static FTC_FaceID _dejavuSansBoldItalic;
 };
 
 static FreeType::Init initFreeType;

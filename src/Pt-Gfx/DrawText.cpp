@@ -72,7 +72,7 @@ DrawText::~DrawText()
 
 void DrawText::setFont(const Font& font)
 {
-    _faceId = FreeType::instance().findFaceId( font.name() );
+    _faceId = FreeType::instance().findFaceId(font);
 
     // setup the image type
     _imageType.face_id = _faceId;

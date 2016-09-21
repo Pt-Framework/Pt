@@ -27,7 +27,10 @@
 */
 
 #include "FreeType.h"
-#include "Vera.h"
+#include "DejaVuSans.h"
+#include "DejaVuSansBold.h"
+#include "DejaVuSansItalic.h"
+#include "DejaVuSansBoldItalic.h"
 #include <stdexcept>
 #include <iostream>
 
@@ -35,8 +38,10 @@ namespace Pt {
 
 namespace Gfx {
 
-FTC_FaceID FreeType::_veraId = (FTC_FaceID)&vera[0];
-
+FTC_FaceID FreeType::_dejavuSans = (FTC_FaceID)&DejaVuSans[0];
+FTC_FaceID FreeType::_dejavuSansBold = (FTC_FaceID)&DejaVuSansBold[0];
+FTC_FaceID FreeType::_dejavuSansItalic = (FTC_FaceID)&DejaVuSansItalic[0];
+FTC_FaceID FreeType::_dejavuSansBoldItalic = (FTC_FaceID)&DejaVuSansBoldItalic[0];
 
 FreeType::FreeType()
 {   
@@ -67,19 +72,41 @@ FreeType::~FreeType()
 FT_Error FreeType::fontRequest( FTC_FaceID face_id, FT_Library library, 
                                 FT_Pointer request_data, FT_Face* face )
 {
-    if(face_id != _veraId)
-        return 1;
+    if(face_id == _dejavuSans)
+        return FT_New_Memory_Face(library, DejaVuSans, DejaVuSansSize, 0, face);
 
-    return FT_New_Memory_Face(library, vera, veraSize, 0, face);
+    if(face_id == _dejavuSansBold)
+        return FT_New_Memory_Face(library, DejaVuSansBold, DejaVuSansBoldSize, 0, face);
+
+    if(face_id == _dejavuSansItalic)
+        return FT_New_Memory_Face(library, DejaVuSansItalic, DejaVuSansItalicSize, 0, face);
+
+    if(face_id == _dejavuSansBoldItalic)
+        return FT_New_Memory_Face(library, DejaVuSansBoldItalic, DejaVuSansBoldItalicSize, 0, face);
+    
+     return 1;
 }
 
 
-FTC_FaceID FreeType::findFaceId(const std::string& name)
+FTC_FaceID FreeType::findFaceId(const Font& font)
 {
-    if(name == "Vera")
-        return _veraId;
+    if(font.name() == "DejaVu-Sans")
+    {
+        switch( font.fontStyle() )
+        {
+            default:
+            case Font::NormalStyle:
+                return _dejavuSans;
+            case Font::BoldStyle:
+                return _dejavuSansBold;
+            case Font::ItalicStyle:
+                return _dejavuSansItalic;
+            case Font::BoldItalicStyle:
+                return _dejavuSansBoldItalic;
+        }
+    }
 
-    return _veraId;
+    return _dejavuSans;
 }
 
 
