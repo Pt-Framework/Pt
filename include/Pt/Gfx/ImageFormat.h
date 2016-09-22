@@ -59,12 +59,12 @@ class ImageFormat
     
         /** @brief Returns distance in bytes between two pixel base pointers.
         */
-        size_t pixelStride() const
+        std::size_t pixelStride() const
         {
             return _pixelStride;
         }
 
-        size_t channels() const
+        std::size_t channels() const
         {
             return _channels;
         }
@@ -164,8 +164,8 @@ class ImageFormat
         virtual std::size_t onImageSize(const Size& size, Pt::ssize_t padding) const = 0;
 
     private:
-        size_t _pixelStride;
-        size_t _channels;
+        std::size_t _pixelStride;
+        std::size_t _channels;
 };
 
 } // namespace

@@ -30,8 +30,9 @@
 #define PT_GFX_ARGB32IMAGE_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/Argb32Format.h>
+#include <Pt/Gfx/Color.h>
+#include <Pt/Gfx/CompositionMode.h>
+#include <Pt/Gfx/BasicImage.h>
 #include <Pt/Types.h>
 
 namespace Pt {
@@ -44,21 +45,23 @@ class Argb32Model
 {
     public:
         class Pixel;
-        
         class ConstPixel;
 
-        typedef Argb32Format Format;
+        static std::size_t imageSize(const Size& size, Pt::ssize_t padding)
+        {
+            std::size_t l = (size.width() * 4) + padding;
+            std::size_t n = l * size.height();
+            return n;
+        }
+
+        static Pt::ssize_t pixelStride()
+        { 
+            return 4; 
+        }
 
     public:
         static Color toColor(const Pt::uint8_t* p)
         {
-            //Pt::uint16_t a = (*p++ << 8) + *p;
-            //Pt::uint16_t r = (*p++ << 8) + *p;
-            //Pt::uint16_t g = (*p++ << 8) + *p;
-            //Pt::uint16_t b = (*p << 8) + *p;
-            //
-            //return Color(a, r, g, b);
-
             Pt::uint32_t pixel = *reinterpret_cast<const Pt::uint32_t*>(p);
             
             const uint16_t ta = pixel >> 24;
@@ -76,11 +79,6 @@ class Argb32Model
 
         static void fromColor(Pt::uint8_t* p, const Color& c)
         {
-            //p[0] = (Pt::uint8_t) (c.alpha() / 257);
-            //p[1] = (Pt::uint8_t) (c.red() / 257);
-            //p[2] = (Pt::uint8_t) (c.green() / 257);
-            //p[3] = (Pt::uint8_t) (c.blue() / 257);
-
             Pt::uint32_t* pixel = reinterpret_cast<Pt::uint32_t*>(p);
 
             *pixel = ( Pt::uint32_t(c.alpha() & 0xFF00) << 16 ) |
@@ -147,7 +145,7 @@ class Argb32Model
 
         template <typename T>
         static void advance(T*& p, Pt::ssize_t& xpos, Pt::ssize_t& ypos, 
-                            const ImageView& view)
+                            const BasicView<Argb32Model>& view)
         {
             if( ++xpos >= view.width() )
             {
@@ -161,9 +159,8 @@ class Argb32Model
         }
 
         template <typename T>
-        static void advance(T*& p, Pt::ssize_t n, 
-                            const ImageView& view, T* data,
-                            Pt::ssize_t& xpos, Pt::ssize_t& ypos)
+        static void advance(T*& p, Pt::ssize_t n, Pt::ssize_t& xpos, Pt::ssize_t& ypos,
+                            const BasicView<Argb32Model>& view, T* data)
         {
             Pt::ssize_t off = xpos + n;
             ypos += off / view.width();
@@ -180,7 +177,7 @@ class Argb32Model::ConstPixel
     friend class Pixel;
 
     public:
-        ConstPixel(const ImageView& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
+        ConstPixel(const BasicView<Argb32Model>& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
         : _view(0)
         , _xpos(0)
         , _ypos(0)
@@ -196,7 +193,7 @@ class Argb32Model::ConstPixel
         , _p(p._p)
         { }
 
-        void reset(const ImageView& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
+        void reset(const BasicView<Argb32Model>& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
         {
             _view = &view;
             _xpos = xpos;
@@ -222,7 +219,7 @@ class Argb32Model::ConstPixel
 
         void advance( Pt::ssize_t n )
         {
-            Argb32Model::advance(_p, n, *_view, _view->data(), _xpos, _ypos);
+            Argb32Model::advance(_p, n, _xpos, _ypos, *_view, _view->data());
         }
 
         Color toColor() const
@@ -268,10 +265,10 @@ class Argb32Model::ConstPixel
         ConstPixel& operator=(const ConstPixel&);
 
     private:
-        const ImageView*   _view;
-        Pt::ssize_t        _xpos;
-        Pt::ssize_t        _ypos;
-        const Pt::uint8_t* _p;
+        const BasicView<Argb32Model>* _view;
+        Pt::ssize_t                   _xpos;
+        Pt::ssize_t                   _ypos;
+        const Pt::uint8_t*            _p;
 };
 
 /** @brief Const pixel in a ARGB-32 Image.
@@ -279,7 +276,7 @@ class Argb32Model::ConstPixel
 class Argb32Model::Pixel
 {
     public:
-        Pixel(ImageView& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
+        Pixel(BasicView<Argb32Model>& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
         : _view(0)
         , _xpos(0)
         , _ypos(0)
@@ -313,7 +310,7 @@ class Argb32Model::Pixel
             return *this;
         }
 
-        void reset(ImageView& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
+        void reset(BasicView<Argb32Model>& view, Pt::ssize_t xpos, Pt::ssize_t ypos)
         {
             _view = &view;
             _xpos = xpos;
@@ -339,7 +336,7 @@ class Argb32Model::Pixel
 
         void advance( Pt::ssize_t n )
         {
-            Argb32Model::advance(_p, n, *_view, _view->data(), _xpos, _ypos);
+            Argb32Model::advance(_p, n, _xpos, _ypos, *_view, _view->data());
         }
 
         void assign(const Color& c, CompositionMode mode)
@@ -417,10 +414,10 @@ class Argb32Model::Pixel
         { return _p == p._p; }
 
     private:
-        ImageView*   _view;
-        Pt::ssize_t  _xpos;
-        Pt::ssize_t  _ypos;
-        Pt::uint8_t* _p;
+        BasicView<Argb32Model>* _view;
+        Pt::ssize_t             _xpos;
+        Pt::ssize_t             _ypos;
+        Pt::uint8_t*            _p;
 };
 
 /** @brief ARGB-32 image.

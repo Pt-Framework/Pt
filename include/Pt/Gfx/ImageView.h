@@ -31,8 +31,8 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Size.h>
-#include <Pt/Gfx/ImageFormat.h>
 #include <Pt/Gfx/Color.h>
+#include <Pt/Gfx/ImageFormat.h>
 #include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Types.h>
 
@@ -41,8 +41,6 @@ namespace Pt {
 namespace Gfx {
 
 class ImageView;
-class Pixel;
-class ConstPixel;
 
 /** @brief Pixel in an image.
 */
@@ -312,6 +310,16 @@ class ImageView
         virtual ~ImageView()
         {}
 
+        void reset(const ImageFormat& format, Pt::uint8_t* data, 
+                  const Size& size, Pt::ssize_t padding)
+        {
+            _format = &format;
+            _data = data;
+            _size = size;
+            _padding = padding;
+            _stride = (_size.width() * _format->pixelStride()) + _padding;
+        }
+
         PixelIterator pixel(Pt::ssize_t x, Pt::ssize_t y)
         { return PixelIterator(*this, x, y); }
 
@@ -359,17 +367,6 @@ class ImageView
 
         Pt::ssize_t padding() const
         { return _padding; }
-
-    protected:
-        void init(const ImageFormat& format, Pt::uint8_t* data, 
-                  const Size& size, Pt::ssize_t padding)
-        {
-            _format = &format;
-            _data = data;
-            _size = size;
-            _padding = padding;
-            _stride = (_size.width() * _format->pixelStride()) + _padding;
-        }
 
     private:
         const ImageFormat* _format;

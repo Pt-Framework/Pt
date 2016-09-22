@@ -27,6 +27,8 @@
 */
 
 #include <Pt/Gfx/Yuv12Image.h>
+#include <Pt/Gfx/Yuv12Format.h>
+#include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Color.h>
 
 #include <Pt/System/Clock.h>
@@ -59,8 +61,8 @@ class Yuv12Test : public Pt::Unit::TestSuite
             registerMethod("Iterator", *this, &Yuv12Test::Iterator);
             registerMethod("Color", *this, &Yuv12Test::Color);
 
-            //registerMethod("BenchmarkPixel", *this, &Yuv12Test::Benchmark);
-            //registerMethod("BenchmarkDirectYUV", *this, &Yuv12Test::BenchmarkRaw);
+            registerMethod("BenchmarkPixel", *this, &Yuv12Test::Benchmark);
+            registerMethod("BenchmarkDirectYUV", *this, &Yuv12Test::BenchmarkRaw);
         }
 
     protected:

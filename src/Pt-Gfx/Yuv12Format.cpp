@@ -43,52 +43,71 @@ Yuv12Format::Yuv12Format()
 
 std::size_t Yuv12Format::onImageSize(const Size& size, Pt::ssize_t padding) const
 {
-    Pt::ssize_t stride = size.width() + padding;
-    Pt::ssize_t planeSize = stride * size.height();
-
-    return planeSize + planeSize / 2;
+    return Yuv12Model::imageSize(size, padding);
 }
 
 
 void Yuv12Format::onSetPixel(Pixel& to, const Pixel& from,
                              CompositionMode mode) const
 {
-    Yuv12Pixel toYuv( to.view(), to.base(), to.x(), to.y() );
-    ConstYuv12Pixel fromYuv( from.view(), from.base(), from.x(), from.y() );
+    //Yuv12Model::Pixel toYuv( to.view(), to.base(), to.x(), to.y() );
+    //Yuv12Model::ConstPixel fromYuv( from.view(), from.base(), from.x(), from.y() );
 
-    toYuv.assign(fromYuv, mode);
+    //toYuv.assign(fromYuv, mode);
 }
 
 
 void Yuv12Format::onSetPixel(Pixel& to, const ConstPixel& from,
                              CompositionMode mode) const
 {
-    Yuv12Pixel toYuv( to.view(), to.base(), to.x(), to.y() );
-    ConstYuv12Pixel fromYuv( from.view(), from.base(), from.x(), from.y() );
+    //Yuv12Model::Pixel toYuv( to.view(), to.base(), to.x(), to.y() );
+    //Yuv12Model::ConstPixel fromYuv( from.view(), from.base(), from.x(), from.y() );
 
-    toYuv.assign(fromYuv, mode);
+    //toYuv.assign(fromYuv, mode);
 }
 
 
 void Yuv12Format::onSetPixel(Pixel& p, const Color& c,
                              CompositionMode mode) const
 {
-    Yuv12Pixel yuv( p.view(), p.base(), p.x(), p.y() );
-    yuv.assign(c, mode);
+    Pt::uint8_t* y;
+    Pt::uint8_t* u;
+    Pt::uint8_t* v;
+
+    Yuv12Model::init(p.view().data(), p.view().stride(), p.view().size(),
+                     p.x(), p.y(), y, u, v);
+
+    Yuv12Model::fromColor(*y, *u, *v, c);
 }
 
 
 Color Yuv12Format::onGetColor(const Pixel& p) const
 {
-    ConstYuv12Pixel yuv( p.view(), p.base(), p.x(), p.y() );
-    return yuv.toColor();
+    const Pt::uint8_t* y;
+    const Pt::uint8_t* u;
+    const Pt::uint8_t* v;
+
+   const Pt::uint8_t* data = p.view().data();
+    
+    Yuv12Model::init(data, p.view().stride(), p.view().size(),
+                     p.x(), p.y(), y, u, v);
+
+    return Yuv12Model::toColor(*y, *u, *v);
 }
 
 
 Color Yuv12Format::onGetColor(const ConstPixel& p) const
 {
-    ConstYuv12Pixel yuv( p.view(), p.base(), p.x(), p.y() );
-    return yuv.toColor();
+    const Pt::uint8_t* y;
+    const Pt::uint8_t* u;
+    const Pt::uint8_t* v;
+
+   const Pt::uint8_t* data = p.view().data();
+    
+    Yuv12Model::init(data, p.view().stride(), p.view().size(),
+                     p.x(), p.y(), y, u, v);
+
+    return Yuv12Model::toColor(*y, *u, *v);
 }
 
 

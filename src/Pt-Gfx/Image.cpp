@@ -33,32 +33,6 @@ namespace Pt {
 
 namespace Gfx {
  
-ImageBase::ImageBase()
-{
-}
-
-
-ImageBase::ImageBase(const ImageFormat& format, Pt::uint8_t* data, 
-                     const Size& size, Pt::ssize_t padding)
-: _data(format, data, size, padding)
-{
-}
-
-
-ImageBase::~ImageBase()
-{
-}
-
-
-void ImageBase::init(const ImageFormat& format, Pt::uint8_t* data, 
-                     const Size& size, Pt::ssize_t padding)
-{
-    _data.reset(format, data, size, padding);
-}
-
-
-
-
 Image::Image()		
 {
 }
@@ -69,13 +43,12 @@ Image::Image(const ImageFormat& format, const Size& size, size_t padding)
 {
     Pt::uint8_t* data = _buffer.empty() ? 0 : &_buffer[0];
 
-    init(format, data, size, padding);
+    _view.reset(format, data, size, padding);
 }
 
 
 Image::Image(const ImageFormat& format, Pt::uint8_t* buffer, 
              const Gfx::Size& size, size_t padding)
-: ImageBase(format, buffer, size, padding)
 {
 }
 
@@ -93,19 +66,19 @@ Image::~Image()
 
 const Image& Image::operator=(const Image& image)
 {
-    const Pt::uint8_t* imageData = image.data();
     Pt::ssize_t n = image.format().imageSize(image.size(), image.padding());
-    
     _buffer.resize(n);
+    
     if( n != 0)
     {
+      const Pt::uint8_t* imageData = image.data();
       std::memcpy(&_buffer[0], imageData, n);
       Pt::uint8_t* data = _buffer.empty() ? 0 : &_buffer[0];    
-      init(image.format(), data, image.size(), image.view().padding());
+      _view.reset(image.format(), data, image.size(), image.view().padding());
     }
     else
     {
-      init(image.format(), 0, image.size(), image.view().padding());
+      _view.reset(image.format(), 0, image.size(), image.view().padding());
     }
 	  
     return *this;
@@ -116,20 +89,19 @@ void Image::reset(const ImageFormat& f,
                   const Gfx::Size& size, Pt::ssize_t padding)
 {
     Pt::ssize_t n = f.imageSize(size, padding);
-    
     _buffer.resize(n); 
     
     Pt::uint8_t* data = _buffer.empty() ? 0
                                         : &_buffer[0];
 
-    init(f, data, size, padding); 
+    _view.reset(f, data, size, padding); 
 }
 
 
 void Image::reset(const ImageFormat& format, Pt::uint8_t* data, 
                   const Gfx::Size& size, Pt::ssize_t padding)
 {
-    init(format, data, size, padding);
+    _view.reset(format, data, size, padding);
     _buffer.clear();  
 }
 
