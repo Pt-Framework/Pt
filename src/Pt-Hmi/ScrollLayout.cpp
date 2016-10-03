@@ -114,21 +114,42 @@ void ScrollLayout::onRemoveWidget(Widget& w)
 }
 
 
+void ScrollLayout::reset()
+{
+  scrollX(0);
+  scrollY(0);
+  updateRange();
+
+}
+
+
 void ScrollLayout::updateRange()
 {
     double maxWidth = 0;
-    double maxHeight = 0;      
+    double maxHeight = 0;
     
     for( size_t i = 0;  i < widgets().size(); ++ i)
     {
       const Widget& w =  *widgets()[i];
 
       maxWidth = std::max( maxWidth, w.position().x() +  w.size().width() );
-      maxHeight= std::max( maxHeight, w.position().y() +  w.size().height() );   
+      maxHeight= std::max( maxHeight, w.position().y() +  w.size().height() );
     }
 
     _hrange = static_cast<int>(maxWidth);
     _vrange = static_cast<int>(maxHeight);
+}
+
+
+double ScrollLayout::scrollX() const
+{
+  return _lastScrollPos.x();
+}
+
+
+double ScrollLayout::scrollY() const
+{
+  return _lastScrollPos.y();
 }
 
 

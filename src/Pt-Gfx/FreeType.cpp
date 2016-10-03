@@ -31,6 +31,7 @@
 #include "DejaVuSansBold.h"
 #include "DejaVuSansItalic.h"
 #include "DejaVuSansBoldItalic.h"
+#include "WqyZenhei.h"
 #include <stdexcept>
 #include <iostream>
 
@@ -42,6 +43,7 @@ FTC_FaceID FreeType::_dejavuSans = (FTC_FaceID)&DejaVuSans[0];
 FTC_FaceID FreeType::_dejavuSansBold = (FTC_FaceID)&DejaVuSansBold[0];
 FTC_FaceID FreeType::_dejavuSansItalic = (FTC_FaceID)&DejaVuSansItalic[0];
 FTC_FaceID FreeType::_dejavuSansBoldItalic = (FTC_FaceID)&DejaVuSansBoldItalic[0];
+FTC_FaceID FreeType::_wqyZenhei =  (FTC_FaceID)&WqyZenhei[0];
 
 FreeType::FreeType()
 {   
@@ -83,6 +85,9 @@ FT_Error FreeType::fontRequest( FTC_FaceID face_id, FT_Library library,
 
     if(face_id == _dejavuSansBoldItalic)
         return FT_New_Memory_Face(library, DejaVuSansBoldItalic, DejaVuSansBoldItalicSize, 0, face);
+
+    if(face_id == _wqyZenhei)
+        return FT_New_Memory_Face(library, WqyZenhei, WqyZenheiSize, 0, face);
     
      return 1;
 }
@@ -104,7 +109,11 @@ FTC_FaceID FreeType::findFaceId(const Font& font)
             case Font::BoldItalicStyle:
                 return _dejavuSansBoldItalic;
         }
+
     }
+
+    if( font.name() == "WenQuanYi Zen Hei")
+       return _wqyZenhei;
 
     return _dejavuSans;
 }

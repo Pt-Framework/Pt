@@ -44,8 +44,8 @@ namespace Pt {
 namespace Hmi {
 
 Panel::Panel()
-: _backgroundColor(Gfx::Color::fromRgb8(237,237,237))
-, _foregroundColor( Gfx::Color::fromRgb8(0,0,0) )
+: _backgroundBrush(Gfx::Color::fromRgb8(237,237,237))
+, _foregroundPen( Gfx::Color::fromRgb8(0,0,0) )
 , _backgroundImage()
 , _backgroundImageLayout( ImageLayout::None )
 , _borderStyle(Single)
@@ -171,11 +171,9 @@ void Panel::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRec
             
     outline[8] = outline[0];
 
-    if( backgroundColor().alpha() != 0)
+    if( _backgroundBrush.color().alpha() != 0)
     {
-        Gfx::Brush brush( backgroundColor() );
-
-        painter.setBrush(brush); 
+        painter.setBrush(_backgroundBrush); 
         painter.fillPolygon(&outline[0], outline.size());
     }
 

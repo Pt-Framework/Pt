@@ -140,6 +140,7 @@ inline int stepAround( int v, int incr, int max )
   return (((v) + (incr) < 0) ? (max - 1) : ((v) + (incr) == max) ? 0 : ((v) + (incr)));
 }
 
+std::string Rasterizer::_defaultFont = "DejaVu-Sans";
 
 Rasterizer::Rasterizer( Image& image )
 : _image( &image )
@@ -3645,14 +3646,21 @@ FontMetrics Rasterizer::fontMetrics( const Font& font, const Pt::String& text )
 
 std::string Rasterizer::defaultFont()
 {
-    return "DejaVu-Sans";
+    return _defaultFont;
 }
+
+void Rasterizer::setDefaultFont( std::string f )
+{
+  _defaultFont = f;
+}
+
 
 
 std::list<std::string> Rasterizer::fontFamilyNames()
 {
     std::list<std::string> fonts;
     fonts.push_back("DejaVu-Sans");
+    fonts.push_back("WenQuanYi Zen Hei");
 
     return std::list<std::string>();
 }

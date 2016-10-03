@@ -239,6 +239,11 @@ std::string ImagePainter::defaultFont()
     return Rasterizer::defaultFont();
 }
 
+void ImagePainter::setDefaultFont(std::string f)
+{
+  Rasterizer::setDefaultFont(f);
+}
+
 
 std::list<std::string> ImagePainter::fontFamilyNames()
 {

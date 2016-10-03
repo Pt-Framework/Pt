@@ -123,6 +123,8 @@ class Rasterizer
     
     static std::string defaultFont();
 
+    static void setDefaultFont( std::string f);
+
     static std::list<std::string> fontFamilyNames(); 
 
   //Output algo.
@@ -201,6 +203,9 @@ class Rasterizer
     CompositionMode _compositionMode;
     int             _clipRight;
     int             _clipBottom;
+
+  private:
+    static std::string  _defaultFont;
 };
 
 } //namespace

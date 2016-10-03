@@ -98,6 +98,9 @@ class PT_GFX_API ImagePainter : public Painter
     static FontMetrics fontMetrics( const Font& font, const Pt::String& text );
 
     static std::string defaultFont();
+    
+    static void setDefaultFont(std::string f);
+    
 
     static std::list<std::string> fontFamilyNames(); 
 

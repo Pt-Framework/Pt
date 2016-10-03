@@ -125,27 +125,27 @@ class PT_HMI_API Panel : public Widget
 		
         virtual ~Panel();	
 
-        const Gfx::Color& backgroundColor() const
+        const Gfx::Brush& backgroundBrush() const
         {
-            return _backgroundColor;
+            return _backgroundBrush;
         }
 
-        void setBackgroundColor( const Gfx::Color& c, bool doRepaint = true )
+        void setBackgroundBrush( const Gfx::Brush& c, bool doRepaint = true )
         {
-            _backgroundColor = c;
+            _backgroundBrush = c;
 
             if( doRepaint )
                 update();
         }
 
-        const Gfx::Color& foregroundColor() const
+        const Gfx::Pen& foregroundPen() const
         {
-            return _foregroundColor;
+            return _foregroundPen;
         }
 
-        void setForegroundColor(const Gfx::Color& c )
+        void setForegroundPen(const Gfx::Pen& c )
         {
-            _foregroundColor = c;
+            _foregroundPen = c;
             update();
         }
 
@@ -214,8 +214,8 @@ class PT_HMI_API Panel : public Widget
         virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect);
 
     private: 
-        Gfx::Color    _backgroundColor;
-        Gfx::Color    _foregroundColor;
+        Gfx::Brush    _backgroundBrush;
+        Gfx::Pen      _foregroundPen;
         Gfx::Image    _backgroundImage;
         Picture       _backgroundPicture;
         ImageLayout   _backgroundImageLayout;

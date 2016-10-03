@@ -93,6 +93,7 @@ class FreeType : public Pt::Singleton<FreeType>
         static FTC_FaceID _dejavuSansBold;
         static FTC_FaceID _dejavuSansItalic;
         static FTC_FaceID _dejavuSansBoldItalic;
+        static FTC_FaceID _wqyZenhei;
 };
 
 static FreeType::Init initFreeType;

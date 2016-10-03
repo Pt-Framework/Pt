@@ -50,6 +50,12 @@ std::string PaintSurfaceImpl::defaultFont()
 }
 
 
+void PaintSurfaceImpl::setDefaultFont( std::string f)
+{
+  Gfx::ImagePainter::setDefaultFont(f);
+}
+
+
 std::list<std::string> PaintSurfaceImpl::fontFamilyNames()
 {
     return Gfx::ImagePainter::fontFamilyNames();

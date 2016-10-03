@@ -44,7 +44,7 @@ Button::Button()
 , _imageAlign( MiddleLeft)
 , _isPressed(false)
 {
-  setBackgroundColor(Gfx::Color::fromRgb8(245,245,245));
+  setBackgroundBrush(Pt::Gfx::Brush(Gfx::Color::fromRgb8(245,245,245)));
 
   setContentAlignment(MiddleCenter);
   setAcceptsFocus(true);
@@ -145,25 +145,26 @@ void Button::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRe
     // TODO: use enter/leave events
     bool mouseOver = Application::instance().pointerWidget() == this;
     
-    Gfx::Color bkgColor = backgroundColor();
+    Gfx::Brush bkgr = backgroundBrush();
+    const Gfx::Color& bkgColor = bkgr.color();
 
     if( mouseOver )
     {
-        setBackgroundColor( Gfx::Color(bkgColor.red() * 0.9f ,
+        setBackgroundBrush( Gfx::Color(bkgColor.red() * 0.9f ,
                                        bkgColor.green() * 0.9f ,
                                        bkgColor.blue() * 0.9f ), false );
     }
 
     if( _isPressed )
     {
-        setBackgroundColor( Gfx::Color(bkgColor.red() * 0.8f ,
+        setBackgroundBrush( Gfx::Color(bkgColor.red() * 0.8f ,
                                        bkgColor.green() * 0.8f ,
                                        bkgColor.blue() * 0.8f ), false );
     }
     
     Label::onPaintBackground(surface, updateRect);
     
-    setBackgroundColor(bkgColor, false);
+    setBackgroundBrush(bkgr, false);
 }
 
 

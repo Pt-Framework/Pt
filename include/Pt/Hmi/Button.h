@@ -66,6 +66,10 @@ class PT_HMI_API Button  : public Label
         {
             return _clicked;
         }
+        bool  isPressed() const
+        {
+          return _isPressed;
+        }
 
     protected:
         virtual void onMnemonic();

@@ -72,12 +72,31 @@ HFONT getFont(const Pt::Gfx::Font& font)
     lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE; // default pitch and family
    
     memset(lf.lfFaceName, 0, LF_FACESIZE * sizeof(TCHAR));
-    
-    memcpy(lf.lfFaceName, font.name().c_str(),
-           std::min<size_t>( LF_FACESIZE - 1, font.name().size() + 1) );
+   
+   if( font.name() == "" )
+   {
+      memcpy(lf.lfFaceName, Pt::Hmi::PaintSurfaceImpl::defaultFont().c_str(), std::min<size_t>( LF_FACESIZE, Pt::Hmi::PaintSurfaceImpl::defaultFont().size() + 1) );
+   }
+   else
+   {
+      memcpy(lf.lfFaceName, font.name().c_str(), std::min<size_t>( LF_FACESIZE, font.name().size() + 1) );
+   }
+
 
     HFONT hf = CreateFontIndirect(&lf);
     return hf;
+}
+
+std::string getDefaultFont()
+{
+    HDC dc = GetDC(NULL);
+
+    std::vector<TCHAR> buffer(32);
+    GetTextFace(dc, buffer.size(), &buffer[0]);
+
+    ReleaseDC(NULL, dc);
+
+  return Pt::win32::toMultiByte(&buffer[0]);
 }
 
 }
@@ -114,6 +133,8 @@ static int CALLBACK EnumFontFamExProc(ENUMLOGFONTEX *logFont, NEWTEXTMETRICEX *p
 
 #endif
 
+std::string PaintSurfaceImpl::_defaultFont = getDefaultFont();
+
 PaintSurfaceImpl::PaintSurfaceImpl()
 {
 }
@@ -126,14 +147,13 @@ PaintSurfaceImpl::~PaintSurfaceImpl()
 
 std::string PaintSurfaceImpl::defaultFont()
 {
-    HDC dc = GetDC(NULL);
+    return _defaultFont;
+}
 
-    std::vector<TCHAR> buffer(32);
-    GetTextFace(dc, buffer.size(), &buffer[0]);
 
-    ReleaseDC(NULL, dc);
-
-    return Pt::win32::toMultiByte(&buffer[0]);
+void PaintSurfaceImpl::setDefaultFont( std::string f)
+{
+  _defaultFont = f;
 }
 
 

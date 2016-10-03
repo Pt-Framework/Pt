@@ -227,7 +227,7 @@ void MenuItem::onPaintBackground(PaintSurface& surface, const Gfx::RectF& update
 
     if(mouseOver)
     {
-        Gfx::Color bgColor = backgroundColor();
+        Gfx::Color bgColor = backgroundBrush().color();
         Gfx::Brush brush = brighten(bgColor, 0.85f);
 
         Painter painter(surface);
@@ -265,9 +265,7 @@ void MenuItem::onPaintItem(PaintSurface& surface, const Gfx::RectF& updateRect)
     painter.setClip(updateRect);
     painter.setFont(_font);
 
-    Gfx::Color fgColor = foregroundColor();
-    Gfx::Pen pen(1, fgColor);
-    painter.setPen(pen);
+    painter.setPen(foregroundPen());
 
     Gfx::FontMetrics fm = Painter::fontMetrics(_font, _text);
     double textX = padding().left() + _iconWidth;
@@ -285,9 +283,7 @@ void MenuItem::onPaintShortcut(PaintSurface& surface, const Gfx::RectF& updateRe
     painter.setClip(updateRect);
     painter.setFont(_font);
 
-    Gfx::Color fgColor = foregroundColor();
-    Gfx::Pen pen(1, fgColor);
-    painter.setPen(pen);
+    painter.setPen(foregroundPen());
 
     const Key* sk = shortcut();
     if(sk)

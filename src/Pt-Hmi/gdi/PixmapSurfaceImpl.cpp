@@ -119,8 +119,14 @@ HFONT getFont(const Pt::Gfx::Font& font)
     lf.lfQuality        = DEFAULT_QUALITY;             // default quality
     lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE; // default pitch and family
    
-    memcpy(lf.lfFaceName, font.name().c_str(),
-           std::min<size_t>( LF_FACESIZE, font.name().size() + 1) );
+   if( font.name() == "" )
+   {
+      memcpy(lf.lfFaceName, Pt::Hmi::PaintSurfaceImpl::defaultFont().c_str(), std::min<size_t>( LF_FACESIZE, Pt::Hmi::PaintSurfaceImpl::defaultFont().size() + 1) );
+   }
+   else
+   {
+      memcpy(lf.lfFaceName, font.name().c_str(), std::min<size_t>( LF_FACESIZE, font.name().size() + 1) );
+   }
 
     HFONT hf = CreateFontIndirect(&lf);
     return hf;

@@ -48,11 +48,13 @@ class PT_HMI_API ScrollView : public Widget
 
         void setWidget(Widget& w);
 
+        void showScrollBars( bool h, bool v);
+
     protected:
         virtual void onResizeEvent(const ResizeEvent& ev );
         
     protected:
-        void onHScroll(ScrollBar& bar, int pos);        
+        void onHScroll(ScrollBar& bar, int pos);
         void onVScroll(ScrollBar& bar, int pos);
         void onScrollChanged(ScrollLayout& layout, int w , int h);
 

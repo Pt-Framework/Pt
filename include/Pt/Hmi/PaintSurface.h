@@ -100,6 +100,8 @@ class PT_HMI_API PaintSurface
 
         virtual void drawPicture(const Gfx::PointF& to, const Picture& pic) = 0;
 
+        static void setDefaultFont( std::string f);
+
     protected:
         PaintSurface();
 };
