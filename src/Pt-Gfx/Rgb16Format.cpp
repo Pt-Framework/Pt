@@ -27,7 +27,7 @@
   02110-1301 USA
 */
 
-#include <Pt/Gfx/Rgb565Format.h>
+#include <Pt/Gfx/Rgb16Format.h>
 #include <Pt/Gfx/ImageView.h>
 
  namespace Pt {

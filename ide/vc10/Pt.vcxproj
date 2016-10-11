@@ -53,8 +53,8 @@
     <ClInclude Include="..\..\include\Pt\Gfx\PngReader.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Point.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Rect.h" />
-    <ClInclude Include="..\..\include\Pt\Gfx\Rgb565Format.h" />
-    <ClInclude Include="..\..\include\Pt\Gfx\Rgb888Format.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\Rgb16Format.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\Rgb32Format.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Size.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Yuv12Format.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Yuv12Image.h" />
@@ -499,8 +499,8 @@
     <ClCompile Include="..\..\src\Pt-Gfx\Pen.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\PngReader.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer.cpp" />
-    <ClCompile Include="..\..\src\Pt-Gfx\Rgb565Format.cpp" />
-    <ClCompile Include="..\..\src\Pt-Gfx\Rgb888Format.cpp" />
+    <ClCompile Include="..\..\src\Pt-Gfx\Rgb16Format.cpp" />
+    <ClCompile Include="..\..\src\Pt-Gfx\Rgb32Format.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\tests\Argb32Test.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\tests\BlockscaleTest.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\tests\ImagePainterTest.cpp" />

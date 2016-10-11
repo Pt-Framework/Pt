@@ -33,8 +33,8 @@ SharedLibrary Pt-Gfx : Argb32Format.cpp
                        Pen.cpp
                        PngReader.cpp
                        Rasterizer.cpp
-                       Rgb888Format.cpp
-                       Rgb565Format.cpp 
+                       Rgb32Format.cpp
+                       Rgb16Format.cpp 
                        Yuv12Format.cpp
                        ;
 

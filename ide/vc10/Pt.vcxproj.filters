@@ -1329,16 +1329,10 @@
     <ClInclude Include="..\..\src\Pt-Hmi\demo\MainWindow.h">
       <Filter>Pt-Hmi\demo</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\Rgb888Format.h">
-      <Filter>Pt-Gfx</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\Image.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\ImageFormat.h">
-      <Filter>Pt-Gfx</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Gfx\Rgb565Format.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\src\Pt-Gfx\Vera.h">
@@ -1399,6 +1393,12 @@
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\Argb32Format.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Rgb16Format.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Rgb32Format.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
   </ItemGroup>
@@ -2552,12 +2552,6 @@
     <ClCompile Include="..\..\src\Pt-Gfx\ImageFormat.cpp">
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Gfx\Rgb565Format.cpp">
-      <Filter>Pt-Gfx</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Gfx\Rgb888Format.cpp">
-      <Filter>Pt-Gfx</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\DrawText.cpp">
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
@@ -2589,6 +2583,12 @@
       <Filter>Pt-Gfx\tests</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\Argb32Format.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Gfx\Rgb16Format.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Gfx\Rgb32Format.cpp">
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
   </ItemGroup>
