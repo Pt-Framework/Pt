@@ -31,7 +31,9 @@
 #include "DejaVuSansBold.h"
 #include "DejaVuSansItalic.h"
 #include "DejaVuSansBoldItalic.h"
-#include "WqyZenhei.h"
+#include <Pt/System/Directory.h>
+#include <Pt/System/FileInfo.h>
+#include <Pt/System/IOError.h>
 #include <stdexcept>
 #include <iostream>
 
@@ -39,18 +41,16 @@ namespace Pt {
 
 namespace Gfx {
 
-FTC_FaceID FreeType::_dejavuSans = (FTC_FaceID)&DejaVuSans[0];
-FTC_FaceID FreeType::_dejavuSansBold = (FTC_FaceID)&DejaVuSansBold[0];
-FTC_FaceID FreeType::_dejavuSansItalic = (FTC_FaceID)&DejaVuSansItalic[0];
-FTC_FaceID FreeType::_dejavuSansBoldItalic = (FTC_FaceID)&DejaVuSansBoldItalic[0];
-FTC_FaceID FreeType::_wqyZenhei =  (FTC_FaceID)&WqyZenhei[0];
+
+Pt::uint64_t FreeType::_id = 1;
 
 FreeType::FreeType()
+: _fontDir(System::Path( System::Path::curdir()) / "fonts")
 {   
     if( FT_Init_FreeType( &_ft ) )
         throw std::runtime_error("FT_Init_FreeType");
 
-    if( FTC_Manager_New( _ft, 0, 0, 0, &FreeType::fontRequest, 0, &_manager ) )
+    if( FTC_Manager_New( _ft, 0, 0, 0, &FreeType::fontRequest, this, &_manager ) )
         throw std::runtime_error( "FTC_Manager_New" );
 
     if( FTC_ImageCache_New( _manager, &_imageCache ) )
@@ -61,6 +61,8 @@ FreeType::FreeType()
 
     if( FTC_SBitCache_New( _manager, &_bitmapCache ) )
         throw std::runtime_error( "FTC_SBitCache_New" );
+
+    reloadFontNames();
 }
 
 
@@ -74,48 +76,29 @@ FreeType::~FreeType()
 FT_Error FreeType::fontRequest( FTC_FaceID face_id, FT_Library library, 
                                 FT_Pointer request_data, FT_Face* face )
 {
-    if(face_id == _dejavuSans)
-        return FT_New_Memory_Face(library, DejaVuSans, DejaVuSansSize, 0, face);
+  return ((FreeType*)request_data)->onFontRequest(face_id, face);
+}
 
-    if(face_id == _dejavuSansBold)
-        return FT_New_Memory_Face(library, DejaVuSansBold, DejaVuSansBoldSize, 0, face);
 
-    if(face_id == _dejavuSansItalic)
-        return FT_New_Memory_Face(library, DejaVuSansItalic, DejaVuSansItalicSize, 0, face);
+FT_Error FreeType::onFontRequest(FTC_FaceID face_id, FT_Face* face)
+{
+    FontMap::iterator it = _fontMap.find((Pt::uint64_t)face_id);
 
-    if(face_id == _dejavuSansBoldItalic)
-        return FT_New_Memory_Face(library, DejaVuSansBoldItalic, DejaVuSansBoldItalicSize, 0, face);
+    if( it == _fontMap.end() )
+      return 1;
 
-    if(face_id == _wqyZenhei)
-        return FT_New_Memory_Face(library, WqyZenhei, WqyZenheiSize, 0, face);
-    
-     return 1;
+    return FT_New_Face(_ft, it->second.toLocal().c_str(), 0, face);
 }
 
 
 FTC_FaceID FreeType::findFaceId(const Font& font)
 {
-    if(font.name() == "DejaVu-Sans")
-    {
-        switch( font.fontStyle() )
-        {
-            default:
-            case Font::NormalStyle:
-                return _dejavuSans;
-            case Font::BoldStyle:
-                return _dejavuSansBold;
-            case Font::ItalicStyle:
-                return _dejavuSansItalic;
-            case Font::BoldItalicStyle:
-                return _dejavuSansBoldItalic;
-        }
+    std::map<Font,Pt::uint64_t>::iterator it = _faces.find( font);
 
-    }
+    if( it != _faces.end() )
+      return 0;
 
-    if( font.name() == "WenQuanYi Zen Hei")
-       return _wqyZenhei;
-
-    return _dejavuSans;
+    return (FTC_FaceID) it->second;
 }
 
 
@@ -153,6 +136,55 @@ FT_Error FreeType::findSize(FTC_Scaler scaler,
                             FT_Size*   size)
 {
     return FTC_Manager_LookupSize(_manager, scaler, size);
+}
+
+
+void FreeType::reloadFontNames()
+{
+    _fontMap.clear();
+    try
+    {
+      System::DirectoryIterator it(_fontDir);
+      System::DirectoryIterator end;
+
+    
+      for( ; it != end; ++it)
+      {
+          std::string pathName = (*it).path().toLocal();
+
+          FT_Face face;
+          FT_Error err = FT_New_Face(_ft, pathName.c_str(), 0, &face);
+
+          if(err != 0)
+              continue;
+
+          Font::FontStyle style = Font::NormalStyle;
+
+          if( (face->style_flags & FT_STYLE_FLAG_BOLD) == FT_STYLE_FLAG_BOLD )
+              style = Font::BoldStyle;
+
+          if( (face->style_flags & FT_STYLE_FLAG_ITALIC) == FT_STYLE_FLAG_ITALIC )
+              style = Font::ItalicStyle;
+
+
+          if( (face->style_flags & FT_STYLE_FLAG_BOLD) == FT_STYLE_FLAG_BOLD && 
+              (face->style_flags & FT_STYLE_FLAG_ITALIC) == FT_STYLE_FLAG_ITALIC )
+              style = Font::BoldItalicStyle;
+       
+
+          Font font(face->family_name,12,style);
+
+        _fontMap[_id] = (*it).path();
+
+        _faces[font] =  _id;
+        ++_id;
+
+        FT_Done_Face(face);
+      }
+    }
+    catch(const Pt::System::AccessFailed&)
+    {
+    }
 }
 
 } // namespace Gfx

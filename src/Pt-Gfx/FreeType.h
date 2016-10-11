@@ -34,9 +34,14 @@
 #include FT_GLYPH_H
 #include FT_CACHE_H
 
+#include <Pt/Types.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Singleton.h>
+#include <Pt/System/Path.h>
 #include <string>
+#include <map>
+#include <vector>
+#include <algorithm>
 
 namespace Pt {
 
@@ -45,6 +50,9 @@ namespace Gfx {
 class FreeType : public Pt::Singleton<FreeType>
 {
     friend class Pt::Singleton<FreeType>;
+
+    private:
+     typedef std::map<Pt::uint64_t,System::Path> FontMap;
 
     public:
         struct Init
@@ -79,8 +87,43 @@ class FreeType : public Pt::Singleton<FreeType>
 
         FT_Error findSize(FTC_Scaler scaler, FT_Size* size);
 
+
+        void setFontDir(const System::Path& path)
+        {
+            _fontDir = path;
+            reloadFontNames();
+        }
+
+        std::vector<std::string> fontNames() const
+        {
+          std::vector<std::string> names;
+          std::map<Font,Pt::uint64_t>::const_iterator it = _faces.begin(); 
+
+          for( ; it != _faces.end(); ++it)
+          {
+              if(std::find(names.begin(), names.end(), it->first.name()) == names.end())
+                names.push_back( it->first.name());
+          }
+
+          return names;
+        }
+
+        std::string defaultFont() const
+        {
+            return _defaultFont;
+        }
+
+        void setDefaultFont( const std::string& f )
+        {
+          _defaultFont = f;
+        }
+
     protected:
         FreeType();
+
+    void reloadFontNames();
+
+    FT_Error onFontRequest(FTC_FaceID face_id, FT_Face* face);
 
     private:
         FT_Library        _ft;
@@ -88,12 +131,13 @@ class FreeType : public Pt::Singleton<FreeType>
         FTC_ImageCache    _imageCache;
         FTC_CMapCache     _charMapCache;
         FTC_SBitCache     _bitmapCache;
-        
-        static FTC_FaceID _dejavuSans;
-        static FTC_FaceID _dejavuSansBold;
-        static FTC_FaceID _dejavuSansItalic;
-        static FTC_FaceID _dejavuSansBoldItalic;
-        static FTC_FaceID _wqyZenhei;
+        System::Path      _fontDir;
+        std::string       _defaultFont;
+        FontMap           _fontMap;
+        std::map<Font,Pt::uint64_t> _faces;
+
+  private:
+    static Pt::uint64_t _id;
 };
 
 static FreeType::Init initFreeType;

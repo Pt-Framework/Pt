@@ -33,6 +33,7 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/String.h>
+#include <Pt/System/Path.h>
 
 namespace Pt {
 
@@ -120,15 +121,9 @@ class Rasterizer
     void clear( const Color& color = Color(1,1,1) );
 
     static FontMetrics fontMetrics( const Font& font, const Pt::String& text );
-    
-    static std::string defaultFont();
-
-    static void setDefaultFont( std::string f);
-
-    static std::list<std::string> fontFamilyNames(); 
 
   //Output algo.
-  protected:   
+  protected:
     void outputSpan( const Point& topLeft, int x, int y, int width );
     void fill( const Point& origin, const Point& pos, int length );
     void fillSolid( const Point& pos,  int length );
@@ -193,7 +188,7 @@ class Rasterizer
     Brush           _brush;
     Image           _brushBuffer; 
     const Image*    _brushImage;
-    ConstPixel      _brushPixel;     
+    ConstPixel      _brushPixel;
     bool            _isGradient; 
 
     Pen             _pen;
@@ -204,8 +199,6 @@ class Rasterizer
     int             _clipRight;
     int             _clipBottom;
 
-  private:
-    static std::string  _defaultFont;
 };
 
 } //namespace

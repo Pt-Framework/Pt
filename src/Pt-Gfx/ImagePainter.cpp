@@ -38,6 +38,7 @@
 #include <Pt/String.h>
 #include "Pt/System/Clock.h"
 #include "Rasterizer.h"
+#include "FreeType.h"
 
 namespace Pt {
 namespace Gfx {
@@ -234,20 +235,26 @@ void ImagePainter::clear( const Gfx::Color& color )
 }
 
 
+void ImagePainter::setFontDir(const Pt::System::Path& path)
+{
+   FreeType::instance().setFontDir(path);
+} 
+
+
 std::string ImagePainter::defaultFont()
 {
-    return Rasterizer::defaultFont();
+    return  FreeType::instance().defaultFont();
 }
 
-void ImagePainter::setDefaultFont(std::string f)
+void ImagePainter::setDefaultFont(const std::string& f)
 {
-  Rasterizer::setDefaultFont(f);
+   FreeType::instance().setDefaultFont(f);
 }
 
 
-std::list<std::string> ImagePainter::fontFamilyNames()
+std::vector<std::string> ImagePainter::fontNames()
 {
-    return Rasterizer::fontFamilyNames();
+    return FreeType::instance().fontNames();
 }
 
 } // namespace

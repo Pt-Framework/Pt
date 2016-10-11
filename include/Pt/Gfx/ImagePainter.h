@@ -32,6 +32,7 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Painter.h>
+#include <Pt/System/Path.h>
 
 namespace Pt {
 
@@ -85,7 +86,7 @@ class PT_GFX_API ImagePainter : public Painter
     virtual void fillEllipse(const PointF& topLeft, const  SizeF& size);
 
     virtual void drawPolyline(const PointF* points, const size_t pointCount);
-    
+
     virtual void fillPolygon(const PointF* points, const size_t pointCount);
 
     virtual void drawImage(const  PointF& to, const Image& image);
@@ -95,14 +96,15 @@ class PT_GFX_API ImagePainter : public Painter
     virtual void clear( const Gfx::Color& color = Gfx::Color( 1, 1, 1 ) );
 
   public:
-    static FontMetrics fontMetrics( const Font& font, const Pt::String& text );
+    static void setFontDir(const System::Path& path);
 
     static std::string defaultFont();
-    
-    static void setDefaultFont(std::string f);
-    
 
-    static std::list<std::string> fontFamilyNames(); 
+    static void setDefaultFont(const std::string& name);
+
+    static std::vector<std::string> fontNames(); 
+
+    static FontMetrics fontMetrics( const Font& font, const Pt::String& text );
 
   private:
     Rasterizer* _rasterizer;

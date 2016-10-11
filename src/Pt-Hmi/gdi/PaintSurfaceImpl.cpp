@@ -122,7 +122,7 @@ static int CALLBACK EnumFontsProc(LOGFONT *logFont, TEXTMETRIC *physFont, DWORD 
 
 static int CALLBACK EnumFontFamExProc(ENUMLOGFONTEX *logFont, NEWTEXTMETRICEX *physFont, DWORD type, LPARAM param)
 {
-    char* faceName = logFont->elfLogFont.lfFaceName;
+    char* faceName = logFont->elfLogFont.lfFaceName;    
 
     if (faceName[0] != '@') {  // Ignore fonts with @ as first character.
         ((std::list<std::string>*)param)->push_back(faceName);

@@ -111,7 +111,13 @@ inline bool operator!=(const Font& a, const Font& b)
 
 inline bool operator<(const Font& a, const Font& b)
 {
-    return a._size < b._size;
+    if( !(a._name < b._name) )
+        return false;
+
+    if(!( a._fontStyle < b._fontStyle) )
+        return false;
+
+    return true;
 }
 
 } //namespace
