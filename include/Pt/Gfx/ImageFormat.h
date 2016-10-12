@@ -79,9 +79,9 @@ class ImageFormat
           return _pixelStride != a._pixelStride || _channels != a._channels;
         }
 
-        PT_GFX_API static const ImageFormat& rgb565();
+        PT_GFX_API static const ImageFormat& rgb16();
     
-        PT_GFX_API static const ImageFormat& rgb888();
+        PT_GFX_API static const ImageFormat& rgb32();
     
         PT_GFX_API static const ImageFormat& argb32();
 

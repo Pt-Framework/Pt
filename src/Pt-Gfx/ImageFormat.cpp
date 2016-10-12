@@ -30,8 +30,8 @@
 #include <Pt/Gfx/ImageFormat.h>
 #include <Pt/Gfx/ImageView.h>
 #include <Pt/Gfx/Argb32Format.h>
-#include <Pt/Gfx/Rgb888Format.h>
-#include <Pt/Gfx/Rgb565Format.h>
+#include <Pt/Gfx/Rgb32Format.h>
+#include <Pt/Gfx/Rgb16Format.h>
 
 namespace Pt {
 
@@ -57,16 +57,16 @@ void ImageFormat::copy(ImageView& to, const Point& toPos,
 }
 
 
-const ImageFormat& ImageFormat::rgb565()
+const ImageFormat& ImageFormat::rgb16()
 {
-	static const Rgb565Format f;
+	static const Rgb16Format f;
 	return f;
 }
 
 
-const ImageFormat& ImageFormat::rgb888()
+const ImageFormat& ImageFormat::rgb32()
 {
-	static const Rgb888Format f;
+	static const Rgb32Format f;
 	return f;
 }
 

@@ -178,7 +178,7 @@ class JpegReaderImpl
                     throw IOError("jpeg error");
 
                 Gfx::Size imageSize(_decomp.output_width, _decomp.output_height);
-                _image->reset(ImageFormat::rgb888(), imageSize);
+                _image->reset(ImageFormat::rgb32(), imageSize);
 
                 _state = OnData;
             }

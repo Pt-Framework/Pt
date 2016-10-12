@@ -34,13 +34,13 @@
 
  namespace Gfx {
 
-Rgb565Format::Rgb565Format()
+Rgb16Format::Rgb16Format()
 : ImageFormat(2, 3)
 {
 }
 
 
-std::size_t Rgb565Format::onImageSize(const Size& size, Pt::ssize_t padding) const
+std::size_t Rgb16Format::onImageSize(const Size& size, Pt::ssize_t padding) const
 {
     std::size_t l = (size.width() * 2) + padding;
     std::size_t n = l * size.height();
@@ -48,7 +48,7 @@ std::size_t Rgb565Format::onImageSize(const Size& size, Pt::ssize_t padding) con
 }
 
 
-void Rgb565Format::onSetPixel(Pixel& to, const Pixel& from, 
+void Rgb16Format::onSetPixel(Pixel& to, const Pixel& from, 
                               CompositionMode mode) const
 {
     Pt::uint8_t* dst = to.base();
@@ -58,7 +58,7 @@ void Rgb565Format::onSetPixel(Pixel& to, const Pixel& from,
 }
 
 
-void Rgb565Format::onSetPixel(Pixel& to, const ConstPixel& from, 
+void Rgb16Format::onSetPixel(Pixel& to, const ConstPixel& from, 
                               CompositionMode mode) const
 {
     Pt::uint8_t* dst = to.base();
@@ -68,7 +68,7 @@ void Rgb565Format::onSetPixel(Pixel& to, const ConstPixel& from,
 }
 
 
-void Rgb565Format::onSetPixel(Pixel& pixel, const Color& c,
+void Rgb16Format::onSetPixel(Pixel& pixel, const Color& c,
                               CompositionMode mode) const
 {
     Pt::uint32_t val =   uint32_t(c.red() & 0xF800) |
@@ -80,7 +80,7 @@ void Rgb565Format::onSetPixel(Pixel& pixel, const Color& c,
 }
 
 
-Color Rgb565Format::onGetColor(const Pixel& pixel) const
+Color Rgb16Format::onGetColor(const Pixel& pixel) const
 {
     const Pt::uint16_t* p = (const Pt::uint16_t*) pixel.base();
 
@@ -97,7 +97,7 @@ Color Rgb565Format::onGetColor(const Pixel& pixel) const
 }
 
 
-Color Rgb565Format::onGetColor(const ConstPixel& pixel) const
+Color Rgb16Format::onGetColor(const ConstPixel& pixel) const
 {
     const Pt::uint16_t* p = (const Pt::uint16_t*) pixel.base();
 
@@ -114,7 +114,7 @@ Color Rgb565Format::onGetColor(const ConstPixel& pixel) const
 }
 
 
-void Rgb565Format::onCopy(Pixel& to, const Pixel& from, size_t length, 
+void Rgb16Format::onCopy(Pixel& to, const Pixel& from, size_t length, 
                           CompositionMode mode) const
 {
     Pt::uint8_t* dst = to.base();
@@ -130,7 +130,7 @@ void Rgb565Format::onCopy(Pixel& to, const Pixel& from, size_t length,
 }
 
 
-void Rgb565Format::onCopy(Pixel& to, const ConstPixel& from, size_t length, 
+void Rgb16Format::onCopy(Pixel& to, const ConstPixel& from, size_t length, 
                           CompositionMode mode) const
 {
     Pt::uint8_t* dst = to.base();
@@ -146,7 +146,7 @@ void Rgb565Format::onCopy(Pixel& to, const ConstPixel& from, size_t length,
 }
 
 
-void Rgb565Format::onCopy(ImageView& to, const Point& toPoint,
+void Rgb16Format::onCopy(ImageView& to, const Point& toPoint,
                           const ImageView& from, const Rect& fromRect,
                           CompositionMode mode) const
 {
