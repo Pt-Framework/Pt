@@ -37,12 +37,10 @@
 #include <Pt/Unit/TestSuite.h>
 #include <Pt/Unit/RegisterTest.h>
 
-Pt::uint8_t argb32Data[] = 
+Pt::uint32_t argb32Data[] = 
 {
-    0,  1,  2,  3,     4,  5,  6,  7, 
-    8,  9,  10, 11,   12, 13, 14, 15,
-    //16, 17, 18, 19,   20, 21, 22, 23,
-    //24, 25, 26, 27,   28, 29, 30, 31
+    0x00010203, 0x04050607, 
+    0x08091011, 0x12131415,
 };
 
 class Argb32Test : public Pt::Unit::TestSuite
@@ -51,19 +49,21 @@ class Argb32Test : public Pt::Unit::TestSuite
         Argb32Test()
         : Pt::Unit::TestSuite("Argb32Test")
         {
-            //registerMethod("Pixel",*this, &Argb32Test::Pixel);
-            //registerMethod("Iterator",*this, &Argb32Test::Iterator);
-            //registerMethod("Color",*this, &Argb32Test::Color);
+            registerMethod("Pixel",*this, &Argb32Test::Pixel);
+            registerMethod("Iterator",*this, &Argb32Test::Iterator);
+            registerMethod("Color",*this, &Argb32Test::Color);
 
-            registerMethod("BenchmarkA_Pixel", *this, &Argb32Test::Benchmark);
-            registerMethod("BenchmarkB_Direct", *this, &Argb32Test::BenchmarkRaw);
+            //registerMethod("BenchmarkA_Pixel", *this, &Argb32Test::Benchmark);
+            //registerMethod("BenchmarkB_Direct", *this, &Argb32Test::BenchmarkRaw);
         }
 
         void Pixel()
         {
             using namespace Pt::Gfx;
 
-            Argb32Image image( argb32Data, Size(2, 2) );
+            Pt::uint8_t* data = reinterpret_cast<Pt::uint8_t*>(argb32Data);
+
+            Argb32Image image( data, Size(2, 2) );
             Argb32Image::PixelIterator pixel = image.pixel(1, 1);
             
             Pt::uint8_t a = pixel->alpha();
@@ -71,17 +71,19 @@ class Argb32Test : public Pt::Unit::TestSuite
             Pt::uint8_t g = pixel->green();
             Pt::uint8_t b = pixel->blue();
             
-            PT_UNIT_ASSERT_EQUAL(a, 12);
-            PT_UNIT_ASSERT_EQUAL(r, 13);
-            PT_UNIT_ASSERT_EQUAL(g, 14);
-            PT_UNIT_ASSERT_EQUAL(b, 15);
+            PT_UNIT_ASSERT_EQUAL(a, 0x12);
+            PT_UNIT_ASSERT_EQUAL(r, 0x13);
+            PT_UNIT_ASSERT_EQUAL(g, 0x14);
+            PT_UNIT_ASSERT_EQUAL(b, 0x15);
         }
 
         void Iterator()
         {
             using namespace Pt::Gfx;
 
-            Argb32Image image( argb32Data, Size(2, 2) );
+            Pt::uint8_t* data = reinterpret_cast<Pt::uint8_t*>(argb32Data);
+
+            Argb32Image image( data, Size(2, 2) );
 
             Argb32Image::PixelIterator it = image.begin();
             Argb32Image::PixelIterator end = image.end();
@@ -92,25 +94,24 @@ class Argb32Test : public Pt::Unit::TestSuite
                 blue += (*it).blue();
             }
 
-            PT_UNIT_ASSERT_EQUAL(blue, 36);
+            PT_UNIT_ASSERT_EQUAL(blue, 48);
         }
 
         void Color()
         {
             using namespace Pt::Gfx;
 
-            Pt::uint8_t argb32[] = { 100, 100, 100, 100 };
+            Pt::uint32_t argb32[] = { 0xaabbccdd };
 
-            Argb32Image image( argb32, Size(1, 1) );
+            Pt::uint8_t* data = reinterpret_cast<Pt::uint8_t*>(argb32Data);
+
+            Argb32Image image( data, Size(1, 1) );
             Argb32Image::PixelIterator pixel = image.pixel(0, 0);
 
             Pt::Gfx::Color c = pixel->toColor();
             pixel->assign(c, CompositionMode::SourceCopy);
 
-            PT_UNIT_ASSERT(argb32[0] > 99 && argb32[0] < 101);
-            PT_UNIT_ASSERT(argb32[1] > 99 && argb32[1] < 101);
-            PT_UNIT_ASSERT(argb32[2] > 99 && argb32[2] < 101);
-            PT_UNIT_ASSERT(argb32[3] > 99 && argb32[3] < 101);
+            PT_UNIT_ASSERT(argb32[0] == 0xaabbccdd);
         }
 
         void Benchmark()
