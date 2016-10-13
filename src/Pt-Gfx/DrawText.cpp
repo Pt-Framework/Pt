@@ -5,7 +5,7 @@
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+ 
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -15,16 +15,16 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+ 
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+ 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
-  02110-1301 USA
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
 */
 
 #include "DrawText.h"
@@ -49,24 +49,11 @@ DrawText::DrawText()
     _matrix.xy = 0;
     _matrix.yx = 0;
     _matrix.yy = 0;
-
-    //if( FTC_Manager_New( FreeType::instance().library(), 0, 0, 0, &FreeType::fontRequest, 0, &_manager ) )
-    //    throw std::runtime_error( "FTC_Manager_New failed" + PT_SOURCEINFO );
-
-    //if( FTC_ImageCache_New( _manager, &_imageCache ) )
-    //    throw std::runtime_error( "FTC_ImageCache_New failed" + PT_SOURCEINFO );
-
-    //if( FTC_CMapCache_New( _manager, &_charMapCache ) )
-    //    throw std::runtime_error( "FTC_CMapCache_New failed" + PT_SOURCEINFO );
-
-    //if( FTC_SBitCache_New( _manager, &_bitmapCache ) )
-    //    throw std::runtime_error( "FTC_SBitCache_New failed" + PT_SOURCEINFO );
 }
 
 
 DrawText::~DrawText()
 {
-    //FTC_Manager_Done( _manager );
 }
 
 
@@ -86,7 +73,7 @@ void DrawText::setFont(const Font& font)
     if ( _fontAngle < 0 )
         _fontAngle += 3600;
 
-    const double angle   = ( _fontAngle / 10.0  *  3.14159) / 180.0 ;
+    const double angle   = (_fontAngle / 10.0  *  3.14159) / 180.0 ;
     const double cosinus = std::cos( angle ) * 0x10000L;
     const double sinus   = std::sin( angle ) * 0x10000L;
 
@@ -95,52 +82,50 @@ void DrawText::setFont(const Font& font)
     _matrix.yx = (FT_Fixed) std::ceil( sinus );
     _matrix.yy = (FT_Fixed) std::ceil( cosinus );
 
-    //FTC_Manager_LookupFace( _manager, _faceId, &_face );
     FreeType::instance().findFace(_faceId, &_face);
 
-    for( int index = 0; index < _face->num_charmaps; ++index )
+    for(int n = 0; n < _face->num_charmaps; ++n)
     {
-        if( _face->charmap[index].encoding == FT_ENCODING_UNICODE )
+        if(_face->charmap[n].encoding == FT_ENCODING_UNICODE)
         {
-            _charMapIndex = index;
+            _charMapIndex = n;
             return;
         }
     }
 
-    throw std::invalid_argument("No fonts installed" );
+    throw std::invalid_argument("invalid font");
 }
 
 
-FontMetrics DrawText::fontMetrics( const String& text )
+FontMetrics DrawText::fontMetrics(const String& text)
 {
-    FT_UInt             previous    = 0;
-    FT_Vector           delta;
-    FT_Glyph            glyph;
-    FT_BBox             gbbox = { 0 ,0 , 0, 0 };
-    FT_BBox             tbbox = { std::numeric_limits<FT_Pos>::max(), std::numeric_limits<FT_Pos>::max(),
-                        std::numeric_limits<FT_Pos>::min(), std::numeric_limits<FT_Pos>::min() };
-    FTC_Node            node;
-    FT_UInt             glyph_index;
+    FT_UInt   previous = 0;
+    FT_Vector delta;
+    FT_Glyph  glyph;
+    FT_BBox   gbbox = { 0 , 0, 0, 0 };
+    FT_BBox   tbbox = { std::numeric_limits<FT_Pos>::max(), 
+                        std::numeric_limits<FT_Pos>::max(),
+                        std::numeric_limits<FT_Pos>::min(), 
+                        std::numeric_limits<FT_Pos>::min() };
+    FTC_Node  node;
+    FT_UInt   glyph_index;
 
-    FT_Size size;
     FTC_ScalerRec scaler;
     scaler.face_id = _imageType.face_id;
-    scaler.width = _imageType.width;
-    scaler.height = _imageType.height;
-    scaler.pixel = 1; // 1 means TRUE and scaler.x_res and scaler.y_res are ignored
+    scaler.width   = _imageType.width;
+    scaler.height  = _imageType.height;
+    scaler.pixel   = 1; // 1 means TRUE and scaler.x_res and scaler.y_res are ignored
     
-    //FTC_Manager_LookupSize( _manager, &scaler, &size );
+    FT_Size size;
     FreeType::instance().findSize(&scaler, &size);
 
     FT_Face face = _face;
-    //FTC_Manager_LookupFace(_manager, _faceId, &face);
 
     int pen_x = 0;
     int pen_y = 0;
 
     for( String::const_iterator it = text.begin(); it != text.end(); ++it )
     {
-        //glyph_index = FTC_CMapCache_Lookup( _charMapCache, _faceId, _charMapIndex, it->value() );
         glyph_index = FreeType::instance().findCharMap(_faceId, _charMapIndex, it->value() );
 
         if( ! glyph_index )
@@ -152,9 +137,6 @@ FontMetrics DrawText::fontMetrics( const String& text )
             pen_x += delta.x; // << 16;
             pen_y -= delta.y; // << 16;
         }
-
-        //if( FTC_ImageCache_Lookup(_imageCache, &_imageType, glyph_index, &glyph, &node) )
-        //    continue;
 
         if( FreeType::instance().findImage(&_imageType, glyph_index, &glyph, &node) )
             continue;
@@ -173,8 +155,10 @@ FontMetrics DrawText::fontMetrics( const String& text )
         previous = glyph_index;
     }
 
-    return FontMetrics(size->metrics.ascender >> 6, (-size->metrics.descender) >> 6,
-                       tbbox.xMax - tbbox.xMin, size->metrics.height >> 6 );
+    return FontMetrics( size->metrics.ascender >> 6, 
+                       (-size->metrics.descender) >> 6,
+                       tbbox.xMax - tbbox.xMin, 
+                       size->metrics.height >> 6 );
 }
 
 

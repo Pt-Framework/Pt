@@ -36,8 +36,9 @@
 
 #include <Pt/Types.h>
 #include <Pt/Gfx/Font.h>
-#include <Pt/Singleton.h>
+#include <Pt/Gfx/FontMetrics.h>
 #include <Pt/System/Path.h>
+#include <Pt/Singleton.h>
 #include <string>
 #include <map>
 #include <vector>
@@ -51,9 +52,6 @@ class FreeType : public Pt::Singleton<FreeType>
 {
     friend class Pt::Singleton<FreeType>;
 
-    private:
-     typedef std::map<Pt::uint64_t,System::Path> FontMap;
-
     public:
         struct Init
         {
@@ -62,6 +60,17 @@ class FreeType : public Pt::Singleton<FreeType>
         };
 
         ~FreeType();
+
+        std::string defaultFont() const;
+
+        void setDefaultFont(const std::string& font);
+
+        std::vector<std::string> fontNames() const;
+
+        void setFontDir(const System::Path& path);
+
+        FontMetrics fontMetrics(const String& text, 
+                                FTC_FaceID faceId, FTC_ImageType imageType);
 
         FT_Library library() const
         { return _ft; }
@@ -87,57 +96,27 @@ class FreeType : public Pt::Singleton<FreeType>
 
         FT_Error findSize(FTC_Scaler scaler, FT_Size* size);
 
-
-        void setFontDir(const System::Path& path)
-        {
-            _fontDir = path;
-            reloadFontNames();
-        }
-
-        std::vector<std::string> fontNames() const
-        {
-          std::vector<std::string> names;
-          std::map<Font,Pt::uint64_t>::const_iterator it = _faces.begin(); 
-
-          for( ; it != _faces.end(); ++it)
-          {
-              if(std::find(names.begin(), names.end(), it->first.name()) == names.end())
-                names.push_back( it->first.name());
-          }
-
-          return names;
-        }
-
-        std::string defaultFont() const
-        {
-            return _defaultFont;
-        }
-
-        void setDefaultFont( const std::string& f )
-        {
-          _defaultFont = f;
-        }
-
     protected:
         FreeType();
 
-    void reloadFontNames();
-
-    FT_Error onFontRequest(FTC_FaceID face_id, FT_Face* face);
+        FT_Error onFontRequest(FTC_FaceID face_id, FT_Face* face);
 
     private:
-        FT_Library        _ft;
-        FTC_Manager       _manager;
-        FTC_ImageCache    _imageCache;
-        FTC_CMapCache     _charMapCache;
-        FTC_SBitCache     _bitmapCache;
-        System::Path      _fontDir;
-        std::string       _defaultFont;
-        FontMap           _fontMap;
-        std::map<Font,Pt::uint64_t> _faces;
+        typedef std::map<Pt::uint64_t, System::Path> FontMap;
+        typedef std::map<Font, Pt::uint64_t> FaceMap;
 
-  private:
-    static Pt::uint64_t _id;
+        FT_Library     _ft;
+        FTC_Manager    _manager;
+        FTC_ImageCache _imageCache;
+        FTC_CMapCache  _charMapCache;
+        FTC_SBitCache  _bitmapCache;
+        System::Path   _fontDir;
+        std::string    _defaultFont;
+        FontMap        _fontMap;
+        FaceMap        _faces;
+
+    private:
+        static Pt::uint64_t _id;
 };
 
 static FreeType::Init initFreeType;
