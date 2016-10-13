@@ -31,6 +31,8 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/PngReader.h>
 #include <Pt/Gfx/JpegReader.h>
+#include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/Algorithm.h>
 #include <sstream>
 #include <fstream>
@@ -180,6 +182,19 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     Window::onPaintBackground(rect);
 
     Painter painter( surface() );
+
+    Gfx::Image image( painter.format(), Gfx::Size(200, 30) );
+    Gfx::ImagePainter imagePainter(image);
+
+    imagePainter.setBrush( Gfx::Brush( Gfx::Color::fromRgb8(200,200,200) ) );
+    imagePainter.fillRect(Gfx::RectF(Gfx::PointF(0,0), Gfx::SizeF(200, 30) ) );
+    
+    Gfx::FontMetrics fm = imagePainter.fontMetrics("Hello");
+
+    imagePainter.setPen( Gfx::Pen( Gfx::Color::fromRgb8(0,0,0) ) );
+    imagePainter.drawText( Gfx::PointF(30, 20), "Hello World!");
+
+    painter.drawImage(Gfx::PointF(0, 0), image);
     painter.drawPicture(Gfx::PointF(0,0), _picture);
 }
 

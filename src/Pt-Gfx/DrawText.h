@@ -110,10 +110,8 @@ class DrawText
                        int bmPitch, int height, int width, const unsigned char* buffer);
 
   private:      
-        FTC_ImageTypeRec _imageType;
-        FT_Int           _charMapIndex;
         FTC_FaceID       _faceId;
-        FT_Face          _face;
+        FTC_ImageTypeRec _imageType;
         FT_Matrix        _matrix;
 
         Pt::ssize_t      _fontAngle;

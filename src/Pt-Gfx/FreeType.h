@@ -36,17 +36,22 @@
 
 #include <Pt/Types.h>
 #include <Pt/Gfx/Font.h>
-#include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/Rect.h>
 #include <Pt/System/Path.h>
 #include <Pt/Singleton.h>
 #include <string>
-#include <map>
 #include <vector>
+#include <map>
+#include <set>
 #include <algorithm>
 
 namespace Pt {
 
 namespace Gfx {
+
+class Color;
+class Image;
+class FontMetrics;
 
 class FreeType : public Pt::Singleton<FreeType>
 {
@@ -72,38 +77,27 @@ class FreeType : public Pt::Singleton<FreeType>
         FontMetrics fontMetrics(const String& text, 
                                 FTC_FaceID faceId, FTC_ImageType imageType);
 
-        FT_Library library() const
-        { return _ft; }
-
         static FT_Error fontRequest(FTC_FaceID face_id, FT_Library library, 
                                     FT_Pointer request_data, FT_Face* face);
 
         FTC_FaceID findFaceId(const Font& font);
 
-        FT_Error findFace(FTC_FaceID faceId, FT_Face* face);
-
-        FT_UInt findCharMap(FTC_FaceID faceId, FT_Int charMapId, FT_UInt32 value);
-
-        FT_Error findBitmap(FTC_ImageType type,
-                            FT_UInt       gindex,
-                            FTC_SBit*     sbit,
-                            FTC_Node*     node);
-        
-        FT_Error findImage(FTC_ImageType type,
-                           FT_UInt       gindex,
-                           FT_Glyph*     glyph,
-                           FTC_Node*     node);
-
-        FT_Error findSize(FTC_Scaler scaler, FT_Size* size);
+        void draw(Image& image, const Color& color, Pt::ssize_t fontAngle,
+                  const Point& pos, const String& text, const Rect& clip,
+                  FT_Matrix& matrix, FTC_FaceID faceId, FTC_ImageType imageType);
 
     protected:
         FreeType();
 
         FT_Error onFontRequest(FTC_FaceID face_id, FT_Face* face);
 
+        void drawGlyph(Image& image, const Color& color, int xpos, int ypos,
+                       int bmPitch, int height, int width, 
+                       const unsigned char* buffer, const Rect& clip);
+
     private:
-        typedef std::map<Pt::uint64_t, System::Path> FontMap;
-        typedef std::map<Font, Pt::uint64_t> FaceMap;
+        typedef std::set<System::Path*> Files;
+        typedef std::map<Font, System::Path> Fonts;
 
         FT_Library     _ft;
         FTC_Manager    _manager;
@@ -112,11 +106,8 @@ class FreeType : public Pt::Singleton<FreeType>
         FTC_SBitCache  _bitmapCache;
         System::Path   _fontDir;
         std::string    _defaultFont;
-        FontMap        _fontMap;
-        FaceMap        _faces;
-
-    private:
-        static Pt::uint64_t _id;
+        Fonts          _fonts;
+        Files          _files;
 };
 
 static FreeType::Init initFreeType;

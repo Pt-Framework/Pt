@@ -31,6 +31,8 @@
 #include "DejaVuSansBold.h"
 #include "DejaVuSansItalic.h"
 #include "DejaVuSansBoldItalic.h"
+#include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/Image.h>
 #include <Pt/System/Directory.h>
 #include <Pt/System/FileInfo.h>
 #include <Pt/System/IOError.h>
@@ -40,9 +42,6 @@
 namespace Pt {
 
 namespace Gfx {
-
-Pt::uint64_t FreeType::_id = 1;
-
 
 FreeType::FreeType()
 {   
@@ -88,13 +87,34 @@ void FreeType::setDefaultFont( const std::string& font )
 }
 
 
+std::vector<std::string> FreeType::fontNames() const
+{
+    // LOCK
+
+    std::vector<std::string> names;
+    names.push_back("DejaVu Sans");
+    
+    Fonts::const_iterator it; 
+    for(it = _fonts.begin(); it != _fonts.end(); ++it)
+    {
+        if(std::find(names.begin(), names.end(), it->first.name()) == names.end())
+            names.push_back( it->first.name() );
+    }
+    
+    // UNLOCK
+
+    return names;
+}
+
+
 void FreeType::setFontDir(const System::Path& path)
 {
     // LOCK
 
     _fontDir = path;
 
-    _fontMap.clear();
+    _fonts.clear();
+    _files.clear();
     
     try
     {
@@ -107,7 +127,6 @@ void FreeType::setFontDir(const System::Path& path)
 
             FT_Face face;
             FT_Error err = FT_New_Face(_ft, pathName.c_str(), 0, &face);
-
             if(err != 0)
                 continue;
 
@@ -125,10 +144,10 @@ void FreeType::setFontDir(const System::Path& path)
 
             Font font(face->family_name, 12, style);
 
-            _fontMap[_id] = it->path();
+            System::Path& fontPath = _fonts[font];
+            fontPath = it->path();
 
-            _faces[font] = _id;
-            ++_id;
+            _files.insert(&fontPath);
 
             FT_Done_Face(face);
         }
@@ -141,54 +160,41 @@ void FreeType::setFontDir(const System::Path& path)
 }
 
 
-std::vector<std::string> FreeType::fontNames() const
-{
-    // LOCK
-
-    std::vector<std::string> names;
-    
-    FaceMap::const_iterator it; 
-    for(it = _faces.begin(); it != _faces.end(); ++it)
-    {
-        if(std::find(names.begin(), names.end(), it->first.name()) == names.end())
-            names.push_back( it->first.name() );
-    }
-    
-    // UNLOCK
-
-    return names;
-}
-
-
 FTC_FaceID FreeType::findFaceId(const Font& font)
 {
     // LOCK
 
-    FaceMap::iterator it = _faces.find( font);
-    if( it != _faces.end() )
+    Fonts::iterator it = _fonts.find(font);
+    if( it == _fonts.end() )
         return 0;
 
-    return (FTC_FaceID) it->second;
+    System::Path* path = &it->second;
+    return reinterpret_cast<FTC_FaceID>(path);
 
     // UNLOCK
 }
 
 
-FT_Error FreeType::fontRequest( FTC_FaceID face_id, FT_Library library, 
-                                FT_Pointer request_data, FT_Face* face )
+FT_Error FreeType::fontRequest( FTC_FaceID faceId, FT_Library library, 
+                                FT_Pointer data, FT_Face* face )
 {
-    FreeType* ft = static_cast<FreeType*>(request_data);
-    return ft->onFontRequest(face_id, face);
+    FreeType* ft = static_cast<FreeType*>(data);
+    return ft->onFontRequest(faceId, face);
 }
 
 
-FT_Error FreeType::onFontRequest(FTC_FaceID face_id, FT_Face* face)
+FT_Error FreeType::onFontRequest(FTC_FaceID faceId, FT_Face* face)
 {
-    FontMap::iterator it = _fontMap.find((Pt::uint64_t)face_id);
-    if( it == _fontMap.end() )
-      return 1;
+    System::Path* path = reinterpret_cast<System::Path*>(faceId);
 
-    return FT_New_Face(_ft, it->second.toLocal().c_str(), 0, face);
+    if(faceId == 0)
+        return FT_New_Memory_Face(_ft, DejaVuSans, DejaVuSansSize, 0, face);
+
+    // check if path is still valid
+    if( _files.find(path) == _files.end() )
+        return FT_New_Memory_Face(_ft, DejaVuSans, DejaVuSansSize, 0, face);
+
+    return FT_New_Face(_ft, path->toLocal().c_str(), 0, face);
 }
 
 
@@ -198,7 +204,7 @@ FontMetrics FreeType::fontMetrics(const String& text,
     // LOCK
 
     FT_Face face = 0;
-    FreeType::instance().findFace(faceId, &face);
+    FTC_Manager_LookupFace(_manager, faceId, &face);
 
     FT_Int charMapIndex = 0;
     for(int n = 0; n < face->num_charmaps; ++n)
@@ -206,7 +212,6 @@ FontMetrics FreeType::fontMetrics(const String& text,
         if(face->charmap[n].encoding == FT_ENCODING_UNICODE)
         {
             charMapIndex = n;
-            return FontMetrics();
         }
     }
 
@@ -217,7 +222,7 @@ FontMetrics FreeType::fontMetrics(const String& text,
     scaler.pixel   = 1; // 1 means TRUE and scaler.x_res and scaler.y_res are ignored
     
     FT_Size size;
-    FreeType::instance().findSize(&scaler, &size);
+    FTC_Manager_LookupSize(_manager, &scaler, &size);
 
     int pen_x = 0;
     int pen_y = 0;
@@ -233,7 +238,7 @@ FontMetrics FreeType::fontMetrics(const String& text,
     for( String::const_iterator it = text.begin(); it != text.end(); ++it )
     {
         FTC_Node  node;
-        FT_UInt glyph_index = FreeType::instance().findCharMap( faceId, charMapIndex, it->value() );
+        FT_UInt glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, it->value());
 
         if( ! glyph_index )
             continue;
@@ -245,7 +250,7 @@ FontMetrics FreeType::fontMetrics(const String& text,
             pen_y -= delta.y; // << 16;
         }
 
-        if( FreeType::instance().findImage(imageType, glyph_index, &glyph, &node) )
+        if( FTC_ImageCache_Lookup(_imageCache, imageType, glyph_index, &glyph, &node) )
             continue;
 
         FT_Glyph_Get_CBox(glyph, FT_GLYPH_BBOX_PIXELS, &gbbox);
@@ -271,40 +276,195 @@ FontMetrics FreeType::fontMetrics(const String& text,
 }
 
 
-FT_Error FreeType::findFace(FTC_FaceID faceId, FT_Face* face)
+void FreeType::draw(Image& image, const Color& color, Pt::ssize_t fontAngle,
+                    const Point& pos, const String& text, const Rect& clip, 
+                    FT_Matrix& matrix, FTC_FaceID faceId, FTC_ImageType imageType)
 {
-    return FTC_Manager_LookupFace(_manager, faceId, face);
+    // LOCK
+
+    FT_Vector      glyphPos;
+    FT_Vector      delta;
+    FT_UInt        previous = 0;
+    FT_Glyph       glyph;
+    FT_Glyph       glyphCopy = 0;
+    FTC_Node       node;
+    FTC_SBit       smalGlyphBitmap;
+    FT_BitmapGlyph glyphBitmap;
+
+    //Glyph bitmap description
+    int            incX;
+    int            incY;
+    int            left;
+    int            top;
+    int            pitch;
+    int            height;
+    int            width;
+    unsigned char* buffer;
+
+    FT_Face face = 0;
+    FTC_Manager_LookupFace(_manager, faceId, &face);
+
+    FT_Int charMapIndex = 0;
+    for(int n = 0; n < face->num_charmaps; ++n)
+    {
+        if(face->charmap[n].encoding == FT_ENCODING_UNICODE)
+        {
+            charMapIndex = n;
+        }
+    }
+
+    glyphPos.x = (int) pos.x() << 16;
+    glyphPos.y = (int) pos.y() << 16;
+
+    for( String::const_iterator it = text.begin(); it != text.end(); ++it )
+    {
+        FT_UInt glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, it->value());
+
+        if( ! glyph_index )
+            continue;
+
+        if( FT_HAS_KERNING(face) && previous )
+        {
+            FT_Get_Kerning(face, previous, glyph_index, FT_KERNING_DEFAULT, &delta);
+
+            glyphPos.x += delta.x;
+            glyphPos.y -= delta.y;
+        }
+
+        if( fontAngle == 0 )
+        {
+            if( FTC_SBitCache_Lookup( _bitmapCache, imageType, glyph_index, &smalGlyphBitmap, &node ) )
+                continue;
+
+            incX        = smalGlyphBitmap->xadvance << 16;
+            incY        = smalGlyphBitmap->yadvance << 16;
+
+            left        = (glyphPos.x >> 16) + smalGlyphBitmap->left;
+            top         = (glyphPos.y >> 16) - smalGlyphBitmap->top;
+            pitch       = smalGlyphBitmap->pitch;
+            height      = smalGlyphBitmap->height;
+            width       = smalGlyphBitmap->width;
+            buffer      = smalGlyphBitmap->buffer;
+        }
+        else
+        {
+            FTC_ImageCache_Lookup(_imageCache, imageType, glyph_index, &glyph, &node);
+
+            FT_Glyph_Copy( glyph, &glyphCopy );
+            FT_Glyph_Transform( glyphCopy, &matrix, 0);
+            FT_Glyph_To_Bitmap( &glyphCopy, FT_RENDER_MODE_NORMAL,  0, 1 );
+
+            glyphBitmap = (FT_BitmapGlyph) glyphCopy;
+
+            incX        = glyphCopy->advance.x;
+            incY        = glyphCopy->advance.y;
+
+            left        = (glyphPos.x >> 16) + glyphBitmap->left;
+            top         = (glyphPos.y >> 16) - glyphBitmap->top;
+            pitch       = glyphBitmap->bitmap.pitch;
+            height      = glyphBitmap->bitmap.rows;
+            width       = glyphBitmap->bitmap.width;
+            buffer      = glyphBitmap->bitmap.buffer;
+        }
+
+        if( ! isspace(*it) )
+        {
+            //FT_Glyph_Get_CBox(image, ft_glyph_bbox_pixels, &bbox );
+
+            //if ( bbox.xMax <= 0 || bbox.xMin >= my_target_width  || 
+            //     bbox.yMax <= 0 || bbox.yMin >= my_target_height )
+            //    continue;
+
+            drawGlyph(image, color, left, top, pitch, height, width, buffer, clip);
+        }
+
+        glyphPos.x  += incX;
+        glyphPos.y  -= incY;
+        previous    = glyph_index;
+
+        if(glyphCopy)
+        {
+            FT_Done_Glyph( glyphCopy );
+            glyphCopy = 0;
+        }
+    }
+
+    // UNLOCK
 }
 
 
-FT_UInt FreeType::findCharMap(FTC_FaceID faceId, FT_Int charMapId, FT_UInt32 value)
+void FreeType::drawGlyph(Image& image, const Color& color, int xpos, int ypos,
+                         int bmPitch, int height, int width, 
+                         const unsigned char* buffer, const Rect& clip)
 {
-    return FTC_CMapCache_Lookup(_charMapCache, faceId, charMapId, value);
-}
+    const int clipRight  = clip.x() + clip.width();
+    const int clipBottom = clip.y() + clip.height();
+    Pt::ssize_t yOffset  = 0;
+    Pt::ssize_t dsy      = 0;
+    Pt::ssize_t dsx      = 0;
+    const Pt::ssize_t x2 = clipRight;
+    const Pt::ssize_t y2 = clipBottom;
 
+    if( bmPitch < width )
+        bmPitch += width;
 
-FT_Error FreeType::findBitmap(FTC_ImageType type,
-                              FT_UInt       gindex,
-                              FTC_SBit*     sbit,
-                              FTC_Node*     node)
-{
-    return FTC_SBitCache_Lookup(_bitmapCache, type, gindex, sbit, node);
-}
+    int ofsx = 0;
+            
+    if(xpos < clip.x() ) 
+    {
+        ofsx = clip.x()  - xpos;
+        xpos =  clip.x();
+    }
+            
+    int ofsy = 0;
+            
+    if(ypos < clip.y()) 
+    {
+        ofsy = clip.y() - ypos;
+        ypos = clip.y();
+    }
 
+    dsy = ypos;
 
-FT_Error FreeType::findImage(FTC_ImageType type,
-                             FT_UInt       gindex,
-                             FT_Glyph*     glyph,
-                             FTC_Node*     node)
-{
-    return FTC_ImageCache_Lookup(_imageCache, type, gindex, glyph, node);
-}
+    Color pixelColor = color;
 
+    for( Pt::int32_t y = ofsy; y < height; ++y, ++dsy )
+    {
+        yOffset = y * bmPitch;
 
-FT_Error FreeType::findSize(FTC_Scaler scaler,
-                            FT_Size*   size)
-{
-    return FTC_Manager_LookupSize(_manager, scaler, size);
+        if( dsy < clip.y() )
+            continue;
+
+        if( dsy > y2 )
+            break;
+
+        dsx   = xpos;
+
+        for( Pt::int32_t x = ofsx; x < width; ++x, ++dsx )
+        {
+            if( dsx < clip.x() )
+                continue;
+
+            if( dsx > x2 )
+                break;
+
+            Pixel pixel(image.view(), dsx, dsy);
+
+            const int px = yOffset + x;
+            unsigned char value = buffer[px];
+                    
+            if(value != 255)
+            {
+                pixelColor.setAlpha(value * 257);
+                image.format().setPixel(pixel, pixelColor,
+                                        CompositionMode::SourceOver);
+            }
+            else
+            {                    
+                image.format().setPixel(pixel, color, CompositionMode::SourceCopy);
+            }
+        }
+    }
 }
 
 } // namespace Gfx
