@@ -42,36 +42,40 @@ namespace Gfx {
 class PT_GFX_API Font
 {
     public:
-        enum FontStyle 
+        enum Style 
         {
-            NormalStyle = 0, BoldStyle, ItalicStyle, BoldItalicStyle
+            Normal = 0, 
+            Bold, 
+            Italic, 
+            BoldItalic
         };
 
         enum Direction {
-            LeftToRightDirection = 0, RightToLeftDirection
+            LeftToRight = 0, 
+            RightToLeft
         };
 
     public:
-        //! @brief Construct a font object using the given informations
-        explicit Font( const std::string& name      = "",
+        //! @brief Construct a font.
+        explicit Font( const std::string& name      = std::string(),
                        size_t             size      = 12,
-                       FontStyle          fontStyle = NormalStyle,
+                       Style              style     = Normal,
                        ssize_t            angle     = 0,
-                       Direction          direction = LeftToRightDirection);
+                       Direction          direction = LeftToRight);
 
-        //! @brief Return the name of the font
+        //! @brief Returns the name of the font
         const std::string& name() const;
 
-        //! @brief Return the size of the font
+        //! @brief Returns the size of the font
         size_t size() const;
 
-        //! @brief Return the style of the font
-        FontStyle fontStyle() const;
+        //! @brief Returns the style of the font
+        Style style() const;
 
-        //! @brief Return the angle of the font
+        //! @brief Returns the angle of the font
         ssize_t angle() const;
 
-        //! @brief Return the text-flow direction of the font
+        //! @brief Returns the text-flow direction of the font
         Direction direction() const;      
 
         friend bool operator==(const Font& a, const Font& b);
@@ -83,7 +87,7 @@ class PT_GFX_API Font
     private:
         std::string _name;
         size_t      _size;
-        FontStyle   _fontStyle;
+        Style       _style;
         ssize_t     _angle;
         Direction   _direction;
 };
@@ -92,7 +96,7 @@ class PT_GFX_API Font
 inline bool operator==(const Font& a, const Font& b)
 {
     return a._name      == b._name      && 
-           a._fontStyle == b._fontStyle && 
+           a._style     == b._style && 
            a._size      == b._size      && 
            a._angle     == b._angle     &&
            a._direction == b._direction;
@@ -102,7 +106,7 @@ inline bool operator==(const Font& a, const Font& b)
 inline bool operator!=(const Font& a, const Font& b)
 {
     return a._name      != b._name      || 
-           a._fontStyle != b._fontStyle || 
+           a._style     != b._style || 
            a._size      != b._size      || 
            a._angle     != b._angle     ||
            a._direction != b._direction;
@@ -114,7 +118,7 @@ inline bool operator<(const Font& a, const Font& b)
     if(a._name < b._name)
         return true;
 
-    if(a._fontStyle < b._fontStyle)
+    if(a._style < b._style)
         return true;
 
     if(a._size < b._size)

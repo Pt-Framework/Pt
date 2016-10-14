@@ -49,9 +49,8 @@ class ImageView;
 class ImageFormat
 {
     public:
-        ImageFormat(size_t pixelStride, size_t channels)
+        ImageFormat(size_t pixelStride)
         : _pixelStride(pixelStride)
-        , _channels(channels)
         { }
 
         virtual ~ImageFormat()
@@ -64,19 +63,14 @@ class ImageFormat
             return _pixelStride;
         }
 
-        std::size_t channels() const
-        {
-            return _channels;
-        }
-
         bool operator==(const ImageFormat& a) const
         {
-          return _pixelStride == a._pixelStride && _channels == a._channels;
+          return _pixelStride == a._pixelStride;
         }
 
         bool operator!=(const ImageFormat& a) const
         {
-          return _pixelStride != a._pixelStride || _channels != a._channels;
+          return _pixelStride != a._pixelStride;
         }
 
         PT_GFX_API static const ImageFormat& rgb16();
@@ -165,7 +159,6 @@ class ImageFormat
 
     private:
         std::size_t _pixelStride;
-        std::size_t _channels;
 };
 
 } // namespace

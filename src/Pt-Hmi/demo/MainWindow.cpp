@@ -33,6 +33,7 @@
 #include <Pt/Gfx/JpegReader.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/ImagePainter.h>
+#include <Pt/Gfx/Argb32Format.h>
 #include <Pt/Gfx/Algorithm.h>
 #include <sstream>
 #include <fstream>

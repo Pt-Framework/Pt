@@ -36,7 +36,7 @@ namespace Pt {
 namespace Gfx {
 
 Argb32Format::Argb32Format()
-: ImageFormat(4, 4)
+: ImageFormat(4)
 {
 }
 

@@ -304,7 +304,6 @@
     <ClInclude Include="..\..\src\Pt-Gfx\LineSlope.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\Rasterizer.h" />
     <ClInclude Include="..\..\src\Pt-Gfx\Span.h" />
-    <ClInclude Include="..\..\src\Pt-Gfx\Vera.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\ArrowCursor.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\cocoa\CursorImpl.h" />

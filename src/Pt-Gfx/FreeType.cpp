@@ -131,17 +131,17 @@ void FreeType::setFontDir(const System::Path& path)
         if(err != 0)
             continue;
 
-        Font::FontStyle style = Font::NormalStyle;
+        Font::Style style = Font::Normal;
 
         if( (face->style_flags & FT_STYLE_FLAG_BOLD) == FT_STYLE_FLAG_BOLD )
-            style = Font::BoldStyle;
+            style = Font::Bold;
 
         if( (face->style_flags & FT_STYLE_FLAG_ITALIC) == FT_STYLE_FLAG_ITALIC )
-            style = Font::ItalicStyle;
+            style = Font::Italic;
 
         if( (face->style_flags & FT_STYLE_FLAG_BOLD) == FT_STYLE_FLAG_BOLD && 
             (face->style_flags & FT_STYLE_FLAG_ITALIC) == FT_STYLE_FLAG_ITALIC )
-            style = Font::BoldItalicStyle;
+            style = Font::BoldItalic;
 
         Font font(face->family_name, 12, style);
 

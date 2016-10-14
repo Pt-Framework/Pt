@@ -33,6 +33,7 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Types.h>
+#include <cstddef>
 
 namespace Pt {
 
@@ -43,21 +44,22 @@ class PT_GFX_API FontMetrics
   public:
       FontMetrics();
             
-      FontMetrics(size_t ascent, size_t descent, size_t width, size_t height);
+      FontMetrics(std::size_t ascent, std::size_t descent, 
+                  std::size_t width, std::size_t height);
 
-      size_t ascent() const;
+      std::size_t ascent() const;
 
-      size_t descent() const;
+      std::size_t descent() const;
 
-      size_t width() const;
+      std::size_t width() const;
 
-      size_t height() const;
+      std::size_t height() const;
 
   private:
-      size_t _ascent;
-      size_t _descent;
-      size_t _width;
-      size_t _height;
+      std::size_t _ascent;
+      std::size_t _descent;
+      std::size_t _width;
+      std::size_t _height;
 };
 
 } // namespace

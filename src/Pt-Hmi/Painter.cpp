@@ -162,6 +162,12 @@ Gfx::FontMetrics Painter::fontMetrics(const Gfx::Font& font, const Pt::String& t
 }
 
 
+std::vector<std::string> Painter::fontNames()
+{
+    return PaintSurfaceImpl::fontNames();
+}
+
+
 void Painter::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 {
     if( _pen.size() == 0 )

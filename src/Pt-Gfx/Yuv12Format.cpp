@@ -36,7 +36,7 @@ namespace Pt {
 namespace Gfx {
 
 Yuv12Format::Yuv12Format()
-: ImageFormat(1, 3)
+: ImageFormat(1)
 {
 }
 

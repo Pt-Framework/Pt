@@ -35,58 +35,6 @@
 
 namespace {
 
-HFONT getFont(const Pt::Gfx::Font& font)
-{
-    int fontWeight;
-    
-    switch( font.fontStyle() ) 
-    {
-        default:
-        case Pt::Gfx::Font::NormalStyle:
-        case Pt::Gfx::Font::ItalicStyle:
-            fontWeight = FW_NORMAL;
-            break;
-
-        case Pt::Gfx::Font::BoldStyle:
-        case Pt::Gfx::Font::BoldItalicStyle:
-            fontWeight = FW_BOLD;
-            break;
-    }
-
-    BYTE italic = font.fontStyle() == Pt::Gfx::Font::ItalicStyle || 
-                  font.fontStyle() == Pt::Gfx::Font::BoldItalicStyle;
-
-    LOGFONT lf;
-    lf.lfHeight         = -((int)font.size());         // converted to device units
-    lf.lfWidth          = 0;                           // default width of the font
-    lf.lfEscapement     = font.angle();                // escapement angle
-    lf.lfOrientation    = 0;                           // orientation
-    lf.lfWeight         = fontWeight;                  // font weight
-    lf.lfItalic         = italic;                      // italic
-    lf.lfUnderline      = FALSE;                       // underline
-    lf.lfStrikeOut      = FALSE;                       // strikeout
-    lf.lfCharSet        = DEFAULT_CHARSET;             // use the default charset
-    lf.lfOutPrecision   = OUT_DEFAULT_PRECIS;          // default output precision
-    lf.lfClipPrecision  = CLIP_DEFAULT_PRECIS;         // default clipping behaviour
-    lf.lfQuality        = DEFAULT_QUALITY;             // default quality
-    lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE; // default pitch and family
-   
-    memset(lf.lfFaceName, 0, LF_FACESIZE * sizeof(TCHAR));
-   
-   if( font.name() == "" )
-   {
-      memcpy(lf.lfFaceName, Pt::Hmi::PaintSurfaceImpl::defaultFont().c_str(), std::min<size_t>( LF_FACESIZE, Pt::Hmi::PaintSurfaceImpl::defaultFont().size() + 1) );
-   }
-   else
-   {
-      memcpy(lf.lfFaceName, font.name().c_str(), std::min<size_t>( LF_FACESIZE, font.name().size() + 1) );
-   }
-
-
-    HFONT hf = CreateFontIndirect(&lf);
-    return hf;
-}
-
 std::string getDefaultFont()
 {
     HDC dc = GetDC(NULL);
@@ -96,7 +44,7 @@ std::string getDefaultFont()
 
     ReleaseDC(NULL, dc);
 
-  return Pt::win32::toMultiByte(&buffer[0]);
+    return Pt::win32::toMultiByte(&buffer[0]);
 }
 
 }
@@ -111,8 +59,11 @@ static int CALLBACK EnumFontsProc(LOGFONT *logFont, TEXTMETRIC *physFont, DWORD 
 {
     WCHAR* faceName = logFont->lfFaceName;
 
-    if (faceName[0] != '@') {  // Ignore fonts with @ as first character.
-        ((std::list<std::string>*)param)->push_back(win32::toMultiByte(faceName));
+    // Ignore fonts with @ as first character.
+    if (faceName[0] != '@') 
+    {  
+        std::string name = win32::toMultiByte(faceName);
+        reinterpret_cast<std::vector<std::string>*>(param)->push_back(name);
     }
 
     return 1;
@@ -124,8 +75,10 @@ static int CALLBACK EnumFontFamExProc(ENUMLOGFONTEX *logFont, NEWTEXTMETRICEX *p
 {
     char* faceName = logFont->elfLogFont.lfFaceName;    
 
-    if (faceName[0] != '@') {  // Ignore fonts with @ as first character.
-        ((std::list<std::string>*)param)->push_back(faceName);
+    // Ignore fonts with @ as first character.
+    if (faceName[0] != '@') 
+    {  
+        reinterpret_cast<std::vector<std::string>*>(param)->push_back(faceName);
     }
 
     return 1;
@@ -134,6 +87,7 @@ static int CALLBACK EnumFontFamExProc(ENUMLOGFONTEX *logFont, NEWTEXTMETRICEX *p
 #endif
 
 std::string PaintSurfaceImpl::_defaultFont = getDefaultFont();
+
 
 PaintSurfaceImpl::PaintSurfaceImpl()
 {
@@ -151,15 +105,15 @@ std::string PaintSurfaceImpl::defaultFont()
 }
 
 
-void PaintSurfaceImpl::setDefaultFont( std::string f)
+void PaintSurfaceImpl::setDefaultFont(const std::string& f)
 {
-  _defaultFont = f;
+    _defaultFont = f;
 }
 
 
-std::list<std::string> PaintSurfaceImpl::fontFamilyNames()
+std::vector<std::string> PaintSurfaceImpl::fontNames()
 {
-    std::list<std::string> fonts;
+    std::vector<std::string> fonts;
     HDC dc = GetDC(NULL);
 
 #ifdef _WIN32_WCE
@@ -175,7 +129,7 @@ std::list<std::string> PaintSurfaceImpl::fontFamilyNames()
 
     ReleaseDC(NULL, dc);
 
-    fonts.unique();
+    fonts.erase( std::unique(fonts.begin(), fonts.end()), fonts.end() );
     return fonts;
 }
 
@@ -209,4 +163,57 @@ Gfx::FontMetrics PaintSurfaceImpl::fontMetrics(const Gfx::Font& font, const Pt::
                             (int)sizeF.width(), 
                             (int)sizeF.height());
 }
-}} // namespace
+
+
+HFONT PaintSurfaceImpl::getFont(const Pt::Gfx::Font& font)
+{
+    int fontWeight;
+    
+    switch( font.style() ) 
+    {
+        default:
+        case Pt::Gfx::Font::Normal:
+        case Pt::Gfx::Font::Italic:
+            fontWeight = FW_NORMAL;
+            break;
+
+        case Pt::Gfx::Font::Bold:
+        case Pt::Gfx::Font::BoldItalic:
+            fontWeight = FW_BOLD;
+            break;
+    }
+
+    BYTE italic = font.style() == Pt::Gfx::Font::Italic || 
+                  font.style() == Pt::Gfx::Font::BoldItalic;
+
+    LOGFONT lf;
+    lf.lfHeight         = -((int)font.size());         // converted to device units
+    lf.lfWidth          = 0;                           // default width of the font
+    lf.lfEscapement     = font.angle();                // escapement angle
+    lf.lfOrientation    = 0;                           // orientation
+    lf.lfWeight         = fontWeight;                  // font weight
+    lf.lfItalic         = italic;                      // italic
+    lf.lfUnderline      = FALSE;                       // underline
+    lf.lfStrikeOut      = FALSE;                       // strikeout
+    lf.lfCharSet        = DEFAULT_CHARSET;             // use the default charset
+    lf.lfOutPrecision   = OUT_DEFAULT_PRECIS;          // default output precision
+    lf.lfClipPrecision  = CLIP_DEFAULT_PRECIS;         // default clipping behaviour
+    lf.lfQuality        = DEFAULT_QUALITY;             // default quality
+    lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE; // default pitch and family
+
+    if( font.name().empty() )
+    {
+        memcpy(lf.lfFaceName, Pt::Hmi::PaintSurfaceImpl::defaultFont().c_str(), std::min<size_t>( LF_FACESIZE, Pt::Hmi::PaintSurfaceImpl::defaultFont().size() + 1) );
+    }
+    else
+    {
+        memcpy(lf.lfFaceName, font.name().c_str(), std::min<size_t>( LF_FACESIZE, font.name().size() + 1) );
+    }
+
+    HFONT hf = CreateFontIndirect(&lf);
+    return hf;
+}
+
+} // namespace
+
+} // namespace

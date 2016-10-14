@@ -82,57 +82,6 @@ DWORD getPenStyle(const Pt::Gfx::Pen& pen)
     return penStyle;
 }
 
-
-HFONT getFont(const Pt::Gfx::Font& font)
-{
-    int fontWeight;
-    
-    switch( font.fontStyle() ) 
-    {
-        default:
-        case Pt::Gfx::Font::NormalStyle:
-        case Pt::Gfx::Font::ItalicStyle:
-            fontWeight = FW_NORMAL;
-            break;
-
-        case Pt::Gfx::Font::BoldStyle:
-        case Pt::Gfx::Font::BoldItalicStyle:
-            fontWeight = FW_BOLD;
-            break;
-    }
-
-    BYTE italic = font.fontStyle() == Pt::Gfx::Font::ItalicStyle || 
-                  font.fontStyle() == Pt::Gfx::Font::BoldItalicStyle;
-
-    LOGFONT lf;
-    lf.lfHeight         = -((int)font.size());         // converted to device units
-    lf.lfWidth          = 0;                           // default width of the font
-    lf.lfEscapement     = font.angle();                // escapement angle
-    lf.lfOrientation    = 0;                           // orientation
-    lf.lfWeight         = fontWeight;                  // font weight
-    lf.lfItalic         = italic;                      // italic
-    lf.lfUnderline      = FALSE;                       // underline
-    lf.lfStrikeOut      = FALSE;                       // strikeout
-    lf.lfCharSet        = DEFAULT_CHARSET;             // use the default charset
-    lf.lfOutPrecision   = OUT_DEFAULT_PRECIS;          // default output precision
-    lf.lfClipPrecision  = CLIP_DEFAULT_PRECIS;         // default clipping behaviour
-    lf.lfQuality        = DEFAULT_QUALITY;             // default quality
-    lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE; // default pitch and family
-   
-   if( font.name() == "" )
-   {
-      memcpy(lf.lfFaceName, Pt::Hmi::PaintSurfaceImpl::defaultFont().c_str(), std::min<size_t>( LF_FACESIZE, Pt::Hmi::PaintSurfaceImpl::defaultFont().size() + 1) );
-   }
-   else
-   {
-      memcpy(lf.lfFaceName, font.name().c_str(), std::min<size_t>( LF_FACESIZE, font.name().size() + 1) );
-   }
-
-    HFONT hf = CreateFontIndirect(&lf);
-    return hf;
-}
-
-
 HBRUSH gradientBrush(HDC dc, int width, int height,
                      Pt::Gfx::Color gradientStart, 
                      Pt::Gfx::Color gradientStop, 

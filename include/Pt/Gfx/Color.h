@@ -48,14 +48,14 @@ class Color
         , _b(0)
         { }
 
-        Color(Pt::uint16_t a, Pt::uint16_t r, Pt::uint16_t g, Pt::uint16_t b )
+        Color(Pt::uint16_t a, Pt::uint16_t r, Pt::uint16_t g, Pt::uint16_t b)
         : _a(a)
         , _r(r)
         , _g(g)
         , _b(b) 
         { }	
 
-        Color(Pt::uint16_t r, Pt::uint16_t g, Pt::uint16_t b )
+        Color(Pt::uint16_t r, Pt::uint16_t g, Pt::uint16_t b)
         : _a(1)
         , _r(r)
         , _g(g)

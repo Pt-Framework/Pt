@@ -103,6 +103,9 @@ class PT_HMI_API Painter : public Gfx::Painter
 
         void drawSurface(const Gfx::PointF& to,  const PixmapSurface& pm,  const Gfx::RectF& pmRect);
     
+    public:
+        static std::vector<std::string> fontNames();
+
     private:
         static void setDefaultFont(std::string f);
 

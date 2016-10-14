@@ -140,15 +140,16 @@ inline int stepAround( int v, int incr, int max )
   return (((v) + (incr) < 0) ? (max - 1) : ((v) + (incr) == max) ? 0 : ((v) + (incr)));
 }
 
-Rasterizer::Rasterizer( Image& image )
-: _image( &image )
+Rasterizer::Rasterizer(Image& image)
+: _image(&image)
 , _text( new DrawText() )
-, _font( ImagePainter::defaultFont() )
+, _font()
 , _compositionMode(CompositionMode::SourceCopy)
 , _penPixel(_image->view(), 0, 0) 
 , _brushPixel(_image->view(), 0, 0)
 {
-    _text->setFont( _font );
+    _text->setFont(_font);
+    
     updateClip();
 }
 
@@ -1853,15 +1854,10 @@ void Rasterizer::stroke( const Point& pixel)
 }
 
 
-void Rasterizer::setFont( const Font& font )
+void Rasterizer::setFont(const Font& font)
 {
-  _font = font;
-
-  if(_font.name().empty() )
-      _font = Font(FreeType::instance().defaultFont(), font.size(), font.fontStyle(), 
-                   font.angle(), font.direction() );
-  
-  _text->setFont( _font );
+  _font = font;  
+  _text->setFont(_font);
 }
 
 

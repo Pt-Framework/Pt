@@ -47,7 +47,7 @@ class PaintSurfaceImpl
         
         static void setDefaultFont( std::string f);
 
-        static std::vector<std::string> fontFamilyNames(); 
+        static std::vector<std::string> fontNames(); 
 
         static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text); 
                                          

@@ -1335,9 +1335,6 @@
     <ClInclude Include="..\..\include\Pt\Gfx\ImageFormat.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\src\Pt-Gfx\Vera.h">
-      <Filter>Pt-Gfx</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Gfx\DrawText.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>

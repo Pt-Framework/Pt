@@ -35,7 +35,7 @@
  namespace Gfx {
 
 Rgb16Format::Rgb16Format()
-: ImageFormat(2, 3)
+: ImageFormat(2)
 {
 }
 

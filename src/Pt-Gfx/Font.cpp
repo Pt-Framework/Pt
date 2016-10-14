@@ -34,11 +34,11 @@ namespace Pt {
 
 namespace Gfx {
 
-Font::Font(const std::string& name, size_t size, FontStyle fontStyle, 
+Font::Font(const std::string& name, size_t size, Style style, 
            ssize_t angle, Direction direction)
 : _name(name),
   _size(size),
-  _fontStyle(fontStyle),
+  _style(style),
   _angle(angle),
   _direction(direction)
 {
@@ -57,9 +57,9 @@ size_t Font::size() const
 }
 
 
-Font::FontStyle Font::fontStyle() const
+Font::Style Font::style() const
 {
-    return _fontStyle;
+    return _style;
 }
 
 
