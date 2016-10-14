@@ -116,44 +116,41 @@ void FreeType::setFontDir(const System::Path& path)
     _fonts.clear();
     _files.clear();
     
-    try
+    if( ! System::FileInfo::exists(_fontDir) )
+        return;
+
+    System::DirectoryIterator it(_fontDir);
+    System::DirectoryIterator end;
+
+    for( ; it != end; ++it)
     {
-        System::DirectoryIterator it(_fontDir);
-        System::DirectoryIterator end;
+        std::string pathName = it->path().toLocal();
 
-        for( ; it != end; ++it)
-        {
-            std::string pathName = it->path().toLocal();
+        FT_Face face;
+        FT_Error err = FT_New_Face(_ft, pathName.c_str(), 0, &face);
+        if(err != 0)
+            continue;
 
-            FT_Face face;
-            FT_Error err = FT_New_Face(_ft, pathName.c_str(), 0, &face);
-            if(err != 0)
-                continue;
+        Font::FontStyle style = Font::NormalStyle;
 
-            Font::FontStyle style = Font::NormalStyle;
+        if( (face->style_flags & FT_STYLE_FLAG_BOLD) == FT_STYLE_FLAG_BOLD )
+            style = Font::BoldStyle;
 
-            if( (face->style_flags & FT_STYLE_FLAG_BOLD) == FT_STYLE_FLAG_BOLD )
-                style = Font::BoldStyle;
+        if( (face->style_flags & FT_STYLE_FLAG_ITALIC) == FT_STYLE_FLAG_ITALIC )
+            style = Font::ItalicStyle;
 
-            if( (face->style_flags & FT_STYLE_FLAG_ITALIC) == FT_STYLE_FLAG_ITALIC )
-                style = Font::ItalicStyle;
+        if( (face->style_flags & FT_STYLE_FLAG_BOLD) == FT_STYLE_FLAG_BOLD && 
+            (face->style_flags & FT_STYLE_FLAG_ITALIC) == FT_STYLE_FLAG_ITALIC )
+            style = Font::BoldItalicStyle;
 
-            if( (face->style_flags & FT_STYLE_FLAG_BOLD) == FT_STYLE_FLAG_BOLD && 
-                (face->style_flags & FT_STYLE_FLAG_ITALIC) == FT_STYLE_FLAG_ITALIC )
-                style = Font::BoldItalicStyle;
+        Font font(face->family_name, 12, style);
 
-            Font font(face->family_name, 12, style);
+        System::Path& fontPath = _fonts[font];
+        fontPath = it->path();
 
-            System::Path& fontPath = _fonts[font];
-            fontPath = it->path();
+        _files.insert(&fontPath);
 
-            _files.insert(&fontPath);
-
-            FT_Done_Face(face);
-        }
-    }
-    catch(const Pt::System::AccessFailed&)
-    {
+        FT_Done_Face(face);
     }
 
     // UNLOCK
@@ -212,6 +209,7 @@ FontMetrics FreeType::fontMetrics(const String& text,
         if(face->charmap[n].encoding == FT_ENCODING_UNICODE)
         {
             charMapIndex = n;
+            break;
         }
     }
 
@@ -310,6 +308,7 @@ void FreeType::draw(Image& image, const Color& color, Pt::ssize_t fontAngle,
         if(face->charmap[n].encoding == FT_ENCODING_UNICODE)
         {
             charMapIndex = n;
+            break;
         }
     }
 
