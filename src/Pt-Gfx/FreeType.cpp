@@ -37,6 +37,7 @@
 #include <Pt/System/FileInfo.h>
 #include <Pt/System/IOError.h>
 #include <stdexcept>
+#include <limits>
 #include <iostream>
 
 namespace Pt {
