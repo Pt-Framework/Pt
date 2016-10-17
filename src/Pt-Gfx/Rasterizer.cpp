@@ -3215,10 +3215,12 @@ void Rasterizer::updateGradientBrush(int width, int height)
     {
         case Pt::Gfx::Brush::HorizontalGradient:
           _brushBuffer.reset(_image->format(), Size(width, 1));
+          height = 1;
         break;
 
         case Pt::Gfx::Brush::VerticalGradient:
           _brushBuffer.reset(_image->format(), Size(1, height));
+          width = 1;
           std::swap(gradientStart, gradientStop);
         break;
     }

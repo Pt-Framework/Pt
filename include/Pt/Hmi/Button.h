@@ -62,13 +62,19 @@ class PT_HMI_API Button  : public Label
            _imageAlign = i;
         }
              
-        Signal<Button&>& clicked()
+        Signal<>& clicked()
         {
             return _clicked;
         }
-        bool  isPressed() const
+
+        Signal<>& pressed()
         {
-          return _isPressed;
+            return _pressed;
+        }
+
+        Signal<>& released()
+        {
+            return _released;
         }
 
     protected:
@@ -96,7 +102,10 @@ class PT_HMI_API Button  : public Label
         virtual void onClicked(const Gfx::PointF& pos);
 
     private:
-        Signal<Button&> _clicked;
+        Signal<> _clicked;
+        Signal<> _pressed;
+        Signal<> _released;
+        
         Gfx::Image _image;
         Alignment  _imageAlign;
         bool _isPressed;

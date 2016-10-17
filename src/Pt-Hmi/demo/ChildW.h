@@ -26,9 +26,9 @@ class ChildW : public Hmi::Window
         ~ChildW();
 
     private:
-        void onShowDialog(Button& button);
+        void onShowDialog();
         
-        void onCloseApp(Button& button);
+        void onCloseApp();
 
         void onVScroll(ScrollBar&, int pos)
         {

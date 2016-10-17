@@ -187,7 +187,10 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     Gfx::Image image( painter.format(), Gfx::Size(200, 30) );
     Gfx::ImagePainter imagePainter(image);
 
-    imagePainter.setBrush( Gfx::Brush( Gfx::Color::fromRgb8(200,200,200) ) );
+    //imagePainter.setBrush( Gfx::Brush( Gfx::Color::fromRgb8(200, 200, 200) ) );
+    imagePainter.setBrush( Gfx::Brush( Gfx::Color::fromRgb8(200, 200, 200), 
+                           Gfx::Color::fromRgb8(255, 255, 255), 
+                           Gfx::Brush::Vertical));
     imagePainter.fillRect(Gfx::RectF(Gfx::PointF(0,0), Gfx::SizeF(200, 30) ) );
     
     Gfx::FontMetrics fm = imagePainter.fontMetrics("Hello");

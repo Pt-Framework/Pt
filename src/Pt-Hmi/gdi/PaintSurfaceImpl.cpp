@@ -86,7 +86,7 @@ static int CALLBACK EnumFontFamExProc(ENUMLOGFONTEX *logFont, NEWTEXTMETRICEX *p
 
 #endif
 
-std::string PaintSurfaceImpl::_defaultFont = getDefaultFont();
+std::string PaintSurfaceImpl::_defaultFont; //getDefaultFont();
 
 
 PaintSurfaceImpl::PaintSurfaceImpl()
