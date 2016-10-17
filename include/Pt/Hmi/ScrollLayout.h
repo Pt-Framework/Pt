@@ -49,8 +49,10 @@ class PT_HMI_API ScrollLayout : public Layout
 
         void enableYScroll(bool e);
 
+        // TODO: use int
         void scrollX(double x);
 
+        // TODO: use int
         void scrollY(double y);
 
         int hRange() const
