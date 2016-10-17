@@ -50,11 +50,76 @@ ScrollLayout::~ScrollLayout()
 }
 
 
+void ScrollLayout::enableXScroll(bool e)
+{
+    _enableX = e;
+}
+
+
+void ScrollLayout::enableYScroll(bool e)
+{
+    _enableY = e;
+}
+
+
+void ScrollLayout::scrollX(double position)
+{
+    if( position > (_hrange - size().width()) || position < 0  )
+        return;
+
+    double delta = position - _lastScrollPos.x();
+
+    for( size_t i = 0; i < widgets().size();  ++i)
+    {
+        Widget* w =  widgets().at(i);
+            
+        Gfx::PointF pos = w->position();
+        pos.subX(delta);
+        w->move(pos);
+    }
+
+    _lastScrollPos.setX( position);
+
+    _scrolledX.send( (int) _lastScrollPos.x() );
+}
+
+
+void ScrollLayout::scrollY(double position)
+{    
+    if( position > (_vrange - size().height()) || position < 0  )
+        return;
+
+    double delta = position - _lastScrollPos.y();
+
+    for( size_t i = 0; i < widgets().size();  ++ i)
+    {
+        Widget* w =  widgets().at(i);
+            
+        Gfx::PointF pos = w->position();
+        pos.subY(delta);
+        w->move(pos);
+    }
+
+    _lastScrollPos.setY( position);
+
+    _scrolledY.send( (int) _lastScrollPos.y() );
+}
+
+
+void ScrollLayout::reset()
+{
+    scrollX(0);
+    scrollY(0);
+  
+    updateRange();
+}
+
+
 void ScrollLayout::onMouseEvent(const MouseEvent& ev)
 {
-   if( ev.isPress())
+   if( ev.isPress() )
    {
-     _lastPos = ev.position();
+      _lastPos = ev.position();
       _doScroll = true;    
     }
 
@@ -66,10 +131,10 @@ void ScrollLayout::onMouseEvent(const MouseEvent& ev)
       Gfx::PointF delta = ev.position() - _lastPos;
 
       if(_enableY) 
-        scrollY( _lastScrollPos.y() - delta.y());
+          scrollY( _lastScrollPos.y() - delta.y());
 
       if(_enableX) 
-        scrollX( _lastScrollPos.x() - delta.x());
+          scrollX( _lastScrollPos.x() - delta.x());
 
       _lastPos = ev.position();
    }
@@ -79,7 +144,7 @@ void ScrollLayout::onTouchEvent(const TouchEvent& ev)
 {    
    if( ev.isPress() )
    {
-     _lastPos = ev.position();
+      _lastPos = ev.position();
       _doScroll = true;    
     }
 
@@ -88,38 +153,30 @@ void ScrollLayout::onTouchEvent(const TouchEvent& ev)
 
    if( _doScroll )
    {
-      Gfx::PointF delta = ev.position() - _lastPos;
+        Gfx::PointF delta = ev.position() - _lastPos;
 
-      if(_enableY) 
-        scrollY( _lastScrollPos.y() - delta.y());
+        if(_enableY) 
+            scrollY( _lastScrollPos.y() - delta.y());
 
-      if(_enableX) 
-        scrollX( _lastScrollPos.x() - delta.x());
+        if(_enableX) 
+            scrollX( _lastScrollPos.x() - delta.x());
 
-      _lastPos = ev.position();
+        _lastPos = ev.position();
    }
 }
 
 
 void ScrollLayout::onAddWidget(Widget& w)
 {
-  Layout::onAddWidget(w);
-  updateRange();
+    Layout::onAddWidget(w);
+    updateRange();
 }
+
 
 void ScrollLayout::onRemoveWidget(Widget& w)
 {
     Layout::onRemoveWidget(w);
     updateRange();
-}
-
-
-void ScrollLayout::reset()
-{
-  scrollX(0);
-  scrollY(0);
-  updateRange();
-
 }
 
 
@@ -138,60 +195,6 @@ void ScrollLayout::updateRange()
 
     _hrange = static_cast<int>(maxWidth);
     _vrange = static_cast<int>(maxHeight);
-}
-
-
-double ScrollLayout::scrollX() const
-{
-  return _lastScrollPos.x();
-}
-
-
-double ScrollLayout::scrollY() const
-{
-  return _lastScrollPos.y();
-}
-
-
-void ScrollLayout::scrollX(double position)
-{
-    if( position  > (_hrange - size().width()) || position < 0  )
-        return;
-
-    double delta = position - _lastScrollPos.x();
-
-    for( size_t i = 0; i < widgets().size();  ++i)
-    {
-        Widget* w =  widgets().at(i);
-            
-        Gfx::PointF pos = w->position();
-        pos.subX( delta );
-        w->move(pos);
-    }
-
-    _lastScrollPos.setX( position);
-    _scrollChanged.send(*this, (int)_lastScrollPos.x(), (int)_lastScrollPos.y() );
-}
-
-
-void ScrollLayout::scrollY(double position)
-{    
-    if( position  > (_vrange - size().height()) || position < 0  )
-        return;
-
-    double delta = position - _lastScrollPos.y();
-
-    for( size_t i = 0; i < widgets().size();  ++ i)
-    {
-        Widget* w =  widgets().at(i);
-            
-        Gfx::PointF pos = w->position();
-        pos.subY( delta );
-        w->move(pos);
-    }
-
-    _lastScrollPos.setY( position);
-    _scrollChanged.send(*this, (int)_lastScrollPos.x(), (int)_lastScrollPos.y() );
 }
 
 } // namespace

@@ -30,11 +30,6 @@ class ChildW : public Hmi::Window
         
         void onCloseApp();
 
-        void onVScroll(ScrollBar&, int pos)
-        {
-            std::clog << "vscroll: " << pos << std::endl;
-        }
-
     private:
         FlowLayout _mainLayout;
         MenuBar _menuBar;

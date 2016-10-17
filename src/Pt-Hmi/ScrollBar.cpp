@@ -63,12 +63,11 @@ void ScrollBar::setRange(int minpos, int maxpos)
     _minPos = minpos;
     _maxPos = maxpos;
     
-
     if(_position < minpos)
-        setPosition(minpos);
+        scroll(minpos);
 
     if(_position > maxpos)
-        setPosition(maxpos);
+        scroll(maxpos);
 
     updateScroll();
 }
@@ -90,6 +89,12 @@ int ScrollBar::minimumPosition() const
 int ScrollBar::maximumPosition() const
 {
     return _maxPos;
+}
+
+
+int ScrollBar::position() const
+{
+    return _position;
 }
 
 
@@ -117,14 +122,14 @@ void ScrollBar::setPosition(int pos)
     _handleRect.set(pt, size);
 
     update();
-
-    _changed.send(*this, _position);
 }
 
 
-int ScrollBar::position() const
+void ScrollBar::scroll(int pos)
 {
-    return _position;
+    setPosition(pos);
+
+    _changed.send(_position);
 }
 
 
@@ -153,7 +158,7 @@ void ScrollBar::onMouseEvent(const MouseEvent& ev)
         int pos = pixelToPosition(pixPos);
 
         if( pos >= _minPos && pos <= _maxPos)
-          setPosition( pos);
+          scroll(pos);
     }
 }
 
@@ -187,8 +192,42 @@ void ScrollBar::onTouchEvent(const TouchEvent& tev)
         int pos = pixelToPosition(pixPos);
 
         if( pos >= _minPos && pos <= _maxPos)
-          setPosition( pos);
+          scroll(pos);
     }
+}
+
+
+void ScrollBar::onResizeEvent(const ResizeEvent& ev)
+{
+    Panel::onResizeEvent(ev);
+
+    updateScroll();
+}
+
+
+void ScrollBar::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
+{
+    Panel::onPaintContent(surface, updateRect);
+
+    Painter painter(surface);
+    painter.setClip(updateRect);
+    
+    Gfx::Brush handleBrush( Gfx::Color::fromRgb8(175, 175, 175) );
+    painter.setBrush(handleBrush);
+    painter.fillRect(_handleRect);
+}
+
+
+int ScrollBar::pixelToPosition(double pix)
+{    
+    double pos = pix * _factorPosition + _offsetPosition;
+    return static_cast<int>(pos);
+}
+        
+
+double ScrollBar::positionToPixel(int pos)
+{
+  return pos * _factorPixel + _offsetPixel;
 }
 
 
@@ -217,46 +256,6 @@ void ScrollBar::updateScroll()
      Gfx::SizeF size(buttonLength, buttonLength);
     
     _handleRect.set( pos, size );
-}
-
-
-void ScrollBar::onResizeEvent(const ResizeEvent& ev)
-{
-    Panel::onResizeEvent(ev);
-
-    updateScroll();
-}
-
-
-void ScrollBar::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
-{
-    Panel::onPaintBackground(surface, updateRect);
-}
-
-
-void ScrollBar::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
-{
-    Panel::onPaintContent(surface, updateRect);
-
-    Painter painter(surface);
-    painter.setClip(updateRect);
-    
-    Gfx::Brush handleBrush( Gfx::Color::fromRgb8(175,175,175) );
-    painter.setBrush(handleBrush);
-    painter.fillRect(_handleRect);
-}
-
-
-int ScrollBar::pixelToPosition(double pix)
-{    
-    double pos = pix * _factorPosition + _offsetPosition;
-    return static_cast<int>(pos);
-}
-        
-
-double ScrollBar::positionToPixel(int pos)
-{
-  return pos * _factorPixel + _offsetPixel;
 }
 
 } // namespace

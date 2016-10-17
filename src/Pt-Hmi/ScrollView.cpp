@@ -39,13 +39,14 @@ ScrollView::ScrollView()
 , _hScrollBar(ScrollBar::Horizontal)
 , _vScrollBar(ScrollBar::Vertical)
 {
-    _hScrollBar.resize( Gfx::SizeF(100,32) );
-    _vScrollBar.resize( Gfx::SizeF(32,100) );
+    _hScrollBar.resize( Gfx::SizeF(100, 32) );
+    _vScrollBar.resize( Gfx::SizeF(32, 100) );
 
-    _hScrollBar.changed() += Pt::slot(*this, &ScrollView::onHScroll);
-    _vScrollBar.changed() += Pt::slot(*this, &ScrollView::onVScroll);
+    _hScrollBar.changed() += Pt::slot(*this, &ScrollView::onHScrollBar);
+    _vScrollBar.changed() += Pt::slot(*this, &ScrollView::onVScrollBar);
 
-    _layout.scrollChanged() += Pt::slot(*this, &ScrollView::onScrollChanged);
+    _layout.scrolledX() += Pt::slot(*this, &ScrollView::onScrolledX);
+    _layout.scrolledY() += Pt::slot(*this, &ScrollView::onScrolledY);
 
     add(_layout);
     add(_hScrollBar);
@@ -58,11 +59,12 @@ ScrollView::~ScrollView()
 }
 
 
-void ScrollView::showScrollBars( bool h, bool v)
+void ScrollView::showScrollBars(bool h, bool v)
 {
-  _hScrollBar.show(h);
-  _vScrollBar.show(v);
+    _hScrollBar.show(h);
+    _vScrollBar.show(v);
 }
+
 
 void ScrollView::setWidget(Widget& widget)
 {
@@ -72,27 +74,32 @@ void ScrollView::setWidget(Widget& widget)
     _layout.add(widget);
     _widget = &widget;
 
-    _hScrollBar.setRange(0, _layout.hRange() );
-    _vScrollBar.setRange(0, _layout.vRange() );
+    _hScrollBar.setRange( 0, _layout.hRange() );
+    _vScrollBar.setRange( 0, _layout.vRange() );
 }
 
 
-void ScrollView::onScrollChanged(ScrollLayout& layout, int w , int h)
-{
-  _hScrollBar.setPosition(w);
-  _vScrollBar.setPosition(h);
-}
-
-
-void ScrollView::onHScroll(ScrollBar& bar, int pos)
+void ScrollView::onHScrollBar(int pos)
 {
     _layout.scrollX(pos);
 }
 
 
-void ScrollView::onVScroll(ScrollBar& bar, int pos)
+void ScrollView::onVScrollBar(int pos)
 {
     _layout.scrollY(pos);
+}
+
+
+void ScrollView::onScrolledX(int n)
+{
+    _hScrollBar.setPosition(n);
+}
+
+
+void ScrollView::onScrolledY(int n)
+{
+    _vScrollBar.setPosition(n);
 }
 
 
@@ -112,14 +119,15 @@ void ScrollView::onResizeEvent(const ResizeEvent& ev)
 
     _hScrollBar.move(Gfx::PointF( 0, 
                                   ev.size().height() - hSize.height()) );
+    
     _hScrollBar.resize( Gfx::SizeF( ev.size().width() - hSize.height(), 
                                     hSize.height()) );
-    
 
     _vScrollBar.show(_layout.size().height() <= _layout.vRange());  
 
     _vScrollBar.move( Gfx::PointF( ev.size().width() - vSize.width(), 
                                    0) );
+    
     _vScrollBar.resize( Gfx::SizeF(_vScrollBar.size().width(), 
                                    ev.size().height() - vSize.width()));
 
@@ -131,18 +139,18 @@ void ScrollView::onResizeEvent(const ResizeEvent& ev)
 }
 
 
-void ScrollView::updateScrollBar(ScrollBar& scroll, double maxRange)
+void ScrollView::updateScrollBar(ScrollBar& sb, double maxRange)
 {
-    int oldPos = scroll.position();
-    int oldMax = scroll.maximumPosition();
+    int oldPos = sb.position();
+    int oldMax = sb.maximumPosition();
 
-    scroll.setRange( 0, static_cast<int>(maxRange) );    
+    sb.setRange( 0, static_cast<int>(maxRange) );    
 
-    if(scroll.maximumPosition() > 0)
+    if(sb.maximumPosition() > 0)
     {      
       double relPos = double(oldPos) / oldMax;
       double newPos = maxRange * relPos + 0.5;
-      scroll.setPosition( static_cast<int>(newPos) );
+      sb.scroll( static_cast<int>(newPos) );
     }
 }
 

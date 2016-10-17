@@ -577,7 +577,7 @@ class Key
             Pa1 = 253,
         
             // The CLEAR key.
-            OemClear = 254,
+            OemClear = 254
         };
 
         enum Modifier

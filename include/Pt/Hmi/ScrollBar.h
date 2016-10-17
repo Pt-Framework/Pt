@@ -58,11 +58,17 @@ class PT_HMI_API ScrollBar : public Panel
 
         int maximumPosition() const;
 
-        void setPosition(int pos);
-
         int position() const;
 
-        Signal<ScrollBar&, int>& changed()
+        /** @brief Updates the position without scrolling.
+        */
+        void setPosition(int pos);
+
+        /** @brief Scrolls to an absolute position.
+        */
+        void scroll(int pos);
+
+        Signal<int>& changed()
         { return _changed; }
 
     protected:
@@ -71,8 +77,6 @@ class PT_HMI_API ScrollBar : public Panel
         virtual void onTouchEvent(const TouchEvent& ev);
 
         virtual void onResizeEvent(const ResizeEvent& ev);
-        
-        virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect);
 
         virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect);
 
@@ -95,8 +99,8 @@ class PT_HMI_API ScrollBar : public Panel
         double _offsetPixel;
         double _factorPosition;
         double _offsetPosition;
-        Gfx::RectF              _handleRect;
-        Signal<ScrollBar&, int> _changed;
+        Gfx::RectF  _handleRect;
+        Signal<int> _changed;
 };
 
 } // namespace

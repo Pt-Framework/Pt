@@ -114,7 +114,6 @@ ChildW::ChildW(const std::string& title)
     _buttonBar.add(_dialogButton);
     _buttonBar.add(_toggleButton);
     
-    _vscroll.changed() += Pt::slot(*this, &ChildW::onVScroll);
     _vscroll.resize( Gfx::SizeF(24, 24) );
     _vscroll.setDocking(Docking::Right);
 
