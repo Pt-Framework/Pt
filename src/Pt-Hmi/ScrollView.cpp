@@ -36,21 +36,21 @@ namespace Hmi {
 
 ScrollView::ScrollView()
 : _widget(0)
-, _hScrollBar(ScrollBar::Horizontal)
-, _vScrollBar(ScrollBar::Vertical)
+, _scrollBarX(ScrollBar::Horizontal)
+, _scrollBarY(ScrollBar::Vertical)
 {
-    _hScrollBar.resize( Gfx::SizeF(100, 32) );
-    _vScrollBar.resize( Gfx::SizeF(32, 100) );
+    _scrollBarX.resize( Gfx::SizeF(100, 32) );
+    _scrollBarY.resize( Gfx::SizeF(32, 100) );
 
-    _hScrollBar.changed() += Pt::slot(*this, &ScrollView::onHScrollBar);
-    _vScrollBar.changed() += Pt::slot(*this, &ScrollView::onVScrollBar);
+    _scrollBarX.changed() += Pt::slot(*this, &ScrollView::onScrollBarX);
+    _scrollBarY.changed() += Pt::slot(*this, &ScrollView::onScrollBarY);
 
     _layout.scrolledX() += Pt::slot(*this, &ScrollView::onScrolledX);
     _layout.scrolledY() += Pt::slot(*this, &ScrollView::onScrolledY);
 
     add(_layout);
-    add(_hScrollBar);
-    add(_vScrollBar);
+    add(_scrollBarX);
+    add(_scrollBarY);
 }
 
 
@@ -59,10 +59,10 @@ ScrollView::~ScrollView()
 }
 
 
-void ScrollView::showScrollBars(bool h, bool v)
+void ScrollView::enableScrollBars(bool h, bool v)
 {
-    _hScrollBar.show(h);
-    _vScrollBar.show(v);
+    _scrollBarX.show(h);
+    _scrollBarY.show(v);
 }
 
 
@@ -74,18 +74,18 @@ void ScrollView::setWidget(Widget& widget)
     _layout.add(widget);
     _widget = &widget;
 
-    _hScrollBar.setRange( 0, _layout.hRange() );
-    _vScrollBar.setRange( 0, _layout.vRange() );
+    _scrollBarX.setRange( 0, _layout.maximumX() );
+    _scrollBarY.setRange( 0, _layout.maximumY() );
 }
 
 
-void ScrollView::onHScrollBar(int pos)
+void ScrollView::onScrollBarX(int pos)
 {
     _layout.scrollX(pos);
 }
 
 
-void ScrollView::onVScrollBar(int pos)
+void ScrollView::onScrollBarY(int pos)
 {
     _layout.scrollY(pos);
 }
@@ -93,13 +93,13 @@ void ScrollView::onVScrollBar(int pos)
 
 void ScrollView::onScrolledX(int n)
 {
-    _hScrollBar.setPosition(n);
+    _scrollBarX.setPosition(n);
 }
 
 
 void ScrollView::onScrolledY(int n)
 {
-    _vScrollBar.setPosition(n);
+    _scrollBarY.setPosition(n);
 }
 
 
@@ -107,35 +107,40 @@ void ScrollView::onResizeEvent(const ResizeEvent& ev)
 {
     Widget::onResizeEvent(ev);
 
+    double width = ev.size().width();
+
+    if( _scrollBarY.isVisible() )
+        width -= _scrollBarY.size().width();
+
+    double height = ev.size().height();
+
+    if( _scrollBarX.isVisible() )
+        height -= _scrollBarX.size().height();
+
     _layout.move( Gfx::PointF(0,0) );
+    _layout.resize( Gfx::SizeF( width, height) );
 
-    Pt::Gfx::SizeF hSize = _hScrollBar.isVisible() ? _hScrollBar.size() : Pt::Gfx::SizeF(0,0);
-    Pt::Gfx::SizeF vSize = _vScrollBar.isVisible() ? _vScrollBar.size() : Pt::Gfx::SizeF(0,0);
+    _scrollBarX.show( width <= _layout.maximumX() );
 
-    _layout.resize( Gfx::SizeF( ev.size().width() - hSize.height(),  
-                                ev.size().height() - vSize.width()) );
+    if( _scrollBarX.isVisible() )
+    {
+        _scrollBarX.move( Gfx::PointF(0, height) );
+        _scrollBarX.resize( Gfx::SizeF(width, _scrollBarX.size().height()) );
+    }
 
-    _hScrollBar.show(_layout.size().width() <= _layout.hRange());
-
-    _hScrollBar.move(Gfx::PointF( 0, 
-                                  ev.size().height() - hSize.height()) );
+    _scrollBarY.show( height <= _layout.maximumY() );  
     
-    _hScrollBar.resize( Gfx::SizeF( ev.size().width() - hSize.height(), 
-                                    hSize.height()) );
+    if( _scrollBarY.isVisible() )
+    {
+        _scrollBarY.move( Gfx::PointF(width, 0) );
+        _scrollBarY.resize( Gfx::SizeF(_scrollBarY.size().width(), height));
+    }
 
-    _vScrollBar.show(_layout.size().height() <= _layout.vRange());  
+    double hrange = _layout.maximumX() -_layout.size().width();
+    updateScrollBar(_scrollBarX, hrange);
 
-    _vScrollBar.move( Gfx::PointF( ev.size().width() - vSize.width(), 
-                                   0) );
-    
-    _vScrollBar.resize( Gfx::SizeF(_vScrollBar.size().width(), 
-                                   ev.size().height() - vSize.width()));
-
-    double hrange = _layout.hRange() -_layout.size().width();
-    updateScrollBar(_hScrollBar, hrange);
-
-    double vrange = _layout.vRange() -_layout.size().height();
-    updateScrollBar(_vScrollBar, vrange);
+    double vrange = _layout.maximumY() -_layout.size().height();
+    updateScrollBar(_scrollBarY, vrange);
 }
 
 

@@ -45,25 +45,15 @@ class PT_HMI_API ScrollLayout : public Layout
 
         virtual ~ScrollLayout();
 
-        void enableXScroll(bool e);
+        void enableScrolling(bool scrollX, bool scrollY);
 
-        void enableYScroll(bool e);
+        int maximumX() const;
 
-        // TODO: use int
-        void scrollX(double x);
+        int maximumY() const;
 
-        // TODO: use int
-        void scrollY(double y);
+        void scrollX(int xpos);
 
-        int hRange() const
-        {
-          return _hrange;
-        }
-
-        int vRange() const
-        {
-          return _vrange;
-        }
+        void scrollY(int ypos);
 
         Pt::Signal<int>& scrolledX() 
         {
@@ -74,8 +64,6 @@ class PT_HMI_API ScrollLayout : public Layout
         {
           return _scrolledY;
         }
-
-        void reset();
 
     protected:
         virtual void onMouseEvent(const MouseEvent& ev);
@@ -90,15 +78,14 @@ class PT_HMI_API ScrollLayout : public Layout
         void updateRange();
 
     private:
-        Gfx::PointF _lastScrollPos;
-        Gfx::PointF _lastPos;
-        bool _doScroll;
-        bool _enableX;
-        bool _enableY;
-        int _hrange;
-        int _vrange;
         Pt::Signal<int> _scrolledX;
         Pt::Signal<int> _scrolledY;
+        Gfx::PointF _lastScrollPos;
+        Gfx::PointF _lastPos;
+        bool _enableX;
+        bool _enableY;
+        int _maxX;
+        int _maxY;
 };
 
 } // namespace

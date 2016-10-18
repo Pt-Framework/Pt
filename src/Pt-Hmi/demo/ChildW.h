@@ -53,7 +53,6 @@ class ChildW : public Hmi::Window
         Button _dialogButton;
         Label  _textLabel;
         DockingLayout _buttonBar;
-        ScrollView _scrollView;
 };
 
 } // namespace

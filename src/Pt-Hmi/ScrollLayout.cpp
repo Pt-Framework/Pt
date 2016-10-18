@@ -35,13 +35,12 @@ namespace Hmi {
 
 ScrollLayout::ScrollLayout()
 : _lastScrollPos(0,0)
-, _doScroll(false)
 , _enableX(true)
 , _enableY(true)
-, _hrange(0)
-, _vrange(0)
+, _maxX(0)
+, _maxY(0)
 {
-  setAcceptInput(true);
+    setAcceptInput(true);
 }
 
 
@@ -50,24 +49,31 @@ ScrollLayout::~ScrollLayout()
 }
 
 
-void ScrollLayout::enableXScroll(bool e)
+void ScrollLayout::enableScrolling(bool scrollX, bool scrollY)
 {
-    _enableX = e;
+    _enableX = scrollX;
+    _enableY = scrollY;
 }
 
 
-void ScrollLayout::enableYScroll(bool e)
+int ScrollLayout::maximumX() const
 {
-    _enableY = e;
+  return _maxX;
 }
 
 
-void ScrollLayout::scrollX(double position)
+int ScrollLayout::maximumY() const
 {
-    if( position > (_hrange - size().width()) || position < 0  )
+  return _maxY;
+}
+
+
+void ScrollLayout::scrollX(int xpos)
+{
+    if( xpos > (_maxX - size().width()) || xpos < 0  )
         return;
 
-    double delta = position - _lastScrollPos.x();
+    double delta = xpos - _lastScrollPos.x();
 
     for( size_t i = 0; i < widgets().size();  ++i)
     {
@@ -78,18 +84,18 @@ void ScrollLayout::scrollX(double position)
         w->move(pos);
     }
 
-    _lastScrollPos.setX( position);
+    _lastScrollPos.setX(xpos);
 
-    _scrolledX.send( (int) _lastScrollPos.x() );
+    _scrolledX.send(xpos);
 }
 
 
-void ScrollLayout::scrollY(double position)
+void ScrollLayout::scrollY(int ypos)
 {    
-    if( position > (_vrange - size().height()) || position < 0  )
+    if( ypos > (_maxY - size().height()) || ypos < 0  )
         return;
 
-    double delta = position - _lastScrollPos.y();
+    double delta = ypos - _lastScrollPos.y();
 
     for( size_t i = 0; i < widgets().size();  ++ i)
     {
@@ -100,69 +106,60 @@ void ScrollLayout::scrollY(double position)
         w->move(pos);
     }
 
-    _lastScrollPos.setY( position);
+    _lastScrollPos.setY(ypos);
 
-    _scrolledY.send( (int) _lastScrollPos.y() );
-}
-
-
-void ScrollLayout::reset()
-{
-    scrollX(0);
-    scrollY(0);
-  
-    updateRange();
+    _scrolledY.send(ypos);
 }
 
 
 void ScrollLayout::onMouseEvent(const MouseEvent& ev)
 {
-   if( ev.isPress() )
-   {
-      _lastPos = ev.position();
-      _doScroll = true;    
+    if( ev.isPress() )
+        _lastPos = ev.position();
+
+    if( ev.isPressed() )
+    {
+        Gfx::PointF delta = ev.position() - _lastPos;
+
+        if(_enableX)
+        {
+            double deltaX = _lastScrollPos.x() - delta.x();
+            scrollX( static_cast<int>(deltaX) );
+        }
+
+        if(_enableY)
+        {
+            double deltaY = _lastScrollPos.y() - delta.y();
+            scrollY( static_cast<int>(deltaY) );
+        }
+
+        _lastPos = ev.position();
     }
-
-   if( ev.isRelease() )
-      _doScroll = false;
-
-   if( _doScroll )
-   {
-      Gfx::PointF delta = ev.position() - _lastPos;
-
-      if(_enableY) 
-          scrollY( _lastScrollPos.y() - delta.y());
-
-      if(_enableX) 
-          scrollX( _lastScrollPos.x() - delta.x());
-
-      _lastPos = ev.position();
-   }
 }
 
 void ScrollLayout::onTouchEvent(const TouchEvent& ev)
 {    
-   if( ev.isPress() )
-   {
-      _lastPos = ev.position();
-      _doScroll = true;    
-    }
+    if( ev.isPress() )
+        _lastPos = ev.position();   
 
-   if( ev.isRelease() )
-      _doScroll = false;
-
-   if( _doScroll )
-   {
+    if( ev.isPressed() )
+    {
         Gfx::PointF delta = ev.position() - _lastPos;
 
-        if(_enableY) 
-            scrollY( _lastScrollPos.y() - delta.y());
+        if(_enableX)
+        {
+            double deltaX = _lastScrollPos.x() - delta.x();
+            scrollX( static_cast<int>(deltaX) );
+        }
 
-        if(_enableX) 
-            scrollX( _lastScrollPos.x() - delta.x());
+        if(_enableY)
+        {
+            double deltaY = _lastScrollPos.y() - delta.y();
+            scrollY( static_cast<int>(deltaY) );
+        }
 
         _lastPos = ev.position();
-   }
+    }
 }
 
 
@@ -185,16 +182,16 @@ void ScrollLayout::updateRange()
     double maxWidth = 0;
     double maxHeight = 0;
     
-    for( size_t i = 0;  i < widgets().size(); ++ i)
+    for(std::size_t i = 0; i < widgets().size(); ++i)
     {
-      const Widget& w =  *widgets()[i];
+        const Widget* w =  widgets()[i];
 
-      maxWidth = std::max( maxWidth, w.position().x() +  w.size().width() );
-      maxHeight= std::max( maxHeight, w.position().y() +  w.size().height() );
+        maxWidth = std::max( maxWidth, w->position().x() +  w->size().width() );
+        maxHeight= std::max( maxHeight, w->position().y() +  w->size().height() );
     }
 
-    _hrange = static_cast<int>(maxWidth);
-    _vrange = static_cast<int>(maxHeight);
+    _maxX = static_cast<int>(maxWidth);
+    _maxY = static_cast<int>(maxHeight);
 }
 
 } // namespace
