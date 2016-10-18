@@ -57,12 +57,12 @@ class PT_HMI_API ScrollLayout : public Layout
 
         Pt::Signal<int>& scrolledX() 
         {
-          return _scrolledX;
+            return _scrolledX;
         }
 
         Pt::Signal<int>& scrolledY() 
         {
-          return _scrolledY;
+            return _scrolledY;
         }
 
     protected:
