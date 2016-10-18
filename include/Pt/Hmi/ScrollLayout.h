@@ -55,6 +55,16 @@ class PT_HMI_API ScrollLayout : public Layout
 
         void scrollY(int ypos);
 
+        int scrollPosX() const
+        {
+          return _lastScrollPos.x();
+        }
+
+        int scrollPosY() const
+        {
+          return _lastScrollPos.y();
+        }
+
         Pt::Signal<int>& scrolledX() 
         {
             return _scrolledX;

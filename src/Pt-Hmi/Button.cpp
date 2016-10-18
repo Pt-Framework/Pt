@@ -63,28 +63,28 @@ Button::~Button()
 void Button::onClicked(const Gfx::PointF& pos)
 {
     Label::onClicked(pos);
-    _clicked.send();
+    _clicked.send(*this);
 }
 
 
 void Button::onMnemonic()
 {
-    Label::onMnemonic();                
-    _clicked.send();
+    Label::onMnemonic();
+    _clicked.send(*this);
 }
 
 
 void Button::onActionKey( const KeyEvent& kev )
 {
     Label::onActionKey(kev);
-    _clicked.send();
+    _clicked.send(*this);
 }
 
 
 void Button::onShortcut( const KeyEvent& kev )
 {
     Label::onShortcut(kev);
-    _clicked.send();            
+    _clicked.send(*this);
 }
 
 
@@ -94,12 +94,12 @@ void Button::onMouseEvent(const MouseEvent& ev)
 
     if( ev.isPress() )
     {
-        _pressed.send();
+        _pressed.send(*this);
     }
 
     if( ev.isRelease() )
     {
-        _released.send();
+        _released.send(*this);
     }
 
     if( ev.isPressed(MouseEvent::Left) != _isPressed )
@@ -116,12 +116,12 @@ void Button::onTouchEvent(const TouchEvent& ev)
 
     if( ev.isPress() )
     {
-        _pressed.send();
+        _pressed.send(*this);
     }
 
     if( ev.isRelease() )
     {
-        _released.send();
+        _released.send(*this);
     }
 
     if( ev.isPressed() != _isPressed )

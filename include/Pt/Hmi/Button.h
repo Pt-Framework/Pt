@@ -62,17 +62,17 @@ class PT_HMI_API Button  : public Label
            _imageAlign = i;
         }
              
-        Signal<>& clicked()
+        Signal<Button&>& clicked()
         {
             return _clicked;
         }
 
-        Signal<>& pressed()
+        Signal<Button&>& pressed()
         {
             return _pressed;
         }
 
-        Signal<>& released()
+        Signal<Button&>& released()
         {
             return _released;
         }
@@ -102,9 +102,9 @@ class PT_HMI_API Button  : public Label
         virtual void onClicked(const Gfx::PointF& pos);
 
     private:
-        Signal<> _clicked;
-        Signal<> _pressed;
-        Signal<> _released;
+        Signal<Button&> _clicked;
+        Signal<Button&> _pressed;
+        Signal<Button&> _released;
         
         Gfx::Image _image;
         Alignment  _imageAlign;
