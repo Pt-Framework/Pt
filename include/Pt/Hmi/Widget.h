@@ -235,8 +235,6 @@ class PT_HMI_API Widget : public Visual
 
         virtual Gfx::SizeF onAutoSize() const;
 
-        virtual void onClicked(const Gfx::PointF& pos);
-
         virtual void onSetActionKey(const Key& ak);
 
         virtual void onActionKey(const KeyEvent& kev);

@@ -142,20 +142,20 @@ void MenuBarItem::close()
 }
 
 
+void MenuBarItem::onClicked()
+{
+    ButtonBase::onClicked();
+
+    toggle();
+}
+
+
 Gfx::SizeF MenuBarItem::onAutoSize() const
 {
     Gfx::FontMetrics fm = Painter::fontMetrics(_font, _text);
 
     return Gfx::SizeF( fm.width() + padding().leftRight(), 
                        fm.height() + padding().topBottom() );
-}
-
-
-void MenuBarItem::onClicked(const Gfx::PointF& pos)
-{
-    WidgetBaseType::onClicked(pos);
-    
-    toggle();
 }
 
 

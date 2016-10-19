@@ -823,11 +823,6 @@ void Widget::onLayout()
 }
 
 
-void Widget::onClicked(const Gfx::PointF& pos)
-{
-}
-
-
 void Widget::onEvent(const Pt::Event& ev)
 {
     _eventReady.send(ev ); 
@@ -841,37 +836,18 @@ void Widget::onPaintEvent(const PaintEvent& ev)
 
 void Widget::onMouseEvent(const MouseEvent& ev)
 { 
-    Gfx::RectF rect( Gfx::PointF(0,0), size() );
-    if( ! rect.contains( ev.position() ) )
-        return;
-
     if( ev.isPress(MouseEvent::Left) && _acceptsFocus )
     {
         focus();
-    }
-
-    if( ev.isRelease(MouseEvent::Left) && hasFocus() )
-    {
-        onClicked( ev.position() );
     }
 }
 
 
 void Widget::onTouchEvent(const TouchEvent& ev)
 {
-    Gfx::RectF rect( Gfx::PointF(0,0), size() );
-
-    if( ! rect.contains( ev.position() ) )
-        return;
-
     if( ev.isPress() && _acceptsFocus )
     {
         focus();
-    }
-
-    if( ev.isRelease() && hasFocus() )
-    {
-        onClicked( ev.position() );
     }
 }
 

@@ -31,7 +31,7 @@
 #define Pt_Hmi_MenuBar_H
 
 #include <Pt/Hmi/MenuShell.h>
-#include <Pt/Hmi/Panel.h>
+#include <Pt/Hmi/Button.h>
 #include <Pt/Hmi/Button.h>
 #include <Pt/Hmi/FlowLayout.h>
 #include <vector>
@@ -43,9 +43,9 @@ namespace Hmi {
 class Menu;
 class MenuBar;
 
-class MenuBarItem : public Panel
+class MenuBarItem : public ButtonBase
 {
-    typedef Panel WidgetBaseType;
+    typedef ButtonBase WidgetBaseType;
 
     public:
         MenuBarItem(MenuBar& mb, Menu& menu, const Pt::String& text);
@@ -72,9 +72,9 @@ class MenuBarItem : public Panel
         void close();
 
     protected:
-        virtual Gfx::SizeF onAutoSize() const;
+        virtual void onClicked();
 
-        virtual void onClicked(const Gfx::PointF& pos);
+        virtual Gfx::SizeF onAutoSize() const;
 
         virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect);
 

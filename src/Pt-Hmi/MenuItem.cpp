@@ -178,18 +178,18 @@ Signal<MenuItem&>& MenuItem::triggered()
 }
 
 
+void MenuItem::onClicked()
+{   
+    ButtonBase::onClicked();
+
+    _triggered.send(*this);
+}
+
+
 void MenuItem::onParentChanged(Widget* w)
 {
     if( ! w && _menu)
         _menu->removeItem(*this);
-}
-
-
-void MenuItem::onClicked(const Gfx::PointF& pos)
-{
-    WidgetBaseType::onClicked(pos);
-    
-    _triggered.send(*this);
 }
 
 

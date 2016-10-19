@@ -30,7 +30,7 @@
 #ifndef Pt_Hmi_MenuItem_H
 #define Pt_Hmi_MenuItem_H
 
-#include <Pt/Hmi/Panel.h>
+#include <Pt/Hmi/Button.h>
 #include <Pt/Hmi/Key.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Font.h>
@@ -43,11 +43,11 @@ namespace Hmi {
 
 class Menu;
 
-class PT_HMI_API MenuItem : public Panel
+class PT_HMI_API MenuItem : public ButtonBase
 {
     friend class Menu;
 
-    typedef Panel WidgetBaseType;
+    typedef ButtonBase WidgetBaseType;
 
     public:
         MenuItem();
@@ -73,10 +73,10 @@ class PT_HMI_API MenuItem : public Panel
         Signal<MenuItem&>& triggered();
 
     protected:
+        virtual void onClicked();
+        
         virtual void onParentChanged(Widget* w);
         
-        virtual void onClicked(const Gfx::PointF& pos);
-
         virtual void onShortcut(const KeyEvent& kev);
 
         virtual Gfx::SizeF onAutoSize() const;

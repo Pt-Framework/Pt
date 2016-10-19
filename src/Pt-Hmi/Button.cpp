@@ -39,6 +39,86 @@ namespace Pt {
 
 namespace Hmi {
 
+ButtonBase::ButtonBase()
+{
+}
+
+  
+ButtonBase::~ButtonBase()
+{
+}
+
+
+void ButtonBase::onPressed()
+{
+    _pressed.send();
+}
+
+
+void ButtonBase::onReleased()
+{
+    _released.send();
+}
+
+
+void ButtonBase::onClicked()
+{
+    _clicked.send();
+}
+
+    
+void ButtonBase::onMouseEvent(const MouseEvent& ev)
+{    
+    Panel::onMouseEvent(ev);
+
+    if( ev.isPress() )
+    {
+        onPressed();
+    }
+    
+    if( ev.isRelease() )
+    {
+        onReleased();
+    }
+    
+    Gfx::RectF rect( Gfx::PointF(0,0), size() );
+    if( ! rect.contains( ev.position() ) )
+        return;
+    
+    if( ev.isRelease() && hasFocus() )
+    {
+        onClicked();
+    }
+}
+
+
+void ButtonBase::onTouchEvent(const TouchEvent& ev)
+{    
+    Panel::onTouchEvent(ev);
+
+    if( ev.isPress() )
+    {
+        onPressed();
+    }
+
+    if( ev.isRelease() )
+    {
+        onReleased();
+    }
+    
+    Gfx::RectF rect( Gfx::PointF(0,0), size() );
+    if( ! rect.contains( ev.position() ) )
+        return;
+    
+    if( ev.isRelease() && hasFocus() )
+    {
+        onClicked();
+    }
+}
+
+
+
+
 Button::Button()
 : _image()
 , _imageAlign( MiddleLeft)
@@ -98,11 +178,15 @@ void Button::onMouseEvent(const MouseEvent& ev)
     {
         _pressed.send(*this);
     }
-    
+
     if( ev.isRelease() )
     {
         _released.send(*this);
     }
+
+    Gfx::RectF rect( Gfx::PointF(0,0), size() );
+    if( ! rect.contains( ev.position() ) )
+        return;
 
     if( ev.isRelease() && hasFocus() )
     {
@@ -130,6 +214,10 @@ void Button::onTouchEvent(const TouchEvent& ev)
     {
         _released.send(*this);
     }
+
+    Gfx::RectF rect( Gfx::PointF(0,0), size() );
+    if( ! rect.contains( ev.position() ) )
+        return;
 
     if( ev.isRelease() && hasFocus() )
     {

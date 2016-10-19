@@ -40,6 +40,49 @@ namespace Hmi {
 class MouseEvent;
 class TouchEvent;
 
+// TODO: name this call Button and rename Button -> PushButton
+//       and derive PushButton from Button
+class PT_HMI_API ButtonBase : public Panel
+{
+    public:
+        ButtonBase();
+    
+        virtual ~ButtonBase();
+        
+        Signal<>& clicked()
+        {
+            return _clicked;
+        }
+
+        Signal<>& pressed()
+        {
+            return _pressed;
+        }
+
+        Signal<>& released()
+        {
+            return _released;
+        }
+
+    protected:
+        virtual void onPressed();
+        
+        virtual void onReleased();
+        
+        virtual void onClicked();
+    
+    protected:
+        virtual void onMouseEvent(const MouseEvent& ev);
+
+        virtual void onTouchEvent(const TouchEvent& ev);
+
+    private:
+        Signal<> _clicked;
+        Signal<> _pressed;
+        Signal<> _released;
+};
+
+
 class PT_HMI_API Button  : public Label
 {
     public:
