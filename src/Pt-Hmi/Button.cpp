@@ -60,11 +60,7 @@ Button::~Button()
 }
 
 
-void Button::onClicked(const Gfx::PointF& pos)
-{
-    Label::onClicked(pos);
-    _clicked.send(*this);
-}
+
 
 
 void Button::onMnemonic()
@@ -92,20 +88,25 @@ void Button::onMouseEvent(const MouseEvent& ev)
 {    
     Label::onMouseEvent(ev);
 
+    if( ev.isPressed() != _isPressed )
+    {
+        _isPressed = ev.isPressed();
+        update();
+    }
+
     if( ev.isPress() )
     {
         _pressed.send(*this);
     }
-
+    
     if( ev.isRelease() )
     {
         _released.send(*this);
     }
 
-    if( ev.isPressed(MouseEvent::Left) != _isPressed )
+    if( ev.isRelease() && hasFocus() )
     {
-        _isPressed = ev.isPressed(MouseEvent::Left);
-        update();
+        _clicked.send(*this);
     }
 }
 
@@ -114,6 +115,12 @@ void Button::onTouchEvent(const TouchEvent& ev)
 {    
     Label::onTouchEvent(ev);
 
+    if( ev.isPressed() != _isPressed )
+    {
+        _isPressed = ev.isPressed();
+        update();
+    }
+
     if( ev.isPress() )
     {
         _pressed.send(*this);
@@ -124,10 +131,9 @@ void Button::onTouchEvent(const TouchEvent& ev)
         _released.send(*this);
     }
 
-    if( ev.isPressed() != _isPressed )
+    if( ev.isRelease() && hasFocus() )
     {
-        _isPressed = ev.isPressed();
-        update();
+        _clicked.send(*this);
     }
 }
 

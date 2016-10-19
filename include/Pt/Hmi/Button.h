@@ -98,8 +98,6 @@ class PT_HMI_API Button  : public Label
         virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect);
 
         virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect);
-        
-        virtual void onClicked(const Gfx::PointF& pos);
 
     private:
         Signal<Button&> _clicked;
