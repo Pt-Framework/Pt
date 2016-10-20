@@ -135,9 +135,9 @@ class PT_HMI_API Window : public WindowBase
 
     void enable( bool e = true );
 
-    void grabMouse();
+    void grabPointer();
 
-    void releaseMouse();
+    void releasePointer();
 
     const Gfx::PointF& position() const;
 

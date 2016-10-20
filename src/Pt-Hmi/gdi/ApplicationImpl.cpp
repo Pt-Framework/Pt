@@ -654,13 +654,13 @@ void ApplicationImpl::onMouse(Window& w, unsigned int msg, WPARAM wparam, LPARAM
   
     Gfx::PointF pos = Application::instance().screen().toUnit( Gfx::Point(xPos, yPos) );
 
-    Visual* mouseGrabber = Application::instance().mouseGrabber();
-    if( mouseGrabber )
+    Visual* grabber = Application::instance().pointerGrabber();
+    if( grabber )
     {
         Gfx::PointF screenPos = w.toScreen(pos);
-        pos = mouseGrabber->fromScreen(screenPos);
+        pos = grabber->fromScreen(screenPos);
         
-        _mouseEvent.setId( mouseGrabber->vid() );
+        _mouseEvent.setId( grabber->vid() );
     }
     else        
     {

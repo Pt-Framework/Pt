@@ -165,7 +165,7 @@ void Window::deinit()
     if( ! _init )
         return;
 
-    releaseMouse();
+    releasePointer();
 
     _parent->onDeinit(*this);
 
@@ -798,16 +798,16 @@ void Window::onEnableEvent(const EnableEvent& ev)
 }
 
 
-void Window::grabMouse()
+void Window::grabPointer()
 {
     if(_init)
-        Application::instance().grabMouse(*this);
+        Application::instance().grabPointer(*this);
 }
 
 
-void Window::releaseMouse()
+void Window::releasePointer()
 {
-    Application::instance().releaseMouse(*this);
+    Application::instance().releasePointer(*this);
 }
 
 

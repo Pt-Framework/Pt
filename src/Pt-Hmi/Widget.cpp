@@ -72,7 +72,7 @@ Widget::Widget()
 
 Widget::~Widget()
 {
-    releaseMouse();
+    releasePointer();
 
     while( ! _children.empty() )
         remove( *_children.back() );
@@ -627,15 +627,15 @@ void Widget::onRaise(Widget& w)
 }
 
 
-void Widget::grabMouse()
+void Widget::grabPointer()
 {
-    Application::instance().grabMouse(*this);
+    Application::instance().grabPointer(*this);
 }
 
 
-void Widget::releaseMouse()
+void Widget::releasePointer()
 {
-    Application::instance().releaseMouse(*this);
+    Application::instance().releasePointer(*this);
 }
 
 

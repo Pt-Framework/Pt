@@ -145,29 +145,39 @@ void ScreenImpl::onTouchEvent(const TouchEvent& ev)
             double scaleY =  screenSize.height() / touchHeight;
             tev.setX( std::floor(scaleX * ev.x()) );
             tev.setY( std::floor(scaleY * ev.y()) );
+            break;
         }
-        break;
-
+        
         case FrameBuffer::Rotation90Degree:
         {
-             double scaleX =  screenSize.width() / touchHeight;
-             double scaleY =  screenSize.height() / touchWidth;
-             tev.setY( std::floor(ev.x() * scaleY) );
-             tev.setX( std::floor((touchHeight - ev.y()) * scaleX) );
+              double scaleX =  screenSize.width() / touchHeight;
+              double scaleY =  screenSize.height() / touchWidth;
+              tev.setY( std::floor(ev.x() * scaleY) );
+              tev.setX( std::floor((touchHeight - ev.y()) * scaleX) );
+              break;
         }
-        break;
-     }
+    }
 
-    _windowManager.touchEvent( tev );   
+    Visual* grabber = Application::instance().pointerGrabber();
+    if(grabber)
+    {
+        Gfx::PointF pos = grabber->fromScreen( tev.position() );
+        tev.setX( pos.x() );
+        tev.setY( pos.y() ); 
+        tev.setId( grabber->vid() );
+
+        Application::instance().loop().commitEvent(tev);
+    }
+    else
+    {
+        _windowManager.touchEvent( tev );
+    }
 }
 
 
 void ScreenImpl::onMouseEvent( const Pt::Hmi::MouseEvent& mouseEvent )
 {        
     _drawCursor =  true;
-
-    Pt::System::Clock clock;
-    clock.start();
 
     if( ! _cursorBackground.empty() )
     {
@@ -183,15 +193,15 @@ void ScreenImpl::onMouseEvent( const Pt::Hmi::MouseEvent& mouseEvent )
         _cursorPos = Gfx::Point( mouseEvent.x() - cursor.xHotspot(), 
                                  mouseEvent.y() - cursor.yHotspot() );
 
-    Visual* mouseGrabber = Application::instance().mouseGrabber();
-    if(mouseGrabber)
+    Visual* grabber = Application::instance().pointerGrabber();
+    if(grabber)
     {
         Pt::Hmi::MouseEvent mev = mouseEvent;
 
-        Gfx::PointF pos = mouseGrabber->fromScreen( mouseEvent.position() );
+        Gfx::PointF pos = grabber->fromScreen( mouseEvent.position() );
         mev.setX( pos.x() );
         mev.setY( pos.y() ); 
-        mev.setId( mouseGrabber->vid() );
+        mev.setId( grabber->vid() );
 
         Application::instance().loop().commitEvent(mev);
     }
@@ -203,7 +213,7 @@ void ScreenImpl::onMouseEvent( const Pt::Hmi::MouseEvent& mouseEvent )
 
     if( _drawCursor )
     {
-      if( !cursor.empty())
+      if( ! cursor.empty() )
         updateScreen(Gfx::Rect( _cursorPos, Gfx::Size (cursor.width(), cursor.height() )));
     }
 }

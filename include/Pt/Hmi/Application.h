@@ -84,15 +84,15 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void setCursor(const Cursor* cursor = 0);
 
-        Visual* mouseGrabber();
+        Visual* pointerGrabber();
 
-        void grabMouse(Window& w);
+        void grabPointer(Window& w);
 
-        void releaseMouse(Window& w);
+        void releasePointer(Window& w);
 
-        void grabMouse(Widget& w);
+        void grabPointer(Widget& w);
 
-        void releaseMouse(Widget& w);
+        void releasePointer(Widget& w);
 
         Pt::uint64_t makeId();
 
@@ -153,7 +153,7 @@ class PT_HMI_API Application : public Pt::System::Application
         VisualMap        _visuals;
         Window*          _pointerWindow;
         Widget*          _pointerWidget;
-        Visual*          _mouseGrabber;
+        Visual*          _pointerGrabber;
 };
 
 } // namespace

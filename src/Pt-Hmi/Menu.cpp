@@ -280,7 +280,7 @@ void Menu::onCancel()
 
 void Menu::onEnter()
 {
-    grabMouse();
+    grabPointer();
 }
 
 /* TODO: 
@@ -403,7 +403,7 @@ void Menu::onMouseEvent(const MouseEvent& ev)
     if(menu && menu != this)
     {   
         // navigate through menu chain
-        releaseMouse();
+        releasePointer();
         menu->onEnter();
     }
     else if( ev.isPress() )
@@ -416,7 +416,7 @@ void Menu::onMouseEvent(const MouseEvent& ev)
 
 void Menu::onCloseEvent(const CloseEvent& ev)
 {
-    releaseMouse();
+    releasePointer();
 
     if( _currentMenu )
     {
@@ -455,7 +455,7 @@ void Menu::onShowEvent(const ShowEvent& ev)
 
     if( ! ev.visible() )
     {
-        releaseMouse();
+        releasePointer();
 
         if( parentShell() )
             parentShell()->onCloseMenu(*this);
@@ -466,7 +466,7 @@ void Menu::onShowEvent(const ShowEvent& ev)
             parentShell()->onOpenMenu(*this);
 
         if( ! parentShell() )
-            grabMouse();
+            grabPointer();
     }
 }
 

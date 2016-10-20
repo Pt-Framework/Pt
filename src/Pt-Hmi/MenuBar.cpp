@@ -114,12 +114,12 @@ void MenuBarItem::toggle()
     if( ! _menu.isVisible() )
     {
         open();
-        grabMouse();
+        grabPointer();
     }
     else
     {
         close();
-        releaseMouse();
+        releasePointer();
      }      
 }
 
@@ -188,14 +188,14 @@ void MenuBarItem::onMouseEvent(const MouseEvent& ev)
     MenuShell* menu = _menu.findMenu(screenPos);   
     if(menu)
     {   
-        releaseMouse();
+        releasePointer();
         return;
     }
 
     // cancel when clicked outside any menu item
     if( ev.isPress() )
     {
-        releaseMouse();
+        releasePointer();
         _menu.cancel();
         return;   
     }
@@ -380,7 +380,7 @@ void MenuBar::onCancel()
 void MenuBar::onEnter()
 {
     if(_currentMenuItem)
-        _currentMenuItem->grabMouse();
+        _currentMenuItem->grabPointer();
 }
 
 

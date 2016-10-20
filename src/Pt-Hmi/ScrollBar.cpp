@@ -141,14 +141,14 @@ void ScrollBar::onMouseEvent(const MouseEvent& ev)
     {
         if(_handleRect.contains( ev.position() ) )
         {
-            this->grabMouse();
+            this->grabPointer();
             _dragging = true;
         }
     }
     else if( ev.isRelease(MouseEvent::Left) )
     {
         _dragging = false;
-        this->releaseMouse();
+        this->releasePointer();
     }
 
     if(_dragging)

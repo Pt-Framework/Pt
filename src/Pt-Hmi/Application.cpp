@@ -44,7 +44,7 @@ Application::Application(int argc, char** argv)
 , _lastId(1)
 , _pointerWindow(0)
 , _pointerWidget(0)
-, _mouseGrabber(0)
+, _pointerGrabber(0)
 {
     this->init(*_impl);
 
@@ -100,51 +100,51 @@ void Application::setCursor( const Cursor* cursor )
 }
 
 
-Visual* Application::mouseGrabber()
+Visual* Application::pointerGrabber()
 { 
-    return _mouseGrabber; 
+    return _pointerGrabber; 
 }
 
 
-void Application::grabMouse(Window& grabber)
+void Application::grabPointer(Window& grabber)
 {    
     _impl->grabMouse(grabber);
 
-    _mouseGrabber = &grabber;
+    _pointerGrabber = &grabber;
 
     setPointerWidget(0);
 }
 
 
-void Application::releaseMouse(Window& grabber)
+void Application::releasePointer(Window& grabber)
 {
-    if(_mouseGrabber != static_cast<Visual*>(&grabber) )
+    if(_pointerGrabber != static_cast<Visual*>(&grabber) )
         return;
     
     _impl->releaseMouse(grabber); 
     
-    _mouseGrabber = 0;
+    _pointerGrabber = 0;
 }
 
 
-void Application::grabMouse(Widget& grabber)
+void Application::grabPointer(Widget& grabber)
 {
     _impl->grabMouse(grabber);
 
-    _mouseGrabber = &grabber;
+    _pointerGrabber = &grabber;
 
     setPointerWidget(&grabber);
 }
 
 
-void Application::releaseMouse(Widget& grabber)
+void Application::releasePointer(Widget& grabber)
 {
-    if( _mouseGrabber != static_cast<Visual*>(&grabber) )
+    if( _pointerGrabber != static_cast<Visual*>(&grabber) )
         return;
 
     _impl->releaseMouse(grabber);
 
-    _mouseGrabber = 0;
+    _pointerGrabber = 0;
 }
 
         
