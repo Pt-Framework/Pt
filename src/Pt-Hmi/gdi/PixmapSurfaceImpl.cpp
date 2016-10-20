@@ -193,7 +193,7 @@ PixmapSurfaceImpl::~PixmapSurfaceImpl()
 
 const Gfx::ImageFormat& PixmapSurfaceImpl::format() const
 {
-  return Gfx::ImageFormat::argb32();
+    return Gfx::ImageFormat::argb32();
 }
 
 

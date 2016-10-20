@@ -176,52 +176,50 @@ const ImageFormat& Rasterizer::format() const
 
 void Rasterizer::setPen( const Pen& pen )
 {
-  _pen = pen;
-  _penBuffer.reset(_image->format(), Size(64, 1));
-  Gfx::fill(_penBuffer.begin(), _penBuffer.end(), pen.color());
-  //_penBuffer.erase( pen.color() );
+    _pen = pen;
+    _penBuffer.reset(_image->format(), Size(64, 1));
+    Gfx::fill(_penBuffer.begin(), _penBuffer.end(), pen.color());
   
-  _penPixel.reset(_penBuffer.view(), 0, 0);
+    _penPixel.reset(_penBuffer.view(), 0, 0);
 }
 
 
 void Rasterizer::setBrush( const Brush& brush )
 {  
-  _brush = brush;
-  _isGradient = false;      
+    _brush = brush;
+    _isGradient = false;      
 
-  switch( brush.fillStyle() )
-  {
-    case Brush::Solid:      
-      _brushBuffer.reset( _image->format(), Size(64, 1) );
-      Gfx::fill(_brushBuffer.begin(), _brushBuffer.end(), brush.color());
-      //_brushBuffer.erase( brush.color());
-      _brushImage = &_brushBuffer;
-    break;
+    switch( brush.fillStyle() )
+    {
+        case Brush::Solid:      
+            _brushBuffer.reset( _image->format(), Size(64, 1) );
+            Gfx::fill(_brushBuffer.begin(), _brushBuffer.end(), brush.color());
+            
+            _brushImage = &_brushBuffer;
+            break;
     
-    case Brush::Texture:
-      if( brush.texture().format() != _image->format() )        
-      {
-        _brushBuffer.reset( _image->format(), brush.texture().size() );
-        Gfx::copy( brush.texture().begin(), brush.texture().end(), _brushBuffer.begin() );
-        
-        //_brushBuffer = brush.texture().convert(_image->format());
-        _brushImage = &_brushBuffer;
-      }
-      else
-      {
-        _brushImage = &_brush.texture();
-      }
-    break;
+        case Brush::Texture:
+            if( brush.texture().format() != _image->format() )        
+            {
+                _brushBuffer.reset( _image->format(), brush.texture().size() );
+                Gfx::copy( brush.texture().begin(), brush.texture().end(), _brushBuffer.begin() );
 
-    case Brush::HorizontalGradient:
-    case Brush::VerticalGradient:
-        _isGradient = true;
-        _brushImage = &_brushBuffer;
-    break;
-  }
+                _brushImage = &_brushBuffer;
+            }
+            else
+            {
+                _brushImage = &_brush.texture();
+            }
+            break;
 
-  _brushPixel.reset(_brushImage->view(), 0, 0);
+        case Brush::HorizontalGradient:
+        case Brush::VerticalGradient:
+            _isGradient = true;
+            _brushImage = &_brushBuffer;
+            break;
+    }
+
+    _brushPixel.reset(_brushImage->view(), 0, 0);
 }
 
 
@@ -1969,41 +1967,40 @@ void Rasterizer::fillVerticalGradient( const Point& origin, const Point& pos,  i
 
 void Rasterizer::fillHorizontalGradient( const Point& origin, const Point& pos,  int length )
 {
-   fillTexture(origin, pos, length);
+    fillTexture(origin, pos, length);
 }
 
 
 void Rasterizer::fillSolid(const Point& pos, int length)
 {
-  int xpos = pos.x();
-  int ypos = pos.y();
+    int xpos = pos.x();
+    int ypos = pos.y();
   
-  if( length <= 0)
-    return;
+    if( length <= 0)
+        return;
      
-  Pt::ssize_t bufferWidth = _brushImage->width();  
+    Pt::ssize_t bufferWidth = _brushImage->width();  
 
-  while(length > 0)
-  {
-      Pt::ssize_t n = std::min(length, bufferWidth);
+    while(length > 0)
+    {
+        Pt::ssize_t n = std::min(length, bufferWidth);
 
-      if( n )
-      {          
-          Pixel destPixel(_image->view(), xpos,ypos);
-         _image->format().copy(destPixel, _brushPixel, n, _compositionMode);
-      }
+        if( n )
+        {          
+            Pixel destPixel(_image->view(), xpos,ypos);
+           _image->format().copy(destPixel, _brushPixel, n, _compositionMode);
+        }
 
-      length -= n;
-      xpos   += n;
-  }
+        length -= n;
+        xpos   += n;
+    }
 }
 
 
 void Rasterizer::strokeText( const Point& to, const Pt::String& text )
 { 
-  _text->setClip(_currentClip);
-  _text->draw( *_image, _pen.color(), to, text );
-
+    _text->setClip(_currentClip);
+    _text->draw( *_image, _pen.color(), to, text );
 }
 
 
@@ -3261,7 +3258,7 @@ void Rasterizer::fillRect(const Rect& rectIn)
         return;
 
     if( _isGradient )
-        updateGradientBrush(rectIn.width(), rectIn.height() );
+        updateGradientBrush( rectIn.width(), rectIn.height() );
 
     int length = rect.width();
     
@@ -3311,7 +3308,7 @@ void Rasterizer::fill( const Point* pts, size_t pointCount)
         origin.setX( std::min( origin.x(), p.x() ) );
         origin.setY( std::min( origin.y(), p.y() ) );
 
-        if(!_isGradient)
+        if( ! _isGradient )
           continue;
         
         if( p.y() < topPos)

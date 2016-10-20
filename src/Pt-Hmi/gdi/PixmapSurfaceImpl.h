@@ -105,7 +105,6 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
 
         void drawPicture(const Gfx::PointF& to, const Picture& pic);
 
-
         HDC deviceContext() const;
 
     private: 
