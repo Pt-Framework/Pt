@@ -59,7 +59,7 @@ ChildW::ChildW(const std::string& title)
     _textLabel.setName("TextLabel");
     _textLabel.setText("Pla&tinum C++ Framework");  
     _textLabel.move( Gfx::PointF(60,60) );
-    _textLabel.setForegroundPen( Gfx::Pen(1,Gfx::Color(65535,0,0,0) ));
+    _textLabel.setForegroundPen( Gfx::Pen(Gfx::Color(0, 0, 0), 1) );
     _textLabel.setBackgroundBrush( Gfx::Color(65535,65535,65535,0) );
     _textLabel.setMnemonicWidget(&_toggleButton);
     _textLabel.setCursor( Hmi::Cursor::waitCursor() );

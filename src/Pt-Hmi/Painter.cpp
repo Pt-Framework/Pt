@@ -39,7 +39,7 @@ namespace Hmi {
 
 Painter::Painter(PaintSurface& surface)
 : _surface(0)
-, _pen(1)
+, _pen()
 , _brush( Gfx::Color(0, 0, 0, 0) )
 , _font( PaintSurfaceImpl::defaultFont() )
 {

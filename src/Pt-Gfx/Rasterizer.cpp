@@ -386,7 +386,7 @@ void Rasterizer::drawWideDashPolyline( const Point* pPts, int npt )
             if( _pen.style() == Pen::DoubleDash || (startPaintType != 0))
             {
                 // Draw cap at left end, unless this is first segment of a closed polyline
-                if( first || (_pen.style() == Pen::DashStyle && prevEndPaintType == 0 ) )
+                if( first || (_pen.style() == Pen::Dash && prevEndPaintType == 0 ) )
                 {
                     if( first && selfJoin )
                     {
@@ -629,7 +629,7 @@ void Rasterizer::dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, 
         // Draw dash (if OnOffDash, don't draw `off' dashes)
         if( _pen.style() == Pen::DoubleDash  || !(paintType == 0))
         {
-            if( _pen.style() == Pen::DashStyle && _pen.capStyle() == Pen::ProjectingCap )
+            if( _pen.style() == Pen::Dash && _pen.capStyle() == Pen::ProjectingCap )
             {
                 saveRight = vertices[V_RIGHT];
                 saveBottom = vertices[V_BOTTOM];
@@ -663,7 +663,7 @@ void Rasterizer::dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, 
             fillLine( y, h, left, right, nleft, nright);
 
             // If doing DashStyle, add caps if any
-            if( _pen.style() == Pen::DashStyle )
+            if( _pen.style() == Pen::Dash )
             {
                 switch( _pen.capStyle() )
                 {
@@ -782,7 +782,7 @@ void Rasterizer::dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, 
 
         // If DashStyle line style and cap mode is projecting, offset the
         // face, so as to draw a projecting cap
-        if( !first && ( _pen.style() == Pen::DashStyle)  && (_pen.capStyle() == Pen::ProjectingCap ) )
+        if( !first && ( _pen.style() == Pen::Dash)  && (_pen.capStyle() == Pen::ProjectingCap ) )
         {
             vertices[V_TOP].setX( vertices[V_TOP].x() - rdx );
             vertices[V_TOP].setY( vertices[V_TOP].y() - rdy );
@@ -806,7 +806,7 @@ void Rasterizer::dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, 
         fillLine( y, h, left, right, nleft, nright);
 
         // If DashStyle line style and cap mode is round, draw a round cap
-        if( ( !first && ( _pen.style() == Pen::DashStyle) && ( _pen.capStyle() == Pen::RoundCap) ) || ( _pen.capStyle() == Pen::TriangularCap) )
+        if( ( !first && ( _pen.style() == Pen::Dash) && ( _pen.capStyle() == Pen::RoundCap) ) || ( _pen.capStyle() == Pen::TriangularCap) )
         {
             lcapFace.setX( x2 );
             lcapFace.setY( y2 );
@@ -1245,14 +1245,14 @@ void Rasterizer::stroke(const Point* points,  size_t pointCount)
 
   switch( _pen.style() )
   {
-    case Pen::SolidStyle:
+    case Pen::Solid:
       if( _pen.size() == 1 )
         drawThinSolidPolyline( points, pointCount );
       else
         drawWideSolidPolyline( points, pointCount );
     break;
 
-    case Pen::DashStyle:
+    case Pen::Dash:
     case Pen::DoubleDash:
       if( _pen.size() == 1 )
         drawThinDashPolyline(points, pointCount );
@@ -2401,7 +2401,7 @@ void Rasterizer::lineArc( LineFace *leftFace, LineFace *rightFace, double xorg, 
     edgeleft1 = false;
     edgeleft2 = false;
 
-    if( (_pen.style() != Pen::SolidStyle || _pen.size() > 2) && ((_pen.capStyle() == Pen::RoundCap && _pen.joinStyle() != Pen::RoundJoin)  || 
+    if( (_pen.style() != Pen::Solid || _pen.size() > 2) && ((_pen.capStyle() == Pen::RoundCap && _pen.joinStyle() != Pen::RoundJoin)  || 
         ( _pen.joinStyle() == Pen::RoundJoin && _pen.capStyle() == Pen::ButtCap)))
     { // Construct clipping edges from the passed line faces (otherwise,
       // ignore them; will just draw a disk).

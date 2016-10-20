@@ -49,10 +49,10 @@ DWORD getPenStyle(const Pt::Gfx::Pen& pen)
 
     switch( pen.style() )
     {
-        case Gfx::Pen::SolidStyle:
+        case Gfx::Pen::Solid:
             penStyle |= PS_SOLID;
         break;
-        case Gfx::Pen::DashStyle:
+        case Gfx::Pen::Dash:
             penStyle |= PS_DASH;
         break;
     }

@@ -166,7 +166,7 @@ void WindowButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
     //
     // bottom right border
     //
-    painter.setPen( Gfx::Pen(1, borderBottomRightColor) );
+    painter.setPen( Gfx::Pen(borderBottomRightColor, 1) );
     painter.drawLine(Gfx::PointF(_geometry.topRight().x(),
                                  _geometry.topRight().y() +1), 
                      Gfx::PointF(_geometry.bottomRight().x(),
@@ -179,7 +179,7 @@ void WindowButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
     //
     // top left border
     //
-    painter.setPen( Gfx::Pen(1, borderTopLeftColor) );
+    painter.setPen( Gfx::Pen(borderTopLeftColor, 1) );
     painter.drawLine(_geometry.topLeft(), _geometry.topRight() );
     painter.drawLine(_geometry.topLeft(), _geometry.bottomLeft() );
 }
@@ -209,8 +209,8 @@ void MinimizeButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
     //
     // draw symbol
     //
-    Gfx::Pen pen(2, Gfx::Color(65535, 65535, 65535), 
-                 Gfx::Pen::SolidStyle, Gfx::Pen::FlatCap);
+    Gfx::Pen pen(Gfx::Color(65535, 65535, 65535), 2,
+                 Gfx::Pen::Solid, Gfx::Pen::FlatCap);
     painter.setPen(pen);
 
     Gfx::PointF tl = geometry().topLeft() + Gfx::PointF(5, 5);
@@ -247,8 +247,8 @@ void MaximizeButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
     //
     // draw symbol
     //
-    Pt::Gfx::Pen pen(2, Gfx::Color(65535, 65535, 65535), 
-                     Gfx::Pen::SolidStyle, Gfx::Pen::FlatCap);
+    Pt::Gfx::Pen pen(Gfx::Color(65535, 65535, 65535), 2,
+                     Gfx::Pen::Solid, Gfx::Pen::FlatCap);
     painter.setPen(pen);
 
     Gfx::PointF tl = geometry().topLeft() + Gfx::PointF(5, 5);
@@ -284,8 +284,8 @@ void CloseButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 
     //
     // draw symbol
-    Pt::Gfx::Pen pen(2, Gfx::Color(65535, 65535, 65535), 
-                     Gfx::Pen::SolidStyle, Gfx::Pen::RoundCap);
+    Pt::Gfx::Pen pen(Gfx::Color(65535, 65535, 65535), 2,
+                     Gfx::Pen::Solid, Gfx::Pen::RoundCap);
     painter.setPen(pen);
 
     Gfx::PointF tl = geometry().topLeft() + Gfx::PointF(4, 4);
@@ -952,7 +952,7 @@ void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
     // light outer and inner border contour
     //
     Gfx::Color borderLight = brighten(color, 1.25f);
-    Gfx::Pen borderPenLight(1, borderLight);
+    Gfx::Pen borderPenLight(borderLight, 1);
 
     painter.setPen(borderPenLight);
     painter.drawLine(_frameRect.topLeft(), 
@@ -977,7 +977,7 @@ void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
     // dark outer and inner border contour
     //
     Gfx::Color borderDark = brighten(color, 0.75f);
-    Gfx::Pen borderPenDark(1, borderDark);
+    Gfx::Pen borderPenDark(borderDark, 1);
 
     painter.setPen(borderPenDark);
     painter.drawLine( Gfx::PointF(_frameRect.bottomLeft().x() + 1,
@@ -1015,7 +1015,7 @@ void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
 
     Gfx::Color textColor = _window->isActive() ? _wm->textColor() 
                                                : _wm->inactiveTextColor(); 
-    Gfx::Pen pen(1, textColor);
+    Gfx::Pen pen(textColor, 1);
     painter.setPen(pen);
     painter.drawText(textPos, title);
 
@@ -1025,12 +1025,12 @@ void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
     Gfx::Color gripColorLight( color.red() * 1.1f, 
                                color.green() * 1.1f, 
                                color.blue() * 1.1f );
-    Gfx::Pen gripPenLight(1, gripColorLight);
+    Gfx::Pen gripPenLight(gripColorLight, 1);
 
     Gfx::Color gripColorDark( color.red() * 0.9f, 
                               color.green() * 0.9f, 
                               color.blue() * 0.9f );
-    Gfx::Pen gripPenDark(1, gripColorDark);
+    Gfx::Pen gripPenDark(gripColorDark, 1);
 
 
     Gfx::PointF gripStart( textPos.x() + fm.width() + _borderWidth, 

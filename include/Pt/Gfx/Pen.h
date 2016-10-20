@@ -24,17 +24,17 @@
   
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
-  02110-1301 USA
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  MA 02110-1301 USA
 */
 
 #ifndef PT_GFX_PEN_H
 #define PT_GFX_PEN_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/SmartPtr.h>
+#include <cstddef>
 
 namespace Pt {
 
@@ -47,16 +47,19 @@ class PenData;
     Pen objects are used as container of drawing attributes for Painter 
     objects. A size and a color can be specified per pen. The size and
     color are used to draw outlined shapes by the Painter. Outlined shapes 
-    or example are lines, outlined rectangles or ellipses and text.
-
+    for example are lines, outlined rectangles or ellipses and text.
 */
 class PT_GFX_API Pen
 {
     public:
-        enum PenStyle { SolidStyle = 0, 
-                        DashStyle = 1, 
-                        DoubleDash = 2 };
+        /** @brief Pen line style.
+        */
+        enum Style { Solid      = 0, 
+                     Dash       = 1, 
+                     DoubleDash = 2 };
         
+        /** @brief Pen cap style.
+        */
         enum CapStyle { FlatCap = 0, 
                         RoundCap = 1, 
                         TriangularCap = 2, 
@@ -64,90 +67,55 @@ class PT_GFX_API Pen
                         ButtCap = 4, 
                         NotLastCap = 5 };
         
+        /** @brief Pen join style.
+        */
         enum JoinStyle { RoundJoin = 0, 
                          BevelJoin = 1, 
                          MiterJoin = 2, 
                          TriangularJoin = 3 };
 
-        /**
-        * @brief Creates a new Pen object.
-        *
-        * The default pen size is 1. The default pen color is black, the default style is solid
-        * and the default cap and join style are round.
+        /** @brief Constructs a Pen object.
+        
+            The default pen size is 1, the default pen color is black, the 
+            default style is solid and the default cap and join style are 
+            round.
         */
         Pen();
 
-        /**
-        * @brief Creates a new Pen object with the specified size
-        *
-        * The default pen color is black. The default style is solid. The default cap and join style are round.
+        /** @brief Constructs a Pen with the specified color.
+            
+            The pen size is 1, the style is solid and the cap and join
+            styles are round.
         */
-        explicit Pen( size_t size );
+        explicit Pen(const Color& color);
 
-        /**
-        * @brief Creates a new Pen object with the specified style
-        *
-        * The default pen size is 1. The default pen color is black. The default cap and join style are round.
+        /** @brief Constructs a Pen with the specified size, color and styles.
         */
-        explicit Pen( PenStyle style );
+        Pen(const Color& color, std::size_t width,  
+            Style style = Solid, CapStyle cap = FlatCap, 
+            JoinStyle join = BevelJoin);
 
-        /**
-        * @brief Creates a new Pen object with the specified color
-        *
-        * The default pen size is 1. The default style is solid. The default cap and join style are round.
+        /** @brief Returns the size of the pen.
         */
-        explicit Pen( const Color& color );
+        std::size_t size() const;
 
-        /**
-        * @brief Creates a new Pen object using the specified size, color and style.
-        *
-        * The pen size, color and style are optional. The default pen size is 1. The
-        * default pen color is black and the default style is solid.
-        *
-        * @param width The width of the pen. This parameter is optional. The default is 1.
-        * @param color The color of the pen. This parameter is optional. The default is black.
-        * @param style The style of the pen. This parameter is optional. The default is SolidStyle.
-        * @param cap The cap style. This parameter is optional. The default is flat style.
-        * @param join The join style. This parameter is optional. The default is round style.
-        */
-        Pen( size_t width, const Color& color, PenStyle style = SolidStyle, CapStyle cap = FlatCap, JoinStyle join = BevelJoin );
-
-        /**
-        * @brief Returns the size of the pen as specified when created.
-        *
-        * @return The size of the pen.
-        */
-        size_t size() const;
-
-        /**
-        * @brief Returns a reference to the color of the pen as specified when created.
-        *
-        * @return The color of the pen.
+        /** @brief Returns the color of the pen.
         */
         const Color& color() const;
 
-        /**
-        * @brief Returns the pen style.
-        *
-        * @return The pen style.
+        /** @brief Returns the pen style.
         */
-        PenStyle style() const;
+        Style style() const;
 
-        /**
-        * @brief Returns the cap style
-        *
-        * @return The cap style.
+        /** @brief Returns the cap style.
         */
         CapStyle capStyle() const;
 
-        /**
-        * @brief Returns the join style
-        *
-        * @return The join style.
+        /** @brief Returns the join style.
         */
         JoinStyle joinStyle() const;
 
-  private:
+    private:
       SmartPtr<PenData> _penData;
 };
 
@@ -155,23 +123,22 @@ class PT_GFX_API Pen
 class PT_GFX_API PenData
 {
   public:
-      PenData(size_t size, const Color& color, 
-              Pen::PenStyle style, Pen::CapStyle cap, Pen::JoinStyle join)
-      : _size(size)
+      PenData(const Color& color, std::size_t size,
+              Pen::Style style, Pen::CapStyle cap, Pen::JoinStyle join)
+      : _color(color)
+      , _size(size)
       , _style(style )      
       , _capStyle(cap)
       , _joinStyle(join)
-      , _color(color)
-      {
-      }
+      { }
 
       const Color& color() const
       { return _color; }
 
-      size_t size() const
+      std::size_t size() const
       { return _size; }
 
-      Pen::PenStyle style() const
+      Pen::Style style() const
       { return _style; }
 
       Pen::CapStyle capStyle() const
@@ -181,11 +148,11 @@ class PT_GFX_API PenData
       { return _joinStyle; }
 
   private:
-      size_t         _size;
-      Pen::PenStyle  _style;   
+      Color          _color;
+      std::size_t    _size;
+      Pen::Style     _style;   
       Pen::CapStyle  _capStyle;
       Pen::JoinStyle _joinStyle;
-      Color          _color;
 };
 
 } // namespace 

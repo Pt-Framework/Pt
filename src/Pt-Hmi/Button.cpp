@@ -293,7 +293,7 @@ void Button::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
         size.addWidth(-4);
 
         Gfx::Color armedColor(Gfx::Color::fromRgb8(176,176,176));
-        Gfx::Pen pen(1, armedColor, Gfx::Pen::DashStyle);
+        Gfx::Pen pen(armedColor, 1, Gfx::Pen::Dash);
         
         Painter painter( surface );
         painter.setClip(updateRect);

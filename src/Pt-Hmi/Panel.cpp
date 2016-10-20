@@ -219,7 +219,7 @@ void Panel::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRec
     {
         case Single:
         {
-            Gfx::Pen pen(static_cast<size_t>(_borderWidth), _borderColor);
+            Gfx::Pen pen(_borderColor, static_cast<size_t>(_borderWidth));
             painter.setPen(pen);
             painter.drawPolyline(&outline[0], outline.size());
             break;
@@ -237,7 +237,7 @@ void Panel::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRec
             points1[2].setX(0 + borderRect.width());
             points1[2].setY(0);
 
-            Gfx::Pen pen(static_cast<size_t>(_borderWidth), _borderColor);
+            Gfx::Pen pen(_borderColor, static_cast<size_t>(_borderWidth));
             painter.setPen(pen);
             painter.drawPolyline(&points1[0], points1.size());
 
@@ -255,7 +255,7 @@ void Panel::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRec
                              _borderColor.green() * 0.9f,
                              _borderColor.blue() * 0.9f);
 
-            Gfx::Pen pen2( static_cast<size_t>(_borderWidth), color );
+            Gfx::Pen pen2( color, static_cast<size_t>(_borderWidth) );
             painter.setPen(pen2);
             painter.drawPolyline(&points2[0], points2.size());	
             break;

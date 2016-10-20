@@ -384,7 +384,7 @@ void Menu::onPaintBackground(const Gfx::RectF& rect)
     //
     Gfx::RectF borderRect(Gfx::PointF(0, 0), size());
 
-    Gfx::Pen pen(1, Gfx::Color(65535*0.5f, 65535*0.5f, 65535*0.51f) );
+    Gfx::Pen pen(Gfx::Color(65535*0.5f, 65535*0.5f, 65535*0.51f), 1 );
     painter.setPen(pen);
     painter.drawRect(borderRect);
 }
