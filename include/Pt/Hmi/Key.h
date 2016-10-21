@@ -11,6 +11,371 @@ namespace Pt {
 
 namespace Hmi {
 
+class KeyCode
+{
+    // TODO: is number on numpad same keycode as on main keyboard
+    //       or do we treat numlock like a modifier
+
+    public:
+        enum Value
+        {
+            Unknown    = 0x100000,
+            ArrowLeft  = 0x100001,
+            ArrowRight = 0x100002,
+            ArrowUp    = 0x100003,
+            ArrowDown  = 0x100004,
+
+
+            // NUMPAD
+                    
+            // The NUM LOCK key.
+            NumLock = 0x000,
+
+            // The 0 key on the numeric keypad.
+            NumPad0 = 0x000,
+        
+            // The 1 key on the numeric keypad.
+            NumPad1 = 0x000,
+        
+            // The 2 key on the numeric keypad.
+            NumPad2 = 0x000,
+        
+            // The 3 key on the numeric keypad.
+            NumPad3 = 0x000,
+        
+            // The 4 key on the numeric keypad.
+            NumPad4 = 0x000,
+        
+            // The 5 key on the numeric keypad.
+            NumPad5 = 0x000,
+        
+            // The 6 key on the numeric keypad.
+            NumPad6 = 0x000,
+        
+            // The 7 key on the numeric keypad.
+            NumPad7 = 0x000,
+        
+            // The 8 key on the numeric keypad.
+            NumPad8 = 0x000,
+        
+            // The 9 key on the numeric keypad.
+            NumPad9 = 0x000,
+        
+            // The multiply key.
+            Multiply = 0x000,
+        
+            // The add key.
+            Add = 0x000,
+            
+            // The divide key.
+            Divide = 0x000,
+
+            // The subtract key.
+            Subtract = 0x000,
+            
+            // The separator key.
+            Separator = 0x000,
+        
+            // The decimal key.
+            Decimal = 0x000,
+        
+
+            // NAVIGATION
+
+            Insert,
+        
+            Delete,
+
+            Home,
+
+            End,
+        
+            PageUp,
+        
+            PageDown,
+    
+            Clear,
+
+
+            // FUNCTION KEYS
+            
+            // The F1 key.
+            F1 = 0x000,
+        
+            // The F2 key.
+            F2 = 0x000,
+        
+            // The F3 key.
+            F3 = 0x000,
+        
+            // The F4 key.
+            F4 = 0x000,
+        
+            // The F5 key.
+            F5 = 0x000,
+        
+            // The F6 key.
+            F6 = 0x000,
+        
+            // The F7 key.
+            F7 = 0x000,
+        
+            // The F8 key.
+            F8 = 0x000,
+        
+            // The F9 key.
+            F9 = 0x000,
+        
+            // The F10 key.
+            F10 = 0x000,
+        
+            // The F11 key.
+            F11 = 0x000,
+        
+            // The F12 key.
+            F12 = 0x000,
+        
+            // The F13 key.
+            F13 = 0x000,
+        
+            // The F14 key.
+            F14 = 0x000,
+        
+            // The F15 key.
+            F15 = 0x000,
+        
+            // The F16 key.
+            F16 = 0x000,
+        
+            // The F17 key.
+            F17 = 0x000,
+        
+            // The F18 key.
+            F18 = 0x000,
+        
+            // The F19 key.
+            F19 = 0x000,
+        
+            // The F20 key.
+            F20 = 0x000,
+        
+            // The F21 key.
+            F21 = 0x000,
+        
+            // The F22 key.
+            F22 = 0x000,
+        
+            // The F23 key.
+            F23 = 0x000,
+        
+            // The F24 key.
+            F24 = 0x000,
+
+
+            // SPECIAL FUNCTION KEYS
+
+            Escape,
+        
+            PrintScreen,
+
+            ScrollLock,
+
+            Pause,
+
+            Back,
+        
+            Tab,
+        
+            Return,
+        
+            Shift,
+
+            Control,
+        
+            Alt,
+
+            Meta,
+
+            AppsMenu,
+        
+            Sleep,
+        
+            CapsLock,
+
+            Select,
+
+            Cancel,
+
+            Print,
+
+            Execute,
+
+            Help,
+
+
+            // SPECIAL APPLICATION KEYS
+            
+            //Play
+            //Zoom
+
+            //BrowserBack
+            //BrowserForward
+            //BrowserRefresh
+            //BrowserStop
+            //BrowserSearch
+            //BrowserFavorites
+            //BrowserHome
+            //VolumeMute
+            //VolumeDown
+            //VolumeUp
+            //MediaNext
+            //MediaPrev
+            //MediaStop
+            //MediaPlay
+            //LaunchMail 
+            //LaunchMedia
+            //LaunchApp1
+            //LaunchApp2
+
+
+            // INPUT METHODS
+
+            ModeChange,
+
+
+            // CHARACTER KEYS (match unicode character code)
+
+            // Space key.
+            Space = 32,
+
+            // The 0 key.
+            D0 = 48,
+        
+            // The 1 key.
+            D1 = 49,
+        
+            // The 2 key.
+            D2 = 50,
+        
+            // The 3 key.
+            D3 = 51,
+        
+            // The 4 key.
+            D4 = 52,
+        
+            // The 5 key.
+            D5 = 53,
+        
+            // The 6 key.
+            D6 = 54,
+        
+            // The 7 key.
+            D7 = 55,
+        
+            // The 8 key.
+            D8 = 56,
+        
+            // The 9 key.
+            D9 = 57,
+        
+            // The A key.
+            A = 65,
+        
+            // The B key.
+            B = 66,
+        
+            // The C key.
+            C = 67,
+        
+            // The D key.
+            D = 68,
+        
+            // The E key.
+            E = 69,
+        
+            // The F key.
+            F = 70,
+        
+            // The G key.
+            G = 71,
+        
+            // The H key.
+            H = 72,
+        
+            // The I key.
+            I = 73,
+        
+            // The J key.
+            J = 74,
+        
+            // The K key.
+            K = 75,
+        
+            // The L key.
+            L = 76,
+        
+            // The M key.
+            M = 77,
+        
+            // The N key.
+            N = 78,
+        
+            // The O key.
+            O = 79,
+        
+            // The P key.
+            P = 80,
+        
+            // The Q key.
+            Q = 81,
+        
+            // The R key.
+            R = 82,
+        
+            // The S key.
+            S = 83,
+        
+            // The T key.
+            T = 84,
+        
+            // The U key.
+            U = 85,
+        
+            // The V key.
+            V = 86,
+        
+            // The W key.
+            W = 87,
+        
+            // The X key.
+            X = 88,
+        
+            // The Y key.
+            Y = 89,
+        
+            // The Z key.
+            Z = 90,
+        };
+
+        KeyCode(Pt::uint32_t vk = 0)
+        : _value(vk)
+        {}
+
+        KeyCode& operator =(Pt::uint32_t vk)
+        {
+            _value = vk;
+            return *this;
+        }
+
+        operator Pt::uint32_t() const
+        { 
+            return _value; 
+        }
+
+    private:
+        Pt::uint32_t _value;
+};
+
 class Key
 {
     public:

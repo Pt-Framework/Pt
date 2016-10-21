@@ -103,6 +103,7 @@ class PT_HMI_API KeyEvent : public Pt::BasicEvent<KeyEvent>
         {
             return _vid;
         }
+
     private:
         Pt::uint64_t _vid;
         Action   _action;

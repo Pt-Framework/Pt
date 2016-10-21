@@ -1,5 +1,4 @@
-/* Copyright (C) 2013 Marc Boris Duerner
-   Copyright (C) 2013 Laurentiu-Gheorghe Crisan
+ /* Copyright (C) 2016 Marc Boris Duerner
    
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -27,331 +26,268 @@
    Boston, MA 02110-1301 USA
 */
 
-namespace {
+#include <Pt/Hmi/Key.h>
+#include <Pt/Types.h>
 
-    // TODO: is number on numpad same keycode as on main keyboard?
-    // TODO: what about punct keys
-
-    //NUMPAD
-    case Qt::Key_NumLock:
-        return VK_NUMLOCK, NumLock // (90) NUM LOCK key
-    case Qt::Key_0:
-        return VK_NUMPAD0, NumPad0
-    case Qt::Key_1:
-        return VK_NUMPAD1, NumPad1
-    case Qt::Key_2:
-        return  VK_NUMPAD2, NumPad2
-    case Qt::Key_3:
-        return VK_NUMPAD3, NumPad3
-    case Qt::Key_4:
-        return VK_NUMPAD4, NumPad4
-    case Qt::Key_5:
-        return VK_NUMPAD5, NumPad5
-    case Qt::Key_6:
-        return VK_NUMPAD6, NumPad6
-    case Qt::Key_7:
-        return VK_NUMPAD7, NumPad7
-    case Qt::Key_8:
-        return VK_NUMPAD8, NumPad8
-    case Qt::Key_9:
-        return VK_NUMPAD9, NumPad9
-    case Qt::Key_Slash:
-        return VK_DIVIDE, Divide
-    case Qt::Key_Asterisk:
-        return VK_MULTIPLY, Multiply
-    case Qt::Key_Minus:
-        return VK_SUBTRACT, Subtract
-    case Qt::Key_Plus:
-        return VK_ADD, Add
-    case Qt::Key_Period:
-        return VK_DECIMAL, Decimal
-    case Qt::Key_Comma:
-        return VK_SEPARATOR, Separator
-        
-
-    // ARROWS
-    case Qt::Key_Left:
-        return VK_LEFT, Left // (25) LEFT ARROW key
-        
-    case Qt::Key_Up:
-        return VK_UP, Up // (26) UP ARROW key
-        
-    case Qt::Key_Right:
-        return VK_RIGHT, Right; // (27) RIGHT ARROW key
-        
-    case Qt::Key_Down:
-        return VK_DOWN, Down; // (28) DOWN ARROW key
-
-
-    // NAVIGATION
-    case Qt::Key_Insert:
-        return VK_INSERT, Insert; // (2D) INS key
-        
-    case Qt::Key_Delete:
-        return VK_DELETE, Delete; // (2E) DEL key
-
-    case Qt::Key_Home:
-        return VK_HOME, Home // (24) HOME key
-
-    case Qt::Key_End:
-        return VK_END End // (23) END key
-        
-    case Qt::Key_PageUp:
-        return VK_PRIOR, PageUp // (21) PAGE UP key
-        
-    case Qt::Key_PageDown:
-        return VK_NEXT, PageDown // (22) PAGE DOWN key
-    
-    case Qt::Key_Clear:
-        return VK_CLEAR, Clear; // (0C) CLEAR key
-               VK_OEM_CLEAR, Clear
-
-
-    // SPECIAL FUNCTION KEYS
-    case Qt::Key_Escape:
-        return VK_ESCAPE, Escape; // (1B) ESC key
-        
-    case Qt::Key_PrintScreen:
-        return VK_SNAPSHOT, PrintScreen// (2C) PRINT SCREEN key
-
-    case Qt::Key_ScrollLock:
-        return VK_SCROLL, Scroll; // (91) SCROLL LOCK key
-
-    case Qt::Key_Pause:
-        return VK_PAUSE, Pause; // (13) PAUSE key
-
-
-    // FUNCTION KEYS
-    case Qt::Key_F1:
-        return VK_F1, F1;
-    case Qt::Key_F2:
-        return VK_F2, F2;
-    case Qt::Key_F3:
-        return VK_F3, F3;
-    case Qt::Key_F4:
-        return VK_F4, F4;
-    case Qt::Key_F5:
-        return VK_F5, F5;
-    case Qt::Key_F6:
-        return VK_F6, F6;
-    case Qt::Key_F7:
-        return VK_F7, F7;
-    case Qt::Key_F8:
-        return VK_F8, F8;
-    case Qt::Key_F9:
-        return VK_F9, F9;
-    case Qt::Key_F10:
-        return VK_F10, F10;
-    case Qt::Key_F11:
-        return VK_F11, F11;
-    case Qt::Key_F12:
-        return VK_F12, F12;
-    case Qt::Key_F13:
-        return VK_F13, F13;
-    case Qt::Key_F14:
-        return VK_F14, F14;
-    case Qt::Key_F15:
-        return VK_F15, F15;
-    case Qt::Key_F16:
-        return VK_F16, F16;
-    case Qt::Key_F17:
-        return VK_F17, F17;
-    case Qt::Key_F18:
-        return VK_F18, F18;
-    case Qt::Key_F19:
-        return VK_F19, F19;
-    case Qt::Key_F20:
-        return VK_F20, F20;
-    case Qt::Key_F21:
-        return VK_F21, F21;
-    case Qt::Key_F22:
-        return VK_F22, F22;
-    case Qt::Key_F23:
-        return VK_F23, F23;
-    case Qt::Key_F24:
-        return VK_F24, F24;
-
-
-    //// INPUT METHODS
-    case Qt::Key_Mode_switch
-        VK_MODECHANGE, IMEModeChange (1F) IME mode change request
-        
-        // MAIN KEYBOARD
-        case Qt::Key_Backspace:
-            return VK_BACK, Back; // (08) BACKSPACE key
-        
-        case Qt::Key_Tab:
-            return VK_TAB, Tab; // (09) TAB key
-        
-        case Qt::Key_Return:
-            return VK_RETURN, Return; //(0D) Return key
-        
-        case Qt::Key_Shift:
-            return VK_SHIFT, Shift; // (10) SHIFT key
-            return VK_LSHIFT, Shift; // (10) SHIFT key
-            return VK_RSHIFT, Shift; // (10) SHIFT key
-
-        case Qt::Key_Control:
-            return VK_CONTROL, Control; // (11) CTRL key
-            return VK_LCONTROL, Control; 
-            return VK_RCONTROL, Control; 
-        
-        case Qt::Key_Alt:
-            return VK_MENU, Menu; // (12) ALT key
-            return VK_LMENU, Menu;
-            return VK_RMENU, Menu;
-
-        case Qt::Key_Meta:
-            return VK_LWIN, LWin // (5B) Left Windows key (Microsoft Natural keyboard)
-        
-        case Qt::Key_Meta: 
-            return VK_RWIN, RWin; // (5C) Right Windows key (Natural keyboard)
-
-        case Qt::Key_Menu
-            VK_APPS, Apps //(5D) Applications key (Natural keyboard)
-        
-        case Qt::Key_Sleep
-            VK_SLEEP, Sleep// (5F) Computer Sleep key
-        
-        case Qt::Key_CapsLock:
-            return VK_CAPITAL, Capital; // (14) CAPS LOCK key
-        
-        case Qt::Key_Select:
-            return VK_SELECT; // (29) SELECT key
-        
-        case Qt::Key_Cancel:
-            return VK_Cancel, Cancel;
-
-        case Qt::Key_Printer:
-            return VK_PRINT; // (2A) PRINT key
-        
-        case Qt::Key_Execute:
-            return VK_EXECUTE;// (2B) EXECUTE key
-
-        case Qt::Key_Help:
-            return VK_HELP; // (2F) HELP key
-
-
-        // ASCII ALPHANUMERIC KEYS
-
-        case Qt::Key_Space:
-            return VK_SPACE; // (20) SPACEBAR
-        
-        case Qt::Key_0:
-            return VK_0;    //  (30) 0 key
-        case Qt::Key_1:
-            return VK_1; //  (31) 1
-        case Qt::Key_2:
-            return VK_2; //  (32) 2
-        case Qt::Key_3:
-            return VK_3; //case '3'
-        case Qt::Key_4:
-            return VK_4;
-        case Qt::Key_5:
-            return VK_5; //  (35) 5 key
-        case Qt::Key_6:
-            return VK_6; //  (36) 6 key
-        case Qt::Key_7:
-            return VK_7; //  (37) 7 key
-        case Qt::Key_8:
-            return VK_8; //  (38) 8 key
-        case Qt::Key_9:
-            return VK_9; //  (39) 9 key 
-
-        case Qt::Key_A:
-            return VK_A; //  (41) A key case 'a': case 'A': return 0x41;
-        case Qt::Key_B:
-            return VK_B; //  (42) B key case 'b': case 'B': return 0x42;
-        case Qt::Key_C:
-            return VK_C; //  (43) C key case 'c': case 'C': return 0x43;
-        case Qt::Key_D:
-            return VK_D; //  (44) D key case 'd': case 'D': return 0x44;
-        case Qt::Key_E:
-            return VK_E; //  (45) E key case 'e': case 'E': return 0x45;
-        case Qt::Key_F:
-            return VK_F; //  (46) F key case 'f': case 'F': return 0x46;
-        case Qt::Key_G:
-            return VK_G; //  (47) G key case 'g': case 'G': return 0x47;
-        case Qt::Key_H:
-            return VK_H; //  (48) H key case 'h': case 'H': return 0x48;
-        case Qt::Key_I:
-            return VK_I; //  (49) I key case 'i': case 'I': return 0x49;
-        case Qt::Key_J:
-            return VK_J; //  (4A) J key case 'j': case 'J': return 0x4A;
-        case Qt::Key_K:
-            return VK_K; //  (4B) K key case 'k': case 'K': return 0x4B;
-        case Qt::Key_L:
-            return VK_L; //  (4C) L key case 'l': case 'L': return 0x4C;
-        case Qt::Key_M:
-            return VK_M; //  (4D) M key case 'm': case 'M': return 0x4D;
-        case Qt::Key_N:
-            return VK_N; //  (4E) N key case 'n': case 'N': return 0x4E;
-        case Qt::Key_O:
-            return VK_O; //  (4F) O key case 'o': case 'O': return 0x4F;
-        case Qt::Key_P:
-            return VK_P; //  (50) P key case 'p': case 'P': return 0x50;
-        case Qt::Key_Q:
-            return VK_Q; //  (51) Q key case 'q': case 'Q': return 0x51;
-        case Qt::Key_R:
-            return VK_R; //  (52) R key case 'r': case 'R': return 0x52;
-        case Qt::Key_S:
-            return VK_S; //  (53) S key case 's': case 'S': return 0x53;
-        case Qt::Key_T:
-            return VK_T; //  (54) T key case 't': case 'T': return 0x54;
-        case Qt::Key_U:
-            return VK_U; //  (55) U key case 'u': case 'U': return 0x55;
-        case Qt::Key_V:
-            return VK_V; //  (56) V key case 'v': case 'V': return 0x56;
-        case Qt::Key_W:
-            return VK_W; //  (57) W key case 'w': case 'W': return 0x57;
-        case Qt::Key_X:
-            return VK_X; //  (58) X key case 'x': case 'X': return 0x58;
-        case Qt::Key_Y:
-            return VK_Y; //  (59) Y key case 'y': case 'Y': return 0x59;
-        case Qt::Key_Z:
-            return VK_Z; //  (5A) Z key case 'z': case 'Z': return 0x5A;
-
-
-        // ASCII PUNCTUATION KEYS
-
-        // VK_OEM_1          //  0xBA ';:' for US
-        // VK_OEM_PLUS       //  0xBB '+' any country
-        // VK_OEM_COMMA      //  0xBC ',' any country
-        // VK_OEM_MINUS      //  0xBD '-' any country
-        // VK_OEM_PERIOD     //  0xBE '.' any country
-        // VK_OEM_2          //  0xBF '/?' for US
-        // VK_OEM_3          //  0xC0 '`~' for US
-        // VK_OEM_4          //  0xDB '[{' for US
-        // VK_OEM_5          //  0xDC '\|' for US
-        // VK_OEM_6          //  0xDD ']}' for US
-        // VK_OEM_7          //  0xDE ''"' for US
-        // VK_OEM_AX         //  0xE1 'AX' key on Japanese AX kbd
-        // VK_OEM_102        //  0xE2 "<>" or "\|" on RT 102-key kbd
-
-        // SPECIAL KEYS
-
-        // VK_PLAY (FA) Play key
-        // VK_ZOOM (FB) Zoom key
-
-        // VK_BROWSER_BACK (A6) Windows 2000/XP: Browser Back key
-        // VK_BROWSER_FORWARD (A7) Windows 2000/XP: Browser Forward key
-        // VK_BROWSER_REFRESH (A8) Windows 2000/XP: Browser Refresh key
-        // VK_BROWSER_STOP (A9) Windows 2000/XP: Browser Stop key
-        // VK_BROWSER_SEARCH (AA) Windows 2000/XP: Browser Search key
-        // VK_BROWSER_FAVORITES (AB) Windows 2000/XP: Browser Favorites key
-        // VK_BROWSER_HOME (AC) Windows 2000/XP: Browser Start and Home key
-        // VK_VOLUME_MUTE (AD) Windows 2000/XP: Volume Mute key
-        // VK_VOLUME_DOWN (AE) Windows 2000/XP: Volume Down key
-        // VK_VOLUME_UP (AF) Windows 2000/XP: Volume Up key
-        // VK_MEDIA_NEXT_TRACK (B0) Windows 2000/XP: Next Track key
-        // VK_MEDIA_PREV_TRACK (B1) Windows 2000/XP: Previous Track key
-        // VK_MEDIA_STOP (B2) Windows 2000/XP: Stop Media key
-        // VK_MEDIA_PLAY_PAUSE (B3) Windows 2000/XP: Play/Pause Media key
-        // VK_LAUNCH_MAIL (B4) Windows 2000/XP: Start Mail key
-        // VK_LAUNCH_MEDIA_SELECT (B5) Windows 2000/XP: Select Media key
-        // VK_LAUNCH_APP1 (B6) Windows 2000/XP: Start Application 1 key
-        // VK_LAUNCH_APP2 (B7) Windows 2000/XP: Start Application 2 key
-
+static Pt::uint32_t keyMap[] =
+{
+    Pt::Hmi::KeyCode::Unknown,           //   0   0x00
+    Pt::Hmi::KeyCode::Unknown,           //   1   0x01   VK_LBUTTON          
+    Pt::Hmi::KeyCode::Unknown,           //   2   0x02   VK_RBUTTON          
+    Pt::Hmi::KeyCode::Cancel,            //   3   0x03   VK_CANCEL           
+    Pt::Hmi::KeyCode::Unknown,           //   4   0x04   VK_MBUTTON          
+    Pt::Hmi::KeyCode::Unknown,           //   5   0x05   VK_XBUTTON1         
+    Pt::Hmi::KeyCode::Unknown,           //   6   0x06   VK_XBUTTON2         
+    Pt::Hmi::KeyCode::Unknown,           //   7   0x07
+    Pt::Hmi::KeyCode::Backspace,         //   8   0x08   VK_BACK             
+    Pt::Hmi::KeyCode::Tab,               //   9   0x09   VK_TAB              
+    Pt::Hmi::KeyCode::Unknown,           //  10   0x0A
+    Pt::Hmi::KeyCode::Unknown,           //  11   0x0B
+    Pt::Hmi::KeyCode::Clear,             //  12   0x0C   VK_CLEAR            
+    Pt::Hmi::KeyCode::Return,            //  13   0x0D   VK_RETURN           
+    Pt::Hmi::KeyCode::Unknown,           //  14   0x0E
+    Pt::Hmi::KeyCode::Unknown,           //  15   0x0F
+    Pt::Hmi::KeyCode::Shift,             //  16   0x10   VK_SHIFT            
+    Pt::Hmi::KeyCode::Control,           //  17   0x11   VK_CONTROL          
+    Pt::Hmi::KeyCode::Alt,               //  18   0x12   VK_MENU             
+    Pt::Hmi::KeyCode::Pause,             //  19   0x13   VK_PAUSE            
+    Pt::Hmi::KeyCode::CapsLock,          //  20   0x14   VK_CAPITAL          
+    Pt::Hmi::KeyCode::Unknown,           //  21   0x15   VK_KANA VK_HANGUL 
+    Pt::Hmi::KeyCode::Unknown,           //  22   0x16
+    Pt::Hmi::KeyCode::Unknown,           //  23   0x17   VK_JUNJA            
+    Pt::Hmi::KeyCode::Unknown,           //  24   0x18   VK_FINAL            
+    Pt::Hmi::KeyCode::Unknown,           //  25   0x19   VK_HANJA VK_KANJI 
+    Pt::Hmi::KeyCode::Unknown,           //  26   0x1A
+    Pt::Hmi::KeyCode::Escape,            //  27   0x1B   VK_ESCAPE           
+    Pt::Hmi::KeyCode::Unknown,           //  28   0x1C   VK_CONVERT          
+    Pt::Hmi::KeyCode::Unknown,           //  29   0x1D   VK_NONCONVERT       
+    Pt::Hmi::KeyCode::Unknown,           //  30   0x1E   VK_ACCEPT           
+    Pt::Hmi::KeyCode::Mode_switch,       //  31   0x1F   VK_MODECHANGE       
+    Pt::Hmi::KeyCode::Space,             //  32   0x20   VK_SPACE            
+    Pt::Hmi::KeyCode::PageUp,            //  33   0x21   VK_PRIOR            
+    Pt::Hmi::KeyCode::PageDown,          //  34   0x22   VK_NEXT             
+    Pt::Hmi::KeyCode::End,               //  35   0x23   VK_END              
+    Pt::Hmi::KeyCode::Home,              //  36   0x24   VK_HOME             
+    Pt::Hmi::KeyCode::ArrowLeft,         //  37   0x25   VK_LEFT             
+    Pt::Hmi::KeyCode::ArrowUp,           //  38   0x26   VK_UP               
+    Pt::Hmi::KeyCode::ArrowRight,        //  39   0x27   VK_RIGHT            
+    Pt::Hmi::KeyCode::ArrowDown,         //  40   0x28   VK_DOWN             
+    Pt::Hmi::KeyCode::Select,            //  41   0x29   VK_SELECT           
+    Pt::Hmi::KeyCode::Print,             //  42   0x2A   VK_PRINT            
+    Pt::Hmi::KeyCode::Execute,           //  43   0x2B   VK_EXECUTE          
+    Pt::Hmi::KeyCode::PrintScreen,       //  44   0x2C   VK_SNAPSHOT         
+    Pt::Hmi::KeyCode::Insert,            //  45   0x2D   VK_INSERT           
+    Pt::Hmi::KeyCode::Delete,            //  46   0x2E   VK_DELETE           
+    Pt::Hmi::KeyCode::Help,              //  47   0x2F   VK_HELP             
+    0,                                   //  48   0x30   VK_0              
+    0,                                   //  49   0x31   VK_1              
+    0,                                   //  50   0x32   VK_2              
+    0,                                   //  51   0x33   VK_3              
+    0,                                   //  52   0x34   VK_4              
+    0,                                   //  53   0x35   VK_5              
+    0,                                   //  54   0x36   VK_6              
+    0,                                   //  55   0x37   VK_7              
+    0,                                   //  56   0x38   VK_8              
+    0,                                   //  57   0x39   VK_9              
+    Pt::Hmi::KeyCode::Unknown,           //  58   0x3A
+    Pt::Hmi::KeyCode::Unknown,           //  59   0x3B
+    Pt::Hmi::KeyCode::Unknown,           //  60   0x3C
+    Pt::Hmi::KeyCode::Unknown,           //  61   0x3D
+    Pt::Hmi::KeyCode::Unknown,           //  62   0x3E
+    Pt::Hmi::KeyCode::Unknown,           //  63   0x3F
+    Pt::Hmi::KeyCode::Unknown,           //  64   0x40
+    0,                                   //  65   0x41   VK_A              
+    0,                                   //  66   0x42   VK_B              
+    0,                                   //  67   0x43   VK_C              
+    0,                                   //  68   0x44   VK_D              
+    0,                                   //  69   0x45   VK_E              
+    0,                                   //  70   0x46   VK_F              
+    0,                                   //  71   0x47   VK_G              
+    0,                                   //  72   0x48   VK_H              
+    0,                                   //  73   0x49   VK_I              
+    0,                                   //  74   0x4A   VK_J              
+    0,                                   //  75   0x4B   VK_K              
+    0,                                   //  76   0x4C   VK_L              
+    0,                                   //  77   0x4D   VK_M              
+    0,                                   //  78   0x4E   VK_N              
+    0,                                   //  79   0x4F   VK_O              
+    0,                                   //  80   0x50   VK_P              
+    0,                                   //  81   0x51   VK_Q              
+    0,                                   //  82   0x52   VK_R              
+    0,                                   //  83   0x53   VK_S              
+    0,                                   //  84   0x54   VK_T              
+    0,                                   //  85   0x55   VK_U              
+    0,                                   //  86   0x56   VK_V              
+    0,                                   //  87   0x57   VK_W              
+    0,                                   //  88   0x58   VK_X              
+    0,                                   //  89   0x59   VK_Y              
+    0,                                   //  90   0x5A   VK_Z              
+    Pt::Hmi::KeyCode::Meta,              //  91   0x5B   VK_LWIN             
+    Pt::Hmi::KeyCode::Meta,              //  92   0x5C   VK_RWIN             
+    Pt::Hmi::KeyCode::AppsMenu,          //  93   0x5D   VK_APPS             
+    Pt::Hmi::KeyCode::Unknown,           //  94   0x5E
+    Pt::Hmi::KeyCode::Sleep,             //  95   0x5F   VK_SLEEP
+    Pt::Hmi::KeyCode::NumPad0,           //  96   0x60   VK_NUMPAD0          
+    Pt::Hmi::KeyCode::NumPad1,           //  97   0x61   VK_NUMPAD1          
+    Pt::Hmi::KeyCode::NumPad2,           //  98   0x62   VK_NUMPAD2          
+    Pt::Hmi::KeyCode::NumPad3,           //  99   0x63   VK_NUMPAD3          
+    Pt::Hmi::KeyCode::NumPad4,           // 100   0x64   VK_NUMPAD4          
+    Pt::Hmi::KeyCode::NumPad5,           // 101   0x65   VK_NUMPAD5          
+    Pt::Hmi::KeyCode::NumPad6,           // 102   0x66   VK_NUMPAD6          
+    Pt::Hmi::KeyCode::NumPad7,           // 103   0x67   VK_NUMPAD7          
+    Pt::Hmi::KeyCode::NumPad8,           // 104   0x68   VK_NUMPAD8          
+    Pt::Hmi::KeyCode::NumPad9,           // 105   0x69   VK_NUMPAD9          
+    Pt::Hmi::KeyCode::Multiply,          // 106   0x6A   VK_MULTIPLY         
+    Pt::Hmi::KeyCode::Add,               // 107   0x6B   VK_ADD              
+    Pt::Hmi::KeyCode::Separator,         // 108   0x6C   VK_SEPARATOR        
+    Pt::Hmi::KeyCode::Subtract,          // 109   0x6D   VK_SUBTRACT         
+    Pt::Hmi::KeyCode::Decimal,           // 110   0x6E   VK_DECIMAL          
+    Pt::Hmi::KeyCode::Divide,            // 111   0x6F   VK_DIVIDE           
+    Pt::Hmi::KeyCode::F1,                // 112   0x70   VK_F1               
+    Pt::Hmi::KeyCode::F2,                // 113   0x71   VK_F2               
+    Pt::Hmi::KeyCode::F3,                // 114   0x72   VK_F3               
+    Pt::Hmi::KeyCode::F4,                // 115   0x73   VK_F4               
+    Pt::Hmi::KeyCode::F5,                // 116   0x74   VK_F5               
+    Pt::Hmi::KeyCode::F6,                // 117   0x75   VK_F6               
+    Pt::Hmi::KeyCode::F7,                // 118   0x76   VK_F7               
+    Pt::Hmi::KeyCode::F8,                // 119   0x77   VK_F8               
+    Pt::Hmi::KeyCode::F9,                // 120   0x78   VK_F9               
+    Pt::Hmi::KeyCode::F10,               // 121   0x79   VK_F10              
+    Pt::Hmi::KeyCode::F11,               // 122   0x7A   VK_F11              
+    Pt::Hmi::KeyCode::F12,               // 123   0x7B   VK_F12              
+    Pt::Hmi::KeyCode::F13,               // 124   0x7C   VK_F13              
+    Pt::Hmi::KeyCode::F14,               // 125   0x7D   VK_F14              
+    Pt::Hmi::KeyCode::F15,               // 126   0x7E   VK_F15              
+    Pt::Hmi::KeyCode::F16,               // 127   0x7F   VK_F16              
+    Pt::Hmi::KeyCode::F17,               // 128   0x80   VK_F17              
+    Pt::Hmi::KeyCode::F18,               // 129   0x81   VK_F18              
+    Pt::Hmi::KeyCode::F19,               // 130   0x82   VK_F19              
+    Pt::Hmi::KeyCode::F20,               // 131   0x83   VK_F20              
+    Pt::Hmi::KeyCode::F21,               // 132   0x84   VK_F21              
+    Pt::Hmi::KeyCode::F22,               // 133   0x85   VK_F22              
+    Pt::Hmi::KeyCode::F23,               // 134   0x86   VK_F23              
+    Pt::Hmi::KeyCode::F24,               // 135   0x87   VK_F24              
+    Pt::Hmi::KeyCode::Unknown,           // 136   0x88
+    Pt::Hmi::KeyCode::Unknown,           // 137   0x89
+    Pt::Hmi::KeyCode::Unknown,           // 138   0x8A
+    Pt::Hmi::KeyCode::Unknown,           // 139   0x8B
+    Pt::Hmi::KeyCode::Unknown,           // 140   0x8C
+    Pt::Hmi::KeyCode::Unknown,           // 141   0x8D
+    Pt::Hmi::KeyCode::Unknown,           // 142   0x8E
+    Pt::Hmi::KeyCode::Unknown,           // 143   0x8F
+    Pt::Hmi::KeyCode::NumLock,           // 144   0x90   VK_NUMLOCK          
+    Pt::Hmi::KeyCode::ScrollLock,        // 145   0x91   VK_SCROLL           
+    0,                                   // 146   0x92   VK_OEM_FJ_JISHO     
+    0,                                   // 147   0x93   VK_OEM_FJ_MASSHOU   
+    0,                                   // 148   0x94   VK_OEM_FJ_TOUROKU   
+    0,                                   // 149   0x95   VK_OEM_FJ_LOYA  
+    0,                                   // 150   0x96   VK_OEM_FJ_ROYA  
+    Pt::Hmi::KeyCode::Unknown,           // 151   0x97
+    Pt::Hmi::KeyCode::Unknown,           // 152   0x98
+    Pt::Hmi::KeyCode::Unknown,           // 153   0x99
+    Pt::Hmi::KeyCode::Unknown,           // 154   0x9A
+    Pt::Hmi::KeyCode::Unknown,           // 155   0x9B
+    Pt::Hmi::KeyCode::Unknown,           // 156   0x9C
+    Pt::Hmi::KeyCode::Unknown,           // 157   0x9D
+    Pt::Hmi::KeyCode::Unknown,           // 158   0x9E
+    Pt::Hmi::KeyCode::Unknown,           // 159   0x9F
+    Pt::Hmi::KeyCode::Shift,             // 160   0xA0   VK_LSHIFT           
+    Pt::Hmi::KeyCode::Shift,             // 161   0xA1   VK_RSHIFT           
+    Pt::Hmi::KeyCode::Control,           // 162   0xA2   VK_LCONTROL         
+    Pt::Hmi::KeyCode::Control,           // 163   0xA3   VK_RCONTROL         
+    Pt::Hmi::KeyCode::Alt,               // 164   0xA4   VK_LMENU            
+    Pt::Hmi::KeyCode::Alt,               // 165   0xA5   VK_RMENU            
+    Pt::Hmi::KeyCode::BrowserBack,       // 166   0xA6   VK_BROWSER_BACK     
+    Pt::Hmi::KeyCode::BrowserForward,    // 167   0xA7   VK_BROWSER_FORWARD  
+    Pt::Hmi::KeyCode::BrowserRefresh,    // 168   0xA8   VK_BROWSER_REFRESH  
+    Pt::Hmi::KeyCode::BrowserStop,       // 169   0xA9   VK_BROWSER_STOP     
+    Pt::Hmi::KeyCode::BrowserSearch,     // 170   0xAA   VK_BROWSER_SEARCH   
+    Pt::Hmi::KeyCode::BrowserFavorites,  // 171   0xAB   VK_BROWSER_FAVORITES
+    Pt::Hmi::KeyCode::BrowserHome,       // 172   0xAC   VK_BROWSER_HOME     
+    Pt::Hmi::KeyCode::VolumeMute,        // 173   0xAD   VK_VOLUME_MUTE      
+    Pt::Hmi::KeyCode::VolumeDown,        // 174   0xAE   VK_VOLUME_DOWN      
+    Pt::Hmi::KeyCode::VolumeUp,          // 175   0xAF   VK_VOLUME_UP        
+    Pt::Hmi::KeyCode::MediaNext,         // 176   0xB0   VK_MEDIA_NEXT_TRACK 
+    Pt::Hmi::KeyCode::MediaPrev,         // 177   0xB1   VK_MEDIA_PREV_TRACK 
+    Pt::Hmi::KeyCode::MediaStop,         // 178   0xB2   VK_MEDIA_STOP       
+    Pt::Hmi::KeyCode::MediaPlay,         // 179   0xB3   VK_MEDIA_PLAY_PAUSE 
+    Pt::Hmi::KeyCode::LaunchMail,        // 180   0xB4   VK_LAUNCH_MAIL      
+    Pt::Hmi::KeyCode::LaunchMedia,       // 181   0xB5   VK_LAUNCH_MEDIA_SELECT
+    Pt::Hmi::KeyCode::LaunchApp1,        // 182   0xB6   VK_LAUNCH_APP1      
+    Pt::Hmi::KeyCode::LaunchApp2,        // 183   0xB7   VK_LAUNCH_APP2      
+    Pt::Hmi::KeyCode::Unknown,           // 184   0xB8
+    Pt::Hmi::KeyCode::Unknown,           // 185   0xB9
+    0,                                   // 186   0xBA   VK_OEM_1            
+    0,                                   // 187   0xBB   VK_OEM_PLUS         
+    0,                                   // 188   0xBC   VK_OEM_COMMA        
+    0,                                   // 189   0xBD   VK_OEM_MINUS        
+    0,                                   // 190   0xBE   VK_OEM_PERIOD       
+    0,                                   // 191   0xBF   VK_OEM_2            
+    0,                                   // 192   0xC0   VK_OEM_3            
+    Pt::Hmi::KeyCode::Unknown,           // 193   0xC1
+    Pt::Hmi::KeyCode::Unknown,           // 194   0xC2
+    Pt::Hmi::KeyCode::Unknown,           // 195   0xC3
+    Pt::Hmi::KeyCode::Unknown,           // 196   0xC4
+    Pt::Hmi::KeyCode::Unknown,           // 197   0xC5
+    Pt::Hmi::KeyCode::Unknown,           // 198   0xC6
+    Pt::Hmi::KeyCode::Unknown,           // 199   0xC7
+    Pt::Hmi::KeyCode::Unknown,           // 200   0xC8
+    Pt::Hmi::KeyCode::Unknown,           // 201   0xC9
+    Pt::Hmi::KeyCode::Unknown,           // 202   0xCA
+    Pt::Hmi::KeyCode::Unknown,           // 203   0xCB
+    Pt::Hmi::KeyCode::Unknown,           // 204   0xCC
+    Pt::Hmi::KeyCode::Unknown,           // 205   0xCD
+    Pt::Hmi::KeyCode::Unknown,           // 206   0xCE
+    Pt::Hmi::KeyCode::Unknown,           // 207   0xCF
+    Pt::Hmi::KeyCode::Unknown,           // 208   0xD0
+    Pt::Hmi::KeyCode::Unknown,           // 209   0xD1
+    Pt::Hmi::KeyCode::Unknown,           // 210   0xD2
+    Pt::Hmi::KeyCode::Unknown,           // 211   0xD3
+    Pt::Hmi::KeyCode::Unknown,           // 212   0xD4
+    Pt::Hmi::KeyCode::Unknown,           // 213   0xD5
+    Pt::Hmi::KeyCode::Unknown,           // 214   0xD6
+    Pt::Hmi::KeyCode::Unknown,           // 215   0xD7
+    Pt::Hmi::KeyCode::Unknown,           // 216   0xD8
+    Pt::Hmi::KeyCode::Unknown,           // 217   0xD9
+    Pt::Hmi::KeyCode::Unknown,           // 218   0xDA
+    0,                                   // 219   0xDB   VK_OEM_4            
+    0,                                   // 220   0xDC   VK_OEM_5            
+    0,                                   // 221   0xDD   VK_OEM_6            
+    0,                                   // 222   0xDE   VK_OEM_7            
+    0,                                   // 223   0xDF   VK_OEM_8
+    Pt::Hmi::KeyCode::Unknown,           // 224   0xE0
+    Pt::Hmi::KeyCode::Unknown,           // 225   0xE1   VK_OEM_AX           
+    0,                                   // 226   0xE2   VK_OEM_102 ("<>" key)       
+    Pt::Hmi::KeyCode::Unknown,           // 227   0xE3   VK_ICO_HELP         
+    Pt::Hmi::KeyCode::Unknown,           // 228   0xE4   VK_ICO_00           
+    Pt::Hmi::KeyCode::Unknown,           // 229   0xE5   VK_PROCESSKEY       
+    Pt::Hmi::KeyCode::Unknown,           // 230   0xE6   VK_ICO_CLEAR        
+    Pt::Hmi::KeyCode::Unknown,           // 231   0xE7   VK_PACKET           
+    Pt::Hmi::KeyCode::Unknown,           // 232   0xE8
+    Pt::Hmi::KeyCode::Unknown,           // 233   0xE9   VK_OEM_RESET
+    Pt::Hmi::KeyCode::Unknown,           // 234   0xEA   VK_OEM_JUMP
+    Pt::Hmi::KeyCode::Unknown,           // 235   0xEB   VK_OEM_PA1
+    Pt::Hmi::KeyCode::Unknown,           // 236   0xEC   VK_OEM_PA2
+    Pt::Hmi::KeyCode::Unknown,           // 237   0xED   VK_OEM_PA3
+    Pt::Hmi::KeyCode::Unknown,           // 238   0xEE   VK_OEM_WSCTRL
+    Pt::Hmi::KeyCode::Unknown,           // 239   0xEF   VK_OEM_CUSEL
+    Pt::Hmi::KeyCode::Unknown,           // 240   0xF0   VK_OEM_ATTN
+    Pt::Hmi::KeyCode::Unknown,           // 241   0xF1   VK_OEM_FINISH
+    Pt::Hmi::KeyCode::Unknown,           // 242   0xF2   VK_OEM_COPY
+    Pt::Hmi::KeyCode::Unknown,           // 243   0xF3   VK_OEM_AUTO
+    Pt::Hmi::KeyCode::Unknown,           // 244   0xF4   VK_OEM_ENLW
+    Pt::Hmi::KeyCode::Unknown,           // 245   0xF5   VK_OEM_BACKTAB
+    Pt::Hmi::KeyCode::Unknown,           // 246   0xF6   VK_ATTN             
+    Pt::Hmi::KeyCode::Unknown,           // 247   0xF7   VK_CRSEL            
+    Pt::Hmi::KeyCode::Unknown,           // 248   0xF8   VK_EXSEL            
+    Pt::Hmi::KeyCode::Unknown,           // 249   0xF9   VK_EREOF            
+    Pt::Hmi::KeyCode::Play,              // 250   0xFA   VK_PLAY             
+    Pt::Hmi::KeyCode::Zoom,              // 251   0xFB   VK_ZOOM             
+    Pt::Hmi::KeyCode::Unknown,           // 252   0xFC   VK_NONAME           
+    Pt::Hmi::KeyCode::Unknown,           // 253   0xFD   VK_PA1              
+    Pt::Hmi::KeyCode::Clear,             // 254   0xFE   VK_OEM_CLEAR        
+    Pt::Hmi::KeyCode::Unknown            // 255   0xFF
+};
 
 
 /*
@@ -618,18 +554,4 @@ static const uint KeyTbl[] = { // Keyboard mapping table
     0
 };
 
-// Possible modifier states.
-// NOTE: The order of these states match the order in QKeyMapperPrivate::updatePossibleKeyCodes()!
-static const Qt::KeyboardModifiers ModsTbl[] = {
-    Qt::NoModifier,                                             // 0
-    Qt::ShiftModifier,                                          // 1
-    Qt::ControlModifier,                                        // 2
-    Qt::ControlModifier | Qt::ShiftModifier,                    // 3
-    Qt::AltModifier,                                            // 4
-    Qt::AltModifier | Qt::ShiftModifier,                        // 5
-    Qt::AltModifier | Qt::ControlModifier,                      // 6
-    Qt::AltModifier | Qt::ShiftModifier | Qt::ControlModifier,  // 7
-    Qt::NoModifier,                                             // Fall-back to raw Key_*
-};
 */
-}
