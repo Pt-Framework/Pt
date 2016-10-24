@@ -31,6 +31,7 @@
 #include "MainWindowImpl.h"
 #include "PaintSurfaceImpl.h"
 #include "PixmapSurfaceImpl.h"
+#include "KeyMap.h"
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/ResizeEvent.h>
@@ -39,6 +40,7 @@
 #include <Pt/Hmi/ActivateEvent.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/System/IOError.h>
+#include <Pt/String.h>
 #include <Pt/Types.h>
 #include <WindowsX.h>
 
@@ -581,6 +583,8 @@ void ApplicationImpl::onKey(Window& w, UINT vkey, UINT scanCode, bool isPress)
     BYTE keyboardState[256];
     GetKeyboardState(keyboardState);
 
+    //std::clog << "KEY: " << std::hex << vkey << std::endl;
+
     wchar_t wc = 0;
     ToUnicode(vkey, scanCode, (BYTE*)keyboardState, &wc, 1, 0);    
 
@@ -603,7 +607,17 @@ void ApplicationImpl::onKey(Window& w, UINT vkey, UINT scanCode, bool isPress)
     if(rwin || lwin)
         modifiers |= Key::Meta;
 
-    Key::Code keyCode = static_cast<Key::Code>(vkey);
+    Pt::uint32_t keyCode = Key::NoKey;
+    if(vkey < keyMapSize)
+    {
+        keyCode = keyMap[vkey];
+        if(keyCode == 0)
+        {
+            Pt::Char ch = static_cast<Pt::uint32_t>(wc);
+            keyCode = toupper(ch).value();
+        }
+    }
+
     Key key(modifiers, keyCode);
 
     if(isPress)

@@ -43,8 +43,7 @@ namespace Hmi {
 InputDevice::InputDevice(const char* deviceName)
 : _ioh(*this)
 , _loop(0)
-, _leftAlt(false)
-, _rightAlt(false)
+, _alt(false)
 , _keyEvent(0)
 , _mouseEvent(0)
 , _touchMove(0)
@@ -60,8 +59,7 @@ InputDevice::InputDevice(const char* deviceName)
 InputDevice::InputDevice()
 : _ioh(*this)
 , _loop(0)
-, _leftAlt(false)
-, _rightAlt(false)
+, _alt(false)
 , _keyEvent(0)
 , _mouseEvent(0)
 , _touchMove(0)
@@ -166,31 +164,22 @@ bool InputDevice::onRun()
                     break;
                 }
 
-                Key::Code keyCode;
+                Pt::uint32_t keyCode = Key::NoKey;
+                Pt::Char ch;
 
                 switch(ev.code)
                 {
                     case KEY_LEFTALT:
-                        if(ev.value == 1)
-                        {
-                            _leftAlt = true;
-                            keyCode = Key::LMenu;
-                        }
-                        else
-                            _leftAlt = false;
-
-                        break;    
-
                     case KEY_RIGHTALT:
                         if(ev.value == 1)
                         {
-                            _rightAlt = true;
-                            keyCode = Key::RMenu;
+                            _alt = true;
+                            keyCode = Key::MetaKey;
                         }
                         else
-                            _rightAlt = false;
+                            _alt = false;
 
-                        break;    
+                        break;        
 
                     case KEY_LEFTCTRL:
                     case KEY_RIGHTCTRL:
@@ -211,13 +200,16 @@ bool InputDevice::onRun()
                         unsigned typ = KTYP(ke.kb_value);
                         unsigned value = KVAL(ke.kb_value);
 
-                        if(typ == KT_LETTER|| typ == KT_LATIN)
+                        if(typ == KT_LETTER || typ == KT_LATIN)
                         {
-                            keyCode = static_cast<Key::Code>(value);
+                            keyCode = value;
+                            ch = keyCode;
                         }
                         else if(typ == KT_PAD && value < 10)
                         {
-                            keyCode = static_cast<Key::Code>(0x30 + value);
+                            // TODO: does this mean numpad?
+                            keyCode = 0x30 + value;
+                            ch = keyCode;
                         }
 
                         break;
@@ -226,13 +218,10 @@ bool InputDevice::onRun()
 
                 Key::Modifiers modifiers;
 
-                if(_leftAlt || _rightAlt)
+                if(_alt)
                     modifiers |= Key::Alt;
 
                 Key key(modifiers, keyCode);
-                    
-                // TODO: 
-                Pt::Char ch = keyCode;
 
                 if(ev.value == 1)
                     _keyEvent.setPress(key, ch);

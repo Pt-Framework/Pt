@@ -96,8 +96,7 @@ class InputDevice : public System::Selectable
         Pt::System::IOHandle _ioh;
         Pt::System::EventLoop* _loop;
         Pt::Gfx::Size _screenSize;
-        bool _leftAlt;
-        bool _rightAlt;
+        bool _alt;
         Key::Modifiers _modifiers;
         KeyEvent _keyEvent;
         MouseEvent _mouseEvent;        

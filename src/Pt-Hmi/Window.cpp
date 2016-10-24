@@ -1124,7 +1124,7 @@ void Window::onKeyEvent(const KeyEvent& ev)
         return;
     }
 
-    if( ev.isPress() && ev.key().hasModifiers(Key::Alt) )
+    if( ev.isPress() && ev.key().modifiers() == Key::Alt )
     {
         std::map<Char, Widget*>::iterator m = _mnemonics.find( ev.unicode() );
         if( m != _mnemonics.end() )
@@ -1142,7 +1142,7 @@ void Window::onKeyEvent(const KeyEvent& ev)
     }
     else
     {
-        if(ev.key().keyCode() == Key::Tab && ev.isPress() )
+        if(ev.key().code() == Key::Tab && ev.isPress() )
         {
             focusNext();
 

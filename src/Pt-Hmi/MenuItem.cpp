@@ -40,11 +40,11 @@ Pt::Gfx::Color brighten(const Pt::Gfx::Color& c, float factor)
     float g = c.green() * factor;
     float b = c.blue() * factor;
 
-    r = r > 65535 ? 65535 : r;
-    g = g > 65535 ? 65535 : g;
-    b = b > 65535 ? 65535 : b;
+    Pt::uint16_t r16 = r > 65535 ? 65535 : static_cast<Pt::uint16_t>(r);
+    Pt::uint16_t g16 = g > 65535 ? 65535 : static_cast<Pt::uint16_t>(g);
+    Pt::uint16_t b16 = b > 65535 ? 65535 : static_cast<Pt::uint16_t>(b);
 
-    return Pt::Gfx::Color(c.alpha(), r, g, b);
+    return Pt::Gfx::Color(c.alpha(), r16, g16, b16);
 }
 
 
@@ -52,46 +52,46 @@ Pt::String shortcutText(const Pt::Hmi::Key& key)
 {
     Pt::String text;
 
-    bool hasCtrl = key.hasModifiers(Pt::Hmi::Key::Control);
+    bool hasCtrl = key.modifiers().has(Pt::Hmi::Key::Control);
     if(hasCtrl)
     {
         if( ! text.empty() )
             text += Pt::Char('+');
 
-        text += Pt::Hmi::Key::toString(Pt::Hmi::Key::Control);
+        text += Pt::Hmi::Key::toString(Pt::Hmi::Key::ControlKey);
     }
         
-    bool hasAlt = key.hasModifiers(Pt::Hmi::Key::Alt);
+    bool hasAlt = key.modifiers().has(Pt::Hmi::Key::Alt);
     if(hasAlt)
     {
         if( ! text.empty() )
             text += Pt::Char('+');
             
-        text += Pt::Hmi::Key::toString(Pt::Hmi::Key::Alt);
+        text += Pt::Hmi::Key::toString(Pt::Hmi::Key::AltKey);
     }
 
-    bool hasMeta = key.hasModifiers(Pt::Hmi::Key::Meta);
+    bool hasMeta = key.modifiers().has(Pt::Hmi::Key::Meta);
     if(hasMeta)
     {
         if( ! text.empty() )
             text += Pt::Char('+');
             
-        text += Pt::Hmi::Key::toString(Pt::Hmi::Key::Meta);
+        text += Pt::Hmi::Key::toString(Pt::Hmi::Key::MetaKey);
     }
 
-    bool hasShift = key.hasModifiers(Pt::Hmi::Key::Shift);
+    bool hasShift = key.modifiers().has(Pt::Hmi::Key::Shift);
     if(hasShift)
     {
         if( ! text.empty() )
             text += Pt::Char('+');
             
-        text += Pt::Hmi::Key::toString(Pt::Hmi::Key::Shift);
+        text += Pt::Hmi::Key::toString(Pt::Hmi::Key::ShiftKey);
     }
 
     if( ! text.empty() )
         text += Pt::Char('+');
 
-    text += Pt::Hmi::Key::toString(key.keyCode());
+    text += Pt::Hmi::Key::toString( key.code() );
 
     return text;
 }

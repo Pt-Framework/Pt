@@ -11,956 +11,416 @@ namespace Pt {
 
 namespace Hmi {
 
-class KeyCode
-{
-    // TODO: is number on numpad same keycode as on main keyboard
-    //       or do we treat numlock like a modifier
-
-    public:
-        enum Value
-        {
-            Unknown    = 0x100000,
-            ArrowLeft  = 0x100001,
-            ArrowRight = 0x100002,
-            ArrowUp    = 0x100003,
-            ArrowDown  = 0x100004,
-
-
-            // NUMPAD
-                    
-            // The NUM LOCK key.
-            NumLock = 0x000,
-
-            // The 0 key on the numeric keypad.
-            NumPad0 = 0x000,
-        
-            // The 1 key on the numeric keypad.
-            NumPad1 = 0x000,
-        
-            // The 2 key on the numeric keypad.
-            NumPad2 = 0x000,
-        
-            // The 3 key on the numeric keypad.
-            NumPad3 = 0x000,
-        
-            // The 4 key on the numeric keypad.
-            NumPad4 = 0x000,
-        
-            // The 5 key on the numeric keypad.
-            NumPad5 = 0x000,
-        
-            // The 6 key on the numeric keypad.
-            NumPad6 = 0x000,
-        
-            // The 7 key on the numeric keypad.
-            NumPad7 = 0x000,
-        
-            // The 8 key on the numeric keypad.
-            NumPad8 = 0x000,
-        
-            // The 9 key on the numeric keypad.
-            NumPad9 = 0x000,
-        
-            // The multiply key.
-            Multiply = 0x000,
-        
-            // The add key.
-            Add = 0x000,
-            
-            // The divide key.
-            Divide = 0x000,
-
-            // The subtract key.
-            Subtract = 0x000,
-            
-            // The separator key.
-            Separator = 0x000,
-        
-            // The decimal key.
-            Decimal = 0x000,
-        
-
-            // NAVIGATION
-
-            Insert,
-        
-            Delete,
-
-            Home,
-
-            End,
-        
-            PageUp,
-        
-            PageDown,
-    
-            Clear,
-
-
-            // FUNCTION KEYS
-            
-            // The F1 key.
-            F1 = 0x000,
-        
-            // The F2 key.
-            F2 = 0x000,
-        
-            // The F3 key.
-            F3 = 0x000,
-        
-            // The F4 key.
-            F4 = 0x000,
-        
-            // The F5 key.
-            F5 = 0x000,
-        
-            // The F6 key.
-            F6 = 0x000,
-        
-            // The F7 key.
-            F7 = 0x000,
-        
-            // The F8 key.
-            F8 = 0x000,
-        
-            // The F9 key.
-            F9 = 0x000,
-        
-            // The F10 key.
-            F10 = 0x000,
-        
-            // The F11 key.
-            F11 = 0x000,
-        
-            // The F12 key.
-            F12 = 0x000,
-        
-            // The F13 key.
-            F13 = 0x000,
-        
-            // The F14 key.
-            F14 = 0x000,
-        
-            // The F15 key.
-            F15 = 0x000,
-        
-            // The F16 key.
-            F16 = 0x000,
-        
-            // The F17 key.
-            F17 = 0x000,
-        
-            // The F18 key.
-            F18 = 0x000,
-        
-            // The F19 key.
-            F19 = 0x000,
-        
-            // The F20 key.
-            F20 = 0x000,
-        
-            // The F21 key.
-            F21 = 0x000,
-        
-            // The F22 key.
-            F22 = 0x000,
-        
-            // The F23 key.
-            F23 = 0x000,
-        
-            // The F24 key.
-            F24 = 0x000,
-
-
-            // SPECIAL FUNCTION KEYS
-
-            Escape,
-        
-            PrintScreen,
-
-            ScrollLock,
-
-            Pause,
-
-            Back,
-        
-            Tab,
-        
-            Return,
-        
-            Shift,
-
-            Control,
-        
-            Alt,
-
-            Meta,
-
-            AppsMenu,
-        
-            Sleep,
-        
-            CapsLock,
-
-            Select,
-
-            Cancel,
-
-            Print,
-
-            Execute,
-
-            Help,
-
-
-            // SPECIAL APPLICATION KEYS
-            
-            //Play
-            //Zoom
-
-            //BrowserBack
-            //BrowserForward
-            //BrowserRefresh
-            //BrowserStop
-            //BrowserSearch
-            //BrowserFavorites
-            //BrowserHome
-            //VolumeMute
-            //VolumeDown
-            //VolumeUp
-            //MediaNext
-            //MediaPrev
-            //MediaStop
-            //MediaPlay
-            //LaunchMail 
-            //LaunchMedia
-            //LaunchApp1
-            //LaunchApp2
-
-
-            // INPUT METHODS
-
-            ModeChange,
-
-
-            // CHARACTER KEYS (match unicode character code)
-
-            // Space key.
-            Space = 32,
-
-            // The 0 key.
-            D0 = 48,
-        
-            // The 1 key.
-            D1 = 49,
-        
-            // The 2 key.
-            D2 = 50,
-        
-            // The 3 key.
-            D3 = 51,
-        
-            // The 4 key.
-            D4 = 52,
-        
-            // The 5 key.
-            D5 = 53,
-        
-            // The 6 key.
-            D6 = 54,
-        
-            // The 7 key.
-            D7 = 55,
-        
-            // The 8 key.
-            D8 = 56,
-        
-            // The 9 key.
-            D9 = 57,
-        
-            // The A key.
-            A = 65,
-        
-            // The B key.
-            B = 66,
-        
-            // The C key.
-            C = 67,
-        
-            // The D key.
-            D = 68,
-        
-            // The E key.
-            E = 69,
-        
-            // The F key.
-            F = 70,
-        
-            // The G key.
-            G = 71,
-        
-            // The H key.
-            H = 72,
-        
-            // The I key.
-            I = 73,
-        
-            // The J key.
-            J = 74,
-        
-            // The K key.
-            K = 75,
-        
-            // The L key.
-            L = 76,
-        
-            // The M key.
-            M = 77,
-        
-            // The N key.
-            N = 78,
-        
-            // The O key.
-            O = 79,
-        
-            // The P key.
-            P = 80,
-        
-            // The Q key.
-            Q = 81,
-        
-            // The R key.
-            R = 82,
-        
-            // The S key.
-            S = 83,
-        
-            // The T key.
-            T = 84,
-        
-            // The U key.
-            U = 85,
-        
-            // The V key.
-            V = 86,
-        
-            // The W key.
-            W = 87,
-        
-            // The X key.
-            X = 88,
-        
-            // The Y key.
-            Y = 89,
-        
-            // The Z key.
-            Z = 90,
-        };
-
-        KeyCode(Pt::uint32_t vk = 0)
-        : _value(vk)
-        {}
-
-        KeyCode& operator =(Pt::uint32_t vk)
-        {
-            _value = vk;
-            return *this;
-        }
-
-        operator Pt::uint32_t() const
-        { 
-            return _value; 
-        }
-
-    private:
-        Pt::uint32_t _value;
-};
-
 class Key
 {
     public:
         enum Code
         {
-            // Pressed key is unknown
-            UnknownKey = 0xFFFF,
+            NoKey      = 0x0,
 
-            // No key pressed.
-            NoKey = 0,
+            // SPECIAL KEYS ASCII
 
-            // The left mouse button.
-            LButton = 1,
-        
-            // The right mouse button.
-            RButton = 2,
-        
-            // The CANCEL key.
-            Cancel = 3,
-        
-            // The middle mouse button (three-button mouse).
-            MButton = 4,
-        
-            // The first x mouse button (five-button mouse).
-            XButton1 = 5,
-        
-            // The second x mouse button (five-button mouse).
-            XButton2 = 6,
-        
-            // The BACKSPACE key.
-            Back = 8,
-        
-            // The TAB key.
-            Tab = 9,
-        
-            // The LINEFEED key.
-            LineFeed = 10,
-        
-            // The CLEAR key.
-            Clear = 12,
-        
-            // The ENTER key.
-            Enter = 13,
-        
-            // The RETURN key.
-            Return = 13,
-        
-            // The SHIFT key.
-            ShiftKey = 16,
-        
-            // The CTRL key.
-            ControlKey = 17,
-        
-            // The ALT key.
-            Menu = 18,
-        
-            // The PAUSE key.
-            Pause = 19,
-        
-            // The CAPS LOCK key.
-            CapsLock = 20,
-        
-            // The CAPS LOCK key.
-            Capital = 20,
-        
-            // The IME Kana mode key.
-            KanaMode = 21,
-        
-            // The IME Hangul mode key.
-            HangulMode = 21,
-        
-            // The IME Junja mode key.
-            JunjaMode = 23,
-        
-            // The IME final mode key.
-            FinalMode = 24,
-        
-            // The IME Kanji mode key.
-            KanjiMode = 25,
-        
-            // The IME Hanja mode key.
-            HanjaMode = 25,
-        
-            // The ESC key.
-            Escape = 27,
-        
-            // The IME convert key.
-            IMEConvert = 28,
-        
-            // The IME nonconvert key.
-            IMENonconvert = 29,
-        
-            // The IME accept key.
-            IMEAccept = 30,
-        
-            // The IME mode change key.
-            IMEModeChange = 31,
-        
-            // The SPACEBAR key.
-            Space = 32,
-        
-            // The PAGE UP key.
-            Prior = 33,
-        
-            // The PAGE UP key.
-            PageUp = 33,
-        
-            // The PAGE DOWN key.
-            Next = 34,
-        
-            // The PAGE DOWN key.
-            PageDown = 34,
-        
-            // The END key.
-            End = 35,
-        
-            // The HOME key.
-            Home = 36,
-        
-            // The LEFT ARROW key.
-            Left = 37,
-        
-            // The UP ARROW key.
-            Up = 38,
-        
-            // The RIGHT ARROW key.
-            Right = 39,
-        
-            // The DOWN ARROW key.
-            Down = 40,
-        
-            // The SELECT key.
-            Select = 41,
-        
-            // The PRINT key.
-            Print = 42,
-        
-            // The EXECUTE key.
-            Execute = 43,
-        
-            // The PRINT SCREEN key.
-            PrintScreen = 44,
-        
-            // The PRINT SCREEN key.
-            Snapshot = 44,
-        
-            // The INS key.
-            Insert = 45,
-        
-            // The DEL key.
-            Delete = 46,
-        
-            // The HELP key.
-            Help = 47,
-        
+            Backspace  = 0x08,
+
+            Tab        = 0x09,
+
+            Return     = 0x0D,
+
+            Escape     = 0x1B,
+
+
+            // CHARACTER KEYS (match unicode)
+
+            // Space key.
+            Space  = 32,
+
             // The 0 key.
-            D0 = 48,
+            D0     = 48,
         
             // The 1 key.
-            D1 = 49,
+            D1     = 49,
         
             // The 2 key.
-            D2 = 50,
+            D2     = 50,
         
             // The 3 key.
-            D3 = 51,
+            D3     = 51,
         
             // The 4 key.
-            D4 = 52,
+            D4     = 52,
         
             // The 5 key.
-            D5 = 53,
+            D5     = 53,
         
             // The 6 key.
-            D6 = 54,
+            D6     = 54,
         
             // The 7 key.
-            D7 = 55,
+            D7     = 55,
         
             // The 8 key.
-            D8 = 56,
+            D8     = 56,
         
             // The 9 key.
-            D9 = 57,
+            D9     = 57,
         
             // The A key.
-            A = 65,
+            A      = 65,
         
             // The B key.
-            B = 66,
+            B      = 66,
         
             // The C key.
-            C = 67,
+            C      = 67,
         
             // The D key.
-            D = 68,
+            D      = 68,
         
             // The E key.
-            E = 69,
+            E      = 69,
         
             // The F key.
-            F = 70,
+            F      = 70,
         
             // The G key.
-            G = 71,
+            G      = 71,
         
             // The H key.
-            H = 72,
+            H      = 72,
         
             // The I key.
-            I = 73,
+            I      = 73,
         
             // The J key.
-            J = 74,
+            J      = 74,
         
             // The K key.
-            K = 75,
+            K      = 75,
         
             // The L key.
-            L = 76,
+            L      = 76,
         
             // The M key.
-            M = 77,
+            M      = 77,
         
             // The N key.
-            N = 78,
+            N      = 78,
         
             // The O key.
-            O = 79,
+            O      = 79,
         
             // The P key.
-            P = 80,
+            P      = 80,
         
             // The Q key.
-            Q = 81,
+            Q      = 81,
         
             // The R key.
-            R = 82,
+            R      = 82,
         
             // The S key.
-            S = 83,
+            S      = 83,
         
             // The T key.
-            T = 84,
+            T      = 84,
         
             // The U key.
-            U = 85,
+            U      = 85,
         
             // The V key.
-            V = 86,
+            V      = 86,
         
             // The W key.
-            W = 87,
+            W      = 87,
         
             // The X key.
-            X = 88,
+            X      = 88,
         
             // The Y key.
-            Y = 89,
+            Y      = 89,
         
             // The Z key.
-            Z = 90,
+            Z      = 90,
+
+
+            // MODIFIERS
+
+            Unknown    = 0x100000,
+
+            // The Shift Key.
+            ShiftKey     = 0x100001, // 1
+
+            // The Control Key.
+            ControlKey   = 0x100002, // 2
         
-            // The left Windows logo key (Microsoft Natural Keyboard).
-            LWin = 91,
-        
-            // The right Windows logo key (Microsoft Natural Keyboard).
-            RWin = 92,
-        
-            // The application key (Microsoft Natural Keyboard).
-            Apps = 93,
-        
-            // The computer sleep key.
-            Sleep = 95,
-        
+            // The Alt Key.
+            AltKey       = 0x100004, // 4
+
+            // The Meta Key.
+            MetaKey      = 0x100008, // 8
+
+            // Reserved.
+            Modifier5    = 0x100010, // 16
+            
+            // Reserved.
+            Modifier6    = 0x100020, // 32
+            
+            // Reserved.
+            Modifier7    = 0x100040, // 64
+            
+            // Reserved.
+            Modifier8    = 0x100080, // 128
+
+            // Reserved.
+            Modifier9    = 0x100100, // 256
+
+
+            // NAVIGATION KEYS 33 to 63
+
+            ArrowLeft    = 0x100021,
+                         
+            ArrowRight   = 0x100022,
+                         
+            ArrowUp      = 0x100023,
+                         
+            ArrowDown    = 0x100024,
+            
+
+            // NUMPAD 65 to 127
+                    
+            // The NUM LOCK key.
+            NumLock     = 0x100041,
+
             // The 0 key on the numeric keypad.
-            NumPad0 = 96,
+            NumPad0     = 0x100042,
         
             // The 1 key on the numeric keypad.
-            NumPad1 = 97,
+            NumPad1     = 0x100043,
         
             // The 2 key on the numeric keypad.
-            NumPad2 = 98,
+            NumPad2     = 0x100044,
         
             // The 3 key on the numeric keypad.
-            NumPad3 = 99,
+            NumPad3     = 0x100045,
         
             // The 4 key on the numeric keypad.
-            NumPad4 = 100,
+            NumPad4     = 0x100046,
         
             // The 5 key on the numeric keypad.
-            NumPad5 = 101,
+            NumPad5     = 0x100047,
         
             // The 6 key on the numeric keypad.
-            NumPad6 = 102,
+            NumPad6     = 0x100048,
         
             // The 7 key on the numeric keypad.
-            NumPad7 = 103,
+            NumPad7     = 0x100049,
         
             // The 8 key on the numeric keypad.
-            NumPad8 = 104,
+            NumPad8     = 0x10004A,
         
             // The 9 key on the numeric keypad.
-            NumPad9 = 105,
+            NumPad9     = 0x10004B,
         
             // The multiply key.
-            Multiply = 106,
+            Multiply    = 0x10004C,
         
             // The add key.
-            Add = 107,
-        
-            // The separator key.
-            Separator = 108,
-        
+            Add         = 0x10004D,
+            
+            // The divide key.
+            Divide      = 0x10004E,
+
             // The subtract key.
-            Subtract = 109,
+            Subtract    = 0x10004F,
+            
+            // The separator key.
+            Separator   = 0x100050,
         
             // The decimal key.
-            Decimal = 110,
-        
-            // The divide key.
-            Divide = 111,
-        
+            Decimal     = 0x100051,
+
+
+            // FUNCTION KEYS 129 to 191
+            
             // The F1 key.
-            F1 = 112,
+            F1  = 0x100081, // 129
         
             // The F2 key.
-            F2 = 113,
+            F2  = 0x100082,
         
             // The F3 key.
-            F3 = 114,
+            F3  = 0x100083,
         
             // The F4 key.
-            F4 = 115,
+            F4  = 0x100084,
         
             // The F5 key.
-            F5 = 116,
+            F5  = 0x100085,
         
             // The F6 key.
-            F6 = 117,
+            F6  = 0x100086,
         
             // The F7 key.
-            F7 = 118,
+            F7  = 0x100087,
         
             // The F8 key.
-            F8 = 119,
+            F8  = 0x100088,
         
             // The F9 key.
-            F9 = 120,
+            F9  = 0x100089,
         
             // The F10 key.
-            F10 = 121,
+            F10 = 0x10008A,
         
             // The F11 key.
-            F11 = 122,
+            F11 = 0x10008B,
         
             // The F12 key.
-            F12 = 123,
+            F12 = 0x10008C,
         
             // The F13 key.
-            F13 = 124,
+            F13 = 0x10008D,
         
             // The F14 key.
-            F14 = 125,
+            F14 = 0x10008E,
         
             // The F15 key.
-            F15 = 126,
+            F15 = 0x10008F,
         
             // The F16 key.
-            F16 = 127,
+            F16 = 0x100090,
         
             // The F17 key.
-            F17 = 128,
+            F17 = 0x100091,
         
             // The F18 key.
-            F18 = 129,
+            F18 = 0x100092,
         
             // The F19 key.
-            F19 = 130,
+            F19 = 0x100093,
         
             // The F20 key.
-            F20 = 131,
+            F20 = 0x100094,
         
             // The F21 key.
-            F21 = 132,
+            F21 = 0x100095,
         
             // The F22 key.
-            F22 = 133,
+            F22 = 0x100096,
         
             // The F23 key.
-            F23 = 134,
+            F23 = 0x100097,
         
             // The F24 key.
-            F24 = 135,
-        
-            // The NUM LOCK key.
-            NumLock = 144,
-        
-            // The SCROLL LOCK key.
-            Scroll = 145,
-        
-            // The left SHIFT key.
-            LShiftKey = 160,
-        
-            // The right SHIFT key.
-            RShiftKey = 161,
-        
-            // The left CTRL key.
-            LControlKey = 162,
-        
-            // The right CTRL key.
-            RControlKey = 163,
-        
-            // The left ALT key.
-            LMenu = 164,
-        
-            // The right ALT key.
-            RMenu = 165,
-        
-            // The browser back key (Windows 2000 or later).
-            BrowserBack = 166,
-        
-            // The browser forward key (Windows 2000 or later).
-            BrowserForward = 167,
-        
-            // The browser refresh key (Windows 2000 or later).
-            BrowserRefresh = 168,
-        
-            // The browser stop key (Windows 2000 or later).
-            BrowserStop = 169,
-        
-            // The browser search key (Windows 2000 or later).
-            BrowserSearch = 170,
-        
-            // The browser favorites key (Windows 2000 or later).
-            BrowserFavorites = 171,
-        
-            // The browser home key (Windows 2000 or later).
-            BrowserHome = 172,
-        
-            // The volume mute key (Windows 2000 or later).
-            VolumeMute = 173,
-        
-            // The volume down key (Windows 2000 or later).
-            VolumeDown = 174,
-        
-            // The volume up key (Windows 2000 or later).
-            VolumeUp = 175,
-        
-            // The media next track key (Windows 2000 or later).
-            MediaNextTrack = 176,
-        
-            // The media previous track key (Windows 2000 or later).
-            MediaPreviousTrack = 177,
-        
-            // The media Stop key (Windows 2000 or later).
-            MediaStop = 178,
-        
-            // The media play pause key (Windows 2000 or later).
-            MediaPlayPause = 179,
-        
-            // The launch mail key (Windows 2000 or later).
-            LaunchMail = 180,
-        
-            // The select media key (Windows 2000 or later).
-            SelectMedia = 181,
-        
-            // The start application one key (Windows 2000 or later).
-            LaunchApplication1 = 182,
-        
-            // The start application two key (Windows 2000 or later).
-            LaunchApplication2 = 183,
-        
-            // The OEM 1 key.
-            Oem1 = 186,
-        
-            // The OEM Semicolon key on a US standard keyboard (Windows 2000 or later).
-            OemSemicolon = 186,
-        
-            // The OEM plus key on any country/region keyboard (Windows 2000 or later).
-            Oemplus = 187,
-        
-            // The OEM comma key on any country/region keyboard (Windows 2000 or later).
-            Oemcomma = 188,
-        
-            // The OEM minus key on any country/region keyboard (Windows 2000 or later).
-            OemMinus = 189,
-        
-            // The OEM period key on any country/region keyboard (Windows 2000 or later).
-            OemPeriod = 190,
-        
-            // The OEM question mark key on a US standard keyboard (Windows 2000 or later).
-            OemQuestion = 191,
-        
-            // The OEM 2 key.
-            Oem2 = 191,
-        
-            // The OEM tilde key on a US standard keyboard (Windows 2000 or later).
-            Oemtilde = 192,
-        
-            // The OEM 3 key.
-            Oem3 = 192,
-        
-            // The OEM 4 key.
-            Oem4 = 219,
-        
-            // The OEM open bracket key on a US standard keyboard (Windows 2000 or later).
-            OemOpenBrackets = 219,
-        
-            // The OEM pipe key on a US standard keyboard (Windows 2000 or later).
-            OemPipe = 220,
-        
-            // The OEM 5 key.
-            Oem5 = 220,
-        
-            // The OEM 6 key.
-            Oem6 = 221,
-        
-            // The OEM close bracket key on a US standard keyboard (Windows 2000 or later).
-            OemCloseBrackets = 221,
-        
-            // The OEM 7 key.
-            Oem7 = 222,
-        
-            // The OEM singled/double quote key on a US standard keyboard (Windows 2000
-            // or later).
-            OemQuotes = 222,
-        
-            // The OEM 8 key.
-            Oem8 = 223,
-        
-            // The OEM 102 key.
-            Oem102 = 226,
-        
-            // The OEM angle bracket or backslash key on the RT 102 key keyboard (Windows
-            // 2000 or later).
-            OemBackslash = 226,
-        
-            // The PROCESS KEY key.
-            ProcessKey = 229,
-        
-            // The ATTN key.
-            Attn = 246,
-        
-            // The CRSEL key.
-            Crsel = 247,
-        
-            // The EXSEL key.
-            Exsel = 248,
-        
-            // The ERASE EOF key.
-            EraseEof = 249,
-        
-            // The PLAY key.
-            Play = 250,
-        
-            // The ZOOM key.
-            Zoom = 251,
-        
-            // A constant reserved for future use.
-            NoName = 252,
-        
-            // The PA1 key.
-            Pa1 = 253,
-        
-            // The CLEAR key.
-            OemClear = 254
+            F24 = 0x100098,
+
+
+            // SPECIAL KEYS 192 to 255
+
+            Insert             = 0x1000C0, // 192
+                               
+            Delete             = 0x1000C1,
+                               
+            Home               = 0x1000C2,
+                               
+            End                = 0x1000C3,
+                               
+            PageUp             = 0x1000C4,
+                               
+            PageDown           = 0x1000C5,
+                               
+            CapsLock           = 0x1000C6,
+                               
+            PrintScreen        = 0x1000C7,
+                               
+            SysReq             = 0x1000C8,
+                               
+            ScrollLock         = 0x1000C9,
+                               
+            Pause              = 0x1000CA,
+                               
+            Break              = 0x1000CB, // 204
+                               
+            Clear              = 0x1000E0, // 224
+                               
+            Sleep              = 0x1000E1,
+                               
+            Select             = 0x1000E2,
+                               
+            Print              = 0x1000E3,
+                               
+            Execute            = 0x1000E4,
+                               
+            Help               = 0x1000E5,
+                               
+            AppsMenu           = 0x1000E6,
+                               
+            ModeChange         = 0x1000E7, // 231
+
+
+            // SPECIAL APPLICATION KEYS 257 to 511
+            
+            Play               = 0x100101,
+                               
+            Zoom               = 0x100102,
+                               
+            BrowserBack        = 0x100103,
+                               
+            BrowserForward     = 0x100104,
+                               
+            BrowserRefresh     = 0x100105,
+                               
+            BrowserStop        = 0x100106,
+                               
+            BrowserSearch      = 0x100107,
+                               
+            BrowserFavorites   = 0x100108,
+                               
+            BrowserHome        = 0x100109,
+                               
+            VolumeMute         = 0x10010A,
+                               
+            VolumeDown         = 0x10010B,
+                               
+            VolumeUp           = 0x10010C,
+                               
+            MediaNext          = 0x10010D,
+                               
+            MediaPrev          = 0x10010E,
+                               
+            MediaStop          = 0x10010F,
+                               
+            MediaPlay          = 0x100111,
+                               
+            LaunchMail         = 0x100112,
+                               
+            LaunchMedia        = 0x100113,
+                               
+            LaunchApp1         = 0x100114,
+                               
+            LaunchApp2         = 0x100115,
+
+            KeyMax = 0x10FFFF
         };
 
         enum Modifier
         {
             // No modifier pressed.
-            NoModifier = 0,
+            NoModifier  = Unknown,
 
             // The SHIFT modifier key.
-            Shift = 1,
+            Shift       = ShiftKey,
 
             // The CTRL modifier key.
-            Control = 2,
+            Control     = ControlKey,
 
             // The ALT modifier key.
-            Alt = 4,
+            Alt         = AltKey,
 
             // The Meta modifier key.
-            Meta = 8
+            Meta        = MetaKey,
+
+            ModifierMax = KeyMax
         };
 
         class Modifiers
@@ -982,6 +442,21 @@ class Key
                     return *this;
                 }
 
+                bool empty() const
+                {
+                    return _value == NoModifier;
+                }
+                
+                bool has(Modifier m) const
+                {
+                    return (_value & m) == m;
+                }
+                
+                bool has(Modifiers m) const
+                {
+                    return (_value & m._value) == m._value;
+                }
+
                 Modifiers operator|(Modifier m) const
                 {
                     return Modifiers(_value | m);
@@ -993,150 +468,128 @@ class Key
                     return *this;
                 }
 
-                Pt::uint16_t value() const
+                bool operator==(Modifier m) const
                 {
-                    return _value;
+                    return _value == static_cast<Pt::uint32_t>(m);
+                }
+                
+                bool operator==(Modifiers m) const
+                {
+                    return _value == m._value;
+                }
+                
+                bool operator!=(Modifier m) const
+                {
+                    return _value != static_cast<Pt::uint32_t>(m);
+                }
+
+                bool operator!=(Modifiers m) const
+                {
+                    return _value != m._value;
+                }
+
+                bool operator<(Modifiers m) const
+                {
+                    return _value < m._value;
                 }
 
             private:
-                explicit Modifiers(Pt::uint16_t value)
+                explicit Modifiers(Pt::uint32_t value)
                 : _value(value)
                 { }
 
             private:
-                Pt::uint16_t _value;
+                Pt::uint32_t _value;
         };
 
     public:
         Key()
         : _code(NoKey)
-        , _modifier(NoModifier)
         {}
 
-        explicit Key(Code c)
+        explicit Key(Pt::uint32_t c)
         : _code(c)
-        , _modifier(NoModifier)
         {}
 
-        Key(Modifier m, Code c)
+        Key(Modifier m, Pt::uint32_t c)
         : _code(c)
         , _modifier(m)
         {}
 
-        Key(Modifiers m, Code c)
+        Key(Modifiers m, Pt::uint32_t c)
         : _code(c)
-        , _modifier( m.value() )
+        , _modifier( m )
         {}
 
         void clear()
         {
             _code = NoKey;
-            _modifier = NoModifier;
+            _modifier = Modifiers();
         }
 
-        void set(Code c)
+        void set(Pt::uint32_t c)
         {
             _code = c;
-            _modifier = NoModifier;
+            _modifier = Modifiers();
         }
 
-        void set(Modifier m, Code c)
+        void set(Modifier m, Pt::uint32_t c)
         {
             _code = c;
             _modifier = m;
         }
 
-        void set(Modifiers m, Code c)
+        void set(Modifiers m, Pt::uint32_t c)
         {
             _code = c;
-            _modifier = m.value();
+            _modifier = m;
         }
 
-        Code keyCode() const
+        Pt::uint32_t code() const
         { 
-            return static_cast<Code>(_code); 
+            return _code; 
         }
 
-        bool hasModifiers() const
-        {
-            return _modifier != NoModifier;
+        Modifiers modifiers() const
+        { 
+            return _modifier; 
         }
 
-        bool hasModifiers(Modifier m) const
-        {
-            return _modifier == m;
-        }
-
-        bool hasModifiers(Modifiers m) const
-        {
-            return _modifier == m.value();
-        }
-
-        bool isPressed(Modifier m) const
-        {
-            return (_modifier & m) == m;
-        }
-
-        bool isPressed(Modifiers m) const
-        {
-            return (_modifier & m.value()) == m.value();
-        }
-
-        bool operator ==(const Key& k) const
+        bool operator==(const Key& k) const
         {
             return ! (*this != k);
         }
 
-        bool operator !=(const Key& k) const
+        bool operator!=(const Key& k) const
         {
             return _code != k._code || 
                    _modifier != k._modifier;
         }
 
-        bool operator <(const Key& k) const
+        bool operator<(const Key& k) const
         {
             return _code < k._code || 
-                   (_code == k._code && _modifier < k._modifier);
-        }
-        
-        /** @brief Converts the modifier code to a string.
-
-            The returned string can be used with the translator.
-        */
-        static Pt::String toString(Modifier m)
-        {
-            switch(m)
-            {
-                case Alt:     return "Alt";
-                case Shift:   return "Shift";
-                case Control: return "Ctrl";
-                case Meta:    return "Meta";
-
-                default:
-                    assert(false);
-                    
-            }
-
-            return Pt::String();
+                  (_code == k._code && _modifier < k._modifier);
         }
 
         /** @brief Converts the key code to a string.
 
             The returned string can be used with the translator.
         */
-        static Pt::String toString(Code c)
+        static Pt::String toString(Pt::uint32_t code)
         {
-            switch(c)
-            {
-                case A: return "A";
-                case B: return "B";
-                case C: return "C";
-                case V: return "V";
-                case X: return "X";
+            if(code < 0x100000)
+                return Pt::String(1, code);
 
-                case F1: return "F1";
-                case F2: return "F2";
-                case F3: return "F3";
+            switch(code)
+            {
+                case F1:         return "F1";
+                case F2:         return "F2";
+                case F3:         return "F3";
+                case AltKey:     return "Alt";
+                case ShiftKey:   return "Shift";
+                case ControlKey: return "Ctrl";
+                case MetaKey:    return "Meta";
 
                 default:
                     assert(false);
@@ -1147,7 +600,7 @@ class Key
 
     private:
         Pt::uint32_t _code;
-        Pt::uint32_t _modifier;
+        Modifiers _modifier;
 };
 
 inline Key::Modifiers operator|(Key::Modifier m1, Key::Modifier m2)

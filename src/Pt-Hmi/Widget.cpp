@@ -394,7 +394,7 @@ void Widget::onActionKey(const KeyEvent& kev)
 
 const Key* Widget::shortcut() const
 {
-    if(_shortcutKey.keyCode() == Key::NoKey)
+    if(_shortcutKey.code() == Key::NoKey)
         return 0;
            
     return &_shortcutKey;
@@ -859,9 +859,9 @@ void Widget::onScrollEvent(const ScrollEvent& ev)
 
 void Widget::onKeyEvent(const KeyEvent& ev)
 {
-    if( (ev.key().keyCode() == Key::Tab) && ev.isPress() )
+    if( (ev.key().code() == Key::Tab) && ev.isPress() )
     {
-        if( ev.key().hasModifiers(Key::Shift) )
+        if( ev.key().modifiers() == Key::Shift )
             _window->focusPrev();
         else
             _window->focusNext();

@@ -54,12 +54,6 @@ class PT_HMI_API KeyEvent : public Pt::BasicEvent<KeyEvent>
 	      {
 	      }
 
-       //   KeyEvent()
-       //   : _vid(0)
-       //   ,  _action(Release)
-	      //{
-       //   }
-
         const Key& key() const
         {
             return _key;
