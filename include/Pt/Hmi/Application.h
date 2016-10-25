@@ -46,6 +46,7 @@
 #include <Pt/Hmi/LeaveEvent.h>
 #include <Pt/Hmi/FocusEvent.h>
 #include <Pt/Hmi/WindowStateEvent.h>
+#include <Pt/Gfx/Font.h>
 #include <Pt/System/Application.h>
 
 namespace Pt {
@@ -74,6 +75,12 @@ class PT_HMI_API Application : public Pt::System::Application
 
         Screen& screen();
 
+        const Gfx::Font& font() const;
+
+        void setFont(const Gfx::Font& font);
+
+        void setCursor(const Cursor* cursor = 0);
+
         Window* pointerWindow();
 
         const Window* pointerWindow() const;
@@ -81,8 +88,6 @@ class PT_HMI_API Application : public Pt::System::Application
         Widget* pointerWidget();
 
         const Widget* pointerWidget() const;
-
-        void setCursor(const Cursor* cursor = 0);
 
         Visual* pointerGrabber();
 
@@ -154,6 +159,7 @@ class PT_HMI_API Application : public Pt::System::Application
         Window*          _pointerWindow;
         Widget*          _pointerWidget;
         Visual*          _pointerGrabber;
+        Gfx::Font        _font;
 };
 
 } // namespace

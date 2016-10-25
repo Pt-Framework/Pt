@@ -66,10 +66,6 @@ class PT_HMI_API MenuItem : public ButtonBase
 
         void setIconPadding(double left);
 
-        const Gfx::Font& font() const;
-
-        void setFont(const Gfx::Font& font);
-
         Signal<MenuItem&>& triggered();
 
     protected:
@@ -103,7 +99,6 @@ class PT_HMI_API MenuItem : public ButtonBase
         Signal<MenuItem&> _triggered;
         double            _iconWidth;
         Gfx::Image        _icon;
-        Gfx::Font         _font;
         Pt::String        _text;
 };
 

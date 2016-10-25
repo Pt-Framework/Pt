@@ -121,9 +121,6 @@
     <Filter Include="Pt-Hmi\egl-test">
       <UniqueIdentifier>{6cd21b01-de79-4a7c-aec3-d783e7c64ca3}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Pt-Hmi\drawing">
-      <UniqueIdentifier>{42c34412-702e-4b18-b4a0-abe0294ae9f5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Pt-Gfx\tests">
       <UniqueIdentifier>{95cc65fe-94a1-48f6-95de-b0af331fe0d2}</UniqueIdentifier>
     </Filter>
@@ -1302,18 +1299,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PixmapSurfaceImpl.h">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Painter.h">
-      <Filter>Pt-Hmi\drawing</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\PaintRegion.h">
-      <Filter>Pt-Hmi\drawing</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\PaintSurface.h">
-      <Filter>Pt-Hmi\drawing</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\PixmapSurface.h">
-      <Filter>Pt-Hmi\drawing</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\PixmapSurfaceImpl.h">
       <Filter>Pt-Hmi\gdi</Filter>
     </ClInclude>
@@ -1397,6 +1382,18 @@
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Gfx\Rgb32Format.h">
       <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Painter.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\PixmapSurface.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\PaintRegion.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\PaintSurface.h">
+      <Filter>Pt-Hmi</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -2519,18 +2516,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PixmapSurfaceImpl.cpp">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Painter.cpp">
-      <Filter>Pt-Hmi\drawing</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\PaintRegion.cpp">
-      <Filter>Pt-Hmi\drawing</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\PaintSurface.cpp">
-      <Filter>Pt-Hmi\drawing</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\PixmapSurface.cpp">
-      <Filter>Pt-Hmi\drawing</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\PixmapSurfaceImpl.cpp">
       <Filter>Pt-Hmi\gdi</Filter>
     </ClCompile>
@@ -2587,6 +2572,18 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\Rgb32Format.cpp">
       <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Painter.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\PaintRegion.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\PaintSurface.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\PixmapSurface.cpp">
+      <Filter>Pt-Hmi</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

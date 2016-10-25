@@ -24,7 +24,7 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
- MA  02110-1301  USA
+ MA 02110-1301 USA
 */
 
 #ifndef Pt_Hmi_PaintSurface_h
@@ -92,7 +92,7 @@ class PT_HMI_API PaintSurface
 
         virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface) = 0;
 
-        virtual void drawSurface(const Gfx::PointF& toF,  const PixmapSurface& pm, const Gfx::RectF& pmRect) = 0;
+        virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& pm, const Gfx::RectF& pmRect) = 0;
 
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image) = 0;
 
@@ -106,6 +106,8 @@ class PT_HMI_API PaintSurface
         PaintSurface();
 };
 
-}}
+} // namespace
+
+} // namespace
 
 #endif

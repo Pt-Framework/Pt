@@ -28,6 +28,7 @@
 */
 
 #include <Pt/Hmi/Label.h>
+#include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/FontMetrics.h>
@@ -55,16 +56,11 @@ void Label::setText(const Pt::String& text)
 }
 
 
-void Label::setFont( const Gfx::Font& f )
-{
-    _font = f;
-    update();
-}
-
-
 Gfx::SizeF Label::onAutoSize() const
 {
-    Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( font(), _text);
+    const Gfx::Font& font = Application::instance().font();
+
+    Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( font, _text);
     return Gfx::SizeF( fm.width() + padding().leftRight(), 
                        fm.height() + padding().topBottom() );
 }
@@ -81,12 +77,13 @@ void Label::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
     Panel::onPaintContent(surface, updateRect);
        
     Gfx::SizeF         size = this->size();
-    Gfx::PointF        pos(0,0);
+    Gfx::PointF        pos(0, 0);
+    const Gfx::Font&   font = Application::instance().font();
 
     Painter painter(surface);
 
     painter.setClip(updateRect);
-    painter.setFont( font() );
+    painter.setFont(font);
     painter.setPen(foregroundPen());
 
     Gfx::FontMetrics metric = painter.fontMetrics(_text);

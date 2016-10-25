@@ -46,7 +46,6 @@
 #include <Pt/Hmi/Docking.h>
 #include <Pt/Hmi/Visual.h>
 #include <Pt/Connectable.h>
-#include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Color.h>

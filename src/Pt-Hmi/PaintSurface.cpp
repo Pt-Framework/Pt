@@ -27,15 +27,14 @@
   MA 02110-1301 USA
 */
 
-
+#include "PaintSurfaceImpl.h"
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Widget.h>
-#include "PaintSurfaceImpl.h"
+
 namespace Pt {
 
 namespace Hmi {
-
 
 PaintSurface::PaintSurface()
 {
@@ -46,8 +45,12 @@ PaintSurface::~PaintSurface()
 {
 }
 
+
 void PaintSurface::setDefaultFont( std::string f)
 {
-  PaintSurfaceImpl::setDefaultFont(f);
+    PaintSurfaceImpl::setDefaultFont(f);
 }
-}}
+
+} // namespace
+
+} // namespace

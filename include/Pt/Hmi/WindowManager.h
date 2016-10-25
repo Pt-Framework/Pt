@@ -92,11 +92,6 @@ class WindowManager : public Pt::Connectable
         {
             return _inactiveTextColor;
         }
-
-        const Gfx::Font& font() const
-        {
-            return _font;
-        }
                   
     public:
         void enterEvent(const EnterEvent& ev);
@@ -154,8 +149,7 @@ class WindowManager : public Pt::Connectable
         Gfx::Color                _inactiveColor;
         Gfx::Color                _activeColor;
         Gfx::Color                _textColor;
-        Gfx::Color                _inactiveTextColor;
-        Gfx::Font                 _font;                         
+        Gfx::Color                _inactiveTextColor;                        
 };
 
 } // namespace

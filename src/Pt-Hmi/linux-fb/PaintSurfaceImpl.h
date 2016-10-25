@@ -35,6 +35,7 @@
 #include <Pt/Gfx/ImagePainter.h>
 
 namespace Pt {
+
 namespace Hmi {
 
 class PaintSurfaceImpl
@@ -44,7 +45,6 @@ class PaintSurfaceImpl
 
         static std::string defaultFont();
 
-        
         static void setDefaultFont( std::string f);
 
         static std::vector<std::string> fontNames(); 
@@ -55,8 +55,8 @@ class PaintSurfaceImpl
         PaintSurfaceImpl();
 };
 
+} // namespace
 
-
-}}
+} // namespace
 
 #endif

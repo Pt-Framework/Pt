@@ -999,14 +999,12 @@ void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
                       Gfx::PointF(_frameRect.topRight().x() - (_borderWidth-2),
                                  _frameRect.topRight().y() + (_borderWidth-1) + _titleHeight) );
 
-
-
     //
     // title bar text
     //
     Pt::String title = _window->title().c_str();
 
-    const Gfx::Font& font = _wm->font();
+    const Gfx::Font& font = Application::instance().font();
     painter.setFont(font);
     Gfx::FontMetrics fm = painter.fontMetrics(title);
 

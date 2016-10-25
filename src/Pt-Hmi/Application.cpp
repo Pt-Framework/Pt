@@ -45,6 +45,7 @@ Application::Application(int argc, char** argv)
 , _pointerWindow(0)
 , _pointerWidget(0)
 , _pointerGrabber(0)
+, _font()
 {
     this->init(*_impl);
 
@@ -100,86 +101,15 @@ void Application::setCursor( const Cursor* cursor )
 }
 
 
-Visual* Application::pointerGrabber()
-{ 
-    return _pointerGrabber; 
-}
-
-
-void Application::grabPointer(Window& grabber)
-{    
-    _impl->grabPointer(grabber);
-
-    _pointerGrabber = &grabber;
-
-    setPointerWidget(0);
-}
-
-
-void Application::releasePointer(Window& grabber)
+const Gfx::Font& Application::font() const
 {
-    if(_pointerGrabber != static_cast<Visual*>(&grabber) )
-        return;
-    
-    _impl->releaseMouse(grabber); 
-    
-    _pointerGrabber = 0;
+    return _font;
 }
 
 
-void Application::grabPointer(Widget& grabber)
+void Application::setFont(const Gfx::Font& font)
 {
-    _impl->grabPointer(grabber);
-
-    _pointerGrabber = &grabber;
-
-    setPointerWidget(&grabber);
-}
-
-
-void Application::releasePointer(Widget& grabber)
-{
-    if( _pointerGrabber != static_cast<Visual*>(&grabber) )
-        return;
-
-    _impl->releaseMouse(grabber);
-
-    _pointerGrabber = 0;
-}
-
-        
-Pt::uint64_t Application::makeId()
-{
-    return _lastId++;
-}
-
-
-const Visual* Application::findVisual(Pt::uint64_t id) const
-{
-    VisualMap::const_iterator it =_visuals.find(id);
-    return it != _visuals.end() ? it->second : 0; 
-}
-
-
-void Application::nextEvent()
-{
-    _impl->nextEvent();
-}
-
-
-void Application::registerVisual( Visual& visual )
-{
-    VisualMap::const_iterator it = _visuals.find( visual.vid() );
-    assert( it == _visuals.end() );
-
-    VisualMap::value_type elem(visual.vid(), &visual);
-    _visuals.insert(elem);
-}
-
-
-void Application::unregisterVisual( Visual& visual )
-{
-   _visuals.erase( visual.vid() );
+    _font = font;
 }
 
 
@@ -251,6 +181,89 @@ void Application::setPointerWidget( Widget* widget )
         EnterEvent ev( _pointerWidget->vid() );
         Application::instance().loop().commitEvent(ev);
     }
+}
+
+
+Visual* Application::pointerGrabber()
+{ 
+    return _pointerGrabber; 
+}
+
+
+void Application::grabPointer(Window& grabber)
+{    
+    _impl->grabPointer(grabber);
+
+    _pointerGrabber = &grabber;
+
+    setPointerWidget(0);
+}
+
+
+void Application::releasePointer(Window& grabber)
+{
+    if(_pointerGrabber != static_cast<Visual*>(&grabber) )
+        return;
+    
+    _impl->releaseMouse(grabber); 
+    
+    _pointerGrabber = 0;
+}
+
+
+void Application::grabPointer(Widget& grabber)
+{
+    _impl->grabPointer(grabber);
+
+    _pointerGrabber = &grabber;
+
+    setPointerWidget(&grabber);
+}
+
+
+void Application::releasePointer(Widget& grabber)
+{
+    if( _pointerGrabber != static_cast<Visual*>(&grabber) )
+        return;
+
+    _impl->releaseMouse(grabber);
+
+    _pointerGrabber = 0;
+}
+
+        
+Pt::uint64_t Application::makeId()
+{
+    return _lastId++;
+}
+
+
+const Visual* Application::findVisual(Pt::uint64_t id) const
+{
+    VisualMap::const_iterator it =_visuals.find(id);
+    return it != _visuals.end() ? it->second : 0; 
+}
+
+
+void Application::registerVisual( Visual& visual )
+{
+    VisualMap::const_iterator it = _visuals.find( visual.vid() );
+    assert( it == _visuals.end() );
+
+    VisualMap::value_type elem(visual.vid(), &visual);
+    _visuals.insert(elem);
+}
+
+
+void Application::unregisterVisual( Visual& visual )
+{
+   _visuals.erase( visual.vid() );
+}
+
+
+void Application::nextEvent()
+{
+    _impl->nextEvent();
 }
 
 

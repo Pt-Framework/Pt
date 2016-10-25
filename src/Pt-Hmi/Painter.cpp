@@ -261,9 +261,10 @@ void Painter::drawImage(const Gfx::PointF& to,
     _surface->drawImage(to, image, imageRect);
 }
 
+
 void Painter::setDefaultFont(std::string f)
 {
-  PaintSurface::setDefaultFont(f);
+    PaintSurface::setDefaultFont(f);
 }
 
 } // namespace

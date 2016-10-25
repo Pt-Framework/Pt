@@ -59,10 +59,6 @@ class MenuBarItem : public ButtonBase
 
         void setText(const String& t);
 
-        const Gfx::Font& font() const;
-
-        void setFont(const Gfx::Font& font);
-
         void setSelected(bool s);
 
         void toggle();
@@ -90,7 +86,6 @@ class MenuBarItem : public ButtonBase
     private:
         MenuBar&   _menuBar;
         Menu&      _menu;
-        Gfx::Font  _font;
         Pt::String _text;
         bool       _highlighted;
         bool       _selected;

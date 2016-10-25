@@ -30,6 +30,7 @@
 #include <Pt/Hmi/MenuBar.h>
 #include <Pt/Hmi/Menu.h>
 #include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/Application.h>
 
 namespace {
 
@@ -90,18 +91,6 @@ void MenuBarItem::setText(const Pt::String& t)
 }
 
 
-const Gfx::Font& MenuBarItem::font() const
-{
-    return _font;
-}
-
-
-void MenuBarItem::setFont(const Gfx::Font& font)
-{   
-    _font = font;
-}
-
-
 void MenuBarItem::setSelected(bool s)
 {
     _selected = s;
@@ -152,7 +141,9 @@ void MenuBarItem::onClicked()
 
 Gfx::SizeF MenuBarItem::onAutoSize() const
 {
-    Gfx::FontMetrics fm = Painter::fontMetrics(_font, _text);
+    const Gfx::Font& font = Application::instance().font();
+
+    Gfx::FontMetrics fm = Painter::fontMetrics(font, _text);
 
     return Gfx::SizeF( fm.width() + padding().leftRight(), 
                        fm.height() + padding().topBottom() );
@@ -219,13 +210,15 @@ void MenuBarItem::onPaintBackground(PaintSurface& surface, const Gfx::RectF& upd
 
 void MenuBarItem::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
+    const Gfx::Font& font = Application::instance().font();
+
     Painter painter(surface);
     painter.setClip(updateRect);
-    painter.setFont(_font);
+    painter.setFont(font);
     
     painter.setPen(foregroundPen());
 
-    Gfx::FontMetrics fm = Painter::fontMetrics(_font, _text);
+    Gfx::FontMetrics fm = Painter::fontMetrics(font, _text);
     double textX = padding().left();
     double textY = (size().height() - fm.height()) / 2;
     textY += fm.ascent();

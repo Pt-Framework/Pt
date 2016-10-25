@@ -37,7 +37,7 @@ namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API Label  : public Panel
+class PT_HMI_API Label : public Panel
 {
     public:
         Label();
@@ -56,16 +56,9 @@ class PT_HMI_API Label  : public Panel
             return _contentAlignment;
         }
 
-        void setContentAlignment( Alignment a )
+        void setContentAlignment(Alignment a)
         {
             _contentAlignment = a;
-        }
-
-        void setFont( const Gfx::Font& f );
-
-        const Gfx::Font& font() const
-        {
-            return _font;
         }
 
     protected:
