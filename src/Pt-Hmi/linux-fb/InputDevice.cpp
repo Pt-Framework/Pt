@@ -30,7 +30,8 @@
 
 #include "InputDevice.h"
 
-#include <Pt/Hmi/Application.h>
+#include <Pt/System/EventLoop.h>
+#include <Pt/String.h>
 
 #include <linux/input.h>
 #include <linux/kd.h>
@@ -43,7 +44,10 @@ namespace Hmi {
 InputDevice::InputDevice(const char* deviceName)
 : _ioh(*this)
 , _loop(0)
+, _shift(false)
+, _control(false)
 , _alt(false)
+, _meta(false)
 , _keyEvent(0)
 , _mouseEvent(0)
 , _touchMove(0)
@@ -59,7 +63,10 @@ InputDevice::InputDevice(const char* deviceName)
 InputDevice::InputDevice()
 : _ioh(*this)
 , _loop(0)
+, _shift(false)
+, _control(false)
 , _alt(false)
+, _meta(false)
 , _keyEvent(0)
 , _mouseEvent(0)
 , _touchMove(0)
@@ -101,6 +108,34 @@ void InputDevice::close()
 }
 
 
+void InputDevice::begin()
+{      
+    if( ! _loop )
+        throw std::logic_error("input device not active");
+
+    Pt::System::Selector& selector = _loop->selector();
+    selector.beginRead(&_ioh);
+}
+
+
+void InputDevice::onAttach(System::EventLoop& loop)
+{ 
+    _loop = &loop;
+}
+
+
+void InputDevice::onDetach(System::EventLoop& loop)
+{ 
+    _loop = 0; 
+}
+
+
+void InputDevice::onCancel()
+{ 
+    throw std::logic_error("not implemented"); 
+}
+
+
 bool InputDevice::onRun()
 {
     struct input_event evts[64];
@@ -111,7 +146,6 @@ bool InputDevice::onRun()
     {
         return false;
     }
-
 
     // event sequence for touch events
     //EV_KEY 330 1
@@ -129,191 +163,233 @@ bool InputDevice::onRun()
         {
             case EV_KEY:
             {
-                //std::clog << "EV_KEY " << ev.code << " " << ev.value << std::endl;
-                if( ev.code == 272)    
-                {
-                    if( ev.value == 0  )
-                        _mouseEvent.setRelease(MouseEvent::Left);
-                    else
-                        _mouseEvent.setPress(MouseEvent::Left);
-
-                    _eventReady.send(_mouseEvent); 
-                    break;
-                }
-
-                if( ev.code == 273 )    
-                {
-                    if( ev.value == 0  )
-                        _mouseEvent.setRelease(MouseEvent::Right);
-                    else
-                        _mouseEvent.setPress(MouseEvent::Right);
-
-                    _eventReady.send(_mouseEvent); 
-                    break;
-                }
-
-                if(ev.code == 330)    
-                {
-                    if( ev.value == 0  )
-                    {
-                        _touchMove = 0;
-                        _touchEvent.setRelease();
-                        _eventReady.send(_touchEvent);
-                    }
-                                                                   
-                    break;
-                }
-
-                Pt::uint32_t keyCode = Key::NoKey;
-                Pt::Char ch;
-
-                switch(ev.code)
-                {
-                    case KEY_LEFTALT:
-                    case KEY_RIGHTALT:
-                        if(ev.value == 1)
-                        {
-                            _alt = true;
-                            keyCode = Key::MetaKey;
-                        }
-                        else
-                            _alt = false;
-
-                        break;        
-
-                    case KEY_LEFTCTRL:
-                    case KEY_RIGHTCTRL:
-                        break;
-
-                    case KEY_LEFTSHIFT:
-                    case KEY_RIGHTSHIFT: 
-                        break;  
-
-                    default:
-                    {
-                        struct kbentry ke;
-                        ke.kb_table = 0;
-                        ke.kb_index = ev.code;
-
-                        ::ioctl(STDIN_FILENO, KDGKBENT, (unsigned long)&ke);
-
-                        unsigned typ = KTYP(ke.kb_value);
-                        unsigned value = KVAL(ke.kb_value);
-
-                        if(typ == KT_LETTER || typ == KT_LATIN)
-                        {
-                            keyCode = value;
-                            ch = keyCode;
-                        }
-                        else if(typ == KT_PAD && value < 10)
-                        {
-                            // TODO: does this mean numpad?
-                            keyCode = 0x30 + value;
-                            ch = keyCode;
-                        }
-
-                        break;
-                    }
-                }
-
-                Key::Modifiers modifiers;
-
-                if(_alt)
-                    modifiers |= Key::Alt;
-
-                Key key(modifiers, keyCode);
-
-                if(ev.value == 1)
-                    _keyEvent.setPress(key, ch);
-                else
-                    _keyEvent.setRelease(key, ch);
-
-                _eventReady.send(_keyEvent);
+                onKey(ev);
                 break;
             }
 
             case EV_REL:
             {
-                //std::clog << "EV_REL" << ev.value << std::endl;
-                _mouseEvent.setMove();
-
-                if(ev.code == REL_X)
-                    _mouseEvent.setX( _mouseEvent.x() + static_cast<double>(ev.value) );
-                else if(ev.code == REL_Y)
-                    _mouseEvent.setY( _mouseEvent.y() + static_cast<double>(ev.value) );
-
-                if( _mouseEvent.x() < 0 )
-                    _mouseEvent.setX( 0);
-
-                if( _mouseEvent.x() >= _screenSize.width() )
-                    _mouseEvent.setX( _screenSize.width() - 1 );
-
-                if( _mouseEvent.y() < 0 )
-                    _mouseEvent.setY( 0);
-
-                if( _mouseEvent.y() >= _screenSize.height() )
-                    _mouseEvent.setY( _screenSize.height() - 1 );
-
-                _eventReady.send(_mouseEvent);    
+                onRelative(ev);
                 break;
             }
 
             case EV_ABS:
             {
-                switch(ev.code)
-                {
-                    case ABS_MT_SLOT:
-                    case ABS_MT_TRACKING_ID:
-
-                    case ABS_X:
-                    case ABS_MT_POSITION_X:                        
-                        _touchEvent.setX(  (static_cast<double>(ev.value)));
-                        _touchMove++;
-                        break;
-
-                    case ABS_Y:
-                    case ABS_MT_POSITION_Y:                        
-                         _touchEvent.setY( static_cast<double>(ev.value));
-                        _touchMove++;
-                        break;
-
-                    case ABS_PRESSURE:
-                    case ABS_MT_PRESSURE:
-                        break;
-
-                    default:
-                        break;
-                }
-                
-                if(_touchMove > 1)
-                {
-                    if(_touchMove == 2)
-                        _touchEvent.setPress();
-                    else
-                        _touchEvent.setMove();
-
-                    _eventReady.send(_touchEvent);  
-                }
-
+                onAbsolute(ev);
                 break;
             }
         }
     }
 
-
     return true;
 }
 
 
-void InputDevice::onAttach(System::EventLoop& loop)
-{ 
-    _loop = &loop;
+void InputDevice::onRelative(const input_event& ev)
+{
+    //std::clog << "EV_REL" << ev.value << std::endl;
+    _mouseEvent.setMove();
+
+    if(ev.code == REL_X)
+        _mouseEvent.setX( _mouseEvent.x() + static_cast<double>(ev.value) );
+    else if(ev.code == REL_Y)
+        _mouseEvent.setY( _mouseEvent.y() + static_cast<double>(ev.value) );
+
+    if( _mouseEvent.x() < 0 )
+        _mouseEvent.setX( 0);
+
+    if( _mouseEvent.x() >= _screenSize.width() )
+        _mouseEvent.setX( _screenSize.width() - 1 );
+
+    if( _mouseEvent.y() < 0 )
+        _mouseEvent.setY( 0);
+
+    if( _mouseEvent.y() >= _screenSize.height() )
+        _mouseEvent.setY( _screenSize.height() - 1 );
+
+    _eventReady.send(_mouseEvent);
 }
 
 
-void InputDevice::onDetach(System::EventLoop& loop)
-{ 
-    _loop = 0; 
+void InputDevice::onAbsolute(const input_event& ev)
+{
+    switch(ev.code)
+    {
+        case ABS_MT_SLOT:
+        case ABS_MT_TRACKING_ID:
+
+        case ABS_X:
+        case ABS_MT_POSITION_X:                        
+            _touchEvent.setX(  (static_cast<double>(ev.value)));
+            _touchMove++;
+            break;
+
+        case ABS_Y:
+        case ABS_MT_POSITION_Y:                        
+              _touchEvent.setY( static_cast<double>(ev.value));
+            _touchMove++;
+            break;
+
+        case ABS_PRESSURE:
+        case ABS_MT_PRESSURE:
+            break;
+
+        default:
+            break;
+    }
+                
+    if(_touchMove > 1)
+    {
+        if(_touchMove == 2)
+            _touchEvent.setPress();
+        else
+            _touchEvent.setMove();
+
+        _eventReady.send(_touchEvent);  
+    }
+}
+
+
+void InputDevice::onKey(const input_event& ev)
+{
+    //std::clog << "EV_KEY " << ev.code << " " << ev.value << std::endl;
+    
+    if( ev.code == 272)    
+    {
+        if(ev.value == 0)
+            _mouseEvent.setRelease(MouseEvent::Left);
+        else
+            _mouseEvent.setPress(MouseEvent::Left);
+
+        _eventReady.send(_mouseEvent); 
+        return;
+    }
+
+    if( ev.code == 273 )    
+    {
+        if(ev.value == 0)
+            _mouseEvent.setRelease(MouseEvent::Right);
+        else
+            _mouseEvent.setPress(MouseEvent::Right);
+
+        _eventReady.send(_mouseEvent); 
+        return;
+    }
+
+    if(ev.code == 330)    
+    {
+        if( ev.value == 0  )
+        {
+            _touchMove = 0;
+            _touchEvent.setRelease();
+            _eventReady.send(_touchEvent);
+        }
+                                                                   
+        return;
+    }
+
+    Pt::uint32_t keyCode = Key::NoKey;
+    Pt::Char ch;
+
+    switch(ev.code)
+    {
+        case KEY_LEFTSHIFT:
+        case KEY_RIGHTSHIFT:
+            if(ev.value == 1)
+            {
+                _shift = true;
+                keyCode = Key::ShiftKey;
+            }
+            else
+                _shift = false;
+
+            break; 
+        
+        case KEY_LEFTCTRL:
+        case KEY_RIGHTCTRL:
+            if(ev.value == 1)
+            {
+                _control = true;
+                keyCode = Key::ControlKey;
+            }
+            else
+                _control = false;
+
+            break; 
+
+        case KEY_LEFTALT:
+        case KEY_RIGHTALT:
+            if(ev.value == 1)
+            {
+                _alt = true;
+                keyCode = Key::AltKey;
+            }
+            else
+                _alt = false;
+
+            break; 
+        
+        case KEY_LEFTMETA:
+        case KEY_RIGHTMETA:
+            if(ev.value == 1)
+            {
+                _meta = true;
+                keyCode = Key::MetaKey;
+            }
+            else
+                _meta = false;
+
+            break; 
+        
+        default:
+        {
+            struct kbentry ke;
+            ke.kb_table = 0;
+            ke.kb_index = ev.code;
+
+            ::ioctl(STDIN_FILENO, KDGKBENT, (unsigned long)&ke);
+
+            unsigned typ = KTYP(ke.kb_value);
+            unsigned value = KVAL(ke.kb_value);
+
+            if(typ == KT_LETTER || typ == KT_LATIN)
+            {
+                ch = value;
+                keyCode = Pt::toupper(ch).value();
+            }
+            else if(typ == KT_PAD && value < 10)
+            {
+                // TODO: does this mean numpad?
+                keyCode = 0x30 + value;
+                ch = keyCode;
+            }
+
+            break;
+        }
+    }
+
+    Key::Modifiers modifiers;
+
+    if(_shift)
+        modifiers.add(Key::Shift);
+
+    if(_control)
+        modifiers.add(Key::Control);
+
+    if(_alt)
+        modifiers.add(Key::Alt);
+
+    if(_meta)
+        modifiers.add(Key::Meta);
+
+    Key key(modifiers, keyCode);
+
+    if(ev.value == 1)
+        _keyEvent.setPress(key, ch);
+    else
+        _keyEvent.setRelease(key, ch);
+
+    _eventReady.send(_keyEvent);
 }
 
 } // namespace

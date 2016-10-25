@@ -596,16 +596,16 @@ void ApplicationImpl::onKey(Window& w, UINT vkey, UINT scanCode, bool isPress)
 
     Key::Modifiers modifiers;
     if(shift)
-        modifiers |= Key::Shift;
+        modifiers.add(Key::Shift);
 
     if(control)
-        modifiers |= Key::Control;
+        modifiers.add(Key::Control);
 
     if(alt)
-        modifiers |= Key::Alt;
+        modifiers.add(Key::Alt);
 
     if(rwin || lwin)
-        modifiers |= Key::Meta;
+        modifiers.add(Key::Meta);
 
     Pt::uint32_t keyCode = Key::NoKey;
     if(vkey < keyMapSize)

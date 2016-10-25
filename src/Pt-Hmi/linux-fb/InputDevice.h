@@ -32,14 +32,18 @@
 #define Pt_Hmi_InputDevice_h
 
 #include "posix/Selector.h"
+
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Hmi/MouseEvent.h>
 #include <Pt/Hmi/TouchEvent.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/System/Selectable.h>
-#include <Pt/System/MainLoop.h>
+#include <Pt/Signal.h>
+
 #include <unistd.h>
+
+struct input_event;
 
 namespace Pt {
 
@@ -54,49 +58,46 @@ class InputDevice : public System::Selectable
 
         ~InputDevice();
 
+        void open(const char* deviceName);
+
+        void close();
+
+        void begin();
+
         void setScreenLimit(const Pt::Gfx::Size& size)
         {
             _screenSize = size;
         }
 
-        void begin()
-        {      
-            if( ! _loop )
-                throw std::logic_error("input device not active");
-
-            Pt::System::Selector& selector = _loop->selector();
-            selector.beginRead(&_ioh);
-        }
-
-        void open(const char* deviceName);
-
-        void close();
-
-        void flush()
-        { this->onRun(); }
-
         Pt::Signal<const Pt::Event&>& eventReady()
         {
-                return _eventReady;
+            return _eventReady;
         }
 
     protected:
-        virtual bool onRun();
-
-        virtual void onCancel()
-        { 
-            throw std::logic_error("not implemented"); 
-        }
-
         void onAttach(System::EventLoop& loop);
 
-        void onDetach(System::EventLoop& loop);    
+        void onDetach(System::EventLoop& loop);  
+
+        virtual bool onRun();
+
+        virtual void onCancel();
+
+    protected:
+        void onKey(const input_event& ev);
+
+        void onRelative(const input_event& ev);
+
+        void onAbsolute(const input_event& ev);
 
     private:
         Pt::System::IOHandle _ioh;
         Pt::System::EventLoop* _loop;
         Pt::Gfx::Size _screenSize;
+        bool _shift;
+        bool _control;
         bool _alt;
+        bool _meta;
         Key::Modifiers _modifiers;
         KeyEvent _keyEvent;
         MouseEvent _mouseEvent;        

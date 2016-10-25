@@ -442,9 +442,19 @@ class Key
                     return *this;
                 }
 
+                void clear()
+                {
+                    _value = NoModifier;
+                }
+
                 bool empty() const
                 {
                     return _value == NoModifier;
+                }
+
+                void add(Modifier m)
+                {
+                    _value |= m;
                 }
                 
                 bool has(Modifier m) const
@@ -460,12 +470,6 @@ class Key
                 Modifiers operator|(Modifier m) const
                 {
                     return Modifiers(_value | m);
-                }
-
-                Modifiers& operator|=(Modifier m)
-                {
-                    _value |= m;
-                    return *this;
                 }
 
                 bool operator==(Modifier m) const
