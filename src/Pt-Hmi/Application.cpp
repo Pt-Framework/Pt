@@ -108,7 +108,7 @@ Visual* Application::pointerGrabber()
 
 void Application::grabPointer(Window& grabber)
 {    
-    _impl->grabMouse(grabber);
+    _impl->grabPointer(grabber);
 
     _pointerGrabber = &grabber;
 
@@ -129,7 +129,7 @@ void Application::releasePointer(Window& grabber)
 
 void Application::grabPointer(Widget& grabber)
 {
-    _impl->grabMouse(grabber);
+    _impl->grabPointer(grabber);
 
     _pointerGrabber = &grabber;
 

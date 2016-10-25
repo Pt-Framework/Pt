@@ -269,7 +269,7 @@ void MainWindowImpl::setState(Window::State s)
 }
 
 
-void MainWindowImpl::grabMouse()
+void MainWindowImpl::grabPointer()
 {
     SetCapture(_hwnd);
 }

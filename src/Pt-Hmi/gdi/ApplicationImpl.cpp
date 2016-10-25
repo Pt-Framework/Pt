@@ -204,9 +204,9 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 }
 
 
-void ApplicationImpl::grabMouse(Window& grabber)
+void ApplicationImpl::grabPointer(Window& grabber)
 {
-    grabber.mainWindow().impl()->grabMouse();
+    grabber.mainWindow().impl()->grabPointer();
 }
 
 
@@ -216,13 +216,13 @@ void ApplicationImpl::releaseMouse(Window& grabber)
 }
 
 
-void ApplicationImpl::grabMouse(Widget& grabber)
+void ApplicationImpl::grabPointer(Widget& grabber)
 {
     Window* w = grabber.window();
     if( ! w )
         return;
 
-    w->mainWindow().impl()->grabMouse();
+    w->mainWindow().impl()->grabPointer();
 }
 
 

@@ -358,7 +358,7 @@ void MenuImpl::onShowEvent(const ShowEvent& ev)
             _self.parentShell()->onOpenMenu(_self);
 
         if( ! _self.parentShell() )
-            grabMouse();
+            grabPointer();
     }
 }
 
@@ -367,7 +367,7 @@ void MenuImpl::onEnterEvent( const EnterEvent& ev )
 {
     BaseType::onEnterEvent(ev);
     
-    grabMouse();
+    grabPointer();
 }
 
 

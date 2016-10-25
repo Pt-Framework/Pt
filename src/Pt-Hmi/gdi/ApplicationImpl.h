@@ -73,11 +73,11 @@ class ApplicationImpl : public Pt::System::EventLoop
 
         void setCursor(const Cursor* cursor);
 
-        void grabMouse(Window& grabber);
+        void grabPointer(Window& grabber);
 
         void releaseMouse(Window& grabber);
 
-        void grabMouse(Widget& grabber);
+        void grabPointer(Widget& grabber);
 
         void releaseMouse(Widget& grabber);
 

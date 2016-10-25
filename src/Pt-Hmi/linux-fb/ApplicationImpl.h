@@ -54,11 +54,11 @@ class ApplicationImpl : public Pt::System::MainLoop
     const Cursor& cursor()
     { return _cursor; }
 
-    void grabMouse(Window& grabber);
+    void grabPointer(Window& grabber);
 
     void releaseMouse(Window& grabber);
 
-    void grabMouse(Widget& grabber);
+    void grabPointer(Widget& grabber);
 
     void releaseMouse(Widget& grabber);
     

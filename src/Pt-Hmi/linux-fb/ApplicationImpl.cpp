@@ -103,7 +103,7 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 }
 
 
-void ApplicationImpl::grabMouse(Window& grabber)
+void ApplicationImpl::grabPointer(Window& grabber)
 {
 }
 
@@ -113,7 +113,7 @@ void ApplicationImpl::releaseMouse(Window& grabber)
 }
 
 
-void ApplicationImpl::grabMouse(Widget& grabber)
+void ApplicationImpl::grabPointer(Widget& grabber)
 {
 }
 
