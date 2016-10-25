@@ -145,34 +145,35 @@ class Key
 
             // MODIFIERS
 
-            Unknown    = 0x100000,
+            Unknown        = 0x100000,
+            ModifiersBegin = 0x100000,
 
             // The Shift Key.
-            ShiftKey     = 0x100001, // 1
+            ShiftKey       = 0x100001, // 1
 
             // The Control Key.
-            ControlKey   = 0x100002, // 2
+            ControlKey     = 0x100002, // 2
         
             // The Alt Key.
-            AltKey       = 0x100004, // 4
+            AltKey         = 0x100004, // 4
 
             // The Meta Key.
-            MetaKey      = 0x100008, // 8
+            MetaKey        = 0x100008, // 8
 
             // Reserved.
-            Modifier5    = 0x100010, // 16
+            Modifier5      = 0x100010, // 16
             
             // Reserved.
-            Modifier6    = 0x100020, // 32
+            Modifier6      = 0x100020, // 32
             
             // Reserved.
-            Modifier7    = 0x100040, // 64
+            Modifier7      = 0x100040, // 64
             
             // Reserved.
-            Modifier8    = 0x100080, // 128
+            Modifier8      = 0x100080, // 128
 
             // Reserved.
-            Modifier9    = 0x100100, // 256
+            Modifier9      = 0x100100, // 256
 
 
             // NAVIGATION KEYS 33 to 63
@@ -406,7 +407,7 @@ class Key
         enum Modifier
         {
             // No modifier pressed.
-            NoModifier  = Unknown,
+            NoModifier  = ModifiersBegin,
 
             // The SHIFT modifier key.
             Shift       = ShiftKey,
@@ -582,7 +583,7 @@ class Key
         */
         static Pt::String toString(Pt::uint32_t code)
         {
-            if(code < 0x100000)
+            if(code < ModifiersBegin)
                 return Pt::String(1, code);
 
             switch(code)
