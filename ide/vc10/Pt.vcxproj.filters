@@ -1395,6 +1395,12 @@
     <ClInclude Include="..\..\include\Pt\Hmi\PaintSurface.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\gdi\PainterImpl.h">
+      <Filter>Pt-Hmi\gdi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PainterImpl.h">
+      <Filter>Pt-Hmi\linux-fb</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">

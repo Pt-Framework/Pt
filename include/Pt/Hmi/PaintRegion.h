@@ -41,11 +41,11 @@
 #include <Pt/Hmi/PaintSurface.h>
 
 namespace Pt {
+
 namespace Hmi {
 
 class PixmapSurface;
 class Picture;
-
 
 /** @brief Drawing region on another surface.
 */
@@ -54,23 +54,14 @@ class PT_HMI_API PaintRegion : public PaintSurface
     public:
         PaintRegion(PaintSurface& surface, const Gfx::RectF& rect);
 
-        PaintRegion();
-
         virtual ~PaintRegion();
 
-        void set(PaintSurface& surface, const Gfx::RectF& rect);
-
+    protected:
         virtual const Gfx::ImageFormat& format() const;
 
-        virtual const Gfx::SizeF& size() const;
-        
         virtual void setClip( const Gfx::RectF& clip);
 
-        virtual const Gfx::RectF& clip() const;
-
         virtual void setCompositionMode(const Gfx::CompositionMode& mode);
-
-        virtual const Gfx::CompositionMode& compositionMode() const ; 
 
         virtual void setPen(const Gfx::Pen& pen);
 
@@ -108,11 +99,20 @@ class PT_HMI_API PaintRegion : public PaintSurface
 
         virtual void drawPicture(const Gfx::PointF& to, const Picture& pic);
 
+    protected:
+        virtual const Gfx::SizeF& onSize() const;
+
+        virtual void onBegin(Painter& painter);
+
+        virtual void onFinish();
+
     private:
         PaintSurface* _surface;
         Gfx::RectF _area;
 };
 
-}}
+} // namespace
+
+} // namespace
 
 #endif

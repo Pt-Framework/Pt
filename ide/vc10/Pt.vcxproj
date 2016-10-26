@@ -343,6 +343,7 @@
     <ClInclude Include="..\..\src\Pt-Hmi\egl-test\Vector.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\ApplicationImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\MainWindowImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\gdi\PainterImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\PaintSurfaceImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\PictureImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\gdi\PixmapSurfaceImpl.h" />
@@ -351,6 +352,7 @@
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\FrameBuffer.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\InputDevice.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\MainWindowImpl.h" />
+    <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PainterImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PaintSurfaceImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PictureImpl.h" />
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PixmapSurfaceImpl.h" />

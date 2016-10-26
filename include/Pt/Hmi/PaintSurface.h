@@ -37,13 +37,13 @@
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/FontMetrics.h>
-#include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Image.h>
 
 namespace Pt {
 
 namespace Hmi {
 
+class Painter;
 class PixmapSurface;
 class Picture;
 
@@ -51,20 +51,36 @@ class Picture;
 */
 class PT_HMI_API PaintSurface
 {
+    friend class Painter;
+    friend class PaintRegion;
+
     public:
         virtual ~PaintSurface();
         
-        virtual const Gfx::ImageFormat& format()  const = 0; 
+        const Gfx::SizeF& size() const;
 
-        virtual void setClip( const Gfx::RectF& clip) = 0; 
+        static void setDefaultFont(const std::string& f);
+    
+    protected:
+        PaintSurface();
 
-        virtual const Gfx::RectF& clip() const = 0;
+        void begin(Painter& painter);
+
+        void finish(Painter& painter);
+
+    protected:
+        virtual const Gfx::SizeF& onSize() const = 0;
+
+        virtual void onBegin(Painter& painter) = 0;
+
+        virtual void onFinish() = 0;
+    
+    protected:
+        virtual const Gfx::ImageFormat& format() const = 0;
+
+        virtual void setClip(const Gfx::RectF& clip) = 0; 
 
         virtual void setCompositionMode(const Gfx::CompositionMode& mode) = 0;
-
-        virtual const Gfx::CompositionMode& compositionMode() const = 0; 
-
-        virtual const Gfx::SizeF& size() const = 0;
 
         virtual void setPen(const Gfx::Pen& pen) = 0;
 
@@ -100,10 +116,8 @@ class PT_HMI_API PaintSurface
 
         virtual void drawPicture(const Gfx::PointF& to, const Picture& pic) = 0;
 
-        static void setDefaultFont( std::string f);
-
-    protected:
-        PaintSurface();
+    private:
+        Painter* _painter;
 };
 
 } // namespace

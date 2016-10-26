@@ -27,48 +27,63 @@
   MA 02110-1301 USA
 */
 
-#include <Pt/Hmi/PaintRegion.h>
 #include "PaintSurfaceImpl.h"
-#include <Pt/Hmi/PaintSurface.h>
+
+#include <Pt/Hmi/PaintRegion.h>
 #include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/Widget.h>
+#include <Pt/Hmi/Painter.h>
 
 namespace Pt {
+
 namespace Hmi {
-
-PaintRegion::PaintRegion()
-: _surface(0)
-{
-}
-
 
 PaintRegion::PaintRegion(PaintSurface& surface, const Gfx::RectF& rect)
 : _surface(0)
-{        
-    set(surface, rect);   
+{           
+    _surface = &surface;
+    _area = rect; 
 }
 
 
 PaintRegion::~PaintRegion()
 {
+    _surface->onFinish();
 }
+
+
+const Gfx::SizeF& PaintRegion::onSize() const
+{
+    return _area.size();
+}
+
+
+void PaintRegion::onBegin(Painter& painter)
+{
+    _surface->onBegin(painter);
+}
+
+
+void PaintRegion::onFinish()
+{
+    _surface->onFinish();
+}
+
 
 const Gfx::ImageFormat& PaintRegion::format() const
 {
-  return _surface->format();
+    return _surface->format();
 }
 
 
-void PaintRegion::set(PaintSurface& surface, const Gfx::RectF& area)
+void PaintRegion::setClip(const Gfx::RectF& clip)
 {
-    _surface = &surface;
-    _area = area;
+    _surface->setClip( Gfx::RectF( clip.topLeft() +  _area.topLeft(), clip.size()));
 }
 
 
-const Gfx::SizeF& PaintRegion::size() const
+void PaintRegion::setCompositionMode(const Gfx::CompositionMode& mode)
 {
-    return _area.size();
+    _surface->setCompositionMode(mode);
 }
 
 
@@ -202,29 +217,6 @@ void PaintRegion::drawPicture(const Gfx::PointF& to, const Picture& pic)
     _surface->drawPicture(to + _area.topLeft(), pic);
 }
 
-
-void PaintRegion::setClip( const Gfx::RectF& clip)
-{
-    _surface->setClip( Gfx::RectF( clip.topLeft() +  _area.topLeft(), clip.size()));
-}
-
-const Gfx::RectF& PaintRegion::clip() const
-{
-    return _surface->clip();
-}
-
-
-void PaintRegion::setCompositionMode(const Gfx::CompositionMode& mode)
-{
-    _surface->setCompositionMode(mode);
-}
-
-
-const Gfx::CompositionMode& PaintRegion::compositionMode() const
-{
-    return _surface->compositionMode();
-}
-
 } // namespace
 
-} 
+} // namespace

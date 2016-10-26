@@ -49,25 +49,19 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         
         void clear(const Gfx::Color& c);  
     
-        void resize(const Gfx::SizeF& size);            
+        void resize(const Gfx::SizeF& size);
+        
+        const Gfx::SizeF& size() const;
+
+        void begin(Painter& painter);  
+        
+        void finish();           
         
         const Gfx::ImageFormat& format() const;
 
-        const Gfx::SizeF& size() const;
-
         void setClip( const Gfx::RectF& clip);
-        
-        const Gfx::RectF& clip();
          
-        void setCompositionMode(const Gfx::CompositionMode& mode)
-        {
-            _compositionMode = mode; 
-        }
-
-        const Gfx::CompositionMode& compositionMode() const
-        {
-            return _compositionMode;
-        }
+        void setCompositionMode(const Gfx::CompositionMode& mode);
 
         void setPen(const Gfx::Pen& pen);
 
@@ -112,21 +106,23 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
 
     private:
         Gfx::SizeF     _size;
-        HDC            _deviceContext;
-        HBITMAP        _bitmapHandle;
+        Painter*       _painter;
+        HDC            _dc;
+        HBITMAP        _bitmap;
         HPEN           _oldPen;
         HBRUSH         _oldBrush;
         HFONT          _oldFont;
+        HBITMAP        _oldBitmap;
         std::wstring   _text;
         
         bool                  _gradientBrush;
         Gfx::Brush::FillStyle _gradientStyle;
         Gfx::Color            _gradientStart;
         Gfx::Color            _gradientStop;
-        Gfx::CompositionMode  _compositionMode;
-        Gfx::RectF            _clip;
 };
 
-}}
+} // namespace
+
+} // namespace
 
 #endif

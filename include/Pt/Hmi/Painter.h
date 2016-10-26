@@ -35,18 +35,23 @@ namespace Pt {
 
 namespace Hmi {
 
+class PainterImpl;
 class PaintSurface;
 class PixmapSurface;
 class Picture;
 
 class PT_HMI_API Painter : public Gfx::Painter
 {
+    friend class PaintSurface;
+
     public:
         Painter(PaintSurface& surface);
 
         virtual ~Painter();
 
         void begin(PaintSurface& surface);
+
+        void finish();
 
         virtual const Gfx::ImageFormat& format() const;
 
@@ -101,6 +106,9 @@ class PT_HMI_API Painter : public Gfx::Painter
 
         void drawSurface(const Gfx::PointF& to, const PixmapSurface& pm, const Gfx::RectF& pmRect);
     
+        PainterImpl* impl()
+        { return _impl;}
+
     public:
         static std::vector<std::string> fontNames();
 
@@ -108,6 +116,10 @@ class PT_HMI_API Painter : public Gfx::Painter
         static void setDefaultFont(std::string f);
 
     private:
+        void onDetach();
+
+    private:
+        PainterImpl*         _impl;
         PaintSurface*        _surface;
         Gfx::Pen             _pen;
         Gfx::Brush           _brush;

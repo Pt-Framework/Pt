@@ -1,5 +1,4 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
-   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2016 Marc Boris Duerner 
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -27,59 +26,73 @@
   MA 02110-1301 USA
 */
 
-#include "PaintSurfaceImpl.h"
-#include "PainterImpl.h"
+#ifndef Pt_Hmi_PainterImpl_h
+#define Pt_Hmi_PainterImpl_h
 
-#include <Pt/Hmi/PaintSurface.h>
-#include <Pt/Hmi/Painter.h>
+#include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/Application.h>
+#include <Pt/Gfx/Pen.h>
+#include <Pt/Gfx/Brush.h>
+#include <Pt/Gfx/Font.h>
+#include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Gfx/CompositionMode.h>
+#include <Pt/Gfx/ImagePainter.h>
+#include <Pt/Gfx/Rect.h>
+#include <Pt/String.h>
+
 
 namespace Pt {
 
 namespace Hmi {
 
-PaintSurface::PaintSurface()
-: _painter(0)
+class PainterImpl
 {
-}
+    public:
+        PainterImpl()
+        { }
 
+        ~PainterImpl()
+        {
+        }
 
-PaintSurface::~PaintSurface()
-{
-    if(_painter)
-        _painter->onDetach();
-}
+        void setPen(const Gfx::Pen& pen)
+        {
+        }
 
+        void setBrush(const Gfx::Brush& brush)
+        {
+        }
 
-const Gfx::SizeF& PaintSurface::size() const
-{
-    return onSize();
-}
+        void setClip(const Gfx::RectF& rectF)
+        {
+        }
 
+        void setCompositionMode(const Gfx::CompositionMode& mode)
+        {
+        }
 
-void PaintSurface::begin(Painter& painter)
-{
-    if(_painter)
-        _painter->finish();
+        void setFont(const Gfx::Font& font)
+        {
+        }
+        
+        static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text)
+        {   
+            return Gfx::ImagePainter::fontMetrics(font, text); 
+        }
+        
+        static std::string defaultFont()
+        {
+            return Gfx::ImagePainter::defaultFont();
+        }
 
-    _painter = 0;
+        static void setDefaultFont(const std::string& f)
+        {
+            Gfx::ImagePainter::setDefaultFont(f);
+        }
+};
 
-    onBegin(painter);
-    _painter = &painter;
-}
-
-
-void PaintSurface::finish(Painter& painter)
-{
-    onFinish();
-    _painter = 0;
-}
-
-
-void PaintSurface::setDefaultFont(const std::string& f)
-{
-    PainterImpl::setDefaultFont(f);
-}
+}  // namespace
 
 } // namespace
 
-} // namespace
+#endif

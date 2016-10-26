@@ -59,6 +59,10 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
     
         const Gfx::ImageFormat& format() const;
 
+        void begin(Painter& painter);  
+        
+        void finish();    
+
         void resize(const Gfx::Size& size, size_t stride);
 
         void resize(const Gfx::SizeF& size);    
@@ -67,11 +71,7 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
 
         void setClip( const Gfx::RectF& clip);
 
-        const Gfx::RectF& clip() const;
-
         void setCompositionMode(const Gfx::CompositionMode& mode);
-
-        const Gfx::CompositionMode& compositionMode() const;
 
         void setPen(const Gfx::Pen& pen);
 
@@ -115,6 +115,8 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         Gfx::ImagePainter     _painter;
 };
 
-}}
+} // namespace
+
+}  // namespace
 
 #endif

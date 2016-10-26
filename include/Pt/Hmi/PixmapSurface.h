@@ -59,17 +59,14 @@ class PT_HMI_API PixmapSurface : public PaintSurface
 
         void clear( const Gfx::Color& color = Gfx::Color( 1, 1, 1 ) );
 
-        virtual const Gfx::ImageFormat& format() const; 
+        PixmapSurfaceImpl* pixmapImpl() const;
 
-        virtual const Gfx::SizeF& size() const;
+    protected:
+        virtual const Gfx::ImageFormat& format() const;
 
         virtual void setCompositionMode(const Gfx::CompositionMode& mode);
 
-        virtual const Gfx::CompositionMode& compositionMode() const; 
-
         virtual void setClip( const Gfx::RectF& clip);
-        
-        virtual const Gfx::RectF& clip() const;
 
         virtual void setPen(const Gfx::Pen& pen);
 
@@ -105,7 +102,12 @@ class PT_HMI_API PixmapSurface : public PaintSurface
 
         virtual void drawPicture(const Gfx::PointF& to, const Picture& pic);
 
-        PixmapSurfaceImpl* pixmapImpl() const;
+    protected:
+        virtual const Gfx::SizeF& onSize() const;
+
+        virtual void onBegin(Painter& painter);
+
+        virtual void onFinish();
 
     private:
         PixmapSurfaceImpl* _impl;

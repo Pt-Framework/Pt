@@ -35,8 +35,8 @@
 #include "PictureImpl.h"
 
 namespace Pt {
-namespace Hmi {
 
+namespace Hmi {
 
 PixmapSurfaceImpl::PixmapSurfaceImpl()
 : _size(10,10)
@@ -59,7 +59,17 @@ void PixmapSurfaceImpl::clear(const Gfx::Color& c)
 
 const Gfx::ImageFormat& PixmapSurfaceImpl::format() const
 {
-  return _painter.format();
+    return _painter.format();
+}
+
+
+void PixmapSurfaceImpl::begin(Painter& painter)
+{
+}
+
+
+void PixmapSurfaceImpl::finish()
+{
 }
 
 
@@ -91,11 +101,11 @@ void PixmapSurfaceImpl::setClip(const Gfx::RectF& clip)
     _painter.setClip(clip);
 }
 
-const Gfx::RectF& PixmapSurfaceImpl::clip() const
-{
-    return _painter.clip();
-}
 
+void PixmapSurfaceImpl::setCompositionMode(const Gfx::CompositionMode& mode)
+{
+    _painter.setCompositionMode(mode);
+}
 
 
 void PixmapSurfaceImpl::setPen(const Gfx::Pen& pen)
@@ -207,18 +217,6 @@ void PixmapSurfaceImpl::drawPicture(const Gfx::PointF& to, const Picture& pic)
         return;
 
     _painter.drawImage(to, image);
-}
-
-
-void PixmapSurfaceImpl::setCompositionMode(const Gfx::CompositionMode& mode)
-{
-    _painter.setCompositionMode(mode);
-}
-
-
-const Gfx::CompositionMode& PixmapSurfaceImpl::compositionMode() const
-{
-    return _painter.compositionMode();
 }
 
 } // namespace

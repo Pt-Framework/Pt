@@ -44,28 +44,11 @@ PaintSurfaceImpl::~PaintSurfaceImpl()
 }
 
 
-std::string PaintSurfaceImpl::defaultFont()
-{
-    return Gfx::ImagePainter::defaultFont();
-}
-
-
-void PaintSurfaceImpl::setDefaultFont( std::string f)
-{
-  Gfx::ImagePainter::setDefaultFont(f);
-}
-
-
 std::vector<std::string> PaintSurfaceImpl::fontNames()
 {
     return Gfx::ImagePainter::fontNames();
 }
 
-
-Gfx::FontMetrics PaintSurfaceImpl::fontMetrics(const Gfx::Font& font, const Pt::String& text)
-{
-    return Gfx::ImagePainter::fontMetrics(font, text);   
-}  
 
 } // namespace
 

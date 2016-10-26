@@ -27,6 +27,7 @@
   MA 02110-1301 USA
 */
 
+#include "PainterImpl.h"
 #include "PaintSurfaceImpl.h"
 
 #include <Pt/Hmi/Api.h>
@@ -38,10 +39,11 @@ namespace Pt {
 namespace Hmi {
 
 Painter::Painter(PaintSurface& surface)
-: _surface(0)
+: _impl( new PainterImpl )
+, _surface(0)
 , _pen()
 , _brush( Gfx::Color(0, 0, 0, 0) )
-, _font( PaintSurfaceImpl::defaultFont() )
+, _font()
 {
     begin(surface);
 }
@@ -49,18 +51,40 @@ Painter::Painter(PaintSurface& surface)
 
 Painter::~Painter()
 {
+    finish();
+
+    delete _impl;
 }
 
 
 void Painter::begin(PaintSurface& surface)
 {
-    _surface = &surface;
+    finish();
 
-    _surface->setClip(_clip);
-    _surface->setCompositionMode(_compositionMode); 
+    _surface = &surface;
+    _surface->begin(*this);
+    
+    _surface->setPen(_pen);
     _surface->setBrush(_brush);
     _surface->setFont(_font);
-    _surface->setPen(_pen);
+    _surface->setClip(_clip);
+    _surface->setCompositionMode(_compositionMode); 
+}
+
+
+void Painter::finish()
+{
+    if(_surface)
+    {
+        _surface->finish(*this);
+        _surface = 0;
+    }
+}
+
+
+void Painter::onDetach()
+{
+    _surface = 0;
 }
 
 
@@ -69,9 +93,12 @@ const Gfx::ImageFormat& Painter::format() const
   return _surface->format();
 }
 
+
 void Painter::setCompositionMode(const Gfx::CompositionMode& mode)
 {
     _compositionMode = mode;
+
+    _impl->setCompositionMode(mode);
 
     if(_surface)
         _surface->setCompositionMode(mode);
@@ -86,10 +113,12 @@ const Gfx::CompositionMode& Painter::compositionMode() const
 
 void Painter::setClip(const Gfx::RectF& clip)
 {
-    if(_surface)
-        _clip = clip;
+    _clip = clip;
 
-    _surface->setClip( clip);
+    _impl->setClip(_clip);
+
+    if(_surface)
+        _surface->setClip(_clip);
 }
 
 
@@ -102,6 +131,8 @@ const Gfx::RectF& Painter::clip() const
 void Painter::setPen(const Gfx::Pen& pen)
 {
     _pen = pen;
+
+    _impl->setPen(_pen);
 
     if(_surface)
         _surface->setPen(_pen);
@@ -118,6 +149,8 @@ void Painter::setBrush(const Gfx::Brush& brush)
 {
     _brush = brush;
 
+    _impl->setBrush(_brush);
+
     if(_surface)
         _surface->setBrush(_brush);
 }
@@ -131,10 +164,9 @@ const Gfx::Brush& Painter::brush() const
 
 void Painter::setFont(const Gfx::Font& font)
 {
-    if (font == _font) 
-        return;
-
     _font = font;
+
+    _impl->setFont(_font);
 
     if(_surface)
         _surface->setFont(_font);
@@ -158,7 +190,7 @@ Gfx::FontMetrics Painter::fontMetrics(const Pt::String& text) const
 
 Gfx::FontMetrics Painter::fontMetrics(const Gfx::Font& font, const Pt::String& text)
 {
-    return PaintSurfaceImpl::fontMetrics(font, text);
+    return PainterImpl::fontMetrics(font, text);
 }
 
 

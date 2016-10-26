@@ -86,8 +86,6 @@ static int CALLBACK EnumFontFamExProc(ENUMLOGFONTEX *logFont, NEWTEXTMETRICEX *p
 
 #endif
 
-std::string PaintSurfaceImpl::_defaultFont; //getDefaultFont();
-
 
 PaintSurfaceImpl::PaintSurfaceImpl()
 {
@@ -96,18 +94,6 @@ PaintSurfaceImpl::PaintSurfaceImpl()
 
 PaintSurfaceImpl::~PaintSurfaceImpl()
 {
-}
-
-
-std::string PaintSurfaceImpl::defaultFont()
-{
-    return _defaultFont;
-}
-
-
-void PaintSurfaceImpl::setDefaultFont(const std::string& f)
-{
-    _defaultFont = f;
 }
 
 
@@ -131,87 +117,6 @@ std::vector<std::string> PaintSurfaceImpl::fontNames()
 
     fonts.erase( std::unique(fonts.begin(), fonts.end()), fonts.end() );
     return fonts;
-}
-
-
-Gfx::FontMetrics PaintSurfaceImpl::fontMetrics(const Gfx::Font& font, const Pt::String& text)
-{   
-    HDC dc = GetDC(NULL);
-
-    HFONT newFont = getFont(font);
-    HFONT oldFont = (HFONT)SelectObject(dc, newFont);
-    
-    SIZE textSize;
-    TEXTMETRIC tm;
-    GetTextMetrics(dc, &tm);
-
-    std::wstring wtext;
-    text.toUtf16( std::back_inserter(wtext) );
-    
-    GetTextExtentPoint32W(dc, wtext.c_str(), wtext.size(), &textSize);
-    
-    Gfx::Size size(textSize.cx, textSize.cy);
-    Gfx::SizeF sizeF = Application::instance().screen().toUnit(size);
-
-    SelectObject(dc, oldFont);
-    DeleteObject(newFont);
-
-    ReleaseDC(NULL, dc);
-
-    return Gfx::FontMetrics(tm.tmAscent, 
-                            tm.tmDescent, 
-                            (int)sizeF.width(), 
-                            (int)sizeF.height());
-}
-
-
-HFONT PaintSurfaceImpl::getFont(const Pt::Gfx::Font& font)
-{
-    int fontWeight;
-    
-    switch( font.style() ) 
-    {
-        default:
-        case Pt::Gfx::Font::Normal:
-        case Pt::Gfx::Font::Italic:
-            fontWeight = FW_NORMAL;
-            break;
-
-        case Pt::Gfx::Font::Bold:
-        case Pt::Gfx::Font::BoldItalic:
-            fontWeight = FW_BOLD;
-            break;
-    }
-
-    BYTE italic = font.style() == Pt::Gfx::Font::Italic || 
-                  font.style() == Pt::Gfx::Font::BoldItalic;
-
-    LOGFONT lf;
-    lf.lfHeight         = -((int)font.size());         // converted to device units
-    lf.lfWidth          = 0;                           // default width of the font
-    lf.lfEscapement     = font.angle();                // escapement angle
-    lf.lfOrientation    = 0;                           // orientation
-    lf.lfWeight         = fontWeight;                  // font weight
-    lf.lfItalic         = italic;                      // italic
-    lf.lfUnderline      = FALSE;                       // underline
-    lf.lfStrikeOut      = FALSE;                       // strikeout
-    lf.lfCharSet        = DEFAULT_CHARSET;             // use the default charset
-    lf.lfOutPrecision   = OUT_DEFAULT_PRECIS;          // default output precision
-    lf.lfClipPrecision  = CLIP_DEFAULT_PRECIS;         // default clipping behaviour
-    lf.lfQuality        = DEFAULT_QUALITY;             // default quality
-    lf.lfPitchAndFamily = DEFAULT_PITCH | FF_DONTCARE; // default pitch and family
-
-    if( font.name().empty() )
-    {
-        memcpy(lf.lfFaceName, Pt::Hmi::PaintSurfaceImpl::defaultFont().c_str(), std::min<size_t>( LF_FACESIZE, Pt::Hmi::PaintSurfaceImpl::defaultFont().size() + 1) );
-    }
-    else
-    {
-        memcpy(lf.lfFaceName, font.name().c_str(), std::min<size_t>( LF_FACESIZE, font.name().size() + 1) );
-    }
-
-    HFONT hf = CreateFontIndirect(&lf);
-    return hf;
 }
 
 } // namespace

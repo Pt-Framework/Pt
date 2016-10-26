@@ -34,23 +34,19 @@
 #include <Pt/Hmi/Widget.h>
 
 namespace Pt {
+
 namespace Hmi {
 
 PixmapSurface::PixmapSurface()
-: _impl( new PixmapSurfaceImpl())
+: _impl( new PixmapSurfaceImpl )
 {
 }
 
 
 PixmapSurface::~PixmapSurface()
 {
+    _impl->finish();
     delete _impl;
-}
-
-
-const Gfx::ImageFormat& PixmapSurface::format() const
-{
-  return _impl->format();
 }
 
 
@@ -66,9 +62,27 @@ void PixmapSurface::clear(const Gfx::Color& c)
 }
 
 
-const Gfx::SizeF& PixmapSurface::size() const
+const Gfx::SizeF& PixmapSurface::onSize() const
 {
     return _impl->size();
+}
+
+
+void PixmapSurface::onBegin(Painter& painter)
+{
+    _impl->begin(painter);
+}
+
+
+void PixmapSurface::onFinish()
+{
+    _impl->finish();
+}
+
+
+const Gfx::ImageFormat& PixmapSurface::format() const
+{
+    return _impl->format();
 }
 
 
@@ -87,6 +101,18 @@ void PixmapSurface::setBrush(const Gfx::Brush& brush)
 void PixmapSurface::setFont(const Gfx::Font& font)
 {
     _impl->setFont(font);
+}
+
+
+void PixmapSurface::setClip( const Gfx::RectF& clip)
+{
+    _impl->setClip(clip);
+}
+
+
+void PixmapSurface::setCompositionMode(const Gfx::CompositionMode& mode)
+{
+    _impl->setCompositionMode(mode);
 }
 
 
@@ -174,30 +200,10 @@ void PixmapSurface::drawPicture(const Gfx::PointF& to, const Picture& pic)
     _impl->drawPicture(to , pic);
 }
 
-void PixmapSurface::setClip( const Gfx::RectF& clip)
-{
-    _impl->setClip(clip);
-}
-
-
-const Gfx::RectF& PixmapSurface::clip() const
-{
-    return _impl->clip();
-}
 
 PixmapSurfaceImpl* PixmapSurface::pixmapImpl() const
 { 
     return _impl; 
-}
-
-void PixmapSurface::setCompositionMode(const Gfx::CompositionMode& mode)
-{
-    _impl->setCompositionMode(mode);
-}
-
-const Gfx::CompositionMode& PixmapSurface::compositionMode() const
-{
-    return _impl->compositionMode();
 }
 
 } // namespace
