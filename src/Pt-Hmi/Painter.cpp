@@ -234,14 +234,6 @@ void Painter::drawPicture(const Gfx::PointF& to, const Picture& pic)
 }
 
 
-void Painter::clear( const Gfx::Color& color)
-{
-    Gfx::RectF rect( Gfx::PointF(0,0), _surface->size() );
-    setBrush( Gfx::Brush(color) );
-    fillRect(rect);
-}
-
-
 void Painter::drawSurface(const Gfx::PointF& to, const PixmapSurface& surface)
 {
     _surface->drawSurface(to, surface);

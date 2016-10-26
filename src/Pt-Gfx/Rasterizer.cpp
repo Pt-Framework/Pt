@@ -3636,21 +3636,6 @@ FontMetrics Rasterizer::fontMetrics( const Font& font, const Pt::String& text )
   return textRender.fontMetrics(text);
 }
 
-void Rasterizer::clear( const Color& color)
-{  
-
-  Rect rect( Point(0,0), _image->size());
-  Brush bs( color );
-  setBrush( bs );
-
-  Point points[4];
-  points[0] = rect.topLeft();
-  points[1] = rect.topRight();
-  points[2] = rect.bottomRight();
-  points[3] = rect.bottomLeft();
-
-  fill(points, 4);
-}
 
 void Rasterizer::setClip( const Rect& clip )
 {
@@ -3658,4 +3643,6 @@ void Rasterizer::setClip( const Rect& clip )
   updateClip();
 }
 
-}}
+} // namespace
+
+} // namespace

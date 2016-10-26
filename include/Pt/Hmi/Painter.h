@@ -96,8 +96,6 @@ class PT_HMI_API Painter : public Gfx::Painter
     
         virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imageRect);
 
-        virtual void clear(const Gfx::Color& color);
-
     public:
         void drawSurface(const Gfx::PointF& to, const PixmapSurface& pm);
 

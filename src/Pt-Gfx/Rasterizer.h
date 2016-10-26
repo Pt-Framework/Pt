@@ -118,8 +118,6 @@ class Rasterizer
 
     FontMetrics fontMetrics( const String& text ) const;
 
-    void clear( const Color& color = Color(1,1,1) );
-
     static FontMetrics fontMetrics( const Font& font, const Pt::String& text );
 
   //Output algo.

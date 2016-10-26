@@ -229,12 +229,6 @@ FontMetrics ImagePainter::fontMetrics( const Font& font, const Pt::String& text 
 }
 
 
-void ImagePainter::clear( const Gfx::Color& color )
-{
-  _rasterizer->clear( color );
-}
-
-
 void ImagePainter::setFontDir(const Pt::System::Path& path)
 {
    FreeType::instance().setFontDir(path);

@@ -93,8 +93,6 @@ class PT_GFX_API ImagePainter : public Painter
 
     virtual void drawImage(const PointF& to, const Image& image, const RectF& imageRect);
 
-    virtual void clear( const Gfx::Color& color = Gfx::Color( 1, 1, 1 ) );
-
   public:
     static void setFontDir(const System::Path& path);
 
