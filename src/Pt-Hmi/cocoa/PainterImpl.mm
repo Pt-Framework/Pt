@@ -28,6 +28,7 @@
 namespace Pt {
 namespace Hmi {
 
+
 PainterImpl::PainterImpl(PaintSurfaceImpl* surface)
 : _font("sans-serif")
 , _surface(surface)
@@ -223,6 +224,13 @@ void PainterImpl::drawRect(const Gfx::RectF& rect)
 void PainterImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
 {
 //TODO:
+//  // Drawing code
+//  CGContextRef  context = UIGraphicsGetCurrentContext();
+//  CGContextSelectFont(context, "Arial", 24, kCGEncodingFontSpecific);
+//  CGContextSetTextPosition(context,80,80);
+//  CGContextShowText(context, "hello", 6);
+  //not even this works
+//  CGContextShowTextAtPoint(context, 1,1, "hello", 6);
 }
         
 void PainterImpl::drawPolyline(const Gfx::PointF* p, const size_t pointCount)

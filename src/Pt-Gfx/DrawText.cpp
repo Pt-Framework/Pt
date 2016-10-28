@@ -74,7 +74,7 @@ void DrawText::setFont(const Font& font)
     _imageType.face_id = _faceId;
     _imageType.width   = font.size();
     _imageType.height  = font.size();
-    _imageType.flags   = FT_RENDER_MODE_NORMAL;
+    _imageType.flags   =  FT_LOAD_DEFAULT | FT_LOAD_RENDER;
 
     // setup the rotation matrix
     _fontAngle = font.angle() % 3600;

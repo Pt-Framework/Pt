@@ -187,6 +187,7 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     Gfx::Image image( painter.format(), Gfx::Size(200, 30) );
     Gfx::ImagePainter imagePainter(image);
 
+    Gfx::ImagePainter::setDefaultFont("DejaVu Sans");
     //imagePainter.setBrush( Gfx::Brush( Gfx::Color::fromRgb8(200, 200, 200) ) );
     imagePainter.setBrush( Gfx::Brush( Gfx::Color::fromRgb8(200, 200, 200), 
                            Gfx::Color::fromRgb8(255, 255, 255), 
@@ -195,8 +196,9 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     
     Gfx::FontMetrics fm = imagePainter.fontMetrics("Hello");
 
+    imagePainter.setFont(Pt::Gfx::Font("",12));
     imagePainter.setPen( Gfx::Pen( Gfx::Color::fromRgb8(0,0,0) ) );
-    imagePainter.drawText( Gfx::PointF(30, 20), "Hello World!");
+    imagePainter.drawText( Gfx::PointF(30, 20), "!HIiii !Hello World!");
 
     painter.drawImage(Gfx::PointF(0, 0), image);
     painter.drawPicture(Gfx::PointF(0,0), _picture);

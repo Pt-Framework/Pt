@@ -67,7 +67,7 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
     painter.setBrush( Gfx::Brush(bgColor) );
     painter.fillRect(rect);
 
-    updateScreen( Gfx::Rect( Gfx::Point(0,0), _frameBuffer.size()));    
+    updateScreen( Gfx::Rect( Gfx::Point(0,0), _frameBuffer.size()));
 }
 
 

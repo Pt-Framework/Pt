@@ -117,7 +117,7 @@ class PT_HMI_API Window : public WindowBase
 
     Gfx::PointF toParent(const Gfx::PointF& pos) const;
 
-    Gfx::PointF fromParent(const Gfx::PointF& pos) const;     
+    Gfx::PointF fromParent(const Gfx::PointF& pos) const;
 
     void repaint();
 

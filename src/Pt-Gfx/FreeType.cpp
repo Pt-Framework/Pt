@@ -61,7 +61,9 @@ FreeType::FreeType()
     if( FTC_SBitCache_New( _manager, &_bitmapCache ) )
         throw std::runtime_error( "FTC_SBitCache_New" );
 
-    setFontDir(System::Path( System::Path::curdir()) / "fonts");
+    System::Path  path = System::Path( System::Path::curdir()) / "fonts";
+    std::string lp = path.toLocal();
+    setFontDir(path);
 }
 
 
@@ -125,10 +127,11 @@ void FreeType::setFontDir(const System::Path& path)
 
     for( ; it != end; ++it)
     {
-        std::string pathName = it->path().toLocal();
+        System::Path fp = _fontDir / it->path();
+        std::string gg = fp.toLocal();
 
         FT_Face face;
-        FT_Error err = FT_New_Face(_ft, pathName.c_str(), 0, &face);
+        FT_Error err = FT_New_Face(_ft, fp.toLocal().c_str(), 0, &face);
         if(err != 0)
             continue;
 
@@ -147,7 +150,7 @@ void FreeType::setFontDir(const System::Path& path)
         Font font(face->family_name, 12, style);
 
         System::Path& fontPath = _fonts[font];
-        fontPath = it->path();
+        fontPath = fp;
 
         _files.insert(&fontPath);
 
@@ -316,6 +319,7 @@ void FreeType::draw(Image& image, const Color& color, Pt::ssize_t fontAngle,
     glyphPos.x = (int) pos.x() << 16;
     glyphPos.y = (int) pos.y() << 16;
 
+
     for( String::const_iterator it = text.begin(); it != text.end(); ++it )
     {
         FT_UInt glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, it->value());
@@ -412,7 +416,7 @@ void FreeType::drawGlyph(Image& image, const Color& color, int xpos, int ypos,
             
     if(xpos < clip.x() ) 
     {
-        ofsx = clip.x()  - xpos;
+        ofsx = clip.x() - xpos;
         xpos =  clip.x();
     }
             
@@ -438,7 +442,7 @@ void FreeType::drawGlyph(Image& image, const Color& color, int xpos, int ypos,
         if( dsy > y2 )
             break;
 
-        dsx   = xpos;
+        dsx = xpos;
 
         for( Pt::int32_t x = ofsx; x < width; ++x, ++dsx )
         {

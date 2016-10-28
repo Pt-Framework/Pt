@@ -158,14 +158,14 @@ void ScreenImpl::updateScreen()
 {
     _drawCursor    = false;
     drawCursor( image().data() );
-    memcpy( _frameBuffer.buffer(), image().data(), _frameBuffer.bufferSize() );            
+    memcpy( _frameBuffer.buffer(), image().data(), _frameBuffer.bufferSize() );
 }
 
 
 void ScreenImpl::update(const Gfx::RectF& updateRect)
 {                
     Pt::System::Clock clock;
-    clock.start();   
+    clock.start();
 
     //if( ! _cursorBackground.empty() )
     //    bitBlit( _cursorBackground.pixel(0,0), 

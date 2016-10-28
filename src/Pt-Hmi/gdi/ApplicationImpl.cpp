@@ -758,7 +758,7 @@ void ApplicationImpl::onResize(Window& w, WPARAM wParam, LPARAM lParam)
 void ApplicationImpl::onPaint(Window& w, HWND hwnd)
 {
     RECT info;
-    GetClientRect(hwnd, &info);      
+    GetClientRect(hwnd, &info);
       
     PAINTSTRUCT ps;
     HDC windowContext = BeginPaint(hwnd, &ps);
