@@ -40,7 +40,9 @@ namespace Hmi {
 Label::Label()
 : Panel()
 , _contentAlignment(TopLeft)
+, _font()
 {
+
 }
 
 
@@ -58,9 +60,10 @@ void Label::setText(const Pt::String& text)
 
 Gfx::SizeF Label::onAutoSize() const
 {
-    const Gfx::Font& font = Application::instance().font();
+    const Gfx::Font& font = _font.empty() ? Application::instance().font() : _font;
 
     Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( font, _text);
+
     return Gfx::SizeF( fm.width() + padding().leftRight(), 
                        fm.height() + padding().topBottom() );
 }
@@ -78,12 +81,14 @@ void Label::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
        
     Gfx::SizeF         size = this->size();
     Gfx::PointF        pos(0, 0);
-    const Gfx::Font&   font = Application::instance().font();
 
     Painter painter(surface);
 
     painter.setClip(updateRect);
+
+    const Gfx::Font& font = _font.empty() ? Application::instance().font() : _font;
     painter.setFont(font);
+
     painter.setPen(foregroundPen());
 
     Gfx::FontMetrics metric = painter.fontMetrics(_text);

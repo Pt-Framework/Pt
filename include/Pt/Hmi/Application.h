@@ -75,9 +75,9 @@ class PT_HMI_API Application : public Pt::System::Application
 
         Screen& screen();
 
-        const Gfx::Font& font() const;
+        const Pt::Gfx::Font& font() const;
 
-        void setFont(const Gfx::Font& font);
+        void setFont(const Pt::Gfx::Font& f);
 
         void setCursor(const Cursor* cursor = 0);
 
@@ -159,7 +159,7 @@ class PT_HMI_API Application : public Pt::System::Application
         Window*          _pointerWindow;
         Widget*          _pointerWidget;
         Visual*          _pointerGrabber;
-        Gfx::Font        _font;
+        Pt::Gfx::Font    _font;
 };
 
 } // namespace

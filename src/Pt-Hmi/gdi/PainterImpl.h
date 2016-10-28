@@ -30,6 +30,7 @@
 #define Pt_Hmi_PainterImpl_h
 
 #include <Pt/Hmi/Api.h>
+#include "win32.h"
 #include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
@@ -80,10 +81,10 @@ class PainterImpl
             }
 
             DWORD penStyle = getPenStyle(pen);
-            
-            DWORD _penColor = RGB( pen.color().red()  / 257, 
-                                   pen.color().green() / 257, 
-                                   pen.color().blue()  / 257 );
+
+            _penColor = RGB( pen.color().red()  / 257, 
+                             pen.color().green() / 257, 
+                             pen.color().blue()  / 257 );
 
 #ifdef _WIN32_WCE
             _pen = CreatePen(penStyle, pen.size(), _penColor);
@@ -199,6 +200,7 @@ class PainterImpl
                 _clipRect = 0;
             }
 
+
             if( rect.isNull() )
                 return;
             
@@ -272,6 +274,18 @@ class PainterImpl
         static void setDefaultFont(const std::string& f)
         {
             getDefaultFont() = f;
+        }
+
+        static std::string getSystemFont()
+        {
+            HDC dc = GetDC(NULL);
+
+            std::vector<TCHAR> buffer(32);
+            GetTextFace(dc, buffer.size(), &buffer[0]);
+
+            ReleaseDC(NULL, dc);
+
+            return Pt::win32::toMultiByte(&buffer[0]);
         }
 
         static std::string& getDefaultFont()

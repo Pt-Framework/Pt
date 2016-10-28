@@ -285,7 +285,7 @@ void Button::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRe
 void Button::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
     Label::onPaintContent(surface, updateRect);
-
+    
     if( hasFocus() )
     {
         Gfx::SizeF size = this->size();

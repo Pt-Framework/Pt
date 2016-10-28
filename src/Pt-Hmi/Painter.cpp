@@ -115,7 +115,7 @@ void Painter::setClip(const Gfx::RectF& clip)
 {
     _clip = clip;
 
-    _impl->setClip(_clip);
+//    _impl->setClip(_clip);
 
     if(_surface)
         _surface->setClip(_clip);

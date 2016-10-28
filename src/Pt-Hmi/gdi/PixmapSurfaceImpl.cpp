@@ -273,7 +273,10 @@ const Gfx::SizeF& PixmapSurfaceImpl::size() const
 
 void PixmapSurfaceImpl::setClip(const Gfx::RectF& clipRect)
 {
+    _painter->impl()->setClip(clipRect);
+
     HRGN hrgn = _painter->impl()->clipRect();
+
     if(hrgn)
         SelectClipRgn(_dc, hrgn);
     else

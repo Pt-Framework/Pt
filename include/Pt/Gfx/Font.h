@@ -58,7 +58,7 @@ class PT_GFX_API Font
     public:
         //! @brief Construct a font.
         explicit Font( const std::string& name      = std::string(),
-                       size_t             size      = 12,
+                       size_t             size      = 0,
                        Style              style     = Normal,
                        ssize_t            angle     = 0,
                        Direction          direction = LeftToRight);
@@ -75,8 +75,13 @@ class PT_GFX_API Font
         //! @brief Returns the angle of the font
         ssize_t angle() const;
 
+        bool empty() const
+        {
+          return size() == 0;
+        }
+
         //! @brief Returns the text-flow direction of the font
-        Direction direction() const;      
+        Direction direction() const;
 
         friend bool operator==(const Font& a, const Font& b);
 
