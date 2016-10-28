@@ -67,6 +67,7 @@ Widget::Widget()
     _eventReady += Pt::slot(*this, &Widget::onEnableEvent);
     _eventReady += Pt::slot(*this, &Widget::onFocusEvent);
     _eventReady += Pt::slot(*this, &Widget::onShowEvent);
+    _eventReady += Pt::slot(*this, &Widget::onInvalidateEvent);
 }
 
 
@@ -497,6 +498,13 @@ void Widget::update()
 }
 
 
+void Widget::invalidate()
+{
+    InvalidateEvent ev(vid());
+    Application::instance().loop().commitEvent(ev);
+} 
+
+
 void Widget::update(const Gfx::RectF& rect)
 {   
     Window* w = window();
@@ -747,21 +755,14 @@ void Widget::setAutoSize(bool a)
 Gfx::SizeF Widget::preferredSize() const
 {
     if(_autoSize)
-        return this->onAutoSize();
+        return _preferredSize;
 
     return size();
 }
-
-
-Gfx::SizeF Widget::onAutoSize() const
-{
-    return size();
-}
-
 
 const Spacing& Widget::margin() const
 {
-    return _margin;                  
+    return _margin;
 }
 
 
@@ -812,14 +813,14 @@ const Docking& Widget::docking() const
 void Widget::setDocking(const Docking& d)
 {
     _docking = d;
-    
+
     if( parent() )
        parent()->onLayout();
 }
 
 
 void Widget::onLayout()
-{         
+{
 }
 
 
@@ -876,9 +877,9 @@ void Widget::onKeyEvent(const KeyEvent& ev)
         return;
     }
 
-    if( ev.key() == actionKey() && hasFocus() )    
+    if( ev.key() == actionKey() && hasFocus() )
     {
-        onActionKey(ev);        
+        onActionKey(ev);
     }
 }
 
@@ -892,6 +893,28 @@ void Widget::onEnterEvent( const EnterEvent& ev )
 void Widget::onLeaveEvent(const LeaveEvent& ev )
 {
 
+}
+
+
+Gfx::SizeF Widget::onAutoSize() const
+{
+  return _size;
+}
+
+
+void Widget::onInvalidate()
+{
+
+}
+
+void Widget::onInvalidateEvent(const InvalidateEvent& ev)
+{
+    onInvalidate();
+
+    onAutoSize();
+
+    if( parent() )
+       parent()->onLayout();
 }
 
 } // namespace

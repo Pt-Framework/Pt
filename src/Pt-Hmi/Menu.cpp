@@ -57,14 +57,16 @@ class SubMenuItem : public MenuItem
         { return _menu; }
 
     protected:
-        virtual Gfx::SizeF onAutoSize() const
+        virtual void onInvalidate()
         {
-            Gfx::SizeF size = BaseType::onAutoSize();
-    
+            MenuItem::onInvalidate();
+
+            Gfx::SizeF size = preferredSize();
+
             // space for the menu indicator
             size.addWidth(indicatorWidth); 
     
-            return size;
+            setPreferredSize(size);
         }
 
         virtual void onPaintShortcut(PaintSurface& surface, 
@@ -160,7 +162,7 @@ void Menu::addItem(MenuItem& item)
     item._menu = this;
     item.triggered() += Pt::slot(*this, &Menu::onItemTriggered);
     
-    onContentChanged();
+    invalidate();
 }
 
 
@@ -174,7 +176,7 @@ void Menu::removeItem(MenuItem& item)
 
     _layout.remove(item);
 
-    onContentChanged();
+    invalidate();
 }
 
 
@@ -193,10 +195,14 @@ void Menu::onAddMenu(Menu& menu, const Pt::String& text)
     _layout.add(*item);
 
     menu._parentMenu = this;
-    
-    onContentChanged();
+    invalidate();
 }
 
+
+void Menu::onInvalidate()
+{
+      onContentChanged();
+}
 
 void Menu::onRemoveMenu(Menu& menu)
 {
@@ -216,7 +222,7 @@ void Menu::onRemoveMenu(Menu& menu)
     if(_currentMenu == &menu)
         _currentMenu = 0;
 
-    onContentChanged();
+    invalidate();
 }
 
 

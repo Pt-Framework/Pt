@@ -63,23 +63,23 @@ class PT_HMI_API Label : public Panel
 
         const Gfx::Font& font() const
         { 
-          return _font;
+          return _userFont;
         }
 
-        void setFont( const Gfx::Font& f)
-        {
-          _font = f;
-        }
+        void setFont( const Gfx::Font& f);
 
     protected:
         virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect);
 
         virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect);
 
+        virtual void onInvalidate();
+        
         virtual Gfx::SizeF onAutoSize() const;
 
     private:
         Alignment _contentAlignment;
+        Gfx::Font _userFont;
         Gfx::Font _font;
         Pt::String _text;
 };

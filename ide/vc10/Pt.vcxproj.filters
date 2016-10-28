@@ -1401,6 +1401,9 @@
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\PainterImpl.h">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\InvalidateEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">

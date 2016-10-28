@@ -40,6 +40,7 @@
 #include <Pt/Hmi/EnterEvent.h>
 #include <Pt/Hmi/LeaveEvent.h>
 #include <Pt/Hmi/EnableEvent.h>
+#include <Pt/Hmi/InvalidateEvent.h>
 #include <Pt/Hmi/ShowEvent.h>
 #include <Pt/Hmi/FocusEvent.h>
 #include <Pt/Hmi/Cursor.h>
@@ -86,7 +87,7 @@ class PT_HMI_API Widget : public Visual
         
         const std::vector<Widget*>& widgets() const;
 
-        Widget* findWidget( const Gfx::PointF& pos );        
+        Widget* findWidget( const Gfx::PointF& pos );
 
         void setContent(Widget& widget);
 
@@ -147,6 +148,8 @@ class PT_HMI_API Widget : public Visual
         //
         // widget operations
         //
+
+        void invalidate();
 
         void update();
 
@@ -218,8 +221,8 @@ class PT_HMI_API Widget : public Visual
 
     public:
         virtual Gfx::PointF toScreen(const Gfx::PointF& pos) const;
-    
-        virtual Gfx::PointF fromScreen(const Gfx::PointF& pos) const;       
+
+        virtual Gfx::PointF fromScreen(const Gfx::PointF& pos) const;
 
     protected:
         virtual void onAddWidget(Widget& w);
@@ -232,8 +235,6 @@ class PT_HMI_API Widget : public Visual
 
         virtual void onLayout();
 
-        virtual Gfx::SizeF onAutoSize() const;
-
         virtual void onSetActionKey(const Key& ak);
 
         virtual void onActionKey(const KeyEvent& kev);
@@ -243,6 +244,10 @@ class PT_HMI_API Widget : public Visual
         virtual void onShortcut(const KeyEvent& kev);
 
         virtual void onMnemonic();
+
+        virtual Pt::Gfx::SizeF onAutoSize() const;
+
+        virtual void onInvalidate();
 
     protected:
         virtual void onEvent( const Event& ev );
@@ -271,12 +276,20 @@ class PT_HMI_API Widget : public Visual
 
         virtual void onLeaveEvent(const LeaveEvent& ev );
 
+        virtual void onInvalidateEvent(const InvalidateEvent& ev);
+
     private:
         void setParent(Widget* parent);
 
         void setWindow(Window* window);
 
         Widget* findWidget( const Gfx::PointF& pos, bool input );
+
+    protected:
+        void setPreferredSize(const Pt::Gfx::SizeF& s)
+        {
+            _preferredSize =s;
+        }
 
     private:
         Pt::Signal<const Pt::Event&> _eventReady;
@@ -291,6 +304,7 @@ class PT_HMI_API Widget : public Visual
         bool                         _enabledState;
         Gfx::PointF                  _position;
         Gfx::SizeF                   _size;
+        Gfx::SizeF                   _preferredSize;
 
         bool                         _hasFocus;
         bool                         _acceptsFocus;
@@ -315,3 +329,4 @@ class PT_HMI_API Widget : public Visual
 } // namespace
 
 #endif // PT_HMI_WIDGET_H
+

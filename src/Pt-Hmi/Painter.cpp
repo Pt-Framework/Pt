@@ -33,6 +33,7 @@
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/PaintSurface.h>
+#include <Pt/Hmi/Application.h>
 
 namespace Pt {
 
@@ -164,7 +165,14 @@ const Gfx::Brush& Painter::brush() const
 
 void Painter::setFont(const Gfx::Font& font)
 {
-    _font = font;
+    if( font.name().empty() )
+    {
+        const Gfx::Font& defaultFont = Application::instance().font();
+        _font = Gfx::Font( defaultFont.name(), font.size(),
+                           font.style(), font.angle(), font.direction() );
+    }
+    else
+        _font = font;
 
     _impl->setFont(_font);
 

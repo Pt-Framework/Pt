@@ -45,6 +45,16 @@ Font::Font(const std::string& name, size_t size, Style style,
 }
 
 
+Font::Font( const std::string& name, const Font& copy)
+: _name(name)
+, _size(copy._size)
+, _style(copy._style)
+, _angle(copy._angle)
+, _direction(copy._direction)
+{
+
+}
+
 const std::string& Font::name() const
 {
     return _name;

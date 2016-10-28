@@ -53,6 +53,8 @@ class PT_HMI_API WindowBase : public Visual
 
         Gfx::SizeF size() const;
 
+        void invalidate();
+
         void update();
 
         void update(const Gfx::RectF& rect);

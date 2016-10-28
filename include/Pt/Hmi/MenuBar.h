@@ -70,7 +70,7 @@ class MenuBarItem : public ButtonBase
     protected:
         virtual void onClicked();
 
-        virtual Gfx::SizeF onAutoSize() const;
+        virtual void onInvalidate();
 
         virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect);
 

@@ -45,6 +45,7 @@
 #include <Pt/Hmi/PaintEvent.h>
 #include <Pt/Hmi/ShowEvent.h>
 #include <Pt/Hmi/EnableEvent.h>
+#include <Pt/Hmi/InvalidateEvent.h>
 #include <Pt/Hmi/PixmapSurface.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Signal.h>
@@ -223,6 +224,8 @@ class PT_HMI_API Window : public WindowBase
 
     virtual void onClosing(Window& w);
 
+    virtual void onInvalidate();
+
   protected:
     virtual void onEvent(const Pt::Event& ev);
 
@@ -257,6 +260,8 @@ class PT_HMI_API Window : public WindowBase
     virtual void onEnableEvent(const EnableEvent& ev);
 
     virtual void onWindowStateEvent(const WindowStateEvent& ev);
+
+    virtual void onInvalidateEvent(const InvalidateEvent& ev);
 
   private:
     void init(Window* parent);

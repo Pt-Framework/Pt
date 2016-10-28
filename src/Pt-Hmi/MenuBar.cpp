@@ -88,13 +88,14 @@ const String& MenuBarItem::text() const
 void MenuBarItem::setText(const Pt::String& t)
 {   
     _text = t;
+    invalidate();
 }
 
 
 void MenuBarItem::setSelected(bool s)
 {
     _selected = s;
-    update();      
+    invalidate();
 }
 
 
@@ -139,14 +140,16 @@ void MenuBarItem::onClicked()
 }
 
 
-Gfx::SizeF MenuBarItem::onAutoSize() const
+void MenuBarItem::onInvalidate()
 {
+    ButtonBase::onInvalidate();
+
     const Gfx::Font& font = Application::instance().font();
 
     Gfx::FontMetrics fm = Painter::fontMetrics(font, _text);
 
-    return Gfx::SizeF( fm.width() + padding().leftRight(), 
-                       fm.height() + padding().topBottom() );
+    setPreferredSize(Gfx::SizeF( fm.width() + padding().leftRight(), 
+                       fm.height() + padding().topBottom() ));
 }
 
 

@@ -75,7 +75,7 @@ class PT_HMI_API MenuItem : public ButtonBase
         
         virtual void onShortcut(const KeyEvent& kev);
 
-        virtual Gfx::SizeF onAutoSize() const;
+        virtual void onInvalidate();
         
         virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect);
 

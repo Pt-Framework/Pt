@@ -60,7 +60,7 @@ class PT_HMI_API Menu : public MenuShell
 
         void addItem(MenuItem& item);
 
-        void removeItem(MenuItem& item);               
+        void removeItem(MenuItem& item);
 
         void show(const Gfx::PointF& pos);
 
@@ -99,6 +99,8 @@ class PT_HMI_API Menu : public MenuShell
         // TODO: need a common way to react to widget content changes
         //       implement onSetShortCut in MenuItem to notify Menu
         virtual void onContentChanged();
+
+        virtual void onInvalidate();
 
     private:
         void onItemTriggered(MenuItem& m);

@@ -45,6 +45,7 @@
 #include <Pt/Hmi/EnterEvent.h>
 #include <Pt/Hmi/LeaveEvent.h>
 #include <Pt/Hmi/FocusEvent.h>
+#include <Pt/Hmi/InvalidateEvent.h>
 #include <Pt/Hmi/WindowStateEvent.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/System/Application.h>
@@ -77,6 +78,8 @@ class PT_HMI_API Application : public Pt::System::Application
 
         const Pt::Gfx::Font& font() const;
 
+        Pt::Gfx::Font labelFont( const Gfx::Font& userFont) const;
+
         void setFont(const Pt::Gfx::Font& f);
 
         void setCursor(const Cursor* cursor = 0);
@@ -106,6 +109,10 @@ class PT_HMI_API Application : public Pt::System::Application
         void nextEvent();
 
         ApplicationImpl* impl();
+
+        void invalidate();
+
+        Gfx::Font makeFont(const Gfx::Font& fromFont) const;
 
     protected:
         void onResizeEvent(const ResizeEvent& ev);
@@ -140,6 +147,8 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void onWindowStateEvent(const WindowStateEvent& ev);
 
+        void onInvalidateEvent(const InvalidateEvent& ev);
+
     private:
         void registerVisual(Visual& visual);
 
@@ -153,13 +162,14 @@ class PT_HMI_API Application : public Pt::System::Application
         typedef std::map<Pt::uint64_t, Visual*> VisualMap;
 
         ApplicationImpl* _impl; 
-        Screen*          _mainScreen;  
+        Screen*          _mainScreen;
         Pt::uint64_t     _lastId;
         VisualMap        _visuals;
         Window*          _pointerWindow;
         Widget*          _pointerWidget;
         Visual*          _pointerGrabber;
         Pt::Gfx::Font    _font;
+        Pt::Gfx::Font    _userFont;
 };
 
 } // namespace

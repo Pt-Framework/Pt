@@ -131,8 +131,9 @@ const String& MenuItem::text() const
 
 
 void MenuItem::setText(const Pt::String& t)
-{   
+{
     _text = t;
+    invalidate();
 }
 
 
@@ -145,6 +146,7 @@ const Gfx::Image& MenuItem::icon() const
 void MenuItem::setIcon(const Gfx::Image& img)
 {   
     _icon = img;
+    invalidate();
 }
 
 
@@ -189,8 +191,10 @@ void MenuItem::onShortcut(const KeyEvent& kev)
 }
 
 
-Gfx::SizeF MenuItem::onAutoSize() const
+void MenuItem::onInvalidate()
 {
+    ButtonBase::onInvalidate();
+
     const Gfx::Font& font = Application::instance().font();
 
     Gfx::FontMetrics fm = Painter::fontMetrics(font, _text);
@@ -206,8 +210,8 @@ Gfx::SizeF MenuItem::onAutoSize() const
         contentWidth += Painter::fontMetrics(font, text).width();
     }
 
-    return Gfx::SizeF( contentWidth + padding().leftRight(),
-                       contentHeight + padding().topBottom() );
+    setPreferredSize(Gfx::SizeF( contentWidth + padding().leftRight(),
+                       contentHeight + padding().topBottom() ));
 }
 
 

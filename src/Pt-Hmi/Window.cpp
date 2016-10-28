@@ -82,6 +82,7 @@ Window::Window(Window* parent, Window::Type type)
     _eventReady += Pt::slot(*this, &Window::onShowEvent);
     _eventReady += Pt::slot(*this, &Window::onEnableEvent);
     _eventReady += Pt::slot(*this, &Window::onWindowStateEvent);
+    _eventReady += Pt::slot(*this, &Window::onInvalidateEvent);
 
     if(parent)
         parent->add(*this);
@@ -1198,6 +1199,19 @@ void Window::setMnemonic(Widget& w, const Char* ch)
 
     if(ch)
         _mnemonics[*ch] = &w;
+}
+
+
+void Window::onInvalidate()
+{
+
+}
+
+
+void Window::onInvalidateEvent(const InvalidateEvent& ev)
+{
+  onInvalidate();
+  update();
 }
 
 } // namespace

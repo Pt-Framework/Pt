@@ -40,9 +40,9 @@ namespace Hmi {
 Label::Label()
 : Panel()
 , _contentAlignment(TopLeft)
-, _font()
+, _font(Application::instance().font())
 {
-
+    _userFont = _font;
 }
 
 
@@ -54,18 +54,30 @@ Label::~Label()
 void Label::setText(const Pt::String& text)
 {
     _text = Widget::setMnemonic(text);
-    update();
+    invalidate();
+}
+
+
+void Label::setFont(const Gfx::Font& f)
+{
+    _userFont = f;
+    invalidate();
 }
 
 
 Gfx::SizeF Label::onAutoSize() const
 {
-    const Gfx::Font& font = _font.empty() ? Application::instance().font() : _font;
+   Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( _font, _text);
 
-    Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( font, _text);
-
-    return Gfx::SizeF( fm.width() + padding().leftRight(), 
+  return Gfx::SizeF( fm.width() + padding().leftRight(), 
                        fm.height() + padding().topBottom() );
+}
+
+
+void Label::onInvalidate()
+{
+   _font = Application::instance().makeFont(_userFont);
+   Panel::onInvalidate();
 }
 
 
@@ -79,17 +91,13 @@ void Label::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
     Panel::onPaintContent(surface, updateRect);
        
-    Gfx::SizeF         size = this->size();
-    Gfx::PointF        pos(0, 0);
+    Gfx::SizeF  size = this->size();
+    Gfx::PointF pos(0, 0);
 
     Painter painter(surface);
-
     painter.setClip(updateRect);
-
-    const Gfx::Font& font = _font.empty() ? Application::instance().font() : _font;
-    painter.setFont(font);
-
     painter.setPen(foregroundPen());
+    painter.setFont(_font);
 
     Gfx::FontMetrics metric = painter.fontMetrics(_text);
 

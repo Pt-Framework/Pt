@@ -29,6 +29,7 @@
 
 #include <Pt/Hmi/WindowBase.h>
 #include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/Application.h>
 
 namespace Pt {
 
@@ -47,6 +48,13 @@ WindowBase::~WindowBase()
 Gfx::SizeF WindowBase::size() const
 {
     return onSize();
+}
+
+
+void WindowBase::invalidate()
+{
+    InvalidateEvent ev(vid());
+    Application::instance().loop().commitEvent(ev);
 }
 
 

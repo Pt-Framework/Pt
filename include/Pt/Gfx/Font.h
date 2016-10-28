@@ -63,6 +63,10 @@ class PT_GFX_API Font
                        ssize_t            angle     = 0,
                        Direction          direction = LeftToRight);
 
+        //! @brief Construct a font.
+        Font( const std::string& name, const Font& copy);
+
+
         //! @brief Returns the name of the font
         const std::string& name() const;
 

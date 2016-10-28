@@ -67,6 +67,7 @@ Application::Application(int argc, char** argv)
     loop().eventReceived() += Pt::slot(*this, &Application::onLeaveEvent );
     loop().eventReceived() += Pt::slot(*this, &Application::onFocusEvent );
     loop().eventReceived() += Pt::slot(*this, &Application::onWindowStateEvent);
+    loop().eventReceived() += Pt::slot(*this, &Application::onInvalidateEvent);
 }
 
 
@@ -80,6 +81,18 @@ Application::~Application()
 Application& Application::instance()
 {
     return static_cast<Application&>( System::Application::instance() );
+}
+
+
+void Application::invalidate()
+{
+  VisualMap::iterator it = _visuals.begin();
+  
+  for( ; it != _visuals.end(); ++it)
+  {
+    InvalidateEvent ev(it->first);
+    loop().commitEvent(ev);
+  }
 }
 
 
@@ -110,6 +123,7 @@ const Gfx::Font& Application::font() const
 void Application::setFont(const Gfx::Font& font)
 {
     _font = font;
+    invalidate();
 }
 
 
@@ -442,9 +456,31 @@ void Application::onWindowStateEvent(const WindowStateEvent& ev )
 }
 
 
+void Application::onInvalidateEvent(const InvalidateEvent& ev)
+{
+    VisualMap::iterator it = _visuals.find( ev.vid() );
+
+    if( it == _visuals.end() )
+        return;
+
+    it->second->processEvent(ev);
+}
+
+
 ApplicationImpl* Application::impl()
 {
     return _impl;
+}
+
+Gfx::Font Application::makeFont(const Gfx::Font& userFont) const
+{
+  if( userFont.empty() )
+      return _font;
+
+  if( userFont.name().empty() )
+      return Gfx::Font(_font.name(), userFont);
+
+  return _userFont;
 }
 
 } // namespace
