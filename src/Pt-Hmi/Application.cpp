@@ -45,6 +45,7 @@ Application::Application(int argc, char** argv)
 , _pointerWindow(0)
 , _pointerWidget(0)
 , _pointerGrabber(0)
+, _font("",12)
 {
     this->init(*_impl);
 
