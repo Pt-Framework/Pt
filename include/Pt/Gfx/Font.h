@@ -121,9 +121,6 @@ inline bool operator<(const Font& a, const Font& b)
     if(a._style < b._style)
         return true;
 
-    if(a._size < b._size)
-        return true;
-
     return false;
 }
 
