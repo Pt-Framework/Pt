@@ -173,7 +173,7 @@ class Rasterizer
   private:
     void stroke(int x, int y);
 
-    void stroke(int xpos, int ypos, Pt::ssize_t length);
+    void stroke(int xpos, int ypos, int length);
     void updateGradientBrush(int width, int height);
       
   private:

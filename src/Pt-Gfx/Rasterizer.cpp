@@ -1979,11 +1979,11 @@ void Rasterizer::fillSolid(const Point& pos, int length)
     if( length <= 0)
         return;
      
-    Pt::ssize_t bufferWidth = _brushImage->width();  
+    int bufferWidth = _brushImage->width();  
 
     while(length > 0)
     {
-        Pt::ssize_t n = std::min(length, bufferWidth);
+        int n = std::min(length, bufferWidth);
 
         if( n )
         {          
@@ -3295,7 +3295,7 @@ void Rasterizer::fill( const Point* pts, size_t pointCount)
 
     // find unclipped origin coordinates
     //
-    Point origin( std::numeric_limits<Pt::ssize_t>::max(), std::numeric_limits<Pt::ssize_t>::max() );
+    Point origin( std::numeric_limits<int>::max(), std::numeric_limits<int>::max() );
     
     int leftPos = std::numeric_limits<int>::max();
     int topPos = std::numeric_limits<int>::max();
@@ -3600,16 +3600,16 @@ void Rasterizer::stroke(int x, int y)
 }
 
 
-void Rasterizer::stroke(int xpos, int ypos, Pt::ssize_t length)
+void Rasterizer::stroke(int xpos, int ypos, int length)
 {       
     clipSpan( xpos, ypos, length );
 
-    Pt::ssize_t bufferWidth = _penBuffer.width();
+    int bufferWidth = _penBuffer.width();
 
 
     while(length > 0)
     {
-        Pt::ssize_t n = std::min(length, bufferWidth);
+        int n = std::min(length, bufferWidth);
         if( n )
         {
              Pixel destPixel( _image->view(), xpos, ypos);
