@@ -140,9 +140,6 @@ Button::~Button()
 }
 
 
-
-
-
 void Button::onMnemonic()
 {
     Label::onMnemonic();

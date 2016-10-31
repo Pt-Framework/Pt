@@ -46,6 +46,7 @@ Widget::Widget()
 , _visible(true)
 , _enabled(true)
 , _enabledState(true)
+, _autoSize(false)
 , _hasFocus(false)
 , _acceptsFocus(false) 
 , _focusIndex(0)
@@ -53,7 +54,6 @@ Widget::Widget()
 , _cursor( Hmi::Cursor::defaultCursor() )
 , _actionKey(Key::Space)
 , _mnemonic(0)
-, _autoSize(false)
 {      
     _eventReady += Pt::slot(*this, &Widget::onKeyEvent );
     _eventReady += Pt::slot(*this, &Widget::onScrollEvent );
@@ -491,18 +491,70 @@ void Widget::onMnemonic()
 }
 
 
-void Widget::update()
-{
-    Gfx::RectF rect( Gfx::PointF(0,0), size() );
-    update(rect);
-}
-
-
 void Widget::invalidate()
 {
     InvalidateEvent ev(vid());
     Application::instance().loop().commitEvent(ev);
 } 
+
+
+
+void Widget::onInvalidateEvent(const InvalidateEvent& ev)
+{
+    onInvalidate();
+
+    _preferredSize = onAutoSize();
+
+    if( parent() )
+       parent()->onLayout();
+}
+
+
+void Widget::onInvalidate()
+{
+}
+
+
+bool Widget::isAutoSize() const
+{
+    return _autoSize;
+}
+
+
+void Widget::setAutoSize(bool a)
+{
+    _autoSize = a;
+
+    // TODO: call invalidate? How is _preferredSize initialized if
+    //       invalidate has not been called yet?
+    // OR:
+    //       update _preferredSize here
+
+    if( parent() )
+       parent()->onLayout();
+}
+
+
+Gfx::SizeF Widget::preferredSize() const
+{
+    if(_autoSize)
+        return _preferredSize;
+
+    return size();
+}
+
+
+Gfx::SizeF Widget::onAutoSize() const
+{
+    return _size;
+}
+
+
+void Widget::update()
+{
+    Gfx::RectF rect( Gfx::PointF(0,0), size() );
+    update(rect);
+}
 
 
 void Widget::update(const Gfx::RectF& rect)
@@ -737,29 +789,6 @@ void Widget::setCursor(const Cursor& c)
 }
 
 
-bool Widget::isAutoSize() const
-{
-    return _autoSize;
-}
-
-
-void Widget::setAutoSize(bool a)
-{
-    _autoSize = a;
-
-    if( parent() )
-       parent()->onLayout();
-}
-
-
-Gfx::SizeF Widget::preferredSize() const
-{
-    if(_autoSize)
-        return _preferredSize;
-
-    return size();
-}
-
 const Spacing& Widget::margin() const
 {
     return _margin;
@@ -893,28 +922,6 @@ void Widget::onEnterEvent( const EnterEvent& ev )
 void Widget::onLeaveEvent(const LeaveEvent& ev )
 {
 
-}
-
-
-Gfx::SizeF Widget::onAutoSize() const
-{
-  return _size;
-}
-
-
-void Widget::onInvalidate()
-{
-
-}
-
-void Widget::onInvalidateEvent(const InvalidateEvent& ev)
-{
-    onInvalidate();
-
-    onAutoSize();
-
-    if( parent() )
-       parent()->onLayout();
 }
 
 } // namespace

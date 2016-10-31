@@ -194,7 +194,11 @@ void MenuItem::onShortcut(const KeyEvent& kev)
 void MenuItem::onInvalidate()
 {
     ButtonBase::onInvalidate();
+}
 
+
+Gfx::SizeF MenuItem::onAutoSize() const
+{
     const Gfx::Font& font = Application::instance().font();
 
     Gfx::FontMetrics fm = Painter::fontMetrics(font, _text);
@@ -210,8 +214,8 @@ void MenuItem::onInvalidate()
         contentWidth += Painter::fontMetrics(font, text).width();
     }
 
-    setPreferredSize(Gfx::SizeF( contentWidth + padding().leftRight(),
-                       contentHeight + padding().topBottom() ));
+    return Gfx::SizeF( contentWidth + padding().leftRight(),
+                       contentHeight + padding().topBottom() );
 }
 
 

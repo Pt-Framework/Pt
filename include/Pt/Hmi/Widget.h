@@ -233,6 +233,10 @@ class PT_HMI_API Widget : public Visual
 
         virtual void onRaise(Widget& w);
 
+        virtual void onInvalidate();
+
+        virtual Pt::Gfx::SizeF onAutoSize() const;
+
         virtual void onLayout();
 
         virtual void onSetActionKey(const Key& ak);
@@ -245,12 +249,10 @@ class PT_HMI_API Widget : public Visual
 
         virtual void onMnemonic();
 
-        virtual Pt::Gfx::SizeF onAutoSize() const;
-
-        virtual void onInvalidate();
-
     protected:
         virtual void onEvent( const Event& ev );
+
+        virtual void onInvalidateEvent(const InvalidateEvent& ev);
 
         virtual void onEnableEvent(const EnableEvent& ev);
 
@@ -276,8 +278,6 @@ class PT_HMI_API Widget : public Visual
 
         virtual void onLeaveEvent(const LeaveEvent& ev );
 
-        virtual void onInvalidateEvent(const InvalidateEvent& ev);
-
     private:
         void setParent(Widget* parent);
 
@@ -286,10 +286,10 @@ class PT_HMI_API Widget : public Visual
         Widget* findWidget( const Gfx::PointF& pos, bool input );
 
     protected:
-        void setPreferredSize(const Pt::Gfx::SizeF& s)
-        {
-            _preferredSize =s;
-        }
+        //void setPreferredSize(const Pt::Gfx::SizeF& s)
+        //{
+        //    _preferredSize =s;
+        //}
 
     private:
         Pt::Signal<const Pt::Event&> _eventReady;
@@ -305,6 +305,7 @@ class PT_HMI_API Widget : public Visual
         Gfx::PointF                  _position;
         Gfx::SizeF                   _size;
         Gfx::SizeF                   _preferredSize;
+        bool                         _autoSize;
 
         bool                         _hasFocus;
         bool                         _acceptsFocus;
@@ -317,11 +318,10 @@ class PT_HMI_API Widget : public Visual
         Pt::Char                     _mnemonic;
         Pt::Delegate<void>           _mnemonicEntered;
 
-        bool                         _autoSize;
+        
         Spacing                      _padding;
         Spacing                      _margin;
         Docking                      _docking;
-
 };
 
 } // namespace

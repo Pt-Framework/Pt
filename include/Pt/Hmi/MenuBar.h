@@ -72,6 +72,8 @@ class MenuBarItem : public ButtonBase
 
         virtual void onInvalidate();
 
+        virtual Gfx::SizeF onAutoSize() const;
+
         virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect);
 
         virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect);

@@ -143,13 +143,17 @@ void MenuBarItem::onClicked()
 void MenuBarItem::onInvalidate()
 {
     ButtonBase::onInvalidate();
+}
 
+
+Gfx::SizeF MenuBarItem::onAutoSize() const
+{
     const Gfx::Font& font = Application::instance().font();
 
     Gfx::FontMetrics fm = Painter::fontMetrics(font, _text);
 
-    setPreferredSize(Gfx::SizeF( fm.width() + padding().leftRight(), 
-                       fm.height() + padding().topBottom() ));
+    return Gfx::SizeF( fm.width() + padding().leftRight(), 
+                       fm.height() + padding().topBottom() );
 }
 
 

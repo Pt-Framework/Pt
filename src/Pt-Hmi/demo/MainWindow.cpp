@@ -198,7 +198,7 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 
     imagePainter.setFont(Pt::Gfx::Font("",12));
     imagePainter.setPen( Gfx::Pen( Gfx::Color::fromRgb8(0,0,0) ) );
-    imagePainter.drawText( Gfx::PointF(30, 20), "!HIiii !Hello World!");
+    imagePainter.drawText( Gfx::PointF(30, 20), "Hello World!");
 
     painter.drawImage(Gfx::PointF(0, 0), image);
     painter.drawPicture(Gfx::PointF(0,0), _picture);

@@ -60,13 +60,16 @@ class SubMenuItem : public MenuItem
         virtual void onInvalidate()
         {
             MenuItem::onInvalidate();
+        }
 
-            Gfx::SizeF size = preferredSize();
-
+        virtual Gfx::SizeF onAutoSize() const
+        {
+            Gfx::SizeF size = BaseType::onAutoSize();
+    
             // space for the menu indicator
             size.addWidth(indicatorWidth); 
     
-            setPreferredSize(size);
+            return size;
         }
 
         virtual void onPaintShortcut(PaintSurface& surface, 
