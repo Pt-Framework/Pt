@@ -158,10 +158,12 @@ void ChildW::onShowDialog(Pt::Hmi::Button&)
     //Gfx::PointF pos(0,0);
     //_childWindow2.move(pos);
 
-    Dialog1 d;    
-    d.showModal();
+    //Dialog1 d;    
+    //d.showModal();
     
     //enable(false);
+
+    _dialogButton.setText("Hallo");
 }
 
 void ChildW::onCloseApp(Pt::Hmi::Button&)

@@ -525,10 +525,7 @@ void Widget::setAutoSize(bool a)
 {
     _autoSize = a;
 
-    // TODO: call invalidate? How is _preferredSize initialized if
-    //       invalidate has not been called yet?
-    // OR:
-    //       update _preferredSize here
+    _preferredSize = onAutoSize();
 
     if( parent() )
        parent()->onLayout();
