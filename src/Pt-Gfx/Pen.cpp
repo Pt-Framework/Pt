@@ -35,7 +35,7 @@ namespace Pt {
 namespace Gfx {
 
 Pen::Pen()
-: _penData(new PenData(Color(0,0,0), 1, Solid, RoundCap, RoundJoin))
+: _penData(new PenData(Color(0,0,0), 0, Solid, RoundCap, RoundJoin))
 { }
 
 
@@ -76,6 +76,12 @@ Pen::CapStyle Pen::capStyle() const
 Pen::JoinStyle Pen::joinStyle() const
 {
     return _penData->joinStyle();
+}
+
+
+bool Pen::isNull() const
+{
+    return size() == 0;
 }
 
 } // namespace

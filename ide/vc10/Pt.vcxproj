@@ -62,6 +62,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Api.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Application.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Button.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\ButtonStyle.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\CloseEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Cursor.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Docking.h" />
@@ -511,6 +512,7 @@
     <ClCompile Include="..\..\src\Pt-Gfx\Yuv12Format.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Application.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Button.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\ButtonStyle.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Cursor.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\demo\ChildW.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\demo\Dialog1.cpp" />

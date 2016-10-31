@@ -59,9 +59,7 @@ void DrawText::setFont(const Font& font)
 {
     if( font.name().empty() )
     {
-        Font defaultFont(FreeType::instance().defaultFont(),
-                         font.size(), font.style(),
-                         font.angle(), font.direction() );
+        Font defaultFont(FreeType::instance().defaultFont(), font);
 
         _faceId = FreeType::instance().findFaceId(defaultFont);
     }

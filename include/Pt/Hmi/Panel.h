@@ -125,12 +125,12 @@ class PT_HMI_API Panel : public Widget
 		
         virtual ~Panel();	
 
-        const Gfx::Brush& backgroundBrush() const
+        const Gfx::Brush& background() const
         {
             return _backgroundBrush;
         }
 
-        void setBackgroundBrush( const Gfx::Brush& c, bool doRepaint = true )
+        void setBackground( const Gfx::Brush& c, bool doRepaint = true )
         {
             _backgroundBrush = c;
 
@@ -138,12 +138,12 @@ class PT_HMI_API Panel : public Widget
                 update();
         }
 
-        const Gfx::Pen& foregroundPen() const
+        const Gfx::Pen& foreground() const
         {
             return _foregroundPen;
         }
 
-        void setForegroundPen(const Gfx::Pen& c )
+        void setForeground(const Gfx::Pen& c )
         {
             _foregroundPen = c;
             update();
@@ -219,10 +219,10 @@ class PT_HMI_API Panel : public Widget
         Gfx::Image    _backgroundImage;
         Picture       _backgroundPicture;
         ImageLayout   _backgroundImageLayout;
-		    BorderStyle	  _borderStyle;
-		    bool				  _borderRound;	
-		    double			  _borderWidth;	  
-		    Gfx::Color	  _borderColor;
+        BorderStyle	  _borderStyle;
+        bool	   	  _borderRound;	
+        double			  _borderWidth;	  
+        Gfx::Color	  _borderColor;
 }; 
 
 } // namespace

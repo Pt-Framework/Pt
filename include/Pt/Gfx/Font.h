@@ -50,22 +50,17 @@ class PT_GFX_API Font
             BoldItalic
         };
 
-        enum Direction {
-            LeftToRight = 0, 
-            RightToLeft
-        };
-
     public:
-        //! @brief Construct a font.
-        explicit Font( const std::string& name      = std::string(),
-                       size_t             size      = 0,
-                       Style              style     = Normal,
-                       ssize_t            angle     = 0,
-                       Direction          direction = LeftToRight);
+        Font();
 
         //! @brief Construct a font.
-        Font( const std::string& name, const Font& copy);
+        explicit Font( const std::string& name,
+                       size_t             size,
+                       Style              style = Normal,
+                       ssize_t            angle = 0);
 
+        //! @brief Construct a font.
+        Font(const std::string& name, const Font& font);
 
         //! @brief Returns the name of the font
         const std::string& name() const;
@@ -79,13 +74,7 @@ class PT_GFX_API Font
         //! @brief Returns the angle of the font
         ssize_t angle() const;
 
-        bool empty() const
-        {
-          return size() == 0;
-        }
-
-        //! @brief Returns the text-flow direction of the font
-        Direction direction() const;
+        bool isNull() const;
 
         friend bool operator==(const Font& a, const Font& b);
 
@@ -98,7 +87,6 @@ class PT_GFX_API Font
         size_t      _size;
         Style       _style;
         ssize_t     _angle;
-        Direction   _direction;
 };
 
 
@@ -107,8 +95,7 @@ inline bool operator==(const Font& a, const Font& b)
     return a._name      == b._name      && 
            a._style     == b._style && 
            a._size      == b._size      && 
-           a._angle     == b._angle     &&
-           a._direction == b._direction;
+           a._angle     == b._angle;
 }
 
 
@@ -117,8 +104,7 @@ inline bool operator!=(const Font& a, const Font& b)
     return a._name      != b._name      || 
            a._style     != b._style || 
            a._size      != b._size      || 
-           a._angle     != b._angle     ||
-           a._direction != b._direction;
+           a._angle     != b._angle;
 }
 
 

@@ -1404,6 +1404,9 @@
     <ClInclude Include="..\..\include\Pt\Hmi\InvalidateEvent.h">
       <Filter>Pt-Hmi\Events</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ButtonStyle.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2592,6 +2595,9 @@
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\PixmapSurface.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\ButtonStyle.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
   </ItemGroup>

@@ -57,6 +57,8 @@ class PT_GFX_API Brush
         };
 
     public:
+        /** @brief Contructs a null brush.
+        */
         Brush();
 
         Brush(const Color& color);
@@ -73,6 +75,8 @@ class PT_GFX_API Brush
         const Color& gradientColor() const;
 
         const Image& texture() const;
+
+        bool isNull() const;
 
     private:
         SmartPtr<BrushData> _brushData;
@@ -100,11 +104,14 @@ class BrushData
 
         const Image& texture() const;
 
+        bool isNull() const;
+
     private:
-        Brush::FillStyle         _fillStyle;
-        Color                    _color;
-        Image                    _texture;
-        Color                    _gradientColor;
+        Brush::FillStyle _fillStyle;
+        Color            _color;
+        Image            _texture;
+        Color            _gradientColor;
+        bool             _isNull;
 };
 
 } // namespace

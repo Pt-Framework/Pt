@@ -472,9 +472,22 @@ ApplicationImpl* Application::impl()
     return _impl;
 }
 
+
+const Style& Application::style() const
+{
+    return _ptStyle;
+}
+
+
+Style& Application::style()
+{
+    return _ptStyle;
+}
+
+
 Gfx::Font Application::makeFont(const Gfx::Font& userFont) const
 {
-  if( userFont.empty() )
+  if( userFont.isNull() )
       return _font;
 
   if( userFont.name().empty() )

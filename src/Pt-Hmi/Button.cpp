@@ -124,7 +124,7 @@ Button::Button()
 , _imageAlign( MiddleLeft)
 , _isPressed(false)
 {
-  setBackgroundBrush(Pt::Gfx::Brush(Gfx::Color::fromRgb8(245,245,245)));
+  setBackground(Pt::Gfx::Brush(Gfx::Color::fromRgb8(245,245,245)));
 
   setContentAlignment(MiddleCenter);
   setAcceptsFocus(true);
@@ -247,57 +247,15 @@ void Button::onFocusEvent(const FocusEvent& ev)
 
 void Button::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
-    if( ! isEnabled() )
-    {
-        Label::onPaintBackground(surface, updateRect);
-        return;
-    }
-
-    // TODO: use enter/leave events
-    bool mouseOver = Application::instance().pointerWidget() == this;
-    
-    Gfx::Brush bkgr = backgroundBrush();
-    const Gfx::Color& bkgColor = bkgr.color();
-
-    if( mouseOver )
-    {
-        setBackgroundBrush( Gfx::Color(bkgColor.red() * 0.9f ,
-                                       bkgColor.green() * 0.9f ,
-                                       bkgColor.blue() * 0.9f ), false );
-    }
-
-    if( _isPressed )
-    {
-        setBackgroundBrush( Gfx::Color(bkgColor.red() * 0.8f ,
-                                       bkgColor.green() * 0.8f ,
-                                       bkgColor.blue() * 0.8f ), false );
-    }
-    
-    Label::onPaintBackground(surface, updateRect);
-    
-    setBackgroundBrush(bkgr, false);
+    const ButtonStyle* bs = Application::instance().style().get<ButtonStyle>();
+    bs->renderBackground(*this, surface, updateRect);
 }
 
 
 void Button::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
-    Label::onPaintContent(surface, updateRect);
-    
-    if( hasFocus() )
-    {
-        Gfx::SizeF size = this->size();
-        size.addHeight(-4);
-        size.addWidth(-4);
-
-        Gfx::Color armedColor(Gfx::Color::fromRgb8(176,176,176));
-        Gfx::Pen pen(armedColor, 1, Gfx::Pen::Dash);
-        
-        Painter painter( surface );
-        painter.setClip(updateRect);
-        painter.setPen(pen);
-        Gfx::RectF rect(Gfx::PointF(2,2), size);
-        painter.drawRect(rect);
-    }
+    const ButtonStyle* bs = Application::instance().style().get<ButtonStyle>();
+    bs->renderContent(*this, surface, updateRect);
 }
 
 } // namespace

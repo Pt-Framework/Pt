@@ -168,8 +168,7 @@ void Painter::setFont(const Gfx::Font& font)
     if( font.name().empty() )
     {
         const Gfx::Font& defaultFont = Application::instance().font();
-        _font = Gfx::Font( defaultFont.name(), font.size(),
-                           font.style(), font.angle(), font.direction() );
+        _font = Gfx::Font( defaultFont.name(), font );
     }
     else
         _font = font;

@@ -64,7 +64,7 @@ MenuBarItem::MenuBarItem(MenuBar& mb, Menu& menu, const Pt::String& text)
     setBorderStyle(Panel::NoBorder);
     setAcceptsFocus(true);
     
-    setBackgroundBrush( Gfx::Color(58981, 58981, 58981) );
+    setBackground( Gfx::Color(58981, 58981, 58981) );
 
     setText(text);
     setBorderRound(false);
@@ -204,7 +204,7 @@ void MenuBarItem::onPaintBackground(PaintSurface& surface, const Gfx::RectF& upd
 {
     if(_highlighted || _selected)
     {
-        Gfx::Color bgColor = backgroundBrush().color();
+        Gfx::Color bgColor = background().color();
         Gfx::Brush brush = brighten(bgColor, 0.85f);
 
         Painter painter(surface);
@@ -223,7 +223,7 @@ void MenuBarItem::onPaintContent(PaintSurface& surface, const Gfx::RectF& update
     painter.setClip(updateRect);
     painter.setFont(font);
     
-    painter.setPen(foregroundPen());
+    painter.setPen(foreground());
 
     Gfx::FontMetrics fm = Painter::fontMetrics(font, _text);
     double textX = padding().left();
@@ -261,7 +261,7 @@ MenuBar::MenuBar()
 , _currentMenu(0)
 , _currentMenuItem(0)
 {
-    this->setBackgroundBrush( Gfx::Color(58981, 58981, 58981) );
+    this->setBackground( Gfx::Color(58981, 58981, 58981) );
     this->setBorderColor( Gfx::Color(32767, 32767, 32767)  );
     this->setBorderStyle(Panel::NoBorder);
 

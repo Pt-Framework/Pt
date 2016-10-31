@@ -34,25 +34,30 @@ namespace Pt {
 
 namespace Gfx {
 
-Font::Font(const std::string& name, size_t size, Style style, 
-           ssize_t angle, Direction direction)
-: _name(name),
-  _size(size),
-  _style(style),
-  _angle(angle),
-  _direction(direction)
+Font::Font()
+: _name()
+, _size(0)
+, _style(Normal)
+, _angle(0)
 {
 }
 
 
-Font::Font( const std::string& name, const Font& copy)
+Font::Font(const std::string& name, std::size_t size, Style style, Pt::ssize_t angle)
 : _name(name)
-, _size(copy._size)
-, _style(copy._style)
-, _angle(copy._angle)
-, _direction(copy._direction)
+,  _size(size)
+,  _style(style)
+,  _angle(angle)
 {
+}
 
+
+Font::Font( const std::string& name, const Font& font)
+: _name(name)
+, _size(font._size)
+, _style(font._style)
+, _angle(font._angle)
+{
 }
 
 const std::string& Font::name() const
@@ -79,9 +84,9 @@ ssize_t Font::angle() const
 }
 
 
-Font::Direction Font::direction() const
+bool Font::isNull() const
 {
-    return _direction;
+    return size() == 0;
 }
 
 } // namespace

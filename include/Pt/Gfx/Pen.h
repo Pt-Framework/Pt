@@ -74,11 +74,9 @@ class PT_GFX_API Pen
                          MiterJoin = 2, 
                          TriangularJoin = 3 };
 
-        /** @brief Constructs a Pen object.
+        /** @brief Constructs a null pen.
         
-            The default pen size is 1, the default pen color is black, the 
-            default style is solid and the default cap and join style are 
-            round.
+            The default pen is null.
         */
         Pen();
 
@@ -114,6 +112,8 @@ class PT_GFX_API Pen
         /** @brief Returns the join style.
         */
         JoinStyle joinStyle() const;
+
+        bool isNull() const;
 
     private:
       SmartPtr<PenData> _penData;

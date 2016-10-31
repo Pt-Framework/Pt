@@ -80,9 +80,16 @@ const Image& Brush::texture() const
 }
 
 
+bool Brush::isNull() const
+{
+    return _brushData->isNull();
+}
+
+
 BrushData::BrushData()
 : _fillStyle(Brush::Solid)
 , _color(0, 0, 0)
+, _isNull(true)
 {
 }
 
@@ -91,6 +98,7 @@ BrushData::BrushData(const Color& color)
 : _fillStyle(Brush::Solid)
 , _color(color)
 , _texture()
+, _isNull(false)
 {
 }
 
@@ -98,6 +106,7 @@ BrushData::BrushData(const Color& color)
 BrushData::BrushData(const Image& texture)
 : _fillStyle(Brush::Texture)
 , _texture(texture)
+, _isNull(false)
 {
 }
 
@@ -107,6 +116,7 @@ BrushData::BrushData(const Color& from, const Color& to, Brush::GradientDirectio
                                      : Brush::VerticalGradient)
 , _color(from)
 , _gradientColor(to)
+, _isNull(false)
 {
 }
 
@@ -137,6 +147,12 @@ const Color& BrushData::gradientColor() const
 const Image& BrushData::texture() const
 {
     return _texture;
+}
+
+
+bool BrushData::isNull() const
+{
+    return _isNull;
 }
 
 } // namespace
