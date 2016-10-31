@@ -120,18 +120,10 @@ void ButtonBase::onTouchEvent(const TouchEvent& ev)
 
 
 Button::Button()
-: _image()
-, _imageAlign( MiddleLeft)
-, _isPressed(false)
+: _isPressed(false)
+, _style(0)
 {
-  setBackground(Pt::Gfx::Brush(Gfx::Color::fromRgb8(245,245,245)));
-
-  setContentAlignment(MiddleCenter);
   setAcceptsFocus(true);
-
-  setBorderWidth(1);
-  setBorderRound(true);
-  setBorderStyle(Panel::Single);
 }
 
 
@@ -142,28 +134,28 @@ Button::~Button()
 
 void Button::onMnemonic()
 {
-    Label::onMnemonic();
+    Control::onMnemonic();
     _clicked.send(*this);
 }
 
 
 void Button::onActionKey( const KeyEvent& kev )
 {
-    Label::onActionKey(kev);
+    Control::onActionKey(kev);
     _clicked.send(*this);
 }
 
 
 void Button::onShortcut( const KeyEvent& kev )
 {
-    Label::onShortcut(kev);
+    Control::onShortcut(kev);
     _clicked.send(*this);
 }
 
 
 void Button::onMouseEvent(const MouseEvent& ev)
 {    
-    Label::onMouseEvent(ev);
+    Control::onMouseEvent(ev);
 
     if( ev.isPressed() != _isPressed )
     {
@@ -194,7 +186,7 @@ void Button::onMouseEvent(const MouseEvent& ev)
 
 void Button::onTouchEvent(const TouchEvent& ev)
 {    
-    Label::onTouchEvent(ev);
+    Control::onTouchEvent(ev);
 
     if( ev.isPressed() != _isPressed )
     {
@@ -225,7 +217,7 @@ void Button::onTouchEvent(const TouchEvent& ev)
 
 void Button::onEnterEvent(const EnterEvent& ev )
 {
-    Label::onEnterEvent(ev);
+    Control::onEnterEvent(ev);
     update();
 }
 
@@ -233,28 +225,28 @@ void Button::onEnterEvent(const EnterEvent& ev )
 void Button::onLeaveEvent(const LeaveEvent& ev )
 {
     _isPressed = false;
-    Label::onLeaveEvent(ev);
+    Control::onLeaveEvent(ev);
     update();
 }
 
 
 void Button::onFocusEvent(const FocusEvent& ev)
 {    
-    Label::onFocusEvent(ev);
+    Control::onFocusEvent(ev);
     update();
 }
 
 
 void Button::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
-{
-    const ButtonStyle* bs = Application::instance().style().get<ButtonStyle>();
+{    
+    const ButtonStyle* bs = _style != 0 ? _style : Application::instance().style().get<ButtonStyle>();
     bs->renderBackground(*this, surface, updateRect);
 }
 
 
 void Button::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
-    const ButtonStyle* bs = Application::instance().style().get<ButtonStyle>();
+    const ButtonStyle* bs = _style != 0 ? _style : Application::instance().style().get<ButtonStyle>();
     bs->renderContent(*this, surface, updateRect);
 }
 

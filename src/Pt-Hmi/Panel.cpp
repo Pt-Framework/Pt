@@ -103,21 +103,6 @@ void Panel::onResizeEvent(const ResizeEvent& ev)
 }
 
 
-void Panel::onPaintEvent(const PaintEvent& ev)
-{
-    Widget::onPaintEvent(ev);
-
-    Gfx::PointF winpos = toWindow( Gfx::PointF(0,0) );
-    PaintSurface& windowSurface = this->window()->surface();
-
-    Gfx::RectF paintRect(winpos, size());
-    PaintRegion region(windowSurface, paintRect);
-    
-    onPaintBackground(region, ev.rect());
-    onPaintContent(region, ev.rect());
-}
-
-
 void Panel::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
     const Gfx::SizeF& size = this->size();

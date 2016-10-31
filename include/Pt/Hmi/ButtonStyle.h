@@ -93,6 +93,11 @@ class PT_HMI_API ButtonStyle : public WidgetStyle
             _pen = pen; 
         }
 
+        void setBackground(const Pt::Gfx::Brush&  b)
+        { 
+            _brush = b;
+        }
+
         const Pt::Gfx::Brush& background() const
         { 
             return _brush; 
@@ -115,7 +120,7 @@ class PT_HMI_API ButtonStyle : public WidgetStyle
     private:
         Pt::Gfx::Pen   _pen;
         Pt::Gfx::Brush _brush;
-        Pt::Gfx::Font  _font;
+        Pt::Gfx::Font  _font;        
 };
 
 
@@ -134,6 +139,10 @@ class PT_HMI_API PtButtonStyle : public ButtonStyle
         virtual void onRenderContent(Button& button, 
                                      PaintSurface& surface, 
                                      const Gfx::RectF& updateRect) const;  
+
+
+    private:
+        Gfx::Color _borderColor;
 };
 
 } // namespace

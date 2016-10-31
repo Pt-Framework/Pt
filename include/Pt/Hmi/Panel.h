@@ -29,7 +29,7 @@
 #ifndef Pt_Hmi_Panel_H
 #define Pt_Hmi_Panel_H
 
-#include <Pt/Hmi/Widget.h>
+#include <Pt/Hmi/Control.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/Picture.h>
@@ -88,7 +88,7 @@ class ImageLayout
 };
 
 
-class PT_HMI_API Panel : public Widget
+class PT_HMI_API Panel : public Control
 {
 	  public:
 		    enum BorderStyle
@@ -205,10 +205,7 @@ class PT_HMI_API Panel : public Widget
 
     protected:
         virtual void onResizeEvent(const ResizeEvent& ev);
-
-        virtual void onPaintEvent( const PaintEvent& ev );
 	
-    protected:
         virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect);
 
         virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect);

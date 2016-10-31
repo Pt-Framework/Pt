@@ -104,7 +104,10 @@ ChildW::ChildW(const std::string& title)
     _closeButton.setMargin(5);
     _closeButton.setPadding(5);
     _closeButton.setDocking( Docking::Bottom );
-    _closeButton.clicked() += Pt::slot(*this, &ChildW::onCloseApp);
+    _closeButton.clicked() += Pt::slot(*this, &ChildW::onCloseApp);    
+
+    _style.setBackground(Pt::Gfx::Color::fromRgb8(255,0,0));
+    _closeButton.setStyle(&_style);
 
     _buttonBar.setName("ButtonBar");
     _buttonBar.resize( Gfx::SizeF(700, 180) );

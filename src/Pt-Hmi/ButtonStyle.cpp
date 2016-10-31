@@ -39,6 +39,9 @@ namespace Hmi {
 
 ButtonStyle::ButtonStyle()
 : WidgetStyle( typeid(ButtonStyle) )
+, _pen(Gfx::Color::fromRgb8(0,0,0))
+, _brush(Gfx::Color::fromRgb8(127,127,127))
+, _font(Application::instance().font())
 {
 }
 
@@ -62,11 +65,10 @@ void PtButtonStyle::onRenderBackground(Button& button,
                                        PaintSurface& surface, 
                                        const Gfx::RectF& updateRect) const
 {
-    const Pt::Gfx::Pen& fg = button.foreground().isNull() ? foreground()
-                                                          : button.foreground();
+    const Pt::Gfx::Pen& fg = foreground();
+                             
 
-    const Pt::Gfx::Brush& bg = button.background().isNull() ? background()
-                                                            : button.background();
+    const Pt::Gfx::Brush& bg = background();
 
     Gfx::Color bkgColor = bg.color();
 
@@ -157,13 +159,9 @@ void PtButtonStyle::onRenderContent(Button& button,
                                     PaintSurface& surface, 
                                     const Gfx::RectF& updateRect) const
 {
-    const Pt::Gfx::Font& textFont = button.font().isNull() ? font() : button.font();
-    const Pt::Gfx::Pen& fg = button.foreground().isNull() ? foreground()
-                                                          : button.foreground();
-
-    const Pt::Gfx::Brush& bg = button.background().isNull() ? background()
-                                                            : button.background();
-
+    const Pt::Gfx::Font& textFont = font();
+    const Pt::Gfx::Pen& fg = foreground();
+    const Pt::Gfx::Brush& bg = background();
     const String& text = button.text();
     const Gfx::SizeF& size = button.size();
 

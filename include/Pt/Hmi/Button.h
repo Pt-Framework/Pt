@@ -30,7 +30,8 @@
 #ifndef Pt_Hmi_Button_H
 #define Pt_Hmi_Button_H
 
-#include <Pt/Hmi/Label.h>
+#include <Pt/Hmi/Control.h>
+#include <Pt/Hmi/Panel.h>
 #include <Pt/Gfx/Image.h>
 
 namespace Pt {
@@ -39,6 +40,7 @@ namespace Hmi {
 
 class MouseEvent;
 class TouchEvent;
+class ButtonStyle;
 
 // TODO: name this call Button and rename Button -> PushButton
 //       and derive PushButton from Button
@@ -83,28 +85,24 @@ class PT_HMI_API ButtonBase : public Panel
 };
 
 
-class PT_HMI_API Button  : public Label
+class PT_HMI_API Button  :  public Control
 {
     public:
         Button();
     
         virtual ~Button();
-
-        void setImage(const Gfx::Image& i) 
+    
+        void setText(const Pt::String& t)
         {
-            _image = i;
+            _text = t;
         }
 
-        Alignment imageAlignment()  const
+        const Pt::String& text() const
         {
-           return _imageAlign;
+            return _text;
         }
 
-        void setImageAlignment(const Alignment& i) 
-        {
-           _imageAlign = i;
-        }
-             
+
         Signal<Button&>& clicked()
         {
             return _clicked;
@@ -124,6 +122,11 @@ class PT_HMI_API Button  : public Label
         {
             return _isPressed;
         }
+        
+        void setStyle(const ButtonStyle* style)
+        {
+            _style = style;
+        }        
 
     protected:
         virtual void onMnemonic();
@@ -150,11 +153,10 @@ class PT_HMI_API Button  : public Label
     private:
         Signal<Button&> _clicked;
         Signal<Button&> _pressed;
-        Signal<Button&> _released;
-        
-        Gfx::Image _image;
-        Alignment  _imageAlign;
-        bool _isPressed;
+        Signal<Button&> _released;       
+        bool            _isPressed;
+        const ButtonStyle*    _style;
+        Pt::String _text;
 };
 
 } // namespace

@@ -11,7 +11,7 @@
 #include <Pt/Hmi/Menu.h>
 #include <Pt/Hmi/ScrollView.h>
 #include "Dialog1.h"
-
+#include <Pt/Hmi/Application.h>
 namespace Pt {
 
 namespace Hmi {
@@ -53,6 +53,7 @@ class ChildW : public Hmi::Window
         Button _dialogButton;
         Label  _textLabel;
         DockingLayout _buttonBar;
+        PtButtonStyle _style;
 };
 
 } // namespace
