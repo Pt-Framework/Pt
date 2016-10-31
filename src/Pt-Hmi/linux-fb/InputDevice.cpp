@@ -360,7 +360,7 @@ void InputDevice::onKey(const input_event& ev)
             else if(typ == KT_PAD && value < 10)
             {
                 // TODO: does this mean numpad?
-                keyCode = 0x30 + value;
+                keyCode = Key::NumPad0 + value;                
                 ch = keyCode;
             }
 
