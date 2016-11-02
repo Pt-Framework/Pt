@@ -62,7 +62,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Api.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Application.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Button.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\ButtonStyle.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\CloseEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Control.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Cursor.h" />
@@ -91,6 +90,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Panel.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Picture.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PixmapSurface.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\PlatinumStyle.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ResizeEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Screen.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ScrollBar.h" />
@@ -99,6 +99,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\ScrollView.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ShowEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Spacing.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\Style.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\TouchEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Visual.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Widget.h" />
@@ -513,7 +514,6 @@
     <ClCompile Include="..\..\src\Pt-Gfx\Yuv12Format.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Application.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Button.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\ButtonStyle.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Control.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Cursor.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\demo\ChildW.cpp" />
@@ -570,10 +570,12 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Panel.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Picture.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\PixmapSurface.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\PlatinumStyle.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Screen.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\ScrollBar.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\ScrollLayout.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\ScrollView.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\Style.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Visual.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Widget.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Window.cpp" />

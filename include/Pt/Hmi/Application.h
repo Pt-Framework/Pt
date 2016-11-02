@@ -47,11 +47,9 @@
 #include <Pt/Hmi/FocusEvent.h>
 #include <Pt/Hmi/InvalidateEvent.h>
 #include <Pt/Hmi/WindowStateEvent.h>
+#include <Pt/Hmi/PlatinumStyle.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/System/Application.h>
-#include <Pt/TypeInfo.h>
-
-#include <Pt/Hmi/ButtonStyle.h>
 
 namespace Pt {
 
@@ -61,53 +59,6 @@ class ApplicationImpl;
 class Window;
 class Widget;
 class Visual;
-
-
-class PT_HMI_API Style
-{
-    public:
-        Style()
-        {}
-
-        ~Style()
-        {}
-
-        void registerStyle(WidgetStyle& style)
-        {
-            _styles[ style.typeId() ] = &style;
-        }
-
-        template <typename T> 
-        const T* get() const
-        {
-            StyleMap::const_iterator it = _styles.find( typeid(T) );
-            if( it == _styles.end() )
-                return 0;
-
-            return static_cast<const T*>(it->second);
-        }
-
-    private:
-        typedef std::map<TypeInfo, WidgetStyle*> StyleMap;
-        StyleMap _styles;
-};
-
-
-class PtStyle : public Style
-{
-    public:
-        PtStyle()
-        {
-            registerStyle(_buttonStyle);
-        }
-
-        ~PtStyle()
-        {}
-
-    private:
-        PtButtonStyle _buttonStyle;
-};
-
 
 class PT_HMI_API Application : public Pt::System::Application
 {
@@ -156,15 +107,17 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void nextEvent();
 
-        ApplicationImpl* impl();
-
         const Style& style() const;
 
         Style& style();
 
+        const StyleOptions& styleOptions() const;
+
         Gfx::Font makeFont(const Gfx::Font& fromFont) const;
 
         void invalidate();
+
+        ApplicationImpl* impl();
 
     protected:
         void onResizeEvent(const ResizeEvent& ev);
@@ -222,7 +175,8 @@ class PT_HMI_API Application : public Pt::System::Application
         Visual*          _pointerGrabber;
         Pt::Gfx::Font    _font;
         Pt::Gfx::Font    _userFont;
-        PtStyle          _ptStyle;
+        PlatinumStyle    _platinumStyle;
+        StyleOptions     _styleOptions;
 };
 
 } // namespace

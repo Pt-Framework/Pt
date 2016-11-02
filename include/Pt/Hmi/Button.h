@@ -38,9 +38,9 @@ namespace Pt {
 
 namespace Hmi {
 
+class Style;
 class MouseEvent;
 class TouchEvent;
-class ButtonStyle;
 
 // TODO: name this call Button and rename Button -> PushButton
 //       and derive PushButton from Button
@@ -85,23 +85,20 @@ class PT_HMI_API ButtonBase : public Panel
 };
 
 
-class PT_HMI_API Button  :  public Control
+class PT_HMI_API Button : public Control
 {
     public:
         Button();
     
         virtual ~Button();
     
-        void setText(const Pt::String& t)
-        {
-            _text = t;
-        }
+        void setText(const Pt::String& t);
 
-        const Pt::String& text() const
-        {
-            return _text;
-        }
+        const Pt::String& text() const;
 
+        bool isPressed() const;
+        
+        void setStyle(const Style& style);
 
         Signal<Button&>& clicked()
         {
@@ -117,16 +114,6 @@ class PT_HMI_API Button  :  public Control
         {
             return _released;
         }
-
-        bool isPressed() const
-        {
-            return _isPressed;
-        }
-        
-        void setStyle(const ButtonStyle* style)
-        {
-            _style = style;
-        }        
 
     protected:
         virtual void onMnemonic();
@@ -151,12 +138,12 @@ class PT_HMI_API Button  :  public Control
         virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect);
 
     private:
-        Signal<Button&> _clicked;
-        Signal<Button&> _pressed;
-        Signal<Button&> _released;       
-        bool            _isPressed;
-        const ButtonStyle*    _style;
-        Pt::String _text;
+        Style*                   _style;
+        Pt::String               _text;
+        bool                     _isPressed;
+        Signal<Button&>          _clicked;
+        Signal<Button&>          _pressed;
+        Signal<Button&>          _released;       
 };
 
 } // namespace

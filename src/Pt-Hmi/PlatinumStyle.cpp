@@ -27,7 +27,7 @@
    MA  02110-1301  USA
 */
 
-#include <Pt/Hmi/ButtonStyle.h>
+#include <Pt/Hmi/PlatinumStyle.h>
 #include <Pt/Hmi/Button.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/PaintSurface.h>
@@ -37,44 +37,28 @@ namespace Pt {
 
 namespace Hmi {
 
-ButtonStyle::ButtonStyle()
-: WidgetStyle( typeid(ButtonStyle) )
-, _pen(Gfx::Color::fromRgb8(0,0,0))
-, _brush(Gfx::Color::fromRgb8(127,127,127))
-, _font(Application::instance().font())
+///////////////////////////////////////////////////////////////////////////////
+// PlatinumButtonRenderer
+///////////////////////////////////////////////////////////////////////////////
+
+PlatinumButtonRenderer::PlatinumButtonRenderer()
 {
 }
 
     
-ButtonStyle::~ButtonStyle()
+PlatinumButtonRenderer::~PlatinumButtonRenderer()
 {
 }
 
 
-PtButtonStyle::PtButtonStyle()
+void PlatinumButtonRenderer::onRenderBackground(Button& button, 
+                                                PaintSurface& surface, 
+                                                const Gfx::RectF& updateRect) const
 {
-}
+    Application& app = Application::instance();
 
-    
-PtButtonStyle::~PtButtonStyle()
-{
-}
-
-
-void PtButtonStyle::onRenderBackground(Button& button, 
-                                       PaintSurface& surface, 
-                                       const Gfx::RectF& updateRect) const
-{
-    const Pt::Gfx::Pen& fg = foreground();
-                             
-
-    const Pt::Gfx::Brush& bg = background();
-
-    Gfx::Color bkgColor = bg.color();
-
-    Gfx::Color frameColor = Gfx::Color(bkgColor.red() * 0.6f ,
-                                       bkgColor.green() * 0.6f ,
-                                       bkgColor.blue() * 0.6f);
+    Gfx::Color bkgColor = app.styleOptions().windowColor();
+    Gfx::Color frameColor = app.styleOptions().widgetColor();
 
     const Gfx::SizeF& size = button.size();
 
@@ -84,12 +68,10 @@ void PtButtonStyle::onRenderBackground(Button& button,
     if( button.isEnabled() )
     {
         // TODO: use enter/leave events
-        bool mouseOver = Application::instance().pointerWidget() == &button;
+        bool mouseOver = app.pointerWidget() == &button;
         if(mouseOver)
         {
-            bkgColor = Gfx::Color(bkgColor.red() * 0.9f ,
-                                  bkgColor.green() * 0.9f ,
-                                  bkgColor.blue() * 0.9f);
+            bkgColor = app.styleOptions().hoverColor();
         }
 
         if( button.isPressed() )
@@ -102,7 +84,7 @@ void PtButtonStyle::onRenderBackground(Button& button,
 
     Painter painter(surface);
     painter.setClip(updateRect);
-    painter.setPen(fg);
+    painter.setPen(frameColor);
     painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
 
     Gfx::RectF borderRect(Gfx::PointF(0,0), size);
@@ -144,30 +126,31 @@ void PtButtonStyle::onRenderBackground(Button& button,
             
     outline[8] = outline[0];
 
-    if( bg.color().alpha() != 0 )
-    {
-        painter.setBrush(bkgColor); 
-        painter.fillPolygon(&outline[0], outline.size());
-    }
+
+    painter.setBrush(bkgColor); 
+    painter.fillPolygon(&outline[0], outline.size());
+
 
     painter.setPen( Gfx::Pen(frameColor) );
     painter.drawPolyline(&outline[0], outline.size());
 }
 
 
-void PtButtonStyle::onRenderContent(Button& button, 
-                                    PaintSurface& surface, 
-                                    const Gfx::RectF& updateRect) const
+void PlatinumButtonRenderer::onRenderContent(Button& button, 
+                                             PaintSurface& surface, 
+                                             const Gfx::RectF& updateRect) const
 {
-    const Pt::Gfx::Font& textFont = font();
-    const Pt::Gfx::Pen& fg = foreground();
-    const Pt::Gfx::Brush& bg = background();
+    Application& app = Application::instance();
+
+    const Gfx::Font& textFont = app.styleOptions().font();
+    Gfx::Color textColor = app.styleOptions().textColor();
+
     const String& text = button.text();
     const Gfx::SizeF& size = button.size();
 
     Painter painter(surface);
     painter.setClip(updateRect);
-    painter.setPen(fg);
+    painter.setPen(textColor);
     painter.setFont(textFont);
     painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
 
@@ -208,13 +191,26 @@ void PtButtonStyle::onRenderContent(Button& button,
         focusSize.addHeight(-4);
         focusSize.addWidth(-4);
 
-        Gfx::Color armedColor( Gfx::Color::fromRgb8(176,176,176) );
-        Gfx::Pen pen(armedColor, 1, Gfx::Pen::Dash);
+        Gfx::Pen pen(textColor, 1, Gfx::Pen::Dash);
         painter.setPen(pen);
         
         Gfx::RectF rect(Gfx::PointF(2,2), focusSize);
         painter.drawRect(rect);
     }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// PlatinumStyle
+///////////////////////////////////////////////////////////////////////////////
+
+PlatinumStyle::PlatinumStyle()
+{
+    set(new PlatinumButtonRenderer);
+}
+
+
+PlatinumStyle::~PlatinumStyle()
+{
 }
 
 } // namespace

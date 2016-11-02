@@ -29,6 +29,7 @@
 
 #include <Pt/Hmi/Button.h>
 #include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/Style.h>
 #include <Pt/Hmi/MouseEvent.h>
 #include <Pt/Hmi/TouchEvent.h>
 #include <Pt/Gfx/Pen.h>
@@ -120,16 +121,44 @@ void ButtonBase::onTouchEvent(const TouchEvent& ev)
 
 
 Button::Button()
-: _isPressed(false)
-, _style(0)
+: _style(0)
+, _isPressed(false)
 {
-  setAcceptsFocus(true);
+    setAcceptsFocus(true);
 }
 
 
 Button::~Button()
 {
+    delete _style;
 }
+
+
+void Button::setText(const Pt::String& text)
+{
+    _text = Widget::setMnemonic(text);
+    invalidate();
+}
+
+
+const Pt::String& Button::text() const
+{
+    return _text;
+}
+
+
+bool Button::isPressed() const
+{
+    return _isPressed;
+}
+
+
+void Button::setStyle(const Style& style)
+{
+    delete _style;
+    _style = 0;
+    _style = new Style(style);
+}    
 
 
 void Button::onMnemonic()
@@ -239,15 +268,29 @@ void Button::onFocusEvent(const FocusEvent& ev)
 
 void Button::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
 {    
-    const ButtonStyle* bs = _style != 0 ? _style : Application::instance().style().get<ButtonStyle>();
-    bs->renderBackground(*this, surface, updateRect);
+    Application& app = Application::instance();
+    
+    const Style* style = _style != 0 ? _style : &app.style();
+
+    const ButtonRenderer* renderer = style->get<ButtonRenderer>();
+    if( ! renderer )
+        return;
+
+    renderer->renderBackground(*this, surface, updateRect);
 }
 
 
 void Button::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
-    const ButtonStyle* bs = _style != 0 ? _style : Application::instance().style().get<ButtonStyle>();
-    bs->renderContent(*this, surface, updateRect);
+    Application& app = Application::instance();
+    
+    const Style* style = _style != 0 ? _style : &app.style();
+
+    const ButtonRenderer* renderer = style->get<ButtonRenderer>();
+    if( ! renderer )
+        return;
+
+    renderer->renderContent(*this, surface, updateRect);
 }
 
 } // namespace

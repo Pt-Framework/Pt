@@ -85,7 +85,7 @@ class PT_GFX_API Pen
             The pen size is 1, the style is solid and the cap and join
             styles are round.
         */
-        explicit Pen(const Color& color);
+        Pen(const Color& color);
 
         /** @brief Constructs a Pen with the specified size, color and styles.
         */

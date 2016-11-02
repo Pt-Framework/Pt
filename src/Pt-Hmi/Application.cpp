@@ -45,7 +45,7 @@ Application::Application(int argc, char** argv)
 , _pointerWindow(0)
 , _pointerWidget(0)
 , _pointerGrabber(0)
-, _font("",12)
+, _font("", 12)
 {
     this->init(*_impl);
 
@@ -124,6 +124,42 @@ void Application::setFont(const Gfx::Font& font)
 {
     _font = font;
     invalidate();
+}
+
+
+const Style& Application::style() const
+{
+    return _platinumStyle;
+}
+
+
+Style& Application::style()
+{
+    return _platinumStyle;
+}
+
+
+const StyleOptions& Application::styleOptions() const
+{
+    return _styleOptions;
+}
+
+
+Gfx::Font Application::makeFont(const Gfx::Font& userFont) const
+{
+  if( userFont.isNull() )
+      return _font;
+
+  if( userFont.name().empty() )
+      return Gfx::Font(_font.name(), userFont);
+
+  return _userFont;
+}
+
+
+ApplicationImpl* Application::impl()
+{
+    return _impl;
 }
 
 
@@ -464,36 +500,6 @@ void Application::onInvalidateEvent(const InvalidateEvent& ev)
         return;
 
     it->second->processEvent(ev);
-}
-
-
-ApplicationImpl* Application::impl()
-{
-    return _impl;
-}
-
-
-const Style& Application::style() const
-{
-    return _ptStyle;
-}
-
-
-Style& Application::style()
-{
-    return _ptStyle;
-}
-
-
-Gfx::Font Application::makeFont(const Gfx::Font& userFont) const
-{
-  if( userFont.isNull() )
-      return _font;
-
-  if( userFont.name().empty() )
-      return Gfx::Font(_font.name(), userFont);
-
-  return _userFont;
 }
 
 } // namespace

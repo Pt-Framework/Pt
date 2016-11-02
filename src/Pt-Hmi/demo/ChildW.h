@@ -53,7 +53,6 @@ class ChildW : public Hmi::Window
         Button _dialogButton;
         Label  _textLabel;
         DockingLayout _buttonBar;
-        PtButtonStyle _style;
 };
 
 } // namespace
