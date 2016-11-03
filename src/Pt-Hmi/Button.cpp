@@ -122,6 +122,7 @@ void ButtonBase::onTouchEvent(const TouchEvent& ev)
 
 Button::Button()
 : _style(0)
+, _styleOptions(0)
 , _isPressed(false)
 {
     setAcceptsFocus(true);
@@ -131,6 +132,7 @@ Button::Button()
 Button::~Button()
 {
     delete _style;
+    delete _styleOptions;
 }
 
 
@@ -159,6 +161,14 @@ void Button::setStyle(const Style& style)
     _style = 0;
     _style = new Style(style);
 }    
+
+
+void Button::setStyleOptions(const StyleOptions& opts)
+{
+    delete _styleOptions;
+    _styleOptions = 0;
+    _styleOptions = new StyleOptions(opts);
+}
 
 
 void Button::onMnemonic()
@@ -270,27 +280,31 @@ void Button::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRe
 {    
     Application& app = Application::instance();
     
-    const Style* style = _style != 0 ? _style : &app.style();
+    const Style& style = _style ? *_style 
+                                : app.style();
+    
+    const StyleOptions& styleOptions = _styleOptions ? *_styleOptions 
+                                                     : app.styleOptions();
 
-    const ButtonRenderer* renderer = style->get<ButtonRenderer>();
-    if( ! renderer )
-        return;
-
-    renderer->renderBackground(*this, surface, updateRect);
+    const ButtonRenderer* renderer = style.get<ButtonRenderer>();
+    if(renderer)
+        renderer->renderBackground(*this, styleOptions, surface, updateRect);
 }
 
 
 void Button::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
     Application& app = Application::instance();
+
+    const Style& style = _style ? *_style 
+                                : app.style();
     
-    const Style* style = _style != 0 ? _style : &app.style();
+    const StyleOptions& styleOptions = _styleOptions ? *_styleOptions 
+                                                     : app.styleOptions();
 
-    const ButtonRenderer* renderer = style->get<ButtonRenderer>();
-    if( ! renderer )
-        return;
-
-    renderer->renderContent(*this, surface, updateRect);
+    const ButtonRenderer* renderer = style.get<ButtonRenderer>();
+    if(renderer)
+        renderer->renderContent(*this, styleOptions, surface, updateRect);
 }
 
 } // namespace

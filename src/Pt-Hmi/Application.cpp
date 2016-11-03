@@ -49,6 +49,12 @@ Application::Application(int argc, char** argv)
 {
     this->init(*_impl);
 
+    // default style with default options
+    _style = PlatinumStyle();
+
+    // override style options from settings
+    _styleOptions = StyleOptions();
+
     _mainScreen = new Screen(*_impl);
 
     loop().eventReceived() += Pt::slot(*this, &Application::onResizeEvent );
@@ -129,19 +135,25 @@ void Application::setFont(const Gfx::Font& font)
 
 const Style& Application::style() const
 {
-    return _platinumStyle;
+    return _style;
 }
 
 
-Style& Application::style()
+void Application::setStyle(const Style& s)
 {
-    return _platinumStyle;
+    _style = s;
 }
 
 
 const StyleOptions& Application::styleOptions() const
 {
     return _styleOptions;
+}
+
+
+void Application::setStyleOptions(const StyleOptions& opts)
+{
+    _styleOptions = opts;
 }
 
 

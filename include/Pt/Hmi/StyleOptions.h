@@ -27,42 +27,79 @@
  MA 02110-1301 USA
 */
 
-#ifndef Pt_Hmi_PlatinumStyle_h
-#define Pt_Hmi_PlatinumStyle_h
+#ifndef Pt_Hmi_StyleOptions_h
+#define Pt_Hmi_StyleOptions_h
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/Style.h>
+#include <Pt/Gfx/Pen.h>
+#include <Pt/Gfx/Brush.h>
+#include <Pt/Gfx/Font.h>
+#include <Pt/Gfx/Color.h>
 
 namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API PlatinumButtonRenderer : public ButtonRenderer
+class PT_HMI_API StyleOptions
 {
     public:
-        PlatinumButtonRenderer();
+        StyleOptions();
 
-        virtual ~PlatinumButtonRenderer();
+        ~StyleOptions();
 
-    protected:
-        virtual void onRenderBackground(const Button& button, 
-                                        const StyleOptions& options,
-                                        PaintSurface& surface, 
-                                        const Gfx::RectF& rect) const;
+        // window
+        // widget
+        // view
+        // tooltip
+        // highlighted
+        // active
+        // highlightedTextColor
 
-        virtual void onRenderContent(const Button& button, 
-                                     const StyleOptions& options,
-                                     PaintSurface& surface, 
-                                     const Gfx::RectF& rect) const;
-};
+        const Gfx::Color& windowColor() const
+        {
+            return _windowColor;
+        }
 
+        void setWindowColor(Gfx::Color& c)
+        {
+            _windowColor = c;
+        }
 
-class PT_HMI_API PlatinumStyle : public Style
-{
-    public:
-        PlatinumStyle();
+        const Gfx::Color& widgetColor() const
+        {
+            return _widgetColor;
+        }
 
-        ~PlatinumStyle();
+        void setWidgetColor(Gfx::Color& c)
+        {
+            _widgetColor = c;
+        }
+
+        const Gfx::Color& textColor() const
+        {
+            return _textColor;
+        }
+
+        void setTextColor(Gfx::Color& c)
+        {
+            _textColor = c;
+        }
+
+        const Gfx::Font& font() const
+        {
+            return _font;
+        }
+
+        void setFont(const Gfx::Font& f)
+        {
+            _font = f;
+        }
+
+    private:
+        Gfx::Color _windowColor;
+        Gfx::Color _widgetColor;
+        Gfx::Color _textColor;
+        Gfx::Font  _font;
 };
 
 } // namespace

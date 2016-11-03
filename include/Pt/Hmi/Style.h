@@ -31,9 +31,7 @@
 #define Pt_Hmi_Style_h
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Gfx/Pen.h>
-#include <Pt/Gfx/Brush.h>
-#include <Pt/Gfx/Font.h>
+#include <Pt/Gfx/Rect.h>
 #include <Pt/TypeInfo.h>
 #include <Pt/NonCopyable.h>
 #include <map>
@@ -44,58 +42,7 @@ namespace Hmi {
 
 class Button;
 class PaintSurface;
-
-class PT_HMI_API StyleOptions
-{
-    public:
-        StyleOptions();
-
-        ~StyleOptions();
-
-        // window
-        // widget
-        // view
-        // tooltip
-        // highlighted
-        // active
-        
-        // textColor
-        // highlightedTextColor
-
-        // font
-
-        const Gfx::Color& windowColor() const
-        {
-            return _windowColor;
-        }
-
-        const Gfx::Color& widgetColor() const
-        {
-            return _widgetColor;
-        }
-
-        const Gfx::Color& hoverColor() const
-        {
-            return _hoverColor;
-        }
-
-        const Gfx::Color& textColor() const
-        {
-            return _textColor;
-        }
-
-        const Gfx::Font& font() const
-        {
-            return _font;
-        }
-
-    private:
-        Gfx::Color _windowColor;
-        Gfx::Color _widgetColor;
-        Gfx::Color _hoverColor;
-        Gfx::Color _textColor;
-        Gfx::Font  _font;
-};
+class StyleOptions;
 
 class PT_HMI_API Style
 {
@@ -110,7 +57,7 @@ class PT_HMI_API Style
 
                 virtual ~Facet()
                 {}
-                
+
                 const std::type_info& typeId() const
                 {
                     return *_typeId;
@@ -125,7 +72,7 @@ class PT_HMI_API Style
                 { 
                     return --_refs; 
                 }
-            
+
             private:
                 const std::type_info* _typeId;
                 std::size_t _refs;
@@ -136,9 +83,11 @@ class PT_HMI_API Style
 
         Style(const Style& style);
 
-        ~Style();
+        virtual ~Style();
 
         Style& operator=(const Style& style);
+
+        void assign(const Style& style);
 
         void set(Facet* facet);
 
@@ -149,7 +98,7 @@ class PT_HMI_API Style
             return static_cast<const FacetT*>(facet);
         }
 
-    protected:
+    private:
         const Facet* find(const std::type_info& ti) const;
 
     private:
@@ -165,18 +114,20 @@ class PT_HMI_API ButtonRenderer : public Style::Facet
 
         virtual ~ButtonRenderer();
 
-        void renderBackground(Button& button, PaintSurface& surface, 
-                              const Gfx::RectF& rect) const;   
+        void renderBackground(const Button& button, const StyleOptions& options,
+                              PaintSurface& surface, const Gfx::RectF& rect) const;
 
-        void renderContent(Button& button, PaintSurface& surface, 
-                           const Gfx::RectF& rect) const; 
+        void renderContent(const Button& button, const StyleOptions& options,
+                           PaintSurface& surface, const Gfx::RectF& rect) const;
 
     protected:
-        virtual void onRenderBackground(Button& button, 
+        virtual void onRenderBackground(const Button& button, 
+                                        const StyleOptions& options,
                                         PaintSurface& surface, 
                                         const Gfx::RectF& rect) const = 0;
 
-        virtual void onRenderContent(Button& button, 
+        virtual void onRenderContent(const Button& button, 
+                                     const StyleOptions& options,
                                      PaintSurface& surface, 
                                      const Gfx::RectF& rect) const = 0;
 };

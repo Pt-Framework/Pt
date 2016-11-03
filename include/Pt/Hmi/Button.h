@@ -39,6 +39,7 @@ namespace Pt {
 namespace Hmi {
 
 class Style;
+class StyleOptions;
 class MouseEvent;
 class TouchEvent;
 
@@ -98,7 +99,11 @@ class PT_HMI_API Button : public Control
 
         bool isPressed() const;
         
+        // TODO: move to Control base class
         void setStyle(const Style& style);
+
+        // TODO: move to Control base class
+        void setStyleOptions(const StyleOptions& style);
 
         Signal<Button&>& clicked()
         {
@@ -139,6 +144,7 @@ class PT_HMI_API Button : public Control
 
     private:
         Style*                   _style;
+        StyleOptions*            _styleOptions;
         Pt::String               _text;
         bool                     _isPressed;
         Signal<Button&>          _clicked;

@@ -1,5 +1,5 @@
-/* Copyright (C) 2013 Marc Boris Duerner 
-   Copyright (C) 2013 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2016 Marc Boris Duerner 
+   Copyright (C) 2016 Laurentiu-Gheorghe Crisan
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -28,31 +28,10 @@
 */
 
 #include <Pt/Hmi/Style.h>
-#include <Pt/Hmi/Application.h>
 
 namespace Pt {
 
 namespace Hmi {
-
-///////////////////////////////////////////////////////////////////////////////
-// Style
-///////////////////////////////////////////////////////////////////////////////
-
-StyleOptions::StyleOptions()
-: _windowColor( Gfx::Color::fromRgb8(210, 210, 211) ) 
-, _widgetColor( Gfx::Color::fromRgb8(100, 100, 101) )
-, _hoverColor( Gfx::Color::fromRgb8(180, 180, 181) )
-, _textColor( Gfx::Color::fromRgb8(0, 0, 0) )
-, _font("", 12)
-{
-}
-
-
-StyleOptions::~StyleOptions()
-{
-}
-
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // Style
@@ -65,11 +44,7 @@ Style::Style()
 
 Style::Style(const Style& style)
 {
-    FacetMap::const_iterator it;
-    for(it = style._facets.begin(); it != style._facets.end(); ++it)
-    {
-        set(it->second);
-    }
+    assign(style);
 }
 
 
@@ -87,18 +62,29 @@ Style::~Style()
 
 Style& Style::operator=(const Style& style)
 {
+    assign(style);
+    return *this;
+}
+
+
+void Style::assign(const Style& style)
+{
+    if(this == &style)
+        return;
+
     FacetMap::const_iterator it;
     for(it = style._facets.begin(); it != style._facets.end(); ++it)
     {
         set(it->second);
     }
-
-    return *this;
 }
 
 
 void Style::set(Facet* facet)
 {
+    if( ! facet )
+        return;
+
     FacetMap::value_type val(facet->typeId(), facet);
     
     std::pair<FacetMap::iterator, bool> r = _facets.insert(val);
@@ -139,19 +125,21 @@ ButtonRenderer::~ButtonRenderer()
 }
 
 
-void ButtonRenderer::renderBackground(Button& button, 
-                      PaintSurface& surface, 
-                      const Gfx::RectF& updateRect) const
+void ButtonRenderer::renderBackground(const Button& button, 
+                                      const StyleOptions& options,
+                                      PaintSurface& surface, 
+                                      const Gfx::RectF& rect) const
 { 
-    onRenderBackground(button, surface, updateRect); 
+    onRenderBackground(button, options, surface, rect); 
 }    
 
 
-void ButtonRenderer::renderContent(Button& button, 
-                    PaintSurface& surface, 
-                    const Gfx::RectF& updateRect) const
+void ButtonRenderer::renderContent(const Button& button, 
+                                   const StyleOptions& options,
+                                   PaintSurface& surface, 
+                                   const Gfx::RectF& rect) const
 { 
-    onRenderContent(button, surface, updateRect); 
+    onRenderContent(button, options, surface, rect); 
 }  
 
 } // namespace

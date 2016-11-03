@@ -47,6 +47,8 @@
 #include <Pt/Hmi/FocusEvent.h>
 #include <Pt/Hmi/InvalidateEvent.h>
 #include <Pt/Hmi/WindowStateEvent.h>
+#include <Pt/Hmi/Style.h>
+#include <Pt/Hmi/StyleOptions.h>
 #include <Pt/Hmi/PlatinumStyle.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/System/Application.h>
@@ -109,9 +111,11 @@ class PT_HMI_API Application : public Pt::System::Application
 
         const Style& style() const;
 
-        Style& style();
+        void setStyle(const Style& s);
 
         const StyleOptions& styleOptions() const;
+
+        void setStyleOptions(const StyleOptions& opts);
 
         Gfx::Font makeFont(const Gfx::Font& fromFont) const;
 
@@ -175,7 +179,7 @@ class PT_HMI_API Application : public Pt::System::Application
         Visual*          _pointerGrabber;
         Pt::Gfx::Font    _font;
         Pt::Gfx::Font    _userFont;
-        PlatinumStyle    _platinumStyle;
+        Style            _style;
         StyleOptions     _styleOptions;
 };
 

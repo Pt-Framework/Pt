@@ -90,13 +90,15 @@ ChildW::ChildW(const std::string& title)
     _dialogButton.setDocking( Docking::Bottom );
     _dialogButton.clicked() += Pt::slot(*this, &ChildW::onShowDialog);
     
-    
     //Close button    
-    _closeButton.setName("CloseButton"); 
-    _closeButton.setText("Close App [CTRL+X]");
-    
     Pt::Hmi::Key xKey(Pt::Hmi::Key::Control, Pt::Hmi::Key::X);
 
+    Pt::Hmi::StyleOptions styleOptions;
+    styleOptions.setWidgetColor( Gfx::Color::fromRgb8(220, 80, 80) );
+
+    _closeButton.setStyleOptions(styleOptions);
+    _closeButton.setName("CloseButton"); 
+    _closeButton.setText("Close App [CTRL+X]");
     _closeButton.setDocking(Docking::Bottom);
     _closeButton.setShortcut(&xKey);
     _closeButton.move( Gfx::PointF(20,200) );
