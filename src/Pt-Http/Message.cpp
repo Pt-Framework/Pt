@@ -164,7 +164,7 @@ void MessageHeader::remove(const char* key)
         {
             std::size_t slen = it->value() - it->name() + std::strlen(it->value()) + 1;
 
-            std::memcpy(
+            std::memmove(
                 const_cast<char*>(it->name()),
                 it->name() + slen,
                 p - it->name() + slen);
