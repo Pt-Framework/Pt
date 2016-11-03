@@ -55,15 +55,16 @@ class PT_HMI_API StyleOptions
         // highlightedTextBackground
         // highlightedTextColor
 
+        // accentColor
         // selectedColor
         // activeColor
         
         // viewBackground
         // alternateViewBackground
 
-        // tooltipBackground
-        // tooltipForeground
-        // tooltipTextColor
+        // tooltipBackground / popupBackground
+        // tooltipForeground / popupForeground
+        // tooltipTextColor / popupTextColor
 
         const Gfx::Color& background() const
         {

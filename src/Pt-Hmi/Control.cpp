@@ -31,20 +31,53 @@
 #include <Pt/Hmi/PaintRegion.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/Style.h>
+#include <Pt/Hmi/StyleOptions.h>
 
 namespace Pt {
 
 namespace Hmi {
 
 Control::Control()
+: _style(0)
+, _styleOptions(0)
 {    
 }
 
 
 Control::~Control()
 {
+    delete _style;
+    delete _styleOptions;
 }
 
+
+void Control::setStyle(const Style& style)
+{
+    delete _style;
+    _style = 0;
+    _style = new Style(style);
+}    
+
+
+const Style* Control::style() const
+{
+    return _style;
+}
+
+
+void Control::setStyleOptions(const StyleOptions& opts)
+{
+    delete _styleOptions;
+    _styleOptions = 0;
+    _styleOptions = new StyleOptions(opts);
+}
+
+
+const StyleOptions* Control::styleOptions() const
+{
+    return _styleOptions;
+}
 
 
 void Control::onPaintEvent(const PaintEvent& ev)

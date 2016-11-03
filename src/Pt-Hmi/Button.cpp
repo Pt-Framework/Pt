@@ -30,6 +30,7 @@
 #include <Pt/Hmi/Button.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Style.h>
+#include <Pt/Hmi/StyleOptions.h>
 #include <Pt/Hmi/MouseEvent.h>
 #include <Pt/Hmi/TouchEvent.h>
 #include <Pt/Gfx/Pen.h>
@@ -121,9 +122,7 @@ void ButtonBase::onTouchEvent(const TouchEvent& ev)
 
 
 Button::Button()
-: _style(0)
-, _styleOptions(0)
-, _isPressed(false)
+: _isPressed(false)
 , _isHover(false)
 {
     setAcceptsFocus(true);
@@ -132,8 +131,6 @@ Button::Button()
 
 Button::~Button()
 {
-    delete _style;
-    delete _styleOptions;
 }
 
 
@@ -159,22 +156,6 @@ bool Button::isPressed() const
 bool Button::isHovered() const
 {
     return _isHover;
-}
-
-
-void Button::setStyle(const Style& style)
-{
-    delete _style;
-    _style = 0;
-    _style = new Style(style);
-}    
-
-
-void Button::setStyleOptions(const StyleOptions& opts)
-{
-    delete _styleOptions;
-    _styleOptions = 0;
-    _styleOptions = new StyleOptions(opts);
 }
 
 
@@ -291,15 +272,15 @@ void Button::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRe
 {    
     Application& app = Application::instance();
     
-    const Style& style = _style ? *_style 
-                                : app.style();
+    const Style& s = style() ? *style() 
+                             : app.style();
     
-    const StyleOptions& styleOptions = _styleOptions ? *_styleOptions 
-                                                     : app.styleOptions();
+    const StyleOptions& so = styleOptions() ? *styleOptions() 
+                                            : app.styleOptions();
 
-    const ButtonRenderer* renderer = style.get<ButtonRenderer>();
+    const ButtonRenderer* renderer = s.get<ButtonRenderer>();
     if(renderer)
-        renderer->renderBackground(*this, styleOptions, surface, updateRect);
+        renderer->renderBackground(*this, so, surface, updateRect);
 }
 
 
@@ -307,15 +288,15 @@ void Button::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
     Application& app = Application::instance();
 
-    const Style& style = _style ? *_style 
-                                : app.style();
+    const Style& s = style() ? *style() 
+                             : app.style();
     
-    const StyleOptions& styleOptions = _styleOptions ? *_styleOptions 
-                                                     : app.styleOptions();
+    const StyleOptions& so = styleOptions() ? *styleOptions() 
+                                            : app.styleOptions();
 
-    const ButtonRenderer* renderer = style.get<ButtonRenderer>();
+    const ButtonRenderer* renderer = s.get<ButtonRenderer>();
     if(renderer)
-        renderer->renderContent(*this, styleOptions, surface, updateRect);
+        renderer->renderContent(*this, so, surface, updateRect);
 }
 
 } // namespace

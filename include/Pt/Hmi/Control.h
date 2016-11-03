@@ -32,11 +32,12 @@
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/PaintSurface.h>
     
-
 namespace Pt {
 
 namespace Hmi {
 
+class Style;
+class StyleOptions;
 
 class PT_HMI_API Control : public Widget
 {
@@ -45,12 +46,24 @@ class PT_HMI_API Control : public Widget
 		
         virtual ~Control();	
 
+        void setStyle(const Style& style);
+
+        const Style* style() const;
+
+        void setStyleOptions(const StyleOptions& style);
+
+        const StyleOptions* styleOptions() const;
+
     protected:
         virtual void onPaintEvent( const PaintEvent& ev );
 	    
         virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect) = 0;
 
         virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect) = 0;
+
+    private:
+        Style*                   _style;
+        StyleOptions*            _styleOptions;
 }; 
 
 } // namespace

@@ -38,8 +38,6 @@ namespace Pt {
 
 namespace Hmi {
 
-class Style;
-class StyleOptions;
 class MouseEvent;
 class TouchEvent;
 
@@ -101,12 +99,6 @@ class PT_HMI_API Button : public Control
 
         bool isHovered() const;
         
-        // TODO: move to Control base class
-        void setStyle(const Style& style);
-
-        // TODO: move to Control base class
-        void setStyleOptions(const StyleOptions& style);
-
         Signal<Button&>& clicked()
         {
             return _clicked;
