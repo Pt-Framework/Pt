@@ -124,6 +124,7 @@ Button::Button()
 : _style(0)
 , _styleOptions(0)
 , _isPressed(false)
+, _isHover(false)
 {
     setAcceptsFocus(true);
 }
@@ -152,6 +153,12 @@ const Pt::String& Button::text() const
 bool Button::isPressed() const
 {
     return _isPressed;
+}
+
+
+bool Button::isHovered() const
+{
+    return _isHover;
 }
 
 
@@ -257,14 +264,18 @@ void Button::onTouchEvent(const TouchEvent& ev)
 void Button::onEnterEvent(const EnterEvent& ev )
 {
     Control::onEnterEvent(ev);
+    _isHover = true;
     update();
 }
 
 
 void Button::onLeaveEvent(const LeaveEvent& ev )
 {
-    _isPressed = false;
     Control::onLeaveEvent(ev);
+
+    _isHover = false;
+    _isPressed = false;
+    
     update();
 }
 

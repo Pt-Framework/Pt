@@ -32,7 +32,6 @@
 #include <Pt/Hmi/Button.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/PaintSurface.h>
-#include <Pt/Hmi/Application.h>
 
 namespace Pt {
 
@@ -57,10 +56,10 @@ void PlatinumButtonRenderer::onRenderBackground(const Button& button,
                                                 PaintSurface& surface, 
                                                 const Gfx::RectF& rect) const
 {
-    Gfx::Color bkgColor = options.widgetColor();
-    Gfx::Color frameColor = Gfx::Color(bkgColor.red() * 0.7f,
-                                       bkgColor.green() * 0.7f,
-                                       bkgColor.blue() * 0.7f);
+    Gfx::Color buttonColor = options.foreground();
+    Gfx::Color frameColor = Gfx::Color(buttonColor.red() * 0.7f,
+                                       buttonColor.green() * 0.7f,
+                                       buttonColor.blue() * 0.7f);
 
     const Gfx::SizeF& size = button.size();
 
@@ -69,37 +68,33 @@ void PlatinumButtonRenderer::onRenderBackground(const Button& button,
 
     if( button.isEnabled() )
     {
-        // TODO: use enter/leave events
-        Application& app = Application::instance();
-        bool mouseOver = app.pointerWidget() == &button;
-        if(mouseOver)
+        if(button.isHovered())
         {
-            bkgColor = Gfx::Color(bkgColor.red() * 0.9f,
-                                  bkgColor.green() * 0.9f,
-                                  bkgColor.blue() * 0.9f);
+            buttonColor = Gfx::Color(buttonColor.red() * 0.9f,
+                                     buttonColor.green() * 0.9f,
+                                     buttonColor.blue() * 0.9f);
         }
 
         if( button.isPressed() )
         {
-            bkgColor = Gfx::Color(bkgColor.red() * 0.8f,
-                                  bkgColor.green() * 0.8f,
-                                  bkgColor.blue() * 0.8f);
+            buttonColor = Gfx::Color(buttonColor.red() * 0.8f,
+                                     buttonColor.green() * 0.8f,
+                                     buttonColor.blue() * 0.8f);
         }
     }
 
     Painter painter(surface);
     painter.setClip(rect);
-    painter.setPen(frameColor);
     painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
 
     Gfx::RectF borderRect(Gfx::PointF(0,0), size);
 
     borderRect.setOrigin( Gfx::PointF(1, 1) );
     borderRect.setSize( Gfx::SizeF(size.width() - 1, 
-                                    size.height() - 1) );
+                                   size.height() - 1) );
 
     double corner = 1.0;
-    std::vector<Gfx::PointF> outline(9);
+    Gfx::PointF outline[9] = {};
 
     // top left
     outline[0].setX(0);
@@ -131,11 +126,11 @@ void PlatinumButtonRenderer::onRenderBackground(const Button& button,
             
     outline[8] = outline[0];
 
-    painter.setBrush(bkgColor); 
-    painter.fillPolygon(&outline[0], outline.size());
+    painter.setBrush(buttonColor); 
+    painter.fillPolygon(outline, 9);
 
-    painter.setPen( Gfx::Pen(frameColor) );
-    painter.drawPolyline(&outline[0], outline.size());
+    painter.setPen(frameColor);
+    painter.drawPolyline(outline, 9);
 }
 
 
@@ -144,10 +139,10 @@ void PlatinumButtonRenderer::onRenderContent(const Button& button,
                                              PaintSurface& surface, 
                                              const Gfx::RectF& rect) const
 {
-    Gfx::Color bkgColor = options.widgetColor();
-    Gfx::Color frameColor = Gfx::Color(bkgColor.red() * 0.6f,
-                                       bkgColor.green() * 0.6f,
-                                       bkgColor.blue() * 0.6f);
+    Gfx::Color buttonColor = options.foreground();
+    Gfx::Color frameColor = Gfx::Color(buttonColor.red() * 0.6f,
+                                       buttonColor.green() * 0.6f,
+                                       buttonColor.blue() * 0.6f);
 
     const Gfx::Font& textFont = options.font();
     Gfx::Color textColor = options.textColor();

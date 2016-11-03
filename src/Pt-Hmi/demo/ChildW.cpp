@@ -94,7 +94,7 @@ ChildW::ChildW(const std::string& title)
     Pt::Hmi::Key xKey(Pt::Hmi::Key::Control, Pt::Hmi::Key::X);
 
     Pt::Hmi::StyleOptions styleOptions;
-    styleOptions.setWidgetColor( Gfx::Color::fromRgb8(220, 80, 80) );
+    styleOptions.setForeground( Gfx::Color::fromRgb8(220, 80, 80) );
 
     _closeButton.setStyleOptions(styleOptions);
     _closeButton.setName("CloseButton"); 

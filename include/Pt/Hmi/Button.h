@@ -98,6 +98,8 @@ class PT_HMI_API Button : public Control
         const Pt::String& text() const;
 
         bool isPressed() const;
+
+        bool isHovered() const;
         
         // TODO: move to Control base class
         void setStyle(const Style& style);
@@ -147,6 +149,7 @@ class PT_HMI_API Button : public Control
         StyleOptions*            _styleOptions;
         Pt::String               _text;
         bool                     _isPressed;
+        bool                     _isHover;
         Signal<Button&>          _clicked;
         Signal<Button&>          _pressed;
         Signal<Button&>          _released;       

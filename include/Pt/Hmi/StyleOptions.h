@@ -47,32 +47,42 @@ class PT_HMI_API StyleOptions
 
         ~StyleOptions();
 
-        // window
-        // widget
-        // view
-        // tooltip
-        // highlighted
-        // active
+        // background
+        // foreground
+        // textColor
+
+        // highlightColor
+        // highlightedTextBackground
         // highlightedTextColor
 
-        const Gfx::Color& windowColor() const
+        // selectedColor
+        // activeColor
+        
+        // viewBackground
+        // alternateViewBackground
+
+        // tooltipBackground
+        // tooltipForeground
+        // tooltipTextColor
+
+        const Gfx::Color& background() const
         {
-            return _windowColor;
+            return _background;
         }
 
-        void setWindowColor(Gfx::Color& c)
+        void setBackground(Gfx::Color& c)
         {
-            _windowColor = c;
+            _background = c;
         }
 
-        const Gfx::Color& widgetColor() const
+        const Gfx::Color& foreground() const
         {
-            return _widgetColor;
+            return _foreground;
         }
 
-        void setWidgetColor(Gfx::Color& c)
+        void setForeground(Gfx::Color& c)
         {
-            _widgetColor = c;
+            _foreground = c;
         }
 
         const Gfx::Color& textColor() const
@@ -96,8 +106,8 @@ class PT_HMI_API StyleOptions
         }
 
     private:
-        Gfx::Color _windowColor;
-        Gfx::Color _widgetColor;
+        Gfx::Color _background;
+        Gfx::Color _foreground;
         Gfx::Color _textColor;
         Gfx::Font  _font;
 };
