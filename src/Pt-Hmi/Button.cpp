@@ -71,7 +71,7 @@ void ButtonBase::onClicked()
     
 void ButtonBase::onMouseEvent(const MouseEvent& ev)
 {    
-    Panel::onMouseEvent(ev);
+    Control::onMouseEvent(ev);
 
     if( ev.isPress() )
     {
@@ -96,7 +96,7 @@ void ButtonBase::onMouseEvent(const MouseEvent& ev)
 
 void ButtonBase::onTouchEvent(const TouchEvent& ev)
 {    
-    Panel::onTouchEvent(ev);
+    Control::onTouchEvent(ev);
 
     if( ev.isPress() )
     {
@@ -161,90 +161,52 @@ bool Button::isHovered() const
 
 void Button::onMnemonic()
 {
-    Control::onMnemonic();
-    _clicked.send(*this);
+    ButtonBase::onMnemonic();
+    clicked().send();
 }
 
 
 void Button::onActionKey( const KeyEvent& kev )
 {
-    Control::onActionKey(kev);
-    _clicked.send(*this);
+    ButtonBase::onActionKey(kev);
+    clicked().send();
 }
 
 
 void Button::onShortcut( const KeyEvent& kev )
 {
-    Control::onShortcut(kev);
-    _clicked.send(*this);
+    ButtonBase::onShortcut(kev);
+    clicked().send();
 }
 
 
 void Button::onMouseEvent(const MouseEvent& ev)
 {    
-    Control::onMouseEvent(ev);
+    ButtonBase::onMouseEvent(ev);
 
     if( ev.isPressed() != _isPressed )
     {
         _isPressed = ev.isPressed();
         update();
-    }
-
-    if( ev.isPress() )
-    {
-        _pressed.send(*this);
-    }
-
-    if( ev.isRelease() )
-    {
-        _released.send(*this);
-    }
-
-    Gfx::RectF rect( Gfx::PointF(0,0), size() );
-    if( ! rect.contains( ev.position() ) )
-        return;
-
-    if( ev.isRelease() && hasFocus() )
-    {
-        _clicked.send(*this);
     }
 }
 
 
 void Button::onTouchEvent(const TouchEvent& ev)
 {    
-    Control::onTouchEvent(ev);
+    ButtonBase::onTouchEvent(ev);
 
     if( ev.isPressed() != _isPressed )
     {
         _isPressed = ev.isPressed();
         update();
     }
-
-    if( ev.isPress() )
-    {
-        _pressed.send(*this);
-    }
-
-    if( ev.isRelease() )
-    {
-        _released.send(*this);
-    }
-
-    Gfx::RectF rect( Gfx::PointF(0,0), size() );
-    if( ! rect.contains( ev.position() ) )
-        return;
-
-    if( ev.isRelease() && hasFocus() )
-    {
-        _clicked.send(*this);
-    }
 }
 
 
 void Button::onEnterEvent(const EnterEvent& ev )
 {
-    Control::onEnterEvent(ev);
+    ButtonBase::onEnterEvent(ev);
     _isHover = true;
     update();
 }
@@ -252,7 +214,7 @@ void Button::onEnterEvent(const EnterEvent& ev )
 
 void Button::onLeaveEvent(const LeaveEvent& ev )
 {
-    Control::onLeaveEvent(ev);
+    ButtonBase::onLeaveEvent(ev);
 
     _isHover = false;
     _isPressed = false;
@@ -263,7 +225,7 @@ void Button::onLeaveEvent(const LeaveEvent& ev )
 
 void Button::onFocusEvent(const FocusEvent& ev)
 {    
-    Control::onFocusEvent(ev);
+    ButtonBase::onFocusEvent(ev);
     update();
 }
 

@@ -112,8 +112,6 @@ MenuItem::MenuItem()
     
     setPadding( Spacing(4, 2, 4, 2) );
     setMargin(0);
-
-    setBorderStyle(Panel::NoBorder);
 }
 
 
@@ -199,7 +197,7 @@ void MenuItem::onInvalidate()
 
 Gfx::SizeF MenuItem::onAutoSize() const
 {
-    const Gfx::Font& font = Application::instance().font();
+    const Gfx::Font& font = Application::instance().styleOptions().font();
 
     Gfx::FontMetrics fm = Painter::fontMetrics(font, _text);
 
@@ -225,7 +223,7 @@ void MenuItem::onPaintBackground(PaintSurface& surface, const Gfx::RectF& update
 
     if(mouseOver)
     {
-        Gfx::Color bgColor = background().color();
+        Gfx::Color bgColor = Application::instance().styleOptions().background();
         Gfx::Brush brush = brighten(bgColor, 0.85f);
 
         Painter painter(surface);
@@ -265,7 +263,7 @@ void MenuItem::onPaintItem(PaintSurface& surface, const Gfx::RectF& updateRect)
     painter.setClip(updateRect);
     painter.setFont(font);
 
-    painter.setPen(foreground());
+    painter.setPen( Application::instance().styleOptions().textColor() );
 
     Gfx::FontMetrics fm = Painter::fontMetrics(font, _text);
     double textX = padding().left() + _iconWidth;
@@ -285,7 +283,7 @@ void MenuItem::onPaintShortcut(PaintSurface& surface, const Gfx::RectF& updateRe
     painter.setClip(updateRect);
     painter.setFont(font);
 
-    painter.setPen(foreground());
+    painter.setPen(Application::instance().styleOptions().textColor());
 
     const Key* sk = shortcut();
     if(sk)

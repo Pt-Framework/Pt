@@ -29,6 +29,7 @@
 
 #include <Pt/Hmi/MenuBar.h>
 #include <Pt/Hmi/Menu.h>
+#include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Application.h>
 
@@ -61,14 +62,9 @@ MenuBarItem::MenuBarItem(MenuBar& mb, Menu& menu, const Pt::String& text)
 , _selected(false)
 {
     setAutoSize(true);
-    setBorderStyle(Panel::NoBorder);
     setAcceptsFocus(true);
-    
-    setBackground( Gfx::Color(58981, 58981, 58981) );
-
     setText(text);
-    setBorderRound(false);
-    
+
     setPadding( Spacing(8, 0, 8, 0) );
     setMargin(0);
 }
@@ -204,7 +200,7 @@ void MenuBarItem::onPaintBackground(PaintSurface& surface, const Gfx::RectF& upd
 {
     if(_highlighted || _selected)
     {
-        Gfx::Color bgColor = background().color();
+        Gfx::Color bgColor = Application::instance().styleOptions().background();
         Gfx::Brush brush = brighten(bgColor, 0.85f);
 
         Painter painter(surface);
@@ -223,7 +219,7 @@ void MenuBarItem::onPaintContent(PaintSurface& surface, const Gfx::RectF& update
     painter.setClip(updateRect);
     painter.setFont(font);
     
-    painter.setPen(foreground());
+    painter.setPen(Application::instance().styleOptions().textColor());
 
     Gfx::FontMetrics fm = Painter::fontMetrics(font, _text);
     double textX = padding().left();
@@ -261,9 +257,9 @@ MenuBar::MenuBar()
 , _currentMenu(0)
 , _currentMenuItem(0)
 {
-    this->setBackground( Gfx::Color(58981, 58981, 58981) );
-    this->setBorderColor( Gfx::Color(32767, 32767, 32767)  );
-    this->setBorderStyle(Panel::NoBorder);
+    //this->setBackground( Gfx::Color(58981, 58981, 58981) );
+    //this->setBorderColor( Gfx::Color(32767, 32767, 32767)  );
+    //this->setBorderStyle(Panel::NoBorder);
 
     _layout.move( Gfx::PointF(0,0) );
     _layout.setPadding(1);
@@ -403,9 +399,28 @@ MenuShell* MenuBar::onFindMenu(const Gfx::PointF& screenPos)
 }
 
 
+void MenuBar::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
+{
+    Painter painter(surface);
+    painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
+
+    Gfx::Color bgColor = Application::instance().styleOptions().background();
+    painter.setBrush(bgColor);
+
+    //painter.setClip(updateRect);
+    painter.fillRect(updateRect);
+}
+
+
+void MenuBar::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
+{
+
+}
+
+
 void MenuBar::onMouseEvent(const MouseEvent& ev)
 { 
-    WidgetBaseType::onMouseEvent(ev);
+    Base::onMouseEvent(ev);
 }
 
 
@@ -422,7 +437,7 @@ void MenuBar::onResizeEvent(const ResizeEvent& ev)
 
     // _layout positions the items now in OnResizeEvent
     // TODO: our overall design should make this clearer
-    WidgetBaseType::onResizeEvent(ev);
+    Base::onResizeEvent(ev);
 }
 
 } // namespace

@@ -109,8 +109,6 @@ class PT_HMI_API Menu : public MenuShell
 
         void onMenuTriggered(MenuItem& m);
 
-       
-
     private:
         MenuShell*                _parentShell;
         Menu*                     _parentMenu;

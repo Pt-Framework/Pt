@@ -145,7 +145,7 @@ ChildW::~ChildW()
 }
 
 
-void ChildW::onShowDialog(Pt::Hmi::Button&)
+void ChildW::onShowDialog()
 {
     //std::clog << "----------------" << std::endl;
     //_closeButton.setText("AAA");
@@ -168,7 +168,7 @@ void ChildW::onShowDialog(Pt::Hmi::Button&)
     _dialogButton.setText("Hallo");
 }
 
-void ChildW::onCloseApp(Pt::Hmi::Button&)
+void ChildW::onCloseApp()
 {
     mainWindow().close();
 }

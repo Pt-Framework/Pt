@@ -31,7 +31,6 @@
 #define Pt_Hmi_Button_H
 
 #include <Pt/Hmi/Control.h>
-#include <Pt/Hmi/Panel.h>
 #include <Pt/Gfx/Image.h>
 
 namespace Pt {
@@ -42,8 +41,7 @@ class MouseEvent;
 class TouchEvent;
 
 // TODO: name this call Button and rename Button -> PushButton
-//       and derive PushButton from Button
-class PT_HMI_API ButtonBase : public Panel
+class PT_HMI_API ButtonBase : public Control
 {
     public:
         ButtonBase();
@@ -84,7 +82,7 @@ class PT_HMI_API ButtonBase : public Panel
 };
 
 
-class PT_HMI_API Button : public Control
+class PT_HMI_API Button : public ButtonBase
 {
     public:
         Button();
@@ -98,21 +96,6 @@ class PT_HMI_API Button : public Control
         bool isPressed() const;
 
         bool isHovered() const;
-        
-        Signal<Button&>& clicked()
-        {
-            return _clicked;
-        }
-
-        Signal<Button&>& pressed()
-        {
-            return _pressed;
-        }
-
-        Signal<Button&>& released()
-        {
-            return _released;
-        }
 
     protected:
         virtual void onMnemonic();
@@ -141,10 +124,7 @@ class PT_HMI_API Button : public Control
         StyleOptions*            _styleOptions;
         Pt::String               _text;
         bool                     _isPressed;
-        bool                     _isHover;
-        Signal<Button&>          _clicked;
-        Signal<Button&>          _pressed;
-        Signal<Button&>          _released;       
+        bool                     _isHover;      
 };
 
 } // namespace

@@ -32,7 +32,7 @@
 
 #include <Pt/Hmi/MenuShell.h>
 #include <Pt/Hmi/Button.h>
-#include <Pt/Hmi/Button.h>
+#include <Pt/Hmi/Control.h>
 #include <Pt/Hmi/FlowLayout.h>
 #include <vector>
 
@@ -95,9 +95,9 @@ class MenuBarItem : public ButtonBase
 
 
 class PT_HMI_API MenuBar : public MenuShell
-                         , public Panel
+                         , public Control
 {
-    typedef Panel WidgetBaseType;
+    typedef Control Base;
 
     public:
         MenuBar();
@@ -122,6 +122,11 @@ class PT_HMI_API MenuBar : public MenuShell
         virtual void onEnter();
 
         virtual MenuShell* onFindMenu(const Gfx::PointF& screenPos);
+
+    protected:
+        virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& rect);
+
+        virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& rect);
 
     protected:
         virtual void onMouseEvent(const MouseEvent& ev);

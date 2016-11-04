@@ -28,6 +28,8 @@
 */
 
 #include <Pt/Hmi/Menu.h>
+#include <Pt/Hmi/Painter.h>
+#include <Pt/Hmi/Application.h>
 
 namespace Pt {
 
@@ -90,7 +92,7 @@ class SubMenuItem : public MenuItem
                                           Gfx::PointF(x + 1, y),
                                           Gfx::PointF(x - 3, y + 4) };
   
-            Gfx::Color fgColor = this->foreground().color();
+            Gfx::Color fgColor = Application::instance().styleOptions().textColor();
             Gfx::Brush brush(fgColor);
             painter.setBrush(brush);
             painter.fillPolygon(indicator, 3);

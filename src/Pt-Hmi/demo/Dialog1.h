@@ -28,6 +28,7 @@
 
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Button.h>
+#include <Pt/Hmi/Panel.h>
 
 namespace Pt {
 namespace Hmi {
