@@ -31,13 +31,13 @@
 #define Pt_Hmi_SCROLLBAR_H
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/Panel.h>
+#include <Pt/Hmi/Control.h>
 
 namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API ScrollBar : public Panel
+class PT_HMI_API ScrollBar : public Control
 {
     public:
         enum Orientation
@@ -72,13 +72,17 @@ class PT_HMI_API ScrollBar : public Panel
         { return _changed; }
 
     protected:
+        virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& rect);
+
+        virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& rect);
+
+
+    protected:
         virtual void onMouseEvent(const MouseEvent& ev);
 
         virtual void onTouchEvent(const TouchEvent& ev);
 
         virtual void onResizeEvent(const ResizeEvent& ev);
-
-        virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect);
 
     private:
         int pixelToPosition(double pix);

@@ -29,6 +29,7 @@
 
 #include <Pt/Hmi/ScrollBar.h>
 #include <Pt/Hmi/Painter.h>
+#include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/Brush.h>
 
 namespace Pt {
@@ -135,7 +136,7 @@ void ScrollBar::scroll(int pos)
 
 void ScrollBar::onMouseEvent(const MouseEvent& ev)
 {
-    Panel::onMouseEvent(ev);
+    Control::onMouseEvent(ev);
 
     if( ev.isPress(MouseEvent::Left) )
     {
@@ -165,7 +166,7 @@ void ScrollBar::onMouseEvent(const MouseEvent& ev)
 
 void ScrollBar::onTouchEvent(const TouchEvent& tev)
 {
-    Panel::onTouchEvent(tev);
+    Control::onTouchEvent(tev);
 
     if( tev.isPress() )
     {
@@ -199,20 +200,31 @@ void ScrollBar::onTouchEvent(const TouchEvent& tev)
 
 void ScrollBar::onResizeEvent(const ResizeEvent& ev)
 {
-    Panel::onResizeEvent(ev);
+    Control::onResizeEvent(ev);
 
     updateScroll();
 }
 
 
+void ScrollBar::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
+{
+    Painter painter(surface);
+    painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
+
+    Gfx::Color bgColor = Application::instance().styleOptions().background();
+    painter.setBrush(bgColor);
+
+    //painter.setClip(updateRect);
+    painter.fillRect(updateRect);
+}
+
+
 void ScrollBar::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
-    Panel::onPaintContent(surface, updateRect);
-
     Painter painter(surface);
     painter.setClip(updateRect);
     
-    Gfx::Brush handleBrush( Gfx::Color::fromRgb8(175, 175, 175) );
+    Gfx::Brush handleBrush = Application::instance().styleOptions().foreground();
     painter.setBrush(handleBrush);
     painter.fillRect(_handleRect);
 }

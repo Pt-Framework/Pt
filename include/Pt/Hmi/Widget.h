@@ -317,7 +317,6 @@ class PT_HMI_API Widget : public Visual
         Key                          _shortcutKey;
         Pt::Char                     _mnemonic;
         Pt::Delegate<void>           _mnemonicEntered;
-
         
         Spacing                      _padding;
         Spacing                      _margin;
