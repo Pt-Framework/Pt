@@ -47,10 +47,7 @@ class PT_HMI_API PushButton : public Button
     
         virtual ~PushButton();
 
-        Signal<PushButton&>& clicked()
-        {
-            return _clicked;
-        }
+        Signal<PushButton&>& clicked();
 
     protected:
         virtual void onClicked();

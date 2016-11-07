@@ -66,7 +66,7 @@ class PT_HMI_API CheckBox : public ToggleButton
         virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect);
 
     private:
-        bool _isUndefined;
+        State _state;
 };
 
 } // namespace

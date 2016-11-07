@@ -48,11 +48,12 @@ class PT_HMI_API Button : public Control
 
         bool isPressed() const;
 
-        void setPressed(bool pressed);
-
         void setText(const Pt::String& t);
 
         const Pt::String& text() const;
+    
+    protected:
+        void setPressed(bool pressed);
 
     protected:
         virtual void onEnterEvent(const EnterEvent& ev);

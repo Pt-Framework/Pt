@@ -44,6 +44,12 @@ PushButton::~PushButton()
 }
 
 
+Signal<PushButton&>& PushButton::clicked()
+{
+    return _clicked;
+}
+
+
 void PushButton::onClicked()
 {
     Base::onClicked();

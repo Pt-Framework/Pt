@@ -37,7 +37,7 @@ namespace Pt {
 namespace Hmi {
 
 CheckBox::CheckBox()
-: _isUndefined(false)
+: _state(Unchecked)
 {
 }
 
@@ -49,41 +49,24 @@ CheckBox::~CheckBox()
 
 CheckBox::State CheckBox::state() const
 {
-    if(_isUndefined)
-        return Undefined;
-
-    return isPressed() ? Checked : Unchecked;
+    return _state;
 }
 
 
 void CheckBox::setState(State s)
 {
-    switch(s)
-    {
-        case Undefined:
-            _isUndefined = true;
-            setPressed(false);
-            
-            break;
-
-        case Checked:
-            _isUndefined = false;
-            setPressed(true);
-            
-            break;
-
-        default:
-        case Unchecked:
-            _isUndefined = false;
-            setPressed(false);
-            break;
-    }
+    _state = s;
+    setPressed(s == Checked);
 }
 
 
 void CheckBox::onToggled()
 {
-    _isUndefined = false;
+    if(_state == Checked)
+        _state = Unchecked;
+    else
+        _state = Checked;
+
     Base::onToggled();
 }
 
