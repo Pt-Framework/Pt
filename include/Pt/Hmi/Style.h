@@ -40,7 +40,7 @@ namespace Pt {
 
 namespace Hmi {
 
-class Button;
+class PushButton;
 class PaintSurface;
 class StyleOptions;
 
@@ -114,19 +114,19 @@ class PT_HMI_API ButtonRenderer : public Style::Facet
 
         virtual ~ButtonRenderer();
 
-        void renderBackground(const Button& button, const StyleOptions& options,
+        void renderBackground(const PushButton& button, const StyleOptions& options,
                               PaintSurface& surface, const Gfx::RectF& rect) const;
 
-        void renderContent(const Button& button, const StyleOptions& options,
+        void renderContent(const PushButton& button, const StyleOptions& options,
                            PaintSurface& surface, const Gfx::RectF& rect) const;
 
     protected:
-        virtual void onRenderBackground(const Button& button, 
+        virtual void onRenderBackground(const PushButton& button, 
                                         const StyleOptions& options,
                                         PaintSurface& surface, 
                                         const Gfx::RectF& rect) const = 0;
 
-        virtual void onRenderContent(const Button& button, 
+        virtual void onRenderContent(const PushButton& button, 
                                      const StyleOptions& options,
                                      PaintSurface& surface, 
                                      const Gfx::RectF& rect) const = 0;

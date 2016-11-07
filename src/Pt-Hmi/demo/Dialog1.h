@@ -27,7 +27,7 @@
 #define Pt_Forms_Demo_Dialog1_h
 
 #include <Pt/Hmi/Window.h>
-#include <Pt/Hmi/Button.h>
+#include <Pt/Hmi/PushButton.h>
 #include <Pt/Hmi/Panel.h>
 
 namespace Pt {
@@ -53,8 +53,8 @@ class Dialog1 : public Pt::Hmi::Window
 		Pt::Hmi::Panel  _panel3;
 		Pt::Hmi::Panel  _panel4;
 		Pt::Hmi::Panel  _panel5;  
-		Pt::Hmi::Button _closeButton;	
-		Pt::Hmi::Button _newDialogButton;
+		Pt::Hmi::PushButton _closeButton;	
+		Pt::Hmi::PushButton _newDialogButton;
 		bool						_clicked;
 }; 
 

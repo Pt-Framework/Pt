@@ -36,6 +36,7 @@ namespace Hmi {
 StyleOptions::StyleOptions()
 : _background( Pt::Gfx::Color::fromRgb8(229, 229, 229) ) 
 , _foreground( Gfx::Color::fromRgb8(210, 210, 210) )
+, _highlight( Gfx::Color::fromRgb8(210, 210, 210) )
 , _textColor( Gfx::Color::fromRgb8(0, 0, 0) )
 , _font("", 12)
 {

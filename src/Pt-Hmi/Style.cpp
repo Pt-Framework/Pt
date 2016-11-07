@@ -125,7 +125,7 @@ ButtonRenderer::~ButtonRenderer()
 }
 
 
-void ButtonRenderer::renderBackground(const Button& button, 
+void ButtonRenderer::renderBackground(const PushButton& button, 
                                       const StyleOptions& options,
                                       PaintSurface& surface, 
                                       const Gfx::RectF& rect) const
@@ -134,7 +134,7 @@ void ButtonRenderer::renderBackground(const Button& button,
 }    
 
 
-void ButtonRenderer::renderContent(const Button& button, 
+void ButtonRenderer::renderContent(const PushButton& button, 
                                    const StyleOptions& options,
                                    PaintSurface& surface, 
                                    const Gfx::RectF& rect) const

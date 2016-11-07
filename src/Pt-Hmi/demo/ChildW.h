@@ -26,9 +26,9 @@ class ChildW : public Hmi::Window
         ~ChildW();
 
     private:
-        void onShowDialog();
+        void onShowDialog(Button&);
         
-        void onCloseApp();
+        void onCloseApp(Button&);
 
     private:
         FlowLayout _mainLayout;
@@ -48,9 +48,9 @@ class ChildW : public Hmi::Window
 
         Window _childWindow2;
         DockingLayout  _childView;
-        Button _closeButton;
-        Button _toggleButton;
-        Button _dialogButton;
+        PushButton _closeButton;
+        PushButton _toggleButton;
+        PushButton _dialogButton;
         Label  _textLabel;
         DockingLayout _buttonBar;
 };

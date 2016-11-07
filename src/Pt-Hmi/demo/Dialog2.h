@@ -27,7 +27,7 @@
 #define Pt_Forms_Dialog2_h
 
 #include <Pt/Hmi/Window.h>
-#include <Pt/Hmi/Button.h>
+#include <Pt/Hmi/PushButton.h>
 #include <Pt/Hmi/Label.h>
 #include <Pt/Hmi/Panel.h>
 
@@ -48,8 +48,8 @@ class Dialog2 : public Pt::Hmi::Window
 		void onClosedByButton();
     
 	private:
-		Pt::Hmi::Button _okButton;
-		Pt::Hmi::Button _cancelButton;	
+		Pt::Hmi::PushButton _okButton;
+		Pt::Hmi::PushButton _cancelButton;	
 		Pt::Hmi::Label  _label;
 		Pt::Hmi::Panel  _okCancelPanel;
 		Pt::Hmi::Panel  _mainPanel;

@@ -28,48 +28,42 @@
 */
 
 #include <Pt/Hmi/Button.h>
-#include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/Style.h>
-#include <Pt/Hmi/StyleOptions.h>
 #include <Pt/Hmi/MouseEvent.h>
 #include <Pt/Hmi/TouchEvent.h>
-#include <Pt/Gfx/Pen.h>
-#include <Pt/Gfx/Color.h>
-#include <Pt/Gfx/Point.h>
 
 namespace Pt {
 
 namespace Hmi {
 
-ButtonBase::ButtonBase()
+Button::Button()
 {
 }
 
   
-ButtonBase::~ButtonBase()
+Button::~Button()
 {
 }
 
 
-void ButtonBase::onPressed()
+void Button::onPressed()
 {
-    _pressed.send();
+    _pressed.send(*this);
 }
 
 
-void ButtonBase::onReleased()
+void Button::onReleased()
 {
-    _released.send();
+    _released.send(*this);
 }
 
 
-void ButtonBase::onClicked()
+void Button::onClicked()
 {
-    _clicked.send();
+    _clicked.send(*this);
 }
 
     
-void ButtonBase::onMouseEvent(const MouseEvent& ev)
+void Button::onMouseEvent(const MouseEvent& ev)
 {    
     Control::onMouseEvent(ev);
 
@@ -84,9 +78,11 @@ void ButtonBase::onMouseEvent(const MouseEvent& ev)
     }
     
     Gfx::RectF rect( Gfx::PointF(0,0), size() );
+
     if( ! rect.contains( ev.position() ) )
         return;
     
+    // TODO: use pointer grabbing
     if( ev.isRelease() && hasFocus() )
     {
         onClicked();
@@ -94,7 +90,7 @@ void ButtonBase::onMouseEvent(const MouseEvent& ev)
 }
 
 
-void ButtonBase::onTouchEvent(const TouchEvent& ev)
+void Button::onTouchEvent(const TouchEvent& ev)
 {    
     Control::onTouchEvent(ev);
 
@@ -116,149 +112,6 @@ void ButtonBase::onTouchEvent(const TouchEvent& ev)
     {
         onClicked();
     }
-}
-
-
-
-
-Button::Button()
-: _isPressed(false)
-, _isHover(false)
-{
-    setAcceptsFocus(true);
-}
-
-
-Button::~Button()
-{
-}
-
-
-void Button::setText(const Pt::String& text)
-{
-    _text = Widget::setMnemonic(text);
-    invalidate();
-}
-
-
-const Pt::String& Button::text() const
-{
-    return _text;
-}
-
-
-bool Button::isPressed() const
-{
-    return _isPressed;
-}
-
-
-bool Button::isHovered() const
-{
-    return _isHover;
-}
-
-
-void Button::onMnemonic()
-{
-    ButtonBase::onMnemonic();
-    clicked().send();
-}
-
-
-void Button::onActionKey( const KeyEvent& kev )
-{
-    ButtonBase::onActionKey(kev);
-    clicked().send();
-}
-
-
-void Button::onShortcut( const KeyEvent& kev )
-{
-    ButtonBase::onShortcut(kev);
-    clicked().send();
-}
-
-
-void Button::onMouseEvent(const MouseEvent& ev)
-{    
-    ButtonBase::onMouseEvent(ev);
-
-    if( ev.isPressed() != _isPressed )
-    {
-        _isPressed = ev.isPressed();
-        update();
-    }
-}
-
-
-void Button::onTouchEvent(const TouchEvent& ev)
-{    
-    ButtonBase::onTouchEvent(ev);
-
-    if( ev.isPressed() != _isPressed )
-    {
-        _isPressed = ev.isPressed();
-        update();
-    }
-}
-
-
-void Button::onEnterEvent(const EnterEvent& ev )
-{
-    ButtonBase::onEnterEvent(ev);
-    _isHover = true;
-    update();
-}
-
-
-void Button::onLeaveEvent(const LeaveEvent& ev )
-{
-    ButtonBase::onLeaveEvent(ev);
-
-    _isHover = false;
-    _isPressed = false;
-    
-    update();
-}
-
-
-void Button::onFocusEvent(const FocusEvent& ev)
-{    
-    ButtonBase::onFocusEvent(ev);
-    update();
-}
-
-
-void Button::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
-{    
-    Application& app = Application::instance();
-    
-    const Style& s = style() ? *style() 
-                             : app.style();
-    
-    const StyleOptions& so = styleOptions() ? *styleOptions() 
-                                            : app.styleOptions();
-
-    const ButtonRenderer* renderer = s.get<ButtonRenderer>();
-    if(renderer)
-        renderer->renderBackground(*this, so, surface, updateRect);
-}
-
-
-void Button::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
-{
-    Application& app = Application::instance();
-
-    const Style& s = style() ? *style() 
-                             : app.style();
-    
-    const StyleOptions& so = styleOptions() ? *styleOptions() 
-                                            : app.styleOptions();
-
-    const ButtonRenderer* renderer = s.get<ButtonRenderer>();
-    if(renderer)
-        renderer->renderContent(*this, so, surface, updateRect);
 }
 
 } // namespace

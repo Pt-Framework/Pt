@@ -43,9 +43,9 @@ namespace Hmi {
 class Menu;
 class MenuBar;
 
-class MenuBarItem : public ButtonBase
+class MenuBarItem : public Button
 {
-    typedef ButtonBase WidgetBaseType;
+    typedef Button WidgetBaseType;
 
     public:
         MenuBarItem(MenuBar& mb, Menu& menu, const Pt::String& text);

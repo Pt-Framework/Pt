@@ -29,7 +29,7 @@
 
 #include <Pt/Hmi/PlatinumStyle.h>
 #include <Pt/Hmi/StyleOptions.h>
-#include <Pt/Hmi/Button.h>
+#include <Pt/Hmi/PushButton.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/PaintSurface.h>
 
@@ -51,7 +51,7 @@ PlatinumButtonRenderer::~PlatinumButtonRenderer()
 }
 
 
-void PlatinumButtonRenderer::onRenderBackground(const Button& button, 
+void PlatinumButtonRenderer::onRenderBackground(const PushButton& button, 
                                                 const StyleOptions& options,
                                                 PaintSurface& surface, 
                                                 const Gfx::RectF& rect) const
@@ -134,7 +134,7 @@ void PlatinumButtonRenderer::onRenderBackground(const Button& button,
 }
 
 
-void PlatinumButtonRenderer::onRenderContent(const Button& button, 
+void PlatinumButtonRenderer::onRenderContent(const PushButton& button, 
                                              const StyleOptions& options,
                                              PaintSurface& surface, 
                                              const Gfx::RectF& rect) const

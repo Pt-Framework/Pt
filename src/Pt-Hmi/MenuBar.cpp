@@ -130,7 +130,7 @@ void MenuBarItem::close()
 
 void MenuBarItem::onClicked()
 {
-    ButtonBase::onClicked();
+    Button::onClicked();
 
     toggle();
 }
@@ -138,7 +138,7 @@ void MenuBarItem::onClicked()
 
 void MenuBarItem::onInvalidate()
 {
-    ButtonBase::onInvalidate();
+    Button::onInvalidate();
 }
 
 
@@ -200,7 +200,7 @@ void MenuBarItem::onPaintBackground(PaintSurface& surface, const Gfx::RectF& upd
 {
     if(_highlighted || _selected)
     {
-        Gfx::Color bgColor = Application::instance().styleOptions().background();
+        Gfx::Color bgColor = Application::instance().styleOptions().highlightColor();
         Gfx::Brush brush = brighten(bgColor, 0.85f);
 
         Painter painter(surface);
@@ -404,8 +404,8 @@ void MenuBar::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateR
     Painter painter(surface);
     painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
 
-    Gfx::Color bgColor = Application::instance().styleOptions().background();
-    painter.setBrush(bgColor);
+    const Gfx::Brush& bg = Application::instance().styleOptions().background();
+    painter.setBrush(bg);
 
     //painter.setClip(updateRect);
     painter.fillRect(updateRect);

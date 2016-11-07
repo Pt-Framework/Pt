@@ -1,10 +1,11 @@
-/* Copyright (C) 2013 Laurentiu-Gheorghe Crisan
-   
+/* Copyright (C) 2016 Marc Boris Duerner 
+   Copyright (C) 2016 Laurentiu-Gheorghe Crisan
+
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
    License as published by the Free Software Foundation; either
    version 2.1 of the License, or (at your option) any later version.
-   
+
    As a special exception, you may use this file as part of a free
    software library without restriction. Specifically, if other files
    instantiate templates or use macros or inline functions from this
@@ -14,74 +15,71 @@
    License. This exception does not however invalidate any other
    reasons why the executable file might be covered by the GNU Library
    General Public License.
-   
+
    This library is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
    Lesser General Public License for more details.
-   
+
    You should have received a copy of the GNU Lesser General Public
    License along with this library; if not, write to the Free Software
    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
-   MA  02110-1301  USA 
+   MA  02110-1301  USA
 */
 
-#ifndef Pt_Hmi_Demo_MainWindow_h
-#define Pt_Hmi_Demo_MainWindow_h
+#ifndef Pt_Hmi_PushButton_H
+#define Pt_Hmi_PushButton_H
 
-#include <Pt/Hmi/Window.h>
-#include <Pt/Hmi/Menu.h>
-#include <Pt/Hmi/MenuItem.h>
-#include <Pt/Hmi/Picture.h>
-#include <Pt/Hmi/ScrollView.h>
-#include "ChildW.h"
+#include <Pt/Hmi/Button.h>
 
 namespace Pt {
 
 namespace Hmi {
 
-namespace Demo {
-
-class MainWindow : public Pt::Hmi::Window
+class PT_HMI_API PushButton : public Button
 {
-      public:
-        MainWindow();
-        
-        virtual ~MainWindow();
+    public:
+        PushButton();
+    
+        virtual ~PushButton();
+    
+        void setText(const Pt::String& t);
+
+        const Pt::String& text() const;
+
+        bool isPressed() const;
+
+        bool isHovered() const;
 
     protected:
-        virtual void onPaintBackground(const Gfx::RectF& rect);
+        virtual void onMnemonic();
+
+        virtual void onShortcut(const KeyEvent& kev);
+
+        virtual void onActionKey(const KeyEvent& kev);
 
         virtual void onMouseEvent(const MouseEvent& ev);
 
-        virtual void onCloseEvent(const CloseEvent& ev);
+        virtual void onEnterEvent( const EnterEvent& ev );
 
-      private:
-            Menu     _menu;
-            MenuItem _item1;
-            MenuItem _item2;
-            MenuItem _item3;
+        virtual void onLeaveEvent(const LeaveEvent& ev );
 
-            Menu     _subMenu;
-            MenuItem _subItem1;
-            MenuItem _subItem2;
-            MenuItem _subItem3;
-            
-            ChildW _child1;
-            Window _child2;
+        virtual void onTouchEvent(const TouchEvent& ev);
 
-            Gfx::Image _icon;
-            Picture   _picture;
+        virtual void onFocusEvent(const FocusEvent& ev);
 
-            FlowLayout _scrollContainer;
-            ScrollView _scrollView;
-            PushButton _btns[20];
-            PushButton _bt2;
-            Pt::Gfx::Image _image;
+    protected:       
+        virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect);
 
+        virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect);
+
+    private:
+        Style*                   _style;
+        StyleOptions*            _styleOptions;
+        Pt::String               _text;
+        bool                     _isPressed;
+        bool                     _isHover;      
 };
-
-} // namespace
 
 } // namespace
 

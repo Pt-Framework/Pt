@@ -211,8 +211,8 @@ void ScrollBar::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updat
     Painter painter(surface);
     painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
 
-    Gfx::Color bgColor = Application::instance().styleOptions().background();
-    painter.setBrush(bgColor);
+    const Gfx::Brush& bg = Application::instance().styleOptions().background();
+    painter.setBrush(bg);
 
     //painter.setClip(updateRect);
     painter.fillRect(updateRect);

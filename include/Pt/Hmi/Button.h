@@ -31,7 +31,7 @@
 #define Pt_Hmi_Button_H
 
 #include <Pt/Hmi/Control.h>
-#include <Pt/Gfx/Image.h>
+#include <Pt/Signal.h>
 
 namespace Pt {
 
@@ -40,25 +40,24 @@ namespace Hmi {
 class MouseEvent;
 class TouchEvent;
 
-// TODO: name this call Button and rename Button -> PushButton
-class PT_HMI_API ButtonBase : public Control
+class PT_HMI_API Button : public Control
 {
     public:
-        ButtonBase();
+        Button();
     
-        virtual ~ButtonBase();
+        virtual ~Button();
         
-        Signal<>& clicked()
+        Signal<Button&>& clicked()
         {
             return _clicked;
         }
 
-        Signal<>& pressed()
+        Signal<Button&>& pressed()
         {
             return _pressed;
         }
 
-        Signal<>& released()
+        Signal<Button&>& released()
         {
             return _released;
         }
@@ -76,55 +75,9 @@ class PT_HMI_API ButtonBase : public Control
         virtual void onTouchEvent(const TouchEvent& ev);
 
     private:
-        Signal<> _clicked;
-        Signal<> _pressed;
-        Signal<> _released;
-};
-
-
-class PT_HMI_API Button : public ButtonBase
-{
-    public:
-        Button();
-    
-        virtual ~Button();
-    
-        void setText(const Pt::String& t);
-
-        const Pt::String& text() const;
-
-        bool isPressed() const;
-
-        bool isHovered() const;
-
-    protected:
-        virtual void onMnemonic();
-
-        virtual void onShortcut(const KeyEvent& kev);
-
-        virtual void onActionKey(const KeyEvent& kev);
-
-        virtual void onMouseEvent(const MouseEvent& ev);
-
-        virtual void onEnterEvent( const EnterEvent& ev );
-
-        virtual void onLeaveEvent(const LeaveEvent& ev );
-
-        virtual void onTouchEvent(const TouchEvent& ev);
-
-        virtual void onFocusEvent(const FocusEvent& ev);
-
-    protected:       
-        virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect);
-
-        virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect);
-
-    private:
-        Style*                   _style;
-        StyleOptions*            _styleOptions;
-        Pt::String               _text;
-        bool                     _isPressed;
-        bool                     _isHover;      
+        Signal<Button&> _clicked;
+        Signal<Button&> _pressed;
+        Signal<Button&> _released;
 };
 
 } // namespace

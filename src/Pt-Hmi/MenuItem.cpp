@@ -168,7 +168,7 @@ Signal<MenuItem&>& MenuItem::triggered()
 
 void MenuItem::onClicked()
 {   
-    ButtonBase::onClicked();
+    Button::onClicked();
 
     _triggered.send(*this);
 }
@@ -191,7 +191,7 @@ void MenuItem::onShortcut(const KeyEvent& kev)
 
 void MenuItem::onInvalidate()
 {
-    ButtonBase::onInvalidate();
+    Button::onInvalidate();
 }
 
 
@@ -220,10 +220,9 @@ Gfx::SizeF MenuItem::onAutoSize() const
 void MenuItem::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
     bool mouseOver = Application::instance().pointerWidget() == this;
-
     if(mouseOver)
     {
-        Gfx::Color bgColor = Application::instance().styleOptions().background();
+        Gfx::Color bgColor = Application::instance().styleOptions().highlightColor();
         Gfx::Brush brush = brighten(bgColor, 0.85f);
 
         Painter painter(surface);

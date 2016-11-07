@@ -66,12 +66,12 @@ class PT_HMI_API StyleOptions
         // tooltipForeground / popupForeground
         // tooltipTextColor / popupTextColor
 
-        const Gfx::Color& background() const
+        const Gfx::Brush& background() const
         {
             return _background;
         }
 
-        void setBackground(Gfx::Color& c)
+        void setBackground(const Gfx::Brush& c)
         {
             _background = c;
         }
@@ -81,9 +81,19 @@ class PT_HMI_API StyleOptions
             return _foreground;
         }
 
-        void setForeground(Gfx::Color& c)
+        void setForeground(const Gfx::Color& c)
         {
             _foreground = c;
+        }
+
+        const Gfx::Color& highlightColor() const
+        {
+            return _highlight;
+        }
+
+        void setHighlightColor(const Gfx::Color& c)
+        {
+            _highlight = c;
         }
 
         const Gfx::Color& textColor() const
@@ -91,7 +101,7 @@ class PT_HMI_API StyleOptions
             return _textColor;
         }
 
-        void setTextColor(Gfx::Color& c)
+        void setTextColor(const Gfx::Color& c)
         {
             _textColor = c;
         }
@@ -107,8 +117,9 @@ class PT_HMI_API StyleOptions
         }
 
     private:
-        Gfx::Color _background;
+        Gfx::Brush _background;
         Gfx::Color _foreground;
+        Gfx::Color _highlight;
         Gfx::Color _textColor;
         Gfx::Font  _font;
 };
