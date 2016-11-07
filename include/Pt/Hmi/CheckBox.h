@@ -56,10 +56,12 @@ class PT_HMI_API CheckBox : public ToggleButton
         State state() const;
 
         void setState(State s);
-
+    
     protected:
-        virtual void onToggled();
+        virtual void onPressed();
 
+        virtual void onReleased();
+    
     protected:       
         virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect);
 

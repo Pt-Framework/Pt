@@ -51,9 +51,22 @@ class PT_HMI_API Button : public Control
         void setText(const Pt::String& t);
 
         const Pt::String& text() const;
+
+        Signal<Button&>& clicked();
     
     protected:
+        virtual void onPressed();
+
+        virtual void onReleased();
+
         void setPressed(bool pressed);
+
+    protected:
+        virtual void onMnemonic();
+
+        virtual void onShortcut(const KeyEvent& kev);
+
+        virtual void onActionKey(const KeyEvent& kev);
 
     protected:
         virtual void onEnterEvent(const EnterEvent& ev);
@@ -62,14 +75,14 @@ class PT_HMI_API Button : public Control
 
         virtual void onFocusEvent(const FocusEvent& ev);
 
-    protected:       
-        virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect);
+        virtual void onMouseEvent(const MouseEvent& ev);
 
-        virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect);
+        virtual void onTouchEvent(const TouchEvent& ev);
 
     private:
-        bool       _isPressed;
-        Pt::String _text;
+        Signal<Button&> _clicked;
+        bool            _isPressed;
+        Pt::String      _text;
 };
 
 } // namespace

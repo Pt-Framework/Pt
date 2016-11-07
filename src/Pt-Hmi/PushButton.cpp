@@ -28,6 +28,9 @@
 */
 
 #include <Pt/Hmi/PushButton.h>
+#include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/Style.h>
+#include <Pt/Hmi/StyleOptions.h>
 
 namespace Pt {
 
@@ -44,59 +47,52 @@ PushButton::~PushButton()
 }
 
 
-Signal<PushButton&>& PushButton::clicked()
+void PushButton::onPressed()
 {
-    return _clicked;
+    Base::onPressed();
+
+    setPressed(true);
 }
 
 
-void PushButton::onClicked()
+void PushButton::onReleased()
 {
-    Base::onClicked();
+    Base::onReleased();
+
+    setPressed(false);
     clicked().send(*this);
 }
 
 
-void PushButton::onMnemonic()
-{
-    Base::onMnemonic();
-    clicked().send(*this);
-}
-
-
-void PushButton::onActionKey( const KeyEvent& kev )
-{
-    Base::onActionKey(kev);
-    clicked().send(*this);
-}
-
-
-void PushButton::onShortcut( const KeyEvent& kev )
-{
-    Base::onShortcut(kev);
-    clicked().send(*this);
-}
-
-
-void PushButton::onMouseEvent(const MouseEvent& ev)
+void PushButton::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
 {    
-    Base::onMouseEvent(ev);
+    Application& app = Application::instance();
+    
+    const Style& s = style() ? *style() 
+                             : app.style();
+    
+    const StyleOptions& so = styleOptions() ? *styleOptions() 
+                                            : app.styleOptions();
 
-    if( ev.isPressed() != isPressed() )
-    {
-        setPressed( ev.isPressed() );
-    }
+    const ButtonRenderer* renderer = s.get<ButtonRenderer>();
+    if(renderer)
+        renderer->renderBackground(*this, so, surface, updateRect);
 }
 
 
-void PushButton::onTouchEvent(const TouchEvent& ev)
-{    
-    Base::onTouchEvent(ev);
+void PushButton::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
+{
+    Application& app = Application::instance();
 
-    if( ev.isPressed() != isPressed() )
-    {
-        setPressed( ev.isPressed() );
-    }
+    const Style& s = style() ? *style() 
+                             : app.style();
+    
+    const StyleOptions& so = styleOptions() ? *styleOptions() 
+                                            : app.styleOptions();
+
+    const ButtonRenderer* renderer = s.get<ButtonRenderer>();
+    if(renderer)
+        renderer->renderContent(*this, so, surface, updateRect);
 }
 
 } // namespace

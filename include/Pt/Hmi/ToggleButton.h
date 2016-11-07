@@ -47,21 +47,22 @@ class PT_HMI_API ToggleButton : public Button
 
         virtual ~ToggleButton();
 
-        Signal<ToggleButton&>& toggled();
+    protected:
+        virtual void onPressed();
+
+        virtual void onReleased();
 
     protected:
-        virtual void onToggled();
-
-        virtual void onClicked();
-
         virtual void onMnemonic();
 
         virtual void onShortcut(const KeyEvent& kev);
 
         virtual void onActionKey(const KeyEvent& kev);
 
-    private:
-        Signal<ToggleButton&> _toggled;
+    protected:       
+        virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect);
+
+        virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect);
 };
 
 } // namespace

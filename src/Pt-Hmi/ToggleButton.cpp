@@ -28,6 +28,9 @@
 */
 
 #include <Pt/Hmi/ToggleButton.h>
+#include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/Style.h>
+#include <Pt/Hmi/StyleOptions.h>
 
 namespace Pt {
 
@@ -43,24 +46,17 @@ ToggleButton::~ToggleButton()
 }
 
 
-Signal<ToggleButton&>& ToggleButton::toggled()
+void ToggleButton::onPressed()
 {
-    return _toggled;
+    Base::onPressed();
 }
 
 
-void ToggleButton::onToggled()
+void ToggleButton::onReleased()
 {
-    _toggled.send(*this);
-}
-
-
-void ToggleButton::onClicked()
-{
-    Base::onClicked();
+    Base::onReleased();
 
     setPressed( ! isPressed() );
-    onToggled();
 }
 
 
@@ -69,31 +65,56 @@ void ToggleButton::onMnemonic()
     Base::onMnemonic();
     
     setPressed( ! isPressed() );
-    onToggled();
 }
 
 
 void ToggleButton::onActionKey( const KeyEvent& kev )
 {
-    Base::onActionKey(kev);
-    
     if( kev.isRelease() )
-    {
         setPressed( ! isPressed() );
-        onToggled();
-    }
+
+    Base::onActionKey(kev);
 }
 
 
 void ToggleButton::onShortcut( const KeyEvent& kev )
 {
-    Base::onShortcut(kev);
-    
     if( kev.isRelease() )
-    {
         setPressed( ! isPressed() );
-        onToggled();
-    }
+    
+    Base::onShortcut(kev);
+}
+
+
+void ToggleButton::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
+{    
+    Application& app = Application::instance();
+    
+    const Style& s = style() ? *style() 
+                             : app.style();
+    
+    const StyleOptions& so = styleOptions() ? *styleOptions() 
+                                            : app.styleOptions();
+
+    const ButtonRenderer* renderer = s.get<ButtonRenderer>();
+    if(renderer)
+        renderer->renderBackground(*this, so, surface, updateRect);
+}
+
+
+void ToggleButton::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
+{
+    Application& app = Application::instance();
+
+    const Style& s = style() ? *style() 
+                             : app.style();
+    
+    const StyleOptions& so = styleOptions() ? *styleOptions() 
+                                            : app.styleOptions();
+
+    const ButtonRenderer* renderer = s.get<ButtonRenderer>();
+    if(renderer)
+        renderer->renderContent(*this, so, surface, updateRect);
 }
 
 } // namespace

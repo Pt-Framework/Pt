@@ -60,14 +60,20 @@ void CheckBox::setState(State s)
 }
 
 
-void CheckBox::onToggled()
+void CheckBox::onPressed()
+{
+    Base::onPressed();
+}
+
+
+void CheckBox::onReleased()
 {
     if(_state == Checked)
         _state = Unchecked;
     else
         _state = Checked;
 
-    Base::onToggled();
+    Base::onReleased();
 }
 
 

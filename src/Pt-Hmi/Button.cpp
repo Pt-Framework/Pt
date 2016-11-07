@@ -74,6 +74,43 @@ const Pt::String& Button::text() const
 }
 
 
+Signal<Button&>& Button::clicked()
+{
+    return _clicked;
+}
+
+
+void Button::onPressed()
+{
+}
+
+
+void Button::onReleased()
+{
+}
+
+
+void Button::onMnemonic()
+{
+    Base::onMnemonic();
+    clicked().send(*this);
+}
+
+
+void Button::onActionKey( const KeyEvent& kev )
+{
+    Base::onActionKey(kev);
+    clicked().send(*this);
+}
+
+
+void Button::onShortcut( const KeyEvent& kev )
+{
+    Base::onShortcut(kev);
+    clicked().send(*this);
+}
+
+
 void Button::onEnterEvent(const EnterEvent& ev)
 {
     Base::onEnterEvent(ev);
@@ -95,35 +132,33 @@ void Button::onFocusEvent(const FocusEvent& ev)
 }
 
 
-void Button::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
+void Button::onMouseEvent(const MouseEvent& ev)
 {    
-    Application& app = Application::instance();
-    
-    const Style& s = style() ? *style() 
-                             : app.style();
-    
-    const StyleOptions& so = styleOptions() ? *styleOptions() 
-                                            : app.styleOptions();
+    Base::onMouseEvent(ev);
 
-    const ButtonRenderer* renderer = s.get<ButtonRenderer>();
-    if(renderer)
-        renderer->renderBackground(*this, so, surface, updateRect);
+    if( ev.isPress() )
+    {
+        onPressed();
+    }
+    else if( ev.isRelease() )
+    {
+        onReleased();
+    }   
 }
 
 
-void Button::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
-{
-    Application& app = Application::instance();
+void Button::onTouchEvent(const TouchEvent& ev)
+{    
+    Base::onTouchEvent(ev);
 
-    const Style& s = style() ? *style() 
-                             : app.style();
-    
-    const StyleOptions& so = styleOptions() ? *styleOptions() 
-                                            : app.styleOptions();
-
-    const ButtonRenderer* renderer = s.get<ButtonRenderer>();
-    if(renderer)
-        renderer->renderContent(*this, so, surface, updateRect);
+    if( ev.isPress() )
+    {
+        onPressed();
+    }
+    else if( ev.isRelease() )
+    {
+        onReleased();
+    }   
 }
 
 } // namespace
