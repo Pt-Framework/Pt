@@ -27,8 +27,8 @@
    MA  02110-1301  USA
 */
 
-#ifndef Pt_Hmi_PushButton_H
-#define Pt_Hmi_PushButton_H
+#ifndef Pt_Hmi_ToggleButton_H
+#define Pt_Hmi_ToggleButton_H
 
 #include <Pt/Hmi/Button.h>
 #include <Pt/Signal.h>
@@ -37,22 +37,21 @@ namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API PushButton : public Button
+class PT_HMI_API ToggleButton : public Button
 {
     public:
         typedef Button Base;
 
     public:
-        PushButton();
-    
-        virtual ~PushButton();
+        ToggleButton();
 
-        Signal<PushButton&>& clicked()
-        {
-            return _clicked;
-        }
+        virtual ~ToggleButton();
+
+        Signal<ToggleButton&>& toggled();
 
     protected:
+        virtual void onToggled();
+
         virtual void onClicked();
 
         virtual void onMnemonic();
@@ -61,14 +60,8 @@ class PT_HMI_API PushButton : public Button
 
         virtual void onActionKey(const KeyEvent& kev);
 
-    protected:
-        virtual void onMouseEvent(const MouseEvent& ev);
-
-        virtual void onTouchEvent(const TouchEvent& ev);
-
     private:
-        Signal<PushButton&> _clicked;
-           
+        Signal<ToggleButton&> _toggled;
 };
 
 } // namespace

@@ -45,12 +45,12 @@ class PT_HMI_API PlatinumButtonRenderer : public ButtonRenderer
         virtual ~PlatinumButtonRenderer();
 
     protected:
-        virtual void onRenderBackground(const PushButton& button, 
+        virtual void onRenderBackground(const Button& button, 
                                         const StyleOptions& options,
                                         PaintSurface& surface, 
                                         const Gfx::RectF& rect) const;
 
-        virtual void onRenderContent(const PushButton& button, 
+        virtual void onRenderContent(const Button& button, 
                                      const StyleOptions& options,
                                      PaintSurface& surface, 
                                      const Gfx::RectF& rect) const;

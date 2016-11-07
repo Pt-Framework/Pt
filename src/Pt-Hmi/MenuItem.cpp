@@ -168,7 +168,7 @@ Signal<MenuItem&>& MenuItem::triggered()
 
 void MenuItem::onClicked()
 {   
-    Button::onClicked();
+    Base::onClicked();
 
     _triggered.send(*this);
 }
@@ -183,7 +183,7 @@ void MenuItem::onParentChanged(Widget* w)
 
 void MenuItem::onShortcut(const KeyEvent& kev)
 {
-    WidgetBaseType::onShortcut(kev);
+    Base::onShortcut(kev);
     
     _triggered.send(*this);
 }
@@ -191,7 +191,7 @@ void MenuItem::onShortcut(const KeyEvent& kev)
 
 void MenuItem::onInvalidate()
 {
-    Button::onInvalidate();
+    Base::onInvalidate();
 }
 
 
@@ -302,21 +302,21 @@ void MenuItem::onPaintShortcut(PaintSurface& surface, const Gfx::RectF& updateRe
 
 void MenuItem::onEnterEvent(const EnterEvent& ev)
 {
-    WidgetBaseType::onEnterEvent(ev);
+    Base::onEnterEvent(ev);
     update();
 }
 
 
 void MenuItem::onLeaveEvent(const LeaveEvent& ev)
 {
-    WidgetBaseType::onLeaveEvent(ev);
+    Base::onLeaveEvent(ev);
     update();
 }
 
 
 void MenuItem::onResizeEvent(const ResizeEvent& ev)
 {
-    WidgetBaseType::onResizeEvent(ev);
+    Base::onResizeEvent(ev);
 }
 
 } // namespace

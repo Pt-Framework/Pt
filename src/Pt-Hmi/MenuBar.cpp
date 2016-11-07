@@ -130,7 +130,7 @@ void MenuBarItem::close()
 
 void MenuBarItem::onClicked()
 {
-    Button::onClicked();
+    Base::onClicked();
 
     toggle();
 }
@@ -138,7 +138,7 @@ void MenuBarItem::onClicked()
 
 void MenuBarItem::onInvalidate()
 {
-    Button::onInvalidate();
+    Base::onInvalidate();
 }
 
 
@@ -155,7 +155,7 @@ Gfx::SizeF MenuBarItem::onAutoSize() const
 
 void MenuBarItem::onMouseEvent(const MouseEvent& ev)
 { 
-    WidgetBaseType::onMouseEvent(ev);
+    Base::onMouseEvent(ev);
 
     // nothing to do if on this item
     Gfx::RectF rect( Gfx::PointF(0,0), size() );
@@ -233,7 +233,7 @@ void MenuBarItem::onPaintContent(PaintSurface& surface, const Gfx::RectF& update
 
 void MenuBarItem::onEnterEvent(const EnterEvent& ev)
 {
-    WidgetBaseType::onEnterEvent(ev);
+    Base::onEnterEvent(ev);
     
     _highlighted = true;
     update();
@@ -242,7 +242,7 @@ void MenuBarItem::onEnterEvent(const EnterEvent& ev)
 
 void MenuBarItem::onLeaveEvent(const LeaveEvent& ev)
 {
-    WidgetBaseType::onLeaveEvent(ev);
+    Base::onLeaveEvent(ev);
     
     _highlighted = false;
     update();

@@ -125,7 +125,7 @@ ButtonRenderer::~ButtonRenderer()
 }
 
 
-void ButtonRenderer::renderBackground(const PushButton& button, 
+void ButtonRenderer::renderBackground(const Button& button, 
                                       const StyleOptions& options,
                                       PaintSurface& surface, 
                                       const Gfx::RectF& rect) const
@@ -134,12 +134,44 @@ void ButtonRenderer::renderBackground(const PushButton& button,
 }    
 
 
-void ButtonRenderer::renderContent(const PushButton& button, 
+void ButtonRenderer::renderContent(const Button& button, 
                                    const StyleOptions& options,
                                    PaintSurface& surface, 
                                    const Gfx::RectF& rect) const
 { 
     onRenderContent(button, options, surface, rect); 
+}  
+
+///////////////////////////////////////////////////////////////////////////////
+// ButtonRenderer
+///////////////////////////////////////////////////////////////////////////////
+
+CheckBoxRenderer::CheckBoxRenderer(std::size_t refs)
+: Style::Facet( typeid(CheckBoxRenderer), refs )
+{
+}
+
+    
+CheckBoxRenderer::~CheckBoxRenderer()
+{
+}
+
+
+void CheckBoxRenderer::renderBackground(const CheckBox& cb, 
+                                      const StyleOptions& options,
+                                      PaintSurface& surface, 
+                                      const Gfx::RectF& rect) const
+{ 
+    onRenderBackground(cb, options, surface, rect); 
+}    
+
+
+void CheckBoxRenderer::renderContent(const CheckBox& cb, 
+                                   const StyleOptions& options,
+                                   PaintSurface& surface, 
+                                   const Gfx::RectF& rect) const
+{ 
+    onRenderContent(cb, options, surface, rect); 
 }  
 
 } // namespace

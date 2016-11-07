@@ -43,11 +43,11 @@ namespace Hmi {
 
 class Menu;
 
-class PT_HMI_API MenuItem : public Button
+class PT_HMI_API MenuItem : public Control
 {
     friend class Menu;
 
-    typedef Button WidgetBaseType;
+    typedef Control Base;
 
     public:
         MenuItem();

@@ -23,6 +23,8 @@ PT_HMI_IMPL += [ GLOB $(PT_HMI_SUBDIR) : *.mm  ] ;
 
 SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
              Application.cpp
+             Button.cpp
+             CheckBox.cpp
              Control.cpp
              Cursor.cpp
              DockingLayout.cpp
@@ -32,7 +34,6 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
              PixmapSurface.cpp 
              PaintRegion.cpp
              Painter.cpp
-             Button.cpp
              Label.cpp
              Panel.cpp
              Widget.cpp
@@ -54,6 +55,7 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
              ScrollLayout.cpp
              Style.cpp
              StyleOptions.cpp
+             ToggleButton.cpp
              ;
 
 LinkSharedLibraries Pt-Hmi : Pt Pt-System Pt-Gfx Pt-Reflex ;

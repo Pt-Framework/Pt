@@ -27,7 +27,7 @@
   MA 02110-1301 USA
 */
 
-#include <Pt/Hmi/Button.h>
+#include <Pt/Hmi/CheckBox.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Style.h>
 #include <Pt/Hmi/StyleOptions.h>
@@ -36,66 +36,59 @@ namespace Pt {
 
 namespace Hmi {
 
-Button::Button()
-: _isPressed(false)
-{
-    setAcceptsFocus(true);
-}
-
-  
-Button::~Button()
+CheckBox::CheckBox()
+: _isUndefined(false)
 {
 }
 
 
-bool Button::isPressed() const
+CheckBox::~CheckBox()
 {
-    return _isPressed;
 }
 
 
-void Button::setPressed(bool pressed)
+CheckBox::State CheckBox::state() const
 {
-    _isPressed = pressed;
-    update();
+    if(_isUndefined)
+        return Undefined;
+
+    return isPressed() ? Checked : Unchecked;
 }
 
 
-void Button::setText(const Pt::String& text)
+void CheckBox::setState(State s)
 {
-    _text = Widget::setMnemonic(text);
-    invalidate();
+    switch(s)
+    {
+        case Undefined:
+            _isUndefined = true;
+            setPressed(false);
+            
+            break;
+
+        case Checked:
+            _isUndefined = false;
+            setPressed(true);
+            
+            break;
+
+        default:
+        case Unchecked:
+            _isUndefined = false;
+            setPressed(false);
+            break;
+    }
 }
 
 
-const Pt::String& Button::text() const
+void CheckBox::onToggled()
 {
-    return _text;
+    _isUndefined = false;
+    Base::onToggled();
 }
 
 
-void Button::onEnterEvent(const EnterEvent& ev)
-{
-    Base::onEnterEvent(ev);
-    update();
-}
-
-
-void Button::onLeaveEvent(const LeaveEvent& ev)
-{
-    Base::onLeaveEvent(ev);
-    update();
-}
-
-
-void Button::onFocusEvent(const FocusEvent& ev)
-{    
-    Base::onFocusEvent(ev);
-    update();
-}
-
-
-void Button::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
+void CheckBox::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
 {    
     Application& app = Application::instance();
     
@@ -105,13 +98,13 @@ void Button::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRe
     const StyleOptions& so = styleOptions() ? *styleOptions() 
                                             : app.styleOptions();
 
-    const ButtonRenderer* renderer = s.get<ButtonRenderer>();
+    const CheckBoxRenderer* renderer = s.get<CheckBoxRenderer>();
     if(renderer)
         renderer->renderBackground(*this, so, surface, updateRect);
 }
 
 
-void Button::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
+void CheckBox::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
     Application& app = Application::instance();
 
@@ -121,7 +114,7 @@ void Button::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
     const StyleOptions& so = styleOptions() ? *styleOptions() 
                                             : app.styleOptions();
 
-    const ButtonRenderer* renderer = s.get<ButtonRenderer>();
+    const CheckBoxRenderer* renderer = s.get<CheckBoxRenderer>();
     if(renderer)
         renderer->renderContent(*this, so, surface, updateRect);
 }

@@ -1,5 +1,5 @@
-/* Copyright (C) 2016 Marc Boris Duerner 
-   Copyright (C) 2016 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2013 Marc Boris Duerner 
+   Copyright (C) 2013 Laurentiu-Gheorghe Crisan
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -27,69 +27,72 @@
   MA 02110-1301 USA
 */
 
-#include <Pt/Hmi/PushButton.h>
+#include <Pt/Hmi/ToggleButton.h>
 
 namespace Pt {
 
 namespace Hmi {
 
-PushButton::PushButton()
-{
-    
-}
-
-
-PushButton::~PushButton()
+ToggleButton::ToggleButton()
 {
 }
 
 
-void PushButton::onClicked()
+ToggleButton::~ToggleButton()
+{
+}
+
+
+Signal<ToggleButton&>& ToggleButton::toggled()
+{
+    return _toggled;
+}
+
+
+void ToggleButton::onToggled()
+{
+    _toggled.send(*this);
+}
+
+
+void ToggleButton::onClicked()
 {
     Base::onClicked();
-    clicked().send(*this);
+
+    setPressed( ! isPressed() );
+    onToggled();
 }
 
 
-void PushButton::onMnemonic()
+void ToggleButton::onMnemonic()
 {
     Base::onMnemonic();
-    clicked().send(*this);
+    
+    setPressed( ! isPressed() );
+    onToggled();
 }
 
 
-void PushButton::onActionKey( const KeyEvent& kev )
+void ToggleButton::onActionKey( const KeyEvent& kev )
 {
     Base::onActionKey(kev);
-    clicked().send(*this);
-}
-
-
-void PushButton::onShortcut( const KeyEvent& kev )
-{
-    Base::onShortcut(kev);
-    clicked().send(*this);
-}
-
-
-void PushButton::onMouseEvent(const MouseEvent& ev)
-{    
-    Base::onMouseEvent(ev);
-
-    if( ev.isPressed() != isPressed() )
+    
+    if( kev.isRelease() )
     {
-        setPressed( ev.isPressed() );
+        setPressed( ! isPressed() );
+        onToggled();
     }
 }
 
 
-void PushButton::onTouchEvent(const TouchEvent& ev)
-{    
-    Base::onTouchEvent(ev);
-
-    if( ev.isPressed() != isPressed() )
+void ToggleButton::onShortcut( const KeyEvent& kev )
+{
+    Base::onShortcut(kev);
+    
+    if( kev.isRelease() )
     {
-        setPressed( ev.isPressed() );
+        setPressed( ! isPressed() );
+        onToggled();
     }
 }
 

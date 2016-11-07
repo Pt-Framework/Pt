@@ -27,48 +27,46 @@
    MA  02110-1301  USA
 */
 
-#ifndef Pt_Hmi_PushButton_H
-#define Pt_Hmi_PushButton_H
+#ifndef Pt_Hmi_CheckBox_h
+#define Pt_Hmi_CheckBox_h
 
-#include <Pt/Hmi/Button.h>
-#include <Pt/Signal.h>
+#include <Pt/Hmi/ToggleButton.h>
 
 namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API PushButton : public Button
+class PT_HMI_API CheckBox : public ToggleButton
 {
     public:
-        typedef Button Base;
+        typedef ToggleButton Base;
+
+        enum State
+        {
+            Undefined,
+            Checked,
+            Unchecked
+        };
 
     public:
-        PushButton();
-    
-        virtual ~PushButton();
+        CheckBox();
 
-        Signal<PushButton&>& clicked()
-        {
-            return _clicked;
-        }
+        virtual ~CheckBox();
 
-    protected:
-        virtual void onClicked();
+        State state() const;
 
-        virtual void onMnemonic();
-
-        virtual void onShortcut(const KeyEvent& kev);
-
-        virtual void onActionKey(const KeyEvent& kev);
+        void setState(State s);
 
     protected:
-        virtual void onMouseEvent(const MouseEvent& ev);
+        virtual void onToggled();
 
-        virtual void onTouchEvent(const TouchEvent& ev);
+    protected:       
+        virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect);
+
+        virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect);
 
     private:
-        Signal<PushButton&> _clicked;
-           
+        bool _isUndefined;
 };
 
 } // namespace

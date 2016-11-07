@@ -31,53 +31,44 @@
 #define Pt_Hmi_Button_H
 
 #include <Pt/Hmi/Control.h>
-#include <Pt/Signal.h>
 
 namespace Pt {
 
 namespace Hmi {
 
-class MouseEvent;
-class TouchEvent;
-
 class PT_HMI_API Button : public Control
 {
+    public:
+        typedef Control Base;
+
     public:
         Button();
     
         virtual ~Button();
-        
-        Signal<Button&>& clicked()
-        {
-            return _clicked;
-        }
 
-        Signal<Button&>& pressed()
-        {
-            return _pressed;
-        }
+        bool isPressed() const;
 
-        Signal<Button&>& released()
-        {
-            return _released;
-        }
+        void setPressed(bool pressed);
+
+        void setText(const Pt::String& t);
+
+        const Pt::String& text() const;
 
     protected:
-        virtual void onPressed();
-        
-        virtual void onReleased();
-        
-        virtual void onClicked();
-    
-    protected:
-        virtual void onMouseEvent(const MouseEvent& ev);
+        virtual void onEnterEvent(const EnterEvent& ev);
 
-        virtual void onTouchEvent(const TouchEvent& ev);
+        virtual void onLeaveEvent(const LeaveEvent& ev);
+
+        virtual void onFocusEvent(const FocusEvent& ev);
+
+    protected:       
+        virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect);
+
+        virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect);
 
     private:
-        Signal<Button&> _clicked;
-        Signal<Button&> _pressed;
-        Signal<Button&> _released;
+        bool       _isPressed;
+        Pt::String _text;
 };
 
 } // namespace

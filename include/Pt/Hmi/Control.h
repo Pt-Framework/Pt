@@ -55,8 +55,16 @@ class PT_HMI_API Control : public Widget
         const StyleOptions* styleOptions() const;
 
     protected:
+        virtual void onClicked();
+
+    protected:
+        virtual void onMouseEvent(const MouseEvent& ev);
+
+        virtual void onTouchEvent(const TouchEvent& ev);
+
         virtual void onPaintEvent( const PaintEvent& ev );
 	    
+    protected:
         virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect) = 0;
 
         virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect) = 0;

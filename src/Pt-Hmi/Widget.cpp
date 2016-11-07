@@ -51,6 +51,7 @@ Widget::Widget()
 , _acceptsFocus(false) 
 , _focusIndex(0)
 , _acceptsInput(true)
+, _isHighlighted(false)
 , _cursor( Hmi::Cursor::defaultCursor() )
 , _actionKey(Key::Space)
 , _mnemonic(0)
@@ -309,6 +310,12 @@ Gfx::PointF Widget::fromScreen(const Gfx::PointF& pos) const
         widgetPos = window()->fromScreen(pos);
 
     return fromWindow( widgetPos );
+}
+
+
+bool Widget::isHighlighted() const
+{
+  return _isHighlighted;
 }
 
 
@@ -910,15 +917,17 @@ void Widget::onKeyEvent(const KeyEvent& ev)
 }
 
 
-void Widget::onEnterEvent( const EnterEvent& ev )
+void Widget::onEnterEvent( const EnterEvent& ev)
 {
     Application::instance().setCursor( &cursor() ); 
+
+    _isHighlighted = true;
 }
 
 
-void Widget::onLeaveEvent(const LeaveEvent& ev )
+void Widget::onLeaveEvent(const LeaveEvent& ev)
 {
-
+    _isHighlighted = false;
 }
 
 } // namespace

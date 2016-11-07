@@ -2,7 +2,8 @@
 #define Pt_Hmi_Demo_ChildW_h
 
 #include <Pt/Hmi/Window.h>
-#include <Pt/Hmi/Button.h>
+#include <Pt/Hmi/PushButton.h>
+#include <Pt/Hmi/ToggleButton.h>
 #include <Pt/Hmi/Panel.h>
 #include <Pt/Hmi/Label.h>
 #include <Pt/Hmi/DockingLayout.h>
@@ -26,9 +27,9 @@ class ChildW : public Hmi::Window
         ~ChildW();
 
     private:
-        void onShowDialog(Button&);
+        void onShowDialog(PushButton&);
         
-        void onCloseApp(Button&);
+        void onCloseApp(PushButton&);
 
     private:
         FlowLayout _mainLayout;
@@ -49,7 +50,7 @@ class ChildW : public Hmi::Window
         Window _childWindow2;
         DockingLayout  _childView;
         PushButton _closeButton;
-        PushButton _toggleButton;
+        ToggleButton _toggleButton;
         PushButton _dialogButton;
         Label  _textLabel;
         DockingLayout _buttonBar;

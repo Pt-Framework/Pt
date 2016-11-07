@@ -1023,9 +1023,6 @@
     <ClInclude Include="..\..\src\Pt-Hmi\linux-fb\InputDevice.h">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Button.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\Label.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
@@ -1417,6 +1414,15 @@
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\PushButton.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ToggleButton.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Button.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\CheckBox.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
   </ItemGroup>
@@ -2342,9 +2348,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\InputDevice.cpp">
       <Filter>Pt-Hmi\linux-fb</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\Button.cpp">
-      <Filter>Pt-Hmi</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\Label.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
@@ -2622,6 +2625,15 @@
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\PushButton.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\ToggleButton.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\Button.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\CheckBox.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
   </ItemGroup>
