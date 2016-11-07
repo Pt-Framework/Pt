@@ -407,6 +407,10 @@ bool Client::advance(const Pt::Xml::Node& node)
             if(node.type() == Xml::Node::EndElement) // end of method tag
             {
                 // no return parameter
+                const Parameter* param = _op->getOutput();
+                if(param)
+                    throw Fault("invalid output parameter", Fault::MethodNotFound);
+
                 _state = OnMethodEnd;
                 break;
             }
@@ -415,7 +419,7 @@ bool Client::advance(const Pt::Xml::Node& node)
             {
                 const Parameter* param = _op->getOutput();
                 if( ! param )
-                    throw Fault("undefined output parameter", Fault::MethodNotFound);
+                    throw Fault("invalid output parameter", Fault::MethodNotFound);
 
                 _fmt.setParameter(*param);
                 _state = OnParam;

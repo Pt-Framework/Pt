@@ -371,6 +371,9 @@ bool Responder::advance(const Pt::Xml::Node& node)
         {
             if(node.type() == Xml::Node::EndElement) // end of method tag
             {
+                if( *_args )
+                    throw SerializationError("too few arguments");
+
                 _state = OnMethodEnd;
                 break;
             }

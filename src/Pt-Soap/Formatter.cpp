@@ -503,6 +503,11 @@ bool Formatter::advance(const Pt::Xml::Node& node)
     }
     else if(node.type() == Xml::Node::EndElement)
     {
+        const Type::TypeId typeId = _paramStack.back()->type()->typeId();
+
+        // TODO: handle empty binary base64 blocks
+        // TODO: handle empty arrays
+
         // handle empty string values
         if(_state == OnStartElement || _state == OnBegin)
             _composer->setString( Pt::String() );
