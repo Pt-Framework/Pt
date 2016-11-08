@@ -32,17 +32,23 @@
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Style.h>
+#include <Pt/String.h>
 
 namespace Pt {
 
 namespace Hmi {
 
+class Painter;
+
 class PT_HMI_API PlatinumButtonRenderer : public ButtonRenderer
 {
     public:
-        PlatinumButtonRenderer();
+        PlatinumButtonRenderer(std::size_t refs = 0);
 
         virtual ~PlatinumButtonRenderer();
+
+        static void renderButtonText(Painter& painter, const Gfx::PointF& textPos,
+                                     const String& text, const Char* mnemonic);
 
     protected:
         virtual void onRenderBackground(const Button& button, 
@@ -51,6 +57,26 @@ class PT_HMI_API PlatinumButtonRenderer : public ButtonRenderer
                                         const Gfx::RectF& rect) const;
 
         virtual void onRenderContent(const Button& button, 
+                                     const StyleOptions& options,
+                                     PaintSurface& surface, 
+                                     const Gfx::RectF& rect) const;
+};
+
+
+class PT_HMI_API PlatinumCheckBoxRenderer : public CheckBoxRenderer
+{
+    public:
+        PlatinumCheckBoxRenderer(std::size_t refs = 0);
+
+        virtual ~PlatinumCheckBoxRenderer();
+
+    protected:
+        virtual void onRenderBackground(const CheckBox& cb, 
+                                        const StyleOptions& options,
+                                        PaintSurface& surface, 
+                                        const Gfx::RectF& rect) const;
+
+        virtual void onRenderContent(const CheckBox& cb, 
                                      const StyleOptions& options,
                                      PaintSurface& surface, 
                                      const Gfx::RectF& rect) const;

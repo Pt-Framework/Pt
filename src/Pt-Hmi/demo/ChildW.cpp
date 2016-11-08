@@ -110,7 +110,7 @@ ChildW::ChildW(const std::string& title)
     _closeButton.clicked() += Pt::slot(*this, &ChildW::onCloseApp);
       
     _checkBox.setName("CheckBox"); 
-    _checkBox.setText("Ch&eck Me");
+    _checkBox.setText("Ch&eck Me gyI");
     _checkBox.setDocking(Docking::Bottom);
     _checkBox.move( Gfx::PointF(0, 0) );
     _checkBox.resize( Gfx::SizeF(130, 30) );

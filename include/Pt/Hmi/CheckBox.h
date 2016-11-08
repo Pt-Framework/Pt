@@ -57,6 +57,8 @@ class PT_HMI_API CheckBox : public Button
         State state() const;
 
         void setState(State s);
+
+        bool isChecked() const;
     
     protected:
         virtual void onPressed();
