@@ -55,7 +55,6 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
              ScrollLayout.cpp
              Style.cpp
              StyleOptions.cpp
-             ToggleButton.cpp
              ;
 
 LinkSharedLibraries Pt-Hmi : Pt Pt-System Pt-Gfx Pt-Reflex ;

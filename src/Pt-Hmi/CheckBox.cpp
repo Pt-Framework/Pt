@@ -68,12 +68,14 @@ void CheckBox::onPressed()
 
 void CheckBox::onReleased()
 {
+    Base::onReleased();
+
     if(_state == Checked)
         _state = Unchecked;
     else
         _state = Checked;
 
-    Base::onReleased();
+    setPressed(_state == Checked);
 }
 
 
@@ -87,7 +89,7 @@ void CheckBox::onPaintBackground(PaintSurface& surface, const Gfx::RectF& update
     const StyleOptions& so = styleOptions() ? *styleOptions() 
                                             : app.styleOptions();
 
-    const CheckBoxRenderer* renderer = s.get<CheckBoxRenderer>();
+    const ButtonRenderer* renderer = s.get<ButtonRenderer>();
     if(renderer)
         renderer->renderBackground(*this, so, surface, updateRect);
 }
@@ -103,10 +105,41 @@ void CheckBox::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRec
     const StyleOptions& so = styleOptions() ? *styleOptions() 
                                             : app.styleOptions();
 
-    const CheckBoxRenderer* renderer = s.get<CheckBoxRenderer>();
+    const ButtonRenderer* renderer = s.get<ButtonRenderer>();
     if(renderer)
         renderer->renderContent(*this, so, surface, updateRect);
 }
+
+//void CheckBox::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
+//{    
+//    Application& app = Application::instance();
+//    
+//    const Style& s = style() ? *style() 
+//                             : app.style();
+//    
+//    const StyleOptions& so = styleOptions() ? *styleOptions() 
+//                                            : app.styleOptions();
+//
+//    const CheckBoxRenderer* renderer = s.get<CheckBoxRenderer>();
+//    if(renderer)
+//        renderer->renderBackground(*this, so, surface, updateRect);
+//}
+//
+//
+//void CheckBox::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
+//{
+//    Application& app = Application::instance();
+//
+//    const Style& s = style() ? *style() 
+//                             : app.style();
+//    
+//    const StyleOptions& so = styleOptions() ? *styleOptions() 
+//                                            : app.styleOptions();
+//
+//    const CheckBoxRenderer* renderer = s.get<CheckBoxRenderer>();
+//    if(renderer)
+//        renderer->renderContent(*this, so, surface, updateRect);
+//}
 
 } // namespace
 

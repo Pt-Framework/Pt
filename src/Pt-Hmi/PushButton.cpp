@@ -47,11 +47,24 @@ PushButton::~PushButton()
 }
 
 
+bool PushButton::isToggle() const
+{
+    return _isToggle;
+}
+
+
+void PushButton::setToggle(bool toggle)
+{
+    _isToggle = toggle;
+}
+
+
 void PushButton::onPressed()
 {
     Base::onPressed();
 
-    setPressed(true);
+    if( ! isToggle() )
+        setPressed(true);
 }
 
 
@@ -59,7 +72,11 @@ void PushButton::onReleased()
 {
     Base::onReleased();
 
-    setPressed(false);
+    if( isToggle() )
+        setPressed( ! isPressed() );
+    else
+      setPressed(false);
+    
     clicked().send(*this);
 }
 

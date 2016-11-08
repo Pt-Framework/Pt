@@ -47,6 +47,10 @@ class PT_HMI_API PushButton : public Button
     
         virtual ~PushButton();
 
+        bool isToggle() const;
+
+        void setToggle(bool toggle);
+
     protected:
         virtual void onPressed();
 
@@ -55,7 +59,10 @@ class PT_HMI_API PushButton : public Button
     protected:       
         virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect);
 
-        virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect);     
+        virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect);
+        
+    private:
+        bool _isToggle;     
 };
 
 } // namespace

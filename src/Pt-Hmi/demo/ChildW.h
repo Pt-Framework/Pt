@@ -1,9 +1,10 @@
 #ifndef Pt_Hmi_Demo_ChildW_h
 #define Pt_Hmi_Demo_ChildW_h
 
+#include "Dialog1.h"
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/PushButton.h>
-#include <Pt/Hmi/ToggleButton.h>
+#include <Pt/Hmi/CheckBox.h>
 #include <Pt/Hmi/Panel.h>
 #include <Pt/Hmi/Label.h>
 #include <Pt/Hmi/DockingLayout.h>
@@ -11,8 +12,8 @@
 #include <Pt/Hmi/MenuBar.h>
 #include <Pt/Hmi/Menu.h>
 #include <Pt/Hmi/ScrollView.h>
-#include "Dialog1.h"
 #include <Pt/Hmi/Application.h>
+
 namespace Pt {
 
 namespace Hmi {
@@ -28,6 +29,8 @@ class ChildW : public Hmi::Window
 
     private:
         void onShowDialog(Button&);
+
+        void onCheckBox(Button&);
         
         void onCloseApp(Button&);
 
@@ -50,8 +53,9 @@ class ChildW : public Hmi::Window
         Window _childWindow2;
         DockingLayout  _childView;
         PushButton _closeButton;
-        ToggleButton _toggleButton;
+        PushButton _toggleButton;
         PushButton _dialogButton;
+        CheckBox   _checkBox;
         Label  _textLabel;
         DockingLayout _buttonBar;
 };

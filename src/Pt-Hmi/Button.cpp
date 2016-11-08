@@ -93,21 +93,31 @@ void Button::onReleased()
 void Button::onMnemonic()
 {
     Base::onMnemonic();
-    clicked().send(*this);
+    
+    onPressed();
+    onReleased();
 }
 
 
 void Button::onActionKey( const KeyEvent& kev )
 {
     Base::onActionKey(kev);
-    clicked().send(*this);
+
+    if( kev.isPress() )
+        onPressed();
+    else if( kev.isRelease() )
+        onReleased();
 }
 
 
 void Button::onShortcut( const KeyEvent& kev )
 {
     Base::onShortcut(kev);
-    clicked().send(*this);
+
+    if( kev.isPress() )
+        onPressed();
+    else if( kev.isRelease() )
+        onReleased();
 }
 
 

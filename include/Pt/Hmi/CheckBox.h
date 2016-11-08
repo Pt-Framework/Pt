@@ -30,16 +30,16 @@
 #ifndef Pt_Hmi_CheckBox_h
 #define Pt_Hmi_CheckBox_h
 
-#include <Pt/Hmi/ToggleButton.h>
+#include <Pt/Hmi/Button.h>
 
 namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API CheckBox : public ToggleButton
+class PT_HMI_API CheckBox : public Button
 {
     public:
-        typedef ToggleButton Base;
+        typedef Button Base;
 
         enum State
         {

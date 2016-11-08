@@ -68,6 +68,7 @@ ChildW::ChildW(const std::string& title)
     //Toggle button
     _toggleButton.setName("ToggleButton");
     _toggleButton.setText("Toggle Me [CTRL+I]" );
+    _toggleButton.setToggle(true);
     
     Pt::Hmi::Key key(Pt::Hmi::Key::Control, Pt::Hmi::Key::I);
     _toggleButton.setShortcut( &key );
@@ -106,12 +107,23 @@ ChildW::ChildW(const std::string& title)
     _closeButton.setMargin(5);
     _closeButton.setPadding(5);
     _closeButton.setDocking( Docking::Bottom );
-    _closeButton.clicked() += Pt::slot(*this, &ChildW::onCloseApp);    
+    _closeButton.clicked() += Pt::slot(*this, &ChildW::onCloseApp);
+      
+    _checkBox.setName("CheckBox"); 
+    _checkBox.setText("Ch&eck Me");
+    _checkBox.setDocking(Docking::Bottom);
+    _checkBox.move( Gfx::PointF(0, 0) );
+    _checkBox.resize( Gfx::SizeF(130, 30) );
+    _checkBox.setMargin(5);
+    _checkBox.setPadding(5);
+    _checkBox.setDocking( Docking::Bottom );
+    _checkBox.clicked() += Pt::slot(*this, &ChildW::onCheckBox);
 
     _buttonBar.setName("ButtonBar");
     _buttonBar.resize( Gfx::SizeF(700, 180) );
     _buttonBar.setPadding(5);
     _buttonBar.setDocking(Docking::Bottom);
+    _buttonBar.add(_checkBox);
     _buttonBar.add(_closeButton);
     _buttonBar.add(_dialogButton);
     _buttonBar.add(_toggleButton);
@@ -167,6 +179,13 @@ void ChildW::onShowDialog(Button&)
 
     _dialogButton.setText("Hallo");
 }
+
+
+void ChildW::onCheckBox(Button&)
+{
+    std::clog << "CHECKBOX CLICKED" << std::endl;
+}
+
 
 void ChildW::onCloseApp(Button&)
 {
