@@ -43,20 +43,26 @@ template<typename T>
 class BasicRect 
 {
   public:
-      BasicRect( const BasicPoint<T>& p = BasicPoint<T>(0, 0), 
+      explicit BasicRect( const BasicPoint<T>& p = BasicPoint<T>(0, 0), 
                  const BasicSize<T>& s = BasicSize<T>(0, 0) )
       : _p(p)
 			, _s(s)
       {
 			}
 
-      BasicRect( const BasicPoint<T>& p1, const BasicPoint<T>& p2 )
+			explicit BasicRect(const BasicSize<T>& s)
+      : _p()
+			, _s(s)
+      {
+			}
+
+      BasicRect(const BasicPoint<T>& p1, const BasicPoint<T>& p2)
       : _p(p1)
 			, _s( p2.x() - p1.x() + 1, p2.y() - p1.y() + 1 )
       {				
 			}
         
-			BasicRect( const T left, const T right, const T top, const T bottom )
+			BasicRect(const T left, const T right, const T top, const T bottom)
       {
 				  set( left, right, top, bottom );
 			}

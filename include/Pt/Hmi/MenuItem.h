@@ -69,13 +69,12 @@ class PT_HMI_API MenuItem : public Control
         Signal<MenuItem&>& triggered();
 
     protected:
+        // TODO: obsolete
         virtual void onClicked();
         
         virtual void onParentChanged(Widget* w);
         
         virtual void onShortcut(const KeyEvent& kev);
-
-        virtual void onInvalidate();
 
         virtual Gfx::SizeF onAutoSize() const;
         
@@ -90,6 +89,10 @@ class PT_HMI_API MenuItem : public Control
         virtual void onPaintShortcut(PaintSurface& surface, const Gfx::RectF& updateRect);
   
     protected:
+        virtual void onMouseEvent(const MouseEvent& ev);
+
+        virtual void onTouchEvent(const TouchEvent& ev);
+
         virtual void onEnterEvent( const EnterEvent& ev);
 
         virtual void onLeaveEvent(const LeaveEvent& ev);

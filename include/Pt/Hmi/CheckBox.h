@@ -43,9 +43,10 @@ class PT_HMI_API CheckBox : public Button
 
         enum State
         {
-            Undefined,
-            Checked,
-            Unchecked
+            Unspecified = 0,
+            Checked = 1,
+            Unchecked = 2
+            // Partial
         };
 
     public:

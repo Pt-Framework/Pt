@@ -103,7 +103,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Spacing.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Style.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\StyleOptions.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\ToggleButton.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\TouchEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Visual.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Widget.h" />
@@ -583,7 +582,6 @@
     <ClCompile Include="..\..\src\Pt-Hmi\ScrollView.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Style.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\StyleOptions.cpp" />
-    <ClCompile Include="..\..\src\Pt-Hmi\ToggleButton.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Visual.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Widget.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Window.cpp" />

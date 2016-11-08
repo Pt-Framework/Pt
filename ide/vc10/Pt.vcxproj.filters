@@ -1416,9 +1416,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\PushButton.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\ToggleButton.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\Button.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
@@ -2625,9 +2622,6 @@
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\PushButton.cpp">
-      <Filter>Pt-Hmi</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\Pt-Hmi\ToggleButton.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\Button.cpp">

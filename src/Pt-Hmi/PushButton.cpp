@@ -37,8 +37,8 @@ namespace Pt {
 namespace Hmi {
 
 PushButton::PushButton()
+: _isToggle(false)
 {
-    
 }
 
 
@@ -63,7 +63,9 @@ void PushButton::onPressed()
 {
     Base::onPressed();
 
-    if( ! isToggle() )
+    if( isToggle() )
+        setPressed( ! isPressed() );
+    else
         setPressed(true);
 }
 
@@ -72,10 +74,8 @@ void PushButton::onReleased()
 {
     Base::onReleased();
 
-    if( isToggle() )
-        setPressed( ! isPressed() );
-    else
-      setPressed(false);
+    if( ! isToggle() )
+        setPressed(false);
     
     clicked().send(*this);
 }

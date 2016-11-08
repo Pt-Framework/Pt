@@ -80,43 +80,6 @@ const StyleOptions* Control::styleOptions() const
 }
 
 
-void Control::onClicked()
-{
-}
-
-
-void Control::onMouseEvent(const MouseEvent& ev)
-{    
-    Widget::onMouseEvent(ev);
-
-    Gfx::RectF rect( Gfx::PointF(0,0), size() );
-
-    if( ! rect.contains( ev.position() ) )
-        return;
-    
-    // TODO: use pointer grabbing
-    if( ev.isRelease() && hasFocus() )
-    {
-        onClicked();
-    }
-}
-
-
-void Control::onTouchEvent(const TouchEvent& ev)
-{    
-    Widget::onTouchEvent(ev);
-
-    Gfx::RectF rect( Gfx::PointF(0,0), size() );
-    if( ! rect.contains( ev.position() ) )
-        return;
-    
-    if( ev.isRelease() && hasFocus() )
-    {
-        onClicked();
-    }
-}
-
-
 void Control::onPaintEvent(const PaintEvent& ev)
 {
     Widget::onPaintEvent(ev);
@@ -134,4 +97,3 @@ void Control::onPaintEvent(const PaintEvent& ev)
 } // namespace
 
 } // namespace
-

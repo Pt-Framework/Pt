@@ -59,7 +59,7 @@ class MenuBarItem : public Control
 
         void setText(const String& t);
 
-        void setSelected(bool s);
+        void setHighlighted(bool s);
 
         void toggle();
 
@@ -68,9 +68,8 @@ class MenuBarItem : public Control
         void close();
 
     protected:
+        // TODO: obsolete
         virtual void onClicked();
-
-        virtual void onInvalidate();
 
         virtual Gfx::SizeF onAutoSize() const;
 
@@ -90,7 +89,6 @@ class MenuBarItem : public Control
         Menu&      _menu;
         Pt::String _text;
         bool       _highlighted;
-        bool       _selected;
 };
 
 

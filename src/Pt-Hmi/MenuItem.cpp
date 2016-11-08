@@ -166,10 +166,9 @@ Signal<MenuItem&>& MenuItem::triggered()
 }
 
 
+// TODO: obsolete
 void MenuItem::onClicked()
 {   
-    Base::onClicked();
-
     _triggered.send(*this);
 }
 
@@ -186,12 +185,6 @@ void MenuItem::onShortcut(const KeyEvent& kev)
     Base::onShortcut(kev);
     
     _triggered.send(*this);
-}
-
-
-void MenuItem::onInvalidate()
-{
-    Base::onInvalidate();
 }
 
 
@@ -296,6 +289,32 @@ void MenuItem::onPaintShortcut(PaintSurface& surface, const Gfx::RectF& updateRe
         Gfx::PointF skPos(skX, skY);
 
         painter.drawText(skPos, skText);
+    }
+}
+
+
+void MenuItem::onMouseEvent(const MouseEvent& ev)
+{    
+    Base::onMouseEvent(ev);
+
+    bool inside = Gfx::RectF( size() ).contains( ev.position() );
+
+    if( inside && ev.isRelease() )
+    {
+        onClicked();
+    }
+}
+
+
+void MenuItem::onTouchEvent(const TouchEvent& ev)
+{    
+    Base::onTouchEvent(ev);
+
+    bool inside = Gfx::RectF( size() ).contains( ev.position() );
+   
+    if( inside && ev.isRelease() )
+    {
+        onClicked();
     }
 }
 

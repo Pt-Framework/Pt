@@ -59,7 +59,6 @@ MenuBarItem::MenuBarItem(MenuBar& mb, Menu& menu, const Pt::String& text)
 : _menuBar(mb)
 , _menu(menu)
 , _highlighted(false)
-, _selected(false)
 {
     setAutoSize(true);
     setAcceptsFocus(true);
@@ -88,9 +87,9 @@ void MenuBarItem::setText(const Pt::String& t)
 }
 
 
-void MenuBarItem::setSelected(bool s)
+void MenuBarItem::setHighlighted(bool s)
 {
-    _selected = s;
+    _highlighted = s;
     invalidate();
 }
 
@@ -128,17 +127,10 @@ void MenuBarItem::close()
 }
 
 
+// TODO: obsolete
 void MenuBarItem::onClicked()
 {
-    Base::onClicked();
-
     toggle();
-}
-
-
-void MenuBarItem::onInvalidate()
-{
-    Base::onInvalidate();
 }
 
 
@@ -157,9 +149,15 @@ void MenuBarItem::onMouseEvent(const MouseEvent& ev)
 { 
     Base::onMouseEvent(ev);
 
-    // nothing to do if on this item
-    Gfx::RectF rect( Gfx::PointF(0,0), size() );
-    if( rect.contains( ev.position() ) )
+    bool inside = Gfx::RectF( size() ).contains( ev.position() );
+
+    if( inside && ev.isRelease() )
+    {
+        onClicked();
+    }
+
+    // nothing to highlight if outside
+    if( inside )
         return;
 
     // navigate to sibling item if a sub menu is open
@@ -170,7 +168,7 @@ void MenuBarItem::onMouseEvent(const MouseEvent& ev)
         if(item)
         {
             toggle();
-            setSelected(false);
+            setHighlighted(false);
             
             item->toggle();
             return;
@@ -198,7 +196,7 @@ void MenuBarItem::onMouseEvent(const MouseEvent& ev)
 
 void MenuBarItem::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
-    if(_highlighted || _selected)
+    if(_highlighted)
     {
         Gfx::Color bgColor = Application::instance().styleOptions().highlightColor();
         Gfx::Brush brush = brighten(bgColor, 0.85f);
@@ -344,7 +342,7 @@ void MenuBar::onOpenMenu(Menu& menu)
     {
         if( &(*it)->menu() == &menu)
         {
-            (*it)->setSelected(true);
+            (*it)->setHighlighted(true);
 
             _currentMenu = &menu;
             _currentMenuItem = *it;
@@ -358,7 +356,7 @@ void MenuBar::onCloseMenu(Menu& menu)
     if(_currentMenu == &menu)
     {
         if(_currentMenuItem)
-            _currentMenuItem->setSelected(false);
+            _currentMenuItem->setHighlighted(false);
 
         _currentMenu = 0;
         _currentMenuItem = 0;
