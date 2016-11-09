@@ -92,8 +92,7 @@ class SubMenuItem : public MenuItem
                                           Gfx::PointF(x + 1, y),
                                           Gfx::PointF(x - 3, y + 4) };
   
-            Gfx::Color fgColor = Application::instance().styleOptions().textColor();
-            Gfx::Brush brush(fgColor);
+            Gfx::Brush brush( Application::instance().styleOptions().getProperty<Gfx::Color>("textColor") );
             painter.setBrush(brush);
             painter.fillPolygon(indicator, 3);
         }

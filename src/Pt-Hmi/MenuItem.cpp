@@ -190,7 +190,7 @@ void MenuItem::onShortcut(const KeyEvent& kev)
 
 Gfx::SizeF MenuItem::onAutoSize() const
 {
-    const Gfx::Font& font = Application::instance().styleOptions().font();
+    const Gfx::Font& font = Application::instance().styleOptions().getProperty<Gfx::Font>("font");
 
     Gfx::FontMetrics fm = Painter::fontMetrics(font, _text);
 
@@ -215,7 +215,7 @@ void MenuItem::onPaintBackground(PaintSurface& surface, const Gfx::RectF& update
     bool mouseOver = Application::instance().pointerWidget() == this;
     if(mouseOver)
     {
-        Gfx::Color bgColor = Application::instance().styleOptions().highlightColor();
+        Gfx::Color bgColor = Application::instance().styleOptions().getProperty<Gfx::Color>("highlightColor");
         Gfx::Brush brush = brighten(bgColor, 0.85f);
 
         Painter painter(surface);
@@ -255,7 +255,7 @@ void MenuItem::onPaintItem(PaintSurface& surface, const Gfx::RectF& updateRect)
     painter.setClip(updateRect);
     painter.setFont(font);
 
-    painter.setPen( Application::instance().styleOptions().textColor() );
+    painter.setPen( Application::instance().styleOptions().getProperty<Gfx::Color>("textColor"));
 
     Gfx::FontMetrics fm = Painter::fontMetrics(font, _text);
     double textX = padding().left() + _iconWidth;
@@ -275,7 +275,7 @@ void MenuItem::onPaintShortcut(PaintSurface& surface, const Gfx::RectF& updateRe
     painter.setClip(updateRect);
     painter.setFont(font);
 
-    painter.setPen(Application::instance().styleOptions().textColor());
+    painter.setPen( Application::instance().styleOptions().getProperty<Gfx::Color>("textColor"));
 
     const Key* sk = shortcut();
     if(sk)

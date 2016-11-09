@@ -83,7 +83,7 @@ void PlatinumButtonRenderer::onRenderBackground(const Button& button,
                                                 PaintSurface& surface, 
                                                 const Gfx::RectF& rect) const
 {
-    Gfx::Color buttonColor = options.foreground();
+    Gfx::Color buttonColor = options.getProperty<Gfx::Color>("foreground");
     Gfx::Color frameColor = Gfx::Color(buttonColor.red() * 0.7f,
                                        buttonColor.green() * 0.7f,
                                        buttonColor.blue() * 0.7f);
@@ -166,13 +166,13 @@ void PlatinumButtonRenderer::onRenderContent(const Button& button,
                                              PaintSurface& surface, 
                                              const Gfx::RectF& rect) const
 {
-    Gfx::Color buttonColor = options.foreground();
+    Gfx::Color buttonColor = options.getProperty<Gfx::Color>("foreground");
     Gfx::Color frameColor = Gfx::Color(buttonColor.red() * 0.6f,
                                        buttonColor.green() * 0.6f,
                                        buttonColor.blue() * 0.6f);
 
-    const Gfx::Font& textFont = options.font();
-    Gfx::Color textColor = options.textColor();
+    const Gfx::Font& textFont = options.getProperty<Gfx::Font>("font");
+    Gfx::Color textColor =  options.getProperty<Gfx::Color>("textColor");
 
     const String& text = button.text();
     const Gfx::SizeF& size = button.size();
@@ -242,13 +242,13 @@ void PlatinumCheckBoxRenderer::onRenderContent(const CheckBox& cb,
                                                PaintSurface& surface, 
                                                const Gfx::RectF& rect) const
 {
-    Gfx::Color buttonColor = options.foreground();
+    Gfx::Color buttonColor = options.getProperty<Gfx::Color>("foreground");
     Gfx::Color frameColor = Gfx::Color(buttonColor.red() * 0.6f,
                                        buttonColor.green() * 0.6f,
                                        buttonColor.blue() * 0.6f);
 
-    const Gfx::Font& textFont = options.font();
-    const Gfx::Color& textColor = options.textColor();
+    const Gfx::Font& textFont = options.getProperty<Gfx::Font>("font");
+    const Gfx::Color& textColor = options.getProperty<Gfx::Color>("textColor");
 
     const String& text = cb.text();
     const Gfx::SizeF& size = cb.size();

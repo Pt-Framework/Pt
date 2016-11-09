@@ -32,6 +32,7 @@
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/StyleOptions.h>
 
 namespace {
 
@@ -198,7 +199,7 @@ void MenuBarItem::onPaintBackground(PaintSurface& surface, const Gfx::RectF& upd
 {
     if(_highlighted)
     {
-        Gfx::Color bgColor = Application::instance().styleOptions().highlightColor();
+        Gfx::Color bgColor = Application::instance().styleOptions().getProperty<Gfx::Color>("highlightColor");
         Gfx::Brush brush = brighten(bgColor, 0.85f);
 
         Painter painter(surface);
@@ -217,7 +218,7 @@ void MenuBarItem::onPaintContent(PaintSurface& surface, const Gfx::RectF& update
     painter.setClip(updateRect);
     painter.setFont(font);
     
-    painter.setPen(Application::instance().styleOptions().textColor());
+    painter.setPen(Application::instance().styleOptions().getProperty<Pt::Gfx::Color>("textColor"));
 
     Gfx::FontMetrics fm = Painter::fontMetrics(font, _text);
     double textX = padding().left();
@@ -402,9 +403,7 @@ void MenuBar::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateR
     Painter painter(surface);
     painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
 
-    const Gfx::Brush& bg = Application::instance().styleOptions().background();
-    painter.setBrush(bg);
-
+    painter.setBrush( Application::instance().styleOptions().getProperty<Gfx::Brush>("background") );
     //painter.setClip(updateRect);
     painter.fillRect(updateRect);
 }

@@ -34,18 +34,19 @@ namespace Pt {
 namespace Hmi {
 
 StyleOptions::StyleOptions()
-: _background( Pt::Gfx::Color::fromRgb8(229, 229, 229) ) 
-, _foreground( Gfx::Color::fromRgb8(210, 210, 210) )
-, _highlight( Gfx::Color::fromRgb8(210, 210, 210) )
-, _textColor( Gfx::Color::fromRgb8(0, 0, 0) )
-, _font("", 12)
 {
+  _properties["background"] = Gfx::Brush( Pt::Gfx::Color::fromRgb8(229, 229, 229) );
+  _properties["foreground"] =  Gfx::Color::fromRgb8(210, 210, 210);
+  _properties["highlight"] =  Gfx::Color::fromRgb8(210, 210, 210);
+  _properties["textColor"] =  Gfx::Color::fromRgb8(0, 0, 0);
+  _properties["font"] =  Gfx::Font("", 12);
 }
 
 
 StyleOptions::~StyleOptions()
 {
 }
+
 
 } // namespace
 

@@ -211,8 +211,7 @@ void ScrollBar::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updat
     Painter painter(surface);
     painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
 
-    const Gfx::Brush& bg = Application::instance().styleOptions().background();
-    painter.setBrush(bg);
+    painter.setBrush(Application::instance().styleOptions().getProperty<Gfx::Brush>("background"));
 
     //painter.setClip(updateRect);
     painter.fillRect(updateRect);
@@ -223,19 +222,19 @@ void ScrollBar::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRe
 {
     Painter painter(surface);
     painter.setClip(updateRect);
-    
-    Gfx::Brush handleBrush = Application::instance().styleOptions().foreground();
+
+    Gfx::Brush handleBrush = Application::instance().styleOptions().getProperty<Gfx::Color>("foreground");
     painter.setBrush(handleBrush);
     painter.fillRect(_handleRect);
 }
 
 
 int ScrollBar::pixelToPosition(double pix)
-{    
+{
     double pos = pix * _factorPosition + _offsetPosition;
     return static_cast<int>(pos);
 }
-        
+
 
 double ScrollBar::positionToPixel(int pos)
 {

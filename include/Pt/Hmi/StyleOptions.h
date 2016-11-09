@@ -35,6 +35,9 @@
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Color.h>
+#include <Pt/Any.h>
+#include <map>
+
 
 namespace Pt {
 
@@ -66,62 +69,34 @@ class PT_HMI_API StyleOptions
         // tooltipForeground / popupForeground
         // tooltipTextColor / popupTextColor
 
-        const Gfx::Brush& background() const
+        template <typename T>
+        const T getProperty(const std::string& name, const T& def = T()) const
         {
-            return _background;
+          std::map<std::string, Pt::Any>::const_iterator it = _properties.find(name);
+
+          if( it == _properties.end() )
+              return def;
+
+          try
+          {
+            return Pt::any_cast<T>(it->second);
+          }
+          catch(const std::exception&)
+          {
+          }
+
+          return def;
+        }
+        
+        template <typename T>
+        void setProperty( const std::string& name, const T& p)
+        {
+          _properties[name] = p;
         }
 
-        void setBackground(const Gfx::Brush& c)
-        {
-            _background = c;
-        }
-
-        const Gfx::Color& foreground() const
-        {
-            return _foreground;
-        }
-
-        void setForeground(const Gfx::Color& c)
-        {
-            _foreground = c;
-        }
-
-        const Gfx::Color& highlightColor() const
-        {
-            return _highlight;
-        }
-
-        void setHighlightColor(const Gfx::Color& c)
-        {
-            _highlight = c;
-        }
-
-        const Gfx::Color& textColor() const
-        {
-            return _textColor;
-        }
-
-        void setTextColor(const Gfx::Color& c)
-        {
-            _textColor = c;
-        }
-
-        const Gfx::Font& font() const
-        {
-            return _font;
-        }
-
-        void setFont(const Gfx::Font& f)
-        {
-            _font = f;
-        }
 
     private:
-        Gfx::Brush _background;
-        Gfx::Color _foreground;
-        Gfx::Color _highlight;
-        Gfx::Color _textColor;
-        Gfx::Font  _font;
+        std::map<std::string, Pt::Any> _properties;
 };
 
 } // namespace
