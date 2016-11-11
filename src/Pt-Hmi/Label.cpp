@@ -94,9 +94,13 @@ void Label::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
     Gfx::SizeF  size = this->size();
     Gfx::PointF pos(0, 0);
 
+    const StyleOptions* options = getFacet<StyleOptions>();
+    if( options == 0)
+      return;
+
     Painter painter(surface);
     painter.setClip(updateRect);
-    painter.setPen(foreground());
+    painter.setPen(options->textColor());
     painter.setFont(_font);
 
     Gfx::FontMetrics metric = painter.fontMetrics(_text);

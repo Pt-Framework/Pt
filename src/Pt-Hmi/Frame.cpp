@@ -36,6 +36,8 @@ namespace Pt {
 namespace Hmi {
 
 Frame::Frame()
+: _color(Gfx::Color::fromRgb8(0,0,0))
+, _hasColor(false)
 {
     setAcceptsFocus(false);
 }

@@ -364,20 +364,16 @@ void PlatinumFrameRenderer::onRenderContent(const Frame& f,
     if( options == 0)
       return;
 
-    Gfx::Color foreground = options->foreground();
-    Gfx::Color frameColor = Gfx::Color(foreground.red() * 0.6f,
-                                       foreground.green() * 0.6f,
-                                       foreground.blue() * 0.6f);
+    Gfx::Color frameColor = f.borderColor() == 0 ? options->foreground() : *f.borderColor();
 
     Painter painter(surface);
     painter.setClip(rect);
     painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
 
-    Gfx::RectF frameRect( Gfx::PointF(0, 0), 
-                          f.size() );
+    Gfx::RectF frameRect( Gfx::PointF(0, 0), f.size() );
 
     painter.setPen(frameColor);
-    painter.drawRect( f.geometry() );
+    painter.drawRect( frameRect);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

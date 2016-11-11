@@ -59,11 +59,12 @@ ChildW::ChildW(const std::string& title)
     _textLabel.setName("TextLabel");
     _textLabel.setText("Pla&tinum C++ Framework");  
     _textLabel.move( Gfx::PointF(60,60) );
-    _textLabel.setForeground( Gfx::Pen(Gfx::Color(0, 0, 0), 1) );
-    _textLabel.setBackground( Gfx::Color(65535,65535,65535,0) );
+//    _textLabel.setForeground( Gfx::Pen(Gfx::Color(0, 0, 0), 1) );
+//    _textLabel.setBackground( Gfx::Color(65535,65535,65535,0) );
     _textLabel.setMnemonicWidget(&_toggleButton);
     _textLabel.setCursor( Hmi::Cursor::waitCursor() );
     _textLabel.setDocking(Docking::Fill);  
+    _textLabel.setBorderColor(Gfx::Color::fromRgb8(0,0,0));
 
     //Toggle button
     _toggleButton.setName("ToggleButton");
@@ -95,10 +96,11 @@ ChildW::ChildW(const std::string& title)
     Pt::Hmi::Key xKey(Pt::Hmi::Key::Control, Pt::Hmi::Key::X);
 
     Pt::Hmi::StyleOptions* styleOptions = new Pt::Hmi::StyleOptions();
-    styleOptions->setForeground(Gfx::Color::fromRgb8(220, 80, 80) );
+    styleOptions->setForeground( Gfx::Color::fromRgb8(220, 80, 80) );
+
     Pt::Hmi::Style style;
     style.set(styleOptions);
-
+    
     _closeButton.setStyle(style);
     _closeButton.setName("CloseButton"); 
     _closeButton.setText("Close App [CTRL+X]");

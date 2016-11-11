@@ -39,6 +39,21 @@ namespace Hmi {
 
 class PT_HMI_API Label : public Panel
 {
+	  public:
+
+        enum Alignment
+        {
+            TopLeft,
+            TopCenter,
+            TopRight,
+            MiddleLeft,
+            MiddleCenter,
+            MiddleRight,
+            BottomLeft,
+            BottomCenter,
+            BottomRight
+        };
+
     public:
         Label();
 

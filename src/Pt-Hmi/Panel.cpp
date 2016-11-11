@@ -44,14 +44,8 @@ namespace Pt {
 namespace Hmi {
 
 Panel::Panel()
-: _backgroundBrush(Gfx::Color::fromRgb8(237,237,237))
-, _foregroundPen( Gfx::Color::fromRgb8(0,0,0) )
-, _backgroundImage()
+: _backgroundImage()
 , _backgroundImageLayout( ImageLayout::None )
-, _borderStyle(Single)
-, _borderRound(false)
-, _borderWidth(1)
-, _borderColor(Gfx::Color::fromRgb8(178,178,178))
 {
     setAcceptsFocus(false);
 }
@@ -108,7 +102,12 @@ void Panel::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRec
     const Gfx::SizeF& size = this->size();
 
     if( size.width() < 0 || size.height() < 0)
-        return;
+        return;    
+
+    const StyleOptions* options = getFacet<StyleOptions>();
+
+    if(options == 0)
+      return;
 
     Painter painter(surface);
     painter.setClip(updateRect);
@@ -116,14 +115,7 @@ void Panel::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRec
 
     Gfx::RectF borderRect( Gfx::PointF(0,0), this->size() );
 
-    if(_borderStyle != NoBorder)
-    {
-        borderRect.setOrigin( Gfx::PointF(_borderWidth/2, _borderWidth/2) );
-        borderRect.setSize( Gfx::SizeF(size.width() - _borderWidth, 
-                                       size.height() - _borderWidth) );
-    }
-
-    double corner = _borderRound ? 2.0 : 0;
+    double corner = 0;
     std::vector<Gfx::PointF> outline(9);
 
     // top left
@@ -156,9 +148,9 @@ void Panel::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRec
             
     outline[8] = outline[0];
 
-    if( _backgroundBrush.color().alpha() != 0)
+    if( options->background().color().alpha() != 0)
     {
-        painter.setBrush(_backgroundBrush); 
+        painter.setBrush(options->background()); 
         painter.fillPolygon(&outline[0], outline.size());
     }
 
@@ -194,66 +186,15 @@ void Panel::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRec
         }
 
         painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
-    }
+    }  
 
-
-    if( _borderWidth <= 0 )
-      return;
-            
-    switch( _borderStyle )
-    {
-        case Single:
-        {
-            Gfx::Pen pen(_borderColor, static_cast<size_t>(_borderWidth));
-            painter.setPen(pen);
-            painter.drawPolyline(&outline[0], outline.size());
-            break;
-        }
-
-        case Border3D:
-        {
-            std::vector<Gfx::PointF> points1(3);
-            points1[0].setX(0);
-            points1[0].setY(borderRect.height());
-
-            points1[1].setX(0);
-            points1[1].setY(0);
-        
-            points1[2].setX(0 + borderRect.width());
-            points1[2].setY(0);
-
-            Gfx::Pen pen(_borderColor, static_cast<size_t>(_borderWidth));
-            painter.setPen(pen);
-            painter.drawPolyline(&points1[0], points1.size());
-
-            std::vector<Gfx::PointF> points2(3);
-            points2[0].setX(0 + borderRect.width());
-            points2[0].setY(0);
-
-            points2[1].setX(0 + borderRect.width());
-            points2[1].setY(0 + borderRect.height());
-
-            points2[2].setX(0);
-            points2[2].setY(0 + borderRect.height());
-
-            Gfx::Color color(_borderColor.red() * 0.9f, 
-                             _borderColor.green() * 0.9f,
-                             _borderColor.blue() * 0.9f);
-
-            Gfx::Pen pen2( color, static_cast<size_t>(_borderWidth) );
-            painter.setPen(pen2);
-            painter.drawPolyline(&points2[0], points2.size());	
-            break;
-        }
-
-        default:
-            break;
-    }
+    Frame::onPaintBackground(surface, updateRect);
 }
 
 
 void Panel::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
+  Frame::onPaintContent(surface, updateRect);
 }
 
 } // namespace

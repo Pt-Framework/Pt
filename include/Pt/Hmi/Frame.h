@@ -43,10 +43,29 @@ class PT_HMI_API Frame : public Control
 		
         virtual ~Frame();	
 
+        void setBorderColor(const Gfx::Color& color)
+        {
+          _color = color;
+          _hasColor = true;
+          update();
+        }
+
+        const Gfx::Color* borderColor() const
+        {
+          if(_hasColor)
+            return &_color;
+
+          return 0;
+        }
+
     protected:
         virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect);
 
         virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect);
+
+    private:
+        Gfx::Color _color;
+        bool      _hasColor;
 }; 
 
 } // namespace

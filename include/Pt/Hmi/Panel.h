@@ -29,10 +29,10 @@
 #ifndef Pt_Hmi_Panel_H
 #define Pt_Hmi_Panel_H
 
-#include <Pt/Hmi/Control.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/Picture.h>
+#include <Pt/Hmi/Frame.h>
 #include <Pt/Gfx/Color.h>
 
 namespace Pt {
@@ -88,30 +88,14 @@ class ImageLayout
 };
 
 
-class PT_HMI_API Panel : public Control
+class PT_HMI_API Panel : public Frame
 {
 	  public:
-		    enum BorderStyle
-		    {
-			      NoBorder,
-			      Single,
-			      Border3D
-		    };
-
-        enum Alignment
-        {
-            TopLeft,
-            TopCenter,
-            TopRight,
-            MiddleLeft,
-            MiddleCenter,
-            MiddleRight,
-            BottomLeft,
-            BottomCenter,
-            BottomRight
-        };
-
-        //enum TileMode
+        Panel();
+		
+        virtual ~Panel();	
+   
+          //enum TileMode
         //{
         //    Tile,
         //    Strech,
@@ -119,35 +103,6 @@ class PT_HMI_API Panel : public Control
         //};
 
         // TODO: use TileMode and Alignment instead of ImageLayout
-
-	  public:
-        Panel();
-		
-        virtual ~Panel();	
-
-        const Gfx::Brush& background() const
-        {
-            return _backgroundBrush;
-        }
-
-        void setBackground( const Gfx::Brush& c, bool doRepaint = true )
-        {
-            _backgroundBrush = c;
-
-            if( doRepaint )
-                update();
-        }
-
-        const Gfx::Pen& foreground() const
-        {
-            return _foregroundPen;
-        }
-
-        void setForeground(const Gfx::Pen& c )
-        {
-            _foregroundPen = c;
-            update();
-        }
 
         void setBackgroundImage(const Gfx::Image& image, ImageLayout layout)
         {
@@ -157,52 +112,8 @@ class PT_HMI_API Panel : public Control
             _backgroundImageLayout = layout;
             _backgroundPicture.set( image);
             update();
-        }
-
-        BorderStyle borderStyle() const
-        {   
-            return _borderStyle;
-        }
-
-        void setBorderStyle(BorderStyle t)
-        {   
-            _borderStyle = t;
-            update();
-        }
-
-        bool isBorderRound() const
-        {   
-          return _borderRound;
-        }
-
-        void setBorderRound(bool b)
-        {   
-          _borderRound = b;
-          update();
-        }
-
-        double borderWidth() const	  
-        {   
-            return _borderWidth;
-        }
-
-        void setBorderWidth( double w )
-        {
-          _borderWidth = w;
-          update();
-        }
-         
-        const Gfx::Color& borderColor() const
-        {
-          return _borderColor;
-        }
-
-        void setBorderColor(Gfx::Color b)
-        {
-          _borderColor = b;
-          update();
-        }
-
+        }      
+              
     protected:
         virtual void onResizeEvent(const ResizeEvent& ev);
 	
@@ -211,15 +122,9 @@ class PT_HMI_API Panel : public Control
         virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect);
 
     private: 
-        Gfx::Brush    _backgroundBrush;
-        Gfx::Pen      _foregroundPen;
         Gfx::Image    _backgroundImage;
         Picture       _backgroundPicture;
         ImageLayout   _backgroundImageLayout;
-        BorderStyle	  _borderStyle;
-        bool	   	  _borderRound;	
-        double			  _borderWidth;	  
-        Gfx::Color	  _borderColor;
 }; 
 
 } // namespace
