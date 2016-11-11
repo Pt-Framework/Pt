@@ -109,6 +109,7 @@ ChildW::ChildW(const std::string& title)
     _closeButton.setDocking( Docking::Bottom );
     _closeButton.clicked() += Pt::slot(*this, &ChildW::onCloseApp);
       
+    _checkBox.setState(CheckBox::Unspecified);
     _checkBox.setName("CheckBox"); 
     _checkBox.setText("Ch&eck Me gyI");
     _checkBox.setDocking(Docking::Bottom);
