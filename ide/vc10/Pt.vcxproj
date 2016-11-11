@@ -72,6 +72,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\EnterEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\FlowLayout.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\FocusEvent.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\Frame.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\InvalidateEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Key.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\KeyEvent.h" />
@@ -548,6 +549,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\egl-test\Texture.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\egl-test\TextureRect.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\FlowLayout.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\Frame.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\ApplicationImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\MainWindowImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\PaintSurfaceImpl.cpp" />

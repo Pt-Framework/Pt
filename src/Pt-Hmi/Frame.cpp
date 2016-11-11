@@ -27,7 +27,7 @@
   MA 02110-1301 USA
 */
 
-#include <Pt/Hmi/CheckBox.h>
+#include <Pt/Hmi/Frame.h>
 #include <Pt/Hmi/Style.h>
 #include <Pt/Hmi/StyleOptions.h>
 
@@ -35,72 +35,34 @@ namespace Pt {
 
 namespace Hmi {
 
-CheckBox::CheckBox()
-: _state(Unchecked)
+Frame::Frame()
+{
+    setAcceptsFocus(false);
+}
+
+
+Frame::~Frame()
 {
 }
 
 
-CheckBox::~CheckBox()
-{
-}
-
-
-CheckBox::State CheckBox::state() const
-{
-    return _state;
-}
-
-
-void CheckBox::setState(State s)
-{
-    _state = s;
-    setPressed(s == Checked);
-}
-
-
-bool CheckBox::isChecked() const
-{
-    return _state == Checked;
-}
-
-
-void CheckBox::onPressed()
-{
-    Base::onPressed();
-}
-
-
-void CheckBox::onReleased()
-{
-    Base::onReleased();
-
-    if(_state == Checked)
-        _state = Unchecked;
-    else
-        _state = Checked;
-
-    setPressed(_state == Checked);
-}
-
-
-void CheckBox::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
+void Frame::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
 {    
     const Style& s = style();
     const StyleOptions& so = styleOptions();
 
-    const CheckBoxRenderer* renderer = s.get<CheckBoxRenderer>();
+    const FrameRenderer* renderer = s.get<FrameRenderer>();
     if(renderer)
         renderer->renderBackground(*this, so, surface, updateRect);
 }
 
 
-void CheckBox::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
+void Frame::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
     const Style& s = style();
     const StyleOptions& so = styleOptions();
 
-    const CheckBoxRenderer* renderer = s.get<CheckBoxRenderer>();
+    const FrameRenderer* renderer = s.get<FrameRenderer>();
     if(renderer)
         renderer->renderContent(*this, so, surface, updateRect);
 }
@@ -108,3 +70,4 @@ void CheckBox::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRec
 } // namespace
 
 } // namespace
+

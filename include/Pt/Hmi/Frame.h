@@ -1,11 +1,11 @@
 /* Copyright (C) 2016 Marc Boris Duerner 
    Copyright (C) 2016 Laurentiu-Gheorghe Crisan
-  
+ 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+ 
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -15,96 +15,42 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+ 
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+ 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
   MA 02110-1301 USA
 */
 
-#include <Pt/Hmi/CheckBox.h>
-#include <Pt/Hmi/Style.h>
-#include <Pt/Hmi/StyleOptions.h>
+#ifndef Pt_Hmi_Frame_H
+#define Pt_Hmi_Frame_H
+
+#include <Pt/Hmi/Control.h>
 
 namespace Pt {
 
 namespace Hmi {
 
-CheckBox::CheckBox()
-: _state(Unchecked)
+class PT_HMI_API Frame : public Control
 {
-}
+	  public:
+        Frame();
+		
+        virtual ~Frame();	
 
+    protected:
+        virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect);
 
-CheckBox::~CheckBox()
-{
-}
-
-
-CheckBox::State CheckBox::state() const
-{
-    return _state;
-}
-
-
-void CheckBox::setState(State s)
-{
-    _state = s;
-    setPressed(s == Checked);
-}
-
-
-bool CheckBox::isChecked() const
-{
-    return _state == Checked;
-}
-
-
-void CheckBox::onPressed()
-{
-    Base::onPressed();
-}
-
-
-void CheckBox::onReleased()
-{
-    Base::onReleased();
-
-    if(_state == Checked)
-        _state = Unchecked;
-    else
-        _state = Checked;
-
-    setPressed(_state == Checked);
-}
-
-
-void CheckBox::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
-{    
-    const Style& s = style();
-    const StyleOptions& so = styleOptions();
-
-    const CheckBoxRenderer* renderer = s.get<CheckBoxRenderer>();
-    if(renderer)
-        renderer->renderBackground(*this, so, surface, updateRect);
-}
-
-
-void CheckBox::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
-{
-    const Style& s = style();
-    const StyleOptions& so = styleOptions();
-
-    const CheckBoxRenderer* renderer = s.get<CheckBoxRenderer>();
-    if(renderer)
-        renderer->renderContent(*this, so, surface, updateRect);
-}
+        virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect);
+}; 
 
 } // namespace
 
 } // namespace
+
+#endif

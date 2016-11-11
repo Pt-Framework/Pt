@@ -28,7 +28,6 @@
 */
 
 #include <Pt/Hmi/PushButton.h>
-#include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Style.h>
 #include <Pt/Hmi/StyleOptions.h>
 
@@ -83,13 +82,8 @@ void PushButton::onReleased()
 
 void PushButton::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
 {    
-    Application& app = Application::instance();
-    
-    const Style& s = style() ? *style() 
-                             : app.style();
-    
-    const StyleOptions& so = styleOptions() ? *styleOptions() 
-                                            : app.styleOptions();
+    const Style& s = style();
+    const StyleOptions& so = styleOptions();
 
     const ButtonRenderer* renderer = s.get<ButtonRenderer>();
     if(renderer)
@@ -99,13 +93,8 @@ void PushButton::onPaintBackground(PaintSurface& surface, const Gfx::RectF& upda
 
 void PushButton::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
-    Application& app = Application::instance();
-
-    const Style& s = style() ? *style() 
-                             : app.style();
-    
-    const StyleOptions& so = styleOptions() ? *styleOptions() 
-                                            : app.styleOptions();
+    const Style& s = style();
+    const StyleOptions& so = styleOptions();
 
     const ButtonRenderer* renderer = s.get<ButtonRenderer>();
     if(renderer)

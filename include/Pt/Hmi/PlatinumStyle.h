@@ -83,6 +83,26 @@ class PT_HMI_API PlatinumCheckBoxRenderer : public CheckBoxRenderer
 };
 
 
+class PT_HMI_API PlatinumFrameRenderer : public FrameRenderer
+{
+    public:
+        PlatinumFrameRenderer(std::size_t refs = 0);
+
+        virtual ~PlatinumFrameRenderer();
+
+    protected:
+        virtual void onRenderBackground(const Frame& f, 
+                                        const StyleOptions& options,
+                                        PaintSurface& surface, 
+                                        const Gfx::RectF& rect) const;
+
+        virtual void onRenderContent(const Frame& f, 
+                                     const StyleOptions& options,
+                                     PaintSurface& surface, 
+                                     const Gfx::RectF& rect) const;
+};
+
+
 class PT_HMI_API PlatinumStyle : public Style
 {
     public:

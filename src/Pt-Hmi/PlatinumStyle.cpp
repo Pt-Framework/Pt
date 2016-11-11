@@ -29,6 +29,7 @@
 
 #include <Pt/Hmi/PlatinumStyle.h>
 #include <Pt/Hmi/StyleOptions.h>
+#include <Pt/Hmi/Frame.h>
 #include <Pt/Hmi/PushButton.h>
 #include <Pt/Hmi/CheckBox.h>
 #include <Pt/Hmi/Painter.h>
@@ -166,10 +167,10 @@ void PlatinumButtonRenderer::onRenderContent(const Button& button,
                                              PaintSurface& surface, 
                                              const Gfx::RectF& rect) const
 {
-    Gfx::Color buttonColor = options.getProperty<Gfx::Color>("foreground");
-    Gfx::Color frameColor = Gfx::Color(buttonColor.red() * 0.6f,
-                                       buttonColor.green() * 0.6f,
-                                       buttonColor.blue() * 0.6f);
+    Gfx::Color foreground = options.getProperty<Gfx::Color>("foreground");
+    Gfx::Color frameColor = Gfx::Color(foreground.red() * 0.6f,
+                                       foreground.green() * 0.6f,
+                                       foreground.blue() * 0.6f);
 
     const Gfx::Font& textFont = options.getProperty<Gfx::Font>("font");
     Gfx::Color textColor =  options.getProperty<Gfx::Color>("textColor");
@@ -242,10 +243,10 @@ void PlatinumCheckBoxRenderer::onRenderContent(const CheckBox& cb,
                                                PaintSurface& surface, 
                                                const Gfx::RectF& rect) const
 {
-    Gfx::Color buttonColor = options.getProperty<Gfx::Color>("foreground");
-    Gfx::Color frameColor = Gfx::Color(buttonColor.red() * 0.6f,
-                                       buttonColor.green() * 0.6f,
-                                       buttonColor.blue() * 0.6f);
+    Gfx::Color foreground = options.getProperty<Gfx::Color>("foreground");
+    Gfx::Color frameColor = Gfx::Color(foreground.red() * 0.6f,
+                                       foreground.green() * 0.6f,
+                                       foreground.blue() * 0.6f);
 
     const Gfx::Font& textFont = options.getProperty<Gfx::Font>("font");
     const Gfx::Color& textColor = options.getProperty<Gfx::Color>("textColor");
@@ -320,6 +321,50 @@ void PlatinumCheckBoxRenderer::onRenderContent(const CheckBox& cb,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// PlatinumFrameRenderer
+///////////////////////////////////////////////////////////////////////////////
+
+PlatinumFrameRenderer::PlatinumFrameRenderer(std::size_t refs)
+: FrameRenderer(refs)
+{
+}
+
+    
+PlatinumFrameRenderer::~PlatinumFrameRenderer()
+{
+}
+
+
+void PlatinumFrameRenderer::onRenderBackground(const Frame& f, 
+                                               const StyleOptions& options,
+                                               PaintSurface& surface, 
+                                               const Gfx::RectF& rect) const
+{
+}
+
+
+void PlatinumFrameRenderer::onRenderContent(const Frame& f, 
+                                            const StyleOptions& options,
+                                            PaintSurface& surface, 
+                                            const Gfx::RectF& rect) const
+{
+    Gfx::Color foreground = options.getProperty<Gfx::Color>("foreground");
+    Gfx::Color frameColor = Gfx::Color(foreground.red() * 0.6f,
+                                       foreground.green() * 0.6f,
+                                       foreground.blue() * 0.6f);
+
+    Painter painter(surface);
+    painter.setClip(rect);
+    painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
+
+    Gfx::RectF frameRect( Gfx::PointF(0, 0), 
+                          f.size() );
+
+    painter.setPen(frameColor);
+    painter.drawRect( f.geometry() );
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // PlatinumStyle
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -327,6 +372,7 @@ PlatinumStyle::PlatinumStyle()
 {
     set(new PlatinumButtonRenderer);
     set(new PlatinumCheckBoxRenderer);
+    set(new PlatinumFrameRenderer);
 }
 
 

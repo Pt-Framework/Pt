@@ -28,6 +28,7 @@
 */
 
 #include <Pt/Hmi/Control.h>
+#include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/PaintRegion.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/Window.h>
@@ -60,9 +61,9 @@ void Control::setStyle(const Style& style)
 }    
 
 
-const Style* Control::style() const
+const Style& Control::style() const
 {
-    return _style;
+    return _style ? *_style : Application::instance().style();
 }
 
 
@@ -74,9 +75,9 @@ void Control::setStyleOptions(const StyleOptions& opts)
 }
 
 
-const StyleOptions* Control::styleOptions() const
+const StyleOptions& Control::styleOptions() const
 {
-    return _styleOptions;
+    return _styleOptions ? *_styleOptions : Application::instance().styleOptions();
 }
 
 

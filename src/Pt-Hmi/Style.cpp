@@ -143,7 +143,7 @@ void ButtonRenderer::renderContent(const Button& button,
 }  
 
 ///////////////////////////////////////////////////////////////////////////////
-// ButtonRenderer
+// CheckBoxRenderer
 ///////////////////////////////////////////////////////////////////////////////
 
 CheckBoxRenderer::CheckBoxRenderer(std::size_t refs)
@@ -173,6 +173,39 @@ void CheckBoxRenderer::renderContent(const CheckBox& cb,
 { 
     onRenderContent(cb, options, surface, rect); 
 }  
+
+///////////////////////////////////////////////////////////////////////////////
+// FrameRenderer
+///////////////////////////////////////////////////////////////////////////////
+
+FrameRenderer::FrameRenderer(std::size_t refs)
+: Style::Facet( typeid(FrameRenderer), refs )
+{
+}
+
+    
+FrameRenderer::~FrameRenderer()
+{
+}
+
+
+void FrameRenderer::renderBackground(const Frame& f, 
+                                      const StyleOptions& options,
+                                      PaintSurface& surface, 
+                                      const Gfx::RectF& rect) const
+{ 
+    onRenderBackground(f, options, surface, rect); 
+}    
+
+
+void FrameRenderer::renderContent(const Frame& f, 
+                                   const StyleOptions& options,
+                                   PaintSurface& surface, 
+                                   const Gfx::RectF& rect) const
+{ 
+    onRenderContent(f, options, surface, rect); 
+}  
+
 
 } // namespace
 

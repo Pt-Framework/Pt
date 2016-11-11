@@ -40,6 +40,7 @@ namespace Pt {
 
 namespace Hmi {
 
+class Frame;
 class Button;
 class CheckBox;
 class PaintSurface;
@@ -154,6 +155,32 @@ class PT_HMI_API CheckBoxRenderer : public Style::Facet
                                         const Gfx::RectF& rect) const = 0;
 
         virtual void onRenderContent(const CheckBox& cb, 
+                                     const StyleOptions& options,
+                                     PaintSurface& surface, 
+                                     const Gfx::RectF& rect) const = 0;
+};
+
+
+class PT_HMI_API FrameRenderer : public Style::Facet
+{
+    public:
+        FrameRenderer(std::size_t refs = 0);
+
+        virtual ~FrameRenderer();
+
+        void renderBackground(const Frame& f, const StyleOptions& options,
+                              PaintSurface& surface, const Gfx::RectF& rect) const;
+
+        void renderContent(const Frame& f, const StyleOptions& options,
+                           PaintSurface& surface, const Gfx::RectF& rect) const;
+
+    protected:
+        virtual void onRenderBackground(const Frame& f, 
+                                        const StyleOptions& options,
+                                        PaintSurface& surface, 
+                                        const Gfx::RectF& rect) const = 0;
+
+        virtual void onRenderContent(const Frame& f, 
                                      const StyleOptions& options,
                                      PaintSurface& surface, 
                                      const Gfx::RectF& rect) const = 0;

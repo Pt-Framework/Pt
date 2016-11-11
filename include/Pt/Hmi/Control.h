@@ -48,11 +48,11 @@ class PT_HMI_API Control : public Widget
 
         void setStyle(const Style& style);
 
-        const Style* style() const;
+        const Style& style() const;
 
         void setStyleOptions(const StyleOptions& style);
 
-        const StyleOptions* styleOptions() const;
+        const StyleOptions& styleOptions() const;
 
     protected:
         virtual void onPaintEvent(const PaintEvent& ev);
@@ -63,8 +63,8 @@ class PT_HMI_API Control : public Widget
         virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect) = 0;
 
     private:
-        Style*                   _style;
-        StyleOptions*            _styleOptions;
+        Style*        _style;
+        StyleOptions* _styleOptions;
 }; 
 
 } // namespace
