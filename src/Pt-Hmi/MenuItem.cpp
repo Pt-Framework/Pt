@@ -215,7 +215,7 @@ void MenuItem::onPaintBackground(PaintSurface& surface, const Gfx::RectF& update
     bool mouseOver = Application::instance().pointerWidget() == this;
     if(mouseOver)
     {
-        Gfx::Color bgColor = Application::instance().styleOptions().getProperty<Gfx::Color>("highlightColor");
+        Gfx::Color bgColor = Application::instance().styleOptions().getProperty<Gfx::Color>("highlight");
         Gfx::Brush brush = brighten(bgColor, 0.85f);
 
         Painter painter(surface);
