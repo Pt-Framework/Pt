@@ -99,101 +99,56 @@ void Panel::onResizeEvent(const ResizeEvent& ev)
 
 void Panel::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
-    const Gfx::SizeF& size = this->size();
-
-    if( size.width() < 0 || size.height() < 0)
-        return;    
-
-    const StyleOptions* options = getFacet<StyleOptions>();
-
-    if(options == 0)
-      return;
-
-    Painter painter(surface);
-    painter.setClip(updateRect);
-    painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
-
-    Gfx::RectF borderRect( Gfx::PointF(0,0), this->size() );
-
-    double corner = 0;
-    std::vector<Gfx::PointF> outline(9);
-
-    // top left
-    outline[0].setX(0);
-    outline[0].setY(corner);
-
-    outline[1].setX(corner);
-    outline[1].setY(0);
-
-    // top right
-    outline[2].setX(borderRect.width() - corner);
-    outline[2].setY(0);
-
-    outline[3].setX(borderRect.width());
-    outline[3].setY(corner);
-
-    // bottom right
-    outline[4].setX(borderRect.width());
-    outline[4].setY(borderRect.height() - corner);
-
-    outline[5].setX(borderRect.width() - corner);
-    outline[5].setY(borderRect.height());
-
-    // bottom left
-    outline[6].setX(corner);
-    outline[6].setY(borderRect.height());
-
-    outline[7].setX(0);
-    outline[7].setY(borderRect.height() - corner);
-            
-    outline[8] = outline[0];
-
-    if( options->background().color().alpha() != 0)
-    {
-        painter.setBrush(options->background()); 
-        painter.fillPolygon(&outline[0], outline.size());
-    }
-
-    if( ! _backgroundPicture.empty() )
-    {
-        painter.setCompositionMode(Gfx::CompositionMode::SourceOver);
-
-        switch( _backgroundImageLayout.type() )
-        {
-            default:
-            {
-                painter.drawPicture( Pt::Gfx::PointF(0,0), _backgroundPicture );
-            }
-            break;
-            
-            case ImageLayout::Tile:
-            {
-                 for( double x = 0; x < size.width();  x += _backgroundPicture.width() )
-                {
-                    for( double y = 0; y < size.height();  y += _backgroundPicture.height() )
-                        painter.drawPicture(Gfx::PointF(x,y), _backgroundPicture);
-                }
-            }
-            break;
-
-            case ImageLayout::Center:
-            {
-                const double x = size.width()/2  - _backgroundPicture.width()/2;
-                const double y = size.height()/2  - _backgroundPicture.height()/2;
-                painter.drawPicture(Gfx::PointF(x, y), _backgroundPicture);
-            }
-            break;
-        }
-
-        painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
-    }  
-
     Frame::onPaintBackground(surface, updateRect);
+
+    const PanelRenderer* renderer = getFacet<PanelRenderer>();
+
+    if(renderer)
+        renderer->renderBackground(*this, surface, updateRect);
 }
 
 
 void Panel::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
+    const PanelRenderer* renderer = getFacet<PanelRenderer>();
+
+    if(renderer)
+        renderer->renderContent(*this, surface, updateRect);
+
+    //if( ! _backgroundPicture.empty() )
+    //{
+    //    painter.setCompositionMode(Gfx::CompositionMode::SourceOver);
+
+    //    switch( _backgroundImageLayout.type() )
+    //    {
+    //        default:
+    //        {
+    //            painter.drawPicture( Pt::Gfx::PointF(0,0), _backgroundPicture );
+    //        }
+    //        break;
+    //        
+    //        case ImageLayout::Tile:
+    //        {
+    //             for( double x = 0; x < size.width();  x += _backgroundPicture.width() )
+    //            {
+    //                for( double y = 0; y < size.height();  y += _backgroundPicture.height() )
+    //                    painter.drawPicture(Gfx::PointF(x,y), _backgroundPicture);
+    //            }
+    //        }
+    //        break;
+
+    //        case ImageLayout::Center:
+    //        {
+    //            const double x = size.width()/2  - _backgroundPicture.width()/2;
+    //            const double y = size.height()/2  - _backgroundPicture.height()/2;
+    //            painter.drawPicture(Gfx::PointF(x, y), _backgroundPicture);
+    //        }
+    //        break;
+    //    }
+
+    //    painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
+    //}  
+
   Frame::onPaintContent(surface, updateRect);
 }
 

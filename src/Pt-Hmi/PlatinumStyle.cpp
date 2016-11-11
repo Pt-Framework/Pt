@@ -30,6 +30,7 @@
 #include <Pt/Hmi/PlatinumStyle.h>
 #include <Pt/Hmi/StyleOptions.h>
 #include <Pt/Hmi/Frame.h>
+#include <Pt/Hmi/Panel.h>
 #include <Pt/Hmi/PushButton.h>
 #include <Pt/Hmi/CheckBox.h>
 #include <Pt/Hmi/Painter.h>
@@ -377,6 +378,84 @@ void PlatinumFrameRenderer::onRenderContent(const Frame& f,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// PlatinumPanelRenderer
+///////////////////////////////////////////////////////////////////////////////
+
+PlatinumPanelRenderer::PlatinumPanelRenderer(std::size_t refs)
+: PanelRenderer(refs)
+{
+}
+
+    
+PlatinumPanelRenderer::~PlatinumPanelRenderer()
+{
+}
+
+
+void PlatinumPanelRenderer::onRenderBackground(const Panel& p, 
+                                               PaintSurface& surface, 
+                                               const Gfx::RectF& rect) const
+{
+}
+
+
+void PlatinumPanelRenderer::onRenderContent(const Panel& p, 
+                                            PaintSurface& surface, 
+                                            const Gfx::RectF& rect) const
+{
+    const StyleOptions* options = p.getFacet<StyleOptions>();
+    if( ! options )
+      return;
+
+    Painter painter(surface);
+    painter.setClip(rect);
+    painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
+
+    const Gfx::SizeF& size = p.size();
+    Gfx::RectF borderRect(Gfx::PointF(0,0), size);
+
+    borderRect.setOrigin( Gfx::PointF(1, 1) );
+    borderRect.setSize( Gfx::SizeF(size.width() - 1, 
+                                   size.height() - 1) );
+
+    double corner = 1.0;
+    Gfx::PointF outline[9] = {};
+
+    // top left
+    outline[0].setX(0);
+    outline[0].setY(corner);
+
+    outline[1].setX(corner);
+    outline[1].setY(0);
+
+    // top right
+    outline[2].setX(borderRect.width() - corner);
+    outline[2].setY(0);
+
+    outline[3].setX(borderRect.width());
+    outline[3].setY(corner);
+
+    // bottom right
+    outline[4].setX(borderRect.width());
+    outline[4].setY(borderRect.height() - corner);
+
+    outline[5].setX(borderRect.width() - corner);
+    outline[5].setY(borderRect.height());
+
+    // bottom left
+    outline[6].setX(corner);
+    outline[6].setY(borderRect.height());
+
+    outline[7].setX(0);
+    outline[7].setY(borderRect.height() - corner);
+            
+    outline[8] = outline[0];
+
+    painter.setBrush( options->background() ); 
+    painter.fillPolygon(outline, 9);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // PlatinumStyle
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -385,6 +464,7 @@ PlatinumStyle::PlatinumStyle()
     set(new PlatinumButtonRenderer);
     set(new PlatinumCheckBoxRenderer);
     set(new PlatinumFrameRenderer);
+    set(new PlatinumPanelRenderer);
 }
 
 

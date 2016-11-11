@@ -201,6 +201,35 @@ void FrameRenderer::renderContent(const Frame& f,
     onRenderContent(f,  surface, rect); 
 }  
 
+///////////////////////////////////////////////////////////////////////////////
+// FrameRenderer
+///////////////////////////////////////////////////////////////////////////////
+
+PanelRenderer::PanelRenderer(std::size_t refs)
+: Style::Facet( typeid(PanelRenderer), refs )
+{
+}
+
+    
+PanelRenderer::~PanelRenderer()
+{
+}
+
+
+void PanelRenderer::renderBackground(const Panel& p, 
+                                     PaintSurface& surface, 
+                                     const Gfx::RectF& rect) const
+{ 
+    onRenderBackground(p, surface, rect); 
+}    
+
+
+void PanelRenderer::renderContent(const Panel& p, 
+                                  PaintSurface& surface, 
+                                  const Gfx::RectF& rect) const
+{ 
+    onRenderContent(p,  surface, rect); 
+}  
 
 } // namespace
 

@@ -97,6 +97,24 @@ class PT_HMI_API PlatinumFrameRenderer : public FrameRenderer
 };
 
 
+class PT_HMI_API PlatinumPanelRenderer : public PanelRenderer
+{
+    public:
+        PlatinumPanelRenderer(std::size_t refs = 0);
+
+        virtual ~PlatinumPanelRenderer();
+
+    protected:
+        virtual void onRenderBackground(const Panel& p, 
+                                        PaintSurface& surface, 
+                                        const Gfx::RectF& rect) const;
+
+        virtual void onRenderContent(const Panel& p, 
+                                     PaintSurface& surface, 
+                                     const Gfx::RectF& rect) const;
+};
+
+
 class PT_HMI_API PlatinumStyle : public Style
 {
     public:
