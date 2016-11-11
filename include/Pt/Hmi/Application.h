@@ -113,10 +113,6 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void setStyle(const Style& s);
 
-        const StyleOptions& styleOptions() const;
-
-        void setStyleOptions(const StyleOptions& opts);
-
         Gfx::Font makeFont(const Gfx::Font& fromFont) const;
 
         void invalidate();
@@ -180,7 +176,6 @@ class PT_HMI_API Application : public Pt::System::Application
         Pt::Gfx::Font    _font;
         Pt::Gfx::Font    _userFont;
         Style            _style;
-        StyleOptions     _styleOptions;
 };
 
 } // namespace

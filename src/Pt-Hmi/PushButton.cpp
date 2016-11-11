@@ -81,24 +81,20 @@ void PushButton::onReleased()
 
 
 void PushButton::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
-{    
-    const Style& s = style();
-    const StyleOptions& so = styleOptions();
+{        
+    const ButtonRenderer* renderer = getFacet<ButtonRenderer>();
 
-    const ButtonRenderer* renderer = s.get<ButtonRenderer>();
-    if(renderer)
-        renderer->renderBackground(*this, so, surface, updateRect);
+    if( renderer)
+      renderer->renderBackground(*this, surface, updateRect);
 }
 
 
 void PushButton::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
-    const Style& s = style();
-    const StyleOptions& so = styleOptions();
+    const ButtonRenderer* renderer = getFacet<ButtonRenderer>();
 
-    const ButtonRenderer* renderer = s.get<ButtonRenderer>();
     if(renderer)
-        renderer->renderContent(*this, so, surface, updateRect);
+        renderer->renderContent(*this, surface, updateRect);
 }
 
 } // namespace

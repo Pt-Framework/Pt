@@ -199,26 +199,37 @@ void MenuBarItem::onPaintBackground(PaintSurface& surface, const Gfx::RectF& upd
 {
     if(_highlighted)
     {
-        Gfx::Color bgColor = Application::instance().styleOptions().getProperty<Gfx::Color>("highlight");
-        Gfx::Brush brush = brighten(bgColor, 0.85f);
+  
+      const StyleOptions* options = getFacet<StyleOptions>();
 
-        Painter painter(surface);
-        painter.setClip(updateRect);
-        painter.setBrush(brush);
-        painter.fillRect( Gfx::RectF(Gfx::PointF(0,0), size()) );
+      if(!options)
+         return;
+
+      Gfx::Color bgColor = options->highlight();
+      Gfx::Brush brush = brighten(bgColor, 0.85f);
+
+      Painter painter(surface);
+      painter.setClip(updateRect);
+      painter.setBrush(brush);
+      painter.fillRect( Gfx::RectF(Gfx::PointF(0,0), size()) );
     }
 }
 
 
 void MenuBarItem::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
-    const Gfx::Font& font = Application::instance().font();
+    const StyleOptions* options = getFacet<StyleOptions>();
+
+    if(!options)
+      return;
+
+    const Gfx::Font& font = options->font();
 
     Painter painter(surface);
     painter.setClip(updateRect);
     painter.setFont(font);
     
-    painter.setPen(Application::instance().styleOptions().getProperty<Pt::Gfx::Color>("textColor"));
+    painter.setPen(options->textColor());
 
     Gfx::FontMetrics fm = Painter::fontMetrics(font, _text);
     double textX = padding().left();
@@ -400,10 +411,15 @@ MenuShell* MenuBar::onFindMenu(const Gfx::PointF& screenPos)
 
 void MenuBar::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
+    const StyleOptions* options = getFacet<StyleOptions>();
+
+    if(!options)
+      return;
+
     Painter painter(surface);
     painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
 
-    painter.setBrush( Application::instance().styleOptions().getProperty<Gfx::Brush>("background") );
+    painter.setBrush( options->background() );
     //painter.setClip(updateRect);
     painter.fillRect(updateRect);
 }

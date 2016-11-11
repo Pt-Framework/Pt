@@ -116,20 +116,16 @@ class PT_HMI_API ButtonRenderer : public Style::Facet
 
         virtual ~ButtonRenderer();
 
-        void renderBackground(const Button& button, const StyleOptions& options,
-                              PaintSurface& surface, const Gfx::RectF& rect) const;
+        void renderBackground(const Button& button, PaintSurface& surface, const Gfx::RectF& rect) const;
 
-        void renderContent(const Button& button, const StyleOptions& options,
-                           PaintSurface& surface, const Gfx::RectF& rect) const;
+        void renderContent(const Button& button, PaintSurface& surface, const Gfx::RectF& rect) const;
 
     protected:
         virtual void onRenderBackground(const Button& button, 
-                                        const StyleOptions& options,
                                         PaintSurface& surface, 
                                         const Gfx::RectF& rect) const = 0;
 
         virtual void onRenderContent(const Button& button, 
-                                     const StyleOptions& options,
                                      PaintSurface& surface, 
                                      const Gfx::RectF& rect) const = 0;
 };
@@ -142,20 +138,18 @@ class PT_HMI_API CheckBoxRenderer : public Style::Facet
 
         virtual ~CheckBoxRenderer();
 
-        void renderBackground(const CheckBox& cb, const StyleOptions& options,
+        void renderBackground(const CheckBox& cb,
                               PaintSurface& surface, const Gfx::RectF& rect) const;
 
-        void renderContent(const CheckBox& cb, const StyleOptions& options,
+        void renderContent(const CheckBox& cb, 
                            PaintSurface& surface, const Gfx::RectF& rect) const;
 
     protected:
         virtual void onRenderBackground(const CheckBox& cb, 
-                                        const StyleOptions& options,
                                         PaintSurface& surface, 
                                         const Gfx::RectF& rect) const = 0;
 
         virtual void onRenderContent(const CheckBox& cb, 
-                                     const StyleOptions& options,
                                      PaintSurface& surface, 
                                      const Gfx::RectF& rect) const = 0;
 };
@@ -168,20 +162,18 @@ class PT_HMI_API FrameRenderer : public Style::Facet
 
         virtual ~FrameRenderer();
 
-        void renderBackground(const Frame& f, const StyleOptions& options,
+        void renderBackground(const Frame& f,
                               PaintSurface& surface, const Gfx::RectF& rect) const;
 
-        void renderContent(const Frame& f, const StyleOptions& options,
+        void renderContent(const Frame& f,
                            PaintSurface& surface, const Gfx::RectF& rect) const;
 
     protected:
         virtual void onRenderBackground(const Frame& f, 
-                                        const StyleOptions& options,
                                         PaintSurface& surface, 
                                         const Gfx::RectF& rect) const = 0;
 
         virtual void onRenderContent(const Frame& f, 
-                                     const StyleOptions& options,
                                      PaintSurface& surface, 
                                      const Gfx::RectF& rect) const = 0;
 };

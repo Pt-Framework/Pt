@@ -94,10 +94,12 @@ ChildW::ChildW(const std::string& title)
     //Close button    
     Pt::Hmi::Key xKey(Pt::Hmi::Key::Control, Pt::Hmi::Key::X);
 
-    Pt::Hmi::StyleOptions styleOptions;
-    styleOptions.setProperty("foreground", Gfx::Color::fromRgb8(220, 80, 80) );
+    Pt::Hmi::StyleOptions* styleOptions = new Pt::Hmi::StyleOptions();
+    styleOptions->setForeground(Gfx::Color::fromRgb8(220, 80, 80) );
+    Pt::Hmi::Style style;
+    style.set(styleOptions);
 
-    _closeButton.setStyleOptions(styleOptions);
+    _closeButton.setStyle(style);
     _closeButton.setName("CloseButton"); 
     _closeButton.setText("Close App [CTRL+X]");
     _closeButton.setDocking(Docking::Bottom);

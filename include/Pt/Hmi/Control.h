@@ -31,13 +31,12 @@
 
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/PaintSurface.h>
+#include <Pt/Hmi/Style.h>
+#include <Pt/Hmi/Application.h>
     
 namespace Pt {
-
 namespace Hmi {
 
-class Style;
-class StyleOptions;
 
 class PT_HMI_API Control : public Widget
 {
@@ -50,9 +49,19 @@ class PT_HMI_API Control : public Widget
 
         const Style& style() const;
 
-        void setStyleOptions(const StyleOptions& style);
+        template<typename T> 
+        const T* getFacet() const
+        {
+          if( _style != 0)
+          {
+            const T* facet = _style->get<T>();
+            if( facet != 0)
+              return facet;
+          }
 
-        const StyleOptions& styleOptions() const;
+           return Application::instance().style().get<T>();
+        }
+
 
     protected:
         virtual void onPaintEvent(const PaintEvent& ev);
@@ -64,7 +73,6 @@ class PT_HMI_API Control : public Widget
 
     private:
         Style*        _style;
-        StyleOptions* _styleOptions;
 }; 
 
 } // namespace

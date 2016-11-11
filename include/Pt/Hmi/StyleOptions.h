@@ -31,6 +31,7 @@
 #define Pt_Hmi_StyleOptions_h
 
 #include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/Style.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
@@ -43,12 +44,12 @@ namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API StyleOptions
+class PT_HMI_API StyleOptions : public Style::Facet
 {
     public:
-        StyleOptions();
+        StyleOptions(std::size_t refs = 0);
 
-        ~StyleOptions();
+        virtual ~StyleOptions();
 
         // background
         // foreground
@@ -69,34 +70,62 @@ class PT_HMI_API StyleOptions
         // tooltipForeground / popupForeground
         // tooltipTextColor / popupTextColor
 
-        template <typename T>
-        const T getProperty(const std::string& name, const T& def = T()) const
+        const Gfx::Brush& background() const
         {
-          std::map<std::string, Pt::Any>::const_iterator it = _properties.find(name);
-
-          if( it == _properties.end() )
-              return def;
-
-          try
-          {
-            return Pt::any_cast<T>(it->second);
-          }
-          catch(const std::exception&)
-          {
-          }
-
-          return def;
-        }
-        
-        template <typename T>
-        void setProperty( const std::string& name, const T& p)
-        {
-          _properties[name] = p;
+          return _background;
         }
 
+        void setBackground(const Gfx::Brush& b)
+        {
+          _background = b;
+        }
+
+        const Gfx::Color& foreground() const
+        {
+          return _foreground;
+        }
+
+        void setForeground(const Gfx::Color& c)
+        {
+          _foreground = c;
+        }
+
+        const Gfx::Color& highlight() const
+        {
+          return _highlight;
+        }
+
+        void setHighlight(const Gfx::Color& c)
+        {
+          _highlight = c;
+        }
+
+        const Gfx::Color& textColor() const
+        {
+          return _textColor;
+        }
+
+        void setTextColor(const Gfx::Color& c)
+        {
+          _textColor = c;
+        }
+
+        const Gfx::Font& font() const
+        {
+          return _font;
+        }
+
+        void setFont(const Gfx::Font& c)
+        {
+          _font = c;
+        }
 
     private:
-        std::map<std::string, Pt::Any> _properties;
+      Gfx::Brush _background;
+      Gfx::Color _foreground;
+      Gfx::Color _highlight;
+      Gfx::Color _textColor;
+      Gfx::Font  _font;    
 };
 
 } // namespace

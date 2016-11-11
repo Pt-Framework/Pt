@@ -52,12 +52,10 @@ class PT_HMI_API PlatinumButtonRenderer : public ButtonRenderer
 
     protected:
         virtual void onRenderBackground(const Button& button, 
-                                        const StyleOptions& options,
                                         PaintSurface& surface, 
                                         const Gfx::RectF& rect) const;
 
         virtual void onRenderContent(const Button& button, 
-                                     const StyleOptions& options,
                                      PaintSurface& surface, 
                                      const Gfx::RectF& rect) const;
 };
@@ -72,12 +70,10 @@ class PT_HMI_API PlatinumCheckBoxRenderer : public CheckBoxRenderer
 
     protected:
         virtual void onRenderBackground(const CheckBox& cb, 
-                                        const StyleOptions& options,
                                         PaintSurface& surface, 
                                         const Gfx::RectF& rect) const;
 
         virtual void onRenderContent(const CheckBox& cb, 
-                                     const StyleOptions& options,
                                      PaintSurface& surface, 
                                      const Gfx::RectF& rect) const;
 };
@@ -92,12 +88,10 @@ class PT_HMI_API PlatinumFrameRenderer : public FrameRenderer
 
     protected:
         virtual void onRenderBackground(const Frame& f, 
-                                        const StyleOptions& options,
                                         PaintSurface& surface, 
                                         const Gfx::RectF& rect) const;
 
         virtual void onRenderContent(const Frame& f, 
-                                     const StyleOptions& options,
                                      PaintSurface& surface, 
                                      const Gfx::RectF& rect) const;
 };

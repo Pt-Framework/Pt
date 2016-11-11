@@ -80,11 +80,16 @@ void PlatinumButtonRenderer::renderButtonText(Painter& painter, const Gfx::Point
 
 
 void PlatinumButtonRenderer::onRenderBackground(const Button& button, 
-                                                const StyleOptions& options,
                                                 PaintSurface& surface, 
                                                 const Gfx::RectF& rect) const
 {
-    Gfx::Color buttonColor = options.getProperty<Gfx::Color>("foreground");
+    const StyleOptions* options = button.getFacet<StyleOptions>();
+
+    if( options == 0)
+      return;
+
+    Gfx::Color buttonColor = options->foreground();
+
     Gfx::Color frameColor = Gfx::Color(buttonColor.red() * 0.7f,
                                        buttonColor.green() * 0.7f,
                                        buttonColor.blue() * 0.7f);
@@ -163,17 +168,21 @@ void PlatinumButtonRenderer::onRenderBackground(const Button& button,
 
 
 void PlatinumButtonRenderer::onRenderContent(const Button& button, 
-                                             const StyleOptions& options,
                                              PaintSurface& surface, 
                                              const Gfx::RectF& rect) const
 {
-    Gfx::Color foreground = options.getProperty<Gfx::Color>("foreground");
+    const StyleOptions* options = button.getFacet<StyleOptions>();
+
+    if( options == 0)
+      return;
+
+    Gfx::Color foreground = options->foreground();
     Gfx::Color frameColor = Gfx::Color(foreground.red() * 0.6f,
                                        foreground.green() * 0.6f,
                                        foreground.blue() * 0.6f);
 
-    const Gfx::Font& textFont = options.getProperty<Gfx::Font>("font");
-    Gfx::Color textColor =  options.getProperty<Gfx::Color>("textColor");
+    const Gfx::Font& textFont = options->font();
+    Gfx::Color textColor =  options->textColor();
 
     const String& text = button.text();
     const Gfx::SizeF& size = button.size();
@@ -231,7 +240,6 @@ PlatinumCheckBoxRenderer::~PlatinumCheckBoxRenderer()
 
 
 void PlatinumCheckBoxRenderer::onRenderBackground(const CheckBox& cb, 
-                                                  const StyleOptions& options,
                                                   PaintSurface& surface, 
                                                   const Gfx::RectF& rect) const
 {
@@ -239,17 +247,21 @@ void PlatinumCheckBoxRenderer::onRenderBackground(const CheckBox& cb,
 
 
 void PlatinumCheckBoxRenderer::onRenderContent(const CheckBox& cb, 
-                                               const StyleOptions& options,
                                                PaintSurface& surface, 
                                                const Gfx::RectF& rect) const
 {
-    Gfx::Color foreground = options.getProperty<Gfx::Color>("foreground");
+    const StyleOptions* options = cb.getFacet<StyleOptions>();
+
+    if( options == 0)
+      return;
+
+    Gfx::Color foreground = options->foreground();
     Gfx::Color frameColor = Gfx::Color(foreground.red() * 0.6f,
                                        foreground.green() * 0.6f,
                                        foreground.blue() * 0.6f);
 
-    const Gfx::Font& textFont = options.getProperty<Gfx::Font>("font");
-    const Gfx::Color& textColor = options.getProperty<Gfx::Color>("textColor");
+    const Gfx::Font& textFont = options->font();
+    const Gfx::Color& textColor = options->textColor();
 
     const String& text = cb.text();
     const Gfx::SizeF& size = cb.size();
@@ -336,7 +348,6 @@ PlatinumFrameRenderer::~PlatinumFrameRenderer()
 
 
 void PlatinumFrameRenderer::onRenderBackground(const Frame& f, 
-                                               const StyleOptions& options,
                                                PaintSurface& surface, 
                                                const Gfx::RectF& rect) const
 {
@@ -344,11 +355,16 @@ void PlatinumFrameRenderer::onRenderBackground(const Frame& f,
 
 
 void PlatinumFrameRenderer::onRenderContent(const Frame& f, 
-                                            const StyleOptions& options,
                                             PaintSurface& surface, 
                                             const Gfx::RectF& rect) const
 {
-    Gfx::Color foreground = options.getProperty<Gfx::Color>("foreground");
+
+    const StyleOptions* options = f.getFacet<StyleOptions>();
+
+    if( options == 0)
+      return;
+
+    Gfx::Color foreground = options->foreground();
     Gfx::Color frameColor = Gfx::Color(foreground.red() * 0.6f,
                                        foreground.green() * 0.6f,
                                        foreground.blue() * 0.6f);

@@ -41,7 +41,6 @@ namespace Hmi {
 
 Control::Control()
 : _style(0)
-, _styleOptions(0)
 {    
 }
 
@@ -49,7 +48,6 @@ Control::Control()
 Control::~Control()
 {
     delete _style;
-    delete _styleOptions;
 }
 
 
@@ -64,20 +62,6 @@ void Control::setStyle(const Style& style)
 const Style& Control::style() const
 {
     return _style ? *_style : Application::instance().style();
-}
-
-
-void Control::setStyleOptions(const StyleOptions& opts)
-{
-    delete _styleOptions;
-    _styleOptions = 0;
-    _styleOptions = new StyleOptions(opts);
-}
-
-
-const StyleOptions& Control::styleOptions() const
-{
-    return _styleOptions ? *_styleOptions : Application::instance().styleOptions();
 }
 
 

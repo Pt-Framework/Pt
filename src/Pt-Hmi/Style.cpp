@@ -28,6 +28,7 @@
 */
 
 #include <Pt/Hmi/Style.h>
+#include <Pt/Hmi/StyleOptions.h>
 
 namespace Pt {
 
@@ -39,6 +40,7 @@ namespace Hmi {
 
 Style::Style()
 {
+    set(new StyleOptions());
 }
 
 
@@ -125,21 +127,18 @@ ButtonRenderer::~ButtonRenderer()
 }
 
 
-void ButtonRenderer::renderBackground(const Button& button, 
-                                      const StyleOptions& options,
-                                      PaintSurface& surface, 
+void ButtonRenderer::renderBackground(const Button& button,  PaintSurface& surface, 
                                       const Gfx::RectF& rect) const
 { 
-    onRenderBackground(button, options, surface, rect); 
+    onRenderBackground(button, surface, rect); 
 }    
 
 
 void ButtonRenderer::renderContent(const Button& button, 
-                                   const StyleOptions& options,
                                    PaintSurface& surface, 
                                    const Gfx::RectF& rect) const
 { 
-    onRenderContent(button, options, surface, rect); 
+    onRenderContent(button, surface, rect); 
 }  
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -158,20 +157,18 @@ CheckBoxRenderer::~CheckBoxRenderer()
 
 
 void CheckBoxRenderer::renderBackground(const CheckBox& cb, 
-                                      const StyleOptions& options,
                                       PaintSurface& surface, 
                                       const Gfx::RectF& rect) const
 { 
-    onRenderBackground(cb, options, surface, rect); 
+    onRenderBackground(cb, surface, rect); 
 }    
 
 
 void CheckBoxRenderer::renderContent(const CheckBox& cb, 
-                                   const StyleOptions& options,
                                    PaintSurface& surface, 
                                    const Gfx::RectF& rect) const
 { 
-    onRenderContent(cb, options, surface, rect); 
+    onRenderContent(cb, surface, rect); 
 }  
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -190,20 +187,18 @@ FrameRenderer::~FrameRenderer()
 
 
 void FrameRenderer::renderBackground(const Frame& f, 
-                                      const StyleOptions& options,
                                       PaintSurface& surface, 
                                       const Gfx::RectF& rect) const
 { 
-    onRenderBackground(f, options, surface, rect); 
+    onRenderBackground(f, surface, rect); 
 }    
 
 
 void FrameRenderer::renderContent(const Frame& f, 
-                                   const StyleOptions& options,
                                    PaintSurface& surface, 
                                    const Gfx::RectF& rect) const
 { 
-    onRenderContent(f, options, surface, rect); 
+    onRenderContent(f,  surface, rect); 
 }  
 
 

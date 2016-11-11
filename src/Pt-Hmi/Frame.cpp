@@ -48,23 +48,19 @@ Frame::~Frame()
 
 void Frame::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
 {    
-    const Style& s = style();
-    const StyleOptions& so = styleOptions();
+    const FrameRenderer* renderer = getFacet<FrameRenderer>();
 
-    const FrameRenderer* renderer = s.get<FrameRenderer>();
     if(renderer)
-        renderer->renderBackground(*this, so, surface, updateRect);
+        renderer->renderBackground(*this, surface, updateRect);
 }
 
 
 void Frame::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
-    const Style& s = style();
-    const StyleOptions& so = styleOptions();
+    const FrameRenderer* renderer = getFacet<FrameRenderer>();
 
-    const FrameRenderer* renderer = s.get<FrameRenderer>();
     if(renderer)
-        renderer->renderContent(*this, so, surface, updateRect);
+        renderer->renderContent(*this, surface, updateRect);
 }
 
 } // namespace

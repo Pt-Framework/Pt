@@ -190,7 +190,13 @@ void MenuItem::onShortcut(const KeyEvent& kev)
 
 Gfx::SizeF MenuItem::onAutoSize() const
 {
-    const Gfx::Font& font = Application::instance().styleOptions().getProperty<Gfx::Font>("font");
+
+    const StyleOptions* options = getFacet<StyleOptions>();
+
+    if(!options)
+        return Gfx::SizeF();
+
+    const Gfx::Font& font = options->font();
 
     Gfx::FontMetrics fm = Painter::fontMetrics(font, _text);
 
@@ -215,7 +221,12 @@ void MenuItem::onPaintBackground(PaintSurface& surface, const Gfx::RectF& update
     bool mouseOver = Application::instance().pointerWidget() == this;
     if(mouseOver)
     {
-        Gfx::Color bgColor = Application::instance().styleOptions().getProperty<Gfx::Color>("highlight");
+        const StyleOptions* options = getFacet<StyleOptions>();
+
+        if(!options)
+          return;
+
+        Gfx::Color bgColor = options->highlight();
         Gfx::Brush brush = brighten(bgColor, 0.85f);
 
         Painter painter(surface);
@@ -249,13 +260,20 @@ void MenuItem::onPaintIcon(PaintSurface& surface, const Gfx::RectF& updateRect)
 
 void MenuItem::onPaintItem(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
-    const Gfx::Font& font = Application::instance().font();
+    const StyleOptions* options = getFacet<StyleOptions>();
+
+    if(!options)
+      return;
 
     Painter painter(surface);
     painter.setClip(updateRect);
+
+    const Gfx::Font& font = options->font();
+
     painter.setFont(font);
 
-    painter.setPen( Application::instance().styleOptions().getProperty<Gfx::Color>("textColor"));
+
+    painter.setPen( options->textColor());
 
     Gfx::FontMetrics fm = Painter::fontMetrics(font, _text);
     double textX = padding().left() + _iconWidth;
@@ -269,13 +287,21 @@ void MenuItem::onPaintItem(PaintSurface& surface, const Gfx::RectF& updateRect)
 
 void MenuItem::onPaintShortcut(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
-    const Gfx::Font& font = Application::instance().font();
+    
+
+    const StyleOptions* options = getFacet<StyleOptions>();
+
+    if(!options)
+      return;
+
+
+    const Gfx::Font& font = options->font();
 
     Painter painter(surface);
     painter.setClip(updateRect);
     painter.setFont(font);
 
-    painter.setPen( Application::instance().styleOptions().getProperty<Gfx::Color>("textColor"));
+    painter.setPen( options->textColor());
 
     const Key* sk = shortcut();
     if(sk)
