@@ -287,12 +287,6 @@ class PT_HMI_API Widget : public Visual
 
         Widget* findWidget( const Gfx::PointF& pos, bool input );
 
-    protected:
-        //void setPreferredSize(const Pt::Gfx::SizeF& s)
-        //{
-        //    _preferredSize =s;
-        //}
-
     private:
         Pt::Signal<const Pt::Event&> _eventReady;
 

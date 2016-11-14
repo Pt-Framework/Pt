@@ -346,7 +346,7 @@ void PlatinumFrameRenderer::onRender(const Frame& f,
     Gfx::RectF frameRect( Gfx::PointF(0, 0), f.size() );
 
     painter.setPen(frameColor);
-    painter.drawRect( frameRect);
+    painter.drawRect(frameRect);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
