@@ -65,6 +65,13 @@ const Style& Control::style() const
 }
 
 
+void Control::onInvalidate()
+{
+  Widget::onInvalidate();
+  update();
+}
+
+
 void Control::onPaintEvent(const PaintEvent& ev)
 {
     Widget::onPaintEvent(ev);
