@@ -202,7 +202,7 @@ void FrameRenderer::renderContent(const Frame& f,
 }  
 
 ///////////////////////////////////////////////////////////////////////////////
-// FrameRenderer
+// PanelRenderer
 ///////////////////////////////////////////////////////////////////////////////
 
 PanelRenderer::PanelRenderer(std::size_t refs)
@@ -230,6 +230,36 @@ void PanelRenderer::renderContent(const Panel& p,
 { 
     onRenderContent(p,  surface, rect); 
 }  
+
+///////////////////////////////////////////////////////////////////////////////
+// LabelRenderer
+///////////////////////////////////////////////////////////////////////////////
+
+LabelRenderer::LabelRenderer(std::size_t refs)
+: Style::Facet( typeid(LabelRenderer), refs )
+{
+}
+
+    
+LabelRenderer::~LabelRenderer()
+{
+}
+
+
+void LabelRenderer::renderBackground(const Label& l, 
+                                     PaintSurface& surface, 
+                                     const Gfx::RectF& rect) const
+{ 
+    onRenderBackground(l, surface, rect); 
+}    
+
+
+void LabelRenderer::renderContent(const Label& l, 
+                                  PaintSurface& surface, 
+                                  const Gfx::RectF& rect) const
+{ 
+    onRenderContent(l,  surface, rect); 
+}
 
 } // namespace
 

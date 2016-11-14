@@ -95,7 +95,7 @@ class PT_HMI_API Panel : public Frame
 		
         virtual ~Panel();	
    
-          //enum TileMode
+        //enum TileMode
         //{
         //    Tile,
         //    Strech,
@@ -104,15 +104,11 @@ class PT_HMI_API Panel : public Frame
 
         // TODO: use TileMode and Alignment instead of ImageLayout
 
-        void setBackgroundImage(const Gfx::Image& image, ImageLayout layout)
-        {
-            if( layout == ImageLayout::Strech || layout ==  ImageLayout::Zoom)
-             _backgroundImage = image;
-            
-            _backgroundImageLayout = layout;
-            _backgroundPicture.set( image);
-            update();
-        }      
+        const Gfx::Color* planeColor() const;
+
+        void setPlaneColor(const Gfx::Color& color);
+
+        void setImage(const Gfx::Image& image, ImageLayout layout);  
               
     protected:
         virtual void onResizeEvent(const ResizeEvent& ev);
@@ -122,9 +118,11 @@ class PT_HMI_API Panel : public Frame
         virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect);
 
     private: 
-        Gfx::Image    _backgroundImage;
-        Picture       _backgroundPicture;
-        ImageLayout   _backgroundImageLayout;
+        Gfx::Image  _image;
+        Picture     _picture;
+        ImageLayout _layout;
+        Gfx::Color  _planeColor;
+        bool        _hasPlaneColor;
 }; 
 
 } // namespace

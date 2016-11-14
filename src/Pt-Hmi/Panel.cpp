@@ -28,14 +28,8 @@
 */
 
 #include <Pt/Hmi/Panel.h>
-#include <Pt/Hmi/Layout.h>
-#include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/PaintSurface.h>
-#include <Pt/Hmi/PaintRegion.h>
-#include <Pt/Hmi/PaintEvent.h>
-#include <Pt/Hmi/Picture.h>
 #include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/BlockScale.h>
 
@@ -44,8 +38,10 @@ namespace Pt {
 namespace Hmi {
 
 Panel::Panel()
-: _backgroundImage()
-, _backgroundImageLayout( ImageLayout::None )
+: _image()
+, _layout( ImageLayout::None )
+, _planeColor( Gfx::Color::fromRgb8(0,0,0) )
+, _hasPlaneColor(false)
 {
     setAcceptsFocus(false);
 }
@@ -56,41 +52,67 @@ Panel::~Panel()
 }
 
 
+const Gfx::Color* Panel::planeColor() const
+{
+    return _hasPlaneColor ? &_planeColor : 0;
+}
+
+
+void Panel::setPlaneColor(const Gfx::Color& color)
+{
+    _planeColor = color;
+    _hasPlaneColor = true;
+    update();
+}
+
+
+void Panel::setImage(const Gfx::Image& image, ImageLayout layout)
+{
+    if(layout == ImageLayout::Strech || layout ==  ImageLayout::Zoom)
+        _image = image;
+            
+    _layout = layout;
+    _picture.set(image);
+    update();
+}   
+
+
 void Panel::onResizeEvent(const ResizeEvent& ev)
 {
     Widget::onResizeEvent(ev);
 
-    if(  _backgroundPicture.empty() || ev.size().width() < 1 || ev.size().height() < 1 )
+    if( _picture.empty() || ev.size().width() < 1 || ev.size().height() < 1 )
      return;
 
-    switch( _backgroundImageLayout.type() )
+    switch( _layout.type() )
     {
         case ImageLayout::Strech:
         {
             Gfx::Size newSize( (int) ev.size().width(), 
                                (int)ev.size().height() );
 
-            Gfx::Image strech(_backgroundImage.format(), newSize);
+            Gfx::Image streched(_image.format(), newSize);
             
-            Gfx::blockScale(_backgroundImage.begin(),_backgroundImage.width(), _backgroundImage.height(),
-                            strech.begin(), strech.width(), strech.height() );
+            Gfx::blockScale( _image.begin(),_image.width(), _image.height(),
+                             streched.begin(), streched.width(), streched.height() );
 
-            _backgroundPicture.set(strech);
+            _picture.set(streched);
         }
         break;
 
         case ImageLayout::Zoom:
         {
-            const double factor = ev.size().width() / (double)_backgroundImage.width();
-            Pt::Gfx::Size newSize( ( size_t)(_backgroundImage.width() * factor), 
-                                   (size_t)(_backgroundImage.height() * factor) );
-
-            Gfx::Image strech(_backgroundImage.format(), newSize);
+            const double factor = ev.size().width() / _image.width();
             
-            Gfx::blockScale( _backgroundImage.begin(),_backgroundImage.width(), _backgroundImage.height(),
-                             strech.begin(), strech.width(), strech.height() );
+            Pt::Gfx::Size newSize( ( size_t)(_image.width() * factor), 
+                                   (size_t)(_image.height() * factor) );
 
-            _backgroundPicture.set(strech);
+            Gfx::Image streched(_image.format(), newSize);
+            
+            Gfx::blockScale( _image.begin(),_image.width(), _image.height(),
+                             streched.begin(), streched.width(), streched.height() );
+
+            _picture.set(streched);
         }
         break;
     }  
@@ -102,7 +124,6 @@ void Panel::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRec
     Frame::onPaintBackground(surface, updateRect);
 
     const PanelRenderer* renderer = getFacet<PanelRenderer>();
-
     if(renderer)
         renderer->renderBackground(*this, surface, updateRect);
 }
@@ -115,41 +136,40 @@ void Panel::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
     if(renderer)
         renderer->renderContent(*this, surface, updateRect);
 
-    //if( ! _backgroundPicture.empty() )
-    //{
-    //    painter.setCompositionMode(Gfx::CompositionMode::SourceOver);
+    if( ! _picture.empty() )
+    {
+        Painter painter(surface);
+        painter.setCompositionMode(Gfx::CompositionMode::SourceOver);
 
-    //    switch( _backgroundImageLayout.type() )
-    //    {
-    //        default:
-    //        {
-    //            painter.drawPicture( Pt::Gfx::PointF(0,0), _backgroundPicture );
-    //        }
-    //        break;
-    //        
-    //        case ImageLayout::Tile:
-    //        {
-    //             for( double x = 0; x < size.width();  x += _backgroundPicture.width() )
-    //            {
-    //                for( double y = 0; y < size.height();  y += _backgroundPicture.height() )
-    //                    painter.drawPicture(Gfx::PointF(x,y), _backgroundPicture);
-    //            }
-    //        }
-    //        break;
+        const Gfx::SizeF& size = this->size();
 
-    //        case ImageLayout::Center:
-    //        {
-    //            const double x = size.width()/2  - _backgroundPicture.width()/2;
-    //            const double y = size.height()/2  - _backgroundPicture.height()/2;
-    //            painter.drawPicture(Gfx::PointF(x, y), _backgroundPicture);
-    //        }
-    //        break;
-    //    }
+        switch( _layout.type() )
+        {
+            default:
+                painter.drawPicture( Pt::Gfx::PointF(0,0), _picture );
+                break;
 
-    //    painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
-    //}  
+            case ImageLayout::Tile:
+            {
+                for( double x = 0; x < size.width();  x += _picture.width() )
+                {
+                    for( double y = 0; y < size.height();  y += _picture.height() )
+                        painter.drawPicture(Gfx::PointF(x,y), _picture);
+                }
+                break;
+            }
+            
+            case ImageLayout::Center:
+            {
+                const double x = size.width()/2  - _picture.width()/2;
+                const double y = size.height()/2  - _picture.height()/2;
+                painter.drawPicture(Gfx::PointF(x, y), _picture);
+                break;
+            }
+        }
+    }  
 
-  Frame::onPaintContent(surface, updateRect);
+    Frame::onPaintContent(surface, updateRect);
 }
 
 } // namespace

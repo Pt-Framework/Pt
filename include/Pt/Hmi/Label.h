@@ -40,7 +40,6 @@ namespace Hmi {
 class PT_HMI_API Label : public Panel
 {
 	  public:
-
         enum Alignment
         {
             TopLeft,
@@ -59,44 +58,36 @@ class PT_HMI_API Label : public Panel
 
         virtual ~Label(); 
 
-        const Pt::String& text() const
-        {
-            return _text;
-        }
+        const Pt::String& text() const;
 
         void setText(const Pt::String& text);
 
-        Alignment contentAlignment()
-        {
-            return _contentAlignment;
-        }
+        Alignment textAlignment() const;
 
-        void setContentAlignment(Alignment a)
-        {
-            _contentAlignment = a;
-        }
+        void setTextAlignment(Alignment a);
 
-        const Gfx::Font& font() const
-        { 
-          return _userFont;
-        }
+        const Gfx::Color* textColor() const;
+
+        void setTextColor(const Gfx::Color& color);
+
+        const Gfx::Font* font() const;
 
         void setFont( const Gfx::Font& f);
 
     protected:
+        virtual Gfx::SizeF onAutoSize() const;
+
         virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect);
 
         virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect);
-
-        virtual void onInvalidate();
         
-        virtual Gfx::SizeF onAutoSize() const;
-
     private:
-        Alignment _contentAlignment;
-        Gfx::Font _userFont;
-        Gfx::Font _font;
         Pt::String _text;
+        Alignment  _textAlignment;
+        Gfx::Font  _font;
+        bool       _hasFont;
+        Gfx::Color _textColor;
+        bool       _hasTextColor;
 };
 
 } // namespace

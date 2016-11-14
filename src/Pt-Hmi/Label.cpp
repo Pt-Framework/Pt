@@ -28,9 +28,6 @@
 */
 
 #include <Pt/Hmi/Label.h>
-#include <Pt/Hmi/Application.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/FontMetrics.h>
 
 namespace Pt {
@@ -38,11 +35,12 @@ namespace Pt {
 namespace Hmi {
 
 Label::Label()
-: Panel()
-, _contentAlignment(TopLeft)
-, _font(Application::instance().font())
+:  _textAlignment(MiddleCenter)
+, _font()
+, _hasFont(false)
+, _textColor( Gfx::Color::fromRgb8(0,0,0) )
+, _hasTextColor(false)
 {
-    _userFont = _font;
 }
 
 
@@ -51,171 +49,88 @@ Label::~Label()
 }
 
 
+const Pt::String& Label::text() const
+{
+    return _text;
+}
+
+
 void Label::setText(const Pt::String& text)
 {
-    _text = Widget::setMnemonic(text);
+    _text = text;
     invalidate();
+}
+
+
+Label::Alignment Label::textAlignment() const
+{
+    return _textAlignment;
+}
+
+
+void Label::setTextAlignment(Alignment a)
+{
+    _textAlignment = a;
+    update();
+}
+
+
+const Gfx::Color* Label::textColor() const
+{
+    return _hasTextColor ? &_textColor : 0;
+}
+
+
+void Label::setTextColor(const Gfx::Color& color)
+{
+    _textColor = color;
+    _hasTextColor = true;
+    update();
+}
+
+
+const Gfx::Font* Label::font() const
+{ 
+    return _hasFont ? &_font : 0;
 }
 
 
 void Label::setFont(const Gfx::Font& f)
 {
-    _userFont = f;
+    _font = f;
+    _hasFont = true;
     invalidate();
 }
 
 
 Gfx::SizeF Label::onAutoSize() const
 {
-   Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( _font, _text);
+    Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( _font, _text);
 
-  return Gfx::SizeF( fm.width() + padding().leftRight(), 
+    return Gfx::SizeF( fm.width() + padding().leftRight(), 
                        fm.height() + padding().topBottom() );
-}
-
-
-void Label::onInvalidate()
-{
-   _font = Application::instance().makeFont(_userFont);
-   Panel::onInvalidate();
 }
 
 
 void Label::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
     Panel::onPaintBackground(surface, updateRect);
+
+    const LabelRenderer* renderer = getFacet<LabelRenderer>();
+    if(renderer)
+        renderer->renderBackground(*this, surface, updateRect);
 }
 
 
 void Label::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
     Panel::onPaintContent(surface, updateRect);
-       
-    Gfx::SizeF  size = this->size();
-    Gfx::PointF pos(0, 0);
 
-    const StyleOptions* options = getFacet<StyleOptions>();
-    if( options == 0)
-      return;
-
-    Painter painter(surface);
-    painter.setClip(updateRect);
-    painter.setPen(options->textColor());
-    painter.setFont(_font);
-
-    Gfx::FontMetrics metric = painter.fontMetrics(_text);
-
-    switch(_contentAlignment)
-    {
-        case TopLeft:
-        {
-            pos = Gfx::PointF(0, metric.ascent());
-        }
-        break;
-
-        case TopCenter:
-        {
-            const double widthHalf     = size.width()/2;
-            const double textWidthHalf = metric.width()/2;
-            pos = Gfx::PointF(widthHalf - textWidthHalf, metric.ascent());
-        }
-        break;
-
-        case TopRight:
-        {
-            const double width     = size.width();
-            const double textWidth = metric.width();
-            pos = Gfx::PointF(width - textWidth, metric.ascent());
-        }
-        break;
-
-        case MiddleLeft:
-        {
-            const double heightHalf     = size.height()/2;
-            const double textHeightHalf = metric.height()/2;
-
-            pos = Gfx::PointF(0, (heightHalf - textHeightHalf) + metric.ascent());
-        }
-        break;
-
-        default:
-        case MiddleCenter:
-        {            
-            const double widthHalf      = size.width()/2;
-            const double heightHalf     = size.height()/2;
-            const double textWidthHalf  = metric.width()/2;
-            const double textHeightHalf = metric.height()/2;
-
-            pos = Gfx::PointF(widthHalf - textWidthHalf, (heightHalf - textHeightHalf) + metric.ascent());
-        }
-        break;
-
-        case MiddleRight:
-        {
-            const double width          = size.width();
-            const double textWidth      = metric.width();
-            const double heightHalf     = size.height()/2;
-            const double textHeightHalf = metric.height()/2;
-
-            pos = Gfx::PointF(width - textWidth, (heightHalf - textHeightHalf) + metric.ascent());
-        }
-        break;
-
-        case BottomLeft:
-        {
-            const double height     = size.height();
-            const double textHeight = metric.height();
-
-            pos = Gfx::PointF(0, (height- textHeight) + metric.ascent());
-        }
-        break;
-
-        case BottomCenter:
-        {
-            const double widthHalf     = size.width()/2;
-            const double textWidthHalf = metric.width()/2;
-            const double height        = size.height();
-            const double textHeight    = metric.height();
-
-            pos = Gfx::PointF(widthHalf - textWidthHalf, (height- textHeight) + metric.ascent());
-        }
-        break;
-
-        case BottomRight:
-        {
-            const double width      = size.width();
-            const double textWidth  = metric.width();
-            const double height     = size.height();
-            const double textHeight = metric.height();
-
-            pos = Gfx::PointF(width - textWidth, (height- textHeight) + metric.ascent());
-        }
-        break;
-    }
-
-    painter.drawText(pos, _text);
-
-    const Char* ch = mnemonic();
-
-    if(ch)
-    {
-        String::size_type n = _text.find( *ch );
-
-        if(n != String::npos)
-        {
-            Pt::String text(_text, 0, n);
-            Gfx::FontMetrics fm = painter.fontMetrics(text);
-            Gfx::PointF from(pos.x() + fm.width(), pos.y() + 1);
-
-            text = *ch;
-            fm = painter.fontMetrics(text);
-            Gfx::PointF to( from.x() + fm.width(), from.y() );
-
-            painter.drawLine(from, to);
-        }
-    }
+    const LabelRenderer* renderer = getFacet<LabelRenderer>();
+    if(renderer)
+        renderer->renderContent(*this, surface, updateRect);
 }
 
 } // namespace
 
-}  // namespace
+} // namespace

@@ -31,6 +31,7 @@
 #include <Pt/Hmi/StyleOptions.h>
 #include <Pt/Hmi/Frame.h>
 #include <Pt/Hmi/Panel.h>
+#include <Pt/Hmi/Label.h>
 #include <Pt/Hmi/PushButton.h>
 #include <Pt/Hmi/CheckBox.h>
 #include <Pt/Hmi/Painter.h>
@@ -451,8 +452,159 @@ void PlatinumPanelRenderer::onRenderContent(const Panel& p,
             
     outline[8] = outline[0];
 
-    painter.setBrush( options->background() ); 
+    const Gfx::Color* color = p.planeColor();
+    if(color)
+        painter.setBrush(*color);
+    else
+        painter.setBrush( options->background() ); 
+    
     painter.fillPolygon(outline, 9);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// PlatinumLabelRenderer
+///////////////////////////////////////////////////////////////////////////////
+
+PlatinumLabelRenderer::PlatinumLabelRenderer(std::size_t refs)
+: LabelRenderer(refs)
+{
+}
+
+    
+PlatinumLabelRenderer::~PlatinumLabelRenderer()
+{
+}
+
+
+void PlatinumLabelRenderer::onRenderBackground(const Label& l, 
+                                               PaintSurface& surface, 
+                                               const Gfx::RectF& updateRect) const
+{
+}
+
+
+void PlatinumLabelRenderer::onRenderContent(const Label& l, 
+                                            PaintSurface& surface, 
+                                            const Gfx::RectF& updateRect) const
+{
+    const StyleOptions* options = l.getFacet<StyleOptions>();
+    if( ! options )
+      return;
+
+    Painter painter(surface);
+    painter.setClip(updateRect);
+
+    const Gfx::SizeF& size = l.size();
+    Gfx::PointF pos(0, 0);
+    Gfx::FontMetrics metric = painter.fontMetrics( l.text() );
+
+    switch( l.textAlignment() )
+    {
+        case Label::TopLeft:
+        {
+            pos = Gfx::PointF(0, metric.ascent());
+            break;
+        }
+        
+        case Label::TopCenter:
+        {
+            const double widthHalf     = size.width() / 2;
+            const double textWidthHalf = metric.width() / 2;
+            pos = Gfx::PointF(widthHalf - textWidthHalf, metric.ascent());
+            break;
+        }
+        break;
+
+        case Label::TopRight:
+        {
+            const double width     = size.width();
+            const double textWidth = metric.width();
+            pos = Gfx::PointF(width - textWidth, metric.ascent());
+            break;
+        }
+        break;
+
+        case Label::MiddleLeft:
+        {
+            const double heightHalf     = size.height() / 2;
+            const double textHeightHalf = metric.height() / 2;
+
+            pos = Gfx::PointF(0, (heightHalf - textHeightHalf) + metric.ascent());
+            break;
+        }
+
+        default:
+        case Label::MiddleCenter:
+        {            
+            const double widthHalf      = size.width() / 2;
+            const double heightHalf     = size.height() / 2;
+            const double textWidthHalf  = metric.width() / 2;
+            const double textHeightHalf = metric.height() / 2;
+
+            pos = Gfx::PointF(widthHalf - textWidthHalf, 
+                              heightHalf - textHeightHalf + metric.ascent());
+            break;
+        }
+
+        case Label::MiddleRight:
+        {
+            const double width          = size.width();
+            const double textWidth      = metric.width();
+            const double heightHalf     = size.height()/2;
+            const double textHeightHalf = metric.height()/2;
+
+            pos = Gfx::PointF(width - textWidth, 
+                              heightHalf - textHeightHalf + metric.ascent());
+            break;
+        }
+
+        case Label::BottomLeft:
+        {
+            const double height     = size.height();
+            const double textHeight = metric.height();
+
+            pos = Gfx::PointF(0, height- textHeight + metric.ascent());
+            break;
+        }
+
+        case Label::BottomCenter:
+        {
+            const double widthHalf     = size.width() / 2;
+            const double textWidthHalf = metric.width() / 2;
+            const double height        = size.height();
+            const double textHeight    = metric.height();
+
+            pos = Gfx::PointF(widthHalf - textWidthHalf, 
+                              height - textHeight + metric.ascent());
+            break;
+        }
+
+        case Label::BottomRight:
+        {
+            const double width      = size.width();
+            const double textWidth  = metric.width();
+            const double height     = size.height();
+            const double textHeight = metric.height();
+
+            pos = Gfx::PointF(width - textWidth, 
+                              height- textHeight + metric.ascent());
+            break;
+        }
+    }
+
+    const Gfx::Color* color = l.textColor();
+    if(color)
+        painter.setPen(*color);
+    else
+        painter.setPen( options->textColor() ); 
+
+    const Gfx::Font* font = l.font();
+    if(font)
+        painter.setFont(*font);
+    else
+        painter.setFont( options->font() );
+
+    painter.drawText( pos, l.text() );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -465,6 +617,7 @@ PlatinumStyle::PlatinumStyle()
     set(new PlatinumCheckBoxRenderer);
     set(new PlatinumFrameRenderer);
     set(new PlatinumPanelRenderer);
+    set(new PlatinumLabelRenderer);
 }
 
 

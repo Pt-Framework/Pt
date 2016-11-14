@@ -115,6 +115,24 @@ class PT_HMI_API PlatinumPanelRenderer : public PanelRenderer
 };
 
 
+class PT_HMI_API PlatinumLabelRenderer : public LabelRenderer
+{
+    public:
+        PlatinumLabelRenderer(std::size_t refs = 0);
+
+        virtual ~PlatinumLabelRenderer();
+
+    protected:
+        virtual void onRenderBackground(const Label& l, 
+                                        PaintSurface& surface, 
+                                        const Gfx::RectF& rect) const;
+
+        virtual void onRenderContent(const Label& l, 
+                                     PaintSurface& surface, 
+                                     const Gfx::RectF& rect) const;
+};
+
+
 class PT_HMI_API PlatinumStyle : public Style
 {
     public:

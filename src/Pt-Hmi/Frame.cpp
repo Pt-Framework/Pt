@@ -36,8 +36,8 @@ namespace Pt {
 namespace Hmi {
 
 Frame::Frame()
-: _color(Gfx::Color::fromRgb8(0,0,0))
-, _hasColor(false)
+: _borderColor( Gfx::Color::fromRgb8(0,0,0) )
+, _hasBorderColor(false)
 {
     setAcceptsFocus(false);
 }
@@ -48,10 +48,23 @@ Frame::~Frame()
 }
 
 
+const Gfx::Color* Frame::borderColor() const
+{
+    return _hasBorderColor ? &_borderColor : 0;
+}
+
+
+void Frame::setBorderColor(const Gfx::Color& color)
+{
+    _borderColor = color;
+    _hasBorderColor = true;
+    update();
+}
+
+
 void Frame::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
 {    
     const FrameRenderer* renderer = getFacet<FrameRenderer>();
-
     if(renderer)
         renderer->renderBackground(*this, surface, updateRect);
 }
@@ -60,7 +73,6 @@ void Frame::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRec
 void Frame::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
     const FrameRenderer* renderer = getFacet<FrameRenderer>();
-
     if(renderer)
         renderer->renderContent(*this, surface, updateRect);
 }
