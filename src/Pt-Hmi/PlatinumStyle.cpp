@@ -332,13 +332,12 @@ void PlatinumFrameRenderer::onRender(const Frame& f,
                                      PaintSurface& surface, 
                                      const Gfx::RectF& rect) const
 {
-
     const StyleOptions* options = f.getFacet<StyleOptions>();
-
-    if( options == 0)
+    if( ! options)
       return;
 
-    Gfx::Color frameColor = f.borderColor() == 0 ? options->foreground() : *f.borderColor();
+    Gfx::Color frameColor = f.borderColor() ? *f.borderColor()     
+                                            : options->foreground();
 
     Painter painter(surface);
     painter.setClip(rect);
