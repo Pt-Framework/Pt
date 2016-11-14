@@ -48,9 +48,7 @@ class PT_HMI_API Frame : public Control
         void setBorderColor(const Gfx::Color& color);
 
     protected:
-        virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect);
-
-        virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect);
+        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
     private:
         Gfx::Color _borderColor;

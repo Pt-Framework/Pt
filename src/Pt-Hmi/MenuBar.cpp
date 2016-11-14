@@ -195,48 +195,35 @@ void MenuBarItem::onMouseEvent(const MouseEvent& ev)
 }
 
 
-void MenuBarItem::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
-{
-    if(_highlighted)
-    {
-  
-      const StyleOptions* options = getFacet<StyleOptions>();
-
-      if(!options)
-         return;
-
-      Gfx::Color bgColor = options->highlight();
-      Gfx::Brush brush = brighten(bgColor, 0.85f);
-
-      Painter painter(surface);
-      painter.setClip(updateRect);
-      painter.setBrush(brush);
-      painter.fillRect( Gfx::RectF(Gfx::PointF(0,0), size()) );
-    }
-}
-
-
-void MenuBarItem::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
+void MenuBarItem::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
     const StyleOptions* options = getFacet<StyleOptions>();
-
-    if(!options)
+    if( ! options)
       return;
-
-    const Gfx::Font& font = options->font();
 
     Painter painter(surface);
     painter.setClip(updateRect);
+    painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
+
+    if(_highlighted)
+    {
+      Gfx::Color bgColor = options->highlight();
+      Gfx::Brush brush = brighten(bgColor, 0.85f);
+
+      painter.setBrush(brush);
+      painter.fillRect( Gfx::RectF(Gfx::PointF(0,0), size()) );
+    }
+
+    const Gfx::Font& font = options->font();
     painter.setFont(font);
     
-    painter.setPen(options->textColor());
-
-    Gfx::FontMetrics fm = Painter::fontMetrics(font, _text);
+    Gfx::FontMetrics fm = painter.fontMetrics(_text);
     double textX = padding().left();
     double textY = (size().height() - fm.height()) / 2;
     textY += fm.ascent();
     Gfx::PointF textPos(textX, textY);
 
+    painter.setPen( options->textColor() );
     painter.drawText(textPos, _text);
 }
 
@@ -409,25 +396,18 @@ MenuShell* MenuBar::onFindMenu(const Gfx::PointF& screenPos)
 }
 
 
-void MenuBar::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
+void MenuBar::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
     const StyleOptions* options = getFacet<StyleOptions>();
-
-    if(!options)
+    if( ! options)
       return;
 
     Painter painter(surface);
+    painter.setClip(updateRect);
     painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
 
     painter.setBrush( options->background() );
-    //painter.setClip(updateRect);
     painter.fillRect(updateRect);
-}
-
-
-void MenuBar::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
-{
-
 }
 
 

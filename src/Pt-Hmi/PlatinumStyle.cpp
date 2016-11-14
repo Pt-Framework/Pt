@@ -81,9 +81,9 @@ void PlatinumButtonRenderer::renderButtonText(Painter& painter, const Gfx::Point
 }
 
 
-void PlatinumButtonRenderer::onRenderBackground(const Button& button, 
-                                                PaintSurface& surface, 
-                                                const Gfx::RectF& rect) const
+void PlatinumButtonRenderer::onRender(const Button& button, 
+                                      PaintSurface& surface, 
+                                      const Gfx::RectF& rect) const
 {
     const StyleOptions* options = button.getFacet<StyleOptions>();
 
@@ -96,14 +96,26 @@ void PlatinumButtonRenderer::onRenderBackground(const Button& button,
                                        buttonColor.green() * 0.7f,
                                        buttonColor.blue() * 0.7f);
 
+    Gfx::Color textColor =  options->textColor();
+
+    Gfx::Color foreground = options->foreground();
+
+    const Gfx::Font& textFont = options->font();
+    
+    const String& text = button.text();
+    
     const Gfx::SizeF& size = button.size();
 
     if( size.width() < 0 || size.height() < 0)
         return;
 
+    //
+    // draw the button area
+    //
+
     if( button.isEnabled() )
     {
-        if(button.isHighlighted())
+        if( button.isHighlighted() )
         {
             buttonColor = Gfx::Color(buttonColor.red() * 0.9f,
                                      buttonColor.green() * 0.9f,
@@ -166,32 +178,6 @@ void PlatinumButtonRenderer::onRenderBackground(const Button& button,
 
     painter.setPen(frameColor);
     painter.drawPolyline(outline, 9);
-}
-
-
-void PlatinumButtonRenderer::onRenderContent(const Button& button, 
-                                             PaintSurface& surface, 
-                                             const Gfx::RectF& rect) const
-{
-    const StyleOptions* options = button.getFacet<StyleOptions>();
-
-    if( options == 0)
-      return;
-
-    Gfx::Color foreground = options->foreground();
-    Gfx::Color frameColor = Gfx::Color(foreground.red() * 0.6f,
-                                       foreground.green() * 0.6f,
-                                       foreground.blue() * 0.6f);
-
-    const Gfx::Font& textFont = options->font();
-    Gfx::Color textColor =  options->textColor();
-
-    const String& text = button.text();
-    const Gfx::SizeF& size = button.size();
-
-    Painter painter(surface);
-    painter.setClip(rect);
-    painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
 
     //
     // draw the button text
@@ -241,16 +227,9 @@ PlatinumCheckBoxRenderer::~PlatinumCheckBoxRenderer()
 }
 
 
-void PlatinumCheckBoxRenderer::onRenderBackground(const CheckBox& cb, 
-                                                  PaintSurface& surface, 
-                                                  const Gfx::RectF& rect) const
-{
-}
-
-
-void PlatinumCheckBoxRenderer::onRenderContent(const CheckBox& cb, 
-                                               PaintSurface& surface, 
-                                               const Gfx::RectF& rect) const
+void PlatinumCheckBoxRenderer::onRender(const CheckBox& cb, 
+                                        PaintSurface& surface, 
+                                        const Gfx::RectF& rect) const
 {
     const StyleOptions* options = cb.getFacet<StyleOptions>();
 
@@ -349,16 +328,9 @@ PlatinumFrameRenderer::~PlatinumFrameRenderer()
 }
 
 
-void PlatinumFrameRenderer::onRenderBackground(const Frame& f, 
-                                               PaintSurface& surface, 
-                                               const Gfx::RectF& rect) const
-{
-}
-
-
-void PlatinumFrameRenderer::onRenderContent(const Frame& f, 
-                                            PaintSurface& surface, 
-                                            const Gfx::RectF& rect) const
+void PlatinumFrameRenderer::onRender(const Frame& f, 
+                                     PaintSurface& surface, 
+                                     const Gfx::RectF& rect) const
 {
 
     const StyleOptions* options = f.getFacet<StyleOptions>();
@@ -393,16 +365,9 @@ PlatinumPanelRenderer::~PlatinumPanelRenderer()
 }
 
 
-void PlatinumPanelRenderer::onRenderBackground(const Panel& p, 
-                                               PaintSurface& surface, 
-                                               const Gfx::RectF& rect) const
-{
-}
-
-
-void PlatinumPanelRenderer::onRenderContent(const Panel& p, 
-                                            PaintSurface& surface, 
-                                            const Gfx::RectF& rect) const
+void PlatinumPanelRenderer::onRender(const Panel& p, 
+                                     PaintSurface& surface, 
+                                     const Gfx::RectF& rect) const
 {
     const StyleOptions* options = p.getFacet<StyleOptions>();
     if( ! options )
@@ -476,16 +441,11 @@ PlatinumLabelRenderer::~PlatinumLabelRenderer()
 }
 
 
-void PlatinumLabelRenderer::onRenderBackground(const Label& l, 
-                                               PaintSurface& surface, 
-                                               const Gfx::RectF& updateRect) const
-{
-}
 
 
-void PlatinumLabelRenderer::onRenderContent(const Label& l, 
-                                            PaintSurface& surface, 
-                                            const Gfx::RectF& updateRect) const
+void PlatinumLabelRenderer::onRender(const Label& l, 
+                                     PaintSurface& surface, 
+                                     const Gfx::RectF& updateRect) const
 {
     const StyleOptions* options = l.getFacet<StyleOptions>();
     if( ! options )

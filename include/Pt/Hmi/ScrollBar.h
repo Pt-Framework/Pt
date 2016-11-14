@@ -72,10 +72,7 @@ class PT_HMI_API ScrollBar : public Control
         { return _changed; }
 
     protected:
-        virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& rect);
-
-        virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& rect);
-
+        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& rect);
 
     protected:
         virtual void onMouseEvent(const MouseEvent& ev);

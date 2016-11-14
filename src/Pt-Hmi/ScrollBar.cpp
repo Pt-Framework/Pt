@@ -206,26 +206,7 @@ void ScrollBar::onResizeEvent(const ResizeEvent& ev)
 }
 
 
-void ScrollBar::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
-{
-
-    const StyleOptions* options = getFacet<StyleOptions>();
-
-    if( options == 0)
-      return;
-
-    Painter painter(surface);
-    painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
-
-  
-    painter.setBrush(options->background());
-
-    //painter.setClip(updateRect);
-    painter.fillRect(updateRect);
-}
-
-
-void ScrollBar::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
+void ScrollBar::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
     const StyleOptions* options = getFacet<StyleOptions>();
 
@@ -234,8 +215,12 @@ void ScrollBar::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRe
 
     Painter painter(surface);
     painter.setClip(updateRect);
+    painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
 
-    Gfx::Brush handleBrush( options->foreground());
+    painter.setBrush( options->background() );
+    painter.fillRect(updateRect);
+
+    Gfx::Brush handleBrush( options->foreground() );
     painter.setBrush(handleBrush);
     painter.fillRect(_handleRect);
 }

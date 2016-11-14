@@ -84,21 +84,12 @@ void CheckBox::onReleased()
 }
 
 
-void CheckBox::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
-{    
-    const CheckBoxRenderer* renderer = getFacet<CheckBoxRenderer>();
-
-    if(renderer)
-        renderer->renderBackground(*this, surface, updateRect);
-}
-
-
-void CheckBox::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
+void CheckBox::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
     const CheckBoxRenderer* renderer = getFacet<CheckBoxRenderer>();
 
     if(renderer)
-        renderer->renderContent(*this, surface, updateRect);
+        renderer->render(*this, surface, updateRect);
 }
 
 } // namespace

@@ -54,25 +54,22 @@ class PT_HMI_API Control : public Widget
         {
           if( _style != 0)
           {
-            const T* facet = _style->get<T>();
-            if( facet != 0)
-              return facet;
+              const T* facet = _style->get<T>();
+              if( facet != 0)
+                  return facet;
           }
 
            return Application::instance().style().get<T>();
         }
 
+    protected:
+        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect) = 0;
 
     protected:
         virtual void onPaintEvent(const PaintEvent& ev);
 	    
-    protected:
-        virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect) = 0;
-
-        virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect) = 0;
-
     private:
-        Style*        _style;
+        Style* _style;
 }; 
 
 } // namespace

@@ -62,19 +62,11 @@ void Frame::setBorderColor(const Gfx::Color& color)
 }
 
 
-void Frame::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
-{    
-    const FrameRenderer* renderer = getFacet<FrameRenderer>();
-    if(renderer)
-        renderer->renderBackground(*this, surface, updateRect);
-}
-
-
-void Frame::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
+void Frame::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
     const FrameRenderer* renderer = getFacet<FrameRenderer>();
     if(renderer)
-        renderer->renderContent(*this, surface, updateRect);
+        renderer->render(*this, surface, updateRect);
 }
 
 } // namespace

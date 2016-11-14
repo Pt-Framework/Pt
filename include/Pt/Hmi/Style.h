@@ -118,18 +118,14 @@ class PT_HMI_API ButtonRenderer : public Style::Facet
 
         virtual ~ButtonRenderer();
 
-        void renderBackground(const Button& button, PaintSurface& surface, const Gfx::RectF& rect) const;
-
-        void renderContent(const Button& button, PaintSurface& surface, const Gfx::RectF& rect) const;
+        void render(const Button& button, 
+                    PaintSurface& surface, 
+                    const Gfx::RectF& rect) const;
 
     protected:
-        virtual void onRenderBackground(const Button& button, 
-                                        PaintSurface& surface, 
-                                        const Gfx::RectF& rect) const = 0;
-
-        virtual void onRenderContent(const Button& button, 
-                                     PaintSurface& surface, 
-                                     const Gfx::RectF& rect) const = 0;
+        virtual void onRender(const Button& button, 
+                              PaintSurface& surface, 
+                              const Gfx::RectF& rect) const = 0;
 };
 
 
@@ -140,20 +136,14 @@ class PT_HMI_API CheckBoxRenderer : public Style::Facet
 
         virtual ~CheckBoxRenderer();
 
-        void renderBackground(const CheckBox& cb,
-                              PaintSurface& surface, const Gfx::RectF& rect) const;
-
-        void renderContent(const CheckBox& cb, 
-                           PaintSurface& surface, const Gfx::RectF& rect) const;
+        void render(const CheckBox& cb, 
+                    PaintSurface& surface, 
+                    const Gfx::RectF& rect) const;
 
     protected:
-        virtual void onRenderBackground(const CheckBox& cb, 
-                                        PaintSurface& surface, 
-                                        const Gfx::RectF& rect) const = 0;
-
-        virtual void onRenderContent(const CheckBox& cb, 
-                                     PaintSurface& surface, 
-                                     const Gfx::RectF& rect) const = 0;
+        virtual void onRender(const CheckBox& cb, 
+                              PaintSurface& surface, 
+                              const Gfx::RectF& rect) const = 0;
 };
 
 
@@ -164,20 +154,14 @@ class PT_HMI_API FrameRenderer : public Style::Facet
 
         virtual ~FrameRenderer();
 
-        void renderBackground(const Frame& f,
-                              PaintSurface& surface, const Gfx::RectF& rect) const;
-
-        void renderContent(const Frame& f,
-                           PaintSurface& surface, const Gfx::RectF& rect) const;
+        void render(const Frame& f,
+                    PaintSurface& surface, 
+                    const Gfx::RectF& rect) const;
 
     protected:
-        virtual void onRenderBackground(const Frame& f, 
-                                        PaintSurface& surface, 
-                                        const Gfx::RectF& rect) const = 0;
-
-        virtual void onRenderContent(const Frame& f, 
-                                     PaintSurface& surface, 
-                                     const Gfx::RectF& rect) const = 0;
+        virtual void onRender(const Frame& f, 
+                              PaintSurface& surface, 
+                              const Gfx::RectF& rect) const = 0;
 };
 
 class PT_HMI_API PanelRenderer : public Style::Facet
@@ -187,20 +171,14 @@ class PT_HMI_API PanelRenderer : public Style::Facet
 
         virtual ~PanelRenderer();
 
-        void renderBackground(const Panel& p,
-                              PaintSurface& surface, const Gfx::RectF& rect) const;
-
-        void renderContent(const Panel& p,
-                           PaintSurface& surface, const Gfx::RectF& rect) const;
+        void render(const Panel& p,
+                    PaintSurface& surface, 
+                    const Gfx::RectF& rect) const;
 
     protected:
-        virtual void onRenderBackground(const Panel& p, 
-                                        PaintSurface& surface, 
-                                        const Gfx::RectF& rect) const = 0;
-
-        virtual void onRenderContent(const Panel& p, 
-                                     PaintSurface& surface, 
-                                     const Gfx::RectF& rect) const = 0;
+        virtual void onRender(const Panel& p, 
+                              PaintSurface& surface, 
+                              const Gfx::RectF& rect) const = 0;
 };
 
 class PT_HMI_API LabelRenderer : public Style::Facet
@@ -210,20 +188,14 @@ class PT_HMI_API LabelRenderer : public Style::Facet
 
         virtual ~LabelRenderer();
 
-        void renderBackground(const Label& l,
-                              PaintSurface& surface, const Gfx::RectF& rect) const;
-
-        void renderContent(const Label& l,
-                           PaintSurface& surface, const Gfx::RectF& rect) const;
+        void render(const Label& l,
+                    PaintSurface& surface,
+                    const Gfx::RectF& rect) const;
 
     protected:
-        virtual void onRenderBackground(const Label& l, 
-                                        PaintSurface& surface, 
-                                        const Gfx::RectF& rect) const = 0;
-
-        virtual void onRenderContent(const Label& l, 
-                                     PaintSurface& surface, 
-                                     const Gfx::RectF& rect) const = 0;
+        virtual void onRender(const Label& l, 
+                              PaintSurface& surface, 
+                              const Gfx::RectF& rect) const = 0;
 };
 
 } // namespace

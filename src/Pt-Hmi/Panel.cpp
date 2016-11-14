@@ -119,22 +119,12 @@ void Panel::onResizeEvent(const ResizeEvent& ev)
 }
 
 
-void Panel::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
-{
-    Frame::onPaintBackground(surface, updateRect);
-
-    const PanelRenderer* renderer = getFacet<PanelRenderer>();
-    if(renderer)
-        renderer->renderBackground(*this, surface, updateRect);
-}
-
-
-void Panel::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
+void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
     const PanelRenderer* renderer = getFacet<PanelRenderer>();
 
     if(renderer)
-        renderer->renderContent(*this, surface, updateRect);
+        renderer->render(*this, surface, updateRect);
 
     if( ! _picture.empty() )
     {
@@ -169,7 +159,7 @@ void Panel::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
         }
     }  
 
-    Frame::onPaintContent(surface, updateRect);
+    Frame::onPaint(surface, updateRect);
 }
 
 } // namespace

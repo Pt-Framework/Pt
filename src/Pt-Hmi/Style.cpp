@@ -127,18 +127,11 @@ ButtonRenderer::~ButtonRenderer()
 }
 
 
-void ButtonRenderer::renderBackground(const Button& button,  PaintSurface& surface, 
-                                      const Gfx::RectF& rect) const
+void ButtonRenderer::render(const Button& button, 
+                            PaintSurface& surface, 
+                            const Gfx::RectF& rect) const
 { 
-    onRenderBackground(button, surface, rect); 
-}    
-
-
-void ButtonRenderer::renderContent(const Button& button, 
-                                   PaintSurface& surface, 
-                                   const Gfx::RectF& rect) const
-{ 
-    onRenderContent(button, surface, rect); 
+    onRender(button, surface, rect); 
 }  
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -156,19 +149,11 @@ CheckBoxRenderer::~CheckBoxRenderer()
 }
 
 
-void CheckBoxRenderer::renderBackground(const CheckBox& cb, 
-                                      PaintSurface& surface, 
-                                      const Gfx::RectF& rect) const
+void CheckBoxRenderer::render(const CheckBox& cb, 
+                              PaintSurface& surface, 
+                              const Gfx::RectF& rect) const
 { 
-    onRenderBackground(cb, surface, rect); 
-}    
-
-
-void CheckBoxRenderer::renderContent(const CheckBox& cb, 
-                                   PaintSurface& surface, 
-                                   const Gfx::RectF& rect) const
-{ 
-    onRenderContent(cb, surface, rect); 
+    onRender(cb, surface, rect); 
 }  
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -186,19 +171,11 @@ FrameRenderer::~FrameRenderer()
 }
 
 
-void FrameRenderer::renderBackground(const Frame& f, 
-                                      PaintSurface& surface, 
-                                      const Gfx::RectF& rect) const
+void FrameRenderer::render(const Frame& f, 
+                           PaintSurface& surface, 
+                           const Gfx::RectF& rect) const
 { 
-    onRenderBackground(f, surface, rect); 
-}    
-
-
-void FrameRenderer::renderContent(const Frame& f, 
-                                   PaintSurface& surface, 
-                                   const Gfx::RectF& rect) const
-{ 
-    onRenderContent(f,  surface, rect); 
+    onRender(f, surface, rect); 
 }  
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -216,19 +193,11 @@ PanelRenderer::~PanelRenderer()
 }
 
 
-void PanelRenderer::renderBackground(const Panel& p, 
-                                     PaintSurface& surface, 
-                                     const Gfx::RectF& rect) const
+void PanelRenderer::render(const Panel& p, 
+                           PaintSurface& surface, 
+                           const Gfx::RectF& rect) const
 { 
-    onRenderBackground(p, surface, rect); 
-}    
-
-
-void PanelRenderer::renderContent(const Panel& p, 
-                                  PaintSurface& surface, 
-                                  const Gfx::RectF& rect) const
-{ 
-    onRenderContent(p,  surface, rect); 
+    onRender(p,  surface, rect); 
 }  
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -246,19 +215,11 @@ LabelRenderer::~LabelRenderer()
 }
 
 
-void LabelRenderer::renderBackground(const Label& l, 
-                                     PaintSurface& surface, 
-                                     const Gfx::RectF& rect) const
+void LabelRenderer::render(const Label& l, 
+                           PaintSurface& surface, 
+                           const Gfx::RectF& rect) const
 { 
-    onRenderBackground(l, surface, rect); 
-}    
-
-
-void LabelRenderer::renderContent(const Label& l, 
-                                  PaintSurface& surface, 
-                                  const Gfx::RectF& rect) const
-{ 
-    onRenderContent(l,  surface, rect); 
+    onRender(l,  surface, rect); 
 }
 
 } // namespace

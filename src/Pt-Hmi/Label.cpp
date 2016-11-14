@@ -112,23 +112,13 @@ Gfx::SizeF Label::onAutoSize() const
 }
 
 
-void Label::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
+void Label::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
-    Panel::onPaintBackground(surface, updateRect);
+    Panel::onPaint(surface, updateRect);
 
     const LabelRenderer* renderer = getFacet<LabelRenderer>();
     if(renderer)
-        renderer->renderBackground(*this, surface, updateRect);
-}
-
-
-void Label::onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect)
-{
-    Panel::onPaintContent(surface, updateRect);
-
-    const LabelRenderer* renderer = getFacet<LabelRenderer>();
-    if(renderer)
-        renderer->renderContent(*this, surface, updateRect);
+        renderer->render(*this, surface, updateRect);
 }
 
 } // namespace

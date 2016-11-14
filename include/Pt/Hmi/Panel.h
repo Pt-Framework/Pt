@@ -113,9 +113,7 @@ class PT_HMI_API Panel : public Frame
     protected:
         virtual void onResizeEvent(const ResizeEvent& ev);
 	
-        virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect);
-
-        virtual void onPaintContent(PaintSurface& surface, const Gfx::RectF& updateRect);
+        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
     private: 
         Gfx::Image  _image;

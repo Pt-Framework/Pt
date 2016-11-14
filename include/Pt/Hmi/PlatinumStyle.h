@@ -51,13 +51,9 @@ class PT_HMI_API PlatinumButtonRenderer : public ButtonRenderer
                                      const String& text, const Char* mnemonic);
 
     protected:
-        virtual void onRenderBackground(const Button& button, 
-                                        PaintSurface& surface, 
-                                        const Gfx::RectF& rect) const;
-
-        virtual void onRenderContent(const Button& button, 
-                                     PaintSurface& surface, 
-                                     const Gfx::RectF& rect) const;
+        virtual void onRender(const Button& button, 
+                              PaintSurface& surface, 
+                              const Gfx::RectF& rect) const;
 };
 
 
@@ -69,13 +65,9 @@ class PT_HMI_API PlatinumCheckBoxRenderer : public CheckBoxRenderer
         virtual ~PlatinumCheckBoxRenderer();
 
     protected:
-        virtual void onRenderBackground(const CheckBox& cb, 
-                                        PaintSurface& surface, 
-                                        const Gfx::RectF& rect) const;
-
-        virtual void onRenderContent(const CheckBox& cb, 
-                                     PaintSurface& surface, 
-                                     const Gfx::RectF& rect) const;
+        virtual void onRender(const CheckBox& cb, 
+                              PaintSurface& surface, 
+                              const Gfx::RectF& rect) const;
 };
 
 
@@ -87,13 +79,9 @@ class PT_HMI_API PlatinumFrameRenderer : public FrameRenderer
         virtual ~PlatinumFrameRenderer();
 
     protected:
-        virtual void onRenderBackground(const Frame& f, 
-                                        PaintSurface& surface, 
-                                        const Gfx::RectF& rect) const;
-
-        virtual void onRenderContent(const Frame& f, 
-                                     PaintSurface& surface, 
-                                     const Gfx::RectF& rect) const;
+        virtual void onRender(const Frame& f, 
+                              PaintSurface& surface, 
+                              const Gfx::RectF& rect) const;
 };
 
 
@@ -105,13 +93,9 @@ class PT_HMI_API PlatinumPanelRenderer : public PanelRenderer
         virtual ~PlatinumPanelRenderer();
 
     protected:
-        virtual void onRenderBackground(const Panel& p, 
-                                        PaintSurface& surface, 
-                                        const Gfx::RectF& rect) const;
-
-        virtual void onRenderContent(const Panel& p, 
-                                     PaintSurface& surface, 
-                                     const Gfx::RectF& rect) const;
+        virtual void onRender(const Panel& p, 
+                              PaintSurface& surface, 
+                              const Gfx::RectF& rect) const;
 };
 
 
@@ -123,13 +107,9 @@ class PT_HMI_API PlatinumLabelRenderer : public LabelRenderer
         virtual ~PlatinumLabelRenderer();
 
     protected:
-        virtual void onRenderBackground(const Label& l, 
-                                        PaintSurface& surface, 
-                                        const Gfx::RectF& rect) const;
-
-        virtual void onRenderContent(const Label& l, 
-                                     PaintSurface& surface, 
-                                     const Gfx::RectF& rect) const;
+        virtual void onRender(const Label& l, 
+                              PaintSurface& surface, 
+                              const Gfx::RectF& rect) const;
 };
 
 
