@@ -37,7 +37,7 @@ StyleOptions::StyleOptions(std::size_t refs)
 : Style::Facet(typeid(StyleOptions), refs)
 , _background(Pt::Gfx::Color::fromRgb8(229, 229, 229) )
 , _foreground(Gfx::Color::fromRgb8(210, 210, 210))
-, _highlight(Gfx::Color::fromRgb8(210, 210, 210))
+, _highlightColor(Gfx::Color::fromRgb8(210, 210, 210))
 , _textColor(Gfx::Color::fromRgb8(0, 0, 0))
 , _font(Gfx::Font("", 12))
 {
@@ -47,7 +47,6 @@ StyleOptions::StyleOptions(std::size_t refs)
 StyleOptions::~StyleOptions()
 {
 }
-
 
 } // namespace
 

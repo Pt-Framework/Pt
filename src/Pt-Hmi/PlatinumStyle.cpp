@@ -434,12 +434,10 @@ PlatinumLabelRenderer::PlatinumLabelRenderer(std::size_t refs)
 {
 }
 
-    
+
 PlatinumLabelRenderer::~PlatinumLabelRenderer()
 {
 }
-
-
 
 
 void PlatinumLabelRenderer::onRender(const Label& l, 

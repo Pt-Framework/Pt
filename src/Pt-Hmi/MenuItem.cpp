@@ -230,11 +230,10 @@ void MenuItem::onPaintBackground(PaintSurface& surface, const Gfx::RectF& update
     if(mouseOver)
     {
         const StyleOptions* options = getFacet<StyleOptions>();
-
-        if(!options)
+        if( ! options)
           return;
 
-        Gfx::Color bgColor = options->highlight();
+        Gfx::Color bgColor = options->highlightColor();
         Gfx::Brush brush = brighten(bgColor, 0.85f);
 
         Painter painter(surface);

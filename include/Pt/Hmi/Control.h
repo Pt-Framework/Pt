@@ -62,14 +62,24 @@ class PT_HMI_API Control : public Widget
            return Application::instance().style().get<T>();
         }
 
+        // TODO: find better name
+        bool isHighlighted() const;
+
     protected:
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect) = 0;
         virtual void onInvalidate();
+
+        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect) = 0;
+
     protected:
         virtual void onPaintEvent(const PaintEvent& ev);
-	    
+
+        virtual void onEnterEvent( const EnterEvent& ev );
+
+        virtual void onLeaveEvent(const LeaveEvent& ev );
+
     private:
         Style* _style;
+        bool   _isHighlighted;
 }; 
 
 } // namespace

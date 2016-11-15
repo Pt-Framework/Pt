@@ -207,7 +207,7 @@ void MenuBarItem::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 
     if(_highlighted)
     {
-      Gfx::Color bgColor = options->highlight();
+      Gfx::Color bgColor = options->highlightColor();
       Gfx::Brush brush = brighten(bgColor, 0.85f);
 
       painter.setBrush(brush);

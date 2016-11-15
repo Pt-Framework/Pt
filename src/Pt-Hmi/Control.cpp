@@ -41,6 +41,7 @@ namespace Hmi {
 
 Control::Control()
 : _style(0)
+, _isHighlighted(false)
 {    
 }
 
@@ -65,6 +66,12 @@ const Style& Control::style() const
 }
 
 
+bool Control::isHighlighted() const
+{
+  return _isHighlighted;
+}
+
+
 void Control::onInvalidate()
 {
   Widget::onInvalidate();
@@ -83,6 +90,22 @@ void Control::onPaintEvent(const PaintEvent& ev)
     PaintRegion region(windowSurface, paintRect);
     
     onPaint(region, ev.rect());
+}
+
+
+void Control::onEnterEvent( const EnterEvent& ev)
+{
+    Widget::onEnterEvent(ev);
+
+    _isHighlighted = true;
+}
+
+
+void Control::onLeaveEvent(const LeaveEvent& ev)
+{
+    Widget::onLeaveEvent(ev);
+
+    _isHighlighted = false;
 }
 
 } // namespace

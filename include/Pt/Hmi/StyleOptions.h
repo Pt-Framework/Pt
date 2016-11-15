@@ -36,9 +36,6 @@
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Color.h>
-#include <Pt/Any.h>
-#include <map>
-
 
 namespace Pt {
 
@@ -90,14 +87,14 @@ class PT_HMI_API StyleOptions : public Style::Facet
           _foreground = c;
         }
 
-        const Gfx::Color& highlight() const
+        const Gfx::Color& highlightColor() const
         {
-          return _highlight;
+          return _highlightColor;
         }
 
-        void setHighlight(const Gfx::Color& c)
+        void setHighlightColor(const Gfx::Color& c)
         {
-          _highlight = c;
+          _highlightColor = c;
         }
 
         const Gfx::Color& textColor() const
@@ -123,7 +120,7 @@ class PT_HMI_API StyleOptions : public Style::Facet
     private:
       Gfx::Brush _background;
       Gfx::Color _foreground;
-      Gfx::Color _highlight;
+      Gfx::Color _highlightColor;
       Gfx::Color _textColor;
       Gfx::Font  _font;    
 };

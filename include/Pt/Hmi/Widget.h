@@ -111,8 +111,6 @@ class PT_HMI_API Widget : public Visual
         // focus handling
         // 
 
-        bool isHighlighted() const;
-
         bool acceptsFocus() const;
 
         // TODO: focus policy:
@@ -307,7 +305,6 @@ class PT_HMI_API Widget : public Visual
         bool                         _acceptsFocus;
         size_t                       _focusIndex;
         bool                         _acceptsInput;
-        bool                         _isHighlighted;
 
         Hmi::Cursor                  _cursor;
         Key                          _actionKey;
