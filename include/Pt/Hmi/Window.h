@@ -47,6 +47,7 @@
 #include <Pt/Hmi/EnableEvent.h>
 #include <Pt/Hmi/InvalidateEvent.h>
 #include <Pt/Hmi/PixmapSurface.h>
+#include <Pt/Hmi/Style.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Signal.h>
 #include <map>
@@ -173,6 +174,23 @@ class PT_HMI_API Window : public WindowBase
     State state() const;
 
     void setState(State s);
+
+    void setStyle(const Style& style);
+
+    const Style& style() const;
+
+    template<typename T> 
+    const T* getFacet() const
+    {
+      if( _style != 0)
+      {
+          const T* facet = _style->get<T>();
+          if( facet != 0)
+              return facet;
+      }
+
+        return Application::instance().style().get<T>();
+    }
 
     MainWindowImpl* impl();
 
@@ -307,6 +325,7 @@ class PT_HMI_API Window : public WindowBase
     std::map<Key, Widget*>         _shortcuts; 
     std::map<Pt::Char, Widget*>    _mnemonics; 
 
+    Style*                         _style;
     bool                           _init;
     bool                           _visible; 
     bool                           _isActive;

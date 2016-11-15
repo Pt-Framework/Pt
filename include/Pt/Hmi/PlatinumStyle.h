@@ -113,6 +113,20 @@ class PT_HMI_API PlatinumLabelRenderer : public LabelRenderer
 };
 
 
+class PT_HMI_API PlatinumMenuRenderer : public MenuRenderer
+{
+    public:
+        PlatinumMenuRenderer(std::size_t refs = 0);
+
+        virtual ~PlatinumMenuRenderer();
+
+    protected:
+        virtual void onRender(const Menu& m, 
+                              PaintSurface& surface, 
+                              const Gfx::RectF& rect) const;
+};
+
+
 class PT_HMI_API PlatinumStyle : public Style
 {
     public:

@@ -53,6 +53,7 @@ Window::Window(Window* parent, Window::Type type)
 , _parentWindow(0)
 , _mainWidget(0)
 , _focusWidget(0)
+, _style(0)
 , _init(false)
 , _visible(false)
 , _isActive(false)
@@ -97,6 +98,8 @@ Window::~Window()
        remove( *_windows.back() );
 
     deinit();
+
+    delete _style;
 }
 
 
@@ -1029,6 +1032,20 @@ void Window::onStateChanged(Window& w)
 void Window::onWindowStateEvent(const WindowStateEvent& ev)
 {
     _state = ev.state();
+}
+
+
+void Window::setStyle(const Style& style)
+{
+    delete _style;
+    _style = 0;
+    _style = new Style(style);
+}    
+
+
+const Style& Window::style() const
+{
+    return _style ? *_style : Application::instance().style();
 }
 
 

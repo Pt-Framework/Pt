@@ -208,11 +208,6 @@ void Menu::onAddMenu(Menu& menu, const Pt::String& text)
 }
 
 
-void Menu::onInvalidate()
-{
-      onContentChanged();
-}
-
 void Menu::onRemoveMenu(Menu& menu)
 {
     std::vector<SubMenuItem*>::iterator it;
@@ -298,8 +293,15 @@ void Menu::onEnter()
     grabPointer();
 }
 
+
+Pt::ssize_t Menu::iconWidth() const
+{
+    return _iconWidth > 0 ? _iconWidth + _layout.padding().left()
+                          : 0;
+}
+
 /* TODO: 
-this happens when item->resize() is called in onContentChanged
+this happens when item->resize() is called in onInvalidate
 One soluton is to assign the _size member in Window::resize immediately
 and not only when the ResizeEvent is received
 
@@ -313,7 +315,7 @@ and not only when the ResizeEvent is received
 
 7 Item ResizeEvent 10x0    (von 4) !!!!
 */
-void Menu::onContentChanged()
+void Menu::onInvalidate()
 {
     _iconWidth = 0;
 
@@ -368,40 +370,9 @@ void Menu::onPaintBackground(const Gfx::RectF& rect)
 {
     WindowBaseType::onPaintBackground(rect);
 
-    Painter painter( surface() );
-    painter.setClip(rect);
-
-    //
-    // icon strip on the left side
-    //
-    if(_iconWidth > 0)
-    {
-        Gfx::RectF iconStrip( Gfx::PointF(0, 0),
-                              Gfx::SizeF(_layout.padding().left() + _iconWidth,
-                                          size().height()) );
-        
-        // only the damaged region
-        //iconStrip = iconStrip.intersect(rect);
-        //Gfx::Brush brush = Pt::Gfx::Color(0.95f, 0.95f, 0.95f);
-
-        // TODO: need painter clipping for gradient
-        
-         Gfx::Brush brush(Gfx::Color(65535* 0.90f, 65535*0.90f, 65535*0.91f),
-                          Gfx::Color(65535*0.99f, 65535*0.99f, 65535*0.99f), 
-                          Gfx::Brush::Vertical);
-
-        painter.setBrush(brush);
-        painter.fillRect(iconStrip);
-    }
-
-    //
-    // menu border
-    //
-    Gfx::RectF borderRect(Gfx::PointF(0, 0), size());
-
-    Gfx::Pen pen(Gfx::Color(65535*0.5f, 65535*0.5f, 65535*0.51f), 1 );
-    painter.setPen(pen);
-    painter.drawRect(borderRect);
+    const MenuRenderer* renderer = getFacet<MenuRenderer>();
+    if(renderer)
+        renderer->render(*this, surface(), rect);
 }
 
 
@@ -458,7 +429,7 @@ void Menu::onResizeEvent(const ResizeEvent& ev)
         item->resize(itemSize);
     }
 
-    // _layout positions the items now in OnResizeEvent
+    // _layout positions the items now in onResizeEvent
     // TODO: our overall design should make this clearer
     WindowBaseType::onResizeEvent(ev);
 }

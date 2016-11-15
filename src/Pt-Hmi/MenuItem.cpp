@@ -190,10 +190,8 @@ void MenuItem::onShortcut(const KeyEvent& kev)
 
 Gfx::SizeF MenuItem::onAutoSize() const
 {
-
     const StyleOptions* options = getFacet<StyleOptions>();
-
-    if(!options)
+    if( ! options)
         return Gfx::SizeF();
 
     const Gfx::Font& font = options->font();
@@ -223,6 +221,7 @@ void MenuItem::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
     onPaintItem(surface, updateRect);
     onPaintShortcut(surface, updateRect);
 }
+
 
 void MenuItem::onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
@@ -260,8 +259,7 @@ void MenuItem::onPaintIcon(PaintSurface& surface, const Gfx::RectF& updateRect)
 void MenuItem::onPaintItem(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
     const StyleOptions* options = getFacet<StyleOptions>();
-
-    if(!options)
+    if( ! options)
       return;
 
     Painter painter(surface);
@@ -286,11 +284,8 @@ void MenuItem::onPaintItem(PaintSurface& surface, const Gfx::RectF& updateRect)
 
 void MenuItem::onPaintShortcut(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
-    
-
     const StyleOptions* options = getFacet<StyleOptions>();
-
-    if(!options)
+    if( ! options)
       return;
 
 

@@ -83,7 +83,6 @@ void PushButton::onReleased()
 void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
     const ButtonRenderer* renderer = getFacet<ButtonRenderer>();
-
     if(renderer)
         renderer->render(*this, surface, updateRect);
 }

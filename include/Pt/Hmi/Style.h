@@ -40,13 +40,14 @@ namespace Pt {
 
 namespace Hmi {
 
+class PaintSurface;
+class StyleOptions;
 class Frame;
 class Panel;
 class Label;
 class Button;
 class CheckBox;
-class PaintSurface;
-class StyleOptions;
+class Menu;
 
 class PT_HMI_API Style
 {
@@ -194,6 +195,23 @@ class PT_HMI_API LabelRenderer : public Style::Facet
 
     protected:
         virtual void onRender(const Label& l, 
+                              PaintSurface& surface, 
+                              const Gfx::RectF& rect) const = 0;
+};
+
+class PT_HMI_API MenuRenderer : public Style::Facet
+{
+    public:
+        MenuRenderer(std::size_t refs = 0);
+
+        virtual ~MenuRenderer();
+
+        void render(const Menu& m,
+                    PaintSurface& surface,
+                    const Gfx::RectF& rect) const;
+
+    protected:
+        virtual void onRender(const Menu& m, 
                               PaintSurface& surface, 
                               const Gfx::RectF& rect) const = 0;
 };

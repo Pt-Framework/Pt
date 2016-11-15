@@ -29,13 +29,14 @@
 
 #include <Pt/Hmi/PlatinumStyle.h>
 #include <Pt/Hmi/StyleOptions.h>
+#include <Pt/Hmi/PaintSurface.h>
+#include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/Frame.h>
 #include <Pt/Hmi/Panel.h>
 #include <Pt/Hmi/Label.h>
 #include <Pt/Hmi/PushButton.h>
 #include <Pt/Hmi/CheckBox.h>
-#include <Pt/Hmi/Painter.h>
-#include <Pt/Hmi/PaintSurface.h>
+#include <Pt/Hmi/Menu.h>
 
 namespace Pt {
 
@@ -565,6 +566,71 @@ void PlatinumLabelRenderer::onRender(const Label& l,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// PlatinumMenuRenderer
+///////////////////////////////////////////////////////////////////////////////
+
+PlatinumMenuRenderer::PlatinumMenuRenderer(std::size_t refs)
+: MenuRenderer(refs)
+{
+}
+
+    
+PlatinumMenuRenderer::~PlatinumMenuRenderer()
+{
+}
+
+
+void PlatinumMenuRenderer::onRender(const Menu& m, 
+                                    PaintSurface& surface, 
+                                    const Gfx::RectF& rect) const
+{
+    const StyleOptions* options = m.getFacet<StyleOptions>();
+    if( ! options)
+      return;
+
+    const Gfx::SizeF& size = m.size();
+
+    Painter painter( surface );
+    painter.setClip(rect);
+
+    //
+    // icon strip on the left side
+    //
+    
+    // TODO: use separate render funtion for iconstrip
+
+    Pt::ssize_t iconWidth = m.iconWidth();
+
+    if(iconWidth > 0)
+    {
+        Gfx::RectF iconStrip( Gfx::PointF(0, 0),
+                              Gfx::SizeF(iconWidth, size.height()) );
+        
+        // only the damaged region
+        //iconStrip = iconStrip.intersect(rect);
+        //Gfx::Brush brush = Pt::Gfx::Color(0.95f, 0.95f, 0.95f);
+
+        // TODO: need painter clipping for gradient
+        
+         Gfx::Brush brush(Gfx::Color(65535* 0.90f, 65535*0.90f, 65535*0.91f),
+                          Gfx::Color(65535*0.99f, 65535*0.99f, 65535*0.99f), 
+                          Gfx::Brush::Vertical);
+
+        painter.setBrush(brush);
+        painter.fillRect(iconStrip);
+    }
+
+    //
+    // menu border
+    //
+    Gfx::RectF borderRect(size);
+
+    Gfx::Pen pen(Gfx::Color(65535*0.5f, 65535*0.5f, 65535*0.51f), 1 );
+    painter.setPen(pen);
+    painter.drawRect(borderRect);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // PlatinumStyle
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -575,6 +641,7 @@ PlatinumStyle::PlatinumStyle()
     set(new PlatinumFrameRenderer);
     set(new PlatinumPanelRenderer);
     set(new PlatinumLabelRenderer);
+    set(new PlatinumMenuRenderer);
 }
 
 

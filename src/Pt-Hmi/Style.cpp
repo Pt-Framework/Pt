@@ -197,7 +197,7 @@ void PanelRenderer::render(const Panel& p,
                            PaintSurface& surface, 
                            const Gfx::RectF& rect) const
 { 
-    onRender(p,  surface, rect); 
+    onRender(p, surface, rect); 
 }  
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -219,7 +219,29 @@ void LabelRenderer::render(const Label& l,
                            PaintSurface& surface, 
                            const Gfx::RectF& rect) const
 { 
-    onRender(l,  surface, rect); 
+    onRender(l, surface, rect); 
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// MenuRenderer
+///////////////////////////////////////////////////////////////////////////////
+
+MenuRenderer::MenuRenderer(std::size_t refs)
+: Style::Facet( typeid(MenuRenderer), refs )
+{
+}
+
+    
+MenuRenderer::~MenuRenderer()
+{
+}
+
+
+void MenuRenderer::render(const Menu& m, 
+                           PaintSurface& surface, 
+                           const Gfx::RectF& rect) const
+{ 
+    onRender(m, surface, rect); 
 }
 
 } // namespace
