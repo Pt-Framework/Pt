@@ -56,6 +56,9 @@ void DockingLayout::onLayout()
 
     for( ; it != end; ++it)
     {
+       if(!(*it)->isVisible() )
+        continue;
+
         switch( (*it)->docking().type() )
         {
             default:
@@ -141,6 +144,9 @@ void DockingLayout::onLayout()
     {
         if( (*it)->docking().type() == Docking::Fill)
         {
+          if( !(*it)->isVisible() )
+            continue;
+              
             (*it)->setGeometry(fillPos, fillSize);            
         }
     }
