@@ -89,12 +89,14 @@ void Connection::verifyPeerName()
     if( ! _ssl )
         throw HandshakeFailed("SSL handshake failed");
 
-    X509* peer = SSL_get_peer_certificate(_ssl);
+    X509AutoPtr peer( SSL_get_peer_certificate(_ssl) );
     if( ! peer) 
         throw HandshakeFailed("Invalid peer name");
 
     char peerCN[256];
-    int ret = X509_NAME_get_text_by_NID(X509_get_subject_name(peer), NID_commonName, peerCN, sizeof(peerCN));
+    int ret = X509_NAME_get_text_by_NID(X509_get_subject_name( peer.get() ), 
+                                        NID_commonName, 
+                                        peerCN, sizeof(peerCN));
     if(ret <= 0) 
         throw HandshakeFailed("Invalid peer name");
 
