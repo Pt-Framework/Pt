@@ -244,6 +244,52 @@ void MenuRenderer::render(const Menu& m,
     onRender(m, surface, rect); 
 }
 
+
+void MenuRenderer::renderItem(const MenuItem& m, 
+                              PaintSurface& surface, 
+                              const Gfx::RectF& rect) const
+{ 
+    onRenderItem(m, surface, rect); 
+}
+
+
+void MenuRenderer::renderIndicator(const MenuItem& m, 
+                                   PaintSurface& surface, 
+                                   const Gfx::RectF& rect) const
+{ 
+    onRenderIndicator(m, surface, rect); 
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// MenuBarRenderer
+///////////////////////////////////////////////////////////////////////////////
+
+MenuBarRenderer::MenuBarRenderer(std::size_t refs)
+: Style::Facet( typeid(MenuBarRenderer), refs )
+{
+}
+
+    
+MenuBarRenderer::~MenuBarRenderer()
+{
+}
+
+
+void MenuBarRenderer::render(const MenuBar& m, 
+                             PaintSurface& surface, 
+                             const Gfx::RectF& rect) const
+{ 
+    onRender(m, surface, rect); 
+}
+
+
+void MenuBarRenderer::renderItem(const MenuBarItem& m, 
+                                 PaintSurface& surface, 
+                                 const Gfx::RectF& rect) const
+{ 
+    onRenderItem(m, surface, rect); 
+}
+
 } // namespace
 
 } // namespace

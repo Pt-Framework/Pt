@@ -59,8 +59,6 @@ class MenuBarItem : public Control
 
         void setText(const String& t);
 
-        void setHighlighted(bool s);
-
         void toggle();
 
         void open();
@@ -75,6 +73,8 @@ class MenuBarItem : public Control
 
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
+        virtual void onPaintText(PaintSurface& surface, const Gfx::RectF& updateRect);
+
     protected:
         virtual void onMouseEvent(const MouseEvent& ev);
 
@@ -86,7 +86,6 @@ class MenuBarItem : public Control
         MenuBar&   _menuBar;
         Menu&      _menu;
         Pt::String _text;
-        bool       _highlighted;
 };
 
 

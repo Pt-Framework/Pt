@@ -36,7 +36,26 @@
 #include <Pt/Hmi/Label.h>
 #include <Pt/Hmi/PushButton.h>
 #include <Pt/Hmi/CheckBox.h>
+#include <Pt/Hmi/MenuBar.h>
 #include <Pt/Hmi/Menu.h>
+#include <Pt/Hmi/MenuItem.h>
+
+namespace {
+
+Pt::Gfx::Color brighten(const Pt::Gfx::Color& c, float factor)
+{
+    float r = c.red() * factor;
+    float g = c.green() * factor;
+    float b = c.blue() * factor;
+
+    Pt::uint16_t r16 = r > 65535 ? 65535 : static_cast<Pt::uint16_t>(r);
+    Pt::uint16_t g16 = g > 65535 ? 65535 : static_cast<Pt::uint16_t>(g);
+    Pt::uint16_t b16 = b > 65535 ? 65535 : static_cast<Pt::uint16_t>(b);
+
+    return Pt::Gfx::Color(c.alpha(), r16, g16, b16);
+}
+
+} // namespace
 
 namespace Pt {
 
@@ -663,6 +682,106 @@ void PlatinumMenuRenderer::onRender(const Menu& m,
     painter.drawRect(borderRect);
 }
 
+
+void PlatinumMenuRenderer::onRenderItem(const MenuItem& m, 
+                                        PaintSurface& surface, 
+                                        const Gfx::RectF& rect) const
+{
+    const StyleOptions* options = m.getFacet<StyleOptions>();
+    if( ! options)
+      return;
+
+    bool highlight = m.isHighlighted();
+    if(highlight)
+    {
+        Gfx::Color bgColor = options->highlightColor();
+        Gfx::Brush brush = brighten(bgColor, 0.85f);
+
+        Painter painter(surface);
+        painter.setClip(rect);
+        painter.setBrush(brush);
+        painter.fillRect( Gfx::RectF(Gfx::PointF(0,0), m.size()) );
+    }
+}
+
+
+void PlatinumMenuRenderer::onRenderIndicator(const MenuItem& m, 
+                                             PaintSurface& surface, 
+                                             const Gfx::RectF& rect) const
+{
+    static const double indicatorWidth = 5.0;
+
+    const StyleOptions* options = m.getFacet<StyleOptions>();
+    if( ! options)
+      return;
+
+    Painter painter(surface);
+    painter.setClip(rect);
+
+    double x = m.size().width() - indicatorWidth - m.padding().right();
+    double y = m.size().height() / 2;
+
+    Gfx::PointF indicator[3] = { Gfx::PointF(x - 3, y - 4),
+                                 Gfx::PointF(x + 1, y),
+                                 Gfx::PointF(x - 3, y + 4) };
+  
+    Gfx::Brush brush( options->textColor() );
+    painter.setBrush(brush);
+    painter.fillPolygon(indicator, 3);
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// PlatinumMenuBarRenderer
+///////////////////////////////////////////////////////////////////////////////
+
+PlatinumMenuBarRenderer::PlatinumMenuBarRenderer(std::size_t refs)
+: MenuBarRenderer(refs)
+{
+}
+
+    
+PlatinumMenuBarRenderer::~PlatinumMenuBarRenderer()
+{
+}
+
+
+void PlatinumMenuBarRenderer::onRender(const MenuBar& m, 
+                                    PaintSurface& surface, 
+                                    const Gfx::RectF& rect) const
+{
+    const StyleOptions* options = m.getFacet<StyleOptions>();
+    if( ! options)
+      return;
+
+    Painter painter(surface);
+    painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
+
+    painter.setBrush( options->background() );
+    painter.fillRect(rect);
+}
+
+
+void PlatinumMenuBarRenderer::onRenderItem(const MenuBarItem& m, 
+                                           PaintSurface& surface, 
+                                           const Gfx::RectF& rect) const
+{
+    const StyleOptions* options = m.getFacet<StyleOptions>();
+    if( ! options)
+      return;
+
+    bool highlight = m.isHighlighted();
+    if(highlight)
+    {
+        Gfx::Color bgColor = options->highlightColor();
+        Gfx::Brush brush = brighten(bgColor, 0.85f);
+
+        Painter painter(surface);
+        painter.setClip(rect);
+        painter.setBrush(brush);
+        painter.fillRect( Gfx::RectF(Gfx::PointF(0,0), m.size()) );
+    }
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 // PlatinumStyle
 ///////////////////////////////////////////////////////////////////////////////
@@ -675,6 +794,7 @@ PlatinumStyle::PlatinumStyle()
     set(new PlatinumPanelRenderer);
     set(new PlatinumLabelRenderer);
     set(new PlatinumMenuRenderer);
+    set(new PlatinumMenuBarRenderer);
 }
 
 

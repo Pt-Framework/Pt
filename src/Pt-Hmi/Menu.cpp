@@ -39,8 +39,6 @@ namespace Hmi {
 // SubMenuItem
 ///////////////////////////////////////////////////////////////////////////////
 
-static const double indicatorWidth = 5.0; 
-
 class SubMenuItem : public MenuItem
 {
     typedef MenuItem BaseType;
@@ -59,16 +57,12 @@ class SubMenuItem : public MenuItem
         { return _menu; }
 
     protected:
-        virtual void onInvalidate()
-        {
-            MenuItem::onInvalidate();
-        }
-
         virtual Gfx::SizeF onAutoSize() const
         {
             Gfx::SizeF size = BaseType::onAutoSize();
-    
-            // space for the menu indicator
+            
+            // some space for the menu indicator
+            const double indicatorWidth = 50.0; 
             size.addWidth(indicatorWidth); 
     
             return size;
@@ -77,29 +71,9 @@ class SubMenuItem : public MenuItem
         virtual void onPaintShortcut(PaintSurface& surface, 
                                      const Gfx::RectF& updateRect)
         {
-            //BaseType::onPaintShortcut(surface, updateRect);
-
-            Painter painter(surface);
-            painter.setClip(updateRect);
-
-            //
-            // draw menu indicator
-            //
-            double x = size().width() - indicatorWidth - padding().right();
-            double y = size().height() / 2;
-
-            Gfx::PointF indicator[3] = { Gfx::PointF(x - 3, y - 4),
-                                          Gfx::PointF(x + 1, y),
-                                          Gfx::PointF(x - 3, y + 4) };
-  
-          const StyleOptions* options = getFacet<StyleOptions>();
-
-          if(options)
-          {
-            Gfx::Brush brush( options->textColor() );
-            painter.setBrush(brush);
-            painter.fillPolygon(indicator, 3);
-          }
+            const MenuRenderer* renderer = getFacet<MenuRenderer>();
+            if(renderer)
+                renderer->renderIndicator(*this, surface, updateRect);
         }
 
     private:

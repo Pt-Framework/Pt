@@ -59,7 +59,6 @@ namespace Hmi {
 MenuBarItem::MenuBarItem(MenuBar& mb, Menu& menu, const Pt::String& text)
 : _menuBar(mb)
 , _menu(menu)
-, _highlighted(false)
 {
     setAutoSize(true);
     setAcceptsFocus(true);
@@ -84,13 +83,6 @@ const String& MenuBarItem::text() const
 void MenuBarItem::setText(const Pt::String& t)
 {   
     _text = t;
-    invalidate();
-}
-
-
-void MenuBarItem::setHighlighted(bool s)
-{
-    _highlighted = s;
     invalidate();
 }
 
@@ -169,7 +161,6 @@ void MenuBarItem::onMouseEvent(const MouseEvent& ev)
         if(item)
         {
             toggle();
-            setHighlighted(false);
             
             item->toggle();
             return;
@@ -197,6 +188,16 @@ void MenuBarItem::onMouseEvent(const MouseEvent& ev)
 
 void MenuBarItem::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
+    const MenuBarRenderer* renderer = getFacet<MenuBarRenderer>();
+    if(renderer)
+        renderer->renderItem(*this, surface, updateRect);
+
+    onPaintText(surface, updateRect);
+}
+
+
+void MenuBarItem::onPaintText(PaintSurface& surface, const Gfx::RectF& updateRect)
+{
     const StyleOptions* options = getFacet<StyleOptions>();
     if( ! options)
       return;
@@ -204,18 +205,7 @@ void MenuBarItem::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
     Painter painter(surface);
     painter.setClip(updateRect);
     painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
-
-    if(_highlighted)
-    {
-      Gfx::Color bgColor = options->highlightColor();
-      Gfx::Brush brush = brighten(bgColor, 0.85f);
-
-      painter.setBrush(brush);
-      painter.fillRect( Gfx::RectF(Gfx::PointF(0,0), size()) );
-    }
-
-    const Gfx::Font& font = options->font();
-    painter.setFont(font);
+    painter.setFont( options->font() );
     
     Gfx::FontMetrics fm = painter.fontMetrics(_text);
     double textX = padding().left();
@@ -231,8 +221,6 @@ void MenuBarItem::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 void MenuBarItem::onEnterEvent(const EnterEvent& ev)
 {
     Base::onEnterEvent(ev);
-    
-    _highlighted = true;
     update();
 }
 
@@ -240,8 +228,6 @@ void MenuBarItem::onEnterEvent(const EnterEvent& ev)
 void MenuBarItem::onLeaveEvent(const LeaveEvent& ev)
 {
     Base::onLeaveEvent(ev);
-    
-    _highlighted = false;
     update();
 }
 
@@ -341,8 +327,6 @@ void MenuBar::onOpenMenu(Menu& menu)
     {
         if( &(*it)->menu() == &menu)
         {
-            (*it)->setHighlighted(true);
-
             _currentMenu = &menu;
             _currentMenuItem = *it;
         }
@@ -354,9 +338,6 @@ void MenuBar::onCloseMenu(Menu& menu)
 {
     if(_currentMenu == &menu)
     {
-        if(_currentMenuItem)
-            _currentMenuItem->setHighlighted(false);
-
         _currentMenu = 0;
         _currentMenuItem = 0;
     }
@@ -398,16 +379,9 @@ MenuShell* MenuBar::onFindMenu(const Gfx::PointF& screenPos)
 
 void MenuBar::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
-    const StyleOptions* options = getFacet<StyleOptions>();
-    if( ! options)
-      return;
-
-    Painter painter(surface);
-    painter.setClip(updateRect);
-    painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
-
-    painter.setBrush( options->background() );
-    painter.fillRect(updateRect);
+    const MenuBarRenderer* renderer = getFacet<MenuBarRenderer>();
+    if(renderer)
+        renderer->render(*this, surface, updateRect);
 }
 
 

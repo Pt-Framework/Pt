@@ -169,6 +169,35 @@ class PT_HMI_API PlatinumMenuRenderer : public MenuRenderer
                               PaintSurface& surface, 
                               const Gfx::RectF& rect) const;
 
+        virtual void onRenderItem(const MenuItem& m, 
+                                  PaintSurface& surface, 
+                                  const Gfx::RectF& rect) const;
+
+        virtual void onRenderIndicator(const MenuItem& m, 
+                                       PaintSurface& surface, 
+                                       const Gfx::RectF& rect) const;
+
+    private:
+        PlatinumRendererBase _baseRenderer;
+};
+
+
+class PT_HMI_API PlatinumMenuBarRenderer : public MenuBarRenderer
+{
+    public:
+        PlatinumMenuBarRenderer(std::size_t refs = 0);
+
+        virtual ~PlatinumMenuBarRenderer();
+
+    protected:
+        virtual void onRender(const MenuBar& m, 
+                              PaintSurface& surface, 
+                              const Gfx::RectF& rect) const;
+
+        virtual void onRenderItem(const MenuBarItem& m, 
+                                  PaintSurface& surface, 
+                                  const Gfx::RectF& rect) const;
+
     private:
         PlatinumRendererBase _baseRenderer;
 };

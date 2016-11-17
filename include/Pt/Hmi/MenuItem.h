@@ -80,11 +80,9 @@ class PT_HMI_API MenuItem : public Control
         
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
-        virtual void onPaintBackground(PaintSurface& surface, const Gfx::RectF& updateRect);
-
         virtual void onPaintIcon(PaintSurface& surface, const Gfx::RectF& updateRect);
 
-        virtual void onPaintItem(PaintSurface& surface, const Gfx::RectF& updateRect);
+        virtual void onPaintText(PaintSurface& surface, const Gfx::RectF& updateRect);
 
         virtual void onPaintShortcut(PaintSurface& surface, const Gfx::RectF& updateRect);
   

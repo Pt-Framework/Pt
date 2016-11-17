@@ -48,6 +48,9 @@ class Label;
 class Button;
 class CheckBox;
 class Menu;
+class MenuItem;
+class MenuBar;
+class MenuBarItem;
 
 class PT_HMI_API Style
 {
@@ -210,10 +213,51 @@ class PT_HMI_API MenuRenderer : public Style::Facet
                     PaintSurface& surface,
                     const Gfx::RectF& rect) const;
 
+        void renderItem(const MenuItem& m, 
+                         PaintSurface& surface, 
+                         const Gfx::RectF& rect) const;
+        
+        void renderIndicator(const MenuItem& m, 
+                             PaintSurface& surface, 
+                             const Gfx::RectF& rect) const;
+    
     protected:
         virtual void onRender(const Menu& m, 
                               PaintSurface& surface, 
                               const Gfx::RectF& rect) const = 0;
+
+        virtual void onRenderItem(const MenuItem& m, 
+                                  PaintSurface& surface, 
+                                  const Gfx::RectF& rect) const = 0;
+        
+        virtual void onRenderIndicator(const MenuItem& m, 
+                                       PaintSurface& surface, 
+                                       const Gfx::RectF& rect) const = 0;
+};
+
+class PT_HMI_API MenuBarRenderer : public Style::Facet
+{
+    public:
+        MenuBarRenderer(std::size_t refs = 0);
+
+        virtual ~MenuBarRenderer();
+
+        void render(const MenuBar& m,
+                    PaintSurface& surface,
+                    const Gfx::RectF& rect) const;
+
+        void renderItem(const MenuBarItem& m, 
+                         PaintSurface& surface, 
+                         const Gfx::RectF& rect) const;
+    
+    protected:
+        virtual void onRender(const MenuBar& m, 
+                              PaintSurface& surface, 
+                              const Gfx::RectF& rect) const = 0;
+
+        virtual void onRenderItem(const MenuBarItem& m, 
+                                  PaintSurface& surface, 
+                                  const Gfx::RectF& rect) const = 0;
 };
 
 } // namespace
