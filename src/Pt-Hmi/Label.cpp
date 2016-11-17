@@ -114,8 +114,6 @@ Gfx::SizeF Label::onAutoSize() const
 
 void Label::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
-    Panel::onPaint(surface, updateRect);
-
     const LabelRenderer* renderer = getFacet<LabelRenderer>();
     if(renderer)
         renderer->render(*this, surface, updateRect);

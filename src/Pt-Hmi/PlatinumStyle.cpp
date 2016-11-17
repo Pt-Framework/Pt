@@ -43,105 +43,78 @@ namespace Pt {
 namespace Hmi {
 
 ///////////////////////////////////////////////////////////////////////////////
-// PlatinumButtonRenderer
+// PlatinumRendererBase
 ///////////////////////////////////////////////////////////////////////////////
 
-PlatinumButtonRenderer::PlatinumButtonRenderer(std::size_t refs)
-: ButtonRenderer(refs)
+PlatinumRendererBase::PlatinumRendererBase()
 {
 }
 
     
-PlatinumButtonRenderer::~PlatinumButtonRenderer()
+PlatinumRendererBase::~PlatinumRendererBase()
 {
 }
 
-
-void PlatinumButtonRenderer::renderButtonText(Painter& painter, const Gfx::PointF& textPos,
-                                              const String& text, const Char* mnemonic)
+void PlatinumRendererBase::renderFrame(Painter& painter,
+                                       const Gfx::RectF& frameRect,
+                                       const StyleOptions& options,
+                                       const Gfx::Color* color,
+                                       double corner) const
 {
-    painter.drawText(textPos, text);
+    Gfx::Color borderColor = color ? *color : options.foreground();
+    Gfx::RectF borderRect = frameRect;
 
-    if(mnemonic)
-    {
-        String::size_type n = text.find(*mnemonic);
+    borderRect.setOrigin( Gfx::PointF(corner, corner) );
+    borderRect.setSize( Gfx::SizeF(frameRect.size().width() - corner, 
+                                   frameRect.size().height() - corner) );
 
-        if(n != String::npos)
-        {
-            Pt::String mnemonicText(text, 0, n);
-            Gfx::FontMetrics fm = painter.fontMetrics(mnemonicText);
-            Gfx::PointF from(textPos.x() + fm.width(), textPos.y() + 1);
+    Gfx::PointF outline[9] = {};
 
-            mnemonicText = *mnemonic;
-            fm = painter.fontMetrics(mnemonicText);
-            Gfx::PointF to( from.x() + fm.width() - 1, from.y() );
+    // top left
+    outline[0].setX(0);
+    outline[0].setY(corner);
 
-            painter.drawLine(from, to);
-        }
-    }
+    outline[1].setX(corner);
+    outline[1].setY(0);
+
+    // top right
+    outline[2].setX(borderRect.width() - corner);
+    outline[2].setY(0);
+
+    outline[3].setX(borderRect.width());
+    outline[3].setY(corner);
+
+    // bottom right
+    outline[4].setX(borderRect.width());
+    outline[4].setY(borderRect.height() - corner);
+
+    outline[5].setX(borderRect.width() - corner);
+    outline[5].setY(borderRect.height());
+
+    // bottom left
+    outline[6].setX(corner);
+    outline[6].setY(borderRect.height());
+
+    outline[7].setX(0);
+    outline[7].setY(borderRect.height() - corner);
+            
+    outline[8] = outline[0];
+    
+    painter.setPen(borderColor);
+    painter.drawPolyline(outline, 9);
 }
 
 
-void PlatinumButtonRenderer::onRender(const Button& button, 
-                                      PaintSurface& surface, 
-                                      const Gfx::RectF& rect) const
+void PlatinumRendererBase::renderPlane(Painter& painter,
+                                       const Gfx::RectF& rect,
+                                       const StyleOptions& options,
+                                       const Gfx::Color* color,
+                                       double corner) const
 {
-    const StyleOptions* options = button.getFacet<StyleOptions>();
+    Gfx::RectF borderRect( Gfx::PointF(corner, corner),
+                           Gfx::SizeF(rect.size().width() - corner, 
+                                      rect.size().height() - corner) );
 
-    if( options == 0)
-      return;
-
-    Gfx::Color buttonColor = options->foreground();
-
-    Gfx::Color frameColor = Gfx::Color(buttonColor.red() * 0.7f,
-                                       buttonColor.green() * 0.7f,
-                                       buttonColor.blue() * 0.7f);
-
-    Gfx::Color textColor =  options->textColor();
-
-    Gfx::Color foreground = options->foreground();
-
-    const Gfx::Font& textFont = options->font();
-    
-    const String& text = button.text();
-    
-    const Gfx::SizeF& size = button.size();
-
-    if( size.width() < 0 || size.height() < 0)
-        return;
-
-    //
-    // draw the button area
-    //
-
-    if( button.isEnabled() )
-    {
-        if( button.isHighlighted() )
-        {
-            buttonColor = Gfx::Color(buttonColor.red() * 0.9f,
-                                     buttonColor.green() * 0.9f,
-                                     buttonColor.blue() * 0.9f);
-        }
-
-        if( button.isPressed() )
-        {
-            buttonColor = Gfx::Color(buttonColor.red() * 0.8f,
-                                     buttonColor.green() * 0.8f,
-                                     buttonColor.blue() * 0.8f);
-        }
-    }
-
-    Painter painter(surface);
-    painter.setClip(rect);
-    painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
-
-    Gfx::RectF borderRect(Gfx::PointF(0,0), size);
-
-    borderRect.setOrigin( Gfx::PointF(1, 1) );
-    borderRect.setSize( Gfx::SizeF(size.width() - 1, 
-                                   size.height() - 1) );
-
-    double corner = 1.0;
     Gfx::PointF outline[9] = {};
 
     // top left
@@ -174,11 +147,109 @@ void PlatinumButtonRenderer::onRender(const Button& button,
             
     outline[8] = outline[0];
 
-    painter.setBrush(buttonColor); 
-    painter.fillPolygon(outline, 9);
+    if(color)
+        painter.setBrush( *color );
+    else
+        painter.setBrush( options.background() );
 
-    painter.setPen(frameColor);
-    painter.drawPolyline(outline, 9);
+    painter.fillPolygon(outline, 9);
+}
+
+
+void PlatinumRendererBase::renderItemText(Painter& painter,
+                                          const Gfx::PointF& textPos,
+                                          const String& text,
+                                          const Char* mnemonic,
+                                          const Gfx::Font& font,
+                                          const Gfx::Color& color) const
+{
+    painter.setPen(color);
+    painter.setFont(font);
+
+    painter.drawText(textPos, text);
+
+    if(mnemonic)
+    {
+        String::size_type n = text.find(*mnemonic);
+
+        if(n != String::npos)
+        {
+            Pt::String mnemonicText(text, 0, n);
+            Gfx::FontMetrics fm = painter.fontMetrics(mnemonicText);
+            Gfx::PointF from(textPos.x() + fm.width(), textPos.y() + 1);
+
+            mnemonicText = *mnemonic;
+            fm = painter.fontMetrics(mnemonicText);
+            Gfx::PointF to( from.x() + fm.width() - 1, from.y() );
+
+            painter.drawLine(from, to);
+        }
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// PlatinumButtonRenderer
+///////////////////////////////////////////////////////////////////////////////
+
+PlatinumButtonRenderer::PlatinumButtonRenderer(std::size_t refs)
+: ButtonRenderer(refs)
+{
+}
+
+    
+PlatinumButtonRenderer::~PlatinumButtonRenderer()
+{
+}
+
+
+void PlatinumButtonRenderer::onRender(const Button& button, 
+                                      PaintSurface& surface, 
+                                      const Gfx::RectF& rect) const
+{
+    const StyleOptions* options = button.getFacet<StyleOptions>();
+    if( ! options)
+      return;
+
+    const String& text = button.text();
+    Gfx::Color buttonColor = options->foreground();
+    Gfx::Color textColor =  options->textColor();
+    const Gfx::Font& textFont = options->font();
+    Gfx::Color frameColor = Gfx::Color(buttonColor.red() * 0.7f,
+                                       buttonColor.green() * 0.7f,
+                                       buttonColor.blue() * 0.7f);
+
+    const Gfx::SizeF& size = button.size();
+    if( size.width() < 0 || size.height() < 0)
+        return;
+
+    Painter painter(surface);
+    painter.setClip(rect);
+    painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
+
+    //
+    // draw the button area
+    //
+
+    if( button.isEnabled() )
+    {
+        if( button.isHighlighted() )
+        {
+            buttonColor = Gfx::Color(buttonColor.red() * 0.9f,
+                                     buttonColor.green() * 0.9f,
+                                     buttonColor.blue() * 0.9f);
+        }
+
+        if( button.isPressed() )
+        {
+            buttonColor = Gfx::Color(buttonColor.red() * 0.8f,
+                                     buttonColor.green() * 0.8f,
+                                     buttonColor.blue() * 0.8f);
+        }
+    }
+
+    Gfx::RectF borderRect(Gfx::PointF(0,0), size);
+    _baseRenderer.renderPlane(painter, borderRect, *options, &buttonColor);
+    _baseRenderer.renderFrame(painter, borderRect, *options, &frameColor);
 
     //
     // draw the button text
@@ -190,9 +261,8 @@ void PlatinumButtonRenderer::onRender(const Button& button,
     double textY = (size.height() / 2) - (metric.height() / 2) + metric.ascent();
     Gfx::PointF textPos(textX, textY);
 
-    painter.setPen(textColor);
-    painter.setFont(textFont);
-    renderButtonText(painter, textPos, text, button.mnemonic());
+    _baseRenderer.renderItemText(painter, textPos, text, button.mnemonic(), 
+                                 textFont, textColor);
 
     //
     // draw the focus rect
@@ -293,9 +363,8 @@ void PlatinumCheckBoxRenderer::onRender(const CheckBox& cb,
     double textY = (size.height() / 2) - (metric.height() / 2) + metric.ascent();
     Gfx::PointF textPos(textX, textY);
 
-    painter.setPen(textColor);
-    painter.setFont(textFont);
-    PlatinumButtonRenderer::renderButtonText(painter, textPos, text, cb.mnemonic());
+    _baseRenderer.renderItemText(painter, textPos, text, cb.mnemonic(),
+                                 textFont, textColor);
 
     //
     // draw the focus rect
@@ -337,17 +406,12 @@ void PlatinumFrameRenderer::onRender(const Frame& f,
     if( ! options)
       return;
 
-    Gfx::Color frameColor = f.borderColor() ? *f.borderColor()     
-                                            : options->foreground();
-
     Painter painter(surface);
     painter.setClip(rect);
     painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
 
     Gfx::RectF frameRect( Gfx::PointF(0, 0), f.size() );
-
-    painter.setPen(frameColor);
-    painter.drawRect(frameRect);
+    _baseRenderer.renderFrame(painter, frameRect, *options, f.borderColor());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -377,53 +441,9 @@ void PlatinumPanelRenderer::onRender(const Panel& p,
     painter.setClip(rect);
     painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
 
-    const Gfx::SizeF& size = p.size();
-    Gfx::RectF borderRect(Gfx::PointF(0,0), size);
-
-    borderRect.setOrigin( Gfx::PointF(1, 1) );
-    borderRect.setSize( Gfx::SizeF(size.width() - 1, 
-                                   size.height() - 1) );
-
-    double corner = 1.0;
-    Gfx::PointF outline[9] = {};
-
-    // top left
-    outline[0].setX(0);
-    outline[0].setY(corner);
-
-    outline[1].setX(corner);
-    outline[1].setY(0);
-
-    // top right
-    outline[2].setX(borderRect.width() - corner);
-    outline[2].setY(0);
-
-    outline[3].setX(borderRect.width());
-    outline[3].setY(corner);
-
-    // bottom right
-    outline[4].setX(borderRect.width());
-    outline[4].setY(borderRect.height() - corner);
-
-    outline[5].setX(borderRect.width() - corner);
-    outline[5].setY(borderRect.height());
-
-    // bottom left
-    outline[6].setX(corner);
-    outline[6].setY(borderRect.height());
-
-    outline[7].setX(0);
-    outline[7].setY(borderRect.height() - corner);
-            
-    outline[8] = outline[0];
-
-    const Gfx::Color* color = p.planeColor();
-    if(color)
-        painter.setBrush(*color);
-    else
-        painter.setBrush( options->background() ); 
-    
-    painter.fillPolygon(outline, 9);
+    Gfx::RectF borderRect( Gfx::PointF(0,0), p.size() );
+    _baseRenderer.renderPlane(painter, borderRect, *options, p.planeColor());
+    _baseRenderer.renderFrame(painter, borderRect, *options, p.borderColor());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -451,6 +471,19 @@ void PlatinumLabelRenderer::onRender(const Label& l,
 
     Painter painter(surface);
     painter.setClip(updateRect);
+    painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
+
+    //
+    // render label background
+    //
+
+    Gfx::RectF borderRect( Gfx::PointF(0,0), l.size() );
+    _baseRenderer.renderPlane(painter, borderRect, *options, l.planeColor());
+    _baseRenderer.renderFrame(painter, borderRect, *options, l.borderColor());
+
+    //
+    // render label text
+    //
 
     const Gfx::SizeF& size = l.size();
     Gfx::PointF pos(0, 0);

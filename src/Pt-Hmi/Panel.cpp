@@ -122,7 +122,6 @@ void Panel::onResizeEvent(const ResizeEvent& ev)
 void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
     const PanelRenderer* renderer = getFacet<PanelRenderer>();
-
     if(renderer)
         renderer->render(*this, surface, updateRect);
 
@@ -158,8 +157,6 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
             }
         }
     }  
-
-    Frame::onPaint(surface, updateRect);
 }
 
 } // namespace

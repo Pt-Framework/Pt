@@ -87,7 +87,6 @@ void CheckBox::onReleased()
 void CheckBox::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
     const CheckBoxRenderer* renderer = getFacet<CheckBoxRenderer>();
-
     if(renderer)
         renderer->render(*this, surface, updateRect);
 }
