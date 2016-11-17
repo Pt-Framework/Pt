@@ -192,6 +192,7 @@ void MenuBarItem::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
     if(renderer)
         renderer->renderItem(*this, surface, updateRect);
 
+    // TODO: should MenuBarItem::onPaint draw the text or the style?
     onPaintText(surface, updateRect);
 }
 

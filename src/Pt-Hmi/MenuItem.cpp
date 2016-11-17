@@ -220,6 +220,7 @@ void MenuItem::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
     if(renderer)
         renderer->renderItem(*this, surface, updateRect);
     
+    // TODO: should MenuItem::onPaint draw the content or the style?
     onPaintIcon(surface, updateRect);
     onPaintText(surface, updateRect);
     onPaintShortcut(surface, updateRect);

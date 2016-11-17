@@ -280,6 +280,7 @@ void PlatinumButtonRenderer::onRender(const Button& button,
     double textY = (size.height() / 2) - (metric.height() / 2) + metric.ascent();
     Gfx::PointF textPos(textX, textY);
 
+    // TODO: should CheckBox::onPaint draw the text or the style?
     _baseRenderer.renderItemText(painter, textPos, text, button.mnemonic(), 
                                  textFont, textColor);
 
@@ -382,6 +383,7 @@ void PlatinumCheckBoxRenderer::onRender(const CheckBox& cb,
     double textY = (size.height() / 2) - (metric.height() / 2) + metric.ascent();
     Gfx::PointF textPos(textX, textY);
 
+    // TODO: should CheckBox::onPaint draw the text or the style?
     _baseRenderer.renderItemText(painter, textPos, text, cb.mnemonic(),
                                  textFont, textColor);
 
