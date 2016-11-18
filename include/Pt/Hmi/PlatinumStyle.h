@@ -203,6 +203,24 @@ class PT_HMI_API PlatinumMenuBarRenderer : public MenuBarRenderer
 };
 
 
+class PT_HMI_API PlatinumScrollBarRenderer : public ScrollBarRenderer
+{
+    public:
+        PlatinumScrollBarRenderer(std::size_t refs = 0);
+
+        virtual ~PlatinumScrollBarRenderer();
+
+    protected:
+        virtual void onRender(const ScrollBar& s,
+                              const Gfx::RectF& handleRect,
+                              PaintSurface& surface, 
+                              const Gfx::RectF& rect) const;
+
+    private:
+        PlatinumRendererBase _baseRenderer;
+};
+
+
 class PT_HMI_API PlatinumStyle : public Style
 {
     public:

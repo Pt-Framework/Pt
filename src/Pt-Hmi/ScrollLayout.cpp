@@ -70,8 +70,13 @@ int ScrollLayout::maximumY() const
 
 void ScrollLayout::scrollX(int xpos)
 {
-    if( xpos > (_maxX - size().width()) || xpos < 0  )
-        return;
+    double maxPosX = _maxX - size().width();
+    
+    if( xpos > maxPosX  )
+        xpos = maxPosX;
+
+    if(xpos < 0)
+        xpos = 0;
 
     double delta = xpos - _lastScrollPos.x();
 
@@ -92,8 +97,13 @@ void ScrollLayout::scrollX(int xpos)
 
 void ScrollLayout::scrollY(int ypos)
 {    
-    if( ypos > (_maxY - size().height()) || ypos < 0  )
-        return;
+    double maxPosY = _maxY - size().height();
+    
+    if( ypos > maxPosY  )
+        ypos = maxPosY;
+
+    if(ypos < 0)
+        ypos = 0;
 
     double delta = ypos - _lastScrollPos.y();
 
@@ -114,6 +124,8 @@ void ScrollLayout::scrollY(int ypos)
 
 void ScrollLayout::onMouseEvent(const MouseEvent& ev)
 {
+    Widget::onMouseEvent(ev);
+
     if( ev.isPress() )
         _lastPos = ev.position();
 
@@ -137,8 +149,11 @@ void ScrollLayout::onMouseEvent(const MouseEvent& ev)
     }
 }
 
+
 void ScrollLayout::onTouchEvent(const TouchEvent& ev)
 {    
+    Widget::onTouchEvent(ev);
+
     if( ev.isPress() )
         _lastPos = ev.position();   
 
@@ -159,6 +174,30 @@ void ScrollLayout::onTouchEvent(const TouchEvent& ev)
         }
 
         _lastPos = ev.position();
+    }
+}
+
+
+void ScrollLayout::onScrollEvent(const ScrollEvent& ev)
+{
+    Widget::onScrollEvent(ev);
+
+    if(ev.wheel() == ScrollEvent::Horizontal)
+    {
+        if(_enableX)
+        {
+            double deltaX = _lastScrollPos.x() - ev.delta() * 20;
+            scrollX(deltaX);
+        }
+    }
+
+    if(ev.wheel() == ScrollEvent::Vertical)
+    {
+        if(_enableY)
+        {
+            double deltaY = _lastScrollPos.y() - ev.delta() * 20;
+            scrollY(deltaY);
+        }
     }
 }
 

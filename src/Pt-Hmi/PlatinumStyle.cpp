@@ -39,6 +39,7 @@
 #include <Pt/Hmi/MenuBar.h>
 #include <Pt/Hmi/Menu.h>
 #include <Pt/Hmi/MenuItem.h>
+#include <Pt/Hmi/ScrollBar.h>
 
 namespace {
 
@@ -785,6 +786,48 @@ void PlatinumMenuBarRenderer::onRenderItem(const MenuBarItem& m,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// PlatinumScrollBarRenderer
+///////////////////////////////////////////////////////////////////////////////
+
+PlatinumScrollBarRenderer::PlatinumScrollBarRenderer(std::size_t refs)
+: ScrollBarRenderer(refs)
+{
+}
+
+    
+PlatinumScrollBarRenderer::~PlatinumScrollBarRenderer()
+{
+}
+
+
+void PlatinumScrollBarRenderer::onRender(const ScrollBar& s,
+                                         const Gfx::RectF& handleRect,
+                                         PaintSurface& surface, 
+                                         const Gfx::RectF& rect) const
+{
+    const StyleOptions* options = s.getFacet<StyleOptions>();
+    if( ! options)
+      return;
+
+    Painter painter(surface);
+    painter.setClip(rect);
+    painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
+
+    painter.setBrush( options->background() );
+    painter.fillRect(rect);
+
+    painter.setPen( options->foreground() );
+    painter.drawRect( Gfx::RectF( s.size() ) );
+
+    painter.setBrush( options->foreground() );
+    painter.fillRect(handleRect);
+
+    Gfx::Color handleFrameColor = brighten(options->foreground(), 0.85f);
+    painter.setPen(handleFrameColor);
+    painter.drawRect(handleRect);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // PlatinumStyle
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -797,6 +840,7 @@ PlatinumStyle::PlatinumStyle()
     set(new PlatinumLabelRenderer);
     set(new PlatinumMenuRenderer);
     set(new PlatinumMenuBarRenderer);
+    set(new PlatinumScrollBarRenderer);
 }
 
 

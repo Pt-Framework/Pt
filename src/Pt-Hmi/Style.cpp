@@ -290,6 +290,29 @@ void MenuBarRenderer::renderItem(const MenuBarItem& m,
     onRenderItem(m, surface, rect); 
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// ScrollBarRenderer
+///////////////////////////////////////////////////////////////////////////////
+
+ScrollBarRenderer::ScrollBarRenderer(std::size_t refs)
+: Style::Facet( typeid(ScrollBarRenderer), refs )
+{
+}
+
+    
+ScrollBarRenderer::~ScrollBarRenderer()
+{
+}
+
+
+void ScrollBarRenderer::render(const ScrollBar& s,
+                               const Gfx::RectF& handleRect,
+                               PaintSurface& surface, 
+                               const Gfx::RectF& rect) const
+{ 
+    onRender(s, handleRect, surface, rect); 
+}
+
 } // namespace
 
 } // namespace

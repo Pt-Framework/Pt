@@ -1114,17 +1114,18 @@ void Window::onTouchEvent(const TouchEvent& tev)
 }
 
 
-void Window::onScrollEvent(const ScrollEvent& ev)
+void Window::onScrollEvent(const ScrollEvent& sev)
 {
-    if( ! _mainWidget )
-        return;
+    // TODO: which widget receives the scroll events?
 
-    Widget* pointerWidget = Application::instance().pointerWidget();
-    if( pointerWidget->window() == this )
+    Widget* widget = Application::instance().pointerWidget();
+
+    if( widget && widget->isEnabled() )
     {
-        ScrollEvent sev( pointerWidget->vid() );
-        Application::instance().loop().commitEvent(sev);
-    }    
+        ScrollEvent ev(sev);
+        ev.setId( widget->vid() );
+        Application::instance().loop().commitEvent(ev); 
+    }
 }
 
 

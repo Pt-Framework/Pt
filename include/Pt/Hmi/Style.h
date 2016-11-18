@@ -51,6 +51,7 @@ class Menu;
 class MenuItem;
 class MenuBar;
 class MenuBarItem;
+class ScrollBar;
 
 class PT_HMI_API Style
 {
@@ -258,6 +259,26 @@ class PT_HMI_API MenuBarRenderer : public Style::Facet
         virtual void onRenderItem(const MenuBarItem& m, 
                                   PaintSurface& surface, 
                                   const Gfx::RectF& rect) const = 0;
+};
+
+
+class PT_HMI_API ScrollBarRenderer : public Style::Facet
+{
+    public:
+        ScrollBarRenderer(std::size_t refs = 0);
+
+        virtual ~ScrollBarRenderer();
+
+        void render(const ScrollBar& s,
+                    const Gfx::RectF& handleRect,
+                    PaintSurface& surface, 
+                    const Gfx::RectF& rect) const;
+    
+    protected:
+        virtual void onRender(const ScrollBar& s,
+                              const Gfx::RectF& handleRect,
+                              PaintSurface& surface, 
+                              const Gfx::RectF& rect) const = 0;
 };
 
 } // namespace

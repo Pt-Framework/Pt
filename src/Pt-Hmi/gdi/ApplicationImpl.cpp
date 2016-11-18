@@ -424,7 +424,7 @@ bool ApplicationImpl::processMessage(HWND hwnd, unsigned int msg,
             int delta = GET_WHEEL_DELTA_WPARAM(wparam);
 
             ScrollEvent sev( w->vid() );
-            sev.set(0, delta/120.0);
+            sev.set(ScrollEvent::Vertical, delta/WHEEL_DELTA);
 
             commitEvent(sev);
             handled = true;

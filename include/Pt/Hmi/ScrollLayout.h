@@ -79,6 +79,8 @@ class PT_HMI_API ScrollLayout : public Layout
         virtual void onMouseEvent(const MouseEvent& ev);
         
         virtual void onTouchEvent(const TouchEvent& ev);
+
+        virtual void onScrollEvent(const ScrollEvent& ev);
         
         virtual void onAddWidget(Widget& w);
         
