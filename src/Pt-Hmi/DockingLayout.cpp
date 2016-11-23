@@ -33,13 +33,37 @@ namespace Pt {
 
 namespace Hmi {
 
-DockingLayout::DockingLayout()
+DockingLayout::DockingLayout(DockStyle ds)
+: _defaultDocking(ds)
 {
 }
 
 
 DockingLayout::~DockingLayout()
 {
+}
+
+
+void DockingLayout::setDockingStyle(Widget& w, DockStyle ds)
+{
+    std::map<Widget*, DockStyle>::iterator it = _docking.find(&w);
+    if( it != _docking.end() )
+        it->second = ds;
+}
+
+
+void DockingLayout::onAddWidget(Widget& w)
+{
+    _docking[&w] = _defaultDocking;
+}
+
+
+void DockingLayout::onRemoveWidget(Widget& w)
+{
+    std::map<Widget*, DockStyle>::iterator it = _docking.find(&w);
+    
+    if( it != _docking.end() )
+        _docking.erase(it);
 }
 
 

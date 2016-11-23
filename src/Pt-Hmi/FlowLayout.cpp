@@ -42,7 +42,10 @@ void StackLeft(Widget& parent)
     
     for( ; it != end; ++it)
     {
-        Widget* item = *it;   
+        Widget* item = *it;
+        
+        if( ! item->isVisible() )
+            continue;  
 
         double x = posLeft + item->margin().left();
         double y = parent.padding().top() + item->margin().top(); 
@@ -72,6 +75,9 @@ void StackRight(Widget& parent)
     for( ; it != end; ++it)
     {
         Widget* item = *it; 
+
+        if( ! item->isVisible() )
+            continue; 
 
         posRight -= item->size().width();
         posRight -= item->margin().right();
@@ -105,6 +111,9 @@ void StackTop(Widget& parent)
     {
         Widget* item = *it; 
 
+        if( ! item->isVisible() )
+            continue; 
+
         double x = parent.padding().left() + item->margin().left();
         double y = posTop + item->margin().top();
                 
@@ -133,6 +142,9 @@ void StackBottom(Widget& parent)
     for( ; it != end; ++it)
     {
         Widget* item = *it; 
+
+        if( ! item->isVisible() )
+            continue; 
         
         posBottom -= item->size().height();
         posBottom -= item->margin().bottom();

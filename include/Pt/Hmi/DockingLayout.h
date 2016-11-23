@@ -32,6 +32,7 @@
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Layout.h>
+#include <map>
 
 namespace Pt {
 
@@ -40,12 +41,33 @@ namespace Hmi {
 class PT_HMI_API DockingLayout : public Layout
 {
     public:
-        DockingLayout();
+        enum DockStyle
+        {
+          None = 0,
+          Left,
+          Top,
+          Right,
+          Bottom,
+          Fill
+        };
+
+    public:
+        explicit DockingLayout(DockStyle ds = None);
 
         virtual ~DockingLayout();
 
+        void setDockingStyle(Widget& w, DockStyle ds);
+
     protected:
+        virtual void onAddWidget(Widget& w);
+
+        virtual void onRemoveWidget(Widget& w);
+
         virtual void onLayout();
+
+    private:
+        std::map<Widget*, DockStyle> _docking;
+        DockStyle                    _defaultDocking;
 };
 
 } // namespace
