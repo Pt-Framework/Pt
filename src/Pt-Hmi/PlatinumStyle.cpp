@@ -274,7 +274,7 @@ void PlatinumButtonRenderer::onRender(const Button& button,
     //
     // draw the button text
     //
-
+    painter.setFont(textFont);
     Gfx::FontMetrics metric = painter.fontMetrics( button.text() );
 
     double textX = size.width() / 2 - metric.width() / 2;
@@ -377,7 +377,7 @@ void PlatinumCheckBoxRenderer::onRender(const CheckBox& cb,
     //
     // draw the checkbox text
     //
-
+    painter.setFont(textFont);
     Gfx::FontMetrics metric = painter.fontMetrics( cb.text() );
 
     double textX = 2 * boxSize;
@@ -506,9 +506,22 @@ void PlatinumLabelRenderer::onRender(const Label& l,
     //
     // render label text
     //
-
+    
     const Gfx::SizeF& size = l.size();
     Gfx::PointF pos(0, 0);
+    
+    const Gfx::Font* font = l.font();
+    if(font)
+        painter.setFont(*font);
+    else
+        painter.setFont( options->font() );
+
+    const Gfx::Color* color = l.textColor();
+    if(color)
+        painter.setPen(*color);
+    else
+        painter.setPen( options->textColor() ); 
+
     Gfx::FontMetrics metric = painter.fontMetrics( l.text() );
 
     switch( l.textAlignment() )
@@ -604,18 +617,6 @@ void PlatinumLabelRenderer::onRender(const Label& l,
             break;
         }
     }
-
-    const Gfx::Color* color = l.textColor();
-    if(color)
-        painter.setPen(*color);
-    else
-        painter.setPen( options->textColor() ); 
-
-    const Gfx::Font* font = l.font();
-    if(font)
-        painter.setFont(*font);
-    else
-        painter.setFont( options->font() );
 
     painter.drawText( pos, l.text() );
 }

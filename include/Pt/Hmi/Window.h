@@ -48,6 +48,7 @@
 #include <Pt/Hmi/InvalidateEvent.h>
 #include <Pt/Hmi/PixmapSurface.h>
 #include <Pt/Hmi/Style.h>
+#include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Signal.h>
 #include <map>

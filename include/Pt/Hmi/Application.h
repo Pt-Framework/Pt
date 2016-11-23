@@ -46,7 +46,6 @@
 #include <Pt/Hmi/LeaveEvent.h>
 #include <Pt/Hmi/FocusEvent.h>
 #include <Pt/Hmi/InvalidateEvent.h>
-#include <Pt/Hmi/WindowStateEvent.h>
 #include <Pt/Hmi/Style.h>
 #include <Pt/Hmi/StyleOptions.h>
 #include <Pt/Hmi/PlatinumStyle.h>
@@ -61,6 +60,7 @@ class ApplicationImpl;
 class Window;
 class Widget;
 class Visual;
+class WindowStateEvent;
 
 class PT_HMI_API Application : public Pt::System::Application
 {

@@ -32,6 +32,7 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/FocusEvent.h>
+#include <Pt/Hmi/WindowStateEvent.h>
 #include <cassert>
 
 namespace {

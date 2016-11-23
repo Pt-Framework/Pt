@@ -32,6 +32,7 @@
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/MouseEvent.h>
+#include <Pt/Hmi/WindowStateEvent.h>
 #include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Application.h>
