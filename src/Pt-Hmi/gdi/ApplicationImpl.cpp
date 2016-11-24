@@ -38,6 +38,7 @@
 #include <Pt/Hmi/MoveEvent.h>
 #include <Pt/Hmi/CloseEvent.h>
 #include <Pt/Hmi/ActivateEvent.h>
+#include <Pt/Hmi/WindowStateEvent.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/System/IOError.h>
 #include <Pt/String.h>

@@ -184,24 +184,75 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 
     Painter painter( surface() );
 
-    Gfx::Image image( painter.format(), Gfx::Size(200, 30) );
+    Gfx::Image image( painter.format(), Gfx::Size(210, 40) );
     Gfx::ImagePainter imagePainter(image);
 
     Gfx::ImagePainter::setDefaultFont("DejaVu Sans");
     //imagePainter.setBrush( Gfx::Brush( Gfx::Color::fromRgb8(200, 200, 200) ) );
-    imagePainter.setBrush( Gfx::Brush( Gfx::Color::fromRgb8(200, 200, 200), 
-                           Gfx::Color::fromRgb8(255, 255, 255), 
-                           Gfx::Brush::Vertical));
-    imagePainter.fillRect(Gfx::RectF(Gfx::PointF(0,0), Gfx::SizeF(200, 30) ) );
+    imagePainter.setBrush( Gfx::Brush( Gfx::Color::fromRgb8(200, 200, 200)));
+//,                           Gfx::Color::fromRgb8(255, 255, 255), 
+//                           Gfx::Brush::Vertical));
+
+
+    
+   Pt::Gfx::RectF borderRect(Pt::Gfx::PointF(0,0), Pt::Gfx::SizeF(image.size().width() - 10, image.size().height() -10));
+
+    const double corner = 7;
+
+    Pt::Gfx::PointF outline[9] = {};
+
+    // top left
+    outline[0].setX(0);
+    outline[0].setY(corner);
+
+    outline[1].setX(corner);
+    outline[1].setY(0);
+
+    // top right
+    outline[2].setX(borderRect.width() - corner);
+    outline[2].setY(0);
+
+    outline[3].setX(borderRect.width());
+    outline[3].setY(corner);
+
+    // bottom right
+    outline[4].setX(borderRect.width());
+    outline[4].setY(borderRect.height() - corner);
+
+    outline[5].setX(borderRect.width() - corner);
+    outline[5].setY(borderRect.height());
+
+    // bottom left
+    outline[6].setX(corner);
+    outline[6].setY(borderRect.height());
+
+    outline[7].setX(0);
+    outline[7].setY(borderRect.height() - corner);
+            
+    outline[8] = outline[0];
+
+    std::vector<Pt::Gfx::PointF> concave;
+
+    concave.push_back(Pt::Gfx::PointF(5,0));
+    concave.push_back(Pt::Gfx::PointF(10,5));
+    concave.push_back(Pt::Gfx::PointF(5,10));
+    concave.push_back(Pt::Gfx::PointF(0,5));
+    concave.push_back(Pt::Gfx::PointF(5,0));
+    
+
+//    imagePainter.fillPolygon(&concave[0],concave.size());
+
+    imagePainter.fillPolygon(&outline[0],9);
     
     Gfx::FontMetrics fm = imagePainter.fontMetrics("Hello");
 
+
     imagePainter.setFont(Pt::Gfx::Font("",12));
     imagePainter.setPen( Gfx::Pen( Gfx::Color::fromRgb8(0,0,0) ) );
-    imagePainter.drawText( Gfx::PointF(30, 20), "Hello World!");
+   // imagePainter.drawText( Gfx::PointF(30, 20), "Hello World!");
 
     painter.drawImage(Gfx::PointF(0, 0), image);
-    painter.drawPicture(Gfx::PointF(0,0), _picture);
+//    painter.drawPicture(Gfx::PointF(0,0), _picture);
 }
 
 

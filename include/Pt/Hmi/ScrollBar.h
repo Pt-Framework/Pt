@@ -50,6 +50,11 @@ class PT_HMI_API ScrollBar : public Control
 
         ~ScrollBar();
 
+        const Pt::Gfx::RectF& handleRect() const
+        {
+          return _handleRect;
+        }
+
         void setRange(int minpos, int maxpos);
         
         void setStepping(int scroll, int page);
@@ -70,6 +75,7 @@ class PT_HMI_API ScrollBar : public Control
 
         Signal<int>& changed()
         { return _changed; }
+        
 
     protected:
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& rect);

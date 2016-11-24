@@ -35,6 +35,7 @@
 
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/PixmapSurface.h>
 #include <Pt/Gfx/Argb32Format.h>
 
 #include <tchar.h>

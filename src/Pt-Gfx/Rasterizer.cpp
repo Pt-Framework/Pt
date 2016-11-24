@@ -3292,9 +3292,9 @@ void Rasterizer::fill( const Point* pts, size_t pointCount)
     ClipPolygon clipper;
 
     clipper( points, _currentClip );
+    
 
     // find unclipped origin coordinates
-    //
     Point origin( std::numeric_limits<int>::max(), std::numeric_limits<int>::max() );
     
     int leftPos = std::numeric_limits<int>::max();
@@ -3337,18 +3337,14 @@ void Rasterizer::fill( const Point* pts, size_t pointCount)
     // might as well create a new table here...
     globalEdgeTable.clear();
 
-    //
-    // Fill the global edge table. Two points yield an edge.
-    //
-    Edge edge;
+    // Fill the global edge table. Two points yield an edge.    
+    Edge   edge;
     Point* bottom = 0;
     Point* top = 0;
 
     for( size_t i = 1; i < points.size(); ++i )
     {
-        //
         // Find out which point is above and which is below
-        //
         if ( points[i-1].y() > points[i].y() )
         {
             bottom = &( points[i-1] );
@@ -3359,24 +3355,21 @@ void Rasterizer::fill( const Point* pts, size_t pointCount)
             bottom = &(points[i]);
             top = &(points[i-1]);
         }
-
-        //
+                
         // Omit horizontal edges, add others to global edge table. The GET
         // is sorted by primarily by the edges ymin and secondarily by
         // the x value of the edge
         
-        if( top->y() != bottom->y() )
+        if( top->y() != bottom->y())
         {
             const int dy   = (int)bottom->y() - (int)top->y();
-            const int dx   = (int)bottom->x() - (int) top->x();
+            const int dx   = (int)bottom->x() - (int)top->x();
 
-            edge.ymax = (int)bottom->y()+1;//   -1 so we don't get last scanline */
+            edge.ymax = (int)bottom->y();
             edge.ymin = (int)top->y();
             edge.x    = (int)top->x();
 
-            //
             // Bresenham stuff...
-            //
             if (dx < 0)
             {
                 edge.m = dx / dy;
@@ -3398,61 +3391,61 @@ void Rasterizer::fill( const Point* pts, size_t pointCount)
         }
     }
 
-    //
     // if all polygon points are on one line the GET will be empty
-    //
     if( globalEdgeTable.empty() )
         return;
 
-    // Time: 1.5e-05
-
-    //
     // Start at ymin of the first entry in the GET.
-    //
     int scanLine = globalEdgeTable.begin()->ymin;
 
-    //
     // move active edges to AET for current scanline. Keep iterator where
     // we stopped for later use.
-    //
     EdgeSet::iterator it = globalEdgeTable.begin();
+
     for( ; it != globalEdgeTable.end() && it->ymin == scanLine; ++it )
         activeEdgeTable.addEdge( *it );
 
-    // Time: 1.9e-05
+    ActiveEdgeTable last;
 
     do
     {
-        //
+        last = activeEdgeTable;
+
         // fill every even span, starting at even (even-odd-rule)
-        //
         for( size_t i = 1; i < activeEdgeTable.size(); i += 2 )
         {
-            const int xend   = std::max(activeEdgeTable[i].x, activeEdgeTable[i-1].x);
-            const int xbegin   = std::min(activeEdgeTable[i].x, activeEdgeTable[i-1].x);
-            const int length = xend - xbegin + 1;
+            const int xend    = std::max(activeEdgeTable[i].x, activeEdgeTable[i-1].x);
+            const int xbegin  = std::min(activeEdgeTable[i].x, activeEdgeTable[i-1].x);
+            const int length  = xend - xbegin + 1;
+
             fill(Point((int)origin.x(), (int)origin.y() ), Point(xbegin, scanLine), length);
         }
 
-        //
         // now we are done with the current active edges and can update
-        // them for the next scanline.
-        //
-        scanLine++;
-        activeEdgeTable.update( scanLine );
-
-        //
+        // them for the next scanline.        
+        scanLine++;        
+        activeEdgeTable.update(scanLine);
+        
         // move active edges to AET for current scanline
-        //
-        for( ; it != globalEdgeTable.end() && it->ymin == scanLine; ++it )
+        for( ;it != globalEdgeTable.end() && it->ymin == scanLine; ++it )
             activeEdgeTable.addEdge( *it );
 
-        //
         // Need to resort the AET, because of update and new edges
-        //
-        activeEdgeTable.sort();
+        activeEdgeTable.sort();        
     }
     while( !activeEdgeTable.empty() );
+
+    last.update();
+
+    // fill every even span, starting at even (even-odd-rule)
+    for( size_t i = 1; i < last.size(); i += 2 )
+    {
+        const int xend    = std::max(last[i].x, last[i-1].x);
+        const int xbegin  = std::min(last[i].x, last[i-1].x);
+        const int length  = xend - xbegin + 1;
+
+        fill(Point((int)origin.x(), (int)origin.y() ), Point(xbegin, scanLine), length);
+    }
 }
 
 

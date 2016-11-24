@@ -44,62 +44,103 @@ class ActiveEdgeTable : public std::vector<Edge>
         { }
 
         inline void addEdge( const Edge& edge )
-        {  push_back( edge ); }
+        {  
+          push_back( edge ); 
+        }
 
 
-        inline void update( int ypos )
+        inline void update(int scanLine)
         {
             for( size_t i = 0; i < size(); i++ )
             {
-                if( ypos >= (*this)[i].ymax )
+               Edge& edge = (*this)[i];
+
+                if(edge.ymax == scanLine )
                 {
-                    //
-                    // remove finished edge
-                    //
-                    erase( begin() + i );
-                    --i;
+                  erase(begin() + i);
+                  --i;
                 }
                 else
                 {
-                    //
-                    // recalc new x value for the scanline
-                    //
-                    // NOTE: Yes, Laurentiu, it can really be that simple... ;)
-                    //
-                    Edge& edge = (*this)[i];
-
-                    if (edge.m1 > 0) {
-                        if (edge.d > 0) {
-                            edge.x += edge.m1;
-                            edge.d += edge.incr1;
-                        }
-                        else {
-                            edge.x += edge.m;
-                            edge.d += edge.incr2;
-                        }
-                    } else {
-                        if (edge.d >= 0) {
-                            edge.x += edge.m1;
-                            edge.d += edge.incr1;
-                        }
-                        else {
-                            edge.x += edge.m;
-                            edge.d += edge.incr2;
-                        }
-                    }
+                  if (edge.m1 > 0) 
+                  {
+                      if (edge.d > 0) 
+                      {
+                          edge.x += edge.m1;
+                          edge.d += edge.incr1;
+                      }
+                      else {
+                          edge.x += edge.m;
+                          edge.d += edge.incr2;
+                      }
+                  } 
+                  else 
+                  {
+                      if (edge.d >= 0) 
+                      {
+                          edge.x += edge.m1;
+                          edge.d += edge.incr1;
+                      }
+                      else 
+                      {
+                          edge.x += edge.m;
+                          edge.d += edge.incr2;
+                      }                 
+                  }
                }
             }
         }
 
-        inline void sort()
-        { std::sort( begin(), end(), _lessXValue ); }
 
+        inline void update()
+        {
+          // recalc new x value for the scanline
+
+            for( size_t i = 0; i < size(); i++ )
+            {
+               Edge& edge = (*this)[i];
+               
+                if (edge.m1 > 0) 
+                {
+                    if (edge.d > 0) 
+                    {
+                        edge.x += edge.m1;
+                        edge.d += edge.incr1;
+                    }
+                    else {
+                        edge.x += edge.m;
+                        edge.d += edge.incr2;
+                    }
+                } 
+                else 
+                {
+                    if (edge.d >= 0) 
+                    {
+                        edge.x += edge.m1;
+                        edge.d += edge.incr1;
+                    }
+                    else 
+                    {
+                        edge.x += edge.m;
+                        edge.d += edge.incr2;
+                    }
+                }
+            }
+        }
+        
+        inline void sort()
+        {           
+          std::sort( begin(), end(), _lessXValue ); 
+        }
+        
     private:
         struct LessXValue
         {
             inline bool operator()(const Edge& e1, const Edge& e2) const
-            { return e1.x < e2.x; }
-        };
+            {                 
+                return e1.x < e2.x;
+            }
+        };        
 
         LessXValue _lessXValue;
 };
