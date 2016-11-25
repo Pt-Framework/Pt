@@ -44,6 +44,7 @@ class LineEdge;
 class LineFace;
 class DrawText;
 class Image;
+class ActiveEdgeTable;
 
 class Rasterizer
 {    
@@ -131,7 +132,8 @@ class Rasterizer
     void createGradientTexture(Image& img, int width, int height,Pt::Gfx::Color gradientStart,  Pt::Gfx::Color gradientStop,  Pt::Gfx::Brush::FillStyle style);
     void clipSpan( int& x, int& y, int& length );
     void updateClip();
- 
+    void outputEdges(const ActiveEdgeTable& edges, const Point&  origin, int scalLine);
+
   //Thin polyline algo.
   protected:
     enum { xAxis, yAxis };

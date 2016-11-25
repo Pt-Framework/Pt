@@ -3293,7 +3293,6 @@ void Rasterizer::fill( const Point* pts, size_t pointCount)
 
     clipper( points, _currentClip );
     
-
     // find unclipped origin coordinates
     Point origin( std::numeric_limits<int>::max(), std::numeric_limits<int>::max() );
     
@@ -3412,18 +3411,12 @@ void Rasterizer::fill( const Point* pts, size_t pointCount)
         last = activeEdgeTable;
 
         // fill every even span, starting at even (even-odd-rule)
-        for( size_t i = 1; i < activeEdgeTable.size(); i += 2 )
-        {
-            const int xend    = std::max(activeEdgeTable[i].x, activeEdgeTable[i-1].x);
-            const int xbegin  = std::min(activeEdgeTable[i].x, activeEdgeTable[i-1].x);
-            const int length  = xend - xbegin + 1;
-
-            fill(Point((int)origin.x(), (int)origin.y() ), Point(xbegin, scanLine), length);
-        }
+        outputEdges(activeEdgeTable, origin, scanLine);
 
         // now we are done with the current active edges and can update
         // them for the next scanline.        
-        scanLine++;        
+        scanLine++;
+
         activeEdgeTable.update(scanLine);
         
         // move active edges to AET for current scanline
@@ -3437,11 +3430,17 @@ void Rasterizer::fill( const Point* pts, size_t pointCount)
 
     last.update();
 
+    outputEdges(last, origin, scanLine);
+}
+
+
+void Rasterizer::outputEdges(const ActiveEdgeTable& edges, const Point&  origin, int scanLine)
+{
     // fill every even span, starting at even (even-odd-rule)
-    for( size_t i = 1; i < last.size(); i += 2 )
+    for( size_t i = 1; i < edges.size(); i += 2 )
     {
-        const int xend    = std::max(last[i].x, last[i-1].x);
-        const int xbegin  = std::min(last[i].x, last[i-1].x);
+        const int xend    = std::max(edges[i].x, edges[i-1].x);
+        const int xbegin  = std::min(edges[i].x, edges[i-1].x);
         const int length  = xend - xbegin + 1;
 
         fill(Point((int)origin.x(), (int)origin.y() ), Point(xbegin, scanLine), length);
