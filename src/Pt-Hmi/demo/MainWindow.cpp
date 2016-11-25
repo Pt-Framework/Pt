@@ -230,20 +230,27 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     outline[7].setY(borderRect.height() - corner);
             
     outline[8] = outline[0];
-
-    std::vector<Pt::Gfx::PointF> concave;
-
-    concave.push_back(Pt::Gfx::PointF(5,0));
-    concave.push_back(Pt::Gfx::PointF(10,5));
-    concave.push_back(Pt::Gfx::PointF(5,10));
-    concave.push_back(Pt::Gfx::PointF(0,5));
-    concave.push_back(Pt::Gfx::PointF(5,0));
-    
-
-//    imagePainter.fillPolygon(&concave[0],concave.size());
-
     imagePainter.fillPolygon(&outline[0],9);
-    
+
+    //std::vector<Pt::Gfx::PointF> concave;
+    //concave.push_back(Pt::Gfx::PointF(5,0));
+    //concave.push_back(Pt::Gfx::PointF(10,5));
+    //concave.push_back(Pt::Gfx::PointF(5,10));
+    //concave.push_back(Pt::Gfx::PointF(0,5));
+    //concave.push_back(Pt::Gfx::PointF(5,0));
+    //imagePainter.fillPolygon(&concave[0],concave.size());
+
+    //std::vector<Pt::Gfx::PointF> concave2;
+    //concave2.push_back(Pt::Gfx::PointF(0,5));
+    //concave2.push_back(Pt::Gfx::PointF(5,0));
+    //concave2.push_back(Pt::Gfx::PointF(10,18));
+    //concave2.push_back(Pt::Gfx::PointF(15,0));
+    //concave2.push_back(Pt::Gfx::PointF(20,5));
+    //concave2.push_back(Pt::Gfx::PointF(20,20));
+    //concave2.push_back(Pt::Gfx::PointF(0,20));
+    //concave2.push_back(Pt::Gfx::PointF(0,5));
+    //imagePainter.fillPolygon(&concave2[0],concave2.size());
+
     Gfx::FontMetrics fm = imagePainter.fontMetrics("Hello");
 
 

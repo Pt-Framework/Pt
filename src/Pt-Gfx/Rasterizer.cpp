@@ -3404,11 +3404,11 @@ void Rasterizer::fill( const Point* pts, size_t pointCount)
     for( ; it != globalEdgeTable.end() && it->ymin == scanLine; ++it )
         activeEdgeTable.addEdge( *it );
 
-    ActiveEdgeTable last;
+    ///ActiveEdgeTable last;
 
     do
     {
-        last = activeEdgeTable;
+        ///last = activeEdgeTable;
 
         // fill every even span, starting at even (even-odd-rule)
         outputEdges(activeEdgeTable, origin, scanLine);
@@ -3420,17 +3420,19 @@ void Rasterizer::fill( const Point* pts, size_t pointCount)
         activeEdgeTable.update(scanLine);
         
         // move active edges to AET for current scanline
-        for( ;it != globalEdgeTable.end() && it->ymin == scanLine; ++it )
-            activeEdgeTable.addEdge( *it );
+        for( ; it != globalEdgeTable.end() && it->ymin == scanLine; ++it )
+        {
+            activeEdgeTable.addEdge(*it);
+        }
 
         // Need to resort the AET, because of update and new edges
         activeEdgeTable.sort();        
     }
-    while( !activeEdgeTable.empty() );
+    while( ! activeEdgeTable.empty() );
 
-    last.update();
+    //last.update();
 
-    outputEdges(last, origin, scanLine);
+    //outputEdges(last, origin, scanLine);
 }
 
 

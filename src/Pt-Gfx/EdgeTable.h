@@ -43,22 +43,38 @@ class ActiveEdgeTable : public std::vector<Edge>
         ActiveEdgeTable()
         { }
 
-        inline void addEdge( const Edge& edge )
+        void addEdge(const Edge& edge)
         {  
-          push_back( edge ); 
+            // remove the edge which connects to the added edge, so we do
+            // not fill a scanline twice and make it easier to keep the
+            // edge table sorted correctly
+
+            std::vector<Edge>::iterator it;
+            for(it = begin(); it != end(); ++it)
+            {
+                // an edge connects to another edge if it has the same
+                // current X coordinate and ymin of the added edge equals
+                // ymax of a current edge (top-down rasterization)
+                if(it->x == edge.x && it->ymax == edge.ymin)
+                {
+                    erase(it);
+                    break;
+                }
+            }
+
+            push_back(edge); 
         }
 
-
-        inline void update(int scanLine)
+        void update(int scanLine)
         {
             for( size_t i = 0; i < size(); i++ )
             {
                Edge& edge = (*this)[i];
 
-                if(edge.ymax == scanLine )
+                if(edge.ymax < scanLine )
                 {
-                  erase(begin() + i);
-                  --i;
+                    erase(begin() + i);
+                    --i;
                 }
                 else
                 {
@@ -90,7 +106,6 @@ class ActiveEdgeTable : public std::vector<Edge>
                }
             }
         }
-
 
         inline void update()
         {
