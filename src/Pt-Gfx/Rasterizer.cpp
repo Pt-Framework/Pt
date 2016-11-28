@@ -3566,8 +3566,7 @@ void Rasterizer::image( const Point& to, const Image& img)
 }
 
 
-
-void Rasterizer::image( const Point& to, const Image& from, const Rect& fromRect)
+void Rasterizer::image(const Point& to, const Image& from, const Rect& fromRect)
 {    
   // clip fromRect to fit into the clip/image rect
   Point d = _currentClip.topLeft() - to;

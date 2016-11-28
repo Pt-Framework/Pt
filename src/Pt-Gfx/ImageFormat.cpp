@@ -32,6 +32,7 @@
 #include <Pt/Gfx/Argb32Format.h>
 #include <Pt/Gfx/Rgb32Format.h>
 #include <Pt/Gfx/Rgb16Format.h>
+#include <cassert>
 
 namespace Pt {
 
@@ -41,7 +42,16 @@ void ImageFormat::copy(ImageView& to, const Point& toPos,
                        const ImageView& from, const Rect& fromRect,
                        CompositionMode mode) const
 {
-    Rect clipRect(Point(0,0), to.size());
+    bool outside = toPos.x() < 0 || toPos.y() < 0 ||
+                   toPos.x() + fromRect.width() > to.width() ||
+                   toPos.y() + fromRect.height() > to.height();
+
+    assert( ! outside );
+
+    if(outside)
+       return;
+
+    //Rect clipRect(Point(0,0), to.size());
 
     //// clip fromRect to fit into the clip/image rect
     //Point d = clipRect.topLeft() - toPos;
