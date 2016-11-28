@@ -44,7 +44,7 @@
 #include <Pt/Hmi/ShowEvent.h>
 #include <Pt/Hmi/FocusEvent.h>
 #include <Pt/Hmi/Cursor.h>
-#include <Pt/Hmi/Docking.h>
+#include <Pt/Hmi/Spacing.h>
 #include <Pt/Hmi/Visual.h>
 #include <Pt/Connectable.h>
 #include <Pt/Gfx/Point.h>
@@ -215,10 +215,6 @@ class PT_HMI_API Widget : public Visual
         // inner spacing
         void setPadding(double n);
 
-        const Docking& docking() const;
-
-        void setDocking(const Docking& d);
-
     public:
         virtual Gfx::PointF toScreen(const Gfx::PointF& pos) const;
 
@@ -314,7 +310,6 @@ class PT_HMI_API Widget : public Visual
         
         Spacing                      _padding;
         Spacing                      _margin;
-        Docking                      _docking;
 };
 
 } // namespace

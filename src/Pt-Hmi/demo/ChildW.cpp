@@ -1,13 +1,12 @@
 #include "ChildW.h"
-#include <Pt/Hmi/Application.h>
-#include <Pt/Hmi/Docking.h>
 #include "Dialog1.h"
+#include <Pt/Hmi/Application.h>
 
-namespace Pt{
+namespace Pt {
 
-namespace Hmi{
+namespace Hmi {
 
-namespace Demo{
+namespace Demo {
 
 ChildW::ChildW(const std::string& title)
 : _vscroll(ScrollBar::Vertical)
@@ -50,7 +49,6 @@ ChildW::ChildW(const std::string& title)
 
     setMainWidget(&_mainLayout);
     
-    
     setTitle(title);
     
     //Text    
@@ -61,8 +59,7 @@ ChildW::ChildW(const std::string& title)
     _textLabel.move( Gfx::PointF(60,60) );
     _textLabel.setPlaneColor( Gfx::Color::fromRgb8(240, 220, 70) );
     _textLabel.setMnemonicWidget(&_toggleButton);
-    _textLabel.setCursor( Hmi::Cursor::waitCursor() );
-    _textLabel.setDocking(Docking::Fill);  
+    _textLabel.setCursor( Hmi::Cursor::waitCursor() ); 
     _textLabel.setBorderColor(Gfx::Color::fromRgb8(200, 190, 60));
 
     //Toggle button
@@ -75,11 +72,9 @@ ChildW::ChildW(const std::string& title)
     _toggleButton.move( Gfx::PointF(20,30) );
     _toggleButton.resize( Gfx::SizeF(130,30) ); 
     _toggleButton.setMargin(5);
-    _toggleButton.setPadding(5);
-    _toggleButton.setDocking( Docking::Bottom );    
+    _toggleButton.setPadding(5);    
 
     //Dialog button  
-    _dialogButton.setDocking(Docking::Top); 
     _dialogButton.setName("DialogButton");  
     _dialogButton.setText("&&Dia&log [CTRL+D]&");
     Pt::Hmi::Key dKey(Pt::Hmi::Key::Control, Pt::Hmi::Key::D);
@@ -88,7 +83,6 @@ ChildW::ChildW(const std::string& title)
     _dialogButton.resize( Gfx::SizeF(130,30) );
     _dialogButton.setMargin(5);
     _dialogButton.setPadding(5);
-    _dialogButton.setDocking( Docking::Bottom );
     _dialogButton.clicked() += Pt::slot(*this, &ChildW::onShowDialog);
     
     //Close button    
@@ -103,48 +97,41 @@ ChildW::ChildW(const std::string& title)
     _closeButton.setStyle(style);
     _closeButton.setName("CloseButton"); 
     _closeButton.setText("Close App [CTRL+X]");
-    _closeButton.setDocking(Docking::Bottom);
     _closeButton.setShortcut(&xKey);
     _closeButton.move( Gfx::PointF(20,200) );
     _closeButton.resize( Gfx::SizeF(130, 30) );
     _closeButton.setMargin(5);
     _closeButton.setPadding(5);
-    _closeButton.setDocking( Docking::Bottom );
     _closeButton.clicked() += Pt::slot(*this, &ChildW::onCloseApp);
       
     _checkBox.setState(CheckBox::Unspecified);
     _checkBox.setName("CheckBox"); 
     _checkBox.setText("Ch&eck Me gyI");
-    _checkBox.setDocking(Docking::Bottom);
     _checkBox.move( Gfx::PointF(0, 0) );
     _checkBox.resize( Gfx::SizeF(130, 30) );
     _checkBox.setMargin(5);
     _checkBox.setPadding(5);
-    _checkBox.setDocking( Docking::Bottom );
     _checkBox.clicked() += Pt::slot(*this, &ChildW::onCheckBox);
 
     _buttonBar.setName("ButtonBar");
     _buttonBar.resize( Gfx::SizeF(700, 180) );
     _buttonBar.setPadding(5);
-    _buttonBar.setDocking(Docking::Bottom);
-    _buttonBar.add(_checkBox);
-    _buttonBar.add(_closeButton);
-    _buttonBar.add(_dialogButton);
-    _buttonBar.add(_toggleButton);
+    _buttonBar.dock(_checkBox, DockingLayout::Bottom);
+    _buttonBar.dock(_closeButton, DockingLayout::Bottom);
+    _buttonBar.dock(_dialogButton, DockingLayout::Bottom); 
+    _buttonBar.dock(_toggleButton, DockingLayout::Bottom);
     
     _vscroll.resize( Gfx::SizeF(24, 24) );
-    _vscroll.setDocking(Docking::Right);
 
     //Panel  
     _childView.resize( Gfx::SizeF(300, 600) );
     _childView.move( Gfx::PointF(1,1) );
     _childView.setName("MainPanel");
     _childView.setPadding(20); 
-    _childView.add(_textLabel);
-    _childView.add(_buttonBar);   
-    _childView.add(_vscroll);
+    _childView.dock(_textLabel, DockingLayout::Fill); 
+    _childView.dock(_buttonBar, DockingLayout::Bottom);  
+    _childView.dock(_vscroll, DockingLayout::Right);
      
-
     //_childWindow2.setMainWidget(&_closeButton);          
     _childWindow2.move(Gfx::PointF(5, 40));    
     _childWindow2.resize( Gfx::SizeF(240, 320) );
@@ -169,7 +156,6 @@ void ChildW::onShowDialog(Button&)
     //_closeButton.setText("CCC");    
     //_closeButton.setMargin(50);
     
-
     //Gfx::SizeF size(400,260);
     //_childWindow2.resize(Gfx::SizeF(400,260));
 

@@ -1164,9 +1164,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Spacing.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\include\Pt\Hmi\Docking.h">
-      <Filter>Pt-Hmi</Filter>
-    </ClInclude>
     <ClInclude Include="..\..\include\Pt\Hmi\EnterEvent.h">
       <Filter>Pt-Hmi\Events</Filter>
     </ClInclude>

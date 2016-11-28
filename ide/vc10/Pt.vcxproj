@@ -66,7 +66,6 @@
     <ClInclude Include="..\..\include\Pt\Hmi\CloseEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Control.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Cursor.h" />
-    <ClInclude Include="..\..\include\Pt\Hmi\Docking.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\DockingLayout.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\EnableEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\EnterEvent.h" />

@@ -44,6 +44,13 @@ DockingLayout::~DockingLayout()
 }
 
 
+void DockingLayout::dock(Widget& w, DockStyle ds)
+{
+    add(w);
+    setDockingStyle(w, ds);
+}
+
+
 void DockingLayout::setDockingStyle(Widget& w, DockStyle ds)
 {
     std::map<Widget*, DockStyle>::iterator it = _docking.find(&w);
@@ -80,84 +87,91 @@ void DockingLayout::onLayout()
 
     for( ; it != end; ++it)
     {
-       if(!(*it)->isVisible() )
-        continue;
+        if( ! (*it)->isVisible() )
+            continue;
 
-        switch( (*it)->docking().type() )
+        std::map<Widget*, DockStyle>::iterator d = _docking.find(*it);
+        if( d == _docking.end() )
+            continue;
+
+        DockStyle ds = d->second;
+
+        switch(ds)
         {
             default:
-            case Docking::Fill:
+            case DockingLayout::Fill:
                 hasFilled = true;
                 break;
 
-            case Docking::Left:
+            case DockingLayout::Left:
             {
-              double x = posLeft + (*it)->margin().left();
-              double y = posTop  + (*it)->margin().top();            
+                double x = posLeft + (*it)->margin().left();
+                double y = posTop  + (*it)->margin().top();            
 
-              const Gfx::SizeF childSize( (*it)->size().width(), 
-                                          (posBottom - posTop) - 
-                                          (*it)->margin().topBottom() );
+                const Gfx::SizeF childSize( (*it)->size().width(), 
+                                            (posBottom - posTop) - 
+                                            (*it)->margin().topBottom() );
 
-              posLeft += (*it)->size().width() + (*it)->margin().leftRight(); 
+                posLeft += (*it)->size().width() + (*it)->margin().leftRight(); 
                             
-              Gfx::PointF pos(x, y);                   
-              (*it)->setGeometry(pos, childSize);              
-              break;  
+                Gfx::PointF pos(x, y);                   
+                (*it)->setGeometry(pos, childSize);              
+                break;  
             }
 
-            case Docking::Top:
+            case DockingLayout::Top:
             {
-              double x = posLeft + (*it)->margin().left();
-              double y = posTop  + (*it)->margin().top();         
+                double x = posLeft + (*it)->margin().left();
+                double y = posTop  + (*it)->margin().top();         
                      
-              const Gfx::SizeF childSize( (posRight - posLeft) - (*it)->margin().leftRight(), 
-                                          (*it)->size().height() );
+                const Gfx::SizeF childSize( (posRight - posLeft) - (*it)->margin().leftRight(), 
+                                            (*it)->size().height() );
 
-              posTop += (*it)->size().height() + (*it)->margin().topBottom();      
+                posTop += (*it)->size().height() + (*it)->margin().topBottom();      
         
-              Gfx::PointF pos(x, y);                   
-              (*it)->setGeometry(pos, childSize);              
-              break;
+                Gfx::PointF pos(x, y);                   
+                (*it)->setGeometry(pos, childSize);              
+                break;
             }
           
-            case Docking::Right:
+            case DockingLayout::Right:
             {
-              posRight -= (*it)->size().width()  + (*it)->margin().right();  
+                posRight -= (*it)->size().width()  + (*it)->margin().right();  
                      
-              double x = posRight;
-              double y = posTop + (*it)->margin().top();                             
+                double x = posRight;
+                double y = posTop + (*it)->margin().top();                             
                     
-              posRight -=  (*it)->margin().left();
+                posRight -=  (*it)->margin().left();
 
-              const Gfx::SizeF childSize( (*it)->size().width(), 
-                                          (posBottom - posTop) - 
-                                          (*it)->margin().topBottom() );
+                const Gfx::SizeF childSize( (*it)->size().width(), 
+                                            (posBottom - posTop) - 
+                                            (*it)->margin().topBottom() );
 
-              Gfx::PointF pos(x, y);                   
-              (*it)->setGeometry(pos, childSize);              
-              break;
+                Gfx::PointF pos(x, y);                   
+                (*it)->setGeometry(pos, childSize);              
+                break;
             }
 
-            case Docking::Bottom:
+            case DockingLayout::Bottom:
             {
-              posBottom -= (*it)->size().height() + (*it)->margin().bottom();   
+                posBottom -= (*it)->size().height() + (*it)->margin().bottom();   
                    
-              double x = posLeft + (*it)->margin().left();
-              double y = posBottom;       
+                double x = posLeft + (*it)->margin().left();
+                double y = posBottom;       
                   
-              posBottom -= (*it)->margin().top();                      
+                posBottom -= (*it)->margin().top();                      
 
-              const Gfx::SizeF childSize( (posRight - posLeft) - (*it)->margin().leftRight(), 
-                                          (*it)->size().height() );
+                const Gfx::SizeF childSize( (posRight - posLeft) - (*it)->margin().leftRight(), 
+                                            (*it)->size().height() );
 
-              Gfx::PointF pos(x, y);                   
-              (*it)->setGeometry(pos, childSize);              
-              break;
+                Gfx::PointF pos(x, y);                   
+                (*it)->setGeometry(pos, childSize);              
+                break;
             }
         }
     }
 
+    // TODO: keep widgets with Fill style in separate container
     if( ! hasFilled)
         return;
     
@@ -166,10 +180,16 @@ void DockingLayout::onLayout()
 
     for(it = widgets().begin(); it != end; ++it)
     {
-        if( (*it)->docking().type() == Docking::Fill)
-        {
-          if( !(*it)->isVisible() )
+        std::map<Widget*, DockStyle>::iterator d = _docking.find(*it);
+        if( d == _docking.end() )
             continue;
+
+        DockStyle ds = d->second;
+
+        if( ds == DockingLayout::Fill)
+        {
+            if( ! (*it)->isVisible() )
+                continue;
               
             (*it)->setGeometry(fillPos, fillSize);            
         }

@@ -830,21 +830,6 @@ void Widget::setPadding(double n)
 }
 
 
-const Docking& Widget::docking() const
-{
-    return _docking;
-}
-
-
-void Widget::setDocking(const Docking& d)
-{
-    _docking = d;
-
-    if( parent() )
-       parent()->onLayout();
-}
-
-
 void Widget::onLayout()
 {
 }

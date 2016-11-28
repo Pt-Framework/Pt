@@ -43,18 +43,20 @@ class PT_HMI_API DockingLayout : public Layout
     public:
         enum DockStyle
         {
-          None = 0,
-          Left,
-          Top,
-          Right,
-          Bottom,
-          Fill
+            None = 0,
+            Left,
+            Top,
+            Right,
+            Bottom,
+            Fill
         };
 
     public:
         explicit DockingLayout(DockStyle ds = None);
 
         virtual ~DockingLayout();
+
+        void dock(Widget& w, DockStyle ds);
 
         void setDockingStyle(Widget& w, DockStyle ds);
 
