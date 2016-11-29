@@ -244,7 +244,6 @@ void PlatinumButtonRenderer::onRender(const Button& button,
 
     Painter painter(surface);
     painter.setClip(rect);
-    painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
 
     //
     // draw the button area
@@ -274,6 +273,7 @@ void PlatinumButtonRenderer::onRender(const Button& button,
     //
     // draw the button text
     //
+    
     painter.setFont(textFont);
     Gfx::FontMetrics metric = painter.fontMetrics( button.text() );
 
@@ -281,7 +281,6 @@ void PlatinumButtonRenderer::onRender(const Button& button,
     double textY = (size.height() / 2) - (metric.height() / 2) + metric.ascent();
     Gfx::PointF textPos(textX, textY);
 
-    // TODO: should CheckBox::onPaint draw the text or the style?
     _baseRenderer.renderItemText(painter, textPos, text, button.mnemonic(), 
                                  textFont, textColor);
 
@@ -324,7 +323,6 @@ void PlatinumCheckBoxRenderer::onRender(const CheckBox& cb,
                                         const Gfx::RectF& rect) const
 {
     const StyleOptions* options = cb.getFacet<StyleOptions>();
-
     if( options == 0)
       return;
 
@@ -341,7 +339,6 @@ void PlatinumCheckBoxRenderer::onRender(const CheckBox& cb,
 
     Painter painter(surface);
     painter.setClip(rect);
-    painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
 
     double boxSize = 12;
 
@@ -377,6 +374,7 @@ void PlatinumCheckBoxRenderer::onRender(const CheckBox& cb,
     //
     // draw the checkbox text
     //
+    
     painter.setFont(textFont);
     Gfx::FontMetrics metric = painter.fontMetrics( cb.text() );
 
@@ -384,14 +382,13 @@ void PlatinumCheckBoxRenderer::onRender(const CheckBox& cb,
     double textY = (size.height() / 2) - (metric.height() / 2) + metric.ascent();
     Gfx::PointF textPos(textX, textY);
 
-    // TODO: should CheckBox::onPaint draw the text or the style?
     _baseRenderer.renderItemText(painter, textPos, text, cb.mnemonic(),
                                  textFont, textColor);
 
     //
     // draw the focus rect
     //
-
+    
     if( cb.hasFocus() )
     {       
         double focusX = textX - 2;
@@ -430,7 +427,6 @@ void PlatinumFrameRenderer::onRender(const Frame& f,
 
     Painter painter(surface);
     painter.setClip(rect);
-    painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
 
     Gfx::RectF frameRect( Gfx::PointF(0, 0), f.size() );
     _baseRenderer.renderFrame(painter, frameRect, *options, f.borderColor());
@@ -461,7 +457,6 @@ void PlatinumPanelRenderer::onRender(const Panel& p,
 
     Painter painter(surface);
     painter.setClip(rect);
-    painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
 
     Gfx::RectF borderRect( Gfx::PointF(0,0), p.size() );
     _baseRenderer.renderPlane(painter, borderRect, *options, p.planeColor());
@@ -493,7 +488,6 @@ void PlatinumLabelRenderer::onRender(const Label& l,
 
     Painter painter(surface);
     painter.setClip(updateRect);
-    painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
 
     //
     // render label background
@@ -758,8 +752,6 @@ void PlatinumMenuBarRenderer::onRender(const MenuBar& m,
       return;
 
     Painter painter(surface);
-    painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
-
     painter.setBrush( options->background() );
     painter.fillRect(rect);
 }
@@ -812,7 +804,6 @@ void PlatinumScrollBarRenderer::onRender(const ScrollBar& s,
 
     Painter painter(surface);
     painter.setClip(rect);
-    painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
 
     painter.setBrush( options->background() );
     painter.fillRect(rect);

@@ -50,7 +50,7 @@ class CompositionMode
         : _mode(m)
         {}
 
-        CompositionMode& operator =(Mode m)
+        CompositionMode& operator=(Mode m)
         {
             _mode = m;
             return *this;
