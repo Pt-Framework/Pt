@@ -500,10 +500,7 @@ void PlatinumLabelRenderer::onRender(const Label& l,
     //
     // render label text
     //
-    
-    const Gfx::SizeF& size = l.size();
-    Gfx::PointF pos(0, 0);
-    
+       
     const Gfx::Font* font = l.font();
     if(font)
         painter.setFont(*font);
@@ -516,6 +513,8 @@ void PlatinumLabelRenderer::onRender(const Label& l,
     else
         painter.setPen( options->textColor() ); 
 
+    const Gfx::SizeF& size = l.size();
+    Gfx::PointF pos(0, 0);
     Gfx::FontMetrics metric = painter.fontMetrics( l.text() );
 
     switch( l.textAlignment() )
