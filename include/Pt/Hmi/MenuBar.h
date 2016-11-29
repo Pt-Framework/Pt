@@ -66,9 +66,6 @@ class MenuBarItem : public Control
         void close();
 
     protected:
-        // TODO: obsolete
-        virtual void onClicked();
-
         virtual Gfx::SizeF onAutoSize() const;
 
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);

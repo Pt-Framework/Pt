@@ -120,13 +120,6 @@ void MenuBarItem::close()
 }
 
 
-// TODO: obsolete
-void MenuBarItem::onClicked()
-{
-    toggle();
-}
-
-
 Gfx::SizeF MenuBarItem::onAutoSize() const
 {
     const Gfx::Font& font = Application::instance().font();
@@ -146,7 +139,7 @@ void MenuBarItem::onMouseEvent(const MouseEvent& ev)
 
     if( inside && ev.isRelease() )
     {
-        onClicked();
+        toggle();
     }
 
     // nothing to highlight if outside

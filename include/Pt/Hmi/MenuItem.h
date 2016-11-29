@@ -66,11 +66,12 @@ class PT_HMI_API MenuItem : public Control
 
         void setIconPadding(double left);
 
+        // TODO: rename onSelected
         Signal<MenuItem&>& triggered();
 
     protected:
-        // TODO: obsolete
-        virtual void onClicked();
+        // TODO: rename onSelected
+        virtual void onTriggered();
         
         virtual void onParentChanged(Widget* w);
         

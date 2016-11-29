@@ -166,8 +166,7 @@ Signal<MenuItem&>& MenuItem::triggered()
 }
 
 
-// TODO: obsolete
-void MenuItem::onClicked()
+void MenuItem::onTriggered()
 {   
     _triggered.send(*this);
 }
@@ -184,7 +183,7 @@ void MenuItem::onShortcut(const KeyEvent& kev)
 {
     Base::onShortcut(kev);
     
-    _triggered.send(*this);
+    onTriggered();
 }
 
 
@@ -300,7 +299,7 @@ void MenuItem::onMouseEvent(const MouseEvent& ev)
 
     if( inside && ev.isRelease() )
     {
-        onClicked();
+        onTriggered();
     }
 }
 
@@ -313,7 +312,7 @@ void MenuItem::onTouchEvent(const TouchEvent& ev)
    
     if( inside && ev.isRelease() )
     {
-        onClicked();
+        onTriggered();
     }
 }
 
