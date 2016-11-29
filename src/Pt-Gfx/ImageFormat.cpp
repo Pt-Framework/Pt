@@ -49,7 +49,7 @@ void ImageFormat::copy(ImageView& to, const Point& toPos,
     assert( ! outside );
 
     if(outside)
-       return;
+        return;
 
     //Rect clipRect(Point(0,0), to.size());
 

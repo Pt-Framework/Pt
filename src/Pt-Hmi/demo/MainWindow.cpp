@@ -251,15 +251,13 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     //concave2.push_back(Pt::Gfx::PointF(0,5));
     //imagePainter.fillPolygon(&concave2[0],concave2.size());
 
-    Gfx::FontMetrics fm = imagePainter.fontMetrics("Hello");
-
-
-    imagePainter.setFont(Pt::Gfx::Font("",12));
+    imagePainter.setFont(Pt::Gfx::Font("", 12));
     imagePainter.setPen( Gfx::Pen( Gfx::Color::fromRgb8(0,0,0) ) );
-   // imagePainter.drawText( Gfx::PointF(30, 20), "Hello World!");
+    //imagePainter.drawText( Gfx::PointF(30, 20), "Hello World!");
+    //imagePainter.drawImage(Gfx::PointF(0, 0), _icon);
 
     painter.drawImage(Gfx::PointF(0, 0), image);
-//    painter.drawPicture(Gfx::PointF(0,0), _picture);
+    //painter.drawPicture(Gfx::PointF(0,0), _picture);
 }
 
 
