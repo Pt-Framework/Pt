@@ -29,6 +29,8 @@
 
 #include <Pt/Hmi/Label.h>
 #include <Pt/Gfx/FontMetrics.h>
+#include <Pt/Any.h>
+#include <string>
 
 namespace Pt {
 
