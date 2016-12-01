@@ -217,111 +217,52 @@ LabelRenderer::~LabelRenderer()
 }
 
 
-void LabelRenderer::render(const Label& l, 
+void LabelRenderer::render(const Label& label, 
                            PaintSurface& surface, 
                            const Gfx::RectF& rect) const
 { 
-    //const StyleOptions* options = l.getFacet<StyleOptions>();
-    //if( ! options )
-    //  return;
-    //
-    //const Gfx::Font* font = l.font();
-    //if( ! font)
-    //    font = &options->font();
-    //
-    //const Gfx::SizeF& size = l.size();
-    //Gfx::PointF pos(0, 0);
-    //Gfx::FontMetrics metric = Hmi::Painter::fontMetrics( *font, l.text() );
+    const StyleOptions* options = label.getFacet<StyleOptions>();
+    if( ! options )
+      return;
 
-    //switch( l.textAlignment() )
-    //{
-    //    case Label::TopLeft:
-    //    {
-    //        pos = Gfx::PointF(0, metric.ascent());
-    //        break;
-    //    }
-    //    
-    //    case Label::TopCenter:
-    //    {
-    //        const double widthHalf     = size.width() / 2;
-    //        const double textWidthHalf = metric.width() / 2;
-    //        pos = Gfx::PointF(widthHalf - textWidthHalf, metric.ascent());
-    //        break;
-    //    }
-    //    break;
+    Gfx::Brush brush = options->background();
+    const Gfx::Color*color = label.planeColor();
+    if(color)
+        brush = *color;
 
-    //    case Label::TopRight:
-    //    {
-    //        const double width     = size.width();
-    //        const double textWidth = metric.width();
-    //        pos = Gfx::PointF(width - textWidth, metric.ascent());
-    //        break;
-    //    }
-    //    break;
+    const Gfx::Color* borderColor = label.borderColor();
+    if( ! borderColor )
+        borderColor = &options->foreground();
+    
+    const Gfx::Font* font = label.font();
+    if( ! font )
+        font = &options->font();
 
-    //    case Label::MiddleLeft:
-    //    {
-    //        const double heightHalf     = size.height() / 2;
-    //        const double textHeightHalf = metric.height() / 2;
-    //        pos = Gfx::PointF(0, (heightHalf - textHeightHalf) + metric.ascent());
-    //        break;
-    //    }
+    const Gfx::Color* textColor = label.textColor();
+    if( ! textColor )
+        textColor = &options->textColor(); 
+    
+    Gfx::PointF pos = label.textPosition(*font);
 
-    //    default:
-    //    case Label::MiddleCenter:
-    //    {            
-    //        const double widthHalf      = size.width() / 2;
-    //        const double heightHalf     = size.height() / 2;
-    //        const double textWidthHalf  = metric.width() / 2;
-    //        const double textHeightHalf = metric.height() / 2;
-    //        pos = Gfx::PointF(widthHalf - textWidthHalf, 
-    //                          heightHalf - textHeightHalf + metric.ascent());
-    //        break;
-    //    }
+    //onRender(l, surface, rect);
 
-    //    case Label::MiddleRight:
-    //    {
-    //        const double width          = size.width();
-    //        const double textWidth      = metric.width();
-    //        const double heightHalf     = size.height()/2;
-    //        const double textHeightHalf = metric.height()/2;
-    //        pos = Gfx::PointF(width - textWidth, 
-    //                          heightHalf - textHeightHalf + metric.ascent());
-    //        break;
-    //    }
+    Painter painter(surface);
+    painter.setClip(rect);
 
-    //    case Label::BottomLeft:
-    //    {
-    //        const double height     = size.height();
-    //        const double textHeight = metric.height();
-    //        pos = Gfx::PointF(0, height- textHeight + metric.ascent());
-    //        break;
-    //    }
+    onRenderBackground(painter, 
+                       rect,
+                       label,
+                       *options, 
+                       brush, 
+                       *borderColor);
 
-    //    case Label::BottomCenter:
-    //    {
-    //        const double widthHalf     = size.width() / 2;
-    //        const double textWidthHalf = metric.width() / 2;
-    //        const double height        = size.height();
-    //        const double textHeight    = metric.height();
-    //        pos = Gfx::PointF(widthHalf - textWidthHalf, 
-    //                          height - textHeight + metric.ascent());
-    //        break;
-    //    }
-
-    //    case Label::BottomRight:
-    //    {
-    //        const double width      = size.width();
-    //        const double textWidth  = metric.width();
-    //        const double height     = size.height();
-    //        const double textHeight = metric.height();
-    //        pos = Gfx::PointF(width - textWidth, 
-    //                          height- textHeight + metric.ascent());
-    //        break;
-    //    }
-    //}
-
-    onRender(l, surface, rect); 
+    onRenderText(painter, 
+                 rect,
+                 label,
+                 *options,
+                 pos,
+                 *font, 
+                 *textColor);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

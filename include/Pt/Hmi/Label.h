@@ -66,13 +66,15 @@ class PT_HMI_API Label : public Panel
 
         void setTextAlignment(Alignment a);
 
+        Gfx::PointF textPosition(const Gfx::Font& font) const;
+
         const Gfx::Color* textColor() const;
 
         void setTextColor(const Gfx::Color& color);
 
         const Gfx::Font* font() const;
 
-        void setFont( const Gfx::Font& f);
+        void setFont(const Gfx::Font& f);
 
     protected:
         virtual Gfx::SizeF onAutoSize() const;

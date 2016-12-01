@@ -31,7 +31,11 @@
 #define Pt_Hmi_Style_h
 
 #include <Pt/Hmi/Api.h>
+#include <Pt/Gfx/Color.h>
+#include <Pt/Gfx/Brush.h>
+#include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Rect.h>
+#include <Pt/Gfx/Font.h>
 #include <Pt/TypeInfo.h>
 #include <Pt/NonCopyable.h>
 #include <map>
@@ -41,6 +45,7 @@ namespace Pt {
 namespace Hmi {
 
 class PaintSurface;
+class Painter;
 class StyleOptions;
 class Frame;
 class Panel;
@@ -198,9 +203,24 @@ class PT_HMI_API LabelRenderer : public Style::Facet
                     const Gfx::RectF& rect) const;
 
     protected:
-        virtual void onRender(const Label& l, 
-                              PaintSurface& surface, 
-                              const Gfx::RectF& rect) const = 0;
+        //virtual void onRender(const Label& l, 
+        //                      PaintSurface& surface, 
+        //                      const Gfx::RectF& rect) const = 0;
+
+        virtual void onRenderBackground(Painter& p, 
+                                        const Gfx::RectF& rect,
+                                        const Label& l,
+                                        const StyleOptions& options, 
+                                        const Gfx::Brush& brush, 
+                                        const Gfx::Color& borderColor) const = 0;
+
+        virtual void onRenderText(Painter& p, 
+                                  const Gfx::RectF& rect,
+                                  const Label& l,
+                                  const StyleOptions& options,
+                                  const Gfx::PointF& pos,
+                                  const Gfx::Font& font, 
+                                  const Gfx::Color& textColor) const = 0;
 };
 
 class PT_HMI_API MenuRenderer : public Style::Facet

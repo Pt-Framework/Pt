@@ -125,6 +125,54 @@ void PlatinumRendererBase::renderFrame(Painter& painter,
 }
 
 
+void PlatinumRendererBase::renderFrame(Painter& painter,
+                                       const Gfx::RectF& frameRect,
+                                       const Gfx::Color& borderColor,
+                                       double corner) const
+{
+    Gfx::RectF borderRect = frameRect;
+
+    borderRect.setOrigin( Gfx::PointF(corner, corner) );
+    borderRect.setSize( Gfx::SizeF(frameRect.size().width() - corner, 
+                                   frameRect.size().height() - corner) );
+
+    Gfx::PointF outline[9] = {};
+
+    // top left
+    outline[0].setX(0);
+    outline[0].setY(corner);
+
+    outline[1].setX(corner);
+    outline[1].setY(0);
+
+    // top right
+    outline[2].setX(borderRect.width() - corner);
+    outline[2].setY(0);
+
+    outline[3].setX(borderRect.width());
+    outline[3].setY(corner);
+
+    // bottom right
+    outline[4].setX(borderRect.width());
+    outline[4].setY(borderRect.height() - corner);
+
+    outline[5].setX(borderRect.width() - corner);
+    outline[5].setY(borderRect.height());
+
+    // bottom left
+    outline[6].setX(corner);
+    outline[6].setY(borderRect.height());
+
+    outline[7].setX(0);
+    outline[7].setY(borderRect.height() - corner);
+            
+    outline[8] = outline[0];
+    
+    painter.setPen(borderColor);
+    painter.drawPolyline(outline, 9);
+}
+
+
 void PlatinumRendererBase::renderPlane(Painter& painter,
                                        const Gfx::RectF& rect,
                                        const StyleOptions& options,
@@ -172,6 +220,52 @@ void PlatinumRendererBase::renderPlane(Painter& painter,
     else
         painter.setBrush( options.background() );
 
+    painter.fillPolygon(outline, 9);
+}
+
+
+void PlatinumRendererBase::renderPlane(Painter& painter,
+                                       const Gfx::RectF& rect,
+                                       const Gfx::Brush& brush,
+                                       double corner) const
+{
+    Gfx::RectF borderRect( Gfx::PointF(corner, corner),
+                           Gfx::SizeF(rect.size().width() - corner, 
+                                      rect.size().height() - corner) );
+
+    Gfx::PointF outline[9] = {};
+
+    // top left
+    outline[0].setX(0);
+    outline[0].setY(corner);
+
+    outline[1].setX(corner);
+    outline[1].setY(0);
+
+    // top right
+    outline[2].setX(borderRect.width() - corner);
+    outline[2].setY(0);
+
+    outline[3].setX(borderRect.width());
+    outline[3].setY(corner);
+
+    // bottom right
+    outline[4].setX(borderRect.width());
+    outline[4].setY(borderRect.height() - corner);
+
+    outline[5].setX(borderRect.width() - corner);
+    outline[5].setY(borderRect.height());
+
+    // bottom left
+    outline[6].setX(corner);
+    outline[6].setY(borderRect.height());
+
+    outline[7].setX(0);
+    outline[7].setY(borderRect.height() - corner);
+            
+    outline[8] = outline[0];
+
+    painter.setBrush( brush );
     painter.fillPolygon(outline, 9);
 }
 
@@ -234,9 +328,7 @@ void PlatinumButtonRenderer::onRender(const Button& button,
     Gfx::Color buttonColor = options->foreground();
     Gfx::Color textColor =  options->textColor();
     const Gfx::Font& textFont = options->font();
-    Gfx::Color frameColor = Gfx::Color(buttonColor.red() * 0.7f,
-                                       buttonColor.green() * 0.7f,
-                                       buttonColor.blue() * 0.7f);
+    Gfx::Color frameColor = brighten(buttonColor, 0.7f);
 
     const Gfx::SizeF& size = button.size();
     if( size.width() < 0 || size.height() < 0)
@@ -478,138 +570,70 @@ PlatinumLabelRenderer::~PlatinumLabelRenderer()
 }
 
 
-void PlatinumLabelRenderer::onRender(const Label& l, 
-                                     PaintSurface& surface, 
-                                     const Gfx::RectF& updateRect) const
+//void PlatinumLabelRenderer::onRender(const Label& l, 
+//                                     PaintSurface& surface, 
+//                                     const Gfx::RectF& updateRect) const
+//{
+//    const StyleOptions* options = l.getFacet<StyleOptions>();
+//    if( ! options )
+//      return;
+//
+//    Painter painter(surface);
+//    painter.setClip(updateRect);
+//
+//    //
+//    // render label background
+//    //
+//
+//    Gfx::RectF borderRect( Gfx::PointF(0,0), l.size() );
+//    _baseRenderer.renderPlane(painter, borderRect, *options, l.planeColor());
+//    _baseRenderer.renderFrame(painter, borderRect, *options, l.borderColor());
+//
+//    //
+//    // render label text
+//    //
+//       
+//    const Gfx::Font* font = l.font();
+//    if(font)
+//        painter.setFont(*font);
+//    else
+//        painter.setFont( options->font() );
+//
+//    const Gfx::Color* color = l.textColor();
+//    if(color)
+//        painter.setPen(*color);
+//    else
+//        painter.setPen( options->textColor() ); 
+//
+//    Gfx::PointF pos = l.textPosition(font ? *font : options->font());
+//    painter.drawText( pos, l.text() );
+//}
+
+
+void PlatinumLabelRenderer::onRenderBackground(Painter& painter, 
+                                               const Gfx::RectF& rect,
+                                               const Label& l,
+                                               const StyleOptions& options,
+                                               const Gfx::Brush& brush, 
+                                               const Gfx::Color& borderColor) const 
 {
-    const StyleOptions* options = l.getFacet<StyleOptions>();
-    if( ! options )
-      return;
-
-    Painter painter(surface);
-    painter.setClip(updateRect);
-
-    //
-    // render label background
-    //
-
     Gfx::RectF borderRect( Gfx::PointF(0,0), l.size() );
-    _baseRenderer.renderPlane(painter, borderRect, *options, l.planeColor());
-    _baseRenderer.renderFrame(painter, borderRect, *options, l.borderColor());
+    
+    _baseRenderer.renderPlane(painter, borderRect, brush);
+    _baseRenderer.renderFrame(painter, borderRect, borderColor);
+}
 
-    //
-    // render label text
-    //
-       
-    const Gfx::Font* font = l.font();
-    if(font)
-        painter.setFont(*font);
-    else
-        painter.setFont( options->font() );
 
-    const Gfx::Color* color = l.textColor();
-    if(color)
-        painter.setPen(*color);
-    else
-        painter.setPen( options->textColor() ); 
-
-    const Gfx::SizeF& size = l.size();
-    Gfx::PointF pos(0, 0);
-    Gfx::FontMetrics metric = painter.fontMetrics( l.text() );
-
-    switch( l.textAlignment() )
-    {
-        case Label::TopLeft:
-        {
-            pos = Gfx::PointF(0, metric.ascent());
-            break;
-        }
-        
-        case Label::TopCenter:
-        {
-            const double widthHalf     = size.width() / 2;
-            const double textWidthHalf = metric.width() / 2;
-            pos = Gfx::PointF(widthHalf - textWidthHalf, metric.ascent());
-            break;
-        }
-        break;
-
-        case Label::TopRight:
-        {
-            const double width     = size.width();
-            const double textWidth = metric.width();
-            pos = Gfx::PointF(width - textWidth, metric.ascent());
-            break;
-        }
-        break;
-
-        case Label::MiddleLeft:
-        {
-            const double heightHalf     = size.height() / 2;
-            const double textHeightHalf = metric.height() / 2;
-
-            pos = Gfx::PointF(0, (heightHalf - textHeightHalf) + metric.ascent());
-            break;
-        }
-
-        default:
-        case Label::MiddleCenter:
-        {            
-            const double widthHalf      = size.width() / 2;
-            const double heightHalf     = size.height() / 2;
-            const double textWidthHalf  = metric.width() / 2;
-            const double textHeightHalf = metric.height() / 2;
-
-            pos = Gfx::PointF(widthHalf - textWidthHalf, 
-                              heightHalf - textHeightHalf + metric.ascent());
-            break;
-        }
-
-        case Label::MiddleRight:
-        {
-            const double width          = size.width();
-            const double textWidth      = metric.width();
-            const double heightHalf     = size.height()/2;
-            const double textHeightHalf = metric.height()/2;
-
-            pos = Gfx::PointF(width - textWidth, 
-                              heightHalf - textHeightHalf + metric.ascent());
-            break;
-        }
-
-        case Label::BottomLeft:
-        {
-            const double height     = size.height();
-            const double textHeight = metric.height();
-
-            pos = Gfx::PointF(0, height- textHeight + metric.ascent());
-            break;
-        }
-
-        case Label::BottomCenter:
-        {
-            const double widthHalf     = size.width() / 2;
-            const double textWidthHalf = metric.width() / 2;
-            const double height        = size.height();
-            const double textHeight    = metric.height();
-
-            pos = Gfx::PointF(widthHalf - textWidthHalf, 
-                              height - textHeight + metric.ascent());
-            break;
-        }
-
-        case Label::BottomRight:
-        {
-            const double width      = size.width();
-            const double textWidth  = metric.width();
-            const double height     = size.height();
-            const double textHeight = metric.height();
-
-            pos = Gfx::PointF(width - textWidth, 
-                              height- textHeight + metric.ascent());
-            break;
-        }
-    }
+void PlatinumLabelRenderer::onRenderText(Painter& painter, 
+                                         const Gfx::RectF& rect,
+                                         const Label& l,
+                                         const StyleOptions& options,
+                                         const Gfx::PointF& pos,
+                                         const Gfx::Font& font, 
+                                         const Gfx::Color& textColor) const 
+{
+    painter.setFont(font);
+    painter.setPen(textColor);
 
     painter.drawText( pos, l.text() );
 }
