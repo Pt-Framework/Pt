@@ -33,6 +33,7 @@
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/Panel.h>
 #include <Pt/Hmi/Label.h>
+#include <Pt/Hmi/LineEdit.h>
 #include <Pt/Hmi/PushButton.h>
 #include <Pt/Hmi/CheckBox.h>
 #include <Pt/Hmi/MenuBar.h>
@@ -608,6 +609,53 @@ void PlatinumLabelRenderer::onRenderText(Painter& painter,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// PlatinumLineEditRenderer
+///////////////////////////////////////////////////////////////////////////////
+
+PlatinumLineEditRenderer::PlatinumLineEditRenderer(std::size_t refs)
+: LineEditRenderer(refs)
+{
+}
+
+    
+PlatinumLineEditRenderer::~PlatinumLineEditRenderer()
+{
+}
+
+
+void PlatinumLineEditRenderer::onRender(const LineEdit& le, 
+                                        PaintSurface& surface, 
+                                        const Gfx::RectF& rect) const
+{
+    const StyleOptions* options = le.getFacet<StyleOptions>();
+    if( ! options )
+      return;
+
+    Gfx::Color frameColor = brighten(options->foreground(), 0.7f);
+    Gfx::Color fillColor = Gfx::Color::fromRgb8(255, 255, 255);
+
+    Painter painter(surface);
+    painter.setClip(rect);
+    
+    painter.setBrush(fillColor);
+    painter.fillRect(rect);
+
+    painter.setPen(frameColor);
+    painter.drawRect(rect);
+
+    painter.setFont( options->font() );
+    painter.setPen( options->textColor() );
+    
+    Gfx::FontMetrics metric = painter.fontMetrics( le.text() );
+
+    double textX = le.padding().left();
+    double textY = (le.size().height() / 2) - (metric.height() / 2) + metric.ascent();
+    Gfx::PointF textPos(textX, textY);
+
+    painter.drawText(textPos, le.text());
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // PlatinumMenuRenderer
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -821,6 +869,7 @@ PlatinumStyle::PlatinumStyle()
     set(new PlatinumCheckBoxRenderer);
     set(new PlatinumPanelRenderer);
     set(new PlatinumLabelRenderer);
+    set(new PlatinumLineEditRenderer);
     set(new PlatinumMenuRenderer);
     set(new PlatinumMenuBarRenderer);
     set(new PlatinumScrollBarRenderer);

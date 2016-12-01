@@ -30,6 +30,7 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
              DockingLayout.cpp
              FlowLayout.cpp
              Layout.cpp
+             LineEdit.cpp
              PaintSurface.cpp
              PixmapSurface.cpp 
              PaintRegion.cpp

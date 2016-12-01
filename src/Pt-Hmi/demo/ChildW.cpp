@@ -113,9 +113,15 @@ ChildW::ChildW(const std::string& title)
     _checkBox.setPadding(5);
     _checkBox.clicked() += Pt::slot(*this, &ChildW::onCheckBox);
 
+    _lineEdit.setName("LineEdit"); 
+    _lineEdit.setText("line edit text");
+    _lineEdit.resize( Gfx::SizeF(130, 26) );
+    _lineEdit.setMargin(5);
+
     _buttonBar.setName("ButtonBar");
-    _buttonBar.resize( Gfx::SizeF(700, 180) );
+    _buttonBar.resize( Gfx::SizeF(700, 220) );
     _buttonBar.setPadding(5);
+    _buttonBar.dock(_lineEdit, DockingLayout::Bottom);
     _buttonBar.dock(_checkBox, DockingLayout::Bottom);
     _buttonBar.dock(_closeButton, DockingLayout::Bottom);
     _buttonBar.dock(_dialogButton, DockingLayout::Bottom); 

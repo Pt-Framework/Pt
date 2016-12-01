@@ -245,6 +245,28 @@ void LabelRenderer::render(const Label& label,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// LineEditRenderer
+///////////////////////////////////////////////////////////////////////////////
+
+LineEditRenderer::LineEditRenderer(std::size_t refs)
+: Style::Facet( typeid(LineEditRenderer), refs )
+{
+}
+
+    
+LineEditRenderer::~LineEditRenderer()
+{
+}
+
+
+void LineEditRenderer::render(const LineEdit& le, 
+                              PaintSurface& surface, 
+                              const Gfx::RectF& rect) const
+{ 
+    onRender(le, surface, rect); 
+}  
+
+///////////////////////////////////////////////////////////////////////////////
 // MenuRenderer
 ///////////////////////////////////////////////////////////////////////////////
 

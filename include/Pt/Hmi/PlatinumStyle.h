@@ -118,24 +118,6 @@ class PT_HMI_API PlatinumCheckBoxRenderer : public CheckBoxRenderer
         PlatinumRendererBase _baseRenderer;
 };
 
-
-//class PT_HMI_API PlatinumFrameRenderer : public FrameRenderer
-//{
-//    public:
-//        PlatinumFrameRenderer(std::size_t refs = 0);
-//
-//        virtual ~PlatinumFrameRenderer();
-//
-//    protected:
-//        virtual void onRender(const Frame& f, 
-//                              PaintSurface& surface, 
-//                              const Gfx::RectF& rect) const;
-//
-//    private:
-//        PlatinumRendererBase _baseRenderer;
-//};
-
-
 class PT_HMI_API PlatinumPanelRenderer : public PanelRenderer
 {
     public:
@@ -147,6 +129,7 @@ class PT_HMI_API PlatinumPanelRenderer : public PanelRenderer
         virtual void onRender(const Panel& p, 
                               PaintSurface& surface, 
                               const Gfx::RectF& rect) const;
+    
     private:
         PlatinumRendererBase _baseRenderer;
 };
@@ -179,6 +162,23 @@ class PT_HMI_API PlatinumLabelRenderer : public LabelRenderer
                                   const Gfx::Font& font, 
                                   const Gfx::Color& textColor) const;
 
+    private:
+        PlatinumRendererBase _baseRenderer;
+};
+
+
+class PT_HMI_API PlatinumLineEditRenderer : public LineEditRenderer
+{
+    public:
+        PlatinumLineEditRenderer(std::size_t refs = 0);
+
+        virtual ~PlatinumLineEditRenderer();
+
+    protected:
+        virtual void onRender(const LineEdit& le, 
+                              PaintSurface& surface, 
+                              const Gfx::RectF& rect) const;
+    
     private:
         PlatinumRendererBase _baseRenderer;
 };

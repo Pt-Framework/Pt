@@ -49,6 +49,7 @@ class Painter;
 class StyleOptions;
 class Panel;
 class Label;
+class LineEdit;
 class Button;
 class CheckBox;
 class Menu;
@@ -203,6 +204,23 @@ class PT_HMI_API LabelRenderer : public Style::Facet
                                   const Gfx::PointF& pos,
                                   const Gfx::Font& font, 
                                   const Gfx::Color& textColor) const = 0;
+};
+
+class PT_HMI_API LineEditRenderer : public Style::Facet
+{
+    public:
+        LineEditRenderer(std::size_t refs = 0);
+
+        virtual ~LineEditRenderer();
+
+        void render(const LineEdit& le,
+                    PaintSurface& surface, 
+                    const Gfx::RectF& rect) const;
+
+    protected:
+        virtual void onRender(const LineEdit& le, 
+                              PaintSurface& surface, 
+                              const Gfx::RectF& rect) const = 0;
 };
 
 class PT_HMI_API MenuRenderer : public Style::Facet
