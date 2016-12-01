@@ -158,27 +158,6 @@ void CheckBoxRenderer::render(const CheckBox& cb,
     onRender(cb, surface, rect); 
 }  
 
-///////////////////////////////////////////////////////////////////////////////
-// FrameRenderer
-///////////////////////////////////////////////////////////////////////////////
-
-FrameRenderer::FrameRenderer(std::size_t refs)
-: Style::Facet( typeid(FrameRenderer), refs )
-{
-}
-
-    
-FrameRenderer::~FrameRenderer()
-{
-}
-
-
-void FrameRenderer::render(const Frame& f, 
-                           PaintSurface& surface, 
-                           const Gfx::RectF& rect) const
-{ 
-    onRender(f, surface, rect); 
-}  
 
 ///////////////////////////////////////////////////////////////////////////////
 // PanelRenderer

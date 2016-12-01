@@ -29,6 +29,7 @@
 #include "MainWindow.h"
 #include "AtesionIcon.h"
 #include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/Painter.h>
 #include <Pt/Gfx/PngReader.h>
 #include <Pt/Gfx/JpegReader.h>
 #include <Pt/Gfx/Image.h>

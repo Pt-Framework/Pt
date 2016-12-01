@@ -29,7 +29,6 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
              Cursor.cpp
              DockingLayout.cpp
              FlowLayout.cpp
-             Frame.cpp
              Layout.cpp
              PaintSurface.cpp
              PixmapSurface.cpp 

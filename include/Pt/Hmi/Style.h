@@ -47,7 +47,6 @@ namespace Hmi {
 class PaintSurface;
 class Painter;
 class StyleOptions;
-class Frame;
 class Panel;
 class Label;
 class Button;
@@ -156,23 +155,6 @@ class PT_HMI_API CheckBoxRenderer : public Style::Facet
                               const Gfx::RectF& rect) const = 0;
 };
 
-
-class PT_HMI_API FrameRenderer : public Style::Facet
-{
-    public:
-        FrameRenderer(std::size_t refs = 0);
-
-        virtual ~FrameRenderer();
-
-        void render(const Frame& f,
-                    PaintSurface& surface, 
-                    const Gfx::RectF& rect) const;
-
-    protected:
-        virtual void onRender(const Frame& f, 
-                              PaintSurface& surface, 
-                              const Gfx::RectF& rect) const = 0;
-};
 
 class PT_HMI_API PanelRenderer : public Style::Facet
 {

@@ -31,7 +31,6 @@
 #include <Pt/Hmi/StyleOptions.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Painter.h>
-#include <Pt/Hmi/Frame.h>
 #include <Pt/Hmi/Panel.h>
 #include <Pt/Hmi/Label.h>
 #include <Pt/Hmi/PushButton.h>
@@ -495,36 +494,6 @@ void PlatinumCheckBoxRenderer::onRender(const CheckBox& cb,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// PlatinumFrameRenderer
-///////////////////////////////////////////////////////////////////////////////
-
-PlatinumFrameRenderer::PlatinumFrameRenderer(std::size_t refs)
-: FrameRenderer(refs)
-{
-}
-
-    
-PlatinumFrameRenderer::~PlatinumFrameRenderer()
-{
-}
-
-
-void PlatinumFrameRenderer::onRender(const Frame& f, 
-                                     PaintSurface& surface, 
-                                     const Gfx::RectF& rect) const
-{
-    const StyleOptions* options = f.getFacet<StyleOptions>();
-    if( ! options)
-      return;
-
-    Painter painter(surface);
-    painter.setClip(rect);
-
-    Gfx::RectF frameRect( Gfx::PointF(0, 0), f.size() );
-    _baseRenderer.renderFrame(painter, frameRect, *options, f.borderColor());
-}
-
-///////////////////////////////////////////////////////////////////////////////
 // PlatinumPanelRenderer
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -850,7 +819,6 @@ PlatinumStyle::PlatinumStyle()
 {
     set(new PlatinumButtonRenderer);
     set(new PlatinumCheckBoxRenderer);
-    set(new PlatinumFrameRenderer);
     set(new PlatinumPanelRenderer);
     set(new PlatinumLabelRenderer);
     set(new PlatinumMenuRenderer);

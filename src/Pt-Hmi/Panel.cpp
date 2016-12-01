@@ -28,7 +28,7 @@
 */
 
 #include <Pt/Hmi/Panel.h>
-#include <Pt/Hmi/PaintSurface.h>
+#include <Pt/Hmi/Painter.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/BlockScale.h>
@@ -42,6 +42,8 @@ Panel::Panel()
 , _layout( ImageLayout::None )
 , _planeColor( Gfx::Color::fromRgb8(0,0,0) )
 , _hasPlaneColor(false)
+, _borderColor( Gfx::Color::fromRgb8(0,0,0) )
+, _hasBorderColor(false)
 {
     setAcceptsFocus(false);
 }
@@ -66,6 +68,20 @@ void Panel::setPlaneColor(const Gfx::Color& color)
 }
 
 
+const Gfx::Color* Panel::borderColor() const
+{
+    return _hasBorderColor ? &_borderColor : 0;
+}
+
+
+void Panel::setBorderColor(const Gfx::Color& color)
+{
+    _borderColor = color;
+    _hasBorderColor = true;
+    update();
+}
+
+
 void Panel::setImage(const Gfx::Image& image, ImageLayout layout)
 {
     if(layout == ImageLayout::Strech || layout ==  ImageLayout::Zoom)
@@ -79,10 +95,10 @@ void Panel::setImage(const Gfx::Image& image, ImageLayout layout)
 
 void Panel::onResizeEvent(const ResizeEvent& ev)
 {
-    Widget::onResizeEvent(ev);
+    Control::onResizeEvent(ev);
 
     if( _picture.empty() || ev.size().width() < 1 || ev.size().height() < 1 )
-     return;
+        return;
 
     switch( _layout.type() )
     {

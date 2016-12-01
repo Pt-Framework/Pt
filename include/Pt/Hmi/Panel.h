@@ -29,10 +29,8 @@
 #ifndef Pt_Hmi_Panel_H
 #define Pt_Hmi_Panel_H
 
-#include <Pt/Hmi/PaintSurface.h>
-#include <Pt/Hmi/Painter.h>
+#include <Pt/Hmi/Control.h>
 #include <Pt/Hmi/Picture.h>
-#include <Pt/Hmi/Frame.h>
 #include <Pt/Gfx/Color.h>
 
 namespace Pt {
@@ -88,7 +86,7 @@ class ImageLayout
 };
 
 
-class PT_HMI_API Panel : public Frame
+class PT_HMI_API Panel : public Control
 {
 	  public:
         Panel();
@@ -108,6 +106,10 @@ class PT_HMI_API Panel : public Frame
 
         void setPlaneColor(const Gfx::Color& color);
 
+        const Gfx::Color* borderColor() const;
+
+        void setBorderColor(const Gfx::Color& color);
+
         void setImage(const Gfx::Image& image, ImageLayout layout);  
               
     protected:
@@ -121,6 +123,8 @@ class PT_HMI_API Panel : public Frame
         ImageLayout _layout;
         Gfx::Color  _planeColor;
         bool        _hasPlaneColor;
+        Gfx::Color  _borderColor;
+        bool        _hasBorderColor;
 }; 
 
 } // namespace
