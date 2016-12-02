@@ -42,28 +42,26 @@ void ImageFormat::copy(ImageView& to, const Point& toPos,
                        const ImageView& from, const Rect& fromRect,
                        CompositionMode mode) const
 {
-/*
     bool outside = toPos.x() < 0 || toPos.y() < 0 ||
                    toPos.x() + fromRect.width() > to.width() ||
                    toPos.y() + fromRect.height() > to.height();
 
+    //assert( ! outside );
 
-    assert( ! outside );
+    //if(outside)
+    //    return;
 
-    if(outside)
-        return;*/
-
-    Rect clipRect(Point(0,0), to.size());
+    //Rect clipRect(Point(0,0), to.size());
 
     //// clip fromRect to fit into the clip/image rect
-    Point d = clipRect.topLeft() - toPos;
-    Point fromPos = fromRect.topLeft() + d;
+    //Point d = clipRect.topLeft() - toPos;
+    //Point fromPos = fromRect.topLeft() + d;
 
-    Rect fromClip( fromPos, clipRect.size() );
-    fromClip = fromRect.intersect(fromClip);
+    //Rect fromClip( fromPos, clipRect.size() );
+    //fromClip = fromRect.intersect(fromClip);
 
     //// account for smaller fromRect
-    Point toClip = toPos + (fromClip.topLeft() - fromRect.topLeft());
+    //Point toClip = toPos + (fromClip.topLeft() - fromRect.topLeft());
     
     //onCopy(to, toClip, from, fromClip, mode);
 
