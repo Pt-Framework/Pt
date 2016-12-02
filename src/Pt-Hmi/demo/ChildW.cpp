@@ -114,7 +114,7 @@ ChildW::ChildW(const std::string& title)
     _checkBox.clicked() += Pt::slot(*this, &ChildW::onCheckBox);
 
     _lineEdit.setName("LineEdit"); 
-    _lineEdit.setText("line edit text");
+    _lineEdit.setText("line");
     _lineEdit.resize( Gfx::SizeF(130, 26) );
     _lineEdit.setMargin(5);
 

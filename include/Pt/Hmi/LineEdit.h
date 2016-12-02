@@ -51,6 +51,10 @@ class PT_HMI_API LineEdit : public Control
 
         const Pt::String& text() const;
 
+        std::size_t cursorPosition() const;
+
+        void setCursorPosition(std::size_t n);
+
     protected:
         virtual void onKeyEvent(const KeyEvent& ev);
 
@@ -58,7 +62,7 @@ class PT_HMI_API LineEdit : public Control
 
     private:
         Pt::String    _text;
-        Pt::String    _emptyText;
+        std::size_t   _cursorPosition;
 };
 
 } // namespace

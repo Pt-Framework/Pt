@@ -28,12 +28,15 @@
 */
 
 #include <Pt/Hmi/LineEdit.h>
+#include <Pt/Hmi/Painter.h>
+#include <Pt/Gfx/ImagePainter.h>
 
 namespace Pt {
 
 namespace Hmi {
 
 LineEdit::LineEdit()
+: _cursorPosition(0)
 {
     setAcceptsFocus(true);
 
@@ -59,6 +62,19 @@ const Pt::String& LineEdit::text() const
 }
 
 
+std::size_t LineEdit::cursorPosition() const
+{
+    return _cursorPosition;
+}
+
+
+void LineEdit::setCursorPosition(std::size_t n)
+{
+    _cursorPosition = n;
+    update();
+}
+
+
 void LineEdit::onKeyEvent(const KeyEvent& ev)
 {  
     Base::onKeyEvent(ev);
@@ -66,27 +82,43 @@ void LineEdit::onKeyEvent(const KeyEvent& ev)
     if( ! ev.isPress() )
         return;
 
-    if( ev.key().code() == Pt::Hmi::Key::Backspace )
+    if( ev.key().code() == Pt::Hmi::Key::ArrowLeft )
     {
-        if( _text.empty() )
-            return;
-        
-        _text.resize( _text.size() - 1 );
+        if(_cursorPosition > 0)
+            --_cursorPosition;
     }
+    else if( ev.key().code() == Pt::Hmi::Key::ArrowRight )
+    {
+        if( _cursorPosition < _text.size() )
+            ++_cursorPosition;
+    }
+    else if( ev.key().code() == Pt::Hmi::Key::Backspace )
+    {
+        if(_text.empty() || _cursorPosition == 0)
+            return;
 
-    Pt::Char ch = ev.unicode();
-    if( Pt::isprint(ch) )
-        _text.push_back(ch);
-
+        --_cursorPosition;
+        _text.erase(_cursorPosition, 1);
+    }
+    else 
+    {
+        Pt::Char ch = ev.unicode();
+        if( Pt::isprint(ch) )
+        {
+            _text.insert(_cursorPosition, 1, ch);
+            ++_cursorPosition;
+        }
+    }
+    
     update();
 }
 
 
 void LineEdit::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
-  const LineEditRenderer* renderer = getFacet<LineEditRenderer>();
-  if(renderer)
-      renderer->render(*this, surface, rect);
+    const LineEditRenderer* renderer = getFacet<LineEditRenderer>();
+    if(renderer)
+        renderer->render(*this, surface, rect);
 }
 
 } // namespace

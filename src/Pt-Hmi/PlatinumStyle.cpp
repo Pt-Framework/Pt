@@ -646,13 +646,24 @@ void PlatinumLineEditRenderer::onRender(const LineEdit& le,
     painter.setFont( options->font() );
     painter.setPen( options->textColor() );
     
-    Gfx::FontMetrics metric = painter.fontMetrics( le.text() );
+    Gfx::FontMetrics fm = painter.fontMetrics( le.text() );
 
+    double textHeight = fm.ascent() + fm.descent();
     double textX = le.padding().left();
-    double textY = (le.size().height() / 2) - (metric.height() / 2) + metric.ascent();
+    double textY = (le.size().height() / 2) - (textHeight / 2) + fm.ascent();
+    
     Gfx::PointF textPos(textX, textY);
-
     painter.drawText(textPos, le.text());
+
+    std::size_t cursorPosition = le.cursorPosition();
+    Pt::String left = le.text().empty() ? Pt::String() 
+                                        : le.text().substr(0, cursorPosition);
+    Gfx::FontMetrics fmCursor = painter.fontMetrics(left);
+
+    float cursorX = textX + fmCursor.width();
+
+    painter.drawLine( Gfx::PointF(cursorX, textY - fm.ascent()),
+                      Gfx::PointF(cursorX, textY + fm.descent()) );
 }
 
 ///////////////////////////////////////////////////////////////////////////////
