@@ -55,14 +55,23 @@ class PT_HMI_API LineEdit : public Control
 
         void setCursorPosition(std::size_t n);
 
+        double hoffset() const
+        { return _hoffset; }
+
     protected:
         virtual void onKeyEvent(const KeyEvent& ev);
 
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& rect);
 
     private:
+        void advanceCursor();
+
+        void reverseCursor();
+
+    private:
         Pt::String    _text;
         std::size_t   _cursorPosition;
+        double        _hoffset;
 };
 
 } // namespace

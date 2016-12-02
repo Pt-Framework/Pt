@@ -649,7 +649,7 @@ void PlatinumLineEditRenderer::onRender(const LineEdit& le,
     Gfx::FontMetrics fm = painter.fontMetrics( le.text() );
 
     double textHeight = fm.ascent() + fm.descent();
-    double textX = le.padding().left();
+    double textX = le.padding().left() - le.hoffset();
     double textY = (le.size().height() / 2) - (textHeight / 2) + fm.ascent();
     
     Gfx::PointF textPos(textX, textY);
@@ -660,7 +660,7 @@ void PlatinumLineEditRenderer::onRender(const LineEdit& le,
                                         : le.text().substr(0, cursorPosition);
     Gfx::FontMetrics fmCursor = painter.fontMetrics(left);
 
-    float cursorX = textX + fmCursor.width();
+    double cursorX = textX + fmCursor.width();
 
     painter.drawLine( Gfx::PointF(cursorX, textY - fm.ascent()),
                       Gfx::PointF(cursorX, textY + fm.descent()) );

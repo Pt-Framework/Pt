@@ -37,6 +37,7 @@ namespace Hmi {
 
 LineEdit::LineEdit()
 : _cursorPosition(0)
+, _hoffset(0)
 {
     setAcceptsFocus(true);
 
@@ -75,6 +76,58 @@ void LineEdit::setCursorPosition(std::size_t n)
 }
 
 
+void LineEdit::advanceCursor()
+{
+    if( _cursorPosition >= _text.size() )
+        return;
+
+    ++_cursorPosition;
+
+    const StyleOptions* options = getFacet<StyleOptions>();
+    if( ! options )
+      return;
+
+    Pt::String left = _text.substr(0, _cursorPosition);
+    Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( options->font(), left );
+
+    double pos = fm.width() + padding().leftRight();
+    if(pos > size().width() + _hoffset)
+        _hoffset = pos - size().width();
+}
+
+
+void LineEdit::reverseCursor()
+{
+    if(_cursorPosition == 0)
+        return;
+
+    --_cursorPosition;
+            
+    const StyleOptions* options = getFacet<StyleOptions>();
+    if( ! options )
+      return;
+
+    if( _text.empty() )
+    {
+        _hoffset = 0;
+        return;
+    }
+
+    Pt::String left = _text.substr(0, _cursorPosition);
+    Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( options->font(), left );
+            
+    double pos = fm.width();
+      if(pos < _hoffset + padding().left())
+    {
+        double delta = (_hoffset + padding().left()) - pos;
+        if(delta > _hoffset)
+            _hoffset = 0;
+        else
+            _hoffset -= delta;
+    }
+}
+
+
 void LineEdit::onKeyEvent(const KeyEvent& ev)
 {  
     Base::onKeyEvent(ev);
@@ -84,29 +137,27 @@ void LineEdit::onKeyEvent(const KeyEvent& ev)
 
     if( ev.key().code() == Pt::Hmi::Key::ArrowLeft )
     {
-        if(_cursorPosition > 0)
-            --_cursorPosition;
+        reverseCursor();
     }
     else if( ev.key().code() == Pt::Hmi::Key::ArrowRight )
     {
-        if( _cursorPosition < _text.size() )
-            ++_cursorPosition;
+        advanceCursor();
     }
     else if( ev.key().code() == Pt::Hmi::Key::Backspace )
     {
-        if(_text.empty() || _cursorPosition == 0)
+        if( _text.empty() )
             return;
 
-        --_cursorPosition;
-        _text.erase(_cursorPosition, 1);
+        _text.erase(_cursorPosition - 1, 1);
+        reverseCursor();
     }
-    else 
+    else
     {
         Pt::Char ch = ev.unicode();
         if( Pt::isprint(ch) )
         {
             _text.insert(_cursorPosition, 1, ch);
-            ++_cursorPosition;
+            advanceCursor();
         }
     }
     
