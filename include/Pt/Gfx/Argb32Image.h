@@ -105,9 +105,9 @@ class Argb32Model
             Pt::uint32_t alphaSrc = alpha + 1;
             Pt::uint32_t alphaInv = 256 - alpha;
 
-            to[0] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.red() / 257) + alphaInv * to[0]) >> 8);
+            to[0] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.blue() / 257) + alphaInv * to[0]) >> 8);
             to[1] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.green() / 257) + alphaInv * to[1]) >> 8);
-            to[2] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.blue() / 257) + alphaInv * to[2]) >> 8);
+            to[2] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.red() / 257) + alphaInv * to[2]) >> 8);
             to[3] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.alpha() / 257) + alphaInv * to[3]) >> 8);
         }
         

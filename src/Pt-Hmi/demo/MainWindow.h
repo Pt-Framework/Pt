@@ -78,7 +78,6 @@ class MainWindow : public Pt::Hmi::Window
             PushButton _btns[20];
             PushButton _bt2;
             Pt::Gfx::Image _image;
-
 };
 
 } // namespace
