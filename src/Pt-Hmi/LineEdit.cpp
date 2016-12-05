@@ -163,6 +163,7 @@ std::size_t LineEdit::xToCursor(double x)
     std::size_t n = _text.length();
     Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( options->font(), _text );
 
+    // estimate start position
     std::size_t widthPerChar = fm.width() / _text.size();
     std::size_t pos = textX / widthPerChar;
 
