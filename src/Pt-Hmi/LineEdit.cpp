@@ -190,10 +190,7 @@ std::size_t LineEdit::xToCursor(double x)
             fm = Hmi::Painter::fontMetrics( options->font(), left );
       
             if( textX < fm.width() )
-            {
-                --pos;
                 break;
-            }
         }
     }
 
