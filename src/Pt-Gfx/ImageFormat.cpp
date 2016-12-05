@@ -46,7 +46,7 @@ void ImageFormat::copy(ImageView& to, const Point& toPos,
                    toPos.x() + fromRect.width() > to.width() ||
                    toPos.y() + fromRect.height() > to.height();
 
-    //assert( ! outside );
+    assert( ! outside );
 
     //if(outside)
     //    return;

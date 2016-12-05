@@ -3575,6 +3575,9 @@ void Rasterizer::image(const Point& to, const Image& from, const Rect& fromRect)
   Rect fromClip( fromPos, _currentClip.size() );
   fromClip = fromRect.intersect(fromClip);
 
+  if( fromClip.isNull() )
+      return;
+
   // account for smaller fromRect
   Point toClip = to + (fromClip.topLeft() - fromRect.topLeft());
 
