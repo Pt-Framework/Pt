@@ -156,9 +156,10 @@ std::size_t LineEdit::xToCursor(double x)
     if( ! options )
         return 0;
 
-    std::size_t textX = padding().left() < x ?  x - padding().left()
-                                             : 0;
-    
+    std::size_t textX = _hoffset;
+    if( padding().left() < x)
+        textX += x - padding().left();
+
     std::size_t n = _text.length();
     Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( options->font(), _text );
 
