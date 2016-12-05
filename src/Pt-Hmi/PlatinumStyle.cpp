@@ -632,12 +632,12 @@ void PlatinumLineEditRenderer::onRender(const LineEdit& le,
       return;
 
     Gfx::Color frameColor = brighten(options->foreground(), 0.7f);
-    Gfx::Color fillColor = Gfx::Color::fromRgb8(255, 255, 255);
+    const Gfx::Brush& fillBrush = options->viewBackground();
 
     Painter painter(surface);
     painter.setClip(rect);
     
-    painter.setBrush(fillColor);
+    painter.setBrush(fillBrush);
     painter.fillRect(rect);
 
     painter.setPen(frameColor);

@@ -77,6 +77,16 @@ class PT_HMI_API StyleOptions : public Style::Facet
           _background = b;
         }
 
+        const Gfx::Brush& viewBackground() const
+        {
+          return _viewBackground;
+        }
+
+        void setViewBackground(const Gfx::Brush& b)
+        {
+          _viewBackground = b;
+        }
+
         const Gfx::Color& foreground() const
         {
           return _foreground;
@@ -119,6 +129,7 @@ class PT_HMI_API StyleOptions : public Style::Facet
 
     private:
       Gfx::Brush _background;
+      Gfx::Brush _viewBackground;
       Gfx::Color _foreground;
       Gfx::Color _highlightColor;
       Gfx::Color _textColor;
