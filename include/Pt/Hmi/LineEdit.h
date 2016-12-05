@@ -37,6 +37,13 @@ namespace Pt {
 
 namespace Hmi {
 
+// TODO: aligned text
+//       echo mode
+//       placeholder text
+//       entered signal
+//       validation signal
+//       font, textColor
+
 class PT_HMI_API LineEdit : public Control
 {
     public:
