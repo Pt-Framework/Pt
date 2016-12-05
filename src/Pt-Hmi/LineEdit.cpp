@@ -71,60 +71,40 @@ std::size_t LineEdit::cursorPosition() const
 
 void LineEdit::setCursorPosition(std::size_t n)
 {
+    if( n > _text.size() )
+        n = _text.size();
+
+    const StyleOptions* options = getFacet<StyleOptions>();
+    if( ! options )
+        return;
+
+    if( ! _text.empty() )
+    { 
+        Pt::String left = _text.substr(0, n);
+        Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( options->font(), left );
+
+        if(n > _cursorPosition)
+        {
+            double pos = fm.width() + padding().leftRight();
+            if(pos > size().width() + _hoffset)
+                _hoffset = pos - size().width();
+        }
+        else
+        {   
+            double pos = fm.width();
+            if( pos < _hoffset + padding().left() )
+            {
+                double delta = (_hoffset + padding().left()) - pos;
+                if(delta > _hoffset)
+                    _hoffset = 0;
+                else
+                    _hoffset -= delta;
+            }
+        }
+    }
+
     _cursorPosition = n;
     update();
-}
-
-
-void LineEdit::advanceCursor()
-{
-    if( _cursorPosition >= _text.size() )
-        return;
-
-    ++_cursorPosition;
-
-    const StyleOptions* options = getFacet<StyleOptions>();
-    if( ! options )
-      return;
-
-    Pt::String left = _text.substr(0, _cursorPosition);
-    Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( options->font(), left );
-
-    double pos = fm.width() + padding().leftRight();
-    if(pos > size().width() + _hoffset)
-        _hoffset = pos - size().width();
-}
-
-
-void LineEdit::reverseCursor()
-{
-    if(_cursorPosition == 0)
-        return;
-
-    --_cursorPosition;
-            
-    const StyleOptions* options = getFacet<StyleOptions>();
-    if( ! options )
-      return;
-
-    if( _text.empty() )
-    {
-        _hoffset = 0;
-        return;
-    }
-
-    Pt::String left = _text.substr(0, _cursorPosition);
-    Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( options->font(), left );
-            
-    double pos = fm.width();
-      if(pos < _hoffset + padding().left())
-    {
-        double delta = (_hoffset + padding().left()) - pos;
-        if(delta > _hoffset)
-            _hoffset = 0;
-        else
-            _hoffset -= delta;
-    }
 }
 
 
@@ -137,19 +117,20 @@ void LineEdit::onKeyEvent(const KeyEvent& ev)
 
     if( ev.key().code() == Pt::Hmi::Key::ArrowLeft )
     {
-        reverseCursor();
+        if(_cursorPosition > 0)
+            setCursorPosition(_cursorPosition - 1);
     }
     else if( ev.key().code() == Pt::Hmi::Key::ArrowRight )
     {
-        advanceCursor();
+        setCursorPosition(_cursorPosition + 1);
     }
     else if( ev.key().code() == Pt::Hmi::Key::Backspace )
     {
-        if( _text.empty() )
-            return;
-
-        _text.erase(_cursorPosition - 1, 1);
-        reverseCursor();
+        if( _cursorPosition != 0 && ! _text.empty() )
+            _text.erase(_cursorPosition - 1, 1);
+        
+        if(_cursorPosition > 0)
+            setCursorPosition(_cursorPosition - 1);
     }
     else
     {
@@ -157,11 +138,90 @@ void LineEdit::onKeyEvent(const KeyEvent& ev)
         if( Pt::isprint(ch) )
         {
             _text.insert(_cursorPosition, 1, ch);
-            advanceCursor();
+
+            setCursorPosition(_cursorPosition + 1);
         }
     }
     
     update();
+}
+
+
+std::size_t LineEdit::xToCursor(double x)
+{
+    if( _text.empty() )
+        return 0;
+
+    const StyleOptions* options = getFacet<StyleOptions>();
+    if( ! options )
+        return 0;
+
+    std::size_t textX = padding().left() < x ?  x - padding().left()
+                                             : 0;
+    
+    std::size_t n = _text.length();
+    Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( options->font(), _text );
+
+    std::size_t widthPerChar = fm.width() / _text.size();
+    std::size_t pos = textX / widthPerChar;
+
+    if( pos >= _text.size() )
+        pos = _text.size() - 1;
+
+    Pt::String left = _text.substr(0, pos + 1);
+    fm = Hmi::Painter::fontMetrics( options->font(), left );
+
+    if( textX < fm.width() ) // search left
+    {
+        for( ; pos > 0; --pos)
+        {
+            left = _text.substr(0, pos);
+            fm = Hmi::Painter::fontMetrics( options->font(), left );
+      
+            if( textX >= fm.width() )
+                break;
+        }
+    }
+    else // if( textX >= fm.width() ) search right 
+    {
+        for(++pos ; pos < _text.size(); ++pos)
+        {
+            left = _text.substr(0, pos + 1);
+            fm = Hmi::Painter::fontMetrics( options->font(), left );
+      
+            if( textX < fm.width() )
+            {
+                --pos;
+                break;
+            }
+        }
+    }
+
+    return pos;
+}
+
+
+void LineEdit::onMouseEvent(const MouseEvent& mev)
+{
+    Base::onMouseEvent(mev);
+
+    if( ! mev.isPress() )
+        return;
+
+    std::size_t pos = xToCursor( mev.x() );
+    setCursorPosition(pos);
+}
+
+
+void LineEdit::onTouchEvent(const TouchEvent& tev)
+{
+    Base::onTouchEvent(tev);
+
+    if( ! tev.isPress() )
+        return;
+
+    std::size_t pos = xToCursor( tev.x() );
+    setCursorPosition(pos);
 }
 
 

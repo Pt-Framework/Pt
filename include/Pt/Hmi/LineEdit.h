@@ -61,12 +61,14 @@ class PT_HMI_API LineEdit : public Control
     protected:
         virtual void onKeyEvent(const KeyEvent& ev);
 
+        virtual void onMouseEvent(const MouseEvent& ev);
+
+        virtual void onTouchEvent(const TouchEvent& ev);
+
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& rect);
-
+    
     private:
-        void advanceCursor();
-
-        void reverseCursor();
+        std::size_t xToCursor(double x);
 
     private:
         Pt::String    _text;
