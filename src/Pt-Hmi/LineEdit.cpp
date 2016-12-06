@@ -128,6 +128,93 @@ void LineEdit::setCursorPosition(std::size_t n)
 }
 
 
+void LineEdit::onKeyEvent(const KeyEvent& ev)
+{  
+    Base::onKeyEvent(ev);
+
+    if( ! ev.isPress() )
+        return;
+
+    if( ev.key().code() == Pt::Hmi::Key::ArrowLeft )
+    {
+        if(_cursorPosition > 0)
+            setCursorPosition(_cursorPosition - 1);
+    }
+    else if( ev.key().code() == Pt::Hmi::Key::ArrowRight )
+    {
+        setCursorPosition(_cursorPosition + 1);
+    }
+    else if( ev.key().code() == Pt::Hmi::Key::Backspace )
+    {
+        if( _cursorPosition > 0 && ! _text.empty() )
+            _text.erase(_cursorPosition - 1, 1);
+
+        if( ! _displayText.empty() )
+            _displayText.resize( _displayText.size() - 1 );
+        
+        if(_cursorPosition > 0)
+            setCursorPosition(_cursorPosition - 1);
+    }
+    else
+    {
+        Pt::Char ch = ev.unicode();
+        if( Pt::isprint(ch) )
+        {
+            _text.insert(_cursorPosition, 1, ch);
+
+            if(_echoMode == Masked)
+                _displayText += maskChar;
+
+            setCursorPosition(_cursorPosition + 1);
+        }
+    }
+}
+
+
+void LineEdit::onMouseEvent(const MouseEvent& mev)
+{
+    Base::onMouseEvent(mev);
+
+    if(_echoMode == Hidden)
+        return;
+
+    if( ! mev.isPress() )
+        return;
+
+    std::size_t pos = xToCursor( mev.x() );
+    setCursorPosition(pos);
+}
+
+
+void LineEdit::onTouchEvent(const TouchEvent& tev)
+{
+    Base::onTouchEvent(tev);
+
+    if(_echoMode == Hidden)
+        return;
+
+    if( ! tev.isPress() )
+        return;
+
+    std::size_t pos = xToCursor( tev.x() );
+    setCursorPosition(pos);
+}
+
+
+void LineEdit::onResizeEvent(const ResizeEvent& ev)
+{
+    layoutText();
+}
+
+
+void LineEdit::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+{
+    const LineEditRenderer* renderer = getFacet<LineEditRenderer>();
+    if(renderer)
+        renderer->render(*this, surface, rect);
+}
+
+
 void LineEdit::layoutText()
 {
     const Pt::String& str = displayText();
@@ -259,93 +346,6 @@ std::size_t LineEdit::xToCursor(double x)
     }
 
     return pos;
-}
-
-
-void LineEdit::onKeyEvent(const KeyEvent& ev)
-{  
-    Base::onKeyEvent(ev);
-
-    if( ! ev.isPress() )
-        return;
-
-    if( ev.key().code() == Pt::Hmi::Key::ArrowLeft )
-    {
-        if(_cursorPosition > 0)
-            setCursorPosition(_cursorPosition - 1);
-    }
-    else if( ev.key().code() == Pt::Hmi::Key::ArrowRight )
-    {
-        setCursorPosition(_cursorPosition + 1);
-    }
-    else if( ev.key().code() == Pt::Hmi::Key::Backspace )
-    {
-        if( _cursorPosition > 0 && ! _text.empty() )
-            _text.erase(_cursorPosition - 1, 1);
-
-        if( ! _displayText.empty() )
-            _displayText.resize( _displayText.size() - 1 );
-        
-        if(_cursorPosition > 0)
-            setCursorPosition(_cursorPosition - 1);
-    }
-    else
-    {
-        Pt::Char ch = ev.unicode();
-        if( Pt::isprint(ch) )
-        {
-            _text.insert(_cursorPosition, 1, ch);
-
-            if(_echoMode == Masked)
-                _displayText += maskChar;
-
-            setCursorPosition(_cursorPosition + 1);
-        }
-    }
-}
-
-
-void LineEdit::onMouseEvent(const MouseEvent& mev)
-{
-    Base::onMouseEvent(mev);
-
-    if(_echoMode == Hidden)
-        return;
-
-    if( ! mev.isPress() )
-        return;
-
-    std::size_t pos = xToCursor( mev.x() );
-    setCursorPosition(pos);
-}
-
-
-void LineEdit::onTouchEvent(const TouchEvent& tev)
-{
-    Base::onTouchEvent(tev);
-
-    if(_echoMode == Hidden)
-        return;
-
-    if( ! tev.isPress() )
-        return;
-
-    std::size_t pos = xToCursor( tev.x() );
-    setCursorPosition(pos);
-}
-
-
-void LineEdit::onResizeEvent(const ResizeEvent& ev)
-{
-    layoutText();
-}
-
-
-void LineEdit::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
-{
-    const LineEditRenderer* renderer = getFacet<LineEditRenderer>();
-    if(renderer)
-        renderer->render(*this, surface, rect);
 }
 
 } // namespace
