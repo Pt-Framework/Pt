@@ -49,14 +49,27 @@ class PT_HMI_API LineEdit : public Control
     public:
         typedef Control Base;
 
+        enum EchoMode
+        {
+            Normal = 0,
+            Hidden = 1,
+            Masked = 2
+        };
+
     public:
         LineEdit();
 
         ~LineEdit();
 
+        const Pt::String& text() const;
+
         void setText(const Pt::String& t);
 
-        const Pt::String& text() const;
+        const Pt::String& displayText() const;
+
+        EchoMode echoMode() const;
+
+        void setEchoMode(EchoMode mode);
 
         std::size_t cursorPosition() const;
 
@@ -78,7 +91,9 @@ class PT_HMI_API LineEdit : public Control
         std::size_t xToCursor(double x);
 
     private:
+        EchoMode      _echoMode;
         Pt::String    _text;
+        Pt::String    _displayText;
         std::size_t   _cursorPosition;
         double        _hoffset;
 };

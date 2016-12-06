@@ -31,12 +31,15 @@
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Gfx/ImagePainter.h>
 
+static const char maskChar = '*';
+
 namespace Pt {
 
 namespace Hmi {
 
 LineEdit::LineEdit()
-: _cursorPosition(0)
+: _echoMode(Normal)
+, _cursorPosition(0)
 , _hoffset(0)
 {
     setAcceptsFocus(true);
@@ -63,6 +66,34 @@ const Pt::String& LineEdit::text() const
 }
 
 
+const Pt::String& LineEdit::displayText() const
+{
+    if(_echoMode == Normal)
+        return _text;
+
+    return _displayText;
+}
+
+
+LineEdit::EchoMode LineEdit::echoMode() const
+{
+    return _echoMode;
+}
+
+
+void LineEdit::setEchoMode(LineEdit::EchoMode mode)
+{
+    _echoMode = mode;
+
+    _displayText.clear();
+    
+    if(_echoMode == Masked)
+        _displayText.assign(_text.size(), maskChar);
+
+    update();
+}
+
+
 std::size_t LineEdit::cursorPosition() const
 {
     return _cursorPosition;
@@ -74,13 +105,21 @@ void LineEdit::setCursorPosition(std::size_t n)
     if( n > _text.size() )
         n = _text.size();
 
+    if(_echoMode == Hidden)
+    {
+        _cursorPosition = n;
+        update();
+        return;
+    }
+
     const StyleOptions* options = getFacet<StyleOptions>();
     if( ! options )
         return;
 
-    if( ! _text.empty() )
+    const Pt::String& str = displayText();
+    if( ! str.empty() )
     { 
-        Pt::String left = _text.substr(0, n);
+        Pt::String left = str.substr(0, n);
         Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( options->font(), left );
 
         if(n > _cursorPosition)
@@ -126,8 +165,11 @@ void LineEdit::onKeyEvent(const KeyEvent& ev)
     }
     else if( ev.key().code() == Pt::Hmi::Key::Backspace )
     {
-        if( _cursorPosition != 0 && ! _text.empty() )
+        if( _cursorPosition > 0 && ! _text.empty() )
             _text.erase(_cursorPosition - 1, 1);
+
+        if( ! _displayText.empty() )
+            _displayText.resize( _displayText.size() - 1 );
         
         if(_cursorPosition > 0)
             setCursorPosition(_cursorPosition - 1);
@@ -139,6 +181,9 @@ void LineEdit::onKeyEvent(const KeyEvent& ev)
         {
             _text.insert(_cursorPosition, 1, ch);
 
+            if(_echoMode == Masked)
+                _displayText += maskChar;
+
             setCursorPosition(_cursorPosition + 1);
         }
     }
@@ -149,6 +194,9 @@ void LineEdit::onKeyEvent(const KeyEvent& ev)
 
 std::size_t LineEdit::xToCursor(double x)
 {
+    if(_echoMode == Hidden)
+        return 0;
+
     if( _text.empty() )
         return 0;
 
@@ -160,35 +208,38 @@ std::size_t LineEdit::xToCursor(double x)
     if( padding().left() < x)
         textX += x - padding().left();
 
-    std::size_t n = _text.length();
-    Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( options->font(), _text );
+    const Pt::String& str = displayText();
+    std::size_t n = str.length();
+    Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( options->font(), str );
 
-    // estimate start position
-    std::size_t widthPerChar = fm.width() / _text.size();
+    // estimate cursor position
+    std::size_t widthPerChar = fm.width() / str.size();
     std::size_t pos = textX / widthPerChar;
 
-    if( pos >= _text.size() )
-        pos = _text.size() - 1;
+    if( pos >= str.size() )
+        pos = str.size() - 1;
 
-    Pt::String left = _text.substr(0, pos + 1);
+    Pt::String left = str.substr(0, pos + 1);
     fm = Hmi::Painter::fontMetrics( options->font(), left );
 
-    if( textX < fm.width() ) // search left
+    if( textX < fm.width() )
     {
+        // cursor position was over estimated, so search left
         for( ; pos > 0; --pos)
         {
-            left = _text.substr(0, pos);
+            left = str.substr(0, pos);
             fm = Hmi::Painter::fontMetrics( options->font(), left );
       
             if( textX >= fm.width() )
                 break;
         }
     }
-    else // if( textX >= fm.width() ) search right 
+    else 
     {
-        for(++pos ; pos < _text.size(); ++pos)
+        // cursor position was under estimated, so search right
+        for(++pos ; pos < str.size(); ++pos)
         {
-            left = _text.substr(0, pos + 1);
+            left = str.substr(0, pos + 1);
             fm = Hmi::Painter::fontMetrics( options->font(), left );
       
             if( textX < fm.width() )
@@ -204,6 +255,9 @@ void LineEdit::onMouseEvent(const MouseEvent& mev)
 {
     Base::onMouseEvent(mev);
 
+    if(_echoMode == Hidden)
+        return;
+
     if( ! mev.isPress() )
         return;
 
@@ -215,6 +269,9 @@ void LineEdit::onMouseEvent(const MouseEvent& mev)
 void LineEdit::onTouchEvent(const TouchEvent& tev)
 {
     Base::onTouchEvent(tev);
+
+    if(_echoMode == Hidden)
+        return;
 
     if( ! tev.isPress() )
         return;
