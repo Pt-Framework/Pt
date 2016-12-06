@@ -647,30 +647,43 @@ void PlatinumLineEditRenderer::onRender(const LineEdit& le,
         return;
 
     painter.setFont( options->font() );
-    painter.setPen( options->textColor() );
+
+    if( le.displayText().empty() )
+        painter.setPen(frameColor);
+    else
+        painter.setPen( options->textColor() );
     
-    const Pt::String& text = le.displayText();
+    const Pt::String& text = le.displayText().empty() ? le.placeholderText()
+                                                      : le.displayText();
+    
     Gfx::FontMetrics fm = painter.fontMetrics(text);
 
-    double textHeight = fm.ascent() + fm.descent();
     double textX = le.padding().left() - le.hscroll();
+    textX += le.halign();
+    
+    double textHeight = fm.ascent() + fm.descent();
     double textY = (le.size().height() / 2) - (textHeight / 2) + fm.ascent();
     
-    // text alignment
-    textX += le.halign();
-
     Gfx::PointF textPos(textX, textY);
-    painter.drawText(textPos, text);
+    
+    // draw placeholder only when not focussed
+    if( (le.displayText().empty() && ! le.hasFocus()) || 
+         ! le.displayText().empty() )
+        painter.drawText(textPos, text);
 
-    std::size_t cursorPosition = le.cursorPosition();
-    Pt::String left = text.empty() ? Pt::String() 
-                                   : text.substr(0, cursorPosition);
-    Gfx::FontMetrics fmCursor = painter.fontMetrics(left);
+    if( le.hasFocus() )
+    {
+        std::size_t cursorPosition = le.cursorPosition();
+        Pt::String left = text.empty() ? Pt::String() 
+                                       : text.substr(0, cursorPosition);
+        Gfx::FontMetrics fmCursor = painter.fontMetrics(left);
 
-    double cursorX = textX + fmCursor.width();
+        double cursorX = textX + fmCursor.width();
 
-    painter.drawLine( Gfx::PointF(cursorX, textY - fm.ascent()),
-                      Gfx::PointF(cursorX, textY + fm.descent()) );
+        painter.setPen( options->textColor() );
+        painter.drawLine( Gfx::PointF(cursorX, textY - fm.ascent()),
+                          Gfx::PointF(cursorX, textY + fm.descent()) );
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

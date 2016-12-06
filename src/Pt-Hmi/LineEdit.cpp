@@ -76,6 +76,19 @@ const Pt::String& LineEdit::displayText() const
 }
 
 
+const Pt::String& LineEdit::placeholderText() const
+{
+    return _placeholderText;
+}
+
+
+void LineEdit::setPlaceholderText(const Pt::String& s)
+{
+    _placeholderText = s;
+    update();
+}
+
+
 LineEdit::EchoMode LineEdit::echoMode() const
 {
     return _echoMode;

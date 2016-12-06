@@ -37,8 +37,7 @@ namespace Pt {
 
 namespace Hmi {
 
-// TODO: placeholder text
-//       entered signal
+// TODO: entered signal
 //       validation signal
 //       font, textColor
 
@@ -79,6 +78,10 @@ class PT_HMI_API LineEdit : public Control
 
         const Pt::String& displayText() const;
 
+        const Pt::String& placeholderText() const;
+
+        void setPlaceholderText(const Pt::String& s);
+
         EchoMode echoMode() const;
 
         void setEchoMode(EchoMode mode);
@@ -118,6 +121,7 @@ class PT_HMI_API LineEdit : public Control
         Alignment     _textAlignment;
         Pt::String    _text;
         Pt::String    _displayText;
+        Pt::String    _placeholderText;
         std::size_t   _cursorPosition;
         double        _hscroll;
         double        _halign;
