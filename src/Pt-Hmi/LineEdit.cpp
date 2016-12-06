@@ -201,10 +201,9 @@ void LineEdit::setCursorPosition(std::size_t n)
 
 std::size_t LineEdit::xToCursor(double x)
 {
-    if(_echoMode == Hidden)
-        return 0;
+    const Pt::String& str = displayText();
 
-    if( _text.empty() )
+    if( str.empty() )
         return 0;
 
     const StyleOptions* options = getFacet<StyleOptions>();
@@ -217,8 +216,6 @@ std::size_t LineEdit::xToCursor(double x)
     std::size_t textX = _hscroll;
     if( padding().left() < x)
         textX += x - padding().left();
-
-    const Pt::String& str = displayText();
 
     // estimate cursor position
     std::size_t n = str.length();
