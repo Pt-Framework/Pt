@@ -104,7 +104,9 @@ LineEdit::Alignment LineEdit::textAlignment() const
 void LineEdit::setTextAlignment(Alignment a)
 {
     _textAlignment = a;
-    setCursorPosition(_cursorPosition);
+    
+    layoutText();
+    update();
 }
 
 
@@ -116,23 +118,31 @@ std::size_t LineEdit::cursorPosition() const
 
 void LineEdit::setCursorPosition(std::size_t n)
 {
-    const Pt::String& str = displayText();
-
     if( n > _text.size() )
         n = _text.size();
 
+    _cursorPosition = n;
+
+    layoutText();
+    update();
+}
+
+
+void LineEdit::layoutText()
+{
+    const Pt::String& str = displayText();
+
     if(_echoMode == Hidden)
-    {
-        _cursorPosition = n;
-        update();
         return;
-    }
 
     const StyleOptions* options = getFacet<StyleOptions>();
     if( ! options )
         return;
 
-    Pt::String left = str.empty() ? Pt::String() : str.substr(0, n);
+    Pt::String left;
+    if( _cursorPosition <= str.size() && ! str.empty() ) 
+        left = str.substr(0, _cursorPosition);
+    
     Gfx::FontMetrics fmLeft = Hmi::Painter::fontMetrics( options->font(), left );
     Gfx::FontMetrics fmText = Hmi::Painter::fontMetrics( options->font(), str );
     
@@ -165,14 +175,11 @@ void LineEdit::setCursorPosition(std::size_t n)
     }
     else
     {
-        if(n > _cursorPosition)
-        {
-            double pos = fmLeft.width() + padding().leftRight();
-            if(pos > size().width() + _hscroll)
-                _hscroll = pos - size().width();
-        }
+        double pos1 = fmLeft.width() + padding().leftRight();
+        if(pos1 > size().width() + _hscroll)
+            _hscroll = pos1 - size().width();
         else
-        {   
+        {
             double pos = fmLeft.width();
             if( pos < _hscroll + padding().left() )
             {
@@ -193,9 +200,6 @@ void LineEdit::setCursorPosition(std::size_t n)
             _hscroll = fmText.width() - maxWidth;
         }
     }
-
-    _cursorPosition = n;
-    update();
 }
 
 
@@ -298,8 +302,6 @@ void LineEdit::onKeyEvent(const KeyEvent& ev)
             setCursorPosition(_cursorPosition + 1);
         }
     }
-    
-    update();
 }
 
 
@@ -335,7 +337,7 @@ void LineEdit::onTouchEvent(const TouchEvent& tev)
 
 void LineEdit::onResizeEvent(const ResizeEvent& ev)
 {
-    setCursorPosition(_cursorPosition);
+    layoutText();
 }
 
 

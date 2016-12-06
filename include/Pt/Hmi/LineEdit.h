@@ -111,6 +111,8 @@ class PT_HMI_API LineEdit : public Control
     private:
         std::size_t xToCursor(double x);
 
+        void layoutText();
+
     private:
         EchoMode      _echoMode;
         Alignment     _textAlignment;
