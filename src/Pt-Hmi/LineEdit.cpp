@@ -39,11 +39,12 @@ namespace Hmi {
 
 LineEdit::LineEdit()
 : _echoMode(Normal)
+, _textAlignment(TopLeft)
 , _cursorPosition(0)
-, _hoffset(0)
+, _hscroll(0)
+, _halign(0)
 {
     setAcceptsFocus(true);
-
     setPadding(5);
 }
 
@@ -56,7 +57,7 @@ LineEdit::~LineEdit()
 void LineEdit::setText(const Pt::String& t)
 {
     _text = t;
-    update();
+    setCursorPosition(0);
 }
 
 
@@ -94,6 +95,19 @@ void LineEdit::setEchoMode(LineEdit::EchoMode mode)
 }
 
 
+LineEdit::Alignment LineEdit::textAlignment() const
+{
+    return _textAlignment;
+}
+
+
+void LineEdit::setTextAlignment(Alignment a)
+{
+    _textAlignment = a;
+    setCursorPosition(_cursorPosition);
+}
+
+
 std::size_t LineEdit::cursorPosition() const
 {
     return _cursorPosition;
@@ -102,6 +116,8 @@ std::size_t LineEdit::cursorPosition() const
 
 void LineEdit::setCursorPosition(std::size_t n)
 {
+    const Pt::String& str = displayText();
+
     if( n > _text.size() )
         n = _text.size();
 
@@ -116,34 +132,132 @@ void LineEdit::setCursorPosition(std::size_t n)
     if( ! options )
         return;
 
-    const Pt::String& str = displayText();
-    if( ! str.empty() )
-    { 
-        Pt::String left = str.substr(0, n);
-        Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( options->font(), left );
+    Pt::String left = str.empty() ? Pt::String() : str.substr(0, n);
+    Gfx::FontMetrics fmLeft = Hmi::Painter::fontMetrics( options->font(), left );
+    Gfx::FontMetrics fmText = Hmi::Painter::fontMetrics( options->font(), str );
+    
+    double maxWidth = size().width() - padding().leftRight();
 
+    if( fmText.width() < maxWidth )
+    {
+        _hscroll = 0;
+
+        switch(_textAlignment)
+        {
+            case TopLeft:
+            case MiddleLeft:
+            case BottomLeft:
+                _halign = 0;
+                break;
+            
+            case TopCenter:
+            case MiddleCenter:
+            case BottomCenter:
+                _halign = (maxWidth - fmText.width()) / 2;
+                break;
+            
+            case TopRight:           
+            case MiddleRight:
+            case BottomRight:
+                _halign = maxWidth - fmText.width();
+                break;
+        }
+    }
+    else
+    {
         if(n > _cursorPosition)
         {
-            double pos = fm.width() + padding().leftRight();
-            if(pos > size().width() + _hoffset)
-                _hoffset = pos - size().width();
+            double pos = fmLeft.width() + padding().leftRight();
+            if(pos > size().width() + _hscroll)
+                _hscroll = pos - size().width();
         }
         else
         {   
-            double pos = fm.width();
-            if( pos < _hoffset + padding().left() )
+            double pos = fmLeft.width();
+            if( pos < _hscroll + padding().left() )
             {
-                double delta = (_hoffset + padding().left()) - pos;
-                if(delta > _hoffset)
-                    _hoffset = 0;
+                double delta = (_hscroll + padding().left()) - pos;
+                if(delta > _hscroll)
+                    _hscroll = 0;
                 else
-                    _hoffset -= delta;
+                    _hscroll -= delta;
             }
+        }
+
+        _halign = 0;
+
+        if( _textAlignment == TopRight ||
+            _textAlignment == MiddleRight ||
+            _textAlignment == BottomRight )
+        {
+            _hscroll = fmText.width() - maxWidth;
         }
     }
 
     _cursorPosition = n;
     update();
+}
+
+
+std::size_t LineEdit::xToCursor(double x)
+{
+    if(_echoMode == Hidden)
+        return 0;
+
+    if( _text.empty() )
+        return 0;
+
+    const StyleOptions* options = getFacet<StyleOptions>();
+    if( ! options )
+        return 0;
+
+    // compensate for text aligmnet
+    x -= _halign;
+
+    std::size_t textX = _hscroll;
+    if( padding().left() < x)
+        textX += x - padding().left();
+
+    const Pt::String& str = displayText();
+
+    // estimate cursor position
+    std::size_t n = str.length();
+    Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( options->font(), str );
+    std::size_t widthPerChar = fm.width() / str.size();
+    std::size_t pos = textX / widthPerChar;
+
+    if( pos >= str.size() )
+        pos = str.size() - 1;
+
+    Pt::String left = str.substr(0, pos + 1);
+    fm = Hmi::Painter::fontMetrics( options->font(), left );
+
+    if( textX < fm.width() )
+    {
+        // cursor position was over estimated, so search left
+        for( ; pos > 0; --pos)
+        {
+            left = str.substr(0, pos);
+            fm = Hmi::Painter::fontMetrics( options->font(), left );
+      
+            if( textX >= fm.width() )
+                break;
+        }
+    }
+    else 
+    {
+        // cursor position was under estimated, so search right
+        for(++pos ; pos < str.size(); ++pos)
+        {
+            left = str.substr(0, pos + 1);
+            fm = Hmi::Painter::fontMetrics( options->font(), left );
+      
+            if( textX < fm.width() )
+                break;
+        }
+    }
+
+    return pos;
 }
 
 
@@ -192,65 +306,6 @@ void LineEdit::onKeyEvent(const KeyEvent& ev)
 }
 
 
-std::size_t LineEdit::xToCursor(double x)
-{
-    if(_echoMode == Hidden)
-        return 0;
-
-    if( _text.empty() )
-        return 0;
-
-    const StyleOptions* options = getFacet<StyleOptions>();
-    if( ! options )
-        return 0;
-
-    std::size_t textX = _hoffset;
-    if( padding().left() < x)
-        textX += x - padding().left();
-
-    const Pt::String& str = displayText();
-    std::size_t n = str.length();
-    Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( options->font(), str );
-
-    // estimate cursor position
-    std::size_t widthPerChar = fm.width() / str.size();
-    std::size_t pos = textX / widthPerChar;
-
-    if( pos >= str.size() )
-        pos = str.size() - 1;
-
-    Pt::String left = str.substr(0, pos + 1);
-    fm = Hmi::Painter::fontMetrics( options->font(), left );
-
-    if( textX < fm.width() )
-    {
-        // cursor position was over estimated, so search left
-        for( ; pos > 0; --pos)
-        {
-            left = str.substr(0, pos);
-            fm = Hmi::Painter::fontMetrics( options->font(), left );
-      
-            if( textX >= fm.width() )
-                break;
-        }
-    }
-    else 
-    {
-        // cursor position was under estimated, so search right
-        for(++pos ; pos < str.size(); ++pos)
-        {
-            left = str.substr(0, pos + 1);
-            fm = Hmi::Painter::fontMetrics( options->font(), left );
-      
-            if( textX < fm.width() )
-                break;
-        }
-    }
-
-    return pos;
-}
-
-
 void LineEdit::onMouseEvent(const MouseEvent& mev)
 {
     Base::onMouseEvent(mev);
@@ -278,6 +333,12 @@ void LineEdit::onTouchEvent(const TouchEvent& tev)
 
     std::size_t pos = xToCursor( tev.x() );
     setCursorPosition(pos);
+}
+
+
+void LineEdit::onResizeEvent(const ResizeEvent& ev)
+{
+    setCursorPosition(_cursorPosition);
 }
 
 

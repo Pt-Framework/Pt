@@ -37,9 +37,7 @@ namespace Pt {
 
 namespace Hmi {
 
-// TODO: aligned text
-//       echo mode
-//       placeholder text
+// TODO: placeholder text
 //       entered signal
 //       validation signal
 //       font, textColor
@@ -54,6 +52,20 @@ class PT_HMI_API LineEdit : public Control
             Normal = 0,
             Hidden = 1,
             Masked = 2
+        };
+
+        // TODO: separate classs
+        enum Alignment
+        {
+            TopLeft,
+            TopCenter,
+            TopRight,
+            MiddleLeft,
+            MiddleCenter,
+            MiddleRight,
+            BottomLeft,
+            BottomCenter,
+            BottomRight
         };
 
     public:
@@ -71,12 +83,19 @@ class PT_HMI_API LineEdit : public Control
 
         void setEchoMode(EchoMode mode);
 
+        Alignment textAlignment() const;
+
+        void setTextAlignment(Alignment a);
+
         std::size_t cursorPosition() const;
 
         void setCursorPosition(std::size_t n);
 
-        double hoffset() const
-        { return _hoffset; }
+        double hscroll() const
+        { return _hscroll; }
+        
+        double halign() const
+        { return _halign; }
 
     protected:
         virtual void onKeyEvent(const KeyEvent& ev);
@@ -85,6 +104,8 @@ class PT_HMI_API LineEdit : public Control
 
         virtual void onTouchEvent(const TouchEvent& ev);
 
+        virtual void onResizeEvent(const ResizeEvent& ev);
+
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& rect);
     
     private:
@@ -92,10 +113,12 @@ class PT_HMI_API LineEdit : public Control
 
     private:
         EchoMode      _echoMode;
+        Alignment     _textAlignment;
         Pt::String    _text;
         Pt::String    _displayText;
         std::size_t   _cursorPosition;
-        double        _hoffset;
+        double        _hscroll;
+        double        _halign;
 };
 
 } // namespace

@@ -40,6 +40,7 @@ namespace Hmi {
 class PT_HMI_API Label : public Panel
 {
 	  public:
+        // TODO: separate classs
         enum Alignment
         {
             TopLeft,

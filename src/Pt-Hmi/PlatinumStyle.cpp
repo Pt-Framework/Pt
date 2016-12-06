@@ -653,9 +653,12 @@ void PlatinumLineEditRenderer::onRender(const LineEdit& le,
     Gfx::FontMetrics fm = painter.fontMetrics(text);
 
     double textHeight = fm.ascent() + fm.descent();
-    double textX = le.padding().left() - le.hoffset();
+    double textX = le.padding().left() - le.hscroll();
     double textY = (le.size().height() / 2) - (textHeight / 2) + fm.ascent();
     
+    // text alignment
+    textX += le.halign();
+
     Gfx::PointF textPos(textX, textY);
     painter.drawText(textPos, text);
 
