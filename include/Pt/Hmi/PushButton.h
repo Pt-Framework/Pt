@@ -31,7 +31,8 @@
 #define Pt_Hmi_PushButton_H
 
 #include <Pt/Hmi/Button.h>
-#include <Pt/Signal.h>
+#include <Pt/Hmi/Picture.h>
+#include <Pt/Gfx/Image.h>
 
 namespace Pt {
 
@@ -42,6 +43,8 @@ class PT_HMI_API PushButton : public Button
     public:
         typedef Button Base;
 
+        // TODO: use Direction to layout image and text
+
     public:
         PushButton();
 
@@ -50,6 +53,10 @@ class PT_HMI_API PushButton : public Button
         bool isToggle() const;
 
         void setToggle(bool toggle);
+
+        void setImage(const Gfx::Image& image);
+
+        const Picture& picture() const;
 
     protected:
         virtual void onPressed();
@@ -60,7 +67,8 @@ class PT_HMI_API PushButton : public Button
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
     private:
-        bool _isToggle;
+        bool    _isToggle;
+        Picture _picture;
 };
 
 } // namespace

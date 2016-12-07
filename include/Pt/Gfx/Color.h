@@ -42,7 +42,7 @@ class Color
 {	
 	  public:	  
         Color()
-        : _a(1)
+        : _a(65535)
         , _r(0)
         , _g(0)
         , _b(0)
@@ -56,7 +56,7 @@ class Color
         { }	
 
         Color(Pt::uint16_t r, Pt::uint16_t g, Pt::uint16_t b)
-        : _a(1)
+        : _a(65535)
         , _r(r)
         , _g(g)
         , _b(b) 

@@ -50,7 +50,7 @@ class StyleOptions;
 class Panel;
 class Label;
 class LineEdit;
-class Button;
+class PushButton;
 class CheckBox;
 class Menu;
 class MenuItem;
@@ -128,12 +128,12 @@ class PT_HMI_API ButtonRenderer : public Style::Facet
 
         virtual ~ButtonRenderer();
 
-        void render(const Button& button, 
+        void render(const PushButton& button, 
                     PaintSurface& surface, 
                     const Gfx::RectF& rect) const;
 
     protected:
-        virtual void onRender(const Button& button, 
+        virtual void onRender(const PushButton& button, 
                               PaintSurface& surface, 
                               const Gfx::RectF& rect) const = 0;
 };

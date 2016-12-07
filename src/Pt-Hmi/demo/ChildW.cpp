@@ -1,6 +1,7 @@
 #include "ChildW.h"
 #include "Dialog1.h"
 #include <Pt/Hmi/Application.h>
+#include <Pt/Gfx/Algorithm.h>
 
 namespace Pt {
 
@@ -63,21 +64,25 @@ ChildW::ChildW(const std::string& title)
     _textLabel.setBorderColor(Gfx::Color::fromRgb8(200, 190, 60));
 
     //Toggle button
+    Pt::Hmi::Key key(Pt::Hmi::Key::Control, Pt::Hmi::Key::I);
+    Pt::Gfx::Image toggleImage(Pt::Gfx::ImageFormat::argb32(), Pt::Gfx::Size(10,10));
+    Gfx::fill(toggleImage.begin(), toggleImage.end(), Gfx::Color());
+    
     _toggleButton.setName("ToggleButton");
     _toggleButton.setText("Toggle Me [CTRL+I]" );
-    _toggleButton.setToggle(true);
-    
-    Pt::Hmi::Key key(Pt::Hmi::Key::Control, Pt::Hmi::Key::I);
+    _toggleButton.setToggle(true);  
     _toggleButton.setShortcut( &key );
     _toggleButton.move( Gfx::PointF(20,30) );
     _toggleButton.resize( Gfx::SizeF(130,30) ); 
     _toggleButton.setMargin(5);
     _toggleButton.setPadding(5);    
+    //_toggleButton.setImage(toggleImage);
 
-    //Dialog button  
+    //Dialog button
+    Pt::Hmi::Key dKey(Pt::Hmi::Key::Control, Pt::Hmi::Key::D);
+    
     _dialogButton.setName("DialogButton");  
     _dialogButton.setText("&&Dia&log [CTRL+D]&");
-    Pt::Hmi::Key dKey(Pt::Hmi::Key::Control, Pt::Hmi::Key::D);
     _dialogButton.setShortcut( &dKey );
     _dialogButton.move( Gfx::PointF(20,100));
     _dialogButton.resize( Gfx::SizeF(130,30) );

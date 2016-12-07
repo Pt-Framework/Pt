@@ -129,7 +129,7 @@ ButtonRenderer::~ButtonRenderer()
 }
 
 
-void ButtonRenderer::render(const Button& button, 
+void ButtonRenderer::render(const PushButton& button, 
                             PaintSurface& surface, 
                             const Gfx::RectF& rect) const
 { 

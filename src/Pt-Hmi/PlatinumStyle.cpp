@@ -316,7 +316,7 @@ PlatinumButtonRenderer::~PlatinumButtonRenderer()
 }
 
 
-void PlatinumButtonRenderer::onRender(const Button& button, 
+void PlatinumButtonRenderer::onRender(const PushButton& button, 
                                       PaintSurface& surface, 
                                       const Gfx::RectF& rect) const
 {
@@ -325,6 +325,8 @@ void PlatinumButtonRenderer::onRender(const Button& button,
       return;
 
     const String& text = button.text();
+    const Picture& picture = button.picture();
+    
     Gfx::Color buttonColor = options->foreground();
     Gfx::Color textColor =  options->textColor();
     const Gfx::Font& textFont = options->font();
@@ -370,14 +372,25 @@ void PlatinumButtonRenderer::onRender(const Button& button,
     //
     
     painter.setFont(textFont);
-    Gfx::FontMetrics metric = painter.fontMetrics( button.text() );
+    Gfx::FontMetrics fm = painter.fontMetrics(text);
 
-    double textX = size.width() / 2 - metric.width() / 2;
-    double textY = (size.height() / 2) - (metric.height() / 2) + metric.ascent();
-    Gfx::PointF textPos(textX, textY);
+    double spacing = picture.empty() || text.empty() ? 0 : fm.height() * 0.5;
+    double itemsWidth = fm.width() + spacing + picture.width();
+    double itemX = (size.width() - itemsWidth) / 2;
+    
+    if( ! picture.empty() )
+    {
+        double pictureY = ((size.height() - picture.height()) / 2);
+        Gfx::PointF picturePos(itemX, pictureY);
+        painter.drawPicture(picturePos, picture);
+    }
 
-    _baseRenderer.renderItemText(painter, textPos, text, button.mnemonic(), 
-                                 textFont, textColor);
+    itemX += picture.width() + spacing;
+    double textY = ((size.height() - fm.height()) / 2) + fm.ascent();
+
+    Gfx::PointF textPos(itemX, textY);
+    _baseRenderer.renderItemText(painter, textPos, text, 
+                                 button.mnemonic(), textFont, textColor);
 
     //
     // draw the focus rect

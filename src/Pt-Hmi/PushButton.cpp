@@ -58,6 +58,19 @@ void PushButton::setToggle(bool toggle)
 }
 
 
+void PushButton::setImage(const Gfx::Image& image)
+{
+    _picture.set(image);
+    update();
+}
+
+
+const Picture& PushButton::picture() const
+{
+    return _picture;
+}
+
+
 void PushButton::onPressed()
 {
     Base::onPressed();
