@@ -38,7 +38,9 @@ namespace Pt {
 namespace Hmi {
 
 LineEdit::LineEdit()
-: _echoMode(Normal)
+: _hasFont(false)
+, _hasTextColor(false)
+, _echoMode(Normal)
 , _textAlignment(TopLeft)
 , _isAccepted(true)
 , _cursorPosition(0)
@@ -153,6 +155,34 @@ void LineEdit::setAccepted(bool a)
 }
 
 
+const Gfx::Color* LineEdit::textColor() const
+{
+    return _hasTextColor ? &_textColor : 0;
+}
+
+
+void LineEdit::setTextColor(const Gfx::Color& color)
+{
+    _textColor = color;
+    _hasTextColor = true;
+    update();
+}
+
+
+const Gfx::Font* LineEdit::font() const
+{ 
+    return _hasFont ? &_font : 0;
+}
+
+
+void LineEdit::setFont(const Gfx::Font& f)
+{
+    _font = f;
+    _hasFont = true;
+    invalidate();
+}
+
+
 Pt::Signal<const Pt::String&>& LineEdit::textEdited()
 {
     return _textEdited;
@@ -261,6 +291,8 @@ void LineEdit::onTouchEvent(const TouchEvent& tev)
 
 void LineEdit::onResizeEvent(const ResizeEvent& ev)
 {
+    Base::onResizeEvent(ev);
+    
     layoutText();
 }
 

@@ -37,8 +37,6 @@ namespace Pt {
 
 namespace Hmi {
 
-// TODO: font, textColor
-
 class PT_HMI_API LineEdit : public Control
 {
     public:
@@ -96,6 +94,14 @@ class PT_HMI_API LineEdit : public Control
 
         void setAccepted(bool a);
 
+        const Gfx::Color* textColor() const;
+
+        void setTextColor(const Gfx::Color& color);
+
+        const Gfx::Font* font() const;
+
+        void setFont(const Gfx::Font& f);
+
         Pt::Signal<const Pt::String&>& textEdited();
 
         Pt::Signal<const Pt::String&>& textEntered();
@@ -127,6 +133,10 @@ class PT_HMI_API LineEdit : public Control
     private:
         Pt::Signal<const Pt::String&>  _textEdited;
         Pt::Signal<const Pt::String&>  _textEntered;
+        Gfx::Font                      _font;
+        bool                           _hasFont;
+        Gfx::Color                     _textColor;
+        bool                           _hasTextColor;
         EchoMode                       _echoMode;
         Alignment                      _textAlignment;
         Pt::String                     _text;

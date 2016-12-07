@@ -634,6 +634,14 @@ void PlatinumLineEditRenderer::onRender(const LineEdit& le,
     Gfx::Color frameColor = brighten(options->foreground(), 0.7f);
     const Gfx::Brush& fillBrush = options->viewBackground();
 
+    const Gfx::Font* font = le.font();
+    if( ! font )
+        font = &options->font();
+
+    const Gfx::Color* textColor = le.textColor();
+    if( ! textColor )
+        textColor = &options->textColor(); 
+
     Painter painter(surface);
     painter.setClip(rect);
     
@@ -646,43 +654,51 @@ void PlatinumLineEditRenderer::onRender(const LineEdit& le,
     if(le.echoMode() == LineEdit::Hidden)
         return;
 
-    painter.setFont( options->font() );
-
-    if( le.displayText().empty() )
-        painter.setPen(frameColor);
-    else
-        painter.setPen( options->textColor() );
-    
-    const Pt::String& text = le.displayText().empty() ? le.placeholderText()
-                                                      : le.displayText();
-    
-    Gfx::FontMetrics fm = painter.fontMetrics(text);
+    painter.setFont(*font);
+   
+    const Pt::String& text = le.displayText();
+    Gfx::FontMetrics fmText = painter.fontMetrics(text);
 
     double textX = le.padding().left() - le.hscroll();
     textX += le.halign();
-    
-    double textHeight = fm.ascent() + fm.descent();
-    double textY = (le.size().height() / 2) - (textHeight / 2) + fm.ascent();
-    
-    Gfx::PointF textPos(textX, textY);
-    
-    // draw placeholder only when not focussed
-    if( (le.displayText().empty() && ! le.hasFocus()) || 
-         ! le.displayText().empty() )
+
+    double textHeight = fmText.ascent() + fmText.descent();
+    double textY = (le.size().height() / 2) - (textHeight / 2) + fmText.ascent();
+
+    if( ! text.empty() )
+    {
+        painter.setPen(*textColor);
+
+        Gfx::PointF textPos(textX, textY);
         painter.drawText(textPos, text);
+    }
 
     if( le.hasFocus() )
     {
         std::size_t cursorPosition = le.cursorPosition();
         Pt::String left = text.empty() ? Pt::String() 
-                                       : text.substr(0, cursorPosition);
+                                        : text.substr(0, cursorPosition);
         Gfx::FontMetrics fmCursor = painter.fontMetrics(left);
 
         double cursorX = textX + fmCursor.width();
 
-        painter.setPen( options->textColor() );
-        painter.drawLine( Gfx::PointF(cursorX, textY - fm.ascent()),
-                          Gfx::PointF(cursorX, textY + fm.descent()) );
+        painter.drawLine( Gfx::PointF(cursorX, textY - fmText.ascent()),
+                          Gfx::PointF(cursorX, textY + fmText.descent()) );
+    }
+
+    const Pt::String& placeholderText = le.placeholderText();
+
+    if( text.empty() && ! le.hasFocus() && ! placeholderText.empty() )
+    {
+        Gfx::FontMetrics fm = painter.fontMetrics(placeholderText);
+        std::size_t align = fm.width() / 2;
+
+        double x = align < textX ? textX - align : textX;
+    
+        painter.setPen(frameColor);
+
+        Gfx::PointF textPos(x, textY);
+        painter.drawText(textPos, placeholderText);
     }
 }
 

@@ -106,7 +106,7 @@ ChildW::ChildW(const std::string& title)
       
     _checkBox.setState(CheckBox::Unspecified);
     _checkBox.setName("CheckBox"); 
-    _checkBox.setText("Ch&eck Me gyI");
+    _checkBox.setText("Ch&eck Me");
     _checkBox.move( Gfx::PointF(0, 0) );
     _checkBox.resize( Gfx::SizeF(130, 30) );
     _checkBox.setMargin(5);
@@ -114,10 +114,11 @@ ChildW::ChildW(const std::string& title)
     _checkBox.clicked() += Pt::slot(*this, &ChildW::onCheckBox);
 
     _lineEdit.setName("LineEdit"); 
-    //_lineEdit.setText("line");
+    //_lineEdit.setText("Hello World!");
     _lineEdit.setPlaceholderText("placeholder text");
     _lineEdit.resize( Gfx::SizeF(130, 26) );
     _lineEdit.setMargin(5);
+    //_lineEdit.setTextAlignment(LineEdit::MiddleCenter);
     //_lineEdit.setEchoMode(Pt::Hmi::LineEdit::Masked);
     _lineEdit.textEntered() += Pt::slot(_textLabel, &Pt::Hmi::Label::setText);
 

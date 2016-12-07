@@ -39,7 +39,6 @@ Label::Label()
 :  _textAlignment(MiddleCenter)
 , _font()
 , _hasFont(false)
-, _textColor( Gfx::Color::fromRgb8(0,0,0) )
 , _hasTextColor(false)
 {
 }
