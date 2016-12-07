@@ -205,9 +205,9 @@ void LabelRenderer::render(const Label& label,
       return;
 
     Gfx::Brush brush = options->background();
-    const Gfx::Color*color = label.planeColor();
-    if(color)
-        brush = *color;
+    const Gfx::Brush* background = label.background();
+    if(background)
+        brush = *background;
 
     const Gfx::Color* borderColor = label.borderColor();
     if( ! borderColor )

@@ -61,7 +61,7 @@ class PlatinumRendererBase
         void renderPlane(Painter& painter,
                          const Gfx::RectF& rect,
                          const StyleOptions& options,
-                         const Gfx::Color* color,
+                         const Gfx::Brush* brush,
                          double corner = 1.0) const;
 
 

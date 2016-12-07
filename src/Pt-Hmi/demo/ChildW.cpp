@@ -57,7 +57,7 @@ ChildW::ChildW(const std::string& title)
     _textLabel.setName("TextLabel");
     _textLabel.setText("Platinum C++ Framework");  
     _textLabel.move( Gfx::PointF(60,60) );
-    _textLabel.setPlaneColor( Gfx::Color::fromRgb8(240, 220, 70) );
+    _textLabel.setBackground( Gfx::Color::fromRgb8(240, 220, 70) );
     _textLabel.setMnemonicWidget(&_toggleButton);
     _textLabel.setCursor( Hmi::Cursor::waitCursor() ); 
     _textLabel.setBorderColor(Gfx::Color::fromRgb8(200, 190, 60));

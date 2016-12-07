@@ -176,7 +176,7 @@ void PlatinumRendererBase::renderFrame(Painter& painter,
 void PlatinumRendererBase::renderPlane(Painter& painter,
                                        const Gfx::RectF& rect,
                                        const StyleOptions& options,
-                                       const Gfx::Color* color,
+                                       const Gfx::Brush* brush,
                                        double corner) const
 {
     Gfx::RectF borderRect( Gfx::PointF(corner, corner),
@@ -215,8 +215,8 @@ void PlatinumRendererBase::renderPlane(Painter& painter,
             
     outline[8] = outline[0];
 
-    if(color)
-        painter.setBrush( *color );
+    if(brush)
+        painter.setBrush( *brush );
     else
         painter.setBrush( options.background() );
 
@@ -359,7 +359,10 @@ void PlatinumButtonRenderer::onRender(const Button& button,
     }
 
     Gfx::RectF borderRect(Gfx::PointF(0,0), size);
-    _baseRenderer.renderPlane(painter, borderRect, *options, &buttonColor);
+    
+    Gfx::Brush background(buttonColor);
+
+    _baseRenderer.renderPlane(painter, borderRect, *options, &background);
     _baseRenderer.renderFrame(painter, borderRect, *options, &frameColor);
 
     //
@@ -521,7 +524,7 @@ void PlatinumPanelRenderer::onRender(const Panel& p,
     painter.setClip(rect);
 
     Gfx::RectF borderRect( Gfx::PointF(0,0), p.size() );
-    _baseRenderer.renderPlane(painter, borderRect, *options, p.planeColor());
+    _baseRenderer.renderPlane(painter, borderRect, *options, p.background());
     _baseRenderer.renderFrame(painter, borderRect, *options, p.borderColor());
 }
 

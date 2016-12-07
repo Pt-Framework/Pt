@@ -40,9 +40,7 @@ namespace Hmi {
 Panel::Panel()
 : _image()
 , _layout( ImageLayout::None )
-, _planeColor( Gfx::Color::fromRgb8(0,0,0) )
-, _hasPlaneColor(false)
-, _borderColor( Gfx::Color::fromRgb8(0,0,0) )
+, _hasBackground(false)
 , _hasBorderColor(false)
 {
     setAcceptsFocus(false);
@@ -54,16 +52,16 @@ Panel::~Panel()
 }
 
 
-const Gfx::Color* Panel::planeColor() const
+const Gfx::Brush* Panel::background() const
 {
-    return _hasPlaneColor ? &_planeColor : 0;
+    return _hasBackground ? &_background : 0;
 }
 
 
-void Panel::setPlaneColor(const Gfx::Color& color)
+void Panel::setBackground(const Gfx::Brush& bg)
 {
-    _planeColor = color;
-    _hasPlaneColor = true;
+    _background = bg;
+    _hasBackground = true;
     update();
 }
 

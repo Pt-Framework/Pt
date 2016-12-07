@@ -32,6 +32,7 @@
 #include <Pt/Hmi/Control.h>
 #include <Pt/Hmi/Picture.h>
 #include <Pt/Gfx/Color.h>
+#include <Pt/Gfx/Brush.h>
 
 namespace Pt {
 
@@ -102,9 +103,9 @@ class PT_HMI_API Panel : public Control
 
         // TODO: use TileMode and Alignment instead of ImageLayout
 
-        const Gfx::Color* planeColor() const;
+        const Gfx::Brush* background() const;
 
-        void setPlaneColor(const Gfx::Color& color);
+        void setBackground(const Gfx::Brush& bg);
 
         const Gfx::Color* borderColor() const;
 
@@ -121,8 +122,8 @@ class PT_HMI_API Panel : public Control
         Gfx::Image  _image;
         Picture     _picture;
         ImageLayout _layout;
-        Gfx::Color  _planeColor;
-        bool        _hasPlaneColor;
+        Gfx::Brush  _background;
+        bool        _hasBackground;
         Gfx::Color  _borderColor;
         bool        _hasBorderColor;
 }; 
