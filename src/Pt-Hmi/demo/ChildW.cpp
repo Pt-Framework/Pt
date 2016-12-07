@@ -119,6 +119,7 @@ ChildW::ChildW(const std::string& title)
     _lineEdit.resize( Gfx::SizeF(130, 26) );
     _lineEdit.setMargin(5);
     //_lineEdit.setEchoMode(Pt::Hmi::LineEdit::Masked);
+    _lineEdit.textEntered() += Pt::slot(_textLabel, &Pt::Hmi::Label::setText);
 
     _buttonBar.setName("ButtonBar");
     _buttonBar.resize( Gfx::SizeF(700, 220) );

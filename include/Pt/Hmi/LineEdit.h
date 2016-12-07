@@ -37,9 +37,7 @@ namespace Pt {
 
 namespace Hmi {
 
-// TODO: entered signal
-//       validation signal
-//       font, textColor
+// TODO: font, textColor
 
 class PT_HMI_API LineEdit : public Control
 {
@@ -94,6 +92,14 @@ class PT_HMI_API LineEdit : public Control
 
         void setCursorPosition(std::size_t n);
 
+        bool isAccepted() const;
+
+        void setAccepted(bool a);
+
+        Pt::Signal<const Pt::String&>& textEdited();
+
+        Pt::Signal<const Pt::String&>& textEntered();
+
         double hscroll() const
         { return _hscroll; }
         
@@ -109,6 +115,8 @@ class PT_HMI_API LineEdit : public Control
 
         virtual void onResizeEvent(const ResizeEvent& ev);
 
+        virtual void onFocusEvent(const FocusEvent& ev);
+
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& rect);
     
     private:
@@ -117,14 +125,17 @@ class PT_HMI_API LineEdit : public Control
         void layoutText();
 
     private:
-        EchoMode      _echoMode;
-        Alignment     _textAlignment;
-        Pt::String    _text;
-        Pt::String    _displayText;
-        Pt::String    _placeholderText;
-        std::size_t   _cursorPosition;
-        double        _hscroll;
-        double        _halign;
+        Pt::Signal<const Pt::String&>  _textEdited;
+        Pt::Signal<const Pt::String&>  _textEntered;
+        EchoMode                       _echoMode;
+        Alignment                      _textAlignment;
+        Pt::String                     _text;
+        Pt::String                     _displayText;
+        Pt::String                     _placeholderText;
+        bool                           _isAccepted;
+        std::size_t                    _cursorPosition;
+        double                         _hscroll;
+        double                         _halign;
 };
 
 } // namespace

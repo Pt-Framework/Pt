@@ -40,6 +40,7 @@ namespace Hmi {
 LineEdit::LineEdit()
 : _echoMode(Normal)
 , _textAlignment(TopLeft)
+, _isAccepted(true)
 , _cursorPosition(0)
 , _hscroll(0)
 , _halign(0)
@@ -141,6 +142,29 @@ void LineEdit::setCursorPosition(std::size_t n)
 }
 
 
+bool LineEdit::isAccepted() const
+{
+    return _isAccepted;
+}
+
+void LineEdit::setAccepted(bool a)
+{
+    _isAccepted = a; 
+}
+
+
+Pt::Signal<const Pt::String&>& LineEdit::textEdited()
+{
+    return _textEdited;
+}
+
+
+Pt::Signal<const Pt::String&>& LineEdit::textEntered()
+{
+    return _textEntered;
+}
+
+
 void LineEdit::onKeyEvent(const KeyEvent& ev)
 {  
     Base::onKeyEvent(ev);
@@ -157,6 +181,23 @@ void LineEdit::onKeyEvent(const KeyEvent& ev)
     {
         setCursorPosition(_cursorPosition + 1);
     }
+    else if( ev.key().code() == Pt::Hmi::Key::Return )
+    {
+        if( isAccepted() )
+            _textEntered.send(_text);
+    }
+    else if( ev.key().code() == Pt::Hmi::Key::Delete )
+    {
+        if( ! _text.empty() )
+            _text.erase(_cursorPosition, 1);
+
+        if( ! _displayText.empty() )
+            _displayText.erase(_cursorPosition, 1);
+        
+        layoutText();
+        update();
+        _textEdited.send(_text);
+    }
     else if( ev.key().code() == Pt::Hmi::Key::Backspace )
     {
         if( _cursorPosition > 0 && ! _text.empty() )
@@ -167,6 +208,8 @@ void LineEdit::onKeyEvent(const KeyEvent& ev)
         
         if(_cursorPosition > 0)
             setCursorPosition(_cursorPosition - 1);
+
+        _textEdited.send(_text);
     }
     else
     {
@@ -179,6 +222,8 @@ void LineEdit::onKeyEvent(const KeyEvent& ev)
                 _displayText += maskChar;
 
             setCursorPosition(_cursorPosition + 1);
+
+            _textEdited.send(_text);
         }
     }
 }
@@ -217,6 +262,18 @@ void LineEdit::onTouchEvent(const TouchEvent& tev)
 void LineEdit::onResizeEvent(const ResizeEvent& ev)
 {
     layoutText();
+}
+
+
+void LineEdit::onFocusEvent(const FocusEvent& ev)
+{
+    Base::onFocusEvent(ev);
+
+    if( ! ev.isFocused() )
+    {
+        if( isAccepted() )
+            _textEntered.send(_text);
+    }
 }
 
 
