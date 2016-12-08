@@ -175,10 +175,28 @@ class PT_HMI_API PlatinumLineEditRenderer : public LineEditRenderer
         virtual ~PlatinumLineEditRenderer();
 
     protected:
-        virtual void onRender(const LineEdit& le, 
-                              PaintSurface& surface, 
-                              const Gfx::RectF& rect) const;
-    
+        virtual void onRenderItem(const LineEdit& le, 
+                                  const StyleOptions& options,
+                                  Painter& painter, 
+                                  const Gfx::RectF& rect,
+                                  const Gfx::Color& foreground,
+                                  const Gfx::Brush& background) const;
+
+        virtual void onRenderText(const LineEdit& le, 
+                                  const StyleOptions& options,
+                                  Painter& painter, 
+                                  const Gfx::RectF& rect,
+                                  const String& text,
+                                  const Gfx::PointF& textPos,
+                                  const Gfx::Font& font,
+                                  const Gfx::Color& textColor) const;
+
+        virtual void onRenderCursor(const LineEdit& le, 
+                                    const StyleOptions& options,
+                                    Painter& painter, 
+                                    const Gfx::RectF& rect,
+                                    const Gfx::RectF& cursorRect ) const;
+
     private:
         PlatinumRendererBase _baseRenderer;
 };

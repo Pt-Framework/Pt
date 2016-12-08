@@ -69,68 +69,79 @@ class PT_HMI_API StyleOptions : public Style::Facet
 
         const Gfx::Brush& background() const
         {
-          return _background;
+            return _background;
         }
 
         void setBackground(const Gfx::Brush& b)
         {
-          _background = b;
+            _background = b;
         }
 
         const Gfx::Brush& viewBackground() const
         {
-          return _viewBackground;
+            return _viewBackground;
         }
 
         void setViewBackground(const Gfx::Brush& b)
         {
-          _viewBackground = b;
+            _viewBackground = b;
         }
 
         const Gfx::Color& foreground() const
         {
-          return _foreground;
+            return _foreground;
         }
 
         void setForeground(const Gfx::Color& c)
         {
-          _foreground = c;
+            _foreground = c;
+        }
+
+        const Gfx::Color& contourColor() const
+        {
+            return _contourColor;
+        }
+
+        void setContourColor(const Gfx::Color& c)
+        {
+            _contourColor = c;
         }
 
         const Gfx::Color& highlightColor() const
         {
-          return _highlightColor;
+            return _highlightColor;
         }
 
         void setHighlightColor(const Gfx::Color& c)
         {
-          _highlightColor = c;
+            _highlightColor = c;
         }
 
         const Gfx::Color& textColor() const
         {
-          return _textColor;
+            return _textColor;
         }
 
         void setTextColor(const Gfx::Color& c)
         {
-          _textColor = c;
+            _textColor = c;
         }
 
         const Gfx::Font& font() const
         {
-          return _font;
+            return _font;
         }
 
         void setFont(const Gfx::Font& c)
         {
-          _font = c;
+            _font = c;
         }
 
     private:
       Gfx::Brush _background;
       Gfx::Brush _viewBackground;
       Gfx::Color _foreground;
+      Gfx::Color _contourColor;
       Gfx::Color _highlightColor;
       Gfx::Color _textColor;
       Gfx::Font  _font;    

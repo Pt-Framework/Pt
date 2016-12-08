@@ -106,12 +106,6 @@ class PT_HMI_API LineEdit : public Control
 
         Pt::Signal<const Pt::String&>& textEntered();
 
-        double hscroll() const
-        { return _hscroll; }
-        
-        double halign() const
-        { return _halign; }
-
     protected:
         virtual void onKeyEvent(const KeyEvent& ev);
 

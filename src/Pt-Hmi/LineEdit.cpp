@@ -311,9 +311,90 @@ void LineEdit::onFocusEvent(const FocusEvent& ev)
 
 void LineEdit::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
+    const StyleOptions* options = getFacet<StyleOptions>();
+    if( ! options )
+        return;
+
     const LineEditRenderer* renderer = getFacet<LineEditRenderer>();
-    if(renderer)
-        renderer->render(*this, surface, rect);
+    if( ! renderer)
+        return;
+
+    const Gfx::Font* font = this->font();
+    if( ! font )
+        font = &options->font();
+
+    const Gfx::Color* textColor = this->textColor();
+    if( ! textColor )
+        textColor = &options->textColor(); 
+
+    Painter painter(surface);
+    painter.setClip(rect);
+    
+    //
+    // text box
+    //
+
+    renderer->renderItem( *this, *options, painter, rect,
+                          options->contourColor(), 
+                          options->viewBackground() );
+    
+    if(echoMode() == LineEdit::Hidden)
+        return;
+
+    //
+    // placeholder or entered text
+    //
+
+    const Pt::String& text = displayText().empty() ? _placeholderText
+                                                   : displayText();
+    
+    Gfx::FontMetrics fm = painter.fontMetrics(text);
+
+    double textX = padding().left() + _halign - _hscroll;
+    
+    double textHeight = fm.ascent() + fm.descent();
+    double textY = ((size().height() - textHeight) / 2) + fm.ascent();
+
+    if( ! _text.empty() )
+    {
+        Gfx::PointF textPos(textX, textY);
+        
+        renderer->renderText(*this, *options, painter, rect, 
+                             text, textPos, *font, *textColor);
+    }
+    else if( ! hasFocus() && ! text.empty() )
+    {
+        std::size_t align = fm.width() / 2;
+
+        if(align < textX)
+            textX -= align;
+  
+        Gfx::PointF textPos(textX, textY);
+
+        renderer->renderText(*this, *options, painter, rect, 
+                             text, textPos, *font, options->contourColor());
+    }
+
+    //
+    // text cursor
+    //
+
+    if( hasFocus() )
+    {
+        double cursorX = textX;
+        
+        if( ! text.empty() )
+        {
+            Pt::String left = text.substr(0, _cursorPosition);
+            Gfx::FontMetrics fm = painter.fontMetrics(left);
+            cursorX += fm.width();
+        }
+
+        Gfx::RectF cursorRect( Gfx::PointF(cursorX, textY - fm.ascent()),
+                               Gfx::SizeF(0, textHeight) );
+
+        renderer->renderCursor(*this, *options, painter, rect, cursorRect);
+    }
 }
 
 
@@ -411,7 +492,6 @@ std::size_t LineEdit::xToCursor(double x)
         textX += x - padding().left();
 
     // estimate cursor position
-    std::size_t n = str.length();
     Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( options->font(), str );
     std::size_t widthPerChar = fm.width() / str.size();
     std::size_t pos = textX / widthPerChar;

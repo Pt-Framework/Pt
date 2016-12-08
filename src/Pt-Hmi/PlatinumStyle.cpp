@@ -639,83 +639,46 @@ PlatinumLineEditRenderer::~PlatinumLineEditRenderer()
 }
 
 
-void PlatinumLineEditRenderer::onRender(const LineEdit& le, 
-                                        PaintSurface& surface, 
-                                        const Gfx::RectF& rect) const
+void PlatinumLineEditRenderer::onRenderItem(const LineEdit& le, 
+                                            const StyleOptions& options,
+                                            Painter& painter, 
+                                            const Gfx::RectF& rect,
+                                            const Gfx::Color& contourColor,
+                                            const Gfx::Brush& background) const
 {
-    const StyleOptions* options = le.getFacet<StyleOptions>();
-    if( ! options )
-      return;
-
-    Gfx::Color frameColor = brighten(options->foreground(), 0.7f);
-    const Gfx::Brush& fillBrush = options->viewBackground();
-
-    const Gfx::Font* font = le.font();
-    if( ! font )
-        font = &options->font();
-
-    const Gfx::Color* textColor = le.textColor();
-    if( ! textColor )
-        textColor = &options->textColor(); 
-
-    Painter painter(surface);
-    painter.setClip(rect);
-    
-    painter.setBrush(fillBrush);
+    painter.setBrush(background);
     painter.fillRect(rect);
 
-    painter.setPen(frameColor);
+    painter.setPen(contourColor);
     painter.drawRect(rect);
+}
 
-    if(le.echoMode() == LineEdit::Hidden)
-        return;
 
-    painter.setFont(*font);
-   
-    const Pt::String& text = le.displayText();
-    Gfx::FontMetrics fmText = painter.fontMetrics(text);
+void PlatinumLineEditRenderer::onRenderText(const LineEdit& le, 
+                                            const StyleOptions& options,
+                                            Painter& painter, 
+                                            const Gfx::RectF& rect,
+                                            const String& text,
+                                            const Gfx::PointF& textPos,
+                                            const Gfx::Font& font,
+                                            const Gfx::Color& textColor) const
+{
+    painter.setPen(textColor);
+    painter.setFont(font);
+    painter.drawText(textPos, text);
+}
 
-    double textX = le.padding().left() - le.hscroll();
-    textX += le.halign();
 
-    double textHeight = fmText.ascent() + fmText.descent();
-    double textY = (le.size().height() / 2) - (textHeight / 2) + fmText.ascent();
-
-    if( ! text.empty() )
-    {
-        painter.setPen(*textColor);
-
-        Gfx::PointF textPos(textX, textY);
-        painter.drawText(textPos, text);
-    }
-
-    if( le.hasFocus() )
-    {
-        std::size_t cursorPosition = le.cursorPosition();
-        Pt::String left = text.empty() ? Pt::String() 
-                                        : text.substr(0, cursorPosition);
-        Gfx::FontMetrics fmCursor = painter.fontMetrics(left);
-
-        double cursorX = textX + fmCursor.width();
-
-        painter.drawLine( Gfx::PointF(cursorX, textY - fmText.ascent()),
-                          Gfx::PointF(cursorX, textY + fmText.descent()) );
-    }
-
-    const Pt::String& placeholderText = le.placeholderText();
-
-    if( text.empty() && ! le.hasFocus() && ! placeholderText.empty() )
-    {
-        Gfx::FontMetrics fm = painter.fontMetrics(placeholderText);
-        std::size_t align = fm.width() / 2;
-
-        double x = align < textX ? textX - align : textX;
+void PlatinumLineEditRenderer::onRenderCursor(const LineEdit& le, 
+                                              const StyleOptions& options,
+                                              Painter& painter, 
+                                              const Gfx::RectF& rect,
+                                              const Gfx::RectF& cursorRect ) const
+{
+    painter.setPen( options.textColor() );
     
-        painter.setPen(frameColor);
-
-        Gfx::PointF textPos(x, textY);
-        painter.drawText(textPos, placeholderText);
-    }
+    painter.drawLine( cursorRect.topLeft(),
+                      cursorRect.bottomLeft() );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

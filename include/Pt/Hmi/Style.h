@@ -212,15 +212,51 @@ class PT_HMI_API LineEditRenderer : public Style::Facet
         LineEditRenderer(std::size_t refs = 0);
 
         virtual ~LineEditRenderer();
+        
+        virtual void renderItem(const LineEdit& le, 
+                                const StyleOptions& options,
+                                Painter& painter, 
+                                const Gfx::RectF& rect,
+                                const Gfx::Color& foreground,
+                                const Gfx::Brush& background) const;
 
-        void render(const LineEdit& le,
-                    PaintSurface& surface, 
-                    const Gfx::RectF& rect) const;
+        virtual void renderText(const LineEdit& le, 
+                                const StyleOptions& options,
+                                Painter& painter, 
+                                const Gfx::RectF& rect,
+                                const String& text,
+                                const Gfx::PointF& textPos,
+                                const Gfx::Font& font,
+                                const Gfx::Color& textColor) const;
 
+        virtual void renderCursor(const LineEdit& le, 
+                                  const StyleOptions& options,
+                                  Painter& painter, 
+                                  const Gfx::RectF& rect,
+                                  const Gfx::RectF& cursorRect ) const;
+    
     protected:
-        virtual void onRender(const LineEdit& le, 
-                              PaintSurface& surface, 
-                              const Gfx::RectF& rect) const = 0;
+        virtual void onRenderItem(const LineEdit& le, 
+                                  const StyleOptions& options,
+                                  Painter& painter, 
+                                  const Gfx::RectF& rect,
+                                  const Gfx::Color& foreground,
+                                  const Gfx::Brush& background) const = 0;
+
+        virtual void onRenderText(const LineEdit& le, 
+                                  const StyleOptions& options,
+                                  Painter& painter, 
+                                  const Gfx::RectF& rect,
+                                  const String& text,
+                                  const Gfx::PointF& textPos,
+                                  const Gfx::Font& font,
+                                  const Gfx::Color& textColor) const = 0;
+
+        virtual void onRenderCursor(const LineEdit& le, 
+                                    const StyleOptions& options,
+                                    Painter& painter, 
+                                    const Gfx::RectF& rect,
+                                    const Gfx::RectF& cursorRect ) const = 0;
 };
 
 class PT_HMI_API MenuRenderer : public Style::Facet

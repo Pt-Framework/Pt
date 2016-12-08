@@ -259,12 +259,38 @@ LineEditRenderer::~LineEditRenderer()
 }
 
 
-void LineEditRenderer::render(const LineEdit& le, 
-                              PaintSurface& surface, 
-                              const Gfx::RectF& rect) const
-{ 
-    onRender(le, surface, rect); 
-}  
+void LineEditRenderer::renderItem(const LineEdit& le, 
+                                  const StyleOptions& options,
+                                  Painter& painter, 
+                                  const Gfx::RectF& rect,
+                                  const Gfx::Color& foreground,
+                                  const Gfx::Brush& background) const
+{
+    onRenderItem(le, options, painter, rect, foreground, background);
+}
+
+
+void LineEditRenderer::renderText(const LineEdit& le, 
+                                  const StyleOptions& options,
+                                  Painter& painter, 
+                                  const Gfx::RectF& rect,
+                                  const String& text,
+                                  const Gfx::PointF& textPos,
+                                  const Gfx::Font& font,
+                                  const Gfx::Color& textColor) const
+{
+    onRenderText(le, options, painter,  rect, text, textPos, font, textColor);
+}
+
+
+void LineEditRenderer::renderCursor(const LineEdit& le, 
+                                    const StyleOptions& options,
+                                    Painter& painter, 
+                                    const Gfx::RectF& rect,
+                                    const Gfx::RectF& cursorRect) const
+{
+    onRenderCursor(le, options, painter, rect, cursorRect);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // MenuRenderer
