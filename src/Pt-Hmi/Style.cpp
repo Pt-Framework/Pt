@@ -174,12 +174,24 @@ PanelRenderer::~PanelRenderer()
 }
 
 
-void PanelRenderer::render(const Panel& p, 
-                           PaintSurface& surface, 
-                           const Gfx::RectF& rect) const
-{ 
-    onRender(p, surface, rect); 
-}  
+void PanelRenderer::renderBackground(const Panel& p,
+                                     const StyleOptions& options,
+                                     Painter& painter, 
+                                     const Gfx::RectF& rect,
+                                     const Gfx::Brush& brush) const
+{
+    onRenderBackground(p, options, painter, rect, brush);
+}
+
+
+void PanelRenderer::renderFrame(const Panel& p,
+                                const StyleOptions& options,
+                                Painter& painter, 
+                                const Gfx::RectF& rect, 
+                                const Gfx::Color& borderColor) const
+{
+    onRenderFrame(p, options, painter, rect, borderColor);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // LabelRenderer
@@ -196,52 +208,36 @@ LabelRenderer::~LabelRenderer()
 }
 
 
-void LabelRenderer::render(const Label& label, 
-                           PaintSurface& surface, 
-                           const Gfx::RectF& rect) const
-{ 
-    const StyleOptions* options = label.getFacet<StyleOptions>();
-    if( ! options )
-      return;
+void LabelRenderer::renderBackground(const Label& l,
+                                     const StyleOptions& options,
+                                     Painter& p, 
+                                     const Gfx::RectF& rect,
+                                     const Gfx::Brush& brush) const
+{
+    onRenderBackground(l, options, p, rect, brush);
+}
 
-    Gfx::Brush brush = options->background();
-    const Gfx::Brush* background = label.background();
-    if(background)
-        brush = *background;
 
-    const Gfx::Color* borderColor = label.borderColor();
-    if( ! borderColor )
-        borderColor = &options->foreground();
-    
-    const Gfx::Font* font = label.font();
-    if( ! font )
-        font = &options->font();
+void LabelRenderer::renderFrame(const Label& l,
+                                const StyleOptions& options,
+                                Painter& p, 
+                                const Gfx::RectF& rect, 
+                                const Gfx::Color& borderColor) const
+{
+    onRenderFrame(l, options, p, rect, borderColor);
+}
 
-    const Gfx::Color* textColor = label.textColor();
-    if( ! textColor )
-        textColor = &options->textColor(); 
-    
-    Gfx::PointF pos = label.textPosition(*font);
 
-    //onRender(l, surface, rect);
-
-    Painter painter(surface);
-    painter.setClip(rect);
-
-    onRenderBackground(painter, 
-                       rect,
-                       label,
-                       *options, 
-                       brush, 
-                       *borderColor);
-
-    onRenderText(painter, 
-                 rect,
-                 label,
-                 *options,
-                 pos,
-                 *font, 
-                 *textColor);
+void LabelRenderer::renderText(const Label& l,
+                               const StyleOptions& options,
+                               Painter& p, 
+                               const Gfx::RectF& rect,
+                               const String& text,
+                               const Gfx::PointF& textPos,
+                               const Gfx::Font& font, 
+                               const Gfx::Color& textColor) const
+{
+    onRenderText(l, options, p, rect, text, textPos, font, textColor);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

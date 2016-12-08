@@ -30,17 +30,17 @@
 #ifndef Pt_Hmi_Label_H
 #define Pt_Hmi_Label_H
 
-#include <Pt/Hmi/Panel.h>
+#include <Pt/Hmi/Control.h>
 #include <Pt/String.h>
 
 namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API Label : public Panel
+class PT_HMI_API Label : public Control
 {
 	  public:
-        // TODO: separate classs
+        // TODO: separate class
         enum Alignment
         {
             TopLeft,
@@ -67,13 +67,15 @@ class PT_HMI_API Label : public Panel
 
         void setTextAlignment(Alignment a);
 
-        Gfx::PointF textPosition(const Gfx::Font& font) const;
+        void setBackground(const Gfx::Brush& b);
 
-        const Gfx::Color* textColor() const;
+        void setBackground(bool b);
+
+        void setFrame(const Gfx::Color& color);
+
+        void setFrame(bool b);
 
         void setTextColor(const Gfx::Color& color);
-
-        const Gfx::Font* font() const;
 
         void setFont(const Gfx::Font& f);
 
@@ -83,12 +85,21 @@ class PT_HMI_API Label : public Panel
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
         
     private:
-        Pt::String _text;
-        Alignment  _textAlignment;
-        Gfx::Font  _font;
-        bool       _hasFont;
-        Gfx::Color _textColor;
-        bool       _hasTextColor;
+        Gfx::PointF textPosition(const Gfx::Font& font) const;
+
+    private:
+        Pt::String  _text;
+        Alignment   _textAlignment;
+        Gfx::Brush  _background;
+        bool        _hasBackground;
+        bool        _customBackground;
+        Gfx::Color  _frameColor;
+        bool        _hasFrame;
+        bool        _customFrame;
+        Gfx::Font   _font;
+        bool        _hasFont;
+        Gfx::Color  _textColor;
+        bool        _hasTextColor;
 };
 
 } // namespace

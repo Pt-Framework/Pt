@@ -37,6 +37,10 @@ namespace Hmi {
 
 Label::Label()
 :  _textAlignment(MiddleCenter)
+, _hasBackground(false)
+, _customBackground(false)
+, _hasFrame(false)
+, _customFrame(false)
 , _font()
 , _hasFont(false)
 , _hasTextColor(false)
@@ -172,9 +176,50 @@ Gfx::PointF Label::textPosition(const Gfx::Font& font) const
 }
 
 
-const Gfx::Color* Label::textColor() const
+void Label::setBackground(const Gfx::Brush& b)
 {
-    return _hasTextColor ? &_textColor : 0;
+    _background = b;
+    _hasBackground = true;
+    _customBackground = true;
+    update();
+}
+
+
+void Label::setBackground(bool b)
+{
+    _hasBackground = b;
+
+    if( ! _hasBackground )
+    {
+        if(_customBackground)
+            _background = Gfx::Brush();
+        
+        _customBackground = false;
+    }
+
+    update();
+}
+
+
+void Label::setFrame(const Gfx::Color& color)
+{
+    _frameColor = color;
+    _hasFrame = true;
+    _customFrame = true;
+    update();
+}
+
+
+void Label::setFrame(bool b)
+{
+    _hasFrame = b;
+
+    if( ! _hasFrame )
+    {       
+        _customFrame = false;
+    }
+
+    update();
 }
 
 
@@ -183,12 +228,6 @@ void Label::setTextColor(const Gfx::Color& color)
     _textColor = color;
     _hasTextColor = true;
     update();
-}
-
-
-const Gfx::Font* Label::font() const
-{ 
-    return _hasFont ? &_font : 0;
 }
 
 
@@ -209,11 +248,47 @@ Gfx::SizeF Label::onAutoSize() const
 }
 
 
-void Label::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
+void Label::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
+    const StyleOptions* options = getFacet<StyleOptions>();
+    if( ! options )
+      return;
+
     const LabelRenderer* renderer = getFacet<LabelRenderer>();
-    if(renderer)
-        renderer->render(*this, surface, updateRect);
+    if( ! renderer)
+        return;
+
+    Painter painter(surface);
+    painter.setClip(rect);
+
+    if( _hasBackground )
+    {
+        const Gfx::Brush& background = _customBackground ? _background
+                                                         : options->background();
+
+        renderer->renderBackground(*this, *options,
+                                   painter, rect, background);
+    }
+
+    if( _hasFrame )
+    {
+        const Gfx::Color& frameColor = _customFrame ? _frameColor
+                                                    : options->contourColor();
+
+        renderer->renderFrame(*this, *options,
+                              painter, rect, frameColor);
+    }
+
+    const Gfx::Font& font = _hasFont ? _font
+                                     : options->font();
+
+    const Gfx::Color& textColor = _hasTextColor ? _textColor
+                                                : options->textColor(); 
+    
+    Gfx::PointF pos = textPosition(font);
+
+    renderer->renderText(*this, *options,  painter, rect,
+                         text(), pos, font, textColor);
 }
 
 } // namespace

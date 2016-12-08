@@ -41,7 +41,9 @@ Panel::Panel()
 : _image()
 , _layout( ImageLayout::None )
 , _hasBackground(false)
-, _hasBorderColor(false)
+, _customBackground(false)
+, _hasFrame(false)
+, _customFrame(false)
 {
     setAcceptsFocus(false);
 }
@@ -52,30 +54,49 @@ Panel::~Panel()
 }
 
 
-const Gfx::Brush* Panel::background() const
+void Panel::setBackground(const Gfx::Brush& b)
 {
-    return _hasBackground ? &_background : 0;
-}
-
-
-void Panel::setBackground(const Gfx::Brush& bg)
-{
-    _background = bg;
+    _background = b;
     _hasBackground = true;
+    _customBackground = true;
     update();
 }
 
 
-const Gfx::Color* Panel::borderColor() const
+void Panel::setBackground(bool b)
 {
-    return _hasBorderColor ? &_borderColor : 0;
+    _hasBackground = b;
+
+    if( ! _hasBackground )
+    {
+        if(_customBackground)
+            _background = Gfx::Brush();
+        
+        _customBackground = false;
+    }
+
+    update();
 }
 
 
-void Panel::setBorderColor(const Gfx::Color& color)
+void Panel::setFrame(const Gfx::Color& color)
 {
-    _borderColor = color;
-    _hasBorderColor = true;
+    _frameColor = color;
+    _hasFrame = true;
+    _customFrame = true;
+    update();
+}
+
+
+void Panel::setFrame(bool b)
+{
+    _hasFrame = b;
+
+    if( ! _hasFrame )
+    {       
+        _customFrame = false;
+    }
+
     update();
 }
 
@@ -133,17 +154,30 @@ void Panel::onResizeEvent(const ResizeEvent& ev)
 }
 
 
-void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
+void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
+    const StyleOptions* options = getFacet<StyleOptions>();
+    if( ! options )
+      return;
+
     const PanelRenderer* renderer = getFacet<PanelRenderer>();
-    if(renderer)
-        renderer->render(*this, surface, updateRect);
+    if( ! renderer)
+        return;
+
+    Painter painter(surface);
+    painter.setClip(rect);
+
+    if( _hasBackground )
+    {
+        const Gfx::Brush& background = _customBackground ? _background
+                                                         : options->background();
+
+        renderer->renderBackground(*this, *options,
+                                   painter, rect, background);
+    }
 
     if( ! _picture.empty() )
     {
-        Painter painter(surface);
-        painter.setCompositionMode(Gfx::CompositionMode::SourceOver);
-
         const Gfx::SizeF& size = this->size();
 
         switch( _layout.type() )
@@ -171,6 +205,15 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
             }
         }
     }  
+
+    if( _hasFrame )
+    {
+        const Gfx::Color& frameColor = _customFrame ? _frameColor
+                                                    : options->contourColor();
+
+        renderer->renderFrame(*this, *options,
+                              painter, rect, frameColor);
+    }
 }
 
 } // namespace

@@ -164,14 +164,30 @@ class PT_HMI_API PanelRenderer : public Style::Facet
 
         virtual ~PanelRenderer();
 
-        void render(const Panel& p,
-                    PaintSurface& surface, 
-                    const Gfx::RectF& rect) const;
+        void renderBackground(const Panel& p,
+                              const StyleOptions& options,
+                              Painter& painter, 
+                              const Gfx::RectF& rect,
+                              const Gfx::Brush& brush) const;
+
+        void renderFrame(const Panel& p,
+                         const StyleOptions& options,
+                         Painter& painter, 
+                         const Gfx::RectF& rect, 
+                         const Gfx::Color& borderColor) const;
 
     protected:
-        virtual void onRender(const Panel& p, 
-                              PaintSurface& surface, 
-                              const Gfx::RectF& rect) const = 0;
+        virtual void onRenderBackground(const Panel& p,
+                                        const StyleOptions& options,
+                                        Painter& painter, 
+                                        const Gfx::RectF& rect,
+                                        const Gfx::Brush& brush) const = 0;
+
+        virtual void onRenderFrame(const Panel& p,
+                                   const StyleOptions& options,
+                                   Painter& painter, 
+                                   const Gfx::RectF& rect, 
+                                   const Gfx::Color& borderColor) const = 0;
 };
 
 class PT_HMI_API LabelRenderer : public Style::Facet
@@ -180,28 +196,47 @@ class PT_HMI_API LabelRenderer : public Style::Facet
         LabelRenderer(std::size_t refs = 0);
 
         virtual ~LabelRenderer();
+        
+        void renderBackground(const Label& l,
+                              const StyleOptions& options,
+                              Painter& p, 
+                              const Gfx::RectF& rect,
+                              const Gfx::Brush& brush) const;
 
-        void render(const Label& l,
-                    PaintSurface& surface,
-                    const Gfx::RectF& rect) const;
+        void renderFrame(const Label& l,
+                         const StyleOptions& options,
+                         Painter& p, 
+                         const Gfx::RectF& rect, 
+                         const Gfx::Color& borderColor) const;
+
+        void renderText(const Label& l,
+                        const StyleOptions& options,
+                        Painter& p, 
+                        const Gfx::RectF& rect,
+                        const String& text,
+                        const Gfx::PointF& textPos,
+                        const Gfx::Font& font, 
+                        const Gfx::Color& textColor) const;
 
     protected:
-        //virtual void onRender(const Label& l, 
-        //                      PaintSurface& surface, 
-        //                      const Gfx::RectF& rect) const = 0;
-
-        virtual void onRenderBackground(Painter& p, 
+        virtual void onRenderBackground(const Label& l,
+                                        const StyleOptions& options,
+                                        Painter& p, 
                                         const Gfx::RectF& rect,
-                                        const Label& l,
-                                        const StyleOptions& options, 
-                                        const Gfx::Brush& brush, 
-                                        const Gfx::Color& borderColor) const = 0;
+                                        const Gfx::Brush& brush) const = 0;
 
-        virtual void onRenderText(Painter& p, 
-                                  const Gfx::RectF& rect,
-                                  const Label& l,
+        virtual void onRenderFrame(const Label& l,
+                                   const StyleOptions& options,
+                                   Painter& p, 
+                                   const Gfx::RectF& rect, 
+                                   const Gfx::Color& borderColor) const = 0;
+
+        virtual void onRenderText(const Label& l,
                                   const StyleOptions& options,
-                                  const Gfx::PointF& pos,
+                                  Painter& p, 
+                                  const Gfx::RectF& rect,
+                                  const String& text,
+                                  const Gfx::PointF& textPos,
                                   const Gfx::Font& font, 
                                   const Gfx::Color& textColor) const = 0;
 };

@@ -35,8 +35,8 @@
 #include <Pt/Hmi/Application.h>
     
 namespace Pt {
-namespace Hmi {
 
+namespace Hmi {
 
 class PT_HMI_API Control : public Widget
 {

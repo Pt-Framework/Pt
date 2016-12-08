@@ -525,20 +525,27 @@ PlatinumPanelRenderer::~PlatinumPanelRenderer()
 }
 
 
-void PlatinumPanelRenderer::onRender(const Panel& p, 
-                                     PaintSurface& surface, 
-                                     const Gfx::RectF& rect) const
+void PlatinumPanelRenderer::onRenderBackground(const Panel& p,
+                                               const StyleOptions& options,
+                                               Painter& painter, 
+                                               const Gfx::RectF& rect,
+                                               const Gfx::Brush& brush) const 
 {
-    const StyleOptions* options = p.getFacet<StyleOptions>();
-    if( ! options )
-      return;
-
-    Painter painter(surface);
-    painter.setClip(rect);
-
     Gfx::RectF borderRect( Gfx::PointF(0,0), p.size() );
-    _baseRenderer.renderPlane(painter, borderRect, *options, p.background());
-    _baseRenderer.renderFrame(painter, borderRect, *options, p.borderColor());
+    
+    _baseRenderer.renderPlane(painter, borderRect, brush);
+}
+
+
+void PlatinumPanelRenderer::onRenderFrame(const Panel& p,
+                                          const StyleOptions& options,
+                                          Painter& painter, 
+                                          const Gfx::RectF& rect,
+                                          const Gfx::Color& borderColor) const 
+{
+    Gfx::RectF borderRect( Gfx::PointF(0,0), p.size() );
+    
+    _baseRenderer.renderFrame(painter, borderRect, borderColor);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -556,72 +563,43 @@ PlatinumLabelRenderer::~PlatinumLabelRenderer()
 }
 
 
-//void PlatinumLabelRenderer::onRender(const Label& l, 
-//                                     PaintSurface& surface, 
-//                                     const Gfx::RectF& updateRect) const
-//{
-//    const StyleOptions* options = l.getFacet<StyleOptions>();
-//    if( ! options )
-//      return;
-//
-//    Painter painter(surface);
-//    painter.setClip(updateRect);
-//
-//    //
-//    // render label background
-//    //
-//
-//    Gfx::RectF borderRect( Gfx::PointF(0,0), l.size() );
-//    _baseRenderer.renderPlane(painter, borderRect, *options, l.planeColor());
-//    _baseRenderer.renderFrame(painter, borderRect, *options, l.borderColor());
-//
-//    //
-//    // render label text
-//    //
-//       
-//    const Gfx::Font* font = l.font();
-//    if(font)
-//        painter.setFont(*font);
-//    else
-//        painter.setFont( options->font() );
-//
-//    const Gfx::Color* color = l.textColor();
-//    if(color)
-//        painter.setPen(*color);
-//    else
-//        painter.setPen( options->textColor() ); 
-//
-//    Gfx::PointF pos = l.textPosition(font ? *font : options->font());
-//    painter.drawText( pos, l.text() );
-//}
-
-
-void PlatinumLabelRenderer::onRenderBackground(Painter& painter, 
-                                               const Gfx::RectF& rect,
-                                               const Label& l,
+void PlatinumLabelRenderer::onRenderBackground(const Label& l,
                                                const StyleOptions& options,
-                                               const Gfx::Brush& brush, 
-                                               const Gfx::Color& borderColor) const 
+                                               Painter& painter, 
+                                               const Gfx::RectF& rect,
+                                               const Gfx::Brush& brush) const 
 {
     Gfx::RectF borderRect( Gfx::PointF(0,0), l.size() );
     
     _baseRenderer.renderPlane(painter, borderRect, brush);
+}
+
+
+void PlatinumLabelRenderer::onRenderFrame(const Label& l,
+                                          const StyleOptions& options,
+                                          Painter& painter, 
+                                          const Gfx::RectF& rect,
+                                          const Gfx::Color& borderColor) const 
+{
+    Gfx::RectF borderRect( Gfx::PointF(0,0), l.size() );
+    
     _baseRenderer.renderFrame(painter, borderRect, borderColor);
 }
 
 
-void PlatinumLabelRenderer::onRenderText(Painter& painter, 
-                                         const Gfx::RectF& rect,
-                                         const Label& l,
+void PlatinumLabelRenderer::onRenderText(const Label& l,
                                          const StyleOptions& options,
-                                         const Gfx::PointF& pos,
+                                         Painter& painter, 
+                                         const Gfx::RectF& rect,
+                                         const String& text,
+                                         const Gfx::PointF& textPos,
                                          const Gfx::Font& font, 
                                          const Gfx::Color& textColor) const 
 {
     painter.setFont(font);
     painter.setPen(textColor);
 
-    painter.drawText( pos, l.text() );
+    painter.drawText( textPos, text );
 }
 
 ///////////////////////////////////////////////////////////////////////////////

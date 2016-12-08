@@ -126,9 +126,17 @@ class PT_HMI_API PlatinumPanelRenderer : public PanelRenderer
         virtual ~PlatinumPanelRenderer();
 
     protected:
-        virtual void onRender(const Panel& p, 
-                              PaintSurface& surface, 
-                              const Gfx::RectF& rect) const;
+        virtual void onRenderBackground(const Panel& p,
+                                        const StyleOptions& options,
+                                        Painter& painter, 
+                                        const Gfx::RectF& rect,
+                                        const Gfx::Brush& brush) const;
+
+        virtual void onRenderFrame(const Panel& p,
+                                   const StyleOptions& options,
+                                   Painter& painter, 
+                                   const Gfx::RectF& rect, 
+                                   const Gfx::Color& borderColor) const;
     
     private:
         PlatinumRendererBase _baseRenderer;
@@ -143,22 +151,24 @@ class PT_HMI_API PlatinumLabelRenderer : public LabelRenderer
         virtual ~PlatinumLabelRenderer();
 
     protected:
-        //virtual void onRender(const Label& l, 
-        //                      PaintSurface& surface, 
-        //                      const Gfx::RectF& rect) const;
-
-        virtual void onRenderBackground(Painter& p, 
-                                        const Gfx::RectF& rect,
-                                        const Label& l,
+        virtual void onRenderBackground(const Label& l,
                                         const StyleOptions& options,
-                                        const Gfx::Brush& brush, 
-                                        const Gfx::Color& borderColor) const;
+                                        Painter& p, 
+                                        const Gfx::RectF& rect,
+                                        const Gfx::Brush& brush) const;
 
-        virtual void onRenderText(Painter& p, 
-                                  const Gfx::RectF& rect,
-                                  const Label& l,
+        virtual void onRenderFrame(const Label& l,
+                                   const StyleOptions& options,
+                                   Painter& p, 
+                                   const Gfx::RectF& rect, 
+                                   const Gfx::Color& borderColor) const;
+
+        virtual void onRenderText(const Label& l,
                                   const StyleOptions& options,
-                                  const Gfx::PointF& pos,
+                                  Painter& p, 
+                                  const Gfx::RectF& rect,
+                                  const String& text,
+                                  const Gfx::PointF& textPos,
                                   const Gfx::Font& font, 
                                   const Gfx::Color& textColor) const;
 
