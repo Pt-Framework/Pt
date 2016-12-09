@@ -420,6 +420,9 @@ void Window::setFocusWidget(Widget* widget)
 
     if( _focusWidget )
     {
+        if( ! _focusWidget->canChangeFocus() )
+            return;
+
         FocusEvent fev(_focusWidget->vid(), false);
         Application::instance().loop().commitEvent(fev);
     }

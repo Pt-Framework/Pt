@@ -9,6 +9,17 @@ namespace Hmi {
 
 namespace Demo {
 
+void ChildW::checkInput(const Pt::String& s)
+{
+    _lineEdit.setAccepted(s == "ggg");
+
+    if( ! _lineEdit.isAccepted() )
+        _lineEdit.setTextColor( Gfx::Color::fromRgb8(255,0,0));
+    else
+        _lineEdit.setTextColor( Gfx::Color::fromRgb8(0,0,0));
+}
+
+
 ChildW::ChildW(const std::string& title)
 : _vscroll(ScrollBar::Vertical)
 {
@@ -118,14 +129,16 @@ ChildW::ChildW(const std::string& title)
     _checkBox.setPadding(5);
     _checkBox.clicked() += Pt::slot(*this, &ChildW::onCheckBox);
 
-    _lineEdit.setName("LineEdit"); 
+    _lineEdit.setName("LineEdit");
+    _lineEdit.setAccepted(false); 
     //_lineEdit.setText("Hello World!");
     _lineEdit.setPlaceholderText("placeholder text");
     _lineEdit.resize( Gfx::SizeF(130, 26) );
     _lineEdit.setMargin(5);
-    //_lineEdit.setTextAlignment(LineEdit::MiddleCenter);
+    _lineEdit.setTextAlignment(LineEdit::MiddleCenter);
     //_lineEdit.setEchoMode(Pt::Hmi::LineEdit::Masked);
     _lineEdit.textEntered() += Pt::slot(_textLabel, &Pt::Hmi::Label::setText);
+    _lineEdit.textChanged() += Pt::slot(*this, &ChildW::checkInput);
 
     _buttonBar.setName("ButtonBar");
     _buttonBar.resize( Gfx::SizeF(700, 220) );

@@ -34,6 +34,8 @@ class ChildW : public Hmi::Window
         void onCheckBox(Button&);
         
         void onCloseApp(Button&);
+        
+        void checkInput(const Pt::String& s);
 
     private:
         FlowLayout _mainLayout;

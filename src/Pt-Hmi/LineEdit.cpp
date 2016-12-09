@@ -183,15 +183,21 @@ void LineEdit::setFont(const Gfx::Font& f)
 }
 
 
-Pt::Signal<const Pt::String&>& LineEdit::textEdited()
+Pt::Signal<const Pt::String&>& LineEdit::textChanged()
 {
-    return _textEdited;
+    return _textChanged;
 }
 
 
 Pt::Signal<const Pt::String&>& LineEdit::textEntered()
 {
     return _textEntered;
+}
+
+
+bool LineEdit::canChangeFocus()
+{
+    return _isAccepted;
 }
 
 
@@ -226,7 +232,7 @@ void LineEdit::onKeyEvent(const KeyEvent& ev)
         
         layoutText();
         update();
-        _textEdited.send(_text);
+        _textChanged.send(_text);
     }
     else if( ev.key().code() == Pt::Hmi::Key::Backspace )
     {
@@ -239,7 +245,7 @@ void LineEdit::onKeyEvent(const KeyEvent& ev)
         if(_cursorPosition > 0)
             setCursorPosition(_cursorPosition - 1);
 
-        _textEdited.send(_text);
+        _textChanged.send(_text);
     }
     else
     {
@@ -253,7 +259,7 @@ void LineEdit::onKeyEvent(const KeyEvent& ev)
 
             setCursorPosition(_cursorPosition + 1);
 
-            _textEdited.send(_text);
+            _textChanged.send(_text);
         }
     }
 }

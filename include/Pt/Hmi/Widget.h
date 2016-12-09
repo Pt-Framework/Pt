@@ -245,6 +245,8 @@ class PT_HMI_API Widget : public Visual
 
         virtual void onMnemonic();
 
+        virtual bool canChangeFocus();
+
     protected:
         virtual void onEvent( const Event& ev );
 

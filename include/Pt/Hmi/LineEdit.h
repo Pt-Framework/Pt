@@ -102,11 +102,13 @@ class PT_HMI_API LineEdit : public Control
 
         void setFont(const Gfx::Font& f);
 
-        Pt::Signal<const Pt::String&>& textEdited();
+        Pt::Signal<const Pt::String&>& textChanged();
 
         Pt::Signal<const Pt::String&>& textEntered();
 
     protected:
+        virtual bool canChangeFocus();
+
         virtual void onKeyEvent(const KeyEvent& ev);
 
         virtual void onMouseEvent(const MouseEvent& ev);
@@ -125,8 +127,9 @@ class PT_HMI_API LineEdit : public Control
         void layoutText();
 
     private:
-        Pt::Signal<const Pt::String&>  _textEdited;
+        Pt::Signal<const Pt::String&>  _textChanged;
         Pt::Signal<const Pt::String&>  _textEntered;
+
         Gfx::Font                      _font;
         bool                           _hasFont;
         Gfx::Color                     _textColor;

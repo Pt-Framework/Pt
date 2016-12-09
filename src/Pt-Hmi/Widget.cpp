@@ -491,6 +491,12 @@ void Widget::onMnemonic()
 }
 
 
+bool Widget::canChangeFocus()
+{
+    return true;
+}
+
+
 void Widget::invalidate()
 {
     InvalidateEvent ev(vid());
