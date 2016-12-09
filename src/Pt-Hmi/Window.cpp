@@ -1072,9 +1072,9 @@ void Window::onEvent(const Pt::Event& ev)
 
 
 void Window::onMouseEvent(const MouseEvent& ev)
-{    
+{
     if( _windowManager.mouseEvent(ev) )
-        return;    
+        return;
 
     Widget* widget = findWidget( ev.position(), true );
     if( ! widget )

@@ -51,6 +51,7 @@
 #include <Pt/Hmi/PlatinumStyle.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/System/Application.h>
+#include <Pt/Hmi/InputMethod.h>
 
 namespace Pt {
 
@@ -119,6 +120,8 @@ class PT_HMI_API Application : public Pt::System::Application
 
         ApplicationImpl* impl();
 
+        void setInputMethod(InputMethod& method);
+
     protected:
         void onResizeEvent(const ResizeEvent& ev);
 
@@ -154,6 +157,8 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void onInvalidateEvent(const InvalidateEvent& ev);
 
+        void onInputMethod(const KeyEvent& ev);
+
     private:
         void registerVisual(Visual& visual);
 
@@ -162,6 +167,8 @@ class PT_HMI_API Application : public Pt::System::Application
         void setPointerWindow(Window* w);
 
         void setPointerWidget(Widget* widget);
+
+        void updateInputMethod(Visual* visual, bool focused = true);
 
     private:
         typedef std::map<Pt::uint64_t, Visual*> VisualMap;
@@ -176,6 +183,8 @@ class PT_HMI_API Application : public Pt::System::Application
         Pt::Gfx::Font    _font;
         Pt::Gfx::Font    _userFont;
         Style            _style;
+        InputMethod*     _inputMethod;
+        Pt::uint64_t     _inputVid;
 };
 
 } // namespace

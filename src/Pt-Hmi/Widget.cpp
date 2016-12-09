@@ -204,6 +204,27 @@ const std::vector<Widget*>& Widget::widgets() const
 }
 
 
+const Widget* Widget::findWidget( const Pt::uint64_t vid ) const 
+{
+    std::vector<Widget*>::const_iterator it;
+
+    if( this->vid() == vid)
+      return this;
+
+    for(it = _children.begin(); it != _children.end(); ++it)
+    {
+        const Widget* child = *it;
+
+        const Widget* found = child->findWidget(vid);
+
+        if( found )
+          return  found;
+    }
+
+    return 0;
+}
+
+
 Widget* Widget::findWidget(const Gfx::PointF& pos, bool input)
 {
     if( ! isVisible() || ! isEnabled() )

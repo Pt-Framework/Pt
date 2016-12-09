@@ -89,6 +89,8 @@ class PT_HMI_API Widget : public Visual
 
         Widget* findWidget( const Gfx::PointF& pos );
 
+        const Widget* findWidget( const Pt::uint64_t vid ) const;
+
         void setContent(Widget& widget);
 
         void setAcceptInput( bool a );

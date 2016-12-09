@@ -1422,6 +1422,9 @@
     <ClInclude Include="..\..\include\Pt\Hmi\LineEdit.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\InputMethod.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">

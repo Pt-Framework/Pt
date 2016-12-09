@@ -31,6 +31,7 @@
 #include <Pt/Hmi/PaintEvent.h>
 #include <Pt/Hmi/WindowStateEvent.h>
 #include <Pt/Hmi/Widget.h>
+#include <Pt/Hmi/Control.h>
 #include <Pt/Hmi/Window.h>
 #include <cassert>
 
@@ -47,6 +48,7 @@ Application::Application(int argc, char** argv)
 , _pointerWidget(0)
 , _pointerGrabber(0)
 , _font("", 12)
+, _inputMethod(0)
 {
     this->init(*_impl);
 
@@ -354,6 +356,9 @@ void Application::onMouseEvent(const MouseEvent& ev)
     if( it == _visuals.end() )
         return;
 
+  if( ev.isPress() )
+      updateInputMethod(it->second);
+
     it->second->processEvent(ev);
 }
 
@@ -364,6 +369,9 @@ void Application::onTouchEvent(const TouchEvent& ev)
 
     if( it == _visuals.end() )
         return;
+
+  if( ev.isPress() )
+      updateInputMethod(it->second);
 
     it->second->processEvent(ev);
 }
@@ -475,7 +483,61 @@ void Application::onFocusEvent(const FocusEvent& ev)
     if( it == _visuals.end() )
         return;
 
+    updateInputMethod(it->second, ev.isFocused());
+
     it->second->processEvent(ev);
+}
+
+
+void Application::updateInputMethod(Visual* visual, bool focused)
+{
+    if(!_inputMethod )
+      return;
+
+    if( _inputMethod->contains(visual->vid()) )
+      return;
+
+    Control* widget = dynamic_cast<Control*>( visual);
+
+    if( !widget)
+    {
+      _inputVid = 0;
+      _inputMethod->show(false);
+      return;
+    }
+
+    if( focused && widget->acceptsInput())
+    {
+      _inputVid = visual->vid();
+      _inputMethod->show(true);
+    }
+    else
+    {
+      _inputVid = 0;
+      _inputMethod->show(false);
+    }
+        
+}
+
+
+void Application::setInputMethod(InputMethod& method)
+{
+  if( _inputMethod)
+    _inputMethod->keyEvent().disconnect();
+
+  _inputMethod = &method;
+  _inputMethod->keyEvent() += Pt::slot(*this, &Application::onInputMethod);
+}
+
+
+
+void Application::onInputMethod(const KeyEvent& ev)
+{
+  KeyEvent kev(ev);
+
+  kev.setId(_inputVid);
+
+  loop().commitEvent(kev);
 }
 
 
