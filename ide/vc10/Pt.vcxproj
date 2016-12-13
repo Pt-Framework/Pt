@@ -13,6 +13,7 @@
     <ClInclude Include="..\..\include\Pt\Arg.h" />
     <ClInclude Include="..\..\include\Pt\Atomicity.h" />
     <ClInclude Include="..\..\include\Pt\Base64Codec.h" />
+    <ClInclude Include="..\..\include\Pt\BoundSlot.h" />
     <ClInclude Include="..\..\include\Pt\Byteorder.h" />
     <ClInclude Include="..\..\include\Pt\Callable.h" />
     <ClInclude Include="..\..\include\Pt\Composer.h" />

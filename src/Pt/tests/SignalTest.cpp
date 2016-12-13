@@ -27,6 +27,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 #include "Pt/Signal.h"
+#include "Pt/BoundSlot.h"
 #include "Pt/Unit/Assertion.h"
 #include "Pt/Unit/TestSuite.h"
 #include "Pt/Unit/RegisterTest.h"
@@ -52,10 +53,19 @@ class Callee : public Pt::Connectable
         }
 
         void slot0()
-        { ++_count; }
+        { 
+            ++_count; 
+        }
+
+        void slot1(int n)
+        { 
+            ++_count; 
+        }
 
         void slot2(int, int)
-        { ++_count; }
+        { 
+            ++_count; 
+        }
 
         int count() const
         { return _count; }
@@ -78,6 +88,9 @@ class SignalTest : public Pt::Unit::TestSuite
         , _caller(0)
         , _callee(0)
         {
+            Pt::Unit::TestSuite::registerMethod( "Bind1", *this, &SignalTest::Bind1 );
+            Pt::Unit::TestSuite::registerMethod( "Bind2", *this, &SignalTest::Bind2 );
+
             Pt::Unit::TestSuite::registerMethod( "Disconnect", *this, &SignalTest::Disconnect );
             Pt::Unit::TestSuite::registerMethod( "DisconnectWhileSend", *this, &SignalTest::DisconnectWhileSend );
             Pt::Unit::TestSuite::registerMethod( "DeleteWhileSend", *this, &SignalTest::DeleteWhileSend );
@@ -102,6 +115,68 @@ class SignalTest : public Pt::Unit::TestSuite
         }
 
     protected:
+        void Bind1()
+        {
+            Callee* recv = new Callee;
+            Pt::Signal<> signal;
+
+            signal += Pt::slot( Pt::slot(*recv, &Callee::slot1), 42 );
+            PT_UNIT_ASSERT(signal.connectionCount() == 1);
+
+            // A deleted receiver must remove itself from a signal
+            delete recv;
+            signal.send();
+            PT_UNIT_ASSERT(signal.connectionCount() == 0);
+
+            // A signal must call its slot when connected
+            recv = new Callee;
+            Pt::Connection connection = 
+                signal += Pt::slot( Pt::slot(*recv, &Callee::slot1), 42 );
+            signal.send();
+            PT_UNIT_ASSERT( recv->count() == 1);
+
+            recv->reset();
+
+            // Closing connections must remove them
+            connection.close();
+            signal.send();
+            PT_UNIT_ASSERT( recv->count() == 0 );
+            PT_UNIT_ASSERT( signal.connectionCount() == 0);
+
+            delete recv;
+        }
+
+        void Bind2()
+        {
+            Callee* recv = new Callee;
+            Pt::Signal<int> signal;
+
+            signal += Pt::slot( Pt::slot(*recv, &Callee::slot2), 42 );
+            PT_UNIT_ASSERT(signal.connectionCount() == 1);
+
+            // A deleted receiver must remove itself from a signal
+            delete recv;
+            signal.send(5);
+            PT_UNIT_ASSERT(signal.connectionCount() == 0);
+
+            // A signal must call its slot when connected
+            recv = new Callee;
+            Pt::Connection connection = 
+                signal += Pt::slot( Pt::slot(*recv, &Callee::slot2), 42 );
+            signal.send(5);
+            PT_UNIT_ASSERT( recv->count() == 1);
+
+            recv->reset();
+
+            // Closing connections must remove them
+            connection.close();
+            signal.send(5);
+            PT_UNIT_ASSERT( recv->count() == 0 );
+            PT_UNIT_ASSERT( signal.connectionCount() == 0);
+
+            delete recv;
+        }
+
         void Disconnect()
         {
             Pt::Signal<> sn;
@@ -161,7 +236,7 @@ class SignalTest : public Pt::Unit::TestSuite
 
             delete recv;
         }
-
+       
         void Send2()
         {
             Callee* recv = new Callee;
