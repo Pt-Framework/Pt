@@ -31,6 +31,7 @@
 
 #include <Pt/Api.h>
 #include <Pt/Void.h>
+#include <Pt/Callable.h>
 
 namespace Pt {
 
@@ -62,6 +63,198 @@ class BasicSlot : public Slot
     public:
         virtual Slot* clone() const = 0;
 };
+
+
+template <typename T>
+class BindAdaptorBase
+{
+    public:
+        BindAdaptorBase(const Slot& s, const T& a)
+        : _slot( s.clone() )
+        , _a(a)
+        { }
+        
+        BindAdaptorBase(const BindAdaptorBase& c)
+        : _slot( c._slot->clone() )
+        , _a(c._a)
+        { }
+        
+        ~BindAdaptorBase()
+        { delete _slot; }
+        
+        BindAdaptorBase& operator=(const BindAdaptorBase& b)
+        {
+            Slot* s = b.slot().clone();
+            delete _slot;
+            _slot = s;
+            
+            _a = b.a;
+            return *this;
+        }
+        
+        Slot& slot()
+        { return *_slot; }
+        
+        const Slot& slot() const
+        { return *_slot; }
+
+        const T& arg() const
+        { return _a; }
+
+    private:
+        Slot* _slot;
+        T     _a;
+};
+
+
+template <typename R, typename A1, 
+          typename A2 = Void, typename A3 = Void, 
+          typename A4 = Void>
+class BindAdaptor : public Callable<R, A1, A2, A3>
+                  , public BindAdaptorBase<A4>
+{   
+    public:
+        typedef BasicSlot<R, A1, A2, A3> SlotBase;
+
+    public:
+        BindAdaptor(const BasicSlot<R, A1, A2, A3, A4>& slot, const A4& a)
+        : BindAdaptorBase<A4>(slot, a)
+        { }
+        
+        virtual Callable<R, A1, A2, A3>* clone() const
+        { return new BindAdaptor(*this); }
+
+        virtual R operator()(A1 a1, A2 a2, A3 a3) const
+        { 
+            const Callable<R, A1, A2, A3, A4>* cb = 
+                static_cast< const Callable<R, A1, A2, A3, A4>* >( this->slot().callable() );
+            
+            return cb->call( a1, a2, a3, this->arg() ); 
+        }
+};
+
+
+template <typename R, typename A1, 
+          typename A2, typename A3>
+class BindAdaptor<R, A1, A2, A3, Void> : public Callable<R, A1, A2>
+                                       , public BindAdaptorBase<A3>
+{   
+    public:
+        typedef BasicSlot<R, A1, A2> SlotBase;
+
+    public:
+        BindAdaptor(const BasicSlot<R, A1, A2, A3>& slot, const A3& a)
+        : BindAdaptorBase<A3>(slot, a)
+        { }
+        
+        virtual Callable<R, A1, A2>* clone() const
+        { return new BindAdaptor(*this); }
+
+        virtual R operator()(A1 a1, A2 a2) const
+        { 
+            const Callable<R, A1, A2, A3>* cb = 
+                static_cast< const Callable<R, A1, A2, A3>* >( this->slot().callable() );
+            
+            return cb->call( a1, a2, this->arg() ); 
+        }
+};
+
+
+
+template <typename R, typename A1, typename A2>
+class BindAdaptor<R, A1, A2, Void, Void> : public Callable<R, A1>
+                                         , public BindAdaptorBase<A2>
+{   
+    public:
+        typedef BasicSlot<R, A1> SlotBase;
+
+    public:
+        BindAdaptor(const BasicSlot<R, A1, A2>& slot, const A2& a)
+        : BindAdaptorBase<A2>(slot, a)
+        { }
+        
+        virtual Callable<R, A1>* clone() const
+        { return new BindAdaptor(*this); }
+
+        virtual R operator()(A1 a1) const
+        { 
+            const Callable<R, A1, A2>* cb = 
+                static_cast< const Callable<R, A1, A2>* >( this->slot().callable() );
+            
+            return cb->call( a1, this->arg() ); 
+        }
+};
+
+
+template <typename R, typename A1>
+class BindAdaptor<R, A1, Void, Void, Void> : public Callable<R>
+                                           , public BindAdaptorBase<A1>
+{   
+    public:
+        typedef BasicSlot<R> SlotBase;
+
+    public:
+        BindAdaptor(const BasicSlot<R, A1>& slot, const A1& a)
+        : BindAdaptorBase<A1>(slot, a)
+        { }
+        
+        virtual Callable<R>* clone() const
+        { return new BindAdaptor(*this); }
+
+        virtual R operator()() const
+        { 
+            const Callable<R, A1>* cb = 
+                static_cast< const Callable<R, A1>* >( this->slot().callable() );
+            
+            return cb->call( this->arg() ); 
+        }
+};
+
+
+template <typename R, typename A1, typename A2, typename A3, typename A4>
+class BoundSlot : public BindAdaptor<R, A1, A2>::SlotBase
+{
+    public:
+        template <typename T>
+        BoundSlot(const BasicSlot<R, A1, A2, A3, A4>& slot, const T& a)
+        : _adaptor(slot, a)
+        { }
+
+        Slot* clone() const
+        { 
+            return new BoundSlot(*this); 
+        }
+        
+        virtual const void* callable() const
+        { 
+            return &_adaptor; 
+        }
+
+        virtual void onConnect(const Connection& c)
+        {
+            _adaptor.slot().onConnect(c);
+        }
+
+        virtual void onDisconnect(const Connection& c)
+        {
+            _adaptor.slot().onDisconnect(c);
+        }
+
+        virtual bool equals(const Slot& slot) const
+        {
+            return _adaptor.slot().equals(slot);
+        }
+
+    private:
+        BindAdaptor<R, A1, A2, A3, A4> _adaptor;     
+};
+
+
+template < typename R, typename A1, typename A2, typename A3, typename A4, typename T>
+BoundSlot<R, A1, A2, A3, A4> slot(const BasicSlot<R, A1, A2, A3, A4>& slot, const T& a)
+{
+    return BoundSlot<R, A1, A2, A3, A4>(slot, a);
+}
 
 } // namespace Pt
 
