@@ -81,7 +81,7 @@ void PlatinumRendererBase::renderFrame(Painter& painter,
                                        const Gfx::Color* color,
                                        double corner) const
 {
-    Gfx::Color borderColor = color ? *color : options.foreground();
+    Gfx::Color borderColor = color ? *color : options.contourColor();
     Gfx::RectF borderRect = frameRect;
 
     borderRect.setOrigin( Gfx::PointF(corner, corner) );
@@ -316,32 +316,42 @@ PlatinumButtonRenderer::~PlatinumButtonRenderer()
 }
 
 
-void PlatinumButtonRenderer::onRender(const PushButton& button, 
-                                      PaintSurface& surface, 
-                                      const Gfx::RectF& rect) const
+void PlatinumButtonRenderer::onPrepare(const PushButton& button,
+                                       const StyleOptions& options,
+                                       Gfx::Brush& foreground,
+                                       Gfx::Pen& contour) const 
 {
-    const StyleOptions* options = button.getFacet<StyleOptions>();
-    if( ! options)
-      return;
+    foreground = options.foreground();
 
-    const String& text = button.text();
-    const Picture& picture = button.picture();
-    
-    Gfx::Color buttonColor = options->foreground();
-    Gfx::Color textColor =  options->textColor();
-    const Gfx::Font& textFont = options->font();
-    Gfx::Color frameColor = brighten(buttonColor, 0.7f);
+    Gfx::Color buttonColor = foreground.color();
 
-    const Gfx::SizeF& size = button.size();
-    if( size.width() < 0 || size.height() < 0)
-        return;
+    if( button.isEnabled() )
+    {
+        if( button.isHighlighted() )
+        {
+            foreground = Gfx::Color(buttonColor.red() * 0.9f,
+                                    buttonColor.green() * 0.9f,
+                                    buttonColor.blue() * 0.9f);
+        }
 
-    Painter painter(surface);
-    painter.setClip(rect);
+        if( button.isPressed() )
+        {
+            foreground = Gfx::Color(buttonColor.red() * 0.8f,
+                                    buttonColor.green() * 0.8f,
+                                    buttonColor.blue() * 0.8f);
+        }
+    }
+}
 
-    //
-    // draw the button area
-    //
+
+void PlatinumButtonRenderer::onRenderBackground(const PushButton& button,
+                                                const StyleOptions& options,
+                                                Painter& painter, 
+                                                const Gfx::RectF& rect,
+                                                const Gfx::Brush& brush,
+                                                const Gfx::Color& contour) const 
+{
+    Gfx::Color buttonColor = brush.color();
 
     if( button.isEnabled() )
     {
@@ -360,56 +370,47 @@ void PlatinumButtonRenderer::onRender(const PushButton& button,
         }
     }
 
-    Gfx::RectF borderRect(Gfx::PointF(0,0), size);
-    
-    Gfx::Brush background(buttonColor);
-
-    _baseRenderer.renderPlane(painter, borderRect, *options, &background);
-    _baseRenderer.renderFrame(painter, borderRect, *options, &frameColor);
-
-    //
-    // draw the button text
-    //
-    
-    painter.setFont(textFont);
-    Gfx::FontMetrics fm = painter.fontMetrics(text);
-
-    double spacing = picture.empty() || text.empty() ? 0 : fm.height() * 0.5;
-    double itemsWidth = fm.width() + spacing + picture.width();
-    double itemX = (size.width() - itemsWidth) / 2;
-    
-    if( ! picture.empty() )
-    {
-        double pictureY = ((size.height() - picture.height()) / 2);
-        Gfx::PointF picturePos(itemX, pictureY);
-        painter.drawPicture(picturePos, picture);
-    }
-
-    itemX += picture.width() + spacing;
-    double textY = ((size.height() - fm.height()) / 2) + fm.ascent();
-
-    Gfx::PointF textPos(itemX, textY);
-    _baseRenderer.renderItemText(painter, textPos, text, 
-                                 button.mnemonic(), textFont, textColor);
-
-    //
-    // draw the focus rect
-    //
+    Gfx::RectF borderRect( button.size() );
+    _baseRenderer.renderPlane(painter, borderRect, buttonColor);
 
     if( button.hasFocus() )
     {
-        Gfx::SizeF focusSize = size;
+        Gfx::SizeF focusSize = button.size();
         focusSize.addHeight(-4);
         focusSize.addWidth(-4);
 
-        Gfx::Pen pen(frameColor, 1, Gfx::Pen::Dash);
+        Gfx::Pen pen(options.contourColor(), 1, Gfx::Pen::Dash);
         painter.setPen(pen);
         
         Gfx::RectF rect(Gfx::PointF(2,2), focusSize);
         painter.drawRect(rect);
     }
+
+    _baseRenderer.renderFrame(painter, borderRect, contour);
 }
 
+
+void PlatinumButtonRenderer::onRenderText(const PushButton& button,
+                                          const StyleOptions& options,
+                                          Painter& painter, 
+                                          const Gfx::RectF& rect,
+                                          const String& text,
+                                          const Gfx::PointF& textPos,
+                                          const Gfx::Font& font, 
+                                          const Gfx::Color& textColor,
+                                          const Gfx::RectF& mnemonic) const 
+{
+    painter.setFont(font);
+    painter.setPen(textColor);
+    painter.drawText(textPos, text);
+
+    if( ! mnemonic.isNull() )
+    {
+        double menmonicY = textPos.y() + 1;
+        painter.drawLine( Gfx::PointF(mnemonic.left(), menmonicY), 
+                          Gfx::PointF(mnemonic.right(), menmonicY) );
+    }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // PlatinumButtonRenderer
@@ -434,7 +435,7 @@ void PlatinumCheckBoxRenderer::onRender(const CheckBox& cb,
     if( options == 0)
       return;
 
-    Gfx::Color foreground = options->foreground();
+    Gfx::Color foreground = options->contourColor();
     Gfx::Color frameColor = Gfx::Color(foreground.red() * 0.6f,
                                        foreground.green() * 0.6f,
                                        foreground.blue() * 0.6f);
@@ -598,8 +599,7 @@ void PlatinumLabelRenderer::onRenderText(const Label& l,
 {
     painter.setFont(font);
     painter.setPen(textColor);
-
-    painter.drawText( textPos, text );
+    painter.drawText( textPos, text);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -849,16 +849,16 @@ void PlatinumScrollBarRenderer::onRender(const ScrollBar& s,
     Painter painter(surface);
     painter.setClip(rect);
 
-    painter.setBrush( options->background() );
+    painter.setBrush( options->foreground() );
     painter.fillRect(rect);
 
-    painter.setPen( options->foreground() );
+    painter.setPen( options->contourColor() );
     painter.drawRect( Gfx::RectF( s.size() ) );
 
     painter.setBrush( options->foreground() );
     painter.fillRect(handleRect);
 
-    Gfx::Color handleFrameColor = brighten(options->foreground(), 0.85f);
+    Gfx::Color handleFrameColor = options->contourColor();
     painter.setPen(handleFrameColor);
     painter.drawRect(handleRect);
 }

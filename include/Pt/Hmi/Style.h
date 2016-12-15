@@ -128,14 +128,40 @@ class PT_HMI_API ButtonRenderer : public Style::Facet
 
         virtual ~ButtonRenderer();
 
-        void render(const PushButton& button, 
-                    PaintSurface& surface, 
-                    const Gfx::RectF& rect) const;
+        void renderBackground(const PushButton& button,
+                              const StyleOptions& options,
+                              Painter& painter, 
+                              const Gfx::RectF& rect,
+                              const Gfx::Brush& brush,
+                              const Gfx::Color& color) const;
+        
+        void renderText(const PushButton& button,
+                        const StyleOptions& options,
+                        Painter& painter, 
+                        const Gfx::RectF& rect,
+                        const String& text,
+                        const Gfx::PointF& textPos,
+                        const Gfx::Font& font, 
+                        const Gfx::Color& textColor,
+                        const Gfx::RectF& mnemonic) const;
 
     protected:
-        virtual void onRender(const PushButton& button, 
-                              PaintSurface& surface, 
-                              const Gfx::RectF& rect) const = 0;
+        virtual void onRenderBackground(const PushButton& button,
+                                        const StyleOptions& options,
+                                        Painter& painter, 
+                                        const Gfx::RectF& rect,
+                                        const Gfx::Brush& brush,
+                                        const Gfx::Color& color) const = 0;
+
+        virtual void onRenderText(const PushButton& button,
+                                  const StyleOptions& options,
+                                  Painter& painter, 
+                                  const Gfx::RectF& rect,
+                                  const String& text,
+                                  const Gfx::PointF& textPos,
+                                  const Gfx::Font& font, 
+                                  const Gfx::Color& textColor,
+                                  const Gfx::RectF& mnemonic) const = 0;
 };
 
 

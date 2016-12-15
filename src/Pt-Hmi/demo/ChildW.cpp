@@ -80,7 +80,7 @@ ChildW::ChildW(const std::string& title)
     Gfx::fill(toggleImage.begin(), toggleImage.end(), Gfx::Color());
     
     _toggleButton.setName("ToggleButton");
-    _toggleButton.setText("Toggle Me [CTRL+I]" );
+    _toggleButton.setText("&Toggle Me [CTRL+I]" );
     _toggleButton.setToggle(true);  
     _toggleButton.setShortcut( &key );
     _toggleButton.move( Gfx::PointF(20,30) );
@@ -106,7 +106,7 @@ ChildW::ChildW(const std::string& title)
 
     Pt::Hmi::StyleOptions* styleOptions = new Pt::Hmi::StyleOptions();
     styleOptions->setForeground( Gfx::Color::fromRgb8(220, 80, 80) );
-
+    styleOptions->setContourColor( Gfx::Color::fromRgb8(140, 30, 30) );
     Pt::Hmi::Style style;
     style.set(styleOptions);
     

@@ -93,9 +93,27 @@ class PT_HMI_API PlatinumButtonRenderer : public ButtonRenderer
         virtual ~PlatinumButtonRenderer();
 
     protected:
-        virtual void onRender(const PushButton& button, 
-                              PaintSurface& surface, 
-                              const Gfx::RectF& rect) const;
+        virtual void onPrepare(const PushButton& button,
+                               const StyleOptions& options,
+                               Gfx::Brush& brush,
+                               Gfx::Pen& contour) const;
+
+        virtual void onRenderBackground(const PushButton& button,
+                                        const StyleOptions& options,
+                                        Painter& painter, 
+                                        const Gfx::RectF& rect,
+                                        const Gfx::Brush& brush,
+                                        const Gfx::Color& color) const;
+
+        virtual void onRenderText(const PushButton& button,
+                                  const StyleOptions& options,
+                                  Painter& painter, 
+                                  const Gfx::RectF& rect,
+                                  const String& text,
+                                  const Gfx::PointF& textPos,
+                                  const Gfx::Font& font, 
+                                  const Gfx::Color& textColor,
+                                  const Gfx::RectF& mnemonic) const;
 
     private:
         PlatinumRendererBase _baseRenderer;

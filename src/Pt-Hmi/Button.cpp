@@ -57,7 +57,7 @@ bool Button::isPressed() const
 void Button::setPressed(bool pressed)
 {
     _isPressed = pressed;
-    update();
+    invalidate();
 }
 
 

@@ -79,6 +79,122 @@ void Label::setTextAlignment(Alignment a)
 }
 
 
+void Label::setBackground(const Gfx::Brush& b)
+{
+    _background = b;
+    _hasBackground = true;
+    _customBackground = true;
+    update();
+}
+
+
+void Label::setBackground(bool b)
+{
+    _hasBackground = b;
+
+    if( ! _hasBackground )
+    {
+        if(_customBackground)
+            _background = Gfx::Brush();
+        
+        _customBackground = false;
+    }
+
+    update();
+}
+
+
+void Label::setFrame(const Gfx::Color& color)
+{
+    _frameColor = color;
+    _hasFrame = true;
+    _customFrame = true;
+    update();
+}
+
+
+void Label::setFrame(bool b)
+{
+    _hasFrame = b;
+
+    if( ! _hasFrame )
+    {       
+        _customFrame = false;
+    }
+
+    update();
+}
+
+
+void Label::setTextColor(const Gfx::Color& color)
+{
+    _textColor = color;
+    _hasTextColor = true;
+    update();
+}
+
+
+void Label::setFont(const Gfx::Font& f)
+{
+    _font = f;
+    _hasFont = true;
+    invalidate();
+}
+
+
+Gfx::SizeF Label::onAutoSize() const
+{
+    Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( _font, _text);
+
+    return Gfx::SizeF( fm.width() + padding().leftRight(), 
+                       fm.height() + padding().topBottom() );
+}
+
+
+void Label::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+{
+    const StyleOptions* options = getFacet<StyleOptions>();
+    if( ! options )
+        return;
+
+    const LabelRenderer* renderer = getFacet<LabelRenderer>();
+    if( ! renderer)
+        return;
+
+    Painter painter(surface);
+    painter.setClip(rect);
+
+    if( _hasBackground )
+    {
+        const Gfx::Brush& background = _customBackground ? _background
+                                                         : options->background();
+
+        renderer->renderBackground(*this, *options,
+                                   painter, rect, background);
+    }
+
+    if( _hasFrame )
+    {
+        const Gfx::Color& frameColor = _customFrame ? _frameColor
+                                                    : options->contourColor();
+
+        renderer->renderFrame(*this, *options,
+                              painter, rect, frameColor);
+    }
+
+    const Gfx::Font& font = _hasFont ? _font
+                                     : options->font();
+
+    const Gfx::Color& textColor = _hasTextColor ? _textColor
+                                                : options->textColor(); 
+    
+    Gfx::PointF pos = textPosition(font);
+
+    renderer->renderText(*this, *options,  painter, rect,
+                         text(), pos, font, textColor);
+}
+
+
 Gfx::PointF Label::textPosition(const Gfx::Font& font) const
 {
     Gfx::PointF pos(0, 0);
@@ -173,122 +289,6 @@ Gfx::PointF Label::textPosition(const Gfx::Font& font) const
     }
 
     return pos;
-}
-
-
-void Label::setBackground(const Gfx::Brush& b)
-{
-    _background = b;
-    _hasBackground = true;
-    _customBackground = true;
-    update();
-}
-
-
-void Label::setBackground(bool b)
-{
-    _hasBackground = b;
-
-    if( ! _hasBackground )
-    {
-        if(_customBackground)
-            _background = Gfx::Brush();
-        
-        _customBackground = false;
-    }
-
-    update();
-}
-
-
-void Label::setFrame(const Gfx::Color& color)
-{
-    _frameColor = color;
-    _hasFrame = true;
-    _customFrame = true;
-    update();
-}
-
-
-void Label::setFrame(bool b)
-{
-    _hasFrame = b;
-
-    if( ! _hasFrame )
-    {       
-        _customFrame = false;
-    }
-
-    update();
-}
-
-
-void Label::setTextColor(const Gfx::Color& color)
-{
-    _textColor = color;
-    _hasTextColor = true;
-    update();
-}
-
-
-void Label::setFont(const Gfx::Font& f)
-{
-    _font = f;
-    _hasFont = true;
-    invalidate();
-}
-
-
-Gfx::SizeF Label::onAutoSize() const
-{
-    Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( _font, _text);
-
-    return Gfx::SizeF( fm.width() + padding().leftRight(), 
-                       fm.height() + padding().topBottom() );
-}
-
-
-void Label::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
-{
-    const StyleOptions* options = getFacet<StyleOptions>();
-    if( ! options )
-      return;
-
-    const LabelRenderer* renderer = getFacet<LabelRenderer>();
-    if( ! renderer)
-        return;
-
-    Painter painter(surface);
-    painter.setClip(rect);
-
-    if( _hasBackground )
-    {
-        const Gfx::Brush& background = _customBackground ? _background
-                                                         : options->background();
-
-        renderer->renderBackground(*this, *options,
-                                   painter, rect, background);
-    }
-
-    if( _hasFrame )
-    {
-        const Gfx::Color& frameColor = _customFrame ? _frameColor
-                                                    : options->contourColor();
-
-        renderer->renderFrame(*this, *options,
-                              painter, rect, frameColor);
-    }
-
-    const Gfx::Font& font = _hasFont ? _font
-                                     : options->font();
-
-    const Gfx::Color& textColor = _hasTextColor ? _textColor
-                                                : options->textColor(); 
-    
-    Gfx::PointF pos = textPosition(font);
-
-    renderer->renderText(*this, *options,  painter, rect,
-                         text(), pos, font, textColor);
 }
 
 } // namespace

@@ -525,9 +525,9 @@ void Widget::invalidate()
 } 
 
 
-
 void Widget::onInvalidateEvent(const InvalidateEvent& ev)
 {
+    // derived class might call update() if required
     onInvalidate();
 
     _preferredSize = onAutoSize();

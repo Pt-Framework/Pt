@@ -33,6 +33,8 @@
 #include <Pt/Hmi/Button.h>
 #include <Pt/Hmi/Picture.h>
 #include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/Brush.h>
+#include <Pt/Gfx/Pen.h>
 
 namespace Pt {
 
@@ -58,6 +60,10 @@ class PT_HMI_API PushButton : public Button
 
         const Picture& picture() const;
 
+        bool isFlat() const;
+
+        void setFlat(bool f);
+
     protected:
         virtual void onPressed();
 
@@ -67,8 +73,11 @@ class PT_HMI_API PushButton : public Button
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
     private:
-        bool    _isToggle;
-        Picture _picture;
+        bool       _isToggle;
+        bool       _isFlat;
+        Gfx::Pen   _pen;
+        Gfx::Brush _brush;
+        Picture    _picture;
 };
 
 } // namespace

@@ -129,11 +129,29 @@ ButtonRenderer::~ButtonRenderer()
 }
 
 
-void ButtonRenderer::render(const PushButton& button, 
-                            PaintSurface& surface, 
-                            const Gfx::RectF& rect) const
+void ButtonRenderer::renderBackground(const PushButton& button,
+                                      const StyleOptions& options,
+                                      Painter& painter, 
+                                      const Gfx::RectF& rect,
+                                      const Gfx::Brush& brush,
+                                      const Gfx::Color& color) const
 { 
-    onRender(button, surface, rect); 
+    onRenderBackground(button, options, painter, rect, brush, color); 
+}  
+
+
+void ButtonRenderer::renderText(const PushButton& button,
+                                const StyleOptions& options,
+                                Painter& painter, 
+                                const Gfx::RectF& rect,
+                                const String& text,
+                                const Gfx::PointF& textPos,
+                                const Gfx::Font& font, 
+                                const Gfx::Color& textColor,
+                                const Gfx::RectF& mnemonic) const
+{ 
+    onRenderText(button, options, painter, rect, 
+                 text, textPos, font, textColor, mnemonic); 
 }  
 
 ///////////////////////////////////////////////////////////////////////////////

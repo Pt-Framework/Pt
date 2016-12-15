@@ -30,6 +30,7 @@
 #include <Pt/Hmi/PushButton.h>
 #include <Pt/Hmi/Style.h>
 #include <Pt/Hmi/StyleOptions.h>
+#include <Pt/Hmi/Painter.h>
 
 namespace Pt {
 
@@ -37,6 +38,7 @@ namespace Hmi {
 
 PushButton::PushButton()
 : _isToggle(false)
+, _isFlat(false)
 {
 }
 
@@ -71,6 +73,19 @@ const Picture& PushButton::picture() const
 }
 
 
+bool PushButton::isFlat() const
+{
+    return _isFlat;
+}
+
+
+void PushButton::setFlat(bool f)
+{
+    _isFlat = f;
+    invalidate();
+}
+
+
 void PushButton::onPressed()
 {
     Base::onPressed();
@@ -93,11 +108,82 @@ void PushButton::onReleased()
 }
 
 
-void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
+void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
+    const StyleOptions* options = getFacet<StyleOptions>();
+    if( ! options )
+      return;
+
     const ButtonRenderer* renderer = getFacet<ButtonRenderer>();
-    if(renderer)
-        renderer->render(*this, surface, updateRect);
+    if( ! renderer)
+        return;
+
+    Painter painter(surface);
+    painter.setClip(rect);
+
+    //
+    // button shape
+    //
+
+    if( ! _isFlat )
+    {
+        renderer->renderBackground(*this, *options, painter, rect, 
+                                  options->foreground(), options->contourColor());
+    }
+
+    Gfx::Color textColor = options->textColor();
+    const Gfx::Font& font = options->font();
+
+    painter.setFont(font);
+    Gfx::FontMetrics fm = painter.fontMetrics( text() );
+
+    //
+    // button icon
+    //
+
+    double spacing = _picture.empty() || text().empty() ? 0 : fm.height() * 0.5;
+    double itemsWidth = fm.width() + spacing + _picture.width();
+    double itemX = (size().width() - itemsWidth) / 2;
+
+    if( ! _picture.empty() )
+    {
+        double pictureY = ((size().height() - _picture.height()) / 2);
+        Gfx::PointF picturePos(itemX, pictureY);
+        painter.drawPicture(picturePos, _picture);
+    }
+
+    //
+    // button text including menomnic
+    //
+
+    itemX += _picture.width() + spacing;
+    double textY = ((size().height() - fm.height()) / 2) + fm.ascent();
+    Gfx::PointF textPos(itemX, textY);
+
+    Gfx::RectF mnemonicRect;
+
+    const Char* m = mnemonic();
+    if(m)
+    {
+        String::size_type n = text().find(*m);
+        if(n != String::npos)
+        {
+            Pt::String mnemonicText(text(), 0, n);
+            Gfx::FontMetrics fmLeft = painter.fontMetrics(mnemonicText);
+
+            mnemonicText = *m;
+            Gfx::FontMetrics fmChar = painter.fontMetrics(mnemonicText);
+
+            mnemonicRect.set( Gfx::PointF(textPos.x() + fmLeft.width(), 
+                                          textPos.y() - fmChar.ascent()),
+                              Gfx::SizeF(fmChar.width(), 
+                                         fmChar.height()) );
+        }
+    }
+
+    renderer->renderText(*this, *options, painter, rect,
+                         text(), textPos, font, textColor,
+                         mnemonicRect);
 }
 
 } // namespace
