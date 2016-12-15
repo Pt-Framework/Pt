@@ -530,10 +530,15 @@ void Widget::onInvalidateEvent(const InvalidateEvent& ev)
     // derived class might call update() if required
     onInvalidate();
 
-    _preferredSize = onAutoSize();
+    Gfx::SizeF s = onAutoSize();
 
-    if( parent() )
-       parent()->onLayout();
+    if(s != _preferredSize)
+    {
+        _preferredSize = s;
+
+        if( parent() )
+           parent()->onLayout();
+    }
 }
 
 
