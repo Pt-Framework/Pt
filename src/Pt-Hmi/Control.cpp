@@ -68,14 +68,14 @@ const Style& Control::style() const
 
 bool Control::isHighlighted() const
 {
-  return _isHighlighted;
+    return _isHighlighted;
 }
 
 
 void Control::onInvalidate()
 {
-  Widget::onInvalidate();
-  update();
+    Widget::onInvalidate();
+    update();
 }
 
 

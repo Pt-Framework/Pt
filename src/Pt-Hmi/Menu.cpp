@@ -178,6 +178,7 @@ void Menu::onAddMenu(Menu& menu, const Pt::String& text)
     _layout.add(*item);
 
     menu._parentMenu = this;
+    
     invalidate();
 }
 

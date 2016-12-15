@@ -1232,8 +1232,8 @@ void Window::onInvalidate()
 
 void Window::onInvalidateEvent(const InvalidateEvent& ev)
 {
-  onInvalidate();
-  update();
+    onInvalidate();
+    update();
 }
 
 } // namespace
