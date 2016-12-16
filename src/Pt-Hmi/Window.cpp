@@ -418,9 +418,12 @@ void Window::setFocusWidget(Widget* widget)
     if( _focusWidget == widget )
         return;
 
+    if(widget && widget->focusPolicy() == Widget::NoFocus)
+        return;
+
     if( _focusWidget )
     {
-        if( ! _focusWidget->canChangeFocus() )
+        if( _focusWidget->focusPolicy() == Widget::KeepFocus)
             return;
 
         FocusEvent fev(_focusWidget->vid(), false);
@@ -455,7 +458,7 @@ void Window::moveFocus(Iter begin, Iter end)
 
         Widget* w = *it;
         
-        if( w->acceptsFocus() )
+        if( w->focusPolicy() != Widget::NoFocus )
         {
             setFocusWidget(w);
             return;
@@ -466,7 +469,7 @@ void Window::moveFocus(Iter begin, Iter end)
 
     // handles the case when the current focus widget has just been set to 
     // not accept focus and no other widget can accept focus either.
-    if( _focusWidget && ! _focusWidget->acceptsFocus() )
+    if( _focusWidget &&  _focusWidget->focusPolicy() == Widget::NoFocus )
     {
         setFocusWidget(0);
     }

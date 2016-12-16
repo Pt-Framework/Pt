@@ -113,11 +113,16 @@ class PT_HMI_API Widget : public Visual
         // focus handling
         // 
 
-        bool acceptsFocus() const;
+        enum FocusPolicy
+        {
+            NoFocus,
+            KeepFocus,
+            NormalFocus
+        };
 
-        // TODO: focus policy:
-        //       focus by Tab, focus by pointer, both and none 
-        void setAcceptsFocus(bool a);
+        void setFocusPolicy(FocusPolicy f);
+
+        FocusPolicy focusPolicy() const;
 
         bool hasFocus() const;
 
@@ -247,8 +252,6 @@ class PT_HMI_API Widget : public Visual
 
         virtual void onMnemonic();
 
-        virtual bool canChangeFocus();
-
     protected:
         virtual void onEvent( const Event& ev );
 
@@ -302,7 +305,7 @@ class PT_HMI_API Widget : public Visual
         bool                         _autoSize;
 
         bool                         _hasFocus;
-        bool                         _acceptsFocus;
+        FocusPolicy                  _focusPolicy;
         size_t                       _focusIndex;
         bool                         _acceptsInput;
 

@@ -48,7 +48,7 @@ Widget::Widget()
 , _enabledState(true)
 , _autoSize(false)
 , _hasFocus(false)
-, _acceptsFocus(false) 
+, _focusPolicy(NoFocus) 
 , _focusIndex(0)
 , _acceptsInput(true)
 , _cursor( Hmi::Cursor::defaultCursor() )
@@ -345,15 +345,15 @@ void Widget::setAcceptInput(bool a)
 }
 
 
-bool Widget::acceptsFocus() const
+void Widget::setFocusPolicy(FocusPolicy f)
 {
-    return _acceptsFocus;
+    _focusPolicy = f;
 }
-     
-        
-void Widget::setAcceptsFocus(bool a) 
+
+
+Widget::FocusPolicy Widget::focusPolicy() const
 {
-    _acceptsFocus = a;
+    return _focusPolicy;
 }
 
 
@@ -509,12 +509,6 @@ void Widget::setMnemonicWidget(Widget* w)
 void Widget::onMnemonic()
 {
     _mnemonicEntered.invoke();
-}
-
-
-bool Widget::canChangeFocus()
-{
-    return true;
 }
 
 
@@ -879,7 +873,7 @@ void Widget::onPaintEvent(const PaintEvent& ev)
 
 void Widget::onMouseEvent(const MouseEvent& ev)
 { 
-    if( ev.isPress(MouseEvent::Left) && _acceptsFocus )
+    if( ev.isPress(MouseEvent::Left) )
     {
         focus();
     }
@@ -888,7 +882,7 @@ void Widget::onMouseEvent(const MouseEvent& ev)
 
 void Widget::onTouchEvent(const TouchEvent& ev)
 {
-    if( ev.isPress() && _acceptsFocus )
+    if( ev.isPress() )
     {
         focus();
     }

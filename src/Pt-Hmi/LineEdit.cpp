@@ -47,7 +47,7 @@ LineEdit::LineEdit()
 , _hscroll(0)
 , _halign(0)
 {
-    setAcceptsFocus(true);
+    setFocusPolicy(Widget::NormalFocus);
     setPadding(5);
 }
 
@@ -149,9 +149,19 @@ bool LineEdit::isAccepted() const
     return _isAccepted;
 }
 
+
 void LineEdit::setAccepted(bool a)
 {
-    _isAccepted = a; 
+    _isAccepted = a;
+    
+    if( ! a )
+    {
+        setFocusPolicy(Widget::KeepFocus);
+    }
+    else
+    {
+        setFocusPolicy(Widget::NormalFocus);
+    }
 }
 
 
@@ -192,12 +202,6 @@ Pt::Signal<const Pt::String&>& LineEdit::textChanged()
 Pt::Signal<const Pt::String&>& LineEdit::textEntered()
 {
     return _textEntered;
-}
-
-
-bool LineEdit::canChangeFocus()
-{
-    return _isAccepted;
 }
 
 

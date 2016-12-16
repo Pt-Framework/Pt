@@ -108,7 +108,7 @@ MenuItem::MenuItem()
 , _text("(empty)")
 {
     setAutoSize(true);
-    setAcceptsFocus(true);
+    setFocusPolicy(Widget::NormalFocus);
     
     setPadding( Spacing(4, 2, 4, 2) );
     setMargin(0);

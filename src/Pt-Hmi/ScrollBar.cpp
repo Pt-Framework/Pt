@@ -49,7 +49,6 @@ ScrollBar::ScrollBar(Orientation o)
 , _factorPosition(1)
 , _offsetPosition(0)
 {
-    setAcceptsFocus(false);
     setAcceptInput(true);
 }
 

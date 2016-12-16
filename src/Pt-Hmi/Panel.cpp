@@ -45,7 +45,6 @@ Panel::Panel()
 , _hasFrame(false)
 , _customFrame(false)
 {
-    setAcceptsFocus(false);
 }
 
 

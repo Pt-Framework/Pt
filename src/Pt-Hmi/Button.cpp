@@ -39,7 +39,7 @@ namespace Hmi {
 Button::Button()
 : _isPressed(false)
 {
-    setAcceptsFocus(true);
+    setFocusPolicy(Widget::NormalFocus);
 }
 
   

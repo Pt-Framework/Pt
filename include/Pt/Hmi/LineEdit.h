@@ -107,8 +107,6 @@ class PT_HMI_API LineEdit : public Control
         Pt::Signal<const Pt::String&>& textEntered();
 
     protected:
-        virtual bool canChangeFocus();
-
         virtual void onKeyEvent(const KeyEvent& ev);
 
         virtual void onMouseEvent(const MouseEvent& ev);

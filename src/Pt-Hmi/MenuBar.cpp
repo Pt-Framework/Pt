@@ -61,7 +61,7 @@ MenuBarItem::MenuBarItem(MenuBar& mb, Menu& menu, const Pt::String& text)
 , _menu(menu)
 {
     setAutoSize(true);
-    setAcceptsFocus(true);
+    setFocusPolicy(Widget::NormalFocus);
     setText(text);
 
     setPadding( Spacing(8, 0, 8, 0) );
