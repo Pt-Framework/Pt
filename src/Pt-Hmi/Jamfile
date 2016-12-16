@@ -52,10 +52,11 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
              PlatinumStyle.cpp
              PushButton.cpp
              ScrollBar.cpp
-             ScrollView.cpp            
+             ScrollView.cpp
              ScrollLayout.cpp
              Style.cpp
              StyleOptions.cpp
+             InputMethod.cpp
              ;
 
 LinkSharedLibraries Pt-Hmi : Pt Pt-System Pt-Gfx Pt-Reflex ;

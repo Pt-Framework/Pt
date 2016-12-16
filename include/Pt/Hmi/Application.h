@@ -122,6 +122,8 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void setInputMethod(InputMethod& method);
 
+        InputMethod& inputMethod();
+
     protected:
         void onResizeEvent(const ResizeEvent& ev);
 
@@ -183,8 +185,8 @@ class PT_HMI_API Application : public Pt::System::Application
         Pt::Gfx::Font    _font;
         Pt::Gfx::Font    _userFont;
         Style            _style;
+        DefaultInputMethod _defaultInputMethod;
         InputMethod*     _inputMethod;
-        Pt::uint64_t     _inputVid;
 };
 
 } // namespace

@@ -26,57 +26,61 @@
    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
    MA  02110-1301  USA
 */
-
-#ifndef Pt_Hmi_InputMethod_H
-#define Pt_Hmi_InputMethod_H
-
-#include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/KeyEvent.h>
-#include <Pt/Connectable.h>
-#include <Pt/System/Timer.h>
+#include <Pt/Hmi/InputMethod.h>
+#include <Pt/Hmi/Widget.h>
+#include <Pt/Hmi/Application.h>
 
 namespace Pt {
 namespace Hmi {
 
-class Widget;
-
-class PT_HMI_API InputMethod : public Pt::Connectable
+InputMethod::InputMethod()
+: _receiver(0)
+, _keyEvent(0)
 {
-public:
-
-    InputMethod();
-
-    virtual ~InputMethod();
-
-    void begin(Widget& widget);
-
-    void finish();
+  _timer.timeout() += Pt::slot(*this, &InputMethod::onTimeout);
+}
 
 
-protected:
-    virtual void onShow(bool show) = 0;
-
-    void sendKeyEvent(const KeyEvent& ev);
-
-    void onTimeout();
-
-private:
-   Pt::uint64_t _receiver;
-   KeyEvent _keyEvent;
-   Pt::System::Timer _timer;
-};
-
-
-class DefaultInputMethod : public InputMethod
+InputMethod::~InputMethod()
 {
-protected:
-    virtual void onShow(bool show)
-    {
-    }
-};
 
+}
+
+
+void InputMethod::onTimeout()
+{
+  _timer.stop();
+  onShow(_receiver != 0);
+}
+
+
+void InputMethod::begin(Widget& widget)
+{
+  _receiver = widget.vid();
+}
+
+
+void InputMethod::finish()
+{
+  _receiver = 0;
+
+  if( !_timer.loop() )
+    _timer.setActive(Application::instance().loop());
+
+  _timer.start(1);
+}
+
+
+void InputMethod::sendKeyEvent(const KeyEvent& ev)
+{
+  if(_receiver == 0)
+    return;
+
+  _keyEvent = ev;
+  _keyEvent.setId(_receiver);
+   Application::instance().loop().commitEvent(_keyEvent);
+}
 
 
 }}
 
-#endif

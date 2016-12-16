@@ -67,7 +67,8 @@ Window::Window(Window* parent, Window::Type type)
 , _minimumSize(0, 0)
 , _maximumSize(64000, 64000)
 , _state(Normal)
-{    
+, _topMost(false)
+{
     _windowManager.init(*this);
 
     _eventReady += Pt::slot(*this, &Window::onKeyEvent);
@@ -159,7 +160,8 @@ void Window::init(Window* parent)
         _impl->setMinimumSize(_minimumSize);
         _impl->setMaximumSize(_maximumSize );
         _impl->setIcon(_icon);
-        _impl->setState(_state);  
+        _impl->setState(_state);
+        _impl->setTopMost(_topMost);
     }  
     
     show(_visible);
@@ -997,6 +999,15 @@ void Window::setMinimumSize(const Gfx::SizeF& s)
 }
 
 
+void Window::setTopMost(bool top)
+{
+  if( _impl ) 
+        _impl->setTopMost(top);
+
+  _topMost = top;
+}
+
+
 const Gfx::SizeF& Window::maximumSize() const
 {
     return _maximumSize;
@@ -1118,6 +1129,7 @@ void Window::onTouchEvent(const TouchEvent& tev)
         ev.setPosition( widget->fromWindow(tev.position()) );
         Application::instance().loop().commitEvent(ev); 
     }
+
 }
 
 
@@ -1147,7 +1159,7 @@ void Window::onKeyEvent(const KeyEvent& ev)
     std::map<Key, Widget*>::iterator s = _shortcuts.find( ev.key() );
     if( s != _shortcuts.end() )
     {
-        s->second->onShortcut(ev);       
+        s->second->onShortcut(ev);
         return;
     }
 
@@ -1156,7 +1168,7 @@ void Window::onKeyEvent(const KeyEvent& ev)
         std::map<Char, Widget*>::iterator m = _mnemonics.find( ev.unicode() );
         if( m != _mnemonics.end() )
         {
-            m->second->onMnemonic();       
+            m->second->onMnemonic();
             return;
         }
     }

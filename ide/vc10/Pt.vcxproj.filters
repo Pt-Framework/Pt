@@ -2636,5 +2636,8 @@
     <ClCompile Include="..\..\src\Pt-Hmi\LineEdit.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\InputMethod.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

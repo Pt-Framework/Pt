@@ -316,6 +316,16 @@ void LineEdit::onFocusEvent(const FocusEvent& ev)
         if( isAccepted() )
             _textEntered.send(_text);
     }
+
+    if( ev.isFocused() )
+    {
+        Application::instance().inputMethod().begin(*this);
+    }
+    else
+    {
+        Application::instance().inputMethod().finish();
+    }
+
 }
 
 

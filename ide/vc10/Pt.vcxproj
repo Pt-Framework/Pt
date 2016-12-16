@@ -555,6 +555,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\PictureImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\PixmapSurfaceImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\ScreenImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\InputMethod.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Label.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Layout.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\LineEdit.cpp" />

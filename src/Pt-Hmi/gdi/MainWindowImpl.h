@@ -76,9 +76,11 @@ class MainWindowImpl
     
         void setMinimumSize(const Gfx::SizeF& s);
     
-        void setMaximumSize(const Gfx::SizeF& s);      
+        void setMaximumSize(const Gfx::SizeF& s);
 
         void setTitle( const std::string& t );
+
+        void setTopMost(bool e);
 
         void grabPointer();
 

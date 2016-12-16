@@ -172,6 +172,8 @@ class PT_HMI_API Window : public WindowBase
 
     void setMaximumSize(const Gfx::SizeF& s);
 
+    void setTopMost(bool top);
+
     State state() const;
 
     void setState(State s);
@@ -341,6 +343,7 @@ class PT_HMI_API Window : public WindowBase
     Gfx::SizeF                     _minimumSize;
     Gfx::SizeF                     _maximumSize;
     State                          _state;
+    bool                           _topMost;
 };
 
 } // namespace
