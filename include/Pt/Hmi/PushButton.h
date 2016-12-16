@@ -58,8 +58,6 @@ class PT_HMI_API PushButton : public Button
 
         void setImage(const Gfx::Image& image);
 
-        const Picture& picture() const;
-
         bool isFlat() const;
 
         void setFlat(bool f);
@@ -70,13 +68,22 @@ class PT_HMI_API PushButton : public Button
         virtual void onReleased();
 
     protected:
+        virtual void onInvalidate();
+
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+
+    protected:
+        virtual void onEnableEvent(const EnableEvent& ev);
 
     private:
         bool       _isToggle;
         bool       _isFlat;
+
         Gfx::Pen   _pen;
         Gfx::Brush _brush;
+        Gfx::Pen   _textPen;
+        Gfx::Font  _font;
+        Gfx::Image _image;
         Picture    _picture;
 };
 

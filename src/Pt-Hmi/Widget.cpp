@@ -529,21 +529,20 @@ void Widget::onInvalidateEvent(const InvalidateEvent& ev)
 {
     // derived class might call update() if required
     onInvalidate();
+}
 
+
+void Widget::onInvalidate()
+{
     Gfx::SizeF s = onAutoSize();
 
-    if(s != _preferredSize)
+    if( s != preferredSize() )
     {
         _preferredSize = s;
 
         if( parent() )
            parent()->onLayout();
     }
-}
-
-
-void Widget::onInvalidate()
-{
 }
 
 
@@ -665,7 +664,7 @@ void Widget::enable(bool e)
     EnableEvent eev( vid(), e);
     Application::instance().loop().commitEvent(eev);
 
-    update();
+    invalidate();
 }
 
 

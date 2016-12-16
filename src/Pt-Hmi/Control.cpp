@@ -98,6 +98,8 @@ void Control::onEnterEvent( const EnterEvent& ev)
     Widget::onEnterEvent(ev);
 
     _isHighlighted = true;
+    
+    invalidate();
 }
 
 
@@ -106,6 +108,8 @@ void Control::onLeaveEvent(const LeaveEvent& ev)
     Widget::onLeaveEvent(ev);
 
     _isHighlighted = false;
+
+    invalidate();
 }
 
 } // namespace

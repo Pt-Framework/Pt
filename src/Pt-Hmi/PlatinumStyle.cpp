@@ -31,6 +31,7 @@
 #include <Pt/Hmi/StyleOptions.h>
 #include <Pt/Hmi/PaintSurface.h>
 #include <Pt/Hmi/Painter.h>
+#include <Pt/Hmi/Picture.h>
 #include <Pt/Hmi/Panel.h>
 #include <Pt/Hmi/Label.h>
 #include <Pt/Hmi/LineEdit.h>
@@ -319,42 +320,18 @@ PlatinumButtonRenderer::~PlatinumButtonRenderer()
 void PlatinumButtonRenderer::onPrepare(const PushButton& button,
                                        const StyleOptions& options,
                                        Gfx::Brush& foreground,
-                                       Gfx::Pen& contour) const 
+                                       Gfx::Pen& contour,
+                                       Gfx::Font& font,
+                                       Gfx::Pen& textPen) const 
 {
-    foreground = options.foreground();
-
-    Gfx::Color buttonColor = foreground.color();
+    contour = options.contourColor();
+    textPen = options.textColor(); 
+    font = options.font();
 
     if( button.isEnabled() )
     {
-        if( button.isHighlighted() )
-        {
-            foreground = Gfx::Color(buttonColor.red() * 0.9f,
-                                    buttonColor.green() * 0.9f,
-                                    buttonColor.blue() * 0.9f);
-        }
+        Gfx::Color buttonColor = options.foreground().color();
 
-        if( button.isPressed() )
-        {
-            foreground = Gfx::Color(buttonColor.red() * 0.8f,
-                                    buttonColor.green() * 0.8f,
-                                    buttonColor.blue() * 0.8f);
-        }
-    }
-}
-
-
-void PlatinumButtonRenderer::onRenderBackground(const PushButton& button,
-                                                const StyleOptions& options,
-                                                Painter& painter, 
-                                                const Gfx::RectF& rect,
-                                                const Gfx::Brush& brush,
-                                                const Gfx::Color& contour) const 
-{
-    Gfx::Color buttonColor = brush.color();
-
-    if( button.isEnabled() )
-    {
         if( button.isHighlighted() )
         {
             buttonColor = Gfx::Color(buttonColor.red() * 0.9f,
@@ -368,10 +345,34 @@ void PlatinumButtonRenderer::onRenderBackground(const PushButton& button,
                                      buttonColor.green() * 0.8f,
                                      buttonColor.blue() * 0.8f);
         }
-    }
 
+        foreground = buttonColor;
+    }
+    else
+    {
+        foreground = options.foreground();
+    }
+}
+
+
+void PlatinumButtonRenderer::onPrepareIcon(const PushButton& button,
+                                           const StyleOptions& options,
+                                           const Gfx::Image& icon,
+                                           Picture& picture) const
+{
+    picture.set(icon);
+}
+
+
+void PlatinumButtonRenderer::onRenderBackground(const PushButton& button,
+                                                const StyleOptions& options,
+                                                Painter& painter, 
+                                                const Gfx::RectF& rect,
+                                                const Gfx::Brush& brush,
+                                                const Gfx::Color& contour) const 
+{
     Gfx::RectF borderRect( button.size() );
-    _baseRenderer.renderPlane(painter, borderRect, buttonColor);
+    _baseRenderer.renderPlane(painter, borderRect, brush);
 
     if( button.hasFocus() )
     {
@@ -397,11 +398,11 @@ void PlatinumButtonRenderer::onRenderText(const PushButton& button,
                                           const String& text,
                                           const Gfx::PointF& textPos,
                                           const Gfx::Font& font, 
-                                          const Gfx::Color& textColor,
+                                          const Gfx::Pen& textPen,
                                           const Gfx::RectF& mnemonic) const 
 {
     painter.setFont(font);
-    painter.setPen(textColor);
+    painter.setPen(textPen);
     painter.drawText(textPos, text);
 
     if( ! mnemonic.isNull() )

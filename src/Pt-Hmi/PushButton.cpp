@@ -57,19 +57,26 @@ bool PushButton::isToggle() const
 void PushButton::setToggle(bool toggle)
 {
     _isToggle = toggle;
+    invalidate();
 }
 
 
 void PushButton::setImage(const Gfx::Image& image)
 {
+    _image = image;
     _picture.set(image);
-    update();
-}
 
+    const StyleOptions* options = getFacet<StyleOptions>();
+    if( ! options )
+      return;
 
-const Picture& PushButton::picture() const
-{
-    return _picture;
+    const ButtonRenderer* renderer = getFacet<ButtonRenderer>();
+    if( ! renderer )
+        return;
+
+    renderer->prepareIcon(*this, *options, image, _picture);
+    
+    invalidate();
 }
 
 
@@ -108,6 +115,22 @@ void PushButton::onReleased()
 }
 
 
+void PushButton::onInvalidate()
+{
+    Base::onInvalidate();
+
+    const StyleOptions* options = getFacet<StyleOptions>();
+    if( ! options )
+      return;
+
+    const ButtonRenderer* renderer = getFacet<ButtonRenderer>();
+    if( ! renderer )
+        return;
+
+    renderer->prepare(*this, *options, _brush, _pen, _font, _textPen);
+}
+
+
 void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions* options = getFacet<StyleOptions>();
@@ -115,7 +138,7 @@ void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
       return;
 
     const ButtonRenderer* renderer = getFacet<ButtonRenderer>();
-    if( ! renderer)
+    if( ! renderer )
         return;
 
     Painter painter(surface);
@@ -128,13 +151,10 @@ void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     if( ! _isFlat )
     {
         renderer->renderBackground(*this, *options, painter, rect, 
-                                  options->foreground(), options->contourColor());
+                                   _brush, _pen.color());
     }
 
-    Gfx::Color textColor = options->textColor();
-    const Gfx::Font& font = options->font();
-
-    painter.setFont(font);
+    painter.setFont(_font);
     Gfx::FontMetrics fm = painter.fontMetrics( text() );
 
     //
@@ -182,8 +202,24 @@ void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     }
 
     renderer->renderText(*this, *options, painter, rect,
-                         text(), textPos, font, textColor,
+                         text(), textPos, _font, _textPen,
                          mnemonicRect);
+}
+
+
+void PushButton::onEnableEvent(const EnableEvent& ev)
+{
+    Base::onEnableEvent(ev);
+
+    const StyleOptions* options = getFacet<StyleOptions>();
+    if( ! options )
+      return;
+
+    const ButtonRenderer* renderer = getFacet<ButtonRenderer>();
+    if( ! renderer )
+        return;
+
+    renderer->prepareIcon(*this, *options, _image, _picture);
 }
 
 } // namespace

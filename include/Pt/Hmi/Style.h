@@ -46,6 +46,7 @@ namespace Hmi {
 
 class PaintSurface;
 class Painter;
+class Picture;
 class StyleOptions;
 class Panel;
 class Label;
@@ -128,6 +129,18 @@ class PT_HMI_API ButtonRenderer : public Style::Facet
 
         virtual ~ButtonRenderer();
 
+        void prepare(const PushButton& button,
+                     const StyleOptions& options,
+                     Gfx::Brush& brush,
+                     Gfx::Pen& contour,
+                     Gfx::Font& font,
+                     Gfx::Pen& textPen) const;
+
+        void prepareIcon(const PushButton& button,
+                         const StyleOptions& options,
+                         const Gfx::Image& icon,
+                         Picture& picture) const;
+
         void renderBackground(const PushButton& button,
                               const StyleOptions& options,
                               Painter& painter, 
@@ -142,10 +155,22 @@ class PT_HMI_API ButtonRenderer : public Style::Facet
                         const String& text,
                         const Gfx::PointF& textPos,
                         const Gfx::Font& font, 
-                        const Gfx::Color& textColor,
+                        const Gfx::Pen& textPen,
                         const Gfx::RectF& mnemonic) const;
 
     protected:
+        virtual void onPrepare(const PushButton& button,
+                               const StyleOptions& options,
+                               Gfx::Brush& brush,
+                               Gfx::Pen& contour,
+                               Gfx::Font& font,
+                               Gfx::Pen& textPen) const = 0;
+
+        virtual void onPrepareIcon(const PushButton& button,
+                                   const StyleOptions& options,
+                                   const Gfx::Image& icon,
+                                   Picture& picture) const = 0;
+
         virtual void onRenderBackground(const PushButton& button,
                                         const StyleOptions& options,
                                         Painter& painter, 
@@ -160,7 +185,7 @@ class PT_HMI_API ButtonRenderer : public Style::Facet
                                   const String& text,
                                   const Gfx::PointF& textPos,
                                   const Gfx::Font& font, 
-                                  const Gfx::Color& textColor,
+                                  const Gfx::Pen& textPen,
                                   const Gfx::RectF& mnemonic) const = 0;
 };
 
@@ -215,6 +240,7 @@ class PT_HMI_API PanelRenderer : public Style::Facet
                                    const Gfx::RectF& rect, 
                                    const Gfx::Color& borderColor) const = 0;
 };
+
 
 class PT_HMI_API LabelRenderer : public Style::Facet
 {

@@ -129,6 +129,26 @@ ButtonRenderer::~ButtonRenderer()
 }
 
 
+void ButtonRenderer::prepare(const PushButton& button,
+                     const StyleOptions& options,
+                     Gfx::Brush& brush,
+                     Gfx::Pen& contour,
+                     Gfx::Font& font,
+                     Gfx::Pen& textPen) const
+{
+    onPrepare(button, options, brush, contour, font, textPen); 
+}
+
+
+void ButtonRenderer::prepareIcon(const PushButton& button,
+                                 const StyleOptions& options,
+                                 const Gfx::Image& icon,
+                                 Picture& picture) const
+{
+    onPrepareIcon(button, options, icon, picture); 
+}
+
+
 void ButtonRenderer::renderBackground(const PushButton& button,
                                       const StyleOptions& options,
                                       Painter& painter, 
@@ -147,11 +167,11 @@ void ButtonRenderer::renderText(const PushButton& button,
                                 const String& text,
                                 const Gfx::PointF& textPos,
                                 const Gfx::Font& font, 
-                                const Gfx::Color& textColor,
+                                const Gfx::Pen& textPen,
                                 const Gfx::RectF& mnemonic) const
 { 
     onRenderText(button, options, painter, rect, 
-                 text, textPos, font, textColor, mnemonic); 
+                 text, textPos, font, textPen, mnemonic); 
 }  
 
 ///////////////////////////////////////////////////////////////////////////////
