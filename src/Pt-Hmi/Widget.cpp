@@ -239,7 +239,7 @@ Widget* Widget::findWidget(const Gfx::PointF& pos, bool input)
             continue;
 
         Gfx::PointF p = child->fromParent(pos);
-        Widget* found = child->findWidget(p);
+        Widget* found = child->findWidget(p, input);
 
         if( ! input)
             return found ? found : child;

@@ -1075,13 +1075,13 @@ MainWindowImpl* Window::impl()
 
 const MainWindowImpl* Window::impl() const
 {
-    return _impl;   
+    return _impl;
 }
 
 
 void Window::onEvent(const Pt::Event& ev)
 {
-    _eventReady.send(ev ); 
+    _eventReady.send(ev );
 }
 
 
@@ -1089,6 +1089,12 @@ void Window::onMouseEvent(const MouseEvent& ev)
 {
     if( _windowManager.mouseEvent(ev) )
         return;
+
+    if( ev.isPress() )
+    {
+      int t = 0;
+      ++t;
+    }
 
     Widget* widget = findWidget( ev.position(), true );
     if( ! widget )
@@ -1129,7 +1135,6 @@ void Window::onTouchEvent(const TouchEvent& tev)
         ev.setPosition( widget->fromWindow(tev.position()) );
         Application::instance().loop().commitEvent(ev); 
     }
-
 }
 
 

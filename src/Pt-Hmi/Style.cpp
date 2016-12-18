@@ -76,6 +76,8 @@ void Style::assign(const Style& style)
     if(this == &style)
         return;
 
+    _facets.clear();
+
     FacetMap::const_iterator it;
     for(it = style._facets.begin(); it != style._facets.end(); ++it)
     {
