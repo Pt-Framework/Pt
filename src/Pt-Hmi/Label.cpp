@@ -41,7 +41,7 @@ Label::Label()
 , _customBackground(false)
 , _hasFrame(false)
 , _customFrame(false)
-, _font()
+, _fontSize(0)
 , _hasFont(false)
 , _hasTextColor(false)
 {
@@ -142,6 +142,12 @@ void Label::setFont(const Gfx::Font& f)
 }
 
 
+void Label::setFontSize(const std::size_t s)
+{
+    _fontSize = s;
+}
+
+
 Gfx::SizeF Label::onAutoSize() const
 {
     Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( _font, _text);
@@ -182,8 +188,13 @@ void Label::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
                               painter, rect, frameColor);
     }
 
-    const Gfx::Font& font = _hasFont ? _font
-                                     : options->font();
+    Gfx::Font font = _hasFont ? _font
+                              : options->font();
+
+    if(_fontSize > 0)
+    {
+        font = Gfx::Font( font.name(), _fontSize, font.style(), font.angle() );
+    }
 
     const Gfx::Color& textColor = _hasTextColor ? _textColor
                                                 : options->textColor(); 

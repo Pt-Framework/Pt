@@ -79,6 +79,8 @@ class PT_HMI_API Label : public Control
 
         void setFont(const Gfx::Font& f);
 
+        void setFontSize(const std::size_t n);
+
     protected:
         virtual Gfx::SizeF onAutoSize() const;
 
@@ -90,14 +92,20 @@ class PT_HMI_API Label : public Control
     private:
         Pt::String  _text;
         Alignment   _textAlignment;
+        
         Gfx::Brush  _background;
         bool        _hasBackground;
         bool        _customBackground;
+        
         Gfx::Color  _frameColor;
         bool        _hasFrame;
         bool        _customFrame;
+        
         Gfx::Font   _font;
         bool        _hasFont;
+
+        std::size_t _fontSize;
+        
         Gfx::Color  _textColor;
         bool        _hasTextColor;
 };
