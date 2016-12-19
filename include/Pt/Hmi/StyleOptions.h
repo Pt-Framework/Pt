@@ -41,10 +41,13 @@ namespace Pt {
 
 namespace Hmi {
 
+// TODO: this could be a normal member of Style instead of a facet
 class PT_HMI_API StyleOptions : public Style::Facet
 {
     public:
-        StyleOptions(std::size_t refs = 0);
+        explicit StyleOptions(std::size_t refs = 0);
+
+        StyleOptions(const StyleOptions& o, std::size_t refs = 0);
 
         virtual ~StyleOptions();
 

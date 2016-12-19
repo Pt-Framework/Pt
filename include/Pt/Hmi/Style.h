@@ -62,7 +62,7 @@ class ScrollBar;
 class PT_HMI_API Style
 {
     public:
-        class Facet : protected NonCopyable
+        class Facet : private NonCopyable
         {
             public:
                 explicit Facet(const std::type_info& ti, std::size_t refs = 0)

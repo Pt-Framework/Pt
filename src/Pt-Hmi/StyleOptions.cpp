@@ -46,6 +46,19 @@ StyleOptions::StyleOptions(std::size_t refs)
 }
 
 
+StyleOptions::StyleOptions(const StyleOptions& o, std::size_t refs)
+: Style::Facet(typeid(StyleOptions), refs)
+, _background(o._background )
+, _viewBackground(o._viewBackground )
+, _foreground(o._foreground)
+, _contourColor(o._contourColor)
+, _highlightColor(o._highlightColor)
+, _textColor(o._textColor)
+, _font(o._font)
+{
+}
+
+
 StyleOptions::~StyleOptions()
 {
 }
