@@ -130,7 +130,7 @@ ChildW::ChildW(const std::string& title)
     _checkBox.clicked() += Pt::slot(*this, &ChildW::onCheckBox);
 
     _lineEdit.setName("LineEdit");
-    _lineEdit.setAccepted(false); 
+    _lineEdit.setAccepted(true); 
     //_lineEdit.setText("Hello World!");
     _lineEdit.setPlaceholderText("placeholder text");
     _lineEdit.resize( Gfx::SizeF(130, 26) );
@@ -140,9 +140,16 @@ ChildW::ChildW(const std::string& title)
     _lineEdit.textEntered() += Pt::slot(_textLabel, &Pt::Hmi::Label::setText);
     _lineEdit.textChanged() += Pt::slot(*this, &ChildW::checkInput);
 
+    _lineEdit2.setName("LineEdit2");
+    _lineEdit2.setAccepted(true); 
+    _lineEdit2.setPlaceholderText("placeholder text");
+    _lineEdit2.setMargin(5);
+    _lineEdit2.resize( Gfx::SizeF(130, 26) );
+
     _buttonBar.setName("ButtonBar");
-    _buttonBar.resize( Gfx::SizeF(700, 220) );
+    _buttonBar.resize( Gfx::SizeF(700, 240) );
     _buttonBar.setPadding(5);
+    _buttonBar.dock(_lineEdit2, DockingLayout::Bottom);
     _buttonBar.dock(_lineEdit, DockingLayout::Bottom);
     _buttonBar.dock(_checkBox, DockingLayout::Bottom);
     _buttonBar.dock(_closeButton, DockingLayout::Bottom);
@@ -152,7 +159,7 @@ ChildW::ChildW(const std::string& title)
     _vscroll.resize( Gfx::SizeF(24, 24) );
 
     //Panel  
-    _childView.resize( Gfx::SizeF(300, 600) );
+    _childView.resize( Gfx::SizeF(300, 620) );
     _childView.move( Gfx::PointF(1,1) );
     _childView.setName("MainPanel");
     _childView.setPadding(20); 
@@ -162,7 +169,7 @@ ChildW::ChildW(const std::string& title)
      
     //_childWindow2.setMainWidget(&_closeButton);          
     _childWindow2.move(Gfx::PointF(5, 40));    
-    _childWindow2.resize( Gfx::SizeF(240, 320) );
+    _childWindow2.resize( Gfx::SizeF(240, 330) );
     _childWindow2.setTitle("Child of " + title);    
     _childWindow2.setMainWidget(&_childView);
     add( _childWindow2 );

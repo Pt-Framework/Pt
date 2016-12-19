@@ -33,50 +33,54 @@
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Connectable.h>
-#include <Pt/System/Timer.h>
+#include <Pt/System/EventLoop.h>
 
 namespace Pt {
+
 namespace Hmi {
 
 class Widget;
+class InputMethodEvent;
 
 class PT_HMI_API InputMethod : public Pt::Connectable
 {
-public:
+    public:
+        InputMethod();
 
-    InputMethod();
+        virtual ~InputMethod();
 
-    virtual ~InputMethod();
+        void setActive(System::EventLoop& loop);
 
-    void begin(Widget& widget);
+        void begin(Widget& widget);
 
-    void finish();
+        void finish();
 
+    protected:
+        virtual void onShow(bool show) = 0;
 
-protected:
-    virtual void onShow(bool show) = 0;
+        void sendKeyEvent(const KeyEvent& ev);
 
-    void sendKeyEvent(const KeyEvent& ev);
+        void onInputMethodEvent(const InputMethodEvent& ev);
 
-    void onTimeout();
-
-private:
-   Pt::uint64_t _receiver;
-   KeyEvent _keyEvent;
-   Pt::System::Timer _timer;
+    private:
+        Pt::uint64_t _receiver;
+        KeyEvent     _keyEvent;
+        bool         _isVisible;
 };
 
 
 class DefaultInputMethod : public InputMethod
 {
-protected:
-    virtual void onShow(bool show)
-    {
-    }
+    protected:
+        virtual void onShow(bool show)
+        {
+            std::clog << "INPUTMETHOD " << (show ? "+++ SHOW +++" : "--- HIDE ---") 
+                      << std::endl;
+        }
 };
 
+} // namespace
 
-
-}}
+} // namespace
 
 #endif

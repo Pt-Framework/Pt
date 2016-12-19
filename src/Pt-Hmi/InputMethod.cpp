@@ -26,61 +26,86 @@
    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
    MA  02110-1301  USA
 */
+
 #include <Pt/Hmi/InputMethod.h>
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/Application.h>
 
 namespace Pt {
+
 namespace Hmi {
+
+class InputMethodEvent : public BasicEvent<InputMethodEvent>
+{
+    public:
+        InputMethodEvent()
+        {
+        }
+
+        virtual ~InputMethodEvent()
+        {
+        }
+};
 
 InputMethod::InputMethod()
 : _receiver(0)
 , _keyEvent(0)
+, _isVisible(false)
 {
-  _timer.timeout() += Pt::slot(*this, &InputMethod::onTimeout);
 }
 
 
 InputMethod::~InputMethod()
 {
-
 }
 
 
-void InputMethod::onTimeout()
+void InputMethod::setActive(System::EventLoop& loop)
 {
-  _timer.stop();
-  onShow(_receiver != 0);
+    loop.eventReceived() += Pt::slot(*this, &InputMethod::onInputMethodEvent);
 }
 
 
-void InputMethod::begin(Widget& widget)
+void InputMethod::begin(Widget& w)
 {
-  _receiver = widget.vid();
+    _receiver = w.vid();
+
+    _isVisible = true;
+
+    onShow(true);
 }
 
 
 void InputMethod::finish()
 {
-  _receiver = 0;
+    _receiver = 0;
 
-  if( !_timer.loop() )
-    _timer.setActive(Application::instance().loop());
+    _isVisible = false;
 
-  _timer.start(1);
+    InputMethodEvent ev;
+    Application::instance().loop().commitEvent(ev);
+}
+
+
+void InputMethod::onInputMethodEvent(const InputMethodEvent& ev)
+{
+    if( ! _isVisible )
+    {
+        onShow(false);
+    }
 }
 
 
 void InputMethod::sendKeyEvent(const KeyEvent& ev)
 {
-  if(_receiver == 0)
-    return;
+    if(_receiver == 0)
+        return;
 
-  _keyEvent = ev;
-  _keyEvent.setId(_receiver);
-   Application::instance().loop().commitEvent(_keyEvent);
+    _keyEvent = ev;
+    _keyEvent.setId(_receiver);
+     Application::instance().loop().commitEvent(_keyEvent);
 }
 
+} // namespace
 
-}}
-
+} // namespace

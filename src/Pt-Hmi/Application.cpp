@@ -30,9 +30,9 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/PaintEvent.h>
 #include <Pt/Hmi/WindowStateEvent.h>
-#include <Pt/Hmi/Widget.h>
-#include <Pt/Hmi/Control.h>
 #include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/Widget.h>
+#include <Pt/Hmi/InputMethod.h>
 #include <cassert>
 
 namespace Pt {
@@ -56,6 +56,8 @@ Application::Application(int argc, char** argv)
     _style = PlatinumStyle();
 
     _mainScreen = new Screen(*_impl);
+
+    _inputMethod->setActive( loop() );
 
     loop().eventReceived() += Pt::slot(*this, &Application::onResizeEvent );
     loop().eventReceived() += Pt::slot(*this, &Application::onMoveEvent );

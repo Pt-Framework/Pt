@@ -60,6 +60,7 @@ class ChildW : public Hmi::Window
         PushButton _dialogButton;
         CheckBox   _checkBox;
         LineEdit   _lineEdit;
+        LineEdit   _lineEdit2;
         Label  _textLabel;
         DockingLayout _buttonBar;
 };
