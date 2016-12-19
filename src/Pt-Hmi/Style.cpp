@@ -76,6 +76,29 @@ void Style::assign(const Style& style)
     if(this == &style)
         return;
 
+    for(FacetMap::iterator it = _facets.begin(); it != _facets.end(); ++it)
+    {
+        Facet* facet = it->second;
+        
+        if( 0 == facet->unref() )
+            delete facet;
+    }
+
+    _facets.clear();
+
+    FacetMap::const_iterator cit;
+    for(cit = style._facets.begin(); cit != style._facets.end(); ++cit)
+    {
+        set(cit->second);
+    }
+}
+
+
+void Style::combine(const Style& style)
+{
+    if(this == &style)
+        return;
+
     _facets.clear();
 
     FacetMap::const_iterator it;

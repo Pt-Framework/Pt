@@ -104,6 +104,8 @@ class PT_HMI_API Style
 
         void assign(const Style& style);
 
+        void combine(const Style& style);
+
         void set(Facet* facet);
 
         template <typename FacetT> 
