@@ -82,7 +82,11 @@ void WindowManager::init(WindowBase& parent)
 void WindowManager::add(Window& w)
 {    
     WindowFrame* frame = new WindowFrame(*this, w);
-    _windows.push_back(frame);
+
+    if(_topMostWindow)
+        _windows.insert( --_windows.end(), frame );
+    else
+        _windows.push_back(frame);
 
     onFrameChanged(w);
 }
@@ -308,43 +312,27 @@ void WindowManager::paint(PaintSurface& surface, const Gfx::RectF& rect)
     {
         WindowFrame* frame = *it;
         
-        if(frame == _topMostWindow)
+        Window* w = frame->window();
+        if( ! w || ! w->isVisible() )
+            continue; 
+
+        // clip window frame rect
+        Gfx::RectF frameRect = frame->frameRect().intersect(rect);
+        if( frameRect.isNull() )
             continue;
 
-        paintWindow(surface, rect, *frame);
+        // clip client rect
+        Gfx::RectF updateRect = frame->clientRect().intersect(rect);
+
+        // update rect in client coordinates
+        Gfx::PointF clientPos = w->fromParent( updateRect.topLeft() );
+        Gfx::RectF clientRect( clientPos, updateRect.size() );
+
+        frame->paint(surface, frameRect);
+
+        Painter painter(surface);
+        painter.drawSurface(updateRect.topLeft(), w->surface(), clientRect); 
     }
-
-    if(_topMostWindow)
-    {
-        paintWindow(surface, rect, *_topMostWindow);
-    }
-}
-
-
-void WindowManager::paintWindow(PaintSurface& surface, const Gfx::RectF& rect, 
-                                WindowFrame& frame)
-{
-    Window* w = frame.window();
-    if( ! w || ! w->isVisible() )
-        return; 
-
-    // clip window frame rect
-    Gfx::RectF frameRect = frame.frameRect().intersect(rect);
-    if( frameRect.isNull() )
-        return;
-
-    // clip client rect
-    Gfx::RectF updateRect = frame.clientRect().intersect(rect);
-
-    // update rect in client coordinates
-    Gfx::PointF clientPos = w->fromParent( updateRect.topLeft() );
-    Gfx::RectF clientRect( clientPos, updateRect.size() );
-
-    frame.paint(surface, frameRect);
-
-    Painter painter(surface);
-    painter.drawSurface(updateRect.topLeft(), 
-                        w->surface(), clientRect); 
 }
 
 
@@ -470,13 +458,21 @@ void WindowManager::onActivate(Window* w)
     if( ! frame )
         return;
 
-    // move active frame to the back
+    // raise active frame
     std::vector<WindowFrame*>::iterator it =
         std::find(_windows.begin(), _windows.end(), frame);
 
     _windows.erase(it);
-    _windows.push_back(frame);
 
+    if(_topMostWindow && frame != _topMostWindow)
+    {
+        _windows.insert(--_windows.end(), frame);
+    }
+    else
+    {
+        _windows.push_back(frame);
+    }
+    
     ActivateEvent aev(w->vid(), true);
     Application::instance().loop().commitEvent(aev);
 
@@ -592,6 +588,13 @@ void WindowManager::onStateChanged(Window& w)
     {
         if(_topMostWindow && _topMostWindow != frame)
             _topMostWindow->window()->setTopMost(false);
+
+        // move top most frame to the back
+        std::vector<WindowFrame*>::iterator it =
+            std::find(_windows.begin(), _windows.end(), frame);
+
+        _windows.erase(it);
+        _windows.push_back(frame);
 
         _topMostWindow = frame;
     }

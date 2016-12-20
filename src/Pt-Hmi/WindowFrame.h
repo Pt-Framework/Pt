@@ -152,8 +152,6 @@ class MenuButton : public WindowButton
 class WindowFrame : public Pt::Connectable
 {
     public:
-        WindowFrame();
-
         WindowFrame(WindowManager& wm, Window& window);
 
         virtual ~WindowFrame();

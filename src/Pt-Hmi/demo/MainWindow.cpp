@@ -101,7 +101,6 @@ MainWindow::MainWindow()
     
     _child2.setTitle("Child 2");
     _child2.move( Gfx::PointF(10, 10) );
-    _child2.setTopMost(true);
     
     for(int n = 0; n < 20; ++n)
     {
@@ -124,7 +123,6 @@ MainWindow::MainWindow()
 
     _scrollContainer.setPadding(5);
     _scrollContainer.setMargin(5);
-
     _scrollContainer.resize( Gfx::SizeF(500, 1000) );
 
     _scrollView.setWidget(_scrollContainer);

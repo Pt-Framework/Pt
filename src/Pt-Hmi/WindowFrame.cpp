@@ -334,16 +334,6 @@ void MenuButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
 // WindowFrame
 //
 
-WindowFrame::WindowFrame()
-: _wm(0)
-, _window(0)
-, _borderWidth(0)
-, _titleHeight(0)
-, _state(Window::Normal)
-{
-}
-
-
 WindowFrame::WindowFrame(WindowManager& wm, Window& window)
 : _wm(&wm)
 , _window(&window)
