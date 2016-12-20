@@ -1103,12 +1103,6 @@ void Window::onMouseEvent(const MouseEvent& ev)
     if( _windowManager.mouseEvent(ev) )
         return;
 
-    if( ev.isPress() )
-    {
-      int t = 0;
-      ++t;
-    }
-
     Widget* widget = findWidget( ev.position(), true );
     if( ! widget )
     {
