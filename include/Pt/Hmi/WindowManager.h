@@ -132,6 +132,9 @@ class WindowManager : public Pt::Connectable
         Gfx::PointF fromParent(const Window& w, const Gfx::PointF& pos) const;
 
     private:
+        void paintWindow(PaintSurface& surface, const Gfx::RectF& rect, 
+                         WindowFrame& frame);
+
         WindowFrame* findWindow(const Gfx::PointF& p);
 
         WindowFrame* findWindow(const Window& w) const;
@@ -143,6 +146,7 @@ class WindowManager : public Pt::Connectable
         WindowFrame*              _activeWindow;
         WindowFrame*              _currentWindow;
         WindowFrame*              _grabbedWindow;
+        WindowFrame*              _topMostWindow;
 
         double                    _borderWidth;
         double                    _titleHeight;

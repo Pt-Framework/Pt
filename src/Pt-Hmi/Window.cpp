@@ -996,15 +996,26 @@ void Window::setMinimumSize(const Gfx::SizeF& s)
         _impl->setMinimumSize(s);
 
     _minimumSize = s;
+
+    // TODO: notify parent?
+}
+
+
+bool Window::isTopMost() const
+{
+    return _topMost;
 }
 
 
 void Window::setTopMost(bool top)
 {
-  if( _impl ) 
-        _impl->setTopMost(top);
+    if( _impl )
+          _impl->setTopMost(top);
 
-  _topMost = top;
+    _topMost = top;
+
+    if(_parent)
+        _parent->onStateChanged(*this);
 }
 
 
@@ -1020,6 +1031,8 @@ void Window::setMaximumSize(const Gfx::SizeF& s)
         _impl->setMaximumSize(s);
 
     _maximumSize = s;
+
+    // TODO: notify parent?
 }
 
 

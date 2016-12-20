@@ -101,6 +101,7 @@ MainWindow::MainWindow()
     
     _child2.setTitle("Child 2");
     _child2.move( Gfx::PointF(10, 10) );
+    _child2.setTopMost(true);
     
     for(int n = 0; n < 20; ++n)
     {
@@ -134,7 +135,7 @@ MainWindow::MainWindow()
     add( _child1 );
     
     _child1.move( Gfx::PointF(30,30));
-    _child1.resize( Gfx::SizeF(300, 400) );
+    _child1.resize( Gfx::SizeF(300, 420) );
     _child1.show(true);
     
     // context menu

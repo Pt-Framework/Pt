@@ -52,6 +52,7 @@ WindowManager::WindowManager()
 , _activeWindow(0)
 , _currentWindow(0)
 , _grabbedWindow(0)
+, _topMostWindow(0)
 , _borderWidth(4.0)
 , _titleHeight(20.0)
 , _inactiveColor(65535*0.68f, 65535 *0.70f, 65535 *0.75f)
@@ -102,6 +103,9 @@ void WindowManager::remove(Window& w)
 
             if(_activeWindow && _activeWindow->window() == &w)
                 _activeWindow  = 0;
+
+            if(_topMostWindow && _topMostWindow->window() == &w)
+                _topMostWindow = 0;
 
             delete *wit;
             _windows.erase(wit);
@@ -298,40 +302,49 @@ bool WindowManager::touchEvent( const TouchEvent& tev )
 
 
 void WindowManager::paint(PaintSurface& surface, const Gfx::RectF& rect)
-{  
+{
     std::vector<WindowFrame*>::iterator it;
-
     for(it = _windows.begin(); it != _windows.end(); ++it )
     {
         WindowFrame* frame = *it;
-        Window* w = frame->window();
         
-        if( ! w->isVisible() )
-            continue; 
-
-        Gfx::RectF frameRect = frame->frameRect().intersect(rect);
-
-        if( frameRect.isNull() )
+        if(frame == _topMostWindow)
             continue;
 
-        frame->paint(surface, frameRect);
-
-        // clip against client rect
-        Gfx::RectF updateRect = frame->clientRect().intersect(rect);
-
-        // update rect in client coordinates
-        Gfx::PointF clientUpdatePos = w->fromParent( updateRect.topLeft() );
-        Gfx::RectF clientUpdateRect( clientUpdatePos, updateRect.size() );
-
-        Painter painter(surface);
-        painter.drawSurface(updateRect.topLeft(), 
-                            w->surface(), clientUpdateRect);
-
-        //painter.drawRect( pev.rect() ); 
-        //std::clog << w->title() << ": "
-        //          << to.x() << "," << to.y() << "  "
-        //          << updateRect.width() << "x" << updateRect.height() << std::endl;  
+        paintWindow(surface, rect, *frame);
     }
+
+    if(_topMostWindow)
+    {
+        paintWindow(surface, rect, *_topMostWindow);
+    }
+}
+
+
+void WindowManager::paintWindow(PaintSurface& surface, const Gfx::RectF& rect, 
+                                WindowFrame& frame)
+{
+    Window* w = frame.window();
+    if( ! w || ! w->isVisible() )
+        return; 
+
+    // clip window frame rect
+    Gfx::RectF frameRect = frame.frameRect().intersect(rect);
+    if( frameRect.isNull() )
+        return;
+
+    // clip client rect
+    Gfx::RectF updateRect = frame.clientRect().intersect(rect);
+
+    // update rect in client coordinates
+    Gfx::PointF clientPos = w->fromParent( updateRect.topLeft() );
+    Gfx::RectF clientRect( clientPos, updateRect.size() );
+
+    frame.paint(surface, frameRect);
+
+    Painter painter(surface);
+    painter.drawSurface(updateRect.topLeft(), 
+                        w->surface(), clientRect); 
 }
 
 
@@ -532,45 +545,60 @@ void WindowManager::onStateChanged(Window& w)
         return;
 
     Window::State state = w.state();
-
     Window::State oldState = frame->state();
-    frame->setState(state);
-
-    if(oldState == Window::Normal)
-        frame->setRestore(w.position(), w.size());
-
-    if(state == Window::Maximized)
+    
+    if(state != oldState)
     {
-        
-        Gfx::SizeF maxSize = _parent->size();
-        maxSize = frame->fromFrame(maxSize);
+        frame->setState(state);
 
-        w.move( Gfx::PointF(0,0) );
-        w.resize(maxSize);
-    }
-    else if(state == Window::Minimized)
-    {
         if(oldState == Window::Normal)
+            frame->setRestore(w.position(), w.size());
+
+        if(state == Window::Maximized)
         {
-            Gfx::SizeF minSize(w.size().width(), 0);
-            w.resize(minSize);
+        
+            Gfx::SizeF maxSize = _parent->size();
+            maxSize = frame->fromFrame(maxSize);
+
+            w.move( Gfx::PointF(0,0) );
+            w.resize(maxSize);
         }
-        else
+        else if(state == Window::Minimized)
+        {
+            if(oldState == Window::Normal)
+            {
+                Gfx::SizeF minSize(w.size().width(), 0);
+                w.resize(minSize);
+            }
+            else
+            {
+                w.move( frame->restorePosition() );
+
+                Gfx::SizeF minSize(frame->restoreSize().width(), 0);
+                w.resize(minSize);
+            }
+        }
+        else if(state == Window::Normal)
         {
             w.move( frame->restorePosition() );
-
-            Gfx::SizeF minSize(frame->restoreSize().width(), 0);
-            w.resize(minSize);
+            w.resize( frame->restoreSize() );
         }
-    }
-    else if(state == Window::Normal)
-    {
-        w.move( frame->restorePosition() );
-        w.resize( frame->restoreSize() );
+
+        WindowStateEvent wse(w.vid(), state);
+        Application::instance().loop().commitEvent(wse);
     }
 
-    WindowStateEvent wse(w.vid(), state);
-    Application::instance().loop().commitEvent(wse);
+    if( w.isTopMost() )
+    {
+        if(_topMostWindow && _topMostWindow != frame)
+            _topMostWindow->window()->setTopMost(false);
+
+        _topMostWindow = frame;
+    }
+    else if(_topMostWindow == frame)
+    {
+        _topMostWindow = 0;
+    }
 }
 
 

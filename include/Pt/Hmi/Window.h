@@ -172,6 +172,8 @@ class PT_HMI_API Window : public WindowBase
 
     void setMaximumSize(const Gfx::SizeF& s);
 
+    bool isTopMost() const;
+
     void setTopMost(bool top);
 
     State state() const;
