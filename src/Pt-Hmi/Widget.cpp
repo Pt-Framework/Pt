@@ -51,6 +51,7 @@ Widget::Widget()
 , _focusPolicy(NoFocus) 
 , _focusIndex(0)
 , _acceptsInput(true)
+, _textInput(false)
 , _cursor( Hmi::Cursor::defaultCursor() )
 , _actionKey(Key::Space)
 , _mnemonic(0)
@@ -321,6 +322,18 @@ bool Widget::acceptsInput() const
 void Widget::setAcceptInput(bool a)
 {
     _acceptsInput = a;
+}
+
+
+void Widget::setTextInput(bool b)
+{
+    _textInput = true;
+}
+
+
+bool Widget::isTextInput() const
+{
+    return _textInput;
 }
 
 

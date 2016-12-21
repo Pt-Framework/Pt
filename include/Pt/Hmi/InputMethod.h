@@ -33,14 +33,12 @@
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Connectable.h>
-#include <Pt/System/EventLoop.h>
 
 namespace Pt {
 
 namespace Hmi {
 
 class Widget;
-class InputMethodEvent;
 
 class PT_HMI_API InputMethod : public Pt::Connectable
 {
@@ -48,8 +46,6 @@ class PT_HMI_API InputMethod : public Pt::Connectable
         InputMethod();
 
         virtual ~InputMethod();
-
-        void setActive(System::EventLoop& loop);
 
         void begin(Widget& widget);
 
@@ -59,8 +55,6 @@ class PT_HMI_API InputMethod : public Pt::Connectable
         virtual void onShow(bool show) = 0;
 
         void sendKeyEvent(const KeyEvent& ev);
-
-        void onInputMethodEvent(const InputMethodEvent& ev);
 
     private:
         Pt::uint64_t _receiver;
@@ -72,11 +66,7 @@ class PT_HMI_API InputMethod : public Pt::Connectable
 class DefaultInputMethod : public InputMethod
 {
     protected:
-        virtual void onShow(bool show)
-        {
-            std::clog << "INPUTMETHOD " << (show ? "+++ SHOW +++" : "--- HIDE ---") 
-                      << std::endl;
-        }
+        virtual void onShow(bool show);
 };
 
 } // namespace

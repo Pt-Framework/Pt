@@ -47,6 +47,7 @@ LineEdit::LineEdit()
 , _hscroll(0)
 , _halign(0)
 {
+    setTextInput(true);
     setFocusPolicy(Widget::NormalFocus);
     setPadding(5);
 }
@@ -279,6 +280,8 @@ void LineEdit::onMouseEvent(const MouseEvent& mev)
     if( ! mev.isPress() )
         return;
 
+    Application::instance().inputMethod().begin(*this);
+
     std::size_t pos = xToCursor( mev.x() );
     setCursorPosition(pos);
 }
@@ -293,6 +296,8 @@ void LineEdit::onTouchEvent(const TouchEvent& tev)
 
     if( ! tev.isPress() )
         return;
+
+    Application::instance().inputMethod().begin(*this);
 
     std::size_t pos = xToCursor( tev.x() );
     setCursorPosition(pos);
@@ -316,16 +321,6 @@ void LineEdit::onFocusEvent(const FocusEvent& ev)
         if( isAccepted() )
             _textEntered.send(_text);
     }
-
-    if( ev.isFocused() )
-    {
-        Application::instance().inputMethod().begin(*this);
-    }
-    else
-    {
-        Application::instance().inputMethod().finish();
-    }
-
 }
 
 

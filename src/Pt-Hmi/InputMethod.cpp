@@ -30,22 +30,11 @@
 #include <Pt/Hmi/InputMethod.h>
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/Application.h>
+#include <iostream>
 
 namespace Pt {
 
 namespace Hmi {
-
-class InputMethodEvent : public BasicEvent<InputMethodEvent>
-{
-    public:
-        InputMethodEvent()
-        {
-        }
-
-        virtual ~InputMethodEvent()
-        {
-        }
-};
 
 InputMethod::InputMethod()
 : _receiver(0)
@@ -60,19 +49,15 @@ InputMethod::~InputMethod()
 }
 
 
-void InputMethod::setActive(System::EventLoop& loop)
-{
-    loop.eventReceived() += Pt::slot(*this, &InputMethod::onInputMethodEvent);
-}
-
-
 void InputMethod::begin(Widget& w)
 {
     _receiver = w.vid();
 
-    _isVisible = true;
+    if(_isVisible)
+        return;
 
     onShow(true);
+    _isVisible = true;
 }
 
 
@@ -80,19 +65,11 @@ void InputMethod::finish()
 {
     _receiver = 0;
 
-    _isVisible = false;
-
-    InputMethodEvent ev;
-    Application::instance().loop().commitEvent(ev);
-}
-
-
-void InputMethod::onInputMethodEvent(const InputMethodEvent& ev)
-{
     if( ! _isVisible )
-    {
-        onShow(false);
-    }
+        return;
+
+    onShow(false);
+    _isVisible = false;
 }
 
 
@@ -104,6 +81,13 @@ void InputMethod::sendKeyEvent(const KeyEvent& ev)
     _keyEvent = ev;
     _keyEvent.setId(_receiver);
      Application::instance().loop().commitEvent(_keyEvent);
+}
+
+
+void DefaultInputMethod::onShow(bool show)
+{
+    // std::clog << "INPUTMETHOD " << (show ? "+++ SHOW +++" : "--- HIDE ---") 
+    //           << std::endl;
 }
 
 } // namespace

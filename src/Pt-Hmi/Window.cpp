@@ -1109,6 +1109,12 @@ void Window::onMouseEvent(const MouseEvent& ev)
         Application::instance().setCursor( &Cursor::defaultCursor() ); 
     }
 
+    if( ev.isPress() )
+    {
+        if( ! widget || ! widget->isTextInput() )
+            Application::instance().inputMethod().finish();
+    }
+
     // widget may be null to unset the pointer widget
     Application::instance().setPointerWidget(widget);
 
@@ -1128,6 +1134,12 @@ void Window::onTouchEvent(const TouchEvent& tev)
         return;
 
     Widget* widget = findWidget( tev.position(), true );
+
+    if( tev.isPress() )
+    {
+        if( ! widget || ! widget->isTextInput() )
+            Application::instance().inputMethod().finish();
+    }
 
     // widget may be null to unset the pointer widget
     if( tev.isRelease() )

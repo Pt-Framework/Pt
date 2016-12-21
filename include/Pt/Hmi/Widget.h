@@ -91,9 +91,13 @@ class PT_HMI_API Widget : public Visual
 
         void setContent(Widget& widget);
 
+        bool acceptsInput() const;
+
         void setAcceptInput( bool a );
 
-        bool acceptsInput() const;
+        void setTextInput(bool b);
+
+        bool isTextInput() const;
 
         //
         // coordinate transformations
@@ -306,6 +310,7 @@ class PT_HMI_API Widget : public Visual
         FocusPolicy                  _focusPolicy;
         size_t                       _focusIndex;
         bool                         _acceptsInput;
+        bool                         _textInput;
 
         Hmi::Cursor                  _cursor;
         Key                          _actionKey;

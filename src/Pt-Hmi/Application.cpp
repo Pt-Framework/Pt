@@ -57,8 +57,6 @@ Application::Application(int argc, char** argv)
 
     _mainScreen = new Screen(*_impl);
 
-    _inputMethod->setActive( loop() );
-
     loop().eventReceived() += Pt::slot(*this, &Application::onResizeEvent );
     loop().eventReceived() += Pt::slot(*this, &Application::onMoveEvent );
     loop().eventReceived() += Pt::slot(*this, &Application::onKeyEvent );
