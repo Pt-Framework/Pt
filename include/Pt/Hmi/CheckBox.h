@@ -1,3 +1,4 @@
+
 /* Copyright (C) 2016 Marc Boris Duerner 
    Copyright (C) 2016 Laurentiu-Gheorghe Crisan
 
@@ -61,6 +62,8 @@ class PT_HMI_API CheckBox : public Button
         bool isChecked() const;
     
     protected:
+        virtual void onInvalidate();
+
         virtual void onPressed();
 
         virtual void onReleased();
@@ -69,7 +72,12 @@ class PT_HMI_API CheckBox : public Button
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
     private:
-        State _state;
+        State      _state;
+        Gfx::Pen   _pen;
+        Gfx::Brush _brush;
+        Gfx::Pen   _textPen;
+        Gfx::Font  _font;
+        Gfx::SizeF _boxSize;
 };
 
 } // namespace

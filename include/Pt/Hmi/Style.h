@@ -36,6 +36,7 @@
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/Font.h>
+#include <Pt/Gfx/FontMetrics.h>
 #include <Pt/TypeInfo.h>
 #include <Pt/NonCopyable.h>
 #include <map>
@@ -199,14 +200,60 @@ class PT_HMI_API CheckBoxRenderer : public Style::Facet
 
         virtual ~CheckBoxRenderer();
 
-        void render(const CheckBox& cb, 
-                    PaintSurface& surface, 
-                    const Gfx::RectF& rect) const;
+        void prepare(const CheckBox& cb,
+                     const StyleOptions& options,
+                     Gfx::Brush& brush,
+                     Gfx::Pen& contour,
+                     Gfx::Font& font,
+                     Gfx::Pen& textPen,
+                     Gfx::SizeF& boxSize) const;
+
+        void renderBox(const CheckBox& cb,
+                       const StyleOptions& options,
+                       Painter& painter, 
+                       const Gfx::RectF& rect,
+                       const Gfx::RectF& boxRect,
+                       const Gfx::Brush& brush,
+                       const Gfx::Pen& pen) const;
+
+        void renderText(const CheckBox& cb,
+                        const StyleOptions& options,
+                        Painter& painter, 
+                        const Gfx::RectF& rect,
+                        const String& text,
+                        const Gfx::PointF& textPos,
+                        const Gfx::FontMetrics& textMetric,
+                        const Gfx::Font& font, 
+                        const Gfx::Pen& textPen,
+                        const Gfx::RectF& mnemonic) const;
 
     protected:
-        virtual void onRender(const CheckBox& cb, 
-                              PaintSurface& surface, 
-                              const Gfx::RectF& rect) const = 0;
+        virtual void onPrepare(const CheckBox& cb,
+                               const StyleOptions& options,
+                               Gfx::Brush& brush,
+                               Gfx::Pen& contour,
+                               Gfx::Font& font,
+                               Gfx::Pen& textPen,
+                               Gfx::SizeF& boxSize) const = 0;
+
+        virtual void onRenderBox(const CheckBox& cb,
+                                 const StyleOptions& options,
+                                 Painter& painter, 
+                                 const Gfx::RectF& rect,
+                                 const Gfx::RectF& boxRect,
+                                 const Gfx::Brush& brush,
+                                 const Gfx::Pen& pen) const = 0;
+
+        virtual void onRenderText(const CheckBox& cb,
+                                  const StyleOptions& options,
+                                  Painter& painter, 
+                                  const Gfx::RectF& rect,
+                                  const String& text,
+                                  const Gfx::PointF& textPos,
+                                  const Gfx::FontMetrics& textMetric,
+                                  const Gfx::Font& font, 
+                                  const Gfx::Pen& textPen,
+                                  const Gfx::RectF& mnemonic) const = 0;
 };
 
 

@@ -155,11 +155,11 @@ ButtonRenderer::~ButtonRenderer()
 
 
 void ButtonRenderer::prepare(const PushButton& button,
-                     const StyleOptions& options,
-                     Gfx::Brush& brush,
-                     Gfx::Pen& contour,
-                     Gfx::Font& font,
-                     Gfx::Pen& textPen) const
+                             const StyleOptions& options,
+                             Gfx::Brush& brush,
+                             Gfx::Pen& contour,
+                             Gfx::Font& font,
+                             Gfx::Pen& textPen) const
 {
     onPrepare(button, options, brush, contour, font, textPen); 
 }
@@ -214,11 +214,44 @@ CheckBoxRenderer::~CheckBoxRenderer()
 }
 
 
-void CheckBoxRenderer::render(const CheckBox& cb, 
-                              PaintSurface& surface, 
-                              const Gfx::RectF& rect) const
+void CheckBoxRenderer::prepare(const CheckBox& cb,
+                               const StyleOptions& options,
+                               Gfx::Brush& brush,
+                               Gfx::Pen& contour,
+                               Gfx::Font& font,
+                               Gfx::Pen& textPen,
+                               Gfx::SizeF& boxSize) const
+{
+    onPrepare(cb, options, brush, contour, font, textPen, boxSize); 
+}
+
+
+void CheckBoxRenderer::renderBox(const CheckBox& cb,
+                                 const StyleOptions& options,
+                                 Painter& painter, 
+                                 const Gfx::RectF& rect,
+                                 const Gfx::RectF& boxRect,
+                                 const Gfx::Brush& brush,
+                                 const Gfx::Pen& pen) const
 { 
-    onRender(cb, surface, rect); 
+    onRenderBox(cb, options, painter, rect, 
+                boxRect, brush, pen); 
+}  
+
+
+void CheckBoxRenderer::renderText(const CheckBox& cb,
+                                  const StyleOptions& options,
+                                  Painter& painter, 
+                                  const Gfx::RectF& rect,
+                                  const String& text,
+                                  const Gfx::PointF& textPos,
+                                  const Gfx::FontMetrics& textMetric,
+                                  const Gfx::Font& font, 
+                                  const Gfx::Pen& textPen,
+                                  const Gfx::RectF& mnemonic) const
+{ 
+    onRenderText(cb, options, painter, rect, 
+                 text, textPos, textMetric, font, textPen, mnemonic); 
 }  
 
 

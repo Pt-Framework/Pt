@@ -122,9 +122,32 @@ class PT_HMI_API PlatinumCheckBoxRenderer : public CheckBoxRenderer
         virtual ~PlatinumCheckBoxRenderer();
 
     protected:
-        virtual void onRender(const CheckBox& cb, 
-                              PaintSurface& surface, 
-                              const Gfx::RectF& rect) const;
+        virtual void onPrepare(const CheckBox& cb,
+                               const StyleOptions& options,
+                               Gfx::Brush& brush,
+                               Gfx::Pen& contour,
+                               Gfx::Font& font,
+                               Gfx::Pen& textPen,
+                               Gfx::SizeF& boxRect) const;
+
+        virtual void onRenderBox(const CheckBox& cb,
+                                 const StyleOptions& options,
+                                 Painter& painter, 
+                                 const Gfx::RectF& rect,
+                                 const Gfx::RectF& boxRect,
+                                 const Gfx::Brush& brush,
+                                 const Gfx::Pen& pen) const;
+
+        virtual void onRenderText(const CheckBox& cb,
+                                  const StyleOptions& options,
+                                  Painter& painter, 
+                                  const Gfx::RectF& rect,
+                                  const String& text,
+                                  const Gfx::PointF& textPos,
+                                  const Gfx::FontMetrics& textMetric,
+                                  const Gfx::Font& font, 
+                                  const Gfx::Pen& textPen,
+                                  const Gfx::RectF& mnemonic) const;
 
     private:
         PlatinumRendererBase _baseRenderer;

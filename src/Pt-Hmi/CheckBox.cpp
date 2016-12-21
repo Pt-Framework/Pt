@@ -30,6 +30,7 @@
 #include <Pt/Hmi/CheckBox.h>
 #include <Pt/Hmi/Style.h>
 #include <Pt/Hmi/StyleOptions.h>
+#include <Pt/Hmi/Painter.h>
 
 namespace Pt {
 
@@ -81,14 +82,81 @@ void CheckBox::onReleased()
         _state = Checked;
 
     setPressed(_state == Checked);
+
+    clicked().send(*this);
 }
 
 
-void CheckBox::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
+void CheckBox::onInvalidate()
 {
+    Base::onInvalidate();
+
+    const StyleOptions* options = getFacet<StyleOptions>();
+    if( ! options )
+      return;
+
     const CheckBoxRenderer* renderer = getFacet<CheckBoxRenderer>();
-    if(renderer)
-        renderer->render(*this, surface, updateRect);
+    if( ! renderer )
+        return;
+
+    renderer->prepare(*this, *options, _brush, _pen, _font, _textPen, _boxSize);
+}
+
+
+void CheckBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+{
+    const StyleOptions* options = getFacet<StyleOptions>();
+    if( ! options )
+      return;
+
+    const CheckBoxRenderer* renderer = getFacet<CheckBoxRenderer>();
+    if( ! renderer )
+        return;
+
+    Painter painter(surface);
+    painter.setClip(rect);
+
+    double boxX = padding().left();
+    double boxY = (size().height() - _boxSize.height()) / 2;
+    
+    Gfx::RectF boxRect(Gfx::PointF(boxX, boxY), _boxSize);
+
+    renderer->renderBox(*this, *options, painter, rect, 
+                         boxRect, _brush, _pen);
+
+    painter.setFont(_font);
+    Gfx::FontMetrics tm = painter.fontMetrics( text() );
+
+    double boxSize = _boxSize.width();
+
+    double textX = padding().leftRight() + _boxSize.width() + padding().left();
+    double textY = (size().height() / 2) - (tm.height() / 2) + tm.ascent();
+    Gfx::PointF textPos(textX, textY);
+
+    Gfx::RectF mnemonicRect;
+
+    const Char* m = mnemonic();
+    if(m)
+    {
+        String::size_type n = text().find(*m);
+        if(n != String::npos)
+        {
+            Pt::String mnemonicText(text(), 0, n);
+            Gfx::FontMetrics fmLeft = painter.fontMetrics(mnemonicText);
+
+            mnemonicText = *m;
+            Gfx::FontMetrics fmChar = painter.fontMetrics(mnemonicText);
+
+            mnemonicRect.set( Gfx::PointF(textPos.x() + fmLeft.width(), 
+                                          textPos.y() - fmChar.ascent()),
+                              Gfx::SizeF(fmChar.width(), 
+                                         fmChar.height()) );
+        }
+    }
+
+    renderer->renderText(*this, *options, painter, rect,
+                         text(), textPos, tm, _font, _textPen,
+                         mnemonicRect);
 }
 
 } // namespace

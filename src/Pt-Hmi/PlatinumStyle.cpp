@@ -328,44 +328,37 @@ PlatinumCheckBoxRenderer::~PlatinumCheckBoxRenderer()
 }
 
 
-void PlatinumCheckBoxRenderer::onRender(const CheckBox& cb, 
-                                        PaintSurface& surface, 
-                                        const Gfx::RectF& rect) const
+void PlatinumCheckBoxRenderer::onPrepare(const CheckBox& cb,
+                                         const StyleOptions& options,
+                                         Gfx::Brush& brush,
+                                         Gfx::Pen& contour,
+                                         Gfx::Font& font,
+                                         Gfx::Pen& textPen,
+                                         Gfx::SizeF& boxSize) const 
 {
-    const StyleOptions* options = cb.getFacet<StyleOptions>();
-    if( options == 0)
-      return;
+    contour = options.contourColor();
+    textPen = options.textColor(); 
+    font = options.font();
+    brush = options.viewBackground();
 
-    Gfx::Color foreground = options->contourColor();
-    Gfx::Color frameColor = Gfx::Color(foreground.red() * 0.6f,
-                                       foreground.green() * 0.6f,
-                                       foreground.blue() * 0.6f);
+    boxSize.set( font.size(), font.size() );
+}
 
-    const Gfx::Font& textFont = options->font();
-    const Gfx::Color& textColor = options->textColor();
 
-    const String& text = cb.text();
-    const Gfx::SizeF& size = cb.size();
+void PlatinumCheckBoxRenderer::onRenderBox(const CheckBox& cb,
+                                           const StyleOptions& options,
+                                           Painter& painter, 
+                                           const Gfx::RectF& rect,
+                                           const Gfx::RectF& boxRect,
+                                           const Gfx::Brush& brush,
+                                           const Gfx::Pen& pen) const
+{
+    Gfx::Color checkColor = options.textColor();
 
-    Painter painter(surface);
-    painter.setClip(rect);
-
-    double boxSize = 12;
-
-    //
-    // draw the checkbox rectangle
-    //
-    
-    double boxX = boxSize / 2;
-    double boxY = (size.height() - boxSize) / 2;
-    
-    Gfx::RectF boxRect( Gfx::PointF(boxX, boxY), 
-                        Gfx::SizeF(boxSize, boxSize) );
-
-    painter.setBrush( Gfx::Color::fromRgb8(255, 255, 255) );
+    painter.setBrush(brush);
     painter.fillRect(boxRect);
 
-    painter.setPen(frameColor);
+    painter.setPen(pen);
     painter.drawRect(boxRect);
 
     if( cb.isChecked() )
@@ -375,38 +368,44 @@ void PlatinumCheckBoxRenderer::onRender(const CheckBox& cb,
         Gfx::PointF tr = boxRect.topRight() + Gfx::PointF(-2, 2);
         Gfx::PointF bl = boxRect.bottomLeft() - Gfx::PointF(-2, 2);
 
-        Pt::Gfx::Pen pen(textColor, 2, Gfx::Pen::Solid, Gfx::Pen::RoundCap);
+        Pt::Gfx::Pen pen(checkColor, 2, Gfx::Pen::Solid, Gfx::Pen::RoundCap);
         painter.setPen(pen);
         painter.drawLine(tl, br);
         painter.drawLine(tr, bl);
     }
+}
 
-    //
-    // draw the checkbox text
-    //
-    
-    painter.setFont(textFont);
-    Gfx::FontMetrics metric = painter.fontMetrics( cb.text() );
 
-    double textX = 2 * boxSize;
-    double textY = (size.height() / 2) - (metric.height() / 2) + metric.ascent();
-    Gfx::PointF textPos(textX, textY);
+void PlatinumCheckBoxRenderer::onRenderText(const CheckBox& cb,
+                                            const StyleOptions& options,
+                                            Painter& painter, 
+                                            const Gfx::RectF& rect,
+                                            const String& text,
+                                            const Gfx::PointF& textPos,
+                                            const Gfx::FontMetrics& textMetric,
+                                            const Gfx::Font& font, 
+                                            const Gfx::Pen& textPen,
+                                            const Gfx::RectF& mnemonic) const 
+{
+    painter.setFont(font);
+    painter.setPen(textPen);
+    painter.drawText(textPos, text);
 
-    _baseRenderer.renderItemText(painter, textPos, text, cb.mnemonic(),
-                                 textFont, textColor);
+    if( ! mnemonic.isNull() )
+    {
+        double menmonicY = textPos.y() + 1;
+        painter.drawLine( Gfx::PointF(mnemonic.left(), menmonicY), 
+                          Gfx::PointF(mnemonic.right(), menmonicY) );
+    }
 
-    //
-    // draw the focus rect
-    //
-    
     if( cb.hasFocus() )
     {       
-        double focusX = textX - 2;
-        double focusY = textY - metric.ascent();
-        Gfx::RectF focusRect( Gfx::PointF(focusX, focusY), 
-                              Gfx::SizeF(metric.width() + 4, metric.height() + 1) );
+        Gfx::RectF focusRect( Gfx::PointF(textPos.x() - 2, 
+                                          textPos.y() - textMetric.ascent()), 
+                              Gfx::SizeF(textMetric.width() + 4, 
+                                         textMetric.height() ) );
         
-        Gfx::Pen pen(frameColor, 1, Gfx::Pen::Dash);
+        Gfx::Pen pen(textPen.color(), 1, Gfx::Pen::Dash);
         painter.setPen(pen);
         painter.drawRect(focusRect);
     }
