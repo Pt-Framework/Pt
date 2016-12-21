@@ -39,6 +39,9 @@ namespace Hmi {
 
 class PT_HMI_API Label : public Control
 {
+    public:
+        typedef Control Base;
+
 	  public:
         // TODO: separate class
         enum Alignment
@@ -69,11 +72,7 @@ class PT_HMI_API Label : public Control
 
         void setBackground(const Gfx::Brush& b);
 
-        void setBackground(bool b);
-
         void setFrame(const Gfx::Color& color);
-
-        void setFrame(bool b);
 
         void setTextColor(const Gfx::Color& color);
 
@@ -81,13 +80,17 @@ class PT_HMI_API Label : public Control
 
         void setFontSize(const std::size_t n);
 
+        void setFontStyle(Gfx::Font::Style style);
+
     protected:
         virtual Gfx::SizeF onAutoSize() const;
+
+        virtual void onInvalidate();
 
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
         
     private:
-        Gfx::PointF textPosition(const Gfx::Font& font) const;
+        Gfx::PointF textPosition() const;
 
     private:
         Pt::String  _text;
@@ -95,19 +98,17 @@ class PT_HMI_API Label : public Control
         
         Gfx::Brush  _background;
         bool        _hasBackground;
-        bool        _customBackground;
         
         Gfx::Color  _frameColor;
         bool        _hasFrame;
-        bool        _customFrame;
         
         Gfx::Font   _font;
-        bool        _hasFont;
-
-        std::size_t _fontSize;
+        bool        _hasFontName;
+        bool        _hasFontSize;
+        bool        _hasFontStyle;
         
-        Gfx::Color  _textColor;
-        bool        _hasTextColor;
+        Gfx::Pen    _textPen;
+        bool        _hasTextPen;
 };
 
 } // namespace

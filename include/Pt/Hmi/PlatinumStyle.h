@@ -54,20 +54,7 @@ class PlatinumRendererBase
 
         void renderFrame(Painter& painter, 
                          const Gfx::RectF& rect,
-                         const StyleOptions& options, 
-                         const Gfx::Color* color,
-                         double corner = 1.0) const;
-
-        void renderPlane(Painter& painter,
-                         const Gfx::RectF& rect,
-                         const StyleOptions& options,
-                         const Gfx::Brush* brush,
-                         double corner = 1.0) const;
-
-
-        void renderFrame(Painter& painter, 
-                         const Gfx::RectF& rect,
-                         const Gfx::Color& borderColor,
+                         const Gfx::Pen& pen,
                          double corner = 1.0) const;
 
         void renderPlane(Painter& painter,
@@ -110,7 +97,7 @@ class PT_HMI_API PlatinumButtonRenderer : public ButtonRenderer
                                         Painter& painter, 
                                         const Gfx::RectF& rect,
                                         const Gfx::Brush& brush,
-                                        const Gfx::Color& color) const;
+                                        const Gfx::Pen& color) const;
 
         virtual void onRenderText(const PushButton& button,
                                   const StyleOptions& options,
@@ -176,6 +163,11 @@ class PT_HMI_API PlatinumLabelRenderer : public LabelRenderer
         virtual ~PlatinumLabelRenderer();
 
     protected:
+        virtual void onPrepare(const Label& l,
+                               const StyleOptions& options,
+                               Gfx::Font& font,
+                               Gfx::Pen& textPen) const;
+
         virtual void onRenderBackground(const Label& l,
                                         const StyleOptions& options,
                                         Painter& p, 
@@ -186,7 +178,7 @@ class PT_HMI_API PlatinumLabelRenderer : public LabelRenderer
                                    const StyleOptions& options,
                                    Painter& p, 
                                    const Gfx::RectF& rect, 
-                                   const Gfx::Color& borderColor) const;
+                                   const Gfx::Pen& contour) const;
 
         virtual void onRenderText(const Label& l,
                                   const StyleOptions& options,
@@ -195,7 +187,7 @@ class PT_HMI_API PlatinumLabelRenderer : public LabelRenderer
                                   const String& text,
                                   const Gfx::PointF& textPos,
                                   const Gfx::Font& font, 
-                                  const Gfx::Color& textColor) const;
+                                  const Gfx::Pen& textPen) const;
 
     private:
         PlatinumRendererBase _baseRenderer;

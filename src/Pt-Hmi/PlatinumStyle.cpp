@@ -76,59 +76,10 @@ PlatinumRendererBase::~PlatinumRendererBase()
 {
 }
 
-void PlatinumRendererBase::renderFrame(Painter& painter,
-                                       const Gfx::RectF& frameRect,
-                                       const StyleOptions& options,
-                                       const Gfx::Color* color,
-                                       double corner) const
-{
-    Gfx::Color borderColor = color ? *color : options.contourColor();
-    Gfx::RectF borderRect = frameRect;
-
-    borderRect.setOrigin( Gfx::PointF(corner, corner) );
-    borderRect.setSize( Gfx::SizeF(frameRect.size().width() - corner, 
-                                   frameRect.size().height() - corner) );
-
-    Gfx::PointF outline[9] = {};
-
-    // top left
-    outline[0].setX(0);
-    outline[0].setY(corner);
-
-    outline[1].setX(corner);
-    outline[1].setY(0);
-
-    // top right
-    outline[2].setX(borderRect.width() - corner);
-    outline[2].setY(0);
-
-    outline[3].setX(borderRect.width());
-    outline[3].setY(corner);
-
-    // bottom right
-    outline[4].setX(borderRect.width());
-    outline[4].setY(borderRect.height() - corner);
-
-    outline[5].setX(borderRect.width() - corner);
-    outline[5].setY(borderRect.height());
-
-    // bottom left
-    outline[6].setX(corner);
-    outline[6].setY(borderRect.height());
-
-    outline[7].setX(0);
-    outline[7].setY(borderRect.height() - corner);
-            
-    outline[8] = outline[0];
-    
-    painter.setPen(borderColor);
-    painter.drawPolyline(outline, 9);
-}
-
 
 void PlatinumRendererBase::renderFrame(Painter& painter,
                                        const Gfx::RectF& frameRect,
-                                       const Gfx::Color& borderColor,
+                                       const Gfx::Pen& pen,
                                        double corner) const
 {
     Gfx::RectF borderRect = frameRect;
@@ -169,59 +120,8 @@ void PlatinumRendererBase::renderFrame(Painter& painter,
             
     outline[8] = outline[0];
     
-    painter.setPen(borderColor);
+    painter.setPen(pen);
     painter.drawPolyline(outline, 9);
-}
-
-
-void PlatinumRendererBase::renderPlane(Painter& painter,
-                                       const Gfx::RectF& rect,
-                                       const StyleOptions& options,
-                                       const Gfx::Brush* brush,
-                                       double corner) const
-{
-    Gfx::RectF borderRect( Gfx::PointF(corner, corner),
-                           Gfx::SizeF(rect.size().width() - corner, 
-                                      rect.size().height() - corner) );
-
-    Gfx::PointF outline[9] = {};
-
-    // top left
-    outline[0].setX(0);
-    outline[0].setY(corner);
-
-    outline[1].setX(corner);
-    outline[1].setY(0);
-
-    // top right
-    outline[2].setX(borderRect.width() - corner);
-    outline[2].setY(0);
-
-    outline[3].setX(borderRect.width());
-    outline[3].setY(corner);
-
-    // bottom right
-    outline[4].setX(borderRect.width());
-    outline[4].setY(borderRect.height() - corner);
-
-    outline[5].setX(borderRect.width() - corner);
-    outline[5].setY(borderRect.height());
-
-    // bottom left
-    outline[6].setX(corner);
-    outline[6].setY(borderRect.height());
-
-    outline[7].setX(0);
-    outline[7].setY(borderRect.height() - corner);
-            
-    outline[8] = outline[0];
-
-    if(brush)
-        painter.setBrush( *brush );
-    else
-        painter.setBrush( options.background() );
-
-    painter.fillPolygon(outline, 9);
 }
 
 
@@ -369,7 +269,7 @@ void PlatinumButtonRenderer::onRenderBackground(const PushButton& button,
                                                 Painter& painter, 
                                                 const Gfx::RectF& rect,
                                                 const Gfx::Brush& brush,
-                                                const Gfx::Color& contour) const 
+                                                const Gfx::Pen& pen) const 
 {
     Gfx::RectF borderRect( button.size() );
     _baseRenderer.renderPlane(painter, borderRect, brush);
@@ -380,14 +280,14 @@ void PlatinumButtonRenderer::onRenderBackground(const PushButton& button,
         focusSize.addHeight(-4);
         focusSize.addWidth(-4);
 
-        Gfx::Pen pen(options.contourColor(), 1, Gfx::Pen::Dash);
-        painter.setPen(pen);
+        Gfx::Pen focusPen(pen.color(), 1, Gfx::Pen::Dash);
+        painter.setPen(focusPen);
         
         Gfx::RectF rect(Gfx::PointF(2,2), focusSize);
         painter.drawRect(rect);
     }
 
-    _baseRenderer.renderFrame(painter, borderRect, contour);
+    _baseRenderer.renderFrame(painter, borderRect, pen);
 }
 
 
@@ -565,6 +465,16 @@ PlatinumLabelRenderer::~PlatinumLabelRenderer()
 }
 
 
+void PlatinumLabelRenderer::onPrepare(const Label& l,
+                                      const StyleOptions& options,
+                                      Gfx::Font& font,
+                                      Gfx::Pen& textPen) const 
+{
+    textPen = options.textColor(); 
+    font = options.font();
+}
+
+
 void PlatinumLabelRenderer::onRenderBackground(const Label& l,
                                                const StyleOptions& options,
                                                Painter& painter, 
@@ -581,11 +491,11 @@ void PlatinumLabelRenderer::onRenderFrame(const Label& l,
                                           const StyleOptions& options,
                                           Painter& painter, 
                                           const Gfx::RectF& rect,
-                                          const Gfx::Color& borderColor) const 
+                                          const Gfx::Pen& contour) const 
 {
     Gfx::RectF borderRect( Gfx::PointF(0,0), l.size() );
     
-    _baseRenderer.renderFrame(painter, borderRect, borderColor);
+    _baseRenderer.renderFrame(painter, borderRect, contour);
 }
 
 
@@ -596,10 +506,10 @@ void PlatinumLabelRenderer::onRenderText(const Label& l,
                                          const String& text,
                                          const Gfx::PointF& textPos,
                                          const Gfx::Font& font, 
-                                         const Gfx::Color& textColor) const 
+                                         const Gfx::Pen& textPen) const 
 {
     painter.setFont(font);
-    painter.setPen(textColor);
+    painter.setPen(textPen);
     painter.drawText( textPos, text);
 }
 

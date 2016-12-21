@@ -151,7 +151,7 @@ void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     if( ! _isFlat )
     {
         renderer->renderBackground(*this, *options, painter, rect, 
-                                   _brush, _pen.color());
+                                   _brush, _pen);
     }
 
     painter.setFont(_font);

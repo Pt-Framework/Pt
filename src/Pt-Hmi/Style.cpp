@@ -179,9 +179,9 @@ void ButtonRenderer::renderBackground(const PushButton& button,
                                       Painter& painter, 
                                       const Gfx::RectF& rect,
                                       const Gfx::Brush& brush,
-                                      const Gfx::Color& color) const
+                                      const Gfx::Pen& pen) const
 { 
-    onRenderBackground(button, options, painter, rect, brush, color); 
+    onRenderBackground(button, options, painter, rect, brush, pen); 
 }  
 
 
@@ -271,6 +271,15 @@ LabelRenderer::~LabelRenderer()
 }
 
 
+void LabelRenderer::prepare(const Label& l,
+                            const StyleOptions& options,
+                            Gfx::Font& font,
+                            Gfx::Pen& textPen) const
+{
+    onPrepare(l, options, font, textPen);
+}
+
+
 void LabelRenderer::renderBackground(const Label& l,
                                      const StyleOptions& options,
                                      Painter& p, 
@@ -285,9 +294,9 @@ void LabelRenderer::renderFrame(const Label& l,
                                 const StyleOptions& options,
                                 Painter& p, 
                                 const Gfx::RectF& rect, 
-                                const Gfx::Color& borderColor) const
+                                const Gfx::Pen& contour) const
 {
-    onRenderFrame(l, options, p, rect, borderColor);
+    onRenderFrame(l, options, p, rect, contour);
 }
 
 
@@ -298,9 +307,9 @@ void LabelRenderer::renderText(const Label& l,
                                const String& text,
                                const Gfx::PointF& textPos,
                                const Gfx::Font& font, 
-                               const Gfx::Color& textColor) const
+                               const Gfx::Pen& textPen) const
 {
-    onRenderText(l, options, p, rect, text, textPos, font, textColor);
+    onRenderText(l, options, p, rect, text, textPos, font, textPen);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

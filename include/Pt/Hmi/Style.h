@@ -148,7 +148,7 @@ class PT_HMI_API ButtonRenderer : public Style::Facet
                               Painter& painter, 
                               const Gfx::RectF& rect,
                               const Gfx::Brush& brush,
-                              const Gfx::Color& color) const;
+                              const Gfx::Pen& pen) const;
         
         void renderText(const PushButton& button,
                         const StyleOptions& options,
@@ -178,7 +178,7 @@ class PT_HMI_API ButtonRenderer : public Style::Facet
                                         Painter& painter, 
                                         const Gfx::RectF& rect,
                                         const Gfx::Brush& brush,
-                                        const Gfx::Color& color) const = 0;
+                                        const Gfx::Pen& pen) const = 0;
 
         virtual void onRenderText(const PushButton& button,
                                   const StyleOptions& options,
@@ -250,6 +250,11 @@ class PT_HMI_API LabelRenderer : public Style::Facet
         LabelRenderer(std::size_t refs = 0);
 
         virtual ~LabelRenderer();
+
+        void prepare(const Label& l,
+                     const StyleOptions& options,
+                     Gfx::Font& font,
+                     Gfx::Pen& textPen) const;
         
         void renderBackground(const Label& l,
                               const StyleOptions& options,
@@ -261,7 +266,7 @@ class PT_HMI_API LabelRenderer : public Style::Facet
                          const StyleOptions& options,
                          Painter& p, 
                          const Gfx::RectF& rect, 
-                         const Gfx::Color& borderColor) const;
+                         const Gfx::Pen& contour) const;
 
         void renderText(const Label& l,
                         const StyleOptions& options,
@@ -270,9 +275,14 @@ class PT_HMI_API LabelRenderer : public Style::Facet
                         const String& text,
                         const Gfx::PointF& textPos,
                         const Gfx::Font& font, 
-                        const Gfx::Color& textColor) const;
+                        const Gfx::Pen& textPen) const;
 
     protected:
+        virtual void onPrepare(const Label& l,
+                               const StyleOptions& options,
+                               Gfx::Font& font,
+                               Gfx::Pen& textPen) const = 0;
+
         virtual void onRenderBackground(const Label& l,
                                         const StyleOptions& options,
                                         Painter& p, 
@@ -283,7 +293,7 @@ class PT_HMI_API LabelRenderer : public Style::Facet
                                    const StyleOptions& options,
                                    Painter& p, 
                                    const Gfx::RectF& rect, 
-                                   const Gfx::Color& borderColor) const = 0;
+                                   const Gfx::Pen& contour) const = 0;
 
         virtual void onRenderText(const Label& l,
                                   const StyleOptions& options,
@@ -292,7 +302,7 @@ class PT_HMI_API LabelRenderer : public Style::Facet
                                   const String& text,
                                   const Gfx::PointF& textPos,
                                   const Gfx::Font& font, 
-                                  const Gfx::Color& textColor) const = 0;
+                                  const Gfx::Pen& textPen) const = 0;
 };
 
 class PT_HMI_API LineEditRenderer : public Style::Facet

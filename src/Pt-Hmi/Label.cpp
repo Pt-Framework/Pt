@@ -36,14 +36,13 @@ namespace Pt {
 namespace Hmi {
 
 Label::Label()
-:  _textAlignment(MiddleCenter)
+: _textAlignment(MiddleCenter)
 , _hasBackground(false)
-, _customBackground(false)
 , _hasFrame(false)
-, _customFrame(false)
-, _fontSize(0)
-, _hasFont(false)
-, _hasTextColor(false)
+, _hasFontName(false)
+, _hasFontSize(false)
+, _hasFontStyle(false)
+, _hasTextPen(false)
 {
 }
 
@@ -83,23 +82,6 @@ void Label::setBackground(const Gfx::Brush& b)
 {
     _background = b;
     _hasBackground = true;
-    _customBackground = true;
-    update();
-}
-
-
-void Label::setBackground(bool b)
-{
-    _hasBackground = b;
-
-    if( ! _hasBackground )
-    {
-        if(_customBackground)
-            _background = Gfx::Brush();
-        
-        _customBackground = false;
-    }
-
     update();
 }
 
@@ -108,28 +90,14 @@ void Label::setFrame(const Gfx::Color& color)
 {
     _frameColor = color;
     _hasFrame = true;
-    _customFrame = true;
-    update();
-}
-
-
-void Label::setFrame(bool b)
-{
-    _hasFrame = b;
-
-    if( ! _hasFrame )
-    {       
-        _customFrame = false;
-    }
-
     update();
 }
 
 
 void Label::setTextColor(const Gfx::Color& color)
 {
-    _textColor = color;
-    _hasTextColor = true;
+    _textPen = color;
+    _hasTextPen = true;
     update();
 }
 
@@ -137,14 +105,29 @@ void Label::setTextColor(const Gfx::Color& color)
 void Label::setFont(const Gfx::Font& f)
 {
     _font = f;
-    _hasFont = true;
+    _hasFontName = true;
+    _hasFontSize = true;
+    _hasFontStyle = true;
+    
     invalidate();
 }
 
 
 void Label::setFontSize(const std::size_t s)
 {
-    _fontSize = s;
+    _font = Gfx::Font( _font.name(), s, _font.style() );
+    _hasFontSize = true;
+    
+    invalidate();
+}
+
+
+void Label::setFontStyle(Gfx::Font::Style style)
+{
+    _font = Gfx::Font( _font.name(), _font.style(), style );
+    _hasFontStyle = true;
+    
+    invalidate();
 }
 
 
@@ -154,6 +137,38 @@ Gfx::SizeF Label::onAutoSize() const
 
     return Gfx::SizeF( fm.width() + padding().leftRight(), 
                        fm.height() + padding().topBottom() );
+}
+
+
+void Label::onInvalidate()
+{
+    Base::onInvalidate();
+
+    const StyleOptions* options = getFacet<StyleOptions>();
+    if( ! options )
+      return;
+
+    const LabelRenderer* renderer = getFacet<LabelRenderer>();
+    if( ! renderer )
+        return;
+
+    Gfx::Font font;
+    Gfx::Pen textPen;
+    renderer->prepare(*this, *options, font, textPen);
+
+    const std::string& fontName = _hasFontName ? _font.name()
+                                               : font.name();
+
+    Gfx::Font::Style fontStyle = _hasFontStyle ? _font.style()
+                                               : font.style();
+
+    std::size_t fontSize = _hasFontSize ? _font.size()
+                                        : font.size();
+
+    _font = Gfx::Font(fontName, fontSize, fontStyle);
+
+    if( ! _hasTextPen )
+        _textPen = textPen;
 }
 
 
@@ -172,44 +187,27 @@ void Label::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 
     if( _hasBackground )
     {
-        const Gfx::Brush& background = _customBackground ? _background
-                                                         : options->background();
-
         renderer->renderBackground(*this, *options,
-                                   painter, rect, background);
+                                   painter, rect, _background);
     }
 
     if( _hasFrame )
     {
-        const Gfx::Color& frameColor = _customFrame ? _frameColor
-                                                    : options->contourColor();
-
         renderer->renderFrame(*this, *options,
-                              painter, rect, frameColor);
+                              painter, rect, _frameColor);
     }
-
-    Gfx::Font font = _hasFont ? _font
-                              : options->font();
-
-    if(_fontSize > 0)
-    {
-        font = Gfx::Font( font.name(), _fontSize, font.style(), font.angle() );
-    }
-
-    const Gfx::Color& textColor = _hasTextColor ? _textColor
-                                                : options->textColor(); 
     
-    Gfx::PointF pos = textPosition(font);
+    Gfx::PointF pos = textPosition();
 
     renderer->renderText(*this, *options,  painter, rect,
-                         text(), pos, font, textColor);
+                         text(), pos, _font, _textPen);
 }
 
 
-Gfx::PointF Label::textPosition(const Gfx::Font& font) const
+Gfx::PointF Label::textPosition() const
 {
     Gfx::PointF pos(0, 0);
-    Gfx::FontMetrics metric = Hmi::Painter::fontMetrics(font, _text);
+    Gfx::FontMetrics metric = Hmi::Painter::fontMetrics(_font, _text);
 
     switch( _textAlignment )
     {
