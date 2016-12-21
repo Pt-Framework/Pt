@@ -73,6 +73,8 @@ class PT_HMI_API Control : public Widget
     protected:
         virtual void onPaintEvent(const PaintEvent& ev);
 
+        virtual void onFocusEvent(const FocusEvent& ev);
+
         virtual void onEnterEvent( const EnterEvent& ev );
 
         virtual void onLeaveEvent(const LeaveEvent& ev );

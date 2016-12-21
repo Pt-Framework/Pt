@@ -94,11 +94,7 @@ class PT_HMI_API LineEdit : public Control
 
         void setAccepted(bool a);
 
-        const Gfx::Color* textColor() const;
-
         void setTextColor(const Gfx::Color& color);
-
-        const Gfx::Font* font() const;
 
         void setFont(const Gfx::Font& f);
 
@@ -117,6 +113,8 @@ class PT_HMI_API LineEdit : public Control
 
         virtual void onFocusEvent(const FocusEvent& ev);
 
+        virtual void onInvalidate();
+
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& rect);
     
     private:
@@ -125,22 +123,26 @@ class PT_HMI_API LineEdit : public Control
         void layoutText();
 
     private:
-        Pt::Signal<const Pt::String&>  _textChanged;
-        Pt::Signal<const Pt::String&>  _textEntered;
+        Pt::Signal<const Pt::String&> _textChanged;
+        Pt::Signal<const Pt::String&> _textEntered;
 
-        Gfx::Font                      _font;
-        bool                           _hasFont;
-        Gfx::Color                     _textColor;
-        bool                           _hasTextColor;
-        EchoMode                       _echoMode;
-        Alignment                      _textAlignment;
-        Pt::String                     _text;
-        Pt::String                     _displayText;
-        Pt::String                     _placeholderText;
-        bool                           _isAccepted;
-        std::size_t                    _cursorPosition;
-        double                         _hscroll;
-        double                         _halign;
+        EchoMode                      _echoMode;
+        Alignment                     _textAlignment;
+        Pt::String                    _text;
+        Pt::String                    _displayText;
+        Pt::String                    _placeholderText;
+        bool                          _isAccepted;
+        std::size_t                   _cursorPosition;
+        double                        _hscroll;
+        double                        _halign;
+
+        Gfx::Pen                      _pen;
+        Gfx::Brush                    _brush;
+        Gfx::Font                     _font;
+        bool                          _hasFont;
+        Gfx::Pen                      _textPen;
+        bool                          _hasTextPen;
+        Gfx::Pen                      _placeholderPen;
 };
 
 } // namespace

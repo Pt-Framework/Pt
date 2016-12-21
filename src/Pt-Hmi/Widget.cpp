@@ -196,6 +196,9 @@ void Widget::setWindow(Window* window)
 
     if( _window )
         _window->addWidget(*this);
+
+    // this serves as the initial invalidate
+    invalidate();
 }
 
 
@@ -626,7 +629,7 @@ void Widget::show( bool s )
     ShowEvent ev(vid(), s);
     Application::instance().loop().commitEvent(ev);
 
-    update();
+    invalidate();
 }
 
 
@@ -894,8 +897,6 @@ void Widget::onKeyEvent(const KeyEvent& ev)
             _window->focusPrev();
         else
             _window->focusNext();
-
-        update();
 
         Widget* focusWidget = _window->focusWidget();
 

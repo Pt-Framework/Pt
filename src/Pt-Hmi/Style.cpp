@@ -360,14 +360,26 @@ LineEditRenderer::~LineEditRenderer()
 }
 
 
+void LineEditRenderer::prepare(const LineEdit& le, 
+                               const StyleOptions& options,
+                               Gfx::Brush& brush,
+                               Gfx::Pen& contour,
+                               Gfx::Font& font,
+                               Gfx::Pen& textPen,
+                               Gfx::Pen& placeholderPen) const
+{
+    onPrepare(le, options, brush, contour, font, textPen, placeholderPen);
+}
+
+
 void LineEditRenderer::renderItem(const LineEdit& le, 
                                   const StyleOptions& options,
                                   Painter& painter, 
                                   const Gfx::RectF& rect,
-                                  const Gfx::Color& foreground,
-                                  const Gfx::Brush& background) const
+                                  const Gfx::Pen& contour,
+                                  const Gfx::Brush& brush) const
 {
-    onRenderItem(le, options, painter, rect, foreground, background);
+    onRenderItem(le, options, painter, rect, contour, brush);
 }
 
 
@@ -378,9 +390,9 @@ void LineEditRenderer::renderText(const LineEdit& le,
                                   const String& text,
                                   const Gfx::PointF& textPos,
                                   const Gfx::Font& font,
-                                  const Gfx::Color& textColor) const
+                                  const Gfx::Pen& textPen) const
 {
-    onRenderText(le, options, painter,  rect, text, textPos, font, textColor);
+    onRenderText(le, options, painter,  rect, text, textPos, font, textPen);
 }
 
 

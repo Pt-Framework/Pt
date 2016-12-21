@@ -38,14 +38,14 @@ namespace Pt {
 namespace Hmi {
 
 LineEdit::LineEdit()
-: _hasFont(false)
-, _hasTextColor(false)
-, _echoMode(Normal)
+: _echoMode(Normal)
 , _textAlignment(TopLeft)
 , _isAccepted(true)
 , _cursorPosition(0)
 , _hscroll(0)
 , _halign(0)
+, _hasFont(false)
+, _hasTextPen(false)
 {
     setTextInput(true);
     setFocusPolicy(Widget::NormalFocus);
@@ -108,7 +108,7 @@ void LineEdit::setEchoMode(LineEdit::EchoMode mode)
     if(_echoMode == Masked)
         _displayText.assign(_text.size(), maskChar);
 
-    update();
+    invalidate();
 }
 
 
@@ -166,23 +166,11 @@ void LineEdit::setAccepted(bool a)
 }
 
 
-const Gfx::Color* LineEdit::textColor() const
-{
-    return _hasTextColor ? &_textColor : 0;
-}
-
-
 void LineEdit::setTextColor(const Gfx::Color& color)
 {
-    _textColor = color;
-    _hasTextColor = true;
+    _textPen = color;
+    _hasTextPen = true;
     update();
-}
-
-
-const Gfx::Font* LineEdit::font() const
-{ 
-    return _hasFont ? &_font : 0;
 }
 
 
@@ -324,6 +312,30 @@ void LineEdit::onFocusEvent(const FocusEvent& ev)
 }
 
 
+void LineEdit::onInvalidate()
+{
+    Base::onInvalidate();
+
+    const StyleOptions* options = getFacet<StyleOptions>();
+    if( ! options )
+      return;
+
+    const LineEditRenderer* renderer = getFacet<LineEditRenderer>();
+    if( ! renderer )
+        return;
+
+    Gfx::Font font;
+    Gfx::Pen textPen;
+    renderer->prepare(*this, *options, _brush, _pen, font, textPen, _placeholderPen);
+
+    if( ! _hasFont )
+        _font = font;
+
+    if( ! _hasTextPen )
+        _textPen = textPen;
+}
+
+
 void LineEdit::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions* options = getFacet<StyleOptions>();
@@ -334,14 +346,6 @@ void LineEdit::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     if( ! renderer)
         return;
 
-    const Gfx::Font* font = this->font();
-    if( ! font )
-        font = &options->font();
-
-    const Gfx::Color* textColor = this->textColor();
-    if( ! textColor )
-        textColor = &options->textColor(); 
-
     Painter painter(surface);
     painter.setClip(rect);
     
@@ -350,8 +354,7 @@ void LineEdit::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     //
 
     renderer->renderItem( *this, *options, painter, rect,
-                          options->contourColor(), 
-                          options->viewBackground() );
+                          _pen, _brush );
     
     if(echoMode() == LineEdit::Hidden)
         return;
@@ -375,7 +378,7 @@ void LineEdit::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
         Gfx::PointF textPos(textX, textY);
         
         renderer->renderText(*this, *options, painter, rect, 
-                             text, textPos, *font, *textColor);
+                             text, textPos, _font, _textPen);
     }
     else if( ! hasFocus() && ! text.empty() )
     {
@@ -387,7 +390,7 @@ void LineEdit::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
         Gfx::PointF textPos(textX, textY);
 
         renderer->renderText(*this, *options, painter, rect, 
-                             text, textPos, *font, options->contourColor());
+                             text, textPos, _font, _placeholderPen);
     }
 
     //

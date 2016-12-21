@@ -527,17 +527,33 @@ PlatinumLineEditRenderer::~PlatinumLineEditRenderer()
 }
 
 
+void PlatinumLineEditRenderer::onPrepare(const LineEdit& le, 
+                                         const StyleOptions& options,
+                                         Gfx::Brush& brush,
+                                         Gfx::Pen& contour,
+                                         Gfx::Font& font,
+                                         Gfx::Pen& textPen,
+                                         Gfx::Pen& placeholderPen) const
+{
+    brush = options.viewBackground();
+    contour = options.contourColor();
+    font = options.font();
+    textPen = options.textColor();
+    placeholderPen = options.contourColor();
+}
+
+
 void PlatinumLineEditRenderer::onRenderItem(const LineEdit& le, 
                                             const StyleOptions& options,
                                             Painter& painter, 
                                             const Gfx::RectF& rect,
-                                            const Gfx::Color& contourColor,
-                                            const Gfx::Brush& background) const
+                                            const Gfx::Pen& contour,
+                                            const Gfx::Brush& brush) const
 {
-    painter.setBrush(background);
+    painter.setBrush(brush);
     painter.fillRect(rect);
 
-    painter.setPen(contourColor);
+    painter.setPen(contour);
     painter.drawRect(rect);
 }
 
@@ -549,9 +565,9 @@ void PlatinumLineEditRenderer::onRenderText(const LineEdit& le,
                                             const String& text,
                                             const Gfx::PointF& textPos,
                                             const Gfx::Font& font,
-                                            const Gfx::Color& textColor) const
+                                            const Gfx::Pen& textPen) const
 {
-    painter.setPen(textColor);
+    painter.setPen(textPen);
     painter.setFont(font);
     painter.drawText(textPos, text);
 }

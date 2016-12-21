@@ -358,36 +358,52 @@ class PT_HMI_API LineEditRenderer : public Style::Facet
         LineEditRenderer(std::size_t refs = 0);
 
         virtual ~LineEditRenderer();
+
+        void prepare(const LineEdit& le, 
+                     const StyleOptions& options,
+                     Gfx::Brush& brush,
+                     Gfx::Pen& contour,
+                     Gfx::Font& font,
+                     Gfx::Pen& textPen,
+                     Gfx::Pen& placeholderPen) const;
         
-        virtual void renderItem(const LineEdit& le, 
-                                const StyleOptions& options,
-                                Painter& painter, 
-                                const Gfx::RectF& rect,
-                                const Gfx::Color& foreground,
-                                const Gfx::Brush& background) const;
+        void renderItem(const LineEdit& le, 
+                        const StyleOptions& options,
+                        Painter& painter, 
+                        const Gfx::RectF& rect,
+                        const Gfx::Pen& contour,
+                        const Gfx::Brush& brush) const;
 
-        virtual void renderText(const LineEdit& le, 
-                                const StyleOptions& options,
-                                Painter& painter, 
-                                const Gfx::RectF& rect,
-                                const String& text,
-                                const Gfx::PointF& textPos,
-                                const Gfx::Font& font,
-                                const Gfx::Color& textColor) const;
+        void renderText(const LineEdit& le, 
+                        const StyleOptions& options,
+                        Painter& painter, 
+                        const Gfx::RectF& rect,
+                        const String& text,
+                        const Gfx::PointF& textPos,
+                        const Gfx::Font& font,
+                        const Gfx::Pen& textPen) const;
 
-        virtual void renderCursor(const LineEdit& le, 
-                                  const StyleOptions& options,
-                                  Painter& painter, 
-                                  const Gfx::RectF& rect,
-                                  const Gfx::RectF& cursorRect ) const;
+        void renderCursor(const LineEdit& le, 
+                          const StyleOptions& options,
+                          Painter& painter, 
+                          const Gfx::RectF& rect,
+                          const Gfx::RectF& cursorRect ) const;
     
     protected:
+        virtual void onPrepare(const LineEdit& le, 
+                               const StyleOptions& options,
+                               Gfx::Brush& brush,
+                               Gfx::Pen& contour,
+                               Gfx::Font& font,
+                               Gfx::Pen& textPen,
+                               Gfx::Pen& placeholderPen) const = 0;
+
         virtual void onRenderItem(const LineEdit& le, 
                                   const StyleOptions& options,
                                   Painter& painter, 
                                   const Gfx::RectF& rect,
-                                  const Gfx::Color& foreground,
-                                  const Gfx::Brush& background) const = 0;
+                                  const Gfx::Pen& contour,
+                                  const Gfx::Brush& brush) const = 0;
 
         virtual void onRenderText(const LineEdit& le, 
                                   const StyleOptions& options,
@@ -396,7 +412,7 @@ class PT_HMI_API LineEditRenderer : public Style::Facet
                                   const String& text,
                                   const Gfx::PointF& textPos,
                                   const Gfx::Font& font,
-                                  const Gfx::Color& textColor) const = 0;
+                                  const Gfx::Pen& textPen) const = 0;
 
         virtual void onRenderCursor(const LineEdit& le, 
                                     const StyleOptions& options,
