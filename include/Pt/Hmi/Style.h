@@ -274,7 +274,7 @@ class PT_HMI_API PanelRenderer : public Style::Facet
                          const StyleOptions& options,
                          Painter& painter, 
                          const Gfx::RectF& rect, 
-                         const Gfx::Color& borderColor) const;
+                         const Gfx::Pen& pen) const;
 
     protected:
         virtual void onRenderBackground(const Panel& p,
@@ -287,7 +287,7 @@ class PT_HMI_API PanelRenderer : public Style::Facet
                                    const StyleOptions& options,
                                    Painter& painter, 
                                    const Gfx::RectF& rect, 
-                                   const Gfx::Color& borderColor) const = 0;
+                                   const Gfx::Pen& pen) const = 0;
 };
 
 

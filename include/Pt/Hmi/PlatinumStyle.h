@@ -171,7 +171,7 @@ class PT_HMI_API PlatinumPanelRenderer : public PanelRenderer
                                    const StyleOptions& options,
                                    Painter& painter, 
                                    const Gfx::RectF& rect, 
-                                   const Gfx::Color& borderColor) const;
+                                   const Gfx::Pen& pen) const;
     
     private:
         PlatinumRendererBase _baseRenderer;

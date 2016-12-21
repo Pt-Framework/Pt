@@ -284,9 +284,9 @@ void PanelRenderer::renderFrame(const Panel& p,
                                 const StyleOptions& options,
                                 Painter& painter, 
                                 const Gfx::RectF& rect, 
-                                const Gfx::Color& borderColor) const
+                                const Gfx::Pen& pen) const
 {
-    onRenderFrame(p, options, painter, rect, borderColor);
+    onRenderFrame(p, options, painter, rect, pen);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

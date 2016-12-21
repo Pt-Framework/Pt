@@ -442,11 +442,11 @@ void PlatinumPanelRenderer::onRenderFrame(const Panel& p,
                                           const StyleOptions& options,
                                           Painter& painter, 
                                           const Gfx::RectF& rect,
-                                          const Gfx::Color& borderColor) const 
+                                          const Gfx::Pen& pen) const 
 {
     Gfx::RectF borderRect( Gfx::PointF(0,0), p.size() );
     
-    _baseRenderer.renderFrame(painter, borderRect, borderColor);
+    _baseRenderer.renderFrame(painter, borderRect, pen);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
