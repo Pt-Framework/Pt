@@ -268,13 +268,33 @@ class PT_HMI_API PlatinumMenuRenderer : public MenuRenderer
         virtual ~PlatinumMenuRenderer();
 
     protected:
-        virtual void onRender(const Menu& m, 
-                              PaintSurface& surface, 
-                              const Gfx::RectF& rect) const;
+        virtual void onPrepare(const Menu& m, 
+                               const StyleOptions& options,
+                               Gfx::Brush& brush,
+                               Gfx::Pen& contour) const;
+
+        virtual void onPrepareItem(const MenuItem& m, 
+                                   const StyleOptions& options,
+                                   const Gfx::Image& icon,
+                                   Picture& picture,
+                                   Gfx::Brush& brush,
+                                   Gfx::Pen& contour,
+                                   Gfx::Font& font,
+                                   Gfx::Pen& textPen) const;
+
+        virtual void onRenderBackground(const Menu& m, 
+                                        const StyleOptions& options,
+                                        Painter& painter, 
+                                        const Gfx::RectF& rect,
+                                        const Gfx::Pen& contour,
+                                        const Gfx::Brush& brush) const;
 
         virtual void onRenderItem(const MenuItem& m, 
-                                  PaintSurface& surface, 
-                                  const Gfx::RectF& rect) const;
+                                  const StyleOptions& options,
+                                  Painter& painter, 
+                                  const Gfx::RectF& rect,
+                                  Gfx::Brush& brush,
+                                  Gfx::Pen& contour) const;
 
         virtual void onRenderIndicator(const MenuItem& m, 
                                        PaintSurface& surface, 

@@ -107,6 +107,7 @@ ChildW::ChildW(const std::string& title)
     Pt::Hmi::StyleOptions* styleOptions = new Pt::Hmi::StyleOptions();
     styleOptions->setForeground( Gfx::Color::fromRgb8(220, 80, 80) );
     styleOptions->setContourColor( Gfx::Color::fromRgb8(140, 30, 30) );
+    styleOptions->setHighlightColor( Gfx::Color::fromRgb8(190, 70, 70) );
     Pt::Hmi::Style style;
     style.set(styleOptions);
     

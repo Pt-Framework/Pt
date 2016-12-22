@@ -213,16 +213,41 @@ Gfx::SizeF MenuItem::onAutoSize() const
 }
 
 
-void MenuItem::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
+void MenuItem::onInvalidate()
 {
+    Base::onInvalidate();
+
+    const StyleOptions* options = getFacet<StyleOptions>();
+    if( ! options )
+      return;
+
     const MenuRenderer* renderer = getFacet<MenuRenderer>();
-    if(renderer)
-        renderer->renderItem(*this, surface, updateRect);
+    if( ! renderer )
+        return;
+
+    renderer->prepareItem(*this, *options, _icon, 
+                          _picture, _brush, _pen, _font, _textPen);
+}
+
+
+void MenuItem::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+{
+    const StyleOptions* options = getFacet<StyleOptions>();
+    if( ! options )
+      return;
+
+    const MenuRenderer* renderer = getFacet<MenuRenderer>();
+    if( ! renderer )
+        return;
     
-    // TODO: should MenuItem::onPaint draw the content or the style?
-    onPaintIcon(surface, updateRect);
-    onPaintText(surface, updateRect);
-    onPaintShortcut(surface, updateRect);
+    Painter painter(surface);
+    painter.setClip(rect);
+
+    renderer->renderItem(*this, *options, painter, rect, _brush, _pen);
+    
+    onPaintIcon(surface, rect);
+    onPaintText(surface, rect);
+    onPaintShortcut(surface, rect);
 }
 
 

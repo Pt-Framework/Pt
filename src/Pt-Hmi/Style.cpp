@@ -420,19 +420,47 @@ MenuRenderer::~MenuRenderer()
 }
 
 
-void MenuRenderer::render(const Menu& m, 
-                           PaintSurface& surface, 
-                           const Gfx::RectF& rect) const
+void MenuRenderer::prepare(const Menu& m, 
+                           const StyleOptions& options,
+                           Gfx::Brush& brush,
+                           Gfx::Pen& contour) const
 { 
-    onRender(m, surface, rect); 
+    onPrepare(m, options, brush, contour); 
+}
+
+
+void MenuRenderer::prepareItem(const MenuItem& m, 
+                               const StyleOptions& options,
+                               const Gfx::Image& icon,
+                               Picture& picture,
+                               Gfx::Brush& brush,
+                               Gfx::Pen& contour,
+                               Gfx::Font& font,
+                               Gfx::Pen& textPen) const
+{
+    onPrepareItem(m, options, icon, picture, brush, contour, font, textPen);
+}
+
+
+void MenuRenderer::renderBackground(const Menu& m, 
+                                    const StyleOptions& options,
+                                    Painter& painter, 
+                                    const Gfx::RectF& rect,
+                                    const Gfx::Pen& contour,
+                                    const Gfx::Brush& brush) const
+{ 
+    onRenderBackground(m, options, painter, rect, contour, brush); 
 }
 
 
 void MenuRenderer::renderItem(const MenuItem& m, 
-                              PaintSurface& surface, 
-                              const Gfx::RectF& rect) const
+                              const StyleOptions& options,
+                              Painter& painter, 
+                              const Gfx::RectF& rect,
+                              Gfx::Brush& brush,
+                              Gfx::Pen& contour) const
 { 
-    onRenderItem(m, surface, rect); 
+    onRenderItem(m, options, painter, rect, brush, contour); 
 }
 
 

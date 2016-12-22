@@ -96,6 +96,7 @@ MainWindow::MainWindow()
     move( Gfx::PointF(60, 60) );
     resize( Gfx::SizeF(720, 900) ); 
     
+    //_child2.setTopMost(true);
     _child2.resize( Gfx::SizeF(600, 800) );
     add( _child2 );
     
@@ -132,7 +133,7 @@ MainWindow::MainWindow()
 
     add( _child1 );
     
-    _child1.setTopMost(true);
+    //_child1.setTopMost(true);
     _child1.move( Gfx::PointF(30,30));
     _child1.resize( Gfx::SizeF(300, 420) );
     _child1.show(true);

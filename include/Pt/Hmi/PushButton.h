@@ -78,12 +78,12 @@ class PT_HMI_API PushButton : public Button
     private:
         bool       _isToggle;
         bool       _isFlat;
+        Gfx::Image _image;
 
         Gfx::Pen   _pen;
         Gfx::Brush _brush;
         Gfx::Pen   _textPen;
         Gfx::Font  _font;
-        Gfx::Image _image;
         Picture    _picture;
 };
 

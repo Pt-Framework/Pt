@@ -218,6 +218,12 @@ class PT_HMI_API Window : public WindowBase
 
     virtual void onUpdate(const Gfx::RectF& rect);
 
+    virtual void onInvalidate();
+
+    virtual void onPaintBackground(const Gfx::RectF& rect);
+
+    virtual void onPaintContent(const Gfx::RectF& rect);
+
   protected:
     virtual void onInit(Window& w);
     
@@ -247,16 +253,10 @@ class PT_HMI_API Window : public WindowBase
 
     virtual void onClosing(Window& w);
 
-    virtual void onInvalidate();
-
   protected:
     virtual void onEvent(const Pt::Event& ev);
 
     virtual void onPaintEvent(const PaintEvent& ev);
-
-    virtual void onPaintBackground(const Gfx::RectF& rect);
-
-    virtual void onPaintContent(const Gfx::RectF& rect);
 
     virtual void onMouseEvent( const MouseEvent& ev );
 

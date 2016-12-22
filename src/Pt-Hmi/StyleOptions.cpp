@@ -39,7 +39,7 @@ StyleOptions::StyleOptions(std::size_t refs)
 , _viewBackground(Pt::Gfx::Color::fromRgb8(255, 255, 255) )
 , _foreground(Gfx::Color::fromRgb8(210, 210, 210))
 , _contourColor(Gfx::Color::fromRgb8(150, 150, 150))
-, _highlightColor(Gfx::Color::fromRgb8(210, 210, 210))
+, _highlightColor(Gfx::Color::fromRgb8(190, 190, 190))
 , _textColor(Gfx::Color::fromRgb8(0, 0, 0))
 , _font(Gfx::Font("", 12))
 {

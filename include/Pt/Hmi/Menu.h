@@ -47,7 +47,7 @@ class PT_HMI_API Menu : public MenuShell
 {
     friend class MenuShell;
 
-    typedef Window WindowBaseType;
+    typedef Window Base;
 
     public:
         Menu();
@@ -82,10 +82,13 @@ class PT_HMI_API Menu : public MenuShell
         virtual MenuShell* onFindMenu(const Gfx::PointF& screenPos);
 
     protected:
-        virtual void onPaintEvent(const PaintEvent& ev);
+        virtual void onInvalidate();
 
         virtual void onPaintBackground(const Gfx::RectF& rect);
-        
+
+    protected:
+        virtual void onPaintEvent(const PaintEvent& ev);
+
         virtual void onCloseEvent(const CloseEvent& ev);
 
         virtual void onResizeEvent(const ResizeEvent& ev);
@@ -97,8 +100,6 @@ class PT_HMI_API Menu : public MenuShell
         virtual void onEnterEvent(const EnterEvent& ev);
 
         virtual void onLeaveEvent(const LeaveEvent& ev);
-
-        virtual void onInvalidate();
 
     private:
         void onItemTriggered(MenuItem& m);
@@ -114,6 +115,9 @@ class PT_HMI_API Menu : public MenuShell
         Menu*                     _currentMenu;
         FlowLayout                _layout;
         Pt::ssize_t               _iconWidth;
+
+        Gfx::Pen                  _contour;
+        Gfx::Brush                _background;
 };
 
 } // namespace

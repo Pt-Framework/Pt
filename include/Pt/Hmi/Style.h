@@ -428,26 +428,66 @@ class PT_HMI_API MenuRenderer : public Style::Facet
 
         virtual ~MenuRenderer();
 
-        void render(const Menu& m,
-                    PaintSurface& surface,
-                    const Gfx::RectF& rect) const;
+        void prepare(const Menu& m, 
+                     const StyleOptions& options,
+                     Gfx::Brush& brush,
+                     Gfx::Pen& contour) const;
+
+        void prepareItem(const MenuItem& m, 
+                         const StyleOptions& options,
+                         const Gfx::Image& icon,
+                         Picture& picture,
+                         Gfx::Brush& brush,
+                         Gfx::Pen& contour,
+                         Gfx::Font& font,
+                         Gfx::Pen& textPen) const;
+
+        void renderBackground(const Menu& m, 
+                              const StyleOptions& options,
+                              Painter& painter, 
+                              const Gfx::RectF& rect,
+                              const Gfx::Pen& contour,
+                              const Gfx::Brush& brush) const;
 
         void renderItem(const MenuItem& m, 
-                         PaintSurface& surface, 
-                         const Gfx::RectF& rect) const;
+                        const StyleOptions& options,
+                        Painter& painter, 
+                        const Gfx::RectF& rect,
+                        Gfx::Brush& brush,
+                        Gfx::Pen& contour) const;
         
         void renderIndicator(const MenuItem& m, 
                              PaintSurface& surface, 
                              const Gfx::RectF& rect) const;
     
     protected:
-        virtual void onRender(const Menu& m, 
-                              PaintSurface& surface, 
-                              const Gfx::RectF& rect) const = 0;
+        virtual void onPrepare(const Menu& m, 
+                               const StyleOptions& options,
+                               Gfx::Brush& brush,
+                               Gfx::Pen& contour) const = 0;
+
+        virtual void onPrepareItem(const MenuItem& m, 
+                                   const StyleOptions& options,
+                                   const Gfx::Image& icon,
+                                   Picture& picture,
+                                   Gfx::Brush& brush,
+                                   Gfx::Pen& contour,
+                                   Gfx::Font& font,
+                                   Gfx::Pen& textPen) const = 0;
+
+        virtual void onRenderBackground(const Menu& m, 
+                                        const StyleOptions& options,
+                                        Painter& painter, 
+                                        const Gfx::RectF& rect,
+                                        const Gfx::Pen& contour,
+                                        const Gfx::Brush& brush) const = 0;
 
         virtual void onRenderItem(const MenuItem& m, 
-                                  PaintSurface& surface, 
-                                  const Gfx::RectF& rect) const = 0;
+                                  const StyleOptions& options,
+                                  Painter& painter, 
+                                  const Gfx::RectF& rect,
+                                  Gfx::Brush& brush,
+                                  Gfx::Pen& contour) const = 0;
         
         virtual void onRenderIndicator(const MenuItem& m, 
                                        PaintSurface& surface, 

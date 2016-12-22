@@ -41,7 +41,7 @@ namespace Hmi {
 
 class SubMenuItem : public MenuItem
 {
-    typedef MenuItem BaseType;
+    typedef MenuItem Base;
 
     public:
         SubMenuItem(Menu& menu, const Pt::String& text)
@@ -59,7 +59,7 @@ class SubMenuItem : public MenuItem
     protected:
         virtual Gfx::SizeF onAutoSize() const
         {
-            Gfx::SizeF size = BaseType::onAutoSize();
+            Gfx::SizeF size = Base::onAutoSize();
             
             // some space for the menu indicator
             const double indicatorWidth = 50.0; 
@@ -292,6 +292,8 @@ and not only when the ResizeEvent is received
 */
 void Menu::onInvalidate()
 {
+    Base::onInvalidate();
+
     _iconWidth = 0;
 
     double menuWidth = 0;
@@ -332,28 +334,48 @@ void Menu::onInvalidate()
     size.addHeight( _layout.padding().topBottom() );
 
     resize(size);
-}
 
+    const StyleOptions* options = getFacet<StyleOptions>();
+    if( ! options )
+      return;
 
-void Menu::onPaintEvent(const PaintEvent& ev)
-{
-    WindowBaseType::onPaintEvent(ev);
+    const MenuRenderer* renderer = getFacet<MenuRenderer>();
+    if( ! renderer )
+        return;
+
+    renderer->prepare(*this, *options, _background, _contour);
 }
 
 
 void Menu::onPaintBackground(const Gfx::RectF& rect)
 {
-    WindowBaseType::onPaintBackground(rect);
+    Base::onPaintBackground(rect);
+
+    const StyleOptions* options = getFacet<StyleOptions>();
+    if( ! options )
+      return;
 
     const MenuRenderer* renderer = getFacet<MenuRenderer>();
-    if(renderer)
-        renderer->render(*this, surface(), rect);
+    if( ! renderer )
+        return;
+
+    Painter painter( surface() );
+    painter.setClip(rect);
+
+    renderer->renderBackground(*this, *options, painter, rect, 
+                               _contour, _background);
+}
+
+
+void Menu::onPaintEvent(const PaintEvent& ev)
+{
+    Base::onPaintEvent(ev);
 }
 
 
 void Menu::onMouseEvent(const MouseEvent& ev)
 {
-    WindowBaseType::onMouseEvent(ev);
+    Base::onMouseEvent(ev);
 
     Gfx::RectF rect( Gfx::PointF(0,0), size() );
     if( rect.contains( ev.position() ) )
@@ -388,7 +410,7 @@ void Menu::onCloseEvent(const CloseEvent& ev)
     if( parentShell() )
         parentShell()->onCloseMenu(*this);
     
-    WindowBaseType::onCloseEvent(ev);    
+    Base::onCloseEvent(ev);    
 }
 
 
@@ -406,13 +428,13 @@ void Menu::onResizeEvent(const ResizeEvent& ev)
 
     // _layout positions the items now in onResizeEvent
     // TODO: our overall design should make this clearer
-    WindowBaseType::onResizeEvent(ev);
+    Base::onResizeEvent(ev);
 }
 
 
 void Menu::onShowEvent(const ShowEvent& ev)
 {
-    WindowBaseType::onShowEvent(ev);
+    Base::onShowEvent(ev);
 
     if( ! ev.visible() )
     {
@@ -434,7 +456,7 @@ void Menu::onShowEvent(const ShowEvent& ev)
 
 void Menu::onEnterEvent( const EnterEvent& ev )
 {
-    WindowBaseType::onEnterEvent(ev);
+    Base::onEnterEvent(ev);
     
     onEnter();
 }
@@ -442,7 +464,7 @@ void Menu::onEnterEvent( const EnterEvent& ev )
 
 void Menu::onLeaveEvent( const LeaveEvent& ev )
 {
-    WindowBaseType::onLeaveEvent(ev);
+    Base::onLeaveEvent(ev);
 }
 
 } // namespace

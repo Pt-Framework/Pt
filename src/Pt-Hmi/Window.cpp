@@ -161,13 +161,10 @@ void Window::init(Window* parent)
         _impl->setMaximumSize(_maximumSize );
         _impl->setIcon(_icon);
         _impl->setState(_state);
-        _impl->setTopMost(_topMost);
     }
 
+    setTopMost(_topMost);
     show(_visible);
-
-    if(_parent)
-        _parent->onStateChanged(*this);
 }
 
 
@@ -599,6 +596,19 @@ void Window::onUpdate(Window& child, const Gfx::RectF& rect)
 }
 
 
+void Window::onInvalidate()
+{
+
+}
+
+
+void Window::onInvalidateEvent(const InvalidateEvent& ev)
+{
+    onInvalidate();
+    update();
+}
+
+
 void Window::repaint()
 {      
     if( _damageRect.isNull() )
@@ -644,9 +654,12 @@ void Window::onPaintEvent(const PaintEvent& ev)
 
 void Window::onPaintBackground(const Gfx::RectF& rect)
 {
+    const StyleOptions* options = getFacet<StyleOptions>();
+    if( ! options )
+      return;
+
     Painter painter(_surface);
-    painter.setBrush( Pt::Gfx::Color(58981, 58981, 58981) );
-    painter.setPen( Gfx::Pen(Pt::Gfx::Color(65535, 0, 0)) );
+    painter.setBrush( options->background() );
     painter.fillRect(rect);
 }
 
@@ -1263,19 +1276,6 @@ void Window::setMnemonic(Widget& w, const Char* ch)
 
     if(ch)
         _mnemonics[*ch] = &w;
-}
-
-
-void Window::onInvalidate()
-{
-
-}
-
-
-void Window::onInvalidateEvent(const InvalidateEvent& ev)
-{
-    onInvalidate();
-    update();
 }
 
 } // namespace

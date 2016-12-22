@@ -234,9 +234,7 @@ void PlatinumButtonRenderer::onPrepare(const PushButton& button,
 
         if( button.isHighlighted() )
         {
-            buttonColor = Gfx::Color(buttonColor.red() * 0.9f,
-                                     buttonColor.green() * 0.9f,
-                                     buttonColor.blue() * 0.9f);
+            buttonColor = options.highlightColor();
         }
 
         if( button.isPressed() )
@@ -600,18 +598,24 @@ PlatinumMenuRenderer::~PlatinumMenuRenderer()
 }
 
 
-void PlatinumMenuRenderer::onRender(const Menu& m, 
-                                    PaintSurface& surface, 
-                                    const Gfx::RectF& rect) const
+void PlatinumMenuRenderer::onPrepare(const Menu& m, 
+                                     const StyleOptions& options,
+                                     Gfx::Brush& brush,
+                                     Gfx::Pen& contour) const
 {
-    const StyleOptions* options = m.getFacet<StyleOptions>();
-    if( ! options)
-      return;
+    brush = options.background();
+    contour = options.contourColor();
+}
 
+
+void PlatinumMenuRenderer::onRenderBackground(const Menu& m, 
+                                              const StyleOptions& options,
+                                              Painter& painter, 
+                                              const Gfx::RectF& rect,
+                                              const Gfx::Pen& contour,
+                                              const Gfx::Brush& brush) const
+{
     const Gfx::SizeF& size = m.size();
-
-    Painter painter( surface );
-    painter.setClip(rect);
 
     //
     // icon strip on the left side
@@ -625,15 +629,9 @@ void PlatinumMenuRenderer::onRender(const Menu& m,
     {
         Gfx::RectF iconStrip( Gfx::PointF(0, 0),
                               Gfx::SizeF(iconWidth, size.height()) );
-        
-        // only the damaged region
-        //iconStrip = iconStrip.intersect(rect);
-        //Gfx::Brush brush = Pt::Gfx::Color(0.95f, 0.95f, 0.95f);
-
-        // TODO: need painter clipping for gradient
-        
-         Gfx::Brush brush(Gfx::Color(65535* 0.90f, 65535*0.90f, 65535*0.91f),
-                          Gfx::Color(65535*0.99f, 65535*0.99f, 65535*0.99f), 
+                
+         Gfx::Brush brush(brush.color(),
+                          Gfx::Color(65000, 65000, 65000), 
                           Gfx::Brush::Vertical);
 
         painter.setBrush(brush);
@@ -645,30 +643,41 @@ void PlatinumMenuRenderer::onRender(const Menu& m,
     //
     Gfx::RectF borderRect(size);
 
-    Gfx::Pen pen(Gfx::Color(65535*0.5f, 65535*0.5f, 65535*0.51f), 1 );
-    painter.setPen(pen);
+    painter.setPen(contour);
     painter.drawRect(borderRect);
 }
 
 
-void PlatinumMenuRenderer::onRenderItem(const MenuItem& m, 
-                                        PaintSurface& surface, 
-                                        const Gfx::RectF& rect) const
+void PlatinumMenuRenderer::onPrepareItem(const MenuItem& m, 
+                                         const StyleOptions& options,
+                                         const Gfx::Image& icon,
+                                         Picture& picture,
+                                         Gfx::Brush& brush,
+                                         Gfx::Pen& contour,
+                                         Gfx::Font& font,
+                                         Gfx::Pen& textPen) const
 {
-    const StyleOptions* options = m.getFacet<StyleOptions>();
-    if( ! options)
-      return;
+    picture.set(icon);
+    brush = m.isHighlighted() ? options.highlightColor() 
+                              : options.background();
+    contour = options.contourColor();
+    font = options.font();
+    textPen = options.textColor();
+}
 
+
+void PlatinumMenuRenderer::onRenderItem(const MenuItem& m, 
+                                        const StyleOptions& options,
+                                        Painter& painter, 
+                                        const Gfx::RectF& rect,
+                                        Gfx::Brush& brush,
+                                        Gfx::Pen& contour) const
+{
     bool highlight = m.isHighlighted();
     if(highlight)
     {
-        Gfx::Color bgColor = options->highlightColor();
-        Gfx::Brush brush = brighten(bgColor, 0.85f);
-
-        Painter painter(surface);
-        painter.setClip(rect);
         painter.setBrush(brush);
-        painter.fillRect( Gfx::RectF(Gfx::PointF(0,0), m.size()) );
+        painter.fillRect(rect);
     }
 }
 

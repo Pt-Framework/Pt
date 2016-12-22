@@ -31,7 +31,7 @@
 #define Pt_Hmi_MenuItem_H
 
 #include <Pt/Hmi/Button.h>
-#include <Pt/Hmi/Key.h>
+#include <Pt/Hmi/Picture.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/String.h>
@@ -78,6 +78,9 @@ class PT_HMI_API MenuItem : public Control
         virtual void onShortcut(const KeyEvent& kev);
 
         virtual Gfx::SizeF onAutoSize() const;
+
+    protected:
+        virtual void onInvalidate();
         
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
@@ -104,6 +107,12 @@ class PT_HMI_API MenuItem : public Control
         double            _iconWidth;
         Gfx::Image        _icon;
         Pt::String        _text;
+
+        Picture           _picture;
+        Gfx::Pen          _pen;
+        Gfx::Brush        _brush;
+        Gfx::Font         _font;
+        Gfx::Pen          _textPen;
 };
 
 } // namespace

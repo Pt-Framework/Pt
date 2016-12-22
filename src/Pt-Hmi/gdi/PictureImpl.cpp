@@ -97,7 +97,9 @@ void PictureImpl::set(const Gfx::Image& image)
         }
     }
 
-    _bitmap = CreateBitmap(_width, _height, 1, 4*8, (VOID*)&_bitmapData[0]);
+    const Pt::uint8_t* data = _bitmapData.empty() ? 0
+                                                  : &_bitmapData[0];
+    _bitmap = CreateBitmap(_width, _height, 1, 4*8, (VOID*)data);
 }
 
 

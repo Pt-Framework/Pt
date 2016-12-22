@@ -217,6 +217,9 @@ Widget* Widget::findWidget(const Gfx::PointF& pos, bool input)
     for(it = _children.rbegin(); it != _children.rend(); ++it)
     {
         Widget* child = *it;
+
+        if( ! child->isVisible() || ! child->isEnabled() )
+            continue;
         
         if( ! child->geometry().contains(pos) )
             continue;
