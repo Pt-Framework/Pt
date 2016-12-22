@@ -73,6 +73,15 @@ void InputMethod::finish()
 }
 
 
+void InputMethod::finish(Widget& w)
+{
+    if( ! onFinish(w) )
+      return;
+
+    finish();
+}
+
+
 void InputMethod::sendKeyEvent(const KeyEvent& ev)
 {
     if(_receiver == 0)
@@ -86,8 +95,13 @@ void InputMethod::sendKeyEvent(const KeyEvent& ev)
 
 void DefaultInputMethod::onShow(bool show)
 {
-    // std::clog << "INPUTMETHOD " << (show ? "+++ SHOW +++" : "--- HIDE ---") 
-    //           << std::endl;
+    std::clog << "INPUTMETHOD " << (show ? "+++ SHOW +++" : "--- HIDE ---") 
+               << std::endl;
+}
+
+bool DefaultInputMethod::onFinish(Widget& widget)
+{
+  return true;
 }
 
 } // namespace

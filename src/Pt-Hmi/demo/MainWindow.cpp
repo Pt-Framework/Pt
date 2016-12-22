@@ -132,6 +132,7 @@ MainWindow::MainWindow()
 
     add( _child1 );
     
+    _child1.setTopMost(true);
     _child1.move( Gfx::PointF(30,30));
     _child1.resize( Gfx::SizeF(300, 420) );
     _child1.show(true);

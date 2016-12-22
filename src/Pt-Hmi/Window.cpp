@@ -162,9 +162,12 @@ void Window::init(Window* parent)
         _impl->setIcon(_icon);
         _impl->setState(_state);
         _impl->setTopMost(_topMost);
-    }  
-    
+    }
+
     show(_visible);
+
+    if(_parent)
+        _parent->onStateChanged(*this);
 }
 
 
@@ -1112,7 +1115,7 @@ void Window::onMouseEvent(const MouseEvent& ev)
     if( ev.isPress() )
     {
         if( ! widget || ! widget->isTextInput() )
-            Application::instance().inputMethod().finish();
+            Application::instance().inputMethod().finish(*widget);
     }
 
     // widget may be null to unset the pointer widget
@@ -1138,7 +1141,7 @@ void Window::onTouchEvent(const TouchEvent& tev)
     if( tev.isPress() )
     {
         if( ! widget || ! widget->isTextInput() )
-            Application::instance().inputMethod().finish();
+            Application::instance().inputMethod().finish(*widget);
     }
 
     // widget may be null to unset the pointer widget

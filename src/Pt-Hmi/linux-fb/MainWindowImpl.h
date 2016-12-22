@@ -74,6 +74,8 @@ class MainWindowImpl
         void setMaximumSize(const Gfx::SizeF& s); 
 
         void setTitle(const std::string& title);
+
+        void setTopMost(bool m);
 };
 
 } // namespace

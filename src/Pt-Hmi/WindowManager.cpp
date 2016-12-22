@@ -94,6 +94,9 @@ void WindowManager::add(Window& w)
 
 void WindowManager::remove(Window& w)
 {
+    // TODO: not when window programmatically removed
+    Application::instance().inputMethod().finish();
+
     std::vector<WindowFrame*>::iterator wit;
     for(wit = _windows.begin(); wit != _windows.end(); ++wit)
     {
@@ -235,7 +238,10 @@ bool WindowManager::mouseEvent( const MouseEvent& mev )
     if(windowFrame)
     {         
         if( windowFrame->mouseEvent(mev) )
+        {
+            //Application::instance().inputMethod().finish();
             _grabbedWindow = windowFrame;
+        }
         else
             _grabbedWindow = 0;
     }
@@ -293,8 +299,11 @@ bool WindowManager::touchEvent( const TouchEvent& tev )
     //
     if(windowFrame)
     {         
-        if(windowFrame->touchEvent(tev))
+        if( windowFrame->touchEvent(tev) )
+        {
+            //Application::instance().inputMethod().finish();
             _grabbedWindow = windowFrame;
+        }
         else
             _grabbedWindow = 0;
     }

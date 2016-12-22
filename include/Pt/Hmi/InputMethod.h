@@ -51,8 +51,11 @@ class PT_HMI_API InputMethod : public Pt::Connectable
 
         void finish();
 
+        void finish(Widget& widget);
+
     protected:
         virtual void onShow(bool show) = 0;
+        virtual bool onFinish(Widget& widget) = 0;
 
         void sendKeyEvent(const KeyEvent& ev);
 
@@ -67,6 +70,7 @@ class DefaultInputMethod : public InputMethod
 {
     protected:
         virtual void onShow(bool show);
+        virtual bool onFinish(Widget& widget);
 };
 
 } // namespace

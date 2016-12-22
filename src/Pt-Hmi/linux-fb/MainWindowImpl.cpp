@@ -108,6 +108,10 @@ void MainWindowImpl::setTitle(const std::string& text)
 {
 }
 
+void MainWindowImpl::setTopMost(bool m)
+{
+}
+
 } // namespace
 
 } // namespace
