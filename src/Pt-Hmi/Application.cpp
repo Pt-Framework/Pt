@@ -145,6 +145,18 @@ void Application::setStyle(const Style& s)
 }
 
 
+const StyleOptions& Application::styleOptions() const
+{
+    return _styleOptions;
+}
+
+
+StyleOptions& Application::styleOptions()
+{
+    return _styleOptions;
+}
+
+
 Gfx::Font Application::makeFont(const Gfx::Font& userFont) const
 {
   if( userFont.isNull() )

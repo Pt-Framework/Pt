@@ -42,6 +42,8 @@ StyleOptions::StyleOptions(std::size_t refs)
 , _highlightColor(Gfx::Color::fromRgb8(190, 190, 190))
 , _textColor(Gfx::Color::fromRgb8(0, 0, 0))
 , _font(Gfx::Font("", 12))
+, _fontSize(12)
+, _fontStyle(Gfx::Font::Normal)
 {
 }
 
@@ -55,6 +57,8 @@ StyleOptions::StyleOptions(const StyleOptions& o, std::size_t refs)
 , _highlightColor(o._highlightColor)
 , _textColor(o._textColor)
 , _font(o._font)
+, _fontSize(12)
+, _fontStyle(Gfx::Font::Normal)
 {
 }
 

@@ -138,17 +138,16 @@ void Label::onInvalidate()
 {
     Base::onInvalidate();
 
-    const StyleOptions* options = 
-        Application::instance().style().get<StyleOptions>();
+    const StyleOptions& options = Application::instance().styleOptions();
 
     const std::string& fontName = _fontNameOption.isValid() ? _fontNameOption.get()
-                                                            : options->font().name();
+                                                            : options.font().name();
 
     std::size_t fontSize = _fontSizeOption.isValid() ? _fontSizeOption.get()
-                                                     : options->font().size();
+                                                     : options.font().size();
 
     Gfx::Font::Style fontStyle = _fontStyleOption.isValid() ? _fontStyleOption.get()
-                                                            : options->font().style();
+                                                            : options.font().style();
 
     _font = Gfx::Font(fontName, fontSize, fontStyle);
 
@@ -157,7 +156,7 @@ void Label::onInvalidate()
         return;
 
     Gfx::Pen textPen;
-    renderer->prepare(*this, *options, _font, textPen);
+    renderer->prepare(*this, options, _font, textPen);
 
     if( ! _hasTextPen )
         _textPen = textPen;

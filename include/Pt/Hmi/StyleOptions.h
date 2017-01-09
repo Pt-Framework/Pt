@@ -175,6 +175,36 @@ class PT_HMI_API StyleOptions : public Style::Facet
             _font = c;
         }
 
+        const std::string& fontName() const
+        {
+            return _fontName;
+        }
+
+        void setFontName(const std::string& name)
+        {
+            _fontName = name;
+        }
+
+        std::size_t fontSize() const
+        {
+            return _fontSize;
+        }
+
+        void setFontSize(const std::size_t n)
+        {
+            _fontSize = n;
+        }
+
+        Gfx::Font::Style fontstyle() const
+        {
+            return _fontStyle;
+        }
+
+        void setFontStyle(Gfx::Font::Style style)
+        {
+            _fontStyle = style;
+        }
+
     private:
       Gfx::Brush _background;
       Gfx::Brush _viewBackground;
@@ -183,6 +213,9 @@ class PT_HMI_API StyleOptions : public Style::Facet
       Gfx::Color _highlightColor;
       Gfx::Color _textColor;
       Gfx::Font  _font;
+      std::string      _fontName;
+      std::size_t      _fontSize;
+      Gfx::Font::Style _fontStyle;
 };
 
 } // namespace
