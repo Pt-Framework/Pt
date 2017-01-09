@@ -102,13 +102,14 @@ class PT_HMI_API Label : public Control
         Gfx::Color  _frameColor;
         bool        _hasFrame;
         
-        Gfx::Font   _font;
-        bool        _hasFontName;
-        bool        _hasFontSize;
-        bool        _hasFontStyle;
-        
         Gfx::Pen    _textPen;
         bool        _hasTextPen;
+
+        Option<std::string>      _fontNameOption;
+        Option<std::size_t>      _fontSizeOption;
+        Option<Gfx::Font::Style> _fontStyleOption;
+
+        Gfx::Font   _font;
 };
 
 } // namespace

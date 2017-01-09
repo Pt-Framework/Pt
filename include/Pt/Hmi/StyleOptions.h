@@ -41,6 +41,41 @@ namespace Pt {
 
 namespace Hmi {
 
+template <typename T>
+class Option
+{
+    public:
+        Option()
+        : _isValid(false)
+        {}
+        
+        Option(const T& value)
+        : _value(value)
+        , _isValid(true)
+        {}
+        
+        const T& get() const
+        {
+            return _value;
+        }
+
+        void set(const T& value)
+        {
+            _value = value;
+            _isValid = true;
+        }
+
+        bool isValid() const
+        {
+            return _isValid;
+        }
+
+    private:
+        T _value;
+        bool _isValid;
+};
+
+
 // TODO: this could be a normal member of Style instead of a facet
 class PT_HMI_API StyleOptions : public Style::Facet
 {
@@ -147,7 +182,7 @@ class PT_HMI_API StyleOptions : public Style::Facet
       Gfx::Color _contourColor;
       Gfx::Color _highlightColor;
       Gfx::Color _textColor;
-      Gfx::Font  _font;    
+      Gfx::Font  _font;
 };
 
 } // namespace

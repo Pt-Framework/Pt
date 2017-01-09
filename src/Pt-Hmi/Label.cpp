@@ -39,9 +39,6 @@ Label::Label()
 : _textAlignment(MiddleCenter)
 , _hasBackground(false)
 , _hasFrame(false)
-, _hasFontName(false)
-, _hasFontSize(false)
-, _hasFontStyle(false)
 , _hasTextPen(false)
 {
 }
@@ -104,10 +101,9 @@ void Label::setTextColor(const Gfx::Color& color)
 
 void Label::setFont(const Gfx::Font& f)
 {
-    _font = f;
-    _hasFontName = true;
-    _hasFontSize = true;
-    _hasFontStyle = true;
+    _fontNameOption.set( f.name() );
+    _fontSizeOption.set( f.size() );
+    _fontStyleOption.set( f.style() );
     
     invalidate();
 }
@@ -115,17 +111,15 @@ void Label::setFont(const Gfx::Font& f)
 
 void Label::setFontSize(const std::size_t s)
 {
-    _font = Gfx::Font( _font.name(), s, _font.style() );
-    _hasFontSize = true;
-    
+    _fontSizeOption.set(s);
+
     invalidate();
 }
 
 
 void Label::setFontStyle(Gfx::Font::Style style)
 {
-    _font = Gfx::Font( _font.name(), _font.style(), style );
-    _hasFontStyle = true;
+    _fontStyleOption.set(style);
     
     invalidate();
 }
@@ -144,28 +138,26 @@ void Label::onInvalidate()
 {
     Base::onInvalidate();
 
-    const StyleOptions* options = getFacet<StyleOptions>();
-    if( ! options )
-      return;
+    const StyleOptions* options = 
+        Application::instance().style().get<StyleOptions>();
+
+    const std::string& fontName = _fontNameOption.isValid() ? _fontNameOption.get()
+                                                            : options->font().name();
+
+    std::size_t fontSize = _fontSizeOption.isValid() ? _fontSizeOption.get()
+                                                     : options->font().size();
+
+    Gfx::Font::Style fontStyle = _fontStyleOption.isValid() ? _fontStyleOption.get()
+                                                            : options->font().style();
+
+    _font = Gfx::Font(fontName, fontSize, fontStyle);
 
     const LabelRenderer* renderer = getFacet<LabelRenderer>();
     if( ! renderer )
         return;
 
-    Gfx::Font font;
     Gfx::Pen textPen;
-    renderer->prepare(*this, *options, font, textPen);
-
-    const std::string& fontName = _hasFontName ? _font.name()
-                                               : font.name();
-
-    Gfx::Font::Style fontStyle = _hasFontStyle ? _font.style()
-                                               : font.style();
-
-    std::size_t fontSize = _hasFontSize ? _font.size()
-                                        : font.size();
-
-    _font = Gfx::Font(fontName, fontSize, fontStyle);
+    renderer->prepare(*this, *options, _font, textPen);
 
     if( ! _hasTextPen )
         _textPen = textPen;

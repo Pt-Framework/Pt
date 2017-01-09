@@ -80,10 +80,10 @@ class PT_HMI_API PushButton : public Button
         bool       _isFlat;
         Gfx::Image _image;
 
-        Gfx::Pen   _pen;
         Gfx::Brush _brush;
-        Gfx::Pen   _textPen;
+        Gfx::Pen   _pen;
         Gfx::Font  _font;
+        Gfx::Pen   _textPen;
         Picture    _picture;
 };
 

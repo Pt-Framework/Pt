@@ -467,8 +467,7 @@ void PlatinumLabelRenderer::onPrepare(const Label& l,
                                       Gfx::Font& font,
                                       Gfx::Pen& textPen) const 
 {
-    textPen = options.textColor(); 
-    font = options.font();
+    textPen = options.textColor();
 }
 
 
