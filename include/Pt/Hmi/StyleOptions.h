@@ -195,7 +195,7 @@ class PT_HMI_API StyleOptions : public Style::Facet
             _fontSize = n;
         }
 
-        Gfx::Font::Style fontstyle() const
+        Gfx::Font::Style fontStyle() const
         {
             return _fontStyle;
         }

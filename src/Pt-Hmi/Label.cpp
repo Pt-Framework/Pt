@@ -141,13 +141,13 @@ void Label::onInvalidate()
     const StyleOptions& options = Application::instance().styleOptions();
 
     const std::string& fontName = _fontNameOption.isValid() ? _fontNameOption.get()
-                                                            : options.font().name();
+                                                            : options.fontName();
 
     std::size_t fontSize = _fontSizeOption.isValid() ? _fontSizeOption.get()
-                                                     : options.font().size();
+                                                     : options.fontSize();
 
     Gfx::Font::Style fontStyle = _fontStyleOption.isValid() ? _fontStyleOption.get()
-                                                            : options.font().style();
+                                                            : options.fontStyle();
 
     _font = Gfx::Font(fontName, fontSize, fontStyle);
 
