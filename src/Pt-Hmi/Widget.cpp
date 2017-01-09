@@ -853,6 +853,12 @@ void Widget::setPadding(double n)
 }
 
 
+Pt::Signal<const Pt::Event&>& Widget::eventReady()
+{
+    return _eventReady;
+}
+
+
 void Widget::onLayout()
 {
 }

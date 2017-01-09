@@ -224,6 +224,8 @@ class PT_HMI_API Widget : public Visual
         // inner spacing
         void setPadding(double n);
 
+        Pt::Signal<const Pt::Event&>& eventReady();
+
     public:
         virtual Gfx::PointF toScreen(const Gfx::PointF& pos) const;
 

@@ -65,6 +65,17 @@ class PT_HMI_API Control : public Widget
         // TODO: find better name
         bool isHighlighted() const;
 
+        const Gfx::Brush& foreground() const
+        {
+            return _foreground.isValid() ? _foreground.get()
+                                         : Application::instance().styleOptions().foreground();
+        }
+
+        void setForeground(const Gfx::Brush& b)
+        {
+            _foreground.set(b);
+        }
+
     protected:
         virtual void onInvalidate();
 
@@ -82,6 +93,8 @@ class PT_HMI_API Control : public Widget
     private:
         Style* _style;
         bool   _isHighlighted;
+
+        Option<Gfx::Brush> _foreground;
 }; 
 
 } // namespace

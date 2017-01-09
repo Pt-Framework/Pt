@@ -36,43 +36,47 @@
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Color.h>
+#include <Pt/NonCopyable.h>
 
 namespace Pt {
 
 namespace Hmi {
 
 template <typename T>
-class Option
+class Option : private NonCopyable
 {
     public:
         Option()
-        : _isValid(false)
+        : _value(0)
         {}
         
         Option(const T& value)
-        : _value(value)
-        , _isValid(true)
+        : _value( new T(value) )
         {}
+
+        ~Option()
+        {
+            delete _value;
+        }
         
         const T& get() const
         {
-            return _value;
+            return *_value;
         }
 
         void set(const T& value)
         {
-            _value = value;
-            _isValid = true;
+            delete _value;
+            _value = new T(value);
         }
 
         bool isValid() const
         {
-            return _isValid;
+            return _value != 0;
         }
 
     private:
-        T _value;
-        bool _isValid;
+        T* _value;
 };
 
 
@@ -175,6 +179,7 @@ class PT_HMI_API StyleOptions : public Style::Facet
             _font = c;
         }
 
+
         const std::string& fontName() const
         {
             return _fontName;
@@ -213,6 +218,7 @@ class PT_HMI_API StyleOptions : public Style::Facet
       Gfx::Color _highlightColor;
       Gfx::Color _textColor;
       Gfx::Font  _font;
+      
       std::string      _fontName;
       std::size_t      _fontSize;
       Gfx::Font::Style _fontStyle;

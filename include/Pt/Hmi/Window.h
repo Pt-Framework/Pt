@@ -197,6 +197,8 @@ class PT_HMI_API Window : public WindowBase
         return Application::instance().style().get<T>();
     }
 
+    Pt::Signal<const Pt::Event&>& eventReady();
+
     MainWindowImpl* impl();
 
     const MainWindowImpl* impl() const; 

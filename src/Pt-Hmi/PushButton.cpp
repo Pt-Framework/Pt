@@ -119,6 +119,8 @@ void PushButton::onInvalidate()
 {
     Base::onInvalidate();
 
+    _brush = foreground();
+
     const StyleOptions* options = getFacet<StyleOptions>();
     if( ! options )
       return;

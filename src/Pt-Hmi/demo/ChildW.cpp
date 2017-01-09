@@ -68,6 +68,7 @@ ChildW::ChildW(const std::string& title)
     _textLabel.resize( Gfx::SizeF(100,40) );
     _textLabel.setName("TextLabel");
     _textLabel.setText("Platinum C++ Framework"); 
+    _textLabel.setFontSize(20);
     _textLabel.move( Gfx::PointF(60,60) );
     _textLabel.setBackground( Gfx::Color::fromRgb8(240, 220, 70) );
     _textLabel.setMnemonicWidget(&_toggleButton);
@@ -104,14 +105,15 @@ ChildW::ChildW(const std::string& title)
     //Close button    
     Pt::Hmi::Key xKey(Pt::Hmi::Key::Control, Pt::Hmi::Key::X);
 
-    Pt::Hmi::StyleOptions* styleOptions = new Pt::Hmi::StyleOptions();
-    styleOptions->setForeground( Gfx::Color::fromRgb8(220, 80, 80) );
-    styleOptions->setContourColor( Gfx::Color::fromRgb8(140, 30, 30) );
-    styleOptions->setHighlightColor( Gfx::Color::fromRgb8(190, 70, 70) );
-    Pt::Hmi::Style style;
-    style.set(styleOptions);
+    //Pt::Hmi::StyleOptions* styleOptions = new Pt::Hmi::StyleOptions();
+    //styleOptions->setForeground( Gfx::Color::fromRgb8(220, 80, 80) );
+    //styleOptions->setContourColor( Gfx::Color::fromRgb8(140, 30, 30) );
+    //styleOptions->setHighlightColor( Gfx::Color::fromRgb8(190, 70, 70) );
+    //Pt::Hmi::Style style;
+    //style.set(styleOptions);
     
-    _closeButton.setStyle(style);
+    _closeButton.setForeground( Gfx::Color::fromRgb8(220, 80, 80) );
+    //_closeButton.setStyle(style);
     _closeButton.setName("CloseButton"); 
     _closeButton.setText("Close App [CTRL+X]");
     _closeButton.setShortcut(&xKey);

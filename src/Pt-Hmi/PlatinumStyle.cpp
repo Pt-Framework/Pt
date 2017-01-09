@@ -230,7 +230,7 @@ void PlatinumButtonRenderer::onPrepare(const PushButton& button,
 
     if( button.isEnabled() )
     {
-        Gfx::Color buttonColor = options.foreground().color();
+        Gfx::Color buttonColor = foreground.color();
 
         if( button.isHighlighted() )
         {
@@ -245,10 +245,6 @@ void PlatinumButtonRenderer::onPrepare(const PushButton& button,
         }
 
         foreground = buttonColor;
-    }
-    else
-    {
-        foreground = options.foreground();
     }
 }
 

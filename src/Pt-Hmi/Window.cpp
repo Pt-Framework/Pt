@@ -1096,6 +1096,12 @@ const Style& Window::style() const
 }
 
 
+Pt::Signal<const Pt::Event&>& Window::eventReady()
+{
+    return _eventReady;
+}
+
+
 MainWindowImpl* Window::impl()
 {
     return _impl;   
