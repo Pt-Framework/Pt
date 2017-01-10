@@ -72,6 +72,31 @@ bool Control::isHighlighted() const
 }
 
 
+const Gfx::Brush& Control::foreground() const
+{
+    return _foreground.isValid() ? _foreground.get()
+                                 : Application::instance().styleOptions().foreground();
+}
+
+void Control::setForeground(const Gfx::Brush& b)
+{
+    _foreground.set(b);
+}
+
+
+const Gfx::Pen& Control::contour() const
+{
+    return _contour.isValid() ? _contour.get()
+                              : Application::instance().styleOptions().contour();
+}
+
+
+void Control::setContour(const Gfx::Pen& p)
+{
+    _contour.set(p);
+}
+
+
 void Control::onInvalidate()
 {
     Widget::onInvalidate();

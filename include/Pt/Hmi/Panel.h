@@ -104,16 +104,20 @@ class PT_HMI_API Panel : public Control
         // TODO: use TileMode and Alignment instead of ImageLayout
         //       Tile seems to be the same as a Brush with an image
 
+        void setImage(const Gfx::Image& image, ImageLayout layout); 
+
+        const Gfx::Brush* background() const;
+
         void setBackground(const Gfx::Brush& b);
 
         void setBackground(bool b);
+
+        const Gfx::Pen* frame() const;
 
         void setFrame(const Gfx::Color& color);
 
         void setFrame(bool b);
 
-        void setImage(const Gfx::Image& image, ImageLayout layout);  
-              
     protected:
         virtual void onResizeEvent(const ResizeEvent& ev);
 	
@@ -123,12 +127,12 @@ class PT_HMI_API Panel : public Control
         Gfx::Image  _image;
         Picture     _picture;
         ImageLayout _layout;
-        Gfx::Brush  _background;
-        bool        _hasBackground;
-        bool        _customBackground;
-        Gfx::Color  _frameColor;
-        bool        _hasFrame;
-        bool        _customFrame;
+
+        Option<Gfx::Brush> _background;
+        bool               _hasBackground;
+
+        Option<Gfx::Pen>   _frame;
+        bool               _hasFrame;
 };
 
 } // namespace

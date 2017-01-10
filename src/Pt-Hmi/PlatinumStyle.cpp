@@ -224,24 +224,18 @@ void PlatinumButtonRenderer::onPrepare(const PushButton& button,
                                        Gfx::Font& font,
                                        Gfx::Pen& textPen) const 
 {
-    contour = options.contourColor();
-    textPen = options.textColor(); 
-    font = options.font();
-
     if( button.isEnabled() )
     {
         Gfx::Color buttonColor = foreground.color();
 
         if( button.isHighlighted() )
         {
-            buttonColor = options.highlightColor();
+            buttonColor = brighten(buttonColor, 0.9);
         }
 
         if( button.isPressed() )
         {
-            buttonColor = Gfx::Color(buttonColor.red() * 0.8f,
-                                     buttonColor.green() * 0.8f,
-                                     buttonColor.blue() * 0.8f);
+            buttonColor = brighten(buttonColor, 0.9);
         }
 
         foreground = buttonColor;
@@ -330,11 +324,6 @@ void PlatinumCheckBoxRenderer::onPrepare(const CheckBox& cb,
                                          Gfx::Pen& textPen,
                                          Gfx::SizeF& boxSize) const 
 {
-    contour = options.contourColor();
-    textPen = options.textColor(); 
-    font = options.font();
-    brush = options.viewBackground();
-
     boxSize.set( font.size(), font.size() );
 }
 
@@ -528,7 +517,7 @@ void PlatinumLineEditRenderer::onPrepare(const LineEdit& le,
                                          Gfx::Pen& textPen,
                                          Gfx::Pen& placeholderPen) const
 {
-    brush = options.viewBackground();
+    brush = options.textBackground();
     contour = options.contourColor();
     font = options.font();
     textPen = options.textColor();

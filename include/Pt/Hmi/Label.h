@@ -70,15 +70,27 @@ class PT_HMI_API Label : public Control
 
         void setTextAlignment(Alignment a);
 
+        const Gfx::Brush* background() const;
+
         void setBackground(const Gfx::Brush& b);
 
-        void setFrame(const Gfx::Color& color);
+        const Gfx::Pen* frame() const;
+
+        void setFrame(const Gfx::Pen& p);
+
+        const Gfx::Color& textColor() const;
 
         void setTextColor(const Gfx::Color& color);
 
-        void setFont(const Gfx::Font& f);
+        const std::string& font() const;
+
+        void setFont(const std::string& fontName);
+
+        std::size_t fontSize() const;
 
         void setFontSize(const std::size_t n);
+
+        Gfx::Font::Style fontStyle() const;
 
         void setFontStyle(Gfx::Font::Style style);
 
@@ -96,20 +108,16 @@ class PT_HMI_API Label : public Control
         Pt::String  _text;
         Alignment   _textAlignment;
         
-        Gfx::Brush  _background;
-        bool        _hasBackground;
-        
-        Gfx::Color  _frameColor;
-        bool        _hasFrame;
+        Option<Gfx::Brush>       _background;
+        Option<Gfx::Pen>         _frame;
+        Option<Gfx::Color>       _textColor;
+        Option<std::string>      _fontName;
+        Option<std::size_t>      _fontSize;
+        Option<Gfx::Font::Style> _fontStyle;
         
         Gfx::Pen    _textPen;
-        bool        _hasTextPen;
-
-        Option<std::string>      _fontNameOption;
-        Option<std::size_t>      _fontSizeOption;
-        Option<Gfx::Font::Style> _fontStyleOption;
-
         Gfx::Font   _font;
+        
 };
 
 } // namespace

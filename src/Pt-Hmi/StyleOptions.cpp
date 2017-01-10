@@ -36,14 +36,12 @@ namespace Hmi {
 StyleOptions::StyleOptions(std::size_t refs)
 : Style::Facet(typeid(StyleOptions), refs)
 , _background(Pt::Gfx::Color::fromRgb8(229, 229, 229) )
-, _viewBackground(Pt::Gfx::Color::fromRgb8(255, 255, 255) )
 , _foreground(Gfx::Color::fromRgb8(210, 210, 210))
-, _contourColor(Gfx::Color::fromRgb8(150, 150, 150))
+, _contour(Gfx::Color::fromRgb8(150, 150, 150))
+, _textBackground(Pt::Gfx::Color::fromRgb8(255, 255, 255) )
 , _highlightColor(Gfx::Color::fromRgb8(190, 190, 190))
 , _textColor(Gfx::Color::fromRgb8(0, 0, 0))
 , _font(Gfx::Font("", 12))
-, _fontSize(12)
-, _fontStyle(Gfx::Font::Normal)
 {
 }
 
@@ -51,14 +49,12 @@ StyleOptions::StyleOptions(std::size_t refs)
 StyleOptions::StyleOptions(const StyleOptions& o, std::size_t refs)
 : Style::Facet(typeid(StyleOptions), refs)
 , _background(o._background )
-, _viewBackground(o._viewBackground )
 , _foreground(o._foreground)
-, _contourColor(o._contourColor)
+, _contour(o._contour)
+, _textBackground(o._textBackground )
 , _highlightColor(o._highlightColor)
 , _textColor(o._textColor)
 , _font(o._font)
-, _fontSize(12)
-, _fontStyle(Gfx::Font::Normal)
 {
 }
 

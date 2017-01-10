@@ -37,9 +37,6 @@ namespace Hmi {
 
 Label::Label()
 : _textAlignment(MiddleCenter)
-, _hasBackground(false)
-, _hasFrame(false)
-, _hasTextPen(false)
 {
 }
 
@@ -75,59 +72,92 @@ void Label::setTextAlignment(Alignment a)
 }
 
 
+const Gfx::Brush* Label::background() const
+{
+    return _background.isValid() ? &_background.get() : 0;
+}
+
+
 void Label::setBackground(const Gfx::Brush& b)
 {
-    _background = b;
-    _hasBackground = true;
+    _background.set(b);
     update();
 }
 
 
-void Label::setFrame(const Gfx::Color& color)
+const Gfx::Pen* Label::frame() const
 {
-    _frameColor = color;
-    _hasFrame = true;
+    return _frame.isValid() ? &_frame.get() : 0;
+}
+
+
+void Label::setFrame(const Gfx::Pen& p)
+{
+    _frame.set(p);
     update();
+}
+
+
+const Gfx::Color& Label::textColor() const
+{
+    return _textColor.isValid() ? _textColor.get()
+                                : Application::instance().styleOptions().textColor();
 }
 
 
 void Label::setTextColor(const Gfx::Color& color)
 {
-    _textPen = color;
-    _hasTextPen = true;
-    update();
+    _textColor.set(color);
+    invalidate();
 }
 
 
-void Label::setFont(const Gfx::Font& f)
+const std::string& Label::font() const
 {
-    _fontNameOption.set( f.name() );
-    _fontSizeOption.set( f.size() );
-    _fontStyleOption.set( f.style() );
-    
+    return _fontName.isValid() ? _fontName.get()
+                               : Application::instance().styleOptions().font().name();
+}
+
+
+void Label::setFont(const std::string& fontName)
+{
+    _fontName.set(fontName);
     invalidate();
+}
+
+
+std::size_t Label::fontSize() const
+{
+
+    return _fontSize.isValid() ? _fontSize.get()
+                               : Application::instance().styleOptions().font().size();
 }
 
 
 void Label::setFontSize(const std::size_t s)
 {
-    _fontSizeOption.set(s);
-
+    _fontSize.set(s);
     invalidate();
+}
+
+
+Gfx::Font::Style Label::fontStyle() const
+{
+    return _fontStyle.isValid() ? _fontStyle.get()
+                                : Application::instance().styleOptions().font().style();
 }
 
 
 void Label::setFontStyle(Gfx::Font::Style style)
 {
-    _fontStyleOption.set(style);
-    
+    _fontStyle.set(style);
     invalidate();
 }
 
 
 Gfx::SizeF Label::onAutoSize() const
 {
-    Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( _font, _text);
+    Gfx::FontMetrics fm = Hmi::Painter::fontMetrics(_font, _text);
 
     return Gfx::SizeF( fm.width() + padding().leftRight(), 
                        fm.height() + padding().topBottom() );
@@ -140,34 +170,20 @@ void Label::onInvalidate()
 
     const StyleOptions& options = Application::instance().styleOptions();
 
-    const std::string& fontName = _fontNameOption.isValid() ? _fontNameOption.get()
-                                                            : options.fontName();
-
-    std::size_t fontSize = _fontSizeOption.isValid() ? _fontSizeOption.get()
-                                                     : options.fontSize();
-
-    Gfx::Font::Style fontStyle = _fontStyleOption.isValid() ? _fontStyleOption.get()
-                                                            : options.fontStyle();
-
-    _font = Gfx::Font(fontName, fontSize, fontStyle);
+    _textPen = textColor();
+    _font = Gfx::Font(font(), fontSize(), fontStyle());
 
     const LabelRenderer* renderer = getFacet<LabelRenderer>();
     if( ! renderer )
         return;
 
-    Gfx::Pen textPen;
-    renderer->prepare(*this, options, _font, textPen);
-
-    if( ! _hasTextPen )
-        _textPen = textPen;
+    renderer->prepare(*this, options, _font, _textPen);
 }
 
 
 void Label::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
-    const StyleOptions* options = getFacet<StyleOptions>();
-    if( ! options )
-        return;
+    const StyleOptions& options = Application::instance().styleOptions();
 
     const LabelRenderer* renderer = getFacet<LabelRenderer>();
     if( ! renderer)
@@ -176,21 +192,23 @@ void Label::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     Painter painter(surface);
     painter.setClip(rect);
 
-    if( _hasBackground )
+    const Gfx::Brush* brush = background();
+    if(brush)
     {
-        renderer->renderBackground(*this, *options,
-                                   painter, rect, _background);
+        renderer->renderBackground(*this, options,
+                                   painter, rect, *brush);
     }
 
-    if( _hasFrame )
+    const Gfx::Pen* pen = frame();
+    if( pen )
     {
-        renderer->renderFrame(*this, *options,
-                              painter, rect, _frameColor);
+        renderer->renderFrame(*this, options,
+                              painter, rect, *pen);
     }
     
     Gfx::PointF pos = textPosition();
 
-    renderer->renderText(*this, *options,  painter, rect,
+    renderer->renderText(*this, options,  painter, rect,
                          text(), pos, _font, _textPen);
 }
 

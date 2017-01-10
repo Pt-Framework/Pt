@@ -66,6 +66,77 @@ bool CheckBox::isChecked() const
 }
 
 
+const Gfx::Brush& CheckBox::background() const
+{
+    return _background.isValid() ? _background.get()
+                                 : Application::instance().styleOptions().textBackground();
+}
+
+
+void CheckBox::setBackground(const Gfx::Brush& b)
+{
+    _background.set(b);
+    invalidate();
+}
+
+
+const Gfx::Color& CheckBox::textColor() const
+{
+    return _textColor.isValid() ? _textColor.get()
+                                : Application::instance().styleOptions().textColor();
+}
+
+
+void CheckBox::setTextColor(const Gfx::Color& color)
+{
+    _textColor.set(color);
+    invalidate();
+}
+
+
+const std::string& CheckBox::font() const
+{
+    return _fontName.isValid() ? _fontName.get()
+                               : Application::instance().styleOptions().font().name();
+}
+
+
+void CheckBox::setFont(const std::string& fontName)
+{
+    _fontName.set(fontName);
+    invalidate();
+}
+
+
+std::size_t CheckBox::fontSize() const
+{
+
+    return _fontSize.isValid() ? _fontSize.get()
+                               : Application::instance().styleOptions().font().size();
+}
+
+
+void CheckBox::setFontSize(const std::size_t s)
+{
+    _fontSize.set(s);
+    invalidate();
+}
+
+
+Gfx::Font::Style CheckBox::fontStyle() const
+{
+    return _fontStyle.isValid() ? _fontStyle.get()
+                                : Application::instance().styleOptions().font().style();
+}
+
+
+void CheckBox::setFontStyle(Gfx::Font::Style style)
+{
+    _fontStyle.set(style);
+    invalidate();
+}
+
+
 void CheckBox::onPressed()
 {
     Base::onPressed();
@@ -91,23 +162,24 @@ void CheckBox::onInvalidate()
 {
     Base::onInvalidate();
 
-    const StyleOptions* options = getFacet<StyleOptions>();
-    if( ! options )
-      return;
+    const StyleOptions& options = Application::instance().styleOptions();
+
+    _brush = background();
+    _pen = contour();
+    _textPen = textColor();
+    _font = Gfx::Font(font(), fontSize(), fontStyle());
 
     const CheckBoxRenderer* renderer = getFacet<CheckBoxRenderer>();
     if( ! renderer )
         return;
 
-    renderer->prepare(*this, *options, _brush, _pen, _font, _textPen, _boxSize);
+    renderer->prepare(*this, options, _brush, _pen, _font, _textPen, _boxSize);
 }
 
 
 void CheckBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
-    const StyleOptions* options = getFacet<StyleOptions>();
-    if( ! options )
-      return;
+    const StyleOptions& options = Application::instance().styleOptions();
 
     const CheckBoxRenderer* renderer = getFacet<CheckBoxRenderer>();
     if( ! renderer )
@@ -121,7 +193,7 @@ void CheckBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     
     Gfx::RectF boxRect(Gfx::PointF(boxX, boxY), _boxSize);
 
-    renderer->renderBox(*this, *options, painter, rect, 
+    renderer->renderBox(*this, options, painter, rect, 
                          boxRect, _brush, _pen);
 
     painter.setFont(_font);
@@ -154,7 +226,7 @@ void CheckBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
         }
     }
 
-    renderer->renderText(*this, *options, painter, rect,
+    renderer->renderText(*this, options, painter, rect,
                          text(), textPos, tm, _font, _textPen,
                          mnemonicRect);
 }

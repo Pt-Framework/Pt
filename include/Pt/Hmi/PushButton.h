@@ -62,6 +62,22 @@ class PT_HMI_API PushButton : public Button
 
         void setFlat(bool f);
 
+        const Gfx::Color& textColor() const;
+
+        void setTextColor(const Gfx::Color& color);
+
+        const std::string& font() const;
+
+        void setFont(const std::string& fontName);
+
+        std::size_t fontSize() const;
+
+        void setFontSize(const std::size_t n);
+
+        Gfx::Font::Style fontStyle() const;
+
+        void setFontStyle(Gfx::Font::Style style);
+
     protected:
         virtual void onPressed();
 
@@ -80,10 +96,16 @@ class PT_HMI_API PushButton : public Button
         bool       _isFlat;
         Gfx::Image _image;
 
+        Option<Gfx::Color>       _textColor;
+        Option<std::string>      _fontName;
+        Option<std::size_t>      _fontSize;
+        Option<Gfx::Font::Style> _fontStyle;
+
         Gfx::Brush _brush;
         Gfx::Pen   _pen;
-        Gfx::Font  _font;
         Gfx::Pen   _textPen;
+        Gfx::Font  _font;
+        
         Picture    _picture;
 };
 

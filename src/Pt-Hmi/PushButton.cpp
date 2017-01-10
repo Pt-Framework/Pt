@@ -93,6 +93,63 @@ void PushButton::setFlat(bool f)
 }
 
 
+const Gfx::Color& PushButton::textColor() const
+{
+    return _textColor.isValid() ? _textColor.get()
+                                : Application::instance().styleOptions().textColor();
+}
+
+
+void PushButton::setTextColor(const Gfx::Color& color)
+{
+    _textColor.set(color);
+    invalidate();
+}
+
+
+const std::string& PushButton::font() const
+{
+    return _fontName.isValid() ? _fontName.get()
+                               : Application::instance().styleOptions().font().name();
+}
+
+
+void PushButton::setFont(const std::string& fontName)
+{
+    _fontName.set(fontName);
+    invalidate();
+}
+
+
+std::size_t PushButton::fontSize() const
+{
+
+    return _fontSize.isValid() ? _fontSize.get()
+                               : Application::instance().styleOptions().font().size();
+}
+
+
+void PushButton::setFontSize(const std::size_t s)
+{
+    _fontSize.set(s);
+    invalidate();
+}
+
+
+Gfx::Font::Style PushButton::fontStyle() const
+{
+    return _fontStyle.isValid() ? _fontStyle.get()
+                                : Application::instance().styleOptions().font().style();
+}
+
+
+void PushButton::setFontStyle(Gfx::Font::Style style)
+{
+    _fontStyle.set(style);
+    invalidate();
+}
+
+
 void PushButton::onPressed()
 {
     Base::onPressed();
@@ -119,25 +176,24 @@ void PushButton::onInvalidate()
 {
     Base::onInvalidate();
 
-    _brush = foreground();
+    const StyleOptions& options = Application::instance().styleOptions();
 
-    const StyleOptions* options = getFacet<StyleOptions>();
-    if( ! options )
-      return;
+    _brush = foreground();
+    _pen = contour();
+    _textPen = textColor();
+    _font = Gfx::Font(font(), fontSize(), fontStyle());
 
     const ButtonRenderer* renderer = getFacet<ButtonRenderer>();
     if( ! renderer )
         return;
 
-    renderer->prepare(*this, *options, _brush, _pen, _font, _textPen);
+    renderer->prepare(*this, options, _brush, _pen, _font, _textPen);
 }
 
 
 void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
-    const StyleOptions* options = getFacet<StyleOptions>();
-    if( ! options )
-      return;
+    const StyleOptions& options = Application::instance().styleOptions();
 
     const ButtonRenderer* renderer = getFacet<ButtonRenderer>();
     if( ! renderer )
@@ -152,7 +208,7 @@ void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 
     if( ! _isFlat )
     {
-        renderer->renderBackground(*this, *options, painter, rect, 
+        renderer->renderBackground(*this, options, painter, rect, 
                                    _brush, _pen);
     }
 
@@ -203,7 +259,7 @@ void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
         }
     }
 
-    renderer->renderText(*this, *options, painter, rect,
+    renderer->renderText(*this, options, painter, rect,
                          text(), textPos, _font, _textPen,
                          mnemonicRect);
 }

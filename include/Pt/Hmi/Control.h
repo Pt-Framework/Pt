@@ -45,6 +45,9 @@ class PT_HMI_API Control : public Widget
 		
         virtual ~Control();	
 
+        // TODO: find better name
+        bool isHighlighted() const;
+
         void setStyle(const Style& style);
 
         const Style& style() const;
@@ -52,29 +55,23 @@ class PT_HMI_API Control : public Widget
         template<typename T> 
         const T* getFacet() const
         {
-          if( _style != 0)
-          {
-              const T* facet = _style->get<T>();
-              if( facet != 0)
-                  return facet;
-          }
+            if( _style != 0)
+            {
+                const T* facet = _style->get<T>();
+                if(facet)
+                    return facet;
+            }
 
-           return Application::instance().style().get<T>();
+            return Application::instance().style().get<T>();
         }
 
-        // TODO: find better name
-        bool isHighlighted() const;
+        const Gfx::Brush& foreground() const;
 
-        const Gfx::Brush& foreground() const
-        {
-            return _foreground.isValid() ? _foreground.get()
-                                         : Application::instance().styleOptions().foreground();
-        }
+        void setForeground(const Gfx::Brush& b);
 
-        void setForeground(const Gfx::Brush& b)
-        {
-            _foreground.set(b);
-        }
+        const Gfx::Pen& contour() const;
+
+        void setContour(const Gfx::Pen& p);
 
     protected:
         virtual void onInvalidate();
@@ -95,6 +92,7 @@ class PT_HMI_API Control : public Widget
         bool   _isHighlighted;
 
         Option<Gfx::Brush> _foreground;
+        Option<Gfx::Pen>   _contour;
 }; 
 
 } // namespace

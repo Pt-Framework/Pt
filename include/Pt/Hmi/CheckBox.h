@@ -60,6 +60,26 @@ class PT_HMI_API CheckBox : public Button
         void setState(State s);
 
         bool isChecked() const;
+
+        const Gfx::Brush& background() const;
+
+        void setBackground(const Gfx::Brush& b);
+
+        const Gfx::Color& textColor() const;
+
+        void setTextColor(const Gfx::Color& color);
+
+        const std::string& font() const;
+
+        void setFont(const std::string& fontName);
+
+        std::size_t fontSize() const;
+
+        void setFontSize(const std::size_t n);
+
+        Gfx::Font::Style fontStyle() const;
+
+        void setFontStyle(Gfx::Font::Style style);
     
     protected:
         virtual void onInvalidate();
@@ -73,8 +93,15 @@ class PT_HMI_API CheckBox : public Button
 
     private:
         State      _state;
-        Gfx::Pen   _pen;
+
+        Option<Gfx::Brush>       _background;
+        Option<Gfx::Color>       _textColor;
+        Option<std::string>      _fontName;
+        Option<std::size_t>      _fontSize;
+        Option<Gfx::Font::Style> _fontStyle;
+
         Gfx::Brush _brush;
+        Gfx::Pen   _pen;
         Gfx::Pen   _textPen;
         Gfx::Font  _font;
         Gfx::SizeF _boxSize;

@@ -67,12 +67,19 @@ class Option : private NonCopyable
         void set(const T& value)
         {
             delete _value;
+            _value = 0;
             _value = new T(value);
         }
 
         bool isValid() const
         {
             return _value != 0;
+        }
+
+        void reset()
+        {
+            delete _value;
+            _value = 0;
         }
 
     private:
@@ -102,7 +109,7 @@ class PT_HMI_API StyleOptions : public Style::Facet
         // selectedColor
         // activeColor
         
-        // viewBackground
+        // textBackground
         // alternateViewBackground
 
         // tooltipBackground / popupBackground
@@ -119,16 +126,6 @@ class PT_HMI_API StyleOptions : public Style::Facet
             _background = b;
         }
 
-        const Gfx::Brush& viewBackground() const
-        {
-            return _viewBackground;
-        }
-
-        void setViewBackground(const Gfx::Brush& b)
-        {
-            _viewBackground = b;
-        }
-
         const Gfx::Brush& foreground() const
         {
             return _foreground;
@@ -141,12 +138,27 @@ class PT_HMI_API StyleOptions : public Style::Facet
 
         const Gfx::Color& contourColor() const
         {
-            return _contourColor;
+            return _contour.color();
+        }
+        
+        const Gfx::Pen& contour() const
+        {
+            return _contour;
+        }
+        
+        void setContour(const Gfx::Pen& p)
+        {
+            _contour = p;
         }
 
-        void setContourColor(const Gfx::Color& c)
+        const Gfx::Brush& textBackground() const
         {
-            _contourColor = c;
+            return _textBackground;
+        }
+
+        void setTextBackground(const Gfx::Brush& b)
+        {
+            _textBackground = b;
         }
 
         const Gfx::Color& highlightColor() const
@@ -179,49 +191,15 @@ class PT_HMI_API StyleOptions : public Style::Facet
             _font = c;
         }
 
-
-        const std::string& fontName() const
-        {
-            return _fontName;
-        }
-
-        void setFontName(const std::string& name)
-        {
-            _fontName = name;
-        }
-
-        std::size_t fontSize() const
-        {
-            return _fontSize;
-        }
-
-        void setFontSize(const std::size_t n)
-        {
-            _fontSize = n;
-        }
-
-        Gfx::Font::Style fontStyle() const
-        {
-            return _fontStyle;
-        }
-
-        void setFontStyle(Gfx::Font::Style style)
-        {
-            _fontStyle = style;
-        }
-
     private:
       Gfx::Brush _background;
-      Gfx::Brush _viewBackground;
       Gfx::Brush _foreground;
-      Gfx::Color _contourColor;
+      Gfx::Pen   _contour;
+
+      Gfx::Brush _textBackground;
       Gfx::Color _highlightColor;
       Gfx::Color _textColor;
       Gfx::Font  _font;
-      
-      std::string      _fontName;
-      std::size_t      _fontSize;
-      Gfx::Font::Style _fontStyle;
 };
 
 } // namespace
