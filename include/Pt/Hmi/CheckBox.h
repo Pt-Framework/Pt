@@ -92,7 +92,7 @@ class PT_HMI_API CheckBox : public Button
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
     private:
-        State      _state;
+        State                    _state;
 
         Option<Gfx::Brush>       _background;
         Option<Gfx::Color>       _textColor;
@@ -100,11 +100,11 @@ class PT_HMI_API CheckBox : public Button
         Option<std::size_t>      _fontSize;
         Option<Gfx::Font::Style> _fontStyle;
 
-        Gfx::Brush _brush;
-        Gfx::Pen   _pen;
-        Gfx::Pen   _textPen;
-        Gfx::Font  _font;
-        Gfx::SizeF _boxSize;
+        Gfx::Brush               _brush;
+        Gfx::Pen                 _pen;
+        Gfx::Pen                 _textPen;
+        Gfx::Font                _font;
+        Gfx::SizeF               _boxSize;
 };
 
 } // namespace

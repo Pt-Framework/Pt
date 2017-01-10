@@ -54,7 +54,6 @@ Window::Window(Window* parent, Window::Type type)
 , _parentWindow(0)
 , _mainWidget(0)
 , _focusWidget(0)
-, _style(0)
 , _init(false)
 , _visible(false)
 , _isActive(false)
@@ -68,6 +67,7 @@ Window::Window(Window* parent, Window::Type type)
 , _maximumSize(64000, 64000)
 , _state(Normal)
 , _topMost(false)
+, _style(0)
 {
     _windowManager.init(*this);
 
@@ -654,12 +654,10 @@ void Window::onPaintEvent(const PaintEvent& ev)
 
 void Window::onPaintBackground(const Gfx::RectF& rect)
 {
-    const StyleOptions* options = getFacet<StyleOptions>();
-    if( ! options )
-      return;
+    const Gfx::Brush& brush = background();
 
     Painter painter(_surface);
-    painter.setBrush( options->background() );
+    painter.setBrush(brush);
     painter.fillRect(rect);
 }
 
@@ -1093,6 +1091,20 @@ void Window::setStyle(const Style& style)
 const Style& Window::style() const
 {
     return _style ? *_style : Application::instance().style();
+}
+
+
+const Gfx::Brush& Window::background() const
+{
+    return _background.isValid() ? _background.get()
+                                 : Application::instance().styleOptions().background();
+}
+
+
+void Window::setBackground(const Gfx::Brush& b)
+{
+    _background.set(b);
+    invalidate();
 }
 
 

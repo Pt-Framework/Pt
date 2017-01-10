@@ -197,6 +197,10 @@ class PT_HMI_API Window : public WindowBase
         return Application::instance().style().get<T>();
     }
 
+    const Gfx::Brush& background() const;
+
+    void setBackground(const Gfx::Brush& b);
+
     Pt::Signal<const Pt::Event&>& eventReady();
 
     MainWindowImpl* impl();
@@ -332,7 +336,6 @@ class PT_HMI_API Window : public WindowBase
     std::map<Key, Widget*>         _shortcuts; 
     std::map<Pt::Char, Widget*>    _mnemonics; 
 
-    Style*                         _style;
     bool                           _init;
     bool                           _visible; 
     bool                           _isActive;
@@ -348,6 +351,9 @@ class PT_HMI_API Window : public WindowBase
     Gfx::SizeF                     _maximumSize;
     State                          _state;
     bool                           _topMost;
+
+    Style*                         _style;
+    Option<Gfx::Brush>             _background;
 };
 
 } // namespace
