@@ -115,27 +115,6 @@ class Char
         Pt::uint32_t _value;
 };
 
-//inline bool operator ==(const Char& a, const Char& b)
-//{ return a.value() == b.value(); }
-
-//inline bool operator !=(const Char& a, const Char& b)
-//{ return a.value() != b.value(); }
-
-//inline bool operator >(const Char& a, const Char& b)
-//{ return a.value() > b.value(); }
-
-//nline bool operator >=(const Char& a, const Char& b)
-//{ return a.value() >= b.value(); }
-
-//inline bool operator <(const Char& a, const Char& b)
-//{ return a.value() < b.value(); }
-
-//inline bool operator <=(const Char& a, const Char& b)
-//{ return a.value() <= b.value(); }
-
-//inline Pt::uint32_t operator -(const Char& a, const Char& b)
-//{ return a.value() - b.value(); }
-
 //! @internal @brief Returns the ctype mask for the \a ch.
 PT_API std::ctype_base::mask ctypeMask(const Char& ch);
 
