@@ -517,11 +517,6 @@ void PlatinumLineEditRenderer::onPrepare(const LineEdit& le,
                                          Gfx::Pen& textPen,
                                          Gfx::Pen& placeholderPen) const
 {
-    brush = options.textBackground();
-    contour = options.contourColor();
-    font = options.font();
-    textPen = options.textColor();
-    placeholderPen = options.contourColor();
 }
 
 

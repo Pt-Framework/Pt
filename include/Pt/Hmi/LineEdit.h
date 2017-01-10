@@ -94,13 +94,29 @@ class PT_HMI_API LineEdit : public Control
 
         void setAccepted(bool a);
 
-        void setTextColor(const Gfx::Color& color);
-
-        void setFont(const Gfx::Font& f);
-
         Pt::Signal<const Pt::String&>& textChanged();
 
         Pt::Signal<const Pt::String&>& textEntered();
+
+        const Gfx::Brush& background() const;
+
+        void setBackground(const Gfx::Brush& b);
+
+        const Gfx::Color& textColor() const;
+
+        void setTextColor(const Gfx::Color& color);
+
+        const std::string& font() const;
+
+        void setFont(const std::string& fontName);
+
+        std::size_t fontSize() const;
+
+        void setFontSize(const std::size_t n);
+
+        Gfx::Font::Style fontStyle() const;
+
+        void setFontStyle(Gfx::Font::Style style);
 
     protected:
         virtual void onKeyEvent(const KeyEvent& ev);
@@ -136,13 +152,17 @@ class PT_HMI_API LineEdit : public Control
         double                        _hscroll;
         double                        _halign;
 
-        Gfx::Pen                      _pen;
+        Option<Gfx::Brush>            _background;
+        Option<Gfx::Color>            _textColor;
+        Option<std::string>           _fontName;
+        Option<std::size_t>           _fontSize;
+        Option<Gfx::Font::Style>      _fontStyle;
+
         Gfx::Brush                    _brush;
-        Gfx::Font                     _font;
-        bool                          _hasFont;
+        Gfx::Pen                      _pen;
         Gfx::Pen                      _textPen;
-        bool                          _hasTextPen;
         Gfx::Pen                      _placeholderPen;
+        Gfx::Font                     _font;
 };
 
 } // namespace

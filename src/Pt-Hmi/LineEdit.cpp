@@ -44,8 +44,6 @@ LineEdit::LineEdit()
 , _cursorPosition(0)
 , _hscroll(0)
 , _halign(0)
-, _hasFont(false)
-, _hasTextPen(false)
 {
     setTextInput(true);
     setFocusPolicy(Widget::NormalFocus);
@@ -166,22 +164,6 @@ void LineEdit::setAccepted(bool a)
 }
 
 
-void LineEdit::setTextColor(const Gfx::Color& color)
-{
-    _textPen = color;
-    _hasTextPen = true;
-    update();
-}
-
-
-void LineEdit::setFont(const Gfx::Font& f)
-{
-    _font = f;
-    _hasFont = true;
-    invalidate();
-}
-
-
 Pt::Signal<const Pt::String&>& LineEdit::textChanged()
 {
     return _textChanged;
@@ -191,6 +173,77 @@ Pt::Signal<const Pt::String&>& LineEdit::textChanged()
 Pt::Signal<const Pt::String&>& LineEdit::textEntered()
 {
     return _textEntered;
+}
+
+
+const Gfx::Brush& LineEdit::background() const
+{
+    return _background.isValid() ? _background.get()
+                                 : Application::instance().styleOptions().textBackground();
+}
+
+
+void LineEdit::setBackground(const Gfx::Brush& b)
+{
+    _background.set(b);
+    invalidate();
+}
+
+
+const Gfx::Color& LineEdit::textColor() const
+{
+    return _textColor.isValid() ? _textColor.get()
+                                : Application::instance().styleOptions().textColor();
+}
+
+
+void LineEdit::setTextColor(const Gfx::Color& color)
+{
+    _textColor.set(color);
+    invalidate();
+}
+
+
+const std::string& LineEdit::font() const
+{
+    return _fontName.isValid() ? _fontName.get()
+                               : Application::instance().styleOptions().font().name();
+}
+
+
+void LineEdit::setFont(const std::string& fontName)
+{
+    _fontName.set(fontName);
+    invalidate();
+}
+
+
+std::size_t LineEdit::fontSize() const
+{
+
+    return _fontSize.isValid() ? _fontSize.get()
+                               : Application::instance().styleOptions().font().size();
+}
+
+
+void LineEdit::setFontSize(const std::size_t s)
+{
+    _fontSize.set(s);
+    invalidate();
+}
+
+
+Gfx::Font::Style LineEdit::fontStyle() const
+{
+    return _fontStyle.isValid() ? _fontStyle.get()
+                                : Application::instance().styleOptions().font().style();
+}
+
+
+void LineEdit::setFontStyle(Gfx::Font::Style style)
+{
+    _fontStyle.set(style);
+    invalidate();
 }
 
 
@@ -316,31 +369,25 @@ void LineEdit::onInvalidate()
 {
     Base::onInvalidate();
 
-    const StyleOptions* options = getFacet<StyleOptions>();
-    if( ! options )
-      return;
+    const StyleOptions& options = Application::instance().styleOptions();
+
+    _brush = background();
+    _pen = contour();
+    _placeholderPen = contour();
+    _textPen = textColor();
+    _font = Gfx::Font(font(), fontSize(), fontStyle());
 
     const LineEditRenderer* renderer = getFacet<LineEditRenderer>();
     if( ! renderer )
         return;
 
-    Gfx::Font font;
-    Gfx::Pen textPen;
-    renderer->prepare(*this, *options, _brush, _pen, font, textPen, _placeholderPen);
-
-    if( ! _hasFont )
-        _font = font;
-
-    if( ! _hasTextPen )
-        _textPen = textPen;
+    renderer->prepare(*this, options, _brush, _pen, _font, _textPen, _placeholderPen);
 }
 
 
 void LineEdit::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
-    const StyleOptions* options = getFacet<StyleOptions>();
-    if( ! options )
-        return;
+    const StyleOptions& options = Application::instance().styleOptions();
 
     const LineEditRenderer* renderer = getFacet<LineEditRenderer>();
     if( ! renderer)
@@ -353,7 +400,7 @@ void LineEdit::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     // text box
     //
 
-    renderer->renderItem( *this, *options, painter, rect,
+    renderer->renderItem( *this, options, painter, rect,
                           _pen, _brush );
     
     if(echoMode() == LineEdit::Hidden)
@@ -377,7 +424,7 @@ void LineEdit::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     {
         Gfx::PointF textPos(textX, textY);
         
-        renderer->renderText(*this, *options, painter, rect, 
+        renderer->renderText(*this, options, painter, rect, 
                              text, textPos, _font, _textPen);
     }
     else if( ! hasFocus() && ! text.empty() )
@@ -389,7 +436,7 @@ void LineEdit::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
   
         Gfx::PointF textPos(textX, textY);
 
-        renderer->renderText(*this, *options, painter, rect, 
+        renderer->renderText(*this, options, painter, rect, 
                              text, textPos, _font, _placeholderPen);
     }
 
@@ -411,7 +458,7 @@ void LineEdit::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
         Gfx::RectF cursorRect( Gfx::PointF(cursorX, textY - fm.ascent()),
                                Gfx::SizeF(0, textHeight) );
 
-        renderer->renderCursor(*this, *options, painter, rect, cursorRect);
+        renderer->renderCursor(*this, options, painter, rect, cursorRect);
     }
 }
 
