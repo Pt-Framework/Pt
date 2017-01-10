@@ -90,18 +90,6 @@ Application& Application::instance()
 }
 
 
-void Application::invalidate()
-{
-  VisualMap::iterator it = _visuals.begin();
-  
-  for( ; it != _visuals.end(); ++it)
-  {
-    InvalidateEvent ev(it->first);
-    loop().commitEvent(ev);
-  }
-}
-
-
 const Screen& Application::screen() const
 {
     return *_mainScreen;
@@ -114,9 +102,15 @@ Screen& Application::screen()
 }
 
 
-void Application::setCursor( const Cursor* cursor )
+void Application::invalidate()
 {
-  _impl->setCursor( cursor );
+    VisualMap::iterator it = _visuals.begin();
+  
+    for( ; it != _visuals.end(); ++it)
+    {
+        InvalidateEvent ev(it->first);
+        loop().commitEvent(ev);
+    }
 }
 
 
@@ -130,6 +124,12 @@ void Application::setFont(const Gfx::Font& font)
 {
     _font = font;
     invalidate();
+}
+
+
+void Application::setCursor( const Cursor* cursor )
+{
+    _impl->setCursor( cursor );
 }
 
 
@@ -159,13 +159,13 @@ StyleOptions& Application::styleOptions()
 
 Gfx::Font Application::makeFont(const Gfx::Font& userFont) const
 {
-  if( userFont.isNull() )
-      return _font;
+    if( userFont.isNull() )
+        return _font;
 
-  if( userFont.name().empty() )
-      return Gfx::Font(_font.name(), userFont);
+    if( userFont.name().empty() )
+        return Gfx::Font(_font.name(), userFont);
 
-  return _userFont;
+    return _userFont;
 }
 
 
@@ -495,13 +495,13 @@ void Application::onFocusEvent(const FocusEvent& ev)
 
 void Application::setInputMethod(InputMethod& method)
 {
-  _inputMethod = &method;
+    _inputMethod = &method;
 }
 
 
 InputMethod& Application::inputMethod()
 {
-  return *_inputMethod;
+    return *_inputMethod;
 }
 
 

@@ -80,6 +80,8 @@ class PT_HMI_API Application : public Pt::System::Application
 
         Screen& screen();
 
+        void invalidate();
+
         const Pt::Gfx::Font& font() const;
 
         void setFont(const Pt::Gfx::Font& f);
@@ -119,8 +121,6 @@ class PT_HMI_API Application : public Pt::System::Application
         StyleOptions& styleOptions();
 
         Gfx::Font makeFont(const Gfx::Font& fromFont) const;
-
-        void invalidate();
 
         ApplicationImpl* impl();
 
