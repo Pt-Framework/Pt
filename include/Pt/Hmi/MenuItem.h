@@ -108,12 +108,6 @@ class PT_HMI_API MenuItem : public Control
         virtual void onInvalidate();
         
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
-
-        virtual void onPaintIcon(PaintSurface& surface, const Gfx::RectF& updateRect);
-
-        virtual void onPaintText(PaintSurface& surface, const Gfx::RectF& updateRect);
-
-        virtual void onPaintShortcut(PaintSurface& surface, const Gfx::RectF& updateRect);
   
     protected:
         virtual void onMouseEvent(const MouseEvent& ev);

@@ -285,6 +285,9 @@ Gfx::SizeF MenuItem::onAutoSize() const
         contentWidth += Painter::fontMetrics(_font, text).width();
     }
 
+    if(_subMenu)
+        contentWidth += fm.height() * 4;
+
     return Gfx::SizeF( contentWidth + padding().leftRight(),
                        contentHeight + padding().topBottom() );
 }
@@ -320,35 +323,24 @@ void MenuItem::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     
     Painter painter(surface);
     painter.setClip(rect);
-
+    
+    //
+    // background
+    //
     renderer->renderItem(*this, options, painter, rect, _brush, _pen);
     
-    onPaintIcon(surface, rect);
-    onPaintText(surface, rect);
-    onPaintShortcut(surface, rect);
-
-    if( _subMenu)
-        renderer->renderIndicator(*this, surface, rect);
-}
-
-
-void MenuItem::onPaintIcon(PaintSurface& surface, const Gfx::RectF& updateRect)
-{
-    Painter painter(surface);
-    painter.setClip(updateRect);
-
+    //
+    // icon
+    //
     double iconX = (iconPadding() - icon().width()) / 2;
     double iconY = (size().height() - icon().height()) / 2;
 
     Gfx::PointF iconPos(iconX, iconY);
-    painter.drawImage(iconPos, icon());
-}
+    painter.drawPicture(iconPos, _picture);
 
-
-void MenuItem::onPaintText(PaintSurface& surface, const Gfx::RectF& updateRect)
-{
-    Painter painter(surface);
-    painter.setClip(updateRect);
+    //
+    // item text
+    //
     painter.setFont(_font);
     painter.setPen(_textPen);
 
@@ -359,16 +351,10 @@ void MenuItem::onPaintText(PaintSurface& surface, const Gfx::RectF& updateRect)
     Gfx::PointF textPos(textX, textY);
 
     painter.drawText(textPos, _text);
-}
 
-
-void MenuItem::onPaintShortcut(PaintSurface& surface, const Gfx::RectF& updateRect)
-{
-    Painter painter(surface);
-    painter.setClip(updateRect);
-    painter.setFont(_font);
-    painter.setPen(_textPen);
-
+    //
+    // shortcut text
+    //
     const Key* sk = shortcut();
     if(sk)
     {
@@ -382,6 +368,12 @@ void MenuItem::onPaintShortcut(PaintSurface& surface, const Gfx::RectF& updateRe
 
         painter.drawText(skPos, skText);
     }
+
+    //
+    // menu indicator
+    //
+    if( _subMenu)
+        renderer->renderIndicator(*this, surface, rect);
 }
 
 
