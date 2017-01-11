@@ -446,8 +446,8 @@ class PT_HMI_API MenuRenderer : public Style::Facet
                               const StyleOptions& options,
                               Painter& painter, 
                               const Gfx::RectF& rect,
-                              const Gfx::Pen& contour,
-                              const Gfx::Brush& brush) const;
+                              const Gfx::Brush& brush,
+                              const Gfx::Pen& contour) const;
 
         void renderItem(const MenuItem& m, 
                         const StyleOptions& options,
@@ -479,8 +479,8 @@ class PT_HMI_API MenuRenderer : public Style::Facet
                                         const StyleOptions& options,
                                         Painter& painter, 
                                         const Gfx::RectF& rect,
-                                        const Gfx::Pen& contour,
-                                        const Gfx::Brush& brush) const = 0;
+                                        const Gfx::Brush& brush,
+                                        const Gfx::Pen& contour) const = 0;
 
         virtual void onRenderItem(const MenuItem& m, 
                                   const StyleOptions& options,

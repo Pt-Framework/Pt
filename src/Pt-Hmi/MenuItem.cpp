@@ -166,6 +166,76 @@ Signal<MenuItem&>& MenuItem::triggered()
 }
 
 
+const Gfx::Brush& MenuItem::background() const
+{
+    return _background.isValid() ? _background.get()
+                                 : Application::instance().styleOptions().background();
+}
+
+
+void MenuItem::setBackground(const Gfx::Brush& b)
+{
+    _background.set(b);
+    invalidate();
+}
+
+
+const Gfx::Color& MenuItem::textColor() const
+{
+    return _textColor.isValid() ? _textColor.get()
+                                : Application::instance().styleOptions().textColor();
+}
+
+
+void MenuItem::setTextColor(const Gfx::Color& color)
+{
+    _textColor.set(color);
+    invalidate();
+}
+
+
+const std::string& MenuItem::font() const
+{
+    return _fontName.isValid() ? _fontName.get()
+                               : Application::instance().styleOptions().font().name();
+}
+
+
+void MenuItem::setFont(const std::string& fontName)
+{
+    _fontName.set(fontName);
+    invalidate();
+}
+
+
+std::size_t MenuItem::fontSize() const
+{
+
+    return _fontSize.isValid() ? _fontSize.get()
+                               : Application::instance().styleOptions().font().size();
+}
+
+
+void MenuItem::setFontSize(const std::size_t s)
+{
+    _fontSize.set(s);
+    invalidate();
+}
+
+
+Gfx::Font::Style MenuItem::fontStyle() const
+{
+    return _fontStyle.isValid() ? _fontStyle.get()
+                                : Application::instance().styleOptions().font().style();
+}
+
+
+void MenuItem::setFontStyle(Gfx::Font::Style style)
+{
+    _fontStyle.set(style);
+    invalidate();
+}
+
 void MenuItem::onTriggered()
 {   
     _triggered.send(*this);
@@ -189,23 +259,17 @@ void MenuItem::onShortcut(const KeyEvent& kev)
 
 Gfx::SizeF MenuItem::onAutoSize() const
 {
-    const StyleOptions* options = getFacet<StyleOptions>();
-    if( ! options)
-        return Gfx::SizeF();
-
-    const Gfx::Font& font = options->font();
-
-    Gfx::FontMetrics fm = Painter::fontMetrics(font, _text);
+    Gfx::FontMetrics fm = Painter::fontMetrics(_font, _text);
 
     double contentHeight = std::max<Pt::ssize_t>( fm.height(), _icon.height() );
-    double contentWidth = fm.width() + _icon.width();
+    double contentWidth = fm.width() + _picture.width();
 
     const Key* sk = shortcut();
     if(sk)
     {
         Pt::String text = shortcutText(*sk);
         contentWidth += fm.height() * 2.5; // spacing towards shortcut text
-        contentWidth += Painter::fontMetrics(font, text).width();
+        contentWidth += Painter::fontMetrics(_font, text).width();
     }
 
     return Gfx::SizeF( contentWidth + padding().leftRight(),
@@ -217,24 +281,25 @@ void MenuItem::onInvalidate()
 {
     Base::onInvalidate();
 
-    const StyleOptions* options = getFacet<StyleOptions>();
-    if( ! options )
-      return;
+    const StyleOptions& options = Application::instance().styleOptions();
+
+    _brush = background();
+    _pen = contour();
+    _textPen = textColor();
+    _font = Gfx::Font(font(), fontSize(), fontStyle());
 
     const MenuRenderer* renderer = getFacet<MenuRenderer>();
     if( ! renderer )
         return;
 
-    renderer->prepareItem(*this, *options, _icon, 
+    renderer->prepareItem(*this, options, _icon, 
                           _picture, _brush, _pen, _font, _textPen);
 }
 
 
 void MenuItem::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
-    const StyleOptions* options = getFacet<StyleOptions>();
-    if( ! options )
-      return;
+    const StyleOptions& options = Application::instance().styleOptions();
 
     const MenuRenderer* renderer = getFacet<MenuRenderer>();
     if( ! renderer )
@@ -243,7 +308,7 @@ void MenuItem::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     Painter painter(surface);
     painter.setClip(rect);
 
-    renderer->renderItem(*this, *options, painter, rect, _brush, _pen);
+    renderer->renderItem(*this, options, painter, rect, _brush, _pen);
     
     onPaintIcon(surface, rect);
     onPaintText(surface, rect);
@@ -266,18 +331,12 @@ void MenuItem::onPaintIcon(PaintSurface& surface, const Gfx::RectF& updateRect)
 
 void MenuItem::onPaintText(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
-    const StyleOptions* options = getFacet<StyleOptions>();
-    if( ! options)
-      return;
-
-    const Gfx::Font& font = options->font();
-
     Painter painter(surface);
     painter.setClip(updateRect);
-    painter.setFont(font);
-    painter.setPen( options->textColor() );
+    painter.setFont(_font);
+    painter.setPen(_textPen);
 
-    Gfx::FontMetrics fm = Painter::fontMetrics(font, _text);
+    Gfx::FontMetrics fm = Painter::fontMetrics(_font, _text);
     double textX = padding().left() + _iconWidth;
     double textY = (size().height() - fm.height()) / 2;
     textY += fm.ascent();
@@ -289,22 +348,16 @@ void MenuItem::onPaintText(PaintSurface& surface, const Gfx::RectF& updateRect)
 
 void MenuItem::onPaintShortcut(PaintSurface& surface, const Gfx::RectF& updateRect)
 {
-    const StyleOptions* options = getFacet<StyleOptions>();
-    if( ! options)
-      return;
-
-    const Gfx::Font& font = options->font();
-
     Painter painter(surface);
     painter.setClip(updateRect);
-    painter.setFont(font);
-    painter.setPen( options->textColor() );
+    painter.setFont(_font);
+    painter.setPen(_textPen);
 
     const Key* sk = shortcut();
     if(sk)
     {
         Pt::String skText = shortcutText(*sk);
-        Gfx::FontMetrics skm = Painter::fontMetrics(font, skText);
+        Gfx::FontMetrics skm = Painter::fontMetrics(_font, skText);
 
         double skX = size().width() - skm.width() - padding().right();
         double skY = (size().height() - skm.height()) / 2;

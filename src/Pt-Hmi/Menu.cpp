@@ -275,6 +275,35 @@ Pt::ssize_t Menu::iconWidth() const
                           : 0;
 }
 
+
+const Gfx::Brush& Menu::background() const
+{
+    return _background.isValid() ? _background.get()
+                                 : Application::instance().styleOptions().background();
+}
+
+
+void Menu::setBackground(const Gfx::Brush& b)
+{
+    _background.set(b);
+    invalidate();
+}
+
+
+const Gfx::Pen& Menu::contour() const
+{
+    return _contour.isValid() ? _contour.get()
+                              : Application::instance().styleOptions().contour();
+}
+
+
+void Menu::setContour(const Gfx::Pen& p)
+{
+    _contour.set(p);
+    invalidate();
+}
+
+
 /* TODO: 
 this happens when item->resize() is called in onInvalidate
 One soluton is to assign the _size member in Window::resize immediately
@@ -335,15 +364,16 @@ void Menu::onInvalidate()
 
     resize(size);
 
-    const StyleOptions* options = getFacet<StyleOptions>();
-    if( ! options )
-      return;
+    const StyleOptions& options = Application::instance().styleOptions();
+
+    _brush = background();
+    _pen = contour();
 
     const MenuRenderer* renderer = getFacet<MenuRenderer>();
     if( ! renderer )
         return;
 
-    renderer->prepare(*this, *options, _background, _contour);
+    renderer->prepare(*this, options, _brush, _pen);
 }
 
 
@@ -351,9 +381,7 @@ void Menu::onPaintBackground(const Gfx::RectF& rect)
 {
     Base::onPaintBackground(rect);
 
-    const StyleOptions* options = getFacet<StyleOptions>();
-    if( ! options )
-      return;
+    const StyleOptions& options = Application::instance().styleOptions();
 
     const MenuRenderer* renderer = getFacet<MenuRenderer>();
     if( ! renderer )
@@ -362,8 +390,8 @@ void Menu::onPaintBackground(const Gfx::RectF& rect)
     Painter painter( surface() );
     painter.setClip(rect);
 
-    renderer->renderBackground(*this, *options, painter, rect, 
-                               _contour, _background);
+    renderer->renderBackground(*this, options, painter, rect, 
+                               _brush, _pen);
 }
 
 

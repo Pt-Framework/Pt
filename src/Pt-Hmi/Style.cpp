@@ -446,10 +446,10 @@ void MenuRenderer::renderBackground(const Menu& m,
                                     const StyleOptions& options,
                                     Painter& painter, 
                                     const Gfx::RectF& rect,
-                                    const Gfx::Pen& contour,
-                                    const Gfx::Brush& brush) const
+                                    const Gfx::Brush& brush,
+                                    const Gfx::Pen& contour) const
 { 
-    onRenderBackground(m, options, painter, rect, contour, brush); 
+    onRenderBackground(m, options, painter, rect, brush, contour); 
 }
 
 

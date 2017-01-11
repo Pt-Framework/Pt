@@ -81,6 +81,7 @@ const Gfx::Brush& Control::foreground() const
 void Control::setForeground(const Gfx::Brush& b)
 {
     _foreground.set(b);
+    invalidate();
 }
 
 
@@ -94,6 +95,7 @@ const Gfx::Pen& Control::contour() const
 void Control::setContour(const Gfx::Pen& p)
 {
     _contour.set(p);
+    invalidate();
 }
 
 

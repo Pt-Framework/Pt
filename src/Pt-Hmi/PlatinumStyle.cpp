@@ -582,8 +582,6 @@ void PlatinumMenuRenderer::onPrepare(const Menu& m,
                                      Gfx::Brush& brush,
                                      Gfx::Pen& contour) const
 {
-    brush = options.background();
-    contour = options.contourColor();
 }
 
 
@@ -591,8 +589,8 @@ void PlatinumMenuRenderer::onRenderBackground(const Menu& m,
                                               const StyleOptions& options,
                                               Painter& painter, 
                                               const Gfx::RectF& rect,
-                                              const Gfx::Pen& contour,
-                                              const Gfx::Brush& brush) const
+                                              const Gfx::Brush& brush,
+                                              const Gfx::Pen& contour) const
 {
     const Gfx::SizeF& size = m.size();
 
@@ -637,11 +635,9 @@ void PlatinumMenuRenderer::onPrepareItem(const MenuItem& m,
                                          Gfx::Pen& textPen) const
 {
     picture.set(icon);
-    brush = m.isHighlighted() ? options.highlightColor() 
-                              : options.background();
-    contour = options.contourColor();
-    font = options.font();
-    textPen = options.textColor();
+
+    if( m.isHighlighted() )
+        brush =  options.highlightColor();
 }
 
 

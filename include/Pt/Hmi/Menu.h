@@ -66,6 +66,14 @@ class PT_HMI_API Menu : public MenuShell
 
         Pt::ssize_t iconWidth() const;
 
+        const Gfx::Brush& background() const;
+
+        void setBackground(const Gfx::Brush& b);
+
+        const Gfx::Pen& contour() const;
+
+        void setContour(const Gfx::Pen& p);
+
     protected:
         virtual void onAddMenu(Menu& menu, const Pt::String& text);
 
@@ -116,8 +124,11 @@ class PT_HMI_API Menu : public MenuShell
         FlowLayout                _layout;
         Pt::ssize_t               _iconWidth;
 
-        Gfx::Pen                  _contour;
-        Gfx::Brush                _background;
+        Option<Gfx::Brush>        _background;
+        Option<Gfx::Pen>          _contour;
+
+        Gfx::Brush                _brush;
+        Gfx::Pen                  _pen;
 };
 
 } // namespace
