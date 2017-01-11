@@ -30,59 +30,11 @@
 #include <Pt/Hmi/Menu.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Hmi/Application.h>
+#include <cassert>
 
 namespace Pt {
 
 namespace Hmi {
-
-///////////////////////////////////////////////////////////////////////////////
-// SubMenuItem
-///////////////////////////////////////////////////////////////////////////////
-
-class SubMenuItem : public MenuItem
-{
-    typedef MenuItem Base;
-
-    public:
-        SubMenuItem(Menu& menu, const Pt::String& text)
-        : _menu(menu)
-        {
-            setText(text);
-        }
-    
-        virtual ~SubMenuItem()
-        { }
-
-        Menu& menu()
-        { return _menu; }
-
-    protected:
-        virtual Gfx::SizeF onAutoSize() const
-        {
-            Gfx::SizeF size = Base::onAutoSize();
-            
-            // some space for the menu indicator
-            const double indicatorWidth = 50.0; 
-            size.addWidth(indicatorWidth); 
-    
-            return size;
-        }
-
-        virtual void onPaintShortcut(PaintSurface& surface, 
-                                     const Gfx::RectF& updateRect)
-        {
-            const MenuRenderer* renderer = getFacet<MenuRenderer>();
-            if(renderer)
-                renderer->renderIndicator(*this, surface, updateRect);
-        }
-
-    private:
-        Menu& _menu;
-};
-
-///////////////////////////////////////////////////////////////////////////////
-// Menu
-///////////////////////////////////////////////////////////////////////////////
 
 Menu::Menu()
 : Window(0, Window::Popup)
@@ -101,10 +53,13 @@ Menu::~Menu()
     if( parentShell() )
         parentShell()->removeMenu(*this);
 
-    std::vector<SubMenuItem*>::iterator it;
+    std::vector<MenuItem*>::iterator it;
     for(it = _subMenus.begin(); it != _subMenus.end(); ++it)
     {
-        (*it)->menu()._parentMenu = 0;
+        Menu* menu = (*it)->subMenu();
+        assert(menu);
+
+        menu->_parentMenu = 0;
         delete *it;
     }
 }
@@ -171,12 +126,16 @@ void Menu::onItemTriggered(MenuItem&)
 
 void Menu::onAddMenu(Menu& menu, const Pt::String& text)
 {
-    SubMenuItem* item = new SubMenuItem(menu, text); 
-    item->triggered() += Pt::slot(*this, &Menu::onMenuTriggered);
-     
-    _subMenus.push_back(item);
+    MenuItem* item = new MenuItem(); 
+    item->setText(text);
+    item->setSubMenu(menu);
+
     _layout.add(*item);
 
+    item->_menu = this;
+    item->triggered() += Pt::slot(*this, &Menu::onMenuTriggered);
+    
+    _subMenus.push_back(item);
     menu._parentMenu = this;
     
     invalidate();
@@ -185,45 +144,44 @@ void Menu::onAddMenu(Menu& menu, const Pt::String& text)
 
 void Menu::onRemoveMenu(Menu& menu)
 {
-    std::vector<SubMenuItem*>::iterator it;
+    std::vector<MenuItem*>::iterator it;
     for(it = _subMenus.begin(); it != _subMenus.end(); ++it)
     {
-        if( &(*it)->menu() == &menu )
+        if( (*it)->subMenu() == &menu )
         {
             delete *it;
+            
             _subMenus.erase(it);
-
             menu._parentMenu = 0;
+
+            if(_currentMenu == &menu)
+                _currentMenu = 0;
+            
             break;
         }
     }
-
-    if(_currentMenu == &menu)
-        _currentMenu = 0;
-
-    invalidate();
 }
 
 
-void Menu::onMenuTriggered(MenuItem& m)
+void Menu::onMenuTriggered(MenuItem& item)
 {
-    SubMenuItem* item = static_cast<SubMenuItem*>(&m);
-    Menu& menu = item->menu();
+    Menu* menu = item.subMenu();
+    assert(menu);
 
     // TODO: open menu on mouse enter and close menu on mouse leave
     //       possibly delayed by a 500ms timer
     
-    if( ! menu.isVisible() )
+    if( ! menu->isVisible() )
     {
-        Gfx::PointF topRight(item->size().width(), 0);
-        Gfx::PointF wpos = item->toWindow(topRight);
-        Gfx::PointF menuPos = item->window()->toScreen(wpos);
+        Gfx::PointF topRight(item.size().width(), 0);
+        Gfx::PointF wpos = item.toWindow(topRight);
+        Gfx::PointF menuPos = item.window()->toScreen(wpos);
 
-        menu.show(menuPos);
+        menu->show(menuPos);
     }
     else
     {
-       menu.close();
+       menu->close();
     }
 }
 

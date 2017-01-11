@@ -106,6 +106,7 @@ MenuItem::MenuItem()
 : _menu(0)
 , _iconWidth(0)
 , _text("(empty)")
+, _subMenu(0)
 {
     setAutoSize(true);
     setFocusPolicy(Widget::NormalFocus);
@@ -157,6 +158,18 @@ double MenuItem::iconPadding() const
 void MenuItem::setIconPadding(double w)
 {
     _iconWidth = std::max<double>(w, _icon.width());
+}
+
+
+Menu* MenuItem::subMenu() const
+{
+    return _subMenu;
+}
+
+
+void MenuItem::setSubMenu(Menu& menu)
+{
+    _subMenu = &menu;
 }
 
 
@@ -313,6 +326,9 @@ void MenuItem::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     onPaintIcon(surface, rect);
     onPaintText(surface, rect);
     onPaintShortcut(surface, rect);
+
+    if( _subMenu)
+        renderer->renderIndicator(*this, surface, rect);
 }
 
 

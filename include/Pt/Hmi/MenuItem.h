@@ -66,6 +66,10 @@ class PT_HMI_API MenuItem : public Control
 
         void setIconPadding(double left);
 
+        Menu* subMenu() const;
+
+        void setSubMenu(Menu& menu);
+
         // TODO: rename onSelected
         Signal<MenuItem&>& triggered();
 
@@ -128,6 +132,7 @@ class PT_HMI_API MenuItem : public Control
         double            _iconWidth;
         Gfx::Image        _icon;
         Pt::String        _text;
+        Menu*             _subMenu;
 
         Option<Gfx::Brush>       _background;
         Option<Gfx::Pen>         _contour;

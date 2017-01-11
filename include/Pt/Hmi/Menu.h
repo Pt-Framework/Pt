@@ -40,8 +40,6 @@ namespace Pt {
 
 namespace Hmi {
 
-class SubMenuItem;
-
 class PT_HMI_API Menu : public MenuShell
                       , public Window
 {
@@ -117,18 +115,18 @@ class PT_HMI_API Menu : public MenuShell
         void onMenuTriggered(MenuItem& m);
 
     private:
-        MenuShell*                _parentShell;
-        Menu*                     _parentMenu;
-        std::vector<SubMenuItem*> _subMenus;
-        Menu*                     _currentMenu;
-        FlowLayout                _layout;
-        Pt::ssize_t               _iconWidth;
+        MenuShell*             _parentShell;
+        Menu*                  _parentMenu;
+        std::vector<MenuItem*> _subMenus;
+        Menu*                  _currentMenu;
+        FlowLayout             _layout;
+        Pt::ssize_t            _iconWidth;
 
-        Option<Gfx::Brush>        _background;
-        Option<Gfx::Pen>          _contour;
+        Option<Gfx::Brush>     _background;
+        Option<Gfx::Pen>       _contour;
 
-        Gfx::Brush                _brush;
-        Gfx::Pen                  _pen;
+        Gfx::Brush             _brush;
+        Gfx::Pen               _pen;
 };
 
 } // namespace
