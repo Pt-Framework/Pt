@@ -93,8 +93,6 @@ class MenuBarItem : public Control
 
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
-        virtual void onPaintText(PaintSurface& surface, const Gfx::RectF& updateRect);
-
     protected:
         virtual void onMouseEvent(const MouseEvent& ev);
 

@@ -373,7 +373,7 @@ void MenuItem::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     // menu indicator
     //
     if( _subMenu)
-        renderer->renderIndicator(*this, surface, rect);
+        renderer->renderIndicator(*this, options, painter, rect);
 }
 
 

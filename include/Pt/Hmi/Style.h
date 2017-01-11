@@ -457,7 +457,8 @@ class PT_HMI_API MenuRenderer : public Style::Facet
                         Gfx::Pen& contour) const;
         
         void renderIndicator(const MenuItem& m, 
-                             PaintSurface& surface, 
+                             const StyleOptions& options,
+                             Painter& painter, 
                              const Gfx::RectF& rect) const;
     
     protected:
@@ -490,7 +491,8 @@ class PT_HMI_API MenuRenderer : public Style::Facet
                                   Gfx::Pen& contour) const = 0;
         
         virtual void onRenderIndicator(const MenuItem& m, 
-                                       PaintSurface& surface, 
+                                       const StyleOptions& options,
+                                       Painter& painter, 
                                        const Gfx::RectF& rect) const = 0;
 };
 

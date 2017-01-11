@@ -658,17 +658,11 @@ void PlatinumMenuRenderer::onRenderItem(const MenuItem& m,
 
 
 void PlatinumMenuRenderer::onRenderIndicator(const MenuItem& m, 
-                                             PaintSurface& surface, 
+                                             const StyleOptions& options,
+                                             Painter& painter, 
                                              const Gfx::RectF& rect) const
 {
     static const double indicatorWidth = 5.0;
-
-    const StyleOptions* options = m.getFacet<StyleOptions>();
-    if( ! options)
-      return;
-
-    Painter painter(surface);
-    painter.setClip(rect);
 
     double x = m.size().width() - indicatorWidth - m.padding().right();
     double y = m.size().height() / 2;
@@ -677,7 +671,7 @@ void PlatinumMenuRenderer::onRenderIndicator(const MenuItem& m,
                                  Gfx::PointF(x + 1, y),
                                  Gfx::PointF(x - 3, y + 4) };
   
-    Gfx::Brush brush( options->textColor() );
+    Gfx::Brush brush( m.textColor() );
     painter.setBrush(brush);
     painter.fillPolygon(indicator, 3);
 }

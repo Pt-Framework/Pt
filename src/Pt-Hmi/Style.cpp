@@ -42,7 +42,6 @@ namespace Hmi {
 
 Style::Style()
 {
-    set(new StyleOptions());
 }
 
 
@@ -465,10 +464,11 @@ void MenuRenderer::renderItem(const MenuItem& m,
 
 
 void MenuRenderer::renderIndicator(const MenuItem& m, 
-                                   PaintSurface& surface, 
+                                   const StyleOptions& options,
+                                   Painter& painter, 
                                    const Gfx::RectF& rect) const
 { 
-    onRenderIndicator(m, surface, rect); 
+    onRenderIndicator(m, options, painter, rect); 
 }
 
 ///////////////////////////////////////////////////////////////////////////////

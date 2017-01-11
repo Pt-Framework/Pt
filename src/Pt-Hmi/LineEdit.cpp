@@ -470,16 +470,12 @@ void LineEdit::layoutText()
     if(_echoMode == Hidden)
         return;
 
-    const StyleOptions* options = getFacet<StyleOptions>();
-    if( ! options )
-        return;
-
     Pt::String left;
     if( _cursorPosition <= str.size() && ! str.empty() ) 
         left = str.substr(0, _cursorPosition);
     
-    Gfx::FontMetrics fmLeft = Hmi::Painter::fontMetrics( options->font(), left );
-    Gfx::FontMetrics fmText = Hmi::Painter::fontMetrics( options->font(), str );
+    Gfx::FontMetrics fmLeft = Hmi::Painter::fontMetrics( _font, left );
+    Gfx::FontMetrics fmText = Hmi::Painter::fontMetrics( _font, str );
     
     double maxWidth = size().width() - padding().leftRight();
 
@@ -545,10 +541,6 @@ std::size_t LineEdit::xToCursor(double x)
     if( str.empty() )
         return 0;
 
-    const StyleOptions* options = getFacet<StyleOptions>();
-    if( ! options )
-        return 0;
-
     // compensate for text aligmnet
     x -= _halign;
 
@@ -557,7 +549,7 @@ std::size_t LineEdit::xToCursor(double x)
         textX += x - padding().left();
 
     // estimate cursor position
-    Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( options->font(), str );
+    Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( _font, str );
     std::size_t widthPerChar = fm.width() / str.size();
     std::size_t pos = textX / widthPerChar;
 
@@ -565,7 +557,7 @@ std::size_t LineEdit::xToCursor(double x)
         pos = str.size() - 1;
 
     Pt::String left = str.substr(0, pos + 1);
-    fm = Hmi::Painter::fontMetrics( options->font(), left );
+    fm = Hmi::Painter::fontMetrics( _font, left );
 
     if( textX < fm.width() )
     {
@@ -573,7 +565,7 @@ std::size_t LineEdit::xToCursor(double x)
         for( ; pos > 0; --pos)
         {
             left = str.substr(0, pos);
-            fm = Hmi::Painter::fontMetrics( options->font(), left );
+            fm = Hmi::Painter::fontMetrics( _font, left );
       
             if( textX >= fm.width() )
                 break;
@@ -585,7 +577,7 @@ std::size_t LineEdit::xToCursor(double x)
         for(++pos ; pos < str.size(); ++pos)
         {
             left = str.substr(0, pos + 1);
-            fm = Hmi::Painter::fontMetrics( options->font(), left );
+            fm = Hmi::Painter::fontMetrics( _font, left );
       
             if( textX < fm.width() )
                 break;

@@ -299,7 +299,8 @@ class PT_HMI_API PlatinumMenuRenderer : public MenuRenderer
                                   Gfx::Pen& contour) const;
 
         virtual void onRenderIndicator(const MenuItem& m, 
-                                       PaintSurface& surface, 
+                                       const StyleOptions& options,
+                                       Painter& painter, 
                                        const Gfx::RectF& rect) const;
 
     private:

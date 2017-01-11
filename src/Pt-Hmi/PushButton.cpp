@@ -66,15 +66,13 @@ void PushButton::setImage(const Gfx::Image& image)
     _image = image;
     _picture.set(image);
 
-    const StyleOptions* options = getFacet<StyleOptions>();
-    if( ! options )
-      return;
+    const StyleOptions& options = Application::instance().styleOptions();
 
     const ButtonRenderer* renderer = getFacet<ButtonRenderer>();
     if( ! renderer )
         return;
 
-    renderer->prepareIcon(*this, *options, image, _picture);
+    renderer->prepareIcon(*this, options, image, _picture);
     
     invalidate();
 }
@@ -269,15 +267,13 @@ void PushButton::onEnableEvent(const EnableEvent& ev)
 {
     Base::onEnableEvent(ev);
 
-    const StyleOptions* options = getFacet<StyleOptions>();
-    if( ! options )
-      return;
+    const StyleOptions& options = Application::instance().styleOptions();
 
     const ButtonRenderer* renderer = getFacet<ButtonRenderer>();
     if( ! renderer )
         return;
 
-    renderer->prepareIcon(*this, *options, _image, _picture);
+    renderer->prepareIcon(*this, options, _image, _picture);
 }
 
 } // namespace

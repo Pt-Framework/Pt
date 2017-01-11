@@ -288,28 +288,6 @@ void MenuBarItem::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 }
 
 
-void MenuBarItem::onPaintText(PaintSurface& surface, const Gfx::RectF& updateRect)
-{
-    const StyleOptions* options = getFacet<StyleOptions>();
-    if( ! options)
-      return;
-
-    Painter painter(surface);
-    painter.setClip(updateRect);
-    painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
-    painter.setFont( options->font() );
-    
-    Gfx::FontMetrics fm = painter.fontMetrics(_text);
-    double textX = padding().left();
-    double textY = (size().height() - fm.height()) / 2;
-    textY += fm.ascent();
-    Gfx::PointF textPos(textX, textY);
-
-    painter.setPen( options->textColor() );
-    painter.drawText(textPos, _text);
-}
-
-
 void MenuBarItem::onEnterEvent(const EnterEvent& ev)
 {
     Base::onEnterEvent(ev);

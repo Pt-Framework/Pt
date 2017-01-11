@@ -135,11 +135,6 @@ class PT_HMI_API StyleOptions : public Style::Facet
         {
             _foreground = c;
         }
-
-        const Gfx::Color& contourColor() const
-        {
-            return _contour.color();
-        }
         
         const Gfx::Pen& contour() const
         {
@@ -195,7 +190,6 @@ class PT_HMI_API StyleOptions : public Style::Facet
       Gfx::Brush _background;
       Gfx::Brush _foreground;
       Gfx::Pen   _contour;
-
       Gfx::Brush _textBackground;
       Gfx::Color _highlightColor;
       Gfx::Color _textColor;
