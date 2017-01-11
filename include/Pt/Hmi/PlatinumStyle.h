@@ -61,14 +61,6 @@ class PlatinumRendererBase
                          const Gfx::RectF& rect,
                          const Gfx::Brush& brush,
                          double corner = 1.0) const;
-
-
-        void renderItemText(Painter& painter, 
-                            const Gfx::PointF& textPos,
-                            const String& text, 
-                            const Char* mnemonic,
-                            const Gfx::Font& font,
-                            const Gfx::Color& color) const;
 };
 
 

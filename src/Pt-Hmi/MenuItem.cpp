@@ -34,20 +34,6 @@
 
 namespace {
 
-Pt::Gfx::Color brighten(const Pt::Gfx::Color& c, float factor)
-{
-    float r = c.red() * factor;
-    float g = c.green() * factor;
-    float b = c.blue() * factor;
-
-    Pt::uint16_t r16 = r > 65535 ? 65535 : static_cast<Pt::uint16_t>(r);
-    Pt::uint16_t g16 = g > 65535 ? 65535 : static_cast<Pt::uint16_t>(g);
-    Pt::uint16_t b16 = b > 65535 ? 65535 : static_cast<Pt::uint16_t>(b);
-
-    return Pt::Gfx::Color(c.alpha(), r16, g16, b16);
-}
-
-
 Pt::String shortcutText(const Pt::Hmi::Key& key)
 {
     Pt::String text;

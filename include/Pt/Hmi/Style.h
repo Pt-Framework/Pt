@@ -45,7 +45,6 @@ namespace Pt {
 
 namespace Hmi {
 
-class PaintSurface;
 class Painter;
 class Picture;
 class StyleOptions;

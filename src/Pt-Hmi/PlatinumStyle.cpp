@@ -171,37 +171,6 @@ void PlatinumRendererBase::renderPlane(Painter& painter,
 }
 
 
-void PlatinumRendererBase::renderItemText(Painter& painter,
-                                          const Gfx::PointF& textPos,
-                                          const String& text,
-                                          const Char* mnemonic,
-                                          const Gfx::Font& font,
-                                          const Gfx::Color& color) const
-{
-    painter.setPen(color);
-    painter.setFont(font);
-
-    painter.drawText(textPos, text);
-
-    if(mnemonic)
-    {
-        String::size_type n = text.find(*mnemonic);
-
-        if(n != String::npos)
-        {
-            Pt::String mnemonicText(text, 0, n);
-            Gfx::FontMetrics fm = painter.fontMetrics(mnemonicText);
-            Gfx::PointF from(textPos.x() + fm.width(), textPos.y() + 1);
-
-            mnemonicText = *mnemonic;
-            fm = painter.fontMetrics(mnemonicText);
-            Gfx::PointF to( from.x() + fm.width() - 1, from.y() );
-
-            painter.drawLine(from, to);
-        }
-    }
-}
-
 ///////////////////////////////////////////////////////////////////////////////
 // PlatinumButtonRenderer
 ///////////////////////////////////////////////////////////////////////////////
@@ -230,12 +199,12 @@ void PlatinumButtonRenderer::onPrepare(const PushButton& button,
 
         if( button.isHighlighted() )
         {
-            buttonColor = brighten(buttonColor, 0.9);
+            buttonColor = brighten(buttonColor, 0.9f);
         }
 
         if( button.isPressed() )
         {
-            buttonColor = brighten(buttonColor, 0.9);
+            buttonColor = brighten(buttonColor, 0.9f);
         }
 
         foreground = buttonColor;
