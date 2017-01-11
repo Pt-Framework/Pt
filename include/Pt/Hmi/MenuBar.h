@@ -64,9 +64,32 @@ class MenuBarItem : public Control
         void open();
 
         void close();
+    
+    public:
+        const Gfx::Brush& background() const;
+
+        void setBackground(const Gfx::Brush& b);
+
+        const Gfx::Color& textColor() const;
+
+        void setTextColor(const Gfx::Color& color);
+
+        const std::string& font() const;
+
+        void setFont(const std::string& fontName);
+
+        std::size_t fontSize() const;
+
+        void setFontSize(const std::size_t n);
+
+        Gfx::Font::Style fontStyle() const;
+
+        void setFontStyle(Gfx::Font::Style style);
 
     protected:
         virtual Gfx::SizeF onAutoSize() const;
+
+        virtual void onInvalidate();
 
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
@@ -83,6 +106,18 @@ class MenuBarItem : public Control
         MenuBar&   _menuBar;
         Menu&      _menu;
         Pt::String _text;
+
+        Option<Gfx::Brush>       _background;
+        Option<Gfx::Pen>         _contour;
+        Option<Gfx::Color>       _textColor;
+        Option<std::string>      _fontName;
+        Option<std::size_t>      _fontSize;
+        Option<Gfx::Font::Style> _fontStyle;
+
+        Gfx::Brush               _brush;
+        Gfx::Pen                 _pen;
+        Gfx::Pen                 _textPen;
+        Gfx::Font                _font;
 };
 
 
@@ -100,6 +135,11 @@ class PT_HMI_API MenuBar : public MenuShell
 
         MenuBarItem* findItem(const Gfx::PointF& pos);
 
+    public:
+        const Gfx::Brush& background() const;
+
+        void setBackground(const Gfx::Brush& b);
+
     protected:
         virtual void onAddMenu(Menu& menu, const Pt::String& text);
 
@@ -116,6 +156,8 @@ class PT_HMI_API MenuBar : public MenuShell
         virtual MenuShell* onFindMenu(const Gfx::PointF& screenPos);
 
     protected:
+        virtual void onInvalidate();
+
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& rect);
 
     protected:
@@ -131,6 +173,11 @@ class PT_HMI_API MenuBar : public MenuShell
         std::vector<MenuBarItem*> _menus;
         Menu*                     _currentMenu;
         MenuBarItem*              _currentMenuItem;
+
+        Option<Gfx::Brush>       _background;
+
+        Gfx::Brush               _brush;
+        Gfx::Pen                 _pen;
 };
 
 } // namespace

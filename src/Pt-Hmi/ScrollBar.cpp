@@ -205,11 +205,53 @@ void ScrollBar::onResizeEvent(const ResizeEvent& ev)
 }
 
 
-void ScrollBar::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
+const Gfx::Brush& ScrollBar::background() const
 {
+    return _background.isValid() ? _background.get()
+                                 : Application::instance().styleOptions().background();
+}
+
+
+void ScrollBar::setBackground(const Gfx::Brush& b)
+{
+    _background.set(b);
+    invalidate();
+}
+
+
+void ScrollBar::onInvalidate()
+{
+    Base::onInvalidate();
+
+    const StyleOptions& options = Application::instance().styleOptions();
+
+    _backgroundBrush = background();
+    _foregroundBrush = foreground();
+    _contourPen = contour();
+
     const ScrollBarRenderer* renderer = getFacet<ScrollBarRenderer>();
-    if(renderer)
-        renderer->render(*this, _handleRect, surface, updateRect);
+    if( ! renderer )
+        return;
+
+    renderer->prepare(*this, options, 
+                      _backgroundBrush, _foregroundBrush, _contourPen);
+}
+
+
+void ScrollBar::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+{
+    const StyleOptions& options = Application::instance().styleOptions();
+
+    const ScrollBarRenderer* renderer = getFacet<ScrollBarRenderer>();
+    if( ! renderer )
+        return;
+
+    Painter painter(surface);
+    painter.setClip(rect);
+
+    renderer->render(*this, options, painter, rect, _handleRect,
+                     _backgroundBrush, _foregroundBrush, _contourPen);
+
 }
 
 

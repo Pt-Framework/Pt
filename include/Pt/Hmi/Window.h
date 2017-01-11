@@ -353,7 +353,9 @@ class PT_HMI_API Window : public WindowBase
     bool                           _topMost;
 
     Style*                         _style;
+    
     Option<Gfx::Brush>             _background;
+    Gfx::Brush                     _backgroundBrush;
 };
 
 } // namespace

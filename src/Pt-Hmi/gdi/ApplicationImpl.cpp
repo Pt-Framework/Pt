@@ -539,7 +539,7 @@ void ApplicationImpl::onShow(Window& w,  bool v)
     ShowEvent sev(w.vid(), v);
     commitEvent( sev );
 
-    w.update();
+    w.invalidate();
 }
 
 
@@ -565,8 +565,6 @@ void ApplicationImpl::onActivate(Window& w, bool a)
 {
     ActivateEvent aev( w.vid(), a );
     commitEvent(aev);
-
-    w.update();
 }
 
 
@@ -575,7 +573,7 @@ void ApplicationImpl::onEnable(Window& w, bool e)
     EnableEvent eev( w.vid(), e );
     commitEvent( eev );
 
-    w.update();
+    w.invalidate();
 }
 
 

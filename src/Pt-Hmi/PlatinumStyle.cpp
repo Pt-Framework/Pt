@@ -697,38 +697,72 @@ PlatinumMenuBarRenderer::~PlatinumMenuBarRenderer()
 }
 
 
-void PlatinumMenuBarRenderer::onRender(const MenuBar& m, 
-                                    PaintSurface& surface, 
-                                    const Gfx::RectF& rect) const
+void PlatinumMenuBarRenderer::onPrepare(const MenuBar& m, 
+                                        const StyleOptions& options,
+                                        Gfx::Brush& brush,
+                                        Gfx::Pen& contour) const
 {
-    const StyleOptions* options = m.getFacet<StyleOptions>();
-    if( ! options)
-      return;
+}
 
-    Painter painter(surface);
-    painter.setBrush( options->background() );
+
+void PlatinumMenuBarRenderer::onRenderBackground(const MenuBar& m, 
+                                                 const StyleOptions& options,
+                                                 Painter& painter, 
+                                                 const Gfx::RectF& rect,
+                                                 const Gfx::Brush& brush,
+                                                 const Gfx::Pen& contour) const
+{
+    painter.setBrush(brush);
     painter.fillRect(rect);
 }
 
 
-void PlatinumMenuBarRenderer::onRenderItem(const MenuBarItem& m, 
-                                           PaintSurface& surface, 
-                                           const Gfx::RectF& rect) const
+void PlatinumMenuBarRenderer::onPrepareItem(const MenuBarItem& m, 
+                                            const StyleOptions& options, 
+                                            Gfx::Brush& brush,
+                                            Gfx::Pen& contour,
+                                            Gfx::Font& font,
+                                            Gfx::Pen& textPen) const
 {
-    const StyleOptions* options = m.getFacet<StyleOptions>();
-    if( ! options)
-      return;
+    if( m.isHighlighted() )
+        brush = options.highlightColor();
+}
 
-    bool highlight = m.isHighlighted();
-    if(highlight)
+
+void PlatinumMenuBarRenderer::onRenderItem(const MenuBarItem& m, 
+                                           const StyleOptions& options,
+                                           Painter& painter, 
+                                           const Gfx::RectF& rect,
+                                           const Gfx::Brush& brush,
+                                           const Gfx::Pen& contour) const
+{
+    if( m.isHighlighted() )
     {
-        Gfx::Color bgColor = options->highlightColor();
-        Gfx::Brush brush = brighten(bgColor, 0.85f);
-
-        Painter painter(surface);
-        painter.setClip(rect);
         painter.setBrush(brush);
         painter.fillRect( Gfx::RectF(Gfx::PointF(0,0), m.size()) );
+    }
+}
+
+
+void PlatinumMenuBarRenderer::onRenderItemText(const MenuBarItem& m,
+                                               const StyleOptions& options,
+                                               Painter& painter, 
+                                               const Gfx::RectF& rect,
+                                               const String& text,
+                                               const Gfx::PointF& textPos,
+                                               const Gfx::Font& font, 
+                                               const Gfx::Pen& textPen,
+                                               const Gfx::RectF& mnemonic) const 
+{
+    painter.setFont(font);
+    painter.setPen(textPen);
+    painter.drawText(textPos, text);
+
+    if( ! mnemonic.isNull() )
+    {
+        double menmonicY = textPos.y() + 1;
+        painter.drawLine( Gfx::PointF(mnemonic.left(), menmonicY), 
+                          Gfx::PointF(mnemonic.right(), menmonicY) );
     }
 }
 
@@ -747,29 +781,34 @@ PlatinumScrollBarRenderer::~PlatinumScrollBarRenderer()
 }
 
 
-void PlatinumScrollBarRenderer::onRender(const ScrollBar& s,
-                                         const Gfx::RectF& handleRect,
-                                         PaintSurface& surface, 
-                                         const Gfx::RectF& rect) const
+void PlatinumScrollBarRenderer::onPrepare(const ScrollBar& s,
+                                          const StyleOptions& options,
+                                          Gfx::Brush& background,
+                                          Gfx::Brush& foreground,
+                                          Gfx::Pen& contour) const
 {
-    const StyleOptions* options = s.getFacet<StyleOptions>();
-    if( ! options)
-      return;
+}
 
-    Painter painter(surface);
-    painter.setClip(rect);
 
-    painter.setBrush( options->foreground() );
+void PlatinumScrollBarRenderer::onRender(const ScrollBar& s,
+                                         const StyleOptions& options,
+                                         Painter& painter,
+                                         const Gfx::RectF& rect,
+                                         const Gfx::RectF& handleRect,
+                                         const Gfx::Brush& background,
+                                         const Gfx::Brush& foreground,
+                                         const Gfx::Pen& contour) const
+{
+    painter.setBrush(background);
     painter.fillRect(rect);
 
-    painter.setPen( options->contourColor() );
+    painter.setPen(contour);
     painter.drawRect( Gfx::RectF( s.size() ) );
 
-    painter.setBrush( options->foreground() );
+    painter.setBrush(foreground);
     painter.fillRect(handleRect);
 
-    Gfx::Color handleFrameColor = options->contourColor();
-    painter.setPen(handleFrameColor);
+    painter.setPen(contour);
     painter.drawRect(handleRect);
 }
 

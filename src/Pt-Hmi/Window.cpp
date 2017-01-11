@@ -583,7 +583,7 @@ void Window::onUpdate(const Gfx::RectF& rect)
 {
     if( ! _init )
         return;
-    
+
     _damageRect.unify(rect);
 
     _parent->onUpdate(*this, rect);
@@ -598,14 +598,15 @@ void Window::onUpdate(Window& child, const Gfx::RectF& rect)
 
 void Window::onInvalidate()
 {
+    _backgroundBrush = background();
 
+    update();
 }
 
 
 void Window::onInvalidateEvent(const InvalidateEvent& ev)
 {
     onInvalidate();
-    update();
 }
 
 
@@ -654,10 +655,8 @@ void Window::onPaintEvent(const PaintEvent& ev)
 
 void Window::onPaintBackground(const Gfx::RectF& rect)
 {
-    const Gfx::Brush& brush = background();
-
     Painter painter(_surface);
-    painter.setBrush(brush);
+    painter.setBrush(_backgroundBrush);
     painter.fillRect(rect);
 }
 

@@ -34,20 +34,6 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/StyleOptions.h>
 
-namespace {
-
-Pt::Gfx::Color brighten(const Pt::Gfx::Color& c, float factor)
-{
-    Pt::uint16_t r = c.red() * factor;
-    Pt::uint16_t g = c.green() * factor;
-    Pt::uint16_t b = c.blue() * factor;
-
-
-    return Pt::Gfx::Color(c.alpha(), r, g, b);
-}
-
-} // namepace
-
 namespace Pt {
 
 namespace Hmi {
@@ -179,14 +165,126 @@ void MenuBarItem::onMouseEvent(const MouseEvent& ev)
 }
 
 
-void MenuBarItem::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
+const Gfx::Brush& MenuBarItem::background() const
 {
-    const MenuBarRenderer* renderer = getFacet<MenuBarRenderer>();
-    if(renderer)
-        renderer->renderItem(*this, surface, updateRect);
+    return _background.isValid() ? _background.get()
+                                 : Application::instance().styleOptions().background();
+}
 
-    // TODO: should MenuBarItem::onPaint draw the text or the style?
-    onPaintText(surface, updateRect);
+
+void MenuBarItem::setBackground(const Gfx::Brush& b)
+{
+    _background.set(b);
+    invalidate();
+}
+
+
+const Gfx::Color& MenuBarItem::textColor() const
+{
+    return _textColor.isValid() ? _textColor.get()
+                                : Application::instance().styleOptions().textColor();
+}
+
+
+void MenuBarItem::setTextColor(const Gfx::Color& color)
+{
+    _textColor.set(color);
+    invalidate();
+}
+
+
+const std::string& MenuBarItem::font() const
+{
+    return _fontName.isValid() ? _fontName.get()
+                               : Application::instance().styleOptions().font().name();
+}
+
+
+void MenuBarItem::setFont(const std::string& fontName)
+{
+    _fontName.set(fontName);
+    invalidate();
+}
+
+
+std::size_t MenuBarItem::fontSize() const
+{
+
+    return _fontSize.isValid() ? _fontSize.get()
+                               : Application::instance().styleOptions().font().size();
+}
+
+
+void MenuBarItem::setFontSize(const std::size_t s)
+{
+    _fontSize.set(s);
+    invalidate();
+}
+
+
+Gfx::Font::Style MenuBarItem::fontStyle() const
+{
+    return _fontStyle.isValid() ? _fontStyle.get()
+                                : Application::instance().styleOptions().font().style();
+}
+
+
+void MenuBarItem::setFontStyle(Gfx::Font::Style style)
+{
+    _fontStyle.set(style);
+    invalidate();
+}
+
+
+void MenuBarItem::onInvalidate()
+{
+    Base::onInvalidate();
+
+    const StyleOptions& options = Application::instance().styleOptions();
+
+    _brush = background();
+    _pen = contour();
+    _textPen = textColor();
+    _font  = Gfx::Font(font(), fontSize(), fontStyle());
+
+    const MenuBarRenderer* renderer = getFacet<MenuBarRenderer>();
+    if( ! renderer )
+        return;
+
+    renderer->prepareItem(*this, options, _brush, _pen, _font, _textPen);
+}
+
+
+void MenuBarItem::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+{
+    const StyleOptions& options = Application::instance().styleOptions();
+    
+    const MenuBarRenderer* renderer = getFacet<MenuBarRenderer>();
+    if( ! renderer )
+        return;
+
+    Painter painter(surface);
+    painter.setClip(rect);
+
+    //
+    // item background
+    //
+    renderer->renderItem(*this, options, painter, rect, 
+                         _brush, _pen);
+
+    //
+    // item text
+    //
+    Gfx::FontMetrics fm = painter.fontMetrics(_text);
+    double textX = padding().left();
+    double textY = (size().height() - fm.height()) / 2;
+    textY += fm.ascent();
+    Gfx::PointF textPos(textX, textY);
+
+    Gfx::RectF mnemonicRect; // TODO
+    
+    renderer->renderItemText(*this, options, painter, rect,
+                             _text, textPos, _font, _textPen, mnemonicRect);
 }
 
 
@@ -371,11 +469,48 @@ MenuShell* MenuBar::onFindMenu(const Gfx::PointF& screenPos)
 }
 
 
-void MenuBar::onPaint(PaintSurface& surface, const Gfx::RectF& updateRect)
+const Gfx::Brush& MenuBar::background() const
 {
+    return _background.isValid() ? _background.get()
+                                 : Application::instance().styleOptions().background();
+}
+
+
+void MenuBar::setBackground(const Gfx::Brush& b)
+{
+    _background.set(b);
+    invalidate();
+}
+
+
+void MenuBar::onInvalidate()
+{
+    Base::onInvalidate();
+
+    const StyleOptions& options = Application::instance().styleOptions();
+
+    _brush = background();
+    _pen = contour();
+
     const MenuBarRenderer* renderer = getFacet<MenuBarRenderer>();
     if(renderer)
-        renderer->render(*this, surface, updateRect);
+        return;
+
+    renderer->prepare(*this, options, _brush, _pen);
+}
+
+
+void MenuBar::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+{
+    const StyleOptions& options = Application::instance().styleOptions();
+
+    Painter painter(surface);
+    painter.setClip(rect);
+
+    const MenuBarRenderer* renderer = getFacet<MenuBarRenderer>();
+    if(renderer)
+        renderer->renderBackground(*this, options, painter, rect, 
+                                   _brush, _pen);
 }
 
 

@@ -486,20 +486,62 @@ MenuBarRenderer::~MenuBarRenderer()
 }
 
 
-void MenuBarRenderer::render(const MenuBar& m, 
-                             PaintSurface& surface, 
-                             const Gfx::RectF& rect) const
+void MenuBarRenderer::prepare(const MenuBar& m, 
+                              const StyleOptions& options,
+                              Gfx::Brush& brush,
+                              Gfx::Pen& contour) const
+{
+    onPrepare(m, options, brush, contour);
+}
+
+
+void MenuBarRenderer::renderBackground(const MenuBar& m, 
+                                       const StyleOptions& options,
+                                       Painter& painter, 
+                                       const Gfx::RectF& rect,
+                                       const Gfx::Brush& brush,
+                                       const Gfx::Pen& contour) const
 { 
-    onRender(m, surface, rect); 
+    onRenderBackground(m, options, painter, rect, brush, contour); 
+}
+
+
+void MenuBarRenderer::prepareItem(const MenuBarItem& m, 
+                                  const StyleOptions& options, 
+                                  Gfx::Brush& brush,
+                                  Gfx::Pen& contour,
+                                  Gfx::Font& font,
+                                  Gfx::Pen& textPen) const
+{ 
+    onPrepareItem(m, options, brush, contour, font, textPen); 
 }
 
 
 void MenuBarRenderer::renderItem(const MenuBarItem& m, 
-                                 PaintSurface& surface, 
-                                 const Gfx::RectF& rect) const
+                                 const StyleOptions& options,
+                                 Painter& painter, 
+                                 const Gfx::RectF& rect,
+                                 const Gfx::Brush& brush,
+                                 const Gfx::Pen& contour) const
 { 
-    onRenderItem(m, surface, rect); 
+    onRenderItem(m, options, painter, rect, brush, contour); 
 }
+
+
+void MenuBarRenderer::renderItemText(const MenuBarItem& m, 
+                                 const StyleOptions& options,
+                                 Painter& painter, 
+                                 const Gfx::RectF& rect,
+                                 const String& text,
+                                 const Gfx::PointF& textPos,
+                                 const Gfx::Font& font, 
+                                 const Gfx::Pen& textPen,
+                                 const Gfx::RectF& mnemonic) const
+{ 
+    onRenderItemText(m, options, painter, rect, 
+                     text, textPos, font, textPen, mnemonic); 
+}
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // ScrollBarRenderer
@@ -516,12 +558,27 @@ ScrollBarRenderer::~ScrollBarRenderer()
 }
 
 
-void ScrollBarRenderer::render(const ScrollBar& s,
-                               const Gfx::RectF& handleRect,
-                               PaintSurface& surface, 
-                               const Gfx::RectF& rect) const
+void ScrollBarRenderer::prepare(const ScrollBar& s,
+                                const StyleOptions& options,
+                                Gfx::Brush& background,
+                                Gfx::Brush& foreground,
+                                Gfx::Pen& contour) const
 { 
-    onRender(s, handleRect, surface, rect); 
+    onPrepare(s, options, background, foreground, contour); 
+}
+
+
+void ScrollBarRenderer::render(const ScrollBar& s,
+                               const StyleOptions& options,
+                               Painter& painter,
+                               const Gfx::RectF& rect,
+                               const Gfx::RectF& handleRect,
+                               const Gfx::Brush& background,
+                               const Gfx::Brush& foreground,
+                               const Gfx::Pen& contour) const
+{ 
+    onRender(s, options, painter,  rect, handleRect,
+             background, foreground, contour); 
 }
 
 } // namespace

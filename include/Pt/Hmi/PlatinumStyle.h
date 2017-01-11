@@ -272,7 +272,14 @@ class PT_HMI_API PlatinumMenuRenderer : public MenuRenderer
                                const StyleOptions& options,
                                Gfx::Brush& brush,
                                Gfx::Pen& contour) const;
-
+        
+        virtual void onRenderBackground(const Menu& m, 
+                                        const StyleOptions& options,
+                                        Painter& painter, 
+                                        const Gfx::RectF& rect,
+                                        const Gfx::Brush& brush,
+                                        const Gfx::Pen& contour) const;
+        
         virtual void onPrepareItem(const MenuItem& m, 
                                    const StyleOptions& options,
                                    const Gfx::Image& icon,
@@ -282,12 +289,7 @@ class PT_HMI_API PlatinumMenuRenderer : public MenuRenderer
                                    Gfx::Font& font,
                                    Gfx::Pen& textPen) const;
 
-        virtual void onRenderBackground(const Menu& m, 
-                                        const StyleOptions& options,
-                                        Painter& painter, 
-                                        const Gfx::RectF& rect,
-                                        const Gfx::Brush& brush,
-                                        const Gfx::Pen& contour) const;
+
 
         virtual void onRenderItem(const MenuItem& m, 
                                   const StyleOptions& options,
@@ -313,14 +315,41 @@ class PT_HMI_API PlatinumMenuBarRenderer : public MenuBarRenderer
         virtual ~PlatinumMenuBarRenderer();
 
     protected:
-        virtual void onRender(const MenuBar& m, 
-                              PaintSurface& surface, 
-                              const Gfx::RectF& rect) const;
+        virtual void onPrepare(const MenuBar& m, 
+                               const StyleOptions& options,
+                               Gfx::Brush& brush,
+                               Gfx::Pen& contour) const;
+
+        virtual void onRenderBackground(const MenuBar& m, 
+                                        const StyleOptions& options,
+                                        Painter& painter, 
+                                        const Gfx::RectF& rect,
+                                        const Gfx::Brush& brush,
+                                        const Gfx::Pen& contour) const;
+
+        virtual void onPrepareItem(const MenuBarItem& m, 
+                                   const StyleOptions& options, 
+                                   Gfx::Brush& brush,
+                                   Gfx::Pen& contour,
+                                   Gfx::Font& font,
+                                   Gfx::Pen& textPen) const;
 
         virtual void onRenderItem(const MenuBarItem& m, 
-                                  PaintSurface& surface, 
-                                  const Gfx::RectF& rect) const;
+                                  const StyleOptions& options,
+                                  Painter& painter, 
+                                  const Gfx::RectF& rect,
+                                  const Gfx::Brush& brush,
+                                  const Gfx::Pen& contour) const;
 
+        virtual void onRenderItemText(const MenuBarItem& m,
+                                      const StyleOptions& options,
+                                      Painter& painter, 
+                                      const Gfx::RectF& rect,
+                                      const String& text,
+                                      const Gfx::PointF& textPos,
+                                      const Gfx::Font& font, 
+                                      const Gfx::Pen& textPen,
+                                      const Gfx::RectF& mnemonic) const;
     private:
         PlatinumRendererBase _baseRenderer;
 };
@@ -334,11 +363,21 @@ class PT_HMI_API PlatinumScrollBarRenderer : public ScrollBarRenderer
         virtual ~PlatinumScrollBarRenderer();
 
     protected:
+        virtual void onPrepare(const ScrollBar& s,
+                               const StyleOptions& options,
+                               Gfx::Brush& background,
+                               Gfx::Brush& foreground,
+                               Gfx::Pen& contour) const;
+        
         virtual void onRender(const ScrollBar& s,
+                              const StyleOptions& options,
+                              Painter& painter,
+                              const Gfx::RectF& rect,
                               const Gfx::RectF& handleRect,
-                              PaintSurface& surface, 
-                              const Gfx::RectF& rect) const;
-
+                              const Gfx::Brush& background,
+                              const Gfx::Brush& foreground,
+                              const Gfx::Pen& contour) const;
+    
     private:
         PlatinumRendererBase _baseRenderer;
 };

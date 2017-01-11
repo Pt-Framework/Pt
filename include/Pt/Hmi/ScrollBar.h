@@ -39,6 +39,8 @@ namespace Hmi {
 
 class PT_HMI_API ScrollBar : public Control
 {
+    typedef Control Base;
+
     public:
         enum Orientation
         {
@@ -76,8 +78,14 @@ class PT_HMI_API ScrollBar : public Control
         Signal<int>& changed()
         { return _changed; }
         
+    public:
+        const Gfx::Brush& background() const;
+
+        void setBackground(const Gfx::Brush& b);
 
     protected:
+        virtual void onInvalidate();
+
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& rect);
 
     protected:
@@ -96,18 +104,24 @@ class PT_HMI_API ScrollBar : public Control
 
     private:
         Orientation _orientation;
-        int _minPos;
-        int _maxPos;
-        int _pageStep;
-        int _scrollStep;
-        int _position;
-        bool _dragging;
-        double _factorPixel;
-        double _offsetPixel;
-        double _factorPosition;
-        double _offsetPosition;
+        int         _minPos;
+        int         _maxPos;
+        int         _pageStep;
+        int         _scrollStep;
+        int         _position;
+        bool        _dragging;
+        double      _factorPixel;
+        double      _offsetPixel;
+        double      _factorPosition;
+        double      _offsetPosition;
         Gfx::RectF  _handleRect;
         Signal<int> _changed;
+
+        Option<Gfx::Brush>       _background;
+
+        Gfx::Brush               _backgroundBrush;
+        Gfx::Brush               _foregroundBrush;
+        Gfx::Pen                 _contourPen;
 };
 
 } // namespace
