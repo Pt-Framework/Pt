@@ -362,7 +362,7 @@ class AutoPtr : public Destroy
         }
 
         //! @brief Reset value.
-        void reset (T* ptr = 0) 
+        void reset(T* ptr = 0) 
         {
             if (ap != ptr) 
             {
@@ -525,7 +525,8 @@ class SmartPtr : public OwnershipPolicy,
 
         /** @brief Access value.
         */
-        T* operator->() const { return object; }
+        T* operator->() const 
+        { return object; }
 
         /** @brief Access value.
         */

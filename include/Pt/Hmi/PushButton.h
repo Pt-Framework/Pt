@@ -40,6 +40,8 @@ namespace Pt {
 
 namespace Hmi {
 
+class ButtonRenderer;
+
 class PT_HMI_API PushButton : public Button
 {
     public:
@@ -104,6 +106,8 @@ class PT_HMI_API PushButton : public Button
         bool       _isToggle;
         bool       _isFlat;
         Gfx::Image _image;
+
+        FacetPtr<ButtonRenderer> _renderer;
 
         Option<Gfx::Brush>       _foreground;
         Option<Gfx::Pen>         _contour;

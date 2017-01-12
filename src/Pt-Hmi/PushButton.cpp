@@ -209,11 +209,13 @@ void PushButton::onInvalidate()
     _textPen = textColor();
     _font = Gfx::Font(font(), fontSize(), fontStyle());
 
-    const ButtonRenderer* renderer = style().get<ButtonRenderer>();
-    if( ! renderer )
-        return;
+    _renderer.reset( style().get<ButtonRenderer>() );
 
-    renderer->prepare(*this, options, _brush, _pen, _font, _textPen);
+    //const ButtonRenderer* renderer = style().get<ButtonRenderer>();
+    //if( ! renderer )
+    //    return;
+
+    _renderer->prepare(*this, options, _brush, _pen, _font, _textPen);
 }
 
 
@@ -221,7 +223,8 @@ void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = styleOptions();
 
-    const ButtonRenderer* renderer = style().get<ButtonRenderer>();
+    //const ButtonRenderer* renderer = style().get<ButtonRenderer>();
+    const ButtonRenderer* renderer = _renderer.get();
     if( ! renderer )
         return;
 

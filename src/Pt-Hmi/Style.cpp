@@ -129,7 +129,7 @@ void Style::set(Facet* facet)
 }
 
 
-const Style::Facet* Style::find(const std::type_info& ti) const
+Style::Facet* Style::find(const std::type_info& ti) const
 {
     FacetMap::const_iterator it = _facets.find(ti);
     if( it == _facets.end() )

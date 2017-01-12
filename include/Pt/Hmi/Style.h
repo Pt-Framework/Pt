@@ -59,6 +59,87 @@ class MenuBar;
 class MenuBarItem;
 class ScrollBar;
 
+template <typename T>
+class FacetPtr
+{
+    public:
+        FacetPtr(T* facet = 0)
+        : _facet(facet)
+        {
+            if( _facet )
+                _facet->ref();
+        }
+
+        FacetPtr(const FacetPtr& ptr)
+        : _facet(ptr._facet)
+        {
+            if( _facet )
+                _facet->ref();
+        }
+
+        ~FacetPtr()
+        {
+            if(_facet)
+            {
+                if( 0 == _facet->unref() )
+                    delete _facet;
+            }
+        }
+
+        FacetPtr& operator=(const FacetPtr& ptr)
+        {
+            if(this == &ptr)
+                return;
+
+            if(_facet)
+            {
+                if( 0 == _facet->unref() )
+                    delete _facet;
+            }
+
+            _facet = ptr._facet;
+            if( _facet )
+                _facet->ref();
+        }
+
+        void reset(T* facet = 0)
+        {
+            if (_facet == facet)
+                return;
+
+            if(_facet)
+            {
+                if( 0 == _facet->unref() )
+                    delete _facet;
+            }
+
+            _facet = facet;
+            if( _facet )
+                _facet->ref();
+        }
+
+        T* operator->() const 
+        { return _facet; }
+
+        T& operator*() const
+        { return *_facet; }
+
+        bool operator! () const
+        { return _facet == 0; }
+
+        operator bool () const
+        { return _facet != 0; }
+
+        T* get()
+        { return _facet; }
+
+        const T* get() const
+        { return _facet; }
+
+    private:
+        T* _facet;
+};
+
 class PT_HMI_API Style
 {
     public:
@@ -109,14 +190,14 @@ class PT_HMI_API Style
         void set(Facet* facet);
 
         template <typename FacetT> 
-        const FacetT* get() const
+        FacetT* get() const
         {
-            const Facet* facet = find( typeid(FacetT) );
-            return static_cast<const FacetT*>(facet);
+            Facet* facet = find( typeid(FacetT) );
+            return static_cast<FacetT*>(facet);
         }
 
     private:
-        const Facet* find(const std::type_info& ti) const;
+        Facet* find(const std::type_info& ti) const;
 
     private:
         typedef std::map<TypeInfo, Facet*> FacetMap;
