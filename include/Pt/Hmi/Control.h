@@ -82,10 +82,6 @@ class PT_HMI_API Control : public Widget
     private:
         Style* _style;
         bool   _isHighlighted;
-        /*
-        Option<Gfx::Brush> _foreground;
-        Option<Gfx::Pen>   _contour;
-        */
 }; 
 
 } // namespace

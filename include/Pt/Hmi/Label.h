@@ -118,7 +118,6 @@ class PT_HMI_API Label : public Control
         
         Gfx::Pen    _textPen;
         Gfx::Font   _font;
-        
 };
 
 } // namespace
