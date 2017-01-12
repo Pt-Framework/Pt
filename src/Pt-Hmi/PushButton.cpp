@@ -68,7 +68,8 @@ void PushButton::setImage(const Gfx::Image& image)
 
     const StyleOptions& options = styleOptions();
 
-    const ButtonRenderer* renderer = style().get<ButtonRenderer>();
+    //const ButtonRenderer* renderer = style().get<ButtonRenderer>();
+    const ButtonRenderer* renderer = _renderer.get();
     if( ! renderer )
         return;
 
@@ -300,7 +301,8 @@ void PushButton::onEnableEvent(const EnableEvent& ev)
 
     const StyleOptions& options = styleOptions();
 
-    const ButtonRenderer* renderer = style().get<ButtonRenderer>();
+    //const ButtonRenderer* renderer = style().get<ButtonRenderer>();
+    const ButtonRenderer* renderer = _renderer.get();
     if( ! renderer )
         return;
 
