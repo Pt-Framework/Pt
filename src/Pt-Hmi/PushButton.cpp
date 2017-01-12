@@ -66,9 +66,9 @@ void PushButton::setImage(const Gfx::Image& image)
     _image = image;
     _picture.set(image);
 
-    const StyleOptions& options = Application::instance().styleOptions();
+    const StyleOptions& options = styleOptions();
 
-    const ButtonRenderer* renderer = getFacet<ButtonRenderer>();
+    const ButtonRenderer* renderer = style().get<ButtonRenderer>();
     if( ! renderer )
         return;
 
@@ -94,8 +94,9 @@ void PushButton::setFlat(bool f)
 const Gfx::Brush& PushButton::foreground() const
 {
     return _foreground.isValid() ? _foreground.get()
-                                 : Application::instance().styleOptions().foreground();
+                                 : styleOptions().foreground();
 }
+
 
 void PushButton::setForeground(const Gfx::Brush& b)
 {
@@ -107,7 +108,7 @@ void PushButton::setForeground(const Gfx::Brush& b)
 const Gfx::Pen& PushButton::contour() const
 {
     return _contour.isValid() ? _contour.get()
-                              : Application::instance().styleOptions().contour();
+                              : styleOptions().contour();
 }
 
 
@@ -121,7 +122,7 @@ void PushButton::setContour(const Gfx::Pen& p)
 const Gfx::Color& PushButton::textColor() const
 {
     return _textColor.isValid() ? _textColor.get()
-                                : Application::instance().styleOptions().textColor();
+                                : styleOptions().textColor();
 }
 
 
@@ -135,7 +136,7 @@ void PushButton::setTextColor(const Gfx::Color& color)
 const std::string& PushButton::font() const
 {
     return _fontName.isValid() ? _fontName.get()
-                               : Application::instance().styleOptions().font().name();
+                               : styleOptions().font().name();
 }
 
 
@@ -150,7 +151,7 @@ std::size_t PushButton::fontSize() const
 {
 
     return _fontSize.isValid() ? _fontSize.get()
-                               : Application::instance().styleOptions().font().size();
+                               : styleOptions().font().size();
 }
 
 
@@ -164,7 +165,7 @@ void PushButton::setFontSize(const std::size_t s)
 Gfx::Font::Style PushButton::fontStyle() const
 {
     return _fontStyle.isValid() ? _fontStyle.get()
-                                : Application::instance().styleOptions().font().style();
+                                : styleOptions().font().style();
 }
 
 
@@ -201,14 +202,14 @@ void PushButton::onInvalidate()
 {
     Base::onInvalidate();
 
-    const StyleOptions& options = Application::instance().styleOptions();
+    const StyleOptions& options = styleOptions();
 
     _brush = foreground();
     _pen = contour();
     _textPen = textColor();
     _font = Gfx::Font(font(), fontSize(), fontStyle());
 
-    const ButtonRenderer* renderer = getFacet<ButtonRenderer>();
+    const ButtonRenderer* renderer = style().get<ButtonRenderer>();
     if( ! renderer )
         return;
 
@@ -218,9 +219,9 @@ void PushButton::onInvalidate()
 
 void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
-    const StyleOptions& options = Application::instance().styleOptions();
+    const StyleOptions& options = styleOptions();
 
-    const ButtonRenderer* renderer = getFacet<ButtonRenderer>();
+    const ButtonRenderer* renderer = style().get<ButtonRenderer>();
     if( ! renderer )
         return;
 
@@ -294,9 +295,9 @@ void PushButton::onEnableEvent(const EnableEvent& ev)
 {
     Base::onEnableEvent(ev);
 
-    const StyleOptions& options = Application::instance().styleOptions();
+    const StyleOptions& options = styleOptions();
 
-    const ButtonRenderer* renderer = getFacet<ButtonRenderer>();
+    const ButtonRenderer* renderer = style().get<ButtonRenderer>();
     if( ! renderer )
         return;
 

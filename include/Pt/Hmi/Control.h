@@ -65,6 +65,8 @@ class PT_HMI_API Control : public Widget
             return Application::instance().style().get<T>();
         }
 
+        const StyleOptions& styleOptions() const;
+
     protected:
         virtual void onInvalidate();
 
@@ -80,8 +82,9 @@ class PT_HMI_API Control : public Widget
         virtual void onLeaveEvent(const LeaveEvent& ev );
 
     private:
-        Style* _style;
-        bool   _isHighlighted;
+        Style*        _style;
+        StyleOptions* _styleOptions;
+        bool          _isHighlighted;
 }; 
 
 } // namespace

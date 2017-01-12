@@ -66,6 +66,12 @@ const Style& Control::style() const
 }
 
 
+const StyleOptions& Control::styleOptions() const
+{
+    return Application::instance().styleOptions();
+}
+
+
 bool Control::isHighlighted() const
 {
     return _isHighlighted;
