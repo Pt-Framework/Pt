@@ -56,7 +56,7 @@ class Base
 };
 
 
-class Child : public Base
+class Derived : public Base
 {
 };
 
@@ -104,7 +104,7 @@ void SmartPtrTest::AutoPtr()
         Ptr ap(obj);
         PT_UNIT_ASSERT_EQUALS(ap.get(), obj);
 
-        Ptr ap2(ap);
+        Ptr ap2 = move(ap);
         PT_UNIT_ASSERT_EQUALS(ap.get(), 0);
         PT_UNIT_ASSERT_EQUALS(ap2.get(), obj);
 
@@ -184,8 +184,8 @@ void SmartPtrTest::RefLinked()
 
 void SmartPtrTest::BaseChildAssignment()
 {
-    //Child* obj = new Child();
-    //Pt::SmartPtr<Child> smartPtr(obj);
+    //Derived* obj = new Derived();
+    //Pt::SmartPtr<Derived> smartPtr(obj);
     //Pt::SmartPtr<Base>  baseSmartPtr;
     //baseSmartPtr = smartPtr;
 }

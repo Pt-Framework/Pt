@@ -80,7 +80,7 @@ namespace Db {
             _current = cursor->fetch();
             if (!_current) {
                 //clog << "No row fetched" << endl;
-                _cursor = 0;
+                _cursor.reset();
             }
         }
     }
@@ -92,7 +92,7 @@ namespace Db {
 
         if (!_current) {
             //clog << "No row fetched" << endl;
-            _cursor = 0;
+            _cursor.reset();
         }
 
         return *this;

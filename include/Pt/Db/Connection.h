@@ -86,7 +86,7 @@ namespace Db {
             */
             void close()
             { 
-                _connection = 0;
+                _connection.reset();
             }
             
             /** \brief Starts a database transaction.            

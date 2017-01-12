@@ -216,7 +216,7 @@ public:
         // copy-on-write
         if ( m_data->refs() > 1 )
         {
-            m_data = m_data->create();
+            m_data.reset( m_data->create() );
         }
 
         m_data->assign(data, len);

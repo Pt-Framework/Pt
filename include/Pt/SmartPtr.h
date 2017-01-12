@@ -264,9 +264,11 @@ class ArrayDestroyPolicy
 
 
 template<typename T>
-struct AutoPtrRef {
+struct AutoPtrRef 
+{
     T* ptr;
-    AutoPtrRef(T* rhs)
+    
+    explicit AutoPtrRef(T* rhs)
     : ptr(rhs)
     { }
 };
@@ -287,45 +289,37 @@ template<typename T,
          typename Destroy = DeletePolicy<T> >
 class AutoPtr : public Destroy
 {
-    private:
-        T* ap;
-
     public:
         typedef T element_type;
 
+    public:
         //! @brief Default constructor.
         explicit AutoPtr(T* ptr = 0)
         : ap(ptr)
         { }
 
         //! @brief Copy constructor.
-        AutoPtr (AutoPtr& rhs)
-          : ap(rhs.release()) {
-        }
-
-        //! @brief Copy constructor.
-        template<class Y>
-        AutoPtr (AutoPtr<Y>& rhs)
-          : ap(rhs.release()) {
+        AutoPtr(AutoPtrRef<T> rhs)
+          : ap(rhs.ptr) {
         }
 
         //! @brief Assignment operator.
-        AutoPtr& operator= (AutoPtr& rhs) {
-            reset(rhs.release());
-            return *this;
-        }
-
-        //! @brief Assignment operator.
-        template<class Y>
-        AutoPtr& operator= (AutoPtr<Y>& rhs)
+        AutoPtr& operator= (AutoPtrRef<T> rhs)
         {
-            reset(rhs.release());
-            return *this;
+              reset(rhs.ptr);
+              return *this;
         }
 
         //! @brief Destructor.
         ~AutoPtr()
         { this->destroy(ap); }
+
+        //! @brief Conversion operator used for assignments.
+        template<class Y>
+        operator AutoPtrRef<Y>()
+        {
+            return AutoPtrRef<Y>( release() );
+        }
 
         //! @brief Access value.
         T* get() const {
@@ -338,12 +332,14 @@ class AutoPtr : public Destroy
         }
 
         //! @brief Access value.
-        T* operator->() const {
+        T* operator->() const 
+        {
             return ap;
         }
 
         //! @brief Returns true if nullptr.
-        bool operator!() const {
+        bool operator!() const 
+        {
             return ap == 0;
         }
         
@@ -368,35 +364,27 @@ class AutoPtr : public Destroy
         //! @brief Reset value.
         void reset (T* ptr = 0) 
         {
-            if (ap != ptr) {
+            if (ap != ptr) 
+            {
                 this->destroy(ap);
                 ap = ptr;
             }
         }
+                
+    private:
+        AutoPtr(AutoPtr &p);
+  
+        AutoPtr& operator= (AutoPtr& p);
 
-        //! @brief Copy constructor.
-        AutoPtr(AutoPtrRef<T> rhs) throw()
-          : ap(rhs.ptr) {
-        }
-        
-        //! @brief Assignment operator.
-        AutoPtr& operator= (AutoPtrRef<T> rhs) throw() {
-              reset(rhs.ptr);
-              return *this;
-        }
-        
-        //! @brief Conversion operator used for assignments.
-        template<class Y>
-        operator AutoPtrRef<Y>() throw() {
-            return AutoPtrRef<Y>(release());
-        }
-        
-        //! @brief Conversion operator used for assignments.
-        template<class Y>
-        operator AutoPtr<Y>() throw() {
-            return AutoPtr<Y>(release());
-        }
+    private:
+        T* ap;
 };
+
+template <typename T>
+AutoPtr<T> move(AutoPtr<T>& p)
+{
+    return AutoPtr<T>( AutoPtrRef<T>(p) );
+}
 
 /** @brief Equality comparison operator.
 
@@ -487,7 +475,7 @@ class SmartPtr : public OwnershipPolicy,
 
         /** @brief Constructs from a pointer to manage.
         */
-        SmartPtr(T* ptr)
+        explicit SmartPtr(T* ptr)
         : object(ptr)
         { this->link(*this, ptr); }
 
@@ -509,11 +497,10 @@ class SmartPtr : public OwnershipPolicy,
         */
         SmartPtr& operator=(const SmartPtr& ptr)
         {
-            if(object == ptr.object) {
+            if(object == ptr.object)
                 return *this;
-            }
 
-            if (this->unlink(object))
+            if( this->unlink(object) )
                 this->destroy(object);
 
             object = ptr.object;
@@ -521,6 +508,19 @@ class SmartPtr : public OwnershipPolicy,
             this->link(ptr, object);
 
             return *this;
+        }
+
+        void reset(T* ptr = 0)
+        {
+            if(object == ptr)
+                return;
+
+            if( this->unlink(object) )
+                this->destroy(object);
+
+            object = ptr;
+
+            this->link(*this, object);
         }
 
         /** @brief Access value.
@@ -647,7 +647,7 @@ void load(const LoadInfo& li, SmartPtr<T, M, D>& sp)
 template <typename T, typename M>
 void operator >>=(const Pt::SerializationInfo& si, SmartPtr<T, M>& sp)
 {
-    sp = new T();
+    sp.reset( new T() );
     si >>= *sp;
 }
 
