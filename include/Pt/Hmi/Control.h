@@ -65,6 +65,7 @@ class PT_HMI_API Control : public Widget
             return Application::instance().style().get<T>();
         }
 
+    public:
         const Gfx::Brush& foreground() const;
 
         void setForeground(const Gfx::Brush& b);

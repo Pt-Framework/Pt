@@ -62,6 +62,7 @@ class PT_HMI_API PushButton : public Button
 
         void setFlat(bool f);
 
+    public:
         const Gfx::Color& textColor() const;
 
         void setTextColor(const Gfx::Color& color);
