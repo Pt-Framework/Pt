@@ -190,6 +190,20 @@ void LineEdit::setBackground(const Gfx::Brush& b)
 }
 
 
+const Gfx::Pen& LineEdit::contour() const
+{
+    return _contour.isValid() ? _contour.get()
+                              : Application::instance().styleOptions().contour();
+}
+
+
+void LineEdit::setContour(const Gfx::Pen& p)
+{
+    _contour.set(p);
+    invalidate();
+}
+
+
 const Gfx::Color& LineEdit::textColor() const
 {
     return _textColor.isValid() ? _textColor.get()

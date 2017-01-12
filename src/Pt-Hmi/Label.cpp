@@ -85,15 +85,15 @@ void Label::setBackground(const Gfx::Brush& b)
 }
 
 
-const Gfx::Pen* Label::frame() const
+const Gfx::Pen* Label::contour() const
 {
-    return _frame.isValid() ? &_frame.get() : 0;
+    return _contour.isValid() ? &_contour.get() : 0;
 }
 
 
-void Label::setFrame(const Gfx::Pen& p)
+void Label::setContour(const Gfx::Pen& p)
 {
-    _frame.set(p);
+    _contour.set(p);
     update();
 }
 
@@ -199,7 +199,7 @@ void Label::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
                                    painter, rect, *brush);
     }
 
-    const Gfx::Pen* pen = frame();
+    const Gfx::Pen* pen = contour();
     if( pen )
     {
         renderer->renderFrame(*this, options,

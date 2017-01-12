@@ -72,7 +72,7 @@ ChildW::ChildW(const std::string& title)
     _textLabel.setBackground( Gfx::Color::fromRgb8(240, 220, 70) );
     _textLabel.setMnemonicWidget(&_toggleButton);
     _textLabel.setCursor( Hmi::Cursor::waitCursor() ); 
-    _textLabel.setFrame(Gfx::Color::fromRgb8(200, 190, 60));
+    _textLabel.setContour(Gfx::Color::fromRgb8(200, 190, 60));
 
     //Toggle button
     Pt::Hmi::Key key(Pt::Hmi::Key::Control, Pt::Hmi::Key::I);

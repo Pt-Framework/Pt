@@ -63,6 +63,14 @@ class PT_HMI_API PushButton : public Button
         void setFlat(bool f);
 
     public:
+        const Gfx::Brush& foreground() const;
+
+        void setForeground(const Gfx::Brush& b);
+
+        const Gfx::Pen& contour() const;
+
+        void setContour(const Gfx::Pen& p);
+
         const Gfx::Color& textColor() const;
 
         void setTextColor(const Gfx::Color& color);
@@ -97,6 +105,8 @@ class PT_HMI_API PushButton : public Button
         bool       _isFlat;
         Gfx::Image _image;
 
+        Option<Gfx::Brush>       _foreground;
+        Option<Gfx::Pen>         _contour;
         Option<Gfx::Color>       _textColor;
         Option<std::string>      _fontName;
         Option<std::size_t>      _fontSize;
@@ -106,7 +116,6 @@ class PT_HMI_API PushButton : public Button
         Gfx::Pen   _pen;
         Gfx::Pen   _textPen;
         Gfx::Font  _font;
-        
         Picture    _picture;
 };
 

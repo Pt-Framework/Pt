@@ -78,6 +78,10 @@ class PT_HMI_API MenuItem : public Control
 
         void setBackground(const Gfx::Brush& b);
 
+        const Gfx::Pen& contour() const;
+
+        void setContour(const Gfx::Pen& p);
+
         const Gfx::Color& textColor() const;
 
         void setTextColor(const Gfx::Color& color);

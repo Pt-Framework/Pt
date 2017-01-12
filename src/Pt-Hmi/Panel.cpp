@@ -72,27 +72,23 @@ void Panel::setBackground(const Gfx::Brush& b)
 void Panel::setBackground(bool b)
 {
     _hasBackground = b;
-
-    if( ! _hasBackground )
-        _background.reset();
-
     update();
 }
 
 
-const Gfx::Pen* Panel::frame() const
+const Gfx::Pen* Panel::contour() const
 {
     if( ! _hasFrame)
         return 0;
 
-    return _frame.isValid() ? &_frame.get() 
-                            : &Application::instance().styleOptions().contour();
+    return _contour.isValid() ? &_contour.get() 
+                              : &Application::instance().styleOptions().contour();
 }
 
 
-void Panel::setFrame(const Gfx::Color& color)
+void Panel::setContour(const Gfx::Color& color)
 {
-    _frame.set(color);
+    _contour.set(color);
     _hasFrame = true;
 
     update();
@@ -102,10 +98,6 @@ void Panel::setFrame(const Gfx::Color& color)
 void Panel::setFrame(bool b)
 {
     _hasFrame = b;
-
-    if( ! _hasFrame )
-        _frame.reset();
-
     update();
 }
 
@@ -211,7 +203,7 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
         }
     }  
 
-    const Gfx::Pen* pen = frame();
+    const Gfx::Pen* pen = contour();
     if(pen)
     {
         renderer->renderFrame(*this, options,

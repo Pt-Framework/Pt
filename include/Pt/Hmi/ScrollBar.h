@@ -79,6 +79,14 @@ class PT_HMI_API ScrollBar : public Control
         { return _changed; }
         
     public:
+        const Gfx::Brush& foreground() const;
+
+        void setForeground(const Gfx::Brush& b);
+
+        const Gfx::Pen& contour() const;
+
+        void setContour(const Gfx::Pen& p);
+
         const Gfx::Brush& background() const;
 
         void setBackground(const Gfx::Brush& b);
@@ -117,6 +125,8 @@ class PT_HMI_API ScrollBar : public Control
         Gfx::RectF  _handleRect;
         Signal<int> _changed;
 
+        Option<Gfx::Brush>       _foreground;
+        Option<Gfx::Pen>         _contour;
         Option<Gfx::Brush>       _background;
 
         Gfx::Brush               _backgroundBrush;

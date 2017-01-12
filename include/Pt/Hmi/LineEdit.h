@@ -98,9 +98,14 @@ class PT_HMI_API LineEdit : public Control
 
         Pt::Signal<const Pt::String&>& textEntered();
 
+    public:
         const Gfx::Brush& background() const;
 
         void setBackground(const Gfx::Brush& b);
+
+        const Gfx::Pen& contour() const;
+
+        void setContour(const Gfx::Pen& p);
 
         const Gfx::Color& textColor() const;
 
@@ -153,6 +158,7 @@ class PT_HMI_API LineEdit : public Control
         double                        _halign;
 
         Option<Gfx::Brush>            _background;
+        Option<Gfx::Pen>              _contour;
         Option<Gfx::Color>            _textColor;
         Option<std::string>           _fontName;
         Option<std::size_t>           _fontSize;

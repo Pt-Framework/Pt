@@ -70,6 +70,10 @@ class MenuBarItem : public Control
 
         void setBackground(const Gfx::Brush& b);
 
+        const Gfx::Pen& contour() const;
+
+        void setContour(const Gfx::Pen& p);
+
         const Gfx::Color& textColor() const;
 
         void setTextColor(const Gfx::Color& color);
@@ -138,6 +142,10 @@ class PT_HMI_API MenuBar : public MenuShell
 
         void setBackground(const Gfx::Brush& b);
 
+        const Gfx::Pen& contour() const;
+
+        void setContour(const Gfx::Pen& p);
+
     protected:
         virtual void onAddMenu(Menu& menu, const Pt::String& text);
 
@@ -173,6 +181,7 @@ class PT_HMI_API MenuBar : public MenuShell
         MenuBarItem*              _currentMenuItem;
 
         Option<Gfx::Brush>       _background;
+        Option<Gfx::Pen>   _contour;
 
         Gfx::Brush               _brush;
         Gfx::Pen                 _pen;

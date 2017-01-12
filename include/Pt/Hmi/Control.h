@@ -65,15 +65,6 @@ class PT_HMI_API Control : public Widget
             return Application::instance().style().get<T>();
         }
 
-    public:
-        const Gfx::Brush& foreground() const;
-
-        void setForeground(const Gfx::Brush& b);
-
-        const Gfx::Pen& contour() const;
-
-        void setContour(const Gfx::Pen& p);
-
     protected:
         virtual void onInvalidate();
 
@@ -91,9 +82,10 @@ class PT_HMI_API Control : public Widget
     private:
         Style* _style;
         bool   _isHighlighted;
-
+        /*
         Option<Gfx::Brush> _foreground;
         Option<Gfx::Pen>   _contour;
+        */
 }; 
 
 } // namespace

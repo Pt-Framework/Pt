@@ -80,6 +80,20 @@ void CheckBox::setBackground(const Gfx::Brush& b)
 }
 
 
+const Gfx::Pen& CheckBox::contour() const
+{
+    return _contour.isValid() ? _contour.get()
+                              : Application::instance().styleOptions().contour();
+}
+
+
+void CheckBox::setContour(const Gfx::Pen& p)
+{
+    _contour.set(p);
+    invalidate();
+}
+
+
 const Gfx::Color& CheckBox::textColor() const
 {
     return _textColor.isValid() ? _textColor.get()

@@ -70,13 +70,14 @@ class PT_HMI_API Label : public Control
 
         void setTextAlignment(Alignment a);
 
+    public:
         const Gfx::Brush* background() const;
 
         void setBackground(const Gfx::Brush& b);
 
-        const Gfx::Pen* frame() const;
+        const Gfx::Pen* contour() const;
 
-        void setFrame(const Gfx::Pen& p);
+        void setContour(const Gfx::Pen& p);
 
         const Gfx::Color& textColor() const;
 
@@ -109,7 +110,7 @@ class PT_HMI_API Label : public Control
         Alignment   _textAlignment;
         
         Option<Gfx::Brush>       _background;
-        Option<Gfx::Pen>         _frame;
+        Option<Gfx::Pen>         _contour;
         Option<Gfx::Color>       _textColor;
         Option<std::string>      _fontName;
         Option<std::size_t>      _fontSize;

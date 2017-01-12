@@ -179,6 +179,20 @@ void MenuBarItem::setBackground(const Gfx::Brush& b)
 }
 
 
+const Gfx::Pen& MenuBarItem::contour() const
+{
+    return _contour.isValid() ? _contour.get()
+                              : Application::instance().styleOptions().contour();
+}
+
+
+void MenuBarItem::setContour(const Gfx::Pen& p)
+{
+    _contour.set(p);
+    invalidate();
+}
+
+
 const Gfx::Color& MenuBarItem::textColor() const
 {
     return _textColor.isValid() ? _textColor.get()
@@ -457,6 +471,20 @@ const Gfx::Brush& MenuBar::background() const
 void MenuBar::setBackground(const Gfx::Brush& b)
 {
     _background.set(b);
+    invalidate();
+}
+
+
+const Gfx::Pen& MenuBar::contour() const
+{
+    return _contour.isValid() ? _contour.get()
+                              : Application::instance().styleOptions().contour();
+}
+
+
+void MenuBar::setContour(const Gfx::Pen& p)
+{
+    _contour.set(p);
     invalidate();
 }
 

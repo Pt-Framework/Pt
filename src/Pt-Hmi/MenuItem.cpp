@@ -179,6 +179,20 @@ void MenuItem::setBackground(const Gfx::Brush& b)
 }
 
 
+const Gfx::Pen& MenuItem::contour() const
+{
+    return _contour.isValid() ? _contour.get()
+                              : Application::instance().styleOptions().contour();
+}
+
+
+void MenuItem::setContour(const Gfx::Pen& p)
+{
+    _contour.set(p);
+    invalidate();
+}
+
+
 const Gfx::Color& MenuItem::textColor() const
 {
     return _textColor.isValid() ? _textColor.get()

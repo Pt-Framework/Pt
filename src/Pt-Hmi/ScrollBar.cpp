@@ -205,6 +205,33 @@ void ScrollBar::onResizeEvent(const ResizeEvent& ev)
 }
 
 
+const Gfx::Brush& ScrollBar::foreground() const
+{
+    return _foreground.isValid() ? _foreground.get()
+                                 : Application::instance().styleOptions().foreground();
+}
+
+void ScrollBar::setForeground(const Gfx::Brush& b)
+{
+    _foreground.set(b);
+    invalidate();
+}
+
+
+const Gfx::Pen& ScrollBar::contour() const
+{
+    return _contour.isValid() ? _contour.get()
+                              : Application::instance().styleOptions().contour();
+}
+
+
+void ScrollBar::setContour(const Gfx::Pen& p)
+{
+    _contour.set(p);
+    invalidate();
+}
+
+
 const Gfx::Brush& ScrollBar::background() const
 {
     return _background.isValid() ? _background.get()

@@ -106,15 +106,16 @@ class PT_HMI_API Panel : public Control
 
         void setImage(const Gfx::Image& image, ImageLayout layout); 
 
+    public:
         const Gfx::Brush* background() const;
 
         void setBackground(const Gfx::Brush& b);
 
         void setBackground(bool b);
 
-        const Gfx::Pen* frame() const;
+        const Gfx::Pen* contour() const;
 
-        void setFrame(const Gfx::Color& color);
+        void setContour(const Gfx::Color& color);
 
         void setFrame(bool b);
 
@@ -131,7 +132,7 @@ class PT_HMI_API Panel : public Control
         Option<Gfx::Brush> _background;
         bool               _hasBackground;
 
-        Option<Gfx::Pen>   _frame;
+        Option<Gfx::Pen>   _contour;
         bool               _hasFrame;
 };
 

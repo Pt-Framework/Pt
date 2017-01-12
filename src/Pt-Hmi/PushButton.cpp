@@ -91,6 +91,33 @@ void PushButton::setFlat(bool f)
 }
 
 
+const Gfx::Brush& PushButton::foreground() const
+{
+    return _foreground.isValid() ? _foreground.get()
+                                 : Application::instance().styleOptions().foreground();
+}
+
+void PushButton::setForeground(const Gfx::Brush& b)
+{
+    _foreground.set(b);
+    invalidate();
+}
+
+
+const Gfx::Pen& PushButton::contour() const
+{
+    return _contour.isValid() ? _contour.get()
+                              : Application::instance().styleOptions().contour();
+}
+
+
+void PushButton::setContour(const Gfx::Pen& p)
+{
+    _contour.set(p);
+    invalidate();
+}
+
+
 const Gfx::Color& PushButton::textColor() const
 {
     return _textColor.isValid() ? _textColor.get()
