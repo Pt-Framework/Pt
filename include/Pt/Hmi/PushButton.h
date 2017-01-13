@@ -35,6 +35,7 @@
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Pen.h>
+#include <Pt/SmartPtr.h>
 
 namespace Pt {
 
@@ -109,7 +110,7 @@ class PT_HMI_API PushButton : public Button
 
         FacetPtr<ButtonRenderer> _renderer;
 
-        Option<Gfx::Brush>       _foreground;
+        AutoPtr<Gfx::Brush>      _foreground;
         Option<Gfx::Pen>         _contour;
         Option<Gfx::Color>       _textColor;
         Option<std::string>      _fontName;

@@ -94,14 +94,14 @@ void PushButton::setFlat(bool f)
 
 const Gfx::Brush& PushButton::foreground() const
 {
-    return _foreground.isValid() ? _foreground.get()
-                                 : styleOptions().foreground();
+    return _foreground ? *_foreground
+                       : styleOptions().foreground();
 }
 
 
 void PushButton::setForeground(const Gfx::Brush& b)
 {
-    _foreground.set(b);
+    _foreground.reset( new Gfx::Brush(b) );
     invalidate();
 }
 
