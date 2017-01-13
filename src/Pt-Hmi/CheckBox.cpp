@@ -38,6 +38,7 @@ namespace Hmi {
 
 CheckBox::CheckBox()
 : _state(Unchecked)
+, _hasRenderer(false)
 {
 }
 
@@ -151,6 +152,15 @@ void CheckBox::setFontStyle(Gfx::Font::Style style)
 }
 
 
+void CheckBox::setRenderer(CheckBoxRenderer* renderer)
+{
+    _renderer.reset(renderer);
+    _hasRenderer = renderer != 0;
+
+    invalidate();
+}
+
+
 void CheckBox::onPressed()
 {
     Base::onPressed();
@@ -177,17 +187,20 @@ void CheckBox::onInvalidate()
     Base::onInvalidate();
 
     const StyleOptions& options = Application::instance().styleOptions();
+    const Style& style = Application::instance().style();
 
     _brush = background();
     _pen = contour();
     _textPen = textColor();
     _font = Gfx::Font(font(), fontSize(), fontStyle());
 
-    const CheckBoxRenderer* renderer = getFacet<CheckBoxRenderer>();
-    if( ! renderer )
+    if( ! _hasRenderer )
+        _renderer.reset( style.get<CheckBoxRenderer>() );
+    
+    if( ! _renderer )
         return;
 
-    renderer->prepare(*this, options, _brush, _pen, _font, _textPen, _boxSize);
+    _renderer->prepare(*this, options, _brush, _pen, _font, _textPen, _boxSize);
 }
 
 
@@ -195,8 +208,7 @@ void CheckBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
-    const CheckBoxRenderer* renderer = getFacet<CheckBoxRenderer>();
-    if( ! renderer )
+    if( ! _renderer )
         return;
 
     Painter painter(surface);
@@ -207,8 +219,8 @@ void CheckBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     
     Gfx::RectF boxRect(Gfx::PointF(boxX, boxY), _boxSize);
 
-    renderer->renderBox(*this, options, painter, rect, 
-                         boxRect, _brush, _pen);
+    _renderer->renderBox(*this, options, painter, rect, 
+                          boxRect, _brush, _pen);
 
     painter.setFont(_font);
     Gfx::FontMetrics tm = painter.fontMetrics( text() );
@@ -240,9 +252,9 @@ void CheckBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
         }
     }
 
-    renderer->renderText(*this, options, painter, rect,
-                         text(), textPos, tm, _font, _textPen,
-                         mnemonicRect);
+    _renderer->renderText(*this, options, painter, rect,
+                          text(), textPos, tm, _font, _textPen,
+                          mnemonicRect);
 }
 
 } // namespace

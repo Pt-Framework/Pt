@@ -123,6 +123,8 @@ class PT_HMI_API LineEdit : public Control
 
         void setFontStyle(Gfx::Font::Style style);
 
+        void setRenderer(LineEditRenderer* renderer);
+
     protected:
         virtual void onKeyEvent(const KeyEvent& ev);
 
@@ -153,9 +155,13 @@ class PT_HMI_API LineEdit : public Control
         Pt::String                    _displayText;
         Pt::String                    _placeholderText;
         bool                          _isAccepted;
+        bool                          _isTextChanged;
         std::size_t                   _cursorPosition;
         double                        _hscroll;
         double                        _halign;
+
+        FacetPtr<LineEditRenderer> _renderer;
+        bool                       _hasRenderer;
 
         Option<Gfx::Brush>            _background;
         Option<Gfx::Pen>              _contour;
@@ -169,6 +175,7 @@ class PT_HMI_API LineEdit : public Control
         Gfx::Pen                      _textPen;
         Gfx::Pen                      _placeholderPen;
         Gfx::Font                     _font;
+        
 };
 
 } // namespace

@@ -95,6 +95,8 @@ class PT_HMI_API Label : public Control
 
         void setFontStyle(Gfx::Font::Style style);
 
+        void setRenderer(LabelRenderer* renderer);
+
     protected:
         virtual Gfx::SizeF onAutoSize() const;
 
@@ -116,6 +118,9 @@ class PT_HMI_API Label : public Control
         Option<std::size_t>      _fontSize;
         Option<Gfx::Font::Style> _fontStyle;
         
+        FacetPtr<LabelRenderer>  _renderer;
+        bool                     _hasRenderer;
+
         Gfx::Pen    _textPen;
         Gfx::Font   _font;
 };

@@ -89,6 +89,8 @@ class ImageLayout
 
 class PT_HMI_API Panel : public Control
 {
+    typedef Control Base;
+
 	  public:
         Panel();
 		
@@ -119,15 +121,23 @@ class PT_HMI_API Panel : public Control
 
         void setFrame(bool b);
 
+        void setRenderer(PanelRenderer* renderer);
+
     protected:
-        virtual void onResizeEvent(const ResizeEvent& ev);
+        void onInvalidate();
 	
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+
+    protected:
+        virtual void onResizeEvent(const ResizeEvent& ev);
 
     private:
         Gfx::Image  _image;
         Picture     _picture;
         ImageLayout _layout;
+
+        FacetPtr<PanelRenderer> _renderer;
+        bool                    _hasRenderer;
 
         Option<Gfx::Brush> _background;
         bool               _hasBackground;

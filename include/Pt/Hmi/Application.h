@@ -82,10 +82,6 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void invalidate();
 
-        const Pt::Gfx::Font& font() const;
-
-        void setFont(const Pt::Gfx::Font& f);
-
         void setCursor(const Cursor* cursor = 0);
 
         Window* pointerWindow();
@@ -110,6 +106,7 @@ class PT_HMI_API Application : public Pt::System::Application
 
         const Visual* findVisual(Pt::uint64_t id) const;
 
+        // TODO: this might be the same as loop().waitNext()
         void nextEvent();
 
         const Style& style() const;
@@ -120,13 +117,13 @@ class PT_HMI_API Application : public Pt::System::Application
 
         StyleOptions& styleOptions();
 
-        Gfx::Font makeFont(const Gfx::Font& fromFont) const;
+        InputMethod& inputMethod();
+
+        void setInputMethod(InputMethod& im);
+
+        void removeInputMethod(InputMethod& im);
 
         ApplicationImpl* impl();
-
-        void setInputMethod(InputMethod& method);
-
-        InputMethod& inputMethod();
 
     protected:
         void onResizeEvent(const ResizeEvent& ev);

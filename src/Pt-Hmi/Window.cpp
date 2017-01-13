@@ -1144,7 +1144,7 @@ void Window::onMouseEvent(const MouseEvent& ev)
 
     if( ev.isPress() )
     {
-        if( ! widget || ! widget->isTextInput() )
+        if( ! widget || !widget->isTextInput() )
             Application::instance().inputMethod().finish(*widget);
     }
 
@@ -1243,7 +1243,12 @@ void Window::onKeyEvent(const KeyEvent& ev)
             focusNext();
 
             if(_focusWidget)
+            {
                 _focusWidget->update();
+
+                if(!_focusWidget->isTextInput() )
+                    Application::instance().inputMethod().finish(*_focusWidget);
+            }
         }
     }
 }

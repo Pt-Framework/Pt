@@ -37,6 +37,7 @@ namespace Hmi {
 
 Label::Label()
 : _textAlignment(MiddleCenter)
+, _hasRenderer(false)
 {
 }
 
@@ -155,6 +156,15 @@ void Label::setFontStyle(Gfx::Font::Style style)
 }
 
 
+void Label::setRenderer(LabelRenderer* renderer)
+{
+    _renderer.reset(renderer);
+    _hasRenderer = renderer != 0;
+
+    invalidate();
+}
+
+
 Gfx::SizeF Label::onAutoSize() const
 {
     Gfx::FontMetrics fm = Hmi::Painter::fontMetrics(_font, _text);
@@ -169,15 +179,18 @@ void Label::onInvalidate()
     Base::onInvalidate();
 
     const StyleOptions& options = Application::instance().styleOptions();
+    const Style& style = Application::instance().style();
 
     _textPen = textColor();
     _font = Gfx::Font(font(), fontSize(), fontStyle());
 
-    const LabelRenderer* renderer = getFacet<LabelRenderer>();
-    if( ! renderer )
+    if( ! _hasRenderer )
+        _renderer.reset( style.get<LabelRenderer>() );
+    
+    if( ! _renderer )
         return;
 
-    renderer->prepare(*this, options, _font, _textPen);
+    _renderer->prepare(*this, options, _font, _textPen);
 }
 
 
@@ -185,8 +198,7 @@ void Label::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
-    const LabelRenderer* renderer = getFacet<LabelRenderer>();
-    if( ! renderer)
+    if( ! _renderer)
         return;
 
     Painter painter(surface);
@@ -195,21 +207,21 @@ void Label::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     const Gfx::Brush* brush = background();
     if(brush)
     {
-        renderer->renderBackground(*this, options,
-                                   painter, rect, *brush);
+        _renderer->renderBackground(*this, options,
+                                    painter, rect, *brush);
     }
 
     const Gfx::Pen* pen = contour();
     if( pen )
     {
-        renderer->renderFrame(*this, options,
-                              painter, rect, *pen);
+        _renderer->renderFrame(*this, options,
+                               painter, rect, *pen);
     }
     
     Gfx::PointF pos = textPosition();
 
-    renderer->renderText(*this, options,  painter, rect,
-                         text(), pos, _font, _textPen);
+    _renderer->renderText(*this, options,  painter, rect,
+                          text(), pos, _font, _textPen);
 }
 
 

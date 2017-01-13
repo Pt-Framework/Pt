@@ -24,12 +24,12 @@
    You should have received a copy of the GNU Lesser General Public
    License along with this library; if not, write to the Free Software
    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
-   MA  02110-1301  USA
+   MA 02110-1301 USA
 */
 
 #include <Pt/Hmi/InputMethod.h>
-#include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/Widget.h>
 #include <iostream>
 
 namespace Pt {
@@ -37,7 +37,8 @@ namespace Pt {
 namespace Hmi {
 
 InputMethod::InputMethod()
-: _receiver(0)
+: _app(0)
+, _receiver(0)
 , _keyEvent(0)
 , _isVisible(false)
 {
@@ -46,6 +47,8 @@ InputMethod::InputMethod()
 
 InputMethod::~InputMethod()
 {
+    if(_app)
+        _app->removeInputMethod(*this);
 }
 
 
@@ -90,6 +93,18 @@ void InputMethod::sendKeyEvent(const KeyEvent& ev)
     _keyEvent = ev;
     _keyEvent.setId(_receiver);
      Application::instance().loop().commitEvent(_keyEvent);
+}
+
+
+void InputMethod::registerApplication(Application& app)
+{
+    _app = &app;
+}
+        
+
+void InputMethod::unregisterApplication(Application&)
+{
+    _app = 0;
 }
 
 

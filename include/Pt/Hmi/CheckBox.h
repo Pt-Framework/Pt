@@ -85,6 +85,8 @@ class PT_HMI_API CheckBox : public Button
         Gfx::Font::Style fontStyle() const;
 
         void setFontStyle(Gfx::Font::Style style);
+
+        void setRenderer(CheckBoxRenderer* renderer);
     
     protected:
         virtual void onInvalidate();
@@ -98,6 +100,9 @@ class PT_HMI_API CheckBox : public Button
 
     private:
         State                    _state;
+
+        FacetPtr<CheckBoxRenderer> _renderer;
+        bool                       _hasRenderer;
 
         Option<Gfx::Brush>       _background;
         Option<Gfx::Pen>         _contour;

@@ -90,6 +90,8 @@ class MenuBarItem : public Control
 
         void setFontStyle(Gfx::Font::Style style);
 
+        void setRenderer(MenuBarRenderer* renderer);
+
     protected:
         virtual Gfx::SizeF onAutoSize() const;
 
@@ -115,6 +117,9 @@ class MenuBarItem : public Control
         Option<std::string>      _fontName;
         Option<std::size_t>      _fontSize;
         Option<Gfx::Font::Style> _fontStyle;
+
+        FacetPtr<MenuBarRenderer> _renderer;
+        bool                      _hasRenderer;
 
         Gfx::Brush               _brush;
         Gfx::Pen                 _pen;
@@ -145,6 +150,8 @@ class PT_HMI_API MenuBar : public MenuShell
         const Gfx::Pen& contour() const;
 
         void setContour(const Gfx::Pen& p);
+
+        void setRenderer(MenuBarRenderer* renderer);
 
     protected:
         virtual void onAddMenu(Menu& menu, const Pt::String& text);
@@ -180,8 +187,11 @@ class PT_HMI_API MenuBar : public MenuShell
         Menu*                     _currentMenu;
         MenuBarItem*              _currentMenuItem;
 
+        FacetPtr<MenuBarRenderer> _renderer;
+        bool                      _hasRenderer;
+
         Option<Gfx::Brush>       _background;
-        Option<Gfx::Pen>   _contour;
+        Option<Gfx::Pen>          _contour;
 
         Gfx::Brush               _brush;
         Gfx::Pen                 _pen;

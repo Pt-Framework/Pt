@@ -98,6 +98,8 @@ class PT_HMI_API MenuItem : public Control
 
         void setFontStyle(Gfx::Font::Style style);
 
+        void setRenderer(MenuRenderer* renderer);
+
     protected:
         // TODO: rename onSelected
         virtual void onTriggered();
@@ -131,6 +133,9 @@ class PT_HMI_API MenuItem : public Control
         Gfx::Image        _icon;
         Pt::String        _text;
         Menu*             _subMenu;
+
+        FacetPtr<MenuRenderer> _renderer;
+        bool                   _hasRenderer;
 
         Option<Gfx::Brush>       _background;
         Option<Gfx::Pen>         _contour;

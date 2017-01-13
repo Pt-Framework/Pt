@@ -90,12 +90,16 @@ class PT_HMI_API PushButton : public Button
 
         void setFontStyle(Gfx::Font::Style style);
 
+        void setRenderer(ButtonRenderer* renderer);
+
     protected:
         virtual void onPressed();
 
         virtual void onReleased();
 
     protected:
+        virtual void onSetStyleOptions(const StyleOptions& options);
+
         virtual void onInvalidate();
 
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
@@ -109,6 +113,7 @@ class PT_HMI_API PushButton : public Button
         Gfx::Image _image;
 
         FacetPtr<ButtonRenderer> _renderer;
+        bool                     _hasRenderer;
 
         AutoPtr<Gfx::Brush>      _foreground;
         Option<Gfx::Pen>         _contour;

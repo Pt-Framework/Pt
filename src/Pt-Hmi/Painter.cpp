@@ -165,14 +165,7 @@ const Gfx::Brush& Painter::brush() const
 
 void Painter::setFont(const Gfx::Font& font)
 {
-    if( font.name().empty() )
-    {
-        const Gfx::Font& defaultFont = Application::instance().font();
-        _font = Gfx::Font( defaultFont.name(), font );
-    }
-    else
-        _font = font;
-
+    _font = font;
     _impl->setFont(_font);
 
     if(_surface)

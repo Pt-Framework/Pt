@@ -42,6 +42,7 @@ Panel::Panel()
 , _layout( ImageLayout::None )
 , _hasBackground(false)
 , _hasFrame(false)
+, _hasRenderer(false)
 {
 }
 
@@ -102,6 +103,15 @@ void Panel::setFrame(bool b)
 }
 
 
+void Panel::setRenderer(PanelRenderer* renderer)
+{
+    _renderer.reset(renderer);
+    _hasRenderer = renderer != 0;
+
+    invalidate();
+}
+
+
 void Panel::setImage(const Gfx::Image& image, ImageLayout layout)
 {
     if(layout == ImageLayout::Strech || layout ==  ImageLayout::Zoom)
@@ -113,9 +123,77 @@ void Panel::setImage(const Gfx::Image& image, ImageLayout layout)
 }   
 
 
+void Panel::onInvalidate()
+{
+    Base::onInvalidate();
+
+    const StyleOptions& options = Application::instance().styleOptions();
+    const Style& style = Application::instance().style();
+
+    if( ! _hasRenderer )
+        _renderer.reset( style.get<PanelRenderer>() );
+}
+
+
+void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+{
+    const StyleOptions& options = Application::instance().styleOptions();
+
+    if( ! _renderer)
+        return;
+
+    Painter painter(surface);
+    painter.setClip(rect);
+
+    const Gfx::Brush* brush = background();
+    if(brush)
+    {
+        _renderer->renderBackground(*this, options,
+                                    painter, rect, *brush);
+    }
+
+    if( ! _picture.empty() )
+    {
+        const Gfx::SizeF& size = this->size();
+
+        switch( _layout.type() )
+        {
+            default:
+                painter.drawPicture( Pt::Gfx::PointF(0,0), _picture );
+                break;
+
+            case ImageLayout::Tile:
+            {
+                for( double x = 0; x < size.width();  x += _picture.width() )
+                {
+                    for( double y = 0; y < size.height();  y += _picture.height() )
+                        painter.drawPicture(Gfx::PointF(x,y), _picture);
+                }
+                break;
+            }
+            
+            case ImageLayout::Center:
+            {
+                const double x = size.width()/2  - _picture.width()/2;
+                const double y = size.height()/2  - _picture.height()/2;
+                painter.drawPicture(Gfx::PointF(x, y), _picture);
+                break;
+            }
+        }
+    }  
+
+    const Gfx::Pen* pen = contour();
+    if(pen)
+    {
+        _renderer->renderFrame(*this, options,
+                               painter, rect, *pen);
+    }
+}
+
+
 void Panel::onResizeEvent(const ResizeEvent& ev)
 {
-    Control::onResizeEvent(ev);
+    Base::onResizeEvent(ev);
 
     if( _picture.empty() || ev.size().width() < 1 || ev.size().height() < 1 )
         return;
@@ -152,63 +230,6 @@ void Panel::onResizeEvent(const ResizeEvent& ev)
         }
         break;
     }  
-}
-
-
-void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
-{
-    const StyleOptions& options = Application::instance().styleOptions();
-
-    const PanelRenderer* renderer = getFacet<PanelRenderer>();
-    if( ! renderer)
-        return;
-
-    Painter painter(surface);
-    painter.setClip(rect);
-
-    const Gfx::Brush* brush = background();
-    if(brush)
-    {
-        renderer->renderBackground(*this, options,
-                                   painter, rect, *brush);
-    }
-
-    if( ! _picture.empty() )
-    {
-        const Gfx::SizeF& size = this->size();
-
-        switch( _layout.type() )
-        {
-            default:
-                painter.drawPicture( Pt::Gfx::PointF(0,0), _picture );
-                break;
-
-            case ImageLayout::Tile:
-            {
-                for( double x = 0; x < size.width();  x += _picture.width() )
-                {
-                    for( double y = 0; y < size.height();  y += _picture.height() )
-                        painter.drawPicture(Gfx::PointF(x,y), _picture);
-                }
-                break;
-            }
-            
-            case ImageLayout::Center:
-            {
-                const double x = size.width()/2  - _picture.width()/2;
-                const double y = size.height()/2  - _picture.height()/2;
-                painter.drawPicture(Gfx::PointF(x, y), _picture);
-                break;
-            }
-        }
-    }  
-
-    const Gfx::Pen* pen = contour();
-    if(pen)
-    {
-        renderer->renderFrame(*this, options,
-                              painter, rect, *pen);
-    }
 }
 
 } // namespace

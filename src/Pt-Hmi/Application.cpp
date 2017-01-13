@@ -48,7 +48,7 @@ Application::Application(int argc, char** argv)
 , _pointerWidget(0)
 , _pointerGrabber(0)
 , _font("", 12)
-, _inputMethod(&_defaultInputMethod)
+, _inputMethod(0)
 {
     this->init(*_impl);
 
@@ -74,13 +74,44 @@ Application::Application(int argc, char** argv)
     loop().eventReceived() += Pt::slot(*this, &Application::onFocusEvent );
     loop().eventReceived() += Pt::slot(*this, &Application::onWindowStateEvent);
     loop().eventReceived() += Pt::slot(*this, &Application::onInvalidateEvent);
+
+    setInputMethod(_defaultInputMethod);
 }
 
 
 Application::~Application()
 {
+    if(_inputMethod)
+        removeInputMethod(*_inputMethod);
+
     delete _mainScreen;
     delete _impl;
+}
+
+
+InputMethod& Application::inputMethod()
+{
+    return *_inputMethod;
+}
+
+
+void Application::setInputMethod(InputMethod& im)
+{
+    if(_inputMethod)
+        removeInputMethod(*_inputMethod);
+
+    _inputMethod = &im;
+    im.registerApplication(*this);
+}
+
+
+void Application::removeInputMethod(InputMethod& im)
+{
+    if(_inputMethod == &im)
+    {
+        _inputMethod = 0;
+        im.unregisterApplication(*this);
+    }
 }
 
 
@@ -114,19 +145,6 @@ void Application::invalidate()
 }
 
 
-const Gfx::Font& Application::font() const
-{
-    return _font;
-}
-
-
-void Application::setFont(const Gfx::Font& font)
-{
-    _font = font;
-    invalidate();
-}
-
-
 void Application::setCursor( const Cursor* cursor )
 {
     _impl->setCursor( cursor );
@@ -154,18 +172,6 @@ const StyleOptions& Application::styleOptions() const
 StyleOptions& Application::styleOptions()
 {
     return _styleOptions;
-}
-
-
-Gfx::Font Application::makeFont(const Gfx::Font& userFont) const
-{
-    if( userFont.isNull() )
-        return _font;
-
-    if( userFont.name().empty() )
-        return Gfx::Font(_font.name(), userFont);
-
-    return _userFont;
 }
 
 
@@ -490,18 +496,6 @@ void Application::onFocusEvent(const FocusEvent& ev)
         return;
 
     it->second->processEvent(ev);
-}
-
-
-void Application::setInputMethod(InputMethod& method)
-{
-    _inputMethod = &method;
-}
-
-
-InputMethod& Application::inputMethod()
-{
-    return *_inputMethod;
 }
 
 

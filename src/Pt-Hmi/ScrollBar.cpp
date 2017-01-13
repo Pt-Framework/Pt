@@ -48,6 +48,7 @@ ScrollBar::ScrollBar(Orientation o)
 , _offsetPixel(0)
 , _factorPosition(1)
 , _offsetPosition(0)
+, _hasRenderer(false)
 {
     setAcceptInput(true);
 }
@@ -246,22 +247,34 @@ void ScrollBar::setBackground(const Gfx::Brush& b)
 }
 
 
+void ScrollBar::setRenderer(ScrollBarRenderer* renderer)
+{
+    _renderer.reset(renderer);
+    _hasRenderer = renderer != 0;
+
+    invalidate();
+}
+
+
 void ScrollBar::onInvalidate()
 {
     Base::onInvalidate();
 
     const StyleOptions& options = Application::instance().styleOptions();
+    const Style& style = Application::instance().style();
 
     _backgroundBrush = background();
     _foregroundBrush = foreground();
     _contourPen = contour();
 
-    const ScrollBarRenderer* renderer = getFacet<ScrollBarRenderer>();
-    if( ! renderer )
+    if( ! _hasRenderer )
+        _renderer.reset( style.get<ScrollBarRenderer>() );
+    
+    if( ! _renderer )
         return;
 
-    renderer->prepare(*this, options, 
-                      _backgroundBrush, _foregroundBrush, _contourPen);
+    _renderer->prepare(*this, options, 
+                       _backgroundBrush, _foregroundBrush, _contourPen);
 }
 
 
@@ -269,15 +282,14 @@ void ScrollBar::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
-    const ScrollBarRenderer* renderer = getFacet<ScrollBarRenderer>();
-    if( ! renderer )
+    if( ! _renderer )
         return;
 
     Painter painter(surface);
     painter.setClip(rect);
 
-    renderer->render(*this, options, painter, rect, _handleRect,
-                     _backgroundBrush, _foregroundBrush, _contourPen);
+    _renderer->render(*this, options, painter, rect, _handleRect,
+                      _backgroundBrush, _foregroundBrush, _contourPen);
 
 }
 

@@ -39,6 +39,7 @@ namespace Hmi {
 PushButton::PushButton()
 : _isToggle(false)
 , _isFlat(false)
+, _hasRenderer(false)
 {
 }
 
@@ -66,14 +67,12 @@ void PushButton::setImage(const Gfx::Image& image)
     _image = image;
     _picture.set(image);
 
-    const StyleOptions& options = styleOptions();
+    const StyleOptions& options = Application::instance().styleOptions();
 
-    //const ButtonRenderer* renderer = style().get<ButtonRenderer>();
-    const ButtonRenderer* renderer = _renderer.get();
-    if( ! renderer )
+    if( ! _renderer )
         return;
 
-    renderer->prepareIcon(*this, options, image, _picture);
+    _renderer->prepareIcon(*this, options, image, _picture);
     
     invalidate();
 }
@@ -95,7 +94,7 @@ void PushButton::setFlat(bool f)
 const Gfx::Brush& PushButton::foreground() const
 {
     return _foreground ? *_foreground
-                       : styleOptions().foreground();
+                       : Application::instance().styleOptions().foreground();
 }
 
 
@@ -109,7 +108,7 @@ void PushButton::setForeground(const Gfx::Brush& b)
 const Gfx::Pen& PushButton::contour() const
 {
     return _contour.isValid() ? _contour.get()
-                              : styleOptions().contour();
+                              : Application::instance().styleOptions().contour();
 }
 
 
@@ -123,7 +122,7 @@ void PushButton::setContour(const Gfx::Pen& p)
 const Gfx::Color& PushButton::textColor() const
 {
     return _textColor.isValid() ? _textColor.get()
-                                : styleOptions().textColor();
+                                : Application::instance().styleOptions().textColor();
 }
 
 
@@ -137,7 +136,7 @@ void PushButton::setTextColor(const Gfx::Color& color)
 const std::string& PushButton::font() const
 {
     return _fontName.isValid() ? _fontName.get()
-                               : styleOptions().font().name();
+                               : Application::instance().styleOptions().font().name();
 }
 
 
@@ -152,7 +151,7 @@ std::size_t PushButton::fontSize() const
 {
 
     return _fontSize.isValid() ? _fontSize.get()
-                               : styleOptions().font().size();
+                               : Application::instance().styleOptions().font().size();
 }
 
 
@@ -166,13 +165,22 @@ void PushButton::setFontSize(const std::size_t s)
 Gfx::Font::Style PushButton::fontStyle() const
 {
     return _fontStyle.isValid() ? _fontStyle.get()
-                                : styleOptions().font().style();
+                                : Application::instance().styleOptions().font().style();
 }
 
 
 void PushButton::setFontStyle(Gfx::Font::Style style)
 {
     _fontStyle.set(style);
+    invalidate();
+}
+
+
+void PushButton::setRenderer(ButtonRenderer* renderer)
+{
+    _renderer.reset(renderer);
+    _hasRenderer = renderer != 0;
+
     invalidate();
 }
 
@@ -199,22 +207,34 @@ void PushButton::onReleased()
 }
 
 
+void PushButton::onSetStyleOptions(const StyleOptions& o)
+{
+    _foreground.reset( new Gfx::Brush(o.foreground()) );
+    _contour.set( o.contour() );
+    _textColor.set( o.textColor() );
+    _fontName.set( o.font().name() );
+    _fontSize.set( o.font().size() );
+    _fontStyle.set( o.font().style() );
+}
+
+
 void PushButton::onInvalidate()
 {
     Base::onInvalidate();
 
-    const StyleOptions& options = styleOptions();
+    const StyleOptions& options = Application::instance().styleOptions();
+    const Style& style = Application::instance().style();
 
     _brush = foreground();
     _pen = contour();
     _textPen = textColor();
     _font = Gfx::Font(font(), fontSize(), fontStyle());
 
-    _renderer.reset( style().get<ButtonRenderer>() );
-
-    //const ButtonRenderer* renderer = style().get<ButtonRenderer>();
-    //if( ! renderer )
-    //    return;
+    if( ! _hasRenderer )
+        _renderer.reset( style.get<ButtonRenderer>() );
+    
+    if( ! _renderer )
+        return;
 
     _renderer->prepare(*this, options, _brush, _pen, _font, _textPen);
 }
@@ -222,11 +242,9 @@ void PushButton::onInvalidate()
 
 void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
-    const StyleOptions& options = styleOptions();
+    const StyleOptions& options = Application::instance().styleOptions();
 
-    //const ButtonRenderer* renderer = style().get<ButtonRenderer>();
-    const ButtonRenderer* renderer = _renderer.get();
-    if( ! renderer )
+    if( ! _renderer )
         return;
 
     Painter painter(surface);
@@ -238,8 +256,8 @@ void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 
     if( ! _isFlat )
     {
-        renderer->renderBackground(*this, options, painter, rect, 
-                                   _brush, _pen);
+        _renderer->renderBackground(*this, options, painter, rect, 
+                                    _brush, _pen);
     }
 
     painter.setFont(_font);
@@ -289,9 +307,9 @@ void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
         }
     }
 
-    renderer->renderText(*this, options, painter, rect,
-                         text(), textPos, _font, _textPen,
-                         mnemonicRect);
+    _renderer->renderText(*this, options, painter, rect,
+                          text(), textPos, _font, _textPen,
+                          mnemonicRect);
 }
 
 
@@ -299,14 +317,10 @@ void PushButton::onEnableEvent(const EnableEvent& ev)
 {
     Base::onEnableEvent(ev);
 
-    const StyleOptions& options = styleOptions();
+    const StyleOptions& options = Application::instance().styleOptions();
 
-    //const ButtonRenderer* renderer = style().get<ButtonRenderer>();
-    const ButtonRenderer* renderer = _renderer.get();
-    if( ! renderer )
-        return;
-
-    renderer->prepareIcon(*this, options, _image, _picture);
+    if(_renderer)
+        _renderer->prepareIcon(*this, options, _image, _picture);
 }
 
 } // namespace

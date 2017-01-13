@@ -24,7 +24,7 @@
    You should have received a copy of the GNU Lesser General Public
    License along with this library; if not, write to the Free Software
    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
-   MA  02110-1301  USA
+   MA 02110-1301 USA
 */
 
 #ifndef Pt_Hmi_InputMethod_H
@@ -39,9 +39,12 @@ namespace Pt {
 namespace Hmi {
 
 class Widget;
+class Application;
 
 class PT_HMI_API InputMethod : public Pt::Connectable
 {
+    friend class Application;
+
     public:
         InputMethod();
 
@@ -55,11 +58,18 @@ class PT_HMI_API InputMethod : public Pt::Connectable
 
     protected:
         virtual void onShow(bool show) = 0;
+        
         virtual bool onFinish(Widget& widget) = 0;
 
         void sendKeyEvent(const KeyEvent& ev);
 
     private:
+        void registerApplication(Application& app);
+        
+        void unregisterApplication(Application& app);
+
+    private:
+        Application* _app;
         Pt::uint64_t _receiver;
         KeyEvent     _keyEvent;
         bool         _isVisible;
@@ -70,6 +80,7 @@ class DefaultInputMethod : public InputMethod
 {
     protected:
         virtual void onShow(bool show);
+        
         virtual bool onFinish(Widget& widget);
 };
 

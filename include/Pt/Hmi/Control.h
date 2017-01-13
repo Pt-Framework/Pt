@@ -48,26 +48,11 @@ class PT_HMI_API Control : public Widget
         // TODO: find better name
         bool isHighlighted() const;
 
-        void setStyle(const Style& style);
-
-        const Style& style() const;
-
-        template<typename T> 
-        const T* getFacet() const
-        {
-            if( _style != 0)
-            {
-                const T* facet = _style->get<T>();
-                if(facet)
-                    return facet;
-            }
-
-            return Application::instance().style().get<T>();
-        }
-
-        const StyleOptions& styleOptions() const;
+        void setStyleOptions(const StyleOptions& o);
 
     protected:
+        virtual void onSetStyleOptions(const StyleOptions& o);
+        
         virtual void onInvalidate();
 
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect) = 0;
@@ -82,8 +67,6 @@ class PT_HMI_API Control : public Widget
         virtual void onLeaveEvent(const LeaveEvent& ev );
 
     private:
-        Style*        _style;
-        StyleOptions* _styleOptions;
         bool          _isHighlighted;
 }; 
 

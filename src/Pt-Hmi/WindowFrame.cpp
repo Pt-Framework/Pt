@@ -994,7 +994,7 @@ void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
     //
     Pt::String title = _window->title().c_str();
 
-    const Gfx::Font& font = Application::instance().font();
+    const Gfx::Font& font = Application::instance().styleOptions().font();
     painter.setFont(font);
     Gfx::FontMetrics fm = painter.fontMetrics(title);
 

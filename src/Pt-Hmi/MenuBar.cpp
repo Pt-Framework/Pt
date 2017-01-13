@@ -45,6 +45,7 @@ namespace Hmi {
 MenuBarItem::MenuBarItem(MenuBar& mb, Menu& menu, const Pt::String& text)
 : _menuBar(mb)
 , _menu(menu)
+, _hasRenderer(false)
 {
     setAutoSize(true);
     setFocusPolicy(Widget::NormalFocus);
@@ -108,9 +109,7 @@ void MenuBarItem::close()
 
 Gfx::SizeF MenuBarItem::onAutoSize() const
 {
-    const Gfx::Font& font = Application::instance().font();
-
-    Gfx::FontMetrics fm = Painter::fontMetrics(font, _text);
+    Gfx::FontMetrics fm = Painter::fontMetrics(_font, _text);
 
     return Gfx::SizeF( fm.width() + padding().leftRight(), 
                        fm.height() + padding().topBottom() );
@@ -250,22 +249,34 @@ void MenuBarItem::setFontStyle(Gfx::Font::Style style)
 }
 
 
+void MenuBarItem::setRenderer(MenuBarRenderer* renderer)
+{
+    _renderer.reset(renderer);
+    _hasRenderer = renderer != 0;
+
+    invalidate();
+}
+
+
 void MenuBarItem::onInvalidate()
 {
     Base::onInvalidate();
 
     const StyleOptions& options = Application::instance().styleOptions();
+    const Style& style = Application::instance().style();
 
     _brush = background();
     _pen = contour();
     _textPen = textColor();
-    _font  = Gfx::Font(font(), fontSize(), fontStyle());
+    _font = Gfx::Font(font(), fontSize(), fontStyle());
 
-    const MenuBarRenderer* renderer = getFacet<MenuBarRenderer>();
-    if( ! renderer )
+    if( ! _hasRenderer )
+        _renderer.reset( style.get<MenuBarRenderer>() );
+    
+    if( ! _renderer )
         return;
 
-    renderer->prepareItem(*this, options, _brush, _pen, _font, _textPen);
+    _renderer->prepareItem(*this, options, _brush, _pen, _font, _textPen);
 }
 
 
@@ -273,8 +284,7 @@ void MenuBarItem::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
     
-    const MenuBarRenderer* renderer = getFacet<MenuBarRenderer>();
-    if( ! renderer )
+    if( ! _renderer )
         return;
 
     Painter painter(surface);
@@ -283,8 +293,8 @@ void MenuBarItem::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     //
     // item background
     //
-    renderer->renderItem(*this, options, painter, rect, 
-                         _brush, _pen);
+    _renderer->renderItem(*this, options, painter, rect, 
+                          _brush, _pen);
 
     //
     // item text
@@ -297,8 +307,8 @@ void MenuBarItem::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 
     Gfx::RectF mnemonicRect; // TODO
     
-    renderer->renderItemText(*this, options, painter, rect,
-                             _text, textPos, _font, _textPen, mnemonicRect);
+    _renderer->renderItemText(*this, options, painter, rect,
+                              _text, textPos, _font, _textPen, mnemonicRect);
 }
 
 
@@ -323,6 +333,7 @@ MenuBar::MenuBar()
 : _layout(FlowLayout::Left)
 , _currentMenu(0)
 , _currentMenuItem(0)
+, _hasRenderer(false)
 {
     //this->setBackground( Gfx::Color(58981, 58981, 58981) );
     //this->setBorderColor( Gfx::Color(32767, 32767, 32767)  );
@@ -489,20 +500,33 @@ void MenuBar::setContour(const Gfx::Pen& p)
 }
 
 
+
+void MenuBar::setRenderer(MenuBarRenderer* renderer)
+{
+    _renderer.reset(renderer);
+    _hasRenderer = renderer != 0;
+
+    invalidate();
+}
+
+
 void MenuBar::onInvalidate()
 {
     Base::onInvalidate();
 
     const StyleOptions& options = Application::instance().styleOptions();
-
+    const Style& style = Application::instance().style();
+    
     _brush = background();
     _pen = contour();
 
-    const MenuBarRenderer* renderer = getFacet<MenuBarRenderer>();
-    if(renderer)
+    if( ! _hasRenderer )
+        _renderer.reset( style.get<MenuBarRenderer>() );
+    
+    if( ! _renderer )
         return;
 
-    renderer->prepare(*this, options, _brush, _pen);
+    _renderer->prepare(*this, options, _brush, _pen);
 }
 
 
@@ -510,13 +534,14 @@ void MenuBar::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
+    if( ! _renderer )
+        return;
+
     Painter painter(surface);
     painter.setClip(rect);
 
-    const MenuBarRenderer* renderer = getFacet<MenuBarRenderer>();
-    if(renderer)
-        renderer->renderBackground(*this, options, painter, rect, 
-                                   _brush, _pen);
+    _renderer->renderBackground(*this, options, painter, rect, 
+                                _brush, _pen);
 }
 
 

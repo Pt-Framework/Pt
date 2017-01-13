@@ -40,35 +40,24 @@ namespace Pt {
 namespace Hmi {
 
 Control::Control()
-: _style(0)
-, _isHighlighted(false)
+: _isHighlighted(false)
 {    
 }
 
 
 Control::~Control()
 {
-    delete _style;
 }
 
 
-void Control::setStyle(const Style& style)
+void Control::setStyleOptions(const StyleOptions& o)
 {
-    delete _style;
-    _style = 0;
-    _style = new Style(style);
-}    
-
-
-const Style& Control::style() const
-{
-    return _style ? *_style : Application::instance().style();
+    onSetStyleOptions(o);
+    invalidate();
 }
 
-
-const StyleOptions& Control::styleOptions() const
+void Control::onSetStyleOptions(const StyleOptions& o)
 {
-    return Application::instance().styleOptions();
 }
 
 
@@ -102,7 +91,7 @@ void Control::onPaintEvent(const PaintEvent& ev)
 void Control::onFocusEvent(const FocusEvent& ev)
 {
     Widget::onFocusEvent(ev);
-    
+        
     invalidate();
 }
 

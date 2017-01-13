@@ -91,6 +91,8 @@ class PT_HMI_API ScrollBar : public Control
 
         void setBackground(const Gfx::Brush& b);
 
+        void setRenderer(ScrollBarRenderer* renderer);
+
     protected:
         virtual void onInvalidate();
 
@@ -125,13 +127,16 @@ class PT_HMI_API ScrollBar : public Control
         Gfx::RectF  _handleRect;
         Signal<int> _changed;
 
-        Option<Gfx::Brush>       _foreground;
-        Option<Gfx::Pen>         _contour;
-        Option<Gfx::Brush>       _background;
+        FacetPtr<ScrollBarRenderer> _renderer;
+        bool                        _hasRenderer;
 
-        Gfx::Brush               _backgroundBrush;
-        Gfx::Brush               _foregroundBrush;
-        Gfx::Pen                 _contourPen;
+        Option<Gfx::Brush>          _foreground;
+        Option<Gfx::Pen>            _contour;
+        Option<Gfx::Brush>          _background;
+
+        Gfx::Brush                  _backgroundBrush;
+        Gfx::Brush                  _foregroundBrush;
+        Gfx::Pen                    _contourPen;
 };
 
 } // namespace

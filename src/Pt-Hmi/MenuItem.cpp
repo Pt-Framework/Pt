@@ -93,6 +93,7 @@ MenuItem::MenuItem()
 , _iconWidth(0)
 , _text("(empty)")
 , _subMenu(0)
+, _hasRenderer(false)
 {
     setAutoSize(true);
     setFocusPolicy(Widget::NormalFocus);
@@ -249,6 +250,16 @@ void MenuItem::setFontStyle(Gfx::Font::Style style)
     invalidate();
 }
 
+
+void MenuItem::setRenderer(MenuRenderer* renderer)
+{
+    _renderer.reset(renderer);
+    _hasRenderer = renderer != 0;
+
+    invalidate();
+}
+
+
 void MenuItem::onTriggered()
 {   
     _triggered.send(*this);
@@ -298,18 +309,21 @@ void MenuItem::onInvalidate()
     Base::onInvalidate();
 
     const StyleOptions& options = Application::instance().styleOptions();
+    const Style& style = Application::instance().style();
 
     _brush = background();
     _pen = contour();
     _textPen = textColor();
     _font = Gfx::Font(font(), fontSize(), fontStyle());
 
-    const MenuRenderer* renderer = getFacet<MenuRenderer>();
-    if( ! renderer )
+    if( ! _hasRenderer )
+        _renderer.reset( style.get<MenuRenderer>() );
+    
+    if( ! _renderer )
         return;
 
-    renderer->prepareItem(*this, options, _icon, 
-                          _picture, _brush, _pen, _font, _textPen);
+    _renderer->prepareItem(*this, options, _icon, 
+                           _picture, _brush, _pen, _font, _textPen);
 }
 
 
@@ -317,8 +331,7 @@ void MenuItem::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
-    const MenuRenderer* renderer = getFacet<MenuRenderer>();
-    if( ! renderer )
+    if( ! _renderer )
         return;
     
     Painter painter(surface);
@@ -327,7 +340,7 @@ void MenuItem::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     //
     // background
     //
-    renderer->renderItem(*this, options, painter, rect, _brush, _pen);
+    _renderer->renderItem(*this, options, painter, rect, _brush, _pen);
     
     //
     // icon
@@ -373,7 +386,7 @@ void MenuItem::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     // menu indicator
     //
     if( _subMenu)
-        renderer->renderIndicator(*this, options, painter, rect);
+        _renderer->renderIndicator(*this, options, painter, rect);
 }
 
 
