@@ -180,32 +180,16 @@ class PT_HMI_API Window : public WindowBase
 
     void setState(State s);
 
-    void setStyle(const Style& style);
-
-    const Style& style() const;
-
-    template<typename T> 
-    const T* getFacet() const
-    {
-      if( _style != 0)
-      {
-          const T* facet = _style->get<T>();
-          if( facet != 0)
-              return facet;
-      }
-
-        return Application::instance().style().get<T>();
-    }
-
-    const Gfx::Brush& background() const;
-
-    void setBackground(const Gfx::Brush& b);
-
     Pt::Signal<const Pt::Event&>& eventReady();
 
     MainWindowImpl* impl();
 
     const MainWindowImpl* impl() const; 
+
+  public:
+    const Gfx::Brush& background() const;
+
+    void setBackground(const Gfx::Brush& b);
 
   protected:
     virtual void onAddWindow(Window& w);

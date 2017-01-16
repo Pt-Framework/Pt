@@ -122,6 +122,8 @@ class PT_HMI_API Menu : public MenuShell
         FlowLayout             _layout;
         Pt::ssize_t            _iconWidth;
 
+        FacetPtr<MenuRenderer> _renderer;
+
         Option<Gfx::Brush>     _background;
         Option<Gfx::Pen>       _contour;
 

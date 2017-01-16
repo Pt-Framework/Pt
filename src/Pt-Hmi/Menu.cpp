@@ -323,15 +323,17 @@ void Menu::onInvalidate()
     resize(size);
 
     const StyleOptions& options = Application::instance().styleOptions();
+    const Style& style = Application::instance().style();
 
     _brush = background();
     _pen = contour();
 
-    const MenuRenderer* renderer = getFacet<MenuRenderer>();
-    if( ! renderer )
+    _renderer.reset( style.get<MenuRenderer>() );
+    
+    if( ! _renderer )
         return;
 
-    renderer->prepare(*this, options, _brush, _pen);
+    _renderer->prepare(*this, options, _brush, _pen);
 }
 
 
@@ -341,15 +343,14 @@ void Menu::onPaintBackground(const Gfx::RectF& rect)
 
     const StyleOptions& options = Application::instance().styleOptions();
 
-    const MenuRenderer* renderer = getFacet<MenuRenderer>();
-    if( ! renderer )
+    if( ! _renderer )
         return;
 
     Painter painter( surface() );
     painter.setClip(rect);
 
-    renderer->renderBackground(*this, options, painter, rect, 
-                               _brush, _pen);
+    _renderer->renderBackground(*this, options, painter, rect, 
+                                _brush, _pen);
 }
 
 

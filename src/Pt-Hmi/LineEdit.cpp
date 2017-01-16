@@ -452,7 +452,7 @@ void LineEdit::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     const Pt::String& text = displayText().empty() ? _placeholderText
                                                    : displayText();
     
-    Gfx::FontMetrics fm = painter.fontMetrics(text);
+    Gfx::FontMetrics fm = painter.fontMetrics(_font, text);
 
     double textX = padding().left() + _halign - _hscroll;
     

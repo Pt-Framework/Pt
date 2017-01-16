@@ -573,6 +573,19 @@ Gfx::PointF Window::fromScreen(const Gfx::PointF& pos) const
 }
 
 
+void Window::setBackground(const Gfx::Brush& b)
+{
+    _background.set(b);
+    invalidate();
+}
+
+
+Pt::Signal<const Pt::Event&>& Window::eventReady()
+{
+    return _eventReady;
+}
+
+
 Gfx::SizeF Window::onSize() const
 {
     return _size;
@@ -1079,37 +1092,10 @@ void Window::onWindowStateEvent(const WindowStateEvent& ev)
 }
 
 
-void Window::setStyle(const Style& style)
-{
-    delete _style;
-    _style = 0;
-    _style = new Style(style);
-}    
-
-
-const Style& Window::style() const
-{
-    return _style ? *_style : Application::instance().style();
-}
-
-
 const Gfx::Brush& Window::background() const
 {
     return _background.isValid() ? _background.get()
                                  : Application::instance().styleOptions().background();
-}
-
-
-void Window::setBackground(const Gfx::Brush& b)
-{
-    _background.set(b);
-    invalidate();
-}
-
-
-Pt::Signal<const Pt::Event&>& Window::eventReady()
-{
-    return _eventReady;
 }
 
 
