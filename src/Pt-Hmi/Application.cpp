@@ -275,7 +275,7 @@ void Application::removeInputMethod(InputMethod& im)
 {
     if(_inputMethod == &im)
     {
-        _inputMethod = 0;
+        _inputMethod = &_defaultInputMethod;
         im.unregisterApplication(*this);
     }
 }
