@@ -80,10 +80,6 @@ class PT_HMI_API Application : public Pt::System::Application
 
         Screen& screen();
 
-        void invalidate();
-
-        void setCursor(const Cursor* cursor = 0);
-
         Window* pointerWindow();
 
         const Window* pointerWindow() const;
@@ -102,12 +98,7 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void releasePointer(Widget& w);
 
-        Pt::uint64_t makeId();
-
-        const Visual* findVisual(Pt::uint64_t id) const;
-
-        // TODO: this might be the same as loop().waitNext()
-        void nextEvent();
+        void setCursor(const Cursor* cursor = 0);
 
         const Style& style() const;
 
@@ -122,6 +113,15 @@ class PT_HMI_API Application : public Pt::System::Application
         void setInputMethod(InputMethod& im);
 
         void removeInputMethod(InputMethod& im);
+
+        void invalidate();
+
+        // TODO: this might be the same as loop().waitNext()
+        void nextEvent();
+
+        Pt::uint64_t makeId();
+
+        const Visual* findVisual(Pt::uint64_t id) const;
 
         ApplicationImpl* impl();
 
@@ -160,8 +160,6 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void onInvalidateEvent(const InvalidateEvent& ev);
 
-        void onInputMethod(const KeyEvent& ev);
-
     private:
         void registerVisual(Visual& visual);
 
@@ -171,24 +169,20 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void setPointerWidget(Widget* widget);
 
-        void updateInputMethod(Visual* visual, bool focused = true);
-
     private:
         typedef std::map<Pt::uint64_t, Visual*> VisualMap;
 
-        ApplicationImpl* _impl; 
-        Screen*          _mainScreen;
-        Pt::uint64_t     _lastId;
-        VisualMap        _visuals;
-        Window*          _pointerWindow;
-        Widget*          _pointerWidget;
-        Visual*          _pointerGrabber;
-        Pt::Gfx::Font    _font;
-        Pt::Gfx::Font    _userFont;
-        Style            _style;
-        StyleOptions     _styleOptions;
+        ApplicationImpl*   _impl; 
+        Screen*            _mainScreen;
+        Pt::uint64_t       _lastId;
+        VisualMap          _visuals;
+        Window*            _pointerWindow;
+        Widget*            _pointerWidget;
+        Visual*            _pointerGrabber;
+        Style              _style;
+        StyleOptions       _styleOptions;
         DefaultInputMethod _defaultInputMethod;
-        InputMethod*     _inputMethod;
+        InputMethod*       _inputMethod;
 };
 
 } // namespace

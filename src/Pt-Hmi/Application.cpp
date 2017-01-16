@@ -47,7 +47,6 @@ Application::Application(int argc, char** argv)
 , _pointerWindow(0)
 , _pointerWidget(0)
 , _pointerGrabber(0)
-, _font("", 12)
 , _inputMethod(0)
 {
     this->init(*_impl);
@@ -89,32 +88,6 @@ Application::~Application()
 }
 
 
-InputMethod& Application::inputMethod()
-{
-    return *_inputMethod;
-}
-
-
-void Application::setInputMethod(InputMethod& im)
-{
-    if(_inputMethod)
-        removeInputMethod(*_inputMethod);
-
-    _inputMethod = &im;
-    im.registerApplication(*this);
-}
-
-
-void Application::removeInputMethod(InputMethod& im)
-{
-    if(_inputMethod == &im)
-    {
-        _inputMethod = 0;
-        im.unregisterApplication(*this);
-    }
-}
-
-
 Application& Application::instance()
 {
     return static_cast<Application&>( System::Application::instance() );
@@ -130,54 +103,6 @@ const Screen& Application::screen() const
 Screen& Application::screen()
 {
     return *_mainScreen;
-}
-
-
-void Application::invalidate()
-{
-    VisualMap::iterator it = _visuals.begin();
-  
-    for( ; it != _visuals.end(); ++it)
-    {
-        InvalidateEvent ev(it->first);
-        loop().commitEvent(ev);
-    }
-}
-
-
-void Application::setCursor( const Cursor* cursor )
-{
-    _impl->setCursor( cursor );
-}
-
-
-const Style& Application::style() const
-{
-    return _style;
-}
-
-
-void Application::setStyle(const Style& s)
-{
-    _style = s;
-}
-
-
-const StyleOptions& Application::styleOptions() const
-{
-    return _styleOptions;
-}
-
-
-StyleOptions& Application::styleOptions()
-{
-    return _styleOptions;
-}
-
-
-ApplicationImpl* Application::impl()
-{
-    return _impl;
 }
 
 
@@ -299,7 +224,81 @@ void Application::releasePointer(Widget& grabber)
     _pointerGrabber = 0;
 }
 
-        
+
+void Application::setCursor( const Cursor* cursor )
+{
+    _impl->setCursor( cursor );
+}
+
+
+const Style& Application::style() const
+{
+    return _style;
+}
+
+
+void Application::setStyle(const Style& s)
+{
+    _style = s;
+}
+
+
+const StyleOptions& Application::styleOptions() const
+{
+    return _styleOptions;
+}
+
+
+StyleOptions& Application::styleOptions()
+{
+    return _styleOptions;
+}
+
+
+InputMethod& Application::inputMethod()
+{
+    return *_inputMethod;
+}
+
+
+void Application::setInputMethod(InputMethod& im)
+{
+    if(_inputMethod)
+        removeInputMethod(*_inputMethod);
+
+    _inputMethod = &im;
+    im.registerApplication(*this);
+}
+
+
+void Application::removeInputMethod(InputMethod& im)
+{
+    if(_inputMethod == &im)
+    {
+        _inputMethod = 0;
+        im.unregisterApplication(*this);
+    }
+}
+
+
+void Application::invalidate()
+{
+    VisualMap::iterator it = _visuals.begin();
+  
+    for( ; it != _visuals.end(); ++it)
+    {
+        InvalidateEvent ev(it->first);
+        loop().commitEvent(ev);
+    }
+}
+
+
+void Application::nextEvent()
+{
+    _impl->nextEvent();
+}
+
+
 Pt::uint64_t Application::makeId()
 {
     return _lastId++;
@@ -310,6 +309,12 @@ const Visual* Application::findVisual(Pt::uint64_t id) const
 {
     VisualMap::const_iterator it =_visuals.find(id);
     return it != _visuals.end() ? it->second : 0; 
+}
+
+
+ApplicationImpl* Application::impl()
+{
+    return _impl;
 }
 
 
@@ -326,12 +331,6 @@ void Application::registerVisual( Visual& visual )
 void Application::unregisterVisual( Visual& visual )
 {
    _visuals.erase( visual.vid() );
-}
-
-
-void Application::nextEvent()
-{
-    _impl->nextEvent();
 }
 
 
