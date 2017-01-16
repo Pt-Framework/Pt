@@ -69,56 +69,56 @@ bool CheckBox::isChecked() const
 
 const Gfx::Brush& CheckBox::background() const
 {
-    return _background.isValid() ? _background.get()
-                                 : Application::instance().styleOptions().textBackground();
+    return _background ? *_background
+                       : Application::instance().styleOptions().textBackground();
 }
 
 
 void CheckBox::setBackground(const Gfx::Brush& b)
 {
-    _background.set(b);
+    _background.reset( new Gfx::Brush(b) );
     invalidate();
 }
 
 
 const Gfx::Pen& CheckBox::contour() const
 {
-    return _contour.isValid() ? _contour.get()
-                              : Application::instance().styleOptions().contour();
+    return _contour ? *_contour
+                    : Application::instance().styleOptions().contour();
 }
 
 
 void CheckBox::setContour(const Gfx::Pen& p)
 {
-    _contour.set(p);
+    _contour.reset( new Gfx::Pen(p) );
     invalidate();
 }
 
 
 const Gfx::Color& CheckBox::textColor() const
 {
-    return _textColor.isValid() ? _textColor.get()
-                                : Application::instance().styleOptions().textColor();
+    return _textColor ? *_textColor
+                      : Application::instance().styleOptions().textColor();
 }
 
 
 void CheckBox::setTextColor(const Gfx::Color& color)
 {
-    _textColor.set(color);
+    _textColor.reset( new Gfx::Color(color) );
     invalidate();
 }
 
 
 const std::string& CheckBox::font() const
 {
-    return _fontName.isValid() ? _fontName.get()
-                               : Application::instance().styleOptions().font().name();
+    return _fontName ? *_fontName
+                     : Application::instance().styleOptions().font().name();
 }
 
 
 void CheckBox::setFont(const std::string& fontName)
 {
-    _fontName.set(fontName);
+    _fontName.reset( new std::string(fontName) );
     invalidate();
 }
 
@@ -126,28 +126,28 @@ void CheckBox::setFont(const std::string& fontName)
 std::size_t CheckBox::fontSize() const
 {
 
-    return _fontSize.isValid() ? _fontSize.get()
-                               : Application::instance().styleOptions().font().size();
+    return _fontSize ? *_fontSize
+                     : Application::instance().styleOptions().font().size();
 }
 
 
 void CheckBox::setFontSize(const std::size_t s)
 {
-    _fontSize.set(s);
+    _fontSize.reset( new std::size_t(s) );
     invalidate();
 }
 
 
 Gfx::Font::Style CheckBox::fontStyle() const
 {
-    return _fontStyle.isValid() ? _fontStyle.get()
-                                : Application::instance().styleOptions().font().style();
+    return _fontStyle ? *_fontStyle
+                      : Application::instance().styleOptions().font().style();
 }
 
 
 void CheckBox::setFontStyle(Gfx::Font::Style style)
 {
-    _fontStyle.set(style);
+    _fontStyle.reset( new Gfx::Font::Style(style) );
     invalidate();
 }
 

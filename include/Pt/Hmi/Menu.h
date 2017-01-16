@@ -34,6 +34,7 @@
 #include <Pt/Hmi/MenuShell.h>
 #include <Pt/Hmi/MenuItem.h>
 #include <Pt/Hmi/FlowLayout.h>
+#include <Pt/SmartPtr.h>
 #include <vector>
 
 namespace Pt {
@@ -71,6 +72,8 @@ class PT_HMI_API Menu : public MenuShell
         const Gfx::Pen& contour() const;
 
         void setContour(const Gfx::Pen& p);
+
+        void setRenderer(MenuRenderer* renderer);
 
     protected:
         virtual void onAddMenu(Menu& menu, const Pt::String& text);
@@ -123,9 +126,10 @@ class PT_HMI_API Menu : public MenuShell
         Pt::ssize_t            _iconWidth;
 
         FacetPtr<MenuRenderer> _renderer;
+        bool                   _hasRenderer;
 
-        Option<Gfx::Brush>     _background;
-        Option<Gfx::Pen>       _contour;
+        AutoPtr<Gfx::Brush>     _background;
+        AutoPtr<Gfx::Pen>       _contour;
 
         Gfx::Brush             _brush;
         Gfx::Pen               _pen;

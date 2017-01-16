@@ -32,6 +32,7 @@
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/Control.h>
+#include <Pt/SmartPtr.h>
 
 namespace Pt {
 
@@ -79,6 +80,10 @@ class PT_HMI_API ScrollBar : public Control
         { return _changed; }
         
     public:
+        const Gfx::Brush& background() const;
+
+        void setBackground(const Gfx::Brush& b);
+
         const Gfx::Brush& foreground() const;
 
         void setForeground(const Gfx::Brush& b);
@@ -86,10 +91,6 @@ class PT_HMI_API ScrollBar : public Control
         const Gfx::Pen& contour() const;
 
         void setContour(const Gfx::Pen& p);
-
-        const Gfx::Brush& background() const;
-
-        void setBackground(const Gfx::Brush& b);
 
         void setRenderer(ScrollBarRenderer* renderer);
 
@@ -127,16 +128,16 @@ class PT_HMI_API ScrollBar : public Control
         Gfx::RectF  _handleRect;
         Signal<int> _changed;
 
-        FacetPtr<ScrollBarRenderer> _renderer;
-        bool                        _hasRenderer;
+        FacetPtr<ScrollBarRenderer>  _renderer;
+        bool                         _hasRenderer;
 
-        Option<Gfx::Brush>          _foreground;
-        Option<Gfx::Pen>            _contour;
-        Option<Gfx::Brush>          _background;
-
-        Gfx::Brush                  _backgroundBrush;
-        Gfx::Brush                  _foregroundBrush;
-        Gfx::Pen                    _contourPen;
+        AutoPtr<Gfx::Brush>          _background;
+        AutoPtr<Gfx::Brush>          _foreground;
+        AutoPtr<Gfx::Pen>            _contour;
+        
+        Gfx::Brush                   _backgroundBrush;
+        Gfx::Brush                   _foregroundBrush;
+        Gfx::Pen                     _contourPen;
 };
 
 } // namespace

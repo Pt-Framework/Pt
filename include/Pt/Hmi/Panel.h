@@ -33,6 +33,7 @@
 #include <Pt/Hmi/Picture.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Brush.h>
+#include <Pt/SmartPtr.h>
 
 namespace Pt {
 
@@ -117,7 +118,7 @@ class PT_HMI_API Panel : public Control
 
         const Gfx::Pen* contour() const;
 
-        void setContour(const Gfx::Color& color);
+        void setContour(const Gfx::Pen& pen);
 
         void setFrame(bool b);
 
@@ -133,17 +134,18 @@ class PT_HMI_API Panel : public Control
 
     private:
         Gfx::Image  _image;
-        Picture     _picture;
         ImageLayout _layout;
 
         FacetPtr<PanelRenderer> _renderer;
         bool                    _hasRenderer;
 
-        Option<Gfx::Brush> _background;
-        bool               _hasBackground;
+        AutoPtr<Gfx::Brush>     _background;
+        bool                    _hasBackground;
+                                
+        AutoPtr<Gfx::Pen>       _contour;
+        bool                    _hasFrame;
 
-        Option<Gfx::Pen>   _contour;
-        bool               _hasFrame;
+        Picture                 _picture;
 };
 
 } // namespace

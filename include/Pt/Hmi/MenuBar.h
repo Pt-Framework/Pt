@@ -34,6 +34,7 @@
 #include <Pt/Hmi/Button.h>
 #include <Pt/Hmi/Control.h>
 #include <Pt/Hmi/FlowLayout.h>
+#include <Pt/SmartPtr.h>
 #include <vector>
 
 namespace Pt {
@@ -111,12 +112,12 @@ class MenuBarItem : public Control
         Menu&      _menu;
         Pt::String _text;
 
-        Option<Gfx::Brush>       _background;
-        Option<Gfx::Pen>         _contour;
-        Option<Gfx::Color>       _textColor;
-        Option<std::string>      _fontName;
-        Option<std::size_t>      _fontSize;
-        Option<Gfx::Font::Style> _fontStyle;
+        AutoPtr<Gfx::Brush>       _background;
+        AutoPtr<Gfx::Pen>         _contour;
+        AutoPtr<Gfx::Color>       _textColor;
+        AutoPtr<std::string>      _fontName;
+        AutoPtr<std::size_t>      _fontSize;
+        AutoPtr<Gfx::Font::Style> _fontStyle;
 
         FacetPtr<MenuBarRenderer> _renderer;
         bool                      _hasRenderer;
@@ -190,8 +191,8 @@ class PT_HMI_API MenuBar : public MenuShell
         FacetPtr<MenuBarRenderer> _renderer;
         bool                      _hasRenderer;
 
-        Option<Gfx::Brush>       _background;
-        Option<Gfx::Pen>          _contour;
+        AutoPtr<Gfx::Brush>       _background;
+        AutoPtr<Gfx::Pen>          _contour;
 
         Gfx::Brush               _brush;
         Gfx::Pen                 _pen;

@@ -33,9 +33,8 @@ namespace Pt {
 
 namespace Hmi {
 
-StyleOptions::StyleOptions(std::size_t refs)
-: Style::Facet(typeid(StyleOptions), refs)
-, _background(Pt::Gfx::Color::fromRgb8(229, 229, 229) )
+StyleOptions::StyleOptions()
+: _background(Pt::Gfx::Color::fromRgb8(229, 229, 229) )
 , _foreground(Gfx::Color::fromRgb8(210, 210, 210))
 , _contour(Gfx::Color::fromRgb8(150, 150, 150))
 , _textBackground(Pt::Gfx::Color::fromRgb8(255, 255, 255) )
@@ -46,9 +45,8 @@ StyleOptions::StyleOptions(std::size_t refs)
 }
 
 
-StyleOptions::StyleOptions(const StyleOptions& o, std::size_t refs)
-: Style::Facet(typeid(StyleOptions), refs)
-, _background(o._background )
+StyleOptions::StyleOptions(const StyleOptions& o)
+: _background(o._background )
 , _foreground(o._foreground)
 , _contour(o._contour)
 , _textBackground(o._textBackground )
@@ -61,6 +59,20 @@ StyleOptions::StyleOptions(const StyleOptions& o, std::size_t refs)
 
 StyleOptions::~StyleOptions()
 {
+}
+
+
+StyleOptions& StyleOptions::operator=(const StyleOptions& o)
+{
+    _background = o._background;
+    _foreground = o._foreground;
+    _contour = o._contour;
+    _textBackground = o._textBackground ;
+    _highlightColor = o._highlightColor;
+    _textColor = o._textColor;
+    _font = o._font;
+    
+    return *this;
 }
 
 } // namespace

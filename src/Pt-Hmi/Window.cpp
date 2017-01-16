@@ -67,7 +67,6 @@ Window::Window(Window* parent, Window::Type type)
 , _maximumSize(64000, 64000)
 , _state(Normal)
 , _topMost(false)
-, _style(0)
 {
     _windowManager.init(*this);
 
@@ -100,8 +99,6 @@ Window::~Window()
        remove( *_windows.back() );
 
     deinit();
-
-    delete _style;
 }
 
 
@@ -573,9 +570,16 @@ Gfx::PointF Window::fromScreen(const Gfx::PointF& pos) const
 }
 
 
+const Gfx::Brush& Window::background() const
+{
+    return _background ? *_background
+                       : Application::instance().styleOptions().background();
+}
+
+
 void Window::setBackground(const Gfx::Brush& b)
 {
-    _background.set(b);
+    _background.reset( new Gfx::Brush(b) );
     invalidate();
 }
 
@@ -1089,13 +1093,6 @@ void Window::onStateChanged(Window& w)
 void Window::onWindowStateEvent(const WindowStateEvent& ev)
 {
     _state = ev.state();
-}
-
-
-const Gfx::Brush& Window::background() const
-{
-    return _background.isValid() ? _background.get()
-                                 : Application::instance().styleOptions().background();
 }
 
 

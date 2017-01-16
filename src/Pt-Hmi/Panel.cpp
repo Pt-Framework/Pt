@@ -56,14 +56,14 @@ const Gfx::Brush* Panel::background() const
     if( ! _hasBackground)
         return 0;
 
-    return _background.isValid() ? &_background.get() 
-                                 : &Application::instance().styleOptions().background();
+    return _background ? _background.get() 
+                       : &Application::instance().styleOptions().background();
 }
 
 
 void Panel::setBackground(const Gfx::Brush& b)
 {
-    _background.set(b);
+    _background.reset( new Gfx::Brush(b) );
     _hasBackground = true;
     
     update();
@@ -82,14 +82,14 @@ const Gfx::Pen* Panel::contour() const
     if( ! _hasFrame)
         return 0;
 
-    return _contour.isValid() ? &_contour.get() 
-                              : &Application::instance().styleOptions().contour();
+    return _contour ? _contour.get() 
+                    : &Application::instance().styleOptions().contour();
 }
 
 
-void Panel::setContour(const Gfx::Color& color)
+void Panel::setContour(const Gfx::Pen& pen)
 {
-    _contour.set(color);
+    _contour.reset( new Gfx::Pen(pen) );
     _hasFrame = true;
 
     update();

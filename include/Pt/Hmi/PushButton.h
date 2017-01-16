@@ -116,11 +116,11 @@ class PT_HMI_API PushButton : public Button
         bool                     _hasRenderer;
 
         AutoPtr<Gfx::Brush>      _foreground;
-        Option<Gfx::Pen>         _contour;
-        Option<Gfx::Color>       _textColor;
-        Option<std::string>      _fontName;
-        Option<std::size_t>      _fontSize;
-        Option<Gfx::Font::Style> _fontStyle;
+        AutoPtr<Gfx::Pen>         _contour;
+        AutoPtr<Gfx::Color>       _textColor;
+        AutoPtr<std::string>      _fontName;
+        AutoPtr<std::size_t>      _fontSize;
+        AutoPtr<Gfx::Font::Style> _fontStyle;
 
         Gfx::Brush _brush;
         Gfx::Pen   _pen;

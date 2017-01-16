@@ -107,42 +107,42 @@ void PushButton::setForeground(const Gfx::Brush& b)
 
 const Gfx::Pen& PushButton::contour() const
 {
-    return _contour.isValid() ? _contour.get()
-                              : Application::instance().styleOptions().contour();
+    return _contour ? *_contour
+                    : Application::instance().styleOptions().contour();
 }
 
 
 void PushButton::setContour(const Gfx::Pen& p)
 {
-    _contour.set(p);
+    _contour.reset( new Gfx::Pen(p) );
     invalidate();
 }
 
 
 const Gfx::Color& PushButton::textColor() const
 {
-    return _textColor.isValid() ? _textColor.get()
-                                : Application::instance().styleOptions().textColor();
+    return _textColor ? *_textColor
+                      : Application::instance().styleOptions().textColor();
 }
 
 
 void PushButton::setTextColor(const Gfx::Color& color)
 {
-    _textColor.set(color);
+    _textColor.reset( new Gfx::Color(color) );
     invalidate();
 }
 
 
 const std::string& PushButton::font() const
 {
-    return _fontName.isValid() ? _fontName.get()
-                               : Application::instance().styleOptions().font().name();
+    return _fontName ? *_fontName
+                     : Application::instance().styleOptions().font().name();
 }
 
 
 void PushButton::setFont(const std::string& fontName)
 {
-    _fontName.set(fontName);
+    _fontName.reset( new std::string(fontName) );
     invalidate();
 }
 
@@ -150,28 +150,28 @@ void PushButton::setFont(const std::string& fontName)
 std::size_t PushButton::fontSize() const
 {
 
-    return _fontSize.isValid() ? _fontSize.get()
-                               : Application::instance().styleOptions().font().size();
+    return _fontSize ? *_fontSize
+                     : Application::instance().styleOptions().font().size();
 }
 
 
 void PushButton::setFontSize(const std::size_t s)
 {
-    _fontSize.set(s);
+    _fontSize.reset( new std::size_t(s) );
     invalidate();
 }
 
 
 Gfx::Font::Style PushButton::fontStyle() const
 {
-    return _fontStyle.isValid() ? _fontStyle.get()
-                                : Application::instance().styleOptions().font().style();
+    return _fontStyle ? *_fontStyle
+                      : Application::instance().styleOptions().font().style();
 }
 
 
 void PushButton::setFontStyle(Gfx::Font::Style style)
 {
-    _fontStyle.set(style);
+    _fontStyle.reset( new Gfx::Font::Style(style) );
     invalidate();
 }
 
@@ -210,11 +210,11 @@ void PushButton::onReleased()
 void PushButton::onSetStyleOptions(const StyleOptions& o)
 {
     _foreground.reset( new Gfx::Brush(o.foreground()) );
-    _contour.set( o.contour() );
-    _textColor.set( o.textColor() );
-    _fontName.set( o.font().name() );
-    _fontSize.set( o.font().size() );
-    _fontStyle.set( o.font().style() );
+    _contour.reset( new Gfx::Pen( o.contour() ) );
+    _textColor.reset( new Gfx::Color( o.textColor() ) );
+    _fontName.reset( new std::string( o.font().name() ) );
+    _fontSize.reset( new std::size_t( o.font().size() ) );
+    _fontStyle.reset( new Gfx::Font::Style( o.font().style() ) );
 }
 
 

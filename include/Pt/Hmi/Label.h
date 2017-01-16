@@ -31,6 +31,7 @@
 #define Pt_Hmi_Label_H
 
 #include <Pt/Hmi/Control.h>
+#include <Pt/SmartPtr.h>
 #include <Pt/String.h>
 
 namespace Pt {
@@ -111,12 +112,12 @@ class PT_HMI_API Label : public Control
         Pt::String  _text;
         Alignment   _textAlignment;
         
-        Option<Gfx::Brush>       _background;
-        Option<Gfx::Pen>         _contour;
-        Option<Gfx::Color>       _textColor;
-        Option<std::string>      _fontName;
-        Option<std::size_t>      _fontSize;
-        Option<Gfx::Font::Style> _fontStyle;
+        AutoPtr<Gfx::Brush>       _background;
+        AutoPtr<Gfx::Pen>         _contour;
+        AutoPtr<Gfx::Color>       _textColor;
+        AutoPtr<std::string>      _fontName;
+        AutoPtr<std::size_t>      _fontSize;
+        AutoPtr<Gfx::Font::Style> _fontStyle;
         
         FacetPtr<LabelRenderer>  _renderer;
         bool                     _hasRenderer;

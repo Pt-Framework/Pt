@@ -43,6 +43,7 @@ Menu::Menu()
 , _currentMenu(0)
 , _layout(FlowLayout::Top)
 , _iconWidth(0)
+, _hasRenderer(false)
 {
     setMainWidget(&_layout);    
 }
@@ -236,28 +237,37 @@ Pt::ssize_t Menu::iconWidth() const
 
 const Gfx::Brush& Menu::background() const
 {
-    return _background.isValid() ? _background.get()
-                                 : Application::instance().styleOptions().background();
+    return _background ? *_background
+                       : Application::instance().styleOptions().background();
 }
 
 
 void Menu::setBackground(const Gfx::Brush& b)
 {
-    _background.set(b);
+    _background.reset( new Gfx::Brush(b) );
     invalidate();
 }
 
 
 const Gfx::Pen& Menu::contour() const
 {
-    return _contour.isValid() ? _contour.get()
-                              : Application::instance().styleOptions().contour();
+    return _contour ? *_contour
+                    : Application::instance().styleOptions().contour();
 }
 
 
 void Menu::setContour(const Gfx::Pen& p)
 {
-    _contour.set(p);
+    _contour.reset( new Gfx::Pen(p) );
+    invalidate();
+}
+
+
+void Menu::setRenderer(MenuRenderer* renderer)
+{
+    _renderer.reset(renderer);
+    _hasRenderer = renderer != 0;
+
     invalidate();
 }
 
@@ -328,7 +338,8 @@ void Menu::onInvalidate()
     _brush = background();
     _pen = contour();
 
-    _renderer.reset( style.get<MenuRenderer>() );
+    if( ! _hasRenderer )
+        _renderer.reset( style.get<MenuRenderer>() );
     
     if( ! _renderer )
         return;

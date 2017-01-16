@@ -134,6 +134,94 @@ void ScrollBar::scroll(int pos)
 }
 
 
+const Gfx::Brush& ScrollBar::background() const
+{
+    return _background ? *_background
+                       : Application::instance().styleOptions().background();
+}
+
+
+void ScrollBar::setBackground(const Gfx::Brush& b)
+{
+    _background.reset( new Gfx::Brush(b) );
+    invalidate();
+}
+
+
+const Gfx::Brush& ScrollBar::foreground() const
+{
+    return _foreground ? *_foreground.get()
+                       : Application::instance().styleOptions().foreground();
+}
+
+void ScrollBar::setForeground(const Gfx::Brush& b)
+{
+    _foreground.reset( new Gfx::Brush(b) );
+    invalidate();
+}
+
+
+const Gfx::Pen& ScrollBar::contour() const
+{
+    return _contour ? *_contour
+                    : Application::instance().styleOptions().contour();
+}
+
+
+void ScrollBar::setContour(const Gfx::Pen& p)
+{
+    _contour.reset( new Gfx::Pen(p) );
+    invalidate();
+}
+
+
+void ScrollBar::setRenderer(ScrollBarRenderer* renderer)
+{
+    _renderer.reset(renderer);
+    _hasRenderer = renderer != 0;
+
+    invalidate();
+}
+
+
+void ScrollBar::onInvalidate()
+{
+    Base::onInvalidate();
+
+    const StyleOptions& options = Application::instance().styleOptions();
+    const Style& style = Application::instance().style();
+
+    _backgroundBrush = background();
+    _foregroundBrush = foreground();
+    _contourPen = contour();
+
+    if( ! _hasRenderer )
+        _renderer.reset( style.get<ScrollBarRenderer>() );
+    
+    if( ! _renderer )
+        return;
+
+    _renderer->prepare(*this, options, 
+                       _backgroundBrush, _foregroundBrush, _contourPen);
+}
+
+
+void ScrollBar::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+{
+    const StyleOptions& options = Application::instance().styleOptions();
+
+    if( ! _renderer )
+        return;
+
+    Painter painter(surface);
+    painter.setClip(rect);
+
+    _renderer->render(*this, options, painter, rect, _handleRect,
+                      _backgroundBrush, _foregroundBrush, _contourPen);
+
+}
+
+
 void ScrollBar::onMouseEvent(const MouseEvent& ev)
 {
     Control::onMouseEvent(ev);
@@ -203,94 +291,6 @@ void ScrollBar::onResizeEvent(const ResizeEvent& ev)
     Control::onResizeEvent(ev);
 
     updateScroll();
-}
-
-
-const Gfx::Brush& ScrollBar::foreground() const
-{
-    return _foreground.isValid() ? _foreground.get()
-                                 : Application::instance().styleOptions().foreground();
-}
-
-void ScrollBar::setForeground(const Gfx::Brush& b)
-{
-    _foreground.set(b);
-    invalidate();
-}
-
-
-const Gfx::Pen& ScrollBar::contour() const
-{
-    return _contour.isValid() ? _contour.get()
-                              : Application::instance().styleOptions().contour();
-}
-
-
-void ScrollBar::setContour(const Gfx::Pen& p)
-{
-    _contour.set(p);
-    invalidate();
-}
-
-
-const Gfx::Brush& ScrollBar::background() const
-{
-    return _background.isValid() ? _background.get()
-                                 : Application::instance().styleOptions().background();
-}
-
-
-void ScrollBar::setBackground(const Gfx::Brush& b)
-{
-    _background.set(b);
-    invalidate();
-}
-
-
-void ScrollBar::setRenderer(ScrollBarRenderer* renderer)
-{
-    _renderer.reset(renderer);
-    _hasRenderer = renderer != 0;
-
-    invalidate();
-}
-
-
-void ScrollBar::onInvalidate()
-{
-    Base::onInvalidate();
-
-    const StyleOptions& options = Application::instance().styleOptions();
-    const Style& style = Application::instance().style();
-
-    _backgroundBrush = background();
-    _foregroundBrush = foreground();
-    _contourPen = contour();
-
-    if( ! _hasRenderer )
-        _renderer.reset( style.get<ScrollBarRenderer>() );
-    
-    if( ! _renderer )
-        return;
-
-    _renderer->prepare(*this, options, 
-                       _backgroundBrush, _foregroundBrush, _contourPen);
-}
-
-
-void ScrollBar::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
-{
-    const StyleOptions& options = Application::instance().styleOptions();
-
-    if( ! _renderer )
-        return;
-
-    Painter painter(surface);
-    painter.setClip(rect);
-
-    _renderer->render(*this, options, painter, rect, _handleRect,
-                      _backgroundBrush, _foregroundBrush, _contourPen);
-
 }
 
 

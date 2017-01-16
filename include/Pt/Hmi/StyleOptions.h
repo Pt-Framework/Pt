@@ -31,7 +31,6 @@
 #define Pt_Hmi_StyleOptions_h
 
 #include <Pt/Hmi/Api.h>
-#include <Pt/Hmi/Style.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
@@ -42,60 +41,16 @@ namespace Pt {
 
 namespace Hmi {
 
-template <typename T>
-class Option : private NonCopyable
+class PT_HMI_API StyleOptions
 {
     public:
-        Option()
-        : _value(0)
-        {}
-        
-        Option(const T& value)
-        : _value( new T(value) )
-        {}
+        explicit StyleOptions();
 
-        ~Option()
-        {
-            delete _value;
-        }
-        
-        const T& get() const
-        {
-            return *_value;
-        }
-
-        void set(const T& value)
-        {
-            delete _value;
-            _value = 0;
-            _value = new T(value);
-        }
-
-        bool isValid() const
-        {
-            return _value != 0;
-        }
-
-        void reset()
-        {
-            delete _value;
-            _value = 0;
-        }
-
-    private:
-        T* _value;
-};
-
-
-// TODO: this could be a normal member of Style instead of a facet
-class PT_HMI_API StyleOptions : public Style::Facet
-{
-    public:
-        explicit StyleOptions(std::size_t refs = 0);
-
-        StyleOptions(const StyleOptions& o, std::size_t refs = 0);
+        StyleOptions(const StyleOptions& o);
 
         virtual ~StyleOptions();
+
+        StyleOptions& operator=(const StyleOptions& o);
 
         // background
         // foreground

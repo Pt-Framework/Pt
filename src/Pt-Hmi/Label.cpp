@@ -75,54 +75,54 @@ void Label::setTextAlignment(Alignment a)
 
 const Gfx::Brush* Label::background() const
 {
-    return _background.isValid() ? &_background.get() : 0;
+    return _background ? _background.get() : 0;
 }
 
 
 void Label::setBackground(const Gfx::Brush& b)
 {
-    _background.set(b);
+    _background.reset( new Gfx::Brush(b) );
     update();
 }
 
 
 const Gfx::Pen* Label::contour() const
 {
-    return _contour.isValid() ? &_contour.get() : 0;
+    return _contour ? _contour.get() : 0;
 }
 
 
 void Label::setContour(const Gfx::Pen& p)
 {
-    _contour.set(p);
+    _contour.reset( new Gfx::Pen(p) );
     update();
 }
 
 
 const Gfx::Color& Label::textColor() const
 {
-    return _textColor.isValid() ? _textColor.get()
-                                : Application::instance().styleOptions().textColor();
+    return _textColor ? *_textColor
+                      : Application::instance().styleOptions().textColor();
 }
 
 
 void Label::setTextColor(const Gfx::Color& color)
 {
-    _textColor.set(color);
+    _textColor.reset( new Gfx::Color(color) );
     invalidate();
 }
 
 
 const std::string& Label::font() const
 {
-    return _fontName.isValid() ? _fontName.get()
-                               : Application::instance().styleOptions().font().name();
+    return _fontName ? *_fontName
+                     : Application::instance().styleOptions().font().name();
 }
 
 
 void Label::setFont(const std::string& fontName)
 {
-    _fontName.set(fontName);
+    _fontName.reset( new std::string(fontName) );
     invalidate();
 }
 
@@ -130,28 +130,28 @@ void Label::setFont(const std::string& fontName)
 std::size_t Label::fontSize() const
 {
 
-    return _fontSize.isValid() ? _fontSize.get()
-                               : Application::instance().styleOptions().font().size();
+    return _fontSize ? *_fontSize
+                     : Application::instance().styleOptions().font().size();
 }
 
 
 void Label::setFontSize(const std::size_t s)
 {
-    _fontSize.set(s);
+    _fontSize.reset( new std::size_t(s) );
     invalidate();
 }
 
 
 Gfx::Font::Style Label::fontStyle() const
 {
-    return _fontStyle.isValid() ? _fontStyle.get()
-                                : Application::instance().styleOptions().font().style();
+    return _fontStyle ? *_fontStyle
+                      : Application::instance().styleOptions().font().style();
 }
 
 
 void Label::setFontStyle(Gfx::Font::Style style)
 {
-    _fontStyle.set(style);
+    _fontStyle.reset( new Gfx::Font::Style(style) );
     invalidate();
 }
 

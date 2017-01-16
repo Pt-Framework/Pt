@@ -34,6 +34,7 @@
 #include <Pt/Hmi/Picture.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Font.h>
+#include <Pt/SmartPtr.h>
 #include <Pt/String.h>
 #include <Pt/Signal.h>
 
@@ -137,12 +138,12 @@ class PT_HMI_API MenuItem : public Control
         FacetPtr<MenuRenderer> _renderer;
         bool                   _hasRenderer;
 
-        Option<Gfx::Brush>       _background;
-        Option<Gfx::Pen>         _contour;
-        Option<Gfx::Color>       _textColor;
-        Option<std::string>      _fontName;
-        Option<std::size_t>      _fontSize;
-        Option<Gfx::Font::Style> _fontStyle;
+        AutoPtr<Gfx::Brush>       _background;
+        AutoPtr<Gfx::Pen>         _contour;
+        AutoPtr<Gfx::Color>       _textColor;
+        AutoPtr<std::string>      _fontName;
+        AutoPtr<std::size_t>      _fontSize;
+        AutoPtr<Gfx::Font::Style> _fontStyle;
 
         Picture           _picture;
         Gfx::Brush        _brush;

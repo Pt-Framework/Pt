@@ -305,41 +305,39 @@ class PT_HMI_API Window : public WindowBase
     Widget* findWidget(const Gfx::PointF& pos, bool input);
 
   private:
-    MainWindowImpl*                _impl;
-    WindowManager                  _windowManager;
-    PixmapSurface                  _surface;
-    Gfx::RectF                     _damageRect;
-    Pt::Signal<const Pt::Event&>   _eventReady;
+    MainWindowImpl*              _impl;
+    WindowManager                _windowManager;
+    PixmapSurface                _surface;
+    Gfx::RectF                   _damageRect;
+    Pt::Signal<const Pt::Event&> _eventReady;
 
-    std::vector<Window*>           _windows;
-    WindowBase*                    _parent;
-    Window*                        _parentWindow;
-    Widget*                        _mainWidget;
-    Widget*                        _focusWidget;
-    std::vector<Widget*>           _focusList;
-    std::map<Key, Widget*>         _shortcuts; 
-    std::map<Pt::Char, Widget*>    _mnemonics; 
+    std::vector<Window*>         _windows;
+    WindowBase*                  _parent;
+    Window*                      _parentWindow;
+    Widget*                      _mainWidget;
+    Widget*                      _focusWidget;
+    std::vector<Widget*>         _focusList;
+    std::map<Key, Widget*>       _shortcuts; 
+    std::map<Pt::Char, Widget*>  _mnemonics; 
 
-    bool                           _init;
-    bool                           _visible; 
-    bool                           _isActive;
-    bool                           _enabled; 
-    bool                           _enabledState;
-    bool                           _isClosed; 
-    Gfx::PointF                    _position;
-    Gfx::SizeF                     _size;
-    Type                           _type;
-    std::string                    _title;
-    Gfx::Image                     _icon;
-    Gfx::SizeF                     _minimumSize;
-    Gfx::SizeF                     _maximumSize;
-    State                          _state;
-    bool                           _topMost;
-
-    Style*                         _style;
-    
-    Option<Gfx::Brush>             _background;
-    Gfx::Brush                     _backgroundBrush;
+    bool                         _init;
+    bool                         _visible; 
+    bool                         _isActive;
+    bool                         _enabled; 
+    bool                         _enabledState;
+    bool                         _isClosed; 
+    Gfx::PointF                  _position;
+    Gfx::SizeF                   _size;
+    Type                         _type;
+    std::string                  _title;
+    Gfx::Image                   _icon;
+    Gfx::SizeF                   _minimumSize;
+    Gfx::SizeF                   _maximumSize;
+    State                        _state;
+    bool                         _topMost;
+   
+    AutoPtr<Gfx::Brush>          _background;
+    Gfx::Brush                   _backgroundBrush;
 };
 
 } // namespace
