@@ -290,11 +290,8 @@ void LineEdit::onKeyEvent(const KeyEvent& ev)
     }
     else if( ev.key().code() == Pt::Hmi::Key::Return )
     {
-        if( isAccepted() && _isTextChanged)
-        {
-             _isTextChanged = false;
+        if( isAccepted() )
             _textEntered.send(_text);
-        }
     }
     else if( ev.key().code() == Pt::Hmi::Key::Delete )
     {

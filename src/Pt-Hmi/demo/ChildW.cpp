@@ -197,7 +197,10 @@ void ChildW::onShowDialog(Button&)
     
     //enable(false);
 
-    _dialogButton.setText("Hallo");
+    _buttonBar.remove(_closeButton);
+    _buttonBar.dock(_closeButton, DockingLayout::Bottom);
+
+    //_dialogButton.setText("Hallo");
 }
 
 

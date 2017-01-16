@@ -38,6 +38,7 @@ namespace Hmi {
 MainWindowImpl::MainWindowImpl(Window::Type type)
 : _hwnd(0)
 , _screen( Application::instance().screen() )
+, _isTopMost(false)
 {
     HINSTANCE hInstance = GetModuleHandle(NULL);
   
@@ -110,11 +111,16 @@ void MainWindowImpl::paint(const Gfx::RectF& rect)
 
 
 void MainWindowImpl::show( bool v)
-{    
-   if( v )
-       ShowWindow(_hwnd, SW_SHOW);
-   else
-       ShowWindow(_hwnd, SW_HIDE);
+{
+    if( v )
+    {
+      setTopMost(_isTopMost);
+      ShowWindow(_hwnd, SW_SHOW);
+    }
+    else
+    {
+        ShowWindow(_hwnd, SW_HIDE);
+    }
 }
 
 
@@ -132,6 +138,8 @@ void MainWindowImpl::enable(bool e)
 
 void MainWindowImpl::setTopMost(bool e)
 {
+  _isTopMost = e;
+
   if( e)
     SetWindowPos(_hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE);
   else
