@@ -169,12 +169,12 @@ void Argb32Format::onCopy(ImageView& to, const Point& toPoint,
 
         case CompositionMode::SourceOver:
         {
-            for(int y = fromRect.y(); y < fromRect.height(); ++y)
+            for(int y = 0; y < fromRect.height(); ++y)
             {
                 Pt::uint8_t* to = toLine;
                 const Pt::uint8_t* from = fromLine;
             
-                for(int x = fromRect.x(); x < fromRect.width() ; ++x )
+                for(int x = 0; x < fromRect.width() ; ++x )
                 {
                     Argb32Model::sourceOver(to, from);
                     to += 4;
