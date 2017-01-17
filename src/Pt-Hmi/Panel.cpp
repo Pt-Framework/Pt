@@ -156,6 +156,8 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     {
         const Gfx::SizeF& size = this->size();
 
+        painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceOver);
+
         switch( _layout.type() )
         {
             default:
@@ -180,6 +182,8 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
                 break;
             }
         }
+
+        painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceCopy);
     }  
 
     const Gfx::Pen* pen = contour();

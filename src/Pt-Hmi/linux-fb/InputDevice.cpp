@@ -213,31 +213,34 @@ void InputDevice::onRelative(const input_event& ev)
 
 void InputDevice::onAbsolute(const input_event& ev)
 {
+  //std::clog << "EV_ABS " << ev.code << " " << ev.value << std::endl;
+
     switch(ev.code)
     {
         case ABS_MT_SLOT:
         case ABS_MT_TRACKING_ID:
+        case ABS_MT_POSITION_Y:
+        case ABS_MT_POSITION_X:
+        case ABS_MT_PRESSURE:
+          return;
 
         case ABS_X:
-        case ABS_MT_POSITION_X:                        
             _touchEvent.setX(  (static_cast<double>(ev.value)));
             _touchMove++;
-            break;
+        break;
 
         case ABS_Y:
-        case ABS_MT_POSITION_Y:                        
-              _touchEvent.setY( static_cast<double>(ev.value));
+           _touchEvent.setY( static_cast<double>(ev.value));
             _touchMove++;
-            break;
+        break;
 
         case ABS_PRESSURE:
-        case ABS_MT_PRESSURE:
-            break;
+        return;
 
         default:
-            break;
+           return;
     }
-                
+
     if(_touchMove > 1)
     {
         if(_touchMove == 2)
@@ -245,14 +248,14 @@ void InputDevice::onAbsolute(const input_event& ev)
         else
             _touchEvent.setMove();
 
-        _eventReady.send(_touchEvent);  
+        _eventReady.send(_touchEvent);
     }
 }
 
 
 void InputDevice::onKey(const input_event& ev)
 {
-    //std::clog << "EV_KEY " << ev.code << " " << ev.value << std::endl;
+//    std::clog << "EV_KEY " << ev.code << " " << ev.value << std::endl;
     
     if( ev.code == 272)    
     {
@@ -276,7 +279,7 @@ void InputDevice::onKey(const input_event& ev)
         return;
     }
 
-    if(ev.code == 330)    
+    if(ev.code == 330)
     {
         if( ev.value == 0  )
         {
@@ -284,7 +287,7 @@ void InputDevice::onKey(const input_event& ev)
             _touchEvent.setRelease();
             _eventReady.send(_touchEvent);
         }
-                                                                   
+
         return;
     }
 

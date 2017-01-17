@@ -275,7 +275,9 @@ void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     {
         double pictureY = ((size().height() - _picture.height()) / 2);
         Gfx::PointF picturePos(itemX, pictureY);
+        painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceOver);
         painter.drawPicture(picturePos, _picture);
+        painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceCopy);
     }
 
     //

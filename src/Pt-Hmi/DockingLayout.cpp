@@ -49,6 +49,7 @@ void DockingLayout::dock(Widget& w, DockStyle ds)
     _docking[&w] = ds;
 
     add(w);
+    onLayout();
 }
 
 
