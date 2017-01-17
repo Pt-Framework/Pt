@@ -133,6 +133,9 @@ void Widget::add(Widget& widget)
     widget.update();
 
     onAddWidget(widget);
+
+    if( parent() )
+        parent()->onLayout();
 }
 
 
@@ -157,7 +160,10 @@ void Widget::remove(Widget& widget)
 
     update();    
     
-    onRemoveWidget(widget); 
+    onRemoveWidget(widget);
+
+    if( parent() )
+        parent()->onLayout();
 }
 
 

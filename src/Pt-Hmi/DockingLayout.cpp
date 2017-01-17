@@ -46,8 +46,9 @@ DockingLayout::~DockingLayout()
 
 void DockingLayout::dock(Widget& w, DockStyle ds)
 {
+    _docking[&w] = ds;
+
     add(w);
-    setDockingStyle(w, ds);
 }
 
 
@@ -61,7 +62,6 @@ void DockingLayout::setDockingStyle(Widget& w, DockStyle ds)
 
 void DockingLayout::onAddWidget(Widget& w)
 {
-    _docking[&w] = _defaultDocking;
 }
 
 
