@@ -38,6 +38,8 @@ namespace Pt {
 
 namespace Hmi {
 
+// TODO: should this really be a Layout? onLayout is not overrriden
+//       -> rename ScrollArea and derive from Widget
 class PT_HMI_API ScrollLayout : public Layout
 {
     public:
