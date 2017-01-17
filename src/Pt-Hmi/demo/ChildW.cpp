@@ -140,6 +140,7 @@ ChildW::ChildW(const std::string& title)
     _lineEdit2.setPlaceholderText("placeholder text");
     _lineEdit2.setMargin(5);
     _lineEdit2.resize( Gfx::SizeF(130, 26) );
+    _lineEdit2.textEntered() += Pt::slot(*this, &ChildW::onTextEntered);
 
     _buttonBar.setName("ButtonBar");
     _buttonBar.resize( Gfx::SizeF(700, 240) );
@@ -207,6 +208,13 @@ void ChildW::onShowDialog(Button&)
 void ChildW::onCheckBox(Button&)
 {
     std::clog << "CHECKBOX CLICKED" << std::endl;
+}
+
+
+void ChildW::onTextEntered(const Pt::String& text)
+{
+    std::clog << "TEXT ENTERED: " << text.narrow() << std::endl;
+    _lineEdit.focus();
 }
 
 

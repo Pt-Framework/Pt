@@ -32,6 +32,8 @@ class ChildW : public Hmi::Window
         void onShowDialog(Button&);
 
         void onCheckBox(Button&);
+
+        void onTextEntered(const Pt::String& text);
         
         void onCloseApp(Button&);
         
