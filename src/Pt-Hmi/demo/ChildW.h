@@ -14,6 +14,7 @@
 #include <Pt/Hmi/Menu.h>
 #include <Pt/Hmi/ScrollView.h>
 #include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/ProgressBar.h>
 
 namespace Pt {
 
@@ -65,6 +66,7 @@ class ChildW : public Hmi::Window
         LineEdit   _lineEdit2;
         Label  _textLabel;
         DockingLayout _buttonBar;
+				ProgressBar		_progressBar;
 };
 
 } // namespace

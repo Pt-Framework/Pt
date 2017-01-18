@@ -50,6 +50,7 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
              MenuShell.cpp 
              Picture.cpp
              PlatinumStyle.cpp
+			 ProgressBar.cpp
              PushButton.cpp
              ScrollBar.cpp
              ScrollView.cpp

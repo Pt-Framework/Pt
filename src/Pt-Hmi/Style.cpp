@@ -1,5 +1,6 @@
 /* Copyright (C) 2016 Marc Boris Duerner 
    Copyright (C) 2016 Laurentiu-Gheorghe Crisan
+	 Copyright (C) 2017 Ilja Maier
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -579,6 +580,47 @@ void ScrollBarRenderer::render(const ScrollBar& s,
 { 
     onRender(s, options, painter,  rect, handleRect,
              background, foreground, contour); 
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// ProgressBarRenderer
+///////////////////////////////////////////////////////////////////////////////
+
+ProgressBarRenderer::ProgressBarRenderer(std::size_t refs)
+: Style::Facet( typeid(ProgressBarRenderer), refs )
+{
+}
+
+    
+ProgressBarRenderer::~ProgressBarRenderer()
+{
+}
+
+
+void ProgressBarRenderer::prepare(const ProgressBar&	p,
+																	const StyleOptions&	options,
+																	Gfx::Brush&					background,
+																	Gfx::Brush&					foreground,
+																	Gfx::Pen&						contour,
+																	Gfx::Pen&						textPen,
+																	Gfx::Font&					font) const
+{ 
+    onPrepare(p, options, background, foreground, contour, textPen, font); 
+}
+
+void ProgressBarRenderer::render( const ProgressBar& p,
+																					 const StyleOptions& options,
+																					Painter& painter,
+																					const Gfx::RectF& rect,
+																					const Gfx::Brush& background,
+																					const Gfx::Brush& foreground,
+																					const Gfx::Pen& contour,
+																					const Gfx::Pen&						textPen,
+																			const Gfx::Font&						font
+																				) const
+{
+	onRender(p, options, painter, rect, background, foreground, contour, textPen, font); 
 }
 
 } // namespace

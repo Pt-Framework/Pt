@@ -1,6 +1,7 @@
 /* Copyright (C) 2016 Laurentiu-Gheorghe Crisan
    Copyright (C) 2016 Marc Boris Duerner
- 
+ 	 Copyright (C) 2017 Ilja Maier
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
@@ -58,6 +59,7 @@ class MenuItem;
 class MenuBar;
 class MenuBarItem;
 class ScrollBar;
+class ProgressBar;
 
 template <typename T>
 class FacetPtr
@@ -695,6 +697,56 @@ class PT_HMI_API ScrollBarRenderer : public Style::Facet
                               const Gfx::Brush& background,
                               const Gfx::Brush& foreground,
                               const Gfx::Pen& contour) const = 0;
+};
+
+
+class PT_HMI_API ProgressBarRenderer : public Style::Facet
+{
+    public:
+        ProgressBarRenderer(std::size_t refs = 0);
+
+        virtual ~ProgressBarRenderer();
+
+        void prepare(const ProgressBar&		p,
+                     const StyleOptions&	options,
+                     Gfx::Brush&					background,
+                     Gfx::Brush&					foreground,
+                     Gfx::Pen&						contour,
+										 Gfx::Pen&						textPen,
+										 Gfx::Font&						font
+										 ) const;
+
+			 void render( const ProgressBar& p,
+															 const StyleOptions& options,
+															Painter& painter,
+															const Gfx::RectF& rect,
+															const Gfx::Brush& background,
+															const Gfx::Brush& foreground,
+															const Gfx::Pen& contour,
+															const Gfx::Pen&						textPen,
+															const Gfx::Font&						font
+																				 ) const;
+
+    protected:
+        virtual void onPrepare(const ProgressBar&		p,
+                               const StyleOptions&	options,
+                               Gfx::Brush&					background,
+                               Gfx::Brush&					foreground,
+                               Gfx::Pen&						contour,
+															 Gfx::Pen&						textPen,
+															 Gfx::Font&						font
+															 ) const = 0;
+
+				virtual void onRender( const ProgressBar& p,
+															 const StyleOptions& options,
+															Painter& painter,
+															const Gfx::RectF& rect,
+															const Gfx::Brush& background,
+															const Gfx::Brush& foreground,
+															const Gfx::Pen& contour,
+															const Gfx::Pen&						textPen,
+															const Gfx::Font&						font
+																				 ) const = 0;
 };
 
 } // namespace

@@ -142,8 +142,14 @@ ChildW::ChildW(const std::string& title)
     _lineEdit2.resize( Gfx::SizeF(130, 26) );
     _lineEdit2.textEntered() += Pt::slot(*this, &ChildW::onTextEntered);
 
+    _progressBar.setName("ProgressBar"); 
+    _progressBar.move( Gfx::PointF(0, 0) );
+    _progressBar.resize( Gfx::SizeF(130, 30) );
+    _progressBar.setMargin(5);
+    _progressBar.setPadding(5);
+
     _buttonBar.setName("ButtonBar");
-    _buttonBar.resize( Gfx::SizeF(700, 240) );
+    _buttonBar.resize( Gfx::SizeF(700, 290) );
     _buttonBar.setPadding(5);
     _buttonBar.dock(_lineEdit2, DockingLayout::Bottom);
     _buttonBar.dock(_lineEdit, DockingLayout::Bottom);
@@ -151,6 +157,7 @@ ChildW::ChildW(const std::string& title)
     _buttonBar.dock(_closeButton, DockingLayout::Bottom);
     _buttonBar.dock(_dialogButton, DockingLayout::Bottom); 
     _buttonBar.dock(_toggleButton, DockingLayout::Bottom);
+		_buttonBar.dock(_progressBar, DockingLayout::Bottom);
     
     _vscroll.resize( Gfx::SizeF(24, 24) );
 
@@ -165,7 +172,7 @@ ChildW::ChildW(const std::string& title)
      
     //_childWindow2.setMainWidget(&_closeButton);          
     _childWindow2.move(Gfx::PointF(5, 40));    
-    _childWindow2.resize( Gfx::SizeF(240, 330) );
+    _childWindow2.resize( Gfx::SizeF(240, 380) );
     _childWindow2.setTitle("Child of " + title);    
     _childWindow2.setMainWidget(&_childView);
     add( _childWindow2 );

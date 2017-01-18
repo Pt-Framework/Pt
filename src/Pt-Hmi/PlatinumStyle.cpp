@@ -1,5 +1,6 @@
 /* Copyright (C) 2013 Marc Boris Duerner 
    Copyright (C) 2013 Laurentiu-Gheorghe Crisan
+	 Copyright (C) 2017 Ilja Maier
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -41,6 +42,7 @@
 #include <Pt/Hmi/Menu.h>
 #include <Pt/Hmi/MenuItem.h>
 #include <Pt/Hmi/ScrollBar.h>
+#include <Pt/Hmi/ProgressBar.h>
 
 namespace {
 
@@ -776,6 +778,65 @@ void PlatinumScrollBarRenderer::onRender(const ScrollBar& s,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// PlatinumProgressBarRenderer
+///////////////////////////////////////////////////////////////////////////////
+
+PlatinumProgressBarRenderer::PlatinumProgressBarRenderer(std::size_t refs)
+: ProgressBarRenderer(refs)
+{
+}
+
+    
+PlatinumProgressBarRenderer::~PlatinumProgressBarRenderer()
+{
+}
+
+
+void PlatinumProgressBarRenderer::onPrepare(const ProgressBar&		p,
+																						const StyleOptions&	options,
+																						Gfx::Brush&					background,
+																						Gfx::Brush&					foreground,
+																						Gfx::Pen&						contour,
+																						Gfx::Pen&						textPen,
+																						Gfx::Font&						font
+																						) const
+{
+}
+
+void PlatinumProgressBarRenderer::onRender( const ProgressBar& p,
+																					  const StyleOptions& options,
+																						Painter& painter,
+																						const Gfx::RectF& rect,
+																						const Gfx::Brush& background,
+																						const Gfx::Brush& foreground,
+																						const Gfx::Pen& contour,
+																						const Gfx::Pen& textPen,
+																						const Gfx::Font& font
+																				 ) const
+{
+		Gfx::RectF boxRect( Gfx::PointF(0.0, p.size().height() / 2 - 1.5),
+		                  Gfx::SizeF(p.size().width(), 3.0) );
+		
+		double progressWidth = p.size().width() * p.progress();
+
+		Gfx::RectF barRect( Gfx::PointF(0.0, p.size().height() / 2 - 1.5),
+		                    Gfx::SizeF(progressWidth, 3.0) );
+
+    painter.setBrush(background);
+    painter.fillRect(boxRect);
+
+		painter.setBrush(foreground);
+		painter.fillRect(barRect);
+
+		painter.setBrush( Gfx::Color::fromRgb8(255,255,255) );
+		painter.fillCircle(Gfx::PointF(progressWidth - 2.5, 
+			                             p.size().height() / 2 - 2.5), 
+												5.0);
+}
+
+
+
+///////////////////////////////////////////////////////////////////////////////
 // PlatinumStyle
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -789,6 +850,7 @@ PlatinumStyle::PlatinumStyle()
     set(new PlatinumMenuRenderer);
     set(new PlatinumMenuBarRenderer);
     set(new PlatinumScrollBarRenderer);
+		set(new PlatinumProgressBarRenderer);
 }
 
 
