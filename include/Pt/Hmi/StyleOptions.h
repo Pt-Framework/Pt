@@ -101,6 +101,16 @@ class PT_HMI_API StyleOptions
             _contour = p;
         }
 
+        const Gfx::Color& accentColor() const
+        {
+            return _accentColor;
+        }
+        
+        void setContour(const Gfx::Color& color)
+        {
+            _accentColor = color;
+        }
+
         const Gfx::Brush& textBackground() const
         {
             return _textBackground;
@@ -145,6 +155,7 @@ class PT_HMI_API StyleOptions
       Gfx::Brush _background;
       Gfx::Brush _foreground;
       Gfx::Pen   _contour;
+      Gfx::Color _accentColor;
       Gfx::Brush _textBackground;
       Gfx::Color _highlightColor;
       Gfx::Color _textColor;
