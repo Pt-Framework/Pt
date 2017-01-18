@@ -71,6 +71,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\EnterEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\FlowLayout.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\FocusEvent.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\GridLayout.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\InputMethod.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\InvalidateEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Key.h" />
@@ -556,6 +557,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\PictureImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\PixmapSurfaceImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\gdi\ScreenImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\GridLayout.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\InputMethod.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Label.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Layout.cpp" />
