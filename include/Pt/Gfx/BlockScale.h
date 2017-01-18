@@ -38,16 +38,16 @@ namespace Pt {
 
 namespace Gfx {
 
-template<typename IteratorT>
-void blockScale(IteratorT from, Pt::ssize_t fromWidth, Pt::ssize_t fromHeight,
-                IteratorT to,   Pt::ssize_t toWidth,   Pt::ssize_t toHeight)
+template<typename InIterT, typename OutIterT>
+void blockScale(InIterT from, Pt::ssize_t fromWidth, Pt::ssize_t fromHeight,
+                OutIterT to, Pt::ssize_t toWidth, Pt::ssize_t toHeight)
 {
     Pt::ssize_t dh = 0;
     Pt::ssize_t y  = 0;
 
     while(y < toHeight) 
     {
-        IteratorT pos = from;
+        InIterT pos = from;
         do 
         {
             Pt::ssize_t dw = 0;
@@ -74,9 +74,9 @@ void blockScale(IteratorT from, Pt::ssize_t fromWidth, Pt::ssize_t fromHeight,
 }
 
 
-template<typename IteratorT, typename AssignT>
-void blockScale(IteratorT from, Pt::ssize_t fromWidth, Pt::ssize_t fromHeight,
-                IteratorT to,   Pt::ssize_t toWidth,   Pt::ssize_t toHeight,
+template<typename InIterT, typename OutIterT, typename AssignT>
+void blockScale(InIterT from, Pt::ssize_t fromWidth, Pt::ssize_t fromHeight,
+                OutIterT to, Pt::ssize_t toWidth, Pt::ssize_t toHeight,
                 AssignT assign)
 {
     Pt::ssize_t dh = 0;
@@ -84,7 +84,7 @@ void blockScale(IteratorT from, Pt::ssize_t fromWidth, Pt::ssize_t fromHeight,
 
     while(y < toHeight) 
     {
-        IteratorT pos = from;
+        InIterT pos = from;
         do 
         {
             Pt::ssize_t dw = 0;

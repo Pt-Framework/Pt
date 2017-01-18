@@ -41,6 +41,7 @@ class BlockScaleTest : public Pt::Unit::TestSuite
         : Pt::Unit::TestSuite("BlockScaleTest")
         {
             Pt::Unit::TestSuite::registerMethod("ScaleUp", *this, &BlockScaleTest::ScaleUp);
+            Pt::Unit::TestSuite::registerMethod("ScaleDown", *this, &BlockScaleTest::ScaleDown);
         }
 
     protected:
@@ -64,11 +65,21 @@ class BlockScaleTest : public Pt::Unit::TestSuite
             Pt::Gfx::Image from( Pt::Gfx::ImageFormat::argb32(), 
                                  Pt::Gfx::Size(100, 100) );
 
+            std::memset(from.data(), 123, from.size().width() * 
+                                          from.size().height() *
+                                          from.format().pixelStride());
+
             Pt::Gfx::Image to( Pt::Gfx::ImageFormat::argb32(), 
                                Pt::Gfx::Size(20, 40) );
 
             Pt::Gfx::blockScale(from.begin(), from.width(), from.height(), 
                                 to.begin(), to.width(), to.height());
+
+            PT_UNIT_ASSERT(0 == std::memcmp(to.data(), 
+                                            from.data(), 
+                                            to.size().width() * 
+                                            to.size().height() *
+                                            to.format().pixelStride()));
         }
 };
 

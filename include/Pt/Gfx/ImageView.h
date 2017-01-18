@@ -491,8 +491,7 @@ inline void ConstPixel::advance(Pt::ssize_t n)
 
 inline Color ConstPixel::toColor() const
 {
-    //return _view->format().getColor(*this);
-    return Color(0, 0, 0);
+    return _view->format().getColor(*this);
 }
 
 } // namespace
