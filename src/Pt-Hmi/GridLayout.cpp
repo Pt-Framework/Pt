@@ -33,10 +33,79 @@ namespace Pt {
 
 namespace Hmi {
 
-GridLayout::GridLayout(GrowStyle g)
+void GridLayoutVertical(Widget& parent, const Gfx::SizeF& itemSize, unsigned cols)
+{
+    std::vector<Widget*>::const_iterator it;
+    std::vector<Widget*>::const_iterator end = parent.widgets().end();
+
+    double itemX = 0;
+    double itemY = 0;
+    unsigned col = 0;
+
+    for(it = parent.widgets().begin(); it != end; ++it)
+    {
+        Widget* widget = *it;
+        
+        if( ! widget->isVisible() )
+            continue;
+
+        // x/y position within a cell
+        double x = ( itemSize.width() - widget->size().width() ) / 2;
+        double y = ( itemSize.height() - widget->size().height() ) / 2;
+
+        Gfx::PointF pos(itemX + x, itemY + y);
+        widget->move(pos);
+
+        itemX += itemSize.width();
+        
+        if(++col == cols)
+        {
+            col = 0;
+            itemX = 0;
+            itemY += itemSize.height();
+        }
+    }
+}
+
+
+void GridLayoutHorizontal(Widget& parent, const Gfx::SizeF& itemSize, unsigned rows)
+{
+    std::vector<Widget*>::const_iterator it;
+    std::vector<Widget*>::const_iterator end = parent.widgets().end();
+
+    double itemX = 0;
+    double itemY = 0;
+    unsigned row = 0;
+    
+    for(it = parent.widgets().begin(); it != end; ++it)
+    {
+        Widget* widget = *it;
+        
+        if( ! widget->isVisible() )
+            continue;
+
+        // x/y position within a cell
+        double x = ( itemSize.width() - widget->size().width() ) / 2;
+        double y = ( itemSize.height() - widget->size().height() ) / 2;
+
+        Gfx::PointF pos(itemX + x, itemY + y);
+        widget->move(pos);
+
+        itemY += itemSize.height();
+        
+        if(++row == rows)
+        {
+            row = 0;
+            itemY = 0;
+            itemX += itemSize.width();
+        }
+    }
+}
+
+
+GridLayout::GridLayout(GrowStyle g, std::size_t span)
 : _growStyle(g)
-, _rows(0)
-, _columns(0)
+, _span(span)
 {
 }
 
@@ -46,33 +115,10 @@ GridLayout::~GridLayout()
 }
 
 
-void GridLayout::setGrowStyle(GrowStyle g)
+void GridLayout::setStyle(GrowStyle g, std::size_t span)
 {
     _growStyle = g;
-}
-
-
-std::size_t GridLayout::rows() const
-{
-    return _rows;
-}
-
-
-void GridLayout::setRows(std::size_t n)
-{
-    _rows = n;
-}
-
-
-std::size_t GridLayout::columns() const
-{
-    return _columns;
-}
-
-
-void GridLayout::setColumns(std::size_t n)
-{
-    _columns = n;
+    _span = span;
 }
 
 
@@ -94,8 +140,10 @@ void GridLayout::onLayout()
         if( ! widget->isVisible() )
             continue;
 
-        double width = std::max( widget->size().width(), itemSize.width() );
-        double height = std::max( widget->size().height(), itemSize.height() );
+        double width = std::max( widget->size().width() + widget->margin().leftRight(), 
+                                 itemSize.width() );
+        double height = std::max( widget->size().height() + widget->margin().topBottom(), 
+                                  itemSize.height() );
         itemSize.set(width, height);
     }
 
@@ -103,29 +151,27 @@ void GridLayout::onLayout()
     // layout widgets
     //
 
-    double itemX = 0;
-    double itemY = 0;
-
-    for(it = widgets().begin(); it != end; ++it)
+    switch(_growStyle)
     {
-        Widget* widget = *it;
-        
-        if( ! widget->isVisible() )
-            continue;
-
-        // x/y position within a cell
-        double x = ( itemSize.width() - widget->size().width() ) / 2;
-        double y = ( itemSize.height() - widget->size().height() ) / 2;
-
-        Gfx::PointF pos(itemX + x, itemY + y);
-        widget->move(pos);
-
-        itemX += itemSize.width();
-        
-        if( itemX > size().width() )
+        default:
+        case Vertical:
         {
-            itemX = 0;
-            itemY += itemSize.height();
+            std::size_t cols = _span;
+            if(_span == 0 )
+              cols = static_cast<std::size_t>( size().width() / itemSize.width() );
+            
+            GridLayoutVertical(*this, itemSize, cols);
+            break;
+        }
+
+        case Horizontal:
+        {
+            std::size_t rows = _span;
+            if(_span == 0 )
+                rows = static_cast<std::size_t>( size().height() / itemSize.height() );
+            
+            GridLayoutHorizontal(*this, itemSize, rows);
+            break;
         }
     }
 }

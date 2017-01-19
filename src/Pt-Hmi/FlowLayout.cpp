@@ -188,9 +188,6 @@ void FlowLayout::setDirection(Direction d)
 
 void FlowLayout::onLayout()
 {
-    std::vector<Widget*>::const_iterator it = this->widgets().begin();
-    std::vector<Widget*>::const_iterator end = this->widgets().end();
-
     switch(_direction)
     {
         default:

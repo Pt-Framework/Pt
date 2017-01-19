@@ -41,33 +41,23 @@ class PT_HMI_API GridLayout : public Layout
     public:
         enum GrowStyle
         {
-            Fixed = 0,
-            GrowRows,
-            GrowColumns
+            Vertical = 0,
+            Horizontal = 1
         };
 
     public:
-        GridLayout(GrowStyle g = GrowRows);
+        explicit GridLayout(GrowStyle g = Vertical, std::size_t span = 0);
 
         virtual ~GridLayout();
 
-        void setGrowStyle(GrowStyle g);
-
-        std::size_t rows() const;
-
-        void setRows(std::size_t n);
-
-        std::size_t columns() const;
-
-        void setColumns(std::size_t n);
+        void setStyle(GrowStyle g, std::size_t span = 0);
 
     protected:
         virtual void onLayout();
 
     private:
         GrowStyle   _growStyle;
-        std::size_t _rows;
-        std::size_t _columns;
+        std::size_t _span;
 };
 
 } // namespace
