@@ -103,8 +103,8 @@ void GridLayoutHorizontal(Widget& parent, const Gfx::SizeF& itemSize, unsigned r
 }
 
 
-GridLayout::GridLayout(GrowStyle g, std::size_t span)
-: _growStyle(g)
+GridLayout::GridLayout(Orientation o, std::size_t span)
+: _orientation(o)
 , _span(span)
 {
 }
@@ -115,9 +115,9 @@ GridLayout::~GridLayout()
 }
 
 
-void GridLayout::setStyle(GrowStyle g, std::size_t span)
+void GridLayout::setOrientation(Orientation o, std::size_t span)
 {
-    _growStyle = g;
+    _orientation = o;
     _span = span;
 }
 
@@ -151,7 +151,7 @@ void GridLayout::onLayout()
     // layout widgets
     //
 
-    switch(_growStyle)
+    switch(_orientation)
     {
         default:
         case Vertical:

@@ -39,24 +39,24 @@ namespace Hmi {
 class PT_HMI_API GridLayout : public Layout
 {
     public:
-        enum GrowStyle
+        enum Orientation
         {
-            Vertical = 0,
-            Horizontal = 1
+            Horizontal = 0,
+            Vertical = 1
         };
 
     public:
-        explicit GridLayout(GrowStyle g = Vertical, std::size_t span = 0);
+        explicit GridLayout(Orientation g = Vertical, std::size_t span = 0);
 
         virtual ~GridLayout();
 
-        void setStyle(GrowStyle g, std::size_t span = 0);
+        void setOrientation(Orientation o, std::size_t span = 0);
 
     protected:
         virtual void onLayout();
 
     private:
-        GrowStyle   _growStyle;
+        Orientation _orientation;
         std::size_t _span;
 };
 
