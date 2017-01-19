@@ -77,10 +77,19 @@ int ProgressBar::value() const
 
 void ProgressBar::setValue(int n)
 {
+	if( n < _min )
+		n = _min;
+
+	if( n > _max )
+		n = _max;
+		
 	_value = n;
 
 	invalidate();
+
+	_valueChanged.send(_value);
 }
+
 
 float ProgressBar::progress() const
 {
@@ -91,6 +100,12 @@ float ProgressBar::progress() const
 		return 1.f;
 
 	return static_cast<float>(_value - _min)/(_max - _min);
+}
+
+
+Signal<int>& ProgressBar::valueChanged()
+{
+	return _valueChanged;
 }
 
 

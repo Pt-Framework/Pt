@@ -32,6 +32,7 @@
 
 #include <Pt/Hmi/Control.h>
 #include <Pt/SmartPtr.h>
+#include <Pt/Signal.h>
 
 namespace Pt {
 
@@ -58,6 +59,8 @@ class PT_HMI_API ProgressBar : public Control
         void setValue(int n);
 			
 				float progress() const;
+
+				Signal<int>& valueChanged();
 
     public:
         const Gfx::Brush& background() const;
@@ -101,6 +104,7 @@ class PT_HMI_API ProgressBar : public Control
         Gfx::PointF textPosition() const;
 
     private:
+				Signal<int> _valueChanged;
 				int _value;
 				int _min;
 				int _max;
