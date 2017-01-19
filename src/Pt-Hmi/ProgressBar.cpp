@@ -35,7 +35,9 @@ namespace Pt {
 namespace Hmi {
 
 ProgressBar::ProgressBar()
-: _progess(0.5f)
+: _value(50)
+, _min(0)
+, _max(100)
 , _hasRenderer(false)
 {
 }
@@ -46,17 +48,49 @@ ProgressBar::~ProgressBar()
 }
 
 
-float ProgressBar::progress() const
+int ProgressBar::maximum() const
 {
-	return _progess;
+	return _max;
 }
 
 
-void ProgressBar::setProgress(const float progress)
+int ProgressBar::minimum() const
 {
-	_progess = progress;
+	return _min;
+}
+
+
+void ProgressBar::setRange(int minpos, int maxpos)
+{
+	_min = minpos;
+	_max = maxpos;
 
 	invalidate();
+}
+
+
+int ProgressBar::value() const
+{
+	return _value;
+}
+
+
+void ProgressBar::setValue(int n)
+{
+	_value = n;
+
+	invalidate();
+}
+
+float ProgressBar::progress() const
+{
+	if( _value <= _min )
+		return 0.f;
+
+	if(_value > _max)
+		return 1.f;
+
+	return static_cast<float>(_value - _min)/(_max - _min);
 }
 
 

@@ -47,11 +47,7 @@ class PT_HMI_API ProgressBar : public Control
 
         virtual ~ProgressBar();
 
-				float progress() const;
-
-				void setProgress(const float progress);
-
-				/*int maximum() const;
+				int maximum() const;
 
 				int minimum() const;
 
@@ -59,7 +55,9 @@ class PT_HMI_API ProgressBar : public Control
 
         int value() const;
 
-        void setValue(int pos);*/
+        void setValue(int n);
+			
+				float progress() const;
 
     public:
         const Gfx::Brush& background() const;
@@ -103,7 +101,9 @@ class PT_HMI_API ProgressBar : public Control
         Gfx::PointF textPosition() const;
 
     private:
-				float _progess;
+				int _value;
+				int _min;
+				int _max;
 
         AutoPtr<Gfx::Brush>       _background;
 				AutoPtr<Gfx::Color>       _foreground;

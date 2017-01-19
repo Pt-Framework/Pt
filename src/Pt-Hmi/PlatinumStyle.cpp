@@ -814,6 +814,7 @@ void PlatinumProgressBarRenderer::onRender( const ProgressBar& p,
 																						const Gfx::Font& font
 																				 ) const
 {
+		
 		const double barHeight = 3.0;
 		const double progressWidth = p.size().width() * p.progress();
 		const double boxY = p.size().height()/2 - barHeight/2;
