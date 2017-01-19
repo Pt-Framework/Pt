@@ -46,7 +46,7 @@ class PT_HMI_API GridLayout : public Layout
         };
 
     public:
-        explicit GridLayout(Orientation g = Vertical, std::size_t span = 0);
+        explicit GridLayout(Orientation o = Vertical, std::size_t span = 0);
 
         virtual ~GridLayout();
 
