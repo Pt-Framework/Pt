@@ -51,6 +51,16 @@ class PT_HMI_API ProgressBar : public Control
 
 				void setProgress(const float progress);
 
+				/*int maximum() const;
+
+				int minimum() const;
+
+				void setRange(int minpos, int maxpos);
+
+        int value() const;
+
+        void setValue(int pos);*/
+
     public:
         const Gfx::Brush& background() const;
 

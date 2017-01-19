@@ -814,24 +814,25 @@ void PlatinumProgressBarRenderer::onRender( const ProgressBar& p,
 																						const Gfx::Font& font
 																				 ) const
 {
-		Gfx::RectF boxRect( Gfx::PointF(0.0, p.size().height() / 2 - 1.5),
-		                  Gfx::SizeF(p.size().width(), 3.0) );
-		
-		double progressWidth = p.size().width() * p.progress();
+		const double barHeight = 3.0;
+		const double progressWidth = p.size().width() * p.progress();
+		const double boxY = p.size().height()/2 - barHeight/2;
 
-		Gfx::RectF barRect( Gfx::PointF(0.0, p.size().height() / 2 - 1.5),
-		                    Gfx::SizeF(progressWidth, 3.0) );
+		Gfx::RectF boxRect( Gfx::PointF(0.0, boxY),
+		                    Gfx::SizeF(p.size().width(), barHeight) );
+
+		Gfx::RectF progressRect( Gfx::PointF(0.0, boxY),
+		                         Gfx::SizeF(progressWidth,barHeight) );
 
     painter.setBrush(background);
     painter.fillRect(boxRect);
 
 		painter.setBrush(foreground);
-		painter.fillRect(barRect);
+		painter.fillRect(progressRect);
 
-		painter.setBrush( Gfx::Color::fromRgb8(255,255,255) );
-		painter.fillCircle(Gfx::PointF(progressWidth - 2.5, 
-			                             p.size().height() / 2 - 2.5), 
-												5.0);
+		painter.setBrush(foreground);
+		painter.fillCircle(Gfx::PointF(progressWidth - barHeight/2, 
+			                             boxY), barHeight);
 }
 
 

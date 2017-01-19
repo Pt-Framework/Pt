@@ -63,7 +63,7 @@ void ProgressBar::setProgress(const float progress)
 const Gfx::Brush& ProgressBar::background() const
 {
     return _background ? *_background
-											 : Application::instance().styleOptions().background();
+											 : Application::instance().styleOptions().foreground();
 }
 
 
