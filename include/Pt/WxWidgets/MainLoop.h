@@ -65,6 +65,8 @@ class PT_WXWIDGETS_API MainLoop : public Pt::System::EventLoop
 
         virtual void onQueueEvent(const Pt::Event& ev);
 
+        virtual void onProcessEvents();
+
         virtual void onWake();
 
         virtual void onAttachTimer(System::Timer& timer);

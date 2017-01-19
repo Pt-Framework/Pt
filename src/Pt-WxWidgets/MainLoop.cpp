@@ -101,6 +101,12 @@ void MainLoop::onQueueEvent(const Pt::Event& ev)
 }
 
 
+void MainLoop::onProcessEvents()
+{
+    _impl->processEvents();
+}
+
+
 void MainLoop::onWake()
 {
     _impl->wake();
