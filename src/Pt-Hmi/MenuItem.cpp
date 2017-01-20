@@ -349,7 +349,9 @@ void MenuItem::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     double iconY = (size().height() - icon().height()) / 2;
 
     Gfx::PointF iconPos(iconX, iconY);
+    painter.setCompositionMode(Gfx::CompositionMode::SourceOver);
     painter.drawPicture(iconPos, _picture);
+    painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
 
     //
     // item text
