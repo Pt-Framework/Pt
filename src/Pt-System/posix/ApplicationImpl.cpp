@@ -111,7 +111,8 @@ ApplicationImpl::ApplicationImpl()
 
 ApplicationImpl::~ApplicationImpl()
 {
-    pt_signal_pipe->out().inputReady() -= slot(processSignal);
+    if(pt_signal_pipe)
+        pt_signal_pipe->out().inputReady() -= slot(processSignal);
 }
 
 
