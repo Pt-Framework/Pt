@@ -407,6 +407,36 @@ class PT_HMI_API PlatinumProgressBarRenderer : public ProgressBarRenderer
 };
 
 
+class PT_HMI_API PlatinumSliderRenderer : public SliderRenderer
+{
+    public:
+        PlatinumSliderRenderer(std::size_t refs = 0);
+
+        virtual ~PlatinumSliderRenderer();
+
+    protected:
+        virtual void onPrepare( const Slider&				s,
+                                const StyleOptions&	options,
+                                Gfx::Brush&					background,
+                                Gfx::Brush&					foreground,
+                                Gfx::Pen&						contour,
+															  Gfx::Pen&						textPen,
+															  Gfx::Font&					font
+															 ) const;
+
+				virtual void onRender( const Slider&				s,
+															 const StyleOptions&	options,
+															 Painter&							painter,
+															 const Gfx::RectF&		rect,
+															 const Gfx::Brush&		background,
+															 const Gfx::Brush&		foreground,
+															 const Gfx::Pen&			contour,
+															 const Gfx::Pen&			textPen,
+															 const Gfx::Font&			font
+															) const;
+};
+
+
 class PT_HMI_API PlatinumStyle : public Style
 {
     public:

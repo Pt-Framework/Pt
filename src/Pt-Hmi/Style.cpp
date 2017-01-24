@@ -623,6 +623,47 @@ void ProgressBarRenderer::render( const ProgressBar& p,
 	onRender(p, options, painter, rect, background, foreground, contour, textPen, font); 
 }
 
+
+///////////////////////////////////////////////////////////////////////////////
+// SliderRenderer
+///////////////////////////////////////////////////////////////////////////////
+
+SliderRenderer::SliderRenderer(std::size_t refs)
+: Style::Facet( typeid(SliderRenderer), refs )
+{
+}
+
+    
+SliderRenderer::~SliderRenderer()
+{
+}
+
+
+void SliderRenderer::prepare( const Slider&				s,
+															const StyleOptions&	options,
+															Gfx::Brush&					background,
+															Gfx::Brush&					foreground,
+															Gfx::Pen&						contour,
+															Gfx::Pen&						textPen,
+															Gfx::Font&					font) const
+{ 
+    onPrepare(s, options, background, foreground, contour, textPen, font); 
+}
+
+void SliderRenderer::render( const Slider&				s,
+														 const StyleOptions&	options,
+														 Painter&							painter,
+														 const Gfx::RectF&		rect,
+														 const Gfx::Brush&		background,
+														 const Gfx::Brush&		foreground,
+														 const Gfx::Pen&			contour,
+														 const Gfx::Pen&			textPen,
+														 const Gfx::Font&			font
+														) const
+{
+	onRender(s, options, painter, rect, background, foreground, contour, textPen, font); 
+}
+
 } // namespace
 
 } // namespace

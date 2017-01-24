@@ -15,6 +15,7 @@
 #include <Pt/Hmi/ScrollView.h>
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/ProgressBar.h>
+#include <Pt/Hmi/Slider.h>
 
 namespace Pt {
 
@@ -67,6 +68,7 @@ class ChildW : public Hmi::Window
         Label  _textLabel;
         DockingLayout _buttonBar;
 				ProgressBar		_progressBar;
+				Slider				_slider;
 };
 
 } // namespace

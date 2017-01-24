@@ -59,6 +59,7 @@ class MenuItem;
 class MenuBar;
 class MenuBarItem;
 class ScrollBar;
+class Slider;
 class ProgressBar;
 
 template <typename T>
@@ -747,6 +748,56 @@ class PT_HMI_API ProgressBarRenderer : public Style::Facet
 															const Gfx::Pen&						textPen,
 															const Gfx::Font&						font
 																				 ) const = 0;
+};
+
+
+class PT_HMI_API SliderRenderer : public Style::Facet
+{
+    public:
+        SliderRenderer(std::size_t refs = 0);
+
+        virtual ~SliderRenderer();
+
+        void prepare(	const Slider&				s,
+											const StyleOptions&	options,
+											Gfx::Brush&					background,
+											Gfx::Brush&					foreground,
+											Gfx::Pen&						contour,
+											Gfx::Pen&						textPen,
+											Gfx::Font&					font
+										 ) const;
+
+			 void render( const Slider&				s,
+									  const StyleOptions& options,
+									  Painter&						painter,
+									  const Gfx::RectF&		rect,
+									  const Gfx::Brush&		background,
+									  const Gfx::Brush&		foreground,
+									  const Gfx::Pen&			contour,
+									  const Gfx::Pen&			textPen,
+									  const Gfx::Font&		font
+									) const;
+
+    protected:
+        virtual void onPrepare( const Slider&				s,
+                                const StyleOptions&	options,
+                                Gfx::Brush&					background,
+                                Gfx::Brush&					foreground,
+                                Gfx::Pen&						contour,
+															  Gfx::Pen&						textPen,
+															  Gfx::Font&				  font
+															) const = 0;
+
+				virtual void onRender( const Slider&				 s,
+															 const StyleOptions&	 options,
+															 Painter&						   painter,
+															 const Gfx::RectF&		 rect,
+															 const Gfx::Brush&		 background,
+															 const Gfx::Brush&		 foreground,
+															 const Gfx::Pen&			 contour,
+															 const Gfx::Pen&			 textPen,
+															 const Gfx::Font&			 font
+														 ) const = 0;
 };
 
 } // namespace

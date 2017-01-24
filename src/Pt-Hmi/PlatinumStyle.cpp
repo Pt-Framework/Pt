@@ -43,6 +43,7 @@
 #include <Pt/Hmi/MenuItem.h>
 #include <Pt/Hmi/ScrollBar.h>
 #include <Pt/Hmi/ProgressBar.h>
+#include <Pt/Hmi/Slider.h>
 
 namespace {
 
@@ -837,6 +838,72 @@ void PlatinumProgressBarRenderer::onRender( const ProgressBar& p,
 }
 
 
+///////////////////////////////////////////////////////////////////////////////
+// PlatinumSliderRenderer
+///////////////////////////////////////////////////////////////////////////////
+
+PlatinumSliderRenderer::PlatinumSliderRenderer(std::size_t refs)
+: SliderRenderer(refs)
+{
+}
+
+    
+PlatinumSliderRenderer::~PlatinumSliderRenderer()
+{
+}
+
+
+void PlatinumSliderRenderer::onPrepare( const Slider&				s,
+																				const StyleOptions&	options,
+																				Gfx::Brush&					background,
+																				Gfx::Brush&					foreground,
+																				Gfx::Pen&						contour,
+																				Gfx::Pen&						textPen,
+																				Gfx::Font&					font
+																			) const
+{
+}
+
+void PlatinumSliderRenderer::onRender( const Slider&				s,
+																			 const StyleOptions&	options,
+																			 Painter&							painter,
+																			 const Gfx::RectF&		rect,
+																			 const Gfx::Brush&		background,
+																			 const Gfx::Brush&		foreground,
+																			 const Gfx::Pen&			contour,
+																			 const Gfx::Pen&			textPen,
+																			 const Gfx::Font&			font
+																		 ) const
+{
+		
+		const double sliderHeight = 6.0;
+		const double boxY = s.size().height()/2 - sliderHeight/2;
+
+		Gfx::RectF boxRect( Gfx::PointF(0.0, boxY),
+		                    Gfx::SizeF(s.size().width(), sliderHeight) );
+
+		painter.setBrush(background);
+    painter.fillRect(boxRect);
+
+		const double knobeWidth = sliderHeight * s.position();
+
+		//Gfx::RectF knobeRect( Gfx::PointF(s.position(), boxY),
+		//                      Gfx::SizeF(sliderHeight, sliderHeight) );
+
+   
+		painter.setBrush(foreground);
+		painter.fillRect( s.knobeRect() );
+
+		
+		
+		
+		
+		//painter.setBrush(foreground);
+		//painter.fillRect(Gfx::PointF(progressWidth - barHeight/2, 
+			                             //boxY), barHeight);
+}
+
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // PlatinumStyle
@@ -853,6 +920,7 @@ PlatinumStyle::PlatinumStyle()
     set(new PlatinumMenuBarRenderer);
     set(new PlatinumScrollBarRenderer);
 		set(new PlatinumProgressBarRenderer);
+		set(new PlatinumSliderRenderer);
 }
 
 

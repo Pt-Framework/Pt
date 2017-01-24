@@ -148,16 +148,25 @@ ChildW::ChildW(const std::string& title)
     _progressBar.setMargin(5);
     _progressBar.setPadding(5);
 
+		_slider.setName("Slider"); 
+    _slider.move( Gfx::PointF(0, 0) );
+    _slider.resize( Gfx::SizeF(100, 30) );
+    _slider.setMargin(5);
+    _slider.setPadding(5);
+		_slider.setRange(0, 100);
+		_slider.setPosition(100);
+
     _buttonBar.setName("ButtonBar");
     _buttonBar.resize( Gfx::SizeF(700, 290) );
     _buttonBar.setPadding(5);
-    _buttonBar.dock(_lineEdit2, DockingLayout::Bottom);
+    //_buttonBar.dock(_lineEdit2, DockingLayout::Bottom);
     _buttonBar.dock(_lineEdit, DockingLayout::Bottom);
     _buttonBar.dock(_checkBox, DockingLayout::Bottom);
     _buttonBar.dock(_closeButton, DockingLayout::Bottom);
     _buttonBar.dock(_dialogButton, DockingLayout::Bottom); 
     _buttonBar.dock(_toggleButton, DockingLayout::Bottom);
 		_buttonBar.dock(_progressBar, DockingLayout::Bottom);
+		_buttonBar.dock(_slider, DockingLayout::Bottom);
     
     _vscroll.resize( Gfx::SizeF(24, 24) );
 
