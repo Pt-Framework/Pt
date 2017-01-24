@@ -178,7 +178,7 @@ void CheckBox::onReleased()
 
     setPressed(_state == Checked);
 
-    clicked().send(*this);
+    clicked().send();
 }
 
 

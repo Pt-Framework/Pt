@@ -52,7 +52,7 @@ class PT_HMI_API Button : public Control
 
         const Pt::String& text() const;
 
-        Signal<Button&>& clicked();
+        Signal<>& clicked();
     
     protected:
         virtual void onPressed();
@@ -80,9 +80,9 @@ class PT_HMI_API Button : public Control
         virtual void onTouchEvent(const TouchEvent& ev);
 
     private:
-        Signal<Button&> _clicked;
-        bool            _isPressed;
-        Pt::String      _text;
+        Signal<>   _clicked;
+        bool       _isPressed;
+        Pt::String _text;
 };
 
 } // namespace

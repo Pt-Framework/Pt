@@ -31,13 +31,13 @@ class ChildW : public Hmi::Window
         ~ChildW();
 
     private:
-        void onShowDialog(Button&);
+        void onShowDialog();
 
-        void onCheckBox(Button&);
+        void onCheckBox();
 
         void onTextEntered(const Pt::String& text);
         
-        void onCloseApp(Button&);
+        void onCloseApp();
         
         void checkInput(const Pt::String& s);
 

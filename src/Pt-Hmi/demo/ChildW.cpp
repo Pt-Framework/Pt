@@ -195,7 +195,7 @@ ChildW::~ChildW()
 }
 
 
-void ChildW::onShowDialog(Button&)
+void ChildW::onShowDialog()
 {
     //std::clog << "----------------" << std::endl;
     //_closeButton.setText("AAA");
@@ -221,7 +221,7 @@ void ChildW::onShowDialog(Button&)
 }
 
 
-void ChildW::onCheckBox(Button&)
+void ChildW::onCheckBox()
 {
     std::clog << "CHECKBOX CLICKED" << std::endl;
 }
@@ -234,7 +234,7 @@ void ChildW::onTextEntered(const Pt::String& text)
 }
 
 
-void ChildW::onCloseApp(Button&)
+void ChildW::onCloseApp()
 {
     mainWindow().close();
 }

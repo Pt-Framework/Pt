@@ -74,7 +74,7 @@ const Pt::String& Button::text() const
 }
 
 
-Signal<Button&>& Button::clicked()
+Signal<>& Button::clicked()
 {
     return _clicked;
 }

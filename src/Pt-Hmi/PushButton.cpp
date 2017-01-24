@@ -203,7 +203,7 @@ void PushButton::onReleased()
     if( ! isToggle() )
         setPressed(false);
     
-    clicked().send(*this);
+    clicked().send();
 }
 
 
