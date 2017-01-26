@@ -39,6 +39,7 @@ namespace Hmi {
 PushButton::PushButton()
 : _isToggle(false)
 , _isFlat(false)
+, _direction(Left)
 , _hasRenderer(false)
 {
 }
@@ -87,6 +88,13 @@ bool PushButton::isFlat() const
 void PushButton::setFlat(bool f)
 {
     _isFlat = f;
+    invalidate();
+}
+
+
+void PushButton::setLayout(Direction d)
+{
+    _direction = d;
     invalidate();
 }
 
@@ -264,19 +272,65 @@ void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     Gfx::FontMetrics fm = painter.fontMetrics( text() );
 
     //
-    // button icon
+    // layout icon and text
     //
+
+    double pictureX = 0;
+    double pictureY = 0;
+    double textX = 0;
+    double textY = 0;
 
     double spacing = _picture.empty() || text().empty() ? 0 : fm.height() * 0.5;
     double itemsWidth = fm.width() + spacing + _picture.width();
-    double itemX = (size().width() - itemsWidth) / 2;
+    double itemsHeight = fm.height() + spacing + _picture.height();
+
+    switch(_direction)
+    {
+        default:
+        case Left:
+            pictureX = (size().width() - itemsWidth) / 2;
+            pictureY = (size().height() - _picture.height()) / 2;
+    
+            textX = pictureX + _picture.width() + spacing;
+            textY = ((size().height() - fm.height()) / 2) + fm.ascent();
+            break;
+
+        case Right:
+            textX = (size().width() - itemsWidth) / 2;
+            textY = ((size().height() - fm.height()) / 2) + fm.ascent();
+            
+            pictureX = textX + fm.width() + spacing;
+            pictureY = (size().height() - _picture.height()) / 2;
+            break;
+
+        case Top:
+            pictureX = (size().width() - _picture.width()) / 2;
+            pictureY = (size().height() - itemsHeight) / 2;
+    
+            textX = (size().width() - fm.width()) / 2;
+            textY = pictureY + _picture.height() + spacing + fm.ascent();
+            break;  
+
+        case Bottom:
+            textX = (size().width() - fm.width()) / 2;
+            textY = ((size().height() - itemsHeight) / 2) + fm.ascent();
+
+            pictureX = (size().width() - _picture.width()) / 2;
+            pictureY = textY + fm.descent() + spacing;
+            break;  
+    }
+
+    //
+    // button icon
+    //
 
     if( ! _picture.empty() )
     {
-        double pictureY = ((size().height() - _picture.height()) / 2);
-        Gfx::PointF picturePos(itemX, pictureY);
         painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceOver);
+        
+        Gfx::PointF picturePos(pictureX, pictureY);
         painter.drawPicture(picturePos, _picture);
+        
         painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceCopy);
     }
 
@@ -284,12 +338,9 @@ void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     // button text including menomnic
     //
 
-    itemX += _picture.width() + spacing;
-    double textY = ((size().height() - fm.height()) / 2) + fm.ascent();
-    Gfx::PointF textPos(itemX, textY);
-
     Gfx::RectF mnemonicRect;
-
+    Gfx::PointF textPos(textX, textY);
+    
     const Char* m = mnemonic();
     if(m)
     {

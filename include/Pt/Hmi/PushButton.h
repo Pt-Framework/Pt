@@ -48,7 +48,13 @@ class PT_HMI_API PushButton : public Button
     public:
         typedef Button Base;
 
-        // TODO: use Direction to layout image and text
+        enum Direction
+        {
+            Left,
+            Right,
+            Top,
+            Bottom
+        };
 
     public:
         PushButton();
@@ -64,6 +70,8 @@ class PT_HMI_API PushButton : public Button
         bool isFlat() const;
 
         void setFlat(bool f);
+
+        void setLayout(Direction d);
 
     public:
         const Gfx::Brush& foreground() const;
@@ -108,14 +116,15 @@ class PT_HMI_API PushButton : public Button
         virtual void onEnableEvent(const EnableEvent& ev);
 
     private:
-        bool       _isToggle;
-        bool       _isFlat;
-        Gfx::Image _image;
+        bool                      _isToggle;
+        bool                      _isFlat;
+        Direction                 _direction;
+        Gfx::Image                _image;
+                                  
+        FacetPtr<ButtonRenderer>  _renderer;
+        bool                      _hasRenderer;
 
-        FacetPtr<ButtonRenderer> _renderer;
-        bool                     _hasRenderer;
-
-        AutoPtr<Gfx::Brush>      _foreground;
+        AutoPtr<Gfx::Brush>       _foreground;
         AutoPtr<Gfx::Pen>         _contour;
         AutoPtr<Gfx::Color>       _textColor;
         AutoPtr<std::string>      _fontName;
