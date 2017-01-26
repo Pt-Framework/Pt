@@ -530,7 +530,7 @@ void Widget::onInvalidateEvent(const InvalidateEvent& ev)
 
 void Widget::onInvalidate()
 {
-    Gfx::SizeF s = onAutoSize();
+    Gfx::SizeF s = _autoSize ? onAutoSize() : _size;
 
     if( s != preferredSize() )
     {
@@ -564,7 +564,7 @@ Gfx::SizeF Widget::preferredSize() const
     if(_autoSize)
         return _preferredSize;
 
-    return size();
+    return _size;
 }
 
 
@@ -629,7 +629,7 @@ bool Widget::isVisible() const
 }
 
 
-void Widget::show( bool s )
+void Widget::show(bool s)
 {
     _visible = s;
 
@@ -643,6 +643,9 @@ void Widget::show( bool s )
 void Widget::onShowEvent(const ShowEvent& ev )
 {
     _visible = ev.visible();
+
+    if( parent() )
+        parent()->onLayout();
 }
 
 
