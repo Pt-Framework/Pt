@@ -1127,7 +1127,9 @@ void Window::onMouseEvent(const MouseEvent& ev)
 
     if( ev.isPress() )
     {
-        if( ! widget || !widget->isTextInput() )
+        if( ! widget )
+            Application::instance().inputMethod().finish();
+        else if( ! widget->isTextInput() )
             Application::instance().inputMethod().finish(*widget);
     }
 
@@ -1153,7 +1155,9 @@ void Window::onTouchEvent(const TouchEvent& tev)
 
     if( tev.isPress() )
     {
-        if( ! widget || ! widget->isTextInput() )
+        if( ! widget)
+            Application::instance().inputMethod().finish();
+        else if( ! widget->isTextInput() )
             Application::instance().inputMethod().finish(*widget);
     }
 
