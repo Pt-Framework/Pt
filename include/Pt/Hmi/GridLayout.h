@@ -56,6 +56,11 @@ class PT_HMI_API GridLayout : public Layout
         virtual void onLayout();
 
     private:
+        void layoutVertical(const Gfx::SizeF& itemSize);
+
+        void layoutHorizontal(const Gfx::SizeF& itemSize);
+
+    private:
         Orientation _orientation;
         std::size_t _span;
 };

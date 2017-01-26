@@ -830,7 +830,7 @@ void Widget::setMargin(const Spacing& s)
 
 void Widget::setMargin(double n)
 {
-    _margin.setAll(n);
+    _margin.set(n);
 
     if( parent() )
        parent()->onLayout();
@@ -852,7 +852,7 @@ void Widget::setPadding( const Spacing& p )
 
 void Widget::setPadding(double n)
 {
-    _padding.setAll(n);
+    _padding.set(n);
     onLayout();
 }
 

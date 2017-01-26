@@ -33,76 +33,6 @@ namespace Pt {
 
 namespace Hmi {
 
-void GridLayoutVertical(Widget& parent, const Gfx::SizeF& itemSize, unsigned cols)
-{
-    std::vector<Widget*>::const_iterator it;
-    std::vector<Widget*>::const_iterator end = parent.widgets().end();
-
-    double itemX = 0;
-    double itemY = 0;
-    unsigned col = 0;
-
-    for(it = parent.widgets().begin(); it != end; ++it)
-    {
-        Widget* widget = *it;
-        
-        if( ! widget->isVisible() )
-            continue;
-
-        // x/y position within a cell
-        double x = ( itemSize.width() - widget->size().width() ) / 2;
-        double y = ( itemSize.height() - widget->size().height() ) / 2;
-
-        Gfx::PointF pos(itemX + x, itemY + y);
-        widget->move(pos);
-
-        itemX += itemSize.width();
-        
-        if(++col == cols)
-        {
-            col = 0;
-            itemX = 0;
-            itemY += itemSize.height();
-        }
-    }
-}
-
-
-void GridLayoutHorizontal(Widget& parent, const Gfx::SizeF& itemSize, unsigned rows)
-{
-    std::vector<Widget*>::const_iterator it;
-    std::vector<Widget*>::const_iterator end = parent.widgets().end();
-
-    double itemX = 0;
-    double itemY = 0;
-    unsigned row = 0;
-    
-    for(it = parent.widgets().begin(); it != end; ++it)
-    {
-        Widget* widget = *it;
-        
-        if( ! widget->isVisible() )
-            continue;
-
-        // x/y position within a cell
-        double x = ( itemSize.width() - widget->size().width() ) / 2;
-        double y = ( itemSize.height() - widget->size().height() ) / 2;
-
-        Gfx::PointF pos(itemX + x, itemY + y);
-        widget->move(pos);
-
-        itemY += itemSize.height();
-        
-        if(++row == rows)
-        {
-            row = 0;
-            itemY = 0;
-            itemX += itemSize.width();
-        }
-    }
-}
-
-
 GridLayout::GridLayout(Orientation o, std::size_t span)
 : _orientation(o)
 , _span(span)
@@ -155,23 +85,115 @@ void GridLayout::onLayout()
     {
         default:
         case Vertical:
-        {
-            std::size_t cols = _span;
-            if(_span == 0 )
-              cols = static_cast<std::size_t>( size().width() / itemSize.width() );
-            
-            GridLayoutVertical(*this, itemSize, cols);
+            layoutVertical(itemSize);
             break;
-        }
 
         case Horizontal:
-        {
-            std::size_t rows = _span;
-            if(_span == 0 )
-                rows = static_cast<std::size_t>( size().height() / itemSize.height() );
-            
-            GridLayoutHorizontal(*this, itemSize, rows);
+            layoutHorizontal(itemSize);
             break;
+    }
+}
+
+
+void GridLayout::layoutVertical(const Gfx::SizeF& itemSize)
+{
+    std::size_t cols = _span;
+
+    if(_span == 0 )
+    {
+        double itemsWidth = size().width() - padding().leftRight();
+        cols = static_cast<std::size_t>( itemsWidth / itemSize.width() );
+        cols = std::min(cols, widgets().size());
+    }
+
+    if(cols == 0)
+          cols = 1;
+
+    std::vector<Widget*>::const_iterator it;
+    std::vector<Widget*>::const_iterator end = widgets().end();
+
+    double width = size().width() - padding().leftRight();
+    double itemsWidth = (itemSize.width() * cols);
+    double itemsPadding = (width - itemsWidth) / 2;
+    double startX = padding().left() + itemsPadding;
+
+    double itemX = startX;
+    double itemY = padding().top();
+    unsigned col = 0;
+
+    for(it = widgets().begin(); it != end; ++it)
+    {
+        Widget* widget = *it;
+        
+        if( ! widget->isVisible() )
+            continue;
+
+        // x/y position within a cell
+        double x = ( itemSize.width() - widget->size().width() ) / 2;
+        double y = ( itemSize.height() - widget->size().height() ) / 2;
+
+        Gfx::PointF pos(itemX + x, itemY + y);
+        widget->move(pos);
+
+        itemX += itemSize.width();
+        
+        if(++col == cols)
+        {
+            col = 0;
+            itemX = startX;
+            itemY += itemSize.height();
+        }
+    }
+}
+
+
+void GridLayout::layoutHorizontal(const Gfx::SizeF& itemSize)
+{
+    std::size_t rows = _span;
+
+    if(_span == 0 )
+    {
+        double itemsHeight = size().height() - padding().topBottom();
+        rows = static_cast<std::size_t>( itemsHeight / itemSize.height() );
+        rows = std::min(rows, widgets().size());
+    }
+
+    if(rows == 0)
+          rows = 1;
+
+    std::vector<Widget*>::const_iterator it;
+    std::vector<Widget*>::const_iterator end = widgets().end();
+
+    double height = size().height() - padding().topBottom();
+    double itemsHeight = (itemSize.height() * rows);
+    double itemsPadding = (height - itemsHeight) / 2;
+    double startY = padding().top() + itemsPadding;
+
+    double itemX = padding().left();
+    double itemY = startY;
+    unsigned row = 0;
+    
+    for(it = widgets().begin(); it != end; ++it)
+    {
+        Widget* widget = *it;
+        
+        if( ! widget->isVisible() )
+            continue;
+
+        // x/y position within a cell
+        double x = ( itemSize.width() - widget->size().width() ) / 2;
+        double y = ( itemSize.height() - widget->size().height() ) / 2;
+
+        Gfx::PointF pos(itemX + x, itemY + y);
+        widget->move(pos);
+
+        itemY += itemSize.height();
+        
+        if(++row == rows)
+        {
+            row = 0;
+            itemY = startY;
+            itemX += itemSize.width();
         }
     }
 }

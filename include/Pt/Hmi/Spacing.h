@@ -37,20 +37,38 @@ class Spacing
   public:
     Spacing(double all)
     {
-      setAll(all);
+      set(all);
     }
 
-    Spacing(const double left, const double top, const double right, const double bottom)
+    Spacing(double horizontal, double vertical)
     {
-      assign( left, top, right, bottom );
+      set(horizontal, vertical);
+    }
+
+    Spacing(double left, double top, double right, double bottom)
+    {
+      set(left, top, right, bottom);
     }
 
     Spacing()    
     {
-      assign( 0, 0, 0, 0);
+      set( 0, 0, 0, 0);
     }
 
-    void assign( double left, double top, double right, double bottom )
+    void set(double value)
+    {
+      set(value, value);
+    }
+
+    void set(double horizontal, double vertical)
+    {
+      _left = horizontal;
+      _top = vertical;
+      _right = horizontal;
+      _bottom = vertical;
+    }
+
+    void set(double left, double top, double right, double bottom)
     {
       _left = left;
       _top = top;
@@ -107,11 +125,6 @@ class Spacing
     {
       _bottom = bottom;
     } 
-
-    void setAll(double value)
-    {
-      assign( value, value, value, value );
-    }
 
   private:
     double _left;
