@@ -208,6 +208,9 @@ void PushButton::onReleased()
 {
     Base::onReleased();
 
+    if( ! isPressed() )
+      return;
+
     if( ! isToggle() )
         setPressed(false);
     
