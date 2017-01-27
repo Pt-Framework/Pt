@@ -213,7 +213,7 @@ void InputDevice::onRelative(const input_event& ev)
 
 void InputDevice::onAbsolute(const input_event& ev)
 {
-  //std::clog << "EV_ABS " << ev.code << " " << ev.value << std::endl;
+    //std::clog << "EV_ABS " << ev.code << " " << ev.value << std::endl;
 
     switch(ev.code)
     {
@@ -255,7 +255,7 @@ void InputDevice::onAbsolute(const input_event& ev)
 
 void InputDevice::onKey(const input_event& ev)
 {
-//    std::clog << "EV_KEY " << ev.code << " " << ev.value << std::endl;
+    //std::clog << "EV_KEY " << ev.code << " " << ev.value << std::endl;
     
     if( ev.code == 272)    
     {
@@ -283,6 +283,12 @@ void InputDevice::onKey(const input_event& ev)
     {
         if( ev.value == 0  )
         {
+            if(_touchMove == 0)
+            {
+                _touchEvent.setPress();
+                _eventReady.send(_touchEvent);
+            }
+
             _touchMove = 0;
             _touchEvent.setRelease();
             _eventReady.send(_touchEvent);
