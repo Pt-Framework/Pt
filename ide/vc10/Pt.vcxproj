@@ -267,6 +267,7 @@
     <ClInclude Include="..\..\include\Pt\Unit\TextProtocol.h" />
     <ClInclude Include="..\..\include\Pt\Utf16Codec.h" />
     <ClInclude Include="..\..\include\Pt\Utf32Codec.h" />
+    <ClInclude Include="..\..\include\Pt\Utf8.h" />
     <ClInclude Include="..\..\include\Pt\Utf8Codec.h" />
     <ClInclude Include="..\..\include\Pt\Void.h" />
     <ClInclude Include="..\..\include\Pt\WinVer.h" />
@@ -846,6 +847,7 @@
     <ClCompile Include="..\..\src\Pt\tests\TimeTest.cpp" />
     <ClCompile Include="..\..\src\Pt\tests\TypesTest.cpp" />
     <ClCompile Include="..\..\src\Pt\tests\TypeTraitsTest.cpp" />
+    <ClCompile Include="..\..\src\Pt\tests\Utf8Test.cpp" />
     <ClCompile Include="..\..\src\Pt\tests\WindowsCodecTest.cpp" />
     <ClCompile Include="..\..\src\Pt\tests\ZBufferTest.cpp" />
     <ClCompile Include="..\..\src\Pt\TextBuffer.cpp" />
@@ -854,6 +856,7 @@
     <ClCompile Include="..\..\src\Pt\UnicodeTable.cpp" />
     <ClCompile Include="..\..\src\Pt\Utf16Codec.cpp" />
     <ClCompile Include="..\..\src\Pt\Utf32Codec.cpp" />
+    <ClCompile Include="..\..\src\Pt\Utf8.cpp" />
     <ClCompile Include="..\..\src\Pt\Utf8Codec.cpp" />
     <ClCompile Include="..\..\src\Pt\ZBuffer.cpp" />
   </ItemGroup>

@@ -1434,6 +1434,9 @@
     <ClInclude Include="..\..\include\Pt\Hmi\GridLayout.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Utf8.h">
+      <Filter>Pt</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2656,6 +2659,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\GridLayout.cpp">
       <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\Utf8.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt\tests\Utf8Test.cpp">
+      <Filter>Pt\tests</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

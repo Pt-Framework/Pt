@@ -27,8 +27,9 @@ Main Pt-test : Pt-test.cpp
                TimespanTest.cpp
                TypesTest.cpp
                TypeTraitsTest.cpp
+               Utf8Test.cpp
                ZBufferTest.cpp
-			   ;
+               ;
 
 LinkSharedLibraries Pt-test : Pt-System Pt-Unit Pt ;
 MakeLocate Pt-test : $(PT_OUTPUT_TARGET) ;

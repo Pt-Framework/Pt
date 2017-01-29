@@ -25,16 +25,12 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#undef PT_API_EXPORT
 
-#include "Pt/Api.h"
-#include "Pt/Unit/Assertion.h"
-#include "Pt/Unit/TestSuite.h"
-#include "Pt/Unit/RegisterTest.h"
-#include "Pt/String.h"
-
-#include <string>
-#include <sstream>
+#include <Pt/Api.h>
+#include <Pt/Unit/Assertion.h>
+#include <Pt/Unit/TestSuite.h>
+#include <Pt/Unit/RegisterTest.h>
+#include <Pt/String.h>
 
 class CharTest : public Pt::Unit::TestSuite
 {
@@ -42,252 +38,152 @@ class CharTest : public Pt::Unit::TestSuite
         CharTest()
         : Pt::Unit::TestSuite("CharTest")
         {
-            /*std::cerr << "upper  " << std::ctype_base::upper << std::endl;
-            std::cerr << "lower  " << std::ctype_base::lower << std::endl;
-            std::cerr << "alpha  " << std::ctype_base::alpha << std::endl;
-            std::cerr << "digit  " << std::ctype_base::digit << std::endl;
-            std::cerr << "alnum  " << std::ctype_base::alnum << std::endl;
-            std::cerr << "xdigit " << std::ctype_base::xdigit << std::endl;
-            std::cerr << "graph  " << std::ctype_base::graph << std::endl;
-            std::cerr << "punct  " << std::ctype_base::punct << std::endl;
-            std::cerr << "space  " << std::ctype_base::space << std::endl;
-            std::cerr << "print  " << std::ctype_base::print << std::endl;
-            std::cerr << "cntrl  " << std::ctype_base::cntrl << std::endl;*/
-
-            Pt::Unit::TestSuite::registerMethod( "OutOfRange", *this, &CharTest::OutOfRange  );
-            Pt::Unit::TestSuite::registerMethod( "testConstructor", *this, &CharTest::testConstructor  );
-            Pt::Unit::TestSuite::registerMethod( "testAssign", *this, &CharTest::testAssign  );
-            Pt::Unit::TestSuite::registerMethod( "testCategory", *this, &CharTest::testCategory  );
-            Pt::Unit::TestSuite::registerMethod( "testCompare", *this, &CharTest::testCompare  );
+            Pt::Unit::TestSuite::registerMethod("Null", *this, &CharTest::Null);
+            Pt::Unit::TestSuite::registerMethod("ToLower", *this, &CharTest::ToLower);
+            Pt::Unit::TestSuite::registerMethod("ToUpper", *this, &CharTest::ToUpper);
+            Pt::Unit::TestSuite::registerMethod("CType", *this, &CharTest::CType);
         }
 
     protected:
-        void OutOfRange();
-        void testConstructor();
-        void testAssign();
-        void testCategory();
-        void testCompare();
-        void testOperators();
+        void Null();
+        void ToLower();
+        void ToUpper();
+        void CType();
 };
 
 Pt::Unit::RegisterTest<CharTest> _registerCharTest;
 
 
-void CharTest::OutOfRange()
+void CharTest::Null()
 {
-    Pt::Char ch(std::numeric_limits<Pt::uint32_t>::max());
+    PT_UNIT_ASSERT(Pt::Char() == 0);
 }
 
 
-void CharTest::testConstructor()
+void CharTest::ToLower()
 {
-    Pt::Char p1;
-    PT_UNIT_ASSERT(p1.value() == 0);
+    Pt::Char ch('A');
+    Pt::Char l = Pt::tolower(ch);
+    PT_UNIT_ASSERT(l == 97);
 
-    Pt::Char p2((char)'a');
-    PT_UNIT_ASSERT(p2.value() == 97);
-
-    Pt::Char p3((wchar_t)'a');
-    PT_UNIT_ASSERT(p3.value() == 97);
-
-    Pt::Char p4((unsigned char)'a');
-    PT_UNIT_ASSERT(p4.value() == 97);
-
-    Pt::Char p5((Pt::int16_t)'a');
-    PT_UNIT_ASSERT(p5.value() == 97);
-
-    Pt::Char p6((Pt::uint16_t)'a');
-    PT_UNIT_ASSERT(p6.value() == 97);
-
-    Pt::Char p7((Pt::int32_t)'a');
-    PT_UNIT_ASSERT(p7.value() == 97);
-
-    Pt::Char p8((Pt::uint32_t)'a');
-    PT_UNIT_ASSERT(p8.value() == 97);
-
-    //Pt::Char p9((long)'a');
-    //PT_UNIT_ASSERT(p9.value() == 97);
-
-    //Pt::Char p10((unsigned long)'a');
-    //PT_UNIT_ASSERT(p10.value() == 97);
 }
 
-void CharTest::testAssign()
+void CharTest::ToUpper()
 {
-    Pt::Char p;
-    PT_UNIT_ASSERT(p.value() == 0);
-
-    p = (char)'a';
-    PT_UNIT_ASSERT(p.value() == 97);
-
-    p = (wchar_t)('b');
-    PT_UNIT_ASSERT(p.value() == 98);
-
-    p = (unsigned char)'c';
-    PT_UNIT_ASSERT(p.value() == 99);
-
-    p = (Pt::int16_t)'d';
-    PT_UNIT_ASSERT(p.value() == 100);
-
-    p = (Pt::uint16_t)'e';
-    PT_UNIT_ASSERT(p.value() == 101);
-
-    p = (Pt::int32_t)'f';
-    PT_UNIT_ASSERT(p.value() == 102);
-
-    p = (Pt::uint32_t)'g';
-    PT_UNIT_ASSERT(p.value() == 103);
-
-    //p = (long)'h';
-    //PT_UNIT_ASSERT(p.value() == 104);
-
-    //p = (unsigned long)'i';
-    //PT_UNIT_ASSERT(p.value() == 105);
+    Pt::Char ch(0xDF);
+    Pt::Char u = Pt::toupper(ch);
+    PT_UNIT_ASSERT(u == 65);
 }
 
-void CharTest::testCategory()
+void CharTest::CType()
 {
-    Pt::Char p;
+    Pt::Char ch;
 
-    p = 'a';
-    //std::cerr << "\nChar " << p.value() << ": " << ctypeMask(p) << std::ctype_base::upper << std::endl;
-    PT_UNIT_ASSERT( isalpha(p));
-    PT_UNIT_ASSERT( isalnum(p));
-    PT_UNIT_ASSERT(!isdigit(p));
-    PT_UNIT_ASSERT( islower(p));
-    PT_UNIT_ASSERT(!isupper(p));
-    PT_UNIT_ASSERT(!iscntrl(p));
-    PT_UNIT_ASSERT( isgraph(p));
-    PT_UNIT_ASSERT( isprint(p));
-    PT_UNIT_ASSERT(!ispunct(p));
-    PT_UNIT_ASSERT(!isspace(p));
+    ch = 'a';
+    PT_UNIT_ASSERT( isalpha(ch));
+    PT_UNIT_ASSERT( isalnum(ch));
+    PT_UNIT_ASSERT(!isdigit(ch));
+    PT_UNIT_ASSERT( islower(ch));
+    PT_UNIT_ASSERT(!isupper(ch));
+    PT_UNIT_ASSERT(!iscntrl(ch));
+    PT_UNIT_ASSERT( isgraph(ch));
+    PT_UNIT_ASSERT( isprint(ch));
+    PT_UNIT_ASSERT(!ispunct(ch));
+    PT_UNIT_ASSERT(!isspace(ch));
 
-    p = toupper(p);  // A
-    //std::cerr << "\nChar " << p.value() << ": " << ctypeMask(p) << std::ctype_base::upper << std::endl;
-    PT_UNIT_ASSERT( isalpha(p));
-    PT_UNIT_ASSERT( isalnum(p));
-    PT_UNIT_ASSERT(!isdigit(p));
-    PT_UNIT_ASSERT(!islower(p));
-    PT_UNIT_ASSERT( isupper(p));
-    PT_UNIT_ASSERT(!iscntrl(p));
-    PT_UNIT_ASSERT( isgraph(p));
-    PT_UNIT_ASSERT( isprint(p));
-    PT_UNIT_ASSERT(!ispunct(p));
-    PT_UNIT_ASSERT(!isspace(p));
+    ch = 'A';
+    PT_UNIT_ASSERT( isalpha(ch));
+    PT_UNIT_ASSERT( isalnum(ch));
+    PT_UNIT_ASSERT(!isdigit(ch));
+    PT_UNIT_ASSERT(!islower(ch));
+    PT_UNIT_ASSERT( isupper(ch));
+    PT_UNIT_ASSERT(!iscntrl(ch));
+    PT_UNIT_ASSERT( isgraph(ch));
+    PT_UNIT_ASSERT( isprint(ch));
+    PT_UNIT_ASSERT(!ispunct(ch));
+    PT_UNIT_ASSERT(!isspace(ch));
 
-    p = wchar_t(248);
-    //std::cerr << "\nChar " << p.value() << ": " << ctypeMask(p) << std::ctype_base::upper << std::endl;
-    PT_UNIT_ASSERT( isalpha(p));
-    PT_UNIT_ASSERT( isalnum(p));
-    PT_UNIT_ASSERT(!isdigit(p));
-    PT_UNIT_ASSERT( islower(p));
-    PT_UNIT_ASSERT(!isupper(p));
-    PT_UNIT_ASSERT(!iscntrl(p));
-    PT_UNIT_ASSERT( isgraph(p));
-    PT_UNIT_ASSERT( isprint(p));
-    PT_UNIT_ASSERT(!ispunct(p));
-    PT_UNIT_ASSERT(!isspace(p));
+    ch = wchar_t(248);
+    PT_UNIT_ASSERT( isalpha(ch));
+    PT_UNIT_ASSERT( isalnum(ch));
+    PT_UNIT_ASSERT(!isdigit(ch));
+    PT_UNIT_ASSERT( islower(ch));
+    PT_UNIT_ASSERT(!isupper(ch));
+    PT_UNIT_ASSERT(!iscntrl(ch));
+    PT_UNIT_ASSERT( isgraph(ch));
+    PT_UNIT_ASSERT( isprint(ch));
+    PT_UNIT_ASSERT(!ispunct(ch));
+    PT_UNIT_ASSERT(!isspace(ch));
 
-    p = toupper(p);
-    //std::cerr << "\nChar " << p.value() << ": " << ctypeMask(p) << std::ctype_base::upper << std::endl;
-    PT_UNIT_ASSERT( isalpha(p));
-    PT_UNIT_ASSERT( isalnum(p));
-    PT_UNIT_ASSERT(!isdigit(p));
-    PT_UNIT_ASSERT(!islower(p));
-    PT_UNIT_ASSERT( isupper(p));
-    PT_UNIT_ASSERT(!iscntrl(p));
-    PT_UNIT_ASSERT( isgraph(p));
-    PT_UNIT_ASSERT( isprint(p));
-    PT_UNIT_ASSERT(!ispunct(p));
-    PT_UNIT_ASSERT(!isspace(p));
+    ch = toupper(ch);
+    PT_UNIT_ASSERT( isalpha(ch));
+    PT_UNIT_ASSERT( isalnum(ch));
+    PT_UNIT_ASSERT(!isdigit(ch));
+    PT_UNIT_ASSERT(!islower(ch));
+    PT_UNIT_ASSERT( isupper(ch));
+    PT_UNIT_ASSERT(!iscntrl(ch));
+    PT_UNIT_ASSERT( isgraph(ch));
+    PT_UNIT_ASSERT( isprint(ch));
+    PT_UNIT_ASSERT(!ispunct(ch));
+    PT_UNIT_ASSERT(!isspace(ch));
 
-    p = '1';
-    //std::cerr << "\nChar " << p.value() << ": " << ctypeMask(p) << std::ctype_base::upper << std::endl;
-    PT_UNIT_ASSERT(!isalpha(p));
-    PT_UNIT_ASSERT( isalnum(p));
-    PT_UNIT_ASSERT( isdigit(p));
-    PT_UNIT_ASSERT(!islower(p));
-    PT_UNIT_ASSERT(!isupper(p));
-    PT_UNIT_ASSERT(!iscntrl(p));
-    PT_UNIT_ASSERT( isgraph(p));
-    PT_UNIT_ASSERT( isprint(p));
-    PT_UNIT_ASSERT(!ispunct(p));
-    PT_UNIT_ASSERT(!isspace(p));
+    ch = '1';
+    PT_UNIT_ASSERT(!isalpha(ch));
+    PT_UNIT_ASSERT( isalnum(ch));
+    PT_UNIT_ASSERT( isdigit(ch));
+    PT_UNIT_ASSERT(!islower(ch));
+    PT_UNIT_ASSERT(!isupper(ch));
+    PT_UNIT_ASSERT(!iscntrl(ch));
+    PT_UNIT_ASSERT( isgraph(ch));
+    PT_UNIT_ASSERT( isprint(ch));
+    PT_UNIT_ASSERT(!ispunct(ch));
+    PT_UNIT_ASSERT(!isspace(ch));
 
-    PT_UNIT_ASSERT(toupper(p) == p);
+    ch = '\t';
+    PT_UNIT_ASSERT(!isalpha(ch));
+    PT_UNIT_ASSERT(!isalnum(ch));
+    PT_UNIT_ASSERT(!isdigit(ch));
+    PT_UNIT_ASSERT(!islower(ch));
+    PT_UNIT_ASSERT(!isupper(ch));
+    PT_UNIT_ASSERT( iscntrl(ch));
+    PT_UNIT_ASSERT(!isgraph(ch));
+    PT_UNIT_ASSERT(!isprint(ch));
+    PT_UNIT_ASSERT(!ispunct(ch));
+    PT_UNIT_ASSERT( isspace(ch));
 
-    p = '\t';
-    //std::cerr << "\nChar " << p.value() << ": " << ctypeMask(p) << std::ctype_base::upper << std::endl;
-    PT_UNIT_ASSERT(!isalpha(p));
-    PT_UNIT_ASSERT(!isalnum(p));
-    PT_UNIT_ASSERT(!isdigit(p));
-    PT_UNIT_ASSERT(!islower(p));
-    PT_UNIT_ASSERT(!isupper(p));
-    PT_UNIT_ASSERT( iscntrl(p));
-    PT_UNIT_ASSERT(!isgraph(p));
-    PT_UNIT_ASSERT(!isprint(p));
-    PT_UNIT_ASSERT(!ispunct(p));
-    PT_UNIT_ASSERT( isspace(p));
+    ch = ' ';
+    PT_UNIT_ASSERT(!isalpha(ch));
+    PT_UNIT_ASSERT(!isalnum(ch));
+    PT_UNIT_ASSERT(!isdigit(ch));
+    PT_UNIT_ASSERT(!islower(ch));
+    PT_UNIT_ASSERT(!isupper(ch));
+    PT_UNIT_ASSERT(!iscntrl(ch));
+    PT_UNIT_ASSERT(!isgraph(ch));
+    PT_UNIT_ASSERT( isprint(ch));
+    PT_UNIT_ASSERT(!ispunct(ch));
+    PT_UNIT_ASSERT( isspace(ch));
 
-    PT_UNIT_ASSERT(toupper(p) == p);
+    ch = ':';
+    PT_UNIT_ASSERT(!isalpha(ch));
+    PT_UNIT_ASSERT(!isalnum(ch));
+    PT_UNIT_ASSERT(!isdigit(ch));
+    PT_UNIT_ASSERT(!islower(ch));
+    PT_UNIT_ASSERT(!isupper(ch));
+    PT_UNIT_ASSERT(!iscntrl(ch));
+    PT_UNIT_ASSERT( isgraph(ch));
+    PT_UNIT_ASSERT( isprint(ch));
+    PT_UNIT_ASSERT( ispunct(ch));
+    PT_UNIT_ASSERT(!isspace(ch));
 
-    p = ' ';
-    //std::cerr << "\nChar " << p.value() << ": " << ctypeMask(p) << std::ctype_base::upper << std::endl;
-    PT_UNIT_ASSERT(!isalpha(p));
-    PT_UNIT_ASSERT(!isalnum(p));
-    PT_UNIT_ASSERT(!isdigit(p));
-    PT_UNIT_ASSERT(!islower(p));
-    PT_UNIT_ASSERT(!isupper(p));
-    PT_UNIT_ASSERT(!iscntrl(p));
-    PT_UNIT_ASSERT(!isgraph(p));
-    PT_UNIT_ASSERT( isprint(p));
-    PT_UNIT_ASSERT(!ispunct(p));
-    PT_UNIT_ASSERT( isspace(p));
-
-    PT_UNIT_ASSERT(toupper(p) == p);
-
-    p = ':';
-    //std::cerr << "\nChar " << p.value() << ": " << ctypeMask(p) << std::ctype_base::upper << std::endl;
-    PT_UNIT_ASSERT(!isalpha(p));
-    PT_UNIT_ASSERT(!isalnum(p));
-    PT_UNIT_ASSERT(!isdigit(p));
-    PT_UNIT_ASSERT(!islower(p));
-    PT_UNIT_ASSERT(!isupper(p));
-    PT_UNIT_ASSERT(!iscntrl(p));
-    PT_UNIT_ASSERT( isgraph(p));
-    PT_UNIT_ASSERT( isprint(p));
-    PT_UNIT_ASSERT( ispunct(p));
-    PT_UNIT_ASSERT(!isspace(p));
-
-    PT_UNIT_ASSERT(toupper(p) == p);
-
-    p = '+';
-    //std::cerr << "\nChar " << p.value() << ": " << ctypeMask(p) << std::ctype_base::upper << std::endl;
-    PT_UNIT_ASSERT(!isalpha(p));
-    PT_UNIT_ASSERT(!isalnum(p));
-    PT_UNIT_ASSERT(!isdigit(p));
-    PT_UNIT_ASSERT(!islower(p));
-    PT_UNIT_ASSERT(!isupper(p));
-    PT_UNIT_ASSERT(!iscntrl(p));
-    PT_UNIT_ASSERT( isgraph(p));
-    PT_UNIT_ASSERT( isprint(p));
-    PT_UNIT_ASSERT( ispunct(p));
-    PT_UNIT_ASSERT(!isspace(p));
-
-    PT_UNIT_ASSERT(toupper(p) == p);
-}
-
-void CharTest::testCompare()
-{
-    Pt::Char a1('a');
-    Pt::Char a2('a');
-    Pt::Char b('b');
-
-    PT_UNIT_ASSERT(a1 == a2);
-    PT_UNIT_ASSERT(a1 == 'a');
-    PT_UNIT_ASSERT(a1 == 97);
-
-    PT_UNIT_ASSERT(b != a1);
-    PT_UNIT_ASSERT(a1 < b);
-    PT_UNIT_ASSERT(b > a1);
+    ch = '+';
+    PT_UNIT_ASSERT(!isalpha(ch));
+    PT_UNIT_ASSERT(!isalnum(ch));
+    PT_UNIT_ASSERT(!isdigit(ch));
+    PT_UNIT_ASSERT(!islower(ch));
+    PT_UNIT_ASSERT(!isupper(ch));
+    PT_UNIT_ASSERT(!iscntrl(ch));
+    PT_UNIT_ASSERT( isgraph(ch));
+    PT_UNIT_ASSERT( isprint(ch));
+    PT_UNIT_ASSERT( ispunct(ch));
+    PT_UNIT_ASSERT(!isspace(ch));
 }
