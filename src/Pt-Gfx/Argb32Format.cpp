@@ -142,7 +142,7 @@ void Argb32Format::onCopy(Pixel& dst_, Pt::uint8_t* alphas, size_t length,
         default:
         case CompositionMode::SourceCopy:
             for(size_t i = 0; i < length; ++i) {
-                Pt::uint16_t blendAlpha    = *alphas;
+                Pt::uint32_t blendAlpha    = *alphas;
                 Pt::uint32_t blendAlphaSrc = blendAlpha + 1;
                 Pt::uint32_t blendAlphaInv = 256 - blendAlpha;
                 dst[0] = (blendAlphaSrc * (Pt::uint32_t)(color.blue () / 257) + blendAlphaInv * dst[0]) >> 8;
@@ -157,7 +157,7 @@ void Argb32Format::onCopy(Pixel& dst_, Pt::uint8_t* alphas, size_t length,
         case CompositionMode::SourceOver:
             for(size_t i = 0; i < length; ++i) {
                 Pt::uint32_t colorAlpha    = color.alpha() / 257;
-                Pt::uint16_t blendAlpha    = colorAlpha * (Pt::uint32_t)(*alphas) / 255;
+                Pt::uint32_t blendAlpha    = colorAlpha * (Pt::uint32_t)(*alphas) / 255;
                 Pt::uint32_t blendAlphaSrc = blendAlpha + 1;
                 Pt::uint32_t blendAlphaInv = 256 - blendAlpha;
                 dst[0] = (blendAlphaSrc * (Pt::uint32_t)(color.blue () / 257) + blendAlphaInv * dst[0]) >> 8;
