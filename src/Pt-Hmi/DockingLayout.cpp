@@ -172,11 +172,11 @@ void DockingLayout::onLayout()
     }
 
     // TODO: keep widgets with Fill style in separate container
-    if( ! hasFilled)
+    if( ! hasFilled )
         return;
     
-    const Gfx::PointF fillPos(posLeft, posTop);
-    const Gfx::SizeF  fillSize(posRight - posLeft, posBottom - posTop);
+    Gfx::SizeF fillSize(posRight - posLeft, 
+                        posBottom - posTop);
 
     for(it = widgets().begin(); it != end; ++it)
     {
@@ -186,12 +186,20 @@ void DockingLayout::onLayout()
 
         DockStyle ds = d->second;
 
-        if( ds == DockingLayout::Fill)
+        if(ds == DockingLayout::Fill)
         {
             if( ! (*it)->isVisible() )
                 continue;
-              
-            (*it)->setGeometry(fillPos, fillSize);            
+
+            const Spacing& margin = (*it)->margin();
+
+            Gfx::PointF pos(posLeft + margin.left(), 
+                            posTop + margin.top());
+
+            Gfx::SizeF size( fillSize.width() - margin.leftRight(), 
+                             fillSize.height() - margin.topBottom()  );
+
+            (*it)->setGeometry(pos, size);            
         }
     }
 }
