@@ -158,7 +158,7 @@ inline int iscntrl(const Char& ch)
 
     @related Pt::Char
 */
-inline int isdigit(const Pt::Char& ch)
+inline int isdigit(const Char& ch)
 {
     return ctypeMask(ch) & std::ctype_base::digit;
 }
@@ -185,7 +185,7 @@ inline int isgraph(const Char& ch)
 
     @related Pt::Char
 */
-inline int islower(const Pt::Char& ch)
+inline int islower(const Char& ch)
 {
     return ctypeMask(ch) & std::ctype_base::lower;
 }
@@ -221,13 +221,13 @@ inline int isspace(const Char& ch)
 
     @related Pt::Char
 */
-PT_API Pt::Char tolower(const Pt::Char& ch);
+PT_API Char tolower(const Char& ch);
 
 /** @brief Convert a character to upper case.
 
     @related Pt::Char
 */
-PT_API Pt::Char toupper(const Pt::Char& ch);
+PT_API Char toupper(const Char& ch);
 
 
 struct MBState

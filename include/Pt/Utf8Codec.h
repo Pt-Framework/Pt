@@ -76,10 +76,10 @@ class PT_API Utf8Codec : public TextCodec<Char, char>
         // inheritdoc
         int do_encoding() const throw();
 
-        //! @brief Deocde to a unicode string.
+        //! @brief Decode to a unicode string.
         static String decode(const char* data, std::size_t size);
         
-        //! @brief Deocde to a unicode string.
+        //! @brief Decode to a unicode string.
         static String decode(const std::string& data)
         { return decode(data.data(), data.size()); }
 

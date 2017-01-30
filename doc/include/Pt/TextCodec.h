@@ -9,15 +9,14 @@ namespace Pt {
 
 /** @brief Converts between character encodings.
 
-    A Pt::TextCodec is used by the text streams and buffers for coding and
-    encoding external byte sequences, hence the name codec. It implements
-    the std::codecvt facet interface, however not all systems provide the
-    std::locale facilities.
+    A Pt::TextCodec is used by text converters to encode and decode external
+    byte sequences, hence the name codec. It implements the std::codecvt facet
+    interface, on systems provide the std::locale facilities.
     Codecs are stateless, which means that one codec can be used with multiple
-    text streams. A %TextCodec is constructed with a reference counter that
-    indicates whether the stream manages the lifetime of the codec. If that
-    value is 0, as it is the case if the %TextCodec is default constructed,
-    the text stream will delete the codec. 
+    text converters. A %TextCodec is constructed with a reference counter that
+    indicates whether the converter or locale manages the lifetime of the codec. 
+    If that value is 0, as it is the case if the %TextCodec is default
+    constructed, the text converter or locale will delete the codec. 
     
     @code
     Pt::TextOStream tos(new Pt::Utf8Codec);
