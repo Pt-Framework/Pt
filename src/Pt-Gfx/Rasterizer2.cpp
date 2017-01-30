@@ -215,9 +215,9 @@ void Rasterizer2::strokeOutline(const PointT* points, size_t pointCount)
 // ===== Protected Member Functions =====================================================
 // ======================================================================================
 
-#define FIXED_POINT_MUL_FACTOR 256
-#define FIXED_POINT_AAA_FACTOR (FIXED_POINT_MUL_FACTOR - 1)
-#define FIXED_POINT_FRACT_MASK 0x000000FF
+#define FIXED_POINT_AA_SHIFT_FACTOR 8
+#define FIXED_POINT_AA_ALPHA_OPAQUE 255
+#define FIXED_POINT_FRACTIONAL_MASK 0x000000FF
 
 void Rasterizer2::updateClip()
 {
@@ -264,26 +264,26 @@ void Rasterizer2::rasterOnePixelLine( float x1_, float y1_, float x2_, float y2_
     memset(&_alphas[0], 0, _alphas.size());
 
     // Caculate the number of steps
-    Pt::int32_t steps = std::min(sizeX, sizeY) * 1;
+    Pt::int32_t steps = std::max(sizeX, sizeY) - 1;
 
     // Translate and convert the coordinates
     Pt::int32_t x1, y1, x2, y2;
 
     if(fx2 > fx1) {
         x1 = 0;
-        x2 = (fx2 - fx1) * FIXED_POINT_MUL_FACTOR;
+        x2 = (maxX - minX) << FIXED_POINT_AA_SHIFT_FACTOR;
     }
     else {
-        x1 = (fx1 - fx2) * FIXED_POINT_MUL_FACTOR;
+        x1 = (maxX - minX) << FIXED_POINT_AA_SHIFT_FACTOR;
         x2 = 0;
     }
 
     if(fy2 > fy1) {
         y1 = 0;
-        y2 = (fy2 - fy1) * FIXED_POINT_MUL_FACTOR;
+        y2 = (maxY - minY) << FIXED_POINT_AA_SHIFT_FACTOR;
     }
     else {
-        y1 = (fy1 - fy2) * FIXED_POINT_MUL_FACTOR;
+        y1 = (maxY - minY) << FIXED_POINT_AA_SHIFT_FACTOR;
         y2 = 0;
     }
 
@@ -293,22 +293,22 @@ void Rasterizer2::rasterOnePixelLine( float x1_, float y1_, float x2_, float y2_
 
     // Draw the line
     for(int i = 0; i <= steps; ++i) {
-        // Calculate the alpha factor of the block
-        Pt::int32_t frx = x1 & FIXED_POINT_FRACT_MASK;
-        Pt::int32_t fry = y1 & FIXED_POINT_FRACT_MASK;
-        Pt::int32_t flx = FIXED_POINT_AAA_FACTOR - frx;
-        Pt::int32_t fly = FIXED_POINT_AAA_FACTOR - fry;
-        // Calculate the top-left position of the block
-        Pt::int32_t lx = x1 / FIXED_POINT_MUL_FACTOR;
-        Pt::int32_t ly = y1 / FIXED_POINT_MUL_FACTOR;
-        // Calculate the bottom-right position of the block
+        // Calculate the alpha factors of the block
+        Pt::int32_t frx = x1 & FIXED_POINT_FRACTIONAL_MASK;
+        Pt::int32_t fry = y1 & FIXED_POINT_FRACTIONAL_MASK;
+        Pt::int32_t flx = FIXED_POINT_AA_ALPHA_OPAQUE - frx;
+        Pt::int32_t fly = FIXED_POINT_AA_ALPHA_OPAQUE - fry;
+        // Calculate the top-left coordinate of the block
+        Pt::int32_t lx = x1 >> FIXED_POINT_AA_SHIFT_FACTOR;
+        Pt::int32_t ly = y1 >> FIXED_POINT_AA_SHIFT_FACTOR;
+        // Calculate the bottom-right coordinate of the block
         Pt::int32_t rx = frx ? (lx + 1) : lx;
         Pt::int32_t ry = fry ? (ly + 1) : ly;
         // Draw the block
-                                       _alphas[ly * sizeX + lx] += (fly * flx) / FIXED_POINT_AAA_FACTOR;
-        if( rx < sizeX               ) _alphas[ly * sizeX + rx] += (fly * frx) / FIXED_POINT_AAA_FACTOR;
-        if(               ry < sizeY ) _alphas[ry * sizeX + lx] += (fry * flx) / FIXED_POINT_AAA_FACTOR;
-        if( rx < sizeX && ry < sizeY ) _alphas[ry * sizeX + rx] += (fry * frx) / FIXED_POINT_AAA_FACTOR;
+                                       _alphas[ly * sizeX + lx] += (fly * flx) / FIXED_POINT_AA_ALPHA_OPAQUE;
+        if( rx < sizeX               ) _alphas[ly * sizeX + rx] += (fly * frx) / FIXED_POINT_AA_ALPHA_OPAQUE;
+        if(               ry < sizeY ) _alphas[ry * sizeX + lx] += (fry * flx) / FIXED_POINT_AA_ALPHA_OPAQUE;
+        if( rx < sizeX && ry < sizeY ) _alphas[ry * sizeX + rx] += (fry * frx) / FIXED_POINT_AA_ALPHA_OPAQUE;
         // Increment the drawing coordinate
         x1 += ix;
         y1 += iy;
