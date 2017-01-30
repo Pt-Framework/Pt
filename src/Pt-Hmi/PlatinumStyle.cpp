@@ -489,6 +489,18 @@ void PlatinumLineEditRenderer::onPrepare(const LineEdit& le,
                                          Gfx::Pen& textPen,
                                          Gfx::Pen& placeholderPen) const
 {
+    if( le.isEnabled() )
+    {
+        Gfx::Color color = contour.color();
+
+        if( le.isHighlighted() || le.hasFocus() )
+        {
+            color = options.accentColor();
+        }
+
+        contour = Gfx::Pen( color, contour.size(), contour.style(), 
+                            contour.capStyle(), contour.joinStyle() );
+    }
 }
 
 
