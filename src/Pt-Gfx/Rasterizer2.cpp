@@ -56,8 +56,12 @@ static const int CS_Right  = 2; // 0010
 static const int CS_Bottom = 4; // 0100
 static const int CS_Top    = 8; // 1000
 
-// Compute the bit code for a point (x, y) using the clip rectangle bounded diagonally by (xmin, ymin), and (xmax, ymax)
-static CSOutcode csComputeOutcode(Pt::int32_t x, Pt::int32_t y, Pt::int32_t xmin, Pt::int32_t ymin, Pt::int32_t xmax, Pt::int32_t ymax)
+// Compute the bit code for a point (x, y) using the clip rectangle
+// bounded diagonally by (xmin, ymin), and (xmax, ymax)
+static CSOutcode csComputeOutcode(
+    Pt::int32_t x, Pt::int32_t y,
+    Pt::int32_t xmin, Pt::int32_t ymin, Pt::int32_t xmax, Pt::int32_t ymax
+)
 {
     CSOutcode code = CS_Inside; // Initialised as being inside of the clip region
 
@@ -93,7 +97,8 @@ static bool csClipLine(
             break;
         }
         else {
-            // Calculate the line segment to clip from an outside point to an intersection with clip edge
+            // Calculate the line segment to clip from an outside point to
+            // an intersection with clip edge
             Pt::int32_t x, y;
             // At least one endpoint is outside the clip rectangle
             CSOutcode outcodeOut = outcode0 ? outcode0 : outcode1;
@@ -218,9 +223,7 @@ void Rasterizer2::setClip( const Rect& clip )
 }
 
 FontMetrics Rasterizer2::fontMetrics( const String& text ) const
-{
-    return _text->fontMetrics( text );
-}
+{ return _text->fontMetrics( text ); }
 
 FontMetrics Rasterizer2::fontMetrics( const Font& font, const Pt::String& text )
 {
@@ -245,10 +248,9 @@ void Rasterizer2::image(const Point& to, const Image& from, const Rect& fromRect
     Rect fromClip(fromPos, _currentClip.size());
     fromClip = fromRect.intersect(fromClip);
 
-    if( fromClip.isNull() )
-      return;
+    if( fromClip.isNull() ) return;
 
-    // Account for smaller fromRect
+    // Take account for smaller fromRect
     Point toClip = to + (fromClip.topLeft() - fromRect.topLeft());
 
     _image->format().copy(_image->view(), toClip, from.view(), fromClip, _compositionMode);
@@ -308,10 +310,8 @@ void Rasterizer2::updateClip()
     _alphas.resize(_currentClip.width() * _currentClip.height());
 }
 
-void Rasterizer2::initWorkBuffer(int sizeX, int sizeY)
-{
-    memset(&_alphas[0], 0, _alphas.size());
-}
+void Rasterizer2::prepWorkBuffer(int sizeX, int sizeY)
+{ memset(&_alphas[0], 0, sizeX * sizeY); }
 
 void Rasterizer2::blitWorkBufferToImage(int minX, int minY, int sizeX, int sizeY)
 {
@@ -321,8 +321,12 @@ void Rasterizer2::blitWorkBufferToImage(int minX, int minY, int sizeX, int sizeY
     }
 }
 
-void Rasterizer2::rasterOneLineSegment(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t chgX, Pt::int32_t chgY, Pt::int32_t steps, Pt::int32_t sizeX, Pt::int32_t sizeY)
+void Rasterizer2::rasterOneLineSegment(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t steps, Pt::int32_t sizeX, Pt::int32_t sizeY)
 {
+    // Calculate the change factors
+    const Pt::int32_t chgX = (x2 - x1) / steps;
+    const Pt::int32_t chgY = (y2 - y1) / steps;
+
     // Draw the line
     for(int i = 0; i <= steps; ++i) {
         // Calculate the alpha factors (1 - 256) of the block
@@ -394,7 +398,7 @@ void Rasterizer2::rasterOnePixelLine(const Point& a, const Point& b)
     const Pt::int32_t steps = std::max(sizeX, sizeY) - 1;
     if(!steps) return;
 
-    // Translate and convert the coordinates
+    // Translate the coordinates to (0, 0) and convert them to fixed-points
     Pt::int32_t x1, y1, x2, y2;
 
     if(fx2 > fx1) {
@@ -415,15 +419,11 @@ void Rasterizer2::rasterOnePixelLine(const Point& a, const Point& b)
         y2 = 0;
     }
 
-    // Calculate the change factors
-    const Pt::int32_t chgX = (x2 - x1) / steps;
-    const Pt::int32_t chgY = (y2 - y1) / steps;
-
-    // Initialize the work buffer
-    initWorkBuffer(sizeX, sizeY);
+    // Prepare the work buffer
+    prepWorkBuffer(sizeX, sizeY);
 
     // Draw the line
-    rasterOneLineSegment(x1, y1, chgX, chgY, steps, sizeX, sizeY);
+    rasterOneLineSegment(x1, y1, x2, y2, steps, sizeX, sizeY);
 
     // Blit the work buffer to the image
     blitWorkBufferToImage(minX, minY, sizeX, sizeY);

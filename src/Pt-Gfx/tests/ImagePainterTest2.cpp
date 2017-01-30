@@ -72,9 +72,11 @@ static void testLines(const char* title, Image& image, ImagePainter2& painter)
 {
     resetImage(image);
 
-    //painter.setClip(RectF (20, image.width() - 20, 20, image.height() - 20));
-    //painter.setPen( Color::fromRgb8(0, 255, 0, 175) );
-    //painter.drawLine( PointF(  0,   0), PointF(799, 599) );
+#if 0
+    painter.setClip(RectF (20, image.width() - 20, 20, image.height() - 20));
+    painter.setPen( Color::fromRgb8(0, 255, 0, 175) );
+    painter.drawLine( PointF(  0,   0), PointF(799, 599) );
+#endif
 
     painter.setPen( Color::fromRgb8(255, 0, 0, 175) );
 
