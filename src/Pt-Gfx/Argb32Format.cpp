@@ -1,11 +1,11 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
+/* Copyright (C) 2015 Marc Boris Duerner
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -15,15 +15,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
   02110-1301 USA
 */
 
@@ -83,11 +83,11 @@ Color Argb32Format::onGetColor(const ConstPixel& pixel) const
 }
 
 
-void Argb32Format::onCopy(Pixel& to, const Pixel& from, size_t length, 
+void Argb32Format::onCopy(Pixel& to, const Pixel& from, size_t length,
                           CompositionMode mode) const
 {
     Pt::uint8_t* dst = to.base();;
-    const Pt::uint8_t* src = from.base(); 
+    const Pt::uint8_t* src = from.base();
 
     switch(mode)
     {
@@ -99,20 +99,20 @@ void Argb32Format::onCopy(Pixel& to, const Pixel& from, size_t length,
         case CompositionMode::SourceOver:
             for(size_t i = 0; i < length; ++i)
             {
-                Argb32Model::sourceOver(dst, src); 
+                Argb32Model::sourceOver(dst, src);
                 src += 4;
                 dst += 4;
             }
             break;
-    }   
+    }
 }
 
 
-void Argb32Format::onCopy(Pixel& to, const ConstPixel& from, size_t length, 
+void Argb32Format::onCopy(Pixel& to, const ConstPixel& from, size_t length,
                           CompositionMode mode) const
 {
     Pt::uint8_t* dst = to.base();;
-    const Pt::uint8_t* src = from.base(); 
+    const Pt::uint8_t* src = from.base();
 
     switch(mode)
     {
@@ -124,14 +124,40 @@ void Argb32Format::onCopy(Pixel& to, const ConstPixel& from, size_t length,
         case CompositionMode::SourceOver:
             for(size_t i = 0; i < length; ++i)
             {
-                Argb32Model::sourceOver(dst, src); 
+                Argb32Model::sourceOver(dst, src);
                 src += 4;
                 dst += 4;
             }
             break;
-    }   
+    }
 }
 
+
+void Argb32Format::onCopy(Pixel& dst, Pt::uint8_t* alphas, size_t length,
+                          const Color& color, CompositionMode mode) const
+{
+    /*
+    Pt::uint8_t*       dst = to.base();
+    const Pt::uint8_t* src = from.base();
+
+    switch(mode)
+    {
+        default:
+        case CompositionMode::SourceCopy:
+            memcpy(dst, src, length * 4);
+            break;
+
+        case CompositionMode::SourceOver:
+            for(size_t i = 0; i < length; ++i)
+            {
+                Argb32Model::sourceOver(dst, src);
+                src += 4;
+                dst += 4;
+            }
+            break;
+    }
+    */
+}
 
 void Argb32Format::onCopy(ImageView& to, const Point& toPoint,
                             const ImageView& from, const Rect& fromRect,
@@ -142,7 +168,7 @@ void Argb32Format::onCopy(ImageView& to, const Point& toPoint,
     // TODO: equals to toInfo.pitch()
     Pt::ssize_t toStride = (to.width() * pixelSize) + to.padding();
     Pt::ssize_t fromStride = (from.width() * pixelSize) + from.padding();
-    
+
     Pt::ssize_t toBegin = (toPoint.y() * toStride) + (toPoint.x() * pixelSize);
     Pt::ssize_t fromBegin = (fromRect.y() * fromStride) + (fromRect.x() * pixelSize);
 
@@ -173,7 +199,7 @@ void Argb32Format::onCopy(ImageView& to, const Point& toPoint,
             {
                 Pt::uint8_t* to = toLine;
                 const Pt::uint8_t* from = fromLine;
-            
+
                 for(int x = 0; x < fromRect.width() ; ++x )
                 {
                     Argb32Model::sourceOver(to, from);
@@ -184,7 +210,7 @@ void Argb32Format::onCopy(ImageView& to, const Point& toPoint,
                 toLine += toStride;
                 fromLine += fromStride;
             }
-            
+
             break;
         }
     }

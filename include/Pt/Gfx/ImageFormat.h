@@ -1,11 +1,11 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
+/* Copyright (C) 2015 Marc Boris Duerner
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -15,15 +15,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
   02110-1301 USA
 */
 
@@ -55,7 +55,7 @@ class ImageFormat
 
         virtual ~ImageFormat()
         {}
-    
+
         /** @brief Returns distance in bytes between two pixel base pointers.
         */
         std::size_t pixelStride() const
@@ -74,9 +74,9 @@ class ImageFormat
         }
 
         PT_GFX_API static const ImageFormat& rgb16();
-    
+
         PT_GFX_API static const ImageFormat& rgb32();
-    
+
         PT_GFX_API static const ImageFormat& argb32();
 
     public:
@@ -85,41 +85,47 @@ class ImageFormat
         void setPixel(Pixel& to, const Pixel& from,
                       CompositionMode mode) const
         { onSetPixel(to, from, mode); }
-        
+
         /** @brief Sets the pixel color.
         */
         void setPixel(Pixel& to, const ConstPixel& from,
                       CompositionMode mode) const
         { onSetPixel(to, from, mode); }
-        
+
         /** @brief Sets the pixel color.
         */
         void setPixel(Pixel& to, const Color& c,
                       CompositionMode mode) const
         { onSetPixel(to, c, mode); }
-        
+
         /** @brief Gets the pixel color.
         */
         Color getColor(const Pixel& pixel) const
         { return onGetColor(pixel); }
-        
+
         /** @brief Gets the pixel color.
         */
         Color getColor(const ConstPixel& pixel) const
         { return onGetColor(pixel); }
-        
+
         /** @brief Sets the color in a pixel span.
         */
-        void copy(Pixel& dst, const Pixel& src, size_t length, 
+        void copy(Pixel& dst, const Pixel& src, size_t length,
                   CompositionMode mode) const
         { onCopy(dst, src, length, mode); }
-        
+
         /** @brief Sets the color in a pixel span.
         */
-        void copy(Pixel& dst, const ConstPixel& src, size_t length, 
+        void copy(Pixel& dst, const ConstPixel& src, size_t length,
                   CompositionMode mode) const
         { onCopy(dst, src, length, mode); }
-        
+
+        /** @brief Sets the color in a pixel span with alpha.
+        */
+        void copy(Pixel& dst, Pt::uint8_t* alphas, size_t length,
+                  const Color& color, CompositionMode mode) const
+        { onCopy(dst, alphas, length, color, mode); }
+
         /** @brief Copies an area of pixels.
         */
         PT_GFX_API void copy(ImageView& to, const Point& toPoint,
@@ -134,22 +140,25 @@ class ImageFormat
     protected:
         virtual void onSetPixel(Pixel& to, const Pixel& from,
                                 CompositionMode mode) const = 0;
-        
+
         virtual void onSetPixel(Pixel& to, const ConstPixel& from,
                                 CompositionMode mode) const = 0;
-        
+
         virtual void onSetPixel(Pixel& pixel, const Color& c,
                                 CompositionMode  mode) const = 0;
-        
+
         virtual Color onGetColor(const Pixel& pixel) const = 0;
 
         virtual Color onGetColor(const ConstPixel& pixel) const = 0;
 
-        virtual void onCopy(Pixel& dst, const Pixel& src, size_t length, 
+        virtual void onCopy(Pixel& dst, const Pixel& src, size_t length,
                             CompositionMode mode) const = 0;
-        
-        virtual void onCopy(Pixel& dst, const ConstPixel& src, size_t length, 
+
+        virtual void onCopy(Pixel& dst, const ConstPixel& src, size_t length,
                             CompositionMode mode) const = 0;
+
+        virtual void onCopy(Pixel& dst, Pt::uint8_t* alphas, size_t length,
+                            const Color& color, CompositionMode mode) const = 0;
 
         virtual void onCopy(ImageView& to, const Point& toPos,
                             const ImageView& from, const Rect& fromRect,

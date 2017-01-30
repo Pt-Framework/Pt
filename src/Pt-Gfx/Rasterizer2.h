@@ -130,8 +130,6 @@ class Rasterizer2
 
         Rect            _clip;
         Rect            _currentClip;
-        int             _clipRight;
-        int             _clipBottom;
 };
 
 } // namespace

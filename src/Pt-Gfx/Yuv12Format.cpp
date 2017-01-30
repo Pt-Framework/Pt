@@ -1,11 +1,11 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
+/* Copyright (C) 2015 Marc Boris Duerner
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -15,15 +15,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
   02110-1301 USA
 */
 
@@ -88,7 +88,7 @@ Color Yuv12Format::onGetColor(const Pixel& p) const
     const Pt::uint8_t* v;
 
    const Pt::uint8_t* data = p.view().data();
-    
+
     Yuv12Model::init(data, p.view().stride(), p.view().size(),
                      p.x(), p.y(), y, u, v);
 
@@ -103,7 +103,7 @@ Color Yuv12Format::onGetColor(const ConstPixel& p) const
     const Pt::uint8_t* v;
 
    const Pt::uint8_t* data = p.view().data();
-    
+
     Yuv12Model::init(data, p.view().stride(), p.view().size(),
                      p.x(), p.y(), y, u, v);
 
@@ -111,17 +111,22 @@ Color Yuv12Format::onGetColor(const ConstPixel& p) const
 }
 
 
-void Yuv12Format::onCopy(Pixel& to, const Pixel& from, size_t length, 
+void Yuv12Format::onCopy(Pixel& to, const Pixel& from, size_t length,
                          CompositionMode mode) const
 {
 }
 
 
-void Yuv12Format::onCopy(Pixel& to, const ConstPixel& from, size_t length, 
+void Yuv12Format::onCopy(Pixel& to, const ConstPixel& from, size_t length,
                          CompositionMode mode) const
 {
 }
 
+void Yuv12Format::onCopy(Pixel& dst, Pt::uint8_t* alphas, size_t length,
+                          const Color& color, CompositionMode mode) const
+{
+    // ### !!! TODO !!! ###
+}
 
 void Yuv12Format::onCopy(ImageView& to, const Point& toPoint,
                          const ImageView& from, const Rect& fromRect,
