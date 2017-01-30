@@ -46,9 +46,6 @@ class Image;
 class Rasterizer2
 {
     public:
-        typedef BasicPoint<float> PointT;
-
-    public:
         Rasterizer2( Image& image );
 
         ~Rasterizer2();
@@ -105,14 +102,14 @@ class Rasterizer2
 
         void strokeText( const Point& to, const Pt::String& text );
 
-        void strokeOutline( const PointT* points, size_t pointCount );
+        void strokeOutline( const Point* points, size_t pointCount );
 
     protected:
         void updateClip();
         void initWorkBuffer(int sizeX, int sizeY);
         void blitWorkBufferToImage(int minX, int minY, int sizeX, int sizeY);
 
-        void rasterOnePixelLine( float x1, float y1, float x2, float y2 );
+        void rasterOnePixelLine(const Point* points);
 
     private:
         Image*          _image;

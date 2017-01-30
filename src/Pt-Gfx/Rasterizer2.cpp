@@ -152,7 +152,7 @@ FontMetrics Rasterizer2::fontMetrics( const Font& font, const Pt::String& text )
     return textRender.fontMetrics(text);
 }
 
-void Rasterizer2::image( const Point& to, const Image& img)
+void Rasterizer2::image(const Point& to, const Image& img)
 {
     Rect imageRect( Point(0,0), img.size() );
     image( to, img, imageRect );
@@ -160,17 +160,17 @@ void Rasterizer2::image( const Point& to, const Image& img)
 
 void Rasterizer2::image(const Point& to, const Image& from, const Rect& fromRect)
 {
-    // clip fromRect to fit into the clip/image rect
+    // Clip fromRect to fit into the clip/image rect
     Point d = _currentClip.topLeft() - to;
     Point fromPos = fromRect.topLeft() + d;
 
-    Rect fromClip( fromPos, _currentClip.size() );
+    Rect fromClip(fromPos, _currentClip.size());
     fromClip = fromRect.intersect(fromClip);
 
     if( fromClip.isNull() )
       return;
 
-    // account for smaller fromRect
+    // Account for smaller fromRect
     Point toClip = to + (fromClip.topLeft() - fromRect.topLeft());
 
     _image->format().copy(_image->view(), toClip, from.view(), fromClip, _compositionMode);
@@ -182,31 +182,18 @@ void Rasterizer2::strokeText( const Point& to, const Pt::String& text )
     _text->draw( *_image, _pen.color(), to, text );
 }
 
-
-void Rasterizer2::strokeOutline(const PointT* points, size_t pointCount)
+void Rasterizer2::strokeOutline(const Point* points, size_t pointCount)
 {
     switch( _pen.style() )
     {
         case Pen::Solid:
-            if( _pen.size() == 1 && pointCount == 2 )
-                rasterOnePixelLine(points[0].x(), points[0].y(), points[1].x(), points[1].y());
-
-            /*
-            if( _pen.size() == 1 )
-                drawThinSolidPolyline( points, pointCount );
-            else
-                drawWideSolidPolyline( points, pointCount );
-            */
+            if( _pen.size() == 1 && pointCount == 2 ) {
+                rasterOnePixelLine(points);
+            }
             break;
 
         case Pen::Dash:
         case Pen::DoubleDash:
-            /*
-            if( _pen.size() == 1 )
-                drawThinDashPolyline(points, pointCount );
-            else
-                drawWideDashPolyline( points, pointCount );
-            */
             break;
     }
 }
@@ -260,42 +247,46 @@ void Rasterizer2::blitWorkBufferToImage(int minX, int minY, int sizeX, int sizeY
     }
 }
 
-void Rasterizer2::rasterOnePixelLine( float x1_, float y1_, float x2_, float y2_ )
+void Rasterizer2::rasterOnePixelLine(const Point* points)
 {
     // Clip the points
-    // ### !!! TODO !!! ###
-    float fx1 = x1_;
-    float fy1 = y1_;
-    float fx2 = x2_;
-    float fy2 = y2_;
+    std::vector<Point> clipped (points, points + 2);
+
+    ClipPolygon clipper;
+    clipper(clipped, _currentClip);
+
+    const Pt::int32_t fx1 = clipped[0].x();
+    const Pt::int32_t fy1 = clipped[0].y();
+    const Pt::int32_t fx2 = clipped[1].x();
+    const Pt::int32_t fy2 = clipped[1].y();
 
     // Find the minimum and maximum coordinates
     Pt::int32_t minX, minY, maxX, maxY;
 
-    if(fx1 < fx2) {
-        minX = floor(fx1);
-        maxX = ceil (fx2);
+    if(fx2 > fx1) {
+        minX = fx1;
+        maxX = fx2;
     }
     else {
-        minX = floor(fx2);
-        maxX = ceil (fx1);
+        minX = fx2;
+        maxX = fx1;
     }
 
-    if(fy1 < fy2) {
-        minY = floor(fy1);
-        maxY = ceil (fy2);
+    if(fy2 > fy1) {
+        minY = fy1;
+        maxY = fy2;
     }
     else {
-        minY = floor(fy2);
-        maxY = ceil (fy1);
+        minY = fy2;
+        maxY = fy1;
     }
 
     // Calculate the work buffer size
-    Pt::int32_t sizeX = maxX - minX + 1;
-    Pt::int32_t sizeY = maxY - minY + 1;
+    const Pt::int32_t sizeX = maxX - minX + 1;
+    const Pt::int32_t sizeY = maxY - minY + 1;
 
     // Caculate the number of steps
-    Pt::int32_t steps = std::max(sizeX, sizeY) - 1;
+    const Pt::int32_t steps = std::max(sizeX, sizeY) - 1;
 
     // Translate and convert the coordinates
     Pt::int32_t x1, y1, x2, y2;
@@ -319,8 +310,8 @@ void Rasterizer2::rasterOnePixelLine( float x1_, float y1_, float x2_, float y2_
     }
 
     // Calculate the change factors
-    Pt::int32_t chgX = (x2 - x1) / steps;
-    Pt::int32_t chgY = (y2 - y1) / steps;
+    const Pt::int32_t chgX = (x2 - x1) / steps;
+    const Pt::int32_t chgY = (y2 - y1) / steps;
 
     // Initialize the work buffer
     initWorkBuffer(sizeX, sizeY);

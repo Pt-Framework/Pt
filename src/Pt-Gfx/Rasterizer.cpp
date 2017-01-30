@@ -1,12 +1,12 @@
-/* Copyright (C) 2006-2015 Marc Boris Duerner 
+/* Copyright (C) 2006-2015 Marc Boris Duerner
    Copyright (C) 2006-2015 Laurentiu-Gheorghe Crisan
    Copyright (C) 1988, 1998  The Open Group, MIT X Consortium
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -16,15 +16,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
   02110-1301 USA
 */
 
@@ -145,11 +145,11 @@ Rasterizer::Rasterizer(Image& image)
 , _text( new DrawText() )
 , _font()
 , _compositionMode(CompositionMode::SourceCopy)
-, _penPixel(_image->view(), 0, 0) 
+, _penPixel(_image->view(), 0, 0)
 , _brushPixel(_image->view(), 0, 0)
 {
     _text->setFont(_font);
-    
+
     updateClip();
 }
 
@@ -162,7 +162,7 @@ Rasterizer::~Rasterizer()
 
 void Rasterizer::setImage( Image& image )
 {
-    _image = &image;     
+    _image = &image;
     _brushBuffer.reset(_image->format(), _brushBuffer.size());
     updateClip();
 }
@@ -179,27 +179,27 @@ void Rasterizer::setPen( const Pen& pen )
     _pen = pen;
     _penBuffer.reset(_image->format(), Size(64, 1));
     Gfx::fill(_penBuffer.begin(), _penBuffer.end(), pen.color());
-  
+
     _penPixel.reset(_penBuffer.view(), 0, 0);
 }
 
 
 void Rasterizer::setBrush( const Brush& brush )
-{  
+{
     _brush = brush;
-    _isGradient = false;      
+    _isGradient = false;
 
     switch( brush.fillStyle() )
     {
-        case Brush::Solid:      
+        case Brush::Solid:
             _brushBuffer.reset( _image->format(), Size(64, 1) );
             Gfx::fill(_brushBuffer.begin(), _brushBuffer.end(), brush.color());
-            
+
             _brushImage = &_brushBuffer;
             break;
-    
+
         case Brush::Texture:
-            if( brush.texture().format() != _image->format() )        
+            if( brush.texture().format() != _image->format() )
             {
                 _brushBuffer.reset( _image->format(), brush.texture().size() );
                 Gfx::copy( brush.texture().begin(), brush.texture().end(), _brushBuffer.begin() );
@@ -257,7 +257,7 @@ void Rasterizer::strokeEllipse( const Point& topLeft, const Size& size )
     long d2yt   = 2*a2;
 
     while( y >= 0 && x <= a )
-    {      
+    {
         stroke(xc+x -errorx, yc+y - errory );
 
         if( x!=0 || y!=0 )
@@ -364,12 +364,12 @@ void Rasterizer::drawWideDashPolyline( const Point* pPts, int npt )
 
         // Have a line segment of nonzero length.
         if( x1 != x2 || y1 != y2 )
-        {            
+        {
             int lastPaintedDashNum;
 
             // Final point; and need a projecting cap here.
             if( npt == 1 && _pen.capStyle() ==Pen::ProjectingCap  && (!selfJoin || (firstPaintType == 0)))
-                projectRight = true;            
+                projectRight = true;
 
             // Draw dashed segment, updating dashNum, dashIndex and dashOffset, returning faces
             dashSegment( &dashNum, &dashIndex, &dashOffset, x1, y1, x2, y2, projectLeft, projectRight, &leftFace, &rightFace, dashes);
@@ -1198,7 +1198,7 @@ void Rasterizer::stepDash( int dist, int* pDashNum, int* pDashIndex, const  int*
     dashIndex   = *pDashIndex;
     dashOffset  = *pDashOffset;
 
-    // Offset won't take us beyond end of present dash. 
+    // Offset won't take us beyond end of present dash.
     if( dashOffset + dist < (int)(pDash[dashIndex]) )
     {
         *pDashOffset = dashOffset + dist;
@@ -1209,14 +1209,14 @@ void Rasterizer::stepDash( int dist, int* pDashNum, int* pDashIndex, const  int*
     dist -= (int)(pDash[dashIndex]) - dashOffset;
     dashNum++;
     dashIndex++;
-    
+
     // Wrap to beginning of dash list.
     if( dashIndex == numInDashList )
         dashIndex = 0;
 
     // Make it easy on ourselves: work modulo iteration interval.
     totallen = 0;
-    
+
     for (i = 0; i < numInDashList; i++)
         totallen += (int)(pDash[i]);
 
@@ -1228,12 +1228,12 @@ void Rasterizer::stepDash( int dist, int* pDashNum, int* pDashIndex, const  int*
         dist -= (int)(pDash[dashIndex]);
         dashNum++;
         dashIndex++;
-         
+
          // Wrap to beginning of dash list.
-        if( dashIndex == numInDashList )    	   
+        if( dashIndex == numInDashList )
           dashIndex = 0;
     }
-    
+
     *pDashNum = dashNum;
     *pDashIndex = dashIndex;
     *pDashOffset = dist;
@@ -1751,7 +1751,7 @@ void Rasterizer::drawThinSolidPolyline( const Point* points,  int pointCount)
     // Paint the last point if the end style isn't CapNotLast.  (I.e. assume
     // that a round/butt/projecting/triangular cap that is one pixel wide is
     // the same as the single pixel of the endpoint.)
-/*    
+/*
     if (_pen.capStyle() != Pen::NotLastCap && (xstart != x2 || ystart != y2 || ppt == points + 1) )
         stroke( x2, y2);
 */
@@ -1854,7 +1854,7 @@ void Rasterizer::stroke( const Point& pixel)
 
 void Rasterizer::setFont(const Font& font)
 {
-  _font = font;  
+  _font = font;
   _text->setFont(_font);
 }
 
@@ -1863,7 +1863,7 @@ void Rasterizer::fillTexture(const Point& origin, const Point& pos,  int length 
 {
     const Image& texture = *_brushImage;
     int xpos = pos.x();
-    int ypos = pos.y();		
+    int ypos = pos.y();
     int originx =  origin.x();
     int originy = origin.y();
 
@@ -1886,7 +1886,7 @@ void Rasterizer::fillTexture(const Point& origin, const Point& pos,  int length 
 
             _image->format().copy( destPixel,  sourcePixel,  fillLength, _compositionMode );
         }
-        
+
         // Remaining unfilled pixels of the span
         length -= fillLength;
         xpos   += fillLength;
@@ -1902,20 +1902,20 @@ void Rasterizer::clipSpan( int& xpos, int& ypos, int& length )
     length = 0;
     return;
   }
-  
+
   if( ypos >= _clipBottom )
   {
     length = 0;
     return;
   }
-  
+
   if( xpos >= _clipRight )
   {
     length = 0;
-    return;  
+    return;
   }
-  
-  
+
+
   if(xpos < _currentClip.x() )
   {
       length -= (_currentClip.x()- xpos);
@@ -1937,7 +1937,7 @@ void Rasterizer::createGradientTexture(Image& texture, int width, int height,Pt:
     int length = texture.width() + texture.height() - 1;
 
     Pt::uint8_t* pixel = texture.data();
-            
+
     for(int n = 0; n < length; ++n)
     {
         float f1 = (length - n) / float(length);
@@ -1951,7 +1951,7 @@ void Rasterizer::createGradientTexture(Image& texture, int width, int height,Pt:
 
         float b1 = gradientStart.blue() * f1;
         float b2 = gradientStop.blue() * f2;
-                
+
         pixel[0] = 255;
         pixel[1] = (r1 + r2) / 257;
         pixel[2] = (g1 + g2) / 257;
@@ -1975,18 +1975,18 @@ void Rasterizer::fillSolid(const Point& pos, int length)
 {
     int xpos = pos.x();
     int ypos = pos.y();
-  
+
     if( length <= 0)
         return;
-     
-    int bufferWidth = _brushImage->width();  
+
+    int bufferWidth = _brushImage->width();
 
     while(length > 0)
     {
         int n = std::min(length, bufferWidth);
 
         if( n )
-        {          
+        {
             Pixel destPixel(_image->view(), xpos,ypos);
            _image->format().copy(destPixel, _brushPixel, n, _compositionMode);
         }
@@ -1998,7 +1998,7 @@ void Rasterizer::fillSolid(const Point& pos, int length)
 
 
 void Rasterizer::strokeText( const Point& to, const Pt::String& text )
-{ 
+{
     _text->setClip(_currentClip);
     _text->draw( *_image, _pen.color(), to, text );
 }
@@ -2011,7 +2011,7 @@ void Rasterizer::fill(const Point& origin, const Point& pos, int length)
     case Brush::Texture:
       fillTexture( origin, pos, length);
     break;
-    
+
     case Brush::VerticalGradient:
       fillVerticalGradient(origin, pos, length);
     break;
@@ -2240,8 +2240,8 @@ int Rasterizer::buildLineEdge( double x0, double y0, double k, int dx, int dy, i
 void Rasterizer::fillSpans(int x, int y,  int w,  int h)
 {
     int ypos = std::max( 0, y );
-    int yend = 0;    
-    
+    int yend = 0;
+
     int clipBottom = _currentClip.y() + _currentClip.height();
 
     if( (y + h) > 0 )
@@ -2401,7 +2401,7 @@ void Rasterizer::lineArc( LineFace *leftFace, LineFace *rightFace, double xorg, 
     edgeleft1 = false;
     edgeleft2 = false;
 
-    if( (_pen.style() != Pen::Solid || _pen.size() > 2) && ((_pen.capStyle() == Pen::RoundCap && _pen.joinStyle() != Pen::RoundJoin)  || 
+    if( (_pen.style() != Pen::Solid || _pen.size() > 2) && ((_pen.capStyle() == Pen::RoundCap && _pen.joinStyle() != Pen::RoundJoin)  ||
         ( _pen.joinStyle() == Pen::RoundJoin && _pen.capStyle() == Pen::ButtCap)))
     { // Construct clipping edges from the passed line faces (otherwise,
       // ignore them; will just draw a disk).
@@ -3204,7 +3204,7 @@ void Rasterizer::lineProjectingCap( const LineFace *face, bool isLeft, bool isIn
 
 
 void Rasterizer::updateGradientBrush(int width, int height)
-{   
+{
     Color gradientStart = _brush.color();
     Color gradientStop = _brush.gradientColor();
 
@@ -3224,7 +3224,7 @@ void Rasterizer::updateGradientBrush(int width, int height)
 
     int length = width + height - 1;
     Pt::uint8_t* pixel = _brushBuffer.data();
-            
+
     for(int n = 0; n < length; ++n)
     {
         float f1 = (length - n) / float(length);
@@ -3238,11 +3238,11 @@ void Rasterizer::updateGradientBrush(int width, int height)
 
         float b1 = gradientStart.blue() * f1;
         float b2 = gradientStop.blue() * f2;
-                
-        
+
+
         pixel[0] = (b1 + b2) / 257;
         pixel[1] = (g1 + g2) / 257;
-        pixel[2] = (r1 + r2) / 257;                
+        pixel[2] = (r1 + r2) / 257;
         pixel[3] = 0;
 
         pixel += 4;
@@ -3251,7 +3251,7 @@ void Rasterizer::updateGradientBrush(int width, int height)
 
 
 void Rasterizer::fillRect(const Rect& rectIn)
-{ 
+{
     Rect rect = _currentClip.intersect( rectIn );
 
     if( rect.isNull() )
@@ -3261,9 +3261,9 @@ void Rasterizer::fillRect(const Rect& rectIn)
         updateGradientBrush( rectIn.width(), rectIn.height() );
 
     int length = rect.width();
-    
+
     Point linePos = rect.topLeft();
-    
+
     for(int y = 0; y < rect.height(); y++)
     {
         fill(rect.topLeft(), linePos, length);
@@ -3292,10 +3292,10 @@ void Rasterizer::fill( const Point* pts, size_t pointCount)
     ClipPolygon clipper;
 
     clipper( points, _currentClip );
-    
+
     // find unclipped origin coordinates
     Point origin( std::numeric_limits<int>::max(), std::numeric_limits<int>::max() );
-    
+
     int leftPos = std::numeric_limits<int>::max();
     int topPos = std::numeric_limits<int>::max();
     int rightPos = 0;
@@ -3309,7 +3309,7 @@ void Rasterizer::fill( const Point* pts, size_t pointCount)
 
         if( ! _isGradient )
           continue;
-        
+
         if( p.y() < topPos)
             topPos = p.y();
 
@@ -3336,7 +3336,7 @@ void Rasterizer::fill( const Point* pts, size_t pointCount)
     // might as well create a new table here...
     globalEdgeTable.clear();
 
-    // Fill the global edge table. Two points yield an edge.    
+    // Fill the global edge table. Two points yield an edge.
     Edge   edge;
     Point* bottom = 0;
     Point* top = 0;
@@ -3354,11 +3354,11 @@ void Rasterizer::fill( const Point* pts, size_t pointCount)
             bottom = &(points[i]);
             top = &(points[i-1]);
         }
-                
+
         // Omit horizontal edges, add others to global edge table. The GET
         // is sorted by primarily by the edges ymin and secondarily by
         // the x value of the edge
-        
+
         if( top->y() != bottom->y())
         {
             const int dy   = (int)bottom->y() - (int)top->y();
@@ -3414,11 +3414,11 @@ void Rasterizer::fill( const Point* pts, size_t pointCount)
         outputEdges(activeEdgeTable, origin, scanLine);
 
         // now we are done with the current active edges and can update
-        // them for the next scanline.        
+        // them for the next scanline.
         scanLine++;
 
         activeEdgeTable.update(scanLine);
-        
+
         // move active edges to AET for current scanline
         for( ; it != globalEdgeTable.end() && it->ymin == scanLine; ++it )
         {
@@ -3426,7 +3426,7 @@ void Rasterizer::fill( const Point* pts, size_t pointCount)
         }
 
         // Need to resort the AET, because of update and new edges
-        activeEdgeTable.sort();        
+        activeEdgeTable.sort();
     }
     while( ! activeEdgeTable.empty() );
 
@@ -3567,7 +3567,7 @@ void Rasterizer::image( const Point& to, const Image& img)
 
 
 void Rasterizer::image(const Point& to, const Image& from, const Rect& fromRect)
-{    
+{
   // clip fromRect to fit into the clip/image rect
   Point d = _currentClip.topLeft() - to;
   Point fromPos = fromRect.topLeft() + d;
@@ -3587,7 +3587,7 @@ void Rasterizer::image(const Point& to, const Image& from, const Rect& fromRect)
 
 void Rasterizer::stroke(int x, int y)
 {
-    if( x < _currentClip.x() || x >= _clipRight || 
+    if( x < _currentClip.x() || x >= _clipRight ||
         y < _currentClip.y() || y >= _clipBottom)
         return;
 
@@ -3597,7 +3597,7 @@ void Rasterizer::stroke(int x, int y)
 
 
 void Rasterizer::stroke(int xpos, int ypos, int length)
-{       
+{
     clipSpan( xpos, ypos, length );
 
     int bufferWidth = _penBuffer.width();

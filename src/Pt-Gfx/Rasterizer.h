@@ -1,11 +1,11 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
+/* Copyright (C) 2015 Marc Boris Duerner
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -15,15 +15,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
   02110-1301 USA
 */
 
@@ -47,10 +47,10 @@ class Image;
 class ActiveEdgeTable;
 
 class Rasterizer
-{    
+{
   public:
     Rasterizer( Image& image );
-    
+
     ~Rasterizer();
 
 
@@ -99,8 +99,8 @@ class Rasterizer
 
     void image( const Point& to, const Image& image);
 
-    void image(const Point& toIn, 
-               const Image& image, 
+    void image(const Point& toIn,
+               const Image& image,
                const Rect& imageRect);
 
     void fillRect(const Rect& r);
@@ -112,9 +112,9 @@ class Rasterizer
     void fill( const Point* points, size_t pointCount );
 
     void strokeText( const Point& to, const Pt::String& text );
-    
+
     void strokeEllipse( const Point& topLeft, const Size& size );
-    
+
     void fillEllipse( const Point& topLeft, const Size& size );
 
     FontMetrics fontMetrics( const String& text ) const;
@@ -140,12 +140,12 @@ class Rasterizer
     void drawThinSolidPolyline( const Point* points, int pointCount );
     void drawThinDashPolyline( const Point* points, int pointCount);
     void stepDash( int dist, int* pDashNum, int* pDashIndex, const int* pDash, int numInDashList, int *pDashOffset );
-    void bresenhamDasheLineSegment(int *pdashNum, int *pdashIndex, const  int *pDash, int numInDashList, int *pdashOffset, bool isDoubleDash, int signdx, int signdy, int axis, int x1, int y1, int e, int e1, int e2, int len);    
+    void bresenhamDasheLineSegment(int *pdashNum, int *pdashIndex, const  int *pDash, int numInDashList, int *pdashOffset, bool isDoubleDash, int signdx, int signdy, int axis, int x1, int y1, int e, int e1, int e2, int len);
     void bresenhamLineSegment( int signdx, int signdy, int axis, int x1, int y1, int e, int e1, int e2, int len );
 
-  //Wide polyline base algo.  
-  protected:      
-    int polyBuildPoly( const Point *vertices, const LineSlope *slopes, int count, int xi, int yi, LineEdge *left, LineEdge *right, int *pnleft, int *pnright, int *h );        
+  //Wide polyline base algo.
+  protected:
+    int polyBuildPoly( const Point *vertices, const LineSlope *slopes, int count, int xi, int yi, LineEdge *left, LineEdge *right, int *pnleft, int *pnright, int *h );
     int buildLineEdge( double x0, double y0, double k, int dx, int dy, int xi, int yi, bool left, LineEdge *edge);
     void fillSpans(int x, int y,  int w,  int h );
     void fillLine(int y,  int overall_height, LineEdge *left, LineEdge *right, int left_count, int right_count );
@@ -167,17 +167,17 @@ class Rasterizer
   //Wide dashed polyline algo.
   protected:
     enum { V_TOP =  0, V_RIGHT = 1, V_BOTTOM = 2, V_LEFT = 3 };
-    
+
     void drawWideDashPolyline( const Point* points, int pointCount );
-    
+
     void dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, int x1, int y1, int x2, int y2, bool projectLeft, bool projectRight, LineFace *leftFace, LineFace *rightFace,  int* dash );
-      
+
   private:
     void stroke(int x, int y);
 
     void stroke(int xpos, int ypos, int length);
     void updateGradientBrush(int width, int height);
-      
+
   private:
     Image*          _image;
     DrawText*       _text;
@@ -186,10 +186,10 @@ class Rasterizer
     Font            _font;
 
     Brush           _brush;
-    Image           _brushBuffer; 
+    Image           _brushBuffer;
     const Image*    _brushImage;
     ConstPixel      _brushPixel;
-    bool            _isGradient; 
+    bool            _isGradient;
 
     Pen             _pen;
     Image           _penBuffer;

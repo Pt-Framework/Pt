@@ -37,8 +37,6 @@
 namespace Pt {
 namespace Gfx {
 
-typedef Rasterizer2::PointT PointT;
-
 ImagePainter2::ImagePainter2(Image& image)
 : _rasterizer( new Rasterizer2(image))
 {
@@ -149,7 +147,7 @@ void ImagePainter2::drawText( const PointF& toIn, const String& text )
 
 void ImagePainter2::drawLine(const PointF& from, const PointF& to)
 {
-    const PointT points[] = { PointT( (float)(from.x()), (float)(from.y()) ) , PointT( (float)(to.x()), (float)(to.y()) ) };
+    const Point points[] = { Point( (int)(from.x()), (int)(from.y()) ) , Point( (int)(to.x()), (int)(to.y()) ) };
     _rasterizer->strokeOutline( points, 2 );
 }
 
