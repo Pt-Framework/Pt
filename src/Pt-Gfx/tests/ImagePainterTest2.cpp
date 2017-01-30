@@ -77,6 +77,10 @@ int main(int argc, char* args[])
     painter.drawLine( PointF( 10,  10), PointF(100,  50) );
     painter.drawLine( PointF( 10, 150), PointF(100, 110) );
 
+    painter.setPen( Pen(Color::fromRgb8( 63,  63,  63)) ); painter.drawLine( PointF(500-50, 500), PointF(200-50, 200) );
+    painter.setPen( Pen(Color::fromRgb8(127, 127, 127)) ); painter.drawLine( PointF(500   , 500), PointF(200   , 200) );
+    painter.setPen( Pen(Color::fromRgb8(255, 255, 255)) ); painter.drawLine( PointF(500+50, 500), PointF(200+50, 200) );
+
     sdlPreviewRGB888Buffer(image.data(), image.width(), image.height());
 
     return 0;

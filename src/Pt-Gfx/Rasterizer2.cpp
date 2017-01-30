@@ -228,24 +228,43 @@ void Rasterizer2::updateClip()
 void Rasterizer2::rasterOnePixelLine( float x1_, float y1_, float x2_, float y2_ )
 {
     // Clip the points
-    // ### TODO ###
+    // ### !!! TODO !!! ###
     float fx1 = x1_;
     float fy1 = y1_;
     float fx2 = x2_;
     float fy2 = y2_;
 
-    // Caculate the buffer size and number of steps
-    float absDX = abs(fx2 - fx1);
-    float absDY = abs(fy2 - fy1);
+    // Find the minimum and maximum coordinates
+    Pt::int32_t minX, minY, maxX, maxY;
 
-    Pt::int32_t sizeX = ceil(absDX + 1);
-    Pt::int32_t sizeY = ceil(absDY + 1);
+    if(fx1 < fx2) {
+        minX = floor(fx1);
+        maxX = ceil (fx2);
+    }
+    else {
+        minX = floor(fx2);
+        maxX = ceil (fx1);
+    }
 
-    Pt::int32_t steps = std::min(absDX, absDY) * 2;
+    if(fy1 < fy2) {
+        minY = floor(fy1);
+        maxY = ceil (fy2);
+    }
+    else {
+        minY = floor(fy2);
+        maxY = ceil (fy1);
+    }
 
-    // Initialize the buffer
+    // Calculate the work buffer size
+    Pt::int32_t sizeX = maxX - minX + 1;
+    Pt::int32_t sizeY = maxY - minY + 1;
+
+    // Initialize the work buffer
     _alphas.resize(sizeX * sizeY);
     memset(&_alphas[0], 0, _alphas.size());
+
+    // Caculate the number of steps
+    Pt::int32_t steps = std::min(sizeX, sizeY) * 1;
 
     // Translate and convert the coordinates
     Pt::int32_t x1, y1, x2, y2;
@@ -268,36 +287,36 @@ void Rasterizer2::rasterOnePixelLine( float x1_, float y1_, float x2_, float y2_
         y2 = 0;
     }
 
-    // Calculayte the increment factors
-    Pt::int32_t ix = ((x2 - x1) / steps);
-    Pt::int32_t iy = ((y2 - y1) / steps);
+    // Calculate the increment factors
+    Pt::int32_t ix = (x2 - x1) / steps;
+    Pt::int32_t iy = (y2 - y1) / steps;
 
-    // Draw the lines
-    for(int i = 0; i < steps; ++i) {
-        //
-        Pt::int32_t lx = x1 / FIXED_POINT_MUL_FACTOR;
-        Pt::int32_t ly = y1 / FIXED_POINT_MUL_FACTOR;
-        //
+    // Draw the line
+    for(int i = 0; i <= steps; ++i) {
+        // Calculate the alpha factor of the block
         Pt::int32_t frx = x1 & FIXED_POINT_FRACT_MASK;
         Pt::int32_t fry = y1 & FIXED_POINT_FRACT_MASK;
         Pt::int32_t flx = FIXED_POINT_AAA_FACTOR - frx;
         Pt::int32_t fly = FIXED_POINT_AAA_FACTOR - fry;
-        //
+        // Calculate the top-left position of the block
+        Pt::int32_t lx = x1 / FIXED_POINT_MUL_FACTOR;
+        Pt::int32_t ly = y1 / FIXED_POINT_MUL_FACTOR;
+        // Calculate the bottom-right position of the block
+        Pt::int32_t rx = frx ? (lx + 1) : lx;
+        Pt::int32_t ry = fry ? (ly + 1) : ly;
+        // Draw the block
+                                       _alphas[ly * sizeX + lx] += (fly * flx) / FIXED_POINT_AAA_FACTOR;
+        if( rx < sizeX               ) _alphas[ly * sizeX + rx] += (fly * frx) / FIXED_POINT_AAA_FACTOR;
+        if(               ry < sizeY ) _alphas[ry * sizeX + lx] += (fry * flx) / FIXED_POINT_AAA_FACTOR;
+        if( rx < sizeX && ry < sizeY ) _alphas[ry * sizeX + rx] += (fry * frx) / FIXED_POINT_AAA_FACTOR;
+        // Increment the drawing coordinate
         x1 += ix;
         y1 += iy;
-        //
-        _alphas[(ly + 0) * sizeX + (lx + 0)] += (fly * flx) / FIXED_POINT_AAA_FACTOR;
-
-        _alphas[(ly + 0) * sizeX + (lx + 1)] += (fly * frx) / FIXED_POINT_AAA_FACTOR;
-
-        _alphas[(ly + 1) * sizeX + (lx + 0)] += (fry * flx) / FIXED_POINT_AAA_FACTOR;
-
-        _alphas[(ly + 1) * sizeX + (lx + 1)] += (fry * frx) / FIXED_POINT_AAA_FACTOR;
     }
 
     // Blit the draw buffer to the image
     for(int r = 0; r < sizeY; ++r) {
-        Pixel destPixel( _image->view(), x1_, y1_ + r);
+        Pixel destPixel( _image->view(), minX, minY + r);
         _image->format().copy(destPixel, _alphas.data() + r * sizeX, sizeX, _pen.color(), _compositionMode);
     }
 }
