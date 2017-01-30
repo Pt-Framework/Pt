@@ -72,10 +72,11 @@ static void testLines(const char* title, Image& image, ImagePainter2& painter)
 {
     resetImage(image);
 
-#if 0
-    painter.setClip(RectF (20, image.width() - 20, 20, image.height() - 20));
+#if 1
+    painter.setClip( RectF (20, image.width() - 20, 20, image.height() - 20) );
     painter.setPen( Color::fromRgb8(0, 255, 0, 175) );
     painter.drawLine( PointF(  0,   0), PointF(799, 599) );
+    painter.setClip( RectF (0, image.width() - 1, 0, image.height() - 1) );
 #endif
 
     painter.setPen( Color::fromRgb8(255, 0, 0, 175) );
@@ -103,6 +104,9 @@ static void testLines(const char* title, Image& image, ImagePainter2& painter)
     painter.drawLine( PointF( 10, 540), PointF(781, 540) );
     painter.drawLine( PointF( 10, 550), PointF(781, 551) );
 
+    painter.setPen( Pen(Color::fromRgb8(0, 255, 255, 175)) );
+    painter.drawText( PointF(100, 100), "Hello world!" );
+
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height());
 }
 
@@ -110,6 +114,8 @@ int main(int argc, char* args[])
 {
     Image         image( ImageFormat::argb32(), Size(800, 600) );
     ImagePainter2 painter(image);
+
+    painter.setFont( Pt::Gfx::Font("../src/Pt-Gfx/fonts/DejaVuSerif.ttf", 24) );
 
     painter.setCompositionMode(CompositionMode::SourceCopy);
     testLines("Test Lines - CompositionMode::SourceCopy", image, painter);

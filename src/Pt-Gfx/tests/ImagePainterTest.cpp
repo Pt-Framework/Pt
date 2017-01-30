@@ -14,8 +14,8 @@ void Paint()
     try
     {
         for(int n = 0; n < 10 ; ++n)
-        {            
-        
+        {
+
             Image image( ImageFormat::argb32(), Size(1280, 800) );
 
             Pt::System::Clock clock;
@@ -46,13 +46,13 @@ void Paint()
 
             std::clog << "drawing: " << clock.stop().toUSecs() << std::endl;
 
-        
+
             std::vector<Pt::uint32_t> frameBuffer(1280 * 800);
             clock.start();
-        
+
             for(int n = 0; n < 10; ++n)
                 std::memcpy( &frameBuffer[0], image.data(), frameBuffer.size() );
-        
+
             std::clog << "copy: " << clock.stop().toUSecs() << std::endl;
             std::clog << std::endl;
         }
@@ -74,14 +74,14 @@ void BlockScale()
 
             Pt::System::Clock clock;
             clock.start();
-            Pt::Gfx::blockScale(image.begin(), image.width(), image.height(), 
+            Pt::Gfx::blockScale(image.begin(), image.width(), image.height(),
                                 image2.begin(), image2.width(), image2.height());
 
             std::clog << "image scale: " << clock.stop().toUSecs() << std::endl;
         }
 
         std::clog << std::endl;
-        
+
         for(int n = 0; n < 10 ; ++n)
         {
             std::vector<Pt::uint32_t> image(1000 * 1000);
@@ -91,7 +91,7 @@ void BlockScale()
 
             Pt::System::Clock clock;
             clock.start();
-            Pt::Gfx::blockScale(image.begin(), 1000, 1000, 
+            Pt::Gfx::blockScale(image.begin(), 1000, 1000,
                                 image2.begin(), 900, 900);
 
             for(unsigned y = 0; y < 900; ++y)
@@ -101,8 +101,8 @@ void BlockScale()
                     unsigned n = (y * 900) + x;
                     Pt::uint8_t* from = reinterpret_cast<Pt::uint8_t*>( &image2[n] );
 
-                    Pt::uint8_t r = from[2]; 
-                    Pt::uint8_t g = from[1]; 
+                    Pt::uint8_t r = from[2];
+                    Pt::uint8_t g = from[1];
                     Pt::uint8_t b = from[0];
 
                     Pt::uint16_t* to = reinterpret_cast<Pt::uint16_t*>( &frameBuffer[n] );
@@ -126,11 +126,11 @@ void BlockScale()
 int main(int argc, char* args[])
 {
     BlockScale();
-    
+
     std::clog << std::endl;
-    
+
     Paint();
-    
+
     return 0;
 }
 
