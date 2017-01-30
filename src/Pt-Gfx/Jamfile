@@ -29,12 +29,14 @@ SharedLibrary Pt-Gfx : Argb32Format.cpp
                        Image.cpp
                        ImageFormat.cpp
                        ImagePainter.cpp
+                       ImagePainter2.cpp
                        JpegReader.cpp
                        Pen.cpp
                        PngReader.cpp
                        Rasterizer.cpp
+                       Rasterizer2.cpp
                        Rgb32Format.cpp
-                       Rgb16Format.cpp 
+                       Rgb16Format.cpp
                        Yuv12Format.cpp
                        ;
 

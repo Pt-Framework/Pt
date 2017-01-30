@@ -1,11 +1,11 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
+/* Copyright (C) 2015 Marc Boris Duerner
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -15,15 +15,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
   02110-1301 USA
 */
 
@@ -50,23 +50,23 @@ class PT_GFX_API Image
 
     public:
         Image();
-    
+
         Image(const ImageFormat& format, const Size& size,
               size_t padding = 0);
 
-        Image(const ImageFormat& format, Pt::uint8_t* buffer, 
+        Image(const ImageFormat& format, Pt::uint8_t* buffer,
               const Size& size, size_t padding = 0);
-    
+
         Image(const Image& image);
-              
+
         virtual ~Image();
 
         const Image& operator=(const Image& image);
 
-        void reset(const ImageFormat& format, 
-                   const Size& size, Pt::ssize_t padding = 0);   
+        void reset(const ImageFormat& format,
+                   const Size& size, Pt::ssize_t padding = 0);
 
-        void reset(const ImageFormat& format, Pt::uint8_t* data, 
+        void reset(const ImageFormat& format, Pt::uint8_t* data,
                    const Size& size, Pt::ssize_t padding = 0);
 
         PixelIterator pixel(Pt::ssize_t x, Pt::ssize_t y)
@@ -107,7 +107,7 @@ class PT_GFX_API Image
         {
             return _view.format();
         }
-        
+
         /** @brief Returns the size of the image.
         */
         const Size& size() const
@@ -124,20 +124,20 @@ class PT_GFX_API Image
         {
             return _view.height();
         }
-    
+
         Pt::ssize_t padding() const
         {
             return _view.padding();
         }
 
         Pt::uint8_t* data()
-        { 
-            return _view.data(); 
+        {
+            return _view.data();
         }
 
         const Pt::uint8_t* data() const
-        { 
-            return _view.data(); 
+        {
+            return _view.data();
         }
 
         bool empty() const
