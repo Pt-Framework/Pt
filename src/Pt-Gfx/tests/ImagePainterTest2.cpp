@@ -66,7 +66,7 @@ int main(int argc, char* args[])
     Image image( ImageFormat::argb32(), Size(800, 600) );
 
     ImagePainter2 painter(image);
-    painter.setCompositionMode(CompositionMode::SourceCopy);
+    painter.setCompositionMode(CompositionMode::SourceOver);
 
     Brush brush( Color::fromRgb8(0, 0, 0) );
     painter.setBrush(brush);
