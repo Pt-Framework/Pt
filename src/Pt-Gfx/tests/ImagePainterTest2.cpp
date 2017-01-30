@@ -8,13 +8,13 @@
 
 using namespace Pt::Gfx;
 
-void sdlPreviewRGB888Buffer(const uint8_t* argb8888Buff, int sizeX, int sizeY)
+static void sdlPreviewRGB888Buffer(const char* title, const uint8_t* argb8888Buff, int sizeX, int sizeY)
 {
     // Initialise SDL
     if(SDL_Init(SDL_INIT_VIDEO) < 0) return;
 
     // Create window, renderer, and texture objects
-    SDL_Window*   sdlWindow     = SDL_CreateWindow  ("ImagePainterTest2", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, sizeX, sizeY, 0);
+    SDL_Window*   sdlWindow     = SDL_CreateWindow  (title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, sizeX, sizeY, 0);
     SDL_Renderer* sdlRenderer   = SDL_CreateRenderer(sdlWindow, -1, 0);
     SDL_Texture*  sdlTexture    = SDL_CreateTexture (sdlRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, sizeX, sizeY);
 
@@ -61,35 +61,35 @@ void sdlPreviewRGB888Buffer(const uint8_t* argb8888Buff, int sizeX, int sizeY)
     SDL_Quit           (             );
 }
 
-int main(int argc, char* args[])
+static void resetImage(Image& image)
 {
-    Image image( ImageFormat::argb32(), Size(800, 600) );
+    const Size origSize = image.size();
+    image.reset(image.format(), Size(0, 0));
+    image.reset(image.format(), origSize);
+}
 
-    ImagePainter2 painter(image);
-    painter.setCompositionMode(CompositionMode::SourceOver);
+static void testLines(const char* title, Image& image, ImagePainter2& painter)
+{
+    resetImage(image);
 
-    Brush brush( Color::fromRgb8(0, 0, 0) );
-    painter.setBrush(brush);
-
-    Pen pen( Color::fromRgb8(255, 0, 0) );
-    painter.setPen(pen);
+    painter.setPen( Color::fromRgb8(255, 0, 0, 175) );
 
     painter.drawLine( PointF(  0,   0), PointF(799,   0) );
     painter.drawLine( PointF(  0, 599), PointF(799, 599) );
     painter.drawLine( PointF(  0,   0), PointF(  0, 599) );
     painter.drawLine( PointF(799,   0), PointF(799, 599) );
 
-    painter.setPen( Color::fromRgb8(255, 255, 255) );
+    painter.setPen( Color::fromRgb8(255, 255, 255, 175) );
 
     painter.drawLine( PointF( 10,  10), PointF(100,  50) );
     painter.drawLine( PointF( 10, 150), PointF(100, 110) );
 
     painter.drawLine( PointF(100,  10), PointF(110,  20) );
 
-    painter.setPen( Pen(Color::fromRgb8( 63,  63,  63)) ); painter.drawLine( PointF(500-50, 500), PointF(200-50, 200) );
-    painter.setPen( Pen(Color::fromRgb8(127, 127, 127)) ); painter.drawLine( PointF(500   , 500), PointF(200   , 200) );
-    painter.setPen( Pen(Color::fromRgb8(255, 255, 255)) ); painter.drawLine( PointF(500+50, 500), PointF(200+50, 200) );
-                                                           painter.drawLine( PointF(300   , 200), PointF(700   , 100) );
+    painter.setPen( Pen(Color::fromRgb8( 63,  63,  63, 175)) ); painter.drawLine( PointF(500-50, 500), PointF(200-50, 200) );
+    painter.setPen( Pen(Color::fromRgb8(127, 127, 127, 175)) ); painter.drawLine( PointF(500   , 500), PointF(200   , 200) );
+    painter.setPen( Pen(Color::fromRgb8(255, 255, 255, 175)) ); painter.drawLine( PointF(500+50, 500), PointF(200+50, 200) );
+                                                                painter.drawLine( PointF(300   , 200), PointF(700   , 100) );
 
     painter.drawLine( PointF(770,  11), PointF(770, 500) );
     painter.drawLine( PointF(780,  11), PointF(782, 500) );
@@ -97,7 +97,19 @@ int main(int argc, char* args[])
     painter.drawLine( PointF( 10, 540), PointF(781, 540) );
     painter.drawLine( PointF( 10, 550), PointF(781, 551) );
 
-    sdlPreviewRGB888Buffer(image.data(), image.width(), image.height());
+    sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height());
+}
+
+int main(int argc, char* args[])
+{
+    Image         image( ImageFormat::argb32(), Size(800, 600) );
+    ImagePainter2 painter(image);
+
+    painter.setCompositionMode(CompositionMode::SourceCopy);
+    testLines("Test Lines - CompositionMode::SourceCopy", image, painter);
+
+    painter.setCompositionMode(CompositionMode::SourceOver);
+    testLines("Test Lines - CompositionMode::SourceOver", image, painter);
 
     return 0;
 }
