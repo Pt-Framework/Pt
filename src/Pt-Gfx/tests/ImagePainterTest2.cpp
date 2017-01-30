@@ -71,8 +71,15 @@ int main(int argc, char* args[])
     Brush brush( Color::fromRgb8(0, 0, 0) );
     painter.setBrush(brush);
 
-    Pen pen( Color::fromRgb8(255, 255, 255) );
+    Pen pen( Color::fromRgb8(255, 0, 0) );
     painter.setPen(pen);
+
+    painter.drawLine( PointF(  0,   0), PointF(799,   0) );
+    painter.drawLine( PointF(  0, 599), PointF(799, 599) );
+    painter.drawLine( PointF(  0,   0), PointF(  0, 599) );
+    painter.drawLine( PointF(799,   0), PointF(799, 599) );
+
+    painter.setPen( Color::fromRgb8(255, 255, 255) );
 
     painter.drawLine( PointF( 10,  10), PointF(100,  50) );
     painter.drawLine( PointF( 10, 150), PointF(100, 110) );
@@ -83,6 +90,12 @@ int main(int argc, char* args[])
     painter.setPen( Pen(Color::fromRgb8(127, 127, 127)) ); painter.drawLine( PointF(500   , 500), PointF(200   , 200) );
     painter.setPen( Pen(Color::fromRgb8(255, 255, 255)) ); painter.drawLine( PointF(500+50, 500), PointF(200+50, 200) );
                                                            painter.drawLine( PointF(300   , 200), PointF(700   , 100) );
+
+    painter.drawLine( PointF(770,  11), PointF(770, 500) );
+    painter.drawLine( PointF(780,  11), PointF(782, 500) );
+
+    painter.drawLine( PointF( 10, 540), PointF(781, 540) );
+    painter.drawLine( PointF( 10, 550), PointF(781, 551) );
 
     sdlPreviewRGB888Buffer(image.data(), image.width(), image.height());
 

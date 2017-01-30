@@ -215,7 +215,16 @@ void Rasterizer2::strokeOutline(const PointT* points, size_t pointCount)
 // ===== Protected Member Functions =====================================================
 // ======================================================================================
 
-#if 1
+#define FIXED_POINT_USE_16_16_FORMAT
+
+#if defined(FIXED_POINT_USE_16_16_FORMAT)
+
+/* Use 16.16 format */
+#define FIXED_POINT_SHIFT_FACTOR 16         // Shift factor
+#define FIXED_POINT_ALPHA_DIVFAC 257        // Must be ( (2 ^ FIXED_POINT_SHIFT_FACTOR - 1) / 255 )
+#define FIXED_POINT_FRACT_VAL_BM 0x0000FFFF // Bit mask for the fractional value; must be (2 ^ FIXED_POINT_SHIFT_FACTOR - 1)
+
+#elif defined(FIXED_POINT_USE_24_8_FORMAT)
 
 /* Use 24.8 format */
 #define FIXED_POINT_SHIFT_FACTOR 8          // Shift factor
@@ -309,9 +318,9 @@ void Rasterizer2::rasterOnePixelLine( float x1_, float y1_, float x2_, float y2_
         y2 = 0;
     }
 
-    // Calculate the increment factors
-    Pt::int32_t ix = (x2 - x1) / steps;
-    Pt::int32_t iy = (y2 - y1) / steps;
+    // Calculate the change factors
+    Pt::int32_t chgX = (x2 - x1) / steps;
+    Pt::int32_t chgY = (y2 - y1) / steps;
 
     // Initialize the work buffer
     initWorkBuffer(sizeX, sizeY);
@@ -319,8 +328,13 @@ void Rasterizer2::rasterOnePixelLine( float x1_, float y1_, float x2_, float y2_
     // Draw the line
     for(int i = 0; i <= steps; ++i) {
         // Calculate the alpha factors (1 - 256) of the block
+#ifdef FIXED_POINT_ALPHA_DIVFAC
+        Pt::int32_t frx = (x1 & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC + 1;
+        Pt::int32_t fry = (y1 & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC + 1;
+#else
         Pt::int32_t frx = (x1 & FIXED_POINT_FRACT_VAL_BM) * FIXED_POINT_ALPHA_MULFAC + 1;
         Pt::int32_t fry = (y1 & FIXED_POINT_FRACT_VAL_BM) * FIXED_POINT_ALPHA_MULFAC + 1;
+#endif
         Pt::int32_t flx = 256 - frx;
         Pt::int32_t fly = 256 - fry;
         // Calculate the top-left coordinate of the block
@@ -335,8 +349,8 @@ void Rasterizer2::rasterOnePixelLine( float x1_, float y1_, float x2_, float y2_
         if(               ry < sizeY ) _alphas[ry * sizeX + lx] += (fry * flx) >> 8;
         if( rx < sizeX && ry < sizeY ) _alphas[ry * sizeX + rx] += (fry * frx) >> 8;
         // Increment the drawing coordinate
-        x1 += ix;
-        y1 += iy;
+        x1 += chgX;
+        y1 += chgY;
     }
 
     // Blit the work buffer to the image
