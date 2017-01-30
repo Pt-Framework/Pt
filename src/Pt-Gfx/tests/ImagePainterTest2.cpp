@@ -74,6 +74,14 @@ static void testLines(const char* title, Image& image, ImagePainter2& painter)
 
     painter.setPen( Color::fromRgb8(255, 0, 0, 175) );
 
+    painter.setClip(RectF (0+20, 799-20, 0+20, 599-20));
+
+//    painter.drawLine( PointF(  0,   0), PointF(799, 599) );
+    //painter.drawLine( PointF(  0,   0), PointF(799,   0) );
+
+ //   painter.drawLine( PointF(770,  100), PointF(770, 599) );
+
+//    /*
     painter.drawLine( PointF(  0,   0), PointF(799,   0) );
     painter.drawLine( PointF(  0, 599), PointF(799, 599) );
     painter.drawLine( PointF(  0,   0), PointF(  0, 599) );
@@ -96,6 +104,7 @@ static void testLines(const char* title, Image& image, ImagePainter2& painter)
 
     painter.drawLine( PointF( 10, 540), PointF(781, 540) );
     painter.drawLine( PointF( 10, 550), PointF(781, 551) );
+   // */
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height());
 }
@@ -108,8 +117,8 @@ int main(int argc, char* args[])
     painter.setCompositionMode(CompositionMode::SourceCopy);
     testLines("Test Lines - CompositionMode::SourceCopy", image, painter);
 
-    painter.setCompositionMode(CompositionMode::SourceOver);
-    testLines("Test Lines - CompositionMode::SourceOver", image, painter);
+    //painter.setCompositionMode(CompositionMode::SourceOver);
+    //testLines("Test Lines - CompositionMode::SourceOver", image, painter);
 
     return 0;
 }

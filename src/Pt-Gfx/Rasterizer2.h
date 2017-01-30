@@ -39,7 +39,7 @@
 namespace Pt {
 namespace Gfx {
 
-    
+
 class DrawText;
 class Image;
 
@@ -110,6 +110,8 @@ class Rasterizer2
         void blitWorkBufferToImage(int minX, int minY, int sizeX, int sizeY);
 
         void rasterOnePixelLine(const Point* points);
+
+        void rasterLineSegment(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t chgX, Pt::int32_t chgY, Pt::int32_t steps, Pt::int32_t sizeX, Pt::int32_t sizeY);
 
     private:
         Image*          _image;

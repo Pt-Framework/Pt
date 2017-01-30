@@ -36,7 +36,6 @@
 #include "DrawText.h"
 
 #include "Rasterizer2.h"
-#include "ClipPolygon2.h"
 
 #include <stdio.h> // Just for easy debugging ;)
 
@@ -231,11 +230,14 @@ void Rasterizer2::updateClip()
 {
     Rect imageRect( Point(0,0) , _image->size() );
     _currentClip = _clip.isNull() ? imageRect : _clip.intersect( imageRect );
+
+    // Resize the work buffer to match the size of the clip
+    _alphas.resize(_currentClip.width() * _currentClip.height());
+    //_alphas.resize(_image->width() * _image->height());
 }
 
 void Rasterizer2::initWorkBuffer(int sizeX, int sizeY)
 {
-    _alphas.resize(sizeX * sizeY);
     memset(&_alphas[0], 0, _alphas.size());
 }
 
@@ -247,17 +249,103 @@ void Rasterizer2::blitWorkBufferToImage(int minX, int minY, int sizeX, int sizeY
     }
 }
 
+typedef int OutCode;
+
+const int INSIDE = 0; // 0000
+const int LEFT = 1;   // 0001
+const int RIGHT = 2;  // 0010
+const int BOTTOM = 4; // 0100
+const int TOP = 8;    // 1000
+
+// Compute the bit code for a point (x, y) using the clip rectangle
+// bounded diagonally by (xmin, ymin), and (xmax, ymax)
+
+// ASSUME THAT xmax, xmin, ymax and ymin are global constants.
+
+OutCode ComputeOutCode(Pt::int32_t x, Pt::int32_t y, Pt::int32_t xmin, Pt::int32_t ymin, Pt::int32_t xmax, Pt::int32_t ymax)
+{
+    OutCode code;
+
+    code = INSIDE;          // initialised as being inside of [[clip window]]
+
+    if (x < xmin)           // to the left of clip window
+        code |= LEFT;
+    else if (x > xmax)      // to the right of clip window
+        code |= RIGHT;
+    if (y < ymin)           // above the clip window
+        code |= TOP;
+    else if (y > ymax)      // below the clip window
+        code |= BOTTOM;
+
+    return code;
+}
+
+// Cohen–Sutherland clipping algorithm clips a line from
+// P0 = (x0, y0) to P1 = (x1, y1) against a rectangle with
+// diagonal from (xmin, ymin) to (xmax, ymax).
+bool CohenSutherlandLineClipAndDraw(Pt::int32_t& x0, Pt::int32_t& y0, Pt::int32_t& x1, Pt::int32_t& y1, Pt::int32_t xmin, Pt::int32_t ymin, Pt::int32_t xmax, Pt::int32_t ymax)
+{
+    // compute outcodes for P0, P1, and whatever point lies outside the clip rectangle
+    OutCode outcode0 = ComputeOutCode(x0, y0, xmin, ymin, xmax, ymax);
+    OutCode outcode1 = ComputeOutCode(x1, y1, xmin, ymin, xmax, ymax);
+    bool accept = false;
+
+    while (true) {
+        if (!(outcode0 | outcode1)) { // Bitwise OR is 0. Trivially accept and get out of loop
+            accept = true;
+            break;
+        } else if (outcode0 & outcode1) { // Bitwise AND is not 0. (implies both end points are in the same region outside the window). Reject and get out of loop
+            break;
+        } else {
+            // failed both tests, so calculate the line segment to clip
+            // from an outside point to an intersection with clip edge
+            Pt::int32_t x, y;
+
+            // At least one endpoint is outside the clip rectangle; pick it.
+            OutCode outcodeOut = outcode0 ? outcode0 : outcode1;
+
+            // Now find the intersection point;
+            // use formulas y = y0 + slope * (x - x0), x = x0 + (1 / slope) * (y - y0)
+            if (outcodeOut & TOP) {           // point is above the clip rectangle
+                x = x0 + (x1 - x0) * (ymin - y0) / (y1 - y0);
+                y = ymin;
+            } else if (outcodeOut & BOTTOM) { // point is below the clip rectangle
+                x = x0 + (x1 - x0) * (ymax - y0) / (y1 - y0);
+                y = ymax;
+            } else if (outcodeOut & RIGHT) {  // point is to the right of clip rectangle
+                y = y0 + (y1 - y0) * (xmax - x0) / (x1 - x0);
+                x = xmax;
+            } else if (outcodeOut & LEFT) {   // point is to the left of clip rectangle
+                y = y0 + (y1 - y0) * (xmin - x0) / (x1 - x0);
+                x = xmin;
+            }
+
+            // Now we move outside point to intersection point to clip
+            // and get ready for next pass.
+            if (outcodeOut == outcode0) {
+                x0 = x;
+                y0 = y;
+                outcode0 = ComputeOutCode(x0, y0, xmin, ymin, xmax, ymax);
+            } else {
+                x1 = x;
+                y1 = y;
+                outcode1 = ComputeOutCode(x1, y1, xmin, ymin, xmax, ymax);
+            }
+        }
+    }
+
+    return accept;
+}
+
 void Rasterizer2::rasterOnePixelLine(const Point* points)
 {
     // Clip the points
-    std::vector<Point> clipped (points, points + 2);
+    Pt::int32_t fx1 = points[0].x();
+    Pt::int32_t fy1 = points[0].y();
+    Pt::int32_t fx2 = points[1].x();
+    Pt::int32_t fy2 = points[1].y();
 
-    ClipPolygon2::clip(clipped, _currentClip);
-
-    const Pt::int32_t fx1 = clipped[0].x();
-    const Pt::int32_t fy1 = clipped[0].y();
-    const Pt::int32_t fx2 = clipped[1].x();
-    const Pt::int32_t fy2 = clipped[1].y();
+    if(!CohenSutherlandLineClipAndDraw(fx1, fy1, fx2, fy2, _currentClip.left(), _currentClip.top(), _currentClip.right(), _currentClip.bottom())) return;
 
     // Find the minimum and maximum coordinates
     Pt::int32_t minX, minY, maxX, maxY;
@@ -280,12 +368,13 @@ void Rasterizer2::rasterOnePixelLine(const Point* points)
         maxY = fy1;
     }
 
-    // Calculate the work buffer size
+    // Calculate the size of the rectangle
     const Pt::int32_t sizeX = maxX - minX + 1;
     const Pt::int32_t sizeY = maxY - minY + 1;
 
     // Caculate the number of steps
     const Pt::int32_t steps = std::max(sizeX, sizeY) - 1;
+    if(!steps) return;
 
     // Translate and convert the coordinates
     Pt::int32_t x1, y1, x2, y2;
@@ -316,6 +405,15 @@ void Rasterizer2::rasterOnePixelLine(const Point* points)
     initWorkBuffer(sizeX, sizeY);
 
     // Draw the line
+    rasterLineSegment(x1, y1, chgX, chgY, steps, sizeX, sizeY);
+
+    // Blit the work buffer to the image
+    blitWorkBufferToImage(minX, minY, sizeX, sizeY);
+}
+
+void Rasterizer2::rasterLineSegment(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t chgX, Pt::int32_t chgY, Pt::int32_t steps, Pt::int32_t sizeX, Pt::int32_t sizeY)
+{
+    // Draw the line
     for(int i = 0; i <= steps; ++i) {
         // Calculate the alpha factors (1 - 256) of the block
 #ifdef FIXED_POINT_ALPHA_DIVFAC
@@ -342,9 +440,6 @@ void Rasterizer2::rasterOnePixelLine(const Point* points)
         x1 += chgX;
         y1 += chgY;
     }
-
-    // Blit the work buffer to the image
-    blitWorkBufferToImage(minX, minY, sizeX, sizeY);
 }
 
 
