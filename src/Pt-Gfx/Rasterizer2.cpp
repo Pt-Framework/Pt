@@ -216,6 +216,7 @@ void Rasterizer2::strokeOutline(const PointT* points, size_t pointCount)
 // ======================================================================================
 
 #define FIXED_POINT_MUL_FACTOR 256
+#define FIXED_POINT_AAA_FACTOR (FIXED_POINT_MUL_FACTOR - 1)
 #define FIXED_POINT_FRACT_MASK 0x000000FF
 
 void Rasterizer2::updateClip()
@@ -240,7 +241,7 @@ void Rasterizer2::rasterOnePixelLine( float x1_, float y1_, float x2_, float y2_
     Pt::int32_t sizeX = ceil(absDX + 1);
     Pt::int32_t sizeY = ceil(absDY + 1);
 
-    Pt::int32_t steps = std::min(absDX, absDY);
+    Pt::int32_t steps = std::min(absDX, absDY) * 2;
 
     // Initialize the buffer
     _alphas.resize(sizeX * sizeY);
@@ -277,16 +278,21 @@ void Rasterizer2::rasterOnePixelLine( float x1_, float y1_, float x2_, float y2_
         Pt::int32_t lx = x1 / FIXED_POINT_MUL_FACTOR;
         Pt::int32_t ly = y1 / FIXED_POINT_MUL_FACTOR;
         //
-        Pt::uint8_t rx = x1 & FIXED_POINT_FRACT_MASK;
-        Pt::uint8_t ry = y1 & FIXED_POINT_FRACT_MASK;
+        Pt::int32_t frx = x1 & FIXED_POINT_FRACT_MASK;
+        Pt::int32_t fry = y1 & FIXED_POINT_FRACT_MASK;
+        Pt::int32_t flx = FIXED_POINT_AAA_FACTOR - frx;
+        Pt::int32_t fly = FIXED_POINT_AAA_FACTOR - fry;
         //
         x1 += ix;
         y1 += iy;
         //
-        int pos = int(ly) * sizeX + int(lx);
+        _alphas[(ly + 0) * sizeX + (lx + 0)] += (fly * flx) / FIXED_POINT_AAA_FACTOR;
 
+        _alphas[(ly + 0) * sizeX + (lx + 1)] += (fly * frx) / FIXED_POINT_AAA_FACTOR;
 
-        _alphas[pos] = 255;
+        _alphas[(ly + 1) * sizeX + (lx + 0)] += (fry * flx) / FIXED_POINT_AAA_FACTOR;
+
+        _alphas[(ly + 1) * sizeX + (lx + 1)] += (fry * frx) / FIXED_POINT_AAA_FACTOR;
     }
 
     // Blit the draw buffer to the image

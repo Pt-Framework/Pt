@@ -16,7 +16,7 @@ void sdlPreviewRGB888Buffer(const uint8_t* argb8888Buff, int sizeX, int sizeY)
     // Create window, renderer, and texture objects
     SDL_Window*   sdlWindow     = SDL_CreateWindow  ("ImagePainterTest2", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, sizeX, sizeY, 0);
     SDL_Renderer* sdlRenderer   = SDL_CreateRenderer(sdlWindow, -1, 0);
-    SDL_Texture*  sdlTexture    = SDL_CreateTexture (sdlRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STATIC, sizeX, sizeY);
+    SDL_Texture*  sdlTexture    = SDL_CreateTexture (sdlRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, sizeX, sizeY);
 
     // Bring the window on top by force
     SDL_SysWMinfo info;
@@ -68,10 +68,10 @@ int main(int argc, char* args[])
     ImagePainter2 painter(image);
     painter.setCompositionMode(CompositionMode::SourceCopy);
 
-    Brush brush( Color(1, 1, 1) );
+    Brush brush( Color::fromRgb8(0, 0, 0) );
     painter.setBrush(brush);
 
-    Pen pen( Color(1, 0, 0) );
+    Pen pen( Color::fromRgb8(255, 255, 255) );
     painter.setPen(pen);
 
     painter.drawLine( PointF( 10,  10), PointF(100,  50) );
