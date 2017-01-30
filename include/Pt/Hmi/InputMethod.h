@@ -41,7 +41,7 @@ namespace Hmi {
 class Widget;
 class Application;
 
-class PT_HMI_API InputMethod : public Pt::Connectable
+class PT_HMI_API InputMethod
 {
     friend class Application;
 
