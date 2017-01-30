@@ -15,7 +15,10 @@ Main ImagePainterTest : ImagePainterTest.cpp ;
 LinkSharedLibraries ImagePainterTest : Pt Pt-Gfx Pt-System ;
 MakeLocate ImagePainterTest : $(PT_OUTPUT_TARGET) ;
 
-Main ImagePainterTest2 : ImagePainterTest2.cpp ;
-LinkSharedLibraries ImagePainterTest2 : Pt Pt-Gfx Pt-System ;
-MakeLocate ImagePainterTest2 : $(PT_OUTPUT_TARGET) ;
-LinkFlags ImagePainterTest2 : -lSDL2 -lX11 ;
+if $(WITH_RASTERIZER2)
+{
+    Main ImagePainterTest2 : ImagePainterTest2.cpp ;
+    LinkSharedLibraries ImagePainterTest2 : Pt Pt-Gfx Pt-System ;
+    MakeLocate ImagePainterTest2 : $(PT_OUTPUT_TARGET) ;
+    LinkFlags ImagePainterTest2 : -lSDL2 -lX11 ;
+}
