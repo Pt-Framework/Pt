@@ -28,7 +28,6 @@
   02110-1301 USA
 */
 
-#include <Pt/Math.h>
 #include <Pt/Gfx/Algorithm.h>
 #include <Pt/Gfx/ImagePainter2.h>
 
@@ -170,11 +169,14 @@ void Rasterizer2::strokeText( const Point& to, const Pt::String& text )
     _text->draw( *_image, _pen.color(), to, text );
 }
 
-void Rasterizer2::strokeOutline(const Point* points, size_t pointCount)
+void Rasterizer2::strokeOutline(const PointT* points, size_t pointCount)
 {
     switch( _pen.style() )
     {
         case Pen::Solid:
+            if( _pen.size() == 1 && pointCount == 2 )
+                rasterOnePixelLine(points[0].x(), points[0].y(), points[1].x(), points[1].y());
+
             /*
             if( _pen.size() == 1 )
                 drawThinSolidPolyline( points, pointCount );
@@ -199,44 +201,19 @@ void Rasterizer2::strokeOutline(const Point* points, size_t pointCount)
 // ===== Internals ======================================================================
 // ======================================================================================
 
-void Rasterizer2::clipSpan( int& xpos, int& ypos, int& length )
-{
-    if( ypos < _currentClip.y() )
-    {
-        length = 0;
-        return;
-    }
-
-    if( ypos >= _clipBottom )
-    {
-        length = 0;
-        return;
-    }
-
-    if( xpos >= _clipRight )
-    {
-        length = 0;
-        return;
-    }
-
-
-    if(xpos < _currentClip.x() )
-    {
-        length -= (_currentClip.x()- xpos);
-        xpos = _currentClip.x();
-    }
-
-    if( (xpos + length) >= _clipRight )
-    length =  _clipRight - xpos;
-}
-
 void Rasterizer2::updateClip()
 {
-    Rect imageRect(Point(0,0) , _image->size());
-    _currentClip =  _clip.isNull() ? imageRect : _clip.intersect( imageRect);
-    _clipRight = _currentClip.x() + _currentClip.width();
-    _clipBottom = _currentClip.y() + _currentClip.height();
+    Rect imageRect( Point(0,0) , _image->size() );
+
+    _currentClip =  _clip.isNull() ? imageRect : _clip.intersect( imageRect );
+    _clipRight   = _currentClip.x() + _currentClip.width();
+    _clipBottom  = _currentClip.y() + _currentClip.height();
 }
+
+void Rasterizer2::rasterOnePixelLine( float x1, float y1, float x2, float y2 )
+{
+}
+
 
 } // namespace
 

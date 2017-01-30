@@ -46,6 +46,9 @@ class Image;
 class Rasterizer2
 {
     public:
+        typedef BasicPoint<float> PointT;
+
+    public:
         Rasterizer2( Image& image );
 
         ~Rasterizer2();
@@ -102,11 +105,12 @@ class Rasterizer2
 
         void strokeText( const Point& to, const Pt::String& text );
 
-        void strokeOutline( const Point* points, size_t pointCount );
+        void strokeOutline( const PointT* points, size_t pointCount );
 
     protected:
-        void clipSpan( int& x, int& y, int& length );
         void updateClip();
+
+        void rasterOnePixelLine( float x1, float y1, float x2, float y2 );
 
     private:
         Image*          _image;
@@ -130,8 +134,8 @@ class Rasterizer2
         int             _clipBottom;
 };
 
-} //namespace
+} // namespace
 
-} //namespace
+} // namespace
 
 #endif

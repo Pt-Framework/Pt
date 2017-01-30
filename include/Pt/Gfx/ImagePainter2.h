@@ -43,74 +43,76 @@ class Rasterizer2;
 
 class PT_GFX_API ImagePainter2 : public Painter
 {
-  public:
-    ImagePainter2( Image& image );
+    public:
+        ImagePainter2( Image& image );
 
-    virtual ~ImagePainter2();
+        virtual ~ImagePainter2();
 
-    void setImage(Image& image);
+        void setImage(Image& image);
 
-    virtual const ImageFormat& format() const;
+        virtual const ImageFormat& format() const;
 
-    virtual void setCompositionMode(const CompositionMode& mode);
+        virtual void setCompositionMode(const CompositionMode& mode);
 
-    virtual const CompositionMode& compositionMode() const;
+        virtual const CompositionMode& compositionMode() const;
 
-    virtual void setClip( const RectF& clip );
+        virtual void setClip( const RectF& clip );
 
-    virtual const Gfx::RectF& clip() const;
+        virtual const Gfx::RectF& clip() const;
 
-    virtual void setPen(const Pen& pen);
+        virtual void setPen(const Pen& pen);
 
-    virtual const Pen& pen() const;
+        virtual const Pen& pen() const;
 
-    virtual void setBrush(const Brush& brush);
+        virtual void setBrush(const Brush& brush);
 
-    virtual const Brush& brush() const;
+        virtual const Brush& brush() const;
 
-    virtual void setFont(const Font& font);
+        virtual void setFont(const Font& font);
 
-    virtual const Font& font() const;
+        virtual const Font& font() const;
 
-    virtual FontMetrics fontMetrics(const Pt::String& text) const;
+        virtual FontMetrics fontMetrics(const Pt::String& text) const;
 
-    virtual void drawLine(const  PointF& from, const  PointF& to);
+        virtual void drawLine(const PointF& from, const  PointF& to);
 
-    virtual void drawText(const  PointF& to, const Pt::String& text );
+        virtual void drawText(const PointF& to, const Pt::String& text);
 
-    virtual void drawRect(const  RectF& rect);
+        virtual void drawRect(const RectF& rect);
 
-    virtual void fillRect(const  RectF& rect);
+        virtual void fillRect(const RectF& rect);
 
-    virtual void drawEllipse(const PointF& topLeft, const  SizeF& size);
+        virtual void drawEllipse(const PointF& topLeft, const SizeF& size);
 
-    virtual void fillEllipse(const PointF& topLeft, const  SizeF& size);
+        virtual void fillEllipse(const PointF& topLeft, const SizeF& size);
 
-    virtual void drawPolyline(const PointF* points, const size_t pointCount);
+        virtual void drawPolyline(const PointF* points, const size_t pointCount);
 
-    virtual void fillPolygon(const PointF* points, const size_t pointCount);
+        virtual void fillPolygon(const PointF* points, const size_t pointCount);
 
-    virtual void drawImage(const  PointF& to, const Image& image);
+        virtual void drawImage(const PointF& to, const Image& image);
 
-    virtual void drawImage(const PointF& to, const Image& image, const RectF& imageRect);
+        virtual void drawImage(const PointF& to, const Image& image, const RectF& imageRect);
 
-  public:
-    static void setFontDir(const System::Path& path);
+    public:
+        static void setFontDir(const System::Path& path);
 
-    static std::string defaultFont();
+        static std::string defaultFont();
 
-    static void setDefaultFont(const std::string& name);
+        static void setDefaultFont(const std::string& name);
 
-    static std::vector<std::string> fontNames();
+        static std::vector<std::string> fontNames();
 
-    static FontMetrics fontMetrics( const Font& font, const Pt::String& text );
+        static FontMetrics fontMetrics( const Font& font, const Pt::String& text );
 
-  private:
-    Rasterizer2* _rasterizer;
-    RectF _clip;
+    private:
+        Rasterizer2* _rasterizer;
+        RectF _clip;
 };
 
-}}
+} // namespace
+
+} // namespace
 
 #endif
 

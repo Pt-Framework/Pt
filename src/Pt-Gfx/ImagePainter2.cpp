@@ -30,19 +30,14 @@
 
 #include <Pt/Math.h>
 #include <Pt/Gfx/ImagePainter2.h>
-#include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/Pen.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/Brush.h>
-#include <Pt/Gfx/Font.h>
-#include <Pt/Gfx/FontMetrics.h>
-#include <Pt/String.h>
-#include "Pt/System/Clock.h"
+
 #include "Rasterizer2.h"
 #include "FreeType.h"
 
 namespace Pt {
 namespace Gfx {
+
+typedef Rasterizer2::PointT PointT;
 
 ImagePainter2::ImagePainter2(Image& image)
 : _rasterizer( new Rasterizer2(image))
@@ -148,14 +143,14 @@ FontMetrics ImagePainter2::fontMetrics(const String& text) const
 
 void ImagePainter2::drawText( const PointF& toIn, const String& text )
 {
-    Point to((int)(toIn.x()), (int)(toIn.y()));
+    const Point to( (int)(toIn.x()), (int)(toIn.y()) );
     _rasterizer->strokeText( to, text );
 }
 
-void ImagePainter2::drawLine(const PointF& from, const  PointF& to)
+void ImagePainter2::drawLine(const PointF& from, const PointF& to)
 {
-    Point points[] = { Point((int)(from.x()), (int)(from.y())) ,  Point((int)(to.x()), (int)(to.y()))  };
-    _rasterizer->strokeOutline( points, 2);
+    const PointT points[] = { PointT( (float)(from.x()), (float)(from.y()) ) , PointT( (float)(to.x()), (float)(to.y()) ) };
+    _rasterizer->strokeOutline( points, 2 );
 }
 
 void ImagePainter2::drawRect( const  RectF& rect )
