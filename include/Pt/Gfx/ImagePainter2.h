@@ -39,6 +39,7 @@ namespace Pt {
 
 namespace Gfx {
 
+
 class Rasterizer2;
 
 class PT_GFX_API ImagePainter2 : public Painter
@@ -107,8 +108,9 @@ class PT_GFX_API ImagePainter2 : public Painter
 
     private:
         Rasterizer2* _rasterizer;
-        RectF _clip;
+        RectF        _clip;
 };
+
 
 } // namespace
 

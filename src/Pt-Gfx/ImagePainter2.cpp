@@ -37,6 +37,7 @@
 namespace Pt {
 namespace Gfx {
 
+    
 ImagePainter2::ImagePainter2(Image& image)
 : _rasterizer( new Rasterizer2(image))
 {

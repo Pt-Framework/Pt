@@ -1,6 +1,7 @@
 /*
  * Copyright (C) 2006-2007 Laurentiu-Gheorghe Crisan
  * Copyright (C) 2006-2007 Marc Boris Duerner
+ * Copyright (C) 2010 Aloysius Indrayanto
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,17 +27,19 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
-#include "ClipPolygon.h"
+#include "ClipPolygon2.h"
 #include <cassert>
 
 
 namespace Pt{
 namespace Gfx{
 
-ClipPolygon::ClipPolygon()
+    
+ClipPolygon2::ClipPolygon2()
 { }
 
-void ClipPolygon::clip( std::vector<Point>& in, const Rect& clippingArea )
+
+void ClipPolygon2::clip( std::vector<Point>& in, const Rect& clippingArea )
 {
     if( clippingArea.isNull())
     {
@@ -59,7 +62,7 @@ void ClipPolygon::clip( std::vector<Point>& in, const Rect& clippingArea )
 }
 
 
-void ClipPolygon::clipEdge( const std::vector<Point>& in, std::vector<Point>& out,
+void ClipPolygon2::clipEdge( const std::vector<Point>& in, std::vector<Point>& out,
                             Point edgePoint0, Point edgePoint1)
 {
     if( in.empty() )
@@ -98,7 +101,7 @@ void ClipPolygon::clipEdge( const std::vector<Point>& in, std::vector<Point>& ou
 }
 
 
-Point ClipPolygon::intersect( const Point& from, const Point& to, const Point& edge0, Point& edge1 )
+Point ClipPolygon2::intersect( const Point& from, const Point& to, const Point& edge0, Point& edge1 )
 {
     Point p;
 
@@ -140,33 +143,35 @@ Point ClipPolygon::intersect( const Point& from, const Point& to, const Point& e
 }
 
 
-bool ClipPolygon::inside( const Point& p, const Point& edge0, Point& edge1 )
+bool ClipPolygon2::inside( const Point& p, const Point& edge0, Point& edge1 )
 {
     if( edge0.x() == edge1.x())
-    {  //Vertical
+    {   // Vertical
         if( edge0.y() < edge1.y())
-        {//Right is inside.
-            return p.x() > edge0.x();
+        {   // Right is inside
+            return p.x() >= edge0.x();
         }
         else
-        {//Left is inside.
-            return p.x() < edge1.x();
+        {   // Left is inside
+            return p.x() <= edge1.x();
         }
     }
 
     if( edge0.y() == edge1.y() )
-    {//Horizontal
+    {  // Horizontal
         if(  edge0.x() < edge1.x() )
-        {//Top is inside.
-            return p.y() < edge0.y();
+        {   // Top is inside
+            return p.y() <= edge0.y();
         }
         else
-        {//Left is inside.
-            return p.y() > edge0.y();
+        {   // Left is inside
+            return p.y() >= edge0.y();
         }
     }
     assert( false );
     return false;
 }
 
-}}//namespace
+
+} // namespace
+} // namespace

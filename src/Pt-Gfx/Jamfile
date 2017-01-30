@@ -22,6 +22,7 @@ if $(WITH_RASTERIZER2)
 {
     PT_GFX_RASTERIZER2_FILES = ImagePainter2.cpp
                                Rasterizer2.cpp
+                               ClipPolygon2.cpp
                                ;
 }
 

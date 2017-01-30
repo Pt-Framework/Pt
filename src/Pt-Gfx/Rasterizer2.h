@@ -37,9 +37,9 @@
 #include <Pt/System/Path.h>
 
 namespace Pt {
-
 namespace Gfx {
 
+    
 class DrawText;
 class Image;
 
@@ -133,8 +133,8 @@ class Rasterizer2
         std::vector<Pt::uint8_t> _alphas;
 };
 
-} // namespace
 
+} // namespace
 } // namespace
 
 #endif

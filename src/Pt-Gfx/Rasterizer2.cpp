@@ -33,16 +33,16 @@
 #include <Pt/Gfx/Algorithm.h>
 #include <Pt/Gfx/ImagePainter2.h>
 
-#include "Rasterizer2.h"
-
-#include "ClipPolygon.h"
 #include "DrawText.h"
 
-#include <stdio.h>
+#include "Rasterizer2.h"
+#include "ClipPolygon2.h"
+
+#include <stdio.h> // Just for easy debugging ;)
 
 namespace Pt {
-
 namespace Gfx {
+
 
 // ======================================================================================
 // ===== Internal Functions =============================================================
@@ -252,8 +252,7 @@ void Rasterizer2::rasterOnePixelLine(const Point* points)
     // Clip the points
     std::vector<Point> clipped (points, points + 2);
 
-    ClipPolygon clipper;
-    clipper(clipped, _currentClip);
+    ClipPolygon2::clip(clipped, _currentClip);
 
     const Pt::int32_t fx1 = clipped[0].x();
     const Pt::int32_t fy1 = clipped[0].y();
@@ -350,5 +349,4 @@ void Rasterizer2::rasterOnePixelLine(const Point* points)
 
 
 } // namespace
-
 } // namespace
