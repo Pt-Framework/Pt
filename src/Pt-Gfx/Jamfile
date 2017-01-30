@@ -18,6 +18,13 @@ if $(FREETYPE_INCLUDES)
     SubDirHdrs $(FREETYPE_INCLUDES) ;
 }
 
+if $(WITH_RASTERIZER2)
+{
+    PT_GFX_RASTERIZER2_FILES = ImagePainter2.cpp
+                               Rasterizer2.cpp
+                               ;
+}
+
 SharedLibrary Pt-Gfx : Argb32Format.cpp
                        Brush.cpp
                        ClipPolygon.cpp
@@ -29,15 +36,14 @@ SharedLibrary Pt-Gfx : Argb32Format.cpp
                        Image.cpp
                        ImageFormat.cpp
                        ImagePainter.cpp
-                       ImagePainter2.cpp
                        JpegReader.cpp
                        Pen.cpp
                        PngReader.cpp
                        Rasterizer.cpp
-                       Rasterizer2.cpp
                        Rgb32Format.cpp
                        Rgb16Format.cpp
                        Yuv12Format.cpp
+                       $(PT_GFX_RASTERIZER2_FILES)
                        ;
 
 LinkSharedLibraries Pt-Gfx : Pt Pt-System ;

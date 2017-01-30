@@ -1,4 +1,4 @@
-// --with-hmi -sGUI=linux-fb
+// ./jam.sh configure --with-hmi -sGUI=linux-fb --with-rasterizer2
 
 #include <Pt/Gfx/ImagePainter2.h>
 
