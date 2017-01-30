@@ -66,7 +66,7 @@ int main(int argc, char* args[])
     Image image( ImageFormat::argb32(), Size(800, 600) );
 
     ImagePainter2 painter(image);
-    painter.setCompositionMode(CompositionMode::SourceOver);
+    painter.setCompositionMode(CompositionMode::SourceCopy);
 
     Brush brush( Color(1, 1, 1) );
     painter.setBrush(brush);
@@ -74,7 +74,7 @@ int main(int argc, char* args[])
     Pen pen( Color(1, 0, 0) );
     painter.setPen(pen);
 
-    painter.drawLine( PointF(0, 0), PointF(200, 200) );
+    painter.drawLine( PointF(10, 10), PointF(200, 100) );
 
     sdlPreviewRGB888Buffer(image.data(), image.width(), image.height());
 

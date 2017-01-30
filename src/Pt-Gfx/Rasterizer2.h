@@ -130,6 +130,8 @@ class Rasterizer2
 
         Rect            _clip;
         Rect            _currentClip;
+
+        std::vector<Pt::uint8_t> _alphas;
 };
 
 } // namespace

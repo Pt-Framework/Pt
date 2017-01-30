@@ -111,7 +111,7 @@ void Argb32Format::onCopy(Pixel& to, const Pixel& from, size_t length,
 void Argb32Format::onCopy(Pixel& to, const ConstPixel& from, size_t length,
                           CompositionMode mode) const
 {
-    Pt::uint8_t* dst = to.base();;
+    Pt::uint8_t* dst = to.base();
     const Pt::uint8_t* src = from.base();
 
     switch(mode)
@@ -132,31 +132,36 @@ void Argb32Format::onCopy(Pixel& to, const ConstPixel& from, size_t length,
     }
 }
 
-
-void Argb32Format::onCopy(Pixel& dst, Pt::uint8_t* alphas, size_t length,
-                          const Color& color, CompositionMode mode) const
+void Argb32Format::onCopy(Pixel& dst_, Pt::uint8_t* alphas, size_t length,
+                          const Color& color_, CompositionMode mode) const
 {
-    /*
-    Pt::uint8_t*       dst = to.base();
-    const Pt::uint8_t* src = from.base();
+    Pt::uint8_t* dst = dst_.base();
+
+    Color color = color_;
 
     switch(mode)
     {
         default:
         case CompositionMode::SourceCopy:
-            memcpy(dst, src, length * 4);
+            for(size_t i = 0; i < length; ++i)
+            {
+                color.setAlpha( Pt::uint16_t(*alphas) * 257 );
+                Argb32Model::sourceOver(dst, color);
+                ++alphas;
+                dst += 4;
+            }
             break;
 
         case CompositionMode::SourceOver:
             for(size_t i = 0; i < length; ++i)
             {
-                Argb32Model::sourceOver(dst, src);
-                src += 4;
+                color.setAlpha( ( Pt::uint32_t(color_.alpha()) * (Pt::uint32_t(*alphas) * 257) ) / 65535 );
+                Argb32Model::sourceOver(dst, color);
+                ++alphas;
                 dst += 4;
             }
             break;
     }
-    */
 }
 
 void Argb32Format::onCopy(ImageView& to, const Point& toPoint,

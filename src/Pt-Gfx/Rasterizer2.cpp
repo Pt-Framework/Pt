@@ -38,6 +38,8 @@
 #include "ClipPolygon.h"
 #include "DrawText.h"
 
+#include <stdio.h>
+
 namespace Pt {
 
 namespace Gfx {
@@ -46,47 +48,6 @@ namespace Gfx {
 // ===== Internal Functions =============================================================
 // ======================================================================================
 
-// Implementation of the Liang-Barsky line clipping algorithm
-//     Daniel White
-//     http://www.skytopia.com/project/articles/compsci/clipping.html
-// This function inputs 8 numbers, and outputs 4 new numbers plus a boolean value to say whether the clipped line is drawn at all
-static bool liangBarsky( float edgeLeft, float edgeRight, float edgeBottom, float edgeTop, // Clipping boundaries
-                         float x0src, float y0src, float x1src, float y1src,               // Original line's points
-                         float &x0clip, float &y0clip, float &x1clip, float &y1clip )      // Clipped line's points
-{
-
-    float t0 = 0.0;
-    float t1 = 1.0;
-    float xdelta = x1src - x0src;
-    float ydelta = y1src - y0src;
-    float p, q, r;
-
-    for(int edge = 0; edge < 4; ++edge) { // Traverse through left, right, bottom, top edges.
-        if (edge==0) { p = -xdelta; q = -(edgeLeft   - x0src); }
-        if (edge==1) { p =  xdelta; q =  (edgeRight  - x0src); }
-        if (edge==2) { p = -ydelta; q = -(edgeBottom - y0src); }
-        if (edge==3) { p =  ydelta; q =  (edgeTop    - y0src); }
-
-        if(p == 0 && q < 0) return false;  // Don't draw line at all (parallel line outside)
-
-        r = q / p;
-        if(p < 0) {
-                 if(r > t1) return false;  // Don't draw line at all
-            else if(r > t0) t0 = r;        // Line is clipped
-        }
-        else if(p > 0) {
-                 if(r < t0) return false;  // Don't draw line at all
-            else if(r < t1) t1 = r;        // Line is clipped
-        }
-    }
-
-    x0clip = x0src + t0 * xdelta;
-    y0clip = y0src + t0 * ydelta;
-    x1clip = x0src + t1 * xdelta;
-    y1clip = y0src + t1 * ydelta;
-
-    return true; // Clipped line can be drawn
-}
 
 // ======================================================================================
 // ===== Public Member Functions ========================================================
@@ -221,6 +182,7 @@ void Rasterizer2::strokeText( const Point& to, const Pt::String& text )
     _text->draw( *_image, _pen.color(), to, text );
 }
 
+
 void Rasterizer2::strokeOutline(const PointT* points, size_t pointCount)
 {
     switch( _pen.style() )
@@ -261,15 +223,12 @@ void Rasterizer2::updateClip()
 
 void Rasterizer2::rasterOnePixelLine( float x1_, float y1_, float x2_, float y2_ )
 {
-    float fx1, fy1, fx2, fy2;
 
-    liangBarsky(_currentClip.left(), _currentClip.right(), _currentClip.bottom(), _currentClip.top(),
-                x1_, y1_, x2_, y2_, fx1, fy1, fx2, fy2);
+    float x1 = x1_;
+    float y1 = y1_;
+    float x2 = x2_;
+    float y2 = y2_;
 
-    float x1 = fx1;
-    float y1 = fy1;
-    float x2 = fx2;
-    float y2 = fy2;
 
     float dx = (x2 - x1);
     float dy = (y2 - y1);
@@ -279,7 +238,26 @@ void Rasterizer2::rasterOnePixelLine( float x1_, float y1_, float x2_, float y2_
 
     int steps = std::min(absdx, absdy);
 
+    float ix = dx / steps;
+    float iy = dy / steps;
 
+    int sizeX = ceil(absdx + 1);
+    int sizeY = ceil(absdy + 1);
+    _alphas.resize( sizeX * sizeY );
+
+    for(int i = 0; i < steps; ++i) {
+        int pos = int(y1) * sizeX + int(x1);
+
+        x1 += ix;
+        y1 += iy;
+
+        _alphas[pos] = 255;
+    }
+
+    for(int r = 0; r < sizeY; ++r) {
+         Pixel destPixel( _image->view(), x1_, y1_ + r);
+        _image->format().copy(destPixel, _alphas.data() + r * sizeX, sizeX, _pen.color(), _compositionMode);
+    }
 }
 
 
