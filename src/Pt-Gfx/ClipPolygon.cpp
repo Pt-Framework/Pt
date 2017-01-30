@@ -147,11 +147,11 @@ bool ClipPolygon::inside( const Point& p, const Point& edge0, Point& edge1 )
     {  //Vertical
         if( edge0.y() < edge1.y())
         {//Right is inside.
-            return p.x() >= edge0.x();
+            return p.x() > edge0.x();
         }
         else
         {//Left is inside.
-            return p.x() <= edge1.x();
+            return p.x() < edge1.x();
         }
     }
 
@@ -159,11 +159,11 @@ bool ClipPolygon::inside( const Point& p, const Point& edge0, Point& edge1 )
     {//Horizontal
         if(  edge0.x() < edge1.x() )
         {//Top is inside.
-            return p.y() <= edge0.y();
+            return p.y() < edge0.y();
         }
         else
         {//Left is inside.
-            return p.y() >= edge0.y();
+            return p.y() > edge0.y();
         }
     }
     assert( false );
