@@ -106,12 +106,13 @@ class Rasterizer2
 
     protected:
         void updateClip();
+
         void initWorkBuffer(int sizeX, int sizeY);
         void blitWorkBufferToImage(int minX, int minY, int sizeX, int sizeY);
 
-        void rasterOnePixelLine(const Point* points);
+        void rasterOneLineSegment(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t chgX, Pt::int32_t chgY, Pt::int32_t steps, Pt::int32_t sizeX, Pt::int32_t sizeY);
 
-        void rasterLineSegment(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t chgX, Pt::int32_t chgY, Pt::int32_t steps, Pt::int32_t sizeX, Pt::int32_t sizeY);
+        void rasterOnePixelLine(const Point& a, const Point& b);
 
     private:
         Image*          _image;

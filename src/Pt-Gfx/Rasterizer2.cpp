@@ -47,6 +47,91 @@ namespace Gfx {
 // ===== Internal Functions =============================================================
 // ======================================================================================
 
+// Cohen–Sutherland clipping algorithm outcode
+typedef int CSOutcode;
+
+static const int CS_Inside = 0; // 0000
+static const int CS_Left   = 1; // 0001
+static const int CS_Right  = 2; // 0010
+static const int CS_Bottom = 4; // 0100
+static const int CS_Top    = 8; // 1000
+
+// Compute the bit code for a point (x, y) using the clip rectangle bounded diagonally by (xmin, ymin), and (xmax, ymax)
+static CSOutcode csComputeOutcode(Pt::int32_t x, Pt::int32_t y, Pt::int32_t xmin, Pt::int32_t ymin, Pt::int32_t xmax, Pt::int32_t ymax)
+{
+    CSOutcode code = CS_Inside; // Initialised as being inside of the clip region
+
+         if(x < xmin) code |= CS_Left;   // to the left of clip region
+    else if(x > xmax) code |= CS_Right;  // to the right of clip region
+
+         if(y < ymin) code |= CS_Top;    // above the clip region
+    else if(y > ymax) code |= CS_Bottom; // below the clip region
+
+    return code;
+}
+
+// Cohen–Sutherland clipping algorithm clips a line from (x0, y0) to (x1, y1)
+// against a rectangle with defined by (xmin, ymin) and (xmax, ymax)
+// https://en.wikipedia.org/wiki/Cohen–Sutherland_algorithm
+static bool csClipLine(
+    Pt::int32_t& x0,   Pt::int32_t& y0,   Pt::int32_t& x1,   Pt::int32_t& y1,
+    Pt::int32_t  xmin, Pt::int32_t  ymin, Pt::int32_t  xmax, Pt::int32_t  ymax
+)
+{
+    // Compute outcodes for P0, P1, and whatever point lies outside the clip rectangle
+    CSOutcode outcode0 = csComputeOutcode(x0, y0, xmin, ymin, xmax, ymax);
+    CSOutcode outcode1 = csComputeOutcode(x1, y1, xmin, ymin, xmax, ymax);
+
+    bool accept = false;
+
+    while(true) {
+        if(!(outcode0 | outcode1)) { // Both points are inside the clip region
+            accept = true;
+            break;
+        }
+        else if (outcode0 & outcode1) { // Both points are outside the clip region
+            break;
+        }
+        else {
+            // Calculate the line segment to clip from an outside point to an intersection with clip edge
+            Pt::int32_t x, y;
+            // At least one endpoint is outside the clip rectangle
+            CSOutcode outcodeOut = outcode0 ? outcode0 : outcode1;
+            // Now find the intersection point:
+            // use formulas y = y0 + slope * (x - x0), x = x0 + (1 / slope) * (y - y0)
+            if (outcodeOut & CS_Top) { // Point is above the clip rectangle
+                x = x0 + (x1 - x0) * (ymin - y0) / (y1 - y0);
+                y = ymin;
+            }
+            else if (outcodeOut & CS_Bottom) { // Point is below the clip rectangle
+                x = x0 + (x1 - x0) * (ymax - y0) / (y1 - y0);
+                y = ymax;
+            }
+            else if (outcodeOut & CS_Right) { // Point is to the right of clip rectangle
+                y = y0 + (y1 - y0) * (xmax - x0) / (x1 - x0);
+                x = xmax;
+            }
+            else if (outcodeOut & CS_Left) { // Point is to the left of clip rectangle
+                y = y0 + (y1 - y0) * (xmin - x0) / (x1 - x0);
+                x = xmin;
+            }
+            // Now we move outside point to intersection point to clip and get ready for next pass
+            if (outcodeOut == outcode0) {
+                x0 = x;
+                y0 = y;
+                outcode0 = csComputeOutcode(x0, y0, xmin, ymin, xmax, ymax);
+            }
+            else {
+                x1 = x;
+                y1 = y;
+                outcode1 = csComputeOutcode(x1, y1, xmin, ymin, xmax, ymax);
+            }
+        }
+    }
+
+    return accept;
+}
+
 
 // ======================================================================================
 // ===== Public Member Functions ========================================================
@@ -65,9 +150,7 @@ Rasterizer2::Rasterizer2(Image& image)
 }
 
 Rasterizer2::~Rasterizer2()
-{
-    delete _text;
-}
+{ delete _text; }
 
 void Rasterizer2::setImage( Image& image )
 {
@@ -77,9 +160,7 @@ void Rasterizer2::setImage( Image& image )
 }
 
 const ImageFormat& Rasterizer2::format() const
-{
-    return _image->format();
-}
+{ return _image->format(); }
 
 void Rasterizer2::setPen( const Pen& pen )
 {
@@ -104,14 +185,12 @@ void Rasterizer2::setBrush( const Brush& brush )
             break;
 
         case Brush::Texture:
-            if( brush.texture().format() != _image->format() )
-            {
+            if( brush.texture().format() != _image->format() ) {
                 _brushBuffer.reset( _image->format(), brush.texture().size() );
                 Gfx::copy( brush.texture().begin(), brush.texture().end(), _brushBuffer.begin() );
                 _brushImage = &_brushBuffer;
             }
-            else
-            {
+            else {
                 _brushImage = &_brush.texture();
             }
             break;
@@ -183,11 +262,10 @@ void Rasterizer2::strokeText( const Point& to, const Pt::String& text )
 
 void Rasterizer2::strokeOutline(const Point* points, size_t pointCount)
 {
-    switch( _pen.style() )
-    {
+    switch( _pen.style() ) {
         case Pen::Solid:
             if( _pen.size() == 1 && pointCount == 2 ) {
-                rasterOnePixelLine(points);
+                rasterOnePixelLine(points[0], points[1]);
             }
             break;
 
@@ -197,33 +275,28 @@ void Rasterizer2::strokeOutline(const Point* points, size_t pointCount)
     }
 }
 
+
 // ======================================================================================
 // ===== Protected Member Functions =====================================================
 // ======================================================================================
 
 #define FIXED_POINT_USE_16_16_FORMAT
 
+// Use 16.16 format
 #if defined(FIXED_POINT_USE_16_16_FORMAT)
-
-/* Use 16.16 format */
-#define FIXED_POINT_SHIFT_FACTOR 16         // Shift factor
-#define FIXED_POINT_ALPHA_DIVFAC 257        // Must be ( (2 ^ FIXED_POINT_SHIFT_FACTOR - 1) / 255 )
-#define FIXED_POINT_FRACT_VAL_BM 0x0000FFFF // Bit mask for the fractional value; must be (2 ^ FIXED_POINT_SHIFT_FACTOR - 1)
-
+    #define FIXED_POINT_SHIFT_FACTOR 16         // Shift factor
+    #define FIXED_POINT_ALPHA_DIVFAC 257        // Must be ( (2 ^ FIXED_POINT_SHIFT_FACTOR - 1) / 255 )
+    #define FIXED_POINT_FRACT_VAL_BM 0x0000FFFF // Bit mask for the fractional value; must be (2 ^ FIXED_POINT_SHIFT_FACTOR - 1)
+// Use 24.8 format
 #elif defined(FIXED_POINT_USE_24_8_FORMAT)
-
-/* Use 24.8 format */
-#define FIXED_POINT_SHIFT_FACTOR 8          // Shift factor
-#define FIXED_POINT_ALPHA_MULFAC 1          // Must be ( 255 / (2 ^ FIXED_POINT_SHIFT_FACTOR - 1) )
-#define FIXED_POINT_FRACT_VAL_BM 0x000000FF // Bit mask for the fractional value; must be (2 ^ FIXED_POINT_SHIFT_FACTOR - 1)
-
+    #define FIXED_POINT_SHIFT_FACTOR 8          // Shift factor
+    #define FIXED_POINT_ALPHA_MULFAC 1          // Must be ( 255 / (2 ^ FIXED_POINT_SHIFT_FACTOR - 1) )
+    #define FIXED_POINT_FRACT_VAL_BM 0x000000FF // Bit mask for the fractional value; must be (2 ^ FIXED_POINT_SHIFT_FACTOR - 1)
+// Use 28.4 format
 #else
-
-/* Use 28.4 format */
-#define FIXED_POINT_SHIFT_FACTOR 4          // Shift factor
-#define FIXED_POINT_ALPHA_MULFAC 17         // Must be ( 255 / (2 ^ FIXED_POINT_SHIFT_FACTOR - 1) )
-#define FIXED_POINT_FRACT_VAL_BM 0x0000000F // Bit mask for the fractional value; must be (2 ^ FIXED_POINT_SHIFT_FACTOR - 1)
-
+    #define FIXED_POINT_SHIFT_FACTOR 4          // Shift factor
+    #define FIXED_POINT_ALPHA_MULFAC 17         // Must be ( 255 / (2 ^ FIXED_POINT_SHIFT_FACTOR - 1) )
+    #define FIXED_POINT_FRACT_VAL_BM 0x0000000F // Bit mask for the fractional value; must be (2 ^ FIXED_POINT_SHIFT_FACTOR - 1)
 #endif
 
 void Rasterizer2::updateClip()
@@ -231,9 +304,8 @@ void Rasterizer2::updateClip()
     Rect imageRect( Point(0,0) , _image->size() );
     _currentClip = _clip.isNull() ? imageRect : _clip.intersect( imageRect );
 
-    // Resize the work buffer to match the size of the clip
+    // Resize the work buffer to match the size of the clip region
     _alphas.resize(_currentClip.width() * _currentClip.height());
-    //_alphas.resize(_image->width() * _image->height());
 }
 
 void Rasterizer2::initWorkBuffer(int sizeX, int sizeY)
@@ -249,103 +321,49 @@ void Rasterizer2::blitWorkBufferToImage(int minX, int minY, int sizeX, int sizeY
     }
 }
 
-typedef int OutCode;
-
-const int INSIDE = 0; // 0000
-const int LEFT = 1;   // 0001
-const int RIGHT = 2;  // 0010
-const int BOTTOM = 4; // 0100
-const int TOP = 8;    // 1000
-
-// Compute the bit code for a point (x, y) using the clip rectangle
-// bounded diagonally by (xmin, ymin), and (xmax, ymax)
-
-// ASSUME THAT xmax, xmin, ymax and ymin are global constants.
-
-OutCode ComputeOutCode(Pt::int32_t x, Pt::int32_t y, Pt::int32_t xmin, Pt::int32_t ymin, Pt::int32_t xmax, Pt::int32_t ymax)
+void Rasterizer2::rasterOneLineSegment(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t chgX, Pt::int32_t chgY, Pt::int32_t steps, Pt::int32_t sizeX, Pt::int32_t sizeY)
 {
-    OutCode code;
-
-    code = INSIDE;          // initialised as being inside of [[clip window]]
-
-    if (x < xmin)           // to the left of clip window
-        code |= LEFT;
-    else if (x > xmax)      // to the right of clip window
-        code |= RIGHT;
-    if (y < ymin)           // above the clip window
-        code |= TOP;
-    else if (y > ymax)      // below the clip window
-        code |= BOTTOM;
-
-    return code;
-}
-
-// Cohen–Sutherland clipping algorithm clips a line from
-// P0 = (x0, y0) to P1 = (x1, y1) against a rectangle with
-// diagonal from (xmin, ymin) to (xmax, ymax).
-bool CohenSutherlandLineClipAndDraw(Pt::int32_t& x0, Pt::int32_t& y0, Pt::int32_t& x1, Pt::int32_t& y1, Pt::int32_t xmin, Pt::int32_t ymin, Pt::int32_t xmax, Pt::int32_t ymax)
-{
-    // compute outcodes for P0, P1, and whatever point lies outside the clip rectangle
-    OutCode outcode0 = ComputeOutCode(x0, y0, xmin, ymin, xmax, ymax);
-    OutCode outcode1 = ComputeOutCode(x1, y1, xmin, ymin, xmax, ymax);
-    bool accept = false;
-
-    while (true) {
-        if (!(outcode0 | outcode1)) { // Bitwise OR is 0. Trivially accept and get out of loop
-            accept = true;
-            break;
-        } else if (outcode0 & outcode1) { // Bitwise AND is not 0. (implies both end points are in the same region outside the window). Reject and get out of loop
-            break;
-        } else {
-            // failed both tests, so calculate the line segment to clip
-            // from an outside point to an intersection with clip edge
-            Pt::int32_t x, y;
-
-            // At least one endpoint is outside the clip rectangle; pick it.
-            OutCode outcodeOut = outcode0 ? outcode0 : outcode1;
-
-            // Now find the intersection point;
-            // use formulas y = y0 + slope * (x - x0), x = x0 + (1 / slope) * (y - y0)
-            if (outcodeOut & TOP) {           // point is above the clip rectangle
-                x = x0 + (x1 - x0) * (ymin - y0) / (y1 - y0);
-                y = ymin;
-            } else if (outcodeOut & BOTTOM) { // point is below the clip rectangle
-                x = x0 + (x1 - x0) * (ymax - y0) / (y1 - y0);
-                y = ymax;
-            } else if (outcodeOut & RIGHT) {  // point is to the right of clip rectangle
-                y = y0 + (y1 - y0) * (xmax - x0) / (x1 - x0);
-                x = xmax;
-            } else if (outcodeOut & LEFT) {   // point is to the left of clip rectangle
-                y = y0 + (y1 - y0) * (xmin - x0) / (x1 - x0);
-                x = xmin;
-            }
-
-            // Now we move outside point to intersection point to clip
-            // and get ready for next pass.
-            if (outcodeOut == outcode0) {
-                x0 = x;
-                y0 = y;
-                outcode0 = ComputeOutCode(x0, y0, xmin, ymin, xmax, ymax);
-            } else {
-                x1 = x;
-                y1 = y;
-                outcode1 = ComputeOutCode(x1, y1, xmin, ymin, xmax, ymax);
-            }
-        }
+    // Draw the line
+    for(int i = 0; i <= steps; ++i) {
+        // Calculate the alpha factors (1 - 256) of the block
+#ifdef FIXED_POINT_ALPHA_DIVFAC
+        Pt::int32_t frx = (x1 & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC + 1;
+        Pt::int32_t fry = (y1 & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC + 1;
+#else
+        Pt::int32_t frx = (x1 & FIXED_POINT_FRACT_VAL_BM) * FIXED_POINT_ALPHA_MULFAC + 1;
+        Pt::int32_t fry = (y1 & FIXED_POINT_FRACT_VAL_BM) * FIXED_POINT_ALPHA_MULFAC + 1;
+#endif
+        Pt::int32_t flx = 256 - frx;
+        Pt::int32_t fly = 256 - fry;
+        // Calculate the top-left coordinate of the block
+        Pt::int32_t lx = x1 >> FIXED_POINT_SHIFT_FACTOR;
+        Pt::int32_t ly = y1 >> FIXED_POINT_SHIFT_FACTOR;
+        // Calculate the bottom-right coordinate of the block
+        Pt::int32_t rx = frx ? (lx + 1) : lx;
+        Pt::int32_t ry = fry ? (ly + 1) : ly;
+        // Draw the block
+                                       _alphas[ly * sizeX + lx] += (fly * flx) >> 8;
+        if( rx < sizeX               ) _alphas[ly * sizeX + rx] += (fly * frx) >> 8;
+        if(               ry < sizeY ) _alphas[ry * sizeX + lx] += (fry * flx) >> 8;
+        if( rx < sizeX && ry < sizeY ) _alphas[ry * sizeX + rx] += (fry * frx) >> 8;
+        // Increment the drawing coordinate
+        x1 += chgX;
+        y1 += chgY;
     }
-
-    return accept;
 }
 
-void Rasterizer2::rasterOnePixelLine(const Point* points)
+void Rasterizer2::rasterOnePixelLine(const Point& a, const Point& b)
 {
     // Clip the points
-    Pt::int32_t fx1 = points[0].x();
-    Pt::int32_t fy1 = points[0].y();
-    Pt::int32_t fx2 = points[1].x();
-    Pt::int32_t fy2 = points[1].y();
+    Pt::int32_t fx1 = a.x();
+    Pt::int32_t fy1 = a.y();
+    Pt::int32_t fx2 = b.x();
+    Pt::int32_t fy2 = b.y();
 
-    if(!CohenSutherlandLineClipAndDraw(fx1, fy1, fx2, fy2, _currentClip.left(), _currentClip.top(), _currentClip.right(), _currentClip.bottom())) return;
+    if(!csClipLine(
+        fx1, fy1, fx2, fy2,
+        _currentClip.left(), _currentClip.top(), _currentClip.right(), _currentClip.bottom())
+    ) return;
 
     // Find the minimum and maximum coordinates
     Pt::int32_t minX, minY, maxX, maxY;
@@ -405,41 +423,10 @@ void Rasterizer2::rasterOnePixelLine(const Point* points)
     initWorkBuffer(sizeX, sizeY);
 
     // Draw the line
-    rasterLineSegment(x1, y1, chgX, chgY, steps, sizeX, sizeY);
+    rasterOneLineSegment(x1, y1, chgX, chgY, steps, sizeX, sizeY);
 
     // Blit the work buffer to the image
     blitWorkBufferToImage(minX, minY, sizeX, sizeY);
-}
-
-void Rasterizer2::rasterLineSegment(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t chgX, Pt::int32_t chgY, Pt::int32_t steps, Pt::int32_t sizeX, Pt::int32_t sizeY)
-{
-    // Draw the line
-    for(int i = 0; i <= steps; ++i) {
-        // Calculate the alpha factors (1 - 256) of the block
-#ifdef FIXED_POINT_ALPHA_DIVFAC
-        Pt::int32_t frx = (x1 & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC + 1;
-        Pt::int32_t fry = (y1 & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC + 1;
-#else
-        Pt::int32_t frx = (x1 & FIXED_POINT_FRACT_VAL_BM) * FIXED_POINT_ALPHA_MULFAC + 1;
-        Pt::int32_t fry = (y1 & FIXED_POINT_FRACT_VAL_BM) * FIXED_POINT_ALPHA_MULFAC + 1;
-#endif
-        Pt::int32_t flx = 256 - frx;
-        Pt::int32_t fly = 256 - fry;
-        // Calculate the top-left coordinate of the block
-        Pt::int32_t lx = x1 >> FIXED_POINT_SHIFT_FACTOR;
-        Pt::int32_t ly = y1 >> FIXED_POINT_SHIFT_FACTOR;
-        // Calculate the bottom-right coordinate of the block
-        Pt::int32_t rx = frx ? (lx + 1) : lx;
-        Pt::int32_t ry = fry ? (ly + 1) : ly;
-        // Draw the block
-                                       _alphas[ly * sizeX + lx] += (fly * flx) >> 8;
-        if( rx < sizeX               ) _alphas[ly * sizeX + rx] += (fly * frx) >> 8;
-        if(               ry < sizeY ) _alphas[ry * sizeX + lx] += (fry * flx) >> 8;
-        if( rx < sizeX && ry < sizeY ) _alphas[ry * sizeX + rx] += (fry * frx) >> 8;
-        // Increment the drawing coordinate
-        x1 += chgX;
-        y1 += chgY;
-    }
 }
 
 
