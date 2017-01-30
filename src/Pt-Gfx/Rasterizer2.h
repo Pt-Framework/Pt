@@ -109,6 +109,8 @@ class Rasterizer2
 
     protected:
         void updateClip();
+        void initWorkBuffer(int sizeX, int sizeY);
+        void blitWorkBufferToImage(int minX, int minY, int sizeX, int sizeY);
 
         void rasterOnePixelLine( float x1, float y1, float x2, float y2 );
 

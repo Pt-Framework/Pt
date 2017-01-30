@@ -215,14 +215,40 @@ void Rasterizer2::strokeOutline(const PointT* points, size_t pointCount)
 // ===== Protected Member Functions =====================================================
 // ======================================================================================
 
-#define FIXED_POINT_AA_SHIFT_FACTOR 8
-#define FIXED_POINT_AA_ALPHA_OPAQUE 255
-#define FIXED_POINT_FRACTIONAL_MASK 0x000000FF
+#if 1
+
+/* Use 24.8 format */
+#define FIXED_POINT_SHIFT_FACTOR 8          // Shift factor
+#define FIXED_POINT_ALPHA_MULFAC 1          // Must be ( 255 / (2 ^ FIXED_POINT_SHIFT_FACTOR - 1) )
+#define FIXED_POINT_FRACT_VAL_BM 0x000000FF // Bit mask for the fractional value; must be (2 ^ FIXED_POINT_SHIFT_FACTOR - 1)
+
+#else
+
+/* Use 28.4 format */
+#define FIXED_POINT_SHIFT_FACTOR 4          // Shift factor
+#define FIXED_POINT_ALPHA_MULFAC 17         // Must be ( 255 / (2 ^ FIXED_POINT_SHIFT_FACTOR - 1) )
+#define FIXED_POINT_FRACT_VAL_BM 0x0000000F // Bit mask for the fractional value; must be (2 ^ FIXED_POINT_SHIFT_FACTOR - 1)
+
+#endif
 
 void Rasterizer2::updateClip()
 {
     Rect imageRect( Point(0,0) , _image->size() );
     _currentClip = _clip.isNull() ? imageRect : _clip.intersect( imageRect );
+}
+
+void Rasterizer2::initWorkBuffer(int sizeX, int sizeY)
+{
+    _alphas.resize(sizeX * sizeY);
+    memset(&_alphas[0], 0, _alphas.size());
+}
+
+void Rasterizer2::blitWorkBufferToImage(int minX, int minY, int sizeX, int sizeY)
+{
+    for(int r = 0; r < sizeY; ++r) {
+        Pixel destPixel( _image->view(), minX, minY + r);
+        _image->format().copy(destPixel, _alphas.data() + r * sizeX, sizeX, _pen.color(), _compositionMode);
+    }
 }
 
 void Rasterizer2::rasterOnePixelLine( float x1_, float y1_, float x2_, float y2_ )
@@ -259,10 +285,6 @@ void Rasterizer2::rasterOnePixelLine( float x1_, float y1_, float x2_, float y2_
     Pt::int32_t sizeX = maxX - minX + 1;
     Pt::int32_t sizeY = maxY - minY + 1;
 
-    // Initialize the work buffer
-    _alphas.resize(sizeX * sizeY);
-    memset(&_alphas[0], 0, _alphas.size());
-
     // Caculate the number of steps
     Pt::int32_t steps = std::max(sizeX, sizeY) - 1;
 
@@ -271,19 +293,19 @@ void Rasterizer2::rasterOnePixelLine( float x1_, float y1_, float x2_, float y2_
 
     if(fx2 > fx1) {
         x1 = 0;
-        x2 = (maxX - minX) << FIXED_POINT_AA_SHIFT_FACTOR;
+        x2 = (maxX - minX) << FIXED_POINT_SHIFT_FACTOR;
     }
     else {
-        x1 = (maxX - minX) << FIXED_POINT_AA_SHIFT_FACTOR;
+        x1 = (maxX - minX) << FIXED_POINT_SHIFT_FACTOR;
         x2 = 0;
     }
 
     if(fy2 > fy1) {
         y1 = 0;
-        y2 = (maxY - minY) << FIXED_POINT_AA_SHIFT_FACTOR;
+        y2 = (maxY - minY) << FIXED_POINT_SHIFT_FACTOR;
     }
     else {
-        y1 = (maxY - minY) << FIXED_POINT_AA_SHIFT_FACTOR;
+        y1 = (maxY - minY) << FIXED_POINT_SHIFT_FACTOR;
         y2 = 0;
     }
 
@@ -291,34 +313,34 @@ void Rasterizer2::rasterOnePixelLine( float x1_, float y1_, float x2_, float y2_
     Pt::int32_t ix = (x2 - x1) / steps;
     Pt::int32_t iy = (y2 - y1) / steps;
 
+    // Initialize the work buffer
+    initWorkBuffer(sizeX, sizeY);
+
     // Draw the line
     for(int i = 0; i <= steps; ++i) {
-        // Calculate the alpha factors of the block
-        Pt::int32_t frx = x1 & FIXED_POINT_FRACTIONAL_MASK;
-        Pt::int32_t fry = y1 & FIXED_POINT_FRACTIONAL_MASK;
-        Pt::int32_t flx = FIXED_POINT_AA_ALPHA_OPAQUE - frx;
-        Pt::int32_t fly = FIXED_POINT_AA_ALPHA_OPAQUE - fry;
+        // Calculate the alpha factors (1 - 256) of the block
+        Pt::int32_t frx = (x1 & FIXED_POINT_FRACT_VAL_BM) * FIXED_POINT_ALPHA_MULFAC + 1;
+        Pt::int32_t fry = (y1 & FIXED_POINT_FRACT_VAL_BM) * FIXED_POINT_ALPHA_MULFAC + 1;
+        Pt::int32_t flx = 256 - frx;
+        Pt::int32_t fly = 256 - fry;
         // Calculate the top-left coordinate of the block
-        Pt::int32_t lx = x1 >> FIXED_POINT_AA_SHIFT_FACTOR;
-        Pt::int32_t ly = y1 >> FIXED_POINT_AA_SHIFT_FACTOR;
+        Pt::int32_t lx = x1 >> FIXED_POINT_SHIFT_FACTOR;
+        Pt::int32_t ly = y1 >> FIXED_POINT_SHIFT_FACTOR;
         // Calculate the bottom-right coordinate of the block
         Pt::int32_t rx = frx ? (lx + 1) : lx;
         Pt::int32_t ry = fry ? (ly + 1) : ly;
         // Draw the block
-                                       _alphas[ly * sizeX + lx] += (fly * flx) / FIXED_POINT_AA_ALPHA_OPAQUE;
-        if( rx < sizeX               ) _alphas[ly * sizeX + rx] += (fly * frx) / FIXED_POINT_AA_ALPHA_OPAQUE;
-        if(               ry < sizeY ) _alphas[ry * sizeX + lx] += (fry * flx) / FIXED_POINT_AA_ALPHA_OPAQUE;
-        if( rx < sizeX && ry < sizeY ) _alphas[ry * sizeX + rx] += (fry * frx) / FIXED_POINT_AA_ALPHA_OPAQUE;
+                                       _alphas[ly * sizeX + lx] += (fly * flx) >> 8;
+        if( rx < sizeX               ) _alphas[ly * sizeX + rx] += (fly * frx) >> 8;
+        if(               ry < sizeY ) _alphas[ry * sizeX + lx] += (fry * flx) >> 8;
+        if( rx < sizeX && ry < sizeY ) _alphas[ry * sizeX + rx] += (fry * frx) >> 8;
         // Increment the drawing coordinate
         x1 += ix;
         y1 += iy;
     }
 
-    // Blit the draw buffer to the image
-    for(int r = 0; r < sizeY; ++r) {
-        Pixel destPixel( _image->view(), minX, minY + r);
-        _image->format().copy(destPixel, _alphas.data() + r * sizeX, sizeX, _pen.color(), _compositionMode);
-    }
+    // Blit the work buffer to the image
+    blitWorkBufferToImage(minX, minY, sizeX, sizeY);
 }
 
 
