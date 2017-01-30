@@ -1,12 +1,6 @@
 // --with-hmi -sGUI=linux-fb
 
-#include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/ImagePainter2.h>
-#include <Pt/Gfx/Brush.h>
-#include <Pt/Gfx/Point.h>
-#include <Pt/Gfx/BlockScale.h>
-#include <Pt/System/Logger.h>
-#include <Pt/System/Clock.h>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>

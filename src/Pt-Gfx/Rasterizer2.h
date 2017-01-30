@@ -54,7 +54,6 @@ class Rasterizer2
 
     ~Rasterizer2();
 
-
     void setImage(Image& image);
 
     const ImageFormat& format() const;
@@ -63,39 +62,38 @@ class Rasterizer2
 
     const Pen& pen() const
     {
-      return _pen;
+        return _pen;
     }
 
     void setBrush( const Brush& brush );
 
     const Brush& brush() const
     {
-      return _brush;
+        return _brush;
     }
 
     void setClip( const Rect& clip );
 
     const Rect& clip() const
     {
-      return _clip;
+        return _clip;
     }
-
 
     void setFont( const Font& font );
 
     const Font& font() const
     {
-      return _font;
+        return _font;
     }
 
     void setCompositionMode(const CompositionMode& mode)
     {
-      _compositionMode = mode;
+        _compositionMode = mode;
     }
 
     const CompositionMode& compositionMode() const
     {
-      return _compositionMode;
+        return _compositionMode;
     }
 
     void image( const Point& to, const Image& image);
@@ -124,54 +122,15 @@ class Rasterizer2
 
   //Output algo.
   protected:
-    void outputSpan( const Point& topLeft, int x, int y, int width );
-    void fill( const Point& origin, const Point& pos, int length );
-    void fillSolid( const Point& pos,  int length );
-    void fillVerticalGradient( const Point& origin, const Point& pos,  int length );
-    void fillHorizontalGradient( const Point& origin, const Point& pos,  int length );
-    void fillTexture( const Point& origin, const Point& pos,  int length );
-    void createGradientTexture(Image& img, int width, int height,Pt::Gfx::Color gradientStart,  Pt::Gfx::Color gradientStop,  Pt::Gfx::Brush::FillStyle style);
     void clipSpan( int& x, int& y, int& length );
     void updateClip();
-    void outputEdges(const ActiveEdgeTable& edges, const Point&  origin, int scalLine);
 
   //Thin polyline algo.
   protected:
     enum { xAxis, yAxis };
     void drawThinSolidPolyline( const Point* points, int pointCount );
-    void drawThinDashPolyline( const Point* points, int pointCount);
-    void stepDash( int dist, int* pDashNum, int* pDashIndex, const int* pDash, int numInDashList, int *pDashOffset );
-    void bresenhamDasheLineSegment(int *pdashNum, int *pdashIndex, const  int *pDash, int numInDashList, int *pdashOffset, bool isDoubleDash, int signdx, int signdy, int axis, int x1, int y1, int e, int e1, int e2, int len);
     void bresenhamLineSegment( int signdx, int signdy, int axis, int x1, int y1, int e, int e1, int e2, int len );
 
-  //Wide polyline base algo.
-  protected:
-    int polyBuildPoly( const Point *vertices, const LineSlope *slopes, int count, int xi, int yi, LineEdge *left, LineEdge *right, int *pnleft, int *pnright, int *h );
-    int buildLineEdge( double x0, double y0, double k, int dx, int dy, int xi, int yi, bool left, LineEdge *edge);
-    void fillSpans(int x, int y,  int w,  int h );
-    void fillLine(int y,  int overall_height, LineEdge *left, LineEdge *right, int left_count, int right_count );
-    void lineArc( LineFace *leftFace, LineFace *rightFace, double xorg, double yorg, bool isInt );
-    void roundJoinClip( LineFace *pLeft, LineFace *pRight, LineEdge *edge1, LineEdge *edge2, int *y1, int *y2, bool *left1, bool *left2 );
-    int roundCapClip( const LineFace *face, bool isInt, LineEdge *edge, bool *leftEdge );
-    int lineArcI( int xorg, int yorg, std::vector<Point>& points, std::vector<int>& widths);
-    int lineArcD( double xorg, double yorg, std::vector<Point>& points, std::vector<int>& widths, LineEdge *edge1, int edgey1, bool edgeleft1, LineEdge *edge2, int edgey2, bool edgeleft2);
-    int roundJoinFace( const LineFace *face, LineEdge *edge, bool *leftEdge );
-    void lineJoin(LineFace *pLeft, LineFace *pRight );
-    void lineProjectingCap(const LineFace *face, bool isLeft, bool isInt );
-    void clipStepEdge( int ybase, int& xcl, int& xcr, int& edgey,  LineEdge* edge, bool edgeleft );
-
-  //Wide solid polyline algo.
-  protected:
-    void drawWideSolidPolyline( const Point* points, int pointCount );
-    void drawSegment( Point from, Point to, bool projectLeft, bool projectRight, LineFace* leftFace, LineFace* rightFace );
-
-  //Wide dashed polyline algo.
-  protected:
-    enum { V_TOP =  0, V_RIGHT = 1, V_BOTTOM = 2, V_LEFT = 3 };
-
-    void drawWideDashPolyline( const Point* points, int pointCount );
-
-    void dashSegment( int *pDashNum, int *pDashIndex, int *pDashOffset, int x1, int y1, int x2, int y2, bool projectLeft, bool projectRight, LineFace *leftFace, LineFace *rightFace,  int* dash );
 
   private:
     void stroke(int x, int y);

@@ -49,90 +49,107 @@ ImagePainter2::ImagePainter2(Image& image)
 {
 }
 
-
 ImagePainter2::~ImagePainter2()
 {
-  delete _rasterizer;
+    delete _rasterizer;
 }
 
+FontMetrics ImagePainter2::fontMetrics( const Font& font, const Pt::String& text )
+{
+    return Rasterizer2::fontMetrics( font, text );
+}
+
+void ImagePainter2::setFontDir(const Pt::System::Path& path)
+{
+     FreeType::instance().setFontDir(path);
+}
+
+std::string ImagePainter2::defaultFont()
+{
+    return  FreeType::instance().defaultFont();
+}
+
+void ImagePainter2::setDefaultFont(const std::string& f)
+{
+     FreeType::instance().setDefaultFont(f);
+}
+
+std::vector<std::string> ImagePainter2::fontNames()
+{
+      return FreeType::instance().fontNames();
+}
 
 void ImagePainter2::setImage(Image& image)
 {
     _rasterizer->setImage(image);
 }
 
-
 const ImageFormat& ImagePainter2::format() const
 {
     return _rasterizer->format();
 }
 
-
 const CompositionMode& ImagePainter2::compositionMode() const
 {
-  return _rasterizer->compositionMode();
+    return _rasterizer->compositionMode();
 }
-
 
 void ImagePainter2::setCompositionMode(const CompositionMode& mode)
 {
   _rasterizer->setCompositionMode(mode);
 }
 
-
 const Gfx::RectF& ImagePainter2::clip() const
 {
-  return _clip;
+    return _clip;
 }
-
 
 void ImagePainter2::setClip( const RectF& clipIn )
 {
-   Rect  clip( Point( (int)(clipIn.x()), (int)(clipIn.y())), Size((int) (clipIn.width()),(int) (clipIn.height())));
-  _rasterizer->setClip( clip );
-  _clip = clipIn;
+     Rect clip( Point( (int)(clipIn.x()), (int)(clipIn.y())), Size((int) (clipIn.width()),(int) (clipIn.height())));
+    _rasterizer->setClip( clip );
+    _clip = clipIn;
 }
-
 
 void ImagePainter2::setPen( const Pen& pen )
 {
-  _rasterizer->setPen( pen ) ;
+    _rasterizer->setPen( pen ) ;
 }
-
 
 const Pen& ImagePainter2::pen() const
 {
     return _rasterizer->pen();
 }
 
-
 void ImagePainter2::setBrush(const Brush& brush)
 {
-  _rasterizer->setBrush( brush);
+    _rasterizer->setBrush( brush);
 }
-
 
 const Brush& ImagePainter2::brush() const
 {
     return _rasterizer->brush();
 }
 
-
 void ImagePainter2::setFont(const Font& font)
 {
     _rasterizer->setFont( font );
 }
-
 
 const Font& ImagePainter2::font() const
 {
     return _rasterizer->font();
 }
 
-
 FontMetrics ImagePainter2::fontMetrics(const String& text) const
 {
     return _rasterizer->fontMetrics( text );
+}
+
+void ImagePainter2::drawText( const PointF& toIn, const String& text )
+{
+    Point to((int)(toIn.x()), (int)(toIn.y()));
+    _rasterizer->strokeText( to, text );
 }
 
 
@@ -142,115 +159,38 @@ void ImagePainter2::drawLine(const PointF& from, const  PointF& to)
     _rasterizer->stroke( points, 2);
 }
 
-
-void ImagePainter2::drawText( const PointF& toIn, const String& text )
-{
-  Point to((int)(toIn.x()), (int)(toIn.y()));
-  _rasterizer->strokeText( to, text );
-}
-
-
 void ImagePainter2::drawRect( const  RectF& rect )
 {
-    Point points[5] = { Point(rect.topLeft().x(),rect.topLeft().y()) ,
-                        Point(rect.topRight().x(),rect.topRight().y()) ,
-                        Point(rect.bottomRight().x(),rect.bottomRight().y()) ,
-                        Point(rect.bottomLeft().x(),rect.bottomLeft().y()) ,
-                        Point(rect.topLeft().x(),rect.topLeft().y()),
-                        };
-    _rasterizer->stroke( points, 5);
 }
-
 
 void ImagePainter2::fillRect( const  RectF& rIn )
 {
-    Rect r( Point( (int)(rIn.x()), (int)(rIn.y()) ), Size((int) (rIn.width()), (int)(rIn.height())));
-    _rasterizer->fillRect(r);
 }
-
 
 void ImagePainter2::drawEllipse( const PointF& topLeftIn, const  SizeF& sizeIn )
 {
-    Point topLeft((int)(topLeftIn.x()), (int)(topLeftIn.y()));
-    Size size((int)(sizeIn.width()), (int)(sizeIn.height()) );
-
-  _rasterizer->strokeEllipse( topLeft, size );
 }
-
 
 void ImagePainter2::fillEllipse( const PointF& topLeftIn, const  SizeF& sizeIn )
 {
-    Point topLeft((int) (topLeftIn.x()), (int)(topLeftIn.y()));
-    Size size((int)(sizeIn.width()), (int)(sizeIn.height()) );
-
-   _rasterizer->fillEllipse( topLeft, size );
 }
-
 
 void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount )
 {
-   std::vector<Point> points(pointCount);
-
-   for( size_t i = 0; i < pointCount; ++i)
-        points[i].set( (int)(ps[i].x()), (int)(ps[i].y()));
-
-  _rasterizer->stroke( &points[0], points.size() );
 }
-
 
 void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
 {
-   std::vector<Point> points(pointCount);
-
-   for( size_t i = 0; i < pointCount; ++i)
-        points[i].set( (int)(ps[i].x()), (int)(ps[i].y()));
-
-  _rasterizer->fill( &points[0], points.size() );
 }
-
 
 void ImagePainter2::drawImage( const PointF& toIn, const Image& image)
 {
-   Point to( (int)(toIn.x()), (int)(toIn.y()));
-  _rasterizer->image( to, image);
 }
-
 
 void ImagePainter2::drawImage(const PointF& toIn, const Image& image, const RectF& imageRectIn)
 {
-   Point to( (int)(toIn.x()), (int)(toIn.y()));
-   Rect  imageRect( Point( (int)(imageRectIn.x()), (int)(imageRectIn.y())), Size((int)( imageRectIn.width()),(int) (imageRectIn.height()) ));
-  _rasterizer->image( to, image, imageRect );
 }
 
-
-FontMetrics ImagePainter2::fontMetrics( const Font& font, const Pt::String& text )
-{
-  return Rasterizer2::fontMetrics( font, text );
-}
-
-
-void ImagePainter2::setFontDir(const Pt::System::Path& path)
-{
-   FreeType::instance().setFontDir(path);
-}
-
-
-std::string ImagePainter2::defaultFont()
-{
-    return  FreeType::instance().defaultFont();
-}
-
-void ImagePainter2::setDefaultFont(const std::string& f)
-{
-   FreeType::instance().setDefaultFont(f);
-}
-
-
-std::vector<std::string> ImagePainter2::fontNames()
-{
-    return FreeType::instance().fontNames();
-}
 
 } // namespace
 
