@@ -215,6 +215,9 @@ void Rasterizer2::strokeOutline(const PointT* points, size_t pointCount)
 // ===== Protected Member Functions =====================================================
 // ======================================================================================
 
+#define FIXED_POINT_MUL_FACTOR 256
+#define FIXED_POINT_FRACT_MASK 0x000000FF
+
 void Rasterizer2::updateClip()
 {
     Rect imageRect( Point(0,0) , _image->size() );
@@ -223,39 +226,72 @@ void Rasterizer2::updateClip()
 
 void Rasterizer2::rasterOnePixelLine( float x1_, float y1_, float x2_, float y2_ )
 {
+    // Clip the points
+    // ### TODO ###
+    float fx1 = x1_;
+    float fy1 = y1_;
+    float fx2 = x2_;
+    float fy2 = y2_;
 
-    float x1 = x1_;
-    float y1 = y1_;
-    float x2 = x2_;
-    float y2 = y2_;
+    // Caculate the buffer size and number of steps
+    float absDX = abs(fx2 - fx1);
+    float absDY = abs(fy2 - fy1);
 
+    Pt::int32_t sizeX = ceil(absDX + 1);
+    Pt::int32_t sizeY = ceil(absDY + 1);
 
-    float dx = (x2 - x1);
-    float dy = (y2 - y1);
+    Pt::int32_t steps = std::min(absDX, absDY);
 
-    float absdx = abs(dx);
-    float absdy = abs(dy);
+    // Initialize the buffer
+    _alphas.resize(sizeX * sizeY);
+    memset(&_alphas[0], 0, _alphas.size());
 
-    int steps = std::min(absdx, absdy);
+    // Translate and convert the coordinates
+    Pt::int32_t x1, y1, x2, y2;
 
-    float ix = dx / steps;
-    float iy = dy / steps;
+    if(fx2 > fx1) {
+        x1 = 0;
+        x2 = (fx2 - fx1) * FIXED_POINT_MUL_FACTOR;
+    }
+    else {
+        x1 = (fx1 - fx2) * FIXED_POINT_MUL_FACTOR;
+        x2 = 0;
+    }
 
-    int sizeX = ceil(absdx + 1);
-    int sizeY = ceil(absdy + 1);
-    _alphas.resize( sizeX * sizeY );
+    if(fy2 > fy1) {
+        y1 = 0;
+        y2 = (fy2 - fy1) * FIXED_POINT_MUL_FACTOR;
+    }
+    else {
+        y1 = (fy1 - fy2) * FIXED_POINT_MUL_FACTOR;
+        y2 = 0;
+    }
 
+    // Calculayte the increment factors
+    Pt::int32_t ix = ((x2 - x1) / steps);
+    Pt::int32_t iy = ((y2 - y1) / steps);
+
+    // Draw the lines
     for(int i = 0; i < steps; ++i) {
-        int pos = int(y1) * sizeX + int(x1);
-
+        //
+        Pt::int32_t lx = x1 / FIXED_POINT_MUL_FACTOR;
+        Pt::int32_t ly = y1 / FIXED_POINT_MUL_FACTOR;
+        //
+        Pt::uint8_t rx = x1 & FIXED_POINT_FRACT_MASK;
+        Pt::uint8_t ry = y1 & FIXED_POINT_FRACT_MASK;
+        //
         x1 += ix;
         y1 += iy;
+        //
+        int pos = int(ly) * sizeX + int(lx);
+
 
         _alphas[pos] = 255;
     }
 
+    // Blit the draw buffer to the image
     for(int r = 0; r < sizeY; ++r) {
-         Pixel destPixel( _image->view(), x1_, y1_ + r);
+        Pixel destPixel( _image->view(), x1_, y1_ + r);
         _image->format().copy(destPixel, _alphas.data() + r * sizeX, sizeX, _pen.color(), _compositionMode);
     }
 }

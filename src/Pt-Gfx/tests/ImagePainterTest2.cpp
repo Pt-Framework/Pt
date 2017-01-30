@@ -74,7 +74,8 @@ int main(int argc, char* args[])
     Pen pen( Color(1, 0, 0) );
     painter.setPen(pen);
 
-    painter.drawLine( PointF(10, 10), PointF(200, 100) );
+    painter.drawLine( PointF( 10,  10), PointF(100,  50) );
+    painter.drawLine( PointF( 10, 150), PointF(100, 110) );
 
     sdlPreviewRGB888Buffer(image.data(), image.width(), image.height());
 
