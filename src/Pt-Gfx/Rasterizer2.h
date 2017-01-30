@@ -40,125 +40,94 @@ namespace Pt {
 
 namespace Gfx {
 
-class LineSlope;
-class LineEdge;
-class LineFace;
 class DrawText;
 class Image;
-class ActiveEdgeTable;
 
 class Rasterizer2
 {
-  public:
-    Rasterizer2( Image& image );
+    public:
+        Rasterizer2( Image& image );
 
-    ~Rasterizer2();
+        ~Rasterizer2();
 
-    void setImage(Image& image);
+        void setImage(Image& image);
 
-    const ImageFormat& format() const;
+        const ImageFormat& format() const;
 
-    void setPen( const Pen& pen );
+        void setPen( const Pen& pen );
 
-    const Pen& pen() const
-    {
-        return _pen;
-    }
+        const Pen& pen() const
+        {
+            return _pen;
+        }
 
-    void setBrush( const Brush& brush );
+        void setBrush( const Brush& brush );
 
-    const Brush& brush() const
-    {
-        return _brush;
-    }
+        const Brush& brush() const
+        {
+            return _brush;
+        }
 
-    void setClip( const Rect& clip );
+        void setFont( const Font& font );
 
-    const Rect& clip() const
-    {
-        return _clip;
-    }
+        const Font& font() const
+        {
+            return _font;
+        }
 
-    void setFont( const Font& font );
+        FontMetrics fontMetrics( const String& text ) const;
 
-    const Font& font() const
-    {
-        return _font;
-    }
+        static FontMetrics fontMetrics( const Font& font, const Pt::String& text );
 
-    void setCompositionMode(const CompositionMode& mode)
-    {
-        _compositionMode = mode;
-    }
+        void setClip( const Rect& clip );
 
-    const CompositionMode& compositionMode() const
-    {
-        return _compositionMode;
-    }
+        const Rect& clip() const
+        {
+            return _clip;
+        }
 
-    void image( const Point& to, const Image& image);
+        void setCompositionMode(const CompositionMode& mode)
+        {
+            _compositionMode = mode;
+        }
 
-    void image(const Point& toIn,
-               const Image& image,
-               const Rect& imageRect);
+        const CompositionMode& compositionMode() const
+        {
+            return _compositionMode;
+        }
 
-    void fillRect(const Rect& r);
+        void image( const Point& to, const Image& image);
 
-    void stroke( const Point* points, size_t pointCount );
+        void image(const Point& toIn, const Image& image, const Rect& imageRect);
 
-    void stroke( const Point& pixel);
+        void strokeText( const Point& to, const Pt::String& text );
 
-    void fill( const Point* points, size_t pointCount );
+        void strokeOutline( const Point* points, size_t pointCount );
 
-    void strokeText( const Point& to, const Pt::String& text );
+    protected:
+        void clipSpan( int& x, int& y, int& length );
+        void updateClip();
 
-    void strokeEllipse( const Point& topLeft, const Size& size );
+    private:
+        Image*          _image;
+        DrawText*       _text;
+        Font            _font;
+        CompositionMode _compositionMode;
 
-    void fillEllipse( const Point& topLeft, const Size& size );
+        Pen             _pen;
+        Image           _penBuffer;
+        ConstPixel      _penPixel;
 
-    FontMetrics fontMetrics( const String& text ) const;
+        Brush           _brush;
+        Image           _brushBuffer;
+        ConstPixel      _brushPixel;
+        const Image*    _brushImage;
+        bool            _isGradient;
 
-    static FontMetrics fontMetrics( const Font& font, const Pt::String& text );
-
-  //Output algo.
-  protected:
-    void clipSpan( int& x, int& y, int& length );
-    void updateClip();
-
-  //Thin polyline algo.
-  protected:
-    enum { xAxis, yAxis };
-    void drawThinSolidPolyline( const Point* points, int pointCount );
-    void bresenhamLineSegment( int signdx, int signdy, int axis, int x1, int y1, int e, int e1, int e2, int len );
-
-
-  private:
-    void stroke(int x, int y);
-
-    void stroke(int xpos, int ypos, int length);
-    void updateGradientBrush(int width, int height);
-
-  private:
-    Image*          _image;
-    DrawText*       _text;
-    Rect            _clip;
-    Rect            _currentClip;
-    Font            _font;
-
-    Brush           _brush;
-    Image           _brushBuffer;
-    const Image*    _brushImage;
-    ConstPixel      _brushPixel;
-    bool            _isGradient;
-
-    Pen             _pen;
-    Image           _penBuffer;
-    ConstPixel      _penPixel;
-
-    CompositionMode _compositionMode;
-    int             _clipRight;
-    int             _clipBottom;
-
+        Rect            _clip;
+        Rect            _currentClip;
+        int             _clipRight;
+        int             _clipBottom;
 };
 
 } //namespace

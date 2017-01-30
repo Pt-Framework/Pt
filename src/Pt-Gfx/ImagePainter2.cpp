@@ -152,11 +152,10 @@ void ImagePainter2::drawText( const PointF& toIn, const String& text )
     _rasterizer->strokeText( to, text );
 }
 
-
 void ImagePainter2::drawLine(const PointF& from, const  PointF& to)
 {
     Point points[] = { Point((int)(from.x()), (int)(from.y())) ,  Point((int)(to.x()), (int)(to.y()))  };
-    _rasterizer->stroke( points, 2);
+    _rasterizer->strokeOutline( points, 2);
 }
 
 void ImagePainter2::drawRect( const  RectF& rect )
