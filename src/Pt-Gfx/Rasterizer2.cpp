@@ -257,8 +257,8 @@ void Rasterizer2::image(const Point& to, const Image& from, const Rect& fromRect
 void Rasterizer2::strokeText( const Point& to, const Pt::String& text )
 {
     _text->setClip(_currentClip);
-    _text->draw( *_image, _pen.color(), to, text );
-}
+    _text->draw( *_image, _pen.color(), to, text, _compositionMode );
+ }
 
 void Rasterizer2::strokeOutline(const Point* points, size_t pointCount)
 {

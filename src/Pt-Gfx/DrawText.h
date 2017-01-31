@@ -1,12 +1,12 @@
 /* Copyright (C) 2006-2015 Laurentiu-Gheorghe Crisan
    Copyright (C) 2006-2015 Marc Boris Duerner
    Copyright (C) 2010 Aloysius Indrayanto
- 
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
- 
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -16,15 +16,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
- 
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
- 
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
 
@@ -101,15 +101,15 @@ class DrawText
             @param color The text color
             @param pos The position to draw
             @param text The text to draw
-            @param background The background color of the font
+            @param mode The composition mode of the text
         */
-        void draw(Image& image, const Color& color, const Point& pos, const String& text);
+        void draw(Image& image, const Color& color, const Point& pos, const String& text, const CompositionMode& mode);
 
     private:
-        void drawGlyph(Image& image, const Color& color, int xpos, int ypos, 
+        void drawGlyph(Image& image, const Color& color, int xpos, int ypos,
                        int bmPitch, int height, int width, const unsigned char* buffer);
 
-  private:      
+  private:
         FTC_FaceID       _faceId;
         FTC_ImageTypeRec _imageType;
         FT_Matrix        _matrix;

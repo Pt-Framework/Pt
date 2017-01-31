@@ -2000,7 +2000,7 @@ void Rasterizer::fillSolid(const Point& pos, int length)
 void Rasterizer::strokeText( const Point& to, const Pt::String& text )
 {
     _text->setClip(_currentClip);
-    _text->draw( *_image, _pen.color(), to, text );
+    _text->draw( *_image, _pen.color(), to, text, _compositionMode );
 }
 
 

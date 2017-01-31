@@ -1,10 +1,10 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
-  
+/* Copyright (C) 2015 Marc Boris Duerner
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -14,15 +14,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
   02110-1301 USA
 */
 
@@ -44,8 +44,9 @@ namespace Pt {
 
 namespace Gfx {
 
+
 FreeType::FreeType()
-{   
+{
     if( FT_Init_FreeType( &_ft ) )
         throw std::runtime_error("FT_Init_FreeType");
 
@@ -96,14 +97,14 @@ std::vector<std::string> FreeType::fontNames() const
 
     std::vector<std::string> names;
     names.push_back("DejaVu Sans");
-    
-    Fonts::const_iterator it; 
+
+    Fonts::const_iterator it;
     for(it = _fonts.begin(); it != _fonts.end(); ++it)
     {
         if(std::find(names.begin(), names.end(), it->first.name()) == names.end())
             names.push_back( it->first.name() );
     }
-    
+
     // UNLOCK
 
     return names;
@@ -118,7 +119,7 @@ void FreeType::setFontDir(const System::Path& path)
 
     _fonts.clear();
     _files.clear();
-    
+
     if( ! System::FileInfo::exists(_fontDir) )
         return;
 
@@ -143,7 +144,7 @@ void FreeType::setFontDir(const System::Path& path)
         if( (face->style_flags & FT_STYLE_FLAG_ITALIC) == FT_STYLE_FLAG_ITALIC )
             style = Font::Italic;
 
-        if( (face->style_flags & FT_STYLE_FLAG_BOLD) == FT_STYLE_FLAG_BOLD && 
+        if( (face->style_flags & FT_STYLE_FLAG_BOLD) == FT_STYLE_FLAG_BOLD &&
             (face->style_flags & FT_STYLE_FLAG_ITALIC) == FT_STYLE_FLAG_ITALIC )
             style = Font::BoldItalic;
 
@@ -176,7 +177,7 @@ FTC_FaceID FreeType::findFaceId(const Font& font)
 }
 
 
-FT_Error FreeType::fontRequest( FTC_FaceID faceId, FT_Library library, 
+FT_Error FreeType::fontRequest( FTC_FaceID faceId, FT_Library library,
                                 FT_Pointer data, FT_Face* face )
 {
     FreeType* ft = static_cast<FreeType*>(data);
@@ -199,7 +200,7 @@ FT_Error FreeType::onFontRequest(FTC_FaceID faceId, FT_Face* face)
 }
 
 
-FontMetrics FreeType::fontMetrics(const String& text, 
+FontMetrics FreeType::fontMetrics(const String& text,
                                   FTC_FaceID faceId, FTC_ImageType imageType)
 {
     // LOCK
@@ -222,7 +223,7 @@ FontMetrics FreeType::fontMetrics(const String& text,
     scaler.width   = imageType->width;
     scaler.height  = imageType->height;
     scaler.pixel   = 1; // 1 means TRUE and scaler.x_res and scaler.y_res are ignored
-    
+
     FT_Size size;
     FTC_Manager_LookupSize(_manager, &scaler, &size);
 
@@ -232,9 +233,9 @@ FontMetrics FreeType::fontMetrics(const String& text,
     FT_Vector delta;
     FT_Glyph  glyph;
     FT_BBox   gbbox = { 0 , 0, 0, 0 };
-    FT_BBox   tbbox = { std::numeric_limits<FT_Pos>::max(), 
+    FT_BBox   tbbox = { std::numeric_limits<FT_Pos>::max(),
                         std::numeric_limits<FT_Pos>::max(),
-                        std::numeric_limits<FT_Pos>::min(), 
+                        std::numeric_limits<FT_Pos>::min(),
                         std::numeric_limits<FT_Pos>::min() };
 
     for( String::const_iterator it = text.begin(); it != text.end(); ++it )
@@ -269,9 +270,9 @@ FontMetrics FreeType::fontMetrics(const String& text,
         previous = glyph_index;
     }
 
-    return FontMetrics( size->metrics.ascender >> 6, 
+    return FontMetrics( size->metrics.ascender >> 6,
                        (-size->metrics.descender) >> 6,
-                       tbbox.xMax - tbbox.xMin, 
+                       tbbox.xMax - tbbox.xMin,
                        size->metrics.height >> 6 );
 
     // UNLOCK
@@ -279,7 +280,7 @@ FontMetrics FreeType::fontMetrics(const String& text,
 
 
 void FreeType::draw(Image& image, const Color& color, Pt::ssize_t fontAngle,
-                    const Point& pos, const String& text, const Rect& clip, 
+                    const Point& pos, const String& text, const Rect& clip, const CompositionMode& mode,
                     FT_Matrix& matrix, FTC_FaceID faceId, FTC_ImageType imageType)
 {
     // LOCK
@@ -375,11 +376,11 @@ void FreeType::draw(Image& image, const Color& color, Pt::ssize_t fontAngle,
         {
             //FT_Glyph_Get_CBox(image, ft_glyph_bbox_pixels, &bbox );
 
-            //if ( bbox.xMax <= 0 || bbox.xMin >= my_target_width  || 
+            //if ( bbox.xMax <= 0 || bbox.xMin >= my_target_width  ||
             //     bbox.yMax <= 0 || bbox.yMin >= my_target_height )
             //    continue;
 
-            drawGlyph(image, color, left, top, pitch, height, width, buffer, clip);
+            drawGlyph(image, color, left, top, pitch, height, width, buffer, clip, mode);
         }
 
         glyphPos.x  += incX;
@@ -398,8 +399,8 @@ void FreeType::draw(Image& image, const Color& color, Pt::ssize_t fontAngle,
 
 
 void FreeType::drawGlyph(Image& image, const Color& color, int xpos, int ypos,
-                         int bmPitch, int height, int width, 
-                         const unsigned char* buffer, const Rect& clip)
+                         int bmPitch, int height, int width,
+                         const unsigned char* buffer, const Rect& clip, const CompositionMode& mode)
 {
     const int clipRight  = clip.x() + clip.width();
     const int clipBottom = clip.y() + clip.height();
@@ -413,16 +414,16 @@ void FreeType::drawGlyph(Image& image, const Color& color, int xpos, int ypos,
         bmPitch += width;
 
     int ofsx = 0;
-            
-    if(xpos < clip.x() ) 
+
+    if(xpos < clip.x() )
     {
         ofsx = clip.x() - xpos;
         xpos =  clip.x();
     }
-            
+
     int ofsy = 0;
-            
-    if(ypos < clip.y()) 
+
+    if(ypos < clip.y())
     {
         ofsy = clip.y() - ypos;
         ypos = clip.y();
@@ -456,20 +457,41 @@ void FreeType::drawGlyph(Image& image, const Color& color, int xpos, int ypos,
 
             const int px = yOffset + x;
             unsigned char value = buffer[px];
-                    
+
+#if 0
             if(value != 255)
             {
                 pixelColor.setAlpha(value * 257);
-                image.format().setPixel(pixel, pixelColor,
-                                        CompositionMode::SourceOver);
+                image.format().setPixel(pixel, pixelColor, CompositionMode::SourceOver);
             }
             else
-            {                    
+            {
                 image.format().setPixel(pixel, color, CompositionMode::SourceCopy);
             }
+#else
+            switch(mode)
+            {
+                default:
+                case CompositionMode::SourceCopy:
+                    if(value != 255) {
+                        pixelColor.setAlpha(value * 257);
+                        image.format().setPixel(pixel, pixelColor, CompositionMode::SourceOver);
+                    }
+                    else {
+                        image.format().setPixel(pixel, color, CompositionMode::SourceCopy);
+                    }
+                    break;
+
+                case CompositionMode::SourceOver:
+                    pixelColor.setAlpha(color.alpha() * value / 255);
+                    image.format().setPixel(pixel, pixelColor, CompositionMode::SourceOver);
+                    break;
+            }
+#endif
         }
     }
 }
+
 
 } // namespace Gfx
 
