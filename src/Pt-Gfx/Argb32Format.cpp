@@ -142,14 +142,14 @@ void Argb32Format::onCopy(Pixel& dst_, Pt::uint8_t* alphas, size_t length,
         default:
         case CompositionMode::SourceCopy:
             for(size_t i = 0; i < length; ++i) {
-                Pt::uint32_t blendAlpha    = *alphas;
-                Pt::uint32_t blendAlphaSrc = blendAlpha + 1;
-                Pt::uint32_t blendAlphaInv = 256 - blendAlpha;
-                dst[0] = (blendAlphaSrc * (Pt::uint32_t)(color.blue () / 257) + blendAlphaInv * dst[0]) >> 8;
-                dst[1] = (blendAlphaSrc * (Pt::uint32_t)(color.green() / 257) + blendAlphaInv * dst[1]) >> 8;
-                dst[2] = (blendAlphaSrc * (Pt::uint32_t)(color.red  () / 257) + blendAlphaInv * dst[2]) >> 8;
-                dst[3] =                                 color.alpha() / 257                                ;
-                ++alphas;
+                Pt::uint32_t blendAlphaSrc = *alphas++;
+                Pt::uint32_t blendAlphaInv = 255 - blendAlphaSrc;
+                if(blendAlphaSrc) {
+                    dst[0] = (blendAlphaSrc * (Pt::uint32_t)(color.blue () / 257) + blendAlphaInv * dst[0] + 255) >> 8;
+                    dst[1] = (blendAlphaSrc * (Pt::uint32_t)(color.green() / 257) + blendAlphaInv * dst[1] + 255) >> 8;
+                    dst[2] = (blendAlphaSrc * (Pt::uint32_t)(color.red  () / 257) + blendAlphaInv * dst[2] + 255) >> 8;
+                }
+                dst[3] = color.alpha() / 257;
                 dst += 4;
             }
             break;
@@ -157,14 +157,15 @@ void Argb32Format::onCopy(Pixel& dst_, Pt::uint8_t* alphas, size_t length,
         case CompositionMode::SourceOver:
             for(size_t i = 0; i < length; ++i) {
                 Pt::uint32_t colorAlpha    = color.alpha() / 257;
-                Pt::uint32_t blendAlpha    = colorAlpha * (Pt::uint32_t)(*alphas) / 255;
-                Pt::uint32_t blendAlphaSrc = blendAlpha + 1;
-                Pt::uint32_t blendAlphaInv = 256 - blendAlpha;
-                dst[0] = (blendAlphaSrc * (Pt::uint32_t)(color.blue () / 257) + blendAlphaInv * dst[0]) >> 8;
-                dst[1] = (blendAlphaSrc * (Pt::uint32_t)(color.green() / 257) + blendAlphaInv * dst[1]) >> 8;
-                dst[2] = (blendAlphaSrc * (Pt::uint32_t)(color.red  () / 257) + blendAlphaInv * dst[2]) >> 8;
-                dst[3] = (blendAlphaSrc * colorAlpha                          + blendAlphaInv * dst[3]) >> 8;
-                ++alphas;
+                Pt::uint32_t blendAlpha    = colorAlpha * (Pt::uint32_t)(*alphas++) / 255;
+                Pt::uint32_t blendAlphaSrc = blendAlpha;
+                Pt::uint32_t blendAlphaInv = 255 - blendAlphaSrc;
+                if(blendAlphaSrc) {
+                    dst[0] = (blendAlphaSrc * (Pt::uint32_t)(color.blue () / 257) + blendAlphaInv * dst[0] + 255) >> 8;
+                    dst[1] = (blendAlphaSrc * (Pt::uint32_t)(color.green() / 257) + blendAlphaInv * dst[1] + 255) >> 8;
+                    dst[2] = (blendAlphaSrc * (Pt::uint32_t)(color.red  () / 257) + blendAlphaInv * dst[2] + 255) >> 8;
+                    dst[3] = (blendAlphaSrc * colorAlpha                          + blendAlphaInv * dst[3] + 255) >> 8;
+                }
                 dst += 4;
             }
             break;

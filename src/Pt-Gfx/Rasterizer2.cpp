@@ -327,16 +327,16 @@ void Rasterizer2::rasterOnePixelLineSegment(Pt::int32_t x1, Pt::int32_t y1, Pt::
 
     // Draw the line
     for(int i = 0; i <= steps; ++i) {
-        // Calculate the alpha factors (1 - 256) of the block
+        // Calculate the alpha factors (0 - 255) of the block
 #ifdef FIXED_POINT_ALPHA_DIVFAC
-        Pt::int32_t frx = (x1 & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC + 1;
-        Pt::int32_t fry = (y1 & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC + 1;
+        Pt::int32_t frx = (x1 & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC;
+        Pt::int32_t fry = (y1 & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC;
 #else
-        Pt::int32_t frx = (x1 & FIXED_POINT_FRACT_VAL_BM) * FIXED_POINT_ALPHA_MULFAC + 1;
-        Pt::int32_t fry = (y1 & FIXED_POINT_FRACT_VAL_BM) * FIXED_POINT_ALPHA_MULFAC + 1;
+        Pt::int32_t frx = (x1 & FIXED_POINT_FRACT_VAL_BM) * FIXED_POINT_ALPHA_MULFAC;
+        Pt::int32_t fry = (y1 & FIXED_POINT_FRACT_VAL_BM) * FIXED_POINT_ALPHA_MULFAC;
 #endif
-        Pt::int32_t flx = 256 - frx;
-        Pt::int32_t fly = 256 - fry;
+        Pt::int32_t flx = 255 - frx;
+        Pt::int32_t fly = 255 - fry;
         // Calculate the top-left coordinate of the block
         Pt::int32_t lx = x1 >> FIXED_POINT_SHIFT_FACTOR;
         Pt::int32_t ly = y1 >> FIXED_POINT_SHIFT_FACTOR;
@@ -344,10 +344,10 @@ void Rasterizer2::rasterOnePixelLineSegment(Pt::int32_t x1, Pt::int32_t y1, Pt::
         Pt::int32_t rx = frx ? (lx + 1) : lx;
         Pt::int32_t ry = fry ? (ly + 1) : ly;
         // Draw the block
-                                       _alphas[ly * sizeX + lx] += (fly * flx) >> 8;
-        if( rx < sizeX               ) _alphas[ly * sizeX + rx] += (fly * frx) >> 8;
-        if(               ry < sizeY ) _alphas[ry * sizeX + lx] += (fry * flx) >> 8;
-        if( rx < sizeX && ry < sizeY ) _alphas[ry * sizeX + rx] += (fry * frx) >> 8;
+                                       _alphas[ly * sizeX + lx] += (fly * flx + 255) >> 8;
+        if( rx < sizeX               ) _alphas[ly * sizeX + rx] += (fly * frx + 255) >> 8;
+        if(               ry < sizeY ) _alphas[ry * sizeX + lx] += (fry * flx + 255) >> 8;
+        if( rx < sizeX && ry < sizeY ) _alphas[ry * sizeX + rx] += (fry * frx + 255) >> 8;
         // Increment the drawing coordinate
         x1 += chgX;
         y1 += chgY;
