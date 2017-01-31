@@ -49,6 +49,10 @@ bool Triangulate::process(std::vector<Point>& result, const std::vector<Point>& 
 
     int* V = new int[n];
 
+    // We do not care about the orientation of the polygon
+    for(int v = 0; v < n; ++v) V[v] = v;
+
+    /*
     // We want a counter-clockwise polygon in V
     if( 0.0f < area(contour) ) {
         for(int v = 0; v < n; ++v) V[v] = v;
@@ -56,6 +60,7 @@ bool Triangulate::process(std::vector<Point>& result, const std::vector<Point>& 
     else {
         for(int v = 0; v < n; ++v) V[v] = (n - 1) - v;
     }
+    */
 
     // Remove nv-2 Vertices, creating 1 triangle every time
     int nv    = n;

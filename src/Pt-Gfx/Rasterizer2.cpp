@@ -570,13 +570,15 @@ void Rasterizer2::rasterOneSolidTriangle(const Point& v1, const Point& v2, const
 
     // Check for bottom-flat triangle
     if(vs[1]->y() == vs[2]->y()) {
-        if( vs[1]->x() < vs[2]->x() ) rasterOneSolidTriangleBottomFlat(*vs[0], *vs[1], *vs[2], sizeX);
-        else                          rasterOneSolidTriangleBottomFlat(*vs[0], *vs[2], *vs[1], sizeX);
+        rasterOneSolidTriangleBottomFlat(*vs[0], *vs[1], *vs[2], sizeX);
+        //if( vs[1]->x() < vs[2]->x() ) rasterOneSolidTriangleBottomFlat(*vs[0], *vs[1], *vs[2], sizeX);
+        //else                          rasterOneSolidTriangleBottomFlat(*vs[0], *vs[2], *vs[1], sizeX);
     }
     // Check for top-flat triangle
     else if(vs[0]->y() == vs[1]->y()) {
-        if( vs[0]->x() < vs[1]->x() ) rasterOneSolidTriangleTopFlat(*vs[0], *vs[1], *vs[2], sizeX);
-        else                          rasterOneSolidTriangleTopFlat(*vs[1], *vs[0], *vs[2], sizeX);
+        rasterOneSolidTriangleTopFlat(*vs[0], *vs[1], *vs[2], sizeX);
+        //if( vs[0]->x() < vs[1]->x() ) rasterOneSolidTriangleTopFlat(*vs[0], *vs[1], *vs[2], sizeX);
+        //else                          rasterOneSolidTriangleTopFlat(*vs[1], *vs[0], *vs[2], sizeX);
     }
     // Split the triangle to a bottom-flat and top-flat
     else {
@@ -591,49 +593,125 @@ void Rasterizer2::rasterOneSolidTriangle(const Point& v1, const Point& v2, const
             vs[1]->y()
         );
 
-        if( vs[1]->x() < vm.x() ) rasterOneSolidTriangleBottomFlat(*vs[0], *vs[1], vm, sizeX);
-        else                      rasterOneSolidTriangleBottomFlat(*vs[0], vm, *vs[1], sizeX);
+        rasterOneSolidTriangleBottomFlat(*vs[0], *vs[1], vm, sizeX);
+        //if( vs[1]->x() < vm.x() ) rasterOneSolidTriangleBottomFlat(*vs[0], *vs[1], vm, sizeX);
+        //else                      rasterOneSolidTriangleBottomFlat(*vs[0], vm, *vs[1], sizeX);
 
-        if( vs[1]->x() < vm.x() ) rasterOneSolidTriangleTopFlat(*vs[1], vm, *vs[2], sizeX);
-        else                      rasterOneSolidTriangleTopFlat( vm, *vs[1], *vs[2], sizeX);
+        rasterOneSolidTriangleTopFlat(*vs[1], vm, *vs[2], sizeX);
+        //if( vs[1]->x() < vm.x() ) rasterOneSolidTriangleTopFlat(*vs[1], vm, *vs[2], sizeX);
+        //else                      rasterOneSolidTriangleTopFlat( vm, *vs[1], *vs[2], sizeX);
     }
 }
 
 // Based on http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
 void Rasterizer2::rasterOneSolidTriangleBottomFlat(const Point& v1, const Point& v2, const Point& v3, Pt::int32_t sizeX)
 {
-    const Pt::int32_t chgX1 = ( ( (v2.x() - v1.x()) << FIXED_POINT_SHIFT_FACTOR ) / (v2.y() - v1.y()) ) ;
-    const Pt::int32_t chgX2 = ( ( (v3.x() - v1.x()) << FIXED_POINT_SHIFT_FACTOR ) / (v3.y() - v1.y()) ) ;
+    /*        v1
+     *
+     *
+     *     v2    v3
+     */
+    const Pt::int32_t chgX1 = ( ( ((int)v2.x() - (int)v1.x()) << FIXED_POINT_SHIFT_FACTOR ) / ((int)v2.y() - (int)v1.y()) ) ;
+    const Pt::int32_t chgX2 = ( ( ((int)v3.x() - (int)v1.x()) << FIXED_POINT_SHIFT_FACTOR ) / ((int)v3.y() - (int)v1.y()) ) ;
 
-    Pt::int32_t  curX1  = (v1.x() << FIXED_POINT_SHIFT_FACTOR) + FIXED_POINT_FRACT_VAL_BM / 2;
-    Pt::int32_t  curX2  = (v1.x() << FIXED_POINT_SHIFT_FACTOR) - FIXED_POINT_FRACT_VAL_BM / 2;
+    Pt::int32_t curX1 = (v1.x() << FIXED_POINT_SHIFT_FACTOR) + FIXED_POINT_FRACT_VAL_BM / 2;
+    Pt::int32_t curX2 = (v1.x() << FIXED_POINT_SHIFT_FACTOR) - FIXED_POINT_FRACT_VAL_BM / 2;
 
     Pt::uint8_t* alphas = &_alphas[0] + v1.y() * sizeX;
 
     for(int i = v1.y(); i <= v2.y(); ++i) {
-        for(int j = (curX1 >> FIXED_POINT_SHIFT_FACTOR); j <= (curX2 >> FIXED_POINT_SHIFT_FACTOR); ++j) {
-            alphas[j] = 255;
+
+/*
+#ifdef FIXED_POINT_ALPHA_DIVFAC
+        Pt::int32_t frx = (fx1 & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC;
+#else
+        Pt::int32_t frx = (fx1 & FIXED_POINT_FRACT_VAL_BM) * FIXED_POINT_ALPHA_MULFAC;
+#endif
+        Pt::int32_t flx = 255 - frx;
+        // Calculate the top-left coordinate of the block
+        Pt::int32_t lx = fx1 >> FIXED_POINT_SHIFT_FACTOR;
+        Pt::int32_t ly = fy1 >> FIXED_POINT_SHIFT_FACTOR;
+        // Calculate the bottom-right coordinate of the block
+        Pt::int32_t rx = frx ? (lx + 1) : lx;
+        Pt::int32_t ry = fry ? (ly + 1) : ly;
+        // Draw the block
+                                       _alphas[ly * sizeX + lx] += (fly * flx + 255) >> 8;
+        if( rx < sizeX               ) _alphas[ly * sizeX + rx] += (fly * frx + 255) >> 8;
+        if(               ry < sizeY ) _alphas[ry * sizeX + lx] += (fry * flx + 255) >> 8;
+        if( rx < sizeX && ry < sizeY ) _alphas[ry * sizeX + rx] += (fry * frx + 255) >> 8;
+*/
+        if(curX1 <= curX2) {
+            for(int j = (curX1 >> FIXED_POINT_SHIFT_FACTOR); j <= (curX2 >> FIXED_POINT_SHIFT_FACTOR); ++j) {
+                alphas[j] = 255;
+            }
+        }
+        else {
+            for(int j = (curX2 >> FIXED_POINT_SHIFT_FACTOR); j <= (curX1 >> FIXED_POINT_SHIFT_FACTOR); ++j) {
+                alphas[j] = 255;
+            }
+        }
+
+
+        alphas += sizeX;
+        curX1  += chgX1;
+        curX2  += chgX2;
+    }
+
+    /*
+    const Pt::int32_t chgX1 = ( ( (v2.x() - v1.x()) << FIXED_POINT_SHIFT_FACTOR ) / (v2.y() - v1.y()) ) ;
+    const Pt::int32_t chgX2 = ( ( (v3.x() - v1.x()) << FIXED_POINT_SHIFT_FACTOR ) / (v3.y() - v1.y()) ) ;
+
+    Pt::int32_t curX1 = (v1.x() << FIXED_POINT_SHIFT_FACTOR) + FIXED_POINT_FRACT_VAL_BM / 2;
+    Pt::int32_t curX2 = (v1.x() << FIXED_POINT_SHIFT_FACTOR) - FIXED_POINT_FRACT_VAL_BM / 2;
+
+    Pt::uint8_t* alphas = &_alphas[0] + v1.y() * sizeX;
+
+    for(int i = v1.y(); i <= v2.y(); ++i) {
+        if(curX1 <= curX2) {
+            for(int j = (curX1 >> FIXED_POINT_SHIFT_FACTOR); j <= (curX2 >> FIXED_POINT_SHIFT_FACTOR); ++j) {
+                alphas[j] = 255;
+            }
+        }
+        else {
+            for(int j = (curX2 >> FIXED_POINT_SHIFT_FACTOR); j <= (curX1 >> FIXED_POINT_SHIFT_FACTOR); ++j) {
+                alphas[j] = 255;
+            }
         }
         alphas += sizeX;
         curX1  += chgX1;
         curX2  += chgX2;
     }
+    */
 }
 
 // Based on http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
 void Rasterizer2::rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2, const Point& v3, Pt::int32_t sizeX)
 {
-    const Pt::int32_t chgX1 = ( ( (v3.x() - v1.x()) << FIXED_POINT_SHIFT_FACTOR ) / (v3.y() - v1.y()) ) ;
-    const Pt::int32_t chgX2 = ( ( (v3.x() - v2.x()) << FIXED_POINT_SHIFT_FACTOR ) / (v3.y() - v2.y()) ) ;
+    /*     v1    v2
+     *
+     *
+     *        v3
+     */
 
-    Pt::int32_t  curX1  = (v3.x() << FIXED_POINT_SHIFT_FACTOR) + FIXED_POINT_FRACT_VAL_BM / 2;
-    Pt::int32_t  curX2  = (v3.x() << FIXED_POINT_SHIFT_FACTOR) - FIXED_POINT_FRACT_VAL_BM / 2;
+    const Pt::int32_t chgX1 = ( ( ((int)v3.x() - (int)v1.x()) << FIXED_POINT_SHIFT_FACTOR ) / ((int)v3.y() - (int)v1.y()) ) ;
+    const Pt::int32_t chgX2 = ( ( ((int)v3.x() - (int)v2.x()) << FIXED_POINT_SHIFT_FACTOR ) / ((int)v3.y() - (int)v2.y()) ) ;
+
+    Pt::int32_t curX1 = (v3.x() << FIXED_POINT_SHIFT_FACTOR) + FIXED_POINT_FRACT_VAL_BM / 2;
+    Pt::int32_t curX2 = (v3.x() << FIXED_POINT_SHIFT_FACTOR) - FIXED_POINT_FRACT_VAL_BM / 2;
 
     Pt::uint8_t* alphas = &_alphas[0] + v3.y() * sizeX;
 
     for(int i = v3.y(); i > v1.y(); --i) {
-        for(int j = (curX1 >> FIXED_POINT_SHIFT_FACTOR); j <= (curX2 >> FIXED_POINT_SHIFT_FACTOR); ++j) {
-            alphas[j] = 255;
+
+        if(curX1 <= curX2) {
+            for(int j = (curX1 >> FIXED_POINT_SHIFT_FACTOR); j <= (curX2 >> FIXED_POINT_SHIFT_FACTOR); ++j) {
+                alphas[j] = 255;
+            }
+        }
+        else {
+            for(int j = (curX2 >> FIXED_POINT_SHIFT_FACTOR); j <= (curX1 >> FIXED_POINT_SHIFT_FACTOR); ++j) {
+                alphas[j] = 255;
+            }
         }
         alphas -= sizeX;
         curX1  -= chgX1;
