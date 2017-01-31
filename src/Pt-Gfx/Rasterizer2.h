@@ -97,16 +97,14 @@ class Rasterizer2
         }
 
         void image(const Point& to, const Image& image);
-
         void image(const Point& toIn, const Image& image, const Rect& imageRect);
 
         void strokeText(const Point& to, const Pt::String& text);
-
         void strokeOutline(const Point* points, size_t pointCount);
 
-        void fillTriangles(Point* points, size_t pointCount);
+        void fillPolygon(const Point* points, const size_t pointCount);
 
-    protected:
+    private:
         void updateClip();
 
         void prepWorkBuffer(Pt::int32_t sizeX, Pt::int32_t sizeY);
@@ -115,10 +113,15 @@ class Rasterizer2
         void rasterOnePixelLine(const Point& a, const Point& b);
         void rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, Pt::int32_t steps, Pt::int32_t sizeX, Pt::int32_t sizeY);
 
-        void rasterSolidTriangles(Point* points, size_t pointCount);
+        void rasterPolygonOutline(const Point* points, size_t pointCount);
+
+        void rasterSolidTriangles(Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY);
+        void rasterOneSolidTriangle(const Point& v1, const Point& v2, const Point& v3, Pt::int32_t sizeX);
         void rasterOneSolidTriangleBottomFlat(const Point& v1, const Point& v2, const Point& v3, Pt::int32_t sizeX);
         void rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2, const Point& v3, Pt::int32_t sizeX);
-        void rasterOneSolidTriangle(const Point& v1, const Point& v2, const Point& v3, Pt::int32_t sizeX);
+        void rasterFillTriangles(Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY);
+
+        void genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount) const;
 
     private:
         Image*          _image;
@@ -140,13 +143,6 @@ class Rasterizer2
         Rect            _currentClip;
 
         std::vector<Pt::uint8_t> _alphas; // Work buffer
-
-    private:
-        void genClippedPolygonPoints(std::vector<Point>& dst, const PointF* src, const size_t pointCount) const;
-
-        void strokePolygonOutline(const Point* points, size_t pointCount);
-
-        friend class ImagePainter2;
 };
 
 

@@ -35,6 +35,7 @@
 
 #include "DrawText.h"
 #include "ClipPolygon.h"
+#include "Triangulate.h"
 
 #include "Rasterizer2.h"
 
@@ -276,24 +277,45 @@ void Rasterizer2::strokeOutline(const Point* points, size_t pointCount)
     }
 }
 
-void Rasterizer2::fillTriangles(Point* points, size_t pointCount)
+void Rasterizer2::fillPolygon(const Point* points, const size_t pointCount)
 {
-    if(pointCount % 3) return;
+    Pt::int32_t minX;
+    Pt::int32_t minY;
+    Pt::int32_t maxX;
+    Pt::int32_t maxY;
 
-    switch( _brush.fillStyle() ) {
-        case Brush::Texture:
-            break;
+#if 1
 
-        case Brush::VerticalGradient:
-            break;
+    std::vector<Point> clipped;
+    genClippedPolygonPoints(clipped, points, pointCount);
 
-        case Brush::HorizontalGradient:
-            break;
+    std::vector<Point> tris;
+    if(!Triangulate::process(tris, clipped)) return;
 
-        case Brush::Solid:
-            rasterSolidTriangles(points, pointCount);
-            break;
-    }
+    rasterFillTriangles(tris.data(), tris.size(), minX, minY, maxX, maxY);
+
+    rasterPolygonOutline(clipped.data(), clipped.size());
+
+#else
+
+    std::vector<Point> tris;
+
+    // bot
+    tris.push_back(Point(200, 100));
+    tris.push_back(Point(100, 200));
+    tris.push_back(Point(300, 200));
+    // top
+    tris.push_back(Point(100, 300));
+    tris.push_back(Point(300, 300));
+    tris.push_back(Point(200, 400));
+    // all
+    tris.push_back(Point(450, 100));
+    tris.push_back(Point(350, 300));
+    tris.push_back(Point(650, 400));
+
+    rasterTriangles(tris.data(), tris.size(), minX, minY, maxX, maxY);
+
+#endif
 }
 
 
@@ -452,147 +474,7 @@ void Rasterizer2::rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt
     }
 }
 
-void Rasterizer2::rasterSolidTriangles(Point* points, size_t pointCount)
-{
-    // Find the minimum and maximum coordinates
-    Pt::int32_t minX =  65535;
-    Pt::int32_t minY =  65535;
-    Pt::int32_t maxX = -65535;
-    Pt::int32_t maxY = -65535;
-
-    for(size_t i = 0; i < pointCount; ++i) {
-        const Pt::int32_t x = points[i].x();
-        const Pt::int32_t y = points[i].y();
-        if(x < minX) minX = x;
-        if(y < minY) minY = y;
-        if(x > maxX) maxX = x;
-        if(y > maxY) maxY = y;
-    }
-
-    // Translate the coordinates to (0, 0)
-    for(size_t i = 0; i < pointCount; ++i) {
-        points[i].set(
-            (points[i].x() - minX),
-            (points[i].y() - minY)
-        );
-    }
-
-    // Calculate the size of the rectangle
-    const Pt::int32_t sizeX = maxX - minX + 1;
-    const Pt::int32_t sizeY = maxY - minY + 1;
-
-    // Prepare the work buffer
-    prepWorkBuffer(sizeX, sizeY);
-
-    // Raster the triangles
-    for(size_t i = 0; i < pointCount; i += 3) {
-        rasterOneSolidTriangle(points[i], points[i + 1], points[i + 2], sizeX);
-    }
-
-    // Blit the work buffer to the image
-    blitWorkBufferToImage(minX, minY, sizeX, sizeY, _brush.color());
-}
-
-// Based on http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
-void Rasterizer2::rasterOneSolidTriangleBottomFlat(const Point& v1, const Point& v2, const Point& v3, Pt::int32_t sizeX)
-{
-    const Pt::int32_t chgX1 = ( ( (v2.x() - v1.x()) << FIXED_POINT_SHIFT_FACTOR ) / (v2.y() - v1.y()) ) ;
-    const Pt::int32_t chgX2 = ( ( (v3.x() - v1.x()) << FIXED_POINT_SHIFT_FACTOR ) / (v3.y() - v1.y()) ) ;
-
-    Pt::int32_t  curX1  = (v1.x() << FIXED_POINT_SHIFT_FACTOR) + FIXED_POINT_FRACT_VAL_BM / 2;
-    Pt::int32_t  curX2  = (v1.x() << FIXED_POINT_SHIFT_FACTOR) - FIXED_POINT_FRACT_VAL_BM / 2;
-
-    Pt::uint8_t* alphas = &_alphas[0] + v1.y() * sizeX;
-
-    for(int i = v1.y(); i <= v2.y(); ++i) {
-        for(int j = (curX1 >> FIXED_POINT_SHIFT_FACTOR); j <= (curX2 >> FIXED_POINT_SHIFT_FACTOR); ++j) {
-            alphas[j] = 255;
-        }
-        alphas += sizeX;
-        curX1  += chgX1;
-        curX2  += chgX2;
-    }
-}
-
-// Based on http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
-void Rasterizer2::rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2, const Point& v3, Pt::int32_t sizeX)
-{
-    const Pt::int32_t chgX1 = ( ( (v3.x() - v1.x()) << FIXED_POINT_SHIFT_FACTOR ) / (v3.y() - v1.y()) ) ;
-    const Pt::int32_t chgX2 = ( ( (v3.x() - v2.x()) << FIXED_POINT_SHIFT_FACTOR ) / (v3.y() - v2.y()) ) ;
-
-    Pt::int32_t  curX1  = (v3.x() << FIXED_POINT_SHIFT_FACTOR) + FIXED_POINT_FRACT_VAL_BM / 2;
-    Pt::int32_t  curX2  = (v3.x() << FIXED_POINT_SHIFT_FACTOR) - FIXED_POINT_FRACT_VAL_BM / 2;
-
-    Pt::uint8_t* alphas = &_alphas[0] + v3.y() * sizeX;
-
-    for(int i = v3.y(); i > v1.y(); --i) {
-        for(int j = (curX1 >> FIXED_POINT_SHIFT_FACTOR); j <= (curX2 >> FIXED_POINT_SHIFT_FACTOR); ++j) {
-            alphas[j] = 255;
-        }
-        alphas -= sizeX;
-        curX1  -= chgX1;
-        curX2  -= chgX2;
-    }
-}
-
-// Based on http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
-void Rasterizer2::rasterOneSolidTriangle(const Point& v1, const Point& v2, const Point& v3, Pt::int32_t sizeX)
-{
-    // Sort the vertices by its Y coordinates
-    const Point* vs[3] = { &v1, &v2, &v3 };
-
-    if( vs[1]->y() < vs[0]->y() ) std::swap( vs[1], vs[0] );
-    if( vs[2]->y() < vs[0]->y() ) std::swap( vs[2], vs[0] );
-    if( vs[2]->y() < vs[1]->y() ) std::swap( vs[2], vs[1] );
-
-    // Check for bottom-flat triangle
-    if(vs[1]->y() == vs[2]->y()) {
-        if( vs[1]->x() < vs[2]->x() ) rasterOneSolidTriangleBottomFlat(*vs[0], *vs[1], *vs[2], sizeX);
-        else                          rasterOneSolidTriangleBottomFlat(*vs[0], *vs[2], *vs[1], sizeX);
-    }
-    // Check for top-flat triangle
-    else if(vs[0]->y() == vs[1]->y()) {
-        if( vs[0]->x() < vs[1]->x() ) rasterOneSolidTriangleTopFlat(*vs[0], *vs[1], *vs[2], sizeX);
-        else                          rasterOneSolidTriangleTopFlat(*vs[1], *vs[0], *vs[2], sizeX);
-    }
-    // Split the triangle to a bottom-flat and top-flat
-    else {
-        Pt::int32_t y2my1 = vs[1]->y() - vs[0]->y();
-        Pt::int32_t y3my1 = vs[2]->y() - vs[0]->y();
-        Pt::int32_t x3mx1 = vs[2]->x() - vs[0]->x();
-        Pt::int32_t y2ry3 = ( (y2my1 << FIXED_POINT_SHIFT_FACTOR) / y3my1 );
-        Pt::int32_t offst = (y2ry3 * x3mx1) >> FIXED_POINT_SHIFT_FACTOR;
-
-        Point vm(
-            vs[0]->x() + offst,
-            vs[1]->y()
-        );
-
-        if( vs[1]->x() < vm.x() ) rasterOneSolidTriangleBottomFlat(*vs[0], *vs[1], vm, sizeX);
-        else                      rasterOneSolidTriangleBottomFlat(*vs[0], vm, *vs[1], sizeX);
-
-        if( vs[1]->x() < vm.x() ) rasterOneSolidTriangleTopFlat(*vs[1], vm, *vs[2], sizeX);
-        else                      rasterOneSolidTriangleTopFlat( vm, *vs[1], *vs[2], sizeX);
-    }
-}
-
-
-// ======================================================================================
-// ===== Private Member Functions =======================================================
-// ======================================================================================
-
-void Rasterizer2::genClippedPolygonPoints(std::vector<Point>& dst, const PointF* src, const size_t pointCount) const
-{
-   dst.clear();
-
-   for(size_t i = 0; i < pointCount; ++i)
-       dst.push_back( Point( src[i].x(), src[i].y() ) );
-
-    ClipPolygon clipper;
-    clipper(dst, _currentClip);
-}
-
-void Rasterizer2::strokePolygonOutline(const Point* points, size_t pointCount)
+void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount)
 {
     // Find the minimum and maximum coordinates
     Pt::int32_t minX =  65535;
@@ -649,6 +531,161 @@ void Rasterizer2::strokePolygonOutline(const Point* points, size_t pointCount)
 
     // Blit the work buffer to the image
     blitWorkBufferToImage(minX, minY, sizeX, sizeY, _brush.color());
+}
+
+void Rasterizer2::rasterSolidTriangles(Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY)
+{
+    // Find the minimum and maximum coordinates
+    minX =  65535;
+    minY =  65535;
+    maxX = -65535;
+    maxY = -65535;
+
+    for(size_t i = 0; i < pointCount; ++i) {
+        const Pt::int32_t x = points[i].x();
+        const Pt::int32_t y = points[i].y();
+        if(x < minX) minX = x;
+        if(y < minY) minY = y;
+        if(x > maxX) maxX = x;
+        if(y > maxY) maxY = y;
+    }
+
+    // Translate the coordinates to (0, 0)
+    for(size_t i = 0; i < pointCount; ++i) {
+        points[i].set(
+            (points[i].x() - minX),
+            (points[i].y() - minY)
+        );
+    }
+
+    // Calculate the size of the rectangle
+    const Pt::int32_t sizeX = maxX - minX + 1;
+    const Pt::int32_t sizeY = maxY - minY + 1;
+
+    // Prepare the work buffer
+    prepWorkBuffer(sizeX, sizeY);
+
+    // Raster the triangles
+    for(size_t i = 0; i < pointCount; i += 3) {
+        rasterOneSolidTriangle(points[i], points[i + 1], points[i + 2], sizeX);
+    }
+
+    // Blit the work buffer to the image
+    blitWorkBufferToImage(minX, minY, sizeX, sizeY, _brush.color());
+}
+
+// Based on http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
+void Rasterizer2::rasterOneSolidTriangle(const Point& v1, const Point& v2, const Point& v3, Pt::int32_t sizeX)
+{
+    // Sort the vertices by its Y coordinates
+    const Point* vs[3] = { &v1, &v2, &v3 };
+
+    if( vs[1]->y() < vs[0]->y() ) std::swap( vs[1], vs[0] );
+    if( vs[2]->y() < vs[0]->y() ) std::swap( vs[2], vs[0] );
+    if( vs[2]->y() < vs[1]->y() ) std::swap( vs[2], vs[1] );
+
+    // Check for bottom-flat triangle
+    if(vs[1]->y() == vs[2]->y()) {
+        if( vs[1]->x() < vs[2]->x() ) rasterOneSolidTriangleBottomFlat(*vs[0], *vs[1], *vs[2], sizeX);
+        else                          rasterOneSolidTriangleBottomFlat(*vs[0], *vs[2], *vs[1], sizeX);
+    }
+    // Check for top-flat triangle
+    else if(vs[0]->y() == vs[1]->y()) {
+        if( vs[0]->x() < vs[1]->x() ) rasterOneSolidTriangleTopFlat(*vs[0], *vs[1], *vs[2], sizeX);
+        else                          rasterOneSolidTriangleTopFlat(*vs[1], *vs[0], *vs[2], sizeX);
+    }
+    // Split the triangle to a bottom-flat and top-flat
+    else {
+        Pt::int32_t y2my1 = vs[1]->y() - vs[0]->y();
+        Pt::int32_t y3my1 = vs[2]->y() - vs[0]->y();
+        Pt::int32_t x3mx1 = vs[2]->x() - vs[0]->x();
+        Pt::int32_t y2ry3 = ( (y2my1 << FIXED_POINT_SHIFT_FACTOR) / y3my1 );
+        Pt::int32_t offst = (y2ry3 * x3mx1) >> FIXED_POINT_SHIFT_FACTOR;
+
+        Point vm(
+            vs[0]->x() + offst,
+            vs[1]->y()
+        );
+
+        if( vs[1]->x() < vm.x() ) rasterOneSolidTriangleBottomFlat(*vs[0], *vs[1], vm, sizeX);
+        else                      rasterOneSolidTriangleBottomFlat(*vs[0], vm, *vs[1], sizeX);
+
+        if( vs[1]->x() < vm.x() ) rasterOneSolidTriangleTopFlat(*vs[1], vm, *vs[2], sizeX);
+        else                      rasterOneSolidTriangleTopFlat( vm, *vs[1], *vs[2], sizeX);
+    }
+}
+
+// Based on http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
+void Rasterizer2::rasterOneSolidTriangleBottomFlat(const Point& v1, const Point& v2, const Point& v3, Pt::int32_t sizeX)
+{
+    const Pt::int32_t chgX1 = ( ( (v2.x() - v1.x()) << FIXED_POINT_SHIFT_FACTOR ) / (v2.y() - v1.y()) ) ;
+    const Pt::int32_t chgX2 = ( ( (v3.x() - v1.x()) << FIXED_POINT_SHIFT_FACTOR ) / (v3.y() - v1.y()) ) ;
+
+    Pt::int32_t  curX1  = (v1.x() << FIXED_POINT_SHIFT_FACTOR) + FIXED_POINT_FRACT_VAL_BM / 2;
+    Pt::int32_t  curX2  = (v1.x() << FIXED_POINT_SHIFT_FACTOR) - FIXED_POINT_FRACT_VAL_BM / 2;
+
+    Pt::uint8_t* alphas = &_alphas[0] + v1.y() * sizeX;
+
+    for(int i = v1.y(); i <= v2.y(); ++i) {
+        for(int j = (curX1 >> FIXED_POINT_SHIFT_FACTOR); j <= (curX2 >> FIXED_POINT_SHIFT_FACTOR); ++j) {
+            alphas[j] = 255;
+        }
+        alphas += sizeX;
+        curX1  += chgX1;
+        curX2  += chgX2;
+    }
+}
+
+// Based on http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
+void Rasterizer2::rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2, const Point& v3, Pt::int32_t sizeX)
+{
+    const Pt::int32_t chgX1 = ( ( (v3.x() - v1.x()) << FIXED_POINT_SHIFT_FACTOR ) / (v3.y() - v1.y()) ) ;
+    const Pt::int32_t chgX2 = ( ( (v3.x() - v2.x()) << FIXED_POINT_SHIFT_FACTOR ) / (v3.y() - v2.y()) ) ;
+
+    Pt::int32_t  curX1  = (v3.x() << FIXED_POINT_SHIFT_FACTOR) + FIXED_POINT_FRACT_VAL_BM / 2;
+    Pt::int32_t  curX2  = (v3.x() << FIXED_POINT_SHIFT_FACTOR) - FIXED_POINT_FRACT_VAL_BM / 2;
+
+    Pt::uint8_t* alphas = &_alphas[0] + v3.y() * sizeX;
+
+    for(int i = v3.y(); i > v1.y(); --i) {
+        for(int j = (curX1 >> FIXED_POINT_SHIFT_FACTOR); j <= (curX2 >> FIXED_POINT_SHIFT_FACTOR); ++j) {
+            alphas[j] = 255;
+        }
+        alphas -= sizeX;
+        curX1  -= chgX1;
+        curX2  -= chgX2;
+    }
+}
+
+void Rasterizer2::rasterFillTriangles(Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY)
+{
+    if(pointCount % 3) return;
+
+    switch( _brush.fillStyle() ) {
+        case Brush::Texture:
+            break;
+
+        case Brush::VerticalGradient:
+            break;
+
+        case Brush::HorizontalGradient:
+            break;
+
+        case Brush::Solid:
+            rasterSolidTriangles(points, pointCount, minX, minY, maxX, maxY);
+            break;
+    }
+}
+
+void Rasterizer2::genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount) const
+{
+    dst.clear();
+
+    for(size_t i = 0; i < pointCount; ++i)
+        dst.push_back( Point( src[i].x(), src[i].y() ) );
+
+    ClipPolygon clipper;
+    clipper(dst, _currentClip);
 }
 
 

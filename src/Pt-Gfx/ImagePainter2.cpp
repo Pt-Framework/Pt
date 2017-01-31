@@ -32,7 +32,6 @@
 #include <Pt/Gfx/ImagePainter2.h>
 
 #include "FreeType.h"
-#include "Triangulate.h"
 
 #include "Rasterizer2.h"
 
@@ -42,8 +41,7 @@ namespace Gfx {
 
 ImagePainter2::ImagePainter2(Image& image)
 : _rasterizer( new Rasterizer2(image))
-{
-}
+{}
 
 ImagePainter2::~ImagePainter2()
 {
@@ -57,7 +55,7 @@ FontMetrics ImagePainter2::fontMetrics( const Font& font, const Pt::String& text
 
 void ImagePainter2::setFontDir(const Pt::System::Path& path)
 {
-     FreeType::instance().setFontDir(path);
+    FreeType::instance().setFontDir(path);
 }
 
 std::string ImagePainter2::defaultFont()
@@ -67,12 +65,12 @@ std::string ImagePainter2::defaultFont()
 
 void ImagePainter2::setDefaultFont(const std::string& f)
 {
-     FreeType::instance().setDefaultFont(f);
+    FreeType::instance().setDefaultFont(f);
 }
 
 std::vector<std::string> ImagePainter2::fontNames()
 {
-      return FreeType::instance().fontNames();
+    return FreeType::instance().fontNames();
 }
 
 void ImagePainter2::setImage(Image& image)
@@ -92,7 +90,7 @@ const CompositionMode& ImagePainter2::compositionMode() const
 
 void ImagePainter2::setCompositionMode(const CompositionMode& mode)
 {
-  _rasterizer->setCompositionMode(mode);
+    _rasterizer->setCompositionMode(mode);
 }
 
 const Gfx::RectF& ImagePainter2::clip() const
@@ -176,38 +174,12 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount )
 
 void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
 {
-#if 1
+    std::vector<Point> points(pointCount);
 
-    std::vector<Point> clipped;
-    _rasterizer->genClippedPolygonPoints(clipped, ps, pointCount);
+    for(size_t i = 0; i < pointCount; ++i)
+        points[i].set( ps[i].x(), ps[i].y() );
 
-    _rasterizer->strokePolygonOutline(clipped.data(), clipped.size());
-
-    std::vector<Point> tris;
-    if(!Triangulate::process(tris, clipped)) return;
-
-    _rasterizer->fillTriangles(tris.data(), tris.size());
-
-#else
-
-    std::vector<Point> tris;
-
-    // bot
-    tris.push_back(Point(200, 100));
-    tris.push_back(Point(100, 200));
-    tris.push_back(Point(300, 200));
-    // top
-    tris.push_back(Point(100, 300));
-    tris.push_back(Point(300, 300));
-    tris.push_back(Point(200, 400));
-    // all
-    tris.push_back(Point(450, 100));
-    tris.push_back(Point(350, 300));
-    tris.push_back(Point(650, 400));
-
-    _rasterizer->fillTriangles(tris.data(), tris.size());
-
-#endif
+    _rasterizer->fillPolygon(points.data(), pointCount);
 }
 
 void ImagePainter2::drawImage( const PointF& toIn, const Image& image)

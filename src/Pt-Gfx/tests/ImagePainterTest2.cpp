@@ -102,7 +102,7 @@ static void testLines(const char* title, Image& image, ImagePainter2& painter)
     painter.drawLine( PointF(780,  11), PointF(782, 500) );
 
     painter.drawLine( PointF( 10, 540), PointF(781, 540) );
-    painter.drawLine( PointF( 10, 550), PointF(781, 551) );
+    painter.drawLine( PointF(781, 551), PointF( 10, 550) );
 
     painter.setPen( Pen(Color::fromRgb8(0, 255, 255, 175)) ); painter.drawText( PointF(100, 100), "Hello world!" );
     painter.setPen( Pen(Color::fromRgb8(0, 255, 255, 255)) ); painter.drawText( PointF(100, 150), "Hello world!" );
