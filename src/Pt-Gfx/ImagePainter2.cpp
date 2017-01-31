@@ -176,6 +176,7 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount )
 
 void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
 {
+    /*
     std::vector<Point> clipped;
     _rasterizer->genClippedPolygonPoints(clipped, ps, pointCount);
 
@@ -183,7 +184,27 @@ void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
     if(!Triangulate::process(tris, clipped)) return;
 
     _rasterizer->fillTriangles(tris.data(), tris.size());
-/*
+    */
+
+    std::vector<Point> tris;
+
+    // bot
+    //tris.push_back(Point(200, 100));
+    //tris.push_back(Point(100, 200));
+    //tris.push_back(Point(300, 200));
+
+    // top
+    //tris.push_back(Point(100, 300));
+    //tris.push_back(Point(300, 300));
+    //tris.push_back(Point(200, 400));
+
+    // all
+    tris.push_back(Point(400, 100));
+    tris.push_back(Point(300, 300));
+    tris.push_back(Point(600, 400));
+
+    _rasterizer->fillTriangles(tris.data(), tris.size());
+    /*
 
     setPen( Color::fromRgb8(0, 255, 0, 255) );
     drawLine(PointF(400, 100), PointF(600,400));
@@ -192,29 +213,15 @@ void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
 
     setPen( Color::fromRgb8(0, 255, 255, 255) );
 
-    std::vector<Point> tris;
 
-    // bot
- //   tris.push_back(Point(200, 100));
-   // tris.push_back(Point(100, 200));
-   // tris.push_back(Point(300, 200));
 
-    // top
-   // tris.push_back(Point(100, 300));
-   // tris.push_back(Point(300, 300));
-   // tris.push_back(Point(200, 400));
 
-    // all
-    tris.push_back(Point(400, 100));
-    tris.push_back(Point(300, 300));
-    tris.push_back(Point(600, 400));
 
   //  tris.push_back(Point(100,   0));
    // tris.push_back(Point(  0, 200));
   //  tris.push_back(Point(233, 200));
 
     //100 0     0 200     233 200
-    _rasterizer->fillTriangles(tris.data(), tris.size());
     */
 }
 
