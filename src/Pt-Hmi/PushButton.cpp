@@ -200,9 +200,9 @@ void PushButton::setRenderer(ButtonRenderer* renderer)
 }
 
 
-void PushButton::onPressed()
+void PushButton::onPressed(const Gfx::PointF& pos)
 {
-    Base::onPressed();
+    Base::onPressed(pos);
 
     if( isToggle() )
         setPressed( ! isPressed() );
@@ -211,17 +211,25 @@ void PushButton::onPressed()
 }
 
 
-void PushButton::onReleased()
+void PushButton::onReleased(const Gfx::PointF& pos)
 {
-    Base::onReleased();
+    Base::onReleased(pos);
 
-    if( ! isPressed() )
-      return;
+    if( pos.x() > 0 && pos.x() <= size().width() &&
+        pos.y() > 0 && pos.y() <= size().height() )
+    {
+        if( ! isToggle() )
+            setPressed(false);
 
-    if( ! isToggle() )
-        setPressed(false);
-    
-    clicked().send();
+        clicked().send();
+    }
+    else
+    {
+        if( isToggle() )
+            setPressed( ! isPressed() );
+        else
+            setPressed(false);
+    }
 }
 
 

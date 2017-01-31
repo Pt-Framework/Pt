@@ -70,6 +70,9 @@ ApplicationImpl::ApplicationImpl()
             std::clog << "using: " << deviceName.toLocal() << std::endl;
         }
     }
+
+    _eventReady += Pt::slot( *this, &ApplicationImpl::onMouseEvent );
+    _eventReady += Pt::slot( *this, &ApplicationImpl::onTouchEvent );
 }
 
 
@@ -83,6 +86,18 @@ ApplicationImpl::~ApplicationImpl()
 
     showConsole(true);
 } 
+
+
+void ApplicationImpl::onMouseEvent(const Pt::Hmi::MouseEvent& ev)
+{
+    _pointerPos = ev.position();
+}
+
+
+void ApplicationImpl::onTouchEvent(const TouchEvent& ev)
+{ 
+    _pointerPos = ev.position();
+}
 
 
 void ApplicationImpl::setCursor(const Cursor* cursor)
@@ -110,6 +125,10 @@ void ApplicationImpl::grabPointer(Window& grabber)
 
 void ApplicationImpl::releaseMouse(Window& grabber)
 {
+    //Pt::Hmi::TouchEvent ev(0);
+    //ev.setMove();
+    //ev.setPosition(_pointerPos);
+    //_eventReady.send(ev);
 }
 
 
@@ -120,6 +139,10 @@ void ApplicationImpl::grabPointer(Widget& grabber)
 
 void ApplicationImpl::releaseMouse(Widget& grabber)
 {
+    //Pt::Hmi::TouchEvent ev(0);
+    //ev.setMove();
+    //ev.setPosition(_pointerPos);
+    //_eventReady.send(ev);
 }
 
 

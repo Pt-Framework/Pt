@@ -75,15 +75,17 @@ class ApplicationImpl : public Pt::System::MainLoop
     void nextEvent();
 
 	private:
-		void onInputEvent(const Pt::Event& ev);
+    void onMouseEvent(const Pt::Hmi::MouseEvent& ev);
+    void onTouchEvent(const TouchEvent& ev);
 
 		void showConsole( bool s);
 
   private:
-		FrameBuffer _frameBuffer; 
-		std::vector<InputDevice*> _inputDevices;
+		FrameBuffer                  _frameBuffer; 
+		std::vector<InputDevice*>    _inputDevices;
 		Pt::Signal<const Pt::Event&> _eventReady;
-    Cursor        _cursor;
+    Cursor                       _cursor;
+    Gfx::PointF                  _pointerPos;
 };
 
 } // namespace

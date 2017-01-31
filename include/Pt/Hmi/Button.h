@@ -55,9 +55,9 @@ class PT_HMI_API Button : public Control
         Signal<>& clicked();
     
     protected:
-        virtual void onPressed();
+        virtual void onPressed(const Gfx::PointF& pos);
 
-        virtual void onReleased();
+        virtual void onReleased(const Gfx::PointF& pos);
 
         void setPressed(bool pressed);
 
@@ -82,6 +82,7 @@ class PT_HMI_API Button : public Control
     private:
         Signal<>   _clicked;
         bool       _isPressed;
+        bool       _onClickBegin;
         Pt::String _text;
 };
 

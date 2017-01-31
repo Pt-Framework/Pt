@@ -103,9 +103,9 @@ class PT_HMI_API PushButton : public Button
         void setRenderer(ButtonRenderer* renderer);
 
     protected:
-        virtual void onPressed();
+        virtual void onPressed(const Gfx::PointF& pos);
 
-        virtual void onReleased();
+        virtual void onReleased(const Gfx::PointF& pos);
 
     protected:
         virtual void onSetStyleOptions(const StyleOptions& options);

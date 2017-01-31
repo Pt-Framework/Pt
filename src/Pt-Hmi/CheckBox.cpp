@@ -161,24 +161,27 @@ void CheckBox::setRenderer(CheckBoxRenderer* renderer)
 }
 
 
-void CheckBox::onPressed()
+void CheckBox::onPressed(const Gfx::PointF& pos)
 {
-    Base::onPressed();
+    Base::onPressed(pos);
 }
 
 
-void CheckBox::onReleased()
+void CheckBox::onReleased(const Gfx::PointF& pos)
 {
-    Base::onReleased();
+    Base::onReleased(pos);
 
-    if(_state == Checked)
-        _state = Unchecked;
-    else
-        _state = Checked;
+    if( pos.x() > 0 && pos.x() <= size().width() &&
+        pos.y() > 0 && pos.y() <= size().height() )
+    {
+        if(_state == Checked)
+            _state = Unchecked;
+        else
+            _state = Checked;
 
-    setPressed(_state == Checked);
-
-    clicked().send();
+        setPressed(_state == Checked);
+        clicked().send();
+    }
 }
 
 
