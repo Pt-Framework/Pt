@@ -41,8 +41,34 @@
 
 #include <stdio.h> // Just for easy debugging ;)
 
+
 namespace Pt {
 namespace Gfx {
+
+
+// ======================================================================================
+// ===== Settings =======================================================================
+// ======================================================================================
+
+#define FIXED_POINT_USE_16_16_FORMAT
+#define FILL_POLYGON_PRECISION_AA
+
+// Use 16.16 format
+#if defined(FIXED_POINT_USE_16_16_FORMAT)
+    #define FIXED_POINT_SHIFT_FACTOR 16         // Shift factor
+    #define FIXED_POINT_ALPHA_DIVFAC 257        // Must be ( (2 ^ FIXED_POINT_SHIFT_FACTOR - 1) / 255 )
+    #define FIXED_POINT_FRACT_VAL_BM 0x0000FFFF // Bit mask for the fractional value; must be (2 ^ FIXED_POINT_SHIFT_FACTOR - 1)
+// Use 24.8 format
+#elif defined(FIXED_POINT_USE_24_8_FORMAT)
+    #define FIXED_POINT_SHIFT_FACTOR 8          // Shift factor
+    #define FIXED_POINT_ALPHA_MULFAC 1          // Must be ( 255 / (2 ^ FIXED_POINT_SHIFT_FACTOR - 1) )
+    #define FIXED_POINT_FRACT_VAL_BM 0x000000FF // Bit mask for the fractional value; must be (2 ^ FIXED_POINT_SHIFT_FACTOR - 1)
+// Use 28.4 format
+#else
+    #define FIXED_POINT_SHIFT_FACTOR 4          // Shift factor
+    #define FIXED_POINT_ALPHA_MULFAC 17         // Must be ( 255 / (2 ^ FIXED_POINT_SHIFT_FACTOR - 1) )
+    #define FIXED_POINT_FRACT_VAL_BM 0x0000000F // Bit mask for the fractional value; must be (2 ^ FIXED_POINT_SHIFT_FACTOR - 1)
+#endif
 
 
 // ======================================================================================
@@ -277,8 +303,6 @@ void Rasterizer2::strokeOutline(const Point* points, size_t pointCount)
     }
 }
 
-#define FILL_POLYGON_AA_USE_OUTLINE
-
 void Rasterizer2::fillPolygon(const Point* points, const size_t pointCount)
 {
     Pt::int32_t minX;
@@ -295,10 +319,7 @@ void Rasterizer2::fillPolygon(const Point* points, const size_t pointCount)
     if(!Triangulate::process(tris, clipped)) return;
 
     rasterFillTriangles(tris.data(), tris.size(), minX, minY, maxX, maxY);
-
-#ifdef FILL_POLYGON_AA_USE_OUTLINE
     rasterPolygonOutline(clipped.data(), clipped.size(), minX, minY, maxX, maxY);
-#endif
 
 #else
 
@@ -326,25 +347,6 @@ void Rasterizer2::fillPolygon(const Point* points, const size_t pointCount)
 // ======================================================================================
 // ===== Protected Member Functions =====================================================
 // ======================================================================================
-
-#define FIXED_POINT_USE_16_16_FORMAT
-
-// Use 16.16 format
-#if defined(FIXED_POINT_USE_16_16_FORMAT)
-    #define FIXED_POINT_SHIFT_FACTOR 16         // Shift factor
-    #define FIXED_POINT_ALPHA_DIVFAC 257        // Must be ( (2 ^ FIXED_POINT_SHIFT_FACTOR - 1) / 255 )
-    #define FIXED_POINT_FRACT_VAL_BM 0x0000FFFF // Bit mask for the fractional value; must be (2 ^ FIXED_POINT_SHIFT_FACTOR - 1)
-// Use 24.8 format
-#elif defined(FIXED_POINT_USE_24_8_FORMAT)
-    #define FIXED_POINT_SHIFT_FACTOR 8          // Shift factor
-    #define FIXED_POINT_ALPHA_MULFAC 1          // Must be ( 255 / (2 ^ FIXED_POINT_SHIFT_FACTOR - 1) )
-    #define FIXED_POINT_FRACT_VAL_BM 0x000000FF // Bit mask for the fractional value; must be (2 ^ FIXED_POINT_SHIFT_FACTOR - 1)
-// Use 28.4 format
-#else
-    #define FIXED_POINT_SHIFT_FACTOR 4          // Shift factor
-    #define FIXED_POINT_ALPHA_MULFAC 17         // Must be ( 255 / (2 ^ FIXED_POINT_SHIFT_FACTOR - 1) )
-    #define FIXED_POINT_FRACT_VAL_BM 0x0000000F // Bit mask for the fractional value; must be (2 ^ FIXED_POINT_SHIFT_FACTOR - 1)
-#endif
 
 void Rasterizer2::updateClip()
 {
@@ -617,7 +619,7 @@ void Rasterizer2::rasterOneSolidTriangleBottomFlat(const Point& v1, const Point&
      *     v2    v3
      */
 
-#ifndef FILL_POLYGON_AA_USE_OUTLINE
+#ifdef FILL_POLYGON_PRECISION_AA
 
     const Pt::int32_t chgX1 = ( ( ((int)v2.x() - (int)v1.x()) << FIXED_POINT_SHIFT_FACTOR ) / ((int)v2.y() - (int)v1.y()) );
     const Pt::int32_t chgX2 = ( ( ((int)v3.x() - (int)v1.x()) << FIXED_POINT_SHIFT_FACTOR ) / ((int)v3.y() - (int)v1.y()) );
@@ -625,11 +627,11 @@ void Rasterizer2::rasterOneSolidTriangleBottomFlat(const Point& v1, const Point&
     Pt::int32_t curX1 = (v1.x() << FIXED_POINT_SHIFT_FACTOR);
     Pt::int32_t curX2 = (v1.x() << FIXED_POINT_SHIFT_FACTOR);
 
-    if(chgX1 < 0) curX1 -= FIXED_POINT_FRACT_VAL_BM / 4;
-    else          curX1 += FIXED_POINT_FRACT_VAL_BM / 4;
+    if(chgX1 < 0) curX1 -= FIXED_POINT_FRACT_VAL_BM / 2;
+    else          curX1 += FIXED_POINT_FRACT_VAL_BM / 2;
 
-    if(chgX2 > 0) curX2 += FIXED_POINT_FRACT_VAL_BM / 4;
-    else          curX2 -= FIXED_POINT_FRACT_VAL_BM / 4;
+    if(chgX2 < 0) curX2 += FIXED_POINT_FRACT_VAL_BM / 2;
+    else          curX2 -= FIXED_POINT_FRACT_VAL_BM / 2;
 
     Pt::uint8_t* alphas = &_alphas[0] + v1.y() * sizeX;
 
@@ -660,8 +662,10 @@ void Rasterizer2::rasterOneSolidTriangleBottomFlat(const Point& v1, const Point&
                     // Draw the block
                     if( ((int) alphas[lx] + flx) <= 255 ) alphas[lx] += flx;
                     else                                  alphas[lx]  = 255;
-                    if( rx < sizeX && ( ((int) alphas[rx] +frx) <= 255 ) ) alphas[rx] += frx;
-                    else                                                   alphas[rx]  = 255;
+                    if( rx < sizeX ) {
+                        if( ((int) alphas[rx] + frx) <= 255 ) alphas[rx] += frx;
+                        else                                  alphas[rx]  = 255;
+                    }
                 }
                 iterX += chgX;
             }
@@ -709,7 +713,7 @@ void Rasterizer2::rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2
      *        v3
      */
 
-#ifndef FILL_POLYGON_AA_USE_OUTLINE
+#ifdef FILL_POLYGON_PRECISION_AA
 
     const Pt::int32_t chgX1 = ( ( ((int)v3.x() - (int)v1.x()) << FIXED_POINT_SHIFT_FACTOR ) / ((int)v3.y() - (int)v1.y()) ) ;
     const Pt::int32_t chgX2 = ( ( ((int)v3.x() - (int)v2.x()) << FIXED_POINT_SHIFT_FACTOR ) / ((int)v3.y() - (int)v2.y()) ) ;
@@ -717,11 +721,11 @@ void Rasterizer2::rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2
     Pt::int32_t curX1 = (v3.x() << FIXED_POINT_SHIFT_FACTOR);
     Pt::int32_t curX2 = (v3.x() << FIXED_POINT_SHIFT_FACTOR);
 
-    if(chgX1 < 0) curX1 -= FIXED_POINT_FRACT_VAL_BM / 4;
-    else          curX1 += FIXED_POINT_FRACT_VAL_BM / 4;
+    if(chgX1 < 0) curX1 += FIXED_POINT_FRACT_VAL_BM / 2;
+    else          curX1 -= FIXED_POINT_FRACT_VAL_BM / 2;
 
-    if(chgX2 > 0) curX2 += FIXED_POINT_FRACT_VAL_BM / 4;
-    else          curX2 -= FIXED_POINT_FRACT_VAL_BM / 4;
+    if(chgX2 < 0) curX2 -= FIXED_POINT_FRACT_VAL_BM / 2;
+    else          curX2 += FIXED_POINT_FRACT_VAL_BM / 2;
 
     Pt::uint8_t* alphas = &_alphas[0] + v3.y() * sizeX;
 
@@ -752,8 +756,10 @@ void Rasterizer2::rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2
                     // Draw the block
                     if( ((int) alphas[lx] + flx) <= 255 ) alphas[lx] += flx;
                     else                                  alphas[lx]  = 255;
-                    if( rx < sizeX && ( ((int) alphas[rx] +frx) <= 255 ) ) alphas[rx] += frx;
-                    else                                                   alphas[rx]  = 255;
+                    if( rx < sizeX ) {
+                        if( ((int) alphas[rx] + frx) <= 255 ) alphas[rx] += frx;
+                        else                                  alphas[rx]  = 255;
+                    }
                 }
                 iterX += chgX;
             }

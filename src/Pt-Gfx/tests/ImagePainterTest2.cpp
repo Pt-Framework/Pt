@@ -150,6 +150,11 @@ int main(int argc, char* args[])
         testFillPolygon("Test Fill Polygons - CompositionMode::SourceCopy", image, painter);
     }
 
+    if(1) {
+        painter.setCompositionMode(CompositionMode::SourceOver);
+        testFillPolygon("Test Fill Polygons - CompositionMode::SourceOver", image, painter);
+    }
+
     return 0;
 }
 
