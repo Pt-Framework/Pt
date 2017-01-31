@@ -56,11 +56,11 @@ class ApplicationImpl : public Pt::System::MainLoop
 
     void grabPointer(Window& grabber);
 
-    void releaseMouse(Window& grabber);
+    void releasePointer(Window& grabber);
 
     void grabPointer(Widget& grabber);
 
-    void releaseMouse(Widget& grabber);
+    void releasePointer(Widget& grabber);
     
 		FrameBuffer& frameBuffer()
 		{
@@ -75,17 +75,16 @@ class ApplicationImpl : public Pt::System::MainLoop
     void nextEvent();
 
 	private:
-    void onMouseEvent(const Pt::Hmi::MouseEvent& ev);
-    void onTouchEvent(const TouchEvent& ev);
-
-		void showConsole( bool s);
+    void onMouseEvent(const MouseEvent& ev);
+		
+    void showConsole( bool s);
 
   private:
 		FrameBuffer                  _frameBuffer; 
 		std::vector<InputDevice*>    _inputDevices;
 		Pt::Signal<const Pt::Event&> _eventReady;
     Cursor                       _cursor;
-    Gfx::PointF                  _pointerPos;
+    MouseEvent                   _lastMouse;
 };
 
 } // namespace

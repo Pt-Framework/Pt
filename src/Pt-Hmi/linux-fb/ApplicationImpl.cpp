@@ -45,6 +45,7 @@ namespace Pt {
 namespace Hmi {
 
 ApplicationImpl::ApplicationImpl()
+: _lastMouse(0)
 {           
     showConsole(false);
     
@@ -71,8 +72,7 @@ ApplicationImpl::ApplicationImpl()
         }
     }
 
-    _eventReady += Pt::slot( *this, &ApplicationImpl::onMouseEvent );
-    _eventReady += Pt::slot( *this, &ApplicationImpl::onTouchEvent );
+    _eventReady += Pt::slot(*this, &ApplicationImpl::onMouseEvent);
 }
 
 
@@ -86,18 +86,6 @@ ApplicationImpl::~ApplicationImpl()
 
     showConsole(true);
 } 
-
-
-void ApplicationImpl::onMouseEvent(const Pt::Hmi::MouseEvent& ev)
-{
-    _pointerPos = ev.position();
-}
-
-
-void ApplicationImpl::onTouchEvent(const TouchEvent& ev)
-{ 
-    _pointerPos = ev.position();
-}
 
 
 void ApplicationImpl::setCursor(const Cursor* cursor)
@@ -118,17 +106,19 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 }
 
 
+void ApplicationImpl::onMouseEvent(const MouseEvent& ev)
+{
+    _lastMouse = ev;
+}
+
+
 void ApplicationImpl::grabPointer(Window& grabber)
 {
 }
 
 
-void ApplicationImpl::releaseMouse(Window& grabber)
+void ApplicationImpl::releasePointer(Window& grabber)
 {
-    //Pt::Hmi::TouchEvent ev(0);
-    //ev.setMove();
-    //ev.setPosition(_pointerPos);
-    //_eventReady.send(ev);
 }
 
 
@@ -137,12 +127,15 @@ void ApplicationImpl::grabPointer(Widget& grabber)
 }
 
 
-void ApplicationImpl::releaseMouse(Widget& grabber)
+void ApplicationImpl::releasePointer(Widget& grabber)
 {
-    //Pt::Hmi::TouchEvent ev(0);
-    //ev.setMove();
-    //ev.setPosition(_pointerPos);
-    //_eventReady.send(ev);
+  // TODO: if mouse is not enabled unset pointer widget
+  // Application::instance().setPointerWidget(0)
+
+  // send mouse move event with current button state
+  // so widget under the cursor gets an enter event 
+  _lastMouse.setMove(); 
+  _eventReady.send(_lastMouse);
 }
 
 

@@ -75,11 +75,11 @@ class ApplicationImpl : public Pt::System::EventLoop
 
         void grabPointer(Window& grabber);
 
-        void releaseMouse(Window& grabber);
+        void releasePointer(Window& grabber);
 
         void grabPointer(Widget& grabber);
 
-        void releaseMouse(Widget& grabber);
+        void releasePointer(Widget& grabber);
 
     protected:
         virtual void onAttachSelectable(System::Selectable&);

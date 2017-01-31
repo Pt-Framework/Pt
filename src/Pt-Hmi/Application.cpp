@@ -187,9 +187,9 @@ void Application::grabPointer(Window& grabber)
 {    
     _impl->grabPointer(grabber);
 
-    _pointerGrabber = &grabber;
-
     setPointerWidget(0);
+
+    _pointerGrabber = &grabber;
 }
 
 
@@ -198,9 +198,9 @@ void Application::releasePointer(Window& grabber)
     if(_pointerGrabber != static_cast<Visual*>(&grabber) )
         return;
     
-    _impl->releaseMouse(grabber); 
-    
     _pointerGrabber = 0;
+
+    _impl->releasePointer(grabber); 
 }
 
 
@@ -208,9 +208,9 @@ void Application::grabPointer(Widget& grabber)
 {
     _impl->grabPointer(grabber);
 
-    _pointerGrabber = &grabber;
-
     setPointerWidget(&grabber);
+
+    _pointerGrabber = &grabber;
 }
 
 
@@ -219,9 +219,9 @@ void Application::releasePointer(Widget& grabber)
     if( _pointerGrabber != static_cast<Visual*>(&grabber) )
         return;
 
-    _impl->releaseMouse(grabber);
-
     _pointerGrabber = 0;
+
+    _impl->releasePointer(grabber);
 }
 
 

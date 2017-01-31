@@ -211,7 +211,7 @@ void ApplicationImpl::grabPointer(Window& grabber)
 }
 
 
-void ApplicationImpl::releaseMouse(Window& grabber)
+void ApplicationImpl::releasePointer(Window& grabber)
 {
     ReleaseCapture();
 }
@@ -227,7 +227,7 @@ void ApplicationImpl::grabPointer(Widget& grabber)
 }
 
 
-void ApplicationImpl::releaseMouse(Widget& grabber)
+void ApplicationImpl::releasePointer(Widget& grabber)
 {
     ReleaseCapture();
 }

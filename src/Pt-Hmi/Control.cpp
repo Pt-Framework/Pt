@@ -98,7 +98,6 @@ void Control::onFocusEvent(const FocusEvent& ev)
 
 void Control::onEnterEvent( const EnterEvent& ev)
 {
-    std::clog << "ENTER\n";
     Widget::onEnterEvent(ev);
 
     _isHighlighted = true;
@@ -109,7 +108,6 @@ void Control::onEnterEvent( const EnterEvent& ev)
 
 void Control::onLeaveEvent(const LeaveEvent& ev)
 {
-    std::clog << "LEAVE\n";
     Widget::onLeaveEvent(ev);
 
     _isHighlighted = false;
