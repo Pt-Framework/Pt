@@ -96,13 +96,15 @@ class Rasterizer2
             return _compositionMode;
         }
 
-        void image( const Point& to, const Image& image);
+        void image(const Point& to, const Image& image);
 
         void image(const Point& toIn, const Image& image, const Rect& imageRect);
 
-        void strokeText( const Point& to, const Pt::String& text );
+        void strokeText(const Point& to, const Pt::String& text);
 
-        void strokeOutline( const Point* points, size_t pointCount );
+        void strokeOutline(const Point* points, size_t pointCount);
+
+        void fillTriangles(const Point* points, size_t pointCount);
 
     protected:
         void updateClip();
@@ -111,7 +113,6 @@ class Rasterizer2
         void blitWorkBufferToImage(int minX, int minY, int sizeX, int sizeY);
 
         void rasterOnePixelLineSegment(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t steps, Pt::int32_t sizeX, Pt::int32_t sizeY);
-
         void rasterOnePixelLine(const Point& a, const Point& b);
 
     private:
@@ -133,7 +134,12 @@ class Rasterizer2
         Rect            _clip;
         Rect            _currentClip;
 
-        std::vector<Pt::uint8_t> _alphas;
+        std::vector<Pt::uint8_t> _alphas; // Work buffer
+
+    private:
+        void genClippedPolygonPoints(std::vector<Point>& dst, const PointF* src, const size_t pointCount) const;
+
+        friend class ImagePainter2;
 };
 
 

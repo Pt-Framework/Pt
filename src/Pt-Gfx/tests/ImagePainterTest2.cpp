@@ -130,14 +130,20 @@ int main(int argc, char* args[])
     painter.setFontDir( Pt::System::Path("../src/Pt-Gfx/fonts") );
     painter.setFont( Pt::Gfx::Font("DejaVu Serif", 24, Pt::Gfx::Font::BoldItalic) );
 
-    //painter.setCompositionMode(CompositionMode::SourceCopy);
-    //testLines("Test Lines - CompositionMode::SourceCopy", image, painter);
+    if(0) {
+        painter.setCompositionMode(CompositionMode::SourceCopy);
+        testLines("Test Lines - CompositionMode::SourceCopy", image, painter);
+    }
 
-    //painter.setCompositionMode(CompositionMode::SourceOver);
-    //testLines("Test Lines - CompositionMode::SourceOver", image, painter);
+    if(0) {
+        painter.setCompositionMode(CompositionMode::SourceOver);
+        testLines("Test Lines - CompositionMode::SourceOver", image, painter);
+    }
 
-    painter.setCompositionMode(CompositionMode::SourceCopy);
-    testFillPolygon("Test Fill Polygons - CompositionMode::SourceCopy", image, painter);
+    if(1) {
+        painter.setCompositionMode(CompositionMode::SourceCopy);
+        testFillPolygon("Test Fill Polygons - CompositionMode::SourceCopy", image, painter);
+    }
 
     return 0;
 }

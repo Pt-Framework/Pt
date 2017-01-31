@@ -41,16 +41,16 @@ namespace Gfx {
 
 static const float EPSILON = 0.0000000001f;
 
-bool Triangulate::process(const PointF* contour, size_t pointCount, std::vector<Point>& result)
+bool Triangulate::process(std::vector<Point>& result, const std::vector<Point>& contour)
 {
     // Allocate and initialize list of Vertices in polygon
-    const int n = pointCount;
+    const int n = contour.size();
     if( n < 3 ) return false;
 
     int* V = new int[n];
 
     // We want a counter-clockwise polygon in V
-    if( 0.0f < area(contour, pointCount) ) {
+    if( 0.0f < area(contour) ) {
         for(int v = 0; v < n; ++v) V[v] = v;
     }
     else {
@@ -96,9 +96,9 @@ bool Triangulate::process(const PointF* contour, size_t pointCount, std::vector<
     return true;
 }
 
-float Triangulate::area(const PointF* contour, size_t pointCount)
+float Triangulate::area(const std::vector<Point>& contour)
 {
-    const int n = pointCount;
+    const int n = contour.size();
     float     A = 0.0f;
 
     for(int p = n - 1, q = 0; q < n; p = q++) {
@@ -108,7 +108,7 @@ float Triangulate::area(const PointF* contour, size_t pointCount)
     return A * 0.5f;
 }
 
-bool Triangulate::snip(const PointF* contour, int u, int v, int w, int n, int* V)
+bool Triangulate::snip(const std::vector<Point>& contour, int u, int v, int w, int n, int* V)
 {
 
     const float Ax = contour[ V[u] ].x();

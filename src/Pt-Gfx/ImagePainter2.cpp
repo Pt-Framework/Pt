@@ -102,7 +102,7 @@ const Gfx::RectF& ImagePainter2::clip() const
 
 void ImagePainter2::setClip( const RectF& clipIn )
 {
-     Rect clip( Point( (int)(clipIn.x()), (int)(clipIn.y())), Size((int) (clipIn.width()),(int) (clipIn.height())));
+     Rect clip( Point( (int)(clipIn.x()), (int)(clipIn.y())), Size((int) (clipIn.width()),(int) (clipIn.height())) );
     _rasterizer->setClip( clip );
     _clip = clipIn;
 }
@@ -176,8 +176,14 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount )
 
 void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
 {
+    std::vector<Point> clipped;
+    _rasterizer->genClippedPolygonPoints(clipped, ps, pointCount);
+
+
     std::vector<Point> tris;
-    if(!Triangulate::process(ps, pointCount, tris)) return;
+    if(!Triangulate::process(tris, clipped)) return;
+
+    _rasterizer->fillTriangles(tris.data(), tris.size());
 }
 
 void ImagePainter2::drawImage( const PointF& toIn, const Image& image)

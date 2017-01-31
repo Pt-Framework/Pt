@@ -34,6 +34,7 @@
 #include <Pt/Gfx/ImagePainter2.h>
 
 #include "DrawText.h"
+#include "ClipPolygon.h"
 
 #include "Rasterizer2.h"
 
@@ -275,6 +276,13 @@ void Rasterizer2::strokeOutline(const Point* points, size_t pointCount)
     }
 }
 
+void Rasterizer2::fillTriangles(const Point* points, size_t pointCount)
+{
+    if(pointCount % 3) return;
+
+    
+}
+
 
 // ======================================================================================
 // ===== Protected Member Functions =====================================================
@@ -422,6 +430,22 @@ void Rasterizer2::rasterOnePixelLine(const Point& a, const Point& b)
 
     // Blit the work buffer to the image
     blitWorkBufferToImage(minX, minY, sizeX, sizeY);
+}
+
+
+// ======================================================================================
+// ===== Private Member Functions =======================================================
+// ======================================================================================
+
+void Rasterizer2::genClippedPolygonPoints(std::vector<Point>& dst, const PointF* src, const size_t pointCount) const
+{
+   dst.clear();
+
+   for(size_t i = 0; i < pointCount; ++i)
+       dst.push_back( Point( src[i].x(), src[i].y() ) );
+
+    ClipPolygon clipper;
+    clipper(dst, _currentClip);
 }
 
 
