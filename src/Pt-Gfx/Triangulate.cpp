@@ -44,7 +44,7 @@ static const float EPSILON = 0.0000000001f;
 bool Triangulate::process(const std::vector<Point>& contour, std::vector<Point>& result)
 {
     // Allocate and initialize list of Vertices in polygon
-    int n = contour.size();
+    const int n = contour.size();
     if( n < 3 ) return false;
 
     int* V = new int[n];
@@ -57,10 +57,8 @@ bool Triangulate::process(const std::vector<Point>& contour, std::vector<Point>&
         for(int v = 0; v < n; ++v) V[v] = (n - 1) - v;
     }
 
-    int nv = n;
-
     // Remove nv-2 Vertices, creating 1 triangle every time
-
+    int nv    = n;
     int count = 2 * nv; // Error detection
 
     for(int m = 0, v = nv - 1; nv > 2;) {
@@ -76,9 +74,9 @@ bool Triangulate::process(const std::vector<Point>& contour, std::vector<Point>&
 
         if( snip(contour, u, v, w, nv, V) ) {
             // True names of the vertices
-            int a = V[u];
-            int b = V[v];
-            int c = V[w];
+            const int a = V[u];
+            const int b = V[v];
+            const int c = V[w];
             // Outputs triangle
             result.push_back( contour[a] );
             result.push_back( contour[b] );
@@ -100,8 +98,8 @@ bool Triangulate::process(const std::vector<Point>& contour, std::vector<Point>&
 
 float Triangulate::area(const std::vector<Point> contour)
 {
-    int   n = contour.size();
-    float A = 0.0f;
+    const int n = contour.size();
+    float     A = 0.0f;
 
     for(int p = n - 1, q = 0; q < n; p = q++) {
         A += contour[p].x() * contour[q].y() - contour[q].x() * contour[p].y();
@@ -111,43 +109,45 @@ float Triangulate::area(const std::vector<Point> contour)
 }
 
 bool Triangulate::insideTriangle(float Ax, float Ay, float Bx, float By, float Cx, float Cy, float Px, float Py)
-
 {
-  float ax, ay, bx, by, cx, cy, apx, apy, bpx, bpy, cpx, cpy;
-  float cCROSSap, bCROSScp, aCROSSbp;
+    const float ax  = Cx - Bx;
+    const float ay  = Cy - By;
+    const float bx  = Ax - Cx;
+    const float by  = Ay - Cy;
+    const float cx  = Bx - Ax;
+    const float cy  = By - Ay;
+    const float apx = Px - Ax;
+    const float apy = Py - Ay;
+    const float bpx = Px - Bx;
+    const float bpy = Py - By;
+    const float cpx = Px - Cx;
+    const float cpy = Py - Cy;
 
-  ax  = Cx - Bx;  ay  = Cy - By;
-  bx  = Ax - Cx;  by  = Ay - Cy;
-  cx  = Bx - Ax;  cy  = By - Ay;
-  apx = Px - Ax;  apy = Py - Ay;
-  bpx = Px - Bx;  bpy = Py - By;
-  cpx = Px - Cx;  cpy = Py - Cy;
+    const float aCROSSbp = ax * bpy - ay * bpx;
+    const float cCROSSap = cx * apy - cy * apx;
+    const float bCROSScp = bx * cpy - by * cpx;
 
-  aCROSSbp = ax * bpy - ay * bpx;
-  cCROSSap = cx * apy - cy * apx;
-  bCROSScp = bx * cpy - by * cpx;
-
-  return ( (aCROSSbp >= 0.0f) && (bCROSScp >= 0.0f) && (cCROSSap >= 0.0f) );
+    return ( (aCROSSbp >= 0.0f) && (bCROSScp >= 0.0f) && (cCROSSap >= 0.0f) );
 }
 
 bool Triangulate::snip(const std::vector<Point>& contour, int u, int v, int w, int n, int* V)
 {
 
-    float Ax = contour[ V[u] ].x();
-    float Ay = contour[ V[u] ].y();
+    const float Ax = contour[ V[u] ].x();
+    const float Ay = contour[ V[u] ].y();
 
-    float Bx = contour[ V[v] ].x();
-    float By = contour[ V[v] ].y();
+    const float Bx = contour[ V[v] ].x();
+    const float By = contour[ V[v] ].y();
 
-    float Cx = contour[ V[w] ].x();
-    float Cy = contour[ V[w] ].y();
+    const float Cx = contour[ V[w] ].x();
+    const float Cy = contour[ V[w] ].y();
 
     if( EPSILON > ( ((Bx - Ax) * (Cy - Ay)) - ((By - Ay) * (Cx - Ax)) ) ) return false;
 
     for(int p = 0; p < n; ++p) {
         if( (p == u) || (p == v) || (p == w) ) continue;
-        float Px = contour[ V[p] ].x();
-        float Py = contour[ V[p] ].y();
+        const float Px = contour[ V[p] ].x();
+        const float Py = contour[ V[p] ].y();
         if( insideTriangle(Ax, Ay, Bx, By, Cx, Cy, Px, Py) ) return false;
     }
 
