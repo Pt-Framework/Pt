@@ -462,7 +462,7 @@ void Rasterizer2::rasterSolidTriangles(const Point* points, size_t pointCount)
         if(y > maxY) maxY = y;
     }
 
-#define FIXED
+//#define FIXED
 
     // Translate the coordinates to (0, 0) and convert them to fixed-points
     std::vector<PointFP> pointsFP(pointCount);
@@ -494,20 +494,20 @@ void Rasterizer2::rasterSolidTriangles(const Point* points, size_t pointCount)
     blitWorkBufferToImage(minX, minY, sizeX, sizeY, _brush.color());
 }
 
-void Rasterizer2::rasterOneSolidTriangleBottomFlat(const PointFP& v1, const PointFP& v2, const PointFP& v3, Pt::int32_t sizeX)
+void Rasterizer2::rasterOneSolidTriangleBottomFlat(const PointFP& fv1, const PointFP& fv2, const PointFP& fv3, Pt::int32_t sizeX)
 {
 #ifdef FIXED
-    Pt::int32_t  chgX1  = ( ((Pt::int64_t)(v2.x() - v1.x())<< FIXED_POINT_SHIFT_FACTOR) / (v2.y() - v1.y()) ) ;
-    Pt::int32_t  chgX2  = ( ((Pt::int64_t)(v3.x() - v1.x())<< FIXED_POINT_SHIFT_FACTOR) / (v3.y() - v1.y()) ) ;
+    Pt::int32_t  chgX1  = ( ((Pt::int64_t)(fv2.x() - fv1.x()) << FIXED_POINT_SHIFT_FACTOR) / (fv2.y() - fv1.y()) ) ;
+    Pt::int32_t  chgX2  = ( ((Pt::int64_t)(fv3.x() - fv1.x()) << FIXED_POINT_SHIFT_FACTOR) / (fv3.y() - fv1.y()) ) ;
 
 //    Pt::int32_t  chgX1  = ( (v2.x() - v1.x()) / (v2.y() - v1.y()) ) << FIXED_POINT_SHIFT_FACTOR;
   //  Pt::int32_t  chgX2  = ( (v3.x() - v1.x()) / (v3.y() - v1.y()) ) << FIXED_POINT_SHIFT_FACTOR;
 
-    Pt::int32_t  y1     = v1.y() >> FIXED_POINT_SHIFT_FACTOR;
-    Pt::int32_t  y2     = v2.y() >> FIXED_POINT_SHIFT_FACTOR;
+    Pt::int32_t  y1     = fv1.y() >> FIXED_POINT_SHIFT_FACTOR;
+    Pt::int32_t  y2     = fv2.y() >> FIXED_POINT_SHIFT_FACTOR;
 
-    Pt::int32_t  curX1  = v1.x();
-    Pt::int32_t  curX2  = v1.x();
+    Pt::int32_t  curX1  = fv1.x();
+    Pt::int32_t  curX2  = fv1.x();
 
     Pt::uint8_t* alphas = &_alphas[0] + y1 * sizeX;
 
@@ -520,15 +520,15 @@ void Rasterizer2::rasterOneSolidTriangleBottomFlat(const PointFP& v1, const Poin
         curX2  += chgX2;
     }
 #else
-    float invslope1 = (float)(v2.x() - v1.x()) / (v2.y() - v1.y());
-    float invslope2 = (float)(v3.x() - v1.x()) / (v3.y() - v1.y());
+    float invslope1 = (float)(fv2.x() - fv1.x()) / (fv2.y() - fv1.y());
+    float invslope2 = (float)(fv3.x() - fv1.x()) / (fv3.y() - fv1.y());
 
-    float curx1 = v1.x();
-    float curx2 = v1.x();
+    float curx1 = fv1.x();
+    float curx2 = fv1.x();
 
-    Pt::uint8_t* alphas = &_alphas[0] + v1.y() * sizeX;
+    Pt::uint8_t* alphas = &_alphas[0] + fv1.y() * sizeX;
 
-    for (int scanlineY = v1.y(); scanlineY <= v2.y(); scanlineY++) {
+    for (int scanlineY = fv1.y(); scanlineY <= fv2.y(); scanlineY++) {
         for(int i = curx1; i <= curx2; ++i) alphas[i] = 255;
         alphas += sizeX;
         curx1  += invslope1;
@@ -537,21 +537,21 @@ void Rasterizer2::rasterOneSolidTriangleBottomFlat(const PointFP& v1, const Poin
 #endif
 }
 
-void Rasterizer2::rasterOneSolidTriangleTopFlat(const PointFP& v1, const PointFP& v2, const PointFP& v3, Pt::int32_t sizeX)
+void Rasterizer2::rasterOneSolidTriangleTopFlat(const PointFP& fv1, const PointFP& fv2, const PointFP& fv3, Pt::int32_t sizeX)
 {
 #ifdef FIXED
 
-    Pt::int32_t  chgX1  = ( ((Pt::int64_t)(v3.x() - v1.x())<< FIXED_POINT_SHIFT_FACTOR) / (v3.y() - v1.y()) ) ;
-    Pt::int32_t  chgX2  = ( ((Pt::int64_t)(v3.x() - v2.x())<< FIXED_POINT_SHIFT_FACTOR) / (v3.y() - v2.y()) ) ;
+    Pt::int32_t  chgX1  = ( ((Pt::int64_t)(fv3.x() - fv1.x()) << FIXED_POINT_SHIFT_FACTOR) / (fv3.y() - fv1.y()) ) ;
+    Pt::int32_t  chgX2  = ( ((Pt::int64_t)(fv3.x() - fv2.x()) << FIXED_POINT_SHIFT_FACTOR) / (fv3.y() - fv2.y()) ) ;
 
     //Pt::int32_t  chgX1  = ( (v3.x() - v1.x()) / (v3.y() - v1.y()) ) << FIXED_POINT_SHIFT_FACTOR;
     //Pt::int32_t  chgX2  = ( (v3.x() - v2.x()) / (v3.y() - v2.y()) ) << FIXED_POINT_SHIFT_FACTOR;
 
-    Pt::int32_t  y3     = v3.y() >> FIXED_POINT_SHIFT_FACTOR;
-    Pt::int32_t  y1     = v1.y() >> FIXED_POINT_SHIFT_FACTOR;
+    Pt::int32_t  y3     = fv3.y() >> FIXED_POINT_SHIFT_FACTOR;
+    Pt::int32_t  y1     = fv1.y() >> FIXED_POINT_SHIFT_FACTOR;
 
-    Pt::int32_t  curX1  = v3.x();
-    Pt::int32_t  curX2  = v3.x();
+    Pt::int32_t  curX1  = fv3.x();
+    Pt::int32_t  curX2  = fv3.x();
 
     Pt::uint8_t* alphas = &_alphas[0] + y3 * sizeX;
 
@@ -564,15 +564,15 @@ void Rasterizer2::rasterOneSolidTriangleTopFlat(const PointFP& v1, const PointFP
         curX2  -= chgX2;
     }
 #else
-    float invslope1 = (float)(v3.x() - v1.x()) / (v3.y() - v1.y());
-    float invslope2 = (float)(v3.x() - v2.x()) / (v3.y() - v2.y());
+    float invslope1 = (float)(fv3.x() - fv1.x()) / (fv3.y() - fv1.y());
+    float invslope2 = (float)(fv3.x() - fv2.x()) / (fv3.y() - fv2.y());
 
-    float curx1 = v3.x();
-    float curx2 = v3.x();
+    float curx1 = fv3.x();
+    float curx2 = fv3.x();
 
-    Pt::uint8_t* alphas = &_alphas[0] + v3.y() * sizeX;
+    Pt::uint8_t* alphas = &_alphas[0] + fv3.y() * sizeX;
 
-    for(int scanlineY = v3.y(); scanlineY > v1.y(); scanlineY--) {
+    for(int scanlineY = fv3.y(); scanlineY > fv1.y(); scanlineY--) {
         for(int i = curx1; i <= curx2; ++i) alphas[i] = 255;
         alphas -= sizeX;
         curx1  -= invslope1;
@@ -581,13 +581,12 @@ void Rasterizer2::rasterOneSolidTriangleTopFlat(const PointFP& v1, const PointFP
 #endif
 }
 
-void Rasterizer2::rasterOneSolidTriangle(const PointFP& v1, const PointFP& v2, const PointFP& v3, Pt::int32_t sizeX)
+void Rasterizer2::rasterOneSolidTriangle(const PointFP& fv1, const PointFP& fv2, const PointFP& fv3, Pt::int32_t sizeX)
 {
     // http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
     // Sort the vertices by its Y coordinates
-    const PointFP* vs[3] = { &v1, &v2, &v3 };
+    const PointFP* vs[3] = { &fv1, &fv2, &fv3 };
 
-    //    printf("%d %d     %d %d     %d %d\n", vs[0]->x(), vs[0]->y(), vs[1]->x(), vs[1]->y(), vs[2]->x(), vs[2]->y());
 
     if( vs[1]->y() < vs[0]->y() ) std::swap( vs[1], vs[0] );
     if( vs[2]->y() < vs[0]->y() ) std::swap( vs[2], vs[0] );
@@ -634,8 +633,7 @@ void Rasterizer2::rasterOneSolidTriangle(const PointFP& v1, const PointFP& v2, c
         float x4    = vs[0]->x() + offst;
 
         //printf("%f %f %f\n", y2my1, y3my1, x3mx1);
-        printf("%f %f\n", y2ry3, offst);
-// 0.666667 133.333344
+        //printf("%f %f\n", y2ry3, offst);
 
 #endif
 

@@ -119,9 +119,9 @@ class Rasterizer2
         void rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, Pt::int32_t steps, Pt::int32_t sizeX, Pt::int32_t sizeY);
 
         void rasterSolidTriangles(const Point* points, size_t pointCount);
-        void rasterOneSolidTriangleBottomFlat(const PointFP& v1, const PointFP& v2, const PointFP& v3, Pt::int32_t sizeX);
-        void rasterOneSolidTriangleTopFlat(const PointFP& v1, const PointFP& v2, const PointFP& v3, Pt::int32_t sizeX);
-        void rasterOneSolidTriangle(const PointFP& v1, const PointFP& v2, const PointFP& v3, Pt::int32_t sizeX);
+        void rasterOneSolidTriangleBottomFlat(const PointFP& fv1, const PointFP& fv2, const PointFP& fv3, Pt::int32_t sizeX);
+        void rasterOneSolidTriangleTopFlat(const PointFP& fv1, const PointFP& fv2, const PointFP& fv3, Pt::int32_t sizeX);
+        void rasterOneSolidTriangle(const PointFP& fv1, const PointFP& fv2, const PointFP& fv3, Pt::int32_t sizeX);
 
     private:
         Image*          _image;
