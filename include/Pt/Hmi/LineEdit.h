@@ -95,9 +95,11 @@ class PT_HMI_API LineEdit : public Control
 
         void setAccepted(bool a);
 
-        Pt::Signal<const Pt::String&>& textChanged();
+        Pt::Signal<const Pt::String&>& textEdited();
 
-        Pt::Signal<const Pt::String&>& textEntered();
+        Pt::Signal<const Pt::String&>& returnPressed();
+
+        Pt::Signal<const Pt::String&>& editingFinished();
 
     public:
         const Gfx::Brush& background() const;
@@ -147,8 +149,9 @@ class PT_HMI_API LineEdit : public Control
         void layoutText();
 
     private:
-        Pt::Signal<const Pt::String&> _textChanged;
-        Pt::Signal<const Pt::String&> _textEntered;
+        Pt::Signal<const Pt::String&> _textEdited;
+        Pt::Signal<const Pt::String&> _returnPressed;
+        Pt::Signal<const Pt::String&> _editingFinished;
 
         EchoMode                      _echoMode;
         Alignment                     _textAlignment;

@@ -11,7 +11,7 @@ namespace Demo {
 
 void ChildW::checkInput(const Pt::String& s)
 {
-    _lineEdit.setAccepted(s == "ggg");
+    _lineEdit.setAccepted(s.size() == 3);
 
     if( ! _lineEdit.isAccepted() )
         _lineEdit.setTextColor( Gfx::Color::fromRgb8(255,0,0));
@@ -132,15 +132,15 @@ ChildW::ChildW(const std::string& title)
     _lineEdit.setMargin(5);
     _lineEdit.setTextAlignment(LineEdit::MiddleCenter);
     //_lineEdit.setEchoMode(Pt::Hmi::LineEdit::Masked);
-    _lineEdit.textEntered() += Pt::slot(_textLabel, &Pt::Hmi::Label::setText);
-    _lineEdit.textChanged() += Pt::slot(*this, &ChildW::checkInput);
+    _lineEdit.editingFinished() += Pt::slot(_textLabel, &Pt::Hmi::Label::setText);
+    _lineEdit.textEdited() += Pt::slot(*this, &ChildW::checkInput);
 
     _lineEdit2.setName("LineEdit2");
     _lineEdit2.setAccepted(true); 
     _lineEdit2.setPlaceholderText("placeholder text");
     _lineEdit2.setMargin(5);
     _lineEdit2.resize( Gfx::SizeF(130, 26) );
-    _lineEdit2.textEntered() += Pt::slot(*this, &ChildW::onTextEntered);
+    _lineEdit2.editingFinished() += Pt::slot(*this, &ChildW::onTextEntered);
 
     _progressBar.setName("ProgressBar"); 
     _progressBar.move( Gfx::PointF(0, 0) );

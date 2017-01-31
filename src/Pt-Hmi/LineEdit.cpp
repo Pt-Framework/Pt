@@ -166,15 +166,21 @@ void LineEdit::setAccepted(bool a)
 }
 
 
-Pt::Signal<const Pt::String&>& LineEdit::textChanged()
+Pt::Signal<const Pt::String&>& LineEdit::textEdited()
 {
-    return _textChanged;
+    return _textEdited;
 }
 
 
-Pt::Signal<const Pt::String&>& LineEdit::textEntered()
+Pt::Signal<const Pt::String&>& LineEdit::returnPressed()
 {
-    return _textEntered;
+    return _returnPressed;
+}
+
+
+Pt::Signal<const Pt::String&>& LineEdit::editingFinished()
+{
+    return _editingFinished;
 }
 
 
@@ -291,7 +297,7 @@ void LineEdit::onKeyEvent(const KeyEvent& ev)
     else if( ev.key().code() == Pt::Hmi::Key::Return )
     {
         if( isAccepted() )
-            _textEntered.send(_text);
+            _returnPressed.send(_text);
     }
     else if( ev.key().code() == Pt::Hmi::Key::Delete )
     {
@@ -304,7 +310,7 @@ void LineEdit::onKeyEvent(const KeyEvent& ev)
         layoutText();
         update();
         _isTextChanged = true;
-        _textChanged.send(_text);
+        _textEdited.send(_text);
     }
     else if( ev.key().code() == Pt::Hmi::Key::Backspace )
     {
@@ -318,7 +324,7 @@ void LineEdit::onKeyEvent(const KeyEvent& ev)
             setCursorPosition(_cursorPosition - 1);
 
         _isTextChanged = true;
-        _textChanged.send(_text);
+        _textEdited.send(_text);
     }
     else
     {
@@ -332,7 +338,7 @@ void LineEdit::onKeyEvent(const KeyEvent& ev)
 
             setCursorPosition(_cursorPosition + 1);
             _isTextChanged = true;
-            _textChanged.send(_text);
+            _textEdited.send(_text);
         }
     }
 }
@@ -389,7 +395,7 @@ void LineEdit::onFocusEvent(const FocusEvent& ev)
         if( isAccepted() && _isTextChanged)
         {
             _isTextChanged = false;
-            _textEntered.send(_text);
+            _editingFinished.send(_text);
         }
     }
     else
