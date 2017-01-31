@@ -36,7 +36,6 @@
 #include <Pt/System/Path.h>
 
 namespace Pt {
-
 namespace Gfx {
 
 
@@ -113,7 +112,6 @@ class PT_GFX_API ImagePainter2 : public Painter
 
 
 } // namespace
-
 } // namespace
 
 #endif
