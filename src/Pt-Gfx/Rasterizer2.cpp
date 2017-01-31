@@ -435,10 +435,16 @@ void Rasterizer2::rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt
         Pt::int32_t rx = frx ? (lx + 1) : lx;
         Pt::int32_t ry = fry ? (ly + 1) : ly;
         // Draw the block
+/*
                                        _alphas[ly * sizeX + lx] += (fly * flx + 255) >> 8;
         if( rx < sizeX               ) _alphas[ly * sizeX + rx] += (fly * frx + 255) >> 8;
         if(               ry < sizeY ) _alphas[ry * sizeX + lx] += (fry * flx + 255) >> 8;
         if( rx < sizeX && ry < sizeY ) _alphas[ry * sizeX + rx] += (fry * frx + 255) >> 8;
+*/
+        if(                             _alphas[ly * sizeX + lx] < 255 ) _alphas[ly * sizeX + lx] += (fly * flx + 255) >> 8;
+        if( rx < sizeX               && _alphas[ly * sizeX + rx] < 255 ) _alphas[ly * sizeX + rx] += (fly * frx + 255) >> 8;
+        if(               ry < sizeY && _alphas[ry * sizeX + lx] < 255 ) _alphas[ry * sizeX + lx] += (fry * flx + 255) >> 8;
+        if( rx < sizeX && ry < sizeY && _alphas[ry * sizeX + rx] < 255 ) _alphas[ry * sizeX + rx] += (fry * frx + 255) >> 8;
         // Increment the drawing coordinate
         fx1 += chgX;
         fy1 += chgY;
@@ -463,7 +469,12 @@ void Rasterizer2::rasterSolidTriangles(Point* points, size_t pointCount)
     }
 
     // Translate the coordinates to (0, 0)
+    //std::vector<Pt::int32_t> lineX(pointCount);
+    //std::vector<Pt::int32_t> lineY(pointCount);
+
     for(size_t i = 0; i < pointCount; ++i) {
+        //lineX[i] = (points[i].x() - minX) << FIXED_POINT_SHIFT_FACTOR;
+        //lineY[i] = (points[i].y() - minY) << FIXED_POINT_SHIFT_FACTOR;
         points[i].set(
             (points[i].x() - minX),
             (points[i].y() - minY)
@@ -478,102 +489,77 @@ void Rasterizer2::rasterSolidTriangles(Point* points, size_t pointCount)
     prepWorkBuffer(sizeX, sizeY);
 
     // Raster the triangles
-    for(size_t i = 0; i < pointCount; i += 3)
+    for(size_t i = 0; i < pointCount; i += 3) {
         rasterOneSolidTriangle(points[i], points[i + 1], points[i + 2], sizeX);
+    }
+
+    /*
+    // Raster the outlines
+    Pt::int32_t xm, ym;
+    for(size_t i = 0; i < pointCount; i += 3) {
+        xm = (points[i].x() > points[i + 1].x()) ? points[i].x() : points[i + 1].x();
+        ym = (points[i].y() > points[i + 1].y()) ? points[i].y() : points[i + 1].y();
+        rasterOnePixelLineSegment(lineX[i], lineY[i], lineX[i + 1], lineY[i + 1], std::max(xm, ym), sizeX, sizeY);
+        xm = (points[i].x() > points[i + 2].x()) ? points[i].x() : points[i + 2].x();
+        ym = (points[i].y() > points[i + 2].y()) ? points[i].y() : points[i + 2].y();
+        rasterOnePixelLineSegment(lineX[i], lineY[i], lineX[i + 2], lineY[i + 2], std::max(xm, ym), sizeX, sizeY);
+        xm = (points[i + 1].x() > points[i + 2].x()) ? points[i + 1].x() : points[i + 2].x();
+        ym = (points[i + 1].y() > points[i + 2].y()) ? points[i + 1].y() : points[i + 2].y();
+        rasterOnePixelLineSegment(lineX[i + 1], lineY[i + 1], lineX[i + 2], lineY[i + 2], std::max(xm, ym), sizeX, sizeY);
+    }
+    */
 
     // Blit the work buffer to the image
     blitWorkBufferToImage(minX, minY, sizeX, sizeY, _brush.color());
 }
 
-//#define FIXED_POINT_POLYGON
-
+// Based on http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
 void Rasterizer2::rasterOneSolidTriangleBottomFlat(const Point& v1, const Point& v2, const Point& v3, Pt::int32_t sizeX)
 {
-#ifdef FIXED_POINT_POLYGON
-    Pt::int32_t  chgX1  = ( ( (v2.x() - v1.x()) << FIXED_POINT_SHIFT_FACTOR ) / (v2.y() - v1.y()) ) ;
-    Pt::int32_t  chgX2  = ( ( (v3.x() - v1.x()) << FIXED_POINT_SHIFT_FACTOR ) / (v3.y() - v1.y()) ) ;
+    const Pt::int32_t chgX1 = ( ( (v2.x() - v1.x()) << FIXED_POINT_SHIFT_FACTOR ) / (v2.y() - v1.y()) ) ;
+    const Pt::int32_t chgX2 = ( ( (v3.x() - v1.x()) << FIXED_POINT_SHIFT_FACTOR ) / (v3.y() - v1.y()) ) ;
 
     Pt::int32_t  curX1  = v1.x() << FIXED_POINT_SHIFT_FACTOR;
     Pt::int32_t  curX2  = v1.x() << FIXED_POINT_SHIFT_FACTOR;
 
-    Pt::int32_t  y1     = v1.y();
-    Pt::int32_t  y2     = v2.y();
+    Pt::uint8_t* alphas = &_alphas[0] + v1.y() * sizeX;
 
-    Pt::uint8_t* alphas = &_alphas[0] + y1 * sizeX;
-
-    for(int i = y1; i <= y2; ++i) {
-        for(int j = curX1 >> FIXED_POINT_SHIFT_FACTOR; j <= curX2 >> FIXED_POINT_SHIFT_FACTOR; ++j) {
+    for(int i = v1.y(); i <= v2.y(); ++i) {
+        for(int j = (curX1 >> FIXED_POINT_SHIFT_FACTOR); j <= (curX2 >> FIXED_POINT_SHIFT_FACTOR); ++j) {
             alphas[j] = 255;
         }
         alphas += sizeX;
         curX1  += chgX1;
         curX2  += chgX2;
     }
-#else
-    float invslope1 = (float)(v2.x() - v1.x()) / (v2.y() - v1.y());
-    float invslope2 = (float)(v3.x() - v1.x()) / (v3.y() - v1.y());
-
-    float curx1 = v1.x();
-    float curx2 = v1.x();
-
-    Pt::uint8_t* alphas = &_alphas[0] + v1.y() * sizeX;
-
-    for (int scanlineY = v1.y(); scanlineY <= v2.y(); scanlineY++) {
-        for(int i = curx1; i <= curx2; ++i) alphas[i] = 255;
-        alphas += sizeX;
-        curx1  += invslope1;
-        curx2  += invslope2;
-    }
-#endif
 }
 
+// Based on http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
 void Rasterizer2::rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2, const Point& v3, Pt::int32_t sizeX)
 {
-#ifdef FIXED_POINT_POLYGON
-
-    Pt::int32_t  chgX1  = ( ( (v3.x() - v1.x()) << FIXED_POINT_SHIFT_FACTOR ) / (v3.y() - v1.y()) ) ;
-    Pt::int32_t  chgX2  = ( ( (v3.x() - v2.x()) << FIXED_POINT_SHIFT_FACTOR ) / (v3.y() - v2.y()) ) ;
+    const Pt::int32_t chgX1 = ( ( (v3.x() - v1.x()) << FIXED_POINT_SHIFT_FACTOR ) / (v3.y() - v1.y()) ) ;
+    const Pt::int32_t chgX2 = ( ( (v3.x() - v2.x()) << FIXED_POINT_SHIFT_FACTOR ) / (v3.y() - v2.y()) ) ;
 
     Pt::int32_t  curX1  = v3.x() << FIXED_POINT_SHIFT_FACTOR;
     Pt::int32_t  curX2  = v3.x() << FIXED_POINT_SHIFT_FACTOR;
 
-    Pt::int32_t  y3     = v3.y();
-    Pt::int32_t  y1     = v1.y();
+    Pt::uint8_t* alphas = &_alphas[0] + v3.y() * sizeX;
 
-    Pt::uint8_t* alphas = &_alphas[0] + y3 * sizeX;
-
-    for(int i = y3; i > y1; --i) {
-        for(int j = curX1 >> FIXED_POINT_SHIFT_FACTOR; j <= curX2 >> FIXED_POINT_SHIFT_FACTOR; ++j) {
+    for(int i = v3.y(); i > v1.y(); --i) {
+        for(int j = (curX1 >> FIXED_POINT_SHIFT_FACTOR); j <= (curX2 >> FIXED_POINT_SHIFT_FACTOR); ++j) {
             alphas[j] = 255;
         }
         alphas -= sizeX;
         curX1  -= chgX1;
         curX2  -= chgX2;
     }
-#else
-    float invslope1 = (float)(v3.x() - v1.x()) / (v3.y() - v1.y());
-    float invslope2 = (float)(v3.x() - v2.x()) / (v3.y() - v2.y());
-
-    float curx1 = v3.x();
-    float curx2 = v3.x();
-
-    Pt::uint8_t* alphas = &_alphas[0] + v3.y() * sizeX;
-
-    for(int scanlineY = v3.y(); scanlineY > v1.y(); scanlineY--) {
-        for(int i = curx1; i <= curx2; ++i) alphas[i] = 255;
-        alphas -= sizeX;
-        curx1  -= invslope1;
-        curx2  -= invslope2;
-    }
-#endif
 }
 
+// Based on http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
 void Rasterizer2::rasterOneSolidTriangle(const Point& v1, const Point& v2, const Point& v3, Pt::int32_t sizeX)
 {
-    // http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
     // Sort the vertices by its Y coordinates
     const Point* vs[3] = { &v1, &v2, &v3 };
-
 
     if( vs[1]->y() < vs[0]->y() ) std::swap( vs[1], vs[0] );
     if( vs[2]->y() < vs[0]->y() ) std::swap( vs[2], vs[0] );
@@ -590,24 +576,14 @@ void Rasterizer2::rasterOneSolidTriangle(const Point& v1, const Point& v2, const
     }
     // Split the triangle to a bottom-flat and top-flat
     else {
-#ifdef FIXED_POINT_POLYGON
         Pt::int32_t y2my1 = vs[1]->y() - vs[0]->y();
         Pt::int32_t y3my1 = vs[2]->y() - vs[0]->y();
         Pt::int32_t x3mx1 = vs[2]->x() - vs[0]->x();
         Pt::int32_t y2ry3 = ( (y2my1 << FIXED_POINT_SHIFT_FACTOR) / y3my1 );
         Pt::int32_t offst = (y2ry3 * x3mx1) >> FIXED_POINT_SHIFT_FACTOR;
-        Pt::int32_t x4    = vs[0]->x() + offst;
-#else
-        float y2my1 = vs[1]->y() - vs[0]->y();
-        float y3my1 = vs[2]->y() - vs[0]->y();
-        float x3mx1 = vs[2]->x() - vs[0]->x();
-        float y2ry3 = y2my1 / y3my1;
-        float offst = y2ry3 * x3mx1;
-        float x4    = vs[0]->x() + offst;
-#endif
 
         Point vm(
-            x4,
+            vs[0]->x() + offst,
             vs[1]->y()
         );
 

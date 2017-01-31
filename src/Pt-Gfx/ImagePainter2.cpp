@@ -180,7 +180,7 @@ void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
     _rasterizer->genClippedPolygonPoints(clipped, ps, pointCount);
 
     std::vector<Point> tris;
-#if 1
+#if 0
     if(!Triangulate::process(tris, clipped)) return;
 #else
     // bot
@@ -192,9 +192,9 @@ void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
     tris.push_back(Point(300, 300));
     tris.push_back(Point(200, 400));
     // all
-    tris.push_back(Point(400, 100));
-    tris.push_back(Point(300, 300));
-    tris.push_back(Point(600, 400));
+    tris.push_back(Point(450, 100));
+    tris.push_back(Point(350, 300));
+    tris.push_back(Point(650, 400));
 #endif
 
     _rasterizer->fillTriangles(tris.data(), tris.size());
