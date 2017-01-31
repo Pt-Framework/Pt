@@ -67,16 +67,14 @@ bool Triangulate::process(std::vector<Point>& result, const std::vector<Point>& 
     int count = 2 * nv; // Error detection
 
     for(int m = 0, v = nv - 1; nv > 2;) {
-        // If we loop, it is probably a non-simple polygon
+        // If we loop, it is probably a probable bad/non-simple polygon
         if(0 >= (count--)) {
-            // ERROR - probable bad polygon!
-            return false;
+            return false; // Exit error
         }
         // Three consecutive vertices in current polygon <u, v, w>
         int u = v    ; if (nv <= u) u = 0; // Previous
             v = u + 1; if (nv <= v) v = 0; // New v
         int w = v + 1; if (nv <= w) w = 0; // Next
-
         if( snip(contour, u, v, w, nv, V) ) {
             // True names of the vertices
             const int a = V[u];
