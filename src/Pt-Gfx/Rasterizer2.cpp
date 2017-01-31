@@ -462,11 +462,11 @@ void Rasterizer2::rasterSolidTriangles(Point* points, size_t pointCount)
         if(y > maxY) maxY = y;
     }
 
-    // Translate the coordinates to (0, 0) and convert them to fixed-points
+    // Translate the coordinates to (0, 0)
     for(size_t i = 0; i < pointCount; ++i) {
         points[i].set(
-            (points[i].x() - minX) << FIXED_POINT_SHIFT_FACTOR,
-            (points[i].y() - minY) << FIXED_POINT_SHIFT_FACTOR
+            (points[i].x() - minX),
+            (points[i].y() - minY)
         );
     }
 
@@ -485,73 +485,103 @@ void Rasterizer2::rasterSolidTriangles(Point* points, size_t pointCount)
     blitWorkBufferToImage(minX, minY, sizeX, sizeY, _brush.color());
 }
 
-void Rasterizer2::rasterOneSolidTriangle(const Point& fv1, const Point& fv2, const Point& fv3, Pt::int32_t sizeX)
+void Rasterizer2::rasterOneSolidTriangleBottomFlat(const Point& v1, const Point& v2, const Point& v3, Pt::int32_t sizeX)
 {
-    /*
-    float y3 = v1.y();
-    float y2 = v2.y();
-    float y1 = v3.y();
+  float invslope1 = (float)(v2.x() - v1.x()) / (v2.y() - v1.y());
+  float invslope2 = (float)(v3.x() - v1.x()) / (v3.y() - v1.y());
 
-    float x3 = v1.x();
-    float x2 = v2.x();
-    float x1 = v3.x();
+  float curx1 = v1.x();
+  float curx2 = v1.x();
 
-    // Deltas
-    float Dx12 = x1 - x2;
-    float Dx23 = x2 - x3;
-    float Dx31 = x3 - x1;
 
-    float Dy12 = y1 - y2;
-    float Dy23 = y2 - y3;
-    float Dy31 = y3 - y1;
+    Pt::uint8_t* alphas = &_alphas[0] + v1.y() * sizeX;
 
-    // Bounding rectangle
-    int minx = std::min(std::min(x1, x2), x3);
-    int maxx = std::max(std::max(x1, x2), x3);
-    int miny = std::min(std::min(y1, y2), y3);
-    int maxy = std::max(std::max(y1, y2), y3);
+  for (int scanlineY = v1.y(); scanlineY <= v2.y(); scanlineY++)
+  {
+      for(int i = curx1; i <= curx2; ++i) alphas[i] = 255;
 
-    // Constant part of half-edge functions
-    float C1 = Dy12 * x1 - Dx12 * y1;
-    float C2 = Dy23 * x2 - Dx23 * y2;
-    float C3 = Dy31 * x3 - Dx31 * y3;
+      alphas += sizeX;
 
-    float Cy1 = C1 + Dx12 * miny - Dy12 * minx;
-    float Cy2 = C2 + Dx23 * miny - Dy23 * minx;
-    float Cy3 = C3 + Dx31 * miny - Dy31 * minx;
-
-    Pt::uint8_t* alphas = &_alphas[0] + miny * sizeX;
-
-    // Scan through bounding rectangle
-    for(int y = miny; y < maxy; y++)
-    {
-        // Start value for horizontal scan
-        float Cx1 = Cy1;
-        float Cx2 = Cy2;
-        float Cx3 = Cy3;
-
-        for(int x = minx; x < maxx; x++)
-        {
-            if(Cx1 > 0 && Cx2 > 0 && Cx3 > 0)
-            {
-
-               //_alphas[ly * sizeX + lx] += (fly * flx + 255) >> 8;
-                alphas[x] = 255;
-            }
-
-            Cx1 -= Dy12;
-            Cx2 -= Dy23;
-            Cx3 -= Dy31;
-        }
-
-        Cy1 += Dx12;
-        Cy2 += Dx23;
-        Cy3 += Dx31;
-
-        alphas += sizeX;
-    }
-    */
+    curx1 += invslope1;
+    curx2 += invslope2;
+  }
 }
+
+void Rasterizer2::rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2, const Point& v3, Pt::int32_t sizeX)
+{
+  float invslope1 = (float)(v3.x() - v1.x()) / (v3.y() - v1.y());
+  float invslope2 = (float)(v3.x() - v2.x()) / (v3.y() - v2.y());
+
+  float curx1 = v3.x();
+  float curx2 = v3.x();
+
+    Pt::uint8_t* alphas = &_alphas[0] + v3.y() * sizeX;
+
+  for (int scanlineY = v3.y(); scanlineY > v1.y(); scanlineY--)
+  {
+      for(int i = curx1; i <= curx2; ++i) alphas[i] = 255;
+
+      alphas -= sizeX;
+
+    curx1 -= invslope1;
+    curx2 -= invslope2;
+  }
+}
+
+void Rasterizer2::rasterOneSolidTriangle(const Point& v1, const Point& v2, const Point& v3, Pt::int32_t sizeX)
+{
+    // http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
+    // Sort the vertices by its Y coordinates
+    const Point* vs[3] = { &v1, &v2, &v3 };
+
+    //    printf("%d %d     %d %d     %d %d\n", vs[0]->x(), vs[0]->y(), vs[1]->x(), vs[1]->y(), vs[2]->x(), vs[2]->y());
+
+    if( vs[1]->y() < vs[0]->y() ) std::swap( vs[1], vs[0] );
+    if( vs[2]->y() < vs[0]->y() ) std::swap( vs[2], vs[0] );
+    if( vs[2]->y() < vs[1]->y() ) std::swap( vs[2], vs[1] );
+
+    // Check for bottom-flat triangle
+    if(vs[1]->y() == vs[2]->y()) {
+        rasterOneSolidTriangleBottomFlat(*vs[0], *vs[1], *vs[2], sizeX);
+        //if(vs[1]->x() <= vs[2]->x()) rasterOneSolidTriangleBottomFlat(*vs[0], *vs[1], *vs[2], sizeX);
+        //else                         rasterOneSolidTriangleBottomFlat(*vs[0], *vs[2], *vs[1], sizeX);
+
+    }
+    // Check for top-flat triangle
+    else if(vs[0]->y() == vs[1]->y()) {
+        rasterOneSolidTriangleTopFlat(*vs[0], *vs[1], *vs[2], sizeX);
+        //if(vs[0]->x() <= vs[1]->x()) rasterOneSolidTriangleTopFlat(*vs[0], *vs[1], *vs[2], sizeX);
+        //else                         rasterOneSolidTriangleTopFlat(*vs[1], *vs[0], *vs[2], sizeX);
+    }
+    // Split the triangle to a bottom-flat and top-flat
+    else {
+
+        float y2my1 = vs[1]->y() - vs[0]->y();
+        float y3my1 = vs[2]->y() - vs[0]->y();
+        float x3mx1 = vs[2]->x() - vs[0]->x();
+
+        float x4    = vs[0]->x() + y2my1 / y3my1 * x3mx1;
+
+        //((float)(vs[1]->y() - vs[0]->y()) / (float)(vs[2]->y() - vs[0]->y())) * (vs[2]->x() - vs[0]->x()),
+        Point vm(
+            x4,
+            vs[1]->y()
+        );
+
+       // printf("%d %d     %d %d     %d %d\n", vs[0]->x(), vs[0]->y(), vs[1]->x(), vs[1]->y(), vm.x(), vm.y());
+
+        //if(vs[1]->x() <= vm.x()) rasterOneSolidTriangleBottomFlat(*vs[0], *vs[1], vm, sizeX);
+        //else                     rasterOneSolidTriangleBottomFlat(*vs[0], vm, *vs[1], sizeX);
+//
+        //if(vs[1]->x() <= vm.x()) rasterOneSolidTriangleTopFlat(*vs[1], vm, *vs[2], sizeX);
+        //else                     rasterOneSolidTriangleTopFlat(vm, *vs[1], *vs[2], sizeX);
+
+        rasterOneSolidTriangleBottomFlat(*vs[0],* vs[1], vm, sizeX);
+        rasterOneSolidTriangleTopFlat(*vs[1], vm, *vs[2], sizeX);
+
+    }
+}
+
 
 // ======================================================================================
 // ===== Private Member Functions =======================================================

@@ -116,7 +116,7 @@ static void testFillPolygon(const char* title, Image& image, ImagePainter2& pain
 
     painter.setBrush( Color::fromRgb8(255, 255, 255, 175) );
 
-    const PointF poly1[5] = { PointF( 10, 10), PointF( 50, 20), PointF( 90, 50), PointF( 70, 70), PointF( 30, 20) };
+    const PointF poly1[5] = { PointF(50, 50), PointF(250, 100), PointF(450, 250), PointF(350, 350), PointF(150, 100) };
     painter.fillPolygon(poly1, sizeof(poly1) / sizeof(poly1[0]));
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height());
