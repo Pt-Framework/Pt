@@ -107,9 +107,6 @@ class Rasterizer2
         void fillTriangles(Point* points, size_t pointCount);
 
     protected:
-        typedef BasicPoint<Pt::int32_t> PointFP;
-
-    protected:
         void updateClip();
 
         void prepWorkBuffer(Pt::int32_t sizeX, Pt::int32_t sizeY);
@@ -118,10 +115,10 @@ class Rasterizer2
         void rasterOnePixelLine(const Point& a, const Point& b);
         void rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, Pt::int32_t steps, Pt::int32_t sizeX, Pt::int32_t sizeY);
 
-        void rasterSolidTriangles(const Point* points, size_t pointCount);
-        void rasterOneSolidTriangleBottomFlat(const PointFP& fv1, const PointFP& fv2, const PointFP& fv3, Pt::int32_t sizeX);
-        void rasterOneSolidTriangleTopFlat(const PointFP& fv1, const PointFP& fv2, const PointFP& fv3, Pt::int32_t sizeX);
-        void rasterOneSolidTriangle(const PointFP& fv1, const PointFP& fv2, const PointFP& fv3, Pt::int32_t sizeX);
+        void rasterSolidTriangles(Point* points, size_t pointCount);
+        void rasterOneSolidTriangleBottomFlat(const Point& v1, const Point& v2, const Point& v3, Pt::int32_t sizeX);
+        void rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2, const Point& v3, Pt::int32_t sizeX);
+        void rasterOneSolidTriangle(const Point& v1, const Point& v2, const Point& v3, Pt::int32_t sizeX);
 
     private:
         Image*          _image;
