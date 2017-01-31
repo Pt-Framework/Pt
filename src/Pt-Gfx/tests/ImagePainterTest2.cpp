@@ -110,6 +110,18 @@ static void testLines(const char* title, Image& image, ImagePainter2& painter)
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height());
 }
 
+static void testFillPolygon(const char* title, Image& image, ImagePainter2& painter)
+{
+    resetImage(image);
+
+    painter.setPen( Color::fromRgb8(255, 255, 255, 175) );
+
+    const PointF poly1[5] = { PointF( 10, 10), PointF( 50, 20), PointF( 90, 50), PointF( 70, 70), PointF( 30, 20) };
+    painter.fillPolygon(poly1, sizeof(poly1) / sizeof(poly1[0]));
+
+    sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height());
+}
+
 int main(int argc, char* args[])
 {
     Image         image( ImageFormat::argb32(), Size(800, 600) );
@@ -118,11 +130,14 @@ int main(int argc, char* args[])
     painter.setFontDir( Pt::System::Path("../src/Pt-Gfx/fonts") );
     painter.setFont( Pt::Gfx::Font("DejaVu Serif", 24, Pt::Gfx::Font::BoldItalic) );
 
-    painter.setCompositionMode(CompositionMode::SourceCopy);
-    testLines("Test Lines - CompositionMode::SourceCopy", image, painter);
+    //painter.setCompositionMode(CompositionMode::SourceCopy);
+    //testLines("Test Lines - CompositionMode::SourceCopy", image, painter);
 
-    painter.setCompositionMode(CompositionMode::SourceOver);
-    testLines("Test Lines - CompositionMode::SourceOver", image, painter);
+    //painter.setCompositionMode(CompositionMode::SourceOver);
+    //testLines("Test Lines - CompositionMode::SourceOver", image, painter);
+
+    painter.setCompositionMode(CompositionMode::SourceCopy);
+    testFillPolygon("Test Fill Polygons - CompositionMode::SourceCopy", image, painter);
 
     return 0;
 }

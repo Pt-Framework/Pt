@@ -38,18 +38,17 @@ namespace Pt {
 namespace Gfx {
 
 
-class Triangulate
-{
+class Triangulate {
     public:
         // Triangulate a contour/polygon
-        static bool process(const std::vector<Point>& contour, std::vector<Point>& result);
+        static bool process(const PointF* contour, size_t pointCount, std::vector<Point>& result);
 
         // Compute area of a contour/polygon
-        static float area(const std::vector<Point> contour);
+        static float area(const PointF* contour, size_t pointCount);
 
     private:
+        static bool snip(const PointF* contour, int u, int v, int w, int n, int* V);
         static bool insideTriangle(float Ax, float Ay, float Bx, float By, float Cx, float Cy, float Px, float Py);
-        static bool snip(const std::vector<Point>& contour, int u, int v, int w, int n, int* V);
 };
 
 

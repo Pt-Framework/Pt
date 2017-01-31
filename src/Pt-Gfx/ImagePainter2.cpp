@@ -31,13 +31,15 @@
 #include <Pt/Math.h>
 #include <Pt/Gfx/ImagePainter2.h>
 
-#include "Rasterizer2.h"
 #include "FreeType.h"
+#include "Triangulate.h"
+
+#include "Rasterizer2.h"
 
 namespace Pt {
 namespace Gfx {
 
-    
+
 ImagePainter2::ImagePainter2(Image& image)
 : _rasterizer( new Rasterizer2(image))
 {
@@ -174,6 +176,8 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount )
 
 void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
 {
+    std::vector<Point> tris;
+    if(!Triangulate::process(ps, pointCount, tris)) return;
 }
 
 void ImagePainter2::drawImage( const PointF& toIn, const Image& image)
