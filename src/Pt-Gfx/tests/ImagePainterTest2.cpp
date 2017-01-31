@@ -114,7 +114,7 @@ static void testFillPolygon(const char* title, Image& image, ImagePainter2& pain
 {
     resetImage(image);
 
-    painter.setPen( Color::fromRgb8(255, 255, 255, 175) );
+    painter.setBrush( Color::fromRgb8(255, 255, 255, 175) );
 
     const PointF poly1[5] = { PointF( 10, 10), PointF( 50, 20), PointF( 90, 50), PointF( 70, 70), PointF( 30, 20) };
     painter.fillPolygon(poly1, sizeof(poly1) / sizeof(poly1[0]));

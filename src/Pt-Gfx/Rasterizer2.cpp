@@ -276,11 +276,24 @@ void Rasterizer2::strokeOutline(const Point* points, size_t pointCount)
     }
 }
 
-void Rasterizer2::fillTriangles(const Point* points, size_t pointCount)
+void Rasterizer2::fillTriangles(Point* points, size_t pointCount)
 {
     if(pointCount % 3) return;
 
-    
+    switch( _brush.fillStyle() ) {
+        case Brush::Texture:
+            break;
+
+        case Brush::VerticalGradient:
+            break;
+
+        case Brush::HorizontalGradient:
+            break;
+
+        case Brush::Solid:
+            rasterSolidTriangles(points, pointCount);
+            break;
+    }
 }
 
 
@@ -316,81 +329,46 @@ void Rasterizer2::updateClip()
     _alphas.resize(_currentClip.width() * _currentClip.height());
 }
 
-void Rasterizer2::prepWorkBuffer(int sizeX, int sizeY)
+void Rasterizer2::prepWorkBuffer(Pt::int32_t sizeX, Pt::int32_t sizeY)
 { memset(&_alphas[0], 0, sizeX * sizeY); }
 
-void Rasterizer2::blitWorkBufferToImage(int minX, int minY, int sizeX, int sizeY)
+void Rasterizer2::blitWorkBufferToImage(Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t sizeX, Pt::int32_t sizeY, const Color& color)
 {
     for(int r = 0; r < sizeY; ++r) {
         Pixel destPixel( _image->view(), minX, minY + r);
-        _image->format().copy(destPixel, _alphas.data() + r * sizeX, sizeX, _pen.color(), _compositionMode);
-    }
-}
-
-void Rasterizer2::rasterOnePixelLineSegment(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t steps, Pt::int32_t sizeX, Pt::int32_t sizeY)
-{
-    // Calculate the change factors
-    const Pt::int32_t chgX = (x2 - x1) / steps;
-    const Pt::int32_t chgY = (y2 - y1) / steps;
-
-    // Draw the line
-    for(int i = 0; i <= steps; ++i) {
-        // Calculate the alpha factors (0 - 255) of the block
-#ifdef FIXED_POINT_ALPHA_DIVFAC
-        Pt::int32_t frx = (x1 & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC;
-        Pt::int32_t fry = (y1 & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC;
-#else
-        Pt::int32_t frx = (x1 & FIXED_POINT_FRACT_VAL_BM) * FIXED_POINT_ALPHA_MULFAC;
-        Pt::int32_t fry = (y1 & FIXED_POINT_FRACT_VAL_BM) * FIXED_POINT_ALPHA_MULFAC;
-#endif
-        Pt::int32_t flx = 255 - frx;
-        Pt::int32_t fly = 255 - fry;
-        // Calculate the top-left coordinate of the block
-        Pt::int32_t lx = x1 >> FIXED_POINT_SHIFT_FACTOR;
-        Pt::int32_t ly = y1 >> FIXED_POINT_SHIFT_FACTOR;
-        // Calculate the bottom-right coordinate of the block
-        Pt::int32_t rx = frx ? (lx + 1) : lx;
-        Pt::int32_t ry = fry ? (ly + 1) : ly;
-        // Draw the block
-                                       _alphas[ly * sizeX + lx] += (fly * flx + 255) >> 8;
-        if( rx < sizeX               ) _alphas[ly * sizeX + rx] += (fly * frx + 255) >> 8;
-        if(               ry < sizeY ) _alphas[ry * sizeX + lx] += (fry * flx + 255) >> 8;
-        if( rx < sizeX && ry < sizeY ) _alphas[ry * sizeX + rx] += (fry * frx + 255) >> 8;
-        // Increment the drawing coordinate
-        x1 += chgX;
-        y1 += chgY;
+        _image->format().copy(destPixel, _alphas.data() + r * sizeX, sizeX, color, _compositionMode);
     }
 }
 
 void Rasterizer2::rasterOnePixelLine(const Point& a, const Point& b)
 {
     // Clip the points
-    Pt::int32_t fx1 = a.x();
-    Pt::int32_t fy1 = a.y();
-    Pt::int32_t fx2 = b.x();
-    Pt::int32_t fy2 = b.y();
+    Pt::int32_t x1 = a.x();
+    Pt::int32_t y1 = a.y();
+    Pt::int32_t x2 = b.x();
+    Pt::int32_t y2 = b.y();
 
-    if(!csClipLine(fx1, fy1, fx2, fy2, _currentClip)) return;
+    if(!csClipLine(x1, y1, x2, y2, _currentClip)) return;
 
     // Find the minimum and maximum coordinates
     Pt::int32_t minX, minY, maxX, maxY;
 
-    if(fx2 > fx1) {
-        minX = fx1;
-        maxX = fx2;
+    if(x2 > x1) {
+        minX = x1;
+        maxX = x2;
     }
     else {
-        minX = fx2;
-        maxX = fx1;
+        minX = x2;
+        maxX = x1;
     }
 
-    if(fy2 > fy1) {
-        minY = fy1;
-        maxY = fy2;
+    if(y2 > y1) {
+        minY = y1;
+        maxY = y2;
     }
     else {
-        minY = fy2;
-        maxY = fy1;
+        minY = y2;
+        maxY = y1;
     }
 
     // Calculate the size of the rectangle
@@ -402,36 +380,178 @@ void Rasterizer2::rasterOnePixelLine(const Point& a, const Point& b)
     if(!steps) return;
 
     // Translate the coordinates to (0, 0) and convert them to fixed-points
-    Pt::int32_t x1, y1, x2, y2;
+    Pt::int32_t fx1, fy1, fx2, fy2;
 
-    if(fx2 > fx1) {
-        x1 = 0;
-        x2 = (maxX - minX) << FIXED_POINT_SHIFT_FACTOR;
+    if(x2 > x1) {
+        fx1 = 0;
+        fx2 = (maxX - minX) << FIXED_POINT_SHIFT_FACTOR;
     }
     else {
-        x1 = (maxX - minX) << FIXED_POINT_SHIFT_FACTOR;
-        x2 = 0;
+        fx1 = (maxX - minX) << FIXED_POINT_SHIFT_FACTOR;
+        fx2 = 0;
     }
 
-    if(fy2 > fy1) {
-        y1 = 0;
-        y2 = (maxY - minY) << FIXED_POINT_SHIFT_FACTOR;
+    if(y2 > y1) {
+        fy1 = 0;
+        fy2 = (maxY - minY) << FIXED_POINT_SHIFT_FACTOR;
     }
     else {
-        y1 = (maxY - minY) << FIXED_POINT_SHIFT_FACTOR;
-        y2 = 0;
+        fy1 = (maxY - minY) << FIXED_POINT_SHIFT_FACTOR;
+        fy2 = 0;
     }
 
     // Prepare the work buffer
     prepWorkBuffer(sizeX, sizeY);
 
-    // Draw the line
-    rasterOnePixelLineSegment(x1, y1, x2, y2, steps, sizeX, sizeY);
+    // Raster the line
+    rasterOnePixelLineSegment(fx1, fy1, fx2, fy2, steps, sizeX, sizeY);
 
     // Blit the work buffer to the image
-    blitWorkBufferToImage(minX, minY, sizeX, sizeY);
+    blitWorkBufferToImage(minX, minY, sizeX, sizeY, _pen.color());
 }
 
+void Rasterizer2::rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, Pt::int32_t steps, Pt::int32_t sizeX, Pt::int32_t sizeY)
+{
+    // Calculate the change factors
+    const Pt::int32_t chgX = (fx2 - fx1) / steps;
+    const Pt::int32_t chgY = (fy2 - fy1) / steps;
+
+    // Draw the line
+    for(int i = 0; i <= steps; ++i) {
+        // Calculate the alpha factors (0 - 255) of the block
+#ifdef FIXED_POINT_ALPHA_DIVFAC
+        Pt::int32_t frx = (fx1 & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC;
+        Pt::int32_t fry = (fy1 & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC;
+#else
+        Pt::int32_t frx = (fx1 & FIXED_POINT_FRACT_VAL_BM) * FIXED_POINT_ALPHA_MULFAC;
+        Pt::int32_t fry = (fy1 & FIXED_POINT_FRACT_VAL_BM) * FIXED_POINT_ALPHA_MULFAC;
+#endif
+        Pt::int32_t flx = 255 - frx;
+        Pt::int32_t fly = 255 - fry;
+        // Calculate the top-left coordinate of the block
+        Pt::int32_t lx = fx1 >> FIXED_POINT_SHIFT_FACTOR;
+        Pt::int32_t ly = fy1 >> FIXED_POINT_SHIFT_FACTOR;
+        // Calculate the bottom-right coordinate of the block
+        Pt::int32_t rx = frx ? (lx + 1) : lx;
+        Pt::int32_t ry = fry ? (ly + 1) : ly;
+        // Draw the block
+                                       _alphas[ly * sizeX + lx] += (fly * flx + 255) >> 8;
+        if( rx < sizeX               ) _alphas[ly * sizeX + rx] += (fly * frx + 255) >> 8;
+        if(               ry < sizeY ) _alphas[ry * sizeX + lx] += (fry * flx + 255) >> 8;
+        if( rx < sizeX && ry < sizeY ) _alphas[ry * sizeX + rx] += (fry * frx + 255) >> 8;
+        // Increment the drawing coordinate
+        fx1 += chgX;
+        fy1 += chgY;
+    }
+}
+
+void Rasterizer2::rasterSolidTriangles(Point* points, size_t pointCount)
+{
+    // Find the minimum and maximum coordinates
+    Pt::int32_t minX =  65535;
+    Pt::int32_t minY =  65535;
+    Pt::int32_t maxX = -65535;
+    Pt::int32_t maxY = -65535;
+
+    for(size_t i = 0; i < pointCount; ++i) {
+        const Pt::int32_t x = points[i].x();
+        const Pt::int32_t y = points[i].y();
+        if(x < minX) minX = x;
+        if(y < minY) minY = y;
+        if(x > maxX) maxX = x;
+        if(y > maxY) maxY = y;
+    }
+
+    // Translate the coordinates to (0, 0) and convert them to fixed-points
+    for(size_t i = 0; i < pointCount; ++i) {
+        points[i].set(
+            (points[i].x() - minX) << FIXED_POINT_SHIFT_FACTOR,
+            (points[i].y() - minY) << FIXED_POINT_SHIFT_FACTOR
+        );
+    }
+
+    // Calculate the size of the rectangle
+    const Pt::int32_t sizeX = maxX - minX + 1;
+    const Pt::int32_t sizeY = maxY - minY + 1;
+
+    // Prepare the work buffer
+    prepWorkBuffer(sizeX, sizeY);
+
+    // Raster the triangles
+    for(size_t i = 0; i < pointCount; i += 3)
+        rasterOneSolidTriangle(points[i], points[i + 1], points[i + 2], sizeX);
+
+    // Blit the work buffer to the image
+    blitWorkBufferToImage(minX, minY, sizeX, sizeY, _brush.color());
+}
+
+void Rasterizer2::rasterOneSolidTriangle(const Point& fv1, const Point& fv2, const Point& fv3, Pt::int32_t sizeX)
+{
+    /*
+    float y3 = v1.y();
+    float y2 = v2.y();
+    float y1 = v3.y();
+
+    float x3 = v1.x();
+    float x2 = v2.x();
+    float x1 = v3.x();
+
+    // Deltas
+    float Dx12 = x1 - x2;
+    float Dx23 = x2 - x3;
+    float Dx31 = x3 - x1;
+
+    float Dy12 = y1 - y2;
+    float Dy23 = y2 - y3;
+    float Dy31 = y3 - y1;
+
+    // Bounding rectangle
+    int minx = std::min(std::min(x1, x2), x3);
+    int maxx = std::max(std::max(x1, x2), x3);
+    int miny = std::min(std::min(y1, y2), y3);
+    int maxy = std::max(std::max(y1, y2), y3);
+
+    // Constant part of half-edge functions
+    float C1 = Dy12 * x1 - Dx12 * y1;
+    float C2 = Dy23 * x2 - Dx23 * y2;
+    float C3 = Dy31 * x3 - Dx31 * y3;
+
+    float Cy1 = C1 + Dx12 * miny - Dy12 * minx;
+    float Cy2 = C2 + Dx23 * miny - Dy23 * minx;
+    float Cy3 = C3 + Dx31 * miny - Dy31 * minx;
+
+    Pt::uint8_t* alphas = &_alphas[0] + miny * sizeX;
+
+    // Scan through bounding rectangle
+    for(int y = miny; y < maxy; y++)
+    {
+        // Start value for horizontal scan
+        float Cx1 = Cy1;
+        float Cx2 = Cy2;
+        float Cx3 = Cy3;
+
+        for(int x = minx; x < maxx; x++)
+        {
+            if(Cx1 > 0 && Cx2 > 0 && Cx3 > 0)
+            {
+
+               //_alphas[ly * sizeX + lx] += (fly * flx + 255) >> 8;
+                alphas[x] = 255;
+            }
+
+            Cx1 -= Dy12;
+            Cx2 -= Dy23;
+            Cx3 -= Dy31;
+        }
+
+        Cy1 += Dx12;
+        Cy2 += Dx23;
+        Cy3 += Dx31;
+
+        alphas += sizeX;
+    }
+    */
+}
 
 // ======================================================================================
 // ===== Private Member Functions =======================================================

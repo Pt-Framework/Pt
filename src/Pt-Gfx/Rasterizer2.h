@@ -104,16 +104,19 @@ class Rasterizer2
 
         void strokeOutline(const Point* points, size_t pointCount);
 
-        void fillTriangles(const Point* points, size_t pointCount);
+        void fillTriangles(Point* points, size_t pointCount);
 
     protected:
         void updateClip();
 
-        void prepWorkBuffer(int sizeX, int sizeY);
-        void blitWorkBufferToImage(int minX, int minY, int sizeX, int sizeY);
+        void prepWorkBuffer(Pt::int32_t sizeX, Pt::int32_t sizeY);
+        void blitWorkBufferToImage(Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t sizeX, Pt::int32_t sizeY, const Color& color);
 
-        void rasterOnePixelLineSegment(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t steps, Pt::int32_t sizeX, Pt::int32_t sizeY);
         void rasterOnePixelLine(const Point& a, const Point& b);
+        void rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, Pt::int32_t steps, Pt::int32_t sizeX, Pt::int32_t sizeY);
+
+        void rasterSolidTriangles(Point* points, size_t pointCount);
+        void rasterOneSolidTriangle(const Point& fv1, const Point& fv2, const Point& fv3, Pt::int32_t sizeX);
 
     private:
         Image*          _image;
