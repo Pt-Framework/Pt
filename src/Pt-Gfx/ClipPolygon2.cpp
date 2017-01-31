@@ -90,22 +90,22 @@ Point ClipPolygon2::intersect( const Point& from, const Point& to, const Point& 
 
     if(edge0.y() == edge1.y()) {
         if(to.y() == from.y()) {
-          if(edge0.y() == to.y()) {
-              p.setX(   to.x());
-              p.setY(edge0.y());
-          }
+            if(edge0.y() == to.y()) {
+                p.setX(   to.x());
+                p.setY(edge0.y());
+            }
         }
         else {
-          p.setX(from.x() + (to.x() - from.x()) * (edge0.y() - from.y()) / (to.y() - from.y()));
-          p.setY(edge0.y());
+            p.setX(from.x() + (to.x() - from.x()) * (edge0.y() - from.y()) / (to.y() - from.y()));
+            p.setY(edge0.y());
         }
     }
 
     if(edge0.x() == edge1.x()) {
         if(to.x() == from.x()) {
             if(to.x() == edge0.x()) {
-              p.setY(   to.y());
-              p.setX(edge0.x());
+                p.setY(   to.y());
+                p.setX(edge0.x());
             }
         }
         else {

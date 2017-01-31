@@ -293,8 +293,7 @@ void Rasterizer2::fillPolygon(const Point* points, const size_t pointCount)
     if(!Triangulate::process(tris, clipped)) return;
 
     rasterFillTriangles(tris.data(), tris.size(), minX, minY, maxX, maxY);
-
-    rasterPolygonOutline(clipped.data(), clipped.size());
+    rasterPolygonOutline(clipped.data(), clipped.size(), minX, minY, maxX, maxY);
 
 #else
 
@@ -474,23 +473,8 @@ void Rasterizer2::rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt
     }
 }
 
-void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount)
+void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY)
 {
-    // Find the minimum and maximum coordinates
-    Pt::int32_t minX =  65535;
-    Pt::int32_t minY =  65535;
-    Pt::int32_t maxX = -65535;
-    Pt::int32_t maxY = -65535;
-
-    for(size_t i = 0; i < pointCount; ++i) {
-        const Pt::int32_t x = points[i].x();
-        const Pt::int32_t y = points[i].y();
-        if(x < minX) minX = x;
-        if(y < minY) minY = y;
-        if(x > maxX) maxX = x;
-        if(y > maxY) maxY = y;
-    }
-
     // Translate the coordinates to (0, 0) and convert them to fixed-points
     std::vector<Pt::int32_t> lineX(pointCount);
     std::vector<Pt::int32_t> lineY(pointCount);
@@ -507,7 +491,7 @@ void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount)
     // Prepare the work buffer
     prepWorkBuffer(sizeX, sizeY);
 
-    // Raster the lines
+    // Raster the outlines as multiple one-pixel lines
     Pt::int32_t xm, ym;
     size_t      pc1 = pointCount - 1;
 
