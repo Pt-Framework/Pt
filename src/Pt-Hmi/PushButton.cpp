@@ -82,6 +82,7 @@ void PushButton::setIcon(const Gfx::Image& image)
 void PushButton::setIconSize(const Gfx::SizeF& size)
 {
     _iconSize = size;
+    update();
 }
 
 
