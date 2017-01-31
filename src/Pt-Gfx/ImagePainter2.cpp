@@ -176,13 +176,22 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount )
 
 void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
 {
+#if 1
+
     std::vector<Point> clipped;
     _rasterizer->genClippedPolygonPoints(clipped, ps, pointCount);
 
+    _rasterizer->strokePolygonOutline(clipped.data(), clipped.size());
+
     std::vector<Point> tris;
-#if 0
     if(!Triangulate::process(tris, clipped)) return;
+
+    _rasterizer->fillTriangles(tris.data(), tris.size());
+
 #else
+
+    std::vector<Point> tris;
+
     // bot
     tris.push_back(Point(200, 100));
     tris.push_back(Point(100, 200));
@@ -195,9 +204,10 @@ void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
     tris.push_back(Point(450, 100));
     tris.push_back(Point(350, 300));
     tris.push_back(Point(650, 400));
-#endif
 
     _rasterizer->fillTriangles(tris.data(), tris.size());
+
+#endif
 }
 
 void ImagePainter2::drawImage( const PointF& toIn, const Image& image)

@@ -114,10 +114,15 @@ static void testFillPolygon(const char* title, Image& image, ImagePainter2& pain
 {
     resetImage(image);
 
-    painter.setBrush( Color::fromRgb8(255, 255, 255, 175) );
+    painter.setBrush( Color::fromRgb8(0, 255, 0, 175) );
 
-    const PointF poly1[5] = { PointF(50, 50), PointF(250, 100), PointF(450, 250), PointF(350, 350), PointF(150, 100) };
+    const PointF poly1[] = { PointF(50, 50), PointF(250, 100), PointF(450, 250), PointF(350, 350), PointF(150, 100) };
     painter.fillPolygon(poly1, sizeof(poly1) / sizeof(poly1[0]));
+
+    painter.setBrush( Color::fromRgb8(0, 255, 255, 175) );
+
+    const PointF poly2[] = { PointF(140, 260), PointF(210, 310), PointF(160, 340), PointF(110, 310) };
+    painter.fillPolygon(poly2, sizeof(poly2) / sizeof(poly2[0]));
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height());
 }

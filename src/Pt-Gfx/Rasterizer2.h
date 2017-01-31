@@ -144,6 +144,8 @@ class Rasterizer2
     private:
         void genClippedPolygonPoints(std::vector<Point>& dst, const PointF* src, const size_t pointCount) const;
 
+        void strokePolygonOutline(const Point* points, size_t pointCount);
+
         friend class ImagePainter2;
 };
 
