@@ -55,6 +55,11 @@ class BasicSize {
             _h = h;
         }
 
+        bool isNull() const
+        {
+            return _w == 0 || _h == 0;
+        }
+
         //! @brief Returns the width
         inline T width() const
         { return _w; }

@@ -65,7 +65,9 @@ class PT_HMI_API PushButton : public Button
 
         void setToggle(bool toggle);
 
-        void setImage(const Gfx::Image& image);
+        void setIcon(const Gfx::Image& image);
+
+        void setIconSize(const Gfx::SizeF& size);
 
         bool isFlat() const;
 
@@ -120,6 +122,7 @@ class PT_HMI_API PushButton : public Button
         bool                      _isFlat;
         Direction                 _direction;
         Gfx::Image                _image;
+        Gfx::SizeF                _iconSize;
                                   
         FacetPtr<ButtonRenderer>  _renderer;
         bool                      _hasRenderer;

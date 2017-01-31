@@ -87,7 +87,7 @@ ChildW::ChildW(const std::string& title)
     _toggleButton.resize( Gfx::SizeF(130,30) ); 
     _toggleButton.setMargin(5);
     _toggleButton.setPadding(5);    
-    _toggleButton.setImage(toggleImage);
+    _toggleButton.setIcon(toggleImage);
 
     //Dialog button
     Pt::Hmi::Key dKey(Pt::Hmi::Key::Control, Pt::Hmi::Key::D);

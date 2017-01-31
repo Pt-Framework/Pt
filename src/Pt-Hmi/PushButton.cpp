@@ -63,7 +63,7 @@ void PushButton::setToggle(bool toggle)
 }
 
 
-void PushButton::setImage(const Gfx::Image& image)
+void PushButton::setIcon(const Gfx::Image& image)
 {
     _image = image;
     _picture.set(image);
@@ -76,6 +76,12 @@ void PushButton::setImage(const Gfx::Image& image)
     _renderer->prepareIcon(*this, options, image, _picture);
     
     invalidate();
+}
+
+
+void PushButton::setIconSize(const Gfx::SizeF& size)
+{
+    _iconSize = size;
 }
 
 
@@ -284,17 +290,19 @@ void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     double textY = 0;
 
     double spacing = _picture.empty() || text().empty() ? 0 : fm.height() * 0.5;
-    double itemsWidth = fm.width() + spacing + _picture.width();
-    double itemsHeight = fm.height() + spacing + _picture.height();
+    double pictureWidth = _iconSize.isNull() ? _picture.width() : _iconSize.width();
+    double pictureHeight = _iconSize.isNull() ? _picture.height() : _iconSize.height();
+    double itemsWidth = fm.width() + spacing + pictureWidth;
+    double itemsHeight = fm.height() + spacing + pictureHeight;
 
     switch(_direction)
     {
         default:
         case Left:
             pictureX = (size().width() - itemsWidth) / 2;
-            pictureY = (size().height() - _picture.height()) / 2;
+            pictureY = (size().height() - pictureHeight) / 2;
     
-            textX = pictureX + _picture.width() + spacing;
+            textX = pictureX + pictureWidth + spacing;
             textY = ((size().height() - fm.height()) / 2) + fm.ascent();
             break;
 
@@ -303,22 +311,22 @@ void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
             textY = ((size().height() - fm.height()) / 2) + fm.ascent();
             
             pictureX = textX + fm.width() + spacing;
-            pictureY = (size().height() - _picture.height()) / 2;
+            pictureY = (size().height() - pictureHeight) / 2;
             break;
 
         case Top:
-            pictureX = (size().width() - _picture.width()) / 2;
+            pictureX = (size().width() - pictureWidth) / 2;
             pictureY = (size().height() - itemsHeight) / 2;
     
             textX = (size().width() - fm.width()) / 2;
-            textY = pictureY + _picture.height() + spacing + fm.ascent();
+            textY = pictureY + pictureHeight + spacing + fm.ascent();
             break;  
 
         case Bottom:
             textX = (size().width() - fm.width()) / 2;
             textY = ((size().height() - itemsHeight) / 2) + fm.ascent();
 
-            pictureX = (size().width() - _picture.width()) / 2;
+            pictureX = (size().width() - pictureWidth) / 2;
             pictureY = textY + fm.descent() + spacing;
             break;  
     }
@@ -331,7 +339,11 @@ void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     {
         painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceOver);
         
-        Gfx::PointF picturePos(pictureX, pictureY);
+        double pictureXOff = (pictureWidth - _picture.width()) / 2;
+        double pictureYOff = (pictureHeight - _picture.height()) / 2;
+
+        Gfx::PointF picturePos(pictureX + pictureXOff, 
+                               pictureY + pictureYOff);
         painter.drawPicture(picturePos, _picture);
         
         painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceCopy);
