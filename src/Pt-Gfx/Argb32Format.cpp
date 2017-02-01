@@ -132,30 +132,85 @@ void Argb32Format::onCopy(Pixel& to, const ConstPixel& from, size_t length,
     }
 }
 
-void Argb32Format::onCopy(Pixel& dst_, const Pt::uint16_t* alphas, size_t length,
+void Argb32Format::onCopy(Pixel& to, const Pt::uint16_t* alphas, size_t length,
                           const Color& color, CompositionMode mode) const
 {
-    Pt::uint8_t* dst = dst_.base();
+    /*
+     *  Division of integers by constants
+     *  June 5, 2009 by Nigel Jones
+     *  http://embeddedgurus.com/stack-overflow/2009/06/division-of-integers-by-constants
+     *
+     *  Calculate the reciprocal multiplication factor and convert to binary using
+     *  Calculate using http://www.easysurf.cc/cnver17.htm#b10tob2
+     *     1 / 257 = 0.00389105058366
+     *      => 0.0000000011111111000000001111111100000000111111111010111011011
+     * or, directly using a browser, paste and execute in its URL
+     *     javascript: (1.0 / 257.0).toString(2)
+     *      => 0.00000000111111110000000011111111000000001111111100000001
+     *
+     *  Left shift until there is a 1 to the right of the binary point
+     *      0.0000000011111111000000001111111100000000111111111010111011011
+     *        ******** (8 shifts)
+     *      => S = 8
+     *      => 0.11111111000000001111111100000000111111111010111011011
+     *
+     *  Take the most significant 17 bits
+     *      => 11111111000000001
+     *
+     *  Add 1 to it
+     *      => 11111111000000010
+     *
+     *  Truncate to 16 bits
+     *      => 1111111100000001
+     *
+     *  Express in 32-bit hexadecimal
+     *      => M = 0x0000FF01
+     *
+     *  Calculate the result using
+     *      result = ( ((uint32_t) input *          M) >> 16 ) >> S
+     *             = ( ((uint32_t) input * 0x0000FF01) >> 16 ) >> 8
+     *               ( ((uint32_t) input * 0x0000FF01) >> 24 )
+     */
 
-    switch(mode)
-    {
+#define IDIV_BY_255(V) ( ((uint32_t)V * 0x00008081) >> 23 )
+#define IDIV_BY_257(V) ( ((uint32_t)V * 0x0000FF01) >> 24 )
+
+    Pt::uint8_t* dst = to.base();
+
+    switch(mode) {
         default:
         case CompositionMode::SourceCopy:
             for(size_t i = 0; i < length; ++i) {
                 Pt::uint32_t blendAlphaSrc = std::min<Pt::uint32_t>(255, *alphas++);
                 Pt::uint32_t blendAlphaInv = 255 - blendAlphaSrc;
                 if(blendAlphaSrc) {
+                    dst[0] = (blendAlphaSrc * IDIV_BY_257(color.blue ()) + blendAlphaInv * dst[0] + 255) >> 8;
+                    dst[1] = (blendAlphaSrc * IDIV_BY_257(color.green()) + blendAlphaInv * dst[1] + 255) >> 8;
+                    dst[2] = (blendAlphaSrc * IDIV_BY_257(color.red  ()) + blendAlphaInv * dst[2] + 255) >> 8;
+                    /*
                     dst[0] = (blendAlphaSrc * (Pt::uint32_t)(color.blue () / 257) + blendAlphaInv * dst[0] + 255) >> 8;
                     dst[1] = (blendAlphaSrc * (Pt::uint32_t)(color.green() / 257) + blendAlphaInv * dst[1] + 255) >> 8;
                     dst[2] = (blendAlphaSrc * (Pt::uint32_t)(color.red  () / 257) + blendAlphaInv * dst[2] + 255) >> 8;
+                    */
                 }
-                dst[3] = color.alpha() / 257;
+                dst[3] = IDIV_BY_257(color.alpha());
                 dst += 4;
             }
             break;
 
         case CompositionMode::SourceOver:
             for(size_t i = 0; i < length; ++i) {
+                Pt::uint32_t colorAlpha    = IDIV_BY_257(color.alpha());
+                Pt::uint32_t blendAlpha    = IDIV_BY_255(colorAlpha * std::min<Pt::uint32_t>(255, *alphas++));
+                Pt::uint32_t blendAlphaSrc = blendAlpha;
+                Pt::uint32_t blendAlphaInv = 255 - blendAlphaSrc;
+                if(blendAlphaSrc) {
+                    dst[0] = (blendAlphaSrc * IDIV_BY_257(color.blue ()) + blendAlphaInv * dst[0] + 255) >> 8;
+                    dst[1] = (blendAlphaSrc * IDIV_BY_257(color.green()) + blendAlphaInv * dst[1] + 255) >> 8;
+                    dst[2] = (blendAlphaSrc * IDIV_BY_257(color.red  ()) + blendAlphaInv * dst[2] + 255) >> 8;
+                    dst[3] = (blendAlphaSrc * colorAlpha                 + blendAlphaInv * dst[3] + 255) >> 8;
+                }
+                /*
                 Pt::uint32_t colorAlpha    = color.alpha() / 257;
                 Pt::uint32_t blendAlpha    = colorAlpha * std::min<Pt::uint32_t>(255, *alphas++) / 255;
                 Pt::uint32_t blendAlphaSrc = blendAlpha;
@@ -166,6 +221,7 @@ void Argb32Format::onCopy(Pixel& dst_, const Pt::uint16_t* alphas, size_t length
                     dst[2] = (blendAlphaSrc * (Pt::uint32_t)(color.red  () / 257) + blendAlphaInv * dst[2] + 255) >> 8;
                     dst[3] = (blendAlphaSrc * colorAlpha                          + blendAlphaInv * dst[3] + 255) >> 8;
                 }
+                */
                 dst += 4;
             }
             break;
