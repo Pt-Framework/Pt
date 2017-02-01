@@ -107,18 +107,18 @@ class Rasterizer2
     private:
         void updateClip();
 
-        void prepWorkBuffer(Pt::int32_t sizeX, Pt::int32_t sizeY);
+        void prepWorkBuffer(Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t sizeX, Pt::int32_t sizeY);
         void blitWorkBufferToImage(Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t sizeX, Pt::int32_t sizeY, const Color& color);
 
         void rasterOnePixelLine(const Point& a, const Point& b);
-        void rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, Pt::int32_t steps, Pt::int32_t sizeX, Pt::int32_t sizeY);
+        void rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, Pt::int32_t steps);
 
         void rasterPolygonOutline(const Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY);
 
-        void rasterSolidTriangles(Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY);
-        void rasterOneSolidTriangle(const Point& v1, const Point& v2, const Point& v3, Pt::int32_t sizeX);
-        void rasterOneSolidTriangleBottomFlat(const Point& v1, const Point& v2, const Point& v3, Pt::int32_t sizeX);
-        void rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2, const Point& v3, Pt::int32_t sizeX);
+        void rasterSolidTriangles(const Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY);
+        void rasterOneSolidTriangle(const Point& v1, const Point& v2, const Point& v3);
+        void rasterOneSolidTriangleBottomFlat(const Point& v1, const Point& v2, const Point& v3);
+        void rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2, const Point& v3);
         void rasterFillTriangles(Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY);
 
         void genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount) const;

@@ -132,7 +132,7 @@ void Argb32Format::onCopy(Pixel& to, const ConstPixel& from, size_t length,
     }
 }
 
-void Argb32Format::onCopy(Pixel& dst_, Pt::uint8_t* alphas, size_t length,
+void Argb32Format::onCopy(Pixel& dst_, const Pt::uint8_t* alphas, size_t length,
                           const Color& color, CompositionMode mode) const
 {
     Pt::uint8_t* dst = dst_.base();
