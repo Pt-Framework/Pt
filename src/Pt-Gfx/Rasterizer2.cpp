@@ -589,15 +589,10 @@ void Rasterizer2::rasterOneSolidTriangleBottomFlat(const Point& v1, const Point&
         Pt::int32_t curX2 = (v1.x() << FIXED_POINT_SHIFT_FACTOR) - FIXED_POINT_FRACT_VAL_BM / 2;
 
         for(Pt::int32_t i = v1.y(); i <= v2.y(); ++i) {
-            if(curX1 <= curX2) {
-                for(int j = (curX1 >> FIXED_POINT_SHIFT_FACTOR); j <= (curX2 >> FIXED_POINT_SHIFT_FACTOR); ++j) {
-                    *(alphas + j) = 255;
-                }
-            }
-            else {
-                for(int j = (curX2 >> FIXED_POINT_SHIFT_FACTOR); j <= (curX1 >> FIXED_POINT_SHIFT_FACTOR); ++j) {
-                    *(alphas + j) = 255;
-                }
+            const Pt::int32_t from = std::min(curX1, curX2) >> FIXED_POINT_SHIFT_FACTOR;
+            const Pt::int32_t to   = std::max(curX1, curX2) >> FIXED_POINT_SHIFT_FACTOR;
+            for(int j = from; j <= to; ++j) {
+                *(alphas + j) = 255;
             }
             alphas += _wbXSize;
             curX1  += chgX1;
@@ -674,15 +669,10 @@ void Rasterizer2::rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2
         Pt::int32_t curX2 = (v3.x() << FIXED_POINT_SHIFT_FACTOR) - FIXED_POINT_FRACT_VAL_BM / 2;
 
         for(Pt::int32_t i = v3.y(); i > v1.y(); --i) {
-            if(curX1 <= curX2) {
-                for(int j = (curX1 >> FIXED_POINT_SHIFT_FACTOR); j <= (curX2 >> FIXED_POINT_SHIFT_FACTOR); ++j) {
-                    alphas[j] = 255;
-                }
-            }
-            else {
-                for(int j = (curX2 >> FIXED_POINT_SHIFT_FACTOR); j <= (curX1 >> FIXED_POINT_SHIFT_FACTOR); ++j) {
-                    alphas[j] = 255;
-                }
+            const Pt::int32_t from = std::min(curX1, curX2) >> FIXED_POINT_SHIFT_FACTOR;
+            const Pt::int32_t to   = std::max(curX1, curX2) >> FIXED_POINT_SHIFT_FACTOR;
+            for(int j = from; j <= to; ++j) {
+                *(alphas + j) = 255;
             }
             alphas -= _wbXSize;
             curX1  -= chgX1;
