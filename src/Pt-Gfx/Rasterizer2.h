@@ -142,7 +142,7 @@ class Rasterizer2
         Rect            _clip;
         Rect            _currentClip;
 
-        std::vector<Pt::uint8_t> _alphas; // Work buffer
+        std::vector<Pt::uint16_t> _alphas; // Work buffer
 };
 
 

@@ -359,17 +359,17 @@ void Rasterizer2::updateClip()
 
 void Rasterizer2::prepWorkBuffer(Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t sizeX, Pt::int32_t sizeY)
 {
-    Pt::uint8_t* alphas = &_alphas[0] + minY * _image->width() + minX;
+    Pt::uint16_t* alphas = &_alphas[0] + minY * _image->width() + minX;
 
     for(int r = 0; r < sizeY; ++r) {
-        memset(alphas, 0, sizeX);
+        memset(alphas, 0, sizeX * sizeof(*alphas));
         alphas += _image->width();
     }
 }
 
 void Rasterizer2::blitWorkBufferToImage(Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t sizeX, Pt::int32_t sizeY, const Color& color)
 {
-    const Pt::uint8_t* alphas = _alphas.data() + minY * _image->width() + minX;
+    const Pt::uint16_t* alphas = _alphas.data() + minY * _image->width() + minX;
 
     for(int r = 0; r < sizeY; ++r) {
         Pixel destPixel( _image->view(), minX, minY + r);
@@ -609,7 +609,7 @@ void Rasterizer2::rasterOneSolidTriangleBottomFlat(const Point& v1, const Point&
     if(chgX2 < 0) curX2 += FIXED_POINT_FRACT_VAL_BM / 2;
     else          curX2 -= FIXED_POINT_FRACT_VAL_BM / 2;
 
-    Pt::uint8_t* alphas = &_alphas[0] + v1.y() * imgW;
+    Pt::uint16_t* alphas = &_alphas[0] + v1.y() * imgW;
 
     for(int i = v1.y(); i <= v2.y(); ++i) {
         Pt::int32_t steps;
@@ -636,12 +636,8 @@ void Rasterizer2::rasterOneSolidTriangleBottomFlat(const Point& v1, const Point&
                     Pt::int32_t lx = iterX >> FIXED_POINT_SHIFT_FACTOR;
                     Pt::int32_t rx = frx ? (lx + 1) : lx;
                     // Draw the block
-                    if( ((Pt::int32_t) alphas[lx] + flx) <= 255 ) alphas[lx] += flx;
-                    else                                          alphas[lx]  = 255;
-                    if( rx < imgW ) {
-                        if( ((Pt::int32_t) alphas[rx] + frx) <= 255 ) alphas[rx] += frx;
-                        else                                          alphas[rx]  = 255;
-                    }
+                                  alphas[lx] += flx;
+                    if(rx < imgW) alphas[rx] += frx;
                 }
                 iterX += chgX;
             }
@@ -656,7 +652,7 @@ void Rasterizer2::rasterOneSolidTriangleBottomFlat(const Point& v1, const Point&
     Pt::int32_t curX1 = (v1.x() << FIXED_POINT_SHIFT_FACTOR) + FIXED_POINT_FRACT_VAL_BM / 2;
     Pt::int32_t curX2 = (v1.x() << FIXED_POINT_SHIFT_FACTOR) - FIXED_POINT_FRACT_VAL_BM / 2;
 
-    Pt::uint8_t* alphas = &_alphas[0] + v1.y() * imgW;
+    Pt::uint16_t* alphas = &_alphas[0] + v1.y() * imgW;
 
     for(int i = v1.y(); i <= v2.y(); ++i) {
         if(curX1 <= curX2) {
@@ -702,7 +698,7 @@ void Rasterizer2::rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2
     if(chgX2 < 0) curX2 -= FIXED_POINT_FRACT_VAL_BM / 2;
     else          curX2 += FIXED_POINT_FRACT_VAL_BM / 2;
 
-    Pt::uint8_t* alphas = &_alphas[0] + v3.y() * imgW;
+    Pt::uint16_t* alphas = &_alphas[0] + v3.y() * imgW;
 
     for(int i = v3.y(); i > v1.y(); --i) {
         Pt::int32_t steps;
@@ -729,12 +725,8 @@ void Rasterizer2::rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2
                     Pt::int32_t lx = iterX >> FIXED_POINT_SHIFT_FACTOR;
                     Pt::int32_t rx = frx ? (lx + 1) : lx;
                     // Draw the block
-                    if( ((Pt::int32_t) alphas[lx] + flx) <= 255 ) alphas[lx] += flx;
-                    else                                          alphas[lx]  = 255;
-                    if( rx < imgW ) {
-                        if( ((Pt::int32_t) alphas[rx] + frx) <= 255 ) alphas[rx] += frx;
-                        else                                          alphas[rx]  = 255;
-                    }
+                                  alphas[lx] += flx;
+                    if(rx < imgW) alphas[rx] += frx;
                 }
                 iterX += chgX;
             }
@@ -749,7 +741,7 @@ void Rasterizer2::rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2
     Pt::int32_t curX1 = (v3.x() << FIXED_POINT_SHIFT_FACTOR) + FIXED_POINT_FRACT_VAL_BM / 2;
     Pt::int32_t curX2 = (v3.x() << FIXED_POINT_SHIFT_FACTOR) - FIXED_POINT_FRACT_VAL_BM / 2;
 
-    Pt::uint8_t* alphas = &_alphas[0] + v3.y() * imgW;
+    Pt::uint16_t* alphas = &_alphas[0] + v3.y() * imgW;
 
     for(int i = v3.y(); i > v1.y(); --i) {
         if(curX1 <= curX2) {

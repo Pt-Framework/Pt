@@ -129,7 +129,7 @@ void Rgb32Format::onCopy(Pixel& to, const Pixel& from, size_t length,
     }
 }
 
-void Rgb32Format::onCopy(Pixel& dst, const Pt::uint8_t* alphas, size_t length,
+void Rgb32Format::onCopy(Pixel& dst, const Pt::uint16_t* alphas, size_t length,
                           const Color& color, CompositionMode mode) const
 {
     // ### !!! TODO !!! ###
