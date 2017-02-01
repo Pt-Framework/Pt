@@ -2,6 +2,12 @@ static void testDrawLine(const char* title, Image& image, ImagePainter2& painter
 {
     resetImage(image);
 
+    painter.setPen( Color::fromRgb8(255, 255, 255, 175) );
+    painter.drawLine( PointF( 10,  10), PointF(100,  50) );
+    sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height());
+
+    return;
+
 #if 1
     painter.setClip( RectF (20, image.width() - 20, 20, image.height() - 20) );
     painter.setPen( Color::fromRgb8(0, 255, 0, 175) );

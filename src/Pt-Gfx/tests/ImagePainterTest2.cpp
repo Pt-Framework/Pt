@@ -29,7 +29,7 @@ int main(int argc, char* args[])
     painter.setFont( Pt::Gfx::Font(FONT_SPEC) );
 
     const int testDraw    = 1;
-    const int doBenchmark = 1;
+    const int doBenchmark = 0;
 
     // Lines
     if(1 && testDraw) {
@@ -43,7 +43,7 @@ int main(int argc, char* args[])
 
     // Solid-filled polygons
     painter.setAntiAliasingQuality(0);
-    if(1 && testDraw) {
+    if(0 && testDraw) {
         painter.setCompositionMode(CompositionMode::SourceCopy);
         testDrawSolidFillPolygon("Solid-Filled Polygons - SourceCopy (N)", image, painter);
     }
@@ -53,7 +53,7 @@ int main(int argc, char* args[])
     }
 
     painter.setAntiAliasingQuality(1);
-    if(1 && testDraw) {
+    if(0 && testDraw) {
         painter.setCompositionMode(CompositionMode::SourceCopy);
         testDrawSolidFillPolygon("Solid-Filled Polygons - SourceCopy (P)", image, painter);
     }
