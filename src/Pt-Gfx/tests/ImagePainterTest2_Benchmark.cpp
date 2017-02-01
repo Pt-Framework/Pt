@@ -1,6 +1,43 @@
-//#define CHECK_RESULT
+//#define CHECK_RESULTING_IMAGE
 
 #define BENCH_COUNT 250
+
+template <typename PainterT>
+size_t benchDrawText(const char* info)
+{
+    size_t sum = 0;
+
+    Image image( ImageFormat::argb32(), Size(800, 600) );
+
+    PainterT painter(image);
+    painter.setCompositionMode(CompositionMode::SourceOver);
+
+    Brush brush( Color::fromRgb8(255, 255, 255, 255) );
+    painter.setBrush(brush);
+
+    Pen pen( Color::fromRgb8(255, 255, 255, 255) );
+    painter.setPen(pen);
+
+    painter.setFontDir( Pt::System::Path(FONT_DIR) );
+    painter.setFont( Pt::Gfx::Font(FONT_SPEC) );
+
+    for(int i = 0; i < BENCH_COUNT ; ++i) {
+        Pt::System::Clock clock;
+        clock.start();
+
+        painter.drawText( PointF(100, 100), "Hello world!" );
+        painter.drawText( PointF(100, 150), "Hello world!" );
+
+        sum += clock.stop().toUSecs();
+#ifdef CHECK_RESULTING_IMAGE
+        if(!i) sdlPreviewRGB888Buffer("benchDrawText", image.data(), image.width(), image.height());
+#endif
+    }
+
+    sum /= BENCH_COUNT;
+    std::clog << info << sum << std::endl;
+    return sum;
+}
 
 template <typename PainterT>
 size_t benchDrawLine(const char* info)
@@ -26,7 +63,7 @@ size_t benchDrawLine(const char* info)
         painter.drawLine( PointF(789, 489), PointF( 10, 589) );
 
         sum += clock.stop().toUSecs();
-#ifdef CHECK_RESULT
+#ifdef CHECK_RESULTING_IMAGE
         if(!i) sdlPreviewRGB888Buffer("benchDrawLine", image.data(), image.width(), image.height());
 #endif
     }
@@ -63,7 +100,7 @@ size_t benchDrawSolidFillPolygon(const char* info)
         painter.fillPolygon(poly2, sizeof(poly2) / sizeof(poly2[0]));
 
         sum += clock.stop().toUSecs();
-#ifdef CHECK_RESULT
+#ifdef CHECK_RESULTING_IMAGE
         if(!i) sdlPreviewRGB888Buffer("benchDrawSolidFillPolygon", image.data(), image.width(), image.height());
 #endif
     }
