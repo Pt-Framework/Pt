@@ -43,23 +43,23 @@ int main(int argc, char* args[])
 
     // Solid-filled polygons
     painter.setAntiAliasingQuality(0);
-    if(0 && testDraw) {
+    if(1 && testDraw) {
         painter.setCompositionMode(CompositionMode::SourceCopy);
-        testDrawSolidFillPolygon("Solid-Filled Polygons - SourceCopy", image, painter);
+        testDrawSolidFillPolygon("Solid-Filled Polygons - SourceCopy (N)", image, painter);
     }
     if(0 && testDraw) {
         painter.setCompositionMode(CompositionMode::SourceOver);
-        testDrawSolidFillPolygon("Solid-Filled Polygons - SourceOver", image, painter);
+        testDrawSolidFillPolygon("Solid-Filled Polygons - SourceOver (N)", image, painter);
     }
 
     painter.setAntiAliasingQuality(1);
     if(1 && testDraw) {
         painter.setCompositionMode(CompositionMode::SourceCopy);
-        testDrawSolidFillPolygon("Solid-Filled Polygons - SourceCopy", image, painter);
+        testDrawSolidFillPolygon("Solid-Filled Polygons - SourceCopy (P)", image, painter);
     }
     if(0 && testDraw) {
         painter.setCompositionMode(CompositionMode::SourceOver);
-        testDrawSolidFillPolygon("Solid-Filled Polygons - SourceOver", image, painter);
+        testDrawSolidFillPolygon("Solid-Filled Polygons - SourceOver (P)", image, painter);
     }
 
     // Benchmark

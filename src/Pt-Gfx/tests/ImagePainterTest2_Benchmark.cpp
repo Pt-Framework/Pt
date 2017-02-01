@@ -12,10 +12,10 @@ static size_t benchDrawText(CompositionMode cm)
     PainterT painter(image);
     painter.setCompositionMode(cm);
 
-    Brush brush( Color::fromRgb8(255, 255, 255, 255) );
+    Brush brush( Color::fromRgb8(255, 255, 255, 175) );
     painter.setBrush(brush);
 
-    Pen pen( Color::fromRgb8(255, 255, 255, 255) );
+    Pen pen( Color::fromRgb8(255, 255, 255, 175) );
     painter.setPen(pen);
 
     painter.setFontDir( Pt::System::Path(FONT_DIR) );
@@ -48,10 +48,10 @@ static size_t benchDrawLine(CompositionMode cm)
     PainterT painter(image);
     painter.setCompositionMode(cm);
 
-    Brush brush( Color::fromRgb8(255, 255, 255, 255) );
+    Brush brush( Color::fromRgb8(255, 255, 255, 175) );
     painter.setBrush(brush);
 
-    Pen pen( Color::fromRgb8(255, 255, 255, 255) );
+    Pen pen( Color::fromRgb8(255, 255, 255, 175) );
     painter.setPen(pen);
 
     for(int i = 0; i < BENCH_COUNT ; ++i) {
@@ -81,10 +81,10 @@ static size_t benchDrawSolidFillPolygon(CompositionMode cm, int aaQuality = 0)
     PainterT painter(image);
     painter.setCompositionMode(cm);
 
-    Brush brush( Color::fromRgb8(255, 255, 255, 255) );
+    Brush brush( Color::fromRgb8(255, 255, 255, 175) );
     painter.setBrush(brush);
 
-    Pen pen( Color::fromRgb8(255, 255, 255, 255) );
+    Pen pen( Color::fromRgb8(255, 255, 255, 175) );
     painter.setPen(pen);
 
     painter.setAntiAliasingQuality(aaQuality);
