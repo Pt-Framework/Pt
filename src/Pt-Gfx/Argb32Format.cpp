@@ -188,15 +188,36 @@ void Argb32Format::onCopy(Pixel& to, const Pt::uint16_t* alphas, size_t length,
         default:
         case CompositionMode::SourceCopy:
             for(size_t i = 0; i < length; ++i) {
-                const Pt::int32_t alpha = *alphas++;
-                if(alpha) {
-                    const Pt::uint32_t blendAlphaSrc = std::min<Pt::uint32_t>(255, alpha);
+                const Pt::int32_t alphaB = *alphas++;
+                const Pt::int32_t alphaC = color.alpha();
+#if 0
+                if(alphaB) {
+                    const Pt::uint32_t blendAlphaSrc = std::min<Pt::uint32_t>(255, alphaB);
                     const Pt::uint32_t blendAlphaInv = 255 - blendAlphaSrc;
                     dst[0] = (blendAlphaSrc * IDIV_BY_257(color.blue ()) + blendAlphaInv * dst[0] + 255) >> 8;
                     dst[1] = (blendAlphaSrc * IDIV_BY_257(color.green()) + blendAlphaInv * dst[1] + 255) >> 8;
                     dst[2] = (blendAlphaSrc * IDIV_BY_257(color.red  ()) + blendAlphaInv * dst[2] + 255) >> 8;
                 }
-                dst[3] = IDIV_BY_257(color.alpha());
+                dst[3] = IDIV_BY_257(alphaC);
+#else
+                if(!alphaB) {
+                    // Nothing to draw!
+                }
+                else if(alphaB >= 255) {
+                    dst[0] = IDIV_BY_257(color.blue ());
+                    dst[1] = IDIV_BY_257(color.green());
+                    dst[2] = IDIV_BY_257(color.red  ());
+                    dst[3] = IDIV_BY_257(alphaC       );
+                }
+                else {
+                    const Pt::uint32_t blendAlphaSrc = alphaB;
+                    const Pt::uint32_t blendAlphaInv = 255 - blendAlphaSrc;
+                    dst[0] = (blendAlphaSrc * IDIV_BY_257(color.blue ()) + blendAlphaInv * dst[0]) >> 8;
+                    dst[1] = (blendAlphaSrc * IDIV_BY_257(color.green()) + blendAlphaInv * dst[1]) >> 8;
+                    dst[2] = (blendAlphaSrc * IDIV_BY_257(color.red  ()) + blendAlphaInv * dst[2]) >> 8;
+                    dst[3] = IDIV_BY_257(alphaC);
+                }
+#endif
                 dst += 4;
             }
             break;
@@ -205,16 +226,47 @@ void Argb32Format::onCopy(Pixel& to, const Pt::uint16_t* alphas, size_t length,
             for(size_t i = 0; i < length; ++i) {
                 const Pt::int32_t alphaB = *alphas++;
                 const Pt::int32_t alphaC = color.alpha();
+#if 0
                 if(alphaB && alphaC) {
                     const Pt::uint32_t colorAlpha    = IDIV_BY_257(alphaC);
-                    const Pt::uint32_t blendAlpha    = IDIV_BY_255(colorAlpha * std::min<Pt::uint32_t>(255, alphaB));
-                    const Pt::uint32_t blendAlphaSrc = blendAlpha;
+                    const Pt::uint32_t blendAlphaSrc = IDIV_BY_255(colorAlpha * std::min<Pt::uint32_t>(255, alphaB));
                     const Pt::uint32_t blendAlphaInv = 255 - blendAlphaSrc;
                     dst[0] = (blendAlphaSrc * IDIV_BY_257(color.blue ()) + blendAlphaInv * dst[0] + 255) >> 8;
                     dst[1] = (blendAlphaSrc * IDIV_BY_257(color.green()) + blendAlphaInv * dst[1] + 255) >> 8;
                     dst[2] = (blendAlphaSrc * IDIV_BY_257(color.red  ()) + blendAlphaInv * dst[2] + 255) >> 8;
                     dst[3] = (blendAlphaSrc * colorAlpha                 + blendAlphaInv * dst[3] + 255) >> 8;
                 }
+#else
+                if(!alphaB || !alphaC) {
+                    // Nothing to draw!
+                }
+                else if(alphaB >= 255) {
+                    const Pt::uint32_t colorAlpha    = IDIV_BY_257(alphaC);
+                    const Pt::uint32_t blendAlphaSrc = colorAlpha;
+                    const Pt::uint32_t blendAlphaInv = 255 - blendAlphaSrc;
+                    dst[0] = (blendAlphaSrc * IDIV_BY_257(color.blue ()) + blendAlphaInv * dst[0]) >> 8;
+                    dst[1] = (blendAlphaSrc * IDIV_BY_257(color.green()) + blendAlphaInv * dst[1]) >> 8;
+                    dst[2] = (blendAlphaSrc * IDIV_BY_257(color.red  ()) + blendAlphaInv * dst[2]) >> 8;
+                    dst[3] = (blendAlphaSrc * colorAlpha                 + blendAlphaInv * dst[3]) >> 8;
+                }
+                else if(alphaC >= 255) {
+                    const Pt::uint32_t blendAlphaSrc = alphaB;
+                    const Pt::uint32_t blendAlphaInv = 255 - blendAlphaSrc;
+                    dst[0] = (blendAlphaSrc * IDIV_BY_257(color.blue ()) + blendAlphaInv * dst[0]) >> 8;
+                    dst[1] = (blendAlphaSrc * IDIV_BY_257(color.green()) + blendAlphaInv * dst[1]) >> 8;
+                    dst[2] = (blendAlphaSrc * IDIV_BY_257(color.red  ()) + blendAlphaInv * dst[2]) >> 8;
+                    dst[3] = (blendAlphaSrc * 255                        + blendAlphaInv * dst[3]) >> 8;
+                }
+                else {
+                    const Pt::uint32_t colorAlpha    = IDIV_BY_257(alphaC);
+                    const Pt::uint32_t blendAlphaSrc = IDIV_BY_255(colorAlpha * alphaB);
+                    const Pt::uint32_t blendAlphaInv = 255 - blendAlphaSrc;
+                    dst[0] = (blendAlphaSrc * IDIV_BY_257(color.blue ()) + blendAlphaInv * dst[0]) >> 8;
+                    dst[1] = (blendAlphaSrc * IDIV_BY_257(color.green()) + blendAlphaInv * dst[1]) >> 8;
+                    dst[2] = (blendAlphaSrc * IDIV_BY_257(color.red  ()) + blendAlphaInv * dst[2]) >> 8;
+                    dst[3] = (blendAlphaSrc * colorAlpha                 + blendAlphaInv * dst[3]) >> 8;
+                }
+#endif
                 dst += 4;
             }
             break;
