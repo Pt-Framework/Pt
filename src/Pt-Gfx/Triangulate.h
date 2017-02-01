@@ -44,11 +44,11 @@ class Triangulate {
         static bool process(std::vector<Point>& result, const std::vector<Point>& contour);
 
         // Compute area of a contour/polygon
-        static float area(const std::vector<Point>& contour);
+        static Pt::int32_t area(const std::vector<Point>& contour);
 
     private:
-        static bool snip(const std::vector<Point>& contour, int u, int v, int w, int n, int* V);
-        static bool insideTriangle(float Ax, float Ay, float Bx, float By, float Cx, float Cy, float Px, float Py);
+        static bool snip(const std::vector<Point>& contour, Pt::int32_t u, Pt::int32_t v, Pt::int32_t w, Pt::int32_t n, Pt::int32_t* V);
+        static bool insideTriangle(Pt::int32_t Ax, Pt::int32_t Ay, Pt::int32_t Bx, Pt::int32_t By, Pt::int32_t Cx, Pt::int32_t Cy, Pt::int32_t Px, Pt::int32_t Py);
 };
 
 
