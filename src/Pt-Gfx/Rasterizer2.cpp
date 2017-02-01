@@ -444,10 +444,10 @@ void Rasterizer2::rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt
         const Pt::int32_t rx = frx ? (lx + 1) : lx;
         const Pt::int32_t ry = fry ? (ly + 1) : ly;
         // Draw the block
-        _alphas[ (ly + MARGIN_PIXELS) * _wbXSize + lx + MARGIN_PIXELS ] += (fly * flx + 255) >> 8;
-        _alphas[ (ly + MARGIN_PIXELS) * _wbXSize + rx + MARGIN_PIXELS ] += (fly * frx + 255) >> 8;
-        _alphas[ (ry + MARGIN_PIXELS) * _wbXSize + lx + MARGIN_PIXELS ] += (fry * flx + 255) >> 8;
-        _alphas[ (ry + MARGIN_PIXELS) * _wbXSize + rx + MARGIN_PIXELS ] += (fry * frx + 255) >> 8;
+        _alphas[ (ly + MARGIN_PIXELS) * _wbXSize + lx + MARGIN_PIXELS ] += (fly * flx) >> 8;
+        _alphas[ (ly + MARGIN_PIXELS) * _wbXSize + rx + MARGIN_PIXELS ] += (fly * frx) >> 8;
+        _alphas[ (ry + MARGIN_PIXELS) * _wbXSize + lx + MARGIN_PIXELS ] += (fry * flx) >> 8;
+        _alphas[ (ry + MARGIN_PIXELS) * _wbXSize + rx + MARGIN_PIXELS ] += (fry * frx) >> 8;
         // Increment the drawing coordinate
         fx1 += chgX;
         fy1 += chgY;
