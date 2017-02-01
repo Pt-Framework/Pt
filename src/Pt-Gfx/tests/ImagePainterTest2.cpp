@@ -23,7 +23,7 @@ int main(int argc, char* args[])
     painter.setFontDir( Pt::System::Path("../src/Pt-Gfx/fonts") );
     painter.setFont( Pt::Gfx::Font("DejaVu Serif", 24, Pt::Gfx::Font::BoldItalic) );
 
-    if(0) {
+    if(1) {
         painter.setCompositionMode(CompositionMode::SourceCopy);
         testDrawLine("Lines and Texts - SourceCopy", image, painter);
     }
@@ -43,19 +43,24 @@ int main(int argc, char* args[])
         testDrawSolidFillPolygon("Solid-Filled Polygons - SourceOver", image, painter);
     }
 
-    if(0) {
-        benchDrawLine            <ImagePainter >("Drawing line using ImagePainter                  = ");
-        benchDrawLine            <ImagePainter2>("Drawing line using ImagePainter2                 = ");
-        benchDrawSolidFillPolygon<ImagePainter >("Drawing solid-filled polygon using ImagePainter  = ");
-        benchDrawSolidFillPolygon<ImagePainter2>("Drawing solid-filled polygon using ImagePainter2 = ");
+    if(1) {
+        double time1, time2;
+
+        std::clog << std::endl;
+
+        time1 = benchDrawLine            <ImagePainter >("Drawing line using ImagePainter                  = ");
+        time2 = benchDrawLine            <ImagePainter2>("Drawing line using ImagePainter2                 = ");
+        std::clog <<  "Slow-down factor                                 = " << (time2 / time1) << "" << std::endl << std::endl;
+
+
+        time1 = benchDrawSolidFillPolygon<ImagePainter >("Drawing solid-filled polygon using ImagePainter  = ");
+        time2 = benchDrawSolidFillPolygon<ImagePainter2>("Drawing solid-filled polygon using ImagePainter2 = ");
+        std::clog <<  "Slow-down factor                                 = " << (time2 / time1) << "" << std::endl << std::endl;
     }
 
-/*
- * Drawing line using ImagePainter                  = 189
- * Drawing line using ImagePainter2                 = 2420
- * Drawing solid-filled polygon using ImagePainter  = 558
- * Drawing solid-filled polygon using ImagePainter2 = 2327
- */
     return 0;
 }
 
+/*
+
+*/

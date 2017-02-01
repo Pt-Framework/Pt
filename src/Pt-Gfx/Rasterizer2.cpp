@@ -50,25 +50,13 @@ namespace Gfx {
 // ===== Settings =======================================================================
 // ======================================================================================
 
-#define FIXED_POINT_USE_16_16_FORMAT
+// Comment this to reduce the precision of the polygon AA
 #define FILL_POLYGON_PRECISION_AA
 
-// Use 16.16 format
-#if defined(FIXED_POINT_USE_16_16_FORMAT)
-    #define FIXED_POINT_SHIFT_FACTOR 16         // Shift factor
-    #define FIXED_POINT_ALPHA_DIVFAC 257        // Must be ( (2 ^ FIXED_POINT_SHIFT_FACTOR - 1) / 255 )
-    #define FIXED_POINT_FRACT_VAL_BM 0x0000FFFF // Bit mask for the fractional value; must be (2 ^ FIXED_POINT_SHIFT_FACTOR - 1)
-// Use 24.8 format
-#elif defined(FIXED_POINT_USE_24_8_FORMAT)
-    #define FIXED_POINT_SHIFT_FACTOR 8          // Shift factor
-    #define FIXED_POINT_ALPHA_MULFAC 1          // Must be ( 255 / (2 ^ FIXED_POINT_SHIFT_FACTOR - 1) )
-    #define FIXED_POINT_FRACT_VAL_BM 0x000000FF // Bit mask for the fractional value; must be (2 ^ FIXED_POINT_SHIFT_FACTOR - 1)
-// Use 28.4 format
-#else
-    #define FIXED_POINT_SHIFT_FACTOR 4          // Shift factor
-    #define FIXED_POINT_ALPHA_MULFAC 17         // Must be ( 255 / (2 ^ FIXED_POINT_SHIFT_FACTOR - 1) )
-    #define FIXED_POINT_FRACT_VAL_BM 0x0000000F // Bit mask for the fractional value; must be (2 ^ FIXED_POINT_SHIFT_FACTOR - 1)
-#endif
+// Use 16.16 fixed-point format
+#define FIXED_POINT_SHIFT_FACTOR 16         // Shift factor
+#define FIXED_POINT_ALPHA_DIVFAC 257        // Must be ( (2 ^ FIXED_POINT_SHIFT_FACTOR - 1) / 255 )
+#define FIXED_POINT_FRACT_VAL_BM 0x0000FFFF // Bit mask for the fractional value; must be (2 ^ FIXED_POINT_SHIFT_FACTOR - 1)
 
 
 // ======================================================================================
@@ -445,13 +433,8 @@ void Rasterizer2::rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt
     // Draw the line
     for(int i = 0; i <= steps; ++i) {
         // Calculate the alpha factors (0 - 255) of the block
-#ifdef FIXED_POINT_ALPHA_DIVFAC
         Pt::int32_t frx = (fx1 & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC;
         Pt::int32_t fry = (fy1 & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC;
-#else
-        Pt::int32_t frx = (fx1 & FIXED_POINT_FRACT_VAL_BM) * FIXED_POINT_ALPHA_MULFAC;
-        Pt::int32_t fry = (fy1 & FIXED_POINT_FRACT_VAL_BM) * FIXED_POINT_ALPHA_MULFAC;
-#endif
         Pt::int32_t flx = 255 - frx;
         Pt::int32_t fly = 255 - fry;
         // Calculate the top-left coordinate of the block
@@ -626,11 +609,7 @@ void Rasterizer2::rasterOneSolidTriangleBottomFlat(const Point& v1, const Point&
                     alphas[iterX >> FIXED_POINT_SHIFT_FACTOR] = 255;
                 }
                 if(j <= 1 || j >= steps - 1) {
-#ifdef FIXED_POINT_ALPHA_DIVFAC
                     Pt::int32_t frx = (iterX & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC;
-#else
-                    Pt::int32_t frx = (iterX & FIXED_POINT_FRACT_VAL_BM) * FIXED_POINT_ALPHA_MULFAC;
-#endif
                     Pt::int32_t flx = 255 - frx;
                     // Calculate the left and right coordinate of the span
                     Pt::int32_t lx = iterX >> FIXED_POINT_SHIFT_FACTOR;
@@ -719,11 +698,7 @@ void Rasterizer2::rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2
                     alphas[iterX >> FIXED_POINT_SHIFT_FACTOR] = 255;
                 }
                 if(j <= 1 || j >= steps - 1) {
-#ifdef FIXED_POINT_ALPHA_DIVFAC
                     Pt::int32_t frx = (iterX & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC;
-#else
-                    Pt::int32_t frx = (iterX & FIXED_POINT_FRACT_VAL_BM) * FIXED_POINT_ALPHA_MULFAC;
-#endif
                     Pt::int32_t flx = 255 - frx;
                     // Calculate the left and right coordinate of the span
                     Pt::int32_t lx = iterX >> FIXED_POINT_SHIFT_FACTOR;

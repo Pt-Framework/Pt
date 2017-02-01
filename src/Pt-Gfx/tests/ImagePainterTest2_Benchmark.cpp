@@ -1,6 +1,6 @@
 //#define CHECK_RESULT
 
-#define BENCH_COUNT 1000
+#define BENCH_COUNT 250
 
 template <typename PainterT>
 size_t benchDrawLine(const char* info)
@@ -22,8 +22,8 @@ size_t benchDrawLine(const char* info)
         Pt::System::Clock clock;
         clock.start();
 
-        painter.drawLine( PointF( 10,  10), PointF(789, 210) );
-        painter.drawLine( PointF(789, 389), PointF( 10, 589) );
+        painter.drawLine( PointF( 10,  10), PointF(789, 110) );
+        painter.drawLine( PointF(789, 489), PointF( 10, 589) );
 
         sum += clock.stop().toUSecs();
 #ifdef CHECK_RESULT
