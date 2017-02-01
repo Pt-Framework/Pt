@@ -5,6 +5,7 @@
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/PushButton.h>
 #include <Pt/Hmi/CheckBox.h>
+#include <Pt/Hmi/ComboBox.h>
 #include <Pt/Hmi/Panel.h>
 #include <Pt/Hmi/Label.h>
 #include <Pt/Hmi/LineEdit.h>
@@ -64,7 +65,7 @@ class ChildW : public Hmi::Window
         PushButton _dialogButton;
         CheckBox   _checkBox;
         LineEdit   _lineEdit;
-        LineEdit   _lineEdit2;
+        ComboBox   _comboBox;
         Label  _textLabel;
         DockingLayout _buttonBar;
 				ProgressBar		_progressBar;

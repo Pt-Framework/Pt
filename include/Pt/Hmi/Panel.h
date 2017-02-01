@@ -1,4 +1,5 @@
-/* Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2015 Marc Boris Duerner
+   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public

@@ -135,12 +135,9 @@ ChildW::ChildW(const std::string& title)
     _lineEdit.editingFinished() += Pt::slot(_textLabel, &Pt::Hmi::Label::setText);
     _lineEdit.textEdited() += Pt::slot(*this, &ChildW::checkInput);
 
-    _lineEdit2.setName("LineEdit2");
-    _lineEdit2.setAccepted(true); 
-    _lineEdit2.setPlaceholderText("placeholder text");
-    _lineEdit2.setMargin(5);
-    _lineEdit2.resize( Gfx::SizeF(130, 26) );
-    _lineEdit2.editingFinished() += Pt::slot(*this, &ChildW::onTextEntered);
+    _comboBox.setName("ComboBox");
+    _comboBox.setMargin(5);
+    _comboBox.resize( Gfx::SizeF(66, 26) );
 
     _progressBar.setName("ProgressBar"); 
     _progressBar.move( Gfx::PointF(0, 0) );
@@ -159,7 +156,7 @@ ChildW::ChildW(const std::string& title)
     _buttonBar.setName("ButtonBar");
     _buttonBar.resize( Gfx::SizeF(700, 290) );
     _buttonBar.setPadding(5);
-    //_buttonBar.dock(_lineEdit2, DockingLayout::Bottom);
+    _buttonBar.dock(_comboBox, DockingLayout::Bottom);
     _buttonBar.dock(_lineEdit, DockingLayout::Bottom);
     _buttonBar.dock(_checkBox, DockingLayout::Bottom);
     _buttonBar.dock(_closeButton, DockingLayout::Bottom);
@@ -181,7 +178,7 @@ ChildW::ChildW(const std::string& title)
      
     //_childWindow2.setMainWidget(&_closeButton);          
     _childWindow2.move(Gfx::PointF(5, 40));    
-    _childWindow2.resize( Gfx::SizeF(240, 380) );
+    _childWindow2.resize( Gfx::SizeF(250, 500) );
     _childWindow2.setTitle("Child of " + title);    
     _childWindow2.setMainWidget(&_childView);
     add( _childWindow2 );

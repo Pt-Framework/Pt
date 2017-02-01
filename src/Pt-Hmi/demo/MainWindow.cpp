@@ -97,11 +97,11 @@ MainWindow::MainWindow()
     resize( Gfx::SizeF(720, 900) ); 
     
     //_child2.setTopMost(true);
-    _child2.resize( Gfx::SizeF(600, 850) );
-    add( _child2 );
+    ///_child2.resize( Gfx::SizeF(600, 850) );
+    ///add( _child2 );
     
-    _child2.setTitle("Child 2");
-    _child2.move( Gfx::PointF(10, 10) );
+    ///_child2.setTitle("Child 2");
+    ///_child2.move( Gfx::PointF(10, 10) );
     
     for(int n = 0; n < 20; ++n)
     {
@@ -126,16 +126,16 @@ MainWindow::MainWindow()
     _scrollContainer.setMargin(5);
     _scrollContainer.resize( Gfx::SizeF(500, 1000) );
 
-    _scrollView.setWidget(_scrollContainer);
+   // _scrollView.setWidget(_scrollContainer);
     
-    _child2.setMainWidget(&_scrollView);
-    _child2.show(true);
+    ///_child2.setMainWidget(&_scrollView);
+    ///_child2.show(true);
 
     add( _child1 );
     
     //_child1.setTopMost(true);
     _child1.move( Gfx::PointF(30,30));
-    _child1.resize( Gfx::SizeF(300, 470) );
+    _child1.resize( Gfx::SizeF(300, 600) );
     _child1.show(true);
     
     // context menu

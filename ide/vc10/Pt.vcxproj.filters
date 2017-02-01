@@ -1437,6 +1437,12 @@
     <ClInclude Include="..\..\include\Pt\Utf8.h">
       <Filter>Pt</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ComboBox.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\ListBox.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2665,6 +2671,12 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt\tests\Utf8Test.cpp">
       <Filter>Pt\tests</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\ComboBox.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\ListBox.cpp">
+      <Filter>Pt-Hmi</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

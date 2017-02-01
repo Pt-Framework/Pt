@@ -25,6 +25,7 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
              Application.cpp
              Button.cpp
              CheckBox.cpp
+             ComboBox.cpp
              Control.cpp
              Cursor.cpp
              DockingLayout.cpp
@@ -32,6 +33,7 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
              GridLayout.cpp
              Layout.cpp
              LineEdit.cpp
+             ListBox.cpp
              PaintSurface.cpp
              PixmapSurface.cpp 
              PaintRegion.cpp

@@ -64,6 +64,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Button.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\CheckBox.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\CloseEvent.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\ComboBox.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Control.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Cursor.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\DockingLayout.h" />
@@ -80,6 +81,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Layout.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\LeaveEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\LineEdit.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\ListBox.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Menu.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\MenuBar.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\MenuItem.h" />
@@ -523,6 +525,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Application.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Button.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\CheckBox.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\ComboBox.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Control.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Cursor.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\demo\ChildW.cpp" />
@@ -572,6 +575,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PictureImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\PixmapSurfaceImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\ScreenImpl.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\ListBox.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Menu.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\MenuBar.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\MenuItem.cpp" />

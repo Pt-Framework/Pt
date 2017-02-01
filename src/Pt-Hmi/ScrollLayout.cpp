@@ -205,6 +205,10 @@ void ScrollLayout::onScrollEvent(const ScrollEvent& ev)
 void ScrollLayout::onAddWidget(Widget& w)
 {
     Layout::onAddWidget(w);
+    
+    w.eventReady() += Pt::slot(*this, &ScrollLayout::onContentResize);
+    w.eventReady() += Pt::slot(*this, &ScrollLayout::onContentMove);
+
     updateRange();
 }
 
@@ -212,6 +216,22 @@ void ScrollLayout::onAddWidget(Widget& w)
 void ScrollLayout::onRemoveWidget(Widget& w)
 {
     Layout::onRemoveWidget(w);
+
+    w.eventReady() -= Pt::slot(*this, &ScrollLayout::onContentResize);
+    w.eventReady() -= Pt::slot(*this, &ScrollLayout::onContentMove);
+
+    updateRange();
+}
+
+
+void ScrollLayout::onContentResize(const ResizeEvent& ev)
+{
+    updateRange();
+}
+
+
+void ScrollLayout::onContentMove(const MoveEvent& ev)
+{
     updateRange();
 }
 
@@ -231,6 +251,8 @@ void ScrollLayout::updateRange()
 
     _maxX = static_cast<int>(maxWidth);
     _maxY = static_cast<int>(maxHeight);
+
+    _contentChanged.send();
 }
 
 } // namespace

@@ -45,10 +45,11 @@ ScrollView::ScrollView()
     _scrollBarX.changed() += Pt::slot(*this, &ScrollView::onScrollBarX);
     _scrollBarY.changed() += Pt::slot(*this, &ScrollView::onScrollBarY);
 
-    _layout.scrolledX() += Pt::slot(*this, &ScrollView::onScrolledX);
-    _layout.scrolledY() += Pt::slot(*this, &ScrollView::onScrolledY);
+    _scrollLayout.scrolledX() += Pt::slot(*this, &ScrollView::onScrolledX);
+    _scrollLayout.scrolledY() += Pt::slot(*this, &ScrollView::onScrolledY);
+    _scrollLayout.contentChanged() += Pt::slot(*this, &ScrollView::onContentChanged);
 
-    add(_layout);
+    add(_scrollLayout);
     add(_scrollBarX);
     add(_scrollBarY);
 }
@@ -69,25 +70,25 @@ void ScrollView::enableScrollBars(bool h, bool v)
 void ScrollView::setWidget(Widget& widget)
 {
     if(_widget)
-        _layout.remove(*_widget);
+        _scrollLayout.remove(*_widget);
 
-    _layout.add(widget);
+    _scrollLayout.add(widget);
     _widget = &widget;
 
-    _scrollBarX.setRange( 0, _layout.maximumX() );
-    _scrollBarY.setRange( 0, _layout.maximumY() );
+    _scrollBarX.setRange( 0, _scrollLayout.maximumX() );
+    _scrollBarY.setRange( 0, _scrollLayout.maximumY() );
 }
 
 
 void ScrollView::onScrollBarX(int pos)
 {
-    _layout.scrollX(pos);
+    _scrollLayout.scrollX(pos);
 }
 
 
 void ScrollView::onScrollBarY(int pos)
 {
-    _layout.scrollY(pos);
+    _scrollLayout.scrollY(pos);
 }
 
 
@@ -103,24 +104,37 @@ void ScrollView::onScrolledY(int n)
 }
 
 
+void ScrollView::onContentChanged()
+{
+}
+
+
 void ScrollView::onResizeEvent(const ResizeEvent& ev)
 {
     Widget::onResizeEvent(ev);
 
+    if( name() == "ListBox.ScrollView" )
+    {
+        int maxX = _scrollLayout.maximumX();
+        maxX = maxX;
+    }
+
     double width = ev.size().width();
-
-    if( _scrollBarY.isVisible() )
-        width -= _scrollBarY.size().width();
-
     double height = ev.size().height();
+
+    _scrollBarX.show( width < _scrollLayout.maximumX() );
+    _scrollBarY.show( height < _scrollLayout.maximumY() ); 
+
+
 
     if( _scrollBarX.isVisible() )
         height -= _scrollBarX.size().height();
 
-    _layout.move( Gfx::PointF(0,0) );
-    _layout.resize( Gfx::SizeF( width, height) );
+    if( _scrollBarY.isVisible() )
+        width -= _scrollBarY.size().width();
 
-    _scrollBarX.show( width <= _layout.maximumX() );
+    _scrollLayout.move( Gfx::PointF(0,0) );
+    _scrollLayout.resize( Gfx::SizeF( width, height) );
 
     if( _scrollBarX.isVisible() )
     {
@@ -128,7 +142,7 @@ void ScrollView::onResizeEvent(const ResizeEvent& ev)
         _scrollBarX.resize( Gfx::SizeF(width, _scrollBarX.size().height()) );
     }
 
-    _scrollBarY.show( height <= _layout.maximumY() );  
+     
     
     if( _scrollBarY.isVisible() )
     {
@@ -136,10 +150,10 @@ void ScrollView::onResizeEvent(const ResizeEvent& ev)
         _scrollBarY.resize( Gfx::SizeF(_scrollBarY.size().width(), height));
     }
 
-    double hrange = _layout.maximumX() -_layout.size().width();
+    double hrange = _scrollLayout.maximumX() -_scrollLayout.size().width();
     updateScrollBar(_scrollBarX, hrange);
 
-    double vrange = _layout.maximumY() -_layout.size().height();
+    double vrange = _scrollLayout.maximumY() -_scrollLayout.size().height();
     updateScrollBar(_scrollBarY, vrange);
 }
 
