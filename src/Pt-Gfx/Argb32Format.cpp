@@ -132,8 +132,6 @@ void Argb32Format::onCopy(Pixel& to, const ConstPixel& from, size_t length,
     }
 }
 
-//inline unsigned char clamp(int32_t n) ;
-
 void Argb32Format::onCopy(Pixel& to, const Pt::uint16_t* alphas, size_t length,
                           const Color& color, CompositionMode mode) const
 {
