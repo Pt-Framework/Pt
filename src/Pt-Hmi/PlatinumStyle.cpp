@@ -906,10 +906,6 @@ void PlatinumSliderRenderer::onRender( const Slider&				s,
 		painter.setBrush(foreground);
 		painter.fillRect( s.knobeRect() );
 
-		
-		
-		
-		
 		//painter.setBrush(foreground);
 		//painter.fillRect(Gfx::PointF(progressWidth - barHeight/2, 
 			                             //boxY), barHeight);

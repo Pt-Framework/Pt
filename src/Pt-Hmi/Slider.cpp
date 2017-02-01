@@ -42,7 +42,7 @@ Slider::Slider()
 , _hasRenderer(false)
 , _dragingMode(false)
 {
-	_knobeRect.set(0, 6, this->size().height() /2, 6);
+	_knobeRect.set(0, 6, 11, 17);
 }
 
 
@@ -265,7 +265,7 @@ void Slider::onMouseEvent(const MouseEvent& ev)
 {
 	Base::onMouseEvent(ev);
 
-	if( ev.isPress() /* && hittest*/ )
+	if( ev.isPress() && _knobeRect.contains( ev.position() ))
 	{
 		_dragingMode = true;
 		_beginDrag = ev.position();
@@ -278,7 +278,9 @@ void Slider::onMouseEvent(const MouseEvent& ev)
 	{
 		_position  +=  ev.position().x() - _beginDrag.x();
 
-		_knobeRect.set(_position, _knobeRect.right(), _knobeRect.top(), _knobeRect.bottom() );
+		_knobeRect.set(_position, _position+6 , _knobeRect.top(), _knobeRect.bottom() );
+
+		invalidate();
 	}
 }
 
