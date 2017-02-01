@@ -206,10 +206,10 @@ void Argb32Format::onCopy(Pixel& to, const Pt::uint16_t* alphas, size_t length,
                 const Pt::int32_t alphaB = *alphas++;
                 const Pt::int32_t alphaC = color.alpha();
                 if(alphaB && alphaC) {
-                    Pt::uint32_t colorAlpha    = IDIV_BY_257(alphaC);
-                    Pt::uint32_t blendAlpha    = IDIV_BY_255(colorAlpha * std::min<Pt::uint32_t>(255, alphaB));
-                    Pt::uint32_t blendAlphaSrc = blendAlpha;
-                    Pt::uint32_t blendAlphaInv = 255 - blendAlphaSrc;
+                    const Pt::uint32_t colorAlpha    = IDIV_BY_257(alphaC);
+                    const Pt::uint32_t blendAlpha    = IDIV_BY_255(colorAlpha * std::min<Pt::uint32_t>(255, alphaB));
+                    const Pt::uint32_t blendAlphaSrc = blendAlpha;
+                    const Pt::uint32_t blendAlphaInv = 255 - blendAlphaSrc;
                     dst[0] = (blendAlphaSrc * IDIV_BY_257(color.blue ()) + blendAlphaInv * dst[0] + 255) >> 8;
                     dst[1] = (blendAlphaSrc * IDIV_BY_257(color.green()) + blendAlphaInv * dst[1] + 255) >> 8;
                     dst[2] = (blendAlphaSrc * IDIV_BY_257(color.red  ()) + blendAlphaInv * dst[2] + 255) >> 8;

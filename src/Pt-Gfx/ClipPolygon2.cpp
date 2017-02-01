@@ -60,7 +60,7 @@ void ClipPolygon2::clipEdge(const std::vector<Point>& in, std::vector<Point>& ou
 
     Point p;
     Point i;
-    Point s = in[ in.size() - 1 ];
+    Point s = in[in.size() - 1];
 
     for(size_t j = 0; j < in.size(); ++j) {
         p = in[j];

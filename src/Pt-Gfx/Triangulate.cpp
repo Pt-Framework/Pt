@@ -48,13 +48,13 @@ bool Triangulate::process(std::vector<Point>& result, const std::vector<Point>& 
     Pt::int32_t* V = new Pt::int32_t[n];
 
     // We do not care about the orientation of the polygon
-    for(int v = 0; v < n; ++v) V[v] = v;
+    for(Pt::int32_t v = 0; v < n; ++v) V[v] = v;
     /*
     if( area(contour) > 0 ) {
-        for(int v = 0; v < n; ++v) V[v] = v;
+        for(Pt::int32_t v = 0; v < n; ++v) V[v] = v;
     }
     else {
-        for(int v = 0; v < n; ++v) V[v] = (n - 1) - v;
+        for(Pt::int32_t v = 0; v < n; ++v) V[v] = (n - 1) - v;
     }
     */
 
@@ -62,7 +62,7 @@ bool Triangulate::process(std::vector<Point>& result, const std::vector<Point>& 
     Pt::int32_t nv    = n;
     Pt::int32_t count = 2 * nv; // Error detection
 
-    for(int m = 0, v = nv - 1; nv > 2;) {
+    for(Pt::int32_t m = 0, v = nv - 1; nv > 2;) {
         // If we loop, it is probably a probable bad/non-simple polygon
         if(0 >= (count--)) {
             return false; // Exit error
@@ -121,7 +121,7 @@ bool Triangulate::snip(const std::vector<Point>& contour, Pt::int32_t u, Pt::int
 
     if( ( ((Bx - Ax) * (Cy - Ay)) - ((By - Ay) * (Cx - Ax)) ) < 0 ) return false;
 
-    for(int p = 0; p < n; ++p) {
+    for(Pt::int32_t p = 0; p < n; ++p) {
         if( (p == u) || (p == v) || (p == w) ) continue;
         const Pt::int32_t Px = contour[ V[p] ].x();
         const Pt::int32_t Py = contour[ V[p] ].y();

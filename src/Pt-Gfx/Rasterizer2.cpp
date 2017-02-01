@@ -253,15 +253,15 @@ FontMetrics Rasterizer2::fontMetrics( const Font& font, const Pt::String& text )
 
 void Rasterizer2::image(const Point& to, const Image& img)
 {
-    Rect imageRect( Point(0,0), img.size() );
+    const Rect imageRect( Point(0,0), img.size() );
     image( to, img, imageRect );
 }
 
 void Rasterizer2::image(const Point& to, const Image& from, const Rect& fromRect)
 {
     // Clip fromRect to fit into the clip/image rect
-    Point d = _currentClip.topLeft() - to;
-    Point fromPos = fromRect.topLeft() + d;
+    const Point d       = _currentClip.topLeft() - to;
+    const Point fromPos = fromRect.topLeft() + d;
 
     Rect fromClip(fromPos, _currentClip.size());
     fromClip = fromRect.intersect(fromClip);
@@ -269,7 +269,7 @@ void Rasterizer2::image(const Point& to, const Image& from, const Rect& fromRect
     if( fromClip.isNull() ) return;
 
     // Take account for smaller fromRect
-    Point toClip = to + (fromClip.topLeft() - fromRect.topLeft());
+    const Point toClip = to + (fromClip.topLeft() - fromRect.topLeft());
 
     _image->format().copy(_image->view(), toClip, from.view(), fromClip, _compositionMode);
 }
@@ -297,6 +297,12 @@ void Rasterizer2::strokeOutline(const Point* points, size_t pointCount)
 
 void Rasterizer2::fillPolygon(const Point* points, const size_t pointCount)
 {
+    std::vector<Point> clipped;
+    genClippedPolygonPoints(clipped, points, pointCount);
+
+    std::vector<Point> tris;
+    if(!Triangulate::process(tris, clipped)) return;
+
     Pt::int32_t minX;
     Pt::int32_t minY;
     Pt::int32_t maxX;
@@ -304,27 +310,21 @@ void Rasterizer2::fillPolygon(const Point* points, const size_t pointCount)
     Pt::int32_t sizeX;
     Pt::int32_t sizeY;
 
-    std::vector<Point> clipped;
-    genClippedPolygonPoints(clipped, points, pointCount);
-
-    std::vector<Point> tris;
-    if(!Triangulate::process(tris, clipped)) return;
-
     rasterFillTriangles(tris.data(), tris.size(), minX, minY, maxX, maxY, sizeX, sizeY);
     rasterPolygonOutline(clipped.data(), clipped.size(), minX, minY, maxX, maxY, sizeX, sizeY, _brush.color());
 
     /*
     std::vector<Point> tris;
 
-    // bot
+    // Bottom-flat
     tris.push_back(Point(200, 100));
     tris.push_back(Point(100, 200));
     tris.push_back(Point(300, 200));
-    // top
+    // Top-flat
     tris.push_back(Point(100, 300));
     tris.push_back(Point(300, 300));
     tris.push_back(Point(200, 400));
-    // all
+    // Non-flat
     tris.push_back(Point(450, 100));
     tris.push_back(Point(350, 300));
     tris.push_back(Point(650, 400));
@@ -340,7 +340,7 @@ void Rasterizer2::fillPolygon(const Point* points, const size_t pointCount)
 
 void Rasterizer2::updateClip()
 {
-    Rect imageRect( Point(0,0) , _image->size() );
+    const Rect imageRect( Point(0,0) , _image->size() );
     _currentClip = _clip.isNull() ? imageRect : _clip.intersect( imageRect );
 
     // Resize the work buffer so it slightly larger than the size of the image
@@ -431,18 +431,18 @@ void Rasterizer2::rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt
     const Pt::int32_t chgY = (fy2 - fy1) / steps;
 
     // Draw the line
-    for(int i = 0; i <= steps; ++i) {
+    for(Pt::int32_t i = 0; i <= steps; ++i) {
         // Calculate the alpha factors (0 - 255) of the block
-        Pt::int32_t frx = (fx1 & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC;
-        Pt::int32_t fry = (fy1 & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC;
-        Pt::int32_t flx = 255 - frx;
-        Pt::int32_t fly = 255 - fry;
+        const Pt::int32_t frx = (fx1 & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC;
+        const Pt::int32_t fry = (fy1 & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC;
+        const Pt::int32_t flx = 255 - frx;
+        const Pt::int32_t fly = 255 - fry;
         // Calculate the top-left coordinate of the block
-        Pt::int32_t lx = fx1 >> FIXED_POINT_SHIFT_FACTOR;
-        Pt::int32_t ly = fy1 >> FIXED_POINT_SHIFT_FACTOR;
+        const Pt::int32_t lx = fx1 >> FIXED_POINT_SHIFT_FACTOR;
+        const Pt::int32_t ly = fy1 >> FIXED_POINT_SHIFT_FACTOR;
         // Calculate the bottom-right coordinate of the block
-        Pt::int32_t rx = frx ? (lx + 1) : lx;
-        Pt::int32_t ry = fry ? (ly + 1) : ly;
+        const Pt::int32_t rx = frx ? (lx + 1) : lx;
+        const Pt::int32_t ry = fry ? (ly + 1) : ly;
         // Draw the block
         _alphas[ (ly + MARGIN_PIXELS) * _wbXSize + lx + MARGIN_PIXELS ] += (fly * flx + 255) >> 8;
         _alphas[ (ly + MARGIN_PIXELS) * _wbXSize + rx + MARGIN_PIXELS ] += (fly * frx + 255) >> 8;
@@ -550,26 +550,26 @@ void Rasterizer2::rasterOneSolidTriangleBottomFlat(const Point& v1, const Point&
         if(chgX2 >= 0) curX2 -= FIXED_POINT_FRACT_VAL_BM / 2;
         else           curX2 += FIXED_POINT_FRACT_VAL_BM / 2;
 
-        for(int i = v1.y(); i <= v2.y(); ++i) {
-            Pt::int32_t steps;
-            if(curX2 > curX1) steps = (curX2 - curX1 + FIXED_POINT_FRACT_VAL_BM) >> FIXED_POINT_SHIFT_FACTOR;
-            else              steps = (curX1 - curX2 + FIXED_POINT_FRACT_VAL_BM) >> FIXED_POINT_SHIFT_FACTOR;
+        for(Pt::int32_t i = v1.y(); i <= v2.y(); ++i) {
+            const Pt::int32_t steps = (curX2 > curX1)
+                                    ? (curX2 - curX1 + FIXED_POINT_FRACT_VAL_BM) >> FIXED_POINT_SHIFT_FACTOR
+                                    : (curX1 - curX2 + FIXED_POINT_FRACT_VAL_BM) >> FIXED_POINT_SHIFT_FACTOR;
             if(!steps) {
                 alphas[curX1 >> FIXED_POINT_SHIFT_FACTOR] = 255;
             }
             else {
-                Pt::int32_t iterX = curX1;
-                Pt::int32_t chgX  = (curX2 - curX1) / steps;
+                const Pt::int32_t chgX  = (curX2 - curX1) / steps;
+                      Pt::int32_t iterX = curX1;
                 for(int j = 0; j <= steps; ++j) {
                     if(j >= 1 && j <= steps - 1) {
                         alphas[iterX >> FIXED_POINT_SHIFT_FACTOR] = 255;
                     }
                     if(j <= 1 || j >= steps - 1) {
-                        Pt::int32_t frx = (iterX & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC;
-                        Pt::int32_t flx = 255 - frx;
+                        const Pt::int32_t frx = (iterX & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC;
+                        const Pt::int32_t flx = 255 - frx;
                         // Calculate the left and right coordinate of the span
-                        Pt::int32_t lx = iterX >> FIXED_POINT_SHIFT_FACTOR;
-                        Pt::int32_t rx = frx ? (lx + 1) : lx;
+                        const Pt::int32_t lx = iterX >> FIXED_POINT_SHIFT_FACTOR;
+                        const Pt::int32_t rx = frx ? (lx + 1) : lx;
                         // Draw the span
                         alphas[lx] += flx;
                         alphas[rx] += frx;
@@ -588,7 +588,7 @@ void Rasterizer2::rasterOneSolidTriangleBottomFlat(const Point& v1, const Point&
         Pt::int32_t curX1 = (v1.x() << FIXED_POINT_SHIFT_FACTOR) + FIXED_POINT_FRACT_VAL_BM / 2;
         Pt::int32_t curX2 = (v1.x() << FIXED_POINT_SHIFT_FACTOR) - FIXED_POINT_FRACT_VAL_BM / 2;
 
-        for(int i = v1.y(); i <= v2.y(); ++i) {
+        for(Pt::int32_t i = v1.y(); i <= v2.y(); ++i) {
             if(curX1 <= curX2) {
                 for(int j = (curX1 >> FIXED_POINT_SHIFT_FACTOR); j <= (curX2 >> FIXED_POINT_SHIFT_FACTOR); ++j) {
                     *(alphas + j) = 255;
@@ -635,26 +635,26 @@ void Rasterizer2::rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2
         if(chgX2 >= 0) curX2 -= FIXED_POINT_FRACT_VAL_BM / 2;
         else           curX2 += FIXED_POINT_FRACT_VAL_BM / 2;
 
-        for(int i = v3.y(); i > v1.y(); --i) {
-            Pt::int32_t steps;
-            if(curX2 > curX1) steps = (curX2 - curX1 + FIXED_POINT_FRACT_VAL_BM) >> FIXED_POINT_SHIFT_FACTOR;
-            else              steps = (curX1 - curX2 + FIXED_POINT_FRACT_VAL_BM) >> FIXED_POINT_SHIFT_FACTOR;
+        for(Pt::int32_t i = v3.y(); i > v1.y(); --i) {
+            const Pt::int32_t steps = (curX2 > curX1)
+                                    ? (curX2 - curX1 + FIXED_POINT_FRACT_VAL_BM) >> FIXED_POINT_SHIFT_FACTOR
+                                    : (curX1 - curX2 + FIXED_POINT_FRACT_VAL_BM) >> FIXED_POINT_SHIFT_FACTOR;
             if(!steps) {
                 alphas[curX1 >> FIXED_POINT_SHIFT_FACTOR] = 255;
             }
             else {
-                Pt::int32_t iterX = curX1;
-                Pt::int32_t chgX  = (curX2 - curX1) / steps;
+                const Pt::int32_t chgX  = (curX2 - curX1) / steps;
+                      Pt::int32_t iterX = curX1;
                 for(int j = 0; j <= steps; ++j) {
                     if(j >= 1 && j <= steps - 1) {
                         alphas[iterX >> FIXED_POINT_SHIFT_FACTOR] = 255;
                     }
                     if(j <= 1 || j >= steps - 1) {
-                        Pt::int32_t frx = (iterX & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC;
-                        Pt::int32_t flx = 255 - frx;
+                        const Pt::int32_t frx = (iterX & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC;
+                        const Pt::int32_t flx = 255 - frx;
                         // Calculate the left and right coordinate of the span
-                        Pt::int32_t lx = iterX >> FIXED_POINT_SHIFT_FACTOR;
-                        Pt::int32_t rx = frx ? (lx + 1) : lx;
+                        const Pt::int32_t lx = iterX >> FIXED_POINT_SHIFT_FACTOR;
+                        const Pt::int32_t rx = frx ? (lx + 1) : lx;
                         // Draw the span
                         alphas[lx] += flx;
                         alphas[rx] += frx;
@@ -673,7 +673,7 @@ void Rasterizer2::rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2
         Pt::int32_t curX1 = (v3.x() << FIXED_POINT_SHIFT_FACTOR) + FIXED_POINT_FRACT_VAL_BM / 2;
         Pt::int32_t curX2 = (v3.x() << FIXED_POINT_SHIFT_FACTOR) - FIXED_POINT_FRACT_VAL_BM / 2;
 
-        for(int i = v3.y(); i > v1.y(); --i) {
+        for(Pt::int32_t i = v3.y(); i > v1.y(); --i) {
             if(curX1 <= curX2) {
                 for(int j = (curX1 >> FIXED_POINT_SHIFT_FACTOR); j <= (curX2 >> FIXED_POINT_SHIFT_FACTOR); ++j) {
                     alphas[j] = 255;
@@ -728,8 +728,8 @@ void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount, P
     // prepWorkBuffer(minX, minY, sizeX, sizeY);
 
     // Raster the outlines as multiple one-pixel lines
-    Pt::int32_t xm, ym;
-    size_t      pc1 = pointCount - 1;
+    const size_t      pc1 = pointCount - 1;
+          Pt::int32_t xm, ym;
 
     for(size_t i = 0; i < pc1; ++i) {
         if(lineX[i] > lineX[i + 1]) xm = lineX[i    ] - lineX[i + 1];
