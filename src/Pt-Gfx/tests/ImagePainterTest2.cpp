@@ -66,10 +66,10 @@ int main(int argc, char* args[])
     if(doBenchmark) {
         std::clog << std::fixed << std::setprecision(0) << std::endl;
 
-        std::clog << "CompositionMode::SourceCopy" << std::endl << std::endl;
+        std::clog << "CompositionMode::SourceCopy" << std::endl;
         doBenchMark(CompositionMode::SourceCopy);
 
-        std::clog << "CompositionMode::SourceOver" << std::endl << std::endl;
+        std::clog << "CompositionMode::SourceOver" << std::endl;
         doBenchMark(CompositionMode::SourceOver);
     }
 

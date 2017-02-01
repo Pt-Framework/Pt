@@ -188,9 +188,10 @@ void Argb32Format::onCopy(Pixel& to, const Pt::uint16_t* alphas, size_t length,
         default:
         case CompositionMode::SourceCopy:
             for(size_t i = 0; i < length; ++i) {
-                Pt::uint32_t blendAlphaSrc = std::min<Pt::uint32_t>(255, *alphas++);
-                Pt::uint32_t blendAlphaInv = 255 - blendAlphaSrc;
-                if(blendAlphaSrc) {
+                const Pt::int32_t alpha = *alphas++;
+                if(alpha) {
+                    const Pt::uint32_t blendAlphaSrc = std::min<Pt::uint32_t>(255, alpha);
+                    const Pt::uint32_t blendAlphaInv = 255 - blendAlphaSrc;
                     dst[0] = (blendAlphaSrc * IDIV_BY_257(color.blue ()) + blendAlphaInv * dst[0] + 255) >> 8;
                     dst[1] = (blendAlphaSrc * IDIV_BY_257(color.green()) + blendAlphaInv * dst[1] + 255) >> 8;
                     dst[2] = (blendAlphaSrc * IDIV_BY_257(color.red  ()) + blendAlphaInv * dst[2] + 255) >> 8;
@@ -202,11 +203,13 @@ void Argb32Format::onCopy(Pixel& to, const Pt::uint16_t* alphas, size_t length,
 
         case CompositionMode::SourceOver:
             for(size_t i = 0; i < length; ++i) {
-                Pt::uint32_t colorAlpha    = IDIV_BY_257(color.alpha());
-                Pt::uint32_t blendAlpha    = IDIV_BY_255(colorAlpha * std::min<Pt::uint32_t>(255, *alphas++));
-                Pt::uint32_t blendAlphaSrc = blendAlpha;
-                Pt::uint32_t blendAlphaInv = 255 - blendAlphaSrc;
-                if(blendAlphaSrc) {
+                const Pt::int32_t alphaB = *alphas++;
+                const Pt::int32_t alphaC = color.alpha();
+                if(alphaB && alphaC) {
+                    Pt::uint32_t colorAlpha    = IDIV_BY_257(alphaC);
+                    Pt::uint32_t blendAlpha    = IDIV_BY_255(colorAlpha * std::min<Pt::uint32_t>(255, alphaB));
+                    Pt::uint32_t blendAlphaSrc = blendAlpha;
+                    Pt::uint32_t blendAlphaInv = 255 - blendAlphaSrc;
                     dst[0] = (blendAlphaSrc * IDIV_BY_257(color.blue ()) + blendAlphaInv * dst[0] + 255) >> 8;
                     dst[1] = (blendAlphaSrc * IDIV_BY_257(color.green()) + blendAlphaInv * dst[1] + 255) >> 8;
                     dst[2] = (blendAlphaSrc * IDIV_BY_257(color.red  ()) + blendAlphaInv * dst[2] + 255) >> 8;
