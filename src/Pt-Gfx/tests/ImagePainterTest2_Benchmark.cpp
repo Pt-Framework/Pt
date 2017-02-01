@@ -3,14 +3,14 @@
 #define BENCH_COUNT 250
 
 template <typename PainterT>
-size_t benchDrawText()
+static size_t benchDrawText(CompositionMode cm)
 {
     size_t sum = 0;
 
     Image image( ImageFormat::argb32(), Size(800, 600) );
 
     PainterT painter(image);
-    painter.setCompositionMode(CompositionMode::SourceOver);
+    painter.setCompositionMode(cm);
 
     Brush brush( Color::fromRgb8(255, 255, 255, 255) );
     painter.setBrush(brush);
@@ -39,14 +39,14 @@ size_t benchDrawText()
 }
 
 template <typename PainterT>
-size_t benchDrawLine()
+static size_t benchDrawLine(CompositionMode cm)
 {
     size_t sum = 0;
 
     Image image( ImageFormat::argb32(), Size(800, 600) );
 
     PainterT painter(image);
-    painter.setCompositionMode(CompositionMode::SourceOver);
+    painter.setCompositionMode(cm);
 
     Brush brush( Color::fromRgb8(255, 255, 255, 255) );
     painter.setBrush(brush);
@@ -72,14 +72,14 @@ size_t benchDrawLine()
 }
 
 template <typename PainterT>
-size_t benchDrawSolidFillPolygon(int aaQuality = 0)
+static size_t benchDrawSolidFillPolygon(CompositionMode cm, int aaQuality = 0)
 {
     size_t sum = 0;
 
     Image image( ImageFormat::argb32(), Size(800, 600) );
 
     PainterT painter(image);
-    painter.setCompositionMode(CompositionMode::SourceOver);
+    painter.setCompositionMode(cm);
 
     Brush brush( Color::fromRgb8(255, 255, 255, 255) );
     painter.setBrush(brush);
@@ -107,4 +107,35 @@ size_t benchDrawSolidFillPolygon(int aaQuality = 0)
 
     sum /= BENCH_COUNT;
     return sum;
+}
+
+static void doBenchMark(CompositionMode cm)
+{
+    double time1, time2, time3;
+
+    std::clog << "                                               Time (Factor)" << std::endl << std::endl;
+
+    time1 = benchDrawText<ImagePainter >(cm);
+    time2 = benchDrawText<ImagePainter2>(cm);
+    std::clog << "    Text                 @ ImagePainter      = " << std::setw(4) << time1 << std::endl;
+    std::clog << "    Text                 @ ImagePainter2     = " << std::setw(4) << time2
+              << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+    std::clog << std::endl;
+
+    time1 = benchDrawLine<ImagePainter >(cm);
+    time2 = benchDrawLine<ImagePainter2>(cm);
+    std::clog << "    Line                 @ ImagePainter      = " << std::setw(4) << time1 << std::endl;
+    std::clog << "    Line                 @ ImagePainter2     = " << std::setw(4) << time2
+              << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+    std::clog << std::endl;
+
+    time1 = benchDrawSolidFillPolygon<ImagePainter >(cm   );
+    time2 = benchDrawSolidFillPolygon<ImagePainter2>(cm, 0);
+    time3 = benchDrawSolidFillPolygon<ImagePainter2>(cm, 1);
+    std::clog << "    Solid-filled polygon @ ImagePainter      = " << std::setw(4) << time1 << std::endl;
+    std::clog << "    Solid-filled polygon @ ImagePainter2 (N) = " << std::setw(4) << time2
+              << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+    std::clog << "    Solid-filled polygon @ ImagePainter2 (P) = " << std::setw(4) << time3
+              << " (" << std::setw(6) << std::setprecision(3) << (time3 / time1) << ")" << std::setprecision(0) << std::endl;
+    std::clog << std::endl;
 }

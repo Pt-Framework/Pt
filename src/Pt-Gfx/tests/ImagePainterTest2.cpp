@@ -63,33 +63,14 @@ int main(int argc, char* args[])
     }
 
     // Benchmark
-    if(1 && doBenchmark) {
-        double time1, time2, time3;
+    if(doBenchmark) {
         std::clog << std::fixed << std::setprecision(0) << std::endl;
 
-        time1 = benchDrawText<ImagePainter >();
-        time2 = benchDrawText<ImagePainter2>();
-        std::clog << "Text                 @ ImagePainter      = " << std::setw(4) << time1 << std::endl;
-        std::clog << "Text                 @ ImagePainter2     = " << std::setw(4) << time2
-                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        std::clog << std::endl;
+        std::clog << "CompositionMode::SourceCopy" << std::endl << std::endl;
+        doBenchMark(CompositionMode::SourceCopy);
 
-        time1 = benchDrawLine<ImagePainter >();
-        time2 = benchDrawLine<ImagePainter2>();
-        std::clog << "Line                 @ ImagePainter      = " << std::setw(4) << time1 << std::endl;
-        std::clog << "Line                 @ ImagePainter2     = " << std::setw(4) << time2
-                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        std::clog << std::endl;
-
-        time1 = benchDrawSolidFillPolygon<ImagePainter >( );
-        time2 = benchDrawSolidFillPolygon<ImagePainter2>(0);
-        time3 = benchDrawSolidFillPolygon<ImagePainter2>(1);
-        std::clog << "Solid-filled polygon @ ImagePainter      = " << std::setw(4) << time1 << std::endl;
-        std::clog << "Solid-filled polygon @ ImagePainter2 (N) = " << std::setw(4) << time2
-                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        std::clog << "Solid-filled polygon @ ImagePainter2 (P) = " << std::setw(4) << time3
-                  << " (" << std::setw(6) << std::setprecision(3) << (time3 / time1) << ")" << std::setprecision(0) << std::endl;
-        std::clog << std::endl;
+        std::clog << "CompositionMode::SourceOver" << std::endl << std::endl;
+        doBenchMark(CompositionMode::SourceOver);
     }
 
     return 0;

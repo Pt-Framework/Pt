@@ -192,11 +192,6 @@ void Argb32Format::onCopy(Pixel& to, const Pt::uint16_t* alphas, size_t length,
                     dst[0] = (blendAlphaSrc * IDIV_BY_257(color.blue ()) + blendAlphaInv * dst[0] + 255) >> 8;
                     dst[1] = (blendAlphaSrc * IDIV_BY_257(color.green()) + blendAlphaInv * dst[1] + 255) >> 8;
                     dst[2] = (blendAlphaSrc * IDIV_BY_257(color.red  ()) + blendAlphaInv * dst[2] + 255) >> 8;
-                    /*
-                    dst[0] = (blendAlphaSrc * (Pt::uint32_t)(color.blue () / 257) + blendAlphaInv * dst[0] + 255) >> 8;
-                    dst[1] = (blendAlphaSrc * (Pt::uint32_t)(color.green() / 257) + blendAlphaInv * dst[1] + 255) >> 8;
-                    dst[2] = (blendAlphaSrc * (Pt::uint32_t)(color.red  () / 257) + blendAlphaInv * dst[2] + 255) >> 8;
-                    */
                 }
                 dst[3] = IDIV_BY_257(color.alpha());
                 dst += 4;
@@ -215,18 +210,6 @@ void Argb32Format::onCopy(Pixel& to, const Pt::uint16_t* alphas, size_t length,
                     dst[2] = (blendAlphaSrc * IDIV_BY_257(color.red  ()) + blendAlphaInv * dst[2] + 255) >> 8;
                     dst[3] = (blendAlphaSrc * colorAlpha                 + blendAlphaInv * dst[3] + 255) >> 8;
                 }
-                /*
-                Pt::uint32_t colorAlpha    = color.alpha() / 257;
-                Pt::uint32_t blendAlpha    = colorAlpha * std::min<Pt::uint32_t>(255, *alphas++) / 255;
-                Pt::uint32_t blendAlphaSrc = blendAlpha;
-                Pt::uint32_t blendAlphaInv = 255 - blendAlphaSrc;
-                if(blendAlphaSrc) {
-                    dst[0] = (blendAlphaSrc * (Pt::uint32_t)(color.blue () / 257) + blendAlphaInv * dst[0] + 255) >> 8;
-                    dst[1] = (blendAlphaSrc * (Pt::uint32_t)(color.green() / 257) + blendAlphaInv * dst[1] + 255) >> 8;
-                    dst[2] = (blendAlphaSrc * (Pt::uint32_t)(color.red  () / 257) + blendAlphaInv * dst[2] + 255) >> 8;
-                    dst[3] = (blendAlphaSrc * colorAlpha                          + blendAlphaInv * dst[3] + 255) >> 8;
-                }
-                */
                 dst += 4;
             }
             break;
