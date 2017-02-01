@@ -301,6 +301,8 @@ void Rasterizer2::fillPolygon(const Point* points, const size_t pointCount)
     Pt::int32_t minY;
     Pt::int32_t maxX;
     Pt::int32_t maxY;
+    Pt::int32_t sizeX;
+    Pt::int32_t sizeY;
 
     std::vector<Point> clipped;
     genClippedPolygonPoints(clipped, points, pointCount);
@@ -308,8 +310,8 @@ void Rasterizer2::fillPolygon(const Point* points, const size_t pointCount)
     std::vector<Point> tris;
     if(!Triangulate::process(tris, clipped)) return;
 
-    rasterFillTriangles(tris.data(), tris.size(), minX, minY, maxX, maxY);
-    rasterPolygonOutline(clipped.data(), clipped.size(), minX, minY, maxX, maxY);
+    rasterFillTriangles(tris.data(), tris.size(), minX, minY, maxX, maxY, sizeX, sizeY);
+    rasterPolygonOutline(clipped.data(), clipped.size(), minX, minY, maxX, maxY, sizeX, sizeY, _brush.color());
 
     /*
     std::vector<Point> tris;
@@ -327,7 +329,7 @@ void Rasterizer2::fillPolygon(const Point* points, const size_t pointCount)
     tris.push_back(Point(350, 300));
     tris.push_back(Point(650, 400));
 
-    rasterFillTriangles(tris.data(), tris.size(), minX, minY, maxX, maxY);
+    rasterFillTriangles(tris.data(), tris.size(), minX, minY, maxX, maxY, sizeX, sizeY);
     */
 }
 
@@ -424,9 +426,6 @@ void Rasterizer2::rasterOnePixelLine(const Point& a, const Point& b)
 
 void Rasterizer2::rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, Pt::int32_t steps)
 {
-    //const Pt::int32_t imgW = _image->width();
-    //const Pt::int32_t imgH = _image->height();
-
     // Calculate the change factors
     const Pt::int32_t chgX = (fx2 - fx1) / steps;
     const Pt::int32_t chgY = (fy2 - fy1) / steps;
@@ -449,19 +448,13 @@ void Rasterizer2::rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt
         _alphas[ (ly + MARGIN_PIXELS) * _wbXSize + rx + MARGIN_PIXELS ] += (fly * frx + 255) >> 8;
         _alphas[ (ry + MARGIN_PIXELS) * _wbXSize + lx + MARGIN_PIXELS ] += (fry * flx + 255) >> 8;
         _alphas[ (ry + MARGIN_PIXELS) * _wbXSize + rx + MARGIN_PIXELS ] += (fry * frx + 255) >> 8;
-        /*
-                                   _alphas[ly * imgW + lx] += (fly * flx + 255) >> 8;
-        if(rx < imgW             ) _alphas[ly * imgW + rx] += (fly * frx + 255) >> 8;
-        if(             ry < imgH) _alphas[ry * imgW + lx] += (fry * flx + 255) >> 8;
-        if(rx < imgW && ry < imgH) _alphas[ry * imgW + rx] += (fry * frx + 255) >> 8;
-        */
         // Increment the drawing coordinate
         fx1 += chgX;
         fy1 += chgY;
     }
 }
 
-void Rasterizer2::rasterSolidTriangles(const Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY)
+void Rasterizer2::rasterSolidTriangles(const Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY, Pt::int32_t& sizeX, Pt::int32_t& sizeY)
 {
     // Find the minimum and maximum coordinates
     minX =  65535;
@@ -479,8 +472,8 @@ void Rasterizer2::rasterSolidTriangles(const Point* points, size_t pointCount, P
     }
 
     // Calculate the size of the rectangle
-    const Pt::int32_t sizeX = maxX - minX + 1;
-    const Pt::int32_t sizeY = maxY - minY + 1;
+    sizeX = maxX - minX + 1;
+    sizeY = maxY - minY + 1;
 
     // Prepare the work buffer
     prepWorkBuffer(minX, minY, sizeX, sizeY);
@@ -490,8 +483,10 @@ void Rasterizer2::rasterSolidTriangles(const Point* points, size_t pointCount, P
         rasterOneSolidTriangle(points[i], points[i + 1], points[i + 2]);
     }
 
-    // Blit the work buffer to the image
-    //blitWorkBufferToImage(minX, minY, sizeX, sizeY, _brush.color());
+    // Do not blit the work buffer to the image because the outline-raster function which
+    // will be called after this function exits is the one which will do it!
+
+    // blitWorkBufferToImage(minX, minY, sizeX, sizeY, _brush.color());
 }
 
 // Based on http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
@@ -696,7 +691,7 @@ void Rasterizer2::rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2
     }
 }
 
-void Rasterizer2::rasterFillTriangles(Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY)
+void Rasterizer2::rasterFillTriangles(Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY, Pt::int32_t& sizeX, Pt::int32_t& sizeY)
 {
     if(pointCount % 3) return;
 
@@ -711,12 +706,12 @@ void Rasterizer2::rasterFillTriangles(Point* points, size_t pointCount, Pt::int3
             break;
 
         case Brush::Solid:
-            rasterSolidTriangles(points, pointCount, minX, minY, maxX, maxY);
+            rasterSolidTriangles(points, pointCount, minX, minY, maxX, maxY, sizeX, sizeY);
             break;
     }
 }
 
-void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
+void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY, Pt::int32_t sizeX, Pt::int32_t sizeY, const Color& color)
 {
     // Convert the coordinates to fixed-points
     std::vector<Pt::int32_t> lineX(pointCount);
@@ -727,12 +722,10 @@ void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount, P
         lineY[i] = points[i].y() << FIXED_POINT_SHIFT_FACTOR;
     }
 
-    // Calculate the size of the rectangle
-    const Pt::int32_t sizeX = maxX - minX + 1;
-    const Pt::int32_t sizeY = maxY - minY + 1;
+    // Do not prepare the work buffer here because the area-filling function which was
+    // called before this function has done it!
 
-    // Prepare the work buffer
-    //prepWorkBuffer(minX, minY, sizeX, sizeY);
+    // prepWorkBuffer(minX, minY, sizeX, sizeY);
 
     // Raster the outlines as multiple one-pixel lines
     Pt::int32_t xm, ym;
@@ -757,7 +750,7 @@ void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount, P
     rasterOnePixelLineSegment(lineX[0], lineY[0], lineX[pc1], lineY[pc1], std::max(xm, ym) - 1);
 
     // Blit the work buffer to the image
-    blitWorkBufferToImage(minX, minY, sizeX, sizeY, _brush.color());
+    blitWorkBufferToImage(minX, minY, sizeX, sizeY, color);
 }
 
 void Rasterizer2::genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount) const
