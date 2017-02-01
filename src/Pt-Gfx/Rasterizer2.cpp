@@ -58,6 +58,9 @@ namespace Gfx {
 #define FIXED_POINT_ALPHA_DIVFAC 257        // Must be ( (2 ^ FIXED_POINT_SHIFT_FACTOR - 1) / 255 )
 #define FIXED_POINT_FRACT_VAL_BM 0x0000FFFF // Bit mask for the fractional value; must be (2 ^ FIXED_POINT_SHIFT_FACTOR - 1)
 
+// The number of margin pixels
+#define MARGIN_PIXELS 2
+
 
 // ======================================================================================
 // ===== Internal Functions =============================================================
@@ -338,28 +341,29 @@ void Rasterizer2::updateClip()
     Rect imageRect( Point(0,0) , _image->size() );
     _currentClip = _clip.isNull() ? imageRect : _clip.intersect( imageRect );
 
-    // Resize the work buffer to match the size of the image
-    _alphas.resize(_image->width() * _image->height());
+    // Resize the work buffer so it slightly larger than the size of the image
+    _alphas.resize( ( _image->width() + MARGIN_PIXELS * 2 ) * ( _image->height() + MARGIN_PIXELS * 2) );
+    _wbXSize = _image->width() + MARGIN_PIXELS * 2;
 }
 
 void Rasterizer2::prepWorkBuffer(Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t sizeX, Pt::int32_t sizeY)
 {
-    Pt::uint16_t* alphas = &_alphas[0] + minY * _image->width() + minX;
+    Pt::uint16_t* alphas = &_alphas[0] + (minY + MARGIN_PIXELS) * _wbXSize + minX + MARGIN_PIXELS;
 
     for(int r = 0; r < sizeY; ++r) {
         memset(alphas, 0, sizeX * sizeof(*alphas));
-        alphas += _image->width();
+        alphas += _wbXSize;
     }
 }
 
 void Rasterizer2::blitWorkBufferToImage(Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t sizeX, Pt::int32_t sizeY, const Color& color)
 {
-    const Pt::uint16_t* alphas = _alphas.data() + minY * _image->width() + minX;
+    const Pt::uint16_t* alphas = _alphas.data() + (minY + MARGIN_PIXELS) * _wbXSize + minX + MARGIN_PIXELS;
 
     for(int r = 0; r < sizeY; ++r) {
         Pixel destPixel( _image->view(), minX, minY + r);
         _image->format().copy(destPixel, alphas, sizeX, color, _compositionMode);
-        alphas += _image->width();
+        alphas += _wbXSize;
     }
 }
 
@@ -420,8 +424,8 @@ void Rasterizer2::rasterOnePixelLine(const Point& a, const Point& b)
 
 void Rasterizer2::rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, Pt::int32_t steps)
 {
-    const Pt::int32_t imgW = _image->width();
-    const Pt::int32_t imgH = _image->height();
+    //const Pt::int32_t imgW = _image->width();
+    //const Pt::int32_t imgH = _image->height();
 
     // Calculate the change factors
     const Pt::int32_t chgX = (fx2 - fx1) / steps;
@@ -441,10 +445,16 @@ void Rasterizer2::rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt
         Pt::int32_t rx = frx ? (lx + 1) : lx;
         Pt::int32_t ry = fry ? (ly + 1) : ly;
         // Draw the block
+        _alphas[ (ly + MARGIN_PIXELS) * _wbXSize + lx + MARGIN_PIXELS ] += (fly * flx + 255) >> 8;
+        _alphas[ (ly + MARGIN_PIXELS) * _wbXSize + rx + MARGIN_PIXELS ] += (fly * frx + 255) >> 8;
+        _alphas[ (ry + MARGIN_PIXELS) * _wbXSize + lx + MARGIN_PIXELS ] += (fry * flx + 255) >> 8;
+        _alphas[ (ry + MARGIN_PIXELS) * _wbXSize + rx + MARGIN_PIXELS ] += (fry * frx + 255) >> 8;
+        /*
                                    _alphas[ly * imgW + lx] += (fly * flx + 255) >> 8;
         if(rx < imgW             ) _alphas[ly * imgW + rx] += (fly * frx + 255) >> 8;
         if(             ry < imgH) _alphas[ry * imgW + lx] += (fry * flx + 255) >> 8;
         if(rx < imgW && ry < imgH) _alphas[ry * imgW + rx] += (fry * frx + 255) >> 8;
+        */
         // Increment the drawing coordinate
         fx1 += chgX;
         fy1 += chgY;
@@ -525,14 +535,14 @@ void Rasterizer2::rasterOneSolidTriangleBottomFlat(const Point& v1, const Point&
      *     v2    v3
      */
 
-    const Pt::int32_t imgW = _image->width();
-
     const Pt::int32_t chgX1 = ( ( ((Pt::int32_t)v2.x() - (Pt::int32_t)v1.x()) << FIXED_POINT_SHIFT_FACTOR ) /
                                   ((Pt::int32_t)v2.y() - (Pt::int32_t)v1.y())
                               );
     const Pt::int32_t chgX2 = ( ( ((Pt::int32_t)v3.x() - (Pt::int32_t)v1.x()) << FIXED_POINT_SHIFT_FACTOR ) /
                                   ((Pt::int32_t)v3.y() - (Pt::int32_t)v1.y())
                               );
+
+    Pt::uint16_t* alphas = &_alphas[0] + (v1.y() + MARGIN_PIXELS) * _wbXSize + MARGIN_PIXELS;
 
     // More precise
     if(_aaLevel) {
@@ -544,8 +554,6 @@ void Rasterizer2::rasterOneSolidTriangleBottomFlat(const Point& v1, const Point&
 
         if(chgX2 >= 0) curX2 -= FIXED_POINT_FRACT_VAL_BM / 2;
         else           curX2 += FIXED_POINT_FRACT_VAL_BM / 2;
-
-        Pt::uint16_t* alphas = &_alphas[0] + v1.y() * imgW;
 
         for(int i = v1.y(); i <= v2.y(); ++i) {
             Pt::int32_t steps;
@@ -567,14 +575,14 @@ void Rasterizer2::rasterOneSolidTriangleBottomFlat(const Point& v1, const Point&
                         // Calculate the left and right coordinate of the span
                         Pt::int32_t lx = iterX >> FIXED_POINT_SHIFT_FACTOR;
                         Pt::int32_t rx = frx ? (lx + 1) : lx;
-                        // Draw the block
-                                      alphas[lx] += flx;
-                        if(rx < imgW) alphas[rx] += frx;
+                        // Draw the span
+                        alphas[lx] += flx;
+                        alphas[rx] += frx;
                     }
                     iterX += chgX;
                 }
             }
-            alphas += imgW;
+            alphas += _wbXSize;
             curX1  += chgX1;
             curX2  += chgX2;
         }
@@ -584,8 +592,6 @@ void Rasterizer2::rasterOneSolidTriangleBottomFlat(const Point& v1, const Point&
     else {
         Pt::int32_t curX1 = (v1.x() << FIXED_POINT_SHIFT_FACTOR) + FIXED_POINT_FRACT_VAL_BM / 2;
         Pt::int32_t curX2 = (v1.x() << FIXED_POINT_SHIFT_FACTOR) - FIXED_POINT_FRACT_VAL_BM / 2;
-
-        Pt::uint16_t* alphas = &_alphas[0] + v1.y() * imgW;
 
         for(int i = v1.y(); i <= v2.y(); ++i) {
             if(curX1 <= curX2) {
@@ -598,7 +604,7 @@ void Rasterizer2::rasterOneSolidTriangleBottomFlat(const Point& v1, const Point&
                     *(alphas + j) = 255;
                 }
             }
-            alphas += imgW;
+            alphas += _wbXSize;
             curX1  += chgX1;
             curX2  += chgX2;
         }
@@ -614,14 +620,14 @@ void Rasterizer2::rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2
      *        v3
      */
 
-    const Pt::int32_t imgW = _image->width();
-
     const Pt::int32_t chgX1 = ( ( ((Pt::int32_t)v1.x() - (Pt::int32_t)v3.x()) << FIXED_POINT_SHIFT_FACTOR ) /
                                   ((Pt::int32_t)v1.y() - (Pt::int32_t)v3.y())
                               );
     const Pt::int32_t chgX2 = ( ( ((Pt::int32_t)v2.x() - (Pt::int32_t)v3.x()) << FIXED_POINT_SHIFT_FACTOR ) /
                                   ((Pt::int32_t)v2.y() - (Pt::int32_t)v3.y())
                               );
+
+    Pt::uint16_t* alphas = &_alphas[0] + (v3.y() + MARGIN_PIXELS) * _wbXSize + MARGIN_PIXELS;
 
     // More precise
     if(_aaLevel) {
@@ -633,8 +639,6 @@ void Rasterizer2::rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2
 
         if(chgX2 >= 0) curX2 -= FIXED_POINT_FRACT_VAL_BM / 2;
         else           curX2 += FIXED_POINT_FRACT_VAL_BM / 2;
-
-        Pt::uint16_t* alphas = &_alphas[0] + v3.y() * imgW;
 
         for(int i = v3.y(); i > v1.y(); --i) {
             Pt::int32_t steps;
@@ -656,14 +660,14 @@ void Rasterizer2::rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2
                         // Calculate the left and right coordinate of the span
                         Pt::int32_t lx = iterX >> FIXED_POINT_SHIFT_FACTOR;
                         Pt::int32_t rx = frx ? (lx + 1) : lx;
-                        // Draw the block
-                                      alphas[lx] += flx;
-                        if(rx < imgW) alphas[rx] += frx;
+                        // Draw the span
+                        alphas[lx] += flx;
+                        alphas[rx] += frx;
                     }
                     iterX += chgX;
                 }
             }
-            alphas -= imgW;
+            alphas -= _wbXSize;
             curX1  -= chgX1;
             curX2  -= chgX2;
         }
@@ -673,8 +677,6 @@ void Rasterizer2::rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2
     else {
         Pt::int32_t curX1 = (v3.x() << FIXED_POINT_SHIFT_FACTOR) + FIXED_POINT_FRACT_VAL_BM / 2;
         Pt::int32_t curX2 = (v3.x() << FIXED_POINT_SHIFT_FACTOR) - FIXED_POINT_FRACT_VAL_BM / 2;
-
-        Pt::uint16_t* alphas = &_alphas[0] + v3.y() * imgW;
 
         for(int i = v3.y(); i > v1.y(); --i) {
             if(curX1 <= curX2) {
@@ -687,7 +689,7 @@ void Rasterizer2::rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2
                     alphas[j] = 255;
                 }
             }
-            alphas -= imgW;
+            alphas -= _wbXSize;
             curX1  -= chgX1;
             curX2  -= chgX2;
         }

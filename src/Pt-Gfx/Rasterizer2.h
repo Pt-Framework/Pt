@@ -151,6 +151,8 @@ class Rasterizer2
 
         int                       _aaLevel; // Quality of the AA
         std::vector<Pt::uint16_t> _alphas;  // Work buffer
+        int                       _wbXSize; // Width of the work buffer
+
 };
 
 
