@@ -172,8 +172,13 @@ void Argb32Format::onCopy(Pixel& to, const Pt::uint16_t* alphas, size_t length,
      *               ( ((uint32_t) input * 0x0000FF01) >> 24 )
      */
 
-#define IDIV_BY_255(V) ( ((uint32_t)V * 0x00008081) >> 23 )
-#define IDIV_BY_257(V) ( ((uint32_t)V * 0x0000FF01) >> 24 )
+#if 1
+    #define IDIV_BY_255(V) ( ((uint32_t)V * 0x00008081) >> 23 )
+    #define IDIV_BY_257(V) ( ((uint32_t)V * 0x0000FF01) >> 24 )
+#else
+    #define IDIV_BY_255(V) ((uint32_t)V / 255)
+    #define IDIV_BY_257(V) ((uint32_t)V / 257)
+#endif
 
     Pt::uint8_t* dst = to.base();
 

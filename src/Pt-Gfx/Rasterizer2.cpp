@@ -163,6 +163,7 @@ Rasterizer2::Rasterizer2(Image& image)
 , _compositionMode(CompositionMode::SourceCopy)
 , _penPixel(_image->view(), 0, 0)
 , _brushPixel(_image->view(), 0, 0)
+, _aaLevel(0)
 {
     _text->setFont(_font);
     updateClip();
@@ -440,10 +441,10 @@ void Rasterizer2::rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt
         Pt::int32_t rx = frx ? (lx + 1) : lx;
         Pt::int32_t ry = fry ? (ly + 1) : ly;
         // Draw the block
-                                     _alphas[ly * imgW + lx] += (fly * flx + 255) >> 8;
-        if( rx < imgW              ) _alphas[ly * imgW + rx] += (fly * frx + 255) >> 8;
-        if(              ry < imgH ) _alphas[ry * imgW + lx] += (fry * flx + 255) >> 8;
-        if( rx < imgW && ry < imgH ) _alphas[ry * imgW + rx] += (fry * frx + 255) >> 8;
+                                   _alphas[ly * imgW + lx] += (fly * flx + 255) >> 8;
+        if(rx < imgW             ) _alphas[ly * imgW + rx] += (fly * frx + 255) >> 8;
+        if(             ry < imgH) _alphas[ry * imgW + lx] += (fry * flx + 255) >> 8;
+        if(rx < imgW && ry < imgH) _alphas[ry * imgW + rx] += (fry * frx + 255) >> 8;
         // Increment the drawing coordinate
         fx1 += chgX;
         fy1 += chgY;
@@ -480,7 +481,7 @@ void Rasterizer2::rasterSolidTriangles(const Point* points, size_t pointCount, P
     }
 
     // Blit the work buffer to the image
-    blitWorkBufferToImage(minX, minY, sizeX, sizeY, _brush.color());
+    //blitWorkBufferToImage(minX, minY, sizeX, sizeY, _brush.color());
 }
 
 // Based on http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
@@ -533,75 +534,75 @@ void Rasterizer2::rasterOneSolidTriangleBottomFlat(const Point& v1, const Point&
                                   ((Pt::int32_t)v3.y() - (Pt::int32_t)v1.y())
                               );
 
-#ifdef FILL_POLYGON_PRECISION_AA
+    // More precise
+    if(_aaLevel) {
+        Pt::int32_t curX1 = (v1.x() << FIXED_POINT_SHIFT_FACTOR);
+        Pt::int32_t curX2 = (v1.x() << FIXED_POINT_SHIFT_FACTOR);
 
-    Pt::int32_t curX1 = (v1.x() << FIXED_POINT_SHIFT_FACTOR);
-    Pt::int32_t curX2 = (v1.x() << FIXED_POINT_SHIFT_FACTOR);
+        if(chgX1 <= 0) curX1 += FIXED_POINT_FRACT_VAL_BM / 2;
+        else           curX1 -= FIXED_POINT_FRACT_VAL_BM / 2;
 
-    if(chgX1 <= 0) curX1 += FIXED_POINT_FRACT_VAL_BM / 2;
-    else           curX1 -= FIXED_POINT_FRACT_VAL_BM / 2;
+        if(chgX2 >= 0) curX2 -= FIXED_POINT_FRACT_VAL_BM / 2;
+        else           curX2 += FIXED_POINT_FRACT_VAL_BM / 2;
 
-    if(chgX2 >= 0) curX2 -= FIXED_POINT_FRACT_VAL_BM / 2;
-    else           curX2 += FIXED_POINT_FRACT_VAL_BM / 2;
+        Pt::uint16_t* alphas = &_alphas[0] + v1.y() * imgW;
 
-    Pt::uint16_t* alphas = &_alphas[0] + v1.y() * imgW;
-
-    for(int i = v1.y(); i <= v2.y(); ++i) {
-        Pt::int32_t steps;
-        if(curX2 > curX1) steps = (curX2 - curX1 + FIXED_POINT_FRACT_VAL_BM) >> FIXED_POINT_SHIFT_FACTOR;
-        else              steps = (curX1 - curX2 + FIXED_POINT_FRACT_VAL_BM) >> FIXED_POINT_SHIFT_FACTOR;
-        if(!steps) {
-            alphas[curX1 >> FIXED_POINT_SHIFT_FACTOR] = 255;
-        }
-        else {
-            Pt::int32_t iterX = curX1;
-            Pt::int32_t chgX  = (curX2 - curX1) / steps;
-            for(int j = 0; j <= steps; ++j) {
-                if(j >= 1 && j <= steps - 1) {
-                    alphas[iterX >> FIXED_POINT_SHIFT_FACTOR] = 255;
-                }
-                if(j <= 1 || j >= steps - 1) {
-                    Pt::int32_t frx = (iterX & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC;
-                    Pt::int32_t flx = 255 - frx;
-                    // Calculate the left and right coordinate of the span
-                    Pt::int32_t lx = iterX >> FIXED_POINT_SHIFT_FACTOR;
-                    Pt::int32_t rx = frx ? (lx + 1) : lx;
-                    // Draw the block
-                                  alphas[lx] += flx;
-                    if(rx < imgW) alphas[rx] += frx;
-                }
-                iterX += chgX;
+        for(int i = v1.y(); i <= v2.y(); ++i) {
+            Pt::int32_t steps;
+            if(curX2 > curX1) steps = (curX2 - curX1 + FIXED_POINT_FRACT_VAL_BM) >> FIXED_POINT_SHIFT_FACTOR;
+            else              steps = (curX1 - curX2 + FIXED_POINT_FRACT_VAL_BM) >> FIXED_POINT_SHIFT_FACTOR;
+            if(!steps) {
+                alphas[curX1 >> FIXED_POINT_SHIFT_FACTOR] = 255;
             }
+            else {
+                Pt::int32_t iterX = curX1;
+                Pt::int32_t chgX  = (curX2 - curX1) / steps;
+                for(int j = 0; j <= steps; ++j) {
+                    if(j >= 1 && j <= steps - 1) {
+                        alphas[iterX >> FIXED_POINT_SHIFT_FACTOR] = 255;
+                    }
+                    if(j <= 1 || j >= steps - 1) {
+                        Pt::int32_t frx = (iterX & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC;
+                        Pt::int32_t flx = 255 - frx;
+                        // Calculate the left and right coordinate of the span
+                        Pt::int32_t lx = iterX >> FIXED_POINT_SHIFT_FACTOR;
+                        Pt::int32_t rx = frx ? (lx + 1) : lx;
+                        // Draw the block
+                                      alphas[lx] += flx;
+                        if(rx < imgW) alphas[rx] += frx;
+                    }
+                    iterX += chgX;
+                }
+            }
+            alphas += imgW;
+            curX1  += chgX1;
+            curX2  += chgX2;
         }
-        alphas += imgW;
-        curX1  += chgX1;
-        curX2  += chgX2;
     }
 
-#else
+    // Normal
+    else {
+        Pt::int32_t curX1 = (v1.x() << FIXED_POINT_SHIFT_FACTOR) + FIXED_POINT_FRACT_VAL_BM / 2;
+        Pt::int32_t curX2 = (v1.x() << FIXED_POINT_SHIFT_FACTOR) - FIXED_POINT_FRACT_VAL_BM / 2;
 
-    Pt::int32_t curX1 = (v1.x() << FIXED_POINT_SHIFT_FACTOR) + FIXED_POINT_FRACT_VAL_BM / 2;
-    Pt::int32_t curX2 = (v1.x() << FIXED_POINT_SHIFT_FACTOR) - FIXED_POINT_FRACT_VAL_BM / 2;
+        Pt::uint16_t* alphas = &_alphas[0] + v1.y() * imgW;
 
-    Pt::uint16_t* alphas = &_alphas[0] + v1.y() * imgW;
-
-    for(int i = v1.y(); i <= v2.y(); ++i) {
-        if(curX1 <= curX2) {
-            for(int j = (curX1 >> FIXED_POINT_SHIFT_FACTOR); j <= (curX2 >> FIXED_POINT_SHIFT_FACTOR); ++j) {
-                *(alphas + j) = 255;
+        for(int i = v1.y(); i <= v2.y(); ++i) {
+            if(curX1 <= curX2) {
+                for(int j = (curX1 >> FIXED_POINT_SHIFT_FACTOR); j <= (curX2 >> FIXED_POINT_SHIFT_FACTOR); ++j) {
+                    *(alphas + j) = 255;
+                }
             }
-        }
-        else {
-            for(int j = (curX2 >> FIXED_POINT_SHIFT_FACTOR); j <= (curX1 >> FIXED_POINT_SHIFT_FACTOR); ++j) {
-                *(alphas + j) = 255;
+            else {
+                for(int j = (curX2 >> FIXED_POINT_SHIFT_FACTOR); j <= (curX1 >> FIXED_POINT_SHIFT_FACTOR); ++j) {
+                    *(alphas + j) = 255;
+                }
             }
+            alphas += imgW;
+            curX1  += chgX1;
+            curX2  += chgX2;
         }
-        alphas += imgW;
-        curX1  += chgX1;
-        curX2  += chgX2;
     }
-
-#endif
 }
 
 // Based on http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
@@ -622,75 +623,75 @@ void Rasterizer2::rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2
                                   ((Pt::int32_t)v2.y() - (Pt::int32_t)v3.y())
                               );
 
-#ifdef FILL_POLYGON_PRECISION_AA
+    // More precise
+    if(_aaLevel) {
+        Pt::int32_t curX1 = (v3.x() << FIXED_POINT_SHIFT_FACTOR);
+        Pt::int32_t curX2 = (v3.x() << FIXED_POINT_SHIFT_FACTOR);
 
-    Pt::int32_t curX1 = (v3.x() << FIXED_POINT_SHIFT_FACTOR);
-    Pt::int32_t curX2 = (v3.x() << FIXED_POINT_SHIFT_FACTOR);
+        if(chgX1 <= 0) curX1 += FIXED_POINT_FRACT_VAL_BM / 2;
+        else           curX1 -= FIXED_POINT_FRACT_VAL_BM / 2;
 
-    if(chgX1 <= 0) curX1 += FIXED_POINT_FRACT_VAL_BM / 2;
-    else           curX1 -= FIXED_POINT_FRACT_VAL_BM / 2;
+        if(chgX2 >= 0) curX2 -= FIXED_POINT_FRACT_VAL_BM / 2;
+        else           curX2 += FIXED_POINT_FRACT_VAL_BM / 2;
 
-    if(chgX2 >= 0) curX2 -= FIXED_POINT_FRACT_VAL_BM / 2;
-    else           curX2 += FIXED_POINT_FRACT_VAL_BM / 2;
+        Pt::uint16_t* alphas = &_alphas[0] + v3.y() * imgW;
 
-    Pt::uint16_t* alphas = &_alphas[0] + v3.y() * imgW;
-
-    for(int i = v3.y(); i > v1.y(); --i) {
-        Pt::int32_t steps;
-        if(curX2 > curX1) steps = (curX2 - curX1 + FIXED_POINT_FRACT_VAL_BM) >> FIXED_POINT_SHIFT_FACTOR;
-        else              steps = (curX1 - curX2 + FIXED_POINT_FRACT_VAL_BM) >> FIXED_POINT_SHIFT_FACTOR;
-        if(!steps) {
-            alphas[curX1 >> FIXED_POINT_SHIFT_FACTOR] = 255;
-        }
-        else {
-            Pt::int32_t iterX = curX1;
-            Pt::int32_t chgX  = (curX2 - curX1) / steps;
-            for(int j = 0; j <= steps; ++j) {
-                if(j >= 1 && j <= steps - 1) {
-                    alphas[iterX >> FIXED_POINT_SHIFT_FACTOR] = 255;
-                }
-                if(j <= 1 || j >= steps - 1) {
-                    Pt::int32_t frx = (iterX & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC;
-                    Pt::int32_t flx = 255 - frx;
-                    // Calculate the left and right coordinate of the span
-                    Pt::int32_t lx = iterX >> FIXED_POINT_SHIFT_FACTOR;
-                    Pt::int32_t rx = frx ? (lx + 1) : lx;
-                    // Draw the block
-                                  alphas[lx] += flx;
-                    if(rx < imgW) alphas[rx] += frx;
-                }
-                iterX += chgX;
+        for(int i = v3.y(); i > v1.y(); --i) {
+            Pt::int32_t steps;
+            if(curX2 > curX1) steps = (curX2 - curX1 + FIXED_POINT_FRACT_VAL_BM) >> FIXED_POINT_SHIFT_FACTOR;
+            else              steps = (curX1 - curX2 + FIXED_POINT_FRACT_VAL_BM) >> FIXED_POINT_SHIFT_FACTOR;
+            if(!steps) {
+                alphas[curX1 >> FIXED_POINT_SHIFT_FACTOR] = 255;
             }
+            else {
+                Pt::int32_t iterX = curX1;
+                Pt::int32_t chgX  = (curX2 - curX1) / steps;
+                for(int j = 0; j <= steps; ++j) {
+                    if(j >= 1 && j <= steps - 1) {
+                        alphas[iterX >> FIXED_POINT_SHIFT_FACTOR] = 255;
+                    }
+                    if(j <= 1 || j >= steps - 1) {
+                        Pt::int32_t frx = (iterX & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC;
+                        Pt::int32_t flx = 255 - frx;
+                        // Calculate the left and right coordinate of the span
+                        Pt::int32_t lx = iterX >> FIXED_POINT_SHIFT_FACTOR;
+                        Pt::int32_t rx = frx ? (lx + 1) : lx;
+                        // Draw the block
+                                      alphas[lx] += flx;
+                        if(rx < imgW) alphas[rx] += frx;
+                    }
+                    iterX += chgX;
+                }
+            }
+            alphas -= imgW;
+            curX1  -= chgX1;
+            curX2  -= chgX2;
         }
-        alphas -= imgW;
-        curX1  -= chgX1;
-        curX2  -= chgX2;
     }
 
-#else
+    // Normal
+    else {
+        Pt::int32_t curX1 = (v3.x() << FIXED_POINT_SHIFT_FACTOR) + FIXED_POINT_FRACT_VAL_BM / 2;
+        Pt::int32_t curX2 = (v3.x() << FIXED_POINT_SHIFT_FACTOR) - FIXED_POINT_FRACT_VAL_BM / 2;
 
-    Pt::int32_t curX1 = (v3.x() << FIXED_POINT_SHIFT_FACTOR) + FIXED_POINT_FRACT_VAL_BM / 2;
-    Pt::int32_t curX2 = (v3.x() << FIXED_POINT_SHIFT_FACTOR) - FIXED_POINT_FRACT_VAL_BM / 2;
+        Pt::uint16_t* alphas = &_alphas[0] + v3.y() * imgW;
 
-    Pt::uint16_t* alphas = &_alphas[0] + v3.y() * imgW;
-
-    for(int i = v3.y(); i > v1.y(); --i) {
-        if(curX1 <= curX2) {
-            for(int j = (curX1 >> FIXED_POINT_SHIFT_FACTOR); j <= (curX2 >> FIXED_POINT_SHIFT_FACTOR); ++j) {
-                alphas[j] = 255;
+        for(int i = v3.y(); i > v1.y(); --i) {
+            if(curX1 <= curX2) {
+                for(int j = (curX1 >> FIXED_POINT_SHIFT_FACTOR); j <= (curX2 >> FIXED_POINT_SHIFT_FACTOR); ++j) {
+                    alphas[j] = 255;
+                }
             }
-        }
-        else {
-            for(int j = (curX2 >> FIXED_POINT_SHIFT_FACTOR); j <= (curX1 >> FIXED_POINT_SHIFT_FACTOR); ++j) {
-                alphas[j] = 255;
+            else {
+                for(int j = (curX2 >> FIXED_POINT_SHIFT_FACTOR); j <= (curX1 >> FIXED_POINT_SHIFT_FACTOR); ++j) {
+                    alphas[j] = 255;
+                }
             }
+            alphas -= imgW;
+            curX1  -= chgX1;
+            curX2  -= chgX2;
         }
-        alphas -= imgW;
-        curX1  -= chgX1;
-        curX2  -= chgX2;
     }
-
-#endif
 }
 
 void Rasterizer2::rasterFillTriangles(Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY)
@@ -729,7 +730,7 @@ void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount, P
     const Pt::int32_t sizeY = maxY - minY + 1;
 
     // Prepare the work buffer
-    prepWorkBuffer(minX, minY, sizeX, sizeY);
+    //prepWorkBuffer(minX, minY, sizeX, sizeY);
 
     // Raster the outlines as multiple one-pixel lines
     Pt::int32_t xm, ym;

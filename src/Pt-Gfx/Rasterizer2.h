@@ -50,6 +50,11 @@ class Rasterizer2
 
         ~Rasterizer2();
 
+        void setAntiAliasingQuality(int level)
+        {
+            _aaLevel = level;
+        }
+
         void setImage(Image& image);
 
         const ImageFormat& format() const;
@@ -119,7 +124,8 @@ class Rasterizer2
         void rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2, const Point& v3);
         void rasterFillTriangles(Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY);
 
-        // This function must be called only after the area-filling function has calculated the minX, minY, maxX, and maxY values
+        // This function MUST ONLY be called only AFTER the area-filling function has calculated
+        // the minX, minY, maxX, and maxY values and preparing the work buffer !!!
         void rasterPolygonOutline(const Point* points, size_t pointCount, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
 
         void genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount) const;
@@ -143,7 +149,8 @@ class Rasterizer2
         Rect            _clip;
         Rect            _currentClip;
 
-        std::vector<Pt::uint16_t> _alphas; // Work buffer
+        int                       _aaLevel; // Quality of the AA
+        std::vector<Pt::uint16_t> _alphas;  // Work buffer
 };
 
 

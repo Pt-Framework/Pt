@@ -3,7 +3,7 @@
 #define BENCH_COUNT 250
 
 template <typename PainterT>
-size_t benchDrawText(const char* info)
+size_t benchDrawText()
 {
     size_t sum = 0;
 
@@ -35,12 +35,11 @@ size_t benchDrawText(const char* info)
     }
 
     sum /= BENCH_COUNT;
-    std::clog << info << sum << std::endl;
     return sum;
 }
 
 template <typename PainterT>
-size_t benchDrawLine(const char* info)
+size_t benchDrawLine()
 {
     size_t sum = 0;
 
@@ -69,12 +68,11 @@ size_t benchDrawLine(const char* info)
     }
 
     sum /= BENCH_COUNT;
-    std::clog << info << sum << std::endl;
     return sum;
 }
 
 template <typename PainterT>
-size_t benchDrawSolidFillPolygon(const char* info)
+size_t benchDrawSolidFillPolygon(int aaQuality = 0)
 {
     size_t sum = 0;
 
@@ -88,6 +86,8 @@ size_t benchDrawSolidFillPolygon(const char* info)
 
     Pen pen( Color::fromRgb8(255, 255, 255, 255) );
     painter.setPen(pen);
+
+    painter.setAntiAliasingQuality(aaQuality);
 
     for(int i = 0; i < BENCH_COUNT ; ++i) {
         Pt::System::Clock clock;
@@ -106,6 +106,5 @@ size_t benchDrawSolidFillPolygon(const char* info)
     }
 
     sum /= BENCH_COUNT;
-    std::clog << info << sum << std::endl;
     return sum;
 }

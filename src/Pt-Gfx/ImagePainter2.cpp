@@ -41,7 +41,9 @@ namespace Gfx {
 
 ImagePainter2::ImagePainter2(Image& image)
 : _rasterizer( new Rasterizer2(image))
-{}
+{
+    setAntiAliasingQuality(); // Use the default setting
+}
 
 ImagePainter2::~ImagePainter2()
 {
@@ -71,6 +73,11 @@ void ImagePainter2::setDefaultFont(const std::string& f)
 std::vector<std::string> ImagePainter2::fontNames()
 {
     return FreeType::instance().fontNames();
+}
+
+void ImagePainter2::setAntiAliasingQuality(int level)
+{
+    _rasterizer->setAntiAliasingQuality(level);
 }
 
 void ImagePainter2::setImage(Image& image)
