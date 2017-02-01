@@ -1,4 +1,4 @@
-static void testLines(const char* title, Image& image, ImagePainter2& painter)
+static void testDrawLine(const char* title, Image& image, ImagePainter2& painter)
 {
     resetImage(image);
 
@@ -40,7 +40,7 @@ static void testLines(const char* title, Image& image, ImagePainter2& painter)
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height());
 }
 
-static void testFillPolygon(const char* title, Image& image, ImagePainter2& painter)
+static void testDrawSolidFillPolygon(const char* title, Image& image, ImagePainter2& painter)
 {
     resetImage(image);
 

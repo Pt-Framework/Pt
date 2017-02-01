@@ -568,17 +568,13 @@ void Rasterizer2::rasterOneSolidTriangle(const Point& v1, const Point& v2, const
     }
     // Split the triangle to a bottom-flat and top-flat
     else {
-        Pt::int32_t y2my1 = vs[1]->y() - vs[0]->y();
-        Pt::int32_t y3my1 = vs[2]->y() - vs[0]->y();
-        Pt::int32_t x3mx1 = vs[2]->x() - vs[0]->x();
-        Pt::int32_t y2ry3 = ( (y2my1 << FIXED_POINT_SHIFT_FACTOR) / y3my1 );
-        Pt::int32_t offst = (y2ry3 * x3mx1) >> FIXED_POINT_SHIFT_FACTOR;
-
-        Point vm(
-            vs[0]->x() + offst,
-            vs[1]->y()
-        );
-
+        const Pt::int32_t deltaY10   = vs[1]->y() - vs[0]->y();
+        const Pt::int32_t deltaY20   = vs[2]->y() - vs[0]->y();
+        const Pt::int32_t deltaX20   = vs[2]->x() - vs[0]->x();
+        const Pt::int32_t ratioY1020 = ( (deltaY10 << FIXED_POINT_SHIFT_FACTOR) / deltaY20 );
+        const Point       vm( vs[0]->x() + ( (ratioY1020 * deltaX20) >> FIXED_POINT_SHIFT_FACTOR ),
+                              vs[1]->y()
+                            );
         rasterOneSolidTriangleBottomFlat(*vs[0], *vs[1], vm);
         rasterOneSolidTriangleTopFlat(*vs[1], vm, *vs[2]);
     }
@@ -595,19 +591,23 @@ void Rasterizer2::rasterOneSolidTriangleBottomFlat(const Point& v1, const Point&
 
     const Pt::int32_t imgW = _image->width();
 
-    const Pt::int32_t chgX1 = ( ( ((Pt::int32_t)v2.x() - (Pt::int32_t)v1.x()) << FIXED_POINT_SHIFT_FACTOR ) / ((Pt::int32_t)v2.y() - (Pt::int32_t)v1.y()) );
-    const Pt::int32_t chgX2 = ( ( ((Pt::int32_t)v3.x() - (Pt::int32_t)v1.x()) << FIXED_POINT_SHIFT_FACTOR ) / ((Pt::int32_t)v3.y() - (Pt::int32_t)v1.y()) );
+    const Pt::int32_t chgX1 = ( ( ((Pt::int32_t)v2.x() - (Pt::int32_t)v1.x()) << FIXED_POINT_SHIFT_FACTOR ) /
+                                  ((Pt::int32_t)v2.y() - (Pt::int32_t)v1.y())
+                              );
+    const Pt::int32_t chgX2 = ( ( ((Pt::int32_t)v3.x() - (Pt::int32_t)v1.x()) << FIXED_POINT_SHIFT_FACTOR ) /
+                                  ((Pt::int32_t)v3.y() - (Pt::int32_t)v1.y())
+                              );
 
 #ifdef FILL_POLYGON_PRECISION_AA
 
     Pt::int32_t curX1 = (v1.x() << FIXED_POINT_SHIFT_FACTOR);
     Pt::int32_t curX2 = (v1.x() << FIXED_POINT_SHIFT_FACTOR);
 
-    if(chgX1 < 0) curX1 -= FIXED_POINT_FRACT_VAL_BM / 2;
-    else          curX1 += FIXED_POINT_FRACT_VAL_BM / 2;
+    if(chgX1 <= 0) curX1 += FIXED_POINT_FRACT_VAL_BM / 2;
+    else           curX1 -= FIXED_POINT_FRACT_VAL_BM / 2;
 
-    if(chgX2 < 0) curX2 += FIXED_POINT_FRACT_VAL_BM / 2;
-    else          curX2 -= FIXED_POINT_FRACT_VAL_BM / 2;
+    if(chgX2 >= 0) curX2 -= FIXED_POINT_FRACT_VAL_BM / 2;
+    else           curX2 += FIXED_POINT_FRACT_VAL_BM / 2;
 
     Pt::uint16_t* alphas = &_alphas[0] + v1.y() * imgW;
 
@@ -684,19 +684,23 @@ void Rasterizer2::rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2
 
     const Pt::int32_t imgW = _image->width();
 
-    const Pt::int32_t chgX1 = ( ( ((Pt::int32_t)v3.x() - (Pt::int32_t)v1.x()) << FIXED_POINT_SHIFT_FACTOR ) / ((Pt::int32_t)v3.y() - (Pt::int32_t)v1.y()) ) ;
-    const Pt::int32_t chgX2 = ( ( ((Pt::int32_t)v3.x() - (Pt::int32_t)v2.x()) << FIXED_POINT_SHIFT_FACTOR ) / ((Pt::int32_t)v3.y() - (Pt::int32_t)v2.y()) ) ;
+    const Pt::int32_t chgX1 = ( ( ((Pt::int32_t)v1.x() - (Pt::int32_t)v3.x()) << FIXED_POINT_SHIFT_FACTOR ) /
+                                  ((Pt::int32_t)v1.y() - (Pt::int32_t)v3.y())
+                              );
+    const Pt::int32_t chgX2 = ( ( ((Pt::int32_t)v2.x() - (Pt::int32_t)v3.x()) << FIXED_POINT_SHIFT_FACTOR ) /
+                                  ((Pt::int32_t)v2.y() - (Pt::int32_t)v3.y())
+                              );
 
 #ifdef FILL_POLYGON_PRECISION_AA
 
     Pt::int32_t curX1 = (v3.x() << FIXED_POINT_SHIFT_FACTOR);
     Pt::int32_t curX2 = (v3.x() << FIXED_POINT_SHIFT_FACTOR);
 
-    if(chgX1 < 0) curX1 += FIXED_POINT_FRACT_VAL_BM / 2;
-    else          curX1 -= FIXED_POINT_FRACT_VAL_BM / 2;
+    if(chgX1 <= 0) curX1 += FIXED_POINT_FRACT_VAL_BM / 2;
+    else           curX1 -= FIXED_POINT_FRACT_VAL_BM / 2;
 
-    if(chgX2 < 0) curX2 -= FIXED_POINT_FRACT_VAL_BM / 2;
-    else          curX2 += FIXED_POINT_FRACT_VAL_BM / 2;
+    if(chgX2 >= 0) curX2 -= FIXED_POINT_FRACT_VAL_BM / 2;
+    else           curX2 += FIXED_POINT_FRACT_VAL_BM / 2;
 
     Pt::uint16_t* alphas = &_alphas[0] + v3.y() * imgW;
 

@@ -1,6 +1,6 @@
 //#define CHECK_RESULT
 
-#define BENCH_COUNT  100
+#define BENCH_COUNT 1000
 
 template <typename PainterT>
 size_t benchDrawLine(const char* info)

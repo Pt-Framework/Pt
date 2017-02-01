@@ -23,27 +23,27 @@ int main(int argc, char* args[])
     painter.setFontDir( Pt::System::Path("../src/Pt-Gfx/fonts") );
     painter.setFont( Pt::Gfx::Font("DejaVu Serif", 24, Pt::Gfx::Font::BoldItalic) );
 
-    if(1) {
+    if(0) {
         painter.setCompositionMode(CompositionMode::SourceCopy);
-        testLines("Test Lines - CompositionMode::SourceCopy", image, painter);
+        testDrawLine("Lines and Texts - SourceCopy", image, painter);
     }
 
     if(0) {
         painter.setCompositionMode(CompositionMode::SourceOver);
-        testLines("Test Lines - CompositionMode::SourceOver", image, painter);
+        testDrawLine("Lines and Texts - SourceOver", image, painter);
     }
 
     if(1) {
         painter.setCompositionMode(CompositionMode::SourceCopy);
-        testFillPolygon("Test Fill Polygons - CompositionMode::SourceCopy", image, painter);
+        testDrawSolidFillPolygon("Solid-Filled Polygons - SourceCopy", image, painter);
     }
 
     if(0) {
         painter.setCompositionMode(CompositionMode::SourceOver);
-        testFillPolygon("Test Fill Polygons - CompositionMode::SourceOver", image, painter);
+        testDrawSolidFillPolygon("Solid-Filled Polygons - SourceOver", image, painter);
     }
 
-    if(1) {
+    if(0) {
         benchDrawLine            <ImagePainter >("Drawing line using ImagePainter                  = ");
         benchDrawLine            <ImagePainter2>("Drawing line using ImagePainter2                 = ");
         benchDrawSolidFillPolygon<ImagePainter >("Drawing solid-filled polygon using ImagePainter  = ");
