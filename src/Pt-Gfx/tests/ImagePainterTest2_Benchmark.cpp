@@ -116,27 +116,33 @@ static void doBenchMark(CompositionMode cm)
     std::clog << "                                               Time (Factor)" << std::endl;
     std::clog << "                                               ---- --------" << std::endl;
 
-    time1 = benchDrawText<ImagePainter >(cm);
-    time2 = benchDrawText<ImagePainter2>(cm);
-    std::clog << "    Text                 @ ImagePainter      = " << std::setw(4) << time1 << std::endl;
-    std::clog << "    Text                 @ ImagePainter2     = " << std::setw(4) << time2
-              << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-    std::clog << std::endl;
+    if(0) {
+        time1 = benchDrawText<ImagePainter >(cm);
+        time2 = benchDrawText<ImagePainter2>(cm);
+        std::clog << "    Text                 @ ImagePainter      = " << std::setw(4) << time1 << std::endl;
+        std::clog << "    Text                 @ ImagePainter2     = " << std::setw(4) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        std::clog << std::endl;
+    }
 
-    time1 = benchDrawLine<ImagePainter >(cm);
-    time2 = benchDrawLine<ImagePainter2>(cm);
-    std::clog << "    Line                 @ ImagePainter      = " << std::setw(4) << time1 << std::endl;
-    std::clog << "    Line                 @ ImagePainter2     = " << std::setw(4) << time2
-              << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-    std::clog << std::endl;
+    if(1) {
+        time1 = benchDrawLine<ImagePainter >(cm);
+        time2 = benchDrawLine<ImagePainter2>(cm);
+        std::clog << "    Line                 @ ImagePainter      = " << std::setw(4) << time1 << std::endl;
+        std::clog << "    Line                 @ ImagePainter2     = " << std::setw(4) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        std::clog << std::endl;
+    }
 
-    time1 = benchDrawSolidFillPolygon<ImagePainter >(cm   );
-    time2 = benchDrawSolidFillPolygon<ImagePainter2>(cm, 0);
-    time3 = benchDrawSolidFillPolygon<ImagePainter2>(cm, 1);
-    std::clog << "    Solid-filled polygon @ ImagePainter      = " << std::setw(4) << time1 << std::endl;
-    std::clog << "    Solid-filled polygon @ ImagePainter2 (N) = " << std::setw(4) << time2
-              << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-    std::clog << "    Solid-filled polygon @ ImagePainter2 (P) = " << std::setw(4) << time3
-              << " (" << std::setw(6) << std::setprecision(3) << (time3 / time1) << ")" << std::setprecision(0) << std::endl;
-    std::clog << std::endl;
+    if(0) {
+        time1 = benchDrawSolidFillPolygon<ImagePainter >(cm   );
+        time2 = benchDrawSolidFillPolygon<ImagePainter2>(cm, 0);
+        time3 = benchDrawSolidFillPolygon<ImagePainter2>(cm, 1);
+        std::clog << "    Solid-filled polygon @ ImagePainter      = " << std::setw(4) << time1 << std::endl;
+        std::clog << "    Solid-filled polygon @ ImagePainter2 (N) = " << std::setw(4) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        std::clog << "    Solid-filled polygon @ ImagePainter2 (P) = " << std::setw(4) << time3
+                  << " (" << std::setw(6) << std::setprecision(3) << (time3 / time1) << ")" << std::setprecision(0) << std::endl;
+        std::clog << std::endl;
+    }
 }

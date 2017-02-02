@@ -29,7 +29,7 @@ int main(int argc, char* args[])
     painter.setFont( Pt::Gfx::Font(FONT_SPEC) );
 
     const int testDraw    = 1;
-    const int doBenchmark = 0;
+    const int doBenchmark = 1;
 
     // Lines
     if(1 && testDraw) {

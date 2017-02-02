@@ -11,28 +11,28 @@ static void testDrawLine(const char* title, Image& image, ImagePainter2& painter
 
     painter.setPen( Color::fromRgb8(255, 0, 0, 175) );
 
-    //painter.drawLine( PointF(  0,   0), PointF(799,   0) );
-    //painter.drawLine( PointF(  0, 599), PointF(799, 599) );
-    //painter.drawLine( PointF(  0,   0), PointF(  0, 599) );
-    //painter.drawLine( PointF(799,   0), PointF(799, 599) );
+    painter.drawLine( PointF(  0,   0), PointF(799,   0) );
+    painter.drawLine( PointF(  0, 599), PointF(799, 599) );
+    painter.drawLine( PointF(  0,   0), PointF(  0, 599) );
+    painter.drawLine( PointF(799,   0), PointF(799, 599) );
 
     painter.setPen( Color::fromRgb8(255, 255, 255, 175) );
 
     painter.drawLine( PointF( 10,  10), PointF(100,  50) );
     painter.drawLine( PointF( 10, 150), PointF(100, 110) );
 
-    //painter.drawLine( PointF(100,  10), PointF(110,  20) );
+    painter.drawLine( PointF(100,  10), PointF(110,  20) );
 
     painter.setPen( Pen(Color::fromRgb8( 63,  63,  63, 175)) ); painter.drawLine( PointF(500-50, 500), PointF(200-50, 200) );
     painter.setPen( Pen(Color::fromRgb8(127, 127, 127, 175)) ); painter.drawLine( PointF(500   , 500), PointF(200   , 200) );
     painter.setPen( Pen(Color::fromRgb8(255, 255, 255, 175)) ); painter.drawLine( PointF(500+50, 500), PointF(200+50, 200) );
                                                                 painter.drawLine( PointF(300   , 200), PointF(700   , 100) );
 
-    //painter.drawLine( PointF(770,  11), PointF(770, 500) );
+    painter.drawLine( PointF(770,  11), PointF(770, 500) );
     painter.drawLine( PointF(780,  11), PointF(782, 500) );
 
-    //painter.drawLine( PointF( 10, 540), PointF(781, 540) );
-    //painter.drawLine( PointF(781, 551), PointF( 10, 550) );
+    painter.drawLine( PointF( 10, 540), PointF(781, 540) );
+    painter.drawLine( PointF(781, 551), PointF( 10, 550) );
 
     painter.setPen( Pen(Color::fromRgb8(0, 255, 255, 175)) ); painter.drawText( PointF(100, 100), "Hello world!" );
     painter.setPen( Pen(Color::fromRgb8(0, 255, 255, 255)) ); painter.drawText( PointF(100, 150), "Hello world!" );
