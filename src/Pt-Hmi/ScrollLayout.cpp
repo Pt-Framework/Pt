@@ -152,9 +152,68 @@ Pt::Signal<>& ScrollLayout::contentChanged()
 }
 
 
+void ScrollLayout::onInvalidate()
+{
+    Base::onInvalidate();
+
+    double maxWidth = 0;
+    double maxHeight = 0;
+    
+    for(std::size_t i = 0; i < widgets().size(); ++i)
+    {
+        const Widget* w =  widgets()[i];
+        Gfx::PointF pos = w->position();
+
+        maxWidth = std::max( maxWidth, w->position().x() +  w->size().width() );
+        maxHeight= std::max( maxHeight, w->position().y() +  w->size().height() );
+    }
+
+    _maxX = static_cast<int>(maxWidth);
+    _maxY = static_cast<int>(maxHeight);
+
+    _contentChanged.send();
+}
+
+
+void ScrollLayout::onAddWidget(Widget& w)
+{
+    Base::onAddWidget(w);
+    
+    w.eventReady() += Pt::slot(*this, &ScrollLayout::onContentResize);
+    //w.eventReady() += Pt::slot(*this, &ScrollLayout::onContentMove);
+
+    onInvalidate();
+}
+
+
+void ScrollLayout::onRemoveWidget(Widget& w)
+{
+    Base::onRemoveWidget(w);
+
+    w.eventReady() -= Pt::slot(*this, &ScrollLayout::onContentResize);
+
+    // TODO: we can not monitor if the user moves a child widget
+    //       because the child widgets are moved themselves by the
+    //       ScrollLayout... It would be possible to have only one 
+    //       child or let the user set the position in a addWidget
+    //       function and the ScrollLayout layouts it at that
+    //       position.
+
+    //w.eventReady() -= Pt::slot(*this, &ScrollLayout::onContentMove);
+
+    onInvalidate();
+}
+
+
+void ScrollLayout::onContentResize(const ResizeEvent& ev)
+{
+    onInvalidate();
+}
+
+
 void ScrollLayout::onMouseEvent(const MouseEvent& ev)
 {
-    Widget::onMouseEvent(ev);
+    Base::onMouseEvent(ev);
 
     if( ev.isPress() )
         _lastPos = ev.position();
@@ -182,7 +241,7 @@ void ScrollLayout::onMouseEvent(const MouseEvent& ev)
 
 void ScrollLayout::onTouchEvent(const TouchEvent& ev)
 {    
-    Widget::onTouchEvent(ev);
+    Base::onTouchEvent(ev);
 
     if( ev.isPress() )
         _lastPos = ev.position();   
@@ -210,7 +269,7 @@ void ScrollLayout::onTouchEvent(const TouchEvent& ev)
 
 void ScrollLayout::onScrollEvent(const ScrollEvent& ev)
 {
-    Widget::onScrollEvent(ev);
+    Base::onScrollEvent(ev);
 
     if(ev.wheel() == ScrollEvent::Horizontal)
     {
@@ -229,68 +288,6 @@ void ScrollLayout::onScrollEvent(const ScrollEvent& ev)
             scrollY(deltaY);
         }
     }
-}
-
-
-void ScrollLayout::onAddWidget(Widget& w)
-{
-    Layout::onAddWidget(w);
-    
-    w.eventReady() += Pt::slot(*this, &ScrollLayout::onContentResize);
-    //w.eventReady() += Pt::slot(*this, &ScrollLayout::onContentMove);
-
-    updateRange();
-}
-
-
-void ScrollLayout::onRemoveWidget(Widget& w)
-{
-    Layout::onRemoveWidget(w);
-
-    w.eventReady() -= Pt::slot(*this, &ScrollLayout::onContentResize);
-    //w.eventReady() -= Pt::slot(*this, &ScrollLayout::onContentMove);
-
-    updateRange();
-}
-
-
-void ScrollLayout::onContentResize(const ResizeEvent& ev)
-{
-    updateRange();
-}
-
-
-void ScrollLayout::onContentMove(const MoveEvent& ev)
-{
-    // TODO: we can not monitor if the user moves a child widget
-    //       because the child widgets are moved themselves by the
-    //       ScrollLayout... It would be possible to have only one 
-    //       child or let the user set the position in a addWidget
-    //       function and the ScrollLayout layouts it at that
-    //       position.
-
-    updateRange();
-}
-
-
-void ScrollLayout::updateRange()
-{
-    double maxWidth = 0;
-    double maxHeight = 0;
-    
-    for(std::size_t i = 0; i < widgets().size(); ++i)
-    {
-        const Widget* w =  widgets()[i];
-        Gfx::PointF pos = w->position();
-
-        maxWidth = std::max( maxWidth, w->position().x() +  w->size().width() );
-        maxHeight= std::max( maxHeight, w->position().y() +  w->size().height() );
-    }
-
-    _maxX = static_cast<int>(maxWidth);
-    _maxY = static_cast<int>(maxHeight);
-
-    _contentChanged.send();
 }
 
 } // namespace

@@ -42,6 +42,8 @@ namespace Hmi {
 //       -> rename ScrollArea and derive from Widget
 class PT_HMI_API ScrollLayout : public Layout
 {
+    typedef Layout Base;
+
     public:
         ScrollLayout();
 
@@ -68,23 +70,22 @@ class PT_HMI_API ScrollLayout : public Layout
         Pt::Signal<>& contentChanged();
 
     protected:
+        virtual void onInvalidate();
+
+        virtual void onAddWidget(Widget& w);
+        
+        virtual void onRemoveWidget(Widget& w);
+
+    protected:
         virtual void onMouseEvent(const MouseEvent& ev);
         
         virtual void onTouchEvent(const TouchEvent& ev);
 
         virtual void onScrollEvent(const ScrollEvent& ev);
         
-        virtual void onAddWidget(Widget& w);
-        
-        virtual void onRemoveWidget(Widget& w);
-
   private:
         void onContentResize(const ResizeEvent& ev);
-
-        void onContentMove(const MoveEvent& ev);
-        
-        void updateRange();
-
+       
     private:
         Pt::Signal<int> _scrolledX;
         Pt::Signal<int> _scrolledY;
