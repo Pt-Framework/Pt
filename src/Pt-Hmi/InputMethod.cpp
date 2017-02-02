@@ -110,9 +110,8 @@ void InputMethod::unregisterApplication(Application&)
 
 void DefaultInputMethod::onShow(bool show)
 {
-    std::clog << "INPUTMETHOD " << (show ? "+++ SHOW +++" : "--- HIDE ---") 
-               << std::endl;
 }
+
 
 bool DefaultInputMethod::onFinish(Widget& widget)
 {

@@ -113,12 +113,6 @@ void ScrollView::onResizeEvent(const ResizeEvent& ev)
 {
     Widget::onResizeEvent(ev);
 
-    if( name() == "ListBox.ScrollView" )
-    {
-        int maxX = _scrollLayout.maximumX();
-        maxX = maxX;
-    }
-
     double width = ev.size().width();
     double height = ev.size().height();
 

@@ -734,6 +734,9 @@ const Gfx::PointF& Widget::position() const
 
 void Widget::move(const Gfx::PointF& pos)
 {
+    if(pos == _position)
+        return;
+
     Gfx::RectF updateRect(Gfx::PointF(0, 0), _size);
 
     Gfx::PointF to = pos - _position;
@@ -763,6 +766,9 @@ const Gfx::SizeF& Widget::size() const
 
 void Widget::resize(const Gfx::SizeF& s)
 {
+    if(_size == s)
+        return;
+
     Gfx::SizeF updateSize( std::max( size().width(), s.width()), 
                            std::max( size().height(), s.height()) );
 
