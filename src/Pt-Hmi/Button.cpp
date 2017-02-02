@@ -81,12 +81,17 @@ Signal<>& Button::clicked()
 }
 
 
-void Button::onPressed(const Gfx::PointF& pos)
+void Button::onPressed()
 {
 }
 
 
-void Button::onReleased(const Gfx::PointF& pos)
+void Button::onReleased()
+{
+}
+
+
+void Button::onCanceled()
 {
 }
 
@@ -95,8 +100,8 @@ void Button::onMnemonic()
 {
     Base::onMnemonic();
     
-    onPressed( Gfx::PointF(0,0) );
-    onReleased( Gfx::PointF(0,0) );
+    onPressed();
+    onReleased();
 }
 
 
@@ -105,9 +110,9 @@ void Button::onActionKey( const KeyEvent& kev )
     Base::onActionKey(kev);
 
     if( kev.isPress() )
-        onPressed( Gfx::PointF(0,0) );
+        onPressed();
     else if( kev.isRelease() )
-        onReleased( Gfx::PointF(0,0) );
+        onReleased();
 }
 
 
@@ -116,9 +121,9 @@ void Button::onShortcut( const KeyEvent& kev )
     Base::onShortcut(kev);
 
     if( kev.isPress() )
-        onPressed( Gfx::PointF(0,0) );
+        onPressed();
     else if( kev.isRelease() )
-        onReleased( Gfx::PointF(0,0) );
+        onReleased();
 }
 
 
@@ -151,15 +156,27 @@ void Button::onMouseEvent(const MouseEvent& ev)
     {
         _onClickBegin = true;
         grabPointer();
-        onPressed( ev.position() );
+        onPressed();
     }
     else if( ev.isRelease() )
     {
-        if(_onClickBegin)
+        const Gfx::PointF& pos = ev.position();
+
+        bool inside = pos.x() > 0 && pos.x() <= size().width() &&
+                      pos.y() > 0 && pos.y() <= size().height();
+
+        bool isClick = _onClickBegin && inside;
+        
+        _onClickBegin = false;
+        releasePointer();
+
+        if(isClick)
         {
-            _onClickBegin = false;
-            releasePointer();
-            onReleased( ev.position() );
+            onReleased();
+        }
+        else
+        {
+            onCanceled();
         }
     }   
 }
@@ -173,17 +190,41 @@ void Button::onTouchEvent(const TouchEvent& ev)
     {
         _onClickBegin = true;
         grabPointer();
-        onPressed( ev.position() );
+        onPressed();
     }
     else if( ev.isRelease() )
     {
-        if(_onClickBegin)
+        const Gfx::PointF& pos = ev.position();
+
+        bool inside = pos.x() > 0 && pos.x() <= size().width() &&
+                      pos.y() > 0 && pos.y() <= size().height();
+
+        bool isClick = _onClickBegin && inside;
+        
+        _onClickBegin = false;
+        releasePointer();
+
+        if(isClick)
         {
-            _onClickBegin = false;
-            releasePointer();
-            onReleased( ev.position() );
+            onReleased();
+        }
+        else
+        {
+            onCanceled();
         }
     }   
+}
+
+
+void Button::onScrollEvent(const ScrollEvent& ev)
+{    
+    _onClickBegin = false;
+    releasePointer();
+
+    onCanceled();
+
+    // propagate scroll to parent
+    Base::onScrollEvent(ev);
 }
 
 } // namespace

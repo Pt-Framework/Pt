@@ -92,9 +92,11 @@ class PT_HMI_API CheckBox : public Button
     protected:
         virtual void onInvalidate();
 
-        virtual void onPressed(const Gfx::PointF& pos);
+        virtual void onPressed();
 
-        virtual void onReleased(const Gfx::PointF& pos);
+        virtual void onReleased();
+
+        virtual void onCanceled();
     
     protected:       
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);

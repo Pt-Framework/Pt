@@ -103,9 +103,11 @@ class PT_HMI_API PushButton : public Button
         void setRenderer(ButtonRenderer* renderer);
 
     protected:
-        virtual void onPressed(const Gfx::PointF& pos);
+        virtual void onPressed();
 
-        virtual void onReleased(const Gfx::PointF& pos);
+        virtual void onReleased();
+
+        virtual void onCanceled();
 
     protected:
         virtual void onSetStyleOptions(const StyleOptions& options);
@@ -119,6 +121,7 @@ class PT_HMI_API PushButton : public Button
 
     private:
         bool                      _isToggle;
+        bool                      _isBeingToggled;
         bool                      _isFlat;
         Direction                 _direction;
         Gfx::Image                _image;

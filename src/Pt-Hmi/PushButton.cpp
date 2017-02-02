@@ -38,6 +38,7 @@ namespace Hmi {
 
 PushButton::PushButton()
 : _isToggle(false)
+, _isBeingToggled(false)
 , _isFlat(false)
 , _direction(Left)
 , _hasRenderer(false)
@@ -200,36 +201,47 @@ void PushButton::setRenderer(ButtonRenderer* renderer)
 }
 
 
-void PushButton::onPressed(const Gfx::PointF& pos)
+void PushButton::onPressed()
 {
-    Base::onPressed(pos);
+    Base::onPressed();
 
     if( isToggle() )
+    {
         setPressed( ! isPressed() );
+        _isBeingToggled = true;
+    }
     else
         setPressed(true);
 }
 
 
-void PushButton::onReleased(const Gfx::PointF& pos)
+void PushButton::onReleased()
 {
-    Base::onReleased(pos);
+    Base::onReleased();
 
-    if( pos.x() > 0 && pos.x() <= size().width() &&
-        pos.y() > 0 && pos.y() <= size().height() )
-    {
-        if( ! isToggle() )
-            setPressed(false);
+    _isBeingToggled = false;
 
-        clicked().send();
+    if( ! isToggle() )
+        setPressed(false);
+
+    clicked().send();
+}
+
+
+void PushButton::onCanceled()
+{
+    Base::onCanceled();
+
+    if( isToggle() )
+    { 
+        if(_isBeingToggled)
+        {
+            _isBeingToggled = false;
+            setPressed( ! isPressed() );
+        }
     }
     else
-    {
-        if( isToggle() )
-            setPressed( ! isPressed() );
-        else
-            setPressed(false);
-    }
+        setPressed(false);
 }
 
 
