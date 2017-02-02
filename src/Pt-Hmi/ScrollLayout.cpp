@@ -152,7 +152,43 @@ Pt::Signal<>& ScrollLayout::contentChanged()
 }
 
 
-void ScrollLayout::onInvalidate()
+void ScrollLayout::onAddWidget(Widget& w)
+{
+    Base::onAddWidget(w);
+    
+    w.eventReady() += Pt::slot(*this, &ScrollLayout::onContentResize);
+    //w.eventReady() += Pt::slot(*this, &ScrollLayout::onContentMove);
+
+    onContentChanged();
+}
+
+
+void ScrollLayout::onRemoveWidget(Widget& w)
+{
+    Base::onRemoveWidget(w);
+
+    w.eventReady() -= Pt::slot(*this, &ScrollLayout::onContentResize);
+
+    // TODO: we can not monitor if the user moves a child widget
+    //       because the child widgets are moved themselves by the
+    //       ScrollLayout... It would be possible to have only one 
+    //       child or let the user set the position in a addWidget
+    //       function and the ScrollLayout layouts it at that
+    //       position.
+
+    //w.eventReady() -= Pt::slot(*this, &ScrollLayout::onContentMove);
+
+    onContentChanged();
+}
+
+
+void ScrollLayout::onContentResize(const ResizeEvent& ev)
+{
+    onContentChanged();
+}
+
+
+void ScrollLayout::onContentChanged()
 {
     Base::onInvalidate();
 
@@ -172,42 +208,6 @@ void ScrollLayout::onInvalidate()
     _maxY = static_cast<int>(maxHeight);
 
     _contentChanged.send();
-}
-
-
-void ScrollLayout::onAddWidget(Widget& w)
-{
-    Base::onAddWidget(w);
-    
-    w.eventReady() += Pt::slot(*this, &ScrollLayout::onContentResize);
-    //w.eventReady() += Pt::slot(*this, &ScrollLayout::onContentMove);
-
-    onInvalidate();
-}
-
-
-void ScrollLayout::onRemoveWidget(Widget& w)
-{
-    Base::onRemoveWidget(w);
-
-    w.eventReady() -= Pt::slot(*this, &ScrollLayout::onContentResize);
-
-    // TODO: we can not monitor if the user moves a child widget
-    //       because the child widgets are moved themselves by the
-    //       ScrollLayout... It would be possible to have only one 
-    //       child or let the user set the position in a addWidget
-    //       function and the ScrollLayout layouts it at that
-    //       position.
-
-    //w.eventReady() -= Pt::slot(*this, &ScrollLayout::onContentMove);
-
-    onInvalidate();
-}
-
-
-void ScrollLayout::onContentResize(const ResizeEvent& ev)
-{
-    onInvalidate();
 }
 
 

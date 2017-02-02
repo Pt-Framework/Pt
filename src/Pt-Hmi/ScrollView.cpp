@@ -106,15 +106,8 @@ void ScrollView::onScrolledY(int n)
 
 void ScrollView::onContentChanged()
 {
-}
-
-
-void ScrollView::onResizeEvent(const ResizeEvent& ev)
-{
-    Widget::onResizeEvent(ev);
-
-    double width = ev.size().width();
-    double height = ev.size().height();
+    double width = size().width();
+    double height = size().height();
 
     _scrollBarX.show( width < _scrollLayout.maximumX() );
     _scrollBarY.show( height < _scrollLayout.maximumY() ); 
@@ -148,6 +141,16 @@ void ScrollView::onResizeEvent(const ResizeEvent& ev)
 }
 
 
+void ScrollView::onResizeEvent(const ResizeEvent& ev)
+{
+    Widget::onResizeEvent(ev);
+
+    assert( ev.size() == size() );
+
+    onContentChanged();
+}
+
+
 void ScrollView::updateScrollBar(ScrollBar& sb, double maxRange)
 {
     int oldPos = sb.position();
@@ -157,9 +160,9 @@ void ScrollView::updateScrollBar(ScrollBar& sb, double maxRange)
 
     if(sb.maximumPosition() > 0)
     {      
-      double relPos = double(oldPos) / oldMax;
-      double newPos = maxRange * relPos + 0.5;
-      sb.scroll( static_cast<int>(newPos) );
+        double relPos = double(oldPos) / oldMax;
+        double newPos = maxRange * relPos + 0.5;
+        sb.scroll( static_cast<int>(newPos) );
     }
 }
 

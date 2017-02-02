@@ -70,8 +70,6 @@ class PT_HMI_API ScrollLayout : public Layout
         Pt::Signal<>& contentChanged();
 
     protected:
-        virtual void onInvalidate();
-
         virtual void onAddWidget(Widget& w);
         
         virtual void onRemoveWidget(Widget& w);
@@ -85,6 +83,8 @@ class PT_HMI_API ScrollLayout : public Layout
         
   private:
         void onContentResize(const ResizeEvent& ev);
+
+        void onContentChanged();
        
     private:
         Pt::Signal<int> _scrolledX;
