@@ -56,7 +56,11 @@ class PT_HMI_API ComboBox : public Control
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
     protected:
+        virtual void onKeyEvent(const KeyEvent& ev);
+
         virtual void onMouseEvent(const MouseEvent& ev);
+
+        virtual void onScrollEvent(const ScrollEvent& ev);
 
     private:
         void onMenuKeyEvent(const KeyEvent& ev);
@@ -66,6 +70,12 @@ class PT_HMI_API ComboBox : public Control
         ListBox     _items;
         ListBoxItem _item1;
         ListBoxItem _item2;
+        ListBoxItem _item3;
+        ListBoxItem _item4;
+        ListBoxItem _item5;
+        ListBoxItem _item6;
+        ListBoxItem _item7;
+        ListBoxItem _item8;
         Window      _menu;
 };
 

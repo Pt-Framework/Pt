@@ -84,6 +84,8 @@ class PT_HMI_API ScrollLayout : public Layout
   private:
         void onContentResize(const ResizeEvent& ev);
 
+        void onContentScroll(const ScrollEvent& ev);
+
         void onContentChanged();
        
     private:

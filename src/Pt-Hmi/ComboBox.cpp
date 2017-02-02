@@ -42,12 +42,25 @@ ComboBox::ComboBox()
 
     _item1.resize( Gfx::SizeF(20, 20) );
     _item2.resize( Gfx::SizeF(20, 20) );
+    _item3.resize( Gfx::SizeF(20, 20) );
+    _item4.resize( Gfx::SizeF(20, 20) );
+    _item5.resize( Gfx::SizeF(20, 20) );
+    _item6.resize( Gfx::SizeF(20, 20) );
+    _item7.resize( Gfx::SizeF(20, 20) );
+    _item8.resize( Gfx::SizeF(20, 20) );
 
     _items.addItem(_item1);
     _items.addItem(_item2);
-    
+    _items.addItem(_item3);
+    _items.addItem(_item4);
+    _items.addItem(_item5);
+    _items.addItem(_item6);
+    _items.addItem(_item7);
+    _items.addItem(_item8);
+
     _menu.setMainWidget(&_items);
     _menu.eventReady() += Pt::slot(*this, &ComboBox::onMenuKeyEvent);
+    _menu.setName("ComboMenu");
 }
 
 
@@ -70,6 +83,9 @@ void ComboBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     painter.setClip(rect);
     
     Gfx::Pen pen     = Gfx::Color::fromRgb8(0, 0, 0);
+    if(isHighlighted() || this->hasFocus() )
+        pen = options.accentColor();
+
     Gfx::Brush brush = Gfx::Color::fromRgb8(255, 255, 255);
     Gfx::Font font   = options.font();
     
@@ -97,6 +113,18 @@ void ComboBox::onMenuKeyEvent(const KeyEvent& ev)
 }
 
 
+void ComboBox::onKeyEvent(const KeyEvent& ev)
+{
+    Base::onKeyEvent(ev);
+
+    if( ! ev.isPress() )
+        return;
+
+    _text += ev.unicode();
+    invalidate();
+}
+
+
 void ComboBox::onMouseEvent(const MouseEvent& ev)
 {    
     Base::onMouseEvent(ev);
@@ -104,7 +132,7 @@ void ComboBox::onMouseEvent(const MouseEvent& ev)
     if( ev.isPress() )
     {
         Gfx::SizeF s = size();
-        _menu.resize( Gfx::SizeF(size().width(), 200) );
+        _menu.resize( Gfx::SizeF(size().width(), 120) );
         _menu.setTopMost(true);
 
         Gfx::PointF pos(0, size().height());
@@ -113,6 +141,10 @@ void ComboBox::onMouseEvent(const MouseEvent& ev)
 
         _menu.show();
     }
+}
+
+void ComboBox::onScrollEvent(const ScrollEvent& ev)
+{
 }
 
 } // namespace

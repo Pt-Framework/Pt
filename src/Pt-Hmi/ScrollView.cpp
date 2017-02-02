@@ -67,9 +67,6 @@ void ScrollView::setWidget(Widget& widget)
 
     _scrollLayout.add(widget);
     _widget = &widget;
-
-    _scrollBarX.setRange( 0, _scrollLayout.maximumX() );
-    _scrollBarY.setRange( 0, _scrollLayout.maximumY() );
 }
 
 

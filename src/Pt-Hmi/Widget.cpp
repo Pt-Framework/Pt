@@ -908,6 +908,13 @@ void Widget::onTouchEvent(const TouchEvent& ev)
 
 void Widget::onScrollEvent(const ScrollEvent& ev)
 {
+    Widget* w = this->parent();
+    if(w)
+    {
+        ScrollEvent ev2(ev);
+        ev2.setId (w->vid() );
+        Application::instance().loop().commitEvent(ev2);
+    }
 }
 
 

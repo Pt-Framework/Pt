@@ -314,6 +314,23 @@ bool WindowManager::touchEvent( const TouchEvent& tev )
 }
 
 
+bool WindowManager::scrollEvent(const ScrollEvent& sev)
+{
+    Window* w = 0;
+
+    if( _activeWindow)
+        w = _activeWindow->window();
+
+    if( ! w )
+        return false;
+
+    if( w->isEnabled() )
+        w->processEvent(sev);
+
+    return true;
+}
+
+
 void WindowManager::paint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     std::vector<WindowFrame*>::iterator it;

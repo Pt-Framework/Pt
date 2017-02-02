@@ -1179,7 +1179,16 @@ void Window::onTouchEvent(const TouchEvent& tev)
 
 void Window::onScrollEvent(const ScrollEvent& sev)
 {
-    // TODO: which widget receives the scroll events?
+    if( _windowManager.scrollEvent(sev) )
+        return;
+
+    if( _focusWidget )
+    {
+        ScrollEvent ev(sev);
+        ev.setId( _focusWidget->vid() );
+        Application::instance().loop().commitEvent(ev);
+        return;
+    }
 
     Widget* widget = Application::instance().pointerWidget();
 

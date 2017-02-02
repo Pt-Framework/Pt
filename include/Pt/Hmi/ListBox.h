@@ -30,6 +30,7 @@
 #define Pt_Hmi_ListBox_H
 
 #include <Pt/Hmi/Control.h>
+#include <Pt/Hmi/Button.h>
 #include <Pt/Hmi/ScrollView.h>
 #include <Pt/Hmi/FlowLayout.h>
 #include <Pt/Gfx/Color.h>
@@ -40,9 +41,9 @@ namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API ListBoxItem : public Control
+class PT_HMI_API ListBoxItem : public Button
 {
-    typedef Control Base;
+    typedef Control Button;
 
 	  public:
         ListBoxItem();
@@ -55,6 +56,25 @@ class PT_HMI_API ListBoxItem : public Control
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
         virtual void onResizeEvent(const ResizeEvent& ev);
+};
+
+
+class PT_HMI_API ListBoxLayout : public FlowLayout
+{
+    typedef FlowLayout Base;
+
+	  public:
+        ListBoxLayout();
+		
+        virtual ~ListBoxLayout();
+
+    protected:
+        virtual void onAddWidget(Widget& w);
+
+        virtual void onRemoveWidget(Widget& w);
+
+    private:
+        void onContentChanged();
 };
 
 
@@ -80,8 +100,8 @@ class PT_HMI_API ListBox : public Control
         virtual void onResizeEvent(const ResizeEvent& ev);
     
     private:
-        FlowLayout _flow;
-        ScrollView _scroll;
+        ListBoxLayout _layout;
+        ScrollView    _scrollView;
 };
 
 } // namespace

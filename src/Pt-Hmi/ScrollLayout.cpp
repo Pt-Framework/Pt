@@ -140,7 +140,7 @@ Pt::Signal<int>& ScrollLayout::scrolledX()
 }
 
 
-Pt::Signal<int>& ScrollLayout::scrolledY() 
+Pt::Signal<int>& ScrollLayout::scrolledY()
 {
     return _scrolledY;
 }
@@ -157,6 +157,7 @@ void ScrollLayout::onAddWidget(Widget& w)
     Base::onAddWidget(w);
     
     w.eventReady() += Pt::slot(*this, &ScrollLayout::onContentResize);
+    w.eventReady() += Pt::slot(*this, &ScrollLayout::onContentScroll);
     //w.eventReady() += Pt::slot(*this, &ScrollLayout::onContentMove);
 
     onContentChanged();
@@ -168,6 +169,7 @@ void ScrollLayout::onRemoveWidget(Widget& w)
     Base::onRemoveWidget(w);
 
     w.eventReady() -= Pt::slot(*this, &ScrollLayout::onContentResize);
+    w.eventReady() -= Pt::slot(*this, &ScrollLayout::onContentScroll);
 
     // TODO: we can not monitor if the user moves a child widget
     //       because the child widgets are moved themselves by the
@@ -185,6 +187,12 @@ void ScrollLayout::onRemoveWidget(Widget& w)
 void ScrollLayout::onContentResize(const ResizeEvent& ev)
 {
     onContentChanged();
+}
+
+
+void ScrollLayout::onContentScroll(const ScrollEvent& ev)
+{
+    onScrollEvent(ev);
 }
 
 
@@ -269,7 +277,7 @@ void ScrollLayout::onTouchEvent(const TouchEvent& ev)
 
 void ScrollLayout::onScrollEvent(const ScrollEvent& ev)
 {
-    Base::onScrollEvent(ev);
+    //Base::onScrollEvent(ev);
 
     if(ev.wheel() == ScrollEvent::Horizontal)
     {

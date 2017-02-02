@@ -46,6 +46,7 @@ class Window;
 class WindowFrame;
 class MouseEvent;
 class TouchEvent;
+class ScrollEvent;
 class KeyEvent;
 class EnterEvent;
 class LeaveEvent;
@@ -103,6 +104,8 @@ class WindowManager : public Pt::Connectable
         bool mouseEvent(const MouseEvent& mev);
 
         bool touchEvent(const TouchEvent& tev);
+
+        bool scrollEvent(const ScrollEvent& ev);
 
         void paint(PaintSurface& surface, const Gfx::RectF& rect);
 

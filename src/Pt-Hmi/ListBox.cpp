@@ -39,6 +39,7 @@ namespace Hmi {
 
 ListBoxItem::ListBoxItem()
 {
+    setFocusPolicy(Widget::NormalFocus);
 }
 
 
@@ -78,47 +79,44 @@ void ListBoxItem::onResizeEvent(const ResizeEvent& ev)
 
 
 //
-// ListBox
+// ListBoxLayout
 //
 
-ListBox::ListBox()
-: _flow(FlowLayout::Top)
+ListBoxLayout::ListBoxLayout()
+: FlowLayout(FlowLayout::Top)
 {
-    _scroll.setWidget(_flow);
-    _scroll.setName("ListBox.ScrollView");
-
-    setContent(_scroll);
+    setFocusPolicy(Widget::NormalFocus);
 }
 
 
-ListBox::~ListBox()
+ListBoxLayout::~ListBoxLayout()
 {
 }
 
 
-void ListBox::addItem(ListBoxItem& item)
-{   
-    _flow.add(item);
-    invalidate();
+void ListBoxLayout::onAddWidget(Widget& w)
+{
+    Base::onAddWidget(w);
+
+    onContentChanged();
 }
 
 
-void ListBox::removeItem(ListBoxItem& item)
+void ListBoxLayout::onRemoveWidget(Widget& w)
 {
-    _flow.remove(item);
-    invalidate();
+    Base::onRemoveWidget(w);
+    
+    onContentChanged();
 }
 
 
-void ListBox::onInvalidate()
+void ListBoxLayout::onContentChanged()
 {
-    Base::onInvalidate();
-
     double itemsHeight = 0;
 
-    for(std::size_t i = 0; i < _flow.widgets().size(); ++i)
+    for(std::size_t i = 0; i < widgets().size(); ++i)
     {
-        ListBoxItem* item = static_cast<ListBoxItem*>(_flow.widgets().at(i));
+        ListBoxItem* item = static_cast<ListBoxItem*>(widgets().at(i));
 
         // item size with margin
         Gfx::SizeF itemSize = item->preferredSize();
@@ -129,10 +127,44 @@ void ListBox::onInvalidate()
         itemsHeight += itemSize.height();
     }
 
-    Gfx::SizeF size = _scroll.size();
+    Gfx::SizeF size = this->size();
     size.setHeight(itemsHeight);
 
-    _flow.resize(size);
+    resize(size);
+}
+
+//
+// ListBox
+//
+
+ListBox::ListBox()
+{
+    _scrollView.setWidget(_layout);
+
+    setContent(_scrollView);
+}
+
+
+ListBox::~ListBox()
+{
+}
+
+
+void ListBox::addItem(ListBoxItem& item)
+{   
+    _layout.add(item);
+}
+
+
+void ListBox::removeItem(ListBoxItem& item)
+{
+    _layout.remove(item);
+}
+
+
+void ListBox::onInvalidate()
+{
+    Base::onInvalidate();
 }
 
 
@@ -143,10 +175,10 @@ void ListBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 
 void ListBox::onResizeEvent(const ResizeEvent& ev)
 {
-    Gfx::SizeF size = _flow.size();
+    Gfx::SizeF size = _layout.size();
     size.setWidth( ev.size().width() );
 
-    _flow.resize(size);
+    _layout.resize(size);
 
     Base::onResizeEvent(ev);
 }
