@@ -122,6 +122,36 @@ void ScrollLayout::scrollY(int ypos)
 }
 
 
+int ScrollLayout::scrollPosX() const
+{
+  return _lastScrollPos.x();
+}
+
+
+int ScrollLayout::scrollPosY() const
+{
+  return _lastScrollPos.y();
+}
+
+
+Pt::Signal<int>& ScrollLayout::scrolledX() 
+{
+    return _scrolledX;
+}
+
+
+Pt::Signal<int>& ScrollLayout::scrolledY() 
+{
+    return _scrolledY;
+}
+
+
+Pt::Signal<>& ScrollLayout::contentChanged() 
+{
+    return _contentChanged;
+}
+
+
 void ScrollLayout::onMouseEvent(const MouseEvent& ev)
 {
     Widget::onMouseEvent(ev);
@@ -207,7 +237,7 @@ void ScrollLayout::onAddWidget(Widget& w)
     Layout::onAddWidget(w);
     
     w.eventReady() += Pt::slot(*this, &ScrollLayout::onContentResize);
-    w.eventReady() += Pt::slot(*this, &ScrollLayout::onContentMove);
+    //w.eventReady() += Pt::slot(*this, &ScrollLayout::onContentMove);
 
     updateRange();
 }
@@ -218,7 +248,7 @@ void ScrollLayout::onRemoveWidget(Widget& w)
     Layout::onRemoveWidget(w);
 
     w.eventReady() -= Pt::slot(*this, &ScrollLayout::onContentResize);
-    w.eventReady() -= Pt::slot(*this, &ScrollLayout::onContentMove);
+    //w.eventReady() -= Pt::slot(*this, &ScrollLayout::onContentMove);
 
     updateRange();
 }
@@ -232,6 +262,13 @@ void ScrollLayout::onContentResize(const ResizeEvent& ev)
 
 void ScrollLayout::onContentMove(const MoveEvent& ev)
 {
+    // TODO: we can not monitor if the user moves a child widget
+    //       because the child widgets are moved themselves by the
+    //       ScrollLayout... It would be possible to have only one 
+    //       child or let the user set the position in a addWidget
+    //       function and the ScrollLayout layouts it at that
+    //       position.
+
     updateRange();
 }
 
@@ -244,6 +281,7 @@ void ScrollLayout::updateRange()
     for(std::size_t i = 0; i < widgets().size(); ++i)
     {
         const Widget* w =  widgets()[i];
+        Gfx::PointF pos = w->position();
 
         maxWidth = std::max( maxWidth, w->position().x() +  w->size().width() );
         maxHeight= std::max( maxHeight, w->position().y() +  w->size().height() );

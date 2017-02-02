@@ -119,8 +119,6 @@ void ScrollView::onResizeEvent(const ResizeEvent& ev)
     _scrollBarX.show( width < _scrollLayout.maximumX() );
     _scrollBarY.show( height < _scrollLayout.maximumY() ); 
 
-
-
     if( _scrollBarX.isVisible() )
         height -= _scrollBarX.size().height();
 
@@ -136,8 +134,6 @@ void ScrollView::onResizeEvent(const ResizeEvent& ev)
         _scrollBarX.resize( Gfx::SizeF(width, _scrollBarX.size().height()) );
     }
 
-     
-    
     if( _scrollBarY.isVisible() )
     {
         _scrollBarY.move( Gfx::PointF(width, 0) );

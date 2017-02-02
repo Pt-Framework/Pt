@@ -68,13 +68,13 @@ class MainWindow : public Pt::Hmi::Window
             MenuItem _subItem3;
             
             ChildW _child1;
-            //Window _child2;
+            Window _child2;
 
             Gfx::Image _icon;
             Picture   _picture;
 
             FlowLayout _scrollContainer;
-            //ScrollView _scrollView;
+            ScrollView _scrollView;
             PushButton _btns[20];
             PushButton _bt2;
             Pt::Gfx::Image _image;

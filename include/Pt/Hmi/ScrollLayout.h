@@ -57,30 +57,15 @@ class PT_HMI_API ScrollLayout : public Layout
 
         void scrollY(int ypos);
 
-        int scrollPosX() const
-        {
-          return _lastScrollPos.x();
-        }
+        int scrollPosX() const;
 
-        int scrollPosY() const
-        {
-          return _lastScrollPos.y();
-        }
+        int scrollPosY() const;
 
-        Pt::Signal<int>& scrolledX() 
-        {
-            return _scrolledX;
-        }
+        Pt::Signal<int>& scrolledX();
 
-        Pt::Signal<int>& scrolledY() 
-        {
-            return _scrolledY;
-        }
+        Pt::Signal<int>& scrolledY();
 
-        Pt::Signal<>& contentChanged() 
-        {
-            return _contentChanged;
-        }
+        Pt::Signal<>& contentChanged();
 
     protected:
         virtual void onMouseEvent(const MouseEvent& ev);
