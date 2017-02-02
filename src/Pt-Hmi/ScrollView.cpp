@@ -60,13 +60,6 @@ ScrollView::~ScrollView()
 }
 
 
-void ScrollView::enableScrollBars(bool h, bool v)
-{
-    _scrollBarX.show(h);
-    _scrollBarY.show(v);
-}
-
-
 void ScrollView::setWidget(Widget& widget)
 {
     if(_widget)
