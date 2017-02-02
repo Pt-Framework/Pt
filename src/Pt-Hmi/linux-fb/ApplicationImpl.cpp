@@ -65,14 +65,12 @@ ApplicationImpl::ApplicationImpl()
             device->setScreenLimit( _frameBuffer.size() );
             device->setActive(*this);
             device->begin();
-            device->eventReady() += Pt::slot(_eventReady);
+            device->eventReady() += Pt::slot(*this, &ApplicationImpl::onMouseEvent);
             
             _inputDevices.push_back(device);
             std::clog << "using: " << deviceName.toLocal() << std::endl;
         }
     }
-
-    _eventReady += Pt::slot(*this, &ApplicationImpl::onMouseEvent);
 }
 
 
@@ -109,6 +107,14 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 void ApplicationImpl::onMouseEvent(const MouseEvent& ev)
 {
     _lastMouse = ev;
+
+    _eventReady.send(ev);
+}
+
+
+void ApplicationImpl::onTouchEvent(const TouchEvent& ev)
+{
+    _eventReady.send(ev);
 }
 
 

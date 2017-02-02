@@ -135,6 +135,7 @@ ApplicationImpl::ApplicationImpl()
 , _pointerInWindow(false)
 , _cursorHandle(0)
 , _currentCursor(0)
+, _onScroll(false)
 {
 #ifdef NDEBUG  
     FreeConsole();
@@ -425,7 +426,7 @@ bool ApplicationImpl::processMessage(HWND hwnd, unsigned int msg,
             int delta = GET_WHEEL_DELTA_WPARAM(wparam);
 
             ScrollEvent sev( w->vid() );
-            sev.set(ScrollEvent::Vertical, delta/WHEEL_DELTA);
+            sev.set(ScrollEvent::Vertical, (delta/WHEEL_DELTA)*20);
 
             commitEvent(sev);
             handled = true;
@@ -666,6 +667,45 @@ void ApplicationImpl::onMouse(Window& w, unsigned int msg, WPARAM wparam, LPARAM
     }
   
     Gfx::PointF pos = Application::instance().screen().toUnit( Gfx::Point(xPos, yPos) );
+
+    
+    if( _mouseEvent.isPress() )
+    {
+        //std::clog << "SCROLL START" << std::endl;
+        _scrollFrom = w.toScreen( pos );
+    }
+    else if( _mouseEvent.isPressed() )
+    {
+        Gfx::PointF scrollTo = w.toScreen( pos );
+        
+        double delta = scrollTo.y() - _scrollFrom.y();
+        
+        if( ! _onScroll && std::fabs(delta) > 8 )
+        {
+            //std::clog << "SCROLL STARTED" << std::endl;
+            _onScroll = true;
+            _scrollFrom = scrollTo;
+        }
+        else if(_onScroll)
+        {
+            //std::clog << "SCROLLING: " << delta << std::endl;
+            Visual* grabber = Application::instance().pointerGrabber();
+
+            ScrollEvent sev(grabber ? grabber->vid() : w.vid() );
+            sev.set(ScrollEvent::Vertical, delta);
+            commitEvent(sev);
+
+            _scrollFrom = scrollTo;
+        }
+    }
+    else
+    {
+        //std::clog << "SCROLL STOP" << std::endl;
+        _onScroll = false;
+    }
+
+
+    
 
     Visual* grabber = Application::instance().pointerGrabber();
     if( grabber )

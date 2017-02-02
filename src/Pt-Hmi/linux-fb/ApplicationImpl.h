@@ -76,6 +76,8 @@ class ApplicationImpl : public Pt::System::MainLoop
 
 	private:
     void onMouseEvent(const MouseEvent& ev);
+
+    void onTouchEvent(const TouchEvent& ev);
 		
     void showConsole( bool s);
 

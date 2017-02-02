@@ -147,6 +147,9 @@ class ApplicationImpl : public Pt::System::EventLoop
         bool                             _pointerInWindow;
         HCURSOR                          _cursorHandle;
         const Cursor*                    _currentCursor;
+
+        bool                             _onScroll;
+        Gfx::PointF                      _scrollFrom;
 };
 
 } // namespace

@@ -223,27 +223,27 @@ void ScrollLayout::onMouseEvent(const MouseEvent& ev)
 {
     Base::onMouseEvent(ev);
 
-    if( ev.isPress() )
-        _lastPos = ev.position();
+    //if( ev.isPress() )
+    //    _lastPos = ev.position();
 
-    if( ev.isPressed() )
-    {
-        Gfx::PointF delta = ev.position() - _lastPos;
+    //if( ev.isPressed() )
+    //{
+    //    Gfx::PointF delta = ev.position() - _lastPos;
 
-        if(_enableX)
-        {
-            double deltaX = _lastScrollPos.x() - delta.x();
-            scrollX( static_cast<int>(deltaX) );
-        }
+    //    if(_enableX)
+    //    {
+    //        double deltaX = _lastScrollPos.x() - delta.x();
+    //        scrollX( static_cast<int>(deltaX) );
+    //    }
 
-        if(_enableY)
-        {
-            double deltaY = _lastScrollPos.y() - delta.y();
-            scrollY( static_cast<int>(deltaY) );
-        }
+    //    if(_enableY)
+    //    {
+    //        double deltaY = _lastScrollPos.y() - delta.y();
+    //        scrollY( static_cast<int>(deltaY) );
+    //    }
 
-        _lastPos = ev.position();
-    }
+    //    _lastPos = ev.position();
+    //}
 }
 
 
@@ -251,27 +251,27 @@ void ScrollLayout::onTouchEvent(const TouchEvent& ev)
 {    
     Base::onTouchEvent(ev);
 
-    if( ev.isPress() )
-        _lastPos = ev.position();   
+    //if( ev.isPress() )
+    //    _lastPos = ev.position();   
 
-    if( ev.isPressed() )
-    {
-        Gfx::PointF delta = ev.position() - _lastPos;
+    //if( ev.isPressed() )
+    //{
+    //    Gfx::PointF delta = ev.position() - _lastPos;
 
-        if(_enableX)
-        {
-            double deltaX = _lastScrollPos.x() - delta.x();
-            scrollX( static_cast<int>(deltaX) );
-        }
+    //    if(_enableX)
+    //    {
+    //        double deltaX = _lastScrollPos.x() - delta.x();
+    //        scrollX( static_cast<int>(deltaX) );
+    //    }
 
-        if(_enableY)
-        {
-            double deltaY = _lastScrollPos.y() - delta.y();
-            scrollY( static_cast<int>(deltaY) );
-        }
+    //    if(_enableY)
+    //    {
+    //        double deltaY = _lastScrollPos.y() - delta.y();
+    //        scrollY( static_cast<int>(deltaY) );
+    //    }
 
-        _lastPos = ev.position();
-    }
+    //    _lastPos = ev.position();
+    //}
 }
 
 
@@ -283,7 +283,7 @@ void ScrollLayout::onScrollEvent(const ScrollEvent& ev)
     {
         if(_enableX)
         {
-            double deltaX = _lastScrollPos.x() - ev.delta() * 20;
+            double deltaX = _lastScrollPos.x() - ev.delta();
             scrollX(deltaX);
         }
     }
@@ -292,7 +292,7 @@ void ScrollLayout::onScrollEvent(const ScrollEvent& ev)
     {
         if(_enableY)
         {
-            double deltaY = _lastScrollPos.y() - ev.delta() * 20;
+            double deltaY = _lastScrollPos.y() - ev.delta();
             scrollY(deltaY);
         }
     }
