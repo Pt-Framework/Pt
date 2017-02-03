@@ -32,22 +32,22 @@ int main(int argc, char* args[])
     const int doBenchmark = 1;
 
     // Lines
-    if(1 && testDraw) {
+    if(0 && testDraw) {
         painter.setCompositionMode(CompositionMode::SourceCopy);
         testDrawLine("Lines and Texts - SourceCopy", image, painter);
     }
-    if(1 && testDraw) {
+    if(0 && testDraw) {
         painter.setCompositionMode(CompositionMode::SourceOver);
         testDrawLine("Lines and Texts - SourceOver", image, painter);
     }
 
     // Rectangles and solid-filled rectangles
-    if(1 && testDraw) {
+    if(0 && testDraw) {
         painter.setCompositionMode(CompositionMode::SourceCopy);
         testDrawRect("Rectangles & Solid-Filled Rectangles - SourceCopy", image, painter);
     }
 
-    if(1 && testDraw) {
+    if(0 && testDraw) {
         painter.setCompositionMode(CompositionMode::SourceOver);
         testDrawRect("Rectangles & Solid-Filled Rectangles - SourceOver", image, painter);
     }

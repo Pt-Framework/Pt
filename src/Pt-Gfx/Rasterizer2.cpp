@@ -335,8 +335,6 @@ void Rasterizer2::rasterOnePixelVLineSegment(Pt::int32_t x, Pt::int32_t y1, Pt::
 
 void Rasterizer2::rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, const Color& color, bool skipLastPoint)
 {
-    // TODO: hline, vline, xline
-
     // Xiaolin Wu's Anti-Aliased Line Algorithm
     // https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
 
@@ -481,7 +479,7 @@ void Rasterizer2::rasterOnePixelRectOutline(const Point& tl, const Point& br)
     rasterOnePixelVLineSegment(maxX, minY + 1, maxY - 1, _pen.color());
 }
 
-// http://alienryderflex.com/polygon_fill
+// http://alienryderflex.com/polygon_fill/
 // Public-domain code by Darel Rex Finley, 2007
 void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, const Color& color)
 {
@@ -501,8 +499,7 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
     }
 
     // List of nodes in normal integers and fixed-points
-    //std::vector<Pt::int32_t> nodeX (pointCount, 0);
-    std::vector<Pt::int32_t> nodeXf(pointCount, 0);
+    std::vector<Pt::int32_t> nodeXf(pointCount * 2, 0);
 
     //  Loop through the rows of the image
     for(Pt::int32_t pixelY = minY; pixelY <= maxY; ++pixelY) {
@@ -517,15 +514,13 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
                 Pt::int32_t deltaYj = points[j].y() - points[i].y();
                 Pt::int32_t deltaXj = points[j].x() - points[i].x();
                 nodeXf[nodes] = FIXED_POINT_FROM_INT(points[i].x()) + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
-                //nodeX [nodes] = FIXED_POINT_TO_INT(nodeXf[nodes]);
                 ++nodes;
             }
             j = i;
         }
-        // Sort the nodes using a simple bubble sort
+        // Sort the nodes using bubble sort
         for(Pt::int32_t i = 0; i < nodes - 1;) {
             if(nodeXf[i] > nodeXf[i + 1]) {
-                //std::swap(nodeX [i], nodeX [i + 1]);
                 std::swap(nodeXf[i], nodeXf[i + 1]);
                 if(i) --i;
             }
