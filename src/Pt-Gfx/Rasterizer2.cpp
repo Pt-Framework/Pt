@@ -37,8 +37,9 @@
 #include "ClipShape.h"
 #include "Rasterizer2.h"
 
-#include <stdio.h> // Just for easy debugging ;)
-
+// Just for easy and faster debugging ;)
+#include <stdio.h>
+#define lprintf(...) fprintf (stderr, __VA_ARGS__)
 
 namespace Pt {
 namespace Gfx {
@@ -329,7 +330,7 @@ void Rasterizer2::rasterOnePixelVLineSegment(Pt::int32_t x, Pt::int32_t y1, Pt::
 
     for(Pt::int32_t i = 0; i < sizeL; ++i) {
         _image->format().setPixel(pixel, color, _compositionMode);
-        pixel.advance(_image->width() - x);
+        pixel.advance(_image->width());
     }
 }
 
@@ -444,30 +445,15 @@ void Rasterizer2::rasterRectArea(const Point& tl, const Point& br)
     const Pt::int32_t sizeX = maxX - minX + 1;
 
     // Draw the rectangles
-#if 1
     for(Pt::int32_t y = minY; y <= maxY; ++y) {
         Pt::int32_t spanWidth = sizeX;
         while(spanWidth > 0) {
             const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
-            Pixel             dstPixel(_image->view(), minX + sizeX - spanWidth, y);
-            ConstPixel        srcPixel(_brushBuffer.view(), 0, 0);
-            _image->format().copy(dstPixel, srcPixel, n, _compositionMode);
+            Pixel             pixel(_image->view(), minX + sizeX - spanWidth, y);
+            _image->format().copy(pixel, _brushPixel, n, _compositionMode);
             spanWidth -= n;
         }
     }
-#else
-    for(Pt::int32_t y = minY; y <= maxY; ++y) {
-        Pt::int32_t spanWidth = sizeX;
-        Pixel       dstPixel(_image->view(), minX + sizeX - spanWidth, y);
-        while(spanWidth > 0) {
-            const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
-            ConstPixel        srcPixel(_brushBuffer.view(), 0, 0);
-            _image->format().copy(dstPixel, srcPixel, n, _compositionMode);
-            dstPixel.advance(n);
-            spanWidth -= n;
-        }
-    }
-#endif
 }
 
 void Rasterizer2::rasterOnePixelRectOutline(const Point& tl, const Point& br)

@@ -238,7 +238,7 @@ class Argb32Model
         {
             Pt::ssize_t off = xpos + n;
             ypos += off / view.width();
-            xpos += off % view.width();
+            xpos  = off % view.width();
 
             p = data + view.stride() * ypos + xpos * 4;
         }

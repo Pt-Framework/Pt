@@ -419,7 +419,7 @@ inline void Pixel::advance(Pt::ssize_t n)
 {
     Pt::ssize_t off = _x + n;
     _y += off / _view->width();
-    _x += off % _view->width();
+    _x  = off % _view->width();
 
     _base = _view->data() + _view->stride() * _y + _x * _view->pixelStride();
 }

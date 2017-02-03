@@ -1,10 +1,10 @@
-/* Copyright (C) 2016 Marc Boris Duerner 
-  
+/* Copyright (C) 2016 Marc Boris Duerner
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -14,15 +14,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
   02110-1301 USA
 */
 
@@ -56,8 +56,8 @@ class Yuv12Model
         }
 
         static Pt::ssize_t pixelStride()
-        { 
-            return 1; 
+        {
+            return 1;
         }
 
     public:
@@ -70,7 +70,7 @@ class Yuv12Model
             Pt::uint16_t r = rv > 65535 ? 65535 : static_cast<Pt::uint16_t>(rv);
             Pt::uint16_t g = gv > 65535 ? 65535 : static_cast<Pt::uint16_t>(gv);
             Pt::uint16_t b = bv > 65535 ? 65535 : static_cast<Pt::uint16_t>(bv);
-            
+
             return Color(r, g, b);
         }
 
@@ -107,7 +107,7 @@ class Yuv12Model
                                 T*& u, T*& v)
         {
             Pt::ssize_t planeSize = stride * size.height();
-            
+
             Pt::ssize_t subStride = stride / 2;
             Pt::ssize_t subPlaneSize = planeSize / 4;
 
@@ -127,7 +127,7 @@ class Yuv12Model
         template <typename T>
         static void advance(T*& y, T*& u, T*& v,
                             Pt::ssize_t& xpos, Pt::ssize_t& ypos,
-                            T* data, Pt::ssize_t stride, const Size& size, 
+                            T* data, Pt::ssize_t stride, const Size& size,
                             Pt::ssize_t padding, Pt::ssize_t subStride)
         {
             ++y;
@@ -136,7 +136,7 @@ class Yuv12Model
             {
                 ++u;
                 ++v;
-                
+
                 if(ypos % 2 == 0)
                 {
                   u -= subStride;
@@ -157,12 +157,12 @@ class Yuv12Model
 
         template <typename T>
         static void advance(T*& y, T*& u, T*& v, Pt::ssize_t n,
-                            Pt::ssize_t& xpos, Pt::ssize_t& ypos, 
+                            Pt::ssize_t& xpos, Pt::ssize_t& ypos,
                             T* data, Pt::ssize_t stride, const Size& size)
         {
             Pt::ssize_t off = xpos + n;
             ypos += off / size.width();
-            xpos += off % size.width();
+            xpos  = off % size.width();
 
             init(data, stride, size,xpos, ypos, y, u, v);
         }
@@ -181,7 +181,7 @@ class Yuv12Model::ConstPixel
         , _y(0)
         , _u(0)
         , _v(0)
-        { 
+        {
             reset(view, xpos, ypos);
         }
 
@@ -206,7 +206,7 @@ class Yuv12Model::ConstPixel
 
         void reset(const ConstPixel& p)
         {
-            _view = p._view;            
+            _view = p._view;
             _xpos = p._xpos;
             _ypos = p._ypos;
             _subStride = p._subStride;
@@ -219,7 +219,7 @@ class Yuv12Model::ConstPixel
         void advance()
         {
             Yuv12Model::advance(_y, _u, _v, _xpos, _ypos,
-                                _view->data(), _view->stride(), 
+                                _view->data(), _view->stride(),
                                 _view->size(), _view->padding(), _subStride);
         }
 
@@ -245,7 +245,7 @@ class Yuv12Model::ConstPixel
 
         bool operator!=(const ConstPixel& p) const
         { return _y != p._y; }
-        
+
         bool operator==(const ConstPixel& p) const
         { return _y == p._y; }
 
@@ -275,7 +275,7 @@ class Yuv12Model::Pixel
         , _y(0)
         , _u(0)
         , _v(0)
-        { 
+        {
             _subStride = Yuv12Model::init(view.data(), view.stride(), view.size(), xpos,  ypos, _y, _u, _v);
         }
 
@@ -318,7 +318,7 @@ class Yuv12Model::Pixel
 
         void reset(const Pixel& p)
         {
-            _view = p._view;            
+            _view = p._view;
             _xpos = p._xpos;
             _ypos = p._ypos;
             _subStride = p._subStride;
@@ -331,7 +331,7 @@ class Yuv12Model::Pixel
         void advance()
         {
             Yuv12Model::advance(_y, _u, _v, _xpos, _ypos,
-                                _view->data(), _view->stride(), 
+                                _view->data(), _view->stride(),
                                 _view->size(), _view->padding(), _subStride);
         }
 
@@ -385,7 +385,7 @@ class Yuv12Model::Pixel
 
         bool operator!=(const Pixel& p) const
         { return _y != p._y; }
-        
+
         bool operator==(const Pixel& p) const
         { return _y == p._y; }
 
@@ -402,7 +402,7 @@ class Yuv12Model::Pixel
 /** @brief YV-12 image.
 
     If the Y plane has pad bytes after each row, then the U and V planes have
-    half as many pad bytes after their rows. In other words, two U/V rows 
+    half as many pad bytes after their rows. In other words, two U/V rows
     (including padding) is exactly as long as one Y row (including padding).
 */
 class Yuv12Image : public BasicImage<Yuv12Model>
@@ -413,7 +413,7 @@ class Yuv12Image : public BasicImage<Yuv12Model>
         Yuv12Image(const Size& size, size_t padding = 0)
         : BasicImage(size, padding)
         { }
-        
+
         /** @brief Construct from external buffer.
         */
         Yuv12Image(Pt::uint8_t* data, const Size& size, size_t padding = 0)

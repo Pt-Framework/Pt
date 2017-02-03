@@ -32,11 +32,11 @@ int main(int argc, char* args[])
     const int doBenchmark = 1;
 
     // Lines
-    if(1 && testDraw) {
+    if(0 && testDraw) {
         painter.setCompositionMode(CompositionMode::SourceCopy);
         testDrawLine("Lines and Texts - SourceCopy", image, painter);
     }
-    if(1 && testDraw) {
+    if(0 && testDraw) {
         painter.setCompositionMode(CompositionMode::SourceOver);
         testDrawLine("Lines and Texts - SourceOver", image, painter);
     }
@@ -53,11 +53,11 @@ int main(int argc, char* args[])
     }
 
     // Solid-filled polygons
-    if(1 && testDraw) {
+    if(0 && testDraw) {
         painter.setCompositionMode(CompositionMode::SourceCopy);
         testDrawSolidFillPolygon("Solid-Filled Polygons - SourceCopy", image, painter);
     }
-    if(1 && testDraw) {
+    if(0 && testDraw) {
         painter.setCompositionMode(CompositionMode::SourceOver);
         testDrawSolidFillPolygon("Solid-Filled Polygons - SourceOver", image, painter);
     }
