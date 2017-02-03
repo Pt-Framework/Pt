@@ -108,7 +108,7 @@ class Rasterizer2
         void updateClip();
 
         void rasterOnePixelLine(const Point& a, const Point& b);
-        void rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, Pt::int32_t steps, const Color& color);
+        void rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, Pt::int32_t steps, const Color& color, bool skipLastPoint);
 
         void rasterPolygonArea(const Point* points, size_t pointCount, const Color& color);
         void rasterPolygonOutline(const Point* points, size_t pointCount, const Color& color);

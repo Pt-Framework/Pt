@@ -32,11 +32,11 @@ int main(int argc, char* args[])
     const int doBenchmark = 1;
 
     // Lines
-    if(0 && testDraw) {
+    if(1 && testDraw) {
         painter.setCompositionMode(CompositionMode::SourceCopy);
         testDrawLine("Lines and Texts - SourceCopy", image, painter);
     }
-    if(0 && testDraw) {
+    if(1 && testDraw) {
         painter.setCompositionMode(CompositionMode::SourceOver);
         testDrawLine("Lines and Texts - SourceOver", image, painter);
     }

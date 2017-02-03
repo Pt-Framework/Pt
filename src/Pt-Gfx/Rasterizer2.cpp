@@ -370,10 +370,10 @@ void Rasterizer2::rasterOnePixelLine(const Point& a, const Point& b)
     const Pt::int32_t fy2 = FIXED_POINT_FROM_INT(y2);
 
     // Raster the line
-    rasterOnePixelLineSegment(fx1, fy1, fx2, fy2, steps, _pen.color());
+    rasterOnePixelLineSegment(fx1, fy1, fx2, fy2, steps, _pen.color(), false);
 }
 
-void Rasterizer2::rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, Pt::int32_t steps, const Color& color)
+void Rasterizer2::rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, Pt::int32_t steps, const Color& color, bool skipLastPoint)
 {
     // TODO: hline, vline, xline
 
@@ -434,13 +434,15 @@ void Rasterizer2::rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt
     Pt::int32_t ypxl2 = FIXED_POINT_IPART(yend);
                 a1    = FIXED_POINT_MUL_TO_A8(FIXED_POINT_RFPART(yend), xgap);
                 a2    = FIXED_POINT_MUL_TO_A8(FIXED_POINT_FPART (yend), xgap);
-    if(steep) {
-        XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(ypxl2                           ), FIXED_POINT_TO_INT(xpxl2), a1);
-        XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(ypxl2 + FIXED_POINT_CONSTANT_ONE), FIXED_POINT_TO_INT(xpxl2), a2);
-    }
-    else {
-        XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(xpxl2), FIXED_POINT_TO_INT(ypxl2                           ), a1);
-        XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(xpxl2), FIXED_POINT_TO_INT(ypxl2 + FIXED_POINT_CONSTANT_ONE), a2);
+    if(!skipLastPoint) {
+        if(steep) {
+            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(ypxl2                           ), FIXED_POINT_TO_INT(xpxl2), a1);
+            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(ypxl2 + FIXED_POINT_CONSTANT_ONE), FIXED_POINT_TO_INT(xpxl2), a2);
+        }
+        else {
+            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(xpxl2), FIXED_POINT_TO_INT(ypxl2                           ), a1);
+            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(xpxl2), FIXED_POINT_TO_INT(ypxl2 + FIXED_POINT_CONSTANT_ONE), a2);
+        }
     }
 
     // Loop through the rest of the pixels
@@ -570,7 +572,7 @@ void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount, c
         else                        ym = lineY[i + 1] - lineY[i    ];
         xm >>= FIXED_POINT_SHIFT_FACTOR;
         ym >>= FIXED_POINT_SHIFT_FACTOR;
-        rasterOnePixelLineSegment(lineX[i], lineY[i], lineX[i + 1], lineY[i + 1], std::max(xm, ym) - 1, color);
+        rasterOnePixelLineSegment(lineX[i], lineY[i], lineX[i + 1], lineY[i + 1], std::max(xm, ym) - 1, color, true);
     }
 
     if(lineX[0] > lineX[pc1]) xm = lineX[0  ] - lineX[pc1];
@@ -579,7 +581,7 @@ void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount, c
     else                      ym = lineY[pc1] - lineY[0  ];
     xm >>= FIXED_POINT_SHIFT_FACTOR;
     ym >>= FIXED_POINT_SHIFT_FACTOR;
-    rasterOnePixelLineSegment(lineX[0], lineY[0], lineX[pc1], lineY[pc1], std::max(xm, ym) - 1, color);
+    rasterOnePixelLineSegment(lineX[0], lineY[0], lineX[pc1], lineY[pc1], std::max(xm, ym) - 1, color, false);
 }
 
 void Rasterizer2::genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount) const
