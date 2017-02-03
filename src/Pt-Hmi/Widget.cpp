@@ -57,7 +57,7 @@ Widget::Widget()
 , _mnemonic(0)
 {      
     _eventReady += Pt::slot(*this, &Widget::onKeyEvent );
-    _eventReady += Pt::slot(*this, &Widget::onScrollEvent );
+    _eventReady += Pt::slot(*this, &Widget::scrollEvent );
     _eventReady += Pt::slot(*this, &Widget::onMoveEvent );
     _eventReady += Pt::slot(*this, &Widget::onResizeEvent );
     _eventReady += Pt::slot(*this, &Widget::onPaintEvent );
@@ -906,8 +906,12 @@ void Widget::onTouchEvent(const TouchEvent& ev)
 }
 
 
-void Widget::onScrollEvent(const ScrollEvent& ev)
+void Widget::scrollEvent(const ScrollEvent& ev)
 {
+    bool consumed = onScrollEvent(ev);
+    if(consumed)
+        return;
+
     Widget* w = this->parent();
     if(w)
     {
@@ -915,6 +919,12 @@ void Widget::onScrollEvent(const ScrollEvent& ev)
         ev2.setId (w->vid() );
         Application::instance().loop().commitEvent(ev2);
     }
+}
+
+
+bool Widget::onScrollEvent(const ScrollEvent& ev)
+{
+    return false;
 }
 
 

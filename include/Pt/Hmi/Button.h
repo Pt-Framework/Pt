@@ -81,7 +81,7 @@ class PT_HMI_API Button : public Control
 
         virtual void onTouchEvent(const TouchEvent& ev);
 
-        virtual void onScrollEvent(const ScrollEvent& ev);
+        virtual bool onScrollEvent(const ScrollEvent& ev);
 
     private:
         Signal<>   _clicked;

@@ -216,15 +216,14 @@ void Button::onTouchEvent(const TouchEvent& ev)
 }
 
 
-void Button::onScrollEvent(const ScrollEvent& ev)
+bool Button::onScrollEvent(const ScrollEvent& ev)
 {    
+    // cancel click detection
     _onClickBegin = false;
     releasePointer();
-
     onCanceled();
 
-    // propagate scroll to parent
-    Base::onScrollEvent(ev);
+    return Base::onScrollEvent(ev);
 }
 
 } // namespace

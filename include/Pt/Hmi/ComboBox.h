@@ -60,10 +60,14 @@ class PT_HMI_API ComboBox : public Control
 
         virtual void onMouseEvent(const MouseEvent& ev);
 
-        virtual void onScrollEvent(const ScrollEvent& ev);
+        virtual void onTouchEvent(const TouchEvent& ev);
+
+        virtual bool onScrollEvent(const ScrollEvent& ev);
 
     private:
         void onMenuKeyEvent(const KeyEvent& ev);
+
+        void onOpenCombo();
 
     private:
         Pt::String  _text;

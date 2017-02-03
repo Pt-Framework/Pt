@@ -275,7 +275,9 @@ class PT_HMI_API Widget : public Visual
 
         virtual void onTouchEvent(const TouchEvent& ev);
 
-        virtual void onScrollEvent( const ScrollEvent& ev );
+        void scrollEvent( const ScrollEvent& ev );
+
+        virtual bool onScrollEvent( const ScrollEvent& ev );
 
         virtual void onKeyEvent(const KeyEvent& ev);
 

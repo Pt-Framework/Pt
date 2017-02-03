@@ -133,13 +133,17 @@ void ScreenImpl::paint(const Gfx::RectF& updateRect)
 }
 
 
-void ScreenImpl::onTouchEvent(const TouchEvent& ev)
+Gfx::PointF _scrollFrom;
+bool _onScroll = false;
+
+
+void ScreenImpl::onTouchEvent(const TouchEvent& evRaw)
 {     
     const Gfx::SizeF screenSize = Application::instance().screen().size();
     const double touchWidth  = 800;
     const double touchHeight = 480;
 
-    TouchEvent tev = ev;
+    TouchEvent tev = evRaw;
 
     switch( _frameBuffer.rotation() )
     {
@@ -147,8 +151,8 @@ void ScreenImpl::onTouchEvent(const TouchEvent& ev)
         {
             double scaleX =  screenSize.width() / touchWidth;
             double scaleY =  screenSize.height() / touchHeight;
-            tev.setX( std::floor(scaleX * ev.x()) );
-            tev.setY( std::floor(scaleY * ev.y()) );
+            tev.setX( std::floor(scaleX * evRaw.x()) );
+            tev.setY( std::floor(scaleY * evRaw.y()) );
             break;
         }
         
@@ -156,11 +160,55 @@ void ScreenImpl::onTouchEvent(const TouchEvent& ev)
         {
               double scaleX =  screenSize.width() / touchHeight;
               double scaleY =  screenSize.height() / touchWidth;
-              tev.setY( std::floor(ev.x() * scaleY) );
-              tev.setX( std::floor((touchHeight - ev.y()) * scaleX) );
+              tev.setY( std::floor(evRaw.x() * scaleY) );
+              tev.setX( std::floor((touchHeight - evRaw.y()) * scaleX) );
               break;
         }
     }
+
+    if( tev.isPress() )
+    {
+        //std::clog << "SCROLL START " << std::endl;
+        _scrollFrom = tev.position();
+    }
+    else if( tev.isMove() )
+    {
+        Gfx::PointF scrollTo = tev.position();
+        
+        double delta = scrollTo.y() - _scrollFrom.y();
+
+        if( ! _onScroll && std::fabs(delta) > 8 )
+        {
+            //std::clog << "SCROLL STARTED" << std::endl;
+            _onScroll = true;
+            _scrollFrom = scrollTo;
+        }
+        else if(_onScroll)
+        {
+            //std::clog << "SCROLLING: " << delta << std::endl;
+            Visual* grabber = Application::instance().pointerGrabber();
+            if(grabber)
+            {
+                ScrollEvent sev( grabber->vid() );
+                sev.set(ScrollEvent::Vertical, delta);
+                Application::instance().loop().commitEvent(sev);
+            }
+            else
+            {
+                ScrollEvent sev(0);
+                sev.set(ScrollEvent::Vertical, delta);
+                _windowManager.scrollEvent(sev);
+            }
+            
+            _scrollFrom = scrollTo;
+        }
+    }
+    else
+    {
+        //std::clog << "SCROLL STOP" << std::endl;
+        _onScroll = false;
+    }
+
 
     Visual* grabber = Application::instance().pointerGrabber();
     if(grabber)

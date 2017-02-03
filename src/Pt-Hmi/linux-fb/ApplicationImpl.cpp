@@ -35,6 +35,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <cmath>
 #include <fcntl.h>
 #include <sys/ioctl.h> 
 #include <sys/mman.h>
@@ -66,7 +67,8 @@ ApplicationImpl::ApplicationImpl()
             device->setActive(*this);
             device->begin();
             device->eventReady() += Pt::slot(*this, &ApplicationImpl::onMouseEvent);
-            
+            device->eventReady() += Pt::slot(*this, &ApplicationImpl::onTouchEvent);
+
             _inputDevices.push_back(device);
             std::clog << "using: " << deviceName.toLocal() << std::endl;
         }
@@ -110,6 +112,7 @@ void ApplicationImpl::onMouseEvent(const MouseEvent& ev)
 
     _eventReady.send(ev);
 }
+
 
 
 void ApplicationImpl::onTouchEvent(const TouchEvent& ev)

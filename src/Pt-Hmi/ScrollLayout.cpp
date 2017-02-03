@@ -275,8 +275,9 @@ void ScrollLayout::onTouchEvent(const TouchEvent& ev)
 }
 
 
-void ScrollLayout::onScrollEvent(const ScrollEvent& ev)
+bool ScrollLayout::onScrollEvent(const ScrollEvent& ev)
 {
+    // TODO: call base class if new event propagation is implemented
     //Base::onScrollEvent(ev);
 
     if(ev.wheel() == ScrollEvent::Horizontal)
@@ -296,6 +297,8 @@ void ScrollLayout::onScrollEvent(const ScrollEvent& ev)
             scrollY(deltaY);
         }
     }
+
+    return true;
 }
 
 } // namespace

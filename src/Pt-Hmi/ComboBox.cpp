@@ -131,20 +131,40 @@ void ComboBox::onMouseEvent(const MouseEvent& ev)
 
     if( ev.isPress() )
     {
-        Gfx::SizeF s = size();
-        _menu.resize( Gfx::SizeF(size().width(), 120) );
-        _menu.setTopMost(true);
-
-        Gfx::PointF pos(0, size().height());
-        pos = this->toScreen(pos);
-        _menu.move(pos);
-
-        _menu.show();
+        onOpenCombo();
     }
 }
 
-void ComboBox::onScrollEvent(const ScrollEvent& ev)
+
+void ComboBox::onTouchEvent(const TouchEvent& ev)
+{    
+    Base::onTouchEvent(ev);
+
+    if( ev.isPress() )
+    {
+        onOpenCombo();
+    }
+}
+
+
+void ComboBox::onOpenCombo()
 {
+    _menu.resize( Gfx::SizeF(size().width(), 120) );
+    _menu.setTopMost(true);
+
+    Gfx::PointF pos(0, size().height());
+    pos = this->toScreen(pos);
+    _menu.move(pos);
+
+    _menu.show();
+    std::clog << "SHOW COMBO BOX" << std::endl;
+}
+
+
+bool ComboBox::onScrollEvent(const ScrollEvent& ev)
+{
+    // TODO: scroll through item list
+    return false;
 }
 
 } // namespace

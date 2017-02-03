@@ -134,9 +134,6 @@ void ScrollView::onContentChanged()
 void ScrollView::onResizeEvent(const ResizeEvent& ev)
 {
     Widget::onResizeEvent(ev);
-
-    assert( ev.size() == size() );
-
     onContentChanged();
 }
 

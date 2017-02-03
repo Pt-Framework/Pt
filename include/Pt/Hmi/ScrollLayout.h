@@ -79,7 +79,7 @@ class PT_HMI_API ScrollLayout : public Layout
         
         virtual void onTouchEvent(const TouchEvent& ev);
 
-        virtual void onScrollEvent(const ScrollEvent& ev);
+        virtual bool onScrollEvent(const ScrollEvent& ev);
         
   private:
         void onContentResize(const ResizeEvent& ev);
