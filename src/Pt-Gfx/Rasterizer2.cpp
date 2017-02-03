@@ -329,7 +329,7 @@ void Rasterizer2::rasterOnePixelVLineSegment(Pt::int32_t x, Pt::int32_t y1, Pt::
 
     for(Pt::int32_t i = 0; i < sizeL; ++i) {
         _image->format().setPixel(pixel, color, _compositionMode);
-        pixel.advance(_image->width() - x);;
+        pixel.advance(_image->width() - x);
     }
 }
 
