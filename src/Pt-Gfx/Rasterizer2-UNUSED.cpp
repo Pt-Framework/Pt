@@ -1,0 +1,208 @@
+void rasterSolidTriangles(const Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY, Pt::int32_t& sizeX, Pt::int32_t& sizeY);
+void rasterOneSolidTriangle(const Point& v1, const Point& v2, const Point& v3);
+void rasterOneSolidTriangleBottomFlat(const Point& v1, const Point& v2, const Point& v3);
+void rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2, const Point& v3);
+void rasterFillTriangles(Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY, Pt::int32_t& sizeX, Pt::int32_t& sizeY);
+
+
+    std::vector<Point> tris;
+
+    // Bottom-flat
+    tris.push_back(Point(200, 100));
+    tris.push_back(Point(100, 200));
+    tris.push_back(Point(300, 200));
+    // Top-flat
+    tris.push_back(Point(100, 300));
+    tris.push_back(Point(300, 300));
+    tris.push_back(Point(200, 400));
+    // Non-flat
+    tris.push_back(Point(450, 100));
+    tris.push_back(Point(350, 300));
+    tris.push_back(Point(650, 400));
+
+    rasterFillTriangles(tris.data(), tris.size(), minX, minY, maxX, maxY, sizeX, sizeY);
+
+
+void Rasterizer2::rasterSolidTriangles(const Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY, Pt::int32_t& sizeX, Pt::int32_t& sizeY)
+{
+    // Find the minimum and maximum coordinates
+    minX =  65535;
+    minY =  65535;
+    maxX = -65535;
+    maxY = -65535;
+
+    for(size_t i = 0; i < pointCount; ++i) {
+        const Pt::int32_t x = points[i].x();
+        const Pt::int32_t y = points[i].y();
+        if(x < minX) minX = x;
+        if(y < minY) minY = y;
+        if(x > maxX) maxX = x;
+        if(y > maxY) maxY = y;
+    }
+
+    // Calculate the size of the rectangle
+    sizeX = maxX - minX + 1;
+    sizeY = maxY - minY + 1;
+
+    // Raster the triangles
+    for(size_t i = 0; i < pointCount; i += 3) {
+        rasterOneSolidTriangle(points[i], points[i + 1], points[i + 2]);
+    }
+}
+
+// Based on http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
+void Rasterizer2::rasterOneSolidTriangle(const Point& v1, const Point& v2, const Point& v3)
+{
+    // Sort the vertices by its Y coordinates
+    const Point* vs[3] = { &v1, &v2, &v3 };
+
+    if( vs[1]->y() < vs[0]->y() ) std::swap( vs[1], vs[0] );
+    if( vs[2]->y() < vs[0]->y() ) std::swap( vs[2], vs[0] );
+    if( vs[2]->y() < vs[1]->y() ) std::swap( vs[2], vs[1] );
+
+    // Check for bottom-flat triangle
+    if(vs[1]->y() == vs[2]->y()) {
+        rasterOneSolidTriangleBottomFlat(*vs[0], *vs[1], *vs[2]);
+    }
+    // Check for top-flat triangle
+    else if(vs[0]->y() == vs[1]->y()) {
+        rasterOneSolidTriangleTopFlat(*vs[0], *vs[1], *vs[2]);
+    }
+    // Split the triangle to a bottom-flat and top-flat
+    else {
+        /*           v1
+         *           *
+         *          + +
+         *         +   +
+         *     v2 *     * v4     x4 = x1 + ( (y2 - y1) / (y3 - y1) ) * (x3 - x1)
+         *         ++    +       y4 = y2
+         *            ++  +
+         *              ++ *
+         *                  v3
+         */
+        const Pt::int32_t deltaY10   = vs[1]->y() - vs[0]->y();
+        const Pt::int32_t deltaY20   = vs[2]->y() - vs[0]->y();
+        const Pt::int32_t deltaX20   = vs[2]->x() - vs[0]->x();
+        const Pt::int32_t ratioY1020 = ( (deltaY10 << FIXED_POINT_SHIFT_FACTOR) / deltaY20 );
+        const Point       vm( vs[0]->x() + ( (ratioY1020 * deltaX20) >> FIXED_POINT_SHIFT_FACTOR ),
+                              vs[1]->y()
+                            );
+        rasterOneSolidTriangleBottomFlat(*vs[0], *vs[1], vm);
+        rasterOneSolidTriangleTopFlat(*vs[1], vm, *vs[2]);
+    }
+}
+
+// Based on http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
+void Rasterizer2::rasterOneSolidTriangleBottomFlat(const Point& v1, const Point& v2, const Point& v3)
+{
+    /*        v1
+     *
+     *
+     *     v2    v3
+     */
+
+    const Pt::int32_t chgX1 = ( ( ((Pt::int32_t)v2.x() - (Pt::int32_t)v1.x()) << FIXED_POINT_SHIFT_FACTOR ) /
+                                  ((Pt::int32_t)v2.y() - (Pt::int32_t)v1.y())
+                              );
+    const Pt::int32_t chgX2 = ( ( ((Pt::int32_t)v3.x() - (Pt::int32_t)v1.x()) << FIXED_POINT_SHIFT_FACTOR ) /
+                                  ((Pt::int32_t)v3.y() - (Pt::int32_t)v1.y())
+                              );
+
+    Pt::int32_t curX1 = (v1.x() << FIXED_POINT_SHIFT_FACTOR);
+    Pt::int32_t curX2 = (v1.x() << FIXED_POINT_SHIFT_FACTOR);
+
+    for(Pt::int32_t y = v1.y(); y <= v2.y(); ++y) {
+        // Calculate the span's position and size
+              Pt::int32_t from      = std::min(curX1, curX2) >> FIXED_POINT_SHIFT_FACTOR;
+        const Pt::int32_t to        = std::max(curX1, curX2) >> FIXED_POINT_SHIFT_FACTOR;
+              Pt::int32_t spanWidth = to - from + 1;
+        // Draw the span
+        while(spanWidth > 0) {
+            const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
+            Pixel             dstPixel(_image->view(), from, y);
+            ConstPixel        srcPixel(_brushBuffer.view(), 0, 0);
+            _image->format().copy(dstPixel, srcPixel, n, _compositionMode);
+            from      += n;
+            spanWidth -= n;
+        }
+        // Update the span's coordinates
+        /*
+        if(y == v1.y()) {
+            if(chgX1 <= 0) curX1 -= FIXED_POINT_CONSTANT_ONE;
+            else           curX1 += FIXED_POINT_CONSTANT_ONE;
+            if(chgX2 >= 0) curX2 += FIXED_POINT_CONSTANT_ONE;
+            else           curX2 -= FIXED_POINT_CONSTANT_ONE;
+        }
+        /*/
+        curX1 += chgX1;
+        curX2 += chgX2;
+    }
+}
+
+// Based on http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
+void Rasterizer2::rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2, const Point& v3)
+{
+    /*     v1    v2
+     *
+     *
+     *        v3
+     */
+
+    const Pt::int32_t chgX1 = ( ( ((Pt::int32_t)v1.x() - (Pt::int32_t)v3.x()) << FIXED_POINT_SHIFT_FACTOR ) /
+                                  ((Pt::int32_t)v3.y() - (Pt::int32_t)v1.y())
+                              );
+    const Pt::int32_t chgX2 = ( ( ((Pt::int32_t)v2.x() - (Pt::int32_t)v3.x()) << FIXED_POINT_SHIFT_FACTOR ) /
+                                  ((Pt::int32_t)v3.y() - (Pt::int32_t)v1.y())
+                              );
+
+    Pt::int32_t curX1 = (v3.x() << FIXED_POINT_SHIFT_FACTOR);
+    Pt::int32_t curX2 = (v3.x() << FIXED_POINT_SHIFT_FACTOR);
+
+    for(Pt::int32_t y = v3.y(); y > v1.y(); --y) {
+        // Calculate the span's position and size
+              Pt::int32_t from      = std::min(curX1, curX2) >> FIXED_POINT_SHIFT_FACTOR;
+        const Pt::int32_t to        = std::max(curX1, curX2) >> FIXED_POINT_SHIFT_FACTOR;
+              Pt::int32_t spanWidth = to - from + 1;
+        // Draw the span
+        while(spanWidth > 0) {
+            const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
+            Pixel             dstPixel(_image->view(), from, y);
+            ConstPixel        srcPixel(_brushBuffer.view(), 0, 0);
+            _image->format().copy(dstPixel, srcPixel, n, _compositionMode);
+            from      += n;
+            spanWidth -= n;
+        }
+        // Update the span's coordinates
+        /*
+        if(y == v3.y()) {
+            if(chgX1 <= 0) curX1 -= FIXED_POINT_CONSTANT_ONE;
+            else           curX1 += FIXED_POINT_CONSTANT_ONE;
+            if(chgX2 >= 0) curX2 += FIXED_POINT_CONSTANT_ONE;
+            else           curX2 -= FIXED_POINT_CONSTANT_ONE;
+        }
+        /*/
+        curX1 += chgX1;
+        curX2 += chgX2;
+    }
+}
+
+void Rasterizer2::rasterFillTriangles(Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY, Pt::int32_t& sizeX, Pt::int32_t& sizeY)
+{
+    if(pointCount % 3) return;
+
+    switch( _brush.fillStyle() ) {
+        case Brush::Texture:
+            break;
+
+        case Brush::VerticalGradient:
+            break;
+
+        case Brush::HorizontalGradient:
+            break;
+
+        case Brush::Solid:
+            rasterSolidTriangles(points, pointCount, minX, minY, maxX, maxY, sizeX, sizeY);
+            break;
+    }
+}
+
