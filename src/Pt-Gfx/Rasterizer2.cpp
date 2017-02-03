@@ -444,6 +444,7 @@ void Rasterizer2::rasterRectArea(const Point& tl, const Point& br)
     const Pt::int32_t sizeX = maxX - minX + 1;
 
     // Draw the rectangles
+#if 1
     for(Pt::int32_t y = minY; y <= maxY; ++y) {
         Pt::int32_t spanWidth = sizeX;
         while(spanWidth > 0) {
@@ -454,6 +455,19 @@ void Rasterizer2::rasterRectArea(const Point& tl, const Point& br)
             spanWidth -= n;
         }
     }
+#else
+    for(Pt::int32_t y = minY; y <= maxY; ++y) {
+        Pt::int32_t spanWidth = sizeX;
+        Pixel       dstPixel(_image->view(), minX + sizeX - spanWidth, y);
+        while(spanWidth > 0) {
+            const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
+            ConstPixel        srcPixel(_brushBuffer.view(), 0, 0);
+            _image->format().copy(dstPixel, srcPixel, n, _compositionMode);
+            dstPixel.advance(n);
+            spanWidth -= n;
+        }
+    }
+#endif
 }
 
 void Rasterizer2::rasterOnePixelRectOutline(const Point& tl, const Point& br)
