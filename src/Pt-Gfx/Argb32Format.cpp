@@ -66,8 +66,28 @@ void Argb32Format::onSetPixel(Pixel& to, const ConstPixel& from,
 void Argb32Format::onSetPixel(Pixel& pixel, const Color& c,
                               CompositionMode mode) const
 {
-    Pt::uint8_t* data = pixel.base();
-    Argb32Model::assign(data, c, mode);
+    Argb32Model::assign(pixel.base(), c, mode);
+}
+
+
+void Argb32Format::onSetPixel(Pixel& to, const Pixel& from,
+                              CompositionMode mode, Pt::uint8_t blendingAlpha) const
+{
+    Argb32Model::assign(to.base(), from.base(), mode, blendingAlpha);
+}
+
+
+void Argb32Format::onSetPixel(Pixel& to, const ConstPixel& from,
+                                CompositionMode mode, Pt::uint8_t blendingAlpha) const
+{
+    Argb32Model::assign(to.base(), from.base(), mode, blendingAlpha);
+}
+
+
+void Argb32Format::onSetPixel(Pixel& pixel, const Color& c,
+                              CompositionMode mode, Pt::uint8_t blendingAlpha) const
+{
+    Argb32Model::assign(pixel.base(), c, mode, blendingAlpha);
 }
 
 

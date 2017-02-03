@@ -51,6 +51,15 @@ class PT_GFX_API Yuv12Format : public ImageFormat
         virtual void onSetPixel(Pixel& pixel, const Color& c,
                                 CompositionMode mode) const;
 
+        virtual void onSetPixel(Pixel& to, const Pixel& from,
+                                CompositionMode mode, Pt::uint8_t blendingAlpha) const;
+
+        virtual void onSetPixel(Pixel& to, const ConstPixel& from,
+                                CompositionMode mode, Pt::uint8_t blendingAlpha) const;
+
+        virtual void onSetPixel(Pixel& pixel, const Color& c,
+                                CompositionMode mode, Pt::uint8_t blendingAlpha) const;
+
         virtual Color onGetColor(const Pixel& pixel) const;
 
         virtual Color onGetColor(const ConstPixel& pixel) const;

@@ -98,6 +98,24 @@ class ImageFormat
                       CompositionMode mode) const
         { onSetPixel(to, c, mode); }
 
+        /** @brief Sets the pixel color with additional blending alhpa.
+        */
+        void setPixel(Pixel& to, const Pixel& from,
+                      CompositionMode mode, Pt::uint8_t blendingAlpha) const
+        { onSetPixel(to, from, mode, blendingAlpha); }
+
+        /** @brief Sets the pixel color with additional blending alhpa.
+        */
+        void setPixel(Pixel& to, const ConstPixel& from,
+                      CompositionMode mode, Pt::uint8_t blendingAlpha) const
+        { onSetPixel(to, from, mode, blendingAlpha); }
+
+        /** @brief Sets the pixel color with additional blending alhpa.
+        */
+        void setPixel(Pixel& to, const Color& c,
+                      CompositionMode mode, Pt::uint8_t blendingAlpha) const
+        { onSetPixel(to, c, mode, blendingAlpha); }
+
         /** @brief Gets the pixel color.
         */
         Color getColor(const Pixel& pixel) const
@@ -146,6 +164,15 @@ class ImageFormat
 
         virtual void onSetPixel(Pixel& pixel, const Color& c,
                                 CompositionMode  mode) const = 0;
+
+        virtual void onSetPixel(Pixel& to, const Pixel& from,
+                                CompositionMode mode, Pt::uint8_t blendingAlpha) const = 0;
+
+        virtual void onSetPixel(Pixel& to, const ConstPixel& from,
+                                CompositionMode mode, Pt::uint8_t blendingAlpha) const = 0;
+
+        virtual void onSetPixel(Pixel& pixel, const Color& c,
+                                CompositionMode mode, Pt::uint8_t blendingAlpha) const = 0;
 
         virtual Color onGetColor(const Pixel& pixel) const = 0;
 

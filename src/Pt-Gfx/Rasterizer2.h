@@ -116,7 +116,7 @@ class Rasterizer2
         void blitWorkBufferToImage(Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t sizeX, Pt::int32_t sizeY, const Color& color);
 
         void rasterOnePixelLine(const Point& a, const Point& b);
-        void rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, Pt::int32_t steps);
+        void rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, Pt::int32_t steps, const Color& color);
 
         void rasterSolidTriangles(const Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY, Pt::int32_t& sizeX, Pt::int32_t& sizeY);
         void rasterOneSolidTriangle(const Point& v1, const Point& v2, const Point& v3);

@@ -54,11 +54,20 @@ namespace Gfx {
 #define FILL_POLYGON_PRECISION_AA
 
 // Use 16.16 fixed-point format
-#define FIXED_POINT_SHIFT_FACTOR 16         // Shift factor
-#define FIXED_POINT_ALPHA_DIVFAC 257        // Must be ( (2 ^ FIXED_POINT_SHIFT_FACTOR - 1) / 255 )
-#define FIXED_POINT_FRACT_VAL_BM 0x0000FFFF // Bit mask for the fractional value; must be (2 ^ FIXED_POINT_SHIFT_FACTOR - 1)
-#define FIXED_POINT_CONSTANT_ONE 65536      // The value 1.0 in fixed-point ( 2 ^ FIXED_POINT_SHIFT_FACTOR    )
-#define FIXED_POINT_CONSTANT_HLF 32768      // The value 0.5 in fixed-point ( 2 ^ FIXED_POINT_SHIFT_FACTOR / 2)
+#define FIXED_POINT_SHIFT_FACTOR  16         // Shift factor
+#define FIXED_POINT_FRACT_BITMASK 0x0000FFFF // Bit mask for the fractional value; must be (2 ^ FIXED_POINT_SHIFT_FACTOR - 1)
+#define FIXED_POINT_ALPHA_DIVFAC  257        // Must be ( (2 ^ FIXED_POINT_SHIFT_FACTOR - 1) / 255 )
+#define FIXED_POINT_CONSTANT_ONE  65536      // The value 1.0 in fixed-point ( 2 ^ FIXED_POINT_SHIFT_FACTOR    )
+#define FIXED_POINT_CONSTANT_HALF 32768      // The value 0.5 in fixed-point ( 2 ^ FIXED_POINT_SHIFT_FACTOR / 2)
+
+#define FIXED_POINT_IPART(V)         ( (V) & ~FIXED_POINT_FRACT_BITMASK )
+#define FIXED_POINT_FPART(V)         ( (V) &  FIXED_POINT_FRACT_BITMASK )
+#define FIXED_POINT_RFPART(V)        ( FIXED_POINT_FRACT_BITMASK - FIXED_POINT_FPART(V) )
+#define FIXED_POINT_ROUND(V)         ( FIXED_POINT_IPART( (V) + FIXED_POINT_CONSTANT_HALF ) )
+#define FIXED_POINT_TO_INT(V)        ( (V) >> FIXED_POINT_SHIFT_FACTOR )
+#define FIXED_POINT_FPART_TO_A8(V)   ( FIXED_POINT_FPART (V) >> 8 )
+#define FIXED_POINT_RFPART_TO_A8(V)  ( FIXED_POINT_RFPART(V) >> 8 )
+#define FIXED_POINT_MUL_TO_A8(A, B)  ( ( ( (Pt::uint32_t)(A) * (Pt::uint32_t)(B) + FIXED_POINT_FRACT_BITMASK ) >> FIXED_POINT_SHIFT_FACTOR ) )
 
 // The number of margin pixels
 #define MARGIN_PIXELS 2
@@ -346,6 +355,7 @@ void Rasterizer2::updateClip()
     _currentClip = _clip.isNull() ? imageRect : _clip.intersect( imageRect );
 
     // Resize the work buffer so it slightly larger than the size of the image
+    // ### TODO: Make the work-buffer's size as small as possible !!! ###
     _alphas.resize( ( _image->width() + MARGIN_PIXELS * 2 ) * ( _image->height() + MARGIN_PIXELS * 2) );
     _wbXSize = _image->width() + MARGIN_PIXELS * 2;
 }
@@ -416,212 +426,102 @@ void Rasterizer2::rasterOnePixelLine(const Point& a, const Point& b)
     const Pt::int32_t fx2 = x2 << FIXED_POINT_SHIFT_FACTOR;
     const Pt::int32_t fy2 = y2 << FIXED_POINT_SHIFT_FACTOR;
 
-    // Prepare the work buffer
-    prepWorkBuffer(minX, minY, sizeX, sizeY);
-
     // Raster the line
-    rasterOnePixelLineSegment(fx1, fy1, fx2, fy2, steps);
-
-    // Blit the work buffer to the image
-    blitWorkBufferToImage(minX, minY, sizeX, sizeY, _pen.color());
+    rasterOnePixelLineSegment(fx1, fy1, fx2, fy2, steps, _pen.color());
 }
 
-void Rasterizer2::rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, Pt::int32_t steps)
+void Rasterizer2::rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, Pt::int32_t steps, const Color& color)
 {
     // TODO: hline, vline, xline
     // svn commit -m "Experiment with Xiaolin Wu's AA line algorithm"
 
-
-#if 1
-
+    // Xiaolin Wu's Anti-Aliased Line Algorithm
     // https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
 
-//      boolean steep := abs(y1 - y0) > abs(x1 - x0)
-        Pt::int32_t deltaX = (fx2 >= fx1) ? (fx2 - fx1) : (fx1 - fx2);
-        Pt::int32_t deltaY = (fy2 >= fy1) ? (fy2 - fy1) : (fy1 - fy2);
-        bool        steep  = deltaY > deltaX;
+    // A helper macro to set pixel
+    #define XW_SET_PIXEL(IMG, COL, X, Y, A)                                        \
+        do {                                                                       \
+            if( X < 0 || X >= IMG->width() || Y < 0 || Y >= IMG->height() ) break; \
+            Pixel PIX(IMG->view(), X, Y);                                          \
+            IMG->format().setPixel(PIX, COL, _compositionMode, A);                 \
+        } while(false)
 
-//      if steep then
-//          swap(x0, y0)
-//          swap(x1, y1)
-//      end if
-        if(steep) {
-            std::swap(fx1, fy1);
-            std::swap(fx2, fy2);
-        }
+    // Swap the values as needed
+    Pt::int32_t deltaX = (fx2 >= fx1) ? (fx2 - fx1) : (fx1 - fx2);
+    Pt::int32_t deltaY = (fy2 >= fy1) ? (fy2 - fy1) : (fy1 - fy2);
+    bool        steep  = deltaY > deltaX;
 
-//      if x0 > x1 then
-//          swap(x0, x1)
-//          swap(y0, y1)
-//      end if
-        if(fx1 > fx2) {
-            std::swap(fx1, fx2);
-            std::swap(fy1, fy2);
-        }
-
-//      dx := x1 - x0
-//      dy := y1 - y0
-        deltaX = fx2 - fx1;
-        deltaY = fy2 - fy1;
-
-//      gradient := dy / dx
-//      if dx == 0.0 then
-//          gradient := 1.0
-//      end if
-        Pt::int32_t gradient = deltaY / (deltaX >> FIXED_POINT_SHIFT_FACTOR);
-        if(!gradient) gradient = (1 << FIXED_POINT_SHIFT_FACTOR);
-
-#define FIXED_POINT_IPART(V)         ( (V) & ~FIXED_POINT_FRACT_VAL_BM )
-#define FIXED_POINT_FPART(V)         ( (V) &  FIXED_POINT_FRACT_VAL_BM )
-#define FIXED_POINT_RFPART(V)        ( FIXED_POINT_FRACT_VAL_BM - FIXED_POINT_FPART(V) )
-#define FIXED_POINT_ROUND(V)         ( FIXED_POINT_IPART( (V) + FIXED_POINT_CONSTANT_HLF ) )
-#define FIXED_POINT_TO_INT(V)        ( (V) >> FIXED_POINT_SHIFT_FACTOR )
-#define FIXED_POINT_MUL_TO_A16(A, B) ( ( ( (Pt::uint32_t)(A) * (Pt::uint32_t)(B) + FIXED_POINT_FRACT_VAL_BM ) >> FIXED_POINT_SHIFT_FACTOR ) )
-
-#define XW_SET_PIXEL(IMG, COL, X, Y, A)                                        \
-    do {                                                                       \
-        if( X < 0 || X >= IMG->width() || Y < 0 || Y >= IMG->height() ) break; \
-        Pixel PIX(IMG->view(), X, Y);                                          \
-        COL.setAlpha(A);                                                       \
-        IMG->format().setPixel(PIX, COL, CompositionMode::SourceOver);         \
-    } while(false)
-
-        // Store the color
-        Color color = _pen.color();
-
-        // Handle the first endpoint
-//      xend := round(x0)
-//      yend := y0 + gradient * (xend - x0)
-//      xgap := rfpart(x0 + 0.5)
-        Pt::int32_t xend = FIXED_POINT_ROUND(fx1);
-        Pt::int32_t yend = fy1 + gradient * FIXED_POINT_TO_INT(xend - fx1);
-        Pt::int32_t xgap = FIXED_POINT_RFPART(fx1 + FIXED_POINT_CONSTANT_HLF);
-
-//      xpxl1 := xend // this will be used in the main loop
-//      ypxl1 := ipart(yend)
-        Pt::int32_t xpxl1 = xend; // Will be used in the main loop
-        Pt::int32_t ypxl1 = FIXED_POINT_IPART(yend);
-
-//      if steep then
-//          plot(ypxl1,   xpxl1, rfpart(yend) * xgap)
-//          plot(ypxl1+1, xpxl1,  fpart(yend) * xgap)
-//      else
-//          plot(xpxl1, ypxl1  , rfpart(yend) * xgap)
-//          plot(xpxl1, ypxl1+1,  fpart(yend) * xgap)
-//      end if
-        Pt::uint16_t a1 = FIXED_POINT_MUL_TO_A16(FIXED_POINT_RFPART(yend), xgap);
-        Pt::uint16_t a2 = FIXED_POINT_MUL_TO_A16(FIXED_POINT_FPART (yend), xgap);
-        if(steep) {
-            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(ypxl1                           ), FIXED_POINT_TO_INT(xpxl1), a1);
-            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(ypxl1 + FIXED_POINT_CONSTANT_HLF), FIXED_POINT_TO_INT(xpxl1), a2);
-        }
-        else {
-            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(xpxl1), FIXED_POINT_TO_INT(ypxl1                           ), a1);
-            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(xpxl1), FIXED_POINT_TO_INT(ypxl1 + FIXED_POINT_CONSTANT_HLF), a2);
-        }
-
-        // First y-intersection for the main loop
-//      intery := yend + gradient // first y-intersection for the main loop
-        Pt::int32_t intery = yend + gradient;
-
-        // Handle the second endpoint
-//      xend := round(x1)
-//      yend := y1 + gradient * (xend - x1)
-//      xgap := fpart(x1 + 0.5)
-        xend = FIXED_POINT_ROUND(fx2);
-        yend = fy2 + gradient * FIXED_POINT_TO_INT(xend - fx2);
-        xgap = FIXED_POINT_RFPART(fx2 + FIXED_POINT_CONSTANT_HLF);
-
-//      xpxl2 := xend //this will be used in the main loop
-//      ypxl2 := ipart(yend)
-        Pt::int32_t xpxl2 = xend; // Will be used in the main loop
-        Pt::int32_t ypxl2 = FIXED_POINT_IPART(yend);
-
-//      if steep then
-//          plot(ypxl2  , xpxl2, rfpart(yend) * xgap)
-//          plot(ypxl2+1, xpxl2,  fpart(yend) * xgap)
-//      else
-//          plot(xpxl2, ypxl2,  rfpart(yend) * xgap)
-//          plot(xpxl2, ypxl2+1, fpart(yend) * xgap)
-//      end if
-        a1 = FIXED_POINT_MUL_TO_A16(FIXED_POINT_RFPART(yend), xgap);
-        a2 = FIXED_POINT_MUL_TO_A16(FIXED_POINT_FPART (yend), xgap);
-        if(steep) {
-            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(ypxl2                           ), FIXED_POINT_TO_INT(xpxl2), a1);
-            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(ypxl2 + FIXED_POINT_CONSTANT_HLF), FIXED_POINT_TO_INT(xpxl2), a2);
-        }
-        else {
-            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(xpxl2), FIXED_POINT_TO_INT(ypxl2                           ), a1);
-            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(xpxl2), FIXED_POINT_TO_INT(ypxl2 + FIXED_POINT_CONSTANT_HLF), a2);
-        }
-
-        // Loop through the rest of the pixels
-//      if steep then
-//          for x from xpxl1 + 1 to xpxl2 - 1 do
-//             begin
-//                  plot(ipart(intery)  , x, rfpart(intery))
-//                  plot(ipart(intery)+1, x,  fpart(intery))
-//                  intery := intery + gradient
-//             end
-//      else
-//          for x from xpxl1 + 1 to xpxl2 - 1 do
-//             begin
-//                  plot(x, ipart(intery),  rfpart(intery))
-//                  plot(x, ipart(intery)+1, fpart(intery))
-//                  intery := intery + gradient
-//             end
-//      end if
-        Pt::int32_t a = FIXED_POINT_TO_INT(xpxl1 + FIXED_POINT_CONSTANT_ONE);
-        Pt::int32_t b = FIXED_POINT_TO_INT(xpxl2 - FIXED_POINT_CONSTANT_ONE);
-        if(steep) {
-            for(Pt::int32_t i = a; i <= b; ++i) {
-                a1 = FIXED_POINT_RFPART(intery);
-                a2 = FIXED_POINT_FPART (intery);
-                XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(FIXED_POINT_IPART(intery)                           ), i, a1);
-                XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(FIXED_POINT_IPART(intery) + FIXED_POINT_CONSTANT_ONE), i, a2);
-                intery += gradient;
-            }
-        }
-        else {
-            for(Pt::int32_t i = a; i <= b; ++i) {
-                a1 = FIXED_POINT_RFPART(intery);
-                a2 = FIXED_POINT_FPART (intery);
-                XW_SET_PIXEL(_image, color, i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(intery)                           ), a1);
-                XW_SET_PIXEL(_image, color, i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(intery) + FIXED_POINT_CONSTANT_ONE), a2);
-                intery += gradient;
-            }
-        }
-
-#else
-
-    // Calculate the change factors
-    const Pt::int32_t chgX = (fx2 - fx1) / steps;
-    const Pt::int32_t chgY = (fy2 - fy1) / steps;
-
-    // Draw the line
-    for(Pt::int32_t i = 0; i <= steps; ++i) {
-        // Calculate the alpha factors (0 - 255) of the block
-        const Pt::int32_t frx = (fx1 & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC;
-        const Pt::int32_t fry = (fy1 & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC;
-        const Pt::int32_t flx = 255 - frx;
-        const Pt::int32_t fly = 255 - fry;
-        // Calculate the top-left coordinate of the block
-        const Pt::int32_t lx = fx1 >> FIXED_POINT_SHIFT_FACTOR;
-        const Pt::int32_t ly = fy1 >> FIXED_POINT_SHIFT_FACTOR;
-        // Calculate the bottom-right coordinate of the block
-        const Pt::int32_t rx = frx ? (lx + 1) : lx;
-        const Pt::int32_t ry = fry ? (ly + 1) : ly;
-        // Draw the block
-        _alphas[ (ly + MARGIN_PIXELS) * _wbXSize + lx + MARGIN_PIXELS ] += (fly * flx) >> 8;
-        _alphas[ (ly + MARGIN_PIXELS) * _wbXSize + rx + MARGIN_PIXELS ] += (fly * frx) >> 8;
-        _alphas[ (ry + MARGIN_PIXELS) * _wbXSize + lx + MARGIN_PIXELS ] += (fry * flx) >> 8;
-        _alphas[ (ry + MARGIN_PIXELS) * _wbXSize + rx + MARGIN_PIXELS ] += (fry * frx) >> 8;
-        // Increment the drawing coordinate
-        fx1 += chgX;
-        fy1 += chgY;
+    if(steep) {
+        std::swap(fx1, fy1);
+        std::swap(fx2, fy2);
     }
 
-#endif
+    if(fx1 > fx2) {
+        std::swap(fx1, fx2);
+        std::swap(fy1, fy2);
+    }
+
+    // Calculate the gradient
+    Pt::int32_t gradient = (fy2 - fy1) / ((fx2 - fx1) >> FIXED_POINT_SHIFT_FACTOR);
+
+    // Handle the first endpoint
+    Pt::int32_t xend  = FIXED_POINT_ROUND(fx1);
+    Pt::int32_t yend  = fy1 + gradient * FIXED_POINT_TO_INT(xend - fx1);
+    Pt::int32_t xgap  = FIXED_POINT_RFPART(fx1 + FIXED_POINT_CONSTANT_HALF);
+    Pt::int32_t xpxl1 = xend; // Will be used in the main loop
+    Pt::int32_t ypxl1 = FIXED_POINT_IPART(yend);
+    Pt::uint8_t a1    = FIXED_POINT_MUL_TO_A8(FIXED_POINT_RFPART(yend), xgap);
+    Pt::uint8_t a2    = FIXED_POINT_MUL_TO_A8(FIXED_POINT_FPART (yend), xgap);
+    if(steep) {
+        XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(ypxl1                           ), FIXED_POINT_TO_INT(xpxl1), a1);
+        XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(ypxl1 + FIXED_POINT_CONSTANT_ONE), FIXED_POINT_TO_INT(xpxl1), a2);
+    }
+    else {
+        XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(xpxl1), FIXED_POINT_TO_INT(ypxl1                           ), a1);
+        XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(xpxl1), FIXED_POINT_TO_INT(ypxl1 + FIXED_POINT_CONSTANT_ONE), a2);
+    }
+
+    // First y-intersection for the main loop
+    Pt::int32_t intery = yend + gradient;
+
+    // Handle the second endpoint
+                xend  = FIXED_POINT_ROUND(fx2);
+                yend  = fy2 + gradient * FIXED_POINT_TO_INT(xend - fx2);
+                xgap  = FIXED_POINT_RFPART(fx2 + FIXED_POINT_CONSTANT_HALF);
+    Pt::int32_t xpxl2 = xend; // Will be used in the main loop
+    Pt::int32_t ypxl2 = FIXED_POINT_IPART(yend);
+                a1    = FIXED_POINT_MUL_TO_A8(FIXED_POINT_RFPART(yend), xgap);
+                a2    = FIXED_POINT_MUL_TO_A8(FIXED_POINT_FPART (yend), xgap);
+    if(steep) {
+        XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(ypxl2                           ), FIXED_POINT_TO_INT(xpxl2), a1);
+        XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(ypxl2 + FIXED_POINT_CONSTANT_ONE), FIXED_POINT_TO_INT(xpxl2), a2);
+    }
+    else {
+        XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(xpxl2), FIXED_POINT_TO_INT(ypxl2                           ), a1);
+        XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(xpxl2), FIXED_POINT_TO_INT(ypxl2 + FIXED_POINT_CONSTANT_ONE), a2);
+    }
+
+    // Loop through the rest of the pixels
+    Pt::int32_t from = FIXED_POINT_TO_INT(xpxl1 + FIXED_POINT_CONSTANT_ONE);
+    Pt::int32_t to   = FIXED_POINT_TO_INT(xpxl2 - FIXED_POINT_CONSTANT_ONE);
+    if(steep) {
+        for(Pt::int32_t i = from; i <= to; ++i) {
+            a1 = FIXED_POINT_RFPART_TO_A8(intery);
+            a2 = FIXED_POINT_FPART_TO_A8 (intery);
+            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(FIXED_POINT_IPART(intery)                           ), i, a1);
+            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(FIXED_POINT_IPART(intery) + FIXED_POINT_CONSTANT_ONE), i, a2);
+            intery += gradient;
+        }
+    }
+    else {
+        for(Pt::int32_t i = from; i <= to; ++i) {
+            a1 = FIXED_POINT_RFPART_TO_A8(intery);
+            a2 = FIXED_POINT_FPART_TO_A8 (intery);
+            XW_SET_PIXEL(_image, color, i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(intery)                           ), a1);
+            XW_SET_PIXEL(_image, color, i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(intery) + FIXED_POINT_CONSTANT_ONE), a2);
+            intery += gradient;
+        }
+    }
 }
 
 void Rasterizer2::rasterSolidTriangles(const Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY, Pt::int32_t& sizeX, Pt::int32_t& sizeY)
@@ -679,6 +579,16 @@ void Rasterizer2::rasterOneSolidTriangle(const Point& v1, const Point& v2, const
     }
     // Split the triangle to a bottom-flat and top-flat
     else {
+        /*           v1
+         *           *
+         *          + +
+         *         +   +
+         *     v2 *     * v4     x4 = x1 + ( (y2 - y1) / (y3 - y1) ) * (x3 - x1)
+         *         ++    +       y4 = y2
+         *            ++  +
+         *              ++ *
+         *                  v3
+         */
         const Pt::int32_t deltaY10   = vs[1]->y() - vs[0]->y();
         const Pt::int32_t deltaY20   = vs[2]->y() - vs[0]->y();
         const Pt::int32_t deltaX20   = vs[2]->x() - vs[0]->x();
@@ -727,16 +637,16 @@ while(spanWidth > 0)
         Pt::int32_t curX1 = (v1.x() << FIXED_POINT_SHIFT_FACTOR);
         Pt::int32_t curX2 = (v1.x() << FIXED_POINT_SHIFT_FACTOR);
 
-        if(chgX1 <= 0) curX1 += FIXED_POINT_FRACT_VAL_BM / 2;
-        else           curX1 -= FIXED_POINT_FRACT_VAL_BM / 2;
+        if(chgX1 <= 0) curX1 += FIXED_POINT_FRACT_BITMASK / 2;
+        else           curX1 -= FIXED_POINT_FRACT_BITMASK / 2;
 
-        if(chgX2 >= 0) curX2 -= FIXED_POINT_FRACT_VAL_BM / 2;
-        else           curX2 += FIXED_POINT_FRACT_VAL_BM / 2;
+        if(chgX2 >= 0) curX2 -= FIXED_POINT_FRACT_BITMASK / 2;
+        else           curX2 += FIXED_POINT_FRACT_BITMASK / 2;
 
         for(Pt::int32_t i = v1.y(); i <= v2.y(); ++i) {
             const Pt::int32_t steps = (curX2 > curX1)
-                                    ? (curX2 - curX1 + FIXED_POINT_FRACT_VAL_BM) >> FIXED_POINT_SHIFT_FACTOR
-                                    : (curX1 - curX2 + FIXED_POINT_FRACT_VAL_BM) >> FIXED_POINT_SHIFT_FACTOR;
+                                    ? (curX2 - curX1 + FIXED_POINT_FRACT_BITMASK) >> FIXED_POINT_SHIFT_FACTOR
+                                    : (curX1 - curX2 + FIXED_POINT_FRACT_BITMASK) >> FIXED_POINT_SHIFT_FACTOR;
             if(!steps) {
                 alphas[curX1 >> FIXED_POINT_SHIFT_FACTOR] = 255;
             }
@@ -748,7 +658,7 @@ while(spanWidth > 0)
                         alphas[iterX >> FIXED_POINT_SHIFT_FACTOR] = 255;
                     }
                     if(j <= 1 || j >= steps - 1) {
-                        const Pt::int32_t frx = (iterX & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC;
+                        const Pt::int32_t frx = (iterX & FIXED_POINT_FRACT_BITMASK) / FIXED_POINT_ALPHA_DIVFAC;
                         const Pt::int32_t flx = 255 - frx;
                         // Calculate the left and right coordinate of the span
                         const Pt::int32_t lx = iterX >> FIXED_POINT_SHIFT_FACTOR;
@@ -768,8 +678,8 @@ while(spanWidth > 0)
 
     // Normal
     else {
-        Pt::int32_t curX1 = (v1.x() << FIXED_POINT_SHIFT_FACTOR) + FIXED_POINT_FRACT_VAL_BM / 2;
-        Pt::int32_t curX2 = (v1.x() << FIXED_POINT_SHIFT_FACTOR) - FIXED_POINT_FRACT_VAL_BM / 2;
+        Pt::int32_t curX1 = (v1.x() << FIXED_POINT_SHIFT_FACTOR) + FIXED_POINT_FRACT_BITMASK / 2;
+        Pt::int32_t curX2 = (v1.x() << FIXED_POINT_SHIFT_FACTOR) - FIXED_POINT_FRACT_BITMASK / 2;
 
         for(Pt::int32_t i = v1.y(); i <= v2.y(); ++i) {
             const Pt::int32_t from = std::min(curX1, curX2) >> FIXED_POINT_SHIFT_FACTOR;
@@ -807,16 +717,16 @@ void Rasterizer2::rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2
         Pt::int32_t curX1 = (v3.x() << FIXED_POINT_SHIFT_FACTOR);
         Pt::int32_t curX2 = (v3.x() << FIXED_POINT_SHIFT_FACTOR);
 
-        if(chgX1 <= 0) curX1 += FIXED_POINT_FRACT_VAL_BM / 2;
-        else           curX1 -= FIXED_POINT_FRACT_VAL_BM / 2;
+        if(chgX1 <= 0) curX1 += FIXED_POINT_FRACT_BITMASK / 2;
+        else           curX1 -= FIXED_POINT_FRACT_BITMASK / 2;
 
-        if(chgX2 >= 0) curX2 -= FIXED_POINT_FRACT_VAL_BM / 2;
-        else           curX2 += FIXED_POINT_FRACT_VAL_BM / 2;
+        if(chgX2 >= 0) curX2 -= FIXED_POINT_FRACT_BITMASK / 2;
+        else           curX2 += FIXED_POINT_FRACT_BITMASK / 2;
 
         for(Pt::int32_t i = v3.y(); i > v1.y(); --i) {
             const Pt::int32_t steps = (curX2 > curX1)
-                                    ? (curX2 - curX1 + FIXED_POINT_FRACT_VAL_BM) >> FIXED_POINT_SHIFT_FACTOR
-                                    : (curX1 - curX2 + FIXED_POINT_FRACT_VAL_BM) >> FIXED_POINT_SHIFT_FACTOR;
+                                    ? (curX2 - curX1 + FIXED_POINT_FRACT_BITMASK) >> FIXED_POINT_SHIFT_FACTOR
+                                    : (curX1 - curX2 + FIXED_POINT_FRACT_BITMASK) >> FIXED_POINT_SHIFT_FACTOR;
             if(!steps) {
                 alphas[curX1 >> FIXED_POINT_SHIFT_FACTOR] = 255;
             }
@@ -828,7 +738,7 @@ void Rasterizer2::rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2
                         alphas[iterX >> FIXED_POINT_SHIFT_FACTOR] = 255;
                     }
                     if(j <= 1 || j >= steps - 1) {
-                        const Pt::int32_t frx = (iterX & FIXED_POINT_FRACT_VAL_BM) / FIXED_POINT_ALPHA_DIVFAC;
+                        const Pt::int32_t frx = (iterX & FIXED_POINT_FRACT_BITMASK) / FIXED_POINT_ALPHA_DIVFAC;
                         const Pt::int32_t flx = 255 - frx;
                         // Calculate the left and right coordinate of the span
                         const Pt::int32_t lx = iterX >> FIXED_POINT_SHIFT_FACTOR;
@@ -848,8 +758,8 @@ void Rasterizer2::rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2
 
     // Normal
     else {
-        Pt::int32_t curX1 = (v3.x() << FIXED_POINT_SHIFT_FACTOR) + FIXED_POINT_FRACT_VAL_BM / 2;
-        Pt::int32_t curX2 = (v3.x() << FIXED_POINT_SHIFT_FACTOR) - FIXED_POINT_FRACT_VAL_BM / 2;
+        Pt::int32_t curX1 = (v3.x() << FIXED_POINT_SHIFT_FACTOR) + FIXED_POINT_FRACT_BITMASK / 2;
+        Pt::int32_t curX2 = (v3.x() << FIXED_POINT_SHIFT_FACTOR) - FIXED_POINT_FRACT_BITMASK / 2;
 
         for(Pt::int32_t i = v3.y(); i > v1.y(); --i) {
             const Pt::int32_t from = std::min(curX1, curX2) >> FIXED_POINT_SHIFT_FACTOR;
@@ -911,7 +821,7 @@ void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount, P
         else                        ym = lineY[i + 1] - lineY[i    ];
         xm >>= FIXED_POINT_SHIFT_FACTOR;
         ym >>= FIXED_POINT_SHIFT_FACTOR;
-        rasterOnePixelLineSegment(lineX[i], lineY[i], lineX[i + 1], lineY[i + 1], std::max(xm, ym) - 1);
+        rasterOnePixelLineSegment(lineX[i], lineY[i], lineX[i + 1], lineY[i + 1], std::max(xm, ym) - 1, color);
     }
 
     if(lineX[0] > lineX[pc1]) xm = lineX[0  ] - lineX[pc1];
@@ -920,7 +830,7 @@ void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount, P
     else                      ym = lineY[pc1] - lineY[0  ];
     xm >>= FIXED_POINT_SHIFT_FACTOR;
     ym >>= FIXED_POINT_SHIFT_FACTOR;
-    rasterOnePixelLineSegment(lineX[0], lineY[0], lineX[pc1], lineY[pc1], std::max(xm, ym) - 1);
+    rasterOnePixelLineSegment(lineX[0], lineY[0], lineX[pc1], lineY[pc1], std::max(xm, ym) - 1, color);
 
     // Blit the work buffer to the image
     blitWorkBufferToImage(minX, minY, sizeX, sizeY, color);

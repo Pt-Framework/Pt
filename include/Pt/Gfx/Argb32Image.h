@@ -1,10 +1,10 @@
-/* Copyright (C) 2016 Marc Boris Duerner 
-  
+/* Copyright (C) 2016 Marc Boris Duerner
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -14,15 +14,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
   02110-1301 USA
 */
 
@@ -55,20 +55,20 @@ class Argb32Model
         }
 
         static Pt::ssize_t pixelStride()
-        { 
-            return 4; 
+        {
+            return 4;
         }
 
     public:
         static Color toColor(const Pt::uint8_t* p)
         {
             Pt::uint32_t pixel = *reinterpret_cast<const Pt::uint32_t*>(p);
-            
+
             const uint16_t ta = pixel >> 24;
             const uint16_t tr = (pixel & 0x00FF0000) >> 16;
             const uint16_t tg = (pixel & 0x0000FF00) >> 8;
             const uint16_t tb = pixel & 0x000000FF;
-            
+
             Pt::uint16_t a = (ta << 8) + ta;
             Pt::uint16_t r = (tr << 8) + tr;
             Pt::uint16_t g = (tg << 8) + tg;
@@ -110,8 +110,8 @@ class Argb32Model
             to[2] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.red() / 257) + alphaInv * to[2]) >> 8);
             to[3] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.alpha() / 257) + alphaInv * to[3]) >> 8);
         }
-        
-        static void assign(Pt::uint8_t* to, const Color& c, 
+
+        static void assign(Pt::uint8_t* to, const Color& c,
                            CompositionMode mode)
         {
             switch( mode)
@@ -124,7 +124,7 @@ class Argb32Model
                 case CompositionMode::SourceOver:
                     Argb32Model::sourceOver(to, c);
                     break;
-            }  
+            }
         }
 
         static void assign(Pt::uint8_t* to, const Pt::uint8_t* from,
@@ -140,11 +140,85 @@ class Argb32Model
                 case CompositionMode::SourceOver:
                     Argb32Model::sourceOver(to, from);
                     break;
-            } 
+            }
+        }
+
+        static void assign(Pt::uint8_t* to, const Color& c,
+                           CompositionMode mode, Pt::uint8_t blendingAlpha)
+        {
+            switch(mode)
+            {
+                default:
+                case CompositionMode::SourceCopy:
+                {
+                    const Pt::uint32_t blendAlphaSrc = blendingAlpha;
+                    const Pt::uint32_t blendAlphaInv = 255 - blendingAlpha;
+                    to[0] = (blendAlphaSrc * (Pt::uint32_t)(c.blue () / 257) + blendAlphaInv * to[0]) >> 8;
+                    to[1] = (blendAlphaSrc * (Pt::uint32_t)(c.green() / 257) + blendAlphaInv * to[1]) >> 8;
+                    to[2] = (blendAlphaSrc * (Pt::uint32_t)(c.red  () / 257) + blendAlphaInv * to[2]) >> 8;
+                    to[3] = (blendAlphaSrc * (Pt::uint32_t)(c.alpha() / 257) + blendAlphaInv * to[3]) >> 8;
+                    break;
+                }
+
+                case CompositionMode::SourceOver:
+                {
+                    const Pt::uint32_t colorAlpha    = c.alpha() / 257;
+                    const Pt::uint32_t blendAlphaSrc = (colorAlpha * blendingAlpha) / 255;
+                    const Pt::uint32_t blendAlphaInv = 255 - blendAlphaSrc;
+                    to[0] = (blendAlphaSrc * (Pt::uint32_t)(c.blue () / 257) + blendAlphaInv * to[0]) >> 8;
+                    to[1] = (blendAlphaSrc * (Pt::uint32_t)(c.green() / 257) + blendAlphaInv * to[1]) >> 8;
+                    to[2] = (blendAlphaSrc * (Pt::uint32_t)(c.red  () / 257) + blendAlphaInv * to[2]) >> 8;
+                    to[3] = (blendAlphaSrc * colorAlpha                      + blendAlphaInv * to[3]) >> 8;
+                    break;
+                }
+            }
+        }
+
+        static void assign(Pt::uint8_t* to, const Pt::uint8_t* from,
+                           CompositionMode mode, Pt::uint8_t blendingAlpha)
+        {
+            switch(mode)
+            {
+                default:
+                case CompositionMode::SourceCopy:
+                {
+                    const Pt::uint32_t blendAlphaSrc = blendingAlpha;
+                    const Pt::uint32_t blendAlphaInv = 255 - blendingAlpha;
+                    to[0] = (blendAlphaSrc * from[0] + blendAlphaInv * to[0]) >> 8;
+                    to[1] = (blendAlphaSrc * from[1] + blendAlphaInv * to[1]) >> 8;
+                    to[2] = (blendAlphaSrc * from[2] + blendAlphaInv * to[2]) >> 8;
+                    to[3] = (blendAlphaSrc * from[3] + blendAlphaInv * to[3]) >> 8;
+                    break;
+                }
+
+                case CompositionMode::SourceOver:
+                {
+                    const Pt::uint32_t colorAlpha    = from[3];
+                    const Pt::uint32_t blendAlphaSrc = (colorAlpha * blendingAlpha) / 255;
+                    const Pt::uint32_t blendAlphaInv = 255 - blendAlphaSrc;
+                    to[0] = (blendAlphaSrc * from[0]    + blendAlphaInv * to[0]) >> 8;
+                    to[1] = (blendAlphaSrc * from[1]    + blendAlphaInv * to[1]) >> 8;
+                    to[2] = (blendAlphaSrc * from[2]    + blendAlphaInv * to[2]) >> 8;
+                    to[3] = (blendAlphaSrc * colorAlpha + blendAlphaInv * to[3]) >> 8;
+                    break;
+                }
+            }
+
+            switch(mode)
+            {
+                default:
+                case CompositionMode::SourceCopy:
+                    *((Pt::uint32_t*)to) = *((const Pt::uint32_t*)from);
+                    break;
+
+                case CompositionMode::SourceOver:
+                    Argb32Model::sourceOver(to, from);
+                    break;
+            }
         }
 
         template <typename T>
-        static void advance(T*& p, Pt::ssize_t& xpos, Pt::ssize_t& ypos, 
+        static void advance(T*& p, Pt::ssize_t& xpos, Pt::ssize_t& ypos,
                             const BasicView<Argb32Model>& view)
         {
             if( ++xpos >= view.width() )
@@ -182,7 +256,7 @@ class Argb32Model::ConstPixel
         , _xpos(0)
         , _ypos(0)
         , _p(0)
-        { 
+        {
             reset(view, xpos, ypos);
         }
 
@@ -205,7 +279,7 @@ class Argb32Model::ConstPixel
 
         void reset(const ConstPixel& p)
         {
-            _view = p._view;            
+            _view = p._view;
             _xpos = p._xpos;
             _ypos = p._ypos;
 
@@ -229,36 +303,36 @@ class Argb32Model::ConstPixel
 
         Pt::uint8_t alpha() const
         {
-            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_p); 
-            return *val >> 24; 
+            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_p);
+            return *val >> 24;
         }
 
         Pt::uint8_t red() const
         {
-            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_p); 
-            return (*val & 0x00FF0000) >> 16; 
+            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_p);
+            return (*val & 0x00FF0000) >> 16;
         }
 
         Pt::uint8_t green() const
         {
-            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_p); 
-            return (*val & 0x0000FF00) >> 8; 
+            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_p);
+            return (*val & 0x0000FF00) >> 8;
         }
 
         Pt::uint8_t blue() const
         {
-            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_p); 
-            return *val & 0x000000FF; 
+            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_p);
+            return *val & 0x000000FF;
         }
 
         bool operator!=(const ConstPixel& p) const
-        { 
-            return _p != p._p; 
+        {
+            return _p != p._p;
         }
 
         bool operator==(const ConstPixel& p) const
-        { 
-            return _p == p._p; 
+        {
+            return _p == p._p;
         }
 
     private:
@@ -281,7 +355,7 @@ class Argb32Model::Pixel
         , _xpos(0)
         , _ypos(0)
         , _p(0)
-        { 
+        {
             reset(view, xpos, ypos);
         }
 
@@ -322,7 +396,7 @@ class Argb32Model::Pixel
 
         void reset(const Pixel& p)
         {
-            _view = p._view;            
+            _view = p._view;
             _xpos = p._xpos;
             _ypos = p._ypos;
 
@@ -361,55 +435,55 @@ class Argb32Model::Pixel
 
         Pt::uint8_t alpha() const
         {
-            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_p); 
-            return *val >> 24; 
+            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_p);
+            return *val >> 24;
         }
 
         Pt::uint8_t red() const
         {
-            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_p); 
-            return (*val & 0x00FF0000) >> 16; 
+            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_p);
+            return (*val & 0x00FF0000) >> 16;
         }
 
         Pt::uint8_t green() const
         {
-            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_p); 
-            return (*val & 0x0000FF00) >> 8; 
+            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_p);
+            return (*val & 0x0000FF00) >> 8;
         }
 
         Pt::uint8_t blue() const
         {
-            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_p); 
-            return *val & 0x000000FF; 
+            const Pt::uint32_t* val = reinterpret_cast<const Pt::uint32_t*>(_p);
+            return *val & 0x000000FF;
         }
 
         void setAlpha(Pt::uint8_t a)
-        { 
+        {
             Pt::uint32_t* val = reinterpret_cast<Pt::uint32_t*>(_p);
-            *val = (*val & 0x00FFFFFF) | (uint32_t(a) << 24); 
+            *val = (*val & 0x00FFFFFF) | (uint32_t(a) << 24);
         }
 
         void setRed(Pt::uint8_t r)
-        { 
+        {
             Pt::uint32_t* val = reinterpret_cast<Pt::uint32_t*>(_p);
-            *val = (*val & 0xFF00FFFF) | (uint32_t(r) << 16); 
+            *val = (*val & 0xFF00FFFF) | (uint32_t(r) << 16);
         }
 
         void setGreen(Pt::uint8_t g)
-        { 
+        {
             Pt::uint32_t* val = reinterpret_cast<Pt::uint32_t*>(_p);
-            *val = (*val & 0xFFFF00FF) | (uint32_t(g) << 8); 
+            *val = (*val & 0xFFFF00FF) | (uint32_t(g) << 8);
         }
 
         void setBlue(Pt::uint8_t b)
-        { 
+        {
             Pt::uint32_t* val = reinterpret_cast<Pt::uint32_t*>(_p);
-            *val = (*val & 0xFFFFFF00) | uint32_t(b); 
+            *val = (*val & 0xFFFFFF00) | uint32_t(b);
         }
 
         bool operator!=(const Pixel& p) const
         { return _p != p._p; }
-        
+
         bool operator==(const Pixel& p) const
         { return _p == p._p; }
 
@@ -430,7 +504,7 @@ class Argb32Image : public BasicImage<Argb32Model>
         Argb32Image(const Size& size, size_t padding = 0)
         : BasicImage(size, padding)
         { }
-        
+
         /** @brief Construct from external buffer.
         */
         Argb32Image(Pt::uint8_t* data, const Size& size, size_t padding = 0)

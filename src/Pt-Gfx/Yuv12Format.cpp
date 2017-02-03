@@ -81,6 +81,26 @@ void Yuv12Format::onSetPixel(Pixel& p, const Color& c,
 }
 
 
+void Yuv12Format::onSetPixel(Pixel& to, const Pixel& from,
+                             CompositionMode mode, Pt::uint8_t blendingAlpha) const
+{
+    // ### !!! TODO !!! ###
+}
+
+
+void Yuv12Format::onSetPixel(Pixel& to, const ConstPixel& from,
+                             CompositionMode mode, Pt::uint8_t blendingAlpha) const
+{
+    // ### !!! TODO !!! ###
+}
+
+
+void Yuv12Format::onSetPixel(Pixel& pixel, const Color& c,
+                             CompositionMode mode, Pt::uint8_t blendingAlpha) const
+{
+    // ### !!! TODO !!! ###
+}
+
 Color Yuv12Format::onGetColor(const Pixel& p) const
 {
     const Pt::uint8_t* y;

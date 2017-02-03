@@ -49,7 +49,7 @@ std::size_t Rgb32Format::onImageSize(const Size& size, Pt::ssize_t padding) cons
 
 
 void Rgb32Format::onSetPixel(Pixel& to, const Pixel& from,
-                              CompositionMode mode) const
+                             CompositionMode mode) const
 {
     Pt::uint8_t* dst = to.base();
     const Pt::uint8_t* src = from.base();
@@ -59,7 +59,7 @@ void Rgb32Format::onSetPixel(Pixel& to, const Pixel& from,
 
 
 void Rgb32Format::onSetPixel(Pixel& to, const ConstPixel& from,
-                              CompositionMode mode) const
+                             CompositionMode mode) const
 {
     Pt::uint8_t* dst = to.base();
     const Pt::uint8_t* src = from.base();
@@ -69,7 +69,7 @@ void Rgb32Format::onSetPixel(Pixel& to, const ConstPixel& from,
 
 
 void Rgb32Format::onSetPixel(Pixel& pixel, const Color& c,
-                              CompositionMode mode) const
+                             CompositionMode mode) const
 {
     const uint32_t val = ( uint32_t(c.red  () & 0xFF) << 16 ) |
                          ( uint32_t(c.green() & 0xFF) << 8)  |
@@ -77,6 +77,27 @@ void Rgb32Format::onSetPixel(Pixel& pixel, const Color& c,
 
     Pt::uint16_t* dst = reinterpret_cast<Pt::uint16_t*>( pixel.base() );
     *((Pt::uint32_t*)dst) = *((const Pt::uint32_t*)val);
+}
+
+
+void Rgb32Format::onSetPixel(Pixel& to, const Pixel& from,
+                             CompositionMode mode, Pt::uint8_t blendingAlpha) const
+{
+    // ### !!! TODO !!! ###
+}
+
+
+void Rgb32Format::onSetPixel(Pixel& to, const ConstPixel& from,
+                             CompositionMode mode, Pt::uint8_t blendingAlpha) const
+{
+    // ### !!! TODO !!! ###
+}
+
+
+void Rgb32Format::onSetPixel(Pixel& pixel, const Color& c,
+                             CompositionMode mode, Pt::uint8_t blendingAlpha) const
+{
+    // ### !!! TODO !!! ###
 }
 
 
