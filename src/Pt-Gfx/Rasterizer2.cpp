@@ -290,7 +290,7 @@ void Rasterizer2::rasterOnePixelLine(const Point& a, const Point& b)
     }
 
     // Check for vertical line
-    if(minY == maxY) {
+    if(minX == maxX) {
         rasterOnePixelVLineSegment(minX, minY, maxY, _pen.color());
         return;
     }
