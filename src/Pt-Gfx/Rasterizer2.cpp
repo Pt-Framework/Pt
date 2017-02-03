@@ -35,8 +35,6 @@
 
 #include "DrawText.h"
 #include "ClipPolygon2.h"
-#include "Triangulate.h"
-
 #include "Rasterizer2.h"
 
 #include <stdio.h> // Just for easy debugging ;)

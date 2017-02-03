@@ -23,7 +23,6 @@ if $(WITH_RASTERIZER2)
     PT_GFX_RASTERIZER2_FILES = ClipPolygon2.cpp
                                ImagePainter2.cpp
                                Rasterizer2.cpp
-                               Triangulate.cpp
                                ;
 }
 
