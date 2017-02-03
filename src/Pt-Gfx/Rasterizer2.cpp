@@ -299,6 +299,14 @@ void Rasterizer2::strokeOutline(const Point* points, size_t pointCount)
 
 void Rasterizer2::fillPolygon(const Point* points, const size_t pointCount)
 {
+    Pt::int32_t minX;
+    Pt::int32_t minY;
+    Pt::int32_t maxX;
+    Pt::int32_t maxY;
+    Pt::int32_t sizeX;
+    Pt::int32_t sizeY;
+
+#if 1
     std::vector<Point> clipped;
     genClippedPolygonPoints(clipped, points, pointCount);
 
@@ -307,17 +315,11 @@ void Rasterizer2::fillPolygon(const Point* points, const size_t pointCount)
 
     // ### TODO ### : Shrink polygon by one pixel before converting to triangles !!! ###
 
-    Pt::int32_t minX;
-    Pt::int32_t minY;
-    Pt::int32_t maxX;
-    Pt::int32_t maxY;
-    Pt::int32_t sizeX;
-    Pt::int32_t sizeY;
-
     rasterFillTriangles(tris.data(), tris.size(), minX, minY, maxX, maxY, sizeX, sizeY);
     rasterPolygonOutline(clipped.data(), clipped.size(), minX, minY, maxX, maxY, sizeX, sizeY, _brush.color());
 
-    /*
+#else
+
     std::vector<Point> tris;
 
     // Bottom-flat
@@ -334,7 +336,8 @@ void Rasterizer2::fillPolygon(const Point* points, const size_t pointCount)
     tris.push_back(Point(650, 400));
 
     rasterFillTriangles(tris.data(), tris.size(), minX, minY, maxX, maxY, sizeX, sizeY);
-    */
+
+#endif
 }
 
 
@@ -578,27 +581,29 @@ void Rasterizer2::rasterOneSolidTriangleBottomFlat(const Point& v1, const Point&
     Pt::int32_t curX1 = (v1.x() << FIXED_POINT_SHIFT_FACTOR);
     Pt::int32_t curX2 = (v1.x() << FIXED_POINT_SHIFT_FACTOR);
 
-    for(Pt::int32_t i = v1.y(); i <= v2.y(); ++i) {
+    for(Pt::int32_t y = v1.y(); y <= v2.y(); ++y) {
         // Calculate the span's position and size
-        const Pt::int32_t from      = std::min(curX1, curX2) >> FIXED_POINT_SHIFT_FACTOR;
+              Pt::int32_t from      = std::min(curX1, curX2) >> FIXED_POINT_SHIFT_FACTOR;
         const Pt::int32_t to        = std::max(curX1, curX2) >> FIXED_POINT_SHIFT_FACTOR;
               Pt::int32_t spanWidth = to - from + 1;
         // Draw the span
-        Pixel pixel(_image->view(), from, i);
-        for(Pt::int32_t j = from; j <= to; ++j) {
-            _image->format().setPixel(pixel, _brush.color(), _compositionMode);//, A);
-            pixel.advance();
-        }
-        /*
-        Pixel dstPixel(_image->view(), from, i);
         while(spanWidth > 0) {
             const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
+            Pixel             dstPixel(_image->view(), from, y);
             ConstPixel        srcPixel(_brushBuffer.view(), 0, 0);
             _image->format().copy(dstPixel, srcPixel, n, _compositionMode);
+            from      += n;
             spanWidth -= n;
         }
-        */
         // Update the span's coordinates
+        /*
+        if(y == v1.y()) {
+            if(chgX1 <= 0) curX1 += FIXED_POINT_CONSTANT_ONE;
+            else           curX1 -= FIXED_POINT_CONSTANT_ONE;
+            if(chgX2 >= 0) curX2 -= FIXED_POINT_CONSTANT_ONE;
+            else           curX2 += FIXED_POINT_CONSTANT_ONE;
+        }
+        */
         curX1 += chgX1;
         curX2 += chgX2;
     }
@@ -614,38 +619,40 @@ void Rasterizer2::rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2
      */
 
     const Pt::int32_t chgX1 = ( ( ((Pt::int32_t)v1.x() - (Pt::int32_t)v3.x()) << FIXED_POINT_SHIFT_FACTOR ) /
-                                  ((Pt::int32_t)v1.y() - (Pt::int32_t)v3.y())
+                                  ((Pt::int32_t)v3.y() - (Pt::int32_t)v1.y())
                               );
     const Pt::int32_t chgX2 = ( ( ((Pt::int32_t)v2.x() - (Pt::int32_t)v3.x()) << FIXED_POINT_SHIFT_FACTOR ) /
-                                  ((Pt::int32_t)v2.y() - (Pt::int32_t)v3.y())
+                                  ((Pt::int32_t)v3.y() - (Pt::int32_t)v1.y())
                               );
 
     Pt::int32_t curX1 = (v3.x() << FIXED_POINT_SHIFT_FACTOR);
     Pt::int32_t curX2 = (v3.x() << FIXED_POINT_SHIFT_FACTOR);
 
-    for(Pt::int32_t i = v3.y(); i > v1.y(); --i) {
+    for(Pt::int32_t y = v3.y(); y > v1.y(); --y) {
         // Calculate the span's position and size
-        const Pt::int32_t from      = std::min(curX1, curX2) >> FIXED_POINT_SHIFT_FACTOR;
+              Pt::int32_t from      = std::min(curX1, curX2) >> FIXED_POINT_SHIFT_FACTOR;
         const Pt::int32_t to        = std::max(curX1, curX2) >> FIXED_POINT_SHIFT_FACTOR;
               Pt::int32_t spanWidth = to - from + 1;
         // Draw the span
-        Pixel pixel(_image->view(), from, i);
-        for(Pt::int32_t j = from; j <= to; ++j) {
-            _image->format().setPixel(pixel, _brush.color(), _compositionMode);//, A);
-            pixel.advance();
-        }
-        /*
-        Pixel dstPixel(_image->view(), from, i);
         while(spanWidth > 0) {
             const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
+            Pixel             dstPixel(_image->view(), from, y);
             ConstPixel        srcPixel(_brushBuffer.view(), 0, 0);
             _image->format().copy(dstPixel, srcPixel, n, _compositionMode);
+            from      += n;
             spanWidth -= n;
         }
-        */
         // Update the span's coordinates
-        curX1 -= chgX1;
-        curX2 -= chgX2;
+        /*
+        if(y == v3.y()) {
+            if(chgX1 <= 0) curX1 += FIXED_POINT_CONSTANT_ONE;
+            else           curX1 -= FIXED_POINT_CONSTANT_ONE;
+            if(chgX2 >= 0) curX2 -= FIXED_POINT_CONSTANT_ONE;
+            else           curX2 += FIXED_POINT_CONSTANT_ONE;
+        }
+        */
+        curX1 += chgX1;
+        curX2 += chgX2;
     }
 }
 
