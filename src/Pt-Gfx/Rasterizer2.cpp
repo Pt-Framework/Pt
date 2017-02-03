@@ -34,7 +34,7 @@
 #include <Pt/Gfx/ImagePainter2.h>
 
 #include "DrawText.h"
-#include "ClipPolygon2.h"
+#include "ClipShape.h"
 #include "Rasterizer2.h"
 
 #include <stdio.h> // Just for easy debugging ;)
@@ -671,7 +671,7 @@ void Rasterizer2::genClippedPolygonPoints(std::vector<Point>& dst, const Point* 
     for(size_t i = 0; i < pointCount; ++i)
         dst.push_back( Point( src[i].x(), src[i].y() ) );
 
-    ClipPolygon2::clip(dst, _currentClip);
+    ClipShape::clipPolygon(dst, _currentClip);
 }
 
 

@@ -28,17 +28,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "ClipPolygon2.h"
+#include "ClipShape.h"
 
 
 namespace Pt{
 namespace Gfx{
 
 
-ClipPolygon2::ClipPolygon2()
+ClipShape::ClipShape()
 {}
 
-void ClipPolygon2::clip(std::vector<Point>& in, const Rect& clippingArea)
+void ClipShape::clipPolygon(std::vector<Point>& in, const Rect& clippingArea)
 {
     if(clippingArea.isNull()) {
         in.clear();
@@ -53,7 +53,7 @@ void ClipPolygon2::clip(std::vector<Point>& in, const Rect& clippingArea)
     clipEdge( buf, in,  clippingArea.topRight   (), clippingArea.topLeft    () );
 }
 
-void ClipPolygon2::clipEdge(const std::vector<Point>& in, std::vector<Point>& out,
+void ClipShape::clipEdge(const std::vector<Point>& in, std::vector<Point>& out,
                             Point edgePoint0, Point edgePoint1)
 {
     if(in.empty()) return;
@@ -84,7 +84,7 @@ void ClipPolygon2::clipEdge(const std::vector<Point>& in, std::vector<Point>& ou
     }
 }
 
-Point ClipPolygon2::intersect( const Point& from, const Point& to, const Point& edge0, Point& edge1)
+Point ClipShape::intersect( const Point& from, const Point& to, const Point& edge0, Point& edge1)
 {
     Point p;
 
@@ -118,7 +118,7 @@ Point ClipPolygon2::intersect( const Point& from, const Point& to, const Point& 
 }
 
 
-bool ClipPolygon2::inside(const Point& p, const Point& edge0, Point& edge1)
+bool ClipShape::inside(const Point& p, const Point& edge0, Point& edge1)
 {
     // Vertical
     if(edge0.x() == edge1.x()) {

@@ -25,8 +25,8 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
-#ifndef PT_GFX_CLIPPOLYGON_2_H
-#define PT_GFX_CLIPPOLYGON_2_H
+#ifndef PT_GFX_CLIPSHAPE_H
+#define PT_GFX_CLIPSHAPE_H
 
 #include <vector>
 
@@ -36,11 +36,11 @@ namespace Pt{
 namespace Gfx{
 
 
-class ClipPolygon2 {
+class ClipShape {
     public:
-        ClipPolygon2();
+        ClipShape();
 
-        static void clip(std::vector<Point>& in, const Rect& clippingArea);
+        static void clipPolygon(std::vector<Point>& in, const Rect& clippingArea);
 
     private:
         enum Orientation{Left, Right, Top, Bottom} ;
