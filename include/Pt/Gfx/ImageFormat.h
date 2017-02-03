@@ -138,12 +138,6 @@ class ImageFormat
                   CompositionMode mode) const
         { onCopy(dst, src, length, mode); }
 
-        /** @brief Sets the color in a pixel span with specified alpha values (used by all anti-aliasing raster functions).
-        */
-        void copy(Pixel& dst, const Pt::uint16_t* alphas, size_t length,
-                  const Color& color, CompositionMode mode) const
-        { onCopy(dst, alphas, length, color, mode); }
-
         /** @brief Copies an area of pixels.
         */
         PT_GFX_API void copy(ImageView& to, const Point& toPoint,
@@ -183,9 +177,6 @@ class ImageFormat
 
         virtual void onCopy(Pixel& dst, const ConstPixel& src, size_t length,
                             CompositionMode mode) const = 0;
-
-        virtual void onCopy(Pixel& dst, const Pt::uint16_t* alphas, size_t length,
-                            const Color& color, CompositionMode mode) const = 0;
 
         virtual void onCopy(ImageView& to, const Point& toPos,
                             const ImageView& from, const Rect& fromRect,

@@ -50,11 +50,6 @@ class Rasterizer2
 
         ~Rasterizer2();
 
-        void setAntiAliasingQuality(int level)
-        {
-            _aaLevel = level;
-        }
-
         void setImage(Image& image);
 
         const ImageFormat& format() const;
@@ -112,9 +107,6 @@ class Rasterizer2
     private:
         void updateClip();
 
-        void prepWorkBuffer(Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t sizeX, Pt::int32_t sizeY);
-        void blitWorkBufferToImage(Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t sizeX, Pt::int32_t sizeY, const Color& color);
-
         void rasterOnePixelLine(const Point& a, const Point& b);
         void rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, Pt::int32_t steps, const Color& color);
 
@@ -148,11 +140,6 @@ class Rasterizer2
 
         Rect            _clip;
         Rect            _currentClip;
-
-        int                       _aaLevel; // Quality of the AA
-        std::vector<Pt::uint16_t> _alphas;  // Work buffer
-        int                       _wbXSize; // Width of the work buffer
-
 };
 
 

@@ -48,8 +48,6 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual ~ImagePainter2();
 
-        void setAntiAliasingQuality(int level = 1); // 0 -> normal; other than 0 -> more precise
-
         void setImage(Image& image);
 
         virtual const ImageFormat& format() const;

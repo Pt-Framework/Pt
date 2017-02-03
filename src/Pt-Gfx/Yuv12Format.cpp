@@ -142,11 +142,6 @@ void Yuv12Format::onCopy(Pixel& to, const ConstPixel& from, size_t length,
 {
 }
 
-void Yuv12Format::onCopy(Pixel& dst, const Pt::uint16_t* alphas, size_t length,
-                          const Color& color, CompositionMode mode) const
-{
-    // ### !!! TODO !!! ###
-}
 
 void Yuv12Format::onCopy(ImageView& to, const Point& toPoint,
                          const ImageView& from, const Rect& fromRect,

@@ -47,30 +47,22 @@ namespace Gfx {
 
 
 // ======================================================================================
-// ===== Settings =======================================================================
+// ===== Fixed-Point 16.16 Settings and Helper Macros ===================================
 // ======================================================================================
 
-// Comment this to reduce the precision of the polygon AA
-#define FILL_POLYGON_PRECISION_AA
-
-// Use 16.16 fixed-point format
 #define FIXED_POINT_SHIFT_FACTOR  16         // Shift factor
 #define FIXED_POINT_FRACT_BITMASK 0x0000FFFF // Bit mask for the fractional value; must be (2 ^ FIXED_POINT_SHIFT_FACTOR - 1)
-#define FIXED_POINT_ALPHA_DIVFAC  257        // Must be ( (2 ^ FIXED_POINT_SHIFT_FACTOR - 1) / 255 )
 #define FIXED_POINT_CONSTANT_ONE  65536      // The value 1.0 in fixed-point ( 2 ^ FIXED_POINT_SHIFT_FACTOR    )
 #define FIXED_POINT_CONSTANT_HALF 32768      // The value 0.5 in fixed-point ( 2 ^ FIXED_POINT_SHIFT_FACTOR / 2)
 
-#define FIXED_POINT_IPART(V)         ( (V) & ~FIXED_POINT_FRACT_BITMASK )
-#define FIXED_POINT_FPART(V)         ( (V) &  FIXED_POINT_FRACT_BITMASK )
-#define FIXED_POINT_RFPART(V)        ( FIXED_POINT_FRACT_BITMASK - FIXED_POINT_FPART(V) )
-#define FIXED_POINT_ROUND(V)         ( FIXED_POINT_IPART( (V) + FIXED_POINT_CONSTANT_HALF ) )
-#define FIXED_POINT_TO_INT(V)        ( (V) >> FIXED_POINT_SHIFT_FACTOR )
-#define FIXED_POINT_FPART_TO_A8(V)   ( FIXED_POINT_FPART (V) >> 8 )
-#define FIXED_POINT_RFPART_TO_A8(V)  ( FIXED_POINT_RFPART(V) >> 8 )
-#define FIXED_POINT_MUL_TO_A8(A, B)  ( ( ( (Pt::uint32_t)(A) * (Pt::uint32_t)(B) + FIXED_POINT_FRACT_BITMASK ) >> FIXED_POINT_SHIFT_FACTOR ) )
-
-// The number of margin pixels
-#define MARGIN_PIXELS 2
+#define FIXED_POINT_IPART(V)        ( (V) & ~FIXED_POINT_FRACT_BITMASK )
+#define FIXED_POINT_FPART(V)        ( (V) &  FIXED_POINT_FRACT_BITMASK )
+#define FIXED_POINT_RFPART(V)       ( FIXED_POINT_FRACT_BITMASK - FIXED_POINT_FPART(V) )
+#define FIXED_POINT_ROUND(V)        ( FIXED_POINT_IPART( (V) + FIXED_POINT_CONSTANT_HALF ) )
+#define FIXED_POINT_FPART_TO_A8(V)  ( FIXED_POINT_FPART (V) >> 8 )
+#define FIXED_POINT_RFPART_TO_A8(V) ( FIXED_POINT_RFPART(V) >> 8 )
+#define FIXED_POINT_MUL_TO_A8(A, B) ( ( ( (Pt::uint32_t)(A) * (Pt::uint32_t)(B) + FIXED_POINT_FRACT_BITMASK ) >> FIXED_POINT_SHIFT_FACTOR ) )
+#define FIXED_POINT_TO_INT(V)       ( (V) >> FIXED_POINT_SHIFT_FACTOR )
 
 
 // ======================================================================================
@@ -177,7 +169,6 @@ Rasterizer2::Rasterizer2(Image& image)
 , _compositionMode(CompositionMode::SourceCopy)
 , _penPixel(_image->view(), 0, 0)
 , _brushPixel(_image->view(), 0, 0)
-, _aaLevel(0)
 {
     _text->setFont(_font);
     updateClip();
@@ -353,32 +344,6 @@ void Rasterizer2::updateClip()
 {
     const Rect imageRect( Point(0,0) , _image->size() );
     _currentClip = _clip.isNull() ? imageRect : _clip.intersect( imageRect );
-
-    // Resize the work buffer so it slightly larger than the size of the image
-    // ### TODO: Make the work-buffer's size as small as possible !!! ###
-    _alphas.resize( ( _image->width() + MARGIN_PIXELS * 2 ) * ( _image->height() + MARGIN_PIXELS * 2) );
-    _wbXSize = _image->width() + MARGIN_PIXELS * 2;
-}
-
-void Rasterizer2::prepWorkBuffer(Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t sizeX, Pt::int32_t sizeY)
-{
-    Pt::uint16_t* alphas = &_alphas[0] + (minY + MARGIN_PIXELS) * _wbXSize + minX + MARGIN_PIXELS;
-
-    for(int r = 0; r < sizeY; ++r) {
-        memset(alphas, 0, sizeX * sizeof(*alphas));
-        alphas += _wbXSize;
-    }
-}
-
-void Rasterizer2::blitWorkBufferToImage(Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t sizeX, Pt::int32_t sizeY, const Color& color)
-{
-    const Pt::uint16_t* alphas = _alphas.data() + (minY + MARGIN_PIXELS) * _wbXSize + minX + MARGIN_PIXELS;
-
-    for(int r = 0; r < sizeY; ++r) {
-        Pixel destPixel( _image->view(), minX, minY + r);
-        _image->format().copy(destPixel, alphas, sizeX, color, _compositionMode);
-        alphas += _wbXSize;
-    }
 }
 
 void Rasterizer2::rasterOnePixelLine(const Point& a, const Point& b)
@@ -433,7 +398,6 @@ void Rasterizer2::rasterOnePixelLine(const Point& a, const Point& b)
 void Rasterizer2::rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, Pt::int32_t steps, const Color& color)
 {
     // TODO: hline, vline, xline
-    // svn commit -m "Experiment with Xiaolin Wu's AA line algorithm"
 
     // Xiaolin Wu's Anti-Aliased Line Algorithm
     // https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
@@ -545,18 +509,10 @@ void Rasterizer2::rasterSolidTriangles(const Point* points, size_t pointCount, P
     sizeX = maxX - minX + 1;
     sizeY = maxY - minY + 1;
 
-    // Prepare the work buffer
-    prepWorkBuffer(minX, minY, sizeX, sizeY);
-
     // Raster the triangles
     for(size_t i = 0; i < pointCount; i += 3) {
         rasterOneSolidTriangle(points[i], points[i + 1], points[i + 2]);
     }
-
-    // Do not blit the work buffer to the image because the outline-raster function which
-    // will be called after this function exits is the one which will do it!
-
-    // blitWorkBufferToImage(minX, minY, sizeX, sizeY, _brush.color());
 }
 
 // Based on http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
@@ -617,80 +573,25 @@ void Rasterizer2::rasterOneSolidTriangleBottomFlat(const Point& v1, const Point&
                                   ((Pt::int32_t)v3.y() - (Pt::int32_t)v1.y())
                               );
 
-    Pt::uint16_t* alphas = &_alphas[0] + (v1.y() + MARGIN_PIXELS) * _wbXSize + MARGIN_PIXELS;
+    Pt::int32_t curX1 = (v1.x() << FIXED_POINT_SHIFT_FACTOR);
+    Pt::int32_t curX2 = (v1.x() << FIXED_POINT_SHIFT_FACTOR);
 
-/*
- * TODO : try this
-spanWidth = ...
-CompositionMode mode = ...;
-
-while(spanWidth > 0)
-{
-    n = min(_brushBuffer.width(), spanWidth);
-    _image->format()->copy(to, _brushBuffer, n, mode);
-    spanWidth -= n;
-}
- */
-
-    // More precise
-    if(_aaLevel) {
-        Pt::int32_t curX1 = (v1.x() << FIXED_POINT_SHIFT_FACTOR);
-        Pt::int32_t curX2 = (v1.x() << FIXED_POINT_SHIFT_FACTOR);
-
-        if(chgX1 <= 0) curX1 += FIXED_POINT_FRACT_BITMASK / 2;
-        else           curX1 -= FIXED_POINT_FRACT_BITMASK / 2;
-
-        if(chgX2 >= 0) curX2 -= FIXED_POINT_FRACT_BITMASK / 2;
-        else           curX2 += FIXED_POINT_FRACT_BITMASK / 2;
-
-        for(Pt::int32_t i = v1.y(); i <= v2.y(); ++i) {
-            const Pt::int32_t steps = (curX2 > curX1)
-                                    ? (curX2 - curX1 + FIXED_POINT_FRACT_BITMASK) >> FIXED_POINT_SHIFT_FACTOR
-                                    : (curX1 - curX2 + FIXED_POINT_FRACT_BITMASK) >> FIXED_POINT_SHIFT_FACTOR;
-            if(!steps) {
-                alphas[curX1 >> FIXED_POINT_SHIFT_FACTOR] = 255;
-            }
-            else {
-                const Pt::int32_t chgX  = (curX2 - curX1) / steps;
-                      Pt::int32_t iterX = curX1;
-                for(int j = 0; j <= steps; ++j) {
-                    if(j >= 1 && j <= steps - 1) {
-                        alphas[iterX >> FIXED_POINT_SHIFT_FACTOR] = 255;
-                    }
-                    if(j <= 1 || j >= steps - 1) {
-                        const Pt::int32_t frx = (iterX & FIXED_POINT_FRACT_BITMASK) / FIXED_POINT_ALPHA_DIVFAC;
-                        const Pt::int32_t flx = 255 - frx;
-                        // Calculate the left and right coordinate of the span
-                        const Pt::int32_t lx = iterX >> FIXED_POINT_SHIFT_FACTOR;
-                        const Pt::int32_t rx = frx ? (lx + 1) : lx;
-                        // Draw the span
-                        alphas[lx] += flx;
-                        alphas[rx] += frx;
-                    }
-                    iterX += chgX;
-                }
-            }
-            alphas += _wbXSize;
-            curX1  += chgX1;
-            curX2  += chgX2;
+    for(Pt::int32_t i = v1.y(); i <= v2.y(); ++i) {
+        // Calculate the span's position and size
+        const Pt::int32_t from      = std::min(curX1, curX2) >> FIXED_POINT_SHIFT_FACTOR;
+        const Pt::int32_t to        = std::max(curX1, curX2) >> FIXED_POINT_SHIFT_FACTOR;
+              Pt::int32_t spanWidth = to - from + 1;
+        // Draw the span
+        Pixel dstPixel(_image->view(), from, i);
+        while(spanWidth > 0) {
+            const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
+            ConstPixel        srcPixel(_brushBuffer.view(), 0, 0);
+            _image->format().copy(dstPixel, srcPixel, n, _compositionMode);
+            spanWidth -= n;
         }
-    }
-
-    // Normal
-    else {
-        Pt::int32_t curX1 = (v1.x() << FIXED_POINT_SHIFT_FACTOR) + FIXED_POINT_FRACT_BITMASK / 2;
-        Pt::int32_t curX2 = (v1.x() << FIXED_POINT_SHIFT_FACTOR) - FIXED_POINT_FRACT_BITMASK / 2;
-
-        for(Pt::int32_t i = v1.y(); i <= v2.y(); ++i) {
-            const Pt::int32_t from = std::min(curX1, curX2) >> FIXED_POINT_SHIFT_FACTOR;
-            const Pt::int32_t to   = std::max(curX1, curX2) >> FIXED_POINT_SHIFT_FACTOR;
-            for(int j = from; j <= to; ++j) {
-                *(alphas + j) = 255;
-            }
-            alphas += _wbXSize;
-            curX1  += chgX1;
-            curX2  += chgX2;
-        }
+        // Update the span's coordinates
+        curX1 += chgX1;
+        curX2 += chgX2;
     }
 }
 
@@ -702,7 +603,7 @@ void Rasterizer2::rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2
      *
      *        v3
      */
-
+return;
     const Pt::int32_t chgX1 = ( ( ((Pt::int32_t)v1.x() - (Pt::int32_t)v3.x()) << FIXED_POINT_SHIFT_FACTOR ) /
                                   ((Pt::int32_t)v1.y() - (Pt::int32_t)v3.y())
                               );
@@ -710,67 +611,25 @@ void Rasterizer2::rasterOneSolidTriangleTopFlat(const Point& v1, const Point& v2
                                   ((Pt::int32_t)v2.y() - (Pt::int32_t)v3.y())
                               );
 
-    Pt::uint16_t* alphas = &_alphas[0] + (v3.y() + MARGIN_PIXELS) * _wbXSize + MARGIN_PIXELS;
+    Pt::int32_t curX1 = (v3.x() << FIXED_POINT_SHIFT_FACTOR);
+    Pt::int32_t curX2 = (v3.x() << FIXED_POINT_SHIFT_FACTOR);
 
-    // More precise
-    if(_aaLevel) {
-        Pt::int32_t curX1 = (v3.x() << FIXED_POINT_SHIFT_FACTOR);
-        Pt::int32_t curX2 = (v3.x() << FIXED_POINT_SHIFT_FACTOR);
-
-        if(chgX1 <= 0) curX1 += FIXED_POINT_FRACT_BITMASK / 2;
-        else           curX1 -= FIXED_POINT_FRACT_BITMASK / 2;
-
-        if(chgX2 >= 0) curX2 -= FIXED_POINT_FRACT_BITMASK / 2;
-        else           curX2 += FIXED_POINT_FRACT_BITMASK / 2;
-
-        for(Pt::int32_t i = v3.y(); i > v1.y(); --i) {
-            const Pt::int32_t steps = (curX2 > curX1)
-                                    ? (curX2 - curX1 + FIXED_POINT_FRACT_BITMASK) >> FIXED_POINT_SHIFT_FACTOR
-                                    : (curX1 - curX2 + FIXED_POINT_FRACT_BITMASK) >> FIXED_POINT_SHIFT_FACTOR;
-            if(!steps) {
-                alphas[curX1 >> FIXED_POINT_SHIFT_FACTOR] = 255;
-            }
-            else {
-                const Pt::int32_t chgX  = (curX2 - curX1) / steps;
-                      Pt::int32_t iterX = curX1;
-                for(int j = 0; j <= steps; ++j) {
-                    if(j >= 1 && j <= steps - 1) {
-                        alphas[iterX >> FIXED_POINT_SHIFT_FACTOR] = 255;
-                    }
-                    if(j <= 1 || j >= steps - 1) {
-                        const Pt::int32_t frx = (iterX & FIXED_POINT_FRACT_BITMASK) / FIXED_POINT_ALPHA_DIVFAC;
-                        const Pt::int32_t flx = 255 - frx;
-                        // Calculate the left and right coordinate of the span
-                        const Pt::int32_t lx = iterX >> FIXED_POINT_SHIFT_FACTOR;
-                        const Pt::int32_t rx = frx ? (lx + 1) : lx;
-                        // Draw the span
-                        alphas[lx] += flx;
-                        alphas[rx] += frx;
-                    }
-                    iterX += chgX;
-                }
-            }
-            alphas -= _wbXSize;
-            curX1  -= chgX1;
-            curX2  -= chgX2;
+    for(Pt::int32_t i = v3.y(); i > v1.y(); --i) {
+        // Calculate the span's position and size
+        const Pt::int32_t from      = std::min(curX1, curX2) >> FIXED_POINT_SHIFT_FACTOR;
+        const Pt::int32_t to        = std::max(curX1, curX2) >> FIXED_POINT_SHIFT_FACTOR;
+              Pt::int32_t spanWidth = to - from + 1;
+        // Draw the span
+        Pixel dstPixel(_image->view(), from, i);
+        while(spanWidth > 0) {
+            const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
+            ConstPixel        srcPixel(_brushBuffer.view(), 0, 0);
+            _image->format().copy(dstPixel, srcPixel, n, _compositionMode);
+            spanWidth -= n;
         }
-    }
-
-    // Normal
-    else {
-        Pt::int32_t curX1 = (v3.x() << FIXED_POINT_SHIFT_FACTOR) + FIXED_POINT_FRACT_BITMASK / 2;
-        Pt::int32_t curX2 = (v3.x() << FIXED_POINT_SHIFT_FACTOR) - FIXED_POINT_FRACT_BITMASK / 2;
-
-        for(Pt::int32_t i = v3.y(); i > v1.y(); --i) {
-            const Pt::int32_t from = std::min(curX1, curX2) >> FIXED_POINT_SHIFT_FACTOR;
-            const Pt::int32_t to   = std::max(curX1, curX2) >> FIXED_POINT_SHIFT_FACTOR;
-            for(int j = from; j <= to; ++j) {
-                *(alphas + j) = 255;
-            }
-            alphas -= _wbXSize;
-            curX1  -= chgX1;
-            curX2  -= chgX2;
-        }
+        // Update the span's coordinates
+        curX1 -= chgX1;
+        curX2 -= chgX2;
     }
 }
 
@@ -805,11 +664,6 @@ void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount, P
         lineY[i] = points[i].y() << FIXED_POINT_SHIFT_FACTOR;
     }
 
-    // Do not prepare the work buffer here because the area-filling function which was
-    // called before this function has done it!
-
-    // prepWorkBuffer(minX, minY, sizeX, sizeY);
-
     // Raster the outlines as multiple one-pixel lines
     const size_t      pc1 = pointCount - 1;
           Pt::int32_t xm, ym;
@@ -831,9 +685,6 @@ void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount, P
     xm >>= FIXED_POINT_SHIFT_FACTOR;
     ym >>= FIXED_POINT_SHIFT_FACTOR;
     rasterOnePixelLineSegment(lineX[0], lineY[0], lineX[pc1], lineY[pc1], std::max(xm, ym) - 1, color);
-
-    // Blit the work buffer to the image
-    blitWorkBufferToImage(minX, minY, sizeX, sizeY, color);
 }
 
 void Rasterizer2::genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount) const

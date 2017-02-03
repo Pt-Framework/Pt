@@ -107,11 +107,6 @@ class PT_GFX_API ImagePainter : public Painter
   private:
     Rasterizer* _rasterizer;
     RectF _clip;
-
-  public:
-    // Not used; just to make the API symmetrical with the new painter
-    void setAntiAliasingQuality(int level = 0)
-    {}
 };
 
 }}

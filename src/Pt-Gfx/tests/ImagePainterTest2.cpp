@@ -32,7 +32,7 @@ int main(int argc, char* args[])
     const int doBenchmark = 1;
 
     // Lines
-    if(1 && testDraw) {
+    if(0 && testDraw) {
         painter.setCompositionMode(CompositionMode::SourceCopy);
         testDrawLine("Lines and Texts - SourceCopy", image, painter);
     }
@@ -42,24 +42,13 @@ int main(int argc, char* args[])
     }
 
     // Solid-filled polygons
-    painter.setAntiAliasingQuality(0);
-    if(0 && testDraw) {
+    if(1 && testDraw) {
         painter.setCompositionMode(CompositionMode::SourceCopy);
-        testDrawSolidFillPolygon("Solid-Filled Polygons - SourceCopy (N)", image, painter);
+        testDrawSolidFillPolygon("Solid-Filled Polygons - SourceCopy", image, painter);
     }
     if(0 && testDraw) {
         painter.setCompositionMode(CompositionMode::SourceOver);
-        testDrawSolidFillPolygon("Solid-Filled Polygons - SourceOver (N)", image, painter);
-    }
-
-    painter.setAntiAliasingQuality(1);
-    if(0 && testDraw) {
-        painter.setCompositionMode(CompositionMode::SourceCopy);
-        testDrawSolidFillPolygon("Solid-Filled Polygons - SourceCopy (P)", image, painter);
-    }
-    if(0 && testDraw) {
-        painter.setCompositionMode(CompositionMode::SourceOver);
-        testDrawSolidFillPolygon("Solid-Filled Polygons - SourceOver (P)", image, painter);
+        testDrawSolidFillPolygon("Solid-Filled Polygons - SourceOver", image, painter);
     }
 
     // Benchmark
