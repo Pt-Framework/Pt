@@ -310,7 +310,7 @@ void Rasterizer2::strokeOutline(const Point* points, size_t pointCount)
 
 void Rasterizer2::fillRect(const Point& tl, const Point& br)
 {
-    rasterOnePixelRectArea(tl, br);
+    rasterRectArea(tl, br);
 }
 
 void Rasterizer2::fillPolygon(const Point* points, const size_t pointCount)
@@ -509,7 +509,7 @@ void Rasterizer2::rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt
     }
 }
 
-void Rasterizer2::rasterOnePixelRectArea(const Point& tl, const Point& br)
+void Rasterizer2::rasterRectArea(const Point& tl, const Point& br)
 {
     // Get the minimum and maximum coordinates
     Pt::int32_t minX = tl.x();

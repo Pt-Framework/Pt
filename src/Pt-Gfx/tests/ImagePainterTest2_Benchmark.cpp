@@ -92,7 +92,46 @@ static size_t benchDrawRect(CompositionMode cm)
         clock.start();
 
         painter.drawRect( RectF(PointF(100, 100), SizeF(200, 100)) );
+        painter.drawRect( RectF(PointF(400, 100), SizeF(200, 100)) );
+
+        painter.drawRect( RectF(PointF(150, 150), SizeF(200, 100)) );
+        painter.drawRect( RectF(PointF(450, 150), SizeF(200, 100)) );
+
+        sum += clock.stop().toUSecs();
+#ifdef CHECK_RESULTING_IMAGE
+        if(!i) sdlPreviewRGB888Buffer("benchDrawRect", image.data(), image.width(), image.height());
+#endif
+    }
+
+    sum /= BENCH_COUNT;
+    return sum;
+}
+
+template <typename PainterT>
+static size_t benchDrawSolidFillRect(CompositionMode cm)
+{
+    size_t sum = 0;
+
+    Image image( ImageFormat::argb32(), Size(800, 600) );
+
+    PainterT painter(image);
+    painter.setCompositionMode(cm);
+
+    Brush brush( Color::fromRgb8(255, 255, 255, 175) );
+    painter.setBrush(brush);
+
+    Pen pen( Color::fromRgb8(255, 255, 255, 175) );
+    painter.setPen(pen);
+
+    for(int i = 0; i < BENCH_COUNT ; ++i) {
+        Pt::System::Clock clock;
+        clock.start();
+
+        painter.fillRect( RectF(PointF(100, 100), SizeF(200, 100)) );
         painter.fillRect( RectF(PointF(400, 100), SizeF(200, 100)) );
+
+        painter.fillRect( RectF(PointF(150, 150), SizeF(200, 100)) );
+        painter.fillRect( RectF(PointF(450, 150), SizeF(200, 100)) );
 
         sum += clock.stop().toUSecs();
 #ifdef CHECK_RESULTING_IMAGE
@@ -147,20 +186,20 @@ static void doBenchMark(CompositionMode cm)
     std::clog << "                                           Time (Factor)" << std::endl;
     std::clog << "                                           ---- --------" << std::endl;
 
-    if(0) {
+    if(1) {
         time1 = benchDrawText<ImagePainter >(cm);
         time2 = benchDrawText<ImagePainter2>(cm);
-        std::clog << "    Text                 @ ImagePainter  = " << std::setw(4) << time1 << std::endl;
-        std::clog << "    Text                 @ ImagePainter2 = " << std::setw(4) << time2
+        std::clog << "    Text                   @ ImagePainter  = " << std::setw(4) << time1 << std::endl;
+        std::clog << "    Text                   @ ImagePainter2 = " << std::setw(4) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
 
-    if(0) {
+    if(1) {
         time1 = benchDrawLine<ImagePainter >(cm);
         time2 = benchDrawLine<ImagePainter2>(cm);
-        std::clog << "    Line                 @ ImagePainter  = " << std::setw(4) << time1 << std::endl;
-        std::clog << "    Line                 @ ImagePainter2 = " << std::setw(4) << time2
+        std::clog << "    Line                   @ ImagePainter  = " << std::setw(4) << time1 << std::endl;
+        std::clog << "    Line                   @ ImagePainter2 = " << std::setw(4) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
@@ -168,17 +207,26 @@ static void doBenchMark(CompositionMode cm)
     if(1) {
         time1 = benchDrawRect<ImagePainter >(cm);
         time2 = benchDrawRect<ImagePainter2>(cm);
-        std::clog << "    Rectangle & Filled   @ ImagePainter  = " << std::setw(4) << time1 << std::endl;
-        std::clog << "    Rectangle & Filled   @ ImagePainter2 = " << std::setw(4) << time2
+        std::clog << "    Rectangle              @ ImagePainter  = " << std::setw(4) << time1 << std::endl;
+        std::clog << "    Rectangle              @ ImagePainter2 = " << std::setw(4) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
 
-    if(0) {
+    if(1) {
+        time1 = benchDrawSolidFillRect<ImagePainter >(cm);
+        time2 = benchDrawSolidFillRect<ImagePainter2>(cm);
+        std::clog << "    Solid-filled Rectangle @ ImagePainter  = " << std::setw(4) << time1 << std::endl;
+        std::clog << "    Solid-filled Rectangle @ ImagePainter2 = " << std::setw(4) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        std::clog << std::endl;
+    }
+
+    if(1) {
         time1 = benchDrawSolidFillPolygon<ImagePainter >(cm);
         time2 = benchDrawSolidFillPolygon<ImagePainter2>(cm);
-        std::clog << "    Solid-filled polygon @ ImagePainter  = " << std::setw(4) << time1 << std::endl;
-        std::clog << "    Solid-filled polygon @ ImagePainter2 = " << std::setw(4) << time2
+        std::clog << "    Solid-filled polygon   @ ImagePainter  = " << std::setw(4) << time1 << std::endl;
+        std::clog << "    Solid-filled polygon   @ ImagePainter2 = " << std::setw(4) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }

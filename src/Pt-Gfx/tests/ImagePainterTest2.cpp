@@ -29,7 +29,7 @@ int main(int argc, char* args[])
     painter.setFont( Pt::Gfx::Font(FONT_SPEC) );
 
     const int testDraw    = 1;
-    const int doBenchmark = 0;
+    const int doBenchmark = 1;
 
     // Lines
     if(0 && testDraw) {
@@ -41,10 +41,15 @@ int main(int argc, char* args[])
         testDrawLine("Lines and Texts - SourceOver", image, painter);
     }
 
-    // Rectangles
-    if(1 && testDraw) {
+    // Rectangles and solid-filled rectangles
+    if(0 && testDraw) {
         painter.setCompositionMode(CompositionMode::SourceCopy);
-        testDrawRect("Rectangles - SourceCopy", image, painter);
+        testDrawRect("Rectangles & Solid-Filled Rectangles - SourceCopy", image, painter);
+    }
+
+    if(0 && testDraw) {
+        painter.setCompositionMode(CompositionMode::SourceOver);
+        testDrawRect("Rectangles & Solid-Filled Rectangles - SourceOver", image, painter);
     }
 
     // Solid-filled polygons

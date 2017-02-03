@@ -114,7 +114,7 @@ class Rasterizer2
         void rasterOnePixelVLineSegment(Pt::int32_t x, Pt::int32_t y1, Pt::int32_t y2, const Color& color);
         void rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, const Color& color, bool skipLastPoint);
 
-        void rasterOnePixelRectArea(const Point& tl, const Point& br);
+        void rasterRectArea(const Point& tl, const Point& br);
         void rasterOnePixelRectOutline(const Point& tl, const Point& br);
 
         void rasterPolygonArea(const Point* points, size_t pointCount, const Color& color);

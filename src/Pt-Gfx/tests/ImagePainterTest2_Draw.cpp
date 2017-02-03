@@ -50,6 +50,12 @@ static void testDrawRect(const char* title, Image& image, ImagePainter2& painter
     painter.drawRect( RectF(PointF(100, 100), SizeF(200, 100)) );
     painter.fillRect( RectF(PointF(400, 100), SizeF(200, 100)) );
 
+    painter.setPen  ( Color::fromRgb8(  0, 255, 255, 175) );
+    painter.setBrush( Color::fromRgb8(255, 255,   0, 175) );
+
+    painter.drawRect( RectF(PointF(150, 150), SizeF(200, 100)) );
+    painter.fillRect( RectF(PointF(450, 150), SizeF(200, 100)) );
+
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height());
 }
 
