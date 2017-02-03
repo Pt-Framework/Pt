@@ -28,42 +28,48 @@ int main(int argc, char* args[])
     painter.setFontDir( Pt::System::Path(FONT_DIR) );
     painter.setFont( Pt::Gfx::Font(FONT_SPEC) );
 
-    const int testDraw    = 1;
-    const int doBenchmark = 1;
+#define DO_BENCHMARKING 0
+
+#define TEST_SOURCECOPY 1
+#define TEST_SOURCEOVER 0
+
+#define TEST_DRAW_LINE_AND_TEXT                0
+#define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES 0
+#define TEST_DRAW_SOLID_FILLED_POLYGONS        1
 
     // Lines
-    if(0 && testDraw) {
+    if(TEST_SOURCECOPY && TEST_DRAW_LINE_AND_TEXT) {
         painter.setCompositionMode(CompositionMode::SourceCopy);
         testDrawLine("Lines and Texts - SourceCopy", image, painter);
     }
-    if(0 && testDraw) {
+    if(TEST_SOURCEOVER && TEST_DRAW_LINE_AND_TEXT) {
         painter.setCompositionMode(CompositionMode::SourceOver);
         testDrawLine("Lines and Texts - SourceOver", image, painter);
     }
 
     // Rectangles and solid-filled rectangles
-    if(1 && testDraw) {
+    if(TEST_SOURCECOPY && TEST_DRAW_RECTANGLES_FILLED_RECTANGLES) {
         painter.setCompositionMode(CompositionMode::SourceCopy);
         testDrawRect("Rectangles & Solid-Filled Rectangles - SourceCopy", image, painter);
     }
 
-    if(1 && testDraw) {
+    if(TEST_SOURCEOVER && TEST_DRAW_RECTANGLES_FILLED_RECTANGLES) {
         painter.setCompositionMode(CompositionMode::SourceOver);
         testDrawRect("Rectangles & Solid-Filled Rectangles - SourceOver", image, painter);
     }
 
     // Solid-filled polygons
-    if(0 && testDraw) {
+    if(TEST_SOURCECOPY && TEST_DRAW_SOLID_FILLED_POLYGONS) {
         painter.setCompositionMode(CompositionMode::SourceCopy);
         testDrawSolidFillPolygon("Solid-Filled Polygons - SourceCopy", image, painter);
     }
-    if(0 && testDraw) {
+    if(TEST_SOURCEOVER && TEST_DRAW_SOLID_FILLED_POLYGONS) {
         painter.setCompositionMode(CompositionMode::SourceOver);
         testDrawSolidFillPolygon("Solid-Filled Polygons - SourceOver", image, painter);
     }
 
     // Benchmark
-    if(doBenchmark) {
+    if(DO_BENCHMARKING) {
         std::clog << std::fixed << std::setprecision(0) << std::endl;
 
         std::clog << "CompositionMode::SourceCopy" << std::endl;

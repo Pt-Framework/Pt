@@ -181,12 +181,18 @@ static size_t benchDrawSolidFillPolygon(CompositionMode cm)
 
 static void doBenchMark(CompositionMode cm)
 {
+#define BENCHMARK_TEXT                   1
+#define BENCHMARK_LINE                   1
+#define BENCHMARK_RECTANGLE              1
+#define BENCHMARK_SOLID_FILLED_RECTANGLE 1
+#define BENCHMARK_SOLID_FILLED_POLYGON   1
+
     double time1, time2;
 
     std::clog << "                                             Time (Factor)" << std::endl;
     std::clog << "                                             ---- --------" << std::endl;
 
-    if(1) {
+    if(BENCHMARK_TEXT) {
         time1 = benchDrawText<ImagePainter >(cm);
         time2 = benchDrawText<ImagePainter2>(cm);
         std::clog << "    Text                   @ ImagePainter  = " << std::setw(4) << time1 << std::endl;
@@ -195,7 +201,7 @@ static void doBenchMark(CompositionMode cm)
         std::clog << std::endl;
     }
 
-    if(1) {
+    if(BENCHMARK_LINE) {
         time1 = benchDrawLine<ImagePainter >(cm);
         time2 = benchDrawLine<ImagePainter2>(cm);
         std::clog << "    Line                   @ ImagePainter  = " << std::setw(4) << time1 << std::endl;
@@ -204,7 +210,7 @@ static void doBenchMark(CompositionMode cm)
         std::clog << std::endl;
     }
 
-    if(1) {
+    if(BENCHMARK_RECTANGLE) {
         time1 = benchDrawRect<ImagePainter >(cm);
         time2 = benchDrawRect<ImagePainter2>(cm);
         std::clog << "    Rectangle              @ ImagePainter  = " << std::setw(4) << time1 << std::endl;
@@ -213,7 +219,7 @@ static void doBenchMark(CompositionMode cm)
         std::clog << std::endl;
     }
 
-    if(1) {
+    if(BENCHMARK_SOLID_FILLED_RECTANGLE) {
         time1 = benchDrawSolidFillRect<ImagePainter >(cm);
         time2 = benchDrawSolidFillRect<ImagePainter2>(cm);
         std::clog << "    Solid-filled Rectangle @ ImagePainter  = " << std::setw(4) << time1 << std::endl;
@@ -222,7 +228,7 @@ static void doBenchMark(CompositionMode cm)
         std::clog << std::endl;
     }
 
-    if(1) {
+    if(BENCHMARK_SOLID_FILLED_POLYGON) {
         time1 = benchDrawSolidFillPolygon<ImagePainter >(cm);
         time2 = benchDrawSolidFillPolygon<ImagePainter2>(cm);
         std::clog << "    Solid-filled polygon   @ ImagePainter  = " << std::setw(4) << time1 << std::endl;
