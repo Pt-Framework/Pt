@@ -283,6 +283,18 @@ void Rasterizer2::rasterOnePixelLine(const Point& a, const Point& b)
     const Pt::int32_t sizeY = maxY - minY + 1;
     if(!sizeX && !sizeY) return;
 
+    // Check for horizontal line
+    if(minY == maxY) {
+        rasterOnePixelHLineSegment(minX, maxX, minY, _pen.color());
+        return;
+    }
+
+    // Check for vertical line
+    if(minY == maxY) {
+        rasterOnePixelVLineSegment(minX, minY, maxY, _pen.color());
+        return;
+    }
+
     // Convert the coordinates to fixed-points
     const Pt::int32_t fx1 = FIXED_POINT_FROM_INT(x1);
     const Pt::int32_t fy1 = FIXED_POINT_FROM_INT(y1);
