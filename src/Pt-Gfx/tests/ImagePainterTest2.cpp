@@ -46,7 +46,7 @@ int main(int argc, char* args[])
         painter.setCompositionMode(CompositionMode::SourceCopy);
         testDrawSolidFillPolygon("Solid-Filled Polygons - SourceCopy", image, painter);
     }
-    if(0 && testDraw) {
+    if(1 && testDraw) {
         painter.setCompositionMode(CompositionMode::SourceOver);
         testDrawSolidFillPolygon("Solid-Filled Polygons - SourceOver", image, painter);
     }
