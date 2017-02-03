@@ -65,99 +65,6 @@ namespace Gfx {
 
 
 // ======================================================================================
-// ===== Internal Functions =============================================================
-// ======================================================================================
-
-// Cohen–Sutherland clipping algorithm outcode
-typedef int CSOutcode;
-
-static const int CS_Inside = 0; // 0000
-static const int CS_Left   = 1; // 0001
-static const int CS_Right  = 2; // 0010
-static const int CS_Bottom = 4; // 0100
-static const int CS_Top    = 8; // 1000
-
-// Compute the bit code for a point (x, y) using the clip rectangle
-static CSOutcode csComputeOutcode(Pt::int32_t x, Pt::int32_t y, const Rect& clip)
-{
-    CSOutcode code = CS_Inside; // Initialised as being inside of the clip region
-
-         if(x < clip.left  ()) code |= CS_Left;   // to the left of clip region
-    else if(x > clip.right ()) code |= CS_Right;  // to the right of clip region
-         if(y < clip.top   ()) code |= CS_Top;    // above the clip region
-    else if(y > clip.bottom()) code |= CS_Bottom; // below the clip region
-
-    return code;
-}
-
-// Cohen–Sutherland clipping algorithm clips a line from (x0, y0) to (x1, y1)
-// against a clip rectangle (https://en.wikipedia.org/wiki/Cohen–Sutherland_algorithm)
-static bool csClipLine(Pt::int32_t& x0, Pt::int32_t& y0, Pt::int32_t& x1, Pt::int32_t& y1, const Rect& clip)
-{
-    // Compute the initial outcodes for the endpoints
-    CSOutcode outcode0 = csComputeOutcode(x0, y0, clip);
-    CSOutcode outcode1 = csComputeOutcode(x1, y1, clip);
-
-    bool        accept = false;
-    Pt::int32_t x, y;
-
-    while(true) {
-        // Both endpoints are inside the clip region
-        if(!(outcode0 | outcode1)) {
-            accept = true;
-            break;
-        }
-        // Both endpoints are outside the clip region
-        else if (outcode0 & outcode1) {
-            break;
-        }
-        // At least one endpoint is outside the clip rectangle
-        else {
-            // Pick the one that is outside the clip rectangle
-            // and find the intersection point using:
-            //     y = y0 + (x - x0) * slope
-            //     x = x0 + (y - y0) * slope
-            CSOutcode outcodeOut = outcode0 ? outcode0 : outcode1;
-            // Endpoint is above the clip rectangle
-            if(outcodeOut & CS_Top) {
-                x = x0 + (x1 - x0) * (clip.top   () - y0) / (y1 - y0);
-                y = clip.top();
-            }
-            // Endpoint is below the clip rectangle
-            else if(outcodeOut & CS_Bottom) {
-                x = x0 + (x1 - x0) * (clip.bottom() - y0) / (y1 - y0);
-                y = clip.bottom();
-            }
-            // Endpoint is to the right of clip rectangle
-            else if(outcodeOut & CS_Right) {
-                y = y0 + (y1 - y0) * (clip.right () - x0) / (x1 - x0);
-                x = clip.right();
-            }
-            // Endpoint is to the left of clip rectangle
-            else if(outcodeOut & CS_Left) {
-                y = y0 + (y1 - y0) * (clip.left  () - x0) / (x1 - x0);
-                x = clip.left();
-            }
-            // Replace the endpoint which is outside the clip rectangle
-            // with the intersection point and run the next pass
-            if(outcodeOut == outcode0) {
-                x0 = x;
-                y0 = y;
-                outcode0 = csComputeOutcode(x0, y0, clip);
-            }
-            else {
-                x1 = x;
-                y1 = y;
-                outcode1 = csComputeOutcode(x1, y1, clip);
-            }
-        }
-    }
-
-    return accept;
-}
-
-
-// ======================================================================================
 // ===== Public Member Functions ========================================================
 // ======================================================================================
 
@@ -348,7 +255,7 @@ void Rasterizer2::rasterOnePixelLine(const Point& a, const Point& b)
     Pt::int32_t x2 = b.x();
     Pt::int32_t y2 = b.y();
 
-    if(!csClipLine(x1, y1, x2, y2, _currentClip)) return;
+    if(!ClipShape::clipLine(x1, y1, x2, y2, _currentClip)) return;
 
     // Find the minimum and maximum coordinates
     Pt::int32_t minX, minY, maxX, maxY;

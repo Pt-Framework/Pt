@@ -40,10 +40,14 @@ class ClipShape {
     public:
         ClipShape();
 
+        static bool clipLine(Pt::int32_t& x0, Pt::int32_t& y0, Pt::int32_t& x1, Pt::int32_t& y1, const Rect& clip);
         static void clipPolygon(std::vector<Point>& in, const Rect& clippingArea);
 
     private:
-        enum Orientation{Left, Right, Top, Bottom} ;
+        static int csComputeOutcode(Pt::int32_t x, Pt::int32_t y, const Rect& clip);
+
+    private:
+        enum Orientation{ Left, Right, Top, Bottom };
 
         static void clipEdge(const std::vector<Point>& in,
                              std::vector<Point>& out,

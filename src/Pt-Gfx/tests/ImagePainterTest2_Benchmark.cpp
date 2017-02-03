@@ -183,8 +183,8 @@ static void doBenchMark(CompositionMode cm)
 {
     double time1, time2;
 
-    std::clog << "                                           Time (Factor)" << std::endl;
-    std::clog << "                                           ---- --------" << std::endl;
+    std::clog << "                                              Time (Factor)" << std::endl;
+    std::clog << "                                              ---- --------" << std::endl;
 
     if(1) {
         time1 = benchDrawText<ImagePainter >(cm);
