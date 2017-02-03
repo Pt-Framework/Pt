@@ -35,7 +35,8 @@ namespace Pt {
 namespace Hmi {
 
 ScrollView::ScrollView()
-: _widget(0)
+: _hasScrollBars(true)
+, _widget(0)
 , _scrollBarX(ScrollBar::Horizontal)
 , _scrollBarY(ScrollBar::Vertical)
 {
@@ -57,6 +58,13 @@ ScrollView::ScrollView()
 
 ScrollView::~ScrollView()
 {
+}
+
+
+void ScrollView::setScrollBars(bool hasScrollBars)
+{
+    _hasScrollBars = hasScrollBars;
+    onContentChanged();
 }
 
 
@@ -99,9 +107,17 @@ void ScrollView::onContentChanged()
     double width = size().width();
     double height = size().height();
 
-    _scrollBarX.show( width < _scrollLayout.maximumX() );
-    _scrollBarY.show( height < _scrollLayout.maximumY() ); 
-
+    if(_hasScrollBars)
+    {
+        _scrollBarX.show( width < _scrollLayout.maximumX() );
+        _scrollBarY.show( height < _scrollLayout.maximumY() ); 
+    }
+    else
+    {
+        _scrollBarX.show(false);
+        _scrollBarY.show(false); 
+    }
+    
     if( _scrollBarX.isVisible() )
         height -= _scrollBarX.size().height();
 

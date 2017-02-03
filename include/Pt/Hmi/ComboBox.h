@@ -41,6 +41,33 @@ namespace Pt {
 
 namespace Hmi {
 
+class PT_HMI_API ComboBoxMenu : public Window
+{
+    typedef Window Base;
+
+	  public:
+        ComboBoxMenu();
+		
+        virtual ~ComboBoxMenu();
+
+        void addItem(ListBoxItem& item);
+
+        void setScrollBars(bool hasScrollBars);
+
+    protected:
+        void onPaintBackground(const Gfx::RectF& rect);
+
+        void onShowEvent(const ShowEvent& ev);
+
+        void onMouseEvent(const MouseEvent& ev);
+
+        void onTouchEvent(const TouchEvent& ev);
+
+    private:
+        ListBox _items;
+};
+
+
 class PT_HMI_API ComboBox : public Control
 {
     typedef Control Base;
@@ -48,7 +75,9 @@ class PT_HMI_API ComboBox : public Control
 	  public:
         ComboBox();
 		
-        virtual ~ComboBox();	
+        virtual ~ComboBox();
+
+        void setScrollBars(bool hasScrollBars);
 
     protected:
         void onInvalidate();
@@ -70,8 +99,8 @@ class PT_HMI_API ComboBox : public Control
         void onOpenCombo();
 
     private:
+        ComboBoxMenu _menu;
         Pt::String  _text;
-        ListBox     _items;
         ListBoxItem _item1;
         ListBoxItem _item2;
         ListBoxItem _item3;
@@ -80,7 +109,6 @@ class PT_HMI_API ComboBox : public Control
         ListBoxItem _item6;
         ListBoxItem _item7;
         ListBoxItem _item8;
-        Window      _menu;
 };
 
 } // namespace

@@ -40,6 +40,8 @@ namespace Hmi {
 ListBoxItem::ListBoxItem()
 {
     setFocusPolicy(Widget::NormalFocus);
+
+    setPadding(8);
 }
 
 
@@ -48,27 +50,184 @@ ListBoxItem::~ListBoxItem()
 }
 
 
+const Pt::String& ListBoxItem::text() const
+{
+    return _text;
+}
+
+
+void ListBoxItem::setText(const Pt::String& text)
+{
+    _text = text;
+    invalidate();
+}
+
+
+void ListBoxItem::setIcon(const Gfx::Image& image)
+{
+    _image = image;
+    _picture.set(image);
+    
+    invalidate();
+}
+
+
+void ListBoxItem::setIconSize(const Gfx::SizeF& size)
+{
+    _iconSize = size;
+    update();
+}
+
+
+const Gfx::Color& ListBoxItem::textColor() const
+{
+    return _textColor ? *_textColor
+                      : Application::instance().styleOptions().textColor();
+}
+
+
+void ListBoxItem::setTextColor(const Gfx::Color& color)
+{
+    _textColor.reset( new Gfx::Color(color) );
+    invalidate();
+}
+
+
+const std::string& ListBoxItem::font() const
+{
+    return _fontName ? *_fontName
+                     : Application::instance().styleOptions().font().name();
+}
+
+
+void ListBoxItem::setFont(const std::string& fontName)
+{
+    _fontName.reset( new std::string(fontName) );
+    invalidate();
+}
+
+
+std::size_t ListBoxItem::fontSize() const
+{
+
+    return _fontSize ? *_fontSize
+                     : Application::instance().styleOptions().font().size();
+}
+
+
+void ListBoxItem::setFontSize(const std::size_t s)
+{
+    _fontSize.reset( new std::size_t(s) );
+    invalidate();
+}
+
+
+Gfx::Font::Style ListBoxItem::fontStyle() const
+{
+    return _fontStyle ? *_fontStyle
+                      : Application::instance().styleOptions().font().style();
+}
+
+
+void ListBoxItem::setFontStyle(Gfx::Font::Style style)
+{
+    _fontStyle.reset( new Gfx::Font::Style(style) );
+    invalidate();
+}
+
+
+void ListBoxItem::onPressed()
+{
+    Base::onPressed();
+}
+
+
+void ListBoxItem::onReleased()
+{
+    Base::onReleased();
+    std::clog << "ITEM SELECTED" << std::endl;
+    //clicked().send();
+}
+
+
+void ListBoxItem::onCanceled()
+{
+    Base::onCanceled();
+}
+
+
 void ListBoxItem::onInvalidate()
 {
     Base::onInvalidate();
+
+    _textPen = textColor();
+    _font = Gfx::Font(font(), fontSize(), fontStyle());
 }
 
 
 void ListBoxItem::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
-    const StyleOptions& options = Application::instance().styleOptions();
-
     Painter painter(surface);
     painter.setClip(rect);
-    
-    Gfx::Pen pen     = Gfx::Color::fromRgb8(0, 0, 0);
-    Gfx::Brush brush = Gfx::Color::fromRgb8(255, 255, 255);
-    
-    painter.setPen(pen);
-    painter.setBrush(brush);
 
-    painter.fillRect( Gfx::RectF( size() ) );
-    painter.drawRect( Gfx::RectF( size() ) );
+    onPaintContent(painter);
+}
+
+
+void ListBoxItem::onPaintContent(Painter& painter)
+{   
+    painter.setFont(_font);
+    painter.setPen(_textPen);
+    
+    //
+    // layout icon and text
+    //
+
+    Gfx::FontMetrics fm = painter.fontMetrics( _text );
+
+    double pictureX = 0;
+    double pictureY = 0;
+    double textX = 0;
+    double textY = 0;
+
+    double spacing = _picture.empty() || _text.empty() ? 0 : fm.height() * 0.5;
+    double pictureWidth = _iconSize.isNull() ? _picture.width() : _iconSize.width();
+    double pictureHeight = _iconSize.isNull() ? _picture.height() : _iconSize.height();
+    double itemsWidth = fm.width() + spacing + pictureWidth;
+    double itemsHeight = fm.height() + spacing + pictureHeight;
+
+    pictureX = padding().left();
+    pictureY = (size().height() - pictureHeight) / 2;
+    
+    textX = pictureX + pictureWidth + spacing;
+    textY = ((size().height() - fm.height()) / 2) + fm.ascent();
+            
+    //
+    // icon
+    //
+
+    if( ! _picture.empty() )
+    {
+        painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceOver);
+        
+        double pictureXOff = (pictureWidth - _picture.width()) / 2;
+        double pictureYOff = (pictureHeight - _picture.height()) / 2;
+
+        Gfx::PointF picturePos(pictureX + pictureXOff, 
+                               pictureY + pictureYOff);
+        painter.drawPicture(picturePos, _picture);
+        
+        painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceCopy);
+    }
+
+    //
+    // text
+    //
+
+    Gfx::RectF mnemonicRect;
+    Gfx::PointF textPos(textX, textY);
+    
+    painter.drawText(textPos, _text);
 }
 
 
@@ -147,6 +306,12 @@ ListBox::ListBox()
 
 ListBox::~ListBox()
 {
+}
+
+
+void ListBox::setScrollBars(bool hasScrollBars)
+{
+    _scrollView.setScrollBars(hasScrollBars);
 }
 
 

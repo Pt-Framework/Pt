@@ -62,16 +62,16 @@ void Button::setPressed(bool pressed)
 }
 
 
+const Pt::String& Button::text() const
+{
+    return _text;
+}
+
+
 void Button::setText(const Pt::String& text)
 {
     _text = Widget::setMnemonic(text);
     invalidate();
-}
-
-
-const Pt::String& Button::text() const
-{
-    return _text;
 }
 
 

@@ -46,6 +46,8 @@ class PT_HMI_API ScrollView : public Widget
 
         virtual ~ScrollView();
 
+        void setScrollBars(bool hasScrollBars);
+
         // TODO: Widget::setContent could work for the ScrollView if the
         //       content widget is stacked behind all other children
 
@@ -70,6 +72,7 @@ class PT_HMI_API ScrollView : public Widget
 
     private:
         ScrollLayout _scrollLayout;
+        bool         _hasScrollBars;
         Widget*      _widget;
         ScrollBar    _scrollBarX; 
         ScrollBar    _scrollBarY;

@@ -33,39 +33,143 @@ namespace Pt {
 
 namespace Hmi {
 
+//
+// ComboBoxMenu
+//
+
+ComboBoxMenu::ComboBoxMenu()
+: Window(0, Window::Popup)
+{
+    setMainWidget(&_items);
+}
+
+		
+ComboBoxMenu::~ComboBoxMenu()
+{
+}
+
+
+void ComboBoxMenu::addItem(ListBoxItem& item)
+{   
+    _items.addItem(item);
+}
+
+
+void ComboBoxMenu::setScrollBars(bool hasScrollBars)
+{
+    _items.setScrollBars(hasScrollBars);
+}
+
+
+void ComboBoxMenu::onPaintBackground(const Gfx::RectF& rect)
+{
+    Base::onPaintBackground(rect);
+
+    const StyleOptions& options = Application::instance().styleOptions();
+
+    Painter painter( surface() );
+    painter.setClip(rect);
+
+    //
+    // menu border
+    //
+    Gfx::RectF borderRect(size());
+    painter.setPen( options.contour() );
+    painter.drawRect(borderRect);
+}
+
+
+void ComboBoxMenu::onMouseEvent(const MouseEvent& ev)
+{
+    Base::onMouseEvent(ev);
+
+    Gfx::RectF rect( Gfx::PointF(0,0), size() );
+    if( rect.contains( ev.position() ) )
+        return;
+
+    if( ev.isPress() )
+    {
+        close();          
+    }
+}
+
+
+void ComboBoxMenu::onTouchEvent(const TouchEvent& ev)
+{
+    Base::onTouchEvent(ev);
+
+    Gfx::RectF rect( Gfx::PointF(0,0), size() );
+    if( rect.contains( ev.position() ) )
+        return;
+
+    if( ev.isPress() )
+    {
+        close();          
+    }
+}
+
+
+void ComboBoxMenu::onShowEvent(const ShowEvent& ev)
+{
+    Base::onShowEvent(ev);
+
+    if( ! ev.visible() )
+    {
+        releasePointer();
+    }
+    else
+    {
+        grabPointer();
+    }
+}
+
+
+//
+// ComboBox
+//
+
 ComboBox::ComboBox()
-: _menu(0, Window::Popup)
 {
     setTextInput(true);
     setFocusPolicy(Widget::NormalFocus);
-    _text = "Hallo";
 
-    _item1.resize( Gfx::SizeF(20, 20) );
-    _item2.resize( Gfx::SizeF(20, 20) );
-    _item3.resize( Gfx::SizeF(20, 20) );
-    _item4.resize( Gfx::SizeF(20, 20) );
-    _item5.resize( Gfx::SizeF(20, 20) );
-    _item6.resize( Gfx::SizeF(20, 20) );
-    _item7.resize( Gfx::SizeF(20, 20) );
-    _item8.resize( Gfx::SizeF(20, 20) );
+    _item1.resize( Gfx::SizeF(20, 25) );
+    _item1.setText("Item 1");
+    _item2.resize( Gfx::SizeF(20, 25) );
+    _item2.setText("Item 2");
+    _item3.resize( Gfx::SizeF(20, 25) );
+    _item3.setText("Item 3");
+    _item4.resize( Gfx::SizeF(20, 25) );
+    _item4.setText("Item 4");
+    _item5.resize( Gfx::SizeF(20, 25) );
+    _item5.setText("Item 5");
+    _item6.resize( Gfx::SizeF(20, 25) );
+    _item6.setText("Item 6");
+    _item7.resize( Gfx::SizeF(20, 25) );
+    _item7.setText("Item 7");
+    _item8.resize( Gfx::SizeF(20, 25) );
+    _item8.setText("Item 8");
 
-    _items.addItem(_item1);
-    _items.addItem(_item2);
-    _items.addItem(_item3);
-    _items.addItem(_item4);
-    _items.addItem(_item5);
-    _items.addItem(_item6);
-    _items.addItem(_item7);
-    _items.addItem(_item8);
-
-    _menu.setMainWidget(&_items);
+    _menu.addItem(_item1);
+    _menu.addItem(_item2);
+    _menu.addItem(_item3);
+    _menu.addItem(_item4);
+    _menu.addItem(_item5);
+    _menu.addItem(_item6);
+    _menu.addItem(_item7);
+    _menu.addItem(_item8);
     _menu.eventReady() += Pt::slot(*this, &ComboBox::onMenuKeyEvent);
-    _menu.setName("ComboMenu");
 }
 
 
 ComboBox::~ComboBox()
 {
+}
+
+
+void ComboBox::setScrollBars(bool hasScrollBars)
+{
+    _menu.setScrollBars(hasScrollBars);
 }
 
 
@@ -82,11 +186,12 @@ void ComboBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     Painter painter(surface);
     painter.setClip(rect);
     
-    Gfx::Pen pen     = Gfx::Color::fromRgb8(0, 0, 0);
+    Gfx::Pen pen  = options.contour();
     if(isHighlighted() || this->hasFocus() )
         pen = options.accentColor();
 
-    Gfx::Brush brush = Gfx::Color::fromRgb8(255, 255, 255);
+    Gfx::Pen textPen = options.textColor();
+    Gfx::Brush brush = options.textBackground();
     Gfx::Font font   = options.font();
     
     painter.setPen(pen);
@@ -99,6 +204,7 @@ void ComboBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     Gfx::FontMetrics fm = painter.fontMetrics(font, _text);
 
     Gfx::PointF textPos( 5, fm.ascent() + 5);
+    painter.setPen(textPen);
     painter.drawText(textPos, _text);
 }
 
@@ -157,7 +263,7 @@ void ComboBox::onOpenCombo()
     _menu.move(pos);
 
     _menu.show();
-    std::clog << "SHOW COMBO BOX" << std::endl;
+    _menu.activate();
 }
 
 

@@ -33,29 +33,82 @@
 #include <Pt/Hmi/Button.h>
 #include <Pt/Hmi/ScrollView.h>
 #include <Pt/Hmi/FlowLayout.h>
+#include <Pt/Hmi/Picture.h>
 #include <Pt/Gfx/Color.h>
-#include <Pt/Gfx/Brush.h>
+#include <Pt/Gfx/Image.h>
 #include <Pt/SmartPtr.h>
 
 namespace Pt {
 
 namespace Hmi {
 
+//
+// TODO: auto-sizing
+//
 class PT_HMI_API ListBoxItem : public Button
 {
-    typedef Control Button;
+    typedef Button Base;
 
 	  public:
         ListBoxItem();
 		
         virtual ~ListBoxItem();	
+        
+        void setText(const Pt::String& t);
+
+        const Pt::String& text() const;
+        
+        void setIcon(const Gfx::Image& image);
+
+        void setIconSize(const Gfx::SizeF& size);
+
+    public:
+        const Gfx::Color& textColor() const;
+
+        void setTextColor(const Gfx::Color& color);
+
+        const std::string& font() const;
+
+        void setFont(const std::string& fontName);
+
+        std::size_t fontSize() const;
+
+        void setFontSize(const std::size_t n);
+
+        Gfx::Font::Style fontStyle() const;
+
+        void setFontStyle(Gfx::Font::Style style);
+
+    protected:
+        virtual void onPressed();
+
+        virtual void onReleased();
+
+        virtual void onCanceled();
 
     protected:
         virtual void onInvalidate();
 	
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
+        virtual void onPaintContent(Painter& painter);
+
+    protected:
         virtual void onResizeEvent(const ResizeEvent& ev);
+
+    private:
+        String     _text;
+        Gfx::Image _image;
+        Gfx::SizeF _iconSize;
+
+        AutoPtr<Gfx::Color>       _textColor;
+        AutoPtr<std::string>      _fontName;
+        AutoPtr<std::size_t>      _fontSize;
+        AutoPtr<Gfx::Font::Style> _fontStyle;
+
+        Gfx::Pen   _textPen;
+        Gfx::Font  _font;
+        Picture    _picture;
 };
 
 
@@ -86,6 +139,8 @@ class PT_HMI_API ListBox : public Control
         ListBox();
 		
         virtual ~ListBox();
+
+        void setScrollBars(bool hasScrollBars);
 
         void addItem(ListBoxItem& item);
 

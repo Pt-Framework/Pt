@@ -48,9 +48,9 @@ class PT_HMI_API Button : public Control
 
         bool isPressed() const;
 
-        void setText(const Pt::String& t);
-
         const Pt::String& text() const;
+
+        void setText(const Pt::String& t);
 
         Signal<>& clicked();
     
