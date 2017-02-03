@@ -469,27 +469,30 @@ void Rasterizer2::rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt
 // Public-domain code by Darel Rex Finley, 2007
 void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, const Color& color)
 {
-    Pt::int32_t minX;
-    Pt::int32_t minY;
-    Pt::int32_t maxX;
-    Pt::int32_t maxY;
-    Pt::int32_t sizeX;
-    Pt::int32_t sizeY;
+    // Find the minimum and maximum coordinates
+    Pt::int32_t minX =  65535;
+    Pt::int32_t minY =  65535;
+    Pt::int32_t maxX = -65535;
+    Pt::int32_t maxY = -65535;
 
-    Pt::int32_t nodes;
-    Pt::int32_t nodeX[1024];
-    Pt::int32_t pixelX;
-    Pt::int32_t pixelY;
-    Pt::int32_t i;
-    Pt::int32_t j;
+    for(size_t i = 0; i < pointCount; ++i) {
+        const Pt::int32_t x = points[i].x();
+        const Pt::int32_t y = points[i].y();
+        if(x < minX) minX = x;
+        if(y < minY) minY = y;
+        if(x > maxX) maxX = x;
+        if(y > maxY) maxY = y;
+    }
+
+    // List of nodes
+    std::vector<Pt::int32_t> nodeX(pointCount, 0);
 
     //  Loop through the rows of the image
-    for(pixelY = 0; pixelY < _image->height(); ++pixelY) {
-
+    for(Pt::int32_t pixelY = minY; pixelY <= maxY; ++pixelY) {
         // Build a list of nodes
-        j     = pointCount - 1;
-        nodes = 0;
-        for(i = 0; i < pointCount; ++i) {
+        Pt::int32_t j     = pointCount - 1;
+        Pt::int32_t nodes = 0;
+        for(Pt::int32_t i = 0; i < pointCount; ++i) {
 
             if( points[i].y() < (double) pixelY && points[j].y() >= (double) pixelY ||
                 points[j].y() < (double) pixelY && points[i].y() >= (double) pixelY
@@ -499,10 +502,8 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
             }
             j = i;
         }
-
         // Sort the nodes, via a simple bubble sort
-        i = 0;
-        while(i < nodes - 1) {
+        for(Pt::int32_t i = 0; i < nodes - 1;) {
             if(nodeX[i] > nodeX[i + 1]) {
                 std::swap(nodeX[i], nodeX[i + 1]);
                 if(i) --i;
@@ -511,16 +512,13 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
                 ++i;
             }
         }
-
         // Fill the pixels between node pairs
-        for(i = 0; i < nodes; i += 2) {
-            if(nodeX[i    ] >= (_image->width() - 1)) break;
-            if(nodeX[i + 1] > 0 ) {
-
-                if(nodeX[i    ] <  0              ) nodeX[i    ] = 0;
-                if(nodeX[i + 1] >= _image->width()) nodeX[i + 1] = _image->width() - 1;
-
-                for(pixelX = nodeX[i]; pixelX < nodeX[i + 1]; ++pixelX) {
+        for(Pt::int32_t i = 0; i < nodes; i += 2) {
+            if(nodeX[i    ] >= maxX) break;
+            if(nodeX[i + 1] >  minX) {
+                if(nodeX[i    ] < minX) nodeX[i    ] = minX;
+                if(nodeX[i + 1] > maxX) nodeX[i + 1] = maxX;
+                for(Pt::int32_t pixelX = nodeX[i]; pixelX < nodeX[i + 1]; ++pixelX) {
                     /*
                     const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
                     Pixel             dstPixel(_image->view(), from, y);
