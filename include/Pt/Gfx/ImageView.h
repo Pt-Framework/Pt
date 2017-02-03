@@ -1,10 +1,10 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
-  
+/* Copyright (C) 2015 Marc Boris Duerner
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -14,15 +14,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
   02110-1301 USA
 */
 
@@ -83,7 +83,7 @@ class Pixel
              _x = p._x;
              _y = p._y;
         }
-        
+
         void advance();
 
         void advance( Pt::ssize_t n );
@@ -96,16 +96,16 @@ class Pixel
         }
 
         void assign(const ConstPixel& p, CompositionMode mode);
-        
+
         Color toColor() const;
 
         ImageView& view() const
         { return *_view; }
-        
+
         Pt::ssize_t x() const
         { return _x; }
 
-        Pt::ssize_t y() const 
+        Pt::ssize_t y() const
         { return _y; }
 
         Pt::uint8_t* base()
@@ -116,7 +116,7 @@ class Pixel
 
         bool operator!=(const Pixel& p) const
         {  return _base != p._base; }
-        
+
         bool operator==(const Pixel& p) const
         { return _base == p._base; }
 
@@ -150,20 +150,20 @@ class ConstPixel
              _x = p._x;
              _y = p._y;
         }
-        
+
         void advance();
 
         void advance( Pt::ssize_t n );
-        
+
         Color toColor() const;
 
         const ImageView& view() const
         { return *_view; }
-        
+
         Pt::ssize_t x() const
         { return _x; }
 
-        Pt::ssize_t y() const 
+        Pt::ssize_t y() const
         { return _y; }
 
         const Pt::uint8_t* base() const
@@ -171,7 +171,7 @@ class ConstPixel
 
         bool operator!=(const ConstPixel& p) const
         {  return _base != p._base; }
-        
+
         bool operator==(const ConstPixel& p) const
         { return _base == p._base; }
 
@@ -212,23 +212,23 @@ class ImageView
 
                 bool operator==(const PixelIterator& it) const
                 { return _pixel == it._pixel; }
-        
+
                 Pixel& operator*()
                 { return _pixel; }
-                
+
                 Pixel* operator->()
                 { return &_pixel; }
-                
+
                 PixelIterator& operator++()
-                {            
+                {
                     _pixel.advance();
-                    return *this; 
+                    return *this;
                 }
 
                 PixelIterator& operator+=(Pt::ssize_t n)
                 {
-                    _pixel.advance(n);  
-                    return *this; 
+                    _pixel.advance(n);
+                    return *this;
                 }
 
             private:
@@ -257,29 +257,29 @@ class ImageView
 
                 bool operator==(const ConstPixelIterator& it) const
                 { return _pixel == it._pixel; }
-        
+
                 const ConstPixel& operator*()
                 { return _pixel; }
-                
+
                 const ConstPixel* operator->() const
                 { return &_pixel; }
-                
+
                 ConstPixelIterator& operator++()
-                {            
+                {
                     _pixel.advance();
-                    return *this; 
+                    return *this;
                 }
 
                 ConstPixelIterator& operator+=(Pt::ssize_t n)
                 {
-                    _pixel.advance(n);  
-                    return *this; 
+                    _pixel.advance(n);
+                    return *this;
                 }
 
             private:
                 ConstPixel _pixel;
         };
-    
+
     public:
         ImageView()
         : _format( &ImageFormat::argb32() )
@@ -297,7 +297,7 @@ class ImageView
         , _stride(0)
         { }
 
-        ImageView(const ImageFormat& format, Pt::uint8_t* data, 
+        ImageView(const ImageFormat& format, Pt::uint8_t* data,
                   const Size& size, Pt::ssize_t padding)
         : _format(&format)
         , _data(data)
@@ -306,11 +306,11 @@ class ImageView
         {
             _stride = (_size.width() * _format->pixelStride()) + _padding;
         }
-        
+
         virtual ~ImageView()
         {}
 
-        void reset(const ImageFormat& format, Pt::uint8_t* data, 
+        void reset(const ImageFormat& format, Pt::uint8_t* data,
                   const Size& size, Pt::ssize_t padding)
         {
             _format = &format;
@@ -386,7 +386,7 @@ inline Pixel::Pixel(ImageView& view, Pt::ssize_t x, Pt::ssize_t y)
 : _view(&view)
 , _x(x)
 , _y(y)
-{ 
+{
     _base = view.data() + view.stride() * y + x * view.pixelStride();
 }
 
@@ -450,7 +450,7 @@ inline ConstPixel::ConstPixel(const ImageView& view, Pt::ssize_t x, Pt::ssize_t 
 : _view(&view)
 , _x(x)
 , _y(y)
-{ 
+{
     _base = view.data() + view.stride() * y + x * view.pixelStride();
 }
 

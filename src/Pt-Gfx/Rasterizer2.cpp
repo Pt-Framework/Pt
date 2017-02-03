@@ -280,6 +280,19 @@ void Rasterizer2::strokeText( const Point& to, const Pt::String& text )
     _text->draw( *_image, _pen.color(), to, text, _compositionMode );
 }
 
+void Rasterizer2::strokeRect(const Point& tl, const Point& br)
+{
+    switch( _pen.style() ) {
+        case Pen::Solid:
+            rasterOnePixelRectOutline(tl, br);
+            break;
+
+        case Pen::Dash:
+        case Pen::DoubleDash:
+            break;
+    }
+}
+
 void Rasterizer2::strokeOutline(const Point* points, size_t pointCount)
 {
     switch( _pen.style() ) {
@@ -293,6 +306,11 @@ void Rasterizer2::strokeOutline(const Point* points, size_t pointCount)
         case Pen::DoubleDash:
             break;
     }
+}
+
+void Rasterizer2::fillRect(const Point& tl, const Point& br)
+{
+    rasterOnePixelRectArea(tl, br);
 }
 
 void Rasterizer2::fillPolygon(const Point* points, const size_t pointCount)
@@ -353,13 +371,10 @@ void Rasterizer2::rasterOnePixelLine(const Point& a, const Point& b)
         maxY = y1;
     }
 
-    // Calculate the size of the rectangle
+    // Calculate the size of the line
     const Pt::int32_t sizeX = maxX - minX + 1;
     const Pt::int32_t sizeY = maxY - minY + 1;
-
-    // Caculate the number of steps
-    const Pt::int32_t steps = std::max(sizeX, sizeY) - 1;
-    if(!steps) return;
+    if(!sizeX && !sizeY) return;
 
     // Convert the coordinates to fixed-points
     const Pt::int32_t fx1 = FIXED_POINT_FROM_INT(x1);
@@ -368,10 +383,38 @@ void Rasterizer2::rasterOnePixelLine(const Point& a, const Point& b)
     const Pt::int32_t fy2 = FIXED_POINT_FROM_INT(y2);
 
     // Raster the line
-    rasterOnePixelLineSegment(fx1, fy1, fx2, fy2, steps, _pen.color(), false);
+    rasterOnePixelLineSegment(fx1, fy1, fx2, fy2, _pen.color(), false);
 }
 
-void Rasterizer2::rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, Pt::int32_t steps, const Color& color, bool skipLastPoint)
+void Rasterizer2::rasterOnePixelHLineSegment(Pt::int32_t x1, Pt::int32_t x2, Pt::int32_t y, const Color& color)
+{
+    // Calculate the length of the line
+    const Pt::int32_t sizeL = x2 - x1 + 1;
+
+    // Draw the line
+    Pixel pixel(_image->view(), x1, y);
+
+    for(Pt::int32_t i = 0; i < sizeL; ++i) {
+        _image->format().setPixel(pixel, color, _compositionMode);
+        pixel.advance();
+    }
+}
+
+void Rasterizer2::rasterOnePixelVLineSegment(Pt::int32_t x, Pt::int32_t y1, Pt::int32_t y2, const Color& color)
+{
+    // Calculate the length of the line
+    const Pt::int32_t sizeL = y2 - y1 + 1;
+
+    // Draw the line
+    Pixel pixel(_image->view(), x, y1);
+
+    for(Pt::int32_t i = 0; i < sizeL; ++i) {
+        _image->format().setPixel(pixel, color, _compositionMode);
+        pixel.advance(_image->width() - x);;
+    }
+}
+
+void Rasterizer2::rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, const Color& color, bool skipLastPoint)
 {
     // TODO: hline, vline, xline
 
@@ -387,8 +430,8 @@ void Rasterizer2::rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt
         } while(false)
 
     // Swap the values as needed
-    Pt::int32_t deltaX = (fx2 >= fx1) ? (fx2 - fx1) : (fx1 - fx2);
-    Pt::int32_t deltaY = (fy2 >= fy1) ? (fy2 - fy1) : (fy1 - fy2);
+    const Pt::int32_t deltaX = (fx2 >= fx1) ? (fx2 - fx1) : (fx1 - fx2);
+    const Pt::int32_t deltaY = (fy2 >= fy1) ? (fy2 - fy1) : (fy1 - fy2);
     bool        steep  = deltaY > deltaX;
 
     if(steep) {
@@ -466,6 +509,59 @@ void Rasterizer2::rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt
     }
 }
 
+void Rasterizer2::rasterOnePixelRectArea(const Point& tl, const Point& br)
+{
+    // Get the minimum and maximum coordinates
+    Pt::int32_t minX = tl.x();
+    Pt::int32_t minY = tl.y();
+    Pt::int32_t maxX = br.x();
+    Pt::int32_t maxY = br.y();
+
+    // Clip the coordinates
+    if(minX < _currentClip.left  ()) minX = _currentClip.left  ();
+    if(minY < _currentClip.top   ()) minY = _currentClip.top   ();
+    if(maxX > _currentClip.right ()) maxX = _currentClip.right ();
+    if(maxY > _currentClip.bottom()) maxY = _currentClip.bottom();
+
+    // Calculate the width of the rectangle
+    const Pt::int32_t sizeX = maxX - minX + 1;
+
+    // Draw the rectangles
+    for(Pt::int32_t y = minY; y <= maxY; ++y) {
+        Pt::int32_t spanWidth = sizeX;
+        while(spanWidth > 0) {
+            const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
+            Pixel             dstPixel(_image->view(), minX + sizeX - spanWidth, y);
+            ConstPixel        srcPixel(_brushBuffer.view(), 0, 0);
+            _image->format().copy(dstPixel, srcPixel, n, _compositionMode);
+            spanWidth -= n;
+        }
+    }
+}
+
+void Rasterizer2::rasterOnePixelRectOutline(const Point& tl, const Point& br)
+{
+    // Get the minimum and maximum coordinates
+    Pt::int32_t minX = tl.x();
+    Pt::int32_t minY = tl.y();
+    Pt::int32_t maxX = br.x();
+    Pt::int32_t maxY = br.y();
+
+    // Clip the coordinates
+    if(minX < _currentClip.left  ()) minX = _currentClip.left  ();
+    if(minY < _currentClip.top   ()) minY = _currentClip.top   ();
+    if(maxX > _currentClip.right ()) maxX = _currentClip.right ();
+    if(maxY > _currentClip.bottom()) maxY = _currentClip.bottom();
+
+    // Draw the rectangle's horizontal lines
+    rasterOnePixelHLineSegment(minX, maxX, minY, _pen.color());
+    rasterOnePixelHLineSegment(minX, maxX, maxY, _pen.color());
+
+    // Draw the rectangle's vertical lines
+    rasterOnePixelVLineSegment(minX, minY + 1, maxY - 1, _pen.color());
+    rasterOnePixelVLineSegment(maxX, minY + 1, maxY - 1, _pen.color());
+}
+
 // http://alienryderflex.com/polygon_fill
 // Public-domain code by Darel Rex Finley, 2007
 void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, const Color& color)
@@ -534,7 +630,7 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
                 to = (x1 == x2) ? x1 : x2;
             }
             if(to < from) continue;
-            // Draw the solid part
+            // Draw the spans
             Pt::int32_t spanWidth = to - from + 1;
             while(spanWidth > 0) {
                 const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
@@ -560,26 +656,12 @@ void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount, c
     }
 
     // Raster the outlines as multiple one-pixel lines
-    const size_t      pc1 = pointCount - 1;
-          Pt::int32_t xm, ym;
+    const size_t pc1 = pointCount - 1;
 
     for(size_t i = 0; i < pc1; ++i) {
-        if(lineX[i] > lineX[i + 1]) xm = lineX[i    ] - lineX[i + 1];
-        else                        xm = lineX[i + 1] - lineX[i    ];
-        if(lineY[i] > lineY[i + 1]) ym = lineY[i    ] - lineY[i + 1];
-        else                        ym = lineY[i + 1] - lineY[i    ];
-        xm >>= FIXED_POINT_SHIFT_FACTOR;
-        ym >>= FIXED_POINT_SHIFT_FACTOR;
-        rasterOnePixelLineSegment(lineX[i], lineY[i], lineX[i + 1], lineY[i + 1], std::max(xm, ym) - 1, color, true);
+        rasterOnePixelLineSegment(lineX[i], lineY[i], lineX[i + 1], lineY[i + 1], color, true);
     }
-
-    if(lineX[0] > lineX[pc1]) xm = lineX[0  ] - lineX[pc1];
-    else                      xm = lineX[pc1] - lineX[0  ];
-    if(lineY[0] > lineY[pc1]) ym = lineY[0  ] - lineY[pc1];
-    else                      ym = lineY[pc1] - lineY[0  ];
-    xm >>= FIXED_POINT_SHIFT_FACTOR;
-    ym >>= FIXED_POINT_SHIFT_FACTOR;
-    rasterOnePixelLineSegment(lineX[0], lineY[0], lineX[pc1], lineY[pc1], std::max(xm, ym) - 1, color, false);
+    rasterOnePixelLineSegment(lineX[0], lineY[0], lineX[pc1], lineY[pc1], color, false);
 }
 
 void Rasterizer2::genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount) const

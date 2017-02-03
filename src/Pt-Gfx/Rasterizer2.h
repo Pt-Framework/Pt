@@ -100,15 +100,22 @@ class Rasterizer2
         void image(const Point& toIn, const Image& image, const Rect& imageRect);
 
         void strokeText(const Point& to, const Pt::String& text);
+        void strokeRect(const Point& tl, const Point& br);
         void strokeOutline(const Point* points, size_t pointCount);
 
+        void fillRect(const Point& tl, const Point& br);
         void fillPolygon(const Point* points, const size_t pointCount);
 
     private:
         void updateClip();
 
         void rasterOnePixelLine(const Point& a, const Point& b);
-        void rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, Pt::int32_t steps, const Color& color, bool skipLastPoint);
+        void rasterOnePixelHLineSegment(Pt::int32_t x1, Pt::int32_t x2, Pt::int32_t y, const Color& color);
+        void rasterOnePixelVLineSegment(Pt::int32_t x, Pt::int32_t y1, Pt::int32_t y2, const Color& color);
+        void rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, const Color& color, bool skipLastPoint);
+
+        void rasterOnePixelRectArea(const Point& tl, const Point& br);
+        void rasterOnePixelRectOutline(const Point& tl, const Point& br);
 
         void rasterPolygonArea(const Point* points, size_t pointCount, const Color& color);
         void rasterPolygonOutline(const Point* points, size_t pointCount, const Color& color);
