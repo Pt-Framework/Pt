@@ -21,10 +21,10 @@ using namespace Pt::Gfx;
 #define BENCHMARK_IMAGE_SIZE             Size(1280, 800)
 #define BENCHMARK_LOOP_COUNT             250
 
-#define BENCHMARK_TEXT                   1
-#define BENCHMARK_LINE                   1
-#define BENCHMARK_RECTANGLE              1
-#define BENCHMARK_SOLID_FILLED_RECTANGLE 1
+#define BENCHMARK_TEXT                   0
+#define BENCHMARK_LINE                   0
+#define BENCHMARK_RECTANGLE              0
+#define BENCHMARK_SOLID_FILLED_RECTANGLE 0
 #define BENCHMARK_SOLID_FILLED_POLYGON   1
 
 #define TEST_SOURCECOPY                        1

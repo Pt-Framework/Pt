@@ -254,7 +254,7 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
 
 #if 1
 
-    #define SCALE 2
+    #define SCALE 16
 
     //
     Pt::int32_t sizeX = (maxX - minX + 1) * SCALE;
@@ -267,7 +267,7 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
     std::vector<Pt::int32_t> pointY(pointCount, 0);
 
     for(size_t i = 0; i < pointCount; ++i) {
-        pointX[i] = points[i].x() * SCALE - minX;
+        pointX[i] = points[i].x() * SCALE - minX * SCALE;
         pointY[i] = points[i].y() * SCALE - minY * SCALE;
     }
 
@@ -308,21 +308,96 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
             Pt::int32_t from = FIXED_POINT_TO_INT(nodeXf[i    ]);
             Pt::int32_t to   = FIXED_POINT_TO_INT(nodeXf[i + 1]);
-            for(Pt::int32_t j = from; j <= to; ++j)
-                alphas[row + j] = 255;
+            for(Pt::int32_t k = from; k <= to; ++k)
+                alphas[row + k] = 255;
+        }
+        /*
+        Pt::int32_t acc = 0;
+        for(Pt::int32_t iterX = 0; iterX < sizeX; ++iterX) {
+            acc += alphas[row + iterX];
+            if( !((iterX + 1) % SCALE) ) {
+                alphas[row + iterX / SCALE] = acc /= SCALE;
+                acc = 0;
+            }
+        }
+        //*/
+    }
+
+    /*
+    Pt::int32_t acc = 0;
+    for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
+        Pt::int32_t row = pixelY * sizeX;
+        for(Pt::int32_t pixelX = 0; pixelX < sizeX; ++pixelX) {
+            acc += alphas[row + pixelX];
+            if(!(pixelX + 1) % SCALE) {
+                alphas[row + pixelX / SCALE] = acc /= SCALE;
+                acc = 0;
+            }
+        }
+    }
+    //*/
+
+    //Pt::int32_t sizeX = (maxX - minX + 1) * SCALE;
+    //Pt::int32_t sizeY = (maxY - minY + 1) * SCALE;
+
+    //std::vector<uint8_t> alphas(sizeX * sizeY, 0);
+/*
+    Pt::int32_t acc = 0;
+
+    for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
+        Pt::int32_t row = pixelY * sizeX;
+        for(Pt::int32_t pixelX = 0; pixelX < sizeX; ++pixelX) {
+            acc += alphas[row + pixelX];
+            if( !((pixelX + 1) % SCALE) ) {
+                alphas[row + pixelX / SCALE] = acc /= SCALE;
+                acc = 0;
+            }
         }
     }
 
+    std::vector<uint8_t> alphas2(sizeX * sizeY, 0);
+
+    for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
+        Pt::int32_t row = pixelY * sizeX;
+
+        for(Pt::int32_t pixelX = 0; pixelX < sizeX; ++pixelX) {
+            acc += alphas[row + pixelX];
+            if( !((pixelX + 1) % SCALE) ) {
+                alphas[row + pixelX / SCALE] = acc /= SCALE;
+                acc = 0;
+            }
+        }
+
+
+            acc += alphas[row + pixelX];
+            if( !((pixelX + 1) % SCALE) ) {
+                alphas[row + pixelX / SCALE] = acc /= SCALE;
+                acc = 0;
+            }
+        }
+    }
+
+    for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
+        for(Pt::int32_t pixelX = 0; pixelX < sizeX; ++pixelX) {
+            if( !((pixelY + 1) % SCALE) && !((pixelX + 1) % SCALE) ) {
+                Pixel pixel(_image->view(), pixelX/SCALE + minX, pixelY/SCALE + minY);
+                _image->format().setPixel(pixel, color, _compositionMode, 255);
+            }
+        }
+    }
+*/
+
+    /*
     for(Pt::int32_t pixelY = minY; pixelY <= maxY; ++pixelY) {
         for(Pt::int32_t pixelX = minX; pixelX <= maxX; ++pixelX) {
-            int x0  = pixelX * SCALE;
-            int y0  = pixelY * SCALE;
+            int x0  = (pixelX - minX) * SCALE;
+            int y0  = (pixelY - minY) * SCALE;
             int acc = 0;
             for(int y = 0; y < SCALE; ++y) {
                 for(int x = 0; x < SCALE; ++x) {
                     int yi = y0 + y;
                     int xi = x0 + x;
-                    acc += alphas[ (yi - minY * SCALE) * sizeX + (xi - minX) ];
+                    acc += alphas[ yi * sizeX + xi ];
                 }
             }
             acc /= SCALE;
@@ -331,7 +406,7 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
             _image->format().setPixel(pixel, color, _compositionMode, acc);
         }
     }
-
+    //*/
 #else
 
     // List of nodes that define the horizontal segments
