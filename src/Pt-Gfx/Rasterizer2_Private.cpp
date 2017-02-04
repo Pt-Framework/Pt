@@ -258,7 +258,7 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
     Pt::int32_t sizeY = (maxY - minY + 1) * SUPERSAMPLING_SIZE;
 
     // Prepare a work buffer
-    std::vector<uint32_t> alphas(sizeX, 0);
+    std::vector<uint8_t> alphas(sizeX, 0);
 
     // Scale the polygon to match the super sampling size and translate it to (0, 0)
     std::vector<Pt::int32_t> pointX(pointCount, 0);
@@ -306,7 +306,7 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
             Pt::int32_t from = FIXED_POINT_TO_INT(nodeXf[i    ]);
             Pt::int32_t to   = FIXED_POINT_TO_INT(nodeXf[i + 1]);
             for(Pt::int32_t k = from; k <= to; ++k) {
-                alphas[k / SUPERSAMPLING_SIZE] += 255;
+                alphas[k / SUPERSAMPLING_SIZE] += 15;
             }
         }
         // Simply skip the next steps if we have not got all the needed samples
@@ -315,8 +315,7 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
 #if 1
         Pixel pixel(_image->view(), minX, pixelY / SUPERSAMPLING_SIZE + minY);
         for(Pt::int32_t iterX = 0; iterX < sizeX; ++iterX) {
-           // if(alphas[ iterX ] > 255) printf("#\n");
-            int acc = alphas[ iterX ] / SUPERSAMPLING_SIZE / SUPERSAMPLING_SIZE;
+            int acc = alphas[ iterX ] * 17 / SUPERSAMPLING_SIZE / SUPERSAMPLING_SIZE;
             _image->format().setPixel(pixel, color, _compositionMode, acc);
             pixel.advance();
         }
@@ -337,7 +336,7 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
         }
 #endif
         // Clear the work buffer
-        memset(&alphas[0], 0, alphas.size()*4);
+        memset(&alphas[0], 0, alphas.size());
     }
 
 #else

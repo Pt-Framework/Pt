@@ -16,7 +16,7 @@ using namespace Pt::Gfx;
 #define FONT_DIR  "../src/Pt-Gfx/fonts"
 #define FONT_SPEC "DejaVu Serif", 24, Pt::Gfx::Font::BoldItalic
 
-#define DO_BENCHMARKING                  0
+#define DO_BENCHMARKING                  1
 #define BENCHMARK_CHECK_RESULTING_IMAGE  0
 #define BENCHMARK_IMAGE_SIZE             Size(1280, 800)
 #define BENCHMARK_LOOP_COUNT             250
