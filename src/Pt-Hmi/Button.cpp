@@ -130,21 +130,18 @@ void Button::onShortcut( const KeyEvent& kev )
 void Button::onEnterEvent(const EnterEvent& ev)
 {
     Base::onEnterEvent(ev);
-    update();
 }
 
 
 void Button::onLeaveEvent(const LeaveEvent& ev)
 {
     Base::onLeaveEvent(ev);
-    update();
 }
 
 
 void Button::onFocusEvent(const FocusEvent& ev)
 {    
     Base::onFocusEvent(ev);
-    update();
 }
 
 
@@ -167,9 +164,12 @@ void Button::onMouseEvent(const MouseEvent& ev)
 
         bool isClick = _onClickBegin && inside;
         
-        _onClickBegin = false;
-        releasePointer();
-
+        if(_onClickBegin)
+        {
+            _onClickBegin = false;
+            releasePointer();
+        }
+        
         if(isClick)
         {
             onReleased();
@@ -201,8 +201,11 @@ void Button::onTouchEvent(const TouchEvent& ev)
 
         bool isClick = _onClickBegin && inside;
         
-        _onClickBegin = false;
-        releasePointer();
+        if(_onClickBegin)
+        {
+            _onClickBegin = false;
+            releasePointer();
+        }
 
         if(isClick)
         {
@@ -219,9 +222,12 @@ void Button::onTouchEvent(const TouchEvent& ev)
 bool Button::onScrollEvent(const ScrollEvent& ev)
 {    
     // cancel click detection
-    _onClickBegin = false;
-    releasePointer();
-    onCanceled();
+    if(_onClickBegin)
+    {
+        _onClickBegin = false;
+        releasePointer();
+        onCanceled();
+    }
 
     return Base::onScrollEvent(ev);
 }

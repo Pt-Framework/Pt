@@ -45,7 +45,7 @@ class PT_HMI_API ComboBoxMenu : public Window
 {
     typedef Window Base;
 
-	  public:
+    public:
         ComboBoxMenu();
 		
         virtual ~ComboBoxMenu();
@@ -53,6 +53,8 @@ class PT_HMI_API ComboBoxMenu : public Window
         void addItem(ListBoxItem& item);
 
         void setScrollBars(bool hasScrollBars);
+
+        Pt::Signal<ListBoxItem&>& selected();
 
     protected:
         void onPaintBackground(const Gfx::RectF& rect);
@@ -64,6 +66,9 @@ class PT_HMI_API ComboBoxMenu : public Window
         void onTouchEvent(const TouchEvent& ev);
 
     private:
+        void onItemSelected(ListBoxItem& item);
+
+    private:
         ListBox _items;
 };
 
@@ -72,10 +77,12 @@ class PT_HMI_API ComboBox : public Control
 {
     typedef Control Base;
 
-	  public:
+	public:
         ComboBox();
 		
         virtual ~ComboBox();
+
+        void addItem(ListBoxItem& item);
 
         void setScrollBars(bool hasScrollBars);
 
@@ -94,6 +101,8 @@ class PT_HMI_API ComboBox : public Control
         virtual bool onScrollEvent(const ScrollEvent& ev);
 
     private:
+        void onItemSelected(ListBoxItem& item);
+        
         void onMenuKeyEvent(const KeyEvent& ev);
 
         void onOpenCombo();

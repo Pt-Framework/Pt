@@ -128,6 +128,13 @@ void ApplicationImpl::grabPointer(Window& grabber)
 
 void ApplicationImpl::releasePointer(Window& grabber)
 {
+    // TODO: if mouse is not enabled unset pointer widget
+    // Application::instance().setPointerWidget(0)
+
+    // send mouse move event with current button state
+    // so widget under the cursor gets an enter event 
+    _lastMouse.setMove(); 
+    _eventReady.send(_lastMouse);
 }
 
 
@@ -138,13 +145,13 @@ void ApplicationImpl::grabPointer(Widget& grabber)
 
 void ApplicationImpl::releasePointer(Widget& grabber)
 {
-  // TODO: if mouse is not enabled unset pointer widget
-  // Application::instance().setPointerWidget(0)
+    // TODO: if mouse is not enabled unset pointer widget
+    // Application::instance().setPointerWidget(0)
 
-  // send mouse move event with current button state
-  // so widget under the cursor gets an enter event 
-  _lastMouse.setMove(); 
-  _eventReady.send(_lastMouse);
+    // send mouse move event with current button state
+    // so widget under the cursor gets an enter event 
+    _lastMouse.setMove(); 
+    _eventReady.send(_lastMouse);
 }
 
 

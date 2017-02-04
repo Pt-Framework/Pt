@@ -21,7 +21,6 @@ void ChildW::checkInput(const Pt::String& s)
 
 
 ChildW::ChildW(const std::string& title)
-: _vscroll(ScrollBar::Vertical)
 {
     _fileMenu.setName("FileMenu");
     
@@ -145,13 +144,13 @@ ChildW::ChildW(const std::string& title)
     _progressBar.setMargin(5);
     _progressBar.setPadding(5);
 
-		_slider.setName("Slider"); 
+    _slider.setName("Slider"); 
     _slider.move( Gfx::PointF(0, 0) );
     _slider.resize( Gfx::SizeF(100, 30) );
     _slider.setMargin(5);
     _slider.setPadding(5);
-		_slider.setRange(0, 100);
-		_slider.setPosition(100);
+    _slider.setRange(0, 100);
+    _slider.setPosition(100);
 
     _buttonBar.setName("ButtonBar");
     _buttonBar.resize( Gfx::SizeF(700, 290) );
@@ -162,24 +161,21 @@ ChildW::ChildW(const std::string& title)
     _buttonBar.dock(_closeButton, DockingLayout::Bottom);
     _buttonBar.dock(_dialogButton, DockingLayout::Bottom); 
     _buttonBar.dock(_toggleButton, DockingLayout::Bottom);
-		_buttonBar.dock(_progressBar, DockingLayout::Bottom);
-		_buttonBar.dock(_slider, DockingLayout::Bottom);
-    
-    _vscroll.resize( Gfx::SizeF(24, 24) );
+    _buttonBar.dock(_progressBar, DockingLayout::Bottom);
+    _buttonBar.dock(_slider, DockingLayout::Bottom);
 
     //Panel  
     _childView.resize( Gfx::SizeF(300, 620) );
     _childView.move( Gfx::PointF(1,1) );
     _childView.setName("MainPanel");
     _childView.setPadding(20); 
-    _childView.dock(_textLabel, DockingLayout::Fill); 
-    _childView.dock(_buttonBar, DockingLayout::Bottom);  
-    _childView.dock(_vscroll, DockingLayout::Right);
+    _childView.dock(_textLabel, DockingLayout::Fill);
+    _childView.dock(_buttonBar, DockingLayout::Bottom);
      
-    //_childWindow2.setMainWidget(&_closeButton);          
-    _childWindow2.move(Gfx::PointF(5, 40));    
+    //_childWindow2.setMainWidget(&_closeButton);
+    _childWindow2.move(Gfx::PointF(5, 40));
     _childWindow2.resize( Gfx::SizeF(250, 500) );
-    _childWindow2.setTitle("Child of " + title);    
+    _childWindow2.setTitle("Child of " + title);
     _childWindow2.setMainWidget(&_childView);
     add( _childWindow2 );
 

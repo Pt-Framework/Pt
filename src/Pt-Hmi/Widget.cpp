@@ -631,6 +631,9 @@ bool Widget::isVisible() const
 
 void Widget::show(bool s)
 {
+    if(_visible == s)
+        return;
+
     _visible = s;
 
     ShowEvent ev(vid(), s);
@@ -642,8 +645,6 @@ void Widget::show(bool s)
 
 void Widget::onShowEvent(const ShowEvent& ev )
 {
-    _visible = ev.visible();
-
     if( parent() )
         parent()->onLayout();
 }

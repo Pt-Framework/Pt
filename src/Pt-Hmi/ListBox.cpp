@@ -79,6 +79,12 @@ void ListBoxItem::setIconSize(const Gfx::SizeF& size)
 }
 
 
+Pt::Signal<ListBoxItem&>& ListBoxItem::selected()
+{
+    return _selected;
+}
+
+
 const Gfx::Color& ListBoxItem::textColor() const
 {
     return _textColor ? *_textColor
@@ -145,8 +151,7 @@ void ListBoxItem::onPressed()
 void ListBoxItem::onReleased()
 {
     Base::onReleased();
-    std::clog << "ITEM SELECTED" << std::endl;
-    //clicked().send();
+    _selected.send(*this);
 }
 
 
@@ -315,15 +320,29 @@ void ListBox::setScrollBars(bool hasScrollBars)
 }
 
 
+void ListBox::onItemSelected(ListBoxItem& item)
+{
+    _selected.send(item);
+}
+
+
 void ListBox::addItem(ListBoxItem& item)
 {   
     _layout.add(item);
+    item.selected() += Pt::slot(*this, &ListBox::onItemSelected);
 }
 
 
 void ListBox::removeItem(ListBoxItem& item)
 {
     _layout.remove(item);
+    item.selected() -= Pt::slot(*this, &ListBox::onItemSelected);
+}
+
+
+Pt::Signal<ListBoxItem&>& ListBox::selected()
+{
+    return _selected;
 }
 
 

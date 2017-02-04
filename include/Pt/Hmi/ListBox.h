@@ -62,6 +62,8 @@ class PT_HMI_API ListBoxItem : public Button
 
         void setIconSize(const Gfx::SizeF& size);
 
+        Pt::Signal<ListBoxItem&>& selected();
+
     public:
         const Gfx::Color& textColor() const;
 
@@ -97,6 +99,7 @@ class PT_HMI_API ListBoxItem : public Button
         virtual void onResizeEvent(const ResizeEvent& ev);
 
     private:
+        Pt::Signal<ListBoxItem&> _selected;
         String     _text;
         Gfx::Image _image;
         Gfx::SizeF _iconSize;
@@ -146,6 +149,8 @@ class PT_HMI_API ListBox : public Control
 
         void removeItem(ListBoxItem& item);
 
+        Pt::Signal<ListBoxItem&>& selected();
+
     protected:
         virtual void onInvalidate();
 	
@@ -153,8 +158,12 @@ class PT_HMI_API ListBox : public Control
     
     protected:
         virtual void onResizeEvent(const ResizeEvent& ev);
+
+    private:
+        void onItemSelected(ListBoxItem& item);
     
     private:
+        Pt::Signal<ListBoxItem&> _selected;
         ListBoxLayout _layout;
         ScrollView    _scrollView;
 };

@@ -158,7 +158,16 @@ void ScrollLayout::onAddWidget(Widget& w)
     
     w.eventReady() += Pt::slot(*this, &ScrollLayout::onContentResize);
     w.eventReady() += Pt::slot(*this, &ScrollLayout::onContentScroll);
-    //w.eventReady() += Pt::slot(*this, &ScrollLayout::onContentMove);
+
+    // TODO: we should not monitor if the user moves a child widget
+    //       because the child widgets are moved themselves by the
+    //       ScrollLayout... It would be possible to have only one 
+    //       child or let the user set the position in a addWidget
+    //       function and the ScrollLayout layouts it at that
+    //       position.
+    //       CURRENTLY this works, because moving a widget to its
+    //       current position does not yield a MoveEvent
+    w.eventReady() += Pt::slot(*this, &ScrollLayout::onContentMove);
 
     onContentChanged();
 }
@@ -170,21 +179,19 @@ void ScrollLayout::onRemoveWidget(Widget& w)
 
     w.eventReady() -= Pt::slot(*this, &ScrollLayout::onContentResize);
     w.eventReady() -= Pt::slot(*this, &ScrollLayout::onContentScroll);
-
-    // TODO: we can not monitor if the user moves a child widget
-    //       because the child widgets are moved themselves by the
-    //       ScrollLayout... It would be possible to have only one 
-    //       child or let the user set the position in a addWidget
-    //       function and the ScrollLayout layouts it at that
-    //       position.
-
-    //w.eventReady() -= Pt::slot(*this, &ScrollLayout::onContentMove);
+    w.eventReady() -= Pt::slot(*this, &ScrollLayout::onContentMove);
 
     onContentChanged();
 }
 
 
 void ScrollLayout::onContentResize(const ResizeEvent& ev)
+{
+    onContentChanged();
+}
+
+
+void ScrollLayout::onContentMove(const MoveEvent& ev)
 {
     onContentChanged();
 }
@@ -208,8 +215,13 @@ void ScrollLayout::onContentChanged()
         const Widget* w =  widgets()[i];
         Gfx::PointF pos = w->position();
 
-        maxWidth = std::max( maxWidth, w->position().x() +  w->size().width() );
-        maxHeight= std::max( maxHeight, w->position().y() +  w->size().height() );
+        maxWidth = std::max( maxWidth, w->position().x() +  
+                                       w->size().width() + 
+                                       _lastScrollPos.x() );
+        
+        maxHeight= std::max( maxHeight, w->position().y() +  
+                                        w->size().height() + 
+                                        _lastScrollPos.y() );
     }
 
     _maxX = static_cast<int>(maxWidth);

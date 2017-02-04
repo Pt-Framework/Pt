@@ -185,43 +185,100 @@ Visual* Application::pointerGrabber()
 
 void Application::grabPointer(Window& grabber)
 {    
+    std::clog << "GRAB:    " << typeid(grabber).name() << std::endl;
+    
+    std::vector<Visual*>::iterator it =
+        std::find(_grabbers.begin(), _grabbers.end(), &grabber);
+
+    if( it != _grabbers.end() )
+        _grabbers.erase(it);
+    
     _impl->grabPointer(grabber);
 
     setPointerWidget(0);
 
     _pointerGrabber = &grabber;
+    _grabbers.push_back(&grabber);
 }
 
 
 void Application::releasePointer(Window& grabber)
-{
-    if(_pointerGrabber != static_cast<Visual*>(&grabber) )
-        return;
-    
+{  
     _pointerGrabber = 0;
 
-    _impl->releasePointer(grabber); 
+    std::vector<Visual*>::iterator it =
+        std::find(_grabbers.begin(), _grabbers.end(), &grabber);
+
+    if( it != _grabbers.end() )
+    {
+        std::clog << "RELEASE: " << typeid(grabber).name() << std::endl;
+        _grabbers.erase(it);
+        _impl->releasePointer(grabber);
+
+        grabLast();
+    }
 }
 
 
 void Application::grabPointer(Widget& grabber)
 {
+    std::clog << "GRAB:    " << typeid(grabber).name() << std::endl;
+
+    std::vector<Visual*>::iterator it =
+        std::find(_grabbers.begin(), _grabbers.end(), &grabber);
+
+    if( it != _grabbers.end() )
+        _grabbers.erase(it);
+
     _impl->grabPointer(grabber);
 
     setPointerWidget(&grabber);
 
     _pointerGrabber = &grabber;
+    _grabbers.push_back(&grabber);
 }
 
 
 void Application::releasePointer(Widget& grabber)
 {
-    if( _pointerGrabber != static_cast<Visual*>(&grabber) )
-        return;
-
     _pointerGrabber = 0;
 
-    _impl->releasePointer(grabber);
+    std::vector<Visual*>::iterator it =
+        std::find(_grabbers.begin(), _grabbers.end(), &grabber);
+
+    if( it != _grabbers.end() )
+    {
+        std::clog << "RELEASE: " << typeid(grabber).name() << std::endl;
+        _grabbers.erase(it);
+        _impl->releasePointer(grabber);
+
+        grabLast();
+    }
+}
+
+
+void Application::grabLast()
+{
+    // TODO: the ugly dynamic_Cast can be removed if Visual could return a
+    //       pointer to its window. Then grabPointer and releasePointer()
+    //       do not need to be overloaded for Window and Widget anymore. Add
+    //       such a virtual function to Visual later.
+
+    if( ! _grabbers.empty() )
+    {
+        Visual* visual = _grabbers.back();
+        Window* window = dynamic_cast<Window*>(visual);
+        if(window)
+        {
+            grabPointer(*window);
+        }
+        else
+        {
+            Widget* widget = static_cast<Widget*>(visual);
+            if(widget)
+                grabPointer(*widget);
+        }
+    }
 }
 
 

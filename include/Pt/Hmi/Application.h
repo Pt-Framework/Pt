@@ -165,6 +165,8 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void unregisterVisual(Visual& visual);
 
+        void grabLast();
+
         void setPointerWindow(Window* w);
 
         void setPointerWidget(Widget* widget);
@@ -179,6 +181,7 @@ class PT_HMI_API Application : public Pt::System::Application
         Window*            _pointerWindow;
         Widget*            _pointerWidget;
         Visual*            _pointerGrabber;
+        std::vector<Visual*> _grabbers;
         Style              _style;
         StyleOptions       _styleOptions;
         DefaultInputMethod _defaultInputMethod;

@@ -56,20 +56,18 @@ class ChildW : public Hmi::Window
         MenuItem _edit2;
         MenuItem _edit3;
 
-        ScrollBar _vscroll;
-
-        Window _childWindow2;
+        Window         _childWindow2;
         DockingLayout  _childView;
-        PushButton _closeButton;
-        PushButton _toggleButton;
-        PushButton _dialogButton;
-        CheckBox   _checkBox;
-        LineEdit   _lineEdit;
-        ComboBox   _comboBox;
-        Label  _textLabel;
-        DockingLayout _buttonBar;
-				ProgressBar		_progressBar;
-				Slider				_slider;
+        PushButton     _closeButton;
+        PushButton     _toggleButton;
+        PushButton     _dialogButton;
+        CheckBox       _checkBox;
+        LineEdit       _lineEdit;
+        ComboBox       _comboBox;
+        Label          _textLabel;
+        DockingLayout  _buttonBar;
+        ProgressBar    _progressBar;
+        Slider         _slider;
 };
 
 } // namespace

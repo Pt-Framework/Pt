@@ -143,6 +143,7 @@ void ScrollView::onContentChanged()
     updateScrollBar(_scrollBarX, hrange);
 
     double vrange = _scrollLayout.maximumY() -_scrollLayout.size().height();
+    std::clog << _scrollLayout.maximumY() << std::endl; 
     updateScrollBar(_scrollBarY, vrange);
 }
 
@@ -159,13 +160,16 @@ void ScrollView::updateScrollBar(ScrollBar& sb, double maxRange)
     int oldPos = sb.position();
     int oldMax = sb.maximumPosition();
 
-    sb.setRange( 0, static_cast<int>(maxRange) );    
-
+    // TODO: setRange might cause a scroll !!!
+    sb.setRange( 0, static_cast<int>(maxRange) ); 
+    
     if(sb.maximumPosition() > 0)
     {      
         double relPos = double(oldPos) / oldMax;
         double newPos = maxRange * relPos + 0.5;
-        sb.scroll( static_cast<int>(newPos) );
+        
+        //sb.scroll( static_cast<int>(newPos) );
+        sb.setPosition( static_cast<int>(newPos) );
     }
 }
 

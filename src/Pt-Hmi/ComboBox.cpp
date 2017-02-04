@@ -41,6 +41,8 @@ ComboBoxMenu::ComboBoxMenu()
 : Window(0, Window::Popup)
 {
     setMainWidget(&_items);
+
+    _items.selected() += Pt::slot(*this, &ComboBoxMenu::onItemSelected);
 }
 
 		
@@ -55,9 +57,21 @@ void ComboBoxMenu::addItem(ListBoxItem& item)
 }
 
 
+void ComboBoxMenu::onItemSelected(ListBoxItem&)
+{
+    close();
+}
+
+
 void ComboBoxMenu::setScrollBars(bool hasScrollBars)
 {
     _items.setScrollBars(hasScrollBars);
+}
+
+
+Pt::Signal<ListBoxItem&>& ComboBoxMenu::selected()
+{
+    return _items.selected();
 }
 
 
@@ -159,11 +173,25 @@ ComboBox::ComboBox()
     _menu.addItem(_item7);
     _menu.addItem(_item8);
     _menu.eventReady() += Pt::slot(*this, &ComboBox::onMenuKeyEvent);
+    _menu.selected() += Pt::slot(*this, &ComboBox::onItemSelected);
 }
 
 
 ComboBox::~ComboBox()
 {
+}
+
+
+void ComboBox::addItem(ListBoxItem& item)
+{   
+    _menu.addItem(item);
+}
+
+
+void ComboBox::onItemSelected(ListBoxItem& item)
+{
+    _text = item.text();
+    invalidate();
 }
 
 
@@ -214,7 +242,12 @@ void ComboBox::onMenuKeyEvent(const KeyEvent& ev)
     if( ! ev.isPress() )
         return;
 
-    _text += ev.unicode();
+    Pt::Char ch = ev.unicode();
+
+    if( ! Pt::isprint(ch) )
+        return;
+
+    _text += ch;
     invalidate();
 }
 
@@ -226,7 +259,12 @@ void ComboBox::onKeyEvent(const KeyEvent& ev)
     if( ! ev.isPress() )
         return;
 
-    _text += ev.unicode();
+    Pt::Char ch = ev.unicode();
+
+    if( ! Pt::isprint(ch) )
+        return;
+
+    _text += ch;
     invalidate();
 }
 
