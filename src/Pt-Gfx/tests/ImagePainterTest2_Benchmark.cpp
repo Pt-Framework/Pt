@@ -140,7 +140,7 @@ static size_t benchDrawSolidFillRect(CompositionMode cm)
 }
 
 template <typename PainterT>
-static size_t benchDrawSolidFillPolygon(CompositionMode cm)
+static size_t benchDrawSolidFillPolygon(CompositionMode cm, bool ss)
 {
     size_t sum = 0;
 
@@ -160,10 +160,12 @@ static size_t benchDrawSolidFillPolygon(CompositionMode cm)
         clock.start();
 
         const PointF poly1[] = { PointF(50, 50), PointF(250, 100), PointF(450, 250), PointF(350, 350), PointF(150, 100) };
-        painter.fillPolygon(poly1, sizeof(poly1) / sizeof(poly1[0]));
+        if(ss) painter.fillPolygonSS(poly1, sizeof(poly1) / sizeof(poly1[0]));
+        else   painter.fillPolygon  (poly1, sizeof(poly1) / sizeof(poly1[0]));
 
         const PointF poly2[] = { PointF(140, 260), PointF(210, 310), PointF(160, 340), PointF(110, 310) };
-        painter.fillPolygon(poly2, sizeof(poly2) / sizeof(poly2[0]));
+        if(ss) painter.fillPolygonSS(poly2, sizeof(poly2) / sizeof(poly2[0]));
+        else   painter.fillPolygon  (poly2, sizeof(poly2) / sizeof(poly2[0]));
 
         sum += clock.stop().toUSecs();
 #if BENCHMARK_CHECK_RESULTING_IMAGE
@@ -179,14 +181,14 @@ static void doBenchMark(CompositionMode cm)
 {
     double time1, time2;
 
-    std::clog << "                                             (Time) (Factor)" << std::endl;
-    std::clog << "                                             ------ --------" << std::endl;
+    std::clog << "                                              (Time) (Factor)" << std::endl;
+    std::clog << "                                              ------ --------" << std::endl;
 
     if(BENCHMARK_TEXT) {
         time1 = benchDrawText<ImagePainter >(cm);
         time2 = benchDrawText<ImagePainter2>(cm);
-        std::clog << "    Text                   @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
-        std::clog << "    Text                   @ ImagePainter2 = " << std::setw(6) << time2
+        std::clog << "    Text                    @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
+        std::clog << "    Text                    @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
@@ -194,8 +196,8 @@ static void doBenchMark(CompositionMode cm)
     if(BENCHMARK_LINE) {
         time1 = benchDrawLine<ImagePainter >(cm);
         time2 = benchDrawLine<ImagePainter2>(cm);
-        std::clog << "    Line                   @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
-        std::clog << "    Line                   @ ImagePainter2 = " << std::setw(6) << time2
+        std::clog << "    Line                    @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
+        std::clog << "    Line                    @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
@@ -203,8 +205,8 @@ static void doBenchMark(CompositionMode cm)
     if(BENCHMARK_RECTANGLE) {
         time1 = benchDrawRect<ImagePainter >(cm);
         time2 = benchDrawRect<ImagePainter2>(cm);
-        std::clog << "    Rectangle              @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
-        std::clog << "    Rectangle              @ ImagePainter2 = " << std::setw(6) << time2
+        std::clog << "    Rectangle               @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
+        std::clog << "    Rectangle               @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
@@ -212,17 +214,26 @@ static void doBenchMark(CompositionMode cm)
     if(BENCHMARK_SOLID_FILLED_RECTANGLE) {
         time1 = benchDrawSolidFillRect<ImagePainter >(cm);
         time2 = benchDrawSolidFillRect<ImagePainter2>(cm);
-        std::clog << "    Solid-filled Rectangle @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
-        std::clog << "    Solid-filled Rectangle @ ImagePainter2 = " << std::setw(6) << time2
+        std::clog << "    Solid-filled Rectangle  @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
+        std::clog << "    Solid-filled Rectangle  @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
 
     if(BENCHMARK_SOLID_FILLED_POLYGON) {
-        time1 = benchDrawSolidFillPolygon<ImagePainter >(cm);
-        time2 = benchDrawSolidFillPolygon<ImagePainter2>(cm);
-        std::clog << "    Solid-filled polygon   @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
-        std::clog << "    Solid-filled polygon   @ ImagePainter2 = " << std::setw(6) << time2
+        time1 = benchDrawSolidFillPolygon<ImagePainter >(cm, false);
+        time2 = benchDrawSolidFillPolygon<ImagePainter2>(cm, false);
+        std::clog << "    Solid-filled polygon    @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
+        std::clog << "    Solid-filled polygon    @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        std::clog << std::endl;
+    }
+
+    if(BENCHMARK_SOLID_FILLED_POLYGON) {
+        time1 = benchDrawSolidFillPolygon<ImagePainter >(cm, true);
+        time2 = benchDrawSolidFillPolygon<ImagePainter2>(cm, true);
+        std::clog << "    Solid-filled polygon SS @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
+        std::clog << "    Solid-filled polygon SS @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
