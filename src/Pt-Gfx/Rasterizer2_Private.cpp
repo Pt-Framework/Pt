@@ -313,61 +313,38 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
         // Simply skip the next steps if we have not got all the needed samples
         if( ((pixelY + 1) % SUPERSAMPLING_SIZE) ) continue;
 
-        #define SCALE_ALPHA(A) ( (A) * 17 / SUPERSAMPLING_SIZE / SUPERSAMPLING_SIZE )
+        #define SCALE_ALPHA(A) ( Pt::uint16_t(A) * 17 / SUPERSAMPLING_SIZE / SUPERSAMPLING_SIZE )
 
-#if 0
-
+#if 1
         // Draw pixels that belongs to the left-part of the shape to the image
-        const Pt::uint8_t* iterB = alphas.data();
-        const Pt::uint8_t* iterE = iterB + sizeX;
-        const Pt::uint8_t* iterL = iterB;
-        while(iterL < iterE) {
-            // Get and check the alpha
-            Pt::uint8_t a = *iterL++;
-            if(!a) continue;
-            // Draw the 1st pixel from the left
-            Pixel pixel(_image->view(), (iterL - iterB) + minX, pixelY / SUPERSAMPLING_SIZE + minY);
-            _image->format().setPixel(pixel, color, _compositionMode, SCALE_ALPHA(a));
-            if(iterL >= iterE) break;
-            // Draw the 2nd pixel from the left
-            pixel.advance();
-            _image->format().setPixel(pixel, color, _compositionMode, SCALE_ALPHA(*iterL++));
-            if(iterL >= iterE) break;
-            // Draw the 3rd pixel from the left
-            pixel.advance();
-            _image->format().setPixel(pixel, color, _compositionMode, SCALE_ALPHA(*iterL  ));
-            break;
+        Pt::int32_t iterL = 0;
+        for(; iterL < sizeX; ++iterL) { // Skip fully-transparent pixels
+            if(alphas[iterL]) break;
         }
+        for(; iterL < sizeX; ++iterL) {
+            // Break if the pixel has become fully opaque
+            if(alphas[iterL] >= (15 * SUPERSAMPLING_SIZE * SUPERSAMPLING_SIZE)) break;
+            // Draw the pixel
+            Pixel pixel(_image->view(), minX + iterL, minY + pixelY / SUPERSAMPLING_SIZE);
+            _image->format().setPixel(pixel, color, _compositionMode, SCALE_ALPHA(alphas[iterL]));
+        }
+
         // Draw pixels that belongs to the right-part of the shape to the image
-        const Pt::uint8_t* iterR = alphas.data() + sizeX - 1 - 3;
-        const Pt::uint8_t* iterF = iterR;
-        while(iterR > iterL) {
-            // Get and check the alpha
-            Pt::uint8_t a = *iterR--;
-            if(!a) continue;
-            //
-            iterR -= 3;
-            iterF = iterR;
-            if(iterR <= iterL) break;
-            // Draw the 3rd pixel from the right
-            Pixel pixel(_image->view(), (iterR - iterB) + minX, pixelY / SUPERSAMPLING_SIZE + minY);
-            _image->format().setPixel(pixel, color, _compositionMode,  SCALE_ALPHA(*iterR++));
-            if(iterR >= iterE) break;
-            // Draw the 2nd pixel from the right
-            pixel.advance();
-            _image->format().setPixel(pixel, color, _compositionMode,  SCALE_ALPHA(*iterR++));
-            if(iterR >= iterE) break;
-            // Draw the 1st pixel from the right
-            pixel.advance();
-            _image->format().setPixel(pixel, color, _compositionMode,  SCALE_ALPHA(*iterR  ));
-            break;
+        Pt::int32_t iterR = sizeX - 1;
+        for(; iterR >= 0; --iterR) { // Skip fully-transparent pixels
+            if(alphas[iterR]) break;
+        }
+        for(; iterR >= 0; --iterR) {
+            // Break if the pixel has become fully opaque
+            if(alphas[iterR] >= (15 * SUPERSAMPLING_SIZE * SUPERSAMPLING_SIZE)) break;
+            // Draw the pixel
+            Pixel pixel(_image->view(), minX + iterR, minY + pixelY / SUPERSAMPLING_SIZE);
+            _image->format().setPixel(pixel, color, _compositionMode, SCALE_ALPHA(alphas[iterR]));
         }
         // Draw pixels that belongs to the middle-part of the shape to the image
-        Pt::int32_t from      = (iterL + 1 - iterB);
-        Pt::int32_t to        = (iterF - 1 - iterB);
-        if(to >= from) {
-            Pt::int32_t spanWidth = to - from + 1;
-            Pixel       pixel(_image->view(), minX + from, minY + pixelY / SUPERSAMPLING_SIZE);
+        if(iterR >= iterL) {
+            Pt::int32_t spanWidth = iterR - iterL + 1;
+            Pixel       pixel(_image->view(), minX + iterL, minY + pixelY / SUPERSAMPLING_SIZE);
             while(spanWidth > 0) {
                 const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
                 _image->format().copy(pixel, _brushPixel, n, _compositionMode);
@@ -375,7 +352,6 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
                 spanWidth -= n;
             }
         }
-
 #else
         // Draw pixels to the image
         Pixel pixel(_image->view(), minX, pixelY / SUPERSAMPLING_SIZE + minY);
