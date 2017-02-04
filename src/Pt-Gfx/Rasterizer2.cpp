@@ -66,8 +66,8 @@ namespace Gfx {
 #define FIXED_POINT_FROM_INT(V)     ( (V) << FIXED_POINT_SHIFT_FACTOR )
 #define FIXED_POINT_TO_INT(V)       ( (V) >> FIXED_POINT_SHIFT_FACTOR )
 
-// Supersampling size (should be the power of two)
-#define SUPERSAMPLING_SIZE 2
+// Supersampling size (2 or 4)
+#define SUPERSAMPLING_SIZE 4
 
 
 // ======================================================================================

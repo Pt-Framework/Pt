@@ -161,9 +161,9 @@ void Rasterizer2::fillPolygon(const Point* points, const size_t pointCount)
 #if 1
     genClippedPolygonPoints(clipped, points, pointCount);
 #else
-    clipped.push_back(Point(450, 100));
-    clipped.push_back(Point(350, 300));
-    clipped.push_back(Point(650, 400));
+    clipped.push_back(Point(450/50, 100/50));
+    clipped.push_back(Point(350/50, 300/50));
+    clipped.push_back(Point(650/50, 400/50));
 #endif
 
     rasterPolygonArea(clipped.data(), clipped.size(), _brush.color());
