@@ -143,7 +143,6 @@ void ScrollView::onContentChanged()
     updateScrollBar(_scrollBarX, hrange);
 
     double vrange = _scrollLayout.maximumY() -_scrollLayout.size().height();
-    std::clog << _scrollLayout.maximumY() << std::endl; 
     updateScrollBar(_scrollBarY, vrange);
 }
 
