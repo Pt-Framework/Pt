@@ -311,6 +311,16 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
             for(Pt::int32_t k = from; k <= to; ++k)
                 alphas[row + k] = 255;
         }
+        //
+        Pt::int32_t accX;
+        for(Pt::int32_t pixelX = 0; pixelX < sizeX; ++pixelX) {
+            accX += alphas[pixelY * sizeX + pixelX];
+            if( !((pixelX + 1) % SCALE) ) {
+                alphas[ pixelY * sizeX + pixelX / SCALE ] = accX / SCALE;
+                accX = 0;
+            }
+        }
+
     }
 
     /*   0 1 2 3 4 5 6 7       0 1 2 3 4 5 6 7     0 1 2 3 4 5 6 7
@@ -325,6 +335,7 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
      */
     //*
     // Combined
+#if 0
     int accX = 0;
     for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
         for(Pt::int32_t pixelX = 0; pixelX < sizeX; ++pixelX) {
@@ -335,6 +346,7 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
             }
         }
     }
+#endif
     int accY = 0;
     for(Pt::int32_t pixelX = 0; pixelX < sizeX/SCALE; ++pixelX) {
         for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
