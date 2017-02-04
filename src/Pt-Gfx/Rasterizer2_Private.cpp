@@ -313,7 +313,17 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
         }
     }
 
-    /*
+    /*   0 1 2 3 4 5 6 7       0 1 2 3 4 5 6 7     0 1 2 3 4 5 6 7
+     * 0 * * * * * * * *     0 * * . . . . . .     0 * * . . . . . .
+     * 0 * * * * * * * *     1 * * . . . . . .     1 * * . . . . . .
+     * 0 * * * * * * * *     2 * * . . . . . .     2 . . . . . . . .
+     * 0 * * * * * * * *     3 * * . . . . . .     3 . . . . . . . .
+     * 0 * * * * * * * *     4 * * . . . . . .     4 . . . . . . . .
+     * 0 * * * * * * * *     5 * * . . . . . .     5 . . . . . . . .
+     * 0 * * * * * * * *     6 * * . . . . . .     6 . . . . . . . .
+     * 0 * * * * * * * *     7 * * . . . . . .     7 . . . . . . . .
+     */
+    //*
     // Combined
     int accX = 0;
     for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
@@ -325,7 +335,6 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
             }
         }
     }
-
     int accY = 0;
     for(Pt::int32_t pixelX = 0; pixelX < sizeX/SCALE; ++pixelX) {
         for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
@@ -337,29 +346,18 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
 
         }
     }
-
-    /*   0 1 2 3 4 5 6 7       0 1 2 3 4 5 6 7     0 1 2 3 4 5 6 7
-     * 0 * * * * * * * *     0 * * . . . . . .     0 * * . . . . . .
-     * 0 * * * * * * * *     1 * * . . . . . .     1 * * . . . . . .
-     * 0 * * * * * * * *     2 * * . . . . . .     2 . . . . . . . .
-     * 0 * * * * * * * *     3 * * . . . . . .     3 . . . . . . . .
-     * 0 * * * * * * * *     4 * * . . . . . .     4 . . . . . . . .
-     * 0 * * * * * * * *     5 * * . . . . . .     5 . . . . . . . .
-     * 0 * * * * * * * *     6 * * . . . . . .     6 . . . . . . . .
-     * 0 * * * * * * * *     7 * * . . . . . .     7 . . . . . . . .
-     */
-
-
-//            Pixel pixel(_image->view(), pixelX / SCALE + minX, pixelY / SCALE + minY);
-  //          _image->format().setPixel(pixel, color, _compositionMode, 255);
-/*
- *             if( !((pixelX + 1) % SCALE) ) {
-                alphas[ pixelY * sizeX + pixelX / SCALE ] = accX / SCALE;
-                accX = 0;
-            }
+    for(Pt::int32_t pixelY = minY; pixelY <= maxY; ++pixelY) {
+        for(Pt::int32_t pixelX = minX; pixelX <= maxX; ++pixelX) {
+            int x0  = pixelX - minX;
+            int y0  = pixelY - minY;
+            int acc = alphas[ y0 * sizeX + x0 ];
+            Pixel pixel(_image->view(), pixelX, pixelY);
+            _image->format().setPixel(pixel, color, _compositionMode, acc);
+        }
+    }
     //*/
 
-    //*
+    /*
     // Original
     for(Pt::int32_t pixelY = minY; pixelY <= maxY; ++pixelY) {
         for(Pt::int32_t pixelX = minX; pixelX <= maxX; ++pixelX) {
