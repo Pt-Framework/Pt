@@ -251,14 +251,15 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
         if(x > maxX) maxX = x;
         if(y > maxY) maxY = y;
     }
-#if defined(SUPERSAMPLING_SIZE) && SUPERSAMPLING_SIZE >= 2
+
+#if defined(SUPERSAMPLING_SIZE) && ( SUPERSAMPLING_SIZE == 2 ||  SUPERSAMPLING_SIZE == 4 )
 
     // Calculate the size of the polygon
     Pt::int32_t sizeX = (maxX - minX + 1);
     Pt::int32_t sizeY = (maxY - minY + 1) * SUPERSAMPLING_SIZE;
 
     // Prepare a work buffer
-    std::vector<uint8_t> alphas(sizeX, 0);
+    std::vector<Pt::uint8_t> alphas(sizeX, 0);
 
     // Scale the polygon to match the super sampling size and translate it to (0, 0)
     std::vector<Pt::int32_t> pointX(pointCount, 0);
@@ -302,7 +303,7 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
             }
         }
         // Fill the samples between the node pairs
-        for(Pt::int32_t i = 0; i < nodes; i += 2) {
+        for(Pt::int32_t i = 0; i < nodes/2; i += 2) {
             Pt::int32_t from = FIXED_POINT_TO_INT(nodeXf[i    ]);
             Pt::int32_t to   = FIXED_POINT_TO_INT(nodeXf[i + 1]);
             for(Pt::int32_t k = from; k <= to; ++k) {
@@ -311,28 +312,77 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
         }
         // Simply skip the next steps if we have not got all the needed samples
         if( ((pixelY + 1) % SUPERSAMPLING_SIZE) ) continue;
-        // Draw pixels to the image
-#if 1
-        Pixel pixel(_image->view(), minX, pixelY / SUPERSAMPLING_SIZE + minY);
-        for(Pt::int32_t iterX = 0; iterX < sizeX; ++iterX) {
-            int acc = alphas[ iterX ] * 17 / SUPERSAMPLING_SIZE / SUPERSAMPLING_SIZE;
-            _image->format().setPixel(pixel, color, _compositionMode, acc);
+
+        #define SCALE_ALPHA(A) ( (A) * 17 / SUPERSAMPLING_SIZE / SUPERSAMPLING_SIZE )
+
+#if 0
+
+        // Draw pixels that belongs to the left-part of the shape to the image
+        const Pt::uint8_t* iterB = alphas.data();
+        const Pt::uint8_t* iterE = iterB + sizeX;
+        const Pt::uint8_t* iterL = iterB;
+        while(iterL < iterE) {
+            // Get and check the alpha
+            Pt::uint8_t a = *iterL++;
+            if(!a) continue;
+            // Draw the 1st pixel from the left
+            Pixel pixel(_image->view(), (iterL - iterB) + minX, pixelY / SUPERSAMPLING_SIZE + minY);
+            _image->format().setPixel(pixel, color, _compositionMode, SCALE_ALPHA(a));
+            if(iterL >= iterE) break;
+            // Draw the 2nd pixel from the left
             pixel.advance();
+            _image->format().setPixel(pixel, color, _compositionMode, SCALE_ALPHA(*iterL++));
+            if(iterL >= iterE) break;
+            // Draw the 3rd pixel from the left
+            pixel.advance();
+            _image->format().setPixel(pixel, color, _compositionMode, SCALE_ALPHA(*iterL  ));
+            break;
         }
-#else
-        for(Pt::int32_t i = 0; i < nodes; i += 2) {
-            // Determine the X coordinates
-            Pt::int32_t from = FIXED_POINT_TO_INT(nodeXf[i    ]) / SUPERSAMPLING_SIZE;
-            Pt::int32_t to   = FIXED_POINT_TO_INT(nodeXf[i + 1]) / SUPERSAMPLING_SIZE;
-            // Draw the spans
+        // Draw pixels that belongs to the right-part of the shape to the image
+        const Pt::uint8_t* iterR = alphas.data() + sizeX - 1 - 3;
+        const Pt::uint8_t* iterF = iterR;
+        while(iterR > iterL) {
+            // Get and check the alpha
+            Pt::uint8_t a = *iterR--;
+            if(!a) continue;
+            //
+            iterR -= 3;
+            iterF = iterR;
+            if(iterR <= iterL) break;
+            // Draw the 3rd pixel from the right
+            Pixel pixel(_image->view(), (iterR - iterB) + minX, pixelY / SUPERSAMPLING_SIZE + minY);
+            _image->format().setPixel(pixel, color, _compositionMode,  SCALE_ALPHA(*iterR++));
+            if(iterR >= iterE) break;
+            // Draw the 2nd pixel from the right
+            pixel.advance();
+            _image->format().setPixel(pixel, color, _compositionMode,  SCALE_ALPHA(*iterR++));
+            if(iterR >= iterE) break;
+            // Draw the 1st pixel from the right
+            pixel.advance();
+            _image->format().setPixel(pixel, color, _compositionMode,  SCALE_ALPHA(*iterR  ));
+            break;
+        }
+        // Draw pixels that belongs to the middle-part of the shape to the image
+        Pt::int32_t from      = (iterL + 1 - iterB);
+        Pt::int32_t to        = (iterF - 1 - iterB);
+        if(to >= from) {
             Pt::int32_t spanWidth = to - from + 1;
-            Pixel       pixel(_image->view(), from + minX, pixelY / SUPERSAMPLING_SIZE + minY);
+            Pixel       pixel(_image->view(), minX + from, minY + pixelY / SUPERSAMPLING_SIZE);
             while(spanWidth > 0) {
                 const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
                 _image->format().copy(pixel, _brushPixel, n, _compositionMode);
                 pixel.advance(n);
                 spanWidth -= n;
             }
+        }
+
+#else
+        // Draw pixels to the image
+        Pixel pixel(_image->view(), minX, pixelY / SUPERSAMPLING_SIZE + minY);
+        for(Pt::int32_t iterX = 0; iterX < sizeX; ++iterX) {
+            Pt::uint8_t acc = SCALE_ALPHA(alphas[ iterX ]);
+            _image->format().setPixel(pixel, color, _compositionMode, acc);
+            pixel.advance();
         }
 #endif
         // Clear the work buffer

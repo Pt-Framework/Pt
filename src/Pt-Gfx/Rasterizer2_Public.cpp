@@ -167,7 +167,8 @@ void Rasterizer2::fillPolygon(const Point* points, const size_t pointCount)
 #endif
 
     rasterPolygonArea(clipped.data(), clipped.size(), _brush.color());
-#if !defined(SUPERSAMPLING_SIZE) || SUPERSAMPLING_SIZE < 2
+#if !defined(SUPERSAMPLING_SIZE) || ( SUPERSAMPLING_SIZE != 2 &&  SUPERSAMPLING_SIZE != 4 )
+    a
     rasterPolygonOutline(clipped.data(), clipped.size(), _brush.color());
 #endif
 }
