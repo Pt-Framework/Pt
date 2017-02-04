@@ -260,7 +260,9 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
     Pt::int32_t sizeX = (maxX - minX + 1) * SCALE;
     Pt::int32_t sizeY = (maxY - minY + 1) * SCALE;
 
-    std::vector<uint8_t> alphas(sizeX * sizeY, 0);
+    //std::vector<uint8_t> alphas(sizeX * sizeY, 0);
+
+    std::vector<uint8_t> alphas(sizeX * SCALE, 0);
 
     //
     std::vector<Pt::int32_t> pointX(pointCount, 0);
@@ -304,36 +306,52 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
             }
         }
         // Fill the pixels between the node pairs
-        Pt::int32_t row = pixelY * sizeX;
+        Pt::int32_t row = (pixelY % SCALE) * sizeX;
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
             Pt::int32_t from = FIXED_POINT_TO_INT(nodeXf[i    ]);
             Pt::int32_t to   = FIXED_POINT_TO_INT(nodeXf[i + 1]);
             for(Pt::int32_t k = from; k <= to; ++k)
                 alphas[row + k] = 255;
         }
-        //
+        // Combine the alpha samples in the X direction
         Pt::int32_t accX;
-        for(Pt::int32_t pixelX = 0; pixelX < sizeX; ++pixelX) {
-            accX += alphas[pixelY * sizeX + pixelX];
-            if( !((pixelX + 1) % SCALE) ) {
-                alphas[ pixelY * sizeX + pixelX / SCALE ] = accX / SCALE;
+        for(Pt::int32_t iterX = 0; iterX < sizeX; ++iterX) {
+            accX += alphas[ (pixelY % SCALE) * sizeX + iterX ];
+            if( !((iterX + 1) % SCALE) ) {
+                alphas[ (pixelY % SCALE) * sizeX + iterX / SCALE ] = accX / SCALE;
                 accX = 0;
             }
         }
-
+        // Simply contionue if we have not got all the samples
+        if( ((pixelY + 1) % SCALE) ) continue;
+        // Combine the alpha samples in the Y direction
+        int accY = 0;
+        for(Pt::int32_t iterX = 0; iterX < (sizeX / SCALE); ++iterX) {
+            for(Pt::int32_t iterY = 0; iterY < SCALE; ++iterY) {
+                accY += alphas[ iterY * sizeX + iterX ];
+            }
+            alphas[ iterX ] = accY / SCALE;
+            accY = 0;
+        }
+        //
+        for(Pt::int32_t pixelX = 0; pixelX < (sizeX / SCALE); ++pixelX) {
+            int acc = alphas[ pixelX ];
+            Pixel pixel(_image->view(), pixelX + minX, pixelY/SCALE + minY);
+            _image->format().setPixel(pixel, color, _compositionMode, acc);
+        }
+        memset(&alphas[0], 0, alphas.size());
     }
 
-    //*
+    /*
     // From the other side
     int accY = 0;
     for(Pt::int32_t pixelX = 0; pixelX < sizeX/SCALE; ++pixelX) {
         for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
             accY += alphas[pixelY * sizeX + pixelX];
             if( !((pixelY + 1) % SCALE) ) {
-                alphas[ (pixelY / SCALE) * sizeX + pixelX] = accY / SCALE;
+                alphas[ (pixelY / SCALE) * sizeX + pixelX ] = accY / SCALE;
                 accY = 0;
             }
-
         }
     }
     for(Pt::int32_t pixelY = 0; pixelY < sizeY/SCALE; ++pixelY) {
