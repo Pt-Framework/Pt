@@ -46,14 +46,16 @@ namespace Gfx {
 
 
 // ======================================================================================
-// ===== Fixed-Point 16.16 Settings and Helper Macros ===================================
+// ===== Settings and Macros ============================================================
 // ======================================================================================
 
+// Fixed-Point 16.16 Settings
 #define FIXED_POINT_SHIFT_FACTOR  16         // Shift factor
 #define FIXED_POINT_FRACT_BITMASK 0x0000FFFF // Bit mask for the fractional value; must be (2 ^ FIXED_POINT_SHIFT_FACTOR - 1)
 #define FIXED_POINT_CONSTANT_ONE  65536      // The value 1.0 in fixed-point ( 2 ^ FIXED_POINT_SHIFT_FACTOR    )
 #define FIXED_POINT_CONSTANT_HALF 32768      // The value 0.5 in fixed-point ( 2 ^ FIXED_POINT_SHIFT_FACTOR / 2)
 
+// Fixed-Point 16.16 Helper Macros
 #define FIXED_POINT_IPART(V)        ( (V) & ~FIXED_POINT_FRACT_BITMASK )
 #define FIXED_POINT_FPART(V)        ( (V) &  FIXED_POINT_FRACT_BITMASK )
 #define FIXED_POINT_RFPART(V)       ( FIXED_POINT_FRACT_BITMASK - FIXED_POINT_FPART(V) )
@@ -63,6 +65,9 @@ namespace Gfx {
 #define FIXED_POINT_MUL_TO_A8(A, B) ( ( ( (Pt::uint32_t)(A) * (Pt::uint32_t)(B) + FIXED_POINT_FRACT_BITMASK ) >> FIXED_POINT_SHIFT_FACTOR ) )
 #define FIXED_POINT_FROM_INT(V)     ( (V) << FIXED_POINT_SHIFT_FACTOR )
 #define FIXED_POINT_TO_INT(V)       ( (V) >> FIXED_POINT_SHIFT_FACTOR )
+
+// Supersampling size
+#define SUPERSAMPLING_SIZE 0
 
 
 // ======================================================================================
