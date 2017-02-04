@@ -302,7 +302,7 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
                 ++i;
             }
         }
-        // Fill the pixels between the node pairs
+        // Fill the samples between the node pairs
         Pt::int32_t row = (pixelY % SUPERSAMPLING_SIZE) * sizeX;
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
             Pt::int32_t from = FIXED_POINT_TO_INT(nodeXf[i    ]);
@@ -331,13 +331,29 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
             accY = 0;
         }
         // Draw pixels to the image
+#if 1
         Pixel pixel(_image->view(), minX, pixelY / SUPERSAMPLING_SIZE + minY);
-
         for(Pt::int32_t iterX = 0; iterX < (sizeX / SUPERSAMPLING_SIZE); ++iterX) {
             int acc = alphas[ iterX ];
             _image->format().setPixel(pixel, color, _compositionMode, acc);
             pixel.advance();
         }
+#else
+        for(Pt::int32_t i = 0; i < nodes; i += 2) {
+            // Determine the X coordinates
+            Pt::int32_t from = FIXED_POINT_TO_INT(nodeXf[i    ]) / SUPERSAMPLING_SIZE;
+            Pt::int32_t to   = FIXED_POINT_TO_INT(nodeXf[i + 1]) / SUPERSAMPLING_SIZE;
+            // Draw the spans
+            Pt::int32_t spanWidth = to - from + 1;
+            Pixel       pixel(_image->view(), from + minX, pixelY / SUPERSAMPLING_SIZE + minY);
+            while(spanWidth > 0) {
+                const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
+                _image->format().copy(pixel, _brushPixel, n, _compositionMode);
+                pixel.advance(n);
+                spanWidth -= n;
+            }
+        }
+#endif
         // Clear the work buffer
         memset(&alphas[0], 0, alphas.size());
     }
