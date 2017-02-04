@@ -104,7 +104,7 @@ class Rasterizer2
         void strokeOutline(const Point* points, size_t pointCount);
 
         void fillRect(const Point& tl, const Point& br);
-        void fillPolygon(const Point* points, const size_t pointCount);
+        void fillPolygon(const Point* points, const size_t pointCount, bool useSupersamplingForAA = false);
 
     private:
         void rasterOnePixelLine(const Point& a, const Point& b);
@@ -116,6 +116,7 @@ class Rasterizer2
         void rasterOnePixelRectOutline(const Point& tl, const Point& br);
 
         void rasterPolygonArea(const Point* points, size_t pointCount, const Color& color);
+        void rasterPolygonAreaSS(const Point* points, size_t pointCount, const Color& color);
         void rasterPolygonOutline(const Point* points, size_t pointCount, const Color& color);
 
         void updateClip();

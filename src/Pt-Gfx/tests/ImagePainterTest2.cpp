@@ -28,7 +28,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_SOLID_FILLED_POLYGON   1
 
 #define TEST_SOURCECOPY                        1
-#define TEST_SOURCEOVER                        0
+#define TEST_SOURCEOVER                        1
 
 #define TEST_DRAW_LINE_AND_TEXT                0
 #define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES 0

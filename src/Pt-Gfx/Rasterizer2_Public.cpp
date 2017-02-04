@@ -154,22 +154,25 @@ void Rasterizer2::fillRect(const Point& tl, const Point& br)
     rasterRectArea(tl, br);
 }
 
-void Rasterizer2::fillPolygon(const Point* points, const size_t pointCount)
+void Rasterizer2::fillPolygon(const Point* points, const size_t pointCount, bool useSupersamplingForAA)
 {
     std::vector<Point> clipped;
 
 #if 1
     genClippedPolygonPoints(clipped, points, pointCount);
 #else
-    clipped.push_back(Point(450/50, 100/50));
-    clipped.push_back(Point(350/50, 300/50));
-    clipped.push_back(Point(650/50, 400/50));
+    #define DIV_FAC 50
+    clipped.push_back(Point(450 / DIV_FAC, 100 / DIV_FAC));
+    clipped.push_back(Point(350 / DIV_FAC, 300 / DIV_FAC));
+    clipped.push_back(Point(650 / DIV_FAC, 400 / DIV_FAC));
 #endif
 
-    rasterPolygonArea(clipped.data(), clipped.size(), _brush.color());
-#if !defined(SUPERSAMPLING_SIZE) || ( SUPERSAMPLING_SIZE != 2 &&  SUPERSAMPLING_SIZE != 4 )
-    a
-    rasterPolygonOutline(clipped.data(), clipped.size(), _brush.color());
-#endif
+    if(useSupersamplingForAA) {
+        rasterPolygonAreaSS(clipped.data(), clipped.size(), _brush.color());
+    }
+    else {
+        rasterPolygonArea(clipped.data(), clipped.size(), _brush.color());
+        rasterPolygonOutline(clipped.data(), clipped.size(), _brush.color());
+    }
 }
 

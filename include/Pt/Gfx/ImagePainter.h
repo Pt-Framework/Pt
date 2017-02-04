@@ -107,6 +107,10 @@ class PT_GFX_API ImagePainter : public Painter
   private:
     Rasterizer* _rasterizer;
     RectF _clip;
+
+  public:
+      virtual void fillPolygonSS(const PointF* points, const size_t pointCount)
+      { fillPolygon(points, pointCount); }
 };
 
 }}

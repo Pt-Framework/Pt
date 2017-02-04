@@ -185,7 +185,17 @@ void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
     for(size_t i = 0; i < pointCount; ++i)
         points[i].set( ps[i].x(), ps[i].y() );
 
-    _rasterizer->fillPolygon(points.data(), pointCount);
+    _rasterizer->fillPolygon(points.data(), pointCount, false);
+}
+
+void ImagePainter2::fillPolygonSS( const PointF* ps, const size_t pointCount )
+{
+    std::vector<Point> points(pointCount);
+
+    for(size_t i = 0; i < pointCount; ++i)
+        points[i].set( ps[i].x(), ps[i].y() );
+
+    _rasterizer->fillPolygon(points.data(), pointCount, true);
 }
 
 void ImagePainter2::drawImage( const PointF& toIn, const Image& image)
