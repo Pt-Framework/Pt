@@ -308,6 +308,8 @@ void MenuItem::onInvalidate()
 {
     Base::onInvalidate();
 
+    // TODO: use renderer and options from parent
+
     const StyleOptions& options = Application::instance().styleOptions();
     const Style& style = Application::instance().style();
 

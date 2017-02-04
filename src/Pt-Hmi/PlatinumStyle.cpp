@@ -44,6 +44,7 @@
 #include <Pt/Hmi/ScrollBar.h>
 #include <Pt/Hmi/ProgressBar.h>
 #include <Pt/Hmi/Slider.h>
+#include <Pt/Hmi/ListBox.h>
 
 namespace {
 
@@ -911,7 +912,70 @@ void PlatinumSliderRenderer::onRender( const Slider&				s,
 			                             //boxY), barHeight);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// PlatinumListBoxRenderer
+///////////////////////////////////////////////////////////////////////////////
 
+PlatinumListBoxRenderer::PlatinumListBoxRenderer(std::size_t refs)
+: ListBoxRenderer(refs)
+{
+}
+
+    
+PlatinumListBoxRenderer::~PlatinumListBoxRenderer()
+{
+}
+
+
+void PlatinumListBoxRenderer::onRenderBackground(const ListBox& lb,
+                                                 const StyleOptions& options,
+                                                 Painter& painter, 
+                                                 const Gfx::RectF& rect,
+                                                 const Gfx::Brush& brush) const 
+{
+    Gfx::RectF borderRect( lb.size() );
+    
+    _baseRenderer.renderPlane(painter, borderRect, brush);
+}
+
+
+void PlatinumListBoxRenderer::onRenderFrame(const ListBox& lb,
+                                            const StyleOptions& options,
+                                            Painter& painter, 
+                                            const Gfx::RectF& rect,
+                                            const Gfx::Pen& pen) const 
+{
+    Gfx::RectF borderRect( lb.size() );
+    
+    _baseRenderer.renderFrame(painter, borderRect, pen);
+}
+
+
+void PlatinumListBoxRenderer::onPrepareItem(const ListBoxItem& item, 
+                                            const StyleOptions& options,
+                                            Gfx::Brush& brush,
+                                            Gfx::Pen& contour,
+                                            Gfx::Font& font,
+                                            Gfx::Pen& textPen) const
+{
+    if( item.isHighlighted() )
+        brush =  options.highlightColor();
+}
+
+
+void PlatinumListBoxRenderer::onRenderItem(const ListBoxItem& item, 
+                                           const StyleOptions& options,
+                                           Painter& painter, 
+                                           const Gfx::RectF& rect,
+                                           Gfx::Brush& brush,
+                                           Gfx::Pen& contour) const
+{
+    if( item.isHighlighted() )
+    {
+        painter.setBrush(brush);
+        painter.fillRect(rect);
+    }
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // PlatinumStyle
@@ -927,8 +991,9 @@ PlatinumStyle::PlatinumStyle()
     set(new PlatinumMenuRenderer);
     set(new PlatinumMenuBarRenderer);
     set(new PlatinumScrollBarRenderer);
-		set(new PlatinumProgressBarRenderer);
-		set(new PlatinumSliderRenderer);
+    set(new PlatinumProgressBarRenderer);
+    set(new PlatinumSliderRenderer);
+    set(new PlatinumListBoxRenderer);
 }
 
 

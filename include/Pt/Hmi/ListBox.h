@@ -49,10 +49,10 @@ class PT_HMI_API ListBoxItem : public Button
 {
     typedef Button Base;
 
-	  public:
+      public:
         ListBoxItem();
-		
-        virtual ~ListBoxItem();	
+        
+        virtual ~ListBoxItem();    
         
         void setText(const Pt::String& t);
 
@@ -65,6 +65,14 @@ class PT_HMI_API ListBoxItem : public Button
         Pt::Signal<ListBoxItem&>& selected();
 
     public:
+        const Gfx::Brush& background() const;
+
+        void setBackground(const Gfx::Brush& b);
+
+        const Gfx::Pen& contour() const;
+
+        void setContour(const Gfx::Pen& p);
+
         const Gfx::Color& textColor() const;
 
         void setTextColor(const Gfx::Color& color);
@@ -81,6 +89,8 @@ class PT_HMI_API ListBoxItem : public Button
 
         void setFontStyle(Gfx::Font::Style style);
 
+        void setRenderer(ListBoxRenderer* renderer);
+
     protected:
         virtual void onPressed();
 
@@ -90,7 +100,7 @@ class PT_HMI_API ListBoxItem : public Button
 
     protected:
         virtual void onInvalidate();
-	
+    
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
         virtual void onPaintContent(Painter& painter);
@@ -100,10 +110,15 @@ class PT_HMI_API ListBoxItem : public Button
 
     private:
         Pt::Signal<ListBoxItem&> _selected;
-        String     _text;
-        Gfx::Image _image;
-        Gfx::SizeF _iconSize;
+        String                   _text;
+        Gfx::Image               _image;
+        Gfx::SizeF               _iconSize;
 
+        FacetPtr<ListBoxRenderer> _renderer;
+        bool                      _hasRenderer;
+
+        AutoPtr<Gfx::Brush>       _background;
+        AutoPtr<Gfx::Pen>         _contour;
         AutoPtr<Gfx::Color>       _textColor;
         AutoPtr<std::string>      _fontName;
         AutoPtr<std::size_t>      _fontSize;
@@ -111,6 +126,8 @@ class PT_HMI_API ListBoxItem : public Button
 
         Gfx::Pen   _textPen;
         Gfx::Font  _font;
+        Gfx::Brush _brush;
+        Gfx::Pen   _pen;
         Picture    _picture;
 };
 
@@ -119,9 +136,9 @@ class PT_HMI_API ListBoxLayout : public FlowLayout
 {
     typedef FlowLayout Base;
 
-	  public:
+    public:
         ListBoxLayout();
-		
+        
         virtual ~ListBoxLayout();
 
     protected:
@@ -138,9 +155,9 @@ class PT_HMI_API ListBox : public Control
 {
     typedef Control Base;
 
-	  public:
+      public:
         ListBox();
-		
+        
         virtual ~ListBox();
 
         void setScrollBars(bool hasScrollBars);
@@ -151,9 +168,24 @@ class PT_HMI_API ListBox : public Control
 
         Pt::Signal<ListBoxItem&>& selected();
 
+    public:
+        const Gfx::Brush* background() const;
+
+        void setBackground(const Gfx::Brush& b);
+
+        void setBackground(bool b);
+
+        const Gfx::Pen* contour() const;
+
+        void setContour(const Gfx::Pen& pen);
+
+        void setFrame(bool b);
+
+        void setRenderer(ListBoxRenderer* renderer);
+
     protected:
         virtual void onInvalidate();
-	
+    
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
     
     protected:
@@ -164,8 +196,18 @@ class PT_HMI_API ListBox : public Control
     
     private:
         Pt::Signal<ListBoxItem&> _selected;
-        ListBoxLayout _layout;
-        ScrollView    _scrollView;
+        ScrollView               _scrollView;
+        ListBoxLayout            _layout;
+        
+        FacetPtr<ListBoxRenderer> _renderer;
+        bool                      _hasRenderer;
+        AutoPtr<Gfx::Brush>       _background;
+        bool                      _hasBackground;       
+        AutoPtr<Gfx::Pen>         _contour;
+        bool                      _hasFrame;
+                                  
+        Gfx::Brush _brush;
+        Gfx::Pen   _pen;
 };
 
 } // namespace

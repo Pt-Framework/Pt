@@ -53,7 +53,7 @@ Panel::~Panel()
 
 const Gfx::Brush* Panel::background() const
 {
-    if( ! _hasBackground)
+    if( ! _hasBackground )
         return 0;
 
     return _background ? _background.get() 
@@ -79,7 +79,7 @@ void Panel::setBackground(bool b)
 
 const Gfx::Pen* Panel::contour() const
 {
-    if( ! _hasFrame)
+    if( ! _hasFrame )
         return 0;
 
     return _contour ? _contour.get() 

@@ -29,9 +29,6 @@
 */
 
 #include <Pt/Hmi/Style.h>
-#include <Pt/Hmi/StyleOptions.h>
-#include <Pt/Hmi/Painter.h>
-#include <Pt/Hmi/Label.h>
 
 namespace Pt {
 
@@ -662,6 +659,62 @@ void SliderRenderer::render( const Slider&				s,
 														) const
 {
 	onRender(s, options, painter, rect, background, foreground, contour, textPen, font); 
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// ListBoxRenderer
+///////////////////////////////////////////////////////////////////////////////
+
+ListBoxRenderer::ListBoxRenderer(std::size_t refs)
+: Style::Facet( typeid(ListBoxRenderer), refs )
+{
+}
+
+    
+ListBoxRenderer::~ListBoxRenderer()
+{
+}
+
+
+void ListBoxRenderer::renderBackground(const ListBox& lb,
+                                       const StyleOptions& options,
+                                       Painter& painter, 
+                                       const Gfx::RectF& rect,
+                                       const Gfx::Brush& brush) const
+{
+    onRenderBackground(lb, options, painter, rect, brush);
+}
+
+
+void ListBoxRenderer::renderFrame(const ListBox& lb,
+                                  const StyleOptions& options,
+                                  Painter& painter, 
+                                  const Gfx::RectF& rect, 
+                                  const Gfx::Pen& pen) const
+{
+    onRenderFrame(lb, options, painter, rect, pen);
+}
+
+
+void ListBoxRenderer::prepareItem(const ListBoxItem& item, 
+                                  const StyleOptions& options, 
+                                  Gfx::Brush& brush,
+                                  Gfx::Pen& contour,
+                                  Gfx::Font& font,
+                                  Gfx::Pen& textPen) const
+{ 
+    onPrepareItem(item, options, brush, contour, font, textPen); 
+}
+
+
+void ListBoxRenderer::renderItem(const ListBoxItem& item, 
+                                 const StyleOptions& options,
+                                 Painter& painter, 
+                                 const Gfx::RectF& rect,
+                                 Gfx::Brush& brush,
+                                 Gfx::Pen& contour) const
+{ 
+    onRenderItem(item, options, painter, rect, brush, contour); 
 }
 
 } // namespace

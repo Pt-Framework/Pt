@@ -65,7 +65,7 @@ class PT_HMI_API StyleOptions
         // activeColor
         
         // textBackground
-        // alternateViewBackground
+        // alternateTextBackground
 
         // tooltipBackground / popupBackground
         // tooltipForeground / popupForeground
@@ -106,9 +106,19 @@ class PT_HMI_API StyleOptions
             return _accentColor;
         }
         
-        void setContour(const Gfx::Color& color)
+        void setAccentColor(const Gfx::Color& color)
         {
             _accentColor = color;
+        }
+
+        const Gfx::Brush& viewBackground() const
+        {
+            return _viewBackground;
+        }
+
+        void setViewBackground(const Gfx::Brush& b)
+        {
+            _viewBackground = b;
         }
 
         const Gfx::Brush& textBackground() const
@@ -156,6 +166,7 @@ class PT_HMI_API StyleOptions
       Gfx::Brush _foreground;
       Gfx::Pen   _contour;
       Gfx::Color _accentColor;
+      Gfx::Brush _viewBackground;
       Gfx::Brush _textBackground;
       Gfx::Color _highlightColor;
       Gfx::Color _textColor;

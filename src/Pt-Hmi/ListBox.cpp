@@ -33,14 +33,13 @@ namespace Pt {
 
 namespace Hmi {
 
-//
+/////////////////////////////////////////////////////////////////////////////
 // ListBoxItem
-//
+/////////////////////////////////////////////////////////////////////////////
 
 ListBoxItem::ListBoxItem()
+: _hasRenderer(false)
 {
-    setFocusPolicy(Widget::NormalFocus);
-
     setPadding(8);
 }
 
@@ -82,6 +81,53 @@ void ListBoxItem::setIconSize(const Gfx::SizeF& size)
 Pt::Signal<ListBoxItem&>& ListBoxItem::selected()
 {
     return _selected;
+}
+
+
+void ListBoxItem::onPressed()
+{
+    Base::onPressed();
+}
+
+
+void ListBoxItem::onReleased()
+{
+    Base::onReleased();
+    _selected.send(*this);
+}
+
+
+void ListBoxItem::onCanceled()
+{
+    Base::onCanceled();
+}
+
+
+const Gfx::Brush& ListBoxItem::background() const
+{
+    return _background ? *_background
+                       : Application::instance().styleOptions().background();
+}
+
+
+void ListBoxItem::setBackground(const Gfx::Brush& b)
+{
+    _background.reset( new Gfx::Brush(b) );
+    invalidate();
+}
+
+
+const Gfx::Pen& ListBoxItem::contour() const
+{
+    return _contour ? *_contour
+                    : Application::instance().styleOptions().contour();
+}
+
+
+void ListBoxItem::setContour(const Gfx::Pen& p)
+{
+    _contour.reset( new Gfx::Pen(p) );
+    invalidate();
 }
 
 
@@ -142,22 +188,12 @@ void ListBoxItem::setFontStyle(Gfx::Font::Style style)
 }
 
 
-void ListBoxItem::onPressed()
+void ListBoxItem::setRenderer(ListBoxRenderer* renderer)
 {
-    Base::onPressed();
-}
+    _renderer.reset(renderer);
+    _hasRenderer = renderer != 0;
 
-
-void ListBoxItem::onReleased()
-{
-    Base::onReleased();
-    _selected.send(*this);
-}
-
-
-void ListBoxItem::onCanceled()
-{
-    Base::onCanceled();
+    invalidate();
 }
 
 
@@ -165,15 +201,40 @@ void ListBoxItem::onInvalidate()
 {
     Base::onInvalidate();
 
+    // TODO: use renderer and options from parent
+
+    const StyleOptions& options = Application::instance().styleOptions();
+    const Style& style = Application::instance().style();
+
+    _brush = background();
+    _pen = contour();
     _textPen = textColor();
     _font = Gfx::Font(font(), fontSize(), fontStyle());
+
+    if( ! _hasRenderer )
+        _renderer.reset( style.get<ListBoxRenderer>() );
+    
+    if( ! _renderer )
+        return;
+
+    _renderer->prepareItem(*this, options, _brush, _pen, _font, _textPen);
 }
 
 
 void ListBoxItem::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
+    const StyleOptions& options = Application::instance().styleOptions();
+
+    if( ! _renderer )
+        return;
+
     Painter painter(surface);
     painter.setClip(rect);
+
+    //
+    // background
+    //
+    _renderer->renderItem(*this, options, painter, rect, _brush, _pen);
 
     onPaintContent(painter);
 }
@@ -241,15 +302,13 @@ void ListBoxItem::onResizeEvent(const ResizeEvent& ev)
     Base::onResizeEvent(ev);
 }
 
-
-//
+/////////////////////////////////////////////////////////////////////////////
 // ListBoxLayout
-//
+/////////////////////////////////////////////////////////////////////////////
 
 ListBoxLayout::ListBoxLayout()
 : FlowLayout(FlowLayout::Top)
 {
-    setFocusPolicy(Widget::NormalFocus);
 }
 
 
@@ -297,12 +356,17 @@ void ListBoxLayout::onContentChanged()
     resize(size);
 }
 
-//
+/////////////////////////////////////////////////////////////////////////////
 // ListBox
-//
+/////////////////////////////////////////////////////////////////////////////
 
 ListBox::ListBox()
+: _hasBackground(true)
+, _hasFrame(true)
+, _hasRenderer(false)
 {
+    setAcceptInput(false);
+
     _scrollView.setWidget(_layout);
 
     setContent(_scrollView);
@@ -320,12 +384,6 @@ void ListBox::setScrollBars(bool hasScrollBars)
 }
 
 
-void ListBox::onItemSelected(ListBoxItem& item)
-{
-    _selected.send(item);
-}
-
-
 void ListBox::addItem(ListBoxItem& item)
 {   
     _layout.add(item);
@@ -340,20 +398,120 @@ void ListBox::removeItem(ListBoxItem& item)
 }
 
 
+void ListBox::onItemSelected(ListBoxItem& item)
+{
+    _selected.send(item);
+}
+
+
 Pt::Signal<ListBoxItem&>& ListBox::selected()
 {
     return _selected;
 }
 
 
+const Gfx::Brush* ListBox::background() const
+{
+    if( ! _hasBackground )
+        return 0;
+
+    return _background ? _background.get() 
+                       : &Application::instance().styleOptions().viewBackground();
+}
+
+
+void ListBox::setBackground(const Gfx::Brush& b)
+{
+    _background.reset( new Gfx::Brush(b) );
+    _hasBackground = true;
+    
+    update();
+}
+
+
+void ListBox::setBackground(bool b)
+{
+    _hasBackground = b;
+    update();
+}
+
+
+const Gfx::Pen* ListBox::contour() const
+{
+    if( ! _hasFrame )
+        return 0;
+
+    return _contour ? _contour.get() 
+                    : &Application::instance().styleOptions().contour();
+}
+
+
+void ListBox::setContour(const Gfx::Pen& pen)
+{
+    _contour.reset( new Gfx::Pen(pen) );
+    _hasFrame = true;
+
+    update();
+}
+
+
+void ListBox::setFrame(bool b)
+{
+    _hasFrame = b;
+    update();
+}
+
+
+void ListBox::setRenderer(ListBoxRenderer* renderer)
+{
+    _renderer.reset(renderer);
+    _hasRenderer = renderer != 0;
+
+    invalidate();
+}
+
+
 void ListBox::onInvalidate()
 {
     Base::onInvalidate();
+
+    const StyleOptions& options = Application::instance().styleOptions();
+    const Style& style = Application::instance().style();
+
+    const Gfx::Brush* brush = background();
+    if( brush )
+        _brush = *brush;
+    
+    const Gfx::Pen* pen = contour();
+    if(pen)
+        _pen = *pen;
+
+    if( ! _hasRenderer )
+        _renderer.reset( style.get<ListBoxRenderer>() );
 }
 
 
 void ListBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
+    const StyleOptions& options = Application::instance().styleOptions();
+
+    if( ! _renderer)
+        return;
+
+    Painter painter(surface);
+    painter.setClip(rect);
+
+    if(_hasBackground)
+    {
+        _renderer->renderBackground(*this, options,
+                                    painter, rect, _brush);
+    }
+
+    if(_hasFrame)
+    {
+        _renderer->renderFrame(*this, options,
+                               painter, rect, _pen);
+    }
 }
 
 

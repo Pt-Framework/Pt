@@ -437,6 +437,43 @@ class PT_HMI_API PlatinumSliderRenderer : public SliderRenderer
 };
 
 
+class PT_HMI_API PlatinumListBoxRenderer : public ListBoxRenderer
+{
+    public:
+        PlatinumListBoxRenderer(std::size_t refs = 0);
+
+        virtual ~PlatinumListBoxRenderer();
+
+    protected:
+        virtual void onRenderBackground(const ListBox& p,
+                                        const StyleOptions& options,
+                                        Painter& painter, 
+                                        const Gfx::RectF& rect,
+                                        const Gfx::Brush& brush) const;
+
+        virtual void onRenderFrame(const ListBox& p,
+                                   const StyleOptions& options,
+                                   Painter& painter, 
+                                   const Gfx::RectF& rect, 
+                                   const Gfx::Pen& pen) const;
+        
+        virtual void onPrepareItem(const ListBoxItem& item, 
+                                   const StyleOptions& options, 
+                                   Gfx::Brush& brush,
+                                   Gfx::Pen& contour,
+                                   Gfx::Font& font,
+                                   Gfx::Pen& textPen) const;
+
+        virtual void onRenderItem(const ListBoxItem& item, 
+                                  const StyleOptions& options,
+                                  Painter& painter, 
+                                  const Gfx::RectF& rect,
+                                  Gfx::Brush& brush,
+                                  Gfx::Pen& contour) const;
+    private:
+        PlatinumRendererBase _baseRenderer;
+};
+
 class PT_HMI_API PlatinumStyle : public Style
 {
     public:

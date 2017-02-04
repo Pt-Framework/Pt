@@ -61,6 +61,8 @@ class MenuBarItem;
 class ScrollBar;
 class Slider;
 class ProgressBar;
+class ListBox;
+class ListBoxItem;
 
 template <typename T>
 class FacetPtr
@@ -798,6 +800,68 @@ class PT_HMI_API SliderRenderer : public Style::Facet
 															 const Gfx::Pen&			 textPen,
 															 const Gfx::Font&			 font
 														 ) const = 0;
+};
+
+
+class PT_HMI_API ListBoxRenderer : public Style::Facet
+{
+    public:
+        ListBoxRenderer(std::size_t refs = 0);
+
+        virtual ~ListBoxRenderer();
+
+        void renderBackground(const ListBox& lb,
+                              const StyleOptions& options,
+                              Painter& painter, 
+                              const Gfx::RectF& rect,
+                              const Gfx::Brush& brush) const;
+
+        void renderFrame(const ListBox& lb,
+                         const StyleOptions& options,
+                         Painter& painter, 
+                         const Gfx::RectF& rect, 
+                         const Gfx::Pen& pen) const;
+
+        void prepareItem(const ListBoxItem& item, 
+                         const StyleOptions& options, 
+                         Gfx::Brush& brush,
+                         Gfx::Pen& contour,
+                         Gfx::Font& font,
+                         Gfx::Pen& textPen) const;
+
+        void renderItem(const ListBoxItem& item, 
+                        const StyleOptions& options,
+                        Painter& painter, 
+                        const Gfx::RectF& rect,
+                        Gfx::Brush& brush,
+                        Gfx::Pen& contour) const;
+
+    protected:
+        virtual void onRenderBackground(const ListBox& lb,
+                                        const StyleOptions& options,
+                                        Painter& painter, 
+                                        const Gfx::RectF& rect,
+                                        const Gfx::Brush& brush) const = 0;
+
+        virtual void onRenderFrame(const ListBox& lb,
+                                   const StyleOptions& options,
+                                   Painter& painter, 
+                                   const Gfx::RectF& rect, 
+                                   const Gfx::Pen& pen) const = 0;
+
+        virtual void onPrepareItem(const ListBoxItem& item, 
+                                   const StyleOptions& options, 
+                                   Gfx::Brush& brush,
+                                   Gfx::Pen& contour,
+                                   Gfx::Font& font,
+                                   Gfx::Pen& textPen) const = 0;
+
+        virtual void onRenderItem(const ListBoxItem& item, 
+                                  const StyleOptions& options,
+                                  Painter& painter, 
+                                  const Gfx::RectF& rect,
+                                  Gfx::Brush& brush,
+                                  Gfx::Pen& contour) const = 0;
 };
 
 } // namespace
