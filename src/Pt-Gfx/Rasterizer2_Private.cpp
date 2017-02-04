@@ -256,8 +256,20 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
 
     #define SCALE 2
 
-    std::vector<uint8_t> alphas(_image->width()*SCALE * _image->height()*SCALE, 0);
-    memset(&alphas[0], 0, alphas.size());
+    //
+    Pt::int32_t sizeX = (maxX - minX + 1) * SCALE;
+    Pt::int32_t sizeY = (maxY - minY + 1) * SCALE;
+
+    std::vector<uint8_t> alphas(sizeX * sizeY, 0);
+
+    //
+    std::vector<Pt::int32_t> pointX(pointCount, 0);
+    std::vector<Pt::int32_t> pointY(pointCount, 0);
+
+    for(size_t i = 0; i < pointCount; ++i) {
+        pointX[i] = points[i].x() * SCALE;
+        pointY[i] = points[i].y() * SCALE;
+    }
 
     // List of nodes that define the horizontal segments
     std::vector<Pt::int32_t> nodeXf(pointCount * 2, 0);
@@ -268,13 +280,13 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
         Pt::int32_t j     = pointCount - 1;
         Pt::int32_t nodes = 0;
         for(size_t i = 0; i < pointCount; ++i) {
-            if( ( points[i].y()*SCALE < pixelY && points[j].y()*SCALE >= pixelY ) ||
-                ( points[j].y()*SCALE < pixelY && points[i].y()*SCALE >= pixelY )
+            if( ( pointY[i] < pixelY && pointY[j] >= pixelY ) ||
+                ( pointY[j] < pixelY && pointY[i] >= pixelY )
             ) {
-                Pt::int32_t deltaYp = pixelY              - points[i].y()*SCALE;
-                Pt::int32_t deltaYj = points[j].y()*SCALE - points[i].y()*SCALE;
-                Pt::int32_t deltaXj = points[j].x()*SCALE - points[i].x()*SCALE;
-                Pt::int32_t interXf = points[i].x()*SCALE + double(deltaYp) / deltaYj * deltaXj;
+                Pt::int32_t deltaYp = pixelY    - pointY[i];
+                Pt::int32_t deltaYj = pointY[j] - pointY[i];
+                Pt::int32_t deltaXj = pointX[j] - pointX[i];
+                Pt::int32_t interXf = pointX[i] + double(deltaYp) / deltaYj * deltaXj;
                 nodeXf[nodes++] = interXf;
                 // Check for too many nodes
                 if((size_t)nodes >= nodeXf.size()) return;
@@ -298,7 +310,7 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
             Pt::int32_t to   = nodeXf[i + 1];
             //
             for(int i = from; i <= to; ++i) {
-                alphas[pixelY * _image->width()*SCALE + i] = 255;
+                alphas[ (pixelY - minY * SCALE) * sizeX + (i - minX) ] = 255;
             }
         }
     }
@@ -312,7 +324,7 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
                 for(int x = 0; x < SCALE; ++x) {
                     int yi = y0 + y;
                     int xi = x0 + x;
-                    acc += alphas[yi * _image->width()*SCALE + xi];
+                    acc += alphas[ (yi - minY * SCALE) * sizeX + (xi - minX) ];
                 }
             }
             acc /= SCALE;
