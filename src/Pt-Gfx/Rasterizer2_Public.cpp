@@ -167,6 +167,6 @@ void Rasterizer2::fillPolygon(const Point* points, const size_t pointCount)
 #endif
 
     rasterPolygonArea(clipped.data(), clipped.size(), _brush.color());
-    //rasterPolygonOutline(clipped.data(), clipped.size(), _brush.color());
+    rasterPolygonOutline(clipped.data(), clipped.size(), _brush.color());
 }
 

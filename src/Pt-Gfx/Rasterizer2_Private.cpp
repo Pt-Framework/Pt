@@ -104,7 +104,7 @@ void Rasterizer2::rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt
     // Swap the values as needed
     const Pt::int32_t deltaX = (fx2 >= fx1) ? (fx2 - fx1) : (fx1 - fx2);
     const Pt::int32_t deltaY = (fy2 >= fy1) ? (fy2 - fy1) : (fy1 - fy2);
-    bool        steep  = deltaY > deltaX;
+    bool              steep  = deltaY > deltaX;
 
     if(steep) {
         std::swap(fx1, fy1);
@@ -252,69 +252,6 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
         if(y > maxY) maxY = y;
     }
 
-#if 0
-
-    // List of nodes in normal integers and fixed-points
-    std::vector<Pt::int32_t> nodeX (pointCount * 2, 0);
-    std::vector<Pt::int32_t> nodeXa(pointCount * 2, 0);
-
-    //  Loop through the rows of the image
-    for(Pt::int32_t pixelY = minY; pixelY <= maxY; ++pixelY) {
-        // Build a list of nodes
-        Pt::int32_t j     = pointCount - 1;
-        Pt::int32_t nodes = 0;
-        for(size_t i = 0; i < pointCount; ++i) {
-            if( ( points[i].y() < pixelY && points[j].y() >= pixelY ) ||
-                ( points[j].y() < pixelY && points[i].y() >= pixelY )
-            ) {
-                Pt::int32_t deltaYp = pixelY        - points[i].y();
-                Pt::int32_t deltaYj = points[j].y() - points[i].y();
-                Pt::int32_t deltaXj = points[j].x() - points[i].x();
-                Pt::int32_t interXf = FIXED_POINT_FROM_INT(points[i].x()) + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
-                nodeX [nodes] = FIXED_POINT_TO_INT(interXf);
-                nodeXa[nodes] = FIXED_POINT_RFPART_TO_A8(interXf);
-                lprintf("%d\n", nodeXa[nodes]);
-                ++nodes;
-            }
-            j = i;
-        }
-        // Sort the nodes using bubble sort
-        for(Pt::int32_t i = 0; i < nodes - 1;) {
-            if(nodeX[i] > nodeX[i + 1]) {
-                std::swap(nodeX [i], nodeX [i + 1]);
-                std::swap(nodeXa[i], nodeXa[i + 1]);
-                if(i) --i;
-            }
-            else {
-                ++i;
-            }
-        }
-        // Fill the pixels between node pairs
-        for(Pt::int32_t i = 0; i < nodes; i += 2) {
-            // Determine the X coordinates
-            Pt::int32_t from = nodeX[i];
-            Pt::int32_t to   = nodeX[i + 1];
-            // Draw the spans
-
-            Pixel pixel(_image->view(), from, pixelY);
-            _image->format().setPixel(pixel, _brushPixel, _compositionMode, nodeXa[i]);
-            //_image->format().setPixel(pixel, _brush.color(), _compositionMode, nodeXa[i]);
-
-            /*
-            Pt::int32_t spanWidth = to - from + 1;
-            Pixel       pixel(_image->view(), from, pixelY);
-            while(spanWidth > 0) {
-                const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
-                _image->format().copy(pixel, _brushPixel, n, _compositionMode);
-                pixel.advance(n);
-                spanWidth -= n;
-            }
-            */
-        }
-    }
-
-#else
-
     // List of nodes in normal integers and fixed-points
     std::vector<Pt::int32_t> nodeXf(pointCount * 2, 0);
 
@@ -332,6 +269,8 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
                 Pt::int32_t deltaXj = points[j].x() - points[i].x();
                 nodeXf[nodes] = FIXED_POINT_FROM_INT(points[i].x()) + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
                 ++nodes;
+                // Check for too many nodes
+                if((size_t)nodes >= nodeXf.size()) return;
             }
             j = i;
         }
@@ -372,9 +311,145 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
             }
         }
     }
-
-#endif
 }
+
+/*
+    // List of nodes in normal integers and fixed-points
+    std::vector<Pt::int32_t> nodeX (pointCount * 2, 0);
+    std::vector<Pt::int32_t> nodeXa(pointCount * 2, 0);
+
+    //  Loop through the rows of the image
+    for(Pt::int32_t pixelY = minY; pixelY <= maxY; ++pixelY) {
+        // Build a list of nodes
+        Pt::int32_t j     = pointCount - 1;
+        Pt::int32_t nodes = 0;
+        for(size_t i = 0; i < pointCount; ++i) {
+            if( ( points[i].y() < pixelY && points[j].y() >= pixelY ) ||
+                ( points[j].y() < pixelY && points[i].y() >= pixelY )
+            ) {
+                Pt::int32_t deltaYp = pixelY        - points[i].y();
+                Pt::int32_t deltaYj = points[j].y() - points[i].y();
+                Pt::int32_t deltaXj = points[j].x() - points[i].x();
+                Pt::int32_t interXf = FIXED_POINT_FROM_INT(points[i].x()) + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
+
+                nodeX [nodes] = FIXED_POINT_TO_INT(interXf + FIXED_POINT_CONSTANT_HALF);
+
+
+                Pt::int32_t fx1 = points[i].x();
+                Pt::int32_t fy1 = points[i].y();
+                Pt::int32_t fx2 = points[j].x();
+                Pt::int32_t fy2 = points[j].y();
+                const Pt::int32_t deltaX = (fx2 >= fx1) ? (fx2 - fx1) : (fx1 - fx2);
+                const Pt::int32_t deltaY = (fy2 >= fy1) ? (fy2 - fy1) : (fy1 - fy2);
+                bool              steep  = deltaY > deltaX;
+                if(steep) {
+                    std::swap(fx1, fy1);
+                    std::swap(fx2, fy2);
+                }
+                if(fx1 > fx2) {
+                    std::swap(fx1, fx2);
+                    std::swap(fy1, fy2);
+                }
+
+                double gradient = double(fy2 - fy1) / double(fx2 - fx1);
+
+                double xend  = round(fx1);
+                double yend  = fy1 + gradient * (xend - fx1);
+                double xpxl1 = xend;
+                double ypxl1 = trunc(yend);
+
+                double intery = yend + gradient;
+
+                       xend  = round(fx2);
+                       yend  = fy2 + gradient * (xend - fx2);
+                double xpxl2 = xend;
+                double ypxl2 = trunc(yend);
+
+                double q = 1.0;
+
+                double from = xpxl1 + 1;
+                double to   = xpxl2 - 1;
+                if(steep) {
+                    for(double i = from; i <= to; ++i) {
+                        double a2 = intery - int(intery);
+                        double a1 = 1.0 - a2;
+
+                        double a4 = (intery - gradient/2) - int(intery - gradient/2);
+                        double a3 = 1.0 - a4;
+
+                        double a6 = (a2 + a4) / 2;
+                        double a5 = (a1 + a3) / 2;
+
+                        if(abs(nodeX[nodes] - intery) <= 0.1) {
+                            q = (nodes & 0x01) ? a6 : a5;
+                            break;
+                        }
+                        intery += gradient;
+                    }
+                }
+                else {
+                    for(double i = from; i <= to; ++i) {
+                        double a2 = intery - int(intery);
+                        double a1 = 1.0 - a2;
+
+                        double a4 = (intery - gradient/2) - int(intery - gradient/2);
+                        double a3 = 1.0 - a4;
+
+                        double a6 = (a2 + a4) / 2;
+                        double a5 = (a1 + a3) / 2;
+
+                        if(abs(nodeX[nodes] - i) <= 0.1) {
+                            q = (nodes & 0x01) ? a6 : a5;
+                            break;
+                        }
+                        intery += gradient;
+                    }
+                }
+                nodeXa[nodes] = q * 255;
+
+                ++nodes;
+            }
+            j = i;
+        }
+        // Sort the nodes using bubble sort
+        for(Pt::int32_t i = 0; i < nodes - 1;) {
+            if(nodeX[i] > nodeX[i + 1]) {
+                std::swap(nodeX [i], nodeX [i + 1]);
+                std::swap(nodeXa[i], nodeXa[i + 1]);
+                if(i) --i;
+            }
+            else {
+                ++i;
+            }
+        }
+        // Fill the pixels between node pairs
+        for(Pt::int32_t i = 0; i < nodes; i += 2) {
+            // Determine the X coordinates
+            Pt::int32_t from = nodeX[i];
+            Pt::int32_t to   = nodeX[i + 1];
+            // Draw the spans
+
+            Pixel pl(_image->view(), from, pixelY);
+            _image->format().setPixel(pl, _brush.color(), _compositionMode, nodeXa[i]);
+
+            Pixel pr(_image->view(), to, pixelY);
+            _image->format().setPixel(pr, _brush.color(), _compositionMode, nodeXa[i + 1]);
+
+            ++from;
+            --to;
+            if(to <= from) continue;
+
+            Pt::int32_t spanWidth = to - from + 1;
+            Pixel       pixel(_image->view(), from, pixelY);
+            while(spanWidth > 0) {
+                const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
+                _image->format().copy(pixel, _brushPixel, n, _compositionMode);
+                pixel.advance(n);
+                spanWidth -= n;
+            }
+        }
+    }
+*/
 
 void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount, const Color& color)
 {

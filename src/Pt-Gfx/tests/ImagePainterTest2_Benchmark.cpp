@@ -1,13 +1,9 @@
-//#define CHECK_RESULTING_IMAGE
-
-#define BENCH_COUNT 250
-
 template <typename PainterT>
 static size_t benchDrawText(CompositionMode cm)
 {
     size_t sum = 0;
 
-    Image image( ImageFormat::argb32(), Size(800, 600) );
+    Image image( ImageFormat::argb32(), BENCHMARK_IMAGE_SIZE );
 
     PainterT painter(image);
     painter.setCompositionMode(cm);
@@ -21,7 +17,7 @@ static size_t benchDrawText(CompositionMode cm)
     painter.setFontDir( Pt::System::Path(FONT_DIR) );
     painter.setFont( Pt::Gfx::Font(FONT_SPEC) );
 
-    for(int i = 0; i < BENCH_COUNT ; ++i) {
+    for(int i = 0; i < BENCHMARK_LOOP_COUNT ; ++i) {
         Pt::System::Clock clock;
         clock.start();
 
@@ -29,12 +25,12 @@ static size_t benchDrawText(CompositionMode cm)
         painter.drawText( PointF(100, 150), "Hello world!" );
 
         sum += clock.stop().toUSecs();
-#ifdef CHECK_RESULTING_IMAGE
+#if BENCHMARK_CHECK_RESULTING_IMAGE
         if(!i) sdlPreviewRGB888Buffer("benchDrawText", image.data(), image.width(), image.height());
 #endif
     }
 
-    sum /= BENCH_COUNT;
+    sum /= BENCHMARK_LOOP_COUNT;
     return sum;
 }
 
@@ -43,7 +39,7 @@ static size_t benchDrawLine(CompositionMode cm)
 {
     size_t sum = 0;
 
-    Image image( ImageFormat::argb32(), Size(800, 600) );
+    Image image( ImageFormat::argb32(), BENCHMARK_IMAGE_SIZE );
 
     PainterT painter(image);
     painter.setCompositionMode(cm);
@@ -54,7 +50,7 @@ static size_t benchDrawLine(CompositionMode cm)
     Pen pen( Color::fromRgb8(255, 255, 255, 175) );
     painter.setPen(pen);
 
-    for(int i = 0; i < BENCH_COUNT ; ++i) {
+    for(int i = 0; i < BENCHMARK_LOOP_COUNT ; ++i) {
         Pt::System::Clock clock;
         clock.start();
 
@@ -62,12 +58,12 @@ static size_t benchDrawLine(CompositionMode cm)
         painter.drawLine( PointF(789, 489), PointF( 10, 589) );
 
         sum += clock.stop().toUSecs();
-#ifdef CHECK_RESULTING_IMAGE
+#if BENCHMARK_CHECK_RESULTING_IMAGE
         if(!i) sdlPreviewRGB888Buffer("benchDrawLine", image.data(), image.width(), image.height());
 #endif
     }
 
-    sum /= BENCH_COUNT;
+    sum /= BENCHMARK_LOOP_COUNT;
     return sum;
 }
 
@@ -76,7 +72,7 @@ static size_t benchDrawRect(CompositionMode cm)
 {
     size_t sum = 0;
 
-    Image image( ImageFormat::argb32(), Size(800, 600) );
+    Image image( ImageFormat::argb32(), BENCHMARK_IMAGE_SIZE );
 
     PainterT painter(image);
     painter.setCompositionMode(cm);
@@ -87,7 +83,7 @@ static size_t benchDrawRect(CompositionMode cm)
     Pen pen( Color::fromRgb8(255, 255, 255, 175) );
     painter.setPen(pen);
 
-    for(int i = 0; i < BENCH_COUNT ; ++i) {
+    for(int i = 0; i < BENCHMARK_LOOP_COUNT ; ++i) {
         Pt::System::Clock clock;
         clock.start();
 
@@ -98,12 +94,12 @@ static size_t benchDrawRect(CompositionMode cm)
         painter.drawRect( RectF(PointF(450, 150), SizeF(200, 100)) );
 
         sum += clock.stop().toUSecs();
-#ifdef CHECK_RESULTING_IMAGE
+#if BENCHMARK_CHECK_RESULTING_IMAGE
         if(!i) sdlPreviewRGB888Buffer("benchDrawRect", image.data(), image.width(), image.height());
 #endif
     }
 
-    sum /= BENCH_COUNT;
+    sum /= BENCHMARK_LOOP_COUNT;
     return sum;
 }
 
@@ -112,7 +108,7 @@ static size_t benchDrawSolidFillRect(CompositionMode cm)
 {
     size_t sum = 0;
 
-    Image image( ImageFormat::argb32(), Size(800, 600) );
+    Image image( ImageFormat::argb32(), BENCHMARK_IMAGE_SIZE );
 
     PainterT painter(image);
     painter.setCompositionMode(cm);
@@ -123,7 +119,7 @@ static size_t benchDrawSolidFillRect(CompositionMode cm)
     Pen pen( Color::fromRgb8(255, 255, 255, 175) );
     painter.setPen(pen);
 
-    for(int i = 0; i < BENCH_COUNT ; ++i) {
+    for(int i = 0; i < BENCHMARK_LOOP_COUNT ; ++i) {
         Pt::System::Clock clock;
         clock.start();
 
@@ -134,12 +130,12 @@ static size_t benchDrawSolidFillRect(CompositionMode cm)
         painter.fillRect( RectF(PointF(450, 150), SizeF(200, 100)) );
 
         sum += clock.stop().toUSecs();
-#ifdef CHECK_RESULTING_IMAGE
+#if BENCHMARK_CHECK_RESULTING_IMAGE
         if(!i) sdlPreviewRGB888Buffer("benchDrawRect", image.data(), image.width(), image.height());
 #endif
     }
 
-    sum /= BENCH_COUNT;
+    sum /= BENCHMARK_LOOP_COUNT;
     return sum;
 }
 
@@ -148,7 +144,7 @@ static size_t benchDrawSolidFillPolygon(CompositionMode cm)
 {
     size_t sum = 0;
 
-    Image image( ImageFormat::argb32(), Size(800, 600) );
+    Image image( ImageFormat::argb32(), BENCHMARK_IMAGE_SIZE );
 
     PainterT painter(image);
     painter.setCompositionMode(cm);
@@ -159,7 +155,7 @@ static size_t benchDrawSolidFillPolygon(CompositionMode cm)
     Pen pen( Color::fromRgb8(255, 255, 255, 175) );
     painter.setPen(pen);
 
-    for(int i = 0; i < BENCH_COUNT ; ++i) {
+    for(int i = 0; i < BENCHMARK_LOOP_COUNT ; ++i) {
         Pt::System::Clock clock;
         clock.start();
 
@@ -170,23 +166,17 @@ static size_t benchDrawSolidFillPolygon(CompositionMode cm)
         painter.fillPolygon(poly2, sizeof(poly2) / sizeof(poly2[0]));
 
         sum += clock.stop().toUSecs();
-#ifdef CHECK_RESULTING_IMAGE
+#if BENCHMARK_CHECK_RESULTING_IMAGE
         if(!i) sdlPreviewRGB888Buffer("benchDrawSolidFillPolygon", image.data(), image.width(), image.height());
 #endif
     }
 
-    sum /= BENCH_COUNT;
+    sum /= BENCHMARK_LOOP_COUNT;
     return sum;
 }
 
 static void doBenchMark(CompositionMode cm)
 {
-#define BENCHMARK_TEXT                   1
-#define BENCHMARK_LINE                   1
-#define BENCHMARK_RECTANGLE              1
-#define BENCHMARK_SOLID_FILLED_RECTANGLE 1
-#define BENCHMARK_SOLID_FILLED_POLYGON   1
-
     double time1, time2;
 
     std::clog << "                                             Time (Factor)" << std::endl;
