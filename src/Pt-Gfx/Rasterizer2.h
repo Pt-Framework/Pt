@@ -107,8 +107,6 @@ class Rasterizer2
         void fillPolygon(const Point* points, const size_t pointCount);
 
     private:
-        void updateClip();
-
         void rasterOnePixelLine(const Point& a, const Point& b);
         void rasterOnePixelHLineSegment(Pt::int32_t x1, Pt::int32_t x2, Pt::int32_t y, const Color& color);
         void rasterOnePixelVLineSegment(Pt::int32_t x, Pt::int32_t y1, Pt::int32_t y2, const Color& color);
@@ -120,6 +118,7 @@ class Rasterizer2
         void rasterPolygonArea(const Point* points, size_t pointCount, const Color& color);
         void rasterPolygonOutline(const Point* points, size_t pointCount, const Color& color);
 
+        void updateClip();
         void genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount) const;
 
     private:
