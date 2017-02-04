@@ -203,18 +203,6 @@ class Argb32Model
                     break;
                 }
             }
-
-            switch(mode)
-            {
-                default:
-                case CompositionMode::SourceCopy:
-                    *((Pt::uint32_t*)to) = *((const Pt::uint32_t*)from);
-                    break;
-
-                case CompositionMode::SourceOver:
-                    Argb32Model::sourceOver(to, from);
-                    break;
-            }
         }
 
         template <typename T>
