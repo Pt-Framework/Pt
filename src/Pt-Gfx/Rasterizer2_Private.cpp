@@ -254,23 +254,23 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
 
 #if 1
 
-    #define SCALE 4
+    // Supersampling size
+    #define SUPERSAMPLING_SIZE 2
 
-    //
-    Pt::int32_t sizeX = (maxX - minX + 1) * SCALE;
-    Pt::int32_t sizeY = (maxY - minY + 1) * SCALE;
+    // Determine the supersampled size
+    Pt::int32_t sizeX = (maxX - minX + 1) * SUPERSAMPLING_SIZE;
+    Pt::int32_t sizeY = (maxY - minY + 1) * SUPERSAMPLING_SIZE;
 
-    //std::vector<uint8_t> alphas(sizeX * sizeY, 0);
+    // Prepare a work buffer
+    std::vector<uint8_t> alphas(sizeX * SUPERSAMPLING_SIZE, 0);
 
-    std::vector<uint8_t> alphas(sizeX * SCALE, 0);
-
-    //
+    // Scale the polygon to match the super sampling size and translate it to (0, 0)
     std::vector<Pt::int32_t> pointX(pointCount, 0);
     std::vector<Pt::int32_t> pointY(pointCount, 0);
 
     for(size_t i = 0; i < pointCount; ++i) {
-        pointX[i] = points[i].x() * SCALE - minX * SCALE;
-        pointY[i] = points[i].y() * SCALE - minY * SCALE;
+        pointX[i] = points[i].x() * SUPERSAMPLING_SIZE - minX * SUPERSAMPLING_SIZE;
+        pointY[i] = points[i].y() * SUPERSAMPLING_SIZE - minY * SUPERSAMPLING_SIZE;
     }
 
     // List of nodes that define the horizontal segments
@@ -290,7 +290,7 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
                 Pt::int32_t deltaXj = pointX[j] - pointX[i];
                 Pt::int32_t interXf = FIXED_POINT_FROM_INT(pointX[i]) + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
                 nodeXf[nodes++] = interXf + FIXED_POINT_CONSTANT_HALF;
-                // Check for too many nodes
+                // Bail out if we have produced too many nodes
                 if((size_t)nodes >= nodeXf.size()) return;
             }
             j = i;
@@ -306,7 +306,7 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
             }
         }
         // Fill the pixels between the node pairs
-        Pt::int32_t row = (pixelY % SCALE) * sizeX;
+        Pt::int32_t row = (pixelY % SUPERSAMPLING_SIZE) * sizeX;
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
             Pt::int32_t from = FIXED_POINT_TO_INT(nodeXf[i    ]);
             Pt::int32_t to   = FIXED_POINT_TO_INT(nodeXf[i + 1]);
@@ -316,31 +316,45 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
         // Combine the alpha samples in the X direction
         Pt::int32_t accX;
         for(Pt::int32_t iterX = 0; iterX < sizeX; ++iterX) {
-            accX += alphas[ (pixelY % SCALE) * sizeX + iterX ];
-            if( !((iterX + 1) % SCALE) ) {
-                alphas[ (pixelY % SCALE) * sizeX + iterX / SCALE ] = accX / SCALE;
+            accX += alphas[ (pixelY % SUPERSAMPLING_SIZE) * sizeX + iterX ];
+            if( !((iterX + 1) % SUPERSAMPLING_SIZE) ) {
+                alphas[ (pixelY % SUPERSAMPLING_SIZE) * sizeX + iterX / SUPERSAMPLING_SIZE ] = accX / SUPERSAMPLING_SIZE;
                 accX = 0;
             }
         }
-        // Simply contionue if we have not got all the samples
-        if( ((pixelY + 1) % SCALE) ) continue;
+        // Simply skip the next steps if we have not got all the needed samples
+        if( ((pixelY + 1) % SUPERSAMPLING_SIZE) ) continue;
         // Combine the alpha samples in the Y direction
         int accY = 0;
-        for(Pt::int32_t iterX = 0; iterX < (sizeX / SCALE); ++iterX) {
-            for(Pt::int32_t iterY = 0; iterY < SCALE; ++iterY) {
+        for(Pt::int32_t iterX = 0; iterX < (sizeX / SUPERSAMPLING_SIZE); ++iterX) {
+            for(Pt::int32_t iterY = 0; iterY < SUPERSAMPLING_SIZE; ++iterY) {
                 accY += alphas[ iterY * sizeX + iterX ];
             }
-            alphas[ iterX ] = accY / SCALE;
+            alphas[ iterX ] = accY / SUPERSAMPLING_SIZE;
             accY = 0;
         }
-        //
-        for(Pt::int32_t pixelX = 0; pixelX < (sizeX / SCALE); ++pixelX) {
-            int acc = alphas[ pixelX ];
-            Pixel pixel(_image->view(), pixelX + minX, pixelY/SCALE + minY);
+        // Draw pixels to the image
+        Pixel pixel(_image->view(), minX, pixelY / SUPERSAMPLING_SIZE + minY);
+
+        for(Pt::int32_t iterX = 0; iterX < (sizeX / SUPERSAMPLING_SIZE); ++iterX) {
+            int acc = alphas[ iterX ];
             _image->format().setPixel(pixel, color, _compositionMode, acc);
+            pixel.advance();
         }
+        // Clear the work buffer
         memset(&alphas[0], 0, alphas.size());
     }
+
+    /*   0 1 2 3 4 5 6 7       0 1 2 3 4 5 6 7     0 1 2 3 4 5 6 7
+     * 0 * * * * * * * *     0 * * . . . . . .     0 * * . . . . . .
+     * 0 * * * * * * * *     1 * * . . . . . .     1 * * . . . . . .
+     * 0 * * * * * * * *     2 * * . . . . . .     2 . . . . . . . .
+     * 0 * * * * * * * *     3 * * . . . . . .     3 . . . . . . . .
+     * 0 * * * * * * * *     4 * * . . . . . .     4 . . . . . . . .
+     * 0 * * * * * * * *     5 * * . . . . . .     5 . . . . . . . .
+     * 0 * * * * * * * *     6 * * . . . . . .     6 . . . . . . . .
+     * 0 * * * * * * * *     7 * * . . . . . .     7 . . . . . . . .
+     */
 
     /*
     // From the other side
@@ -363,16 +377,6 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
     }
     //*/
 
-    /*   0 1 2 3 4 5 6 7       0 1 2 3 4 5 6 7     0 1 2 3 4 5 6 7
-     * 0 * * * * * * * *     0 * * . . . . . .     0 * * . . . . . .
-     * 0 * * * * * * * *     1 * * . . . . . .     1 * * . . . . . .
-     * 0 * * * * * * * *     2 * * . . . . . .     2 . . . . . . . .
-     * 0 * * * * * * * *     3 * * . . . . . .     3 . . . . . . . .
-     * 0 * * * * * * * *     4 * * . . . . . .     4 . . . . . . . .
-     * 0 * * * * * * * *     5 * * . . . . . .     5 . . . . . . . .
-     * 0 * * * * * * * *     6 * * . . . . . .     6 . . . . . . . .
-     * 0 * * * * * * * *     7 * * . . . . . .     7 . . . . . . . .
-     */
     /*
     // Combined X & Y alphas
     int accX = 0;
@@ -428,6 +432,7 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
         }
     }
     //*/
+
 #else
 
     // List of nodes that define the horizontal segments
@@ -447,7 +452,7 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
                 Pt::int32_t deltaXj = points[j].x() - points[i].x();
                 Pt::int32_t interXf = FIXED_POINT_FROM_INT(points[i].x()) + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
                 nodeXf[nodes++] = interXf + FIXED_POINT_CONSTANT_HALF;
-                // Check for too many nodes
+                // Bail out if we have produced too many nodes
                 if((size_t)nodes >= nodeXf.size()) return;
             }
             j = i;
