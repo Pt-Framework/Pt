@@ -252,7 +252,78 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
         if(y > maxY) maxY = y;
     }
 
-    // List of nodes in normal integers and fixed-points
+#if 1
+
+    #define SCALE 2
+
+    std::vector<uint8_t> alphas(_image->width()*SCALE * _image->height()*SCALE, 0);
+    memset(&alphas[0], 0, alphas.size());
+
+    // List of nodes that define the horizontal segments
+    std::vector<Pt::int32_t> nodeXf(pointCount * 2, 0);
+
+    //  Loop through the rows of the image
+    for(Pt::int32_t pixelY = minY*SCALE; pixelY <= maxY*SCALE; ++pixelY) {
+        // Build a list of nodes
+        Pt::int32_t j     = pointCount - 1;
+        Pt::int32_t nodes = 0;
+        for(size_t i = 0; i < pointCount; ++i) {
+            if( ( points[i].y()*SCALE < pixelY && points[j].y()*SCALE >= pixelY ) ||
+                ( points[j].y()*SCALE < pixelY && points[i].y()*SCALE >= pixelY )
+            ) {
+                Pt::int32_t deltaYp = pixelY              - points[i].y()*SCALE;
+                Pt::int32_t deltaYj = points[j].y()*SCALE - points[i].y()*SCALE;
+                Pt::int32_t deltaXj = points[j].x()*SCALE - points[i].x()*SCALE;
+                Pt::int32_t interXf = points[i].x()*SCALE + double(deltaYp) / deltaYj * deltaXj;
+                nodeXf[nodes++] = interXf;
+                // Check for too many nodes
+                if((size_t)nodes >= nodeXf.size()) return;
+            }
+            j = i;
+        }
+        // Sort the nodes using bubble sort
+        for(Pt::int32_t i = 0; i < nodes - 1;) {
+            if(nodeXf[i] > nodeXf[i + 1]) {
+                std::swap(nodeXf[i], nodeXf[i + 1]);
+                if(i) --i;
+            }
+            else {
+                ++i;
+            }
+        }
+        // Fill the pixels between node pairs
+        for(Pt::int32_t i = 0; i < nodes; i += 2) {
+            // Determine the X coordinates
+            Pt::int32_t from = nodeXf[i];
+            Pt::int32_t to   = nodeXf[i + 1];
+            //
+            for(int i = from; i <= to; ++i) {
+                alphas[pixelY * _image->width()*SCALE + i] = 255;
+            }
+        }
+    }
+
+    for(Pt::int32_t pixelY = minY; pixelY <= maxY; ++pixelY) {
+        for(Pt::int32_t pixelX = minX; pixelX <= maxX; ++pixelX) {
+            int x0  = pixelX * SCALE;
+            int y0  = pixelY * SCALE;
+            int acc = 0;
+            for(int y = 0; y < SCALE; ++y) {
+                for(int x = 0; x < SCALE; ++x) {
+                    int yi = y0 + y;
+                    int xi = x0 + x;
+                    acc += alphas[yi * _image->width()*SCALE + xi];
+                }
+            }
+            acc /= SCALE;
+            acc /= SCALE;
+            Pixel pixel(_image->view(), pixelX, pixelY);
+            _image->format().setPixel(pixel, color, _compositionMode, acc);
+        }
+    }
+#else
+
+    // List of nodes that define the horizontal segments
     std::vector<Pt::int32_t> nodeXf(pointCount * 2, 0);
 
     //  Loop through the rows of the image
@@ -267,8 +338,8 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
                 Pt::int32_t deltaYp = pixelY        - points[i].y();
                 Pt::int32_t deltaYj = points[j].y() - points[i].y();
                 Pt::int32_t deltaXj = points[j].x() - points[i].x();
-                nodeXf[nodes] = FIXED_POINT_FROM_INT(points[i].x()) + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
-                ++nodes;
+                Pt::int32_t interXf = FIXED_POINT_FROM_INT(points[i].x()) + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
+                nodeXf[nodes++] = interXf + FIXED_POINT_CONSTANT_HALF;
                 // Check for too many nodes
                 if((size_t)nodes >= nodeXf.size()) return;
             }
@@ -311,6 +382,8 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
             }
         }
     }
+
+#endif
 }
 
 /*
