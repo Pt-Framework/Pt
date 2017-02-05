@@ -70,7 +70,7 @@ static void testDrawSolidFillPolygon(const char* title, Image& image, ImagePaint
 
     const int    o1       = 250;
     const PointF poly1b[] = { PointF(50 + o1, 50), PointF(250 + o1, 100), PointF(450 + o1, 250), PointF(350 + o1, 350), PointF(150 + o1, 100) };
-    painter.fillPolygonSS(poly1b, sizeof(poly1) / sizeof(poly1[0]));
+    painter.fillPolygon(poly1b, sizeof(poly1) / sizeof(poly1[0]), true);
 
     painter.setBrush( Color::fromRgb8(0, 255, 255, 175) );
 
@@ -79,7 +79,7 @@ static void testDrawSolidFillPolygon(const char* title, Image& image, ImagePaint
 
     const int    o2       = 100;
     const PointF poly2b[] = { PointF(140, 260 + o2), PointF(210, 310 + o2), PointF(160, 340 + o2), PointF(110, 310 + o2) };
-    painter.fillPolygonSS(poly2b, sizeof(poly2) / sizeof(poly2[0]));
+    painter.fillPolygon(poly2b, sizeof(poly2) / sizeof(poly2[0]), true);
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height());
 }

@@ -28,53 +28,157 @@
   02110-1301 USA
 */
 
-#include <cmath>
-
-#include <Pt/Gfx/Algorithm.h>
-#include <Pt/Gfx/ImagePainter2.h>
-
-#include "DrawText.h"
-#include "ClipShape.h"
-#include "Rasterizer2.h"
-
-// Just for easy and faster debugging ;)
-#include <stdio.h>
-#define lprintf(...) fprintf (stderr, __VA_ARGS__)
+#include "Rasterizer2_Config.h"
 
 namespace Pt {
 namespace Gfx {
 
 
 // ======================================================================================
-// ===== Settings and Macros ============================================================
+// ===== Public Member Functions ========================================================
 // ======================================================================================
 
-// Fixed-Point 16.16 Settings
-#define FIXED_POINT_SHIFT_FACTOR  16         // Shift factor
-#define FIXED_POINT_FRACT_BITMASK 0x0000FFFF // Bit mask for the fractional value; must be (2 ^ FIXED_POINT_SHIFT_FACTOR - 1)
-#define FIXED_POINT_CONSTANT_ONE  65536      // The value 1.0 in fixed-point ( 2 ^ FIXED_POINT_SHIFT_FACTOR    )
-#define FIXED_POINT_CONSTANT_HALF 32768      // The value 0.5 in fixed-point ( 2 ^ FIXED_POINT_SHIFT_FACTOR / 2)
+Rasterizer2::Rasterizer2(Image& image)
+: _image(&image)
+, _text( new DrawText() )
+, _font()
+, _compositionMode(CompositionMode::SourceCopy)
+, _penPixel(_image->view(), 0, 0)
+, _brushPixel(_image->view(), 0, 0)
+{
+    _text->setFont(_font);
+    updateClip();
+}
 
-// Fixed-Point 16.16 Helper Macros
-#define FIXED_POINT_IPART(V)        ( (V) & ~FIXED_POINT_FRACT_BITMASK )
-#define FIXED_POINT_FPART(V)        ( (V) &  FIXED_POINT_FRACT_BITMASK )
-#define FIXED_POINT_RFPART(V)       ( FIXED_POINT_FRACT_BITMASK - FIXED_POINT_FPART(V) )
-#define FIXED_POINT_ROUND(V)        ( FIXED_POINT_IPART( (V) + FIXED_POINT_CONSTANT_HALF ) )
-#define FIXED_POINT_FPART_TO_A8(V)  ( FIXED_POINT_FPART (V) >> 8 )
-#define FIXED_POINT_RFPART_TO_A8(V) ( FIXED_POINT_RFPART(V) >> 8 )
-#define FIXED_POINT_MUL_TO_A8(A, B) ( ( ( (Pt::uint32_t)(A) * (Pt::uint32_t)(B) + FIXED_POINT_FRACT_BITMASK ) >> FIXED_POINT_SHIFT_FACTOR ) )
-#define FIXED_POINT_FROM_INT(V)     ( (V) << FIXED_POINT_SHIFT_FACTOR )
-#define FIXED_POINT_TO_INT(V)       ( (V) >> FIXED_POINT_SHIFT_FACTOR )
+Rasterizer2::~Rasterizer2()
+{
+    delete _text;
+}
 
-// Supersampling size (2 or 4)
-#define SUPERSAMPLING_SIZE 2
+void Rasterizer2::setImage( Image& image )
+{
+    _image = &image;
+    _brushBuffer.reset(_image->format(), _brushBuffer.size());
+    updateClip();
+}
+
+const ImageFormat& Rasterizer2::format() const
+{ return _image->format(); }
+
+void Rasterizer2::setPen( const Pen& pen )
+{
+    _pen = pen;
+    _penBuffer.reset(_image->format(), Size(64, 1));
+    Gfx::fill(_penBuffer.begin(), _penBuffer.end(), pen.color());
+
+    _penPixel.reset(_penBuffer.view(), 0, 0);
+}
+
+void Rasterizer2::setBrush( const Brush& brush )
+{
+    _brush = brush;
+    _isGradient = false;
+
+    switch( brush.fillStyle() ) {
+        case Brush::Solid:
+            _brushBuffer.reset( _image->format(), Size(64, 1) );
+            Gfx::fill(_brushBuffer.begin(), _brushBuffer.end(), brush.color());
+            _brushImage = &_brushBuffer;
+            break;
+
+        case Brush::Texture:
+            if( brush.texture().format() != _image->format() ) {
+                _brushBuffer.reset( _image->format(), brush.texture().size() );
+                Gfx::copy( brush.texture().begin(), brush.texture().end(), _brushBuffer.begin() );
+                _brushImage = &_brushBuffer;
+            }
+            else {
+                _brushImage = &_brush.texture();
+            }
+            break;
+
+        case Brush::HorizontalGradient:
+        case Brush::VerticalGradient:
+            _isGradient = true;
+            _brushImage = &_brushBuffer;
+            break;
+    }
+
+    _brushPixel.reset(_brushImage->view(), 0, 0);
+}
+
+void Rasterizer2::setFont(const Font& font)
+{
+    _font = font;
+    _text->setFont(_font);
+}
+
+void Rasterizer2::setClip( const Rect& clip )
+{
+    _clip = clip;
+    updateClip();
+}
+
+FontMetrics Rasterizer2::fontMetrics( const String& text ) const
+{ return _text->fontMetrics( text ); }
+
+FontMetrics Rasterizer2::fontMetrics( const Font& font, const Pt::String& text )
+{
+    DrawText textRender;
+    textRender.setFont(font);
+
+    return textRender.fontMetrics(text);
+}
+
+void Rasterizer2::image(const Point& to, const Image& img)
+{
+    const Rect imageRect( Point(0,0), img.size() );
+    image( to, img, imageRect );
+}
+
+void Rasterizer2::image(const Point& to, const Image& from, const Rect& fromRect)
+{
+    // Clip fromRect to fit into the clip/image rect
+    const Point d       = _currentClip.topLeft() - to;
+    const Point fromPos = fromRect.topLeft() + d;
+
+    Rect fromClip(fromPos, _currentClip.size());
+    fromClip = fromRect.intersect(fromClip);
+
+    if( fromClip.isNull() ) return;
+
+    // Take account for smaller fromRect
+    const Point toClip = to + (fromClip.topLeft() - fromRect.topLeft());
+
+    _image->format().copy(_image->view(), toClip, from.view(), fromClip, _compositionMode);
+}
+
+void Rasterizer2::strokeText( const Point& to, const Pt::String& text )
+{
+    _text->setClip(_currentClip);
+    _text->draw( *_image, _pen.color(), to, text, _compositionMode );
+}
 
 
 // ======================================================================================
-// ===== Include the Member Functions Implementations ===================================
+// ===== Private Member Functions - Utilities ===========================================
 // ======================================================================================
-#include "Rasterizer2_Public.cpp"
-#include "Rasterizer2_Private.cpp"
+
+void Rasterizer2::updateClip()
+{
+    const Rect imageRect( Point(0,0) , _image->size() );
+    _currentClip = _clip.isNull() ? imageRect : _clip.intersect( imageRect );
+}
+
+void Rasterizer2::genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount) const
+{
+    dst.clear();
+
+    for(size_t i = 0; i < pointCount; ++i)
+        dst.push_back( Point( src[i].x(), src[i].y() ) );
+
+    ClipShape::clipPolygon(dst, _currentClip);
+}
 
 
 } // namespace

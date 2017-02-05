@@ -101,23 +101,23 @@ class Rasterizer2
 
         void strokeText(const Point& to, const Pt::String& text);
         void strokeRect(const Point& tl, const Point& br);
-        void strokeOutline(const Point* points, size_t pointCount);
+        void strokePolygon(const Point* points, size_t pointCount);
 
         void fillRect(const Point& tl, const Point& br);
         void fillPolygon(const Point* points, const size_t pointCount, bool useSupersamplingForAA = false);
 
     private:
         void rasterOnePixelLine(const Point& a, const Point& b);
-        void rasterOnePixelHLineSegment(Pt::int32_t x1, Pt::int32_t x2, Pt::int32_t y, const Color& color);
-        void rasterOnePixelVLineSegment(Pt::int32_t x, Pt::int32_t y1, Pt::int32_t y2, const Color& color);
-        void rasterOnePixelLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, const Color& color, bool skipLastPoint);
+        void rasterOnePixelHLineSegment(Pt::int32_t x1, Pt::int32_t x2, Pt::int32_t y, const Color& color, bool skipLastPoint);
+        void rasterOnePixelVLineSegment(Pt::int32_t x, Pt::int32_t y1, Pt::int32_t y2, const Color& color, bool skipLastPoint);
+        void rasterOnePixelGLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, const Color& color, bool skipLastPoint);
 
-        void rasterRectArea(const Point& tl, const Point& br);
         void rasterOnePixelRectOutline(const Point& tl, const Point& br);
+        void rasterRectArea(const Point& tl, const Point& br);
 
+        void rasterPolygonOutline(const Point* points, size_t pointCount, const Color& color);
         void rasterPolygonArea(const Point* points, size_t pointCount, const Color& color);
         void rasterPolygonAreaSS(const Point* points, size_t pointCount, const Color& color);
-        void rasterPolygonOutline(const Point* points, size_t pointCount, const Color& color);
 
         void updateClip();
         void genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount) const;

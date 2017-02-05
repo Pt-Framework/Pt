@@ -74,7 +74,7 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual FontMetrics fontMetrics(const Pt::String& text) const;
 
-        virtual void drawLine(const PointF& from, const  PointF& to);
+        virtual void drawLine(const PointF& from, const PointF& to);
 
         virtual void drawText(const PointF& to, const Pt::String& text);
 
@@ -88,13 +88,16 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual void drawPolyline(const PointF* points, const size_t pointCount);
 
-        virtual void fillPolygon(const PointF* points, const size_t pointCount);
-
-          virtual void fillPolygonSS(const PointF* points, const size_t pointCount);
+        virtual void fillPolygon(const PointF* points, const size_t pointCount, bool useSupersamplingForAA);
 
         virtual void drawImage(const PointF& to, const Image& image);
 
         virtual void drawImage(const PointF& to, const Image& image, const RectF& imageRect);
+
+    public:
+        // Just to make it API compatible with the Painter class
+        virtual void fillPolygon(const PointF* points, const size_t pointCount)
+        { fillPolygon(points, pointCount, false); }
 
     public:
         static void setFontDir(const System::Path& path);

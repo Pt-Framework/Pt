@@ -160,12 +160,10 @@ static size_t benchDrawSolidFillPolygon(CompositionMode cm, bool ss)
         clock.start();
 
         const PointF poly1[] = { PointF(50, 50), PointF(250, 100), PointF(450, 250), PointF(350, 350), PointF(150, 100) };
-        if(ss) painter.fillPolygonSS(poly1, sizeof(poly1) / sizeof(poly1[0]));
-        else   painter.fillPolygon  (poly1, sizeof(poly1) / sizeof(poly1[0]));
+        painter.fillPolygon(poly1, sizeof(poly1) / sizeof(poly1[0]), ss);
 
         const PointF poly2[] = { PointF(140, 260), PointF(210, 310), PointF(160, 340), PointF(110, 310) };
-        if(ss) painter.fillPolygonSS(poly2, sizeof(poly2) / sizeof(poly2[0]));
-        else   painter.fillPolygon  (poly2, sizeof(poly2) / sizeof(poly2[0]));
+        painter.fillPolygon(poly2, sizeof(poly2) / sizeof(poly2[0]), ss);
 
         sum += clock.stop().toUSecs();
 #if BENCHMARK_CHECK_RESULTING_IMAGE

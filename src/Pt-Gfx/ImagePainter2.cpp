@@ -149,7 +149,7 @@ void ImagePainter2::drawText( const PointF& toIn, const String& text )
 void ImagePainter2::drawLine(const PointF& from, const PointF& to)
 {
     const Point points[] = { Point( (int)(from.x()), (int)(from.y()) ) , Point( (int)(to.x()), (int)(to.y()) ) };
-    _rasterizer->strokeOutline( points, 2 );
+    _rasterizer->strokePolygon( points, 2 );
 }
 
 void ImagePainter2::drawRect( const RectF& rect )
@@ -178,24 +178,14 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount )
 {
 }
 
-void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
+void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount, bool useSupersamplingForAA )
 {
     std::vector<Point> points(pointCount);
 
     for(size_t i = 0; i < pointCount; ++i)
         points[i].set( ps[i].x(), ps[i].y() );
 
-    _rasterizer->fillPolygon(points.data(), pointCount, false);
-}
-
-void ImagePainter2::fillPolygonSS( const PointF* ps, const size_t pointCount )
-{
-    std::vector<Point> points(pointCount);
-
-    for(size_t i = 0; i < pointCount; ++i)
-        points[i].set( ps[i].x(), ps[i].y() );
-
-    _rasterizer->fillPolygon(points.data(), pointCount, true);
+    _rasterizer->fillPolygon(points.data(), pointCount, useSupersamplingForAA);
 }
 
 void ImagePainter2::drawImage( const PointF& toIn, const Image& image)

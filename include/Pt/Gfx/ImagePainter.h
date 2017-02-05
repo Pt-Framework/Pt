@@ -109,7 +109,8 @@ class PT_GFX_API ImagePainter : public Painter
     RectF _clip;
 
   public:
-      virtual void fillPolygonSS(const PointF* points, const size_t pointCount)
+      // Just to make it API compatible with the ImagePainter2 class
+      virtual void fillPolygon(const PointF* points, const size_t pointCount, bool /*useSupersamplingForAA*/)
       { fillPolygon(points, pointCount); }
 };
 
