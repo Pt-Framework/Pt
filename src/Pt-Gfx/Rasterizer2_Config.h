@@ -64,3 +64,7 @@
 
 // Supersampling size (2 or 4)
 #define SUPERSAMPLING_SIZE 2
+
+// Uncomment this to use ImageView::PixelIterator
+// NOTE: Currently it is slower than using the Pixel class; so do not uncomment this
+// #define R2_USE_PIXEL_ITERATOR

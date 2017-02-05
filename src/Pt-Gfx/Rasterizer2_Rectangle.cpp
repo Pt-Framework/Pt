@@ -101,6 +101,19 @@ void Rasterizer2::rasterRectArea(const Point& tl, const Point& br)
     const Pt::int32_t sizeX = maxX - minX + 1;
 
     // Draw the rectangles
+#ifdef R2_USE_PIXEL_ITERATOR
+    ImageView::PixelIterator pixel = _image->view().pixel(minX, minY);
+    for(Pt::int32_t y = minY; y <= maxY; ++y) {
+        Pt::int32_t spanWidth = sizeX;
+        while(spanWidth > 0) {
+            const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
+            _image->format().copy(*pixel, _brushPixel, n, _compositionMode);
+            pixel     += n;
+            spanWidth -= n;
+        }
+        pixel += (_image->width() - sizeX);
+    }
+#else
     for(Pt::int32_t y = minY; y <= maxY; ++y) {
         Pt::int32_t spanWidth = sizeX;
         while(spanWidth > 0) {
@@ -110,6 +123,7 @@ void Rasterizer2::rasterRectArea(const Point& tl, const Point& br)
             spanWidth -= n;
         }
     }
+#endif
 }
 
 

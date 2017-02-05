@@ -168,6 +168,20 @@ void Rasterizer2::rasterOnePixelGLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, P
     Pt::int32_t ypxl1 = FIXED_POINT_IPART(yend);
     Pt::uint8_t a1    = FIXED_POINT_MUL_TO_A8(FIXED_POINT_RFPART(yend), xgap);
     Pt::uint8_t a2    = FIXED_POINT_MUL_TO_A8(FIXED_POINT_FPART (yend), xgap);
+#ifdef R2_USE_PIXEL_ITERATOR
+    if(steep) {
+        ImageView::PixelIterator pixel = _image->view().pixel(FIXED_POINT_TO_INT(ypxl1), FIXED_POINT_TO_INT(xpxl1));
+        _image->format().setPixel(*pixel, color, _compositionMode, a1);
+        ++pixel;
+        _image->format().setPixel(*pixel, color, _compositionMode, a2);
+    }
+    else {
+        ImageView::PixelIterator pixel = _image->view().pixel( FIXED_POINT_TO_INT(xpxl1), FIXED_POINT_TO_INT(ypxl1));
+        _image->format().setPixel(*pixel, color, _compositionMode, a1);
+        pixel += _image->width();
+        _image->format().setPixel(*pixel, color, _compositionMode, a2);
+    }
+#else
     if(steep) {
         XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(ypxl1                           ), FIXED_POINT_TO_INT(xpxl1), a1);
         XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(ypxl1 + FIXED_POINT_CONSTANT_ONE), FIXED_POINT_TO_INT(xpxl1), a2);
@@ -176,6 +190,7 @@ void Rasterizer2::rasterOnePixelGLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, P
         XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(xpxl1), FIXED_POINT_TO_INT(ypxl1                           ), a1);
         XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(xpxl1), FIXED_POINT_TO_INT(ypxl1 + FIXED_POINT_CONSTANT_ONE), a2);
     }
+#endif
 
     // First y-intersection for the main loop
     Pt::int32_t intery = yend + gradient;
@@ -189,6 +204,20 @@ void Rasterizer2::rasterOnePixelGLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, P
                 a1    = FIXED_POINT_MUL_TO_A8(FIXED_POINT_RFPART(yend), xgap);
                 a2    = FIXED_POINT_MUL_TO_A8(FIXED_POINT_FPART (yend), xgap);
     if(!skipLastPoint) {
+#ifdef R2_USE_PIXEL_ITERATOR
+        if(steep) {
+            ImageView::PixelIterator pixel = _image->view().pixel(FIXED_POINT_TO_INT(ypxl2), FIXED_POINT_TO_INT(xpxl2));
+            _image->format().setPixel(*pixel, color, _compositionMode, a1);
+            ++pixel;
+            _image->format().setPixel(*pixel, color, _compositionMode, a2);
+        }
+        else {
+            ImageView::PixelIterator pixel = _image->view().pixel(FIXED_POINT_TO_INT(xpxl2), FIXED_POINT_TO_INT(ypxl2));
+            _image->format().setPixel(*pixel, color, _compositionMode, a1);
+            pixel += _image->width();
+            _image->format().setPixel(*pixel, color, _compositionMode, a2);
+        }
+#else
         if(steep) {
             XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(ypxl2                           ), FIXED_POINT_TO_INT(xpxl2), a1);
             XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(ypxl2 + FIXED_POINT_CONSTANT_ONE), FIXED_POINT_TO_INT(xpxl2), a2);
@@ -197,6 +226,7 @@ void Rasterizer2::rasterOnePixelGLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, P
             XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(xpxl2), FIXED_POINT_TO_INT(ypxl2                           ), a1);
             XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(xpxl2), FIXED_POINT_TO_INT(ypxl2 + FIXED_POINT_CONSTANT_ONE), a2);
         }
+#endif
     }
 
     // Loop through the rest of the pixels
@@ -206,8 +236,15 @@ void Rasterizer2::rasterOnePixelGLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, P
         for(Pt::int32_t i = from; i <= to; ++i) {
             a1 = FIXED_POINT_RFPART_TO_A8(intery);
             a2 = FIXED_POINT_FPART_TO_A8 (intery);
+#ifdef R2_USE_PIXEL_ITERATOR
+            ImageView::PixelIterator pixel = _image->view().pixel(FIXED_POINT_TO_INT(FIXED_POINT_IPART(intery)), i);
+            _image->format().setPixel(*pixel, color, _compositionMode, a1);
+            ++pixel;
+            _image->format().setPixel(*pixel, color, _compositionMode, a2);
+#else
             XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(FIXED_POINT_IPART(intery)                           ), i, a1);
             XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(FIXED_POINT_IPART(intery) + FIXED_POINT_CONSTANT_ONE), i, a2);
+#endif
             intery += gradient;
         }
     }
@@ -215,8 +252,15 @@ void Rasterizer2::rasterOnePixelGLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, P
         for(Pt::int32_t i = from; i <= to; ++i) {
             a1 = FIXED_POINT_RFPART_TO_A8(intery);
             a2 = FIXED_POINT_FPART_TO_A8 (intery);
+#ifdef R2_USE_PIXEL_ITERATOR
+            ImageView::PixelIterator pixel = _image->view().pixel(i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(intery)));
+            _image->format().setPixel(*pixel, color, _compositionMode, a1);
+            pixel += _image->width();
+            _image->format().setPixel(*pixel, color, _compositionMode, a2);
+#else
             XW_SET_PIXEL(_image, color, i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(intery)                           ), a1);
             XW_SET_PIXEL(_image, color, i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(intery) + FIXED_POINT_CONSTANT_ONE), a2);
+#endif
             intery += gradient;
         }
     }
