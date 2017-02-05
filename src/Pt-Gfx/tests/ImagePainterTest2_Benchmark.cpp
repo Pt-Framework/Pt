@@ -1,3 +1,36 @@
+#ifdef __GNUC__
+#include <cxxabi.h>
+#endif
+
+static const std::string formatCaption(const Painter& painter, CompositionMode cm, const char* funcName)
+{
+    // Get the class name string
+    std::string className = typeid(painter).name();
+#ifdef __GNUC__
+    int s;
+    char* demangled = abi::__cxa_demangle(className.c_str(), 0, 0, &s);
+    className = demangled;
+    free(demangled);
+#endif
+
+    // Get the composition mode string
+    std::string cmStr;
+    switch(cm) {
+        case CompositionMode::SourceCopy : cmStr = "SourceCopy"; break;
+        case CompositionMode::SourceOver : cmStr = "SourceOver"; break;
+        default                          : cmStr = "<unknown>";  break;
+    }
+
+    // Generate the information text
+    std::stringstream ss;
+    ss << funcName << "() - " << className << " [" << cmStr << "]";
+
+    // Return the text
+    return ss.str();
+}
+
+#define BENCHMARK_DISPLAY_RESULTING_IMAGE if(BENCHMARK_CHECK_RESULTING_IMAGE && !i) sdlPreviewRGB888Buffer(formatCaption(painter, cm, __FUNCTION__), image.data(), image.width(), image.height())
+
 template <typename PainterT>
 static size_t benchDrawText(CompositionMode cm)
 {
@@ -25,9 +58,8 @@ static size_t benchDrawText(CompositionMode cm)
         painter.drawText( PointF(100, 150), "Hello world!" );
 
         sum += clock.stop().toUSecs();
-#if BENCHMARK_CHECK_RESULTING_IMAGE
-        if(!i) sdlPreviewRGB888Buffer("benchDrawText", image.data(), image.width(), image.height());
-#endif
+
+        BENCHMARK_DISPLAY_RESULTING_IMAGE;
     }
 
     sum /= BENCHMARK_LOOP_COUNT;
@@ -58,9 +90,8 @@ static size_t benchDrawLine(CompositionMode cm)
         painter.drawLine( PointF(789, 489), PointF( 10, 589) );
 
         sum += clock.stop().toUSecs();
-#if BENCHMARK_CHECK_RESULTING_IMAGE
-        if(!i) sdlPreviewRGB888Buffer("benchDrawLine", image.data(), image.width(), image.height());
-#endif
+
+        BENCHMARK_DISPLAY_RESULTING_IMAGE;
     }
 
     sum /= BENCHMARK_LOOP_COUNT;
@@ -94,9 +125,8 @@ static size_t benchDrawRect(CompositionMode cm)
         painter.drawRect( RectF(PointF(450, 150), SizeF(200, 100)) );
 
         sum += clock.stop().toUSecs();
-#if BENCHMARK_CHECK_RESULTING_IMAGE
-        if(!i) sdlPreviewRGB888Buffer("benchDrawRect", image.data(), image.width(), image.height());
-#endif
+
+        BENCHMARK_DISPLAY_RESULTING_IMAGE;
     }
 
     sum /= BENCHMARK_LOOP_COUNT;
@@ -130,9 +160,8 @@ static size_t benchDrawSolidFillRect(CompositionMode cm)
         painter.fillRect( RectF(PointF(450, 150), SizeF(200, 100)) );
 
         sum += clock.stop().toUSecs();
-#if BENCHMARK_CHECK_RESULTING_IMAGE
-        if(!i) sdlPreviewRGB888Buffer("benchDrawRect", image.data(), image.width(), image.height());
-#endif
+
+        BENCHMARK_DISPLAY_RESULTING_IMAGE;
     }
 
     sum /= BENCHMARK_LOOP_COUNT;
@@ -155,20 +184,23 @@ static size_t benchDrawSolidFillPolygon(CompositionMode cm, bool ss)
     Pen pen( Color::fromRgb8(255, 255, 255, 175) );
     painter.setPen(pen);
 
+    ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
+
     for(int i = 0; i < BENCHMARK_LOOP_COUNT ; ++i) {
         Pt::System::Clock clock;
         clock.start();
 
         const PointF poly1[] = { PointF(50, 50), PointF(250, 100), PointF(450, 250), PointF(350, 350), PointF(150, 100) };
-        painter.fillPolygon(poly1, sizeof(poly1) / sizeof(poly1[0]), ss);
+        if(ip2) ip2->fillPolygon(poly1, sizeof(poly1) / sizeof(poly1[0]), ss);
+        else    painter.fillPolygon(poly1, sizeof(poly1) / sizeof(poly1[0]));
 
         const PointF poly2[] = { PointF(140, 260), PointF(210, 310), PointF(160, 340), PointF(110, 310) };
-        painter.fillPolygon(poly2, sizeof(poly2) / sizeof(poly2[0]), ss);
+        if(ip2) ip2->fillPolygon(poly2, sizeof(poly2) / sizeof(poly2[0]), ss);
+        else    painter.fillPolygon(poly2, sizeof(poly2) / sizeof(poly2[0]));
 
         sum += clock.stop().toUSecs();
-#if BENCHMARK_CHECK_RESULTING_IMAGE
-        if(!i) sdlPreviewRGB888Buffer("benchDrawSolidFillPolygon", image.data(), image.width(), image.height());
-#endif
+
+        BENCHMARK_DISPLAY_RESULTING_IMAGE;
     }
 
     sum /= BENCHMARK_LOOP_COUNT;

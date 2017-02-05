@@ -17,6 +17,8 @@ using namespace Pt::Gfx;
 #define FONT_SPEC "DejaVu Serif", 24, Pt::Gfx::Font::BoldItalic
 
 #define DO_BENCHMARKING                  1
+#define DO_TEST_DRAW                     1
+
 #define BENCHMARK_CHECK_RESULTING_IMAGE  0
 #define BENCHMARK_IMAGE_SIZE             Size(1280, 800)
 #define BENCHMARK_LOOP_COUNT             250
@@ -41,40 +43,48 @@ using namespace Pt::Gfx;
 int main(int argc, char* args[])
 {
     Image         image( ImageFormat::argb32(), Size(800, 600) );
-    ImagePainter2 painter(image);
+    ImagePainter  painter1obj(image);
+    ImagePainter2 painter2obj(image);
 
-    painter.setFontDir( Pt::System::Path(FONT_DIR) );
-    painter.setFont( Pt::Gfx::Font(FONT_SPEC) );
+    painter1obj.setFontDir( Pt::System::Path(FONT_DIR) );
+    painter1obj.setFont( Pt::Gfx::Font(FONT_SPEC) );
+
+    painter2obj.setFontDir( Pt::System::Path(FONT_DIR) );
+    painter2obj.setFont( Pt::Gfx::Font(FONT_SPEC) );
+
+    Painter* painter1 = dynamic_cast<Painter*>(&painter1obj);
+    Painter* painter2 = dynamic_cast<Painter*>(&painter2obj);
 
     // Lines
-    if(TEST_SOURCECOPY && TEST_DRAW_LINE_AND_TEXT) {
-        painter.setCompositionMode(CompositionMode::SourceCopy);
-        testDrawLine("Lines and Texts - SourceCopy", image, painter);
+    if(DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_LINE_AND_TEXT) {
+        painter2->setCompositionMode(CompositionMode::SourceCopy);
+        testDrawLine("Lines and Texts - ImagePainter2 [SourceCopy]", image, *painter2);
     }
-    if(TEST_SOURCEOVER && TEST_DRAW_LINE_AND_TEXT) {
-        painter.setCompositionMode(CompositionMode::SourceOver);
-        testDrawLine("Lines and Texts - SourceOver", image, painter);
+    if(DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_LINE_AND_TEXT) {
+        painter2->setCompositionMode(CompositionMode::SourceOver);
+        testDrawLine("Lines and Texts - ImagePainter2 [SourceOver]", image, *painter2);
     }
 
     // Rectangles and solid-filled rectangles
-    if(TEST_SOURCECOPY && TEST_DRAW_RECTANGLES_FILLED_RECTANGLES) {
-        painter.setCompositionMode(CompositionMode::SourceCopy);
-        testDrawRect("Rectangles & Solid-Filled Rectangles - SourceCopy", image, painter);
+    if(DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_RECTANGLES_FILLED_RECTANGLES) {
+        painter2->setCompositionMode(CompositionMode::SourceCopy);
+        testDrawRect("Rectangles & Solid-Filled Rectangles - ImagePainter2 [SourceCopy]", image, *painter2);
+        testDrawRect("Rectangles & Solid-Filled Rectangles - ImagePainter1 [SourceCopy]", image, *painter1);
     }
 
-    if(TEST_SOURCEOVER && TEST_DRAW_RECTANGLES_FILLED_RECTANGLES) {
-        painter.setCompositionMode(CompositionMode::SourceOver);
-        testDrawRect("Rectangles & Solid-Filled Rectangles - SourceOver", image, painter);
+    if(DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_RECTANGLES_FILLED_RECTANGLES) {
+        painter2->setCompositionMode(CompositionMode::SourceOver);
+        testDrawRect("Rectangles & Solid-Filled Rectangles - ImagePainter2 [SourceOver]", image, *painter2);
     }
 
     // Solid-filled polygons
-    if(TEST_SOURCECOPY && TEST_DRAW_SOLID_FILLED_POLYGONS) {
-        painter.setCompositionMode(CompositionMode::SourceCopy);
-        testDrawSolidFillPolygon("Solid-Filled Polygons - SourceCopy", image, painter);
+    if(DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_SOLID_FILLED_POLYGONS) {
+        painter2->setCompositionMode(CompositionMode::SourceCopy);
+        testDrawSolidFillPolygon("Solid-Filled Polygons - ImagePainter2 [SourceCopy]", image, *painter2);
     }
-    if(TEST_SOURCEOVER && TEST_DRAW_SOLID_FILLED_POLYGONS) {
-        painter.setCompositionMode(CompositionMode::SourceOver);
-        testDrawSolidFillPolygon("Solid-Filled Polygons - SourceOver", image, painter);
+    if(DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_SOLID_FILLED_POLYGONS) {
+        painter2->setCompositionMode(CompositionMode::SourceOver);
+        testDrawSolidFillPolygon("Solid-Filled Polygons - ImagePainter2 [SourceOver]", image, *painter2);
     }
 
     // Benchmark

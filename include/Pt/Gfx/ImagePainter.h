@@ -107,11 +107,6 @@ class PT_GFX_API ImagePainter : public Painter
   private:
     Rasterizer* _rasterizer;
     RectF _clip;
-
-  public:
-      // Just to make it API compatible with the ImagePainter2 class
-      virtual void fillPolygon(const PointF* points, const size_t pointCount, bool /*useSupersamplingForAA*/)
-      { fillPolygon(points, pointCount); }
 };
 
 }}

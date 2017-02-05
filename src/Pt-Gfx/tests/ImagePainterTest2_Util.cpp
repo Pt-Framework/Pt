@@ -1,10 +1,10 @@
-static void sdlPreviewRGB888Buffer(const char* title, const uint8_t* argb8888Buff, int sizeX, int sizeY)
+static void sdlPreviewRGB888Buffer(const std::string& title, const uint8_t* argb8888Buff, int sizeX, int sizeY)
 {
     // Initialise SDL
     if(SDL_Init(SDL_INIT_VIDEO) < 0) return;
 
     // Create window, renderer, and texture objects
-    SDL_Window*   sdlWindow     = SDL_CreateWindow  (title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, sizeX, sizeY, 0);
+    SDL_Window*   sdlWindow     = SDL_CreateWindow  (title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, sizeX, sizeY, 0);
     SDL_Renderer* sdlRenderer   = SDL_CreateRenderer(sdlWindow, -1, 0);
     SDL_Texture*  sdlTexture    = SDL_CreateTexture (sdlRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, sizeX, sizeY);
 
