@@ -205,7 +205,7 @@ void ScrollLayout::onContentScroll(const ScrollEvent& ev)
 
 void ScrollLayout::onContentChanged()
 {
-    Base::onInvalidate();
+    //Base::onInvalidate();
 
     double maxWidth = 0;
     double maxHeight = 0;

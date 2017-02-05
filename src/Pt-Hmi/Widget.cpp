@@ -792,6 +792,9 @@ void Widget::onResizeEvent(const ResizeEvent& ev)
       _content->resize( _size );
 
     onLayout();
+
+    //if( parent() )
+    //    parent()->onLayout();
 }
 
 
