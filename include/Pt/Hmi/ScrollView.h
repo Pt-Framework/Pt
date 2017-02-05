@@ -64,8 +64,9 @@ class PT_HMI_API ScrollView : public Widget
         void onScrolledX(int n);
         
         void onScrolledY(int n);
-        
-        void onContentChanged();
+
+    protected:
+        virtual void onLayout();
     
     private:
         void updateScrollBar(ScrollBar& scroll, double maxRange);

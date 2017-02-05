@@ -48,7 +48,7 @@ ScrollView::ScrollView()
 
     _scrollLayout.scrolledX() += Pt::slot(*this, &ScrollView::onScrolledX);
     _scrollLayout.scrolledY() += Pt::slot(*this, &ScrollView::onScrolledY);
-    _scrollLayout.contentChanged() += Pt::slot(*this, &ScrollView::onContentChanged);
+    _scrollLayout.layoutChanged() += Pt::slot(*this, &ScrollView::onLayout);
 
     add(_scrollLayout);
     add(_scrollBarX);
@@ -64,7 +64,7 @@ ScrollView::~ScrollView()
 void ScrollView::setScrollBars(bool hasScrollBars)
 {
     _hasScrollBars = hasScrollBars;
-    onContentChanged();
+    onLayout();
 }
 
 
@@ -102,8 +102,10 @@ void ScrollView::onScrolledY(int n)
 }
 
 
-void ScrollView::onContentChanged()
+void ScrollView::onLayout()
 {
+    Widget::onLayout();
+    
     double width = size().width();
     double height = size().height();
 
@@ -124,19 +126,19 @@ void ScrollView::onContentChanged()
     if( _scrollBarY.isVisible() )
         width -= _scrollBarY.size().width();
 
-    _scrollLayout.move( Gfx::PointF(0,0) );
-    _scrollLayout.resize( Gfx::SizeF( width, height) );
+    _scrollLayout.move( Gfx::PointF(0,0), vid() );
+    _scrollLayout.resize( Gfx::SizeF( width, height), vid() );
 
     if( _scrollBarX.isVisible() )
     {
-        _scrollBarX.move( Gfx::PointF(0, height) );
-        _scrollBarX.resize( Gfx::SizeF(width, _scrollBarX.size().height()) );
+        _scrollBarX.move( Gfx::PointF(0, height), vid() );
+        _scrollBarX.resize( Gfx::SizeF(width, _scrollBarX.size().height()), vid() );
     }
 
     if( _scrollBarY.isVisible() )
     {
-        _scrollBarY.move( Gfx::PointF(width, 0) );
-        _scrollBarY.resize( Gfx::SizeF(_scrollBarY.size().width(), height));
+        _scrollBarY.move( Gfx::PointF(width, 0), vid() );
+        _scrollBarY.resize( Gfx::SizeF(_scrollBarY.size().width(), height), vid());
     }
 
     double hrange = _scrollLayout.maximumX() -_scrollLayout.size().width();
@@ -150,7 +152,6 @@ void ScrollView::onContentChanged()
 void ScrollView::onResizeEvent(const ResizeEvent& ev)
 {
     Widget::onResizeEvent(ev);
-    onContentChanged();
 }
 
 

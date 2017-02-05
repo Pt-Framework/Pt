@@ -86,7 +86,7 @@ void ScrollLayout::scrollX(int xpos)
             
         Gfx::PointF pos = w->position();
         pos.subX(delta);
-        w->move(pos);
+        w->move(pos, vid());
     }
 
     _lastScrollPos.setX(xpos);
@@ -113,7 +113,7 @@ void ScrollLayout::scrollY(int ypos)
             
         Gfx::PointF pos = w->position();
         pos.subY(delta);
-        w->move(pos);
+        w->move(pos, vid());
     }
 
     _lastScrollPos.setY(ypos);
@@ -146,67 +146,26 @@ Pt::Signal<int>& ScrollLayout::scrolledY()
 }
 
 
-Pt::Signal<>& ScrollLayout::contentChanged() 
+Pt::Signal<>& ScrollLayout::layoutChanged() 
 {
-    return _contentChanged;
+    return _layoutChanged;
 }
 
 
 void ScrollLayout::onAddWidget(Widget& w)
 {
     Base::onAddWidget(w);
-    
-    w.eventReady() += Pt::slot(*this, &ScrollLayout::onContentResize);
-    w.eventReady() += Pt::slot(*this, &ScrollLayout::onContentScroll);
-
-    // TODO: we should not monitor if the user moves a child widget
-    //       because the child widgets are moved themselves by the
-    //       ScrollLayout... It would be possible to have only one 
-    //       child or let the user set the position in a addWidget
-    //       function and the ScrollLayout layouts it at that
-    //       position.
-    //       CURRENTLY this works, because moving a widget to its
-    //       current position does not yield a MoveEvent
-    w.eventReady() += Pt::slot(*this, &ScrollLayout::onContentMove);
-
-    onContentChanged();
 }
 
 
 void ScrollLayout::onRemoveWidget(Widget& w)
 {
     Base::onRemoveWidget(w);
-
-    w.eventReady() -= Pt::slot(*this, &ScrollLayout::onContentResize);
-    w.eventReady() -= Pt::slot(*this, &ScrollLayout::onContentScroll);
-    w.eventReady() -= Pt::slot(*this, &ScrollLayout::onContentMove);
-
-    onContentChanged();
 }
 
 
-void ScrollLayout::onContentResize(const ResizeEvent& ev)
+void ScrollLayout::onLayout()
 {
-    onContentChanged();
-}
-
-
-void ScrollLayout::onContentMove(const MoveEvent& ev)
-{
-    onContentChanged();
-}
-
-
-void ScrollLayout::onContentScroll(const ScrollEvent& ev)
-{
-    onScrollEvent(ev);
-}
-
-
-void ScrollLayout::onContentChanged()
-{
-    //Base::onInvalidate();
-
     double maxWidth = 0;
     double maxHeight = 0;
     
@@ -224,66 +183,25 @@ void ScrollLayout::onContentChanged()
                                         _lastScrollPos.y() );
     }
 
+    bool hasChanged = maxWidth != _maxX || maxHeight != _maxY;
+
     _maxX = static_cast<int>(maxWidth);
     _maxY = static_cast<int>(maxHeight);
 
-    _contentChanged.send();
+    if(hasChanged)
+        _layoutChanged.send();
 }
 
 
 void ScrollLayout::onMouseEvent(const MouseEvent& ev)
 {
     Base::onMouseEvent(ev);
-
-    //if( ev.isPress() )
-    //    _lastPos = ev.position();
-
-    //if( ev.isPressed() )
-    //{
-    //    Gfx::PointF delta = ev.position() - _lastPos;
-
-    //    if(_enableX)
-    //    {
-    //        double deltaX = _lastScrollPos.x() - delta.x();
-    //        scrollX( static_cast<int>(deltaX) );
-    //    }
-
-    //    if(_enableY)
-    //    {
-    //        double deltaY = _lastScrollPos.y() - delta.y();
-    //        scrollY( static_cast<int>(deltaY) );
-    //    }
-
-    //    _lastPos = ev.position();
-    //}
 }
 
 
 void ScrollLayout::onTouchEvent(const TouchEvent& ev)
 {    
     Base::onTouchEvent(ev);
-
-    //if( ev.isPress() )
-    //    _lastPos = ev.position();   
-
-    //if( ev.isPressed() )
-    //{
-    //    Gfx::PointF delta = ev.position() - _lastPos;
-
-    //    if(_enableX)
-    //    {
-    //        double deltaX = _lastScrollPos.x() - delta.x();
-    //        scrollX( static_cast<int>(deltaX) );
-    //    }
-
-    //    if(_enableY)
-    //    {
-    //        double deltaY = _lastScrollPos.y() - delta.y();
-    //        scrollY( static_cast<int>(deltaY) );
-    //    }
-
-    //    _lastPos = ev.position();
-    //}
 }
 
 

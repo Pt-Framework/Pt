@@ -733,7 +733,7 @@ const Gfx::PointF& Widget::position() const
 }
 
 
-void Widget::move(const Gfx::PointF& pos)
+void Widget::move(const Gfx::PointF& pos, Pt::uint64_t origin)
 {
     if(pos == _position)
         return;
@@ -743,7 +743,7 @@ void Widget::move(const Gfx::PointF& pos)
     Gfx::PointF to = pos - _position;
     updateRect.unify( Gfx::RectF(to, _size) ); 
     
-    MoveEvent mev(vid(), pos);
+    MoveEvent mev(vid(), pos, origin);
     Application::instance().loop().commitEvent(mev);
 
     // update needs to refer to previous position
@@ -755,7 +755,11 @@ void Widget::move(const Gfx::PointF& pos)
 
 void Widget::onMoveEvent(const MoveEvent& ev)
 {        
-    //_position = ev.position();
+    Widget* parentWidget = parent();
+    if( parentWidget && parentWidget->vid() != ev.origin() )
+    {
+        parentWidget->onLayout();
+    }
 }
 
 
@@ -765,7 +769,7 @@ const Gfx::SizeF& Widget::size() const
 }
 
 
-void Widget::resize(const Gfx::SizeF& s)
+void Widget::resize(const Gfx::SizeF& s, Pt::uint64_t origin)
 {
     if(_size == s)
         return;
@@ -777,7 +781,7 @@ void Widget::resize(const Gfx::SizeF& s)
 
     _size = s;
 
-    ResizeEvent rev(vid(), s);
+    ResizeEvent rev(vid(), s, origin);
     Application::instance().loop().commitEvent(rev);
     
     update(updateRect);
@@ -786,15 +790,16 @@ void Widget::resize(const Gfx::SizeF& s)
 
 void Widget::onResizeEvent(const ResizeEvent& ev)
 {    
-    //_size = ev.size();
-
     if( _content ) 
       _content->resize( _size );
 
     onLayout();
 
-    //if( parent() )
-    //    parent()->onLayout();
+    Widget* parentWidget = parent();
+    if( parentWidget && parentWidget->vid() != ev.origin() )
+    {
+        parentWidget->onLayout();
+    }
 }
 
 
@@ -804,10 +809,12 @@ const Gfx::RectF Widget::geometry() const
 }
 
 
-void Widget::setGeometry(const Gfx::PointF& pos, const Gfx::SizeF& size)
+void Widget::setGeometry(const Gfx::PointF& pos, 
+                        const Gfx::SizeF& size, 
+                        Pt::uint64_t origin)
 {
-    move(pos);
-    resize(size);
+    move(pos, origin);
+    resize(size, origin);
 }
 
 

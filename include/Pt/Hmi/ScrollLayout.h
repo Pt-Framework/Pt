@@ -38,8 +38,6 @@ namespace Pt {
 
 namespace Hmi {
 
-// TODO: should this really be a Layout? onLayout is not overrriden
-//       -> rename ScrollArea and derive from Widget
 class PT_HMI_API ScrollLayout : public Layout
 {
     typedef Layout Base;
@@ -67,12 +65,14 @@ class PT_HMI_API ScrollLayout : public Layout
 
         Pt::Signal<int>& scrolledY();
 
-        Pt::Signal<>& contentChanged();
+        Pt::Signal<>& layoutChanged();
 
     protected:
         virtual void onAddWidget(Widget& w);
         
         virtual void onRemoveWidget(Widget& w);
+
+        virtual void onLayout();
 
     protected:
         virtual void onMouseEvent(const MouseEvent& ev);
@@ -80,20 +80,11 @@ class PT_HMI_API ScrollLayout : public Layout
         virtual void onTouchEvent(const TouchEvent& ev);
 
         virtual bool onScrollEvent(const ScrollEvent& ev);
-        
-  private:
-        void onContentResize(const ResizeEvent& ev);
-
-        void onContentMove(const MoveEvent& ev);
-
-        void onContentScroll(const ScrollEvent& ev);
-
-        void onContentChanged();
        
     private:
         Pt::Signal<int> _scrolledX;
         Pt::Signal<int> _scrolledY;
-        Pt::Signal<> _contentChanged;
+        Pt::Signal<> _layoutChanged;
         Gfx::PointF _lastScrollPos;
         Gfx::PointF _lastPos;
         bool _enableX;
