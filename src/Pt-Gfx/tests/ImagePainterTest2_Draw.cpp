@@ -61,10 +61,10 @@ static void testDrawRect(const char* title, Image& image, Painter& painter)
     painter.fillRect( RectF(PointF(100, 300), SizeF(200, 100)) );
     painter.fillRect( RectF(PointF(400, 300), SizeF(200, 100)) );
 
-    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0), Color::fromRgb8(0, 255, 0), Brush::Horizontal) );
+    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Horizontal) );
     painter.fillRect( RectF(PointF(150, 350), SizeF(200, 100)) );
 
-    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0), Color::fromRgb8(0, 255, 0), Brush::Vertical) );
+    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Vertical) );
     painter.fillRect( RectF(PointF(450, 350), SizeF(200, 100)) );
 
 

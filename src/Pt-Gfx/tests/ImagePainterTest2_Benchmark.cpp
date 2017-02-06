@@ -32,7 +32,7 @@ static const std::string formatCaption(const Painter& painter, CompositionMode c
 #define BENCHMARK_DISPLAY_RESULTING_IMAGE if(BENCHMARK_CHECK_RESULTING_IMAGE && !i) sdlPreviewRGB888Buffer(formatCaption(painter, cm, __FUNCTION__), image.data(), image.width(), image.height())
 
 template <typename PainterT>
-static size_t benchDrawText(CompositionMode cm)
+static size_t benchDrawText(int loopCount, CompositionMode cm)
 {
     size_t sum = 0;
 
@@ -50,7 +50,7 @@ static size_t benchDrawText(CompositionMode cm)
     painter.setFontDir( Pt::System::Path(FONT_DIR) );
     painter.setFont( Pt::Gfx::Font(FONT_SPEC) );
 
-    for(int i = 0; i < BENCHMARK_LOOP_COUNT ; ++i) {
+    for(int i = 0; i < loopCount ; ++i) {
         Pt::System::Clock clock;
         clock.start();
 
@@ -62,12 +62,12 @@ static size_t benchDrawText(CompositionMode cm)
         BENCHMARK_DISPLAY_RESULTING_IMAGE;
     }
 
-    sum /= BENCHMARK_LOOP_COUNT;
+    sum /= loopCount;
     return sum;
 }
 
 template <typename PainterT>
-static size_t benchDrawLine(CompositionMode cm)
+static size_t benchDrawLine(int loopCount, CompositionMode cm)
 {
     size_t sum = 0;
 
@@ -82,7 +82,7 @@ static size_t benchDrawLine(CompositionMode cm)
     Pen pen( Color::fromRgb8(255, 255, 255, 175) );
     painter.setPen(pen);
 
-    for(int i = 0; i < BENCHMARK_LOOP_COUNT ; ++i) {
+    for(int i = 0; i < loopCount ; ++i) {
         Pt::System::Clock clock;
         clock.start();
 
@@ -94,12 +94,12 @@ static size_t benchDrawLine(CompositionMode cm)
         BENCHMARK_DISPLAY_RESULTING_IMAGE;
     }
 
-    sum /= BENCHMARK_LOOP_COUNT;
+    sum /= loopCount;
     return sum;
 }
 
 template <typename PainterT>
-static size_t benchDrawRect(CompositionMode cm)
+static size_t benchDrawRect(int loopCount, CompositionMode cm)
 {
     size_t sum = 0;
 
@@ -114,7 +114,7 @@ static size_t benchDrawRect(CompositionMode cm)
     Pen pen( Color::fromRgb8(255, 255, 255, 175) );
     painter.setPen(pen);
 
-    for(int i = 0; i < BENCHMARK_LOOP_COUNT ; ++i) {
+    for(int i = 0; i < loopCount ; ++i) {
         Pt::System::Clock clock;
         clock.start();
 
@@ -129,12 +129,12 @@ static size_t benchDrawRect(CompositionMode cm)
         BENCHMARK_DISPLAY_RESULTING_IMAGE;
     }
 
-    sum /= BENCHMARK_LOOP_COUNT;
+    sum /= loopCount;
     return sum;
 }
 
 template <typename PainterT>
-static size_t benchDrawSolidFillRect(CompositionMode cm)
+static size_t benchDrawSolidFillRect(int loopCount, CompositionMode cm)
 {
     size_t sum = 0;
 
@@ -149,7 +149,7 @@ static size_t benchDrawSolidFillRect(CompositionMode cm)
     Pen pen( Color::fromRgb8(255, 255, 255, 175) );
     painter.setPen(pen);
 
-    for(int i = 0; i < BENCHMARK_LOOP_COUNT ; ++i) {
+    for(int i = 0; i < loopCount ; ++i) {
         Pt::System::Clock clock;
         clock.start();
 
@@ -164,12 +164,12 @@ static size_t benchDrawSolidFillRect(CompositionMode cm)
         BENCHMARK_DISPLAY_RESULTING_IMAGE;
     }
 
-    sum /= BENCHMARK_LOOP_COUNT;
+    sum /= loopCount;
     return sum;
 }
 
 template <typename PainterT>
-static size_t benchDrawGradFillRect(CompositionMode cm)
+static size_t benchDrawGradFillRect(int loopCount, CompositionMode cm)
 {
     size_t sum = 0;
 
@@ -178,13 +178,13 @@ static size_t benchDrawGradFillRect(CompositionMode cm)
     PainterT painter(image);
     painter.setCompositionMode(cm);
 
-    Brush brush( Color::fromRgb8(255, 255, 255, 175) );
+    Brush brush(Color::fromRgb8(255, 255, 255, 175), Color::fromRgb8(0, 0, 0, 175), Brush::Vertical);
     painter.setBrush(brush);
 
     Pen pen( Color::fromRgb8(255, 255, 255, 175) );
     painter.setPen(pen);
 
-    for(int i = 0; i < BENCHMARK_LOOP_COUNT ; ++i) {
+    for(int i = 0; i < loopCount ; ++i) {
         Pt::System::Clock clock;
         clock.start();
 
@@ -199,12 +199,12 @@ static size_t benchDrawGradFillRect(CompositionMode cm)
         BENCHMARK_DISPLAY_RESULTING_IMAGE;
     }
 
-    sum /= BENCHMARK_LOOP_COUNT;
+    sum /= loopCount;
     return sum;
 }
 
 template <typename PainterT>
-static size_t benchDrawSolidFillPolygon(CompositionMode cm, bool ss)
+static size_t benchDrawSolidFillPolygon(int loopCount, CompositionMode cm, bool ss)
 {
     size_t sum = 0;
 
@@ -221,7 +221,7 @@ static size_t benchDrawSolidFillPolygon(CompositionMode cm, bool ss)
 
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
 
-    for(int i = 0; i < BENCHMARK_LOOP_COUNT ; ++i) {
+    for(int i = 0; i < loopCount ; ++i) {
         Pt::System::Clock clock;
         clock.start();
 
@@ -238,7 +238,7 @@ static size_t benchDrawSolidFillPolygon(CompositionMode cm, bool ss)
         BENCHMARK_DISPLAY_RESULTING_IMAGE;
     }
 
-    sum /= BENCHMARK_LOOP_COUNT;
+    sum /= loopCount;
     return sum;
 }
 
@@ -246,48 +246,48 @@ static void doBenchMark(CompositionMode cm)
 {
     double time1, time2;
 
-    std::clog << "                                              (Time) (Factor)" << std::endl;
-    std::clog << "                                              ------ --------" << std::endl;
+    std::clog << "                                                 (Time) (Factor)" << std::endl;
+    std::clog << "                                                 ------ --------" << std::endl;
 
     if(BENCHMARK_TEXT) {
-        time1 = benchDrawText<ImagePainter >(cm);
-        time2 = benchDrawText<ImagePainter2>(cm);
-        std::clog << "    Text                    @ ImagePainter     = " << std::setw(6) << time1 << std::endl;
-        std::clog << "    Text                    @ ImagePainter2    = " << std::setw(6) << time2
+        time1 = benchDrawText<ImagePainter >(BENCHMARK_LOOP_COUNT_LONG, cm);
+        time2 = benchDrawText<ImagePainter2>(BENCHMARK_LOOP_COUNT_LONG, cm);
+        std::clog << "    Text                      @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
+        std::clog << "    Text                      @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
 
     if(BENCHMARK_LINE) {
-        time1 = benchDrawLine<ImagePainter >(cm);
-        time2 = benchDrawLine<ImagePainter2>(cm);
-        std::clog << "    Line                    @ ImagePainter     = " << std::setw(6) << time1 << std::endl;
-        std::clog << "    Line                    @ ImagePainter2    = " << std::setw(6) << time2
+        time1 = benchDrawLine<ImagePainter >(BENCHMARK_LOOP_COUNT_LONG, cm);
+        time2 = benchDrawLine<ImagePainter2>(BENCHMARK_LOOP_COUNT_LONG, cm);
+        std::clog << "    Line                       @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
+        std::clog << "    Line                       @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
 
     if(BENCHMARK_RECTANGLE) {
-        time1 = benchDrawRect<ImagePainter >(cm);
-        time2 = benchDrawRect<ImagePainter2>(cm);
-        std::clog << "    Rectangle               @ ImagePainter     = " << std::setw(6) << time1 << std::endl;
-        std::clog << "    Rectangle               @ ImagePainter2    = " << std::setw(6) << time2
+        time1 = benchDrawRect<ImagePainter >(BENCHMARK_LOOP_COUNT_LONG, cm);
+        time2 = benchDrawRect<ImagePainter2>(BENCHMARK_LOOP_COUNT_LONG, cm);
+        std::clog << "    Rectangle                  @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
+        std::clog << "    Rectangle                  @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
 
     if(BENCHMARK_SOLID_FILLED_RECTANGLE) {
-        time1 = benchDrawSolidFillRect<ImagePainter >(cm);
-        time2 = benchDrawSolidFillRect<ImagePainter2>(cm);
-        std::clog << "    Solid-filled Rectangle  @ ImagePainter     = " << std::setw(6) << time1 << std::endl;
-        std::clog << "    Solid-filled Rectangle  @ ImagePainter2    = " << std::setw(6) << time2
+        time1 = benchDrawSolidFillRect<ImagePainter >(BENCHMARK_LOOP_COUNT_LONG, cm);
+        time2 = benchDrawSolidFillRect<ImagePainter2>(BENCHMARK_LOOP_COUNT_LONG, cm);
+        std::clog << "    Solid-filled Rectangle     @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
+        std::clog << "    Solid-filled Rectangle     @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
 
     if(BENCHMARK_GRADIENT_FILLED_RECTANGLE) {
-        time1 = benchDrawGradFillRect<ImagePainter >(cm);
-        time2 = benchDrawGradFillRect<ImagePainter2>(cm);
+        time1 = benchDrawGradFillRect<ImagePainter >(BENCHMARK_LOOP_COUNT_SHORT, cm);
+        time2 = benchDrawGradFillRect<ImagePainter2>(BENCHMARK_LOOP_COUNT_SHORT, cm);
         std::clog << "    Gradient-filled Rectangle  @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         std::clog << "    Gradient-filled Rectangle  @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
@@ -295,8 +295,8 @@ static void doBenchMark(CompositionMode cm)
     }
 
     if(BENCHMARK_SOLID_FILLED_POLYGON) {
-        time1 = benchDrawSolidFillPolygon<ImagePainter >(cm, false);
-        time2 = benchDrawSolidFillPolygon<ImagePainter2>(cm, false);
+        time1 = benchDrawSolidFillPolygon<ImagePainter >(BENCHMARK_LOOP_COUNT_LONG, cm, false);
+        time2 = benchDrawSolidFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT_LONG, cm, false);
         std::clog << "    Solid-filled polygon    @ ImagePainter     = " << std::setw(6) << time1 << std::endl;
         std::clog << "    Solid-filled polygon    @ ImagePainter2    = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
@@ -304,8 +304,8 @@ static void doBenchMark(CompositionMode cm)
     }
 
     if(BENCHMARK_SOLID_FILLED_POLYGON) {
-        time1 = benchDrawSolidFillPolygon<ImagePainter >(cm, true);
-        time2 = benchDrawSolidFillPolygon<ImagePainter2>(cm, true);
+        time1 = benchDrawSolidFillPolygon<ImagePainter >(BENCHMARK_LOOP_COUNT_LONG, cm, true);
+        time2 = benchDrawSolidFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT_LONG, cm, true);
         std::clog << "    Solid-filled polygon SS @ ImagePainter     = " << std::setw(6) << time1 << std::endl;
         std::clog << "    Solid-filled polygon SS @ ImagePainter2    = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
