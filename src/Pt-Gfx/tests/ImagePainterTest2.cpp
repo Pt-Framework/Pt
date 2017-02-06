@@ -16,21 +16,21 @@
 using namespace Pt::Gfx;
 
 #define DO_TEST_DRAW    1
-#define DO_BENCHMARKING 1
+#define DO_BENCHMARKING 0
 
 //
 
 #define TEST_SOURCECOPY                        1
-#define TEST_SOURCEOVER                        1
+#define TEST_SOURCEOVER                        0
 
-#define TEST_DRAW_LINE_AND_TEXT                1
-#define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES 1
+#define TEST_DRAW_LINE_AND_TEXT                0
+#define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES 0
 
-#define TEST_DRAW_SOLID_FILLED_POLYGONS        1
-#define TEST_DRAW_GRADIENT_FILLED_POLYGONS     0
+#define TEST_DRAW_SOLID_FILLED_POLYGONS        0
+#define TEST_DRAW_GRADIENT_FILLED_POLYGONS     1
 #define TEST_DRAW_TEXTURE_FILLED_POLYGONS      0
 
-#define TEST_COMPARE_WITH_OLD_PAINTER          1
+#define TEST_COMPARE_WITH_OLD_PAINTER          0
 
 //
 
@@ -48,8 +48,8 @@ using namespace Pt::Gfx;
 #define BENCHMARK_TEXTURE_FILLED_RECTANGLE  1
 
 #define BENCHMARK_SOLID_FILLED_POLYGON      1
-#define BENCHMARK_GRADIENT_FILLED_POLYGON   0
-#define BENCHMARK_TEXTURE_FILLED_POLYGON    0
+#define BENCHMARK_GRADIENT_FILLED_POLYGON   1
+#define BENCHMARK_TEXTURE_FILLED_POLYGON    1
 
 //
 
@@ -117,49 +117,58 @@ int main(int argc, char* args[])
         }
     }
 
+    // Create the brushes
+    const Brush brushSolid1   (Color::fromRgb8(  0, 255, 0, 175));
+    const Brush brushGradient1(Color::fromRgb8(  0, 255, 0, 175), Color::fromRgb8(0, 0, 0, 175), Brush::Vertical);
+    const Brush brushTexture1 (textureWithTransBackground);
+
+    const Brush brushSolid2   (Color::fromRgb8(  0, 255, 255, 175));
+    const Brush brushGradient2(Color::fromRgb8(  0, 255, 255, 175), Color::fromRgb8(0, 0, 0, 175), Brush::Vertical);
+    const Brush brushTexture2 (textureWithWhiteBackground);
+
     // Solid-filled polygons
     if(DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_SOLID_FILLED_POLYGONS) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
-        testDrawSolidFillPolygon("Solid-Filled Polygons - ImagePainter2 [SourceCopy]", image, *painter2);
+        testDrawFillPolygon("Solid-Filled Polygons - ImagePainter2 [SourceCopy]", image, *painter2, brushSolid1,  brushSolid2);
     }
     if(DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_SOLID_FILLED_POLYGONS) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
-        testDrawSolidFillPolygon("Solid-Filled Polygons - ImagePainter2 [SourceOver]", image, *painter2);
+        testDrawFillPolygon("Solid-Filled Polygons - ImagePainter2 [SourceOver]", image, *painter2, brushSolid1,  brushSolid2);
     }
 
     // Gradient-filled polygons
     if(DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_GRADIENT_FILLED_POLYGONS) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
-        testDrawGradFillPolygon("Gradient-Filled Polygons - ImagePainter2 [SourceCopy]", image, *painter2);
+        testDrawFillPolygon("Gradient-Filled Polygons - ImagePainter2 [SourceCopy]", image, *painter2, brushGradient1, brushGradient2);
         if(TEST_COMPARE_WITH_OLD_PAINTER) {
             painter1->setCompositionMode(CompositionMode::SourceCopy);
-            testDrawGradFillPolygon("Gradient-Filled Polygons - ImagePainter [SourceCopy]", image, *painter1);
+            testDrawFillPolygon("Gradient-Filled Polygons - ImagePainter [SourceCopy]", image, *painter1, brushGradient1, brushGradient2);
         }
     }
     if(DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_GRADIENT_FILLED_POLYGONS) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
-        testDrawGradFillPolygon("Gradient-Filled Polygons - ImagePainter2 [SourceOver]", image, *painter2);
+        testDrawFillPolygon("Gradient-Filled Polygons - ImagePainter2 [SourceOver]", image, *painter2, brushGradient1, brushGradient2);
         if(TEST_COMPARE_WITH_OLD_PAINTER) {
             painter1->setCompositionMode(CompositionMode::SourceOver);
-            testDrawGradFillPolygon("Gradient-Filled Polygons - ImagePainter [SourceOver]", image, *painter1);
+            testDrawFillPolygon("Gradient-Filled Polygons - ImagePainter [SourceOver]", image, *painter1, brushGradient1, brushGradient2);
         }
     }
 
     // Texture-filled polygons
     if(DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_TEXTURE_FILLED_POLYGONS) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
-        testDrawTxtrFillPolygon("Texture-Filled Polygons - ImagePainter2 [SourceCopy]", image, *painter2);
+        testDrawFillPolygon("Texture-Filled Polygons - ImagePainter2 [SourceCopy]", image, *painter2, brushTexture1, brushTexture2);
         if(TEST_COMPARE_WITH_OLD_PAINTER) {
             painter1->setCompositionMode(CompositionMode::SourceCopy);
-            testDrawTxtrFillPolygon("Texture-Filled Polygons - ImagePainter [SourceCopy]", image, *painter1);
+            testDrawFillPolygon("Texture-Filled Polygons - ImagePainter [SourceCopy]", image, *painter1, brushTexture1, brushTexture2);
         }
     }
     if(DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_TEXTURE_FILLED_POLYGONS) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
-        testDrawTxtrFillPolygon("Texture-Filled Polygons - ImagePainter2 [SourceOver]", image, *painter2);
+        testDrawFillPolygon("Texture-Filled Polygons - ImagePainter2 [SourceOver]", image, *painter2, brushTexture1, brushTexture2);
         if(TEST_COMPARE_WITH_OLD_PAINTER) {
             painter1->setCompositionMode(CompositionMode::SourceOver);
-            testDrawTxtrFillPolygon("Texture-Filled Polygons - ImagePainter [SourceOver]", image, *painter1);
+            testDrawFillPolygon("Texture-Filled Polygons - ImagePainter [SourceOver]", image, *painter1, brushTexture1, brushTexture2);
         }
     }
 

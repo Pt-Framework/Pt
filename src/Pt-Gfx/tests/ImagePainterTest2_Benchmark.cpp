@@ -213,9 +213,9 @@ static void doBenchMark(CompositionMode cm)
     std::clog << "                                                 ------ --------" << std::endl;
 
     // Create the brushes
-    Brush brushSolid   (Color::fromRgb8(255, 255, 255, 175));
-    Brush brushGradient(Color::fromRgb8(255, 255, 255, 175), Color::fromRgb8(0, 0, 0, 175), Brush::Vertical);
-    Brush brushTexture (textureWithWhiteBackground);
+    const Brush brushSolid   (Color::fromRgb8(255, 255, 255, 175));
+    const Brush brushGradient(Color::fromRgb8(255, 255, 255, 175), Color::fromRgb8(0, 0, 0, 175), Brush::Vertical);
+    const Brush brushTexture (textureWithWhiteBackground);
 
     // Texts
     if(BENCHMARK_TEXT) {
