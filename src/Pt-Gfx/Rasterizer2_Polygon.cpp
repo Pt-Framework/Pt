@@ -194,13 +194,16 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
                 }
             }
             else {
+                Pt::int32_t iterX     = from;
                 Pt::int32_t spanWidth = to - from + 1;
-                Pixel       pixel(_image->view(), from, pixelY);
                 while(spanWidth > 0) {
                     const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
-                    _image->format().copy(pixel, _brushPixel, n, _compositionMode);
-                    pixel.advance(n);
+                    if(n) {
+                        Pixel pixel(_image->view(), iterX, pixelY);
+                        _image->format().copy(pixel, _brushPixel, n, _compositionMode);
+                    }
                     spanWidth -= n;
+                    iterX     += n;
                 }
             }
         }
@@ -298,8 +301,8 @@ void Rasterizer2::rasterPolygonAreaSolidSS(const Point* points, size_t pointCoun
         }
         // Draw pixels that belongs to the middle-part of the shape to the image
         if(iterR >= iterL) {
-            Pt::int32_t spanWidth = iterR - iterL + 1;
             Pt::int32_t iterX     = minX + iterL;
+            Pt::int32_t spanWidth = iterR - iterL + 1;
             while(spanWidth > 0) {
                 const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
                 if(n) {
@@ -407,8 +410,8 @@ void Rasterizer2::rasterPolygonAreaGraTexSS(const Point* points, size_t pointCou
         // Draw pixels that belongs to the middle-part of the shape to the image
         if(iterR >= iterL) {
             /*
-            Pt::int32_t spanWidth = iterR - iterL + 1;
             Pt::int32_t iterX     = minX + iterL;
+            Pt::int32_t spanWidth = iterR - iterL + 1;
             while(spanWidth > 0) {
                 const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
                 if(n) {
@@ -419,6 +422,7 @@ void Rasterizer2::rasterPolygonAreaGraTexSS(const Point* points, size_t pointCou
                 iterX     += n;
             }
             */
+
         }
 /*
         Pt::int32_t iterX     = from;
