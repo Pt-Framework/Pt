@@ -76,21 +76,15 @@ void Rasterizer2::fillPolygon(const Point* points, const size_t pointCount, bool
 #endif
 
     // Draw the polygon
-    if(_isGradient || _isTexture) {
-        if(useSupersamplingForAA)
+    if(useSupersamplingForAA) {
+        if(_isGradient || _isTexture)
             rasterPolygonAreaGraTexSS(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
-        else {
-            rasterPolygonAreaGraTex(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
-            rasterPolygonOutline(clipped.data(), clipped.size(), _brush.color());
-        }
+        else
+            rasterPolygonAreaSolidSS(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
     }
     else {
-        if(useSupersamplingForAA)
-            rasterPolygonAreaSolidSS(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
-        else {
-            rasterPolygonAreaSolid(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
-            rasterPolygonOutline(clipped.data(), clipped.size(), _brush.color());
-        }
+        rasterPolygonArea(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
+        rasterPolygonOutline(clipped.data(), clipped.size(), _brush.color());
     }
 }
 
@@ -132,7 +126,7 @@ void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount, c
 
 // Based on http://alienryderflex.com/polygon_fill
 // Public-domain code by Darel Rex Finley, 2007
-void Rasterizer2::rasterPolygonAreaSolid(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
+void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
 {
     // List of nodes that define the horizontal segments
     std::vector<Pt::int32_t> nodeXf(pointCount * 2, 0);
@@ -183,13 +177,31 @@ void Rasterizer2::rasterPolygonAreaSolid(const Point* points, size_t pointCount,
             }
             if(to < from) continue;
             // Draw the spans
-            Pt::int32_t spanWidth = to - from + 1;
-            Pixel       pixel(_image->view(), from, pixelY);
-            while(spanWidth > 0) {
-                const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
-                _image->format().copy(pixel, _brushPixel, n, _compositionMode);
-                pixel.advance(n);
-                spanWidth -= n;
+            if(_isGradient || _isTexture) {
+                Pt::int32_t iterX     = from;
+                Pt::int32_t spanWidth = to - from + 1;
+                while(spanWidth > 0) {
+                    const Pt::int32_t tX = (iterX  - minX) % _brushImage->width ();
+                    const Pt::int32_t tY = (pixelY - minY) % _brushImage->height();
+                    const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tX);
+                    if(n) {
+                        ConstPixel srcPixel(_brushImage->view(), tX, tY);
+                        Pixel      dstPixel(_image->view(), iterX, pixelY);
+                        _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
+                    }
+                    spanWidth -= n;
+                    iterX     += n;
+                }
+            }
+            else {
+                Pt::int32_t spanWidth = to - from + 1;
+                Pixel       pixel(_image->view(), from, pixelY);
+                while(spanWidth > 0) {
+                    const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
+                    _image->format().copy(pixel, _brushPixel, n, _compositionMode);
+                    pixel.advance(n);
+                    spanWidth -= n;
+                }
             }
         }
     }
@@ -298,12 +310,6 @@ void Rasterizer2::rasterPolygonAreaSolidSS(const Point* points, size_t pointCoun
         // Clear the work buffer
         memset(&alphas[0], 0, alphas.size());
     }
-}
-
-// Based on http://alienryderflex.com/polygon_fill
-// Public-domain code by Darel Rex Finley, 2007
-void Rasterizer2::rasterPolygonAreaGraTex(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
-{
 }
 
 // Partially based on http://alienryderflex.com/polygon_fill
