@@ -16,7 +16,7 @@
 using namespace Pt::Gfx;
 
 #define DO_TEST_DRAW    1
-#define DO_BENCHMARKING 1
+#define DO_BENCHMARKING 0
 
 //
 
@@ -30,7 +30,7 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_GRADIENT_FILLED_POLYGONS     1
 #define TEST_DRAW_TEXTURE_FILLED_POLYGONS      1
 
-#define TEST_COMPARE_WITH_OLD_PAINTER          1
+#define TEST_COMPARE_WITH_OLD_PAINTER          0
 
 //
 
