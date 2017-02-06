@@ -442,8 +442,8 @@ void LineEdit::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     // text box
     //
 
-    _renderer->renderItem( *this, options, painter, rect,
-                           _pen, _brush );
+    _renderer->renderBackground( *this, options, painter, rect,
+                                 _pen, _brush );
     
     if(echoMode() == LineEdit::Hidden)
         return;

@@ -505,12 +505,12 @@ void PlatinumLineEditRenderer::onPrepare(const LineEdit& le,
 }
 
 
-void PlatinumLineEditRenderer::onRenderItem(const LineEdit& le, 
-                                            const StyleOptions& options,
-                                            Painter& painter, 
-                                            const Gfx::RectF& rect,
-                                            const Gfx::Pen& contour,
-                                            const Gfx::Brush& brush) const
+void PlatinumLineEditRenderer::onRenderBackground(const LineEdit& le, 
+                                                  const StyleOptions& options,
+                                                  Painter& painter, 
+                                                  const Gfx::RectF& rect,
+                                                  const Gfx::Pen& contour,
+                                                  const Gfx::Brush& brush) const
 {
     painter.setBrush(brush);
     painter.fillRect(rect);

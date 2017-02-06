@@ -226,12 +226,12 @@ class PT_HMI_API PlatinumLineEditRenderer : public LineEditRenderer
                                Gfx::Pen& textPen,
                                Gfx::Pen& placeholderPen) const;
 
-        virtual void onRenderItem(const LineEdit& le, 
-                                  const StyleOptions& options,
-                                  Painter& painter, 
-                                  const Gfx::RectF& rect,
-                                  const Gfx::Pen& contour,
-                                  const Gfx::Brush& brush) const;
+        virtual void onRenderBackground(const LineEdit& le, 
+                                        const StyleOptions& options,
+                                        Painter& painter, 
+                                        const Gfx::RectF& rect,
+                                        const Gfx::Pen& contour,
+                                        const Gfx::Brush& brush) const;
 
         virtual void onRenderText(const LineEdit& le, 
                                   const StyleOptions& options,
