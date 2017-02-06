@@ -103,8 +103,8 @@ void Rasterizer2::rasterRectArea(const Point& tl, const Point& br)
     // Calculate the width of the rectangle
     const Pt::int32_t sizeX = maxX - minX + 1;
 
-    // Draw the rectangles using gradient
-    if(_isGradient) {
+    // Draw the rectangle using gradient/texture
+    if(_isGradient || _isTexture) {
         for(Pt::int32_t iterY = minY; iterY <= maxY; ++iterY) {
             Pt::int32_t iterX     = minX;
             Pt::int32_t spanWidth = sizeX;
@@ -125,7 +125,7 @@ void Rasterizer2::rasterRectArea(const Point& tl, const Point& br)
         return;
     }
 
-    // Draw the rectangles using solid color
+    // Draw the rectangle using solid color
 #ifdef R2_USE_PIXEL_ITERATOR
     ImageView::PixelIterator pixel = _image->view().pixel(minX, minY);
     for(Pt::int32_t y = minY; y <= maxY; ++y) {

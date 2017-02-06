@@ -76,8 +76,9 @@ void Rasterizer2::setPen( const Pen& pen )
 
 void Rasterizer2::setBrush( const Brush& brush )
 {
-    _brush = brush;
+    _brush      = brush;
     _isGradient = false;
+    _isTexture  = false;
 
     switch( brush.fillStyle() ) {
         case Brush::Solid:
@@ -95,6 +96,7 @@ void Rasterizer2::setBrush( const Brush& brush )
             else {
                 _brushImage = &_brush.texture();
             }
+            _isTexture = true;
             break;
 
         case Brush::HorizontalGradient:

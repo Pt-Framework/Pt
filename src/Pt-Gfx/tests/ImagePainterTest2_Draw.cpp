@@ -27,7 +27,6 @@ static void testDrawLine(const char* title, Image& image, Painter& painter)
     painter.setPen( Pen(Color::fromRgb8(127, 127, 127, 175)) ); painter.drawLine( PointF(500   , 500), PointF(200   , 200) );
     painter.setPen( Pen(Color::fromRgb8(255, 255, 255, 175)) ); painter.drawLine( PointF(500+50, 500), PointF(200+50, 200) );
                                                                 painter.drawLine( PointF(300   , 200), PointF(700   , 100) );
-
     painter.drawLine( PointF(770,  11), PointF(770, 500) );
     painter.drawLine( PointF(780,  11), PointF(782, 500) );
 
@@ -44,28 +43,38 @@ static void testDrawRect(const char* title, Image& image, Painter& painter)
 {
     resetImage(image);
 
+    // Solid
     painter.setPen  ( Color::fromRgb8(255, 255,   0, 175) );
     painter.setBrush( Color::fromRgb8(255,   0, 255, 175) );
-
-    painter.drawRect( RectF(PointF(100, 100), SizeF(200, 100)) );
-    painter.fillRect( RectF(PointF(400, 100), SizeF(200, 100)) );
+    painter.drawRect( RectF(PointF(100,  50), SizeF(200, 100)) );
+    painter.fillRect( RectF(PointF(400,  50), SizeF(200, 100)) );
 
     painter.setPen  ( Color::fromRgb8(  0, 255, 255, 175) );
     painter.setBrush( Color::fromRgb8(255, 255,   0, 175) );
+    painter.drawRect( RectF(PointF(150, 100), SizeF(200, 100)) );
+    painter.fillRect( RectF(PointF(450, 100), SizeF(200, 100)) );
 
-    painter.drawRect( RectF(PointF(150, 150), SizeF(200, 100)) );
-    painter.fillRect( RectF(PointF(450, 150), SizeF(200, 100)) );
-
-
+    // Gradient
     painter.setBrush( Color::fromRgb8(255, 255, 255, 175) );
-    painter.fillRect( RectF(PointF(100, 300), SizeF(200, 100)) );
-    painter.fillRect( RectF(PointF(400, 300), SizeF(200, 100)) );
+    painter.fillRect( RectF(PointF(100, 220), SizeF(200, 100)) );
+    painter.fillRect( RectF(PointF(400, 220), SizeF(200, 100)) );
 
     painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Horizontal) );
-    painter.fillRect( RectF(PointF(150, 350), SizeF(200, 100)) );
+    painter.fillRect( RectF(PointF(150, 270), SizeF(200, 100)) );
 
     painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Vertical) );
-    painter.fillRect( RectF(PointF(450, 350), SizeF(200, 100)) );
+    painter.fillRect( RectF(PointF(450, 270), SizeF(200, 100)) );
+
+    // Texture
+    painter.setBrush( Color::fromRgb8(255, 255, 255, 175) );
+    painter.fillRect( RectF(PointF(100, 390), SizeF(200, 100)) );
+    painter.fillRect( RectF(PointF(400, 390), SizeF(200, 100)) );
+
+    painter.setBrush( Brush(textureWithWhiteBackground) );
+    painter.fillRect( RectF(PointF(150, 440), SizeF(200, 100)) );
+
+    painter.setBrush( Brush(textureWithTransBackground) );
+    painter.fillRect( RectF(PointF(450, 440), SizeF(200, 100)) );
 
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height());

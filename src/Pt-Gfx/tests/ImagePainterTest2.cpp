@@ -1,9 +1,11 @@
 // ./jam.sh configure --with-hmi -sGUI=linux-fb --with-rasterizer2
 
+#include <fstream>
 #include <iomanip>
 
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/ImagePainter2.h>
+#include <Pt/Gfx/PngReader.h>
 #include <Pt/System/Logger.h>
 #include <Pt/System/Clock.h>
 
@@ -13,7 +15,7 @@
 
 using namespace Pt::Gfx;
 
-#define DO_TEST_DRAW    1
+#define DO_TEST_DRAW    0
 #define DO_BENCHMARKING 1
 
 //
@@ -29,24 +31,28 @@ using namespace Pt::Gfx;
 
 //
 
-#define BENCHMARK_CHECK_RESULTING_IMAGE  0
+#define BENCHMARK_CHECK_RESULTING_IMAGE  1
 #define BENCHMARK_IMAGE_SIZE             Size(1280, 800)
 #define BENCHMARK_LOOP_COUNT_SHORT       25
 #define BENCHMARK_LOOP_COUNT_LONG        250
 
-#define BENCHMARK_TEXT                      1
-#define BENCHMARK_LINE                      1
+#define BENCHMARK_TEXT                      0
+#define BENCHMARK_LINE                      0
 
-#define BENCHMARK_RECTANGLE                 1
+#define BENCHMARK_RECTANGLE                 0
 #define BENCHMARK_SOLID_FILLED_RECTANGLE    1
 #define BENCHMARK_GRADIENT_FILLED_RECTANGLE 1
+#define BENCHMARK_TEXTURE_FILLED_RECTANGLE  1
 
-#define BENCHMARK_SOLID_FILLED_POLYGON      1
+#define BENCHMARK_SOLID_FILLED_POLYGON      0
 
 //
 
 #define FONT_DIR  "../src/Pt-Gfx/fonts"
 #define FONT_SPEC "DejaVu Serif", 24, Pt::Gfx::Font::BoldItalic
+
+static Image textureWithTransBackground;
+static Image textureWithWhiteBackground;
 
 #include "ImagePainterTest2_Util.cpp"
 #include "ImagePainterTest2_Draw.cpp"
@@ -54,6 +60,16 @@ using namespace Pt::Gfx;
 
 int main(int argc, char* args[])
 {
+    // Load the textures
+    std::ifstream tbgrIfs("../etc/images/bleech-200x200-tbgr.png");
+    PngReader     tbgrPng(tbgrIfs, textureWithTransBackground);
+    tbgrPng.get();
+
+    std::ifstream wbgrIfs("../etc/images/bleech-200x200-wbgr.png");
+    PngReader     wbgrPng(wbgrIfs, textureWithWhiteBackground);
+    wbgrPng.get();
+
+    // Prepare the images and painters
     Image         image( ImageFormat::argb32(), Size(800, 600) );
     ImagePainter  painter1obj(image);
     ImagePainter2 painter2obj(image);

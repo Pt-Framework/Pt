@@ -139,6 +139,7 @@ class Rasterizer2
         ConstPixel      _brushPixel;
         const Image*    _brushImage;
         bool            _isGradient;
+        bool            _isTexture;
 
         Rect            _clip;
         Rect            _currentClip;
