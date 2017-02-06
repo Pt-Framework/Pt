@@ -55,23 +55,42 @@ void Rasterizer2::strokePolygon(const Point* points, size_t pointCount)
 
 void Rasterizer2::fillPolygon(const Point* points, const size_t pointCount, bool useSupersamplingForAA)
 {
+    // Clip the coordinates
     std::vector<Point> clipped;
-
-#if 1
     genClippedPolygonPoints(clipped, points, pointCount);
-#else
+
+    // Get the minimum and maximum coordinate values
+    Pt::int32_t minX, minY, maxX, maxY;
+    getPolygonRectMinMax(points, pointCount, minX, minY, maxX, maxY);
+
+    // Update gradient as needed
+    if(_isGradient)
+        updateGradientBrush(maxX - minX + 1, maxY - minY + 1);
+
+#if 0
     #define DIV_FAC 50
+    clipped.clear();
     clipped.push_back(Point(450 / DIV_FAC, 100 / DIV_FAC));
     clipped.push_back(Point(350 / DIV_FAC, 300 / DIV_FAC));
     clipped.push_back(Point(650 / DIV_FAC, 400 / DIV_FAC));
 #endif
 
-    if(useSupersamplingForAA) {
-        rasterPolygonAreaSS(clipped.data(), clipped.size(), _brush.color());
+    // Draw the polygon
+    if(_isGradient || _isTexture) {
+        if(useSupersamplingForAA)
+            rasterPolygonAreaGraTexSS(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
+        else {
+            rasterPolygonAreaGraTex(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
+            rasterPolygonOutline(clipped.data(), clipped.size(), _brush.color());
+        }
     }
     else {
-        rasterPolygonArea(clipped.data(), clipped.size(), _brush.color());
-        rasterPolygonOutline(clipped.data(), clipped.size(), _brush.color());
+        if(useSupersamplingForAA)
+            rasterPolygonAreaSolidSS(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
+        else {
+            rasterPolygonAreaSolid(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
+            rasterPolygonOutline(clipped.data(), clipped.size(), _brush.color());
+        }
     }
 }
 
@@ -113,23 +132,8 @@ void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount, c
 
 // Based on http://alienryderflex.com/polygon_fill
 // Public-domain code by Darel Rex Finley, 2007
-void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, const Color& color)
+void Rasterizer2::rasterPolygonAreaSolid(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
 {
-    // Find the minimum and maximum coordinates
-    Pt::int32_t minX =  65535;
-    Pt::int32_t minY =  65535;
-    Pt::int32_t maxX = -65535;
-    Pt::int32_t maxY = -65535;
-
-    for(size_t i = 0; i < pointCount; ++i) {
-        const Pt::int32_t x = points[i].x();
-        const Pt::int32_t y = points[i].y();
-        if(x < minX) minX = x;
-        if(y < minY) minY = y;
-        if(x > maxX) maxX = x;
-        if(y > maxY) maxY = y;
-    }
-
     // List of nodes that define the horizontal segments
     std::vector<Pt::int32_t> nodeXf(pointCount * 2, 0);
 
@@ -191,25 +195,10 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
     }
 }
 
-// Based on http://alienryderflex.com/polygon_fill
+// Partially based on http://alienryderflex.com/polygon_fill
 // Public-domain code by Darel Rex Finley, 2007
-void Rasterizer2::rasterPolygonAreaSS(const Point* points, size_t pointCount, const Color& color)
+void Rasterizer2::rasterPolygonAreaSolidSS(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
 {
-    // Find the minimum and maximum coordinates
-    Pt::int32_t minX =  65535;
-    Pt::int32_t minY =  65535;
-    Pt::int32_t maxX = -65535;
-    Pt::int32_t maxY = -65535;
-
-    for(size_t i = 0; i < pointCount; ++i) {
-        const Pt::int32_t x = points[i].x();
-        const Pt::int32_t y = points[i].y();
-        if(x < minX) minX = x;
-        if(y < minY) minY = y;
-        if(x > maxX) maxX = x;
-        if(y > maxY) maxY = y;
-    }
-
     // Calculate the size of the polygon
     Pt::int32_t sizeX = (maxX - minX + 1);
     Pt::int32_t sizeY = (maxY - minY + 1) * SUPERSAMPLING_SIZE;
@@ -309,6 +298,18 @@ void Rasterizer2::rasterPolygonAreaSS(const Point* points, size_t pointCount, co
         // Clear the work buffer
         memset(&alphas[0], 0, alphas.size());
     }
+}
+
+// Based on http://alienryderflex.com/polygon_fill
+// Public-domain code by Darel Rex Finley, 2007
+void Rasterizer2::rasterPolygonAreaGraTex(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
+{
+}
+
+// Partially based on http://alienryderflex.com/polygon_fill
+// Public-domain code by Darel Rex Finley, 2007
+void Rasterizer2::rasterPolygonAreaGraTexSS(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
+{
 }
 
 

@@ -116,13 +116,16 @@ class Rasterizer2
         void rasterRectArea(const Point& tl, const Point& br);
 
         void rasterPolygonOutline(const Point* points, size_t pointCount, const Color& color);
-        void rasterPolygonArea(const Point* points, size_t pointCount, const Color& color);
-        void rasterPolygonAreaSS(const Point* points, size_t pointCount, const Color& color);
+        void rasterPolygonAreaSolid(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
+        void rasterPolygonAreaSolidSS(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
+        void rasterPolygonAreaGraTex(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
+        void rasterPolygonAreaGraTexSS(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
 
         void updateGradientBrush(Pt::int32_t width, Pt::int32_t height);
 
         void updateClip();
         void genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount) const;
+        void getPolygonRectMinMax(const Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY);
 
     private:
         Image*          _image;
