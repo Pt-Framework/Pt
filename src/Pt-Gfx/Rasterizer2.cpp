@@ -164,6 +164,49 @@ void Rasterizer2::strokeText( const Point& to, const Pt::String& text )
 // ===== Private Member Functions - Utilities ===========================================
 // ======================================================================================
 
+void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
+{
+    Color gradientStart = _brush.color();
+    Color gradientStop  = _brush.gradientColor();
+
+    switch(_brush.fillStyle()) {
+        case Pt::Gfx::Brush::HorizontalGradient:
+            _brushBuffer.reset(_image->format(), Size(width, 1));
+            height = 1;
+            break;
+
+        case Pt::Gfx::Brush::VerticalGradient:
+            _brushBuffer.reset(_image->format(), Size(1, height));
+            width = 1;
+            std::swap(gradientStart, gradientStop);
+            break;
+
+        default:
+            return;
+    }
+
+    const Pt::int32_t  length = width + height - 1;
+          Pt::uint8_t* pixel  = _brushBuffer.data();
+
+    for(int n = 0; n < length; ++n) {
+        const float f1 = (length - n) / float(length);
+        const float f2 = n / float(length);
+        const float r1 = gradientStart.red  () * f1;
+        const float r2 = gradientStop .red  () * f2;
+        const float g1 = gradientStart.green() * f1;
+        const float g2 = gradientStop .green() * f2;
+        const float b1 = gradientStart.blue () * f1;
+        const float b2 = gradientStop .blue () * f2;
+        const float a1 = gradientStart.alpha() * f1;
+        const float a2 = gradientStop .alpha() * f2;
+        pixel[0]  = (b1 + b2) / 257;
+        pixel[1]  = (g1 + g2) / 257;
+        pixel[2]  = (r1 + r2) / 257;
+        pixel[3]  = (a1 + a2) / 257;
+        pixel    += 4;
+    }
+}
+
 void Rasterizer2::updateClip()
 {
     const Rect imageRect( Point(0,0) , _image->size() );

@@ -119,6 +119,8 @@ class Rasterizer2
         void rasterPolygonArea(const Point* points, size_t pointCount, const Color& color);
         void rasterPolygonAreaSS(const Point* points, size_t pointCount, const Color& color);
 
+        void updateGradientBrush(Pt::int32_t width, Pt::int32_t height);
+
         void updateClip();
         void genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount) const;
 

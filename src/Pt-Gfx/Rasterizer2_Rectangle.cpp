@@ -53,6 +53,9 @@ void Rasterizer2::strokeRect(const Point& tl, const Point& br)
 
 void Rasterizer2::fillRect(const Point& tl, const Point& br)
 {
+    if(_isGradient)
+        updateGradientBrush(br.x() - tl.x() + 1, br.y() - tl.y() + 1);
+
     rasterRectArea(tl, br);
 }
 
@@ -100,7 +103,29 @@ void Rasterizer2::rasterRectArea(const Point& tl, const Point& br)
     // Calculate the width of the rectangle
     const Pt::int32_t sizeX = maxX - minX + 1;
 
-    // Draw the rectangles
+    // Draw the rectangles using gradient
+    if(_isGradient) {
+        for(Pt::int32_t iterY = minY; iterY <= maxY; ++iterY) {
+            Pt::int32_t iterX     = minX;
+            Pt::int32_t spanWidth = sizeX;
+            // Fill the sans
+            while(spanWidth > 0) {
+                const Pt::int32_t tX = (iterX - minX) % _brushImage->width ();
+                const Pt::int32_t tY = (iterY - minY) % _brushImage->height();
+                const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tX);
+                if(n) {
+                    ConstPixel srcPixel(_brushImage->view(), tX, tY);
+                    Pixel      dstPixel(_image->view(), iterX, iterY);
+                    _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
+                }
+                spanWidth -= n;
+                iterX     += n;
+            }
+        }
+        return;
+    }
+
+    // Draw the rectangles using solid color
 #ifdef R2_USE_PIXEL_ITERATOR
     ImageView::PixelIterator pixel = _image->view().pixel(minX, minY);
     for(Pt::int32_t y = minY; y <= maxY; ++y) {
