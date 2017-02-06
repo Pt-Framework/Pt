@@ -392,8 +392,14 @@ void Rasterizer2::rasterPolygonAreaGraTexSS(const Point* points, size_t pointCou
             // Break if the pixel has become fully opaque
             if(alphas[iterL] >= (15 * SUPERSAMPLING_SIZE * SUPERSAMPLING_SIZE)) break;
             // Draw the pixel
-            Pixel pixel(_image->view(), minX + iterL, minY + pixelY / SUPERSAMPLING_SIZE);
-            //_image->format().setPixel(pixel, color, _compositionMode, SCALE_ALPHA(alphas[iterL]));
+            const Pt::int32_t iterX = minX + iterL;
+            const Pt::int32_t iterY = minY + pixelY / SUPERSAMPLING_SIZE;
+            const Pt::int32_t tX    = (iterL                      ) % _brushImage->width ();
+            const Pt::int32_t tY    = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
+            ConstPixel srcPixel(_brushImage->view(), tX, tY);
+            Pixel      dstPixel(_image->view(), iterX, iterY);
+            _image->format().setPixel(dstPixel, srcPixel, _compositionMode, SCALE_ALPHA(alphas[iterL]));
+
         }
         // Draw pixels that belongs to the right-part of the shape to the image
         Pt::int32_t iterR = sizeX - 1;
@@ -404,42 +410,31 @@ void Rasterizer2::rasterPolygonAreaGraTexSS(const Point* points, size_t pointCou
             // Break if the pixel has become fully opaque
             if(alphas[iterR] >= (15 * SUPERSAMPLING_SIZE * SUPERSAMPLING_SIZE)) break;
             // Draw the pixel
-            Pixel pixel(_image->view(), minX + iterR, minY + pixelY / SUPERSAMPLING_SIZE);
-            //_image->format().setPixel(pixel, color, _compositionMode, SCALE_ALPHA(alphas[iterR]));
+            const Pt::int32_t iterX = minX + iterR;
+            const Pt::int32_t iterY = minY + pixelY / SUPERSAMPLING_SIZE;
+            const Pt::int32_t tX    = (iterR                      ) % _brushImage->width ();
+            const Pt::int32_t tY    = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
+            ConstPixel srcPixel(_brushImage->view(), tX, tY);
+            Pixel      dstPixel(_image->view(), iterX, iterY);
+            _image->format().setPixel(dstPixel, srcPixel, _compositionMode, SCALE_ALPHA(alphas[iterR]));
         }
         // Draw pixels that belongs to the middle-part of the shape to the image
         if(iterR >= iterL) {
-            /*
-            Pt::int32_t iterX     = minX + iterL;
+            Pt::int32_t iterX     = iterL;
             Pt::int32_t spanWidth = iterR - iterL + 1;
             while(spanWidth > 0) {
-                const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
+                const Pt::int32_t tX = (iterX                      ) % _brushImage->width ();
+                const Pt::int32_t tY = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
+                const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tX);
                 if(n) {
-                    Pixel pixel(_image->view(), iterX, minY + pixelY / SUPERSAMPLING_SIZE);
-                    _image->format().copy(pixel, _brushPixel, n, _compositionMode);
+                    ConstPixel srcPixel(_brushImage->view(), tX, tY);
+                    Pixel      dstPixel(_image->view(), minX + iterX, minY + pixelY / SUPERSAMPLING_SIZE);
+                    _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
                 }
                 spanWidth -= n;
                 iterX     += n;
             }
-            */
-
         }
-/*
-        Pt::int32_t iterX     = from;
-        Pt::int32_t spanWidth = to - from + 1;
-        while(spanWidth > 0) {
-            const Pt::int32_t tX = (iterX  - minX) % _brushImage->width ();
-            const Pt::int32_t tY = (pixelY - minY) % _brushImage->height();
-            const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tX);
-            if(n) {
-                ConstPixel srcPixel(_brushImage->view(), tX, tY);
-                Pixel      dstPixel(_image->view(), iterX, pixelY);
-                _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
-            }
-            spanWidth -= n;
-            iterX     += n;
-        }
-*/
         // Clear the work buffer
         memset(&alphas[0], 0, alphas.size());
     }
