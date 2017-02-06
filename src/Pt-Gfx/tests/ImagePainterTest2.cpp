@@ -21,16 +21,16 @@ using namespace Pt::Gfx;
 //
 
 #define TEST_SOURCECOPY                        1
-#define TEST_SOURCEOVER                        0
+#define TEST_SOURCEOVER                        1
 
-#define TEST_DRAW_LINE_AND_TEXT                0
-#define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES 0
+#define TEST_DRAW_LINE_AND_TEXT                1
+#define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES 1
 
-#define TEST_DRAW_SOLID_FILLED_POLYGONS        0
+#define TEST_DRAW_SOLID_FILLED_POLYGONS        1
 #define TEST_DRAW_GRADIENT_FILLED_POLYGONS     1
 #define TEST_DRAW_TEXTURE_FILLED_POLYGONS      1
 
-#define TEST_COMPARE_WITH_OLD_PAINTER          0
+#define TEST_COMPARE_WITH_OLD_PAINTER          1
 
 //
 

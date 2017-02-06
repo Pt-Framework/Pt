@@ -53,35 +53,32 @@ void Rasterizer2::strokePolygon(const Point* points, size_t pointCount)
     }
 }
 
-void Rasterizer2::fillPolygon(const Point* points, const size_t pointCount, bool useSupersamplingForAA)
+void Rasterizer2::fillPolygon(const Point* points, size_t pointCount, bool useSupersamplingForAA)
 {
     // Clip the coordinates
     std::vector<Point> clipped;
     genClippedPolygonPoints(clipped, points, pointCount);
 
+#if 0
+    #define DIV_FAC 1
+    clipped.clear();
+    clipped.push_back(Point(450 / DIV_FAC, 100 / DIV_FAC));
+    clipped.push_back(Point(350 / DIV_FAC, 300 / DIV_FAC));
+    clipped.push_back(Point(650 / DIV_FAC, 400 / DIV_FAC));
+    pointCount = 3;
+#endif
+
     // Get the minimum and maximum coordinate values
     Pt::int32_t minX, minY, maxX, maxY;
-    getPolygonRectMinMax(points, pointCount, minX, minY, maxX, maxY);
+    getPolygonRectMinMax(clipped.data(), clipped.size(), minX, minY, maxX, maxY);
 
     // Update gradient as needed
     if(_isGradient)
         updateGradientBrush(maxX - minX + 1, maxY - minY + 1);
 
-#if 0
-    #define DIV_FAC 50
-    clipped.clear();
-    clipped.push_back(Point(450 / DIV_FAC, 100 / DIV_FAC));
-    clipped.push_back(Point(350 / DIV_FAC, 300 / DIV_FAC));
-    clipped.push_back(Point(650 / DIV_FAC, 400 / DIV_FAC));
-#endif
-
     // Draw the polygon
-    if(useSupersamplingForAA) {
-        if(_isGradient || _isTexture)
-            rasterPolygonAreaGraTexSS(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
-        else
-            rasterPolygonAreaSolidSS(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
-    }
+    if(useSupersamplingForAA)
+        rasterPolygonAreaSS(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
     else {
         rasterPolygonArea(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
         rasterPolygonOutline(clipped.data(), clipped.size(), _brush.color());
@@ -212,7 +209,7 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
 
 // Partially based on http://alienryderflex.com/polygon_fill
 // Public-domain code by Darel Rex Finley, 2007
-void Rasterizer2::rasterPolygonAreaSolidSS(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
+void Rasterizer2::rasterPolygonAreaSS(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
 {
     // Calculate the size of the polygon
     Pt::int32_t sizeX = (maxX - minX + 1);
@@ -280,159 +277,88 @@ void Rasterizer2::rasterPolygonAreaSolidSS(const Point* points, size_t pointCoun
         for(; iterL < sizeX; ++iterL) { // Skip fully-transparent pixels
             if(alphas[iterL]) break;
         }
-        for(; iterL < sizeX; ++iterL) {
-            // Break if the pixel has become fully opaque
-            if(alphas[iterL] >= (15 * SUPERSAMPLING_SIZE * SUPERSAMPLING_SIZE)) break;
-            // Draw the pixel
-            Pixel pixel(_image->view(), minX + iterL, minY + pixelY / SUPERSAMPLING_SIZE);
-            _image->format().setPixel(pixel, color, _compositionMode, SCALE_ALPHA(alphas[iterL]));
+        if(_isGradient || _isTexture) {
+            for(; iterL < sizeX; ++iterL) {
+                // Break if the pixel has become fully opaque
+                if(alphas[iterL] >= (15 * SUPERSAMPLING_SIZE * SUPERSAMPLING_SIZE)) break;
+                // Draw the pixel
+                const Pt::int32_t iterX = minX + iterL;
+                const Pt::int32_t iterY = minY + pixelY / SUPERSAMPLING_SIZE;
+                const Pt::int32_t tX    = (iterL                      ) % _brushImage->width ();
+                const Pt::int32_t tY    = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
+                ConstPixel srcPixel(_brushImage->view(), tX, tY);
+                Pixel      dstPixel(_image->view(), iterX, iterY);
+                _image->format().setPixel(dstPixel, srcPixel, _compositionMode, SCALE_ALPHA(alphas[iterL]));
+
+            }
+        }
+        else {
+            for(; iterL < sizeX; ++iterL) {
+                // Break if the pixel has become fully opaque
+                if(alphas[iterL] >= (15 * SUPERSAMPLING_SIZE * SUPERSAMPLING_SIZE)) break;
+                // Draw the pixel
+                Pixel pixel(_image->view(), minX + iterL, minY + pixelY / SUPERSAMPLING_SIZE);
+                _image->format().setPixel(pixel, color, _compositionMode, SCALE_ALPHA(alphas[iterL]));
+            }
         }
         // Draw pixels that belongs to the right-part of the shape to the image
         Pt::int32_t iterR = sizeX - 1;
         for(; iterR >= 0; --iterR) { // Skip fully-transparent pixels
             if(alphas[iterR]) break;
         }
-        for(; iterR >= 0; --iterR) {
-            // Break if the pixel has become fully opaque
-            if(alphas[iterR] >= (15 * SUPERSAMPLING_SIZE * SUPERSAMPLING_SIZE)) break;
-            // Draw the pixel
-            Pixel pixel(_image->view(), minX + iterR, minY + pixelY / SUPERSAMPLING_SIZE);
-            _image->format().setPixel(pixel, color, _compositionMode, SCALE_ALPHA(alphas[iterR]));
+        if(_isGradient || _isTexture) {
+            for(; iterR >= 0; --iterR) {
+                // Break if the pixel has become fully opaque
+                if(alphas[iterR] >= (15 * SUPERSAMPLING_SIZE * SUPERSAMPLING_SIZE)) break;
+                // Draw the pixel
+                const Pt::int32_t iterX = minX + iterR;
+                const Pt::int32_t iterY = minY + pixelY / SUPERSAMPLING_SIZE;
+                const Pt::int32_t tX    = (iterR                      ) % _brushImage->width ();
+                const Pt::int32_t tY    = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
+                ConstPixel srcPixel(_brushImage->view(), tX, tY);
+                Pixel      dstPixel(_image->view(), iterX, iterY);
+                _image->format().setPixel(dstPixel, srcPixel, _compositionMode, SCALE_ALPHA(alphas[iterR]));
+            }
+        }
+        else {
+            for(; iterR >= 0; --iterR) {
+                // Break if the pixel has become fully opaque
+                if(alphas[iterR] >= (15 * SUPERSAMPLING_SIZE * SUPERSAMPLING_SIZE)) break;
+                // Draw the pixel
+                Pixel pixel(_image->view(), minX + iterR, minY + pixelY / SUPERSAMPLING_SIZE);
+                _image->format().setPixel(pixel, color, _compositionMode, SCALE_ALPHA(alphas[iterR]));
+            }
         }
         // Draw pixels that belongs to the middle-part of the shape to the image
         if(iterR >= iterL) {
-            Pt::int32_t iterX     = minX + iterL;
-            Pt::int32_t spanWidth = iterR - iterL + 1;
-            while(spanWidth > 0) {
-                const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
-                if(n) {
-                    Pixel pixel(_image->view(), iterX, minY + pixelY / SUPERSAMPLING_SIZE);
-                    _image->format().copy(pixel, _brushPixel, n, _compositionMode);
+            if(_isGradient || _isTexture) {
+                Pt::int32_t iterX     = iterL;
+                Pt::int32_t spanWidth = iterR - iterL + 1;
+                while(spanWidth > 0) {
+                    const Pt::int32_t tX = (iterX                      ) % _brushImage->width ();
+                    const Pt::int32_t tY = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
+                    const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tX);
+                    if(n) {
+                        ConstPixel srcPixel(_brushImage->view(), tX, tY);
+                        Pixel      dstPixel(_image->view(), minX + iterX, minY + pixelY / SUPERSAMPLING_SIZE);
+                        _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
+                    }
+                    spanWidth -= n;
+                    iterX     += n;
                 }
-                spanWidth -= n;
-                iterX     += n;
-            }
-        }
-        // Clear the work buffer
-        memset(&alphas[0], 0, alphas.size());
-    }
-}
-
-// Partially based on http://alienryderflex.com/polygon_fill
-// Public-domain code by Darel Rex Finley, 2007
-void Rasterizer2::rasterPolygonAreaGraTexSS(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
-{
-    // Calculate the size of the polygon
-    Pt::int32_t sizeX = (maxX - minX + 1);
-    Pt::int32_t sizeY = (maxY - minY + 1) * SUPERSAMPLING_SIZE;
-
-    // Prepare a work buffer
-    std::vector<Pt::uint8_t> alphas(sizeX, 0);
-
-    // Scale the polygon to match the super sampling size and translate it to (0, 0)
-    std::vector<Pt::int32_t> pointX(pointCount, 0);
-    std::vector<Pt::int32_t> pointY(pointCount, 0);
-
-    for(size_t i = 0; i < pointCount; ++i) {
-        pointX[i] = points[i].x() * SUPERSAMPLING_SIZE - minX * SUPERSAMPLING_SIZE;
-        pointY[i] = points[i].y() * SUPERSAMPLING_SIZE - minY * SUPERSAMPLING_SIZE;
-    }
-
-    // List of nodes that define the horizontal segments
-    std::vector<Pt::int32_t> nodeXf(pointCount * 2, 0);
-
-    // A helper macro to scale the alpha
-    #define SCALE_ALPHA(A) ( Pt::uint16_t(A) * 17 / SUPERSAMPLING_SIZE / SUPERSAMPLING_SIZE )
-
-    //  Loop through the rows of the image
-    for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
-        // Build a list of nodes
-        Pt::int32_t j     = pointCount - 1;
-        Pt::int32_t nodes = 0;
-        for(size_t i = 0; i < pointCount; ++i) {
-            if( ( pointY[i] < pixelY && pointY[j] >= pixelY ) ||
-                ( pointY[j] < pixelY && pointY[i] >= pixelY )
-            ) {
-                Pt::int32_t deltaYp = pixelY    - pointY[i];
-                Pt::int32_t deltaYj = pointY[j] - pointY[i];
-                Pt::int32_t deltaXj = pointX[j] - pointX[i];
-                Pt::int32_t interXf = FIXED_POINT_FROM_INT(pointX[i]) + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
-                nodeXf[nodes++] = interXf + FIXED_POINT_CONSTANT_HALF;
-                // Bail out if we have produced too many nodes
-                if((size_t)nodes >= nodeXf.size()) return;
-            }
-            j = i;
-        }
-        // Sort the nodes using bubble sort
-        for(Pt::int32_t i = 0; i < nodes - 1;) {
-            if(nodeXf[i] > nodeXf[i + 1]) {
-                std::swap(nodeXf[i], nodeXf[i + 1]);
-                if(i) --i;
             }
             else {
-                ++i;
-            }
-        }
-        // Fill the samples between the node pairs
-        for(Pt::int32_t i = 0; i < nodes/2; i += 2) {
-            Pt::int32_t from = FIXED_POINT_TO_INT(nodeXf[i    ]);
-            Pt::int32_t to   = FIXED_POINT_TO_INT(nodeXf[i + 1]);
-            for(Pt::int32_t k = from; k <= to; ++k) {
-                alphas[k / SUPERSAMPLING_SIZE] += 15;
-            }
-        }
-        // Simply skip the next steps if we have not got all the needed samples
-        if( ((pixelY + 1) % SUPERSAMPLING_SIZE) ) continue;
-        // Draw pixels that belongs to the left-part of the shape to the image
-        Pt::int32_t iterL = 0;
-        for(; iterL < sizeX; ++iterL) { // Skip fully-transparent pixels
-            if(alphas[iterL]) break;
-        }
-        for(; iterL < sizeX; ++iterL) {
-            // Break if the pixel has become fully opaque
-            if(alphas[iterL] >= (15 * SUPERSAMPLING_SIZE * SUPERSAMPLING_SIZE)) break;
-            // Draw the pixel
-            const Pt::int32_t iterX = minX + iterL;
-            const Pt::int32_t iterY = minY + pixelY / SUPERSAMPLING_SIZE;
-            const Pt::int32_t tX    = (iterL                      ) % _brushImage->width ();
-            const Pt::int32_t tY    = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
-            ConstPixel srcPixel(_brushImage->view(), tX, tY);
-            Pixel      dstPixel(_image->view(), iterX, iterY);
-            _image->format().setPixel(dstPixel, srcPixel, _compositionMode, SCALE_ALPHA(alphas[iterL]));
-
-        }
-        // Draw pixels that belongs to the right-part of the shape to the image
-        Pt::int32_t iterR = sizeX - 1;
-        for(; iterR >= 0; --iterR) { // Skip fully-transparent pixels
-            if(alphas[iterR]) break;
-        }
-        for(; iterR >= 0; --iterR) {
-            // Break if the pixel has become fully opaque
-            if(alphas[iterR] >= (15 * SUPERSAMPLING_SIZE * SUPERSAMPLING_SIZE)) break;
-            // Draw the pixel
-            const Pt::int32_t iterX = minX + iterR;
-            const Pt::int32_t iterY = minY + pixelY / SUPERSAMPLING_SIZE;
-            const Pt::int32_t tX    = (iterR                      ) % _brushImage->width ();
-            const Pt::int32_t tY    = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
-            ConstPixel srcPixel(_brushImage->view(), tX, tY);
-            Pixel      dstPixel(_image->view(), iterX, iterY);
-            _image->format().setPixel(dstPixel, srcPixel, _compositionMode, SCALE_ALPHA(alphas[iterR]));
-        }
-        // Draw pixels that belongs to the middle-part of the shape to the image
-        if(iterR >= iterL) {
-            Pt::int32_t iterX     = iterL;
-            Pt::int32_t spanWidth = iterR - iterL + 1;
-            while(spanWidth > 0) {
-                const Pt::int32_t tX = (iterX                      ) % _brushImage->width ();
-                const Pt::int32_t tY = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
-                const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tX);
-                if(n) {
-                    ConstPixel srcPixel(_brushImage->view(), tX, tY);
-                    Pixel      dstPixel(_image->view(), minX + iterX, minY + pixelY / SUPERSAMPLING_SIZE);
-                    _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
+                Pt::int32_t iterX     = minX + iterL;
+                Pt::int32_t spanWidth = iterR - iterL + 1;
+                while(spanWidth > 0) {
+                    const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
+                    if(n) {
+                        Pixel pixel(_image->view(), iterX, minY + pixelY / SUPERSAMPLING_SIZE);
+                        _image->format().copy(pixel, _brushPixel, n, _compositionMode);
+                    }
+                    spanWidth -= n;
+                    iterX     += n;
                 }
-                spanWidth -= n;
-                iterX     += n;
             }
         }
         // Clear the work buffer

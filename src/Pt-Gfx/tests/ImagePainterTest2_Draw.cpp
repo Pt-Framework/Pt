@@ -87,6 +87,10 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(&painter);
 
 
+    painter.setBrush( Color::fromRgb8(255, 255, 255, 175) );
+    painter.fillRect( RectF( PointF(170, 250), SizeF(image.width() - 340, image.height() - 400) ) );
+
+
     painter.setBrush( brush1 );
 
     const PointF poly1[] = { PointF(50, 50), PointF(250, 100), PointF(450, 250), PointF(350, 350), PointF(150, 100) };
