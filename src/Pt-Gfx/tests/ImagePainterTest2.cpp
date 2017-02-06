@@ -25,7 +25,10 @@ using namespace Pt::Gfx;
 
 #define TEST_DRAW_LINE_AND_TEXT                1
 #define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES 1
+
 #define TEST_DRAW_SOLID_FILLED_POLYGONS        1
+#define TEST_DRAW_GRADIENT_FILLED_POLYGONS     0
+#define TEST_DRAW_TEXTURE_FILLED_POLYGONS      0
 
 #define TEST_COMPARE_WITH_OLD_PAINTER          1
 
@@ -45,6 +48,8 @@ using namespace Pt::Gfx;
 #define BENCHMARK_TEXTURE_FILLED_RECTANGLE  1
 
 #define BENCHMARK_SOLID_FILLED_POLYGON      1
+#define BENCHMARK_GRADIENT_FILLED_POLYGON   0
+#define BENCHMARK_TEXTURE_FILLED_POLYGON    0
 
 //
 
@@ -93,7 +98,7 @@ int main(int argc, char* args[])
         testDrawLine("Lines and Texts - ImagePainter2 [SourceOver]", image, *painter2);
     }
 
-    // Rectangles and solid-filled rectangles
+    // Rectangles and filled rectangles
     if(DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_RECTANGLES_FILLED_RECTANGLES) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
         testDrawRect("Rectangles & Solid-Filled Rectangles - ImagePainter2 [SourceCopy]", image, *painter2);
@@ -120,6 +125,42 @@ int main(int argc, char* args[])
     if(DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_SOLID_FILLED_POLYGONS) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
         testDrawSolidFillPolygon("Solid-Filled Polygons - ImagePainter2 [SourceOver]", image, *painter2);
+    }
+
+    // Gradient-filled polygons
+    if(DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_GRADIENT_FILLED_POLYGONS) {
+        painter2->setCompositionMode(CompositionMode::SourceCopy);
+        testDrawGradFillPolygon("Gradient-Filled Polygons - ImagePainter2 [SourceCopy]", image, *painter2);
+        if(TEST_COMPARE_WITH_OLD_PAINTER) {
+            painter1->setCompositionMode(CompositionMode::SourceCopy);
+            testDrawGradFillPolygon("Gradient-Filled Polygons - ImagePainter [SourceCopy]", image, *painter1);
+        }
+    }
+    if(DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_GRADIENT_FILLED_POLYGONS) {
+        painter2->setCompositionMode(CompositionMode::SourceOver);
+        testDrawGradFillPolygon("Gradient-Filled Polygons - ImagePainter2 [SourceOver]", image, *painter2);
+        if(TEST_COMPARE_WITH_OLD_PAINTER) {
+            painter1->setCompositionMode(CompositionMode::SourceOver);
+            testDrawGradFillPolygon("Gradient-Filled Polygons - ImagePainter [SourceOver]", image, *painter1);
+        }
+    }
+
+    // Texture-filled polygons
+    if(DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_TEXTURE_FILLED_POLYGONS) {
+        painter2->setCompositionMode(CompositionMode::SourceCopy);
+        testDrawTxtrFillPolygon("Texture-Filled Polygons - ImagePainter2 [SourceCopy]", image, *painter2);
+        if(TEST_COMPARE_WITH_OLD_PAINTER) {
+            painter1->setCompositionMode(CompositionMode::SourceCopy);
+            testDrawTxtrFillPolygon("Texture-Filled Polygons - ImagePainter [SourceCopy]", image, *painter1);
+        }
+    }
+    if(DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_TEXTURE_FILLED_POLYGONS) {
+        painter2->setCompositionMode(CompositionMode::SourceOver);
+        testDrawTxtrFillPolygon("Texture-Filled Polygons - ImagePainter2 [SourceOver]", image, *painter2);
+        if(TEST_COMPARE_WITH_OLD_PAINTER) {
+            painter1->setCompositionMode(CompositionMode::SourceOver);
+            testDrawTxtrFillPolygon("Texture-Filled Polygons - ImagePainter [SourceOver]", image, *painter1);
+        }
     }
 
     // Benchmark
