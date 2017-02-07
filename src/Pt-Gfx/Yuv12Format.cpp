@@ -101,6 +101,28 @@ void Yuv12Format::onSetPixel(Pixel& pixel, const Color& c,
     // ### !!! TODO !!! ###
 }
 
+
+void Yuv12Format::onSetPixels(Pixel& to, const Pixel& from, size_t length,
+                              CompositionMode mode) const
+{
+    // ### !!! TODO !!! ###
+}
+
+
+void Yuv12Format::onSetPixels(Pixel& to, const ConstPixel& from, size_t length,
+                              CompositionMode mode) const
+{
+    // ### !!! TODO !!! ###
+}
+
+
+void Yuv12Format::onSetPixels(Pixel& pixel, const Color& c, size_t length,
+                              CompositionMode mode) const
+{
+    // ### !!! TODO !!! ###
+}
+
+
 Color Yuv12Format::onGetColor(const Pixel& p) const
 {
     const Pt::uint8_t* y;

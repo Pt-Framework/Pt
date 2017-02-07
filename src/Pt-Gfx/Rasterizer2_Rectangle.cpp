@@ -100,15 +100,24 @@ void Rasterizer2::rasterRectArea(const Point& tl, const Point& br)
     if(maxX > _currentClip.right ()) maxX = _currentClip.right ();
     if(maxY > _currentClip.bottom()) maxY = _currentClip.bottom();
 
+/*
+CompositionMode::SourceCopy
+    Gradient-filled Rectangle  @ ImagePainter  =   7069
+    Gradient-filled Rectangle  @ ImagePainter2 =   6578 ( 0.931)
+CompositionMode::SourceOver
+    Gradient-filled Rectangle  @ ImagePainter  =   7325
+    Gradient-filled Rectangle  @ ImagePainter2 =   7332 ( 1.001)
+*/
+
     // Calculate the width of the rectangle
     const Pt::int32_t sizeX = maxX - minX + 1;
 
-    // Draw the rectangle using gradient/texture
-    if(_isGradient || _isTexture) {
+    // Draw the rectangle using texture
+    if(_isTexture) {
         for(Pt::int32_t iterY = minY; iterY <= maxY; ++iterY) {
             Pt::int32_t iterX     = minX;
             Pt::int32_t spanWidth = sizeX;
-            // Fill the sans
+            // Fill the spans
             while(spanWidth > 0) {
                 const Pt::int32_t tX = (iterX - minX) % _brushImage->width ();
                 const Pt::int32_t tY = (iterY - minY) % _brushImage->height();
@@ -120,6 +129,36 @@ void Rasterizer2::rasterRectArea(const Point& tl, const Point& br)
                 }
                 spanWidth -= n;
                 iterX     += n;
+            }
+        }
+        return;
+    }
+
+    // Draw the rectangle using gradient
+    if(_isGradient) {
+        for(Pt::int32_t iterY = minY; iterY <= maxY; ++iterY) {
+            Pt::int32_t iterX     = minX;
+            Pt::int32_t spanWidth = sizeX;
+            // Fill the spans - vertical gradient
+            if(_brush.fillStyle() == Pt::Gfx::Brush::VerticalGradient) {
+                const Pt::int32_t textureY = (iterY - minY) % _brushImage->height();
+                ConstPixel        srcPixel(_brushImage->view(), 0, textureY);
+                Pixel             dstPixel(_image->view(), iterX, iterY);
+                _image->format().setPixels(dstPixel, srcPixel, spanWidth, _compositionMode);
+            }
+            // Fill the spans - horizontal gradient
+            else {
+                while(spanWidth > 0) {
+                    const Pt::int32_t textureX = (iterX - minX) % _brushImage->width ();
+                    const Pt::int32_t n        = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - textureX);
+                    if(n) {
+                        ConstPixel srcPixel(_brushImage->view(), textureX, 0);
+                        Pixel      dstPixel(_image->view(), iterX, iterY);
+                        _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
+                    }
+                    spanWidth -= n;
+                    iterX     += n;
+                }
             }
         }
         return;

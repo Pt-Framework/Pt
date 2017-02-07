@@ -116,6 +116,24 @@ class ImageFormat
                       CompositionMode mode, Pt::uint8_t blendingAlpha) const
         { onSetPixel(to, c, mode, blendingAlpha); }
 
+        /** @brief Sets the pixels color.
+        */
+        void setPixels(Pixel& to, const Pixel& from, size_t length,
+                      CompositionMode mode) const
+        { onSetPixels(to, from, length, mode); }
+
+        /** @brief Sets the pixels color.
+        */
+        void setPixels(Pixel& to, const ConstPixel& from, size_t length,
+                      CompositionMode mode) const
+        { onSetPixels(to, from, length, mode); }
+
+        /** @brief Sets the pixels color.
+        */
+        void setPixesl(Pixel& to, const Color& c, size_t length,
+                      CompositionMode mode) const
+        { onSetPixels(to, c, length, mode); }
+
         /** @brief Gets the pixel color.
         */
         Color getColor(const Pixel& pixel) const
@@ -167,6 +185,15 @@ class ImageFormat
 
         virtual void onSetPixel(Pixel& pixel, const Color& c,
                                 CompositionMode mode, Pt::uint8_t blendingAlpha) const = 0;
+
+        virtual void onSetPixels(Pixel& to, const Pixel& from, size_t length,
+                                CompositionMode mode) const = 0;
+
+        virtual void onSetPixels(Pixel& to, const ConstPixel& from, size_t length,
+                                CompositionMode mode) const = 0;
+
+        virtual void onSetPixels(Pixel& pixel, const Color& c, size_t length,
+                                CompositionMode  mode) const = 0;
 
         virtual Color onGetColor(const Pixel& pixel) const = 0;
 

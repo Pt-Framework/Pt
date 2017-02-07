@@ -62,6 +62,15 @@ class PT_GFX_API Rgb32Format : public ImageFormat
         virtual void onSetPixel(Pixel& pixel, const Color& c,
                                 CompositionMode mode, Pt::uint8_t blendingAlpha) const;
 
+        virtual void onSetPixels(Pixel& to, const Pixel& from, size_t length,
+                                CompositionMode mode) const;
+
+        virtual void onSetPixels(Pixel& to, const ConstPixel& from, size_t length,
+                                CompositionMode mode) const;
+
+        virtual void onSetPixels(Pixel& pixel, const Color& c, size_t length,
+                                CompositionMode  mode) const;
+
         virtual Color onGetColor(const Pixel& pixel) const;
 
         virtual Color onGetColor(const ConstPixel& pixel) const;

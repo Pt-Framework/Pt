@@ -168,44 +168,66 @@ void Rasterizer2::strokeText( const Point& to, const Pt::String& text )
 
 void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
 {
-    Color gradientStart = _brush.color();
-    Color gradientStop  = _brush.gradientColor();
+    // Start colors
+    Pt::uint8_t rs, gs, bs, as;
 
+    // End colors
+    Pt::uint8_t re, ge, be, ae;
+
+    // Resize the brush buffer and the start-end colors
     switch(_brush.fillStyle()) {
         case Pt::Gfx::Brush::HorizontalGradient:
-            _brushBuffer.reset(_image->format(), Size(width, 1));
+            // Resize the brush buffer
             height = 1;
+            _brushBuffer.reset(_image->format(), Size(width, 1));
+            // Determine the colors
+            rs = _brush.color        ().red  () / 257;
+            gs = _brush.color        ().green() / 257;
+            bs = _brush.color        ().blue () / 257;
+            as = _brush.color        ().alpha() / 257;
+            re = _brush.gradientColor().red  () / 257;
+            ge = _brush.gradientColor().green() / 257;
+            be = _brush.gradientColor().blue () / 257;
+            ae = _brush.gradientColor().alpha() / 257;
             break;
 
         case Pt::Gfx::Brush::VerticalGradient:
-            _brushBuffer.reset(_image->format(), Size(1, height));
+            // Resize the brush buffer
             width = 1;
-            std::swap(gradientStart, gradientStop);
+            _brushBuffer.reset(_image->format(), Size(1, height));
+            // Determine the colors
+            rs = _brush.gradientColor().red  () / 257;
+            gs = _brush.gradientColor().green() / 257;
+            bs = _brush.gradientColor().blue () / 257;
+            as = _brush.gradientColor().alpha() / 257;
+            re = _brush.color        ().red  () / 257;
+            ge = _brush.color        ().green() / 257;
+            be = _brush.color        ().blue () / 257;
+            ae = _brush.color        ().alpha() / 257;
             break;
 
         default:
             return;
     }
 
-    const Pt::int32_t  length = width + height - 1;
+    // Create the gradient
+    const Pt::int32_t  length = width + height - 1 - 1;
           Pt::uint8_t* pixel  = _brushBuffer.data();
-
-    for(int n = 0; n < length; ++n) {
-        const float f1 = (length - n) / float(length);
-        const float f2 = n / float(length);
-        const float r1 = gradientStart.red  () * f1;
-        const float r2 = gradientStop .red  () * f2;
-        const float g1 = gradientStart.green() * f1;
-        const float g2 = gradientStop .green() * f2;
-        const float b1 = gradientStart.blue () * f1;
-        const float b2 = gradientStop .blue () * f2;
-        const float a1 = gradientStart.alpha() * f1;
-        const float a2 = gradientStop .alpha() * f2;
-        pixel[0]  = (b1 + b2) / 257;
-        pixel[1]  = (g1 + g2) / 257;
-        pixel[2]  = (r1 + r2) / 257;
-        pixel[3]  = (a1 + a2) / 257;
-        pixel    += 4;
+    for(int n = 0; n <= length; ++n) {
+        const Pt::int32_t f2 = FIXED_POINT_FROM_INT(n) / length;
+        const Pt::int32_t f1 = FIXED_POINT_CONSTANT_ONE - f2;
+        const Pt::uint8_t r1 = FIXED_POINT_TO_INT(rs * f1);
+        const Pt::uint8_t r2 = FIXED_POINT_TO_INT(re * f2);
+        const Pt::uint8_t g1 = FIXED_POINT_TO_INT(gs * f1);
+        const Pt::uint8_t g2 = FIXED_POINT_TO_INT(ge * f2);
+        const Pt::uint8_t b1 = FIXED_POINT_TO_INT(bs * f1);
+        const Pt::uint8_t b2 = FIXED_POINT_TO_INT(be * f2);
+        const Pt::uint8_t a1 = FIXED_POINT_TO_INT(as * f1);
+        const Pt::uint8_t a2 = FIXED_POINT_TO_INT(ae * f2);
+        *pixel++ = b1 + b2;
+        *pixel++ = g1 + g2;
+        *pixel++ = r1 + r2;
+        *pixel++ = a1 + a2;
     }
 }
 

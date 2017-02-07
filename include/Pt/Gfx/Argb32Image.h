@@ -114,8 +114,7 @@ class Argb32Model
         static void assign(Pt::uint8_t* to, const Color& c,
                            CompositionMode mode)
         {
-            switch( mode)
-            {
+            switch(mode) {
                 default:
                 case CompositionMode::SourceCopy:
                     Argb32Model::fromColor(to, c);
@@ -130,8 +129,7 @@ class Argb32Model
         static void assign(Pt::uint8_t* to, const Pt::uint8_t* from,
                            CompositionMode mode)
         {
-            switch(mode)
-            {
+            switch(mode) {
                 default:
                 case CompositionMode::SourceCopy:
                     *((Pt::uint32_t*)to) = *((const Pt::uint32_t*)from);
@@ -146,11 +144,9 @@ class Argb32Model
         static void assign(Pt::uint8_t* to, const Color& c,
                            CompositionMode mode, Pt::uint8_t blendingAlpha)
         {
-            switch(mode)
-            {
+            switch(mode) {
                 default:
-                case CompositionMode::SourceCopy:
-                {
+                case CompositionMode::SourceCopy: {
                     const Pt::uint32_t blendAlphaSrc = blendingAlpha;
                     const Pt::uint32_t blendAlphaInv = 255 - blendingAlpha;
                     to[0] = (blendAlphaSrc * (Pt::uint32_t)(c.blue () / 257) + blendAlphaInv * to[0]) >> 8;
@@ -177,11 +173,9 @@ class Argb32Model
         static void assign(Pt::uint8_t* to, const Pt::uint8_t* from,
                            CompositionMode mode, Pt::uint8_t blendingAlpha)
         {
-            switch(mode)
-            {
+            switch(mode) {
                 default:
-                case CompositionMode::SourceCopy:
-                {
+                case CompositionMode::SourceCopy: {
                     const Pt::uint32_t blendAlphaSrc = blendingAlpha;
                     const Pt::uint32_t blendAlphaInv = 255 - blendingAlpha;
                     to[0] = (blendAlphaSrc * from[0] + blendAlphaInv * to[0]) >> 8;
@@ -200,6 +194,53 @@ class Argb32Model
                     to[1] = (blendAlphaSrc * from[1]    + blendAlphaInv * to[1]) >> 8;
                     to[2] = (blendAlphaSrc * from[2]    + blendAlphaInv * to[2]) >> 8;
                     to[3] = (blendAlphaSrc * colorAlpha + blendAlphaInv * to[3]) >> 8;
+                    break;
+                }
+            }
+        }
+
+        static void assign(Pt::uint8_t* to, const Color& c, size_t length,
+                           CompositionMode mode)
+        {
+            switch(mode) {
+                default:
+                case CompositionMode::SourceCopy:
+                    //Argb32Model::fromColor(to, c);
+                    break;
+
+                case CompositionMode::SourceOver:
+                    //Argb32Model::sourceOver(to, c);
+                    break;
+            }
+        }
+
+        static void assign(Pt::uint8_t* to, const Pt::uint8_t* from, size_t length,
+                           CompositionMode mode)
+        {
+            switch(mode) {
+                default:
+                case CompositionMode::SourceCopy: {
+                    Pt::uint32_t  src = *reinterpret_cast<const Pt::uint32_t*>(from);
+                    Pt::uint32_t* dst =  reinterpret_cast<Pt::uint32_t*>(to);
+                    for(size_t i = 0; i < length; ++i) *dst++ = src;
+                    break;
+                }
+
+                case CompositionMode::SourceOver: {
+                    const Pt::uint32_t  blend    = from[3];
+                    const Pt::uint32_t  blendInv = 255 - blend;
+                    const Pt::uint32_t  srcR     = from[0] * blend;
+                    const Pt::uint32_t  srcG     = from[1] * blend;
+                    const Pt::uint32_t  srcB     = from[2] * blend;
+                    const Pt::uint32_t  srcA     = blend   * blend;
+                          Pt::uint8_t*  dst      = to;
+                    for(size_t i = 0; i < length; ++i) {
+                        dst[0] = (srcR + blendInv * dst[0]) >> 8;
+                        dst[1] = (srcG + blendInv * dst[1]) >> 8;
+                        dst[2] = (srcB + blendInv * dst[2]) >> 8;
+                        dst[3] = (srcA + blendInv * dst[3]) >> 8;
+                        dst += 4;
+                    }
                     break;
                 }
             }

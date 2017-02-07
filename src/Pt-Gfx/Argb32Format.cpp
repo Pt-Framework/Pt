@@ -91,6 +91,26 @@ void Argb32Format::onSetPixel(Pixel& pixel, const Color& c,
 }
 
 
+void Argb32Format::onSetPixels(Pixel& to, const Pixel& from, size_t length,
+                               CompositionMode mode) const
+{
+    Argb32Model::assign(to.base(), from.base(), length, mode);
+}
+
+
+void Argb32Format::onSetPixels(Pixel& to, const ConstPixel& from, size_t length,
+                               CompositionMode mode) const
+{
+    Argb32Model::assign(to.base(), from.base(), length, mode);
+}
+
+
+void Argb32Format::onSetPixels(Pixel& pixel, const Color& c, size_t length,
+                               CompositionMode mode) const
+{
+    Argb32Model::assign(pixel.base(), c, length, mode);
+}
+
 Color Argb32Format::onGetColor(const Pixel& pixel) const
 {
     return Argb32Model::toColor( pixel.base() );

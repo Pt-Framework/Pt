@@ -101,6 +101,27 @@ void Rgb16Format::onSetPixel(Pixel& pixel, const Color& c,
 }
 
 
+void Rgb16Format::onSetPixels(Pixel& to, const Pixel& from, size_t length,
+                              CompositionMode mode) const
+{
+    // ### !!! TODO !!! ###
+}
+
+
+void Rgb16Format::onSetPixels(Pixel& to, const ConstPixel& from, size_t length,
+                              CompositionMode mode) const
+{
+    // ### !!! TODO !!! ###
+}
+
+
+void Rgb16Format::onSetPixels(Pixel& pixel, const Color& c, size_t length,
+                              CompositionMode mode) const
+{
+    // ### !!! TODO !!! ###
+}
+
+
 Color Rgb16Format::onGetColor(const Pixel& pixel) const
 {
     const Pt::uint16_t* p = (const Pt::uint16_t*) pixel.base();
