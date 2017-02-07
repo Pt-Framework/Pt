@@ -50,7 +50,7 @@ class PT_HMI_API LineEdit : public Control
             Masked = 2
         };
 
-        // TODO: separate classs
+        // TODO: separate class
         enum Alignment
         {
             TopLeft,

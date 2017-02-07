@@ -81,6 +81,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Layout.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\LeaveEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\LineEdit.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\LineEditor.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ListBox.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Menu.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\MenuBar.h" />
@@ -567,6 +568,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Label.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Layout.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\LineEdit.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\LineEditor.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\ApplicationImpl.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\FrameBuffer.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\linux-fb\InputDevice.cpp" />

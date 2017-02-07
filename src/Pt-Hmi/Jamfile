@@ -33,6 +33,7 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
              GridLayout.cpp
              Layout.cpp
              LineEdit.cpp
+             LineEditor.cpp
              ListBox.cpp
              PaintSurface.cpp
              PixmapSurface.cpp 

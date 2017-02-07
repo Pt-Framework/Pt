@@ -189,7 +189,7 @@ void ComboBox::addItem(ListBoxItem& item)
 
 void ComboBox::onItemSelected(ListBoxItem& item)
 {
-    _text = item.text();
+    //_text = item.text();
     invalidate();
 }
 
@@ -203,6 +203,11 @@ void ComboBox::setScrollBars(bool hasScrollBars)
 void ComboBox::onInvalidate()
 {
     Base::onInvalidate();
+
+    const StyleOptions& options = Application::instance().styleOptions();
+    
+    _editor.setFont( options.font() );
+    _editor.layout(_line);
 }
 
 
@@ -228,11 +233,17 @@ void ComboBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     painter.fillRect(rect);
     painter.drawRect(rect);
 
-    Gfx::FontMetrics fm = painter.fontMetrics(font, _text);
-
-    Gfx::PointF textPos( 5, fm.ascent() + 5);
+    Gfx::PointF textPos( _line.position() );
     painter.setPen(textPen);
-    painter.drawText(textPos, _text);
+    painter.drawText(textPos, _editor.text());
+}
+
+
+void ComboBox::onResizeEvent(const ResizeEvent& ev)
+{
+    Base::onResizeEvent(ev);
+    
+    _editor.setSize( ev.size() );
 }
 
 
@@ -246,7 +257,8 @@ void ComboBox::onMenuKeyEvent(const KeyEvent& ev)
     if( ! Pt::isprint(ch) )
         return;
 
-    _text += ch;
+    _editor.insert(ch);
+
     invalidate();
 }
 
@@ -255,16 +267,7 @@ void ComboBox::onKeyEvent(const KeyEvent& ev)
 {
     Base::onKeyEvent(ev);
 
-    if( ! ev.isPress() )
-        return;
-
-    Pt::Char ch = ev.unicode();
-
-    if( ! Pt::isprint(ch) )
-        return;
-
-    _text += ch;
-    invalidate();
+    onMenuKeyEvent(ev);
 }
 
 

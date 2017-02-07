@@ -32,6 +32,7 @@
 #include <Pt/Hmi/Control.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/ListBox.h>
+#include <Pt/Hmi/LineEditor.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/String.h>
@@ -92,6 +93,8 @@ class PT_HMI_API ComboBox : public Control
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
     protected:
+        void onResizeEvent(const ResizeEvent& ev);
+
         virtual void onKeyEvent(const KeyEvent& ev);
 
         virtual void onMouseEvent(const MouseEvent& ev);
@@ -108,8 +111,10 @@ class PT_HMI_API ComboBox : public Control
         void onOpenCombo();
 
     private:
+        LineEditor   _editor;
+        TextLine     _line;
         ComboBoxMenu _menu;
-        Pt::String  _text;
+        
         ListBoxItem _item1;
         ListBoxItem _item2;
         ListBoxItem _item3;
