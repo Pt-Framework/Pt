@@ -121,9 +121,6 @@ class Pixel
         bool operator==(const Pixel& p) const
         { return _base == p._base; }
 
-        Pixel& operator++();
-        Pixel& operator--();
-
     private:
         ImageView* _view;
         Pt::uint8_t* _base;
@@ -178,9 +175,6 @@ class ConstPixel
 
         bool operator==(const ConstPixel& p) const
         { return _base == p._base; }
-
-        ConstPixel& operator++();
-        ConstPixel& operator--();
 
     private:
         const ImageView*   _view;
@@ -450,22 +444,6 @@ inline Color Pixel::toColor() const
 }
 
 
-inline Pixel& Pixel::operator++()
-{
-  //  ++_x;
-    _base += _view->pixelStride();
-    return *this;
-}
-
-
-inline Pixel& Pixel::operator--()
-{
-   // --_x;
-    _base -= _view->pixelStride();
-    return *this;
-}
-
-
 /////////////////////////////////////////////////////////////////////////////
 // ConstPixel Implementation
 /////////////////////////////////////////////////////////////////////////////
@@ -516,23 +494,6 @@ inline void ConstPixel::advance(Pt::ssize_t n)
 inline Color ConstPixel::toColor() const
 {
     return _view->format().getColor(*this);
-}
-
-
-
-inline ConstPixel& ConstPixel::operator++()
-{
-   // ++_x;
-    _base += _view->pixelStride();
-    return *this;
-}
-
-
-inline ConstPixel& ConstPixel::operator--()
-{
-   // --_x;
-    _base -= _view->pixelStride();
-    return *this;
 }
 
 

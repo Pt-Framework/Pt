@@ -262,8 +262,7 @@ void Rasterizer2::rasterPolygonAreaSS(const Point* points, size_t pointCount, co
     #define SCALE_ALPHA(A) ( Pt::uint8_t(A) * 17 / SUPERSAMPLING_SIZE / SUPERSAMPLING_SIZE )
 
     //  Loop through the rows of the image
-    Pt::int32_t pixelY;
-    for(pixelY = 0; pixelY < sizeY; ++pixelY) {
+    for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
         // Build a list of nodes
         Pt::int32_t j     = pointCount - 1;
         Pt::int32_t nodes = 0;
@@ -301,91 +300,64 @@ void Rasterizer2::rasterPolygonAreaSS(const Point* points, size_t pointCount, co
         }
         // Simply skip the next steps if we have not got all the needed samples
         if( ((pixelY + 1) % SUPERSAMPLING_SIZE) ) continue;
-/*
-CompositionMode::SourceCopy
-    Solid-filled    polygon    @ ImagePainter2 =    377 ( 1.558)
-    Solid-filled    polygon SS @ ImagePainter2 =   1717 ( 7.095)
-
-CompositionMode::SourceOver
-    Solid-filled    polygon    @ ImagePainter2 =   1090 ( 1.151)
-    Solid-filled    polygon SS @ ImagePainter2 =   1705 ( 1.800)
-
-CompositionMode::SourceCopy
-    Solid-filled    polygon    @ ImagePainter2 =    385 ( 1.631)
-    Solid-filled    polygon SS @ ImagePainter2 =   1705 ( 7.225)
-
-CompositionMode::SourceOver
-    Solid-filled    polygon    @ ImagePainter2 =   1087 ( 1.158)
-    Solid-filled    polygon SS @ ImagePainter2 =   1697 ( 1.807)
-*/
         // Draw pixels that belongs to the left-part of the shape to the image
         Pt::int32_t iterL = 0;
-#if 1
         for(; iterL < sizeX; ++iterL) { // Skip fully-transparent pixels
             if(alphas[iterL]) break;
         }
-        if(_isTexture || _isGradient) { // Texture/gradient
-            const Pt::int32_t iterX = minX + iterL;
-            const Pt::int32_t iterY = minY + pixelY / SUPERSAMPLING_SIZE;
-                  Pixel       dstPixel(_image->view(), iterX, iterY);
-            const Pt::int32_t textureX = (iterL                      ) % _brushImage->width ();
-            const Pt::int32_t textureY = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
-                  ConstPixel  srcPixel(_brushImage->view(), textureX, textureY);
+        if(_isGradient || _isTexture) {
             for(; iterL < sizeX; ++iterL) {
                 // Break if the pixel has become fully opaque
                 if(alphas[iterL] >= (15 * SUPERSAMPLING_SIZE * SUPERSAMPLING_SIZE)) break;
                 // Draw the pixel
+                const Pt::int32_t iterX = minX + iterL;
+                const Pt::int32_t iterY = minY + pixelY / SUPERSAMPLING_SIZE;
+                const Pt::int32_t tX    = (iterL                      ) % _brushImage->width ();
+                const Pt::int32_t tY    = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
+                ConstPixel srcPixel(_brushImage->view(), tX, tY);
+                Pixel      dstPixel(_image->view(), iterX, iterY);
                 _image->format().setPixel(dstPixel, srcPixel, _compositionMode, SCALE_ALPHA(alphas[iterL]));
-                ++dstPixel;
-                ++srcPixel;
             }
         }
-        else { // Solid color
-            Pixel dstPixel(_image->view(), minX + iterL, minY + pixelY / SUPERSAMPLING_SIZE);
+        else {
             for(; iterL < sizeX; ++iterL) {
                 // Break if the pixel has become fully opaque
                 if(alphas[iterL] >= (15 * SUPERSAMPLING_SIZE * SUPERSAMPLING_SIZE)) break;
                 // Draw the pixel
-                _image->format().setPixel(dstPixel, color, _compositionMode, SCALE_ALPHA(alphas[iterL]));
-                ++dstPixel;
+                Pixel pixel(_image->view(), minX + iterL, minY + pixelY / SUPERSAMPLING_SIZE);
+                _image->format().setPixel(pixel, color, _compositionMode, SCALE_ALPHA(alphas[iterL]));
             }
         }
-#endif
         // Draw pixels that belongs to the right-part of the shape to the image
         Pt::int32_t iterR = sizeX - 1;
-#if 1
         for(; iterR >= 0; --iterR) { // Skip fully-transparent pixels
             if(alphas[iterR]) break;
         }
-        if(_isTexture || _isGradient) { // Texture/gradient
-            const Pt::int32_t iterX = minX + iterR;
-            const Pt::int32_t iterY = minY + pixelY / SUPERSAMPLING_SIZE;
-                  Pixel       dstPixel(_image->view(), iterX, iterY);
-            const Pt::int32_t textureX = (iterR                      ) % _brushImage->width ();
-            const Pt::int32_t textureY = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
-                  ConstPixel  srcPixel(_brushImage->view(), textureX, textureY);
+        if(_isGradient || _isTexture) {
             for(; iterR >= 0; --iterR) {
                 // Break if the pixel has become fully opaque
                 if(alphas[iterR] >= (15 * SUPERSAMPLING_SIZE * SUPERSAMPLING_SIZE)) break;
                 // Draw the pixel
+                const Pt::int32_t iterX = minX + iterR;
+                const Pt::int32_t iterY = minY + pixelY / SUPERSAMPLING_SIZE;
+                const Pt::int32_t tX    = (iterR                      ) % _brushImage->width ();
+                const Pt::int32_t tY    = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
+                ConstPixel srcPixel(_brushImage->view(), tX, tY);
+                Pixel      dstPixel(_image->view(), iterX, iterY);
                 _image->format().setPixel(dstPixel, srcPixel, _compositionMode, SCALE_ALPHA(alphas[iterR]));
-                --dstPixel;
-                --srcPixel;
             }
         }
-        else { // Solid color
-            Pixel dstPixel(_image->view(), minX + iterR, minY + pixelY / SUPERSAMPLING_SIZE);
+        else {
             for(; iterR >= 0; --iterR) {
                 // Break if the pixel has become fully opaque
                 if(alphas[iterR] >= (15 * SUPERSAMPLING_SIZE * SUPERSAMPLING_SIZE)) break;
                 // Draw the pixel
-                _image->format().setPixel(dstPixel, color, _compositionMode, SCALE_ALPHA(alphas[iterR]));
-                --dstPixel;
+                Pixel pixel(_image->view(), minX + iterR, minY + pixelY / SUPERSAMPLING_SIZE);
+                _image->format().setPixel(pixel, color, _compositionMode, SCALE_ALPHA(alphas[iterR]));
             }
         }
-#endif
         // Draw pixels that belongs to the middle-part of the shape to the image
-        if(true  && iterR >= iterL) {
+        if(iterR >= iterL) {
             // Draw the span using texture
             if(_isTexture) {
                 Pt::int32_t iterX     = iterL;
