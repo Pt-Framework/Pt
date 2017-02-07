@@ -60,7 +60,7 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount, bool useSu
     genClippedPolygonPoints(clipped, points, pointCount);
 
 #if 0
-    #define DIV_FAC 1
+    #define DIV_FAC 5
     clipped.clear();
     clipped.push_back(Point(450 / DIV_FAC, 100 / DIV_FAC));
     clipped.push_back(Point(350 / DIV_FAC, 300 / DIV_FAC));
@@ -143,7 +143,7 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
                 Pt::int32_t interXf = FIXED_POINT_FROM_INT(points[i].x()) + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
                 nodeXf[nodes++] = interXf;
                 // Bail out if we have produced too many nodes
-                if((size_t)nodes >= nodeXf.size()) return;
+                if((size_t) nodes >= nodeXf.size()) return;
             }
             j = i;
         }
@@ -259,10 +259,11 @@ void Rasterizer2::rasterPolygonAreaSS(const Point* points, size_t pointCount, co
     std::vector<Pt::int32_t> nodeXf(pointCount * 2, 0);
 
     // A helper macro to scale the alpha
-    #define SCALE_ALPHA(A) ( Pt::uint16_t(A) * 17 / SUPERSAMPLING_SIZE / SUPERSAMPLING_SIZE )
+    #define SCALE_ALPHA(A) ( Pt::uint8_t(A) * 17 / SUPERSAMPLING_SIZE / SUPERSAMPLING_SIZE )
 
     //  Loop through the rows of the image
-    for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
+    Pt::int32_t pixelY;
+    for(pixelY = 0; pixelY < sizeY; ++pixelY) {
         // Build a list of nodes
         Pt::int32_t j     = pointCount - 1;
         Pt::int32_t nodes = 0;
@@ -276,7 +277,7 @@ void Rasterizer2::rasterPolygonAreaSS(const Point* points, size_t pointCount, co
                 Pt::int32_t interXf = FIXED_POINT_FROM_INT(pointX[i]) + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
                 nodeXf[nodes++] = interXf + FIXED_POINT_CONSTANT_HALF;
                 // Bail out if we have produced too many nodes
-                if((size_t)nodes >= nodeXf.size()) return;
+                if((size_t) nodes >= nodeXf.size()) return;
             }
             j = i;
         }
@@ -291,7 +292,7 @@ void Rasterizer2::rasterPolygonAreaSS(const Point* points, size_t pointCount, co
             }
         }
         // Fill the samples between the node pairs
-        for(Pt::int32_t i = 0; i < nodes/2; i += 2) {
+        for(Pt::int32_t i = 0; i < nodes; i += 2) {
             Pt::int32_t from = FIXED_POINT_TO_INT(nodeXf[i    ]);
             Pt::int32_t to   = FIXED_POINT_TO_INT(nodeXf[i + 1]);
             for(Pt::int32_t k = from; k <= to; ++k) {
@@ -317,7 +318,6 @@ void Rasterizer2::rasterPolygonAreaSS(const Point* points, size_t pointCount, co
                 ConstPixel srcPixel(_brushImage->view(), tX, tY);
                 Pixel      dstPixel(_image->view(), iterX, iterY);
                 _image->format().setPixel(dstPixel, srcPixel, _compositionMode, SCALE_ALPHA(alphas[iterL]));
-
             }
         }
         else {

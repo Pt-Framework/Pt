@@ -1,3 +1,31 @@
+        /*
+        for(Pt::int32_t i = 0; i < nodes; i += 2) {
+            Pt::int32_t a1 = FIXED_POINT_TO_INT(nodeXf[i    ]);
+            Pt::int32_t b1 = FIXED_POINT_TO_INT(nodeXf[i + 1]);
+            if(!nodeFl[i]) {
+                lprintf("%d\n", i);
+                continue;
+            }
+            for(Pt::int32_t j = 2; j < nodes; j += 2) {
+                Pt::int32_t a2 = FIXED_POINT_TO_INT(nodeXf[j    ]);
+                Pt::int32_t b2 = FIXED_POINT_TO_INT(nodeXf[j + 1]);
+                if(a1 == a2 && b1 == b2) nodeFl[i] = 0;
+            }
+        }
+        for(Pt::int32_t i = 0; i < nodes; i += 2) {
+            Pt::int32_t from = FIXED_POINT_TO_INT(nodeXf[i    ]);
+            Pt::int32_t to   = FIXED_POINT_TO_INT(nodeXf[i + 1]);
+            lprintf("%d to %d\n", from, to);
+        }
+        //*/
+
+
+        //int m = 0;
+        //for(int i = 0; i < sizeX; ++i) if(alphas[i] > m) m = alphas[i]; // 2 =>60 ; 4 => 240
+        //lprintf("%d\n", m);
+
+
+
     /*   0 1 2 3 4 5 6 7       0 1 2 3 4 5 6 7     0 1 2 3 4 5 6 7
      * 0 * * * * * * * *     0 * * . . . . . .     0 * * . . . . . .
      * 0 * * * * * * * *     1 * * . . . . . .     1 * * . . . . . .
