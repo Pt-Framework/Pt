@@ -37,10 +37,11 @@
 #include <Pt/Types.h>
 
 namespace Pt {
-
 namespace Gfx {
 
+
 class ImageView;
+
 
 /** @brief Pixel in an image.
 */
@@ -120,6 +121,9 @@ class Pixel
         bool operator==(const Pixel& p) const
         { return _base == p._base; }
 
+        Pixel& operator++();
+        Pixel& operator--();
+
     private:
         ImageView* _view;
         Pt::uint8_t* _base;
@@ -174,6 +178,9 @@ class ConstPixel
 
         bool operator==(const ConstPixel& p) const
         { return _base == p._base; }
+
+        ConstPixel& operator++();
+        ConstPixel& operator--();
 
     private:
         const ImageView*   _view;
@@ -442,6 +449,23 @@ inline Color Pixel::toColor() const
     return _view->format().getColor(*this);
 }
 
+
+inline Pixel& Pixel::operator++()
+{
+  //  ++_x;
+    _base += _view->pixelStride();
+    return *this;
+}
+
+
+inline Pixel& Pixel::operator--()
+{
+   // --_x;
+    _base -= _view->pixelStride();
+    return *this;
+}
+
+
 /////////////////////////////////////////////////////////////////////////////
 // ConstPixel Implementation
 /////////////////////////////////////////////////////////////////////////////
@@ -494,8 +518,25 @@ inline Color ConstPixel::toColor() const
     return _view->format().getColor(*this);
 }
 
-} // namespace
 
+
+inline ConstPixel& ConstPixel::operator++()
+{
+   // ++_x;
+    _base += _view->pixelStride();
+    return *this;
+}
+
+
+inline ConstPixel& ConstPixel::operator--()
+{
+   // --_x;
+    _base -= _view->pixelStride();
+    return *this;
+}
+
+
+} // namespace
 } // namespace
 
 #endif
