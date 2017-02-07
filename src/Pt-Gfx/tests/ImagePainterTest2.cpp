@@ -20,14 +20,14 @@ using namespace Pt::Gfx;
 
 //
 
-#define TEST_SOURCECOPY                        1
+#define TEST_SOURCECOPY                        0
 #define TEST_SOURCEOVER                        1
 
 #define TEST_DRAW_LINE_AND_TEXT                0
-#define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES 1
+#define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES 0
 
 #define TEST_DRAW_SOLID_FILLED_POLYGONS        0
-#define TEST_DRAW_GRADIENT_FILLED_POLYGONS     0
+#define TEST_DRAW_GRADIENT_FILLED_POLYGONS     1
 #define TEST_DRAW_TEXTURE_FILLED_POLYGONS      0
 
 #define TEST_COMPARE_WITH_OLD_PAINTER          0
@@ -43,12 +43,12 @@ using namespace Pt::Gfx;
 #define BENCHMARK_LINE                      0
 
 #define BENCHMARK_RECTANGLE                 0
-#define BENCHMARK_SOLID_FILLED_RECTANGLE    1
-#define BENCHMARK_GRADIENT_FILLED_RECTANGLE 1
-#define BENCHMARK_TEXTURE_FILLED_RECTANGLE  1
+#define BENCHMARK_SOLID_FILLED_RECTANGLE    0
+#define BENCHMARK_GRADIENT_FILLED_RECTANGLE 0
+#define BENCHMARK_TEXTURE_FILLED_RECTANGLE  0
 
 #define BENCHMARK_SOLID_FILLED_POLYGON      0
-#define BENCHMARK_GRADIENT_FILLED_POLYGON   0
+#define BENCHMARK_GRADIENT_FILLED_POLYGON   1
 #define BENCHMARK_TEXTURE_FILLED_POLYGON    0
 
 //
@@ -123,7 +123,7 @@ int main(int argc, char* args[])
     const Brush brushTexture1 (textureWithTransBackground);
 
     const Brush brushSolid2   (Color::fromRgb8(  0, 255, 255, 175));
-    const Brush brushGradient2(Color::fromRgb8(  0, 255, 255, 175), Color::fromRgb8(0, 0, 0, 175), Brush::Vertical);
+    const Brush brushGradient2(Color::fromRgb8(  0, 255, 255, 175), Color::fromRgb8(0, 0, 0, 175), Brush::Horizontal);
     const Brush brushTexture2 (textureWithWhiteBackground);
 
     // Solid-filled polygons

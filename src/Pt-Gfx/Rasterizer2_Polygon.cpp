@@ -175,18 +175,18 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
             if(to < from) continue;
 /*
 CompositionMode::SourceCopy
-    Gradient-filled polygon    @ ImagePainter2 =   3381 ( 1.013)
-    Texture-filled  polygon    @ ImagePainter2 =    235 ( 1.556)
+    Gradient-filled polygon    @ ImagePainter2 =   3022 ( 1.011)
+    Texture-filled  polygon    @ ImagePainter2 =    369 ( 1.597)
 
-    Gradient-filled polygon SS @ ImagePainter2 =   4011 ( 1.280)
-    Texture-filled  polygon SS @ ImagePainter2 =   1087 ( 7.395)
+    Gradient-filled polygon SS @ ImagePainter2 =   4507 ( 1.570)
+    Texture-filled  polygon SS @ ImagePainter2 =   1882 ( 8.147)
 
 CompositionMode::SourceOver
-    Gradient-filled polygon    @ ImagePainter2 =   3578 ( 1.019)
-    Texture-filled  polygon    @ ImagePainter2 =    648 ( 1.159)
+    Gradient-filled polygon    @ ImagePainter2 =   3699 ( 1.039)
+    Texture-filled  polygon    @ ImagePainter2 =   1088 ( 1.146)
 
-    Gradient-filled polygon SS @ ImagePainter2 =   4434 ( 1.239)
-    Texture-filled  polygon SS @ ImagePainter2 =   1480 ( 2.624)
+    Gradient-filled polygon SS @ ImagePainter2 =   5178 ( 1.454)
+    Texture-filled  polygon SS @ ImagePainter2 =   2585 ( 2.724)
 */
             // Draw the spans using texture
             if(_isTexture) {
