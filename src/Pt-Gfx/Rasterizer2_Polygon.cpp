@@ -305,7 +305,7 @@ void Rasterizer2::rasterPolygonAreaSS(const Point* points, size_t pointCount, co
         for(; iterL < sizeX; ++iterL) { // Skip fully-transparent pixels
             if(alphas[iterL]) break;
         }
-        if(_isGradient || _isTexture) {
+        if(_isTexture || _isGradient) { // Texture or gradient
             for(; iterL < sizeX; ++iterL) {
                 // Break if the pixel has become fully opaque
                 if(alphas[iterL] >= (15 * SUPERSAMPLING_SIZE * SUPERSAMPLING_SIZE)) break;
@@ -319,7 +319,7 @@ void Rasterizer2::rasterPolygonAreaSS(const Point* points, size_t pointCount, co
                 _image->format().setPixel(dstPixel, srcPixel, _compositionMode, SCALE_ALPHA(alphas[iterL]));
             }
         }
-        else {
+        else { // Solid color
             for(; iterL < sizeX; ++iterL) {
                 // Break if the pixel has become fully opaque
                 if(alphas[iterL] >= (15 * SUPERSAMPLING_SIZE * SUPERSAMPLING_SIZE)) break;
@@ -333,7 +333,7 @@ void Rasterizer2::rasterPolygonAreaSS(const Point* points, size_t pointCount, co
         for(; iterR >= 0; --iterR) { // Skip fully-transparent pixels
             if(alphas[iterR]) break;
         }
-        if(_isGradient || _isTexture) {
+        if(_isTexture || _isGradient) { // Texture or gradient
             for(; iterR >= 0; --iterR) {
                 // Break if the pixel has become fully opaque
                 if(alphas[iterR] >= (15 * SUPERSAMPLING_SIZE * SUPERSAMPLING_SIZE)) break;
@@ -347,7 +347,7 @@ void Rasterizer2::rasterPolygonAreaSS(const Point* points, size_t pointCount, co
                 _image->format().setPixel(dstPixel, srcPixel, _compositionMode, SCALE_ALPHA(alphas[iterR]));
             }
         }
-        else {
+        else { // Solid color
             for(; iterR >= 0; --iterR) {
                 // Break if the pixel has become fully opaque
                 if(alphas[iterR] >= (15 * SUPERSAMPLING_SIZE * SUPERSAMPLING_SIZE)) break;

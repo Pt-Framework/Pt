@@ -63,7 +63,7 @@
 #define FIXED_POINT_TO_INT(V)       ( (V) >> FIXED_POINT_SHIFT_FACTOR )
 
 // Supersampling size (2 or 4)
-#define SUPERSAMPLING_SIZE 1
+#define SUPERSAMPLING_SIZE 2
 
 // Uncomment this to use ImageView::PixelIterator
 // NOTE: Currently it is slower than using the Pixel class; so do not uncomment this

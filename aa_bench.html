@@ -1,76 +1,76 @@
-<h1><pre><b>NEW ALGORITHM WITH OPTIMIZATION</b></pre></h1>
+<h1><pre><b>ADDED SOME OPTIMIZATION AND USING A MORE THOROUGH BENCHMARK</b></pre></h1>
 
 <pre>
-<b>2017/02/07 - 2</b><br/>
+<b>2017/02/XX - X</b><br/>
 </pre><br/>
 
 <pre>
-<b>2017/02/07 - 1</b><br/>
+<b>2017/02/07</b><br/>
 CompositionMode::SourceCopy
                                                  (Time) (Factor)
                                                  ------ --------
-    Text                       @ ImagePainter  =    326
-    Text                       @ ImagePainter2 =    315 ( 0.966)
+    Text                       @ ImagePainter  =    315
+    Text                       @ ImagePainter2 =    307 ( 0.975)
 
-    Line                       @ ImagePainter  =     57
-    Line                       @ ImagePainter2 =    189 ( 3.316)
+    Line                       @ ImagePainter  =     56
+    Line                       @ ImagePainter2 =    188 ( 3.357)
 
-    Rectangle                  @ ImagePainter  =     39
-    Rectangle                  @ ImagePainter2 =    118 ( 3.026)
+    Rectangle                  @ ImagePainter  =     37
+    Rectangle                  @ ImagePainter2 =    117 ( 3.162)
 
-    Solid-filled    Rectangle  @ ImagePainter  =     97
-    Solid-filled    Rectangle  @ ImagePainter2 =     95 ( 0.979)
+    Solid-filled    Rectangle  @ ImagePainter  =     95
+    Solid-filled    Rectangle  @ ImagePainter2 =     91 ( 0.958)
 
-    Gradient-filled Rectangle  @ ImagePainter  =   3305
-    Gradient-filled Rectangle  @ ImagePainter2 =    130 ( 0.039)
+    Gradient-filled Rectangle  @ ImagePainter  =   3294
+    Gradient-filled Rectangle  @ ImagePainter2 =    130 ( 0.039) <b>&#x1F603;</b>
 
     Texture-filled  Rectangle  @ ImagePainter  =     62
     Texture-filled  Rectangle  @ ImagePainter2 =     47 ( 0.758)
 
-    Solid-filled    polygon    @ ImagePainter  =    222
-    Solid-filled    polygon    @ ImagePainter2 =    368 ( 1.658)
-    Solid-filled    polygon SS @ ImagePainter2 =   1779 ( 8.014)
+    Solid-filled    polygon    @ ImagePainter  =    226
+    Solid-filled    polygon    @ ImagePainter2 =    365 ( 1.615)
+    Solid-filled    polygon SS @ ImagePainter2 =   1799 ( 7.960)
 
-    Gradient-filled polygon    @ ImagePainter  =   2867
-    Gradient-filled polygon    @ ImagePainter2 =    416 ( 0.145)
-    Gradient-filled polygon SS @ ImagePainter2 =   1937 ( 0.676)
+    Gradient-filled polygon    @ ImagePainter  =   2860
+    Gradient-filled polygon    @ ImagePainter2 =    412 ( 0.144) <b>&#x1F603;</b>
+    Gradient-filled polygon SS @ ImagePainter2 =   1948 ( 0.681) <b>&#x1F603;</b>
 
-    Texture-filled  polygon    @ ImagePainter  =    232
-    Texture-filled  polygon    @ ImagePainter2 =    369 ( 1.591)
-    Texture-filled  polygon SS @ ImagePainter2 =   1889 ( 8.142)
+    Texture-filled  polygon    @ ImagePainter  =    235
+    Texture-filled  polygon    @ ImagePainter2 =    372 ( 1.583)
+    Texture-filled  polygon SS @ ImagePainter2 =   1908 ( 8.119)
 
 CompositionMode::SourceOver
                                                  (Time) (Factor)
                                                  ------ --------
-    Text                       @ ImagePainter  =    314
-    Text                       @ ImagePainter2 =    311 ( 0.990)
+    Text                       @ ImagePainter  =    301
+    Text                       @ ImagePainter2 =    298 ( 0.990)
 
-    Line                       @ ImagePainter  =     72
-    Line                       @ ImagePainter2 =    189 ( 2.625)
+    Line                       @ ImagePainter  =     71
+    Line                       @ ImagePainter2 =    190 ( 2.676)
 
     Rectangle                  @ ImagePainter  =     65
-    Rectangle                  @ ImagePainter2 =    137 ( 2.108)
+    Rectangle                  @ ImagePainter2 =    132 ( 2.031)
 
-    Solid-filled    Rectangle  @ ImagePainter  =    973
-    Solid-filled    Rectangle  @ ImagePainter2 =    985 ( 1.012)
+    Solid-filled    Rectangle  @ ImagePainter  =    972
+    Solid-filled    Rectangle  @ ImagePainter2 =    967 ( 0.995)
 
-    Gradient-filled Rectangle  @ ImagePainter  =   4140
-    Gradient-filled Rectangle  @ ImagePainter2 =    686 ( 0.166)
+    Gradient-filled Rectangle  @ ImagePainter  =   4128
+    Gradient-filled Rectangle  @ ImagePainter2 =    685 ( 0.166) <b>&#x1F603;</b>
 
     Texture-filled  Rectangle  @ ImagePainter  =    934
-    Texture-filled  Rectangle  @ ImagePainter2 =    924 ( 0.989)
+    Texture-filled  Rectangle  @ ImagePainter2 =    921 ( 0.986)
 
-    Solid-filled    polygon    @ ImagePainter  =    953
-    Solid-filled    polygon    @ ImagePainter2 =   1097 ( 1.151)
-    Solid-filled    polygon SS @ ImagePainter2 =   2498 ( 2.621)
+    Solid-filled    polygon    @ ImagePainter  =    944
+    Solid-filled    polygon    @ ImagePainter2 =   1083 ( 1.147)
+    Solid-filled    polygon SS @ ImagePainter2 =   2517 ( 2.666)
 
-    Gradient-filled polygon    @ ImagePainter  =   3557
-    Gradient-filled polygon    @ ImagePainter2 =    877 ( 0.247)
-    Gradient-filled polygon SS @ ImagePainter2 =   2388 ( 0.671)
+    Gradient-filled polygon    @ ImagePainter  =   3544
+    Gradient-filled polygon    @ ImagePainter2 =    874 ( 0.247) <b>&#x1F603;</b>
+    Gradient-filled polygon SS @ ImagePainter2 =   2405 ( 0.679) <b>&#x1F603;</b>
 
     Texture-filled  polygon    @ ImagePainter  =    952
-    Texture-filled  polygon    @ ImagePainter2 =   1091 ( 1.146)
-    Texture-filled  polygon SS @ ImagePainter2 =   2598 ( 2.729)
+    Texture-filled  polygon    @ ImagePainter2 =   1086 ( 1.141)
+    Texture-filled  polygon SS @ ImagePainter2 =   2614 ( 2.746)
 </pre><br/>
 
 
