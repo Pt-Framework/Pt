@@ -61,6 +61,8 @@ class Argb32Model
 
     public:
         /*
+         * http://embeddedgurus.com/stack-overflow/2009/06/division-of-integers-by-constants
+         * 
          * Convert to binary using Javascript console: alert((1/255).toString(2))
          *     1/255
          *     => 0.00000001000000010000000100000001000000010000000100000001
