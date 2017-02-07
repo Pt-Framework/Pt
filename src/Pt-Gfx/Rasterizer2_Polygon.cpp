@@ -357,21 +357,6 @@ void Rasterizer2::rasterPolygonAreaSS(const Point* points, size_t pointCount, co
                 _image->format().setPixel(pixel, color, _compositionMode, SCALE_ALPHA(alphas[iterR]));
             }
         }
-/*
-CompositionMode::SourceCopy
-    Gradient-filled polygon    @ ImagePainter2 =   3022 ( 1.011)
-    Gradient-filled polygon SS @ ImagePainter2 =   4507 ( 1.570)
-
-    Texture-filled  polygon    @ ImagePainter2 =    369 ( 1.597)
-    Texture-filled  polygon SS @ ImagePainter2 =   1882 ( 8.147)
-
-CompositionMode::SourceOver
-    Gradient-filled polygon    @ ImagePainter2 =   3699 ( 1.039)
-    Gradient-filled polygon SS @ ImagePainter2 =   5178 ( 1.454)
-
-    Texture-filled  polygon    @ ImagePainter2 =   1088 ( 1.146)
-    Texture-filled  polygon SS @ ImagePainter2 =   2585 ( 2.724)
-*/
         // Draw pixels that belongs to the middle-part of the shape to the image
         if(iterR >= iterL) {
             // Draw the span using texture

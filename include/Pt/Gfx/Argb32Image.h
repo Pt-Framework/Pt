@@ -60,14 +60,71 @@ class Argb32Model
         }
 
     public:
+        /*
+         * Convert to binary using Javascript console: alert((1/255).toString(2))
+         *     1/255
+         *     => 0.00000001000000010000000100000001000000010000000100000001
+         *
+         * Take all the bits to the right of the binary point:
+         *     => 00000001000000010000000100000001000000010000000100000001
+         *
+         * Left shift them until the bit to the right of the binary point is 1 and
+         * record the required number of shifts as S:
+         *        00000001000000010000000100000001000000010000000100000001
+         *        *******
+         *     => 1000000010000000100000001000000010000000100000001
+         *     => S = 7
+         *
+         * Take the most significant 17 bits:
+         *        1000000010000000100000001000000010000000100000001
+         *        *****************
+         *     => 10000000100000001
+         *
+         * Add one:
+         *        10000000100000001
+         *                        1
+         *        ----------------- +
+         *     => 10000000100000010
+         *
+         * Truncate to 16 bits and convert to 4-digit hexadecimal as M:
+         *        10000000100000010
+         *        ****************
+         *     => 8081
+         *
+         * The formula will be RESULT = (((uint32_t) VALUE * (uint32_t) M) >> 16) >> S:
+         *     => RESULT = (((uint32_t) VALUE * 0x00008081) >> 16) >> 7
+         *
+         *
+         * For 1/257:
+         *     => 0.00000000111111110000000011111111000000001111111100000001
+         *     => 00000000111111110000000011111111000000001111111100000001
+         *        ********
+         *     => 111111110000000011111111000000001111111100000001 (S = 8)
+         *        *****************
+         *     => 11111111000000001
+         *                        1
+         *        ----------------- +
+         *     => 11111111000000010
+         *        ****************
+         *     => FF01
+         *     => RESULT = (((uint32_t) VALUE * 0x0000FF01) >> 16) >> 8
+         */
+#if 0
+        #define DIV_BY_255(V) ( (((uint32_t) V * 0x00008081) >> 16) >> 7 )
+        #define DIV_BY_257(V) ( (((uint32_t) V * 0x0000FF01) >> 16) >> 8 )
+#else
+        #define DIV_BY_255(V) ( (uint32_t) V / 255 )
+        #define DIV_BY_257(V) ( (uint32_t) V / 257 )
+#endif
+
         static Color toColor(const Pt::uint8_t* p)
         {
             Pt::uint32_t pixel = *reinterpret_cast<const Pt::uint32_t*>(p);
 
-            const uint16_t ta = pixel >> 24;
+            const uint16_t ta =  pixel               >> 24;
             const uint16_t tr = (pixel & 0x00FF0000) >> 16;
-            const uint16_t tg = (pixel & 0x0000FF00) >> 8;
-            const uint16_t tb = pixel & 0x000000FF;
+            const uint16_t tg = (pixel & 0x0000FF00) >>  8;
+            const uint16_t tb =  pixel & 0x000000FF;
 
             Pt::uint16_t a = (ta << 8) + ta;
             Pt::uint16_t r = (tr << 8) + tr;
@@ -93,22 +150,22 @@ class Argb32Model
             Pt::uint32_t alphaSrc = alpha;
             Pt::uint32_t alphaInv = 255 - alpha;
 
-            to[0] = (unsigned char)((alphaSrc * from[0] + alphaInv * to[0]) >> 8);
-            to[1] = (unsigned char)((alphaSrc * from[1] + alphaInv * to[1]) >> 8);
-            to[2] = (unsigned char)((alphaSrc * from[2] + alphaInv * to[2]) >> 8);
-            to[3] = (unsigned char)((alphaSrc * from[3] + alphaInv * to[3]) >> 8);
+            to[0] = (Pt::uint8_t)((alphaSrc * from[0] + alphaInv * to[0]) >> 8);
+            to[1] = (Pt::uint8_t)((alphaSrc * from[1] + alphaInv * to[1]) >> 8);
+            to[2] = (Pt::uint8_t)((alphaSrc * from[2] + alphaInv * to[2]) >> 8);
+            to[3] = (Pt::uint8_t)((alphaSrc * from[3] + alphaInv * to[3]) >> 8);
         }
 
         static void sourceOver(Pt::uint8_t* to, const Pt::Gfx::Color& from)
         {
-            Pt::uint16_t alpha    = from.alpha() / 257;
+            Pt::uint32_t alpha    = DIV_BY_257(from.alpha());
             Pt::uint32_t alphaSrc = alpha;
             Pt::uint32_t alphaInv = 255 - alpha;
 
-            to[0] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.blue () / 257) + alphaInv * to[0]) >> 8);
-            to[1] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.green() / 257) + alphaInv * to[1]) >> 8);
-            to[2] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.red  () / 257) + alphaInv * to[2]) >> 8);
-            to[3] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.alpha() / 257) + alphaInv * to[3]) >> 8);
+            to[0] = (Pt::uint8_t)((alphaSrc * DIV_BY_257(from.blue ()) + alphaInv * to[0]) >> 8);
+            to[1] = (Pt::uint8_t)((alphaSrc * DIV_BY_257(from.green()) + alphaInv * to[1]) >> 8);
+            to[2] = (Pt::uint8_t)((alphaSrc * DIV_BY_257(from.red  ()) + alphaInv * to[2]) >> 8);
+            to[3] = (Pt::uint8_t)((alphaSrc * alpha                    + alphaInv * to[3]) >> 8);
         }
 
         static void assign(Pt::uint8_t* to, const Color& c,
@@ -149,22 +206,22 @@ class Argb32Model
                 case CompositionMode::SourceCopy: {
                     const Pt::uint32_t blendAlphaSrc = blendingAlpha;
                     const Pt::uint32_t blendAlphaInv = 255 - blendingAlpha;
-                    to[0] = (blendAlphaSrc * (Pt::uint32_t)(c.blue () / 257) + blendAlphaInv * to[0]) >> 8;
-                    to[1] = (blendAlphaSrc * (Pt::uint32_t)(c.green() / 257) + blendAlphaInv * to[1]) >> 8;
-                    to[2] = (blendAlphaSrc * (Pt::uint32_t)(c.red  () / 257) + blendAlphaInv * to[2]) >> 8;
-                    to[3] = (blendAlphaSrc * (Pt::uint32_t)(c.alpha() / 257) + blendAlphaInv * to[3]) >> 8;
+                    to[0] = (blendAlphaSrc * DIV_BY_257(c.blue ()) + blendAlphaInv * to[0]) >> 8;
+                    to[1] = (blendAlphaSrc * DIV_BY_257(c.green()) + blendAlphaInv * to[1]) >> 8;
+                    to[2] = (blendAlphaSrc * DIV_BY_257(c.red  ()) + blendAlphaInv * to[2]) >> 8;
+                    to[3] = (blendAlphaSrc * DIV_BY_257(c.alpha()) + blendAlphaInv * to[3]) >> 8;
                     break;
                 }
 
                 case CompositionMode::SourceOver:
                 {
-                    const Pt::uint32_t colorAlpha    = c.alpha() / 257;
-                    const Pt::uint32_t blendAlphaSrc = (colorAlpha * blendingAlpha) / 255;
+                    const Pt::uint32_t colorAlpha    = DIV_BY_257(c.alpha());
+                    const Pt::uint32_t blendAlphaSrc = DIV_BY_255(colorAlpha * blendingAlpha);
                     const Pt::uint32_t blendAlphaInv = 255 - blendAlphaSrc;
-                    to[0] = (blendAlphaSrc * (Pt::uint32_t)(c.blue () / 257) + blendAlphaInv * to[0]) >> 8;
-                    to[1] = (blendAlphaSrc * (Pt::uint32_t)(c.green() / 257) + blendAlphaInv * to[1]) >> 8;
-                    to[2] = (blendAlphaSrc * (Pt::uint32_t)(c.red  () / 257) + blendAlphaInv * to[2]) >> 8;
-                    to[3] = (blendAlphaSrc * colorAlpha                      + blendAlphaInv * to[3]) >> 8;
+                    to[0] = (blendAlphaSrc * DIV_BY_257(c.blue ()) + blendAlphaInv * to[0]) >> 8;
+                    to[1] = (blendAlphaSrc * DIV_BY_257(c.green()) + blendAlphaInv * to[1]) >> 8;
+                    to[2] = (blendAlphaSrc * DIV_BY_257(c.red  ()) + blendAlphaInv * to[2]) >> 8;
+                    to[3] = (blendAlphaSrc * colorAlpha            + blendAlphaInv * to[3]) >> 8;
                     break;
                 }
             }
@@ -188,7 +245,7 @@ class Argb32Model
                 case CompositionMode::SourceOver:
                 {
                     const Pt::uint32_t colorAlpha    = from[3];
-                    const Pt::uint32_t blendAlphaSrc = (colorAlpha * blendingAlpha) / 255;
+                    const Pt::uint32_t blendAlphaSrc = DIV_BY_255(colorAlpha * blendingAlpha);
                     const Pt::uint32_t blendAlphaInv = 255 - blendAlphaSrc;
                     to[0] = (blendAlphaSrc * from[0]    + blendAlphaInv * to[0]) >> 8;
                     to[1] = (blendAlphaSrc * from[1]    + blendAlphaInv * to[1]) >> 8;
