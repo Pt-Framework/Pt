@@ -258,8 +258,8 @@ static void doBenchMark(CompositionMode cm)
     }
 
     if(BENCHMARK_GRADIENT_FILLED_RECTANGLE) {
-        time1 = benchDrawFillRect<ImagePainter >(BENCHMARK_LOOP_COUNT_SHORT, brushGradient, cm);
-        time2 = benchDrawFillRect<ImagePainter2>(BENCHMARK_LOOP_COUNT_SHORT, brushGradient, cm);
+        time1 = benchDrawFillRect<ImagePainter >(BENCHMARK_LOOP_COUNT_LONG, brushGradient, cm);
+        time2 = benchDrawFillRect<ImagePainter2>(BENCHMARK_LOOP_COUNT_LONG, brushGradient, cm);
         std::clog << "    Gradient-filled Rectangle  @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         std::clog << "    Gradient-filled Rectangle  @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;

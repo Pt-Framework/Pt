@@ -100,15 +100,6 @@ void Rasterizer2::rasterRectArea(const Point& tl, const Point& br)
     if(maxX > _currentClip.right ()) maxX = _currentClip.right ();
     if(maxY > _currentClip.bottom()) maxY = _currentClip.bottom();
 
-/*
-CompositionMode::SourceCopy
-    Gradient-filled Rectangle  @ ImagePainter  =   7069
-    Gradient-filled Rectangle  @ ImagePainter2 =   6578 ( 0.931)
-CompositionMode::SourceOver
-    Gradient-filled Rectangle  @ ImagePainter  =   7325
-    Gradient-filled Rectangle  @ ImagePainter2 =   7332 ( 1.001)
-*/
-
     // Calculate the width of the rectangle
     const Pt::int32_t sizeX = maxX - minX + 1;
 

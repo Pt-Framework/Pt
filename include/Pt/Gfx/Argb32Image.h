@@ -89,9 +89,9 @@ class Argb32Model
 
         static void sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from)
         {
-            Pt::uint8_t alpha = *((const Pt::uint32_t*)(from)) >> 24;
-            Pt::uint32_t alphaSrc = alpha + 1;
-            Pt::uint32_t alphaInv = 256 - alpha;
+            Pt::uint8_t  alpha    = *((const Pt::uint32_t*) (from)) >> 24;
+            Pt::uint32_t alphaSrc = alpha;
+            Pt::uint32_t alphaInv = 255 - alpha;
 
             to[0] = (unsigned char)((alphaSrc * from[0] + alphaInv * to[0]) >> 8);
             to[1] = (unsigned char)((alphaSrc * from[1] + alphaInv * to[1]) >> 8);
@@ -101,13 +101,13 @@ class Argb32Model
 
         static void sourceOver(Pt::uint8_t* to, const Pt::Gfx::Color& from)
         {
-            Pt::uint16_t alpha = from.alpha() / 257;
-            Pt::uint32_t alphaSrc = alpha + 1;
-            Pt::uint32_t alphaInv = 256 - alpha;
+            Pt::uint16_t alpha    = from.alpha() / 257;
+            Pt::uint32_t alphaSrc = alpha;
+            Pt::uint32_t alphaInv = 255 - alpha;
 
-            to[0] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.blue() / 257) + alphaInv * to[0]) >> 8);
+            to[0] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.blue () / 257) + alphaInv * to[0]) >> 8);
             to[1] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.green() / 257) + alphaInv * to[1]) >> 8);
-            to[2] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.red() / 257) + alphaInv * to[2]) >> 8);
+            to[2] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.red  () / 257) + alphaInv * to[2]) >> 8);
             to[3] = (unsigned char)((alphaSrc * (Pt::uint32_t)(from.alpha() / 257) + alphaInv * to[3]) >> 8);
         }
 
@@ -132,7 +132,7 @@ class Argb32Model
             switch(mode) {
                 default:
                 case CompositionMode::SourceCopy:
-                    *((Pt::uint32_t*)to) = *((const Pt::uint32_t*)from);
+                    *((Pt::uint32_t*) to) = *((const Pt::uint32_t*) from);
                     break;
 
                 case CompositionMode::SourceOver:
@@ -204,13 +204,33 @@ class Argb32Model
         {
             switch(mode) {
                 default:
-                case CompositionMode::SourceCopy:
-                    //Argb32Model::fromColor(to, c);
+                case CompositionMode::SourceCopy: {
+                   Pt::uint32_t src = ( Pt::uint32_t(c.alpha() & 0xFF00) << 16 ) |
+                                      ( Pt::uint32_t(c.red  () & 0xFF00) <<  8 ) |
+                                      ( Pt::uint32_t(c.green() & 0xFF00)       )  |
+                                      ( Pt::uint32_t(c.blue ()         ) >>  8 );
+                    Pt::uint32_t* dst =  reinterpret_cast<Pt::uint32_t*>(to);
+                    for(size_t i = 0; i < length; ++i) *dst++ = src;
                     break;
+                }
 
-                case CompositionMode::SourceOver:
-                    //Argb32Model::sourceOver(to, c);
+                case CompositionMode::SourceOver: {
+                    const Pt::uint32_t  blend    = (Pt::uint32_t(c.alpha() & 0xFF00) << 16);
+                    const Pt::uint32_t  blendInv = 255 - blend;
+                    const Pt::uint32_t  srcR     = (Pt::uint32_t(c.red  () & 0xFF00) <<  8) * blend;
+                    const Pt::uint32_t  srcG     = (Pt::uint32_t(c.green() & 0xFF00)      ) * blend;
+                    const Pt::uint32_t  srcB     = (Pt::uint32_t(c.blue ()         ) >>  8) * blend;
+                    const Pt::uint32_t  srcA     = blend   * blend;
+                          Pt::uint8_t*  dst      = to;
+                    for(size_t i = 0; i < length; ++i) {
+                        dst[0] = (srcR + blendInv * dst[0]) >> 8;
+                        dst[1] = (srcG + blendInv * dst[1]) >> 8;
+                        dst[2] = (srcB + blendInv * dst[2]) >> 8;
+                        dst[3] = (srcA + blendInv * dst[3]) >> 8;
+                        dst += 4;
+                    }
                     break;
+                }
             }
         }
 
