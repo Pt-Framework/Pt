@@ -173,22 +173,7 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
                 to = (x1 == x2) ? x1 : x2;
             }
             if(to < from) continue;
-/*
-CompositionMode::SourceCopy
-    Gradient-filled polygon    @ ImagePainter2 =   3022 ( 1.011)
-    Texture-filled  polygon    @ ImagePainter2 =    369 ( 1.597)
-
-    Gradient-filled polygon SS @ ImagePainter2 =   4507 ( 1.570)
-    Texture-filled  polygon SS @ ImagePainter2 =   1882 ( 8.147)
-
-CompositionMode::SourceOver
-    Gradient-filled polygon    @ ImagePainter2 =   3699 ( 1.039)
-    Texture-filled  polygon    @ ImagePainter2 =   1088 ( 1.146)
-
-    Gradient-filled polygon SS @ ImagePainter2 =   5178 ( 1.454)
-    Texture-filled  polygon SS @ ImagePainter2 =   2585 ( 2.724)
-*/
-            // Draw the spans using texture
+            // Draw the span using texture
             if(_isTexture) {
                 Pt::int32_t iterX     = from;
                 Pt::int32_t spanWidth = to - from + 1;
@@ -206,49 +191,35 @@ CompositionMode::SourceOver
                 }
                 continue;
             }
-            // Draw the spans using gradient
+            // Draw the span using gradient
             if(_isGradient) {
                 Pt::int32_t iterX     = from;
                 Pt::int32_t spanWidth = to - from + 1;
-#if 0
-                // Fill the spans - vertical gradient
+                // Fill the span - vertical gradient
                 if(_brush.fillStyle() == Pt::Gfx::Brush::VerticalGradient) {
-                    const Pt::int32_t textureY = (iterY - minY) % _brushImage->height();
+                    const Pt::int32_t textureY = (pixelY - minY) % _brushImage->height();
                     ConstPixel        srcPixel(_brushImage->view(), 0, textureY);
-                    Pixel             dstPixel(_image->view(), iterX, iterY);
+                    Pixel             dstPixel(_image->view(), iterX, pixelY);
                     _image->format().setPixels(dstPixel, srcPixel, spanWidth, _compositionMode);
                 }
-                // Fill the spans - horizontal gradient
+                // Fill the span - horizontal gradient
                 else {
                     while(spanWidth > 0) {
-                        const Pt::int32_t textureX = (iterX - minX) % _brushImage->width ();
-                        const Pt::int32_t n        = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - textureX);
+                        const Pt::int32_t tX = (iterX  - minX) % _brushImage->width ();
+                        const Pt::int32_t tY = (pixelY - minY) % _brushImage->height();
+                        const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tX);
                         if(n) {
-                            ConstPixel srcPixel(_brushImage->view(), textureX, 0);
-                            Pixel      dstPixel(_image->view(), iterX, iterY);
+                            ConstPixel srcPixel(_brushImage->view(), tX, tY);
+                            Pixel      dstPixel(_image->view(), iterX, pixelY);
                             _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
                         }
                         spanWidth -= n;
                         iterX     += n;
                     }
                 }
-#else
-                while(spanWidth > 0) {
-                    const Pt::int32_t tX = (iterX  - minX) % _brushImage->width ();
-                    const Pt::int32_t tY = (pixelY - minY) % _brushImage->height();
-                    const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tX);
-                    if(n) {
-                        ConstPixel srcPixel(_brushImage->view(), tX, tY);
-                        Pixel      dstPixel(_image->view(), iterX, pixelY);
-                        _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
-                    }
-                    spanWidth -= n;
-                    iterX     += n;
-                }
-#endif
                 continue;
             }
-            // Draw the spans using solid color
+            // Draw the span using solid color
             Pt::int32_t iterX     = from;
             Pt::int32_t spanWidth = to - from + 1;
             while(spanWidth > 0) {
@@ -386,8 +357,83 @@ void Rasterizer2::rasterPolygonAreaSS(const Point* points, size_t pointCount, co
                 _image->format().setPixel(pixel, color, _compositionMode, SCALE_ALPHA(alphas[iterR]));
             }
         }
+/*
+CompositionMode::SourceCopy
+    Gradient-filled polygon    @ ImagePainter2 =   3022 ( 1.011)
+    Texture-filled  polygon    @ ImagePainter2 =    369 ( 1.597)
+
+    Gradient-filled polygon SS @ ImagePainter2 =   4507 ( 1.570)
+    Texture-filled  polygon SS @ ImagePainter2 =   1882 ( 8.147)
+
+CompositionMode::SourceOver
+    Gradient-filled polygon    @ ImagePainter2 =   3699 ( 1.039)
+    Texture-filled  polygon    @ ImagePainter2 =   1088 ( 1.146)
+
+    Gradient-filled polygon SS @ ImagePainter2 =   5178 ( 1.454)
+    Texture-filled  polygon SS @ ImagePainter2 =   2585 ( 2.724)
+*/
         // Draw pixels that belongs to the middle-part of the shape to the image
         if(iterR >= iterL) {
+#if 1
+            // Draw the span using texture
+            if(_isTexture) {
+                Pt::int32_t iterX     = iterL;
+                Pt::int32_t spanWidth = iterR - iterL + 1;
+                while(spanWidth > 0) {
+                    const Pt::int32_t tX = (iterX                      ) % _brushImage->width ();
+                    const Pt::int32_t tY = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
+                    const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tX);
+                    if(n) {
+                        ConstPixel srcPixel(_brushImage->view(), tX, tY);
+                        Pixel      dstPixel(_image->view(), minX + iterX, minY + pixelY / SUPERSAMPLING_SIZE);
+                        _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
+                    }
+                    spanWidth -= n;
+                    iterX     += n;
+                }
+            }
+            // Draw the span using gradient
+            else if(_isGradient) {
+                Pt::int32_t iterX     = iterL;
+                Pt::int32_t spanWidth = iterR - iterL + 1;
+                // Fill the span - vertical gradient
+                if(_brush.fillStyle() == Pt::Gfx::Brush::VerticalGradient) {
+                    const Pt::int32_t textureY = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
+                    ConstPixel        srcPixel(_brushImage->view(), 0, textureY);
+                    Pixel             dstPixel(_image->view(), minX + iterX, minY + pixelY / SUPERSAMPLING_SIZE);
+                    _image->format().setPixels(dstPixel, srcPixel, spanWidth, _compositionMode);
+                }
+                // Fill the span - horizontal gradient
+                else {
+                    while(spanWidth > 0) {
+                        const Pt::int32_t tX = (iterX                      ) % _brushImage->width ();
+                        const Pt::int32_t tY = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
+                        const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tX);
+                        if(n) {
+                            ConstPixel srcPixel(_brushImage->view(), tX, tY);
+                            Pixel      dstPixel(_image->view(), minX + iterX, minY + pixelY / SUPERSAMPLING_SIZE);
+                            _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
+                        }
+                        spanWidth -= n;
+                        iterX     += n;
+                    }
+                }
+            }
+            // Draw the span using solid color
+            else {
+                Pt::int32_t iterX     = minX + iterL;
+                Pt::int32_t spanWidth = iterR - iterL + 1;
+                while(spanWidth > 0) {
+                    const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
+                    if(n) {
+                        Pixel pixel(_image->view(), iterX, minY + pixelY / SUPERSAMPLING_SIZE);
+                        _image->format().copy(pixel, _brushPixel, n, _compositionMode);
+                    }
+                    spanWidth -= n;
+                    iterX     += n;
+                }
+            }
+#else
             if(_isGradient || _isTexture) {
                 Pt::int32_t iterX     = iterL;
                 Pt::int32_t spanWidth = iterR - iterL + 1;
@@ -417,6 +463,7 @@ void Rasterizer2::rasterPolygonAreaSS(const Point* points, size_t pointCount, co
                     iterX     += n;
                 }
             }
+#endif
         }
         // Clear the work buffer
         memset(&alphas[0], 0, alphas.size());

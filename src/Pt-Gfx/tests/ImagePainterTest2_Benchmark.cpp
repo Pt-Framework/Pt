@@ -284,6 +284,9 @@ static void doBenchMark(CompositionMode cm)
         std::clog << "    Solid-filled    polygon    @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         std::clog << "    Solid-filled    polygon    @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT_LONG, brushSolid, brushSolid, cm, true);
+        std::clog << "    Solid-filled    polygon SS @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
 
@@ -292,6 +295,9 @@ static void doBenchMark(CompositionMode cm)
         time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT_SHORT, brushGradientH, brushGradientV, cm, false);
         std::clog << "    Gradient-filled polygon    @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         std::clog << "    Gradient-filled polygon    @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT_SHORT, brushGradientH, brushGradientV, cm, true);
+        std::clog << "    Gradient-filled polygon SS @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
@@ -302,32 +308,7 @@ static void doBenchMark(CompositionMode cm)
         std::clog << "    Texture-filled  polygon    @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         std::clog << "    Texture-filled  polygon    @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        std::clog << std::endl;
-    }
-
-    // Filled polygons (with supersampling)
-    if(BENCHMARK_SOLID_FILLED_POLYGON) {
-        time1 = benchDrawFillPolygon<ImagePainter >(BENCHMARK_LOOP_COUNT_LONG, brushSolid, brushSolid, cm, true);
-        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT_LONG, brushSolid, brushSolid, cm, true);
-        std::clog << "    Solid-filled    polygon SS @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
-        std::clog << "    Solid-filled    polygon SS @ ImagePainter2 = " << std::setw(6) << time2
-                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        std::clog << std::endl;
-    }
-
-    if(BENCHMARK_GRADIENT_FILLED_POLYGON) {
-        time1 = benchDrawFillPolygon<ImagePainter >(BENCHMARK_LOOP_COUNT_SHORT, brushGradientH, brushGradientV, cm, true);
-        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT_SHORT, brushGradientH, brushGradientV, cm, true);
-        std::clog << "    Gradient-filled polygon SS @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
-        std::clog << "    Gradient-filled polygon SS @ ImagePainter2 = " << std::setw(6) << time2
-                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        std::clog << std::endl;
-    }
-
-    if(BENCHMARK_TEXTURE_FILLED_POLYGON) {
-        time1 = benchDrawFillPolygon<ImagePainter >(BENCHMARK_LOOP_COUNT_LONG, brushTextureT, brushTextureW, cm, true);
         time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT_LONG, brushTextureT, brushTextureW, cm, true);
-        std::clog << "    Texture-filled  polygon SS @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         std::clog << "    Texture-filled  polygon SS @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
