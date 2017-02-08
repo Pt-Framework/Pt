@@ -77,12 +77,14 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount, bool useSu
         updateGradientBrush(maxX - minX + 1, maxY - minY + 1);
 
     // Draw the polygon
-    if(useSupersamplingForAA)
-        //rasterPolygonAreaSSAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
+    if(useSupersamplingForAA) {
+      //rasterPolygonAreaSSAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
         rasterPolygonAreaASAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
+      //rasterPolygonAreaCSAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
+    }
     else {
-        rasterPolygonAreaSSAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
-        //rasterPolygonOutline(clipped.data(), clipped.size(), _brush.color());
+        rasterPolygonAreaNOAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
+        rasterPolygonOutline(clipped.data(), clipped.size(), _brush.color());
     }
 }
 
@@ -124,7 +126,7 @@ void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount, c
 
 // Based on http://alienryderflex.com/polygon_fill
 // Public-domain code by Darel Rex Finley, 2007
-void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
+void Rasterizer2::rasterPolygonAreaNOAA(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
 {
     // List of nodes that define the horizontal segments
     std::vector<Pt::int32_t> nodeXf(pointCount * 2, 0);
@@ -447,7 +449,7 @@ void Rasterizer2::rasterPolygonAreaASAA(const Point* points, size_t pointCount, 
     std::vector<Pt::int32_t> nodeX(pointCount * 2, 0);
 
     // How far from the edges shall the anti-aliasing be done
-    #define EDGE_FACTOR 5
+    #define EDGE_FACTOR (8 * SUPERSAMPLING_SIZE)
 
     // A helper macro to scale the alpha
     #define SCALE_ALPHA(A) ( Pt::uint8_t(A) * 17 / SUPERSAMPLING_SIZE / SUPERSAMPLING_SIZE )
@@ -485,14 +487,14 @@ void Rasterizer2::rasterPolygonAreaASAA(const Point* points, size_t pointCount, 
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
             Pt::int32_t from    = nodeX[i    ];
             Pt::int32_t to      = nodeX[i + 1];
-            if( (to - from) <= (EDGE_FACTOR * 2 * SUPERSAMPLING_SIZE) ) {
+            if( (to - from) <= (EDGE_FACTOR * 2 ) ) {
                 for(Pt::int32_t k = from; k <= to; ++k) {
                     alphas[k / SUPERSAMPLING_SIZE] += 15;
                 }
             }
             else {
-                const Pt::int32_t fromMax = from + EDGE_FACTOR * SUPERSAMPLING_SIZE;
-                const Pt::int32_t toMin   = to   - EDGE_FACTOR * SUPERSAMPLING_SIZE;
+                const Pt::int32_t fromMax = from + EDGE_FACTOR;
+                const Pt::int32_t toMin   = to   - EDGE_FACTOR;
                 for(; from < fromMax; ++from) {
                     if(from >= to) break;
                     alphas[from / SUPERSAMPLING_SIZE] += 15;
@@ -507,11 +509,17 @@ void Rasterizer2::rasterPolygonAreaASAA(const Point* points, size_t pointCount, 
         if( ((pixelY + 1) % SUPERSAMPLING_SIZE) ) continue;
         // Set the corresponding alphas of the edge of the middle-part of the span to zeroes
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
-            Pt::int32_t from = nodeX[i    ] + EDGE_FACTOR;
-            Pt::int32_t to   = nodeX[i + 1] - EDGE_FACTOR;
+            Pt::int32_t from = nodeX[i    ] + EDGE_FACTOR / 2;
+            Pt::int32_t to   = nodeX[i + 1] - EDGE_FACTOR / 2;
             if(to < from) continue;
-            alphas[from / SUPERSAMPLING_SIZE] = 0;
-            alphas[to   / SUPERSAMPLING_SIZE] = 0;
+            for(Pt::int32_t k = from; k <= from + EDGE_FACTOR / 2; ++k) {
+                if(k >= to) break;
+                alphas[k / SUPERSAMPLING_SIZE] = 0;
+            }
+            for(Pt::int32_t k = to; k >= to - EDGE_FACTOR / 2; --k) {
+                if(k <= from) break;
+                alphas[k / SUPERSAMPLING_SIZE] = 0;
+            }
         }
         // Draw pixels that belongs to the left-part of the span to the image
         Pt::int32_t iterL = 0;
