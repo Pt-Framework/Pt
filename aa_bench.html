@@ -1,8 +1,81 @@
-<h1><pre><b>ADDED SOME OPTIMIZATION AND USING A MORE THOROUGH BENCHMARK</b></pre></h1>
+<h1><pre><b>YET ANOTHER NEW ALGORITHM</b></pre></h1>
 
 <pre>
 <b>2017/02/XX - X</b><br/>
 </pre><br/>
+
+<pre>
+<b>2017/02/09 - 1</b><br/>
+CompositionMode::SourceCopy
+                                                   (Time) (Factor)
+                                                   ------ --------
+    Text                         @ ImagePainter  =    299
+    Text                         @ ImagePainter2 =    294 ( 0.983)
+
+    Line                         @ ImagePainter  =     55
+    Line                         @ ImagePainter2 =    184 ( 3.345)
+
+    Rectangle                    @ ImagePainter  =     37
+    Rectangle                    @ ImagePainter2 =    115 ( 3.108)
+
+    Solid-filled    Rectangle    @ ImagePainter  =     96
+    Solid-filled    Rectangle    @ ImagePainter2 =     92 ( 0.958)
+
+    Gradient-filled Rectangle    @ ImagePainter  =   3331
+    Gradient-filled Rectangle    @ ImagePainter2 =    137 ( 0.041) <b>&#x1F600;</b>
+
+    Texture-filled  Rectangle    @ ImagePainter  =     68
+    Texture-filled  Rectangle    @ ImagePainter2 =     51 ( 0.750) <b>&#x1F600;</b>
+
+    Solid-filled    polygon      @ ImagePainter  =    231
+    Solid-filled    polygon NOAA @ ImagePainter2 =    166 ( 0.719) <b>&#x1F600;</b>
+    Solid-filled    polygon SSAA @ ImagePainter2 =    830 ( 3.593) <b>&#x1F60F;</b>
+
+    Gradient-filled polygon      @ ImagePainter  =   2846
+    Gradient-filled polygon NOAA @ ImagePainter2 =    211 ( 0.074) <b>&#x1F600;</b>
+    Gradient-filled polygon SSAA @ ImagePainter2 =    921 ( 0.324) <b>&#x1F600;</b>
+
+    Texture-filled  polygon      @ ImagePainter  =    231
+    Texture-filled  polygon NOAA @ ImagePainter2 =    164 ( 0.710) <b>&#x1F600;</b>
+    Texture-filled  polygon SSAA @ ImagePainter2 =    875 ( 3.788) <b>&#x1F60F;</b>
+
+CompositionMode::SourceOver
+                                                   (Time) (Factor)
+                                                   ------ --------
+    Text                         @ ImagePainter  =    303
+    Text                         @ ImagePainter2 =    300 ( 0.990)
+
+    Line                         @ ImagePainter  =     72
+    Line                         @ ImagePainter2 =    189 ( 2.625)
+
+    Rectangle                    @ ImagePainter  =     66
+    Rectangle                    @ ImagePainter2 =    132 ( 2.000)
+
+    Solid-filled    Rectangle    @ ImagePainter  =    997
+    Solid-filled    Rectangle    @ ImagePainter2 =    990 ( 0.993)
+
+    Gradient-filled Rectangle    @ ImagePainter  =   4140
+    Gradient-filled Rectangle    @ ImagePainter2 =    689 ( 0.166) <b>&#x1F600;</b>
+
+    Texture-filled  Rectangle    @ ImagePainter  =    939
+    Texture-filled  Rectangle    @ ImagePainter2 =    926 ( 0.986)
+
+    Solid-filled    polygon      @ ImagePainter  =    941
+    Solid-filled    polygon NOAA @ ImagePainter2 =    880 ( 0.935) <b>&#x1F600;</b>
+    Solid-filled    polygon SSAA @ ImagePainter2 =   1532 ( 1.628) <b>&#x1F603;</b>
+
+    Gradient-filled polygon      @ ImagePainter  =   3545
+    Gradient-filled polygon NOAA @ ImagePainter2 =    668 ( 0.188) <b>&#x1F600;</b>
+    Gradient-filled polygon SSAA @ ImagePainter2 =   1373 ( 0.387) <b>&#x1F600;</b>
+
+    Texture-filled  polygon      @ ImagePainter  =    948
+    Texture-filled  polygon NOAA @ ImagePainter2 =    882 ( 0.930)
+    Texture-filled  polygon SSAA @ ImagePainter2 =   1580 ( 1.667) <b>&#x1F603;</b>
+</pre><br/>
+
+
+
+<h1><pre><b>ADDED SOME OPTIMIZATION AND USING A MORE THOROUGH BENCHMARK</b></pre></h1>
 
 <pre>
 <b>2017/02/08</b><br/>

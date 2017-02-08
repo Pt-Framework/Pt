@@ -634,8 +634,9 @@ void Rasterizer2::rasterPolygonAreaEdgeSSAA(const Point* points, size_t pointCou
 // Public-domain code by Darel Rex Finley, 2007
 void Rasterizer2::rasterPolygonAreaFastSSAA(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
 {
-    // Calculate the area width of the polygon
+    // Calculate the size of the polygon
     Pt::int32_t sizeX = (maxX - minX + 1);
+    Pt::int32_t sizeY = (maxY - minY + 1);
 
     // Prepare a work buffer
     std::vector<Pt::uint8_t> alphas(maxX - minX + 1, 0);
@@ -645,8 +646,8 @@ void Rasterizer2::rasterPolygonAreaFastSSAA(const Point* points, size_t pointCou
     std::vector<Pt::int32_t> pointY(pointCount, 0);
 
     for(size_t i = 0; i < pointCount; ++i) {
-        pointX[i] = (points[i].x() - minX)* 2;
-        pointY[i] =  points[i].y() * 2;
+        pointX[i] = (points[i].x() - minX) * 2;
+        pointY[i] = (points[i].y() - minY) * 2;
     }
 
     // List of nodes that define the horizontal segments
@@ -658,7 +659,7 @@ void Rasterizer2::rasterPolygonAreaFastSSAA(const Point* points, size_t pointCou
     #define FSAA_MAX_ALPHA      ( 15 * 2 * 2 )
 
     //  Loop through the rows of the image
-    for(Pt::int32_t pixelY = minY; pixelY <= maxY; ++pixelY) {
+    for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
         // We examine two rows at a time
         const Pt::int32_t iterY0 = pixelY * 2;
         const Pt::int32_t iterY1 = iterY0 + 1;
@@ -697,16 +698,14 @@ void Rasterizer2::rasterPolygonAreaFastSSAA(const Point* points, size_t pointCou
         // Fill the samples between the node pairs
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
             // Get the from and to coordinates
-            const Pt::int32_t from0    = nodeXf0[i    ];
-            const Pt::int32_t from1    = nodeXf1[i    ];
-            const Pt::int32_t to0      = nodeXf0[i + 1];
-            const Pt::int32_t to1      = nodeXf1[i + 1];
-            const Pt::int32_t fromMin  = std::min(from0, from1);
-            const Pt::int32_t fromMax  = std::max(from0, from1);
-            const Pt::int32_t toMin    = std::min(to0,   to1  );
-            const Pt::int32_t toMax    = std::max(to0,   to1  );
-            Pt::int32_t iterL = 0;
-            Pt::int32_t iterR = sizeX - 1;
+            const Pt::int32_t from0   = nodeXf0[i    ];
+            const Pt::int32_t from1   = nodeXf1[i    ];
+            const Pt::int32_t to0     = nodeXf0[i + 1];
+            const Pt::int32_t to1     = nodeXf1[i + 1];
+            const Pt::int32_t fromMin = std::min(from0, from1);
+            const Pt::int32_t fromMax = std::max(from0, from1);
+            const Pt::int32_t toMin   = std::min(to0,   to1  );
+            const Pt::int32_t toMax   = std::max(to0,   to1  );
             // Reset the alphas
             memset(&alphas[0], 0, alphas.size());
             // Calculate the alphas of the left-part of the span
@@ -723,6 +722,7 @@ void Rasterizer2::rasterPolygonAreaFastSSAA(const Point* points, size_t pointCou
             alphas[(fromMax + 1) / 2] = FSAA_MAX_ALPHA;
             alphas[(toMin   - 1) / 2] = FSAA_MAX_ALPHA;
             // Draw pixels that belongs to the left-part of the span to the image
+            Pt::int32_t iterL = 0;
             for(; iterL < sizeX; ++iterL) { // Skip fully-transparent pixels
                 if(alphas[iterL]) break;
             }
@@ -732,9 +732,9 @@ void Rasterizer2::rasterPolygonAreaFastSSAA(const Point* points, size_t pointCou
                     if(alphas[iterL] >= FSAA_MAX_ALPHA) break;
                     // Draw the pixel
                     const Pt::int32_t iterX = minX + iterL;
-                    const Pt::int32_t iterY = pixelY;
-                    const Pt::int32_t tX    =  iterL          % _brushImage->width ();
-                    const Pt::int32_t tY    = (pixelY - minY) % _brushImage->height();
+                    const Pt::int32_t iterY = minY + pixelY;
+                    const Pt::int32_t tX    = iterL  % _brushImage->width ();
+                    const Pt::int32_t tY    = pixelY % _brushImage->height();
                     ConstPixel srcPixel(_brushImage->view(), tX, tY);
                     Pixel      dstPixel(_image->view(), iterX, iterY);
                     _image->format().setPixel(dstPixel, srcPixel, _compositionMode, FSAA_SCALE_ALPHA(alphas[iterL]));
@@ -745,11 +745,12 @@ void Rasterizer2::rasterPolygonAreaFastSSAA(const Point* points, size_t pointCou
                     // Break if the pixel has become fully opaque
                     if(alphas[iterL] >= FSAA_MAX_ALPHA) break;
                     // Draw the pixel
-                    Pixel pixel(_image->view(), minX + iterL, pixelY);
+                    Pixel pixel(_image->view(), minX + iterL, minY + pixelY);
                     _image->format().setPixel(pixel, color, _compositionMode, FSAA_SCALE_ALPHA(alphas[iterL]));
                 }
             }
             // Draw pixels that belongs to the right-part of the span to the image
+            Pt::int32_t iterR = sizeX - 1;
             for(; iterR >= 0; --iterR) { // Skip fully-transparent pixels
                 if(alphas[iterR]) break;
             }
@@ -759,9 +760,9 @@ void Rasterizer2::rasterPolygonAreaFastSSAA(const Point* points, size_t pointCou
                     if(alphas[iterR] >= FSAA_MAX_ALPHA) break;
                     // Draw the pixel
                     const Pt::int32_t iterX = minX + iterR;
-                    const Pt::int32_t iterY = pixelY ;
-                    const Pt::int32_t tX    =  iterR          % _brushImage->width ();
-                    const Pt::int32_t tY    = (pixelY - minY) % _brushImage->height();
+                    const Pt::int32_t iterY = minY + pixelY ;
+                    const Pt::int32_t tX    = iterR  % _brushImage->width ();
+                    const Pt::int32_t tY    = pixelY % _brushImage->height();
                     ConstPixel srcPixel(_brushImage->view(), tX, tY);
                     Pixel      dstPixel(_image->view(), iterX, iterY);
                     _image->format().setPixel(dstPixel, srcPixel, _compositionMode, FSAA_SCALE_ALPHA(alphas[iterR]));
@@ -772,14 +773,14 @@ void Rasterizer2::rasterPolygonAreaFastSSAA(const Point* points, size_t pointCou
                     // Break if we have reached the non anti-aliased part of the span
                     if(alphas[iterR] >= FSAA_MAX_ALPHA) break;
                     // Draw the pixel
-                    Pixel pixel(_image->view(), minX + iterR, pixelY);
+                    Pixel pixel(_image->view(), minX + iterR, minY + pixelY);
                     _image->format().setPixel(pixel, color, _compositionMode, FSAA_SCALE_ALPHA(alphas[iterR]));
                 }
             }
             // Draw pixels that belongs to the middle-part of the span to the image
             if(iterR >= iterL) {
                 // Adjust the coordinate on the last row
-                if(pixelY == maxY) {
+                if(pixelY == sizeY - 1) {
                     iterL = from0 / 2;
                     iterR = to0   / 2;
                 }
@@ -788,12 +789,12 @@ void Rasterizer2::rasterPolygonAreaFastSSAA(const Point* points, size_t pointCou
                     Pt::int32_t iterX     = iterL;
                     Pt::int32_t spanWidth = iterR - iterL + 1;
                     while(spanWidth > 0) {
-                        const Pt::int32_t tX =  iterX          % _brushImage->width ();
-                        const Pt::int32_t tY = (pixelY - minY) % _brushImage->height();
+                        const Pt::int32_t tX = iterX  % _brushImage->width ();
+                        const Pt::int32_t tY = pixelY % _brushImage->height();
                         const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tX);
                         if(n) {
                             ConstPixel srcPixel(_brushImage->view(), tX, tY);
-                            Pixel      dstPixel(_image->view(), minX + iterX, pixelY);
+                            Pixel      dstPixel(_image->view(), minX + iterX, minY + pixelY);
                             _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
                         }
                         spanWidth -= n;
@@ -806,20 +807,19 @@ void Rasterizer2::rasterPolygonAreaFastSSAA(const Point* points, size_t pointCou
                     Pt::int32_t spanWidth = iterR - iterL + 1;
                     // Fill the span - vertical gradient
                     if(_brush.fillStyle() == Pt::Gfx::Brush::VerticalGradient) {
-                        const Pt::int32_t textureY = (pixelY - minY) % _brushImage->height();
+                        const Pt::int32_t textureY = pixelY % _brushImage->height();
                         ConstPixel        srcPixel(_brushImage->view(), 0, textureY);
-                        Pixel             dstPixel(_image->view(), minX + iterX, pixelY);
+                        Pixel             dstPixel(_image->view(), minX + iterX, minY + pixelY);
                         _image->format().setPixels(dstPixel, srcPixel, spanWidth, _compositionMode);
                     }
                     // Fill the span - horizontal gradient
                     else {
                         while(spanWidth > 0) {
-                            const Pt::int32_t tX = iterX  % _brushImage->width ();
-                            const Pt::int32_t tY = pixelY % _brushImage->height();
-                            const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tX);
+                            const Pt::int32_t textureX = iterX  % _brushImage->width ();
+                            const Pt::int32_t n        = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - textureX);
                             if(n) {
-                                ConstPixel srcPixel(_brushImage->view(), tX, tY);
-                                Pixel      dstPixel(_image->view(), minX + iterX, pixelY);
+                                ConstPixel srcPixel(_brushImage->view(), textureX, 0);
+                                Pixel      dstPixel(_image->view(), minX + iterX, minY + pixelY);
                                 _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
                             }
                             spanWidth -= n;
@@ -834,7 +834,7 @@ void Rasterizer2::rasterPolygonAreaFastSSAA(const Point* points, size_t pointCou
                     while(spanWidth > 0) {
                         const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
                         if(n) {
-                            Pixel pixel(_image->view(), iterX, pixelY);
+                            Pixel pixel(_image->view(), iterX, minY + pixelY);
                             _image->format().copy(pixel, _brushPixel, n, _compositionMode);
                         }
                         spanWidth -= n;
