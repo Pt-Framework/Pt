@@ -82,7 +82,6 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount, bool useSu
         rasterPolygonAreaASAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
     else {
         rasterPolygonAreaSSAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
-        //rasterPolygonArea(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
         //rasterPolygonOutline(clipped.data(), clipped.size(), _brush.color());
     }
 }
@@ -258,7 +257,7 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, size_t pointCount, 
     }
 
     // List of nodes that define the horizontal segments
-    std::vector<Pt::int32_t> nodeXf(pointCount * 2, 0);
+    std::vector<Pt::int32_t> nodeX(pointCount * 2, 0);
 
     // A helper macro to scale the alpha
     #define SCALE_ALPHA(A) ( Pt::uint8_t(A) * 17 / SUPERSAMPLING_SIZE / SUPERSAMPLING_SIZE )
@@ -276,16 +275,16 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, size_t pointCount, 
                 const Pt::int32_t deltaYj = pointY[j] - pointY[i];
                 const Pt::int32_t deltaXj = pointX[j] - pointX[i];
                 const Pt::int32_t interXf = FIXED_POINT_FROM_INT(pointX[i]) + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
-                nodeXf[nodes++] = interXf + FIXED_POINT_CONSTANT_HALF;
+                nodeX[nodes++] = FIXED_POINT_TO_INT(interXf + FIXED_POINT_CONSTANT_HALF);
                 // Bail out if we have produced too many nodes
-                if((size_t) nodes >= nodeXf.size()) return;
+                if((size_t) nodes >= nodeX.size()) return;
             }
             j = i;
         }
         // Sort the nodes using bubble sort
         for(Pt::int32_t i = 0; i < nodes - 1;) {
-            if(nodeXf[i] > nodeXf[i + 1]) {
-                std::swap(nodeXf[i], nodeXf[i + 1]);
+            if(nodeX[i] > nodeX[i + 1]) {
+                std::swap(nodeX[i], nodeX[i + 1]);
                 if(i) --i;
             }
             else {
@@ -294,8 +293,8 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, size_t pointCount, 
         }
         // Accumulate the alphas of the samples between the node pairs
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
-            const Pt::int32_t from = FIXED_POINT_TO_INT(nodeXf[i    ]);
-            const Pt::int32_t to   = FIXED_POINT_TO_INT(nodeXf[i + 1]);
+            const Pt::int32_t from = nodeX[i    ];
+            const Pt::int32_t to   = nodeX[i + 1];
             for(Pt::int32_t k = from; k <= to; ++k) {
                 alphas[k / SUPERSAMPLING_SIZE] += 15;
             }
@@ -445,13 +444,13 @@ void Rasterizer2::rasterPolygonAreaASAA(const Point* points, size_t pointCount, 
     }
 
     // List of nodes that define the horizontal segments
-    std::vector<Pt::int32_t> nodeXf(pointCount * 2, 0);
+    std::vector<Pt::int32_t> nodeX(pointCount * 2, 0);
+
+    // How far from the edges shall the anti-aliasing be done
+    #define EDGE_FACTOR 5
 
     // A helper macro to scale the alpha
     #define SCALE_ALPHA(A) ( Pt::uint8_t(A) * 17 / SUPERSAMPLING_SIZE / SUPERSAMPLING_SIZE )
-
-    //Solid-filled    polygon    @ ImagePainter2 =     71   (REF)
-    //Solid-filled    polygon SS @ ImagePainter2 =   1006 -> 233
 
     //  Loop through the rows of the image
     for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
@@ -466,16 +465,16 @@ void Rasterizer2::rasterPolygonAreaASAA(const Point* points, size_t pointCount, 
                 const Pt::int32_t deltaYj = pointY[j] - pointY[i];
                 const Pt::int32_t deltaXj = pointX[j] - pointX[i];
                 const Pt::int32_t interXf = FIXED_POINT_FROM_INT(pointX[i]) + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
-                nodeXf[nodes++] = interXf + FIXED_POINT_CONSTANT_HALF;
+                nodeX[nodes++] = FIXED_POINT_TO_INT(interXf + FIXED_POINT_CONSTANT_HALF);
                 // Bail out if we have produced too many nodes
-                if((size_t) nodes >= nodeXf.size()) return;
+                if((size_t) nodes >= nodeX.size()) return;
             }
             j = i;
         }
         // Sort the nodes using bubble sort
         for(Pt::int32_t i = 0; i < nodes - 1;) {
-            if(nodeXf[i] > nodeXf[i + 1]) {
-                std::swap(nodeXf[i], nodeXf[i + 1]);
+            if(nodeX[i] > nodeX[i + 1]) {
+                std::swap(nodeX[i], nodeX[i + 1]);
                 if(i) --i;
             }
             else {
@@ -483,10 +482,9 @@ void Rasterizer2::rasterPolygonAreaASAA(const Point* points, size_t pointCount, 
             }
         }
         // Accumulate the alphas of the anti-aliased parts of the samples between the node pairs
-        #define EDGE_FACTOR 4
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
-            Pt::int32_t from    = FIXED_POINT_TO_INT(nodeXf[i    ]);
-            Pt::int32_t to      = FIXED_POINT_TO_INT(nodeXf[i + 1]);
+            Pt::int32_t from    = nodeX[i    ];
+            Pt::int32_t to      = nodeX[i + 1];
             if( (to - from) <= (EDGE_FACTOR * 2 * SUPERSAMPLING_SIZE) ) {
                 for(Pt::int32_t k = from; k <= to; ++k) {
                     alphas[k / SUPERSAMPLING_SIZE] += 15;
@@ -507,16 +505,14 @@ void Rasterizer2::rasterPolygonAreaASAA(const Point* points, size_t pointCount, 
         }
         // Simply skip the next steps if we have not got all the needed samples
         if( ((pixelY + 1) % SUPERSAMPLING_SIZE) ) continue;
-        //
+        // Set the corresponding alphas of the edge of the middle-part of the span to zeroes
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
-            Pt::int32_t from = FIXED_POINT_TO_INT(nodeXf[i    ]) + EDGE_FACTOR;
-            Pt::int32_t to   = FIXED_POINT_TO_INT(nodeXf[i + 1]) - EDGE_FACTOR;
+            Pt::int32_t from = nodeX[i    ] + EDGE_FACTOR;
+            Pt::int32_t to   = nodeX[i + 1] - EDGE_FACTOR;
             if(to < from) continue;
             alphas[from / SUPERSAMPLING_SIZE] = 0;
             alphas[to   / SUPERSAMPLING_SIZE] = 0;
         }
-
-#if 1
         // Draw pixels that belongs to the left-part of the span to the image
         Pt::int32_t iterL = 0;
         for(; iterL < sizeX; ++iterL) { // Skip fully-transparent pixels
@@ -574,8 +570,6 @@ void Rasterizer2::rasterPolygonAreaASAA(const Point* points, size_t pointCount, 
             }
         }
         // Draw pixels that belongs to the middle-part of the span to the image
-        //--iterL;
-        //++iterR;
         if(iterR >= iterL) {
             // Draw the span using texture
             if(_isTexture) {
@@ -636,7 +630,6 @@ void Rasterizer2::rasterPolygonAreaASAA(const Point* points, size_t pointCount, 
                 }
             }
         }
-#endif
         // Clear the work buffer
         memset(&alphas[0], 0, alphas.size());
     }
@@ -646,10 +639,6 @@ void Rasterizer2::rasterPolygonAreaASAA(const Point* points, size_t pointCount, 
 // Public-domain code by Darel Rex Finley, 2007
 void Rasterizer2::rasterPolygonAreaCSAA(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
 {
-    // Calculate the size of the polygon
-    Pt::int32_t sizeX = (maxX - minX + 1);
-    Pt::int32_t sizeY = (maxY - minY + 1);
-
     // Scale the polygon twice as big
     std::vector<Pt::int32_t> pointX(pointCount, 0);
     std::vector<Pt::int32_t> pointY(pointCount, 0);
