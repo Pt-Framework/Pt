@@ -78,10 +78,10 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount, bool useSu
 
     // Draw the polygon
     if(useSupersamplingForAA)
-        //rasterPolygonAreaSS(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
-        rasterPolygonAreaMAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
+        //rasterPolygonAreaSSAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
+        rasterPolygonAreaASAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
     else {
-        rasterPolygonAreaSS(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
+        rasterPolygonAreaSSAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
         //rasterPolygonArea(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
         //rasterPolygonOutline(clipped.data(), clipped.size(), _brush.color());
     }
@@ -239,7 +239,7 @@ void Rasterizer2::rasterPolygonArea(const Point* points, size_t pointCount, cons
 
 // Partially based on http://alienryderflex.com/polygon_fill
 // Public-domain code by Darel Rex Finley, 2007
-void Rasterizer2::rasterPolygonAreaSS(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
+void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
 {
     // Calculate the size of the polygon
     Pt::int32_t sizeX = (maxX - minX + 1);
@@ -426,7 +426,7 @@ void Rasterizer2::rasterPolygonAreaSS(const Point* points, size_t pointCount, co
 
 // Partially based on http://alienryderflex.com/polygon_fill
 // Public-domain code by Darel Rex Finley, 2007
-void Rasterizer2::rasterPolygonAreaMAA(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
+void Rasterizer2::rasterPolygonAreaASAA(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
 {
     // Calculate the size of the polygon
     Pt::int32_t sizeX = (maxX - minX + 1);
@@ -450,8 +450,8 @@ void Rasterizer2::rasterPolygonAreaMAA(const Point* points, size_t pointCount, c
     // A helper macro to scale the alpha
     #define SCALE_ALPHA(A) ( Pt::uint8_t(A) * 17 / SUPERSAMPLING_SIZE / SUPERSAMPLING_SIZE )
 
-    //Solid-filled    polygon    @ ImagePainter2 =     71
-    //Solid-filled    polygon SS @ ImagePainter2 =   1006
+    //Solid-filled    polygon    @ ImagePainter2 =     71   (REF)
+    //Solid-filled    polygon SS @ ImagePainter2 =   1006 -> 233
 
     //  Loop through the rows of the image
     for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
@@ -483,27 +483,39 @@ void Rasterizer2::rasterPolygonAreaMAA(const Point* points, size_t pointCount, c
             }
         }
         // Accumulate the alphas of the anti-aliased parts of the samples between the node pairs
+        #define EDGE_FACTOR 4
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
-                  Pt::int32_t from    = FIXED_POINT_TO_INT(nodeXf[i    ]);
-                  Pt::int32_t to      = FIXED_POINT_TO_INT(nodeXf[i + 1]);
-            const Pt::int32_t fromMax = from + 4 * SUPERSAMPLING_SIZE;
-            const Pt::int32_t toMin   = to   - 4 * SUPERSAMPLING_SIZE;
-            for(; from < fromMax; ++from) {
-                if(from >= to) break;
-                alphas[from / SUPERSAMPLING_SIZE] += 15;
+            Pt::int32_t from    = FIXED_POINT_TO_INT(nodeXf[i    ]);
+            Pt::int32_t to      = FIXED_POINT_TO_INT(nodeXf[i + 1]);
+            if( (to - from) <= (EDGE_FACTOR * 2 * SUPERSAMPLING_SIZE) ) {
+                for(Pt::int32_t k = from; k <= to; ++k) {
+                    alphas[k / SUPERSAMPLING_SIZE] += 15;
+                }
             }
-            for(; to > toMin; --to) {
-                if(to <= from) break;
-                alphas[to / SUPERSAMPLING_SIZE] += 15;
+            else {
+                const Pt::int32_t fromMax = from + EDGE_FACTOR * SUPERSAMPLING_SIZE;
+                const Pt::int32_t toMin   = to   - EDGE_FACTOR * SUPERSAMPLING_SIZE;
+                for(; from < fromMax; ++from) {
+                    if(from >= to) break;
+                    alphas[from / SUPERSAMPLING_SIZE] += 15;
+                }
+                for(; to > toMin; --to) {
+                    if(to <= from) break;
+                    alphas[to / SUPERSAMPLING_SIZE] += 15;
+                }
             }
-            if(to > from) {
-                alphas[from / SUPERSAMPLING_SIZE] = 0;
-                alphas[to / SUPERSAMPLING_SIZE] = 0;
-            }
-
         }
         // Simply skip the next steps if we have not got all the needed samples
         if( ((pixelY + 1) % SUPERSAMPLING_SIZE) ) continue;
+        //
+        for(Pt::int32_t i = 0; i < nodes; i += 2) {
+            Pt::int32_t from = FIXED_POINT_TO_INT(nodeXf[i    ]) + EDGE_FACTOR;
+            Pt::int32_t to   = FIXED_POINT_TO_INT(nodeXf[i + 1]) - EDGE_FACTOR;
+            if(to < from) continue;
+            alphas[from / SUPERSAMPLING_SIZE] = 0;
+            alphas[to   / SUPERSAMPLING_SIZE] = 0;
+        }
+
 #if 1
         // Draw pixels that belongs to the left-part of the span to the image
         Pt::int32_t iterL = 0;
@@ -562,9 +574,9 @@ void Rasterizer2::rasterPolygonAreaMAA(const Point* points, size_t pointCount, c
             }
         }
         // Draw pixels that belongs to the middle-part of the span to the image
-        --iterL;
-        ++iterR;
-        if(iterR > iterL) {
+        //--iterL;
+        //++iterR;
+        if(iterR >= iterL) {
             // Draw the span using texture
             if(_isTexture) {
                 Pt::int32_t iterX     = iterL;
@@ -632,7 +644,7 @@ void Rasterizer2::rasterPolygonAreaMAA(const Point* points, size_t pointCount, c
 
 // Partially based on http://alienryderflex.com/polygon_fill
 // Public-domain code by Darel Rex Finley, 2007
-void Rasterizer2::rasterPolygonAreaFAA(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
+void Rasterizer2::rasterPolygonAreaCSAA(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
 {
     // Calculate the size of the polygon
     Pt::int32_t sizeX = (maxX - minX + 1);
