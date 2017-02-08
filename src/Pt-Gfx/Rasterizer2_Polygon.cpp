@@ -83,9 +83,9 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount, bool useSu
         rasterPolygonAreaCSAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
     }
     else {
-        rasterPolygonAreaSSAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
-        //rasterPolygonAreaNOAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
-        //rasterPolygonOutline(clipped.data(), clipped.size(), _brush.color());
+        //rasterPolygonAreaSSAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
+        rasterPolygonAreaNOAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
+        rasterPolygonOutline(clipped.data(), clipped.size(), _brush.color());
     }
 }
 
@@ -263,7 +263,7 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, size_t pointCount, 
     std::vector<Pt::int32_t> nodeX(pointCount * 2, 0);
 
     // A helper macro to scale the alpha
-    #define SCALE_ALPHA(A) ( Pt::uint16_t(A) * 17 / SUPERSAMPLING_SIZE / SUPERSAMPLING_SIZE )
+    #define SSAA_SCALE_ALPHA(A) ( Pt::uint16_t(A) * 17 / SUPERSAMPLING_SIZE / SUPERSAMPLING_SIZE )
 
     //  Loop through the rows of the image
     for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
@@ -320,7 +320,7 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, size_t pointCount, 
                 const Pt::int32_t tY    = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
                 ConstPixel srcPixel(_brushImage->view(), tX, tY);
                 Pixel      dstPixel(_image->view(), iterX, iterY);
-                _image->format().setPixel(dstPixel, srcPixel, _compositionMode, SCALE_ALPHA(alphas[iterL]));
+                _image->format().setPixel(dstPixel, srcPixel, _compositionMode, SSAA_SCALE_ALPHA(alphas[iterL]));
             }
         }
         else { // Solid color
@@ -329,7 +329,7 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, size_t pointCount, 
                 if(alphas[iterL] >= (15 * SUPERSAMPLING_SIZE * SUPERSAMPLING_SIZE)) break;
                 // Draw the pixel
                 Pixel pixel(_image->view(), minX + iterL, minY + pixelY / SUPERSAMPLING_SIZE);
-                _image->format().setPixel(pixel, color, _compositionMode, SCALE_ALPHA(alphas[iterL]));
+                _image->format().setPixel(pixel, color, _compositionMode, SSAA_SCALE_ALPHA(alphas[iterL]));
             }
         }
         // Draw pixels that belongs to the right-part of the span to the image
@@ -348,7 +348,7 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, size_t pointCount, 
                 const Pt::int32_t tY    = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
                 ConstPixel srcPixel(_brushImage->view(), tX, tY);
                 Pixel      dstPixel(_image->view(), iterX, iterY);
-                _image->format().setPixel(dstPixel, srcPixel, _compositionMode, SCALE_ALPHA(alphas[iterR]));
+                _image->format().setPixel(dstPixel, srcPixel, _compositionMode, SSAA_SCALE_ALPHA(alphas[iterR]));
             }
         }
         else { // Solid color
@@ -357,7 +357,7 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, size_t pointCount, 
                 if(alphas[iterR] >= (15 * SUPERSAMPLING_SIZE * SUPERSAMPLING_SIZE)) break;
                 // Draw the pixel
                 Pixel pixel(_image->view(), minX + iterR, minY + pixelY / SUPERSAMPLING_SIZE);
-                _image->format().setPixel(pixel, color, _compositionMode, SCALE_ALPHA(alphas[iterR]));
+                _image->format().setPixel(pixel, color, _compositionMode, SSAA_SCALE_ALPHA(alphas[iterR]));
             }
         }
         // Draw pixels that belongs to the middle-part of the span to the image
@@ -453,7 +453,7 @@ void Rasterizer2::rasterPolygonAreaASAA(const Point* points, size_t pointCount, 
     #define EDGE_FACTOR (8 * SUPERSAMPLING_SIZE)
 
     // A helper macro to scale the alpha
-    #define SCALE_ALPHA(A) ( Pt::uint16_t(A) * 17 / SUPERSAMPLING_SIZE / SUPERSAMPLING_SIZE )
+    #define ASAA_SCALE_ALPHA(A) ( Pt::uint16_t(A) * 17 / SUPERSAMPLING_SIZE / SUPERSAMPLING_SIZE )
 
     //  Loop through the rows of the image
     for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
@@ -538,7 +538,7 @@ void Rasterizer2::rasterPolygonAreaASAA(const Point* points, size_t pointCount, 
                 const Pt::int32_t tY    = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
                 ConstPixel srcPixel(_brushImage->view(), tX, tY);
                 Pixel      dstPixel(_image->view(), iterX, iterY);
-                _image->format().setPixel(dstPixel, srcPixel, _compositionMode, SCALE_ALPHA(alphas[iterL]));
+                _image->format().setPixel(dstPixel, srcPixel, _compositionMode, ASAA_SCALE_ALPHA(alphas[iterL]));
             }
         }
         else { // Solid color
@@ -547,7 +547,7 @@ void Rasterizer2::rasterPolygonAreaASAA(const Point* points, size_t pointCount, 
                 if(!alphas[iterL]) break;
                 // Draw the pixel
                 Pixel pixel(_image->view(), minX + iterL, minY + pixelY / SUPERSAMPLING_SIZE);
-                _image->format().setPixel(pixel, color, _compositionMode, SCALE_ALPHA(alphas[iterL]));
+                _image->format().setPixel(pixel, color, _compositionMode, ASAA_SCALE_ALPHA(alphas[iterL]));
             }
         }
         // Draw pixels that belongs to the right-part of the span to the image
@@ -566,7 +566,7 @@ void Rasterizer2::rasterPolygonAreaASAA(const Point* points, size_t pointCount, 
                 const Pt::int32_t tY    = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
                 ConstPixel srcPixel(_brushImage->view(), tX, tY);
                 Pixel      dstPixel(_image->view(), iterX, iterY);
-                _image->format().setPixel(dstPixel, srcPixel, _compositionMode, SCALE_ALPHA(alphas[iterR]));
+                _image->format().setPixel(dstPixel, srcPixel, _compositionMode, ASAA_SCALE_ALPHA(alphas[iterR]));
             }
         }
         else { // Solid color
@@ -575,7 +575,7 @@ void Rasterizer2::rasterPolygonAreaASAA(const Point* points, size_t pointCount, 
                 if(!alphas[iterR]) break;
                 // Draw the pixel
                 Pixel pixel(_image->view(), minX + iterR, minY + pixelY / SUPERSAMPLING_SIZE);
-                _image->format().setPixel(pixel, color, _compositionMode, SCALE_ALPHA(alphas[iterR]));
+                _image->format().setPixel(pixel, color, _compositionMode, ASAA_SCALE_ALPHA(alphas[iterR]));
             }
         }
         // Draw pixels that belongs to the middle-part of the span to the image
@@ -648,6 +648,9 @@ void Rasterizer2::rasterPolygonAreaASAA(const Point* points, size_t pointCount, 
 // Public-domain code by Darel Rex Finley, 2007
 void Rasterizer2::rasterPolygonAreaCSAA(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
 {
+    // Calculate the area width of the polygon
+    Pt::int32_t sizeX = (maxX - minX + 1);
+
     // Prepare a work buffer
     std::vector<Pt::uint8_t> alphas(maxX - minX + 1, 0);
 
@@ -657,7 +660,7 @@ void Rasterizer2::rasterPolygonAreaCSAA(const Point* points, size_t pointCount, 
 
     for(size_t i = 0; i < pointCount; ++i) {
         pointX[i] = (points[i].x() - minX)* 2;
-        pointY[i] = points[i].y() * 2;
+        pointY[i] =  points[i].y() * 2;
     }
 
     // List of nodes that define the horizontal segments
@@ -665,7 +668,8 @@ void Rasterizer2::rasterPolygonAreaCSAA(const Point* points, size_t pointCount, 
     std::vector<Pt::int32_t> nodeXf1(pointCount * 2, 0); // Row (Y + 1)
 
     // A helper macro to scale the alpha
-    #define SCALE_ALPHA(A) ( Pt::uint16_t(A) * 17 / 2 / 2 )
+    #define FSAA_SCALE_ALPHA(A) ( Pt::uint16_t(A) * 17 / 2 / 2 )
+    #define FSAA_MAX_ALPHA      ( 15 * 2 * 2 )
 
     //  Loop through the rows of the image
     for(Pt::int32_t pixelY = minY; pixelY <= maxY; ++pixelY) {
@@ -715,42 +719,141 @@ void Rasterizer2::rasterPolygonAreaCSAA(const Point* points, size_t pointCount, 
             Pt::int32_t fromMax  = std::max(from0, from1);
             Pt::int32_t toMin    = std::min(to0,   to1  );
             Pt::int32_t toMax    = std::max(to0,   to1  );
-            Pt::int32_t fromMin2 = fromMin / 2;
-            Pt::int32_t fromMax2 = fromMax / 2;
-            Pt::int32_t toMin2   = toMin   / 2;
-            Pt::int32_t toMax2   = toMax   / 2;
-            // Draw pixels that belongs to the left-part of the span to the image
+            // Reset the alphas
             memset(&alphas[0], 0, alphas.size());
+            // Calculate the alphas of the left-part of the span
             for(Pt::int32_t iterX = fromMin; iterX <= fromMax; ++iterX) {
                 alphas[iterX / 2] += 15;
             }
             alphas[fromMax / 2] += 15;
-            for(Pt::int32_t iterX = fromMin2; iterX <= fromMax2; ++iterX) {
-                Pixel pixel(_image->view(), minX + iterX, pixelY);
-                _image->format().setPixel(pixel, color, _compositionMode, SCALE_ALPHA(alphas[iterX]));
-            }
-            // Draw pixels that belongs to the right-part of the span to the image
-            memset(&alphas[0], 0, alphas.size());
+            // Calculate the alphas of the right-part of the span
             for(Pt::int32_t iterX = toMin; iterX <= toMax; ++iterX) {
                 alphas[iterX / 2] += 15;
             }
             alphas[toMin / 2] += 15;
-            for(Pt::int32_t iterX = toMin2; iterX <= toMax2; ++iterX) {
-                Pixel pixel(_image->view(), minX + iterX, pixelY);
-                _image->format().setPixel(pixel, color, _compositionMode, SCALE_ALPHA(alphas[iterX]));
+            // Set the alphas of the middle-part of the span
+            memset(&alphas[(fromMax + 1) / 2], FSAA_MAX_ALPHA, ((toMin - 1) - (fromMax + 1)) / 2 + 1);
+            alphas[(toMin - 1) / 2] = FSAA_MAX_ALPHA;
+            // Draw pixels that belongs to the left-part of the span to the image
+            Pt::int32_t iterL = 0;
+            for(; iterL < sizeX; ++iterL) { // Skip fully-transparent pixels
+                if(alphas[iterL]) break;
+            }
+            if(_isTexture || _isGradient) { // Texture or gradient
+                for(; iterL < sizeX; ++iterL) {
+                    // Break if we have reached the non anti-aliased part of the span
+                    //if(!alphas[iterL]) break;
+                    // Break if the pixel has become fully opaque
+                    if(alphas[iterL] >= FSAA_MAX_ALPHA) break;
+                    // Draw the pixel
+                    const Pt::int32_t iterX = minX + iterL;
+                    const Pt::int32_t iterY = pixelY;
+                    const Pt::int32_t tX    = iterL  % _brushImage->width ();
+                    const Pt::int32_t tY    = pixelY % _brushImage->height();
+                    ConstPixel srcPixel(_brushImage->view(), tX, tY);
+                    Pixel      dstPixel(_image->view(), iterX, iterY);
+                    _image->format().setPixel(dstPixel, srcPixel, _compositionMode, FSAA_SCALE_ALPHA(alphas[iterL]));
+                }
+            }
+            else { // Solid color
+                for(; iterL < sizeX; ++iterL) {
+                    // Break if the pixel has become fully opaque
+                    if(alphas[iterL] >= FSAA_MAX_ALPHA) break;
+                    // Draw the pixel
+                    Pixel pixel(_image->view(), minX + iterL, pixelY);
+                    _image->format().setPixel(pixel, color, _compositionMode, FSAA_SCALE_ALPHA(alphas[iterL]));
+                }
+            }
+            // Draw pixels that belongs to the right-part of the span to the image
+            Pt::int32_t iterR = sizeX - 1;
+            for(; iterR >= 0; --iterR) { // Skip fully-transparent pixels
+                if(alphas[iterR]) break;
+            }
+            if(_isTexture || _isGradient) { // Texture or gradient
+                for(; iterR >= 0; --iterR) {
+                    // Break if the pixel has become fully opaque
+                    if(alphas[iterR] >= FSAA_MAX_ALPHA) break;
+                    // Draw the pixel
+                    const Pt::int32_t iterX = minX + iterR;
+                    const Pt::int32_t iterY = pixelY ;
+                    const Pt::int32_t tX    = iterR  % _brushImage->width ();
+                    const Pt::int32_t tY    = pixelY % _brushImage->height();
+                    ConstPixel srcPixel(_brushImage->view(), tX, tY);
+                    Pixel      dstPixel(_image->view(), iterX, iterY);
+                    _image->format().setPixel(dstPixel, srcPixel, _compositionMode, FSAA_SCALE_ALPHA(alphas[iterR]));
+                }
+            }
+            else { // Solid color
+                for(; iterR >= 0; --iterR) {
+                    // Break if the pixel has become fully opaque
+                    if(alphas[iterR] >= FSAA_MAX_ALPHA) break;
+                    // Draw the pixel
+                    Pixel pixel(_image->view(), minX + iterR, pixelY);
+                    _image->format().setPixel(pixel, color, _compositionMode, FSAA_SCALE_ALPHA(alphas[iterR]));
+                }
             }
             // Draw pixels that belongs to the middle-part of the span to the image
-            Pt::int32_t iterX     = (fromMax2 + 1);
-            Pt::int32_t spanWidth = (toMin2 -   1) - (fromMax2 + 1) + 1;
-            while(spanWidth > 0) {
-                const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
-                if(n) {
-                    Pixel pixel(_image->view(), minX + iterX, pixelY);
-                    //_image->format().copy(pixel, _brushPixel, n, _compositionMode);
+            if(iterR >= iterL) {
+                // Draw the span using texture
+                if(_isTexture) {
+                    Pt::int32_t iterX     = iterL;
+                    Pt::int32_t spanWidth = iterR - iterL + 1;
+                    while(spanWidth > 0) {
+                        const Pt::int32_t tX = iterX  % _brushImage->width ();
+                        const Pt::int32_t tY = pixelY % _brushImage->height();
+                        const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tX);
+                        if(n) {
+                            ConstPixel srcPixel(_brushImage->view(), tX, tY);
+                            Pixel      dstPixel(_image->view(), minX + iterX, pixelY);
+                            _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
+                        }
+                        spanWidth -= n;
+                        iterX     += n;
+                    }
                 }
-                spanWidth -= n;
-                iterX     += n;
+                // Draw the span using gradient
+                else if(_isGradient) {
+                    Pt::int32_t iterX     = iterL;
+                    Pt::int32_t spanWidth = iterR - iterL + 1;
+                    // Fill the span - vertical gradient
+                    if(_brush.fillStyle() == Pt::Gfx::Brush::VerticalGradient) {
+                        const Pt::int32_t textureY = pixelY % _brushImage->height();
+                        ConstPixel        srcPixel(_brushImage->view(), 0, textureY);
+                        Pixel             dstPixel(_image->view(), minX + iterX, pixelY);
+                        _image->format().setPixels(dstPixel, srcPixel, spanWidth, _compositionMode);
+                    }
+                    // Fill the span - horizontal gradient
+                    else {
+                        while(spanWidth > 0) {
+                            const Pt::int32_t tX = iterX  % _brushImage->width ();
+                            const Pt::int32_t tY = pixelY % _brushImage->height();
+                            const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tX);
+                            if(n) {
+                                ConstPixel srcPixel(_brushImage->view(), tX, tY);
+                                Pixel      dstPixel(_image->view(), minX + iterX, pixelY);
+                                _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
+                            }
+                            spanWidth -= n;
+                            iterX     += n;
+                        }
+                    }
+                }
+                // Draw the span using solid color
+                else {
+                    Pt::int32_t iterX     = minX + iterL;
+                    Pt::int32_t spanWidth = iterR - iterL + 1;
+                    while(spanWidth > 0) {
+                        const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
+                        if(n) {
+                            Pixel pixel(_image->view(), iterX, pixelY);
+                            _image->format().copy(pixel, _brushPixel, n, _compositionMode);
+                        }
+                        spanWidth -= n;
+                        iterX     += n;
+                    }
+                }
             }
+
         }
     }
 }
