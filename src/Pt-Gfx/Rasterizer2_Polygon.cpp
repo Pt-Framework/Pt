@@ -79,12 +79,13 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount, bool useSu
     // Draw the polygon
     if(useSupersamplingForAA) {
       //rasterPolygonAreaSSAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
-        rasterPolygonAreaASAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
-      //rasterPolygonAreaCSAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
+      //rasterPolygonAreaASAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
+        rasterPolygonAreaCSAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
     }
     else {
-        rasterPolygonAreaNOAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
-        rasterPolygonOutline(clipped.data(), clipped.size(), _brush.color());
+        rasterPolygonAreaSSAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
+        //rasterPolygonAreaNOAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
+        //rasterPolygonOutline(clipped.data(), clipped.size(), _brush.color());
     }
 }
 
@@ -262,7 +263,7 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, size_t pointCount, 
     std::vector<Pt::int32_t> nodeX(pointCount * 2, 0);
 
     // A helper macro to scale the alpha
-    #define SCALE_ALPHA(A) ( Pt::uint8_t(A) * 17 / SUPERSAMPLING_SIZE / SUPERSAMPLING_SIZE )
+    #define SCALE_ALPHA(A) ( Pt::uint16_t(A) * 17 / SUPERSAMPLING_SIZE / SUPERSAMPLING_SIZE )
 
     //  Loop through the rows of the image
     for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
@@ -452,7 +453,7 @@ void Rasterizer2::rasterPolygonAreaASAA(const Point* points, size_t pointCount, 
     #define EDGE_FACTOR (8 * SUPERSAMPLING_SIZE)
 
     // A helper macro to scale the alpha
-    #define SCALE_ALPHA(A) ( Pt::uint8_t(A) * 17 / SUPERSAMPLING_SIZE / SUPERSAMPLING_SIZE )
+    #define SCALE_ALPHA(A) ( Pt::uint16_t(A) * 17 / SUPERSAMPLING_SIZE / SUPERSAMPLING_SIZE )
 
     //  Loop through the rows of the image
     for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
@@ -647,12 +648,15 @@ void Rasterizer2::rasterPolygonAreaASAA(const Point* points, size_t pointCount, 
 // Public-domain code by Darel Rex Finley, 2007
 void Rasterizer2::rasterPolygonAreaCSAA(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
 {
+    // Prepare a work buffer
+    std::vector<Pt::uint8_t> alphas(maxX - minX + 1, 0);
+
     // Scale the polygon twice as big
     std::vector<Pt::int32_t> pointX(pointCount, 0);
     std::vector<Pt::int32_t> pointY(pointCount, 0);
 
     for(size_t i = 0; i < pointCount; ++i) {
-        pointX[i] = points[i].x() * 2;
+        pointX[i] = (points[i].x() - minX)* 2;
         pointY[i] = points[i].y() * 2;
     }
 
@@ -660,8 +664,11 @@ void Rasterizer2::rasterPolygonAreaCSAA(const Point* points, size_t pointCount, 
     std::vector<Pt::int32_t> nodeXf0(pointCount * 2, 0); // Row (Y    )
     std::vector<Pt::int32_t> nodeXf1(pointCount * 2, 0); // Row (Y + 1)
 
+    // A helper macro to scale the alpha
+    #define SCALE_ALPHA(A) ( Pt::uint16_t(A) * 17 / 2 / 2 )
+
     //  Loop through the rows of the image
-    for(Pt::int32_t pixelY = minY; pixelY < maxY; ++pixelY) {
+    for(Pt::int32_t pixelY = minY; pixelY <= maxY; ++pixelY) {
         // We examine two rows at a time
         const Pt::int32_t iterY0 = pixelY * 2;
         const Pt::int32_t iterY1 = iterY0 + 1;
@@ -678,8 +685,8 @@ void Rasterizer2::rasterPolygonAreaCSAA(const Point* points, size_t pointCount, 
                 const Pt::int32_t deltaXj  = pointX[j] - pointX[i];
                 const Pt::int32_t interXf0 = FIXED_POINT_FROM_INT(pointX[i]) + FIXED_POINT_FROM_INT(deltaYp0) / deltaYj * deltaXj;
                 const Pt::int32_t interXf1 = FIXED_POINT_FROM_INT(pointX[i]) + FIXED_POINT_FROM_INT(deltaYp1) / deltaYj * deltaXj;
-                nodeXf0[nodes] = interXf0 + FIXED_POINT_CONSTANT_HALF;
-                nodeXf1[nodes] = interXf1 + FIXED_POINT_CONSTANT_HALF;
+                nodeXf0[nodes] = FIXED_POINT_TO_INT(interXf0 + FIXED_POINT_CONSTANT_HALF);
+                nodeXf1[nodes] = FIXED_POINT_TO_INT(interXf1 + FIXED_POINT_CONSTANT_HALF);
                 ++nodes;
                 // Bail out if we have produced too many nodes
                 if((size_t) nodes >= nodeXf0.size()) return;
@@ -699,109 +706,47 @@ void Rasterizer2::rasterPolygonAreaCSAA(const Point* points, size_t pointCount, 
         }
         // Fill the samples between the node pairs
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
-            // Get the from and to coordinates (X axis)
-            //     Row (Y    ) : from0 --- to0
-            //     Row (Y + 1) : from1 --- to1
-            Pt::int32_t from0 = nodeXf0[i    ] / 2;
-            Pt::int32_t from1 = nodeXf1[i    ] / 2;
-            Pt::int32_t to0   = nodeXf0[i + 1] / 2;
-            Pt::int32_t to1   = nodeXf1[i + 1] / 2;
-            // Calculate the alphas
-            //     f0l f0r --- t0l t0r
-            //     f1l f1r --- t1l t1r
-            Pt::int32_t from0AlphaL = FIXED_POINT_RFPART_TO_A8(from0);
-            Pt::int32_t from0AlphaR = FIXED_POINT_FPART_TO_A8 (from0);
-            Pt::int32_t from1AlphaL = FIXED_POINT_RFPART_TO_A8(from1);
-            Pt::int32_t from1AlphaR = FIXED_POINT_FPART_TO_A8 (from1);
-            Pt::int32_t to0AlphaL   = FIXED_POINT_RFPART_TO_A8(to0  );
-            Pt::int32_t to0AlphaR   = FIXED_POINT_FPART_TO_A8 (to0  );
-            Pt::int32_t to1AlphaL   = FIXED_POINT_RFPART_TO_A8(to1  );
-            Pt::int32_t to1AlphaR   = FIXED_POINT_FPART_TO_A8 (to1  );
-            //
-            /*
-             *     ┌────┬────┐        ┌────┬────┐
-             *     │ 00 │ f0 ┝        │ t0 ┝ 00 │
-             *     ├────┼────┤        ├────┼────┤
-             *     │ f1 ┝ FF │        │ FF │ t1 ┝
-             *     └────┴────┘        └────┴────┘
-             *
-             *     ┌────┬────┐        ┌────┬────┐
-             *     │ 00 │ f0 ┝        │ t0 ┝ 00 │
-             *     ├────┼────┤        ├────┼────┤
-             *     │ 00 │ f1 ┝        │ t1 ┝ 00 │
-             *     └────┴────┘        └────┴────┘
-             *
-             *     ┌────┬────┐        ┌────┬────┐
-             *     │ f0 ┝ FF │        │ FF │ t0 ┝
-             *     ├────┼────┤        ├────┼────┤
-             *     │ 00 │ f1 ┝        │ t1 ┝ 00 │
-             *     └────┴────┘        └────┴────┘
-             */
-            Pt::int32_t from = 0, to = 0, alpha;
-            // Left side of the span
-            if(from1 < from0) {
-                from = FIXED_POINT_TO_INT(from1);
-                Pixel pixel(_image->view(), from, pixelY);
-                alpha = (0 + from0AlphaL + from1AlphaL + from1AlphaR) / 4;
-                _image->format().setPixel(pixel, color, _compositionMode, alpha);
-                pixel.advance();
-                alpha = (from0AlphaR + 255 + 255 + 255) / 4;
-                _image->format().setPixel(pixel, color, _compositionMode, alpha);
+            // Get the from and to coordinates
+            Pt::int32_t from0    = nodeXf0[i    ];
+            Pt::int32_t from1    = nodeXf1[i    ];
+            Pt::int32_t to0      = nodeXf0[i + 1];
+            Pt::int32_t to1      = nodeXf1[i + 1];
+            Pt::int32_t fromMin  = std::min(from0, from1);
+            Pt::int32_t fromMax  = std::max(from0, from1);
+            Pt::int32_t toMin    = std::min(to0,   to1  );
+            Pt::int32_t toMax    = std::max(to0,   to1  );
+            Pt::int32_t fromMin2 = fromMin / 2;
+            Pt::int32_t fromMax2 = fromMax / 2;
+            Pt::int32_t toMin2   = toMin   / 2;
+            Pt::int32_t toMax2   = toMax   / 2;
+            // Draw pixels that belongs to the left-part of the span to the image
+            memset(&alphas[0], 0, alphas.size());
+            for(Pt::int32_t iterX = fromMin; iterX <= fromMax; ++iterX) {
+                alphas[iterX / 2] += 15;
             }
-            else if(from1 == from0) {
-                from = FIXED_POINT_TO_INT(from0 - 1);
-                Pixel pixel(_image->view(), from, pixelY);
-                alpha = (0 + from0AlphaL + 0 + from1AlphaL) / 4;
-                _image->format().setPixel(pixel, color, _compositionMode, alpha);
-                pixel.advance();
-                alpha = (from0AlphaR + 255 + from1AlphaR + 255) / 4;
-                _image->format().setPixel(pixel, color, _compositionMode, alpha);
+            alphas[fromMax / 2] += 15;
+            for(Pt::int32_t iterX = fromMin2; iterX <= fromMax2; ++iterX) {
+                Pixel pixel(_image->view(), minX + iterX, pixelY);
+                _image->format().setPixel(pixel, color, _compositionMode, SCALE_ALPHA(alphas[iterX]));
             }
-            else { // from1 > from0
-                from = FIXED_POINT_TO_INT(from0);
-                Pixel pixel(_image->view(), from, pixelY);
-                alpha = (from0AlphaL + from0AlphaR + 0 + from1AlphaL) / 4;
-                _image->format().setPixel(pixel, color, _compositionMode, alpha);
-                pixel.advance();
-                alpha = (255 + 255 + from1AlphaR + 255) / 4;
-                _image->format().setPixel(pixel, color, _compositionMode, alpha);
+            // Draw pixels that belongs to the right-part of the span to the image
+            memset(&alphas[0], 0, alphas.size());
+            for(Pt::int32_t iterX = toMin; iterX <= toMax; ++iterX) {
+                alphas[iterX / 2] += 15;
             }
-            // Right side of the span
-            if(to1 > to0) {
-                to = FIXED_POINT_TO_INT(to0);
-                Pixel pixel(_image->view(), to, pixelY);
-                alpha = (to0AlphaL + to0AlphaR + 255 + to1AlphaL) / 4;
-                _image->format().setPixel(pixel, color, _compositionMode, alpha);
-                pixel.advance();
-                alpha = (0 + 0 + to1AlphaR + 0) / 4;
-                _image->format().setPixel(pixel, color, _compositionMode, alpha);
+            alphas[toMin / 2] += 15;
+            for(Pt::int32_t iterX = toMin2; iterX <= toMax2; ++iterX) {
+                Pixel pixel(_image->view(), minX + iterX, pixelY);
+                _image->format().setPixel(pixel, color, _compositionMode, SCALE_ALPHA(alphas[iterX]));
             }
-            else if(to1 == to0) {
-                to = FIXED_POINT_TO_INT(to0);
-                Pixel pixel(_image->view(), to, pixelY);
-                alpha = (to0AlphaL + to0AlphaR + to1AlphaL + to1AlphaR) / 4;
-                _image->format().setPixel(pixel, color, _compositionMode, alpha);
-            }
-            else { // to1 < to0
-                to  = FIXED_POINT_TO_INT(to1);
-                Pixel pixel(_image->view(), to, pixelY);
-                alpha = (255 + to0AlphaL + to1AlphaL + to1AlphaR) / 4;
-                _image->format().setPixel(pixel, color, _compositionMode, alpha);
-                pixel.advance();
-                alpha = (to0AlphaR + 0 + 0 + 0) / 4;
-                _image->format().setPixel(pixel, color, _compositionMode, alpha);
-            }
-            // Adjust coordinates
-            from += 2;
-            to   -= 1;
-            // Middle side of the span
-            Pt::int32_t iterX     = from;
-            Pt::int32_t spanWidth = to - from + 1;
+            // Draw pixels that belongs to the middle-part of the span to the image
+            Pt::int32_t iterX     = (fromMax2 + 1);
+            Pt::int32_t spanWidth = (toMin2 -   1) - (fromMax2 + 1) + 1;
             while(spanWidth > 0) {
                 const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
                 if(n) {
-                    Pixel pixel(_image->view(), iterX, pixelY);
-                    _image->format().copy(pixel, _brushPixel, n, _compositionMode);
+                    Pixel pixel(_image->view(), minX + iterX, pixelY);
+                    //_image->format().copy(pixel, _brushPixel, n, _compositionMode);
                 }
                 spanWidth -= n;
                 iterX     += n;
