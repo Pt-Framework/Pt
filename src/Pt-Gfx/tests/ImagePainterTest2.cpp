@@ -17,42 +17,44 @@
 
 using namespace Pt::Gfx;
 
-#define DO_TEST_DRAW          0
-#define DO_BENCHMARKING       0
+#define DO_TEST_DRAW          1
+#define DO_BENCHMARKING       1
 #define DO_CAIRO_BENCHMARKING 1
 
 //
 
 #define TEST_SOURCECOPY                        1
-#define TEST_SOURCEOVER                        1
+#define TEST_SOURCEOVER                        0
 
-#define TEST_DRAW_LINE_AND_TEXT                1
-#define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES 1
+#define TEST_DRAW_LINE_AND_TEXT                0
+#define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES 0
 
 #define TEST_DRAW_SOLID_FILLED_POLYGONS        1
-#define TEST_DRAW_GRADIENT_FILLED_POLYGONS     1
-#define TEST_DRAW_TEXTURE_FILLED_POLYGONS      1
+#define TEST_DRAW_GRADIENT_FILLED_POLYGONS     0
+#define TEST_DRAW_TEXTURE_FILLED_POLYGONS      0
 
 #define TEST_COMPARE_WITH_OLD_PAINTER          0
 
 //
 
-#define BENCHMARK_CHECK_RESULTING_IMAGE     1
+#define CAIRO_CHECK_RESULTING_IMAGE         0
+
+#define BENCHMARK_CHECK_RESULTING_IMAGE     0
 #define BENCHMARK_IMAGE_SIZE                Size(1280, 800)
 #define BENCHMARK_LOOP_COUNT_SHORT          100
 #define BENCHMARK_LOOP_COUNT_LONG           200
 
-#define BENCHMARK_TEXT                      1
-#define BENCHMARK_LINE                      1
+#define BENCHMARK_TEXT                      0
+#define BENCHMARK_LINE                      0
 
-#define BENCHMARK_RECTANGLE                 1
-#define BENCHMARK_SOLID_FILLED_RECTANGLE    1
-#define BENCHMARK_GRADIENT_FILLED_RECTANGLE 1
-#define BENCHMARK_TEXTURE_FILLED_RECTANGLE  1
+#define BENCHMARK_RECTANGLE                 0
+#define BENCHMARK_SOLID_FILLED_RECTANGLE    0
+#define BENCHMARK_GRADIENT_FILLED_RECTANGLE 0
+#define BENCHMARK_TEXTURE_FILLED_RECTANGLE  0
 
 #define BENCHMARK_SOLID_FILLED_POLYGON      1
-#define BENCHMARK_GRADIENT_FILLED_POLYGON   1
-#define BENCHMARK_TEXTURE_FILLED_POLYGON    1
+#define BENCHMARK_GRADIENT_FILLED_POLYGON   0
+#define BENCHMARK_TEXTURE_FILLED_POLYGON    0
 
 //
 
@@ -180,10 +182,10 @@ int main(int argc, char* args[])
     if(DO_BENCHMARKING) {
         std::clog << std::fixed << std::setprecision(0) << std::endl;
 
-        std::clog << "CompositionMode::SourceCopy" << std::endl;
+        std::clog << "Pt::Gfx - CompositionMode::SourceCopy" << std::endl;
         doBenchmark(CompositionMode::SourceCopy);
 
-        std::clog << "CompositionMode::SourceOver" << std::endl;
+        std::clog << "Pt::Gfx - CompositionMode::SourceOver" << std::endl;
         doBenchmark(CompositionMode::SourceOver);
     }
 

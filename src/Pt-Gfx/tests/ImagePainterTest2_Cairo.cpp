@@ -1,5 +1,5 @@
 #define CAIRO_BENCHMARK_DISPLAY_RESULTING_IMAGE \
-    if(BENCHMARK_CHECK_RESULTING_IMAGE && !i) sdlPreviewRGB888Buffer(formatCaption("Cairo", cm, __FUNCTION__), buffer.data(), imgSize.width(), imgSize.height(), false)
+    if(CAIRO_CHECK_RESULTING_IMAGE && !i) sdlPreviewRGB888Buffer(formatCaption("Cairo", cm, __FUNCTION__), buffer.data(), imgSize.width(), imgSize.height(), false)
 
 static size_t cairoBenchFillPolygon(int loopCount, CompositionMode cm)
 {
@@ -16,17 +16,24 @@ static size_t cairoBenchFillPolygon(int loopCount, CompositionMode cm)
         Pt::System::Clock clock;
         clock.start();
 
-        /*
-        painter.setBrush(brushH);
-        const PointF poly1[] = { PointF(50, 50), PointF(250, 100), PointF(450, 250), PointF(350, 350), PointF(150, 100) };
-        if(ip2) ip2->fillPolygon(poly1, sizeof(poly1) / sizeof(poly1[0]), useAntiAliasing);
-        else    painter.fillPolygon(poly1, sizeof(poly1) / sizeof(poly1[0]));
+        if(cm == CompositionMode::SourceOver)
+            cairo_set_source_rgba(cairo, 1.0f, 1.0f, 1.0f, 175.0f / 255.0f);
+        else
+            cairo_set_source_rgba(cairo, 1.0f, 1.0f, 1.0f, 1.0f);
 
-        painter.setBrush(brushV);
-        const PointF poly2[] = { PointF(250, 50), PointF(450, 100), PointF(650, 250), PointF(550, 350), PointF(350, 100) };
-        if(ip2) ip2->fillPolygon(poly2, sizeof(poly2) / sizeof(poly2[0]), useAntiAliasing);
-        else    painter.fillPolygon(poly2, sizeof(poly2) / sizeof(poly2[0]));
-        */
+        cairo_move_to(cairo,  50,  50);
+        cairo_line_to(cairo, 250, 100);
+        cairo_line_to(cairo, 450, 250);
+        cairo_line_to(cairo, 350, 350);
+        cairo_line_to(cairo, 150, 100);
+        cairo_fill (cairo);
+
+        cairo_move_to(cairo, 250,  50);
+        cairo_line_to(cairo, 450, 100);
+        cairo_line_to(cairo, 650, 250);
+        cairo_line_to(cairo, 550, 350);
+        cairo_line_to(cairo, 350, 100);
+        cairo_fill (cairo);
 
         sum += clock.stop().toUSecs();
 
