@@ -168,7 +168,7 @@ static size_t benchDrawFillRect(int loopCount, const Brush& brushH, const Brush&
 }
 
 template <typename PainterT>
-static size_t benchDrawFillPolygon(int loopCount, const Brush& brushH, const Brush& brushV, CompositionMode cm, bool ss)
+static size_t benchDrawFillPolygon(int loopCount, const Brush& brushH, const Brush& brushV, CompositionMode cm, bool useAntiAliasing)
 {
     size_t sum = 0;
 
@@ -188,12 +188,12 @@ static size_t benchDrawFillPolygon(int loopCount, const Brush& brushH, const Bru
 
         painter.setBrush(brushH);
         const PointF poly1[] = { PointF(50, 50), PointF(250, 100), PointF(450, 250), PointF(350, 350), PointF(150, 100) };
-        if(ip2) ip2->fillPolygon(poly1, sizeof(poly1) / sizeof(poly1[0]), ss);
+        if(ip2) ip2->fillPolygon(poly1, sizeof(poly1) / sizeof(poly1[0]), useAntiAliasing);
         else    painter.fillPolygon(poly1, sizeof(poly1) / sizeof(poly1[0]));
 
         painter.setBrush(brushV);
         const PointF poly2[] = { PointF(250, 50), PointF(450, 100), PointF(650, 250), PointF(550, 350), PointF(350, 100) };
-        if(ip2) ip2->fillPolygon(poly2, sizeof(poly2) / sizeof(poly2[0]), ss);
+        if(ip2) ip2->fillPolygon(poly2, sizeof(poly2) / sizeof(poly2[0]), useAntiAliasing);
         else    painter.fillPolygon(poly2, sizeof(poly2) / sizeof(poly2[0]));
 
         sum += clock.stop().toUSecs();
