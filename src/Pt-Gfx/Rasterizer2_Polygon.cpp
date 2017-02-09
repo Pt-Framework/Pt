@@ -410,6 +410,9 @@ void Rasterizer2::rasterPolygonAreaTrueSSAA(const Point* points, size_t pointCou
         // Clear the work buffer
         memset(&alphas[0], 0, alphas.size());
     }
+
+    // Undefine the helper macro
+    #undef SSAA_SCALE_ALPHA
 }
 
 // Partially based on http://alienryderflex.com/polygon_fill
@@ -435,11 +438,11 @@ void Rasterizer2::rasterPolygonAreaEdgeSSAA(const Point* points, size_t pointCou
     // List of nodes that define the horizontal segments
     std::vector<Pt::int32_t> nodeX(pointCount * 2, 0);
 
-    // How far from the edges shall the anti-aliasing be done
-    #define EDGE_FACTOR (8 * SUPERSAMPLING_SIZE)
-
     // A helper macro to scale the alpha
     #define ASAA_SCALE_ALPHA(A) ( Pt::uint16_t(A) * 17 / SUPERSAMPLING_SIZE / SUPERSAMPLING_SIZE )
+
+    // How far from the edges shall the anti-aliasing be done
+    #define EDGE_FACTOR (8 * SUPERSAMPLING_SIZE)
 
     //  Loop through the rows of the image
     for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
@@ -628,6 +631,10 @@ void Rasterizer2::rasterPolygonAreaEdgeSSAA(const Point* points, size_t pointCou
         // Clear the work buffer
         memset(&alphas[0], 0, alphas.size());
     }
+
+    // Undefine the helper macro
+    #undef EDGE_FACTOR
+    #undef ASAA_SCALE_ALPHA
 }
 
 // Partially based on http://alienryderflex.com/polygon_fill
@@ -656,7 +663,9 @@ void Rasterizer2::rasterPolygonAreaFastSSAA(const Point* points, size_t pointCou
 
     // A helper macro to scale the alpha
     #define FSAA_SCALE_ALPHA(A) ( Pt::uint16_t(A) * 17 / 2 / 2 )
-    #define FSAA_MAX_ALPHA      ( 15 * 2 * 2 )
+
+    // The maximum possible value for alpha
+    #define FSAA_MAX_ALPHA ( 15 * 2 * 2 )
 
     //  Loop through the rows of the image
     for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
@@ -844,6 +853,10 @@ void Rasterizer2::rasterPolygonAreaFastSSAA(const Point* points, size_t pointCou
             }
         }
     }
+
+    // Undefine the helper macro
+    #undef FSAA_SCALE_ALPHA
+    #undef FSAA_MAX_ALPHA
 }
 
 

@@ -177,6 +177,9 @@ void Rasterizer2::rasterOnePixelGLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, P
             ypxl += grad;
         }
     }
+
+    // Undefine the helper macro
+    #undef XW_SET_PIXEL
 }
 
 

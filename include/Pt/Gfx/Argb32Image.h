@@ -36,8 +36,8 @@
 #include <Pt/Types.h>
 
 namespace Pt {
-
 namespace Gfx {
+
 
 /** @brief ARGB-32 image model.
 */
@@ -60,6 +60,13 @@ class Argb32Model
         }
 
     public:
+
+// Enabling this one seems to does not matter in an x86_64
+//#define USE_MULTIPLY_SHIFT_FOR_CONSTANT_DIVISION
+
+// Enabling this one seems to make everything faster in an x86_64
+#define USE_DUFFS_DEVICE
+
         /*
          * http://embeddedgurus.com/stack-overflow/2009/06/division-of-integers-by-constants
          *
@@ -111,12 +118,12 @@ class Argb32Model
          *     => FF01
          *     => RESULT = (((uint32_t) VALUE * 0x0000FF01) >> 16) >> 8
          */
-#if 0
-        #define DIV_BY_255(V) ( (((uint32_t) V * 0x00008081) >> 16) >> 7 )
-        #define DIV_BY_257(V) ( (((uint32_t) V * 0x0000FF01) >> 16) >> 8 )
+#ifndef USE_MULTIPLY_SHIFT_FOR_CONSTANT_DIVISION
+    #define DIV_BY_255(V) ( (uint32_t) V / 255 )
+    #define DIV_BY_257(V) ( (uint32_t) V / 257 )
 #else
-        #define DIV_BY_255(V) ( (uint32_t) V / 255 )
-        #define DIV_BY_257(V) ( (uint32_t) V / 257 )
+    #define DIV_BY_255(V) ( (((uint32_t) V * 0x00008081) >> 16) >> 7 )
+    #define DIV_BY_257(V) ( (((uint32_t) V * 0x0000FF01) >> 16) >> 8 )
 #endif
 
         static Color toColor(const Pt::uint8_t* p)
@@ -264,12 +271,30 @@ class Argb32Model
             switch(mode) {
                 default:
                 case CompositionMode::SourceCopy: {
-                   Pt::uint32_t src = ( Pt::uint32_t(c.alpha() & 0xFF00) << 16 ) |
-                                      ( Pt::uint32_t(c.red  () & 0xFF00) <<  8 ) |
-                                      ( Pt::uint32_t(c.green() & 0xFF00)       )  |
-                                      ( Pt::uint32_t(c.blue ()         ) >>  8 );
+                    Pt::uint32_t src = ( Pt::uint32_t(c.alpha() & 0xFF00) << 16 ) |
+                                       ( Pt::uint32_t(c.red  () & 0xFF00) <<  8 ) |
+                                       ( Pt::uint32_t(c.green() & 0xFF00)       )  |
+                                       ( Pt::uint32_t(c.blue ()         ) >>  8 );
                     Pt::uint32_t* dst =  reinterpret_cast<Pt::uint32_t*>(to);
+#ifndef USE_DUFFS_DEVICE
                     for(size_t i = 0; i < length; ++i) *dst++ = src;
+#else
+                    register Pt::uint32_t* dst_ = dst;
+                    register Pt::uint32_t  src_ = src;
+                    register Pt::uint32_t  cnt  = length;
+                    register Pt::uint32_t  n    = (cnt + 7) / 8;
+                    switch(cnt % 8) {
+                            case 0 : do { *dst_++ = src_;
+                            case 7 :      *dst_++ = src_;
+                            case 6 :      *dst_++ = src_;
+                            case 5 :      *dst_++ = src_;
+                            case 4 :      *dst_++ = src_;
+                            case 3 :      *dst_++ = src_;
+                            case 2 :      *dst_++ = src_;
+                            case 1 :      *dst_++ = src_;
+                                     } while (--n > 0);
+                    }
+#endif
                     break;
                 }
 
@@ -281,6 +306,7 @@ class Argb32Model
                     const Pt::uint32_t  srcB     = DIV_BY_257(c.blue ()) * blend;
                     const Pt::uint32_t  srcA     = blend * blend;
                           Pt::uint8_t*  dst      = to;
+#ifndef USE_DUFFS_DEVICE
                     for(size_t i = 0; i < length; ++i) {
                         dst[0] = (srcB + blendInv * dst[0]) >> 8;
                         dst[1] = (srcG + blendInv * dst[1]) >> 8;
@@ -288,6 +314,34 @@ class Argb32Model
                         dst[3] = (srcA + blendInv * dst[3]) >> 8;
                         dst += 4;
                     }
+#else
+                    #define STORE_VALUES()                            \
+                        dst_[0] = (srcB_ + blendInv_ * dst_[0]) >> 8; \
+                        dst_[1] = (srcG_ + blendInv_ * dst_[1]) >> 8; \
+                        dst_[2] = (srcR_ + blendInv_ * dst_[2]) >> 8; \
+                        dst_[3] = (srcA_ + blendInv_ * dst_[3]) >> 8; \
+                        dst_ += 4
+                    register Pt::uint32_t srcR_     = srcR;
+                    register Pt::uint32_t srcG_     = srcG;
+                    register Pt::uint32_t srcB_     = srcB;
+                    register Pt::uint32_t srcA_     = srcA;
+                    register Pt::uint32_t blendInv_ = blendInv;
+                    register Pt::uint8_t* dst_ = dst;
+                    register Pt::uint32_t cnt  = length;
+                    register Pt::uint32_t n    = (cnt + 7) / 8;
+                    switch(cnt % 8) {
+                            case 0 : do { STORE_VALUES();
+                            case 7 :      STORE_VALUES();
+                            case 6 :      STORE_VALUES();
+                            case 5 :      STORE_VALUES();
+                            case 4 :      STORE_VALUES();
+                            case 3 :      STORE_VALUES();
+                            case 2 :      STORE_VALUES();
+                            case 1 :      STORE_VALUES();
+                                     } while (--n > 0);
+                    }
+                    #undef STORE_VALUES
+#endif
                     break;
                 }
             }
@@ -301,25 +355,72 @@ class Argb32Model
                 case CompositionMode::SourceCopy: {
                     Pt::uint32_t  src = *reinterpret_cast<const Pt::uint32_t*>(from);
                     Pt::uint32_t* dst =  reinterpret_cast<Pt::uint32_t*>(to);
+#ifndef USE_DUFFS_DEVICE
                     for(size_t i = 0; i < length; ++i) *dst++ = src;
+#else
+                    register Pt::uint32_t* dst_ = dst;
+                    register Pt::uint32_t  src_ = src;
+                    register Pt::uint32_t  cnt  = length;
+                    register Pt::uint32_t  n    = (cnt + 7) / 8;
+                    switch(cnt % 8) {
+                            case 0 : do { *dst_++ = src_;
+                            case 7 :      *dst_++ = src_;
+                            case 6 :      *dst_++ = src_;
+                            case 5 :      *dst_++ = src_;
+                            case 4 :      *dst_++ = src_;
+                            case 3 :      *dst_++ = src_;
+                            case 2 :      *dst_++ = src_;
+                            case 1 :      *dst_++ = src_;
+                                     } while (--n > 0);
+                    }
+#endif
                     break;
                 }
 
                 case CompositionMode::SourceOver: {
                     const Pt::uint32_t  blend    = from[3];
                     const Pt::uint32_t  blendInv = 255 - blend;
-                    const Pt::uint32_t  srcR     = from[0] * blend;
+                    const Pt::uint32_t  srcR     = from[2] * blend;
                     const Pt::uint32_t  srcG     = from[1] * blend;
-                    const Pt::uint32_t  srcB     = from[2] * blend;
+                    const Pt::uint32_t  srcB     = from[0] * blend;
                     const Pt::uint32_t  srcA     = blend   * blend;
                           Pt::uint8_t*  dst      = to;
+#ifndef USE_DUFFS_DEVICE
                     for(size_t i = 0; i < length; ++i) {
-                        dst[0] = (srcR + blendInv * dst[0]) >> 8;
+                        dst[0] = (srcB + blendInv * dst[0]) >> 8;
                         dst[1] = (srcG + blendInv * dst[1]) >> 8;
-                        dst[2] = (srcB + blendInv * dst[2]) >> 8;
+                        dst[2] = (srcR + blendInv * dst[2]) >> 8;
                         dst[3] = (srcA + blendInv * dst[3]) >> 8;
                         dst += 4;
                     }
+#else
+                    #define STORE_VALUES()                            \
+                        dst_[0] = (srcB_ + blendInv_ * dst_[0]) >> 8; \
+                        dst_[1] = (srcG_ + blendInv_ * dst_[1]) >> 8; \
+                        dst_[2] = (srcR_ + blendInv_ * dst_[2]) >> 8; \
+                        dst_[3] = (srcA_ + blendInv_ * dst_[3]) >> 8; \
+                        dst_ += 4
+                    register Pt::uint32_t srcR_     = srcR;
+                    register Pt::uint32_t srcG_     = srcG;
+                    register Pt::uint32_t srcB_     = srcB;
+                    register Pt::uint32_t srcA_     = srcA;
+                    register Pt::uint32_t blendInv_ = blendInv;
+                    register Pt::uint8_t* dst_ = dst;
+                    register Pt::uint32_t cnt  = length;
+                    register Pt::uint32_t n    = (cnt + 7) / 8;
+                    switch(cnt % 8) {
+                            case 0 : do { STORE_VALUES();
+                            case 7 :      STORE_VALUES();
+                            case 6 :      STORE_VALUES();
+                            case 5 :      STORE_VALUES();
+                            case 4 :      STORE_VALUES();
+                            case 3 :      STORE_VALUES();
+                            case 2 :      STORE_VALUES();
+                            case 1 :      STORE_VALUES();
+                                     } while (--n > 0);
+                    }
+                    #undef STORE_VALUES
+#endif
                     break;
                 }
             }
@@ -350,7 +451,10 @@ class Argb32Model
 
             p = data + view.stride() * ypos + xpos * 4;
         }
+#undef DIV_BY_255
+#undef DIV_BY_257
 };
+
 
 /** @brief Const pixel in a ARGB-32 Image.
 */
@@ -452,6 +556,7 @@ class Argb32Model::ConstPixel
         Pt::ssize_t                   _ypos;
         const Pt::uint8_t*            _p;
 };
+
 
 /** @brief Const pixel in a ARGB-32 Image.
 */
@@ -602,6 +707,7 @@ class Argb32Model::Pixel
         Pt::uint8_t*            _p;
 };
 
+
 /** @brief ARGB-32 image.
 */
 class Argb32Image : public BasicImage<Argb32Model>
@@ -620,8 +726,8 @@ class Argb32Image : public BasicImage<Argb32Model>
         { }
 };
 
-} // namespace
 
+} // namespace
 } // namespace
 
 #endif
