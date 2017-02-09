@@ -121,7 +121,6 @@ void Rasterizer2::rasterOnePixelVLineSegment(Pt::int32_t x, Pt::int32_t y1, Pt::
         Pixel pixel(_image->view(), x, y1++);
         _image->format().setPixel(pixel, color, _compositionMode);
     }
-
 }
 
 // Xiaolin Wu's Anti-Aliased Line Algorithm
