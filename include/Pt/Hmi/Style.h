@@ -914,6 +914,7 @@ class PT_HMI_API ComboBoxRenderer : public Style::Facet
                                     const Gfx::RectF& rect,
                                     const Gfx::RectF& cursorRect ) const = 0;
 };
+
 } // namespace
 
 } // namespace

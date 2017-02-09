@@ -87,6 +87,33 @@ class PT_HMI_API ComboBox : public Control
 
         void setScrollBars(bool hasScrollBars);
 
+    public:
+        const Gfx::Brush& background() const;
+
+        void setBackground(const Gfx::Brush& b);
+
+        const Gfx::Pen& contour() const;
+
+        void setContour(const Gfx::Pen& p);
+
+        const Gfx::Color& textColor() const;
+
+        void setTextColor(const Gfx::Color& color);
+
+        const std::string& font() const;
+
+        void setFont(const std::string& fontName);
+
+        std::size_t fontSize() const;
+
+        void setFontSize(const std::size_t n);
+
+        Gfx::Font::Style fontStyle() const;
+
+        void setFontStyle(Gfx::Font::Style style);
+
+        void setRenderer(ComboBoxRenderer* renderer);
+
     protected:
         void onInvalidate();
 	
@@ -115,6 +142,22 @@ class PT_HMI_API ComboBox : public Control
         TextLine     _line;
         ComboBoxMenu _menu;
         
+        AutoPtr<Gfx::Brush>       _background;
+        AutoPtr<Gfx::Pen>         _contour;
+        AutoPtr<Gfx::Color>       _textColor;
+        AutoPtr<std::string>      _fontName;
+        AutoPtr<std::size_t>      _fontSize;
+        AutoPtr<Gfx::Font::Style> _fontStyle;
+
+        FacetPtr<ComboBoxRenderer> _renderer;
+        bool                       _hasRenderer;
+
+        Gfx::Brush _brush;
+        Gfx::Pen   _pen;
+        Gfx::Pen   _textPen;
+        Gfx::Pen   _placeholderPen;
+        Gfx::Font  _font;
+
         ListBoxItem _item1;
         ListBoxItem _item2;
         ListBoxItem _item3;

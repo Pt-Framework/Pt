@@ -474,6 +474,38 @@ class PT_HMI_API PlatinumListBoxRenderer : public ListBoxRenderer
         PlatinumRendererBase _baseRenderer;
 };
 
+
+class PT_HMI_API PlatinumComboBoxRenderer : public ComboBoxRenderer
+{
+    public:
+        PlatinumComboBoxRenderer(std::size_t refs = 0);
+
+        virtual ~PlatinumComboBoxRenderer();
+
+    protected:
+        virtual void onPrepare(const ComboBox& cb, 
+                               const StyleOptions& options,
+                               Gfx::Brush& brush,
+                               Gfx::Pen& contour,
+                               Gfx::Font& font,
+                               Gfx::Pen& textPen) const;
+
+        virtual void onRenderBackground(const ComboBox& cb, 
+                                        const StyleOptions& options,
+                                        Painter& painter, 
+                                        const Gfx::RectF& rect,
+                                        const Gfx::Pen& contour,
+                                        const Gfx::Brush& brush) const;
+
+        virtual void onRenderCursor(const ComboBox& cb, 
+                                    const StyleOptions& options,
+                                    Painter& painter, 
+                                    const Gfx::RectF& rect,
+                                    const Gfx::RectF& cursorRect) const;
+    private:
+        PlatinumRendererBase _baseRenderer;
+};
+
 class PT_HMI_API PlatinumStyle : public Style
 {
     public:

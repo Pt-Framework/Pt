@@ -45,6 +45,7 @@
 #include <Pt/Hmi/ProgressBar.h>
 #include <Pt/Hmi/Slider.h>
 #include <Pt/Hmi/ListBox.h>
+#include <Pt/Hmi/ComboBox.h>
 
 namespace {
 
@@ -978,6 +979,83 @@ void PlatinumListBoxRenderer::onRenderItem(const ListBoxItem& item,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// PlatinumComboBoxRenderer
+///////////////////////////////////////////////////////////////////////////////
+
+PlatinumComboBoxRenderer::PlatinumComboBoxRenderer(std::size_t refs)
+: ComboBoxRenderer(refs)
+{
+}
+
+    
+PlatinumComboBoxRenderer::~PlatinumComboBoxRenderer()
+{
+}
+
+
+void PlatinumComboBoxRenderer::onPrepare(const ComboBox& cb, 
+                                         const StyleOptions& options,
+                                         Gfx::Brush& brush,
+                                         Gfx::Pen& contour,
+                                         Gfx::Font& font,
+                                         Gfx::Pen& textPen) const
+{
+    if( cb.isEnabled() )
+    {
+        Gfx::Color color = contour.color();
+
+        if( cb.isHighlighted() || cb.hasFocus() )
+        {
+            color = options.accentColor();
+        }
+
+        contour = Gfx::Pen( color, contour.size(), contour.style(), 
+                            contour.capStyle(), contour.joinStyle() );
+    }
+}
+
+
+void PlatinumComboBoxRenderer::onRenderBackground(const ComboBox& cb, 
+                                                  const StyleOptions& options,
+                                                  Painter& painter, 
+                                                  const Gfx::RectF& rect,
+                                                  const Gfx::Pen& contour,
+                                                  const Gfx::Brush& brush) const
+{
+    painter.setBrush(brush);
+    painter.fillRect(rect);
+
+    painter.setPen(contour);
+    painter.drawRect(rect);
+
+    static const double indicatorWidth = 8.0;
+
+    double x = cb.size().width() - indicatorWidth * 1.5;
+    double y = cb.size().height() - indicatorWidth * 1.5;
+
+    Gfx::PointF indicator[3] = { Gfx::PointF(x, y + indicatorWidth),
+                                 Gfx::PointF(x + indicatorWidth, y + indicatorWidth),
+                                 Gfx::PointF(x + indicatorWidth, y) };
+
+    painter.setBrush( contour.color() );
+    painter.fillPolygon(indicator, 3);
+
+}
+
+
+void PlatinumComboBoxRenderer::onRenderCursor(const ComboBox& cb, 
+                                              const StyleOptions& options,
+                                              Painter& painter, 
+                                              const Gfx::RectF& rect,
+                                              const Gfx::RectF& cursorRect) const
+{
+    painter.setPen( options.textColor() );
+    
+    painter.drawLine( cursorRect.topLeft(),
+                      cursorRect.bottomLeft() );
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // PlatinumStyle
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -994,6 +1072,7 @@ PlatinumStyle::PlatinumStyle()
     set(new PlatinumProgressBarRenderer);
     set(new PlatinumSliderRenderer);
     set(new PlatinumListBoxRenderer);
+    set(new PlatinumComboBoxRenderer);
 }
 
 

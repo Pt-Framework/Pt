@@ -142,9 +142,12 @@ void ComboBoxMenu::onShowEvent(const ShowEvent& ev)
 /////////////////////////////////////////////////////////////////////////////
 
 ComboBox::ComboBox()
+: _hasRenderer(false)
 {
     setTextInput(true);
     setFocusPolicy(Widget::NormalFocus);
+
+    setPadding(5);
 
     _item1.resize( Gfx::SizeF(20, 25) );
     _item1.setText("Item 1");
@@ -200,13 +203,122 @@ void ComboBox::setScrollBars(bool hasScrollBars)
 }
 
 
+const Gfx::Brush& ComboBox::background() const
+{
+    return _background ? *_background
+                       : Application::instance().styleOptions().textBackground();
+}
+
+
+void ComboBox::setBackground(const Gfx::Brush& b)
+{
+    _background.reset( new Gfx::Brush(b) );
+    invalidate();
+}
+
+
+const Gfx::Pen& ComboBox::contour() const
+{
+    return _contour ? *_contour
+                    : Application::instance().styleOptions().contour();
+}
+
+
+void ComboBox::setContour(const Gfx::Pen& p)
+{
+    _contour.reset( new Gfx::Pen(p) );
+    invalidate();
+}
+
+
+const Gfx::Color& ComboBox::textColor() const
+{
+    return _textColor ? *_textColor
+                      : Application::instance().styleOptions().textColor();
+}
+
+
+void ComboBox::setTextColor(const Gfx::Color& color)
+{
+    _textColor.reset( new Gfx::Color(color) );
+    invalidate();
+}
+
+
+const std::string& ComboBox::font() const
+{
+    return _fontName ? *_fontName
+                     : Application::instance().styleOptions().font().name();
+}
+
+
+void ComboBox::setFont(const std::string& fontName)
+{
+    _fontName.reset( new std::string(fontName) );
+    invalidate();
+}
+
+
+std::size_t ComboBox::fontSize() const
+{
+
+    return _fontSize ? *_fontSize
+                     : Application::instance().styleOptions().font().size();
+}
+
+
+void ComboBox::setFontSize(const std::size_t s)
+{
+    _fontSize.reset( new std::size_t(s) );
+    invalidate();
+}
+
+
+Gfx::Font::Style ComboBox::fontStyle() const
+{
+    return _fontStyle ? *_fontStyle
+                      : Application::instance().styleOptions().font().style();
+}
+
+
+void ComboBox::setFontStyle(Gfx::Font::Style style)
+{
+    _fontStyle.reset( new Gfx::Font::Style(style) );
+    invalidate();
+}
+
+
+void ComboBox::setRenderer(ComboBoxRenderer* renderer)
+{
+    _renderer.reset(renderer);
+    _hasRenderer = renderer != 0;
+
+    invalidate();
+}
+
+
 void ComboBox::onInvalidate()
 {
     Base::onInvalidate();
 
     const StyleOptions& options = Application::instance().styleOptions();
+    const Style& style = Application::instance().style();
+
+    _brush = background();
+    _pen = contour();
+    _placeholderPen = contour();
+    _textPen = textColor();
+    _font = Gfx::Font(font(), fontSize(), fontStyle());
+
+    if( ! _hasRenderer )
+        _renderer.reset( style.get<ComboBoxRenderer>() );
     
-    _editor.setFont( options.font() );
+    if( ! _renderer )
+        return;
+
+    _renderer->prepare(*this, options, _brush, _pen, _font, _textPen);
+    
+    _editor.setFont(_font);
     _editor.layout(_line);
 }
 
@@ -215,26 +327,19 @@ void ComboBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
+    if( ! _renderer)
+        return;
+
     Painter painter(surface);
     painter.setClip(rect);
-    
-    Gfx::Pen pen  = options.contour();
-    if(isHighlighted() || this->hasFocus() )
-        pen = options.accentColor();
 
-    Gfx::Pen textPen = options.textColor();
-    Gfx::Brush brush = options.textBackground();
-    Gfx::Font font   = options.font();
+    _renderer->renderBackground( *this, options, painter, rect,
+                                 _pen, _brush );
     
-    painter.setPen(pen);
-    painter.setBrush(brush);
-    painter.setFont(font);
-
-    painter.fillRect(rect);
-    painter.drawRect(rect);
 
     Gfx::PointF textPos( _line.position() );
-    painter.setPen(textPen);
+    painter.setPen(_textPen);
+    painter.setFont(_font);
     painter.drawText(textPos, _editor.text());
 }
 
