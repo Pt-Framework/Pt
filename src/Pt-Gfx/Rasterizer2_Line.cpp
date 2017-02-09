@@ -108,11 +108,7 @@ void Rasterizer2::rasterOnePixelHLineSegment(Pt::int32_t x1, Pt::int32_t x2, Pt:
 
     // Draw the line
     Pixel pixel(_image->view(), x1, y);
-
-    for(Pt::int32_t i = 0; i < sizeL; ++i) {
-        _image->format().setPixel(pixel, color, _compositionMode);
-        pixel.advance();
-    }
+    _image->format().setPixels(pixel, color, sizeL, _compositionMode);
 }
 
 void Rasterizer2::rasterOnePixelVLineSegment(Pt::int32_t x, Pt::int32_t y1, Pt::int32_t y2, const Color& color, bool skipLastPoint)
@@ -129,11 +125,10 @@ void Rasterizer2::rasterOnePixelVLineSegment(Pt::int32_t x, Pt::int32_t y1, Pt::
     }
 }
 
+// Xiaolin Wu's Anti-Aliased Line Algorithm
+// https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
 void Rasterizer2::rasterOnePixelGLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, const Color& color, bool skipLastPoint)
 {
-    // Xiaolin Wu's Anti-Aliased Line Algorithm
-    // https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
-
     // A helper macro to set pixel
     #define XW_SET_PIXEL(IMG, COL, X, Y, A)                                        \
         do {                                                                       \
@@ -145,7 +140,7 @@ void Rasterizer2::rasterOnePixelGLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, P
     // Swap the values as needed
     const Pt::int32_t deltaX = (fx2 >= fx1) ? (fx2 - fx1) : (fx1 - fx2);
     const Pt::int32_t deltaY = (fy2 >= fy1) ? (fy2 - fy1) : (fy1 - fy2);
-    bool              steep  = deltaY > deltaX;
+    const bool        steep  = deltaY > deltaX;
 
     if(steep) {
         std::swap(fx1, fy1);
@@ -157,111 +152,31 @@ void Rasterizer2::rasterOnePixelGLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, P
         std::swap(fy1, fy2);
     }
 
-    // Calculate the gradient
-    Pt::int32_t gradient = (fy2 - fy1) / ((fx2 - fx1) >> FIXED_POINT_SHIFT_FACTOR);
-
-    // Handle the first endpoint
-    Pt::int32_t xend  = FIXED_POINT_ROUND(fx1);
-    Pt::int32_t yend  = fy1 + gradient * FIXED_POINT_TO_INT(xend - fx1);
-    Pt::int32_t xgap  = FIXED_POINT_RFPART(fx1 + FIXED_POINT_CONSTANT_HALF);
-    Pt::int32_t xpxl1 = xend; // Will be used to raster the rest of the pixels
-    Pt::int32_t ypxl1 = FIXED_POINT_IPART(yend);
-    Pt::uint8_t a1    = FIXED_POINT_MUL_TO_A8(FIXED_POINT_RFPART(yend), xgap);
-    Pt::uint8_t a2    = FIXED_POINT_MUL_TO_A8(FIXED_POINT_FPART (yend), xgap);
-#ifdef R2_USE_PIXEL_ITERATOR
-    if(steep) {
-        ImageView::PixelIterator pixel = _image->view().pixel(FIXED_POINT_TO_INT(ypxl1), FIXED_POINT_TO_INT(xpxl1));
-        _image->format().setPixel(*pixel, color, _compositionMode, a1);
-        ++pixel;
-        _image->format().setPixel(*pixel, color, _compositionMode, a2);
-    }
-    else {
-        ImageView::PixelIterator pixel = _image->view().pixel( FIXED_POINT_TO_INT(xpxl1), FIXED_POINT_TO_INT(ypxl1));
-        _image->format().setPixel(*pixel, color, _compositionMode, a1);
-        pixel += _image->width();
-        _image->format().setPixel(*pixel, color, _compositionMode, a2);
-    }
-#else
-    if(steep) {
-        XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(ypxl1                           ), FIXED_POINT_TO_INT(xpxl1), a1);
-        XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(ypxl1 + FIXED_POINT_CONSTANT_ONE), FIXED_POINT_TO_INT(xpxl1), a2);
-    }
-    else {
-        XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(xpxl1), FIXED_POINT_TO_INT(ypxl1                           ), a1);
-        XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(xpxl1), FIXED_POINT_TO_INT(ypxl1 + FIXED_POINT_CONSTANT_ONE), a2);
-    }
-#endif
-
-    // First y-intersection for the main loop
-    Pt::int32_t intery = yend + gradient;
-
-    // Handle the second endpoint
-                xend  = FIXED_POINT_ROUND(fx2);
-                yend  = fy2 + gradient * FIXED_POINT_TO_INT(xend - fx2);
-                xgap  = FIXED_POINT_RFPART(fx2 + FIXED_POINT_CONSTANT_HALF);
-    Pt::int32_t xpxl2 = xend; // Will be used to raster the rest of the pixels
-    Pt::int32_t ypxl2 = FIXED_POINT_IPART(yend);
-                a1    = FIXED_POINT_MUL_TO_A8(FIXED_POINT_RFPART(yend), xgap);
-                a2    = FIXED_POINT_MUL_TO_A8(FIXED_POINT_FPART (yend), xgap);
-    if(!skipLastPoint) {
-#ifdef R2_USE_PIXEL_ITERATOR
-        if(steep) {
-            ImageView::PixelIterator pixel = _image->view().pixel(FIXED_POINT_TO_INT(ypxl2), FIXED_POINT_TO_INT(xpxl2));
-            _image->format().setPixel(*pixel, color, _compositionMode, a1);
-            ++pixel;
-            _image->format().setPixel(*pixel, color, _compositionMode, a2);
-        }
-        else {
-            ImageView::PixelIterator pixel = _image->view().pixel(FIXED_POINT_TO_INT(xpxl2), FIXED_POINT_TO_INT(ypxl2));
-            _image->format().setPixel(*pixel, color, _compositionMode, a1);
-            pixel += _image->width();
-            _image->format().setPixel(*pixel, color, _compositionMode, a2);
-        }
-#else
-        if(steep) {
-            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(ypxl2                           ), FIXED_POINT_TO_INT(xpxl2), a1);
-            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(ypxl2 + FIXED_POINT_CONSTANT_ONE), FIXED_POINT_TO_INT(xpxl2), a2);
-        }
-        else {
-            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(xpxl2), FIXED_POINT_TO_INT(ypxl2                           ), a1);
-            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(xpxl2), FIXED_POINT_TO_INT(ypxl2 + FIXED_POINT_CONSTANT_ONE), a2);
-        }
-#endif
-    }
+    // Handle the gradient, starting point, and ending point
+    const Pt::int32_t grad = (fy2 - fy1) / FIXED_POINT_TO_INT(fx2 - fx1);
+    const Pt::int32_t xpxl1 = FIXED_POINT_ROUND(fx1);
+    const Pt::int32_t xpxl2 = FIXED_POINT_ROUND(fx2);
+          Pt::int32_t ypxl  = fy1 + grad * FIXED_POINT_TO_INT(xpxl1 - fx1);
 
     // Loop through the rest of the pixels
-    Pt::int32_t from = FIXED_POINT_TO_INT(xpxl1 + FIXED_POINT_CONSTANT_ONE);
-    Pt::int32_t to   = FIXED_POINT_TO_INT(xpxl2 - FIXED_POINT_CONSTANT_ONE);
+    const Pt::int32_t from = FIXED_POINT_TO_INT(FIXED_POINT_ROUND(fx1));
+    const Pt::int32_t to   = skipLastPoint ? ( FIXED_POINT_TO_INT(xpxl2) - 1) : FIXED_POINT_TO_INT(xpxl2);
     if(steep) {
         for(Pt::int32_t i = from; i <= to; ++i) {
-            a1 = FIXED_POINT_RFPART_TO_A8(intery);
-            a2 = FIXED_POINT_FPART_TO_A8 (intery);
-#ifdef R2_USE_PIXEL_ITERATOR
-            ImageView::PixelIterator pixel = _image->view().pixel(FIXED_POINT_TO_INT(FIXED_POINT_IPART(intery)), i);
-            _image->format().setPixel(*pixel, color, _compositionMode, a1);
-            ++pixel;
-            _image->format().setPixel(*pixel, color, _compositionMode, a2);
-#else
-            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(FIXED_POINT_IPART(intery)                           ), i, a1);
-            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(FIXED_POINT_IPART(intery) + FIXED_POINT_CONSTANT_ONE), i, a2);
-#endif
-            intery += gradient;
+            const Pt::uint8_t a1 = FIXED_POINT_RFPART_TO_A8(ypxl);
+            const Pt::uint8_t a2 = FIXED_POINT_FPART_TO_A8 (ypxl);
+            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl)                           ), i, a1);
+            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl) + FIXED_POINT_CONSTANT_ONE), i, a2);
+            ypxl += grad;
         }
     }
     else {
         for(Pt::int32_t i = from; i <= to; ++i) {
-            a1 = FIXED_POINT_RFPART_TO_A8(intery);
-            a2 = FIXED_POINT_FPART_TO_A8 (intery);
-#ifdef R2_USE_PIXEL_ITERATOR
-            ImageView::PixelIterator pixel = _image->view().pixel(i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(intery)));
-            _image->format().setPixel(*pixel, color, _compositionMode, a1);
-            pixel += _image->width();
-            _image->format().setPixel(*pixel, color, _compositionMode, a2);
-#else
-            XW_SET_PIXEL(_image, color, i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(intery)                           ), a1);
-            XW_SET_PIXEL(_image, color, i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(intery) + FIXED_POINT_CONSTANT_ONE), a2);
-#endif
-            intery += gradient;
+            const Pt::uint8_t a1 = FIXED_POINT_RFPART_TO_A8(ypxl);
+            const Pt::uint8_t a2 = FIXED_POINT_FPART_TO_A8 (ypxl);
+            XW_SET_PIXEL(_image, color, i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl)                           ), a1);
+            XW_SET_PIXEL(_image, color, i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl) + FIXED_POINT_CONSTANT_ONE), a2);
+            ypxl += grad;
         }
     }
 }

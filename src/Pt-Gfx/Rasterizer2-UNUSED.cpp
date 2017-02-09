@@ -427,3 +427,168 @@ void Rasterizer2::rasterPolygonAreaNOAA_ORIGINAL(const Point* points, size_t poi
         }
     }
 }
+
+
+
+
+
+
+
+// Line
+#ifdef R2_USE_PIXEL_ITERATOR
+    if(steep) {
+        ImageView::PixelIterator pixel = _image->view().pixel(FIXED_POINT_TO_INT(ypxl1), FIXED_POINT_TO_INT(xpxl1));
+        _image->format().setPixel(*pixel, color, _compositionMode, a1);
+        ++pixel;
+        _image->format().setPixel(*pixel, color, _compositionMode, a2);
+    }
+    else {
+        ImageView::PixelIterator pixel = _image->view().pixel( FIXED_POINT_TO_INT(xpxl1), FIXED_POINT_TO_INT(ypxl1));
+        _image->format().setPixel(*pixel, color, _compositionMode, a1);
+        pixel += _image->width();
+        _image->format().setPixel(*pixel, color, _compositionMode, a2);
+    }
+#else
+
+#ifdef R2_USE_PIXEL_ITERATOR
+        if(steep) {
+            ImageView::PixelIterator pixel = _image->view().pixel(FIXED_POINT_TO_INT(ypxl2), FIXED_POINT_TO_INT(xpxl2));
+            _image->format().setPixel(*pixel, color, _compositionMode, a1);
+            ++pixel;
+            _image->format().setPixel(*pixel, color, _compositionMode, a2);
+        }
+        else {
+            ImageView::PixelIterator pixel = _image->view().pixel(FIXED_POINT_TO_INT(xpxl2), FIXED_POINT_TO_INT(ypxl2));
+            _image->format().setPixel(*pixel, color, _compositionMode, a1);
+            pixel += _image->width();
+            _image->format().setPixel(*pixel, color, _compositionMode, a2);
+        }
+#else
+
+#ifdef R2_USE_PIXEL_ITERATOR
+            ImageView::PixelIterator pixel = _image->view().pixel(FIXED_POINT_TO_INT(FIXED_POINT_IPART(intery)), i);
+            _image->format().setPixel(*pixel, color, _compositionMode, a1);
+            ++pixel;
+            _image->format().setPixel(*pixel, color, _compositionMode, a2);
+#else
+
+#ifdef R2_USE_PIXEL_ITERATOR
+            ImageView::PixelIterator pixel = _image->view().pixel(i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(intery)));
+            _image->format().setPixel(*pixel, color, _compositionMode, a1);
+            pixel += _image->width();
+            _image->format().setPixel(*pixel, color, _compositionMode, a2);
+#else
+
+
+
+// Rectagle
+#ifdef R2_USE_PIXEL_ITERATOR
+    ImageView::PixelIterator pixel = _image->view().pixel(minX, minY);
+    for(Pt::int32_t y = minY; y <= maxY; ++y) {
+        Pt::int32_t spanWidth = sizeX;
+        while(spanWidth > 0) {
+            const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
+            _image->format().copy(*pixel, _brushPixel, n, _compositionMode);
+            pixel     += n;
+            spanWidth -= n;
+        }
+        pixel += (_image->width() - sizeX);
+    }
+#else
+
+
+
+
+
+
+// Xiaolin Wu's Anti-Aliased Line Algorithm
+// https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
+void Rasterizer2::rasterOnePixelGLineSegment_ORIGINAL(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, const Color& color, bool skipLastPoint)
+{
+    // A helper macro to set pixel
+    #define XW_SET_PIXEL(IMG, COL, X, Y, A)                                        \
+        do {                                                                       \
+            if( X < 0 || X >= IMG->width() || Y < 0 || Y >= IMG->height() ) break; \
+            Pixel PIX(IMG->view(), X, Y);                                          \
+            IMG->format().setPixel(PIX, COL, _compositionMode, A);                 \
+        } while(false)
+
+    // Swap the values as needed
+    const Pt::int32_t deltaX = (fx2 >= fx1) ? (fx2 - fx1) : (fx1 - fx2);
+    const Pt::int32_t deltaY = (fy2 >= fy1) ? (fy2 - fy1) : (fy1 - fy2);
+    bool              steep  = deltaY > deltaX;
+
+    if(steep) {
+        std::swap(fx1, fy1);
+        std::swap(fx2, fy2);
+    }
+
+    if(fx1 > fx2) {
+        std::swap(fx1, fx2);
+        std::swap(fy1, fy2);
+    }
+
+    // Calculate the gradient
+    Pt::int32_t gradient = (fy2 - fy1) / ((fx2 - fx1) >> FIXED_POINT_SHIFT_FACTOR);
+
+    // Handle the first endpoint
+    Pt::int32_t xend  = FIXED_POINT_ROUND(fx1);
+    Pt::int32_t yend  = fy1 + gradient * FIXED_POINT_TO_INT(xend - fx1);
+    Pt::int32_t xgap  = FIXED_POINT_RFPART(fx1 + FIXED_POINT_CONSTANT_HALF);
+    Pt::int32_t xpxl1 = xend; // Will be used to raster the rest of the pixels
+    Pt::int32_t ypxl1 = FIXED_POINT_IPART(yend);
+    Pt::uint8_t a1    = FIXED_POINT_MUL_TO_A8(FIXED_POINT_RFPART(yend), xgap);
+    Pt::uint8_t a2    = FIXED_POINT_MUL_TO_A8(FIXED_POINT_FPART (yend), xgap);
+    if(steep) {
+        XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(ypxl1                           ), FIXED_POINT_TO_INT(xpxl1), a1);
+        XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(ypxl1 + FIXED_POINT_CONSTANT_ONE), FIXED_POINT_TO_INT(xpxl1), a2);
+    }
+    else {
+        XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(xpxl1), FIXED_POINT_TO_INT(ypxl1                           ), a1);
+        XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(xpxl1), FIXED_POINT_TO_INT(ypxl1 + FIXED_POINT_CONSTANT_ONE), a2);
+    }
+
+    // First y-intersection for the main loop
+    Pt::int32_t intery = yend + gradient;
+
+    // Handle the second endpoint
+                xend  = FIXED_POINT_ROUND(fx2);
+                yend  = fy2 + gradient * FIXED_POINT_TO_INT(xend - fx2);
+                xgap  = FIXED_POINT_RFPART(fx2 + FIXED_POINT_CONSTANT_HALF);
+    Pt::int32_t xpxl2 = xend; // Will be used to raster the rest of the pixels
+    Pt::int32_t ypxl2 = FIXED_POINT_IPART(yend);
+                a1    = FIXED_POINT_MUL_TO_A8(FIXED_POINT_RFPART(yend), xgap);
+                a2    = FIXED_POINT_MUL_TO_A8(FIXED_POINT_FPART (yend), xgap);
+    if(!skipLastPoint) {
+        if(steep) {
+            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(ypxl2                           ), FIXED_POINT_TO_INT(xpxl2), a1);
+            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(ypxl2 + FIXED_POINT_CONSTANT_ONE), FIXED_POINT_TO_INT(xpxl2), a2);
+        }
+        else {
+            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(xpxl2), FIXED_POINT_TO_INT(ypxl2                           ), a1);
+            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(xpxl2), FIXED_POINT_TO_INT(ypxl2 + FIXED_POINT_CONSTANT_ONE), a2);
+        }
+    }
+
+    // Loop through the rest of the pixels
+    Pt::int32_t from = FIXED_POINT_TO_INT(xpxl1 + FIXED_POINT_CONSTANT_ONE);
+    Pt::int32_t to   = FIXED_POINT_TO_INT(xpxl2 - FIXED_POINT_CONSTANT_ONE);
+    if(steep) {
+        for(Pt::int32_t i = from; i <= to; ++i) {
+            a1 = FIXED_POINT_RFPART_TO_A8(intery);
+            a2 = FIXED_POINT_FPART_TO_A8 (intery);
+            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(FIXED_POINT_IPART(intery)                           ), i, a1);
+            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(FIXED_POINT_IPART(intery) + FIXED_POINT_CONSTANT_ONE), i, a2);
+            intery += gradient;
+        }
+    }
+    else {
+        for(Pt::int32_t i = from; i <= to; ++i) {
+            a1 = FIXED_POINT_RFPART_TO_A8(intery);
+            a2 = FIXED_POINT_FPART_TO_A8 (intery);
+            XW_SET_PIXEL(_image, color, i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(intery)                           ), a1);
+            XW_SET_PIXEL(_image, color, i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(intery) + FIXED_POINT_CONSTANT_ONE), a2);
+            intery += gradient;
+        }
+    }
+}

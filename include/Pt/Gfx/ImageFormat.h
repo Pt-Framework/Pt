@@ -130,7 +130,7 @@ class ImageFormat
 
         /** @brief Sets the pixels color.
         */
-        void setPixesl(Pixel& to, const Color& c, size_t length,
+        void setPixels(Pixel& to, const Color& c, size_t length,
                       CompositionMode mode) const
         { onSetPixels(to, c, length, mode); }
 

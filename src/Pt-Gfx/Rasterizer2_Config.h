@@ -62,9 +62,5 @@
 #define FIXED_POINT_FROM_INT(V)     ( (V) << FIXED_POINT_SHIFT_FACTOR )
 #define FIXED_POINT_TO_INT(V)       ( (V) >> FIXED_POINT_SHIFT_FACTOR )
 
-// Supersampling size (2 or 4)
+// Supersampling size (2 or 4) for True SSAA-and Edge-SSAA and algorithms
 #define SUPERSAMPLING_SIZE 2
-
-// Uncomment this to use ImageView::PixelIterator
-// NOTE: Currently it is slower than using the Pixel class; so do not uncomment this
-// #define R2_USE_PIXEL_ITERATOR
