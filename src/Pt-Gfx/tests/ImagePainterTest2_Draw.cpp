@@ -36,7 +36,7 @@ static void testDrawLine(const char* title, Image& image, Painter& painter)
     painter.setPen( Pen(Color::fromRgb8(0, 255, 255, 175)) ); painter.drawText( PointF(100, 100), "Hello world!" );
     painter.setPen( Pen(Color::fromRgb8(0, 255, 255, 255)) ); painter.drawText( PointF(100, 150), "Hello world!" );
 
-    sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height());
+    sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
 }
 
 static void testDrawRect(const char* title, Image& image, Painter& painter)
@@ -77,7 +77,7 @@ static void testDrawRect(const char* title, Image& image, Painter& painter)
     painter.fillRect( RectF(PointF(450, 440), SizeF(200, 100)) );
 
 
-    sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height());
+    sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
 }
 
 static void testDrawFillPolygon(const char* title, Image& image, Painter& painter, const Brush& brush1, const Brush& brush2)
@@ -115,6 +115,6 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
     else    painter.fillPolygon(poly2b, sizeof(poly2b) / sizeof(poly2b[0]));
 
 
-    sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height());
+    sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }
 

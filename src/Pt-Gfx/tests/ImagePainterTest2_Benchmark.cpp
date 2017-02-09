@@ -29,7 +29,7 @@ static const std::string formatCaption(const Painter& painter, CompositionMode c
     return ss.str();
 }
 
-#define BENCHMARK_DISPLAY_RESULTING_IMAGE if(BENCHMARK_CHECK_RESULTING_IMAGE && !i) sdlPreviewRGB888Buffer(formatCaption(painter, cm, __FUNCTION__), image.data(), image.width(), image.height())
+#define BENCHMARK_DISPLAY_RESULTING_IMAGE if(BENCHMARK_CHECK_RESULTING_IMAGE && !i) sdlPreviewRGB888Buffer(formatCaption(painter, cm, __FUNCTION__), image.data(), image.width(), image.height(), false)
 
 template <typename PainterT>
 static size_t benchDrawText(int loopCount, CompositionMode cm)

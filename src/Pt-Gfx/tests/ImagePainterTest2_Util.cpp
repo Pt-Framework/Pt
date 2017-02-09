@@ -1,4 +1,4 @@
-static void sdlPreviewRGB888Buffer(const std::string& title, const uint8_t* argb8888Buff, int sizeX, int sizeY)
+static void sdlPreviewRGB888Buffer(const std::string& title, const uint8_t* argb8888Buff, int sizeX, int sizeY, bool saveImageAsBMP)
 {
     // Initialise SDL
     if(SDL_Init(SDL_INIT_VIDEO) < 0) return;
@@ -42,6 +42,16 @@ static void sdlPreviewRGB888Buffer(const std::string& title, const uint8_t* argb
         // Display the frame and wait for a while
         SDL_RenderPresent(sdlRenderer);
         usleep(10000);
+    }
+
+    // Save the image as a BMP file
+    if(saveImageAsBMP) {
+        std::string eraseStr = " - ImagePainter2";
+        std::string fileName = std::string("IPT2 - ") + title + ".bmp";
+        fileName.erase(fileName.find(eraseStr), eraseStr.length());
+         SDL_Surface* sdlSurface = SDL_CreateRGBSurfaceFrom((void*) argb8888Buff, sizeX, sizeY, 32, sizeX * 4, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
+        SDL_SaveBMP(sdlSurface, fileName.c_str());
+        SDL_FreeSurface(sdlSurface);
     }
 
     // Done
