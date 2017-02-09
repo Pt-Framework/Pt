@@ -875,7 +875,8 @@ class PT_HMI_API ComboBoxRenderer : public Style::Facet
 
         void prepare(const ComboBox& cb, 
                      const StyleOptions& options,
-                     Gfx::Brush& brush,
+                     Gfx::Brush& background,
+                     Gfx::Brush& foreground,
                      Gfx::Pen& contour,
                      Gfx::Font& font,
                      Gfx::Pen& textPen) const;
@@ -887,6 +888,13 @@ class PT_HMI_API ComboBoxRenderer : public Style::Facet
                               const Gfx::Pen& contour,
                               const Gfx::Brush& brush) const;
 
+        void renderButton(const ComboBox& cb, 
+                          const StyleOptions& options,
+                          Painter& painter, 
+                          const Gfx::RectF& rect,
+                          const Gfx::Pen& contour,
+                          const Gfx::Brush& foreground) const;
+
         void renderCursor(const ComboBox& cb, 
                           const StyleOptions& options,
                           Painter& painter, 
@@ -896,7 +904,8 @@ class PT_HMI_API ComboBoxRenderer : public Style::Facet
     protected:
         virtual void onPrepare(const ComboBox& cb, 
                                const StyleOptions& options,
-                               Gfx::Brush& brush,
+                               Gfx::Brush& background,
+                               Gfx::Brush& foreground,
                                Gfx::Pen& contour,
                                Gfx::Font& font,
                                Gfx::Pen& textPen) const = 0;
@@ -907,6 +916,12 @@ class PT_HMI_API ComboBoxRenderer : public Style::Facet
                                         const Gfx::RectF& rect,
                                         const Gfx::Pen& contour,
                                         const Gfx::Brush& brush) const = 0;
+        virtual void onRenderButton(const ComboBox& cb, 
+                                    const StyleOptions& options,
+                                    Painter& painter, 
+                                    const Gfx::RectF& rect,
+                                    const Gfx::Pen& contour,
+                                    const Gfx::Brush& foreground) const = 0;
 
         virtual void onRenderCursor(const ComboBox& cb, 
                                     const StyleOptions& options,

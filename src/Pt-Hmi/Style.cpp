@@ -734,12 +734,13 @@ ComboBoxRenderer::~ComboBoxRenderer()
 
 void ComboBoxRenderer::prepare(const ComboBox& cb, 
                                const StyleOptions& options,
-                               Gfx::Brush& brush,
+                               Gfx::Brush& background,
+                               Gfx::Brush& foreground,
                                Gfx::Pen& contour,
                                Gfx::Font& font,
                                Gfx::Pen& textPen) const
 {
-    onPrepare(cb, options, brush, contour, font, textPen);
+    onPrepare(cb, options, background, foreground, contour, font, textPen);
 }
 
 
@@ -751,6 +752,17 @@ void ComboBoxRenderer::renderBackground(const ComboBox& cb,
                                         const Gfx::Brush& brush) const
 {
     onRenderBackground(cb, options, painter, rect, contour, brush);
+}
+
+
+void ComboBoxRenderer::renderButton(const ComboBox& cb, 
+                                    const StyleOptions& options,
+                                    Painter& painter, 
+                                    const Gfx::RectF& rect,
+                                    const Gfx::Pen& contour,
+                                    const Gfx::Brush& foreground) const
+{
+    onRenderButton(cb, options, painter, rect, contour, foreground);
 }
 
 

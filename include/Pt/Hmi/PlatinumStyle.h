@@ -485,7 +485,8 @@ class PT_HMI_API PlatinumComboBoxRenderer : public ComboBoxRenderer
     protected:
         virtual void onPrepare(const ComboBox& cb, 
                                const StyleOptions& options,
-                               Gfx::Brush& brush,
+                               Gfx::Brush& background,
+                               Gfx::Brush& foreground,
                                Gfx::Pen& contour,
                                Gfx::Font& font,
                                Gfx::Pen& textPen) const;
@@ -496,6 +497,13 @@ class PT_HMI_API PlatinumComboBoxRenderer : public ComboBoxRenderer
                                         const Gfx::RectF& rect,
                                         const Gfx::Pen& contour,
                                         const Gfx::Brush& brush) const;
+
+        virtual void onRenderButton(const ComboBox& cb, 
+                                    const StyleOptions& options,
+                                    Painter& painter, 
+                                    const Gfx::RectF& rect,
+                                    const Gfx::Pen& contour,
+                                    const Gfx::Brush& foreground) const;
 
         virtual void onRenderCursor(const ComboBox& cb, 
                                     const StyleOptions& options,

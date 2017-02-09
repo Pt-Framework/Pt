@@ -995,7 +995,8 @@ PlatinumComboBoxRenderer::~PlatinumComboBoxRenderer()
 
 void PlatinumComboBoxRenderer::onPrepare(const ComboBox& cb, 
                                          const StyleOptions& options,
-                                         Gfx::Brush& brush,
+                                         Gfx::Brush& background,
+                                         Gfx::Brush& foreground,
                                          Gfx::Pen& contour,
                                          Gfx::Font& font,
                                          Gfx::Pen& textPen) const
@@ -1012,6 +1013,8 @@ void PlatinumComboBoxRenderer::onPrepare(const ComboBox& cb,
         contour = Gfx::Pen( color, contour.size(), contour.style(), 
                             contour.capStyle(), contour.joinStyle() );
     }
+
+    foreground = contour.color();
 }
 
 
@@ -1022,12 +1025,23 @@ void PlatinumComboBoxRenderer::onRenderBackground(const ComboBox& cb,
                                                   const Gfx::Pen& contour,
                                                   const Gfx::Brush& brush) const
 {
+    Gfx::RectF borderRect( cb.size() );
+
     painter.setBrush(brush);
-    painter.fillRect(rect);
+    painter.fillRect(borderRect);
 
     painter.setPen(contour);
-    painter.drawRect(rect);
+    painter.drawRect(borderRect);
+}
 
+
+void PlatinumComboBoxRenderer::onRenderButton(const ComboBox& cb, 
+                                              const StyleOptions& options,
+                                              Painter& painter, 
+                                              const Gfx::RectF& rect,
+                                              const Gfx::Pen& contour,
+                                              const Gfx::Brush& foreground) const
+{
     static const double indicatorWidth = 8.0;
 
     double x = cb.size().width() - indicatorWidth * 1.5;
@@ -1037,9 +1051,8 @@ void PlatinumComboBoxRenderer::onRenderBackground(const ComboBox& cb,
                                  Gfx::PointF(x + indicatorWidth, y + indicatorWidth),
                                  Gfx::PointF(x + indicatorWidth, y) };
 
-    painter.setBrush( contour.color() );
+    painter.setBrush(foreground);
     painter.fillPolygon(indicator, 3);
-
 }
 
 

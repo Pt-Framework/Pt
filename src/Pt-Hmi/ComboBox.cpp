@@ -217,6 +217,20 @@ void ComboBox::setBackground(const Gfx::Brush& b)
 }
 
 
+const Gfx::Brush& ComboBox::foreground() const
+{
+    return _foreground ? *_foreground
+                       : Application::instance().styleOptions().foreground();
+}
+
+
+void ComboBox::setForeground(const Gfx::Brush& b)
+{
+    _foreground.reset( new Gfx::Brush(b) );
+    invalidate();
+}
+
+
 const Gfx::Pen& ComboBox::contour() const
 {
     return _contour ? *_contour
@@ -304,9 +318,9 @@ void ComboBox::onInvalidate()
     const StyleOptions& options = Application::instance().styleOptions();
     const Style& style = Application::instance().style();
 
-    _brush = background();
+    _backgroundBrush = background();
+    _foregroundBrush = foreground();
     _pen = contour();
-    _placeholderPen = contour();
     _textPen = textColor();
     _font = Gfx::Font(font(), fontSize(), fontStyle());
 
@@ -316,7 +330,8 @@ void ComboBox::onInvalidate()
     if( ! _renderer )
         return;
 
-    _renderer->prepare(*this, options, _brush, _pen, _font, _textPen);
+    _renderer->prepare(*this, options, _backgroundBrush, _foregroundBrush,
+                       _pen, _font, _textPen);
     
     _editor.setFont(_font);
     _editor.layout(_line);
@@ -334,8 +349,11 @@ void ComboBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     painter.setClip(rect);
 
     _renderer->renderBackground( *this, options, painter, rect,
-                                 _pen, _brush );
+                                 _pen, _backgroundBrush );
     
+
+    _renderer->renderButton( *this, options, painter, rect,
+                             _pen, _foregroundBrush );
 
     Gfx::PointF textPos( _line.position() );
     painter.setPen(_textPen);
@@ -348,7 +366,11 @@ void ComboBox::onResizeEvent(const ResizeEvent& ev)
 {
     Base::onResizeEvent(ev);
     
-    _editor.setSize( ev.size() );
+    // TODO: query button size from renderer
+    Gfx::SizeF s = ev.size();
+    s.addWidth(-20);
+
+    _editor.setSize(s);
 }
 
 

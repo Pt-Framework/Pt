@@ -92,6 +92,10 @@ class PT_HMI_API ComboBox : public Control
 
         void setBackground(const Gfx::Brush& b);
 
+        const Gfx::Brush& foreground() const;
+
+        void setForeground(const Gfx::Brush& b);
+
         const Gfx::Pen& contour() const;
 
         void setContour(const Gfx::Pen& p);
@@ -143,6 +147,7 @@ class PT_HMI_API ComboBox : public Control
         ComboBoxMenu _menu;
         
         AutoPtr<Gfx::Brush>       _background;
+        AutoPtr<Gfx::Brush>       _foreground;
         AutoPtr<Gfx::Pen>         _contour;
         AutoPtr<Gfx::Color>       _textColor;
         AutoPtr<std::string>      _fontName;
@@ -152,10 +157,10 @@ class PT_HMI_API ComboBox : public Control
         FacetPtr<ComboBoxRenderer> _renderer;
         bool                       _hasRenderer;
 
-        Gfx::Brush _brush;
+        Gfx::Brush _backgroundBrush;
+        Gfx::Brush _foregroundBrush;
         Gfx::Pen   _pen;
         Gfx::Pen   _textPen;
-        Gfx::Pen   _placeholderPen;
         Gfx::Font  _font;
 
         ListBoxItem _item1;
