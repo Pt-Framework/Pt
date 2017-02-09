@@ -3,20 +3,23 @@
 #include <fstream>
 #include <iomanip>
 
+#include <unistd.h>
+
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/ImagePainter2.h>
 #include <Pt/Gfx/PngReader.h>
 #include <Pt/System/Logger.h>
 #include <Pt/System/Clock.h>
 
+#include <cairo/cairo.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
-#include <unistd.h>
 
 using namespace Pt::Gfx;
 
-#define DO_TEST_DRAW    1
-#define DO_BENCHMARKING 1
+#define DO_TEST_DRAW          0
+#define DO_BENCHMARKING       0
+#define DO_CAIRO_BENCHMARKING 1
 
 //
 
@@ -34,7 +37,7 @@ using namespace Pt::Gfx;
 
 //
 
-#define BENCHMARK_CHECK_RESULTING_IMAGE     0
+#define BENCHMARK_CHECK_RESULTING_IMAGE     1
 #define BENCHMARK_IMAGE_SIZE                Size(1280, 800)
 #define BENCHMARK_LOOP_COUNT_SHORT          100
 #define BENCHMARK_LOOP_COUNT_LONG           200
@@ -60,6 +63,7 @@ static Image textureWithTransBackground;
 static Image textureWithWhiteBackground;
 
 #include "ImagePainterTest2_Util.cpp"
+#include "ImagePainterTest2_Cairo.cpp"
 #include "ImagePainterTest2_Draw.cpp"
 #include "ImagePainterTest2_Benchmark.cpp"
 
@@ -177,10 +181,20 @@ int main(int argc, char* args[])
         std::clog << std::fixed << std::setprecision(0) << std::endl;
 
         std::clog << "CompositionMode::SourceCopy" << std::endl;
-        doBenchMark(CompositionMode::SourceCopy);
+        doBenchmark(CompositionMode::SourceCopy);
 
         std::clog << "CompositionMode::SourceOver" << std::endl;
-        doBenchMark(CompositionMode::SourceOver);
+        doBenchmark(CompositionMode::SourceOver);
+    }
+
+    if(DO_CAIRO_BENCHMARKING) {
+        std::clog << std::fixed << std::setprecision(0) << std::endl;
+
+        std::clog << "Cairo - CompositionMode::SourceCopy" << std::endl;
+        cairoBenchmark(CompositionMode::SourceCopy);
+
+        std::clog << "Cairo - CompositionMode::SourceOver" << std::endl;
+        cairoBenchmark(CompositionMode::SourceOver);
     }
 
     return 0;

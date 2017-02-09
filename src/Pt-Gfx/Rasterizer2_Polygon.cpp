@@ -715,6 +715,65 @@ void Rasterizer2::rasterPolygonAreaFastSSAA(const Point* points, size_t pointCou
             const Pt::int32_t fromMax = std::max(from0, from1);
             const Pt::int32_t toMin   = std::min(to0,   to1  );
             const Pt::int32_t toMax   = std::max(to0,   to1  );
+            /*
+             *        Normal Pixel# 00    01    02    03    04    05    06    07    08    09
+             * Supersampling Pixel# 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19
+             *
+             *                     ┌──┬──┬──┐                                         ┌──┬──┬──┐
+             *               from0 │O-│  │  │                                         │  │  │-O│ to0
+             *               from1 │O-│  │  │                                         │  │  │-O│ to1
+             *                     └──┴──┴──┘                                         └──┴──┴──┘
+             *         Alpha Score  4                                                         4
+             *
+             *                     ┌──┬──┬──┐       fx0 =  fromMin / 2                ┌──┬──┬──┐
+             *               from0 │O-│  │  │       fa0 = (fromMin & 1) ? 1 : 2       │  │  │-O│ to0
+             *               from1 │ O│  │  │           + (fromMax & 1) ? 1 : 2       │  │  │O │ to1
+             *                     └──┴──┴──┘                                         └──┴──┴──┘
+             *         Alpha Score  3               fx1 =  fromMax / 2                        3
+             *                                      fa1 = (fromMax & 1) ? 1 : 2
+             *                     ┌──┬──┬──┐           + 2                           ┌──┬──┬──┐
+             *               from0 │ O│  │  │                                         │  │  │O │ to0
+             *               from1 │ O│  │  │       iterX = [ fx0 + 1 , fx1 )         │  │  │O │ to1
+             *                     └──┴──┴──┘       iterA = 2                         └──┴──┴──┘
+             *         Alpha Score  2                                                         2
+             *
+             *                     ┌──┬──┬──┐                                         ┌──┬──┬──┐
+             *               from0 │O-│--│  │                                         │  │--│-O│ to0
+             *               from1 │  │O-│  │                                         │  │-O│  │ to1
+             *                     └──┴──┴──┘                                         └──┴──┴──┘
+             *         Alpha Score  2  4                                                   4  2
+             *
+             *                     ┌──┬──┬──┐       tx0 =  toMin / 2                  ┌──┬──┬──┐
+             *               from0 │O-│--│  │       ta0 = (toMin & 1) ? 2 : 1         │  │--│-O│ to0
+             *               from1 │  │ O│  │           +  2                          │  │O │  │ to1
+             *                     └──┴──┴──┘                                         └──┴──┴──┘
+             *         Alpha Score  2   3           tx1 =  toMax / 2                       3  2
+             *                                      ta1 = (toMin & 1) ? 2 : 1
+             *                     ┌──┬──┬──┐           + (toMax & 1) ? 2 : 1         ┌──┬──┬──┐
+             *               from0 │ O│--│  │                                         │  │--│O │ to0
+             *               from1 │  │O-│  │       iterX = [ tx0 + 1 , tx1 )         │  │-O│  │ to1
+             *                     └──┴──┴──┘       iterA = 2                         └──┴──┴──┘
+             *         Alpha Score  1  4                                                   4  1
+             *
+             *                     ┌──┬──┬──┐                                         ┌──┬──┬──┐
+             *               from0 │ O│--│  │                                         │  │--│O │ to0
+             *               from1 │  │ O│  │                                         │  │O │  │ to1
+             *                     └──┴──┴──┘                                         └──┴──┴──┘
+             *         Alpha Score  1  3                                                   3  1
+             *
+             *                     ┌──┬──┬──┐       pxAlpha = (alpha * 255) / 4       ┌──┬──┬──┐
+             *               from0 │O-│--│--│                                         │--│--│-O│ to0
+             *               from1 │  │  │O-│                                         │-O│  │  │ to1
+             *                     └──┴──┴──┘                                         └──┴──┴──┘
+             *         Alpha Score  2  2  4                                             4  2  2
+             *
+             *                     ┌──┬──┬──┐                                         ┌──┬──┬──┐
+             *               from0 │ O│--│--│                                         │--│--│O │ to0
+             *               from1 │  │  │ O│                                         │O │  │  │ to1
+             *                     └──┴──┴──┘                                         └──┴──┴──┘
+             *         Alpha Score  1  2  3                                             3  2  1
+             */
+
             // Reset the alphas
             memset(&alphas[0], 0, alphas.size());
             // Calculate the alphas of the left-part of the span

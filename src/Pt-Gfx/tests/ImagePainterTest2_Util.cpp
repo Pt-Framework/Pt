@@ -67,3 +67,40 @@ static void resetImage(Image& image)
     image.reset(image.format(), Size(0, 0));
     image.reset(image.format(), origSize);
 }
+
+#ifdef __GNUC__
+#include <cxxabi.h>
+#endif
+
+static const std::string formatCaption(const std::string& className, CompositionMode cm, const char* funcName)
+{
+    // Get the composition mode string
+    std::string cmStr;
+    switch(cm) {
+        case CompositionMode::SourceCopy : cmStr = "SourceCopy"; break;
+        case CompositionMode::SourceOver : cmStr = "SourceOver"; break;
+        default                          : cmStr = "<unknown>";  break;
+    }
+
+    // Generate the information text
+    std::stringstream ss;
+    ss << funcName << "() - " << className << " [" << cmStr << "]";
+
+    // Return the text
+    return ss.str();
+}
+
+static const std::string formatCaption(const Painter& painter, CompositionMode cm, const char* funcName)
+{
+    // Get the class name string
+    std::string className = typeid(painter).name();
+#ifdef __GNUC__
+    int s;
+    char* demangled = abi::__cxa_demangle(className.c_str(), 0, 0, &s);
+    className = demangled;
+    free(demangled);
+#endif
+
+    // Call the overload function
+    return formatCaption(className, cm, funcName);
+}

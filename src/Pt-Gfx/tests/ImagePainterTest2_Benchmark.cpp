@@ -1,35 +1,5 @@
-#ifdef __GNUC__
-#include <cxxabi.h>
-#endif
-
-static const std::string formatCaption(const Painter& painter, CompositionMode cm, const char* funcName)
-{
-    // Get the class name string
-    std::string className = typeid(painter).name();
-#ifdef __GNUC__
-    int s;
-    char* demangled = abi::__cxa_demangle(className.c_str(), 0, 0, &s);
-    className = demangled;
-    free(demangled);
-#endif
-
-    // Get the composition mode string
-    std::string cmStr;
-    switch(cm) {
-        case CompositionMode::SourceCopy : cmStr = "SourceCopy"; break;
-        case CompositionMode::SourceOver : cmStr = "SourceOver"; break;
-        default                          : cmStr = "<unknown>";  break;
-    }
-
-    // Generate the information text
-    std::stringstream ss;
-    ss << funcName << "() - " << className << " [" << cmStr << "]";
-
-    // Return the text
-    return ss.str();
-}
-
-#define BENCHMARK_DISPLAY_RESULTING_IMAGE if(BENCHMARK_CHECK_RESULTING_IMAGE && !i) sdlPreviewRGB888Buffer(formatCaption(painter, cm, __FUNCTION__), image.data(), image.width(), image.height(), false)
+#define BENCHMARK_DISPLAY_RESULTING_IMAGE \
+    if(BENCHMARK_CHECK_RESULTING_IMAGE && !i) sdlPreviewRGB888Buffer(formatCaption(painter, cm, __FUNCTION__), image.data(), image.width(), image.height(), false)
 
 template <typename PainterT>
 static size_t benchDrawText(int loopCount, CompositionMode cm)
@@ -205,7 +175,7 @@ static size_t benchDrawFillPolygon(int loopCount, const Brush& brushH, const Bru
     return sum;
 }
 
-static void doBenchMark(CompositionMode cm)
+static void doBenchmark(CompositionMode cm)
 {
     double time1, time2;
 
@@ -314,3 +284,5 @@ static void doBenchMark(CompositionMode cm)
         std::clog << std::endl;
     }
 }
+
+#undef BENCHMARK_DISPLAY_RESULTING_IMAGE

@@ -20,5 +20,7 @@ if $(WITH_RASTERIZER2)
     Main ImagePainterTest2 : ImagePainterTest2.cpp ;
     LinkSharedLibraries ImagePainterTest2 : Pt Pt-Gfx Pt-System ;
     MakeLocate ImagePainterTest2 : $(PT_OUTPUT_TARGET) ;
-    LinkFlags ImagePainterTest2 : -lSDL2 -lX11 ;
+    LinkFlags ImagePainterTest2 : -lcairo  -lSDL2 -lX11 ;
 }
+
+#-I/usr/include/cairo -I/usr/include/glib-2.0 -I/usr/lib64/glib-2.0/include -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng15 -I/usr/include/libdrm  -lcairo
