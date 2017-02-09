@@ -32,12 +32,43 @@
 #include <Pt/Hmi/Api.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Size.h>
+#include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/String.h>
 
 namespace Pt {
 
 namespace Hmi {
+
+class Adjustment
+{
+    public:
+        enum Mode
+        {
+            Left,
+            Right,
+            Center,
+            Justify
+        };
+
+        Adjustment(Mode m = Left)
+        : _mode(m)
+        {}
+
+        Adjustment& operator=(Mode m)
+        {
+            _mode = m;
+            return *this;
+        }
+
+        operator Pt::uint32_t() const
+        { 
+            return _mode; 
+        }
+
+    private:
+        Pt::uint32_t _mode;
+};
 
 class TextLine
 {
@@ -52,19 +83,23 @@ class TextLine
 
         void setPosition(double x, double y);
 
-        const Gfx::SizeF& size() const;
+        double width() const;
 
-        void setSize(const Gfx::SizeF& s);
+        double height() const;
+
+        double ascent() const;
+
+        double descent() const;
 
         void setText(const Pt::String& text, const Gfx::Font& font);
 
         double cursorToX(std::size_t n) const;
 
     private:
-        Gfx::SizeF  _size;
-        Gfx::PointF _position;
-        Pt::String  _text;
-        Gfx::Font   _font;
+        Gfx::PointF      _position;
+        Pt::String       _text;
+        Gfx::Font        _font;
+        Gfx::FontMetrics _textMetrics;
 };
 
 class LineEditor
@@ -74,21 +109,43 @@ class LineEditor
         
         ~LineEditor();
 
+        const Gfx::SizeF& size() const;
+
+        void setSize(const Gfx::SizeF& s);
+
+        void setAdjustment(Adjustment a);
+
+        Adjustment adjustment() const;
+
         const Pt::String& text() const;
 
-        void insert(Char ch);
+        void setText(const Pt::String& s);
+
+        const Gfx::Font& font() const;
 
         void setFont(const Gfx::Font& font);
 
-        void setSize(const Gfx::SizeF& s);
+        std::size_t cursorPosition() const;
+
+        void insert(Char ch);
+
+        void left();
+
+        void right();
+
+        void del();
+
+        void backspace();
 
         void layout(TextLine& line);
 
     private:
         Gfx::SizeF  _size;
+        Adjustment  _adjustment;
         Pt::String  _text;
         Gfx::Font   _font;
         std::size_t _cursorPosition;
+        double      _scrollOffset;
 };
 
 } // namespace

@@ -1042,7 +1042,7 @@ void PlatinumComboBoxRenderer::onRenderButton(const ComboBox& cb,
                                               const Gfx::Pen& contour,
                                               const Gfx::Brush& foreground) const
 {
-    static const double indicatorWidth = 8.0;
+    double indicatorWidth = cb.size().height() / 3;
 
     double x = cb.size().width() - indicatorWidth * 1.5;
     double y = cb.size().height() - indicatorWidth * 1.5;

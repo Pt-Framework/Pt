@@ -147,8 +147,6 @@ ComboBox::ComboBox()
     setTextInput(true);
     setFocusPolicy(Widget::NormalFocus);
 
-    setPadding(5);
-
     _item1.resize( Gfx::SizeF(20, 25) );
     _item1.setText("Item 1");
     _item2.resize( Gfx::SizeF(20, 25) );
@@ -174,7 +172,7 @@ ComboBox::ComboBox()
     _menu.addItem(_item6);
     _menu.addItem(_item7);
     _menu.addItem(_item8);
-    _menu.eventReady() += Pt::slot(*this, &ComboBox::onMenuKeyEvent);
+    _menu.eventReady() += Pt::slot(*this, &ComboBox::processKeyEvent);
     _menu.selected() += Pt::slot(*this, &ComboBox::onItemSelected);
 }
 
@@ -187,13 +185,6 @@ ComboBox::~ComboBox()
 void ComboBox::addItem(ListBoxItem& item)
 {   
     _menu.addItem(item);
-}
-
-
-void ComboBox::onItemSelected(ListBoxItem& item)
-{
-    //_text = item.text();
-    invalidate();
 }
 
 
@@ -311,6 +302,62 @@ void ComboBox::setRenderer(ComboBoxRenderer* renderer)
 }
 
 
+void ComboBox::onOpenCombo()
+{
+    _menu.resize( Gfx::SizeF(size().width(), 120) );
+    _menu.setTopMost(true);
+
+    Gfx::PointF pos(0, size().height());
+    pos = this->toScreen(pos);
+    _menu.move(pos);
+
+    _menu.show();
+    _menu.activate();
+}
+
+
+void ComboBox::onItemSelected(ListBoxItem& item)
+{
+    _editor.setText( item.text() );
+    invalidate();
+}
+
+
+void ComboBox::processKeyEvent(const KeyEvent& ev)
+{
+    if( ! ev.isPress() )
+        return;
+
+    if( ev.key().code() == Pt::Hmi::Key::ArrowLeft )
+    {
+        _editor.left();
+    }
+    else if( ev.key().code() == Pt::Hmi::Key::ArrowRight )
+    {
+        _editor.right();
+    }
+    else if( ev.key().code() == Pt::Hmi::Key::Delete )
+    {
+        _editor.del();
+    }
+    else if( ev.key().code() == Pt::Hmi::Key::Backspace )
+    {
+        _editor.backspace();
+    }
+    else
+    {
+        Pt::Char ch = ev.unicode();
+
+        if( Pt::isprint(ch) )
+        {
+            _editor.insert(ch);
+        }
+    }
+
+    invalidate();
+}
+
+
 void ComboBox::onInvalidate()
 {
     Base::onInvalidate();
@@ -348,17 +395,52 @@ void ComboBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     Painter painter(surface);
     painter.setClip(rect);
 
+    //
+    // combo box
+    //
+
     _renderer->renderBackground( *this, options, painter, rect,
                                  _pen, _backgroundBrush );
     
 
     _renderer->renderButton( *this, options, painter, rect,
                              _pen, _foregroundBrush );
+   
+    //
+    // clipping rect for text
+    //
+    
+    // TODO: query text size from renderer
+    Gfx::SizeF textSize = size();
+    textSize.addWidth(-20);
+    painter.setClip( Gfx::RectF(textSize) );
 
-    Gfx::PointF textPos( _line.position() );
+    //
+    // entered or selected item text
+    //
+    
+    Gfx::PointF textPos = _line.position();
+    textPos.addY( _line.ascent() );
+    
     painter.setPen(_textPen);
     painter.setFont(_font);
     painter.drawText(textPos, _editor.text());
+
+    //
+    // text cursor
+    //
+
+    if( hasFocus() )
+    {
+        double cursorX = _line.cursorToX( _editor.cursorPosition() );
+        cursorX += _line.position().x();
+        
+
+        Gfx::RectF cursorRect( Gfx::PointF(cursorX, _line.position().y()),
+                               Gfx::SizeF(0, _line.height()) );
+
+        _renderer->renderCursor(*this, options, painter, rect, cursorRect);
+    }
 }
 
 
@@ -366,7 +448,7 @@ void ComboBox::onResizeEvent(const ResizeEvent& ev)
 {
     Base::onResizeEvent(ev);
     
-    // TODO: query button size from renderer
+    // TODO: query text size from renderer
     Gfx::SizeF s = ev.size();
     s.addWidth(-20);
 
@@ -374,27 +456,11 @@ void ComboBox::onResizeEvent(const ResizeEvent& ev)
 }
 
 
-void ComboBox::onMenuKeyEvent(const KeyEvent& ev)
-{
-    if( ! ev.isPress() )
-        return;
-
-    Pt::Char ch = ev.unicode();
-
-    if( ! Pt::isprint(ch) )
-        return;
-
-    _editor.insert(ch);
-
-    invalidate();
-}
-
-
 void ComboBox::onKeyEvent(const KeyEvent& ev)
 {
     Base::onKeyEvent(ev);
 
-    onMenuKeyEvent(ev);
+    processKeyEvent(ev);
 }
 
 
@@ -417,20 +483,6 @@ void ComboBox::onTouchEvent(const TouchEvent& ev)
     {
         onOpenCombo();
     }
-}
-
-
-void ComboBox::onOpenCombo()
-{
-    _menu.resize( Gfx::SizeF(size().width(), 120) );
-    _menu.setTopMost(true);
-
-    Gfx::PointF pos(0, size().height());
-    pos = this->toScreen(pos);
-    _menu.move(pos);
-
-    _menu.show();
-    _menu.activate();
 }
 
 

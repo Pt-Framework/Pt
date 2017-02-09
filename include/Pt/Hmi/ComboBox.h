@@ -135,11 +135,11 @@ class PT_HMI_API ComboBox : public Control
         virtual bool onScrollEvent(const ScrollEvent& ev);
 
     private:
+        void onOpenCombo();
+
         void onItemSelected(ListBoxItem& item);
         
-        void onMenuKeyEvent(const KeyEvent& ev);
-
-        void onOpenCombo();
+        void processKeyEvent(const KeyEvent& ev);
 
     private:
         LineEditor   _editor;

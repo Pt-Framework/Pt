@@ -63,27 +63,38 @@ void TextLine::setPosition(double x, double y)
 {
     _position.set(x, y);
 }
-
-
-const Gfx::SizeF& TextLine::size() const
-{
-    return _size;
-}
-
-
-void TextLine::setSize(const Gfx::SizeF& s)
-{
-    _size = s;
-}
    
+
+double TextLine::width() const
+{
+    return _textMetrics.width();
+}
+
+
+double TextLine::height() const
+{
+    return _textMetrics.ascent() + _textMetrics.descent();
+}
+
+
+double TextLine::ascent() const
+{
+    return _textMetrics.ascent();
+}
+
+
+double TextLine::descent() const
+{
+    return _textMetrics.descent();
+}
+
 
 void TextLine::setText(const Pt::String& text, const Gfx::Font& font)
 {
     _text = text;
     _font = font;
 
-    Gfx::FontMetrics fm = Hmi::Painter::fontMetrics(_font, _text);
-    _position.setY( fm.ascent() );
+    _textMetrics = Hmi::Painter::fontMetrics(_font, _text);
 }
 
 
@@ -93,9 +104,9 @@ double TextLine::cursorToX(std::size_t cursorPosition) const
     if( cursorPosition <= _text.size() && ! _text.empty() ) 
         left = _text.substr(0, cursorPosition);
 
-    Gfx::FontMetrics fmLeft = Hmi::Painter::fontMetrics( _font, left );
+    Gfx::FontMetrics fmLeft = Hmi::Painter::fontMetrics(_font, left);
 
-    return fmLeft.width() + _position.x();
+    return fmLeft.width();
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -104,6 +115,7 @@ double TextLine::cursorToX(std::size_t cursorPosition) const
 
 LineEditor::LineEditor()
 : _cursorPosition(0)
+, _scrollOffset(0)
 {
 }
 
@@ -113,9 +125,59 @@ LineEditor::~LineEditor()
 }
 
 
+const Gfx::SizeF& LineEditor::size() const
+{
+    return _size;
+}
+
+
+void LineEditor::setSize(const Gfx::SizeF& s)
+{
+    _size = s;
+}
+
+
+void LineEditor::setAdjustment(Adjustment a)
+{
+    _adjustment = a;
+}
+
+
+Adjustment LineEditor::adjustment() const
+{
+    return _adjustment;
+}
+
+
 const Pt::String& LineEditor::text() const
 {
     return _text;
+}
+
+
+void LineEditor::setText(const Pt::String& s)
+{
+    _text = s;
+    _cursorPosition = 0;
+    _scrollOffset = 0;
+}
+
+
+const Gfx::Font& LineEditor::font() const
+{
+    return _font;
+}
+
+
+void LineEditor::setFont(const Gfx::Font& font)
+{
+    _font = font;
+}
+
+
+std::size_t LineEditor::cursorPosition() const
+{
+    return _cursorPosition;
 }
 
 
@@ -126,35 +188,82 @@ void LineEditor::insert(Char ch)
 }
 
 
-void LineEditor::setFont(const Gfx::Font& font)
+void LineEditor::left()
 {
-    _font = font;
+    if(_cursorPosition > 0)
+        _cursorPosition--;
 }
 
 
-void LineEditor::setSize(const Gfx::SizeF& s)
+void LineEditor::right()
 {
-    _size = s;
+    if( _cursorPosition < _text.size() )
+        _cursorPosition++;
+}
+
+
+void LineEditor::del()
+{
+    if( ! _text.empty() )
+        _text.erase(_cursorPosition, 1);
+}
+
+
+void LineEditor::backspace()
+{
+    if( _cursorPosition > 0 && ! _text.empty() )
+        _text.erase(--_cursorPosition, 1);
 }
 
 
 void LineEditor::layout(TextLine& line)
 {
-    line.setPosition(0, 0);
-    line.setSize(_size);
+    _adjustment = Adjustment::Center;
+
     line.setText(_text, _font);
     
     double cursorX = line.cursorToX(_cursorPosition);
+    double maxX = _size.width() + _scrollOffset;
 
-    double x = 0;
-    double y = line.position().y();
+    double lineX = 0;
+    double lineY = (_size.height() - line.height()) / 2;
 
-    if( cursorX > line.size().width() )
+    if(line.width() < _size.width() )
     {
-        x = line.size().width() - cursorX;
+        switch(_adjustment)
+        {
+            default:
+            case Adjustment::Left:
+                lineX = 0;
+                break;
+
+            case Adjustment::Right:
+                lineX = _size.width() - line.width();
+                break;
+
+            case Adjustment::Center:
+                lineX = (_size.width() - line.width()) / 2;
+                break;
+        }
+    }
+    else
+    {
+        if( cursorX > maxX )
+        {
+            double delta = cursorX - maxX;
+            _scrollOffset += delta;
+        }
+
+        if( cursorX < _scrollOffset )
+        {
+            double delta = _scrollOffset - cursorX;
+            _scrollOffset -= delta;
+        }
+
+        lineX = - _scrollOffset;
     }
 
-    line.setPosition(x, y);
+    line.setPosition(lineX, lineY);
 }
 
 } // namespace
