@@ -62,7 +62,7 @@ class Argb32Model
     public:
         /*
          * http://embeddedgurus.com/stack-overflow/2009/06/division-of-integers-by-constants
-         * 
+         *
          * Convert to binary using Javascript console: alert((1/255).toString(2))
          *     1/255
          *     => 0.00000001000000010000000100000001000000010000000100000001
@@ -274,17 +274,17 @@ class Argb32Model
                 }
 
                 case CompositionMode::SourceOver: {
-                    const Pt::uint32_t  blend    = (Pt::uint32_t(c.alpha() & 0xFF00) << 16);
+                    const Pt::uint32_t  blend    = DIV_BY_257(c.alpha());
                     const Pt::uint32_t  blendInv = 255 - blend;
-                    const Pt::uint32_t  srcR     = (Pt::uint32_t(c.red  () & 0xFF00) <<  8) * blend;
-                    const Pt::uint32_t  srcG     = (Pt::uint32_t(c.green() & 0xFF00)      ) * blend;
-                    const Pt::uint32_t  srcB     = (Pt::uint32_t(c.blue ()         ) >>  8) * blend;
-                    const Pt::uint32_t  srcA     = blend   * blend;
+                    const Pt::uint32_t  srcR     = DIV_BY_257(c.red  ()) * blend;
+                    const Pt::uint32_t  srcG     = DIV_BY_257(c.green()) * blend;
+                    const Pt::uint32_t  srcB     = DIV_BY_257(c.blue ()) * blend;
+                    const Pt::uint32_t  srcA     = blend * blend;
                           Pt::uint8_t*  dst      = to;
                     for(size_t i = 0; i < length; ++i) {
-                        dst[0] = (srcR + blendInv * dst[0]) >> 8;
+                        dst[0] = (srcB + blendInv * dst[0]) >> 8;
                         dst[1] = (srcG + blendInv * dst[1]) >> 8;
-                        dst[2] = (srcB + blendInv * dst[2]) >> 8;
+                        dst[2] = (srcR + blendInv * dst[2]) >> 8;
                         dst[3] = (srcA + blendInv * dst[3]) >> 8;
                         dst += 4;
                     }

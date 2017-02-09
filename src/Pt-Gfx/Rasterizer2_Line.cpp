@@ -117,12 +117,11 @@ void Rasterizer2::rasterOnePixelVLineSegment(Pt::int32_t x, Pt::int32_t y1, Pt::
     const Pt::int32_t sizeL = y2 - y1 + (skipLastPoint ? 0 : 1);
 
     // Draw the line
-    Pixel pixel(_image->view(), x, y1);
-
     for(Pt::int32_t i = 0; i < sizeL; ++i) {
+        Pixel pixel(_image->view(), x, y1++);
         _image->format().setPixel(pixel, color, _compositionMode);
-        pixel.advance(_image->width());
     }
+
 }
 
 // Xiaolin Wu's Anti-Aliased Line Algorithm
