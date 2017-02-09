@@ -182,13 +182,6 @@ static void doBenchmark(CompositionMode cm)
     std::clog << "                                                   (Time) (Factor)" << std::endl;
     std::clog << "                                                   ------ --------" << std::endl;
 
-    // Create the brushes
-    const Brush brushSolid    (Color::fromRgb8(255, 255, 255, 175));
-    const Brush brushGradientH(Color::fromRgb8(255, 255, 255, 175), Color::fromRgb8(0, 0, 0, 175), Brush::Horizontal);
-    const Brush brushGradientV(Color::fromRgb8(255, 255, 255, 175), Color::fromRgb8(0, 0, 0, 175), Brush::Vertical  );
-    const Brush brushTextureT (textureWithTransBackground);
-    const Brush brushTextureW (textureWithWhiteBackground);
-
     // Texts
     if(BENCHMARK_TEXT) {
         time1 = benchDrawText<ImagePainter >(BENCHMARK_LOOP_COUNT_LONG, cm);
@@ -221,8 +214,8 @@ static void doBenchmark(CompositionMode cm)
 
     // Filled rectangles
     if(BENCHMARK_SOLID_FILLED_RECTANGLE) {
-        time1 = benchDrawFillRect<ImagePainter >(BENCHMARK_LOOP_COUNT_LONG, brushSolid, brushSolid, cm);
-        time2 = benchDrawFillRect<ImagePainter2>(BENCHMARK_LOOP_COUNT_LONG, brushSolid, brushSolid, cm);
+        time1 = benchDrawFillRect<ImagePainter >(BENCHMARK_LOOP_COUNT_LONG, bmBrushSolid, bmBrushSolid, cm);
+        time2 = benchDrawFillRect<ImagePainter2>(BENCHMARK_LOOP_COUNT_LONG, bmBrushSolid, bmBrushSolid, cm);
         std::clog << "    Solid-filled    Rectangle    @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         std::clog << "    Solid-filled    Rectangle    @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
@@ -230,8 +223,8 @@ static void doBenchmark(CompositionMode cm)
     }
 
     if(BENCHMARK_GRADIENT_FILLED_RECTANGLE) {
-        time1 = benchDrawFillRect<ImagePainter >(BENCHMARK_LOOP_COUNT_SHORT, brushGradientH, brushGradientV, cm);
-        time2 = benchDrawFillRect<ImagePainter2>(BENCHMARK_LOOP_COUNT_SHORT, brushGradientH, brushGradientV, cm);
+        time1 = benchDrawFillRect<ImagePainter >(BENCHMARK_LOOP_COUNT_SHORT, bmBrushGradientH, bmBrushGradientV, cm);
+        time2 = benchDrawFillRect<ImagePainter2>(BENCHMARK_LOOP_COUNT_SHORT, bmBrushGradientH, bmBrushGradientV, cm);
         std::clog << "    Gradient-filled Rectangle    @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         std::clog << "    Gradient-filled Rectangle    @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
@@ -239,8 +232,8 @@ static void doBenchmark(CompositionMode cm)
     }
 
     if(BENCHMARK_TEXTURE_FILLED_RECTANGLE) {
-        time1 = benchDrawFillRect<ImagePainter >(BENCHMARK_LOOP_COUNT_LONG, brushTextureT, brushTextureW, cm);
-        time2 = benchDrawFillRect<ImagePainter2>(BENCHMARK_LOOP_COUNT_LONG, brushTextureT, brushTextureW, cm);
+        time1 = benchDrawFillRect<ImagePainter >(BENCHMARK_LOOP_COUNT_LONG, bmBrushTextureT, bmBrushTextureW, cm);
+        time2 = benchDrawFillRect<ImagePainter2>(BENCHMARK_LOOP_COUNT_LONG, bmBrushTextureT, bmBrushTextureW, cm);
         std::clog << "    Texture-filled  Rectangle    @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         std::clog << "    Texture-filled  Rectangle    @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
@@ -249,36 +242,36 @@ static void doBenchmark(CompositionMode cm)
 
     // Filled polygons
     if(BENCHMARK_SOLID_FILLED_POLYGON) {
-        time1 = benchDrawFillPolygon<ImagePainter >(BENCHMARK_LOOP_COUNT_LONG, brushSolid, brushSolid, cm, false);
-        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT_LONG, brushSolid, brushSolid, cm, false);
+        time1 = benchDrawFillPolygon<ImagePainter >(BENCHMARK_LOOP_COUNT_LONG, bmBrushSolid, bmBrushSolid, cm, false);
+        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT_LONG, bmBrushSolid, bmBrushSolid, cm, false);
         std::clog << "    Solid-filled    polygon      @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         std::clog << "    Solid-filled    polygon NOAA @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT_LONG, brushSolid, brushSolid, cm, true);
+        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT_LONG, bmBrushSolid, bmBrushSolid, cm, true);
         std::clog << "    Solid-filled    polygon SSAA @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
 
     if(BENCHMARK_GRADIENT_FILLED_POLYGON) {
-        time1 = benchDrawFillPolygon<ImagePainter >(BENCHMARK_LOOP_COUNT_SHORT, brushGradientH, brushGradientV, cm, false);
-        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT_SHORT, brushGradientH, brushGradientV, cm, false);
+        time1 = benchDrawFillPolygon<ImagePainter >(BENCHMARK_LOOP_COUNT_SHORT, bmBrushGradientH, bmBrushGradientV, cm, false);
+        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT_SHORT, bmBrushGradientH, bmBrushGradientV, cm, false);
         std::clog << "    Gradient-filled polygon      @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         std::clog << "    Gradient-filled polygon NOAA @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT_SHORT, brushGradientH, brushGradientV, cm, true);
+        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT_SHORT, bmBrushGradientH, bmBrushGradientV, cm, true);
         std::clog << "    Gradient-filled polygon SSAA @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
 
     if(BENCHMARK_TEXTURE_FILLED_POLYGON) {
-        time1 = benchDrawFillPolygon<ImagePainter >(BENCHMARK_LOOP_COUNT_LONG, brushTextureT, brushTextureW, cm, false);
-        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT_LONG, brushTextureT, brushTextureW, cm, false);
+        time1 = benchDrawFillPolygon<ImagePainter >(BENCHMARK_LOOP_COUNT_LONG, bmBrushTextureT, bmBrushTextureW, cm, false);
+        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT_LONG, bmBrushTextureT, bmBrushTextureW, cm, false);
         std::clog << "    Texture-filled  polygon      @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         std::clog << "    Texture-filled  polygon NOAA @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT_LONG, brushTextureT, brushTextureW, cm, true);
+        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT_LONG, bmBrushTextureT, bmBrushTextureW, cm, true);
         std::clog << "    Texture-filled  polygon SSAA @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;

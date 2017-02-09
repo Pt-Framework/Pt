@@ -49,15 +49,24 @@ static size_t cairoBenchFillPolygon(int loopCount, CompositionMode cm)
 
 static void cairoBenchmark(CompositionMode cm)
 {
-    double time1;
+    double time1, time2;
 
-    std::clog << "                                                   (Time)" << std::endl;
-    std::clog << "                                                   ------" << std::endl;
+    std::clog << "                                                   (Time) (Factor)" << std::endl;
+    std::clog << "                                                   ------ --------" << std::endl;
 
     // Filled polygons
     if(BENCHMARK_SOLID_FILLED_POLYGON) {
-        time1 = cairoBenchFillPolygon(BENCHMARK_LOOP_COUNT_LONG, cm);
+        time1 = cairoBenchFillPolygon              (BENCHMARK_LOOP_COUNT_LONG, cm);
         std::clog << "    Solid-filled    polygon      @ Cairo         = " << std::setw(6) << time1 << std::endl;
+        time2 = benchDrawFillPolygon<ImagePainter >(BENCHMARK_LOOP_COUNT_LONG, bmBrushSolid, bmBrushSolid, cm, false);
+        std::clog << "    Solid-filled    polygon      @ ImagePainter  = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT_LONG, bmBrushSolid, bmBrushSolid, cm, false);
+        std::clog << "    Solid-filled    polygon NOAA @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT_LONG, bmBrushSolid, bmBrushSolid, cm, true);
+        std::clog << "    Solid-filled    polygon SSAA @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
 }

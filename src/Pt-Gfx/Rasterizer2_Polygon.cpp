@@ -773,6 +773,7 @@ void Rasterizer2::rasterPolygonAreaFastSSAA(const Point* points, size_t pointCou
              *                     └──┴──┴──┘                                         └──┴──┴──┘
              *         Alpha Score  1  2  3                                             3  2  1
              */
+            // ### TODO: IMPROVE THE SPEED !!! ###
 
             // Reset the alphas
             memset(&alphas[0], 0, alphas.size());

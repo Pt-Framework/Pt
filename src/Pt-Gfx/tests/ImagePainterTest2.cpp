@@ -18,10 +18,10 @@
 using namespace Pt::Gfx;
 
 #define DO_TEST_DRAW          1
-#define DO_BENCHMARKING       1
+#define DO_BENCHMARKING       0
 #define DO_CAIRO_BENCHMARKING 1
 
-//
+// Test
 
 #define TEST_SOURCECOPY                        1
 #define TEST_SOURCEOVER                        0
@@ -35,7 +35,7 @@ using namespace Pt::Gfx;
 
 #define TEST_COMPARE_WITH_OLD_PAINTER          0
 
-//
+// Benchmark
 
 #define CAIRO_CHECK_RESULTING_IMAGE         0
 
@@ -44,30 +44,36 @@ using namespace Pt::Gfx;
 #define BENCHMARK_LOOP_COUNT_SHORT          100
 #define BENCHMARK_LOOP_COUNT_LONG           200
 
-#define BENCHMARK_TEXT                      0
-#define BENCHMARK_LINE                      0
+#define BENCHMARK_TEXT                      1
+#define BENCHMARK_LINE                      1
 
-#define BENCHMARK_RECTANGLE                 0
-#define BENCHMARK_SOLID_FILLED_RECTANGLE    0
-#define BENCHMARK_GRADIENT_FILLED_RECTANGLE 0
-#define BENCHMARK_TEXTURE_FILLED_RECTANGLE  0
+#define BENCHMARK_RECTANGLE                 1
+#define BENCHMARK_SOLID_FILLED_RECTANGLE    1
+#define BENCHMARK_GRADIENT_FILLED_RECTANGLE 1
+#define BENCHMARK_TEXTURE_FILLED_RECTANGLE  1
 
 #define BENCHMARK_SOLID_FILLED_POLYGON      1
-#define BENCHMARK_GRADIENT_FILLED_POLYGON   0
-#define BENCHMARK_TEXTURE_FILLED_POLYGON    0
+#define BENCHMARK_GRADIENT_FILLED_POLYGON   1
+#define BENCHMARK_TEXTURE_FILLED_POLYGON    1
 
-//
-
+// Configurations and objects
 #define FONT_DIR  "../src/Pt-Gfx/fonts"
 #define FONT_SPEC "DejaVu Serif", 24, Pt::Gfx::Font::BoldItalic
 
 static Image textureWithTransBackground;
 static Image textureWithWhiteBackground;
 
+static Brush bmBrushSolid;
+static Brush bmBrushGradientH;
+static Brush bmBrushGradientV;
+static Brush bmBrushTextureT;
+static Brush bmBrushTextureW;
+
+// Include the other source files
 #include "ImagePainterTest2_Util.cpp"
-#include "ImagePainterTest2_Cairo.cpp"
 #include "ImagePainterTest2_Draw.cpp"
 #include "ImagePainterTest2_Benchmark.cpp"
+#include "ImagePainterTest2_Cairo.cpp"
 
 int main(int argc, char* args[])
 {
@@ -123,7 +129,14 @@ int main(int argc, char* args[])
         }
     }
 
-    // Create the brushes
+    // Create the brushes used for benchmarking
+    bmBrushSolid     = Brush(Color::fromRgb8(255, 255, 255, 175));
+    bmBrushGradientH = Brush(Color::fromRgb8(255, 255, 255, 175), Color::fromRgb8(0, 0, 0, 175), Brush::Horizontal);
+    bmBrushGradientV = Brush(Color::fromRgb8(255, 255, 255, 175), Color::fromRgb8(0, 0, 0, 175), Brush::Vertical  );
+    bmBrushTextureT  = Brush(textureWithTransBackground);
+    bmBrushTextureW  = Brush(textureWithWhiteBackground);
+
+    // Create the brushes used for drawing
     const Brush brushSolid1   (Color::fromRgb8(  0, 255, 0, 175));
     const Brush brushGradient1(Color::fromRgb8(  0, 255, 0, 175), Color::fromRgb8(0, 0, 0, 175), Brush::Vertical);
     const Brush brushTexture1 (textureWithTransBackground);
