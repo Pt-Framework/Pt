@@ -1,7 +1,7 @@
 #define BENCHMARK_LIBART_DISPLAY_RESULTING_IMAGE \
     if(BENCHMARK_LIBART_CHECK_RESULTING_IMAGE && !i) sdlPreviewRGB888Buffer(formatCaption("Libart", cm, __FUNCTION__), buffer, imgSize.width(), imgSize.height(), false)
 
-static size_t libartBenchFillPolygon(int loopCount, CompositionMode cm)
+static size_t libartBenchFillPolygon(int loopCount, CompositionMode cm, bool aa)
 {
     size_t sum = 0;
 
@@ -30,7 +30,8 @@ static size_t libartBenchFillPolygon(int loopCount, CompositionMode cm)
         vectors[5].code = ART_LINETO; vectors[5].x = 150; vectors[5].y = 100;
         vectors[6].code = ART_END;
         svp = art_svp_from_vpath(vectors);
-        art_rgb_svp_alpha(svp, 0, 0, imgSize.width(), imgSize.height(), (cm == CompositionMode::SourceOver) ? colorT : colorS, buffer, imgSize.width() * 4, 0);
+        if(aa) art_rgb_svp_aa(svp, 0, 0, imgSize.width(), imgSize.height(), (cm == CompositionMode::SourceOver) ? colorT : colorS, 0, buffer, imgSize.width() * 4, 0);
+        else   art_rgb_svp_alpha(svp, 0, 0, imgSize.width(), imgSize.height(), (cm == CompositionMode::SourceOver) ? colorT : colorS, buffer, imgSize.width() * 4, 0);
         art_free(svp);
 
         vectors[0].code = ART_MOVETO; vectors[0].x = 350; vectors[0].y = 100; // CCW
@@ -41,7 +42,8 @@ static size_t libartBenchFillPolygon(int loopCount, CompositionMode cm)
         vectors[5].code = ART_LINETO; vectors[5].x = 350; vectors[5].y = 100;
         vectors[6].code = ART_END;
         svp = art_svp_from_vpath(vectors);
-        art_rgb_svp_alpha(svp, 0, 0, imgSize.width(), imgSize.height(), (cm == CompositionMode::SourceOver) ? colorT : colorS, buffer, imgSize.width() * 4, 0);
+        if(aa) art_rgb_svp_aa(svp, 0, 0, imgSize.width(), imgSize.height(), (cm == CompositionMode::SourceOver) ? colorT : colorS, 0, buffer, imgSize.width() * 4, 0);
+        else   art_rgb_svp_alpha(svp, 0, 0, imgSize.width(), imgSize.height(), (cm == CompositionMode::SourceOver) ? colorT : colorS, buffer, imgSize.width() * 4, 0);
         art_free(svp);
 
         sum += clock.stop().toUSecs();
@@ -65,8 +67,9 @@ static void libartBenchmark(CompositionMode cm)
 
     // Filled polygons
     if(BENCHMARK_SOLID_FILLED_POLYGON) {
-        time1 = libartBenchFillPolygon             (BENCHMARK_LOOP_COUNT_LONG, cm);
-        std::clog << "    Solid-filled    polygon      @ Libart        = " << std::setw(6) << time1 << std::endl;
+        // art_rgb_svp_alpha()
+        time1 = libartBenchFillPolygon             (BENCHMARK_LOOP_COUNT_LONG, cm, false);
+        std::clog << "    Solid-filled    polygon      @ Libart _alpha = " << std::setw(6) << time1 << std::endl;
         time2 = benchDrawFillPolygon<ImagePainter >(BENCHMARK_LOOP_COUNT_LONG, bmBrushSolid, bmBrushSolid, cm, false);
         std::clog << "    Solid-filled    polygon      @ ImagePainter  = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
@@ -77,6 +80,20 @@ static void libartBenchmark(CompositionMode cm)
         std::clog << "    Solid-filled    polygon SSAA @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
+        // art_rgb_svp_aa()
+        time1 = libartBenchFillPolygon             (BENCHMARK_LOOP_COUNT_LONG, cm, true);
+        std::clog << "    Solid-filled    polygon      @ Libart _aa    = " << std::setw(6) << time1 << std::endl;
+        time2 = benchDrawFillPolygon<ImagePainter >(BENCHMARK_LOOP_COUNT_LONG, bmBrushSolid, bmBrushSolid, cm, false);
+        std::clog << "    Solid-filled    polygon      @ ImagePainter  = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT_LONG, bmBrushSolid, bmBrushSolid, cm, false);
+        std::clog << "    Solid-filled    polygon NOAA @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT_LONG, bmBrushSolid, bmBrushSolid, cm, true);
+        std::clog << "    Solid-filled    polygon SSAA @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        std::clog << std::endl;
+
     }
 }
 

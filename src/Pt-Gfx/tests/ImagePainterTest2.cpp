@@ -28,7 +28,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_CAIRO_CHECK_RESULTING_IMAGE 0
 
 // Comparison with Libart
-#define DO_BENCHMARKING_LIBART                 1
+#define DO_BENCHMARKING_LIBART                 0
 #define BENCHMARK_LIBART_CHECK_RESULTING_IMAGE 0
 
 // Detailed-test enable settings
@@ -222,10 +222,10 @@ int main(int argc, char* args[])
     if(DO_BENCHMARKING_LIBART) {
         std::clog << std::fixed << std::setprecision(0) << std::endl;
 
-        std::clog << "Libart - CompositionMode::SourceCopy" << std::endl;
+        std::clog << "Libart (LGPL) - CompositionMode::SourceCopy" << std::endl;
         libartBenchmark(CompositionMode::SourceCopy);
 
-        std::clog << "Libart - CompositionMode::SourceOver" << std::endl;
+        std::clog << "Libart (LGPL) - CompositionMode::SourceOver" << std::endl;
         libartBenchmark(CompositionMode::SourceOver);
     }
 
