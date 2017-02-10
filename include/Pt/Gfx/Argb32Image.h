@@ -451,8 +451,12 @@ class Argb32Model
 
             p = data + view.stride() * ypos + xpos * 4;
         }
+
 #undef DIV_BY_255
 #undef DIV_BY_257
+
+#undef USE_MULTIPLY_SHIFT_FOR_CONSTANT_DIVISION
+#undef USE_DUFFS_DEVICE
 };
 
 

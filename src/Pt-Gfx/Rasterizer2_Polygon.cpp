@@ -255,6 +255,9 @@ void Rasterizer2::rasterPolygonAreaTrueSSAA(const Point* points, size_t pointCou
     // A helper macro to scale the alpha
     #define SSAA_SCALE_ALPHA(A) ( Pt::uint16_t(A) * 17 / SUPERSAMPLING_SIZE / SUPERSAMPLING_SIZE )
 
+    // Uncomment this to use Duff's device
+    #define USE_DUFFS_DEVICE
+
     //  Loop through the rows of the image
     for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
         // Build a list of nodes
@@ -289,9 +292,27 @@ void Rasterizer2::rasterPolygonAreaTrueSSAA(const Point* points, size_t pointCou
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
             const Pt::int32_t from = nodeX[i    ];
             const Pt::int32_t to   = nodeX[i + 1];
+#ifdef USE_DUFFS_DEVICE
+            register Pt::uint8_t* dst = &alphas[0];
+            register Pt::int32_t  cnt  = to - from + 1;
+            register Pt::int32_t  n    = (cnt + 7) / 8;
+            register Pt::int32_t  k    = from;
+            switch(cnt % 8) {
+                    case 0 : do { dst[k / SUPERSAMPLING_SIZE] += 15; ++k;
+                    case 7 :      dst[k / SUPERSAMPLING_SIZE] += 15; ++k;
+                    case 6 :      dst[k / SUPERSAMPLING_SIZE] += 15; ++k;
+                    case 5 :      dst[k / SUPERSAMPLING_SIZE] += 15; ++k;
+                    case 4 :      dst[k / SUPERSAMPLING_SIZE] += 15; ++k;
+                    case 3 :      dst[k / SUPERSAMPLING_SIZE] += 15; ++k;
+                    case 2 :      dst[k / SUPERSAMPLING_SIZE] += 15; ++k;
+                    case 1 :      dst[k / SUPERSAMPLING_SIZE] += 15; ++k;
+                             } while (--n > 0);
+            }
+#else
             for(Pt::int32_t k = from; k <= to; ++k) {
                 alphas[k / SUPERSAMPLING_SIZE] += 15;
             }
+#endif
         }
         // Simply skip the next steps if we have not got all the needed samples
         if( ((pixelY + 1) % SUPERSAMPLING_SIZE) ) continue;
@@ -418,6 +439,7 @@ void Rasterizer2::rasterPolygonAreaTrueSSAA(const Point* points, size_t pointCou
 
     // Undefine the helper macro
     #undef SSAA_SCALE_ALPHA
+    #undef USE_DUFFS_DEVICE
 }
 
 // Partially based on http://alienryderflex.com/polygon_fill
