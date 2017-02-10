@@ -11,8 +11,9 @@
 #include <Pt/System/Logger.h>
 #include <Pt/System/Clock.h>
 
-#include <cairo/cairo.h>
-#include <libart-2.0/libart_lgpl/libart.h>
+#include <cairo.h>
+#include <gd.h>
+#include <libart.h>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
@@ -26,6 +27,10 @@ using namespace Pt::Gfx;
 // Comparison with Cairo
 #define DO_BENCHMARKING_CAIRO                 0
 #define BENCHMARK_CAIRO_CHECK_RESULTING_IMAGE 0
+
+// Comparison with GD
+#define DO_BENCHMARKING_GD                 1
+#define BENCHMARK_GD_CHECK_RESULTING_IMAGE 1
 
 // Comparison with Libart
 #define DO_BENCHMARKING_LIBART                 0
@@ -80,6 +85,7 @@ static Brush bmBrushTextureW;
 #include "ImagePainterTest2_Draw.cpp"
 #include "ImagePainterTest2_Benchmark.cpp"
 #include "ImagePainterTest2_Cairo.cpp"
+#include "ImagePainterTest2_GD.cpp"
 #include "ImagePainterTest2_Libart.cpp"
 
 int main(int argc, char* args[])
@@ -217,6 +223,16 @@ int main(int argc, char* args[])
 
         std::clog << "Cairo - CompositionMode::SourceOver" << std::endl;
         cairoBenchmark(CompositionMode::SourceOver);
+    }
+
+    if(DO_BENCHMARKING_GD) {
+        std::clog << std::fixed << std::setprecision(0) << std::endl;
+
+        std::clog << "GD - CompositionMode::SourceCopy" << std::endl;
+        gdBenchmark(CompositionMode::SourceCopy);
+
+        std::clog << "GD - CompositionMode::SourceOver" << std::endl;
+        gdBenchmark(CompositionMode::SourceOver);
     }
 
     if(DO_BENCHMARKING_LIBART) {
