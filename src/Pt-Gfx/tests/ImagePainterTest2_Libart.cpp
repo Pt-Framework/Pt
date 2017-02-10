@@ -7,14 +7,14 @@ static size_t libartBenchFillPolygon(int loopCount, CompositionMode cm, bool aa)
 
     const Size& imgSize = BENCHMARK_IMAGE_SIZE;
 
-    Pt::int32_t imageSize  = imgSize.width() * imgSize.height();
-    Pt::int32_t bufferSize = imageSize * 4;
-    art_u8*     buffer     = art_new(art_u8, bufferSize);
+    const Pt::int32_t imageSize  = imgSize.width() * imgSize.height();
+    const Pt::int32_t bufferSize = imageSize * 4;
+          art_u8*     buffer     = art_new(art_u8, bufferSize);
 
-    art_u32     colorS     = (0xFF << 24) | (0xFF << 16) | (0xFF << 8) | (0xFF) ; // RRGGBBAA
-    art_u32     colorT     = (0xFF << 24) | (0xFF << 16) | (0xFF << 8) | (0xAF) ; // RRGGBBAA
-    ArtVpath*   vectors    = art_new(ArtVpath, 100);
-    ArtSVP*     svp        = 0;
+    const art_u32     colorS     = (0xFF << 24) | (0xFF << 16) | (0xFF << 8) | (0xFF) ; // RRGGBBAA
+    const art_u32     colorT     = (0xFF << 24) | (0xFF << 16) | (0xFF << 8) | (0xAF) ; // RRGGBBAA
+          ArtVpath*   vectors    = art_new(ArtVpath, 100);
+          ArtSVP*     svp        = 0;
 
     art_rgb_run_alpha(buffer, 0, 0, 0, 255, imageSize);
 

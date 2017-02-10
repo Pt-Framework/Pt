@@ -24,8 +24,8 @@ static size_t gdBenchFillPolygon(int loopCount, CompositionMode cm)
 
     const Size& imgSize = BENCHMARK_IMAGE_SIZE;
 
-    gdImagePtr  gdImg = gdImageCreateTrueColor(imgSize.width(), imgSize.height());
-    Pt::int32_t white = gdTrueColorAlpha(255, 255, 255, 127 * 175 / 255);
+    const gdImagePtr  gdImg = gdImageCreateTrueColor(imgSize.width(), imgSize.height());
+    const Pt::int32_t white = gdTrueColorAlpha(255, 255, 255, 127 * 175 / 255);
 
     for(int i = 0; i < loopCount ; ++i) {
         Pt::System::Clock clock;
