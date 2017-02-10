@@ -866,7 +866,6 @@ void Rasterizer2::rasterPolygonAreaFastSSAA(const Point* points, size_t pointCou
 
 // Fast Anti-Aliasing Polygon Scan Conversion
 // Jack Morrison, Graphics Gems, Academic Press, 1990
-// Dan Field, Incremental Linear Interpolation, ACM Transactions on Graphics, 1985
 // http://www.realtimerendering.com/resources/GraphicsGems
 // http://www.realtimerendering.com/resources/GraphicsGems/category.html
 // http://www.realtimerendering.com/resources/GraphicsGems/gems/AAPolyScan.c
@@ -986,19 +985,37 @@ void Rasterizer2::renderScanline(const Point* Vl, const Point* Vr, int y)
         vLerp((double)(x-xLmin)/(xRmax-xLmin), Vl, Vr, &Vpixel);
         computePixelMask(x, mask);
 
-
-        for(int yy = 0; yy < SUBYRES; ++yy) {
-            Pixel      dstPixel(_image->view(), x/SUBXRES, y*SUBYRES +yy);
+            Pixel      dstPixel(_image->view(), x/SUBXRES, y);
             _image->format().setPixel(dstPixel, _brush.color(), _compositionMode, cov);// * mask[yy] / 65535);
-        }
+
+
+//        for(int yy = 0; yy < SUBYRES; ++yy) {
+        //    Pixel      dstPixel(_image->view(), x/SUBXRES, y*SUBYRES +yy);
+      //      _image->format().setPixel(dstPixel, _brush.color(), _compositionMode, cov);// * mask[yy] / 65535);
+//            lprintf("%04X ", mask[yy]);
+    //    }
     }
+  //  lprintf("\n#\n");
 }
 
 
 
-void Rasterizer2::rasterPolygonAreaFastAASC(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
+void Rasterizer2::rasterPolygonAreaFastAASC(const Point* points_, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
 {
-#define screenX(P) (P->x()*SUBXRES)
+
+    // Scale the polygon twice as big
+    std::vector<Point>  spoints(pointCount);
+
+    Point* points  = &spoints[0];
+
+    for(size_t i = 0; i < pointCount; ++i) {
+        points[i].setX(points_[i].x() * SUBXRES);
+        points[i].setY(points_[i].y() * SUBYRES);
+    }
+
+
+
+#define screenX(P) (P->x())
 
     const Point *endPoly;            /* end of polygon vertex list */
     Point VscanLeft, VscanRight;   /* interpolated vertices */                                 /* at scanline */
