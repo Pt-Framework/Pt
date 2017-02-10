@@ -228,7 +228,7 @@ void ScreenImpl::onTouchEvent(const TouchEvent& evRaw)
 
 
 void ScreenImpl::onMouseEvent( const Pt::Hmi::MouseEvent& mouseEvent )
-{        
+{
     _drawCursor =  true;
 
     if( ! _cursorBackground.empty() )
@@ -259,7 +259,7 @@ void ScreenImpl::onMouseEvent( const Pt::Hmi::MouseEvent& mouseEvent )
     }
     else
     {
-        _windowManager.mouseEvent( mouseEvent );        
+        _windowManager.mouseEvent( mouseEvent );
     }
 
 

@@ -175,6 +175,7 @@ ComboBox::ComboBox()
     _menu.addItem(_item6);
     _menu.addItem(_item7);
     _menu.addItem(_item8);
+
     _menu.eventReady() += Pt::slot(*this, &ComboBox::processKeyEvent);
     _menu.selected() += Pt::slot(*this, &ComboBox::onItemSelected);
 }
@@ -474,6 +475,7 @@ bool ComboBox::onMouseEvent(const MouseEvent& ev)
     if( ev.isPress() )
     {
         onOpenCombo();
+        Application::instance().inputMethod().begin(*this);
     }
 
     return true;
@@ -487,6 +489,26 @@ void ComboBox::onTouchEvent(const TouchEvent& ev)
     if( ev.isPress() )
     {
         onOpenCombo();
+        Application::instance().inputMethod().begin(*this);
+    }
+}
+
+
+void ComboBox::onFocusEvent(const FocusEvent& ev)
+{
+    Base::onFocusEvent(ev);
+
+    if( ! ev.isFocused() )
+    {
+        //if( isAccepted() && _isTextChanged)
+        //{
+        //    _isTextChanged = false;
+        //    _editingFinished.send(_text);
+        //}
+    }
+    else
+    {
+        Application::instance().inputMethod().begin(*this);
     }
 }
 

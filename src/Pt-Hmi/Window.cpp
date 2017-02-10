@@ -1133,10 +1133,19 @@ bool Window::onMouseEvent(const MouseEvent& ev)
 
     if( ev.isPress() )
     {
+        //std::clog << "PRESS" << std::endl;
+
         if( ! widget )
-            Application::instance().inputMethod().finish();
+        {
+            //std::clog << "no widget " << std::endl;
+            if( Application::instance().pointerGrabber() == 0 )
+                Application::instance().inputMethod().finish();
+        }
         else if( ! widget->isTextInput() )
+        {
+            //std::clog << "not text widget " << typeid(*widget).name() << std::endl;
             Application::instance().inputMethod().finish(*widget);
+        }
     }
 
     // widget may be null to unset the pointer widget

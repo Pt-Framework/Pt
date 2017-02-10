@@ -400,7 +400,7 @@ bool ApplicationImpl::processMessage(HWND hwnd, unsigned int msg,
         case WM_MOUSEMOVE:
         {
           TRACKMOUSEEVENT tme = { sizeof(TRACKMOUSEEVENT), TME_LEAVE, hwnd, 0 };
-          TrackMouseEvent(&tme);              
+          TrackMouseEvent(&tme);
           onMouse(*w, msg, wparam, lparam);
           handled = true;
           break;
@@ -705,11 +705,10 @@ void ApplicationImpl::onMouse(Window& w, unsigned int msg, WPARAM wparam, LPARAM
     }
 
 
-    
-
     Visual* grabber = Application::instance().pointerGrabber();
     if( grabber )
     {
+        
         Gfx::PointF screenPos = w.toScreen(pos);
         pos = grabber->fromScreen(screenPos);
         
@@ -727,7 +726,7 @@ void ApplicationImpl::onMouse(Window& w, unsigned int msg, WPARAM wparam, LPARAM
     }
 
     _mouseEvent.setX( pos.x() );
-    _mouseEvent.setY( pos.y() );            
+    _mouseEvent.setY( pos.y() );
 
     commitEvent(_mouseEvent);
 }

@@ -132,6 +132,8 @@ class PT_HMI_API ComboBox : public Control
 
         virtual void onTouchEvent(const TouchEvent& ev);
 
+        virtual void onFocusEvent(const FocusEvent& ev);
+
         virtual bool onScrollEvent(const ScrollEvent& ev);
 
     private:
