@@ -27,22 +27,22 @@ static size_t cairoBenchFillPolygon(int loopCount, CompositionMode cm)
 
         cairo_reset_clip   (cairo);
         cairo_new_path     (cairo);
-        cairo_move_to      (cairo,  50,  50);
-        cairo_line_to      (cairo, 250, 100);
-        cairo_line_to      (cairo, 450, 250);
+        cairo_move_to      (cairo, 150, 100); // CCW
         cairo_line_to      (cairo, 350, 350);
-        cairo_line_to      (cairo, 150, 100);
+        cairo_line_to      (cairo, 450, 250);
+        cairo_line_to      (cairo, 250, 100);
+        cairo_line_to      (cairo,  50,  50);
         cairo_close_path   (cairo);
         cairo_clip_preserve(cairo);
         cairo_fill         (cairo);
 
         cairo_reset_clip   (cairo);
         cairo_new_path     (cairo);
-        cairo_move_to      (cairo, 250,  50);
-        cairo_line_to      (cairo, 450, 100);
-        cairo_line_to      (cairo, 650, 250);
+        cairo_move_to      (cairo, 350, 100); // CCW
         cairo_line_to      (cairo, 550, 350);
-        cairo_line_to      (cairo, 350, 100);
+        cairo_line_to      (cairo, 650, 250);
+        cairo_line_to      (cairo, 450, 100);
+        cairo_line_to      (cairo, 250,  50);
         cairo_close_path   (cairo);
         cairo_clip_preserve(cairo);
         cairo_fill         (cairo);

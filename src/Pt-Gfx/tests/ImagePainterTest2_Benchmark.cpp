@@ -157,12 +157,24 @@ static size_t benchDrawFillPolygon(int loopCount, const Brush& brushH, const Bru
         clock.start();
 
         painter.setBrush(brushH);
-        const PointF poly1[] = { PointF(50, 50), PointF(250, 100), PointF(450, 250), PointF(350, 350), PointF(150, 100) };
+        const PointF poly1[] = { // CCW
+            PointF(150, 100),
+            PointF(350, 350),
+            PointF(450, 250),
+            PointF(250, 100),
+            PointF( 50,  50)
+        };
         if(ip2) ip2->fillPolygon(poly1, sizeof(poly1) / sizeof(poly1[0]), useAntiAliasing);
         else    painter.fillPolygon(poly1, sizeof(poly1) / sizeof(poly1[0]));
 
         painter.setBrush(brushV);
-        const PointF poly2[] = { PointF(250, 50), PointF(450, 100), PointF(650, 250), PointF(550, 350), PointF(350, 100) };
+        const PointF poly2[] = { // CCW
+            PointF(350, 100),
+            PointF(550, 350),
+            PointF(650, 250),
+            PointF(450, 100),
+            PointF(250,  50)
+        };
         if(ip2) ip2->fillPolygon(poly2, sizeof(poly2) / sizeof(poly2[0]), useAntiAliasing);
         else    painter.fillPolygon(poly2, sizeof(poly2) / sizeof(poly2[0]));
 

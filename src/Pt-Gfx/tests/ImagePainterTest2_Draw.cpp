@@ -93,36 +93,47 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
 
     painter.setBrush( brush1 );
 
-    const PointF poly1[] = { PointF(50, 50), PointF(250, 100), PointF(450, 250), PointF(350, 350), PointF(150, 100) };
+    const PointF poly1[] = { // CCW
+        PointF(150, 100),
+        PointF(350, 350),
+        PointF(450, 250),
+        PointF(250, 100),
+        PointF( 50,  50)
+    };
     if(ip2) ip2   ->fillPolygon(poly1, sizeof(poly1) / sizeof(poly1[0]), false);
     else    painter.fillPolygon(poly1, sizeof(poly1) / sizeof(poly1[0]));
 
     const int    o1       = 250;
-//    const PointF poly1b[] = { PointF(50 + o1, 50), PointF(250 + o1, 100), PointF(450 + o1, 250), PointF(350 + o1, 350), PointF(150 + o1, 100) };
-
-    const PointF poly1b[] = {
+    const PointF poly1b[] = { // CCW
         PointF(150 + o1, 100),
         PointF(350 + o1, 350),
         PointF(450 + o1, 250),
         PointF(250 + o1, 100),
-        PointF(50 + o1, 50)
+        PointF( 50 + o1,  50)
     };
-
     if(ip2) ip2   ->fillPolygon(poly1b, sizeof(poly1b) / sizeof(poly1b[0]), true);
     else    painter.fillPolygon(poly1b, sizeof(poly1b) / sizeof(poly1b[0]));
 
-/*
     painter.setBrush( brush2 );
 
-    const PointF poly2[] = { PointF(140, 260), PointF(210, 310), PointF(160, 340), PointF(110, 310) };
+    const PointF poly2[] = { // CCW
+        PointF(110, 310),
+        PointF(160, 340),
+        PointF(210, 310),
+        PointF(140, 260)
+    };
     if(ip2) ip2   ->fillPolygon(poly2, sizeof(poly2) / sizeof(poly2[0]), false);
     else    painter.fillPolygon(poly2, sizeof(poly2) / sizeof(poly2[0]));
 
     const int    o2       = 100;
-    const PointF poly2b[] = { PointF(140, 260 + o2), PointF(210, 310 + o2), PointF(160, 340 + o2), PointF(110, 310 + o2) };
+    const PointF poly2b[] = { // CCW
+        PointF(110, 310 + o2),
+        PointF(160, 340 + o2),
+        PointF(210, 310 + o2),
+        PointF(140, 260 + o2)
+    };
     if(ip2) ip2   ->fillPolygon(poly2b, sizeof(poly2b) / sizeof(poly2b[0]), true);
     else    painter.fillPolygon(poly2b, sizeof(poly2b) / sizeof(poly2b[0]));
-*/
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }

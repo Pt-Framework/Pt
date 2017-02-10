@@ -864,16 +864,19 @@ void Rasterizer2::rasterPolygonAreaFastSSAA(const Point* points, size_t pointCou
     #undef FSAA_MAX_ALPHA
 }
 
-// Fast Anti-Aliasing Polygon Scan Conversion
-// Jack Morrison, Graphics Gems, Academic Press, 1990
-// http://www.realtimerendering.com/resources/GraphicsGems
-// http://www.realtimerendering.com/resources/GraphicsGems/category.html
-// http://www.realtimerendering.com/resources/GraphicsGems/gems/AAPolyScan.c
 
-#define SUBYRES 8       /* subpixel Y resolution per scanline */
-#define SUBXRES 16      /* subpixel X resolution per pixel */
-#define MAX_AREA    (SUBYRES*SUBXRES)
-#define MODRES(y)   ((y) & 7)       /*subpixel Y modulo */
+// Subpixel Y resolution per scanline (must be in the power of two)
+#define FAASC_SUB_Y_RES 2
+
+// Subpixel X resolution per pixel (must be in the power of two)
+#define FAASC_SUB_X_RES 2
+
+// Subpixel Y modulo
+#define FAASC_SUB_Y_MOD(Y) ((Y) & (FAASC_SUB_Y_RES - 1))
+
+// Maximum area that a pixel can cover
+#define FAASC_MAX_AREA (FAASC_SUB_Y_RES * FAASC_SUB_X_RES)
+
 #define MAX_X   0x7FFF  /* subpixel X beyond right edge */
 
 const Point *Vleft, *VnextLeft;      /* current left edge */
@@ -881,87 +884,43 @@ const Point *Vright, *VnextRight;    /* current right edge */
 
 struct  SubPixel  {         /* subpixel extents for scanline */
     int xLeft, xRight;
-    } sp[SUBYRES];
+    } sp[FAASC_SUB_Y_RES];
 
 int xLmin, xLmax;       /* subpixel x extremes for scanline */
 int xRmax, xRmin;       /* (for optimization shortcut) */
 
-inline void vLerp(double alpha, const Point* Va, const Point* Vb, Point* Vout)
+inline void interpolatePoints(Point* pointOut, const Point* pointA, const Point* pointB, double factor)
 {
-    double ialpha = 1.0 - alpha;
+    const double ifactor = 1.0 - factor;
 
-    Vout->setX(ialpha * Va->x() + alpha * Vb->x());
-    Vout->setY(ialpha * Va->y() + alpha * Vb->y());
+    pointOut->setX(ifactor * pointA->x() + factor * pointB->x());
+    pointOut->setY(ifactor * pointA->y() + factor * pointB->y());
 }
 
-inline double LERP(double alpha, int a, int b)
+inline Pt::int32_t interpolateInteger(double alpha, Pt::int32_t a, int32_t b)
 {
     double ialpha = 1.0 - alpha;
+
     return ialpha * a + alpha * b;
 }
 
-/* Compute bitmask indicating which subpixels are covered by
- * polygon at current pixel. (Not all hidden-surface methods
- * need this mask. )
-*/
-void computePixelMask(
-    int x,          /* left subpixel of pixel */
-    unsigned mask[]    /* output bitmask */
-)
+// Compute number of subpixels covered by polygon at current pixel
+Pt::int32_t Coverage(Pt::int32_t x /* left subpixel of pixel */)
 {
-    static unsigned leftMaskTable[] =
-        { 0xFFFF, 0x7FFF, 0x3FFF, 0x1FFF, 0x0FFF, 0x07FF, 0x03FF,
-          0x01FF, 0x00FF, 0x007F, 0x003F, 0x001F, 0x000F, 0x0007,
-          0x0003, 0x0001  };
-    static unsigned rightMaskTable[] =
-        { 0x8000, 0xC000, 0xE000, 0xF000, 0xF800, 0xFC00,
-          0xFE00, 0xFF00, 0xFF80, 0xFFC0, 0xFFE0, 0xFFF0,
-          0xFFF8, 0xFFFC, 0xFFFE, 0xFFFF   };
-    unsigned leftMask, rightMask;       /* partial masks */
-    int xr = x+SUBXRES-1;           /* right subpixel of pixel */
-    int y;
+    // Fast Anti-Aliasing Polygon Scan Conversion
+    // Jack Morrison, Graphics Gems, Academic Press, 1990
+    // http://www.realtimerendering.com/resources/GraphicsGems/gems/AAPolyScan.c
 
-/* shortcut for common case of fully covered pixel */
-    if (x>xLmax && x<xRmin)     {
-        for (y=0; y<SUBYRES; y++)
-            mask[y] = 0xFFFF;
-    } else  {
-        for (y=0; y<SUBYRES; y++)   {
-            if (sp[y].xLeft < x)    /* completely left of pixel*/
-                leftMask = 0xFFFF;
-            else if (sp[y].xLeft > xr)  /* completely right */
-                leftMask = 0;
-            else
-                leftMask = leftMaskTable[sp[y].xLeft -x];
-
-            if (sp[y].xRight > xr)      /* completely  */
-                            /* right of pixel*/
-                rightMask = 0xFFFF;
-            else if (sp[y].xRight < x)  /*completely left */
-                rightMask = 0;
-            else
-                rightMask = rightMaskTable[sp[y].xRight -x];
-            mask[y] = leftMask & rightMask;
-        }
-    }
-}
-/*
- * Compute number of subpixels covered by polygon at current pixel
-*/
-int Coverage(
-    int x          /* left subpixel of pixel */
-    )
-{
-    int  area;          /* total covered area */
-    int partialArea;      /* covered area for current subpixel y */
-    int xr = x+SUBXRES-1;   /*right subpixel of pixel */
-    int y;
+    Pt::int32_t area;                     // Total covered area
+    Pt::int32_t partialArea;              // Covered area for current subpixel y
+    Pt::int32_t xr = x+FAASC_SUB_X_RES-1; // Right subpixel of pixel
+    Pt::int32_t y;
 
     /* shortcut for common case of fully covered pixel */
     if (x>xLmax && x<xRmin)
-        return MAX_AREA;
+        return FAASC_MAX_AREA;
 
-    for (area=y=0; y<SUBYRES; y++) {
+    for (area=y=0; y<FAASC_SUB_Y_RES; y++) {
         partialArea = std::min(sp[y].xRight, xr)
              - std::max(sp[y].xLeft, x) + 1;
         if (partialArea > 0)
@@ -977,15 +936,13 @@ int Coverage(
 void Rasterizer2::renderScanline(const Point* Vl, const Point* Vr, int y)
 {
     Point Vpixel;  /*object info interpolated at one pixel */
-    unsigned mask[SUBYRES]; /*pixel coverage bitmask */
     int x;          /* leftmost subpixel of current pixel */
 
-    for (x=SUBXRES*floor((double)(xLmin/SUBXRES)); x<=xRmax; x+=SUBXRES) {
-        int cov = Coverage(x) * 255 / MAX_AREA;
-        vLerp((double)(x-xLmin)/(xRmax-xLmin), Vl, Vr, &Vpixel);
-        computePixelMask(x, mask);
+    for (x=FAASC_SUB_X_RES*floor((double)(xLmin/FAASC_SUB_X_RES)); x<=xRmax; x+=FAASC_SUB_X_RES) {
+        int cov = Coverage(x) * 255 / FAASC_MAX_AREA;
+        interpolatePoints(&Vpixel, Vl, Vr, (double)(x-xLmin)/(xRmax-xLmin));
 
-            Pixel      dstPixel(_image->view(), x/SUBXRES, y);
+            Pixel      dstPixel(_image->view(), x/FAASC_SUB_X_RES, y);
             _image->format().setPixel(dstPixel, _brush.color(), _compositionMode, cov);
     }
 }
@@ -1001,8 +958,8 @@ void Rasterizer2::rasterPolygonAreaFastAASC(const Point* points_, size_t pointCo
     Point* points  = &spoints[0];
 
     for(size_t i = 0; i < pointCount; ++i) {
-        points[i].setX(points_[i].x() * SUBXRES);
-        points[i].setY(points_[i].y() * SUBYRES);
+        points[i].setX(points_[i].x() * FAASC_SUB_X_RES);
+        points[i].setY(points_[i].y() * FAASC_SUB_Y_RES);
     }
 
 
@@ -1026,7 +983,7 @@ endPoly = &points[pointCount-1];
 Vright = VnextRight = VnextLeft = Vleft;
 
 /* prepare bottom of initial scanline - no coverage by polygon */
-for (i=0; i<SUBYRES; i++)
+for (i=0; i<FAASC_SUB_Y_RES; i++)
     sp[i].xLeft = sp[i].xRight = -1;
 xLmin = xRmin = MAX_X;
 xLmax = xRmax = -1;
@@ -1054,9 +1011,9 @@ for (y=Vleft->y(); ; y++) {
 
     if (y>VnextLeft->y() || y>VnextRight->y())  {
                 /* done, mark uncovered part of last scanline */
-        for (; MODRES(y); y++)
-            sp[MODRES(y)].xLeft = sp[MODRES(y)].xRight = -1;
-        renderScanline(Vleft, Vright, y/SUBYRES);
+        for (; FAASC_SUB_Y_MOD(y); y++)
+            sp[FAASC_SUB_Y_MOD(y)].xLeft = sp[FAASC_SUB_Y_MOD(y)].xRight = -1;
+        renderScanline(Vleft, Vright, y/FAASC_SUB_Y_RES);
         return;
     }
 
@@ -1065,9 +1022,9 @@ for (y=Vleft->y(); ; y++) {
  * and update extremes for pixel coherence optimization
  */
 
-    sp_ptr = &sp[MODRES(y)];
+    sp_ptr = &sp[FAASC_SUB_Y_MOD(y)];
     aLeft = (double)(y - Vleft->y()) / (VnextLeft->y() - Vleft->y());
-    sp_ptr->xLeft = LERP(aLeft, xLeft, xNextLeft);
+    sp_ptr->xLeft = interpolateInteger(aLeft, xLeft, xNextLeft);
     if (sp_ptr->xLeft < xLmin)
         xLmin = sp_ptr->xLeft;
     if (sp_ptr->xLeft > xLmax)
@@ -1075,17 +1032,17 @@ for (y=Vleft->y(); ; y++) {
 
     aRight = (double)(y - Vright->y()) / (VnextRight->y()
                     - Vright->y());
-    sp_ptr->xRight = LERP(aRight, xRight, xNextRight);
+    sp_ptr->xRight = interpolateInteger(aRight, xRight, xNextRight);
     if (sp_ptr->xRight < xRmin)
         xRmin = sp_ptr->xRight;
     if (sp_ptr->xRight > xRmax)
         xRmax = sp_ptr->xRight;
 
-    if (MODRES(y) == SUBYRES-1) {   /* end of scanline */
+    if (FAASC_SUB_Y_MOD(y) == FAASC_SUB_Y_RES-1) {   /* end of scanline */
             /* interpolate edges to this scanline */
-        vLerp(aLeft, Vleft, VnextLeft, &VscanLeft);
-        vLerp(aRight, Vright, VnextRight, &VscanRight);
-        renderScanline(&VscanLeft, &VscanRight, y/SUBYRES);
+        interpolatePoints(&VscanLeft, Vleft, VnextLeft, aLeft);
+        interpolatePoints(&VscanRight, Vright, VnextRight, aRight);
+        renderScanline(&VscanLeft, &VscanRight, y/FAASC_SUB_Y_RES);
         xLmin = xRmin = MAX_X;      /* reset extremes */
         xLmax = xRmax = -1;
     }
