@@ -94,6 +94,9 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount, bool useAn
 // ===== Private Member Functions =======================================================
 // ======================================================================================
 
+// Uncomment this to use Duff's device
+#define USE_DUFFS_DEVICE
+
 void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount, const Color& color)
 {
     // Convert the coordinates to fixed-points
@@ -254,9 +257,6 @@ void Rasterizer2::rasterPolygonAreaTrueSSAA(const Point* points, size_t pointCou
 
     // A helper macro to scale the alpha
     #define SSAA_SCALE_ALPHA(A) ( Pt::uint16_t(A) * 17 / SUPERSAMPLING_SIZE / SUPERSAMPLING_SIZE )
-
-    // Uncomment this to use Duff's device
-    #define USE_DUFFS_DEVICE
 
     //  Loop through the rows of the image
     for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
@@ -481,7 +481,6 @@ void Rasterizer2::rasterPolygonAreaTrueSSAA(const Point* points, size_t pointCou
 
     // Undefine the helper macro
     #undef SSAA_SCALE_ALPHA
-    #undef USE_DUFFS_DEVICE
 }
 
 // Partially based on http://alienryderflex.com/polygon_fill
@@ -853,9 +852,30 @@ void Rasterizer2::rasterPolygonAreaFastSSAA(const Point* points, size_t pointCou
             //lprintf("B: "); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%d ", alphas[k] / 15); lprintf("\n");
             // Draw pixels that belongs to the left-part of the span to the image
             Pt::int32_t iterL = 0;
+#ifdef USE_DUFFS_DEVICE
+            if(true) { // Skip fully-transparent pixels
+                register Pt::uint8_t* src  = &alphas[0];
+                register Pt::int32_t  cnt  = sizeX - 1;
+                register Pt::int32_t  n    = (cnt + 7) / 8;
+                register Pt::int32_t  k    = iterL;
+                switch(cnt % 8) {
+                        case 0 : do { if(src[k]) {n = 0; break; } ++k;
+                        case 7 :      if(src[k]) {n = 0; break; } ++k;
+                        case 6 :      if(src[k]) {n = 0; break; } ++k;
+                        case 5 :      if(src[k]) {n = 0; break; } ++k;
+                        case 4 :      if(src[k]) {n = 0; break; } ++k;
+                        case 3 :      if(src[k]) {n = 0; break; } ++k;
+                        case 2 :      if(src[k]) {n = 0; break; } ++k;
+                        case 1 :      if(src[k]) {n = 0; break; } ++k;
+                                 } while (--n > 0);
+                }
+                iterL = k;
+            }
+#else
             for(; iterL < sizeX; ++iterL) { // Skip fully-transparent pixels
                 if(alphas[iterL]) break;
             }
+#endif
             if(_isTexture || _isGradient) { // Texture or gradient
                 for(; iterL < sizeX; ++iterL) {
                     // Break if we have reached the non anti-aliased part of the span
@@ -881,9 +901,30 @@ void Rasterizer2::rasterPolygonAreaFastSSAA(const Point* points, size_t pointCou
             }
             // Draw pixels that belongs to the right-part of the span to the image
             Pt::int32_t iterR = sizeX - 1;
+#ifdef USE_DUFFS_DEVICE
+            if(true) { // Skip fully-transparent pixels
+                register Pt::uint8_t* src  = &alphas[0];
+                register Pt::int32_t  cnt  = sizeX - 1;
+                register Pt::int32_t  n    = (cnt + 7) / 8;
+                register Pt::int32_t  k    = iterR;
+                switch(cnt % 8) {
+                        case 0 : do { if(src[k]) {n = 0; break; } --k;
+                        case 7 :      if(src[k]) {n = 0; break; } --k;
+                        case 6 :      if(src[k]) {n = 0; break; } --k;
+                        case 5 :      if(src[k]) {n = 0; break; } --k;
+                        case 4 :      if(src[k]) {n = 0; break; } --k;
+                        case 3 :      if(src[k]) {n = 0; break; } --k;
+                        case 2 :      if(src[k]) {n = 0; break; } --k;
+                        case 1 :      if(src[k]) {n = 0; break; } --k;
+                                 } while (--n > 0);
+                }
+                iterR = k;
+            }
+#else
             for(; iterR >= 0; --iterR) { // Skip fully-transparent pixels
                 if(alphas[iterR]) break;
             }
+#endif
             if(_isTexture || _isGradient) { // Texture or gradient
                 for(; iterR >= 0; --iterR) {
                     // Break if we have reached the non anti-aliased part of the span
@@ -981,6 +1022,8 @@ void Rasterizer2::rasterPolygonAreaFastSSAA(const Point* points, size_t pointCou
     #undef FSAA_MID_ALPHA
     #undef FSAA_MAX_ALPHA
 }
+
+#undef USE_DUFFS_DEVICE
 
 
 } // namespace
