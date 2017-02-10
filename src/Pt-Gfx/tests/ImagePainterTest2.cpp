@@ -25,7 +25,7 @@ using namespace Pt::Gfx;
 #define DO_BENCHMARKING 1
 
 // Comparison with Cairo
-#define DO_BENCHMARKING_CAIRO                 1
+#define DO_BENCHMARKING_CAIRO                 0
 #define BENCHMARK_CAIRO_CHECK_RESULTING_IMAGE 0
 
 // Comparison with GD
@@ -33,19 +33,19 @@ using namespace Pt::Gfx;
 #define BENCHMARK_GD_CHECK_RESULTING_IMAGE 0
 
 // Comparison with Libart
-#define DO_BENCHMARKING_LIBART                 1
+#define DO_BENCHMARKING_LIBART                 0
 #define BENCHMARK_LIBART_CHECK_RESULTING_IMAGE 0
 
 // Detailed-test enable settings
 #define TEST_SOURCECOPY                        1
 #define TEST_SOURCEOVER                        1
 
-#define TEST_DRAW_LINE_AND_TEXT                1
-#define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES 1
+#define TEST_DRAW_LINE_AND_TEXT                0
+#define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES 0
 
 #define TEST_DRAW_SOLID_FILLED_POLYGONS        1
-#define TEST_DRAW_GRADIENT_FILLED_POLYGONS     1
-#define TEST_DRAW_TEXTURE_FILLED_POLYGONS      1
+#define TEST_DRAW_GRADIENT_FILLED_POLYGONS     0
+#define TEST_DRAW_TEXTURE_FILLED_POLYGONS      0
 
 #define TEST_COMPARE_WITH_OLD_PAINTER          0
 
@@ -55,13 +55,13 @@ using namespace Pt::Gfx;
 #define BENCHMARK_LOOP_COUNT_SHORT          100
 #define BENCHMARK_LOOP_COUNT_LONG           200
 
-#define BENCHMARK_TEXT                      1
-#define BENCHMARK_LINE                      1
+#define BENCHMARK_TEXT                      0
+#define BENCHMARK_LINE                      0
 
-#define BENCHMARK_RECTANGLE                 1
-#define BENCHMARK_SOLID_FILLED_RECTANGLE    1
-#define BENCHMARK_GRADIENT_FILLED_RECTANGLE 1
-#define BENCHMARK_TEXTURE_FILLED_RECTANGLE  1
+#define BENCHMARK_RECTANGLE                 0
+#define BENCHMARK_SOLID_FILLED_RECTANGLE    0
+#define BENCHMARK_GRADIENT_FILLED_RECTANGLE 0
+#define BENCHMARK_TEXTURE_FILLED_RECTANGLE  0
 
 #define BENCHMARK_SOLID_FILLED_POLYGON      1
 #define BENCHMARK_GRADIENT_FILLED_POLYGON   1

@@ -178,14 +178,14 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount )
 {
 }
 
-void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount, bool useSupersamplingForAA )
+void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount, Pt::uint8_t antiAliasingLevel )
 {
     std::vector<Point> points(pointCount);
 
     for(size_t i = 0; i < pointCount; ++i)
         points[i].set( ps[i].x(), ps[i].y() );
 
-    _rasterizer->fillPolygon(points.data(), pointCount, useSupersamplingForAA);
+    _rasterizer->fillPolygon(points.data(), pointCount, antiAliasingLevel);
 }
 
 void ImagePainter2::drawImage( const PointF& toIn, const Image& image)
