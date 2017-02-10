@@ -17,10 +17,16 @@ MakeLocate ImagePainterTest : $(PT_OUTPUT_TARGET) ;
 
 if $(WITH_RASTERIZER2)
 {
+    SubDirC++Flags [ FIncludes "/usr/include/libart-2.0" ] ;
+
     Main ImagePainterTest2 : ImagePainterTest2.cpp ;
     LinkSharedLibraries ImagePainterTest2 : Pt Pt-Gfx Pt-System ;
     MakeLocate ImagePainterTest2 : $(PT_OUTPUT_TARGET) ;
-    LinkFlags ImagePainterTest2 : -lcairo  -lSDL2 -lX11 ;
+    LinkFlags ImagePainterTest2 : -lcairo -lart_lgpl_2 -lSDL2 -lX11 ;
 }
 
-#-I/usr/include/cairo -I/usr/include/glib-2.0 -I/usr/lib64/glib-2.0/include -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng15 -I/usr/include/libdrm  -lcairo
+# pkg-config --cflags cairo
+# pkg-config --libs cairo
+
+# libart2-config --cflags
+# libart2-config --libs
