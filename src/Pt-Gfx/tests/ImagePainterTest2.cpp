@@ -25,20 +25,20 @@ using namespace Pt::Gfx;
 #define DO_BENCHMARKING 1
 
 // Comparison with Cairo
-#define DO_BENCHMARKING_CAIRO                 1
+#define DO_BENCHMARKING_CAIRO                 0
 #define BENCHMARK_CAIRO_CHECK_RESULTING_IMAGE 0
 
 // Comparison with GD
-#define DO_BENCHMARKING_GD                 1
+#define DO_BENCHMARKING_GD                 0
 #define BENCHMARK_GD_CHECK_RESULTING_IMAGE 0
 
 // Comparison with Libart
-#define DO_BENCHMARKING_LIBART                 1
+#define DO_BENCHMARKING_LIBART                 0
 #define BENCHMARK_LIBART_CHECK_RESULTING_IMAGE 0
 
 // Detailed-test enable settings
-#define TEST_SOURCECOPY                        1
-#define TEST_SOURCEOVER                        0
+#define TEST_SOURCECOPY                        0
+#define TEST_SOURCEOVER                        1
 
 #define TEST_DRAW_LINE_AND_TEXT                0
 #define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES 0

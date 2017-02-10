@@ -78,9 +78,9 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount, bool useAn
 
     // Draw the polygon
     if(useAntiAliasing) {
-      //rasterPolygonAreaTrueSSAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
+        rasterPolygonAreaTrueSSAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
       //rasterPolygonAreaEdgeSSAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
-        rasterPolygonAreaFastSSAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
+      //rasterPolygonAreaFastSSAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
     }
 
     else {
