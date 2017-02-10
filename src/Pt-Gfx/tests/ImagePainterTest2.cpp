@@ -19,10 +19,11 @@ using namespace Pt::Gfx;
 
 // General settings
 #define DO_TEST_DRAW    1
-#define DO_BENCHMARKING 0
+#define DO_BENCHMARKING 1
 
-#define DO_CAIRO_BENCHMARKING       1
-#define CAIRO_CHECK_RESULTING_IMAGE 0
+// COmparison with Cairo
+#define DO_BENCHMARKING_CAIRO                 1
+#define BENCHMARK_CAIRO_CHECK_RESULTING_IMAGE 0
 
 // Detailed-test enable settings
 #define TEST_SOURCECOPY                        1
@@ -43,17 +44,17 @@ using namespace Pt::Gfx;
 #define BENCHMARK_LOOP_COUNT_SHORT          100
 #define BENCHMARK_LOOP_COUNT_LONG           200
 
-#define BENCHMARK_TEXT                      1
-#define BENCHMARK_LINE                      1
+#define BENCHMARK_TEXT                      0
+#define BENCHMARK_LINE                      0
 
-#define BENCHMARK_RECTANGLE                 1
-#define BENCHMARK_SOLID_FILLED_RECTANGLE    1
-#define BENCHMARK_GRADIENT_FILLED_RECTANGLE 1
-#define BENCHMARK_TEXTURE_FILLED_RECTANGLE  1
+#define BENCHMARK_RECTANGLE                 0
+#define BENCHMARK_SOLID_FILLED_RECTANGLE    0
+#define BENCHMARK_GRADIENT_FILLED_RECTANGLE 0
+#define BENCHMARK_TEXTURE_FILLED_RECTANGLE  0
 
 #define BENCHMARK_SOLID_FILLED_POLYGON      1
-#define BENCHMARK_GRADIENT_FILLED_POLYGON   1
-#define BENCHMARK_TEXTURE_FILLED_POLYGON    1
+#define BENCHMARK_GRADIENT_FILLED_POLYGON   0
+#define BENCHMARK_TEXTURE_FILLED_POLYGON    0
 
 // Configurations and objects
 #define FONT_DIR  "../src/Pt-Gfx/fonts"
@@ -201,7 +202,7 @@ int main(int argc, char* args[])
         doBenchmark(CompositionMode::SourceOver);
     }
 
-    if(DO_CAIRO_BENCHMARKING) {
+    if(DO_BENCHMARKING_CAIRO) {
         std::clog << std::fixed << std::setprecision(0) << std::endl;
 
         std::clog << "Cairo - CompositionMode::SourceCopy" << std::endl;

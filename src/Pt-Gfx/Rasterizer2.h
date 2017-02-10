@@ -121,11 +121,6 @@ class Rasterizer2
         void rasterPolygonAreaEdgeSSAA(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
         void rasterPolygonAreaFastSSAA(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
 
-
-        void rasterPolygonAreaFastAASC(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
-
-        void renderScanline(const Point* Vl, const Point* Vr, int y);
-
         void updateGradientBrush(Pt::int32_t width, Pt::int32_t height);
 
         void updateClip();

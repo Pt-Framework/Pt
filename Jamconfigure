@@ -38,16 +38,16 @@ Configure PT_OUTPUT_TEST ;
 
 PT_INSTALL_DIR ?= [ FDirName $(PT_TOP) deploy $(CONFIG) ] ;
 
-PT_INSTALL_BINDIR ?= [ FDirName $(PT_INSTALL_DIR) bin ] ; 
+PT_INSTALL_BINDIR ?= [ FDirName $(PT_INSTALL_DIR) bin ] ;
 EchoOption PT_INSTALL_BINDIR : "Pt Binary Install Dir" ;
 Configure PT_INSTALL_BINDIR ;
 
-PT_INSTALL_INCLUDEDIR ?= [ FDirName $(PT_INSTALL_DIR) include ] ; 
+PT_INSTALL_INCLUDEDIR ?= [ FDirName $(PT_INSTALL_DIR) include ] ;
 EchoOption PT_INSTALL_INCLUDEDIR : "Pt Include Install Dir" ;
 Configure PT_INSTALL_INCLUDEDIR ;
 
 PT_INSTALL_LIBDIR ?= [ FDirName $(PT_INSTALL_DIR) lib ] ;
-EchoOption PT_INSTALL_LIBDIR : "Pt Library Install Dir" ; 
+EchoOption PT_INSTALL_LIBDIR : "Pt Library Install Dir" ;
 Configure PT_INSTALL_LIBDIR ;
 
 #############################################################################
@@ -88,7 +88,7 @@ if $(PT_SYSTEM) = win32
                                  "return 0; }"
                                  : ""
                                  : $(PSAPI_LINKLIBS) ] ;
-        
+
     if ! $(WITH_PSAPI)
     {
         PSAPI_LINKLIBS = -lPsapi ;
@@ -111,11 +111,11 @@ if $(PT_SYSTEM) = win32
 #
 
 if $(PT_SYSTEM) = posix
-{   
+{
     #
     # System realtime clock
     #
-    
+
     # Linux can link programs without -lrt, but needs it to run
 
     POSIX_CLOCK_LINKLIBS ?= -lrt ;
@@ -167,7 +167,7 @@ if $(PT_SYSTEM) = posix
     {
         Exit "ERROR: clocks are required." ;
     }
-    
+
     #
     # dynamic library loader
     #
@@ -332,7 +332,7 @@ if $(PT_SYSTEM) = posix
                                    : ""
                                    : $(NSL_LINKLIBS) ] ;
     }
-    
+
     if ! $(WITH_NSL)
     {
         NSL_LINKLIBS = -lsocket ;
@@ -382,7 +382,7 @@ if ! $(WITH_ATOMICS)
 # zlib compression library
 #############################################################################
 
-if --with-zlib in $(ARGV) 
+if --with-zlib in $(ARGV)
 {
     WITH_BUILTIN_ZLIB = yes ;
     WITH_ZLIB = yes ;
@@ -401,7 +401,7 @@ if ! $(WITH_ZLIB)
 }
 
 if ! $(WITH_ZLIB) || $(WITH_BUILTIN_ZLIB)
-{   
+{
     WITH_BUILTIN_ZLIB = yes ;
     WITH_ZLIB = yes ;
     ZLIB_INCLUDES = [ FDirName $(PT_TOP) src zlib ] ;
@@ -441,7 +441,7 @@ if --with-rasterizer2 in $(ARGV)
 # PNG support with libpng
 #############################################################################
 
-if --with-libpng in $(ARGV) 
+if --with-libpng in $(ARGV)
 {
     WITH_BUILTIN_LIBPNG = yes ;
     WITH_PNG = yes ;
@@ -460,7 +460,7 @@ if ! $(WITH_PNG)
 }
 
 if ! $(WITH_PNG) || $(WITH_BUILTIN_LIBPNG)
-{   
+{
     WITH_BUILTIN_LIBPNG = yes ;
     WITH_PNG = yes ;
     PNG_INCLUDES = [ FDirName $(PT_TOP) src libpng ] ;
@@ -480,7 +480,7 @@ EchoOption PNG_LINKLIBS : "PNG libs" ;
 # JPEG support with libjpeg
 #############################################################################
 
-if --with-libjpeg in $(ARGV) 
+if --with-libjpeg in $(ARGV)
 {
     WITH_BUILTIN_LIBJPEG = yes ;
     WITH_JPEG = yes ;
@@ -499,7 +499,7 @@ if ! $(WITH_JPEG)
 }
 
 if ! $(WITH_JPEG) || $(WITH_BUILTIN_LIBJPEG)
-{   
+{
     WITH_BUILTIN_LIBJPEG = yes ;
     WITH_JPEG = yes ;
     JPEG_INCLUDES = [ FDirName $(PT_TOP) src libjpeg ] ;
@@ -519,7 +519,7 @@ EchoOption JPEG_LINKLIBS : "JPEG libs" ;
 # Freetype support
 #############################################################################
 
-if --with-freetype in $(ARGV) 
+if --with-freetype in $(ARGV)
 {
     WITH_BUILTIN_FREETYPE = yes ;
     WITH_FREETYPE = yes ;
@@ -540,7 +540,7 @@ if ! $(WITH_FREETYPE)
 }
 
 if ! $(WITH_FREETYPE) || $(WITH_BUILTIN_FREETYPE)
-{   
+{
     WITH_BUILTIN_FREETYPE = yes ;
     WITH_FREETYPE = yes ;
     FREETYPE_INCLUDES = [ FDirName $(PT_TOP) src freetype include ] ;
@@ -561,7 +561,7 @@ EchoOption FREETYPE_LINKLIBS : "Freetype libs" ;
 #############################################################################
 
 if --with-openssl in $(ARGV)
-{   
+{
     include [ FDirName src openssl Jamconfigure ] ;
 
     WITH_OPENSSL = "yes" ;
@@ -695,7 +695,7 @@ if --with-wxwidgets in $(ARGV)
     {
         Exit "ERROR:" $(WXCONFIG) "does not work" ;
     }
-    
+
     WX_LINKLIBS = $(WXCONFIG_RESULT[2-]) ;
     EchoOption WX_LINKLIBS : "wx Widgets link flags" ;
     Configure WX_LINKLIBS ;
@@ -726,7 +726,7 @@ if $(QT5_SUPPORT)
 
 	WITH_QT = [ CheckBuildC++ "#include <QtCore/QString>"
 							  "int main() { QString qs; return 0; }"
-							: [ FIncludes $(QT_INCLUDES) ] $(QT_C++FLAGS) 
+							: [ FIncludes $(QT_INCLUDES) ] $(QT_C++FLAGS)
 							: $(QT_LINKLIBS) $(QT_LINKFLAGS) ] ;
 
 	if ! $(WITH_QT)
@@ -744,7 +744,7 @@ if $(QT5_SUPPORT)
 	if ! $(WITH_QT)
 	{
 		if $(WITH_DEBUG) && ! $(WITH_OPTIM)
-		{   
+		{
 			QT_SUFLIB = d.lib ;
 		}
 
@@ -860,7 +860,7 @@ if ! $(GUI)  || GUI = "x11"
     Load x11.jam ;
 
     ConfigureX11 ;
-    
+
     if $(X11_LIBS)
     {
         ConfigureXExt ;

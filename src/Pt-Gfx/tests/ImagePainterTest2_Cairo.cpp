@@ -1,5 +1,5 @@
-#define CAIRO_BENCHMARK_DISPLAY_RESULTING_IMAGE \
-    if(CAIRO_CHECK_RESULTING_IMAGE && !i) sdlPreviewRGB888Buffer(formatCaption("Cairo", cm, __FUNCTION__), buffer.data(), imgSize.width(), imgSize.height(), false)
+#define BENCHMARK_CAIRO_DISPLAY_RESULTING_IMAGE \
+    if(BENCHMARK_CAIRO_CHECK_RESULTING_IMAGE && !i) sdlPreviewRGB888Buffer(formatCaption("Cairo", cm, __FUNCTION__), buffer.data(), imgSize.width(), imgSize.height(), false)
 
 static size_t cairoBenchFillPolygon(int loopCount, CompositionMode cm)
 {
@@ -49,7 +49,7 @@ static size_t cairoBenchFillPolygon(int loopCount, CompositionMode cm)
 
         sum += clock.stop().toUSecs();
 
-        CAIRO_BENCHMARK_DISPLAY_RESULTING_IMAGE;
+        BENCHMARK_CAIRO_DISPLAY_RESULTING_IMAGE;
     }
 
     cairo_destroy (cairo);
@@ -83,4 +83,4 @@ static void cairoBenchmark(CompositionMode cm)
     }
 }
 
-#undef CAIRO_BENCHMARK_DISPLAY_RESULTING_IMAGE
+#undef BENCHMARK_CAIRO_DISPLAY_RESULTING_IMAGE
