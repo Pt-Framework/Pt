@@ -986,16 +986,8 @@ void Rasterizer2::renderScanline(const Point* Vl, const Point* Vr, int y)
         computePixelMask(x, mask);
 
             Pixel      dstPixel(_image->view(), x/SUBXRES, y);
-            _image->format().setPixel(dstPixel, _brush.color(), _compositionMode, cov);// * mask[yy] / 65535);
-
-
-//        for(int yy = 0; yy < SUBYRES; ++yy) {
-        //    Pixel      dstPixel(_image->view(), x/SUBXRES, y*SUBYRES +yy);
-      //      _image->format().setPixel(dstPixel, _brush.color(), _compositionMode, cov);// * mask[yy] / 65535);
-//            lprintf("%04X ", mask[yy]);
-    //    }
+            _image->format().setPixel(dstPixel, _brush.color(), _compositionMode, cov);
     }
-  //  lprintf("\n#\n");
 }
 
 
@@ -1014,8 +1006,6 @@ void Rasterizer2::rasterPolygonAreaFastAASC(const Point* points_, size_t pointCo
     }
 
 
-
-#define screenX(P) (P->x())
 
     const Point *endPoly;            /* end of polygon vertex list */
     Point VscanLeft, VscanRight;   /* interpolated vertices */                                 /* at scanline */
@@ -1050,16 +1040,16 @@ for (y=Vleft->y(); ; y++) {
             VnextLeft = points;
         if (VnextLeft == Vright)    /* all y's same?  */
             return;             /* (null polygon) */
-        xLeft = screenX(Vleft);
-        xNextLeft = screenX(VnextLeft);
+        xLeft = Vleft->x();
+        xNextLeft = VnextLeft->x();
     }
 
     while (y == VnextRight->y())  { /*reached next right vertex */
         VnextRight = (Vright=VnextRight) -1;
         if (VnextRight < points)           /* (wraparound) */
             VnextRight = endPoly;
-        xRight = screenX(Vright);
-        xNextRight = screenX(VnextRight);
+        xRight = Vright->x();
+        xNextRight = VnextRight->x();
     }
 
     if (y>VnextLeft->y() || y>VnextRight->y())  {
