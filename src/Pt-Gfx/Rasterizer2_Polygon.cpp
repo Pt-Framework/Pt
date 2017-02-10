@@ -60,7 +60,7 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount, bool useAn
     genClippedPolygonPoints(clipped, points, pointCount);
 
 #if 0
-    #define DIV_FAC 5
+    #define DIV_FAC 50
     clipped.clear();
     clipped.push_back(Point(450 / DIV_FAC, 100 / DIV_FAC));
     clipped.push_back(Point(350 / DIV_FAC, 300 / DIV_FAC));
@@ -82,8 +82,10 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount, bool useAn
       //rasterPolygonAreaEdgeSSAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
         rasterPolygonAreaFastSSAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
     }
-    else
-        rasterPolygonAreaFastNOAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
+    else {
+      rasterPolygonAreaTrueSSAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
+        //rasterPolygonAreaFastNOAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
+    }
 }
 
 
@@ -715,6 +717,7 @@ void Rasterizer2::rasterPolygonAreaFastSSAA(const Point* points, size_t pointCou
             const Pt::int32_t fromMax = std::max(from0, from1);
             const Pt::int32_t toMin   = std::min(to0,   to1  );
             const Pt::int32_t toMax   = std::max(to0,   to1  );
+#if 0
             /*
              *        Normal Pixel# 00    01    02    03    04    05    06    07    08    09
              * Supersampling Pixel# 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19
@@ -773,8 +776,53 @@ void Rasterizer2::rasterPolygonAreaFastSSAA(const Point* points, size_t pointCou
              *                     └──┴──┴──┘                                         └──┴──┴──┘
              *         Alpha Score  1  2  3                                             3  2  1
              */
-            // ### TODO: IMPROVE THE SPEED !!! ###
-
+            //
+            const Pt::int32_t fx0 = fromMin / 2;
+            const Pt::int32_t fx1 = fromMax / 2;
+            const Pt::uint8_t fa0 = ( ( (fromMin & 1) ? 1 : 2 ) + ( (fromMax & 1) ? 1 : 2 ) );// * 255 / 4;
+            const Pt::uint8_t fa1 = ( 2                         + ( (fromMax & 1) ? 1 : 2 ) );// * 255 / 4;
+            const Pt::int32_t tx0 = toMin   / 2;
+            const Pt::int32_t tx1 = toMax   / 2;
+            const Pt::uint8_t ta0 = ( ( (toMin   & 1) ? 2 : 1 ) + 2                         );// * 255 / 4;
+            const Pt::uint8_t ta1 = ( ( (toMin   & 1) ? 2 : 1 ) + ( (toMax   & 1) ? 2 : 1 ) );// * 255 / 4;
+            if(true) {
+                Pixel pixel(_image->view(), minX + fx0, minY + pixelY);
+                _image->format().setPixel(pixel, color, _compositionMode, fa0);
+            }
+            if(fx0 != fx1) {
+                Pixel pixel(_image->view(), minX + fx1, minY + pixelY);
+                _image->format().setPixel(pixel, color, _compositionMode, fa1);
+            }
+            for(Pt::int32_t iterX = fx0 + 1; iterX < fx1; ++iterX) {
+                Pixel pixel(_image->view(), minX + iterX, minY + pixelY);
+                _image->format().setPixel(pixel, color, _compositionMode, 127);
+            }
+            //
+            if(true) {
+                Pixel pixel(_image->view(), minX + tx0, minY + pixelY);
+                _image->format().setPixel(pixel, color, _compositionMode, ta0);
+            }
+            if(tx0 != tx1) {
+                Pixel pixel(_image->view(), minX + tx1, minY + pixelY);
+                _image->format().setPixel(pixel, color, _compositionMode, ta1);
+            }
+            for(Pt::int32_t iterX = tx0 + 1; iterX < tx1; ++iterX) {
+                Pixel pixel(_image->view(), minX + iterX, minY + pixelY);
+                _image->format().setPixel(pixel, color, _compositionMode, 127);
+            }
+            //
+            Pt::int32_t iterX     = minX + fx1 + 1;
+            Pt::int32_t spanWidth = (tx0 - 1) - (fx1 + 1) + 1;
+            while(spanWidth > 0) {
+                const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
+                if(n) {
+                    Pixel pixel(_image->view(), iterX, minY + pixelY);
+                    _image->format().copy(pixel, _brushPixel, n, _compositionMode);
+                }
+                spanWidth -= n;
+                iterX     += n;
+            }
+#else
             // Reset the alphas
             memset(&alphas[0], 0, alphas.size());
             // Calculate the alphas of the left-part of the span
@@ -790,6 +838,7 @@ void Rasterizer2::rasterPolygonAreaFastSSAA(const Point* points, size_t pointCou
             // Set the alphas of the boundary edge of the middle-part of the span
             alphas[(fromMax + 1) / 2] = FSAA_MAX_ALPHA;
             alphas[(toMin   - 1) / 2] = FSAA_MAX_ALPHA;
+            //lprintf("B: "); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%d ", alphas[k] / 15); lprintf("\n");
             // Draw pixels that belongs to the left-part of the span to the image
             Pt::int32_t iterL = 0;
             for(; iterL < sizeX; ++iterL) { // Skip fully-transparent pixels
@@ -911,12 +960,13 @@ void Rasterizer2::rasterPolygonAreaFastSSAA(const Point* points, size_t pointCou
                     }
                 }
             }
+#endif
         }
     }
 
     // Undefine the helper macro
-    #undef FSAA_SCALE_ALPHA
-    #undef FSAA_MAX_ALPHA
+ //   #undef FSAA_SCALE_ALPHA
+  //  #undef FSAA_MAX_ALPHA
 }
 
 

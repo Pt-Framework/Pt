@@ -17,12 +17,14 @@
 
 using namespace Pt::Gfx;
 
-#define DO_TEST_DRAW          1
-#define DO_BENCHMARKING       0
-#define DO_CAIRO_BENCHMARKING 1
+// General settings
+#define DO_TEST_DRAW    1
+#define DO_BENCHMARKING 0
 
-// Test
+#define DO_CAIRO_BENCHMARKING       0
+#define CAIRO_CHECK_RESULTING_IMAGE 0
 
+// Detailed-test enable settings
 #define TEST_SOURCECOPY                        1
 #define TEST_SOURCEOVER                        0
 
@@ -35,10 +37,7 @@ using namespace Pt::Gfx;
 
 #define TEST_COMPARE_WITH_OLD_PAINTER          0
 
-// Benchmark
-
-#define CAIRO_CHECK_RESULTING_IMAGE         0
-
+// Detailed-test benchmark settings
 #define BENCHMARK_CHECK_RESULTING_IMAGE     0
 #define BENCHMARK_IMAGE_SIZE                Size(1280, 800)
 #define BENCHMARK_LOOP_COUNT_SHORT          100
