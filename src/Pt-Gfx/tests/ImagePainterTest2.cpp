@@ -21,7 +21,7 @@ using namespace Pt::Gfx;
 #define DO_TEST_DRAW    1
 #define DO_BENCHMARKING 0
 
-#define DO_CAIRO_BENCHMARKING       0
+#define DO_CAIRO_BENCHMARKING       1
 #define CAIRO_CHECK_RESULTING_IMAGE 0
 
 // Detailed-test enable settings
