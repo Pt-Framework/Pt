@@ -1,3 +1,114 @@
+#if 0
+            /*
+             *        Normal Pixel# 00    01    02    03    04    05    06    07    08    09
+             * Supersampling Pixel# 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19
+             *
+             *                     ┌──┬──┬──┐                                         ┌──┬──┬──┐
+             *               from0 │O-│  │  │                                         │  │  │-O│ to0
+             *               from1 │O-│  │  │                                         │  │  │-O│ to1
+             *                     └──┴──┴──┘                                         └──┴──┴──┘
+             *         Alpha Score  4                                                         4
+             *
+             *                     ┌──┬──┬──┐       fx0 =  fromMin / 2                ┌──┬──┬──┐
+             *               from0 │O-│  │  │       fa0 = (fromMin & 1) ? 1 : 2       │  │  │-O│ to0
+             *               from1 │ O│  │  │           + (fromMax & 1) ? 1 : 2       │  │  │O │ to1
+             *                     └──┴──┴──┘                                         └──┴──┴──┘
+             *         Alpha Score  3               fx1 =  fromMax / 2                        3
+             *                                      fa1 = (fromMax & 1) ? 1 : 2
+             *                     ┌──┬──┬──┐           + 2                           ┌──┬──┬──┐
+             *               from0 │ O│  │  │                                         │  │  │O │ to0
+             *               from1 │ O│  │  │       iterX = [ fx0 + 1 , fx1 )         │  │  │O │ to1
+             *                     └──┴──┴──┘       iterA = 2                         └──┴──┴──┘
+             *         Alpha Score  2                                                         2
+             *
+             *                     ┌──┬──┬──┐                                         ┌──┬──┬──┐
+             *               from0 │O-│--│  │                                         │  │--│-O│ to0
+             *               from1 │  │O-│  │                                         │  │-O│  │ to1
+             *                     └──┴──┴──┘                                         └──┴──┴──┘
+             *         Alpha Score  2  4                                                   4  2
+             *
+             *                     ┌──┬──┬──┐       tx0 =  toMin / 2                  ┌──┬──┬──┐
+             *               from0 │O-│--│  │       ta0 = (toMin & 1) ? 2 : 1         │  │--│-O│ to0
+             *               from1 │  │ O│  │           +  2                          │  │O │  │ to1
+             *                     └──┴──┴──┘                                         └──┴──┴──┘
+             *         Alpha Score  2   3           tx1 =  toMax / 2                       3  2
+             *                                      ta1 = (toMin & 1) ? 2 : 1
+             *                     ┌──┬──┬──┐           + (toMax & 1) ? 2 : 1         ┌──┬──┬──┐
+             *               from0 │ O│--│  │                                         │  │--│O │ to0
+             *               from1 │  │O-│  │       iterX = [ tx0 + 1 , tx1 )         │  │-O│  │ to1
+             *                     └──┴──┴──┘       iterA = 2                         └──┴──┴──┘
+             *         Alpha Score  1  4                                                   4  1
+             *
+             *                     ┌──┬──┬──┐                                         ┌──┬──┬──┐
+             *               from0 │ O│--│  │                                         │  │--│O │ to0
+             *               from1 │  │ O│  │                                         │  │O │  │ to1
+             *                     └──┴──┴──┘                                         └──┴──┴──┘
+             *         Alpha Score  1  3                                                   3  1
+             *
+             *                     ┌──┬──┬──┐       pxAlpha = (alpha * 255) / 4       ┌──┬──┬──┐
+             *               from0 │O-│--│--│                                         │--│--│-O│ to0
+             *               from1 │  │  │O-│                                         │-O│  │  │ to1
+             *                     └──┴──┴──┘                                         └──┴──┴──┘
+             *         Alpha Score  2  2  4                                             4  2  2
+             *
+             *                     ┌──┬──┬──┐                                         ┌──┬──┬──┐
+             *               from0 │ O│--│--│                                         │--│--│O │ to0
+             *               from1 │  │  │ O│                                         │O │  │  │ to1
+             *                     └──┴──┴──┘                                         └──┴──┴──┘
+             *         Alpha Score  1  2  3                                             3  2  1
+             */
+            //
+            const Pt::int32_t fx0 = fromMin / 2;
+            const Pt::int32_t fx1 = fromMax / 2;
+            const Pt::uint8_t fa0 = ( ( (fromMin & 1) ? 1 : 2 ) + ( (fromMax & 1) ? 1 : 2 ) );// * 255 / 4;
+            const Pt::uint8_t fa1 = ( 2                         + ( (fromMax & 1) ? 1 : 2 ) );// * 255 / 4;
+            const Pt::int32_t tx0 = toMin   / 2;
+            const Pt::int32_t tx1 = toMax   / 2;
+            const Pt::uint8_t ta0 = ( ( (toMin   & 1) ? 2 : 1 ) + 2                         );// * 255 / 4;
+            const Pt::uint8_t ta1 = ( ( (toMin   & 1) ? 2 : 1 ) + ( (toMax   & 1) ? 2 : 1 ) );// * 255 / 4;
+            if(true) {
+                Pixel pixel(_image->view(), minX + fx0, minY + pixelY);
+                _image->format().setPixel(pixel, color, _compositionMode, fa0);
+            }
+            if(fx0 != fx1) {
+                Pixel pixel(_image->view(), minX + fx1, minY + pixelY);
+                _image->format().setPixel(pixel, color, _compositionMode, fa1);
+            }
+            for(Pt::int32_t iterX = fx0 + 1; iterX < fx1; ++iterX) {
+                Pixel pixel(_image->view(), minX + iterX, minY + pixelY);
+                _image->format().setPixel(pixel, color, _compositionMode, 127);
+            }
+            //
+            if(true) {
+                Pixel pixel(_image->view(), minX + tx0, minY + pixelY);
+                _image->format().setPixel(pixel, color, _compositionMode, ta0);
+            }
+            if(tx0 != tx1) {
+                Pixel pixel(_image->view(), minX + tx1, minY + pixelY);
+                _image->format().setPixel(pixel, color, _compositionMode, ta1);
+            }
+            for(Pt::int32_t iterX = tx0 + 1; iterX < tx1; ++iterX) {
+                Pixel pixel(_image->view(), minX + iterX, minY + pixelY);
+                _image->format().setPixel(pixel, color, _compositionMode, 127);
+            }
+            //
+            Pt::int32_t iterX     = minX + fx1 + 1;
+            Pt::int32_t spanWidth = (tx0 - 1) - (fx1 + 1) + 1;
+            while(spanWidth > 0) {
+                const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
+                if(n) {
+                    Pixel pixel(_image->view(), iterX, minY + pixelY);
+                    _image->format().copy(pixel, _brushPixel, n, _compositionMode);
+                }
+                spanWidth -= n;
+                iterX     += n;
+            }
+#else
+#endif
+
+
+
+
         /*
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
             Pt::int32_t a1 = FIXED_POINT_TO_INT(nodeXf[i    ]);
