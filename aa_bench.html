@@ -4,14 +4,144 @@
 <h1><pre><b>😁 😃 😶 😏 😣 BENCHMARK RESULT 😣 😏 😶 😃 😁</b></pre></h1>
 <br/>
 
-<h1><pre><b>YET ANOTHER NEW ALGORITHM</b></pre></h1>
+<h1><pre><b>OPTIMIZATION AND COMPARISON</b></pre></h1>
 
 <pre>
 <b>2017/02/XX - X</b><br/>
 </pre><br/>
 
 <pre>
-<b>2017/02/10</b><br/>
+<b>2017/02/10 - 2</b><br/>
+Pt::Gfx - CompositionMode::SourceCopy
+                                                   (Time) (Factor)
+                                                   ------ --------
+    Text                         @ ImagePainter  =    317
+    Text                         @ ImagePainter2 =    313 ( 0.987)
+
+    Line                         @ ImagePainter  =     56
+    Line                         @ ImagePainter2 =    190 ( 3.393)
+
+    Rectangle                    @ ImagePainter  =     37
+    Rectangle                    @ ImagePainter2 =     35 ( 0.946)
+
+    Solid-filled    Rectangle    @ ImagePainter  =     99
+    Solid-filled    Rectangle    @ ImagePainter2 =     95 ( 0.960)
+
+    Gradient-filled Rectangle    @ ImagePainter  =   3320
+    Gradient-filled Rectangle    @ ImagePainter2 =     55 ( 0.017)
+
+    Texture-filled  Rectangle    @ ImagePainter  =     63
+    Texture-filled  Rectangle    @ ImagePainter2 =     48 ( 0.762)
+
+    Solid-filled    polygon      @ ImagePainter  =    222
+    Solid-filled    polygon NOAA @ ImagePainter2 =    150 ( 0.676)
+    Solid-filled    polygon SSAA @ ImagePainter2 =    788 ( 3.550) <b>* Use TrueFSAA not FastSSAA *</b>
+
+    Gradient-filled polygon      @ ImagePainter  =   2862
+    Gradient-filled polygon NOAA @ ImagePainter2 =    141 ( 0.049)
+    Gradient-filled polygon SSAA @ ImagePainter2 =    916 ( 0.320) <b>* Use TrueFSAA not FastSSAA *</b>
+
+    Texture-filled  polygon      @ ImagePainter  =    233
+    Texture-filled  polygon NOAA @ ImagePainter2 =    155 ( 0.665)
+    Texture-filled  polygon SSAA @ ImagePainter2 =    929 ( 3.987) <b>* Use TrueFSAA not FastSSAA *</b>
+
+Pt::Gfx - CompositionMode::SourceOver
+                                                   (Time) (Factor)
+                                                   ------ --------
+    Text                         @ ImagePainter  =    303
+    Text                         @ ImagePainter2 =    300 ( 0.990)
+
+    Line                         @ ImagePainter  =     72
+    Line                         @ ImagePainter2 =    191 ( 2.653)
+
+    Rectangle                    @ ImagePainter  =     65
+    Rectangle                    @ ImagePainter2 =     44 ( 0.677)
+
+    Solid-filled    Rectangle    @ ImagePainter  =    973
+    Solid-filled    Rectangle    @ ImagePainter2 =    969 ( 0.996)
+
+    Gradient-filled Rectangle    @ ImagePainter  =   4164
+    Gradient-filled Rectangle    @ ImagePainter2 =    597 ( 0.143)
+
+    Texture-filled  Rectangle    @ ImagePainter  =    936
+    Texture-filled  Rectangle    @ ImagePainter2 =    924 ( 0.987)
+
+    Solid-filled    polygon      @ ImagePainter  =    940
+    Solid-filled    polygon NOAA @ ImagePainter2 =    870 ( 0.926)
+    Solid-filled    polygon SSAA @ ImagePainter2 =    964 ( 1.026) <b>* Use TrueFSAA not FastSSAA *</b>
+
+    Gradient-filled polygon      @ ImagePainter  =   3571
+    Gradient-filled polygon NOAA @ ImagePainter2 =    589 ( 0.165)
+    Gradient-filled polygon SSAA @ ImagePainter2 =   1368 ( 0.383) <b>* Use TrueFSAA not FastSSAA *</b>
+
+    Texture-filled  polygon      @ ImagePainter  =    951
+    Texture-filled  polygon NOAA @ ImagePainter2 =    874 ( 0.919)
+    Texture-filled  polygon SSAA @ ImagePainter2 =   1636 ( 1.720) <b>* Use TrueFSAA not FastSSAA *</b>
+
+
+Cairo - CompositionMode::SourceCopy
+=> RESULT : GOOD IMAGE                             (Time) (Factor)
+                                                   ------ --------
+    Solid-filled    polygon      @ Cairo         =    100
+    Solid-filled    polygon      @ ImagePainter  =    220 ( 2.200)
+    Solid-filled    polygon NOAA @ ImagePainter2 =    154 ( 1.540)
+    Solid-filled    polygon SSAA @ ImagePainter2 =    792 ( 7.920) <b>* Use TrueFSAA not FastSSAA *</b>
+
+Cairo - CompositionMode::SourceOver
+=> RESULT : GOOD IMAGE                             (Time) (Factor)
+                                                   ------ --------
+    Solid-filled    polygon      @ Cairo         =    320
+    Solid-filled    polygon      @ ImagePainter  =    940 ( 2.938)
+    Solid-filled    polygon NOAA @ ImagePainter2 =    872 ( 2.725)
+    Solid-filled    polygon SSAA @ ImagePainter2 =    964 ( 3.013) <b>* Use TrueFSAA not FastSSAA *</b>
+
+
+GD - CompositionMode::SourceCopy
+=> RESULT : GOOD IMAGE                             (Time) (Factor)
+                                                   ------ --------
+    Solid-filled    polygon      @ GD            =    342
+    Solid-filled    polygon      @ ImagePainter  =    221 ( 0.646)
+    Solid-filled    polygon NOAA @ ImagePainter2 =    153 ( 0.447)
+    Solid-filled    polygon SSAA @ ImagePainter2 =    789 ( 2.307) <b>* Use TrueFSAA not FastSSAA *</b>
+
+GD - CompositionMode::SourceOver
+=> RESULT : BAD IMAGE                              (Time) (Factor)
+                                                   ------ --------
+    Solid-filled    polygon      @ GD            =   1166
+    Solid-filled    polygon      @ ImagePainter  =    941 ( 0.807)
+    Solid-filled    polygon NOAA @ ImagePainter2 =    873 ( 0.749)
+    Solid-filled    polygon SSAA @ ImagePainter2 =    965 ( 0.828) <b>* Use TrueFSAA not FastSSAA *</b>
+
+
+Libart (LGPL) - CompositionMode::SourceCopy
+=> RESULT : BAD IMAGE                              (Time) (Factor)
+                                                   ------ --------
+    Solid-filled    polygon      @ Libart _alpha =     84
+    Solid-filled    polygon      @ ImagePainter  =    220 ( 2.619)
+    Solid-filled    polygon NOAA @ ImagePainter2 =    153 ( 1.821)
+    Solid-filled    polygon SSAA @ ImagePainter2 =    790 ( 9.405) <b>* Use TrueFSAA not FastSSAA *</b>
+
+    Solid-filled    polygon      @ Libart _aa    =    371
+    Solid-filled    polygon      @ ImagePainter  =    221 ( 0.596)
+    Solid-filled    polygon NOAA @ ImagePainter2 =    153 ( 0.412)
+    Solid-filled    polygon SSAA @ ImagePainter2 =    788 ( 2.124) <b>* Use TrueFSAA not FastSSAA *</b>
+
+Libart (LGPL) - CompositionMode::SourceOver
+                                                   (Time) (Factor)
+                                                   ------ --------
+    Solid-filled    polygon      @ Libart _alpha =    244
+    Solid-filled    polygon      @ ImagePainter  =    940 ( 3.852)
+    Solid-filled    polygon NOAA @ ImagePainter2 =    872 ( 3.574)
+    Solid-filled    polygon SSAA @ ImagePainter2 =    965 ( 3.955) <b>* Use TrueFSAA not FastSSAA *</b>
+
+    Solid-filled    polygon      @ Libart _aa    =    379
+    Solid-filled    polygon      @ ImagePainter  =    957 ( 2.525)
+    Solid-filled    polygon NOAA @ ImagePainter2 =    873 ( 2.303)
+    Solid-filled    polygon SSAA @ ImagePainter2 =    966 ( 2.549) <b>* Use TrueFSAA not FastSSAA *</b>
+</pre><br/>
+
+<pre>
+<b>2017/02/10 - 1</b><br/>
 Pt::Gfx - CompositionMode::SourceCopy
                                                    (Time) (Factor)
                                                    ------ --------
@@ -139,6 +269,10 @@ Libart (LGPL) - CompositionMode::SourceOver
     Solid-filled    polygon NOAA @ ImagePainter2 =    872 ( 2.325)
     Solid-filled    polygon SSAA @ ImagePainter2 =   1565 ( 4.173)
 </pre><br/>
+
+
+
+<h1><pre><b>YET ANOTHER NEW ALGORITHM</b></pre></h1>
 
 <pre>
 <b>2017/02/09 - 3</b><br/>
