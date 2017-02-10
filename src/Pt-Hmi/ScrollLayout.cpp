@@ -174,12 +174,12 @@ void ScrollLayout::onLayout()
         const Widget* w =  widgets()[i];
         Gfx::PointF pos = w->position();
 
-        maxWidth = std::max( maxWidth, w->position().x() +  
-                                       w->size().width() + 
+        maxWidth = std::max( maxWidth, w->position().x() +
+                                       w->size().width() +
                                        _lastScrollPos.x() );
         
-        maxHeight= std::max( maxHeight, w->position().y() +  
-                                        w->size().height() + 
+        maxHeight= std::max( maxHeight, w->position().y() +
+                                        w->size().height() +
                                         _lastScrollPos.y() );
     }
 

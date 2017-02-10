@@ -142,10 +142,12 @@ void ScrollView::onLayout()
     }
 
     double hrange = _scrollLayout.maximumX() -_scrollLayout.size().width();
-    updateScrollBar(_scrollBarX, hrange);
+    if(hrange >= 0)
+        updateScrollBar(_scrollBarX, hrange);
 
     double vrange = _scrollLayout.maximumY() -_scrollLayout.size().height();
-    updateScrollBar(_scrollBarY, vrange);
+    if(vrange >= 0)
+        updateScrollBar(_scrollBarY, vrange);
 }
 
 
@@ -167,8 +169,7 @@ void ScrollView::updateScrollBar(ScrollBar& sb, double maxRange)
     {      
         double relPos = double(oldPos) / oldMax;
         double newPos = maxRange * relPos + 0.5;
-        
-        //sb.scroll( static_cast<int>(newPos) );
+
         sb.setPosition( static_cast<int>(newPos) );
     }
 }

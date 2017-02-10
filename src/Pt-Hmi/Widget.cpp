@@ -756,7 +756,7 @@ void Widget::move(const Gfx::PointF& pos, Pt::uint64_t origin)
 void Widget::onMoveEvent(const MoveEvent& ev)
 {        
     Widget* parentWidget = parent();
-    if( parentWidget && parentWidget->vid() != ev.origin() )
+    if( parentWidget /*&& parentWidget->vid() != ev.origin()*/ )
     {
         parentWidget->onLayout();
     }
@@ -796,7 +796,7 @@ void Widget::onResizeEvent(const ResizeEvent& ev)
     onLayout();
 
     Widget* parentWidget = parent();
-    if( parentWidget && parentWidget->vid() != ev.origin() )
+    if( parentWidget /*&& parentWidget->vid() != ev.origin()*/ )
     {
         parentWidget->onLayout();
     }
