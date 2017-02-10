@@ -131,7 +131,7 @@ class PT_HMI_API LineEdit : public Control
     protected:
         virtual void onKeyEvent(const KeyEvent& ev);
 
-        virtual void onMouseEvent(const MouseEvent& ev);
+        virtual bool onMouseEvent(const MouseEvent& ev);
 
         virtual void onTouchEvent(const TouchEvent& ev);
 

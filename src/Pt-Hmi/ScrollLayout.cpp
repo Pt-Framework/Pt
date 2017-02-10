@@ -193,9 +193,9 @@ void ScrollLayout::onLayout()
 }
 
 
-void ScrollLayout::onMouseEvent(const MouseEvent& ev)
+bool ScrollLayout::onMouseEvent(const MouseEvent& ev)
 {
-    Base::onMouseEvent(ev);
+    return Base::onMouseEvent(ev);
 }
 
 

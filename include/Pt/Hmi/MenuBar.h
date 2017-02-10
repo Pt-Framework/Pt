@@ -101,7 +101,7 @@ class MenuBarItem : public Control
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
     protected:
-        virtual void onMouseEvent(const MouseEvent& ev);
+        virtual bool onMouseEvent(const MouseEvent& ev);
 
         virtual void onEnterEvent( const EnterEvent& ev);
 
@@ -175,7 +175,7 @@ class PT_HMI_API MenuBar : public MenuShell
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& rect);
 
     protected:
-        virtual void onMouseEvent(const MouseEvent& ev);
+        virtual bool onMouseEvent(const MouseEvent& ev);
 
         virtual void onResizeEvent(const ResizeEvent& ev);
 

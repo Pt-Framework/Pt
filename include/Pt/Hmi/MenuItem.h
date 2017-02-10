@@ -117,7 +117,7 @@ class PT_HMI_API MenuItem : public Control
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
   
     protected:
-        virtual void onMouseEvent(const MouseEvent& ev);
+        virtual bool onMouseEvent(const MouseEvent& ev);
 
         virtual void onTouchEvent(const TouchEvent& ev);
 

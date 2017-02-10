@@ -62,7 +62,7 @@ class PT_HMI_API ComboBoxMenu : public Window
 
         void onShowEvent(const ShowEvent& ev);
 
-        void onMouseEvent(const MouseEvent& ev);
+        bool onMouseEvent(const MouseEvent& ev);
 
         void onTouchEvent(const TouchEvent& ev);
 
@@ -128,7 +128,7 @@ class PT_HMI_API ComboBox : public Control
 
         virtual void onKeyEvent(const KeyEvent& ev);
 
-        virtual void onMouseEvent(const MouseEvent& ev);
+        virtual bool onMouseEvent(const MouseEvent& ev);
 
         virtual void onTouchEvent(const TouchEvent& ev);
 

@@ -93,18 +93,21 @@ void ComboBoxMenu::onPaintBackground(const Gfx::RectF& rect)
 }
 
 
-void ComboBoxMenu::onMouseEvent(const MouseEvent& ev)
+bool ComboBoxMenu::onMouseEvent(const MouseEvent& ev)
 {
     Base::onMouseEvent(ev);
 
     Gfx::RectF rect( Gfx::PointF(0,0), size() );
+
     if( rect.contains( ev.position() ) )
-        return;
+        return true;
 
     if( ev.isPress() )
     {
-        close();          
+        close();
     }
+
+    return true;
 }
 
 
@@ -464,7 +467,7 @@ void ComboBox::onKeyEvent(const KeyEvent& ev)
 }
 
 
-void ComboBox::onMouseEvent(const MouseEvent& ev)
+bool ComboBox::onMouseEvent(const MouseEvent& ev)
 {    
     Base::onMouseEvent(ev);
 
@@ -472,6 +475,8 @@ void ComboBox::onMouseEvent(const MouseEvent& ev)
     {
         onOpenCombo();
     }
+
+    return true;
 }
 
 

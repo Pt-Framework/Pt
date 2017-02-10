@@ -258,7 +258,7 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 }
 
 
-void MainWindow::onMouseEvent(const MouseEvent& ev)
+bool MainWindow::onMouseEvent(const MouseEvent& ev)
 {
     Window::onMouseEvent(ev);
 
@@ -268,6 +268,8 @@ void MainWindow::onMouseEvent(const MouseEvent& ev)
 
         _menu.show(menuPos);
     }
+
+    return true;
 }
 
 

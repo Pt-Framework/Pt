@@ -77,7 +77,7 @@ class PT_HMI_API Button : public Control
 
         virtual void onFocusEvent(const FocusEvent& ev);
 
-        virtual void onMouseEvent(const MouseEvent& ev);
+        virtual bool onMouseEvent(const MouseEvent& ev);
 
         virtual void onTouchEvent(const TouchEvent& ev);
 

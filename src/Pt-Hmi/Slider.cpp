@@ -261,7 +261,7 @@ void Slider::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 }
 
 
-void Slider::onMouseEvent(const MouseEvent& ev)
+bool Slider::onMouseEvent(const MouseEvent& ev)
 {
 	Base::onMouseEvent(ev);
 
@@ -282,6 +282,8 @@ void Slider::onMouseEvent(const MouseEvent& ev)
 
 		invalidate();
 	}
+
+  return true;
 }
 
 

@@ -394,8 +394,8 @@ void MenuItem::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 }
 
 
-void MenuItem::onMouseEvent(const MouseEvent& ev)
-{    
+bool MenuItem::onMouseEvent(const MouseEvent& ev)
+{
     Base::onMouseEvent(ev);
 
     bool inside = Gfx::RectF( size() ).contains( ev.position() );
@@ -404,6 +404,8 @@ void MenuItem::onMouseEvent(const MouseEvent& ev)
     {
         onTriggered();
     }
+
+    return true;
 }
 
 

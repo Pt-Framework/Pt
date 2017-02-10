@@ -222,7 +222,7 @@ void ScrollBar::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 }
 
 
-void ScrollBar::onMouseEvent(const MouseEvent& ev)
+bool ScrollBar::onMouseEvent(const MouseEvent& ev)
 {
     Control::onMouseEvent(ev);
 
@@ -249,6 +249,8 @@ void ScrollBar::onMouseEvent(const MouseEvent& ev)
         if( pos >= _minPos && pos <= _maxPos)
           scroll(pos);
     }
+
+    return true;
 }
 
 

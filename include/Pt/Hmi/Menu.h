@@ -104,7 +104,7 @@ class PT_HMI_API Menu : public MenuShell
 
         virtual void onShowEvent(const ShowEvent& ev);
 
-        virtual void onMouseEvent(const MouseEvent& ev);
+        virtual bool onMouseEvent(const MouseEvent& ev);
 
         virtual void onEnterEvent(const EnterEvent& ev);
 

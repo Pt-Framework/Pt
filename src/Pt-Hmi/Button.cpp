@@ -145,8 +145,8 @@ void Button::onFocusEvent(const FocusEvent& ev)
 }
 
 
-void Button::onMouseEvent(const MouseEvent& ev)
-{    
+bool Button::onMouseEvent(const MouseEvent& ev)
+{
     Base::onMouseEvent(ev);
 
     if( ev.isPress() )
@@ -178,7 +178,9 @@ void Button::onMouseEvent(const MouseEvent& ev)
         {
             onCanceled();
         }
-    }   
+    }
+
+    return true;
 }
 
 

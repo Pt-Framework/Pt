@@ -371,18 +371,20 @@ void Menu::onPaintEvent(const PaintEvent& ev)
 }
 
 
-void Menu::onMouseEvent(const MouseEvent& ev)
+bool Menu::onMouseEvent(const MouseEvent& ev)
 {
     Base::onMouseEvent(ev);
 
     Gfx::RectF rect( Gfx::PointF(0,0), size() );
+
     if( rect.contains( ev.position() ) )
-        return;
+        return true;
 
     Gfx::PointF screenPos = toScreen( ev.position() );
-    MenuShell* menu = rootShell().findMenu(screenPos);   
+    MenuShell* menu = rootShell().findMenu(screenPos);
+
     if(menu && menu != this)
-    {   
+    {
         // navigate through menu chain
         releasePointer();
         menu->onEnter();
@@ -390,8 +392,10 @@ void Menu::onMouseEvent(const MouseEvent& ev)
     else if( ev.isPress() )
     {
         // cancel when clicked outside menu chain
-        rootShell().cancel();          
+        rootShell().cancel();
     }
+
+    return true;
 }
 
 

@@ -71,7 +71,7 @@ Window::Window(Window* parent, Window::Type type)
     _windowManager.init(*this);
 
     _eventReady += Pt::slot(*this, &Window::onKeyEvent);
-    _eventReady += Pt::slot(*this, &Window::onMouseEvent);
+    _eventReady += Pt::slot(*this, &Window::mouseEvent);
     _eventReady += Pt::slot(*this, &Window::onTouchEvent);
     _eventReady += Pt::slot(*this, &Window::onScrollEvent);
     _eventReady += Pt::slot(*this, &Window::onPaintEvent);
@@ -1114,10 +1114,16 @@ void Window::onEvent(const Pt::Event& ev)
 }
 
 
-void Window::onMouseEvent(const MouseEvent& ev)
+void Window::mouseEvent( const MouseEvent& ev )
+{
+    bool consumend = onMouseEvent(ev);
+}
+
+
+bool Window::onMouseEvent(const MouseEvent& ev)
 {
     if( _windowManager.mouseEvent(ev) )
-        return;
+        return true;
 
     Widget* widget = findWidget( ev.position(), true );
     if( ! widget )
@@ -1143,6 +1149,8 @@ void Window::onMouseEvent(const MouseEvent& ev)
         clientEv.setPosition( widget->fromWindow(ev.position()) );
         Application::instance().loop().commitEvent(clientEv); 
     }
+
+    return true;
 }
 
 

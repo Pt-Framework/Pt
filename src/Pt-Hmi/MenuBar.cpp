@@ -116,7 +116,7 @@ Gfx::SizeF MenuBarItem::onAutoSize() const
 }
 
 
-void MenuBarItem::onMouseEvent(const MouseEvent& ev)
+bool MenuBarItem::onMouseEvent(const MouseEvent& ev)
 { 
     Base::onMouseEvent(ev);
 
@@ -129,7 +129,7 @@ void MenuBarItem::onMouseEvent(const MouseEvent& ev)
 
     // nothing to highlight if outside
     if( inside )
-        return;
+        return true;
 
     // navigate to sibling item if a sub menu is open
     if( _menuBar.selectedMenu() )
@@ -141,7 +141,7 @@ void MenuBarItem::onMouseEvent(const MouseEvent& ev)
             toggle();
             
             item->toggle();
-            return;
+            return true;
         }
     }
 
@@ -151,7 +151,7 @@ void MenuBarItem::onMouseEvent(const MouseEvent& ev)
     if(menu)
     {   
         releasePointer();
-        return;
+        return true;
     }
 
     // cancel when clicked outside any menu item
@@ -159,8 +159,10 @@ void MenuBarItem::onMouseEvent(const MouseEvent& ev)
     {
         releasePointer();
         _menu.cancel();
-        return;   
+        return true;
     }
+
+    return true;
 }
 
 
@@ -544,9 +546,9 @@ void MenuBar::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 }
 
 
-void MenuBar::onMouseEvent(const MouseEvent& ev)
+bool MenuBar::onMouseEvent(const MouseEvent& ev)
 { 
-    Base::onMouseEvent(ev);
+    return Base::onMouseEvent(ev);
 }
 
 

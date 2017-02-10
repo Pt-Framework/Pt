@@ -344,20 +344,21 @@ void LineEdit::onKeyEvent(const KeyEvent& ev)
 }
 
 
-void LineEdit::onMouseEvent(const MouseEvent& mev)
+bool LineEdit::onMouseEvent(const MouseEvent& mev)
 {
     Base::onMouseEvent(mev);
 
     if(_echoMode == Hidden)
-        return;
+        return true;
 
     if( ! mev.isPress() )
-        return;
+        return true;
 
     Application::instance().inputMethod().begin(*this);
 
     std::size_t pos = xToCursor( mev.x() );
     setCursorPosition(pos);
+    return true;
 }
 
 
