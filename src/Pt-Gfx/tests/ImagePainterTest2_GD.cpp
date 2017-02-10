@@ -32,33 +32,23 @@ static size_t gdBenchFillPolygon(int loopCount, CompositionMode cm)
         clock.start();
 
         gdImageAlphaBlending(gdImg, (cm == CompositionMode::SourceOver) ? 1 : 0);
-        gdImageFilledRectangle(gdImg, 0, 0, 25, 25, white);
+        gdImageSetAntiAliased(gdImg, white);
 
-        /*
-        vectors[0].code = ART_MOVETO; vectors[0].x = 150; vectors[0].y = 100; // CCW
-        vectors[1].code = ART_LINETO; vectors[1].x = 350; vectors[1].y = 350;
-        vectors[2].code = ART_LINETO; vectors[2].x = 450; vectors[2].y = 250;
-        vectors[3].code = ART_LINETO; vectors[3].x = 250; vectors[3].y = 100;
-        vectors[4].code = ART_LINETO; vectors[4].x =  50; vectors[4].y =  50;
-        vectors[5].code = ART_LINETO; vectors[5].x = 150; vectors[5].y = 100;
-        vectors[6].code = ART_END;
-        svp = art_svp_from_vpath(vectors);
-        if(aa) art_rgb_svp_aa(svp, 0, 0, imgSize.width(), imgSize.height(), (cm == CompositionMode::SourceOver) ? colorT : colorS, 0, buffer, imgSize.width() * 4, 0);
-        else   art_rgb_svp_alpha(svp, 0, 0, imgSize.width(), imgSize.height(), (cm == CompositionMode::SourceOver) ? colorT : colorS, buffer, imgSize.width() * 4, 0);
-        art_free(svp);
+        gdPoint poly1[5]; // CCW
+        poly1[0].x = 150; poly1[0].y = 100;
+        poly1[1].x = 350, poly1[1].y = 350;
+        poly1[2].x = 450, poly1[2].y = 250;
+        poly1[3].x = 250, poly1[3].y = 100;
+        poly1[4].x =  50, poly1[4].y =  50;
+        gdImageFilledPolygon(gdImg, poly1, 5, gdAntiAliased);
 
-        vectors[0].code = ART_MOVETO; vectors[0].x = 350; vectors[0].y = 100; // CCW
-        vectors[1].code = ART_LINETO; vectors[1].x = 550; vectors[1].y = 350;
-        vectors[2].code = ART_LINETO; vectors[2].x = 650; vectors[2].y = 250;
-        vectors[3].code = ART_LINETO; vectors[3].x = 450; vectors[3].y = 100;
-        vectors[4].code = ART_LINETO; vectors[4].x = 250; vectors[4].y =  50;
-        vectors[5].code = ART_LINETO; vectors[5].x = 350; vectors[5].y = 100;
-        vectors[6].code = ART_END;
-        svp = art_svp_from_vpath(vectors);
-        if(aa) art_rgb_svp_aa(svp, 0, 0, imgSize.width(), imgSize.height(), (cm == CompositionMode::SourceOver) ? colorT : colorS, 0, buffer, imgSize.width() * 4, 0);
-        else   art_rgb_svp_alpha(svp, 0, 0, imgSize.width(), imgSize.height(), (cm == CompositionMode::SourceOver) ? colorT : colorS, buffer, imgSize.width() * 4, 0);
-        art_free(svp);
-        */
+        gdPoint poly2[5]; // CCW
+        poly2[0].x = 350; poly2[0].y = 100;
+        poly2[1].x = 550, poly2[1].y = 350;
+        poly2[2].x = 650, poly2[2].y = 250;
+        poly2[3].x = 450, poly2[3].y = 100;
+        poly2[4].x = 250, poly2[4].y =  50;
+        gdImageFilledPolygon(gdImg, poly2, 5, gdAntiAliased);
 
         sum += clock.stop().toUSecs();
 

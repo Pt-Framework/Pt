@@ -7,7 +7,7 @@
 <h1><pre><b>YET ANOTHER NEW ALGORITHM</b></pre></h1>
 
 <pre>
-<b>2017/02/10</b><br/>
+<b>2017/02/XX - X</b><br/>
 </pre><br/>
 
 <pre>
@@ -84,16 +84,33 @@ Cairo - CompositionMode::SourceCopy
                                                    ------ --------
     Solid-filled    polygon      @ Cairo         =    100
     Solid-filled    polygon      @ ImagePainter  =    222 ( 2.220)
-    Solid-filled    polygon NOAA @ ImagePainter2 =    152 ( 1.520)
-    Solid-filled    polygon SSAA @ ImagePainter2 =    948 ( 9.480)
+    Solid-filled    polygon NOAA @ ImagePainter2 =    154 ( 1.540)
+    Solid-filled    polygon SSAA @ ImagePainter2 =    905 ( 9.050)
 
 Cairo - CompositionMode::SourceOver
 => RESULT : GOOD IMAGE                             (Time) (Factor)
                                                    ------ --------
-    Solid-filled    polygon      @ Cairo         =    320
-    Solid-filled    polygon      @ ImagePainter  =    941 ( 2.941)
-    Solid-filled    polygon NOAA @ ImagePainter2 =    875 ( 2.734)
-    Solid-filled    polygon SSAA @ ImagePainter2 =   1654 ( 5.169)
+    Solid-filled    polygon      @ Cairo         =    319
+    Solid-filled    polygon      @ ImagePainter  =    942 ( 2.953)
+    Solid-filled    polygon NOAA @ ImagePainter2 =    872 ( 2.734)
+    Solid-filled    polygon SSAA @ ImagePainter2 =   1565 ( 4.906)
+
+
+GD - CompositionMode::SourceCopy
+=> RESULT : GOOD IMAGE                             (Time) (Factor)
+                                                   ------ --------
+    Solid-filled    polygon      @ GD            =    342
+    Solid-filled    polygon      @ ImagePainter  =    222 ( 0.649)
+    Solid-filled    polygon NOAA @ ImagePainter2 =    154 ( 0.450)
+    Solid-filled    polygon SSAA @ ImagePainter2 =    906 ( 2.649)
+
+GD - CompositionMode::SourceOver
+=> RESULT : BAD IMAGE                              (Time) (Factor)
+                                                   ------ --------
+    Solid-filled    polygon      @ GD            =   1164
+    Solid-filled    polygon      @ ImagePainter  =    939 ( 0.807)
+    Solid-filled    polygon NOAA @ ImagePainter2 =    872 ( 0.749)
+    Solid-filled    polygon SSAA @ ImagePainter2 =   1566 ( 1.345)
 
 
 Libart (LGPL) - CompositionMode::SourceCopy
@@ -102,25 +119,25 @@ Libart (LGPL) - CompositionMode::SourceCopy
     Solid-filled    polygon      @ Libart _alpha =     84
     Solid-filled    polygon      @ ImagePainter  =    222 ( 2.643)
     Solid-filled    polygon NOAA @ ImagePainter2 =    154 ( 1.833)
-    Solid-filled    polygon SSAA @ ImagePainter2 =    952 (11.333)
+    Solid-filled    polygon SSAA @ ImagePainter2 =    905 (10.774)
 
-    Solid-filled    polygon      @ Libart _aa    =    364
-    Solid-filled    polygon      @ ImagePainter  =    222 ( 0.610)
-    Solid-filled    polygon NOAA @ ImagePainter2 =    154 ( 0.423)
-    Solid-filled    polygon SSAA @ ImagePainter2 =    949 ( 2.607)
+    Solid-filled    polygon      @ Libart _aa    =    368
+    Solid-filled    polygon      @ ImagePainter  =    222 ( 0.603)
+    Solid-filled    polygon NOAA @ ImagePainter2 =    152 ( 0.413)
+    Solid-filled    polygon SSAA @ ImagePainter2 =    903 ( 2.454)
 
 Libart (LGPL) - CompositionMode::SourceOver
 => RESULT : BAD IMAGE                              (Time) (Factor)
                                                    ------ --------
     Solid-filled    polygon      @ Libart _alpha =    244
-    Solid-filled    polygon      @ ImagePainter  =    949 ( 3.889)
-    Solid-filled    polygon NOAA @ ImagePainter2 =    882 ( 3.615)
-    Solid-filled    polygon SSAA @ ImagePainter2 =   1661 ( 6.807)
+    Solid-filled    polygon      @ ImagePainter  =    941 ( 3.857)
+    Solid-filled    polygon NOAA @ ImagePainter2 =    872 ( 3.574)
+    Solid-filled    polygon SSAA @ ImagePainter2 =   1566 ( 6.418)
 
-    Solid-filled    polygon      @ Libart _aa    =    372
-    Solid-filled    polygon      @ ImagePainter  =    940 ( 2.527)
-    Solid-filled    polygon NOAA @ ImagePainter2 =    882 ( 2.371)
-    Solid-filled    polygon SSAA @ ImagePainter2 =   1656 ( 4.452)
+    Solid-filled    polygon      @ Libart _aa    =    375
+    Solid-filled    polygon      @ ImagePainter  =    944 ( 2.517)
+    Solid-filled    polygon NOAA @ ImagePainter2 =    872 ( 2.325)
+    Solid-filled    polygon SSAA @ ImagePainter2 =   1565 ( 4.173)
 </pre><br/>
 
 <pre>
