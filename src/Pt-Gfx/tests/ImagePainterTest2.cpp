@@ -37,7 +37,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_LIBART_CHECK_RESULTING_IMAGE 0
 
 // Detailed-test enable settings
-#define TEST_SOURCECOPY                        0
+#define TEST_SOURCECOPY                        1
 #define TEST_SOURCEOVER                        1
 
 #define TEST_DRAW_LINE_AND_TEXT                0

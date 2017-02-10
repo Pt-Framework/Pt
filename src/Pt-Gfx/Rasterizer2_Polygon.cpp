@@ -78,9 +78,9 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount, bool useAn
 
     // Draw the polygon
     if(useAntiAliasing) {
-      //rasterPolygonAreaTrueSSAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
+        rasterPolygonAreaTrueSSAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
       //rasterPolygonAreaEdgeSSAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY); // Produces artifacts at some corner area with CompositionMode::SourceOver
-        rasterPolygonAreaFastSSAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY); // Produces artifacts at almost every corner vertex
+      //rasterPolygonAreaFastSSAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY); // Produces artifacts at almost every corner vertex
     }
 
     else {
@@ -247,10 +247,41 @@ void Rasterizer2::rasterPolygonAreaTrueSSAA(const Point* points, size_t pointCou
     std::vector<Pt::int32_t> pointX(pointCount, 0);
     std::vector<Pt::int32_t> pointY(pointCount, 0);
 
+#ifdef USE_DUFFS_DEVICE
+    if(true) {
+        register const Point* src  = points;
+        register Pt::int32_t* dstX = &pointX[0];
+        register Pt::int32_t* dstY = &pointY[0];
+        register Pt::int32_t  rmnX = minX * SUPERSAMPLING_SIZE;
+        register Pt::int32_t  rmnY = minY * SUPERSAMPLING_SIZE;
+        register Pt::int32_t  cnt = pointCount;
+        register Pt::int32_t  n   = (cnt + 7) / 8;
+        switch(cnt % 8) {
+                case 0 : do { *dstX = src->x() * SUPERSAMPLING_SIZE - rmnX; ++dstX;
+                              *dstY = src->y() * SUPERSAMPLING_SIZE - rmnY; ++dstY; ++src;
+                case 7 :      *dstX = src->x() * SUPERSAMPLING_SIZE - rmnX; ++dstX;
+                              *dstY = src->y() * SUPERSAMPLING_SIZE - rmnY; ++dstY; ++src;
+                case 6 :      *dstX = src->x() * SUPERSAMPLING_SIZE - rmnX; ++dstX;
+                              *dstY = src->y() * SUPERSAMPLING_SIZE - rmnY; ++dstY; ++src;
+                case 5 :      *dstX = src->x() * SUPERSAMPLING_SIZE - rmnX; ++dstX;
+                              *dstY = src->y() * SUPERSAMPLING_SIZE - rmnY; ++dstY; ++src;
+                case 4 :      *dstX = src->x() * SUPERSAMPLING_SIZE - rmnX; ++dstX;
+                              *dstY = src->y() * SUPERSAMPLING_SIZE - rmnY; ++dstY; ++src;
+                case 3 :      *dstX = src->x() * SUPERSAMPLING_SIZE - rmnX; ++dstX;
+                              *dstY = src->y() * SUPERSAMPLING_SIZE - rmnY; ++dstY; ++src;
+                case 2 :      *dstX = src->x() * SUPERSAMPLING_SIZE - rmnX; ++dstX;
+                              *dstY = src->y() * SUPERSAMPLING_SIZE - rmnY; ++dstY; ++src;
+                case 1 :      *dstX = src->x() * SUPERSAMPLING_SIZE - rmnX; ++dstX;
+                              *dstY = src->y() * SUPERSAMPLING_SIZE - rmnY; ++dstY; ++src;
+                         } while (--n > 0);
+        }
+    }
+#else
     for(size_t i = 0; i < pointCount; ++i) {
         pointX[i] = points[i].x() * SUPERSAMPLING_SIZE - minX * SUPERSAMPLING_SIZE;
         pointY[i] = points[i].y() * SUPERSAMPLING_SIZE - minY * SUPERSAMPLING_SIZE;
     }
+#endif
 
     // List of nodes that define the horizontal segments
     std::vector<Pt::int32_t> nodeX(pointCount * 2, 0);
@@ -462,6 +493,10 @@ void Rasterizer2::rasterPolygonAreaTrueSSAA(const Point* points, size_t pointCou
             }
             // Draw the span using solid color
             else {
+#if 1
+                Pixel pixel(_image->view(), minX + iterL, minY + pixelY / SUPERSAMPLING_SIZE);
+                _image->format().setPixels(pixel, _brush.color(), iterR - iterL + 1, _compositionMode);
+#else
                 Pt::int32_t iterX     = minX + iterL;
                 Pt::int32_t spanWidth = iterR - iterL + 1;
                 while(spanWidth > 0) {
@@ -473,6 +508,7 @@ void Rasterizer2::rasterPolygonAreaTrueSSAA(const Point* points, size_t pointCou
                     spanWidth -= n;
                     iterX     += n;
                 }
+#endif
             }
         }
         // Clear the work buffer
