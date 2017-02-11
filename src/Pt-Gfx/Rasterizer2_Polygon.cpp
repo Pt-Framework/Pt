@@ -91,7 +91,12 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount, Pt::uint8_
 // ======================================================================================
 
 // Uncomment this to use Duff's device
-//#define USE_DUFFS_DEVICE
+// NOTE: enabling this one seems to only improve performance by 1.5% for SourceOver
+#define USE_DUFFS_DEVICE
+
+// Uncomment this to use putPixels() for drawing solid colors
+// NOTE: enabling this one seems to only improve performance by ~23% for SourceOver
+#define USE_PUTPIXELS_FOR_SOLID_COLOR
 
 void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount, const Color& color)
 {
@@ -213,6 +218,10 @@ void Rasterizer2::rasterPolygonAreaNOAA(const Point* points, size_t pointCount, 
                 continue;
             }
             // Draw the span using solid color
+#ifdef USE_PUTPIXELS_FOR_SOLID_COLOR
+            Pixel pixel(_image->view(), from, pixelY);
+            _image->format().setPixels(pixel, _brush.color(), to - from + 1, _compositionMode);
+#else
             Pt::int32_t iterX     = from;
             Pt::int32_t spanWidth = to - from + 1;
             while(spanWidth > 0) {
@@ -224,6 +233,7 @@ void Rasterizer2::rasterPolygonAreaNOAA(const Point* points, size_t pointCount, 
                 spanWidth -= n;
                 iterX     += n;
             }
+#endif
         }
     }
 }
@@ -243,41 +253,10 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, size_t pointCount, 
     std::vector<Pt::int32_t> pointX(pointCount, 0);
     std::vector<Pt::int32_t> pointY(pointCount, 0);
 
-#ifdef USE_DUFFS_DEVICE
-    if(true) {
-        register const Point* src  = points;
-        register Pt::int32_t* dstX = &pointX[0];
-        register Pt::int32_t* dstY = &pointY[0];
-        register Pt::int32_t  rmnX = minX * SUPERSAMPLING_SIZE;
-        register Pt::int32_t  rmnY = minY * SUPERSAMPLING_SIZE;
-        register Pt::int32_t  cnt = pointCount;
-        register Pt::int32_t  n   = (cnt + 7) / 8;
-        switch(cnt % 8) {
-                case 0 : do { *dstX = src->x() * SUPERSAMPLING_SIZE - rmnX; ++dstX;
-                              *dstY = src->y() * SUPERSAMPLING_SIZE - rmnY; ++dstY; ++src;
-                case 7 :      *dstX = src->x() * SUPERSAMPLING_SIZE - rmnX; ++dstX;
-                              *dstY = src->y() * SUPERSAMPLING_SIZE - rmnY; ++dstY; ++src;
-                case 6 :      *dstX = src->x() * SUPERSAMPLING_SIZE - rmnX; ++dstX;
-                              *dstY = src->y() * SUPERSAMPLING_SIZE - rmnY; ++dstY; ++src;
-                case 5 :      *dstX = src->x() * SUPERSAMPLING_SIZE - rmnX; ++dstX;
-                              *dstY = src->y() * SUPERSAMPLING_SIZE - rmnY; ++dstY; ++src;
-                case 4 :      *dstX = src->x() * SUPERSAMPLING_SIZE - rmnX; ++dstX;
-                              *dstY = src->y() * SUPERSAMPLING_SIZE - rmnY; ++dstY; ++src;
-                case 3 :      *dstX = src->x() * SUPERSAMPLING_SIZE - rmnX; ++dstX;
-                              *dstY = src->y() * SUPERSAMPLING_SIZE - rmnY; ++dstY; ++src;
-                case 2 :      *dstX = src->x() * SUPERSAMPLING_SIZE - rmnX; ++dstX;
-                              *dstY = src->y() * SUPERSAMPLING_SIZE - rmnY; ++dstY; ++src;
-                case 1 :      *dstX = src->x() * SUPERSAMPLING_SIZE - rmnX; ++dstX;
-                              *dstY = src->y() * SUPERSAMPLING_SIZE - rmnY; ++dstY; ++src;
-                         } while (--n > 0);
-        }
-    }
-#else
     for(size_t i = 0; i < pointCount; ++i) {
         pointX[i] = points[i].x() * SUPERSAMPLING_SIZE - minX * SUPERSAMPLING_SIZE;
         pointY[i] = points[i].y() * SUPERSAMPLING_SIZE - minY * SUPERSAMPLING_SIZE;
     }
-#endif
 
     // List of nodes that define the horizontal segments
     std::vector<Pt::int32_t> nodeX(pointCount * 2, 0);
@@ -497,8 +476,7 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, size_t pointCount, 
                 }
                 // Draw the span using solid color
                 else {
-// USE_DUFFS_DEVICE
-#if 0
+#ifdef USE_PUTPIXELS_FOR_SOLID_COLOR
                     Pixel pixel(_image->view(), minX + iterL, minY + pixelY / SUPERSAMPLING_SIZE);
                     _image->format().setPixels(pixel, _brush.color(), iterR - iterL + 1, _compositionMode);
 #else
@@ -821,6 +799,10 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, size_t pointCount, 
                 }
                 // Draw the span using solid color
                 else {
+#ifdef USE_PUTPIXELS_FOR_SOLID_COLOR
+                    Pixel pixel(_image->view(), minX + iterL, minY + pixelY);
+                    _image->format().setPixels(pixel, _brush.color(), iterR - iterL + 1, _compositionMode);
+#else
                     Pt::int32_t iterX     = minX + iterL;
                     Pt::int32_t spanWidth = iterR - iterL + 1;
                     while(spanWidth > 0) {
@@ -832,6 +814,7 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, size_t pointCount, 
                         spanWidth -= n;
                         iterX     += n;
                     }
+#endif
                 }
             }
         }
@@ -845,6 +828,7 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, size_t pointCount, 
 }
 
 #undef USE_DUFFS_DEVICE
+#undef USE_PUTPIXELS_FOR_SOLID_COLOR
 
 
 } // namespace

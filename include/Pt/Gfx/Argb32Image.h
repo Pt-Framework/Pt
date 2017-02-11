@@ -61,11 +61,13 @@ class Argb32Model
 
     public:
 
-// Enabling this one seems to does not matter in an x86_64
+// Uncomment this to replace constant division with multiply-and-shift
+// NOTE: enabling this one seems does not reduce or improve performance in an x86_64
 //#define USE_MULTIPLY_SHIFT_FOR_CONSTANT_DIVISION
 
-// Enabling this one seems to make everything faster in an x86_64
-//#define USE_DUFFS_DEVICE
+// Uncomment this to use Duff's device
+// NOTE: enabling this one seems does not reduce or improve performance, except in -O0
+#define USE_DUFFS_DEVICE
 
         /*
          * http://embeddedgurus.com/stack-overflow/2009/06/division-of-integers-by-constants
