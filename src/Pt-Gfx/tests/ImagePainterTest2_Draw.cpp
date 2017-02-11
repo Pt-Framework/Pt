@@ -155,11 +155,12 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
 
 
     const PointF poly3a[] = { // CCW
+        // Outside
         PointF(400 - 20, 300),
         PointF(500 - 20, 400),
         PointF(400 - 20, 500),
         PointF(300 - 20, 400),
-
+        // Inside
         PointF(320 - 20, 400),
         PointF(400 - 20, 480),
         PointF(480 - 20, 400),
@@ -168,13 +169,13 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
     if(ip2) ip2   ->fillPolygon(poly3a, sizeof(poly3a) / sizeof(poly3a[0]), 1);
     else    painter.fillPolygon(poly3a, sizeof(poly3a) / sizeof(poly3a[0]));
 
-
     const PointF poly3b[] = { // CCW
+        // Outside
         PointF(400 + 220, 300),
         PointF(500 + 220, 400),
         PointF(400 + 220, 500),
         PointF(300 + 220, 400),
-
+        // Inside
         PointF(320 + 220, 400),
         PointF(400 + 220, 480),
         PointF(480 + 220, 400),
@@ -182,6 +183,7 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
     };
     if(ip2) ip2   ->fillPolygon(poly3b, sizeof(poly3b) / sizeof(poly3b[0]), 2);
     else    painter.fillPolygon(poly3b, sizeof(poly3b) / sizeof(poly3b[0]));
+
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }

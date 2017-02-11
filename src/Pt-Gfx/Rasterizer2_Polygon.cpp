@@ -347,136 +347,114 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, size_t pointCount, 
         }
         // Simply skip the next steps if we have not got all the needed samples
         if( ((pixelY + 1) % SUPERSAMPLING_SIZE) ) continue;
-        // Draw pixels that belongs to the left-part of the span to the image
-        Pt::int32_t iterL = 0;
+        // Fill the pixels between the node pairs
+        for(Pt::int32_t i = 0; i < nodes; i += 2) {
+            // Draw pixels that belongs to the left-part of the span to the image
+            Pt::int32_t iterL = nodeX[i] / SUPERSAMPLING_SIZE - 2;
+            if(iterL < 0) iterL = 0;
 #ifdef USE_DUFFS_DEVICE
-        if(true) { // Skip fully-transparent pixels
-            register Pt::uint8_t* src  = &alphas[0];
-            register Pt::int32_t  cnt  = sizeX - 1;
-            register Pt::int32_t  n    = (cnt + 7) / 8;
-            register Pt::int32_t  k    = iterL;
-            switch(cnt % 8) {
-                    case 0 : do { if(src[k]) {n = 0; break; } ++k;
-                    case 7 :      if(src[k]) {n = 0; break; } ++k;
-                    case 6 :      if(src[k]) {n = 0; break; } ++k;
-                    case 5 :      if(src[k]) {n = 0; break; } ++k;
-                    case 4 :      if(src[k]) {n = 0; break; } ++k;
-                    case 3 :      if(src[k]) {n = 0; break; } ++k;
-                    case 2 :      if(src[k]) {n = 0; break; } ++k;
-                    case 1 :      if(src[k]) {n = 0; break; } ++k;
-                             } while (--n > 0);
+            if(true) { // Skip fully-transparent pixels
+                register Pt::uint8_t* src  = &alphas[0];
+                register Pt::int32_t  cnt  = sizeX - 1;
+                register Pt::int32_t  n    = (cnt + 7) / 8;
+                register Pt::int32_t  k    = iterL;
+                switch(cnt % 8) {
+                        case 0 : do { if(src[k]) {n = 0; break; } ++k;
+                        case 7 :      if(src[k]) {n = 0; break; } ++k;
+                        case 6 :      if(src[k]) {n = 0; break; } ++k;
+                        case 5 :      if(src[k]) {n = 0; break; } ++k;
+                        case 4 :      if(src[k]) {n = 0; break; } ++k;
+                        case 3 :      if(src[k]) {n = 0; break; } ++k;
+                        case 2 :      if(src[k]) {n = 0; break; } ++k;
+                        case 1 :      if(src[k]) {n = 0; break; } ++k;
+                                 } while (--n > 0);
+                }
+                iterL = k;
             }
-            iterL = k;
-        }
 #else
-        for(; iterL < sizeX; ++iterL) { // Skip fully-transparent pixels
-            if(alphas[iterL]) break;
-        }
+            for(; iterL < sizeX; ++iterL) { // Skip fully-transparent pixels
+                if(alphas[iterL]) break;
+            }
 #endif
-        if(_isTexture || _isGradient) { // Texture or gradient
-            for(; iterL < sizeX; ++iterL) {
-                // Break if the pixel has become fully opaque
-                if(alphas[iterL] >= SSAA_MAX_ALPHA) break;
-                // Draw the pixel
-                const Pt::int32_t iterX = minX + iterL;
-                const Pt::int32_t iterY = minY + pixelY / SUPERSAMPLING_SIZE;
-                const Pt::int32_t tX    = (iterL                      ) % _brushImage->width ();
-                const Pt::int32_t tY    = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
-                ConstPixel srcPixel(_brushImage->view(), tX, tY);
-                Pixel      dstPixel(_image->view(), iterX, iterY);
-                _image->format().setPixel(dstPixel, srcPixel, _compositionMode, SSAA_SCALE_ALPHA(alphas[iterL]));
-            }
-        }
-        else { // Solid color
-            for(; iterL < sizeX; ++iterL) {
-                // Break if the pixel has become fully opaque
-                if(alphas[iterL] >= SSAA_MAX_ALPHA) break;
-                // Draw the pixel
-                Pixel pixel(_image->view(), minX + iterL, minY + pixelY / SUPERSAMPLING_SIZE);
-                _image->format().setPixel(pixel, color, _compositionMode, SSAA_SCALE_ALPHA(alphas[iterL]));
-            }
-        }
-        // Draw pixels that belongs to the right-part of the span to the image
-        Pt::int32_t iterR = sizeX - 1;
-#ifdef USE_DUFFS_DEVICE
-        if(true) { // Skip fully-transparent pixels
-            register Pt::uint8_t* src  = &alphas[0];
-            register Pt::int32_t  cnt  = sizeX - 1;
-            register Pt::int32_t  n    = (cnt + 7) / 8;
-            register Pt::int32_t  k    = iterR;
-            switch(cnt % 8) {
-                    case 0 : do { if(src[k]) {n = 0; break; } --k;
-                    case 7 :      if(src[k]) {n = 0; break; } --k;
-                    case 6 :      if(src[k]) {n = 0; break; } --k;
-                    case 5 :      if(src[k]) {n = 0; break; } --k;
-                    case 4 :      if(src[k]) {n = 0; break; } --k;
-                    case 3 :      if(src[k]) {n = 0; break; } --k;
-                    case 2 :      if(src[k]) {n = 0; break; } --k;
-                    case 1 :      if(src[k]) {n = 0; break; } --k;
-                             } while (--n > 0);
-            }
-            iterR = k;
-        }
-#else
-        for(; iterR >= 0; --iterR) { // Skip fully-transparent pixels
-            if(alphas[iterR]) break;
-        }
-#endif
-        if(_isTexture || _isGradient) { // Texture or gradient
-            for(; iterR >= 0; --iterR) {
-                // Break if the pixel has become fully opaque
-                if(alphas[iterR] >= SSAA_MAX_ALPHA) break;
-                // Draw the pixel
-                const Pt::int32_t iterX = minX + iterR;
-                const Pt::int32_t iterY = minY + pixelY / SUPERSAMPLING_SIZE;
-                const Pt::int32_t tX    = (iterR                      ) % _brushImage->width ();
-                const Pt::int32_t tY    = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
-                ConstPixel srcPixel(_brushImage->view(), tX, tY);
-                Pixel      dstPixel(_image->view(), iterX, iterY);
-                _image->format().setPixel(dstPixel, srcPixel, _compositionMode, SSAA_SCALE_ALPHA(alphas[iterR]));
-            }
-        }
-        else { // Solid color
-            for(; iterR >= 0; --iterR) {
-                // Break if the pixel has become fully opaque
-                if(alphas[iterR] >= SSAA_MAX_ALPHA) break;
-                // Draw the pixel
-                Pixel pixel(_image->view(), minX + iterR, minY + pixelY / SUPERSAMPLING_SIZE);
-                _image->format().setPixel(pixel, color, _compositionMode, SSAA_SCALE_ALPHA(alphas[iterR]));
-            }
-        }
-        // Draw pixels that belongs to the middle-part of the span to the image
-        if(iterR >= iterL) {
-            // Draw the span using texture
-            if(_isTexture) {
-                Pt::int32_t iterX     = iterL;
-                Pt::int32_t spanWidth = iterR - iterL + 1;
-                while(spanWidth > 0) {
-                    const Pt::int32_t tX = (iterX                      ) % _brushImage->width ();
-                    const Pt::int32_t tY = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
-                    const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tX);
-                    if(n) {
-                        ConstPixel srcPixel(_brushImage->view(), tX, tY);
-                        Pixel      dstPixel(_image->view(), minX + iterX, minY + pixelY / SUPERSAMPLING_SIZE);
-                        _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
-                    }
-                    spanWidth -= n;
-                    iterX     += n;
+            if(_isTexture || _isGradient) { // Texture or gradient
+                for(; iterL < sizeX; ++iterL) {
+                    // Break if we have reached the non anti-aliased part of the span
+                    if(alphas[iterL] >= SSAA_MAX_ALPHA) break;
+                    // Draw the pixel
+                    const Pt::int32_t iterX = minX + iterL;
+                    const Pt::int32_t iterY = minY + pixelY / SUPERSAMPLING_SIZE;
+                    const Pt::int32_t tX    = (iterL                      ) % _brushImage->width ();
+                    const Pt::int32_t tY    = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
+                    ConstPixel srcPixel(_brushImage->view(), tX, tY);
+                    Pixel      dstPixel(_image->view(), iterX, iterY);
+                    _image->format().setPixel(dstPixel, srcPixel, _compositionMode, SSAA_SCALE_ALPHA(alphas[iterL]));
                 }
             }
-            // Draw the span using gradient
-            else if(_isGradient) {
-                Pt::int32_t iterX     = iterL;
-                Pt::int32_t spanWidth = iterR - iterL + 1;
-                // Fill the span - vertical gradient
-                if(_brush.fillStyle() == Pt::Gfx::Brush::VerticalGradient) {
-                    const Pt::int32_t textureY = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
-                    ConstPixel        srcPixel(_brushImage->view(), 0, textureY);
-                    Pixel             dstPixel(_image->view(), minX + iterX, minY + pixelY / SUPERSAMPLING_SIZE);
-                    _image->format().setPixels(dstPixel, srcPixel, spanWidth, _compositionMode);
+            else { // Solid color
+                for(; iterL < sizeX; ++iterL) {
+                    // Break if we have reached the non anti-aliased part of the span
+                    if(alphas[iterL] >= SSAA_MAX_ALPHA) break;
+                    // Draw the pixel
+                    Pixel pixel(_image->view(), minX + iterL, minY + pixelY / SUPERSAMPLING_SIZE);
+                    _image->format().setPixel(pixel, color, _compositionMode, SSAA_SCALE_ALPHA(alphas[iterL]));
                 }
-                // Fill the span - horizontal gradient
-                else {
+            }
+            // Draw pixels that belongs to the right-part of the span to the image
+            Pt::int32_t iterR = nodeX[i + 1] / SUPERSAMPLING_SIZE + 2;
+            if(iterR >= sizeX) iterR = sizeX - 1;
+#ifdef USE_DUFFS_DEVICE
+            if(true) { // Skip fully-transparent pixels
+                register Pt::uint8_t* src  = &alphas[0];
+                register Pt::int32_t  cnt  = sizeX - 1;
+                register Pt::int32_t  n    = (cnt + 7) / 8;
+                register Pt::int32_t  k    = iterR;
+                switch(cnt % 8) {
+                        case 0 : do { if(src[k]) {n = 0; break; } --k;
+                        case 7 :      if(src[k]) {n = 0; break; } --k;
+                        case 6 :      if(src[k]) {n = 0; break; } --k;
+                        case 5 :      if(src[k]) {n = 0; break; } --k;
+                        case 4 :      if(src[k]) {n = 0; break; } --k;
+                        case 3 :      if(src[k]) {n = 0; break; } --k;
+                        case 2 :      if(src[k]) {n = 0; break; } --k;
+                        case 1 :      if(src[k]) {n = 0; break; } --k;
+                                 } while (--n > 0);
+                }
+                iterR = k;
+            }
+#else
+            for(; iterR >= 0; --iterR) { // Skip fully-transparent pixels
+                if(alphas[iterR]) break;
+            }
+#endif
+            if(_isTexture || _isGradient) { // Texture or gradient
+                for(; iterR >= 0; --iterR) {
+                    // Break if we have reached the non anti-aliased part of the span
+                    if(alphas[iterR] >= SSAA_MAX_ALPHA) break;
+                    // Draw the pixel
+                    const Pt::int32_t iterX = minX + iterR;
+                    const Pt::int32_t iterY = minY + pixelY / SUPERSAMPLING_SIZE;
+                    const Pt::int32_t tX    = (iterR                      ) % _brushImage->width ();
+                    const Pt::int32_t tY    = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
+                    ConstPixel srcPixel(_brushImage->view(), tX, tY);
+                    Pixel      dstPixel(_image->view(), iterX, iterY);
+                    _image->format().setPixel(dstPixel, srcPixel, _compositionMode, SSAA_SCALE_ALPHA(alphas[iterR]));
+                }
+            }
+            else { // Solid color
+                for(; iterR >= 0; --iterR) {
+                    // Break if we have reached the non anti-aliased part of the span
+                    if(alphas[iterR] >= SSAA_MAX_ALPHA) break;
+                    // Draw the pixel
+                    Pixel pixel(_image->view(), minX + iterR, minY + pixelY / SUPERSAMPLING_SIZE);
+                    _image->format().setPixel(pixel, color, _compositionMode, SSAA_SCALE_ALPHA(alphas[iterR]));
+                }
+            }
+            // Draw pixels that belongs to the middle-part of the span to the image
+            if(iterR >= iterL) {
+                // Draw the span using texture
+                if(_isTexture) {
+                    Pt::int32_t iterX     = iterL;
+                    Pt::int32_t spanWidth = iterR - iterL + 1;
                     while(spanWidth > 0) {
                         const Pt::int32_t tX = (iterX                      ) % _brushImage->width ();
                         const Pt::int32_t tY = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
@@ -490,25 +468,52 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, size_t pointCount, 
                         iterX     += n;
                     }
                 }
-            }
-            // Draw the span using solid color
-            else {
-#if 1
-                Pixel pixel(_image->view(), minX + iterL, minY + pixelY / SUPERSAMPLING_SIZE);
-                _image->format().setPixels(pixel, _brush.color(), iterR - iterL + 1, _compositionMode);
-#else
-                Pt::int32_t iterX     = minX + iterL;
-                Pt::int32_t spanWidth = iterR - iterL + 1;
-                while(spanWidth > 0) {
-                    const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
-                    if(n) {
-                        Pixel pixel(_image->view(), iterX, minY + pixelY / SUPERSAMPLING_SIZE);
-                        _image->format().copy(pixel, _brushPixel, n, _compositionMode);
+                // Draw the span using gradient
+                else if(_isGradient) {
+                    Pt::int32_t iterX     = iterL;
+                    Pt::int32_t spanWidth = iterR - iterL + 1;
+                    // Fill the span - vertical gradient
+                    if(_brush.fillStyle() == Pt::Gfx::Brush::VerticalGradient) {
+                        const Pt::int32_t textureY = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
+                        ConstPixel        srcPixel(_brushImage->view(), 0, textureY);
+                        Pixel             dstPixel(_image->view(), minX + iterX, minY + pixelY / SUPERSAMPLING_SIZE);
+                        _image->format().setPixels(dstPixel, srcPixel, spanWidth, _compositionMode);
                     }
-                    spanWidth -= n;
-                    iterX     += n;
+                    // Fill the span - horizontal gradient
+                    else {
+                        while(spanWidth > 0) {
+                            const Pt::int32_t tX = (iterX                      ) % _brushImage->width ();
+                            const Pt::int32_t tY = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
+                            const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tX);
+                            if(n) {
+                                ConstPixel srcPixel(_brushImage->view(), tX, tY);
+                                Pixel      dstPixel(_image->view(), minX + iterX, minY + pixelY / SUPERSAMPLING_SIZE);
+                                _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
+                            }
+                            spanWidth -= n;
+                            iterX     += n;
+                        }
+                    }
                 }
+                // Draw the span using solid color
+                else {
+#if 1
+                    Pixel pixel(_image->view(), minX + iterL, minY + pixelY / SUPERSAMPLING_SIZE);
+                    _image->format().setPixels(pixel, _brush.color(), iterR - iterL + 1, _compositionMode);
+#else
+                    Pt::int32_t iterX     = minX + iterL;
+                    Pt::int32_t spanWidth = iterR - iterL + 1;
+                    while(spanWidth > 0) {
+                        const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
+                        if(n) {
+                            Pixel pixel(_image->view(), iterX, minY + pixelY / SUPERSAMPLING_SIZE);
+                            _image->format().copy(pixel, _brushPixel, n, _compositionMode);
+                        }
+                        spanWidth -= n;
+                        iterX     += n;
+                    }
 #endif
+                }
             }
         }
         // Clear the work buffer
@@ -601,7 +606,7 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, size_t pointCount, 
                 ++i;
             }
         }
-        // Fill the samples between the node pairs
+        // Fill the pixels between the node pairs
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
             // Get the from and to coordinates
             const Pt::int32_t from0   = nodeX0[i    ];
@@ -707,7 +712,7 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, size_t pointCount, 
             }
             else { // Solid color
                 for(; iterL < sizeX; ++iterL) {
-                    // Break if the pixel has become fully opaque
+                    // Break if we have reached the non anti-aliased part of the span
                     if(alphas[iterL] >= FSAA_MAX_ALPHA) break;
                     // Draw the pixel
                     Pixel pixel(_image->view(), minX + iterL, minY + pixelY);
@@ -746,7 +751,7 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, size_t pointCount, 
                     if(alphas[iterR] >= FSAA_MAX_ALPHA) break;
                     // Draw the pixel
                     const Pt::int32_t iterX = minX + iterR;
-                    const Pt::int32_t iterY = minY + pixelY ;
+                    const Pt::int32_t iterY = minY + pixelY;
                     const Pt::int32_t tX    = iterR  % _brushImage->width ();
                     const Pt::int32_t tY    = pixelY % _brushImage->height();
                     ConstPixel srcPixel(_brushImage->view(), tX, tY);

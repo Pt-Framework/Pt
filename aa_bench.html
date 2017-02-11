@@ -73,7 +73,7 @@
 </head>
 
 <body>
-<h1><pre><b>😁 😃 😶 😏 😣 BENCHMARK RESULT 😣 😏 😶 😃 😁</b></pre></h1>
+<h1><pre><b>😁 😃 😶 😏 😣 BENCHMARK RESULT 😣 😏 😶 😃 😁</b></pre>
 <br/>
 
 <!--
@@ -82,9 +82,157 @@
 </pre><br/>
 -->
 
-<h1><pre><b>COMPARISON OF OPTIMIZATION LEVEL</b></pre></h1>
+<h1><pre>
+<b>COMPARISON OF OPTIMIZATION LEVEL</b>
+<b>(UNLESS STATED OTHERWISE, IT IS ALWAYS USING -O0)</b>
+</pre>
+
 <pre>
-<b>2017/02/1</b><br/>
+<b>2017/02/1 - 2</b><br/>
+Pt::Gfx - CompositionMode::SourceCopy
+                                                   (Time) (Factor)
+                                                   ------ --------
+    Text                         @ ImagePainter  =    314
+    Text                         @ ImagePainter2 =    309 ( 0.984)
+
+    Line                         @ ImagePainter  =     56
+    Line                         @ ImagePainter2 =    189 ( 3.375)
+
+    Rectangle                    @ ImagePainter  =     38
+    Rectangle                    @ ImagePainter2 =     35 ( 0.921)
+
+    Solid-filled    Rectangle    @ ImagePainter  =     99
+    Solid-filled    Rectangle    @ ImagePainter2 =     93 ( 0.939)
+
+    Gradient-filled Rectangle    @ ImagePainter  =   3304
+    Gradient-filled Rectangle    @ ImagePainter2 =     55 ( 0.017)
+
+    Texture-filled  Rectangle    @ ImagePainter  =     63
+    Texture-filled  Rectangle    @ ImagePainter2 =     49 ( 0.778)
+
+    Solid-filled    polygon      @ ImagePainter  =    223
+    Solid-filled    polygon NOAA @ ImagePainter2 =    151 ( 0.677)
+    Solid-filled    polygon FSAA @ ImagePainter2 =    405 ( 1.816)
+    Solid-filled    polygon SSAA @ ImagePainter2 =    648 ( 2.906)
+
+    Gradient-filled polygon      @ ImagePainter  =   2867
+    Gradient-filled polygon NOAA @ ImagePainter2 =    142 ( 0.050)
+    Gradient-filled polygon FSAA @ ImagePainter2 =    445 ( 0.155)
+    Gradient-filled polygon SSAA @ ImagePainter2 =    746 ( 0.260)
+
+    Texture-filled  polygon      @ ImagePainter  =    244
+    Texture-filled  polygon NOAA @ ImagePainter2 =    155 ( 0.635)
+    Texture-filled  polygon FSAA @ ImagePainter2 =    459 ( 1.881)
+    Texture-filled  polygon SSAA @ ImagePainter2 =    753 ( 3.086)
+
+Pt::Gfx - CompositionMode::SourceOver
+                                                   (Time) (Factor)
+                                                   ------ --------
+    Text                         @ ImagePainter  =    302
+    Text                         @ ImagePainter2 =    300 ( 0.993)
+
+    Line                         @ ImagePainter  =     72
+    Line                         @ ImagePainter2 =    190 ( 2.639)
+
+    Rectangle                    @ ImagePainter  =     66
+    Rectangle                    @ ImagePainter2 =     44 ( 0.667)
+
+    Solid-filled    Rectangle    @ ImagePainter  =    976
+    Solid-filled    Rectangle    @ ImagePainter2 =    970 ( 0.994)
+
+    Gradient-filled Rectangle    @ ImagePainter  =   4152
+    Gradient-filled Rectangle    @ ImagePainter2 =    601 ( 0.145)
+
+    Texture-filled  Rectangle    @ ImagePainter  =    938
+    Texture-filled  Rectangle    @ ImagePainter2 =    923 ( 0.984)
+
+    Solid-filled    polygon      @ ImagePainter  =    940
+    Solid-filled    polygon NOAA @ ImagePainter2 =    867 ( 0.922)
+    Solid-filled    polygon FSAA @ ImagePainter2 =   1113 ( 1.184)
+    Solid-filled    polygon SSAA @ ImagePainter2 =    815 ( 0.867)
+
+    Gradient-filled polygon      @ ImagePainter  =   3561
+    Gradient-filled polygon NOAA @ ImagePainter2 =    590 ( 0.166)
+    Gradient-filled polygon FSAA @ ImagePainter2 =    888 ( 0.249)
+    Gradient-filled polygon SSAA @ ImagePainter2 =   1190 ( 0.334)
+
+    Texture-filled  polygon      @ ImagePainter  =    957
+    Texture-filled  polygon NOAA @ ImagePainter2 =    871 ( 0.910)
+    Texture-filled  polygon FSAA @ ImagePainter2 =   1165 ( 1.217)
+    Texture-filled  polygon SSAA @ ImagePainter2 =   1468 ( 1.534)
+
+
+Cairo - CompositionMode::SourceCopy
+                                                   (Time) (Factor)
+                                                   ------ --------
+    Solid-filled    polygon      @ Cairo         =    101
+    Solid-filled    polygon      @ ImagePainter  =    221 ( 2.188)
+    Solid-filled    polygon NOAA @ ImagePainter2 =    154 ( 1.525)
+    Solid-filled    polygon FSAA @ ImagePainter2 =    405 ( 4.010)
+    Solid-filled    polygon SSAA @ ImagePainter2 =    645 ( 6.386)
+
+Cairo - CompositionMode::SourceOver
+                                                   (Time) (Factor)
+                                                   ------ --------
+    Solid-filled    polygon      @ Cairo         =    320
+    Solid-filled    polygon      @ ImagePainter  =    940 ( 2.938)
+    Solid-filled    polygon NOAA @ ImagePainter2 =    869 ( 2.716)
+    Solid-filled    polygon FSAA @ ImagePainter2 =   1113 ( 3.478)
+    Solid-filled    polygon SSAA @ ImagePainter2 =    815 ( 2.547)
+
+
+GD - CompositionMode::SourceCopy
+                                                   (Time) (Factor)
+                                                   ------ --------
+    Solid-filled    polygon      @ GD            =    342
+    Solid-filled    polygon      @ ImagePainter  =    221 ( 0.646)
+    Solid-filled    polygon NOAA @ ImagePainter2 =    152 ( 0.444)
+    Solid-filled    polygon FSAA @ ImagePainter2 =    405 ( 1.184)
+    Solid-filled    polygon SSAA @ ImagePainter2 =    645 ( 1.886)
+
+GD - CompositionMode::SourceOver
+                                                   (Time) (Factor)
+                                                   ------ --------
+    Solid-filled    polygon      @ GD            =   1163
+    Solid-filled    polygon      @ ImagePainter  =    940 ( 0.808)
+    Solid-filled    polygon NOAA @ ImagePainter2 =    870 ( 0.748)
+    Solid-filled    polygon FSAA @ ImagePainter2 =   1114 ( 0.958)
+    Solid-filled    polygon SSAA @ ImagePainter2 =    816 ( 0.702)
+
+
+Libart (LGPL) - CompositionMode::SourceCopy
+                                                   (Time) (Factor)
+                                                   ------ --------
+    Solid-filled    polygon      @ Libart _alpha =     85
+    Solid-filled    polygon      @ ImagePainter  =    223 ( 2.624)
+    Solid-filled    polygon NOAA @ ImagePainter2 =    153 ( 1.800)
+    Solid-filled    polygon FSAA @ ImagePainter2 =    406 ( 4.776)
+    Solid-filled    polygon SSAA @ ImagePainter2 =    645 ( 7.588)
+
+    Solid-filled    polygon      @ Libart _aa    =    370
+    Solid-filled    polygon      @ ImagePainter  =    221 ( 0.597)
+    Solid-filled    polygon NOAA @ ImagePainter2 =    152 ( 0.411)
+    Solid-filled    polygon FSAA @ ImagePainter2 =    405 ( 1.095)
+    Solid-filled    polygon SSAA @ ImagePainter2 =    648 ( 1.751)
+
+Libart (LGPL) - CompositionMode::SourceOver
+                                                   (Time) (Factor)
+                                                   ------ --------
+    Solid-filled    polygon      @ Libart _alpha =    244
+    Solid-filled    polygon      @ ImagePainter  =    940 ( 3.852)
+    Solid-filled    polygon NOAA @ ImagePainter2 =    870 ( 3.566)
+    Solid-filled    polygon FSAA @ ImagePainter2 =   1113 ( 4.561)
+    Solid-filled    polygon SSAA @ ImagePainter2 =    817 ( 3.348)
+
+    Solid-filled    polygon      @ Libart _aa    =    379
+    Solid-filled    polygon      @ ImagePainter  =    940 ( 2.480)
+    Solid-filled    polygon NOAA @ ImagePainter2 =    870 ( 2.296)
+    Solid-filled    polygon FSAA @ ImagePainter2 =   1113 ( 2.937)
+    Solid-filled    polygon SSAA @ ImagePainter2 =    814 ( 2.148)
+</pre><br/>
+
+<pre>
+<b>2017/02/1 - 1</b><br/>
 <div id='wrapperTop5d0125e3'>
     <table id='contentTop5d0125e3'></table>
 </div>
@@ -382,7 +530,7 @@ GD - CompositionMode::SourceOver
 
 
 
-<h1><pre><b>OPTIMIZATION AND COMPARISON</b></pre></h1>
+<h1><pre><b>OPTIMIZATION AND COMPARISON</b></pre>
 
 <pre>
 <b>2017/02/10 - 2</b><br/>
@@ -646,7 +794,7 @@ Libart (LGPL) - CompositionMode::SourceOver
 
 
 
-<h1><pre><b>YET ANOTHER NEW ALGORITHM</b></pre></h1>
+<h1><pre><b>YET ANOTHER NEW ALGORITHM</b></pre>
 
 <pre>
 <b>2017/02/09 - 3</b><br/>
@@ -857,7 +1005,7 @@ CompositionMode::SourceOver
 
 
 
-<h1><pre><b>ADDED SOME OPTIMIZATION AND USING A MORE THOROUGH BENCHMARK</b></pre></h1>
+<h1><pre><b>ADDED SOME OPTIMIZATION AND USING A MORE THOROUGH BENCHMARK</b></pre>
 
 <pre>
 <b>2017/02/08</b><br/>
@@ -999,7 +1147,7 @@ CompositionMode::SourceOver
 
 
 
-<h1><pre><b>NEW ALGORITHM</b></pre></h1>
+<h1><pre><b>NEW ALGORITHM</b></pre>
 
 <pre>
 <b>2017/02/06 - 2</b><br/>
@@ -1291,7 +1439,7 @@ CompositionMode::SourceOver
 
 
 
-<h1><pre><b>OLD ALGORITHM</b></pre></h1>
+<h1><pre><b>OLD ALGORITHM</b></pre>
 
 <pre>
 <b>2017/02/01 - 2</b><br/>
