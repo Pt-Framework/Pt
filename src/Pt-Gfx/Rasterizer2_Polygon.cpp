@@ -53,18 +53,11 @@ void Rasterizer2::strokePolygon(const Point* points, size_t pointCount)
     }
 }
 
-//#define TEST_HOLES
-
 void Rasterizer2::fillPolygon(const Point* points, size_t pointCount, Pt::uint8_t antiAliasingLevel)
 {
     // Clip the coordinates
     std::vector<Point> clipped;
     genClippedPolygonPoints(clipped, points, pointCount);
-
-#ifdef TEST_HOLES
-    clipped.resize(pointCount);
-    for(size_t i = 0; i < pointCount; ++i) clipped[i] = points[i];
-#endif
 
 #if 0
     #define DIV_FAC 50
@@ -98,7 +91,7 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount, Pt::uint8_
 // ======================================================================================
 
 // Uncomment this to use Duff's device
-#define USE_DUFFS_DEVICE
+//#define USE_DUFFS_DEVICE
 
 void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount, const Color& color)
 {
@@ -138,52 +131,8 @@ void Rasterizer2::rasterPolygonAreaNOAA(const Point* points, size_t pointCount, 
     // List of nodes that define the horizontal segments
     std::vector<Pt::int32_t> nodeX(pointCount * 2, 0);
 
-#ifdef TEST_HOLES
-    //
-    size_t holeStartIndex = 0;
-    for(size_t i = 0; i < pointCount; ++i) {
-        if(points[i].x() == -1 && points[i].y() == -1) {
-            holeStartIndex = i;
-            break;
-        }
-    }
-    if(holeStartIndex) lprintf("holeStartIndex = %d\n", holeStartIndex);
-#endif
-
     //  Loop through the rows of the image
     for(Pt::int32_t pixelY = minY; pixelY <= maxY; ++pixelY) {
-#ifdef TEST_HOLES
-        // Build a list of nodes
-        Pt::int32_t j     = pointCount - 1;
-        Pt::int32_t nodes = 0;
-        for(size_t i = 0; i < pointCount; ++i) {
-
-            if(holeStartIndex) {
-                if(i == holeStartIndex || j == holeStartIndex) { j = i; continue; }
-                if(i < holeStartIndex && j >= holeStartIndex) { j = i; continue; }
-                if(j < holeStartIndex && i >= holeStartIndex) { j = i; continue; }
-            }
-
-            Pt::int32_t ix =  points[i].x();
-            Pt::int32_t iy =  points[i].y();
-            Pt::int32_t jx =  points[j].x();
-            Pt::int32_t jy =  points[j].y();
-
-            if( ( iy < pixelY && jy >= pixelY ) ||
-                ( jy < pixelY && iy >= pixelY )
-            ) {
-                // Bail out if we have produced too many nodes
-                if((size_t) nodes >= nodeX.size()) return;
-                // Calculate the node's coordinate
-                Pt::int32_t deltaYp = pixelY        - points[i].y();
-                Pt::int32_t deltaYj = points[j].y() - points[i].y();
-                Pt::int32_t deltaXj = points[j].x() - points[i].x();
-                Pt::int32_t interXf = FIXED_POINT_FROM_INT(points[i].x()) + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
-                nodeX[nodes++] = FIXED_POINT_TO_INT(interXf + FIXED_POINT_CONSTANT_HALF);
-            }
-            j = i;
-        }
-#else
         // Build a list of nodes
         Pt::int32_t j     = pointCount - 1;
         Pt::int32_t nodes = 0;
@@ -202,7 +151,6 @@ void Rasterizer2::rasterPolygonAreaNOAA(const Point* points, size_t pointCount, 
             }
             j = i;
         }
-#endif
         // Sort the nodes using bubble sort
         for(Pt::int32_t i = 0; i < nodes - 1;) {
             if(nodeX[i] > nodeX[i + 1]) {
@@ -549,7 +497,8 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, size_t pointCount, 
                 }
                 // Draw the span using solid color
                 else {
-#if 1
+// USE_DUFFS_DEVICE
+#if 0
                     Pixel pixel(_image->view(), minX + iterL, minY + pixelY / SUPERSAMPLING_SIZE);
                     _image->format().setPixels(pixel, _brush.color(), iterR - iterL + 1, _compositionMode);
 #else

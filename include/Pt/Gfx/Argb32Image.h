@@ -65,7 +65,7 @@ class Argb32Model
 //#define USE_MULTIPLY_SHIFT_FOR_CONSTANT_DIVISION
 
 // Enabling this one seems to make everything faster in an x86_64
-#define USE_DUFFS_DEVICE
+//#define USE_DUFFS_DEVICE
 
         /*
          * http://embeddedgurus.com/stack-overflow/2009/06/division-of-integers-by-constants
