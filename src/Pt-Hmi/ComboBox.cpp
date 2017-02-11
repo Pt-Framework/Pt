@@ -40,6 +40,7 @@ namespace Hmi {
 ComboBoxMenu::ComboBoxMenu()
 : Window(0, Window::Popup)
 {
+    setTitle("ComboBox Menu");
     setMainWidget(&_items);
 
     _items.selected() += Pt::slot(*this, &ComboBoxMenu::onItemSelected);
@@ -59,7 +60,7 @@ void ComboBoxMenu::addItem(ListBoxItem& item)
 
 void ComboBoxMenu::onItemSelected(ListBoxItem&)
 {
-    close();
+    show(false);
 }
 
 
@@ -98,13 +99,12 @@ bool ComboBoxMenu::onMouseEvent(const MouseEvent& ev)
     Base::onMouseEvent(ev);
 
     Gfx::RectF rect( Gfx::PointF(0,0), size() );
-
     if( rect.contains( ev.position() ) )
         return true;
 
     if( ev.isPress() )
     {
-        close();
+        show(false);
     }
 
     return true;
@@ -121,7 +121,7 @@ void ComboBoxMenu::onTouchEvent(const TouchEvent& ev)
 
     if( ev.isPress() )
     {
-        close();          
+        show(false);          
     }
 }
 
@@ -133,10 +133,12 @@ void ComboBoxMenu::onShowEvent(const ShowEvent& ev)
     if( ! ev.visible() )
     {
         releasePointer();
+        //Application::instance().inputMethod().release();
     }
     else
     {
         grabPointer();
+        //Application::instance().inputMethod().grab();
     }
 }
 
@@ -309,7 +311,7 @@ void ComboBox::setRenderer(ComboBoxRenderer* renderer)
 void ComboBox::onOpenCombo()
 {
     _menu.resize( Gfx::SizeF(size().width(), 120) );
-    _menu.setTopMost(true);
+    //_menu.setTopMost(true);
 
     Gfx::PointF pos(0, size().height());
     pos = this->toScreen(pos);
@@ -355,6 +357,7 @@ void ComboBox::processKeyEvent(const KeyEvent& ev)
         if( Pt::isprint(ch) )
         {
             _editor.insert(ch);
+            onOpenCombo();
         }
     }
 
@@ -474,8 +477,15 @@ bool ComboBox::onMouseEvent(const MouseEvent& ev)
 
     if( ev.isPress() )
     {
-        onOpenCombo();
-        Application::instance().inputMethod().begin(*this);
+        if( ev.position().x() > size().width() - 20 )
+        {
+            onOpenCombo();
+            Application::instance().inputMethod().finish();
+        }
+        else
+        {
+            Application::instance().inputMethod().begin(*this);
+        }
     }
 
     return true;
@@ -488,8 +498,15 @@ void ComboBox::onTouchEvent(const TouchEvent& ev)
 
     if( ev.isPress() )
     {
-        onOpenCombo();
-        Application::instance().inputMethod().begin(*this);
+        if( ev.position().x() > size().width() - 20 )
+        {
+            onOpenCombo();
+            Application::instance().inputMethod().finish();
+        }
+        else
+        {
+            Application::instance().inputMethod().begin(*this);
+        }
     }
 }
 

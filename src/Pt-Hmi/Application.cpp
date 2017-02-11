@@ -185,7 +185,7 @@ Visual* Application::pointerGrabber()
 
 void Application::grabPointer(Window& grabber)
 {    
-    std::clog << "GRAB:    " << typeid(grabber).name() << std::endl;
+    //std::clog << "GRAB:    " << typeid(grabber).name() << std::endl;
     
     std::vector<Visual*>::iterator it =
         std::find(_grabbers.begin(), _grabbers.end(), &grabber);
@@ -211,7 +211,7 @@ void Application::releasePointer(Window& grabber)
 
     if( it != _grabbers.end() )
     {
-        std::clog << "RELEASE: " << typeid(grabber).name() << std::endl;
+        //std::clog << "RELEASE: " << typeid(grabber).name() << std::endl;
         _grabbers.erase(it);
         _impl->releasePointer(grabber);
 
@@ -222,7 +222,7 @@ void Application::releasePointer(Window& grabber)
 
 void Application::grabPointer(Widget& grabber)
 {
-    std::clog << "GRAB:    " << typeid(grabber).name() << std::endl;
+    //std::clog << "GRAB:    " << typeid(grabber).name() << std::endl;
 
     std::vector<Visual*>::iterator it =
         std::find(_grabbers.begin(), _grabbers.end(), &grabber);
@@ -248,7 +248,7 @@ void Application::releasePointer(Widget& grabber)
 
     if( it != _grabbers.end() )
     {
-        std::clog << "RELEASE: " << typeid(grabber).name() << std::endl;
+        //std::clog << "RELEASE: " << typeid(grabber).name() << std::endl;
         _grabbers.erase(it);
         _impl->releasePointer(grabber);
 

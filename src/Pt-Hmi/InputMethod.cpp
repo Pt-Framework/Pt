@@ -41,6 +41,7 @@ InputMethod::InputMethod()
 , _receiver(0)
 , _keyEvent(0)
 , _isVisible(false)
+, _isGrabbed(false)
 {
 }
 
@@ -49,6 +50,18 @@ InputMethod::~InputMethod()
 {
     if(_app)
         _app->removeInputMethod(*this);
+}
+
+
+void InputMethod::grab()
+{
+    _isGrabbed = true;
+}
+
+
+void InputMethod::release()
+{
+    _isGrabbed = false;
 }
 
 
@@ -66,6 +79,9 @@ void InputMethod::begin(Widget& w)
 
 void InputMethod::finish()
 {
+    if(_isGrabbed)
+        return;
+
     _receiver = 0;
 
     if( ! _isVisible )
@@ -75,9 +91,13 @@ void InputMethod::finish()
     _isVisible = false;
 }
 
-
+// TODO: this might not be neccessary if the virtual keyboard
+//       is a text widget aka Widget::isTextInput returns true !!!
 void InputMethod::finish(Widget& w)
 {
+    if(_isGrabbed)
+        return;
+
     if( ! onFinish(w) )
       return;
 
@@ -110,12 +130,16 @@ void InputMethod::unregisterApplication(Application&)
 
 void DefaultInputMethod::onShow(bool show)
 {
+    if(show)
+        std::clog << "INPUTMETHOD SHOW" << std::endl;
+    else
+        std::clog << "INPUTMETHOD HIDE" << std::endl;
 }
 
 
 bool DefaultInputMethod::onFinish(Widget& widget)
 {
-  return true;
+    return true;
 }
 
 } // namespace

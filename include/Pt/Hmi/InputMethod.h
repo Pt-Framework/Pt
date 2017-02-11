@@ -52,6 +52,10 @@ class PT_HMI_API InputMethod
 
         void begin(Widget& widget);
 
+        void grab();
+
+        void release();
+
         void finish();
 
         void finish(Widget& widget);
@@ -73,6 +77,7 @@ class PT_HMI_API InputMethod
         Pt::uint64_t _receiver;
         KeyEvent     _keyEvent;
         bool         _isVisible;
+        bool         _isGrabbed;
 };
 
 

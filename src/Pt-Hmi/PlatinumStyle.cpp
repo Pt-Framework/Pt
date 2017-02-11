@@ -1023,11 +1023,11 @@ void PlatinumComboBoxRenderer::onRenderBackground(const ComboBox& cb,
                                                   Painter& painter, 
                                                   const Gfx::RectF& rect,
                                                   const Gfx::Pen& contour,
-                                                  const Gfx::Brush& brush) const
+                                                  const Gfx::Brush& background) const
 {
     Gfx::RectF borderRect( cb.size() );
 
-    painter.setBrush(brush);
+    painter.setBrush(background);
     painter.fillRect(borderRect);
 
     painter.setPen(contour);
@@ -1042,14 +1042,27 @@ void PlatinumComboBoxRenderer::onRenderButton(const ComboBox& cb,
                                               const Gfx::Pen& contour,
                                               const Gfx::Brush& foreground) const
 {
-    double indicatorWidth = cb.size().height() / 3;
+    int indicatorWidth = static_cast<int>(cb.size().height()) / 3;
+    if(indicatorWidth % 2 == 0)
+        ++indicatorWidth;
+    
+    int indicatorHeight = indicatorWidth / 2 + 1;
 
-    double x = cb.size().width() - indicatorWidth * 1.5;
-    double y = cb.size().height() - indicatorWidth * 1.5;
+    double lineX = cb.size().width() - indicatorWidth * 2.5;
 
-    Gfx::PointF indicator[3] = { Gfx::PointF(x, y + indicatorWidth),
-                                 Gfx::PointF(x + indicatorWidth, y + indicatorWidth),
-                                 Gfx::PointF(x + indicatorWidth, y) };
+    painter.setPen(contour);
+    painter.drawLine( Gfx::PointF(lineX, 
+                                  indicatorHeight - 1),
+                      Gfx::PointF(lineX, 
+                                  cb.size().height() - indicatorHeight) );
+
+
+    double x = cb.size().width() - indicatorWidth * 1.75;
+    double y = (cb.size().height() - indicatorHeight) / 2 + 1;
+
+    Gfx::PointF indicator[3] = { Gfx::PointF(x, y),
+                                 Gfx::PointF(x + indicatorWidth, y),
+                                 Gfx::PointF(x + indicatorHeight - 1, y + indicatorHeight) };
 
     painter.setBrush(foreground);
     painter.fillPolygon(indicator, 3);
