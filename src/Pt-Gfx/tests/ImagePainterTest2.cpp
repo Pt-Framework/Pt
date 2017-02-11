@@ -1,5 +1,7 @@
 // ./jam.sh configure --with-rasterizer2 --with-hmi -sGUI=linux-fb -sOPTIM=-O3
-// ps -aF | grep ImagePainterTest2
+//
+// while true; do ps -aF | grep "[I]magePainterTest2"; done
+//
 
 #include <fstream>
 #include <iomanip>
@@ -30,7 +32,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_CAIRO_CHECK_RESULTING_IMAGE 0
 
 // Comparison with GD
-#define DO_BENCHMARKING_GD                 1
+#define DO_BENCHMARKING_GD                 0
 #define BENCHMARK_GD_CHECK_RESULTING_IMAGE 0
 
 // Comparison with Libart
