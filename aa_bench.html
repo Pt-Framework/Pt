@@ -1,9 +1,77 @@
 <!DOCTYPE HTML>
+
 <html><head>
 <meta charset='UTF-8'/>
-<style>body{background:#000;color:#FFF;}pre{font-size:120%;}</style>
+<style>
+    body {
+        background : #000;
+        color      : #FFF;
+    }
+    pre {
+        font-size : 14px;
+    }
+    pre:first-child {
+        font-size : 24px;
+    }
+</style>
 <script src='jquery-3.1.1.min.js'></script>
+<script>
+    function getScrollBarWidth()
+    {
+          var inner = document.createElement('p');
+          inner.style.width  = '100%';
+          inner.style.height = '200px';
+
+          var outer = document.createElement('div');
+          outer.style.position   = 'absolute';
+          outer.style.top        = '0px';
+          outer.style.left       = '0px';
+          outer.style.visibility = 'hidden';
+          outer.style.width      = '200px';
+          outer.style.height     = '150px';
+          outer.style.overflow   = 'hidden';
+          outer.appendChild(inner);
+
+          document.body.appendChild (outer);
+          var w1 = inner.offsetWidth;
+
+          outer.style.overflow = 'scroll';
+          var w2 = inner.offsetWidth;
+
+          if(w1 == w2) w2 = outer.clientWidth;
+
+          document.body.removeChild(outer);
+
+          return (w1 - w2);
+    };
+
+    function pairHScroll(uniqueID, wrapperTop, wrapperBot, contentTop, contentBot)
+    {
+        wrapperTop = '#' + wrapperTop + uniqueID;
+        wrapperBot = '#' + wrapperBot + uniqueID;
+        contentTop = '#' + contentTop + uniqueID;
+        contentBot = '#' + contentBot + uniqueID;
+
+        $(wrapperBot).css('overflow-x', 'scroll');
+        $(wrapperBot).css('width',      '1100px');
+        $(wrapperTop).css('overflow-x', 'scroll');
+        $(wrapperTop).css('width',      '1100px');
+
+        $(wrapperTop).css('height', getScrollBarWidth());
+
+        $(contentTop).css('visibility', 'hidden');
+        $(contentTop).html($(contentBot).html());
+
+        $(wrapperBot).scroll(function(){
+            $(wrapperTop).scrollLeft($(wrapperBot).scrollLeft());
+        });
+        $(wrapperTop).scroll(function(){
+            $(wrapperBot).scrollLeft($(wrapperTop).scrollLeft());
+        });
+    }
+</script>
 </head>
+
 <body>
 <h1><pre><b>😁 😃 😶 😏 😣 BENCHMARK RESULT 😣 😏 😶 😃 😁</b></pre></h1>
 <br/>
@@ -310,26 +378,7 @@ GD - CompositionMode::SourceOver
 </tr>
 </table>
 </div></pre><br/>
-<script>
-$(document).ready(function() {
-    $('#wrapperBot5d0125e3').css('overflow-x', 'scroll');
-    $('#wrapperBot5d0125e3').css('width',      '1024px');
-
-    $('#wrapperTop5d0125e3').css('overflow-x', 'scroll');
-    $('#wrapperTop5d0125e3').css('width',      '1024px');
-    $('#wrapperTop5d0125e3').css('height',     '13'    );
-
-    $('#contentTop5d0125e3').css('visibility', 'hidden');
-    $('#contentTop5d0125e3').html($('#contentBot5d0125e3').html());
-
-    $('#wrapperBot5d0125e3').scroll(function(){
-        $('#wrapperTop5d0125e3').scrollLeft($('#wrapperBot5d0125e3').scrollLeft());
-    });
-    $('#wrapperTop5d0125e3').scroll(function(){
-        $('#wrapperBot5d0125e3').scrollLeft($('#wrapperTop5d0125e3').scrollLeft());
-    });
-});
-</script>
+<script>$(document).ready(function() { pairHScroll('5d0125e3', 'wrapperTop', 'wrapperBot', 'contentTop', 'contentBot'); });</script>
 
 
 
