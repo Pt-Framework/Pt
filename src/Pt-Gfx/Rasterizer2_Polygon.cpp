@@ -350,7 +350,7 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, size_t pointCount, 
         // Fill the pixels between the node pairs
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
             // Draw pixels that belongs to the left-part of the span to the image
-            Pt::int32_t iterL = nodeX[i] / SUPERSAMPLING_SIZE - 2;
+            Pt::int32_t iterL = nodeX[i] / SUPERSAMPLING_SIZE - 1; // SUPERSAMPLING_SIZE * 2;
             if(iterL < 0) iterL = 0;
 #ifdef USE_DUFFS_DEVICE
             if(true) { // Skip fully-transparent pixels
@@ -400,7 +400,7 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, size_t pointCount, 
                 }
             }
             // Draw pixels that belongs to the right-part of the span to the image
-            Pt::int32_t iterR = nodeX[i + 1] / SUPERSAMPLING_SIZE + 2;
+            Pt::int32_t iterR = nodeX[i + 1] / SUPERSAMPLING_SIZE + 1; // SUPERSAMPLING_SIZE * 2;
             if(iterR >= sizeX) iterR = sizeX - 1;
 #ifdef USE_DUFFS_DEVICE
             if(true) { // Skip fully-transparent pixels

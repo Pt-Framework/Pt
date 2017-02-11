@@ -5,21 +5,21 @@ static void testDrawLine(const char* title, Image& image, Painter& painter)
 #if 1
     painter.setClip( RectF (20, image.width() - 20, 20, image.height() - 20) );
     painter.setPen( Color::fromRgb8(0, 255, 0, 175) );
-    painter.drawLine( PointF(  0,   0), PointF(799, 599) );
+    painter.drawLine( PointF(  0,   0), PointF(999, 599) );
     painter.setClip( RectF (0, image.width() - 1, 0, image.height() - 1) );
 #endif
 
     painter.setPen( Color::fromRgb8(255, 0, 0, 175) );
 
-    painter.drawLine( PointF(  0,   0), PointF(799,   0) );
-    painter.drawLine( PointF(  0, 599), PointF(799, 599) );
+    painter.drawLine( PointF(  0,   0), PointF(999,   0) );
+    painter.drawLine( PointF(  0, 599), PointF(999, 599) );
     painter.drawLine( PointF(  0,   0), PointF(  0, 599) );
-    painter.drawLine( PointF(799,   0), PointF(799, 599) );
+    painter.drawLine( PointF(999,   0), PointF(999, 599) );
 
     painter.setPen( Color::fromRgb8(255, 255, 255, 175) );
 
-    painter.drawLine( PointF( 10,  10), PointF(100,  50) );
-    painter.drawLine( PointF( 10, 150), PointF(100, 110) );
+    painter.drawLine( PointF( 10, 110), PointF(100, 150) );
+    painter.drawLine( PointF( 10, 250), PointF(100, 210) );
 
     painter.drawLine( PointF(100,  10), PointF(110,  20) );
 
@@ -33,8 +33,8 @@ static void testDrawLine(const char* title, Image& image, Painter& painter)
     painter.drawLine( PointF( 10, 540), PointF(781, 540) );
     painter.drawLine( PointF(781, 552), PointF( 10, 550) );
 
-    painter.setPen( Pen(Color::fromRgb8(0, 255, 255, 175)) ); painter.drawText( PointF(100, 100), "Hello world!" );
-    painter.setPen( Pen(Color::fromRgb8(0, 255, 255, 255)) ); painter.drawText( PointF(100, 150), "Hello world!" );
+    painter.setPen( Pen(Color::fromRgb8(0, 255, 255, 255)) ); painter.drawText( PointF(100, 175), "Hello world!" );
+    painter.setPen( Pen(Color::fromRgb8(0, 255, 255, 175)) ); painter.drawText( PointF(100, 225), "Hello world!" );
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
 }
@@ -88,8 +88,8 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
 
 
     painter.setBrush( Color::fromRgb8(255, 255, 255, 175) );
-    painter.fillRect( RectF( PointF(170, 250), SizeF(image.width() - 200, image.height() - 300) ) );
-
+    painter.fillRect( RectF( PointF(170, 250), SizeF(800, 200) ) );
+    painter.fillRect( RectF( PointF(170, 450), SizeF(100, 100) ) );
 
     painter.setBrush( brush1 );
 
@@ -166,7 +166,7 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(480 - 20, 400),
         PointF(400 - 20, 320)
     };
-    if(ip2) ip2   ->fillPolygon(poly3a, sizeof(poly3a) / sizeof(poly3a[0]), 1);
+    if(ip2) ip2   ->fillPolygon(poly3a, sizeof(poly3a) / sizeof(poly3a[0]), 0);
     else    painter.fillPolygon(poly3a, sizeof(poly3a) / sizeof(poly3a[0]));
 
     const PointF poly3b[] = { // CCW
@@ -181,8 +181,23 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(480 + 220, 400),
         PointF(400 + 220, 320)
     };
-    if(ip2) ip2   ->fillPolygon(poly3b, sizeof(poly3b) / sizeof(poly3b[0]), 2);
+    if(ip2) ip2   ->fillPolygon(poly3b, sizeof(poly3b) / sizeof(poly3b[0]), 1);
     else    painter.fillPolygon(poly3b, sizeof(poly3b) / sizeof(poly3b[0]));
+
+    const PointF poly3c[] = { // CCW
+        // Outside
+        PointF(400 + 460, 300),
+        PointF(500 + 460, 400),
+        PointF(400 + 460, 500),
+        PointF(300 + 460, 400),
+        // Inside
+        PointF(320 + 460, 400),
+        PointF(400 + 460, 480),
+        PointF(480 + 460, 400),
+        PointF(400 + 460, 320)
+    };
+    if(ip2) ip2   ->fillPolygon(poly3c, sizeof(poly3c) / sizeof(poly3c[0]), 2);
+    else    painter.fillPolygon(poly3c, sizeof(poly3c) / sizeof(poly3c[0]));
 
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);

@@ -44,7 +44,7 @@ using namespace Pt::Gfx;
 
 // Detailed-test enable settings
 #define TEST_SOURCECOPY                        1
-#define TEST_SOURCEOVER                        1
+#define TEST_SOURCEOVER                        0
 
 #define TEST_DRAW_LINE_AND_TEXT                0
 #define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES 0
@@ -106,7 +106,7 @@ int main(int argc, char* args[])
     wbgrPng.get();
 
     // Prepare the images and painters
-    Image         image( ImageFormat::argb32(), Size(800, 600) );
+    Image         image( ImageFormat::argb32(), Size(1000, 600) );
     ImagePainter  painter1obj(image);
     ImagePainter2 painter2obj(image);
 
