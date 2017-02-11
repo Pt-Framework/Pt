@@ -285,6 +285,10 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, size_t pointCount, 
     // A helper macro to scale the alpha
     #define SSAA_SCALE_ALPHA(A) ( Pt::uint16_t(A) * 17 / SUPERSAMPLING_SIZE / SUPERSAMPLING_SIZE )
 
+    // The minimum and maximum values for alpha
+    #define SSAA_MIN_ALPHA 15
+    #define SSAA_MAX_ALPHA (SSAA_MIN_ALPHA * SUPERSAMPLING_SIZE * SUPERSAMPLING_SIZE)
+
     //  Loop through the rows of the image
     for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
         // Build a list of nodes
@@ -325,19 +329,19 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, size_t pointCount, 
             register Pt::int32_t  n   = (cnt + 7) / 8;
             register Pt::int32_t  k   = from;
             switch(cnt % 8) {
-                    case 0 : do { dst[k / SUPERSAMPLING_SIZE] += 15; ++k;
-                    case 7 :      dst[k / SUPERSAMPLING_SIZE] += 15; ++k;
-                    case 6 :      dst[k / SUPERSAMPLING_SIZE] += 15; ++k;
-                    case 5 :      dst[k / SUPERSAMPLING_SIZE] += 15; ++k;
-                    case 4 :      dst[k / SUPERSAMPLING_SIZE] += 15; ++k;
-                    case 3 :      dst[k / SUPERSAMPLING_SIZE] += 15; ++k;
-                    case 2 :      dst[k / SUPERSAMPLING_SIZE] += 15; ++k;
-                    case 1 :      dst[k / SUPERSAMPLING_SIZE] += 15; ++k;
+                    case 0 : do { dst[k / SUPERSAMPLING_SIZE] += SSAA_MIN_ALPHA; ++k;
+                    case 7 :      dst[k / SUPERSAMPLING_SIZE] += SSAA_MIN_ALPHA; ++k;
+                    case 6 :      dst[k / SUPERSAMPLING_SIZE] += SSAA_MIN_ALPHA; ++k;
+                    case 5 :      dst[k / SUPERSAMPLING_SIZE] += SSAA_MIN_ALPHA; ++k;
+                    case 4 :      dst[k / SUPERSAMPLING_SIZE] += SSAA_MIN_ALPHA; ++k;
+                    case 3 :      dst[k / SUPERSAMPLING_SIZE] += SSAA_MIN_ALPHA; ++k;
+                    case 2 :      dst[k / SUPERSAMPLING_SIZE] += SSAA_MIN_ALPHA; ++k;
+                    case 1 :      dst[k / SUPERSAMPLING_SIZE] += SSAA_MIN_ALPHA; ++k;
                              } while (--n > 0);
             }
 #else
             for(Pt::int32_t k = from; k <= to; ++k) {
-                alphas[k / SUPERSAMPLING_SIZE] += 15;
+                alphas[k / SUPERSAMPLING_SIZE] += SSAA_MIN_ALPHA;
             }
 #endif
         }
@@ -372,7 +376,7 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, size_t pointCount, 
         if(_isTexture || _isGradient) { // Texture or gradient
             for(; iterL < sizeX; ++iterL) {
                 // Break if the pixel has become fully opaque
-                if(alphas[iterL] >= (15 * SUPERSAMPLING_SIZE * SUPERSAMPLING_SIZE)) break;
+                if(alphas[iterL] >= SSAA_MAX_ALPHA) break;
                 // Draw the pixel
                 const Pt::int32_t iterX = minX + iterL;
                 const Pt::int32_t iterY = minY + pixelY / SUPERSAMPLING_SIZE;
@@ -386,7 +390,7 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, size_t pointCount, 
         else { // Solid color
             for(; iterL < sizeX; ++iterL) {
                 // Break if the pixel has become fully opaque
-                if(alphas[iterL] >= (15 * SUPERSAMPLING_SIZE * SUPERSAMPLING_SIZE)) break;
+                if(alphas[iterL] >= SSAA_MAX_ALPHA) break;
                 // Draw the pixel
                 Pixel pixel(_image->view(), minX + iterL, minY + pixelY / SUPERSAMPLING_SIZE);
                 _image->format().setPixel(pixel, color, _compositionMode, SSAA_SCALE_ALPHA(alphas[iterL]));
@@ -421,7 +425,7 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, size_t pointCount, 
         if(_isTexture || _isGradient) { // Texture or gradient
             for(; iterR >= 0; --iterR) {
                 // Break if the pixel has become fully opaque
-                if(alphas[iterR] >= (15 * SUPERSAMPLING_SIZE * SUPERSAMPLING_SIZE)) break;
+                if(alphas[iterR] >= SSAA_MAX_ALPHA) break;
                 // Draw the pixel
                 const Pt::int32_t iterX = minX + iterR;
                 const Pt::int32_t iterY = minY + pixelY / SUPERSAMPLING_SIZE;
@@ -435,7 +439,7 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, size_t pointCount, 
         else { // Solid color
             for(; iterR >= 0; --iterR) {
                 // Break if the pixel has become fully opaque
-                if(alphas[iterR] >= (15 * SUPERSAMPLING_SIZE * SUPERSAMPLING_SIZE)) break;
+                if(alphas[iterR] >= SSAA_MAX_ALPHA) break;
                 // Draw the pixel
                 Pixel pixel(_image->view(), minX + iterR, minY + pixelY / SUPERSAMPLING_SIZE);
                 _image->format().setPixel(pixel, color, _compositionMode, SSAA_SCALE_ALPHA(alphas[iterR]));
@@ -511,8 +515,10 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, size_t pointCount, 
         memset(&alphas[0], 0, alphas.size());
     }
 
-    // Undefine the helper macro
+    // Undefine the helper macros
     #undef SSAA_SCALE_ALPHA
+    #undef SSAA_MIN_ALPHA
+    #undef SSAA_MAX_ALPHA
 }
 
 // Partially based on http://alienryderflex.com/polygon_fill
