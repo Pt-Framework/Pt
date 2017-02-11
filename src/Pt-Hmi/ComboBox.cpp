@@ -169,14 +169,14 @@ ComboBox::ComboBox()
     _item8.resize( Gfx::SizeF(20, 25) );
     _item8.setText("Item 8");
 
-    _menu.addItem(_item1);
-    _menu.addItem(_item2);
-    _menu.addItem(_item3);
-    _menu.addItem(_item4);
-    _menu.addItem(_item5);
-    _menu.addItem(_item6);
-    _menu.addItem(_item7);
-    _menu.addItem(_item8);
+    addItem(_item1);
+    addItem(_item2);
+    addItem(_item3);
+    addItem(_item4);
+    addItem(_item5);
+    addItem(_item6);
+    addItem(_item7);
+    addItem(_item8);
 
     _menu.eventReady() += Pt::slot(*this, &ComboBox::processKeyEvent);
     _menu.selected() += Pt::slot(*this, &ComboBox::onItemSelected);
@@ -191,6 +191,7 @@ ComboBox::~ComboBox()
 void ComboBox::addItem(ListBoxItem& item)
 {   
     _menu.addItem(item);
+    item.setTextInput(true);
 }
 
 
@@ -324,6 +325,7 @@ void ComboBox::onOpenCombo()
 
 void ComboBox::onItemSelected(ListBoxItem& item)
 {
+    Application::instance().inputMethod().finish();
     _editor.setText( item.text() );
     invalidate();
 }
@@ -480,9 +482,9 @@ bool ComboBox::onMouseEvent(const MouseEvent& ev)
         if( ev.position().x() > size().width() - 20 )
         {
             onOpenCombo();
-            Application::instance().inputMethod().finish();
+            //Application::instance().inputMethod().finish();
         }
-        else
+        //else
         {
             Application::instance().inputMethod().begin(*this);
         }

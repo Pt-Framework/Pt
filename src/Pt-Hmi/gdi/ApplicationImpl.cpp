@@ -706,16 +706,32 @@ void ApplicationImpl::onMouse(Window& w, unsigned int msg, WPARAM wparam, LPARAM
 
 
     Visual* grabber = Application::instance().pointerGrabber();
-    if( grabber )
+    if(grabber)
     {
-        
         Gfx::PointF screenPos = w.toScreen(pos);
-        pos = grabber->fromScreen(screenPos);
+
+        Window* ime = Application::instance().inputMethod().activeWindow();
+        if(ime)
+        {
+            Gfx::PointF p = ime->fromScreen( w.toScreen(pos) );
+            Gfx::RectF rect( ime->size() );
+            if( rect.contains(p) )
+            {
+                _mouseEvent.setPosition(p);
+                _mouseEvent.setId( ime->vid() );
+                grabber = 0;
+            }
+        }
         
-        _mouseEvent.setId( grabber->vid() );
+        if(grabber)
+        {
+            _mouseEvent.setPosition( grabber->fromScreen(screenPos) );
+            _mouseEvent.setId( grabber->vid() );
+        }
     }
     else        
     {
+        _mouseEvent.setPosition(pos);
         _mouseEvent.setId( w.vid() );
     
         if( ! _pointerInWindow )
@@ -724,9 +740,6 @@ void ApplicationImpl::onMouse(Window& w, unsigned int msg, WPARAM wparam, LPARAM
             _pointerInWindow = true;
         }
     }
-
-    _mouseEvent.setX( pos.x() );
-    _mouseEvent.setY( pos.y() );
 
     commitEvent(_mouseEvent);
 }

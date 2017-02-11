@@ -32,6 +32,7 @@
 
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/KeyEvent.h>
+#include <Pt/Hmi/MouseEvent.h>
 #include <Pt/Connectable.h>
 
 namespace Pt {
@@ -39,6 +40,7 @@ namespace Pt {
 namespace Hmi {
 
 class Widget;
+class Window;
 class Application;
 
 class PT_HMI_API InputMethod
@@ -52,6 +54,10 @@ class PT_HMI_API InputMethod
 
         void begin(Widget& widget);
 
+        bool isVisible() const;
+
+        Window* activeWindow();
+
         void grab();
 
         void release();
@@ -60,10 +66,14 @@ class PT_HMI_API InputMethod
 
         void finish(Widget& widget);
 
+        //virtual bool mouseEvent(const MouseEvent& ev) = 0;
+
     protected:
         virtual void onShow(bool show) = 0;
         
         virtual bool onFinish(Widget& widget) = 0;
+
+        virtual Window* onActiveWindow() = 0;
 
         void sendKeyEvent(const KeyEvent& ev);
 
@@ -82,11 +92,27 @@ class PT_HMI_API InputMethod
 
 
 class DefaultInputMethod : public InputMethod
+                         , public Connectable
 {
+    public:
+        DefaultInputMethod();
+
+        ~DefaultInputMethod();
+
+        //virtual bool mouseEvent(const MouseEvent& ev);
+
     protected:
         virtual void onShow(bool show);
         
         virtual bool onFinish(Widget& widget);
+
+        virtual Window* onActiveWindow();
+
+    private:
+        void onKeyPress();
+
+    private:
+        class KeyboardWindow* _window;
 };
 
 } // namespace

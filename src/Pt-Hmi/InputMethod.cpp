@@ -29,6 +29,7 @@
 
 #include <Pt/Hmi/InputMethod.h>
 #include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Widget.h>
 #include <iostream>
 
@@ -62,6 +63,21 @@ void InputMethod::grab()
 void InputMethod::release()
 {
     _isGrabbed = false;
+}
+
+
+Window* InputMethod::activeWindow()
+{
+    if( ! _isVisible )
+        return 0;
+
+    return onActiveWindow();
+}
+
+
+bool InputMethod::isVisible() const
+{
+    return _isVisible;
 }
 
 
@@ -128,12 +144,95 @@ void InputMethod::unregisterApplication(Application&)
 }
 
 
+class KeyboardWindow : public Window
+{
+    public:
+        KeyboardWindow()
+        {
+        }
+
+        Pt::Signal<> keyPressed;
+
+    protected:
+        bool onMouseEvent(const MouseEvent& ev)
+        {
+            if( ev.isPress() )
+            {
+                keyPressed.send();
+            }
+
+            return true;
+        }
+
+        void onKeyEvent(const KeyEvent& ev)
+        {
+            std::clog << "KEY EVENT" << std::endl;
+        }
+        
+};
+
+DefaultInputMethod::DefaultInputMethod()
+{
+    _window = new KeyboardWindow();
+    _window->setTopMost(true);
+    _window->move( Gfx::PointF(500, 500) );
+    _window->resize( Gfx::SizeF(100, 100) );
+
+    _window->keyPressed += Pt::slot(*this, &DefaultInputMethod::onKeyPress);
+}
+
+
+DefaultInputMethod::~DefaultInputMethod()
+{
+    delete _window;
+}
+
+
+Window* DefaultInputMethod::onActiveWindow()
+{
+    //return _window;
+    return 0;
+}
+
+
+//bool DefaultInputMethod::mouseEvent(const MouseEvent& ev)
+//{
+//    Gfx::PointF pos = _window->fromScreen( ev.position() );
+//    Gfx::RectF rect( _window->size() );
+//    if( ! rect.contains(pos) )
+//        return false;
+//
+//    MouseEvent ev2(ev);
+//    ev2.setId( _window->vid() );
+//    ev2.setPosition( _window->fromScreen( ev.position() ) );
+//    
+//    Application::instance().loop().commitEvent(ev2);
+//    return true;
+//}
+
+
+void DefaultInputMethod::onKeyPress()
+{
+    std::clog << "KEY PRESS" << std::endl;
+    KeyEvent kev(0);
+    kev.setPress(Key(Key::A), 'a');
+
+    sendKeyEvent(kev);
+}
+
+
 void DefaultInputMethod::onShow(bool show)
 {
     if(show)
+    {
         std::clog << "INPUTMETHOD SHOW" << std::endl;
+    }
     else
+    {
         std::clog << "INPUTMETHOD HIDE" << std::endl;
+    }
+
+    //_window->show(show);
 }
 
 
