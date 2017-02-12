@@ -206,14 +206,14 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(960, 130),
         PointF(860, 230),
         PointF(760, 130),
-        // Separator
+        // Seperator
         PointF(65536, 65536),
         // Hole 1
         PointF(860 - 40 +  0, 130 - 40     ),
         PointF(860 - 40 + 20, 130 - 40 + 20),
         PointF(860 - 40 -  0, 130 - 40 + 40),
         PointF(860 - 40 - 20, 130 - 40 + 20),
-        // Separator
+        // Seperator
         PointF(65536, 65536),
         // Hole 2
         PointF(860 + 40 +  0, 130 - 40     ),
@@ -221,7 +221,7 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(860 + 40 -  0, 130 - 40 + 40),
         PointF(860 + 40 - 20, 130 - 40 + 20)
     };
-    if(ip2) ip2->fillPolygonMulti(poly4, sizeof(poly4) / sizeof(poly4[0]), 0);
+    if(ip2) ip2->fillPolygon(poly4, sizeof(poly4) / sizeof(poly4[0]), 0);
 
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);

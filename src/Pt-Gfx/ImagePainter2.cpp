@@ -180,22 +180,17 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount )
 
 void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount, Pt::uint8_t antiAliasingLevel )
 {
-    std::vector<Point> points(pointCount);
+    const bool   addCloser = ( (ps[pointCount - 1].x() <= 65535 || ps[pointCount - 1].y() <= 65535) );
+    const size_t effPC     = addCloser ? (pointCount + 1) : pointCount;
+
+    std::vector<Point> points(effPC);
 
     for(size_t i = 0; i < pointCount; ++i)
         points[i].set( ps[i].x(), ps[i].y() );
 
-    _rasterizer->fillPolygon(points.data(), pointCount, antiAliasingLevel);
-}
+    if(addCloser) points[pointCount].set( 65536, 65536 );
 
-void ImagePainter2::fillPolygonMulti( const PointF* ps, const size_t pointCount, Pt::uint8_t antiAliasingLevel )
-{
-    std::vector<Point> points(pointCount);
-
-    for(size_t i = 0; i < pointCount; ++i)
-        points[i].set( ps[i].x(), ps[i].y() );
-
-    _rasterizer->fillPolygonMulti(points.data(), pointCount, antiAliasingLevel);
+    _rasterizer->fillPolygon(points.data(), effPC, antiAliasingLevel);
 }
 
 void ImagePainter2::drawImage( const PointF& toIn, const Image& image)

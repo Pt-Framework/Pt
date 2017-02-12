@@ -55,51 +55,32 @@ void Rasterizer2::strokePolygon(const Point* points, size_t pointCount)
 
 void Rasterizer2::fillPolygon(const Point* points, size_t pointCount, Pt::uint8_t antiAliasingLevel)
 {
-    // Clip the coordinates
-    std::vector<Point> clipped;
-    genClippedPolygonPoints(clipped, points, pointCount);
+    // Minimum and maximum coordinate values for all the polygons
+    Pt::int32_t minX =  65535;
+    Pt::int32_t minY =  65535;
+    Pt::int32_t maxX = -65535;
+    Pt::int32_t maxY = -65535;
 
-#if 0
-    #define DIV_FAC 50
-    clipped.clear();
-    clipped.push_back(Point(450 / DIV_FAC, 100 / DIV_FAC));
-    clipped.push_back(Point(350 / DIV_FAC, 300 / DIV_FAC));
-    clipped.push_back(Point(650 / DIV_FAC, 400 / DIV_FAC));
-    pointCount = 3;
-#endif
-
-    // Get the minimum and maximum coordinate values
-    Pt::int32_t minX, minY, maxX, maxY;
-    getPolygonRectMinMax(clipped.data(), clipped.size(), minX, minY, maxX, maxY);
-
-    // Update gradient as needed
-    if(_isGradient)
-        updateGradientBrush(maxX - minX + 1, maxY - minY + 1);
-
-    // Draw the polygon
-    if(antiAliasingLevel == 0)
-        rasterPolygonAreaNOAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
-    else if(antiAliasingLevel == 1)
-        rasterPolygonAreaFSAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY); // Produces artifacts at almost every corner vertex
-    else
-        rasterPolygonAreaSSAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
-}
-
-void Rasterizer2::fillPolygonMulti(const Point* points, size_t pointCount, Pt::uint8_t antiAliasingLevel)
-{
     // Separate the polygons and clip their coordinates
     std::vector<Point > clippedPoints;
     std::vector<size_t> clippedCounts;
-
-    size_t prevStart = 0;
-
+    size_t              startIndex = 0;
     for(size_t i = 0; i < pointCount; ++i) {
         if(points[i].x() > 65535 && points[i].y() > 65535) {
             // Calculate the number of points for this polygon
-            const size_t curPC = i - prevStart;
+            const size_t curPC = i - startIndex;
             // Clip the coordinates
             std::vector<Point> clipped;
-            genClippedPolygonPoints(clipped, points + prevStart, curPC);
+            genClippedPolygonPoints(clipped, points + startIndex, curPC);
+            // Increment the start index
+            startIndex += curPC + 1;
+            // Get the minimum and maximum coordinate values
+            Pt::int32_t curMinX, curMinY, curMaxX, curMaxY;
+            getPolygonRectMinMax(clipped.data(), clipped.size(), curMinX, curMinY, curMaxX, curMaxY);
+            if(curMinX < minX) minX = curMinX;
+            if(curMinY < minY) minY = curMinY;
+            if(curMaxX > maxX) maxX = curMaxX;
+            if(curMaxY > maxY) maxY = curMaxY;
             // Store the clipped points
             clippedPoints.insert(clippedPoints.end(), clipped.begin(), clipped.end());
             // Store the number of points
@@ -107,16 +88,25 @@ void Rasterizer2::fillPolygonMulti(const Point* points, size_t pointCount, Pt::u
         }
     }
 
-    // Get the minimum and maximum coordinate values
-  //  Pt::int32_t minX, minY, maxX, maxY;
-  //  getPolygonRectMinMax(clipped.data(), clipped.size(), minX, minY, maxX, maxY);
-
     // Update gradient as needed
-//    if(_isGradient)
-   //     updateGradientBrush(maxX - minX + 1, maxY - minY + 1);
+    if(_isGradient)
+        updateGradientBrush(maxX - minX + 1, maxY - minY + 1);
 
     // Draw the polygon
-    //rasterPolygonMultiAreaNOAA(const Point** points, const size_t* pointCount, size_t polyCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
+    if(antiAliasingLevel == 0) {
+        rasterPolygonAreaNOAA(
+            clippedPoints.data(), clippedCounts.data(),
+            clippedCounts.size(), clippedPoints.size(),
+            _brush.color(), minX, minY, maxX, maxY
+        );
+    }
+    else if(antiAliasingLevel == 1) {
+        // Produces artifacts at almost every corner vertex
+        rasterPolygonAreaFSAA(clippedPoints.data(), clippedPoints.size(), _brush.color(), minX, minY, maxX, maxY);
+    }
+    else {
+        rasterPolygonAreaSSAA(clippedPoints.data(), clippedPoints.size(), _brush.color(), minX, minY, maxX, maxY);
+    }
 }
 
 // ======================================================================================
@@ -164,30 +154,42 @@ void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount, c
 
 // Based on http://alienryderflex.com/polygon_fill
 // Public-domain code by Darel Rex Finley, 2007
-void Rasterizer2::rasterPolygonAreaNOAA(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
+void Rasterizer2::rasterPolygonAreaNOAA(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
 {
     // List of nodes that define the horizontal segments
-    std::vector<Pt::int32_t> nodeX(pointCount * 2, 0);
+    std::vector<Pt::int32_t> nodeX(totalPointCount * 2, 0);
 
     //  Loop through the rows of the image
     for(Pt::int32_t pixelY = minY; pixelY <= maxY; ++pixelY) {
-        // Build a list of nodes
-        Pt::int32_t j     = pointCount - 1;
+        // Pointer base for the polygons
+        const Point* curPointBase = points;
+        // Build a list of nodes using all the polygons
         Pt::int32_t nodes = 0;
-        for(size_t i = 0; i < pointCount; ++i) {
-            if( ( points[i].y() < pixelY && points[j].y() >= pixelY ) ||
-                ( points[j].y() < pixelY && points[i].y() >= pixelY )
-            ) {
-                // Bail out if we have produced too many nodes
-                if((size_t) nodes >= nodeX.size()) return;
-                // Calculate the node's coordinate
-                Pt::int32_t deltaYp = pixelY        - points[i].y();
-                Pt::int32_t deltaYj = points[j].y() - points[i].y();
-                Pt::int32_t deltaXj = points[j].x() - points[i].x();
-                Pt::int32_t interXf = FIXED_POINT_FROM_INT(points[i].x()) + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
-                nodeX[nodes++] = FIXED_POINT_TO_INT(interXf + FIXED_POINT_CONSTANT_HALF);
+        for(size_t p = 0; p < polyCount; ++p) {
+            // Get the current point count
+            const size_t curPointCount = pointCount[p];
+            // Loop thorugh the points
+            Pt::int32_t j = curPointCount - 1;
+            for(size_t i = 0; i < curPointCount; ++i) {
+                const Pt::int32_t curXi = (curPointBase + i)->x();
+                const Pt::int32_t curYi = (curPointBase + i)->y();
+                const Pt::int32_t curXj = (curPointBase + j)->x();
+                const Pt::int32_t curYj = (curPointBase + j)->y();
+                if( ( curYi < pixelY && curYj >= pixelY ) || ( curYj < pixelY && curYi >= pixelY ) ) {
+                    // Bail out if we have produced too many nodes
+                    if((size_t) nodes >= nodeX.size()) return;
+                    // Calculate the node's coordinate
+                    Pt::int32_t deltaYp = pixelY - curYi;
+                    Pt::int32_t deltaYj = curYj  - curYi;
+                    Pt::int32_t deltaXj = curXj  - curXi;
+                    Pt::int32_t interXf = FIXED_POINT_FROM_INT(curXi)
+                                        + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
+                    nodeX[nodes++] = FIXED_POINT_TO_INT(interXf + FIXED_POINT_CONSTANT_HALF);
+                }
+                j = i;
             }
-            j = i;
+            // Increment the base pointer
+            curPointBase += curPointCount;
         }
         // Sort the nodes using bubble sort
         for(Pt::int32_t i = 0; i < nodes - 1;) {
@@ -269,273 +271,6 @@ void Rasterizer2::rasterPolygonAreaNOAA(const Point* points, size_t pointCount, 
 #endif
         }
     }
-}
-
-// Partially based on http://alienryderflex.com/polygon_fill
-// Public-domain code by Darel Rex Finley, 2007
-void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
-{
-    // Calculate the size of the polygon
-    Pt::int32_t sizeX = (maxX - minX + 1);
-    Pt::int32_t sizeY = (maxY - minY + 1) * SUPERSAMPLING_SIZE;
-
-    // Prepare a work buffer
-    std::vector<Pt::uint8_t> alphas(sizeX, 0);
-
-    // Scale the polygon to match the super sampling size and translate it to (0, 0)
-    std::vector<Pt::int32_t> pointX(pointCount, 0);
-    std::vector<Pt::int32_t> pointY(pointCount, 0);
-
-    for(size_t i = 0; i < pointCount; ++i) {
-        pointX[i] = points[i].x() * SUPERSAMPLING_SIZE - minX * SUPERSAMPLING_SIZE;
-        pointY[i] = points[i].y() * SUPERSAMPLING_SIZE - minY * SUPERSAMPLING_SIZE;
-    }
-
-    // List of nodes that define the horizontal segments
-    std::vector<Pt::int32_t> nodeX(pointCount * 2, 0);
-
-    // A helper macro to scale the alpha
-    #define SSAA_SCALE_ALPHA(A) ( Pt::uint16_t(A) * 17 / SUPERSAMPLING_SIZE / SUPERSAMPLING_SIZE )
-
-    // The minimum and maximum values for alpha
-    #define SSAA_MIN_ALPHA 15
-    #define SSAA_MAX_ALPHA (SSAA_MIN_ALPHA * SUPERSAMPLING_SIZE * SUPERSAMPLING_SIZE)
-
-    //  Loop through the rows of the image
-    for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
-        // Build a list of nodes
-        Pt::int32_t j     = pointCount - 1;
-        Pt::int32_t nodes = 0;
-        for(size_t i = 0; i < pointCount; ++i) {
-            if( ( pointY[i] < pixelY && pointY[j] >= pixelY ) ||
-                ( pointY[j] < pixelY && pointY[i] >= pixelY )
-            ) {
-                // Bail out if we have produced too many nodes
-                if((size_t) nodes >= nodeX.size()) return;
-                // Calculate the node's coordinate
-                const Pt::int32_t deltaYp = pixelY    - pointY[i];
-                const Pt::int32_t deltaYj = pointY[j] - pointY[i];
-                const Pt::int32_t deltaXj = pointX[j] - pointX[i];
-                const Pt::int32_t interXf = FIXED_POINT_FROM_INT(pointX[i]) + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
-                nodeX[nodes++] = FIXED_POINT_TO_INT(interXf + FIXED_POINT_CONSTANT_HALF);
-            }
-            j = i;
-        }
-        // Sort the nodes using bubble sort
-        for(Pt::int32_t i = 0; i < nodes - 1;) {
-            if(nodeX[i] > nodeX[i + 1]) {
-                std::swap(nodeX[i], nodeX[i + 1]);
-                if(i) --i;
-            }
-            else {
-                ++i;
-            }
-        }
-        // Accumulate the alphas of the samples between the node pairs
-        for(Pt::int32_t i = 0; i < nodes; i += 2) {
-            const Pt::int32_t from = nodeX[i    ];
-            const Pt::int32_t to   = nodeX[i + 1];
-#ifdef USE_DUFFS_DEVICE
-            register Pt::uint8_t* dst = &alphas[0];
-            register Pt::int32_t  cnt = to - from + 1;
-            register Pt::int32_t  n   = (cnt + 7) / 8;
-            register Pt::int32_t  k   = from;
-            switch(cnt % 8) {
-                    case 0 : do { dst[k / SUPERSAMPLING_SIZE] += SSAA_MIN_ALPHA; ++k;
-                    case 7 :      dst[k / SUPERSAMPLING_SIZE] += SSAA_MIN_ALPHA; ++k;
-                    case 6 :      dst[k / SUPERSAMPLING_SIZE] += SSAA_MIN_ALPHA; ++k;
-                    case 5 :      dst[k / SUPERSAMPLING_SIZE] += SSAA_MIN_ALPHA; ++k;
-                    case 4 :      dst[k / SUPERSAMPLING_SIZE] += SSAA_MIN_ALPHA; ++k;
-                    case 3 :      dst[k / SUPERSAMPLING_SIZE] += SSAA_MIN_ALPHA; ++k;
-                    case 2 :      dst[k / SUPERSAMPLING_SIZE] += SSAA_MIN_ALPHA; ++k;
-                    case 1 :      dst[k / SUPERSAMPLING_SIZE] += SSAA_MIN_ALPHA; ++k;
-                             } while (--n > 0);
-            }
-#else
-            for(Pt::int32_t k = from; k <= to; ++k) {
-                alphas[k / SUPERSAMPLING_SIZE] += SSAA_MIN_ALPHA;
-            }
-#endif
-        }
-        // Simply skip the next steps if we have not got all the needed samples
-        if( ((pixelY + 1) % SUPERSAMPLING_SIZE) ) continue;
-        // Fill the pixels between the node pairs
-        for(Pt::int32_t i = 0; i < nodes; i += 2) {
-            // Draw pixels that belongs to the left-part of the span to the image
-            Pt::int32_t iterL = nodeX[i] / SUPERSAMPLING_SIZE - 1; // SUPERSAMPLING_SIZE * 2;
-            if(iterL < 0) iterL = 0;
-#ifdef USE_DUFFS_DEVICE
-            if(true) { // Skip fully-transparent pixels
-                register Pt::uint8_t* src  = &alphas[0];
-                register Pt::int32_t  cnt  = sizeX - 1;
-                register Pt::int32_t  n    = (cnt + 7) / 8;
-                register Pt::int32_t  k    = iterL;
-                switch(cnt % 8) {
-                        case 0 : do { if(src[k]) {n = 0; break; } ++k;
-                        case 7 :      if(src[k]) {n = 0; break; } ++k;
-                        case 6 :      if(src[k]) {n = 0; break; } ++k;
-                        case 5 :      if(src[k]) {n = 0; break; } ++k;
-                        case 4 :      if(src[k]) {n = 0; break; } ++k;
-                        case 3 :      if(src[k]) {n = 0; break; } ++k;
-                        case 2 :      if(src[k]) {n = 0; break; } ++k;
-                        case 1 :      if(src[k]) {n = 0; break; } ++k;
-                                 } while (--n > 0);
-                }
-                iterL = k;
-            }
-#else
-            for(; iterL < sizeX; ++iterL) { // Skip fully-transparent pixels
-                if(alphas[iterL]) break;
-            }
-#endif
-            if(_isTexture || _isGradient) { // Texture or gradient
-                for(; iterL < sizeX; ++iterL) {
-                    // Break if we have reached the non anti-aliased part of the span
-                    if(alphas[iterL] >= SSAA_MAX_ALPHA) break;
-                    // Draw the pixel
-                    const Pt::int32_t iterX = minX + iterL;
-                    const Pt::int32_t iterY = minY + pixelY / SUPERSAMPLING_SIZE;
-                    const Pt::int32_t tX    = (iterL                      ) % _brushImage->width ();
-                    const Pt::int32_t tY    = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
-                    ConstPixel srcPixel(_brushImage->view(), tX, tY);
-                    Pixel      dstPixel(_image->view(), iterX, iterY);
-                    _image->format().setPixel(dstPixel, srcPixel, _compositionMode, SSAA_SCALE_ALPHA(alphas[iterL]));
-                }
-            }
-            else { // Solid color
-                for(; iterL < sizeX; ++iterL) {
-                    // Break if we have reached the non anti-aliased part of the span
-                    if(alphas[iterL] >= SSAA_MAX_ALPHA) break;
-                    // Draw the pixel
-                    Pixel pixel(_image->view(), minX + iterL, minY + pixelY / SUPERSAMPLING_SIZE);
-                    _image->format().setPixel(pixel, color, _compositionMode, SSAA_SCALE_ALPHA(alphas[iterL]));
-                }
-            }
-            // Draw pixels that belongs to the right-part of the span to the image
-            Pt::int32_t iterR = nodeX[i + 1] / SUPERSAMPLING_SIZE + 1; // SUPERSAMPLING_SIZE * 2;
-            if(iterR >= sizeX) iterR = sizeX - 1;
-#ifdef USE_DUFFS_DEVICE
-            if(true) { // Skip fully-transparent pixels
-                register Pt::uint8_t* src  = &alphas[0];
-                register Pt::int32_t  cnt  = sizeX - 1;
-                register Pt::int32_t  n    = (cnt + 7) / 8;
-                register Pt::int32_t  k    = iterR;
-                switch(cnt % 8) {
-                        case 0 : do { if(src[k]) {n = 0; break; } --k;
-                        case 7 :      if(src[k]) {n = 0; break; } --k;
-                        case 6 :      if(src[k]) {n = 0; break; } --k;
-                        case 5 :      if(src[k]) {n = 0; break; } --k;
-                        case 4 :      if(src[k]) {n = 0; break; } --k;
-                        case 3 :      if(src[k]) {n = 0; break; } --k;
-                        case 2 :      if(src[k]) {n = 0; break; } --k;
-                        case 1 :      if(src[k]) {n = 0; break; } --k;
-                                 } while (--n > 0);
-                }
-                iterR = k;
-            }
-#else
-            for(; iterR >= 0; --iterR) { // Skip fully-transparent pixels
-                if(alphas[iterR]) break;
-            }
-#endif
-            if(_isTexture || _isGradient) { // Texture or gradient
-                for(; iterR >= 0; --iterR) {
-                    // Break if we have reached the non anti-aliased part of the span
-                    if(alphas[iterR] >= SSAA_MAX_ALPHA) break;
-                    // Draw the pixel
-                    const Pt::int32_t iterX = minX + iterR;
-                    const Pt::int32_t iterY = minY + pixelY / SUPERSAMPLING_SIZE;
-                    const Pt::int32_t tX    = (iterR                      ) % _brushImage->width ();
-                    const Pt::int32_t tY    = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
-                    ConstPixel srcPixel(_brushImage->view(), tX, tY);
-                    Pixel      dstPixel(_image->view(), iterX, iterY);
-                    _image->format().setPixel(dstPixel, srcPixel, _compositionMode, SSAA_SCALE_ALPHA(alphas[iterR]));
-                }
-            }
-            else { // Solid color
-                for(; iterR >= 0; --iterR) {
-                    // Break if we have reached the non anti-aliased part of the span
-                    if(alphas[iterR] >= SSAA_MAX_ALPHA) break;
-                    // Draw the pixel
-                    Pixel pixel(_image->view(), minX + iterR, minY + pixelY / SUPERSAMPLING_SIZE);
-                    _image->format().setPixel(pixel, color, _compositionMode, SSAA_SCALE_ALPHA(alphas[iterR]));
-                }
-            }
-            // Draw pixels that belongs to the middle-part of the span to the image
-            if(iterR >= iterL) {
-                // Draw the span using texture
-                if(_isTexture) {
-                    Pt::int32_t iterX     = iterL;
-                    Pt::int32_t spanWidth = iterR - iterL + 1;
-                    while(spanWidth > 0) {
-                        const Pt::int32_t tX = (iterX                      ) % _brushImage->width ();
-                        const Pt::int32_t tY = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
-                        const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tX);
-                        if(n) {
-                            ConstPixel srcPixel(_brushImage->view(), tX, tY);
-                            Pixel      dstPixel(_image->view(), minX + iterX, minY + pixelY / SUPERSAMPLING_SIZE);
-                            _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
-                        }
-                        spanWidth -= n;
-                        iterX     += n;
-                    }
-                }
-                // Draw the span using gradient
-                else if(_isGradient) {
-                    Pt::int32_t iterX     = iterL;
-                    Pt::int32_t spanWidth = iterR - iterL + 1;
-                    // Fill the span - vertical gradient
-                    if(_brush.fillStyle() == Pt::Gfx::Brush::VerticalGradient) {
-                        const Pt::int32_t textureY = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
-                        ConstPixel        srcPixel(_brushImage->view(), 0, textureY);
-                        Pixel             dstPixel(_image->view(), minX + iterX, minY + pixelY / SUPERSAMPLING_SIZE);
-                        _image->format().setPixels(dstPixel, srcPixel, spanWidth, _compositionMode);
-                    }
-                    // Fill the span - horizontal gradient
-                    else {
-                        while(spanWidth > 0) {
-                            const Pt::int32_t tX = (iterX                      ) % _brushImage->width ();
-                            const Pt::int32_t tY = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
-                            const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tX);
-                            if(n) {
-                                ConstPixel srcPixel(_brushImage->view(), tX, tY);
-                                Pixel      dstPixel(_image->view(), minX + iterX, minY + pixelY / SUPERSAMPLING_SIZE);
-                                _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
-                            }
-                            spanWidth -= n;
-                            iterX     += n;
-                        }
-                    }
-                }
-                // Draw the span using solid color
-                else {
-#ifdef USE_PUTPIXELS_FOR_SOLID_COLOR
-                    Pixel pixel(_image->view(), minX + iterL, minY + pixelY / SUPERSAMPLING_SIZE);
-                    _image->format().setPixels(pixel, _brush.color(), iterR - iterL + 1, _compositionMode);
-#else
-                    Pt::int32_t iterX     = minX + iterL;
-                    Pt::int32_t spanWidth = iterR - iterL + 1;
-                    while(spanWidth > 0) {
-                        const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
-                        if(n) {
-                            Pixel pixel(_image->view(), iterX, minY + pixelY / SUPERSAMPLING_SIZE);
-                            _image->format().copy(pixel, _brushPixel, n, _compositionMode);
-                        }
-                        spanWidth -= n;
-                        iterX     += n;
-                    }
-#endif
-                }
-            }
-        }
-        // Clear the work buffer
-        memset(&alphas[0], 0, alphas.size());
-    }
-
-    // Undefine the helper macros
-    #undef SSAA_SCALE_ALPHA
-    #undef SSAA_MIN_ALPHA
-    #undef SSAA_MAX_ALPHA
 }
 
 // Partially based on http://alienryderflex.com/polygon_fill
@@ -860,41 +595,55 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, size_t pointCount, 
     #undef FSAA_MAX_ALPHA
 }
 
-
-// Based on http://alienryderflex.com/polygon_fill
+// Partially based on http://alienryderflex.com/polygon_fill
 // Public-domain code by Darel Rex Finley, 2007
-void Rasterizer2::rasterPolygonMultiAreaNOAA(const Point** points, const size_t* pointCount, size_t polyCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
+void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
 {
-    // Find the maximum number of points
-    size_t maxPC = pointCount[0];
-    for(size_t i = 1; i < polyCount; ++i) {
-        if(pointCount[i] > maxPC) maxPC = pointCount[i];
+    // Calculate the size of the polygon
+    Pt::int32_t sizeX = (maxX - minX + 1);
+    Pt::int32_t sizeY = (maxY - minY + 1) * SUPERSAMPLING_SIZE;
+
+    // Prepare a work buffer
+    std::vector<Pt::uint8_t> alphas(sizeX, 0);
+
+    // Scale the polygon to match the super sampling size and translate it to (0, 0)
+    std::vector<Pt::int32_t> pointX(pointCount, 0);
+    std::vector<Pt::int32_t> pointY(pointCount, 0);
+
+    for(size_t i = 0; i < pointCount; ++i) {
+        pointX[i] = points[i].x() * SUPERSAMPLING_SIZE - minX * SUPERSAMPLING_SIZE;
+        pointY[i] = points[i].y() * SUPERSAMPLING_SIZE - minY * SUPERSAMPLING_SIZE;
     }
 
     // List of nodes that define the horizontal segments
-    std::vector<Pt::int32_t> nodeX(polyCount * maxPC * 2, 0);
+    std::vector<Pt::int32_t> nodeX(pointCount * 2, 0);
+
+    // A helper macro to scale the alpha
+    #define SSAA_SCALE_ALPHA(A) ( Pt::uint16_t(A) * 17 / SUPERSAMPLING_SIZE / SUPERSAMPLING_SIZE )
+
+    // The minimum and maximum values for alpha
+    #define SSAA_MIN_ALPHA 15
+    #define SSAA_MAX_ALPHA (SSAA_MIN_ALPHA * SUPERSAMPLING_SIZE * SUPERSAMPLING_SIZE)
 
     //  Loop through the rows of the image
-    for(Pt::int32_t pixelY = minY; pixelY <= maxY; ++pixelY) {
+    for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
         // Build a list of nodes
+        Pt::int32_t j     = pointCount - 1;
         Pt::int32_t nodes = 0;
-        for(size_t p = 0; p < polyCount; ++p) {
-            Pt::int32_t j = pointCount[p] - 1;
-            for(size_t i = 0; i < pointCount[p]; ++i) {
-                if( ( points[p][i].y() < pixelY && points[p][j].y() >= pixelY ) ||
-                    ( points[p][j].y() < pixelY && points[p][i].y() >= pixelY )
-                ) {
-                    // Bail out if we have produced too many nodes
-                    if((size_t) nodes >= nodeX.size()) return;
-                    // Calculate the node's coordinate
-                    Pt::int32_t deltaYp = pixelY           - points[p][i].y();
-                    Pt::int32_t deltaYj = points[p][j].y() - points[p][i].y();
-                    Pt::int32_t deltaXj = points[p][j].x() - points[p][i].x();
-                    Pt::int32_t interXf = FIXED_POINT_FROM_INT(points[p][i].x()) + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
-                    nodeX[nodes++] = FIXED_POINT_TO_INT(interXf + FIXED_POINT_CONSTANT_HALF);
-                }
-                j = i;
+        for(size_t i = 0; i < pointCount; ++i) {
+            if( ( pointY[i] < pixelY && pointY[j] >= pixelY ) ||
+                ( pointY[j] < pixelY && pointY[i] >= pixelY )
+            ) {
+                // Bail out if we have produced too many nodes
+                if((size_t) nodes >= nodeX.size()) return;
+                // Calculate the node's coordinate
+                const Pt::int32_t deltaYp = pixelY    - pointY[i];
+                const Pt::int32_t deltaYj = pointY[j] - pointY[i];
+                const Pt::int32_t deltaXj = pointX[j] - pointX[i];
+                const Pt::int32_t interXf = FIXED_POINT_FROM_INT(pointX[i]) + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
+                nodeX[nodes++] = FIXED_POINT_TO_INT(interXf + FIXED_POINT_CONSTANT_HALF);
             }
+            j = i;
         }
         // Sort the nodes using bubble sort
         for(Pt::int32_t i = 0; i < nodes - 1;) {
@@ -906,76 +655,211 @@ void Rasterizer2::rasterPolygonMultiAreaNOAA(const Point** points, const size_t*
                 ++i;
             }
         }
+        // Accumulate the alphas of the samples between the node pairs
+        for(Pt::int32_t i = 0; i < nodes; i += 2) {
+            const Pt::int32_t from = nodeX[i    ];
+            const Pt::int32_t to   = nodeX[i + 1];
+#ifdef USE_DUFFS_DEVICE
+            register Pt::uint8_t* dst = &alphas[0];
+            register Pt::int32_t  cnt = to - from + 1;
+            register Pt::int32_t  n   = (cnt + 7) / 8;
+            register Pt::int32_t  k   = from;
+            switch(cnt % 8) {
+                    case 0 : do { dst[k / SUPERSAMPLING_SIZE] += SSAA_MIN_ALPHA; ++k;
+                    case 7 :      dst[k / SUPERSAMPLING_SIZE] += SSAA_MIN_ALPHA; ++k;
+                    case 6 :      dst[k / SUPERSAMPLING_SIZE] += SSAA_MIN_ALPHA; ++k;
+                    case 5 :      dst[k / SUPERSAMPLING_SIZE] += SSAA_MIN_ALPHA; ++k;
+                    case 4 :      dst[k / SUPERSAMPLING_SIZE] += SSAA_MIN_ALPHA; ++k;
+                    case 3 :      dst[k / SUPERSAMPLING_SIZE] += SSAA_MIN_ALPHA; ++k;
+                    case 2 :      dst[k / SUPERSAMPLING_SIZE] += SSAA_MIN_ALPHA; ++k;
+                    case 1 :      dst[k / SUPERSAMPLING_SIZE] += SSAA_MIN_ALPHA; ++k;
+                             } while (--n > 0);
+            }
+#else
+            for(Pt::int32_t k = from; k <= to; ++k) {
+                alphas[k / SUPERSAMPLING_SIZE] += SSAA_MIN_ALPHA;
+            }
+#endif
+        }
+        // Simply skip the next steps if we have not got all the needed samples
+        if( ((pixelY + 1) % SUPERSAMPLING_SIZE) ) continue;
         // Fill the pixels between the node pairs
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
-            // Determine the X coordinates
-            Pt::int32_t from = nodeX[i    ];
-            Pt::int32_t to   = nodeX[i + 1];
-            // Draw the span using texture
-            if(_isTexture) {
-                Pt::int32_t iterX     = from;
-                Pt::int32_t spanWidth = to - from + 1;
-                while(spanWidth > 0) {
-                    const Pt::int32_t tX = (iterX  - minX) % _brushImage->width ();
-                    const Pt::int32_t tY = (pixelY - minY) % _brushImage->height();
-                    const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tX);
-                    if(n) {
-                        ConstPixel srcPixel(_brushImage->view(), tX, tY);
-                        Pixel      dstPixel(_image->view(), iterX, pixelY);
-                        _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
-                    }
-                    spanWidth -= n;
-                    iterX     += n;
+            // Draw pixels that belongs to the left-part of the span to the image
+            Pt::int32_t iterL = nodeX[i] / SUPERSAMPLING_SIZE - 1; // SUPERSAMPLING_SIZE * 2;
+            if(iterL < 0) iterL = 0;
+#ifdef USE_DUFFS_DEVICE
+            if(true) { // Skip fully-transparent pixels
+                register Pt::uint8_t* src  = &alphas[0];
+                register Pt::int32_t  cnt  = sizeX - 1;
+                register Pt::int32_t  n    = (cnt + 7) / 8;
+                register Pt::int32_t  k    = iterL;
+                switch(cnt % 8) {
+                        case 0 : do { if(src[k]) {n = 0; break; } ++k;
+                        case 7 :      if(src[k]) {n = 0; break; } ++k;
+                        case 6 :      if(src[k]) {n = 0; break; } ++k;
+                        case 5 :      if(src[k]) {n = 0; break; } ++k;
+                        case 4 :      if(src[k]) {n = 0; break; } ++k;
+                        case 3 :      if(src[k]) {n = 0; break; } ++k;
+                        case 2 :      if(src[k]) {n = 0; break; } ++k;
+                        case 1 :      if(src[k]) {n = 0; break; } ++k;
+                                 } while (--n > 0);
                 }
-                continue;
+                iterL = k;
             }
-            // Draw the span using gradient
-            if(_isGradient) {
-                Pt::int32_t iterX     = from;
-                Pt::int32_t spanWidth = to - from + 1;
-                // Fill the span - vertical gradient
-                if(_brush.fillStyle() == Pt::Gfx::Brush::VerticalGradient) {
-                    const Pt::int32_t textureY = (pixelY - minY) % _brushImage->height();
-                    ConstPixel        srcPixel(_brushImage->view(), 0, textureY);
-                    Pixel             dstPixel(_image->view(), iterX, pixelY);
-                    _image->format().setPixels(dstPixel, srcPixel, spanWidth, _compositionMode);
+#else
+            for(; iterL < sizeX; ++iterL) { // Skip fully-transparent pixels
+                if(alphas[iterL]) break;
+            }
+#endif
+            if(_isTexture || _isGradient) { // Texture or gradient
+                for(; iterL < sizeX; ++iterL) {
+                    // Break if we have reached the non anti-aliased part of the span
+                    if(alphas[iterL] >= SSAA_MAX_ALPHA) break;
+                    // Draw the pixel
+                    const Pt::int32_t iterX = minX + iterL;
+                    const Pt::int32_t iterY = minY + pixelY / SUPERSAMPLING_SIZE;
+                    const Pt::int32_t tX    = (iterL                      ) % _brushImage->width ();
+                    const Pt::int32_t tY    = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
+                    ConstPixel srcPixel(_brushImage->view(), tX, tY);
+                    Pixel      dstPixel(_image->view(), iterX, iterY);
+                    _image->format().setPixel(dstPixel, srcPixel, _compositionMode, SSAA_SCALE_ALPHA(alphas[iterL]));
                 }
-                // Fill the span - horizontal gradient
-                else {
+            }
+            else { // Solid color
+                for(; iterL < sizeX; ++iterL) {
+                    // Break if we have reached the non anti-aliased part of the span
+                    if(alphas[iterL] >= SSAA_MAX_ALPHA) break;
+                    // Draw the pixel
+                    Pixel pixel(_image->view(), minX + iterL, minY + pixelY / SUPERSAMPLING_SIZE);
+                    _image->format().setPixel(pixel, color, _compositionMode, SSAA_SCALE_ALPHA(alphas[iterL]));
+                }
+            }
+            // Draw pixels that belongs to the right-part of the span to the image
+            Pt::int32_t iterR = nodeX[i + 1] / SUPERSAMPLING_SIZE + 1; // SUPERSAMPLING_SIZE * 2;
+            if(iterR >= sizeX) iterR = sizeX - 1;
+#ifdef USE_DUFFS_DEVICE
+            if(true) { // Skip fully-transparent pixels
+                register Pt::uint8_t* src  = &alphas[0];
+                register Pt::int32_t  cnt  = sizeX - 1;
+                register Pt::int32_t  n    = (cnt + 7) / 8;
+                register Pt::int32_t  k    = iterR;
+                switch(cnt % 8) {
+                        case 0 : do { if(src[k]) {n = 0; break; } --k;
+                        case 7 :      if(src[k]) {n = 0; break; } --k;
+                        case 6 :      if(src[k]) {n = 0; break; } --k;
+                        case 5 :      if(src[k]) {n = 0; break; } --k;
+                        case 4 :      if(src[k]) {n = 0; break; } --k;
+                        case 3 :      if(src[k]) {n = 0; break; } --k;
+                        case 2 :      if(src[k]) {n = 0; break; } --k;
+                        case 1 :      if(src[k]) {n = 0; break; } --k;
+                                 } while (--n > 0);
+                }
+                iterR = k;
+            }
+#else
+            for(; iterR >= 0; --iterR) { // Skip fully-transparent pixels
+                if(alphas[iterR]) break;
+            }
+#endif
+            if(_isTexture || _isGradient) { // Texture or gradient
+                for(; iterR >= 0; --iterR) {
+                    // Break if we have reached the non anti-aliased part of the span
+                    if(alphas[iterR] >= SSAA_MAX_ALPHA) break;
+                    // Draw the pixel
+                    const Pt::int32_t iterX = minX + iterR;
+                    const Pt::int32_t iterY = minY + pixelY / SUPERSAMPLING_SIZE;
+                    const Pt::int32_t tX    = (iterR                      ) % _brushImage->width ();
+                    const Pt::int32_t tY    = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
+                    ConstPixel srcPixel(_brushImage->view(), tX, tY);
+                    Pixel      dstPixel(_image->view(), iterX, iterY);
+                    _image->format().setPixel(dstPixel, srcPixel, _compositionMode, SSAA_SCALE_ALPHA(alphas[iterR]));
+                }
+            }
+            else { // Solid color
+                for(; iterR >= 0; --iterR) {
+                    // Break if we have reached the non anti-aliased part of the span
+                    if(alphas[iterR] >= SSAA_MAX_ALPHA) break;
+                    // Draw the pixel
+                    Pixel pixel(_image->view(), minX + iterR, minY + pixelY / SUPERSAMPLING_SIZE);
+                    _image->format().setPixel(pixel, color, _compositionMode, SSAA_SCALE_ALPHA(alphas[iterR]));
+                }
+            }
+            // Draw pixels that belongs to the middle-part of the span to the image
+            if(iterR >= iterL) {
+                // Draw the span using texture
+                if(_isTexture) {
+                    Pt::int32_t iterX     = iterL;
+                    Pt::int32_t spanWidth = iterR - iterL + 1;
                     while(spanWidth > 0) {
-                        const Pt::int32_t tX = (iterX  - minX) % _brushImage->width ();
-                        const Pt::int32_t tY = (pixelY - minY) % _brushImage->height();
+                        const Pt::int32_t tX = (iterX                      ) % _brushImage->width ();
+                        const Pt::int32_t tY = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
                         const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tX);
                         if(n) {
                             ConstPixel srcPixel(_brushImage->view(), tX, tY);
-                            Pixel      dstPixel(_image->view(), iterX, pixelY);
+                            Pixel      dstPixel(_image->view(), minX + iterX, minY + pixelY / SUPERSAMPLING_SIZE);
                             _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
                         }
                         spanWidth -= n;
                         iterX     += n;
                     }
                 }
-                continue;
-            }
-            // Draw the span using solid color
-#ifdef USE_PUTPIXELS_FOR_SOLID_COLOR
-            Pixel pixel(_image->view(), from, pixelY);
-            _image->format().setPixels(pixel, _brush.color(), to - from + 1, _compositionMode);
-#else
-            Pt::int32_t iterX     = from;
-            Pt::int32_t spanWidth = to - from + 1;
-            while(spanWidth > 0) {
-                const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
-                if(n) {
-                    Pixel pixel(_image->view(), iterX, pixelY);
-                    _image->format().copy(pixel, _brushPixel, n, _compositionMode);
+                // Draw the span using gradient
+                else if(_isGradient) {
+                    Pt::int32_t iterX     = iterL;
+                    Pt::int32_t spanWidth = iterR - iterL + 1;
+                    // Fill the span - vertical gradient
+                    if(_brush.fillStyle() == Pt::Gfx::Brush::VerticalGradient) {
+                        const Pt::int32_t textureY = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
+                        ConstPixel        srcPixel(_brushImage->view(), 0, textureY);
+                        Pixel             dstPixel(_image->view(), minX + iterX, minY + pixelY / SUPERSAMPLING_SIZE);
+                        _image->format().setPixels(dstPixel, srcPixel, spanWidth, _compositionMode);
+                    }
+                    // Fill the span - horizontal gradient
+                    else {
+                        while(spanWidth > 0) {
+                            const Pt::int32_t tX = (iterX                      ) % _brushImage->width ();
+                            const Pt::int32_t tY = (pixelY / SUPERSAMPLING_SIZE) % _brushImage->height();
+                            const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tX);
+                            if(n) {
+                                ConstPixel srcPixel(_brushImage->view(), tX, tY);
+                                Pixel      dstPixel(_image->view(), minX + iterX, minY + pixelY / SUPERSAMPLING_SIZE);
+                                _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
+                            }
+                            spanWidth -= n;
+                            iterX     += n;
+                        }
+                    }
                 }
-                spanWidth -= n;
-                iterX     += n;
-            }
+                // Draw the span using solid color
+                else {
+#ifdef USE_PUTPIXELS_FOR_SOLID_COLOR
+                    Pixel pixel(_image->view(), minX + iterL, minY + pixelY / SUPERSAMPLING_SIZE);
+                    _image->format().setPixels(pixel, _brush.color(), iterR - iterL + 1, _compositionMode);
+#else
+                    Pt::int32_t iterX     = minX + iterL;
+                    Pt::int32_t spanWidth = iterR - iterL + 1;
+                    while(spanWidth > 0) {
+                        const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
+                        if(n) {
+                            Pixel pixel(_image->view(), iterX, minY + pixelY / SUPERSAMPLING_SIZE);
+                            _image->format().copy(pixel, _brushPixel, n, _compositionMode);
+                        }
+                        spanWidth -= n;
+                        iterX     += n;
+                    }
 #endif
+                }
+            }
         }
+        // Clear the work buffer
+        memset(&alphas[0], 0, alphas.size());
     }
+
+    // Undefine the helper macros
+    #undef SSAA_SCALE_ALPHA
+    #undef SSAA_MIN_ALPHA
+    #undef SSAA_MAX_ALPHA
 }
 
 
