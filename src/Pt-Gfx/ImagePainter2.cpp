@@ -39,6 +39,8 @@ namespace Pt {
 namespace Gfx {
 
 
+const PointF ImagePainter2::PolygonSeparatorPointF(99999, 99999);
+
 ImagePainter2::ImagePainter2(Image& image)
 : _rasterizer( new Rasterizer2(image))
 {}
@@ -180,7 +182,7 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount )
 
 void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount, Pt::uint8_t antiAliasingLevel )
 {
-    const bool   addCloser = ( (ps[pointCount - 1].x() <= 65535 || ps[pointCount - 1].y() <= 65535) );
+    const bool   addCloser = ( (ps[pointCount - 1].x() < PolygonSeparatorPointF.x() || ps[pointCount - 1].y() < PolygonSeparatorPointF.y()) );
     const size_t effPC     = addCloser ? (pointCount + 1) : pointCount;
 
     std::vector<Point> points(effPC);
@@ -188,7 +190,7 @@ void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount, Pt::
     for(size_t i = 0; i < pointCount; ++i)
         points[i].set( ps[i].x(), ps[i].y() );
 
-    if(addCloser) points[pointCount].set( 65536, 65536 );
+    if(addCloser) points[pointCount] = Rasterizer2::PolygonSeparatorPoint;
 
     _rasterizer->fillPolygon(points.data(), effPC, antiAliasingLevel);
 }

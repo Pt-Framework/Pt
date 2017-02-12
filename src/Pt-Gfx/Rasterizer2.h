@@ -145,6 +145,11 @@ class Rasterizer2
 
         Rect            _clip;
         Rect            _currentClip;
+
+    private:
+        static const Point PolygonSeparatorPoint;
+        friend class ImagePainter2;
+
 };
 
 

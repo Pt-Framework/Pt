@@ -86,10 +86,11 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
 
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(&painter);
 
-
     painter.setBrush( Color::fromRgb8(255, 255, 255, 175) );
+    painter.fillRect( RectF( PointF(800, 120), SizeF(170, 130) ) );
     painter.fillRect( RectF( PointF(170, 250), SizeF(800, 200) ) );
     painter.fillRect( RectF( PointF(170, 450), SizeF(100, 100) ) );
+
 
     painter.setBrush( brush1 );
 
@@ -154,6 +155,8 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
     else    painter.fillPolygon(poly2c, sizeof(poly2b) / sizeof(poly2b[0]));
 
 
+    painter.setBrush( brush1 );
+
     const PointF poly3a[] = { // CCW
         // Outside
         PointF(400 - 20, 300),
@@ -200,21 +203,21 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
     else    painter.fillPolygon(poly3c, sizeof(poly3c) / sizeof(poly3c[0]));
 
 
+    painter.setBrush( brush2 );
+
     const PointF poly4[] = { // CCW
         // Outside
         PointF(840,  30),
         PointF(960, 110),
         PointF(880, 230),
         PointF(760, 150),
-        // Seperator
-        PointF(65536, 65536),
+        ImagePainter2::PolygonSeparatorPointF,
         // Hole 1
         PointF(860 - 40 +  0, 130 - 20     ),
         PointF(860 - 40 + 30, 130 - 20 + 15),
         PointF(860 - 40 -  0, 130 - 20 + 40),
         PointF(860 - 40 - 20, 130 - 20 + 20),
-        // Seperator
-        PointF(65536, 65536),
+        ImagePainter2::PolygonSeparatorPointF,
         // Hole 2
         PointF(860 + 40 +  0, 130 - 20     ),
         PointF(860 + 40 + 20, 130 - 20 + 20),

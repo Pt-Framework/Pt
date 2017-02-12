@@ -44,6 +44,9 @@ class Rasterizer2;
 class PT_GFX_API ImagePainter2 : public Painter
 {
     public:
+         static const PointF PolygonSeparatorPointF;
+
+    public:
         ImagePainter2( Image& image );
 
         virtual ~ImagePainter2();
