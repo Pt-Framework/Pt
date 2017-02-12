@@ -109,6 +109,55 @@ double TextLine::cursorToX(std::size_t cursorPosition) const
     return fmLeft.width();
 }
 
+
+std::size_t TextLine::xToCursor(double x) const
+{
+    const Pt::String& str = _text;
+
+    if( str.empty() )
+        return 0;
+
+    std::size_t textX = x - _position.x();
+
+    // estimate cursor position
+    Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( _font, str );
+    std::size_t widthPerChar = fm.width() / str.size();
+    std::size_t pos = textX / widthPerChar;
+
+    if( pos >= str.size() )
+        pos = str.size() - 1;
+
+    Pt::String left = str.substr(0, pos + 1);
+    fm = Hmi::Painter::fontMetrics( _font, left );
+
+    if( textX < fm.width() )
+    {
+        // cursor position was over estimated, so search left
+        for( ; pos > 0; --pos)
+        {
+            left = str.substr(0, pos);
+            fm = Hmi::Painter::fontMetrics( _font, left );
+      
+            if( textX >= fm.width() )
+                break;
+        }
+    }
+    else 
+    {
+        // cursor position was under estimated, so search right
+        for(++pos ; pos < str.size(); ++pos)
+        {
+            left = str.substr(0, pos + 1);
+            fm = Hmi::Painter::fontMetrics( _font, left );
+      
+            if( textX < fm.width() )
+                break;
+        }
+    }
+
+    return pos;
+}
+
 //////////////////////////////////////////////////////////////////////////
 // LineEditor
 //////////////////////////////////////////////////////////////////////////
@@ -128,6 +177,18 @@ LineEditor::~LineEditor()
 const Gfx::SizeF& LineEditor::size() const
 {
     return _size;
+}
+
+
+const Gfx::PointF& LineEditor::position() const
+{
+    return _position;
+}
+
+
+void LineEditor::setPosition(const Gfx::PointF& p)
+{
+    _position = p;
 }
 
 
@@ -181,6 +242,15 @@ std::size_t LineEditor::cursorPosition() const
 }
 
 
+void LineEditor::setCursorPosition(std::size_t n)
+{
+    if( n > _text.size() )
+        n = _text.size();
+
+    _cursorPosition = n;
+}
+
+
 void LineEditor::insert(Char ch)
 {
     _text.insert(_cursorPosition, 1, ch);
@@ -218,8 +288,6 @@ void LineEditor::backspace()
 
 void LineEditor::layout(TextLine& line)
 {
-    _adjustment = Adjustment::Center;
-
     line.setText(_text, _font);
     
     double cursorX = line.cursorToX(_cursorPosition);
@@ -263,7 +331,8 @@ void LineEditor::layout(TextLine& line)
         lineX = - _scrollOffset;
     }
 
-    line.setPosition(lineX, lineY);
+    line.setPosition( lineX + _position.x(), 
+                      lineY + _position.y());
 }
 
 } // namespace

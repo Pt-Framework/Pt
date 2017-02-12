@@ -36,6 +36,8 @@ class ChildW : public Hmi::Window
 
         void onCheckBox();
 
+        void onComboSelected(Pt::Hmi::ListBoxItem& item);
+
         void onTextEntered(const Pt::String& text);
         
         void onCloseApp();

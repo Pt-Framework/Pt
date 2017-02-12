@@ -40,7 +40,6 @@ namespace Hmi {
 ComboBoxMenu::ComboBoxMenu()
 : Window(0, Window::Popup)
 {
-    setTitle("ComboBox Menu");
     setMainWidget(&_items);
 
     _items.selected() += Pt::slot(*this, &ComboBoxMenu::onItemSelected);
@@ -55,6 +54,12 @@ ComboBoxMenu::~ComboBoxMenu()
 void ComboBoxMenu::addItem(ListBoxItem& item)
 {   
     _items.addItem(item);
+}
+
+
+void ComboBoxMenu::removeItem(ListBoxItem& item)
+{   
+    _items.removeItem(item);
 }
 
 
@@ -98,7 +103,7 @@ bool ComboBoxMenu::onMouseEvent(const MouseEvent& ev)
 {
     Base::onMouseEvent(ev);
 
-    Gfx::RectF rect( Gfx::PointF(0,0), size() );
+    Gfx::RectF rect( size() );
     if( rect.contains( ev.position() ) )
         return true;
 
@@ -115,7 +120,7 @@ void ComboBoxMenu::onTouchEvent(const TouchEvent& ev)
 {
     Base::onTouchEvent(ev);
 
-    Gfx::RectF rect( Gfx::PointF(0,0), size() );
+    Gfx::RectF rect( size() );
     if( rect.contains( ev.position() ) )
         return;
 
@@ -130,15 +135,13 @@ void ComboBoxMenu::onShowEvent(const ShowEvent& ev)
 {
     Base::onShowEvent(ev);
 
-    if( ! ev.visible() )
+    if( ev.visible() )
     {
-        releasePointer();
-        //Application::instance().inputMethod().release();
+        grabPointer();
     }
     else
     {
-        grabPointer();
-        //Application::instance().inputMethod().grab();
+        releasePointer();
     }
 }
 
@@ -147,7 +150,8 @@ void ComboBoxMenu::onShowEvent(const ShowEvent& ev)
 /////////////////////////////////////////////////////////////////////////////
 
 ComboBox::ComboBox()
-: _hasRenderer(false)
+: _textPadding(2)
+, _hasRenderer(false)
 {
     setTextInput(true);
     setFocusPolicy(Widget::NormalFocus);
@@ -191,7 +195,40 @@ ComboBox::~ComboBox()
 void ComboBox::addItem(ListBoxItem& item)
 {   
     _menu.addItem(item);
-    item.setTextInput(true);
+
+    //item.setTextInput(true);
+}
+
+
+void ComboBox::removeItem(ListBoxItem& item)
+{
+    _menu.addItem(item);
+}
+
+
+const Pt::String& ComboBox::text() const
+{
+    return _editor.text();
+}
+
+
+void ComboBox::setText(const Pt::String& str)
+{
+    _editor.setText(str);
+    invalidate();
+}
+
+
+Adjustment ComboBox::textAdjustment() const
+{
+    return _editor.adjustment();
+}
+
+
+void ComboBox::setTextAdjustment(Adjustment a)
+{
+    _editor.setAdjustment(a);
+    invalidate();
 }
 
 
@@ -200,6 +237,29 @@ void ComboBox::setScrollBars(bool hasScrollBars)
     _menu.setScrollBars(hasScrollBars);
 }
 
+
+Pt::Signal<const Pt::String&>& ComboBox::textEdited()
+{
+    return _textEdited;
+}
+
+
+Pt::Signal<const Pt::String&>& ComboBox::returnPressed()
+{
+    return _returnPressed;
+}
+
+
+Pt::Signal<const Pt::String&>& ComboBox::editingFinished()
+{
+    return _editingFinished;
+}
+
+
+Pt::Signal<ListBoxItem&>& ComboBox::selected()
+{
+    return _menu.selected();
+}
 
 const Gfx::Brush& ComboBox::background() const
 {
@@ -312,7 +372,6 @@ void ComboBox::setRenderer(ComboBoxRenderer* renderer)
 void ComboBox::onOpenCombo()
 {
     _menu.resize( Gfx::SizeF(size().width(), 120) );
-    //_menu.setTopMost(true);
 
     Gfx::PointF pos(0, size().height());
     pos = this->toScreen(pos);
@@ -344,13 +403,19 @@ void ComboBox::processKeyEvent(const KeyEvent& ev)
     {
         _editor.right();
     }
+    else if( ev.key().code() == Pt::Hmi::Key::Return )
+    {
+        _returnPressed.send( _editor.text() );
+    }
     else if( ev.key().code() == Pt::Hmi::Key::Delete )
     {
         _editor.del();
+        _textEdited.send( _editor.text() );
     }
     else if( ev.key().code() == Pt::Hmi::Key::Backspace )
     {
         _editor.backspace();
+        _textEdited.send( _editor.text() );
     }
     else
     {
@@ -360,6 +425,7 @@ void ComboBox::processKeyEvent(const KeyEvent& ev)
         {
             _editor.insert(ch);
             onOpenCombo();
+            _textEdited.send( _editor.text() );
         }
     }
 
@@ -418,11 +484,10 @@ void ComboBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     //
     // clipping rect for text
     //
-    
-    // TODO: query text size from renderer
-    Gfx::SizeF textSize = size();
-    textSize.addWidth(-20);
-    painter.setClip( Gfx::RectF(textSize) );
+    Gfx::PointF clipPos = _editor.position();
+    Gfx::SizeF clipSize = _editor.size();
+    clipSize.addWidth(_textPadding); // space for cursor at end
+    painter.setClip( Gfx::RectF(clipPos, clipSize) );
 
     //
     // entered or selected item text
@@ -430,7 +495,7 @@ void ComboBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     
     Gfx::PointF textPos = _line.position();
     textPos.addY( _line.ascent() );
-    
+
     painter.setPen(_textPen);
     painter.setFont(_font);
     painter.drawText(textPos, _editor.text());
@@ -443,7 +508,6 @@ void ComboBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     {
         double cursorX = _line.cursorToX( _editor.cursorPosition() );
         cursorX += _line.position().x();
-        
 
         Gfx::RectF cursorRect( Gfx::PointF(cursorX, _line.position().y()),
                                Gfx::SizeF(0, _line.height()) );
@@ -457,11 +521,15 @@ void ComboBox::onResizeEvent(const ResizeEvent& ev)
 {
     Base::onResizeEvent(ev);
     
-    // TODO: query text size from renderer
-    Gfx::SizeF s = ev.size();
-    s.addWidth(-20);
+    _textPadding = ev.size().height() / 4;
 
-    _editor.setSize(s);
+    Gfx::PointF editPosition(_textPadding, 0);
+    _editor.setPosition(editPosition);
+
+    Gfx::SizeF editSize = ev.size();
+    editSize.addWidth(-30); // TODO: query text size from renderer
+    editSize.addWidth(-2 * _textPadding);
+    _editor.setSize(editSize);
 }
 
 
@@ -479,15 +547,16 @@ bool ComboBox::onMouseEvent(const MouseEvent& ev)
 
     if( ev.isPress() )
     {
-        if( ev.position().x() > size().width() - 20 )
+        if( ev.position().x() > size().width() - 30 )
         {
             onOpenCombo();
-            //Application::instance().inputMethod().finish();
         }
-        //else
-        {
-            Application::instance().inputMethod().begin(*this);
-        }
+
+        Application::instance().inputMethod().begin(*this);
+
+        std::size_t n = _line.xToCursor( ev.x() );
+        _editor.setCursorPosition(n);
+        update();
     }
 
     return true;
@@ -500,15 +569,16 @@ void ComboBox::onTouchEvent(const TouchEvent& ev)
 
     if( ev.isPress() )
     {
-        if( ev.position().x() > size().width() - 20 )
+        if( ev.position().x() > size().width() - 30 )
         {
             onOpenCombo();
-            Application::instance().inputMethod().finish();
         }
-        else
-        {
-            Application::instance().inputMethod().begin(*this);
-        }
+        
+        Application::instance().inputMethod().begin(*this);
+
+        std::size_t n = _line.xToCursor( ev.x() );
+        _editor.setCursorPosition(n);
+        update();
     }
 }
 

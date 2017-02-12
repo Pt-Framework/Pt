@@ -59,6 +59,7 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Yuv12Format.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Yuv12Image.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ActivateEvent.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\Adjustment.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Api.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Application.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Button.h" />

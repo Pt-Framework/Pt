@@ -137,6 +137,7 @@ ChildW::ChildW(const std::string& title)
     _comboBox.setName("ComboBox");
     _comboBox.setMargin(5);
     _comboBox.resize( Gfx::SizeF(66, 26) );
+    _comboBox.selected() += Pt::slot(*this, &ChildW::onComboSelected);
 
     _progressBar.setName("ProgressBar"); 
     _progressBar.move( Gfx::PointF(0, 0) );
@@ -217,6 +218,12 @@ void ChildW::onShowDialog()
 void ChildW::onCheckBox()
 {
     std::clog << "CHECKBOX CLICKED" << std::endl;
+}
+
+
+void ChildW::onComboSelected(Pt::Hmi::ListBoxItem& item)
+{
+    _textLabel.setText( item.text() );
 }
 
 

@@ -29,7 +29,7 @@
 #ifndef Pt_Hmi_LineEditor_H
 #define Pt_Hmi_LineEditor_H
 
-#include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/Adjustment.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/FontMetrics.h>
@@ -40,35 +40,6 @@ namespace Pt {
 
 namespace Hmi {
 
-class Adjustment
-{
-    public:
-        enum Mode
-        {
-            Left,
-            Right,
-            Center,
-            Justify
-        };
-
-        Adjustment(Mode m = Left)
-        : _mode(m)
-        {}
-
-        Adjustment& operator=(Mode m)
-        {
-            _mode = m;
-            return *this;
-        }
-
-        operator Pt::uint32_t() const
-        { 
-            return _mode; 
-        }
-
-    private:
-        Pt::uint32_t _mode;
-};
 
 class TextLine
 {
@@ -95,6 +66,8 @@ class TextLine
 
         double cursorToX(std::size_t n) const;
 
+        std::size_t xToCursor(double x) const;
+
     private:
         Gfx::PointF      _position;
         Pt::String       _text;
@@ -108,6 +81,10 @@ class LineEditor
         LineEditor();
         
         ~LineEditor();
+
+        const Gfx::PointF& position() const;
+        
+        void setPosition(const Gfx::PointF& p);
 
         const Gfx::SizeF& size() const;
 
@@ -126,6 +103,8 @@ class LineEditor
         void setFont(const Gfx::Font& font);
 
         std::size_t cursorPosition() const;
+        
+        void setCursorPosition(std::size_t n);
 
         void insert(Char ch);
 
@@ -140,6 +119,7 @@ class LineEditor
         void layout(TextLine& line);
 
     private:
+        Gfx::PointF _position;
         Gfx::SizeF  _size;
         Adjustment  _adjustment;
         Pt::String  _text;

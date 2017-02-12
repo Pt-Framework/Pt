@@ -213,10 +213,26 @@ void ScreenImpl::onTouchEvent(const TouchEvent& evRaw)
     Visual* grabber = Application::instance().pointerGrabber();
     if(grabber)
     {
-        Gfx::PointF pos = grabber->fromScreen( tev.position() );
-        tev.setX( pos.x() );
-        tev.setY( pos.y() ); 
-        tev.setId( grabber->vid() );
+        Window* ime = Application::instance().inputMethod().activeWindow();
+        if(ime)
+        {
+            Gfx::PointF p = ime->fromScreen( tev.position() );
+            Gfx::RectF rect( ime->size() );
+            if( rect.contains(p) )
+            {
+                tev.setPosition(p);
+                tev.setId( ime->vid() );
+                grabber = 0;
+            }
+        }
+
+        if(grabber)
+        {
+            Gfx::PointF pos = grabber->fromScreen( tev.position() );
+            tev.setX( pos.x() );
+            tev.setY( pos.y() ); 
+            tev.setId( grabber->vid() );
+        }
 
         Application::instance().loop().commitEvent(tev);
     }

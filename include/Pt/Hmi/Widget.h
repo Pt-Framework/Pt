@@ -220,6 +220,9 @@ class PT_HMI_API Widget : public Visual
         void setMargin(double n);
 
         // inner spacing
+        void setMargin(double horiz, double vertical);
+
+        // inner spacing
         const Spacing& padding() const;
 
         // inner spacing
@@ -227,6 +230,9 @@ class PT_HMI_API Widget : public Visual
 
         // inner spacing
         void setPadding(double n);
+
+        // inner spacing
+        void setPadding(double horiz, double vertical);
 
         Pt::Signal<const Pt::Event&>& eventReady();
 

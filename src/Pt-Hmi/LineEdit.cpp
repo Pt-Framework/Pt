@@ -58,9 +58,9 @@ LineEdit::~LineEdit()
 }
 
 
-void LineEdit::setText(const Pt::String& t)
+void LineEdit::setText(const Pt::String& str)
 {
-    _text = t;
+    _text = str;
     setCursorPosition(0);
 }
 

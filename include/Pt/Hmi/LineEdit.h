@@ -71,7 +71,7 @@ class PT_HMI_API LineEdit : public Control
 
         const Pt::String& text() const;
 
-        void setText(const Pt::String& t);
+        void setText(const Pt::String& str);
 
         const Pt::String& displayText() const;
 
@@ -164,8 +164,8 @@ class PT_HMI_API LineEdit : public Control
         double                        _hscroll;
         double                        _halign;
 
-        FacetPtr<LineEditRenderer> _renderer;
-        bool                       _hasRenderer;
+        FacetPtr<LineEditRenderer>     _renderer;
+        bool                           _hasRenderer;
 
         AutoPtr<Gfx::Brush>            _background;
         AutoPtr<Gfx::Pen>              _contour;
