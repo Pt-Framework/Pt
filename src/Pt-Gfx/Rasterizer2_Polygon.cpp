@@ -75,7 +75,7 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount, Pt::uint8_
             genClippedPolygonPoints(clipped, points + startIndex, curPC);
             // Increment the start index
             startIndex += curPC + 1;
-            // Get the minimum and maximum coordinate values
+            // Calculate the minimum and maximum coordinate values
             Pt::int32_t curMinX, curMinY, curMaxX, curMaxY;
             getPolygonRectMinMax(clipped.data(), clipped.size(), curMinX, curMinY, curMaxX, curMaxY);
             if(curMinX < minX) minX = curMinX;
@@ -115,6 +115,40 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount, Pt::uint8_
             clippedCounts.size(), clippedPoints.size(),
             _brush.color(), minX, minY, maxX, maxY
         );
+    }
+}
+
+void Rasterizer2::fillPolygonSeparate(const Point* points, size_t pointCount, Pt::uint8_t antiAliasingLevel)
+{
+    // Separate the polygons, clip their coordinates, and raster them
+    size_t startIndex = 0;
+
+    for(size_t i = 0; i < pointCount; ++i) {
+        // Search for the separator point
+        if(points[i].x() > 65535 && points[i].y() > 65535) {
+            // Calculate the number of points for this polygon
+            const size_t curPC = i - startIndex;
+            // Clip the coordinates
+            std::vector<Point> clipped;
+            genClippedPolygonPoints(clipped, points + startIndex, curPC);
+            // Increment the start index
+            startIndex += curPC + 1;
+            // Calculate the minimum and maximum coordinate values
+            Pt::int32_t minX, minY, maxX, maxY;
+            getPolygonRectMinMax(clipped.data(), clipped.size(), minX, minY, maxX, maxY);
+            // Update gradient as needed
+            if(_isGradient)
+                updateGradientBrush(maxX - minX + 1, maxY - minY + 1);
+            // Get the number of points for drawing this polygon
+            const size_t numPoint[1] = { clipped.size() };
+            // Draw the polygon
+            if(antiAliasingLevel == 0)
+                rasterPolygonAreaNOAA(clipped.data(), numPoint, 1, clipped.size(), _brush.color(), minX, minY, maxX, maxY);
+            else if(antiAliasingLevel == 1) // Produces artifacts at almost every corner vertex
+                rasterPolygonAreaFSAA(clipped.data(), numPoint, 1, clipped.size(), _brush.color(), minX, minY, maxX, maxY);
+            else
+                rasterPolygonAreaSSAA(clipped.data(), numPoint, 1, clipped.size(), _brush.color(), minX, minY, maxX, maxY);
+        }
     }
 }
 

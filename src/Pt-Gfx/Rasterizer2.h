@@ -105,6 +105,7 @@ class Rasterizer2
 
         void fillRect(const Point& tl, const Point& br);
         void fillPolygon(const Point* points, size_t pointCount, Pt::uint8_t antiAliasingLevel);
+        void fillPolygonSeparate(const Point* points, size_t pointCount, Pt::uint8_t antiAliasingLevel);
 
     private:
         void rasterOnePixelLine(const Point& a, const Point& b);
