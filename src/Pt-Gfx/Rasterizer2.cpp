@@ -166,8 +166,6 @@ void Rasterizer2::strokeText( const Point& to, const Pt::String& text )
 // ===== Private Member Functions - Utilities ===========================================
 // ======================================================================================
 
-const Point Rasterizer2::PolygonSeparatorPoint(99999, 99999);
-
 void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
 {
     // Start colors

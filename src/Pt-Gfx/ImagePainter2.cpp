@@ -182,16 +182,19 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount )
 
 void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount, Pt::uint8_t antiAliasingLevel )
 {
-    const bool   addCloser = ( (ps[pointCount - 1].x() < PolygonSeparatorPointF.x() || ps[pointCount - 1].y() < PolygonSeparatorPointF.y()) );
-    const size_t effPC     = addCloser ? (pointCount + 1) : pointCount;
+    // Check if we need to add a closing separator point
+    const bool   addCSP = !( (ps[pointCount - 1].x() > 65535 && ps[pointCount - 1].y() > 65535) );
+    const size_t effPC  = addCSP ? (pointCount + 1) : pointCount;
 
+    // Copy the points and add a closing separator point as needed
     std::vector<Point> points(effPC);
 
     for(size_t i = 0; i < pointCount; ++i)
         points[i].set( ps[i].x(), ps[i].y() );
 
-    if(addCloser) points[pointCount] = Rasterizer2::PolygonSeparatorPoint;
+    if(addCSP) points[pointCount].set( ImagePainter2::PolygonSeparatorPointF.x(), ImagePainter2::PolygonSeparatorPointF.y() );
 
+    // Rasterize the polygon
     _rasterizer->fillPolygon(points.data(), effPC, antiAliasingLevel);
 }
 

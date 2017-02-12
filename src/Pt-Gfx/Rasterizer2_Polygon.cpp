@@ -66,6 +66,7 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount, Pt::uint8_
     std::vector<size_t> clippedCounts;
     size_t              startIndex = 0;
     for(size_t i = 0; i < pointCount; ++i) {
+        // Search for the separator point
         if(points[i].x() > 65535 && points[i].y() > 65535) {
             // Calculate the number of points for this polygon
             const size_t curPC = i - startIndex;
