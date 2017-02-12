@@ -1035,6 +1035,18 @@ void PlatinumComboBoxRenderer::onRenderBackground(const ComboBox& cb,
 }
 
 
+Gfx::SizeF PlatinumComboBoxRenderer::onResizeButton(const ComboBox& cb) const
+{
+    int indicatorWidth = static_cast<int>(cb.size().height()) / 3;
+    if(indicatorWidth % 2 == 0)
+        ++indicatorWidth;
+    
+    double width = indicatorWidth * 2.5;
+    double height = cb.size().height();
+    return Gfx::SizeF(width, height);
+}
+
+
 void PlatinumComboBoxRenderer::onRenderButton(const ComboBox& cb, 
                                               const StyleOptions& options,
                                               Painter& painter, 

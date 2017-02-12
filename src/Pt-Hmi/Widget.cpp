@@ -337,7 +337,7 @@ void Widget::setAcceptInput(bool a)
 
 void Widget::setTextInput(bool b)
 {
-    _textInput = true;
+    _textInput = b;
 }
 
 

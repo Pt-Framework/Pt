@@ -888,6 +888,8 @@ class PT_HMI_API ComboBoxRenderer : public Style::Facet
                               const Gfx::Pen& contour,
                               const Gfx::Brush& brush) const;
 
+        Gfx::SizeF resizeButton(const ComboBox& cb) const;
+
         void renderButton(const ComboBox& cb, 
                           const StyleOptions& options,
                           Painter& painter, 
@@ -916,6 +918,9 @@ class PT_HMI_API ComboBoxRenderer : public Style::Facet
                                         const Gfx::RectF& rect,
                                         const Gfx::Pen& contour,
                                         const Gfx::Brush& brush) const = 0;
+
+        virtual Gfx::SizeF onResizeButton(const ComboBox& cb) const = 0;
+
         virtual void onRenderButton(const ComboBox& cb, 
                                     const StyleOptions& options,
                                     Painter& painter, 

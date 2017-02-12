@@ -150,10 +150,12 @@ void ComboBoxMenu::onShowEvent(const ShowEvent& ev)
 /////////////////////////////////////////////////////////////////////////////
 
 ComboBox::ComboBox()
-: _textPadding(2)
+: _popupHeight(120)
+, _textPadding(2)
+, _isEditable(true)
 , _hasRenderer(false)
 {
-    setTextInput(true);
+    setTextInput(_isEditable);
     setFocusPolicy(Widget::NormalFocus);
 
     _item1.resize( Gfx::SizeF(20, 25) );
@@ -182,8 +184,8 @@ ComboBox::ComboBox()
     addItem(_item7);
     addItem(_item8);
 
-    _menu.eventReady() += Pt::slot(*this, &ComboBox::processKeyEvent);
-    _menu.selected() += Pt::slot(*this, &ComboBox::onItemSelected);
+    _popup.eventReady() += Pt::slot(*this, &ComboBox::processKeyEvent);
+    _popup.selected() += Pt::slot(*this, &ComboBox::onItemSelected);
 }
 
 
@@ -194,7 +196,7 @@ ComboBox::~ComboBox()
 
 void ComboBox::addItem(ListBoxItem& item)
 {   
-    _menu.addItem(item);
+    _popup.addItem(item);
 
     //item.setTextInput(true);
 }
@@ -202,7 +204,27 @@ void ComboBox::addItem(ListBoxItem& item)
 
 void ComboBox::removeItem(ListBoxItem& item)
 {
-    _menu.addItem(item);
+    _popup.addItem(item);
+}
+
+
+bool ComboBox::isEditable() const
+{
+    return _isEditable;
+}
+
+
+void ComboBox::setEditable(bool e)
+{
+    _isEditable = e;
+    setTextInput(_isEditable);
+    update();
+}
+
+
+void ComboBox::setPopupHeight(double height)
+{
+    _popupHeight = height;
 }
 
 
@@ -234,7 +256,7 @@ void ComboBox::setTextAdjustment(Adjustment a)
 
 void ComboBox::setScrollBars(bool hasScrollBars)
 {
-    _menu.setScrollBars(hasScrollBars);
+    _popup.setScrollBars(hasScrollBars);
 }
 
 
@@ -258,7 +280,7 @@ Pt::Signal<const Pt::String&>& ComboBox::editingFinished()
 
 Pt::Signal<ListBoxItem&>& ComboBox::selected()
 {
-    return _menu.selected();
+    return _popup.selected();
 }
 
 const Gfx::Brush& ComboBox::background() const
@@ -369,16 +391,16 @@ void ComboBox::setRenderer(ComboBoxRenderer* renderer)
 }
 
 
-void ComboBox::onOpenCombo()
+void ComboBox::onShowPopup()
 {
-    _menu.resize( Gfx::SizeF(size().width(), 120) );
+    _popup.resize( Gfx::SizeF(size().width(), _popupHeight) );
 
     Gfx::PointF pos(0, size().height());
     pos = this->toScreen(pos);
-    _menu.move(pos);
+    _popup.move(pos);
 
-    _menu.show();
-    _menu.activate();
+    _popup.show();
+    _popup.activate();
 }
 
 
@@ -392,7 +414,7 @@ void ComboBox::onItemSelected(ListBoxItem& item)
 
 void ComboBox::processKeyEvent(const KeyEvent& ev)
 {
-    if( ! ev.isPress() )
+    if( ! ev.isPress() || ! _isEditable )
         return;
 
     if( ev.key().code() == Pt::Hmi::Key::ArrowLeft )
@@ -424,7 +446,7 @@ void ComboBox::processKeyEvent(const KeyEvent& ev)
         if( Pt::isprint(ch) )
         {
             _editor.insert(ch);
-            onOpenCombo();
+            onShowPopup();
             _textEdited.send( _editor.text() );
         }
     }
@@ -476,7 +498,6 @@ void ComboBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 
     _renderer->renderBackground( *this, options, painter, rect,
                                  _pen, _backgroundBrush );
-    
 
     _renderer->renderButton( *this, options, painter, rect,
                              _pen, _foregroundBrush );
@@ -504,7 +525,7 @@ void ComboBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     // text cursor
     //
 
-    if( hasFocus() )
+    if( _isEditable && hasFocus() )
     {
         double cursorX = _line.cursorToX( _editor.cursorPosition() );
         cursorX += _line.position().x();
@@ -521,14 +542,26 @@ void ComboBox::onResizeEvent(const ResizeEvent& ev)
 {
     Base::onResizeEvent(ev);
     
+    if( ! _renderer )
+    {
+        const Style& style = Application::instance().style();
+        _renderer.reset( style.get<ComboBoxRenderer>() );
+    }
+
+    if( ! _renderer )
+        return;
+
+    // TODO: use buttonRect member in onMouseEvent/onTouchEvent
+    Gfx::SizeF buttonSize = _renderer->resizeButton(*this);
+
     _textPadding = ev.size().height() / 4;
 
     Gfx::PointF editPosition(_textPadding, 0);
     _editor.setPosition(editPosition);
 
     Gfx::SizeF editSize = ev.size();
-    editSize.addWidth(-30); // TODO: query text size from renderer
-    editSize.addWidth(-2 * _textPadding);
+    editSize.addWidth( -buttonSize.width() );
+    editSize.addWidth(-3 * _textPadding);
     _editor.setSize(editSize);
 }
 
@@ -547,16 +580,22 @@ bool ComboBox::onMouseEvent(const MouseEvent& ev)
 
     if( ev.isPress() )
     {
-        if( ev.position().x() > size().width() - 30 )
+        double buttonX = _editor.size().width() + 
+                         _editor.position().x() + 
+                         2 * _textPadding;
+        
+        if( ev.position().x() > buttonX )
         {
-            onOpenCombo();
+            onShowPopup();
         }
-
-        Application::instance().inputMethod().begin(*this);
-
-        std::size_t n = _line.xToCursor( ev.x() );
-        _editor.setCursorPosition(n);
-        update();
+        else if(_isEditable)
+        {
+            std::size_t n = _line.xToCursor( ev.x() );
+            _editor.setCursorPosition(n);
+            update();
+            
+            Application::instance().inputMethod().begin(*this);
+        }
     }
 
     return true;
@@ -569,16 +608,22 @@ void ComboBox::onTouchEvent(const TouchEvent& ev)
 
     if( ev.isPress() )
     {
-        if( ev.position().x() > size().width() - 30 )
-        {
-            onOpenCombo();
-        }
-        
-        Application::instance().inputMethod().begin(*this);
+        double buttonX = _editor.size().width() + 
+                         _editor.position().x() + 
+                         2 * _textPadding;
 
-        std::size_t n = _line.xToCursor( ev.x() );
-        _editor.setCursorPosition(n);
-        update();
+        if( ev.position().x() > buttonX )
+        {
+            onShowPopup();
+        }
+        else if(_isEditable)
+        {
+            std::size_t n = _line.xToCursor( ev.x() );
+            _editor.setCursorPosition(n);
+            update();
+
+            Application::instance().inputMethod().begin(*this);
+        }
     }
 }
 
@@ -595,17 +640,10 @@ void ComboBox::onFocusEvent(const FocusEvent& ev)
         //    _editingFinished.send(_text);
         //}
     }
-    else
+    else if(_isEditable)
     {
         Application::instance().inputMethod().begin(*this);
     }
-}
-
-
-bool ComboBox::onScrollEvent(const ScrollEvent& ev)
-{
-    // TODO: scroll through item list
-    return false;
 }
 
 } // namespace

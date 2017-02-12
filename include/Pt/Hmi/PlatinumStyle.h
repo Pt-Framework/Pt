@@ -498,6 +498,8 @@ class PT_HMI_API PlatinumComboBoxRenderer : public ComboBoxRenderer
                                         const Gfx::Pen& contour,
                                         const Gfx::Brush& brush) const;
 
+        virtual Gfx::SizeF onResizeButton(const ComboBox& cb) const;
+
         virtual void onRenderButton(const ComboBox& cb, 
                                     const StyleOptions& options,
                                     Painter& painter, 

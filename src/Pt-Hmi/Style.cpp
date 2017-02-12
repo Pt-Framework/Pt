@@ -755,6 +755,12 @@ void ComboBoxRenderer::renderBackground(const ComboBox& cb,
 }
 
 
+Gfx::SizeF ComboBoxRenderer::resizeButton(const ComboBox& cb) const
+{
+    return onResizeButton(cb);
+}
+
+
 void ComboBoxRenderer::renderButton(const ComboBox& cb, 
                                     const StyleOptions& options,
                                     Painter& painter, 
