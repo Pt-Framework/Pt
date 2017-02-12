@@ -2,8 +2,12 @@
 //
 // while true; do ps -aF | grep "[I]magePainterTest2"; done
 //
-// perf record -b ./ImagePainterTest2
+// perf record -d -g -T -e cycles,instructions,cache-references,cache-misses,bus-cycles ./ImagePainterTest2
 // perf report
+//
+// perf archive
+//     Now please run: 'tar xvf perf.data.tar.bz2 -C ~/.debug'
+//     wherever you need to run 'perf report' on.
 //
 
 #include <fstream>
@@ -43,8 +47,8 @@ using namespace Pt::Gfx;
 #define BENCHMARK_LIBART_CHECK_RESULTING_IMAGE 0
 
 // Detailed-test enable settings
-#define TEST_SOURCECOPY                        1
-#define TEST_SOURCEOVER                        0
+#define TEST_SOURCECOPY                        0
+#define TEST_SOURCEOVER                        1
 
 #define TEST_DRAW_LINE_AND_TEXT                0
 #define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES 0
