@@ -109,7 +109,11 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount, Pt::uint8_
         );
     }
     else {
-        rasterPolygonAreaSSAA(clippedPoints.data(), clippedPoints.size(), _brush.color(), minX, minY, maxX, maxY);
+        rasterPolygonAreaSSAA(
+            clippedPoints.data(), clippedCounts.data(),
+            clippedCounts.size(), clippedPoints.size(),
+            _brush.color(), minX, minY, maxX, maxY
+        );
     }
 }
 
@@ -165,7 +169,7 @@ void Rasterizer2::rasterPolygonAreaNOAA(const Point* points, const size_t* point
 
     //  Loop through the rows of the image
     for(Pt::int32_t pixelY = minY; pixelY <= maxY; ++pixelY) {
-        // Base pointers for the polygons
+        // Base pointer for the polygons
         const Point* curPointBase = points;
         // Build a list of nodes using all the polygons
         Pt::int32_t nodes = 0;
@@ -359,41 +363,6 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
             curPointBaseX += curPointCount;
             curPointBaseY += curPointCount;
         }
-/*
-
-        // Build a list of nodes
-        Pt::int32_t j     = pointCount - 1;
-        Pt::int32_t nodes = 0;
-        for(size_t i = 0; i < pointCount; ++i) {
-            if( ( pointY[i] < iterY0 && pointY[j] >= iterY0 ) ||
-                ( pointY[j] < iterY0 && pointY[i] >= iterY0 )
-            ) {
-                // Bail out if we have produced too many nodes
-                if((size_t) nodes >= nodeX0.size()) return;
-                // Row (Y)
-                const Pt::int32_t deltaYp0 = iterY0    - pointY[i];
-                const Pt::int32_t deltaYj  = pointY[j] - pointY[i];
-                const Pt::int32_t deltaXj  = pointX[j] - pointX[i];
-                const Pt::int32_t interXf0 = FIXED_POINT_FROM_INT(pointX[i]) + FIXED_POINT_FROM_INT(deltaYp0) / deltaYj * deltaXj;
-                nodeX0[nodes] = FIXED_POINT_TO_INT(interXf0 + FIXED_POINT_CONSTANT_HALF);
-                // Row (Y + 1) is valid
-                if( ( pointY[i] < iterY1 && pointY[j] >= iterY1 ) ||
-                    ( pointY[j] < iterY1 && pointY[i] >= iterY1 )
-                ) {
-                    const Pt::int32_t deltaYp1 = iterY1    - pointY[i];
-                    const Pt::int32_t interXf1 = FIXED_POINT_FROM_INT(pointX[i]) + FIXED_POINT_FROM_INT(deltaYp1) / deltaYj * deltaXj;
-                    nodeX1[nodes] = FIXED_POINT_TO_INT(interXf1 + FIXED_POINT_CONSTANT_HALF);
-                }
-                // Row (Y + 1) is not valid
-                else {
-                    nodeX1[nodes] = -1;
-                }
-                // Increment the number of nodes
-                ++nodes;
-            }
-            j = i;
-        }
-*/
         // Sort the nodes using bubble sort
         for(Pt::int32_t i = 0; i < nodes - 1;) {
             if(nodeX0[i] > nodeX0[i + 1]) {
@@ -649,7 +618,7 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
 
 // Partially based on http://alienryderflex.com/polygon_fill
 // Public-domain code by Darel Rex Finley, 2007
-void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
+void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
 {
     // Calculate the size of the polygon
     Pt::int32_t sizeX = (maxX - minX + 1);
@@ -659,16 +628,16 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, size_t pointCount, 
     std::vector<Pt::uint8_t> alphas(sizeX, 0);
 
     // Scale the polygon to match the super sampling size and translate it to (0, 0)
-    std::vector<Pt::int32_t> pointX(pointCount, 0);
-    std::vector<Pt::int32_t> pointY(pointCount, 0);
+    std::vector<Pt::int32_t> pointX(totalPointCount, 0);
+    std::vector<Pt::int32_t> pointY(totalPointCount, 0);
 
-    for(size_t i = 0; i < pointCount; ++i) {
+    for(size_t i = 0; i < totalPointCount; ++i) {
         pointX[i] = points[i].x() * SUPERSAMPLING_SIZE - minX * SUPERSAMPLING_SIZE;
         pointY[i] = points[i].y() * SUPERSAMPLING_SIZE - minY * SUPERSAMPLING_SIZE;
     }
 
     // List of nodes that define the horizontal segments
-    std::vector<Pt::int32_t> nodeX(pointCount * 2, 0);
+    std::vector<Pt::int32_t> nodeX(totalPointCount * 2, 0);
 
     // A helper macro to scale the alpha
     #define SSAA_SCALE_ALPHA(A) ( Pt::uint16_t(A) * 17 / SUPERSAMPLING_SIZE / SUPERSAMPLING_SIZE )
@@ -679,6 +648,40 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, size_t pointCount, 
 
     //  Loop through the rows of the image
     for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
+        // Base pointers for the polygons
+        const Pt::int32_t* curPointBaseX = pointX.data();
+        const Pt::int32_t* curPointBaseY = pointY.data();
+        // Build a list of nodes using all the polygons
+        Pt::int32_t nodes = 0;
+        for(size_t p = 0; p < polyCount; ++p) {
+            // Get the current point count
+            const size_t curPointCount = pointCount[p];
+            // Loop thorugh the points
+            Pt::int32_t j = curPointCount - 1;
+            for(size_t i = 0; i < curPointCount; ++i) {
+                const Pt::int32_t curXi = *(curPointBaseX + i);
+                const Pt::int32_t curYi = *(curPointBaseY + i);
+                const Pt::int32_t curXj = *(curPointBaseX + j);
+                const Pt::int32_t curYj = *(curPointBaseY + j);
+                if( ( curYi < pixelY && curYj >= pixelY ) || ( curYj < pixelY && curYi >= pixelY ) ) {
+                    // Bail out if we have produced too many nodes
+                    if((size_t) nodes >= nodeX.size()) return;
+                    // Calculate the node's coordinate
+                    Pt::int32_t deltaYp = pixelY - curYi;
+                    Pt::int32_t deltaYj = curYj  - curYi;
+                    Pt::int32_t deltaXj = curXj  - curXi;
+                    Pt::int32_t interXf = FIXED_POINT_FROM_INT(curXi)
+                                        + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
+                    nodeX[nodes++] = FIXED_POINT_TO_INT(interXf + FIXED_POINT_CONSTANT_HALF);
+                }
+                j = i;
+            }
+            // Increment the base pointers
+            curPointBaseX += curPointCount;
+            curPointBaseY += curPointCount;
+        }
+
+        /*
         // Build a list of nodes
         Pt::int32_t j     = pointCount - 1;
         Pt::int32_t nodes = 0;
@@ -697,6 +700,7 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, size_t pointCount, 
             }
             j = i;
         }
+        */
         // Sort the nodes using bubble sort
         for(Pt::int32_t i = 0; i < nodes - 1;) {
             if(nodeX[i] > nodeX[i + 1]) {
