@@ -202,26 +202,26 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
 
     const PointF poly4[] = { // CCW
         // Outside
-        PointF(860,  30),
-        PointF(960, 130),
-        PointF(860, 230),
-        PointF(760, 130),
+        PointF(840,  30),
+        PointF(960, 110),
+        PointF(880, 230),
+        PointF(760, 150),
         // Seperator
         PointF(65536, 65536),
         // Hole 1
-        PointF(860 - 40 +  0, 130 - 40     ),
-        PointF(860 - 40 + 20, 130 - 40 + 20),
-        PointF(860 - 40 -  0, 130 - 40 + 40),
-        PointF(860 - 40 - 20, 130 - 40 + 20),
+        PointF(860 - 40 +  0, 130 - 20     ),
+        PointF(860 - 40 + 30, 130 - 20 + 15),
+        PointF(860 - 40 -  0, 130 - 20 + 40),
+        PointF(860 - 40 - 20, 130 - 20 + 20),
         // Seperator
         PointF(65536, 65536),
         // Hole 2
-        PointF(860 + 40 +  0, 130 - 40     ),
-        PointF(860 + 40 + 20, 130 - 40 + 20),
-        PointF(860 + 40 -  0, 130 - 40 + 40),
-        PointF(860 + 40 - 20, 130 - 40 + 20)
+        PointF(860 + 40 +  0, 130 - 20     ),
+        PointF(860 + 40 + 20, 130 - 20 + 20),
+        PointF(860 + 40 -  0, 130 - 20 + 40),
+        PointF(860 + 40 - 30, 130 - 20 + 15)
     };
-    if(ip2) ip2->fillPolygon(poly4, sizeof(poly4) / sizeof(poly4[0]), 1);
+    if(ip2) ip2->fillPolygon(poly4, sizeof(poly4) / sizeof(poly4[0]), 2);
 
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);

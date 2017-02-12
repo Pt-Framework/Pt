@@ -680,27 +680,6 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, const size_t* point
             curPointBaseX += curPointCount;
             curPointBaseY += curPointCount;
         }
-
-        /*
-        // Build a list of nodes
-        Pt::int32_t j     = pointCount - 1;
-        Pt::int32_t nodes = 0;
-        for(size_t i = 0; i < pointCount; ++i) {
-            if( ( pointY[i] < pixelY && pointY[j] >= pixelY ) ||
-                ( pointY[j] < pixelY && pointY[i] >= pixelY )
-            ) {
-                // Bail out if we have produced too many nodes
-                if((size_t) nodes >= nodeX.size()) return;
-                // Calculate the node's coordinate
-                const Pt::int32_t deltaYp = pixelY    - pointY[i];
-                const Pt::int32_t deltaYj = pointY[j] - pointY[i];
-                const Pt::int32_t deltaXj = pointX[j] - pointX[i];
-                const Pt::int32_t interXf = FIXED_POINT_FROM_INT(pointX[i]) + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
-                nodeX[nodes++] = FIXED_POINT_TO_INT(interXf + FIXED_POINT_CONSTANT_HALF);
-            }
-            j = i;
-        }
-        */
         // Sort the nodes using bubble sort
         for(Pt::int32_t i = 0; i < nodes - 1;) {
             if(nodeX[i] > nodeX[i + 1]) {
