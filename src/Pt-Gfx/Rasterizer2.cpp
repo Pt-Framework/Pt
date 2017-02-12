@@ -239,8 +239,6 @@ void Rasterizer2::updateClip()
 
 void Rasterizer2::genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount) const
 {
-    dst.clear();
-
     for(size_t i = 0; i < pointCount; ++i)
         dst.push_back( Point( src[i].x(), src[i].y() ) );
 

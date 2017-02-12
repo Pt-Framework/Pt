@@ -104,7 +104,8 @@ class Rasterizer2
         void strokePolygon(const Point* points, size_t pointCount);
 
         void fillRect(const Point& tl, const Point& br);
-        void fillPolygon(const Point* points, const size_t pointCount, Pt::uint8_t antiAliasingLevel);
+        void fillPolygon(const Point* points, size_t pointCount, Pt::uint8_t antiAliasingLevel);
+        void fillPolygonMulti(const Point* points, size_t pointCount, Pt::uint8_t antiAliasingLevel);
 
     private:
         void rasterOnePixelLine(const Point& a, const Point& b);
@@ -119,6 +120,8 @@ class Rasterizer2
         void rasterPolygonAreaNOAA(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
         void rasterPolygonAreaSSAA(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
         void rasterPolygonAreaFSAA(const Point* points, size_t pointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
+
+        void rasterPolygonMultiAreaNOAA(const Point** points, const size_t* pointCount, size_t polyCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
 
         void updateGradientBrush(Pt::int32_t width, Pt::int32_t height);
 

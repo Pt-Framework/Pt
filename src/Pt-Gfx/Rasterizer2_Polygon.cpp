@@ -85,6 +85,39 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount, Pt::uint8_
         rasterPolygonAreaSSAA(clipped.data(), clipped.size(), _brush.color(), minX, minY, maxX, maxY);
 }
 
+void Rasterizer2::fillPolygonMulti(const Point* points, size_t pointCount, Pt::uint8_t antiAliasingLevel)
+{
+    // Separate the polygons and clip their coordinates
+    std::vector<Point > clippedPoints;
+    std::vector<size_t> clippedCounts;
+
+    size_t prevStart = 0;
+
+    for(size_t i = 0; i < pointCount; ++i) {
+        if(points[i].x() > 65535 && points[i].y() > 65535) {
+            // Calculate the number of points for this polygon
+            const size_t curPC = i - prevStart;
+            // Clip the coordinates
+            std::vector<Point> clipped;
+            genClippedPolygonPoints(clipped, points + prevStart, curPC);
+            // Store the clipped points
+            clippedPoints.insert(clippedPoints.end(), clipped.begin(), clipped.end());
+            // Store the number of points
+            clippedCounts.push_back(curPC);
+        }
+    }
+
+    // Get the minimum and maximum coordinate values
+  //  Pt::int32_t minX, minY, maxX, maxY;
+  //  getPolygonRectMinMax(clipped.data(), clipped.size(), minX, minY, maxX, maxY);
+
+    // Update gradient as needed
+//    if(_isGradient)
+   //     updateGradientBrush(maxX - minX + 1, maxY - minY + 1);
+
+    // Draw the polygon
+    //rasterPolygonMultiAreaNOAA(const Point** points, const size_t* pointCount, size_t polyCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
+}
 
 // ======================================================================================
 // ===== Private Member Functions =======================================================
@@ -826,6 +859,125 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, size_t pointCount, 
     #undef FSAA_MID_ALPHA
     #undef FSAA_MAX_ALPHA
 }
+
+
+// Based on http://alienryderflex.com/polygon_fill
+// Public-domain code by Darel Rex Finley, 2007
+void Rasterizer2::rasterPolygonMultiAreaNOAA(const Point** points, const size_t* pointCount, size_t polyCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
+{
+    // Find the maximum number of points
+    size_t maxPC = pointCount[0];
+    for(size_t i = 1; i < polyCount; ++i) {
+        if(pointCount[i] > maxPC) maxPC = pointCount[i];
+    }
+
+    // List of nodes that define the horizontal segments
+    std::vector<Pt::int32_t> nodeX(polyCount * maxPC * 2, 0);
+
+    //  Loop through the rows of the image
+    for(Pt::int32_t pixelY = minY; pixelY <= maxY; ++pixelY) {
+        // Build a list of nodes
+        Pt::int32_t nodes = 0;
+        for(size_t p = 0; p < polyCount; ++p) {
+            Pt::int32_t j = pointCount[p] - 1;
+            for(size_t i = 0; i < pointCount[p]; ++i) {
+                if( ( points[p][i].y() < pixelY && points[p][j].y() >= pixelY ) ||
+                    ( points[p][j].y() < pixelY && points[p][i].y() >= pixelY )
+                ) {
+                    // Bail out if we have produced too many nodes
+                    if((size_t) nodes >= nodeX.size()) return;
+                    // Calculate the node's coordinate
+                    Pt::int32_t deltaYp = pixelY           - points[p][i].y();
+                    Pt::int32_t deltaYj = points[p][j].y() - points[p][i].y();
+                    Pt::int32_t deltaXj = points[p][j].x() - points[p][i].x();
+                    Pt::int32_t interXf = FIXED_POINT_FROM_INT(points[p][i].x()) + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
+                    nodeX[nodes++] = FIXED_POINT_TO_INT(interXf + FIXED_POINT_CONSTANT_HALF);
+                }
+                j = i;
+            }
+        }
+        // Sort the nodes using bubble sort
+        for(Pt::int32_t i = 0; i < nodes - 1;) {
+            if(nodeX[i] > nodeX[i + 1]) {
+                std::swap(nodeX[i], nodeX[i + 1]);
+                if(i) --i;
+            }
+            else {
+                ++i;
+            }
+        }
+        // Fill the pixels between the node pairs
+        for(Pt::int32_t i = 0; i < nodes; i += 2) {
+            // Determine the X coordinates
+            Pt::int32_t from = nodeX[i    ];
+            Pt::int32_t to   = nodeX[i + 1];
+            // Draw the span using texture
+            if(_isTexture) {
+                Pt::int32_t iterX     = from;
+                Pt::int32_t spanWidth = to - from + 1;
+                while(spanWidth > 0) {
+                    const Pt::int32_t tX = (iterX  - minX) % _brushImage->width ();
+                    const Pt::int32_t tY = (pixelY - minY) % _brushImage->height();
+                    const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tX);
+                    if(n) {
+                        ConstPixel srcPixel(_brushImage->view(), tX, tY);
+                        Pixel      dstPixel(_image->view(), iterX, pixelY);
+                        _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
+                    }
+                    spanWidth -= n;
+                    iterX     += n;
+                }
+                continue;
+            }
+            // Draw the span using gradient
+            if(_isGradient) {
+                Pt::int32_t iterX     = from;
+                Pt::int32_t spanWidth = to - from + 1;
+                // Fill the span - vertical gradient
+                if(_brush.fillStyle() == Pt::Gfx::Brush::VerticalGradient) {
+                    const Pt::int32_t textureY = (pixelY - minY) % _brushImage->height();
+                    ConstPixel        srcPixel(_brushImage->view(), 0, textureY);
+                    Pixel             dstPixel(_image->view(), iterX, pixelY);
+                    _image->format().setPixels(dstPixel, srcPixel, spanWidth, _compositionMode);
+                }
+                // Fill the span - horizontal gradient
+                else {
+                    while(spanWidth > 0) {
+                        const Pt::int32_t tX = (iterX  - minX) % _brushImage->width ();
+                        const Pt::int32_t tY = (pixelY - minY) % _brushImage->height();
+                        const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tX);
+                        if(n) {
+                            ConstPixel srcPixel(_brushImage->view(), tX, tY);
+                            Pixel      dstPixel(_image->view(), iterX, pixelY);
+                            _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
+                        }
+                        spanWidth -= n;
+                        iterX     += n;
+                    }
+                }
+                continue;
+            }
+            // Draw the span using solid color
+#ifdef USE_PUTPIXELS_FOR_SOLID_COLOR
+            Pixel pixel(_image->view(), from, pixelY);
+            _image->format().setPixels(pixel, _brush.color(), to - from + 1, _compositionMode);
+#else
+            Pt::int32_t iterX     = from;
+            Pt::int32_t spanWidth = to - from + 1;
+            while(spanWidth > 0) {
+                const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
+                if(n) {
+                    Pixel pixel(_image->view(), iterX, pixelY);
+                    _image->format().copy(pixel, _brushPixel, n, _compositionMode);
+                }
+                spanWidth -= n;
+                iterX     += n;
+            }
+#endif
+        }
+    }
+}
+
 
 #undef USE_DUFFS_DEVICE
 #undef USE_PUTPIXELS_FOR_SOLID_COLOR

@@ -188,6 +188,16 @@ void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount, Pt::
     _rasterizer->fillPolygon(points.data(), pointCount, antiAliasingLevel);
 }
 
+void ImagePainter2::fillPolygonMulti( const PointF* ps, const size_t pointCount, Pt::uint8_t antiAliasingLevel )
+{
+    std::vector<Point> points(pointCount);
+
+    for(size_t i = 0; i < pointCount; ++i)
+        points[i].set( ps[i].x(), ps[i].y() );
+
+    _rasterizer->fillPolygonMulti(points.data(), pointCount, antiAliasingLevel);
+}
+
 void ImagePainter2::drawImage( const PointF& toIn, const Image& image)
 {
 }

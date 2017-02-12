@@ -90,6 +90,8 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual void fillPolygon(const PointF* points, const size_t pointCount, Pt::uint8_t antiAliasingLevel);
 
+        virtual void fillPolygonMulti(const PointF* points, const size_t pointCount, Pt::uint8_t antiAliasingLevel);
+
         virtual void drawImage(const PointF& to, const Image& image);
 
         virtual void drawImage(const PointF& to, const Image& image, const RectF& imageRect);
