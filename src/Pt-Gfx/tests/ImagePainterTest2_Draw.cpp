@@ -184,8 +184,8 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(480 + 220, 400),
         PointF(400 + 220, 320)
     };
-    if(ip2) ip2   ->fillPolygon(poly3b, sizeof(poly3b) / sizeof(poly3b[0]), 1);
-    else    painter.fillPolygon(poly3b, sizeof(poly3b) / sizeof(poly3b[0]));
+    //if(ip2) ip2   ->fillPolygon(poly3b, sizeof(poly3b) / sizeof(poly3b[0]), 1);
+    //else    painter.fillPolygon(poly3b, sizeof(poly3b) / sizeof(poly3b[0]));
 
     const PointF poly3c[] = { // CCW
         // Outside

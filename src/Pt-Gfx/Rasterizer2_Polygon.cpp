@@ -102,7 +102,6 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount, Pt::uint8_
         );
     }
     else if(antiAliasingLevel == 1) {
-        // Produces artifacts at almost every corner vertex
         rasterPolygonAreaFSAA(
             clippedPoints.data(), clippedCounts.data(),
             clippedCounts.size(), clippedPoints.size(),
@@ -231,12 +230,13 @@ void Rasterizer2::rasterPolygonAreaNOAA(const Point* points, const size_t* point
                                               + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
                     nodeX[nodes++] = FIXED_POINT_TO_INT(interXf + FIXED_POINT_CONSTANT_HALF);
                 }
-                // Update the search index
+                // Update the searching index
                 j = i;
             }
             // Increment the base pointer
             curPointBase += curPointCount;
         }
+        // Skip if there is no node
         if(!nodes) continue;
         // Sort the nodes using bubble sort
         for(Pt::int32_t i = 0; i < nodes - 1;) {
@@ -395,13 +395,14 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
                     // Increment the number of nodes
                     ++nodes;
                 }
-                // Update the search index
+                // Update the searching index
                 j = i;
             }
             // Increment the base pointers
             curPointBaseX += curPointCount;
             curPointBaseY += curPointCount;
         }
+        // Skip if there is no node
         if(!nodes) continue;
         // Sort the nodes using bubble sort
         for(Pt::int32_t i = 0; i < nodes - 1;) {
@@ -435,6 +436,9 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
             const Pt::int32_t fromMax  = std::max(from0, from1);
             const Pt::int32_t toMin    = std::min(to0,   to1  );
             const Pt::int32_t toMax    = std::max(to0,   to1  );
+
+            Pt::int32_t from = 1000;
+            Pt::int32_t to   = -1000;
             // Handle cases when both the "from" nodes are valid
             if(from0val && from1val) {
                 // Calculate the alphas of the left-part of the span
@@ -444,20 +448,25 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
                 alphas[fromMax / 2] += FSAA_MIN_ALPHA;
                 // Set the alphas of the boundary edge of the middle-part of the span
                 alphas[(fromMax + 1) / 2] = FSAA_MAX_ALPHA;
+
+                from = (fromMax + 1) / 2;
             }
             // Handle cases when only the "from0" nodes are valid
             else if(from0val) {
                 // Set the alphas of the left-part of the span
                 alphas[from0 / 2] += FSAA_MIN_ALPHA;
 
-                //alphas[(from0 + 1)/ 2] = FSAA_MAX_ALPHA;
+                alphas[(from0 + 1)/ 2] = FSAA_MAX_ALPHA;
+                from = (from0 + 1) / 2;
             }
             // Handle cases when only the "from1" nodes are valid
             else if(from1val) {
                 // Set the alphas of the left-part of the span
                 alphas[from1 / 2] += FSAA_MIN_ALPHA;
 
-                //alphas[(from1 + 1)/ 2] = FSAA_MAX_ALPHA;
+                from = (from1 + 1) / 2;
+
+                alphas[(from1 + 1)/ 2] = FSAA_MAX_ALPHA;
             }
             // Handle cases when both the "to" nodes are valid
             if(to0val && to1val) {
@@ -468,27 +477,51 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
                 alphas[toMin / 2] += FSAA_MIN_ALPHA;
                 // Set the alphas of the boundary edge of the middle-part of the span
                 alphas[(toMin - 1) / 2] = FSAA_MAX_ALPHA;
+
+                to = (toMin - 1) / 2;
+
             }
             // Handle cases when only the "to0" nodes are valid
             else if(to0val) {
                 // Set the alphas of the right-part of the span
                 alphas[to0 / 2] += FSAA_MIN_ALPHA;
 
-                //alphas[(to0 + 1)/ 2] = FSAA_MAX_ALPHA;
+                alphas[(to0 - 1)/ 2] = FSAA_MAX_ALPHA;
+
+                to = (to0 - 1) / 2;
+
             }
             // Handle cases when only the "to1" nodes are valid
             else if(to1val) {
                 // Set the alphas of the right-part of the span
                 alphas[to1 / 2] += FSAA_MIN_ALPHA;
 
-                //alphas[(to1 + 1)/ 2] = FSAA_MAX_ALPHA;
+                alphas[(to1 - 1)/ 2] = FSAA_MAX_ALPHA;
+
+                to = (to1 - 1) / 2;
+
             }
+
+          //  if(to >= from) memset(&alphas[from], FSAA_MAX_ALPHA, to-from+1);
+
         }
 
         //if(sizeY == 81) {
         lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%d", alphas[k] / 15); lprintf("\n");
         //}
 
+
+        Pt::int32_t iterX = 0;
+        Pt::int32_t iterR = sizeX - 1;
+
+        while(iterX <= iterR) {
+            Pixel pixel(_image->view(), minX + iterX, minY + pixelY);
+            _image->format().setPixel(pixel, color, _compositionMode, FSAA_SCALE_ALPHA(alphas[iterX]));
+            ++iterX;
+        }
+
+/*
+continue;
         // Skip fully-transparent pixels ad the beginning and end of the span
         Pt::int32_t iterL = 0;
         Pt::int32_t iterR = sizeX - 1;
@@ -499,52 +532,58 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
             if(alphas[iterR]) break;
         }
 
-        //if(pixelY == 100 || pixelY == 179 || pixelY == 180) {
-        //lprintf("%03d: ", pixelY); for(size_t k = iterL; k <= iterR; ++k) lprintf("%d", alphas[k] / 15); lprintf("\n");
-        //lprintf("\n");
-        //}
+        if(pixelY == 100 || pixelY == 179 || pixelY == 180) {
+        lprintf("%03d: ", pixelY); for(size_t k = iterL; k <= iterR; ++k) lprintf("%d", alphas[k] / 15); lprintf("\n");
+        lprintf("\n");
+        }
 
 
         //for(Pt::int32_t k = iterL; k <= iterR; ++k) {
 
-        Pt::int32_t iterX = iterL;
+        Pt::int32_t iterX  = iterL;
 CUK:
+
             //
-            //if(pixelY == 100) lprintf("PART_1A: iterX = %03d ; alpha = %d\n", iterX, alphas[iterX] / 15);
+            if(pixelY == 179) lprintf("PART_1A: iterX = %03d ; alpha = %d\n", iterX, alphas[iterX] / 15);
             while(iterX <= iterR) {
                 if(!alphas[iterX]) break;
                 Pixel pixel(_image->view(), minX + iterX, minY + pixelY);
                 _image->format().setPixel(pixel, color, _compositionMode, FSAA_SCALE_ALPHA(alphas[iterX]));
                 ++iterX;
-            }
-            //if(pixelY == 100) lprintf("PART_1B: iterX = %03d ; alpha = %d\n", iterX, alphas[iterX] / 15);
 
-            //if(pixelY == 100) lprintf("PART_2A: iterX = %03d ; alpha = %d\n", iterX, alphas[iterX] / 15);
+                if(pixelY == 179) lprintf("PART_1I: iterX = %03d ; alpha = %d\n", iterX, alphas[iterX] / 15);
+
+            }
+            if(pixelY == 179) lprintf("PART_1B: iterX = %03d ; alpha = %d\n", iterX, alphas[iterX] / 15);
+
+            if(pixelY == 179) lprintf("PART_2A: iterX = %03d ; alpha = %d\n", iterX, alphas[iterX] / 15);
             while(iterX <= iterR) {
                 if(alphas[iterX]) break;
-                //if(pixelY == 100) lprintf("%d", alphas[iterX] / 15);
+                //if(pixelY == 179) lprintf("%d", alphas[iterX] / 15);
 
-                Pixel pixel(_image->view(), minX + iterX, minY + pixelY);
-                _image->format().setPixel(pixel, color, _compositionMode);
+                    Pixel pixel(_image->view(), minX + iterX, minY + pixelY);
+                    _image->format().setPixel(pixel, color, _compositionMode);
                 ++iterX;
+                if(pixelY == 179) lprintf("PART_2I: iterX = %03d ; alpha = %d ", iterX, alphas[iterX] / 15);
             }
+            //if(pixelY == 179) lprintf("\n");
+            if(pixelY == 179) lprintf("PART_2B: iterX = %03d ; alpha = %d\n", iterX, alphas[iterX] / 15);
 
-            //if(pixelY == 100) lprintf("\n");
-            //if(pixelY == 100) lprintf("PART_2B: iterX = %03d ; alpha = %d\n", iterX, alphas[iterX] / 15);
-
-            //if(pixelY == 100) lprintf("PART_3A: iterX = %03d ; alpha = %d\n", iterX, alphas[iterX] / 15);
+            if(pixelY == 179) lprintf("PART_3A: iterX = %03d ; alpha = %d\n", iterX, alphas[iterX] / 15);
             while(iterX <= iterR) {
                 if(!alphas[iterX]) break;
                 Pixel pixel(_image->view(), minX + iterX, minY + pixelY);
                 _image->format().setPixel(pixel, color, _compositionMode, FSAA_SCALE_ALPHA(alphas[iterX]));
                 ++iterX;
-            }
-            //if(pixelY == 100) lprintf("PART_3B: iterX = %03d ; alpha = %d\n", iterX, alphas[iterX] / 15);
 
-            while(iterX <= iterR) {
-                if(alphas[iterX]) break;
-                ++iterX;
+                if(pixelY == 179) lprintf("PART_3I: iterX = %03d ; alpha = %d\n", iterX, alphas[iterX] / 15);
             }
+            if(pixelY == 179) lprintf("PART_3B: iterX = %03d ; alpha = %d\n", iterX, alphas[iterX] / 15);
+
+           // while(iterX <= iterR) {
+             //   if(alphas[iterX]) break;
+              //  ++iterX;
+           // }
 
             if(iterX <= iterR) goto CUK;
 
@@ -748,6 +787,7 @@ CUK:
                 }
             }
         }
+            */
     }
 
     // Undefine the helper macros
@@ -817,13 +857,15 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, const size_t* point
                                               + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
                     nodeX[nodes++] = FIXED_POINT_TO_INT(interXf + FIXED_POINT_CONSTANT_HALF);
                 }
-                // Update the search index
+                // Update the searching index
                 j = i;
             }
             // Increment the base pointers
             curPointBaseX += curPointCount;
             curPointBaseY += curPointCount;
         }
+        // Skip if there is no node
+        if(!nodes) continue;
         // Sort the nodes using bubble sort
         for(Pt::int32_t i = 0; i < nodes - 1;) {
             if(nodeX[i] > nodeX[i + 1]) {
