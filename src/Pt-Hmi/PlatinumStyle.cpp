@@ -513,11 +513,13 @@ void PlatinumLineEditRenderer::onRenderBackground(const LineEdit& le,
                                                   const Gfx::Pen& contour,
                                                   const Gfx::Brush& brush) const
 {
+    Gfx::RectF borderRect( le.size() );
+
     painter.setBrush(brush);
-    painter.fillRect(rect);
+    painter.fillRect(borderRect);
 
     painter.setPen(contour);
-    painter.drawRect(rect);
+    painter.drawRect(borderRect);
 }
 
 

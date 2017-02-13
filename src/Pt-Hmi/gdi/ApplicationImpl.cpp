@@ -708,15 +708,18 @@ void ApplicationImpl::onMouse(Window& w, unsigned int msg, WPARAM wparam, LPARAM
     Visual* grabber = Application::instance().pointerGrabber();
     if(grabber)
     {
+        std::clog << "grabber" << std::endl;
         Gfx::PointF screenPos = w.toScreen(pos);
 
         Window* ime = Application::instance().inputMethod().activeWindow();
         if(ime)
         {
+            std::clog << "ime" << std::endl;
             Gfx::PointF p = ime->fromScreen( w.toScreen(pos) );
             Gfx::RectF rect( ime->size() );
             if( rect.contains(p) )
             {
+                std::clog << "ime inside" << std::endl;
                 _mouseEvent.setPosition(p);
                 _mouseEvent.setId( ime->vid() );
                 grabber = 0;

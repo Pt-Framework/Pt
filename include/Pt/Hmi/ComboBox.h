@@ -205,6 +205,8 @@ class PT_HMI_API ComboBox : public Control
         ListBoxItem _item6;
         ListBoxItem _item7;
         ListBoxItem _item8;
+        ListBoxItem _item9;
+        ListBoxItem _item10;
 };
 
 } // namespace

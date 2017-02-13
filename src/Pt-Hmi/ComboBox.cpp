@@ -158,22 +158,26 @@ ComboBox::ComboBox()
     setTextInput(_isEditable);
     setFocusPolicy(Widget::NormalFocus);
 
-    _item1.resize( Gfx::SizeF(20, 25) );
+    _item1.resize( Gfx::SizeF(20, 80) );
     _item1.setText("Item 1");
-    _item2.resize( Gfx::SizeF(20, 25) );
+    _item2.resize( Gfx::SizeF(20, 80) );
     _item2.setText("Item 2");
-    _item3.resize( Gfx::SizeF(20, 25) );
+    _item3.resize( Gfx::SizeF(20, 80) );
     _item3.setText("Item 3");
-    _item4.resize( Gfx::SizeF(20, 25) );
+    _item4.resize( Gfx::SizeF(20, 80) );
     _item4.setText("Item 4");
-    _item5.resize( Gfx::SizeF(20, 25) );
+    _item5.resize( Gfx::SizeF(20, 80) );
     _item5.setText("Item 5");
-    _item6.resize( Gfx::SizeF(20, 25) );
+    _item6.resize( Gfx::SizeF(20, 80) );
     _item6.setText("Item 6");
-    _item7.resize( Gfx::SizeF(20, 25) );
+    _item7.resize( Gfx::SizeF(20, 80) );
     _item7.setText("Item 7");
-    _item8.resize( Gfx::SizeF(20, 25) );
+    _item8.resize( Gfx::SizeF(20, 80) );
     _item8.setText("Item 8");
+    _item9.resize( Gfx::SizeF(20, 80) );
+    _item9.setText("Item 9");
+    _item10.resize( Gfx::SizeF(20, 80) );
+    _item10.setText("Item 10");
 
     addItem(_item1);
     addItem(_item2);
@@ -183,6 +187,8 @@ ComboBox::ComboBox()
     addItem(_item6);
     addItem(_item7);
     addItem(_item8);
+    addItem(_item9);
+    addItem(_item10);
 
     _popup.eventReady() += Pt::slot(*this, &ComboBox::processKeyEvent);
     _popup.selected() += Pt::slot(*this, &ComboBox::onItemSelected);

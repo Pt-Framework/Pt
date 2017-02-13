@@ -174,25 +174,25 @@ class KeyboardWindow : public Window
 DefaultInputMethod::DefaultInputMethod()
 : _window(0)
 {
-    //_window = new KeyboardWindow();
-    //_window->setTopMost(true);
-    //_window->move( Gfx::PointF(500, 500) );
-    //_window->resize( Gfx::SizeF(100, 100) );
+    _window = new KeyboardWindow();
+    _window->setTopMost(true);
+    _window->move( Gfx::PointF(500, 500) );
+    _window->resize( Gfx::SizeF(100, 100) );
 
-    //_window->keyPressed += Pt::slot(*this, &DefaultInputMethod::onKeyPress);
+    _window->keyPressed += Pt::slot(*this, &DefaultInputMethod::onKeyPress);
 }
 
 
 DefaultInputMethod::~DefaultInputMethod()
 {
-    //delete _window;
+    delete _window;
 }
 
 
 Window* DefaultInputMethod::onActiveWindow()
 {
-    //return _window;
-    return 0;
+    return _window;
+    //return 0;
 }
 
 
@@ -233,7 +233,7 @@ void DefaultInputMethod::onShow(bool show)
         std::clog << "INPUTMETHOD HIDE" << std::endl;
     }
 
-    //_window->show(show);
+    _window->show(show);
 }
 
 
