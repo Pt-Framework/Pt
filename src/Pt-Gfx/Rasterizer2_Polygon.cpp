@@ -234,6 +234,7 @@ void Rasterizer2::rasterPolygonAreaNOAA(const Point* points, const size_t* point
             // Increment the base pointer
             curPointBase += curPointCount;
         }
+        if(!nodes) continue;
         // Sort the nodes using bubble sort
         for(Pt::int32_t i = 0; i < nodes - 1;) {
             if(nodeX[i] > nodeX[i + 1]) {
@@ -398,6 +399,7 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
             curPointBaseX += curPointCount;
             curPointBaseY += curPointCount;
         }
+        if(!nodes) continue;
         // Sort the nodes using bubble sort
         for(Pt::int32_t i = 0; i < nodes - 1;) {
             if(nodeX0[i] > nodeX0[i + 1]) {
@@ -715,6 +717,7 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, const size_t* point
             curPointBaseX += curPointCount;
             curPointBaseY += curPointCount;
         }
+        if(!nodes) continue;
         // Sort the nodes using bubble sort
         for(Pt::int32_t i = 0; i < nodes - 1;) {
             if(nodeX[i] > nodeX[i + 1]) {
