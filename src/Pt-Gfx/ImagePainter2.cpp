@@ -195,7 +195,10 @@ void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount, Pt::
     for(size_t i = 0; i < pointCount; ++i)
         points[i].set( ps[i].x(), ps[i].y() );
 
-    if(addCSP) points[pointCount].set( ImagePainter2::PolygonSeparatorPointF.x(), ImagePainter2::PolygonSeparatorPointF.y() );
+    if(addCSP) points[pointCount].set(
+        ImagePainter2::PolygonSeparatorPointF.x(),
+        ImagePainter2::PolygonSeparatorPointF.y()
+    );
 
     // Rasterize the polygon
     _rasterizer->fillPolygon(points.data(), effPC, antiAliasingLevel);

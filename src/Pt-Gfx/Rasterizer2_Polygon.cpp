@@ -214,6 +214,7 @@ void Rasterizer2::rasterPolygonAreaNOAA(const Point* points, const size_t* point
             // Loop through the points
             Pt::int32_t j = curPointCount - 1;
             for(size_t i = 0; i < curPointCount; ++i) {
+                // Get the coordinates
                 const Pt::int32_t curXi = (curPointBase + i)->x();
                 const Pt::int32_t curYi = (curPointBase + i)->y();
                 const Pt::int32_t curXj = (curPointBase + j)->x();
@@ -365,6 +366,7 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
             // Loop through the points
             Pt::int32_t j = curPointCount - 1;
             for(size_t i = 0; i < curPointCount; ++i) {
+                // Get the coordinates
                 const Pt::int32_t curXi = *(curPointBaseX + i);
                 const Pt::int32_t curYi = *(curPointBaseY + i);
                 const Pt::int32_t curXj = *(curPointBaseX + j);
@@ -700,18 +702,20 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, const size_t* point
             // Loop through the points
             Pt::int32_t j = curPointCount - 1;
             for(size_t i = 0; i < curPointCount; ++i) {
+                // Get the coordinates
                 const Pt::int32_t curXi = *(curPointBaseX + i);
                 const Pt::int32_t curYi = *(curPointBaseY + i);
                 const Pt::int32_t curXj = *(curPointBaseX + j);
                 const Pt::int32_t curYj = *(curPointBaseY + j);
+                // Calculate the common deltas
+                const Pt::int32_t deltaYj = curYj  - curYi;
+                const Pt::int32_t deltaXj = curXj  - curXi;
                 // Row (Y)
                 if( ( curYi < iterY0 && curYj >= iterY0 ) || ( curYj < iterY0 && curYi >= iterY0 ) ) {
                     // Bail out if we have produced too many nodes
                     if((size_t) (nodes0 + nodes1) >= nodeX.size()) return;
                     // Calculate the node's coordinate
                     Pt::int32_t deltaYp = iterY0 - curYi;
-                    Pt::int32_t deltaYj = curYj  - curYi;
-                    Pt::int32_t deltaXj = curXj  - curXi;
                     Pt::int32_t interXf = FIXED_POINT_FROM_INT(curXi)
                                         + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
                     nodeX[nodes0 + nodes1] = FIXED_POINT_TO_INT(interXf + FIXED_POINT_CONSTANT_HALF);
@@ -723,8 +727,6 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, const size_t* point
                     if((size_t) (nodes0 + nodes1) >= nodeX.size()) return;
                     // Calculate the node's coordinate
                     Pt::int32_t deltaYp = iterY1 - curYi;
-                    Pt::int32_t deltaYj = curYj  - curYi;
-                    Pt::int32_t deltaXj = curXj  - curXi;
                     Pt::int32_t interXf = FIXED_POINT_FROM_INT(curXi)
                                         + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
                     nodeX[nodes0 + nodes1] = COORDINATE_LIMIT + FIXED_POINT_TO_INT(interXf + FIXED_POINT_CONSTANT_HALF);
