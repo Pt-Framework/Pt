@@ -468,6 +468,7 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
         // 01    01    1  0
         // 10    10   1    0
 
+        //*
         for(Pt::int32_t i = 0; i < std::max(nodes0, nodes1); i += 2) {
             if(i < nodes0 && i < nodes1) {
                 const Pt::int32_t from0 = std::min(nodeX0[i    ], nodeX1[i    ]);
@@ -481,8 +482,8 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
 
                 int from0_cell   = from0 / 2;
                 int from1_cell   = from1 / 2;
-                int from0_weight = ((from0_cell * 2) < from0) ? 2 : 1;
-                int from1_weight = ((from1_cell * 2) < from1) ? 2 : 1;
+                int from0_weight = ((from0_cell * 2) < from0) ? 1 : 2;
+                int from1_weight = ((from1_cell * 2) < from1) ? 1 : 2;
                 if(from0_cell == from1_cell) {
                     alphas[from0_cell] = (from0_weight + from1_weight) * FSAA_MIN_ALPHA;
                     from = from1_cell + 1;
@@ -491,72 +492,31 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
                     alphas[from0_cell] = (from0_weight               ) * FSAA_MIN_ALPHA;
                     alphas[from1_cell] = (               from1_weight) * FSAA_MIN_ALPHA;
                     for(Pt::int32_t k = from0_cell + 1; k < from1_cell - 1; ++k) {
-                        alphas[k] += FSAA_MID_ALPHA;
+                        alphas[k] = FSAA_MID_ALPHA;
                     }
                     from = from1_cell + 1;
                 }
 
                 int to0_cell   = to0 / 2;
                 int to1_cell   = to1 / 2;
-                int to0_weight = ((to0_cell * 2) < to0) ? 2 : 1;
-                int to1_weight = ((to1_cell * 2) < to1) ? 2 : 1;
+                int to0_weight = ((to0_cell * 2) < to0) ? 1 : 2;
+                int to1_weight = ((to1_cell * 2) < to1) ? 1 : 2;
                 if(to0_cell == to1_cell) {
                     alphas[to0_cell] = (to0_weight + to1_weight) * FSAA_MIN_ALPHA;
-                    to = to0_cell + 1;
+                    to = to0_cell - 1;
                 }
                 else {
                     alphas[to0_cell] = (to0_weight               ) * FSAA_MIN_ALPHA;
                     alphas[to1_cell] = (               to1_weight) * FSAA_MIN_ALPHA;
                     for(Pt::int32_t k = to0_cell + 1; k < to1_cell - 1; ++k) {
-                        alphas[k] += FSAA_MID_ALPHA;
+                        alphas[k] = FSAA_MID_ALPHA;
                     }
-                    to = to0_cell + 1;
+                    to = to0_cell - 1;
                 }
 
                 for(Pt::int32_t k = from; k <= to; ++k) {
                     alphas[k] = FSAA_MAX_ALPHA;
                 }
-
-/*
-                Pt::int32_t from;
-                Pt::int32_t to;
-
-                if(from0 == from1) {
-                    from = from0;
-                }
-                else if(from0 < from1) {
-                    from = from1;
-                    for(Pt::int32_t k = from0; k < from1; ++k) {
-                        alphas[k/2] += FSAA_MIN_ALPHA;
-                    }
-                }
-                else if(from0 > from1) {
-                    from = from0;
-                    for(Pt::int32_t k = from1; k < from0; ++k) {
-                        alphas[k/2] += FSAA_MIN_ALPHA;
-                    }
-                }
-
-                if(to0 == to1) {
-                    to = to0;
-                }
-                else if(to0 < to1) {
-                    to = to1;
-                    for(Pt::int32_t k = to1; k > to0; --k) {
-                        alphas[k/2] += FSAA_MIN_ALPHA;
-                    }
-                }
-                else if(to0 > to1) {
-                    to = to0;
-                    for(Pt::int32_t k = to0; k > to1; --k) {
-                        alphas[k/2] += FSAA_MIN_ALPHA;
-                    }
-                }
-
-                for(Pt::int32_t k = from; k < to; ++k) {
-                    alphas[k/2] += FSAA_MID_ALPHA;
-                }
-*/
             }
             else {
                 if(i < nodes0) {
@@ -575,6 +535,7 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
                 }
             }
         }
+        //*/
 
         /*
         for(Pt::int32_t i = 0; i < nodes0; i += 2) {
@@ -592,7 +553,7 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
                 alphas[k / 2] += FSAA_MIN_ALPHA;
             }
         }
-        */
+        //*/
 
         // Fill the pixels between the node pairs
         for(Pt::int32_t i = 0; i < nodes1; i += 2) {
