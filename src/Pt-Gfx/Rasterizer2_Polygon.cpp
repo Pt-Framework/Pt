@@ -450,14 +450,14 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
                 // Set the alphas of the left-part of the span
                 alphas[from0 / 2] += FSAA_MIN_ALPHA;
 
-                alphas[(from0 + 1)/ 2] = FSAA_MAX_ALPHA;
+                //alphas[(from0 + 1)/ 2] = FSAA_MAX_ALPHA;
             }
             // Handle cases when only the "from1" nodes are valid
             else if(from1val) {
                 // Set the alphas of the left-part of the span
                 alphas[from1 / 2] += FSAA_MIN_ALPHA;
 
-                alphas[(from1 + 1)/ 2] = FSAA_MAX_ALPHA;
+                //alphas[(from1 + 1)/ 2] = FSAA_MAX_ALPHA;
             }
             // Handle cases when both the "to" nodes are valid
             if(to0val && to1val) {
@@ -474,24 +474,22 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
                 // Set the alphas of the right-part of the span
                 alphas[to0 / 2] += FSAA_MIN_ALPHA;
 
-                alphas[(to0 + 1)/ 2] = FSAA_MAX_ALPHA;
+                //alphas[(to0 + 1)/ 2] = FSAA_MAX_ALPHA;
             }
             // Handle cases when only the "to1" nodes are valid
             else if(to1val) {
                 // Set the alphas of the right-part of the span
                 alphas[to1 / 2] += FSAA_MIN_ALPHA;
 
-                alphas[(to1 + 1)/ 2] = FSAA_MAX_ALPHA;
+                //alphas[(to1 + 1)/ 2] = FSAA_MAX_ALPHA;
             }
         }
 
-        if(sizeY == 81) {
+        //if(sizeY == 81) {
         //lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%d", alphas[k] / 15); lprintf("\n");
-        }
+        //}
 
-
-
-       // Skip fully-transparent pixels ad the beginning and end of the span
+        // Skip fully-transparent pixels ad the beginning and end of the span
         Pt::int32_t iterL = 0;
         Pt::int32_t iterR = sizeX - 1;
         for(; iterL < sizeX; ++iterL) {
@@ -501,10 +499,53 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
             if(alphas[iterR]) break;
         }
 
-        for(Pt::int32_t k = iterL; k <= iterR; ++k) {
-            Pixel pixel(_image->view(), minX + k, minY + pixelY);
-            _image->format().setPixel(pixel, color, _compositionMode, FSAA_SCALE_ALPHA(alphas[k]));
+        if(pixelY == 100 || pixelY == 179 || pixelY == 180) {
+        lprintf("%03d: ", pixelY); for(size_t k = iterL; k <= iterR; ++k) lprintf("%d", alphas[k] / 15); lprintf("\n");
+        lprintf("\n");
         }
+
+
+        //for(Pt::int32_t k = iterL; k <= iterR; ++k) {
+
+        Pt::int32_t iterX = iterL;
+CUK:
+            //
+            //if(pixelY == 100) lprintf("PART_1A: iterX = %03d ; alpha = %d\n", iterX, alphas[iterX] / 15);
+            while(iterX <= iterR) {
+                if(!alphas[iterX]) break;
+                Pixel pixel(_image->view(), minX + iterX, minY + pixelY);
+                _image->format().setPixel(pixel, color, _compositionMode, FSAA_SCALE_ALPHA(alphas[iterX]));
+                ++iterX;
+            }
+            //if(pixelY == 100) lprintf("PART_1B: iterX = %03d ; alpha = %d\n", iterX, alphas[iterX] / 15);
+
+            //if(pixelY == 100) lprintf("PART_2A: iterX = %03d ; alpha = %d\n", iterX, alphas[iterX] / 15);
+            while(iterX <= iterR) {
+                if(alphas[iterX]) break;
+                //if(pixelY == 100) lprintf("%d", alphas[iterX] / 15);
+
+                Pixel pixel(_image->view(), minX + iterX, minY + pixelY);
+                _image->format().setPixel(pixel, color, _compositionMode);
+                ++iterX;
+            }
+            //if(pixelY == 100) lprintf("\n");
+            //if(pixelY == 100) lprintf("PART_2B: iterX = %03d ; alpha = %d\n", iterX, alphas[iterX] / 15);
+
+            //if(pixelY == 100) lprintf("PART_3A: iterX = %03d ; alpha = %d\n", iterX, alphas[iterX] / 15);
+            while(iterX <= iterR) {
+                if(!alphas[iterX]) break;
+                Pixel pixel(_image->view(), minX + iterX, minY + pixelY);
+                _image->format().setPixel(pixel, color, _compositionMode, FSAA_SCALE_ALPHA(alphas[iterX]));
+                ++iterX;
+            }
+            //if(pixelY == 100) lprintf("PART_3B: iterX = %03d ; alpha = %d\n", iterX, alphas[iterX] / 15);
+
+            while(iterX <= iterR) {
+                if(alphas[iterX]) break;
+                ++iterX;
+            }
+
+            if(iterX <= iterR) goto CUK;
 
 
 
