@@ -528,6 +528,7 @@ CUK:
                 _image->format().setPixel(pixel, color, _compositionMode);
                 ++iterX;
             }
+
             //if(pixelY == 100) lprintf("\n");
             //if(pixelY == 100) lprintf("PART_2B: iterX = %03d ; alpha = %d\n", iterX, alphas[iterX] / 15);
 
