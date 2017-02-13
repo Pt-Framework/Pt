@@ -692,7 +692,7 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, const size_t* point
         const Pt::int32_t* curPointBaseX = pointX.data();
         const Pt::int32_t* curPointBaseY = pointY.data();
         // Build a list of nodes using all the polygons
-        Pt::int32_t nodes  = 0;
+        Pt::int32_t nodes0 = 0;
         Pt::int32_t nodes1 = 0;
         for(size_t p = 0; p < polyCount; ++p) {
             // Get the current point count
@@ -707,26 +707,27 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, const size_t* point
                 // Row (Y)
                 if( ( curYi < iterY0 && curYj >= iterY0 ) || ( curYj < iterY0 && curYi >= iterY0 ) ) {
                     // Bail out if we have produced too many nodes
-                    if((size_t) nodes >= nodeX.size()) return;
+                    if((size_t) (nodes0 + nodes1) >= nodeX.size()) return;
                     // Calculate the node's coordinate
                     Pt::int32_t deltaYp = iterY0 - curYi;
                     Pt::int32_t deltaYj = curYj  - curYi;
                     Pt::int32_t deltaXj = curXj  - curXi;
                     Pt::int32_t interXf = FIXED_POINT_FROM_INT(curXi)
                                         + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
-                    nodeX[nodes++] = FIXED_POINT_TO_INT(interXf + FIXED_POINT_CONSTANT_HALF);
+                    nodeX[nodes0 + nodes1] = FIXED_POINT_TO_INT(interXf + FIXED_POINT_CONSTANT_HALF);
+                    ++nodes0;
                 }
                 // Row (Y + 1)
                 if( ( curYi < iterY1 && curYj >= iterY1 ) || ( curYj < iterY1 && curYi >= iterY1 ) ) {
                     // Bail out if we have produced too many nodes
-                    if((size_t) nodes >= nodeX.size()) return;
+                    if((size_t) (nodes0 + nodes1) >= nodeX.size()) return;
                     // Calculate the node's coordinate
                     Pt::int32_t deltaYp = iterY1 - curYi;
                     Pt::int32_t deltaYj = curYj  - curYi;
                     Pt::int32_t deltaXj = curXj  - curXi;
                     Pt::int32_t interXf = FIXED_POINT_FROM_INT(curXi)
                                         + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
-                    nodeX[nodes++] = 65535 + FIXED_POINT_TO_INT(interXf + FIXED_POINT_CONSTANT_HALF);
+                    nodeX[nodes0 + nodes1] = 65535 + FIXED_POINT_TO_INT(interXf + FIXED_POINT_CONSTANT_HALF);
                     ++nodes1;
                 }
                 // Update the searching index
@@ -736,9 +737,9 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, const size_t* point
             curPointBaseX += curPointCount;
             curPointBaseY += curPointCount;
         }
-        if(!nodes) continue;
+        if( !(nodes0 + nodes1) ) continue;
         // Sort the nodes using bubble sort
-        for(Pt::int32_t i = 0; i < nodes - 1;) {
+        for(Pt::int32_t i = 0; i < (nodes0 + nodes1 - 1);) {
             if(nodeX[i] > nodeX[i + 1]) {
                 std::swap(nodeX[i], nodeX[i + 1]);
                 if(i) --i;
@@ -748,7 +749,7 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, const size_t* point
             }
         }
         // Accumulate the alphas of the samples between the node pairs
-        for(Pt::int32_t i = 0; i < nodes; i += 2) {
+        for(Pt::int32_t i = 0; i < (nodes0 + nodes1); i += 2) {
             Pt::int32_t from = nodeX[i    ];
             Pt::int32_t to   = nodeX[i + 1];
             if(from > 65535) from -= 65535;
@@ -776,7 +777,7 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, const size_t* point
 #endif
         }
         // Fill the pixels between the node pairs
-        for(Pt::int32_t i = 0; i < nodes1; i += 2) {
+        for(Pt::int32_t i = 0; i < std::max(nodes0, nodes1); i += 2) {
             // Draw pixels that belongs to the left-part of the span to the image
             Pt::int32_t iterL = nodeX[i] / 2 - 1; // 2 * 2;
             if(iterL < 0) iterL = 0;
