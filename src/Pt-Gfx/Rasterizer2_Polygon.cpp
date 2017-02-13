@@ -368,30 +368,52 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
                 const Pt::int32_t curYi = *(curPointBaseY + i);
                 const Pt::int32_t curXj = *(curPointBaseX + j);
                 const Pt::int32_t curYj = *(curPointBaseY + j);
+
+                // Row (Y)
+                Pt::int32_t gotX0 = -1;
                 if( ( curYi < iterY0 && curYj >= iterY0 ) || ( curYj < iterY0 && curYi >= iterY0 ) ) {
                     // Bail out if we have produced too many nodes
                     if((size_t) nodes >= nodeX0.size()) return;
-                    // Row (Y)
+                    // Calculate the node's coordinate
                     const Pt::int32_t deltaYp0 = iterY0 - curYi;
                     const Pt::int32_t deltaYj  = curYj  - curYi;
                     const Pt::int32_t deltaXj  = curXj  - curXi;
                     const Pt::int32_t interXf0 = FIXED_POINT_FROM_INT(curXi)
                                                + FIXED_POINT_FROM_INT(deltaYp0) / deltaYj * deltaXj;
-                    nodeX0[nodes] = FIXED_POINT_TO_INT(interXf0 + FIXED_POINT_CONSTANT_HALF);
-                    // Row (Y + 1) is valid
-                    if( ( curYi < iterY1 && curYj >= iterY1 ) || ( curYj < iterY1 && curYi >= iterY1 ) ) {
-                        const Pt::int32_t deltaYp1 = iterY1    - curYi;
-                        const Pt::int32_t interXf1 = FIXED_POINT_FROM_INT(curXi)
-                                                   + FIXED_POINT_FROM_INT(deltaYp1) / deltaYj * deltaXj;
-                        nodeX1[nodes] = FIXED_POINT_TO_INT(interXf1 + FIXED_POINT_CONSTANT_HALF);
-                    }
-                    // Row (Y + 1) is not valid
-                    else {
-                        nodeX1[nodes] = -1;
-                    }
-                    // Increment the number of nodes
+                    gotX0 = FIXED_POINT_TO_INT(interXf0 + FIXED_POINT_CONSTANT_HALF);
+                }
+
+                // Row (Y + 1)
+                Pt::int32_t gotX1 = -1;
+                if( ( curYi < iterY1 && curYj >= iterY1 ) || ( curYj < iterY1 && curYi >= iterY1 ) ) {
+                    // Bail out if we have produced too many nodes
+                    if((size_t) nodes >= nodeX0.size()) return;
+                    // Calculate the node's coordinate
+                    const Pt::int32_t deltaYp0 = iterY1 - curYi;
+                    const Pt::int32_t deltaYj  = curYj  - curYi;
+                    const Pt::int32_t deltaXj  = curXj  - curXi;
+                    const Pt::int32_t interXf0 = FIXED_POINT_FROM_INT(curXi)
+                                               + FIXED_POINT_FROM_INT(deltaYp0) / deltaYj * deltaXj;
+                    gotX1 = FIXED_POINT_TO_INT(interXf0 + FIXED_POINT_CONSTANT_HALF);
+                }
+
+                if(gotX0 == -1 && gotX1 != -1) {
+                    nodeX0[nodes] = gotX1;
+                    nodeX1[nodes] = gotX1;
                     ++nodes;
                 }
+                else if(gotX0 != -1 && gotX1 == -1) {
+                    nodeX0[nodes] = gotX0;
+                    nodeX1[nodes] = gotX0;
+                    ++nodes;
+                }
+                else if(gotX0 != -1 && gotX1 != -1) {
+                    nodeX0[nodes] = gotX0;
+                    nodeX1[nodes] = gotX1;
+                    ++nodes;
+                }
+
+
                 j = i;
             }
             // Increment the base pointers
@@ -422,7 +444,7 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
             const Pt::int32_t toMax   = std::max(to0,   to1  );
             // Reset the alphas
             memset(&alphas[0], 0, alphas.size());
-#if 1
+#if 0
             // Handle cases where the next row is not a valid row
             if(from1 < 0) {
                 // Set the alphas of the left-part of the span
@@ -574,10 +596,10 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
             // Draw pixels that belongs to the middle-part of the span to the image
             if(iterR >= iterL) {
                 // Adjust the coordinate on the last row
-                if(pixelY == sizeY - 1) {
-                    iterL = from0 / 2;
-                    iterR = to0   / 2;
-                }
+                //if(pixelY == sizeY - 1) {
+                //    iterL = from0 / 2;
+                //    iterR = to0   / 2;
+                //}
                 // Draw the span using texture
                 if(_isTexture) {
                     Pt::int32_t iterX     = iterL;
