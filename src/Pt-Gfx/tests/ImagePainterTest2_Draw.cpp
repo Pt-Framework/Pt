@@ -169,8 +169,8 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(480 - 20, 400),
         PointF(400 - 20, 320)
     };
-    if(ip2) ip2   ->fillPolygon(poly3a, sizeof(poly3a) / sizeof(poly3a[0]), 0);
-    else    painter.fillPolygon(poly3a, sizeof(poly3a) / sizeof(poly3a[0]));
+    //if(ip2) ip2   ->fillPolygon(poly3a, sizeof(poly3a) / sizeof(poly3a[0]), 0);
+    //else    painter.fillPolygon(poly3a, sizeof(poly3a) / sizeof(poly3a[0]));
 
     const PointF poly3b[] = { // CCW
         // Outside
@@ -199,8 +199,8 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(480 + 460, 400),
         PointF(400 + 460, 320)
     };
-    if(ip2) ip2   ->fillPolygon(poly3c, sizeof(poly3c) / sizeof(poly3c[0]), 2);
-    else    painter.fillPolygon(poly3c, sizeof(poly3c) / sizeof(poly3c[0]));
+    //if(ip2) ip2   ->fillPolygon(poly3c, sizeof(poly3c) / sizeof(poly3c[0]), 2);
+    //else    painter.fillPolygon(poly3c, sizeof(poly3c) / sizeof(poly3c[0]));
 
 
     painter.setBrush( brush2 );

@@ -416,8 +416,10 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
                 ++i;
             }
         }
+
         // Reset the alphas
         memset(&alphas[0], 0, alphas.size());
+
         // Accumulate the alphas of the samples between the node pairs
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
             // Get the from and to coordinates
@@ -447,14 +449,15 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
             else if(from0val) {
                 // Set the alphas of the left-part of the span
                 alphas[from0 / 2] += FSAA_MIN_ALPHA;
+
+                alphas[(from0 + 1)/ 2] = FSAA_MAX_ALPHA;
             }
             // Handle cases when only the "from1" nodes are valid
             else if(from1val) {
                 // Set the alphas of the left-part of the span
                 alphas[from1 / 2] += FSAA_MIN_ALPHA;
-            }
-            else {
-                lprintf("FFF\n");
+
+                alphas[(from1 + 1)/ 2] = FSAA_MAX_ALPHA;
             }
             // Handle cases when both the "to" nodes are valid
             if(to0val && to1val) {
@@ -470,21 +473,48 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
             else if(to0val) {
                 // Set the alphas of the right-part of the span
                 alphas[to0 / 2] += FSAA_MIN_ALPHA;
+
+                alphas[(to0 + 1)/ 2] = FSAA_MAX_ALPHA;
             }
             // Handle cases when only the "to1" nodes are valid
             else if(to1val) {
                 // Set the alphas of the right-part of the span
                 alphas[to1 / 2] += FSAA_MIN_ALPHA;
-            }
-            else {
-                lprintf("TTT\n");
+
+                alphas[(to1 + 1)/ 2] = FSAA_MAX_ALPHA;
             }
         }
-        //lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%d", alphas[k] / 15); lprintf("\n");
+
+        if(sizeY == 81) {
+        lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%d", alphas[k] / 15); lprintf("\n");
+        }
+
+        continue;
         // Fill the pixels between the node pairs
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
+
+            // Get the from and to coordinates
+            const Pt::int32_t from0    = nodeX0[i    ];
+            const Pt::int32_t from1    = nodeX1[i    ];
+            const Pt::int32_t to0      = nodeX0[i + 1];
+            const Pt::int32_t to1      = nodeX1[i + 1];
+            const Pt::uint8_t from0val = nodeV0[i    ];
+            const Pt::uint8_t from1val = nodeV1[i    ];
+            const Pt::int32_t to0val   = nodeV0[i + 1];
+            const Pt::int32_t to1val   = nodeV1[i + 1];
+            const Pt::int32_t fromMin  = std::min(from0, from1);
+            const Pt::int32_t fromMax  = std::max(from0, from1);
+            const Pt::int32_t toMin    = std::min(to0,   to1  );
+            const Pt::int32_t toMax    = std::max(to0,   to1  );
+
             // Draw pixels that belongs to the left-part of the span to the image
             Pt::int32_t iterL = 0;
+
+                 if(from0val && from1val) iterL = fromMin / 2 - 1;
+            else if(from0val            ) iterL = from0   / 2 - 1;
+            else if(            from1val) iterL = from1   / 2 - 1;
+            if(iterL < 0) iterL = 0;
+
 #ifdef USE_DUFFS_DEVICE
             if(true) { // Skip fully-transparent pixels
                 register Pt::uint8_t* src  = &alphas[0];
@@ -512,7 +542,8 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
             if(_isTexture || _isGradient) { // Texture or gradient
                 for(; iterL < sizeX; ++iterL) {
                     // Break if we have reached the non anti-aliased part of the span
-                    if(!alphas[iterL]) break;
+                    if(alphas[iterL] >= FSAA_MAX_ALPHA) break;
+                    //if(!alphas[iterL]) break;
                     // Draw the pixel
                     const Pt::int32_t iterX = minX + iterL;
                     const Pt::int32_t iterY = minY + pixelY;
@@ -526,7 +557,8 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
             else { // Solid color
                 for(; iterL < sizeX; ++iterL) {
                     // Break if we have reached the non anti-aliased part of the span
-                    if(!alphas[iterL]) break;
+                    if(alphas[iterL] >= FSAA_MAX_ALPHA) break;
+                    //if(!alphas[iterL]) break;
                     // Draw the pixel
                     Pixel pixel(_image->view(), minX + iterL, minY + pixelY);
                     _image->format().setPixel(pixel, color, _compositionMode, FSAA_SCALE_ALPHA(alphas[iterL]));
@@ -534,6 +566,12 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
             }
             // Draw pixels that belongs to the right-part of the span to the image
             Pt::int32_t iterR = sizeX - 1;
+
+                 if(to0val && to1val) iterR = toMax / 2 + 1;
+            else if(to0val          ) iterR = to0   / 2 + 1;
+            else if(          to1val) iterR = to1   / 2 + 1;
+            if(iterR >= sizeX) iterR = sizeX - 1;
+
 #ifdef USE_DUFFS_DEVICE
             if(true) { // Skip fully-transparent pixels
                 register Pt::uint8_t* src  = &alphas[0];
@@ -561,7 +599,8 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
             if(_isTexture || _isGradient) { // Texture or gradient
                 for(; iterR >= 0; --iterR) {
                     // Break if we have reached the non anti-aliased part of the span
-                    if(!alphas[iterR]) break;
+                    if(alphas[iterR] >= FSAA_MAX_ALPHA) break;
+                    //if(!alphas[iterR]) break;
                     // Draw the pixel
                     const Pt::int32_t iterX = minX + iterR;
                     const Pt::int32_t iterY = minY + pixelY;
@@ -575,13 +614,13 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
             else { // Solid color
                 for(; iterR >= 0; --iterR) {
                     // Break if we have reached the non anti-aliased part of the span
-                    if(!alphas[iterR]) break;
+                    if(alphas[iterR] >= FSAA_MAX_ALPHA) break;
+                    //if(!alphas[iterR]) break;
                     // Draw the pixel
                     Pixel pixel(_image->view(), minX + iterR, minY + pixelY);
                     _image->format().setPixel(pixel, color, _compositionMode, FSAA_SCALE_ALPHA(alphas[iterR]));
                 }
             }
-            continue;
             // Draw pixels that belongs to the middle-part of the span to the image
             if(iterR >= iterL) {
                 // Draw the span using texture
