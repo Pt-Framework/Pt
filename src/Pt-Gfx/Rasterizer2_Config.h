@@ -42,7 +42,7 @@
 #define lprintf(...) fprintf (stderr, __VA_ARGS__)
 
 // ======================================================================================
-// ===== COnfigurations and Macros ======================================================
+// ===== Configurations and Macros ======================================================
 // ======================================================================================
 
 // Fixed-Point 16.16 Settings
@@ -62,5 +62,3 @@
 #define FIXED_POINT_FROM_INT(V)     ( (V) << FIXED_POINT_SHIFT_FACTOR )
 #define FIXED_POINT_TO_INT(V)       ( (V) >> FIXED_POINT_SHIFT_FACTOR )
 
-// Supersampling size (2 or 4) for True SSAA-and Edge-SSAA and algorithms
-#define SUPERSAMPLING_SIZE 2

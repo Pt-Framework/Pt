@@ -101,8 +101,8 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(200 + 5, 100),
         PointF(  0 + 5,  50)
     };
-  //  if(ip2) ip2   ->fillPolygon(poly1a, sizeof(poly1a) / sizeof(poly1a[0]), 0);
-   // else    painter.fillPolygon(poly1a, sizeof(poly1a) / sizeof(poly1a[0]));
+    if(ip2) ip2   ->fillPolygon(poly1a, sizeof(poly1a) / sizeof(poly1a[0]), 0);
+    else    painter.fillPolygon(poly1a, sizeof(poly1a) / sizeof(poly1a[0]));
 
     const PointF poly1b[] = { // CCW
         PointF(100 + 198, 100),
@@ -111,8 +111,8 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(200 + 198, 100),
         PointF(  0 + 198,  50)
     };
-  //  if(ip2) ip2   ->fillPolygon(poly1b, sizeof(poly1b) / sizeof(poly1b[0]), 1);
-  //  else    painter.fillPolygon(poly1b, sizeof(poly1b) / sizeof(poly1b[0]));
+    if(ip2) ip2   ->fillPolygon(poly1b, sizeof(poly1b) / sizeof(poly1b[0]), 1);
+    else    painter.fillPolygon(poly1b, sizeof(poly1b) / sizeof(poly1b[0]));
 
     const PointF poly1c[] = { // CCW
         PointF(100 + 391, 100),
@@ -121,8 +121,8 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(200 + 391, 100),
         PointF(  0 + 391,  50)
     };
-  //  if(ip2) ip2   ->fillPolygon(poly1c, sizeof(poly1b) / sizeof(poly1b[0]), 2);
-  //  else    painter.fillPolygon(poly1c, sizeof(poly1b) / sizeof(poly1b[0]));
+    if(ip2) ip2   ->fillPolygon(poly1c, sizeof(poly1b) / sizeof(poly1b[0]), 2);
+    else    painter.fillPolygon(poly1c, sizeof(poly1b) / sizeof(poly1b[0]));
 
 
     painter.setBrush( brush2 );
@@ -133,8 +133,8 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(210, 310),
         PointF(140, 260)
     };
- //   if(ip2) ip2   ->fillPolygon(poly2a, sizeof(poly2a) / sizeof(poly2a[0]), 0);
-  //  else    painter.fillPolygon(poly2a, sizeof(poly2a) / sizeof(poly2a[0]));
+    if(ip2) ip2   ->fillPolygon(poly2a, sizeof(poly2a) / sizeof(poly2a[0]), 0);
+    else    painter.fillPolygon(poly2a, sizeof(poly2a) / sizeof(poly2a[0]));
 
     const PointF poly2b[] = { // CCW
         PointF(110, 310 + 100),
@@ -142,8 +142,8 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(210, 310 + 100),
         PointF(140, 260 + 100)
     };
-    //if(ip2) ip2   ->fillPolygon(poly2b, sizeof(poly2b) / sizeof(poly2b[0]), 1);
-    //else    painter.fillPolygon(poly2b, sizeof(poly2b) / sizeof(poly2b[0]));
+    if(ip2) ip2   ->fillPolygon(poly2b, sizeof(poly2b) / sizeof(poly2b[0]), 1);
+    else    painter.fillPolygon(poly2b, sizeof(poly2b) / sizeof(poly2b[0]));
 
     const PointF poly2c[] = { // CCW
         PointF(110, 310 + 200),
@@ -169,8 +169,8 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(480 - 20, 400),
         PointF(400 - 20, 320)
     };
-  //  if(ip2) ip2   ->fillPolygon(poly3a, sizeof(poly3a) / sizeof(poly3a[0]), 0);
-   // else    painter.fillPolygon(poly3a, sizeof(poly3a) / sizeof(poly3a[0]));
+    if(ip2) ip2   ->fillPolygon(poly3a, sizeof(poly3a) / sizeof(poly3a[0]), 0);
+    else    painter.fillPolygon(poly3a, sizeof(poly3a) / sizeof(poly3a[0]));
 
     const PointF poly3b[] = { // CCW
         // Outside
@@ -184,8 +184,8 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(480 + 220, 400),
         PointF(400 + 220, 320)
     };
-  //  if(ip2) ip2   ->fillPolygon(poly3b, sizeof(poly3b) / sizeof(poly3b[0]), 1);
-  //  else    painter.fillPolygon(poly3b, sizeof(poly3b) / sizeof(poly3b[0]));
+    if(ip2) ip2   ->fillPolygon(poly3b, sizeof(poly3b) / sizeof(poly3b[0]), 1);
+    else    painter.fillPolygon(poly3b, sizeof(poly3b) / sizeof(poly3b[0]));
 
     const PointF poly3c[] = { // CCW
         // Outside
@@ -199,8 +199,8 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(480 + 460, 400),
         PointF(400 + 460, 320)
     };
-   // if(ip2) ip2   ->fillPolygon(poly3c, sizeof(poly3c) / sizeof(poly3c[0]), 2);
-   // else    painter.fillPolygon(poly3c, sizeof(poly3c) / sizeof(poly3c[0]));
+    if(ip2) ip2   ->fillPolygon(poly3c, sizeof(poly3c) / sizeof(poly3c[0]), 2);
+    else    painter.fillPolygon(poly3c, sizeof(poly3c) / sizeof(poly3c[0]));
 
 
     painter.setBrush( brush2 );
@@ -224,7 +224,7 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(860 + 40 -  0, 130 - 20 + 40),
         PointF(860 + 40 - 30, 130 - 20 + 15)
     };
-   // if(ip2) ip2->fillPolygon(poly4, sizeof(poly4) / sizeof(poly4[0]), 2);
+    if(ip2) ip2->fillPolygon(poly4, sizeof(poly4) / sizeof(poly4[0]), 2);
 
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
