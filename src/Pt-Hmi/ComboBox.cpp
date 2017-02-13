@@ -85,6 +85,24 @@ void ComboBoxMenu::onPaintBackground(const Gfx::RectF& rect)
 {
     Base::onPaintBackground(rect);
 
+    //const StyleOptions& options = Application::instance().styleOptions();
+
+    //Painter painter( surface() );
+    //painter.setClip(rect);
+
+    ////
+    //// menu border
+    ////
+    //Gfx::RectF borderRect(size());
+    //painter.setPen( options.contour() );
+    //painter.drawRect(borderRect);
+}
+
+
+void ComboBoxMenu::onPaintContent(const Gfx::RectF& rect)
+{
+    Base::onPaintContent(rect);
+
     const StyleOptions& options = Application::instance().styleOptions();
 
     Painter painter( surface() );

@@ -62,6 +62,8 @@ class PT_HMI_API ComboBoxMenu : public Window
     protected:
         void onPaintBackground(const Gfx::RectF& rect);
 
+        void onPaintContent(const Gfx::RectF& rect);
+
         void onShowEvent(const ShowEvent& ev);
 
         bool onMouseEvent(const MouseEvent& ev);

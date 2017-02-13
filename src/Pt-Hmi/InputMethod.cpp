@@ -31,6 +31,7 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Widget.h>
+#include <Pt/Hmi/PushButton.h>
 #include <iostream>
 
 namespace Pt {
@@ -144,55 +145,29 @@ void InputMethod::unregisterApplication(Application&)
 }
 
 
-class KeyboardWindow : public Window
-{
-    public:
-        KeyboardWindow()
-        {
-        }
-
-        Pt::Signal<> keyPressed;
-
-    protected:
-        bool onMouseEvent(const MouseEvent& ev)
-        {
-            if( ev.isPress() )
-            {
-                keyPressed.send();
-            }
-
-            return true;
-        }
-
-        void onKeyEvent(const KeyEvent& ev)
-        {
-            std::clog << "KEY EVENT" << std::endl;
-        }
-        
-};
-
 DefaultInputMethod::DefaultInputMethod()
 : _window(0)
+, _keyButton(0)
 {
-    _window = new KeyboardWindow();
-    _window->setTopMost(true);
-    _window->move( Gfx::PointF(500, 500) );
-    _window->resize( Gfx::SizeF(100, 100) );
+    //_window = new Window();
+    //_window->setTopMost(true);
+    //_window->move( Gfx::PointF(500, 500) );
+    //_window->resize( Gfx::SizeF(100, 100) );
 
-    _window->keyPressed += Pt::slot(*this, &DefaultInputMethod::onKeyPress);
+    //_window->keyPressed += Pt::slot(*this, &DefaultInputMethod::onKeyPress);
 }
 
 
 DefaultInputMethod::~DefaultInputMethod()
 {
-    delete _window;
+    //delete _keyButton;
+    //delete _window;
 }
 
 
 Window* DefaultInputMethod::onActiveWindow()
 {
     return _window;
-    //return 0;
 }
 
 
@@ -224,6 +199,14 @@ void DefaultInputMethod::onKeyPress()
 
 void DefaultInputMethod::onShow(bool show)
 {
+    //if( ! _keyButton)
+    //{
+    //    _keyButton = new PushButton();
+    //    _keyButton->setText("a");
+    //    _window->setMainWidget(_keyButton);
+    //    _keyButton->clicked() += Pt::slot(*this, &DefaultInputMethod::onKeyPress);
+    //}
+
     if(show)
     {
         std::clog << "INPUTMETHOD SHOW" << std::endl;
@@ -233,13 +216,13 @@ void DefaultInputMethod::onShow(bool show)
         std::clog << "INPUTMETHOD HIDE" << std::endl;
     }
 
-    _window->show(show);
+    //_window->show(show);
 }
 
 
 bool DefaultInputMethod::onFinish(Widget& widget)
 {
-    return true;
+    return widget.window() != _window;
 }
 
 } // namespace

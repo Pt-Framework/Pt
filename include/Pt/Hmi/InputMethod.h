@@ -33,6 +33,7 @@
 #include <Pt/Hmi/Api.h>
 #include <Pt/Hmi/KeyEvent.h>
 #include <Pt/Hmi/MouseEvent.h>
+
 #include <Pt/Connectable.h>
 
 namespace Pt {
@@ -41,6 +42,7 @@ namespace Hmi {
 
 class Widget;
 class Window;
+class PushButton;
 class Application;
 
 class PT_HMI_API InputMethod
@@ -112,7 +114,8 @@ class DefaultInputMethod : public InputMethod
         void onKeyPress();
 
     private:
-        class KeyboardWindow* _window;
+        Window* _window;
+        PushButton* _keyButton;
 };
 
 } // namespace

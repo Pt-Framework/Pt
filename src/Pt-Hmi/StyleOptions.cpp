@@ -34,14 +34,15 @@ namespace Pt {
 namespace Hmi {
 
 StyleOptions::StyleOptions()
-: _background(Pt::Gfx::Color::fromRgb8(229, 229, 229) )
+: _background(Pt::Gfx::Color::fromRgb8(229, 229, 229))
 , _foreground(Gfx::Color::fromRgb8(210, 210, 210))
 , _contour(Gfx::Color::fromRgb8(150, 150, 150))
 , _accentColor(Gfx::Color::fromRgb8(20, 140, 250))
-, _viewBackground(Pt::Gfx::Color::fromRgb8(255, 255, 255) )
-, _textBackground(Pt::Gfx::Color::fromRgb8(255, 255, 255) )
+, _viewBackground(Pt::Gfx::Color::fromRgb8(255, 255, 255))
 , _highlightColor(Gfx::Color::fromRgb8(190, 190, 190))
+, _textBackground(Pt::Gfx::Color::fromRgb8(255, 255, 255))
 , _textColor(Gfx::Color::fromRgb8(0, 0, 0))
+, _highlightedTextColor(Gfx::Color::fromRgb8(0, 0, 0))
 , _font(Gfx::Font("", 12))
 {
 }
@@ -52,9 +53,11 @@ StyleOptions::StyleOptions(const StyleOptions& o)
 , _foreground(o._foreground)
 , _contour(o._contour)
 , _accentColor(o._accentColor)
-, _textBackground(o._textBackground )
+, _viewBackground(o.viewBackground() )
 , _highlightColor(o._highlightColor)
+, _textBackground(o._textBackground )
 , _textColor(o._textColor)
+, _highlightedTextColor( o.highlightedTextColor() )
 , _font(o._font)
 {
 }

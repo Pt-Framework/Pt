@@ -962,7 +962,10 @@ void PlatinumListBoxRenderer::onPrepareItem(const ListBoxItem& item,
                                             Gfx::Pen& textPen) const
 {
     if( item.isHighlighted() )
+    {
         brush =  options.highlightColor();
+        textPen = options.highlightedTextColor();
+    }
 }
 
 

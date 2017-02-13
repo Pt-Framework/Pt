@@ -121,16 +121,6 @@ class PT_HMI_API StyleOptions
             _viewBackground = b;
         }
 
-        const Gfx::Brush& textBackground() const
-        {
-            return _textBackground;
-        }
-
-        void setTextBackground(const Gfx::Brush& b)
-        {
-            _textBackground = b;
-        }
-
         const Gfx::Color& highlightColor() const
         {
             return _highlightColor;
@@ -141,6 +131,16 @@ class PT_HMI_API StyleOptions
             _highlightColor = c;
         }
 
+        const Gfx::Brush& textBackground() const
+        {
+            return _textBackground;
+        }
+
+        void setTextBackground(const Gfx::Brush& b)
+        {
+            _textBackground = b;
+        }
+
         const Gfx::Color& textColor() const
         {
             return _textColor;
@@ -149,6 +149,16 @@ class PT_HMI_API StyleOptions
         void setTextColor(const Gfx::Color& c)
         {
             _textColor = c;
+        }
+
+        const Gfx::Color& highlightedTextColor() const
+        {
+            return _highlightedTextColor;
+        }
+
+        void setHighlightedTextColor(const Gfx::Color& c)
+        {
+            _highlightedTextColor = c;
         }
 
         const Gfx::Font& font() const
@@ -167,9 +177,10 @@ class PT_HMI_API StyleOptions
       Gfx::Pen   _contour;
       Gfx::Color _accentColor;
       Gfx::Brush _viewBackground;
-      Gfx::Brush _textBackground;
       Gfx::Color _highlightColor;
+      Gfx::Brush _textBackground;
       Gfx::Color _textColor;
+      Gfx::Color _highlightedTextColor;
       Gfx::Font  _font;
 };
 
