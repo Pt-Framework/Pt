@@ -486,8 +486,27 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
         }
 
         if(sizeY == 81) {
-        lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%d", alphas[k] / 15); lprintf("\n");
+        //lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%d", alphas[k] / 15); lprintf("\n");
         }
+
+
+
+       // Skip fully-transparent pixels ad the beginning and end of the span
+        Pt::int32_t iterL = 0;
+        Pt::int32_t iterR = sizeX - 1;
+        for(; iterL < sizeX; ++iterL) {
+            if(alphas[iterL]) break;
+        }
+        for(; iterR >= 0; --iterR) {
+            if(alphas[iterR]) break;
+        }
+
+        for(Pt::int32_t k = iterL; k <= iterR; ++k) {
+            Pixel pixel(_image->view(), minX + k, minY + pixelY);
+            _image->format().setPixel(pixel, color, _compositionMode, FSAA_SCALE_ALPHA(alphas[k]));
+        }
+
+
 
         continue;
         // Fill the pixels between the node pairs
