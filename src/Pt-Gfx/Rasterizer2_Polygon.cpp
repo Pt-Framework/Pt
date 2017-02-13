@@ -211,7 +211,7 @@ void Rasterizer2::rasterPolygonAreaNOAA(const Point* points, const size_t* point
         for(size_t p = 0; p < polyCount; ++p) {
             // Get the current point count
             const size_t curPointCount = pointCount[p];
-            // Loop thorugh the points
+            // Loop through the points
             Pt::int32_t j = curPointCount - 1;
             for(size_t i = 0; i < curPointCount; ++i) {
                 const Pt::int32_t curXi = (curPointBase + i)->x();
@@ -362,7 +362,7 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
         for(size_t p = 0; p < polyCount; ++p) {
             // Get the current point count
             const size_t curPointCount = pointCount[p];
-            // Loop thorugh the points
+            // Loop through the points
             Pt::int32_t j = curPointCount - 1;
             for(size_t i = 0; i < curPointCount; ++i) {
                 const Pt::int32_t curXi = *(curPointBaseX + i);
@@ -659,7 +659,7 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, const size_t* point
 {
     // Calculate the size of the polygon
     Pt::int32_t sizeX = (maxX - minX + 1);
-    Pt::int32_t sizeY = (maxY - minY + 1) * SUPERSAMPLING_SIZE;
+    Pt::int32_t sizeY = (maxY - minY + 1) * 2;
 
     // Prepare a work buffer
     std::vector<Pt::uint8_t> alphas(sizeX, 0);
@@ -693,7 +693,7 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, const size_t* point
         for(size_t p = 0; p < polyCount; ++p) {
             // Get the current point count
             const size_t curPointCount = pointCount[p];
-            // Loop thorugh the points
+            // Loop through the points
             Pt::int32_t j = curPointCount - 1;
             for(size_t i = 0; i < curPointCount; ++i) {
                 const Pt::int32_t curXi = *(curPointBaseX + i);
