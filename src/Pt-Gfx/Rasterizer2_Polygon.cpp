@@ -343,8 +343,8 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
     // List of nodes that define the horizontal segments
     std::vector<Pt::int32_t> nodeX0(totalPointCount * 2, 0); // Nodes' X coordinates for row (Y    )
     std::vector<Pt::int32_t> nodeX1(totalPointCount * 2, 0); // Nodes' X coordinates for row (Y + 1)
-    std::vector<Pt::uint8_t> nodeV0(totalPointCount * 2, 0); // Node's validity flag for row (Y    )
-    std::vector<Pt::uint8_t> nodeV1(totalPointCount * 2, 0); // Node's validity flag for row (Y + 1)
+    //std::vector<Pt::uint8_t> nodeV0(totalPointCount * 2, 0); // Node's validity flag for row (Y    )
+    //std::vector<Pt::uint8_t> nodeV1(totalPointCount * 2, 0); // Node's validity flag for row (Y + 1)
 
     // A helper macro to scale the alpha
     #define FSAA_SCALE_ALPHA(A) ( Pt::uint16_t(A) * 17 / 2 / 2 )
@@ -363,7 +363,10 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
         const Pt::int32_t* curPointBaseX = pointX.data();
         const Pt::int32_t* curPointBaseY = pointY.data();
         // Build a list of nodes using all the polygons
-        Pt::int32_t nodes = 0;
+        //Pt::int32_t nodes = 0;
+        Pt::int32_t nodes0 = 0;
+        Pt::int32_t nodes1 = 0;
+
         for(size_t p = 0; p < polyCount; ++p) {
             // Get the current point count
             const size_t curPointCount = pointCount[p];
@@ -375,6 +378,31 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
                 const Pt::int32_t curYi = *(curPointBaseY + i);
                 const Pt::int32_t curXj = *(curPointBaseX + j);
                 const Pt::int32_t curYj = *(curPointBaseY + j);
+                // Row (Y)
+                if( ( curYi < iterY0 && curYj >= iterY0 ) || ( curYj < iterY0 && curYi >= iterY0 ) ) {
+                    // Bail out if we have produced too many nodes
+                    if((size_t) nodes0 >= nodeX0.size()) return;
+                    // Calculate the nodes' coordinates
+                    const Pt::int32_t deltaYp0 = iterY0 - curYi;
+                    const Pt::int32_t deltaYj  = curYj  - curYi;
+                    const Pt::int32_t deltaXj  = curXj  - curXi;
+                    const Pt::int32_t interXf0 = FIXED_POINT_FROM_INT(curXi)
+                                               + FIXED_POINT_FROM_INT(deltaYp0) / deltaYj * deltaXj;
+                    nodeX0[nodes0++] = FIXED_POINT_TO_INT(interXf0 + FIXED_POINT_CONSTANT_HALF);
+                }
+                // Row (Y + 1)
+                if( ( curYi < iterY1 && curYj >= iterY1 ) || ( curYj < iterY1 && curYi >= iterY1 ) ) {
+                    // Bail out if we have produced too many nodes
+                    if((size_t) nodes1 >= nodeX1.size()) return;
+                    // Calculate the nodes' coordinates
+                    const Pt::int32_t deltaYp1 = iterY1 - curYi;
+                    const Pt::int32_t deltaYj  = curYj  - curYi;
+                    const Pt::int32_t deltaXj  = curXj  - curXi;
+                    const Pt::int32_t interXf1 = FIXED_POINT_FROM_INT(curXi)
+                                               + FIXED_POINT_FROM_INT(deltaYp1) / deltaYj * deltaXj;
+                    nodeX1[nodes1++] = FIXED_POINT_TO_INT(interXf1 + FIXED_POINT_CONSTANT_HALF);
+                }
+                /*
                 // Check the nodes' validity
                 nodeV0[nodes] = ( ( curYi < iterY0 && curYj >= iterY0 ) || ( curYj < iterY0 && curYi >= iterY0 ) );
                 nodeV1[nodes] = ( ( curYi < iterY1 && curYj >= iterY1 ) || ( curYj < iterY1 && curYi >= iterY1 ) );
@@ -395,6 +423,7 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
                     // Increment the number of nodes
                     ++nodes;
                 }
+                */
                 // Update the searching index
                 j = i;
             }
@@ -403,14 +432,23 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
             curPointBaseY += curPointCount;
         }
         // Skip if there is no node
-        if(!nodes) continue;
+        if(!nodes0 || !nodes1) continue;
         // Sort the nodes using bubble sort
-        for(Pt::int32_t i = 0; i < nodes - 1;) {
+        for(Pt::int32_t i = 0; i < nodes0 - 1;) {
             if(nodeX0[i] > nodeX0[i + 1]) {
                 std::swap(nodeX0[i], nodeX0[i + 1]);
+               // std::swap(nodeV0[i], nodeV0[i + 1]);
+                if(i) --i;
+            }
+            else {
+                ++i;
+            }
+        }
+
+        for(Pt::int32_t i = 0; i < nodes1 - 1;) {
+            if(nodeX1[i] > nodeX1[i + 1]) {
                 std::swap(nodeX1[i], nodeX1[i + 1]);
-                std::swap(nodeV0[i], nodeV0[i + 1]);
-                std::swap(nodeV1[i], nodeV1[i + 1]);
+               // std::swap(nodeV1[i], nodeV1[i + 1]);
                 if(i) --i;
             }
             else {
@@ -422,199 +460,27 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
         memset(&alphas[0], 0, alphas.size());
 
         // Accumulate the alphas of the samples between the node pairs
-        for(Pt::int32_t i = 0; i < nodes; i += 2) {
-            // Get the from and to coordinates
-            const Pt::int32_t from0    = nodeX0[i    ];
-            const Pt::int32_t from1    = nodeX1[i    ];
-            const Pt::int32_t to0      = nodeX0[i + 1];
-            const Pt::int32_t to1      = nodeX1[i + 1];
-            const Pt::uint8_t from0val = nodeV0[i    ];
-            const Pt::uint8_t from1val = nodeV1[i    ];
-            const Pt::int32_t to0val   = nodeV0[i + 1];
-            const Pt::int32_t to1val   = nodeV1[i + 1];
-            const Pt::int32_t fromMin  = std::min(from0, from1);
-            const Pt::int32_t fromMax  = std::max(from0, from1);
-            const Pt::int32_t toMin    = std::min(to0,   to1  );
-            const Pt::int32_t toMax    = std::max(to0,   to1  );
-
-            Pt::int32_t from = 1000;
-            Pt::int32_t to   = -1000;
-            // Handle cases when both the "from" nodes are valid
-            if(from0val && from1val) {
-                // Calculate the alphas of the left-part of the span
-                for(Pt::int32_t iterX = fromMin; iterX <= fromMax; ++iterX) {
-                    alphas[iterX / 2] += FSAA_MIN_ALPHA;
-                }
-                alphas[fromMax / 2] += FSAA_MIN_ALPHA;
-                // Set the alphas of the boundary edge of the middle-part of the span
-                alphas[(fromMax + 1) / 2] = FSAA_MAX_ALPHA;
-
-                from = (fromMax + 1) / 2;
+        for(Pt::int32_t i = 0; i < nodes0; i += 2) {
+            const Pt::int32_t from = nodeX0[i    ];
+            const Pt::int32_t to   = nodeX0[i + 1];
+            for(Pt::int32_t k = from; k <= to; ++k) {
+                alphas[k / 2] += FSAA_MIN_ALPHA;
             }
-            // Handle cases when only the "from0" nodes are valid
-            else if(from0val) {
-                // Set the alphas of the left-part of the span
-                alphas[from0 / 2] += FSAA_MIN_ALPHA;
-
-                alphas[(from0 + 1)/ 2] = FSAA_MAX_ALPHA;
-                from = (from0 + 1) / 2;
-            }
-            // Handle cases when only the "from1" nodes are valid
-            else if(from1val) {
-                // Set the alphas of the left-part of the span
-                alphas[from1 / 2] += FSAA_MIN_ALPHA;
-
-                from = (from1 + 1) / 2;
-
-                alphas[(from1 + 1)/ 2] = FSAA_MAX_ALPHA;
-            }
-            // Handle cases when both the "to" nodes are valid
-            if(to0val && to1val) {
-                // Calculate the alphas of the right-part of the span
-                for(Pt::int32_t iterX = toMin; iterX <= toMax; ++iterX) {
-                    alphas[iterX / 2] += FSAA_MIN_ALPHA;
-                }
-                alphas[toMin / 2] += FSAA_MIN_ALPHA;
-                // Set the alphas of the boundary edge of the middle-part of the span
-                alphas[(toMin - 1) / 2] = FSAA_MAX_ALPHA;
-
-                to = (toMin - 1) / 2;
-
-            }
-            // Handle cases when only the "to0" nodes are valid
-            else if(to0val) {
-                // Set the alphas of the right-part of the span
-                alphas[to0 / 2] += FSAA_MIN_ALPHA;
-
-                alphas[(to0 - 1)/ 2] = FSAA_MAX_ALPHA;
-
-                to = (to0 - 1) / 2;
-
-            }
-            // Handle cases when only the "to1" nodes are valid
-            else if(to1val) {
-                // Set the alphas of the right-part of the span
-                alphas[to1 / 2] += FSAA_MIN_ALPHA;
-
-                alphas[(to1 - 1)/ 2] = FSAA_MAX_ALPHA;
-
-                to = (to1 - 1) / 2;
-
-            }
-
-          //  if(to >= from) memset(&alphas[from], FSAA_MAX_ALPHA, to-from+1);
-
         }
 
-        //if(sizeY == 81) {
-        lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%d", alphas[k] / 15); lprintf("\n");
-        //}
-
-
-        Pt::int32_t iterX = 0;
-        Pt::int32_t iterR = sizeX - 1;
-
-        while(iterX <= iterR) {
-            Pixel pixel(_image->view(), minX + iterX, minY + pixelY);
-            _image->format().setPixel(pixel, color, _compositionMode, FSAA_SCALE_ALPHA(alphas[iterX]));
-            ++iterX;
-        }
-
-/*
-continue;
-        // Skip fully-transparent pixels ad the beginning and end of the span
-        Pt::int32_t iterL = 0;
-        Pt::int32_t iterR = sizeX - 1;
-        for(; iterL < sizeX; ++iterL) {
-            if(alphas[iterL]) break;
-        }
-        for(; iterR >= 0; --iterR) {
-            if(alphas[iterR]) break;
-        }
-
-        if(pixelY == 100 || pixelY == 179 || pixelY == 180) {
-        lprintf("%03d: ", pixelY); for(size_t k = iterL; k <= iterR; ++k) lprintf("%d", alphas[k] / 15); lprintf("\n");
-        lprintf("\n");
-        }
-
-
-        //for(Pt::int32_t k = iterL; k <= iterR; ++k) {
-
-        Pt::int32_t iterX  = iterL;
-CUK:
-
-            //
-            if(pixelY == 179) lprintf("PART_1A: iterX = %03d ; alpha = %d\n", iterX, alphas[iterX] / 15);
-            while(iterX <= iterR) {
-                if(!alphas[iterX]) break;
-                Pixel pixel(_image->view(), minX + iterX, minY + pixelY);
-                _image->format().setPixel(pixel, color, _compositionMode, FSAA_SCALE_ALPHA(alphas[iterX]));
-                ++iterX;
-
-                if(pixelY == 179) lprintf("PART_1I: iterX = %03d ; alpha = %d\n", iterX, alphas[iterX] / 15);
-
+        for(Pt::int32_t i = 0; i < nodes1; i += 2) {
+            const Pt::int32_t from = nodeX1[i    ];
+            const Pt::int32_t to   = nodeX1[i + 1];
+            for(Pt::int32_t k = from; k <= to; ++k) {
+                alphas[k / 2] += FSAA_MIN_ALPHA;
             }
-            if(pixelY == 179) lprintf("PART_1B: iterX = %03d ; alpha = %d\n", iterX, alphas[iterX] / 15);
+        }
 
-            if(pixelY == 179) lprintf("PART_2A: iterX = %03d ; alpha = %d\n", iterX, alphas[iterX] / 15);
-            while(iterX <= iterR) {
-                if(alphas[iterX]) break;
-                //if(pixelY == 179) lprintf("%d", alphas[iterX] / 15);
-
-                    Pixel pixel(_image->view(), minX + iterX, minY + pixelY);
-                    _image->format().setPixel(pixel, color, _compositionMode);
-                ++iterX;
-                if(pixelY == 179) lprintf("PART_2I: iterX = %03d ; alpha = %d ", iterX, alphas[iterX] / 15);
-            }
-            //if(pixelY == 179) lprintf("\n");
-            if(pixelY == 179) lprintf("PART_2B: iterX = %03d ; alpha = %d\n", iterX, alphas[iterX] / 15);
-
-            if(pixelY == 179) lprintf("PART_3A: iterX = %03d ; alpha = %d\n", iterX, alphas[iterX] / 15);
-            while(iterX <= iterR) {
-                if(!alphas[iterX]) break;
-                Pixel pixel(_image->view(), minX + iterX, minY + pixelY);
-                _image->format().setPixel(pixel, color, _compositionMode, FSAA_SCALE_ALPHA(alphas[iterX]));
-                ++iterX;
-
-                if(pixelY == 179) lprintf("PART_3I: iterX = %03d ; alpha = %d\n", iterX, alphas[iterX] / 15);
-            }
-            if(pixelY == 179) lprintf("PART_3B: iterX = %03d ; alpha = %d\n", iterX, alphas[iterX] / 15);
-
-           // while(iterX <= iterR) {
-             //   if(alphas[iterX]) break;
-              //  ++iterX;
-           // }
-
-            if(iterX <= iterR) goto CUK;
-
-
-
-        continue;
         // Fill the pixels between the node pairs
-        for(Pt::int32_t i = 0; i < nodes; i += 2) {
-
-            // Get the from and to coordinates
-            const Pt::int32_t from0    = nodeX0[i    ];
-            const Pt::int32_t from1    = nodeX1[i    ];
-            const Pt::int32_t to0      = nodeX0[i + 1];
-            const Pt::int32_t to1      = nodeX1[i + 1];
-            const Pt::uint8_t from0val = nodeV0[i    ];
-            const Pt::uint8_t from1val = nodeV1[i    ];
-            const Pt::int32_t to0val   = nodeV0[i + 1];
-            const Pt::int32_t to1val   = nodeV1[i + 1];
-            const Pt::int32_t fromMin  = std::min(from0, from1);
-            const Pt::int32_t fromMax  = std::max(from0, from1);
-            const Pt::int32_t toMin    = std::min(to0,   to1  );
-            const Pt::int32_t toMax    = std::max(to0,   to1  );
-
+        for(Pt::int32_t i = 0; i < nodes1; i += 2) {
             // Draw pixels that belongs to the left-part of the span to the image
-            Pt::int32_t iterL = 0;
-
-                 if(from0val && from1val) iterL = fromMin / 2 - 1;
-            else if(from0val            ) iterL = from0   / 2 - 1;
-            else if(            from1val) iterL = from1   / 2 - 1;
+            Pt::int32_t iterL = nodeX1[i] / 2 - 1; // SUPERSAMPLING_SIZE * 2;
             if(iterL < 0) iterL = 0;
-
 #ifdef USE_DUFFS_DEVICE
             if(true) { // Skip fully-transparent pixels
                 register Pt::uint8_t* src  = &alphas[0];
@@ -643,7 +509,6 @@ CUK:
                 for(; iterL < sizeX; ++iterL) {
                     // Break if we have reached the non anti-aliased part of the span
                     if(alphas[iterL] >= FSAA_MAX_ALPHA) break;
-                    //if(!alphas[iterL]) break;
                     // Draw the pixel
                     const Pt::int32_t iterX = minX + iterL;
                     const Pt::int32_t iterY = minY + pixelY;
@@ -658,20 +523,14 @@ CUK:
                 for(; iterL < sizeX; ++iterL) {
                     // Break if we have reached the non anti-aliased part of the span
                     if(alphas[iterL] >= FSAA_MAX_ALPHA) break;
-                    //if(!alphas[iterL]) break;
                     // Draw the pixel
                     Pixel pixel(_image->view(), minX + iterL, minY + pixelY);
                     _image->format().setPixel(pixel, color, _compositionMode, FSAA_SCALE_ALPHA(alphas[iterL]));
                 }
             }
             // Draw pixels that belongs to the right-part of the span to the image
-            Pt::int32_t iterR = sizeX - 1;
-
-                 if(to0val && to1val) iterR = toMax / 2 + 1;
-            else if(to0val          ) iterR = to0   / 2 + 1;
-            else if(          to1val) iterR = to1   / 2 + 1;
+            Pt::int32_t iterR = nodeX1[i + 1] / 2 + 1; // 2 * 2;
             if(iterR >= sizeX) iterR = sizeX - 1;
-
 #ifdef USE_DUFFS_DEVICE
             if(true) { // Skip fully-transparent pixels
                 register Pt::uint8_t* src  = &alphas[0];
@@ -700,7 +559,6 @@ CUK:
                 for(; iterR >= 0; --iterR) {
                     // Break if we have reached the non anti-aliased part of the span
                     if(alphas[iterR] >= FSAA_MAX_ALPHA) break;
-                    //if(!alphas[iterR]) break;
                     // Draw the pixel
                     const Pt::int32_t iterX = minX + iterR;
                     const Pt::int32_t iterY = minY + pixelY;
@@ -715,7 +573,6 @@ CUK:
                 for(; iterR >= 0; --iterR) {
                     // Break if we have reached the non anti-aliased part of the span
                     if(alphas[iterR] >= FSAA_MAX_ALPHA) break;
-                    //if(!alphas[iterR]) break;
                     // Draw the pixel
                     Pixel pixel(_image->view(), minX + iterR, minY + pixelY);
                     _image->format().setPixel(pixel, color, _compositionMode, FSAA_SCALE_ALPHA(alphas[iterR]));
@@ -754,10 +611,11 @@ CUK:
                     // Fill the span - horizontal gradient
                     else {
                         while(spanWidth > 0) {
-                            const Pt::int32_t textureX = iterX  % _brushImage->width ();
-                            const Pt::int32_t n        = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - textureX);
+                            const Pt::int32_t tX = iterX  % _brushImage->width ();
+                            const Pt::int32_t tY = pixelY % _brushImage->height();
+                            const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tX);
                             if(n) {
-                                ConstPixel srcPixel(_brushImage->view(), textureX, 0);
+                                ConstPixel srcPixel(_brushImage->view(), tX, tY);
                                 Pixel      dstPixel(_image->view(), minX + iterX, minY + pixelY);
                                 _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
                             }
@@ -787,7 +645,7 @@ CUK:
                 }
             }
         }
-            */
+
     }
 
     // Undefine the helper macros
