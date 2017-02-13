@@ -729,7 +729,8 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, const size_t* point
                     Pt::int32_t deltaYp = iterY1 - curYi;
                     Pt::int32_t interXf = FIXED_POINT_FROM_INT(curXi)
                                         + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
-                    nodeX[nodes0 + nodes1] = COORDINATE_LIMIT + FIXED_POINT_TO_INT(interXf + FIXED_POINT_CONSTANT_HALF);
+                    nodeX[nodes0 + nodes1] = COORDINATE_LIMIT
+                                           + FIXED_POINT_TO_INT(interXf + FIXED_POINT_CONSTANT_HALF);
                     ++nodes1;
                 }
                 // Update the searching index
