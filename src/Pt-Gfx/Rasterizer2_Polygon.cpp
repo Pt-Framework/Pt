@@ -462,12 +462,6 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
         // Accumulate the alphas of the samples between the node pairs
         //if(nodes0 != nodes1) lprintf("%d %d\n", nodes0, nodes1);
 
-        // 00112233   00112233
-        // #     #    0   1
-        //  #     #   0    1
-        // 01    01    1  0
-        // 10    10   1    0
-
         //*
         for(Pt::int32_t i = 0; i < std::max(nodes0, nodes1); i += 2) {
             if(i < nodes0 && i < nodes1) {
@@ -480,12 +474,18 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
                 int from;
                 int to;
 
+                // 01234567   01234567
+                // 00112233   00112233
+                // #     #    0   1
+                //  #     #   0    1
+                // 01    01    1  0
+                // 10    10   1    0
                 int from0_cell   = from0 / 2;
                 int from1_cell   = from1 / 2;
                 int from0_weight = ((from0_cell * 2) < from0) ? 1 : 2;
                 int from1_weight = ((from1_cell * 2) < from1) ? 1 : 2;
                 if(from0_cell == from1_cell) {
-                    alphas[from0_cell] = (from0_weight + from1_weight) * FSAA_MIN_ALPHA;
+                    alphas[from1_cell] = (from0_weight + from1_weight) * FSAA_MIN_ALPHA;
                     from = from1_cell + 1;
                 }
                 else {
@@ -497,10 +497,16 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
                     from = from1_cell + 1;
                 }
 
+                // 01234567   01234567
+                // 00112233   00112233
+                // #     #    0   1
+                //  #     #   0    1
+                // 01    01    1  0
+                // 10    10   1    0
                 int to0_cell   = to0 / 2;
                 int to1_cell   = to1 / 2;
-                int to0_weight = ((to0_cell * 2) < to0) ? 1 : 2;
-                int to1_weight = ((to1_cell * 2) < to1) ? 1 : 2;
+                int to0_weight = ((to0_cell * 2) < to0) ? 2 : 1;
+                int to1_weight = ((to1_cell * 2) < to1) ? 2 : 1;
                 if(to0_cell == to1_cell) {
                     alphas[to0_cell] = (to0_weight + to1_weight) * FSAA_MIN_ALPHA;
                     to = to0_cell - 1;
