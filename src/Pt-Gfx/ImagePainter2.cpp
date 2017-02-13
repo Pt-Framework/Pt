@@ -39,7 +39,8 @@ namespace Pt {
 namespace Gfx {
 
 
-const PointF ImagePainter2::PolygonSeparatorPointF(99999, 99999);
+const PointF      ImagePainter2::PolygonSeparatorPointF(99999, 99999);
+const Pt::int32_t ImagePainter2::MaximumCoordinate = 65535;
 
 ImagePainter2::ImagePainter2(Image& image)
 : _rasterizer( new Rasterizer2(image))
@@ -183,7 +184,9 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount )
 void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount, Pt::uint8_t antiAliasingLevel )
 {
     // Check if we need to add a closing separator point
-    const bool   addCSP = !( (ps[pointCount - 1].x() > 65535 && ps[pointCount - 1].y() > 65535) );
+    const bool   addCSP = !( ps[pointCount - 1].x() > ImagePainter2::MaximumCoordinate &&
+                             ps[pointCount - 1].y() > ImagePainter2::MaximumCoordinate
+                           );
     const size_t effPC  = addCSP ? (pointCount + 1) : pointCount;
 
     // Copy the points and add a closing separator point as needed

@@ -62,3 +62,5 @@
 #define FIXED_POINT_FROM_INT(V)     ( (V) << FIXED_POINT_SHIFT_FACTOR )
 #define FIXED_POINT_TO_INT(V)       ( (V) >> FIXED_POINT_SHIFT_FACTOR )
 
+// Coordinate limit
+#define COORDINATE_LIMIT ImagePainter2::MaximumCoordinate

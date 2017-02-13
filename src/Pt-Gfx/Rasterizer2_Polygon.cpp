@@ -56,10 +56,10 @@ void Rasterizer2::strokePolygon(const Point* points, size_t pointCount)
 void Rasterizer2::fillPolygon(const Point* points, size_t pointCount, Pt::uint8_t antiAliasingLevel)
 {
     // Minimum and maximum coordinate values for all the polygons
-    Pt::int32_t minX =  65535;
-    Pt::int32_t minY =  65535;
-    Pt::int32_t maxX = -65535;
-    Pt::int32_t maxY = -65535;
+    Pt::int32_t minX =  COORDINATE_LIMIT;
+    Pt::int32_t minY =  COORDINATE_LIMIT;
+    Pt::int32_t maxX = -COORDINATE_LIMIT;
+    Pt::int32_t maxY = -COORDINATE_LIMIT;
 
     // Separate the polygons and clip their coordinates
     std::vector<Point > clippedPoints;
@@ -67,7 +67,7 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount, Pt::uint8_
     size_t              startIndex = 0;
     for(size_t i = 0; i < pointCount; ++i) {
         // Search for the separator point
-        if(points[i].x() > 65535 && points[i].y() > 65535) {
+        if(points[i].x() > COORDINATE_LIMIT && points[i].y() > COORDINATE_LIMIT) {
             // Calculate the number of points for this polygon
             const size_t curPC = i - startIndex;
             // Clip the coordinates
@@ -125,7 +125,7 @@ void Rasterizer2::fillPolygonSeparate(const Point* points, size_t pointCount, Pt
 
     for(size_t i = 0; i < pointCount; ++i) {
         // Search for the separator point
-        if(points[i].x() > 65535 && points[i].y() > 65535) {
+        if(points[i].x() > COORDINATE_LIMIT && points[i].y() > COORDINATE_LIMIT) {
             // Calculate the number of points for this polygon
             const size_t curPC = i - startIndex;
             // Clip the coordinates
@@ -727,7 +727,7 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, const size_t* point
                     Pt::int32_t deltaXj = curXj  - curXi;
                     Pt::int32_t interXf = FIXED_POINT_FROM_INT(curXi)
                                         + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
-                    nodeX[nodes0 + nodes1] = 65535 + FIXED_POINT_TO_INT(interXf + FIXED_POINT_CONSTANT_HALF);
+                    nodeX[nodes0 + nodes1] = COORDINATE_LIMIT + FIXED_POINT_TO_INT(interXf + FIXED_POINT_CONSTANT_HALF);
                     ++nodes1;
                 }
                 // Update the searching index
@@ -750,10 +750,12 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, const size_t* point
         }
         // Accumulate the alphas of the samples between the node pairs
         for(Pt::int32_t i = 0; i < (nodes0 + nodes1); i += 2) {
+            // Get the coordinates
             Pt::int32_t from = nodeX[i    ];
             Pt::int32_t to   = nodeX[i + 1];
-            if(from > 65535) from -= 65535;
-            if(to   > 65535) to   -= 65535;
+            if(from > COORDINATE_LIMIT) from -= COORDINATE_LIMIT;
+            if(to   > COORDINATE_LIMIT) to   -= COORDINATE_LIMIT;
+            // Accumulate the alphas
 #ifdef USE_DUFFS_DEVICE
             register Pt::uint8_t* dst = &alphas[0];
             register Pt::int32_t  cnt = to - from + 1;

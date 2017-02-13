@@ -44,7 +44,8 @@ class Rasterizer2;
 class PT_GFX_API ImagePainter2 : public Painter
 {
     public:
-         static const PointF PolygonSeparatorPointF;
+         static const PointF      PolygonSeparatorPointF;
+         static const Pt::int32_t MaximumCoordinate;
 
     public:
         ImagePainter2( Image& image );
