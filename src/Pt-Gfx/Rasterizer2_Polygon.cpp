@@ -158,7 +158,7 @@ void Rasterizer2::fillPolygonSeparate(const Point* points, size_t pointCount, Pt
 
 // Uncomment this to use Duff's device
 // NOTE: enabling this one seems to only improve performance by 1.5% for SourceOver
-#define USE_DUFFS_DEVICE
+//#define USE_DUFFS_DEVICE
 
 // Uncomment this to use putPixels() for drawing solid colors
 // NOTE: enabling this one seems to only improve performance by ~23% for SourceOver
@@ -224,11 +224,11 @@ void Rasterizer2::rasterPolygonAreaNOAA(const Point* points, const size_t* point
                     // Bail out if we have produced too many nodes
                     if((size_t) nodes >= nodeX.size()) return;
                     // Calculate the node's coordinate
-                    Pt::int32_t deltaYp = pixelY - curYi;
-                    Pt::int32_t deltaYj = curYj  - curYi;
-                    Pt::int32_t deltaXj = curXj  - curXi;
-                    Pt::int32_t interXf = FIXED_POINT_FROM_INT(curXi)
-                                        + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
+                    const Pt::int32_t deltaYp = pixelY - curYi;
+                    const Pt::int32_t deltaYj = curYj  - curYi;
+                    const Pt::int32_t deltaXj = curXj  - curXi;
+                    const Pt::int32_t interXf = FIXED_POINT_FROM_INT(curXi)
+                                              + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
                     nodeX[nodes++] = FIXED_POINT_TO_INT(interXf + FIXED_POINT_CONSTANT_HALF);
                 }
                 // Update the search index
@@ -375,24 +375,26 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
                 const Pt::int32_t curYi = *(curPointBaseY + i);
                 const Pt::int32_t curXj = *(curPointBaseX + j);
                 const Pt::int32_t curYj = *(curPointBaseY + j);
-                // Calculate the nodes' coordinates
-                // Row (Y)
-                const Pt::int32_t deltaYp0 = iterY0 - curYi;
-                const Pt::int32_t deltaYj  = curYj  - curYi;
-                const Pt::int32_t deltaXj  = curXj  - curXi;
-                const Pt::int32_t interXf0 = FIXED_POINT_FROM_INT(curXi)
-                                           + FIXED_POINT_FROM_INT(deltaYp0) / deltaYj * deltaXj;
-                nodeX0[nodes] = FIXED_POINT_TO_INT(interXf0 + FIXED_POINT_CONSTANT_HALF);
-                // Row (Y + 1)
-                const Pt::int32_t deltaYp1 = iterY1 - curYi;
-                const Pt::int32_t interXf1 = FIXED_POINT_FROM_INT(curXi)
-                                           + FIXED_POINT_FROM_INT(deltaYp1) / deltaYj * deltaXj;
-                nodeX1[nodes] = FIXED_POINT_TO_INT(interXf1 + FIXED_POINT_CONSTANT_HALF);
                 // Check the nodes' validity
-                nodeV0[nodes] = ( nodeX0[nodes] >= 0 ) && ( ( curYi < iterY0 && curYj >= iterY0 ) || ( curYj < iterY0 && curYi >= iterY0 ) );
-                nodeV1[nodes] = ( nodeX1[nodes] >= 0 ) && ( ( curYi < iterY1 && curYj >= iterY1 ) || ( curYj < iterY1 && curYi >= iterY1 ) );
-                // Increment the number of nodes as needed
-                if(nodeV0[nodes] || nodeV1[nodes]) ++nodes;
+                nodeV0[nodes] = ( ( curYi < iterY0 && curYj >= iterY0 ) || ( curYj < iterY0 && curYi >= iterY0 ) );
+                nodeV1[nodes] = ( ( curYi < iterY1 && curYj >= iterY1 ) || ( curYj < iterY1 && curYi >= iterY1 ) );
+                // Calculate the nodes' coordinates
+                if(nodeV0[nodes] || nodeV1[nodes]) {
+                    // Row (Y)
+                    const Pt::int32_t deltaYp0 = iterY0 - curYi;
+                    const Pt::int32_t deltaYj  = curYj  - curYi;
+                    const Pt::int32_t deltaXj  = curXj  - curXi;
+                    const Pt::int32_t interXf0 = FIXED_POINT_FROM_INT(curXi)
+                                               + FIXED_POINT_FROM_INT(deltaYp0) / deltaYj * deltaXj;
+                    nodeX0[nodes] = FIXED_POINT_TO_INT(interXf0 + FIXED_POINT_CONSTANT_HALF);
+                    // Row (Y + 1)
+                    const Pt::int32_t deltaYp1 = iterY1 - curYi;
+                    const Pt::int32_t interXf1 = FIXED_POINT_FROM_INT(curXi)
+                                               + FIXED_POINT_FROM_INT(deltaYp1) / deltaYj * deltaXj;
+                    nodeX1[nodes] = FIXED_POINT_TO_INT(interXf1 + FIXED_POINT_CONSTANT_HALF);
+                    // Increment the number of nodes
+                    ++nodes;
+                }
                 // Update the search index
                 j = i;
             }
@@ -444,16 +446,15 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
             // Handle cases when only the "from0" nodes are valid
             else if(from0val) {
                 // Set the alphas of the left-part of the span
-                alphas[from0 / 2    ] += FSAA_MID_ALPHA;
-                // Set the alphas of the boundary edge of the middle-part of the span
-                alphas[from0 / 2 + 1] = FSAA_MAX_ALPHA;
+                alphas[from0 / 2] += FSAA_MIN_ALPHA;
             }
             // Handle cases when only the "from1" nodes are valid
             else if(from1val) {
                 // Set the alphas of the left-part of the span
-                alphas[from1 / 2    ] += FSAA_MID_ALPHA;
-                // Set the alphas of the boundary edge of the middle-part of the span
-                alphas[from1 / 2 + 1] = FSAA_MAX_ALPHA;
+                alphas[from1 / 2] += FSAA_MIN_ALPHA;
+            }
+            else {
+                lprintf("FFF\n");
             }
             // Handle cases when both the "to" nodes are valid
             if(to0val && to1val) {
@@ -468,20 +469,18 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
             // Handle cases when only the "to0" nodes are valid
             else if(to0val) {
                 // Set the alphas of the right-part of the span
-                alphas[to0 / 2    ] += FSAA_MID_ALPHA;
-                // Set the alphas of the boundary edge of the middle-part of the span
-                alphas[to0 / 2 - 1] = FSAA_MAX_ALPHA;
+                alphas[to0 / 2] += FSAA_MIN_ALPHA;
             }
             // Handle cases when only the "to1" nodes are valid
             else if(to1val) {
                 // Set the alphas of the right-part of the span
-                alphas[to1 / 2    ] += FSAA_MID_ALPHA;
-                // Set the alphas of the boundary edge of the middle-part of the span
-                alphas[to1 / 2 - 1] = FSAA_MAX_ALPHA;
+                alphas[to1 / 2] += FSAA_MIN_ALPHA;
+            }
+            else {
+                lprintf("TTT\n");
             }
         }
-        lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%d", alphas[k] / 15); lprintf("\n");
-
+        //lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%d", alphas[k] / 15); lprintf("\n");
         // Fill the pixels between the node pairs
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
             // Draw pixels that belongs to the left-part of the span to the image
@@ -513,7 +512,7 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
             if(_isTexture || _isGradient) { // Texture or gradient
                 for(; iterL < sizeX; ++iterL) {
                     // Break if we have reached the non anti-aliased part of the span
-                    if(alphas[iterL] >= FSAA_MAX_ALPHA) break;
+                    if(!alphas[iterL]) break;
                     // Draw the pixel
                     const Pt::int32_t iterX = minX + iterL;
                     const Pt::int32_t iterY = minY + pixelY;
@@ -527,7 +526,7 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
             else { // Solid color
                 for(; iterL < sizeX; ++iterL) {
                     // Break if we have reached the non anti-aliased part of the span
-                    if(alphas[iterL] >= FSAA_MAX_ALPHA) break;
+                    if(!alphas[iterL]) break;
                     // Draw the pixel
                     Pixel pixel(_image->view(), minX + iterL, minY + pixelY);
                     _image->format().setPixel(pixel, color, _compositionMode, FSAA_SCALE_ALPHA(alphas[iterL]));
@@ -562,7 +561,7 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
             if(_isTexture || _isGradient) { // Texture or gradient
                 for(; iterR >= 0; --iterR) {
                     // Break if we have reached the non anti-aliased part of the span
-                    if(alphas[iterR] >= FSAA_MAX_ALPHA) break;
+                    if(!alphas[iterR]) break;
                     // Draw the pixel
                     const Pt::int32_t iterX = minX + iterR;
                     const Pt::int32_t iterY = minY + pixelY;
@@ -576,12 +575,13 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
             else { // Solid color
                 for(; iterR >= 0; --iterR) {
                     // Break if we have reached the non anti-aliased part of the span
-                    if(alphas[iterR] >= FSAA_MAX_ALPHA) break;
+                    if(!alphas[iterR]) break;
                     // Draw the pixel
                     Pixel pixel(_image->view(), minX + iterR, minY + pixelY);
                     _image->format().setPixel(pixel, color, _compositionMode, FSAA_SCALE_ALPHA(alphas[iterR]));
                 }
             }
+            continue;
             // Draw pixels that belongs to the middle-part of the span to the image
             if(iterR >= iterL) {
                 // Draw the span using texture
@@ -709,12 +709,12 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, const size_t* point
                     // Bail out if we have produced too many nodes
                     if((size_t) nodes >= nodeX.size()) return;
                     // Calculate the node's coordinate
-                    Pt::int32_t deltaYp = pixelY - curYi;
-                    Pt::int32_t deltaYj = curYj  - curYi;
-                    Pt::int32_t deltaXj = curXj  - curXi;
+                    const Pt::int32_t deltaYp = pixelY - curYi;
+                    const Pt::int32_t deltaYj = curYj  - curYi;
+                    const Pt::int32_t deltaXj = curXj  - curXi;
                     // Calculate the node's coordinate
-                    Pt::int32_t interXf = FIXED_POINT_FROM_INT(curXi)
-                                        + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
+                    const Pt::int32_t interXf = FIXED_POINT_FROM_INT(curXi)
+                                              + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
                     nodeX[nodes++] = FIXED_POINT_TO_INT(interXf + FIXED_POINT_CONSTANT_HALF);
                 }
                 // Update the search index
