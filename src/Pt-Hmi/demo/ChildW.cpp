@@ -137,7 +137,21 @@ ChildW::ChildW(const std::string& title)
     _comboBox.setName("ComboBox");
     _comboBox.setMargin(5);
     _comboBox.resize( Gfx::SizeF(66, 26) );
+    _comboBox.setMaxHeight(150);
     _comboBox.selected() += Pt::slot(*this, &ChildW::onComboSelected);
+
+    for(unsigned n = 0; n < 10; ++n)
+    {
+        ListBoxItem* item = new ListBoxItem;
+        item->resize( Gfx::SizeF(20, 25) );
+        
+        std::ostringstream oss;
+        oss << "Item " << n;
+        item->setText(oss.str().c_str());
+
+        _comboBox.addItem(*item);
+        _comboItems.push_back(item);
+    }
 
     _progressBar.setName("ProgressBar"); 
     _progressBar.move( Gfx::PointF(0, 0) );
@@ -186,6 +200,11 @@ ChildW::ChildW(const std::string& title)
 
 ChildW::~ChildW()
 {
+    std::vector<ListBoxItem*>::iterator it;
+    for(it = _comboItems.begin(); it != _comboItems.end(); ++it)
+    {
+        delete *it;
+    }
 }
 
 

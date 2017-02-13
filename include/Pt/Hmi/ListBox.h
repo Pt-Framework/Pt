@@ -155,7 +155,7 @@ class PT_HMI_API ListBox : public Control
 {
     typedef Control Base;
 
-      public:
+    public:
         ListBox();
         
         virtual ~ListBox();
@@ -165,6 +165,8 @@ class PT_HMI_API ListBox : public Control
         void addItem(ListBoxItem& item);
 
         void removeItem(ListBoxItem& item);
+
+        const Gfx::SizeF& itemsSize() const;
 
         Pt::Signal<ListBoxItem&>& selected();
 

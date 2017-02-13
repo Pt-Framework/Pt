@@ -339,7 +339,7 @@ void ListBoxLayout::onContentChanged()
 
     for(std::size_t i = 0; i < widgets().size(); ++i)
     {
-        ListBoxItem* item = static_cast<ListBoxItem*>(widgets().at(i));
+        Widget* item = widgets().at(i);
 
         // item size with margin
         Gfx::SizeF itemSize = item->preferredSize();
@@ -395,6 +395,12 @@ void ListBox::removeItem(ListBoxItem& item)
 {
     _layout.remove(item);
     item.selected() -= Pt::slot(*this, &ListBox::onItemSelected);
+}
+
+
+const Gfx::SizeF& ListBox::itemsSize() const
+{
+    return _layout.size();
 }
 
 

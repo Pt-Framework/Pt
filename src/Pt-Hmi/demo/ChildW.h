@@ -58,6 +58,8 @@ class ChildW : public Hmi::Window
         MenuItem _edit2;
         MenuItem _edit3;
 
+        std::vector<ListBoxItem*> _comboItems;
+
         Window         _childWindow2;
         DockingLayout  _childView;
         PushButton     _closeButton;

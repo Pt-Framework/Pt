@@ -55,6 +55,8 @@ class PT_HMI_API ComboBoxMenu : public Window
 
         void removeItem(ListBoxItem& item);
 
+        const Gfx::SizeF& itemsSize() const;
+
         void setScrollBars(bool hasScrollBars);
 
         Pt::Signal<ListBoxItem&>& selected();
@@ -95,8 +97,7 @@ class PT_HMI_API ComboBox : public Control
 
         void setEditable(bool e);
 
-        // max visible items
-        void setPopupHeight(double height);
+        void setMaxHeight(double height);
 
         const Pt::String& text() const;
 
@@ -107,6 +108,10 @@ class PT_HMI_API ComboBox : public Control
         void setTextAdjustment(Adjustment a);
 
         void setScrollBars(bool hasScrollBars);
+
+        void showPopup();
+
+        void hidePopup();
 
         Pt::Signal<const Pt::String&>& textEdited();
 
@@ -164,8 +169,6 @@ class PT_HMI_API ComboBox : public Control
         virtual void onFocusEvent(const FocusEvent& ev);
 
     private:
-        void onShowPopup();
-
         void onItemSelected(ListBoxItem& item);
         
         void processKeyEvent(const KeyEvent& ev);
@@ -178,7 +181,7 @@ class PT_HMI_API ComboBox : public Control
         LineEditor   _editor;
         TextLine     _line;
         ComboBoxMenu _popup;
-        double       _popupHeight;
+        double       _maxHeight;
         double       _textPadding;
         bool         _isEditable;
         

@@ -530,12 +530,13 @@ void Widget::onInvalidateEvent(const InvalidateEvent& ev)
 
 void Widget::onInvalidate()
 {
-    Gfx::SizeF s = _autoSize ? onAutoSize() : _size;
+    Gfx::SizeF size = preferredSize();
 
-    if( s != preferredSize() )
+    if(_autoSize)
+        _preferredSize = onAutoSize();
+
+    if( size != preferredSize() )
     {
-        _preferredSize = s;
-
         if( parent() )
            parent()->onLayout();
     }
@@ -550,12 +551,18 @@ bool Widget::isAutoSize() const
 
 void Widget::setAutoSize(bool a)
 {
+    Gfx::SizeF size = preferredSize();
+
     _autoSize = a;
 
-    _preferredSize = onAutoSize();
+    if(_autoSize)
+        _preferredSize = onAutoSize();
 
-    if( parent() )
-       parent()->onLayout();
+    if( size != preferredSize() )
+    {
+        if( parent() )
+            parent()->onLayout();
+    }
 }
 
 
