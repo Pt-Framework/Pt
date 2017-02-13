@@ -486,7 +486,7 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
         }
 
         //if(sizeY == 81) {
-        //lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%d", alphas[k] / 15); lprintf("\n");
+        lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%d", alphas[k] / 15); lprintf("\n");
         //}
 
         // Skip fully-transparent pixels ad the beginning and end of the span
@@ -499,10 +499,10 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
             if(alphas[iterR]) break;
         }
 
-        if(pixelY == 100 || pixelY == 179 || pixelY == 180) {
-        lprintf("%03d: ", pixelY); for(size_t k = iterL; k <= iterR; ++k) lprintf("%d", alphas[k] / 15); lprintf("\n");
-        lprintf("\n");
-        }
+        //if(pixelY == 100 || pixelY == 179 || pixelY == 180) {
+        //lprintf("%03d: ", pixelY); for(size_t k = iterL; k <= iterR; ++k) lprintf("%d", alphas[k] / 15); lprintf("\n");
+        //lprintf("\n");
+        //}
 
 
         //for(Pt::int32_t k = iterL; k <= iterR; ++k) {
