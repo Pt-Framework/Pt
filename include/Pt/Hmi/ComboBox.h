@@ -97,8 +97,6 @@ class PT_HMI_API ComboBox : public Control
 
         void setEditable(bool e);
 
-        void setMaxHeight(double height);
-
         const Pt::String& text() const;
 
         void setText(const Pt::String& str);
@@ -108,6 +106,8 @@ class PT_HMI_API ComboBox : public Control
         void setTextAdjustment(Adjustment a);
 
         void setScrollBars(bool hasScrollBars);
+
+        void setMaxHeight(double height);
 
         void showPopup();
 

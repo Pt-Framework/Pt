@@ -208,12 +208,6 @@ void ComboBox::setEditable(bool e)
 }
 
 
-void ComboBox::setMaxHeight(double height)
-{
-    _maxHeight = height;
-}
-
-
 const Pt::String& ComboBox::text() const
 {
     return _editor.text();
@@ -243,6 +237,31 @@ void ComboBox::setTextAdjustment(Adjustment a)
 void ComboBox::setScrollBars(bool hasScrollBars)
 {
     _popup.setScrollBars(hasScrollBars);
+}
+
+
+void ComboBox::setMaxHeight(double height)
+{
+    _maxHeight = height;
+}
+
+
+void ComboBox::showPopup()
+{
+    double height = std::min(_popup.itemsSize().height(), _maxHeight);
+    _popup.resize( Gfx::SizeF(size().width(), height) );
+
+    Gfx::PointF pos(0, size().height());
+    pos = this->toScreen(pos);
+    _popup.move(pos);
+
+    _popup.show();
+}
+
+
+void ComboBox::hidePopup()
+{
+    _popup.show(false);
 }
 
 
@@ -374,27 +393,6 @@ void ComboBox::setRenderer(ComboBoxRenderer* renderer)
     _hasRenderer = renderer != 0;
 
     invalidate();
-}
-
-
-void ComboBox::showPopup()
-{
-    double height = std::min(_popup.itemsSize().height(), _maxHeight);
-
-    _popup.resize( Gfx::SizeF(size().width(), height) );
-
-    Gfx::PointF pos(0, size().height());
-    pos = this->toScreen(pos);
-    _popup.move(pos);
-
-    _popup.show();
-    _popup.activate();
-}
-
-
-void ComboBox::hidePopup()
-{
-    _popup.show(false);
 }
 
 
