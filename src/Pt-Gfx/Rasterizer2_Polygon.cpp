@@ -329,7 +329,7 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
     Pt::int32_t sizeY = (maxY - minY + 1);
 
     // Prepare a work buffer
-    std::vector<Pt::uint8_t> alphas(maxX - minX + 1, 0);
+    std::vector<Pt::uint8_t> alphas(sizeX, 0);
 
     // Scale the polygon twice as big
     std::vector<Pt::int32_t> pointX(totalPointCount, 0);
@@ -384,7 +384,7 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
                                            + FIXED_POINT_FROM_INT(deltaYp0) / deltaYj * deltaXj;
                 nodeX0[nodes] = FIXED_POINT_TO_INT(interXf0 + FIXED_POINT_CONSTANT_HALF);
                 // Row (Y + 1)
-                const Pt::int32_t deltaYp1 = iterY1    - curYi;
+                const Pt::int32_t deltaYp1 = iterY1 - curYi;
                 const Pt::int32_t interXf1 = FIXED_POINT_FROM_INT(curXi)
                                            + FIXED_POINT_FROM_INT(deltaYp1) / deltaYj * deltaXj;
                 nodeX1[nodes] = FIXED_POINT_TO_INT(interXf1 + FIXED_POINT_CONSTANT_HALF);
@@ -438,28 +438,27 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
                 for(Pt::int32_t iterX = fromMin; iterX <= fromMax; ++iterX) {
                     alphas[iterX / 2] += FSAA_MIN_ALPHA;
                 }
-                alphas[fromMax / 2] += FSAA_MIN_ALPHA;
+               // alphas[fromMax / 2] += FSAA_MIN_ALPHA;
                 // Set the alphas of the boundary edge of the middle-part of the span
-                alphas[(fromMax + 1) / 2] = FSAA_MAX_ALPHA;
+            //    alphas[(fromMax + 1) / 2] = FSAA_MAX_ALPHA;
             }
             // Handle cases when only the "from0" nodes are valid
             else if(from0val) {
                 // Set the alphas of the left-part of the span
-               // alphas[from0 / 2    ] = FSAA_MID_ALPHA;
+                alphas[from0 / 2    ] = FSAA_MID_ALPHA;
                 // Set the alphas of the boundary edge of the middle-part of the span
-               // alphas[from0 / 2 + 1] = FSAA_MAX_ALPHA;
+              //  alphas[from0 / 2 + 1] = FSAA_MAX_ALPHA;
             }
             // Handle cases when only the "from1" nodes are valid
             else if(from1val) {
                 // Set the alphas of the left-part of the span
-               // alphas[from1 / 2    ] = FSAA_MID_ALPHA;
+                alphas[from1 / 2    ] = FSAA_MID_ALPHA;
                 // Set the alphas of the boundary edge of the middle-part of the span
-               // alphas[from1 / 2 + 1] = FSAA_MAX_ALPHA;
+              //  alphas[from1 / 2 + 1] = FSAA_MAX_ALPHA;
             }
             else {
                 lprintf("FFF\n");
             }
-            //for(size_t k = 0; k < alphas.size(); ++k) lprintf("%d", alphas[k] / 15); lprintf("\n");
 
             // Handle cases when both the "to" nodes are valid
             if(to0val && to1val) {
@@ -469,27 +468,28 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
                 }
                 alphas[toMin / 2] += FSAA_MIN_ALPHA;
                 // Set the alphas of the boundary edge of the middle-part of the span
-                alphas[(toMin   - 1) / 2] = FSAA_MAX_ALPHA;
+              //  alphas[(toMin   - 1) / 2] = FSAA_MAX_ALPHA;
             }
             // Handle cases when only the "to0" nodes are valid
             else if(to0val) {
                 // Set the alphas of the right-part of the span
-               // alphas[to0 / 2    ] = FSAA_MID_ALPHA;
+                alphas[to0 / 2    ] = FSAA_MID_ALPHA;
                 // Set the alphas of the boundary edge of the middle-part of the span
-               // alphas[to0 / 2 - 1] = FSAA_MAX_ALPHA;
+              //  alphas[to0 / 2 - 1] = FSAA_MAX_ALPHA;
             }
             // Handle cases when only the "to1" nodes are valid
             else if(to1val) {
                 // Set the alphas of the right-part of the span
-               // alphas[to1 / 2    ] = FSAA_MID_ALPHA;
+                alphas[to1 / 2    ] = FSAA_MID_ALPHA;
                 // Set the alphas of the boundary edge of the middle-part of the span
-               // alphas[to1 / 2 - 1] = FSAA_MAX_ALPHA;
+              //  alphas[to1 / 2 - 1] = FSAA_MAX_ALPHA;
             }
             else {
                 lprintf("TTT\n");
             }
 
-            //lprintf("B: "); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%d ", alphas[k] / 15); lprintf("\n");
+            lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%d", alphas[k] / 15); lprintf("\n");
+
             // Draw pixels that belongs to the left-part of the span to the image
             Pt::int32_t iterL = 0;
 #ifdef USE_DUFFS_DEVICE
@@ -766,9 +766,9 @@ void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, const size_t* point
             }
 #endif
         }
-        //for(size_t k = 0; k < alphas.size(); ++k) lprintf("%d", alphas[k] / 15); lprintf("\n");
         // Simply skip the next steps if we have not got all the needed samples
         if( ((pixelY + 1) % SUPERSAMPLING_SIZE) ) continue;
+        //lprintf("%03d: ", pixelY / SUPERSAMPLING_SIZE); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%d", alphas[k] / 15); lprintf("\n");
         // Fill the pixels between the node pairs
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
             // Draw pixels that belongs to the left-part of the span to the image
