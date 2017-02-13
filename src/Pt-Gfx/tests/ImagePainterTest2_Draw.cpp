@@ -224,7 +224,7 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(860 + 40 -  0, 130 - 20 + 40),
         PointF(860 + 40 - 30, 130 - 20 + 15)
     };
-    //if(ip2) ip2->fillPolygon(poly4, sizeof(poly4) / sizeof(poly4[0]), 2);
+    if(ip2) ip2->fillPolygon(poly4, sizeof(poly4) / sizeof(poly4[0]), 1);
 
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);

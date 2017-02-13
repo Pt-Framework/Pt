@@ -460,6 +460,74 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
         memset(&alphas[0], 0, alphas.size());
 
         // Accumulate the alphas of the samples between the node pairs
+        //if(nodes0 != nodes1) lprintf("%d %d\n", nodes0, nodes1);
+
+        for(Pt::int32_t i = 0; i < std::max(nodes0, nodes1); i += 2) {
+            if(i < nodes0 && i < nodes1) {
+                const Pt::int32_t from0 = nodeX0[i    ];
+                const Pt::int32_t to0   = nodeX0[i + 1];
+                const Pt::int32_t from1 = nodeX1[i    ];
+                const Pt::int32_t to1   = nodeX1[i + 1];
+
+                Pt::int32_t from;
+                Pt::int32_t to;
+
+                if(from0 == from1) {
+                    from = from0;
+                }
+                else if(from0 < from1) {
+                    from = from1;
+                    for(Pt::int32_t k = from0; k < from1; ++k) {
+                        alphas[k / 2] += FSAA_MIN_ALPHA;
+                    }
+                }
+                else if(from0 > from1) {
+                    from = from0;
+                    for(Pt::int32_t k = from1; k < from0; ++k) {
+                        alphas[k / 2] += FSAA_MIN_ALPHA;
+                    }
+                }
+
+                if(to0 == to1) {
+                    to = to0;
+                }
+                else if(to0 < to1) {
+                    to = to1;
+                    for(Pt::int32_t k = to0 + 1; k <= to1; ++k) {
+                        alphas[k / 2] += FSAA_MIN_ALPHA;
+                    }
+                }
+                else if(to0 > to1) {
+                    to = to0;
+                    for(Pt::int32_t k = to1 + 1; k <= to0; ++k) {
+                        alphas[k / 2] += FSAA_MIN_ALPHA;
+                    }
+                }
+
+                for(Pt::int32_t k = from; k <= to; ++k) {
+                    alphas[k / 2] += FSAA_MID_ALPHA;
+                }
+
+            }
+            else {
+                if(i < nodes0) {
+                    const Pt::int32_t from = nodeX0[i    ];
+                    const Pt::int32_t to   = nodeX0[i + 1];
+                    for(Pt::int32_t k = from; k <= to; ++k) {
+                        alphas[k / 2] += FSAA_MIN_ALPHA;
+                    }
+                }
+                if(i < nodes1) {
+                    const Pt::int32_t from = nodeX1[i    ];
+                    const Pt::int32_t to   = nodeX1[i + 1];
+                    for(Pt::int32_t k = from; k <= to; ++k) {
+                        alphas[k / 2] += FSAA_MIN_ALPHA;
+                    }
+                }
+            }
+        }
+
+        /*
         for(Pt::int32_t i = 0; i < nodes0; i += 2) {
             const Pt::int32_t from = nodeX0[i    ];
             const Pt::int32_t to   = nodeX0[i + 1];
@@ -475,6 +543,7 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
                 alphas[k / 2] += FSAA_MIN_ALPHA;
             }
         }
+        */
 
         // Fill the pixels between the node pairs
         for(Pt::int32_t i = 0; i < nodes1; i += 2) {
