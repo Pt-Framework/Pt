@@ -447,23 +447,69 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
         // 001: 2344442
         // 002: 0012440
         // 003: 0000010
-
-        /*
-        for(Pt::int32_t i = 0; i < nodes0; i += 2) {
-            const Pt::int32_t from = nodeX0[i    ];
-            const Pt::int32_t to   = nodeX0[i + 1];
-            for(Pt::int32_t k = from; k <= to; ++k) {
-                alphas[k / 2] += FSAA_MIN_ALPHA;
+        // The number of nodes within the two rows are equal
+        if(nodes0 != nodes1) {
+            for(Pt::int32_t i = 0; i < nodes0; i += 2) {
+                // Calculate the cells and coverage areas
+                const Pt::int32_t from0      = std::min(nodeX0[i    ], nodeX1[i    ]);
+                const Pt::int32_t from1      = std::max(nodeX0[i    ], nodeX1[i    ]);
+                const Pt::int32_t to0        = std::min(nodeX0[i + 1], nodeX1[i + 1]);
+                const Pt::int32_t to1        = std::max(nodeX0[i + 1], nodeX1[i + 1]);
+                const Pt::int32_t from0_cell = from0 / 2;
+                const Pt::int32_t from1_cell = from1 / 2;
+                const Pt::int32_t to0_cell   = to0   / 2;
+                const Pt::int32_t to1_cell   = to1   / 2;
+                const Pt::int32_t from0_area = ( (from0_cell * 2) < from0 ) ? FSAA_MIN_ALPHA : FSAA_MID_ALPHA;
+                const Pt::int32_t from1_area = ( (from1_cell * 2) < from1 ) ? FSAA_MIN_ALPHA : FSAA_MID_ALPHA;
+                const Pt::int32_t to0_area   = ( (to0_cell   * 2) < to0   ) ? FSAA_MID_ALPHA : FSAA_MIN_ALPHA;
+                const Pt::int32_t to1_area   = ( (to1_cell   * 2) < to1   ) ? FSAA_MID_ALPHA : FSAA_MIN_ALPHA;
+                // Calculate alphas for the left side
+                if(from0_cell == from1_cell) {
+                    alphas[from0_cell] = from0_area + from1_area;
+                }
+                else {
+                    alphas[from0_cell] = from0_area;
+                    alphas[from1_cell] = from1_area + FSAA_MID_ALPHA;
+                    for(Pt::int32_t k = (from0_cell + 1); k <= (from1_cell - 1); ++k) {
+                        alphas[k] = FSAA_MID_ALPHA;
+                    }
+                }
+                // Calculate alphas for the right side
+                if(to0_cell == to1_cell) {
+                    alphas[to0_cell] = to0_area + to1_area;
+                }
+                else {
+                    alphas[to0_cell] = to0_area + FSAA_MID_ALPHA;
+                    alphas[to1_cell] = to1_area;
+                    for(Pt::int32_t k = (to0_cell + 1); k <= (to1_cell - 1); ++k) {
+                        alphas[k] = FSAA_MID_ALPHA;
+                    }
+                }
+                // Assign alphas for the middle side
+                for(Pt::int32_t k (from1_cell + 1); k <= (to0_cell - 1); ++k) {
+                    alphas[k] = FSAA_MAX_ALPHA;
+                }
             }
         }
-        for(Pt::int32_t i = 0; i < nodes1; i += 2) {
-            const Pt::int32_t from = nodeX1[i    ];
-            const Pt::int32_t to   = nodeX1[i + 1];
-            for(Pt::int32_t k = from; k <= to; ++k) {
-                alphas[k / 2] += FSAA_MIN_ALPHA;
+        // The number of nodes within the two rows are not equal
+        else {
+            /*
+            for(Pt::int32_t i = 0; i < nodes0; i += 2) {
+                const Pt::int32_t from = nodeX0[i    ];
+                const Pt::int32_t to   = nodeX0[i + 1];
+                for(Pt::int32_t k = from; k <= to; ++k) {
+                    alphas[k / 2] += FSAA_MIN_ALPHA;
+                }
             }
+            for(Pt::int32_t i = 0; i < nodes1; i += 2) {
+                const Pt::int32_t from = nodeX1[i    ];
+                const Pt::int32_t to   = nodeX1[i + 1];
+                for(Pt::int32_t k = from; k <= to; ++k) {
+                    alphas[k / 2] += FSAA_MIN_ALPHA;
+                }
+            }
+            */
         }
-        //*/
 
         lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%d", alphas[k]); lprintf("\n");
 
