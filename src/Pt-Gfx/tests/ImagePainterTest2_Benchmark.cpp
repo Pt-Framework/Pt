@@ -157,26 +157,44 @@ static size_t benchDrawFillPolygon(int loopCount, const Brush& brushH, const Bru
         clock.start();
 
         painter.setBrush(brushH);
-        const PointF poly1[] = { // CCW
+        const PointF poly1a[] = { // CCW
             PointF(150, 100),
             PointF(350, 350),
             PointF(450, 250),
             PointF(250, 100),
             PointF( 50,  50)
         };
-        if(ip2) ip2->fillPolygon(poly1, sizeof(poly1) / sizeof(poly1[0]), antiAliasingLevel);
-        else    painter.fillPolygon(poly1, sizeof(poly1) / sizeof(poly1[0]));
+        if(ip2) ip2->fillPolygon(poly1a, sizeof(poly1a) / sizeof(poly1a[0]), antiAliasingLevel);
+        else    painter.fillPolygon(poly1a, sizeof(poly1a) / sizeof(poly1a[0]));
 
         painter.setBrush(brushV);
-        const PointF poly2[] = { // CCW
+        const PointF poly1b[] = { // CCW
             PointF(350, 100),
             PointF(550, 350),
             PointF(650, 250),
             PointF(450, 100),
             PointF(250,  50)
         };
-        if(ip2) ip2->fillPolygon(poly2, sizeof(poly2) / sizeof(poly2[0]), antiAliasingLevel);
-        else    painter.fillPolygon(poly2, sizeof(poly2) / sizeof(poly2[0]));
+        if(ip2) ip2->fillPolygon(poly1b, sizeof(poly1b) / sizeof(poly1b[0]), antiAliasingLevel);
+        else    painter.fillPolygon(poly1b, sizeof(poly1b) / sizeof(poly1b[0]));
+
+        const PointF poly2a[] = { // CCW
+            PointF(110, 310),
+            PointF(160, 340),
+            PointF(210, 310),
+            PointF(140, 260)
+        };
+        if(ip2) ip2->fillPolygon(poly2a, sizeof(poly2a) / sizeof(poly2a[0]), antiAliasingLevel);
+        else    painter.fillPolygon(poly2a, sizeof(poly2a) / sizeof(poly2a[0]));
+
+        const PointF poly2b[] = { // CCW
+            PointF(110, 410),
+            PointF(160, 440),
+            PointF(210, 410),
+            PointF(140, 360)
+        };
+        if(ip2) ip2->fillPolygon(poly2b, sizeof(poly2b) / sizeof(poly2b[0]), antiAliasingLevel);
+        else    painter.fillPolygon(poly2b, sizeof(poly2b) / sizeof(poly2b[0]));
 
         sum += clock.stop().toUSecs();
 

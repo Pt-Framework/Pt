@@ -34,21 +34,35 @@ static size_t gdBenchFillPolygon(int loopCount, CompositionMode cm)
         gdImageAlphaBlending(gdImg, (cm == CompositionMode::SourceOver) ? 1 : 0);
         gdImageSetAntiAliased(gdImg, white);
 
-        gdPoint poly1[5]; // CCW
-        poly1[0].x = 150; poly1[0].y = 100;
-        poly1[1].x = 350, poly1[1].y = 350;
-        poly1[2].x = 450, poly1[2].y = 250;
-        poly1[3].x = 250, poly1[3].y = 100;
-        poly1[4].x =  50, poly1[4].y =  50;
-        gdImageFilledPolygon(gdImg, poly1, 5, gdAntiAliased);
+        gdPoint poly1a[5]; // CCW
+        poly1a[0].x = 150; poly1a[0].y = 100;
+        poly1a[1].x = 350, poly1a[1].y = 350;
+        poly1a[2].x = 450, poly1a[2].y = 250;
+        poly1a[3].x = 250, poly1a[3].y = 100;
+        poly1a[4].x =  50, poly1a[4].y =  50;
+        gdImageFilledPolygon(gdImg, poly1a, 5, gdAntiAliased);
 
-        gdPoint poly2[5]; // CCW
-        poly2[0].x = 350; poly2[0].y = 100;
-        poly2[1].x = 550, poly2[1].y = 350;
-        poly2[2].x = 650, poly2[2].y = 250;
-        poly2[3].x = 450, poly2[3].y = 100;
-        poly2[4].x = 250, poly2[4].y =  50;
-        gdImageFilledPolygon(gdImg, poly2, 5, gdAntiAliased);
+        gdPoint poly1b[5]; // CCW
+        poly1b[0].x = 350; poly1b[0].y = 100;
+        poly1b[1].x = 550, poly1b[1].y = 350;
+        poly1b[2].x = 650, poly1b[2].y = 250;
+        poly1b[3].x = 450, poly1b[3].y = 100;
+        poly1b[4].x = 250, poly1b[4].y =  50;
+        gdImageFilledPolygon(gdImg, poly1b, 5, gdAntiAliased);
+
+        gdPoint poly2a[5]; // CCW
+        poly2a[0].x = 110; poly2a[0].y = 310;
+        poly2a[1].x = 160, poly2a[1].y = 340;
+        poly2a[2].x = 210, poly2a[2].y = 310;
+        poly2a[3].x = 140, poly2a[3].y = 260;
+        gdImageFilledPolygon(gdImg, poly2a, 4, gdAntiAliased);
+
+        gdPoint poly2b[5]; // CCW
+        poly2b[0].x = 110; poly2b[0].y = 410;
+        poly2b[1].x = 160, poly2b[1].y = 440;
+        poly2b[2].x = 210, poly2b[2].y = 410;
+        poly2b[3].x = 140, poly2b[3].y = 360;
+        gdImageFilledPolygon(gdImg, poly2b, 4, gdAntiAliased);
 
         sum += clock.stop().toUSecs();
 

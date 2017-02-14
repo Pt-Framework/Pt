@@ -47,6 +47,26 @@ static size_t cairoBenchFillPolygon(int loopCount, CompositionMode cm)
         cairo_clip_preserve(cairo);
         cairo_fill         (cairo);
 
+        cairo_reset_clip   (cairo);
+        cairo_new_path     (cairo);
+        cairo_move_to      (cairo, 110, 310); // CCW
+        cairo_line_to      (cairo, 160, 340);
+        cairo_line_to      (cairo, 210, 310);
+        cairo_line_to      (cairo, 140, 260);
+        cairo_close_path   (cairo);
+        cairo_clip_preserve(cairo);
+        cairo_fill         (cairo);
+
+        cairo_reset_clip   (cairo);
+        cairo_new_path     (cairo);
+        cairo_move_to      (cairo, 110, 410); // CCW
+        cairo_line_to      (cairo, 160, 440);
+        cairo_line_to      (cairo, 210, 410);
+        cairo_line_to      (cairo, 140, 360);
+        cairo_close_path   (cairo);
+        cairo_clip_preserve(cairo);
+        cairo_fill         (cairo);
+
         sum += clock.stop().toUSecs();
 
         BENCHMARK_CAIRO_DISPLAY_RESULTING_IMAGE;
