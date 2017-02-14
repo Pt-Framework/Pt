@@ -63,8 +63,8 @@ static void cairoBenchmark(CompositionMode cm)
 {
     double time1, time2;
 
-    std::clog << "                                                   (Time) (Factor)" << std::endl;
-    std::clog << "                                                   ------ --------" << std::endl;
+    std::clog << "                                                       (Time) (Factor)" << std::endl;
+    std::clog << "                                                       ------ --------" << std::endl;
 
     // Filled polygons
     if(BENCHMARK_SOLID_FILLED_POLYGON) {
