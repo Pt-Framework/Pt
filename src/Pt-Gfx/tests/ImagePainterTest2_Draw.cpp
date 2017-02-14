@@ -23,9 +23,9 @@ static void testDrawLine(const char* title, Image& image, Painter& painter)
 
     painter.drawLine( PointF(100,  10), PointF(110,  20) );
 
-    painter.setPen( Pen(Color::fromRgb8( 63,  63,  63, 175)) ); painter.drawLine( PointF(500-50, 500), PointF(200-50, 200) );
-    painter.setPen( Pen(Color::fromRgb8(127, 127, 127, 175)) ); painter.drawLine( PointF(500   , 500), PointF(200   , 200) );
-    painter.setPen( Pen(Color::fromRgb8(255, 255, 255, 175)) ); painter.drawLine( PointF(500+50, 500), PointF(200+50, 200) );
+    painter.setPen( Color::fromRgb8( 63,  63,  63, 175) ); painter.drawLine( PointF(500-50, 500), PointF(200-50, 200) );
+    painter.setPen( Color::fromRgb8(127, 127, 127, 175) ); painter.drawLine( PointF(500   , 500), PointF(200   , 200) );
+    painter.setPen( Color::fromRgb8(255, 255, 255, 175) ); painter.drawLine( PointF(500+50, 500), PointF(200+50, 200) );
                                                                 painter.drawLine( PointF(300   , 200), PointF(700   , 100) );
     painter.drawLine( PointF(770,  11), PointF(770, 500) );
     painter.drawLine( PointF(780,  11), PointF(782, 500) );
@@ -33,8 +33,8 @@ static void testDrawLine(const char* title, Image& image, Painter& painter)
     painter.drawLine( PointF( 10, 540), PointF(781, 540) );
     painter.drawLine( PointF(781, 552), PointF( 10, 550) );
 
-    painter.setPen( Pen(Color::fromRgb8(0, 255, 255, 255)) ); painter.drawText( PointF(100, 175), "Hello world!" );
-    painter.setPen( Pen(Color::fromRgb8(0, 255, 255, 175)) ); painter.drawText( PointF(100, 225), "Hello world!" );
+    painter.setPen( Color::fromRgb8(0, 255, 255, 255) ); painter.drawText( PointF(100, 175), "Hello world!" );
+    painter.setPen( Color::fromRgb8(0, 255, 255, 175) ); painter.drawText( PointF(100, 225), "Hello world!" );
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
 }
@@ -86,6 +86,8 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
 
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(&painter);
 
+    painter.setPen( Color::fromRgb8(255, 0, 0) );
+
     painter.setBrush( Color::fromRgb8(255, 255, 255, 175) );
     painter.fillRect( RectF( PointF(800, 120), SizeF(170, 130) ) );
     painter.fillRect( RectF( PointF(170, 250), SizeF(800, 200) ) );
@@ -103,8 +105,7 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
     };
     if(ip2) ip2   ->fillPolygon(poly1a, sizeof(poly1a) / sizeof(poly1a[0]), 0);
     else    painter.fillPolygon(poly1a, sizeof(poly1a) / sizeof(poly1a[0]));
-
-    //painter.setPen( Pen(Color::fromRgb8(255, 255, 255,)) ); painter.drawText( PointF(100, 100), "NOAA" );
+    painter.drawText( PointF(30, 50), "NOAA" );
 
     const PointF poly1b[] = { // CCW
         PointF(100 + 198, 100),
@@ -115,6 +116,7 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
     };
     if(ip2) ip2   ->fillPolygon(poly1b, sizeof(poly1b) / sizeof(poly1b[0]), 1);
     else    painter.fillPolygon(poly1b, sizeof(poly1b) / sizeof(poly1b[0]));
+    painter.drawText( PointF(30 + 198, 50), "FSAA 2x2" );
 
     const PointF poly1c[] = { // CCW
         PointF(100 + 391, 100),
@@ -125,6 +127,7 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
     };
     if(ip2) ip2   ->fillPolygon(poly1c, sizeof(poly1b) / sizeof(poly1b[0]), 2);
     else    painter.fillPolygon(poly1c, sizeof(poly1b) / sizeof(poly1b[0]));
+    painter.drawText( PointF(30 + 391, 50), "SSAA 4x4" );
 
 
     painter.setBrush( brush2 );
@@ -137,6 +140,7 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
     };
     if(ip2) ip2   ->fillPolygon(poly2a, sizeof(poly2a) / sizeof(poly2a[0]), 0);
     else    painter.fillPolygon(poly2a, sizeof(poly2a) / sizeof(poly2a[0]));
+    painter.drawText( PointF(10, 250 + 100), "NOAA" );
 
     const PointF poly2b[] = { // CCW
         PointF(110, 310 + 100),
@@ -146,6 +150,7 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
     };
     if(ip2) ip2   ->fillPolygon(poly2b, sizeof(poly2b) / sizeof(poly2b[0]), 1);
     else    painter.fillPolygon(poly2b, sizeof(poly2b) / sizeof(poly2b[0]));
+    painter.drawText( PointF(10, 250 + 200), "FSAA 2x2" );
 
     const PointF poly2c[] = { // CCW
         PointF(110, 310 + 200),
@@ -155,6 +160,7 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
     };
     if(ip2) ip2   ->fillPolygon(poly2c, sizeof(poly2b) / sizeof(poly2b[0]), 2);
     else    painter.fillPolygon(poly2c, sizeof(poly2b) / sizeof(poly2b[0]));
+    painter.drawText( PointF(10, 250 + 300), "SSAA 4x4" );
 
 
     painter.setBrush( brush1 );
@@ -173,6 +179,7 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
     };
     if(ip2) ip2   ->fillPolygon(poly3a, sizeof(poly3a) / sizeof(poly3a[0]), 0);
     else    painter.fillPolygon(poly3a, sizeof(poly3a) / sizeof(poly3a[0]));
+    painter.drawText( PointF(330, 530), "NOAA" );
 
     const PointF poly3b[] = { // CCW
         // Outside
@@ -188,6 +195,7 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
     };
     if(ip2) ip2   ->fillPolygon(poly3b, sizeof(poly3b) / sizeof(poly3b[0]), 1);
     else    painter.fillPolygon(poly3b, sizeof(poly3b) / sizeof(poly3b[0]));
+    painter.drawText( PointF(330 + 220, 530), "FSAA 2x2" );
 
     const PointF poly3c[] = { // CCW
         // Outside
@@ -203,6 +211,7 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
     };
     if(ip2) ip2   ->fillPolygon(poly3c, sizeof(poly3c) / sizeof(poly3c[0]), 2);
     else    painter.fillPolygon(poly3c, sizeof(poly3c) / sizeof(poly3c[0]));
+    painter.drawText( PointF(330 + 460, 530), "SSAA 4x4" );
 
 
     painter.setBrush( brush2 );
@@ -227,6 +236,7 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(860 + 40 - 30, 130 - 20 + 15)
     };
     if(ip2) ip2->fillPolygon(poly4, sizeof(poly4) / sizeof(poly4[0]), 1);
+    painter.drawText( PointF(680, 70), "FSAA 2x2" );
 
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
