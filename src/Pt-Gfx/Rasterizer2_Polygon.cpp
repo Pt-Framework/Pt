@@ -443,12 +443,8 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
         // Reset the alphas
         memset(&alphas[0], 0, alphas.size());
         // Accumulate the alphas of the samples between the node pairs
-        // 000: 0022210
-        // 001: 2344442
-        // 002: 0012440
-        // 003: 0000010
-        // The number of nodes within the two rows are equal
-        if(nodes0 != nodes1) {
+        // --- the number of nodes within the two rows are equal ---
+        if(nodes0 == nodes1) {
             for(Pt::int32_t i = 0; i < nodes0; i += 2) {
                 // Calculate the cells and coverage areas
                 const Pt::int32_t from0      = std::min(nodeX0[i    ], nodeX1[i    ]);
@@ -491,9 +487,9 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
                 }
             }
         }
-        // The number of nodes within the two rows are not equal
+        // Accumulate the alphas of the samples between the node pairs
+        // --- the number of nodes within the two rows are not equal --
         else {
-            /*
             for(Pt::int32_t i = 0; i < nodes0; i += 2) {
                 const Pt::int32_t from = nodeX0[i    ];
                 const Pt::int32_t to   = nodeX0[i + 1];
@@ -508,115 +504,12 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
                     alphas[k / 2] += FSAA_MIN_ALPHA;
                 }
             }
-            */
         }
-
-        lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%d", alphas[k]); lprintf("\n");
-
-
-        /*
-        for(Pt::int32_t i = 0; i < std::max(nodes0, nodes1); i += 2) {
-            if(i < nodes0 && i < nodes1) {
-                const Pt::int32_t from0 = std::min(nodeX0[i    ], nodeX1[i    ]);
-                const Pt::int32_t from1 = std::max(nodeX0[i    ], nodeX1[i    ]);
-
-                const Pt::int32_t to0   = std::min(nodeX0[i + 1], nodeX1[i + 1]);
-                const Pt::int32_t to1   = std::max(nodeX0[i + 1], nodeX1[i + 1]);
-
-                int from;
-                int to;
-
-                // 01234567   01234567
-                // 00112233   00112233
-                // #     #    0   1
-                //  #     #   0    1
-                // 01    01    1  0
-                // 10    10   1    0
-                int from0_cell   = from0 / 2;
-                int from1_cell   = from1 / 2;
-                int from0_weight = ((from0_cell * 2) < from0) ? 1 : 2;
-                int from1_weight = ((from1_cell * 2) < from1) ? 1 : 2;
-                if(from0_cell == from1_cell) {
-                    alphas[from1_cell] = (from0_weight + from1_weight) * FSAA_MIN_ALPHA;
-                    from = from1_cell + 1;
-                }
-                else {
-                    alphas[from0_cell] = (from0_weight               ) * FSAA_MIN_ALPHA;
-                    alphas[from1_cell] = (               from1_weight) * FSAA_MIN_ALPHA;
-                    for(Pt::int32_t k = from0_cell + 1; k < from1_cell - 1; ++k) {
-                        alphas[k] = FSAA_MID_ALPHA;
-                    }
-                    from = from1_cell + 1;
-                }
-
-                // 01234567   01234567
-                // 00112233   00112233
-                // #     #    0   1
-                //  #     #   0    1
-                // 01    01    1  0
-                // 10    10   1    0
-                int to0_cell   = to0 / 2;
-                int to1_cell   = to1 / 2;
-                int to0_weight = ((to0_cell * 2) < to0) ? 2 : 1;
-                int to1_weight = ((to1_cell * 2) < to1) ? 2 : 1;
-                if(to0_cell == to1_cell) {
-                    alphas[to0_cell] = (to0_weight + to1_weight) * FSAA_MIN_ALPHA;
-                    to = to0_cell - 1;
-                }
-                else {
-                    alphas[to0_cell] = (to0_weight               ) * FSAA_MIN_ALPHA;
-                    alphas[to1_cell] = (               to1_weight) * FSAA_MIN_ALPHA;
-                    for(Pt::int32_t k = to0_cell + 1; k < to1_cell - 1; ++k) {
-                        alphas[k] = FSAA_MID_ALPHA;
-                    }
-                    to = to0_cell - 1;
-                }
-
-                for(Pt::int32_t k = from; k <= to; ++k) {
-                    alphas[k] = FSAA_MAX_ALPHA;
-                }
-            }
-            else {
-                if(i < nodes0) {
-                    const Pt::int32_t from = nodeX0[i    ];
-                    const Pt::int32_t to   = nodeX0[i + 1];
-                    for(Pt::int32_t k = from; k <= to; ++k) {
-                        alphas[k / 2] += FSAA_MIN_ALPHA;
-                    }
-                }
-                if(i < nodes1) {
-                    const Pt::int32_t from = nodeX1[i    ];
-                    const Pt::int32_t to   = nodeX1[i + 1];
-                    for(Pt::int32_t k = from; k <= to; ++k) {
-                        alphas[k / 2] += FSAA_MIN_ALPHA;
-                    }
-                }
-            }
-        }
-        //*/
-
-        /*
-        for(Pt::int32_t i = 0; i < nodes0; i += 2) {
-            const Pt::int32_t from = nodeX0[i    ];
-            const Pt::int32_t to   = nodeX0[i + 1];
-            for(Pt::int32_t k = from; k <= to; ++k) {
-                alphas[k / 2] += FSAA_MIN_ALPHA;
-            }
-        }
-
-        for(Pt::int32_t i = 0; i < nodes1; i += 2) {
-            const Pt::int32_t from = nodeX1[i    ];
-            const Pt::int32_t to   = nodeX1[i + 1];
-            for(Pt::int32_t k = from; k <= to; ++k) {
-                alphas[k / 2] += FSAA_MIN_ALPHA;
-            }
-        }
-        //*/
-continue;
+        // lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%d", alphas[k]); lprintf("\n");
         // Fill the pixels between the node pairs
-        for(Pt::int32_t i = 0; i < nodes1; i += 2) {
+        for(Pt::int32_t i = 0; i < nodes0; i += 2) {
             // Draw pixels that belongs to the left-part of the span to the image
-            Pt::int32_t iterL = nodeX1[i] / 2 - 1; // SUPERSAMPLING_SIZE * 2;
+            Pt::int32_t iterL = nodeX0[i] / 2 - 1; // SUPERSAMPLING_SIZE * 2;
             if(iterL < 0) iterL = 0;
 #ifdef USE_DUFFS_DEVICE
             if(true) { // Skip fully-transparent pixels
@@ -666,7 +559,7 @@ continue;
                 }
             }
             // Draw pixels that belongs to the right-part of the span to the image
-            Pt::int32_t iterR = nodeX1[i + 1] / 2 + 1; // 2 * 2;
+            Pt::int32_t iterR = nodeX0[i + 1] / 2 + 1; // 2 * 2;
             if(iterR >= sizeX) iterR = sizeX - 1;
 #ifdef USE_DUFFS_DEVICE
             if(true) { // Skip fully-transparent pixels
