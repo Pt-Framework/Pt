@@ -38,7 +38,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_CAIRO_CHECK_RESULTING_IMAGE 0
 
 // Comparison with GD
-#define DO_BENCHMARKING_GD                 0
+#define DO_BENCHMARKING_GD                 1
 #define BENCHMARK_GD_CHECK_RESULTING_IMAGE 0
 
 // Detailed-test enable settings
@@ -49,8 +49,8 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES 0
 
 #define TEST_DRAW_SOLID_FILLED_POLYGONS        1
-#define TEST_DRAW_GRADIENT_FILLED_POLYGONS     1
-#define TEST_DRAW_TEXTURE_FILLED_POLYGONS      1
+#define TEST_DRAW_GRADIENT_FILLED_POLYGONS     0
+#define TEST_DRAW_TEXTURE_FILLED_POLYGONS      0
 
 #define TEST_COMPARE_WITH_OLD_PAINTER          0
 

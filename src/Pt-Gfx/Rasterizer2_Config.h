@@ -66,4 +66,4 @@
 #define COORDINATE_LIMIT ImagePainter2::MaximumCoordinate
 
 // Supersampling size for SSAA (2 or 4)
-#define SUPERSAMPLING_SIZE 2
+#define SUPERSAMPLING_SIZE 4

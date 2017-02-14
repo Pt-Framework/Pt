@@ -104,6 +104,8 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
     if(ip2) ip2   ->fillPolygon(poly1a, sizeof(poly1a) / sizeof(poly1a[0]), 0);
     else    painter.fillPolygon(poly1a, sizeof(poly1a) / sizeof(poly1a[0]));
 
+    //painter.setPen( Pen(Color::fromRgb8(255, 255, 255,)) ); painter.drawText( PointF(100, 100), "NOAA" );
+
     const PointF poly1b[] = { // CCW
         PointF(100 + 198, 100),
         PointF(300 + 198, 350),
