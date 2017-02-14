@@ -86,22 +86,6 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
 
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(&painter);
 
-    /*
-    painter.setBrush( brush1 );
-    const PointF xxx[] = { // CCW
-        PointF(0, 2),
-        PointF(4, 1),
-        PointF(6, 2),
-        PointF(5, 4)
-
-    };
-    if(ip2) ip2->fillPolygon(xxx, sizeof(xxx) / sizeof(xxx[0]), 1);
-    sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
-    return;
-    //*/
-
-
-
     painter.setBrush( Color::fromRgb8(255, 255, 255, 175) );
     painter.fillRect( RectF( PointF(800, 120), SizeF(170, 130) ) );
     painter.fillRect( RectF( PointF(170, 250), SizeF(800, 200) ) );

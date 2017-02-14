@@ -34,7 +34,7 @@ using namespace Pt::Gfx;
 #define DO_BENCHMARKING 0
 
 // Comparison with Cairo
-#define DO_BENCHMARKING_CAIRO                 0
+#define DO_BENCHMARKING_CAIRO                 1
 #define BENCHMARK_CAIRO_CHECK_RESULTING_IMAGE 0
 
 // Comparison with GD
@@ -57,7 +57,7 @@ using namespace Pt::Gfx;
 // Detailed-test benchmark settings
 #define BENCHMARK_CHECK_RESULTING_IMAGE     0
 #define BENCHMARK_IMAGE_SIZE                Size(1280, 800)
-#define BENCHMARK_LOOP_COUNT                500
+#define BENCHMARK_LOOP_COUNT                5000
 
 #define BENCHMARK_TEXT                      1
 #define BENCHMARK_LINE                      1
