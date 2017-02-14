@@ -101,7 +101,7 @@ class PT_GFX_API ImagePainter2 : public Painter
     public:
         // Just to make it API compatible with the Painter base class
         virtual void fillPolygon(const PointF* points, const size_t pointCount)
-        { fillPolygon(points, pointCount, 2); }
+        { fillPolygon(points, pointCount, 1); }
 
     public:
         static void setFontDir(const System::Path& path);

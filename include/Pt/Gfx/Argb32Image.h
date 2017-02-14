@@ -62,11 +62,11 @@ class Argb32Model
     public:
 
 // Uncomment this to replace constant division with multiply-and-shift
-// NOTE: enabling this one seems does not reduce or improve performance in an x86_64
+// NOTE: Enabling this optimization deos not seem to reduce or increase performance on an x86_64
 //#define USE_MULTIPLY_SHIFT_FOR_CONSTANT_DIVISION
 
 // Uncomment this to use Duff's device
-// NOTE: enabling this one seems does not reduce or improve performance, except in -O0
+// NOTE: Enabling this optimization deos not seem to reduce or increase performance, EXCEPT when using -O0
 #define USE_DUFFS_DEVICE
 
         /*

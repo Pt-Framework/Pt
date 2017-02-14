@@ -156,11 +156,11 @@ void Rasterizer2::fillPolygonSeparate(const Point* points, size_t pointCount, Pt
 // ======================================================================================
 
 // Uncomment this to use Duff's device
-// NOTE: enabling this one seems to only improve performance by 1.5% for SourceOver
-//#define USE_DUFFS_DEVICE
+// NOTE: Enabling this optimization deos not seem to reduce or increase performance, EXCEPT when using -O0
+#define USE_DUFFS_DEVICE
 
 // Uncomment this to use putPixels() for drawing solid colors
-// NOTE: enabling this one seems to only improve performance by ~23% for SourceOver
+// NOTE: enabling this one seems to only improve performance by ~26% for SourceOver
 #define USE_PUTPIXELS_FOR_SOLID_COLOR
 
 void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount, const Color& color)
@@ -194,7 +194,7 @@ void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount, c
         rasterOnePixelGLineSegment(lineX[0], lineY[0], lineX[pc1], lineY[pc1], color, true);
 }
 
-// Based on http://alienryderflex.com/polygon_fill
+// Inspired by http://alienryderflex.com/polygon_fill
 // Public-domain code by Darel Rex Finley, 2007
 void Rasterizer2::rasterPolygonAreaNOAA(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
 {
@@ -320,7 +320,7 @@ void Rasterizer2::rasterPolygonAreaNOAA(const Point* points, const size_t* point
     }
 }
 
-// Partially based on http://alienryderflex.com/polygon_fill
+// Inspired by http://alienryderflex.com/polygon_fill
 // Public-domain code by Darel Rex Finley, 2007
 void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
 {
@@ -426,20 +426,6 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
                 ++i;
             }
         }
-
-        /*
-        for(Pt::int32_t i = 0; i < nodes0; ++i) {
-            lprintf("(0) %02d %02d\n", nodeX0[i], nodeX0[i + 1]);
-        }
-        lprintf("\n");
-
-        for(Pt::int32_t i = 0; i < nodes1; ++i) {
-            lprintf("(1) %02d %02d\n", nodeX1[i], nodeX1[i + 1]);
-        }
-        lprintf("\n");
-        lprintf("\n");
-        //*/
-
         // Reset the alphas
         memset(&alphas[0], 0, alphas.size());
         // Accumulate the alphas of the samples between the node pairs
@@ -482,9 +468,8 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
                     }
                 }
                 // Assign alphas for the middle side
-                for(Pt::int32_t k (from1_cell + 1); k <= (to0_cell - 1); ++k) {
-                    alphas[k] = FSAA_MAX_ALPHA;
-                }
+                const Pt::int32_t len = (to0_cell - 1) - (from1_cell + 1) + 1;
+                if(len > 0) memset(&alphas[from1_cell + 1], FSAA_MAX_ALPHA, len);
             }
         }
         // Accumulate the alphas of the samples between the node pairs
@@ -675,7 +660,6 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
                 }
             }
         }
-
     }
 
     // Undefine the helper macros
@@ -685,7 +669,7 @@ void Rasterizer2::rasterPolygonAreaFSAA(const Point* points, const size_t* point
     #undef FSAA_MAX_ALPHA
 }
 
-// Partially based on http://alienryderflex.com/polygon_fill
+// Inspired by http://alienryderflex.com/polygon_fill
 // Public-domain code by Darel Rex Finley, 2007
 void Rasterizer2::rasterPolygonAreaSSAA(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
 {
