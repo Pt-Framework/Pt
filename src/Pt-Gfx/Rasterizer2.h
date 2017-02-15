@@ -50,6 +50,11 @@ class Rasterizer2
 
         ~Rasterizer2();
 
+        void setAntiAliasingLevel(Pt::uint8_t level)
+        {
+            _aaLevel = level;
+        }
+
         void setImage(Image& image);
 
         const ImageFormat& format() const;
@@ -104,14 +109,14 @@ class Rasterizer2
         void strokePolygon(const Point* points, size_t pointCount);
 
         void fillRect(const Point& tl, const Point& br);
-        void fillPolygon(const Point* points, size_t pointCount, Pt::uint8_t antiAliasingLevel);
-        void fillPolygonSeparate(const Point* points, size_t pointCount, Pt::uint8_t antiAliasingLevel);
+        void fillPolygon(const Point* points, size_t pointCount);
+        void fillPolygonSeparate(const Point* points, size_t pointCount);
 
     private:
         void rasterOnePixelLine(const Point& a, const Point& b);
         void rasterOnePixelHLineSegment(Pt::int32_t x1, Pt::int32_t x2, Pt::int32_t y, const Color& color, bool skipLastPoint);
         void rasterOnePixelVLineSegment(Pt::int32_t x, Pt::int32_t y1, Pt::int32_t y2, const Color& color, bool skipLastPoint);
-        void rasterOnePixelGLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, const Color& color, bool skipLastPoint);
+        void rasterOnePixelGLineSegmentXWAA(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, const Color& color, bool skipLastPoint);
 
         void rasterOnePixelRectOutline(const Point& tl, const Point& br);
         void rasterRectArea(const Point& tl, const Point& br);
@@ -128,6 +133,8 @@ class Rasterizer2
         void getPolygonRectMinMax(const Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY);
 
     private:
+        Pt::uint8_t     _aaLevel;
+
         Image*          _image;
         DrawText*       _text;
         Font            _font;

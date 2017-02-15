@@ -52,6 +52,8 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual ~ImagePainter2();
 
+        void setAntiAliasingLevel(Pt::uint8_t level);
+
         void setImage(Image& image);
 
         virtual const ImageFormat& format() const;
@@ -88,24 +90,15 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual void drawEllipse(const PointF& topLeft, const SizeF& size);
 
-        virtual void fillEllipse(const PointF& topLeft, const SizeF& size, Pt::uint8_t antiAliasingLevel);
+        virtual void fillEllipse(const PointF& topLeft, const SizeF& size);
 
         virtual void drawPolyline(const PointF* points, const size_t pointCount);
 
-        virtual void fillPolygon(const PointF* points, const size_t pointCount, Pt::uint8_t antiAliasingLevel);
+        virtual void fillPolygon(const PointF* points, const size_t pointCount);
 
         virtual void drawImage(const PointF& to, const Image& image);
 
         virtual void drawImage(const PointF& to, const Image& image, const RectF& imageRect);
-
-    public:
-        // Just to make it API compatible with the Painter base class
-
-        virtual void fillEllipse(const PointF& topLeft, const SizeF& size)
-        { fillEllipse(topLeft, size, 1); }
-
-        virtual void fillPolygon(const PointF* points, const size_t pointCount)
-        { fillPolygon(points, pointCount, 1); }
 
     public:
         static void setFontDir(const System::Path& path);

@@ -54,7 +54,7 @@ void Rasterizer2::strokePolygon(const Point* points, size_t pointCount)
     }
 }
 
-void Rasterizer2::fillPolygon(const Point* points, size_t pointCount, Pt::uint8_t antiAliasingLevel)
+void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
 {
     // Minimum and maximum coordinate values for all the polygons
     Pt::int32_t minX =  COORDINATE_LIMIT;
@@ -95,14 +95,14 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount, Pt::uint8_
         updateGradientBrush(maxX - minX + 1, maxY - minY + 1);
 
     // Draw the polygon
-    if(antiAliasingLevel == 0) {
+    if(_aaLevel == 0) {
         rasterPolygonAreaJaggies(
             clippedPoints.data(), clippedCounts.data(),
             clippedCounts.size(), clippedPoints.size(),
             _brush.color(), minX, minY, maxX, maxY
         );
     }
-    else if(antiAliasingLevel == 1) {
+    else if(_aaLevel == 1) {
         rasterPolygonAreaFSAA2x2(
             clippedPoints.data(), clippedCounts.data(),
             clippedCounts.size(), clippedPoints.size(),
@@ -118,7 +118,7 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount, Pt::uint8_
     }
 }
 
-void Rasterizer2::fillPolygonSeparate(const Point* points, size_t pointCount, Pt::uint8_t antiAliasingLevel)
+void Rasterizer2::fillPolygonSeparate(const Point* points, size_t pointCount)
 {
     // Separate the polygons, clip their coordinates, and raster them
     size_t startIndex = 0;
@@ -142,9 +142,9 @@ void Rasterizer2::fillPolygonSeparate(const Point* points, size_t pointCount, Pt
             // Get the number of points for drawing this polygon
             const size_t numPoint[1] = { clipped.size() };
             // Draw the polygon
-            if(antiAliasingLevel == 0)
+            if(_aaLevel == 0)
                 rasterPolygonAreaJaggies(clipped.data(), numPoint, 1, clipped.size(), _brush.color(), minX, minY, maxX, maxY);
-            else if(antiAliasingLevel == 1) // Produces artifacts at almost every corner vertex
+            else if(_aaLevel == 1) // Produces artifacts at almost every corner vertex
                 rasterPolygonAreaFSAA2x2(clipped.data(), numPoint, 1, clipped.size(), _brush.color(), minX, minY, maxX, maxY);
             else
                 rasterPolygonAreaSSAA4x4(clipped.data(), numPoint, 1, clipped.size(), _brush.color(), minX, minY, maxX, maxY);
@@ -184,7 +184,7 @@ void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount, c
         else if(lineX[i] == lineX[i + 1])
             rasterOnePixelVLineSegment(lineX[i], lineY[i], lineY[i + 1], color, true);
         else
-            rasterOnePixelGLineSegment(lineX[i], lineY[i], lineX[i + 1], lineY[i + 1], color, true);
+            rasterOnePixelGLineSegmentXWAA(lineX[i], lineY[i], lineX[i + 1], lineY[i + 1], color, true);
     }
 
     if(lineY[0] == lineY[pc1])
@@ -192,7 +192,7 @@ void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount, c
     else if(lineX[0] == lineX[pc1])
         rasterOnePixelVLineSegment(lineX[0], lineY[0], lineY[pc1], color, true);
     else
-        rasterOnePixelGLineSegment(lineX[0], lineY[0], lineX[pc1], lineY[pc1], color, true);
+        rasterOnePixelGLineSegmentXWAA(lineX[0], lineY[0], lineX[pc1], lineY[pc1], color, true);
 }
 
 // Inspired by http://alienryderflex.com/polygon_fill

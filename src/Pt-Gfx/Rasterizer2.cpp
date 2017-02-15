@@ -39,7 +39,8 @@ namespace Gfx {
 // ======================================================================================
 
 Rasterizer2::Rasterizer2(Image& image)
-: _image(&image)
+: _aaLevel(1)
+, _image(&image)
 , _text( new DrawText() )
 , _font()
 , _compositionMode(CompositionMode::SourceCopy)

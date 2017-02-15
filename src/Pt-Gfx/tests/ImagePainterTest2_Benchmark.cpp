@@ -164,8 +164,8 @@ static size_t benchDrawFillPolygon(int loopCount, const Brush& brushH, const Bru
             PointF(250, 100),
             PointF( 50,  50)
         };
-        if(ip2) ip2->fillPolygon(poly1a, sizeof(poly1a) / sizeof(poly1a[0]), antiAliasingLevel);
-        else    painter.fillPolygon(poly1a, sizeof(poly1a) / sizeof(poly1a[0]));
+        if(ip2) ip2->setAntiAliasingLevel(antiAliasingLevel);
+        painter.fillPolygon(poly1a, sizeof(poly1a) / sizeof(poly1a[0]));
 
         painter.setBrush(brushV);
         const PointF poly1b[] = { // CCW
@@ -175,8 +175,7 @@ static size_t benchDrawFillPolygon(int loopCount, const Brush& brushH, const Bru
             PointF(450, 100),
             PointF(250,  50)
         };
-        if(ip2) ip2->fillPolygon(poly1b, sizeof(poly1b) / sizeof(poly1b[0]), antiAliasingLevel);
-        else    painter.fillPolygon(poly1b, sizeof(poly1b) / sizeof(poly1b[0]));
+        painter.fillPolygon(poly1b, sizeof(poly1b) / sizeof(poly1b[0]));
 
         const PointF poly2a[] = { // CCW
             PointF(110, 310),
@@ -184,8 +183,8 @@ static size_t benchDrawFillPolygon(int loopCount, const Brush& brushH, const Bru
             PointF(210, 310),
             PointF(140, 260)
         };
-        if(ip2) ip2->fillPolygon(poly2a, sizeof(poly2a) / sizeof(poly2a[0]), antiAliasingLevel);
-        else    painter.fillPolygon(poly2a, sizeof(poly2a) / sizeof(poly2a[0]));
+        if(ip2) ip2->setAntiAliasingLevel(antiAliasingLevel);
+        painter.fillPolygon(poly2a, sizeof(poly2a) / sizeof(poly2a[0]));
 
         const PointF poly2b[] = { // CCW
             PointF(110, 410),
@@ -193,8 +192,7 @@ static size_t benchDrawFillPolygon(int loopCount, const Brush& brushH, const Bru
             PointF(210, 410),
             PointF(140, 360)
         };
-        if(ip2) ip2->fillPolygon(poly2b, sizeof(poly2b) / sizeof(poly2b[0]), antiAliasingLevel);
-        else    painter.fillPolygon(poly2b, sizeof(poly2b) / sizeof(poly2b[0]));
+        painter.fillPolygon(poly2b, sizeof(poly2b) / sizeof(poly2b[0]));
 
         sum += clock.stop().toUSecs();
 
@@ -225,12 +223,12 @@ static size_t benchDrawFillEllipse(int loopCount, const Brush& brushH, const Bru
         clock.start();
 
         painter.setBrush(brushH);
-        if(ip2) ip2   ->fillEllipse( PointF (30, 60), SizeF(120, 60), antiAliasingLevel );
-        else    painter.fillEllipse( PointF (30, 60), SizeF(120, 60) );
+        if(ip2) ip2->setAntiAliasingLevel(antiAliasingLevel);
+        painter.fillEllipse( PointF (30, 60), SizeF(120, 60) );
 
         painter.setBrush(brushV);
-        if(ip2) ip2   ->fillEllipse( PointF (230, 60), SizeF(60, 120), antiAliasingLevel );
-        else    painter.fillEllipse( PointF (230, 60), SizeF(60, 120) );
+        if(ip2) ip2->setAntiAliasingLevel(antiAliasingLevel);
+        painter.fillEllipse( PointF (230, 60), SizeF(60, 120) );
 
         sum += clock.stop().toUSecs();
 

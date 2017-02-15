@@ -43,7 +43,7 @@ const PointF      ImagePainter2::PolygonSeparatorPointF(99999, 99999);
 const Pt::int32_t ImagePainter2::MaximumCoordinate = 65535;
 
 ImagePainter2::ImagePainter2(Image& image)
-: _rasterizer( new Rasterizer2(image))
+: _rasterizer(new Rasterizer2(image))
 {}
 
 ImagePainter2::~ImagePainter2()
@@ -51,9 +51,14 @@ ImagePainter2::~ImagePainter2()
     delete _rasterizer;
 }
 
+void ImagePainter2::setAntiAliasingLevel(Pt::uint8_t level)
+{
+    _rasterizer->setAntiAliasingLevel(level);
+}
+
 FontMetrics ImagePainter2::fontMetrics( const Font& font, const Pt::String& text )
 {
-    return Rasterizer2::fontMetrics( font, text );
+    return Rasterizer2::fontMetrics(font, text);
 }
 
 void ImagePainter2::setFontDir(const Pt::System::Path& path)
@@ -173,7 +178,7 @@ void ImagePainter2::drawEllipse( const PointF& topLeftIn, const SizeF& sizeIn )
 {
 }
 
-void ImagePainter2::fillEllipse( const PointF& topLeftIn, const SizeF& sizeIn, Pt::uint8_t antiAliasingLevel )
+void ImagePainter2::fillEllipse( const PointF& topLeftIn, const SizeF& sizeIn )
 {
     // Generate a polygon that approximates the ellipse
     const Pt::int32_t radiusX = sizeIn.width () / 2;
@@ -195,14 +200,14 @@ void ImagePainter2::fillEllipse( const PointF& topLeftIn, const SizeF& sizeIn, P
     }
 
     // Rasterize the polygon
-    _rasterizer->fillPolygon(points.data(), numSegs, antiAliasingLevel);
+    _rasterizer->fillPolygon(points.data(), numSegs);
 }
 
 void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount )
 {
 }
 
-void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount, Pt::uint8_t antiAliasingLevel )
+void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
 {
     // Copy the points
     std::vector<Point> points(pointCount);
@@ -211,7 +216,7 @@ void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount, Pt::
         points[i].set( ps[i].x(), ps[i].y() );
 
     // Rasterize the polygon
-    _rasterizer->fillPolygon(points.data(), pointCount, antiAliasingLevel);
+    _rasterizer->fillPolygon(points.data(), pointCount);
 }
 
 void ImagePainter2::drawImage( const PointF& toIn, const Image& image)

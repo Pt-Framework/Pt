@@ -98,7 +98,7 @@ void Rasterizer2::rasterOnePixelLine(const Point& a, const Point& b)
     const Pt::int32_t fy2 = FIXED_POINT_FROM_INT(y2);
 
     // Raster the line
-    rasterOnePixelGLineSegment(fx1, fy1, fx2, fy2, _pen.color(), false);
+    rasterOnePixelGLineSegmentXWAA(fx1, fy1, fx2, fy2, _pen.color(), false);
 }
 
 void Rasterizer2::rasterOnePixelHLineSegment(Pt::int32_t x1, Pt::int32_t x2, Pt::int32_t y, const Color& color, bool skipLastPoint)
@@ -125,7 +125,7 @@ void Rasterizer2::rasterOnePixelVLineSegment(Pt::int32_t x, Pt::int32_t y1, Pt::
 
 // Xiaolin Wu's Anti-Aliased Line Algorithm
 // https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
-void Rasterizer2::rasterOnePixelGLineSegment(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, const Color& color, bool skipLastPoint)
+void Rasterizer2::rasterOnePixelGLineSegmentXWAA(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, const Color& color, bool skipLastPoint)
 {
     // A helper macro to set pixel
     #define XW_SET_PIXEL(IMG, COL, X, Y, A)                                        \

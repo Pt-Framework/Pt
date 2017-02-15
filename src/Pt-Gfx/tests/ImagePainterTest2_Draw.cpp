@@ -2,6 +2,9 @@ static void testDrawLine(const char* title, Image& image, Painter& painter)
 {
     resetImage(image);
 
+    ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
+    if(ip2) ip2->setAntiAliasingLevel(1);
+
 #if 1
     painter.setClip( RectF (20, image.width() - 20, 20, image.height() - 20) );
     painter.setPen( Color::fromRgb8(0, 255, 0, 175) );
@@ -42,6 +45,9 @@ static void testDrawLine(const char* title, Image& image, Painter& painter)
 static void testDrawRect(const char* title, Image& image, Painter& painter)
 {
     resetImage(image);
+
+    ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
+    if(ip2) ip2->setAntiAliasingLevel(1);
 
     // Solid
     painter.setPen  ( Color::fromRgb8(255, 255,   0, 175) );
@@ -103,8 +109,8 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(200 + 5, 100),
         PointF(  0 + 5,  50)
     };
-    if(ip2) ip2   ->fillPolygon( poly1a, sizeof(poly1a) / sizeof(poly1a[0]), 0 );
-    else    painter.fillPolygon( poly1a, sizeof(poly1a) / sizeof(poly1a[0]) );
+    if(ip2) ip2->setAntiAliasingLevel(0);
+    painter.fillPolygon( poly1a, sizeof(poly1a) / sizeof(poly1a[0]) );
     painter.drawText( PointF(30, 50), "NOAA" );
 
     const PointF poly1b[] = { // CCW
@@ -114,8 +120,8 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(200 + 198, 100),
         PointF(  0 + 198,  50)
     };
-    if(ip2) ip2   ->fillPolygon( poly1b, sizeof(poly1b) / sizeof(poly1b[0]), 1 );
-    else    painter.fillPolygon( poly1b, sizeof(poly1b) / sizeof(poly1b[0]) );
+    if(ip2) ip2->setAntiAliasingLevel(1);
+    painter.fillPolygon( poly1b, sizeof(poly1b) / sizeof(poly1b[0]) );
     painter.drawText( PointF(30 + 198, 50), "FSAA 2x2" );
 
     const PointF poly1c[] = { // CCW
@@ -125,8 +131,8 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(200 + 391, 100),
         PointF(  0 + 391,  50)
     };
-    if(ip2) ip2   ->fillPolygon( poly1c, sizeof(poly1b) / sizeof(poly1b[0]), 2 );
-    else    painter.fillPolygon( poly1c, sizeof(poly1b) / sizeof(poly1b[0]) );
+    if(ip2) ip2->setAntiAliasingLevel(2);
+    painter.fillPolygon( poly1c, sizeof(poly1b) / sizeof(poly1b[0]) );
     painter.drawText( PointF(30 + 391, 50), "SSAA 4x4" );
 
 
@@ -138,8 +144,8 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(210, 310),
         PointF(140, 260)
     };
-    if(ip2) ip2   ->fillPolygon( poly2a, sizeof(poly2a) / sizeof(poly2a[0]), 0 );
-    else    painter.fillPolygon( poly2a, sizeof(poly2a) / sizeof(poly2a[0]) );
+    if(ip2) ip2->setAntiAliasingLevel(0);
+    painter.fillPolygon( poly2a, sizeof(poly2a) / sizeof(poly2a[0]) );
     painter.drawText( PointF(10, 250 + 100), "NOAA" );
 
     const PointF poly2b[] = { // CCW
@@ -148,8 +154,8 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(210, 310 + 100),
         PointF(140, 260 + 100)
     };
-    if(ip2) ip2   ->fillPolygon( poly2b, sizeof(poly2b) / sizeof(poly2b[0]), 1 );
-    else    painter.fillPolygon( poly2b, sizeof(poly2b) / sizeof(poly2b[0]) );
+    if(ip2) ip2->setAntiAliasingLevel(1);
+    painter.fillPolygon( poly2b, sizeof(poly2b) / sizeof(poly2b[0]) );
     painter.drawText( PointF(10, 250 + 200), "FSAA 2x2" );
 
     const PointF poly2c[] = { // CCW
@@ -158,8 +164,8 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(210, 310 + 200),
         PointF(140, 260 + 200)
     };
-    if(ip2) ip2   ->fillPolygon( poly2c, sizeof(poly2b) / sizeof(poly2b[0]), 2 );
-    else    painter.fillPolygon( poly2c, sizeof(poly2b) / sizeof(poly2b[0]) );
+    if(ip2) ip2->setAntiAliasingLevel(2);
+    painter.fillPolygon( poly2c, sizeof(poly2b) / sizeof(poly2b[0]) );
     painter.drawText( PointF(10, 250 + 300), "SSAA 4x4" );
 
 
@@ -177,8 +183,8 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(480 - 20, 400),
         PointF(400 - 20, 320)
     };
-    if(ip2) ip2   ->fillPolygon( poly3a, sizeof(poly3a) / sizeof(poly3a[0]), 0 );
-    else    painter.fillPolygon( poly3a, sizeof(poly3a) / sizeof(poly3a[0]) );
+    if(ip2) ip2->setAntiAliasingLevel(0);
+    painter.fillPolygon( poly3a, sizeof(poly3a) / sizeof(poly3a[0]) );
     painter.drawText( PointF(330, 530), "NOAA" );
 
     const PointF poly3b[] = { // CCW
@@ -193,8 +199,8 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(480 + 220, 400),
         PointF(400 + 220, 320)
     };
-    if(ip2) ip2   ->fillPolygon( poly3b, sizeof(poly3b) / sizeof(poly3b[0]), 1 );
-    else    painter.fillPolygon( poly3b, sizeof(poly3b) / sizeof(poly3b[0]) );
+    if(ip2) ip2->setAntiAliasingLevel(1);
+    painter.fillPolygon( poly3b, sizeof(poly3b) / sizeof(poly3b[0]) );
     painter.drawText( PointF(330 + 220, 530), "FSAA 2x2" );
 
     const PointF poly3c[] = { // CCW
@@ -209,8 +215,8 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(480 + 460, 400),
         PointF(400 + 460, 320)
     };
-    if(ip2) ip2   ->fillPolygon( poly3c, sizeof(poly3c) / sizeof(poly3c[0]), 2 );
-    else    painter.fillPolygon( poly3c, sizeof(poly3c) / sizeof(poly3c[0]) );
+    if(ip2) ip2->setAntiAliasingLevel(2);
+    painter.fillPolygon( poly3c, sizeof(poly3c) / sizeof(poly3c[0]) );
     painter.drawText( PointF(330 + 460, 530), "SSAA 4x4" );
 
 
@@ -235,7 +241,8 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(860 + 40 -  0, 130 - 20 + 40),
         PointF(860 + 40 - 30, 130 - 20 + 15)
     };
-    if(ip2) ip2->fillPolygon( poly4, sizeof(poly4) / sizeof(poly4[0]), 1 );
+    if(ip2) ip2->setAntiAliasingLevel(1);
+    painter.fillPolygon( poly4, sizeof(poly4) / sizeof(poly4[0]) );
     painter.drawText( PointF(680, 70), "FSAA 2x2" );
 
 
@@ -258,46 +265,46 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
 
     painter.setBrush( brush1 );
 
-    if(ip2) ip2   ->fillEllipse( PointF (30, 50), SizeF(120, 120), 0 );
-    else    painter.fillEllipse( PointF (30, 50), SizeF(120, 120) );
+    if(ip2) ip2->setAntiAliasingLevel(0);
+    painter.fillEllipse( PointF (30, 50), SizeF(120, 120) );
     painter.drawText( PointF(30, 30), "NOAA" );
 
-    if(ip2) ip2   ->fillEllipse( PointF (30 + 200, 50), SizeF(120, 120), 1 );
-    else    painter.fillEllipse( PointF (30 + 200, 50), SizeF(120, 120) );
+    if(ip2) ip2->setAntiAliasingLevel(1);
+    painter.fillEllipse( PointF (30 + 200, 50), SizeF(120, 120) );
     painter.drawText( PointF(30 + 200, 30), "FSAA 2x2" );
 
-    if(ip2) ip2   ->fillEllipse( PointF (30 + 400, 50), SizeF(120, 120), 2 );
-    else    painter.fillEllipse( PointF (30 + 400, 50), SizeF(120, 120) );
+    if(ip2) ip2->setAntiAliasingLevel(2);
+    painter.fillEllipse( PointF (30 + 400, 50), SizeF(120, 120) );
     painter.drawText( PointF(30 + 400, 30), "SSAA 4x4" );
 
 
     painter.setBrush( brush2 );
 
-    if(ip2) ip2   ->fillEllipse( PointF (30, 50 + 200), SizeF(120, 60), 0 );
-    else    painter.fillEllipse( PointF (30, 50 + 200), SizeF(120, 60) );
+    if(ip2) ip2->setAntiAliasingLevel(0);
+    painter.fillEllipse( PointF (30, 50 + 200), SizeF(120, 60) );
     painter.drawText( PointF(30, 30 + 200), "NOAA" );
 
-    if(ip2) ip2   ->fillEllipse( PointF (30 + 200, 50 + 200), SizeF(120, 60), 1 );
-    else    painter.fillEllipse( PointF (30 + 200, 50 + 200), SizeF(120, 60) );
+    if(ip2) ip2->setAntiAliasingLevel(1);
+    painter.fillEllipse( PointF (30 + 200, 50 + 200), SizeF(120, 60) );
     painter.drawText( PointF(30 + 200, 30 + 200), "FSAA 2x2" );
 
-    if(ip2) ip2   ->fillEllipse( PointF (30 + 400, 50 + 200), SizeF(120, 60), 2 );
-    else    painter.fillEllipse( PointF (30 + 400, 50 + 200), SizeF(120, 60) );
+    if(ip2) ip2->setAntiAliasingLevel(2);
+    painter.fillEllipse( PointF (30 + 400, 50 + 200), SizeF(120, 60) );
     painter.drawText( PointF(30 + 400, 30 + 200), "SSAA 4x4" );
 
 
     painter.setBrush( brush2 );
 
-    if(ip2) ip2   ->fillEllipse( PointF (30, 50 + 400), SizeF(60, 120), 0 );
-    else    painter.fillEllipse( PointF (30, 50 + 400), SizeF(60, 120) );
+    if(ip2) ip2->setAntiAliasingLevel(0);
+    painter.fillEllipse( PointF (30, 50 + 400), SizeF(60, 120) );
     painter.drawText( PointF(30, 30 + 400), "NOAA" );
 
-    if(ip2) ip2   ->fillEllipse( PointF (30 + 200, 50 + 400), SizeF(60, 120), 1 );
-    else    painter.fillEllipse( PointF (30 + 200, 50 + 400), SizeF(60, 120) );
+    if(ip2) ip2->setAntiAliasingLevel(1);
+    painter.fillEllipse( PointF (30 + 200, 50 + 400), SizeF(60, 120) );
     painter.drawText( PointF(30 + 200, 30 + 400), "FSAA 2x2" );
 
-    if(ip2) ip2   ->fillEllipse( PointF (30 + 400, 50 + 400), SizeF(60, 120), 2 );
-    else    painter.fillEllipse( PointF (30 + 400, 50 + 400), SizeF(60, 120) );
+    if(ip2) ip2->setAntiAliasingLevel(2);
+    painter.fillEllipse( PointF (30 + 400, 50 + 400), SizeF(60, 120) );
     painter.drawText( PointF(30 + 400, 30 + 400), "SSAA 4x4" );
 
 
