@@ -88,6 +88,159 @@
 
 <pre>
 <b>2017/02/15 - 2 (AFTER REFACTORING)</b><br/>
+Pt::Gfx - CompositionMode::SourceCopy
+                                                       (Time) (Factor)
+                                                       ------ --------
+    Text                             @ ImagePainter  =     38
+    Text                             @ ImagePainter2 =     37 ( 0.974)
+
+    Line                             @ ImagePainter  =      7
+    Line NOAA                        @ ImagePainter2 =      7 ( 1.000)
+    Line XWAA                        @ ImagePainter2 =     23 ( 3.286)
+
+    Rectangle                        @ ImagePainter  =      6
+    Rectangle                        @ ImagePainter2 =      6 ( 1.000)
+
+    Solid-filled    Rectangle        @ ImagePainter  =     34
+    Solid-filled    Rectangle        @ ImagePainter2 =     33 ( 0.971)
+
+    Gradient-filled Rectangle        @ ImagePainter  =   1020
+    Gradient-filled Rectangle        @ ImagePainter2 =     27 ( 0.026)
+
+    Texture-filled  Rectangle        @ ImagePainter  =     26
+    Texture-filled  Rectangle        @ ImagePainter2 =     23 ( 0.885)
+
+    Solid-filled    polygon          @ ImagePainter  =     56
+    Solid-filled    polygon NOAA     @ ImagePainter2 =     50 ( 0.893)
+    Solid-filled    polygon FSAA 2x2 @ ImagePainter2 =    103 ( 1.839)
+    Solid-filled    polygon SSAA 4x4 @ ImagePainter2 =   1301 (23.232)
+
+    Gradient-filled polygon          @ ImagePainter  =   1079
+    Gradient-filled polygon NOAA     @ ImagePainter2 =     58 ( 0.054)
+    Gradient-filled polygon FSAA 2x2 @ ImagePainter2 =    158 ( 0.146)
+    Gradient-filled polygon SSAA 4x4 @ ImagePainter2 =   1402 ( 1.299)
+
+    Texture-filled  polygon          @ ImagePainter  =     72
+    Texture-filled  polygon NOAA     @ ImagePainter2 =     58 ( 0.806)
+    Texture-filled  polygon FSAA 2x2 @ ImagePainter2 =    157 ( 2.181)
+    Texture-filled  polygon SSAA 4x4 @ ImagePainter2 =   1412 (19.611)
+
+    Solid-filled    ellipse          @ ImagePainter  =      6
+    Solid-filled    ellipse NOAA     @ ImagePainter2 =     21 ( 3.500)
+    Solid-filled    ellipse FSAA 2x2 @ ImagePainter2 =     35 ( 5.833)
+    Solid-filled    ellipse SSAA 4x4 @ ImagePainter2 =    231 (38.500)
+
+    Gradient-filled ellipse          @ ImagePainter  =    150
+    Gradient-filled ellipse NOAA     @ ImagePainter2 =     23 ( 0.153)
+    Gradient-filled ellipse FSAA 2x2 @ ImagePainter2 =     46 ( 0.307)
+    Gradient-filled ellipse SSAA 4x4 @ ImagePainter2 =    247 ( 1.647)
+
+    Texture-filled  ellipse          @ ImagePainter  =      8
+    Texture-filled  ellipse NOAA     @ ImagePainter2 =     22 ( 2.750)
+    Texture-filled  ellipse FSAA 2x2 @ ImagePainter2 =     45 ( 5.625)
+    Texture-filled  ellipse SSAA 4x4 @ ImagePainter2 =    246 (30.750)
+
+Pt::Gfx - CompositionMode::SourceOver
+                                                       (Time) (Factor)
+                                                       ------ --------
+    Text                             @ ImagePainter  =     43
+    Text                             @ ImagePainter2 =     43 ( 1.000)
+
+    Line                             @ ImagePainter  =     12
+    Line NOAA                        @ ImagePainter2 =     12 ( 1.000)
+    Line XWAA                        @ ImagePainter2 =     24 ( 2.000)
+
+    Rectangle                        @ ImagePainter  =     12
+    Rectangle                        @ ImagePainter2 =      9 ( 0.750)
+
+    Solid-filled    Rectangle        @ ImagePainter  =    243
+    Solid-filled    Rectangle        @ ImagePainter2 =    240 ( 0.988)
+
+    Gradient-filled Rectangle        @ ImagePainter  =   1175
+    Gradient-filled Rectangle        @ ImagePainter2 =    194 ( 0.165)
+
+    Texture-filled  Rectangle        @ ImagePainter  =    233
+    Texture-filled  Rectangle        @ ImagePainter2 =    232 ( 0.996)
+
+    Solid-filled    polygon          @ ImagePainter  =    256
+    Solid-filled    polygon NOAA     @ ImagePainter2 =    165 ( 0.645)
+    Solid-filled    polygon FSAA 2x2 @ ImagePainter2 =    216 ( 0.844)
+    Solid-filled    polygon SSAA 4x4 @ ImagePainter2 =   1419 ( 5.543)
+
+    Gradient-filled polygon          @ ImagePainter  =   1208
+    Gradient-filled polygon NOAA     @ ImagePainter2 =    212 ( 0.175)
+    Gradient-filled polygon FSAA 2x2 @ ImagePainter2 =    307 ( 0.254)
+    Gradient-filled polygon SSAA 4x4 @ ImagePainter2 =   1551 ( 1.284)
+
+    Texture-filled  polygon          @ ImagePainter  =    266
+    Texture-filled  polygon NOAA     @ ImagePainter2 =    258 ( 0.970)
+    Texture-filled  polygon FSAA 2x2 @ ImagePainter2 =    349 ( 1.312)
+    Texture-filled  polygon SSAA 4x4 @ ImagePainter2 =   1595 ( 5.996)
+
+    Solid-filled    ellipse          @ ImagePainter  =     37
+    Solid-filled    ellipse NOAA     @ ImagePainter2 =     38 ( 1.027)
+    Solid-filled    ellipse FSAA 2x2 @ ImagePainter2 =     53 ( 1.432)
+    Solid-filled    ellipse SSAA 4x4 @ ImagePainter2 =    250 ( 6.757)
+
+    Gradient-filled ellipse          @ ImagePainter  =    173
+    Gradient-filled ellipse NOAA     @ ImagePainter2 =     47 ( 0.272)
+    Gradient-filled ellipse FSAA 2x2 @ ImagePainter2 =     70 ( 0.405)
+    Gradient-filled ellipse SSAA 4x4 @ ImagePainter2 =    270 ( 1.561)
+
+    Texture-filled  ellipse          @ ImagePainter  =     41
+    Texture-filled  ellipse NOAA     @ ImagePainter2 =     52 ( 1.268)
+    Texture-filled  ellipse FSAA 2x2 @ ImagePainter2 =     76 ( 1.854)
+    Texture-filled  ellipse SSAA 4x4 @ ImagePainter2 =    275 ( 6.707)
+
+
+Cairo - CompositionMode::SourceCopy
+                                                       (Time) (Factor)
+                                                       ------ --------
+    Solid-filled    polygon          @ Cairo         =    128
+    Solid-filled    polygon          @ ImagePainter  =     62 ( 0.484)
+    Solid-filled    polygon NOAA     @ ImagePainter2 =     49 ( 0.383)
+    Solid-filled    polygon FSAA 2x2 @ ImagePainter2 =    103 ( 0.805)
+    Solid-filled    polygon SSAA 4x4 @ ImagePainter2 =   1301 (10.164)
+
+    Solid-filled    ellipse          @ Cairo         =     88
+    Solid-filled    ellipse          @ ImagePainter  =      6 ( 0.068)
+    Solid-filled    ellipse NOAA     @ ImagePainter2 =     21 ( 0.239)
+    Solid-filled    ellipse FSAA 2x2 @ ImagePainter2 =     35 ( 0.398)
+    Solid-filled    ellipse SSAA 4x4 @ ImagePainter2 =    231 ( 2.625)
+
+Cairo - CompositionMode::SourceOver
+                                                       (Time) (Factor)
+                                                       ------ --------
+    Solid-filled    polygon          @ Cairo         =    402
+    Solid-filled    polygon          @ ImagePainter  =    256 ( 0.637)
+    Solid-filled    polygon NOAA     @ ImagePainter2 =    166 ( 0.413)
+    Solid-filled    polygon FSAA 2x2 @ ImagePainter2 =    216 ( 0.537)
+    Solid-filled    polygon SSAA 4x4 @ ImagePainter2 =   1420 ( 3.532)
+
+    Solid-filled    ellipse          @ Cairo         =    154
+    Solid-filled    ellipse          @ ImagePainter  =     37 ( 0.240)
+    Solid-filled    ellipse NOAA     @ ImagePainter2 =     38 ( 0.247)
+    Solid-filled    ellipse FSAA 2x2 @ ImagePainter2 =     53 ( 0.344)
+    Solid-filled    ellipse SSAA 4x4 @ ImagePainter2 =    250 ( 1.623)
+
+
+GD - CompositionMode::SourceCopy
+                                                       (Time) (Factor)
+                                                       ------ --------
+    Solid-filled    polygon          @ GD            =    390
+    Solid-filled    polygon          @ ImagePainter  =     56 ( 0.144)
+    Solid-filled    polygon NOAA     @ ImagePainter2 =     49 ( 0.126)
+    Solid-filled    polygon FSAA 2x2 @ ImagePainter2 =    103 ( 0.264)
+    Solid-filled    polygon SSAA 4x4 @ ImagePainter2 =   1301 ( 3.336)
+
+GD - CompositionMode::SourceOver
+                                                       (Time) (Factor)
+                                                       ------ --------
+    Solid-filled    polygon          @ GD            =   1316
+    Solid-filled    polygon          @ ImagePainter  =    256 ( 0.195)
+    Solid-filled    polygon NOAA     @ ImagePainter2 =    166 ( 0.126)
+    Solid-filled    polygon FSAA 2x2 @ ImagePainter2 =    216 ( 0.164)
+    Solid-filled    polygon SSAA 4x4 @ ImagePainter2 =   1419 ( 1.078)
 </pre><br/>
 
 <pre>
