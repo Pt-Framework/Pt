@@ -37,7 +37,7 @@ static size_t benchDrawText(int loopCount, CompositionMode cm)
 }
 
 template <typename PainterT>
-static size_t benchDrawLine(int loopCount, CompositionMode cm)
+static size_t benchDrawLine(int loopCount, CompositionMode cm, Pt::uint8_t antiAliasingLevel)
 {
     size_t sum = 0;
 
@@ -52,10 +52,13 @@ static size_t benchDrawLine(int loopCount, CompositionMode cm)
     Pen pen( Color::fromRgb8(255, 255, 255, 175) );
     painter.setPen(pen);
 
+    ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
+
     for(int i = 0; i < loopCount ; ++i) {
         Pt::System::Clock clock;
         clock.start();
 
+        if(ip2) ip2->setAntiAliasingLevel(antiAliasingLevel);
         painter.drawLine( PointF( 10,  10), PointF(789, 110) );
         painter.drawLine( PointF(789, 489), PointF( 10, 589) );
 
@@ -258,10 +261,13 @@ static void doBenchmark(CompositionMode cm)
 
     // Lines
     if(BENCHMARK_LINE) {
-        time1 = benchDrawLine<ImagePainter >(BENCHMARK_LOOP_COUNT, cm);
-        time2 = benchDrawLine<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm);
+        time1 = benchDrawLine<ImagePainter >(BENCHMARK_LOOP_COUNT, cm, 0);
+        time2 = benchDrawLine<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, 0);
         std::clog << "    Line                             @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
-        std::clog << "    Line                             @ ImagePainter2 = " << std::setw(6) << time2
+        std::clog << "    Line NOAA                        @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time2 = benchDrawLine<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, 1);
+        std::clog << "    Line XWAA                        @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }

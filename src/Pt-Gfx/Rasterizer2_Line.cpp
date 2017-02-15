@@ -98,7 +98,10 @@ void Rasterizer2::rasterOnePixelLine(const Point& a, const Point& b)
     const Pt::int32_t fy2 = FIXED_POINT_FROM_INT(y2);
 
     // Raster the line
-    rasterOnePixelGLineSegmentXWAA(fx1, fy1, fx2, fy2, _pen.color(), false);
+    if(_aaLevel)
+        rasterOnePixelGLineSegmentXWAA(fx1, fy1, fx2, fy2, _pen.color(), false);
+    else
+        rasterOnePixelGLineSegmentNOAA(fx1, fy1, fx2, fy2, _pen.color(), false);
 }
 
 void Rasterizer2::rasterOnePixelHLineSegment(Pt::int32_t x1, Pt::int32_t x2, Pt::int32_t y, const Color& color, bool skipLastPoint)
@@ -119,6 +122,51 @@ void Rasterizer2::rasterOnePixelVLineSegment(Pt::int32_t x, Pt::int32_t y1, Pt::
     // Draw the line
     for(Pt::int32_t i = 0; i < sizeL; ++i) {
         Pixel pixel(_image->view(), x, y1++);
+        _image->format().setPixel(pixel, color, _compositionMode);
+    }
+}
+
+// Bresenham's Line Aalgorithm
+// https://en.wikipedia.org/wiki/Bresenham's_line_algorithm
+void Rasterizer2::rasterOnePixelGLineSegmentNOAA(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, const Color& color, bool skipLastPoint)
+{
+    Pt::int32_t x1 = FIXED_POINT_TO_INT(fx1);
+    Pt::int32_t y1 = FIXED_POINT_TO_INT(fy1);
+    Pt::int32_t x2 = FIXED_POINT_TO_INT(fx2);
+    Pt::int32_t y2 = FIXED_POINT_TO_INT(fy2);
+
+    Pt::int32_t dx = abs(x2 - x1);
+    Pt::int32_t dy = abs(y2 - y1);
+
+    Pt::int32_t p  = 2 * dy - dx;
+
+    Pt::int32_t x, y, end;
+
+    if(x1 > x2) {
+        x   = x2;
+        y   = y2;
+        end = x1;
+    }
+    else {
+        x = x1;
+        y = y1;
+        end = x2;
+    }
+
+    Pixel pixel(_image->view(), x, y);
+    _image->format().setPixel(pixel, color, _compositionMode);
+
+    while(x < end) {
+        ++x;
+        if(p < 0) {
+            p = p + 2 * dy;
+        }
+        else {
+            y = y + 1;
+            p = p + 2 * (dy - dx);
+        }
+        
+        Pixel pixel(_image->view(), x, y);
         _image->format().setPixel(pixel, color, _compositionMode);
     }
 }

@@ -116,6 +116,7 @@ class Rasterizer2
         void rasterOnePixelLine(const Point& a, const Point& b);
         void rasterOnePixelHLineSegment(Pt::int32_t x1, Pt::int32_t x2, Pt::int32_t y, const Color& color, bool skipLastPoint);
         void rasterOnePixelVLineSegment(Pt::int32_t x, Pt::int32_t y1, Pt::int32_t y2, const Color& color, bool skipLastPoint);
+        void rasterOnePixelGLineSegmentNOAA(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, const Color& color, bool skipLastPoint);
         void rasterOnePixelGLineSegmentXWAA(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, const Color& color, bool skipLastPoint);
 
         void rasterOnePixelRectOutline(const Point& tl, const Point& br);

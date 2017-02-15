@@ -183,16 +183,24 @@ void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount, c
             rasterOnePixelHLineSegment(lineX[i], lineX[i + 1], lineY[i], color, true);
         else if(lineX[i] == lineX[i + 1])
             rasterOnePixelVLineSegment(lineX[i], lineY[i], lineY[i + 1], color, true);
-        else
-            rasterOnePixelGLineSegmentXWAA(lineX[i], lineY[i], lineX[i + 1], lineY[i + 1], color, true);
+        else {
+            if(_aaLevel)
+                rasterOnePixelGLineSegmentXWAA(lineX[i], lineY[i], lineX[i + 1], lineY[i + 1], color, true);
+            else
+                rasterOnePixelGLineSegmentNOAA(lineX[i], lineY[i], lineX[i + 1], lineY[i + 1], color, true);
+        }
     }
 
     if(lineY[0] == lineY[pc1])
         rasterOnePixelHLineSegment(lineX[0], lineX[pc1], lineY[0], color, true);
     else if(lineX[0] == lineX[pc1])
         rasterOnePixelVLineSegment(lineX[0], lineY[0], lineY[pc1], color, true);
-    else
-        rasterOnePixelGLineSegmentXWAA(lineX[0], lineY[0], lineX[pc1], lineY[pc1], color, true);
+    else {
+        if(_aaLevel)
+            rasterOnePixelGLineSegmentXWAA(lineX[0], lineY[0], lineX[pc1], lineY[pc1], color, true);
+        else
+            rasterOnePixelGLineSegmentNOAA(lineX[0], lineY[0], lineX[pc1], lineY[pc1], color, true);
+    }
 }
 
 // Inspired by http://alienryderflex.com/polygon_fill
