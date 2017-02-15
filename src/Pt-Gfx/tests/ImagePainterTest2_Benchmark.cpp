@@ -205,6 +205,42 @@ static size_t benchDrawFillPolygon(int loopCount, const Brush& brushH, const Bru
     return sum;
 }
 
+template <typename PainterT>
+static size_t benchDrawFillEllipse(int loopCount, const Brush& brushH, const Brush& brushV, CompositionMode cm, Pt::uint8_t antiAliasingLevel)
+{
+    size_t sum = 0;
+
+    Image image( ImageFormat::argb32(), BENCHMARK_IMAGE_SIZE );
+
+    PainterT painter(image);
+    painter.setCompositionMode(cm);
+
+    Pen pen( Color::fromRgb8(255, 255, 255, 175) );
+    painter.setPen(pen);
+
+    ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
+
+    for(int i = 0; i < loopCount ; ++i) {
+        Pt::System::Clock clock;
+        clock.start();
+
+        painter.setBrush(brushH);
+        if(ip2) ip2   ->fillEllipse( PointF (30, 50), SizeF(100, 50), antiAliasingLevel );
+        else    painter.fillEllipse( PointF (30, 50), SizeF(100, 50) );
+
+        painter.setBrush(brushV);
+        if(ip2) ip2   ->fillEllipse( PointF (230, 50), SizeF(50, 100), antiAliasingLevel );
+        else    painter.fillEllipse( PointF (230, 50), SizeF(50, 100) );
+
+        sum += clock.stop().toUSecs();
+
+        BENCHMARK_DISPLAY_RESULTING_IMAGE;
+    }
+
+    sum /= loopCount;
+    return sum;
+}
+
 static void doBenchmark(CompositionMode cm)
 {
     double time1, time2;
@@ -312,6 +348,52 @@ static void doBenchmark(CompositionMode cm)
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, 2);
         std::clog << "    Texture-filled  polygon SSAA 4x4 @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        std::clog << std::endl;
+    }
+
+    // Filled ellpise
+    if(BENCHMARK_SOLID_FILLED_ELLIPSE) {
+        time1 = benchDrawFillEllipse<ImagePainter >(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, 0);
+        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, 0);
+        std::clog << "    Solid-filled    ellipse          @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
+        std::clog << "    Solid-filled    ellipse NOAA     @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, 1);
+        std::clog << "    Solid-filled    ellipse FSAA 2x2 @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, 2);
+        std::clog << "    Solid-filled    ellipse SSAA 4x4 @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        std::clog << std::endl;
+    }
+
+    if(BENCHMARK_GRADIENT_FILLED_ELLIPSE) {
+        time1 = benchDrawFillEllipse<ImagePainter >(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm, 0);
+        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm, 0);
+        std::clog << "    Gradient-filled ellipse          @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
+        std::clog << "    Gradient-filled ellipse NOAA     @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm, 1);
+        std::clog << "    Gradient-filled ellipse FSAA 2x2 @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm, 2);
+        std::clog << "    Gradient-filled ellipse SSAA 4x4 @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        std::clog << std::endl;
+    }
+
+    if(BENCHMARK_TEXTURE_FILLED_ELLIPSE) {
+        time1 = benchDrawFillEllipse<ImagePainter >(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, 0);
+        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, 0);
+        std::clog << "    Texture-filled  ellipse          @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
+        std::clog << "    Texture-filled  ellipse NOAA     @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, 1);
+        std::clog << "    Texture-filled  ellipse FSAA 2x2 @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, 2);
+        std::clog << "    Texture-filled  ellipse SSAA 4x4 @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
