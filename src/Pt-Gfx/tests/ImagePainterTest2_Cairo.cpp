@@ -115,7 +115,7 @@ static size_t cairoBenchFillEllipse(int loopCount, CompositionMode cm)
         cairo_new_path       (cairo);
         cairo_identity_matrix(cairo);
         cairo_scale          (cairo, 1, 0.5);
-        cairo_arc            (cairo, (30 + 100 / 2), (50 + 100 / 2 / 2) * 2, 100 / 2, 0, 2 * Pt::Pi);
+        cairo_arc            (cairo, (30 + 120 / 2), (60 + 120 / 2 / 2) * 2, 120 / 2, 0, 2 * Pt::Pi);
         cairo_clip_preserve  (cairo);
         cairo_fill           (cairo);
 
@@ -123,7 +123,7 @@ static size_t cairoBenchFillEllipse(int loopCount, CompositionMode cm)
         cairo_new_path       (cairo);
         cairo_identity_matrix(cairo);
         cairo_scale          (cairo, 0.5, 1);
-        cairo_arc            (cairo, (230 + 100 / 2 / 2) * 2, (50 + 100 / 2), 100 / 2, 0, 2 * Pt::Pi);
+        cairo_arc            (cairo, (230 + 120 / 2 / 2) * 2, (60 + 120 / 2), 120 / 2, 0, 2 * Pt::Pi);
         cairo_clip_preserve  (cairo);
         cairo_fill           (cairo);
 

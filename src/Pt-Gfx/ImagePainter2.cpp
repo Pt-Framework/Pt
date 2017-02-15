@@ -185,9 +185,13 @@ void ImagePainter2::fillEllipse( const PointF& topLeftIn, const SizeF& sizeIn, P
     std::vector<Point> points(numSegs);
 
     for (Pt::int32_t i = 0; i < numSegs; ++i) {
+        // Calculate the angle
         const float angle = 2 * Pt::Pi * i / numSegs;
-        points[i].setX( centerX + radiusX * fastCos<float, true>(angle) );
-        points[i].setY( centerY + radiusY * fastSin<float, true>(angle) );
+        // Calculate the displacements
+        const Pt::int32_t disX = radiusX * fastCos<float, true>(angle);
+        const Pt::int32_t disY = radiusY * fastSin<float, true>(angle);
+        // Store the coordinate
+        points[i].set(centerX + disX, centerY + disY);
     }
 
     // Rasterize the polygon

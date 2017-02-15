@@ -225,12 +225,12 @@ static size_t benchDrawFillEllipse(int loopCount, const Brush& brushH, const Bru
         clock.start();
 
         painter.setBrush(brushH);
-        if(ip2) ip2   ->fillEllipse( PointF (30, 50), SizeF(100, 50), antiAliasingLevel );
-        else    painter.fillEllipse( PointF (30, 50), SizeF(100, 50) );
+        if(ip2) ip2   ->fillEllipse( PointF (30, 60), SizeF(120, 60), antiAliasingLevel );
+        else    painter.fillEllipse( PointF (30, 60), SizeF(120, 60) );
 
         painter.setBrush(brushV);
-        if(ip2) ip2   ->fillEllipse( PointF (230, 50), SizeF(50, 100), antiAliasingLevel );
-        else    painter.fillEllipse( PointF (230, 50), SizeF(50, 100) );
+        if(ip2) ip2   ->fillEllipse( PointF (230, 60), SizeF(60, 120), antiAliasingLevel );
+        else    painter.fillEllipse( PointF (230, 60), SizeF(60, 120) );
 
         sum += clock.stop().toUSecs();
 

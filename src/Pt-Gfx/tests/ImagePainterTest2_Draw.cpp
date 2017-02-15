@@ -251,53 +251,53 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
     painter.setPen( Color::fromRgb8(255, 0, 0) );
 
     painter.setBrush( Color::fromRgb8(63, 63, 255) );
-    painter.fillRect( RectF( PointF(0, 75), SizeF(image.width(), 50) ) );
-    painter.fillRect( RectF( PointF(0, 75 + 188), SizeF(image.width(), 25) ) );
-    painter.fillRect( RectF( PointF(0, 75 + 400), SizeF(image.width(), 50) ) );
+    painter.fillRect( RectF( PointF(0, 80), SizeF(image.width(), 60) ) );
+    painter.fillRect( RectF( PointF(0, 80 + 185), SizeF(image.width(), 30) ) );
+    painter.fillRect( RectF( PointF(0, 80 + 400), SizeF(image.width(), 60) ) );
 
 
     painter.setBrush( brush1 );
 
-    if(ip2) ip2   ->fillEllipse( PointF (30, 50), SizeF(100, 100), 0 );
-    else    painter.fillEllipse( PointF (30, 50), SizeF(100, 100) );
+    if(ip2) ip2   ->fillEllipse( PointF (30, 50), SizeF(120, 120), 0 );
+    else    painter.fillEllipse( PointF (30, 50), SizeF(120, 120) );
     painter.drawText( PointF(30, 30), "NOAA" );
 
-    if(ip2) ip2   ->fillEllipse( PointF (30 + 200, 50), SizeF(100, 100), 1 );
-    else    painter.fillEllipse( PointF (30 + 200, 50), SizeF(100, 100) );
+    if(ip2) ip2   ->fillEllipse( PointF (30 + 200, 50), SizeF(120, 120), 1 );
+    else    painter.fillEllipse( PointF (30 + 200, 50), SizeF(120, 120) );
     painter.drawText( PointF(30 + 200, 30), "FSAA 2x2" );
 
-    if(ip2) ip2   ->fillEllipse( PointF (30 + 400, 50), SizeF(100, 100), 2 );
-    else    painter.fillEllipse( PointF (30 + 400, 50), SizeF(100, 100) );
+    if(ip2) ip2   ->fillEllipse( PointF (30 + 400, 50), SizeF(120, 120), 2 );
+    else    painter.fillEllipse( PointF (30 + 400, 50), SizeF(120, 120) );
     painter.drawText( PointF(30 + 400, 30), "SSAA 4x4" );
 
 
     painter.setBrush( brush2 );
 
-    if(ip2) ip2   ->fillEllipse( PointF (30, 50 + 200), SizeF(100, 50), 0 );
-    else    painter.fillEllipse( PointF (30, 50 + 200), SizeF(100, 50) );
+    if(ip2) ip2   ->fillEllipse( PointF (30, 50 + 200), SizeF(120, 60), 0 );
+    else    painter.fillEllipse( PointF (30, 50 + 200), SizeF(120, 60) );
     painter.drawText( PointF(30, 30 + 200), "NOAA" );
 
-    if(ip2) ip2   ->fillEllipse( PointF (30 + 200, 50 + 200), SizeF(100, 50), 1 );
-    else    painter.fillEllipse( PointF (30 + 200, 50 + 200), SizeF(100, 50) );
+    if(ip2) ip2   ->fillEllipse( PointF (30 + 200, 50 + 200), SizeF(120, 60), 1 );
+    else    painter.fillEllipse( PointF (30 + 200, 50 + 200), SizeF(120, 60) );
     painter.drawText( PointF(30 + 200, 30 + 200), "FSAA 2x2" );
 
-    if(ip2) ip2   ->fillEllipse( PointF (30 + 400, 50 + 200), SizeF(100, 50), 2 );
-    else    painter.fillEllipse( PointF (30 + 400, 50 + 200), SizeF(100, 50) );
+    if(ip2) ip2   ->fillEllipse( PointF (30 + 400, 50 + 200), SizeF(120, 60), 2 );
+    else    painter.fillEllipse( PointF (30 + 400, 50 + 200), SizeF(120, 60) );
     painter.drawText( PointF(30 + 400, 30 + 200), "SSAA 4x4" );
 
 
     painter.setBrush( brush2 );
 
-    if(ip2) ip2   ->fillEllipse( PointF (30, 50 + 400), SizeF(50, 100), 0 );
-    else    painter.fillEllipse( PointF (30, 50 + 400), SizeF(50, 100) );
+    if(ip2) ip2   ->fillEllipse( PointF (30, 50 + 400), SizeF(60, 120), 0 );
+    else    painter.fillEllipse( PointF (30, 50 + 400), SizeF(60, 120) );
     painter.drawText( PointF(30, 30 + 400), "NOAA" );
 
-    if(ip2) ip2   ->fillEllipse( PointF (30 + 200, 50 + 400), SizeF(50, 100), 1 );
-    else    painter.fillEllipse( PointF (30 + 200, 50 + 400), SizeF(50, 100) );
+    if(ip2) ip2   ->fillEllipse( PointF (30 + 200, 50 + 400), SizeF(60, 120), 1 );
+    else    painter.fillEllipse( PointF (30 + 200, 50 + 400), SizeF(60, 120) );
     painter.drawText( PointF(30 + 200, 30 + 400), "FSAA 2x2" );
 
-    if(ip2) ip2   ->fillEllipse( PointF (30 + 400, 50 + 400), SizeF(50, 100), 2 );
-    else    painter.fillEllipse( PointF (30 + 400, 50 + 400), SizeF(50, 100) );
+    if(ip2) ip2   ->fillEllipse( PointF (30 + 400, 50 + 400), SizeF(60, 120), 2 );
+    else    painter.fillEllipse( PointF (30 + 400, 50 + 400), SizeF(60, 120) );
     painter.drawText( PointF(30 + 400, 30 + 400), "SSAA 4x4" );
 
 
