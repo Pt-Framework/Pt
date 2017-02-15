@@ -185,7 +185,7 @@ void ImagePainter2::fillEllipse( const PointF& topLeftIn, const SizeF& sizeIn, P
     std::vector<Point> points(numSegs);
 
     for (Pt::int32_t i = 0; i < numSegs; ++i) {
-        const float angle = 2 * M_PI * i / numSegs;
+        const float angle = 2 * Pt::Pi * i / numSegs;
         points[i].setX( centerX + radiusX * fastCos<float, true>(angle) );
         points[i].setY( centerY + radiusY * fastSin<float, true>(angle) );
     }

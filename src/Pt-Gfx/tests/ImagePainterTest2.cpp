@@ -15,6 +15,7 @@
 
 #include <unistd.h>
 
+#include <Pt/Math.h>
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/ImagePainter2.h>
 #include <Pt/Gfx/PngReader.h>
@@ -43,7 +44,7 @@ using namespace Pt::Gfx;
 
 // Detailed-test enable settings for Pt-Gfx
 #define TEST_SOURCECOPY                        1
-#define TEST_SOURCEOVER                        1
+#define TEST_SOURCEOVER                        0
 
 #define TEST_DRAW_LINE_AND_TEXT                0
 #define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES 0
@@ -60,6 +61,7 @@ using namespace Pt::Gfx;
 
 // Detailed-test benchmark settings for Pt-Gfx and Cairo/GD
 #define BENCHMARK_CHECK_RESULTING_IMAGE     0
+
 #define BENCHMARK_IMAGE_SIZE                Size(1280, 800)
 #define BENCHMARK_LOOP_COUNT                500
 

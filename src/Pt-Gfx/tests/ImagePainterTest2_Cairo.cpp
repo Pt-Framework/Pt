@@ -25,6 +25,10 @@ static size_t cairoBenchFillPolygon(int loopCount, CompositionMode cm)
             cairo_set_source_rgba(cairo, 1.0f, 1.0f, 1.0f, 1.0f);
         }
 
+        // NOTE: * The calls to Cairo's clipping functions are not actually needed.
+        //       * They are put here so that the benchmarking process will be a fair one,
+        //         due to the fact that Pt-Gfx always perform clipping.
+
         cairo_reset_clip   (cairo);
         cairo_new_path     (cairo);
         cairo_move_to      (cairo, 150, 100); // CCW
@@ -103,21 +107,25 @@ static size_t cairoBenchFillEllipse(int loopCount, CompositionMode cm)
             cairo_set_source_rgba(cairo, 1.0f, 1.0f, 1.0f, 1.0f);
         }
 
-        cairo_reset_clip   (cairo);
-        cairo_new_path     (cairo);
-        cairo_identity_matrix(cairo);
-        cairo_scale        (cairo, 1, 0.5);
-        cairo_arc          (cairo, (30 + 100 / 2), (50 + 100 / 2 / 2) * 2, 100 / 2, 0, 2 * M_PI);
-        cairo_clip_preserve(cairo);
-        cairo_fill         (cairo);
+        // NOTE: * The calls to Cairo's clipping functions are not actually needed.
+        //       * They are put here so that the benchmarking process will be a fair one,
+        //         due to the fact that Pt-Gfx always perform clipping.
 
-        cairo_reset_clip   (cairo);
-        cairo_new_path     (cairo);
+        cairo_reset_clip     (cairo);
+        cairo_new_path       (cairo);
         cairo_identity_matrix(cairo);
-        cairo_scale        (cairo, 0.5, 1);
-        cairo_arc          (cairo, (230 + 100 / 2 / 2) * 2, (50 + 100 / 2), 100 / 2, 0, 2 * M_PI);
-        cairo_clip_preserve(cairo);
-        cairo_fill         (cairo);
+        cairo_scale          (cairo, 1, 0.5);
+        cairo_arc            (cairo, (30 + 100 / 2), (50 + 100 / 2 / 2) * 2, 100 / 2, 0, 2 * Pt::Pi);
+        cairo_clip_preserve  (cairo);
+        cairo_fill           (cairo);
+
+        cairo_reset_clip     (cairo);
+        cairo_new_path       (cairo);
+        cairo_identity_matrix(cairo);
+        cairo_scale          (cairo, 0.5, 1);
+        cairo_arc            (cairo, (230 + 100 / 2 / 2) * 2, (50 + 100 / 2), 100 / 2, 0, 2 * Pt::Pi);
+        cairo_clip_preserve  (cairo);
+        cairo_fill           (cairo);
 
         sum += clock.stop().toUSecs();
 
