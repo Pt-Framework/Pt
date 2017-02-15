@@ -128,46 +128,57 @@ void Rasterizer2::rasterOnePixelVLineSegment(Pt::int32_t x, Pt::int32_t y1, Pt::
 
 // Bresenham's Line Aalgorithm
 // https://en.wikipedia.org/wiki/Bresenham's_line_algorithm
+// https://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm
 void Rasterizer2::rasterOnePixelGLineSegmentNOAA(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, const Color& color, bool skipLastPoint)
 {
-    Pt::int32_t x1 = FIXED_POINT_TO_INT(fx1);
-    Pt::int32_t y1 = FIXED_POINT_TO_INT(fy1);
-    Pt::int32_t x2 = FIXED_POINT_TO_INT(fx2);
-    Pt::int32_t y2 = FIXED_POINT_TO_INT(fy2);
+    // Convert fixed-points to integers
+    const Pt::int32_t x1 = FIXED_POINT_TO_INT(fx1);
+    const Pt::int32_t y1 = FIXED_POINT_TO_INT(fy1);
+    const Pt::int32_t x2 = FIXED_POINT_TO_INT(fx2);
+    const Pt::int32_t y2 = FIXED_POINT_TO_INT(fy2);
 
-    Pt::int32_t dx = abs(x2 - x1);
-    Pt::int32_t dy = abs(y2 - y1);
+    // Calculate the deltas
+    const Pt::int32_t dx = abs(x2 - x1);
+    const Pt::int32_t dy = abs(y2 - y1);
 
-    Pt::int32_t p  = 2 * dy - dx;
+    // Calculate the directions
+    const Pt::int32_t sx = (x1 < x2) ? 1 : -1;
+    const Pt::int32_t sy = (y1 < y2) ? 1 : -1;
 
-    Pt::int32_t x, y, end;
+    // Calculate the initial error
+    Pt::int32_t err1 = (dx > dy ? dx : -dy) / 2;
+    Pt::int32_t err2;
 
-    if(x1 > x2) {
-        x   = x2;
-        y   = y2;
-        end = x1;
+    // Prepare the initial and ending coordinates
+    Pt::int32_t x  = x1;
+    Pt::int32_t y  = y1;
+    Pt::int32_t xm = x2;
+    Pt::int32_t ym = y2;
+
+    if(skipLastPoint) {
+        if(sx > 0) --xm;
+        else       ++xm;
+        if(sy > 0) --ym;
+        else       ++ym;
     }
-    else {
-        x = x1;
-        y = y1;
-        end = x2;
-    }
 
-    Pixel pixel(_image->view(), x, y);
-    _image->format().setPixel(pixel, color, _compositionMode);
-
-    while(x < end) {
-        ++x;
-        if(p < 0) {
-            p = p + 2 * dy;
-        }
-        else {
-            y = y + 1;
-            p = p + 2 * (dy - dx);
-        }
-        
+    // Draw the pixels
+    for(;;) {
+        // Draw the pixel
         Pixel pixel(_image->view(), x, y);
         _image->format().setPixel(pixel, color, _compositionMode);
+        // Stop if we have reached the end
+        if(x == xm && y == ym) break;
+        // Update the coordinate
+        err2 = err1;
+        if(err2 > -dx) {
+            err1 -= dy;
+            x    += sx;
+        }
+        if(err2 <  dy) {
+            err1 += dx;
+            y    += sy;
+        }
     }
 }
 
@@ -204,7 +215,7 @@ void Rasterizer2::rasterOnePixelGLineSegmentXWAA(Pt::int32_t fx1, Pt::int32_t fy
     const Pt::int32_t xpxl2 = FIXED_POINT_ROUND(fx2);
           Pt::int32_t ypxl  = fy1 + grad * FIXED_POINT_TO_INT(xpxl1 - fx1);
 
-    // Loop through the rest of the pixels
+    // Draw the pixels
     const Pt::int32_t from = FIXED_POINT_TO_INT(FIXED_POINT_ROUND(fx1));
     const Pt::int32_t to   = skipLastPoint ? ( FIXED_POINT_TO_INT(xpxl2) - 1) : FIXED_POINT_TO_INT(xpxl2);
     if(steep) {
