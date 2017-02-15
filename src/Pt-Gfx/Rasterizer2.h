@@ -40,6 +40,14 @@ namespace Pt {
 namespace Gfx {
 
 
+// Uncomment this to use Duff's device
+// NOTE: Enabling this optimization does not seem to reduce or increase performance, EXCEPT when using -O0
+#define USE_DUFFS_DEVICE
+
+// Uncomment this to use putPixels() for drawing solid colors
+// NOTE: enabling this one seems to only improve performance for SourceOver
+#define USE_PUTPIXELS_FOR_SOLID_COLOR
+
 class DrawText;
 class Image;
 
@@ -171,7 +179,7 @@ class Rasterizer2
 };
 
 // ======================================================================================
-// ===== Template Member Functions ======================================================
+// ===== Templated Private Member Functions =============================================
 // ======================================================================================
 
 template<Pt::uint8_t SUPERSAMPLE_SIZE, Pt::uint8_t MIN_ALPHA, Pt::uint8_t MUL_ALPHA>

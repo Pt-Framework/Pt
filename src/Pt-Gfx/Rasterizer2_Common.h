@@ -28,6 +28,10 @@
   02110-1301 USA
 */
 
+#ifndef PT_GFX_RASTERIZER_2_COMMON_H
+#define PT_GFX_RASTERIZER_2_COMMON_H
+
+
 #include <cmath>
 
 #include <Pt/Gfx/Algorithm.h>
@@ -65,10 +69,5 @@
 // Coordinate limit
 #define COORDINATE_LIMIT ImagePainter2::MaximumCoordinate
 
-// Uncomment this to use Duff's device
-// NOTE: Enabling this optimization does not seem to reduce or increase performance, EXCEPT when using -O0
-#define USE_DUFFS_DEVICE
 
-// Uncomment this to use putPixels() for drawing solid colors
-// NOTE: enabling this one seems to only improve performance by ~26% for SourceOver
-#define USE_PUTPIXELS_FOR_SOLID_COLOR
+#endif

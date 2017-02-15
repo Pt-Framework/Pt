@@ -28,7 +28,7 @@
   02110-1301 USA
 */
 
-#include "Rasterizer2_Config.h"
+#include "Rasterizer2_Common.h"
 
 namespace Pt {
 namespace Gfx {
