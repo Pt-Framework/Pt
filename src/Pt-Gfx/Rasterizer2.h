@@ -134,6 +134,12 @@ class Rasterizer2
         void getPolygonRectMinMax(const Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY);
 
     private:
+        void rasterScanline(
+            Pt::int32_t  iterL, Pt::int32_t iterR, Pt::int32_t pixelY,
+            Pt::int32_t  minX,  Pt::int32_t minY,
+            const Color& color
+        );
+
         template<Pt::uint8_t SUPERSAMPLE_SIZE, Pt::uint8_t MIN_ALPHA, Pt::uint8_t MUL_ALPHA>
         void rasterScanline(
             Pt::int32_t  iterL, Pt::int32_t iterR, Pt::int32_t pixelY,

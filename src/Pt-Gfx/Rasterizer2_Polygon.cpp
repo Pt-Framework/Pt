@@ -251,6 +251,11 @@ void Rasterizer2::rasterPolygonAreaJaggies(const Point* points, const size_t* po
         }
         // Fill the pixels between the node pairs
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
+            const Pt::int32_t from = nodeX[i    ];
+            const Pt::int32_t to   = nodeX[i + 1];
+            rasterScanline(from - minX, to - minX, pixelY - minY, minX, minY, color);
+
+/*
             // Determine the X coordinates
             Pt::int32_t from = nodeX[i    ];
             Pt::int32_t to   = nodeX[i + 1];
@@ -317,6 +322,7 @@ void Rasterizer2::rasterPolygonAreaJaggies(const Point* points, const size_t* po
                 iterX     += n;
             }
 #endif
+*/
         }
     }
 }
