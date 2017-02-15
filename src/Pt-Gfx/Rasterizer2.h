@@ -134,6 +134,14 @@ class Rasterizer2
         void getPolygonRectMinMax(const Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY);
 
     private:
+        template<Pt::uint8_t SUPERSAMPLE_SIZE, Pt::uint8_t MIN_ALPHA, Pt::uint8_t MUL_ALPHA>
+        void rasterScanline(
+            Pt::int32_t  iterL, Pt::int32_t iterR, Pt::int32_t pixelY,
+            Pt::int32_t  minX,  Pt::int32_t minY,  Pt::int32_t sizeX,
+            const Color& color, const std::vector<Pt::uint8_t>& alphas
+        );
+
+    private:
         Pt::uint8_t     _aaLevel;
 
         Image*          _image;
@@ -155,6 +163,221 @@ class Rasterizer2
         Rect            _clip;
         Rect            _currentClip;
 };
+
+// ======================================================================================
+// ===== Template Member Functions ======================================================
+// ======================================================================================
+
+template<Pt::uint8_t SUPERSAMPLE_SIZE, Pt::uint8_t MIN_ALPHA, Pt::uint8_t MUL_ALPHA>
+void Rasterizer2::rasterScanline(
+    Pt::int32_t  iterL, Pt::int32_t iterR, Pt::int32_t pixelY,
+    Pt::int32_t  minX,  Pt::int32_t minY,  Pt::int32_t sizeX,
+    const Color& color, const std::vector<Pt::uint8_t>& alphas
+)
+{
+    // A helper macro to scale the alpha
+    #define RSL_SCALE_ALPHA(A) ( Pt::uint16_t(A) * MUL_ALPHA / SUPERSAMPLE_SIZE / SUPERSAMPLE_SIZE )
+
+    // The minimum, middle, and maximum values for alpha
+    #define RSL_MIN_ALPHA  MIN_ALPHA
+    #define RSL_MID_ALPHA (MIN_ALPHA * SUPERSAMPLE_SIZE    )
+    #define RSL_MAX_ALPHA (MIN_ALPHA * SUPERSAMPLE_SIZE * SUPERSAMPLE_SIZE)
+
+    //
+    // Draw pixels that belongs to the left-part of the span to the image
+    //
+    if(iterL < 0) iterL = 0;
+
+
+    // Skip fully-transparent pixels
+#ifdef USE_DUFFS_DEVICE
+    if(true) {
+        register const Pt::uint8_t* src  = &alphas[0];
+        register       Pt::int32_t  cnt  = sizeX - 1;
+        register       Pt::int32_t  n    = (cnt + 7) / 8;
+        register       Pt::int32_t  k    = iterL;
+        switch(cnt % 8) {
+                case 0 : do { if(src[k]) {n = 0; break; } ++k;
+                case 7 :      if(src[k]) {n = 0; break; } ++k;
+                case 6 :      if(src[k]) {n = 0; break; } ++k;
+                case 5 :      if(src[k]) {n = 0; break; } ++k;
+                case 4 :      if(src[k]) {n = 0; break; } ++k;
+                case 3 :      if(src[k]) {n = 0; break; } ++k;
+                case 2 :      if(src[k]) {n = 0; break; } ++k;
+                case 1 :      if(src[k]) {n = 0; break; } ++k;
+                         } while (--n > 0);
+        }
+        iterL = k;
+    }
+#else
+    for(; iterL < sizeX; ++iterL) {
+        if(alphas[iterL]) break;
+    }
+#endif
+
+     // Texture or gradient
+    if(_isTexture || _isGradient) {
+        for(; iterL < sizeX; ++iterL) {
+            // Break if we have reached the non anti-aliased part of the span
+            if(alphas[iterL] >= RSL_MAX_ALPHA) break;
+            // Draw the pixel
+            const Pt::int32_t iterX = minX + iterL;
+            const Pt::int32_t iterY = minY + pixelY;
+            const Pt::int32_t tX    = iterL  % _brushImage->width ();
+            const Pt::int32_t tY    = pixelY % _brushImage->height();
+            ConstPixel srcPixel(_brushImage->view(), tX, tY);
+            Pixel      dstPixel(_image->view(), iterX, iterY);
+            _image->format().setPixel(dstPixel, srcPixel, _compositionMode, RSL_SCALE_ALPHA(alphas[iterL]));
+        }
+    }
+
+    // Solid color
+    else {
+        for(; iterL < sizeX; ++iterL) {
+            // Break if we have reached the non anti-aliased part of the span
+            if(alphas[iterL] >= RSL_MAX_ALPHA) break;
+            // Draw the pixel
+            Pixel pixel(_image->view(), minX + iterL, minY + pixelY);
+            _image->format().setPixel(pixel, color, _compositionMode, RSL_SCALE_ALPHA(alphas[iterL]));
+        }
+    }
+
+    //
+    // Draw pixels that belongs to the right-part of the span to the image
+    //
+    if(iterR >= sizeX) iterR = sizeX - 1;
+
+    // Skip fully-transparent pixels
+#ifdef USE_DUFFS_DEVICE
+    if(true) {
+        register const Pt::uint8_t* src  = &alphas[0];
+        register       Pt::int32_t  cnt  = sizeX - 1;
+        register       Pt::int32_t  n    = (cnt + 7) / 8;
+        register       Pt::int32_t  k    = iterR;
+        switch(cnt % 8) {
+                case 0 : do { if(src[k]) {n = 0; break; } --k;
+                case 7 :      if(src[k]) {n = 0; break; } --k;
+                case 6 :      if(src[k]) {n = 0; break; } --k;
+                case 5 :      if(src[k]) {n = 0; break; } --k;
+                case 4 :      if(src[k]) {n = 0; break; } --k;
+                case 3 :      if(src[k]) {n = 0; break; } --k;
+                case 2 :      if(src[k]) {n = 0; break; } --k;
+                case 1 :      if(src[k]) {n = 0; break; } --k;
+                         } while (--n > 0);
+        }
+        iterR = k;
+    }
+#else
+    for(; iterR >= 0; --iterR) {
+        if(alphas[iterR]) break;
+    }
+#endif
+
+     // Texture or gradient
+    if(_isTexture || _isGradient) {
+        for(; iterR >= 0; --iterR) {
+            // Break if we have reached the non anti-aliased part of the span
+            if(alphas[iterR] >= RSL_MAX_ALPHA) break;
+            // Draw the pixel
+            const Pt::int32_t iterX = minX + iterR;
+            const Pt::int32_t iterY = minY + pixelY;
+            const Pt::int32_t tX    = iterR  % _brushImage->width ();
+            const Pt::int32_t tY    = pixelY % _brushImage->height();
+            ConstPixel srcPixel(_brushImage->view(), tX, tY);
+            Pixel      dstPixel(_image->view(), iterX, iterY);
+            _image->format().setPixel(dstPixel, srcPixel, _compositionMode, RSL_SCALE_ALPHA(alphas[iterR]));
+        }
+    }
+
+    // Solid color
+    else {
+        for(; iterR >= 0; --iterR) {
+            // Break if we have reached the non anti-aliased part of the span
+            if(alphas[iterR] >= RSL_MAX_ALPHA) break;
+            // Draw the pixel
+            Pixel pixel(_image->view(), minX + iterR, minY + pixelY);
+            _image->format().setPixel(pixel, color, _compositionMode, RSL_SCALE_ALPHA(alphas[iterR]));
+        }
+    }
+
+    //
+    // Draw pixels that belongs to the middle-part of the span to the image
+    //
+    if(iterR < iterL) return;
+
+
+    // Draw the span using texture
+    if(_isTexture) {
+        Pt::int32_t iterX     = iterL;
+        Pt::int32_t spanWidth = iterR - iterL + 1;
+        while(spanWidth > 0) {
+            const Pt::int32_t tX = iterX  % _brushImage->width ();
+            const Pt::int32_t tY = pixelY % _brushImage->height();
+            const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tX);
+            if(n) {
+                ConstPixel srcPixel(_brushImage->view(), tX, tY);
+                Pixel      dstPixel(_image->view(), minX + iterX, minY + pixelY);
+                _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
+            }
+            spanWidth -= n;
+            iterX     += n;
+        }
+    }
+
+    // Draw the span using gradient
+    else if(_isGradient) {
+        Pt::int32_t iterX     = iterL;
+        Pt::int32_t spanWidth = iterR - iterL + 1;
+        // Fill the span - vertical gradient
+        if(_brush.fillStyle() == Pt::Gfx::Brush::VerticalGradient) {
+            const Pt::int32_t textureY = pixelY % _brushImage->height();
+            ConstPixel        srcPixel(_brushImage->view(), 0, textureY);
+            Pixel             dstPixel(_image->view(), minX + iterX, minY + pixelY);
+            _image->format().setPixels(dstPixel, srcPixel, spanWidth, _compositionMode);
+        }
+        // Fill the span - horizontal gradient
+        else {
+            while(spanWidth > 0) {
+                const Pt::int32_t tX = iterX  % _brushImage->width ();
+                const Pt::int32_t tY = pixelY % _brushImage->height();
+                const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tX);
+                if(n) {
+                    ConstPixel srcPixel(_brushImage->view(), tX, tY);
+                    Pixel      dstPixel(_image->view(), minX + iterX, minY + pixelY);
+                    _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
+                }
+                spanWidth -= n;
+                iterX     += n;
+            }
+        }
+    }
+
+    // Draw the span using solid color
+    else {
+#ifdef USE_PUTPIXELS_FOR_SOLID_COLOR
+        Pixel pixel(_image->view(), minX + iterL, minY + pixelY);
+        _image->format().setPixels(pixel, _brush.color(), iterR - iterL + 1, _compositionMode);
+#else
+        Pt::int32_t iterX     = minX + iterL;
+        Pt::int32_t spanWidth = iterR - iterL + 1;
+        while(spanWidth > 0) {
+            const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
+            if(n) {
+                Pixel pixel(_image->view(), iterX, minY + pixelY);
+                _image->format().copy(pixel, _brushPixel, n, _compositionMode);
+            }
+            spanWidth -= n;
+            iterX     += n;
+        }
+#endif
+    }
+
+    // Undefine the macros
+    #undef RSL_SCALE_ALPHA
+    #undef RSL_MIN_ALPHA
+    #undef RSL_MID_ALPHA
+    #undef RSL_MAX_ALPHA
+}
 
 
 } // namespace
