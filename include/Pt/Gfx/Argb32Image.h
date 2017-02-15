@@ -65,61 +65,57 @@ class Argb32Model
 // NOTE: Enabling this optimization deos not seem to reduce or increase performance on an x86_64
 //#define USE_MULTIPLY_SHIFT_FOR_CONSTANT_DIVISION
 
-// Uncomment this to use Duff's device
-// NOTE: Enabling this optimization deos not seem to reduce or increase performance, EXCEPT when using -O0
-#define USE_DUFFS_DEVICE
-
-        /*
-         * http://embeddedgurus.com/stack-overflow/2009/06/division-of-integers-by-constants
-         *
-         * Convert to binary using Javascript console: alert((1/255).toString(2))
-         *     1/255
-         *     => 0.00000001000000010000000100000001000000010000000100000001
-         *
-         * Take all the bits to the right of the binary point:
-         *     => 00000001000000010000000100000001000000010000000100000001
-         *
-         * Left shift them until the bit to the right of the binary point is 1 and
-         * record the required number of shifts as S:
-         *        00000001000000010000000100000001000000010000000100000001
-         *        *******
-         *     => 1000000010000000100000001000000010000000100000001
-         *     => S = 7
-         *
-         * Take the most significant 17 bits:
-         *        1000000010000000100000001000000010000000100000001
-         *        *****************
-         *     => 10000000100000001
-         *
-         * Add one:
-         *        10000000100000001
-         *                        1
-         *        ----------------- +
-         *     => 10000000100000010
-         *
-         * Truncate to 16 bits and convert to 4-digit hexadecimal as M:
-         *        10000000100000010
-         *        ****************
-         *     => 8081
-         *
-         * The formula will be RESULT = (((uint32_t) VALUE * (uint32_t) M) >> 16) >> S:
-         *     => RESULT = (((uint32_t) VALUE * 0x00008081) >> 16) >> 7
-         *
-         *
-         * For 1/257:
-         *     => 0.00000000111111110000000011111111000000001111111100000001
-         *     => 00000000111111110000000011111111000000001111111100000001
-         *        ********
-         *     => 111111110000000011111111000000001111111100000001 (S = 8)
-         *        *****************
-         *     => 11111111000000001
-         *                        1
-         *        ----------------- +
-         *     => 11111111000000010
-         *        ****************
-         *     => FF01
-         *     => RESULT = (((uint32_t) VALUE * 0x0000FF01) >> 16) >> 8
-         */
+/*
+ * http://embeddedgurus.com/stack-overflow/2009/06/division-of-integers-by-constants
+ *
+ * Convert to binary using Javascript console: alert((1/255).toString(2))
+ *     1/255
+ *     => 0.00000001000000010000000100000001000000010000000100000001
+ *
+ * Take all the bits to the right of the binary point:
+ *     => 00000001000000010000000100000001000000010000000100000001
+ *
+ * Left shift them until the bit to the right of the binary point is 1 and
+ * record the required number of shifts as S:
+ *        00000001000000010000000100000001000000010000000100000001
+ *        *******
+ *     => 1000000010000000100000001000000010000000100000001
+ *     => S = 7
+ *
+ * Take the most significant 17 bits:
+ *        1000000010000000100000001000000010000000100000001
+ *        *****************
+ *     => 10000000100000001
+ *
+ * Add one:
+ *        10000000100000001
+ *                        1
+ *        ----------------- +
+ *     => 10000000100000010
+ *
+ * Truncate to 16 bits and convert to 4-digit hexadecimal as M:
+ *        10000000100000010
+ *        ****************
+ *     => 8081
+ *
+ * The formula will be RESULT = (((uint32_t) VALUE * (uint32_t) M) >> 16) >> S:
+ *     => RESULT = (((uint32_t) VALUE * 0x00008081) >> 16) >> 7
+ *
+ *
+ * For 1/257:
+ *     => 0.00000000111111110000000011111111000000001111111100000001
+ *     => 00000000111111110000000011111111000000001111111100000001
+ *        ********
+ *     => 111111110000000011111111000000001111111100000001 (S = 8)
+ *        *****************
+ *     => 11111111000000001
+ *                        1
+ *        ----------------- +
+ *     => 11111111000000010
+ *        ****************
+ *     => FF01
+ *     => RESULT = (((uint32_t) VALUE * 0x0000FF01) >> 16) >> 8
+ */
 #ifdef USE_MULTIPLY_SHIFT_FOR_CONSTANT_DIVISION
     #define DIV_BY_255(V) ( (((uint32_t) V * 0x00008081) >> 16) >> 7 )
     #define DIV_BY_257(V) ( (((uint32_t) V * 0x0000FF01) >> 16) >> 8 )
@@ -278,9 +274,8 @@ class Argb32Model
                                        ( Pt::uint32_t(c.green() & 0xFF00)       )  |
                                        ( Pt::uint32_t(c.blue ()         ) >>  8 );
                     Pt::uint32_t* dst =  reinterpret_cast<Pt::uint32_t*>(to);
-#ifndef USE_DUFFS_DEVICE
-                    for(size_t i = 0; i < length; ++i) *dst++ = src;
-#else
+                    // Use Duff's device for:
+                    //     for(size_t i = 0; i < length; ++i) *dst++ = src;
                     register Pt::uint32_t* dst_ = dst;
                     register Pt::uint32_t  src_ = src;
                     register Pt::uint32_t  cnt  = length;
@@ -296,7 +291,6 @@ class Argb32Model
                             case 1 :      *dst_++ = src_;
                                      } while (--n > 0);
                     }
-#endif
                     break;
                 }
 
@@ -308,15 +302,14 @@ class Argb32Model
                     const Pt::uint32_t  srcB     = DIV_BY_257(c.blue ()) * blend;
                     const Pt::uint32_t  srcA     = blend * blend;
                           Pt::uint8_t*  dst      = to;
-#ifndef USE_DUFFS_DEVICE
-                    for(size_t i = 0; i < length; ++i) {
-                        dst[0] = (srcB + blendInv * dst[0]) >> 8;
-                        dst[1] = (srcG + blendInv * dst[1]) >> 8;
-                        dst[2] = (srcR + blendInv * dst[2]) >> 8;
-                        dst[3] = (srcA + blendInv * dst[3]) >> 8;
-                        dst += 4;
-                    }
-#else
+                    // Use Duff's device for:
+                    //     for(size_t i = 0; i < length; ++i) {
+                    //        dst[0] = (srcB + blendInv * dst[0]) >> 8;
+                    //        dst[1] = (srcG + blendInv * dst[1]) >> 8;
+                    //        dst[2] = (srcR + blendInv * dst[2]) >> 8;
+                    //        dst[3] = (srcA + blendInv * dst[3]) >> 8;
+                    //        dst += 4;
+                    //    }
                     #define STORE_VALUES()                            \
                         dst_[0] = (srcB_ + blendInv_ * dst_[0]) >> 8; \
                         dst_[1] = (srcG_ + blendInv_ * dst_[1]) >> 8; \
@@ -343,7 +336,6 @@ class Argb32Model
                                      } while (--n > 0);
                     }
                     #undef STORE_VALUES
-#endif
                     break;
                 }
             }
@@ -357,9 +349,8 @@ class Argb32Model
                 case CompositionMode::SourceCopy: {
                     Pt::uint32_t  src = *reinterpret_cast<const Pt::uint32_t*>(from);
                     Pt::uint32_t* dst =  reinterpret_cast<Pt::uint32_t*>(to);
-#ifndef USE_DUFFS_DEVICE
-                    for(size_t i = 0; i < length; ++i) *dst++ = src;
-#else
+                    // Use Duff's device for:
+                    //     for(size_t i = 0; i < length; ++i) *dst++ = src;
                     register Pt::uint32_t* dst_ = dst;
                     register Pt::uint32_t  src_ = src;
                     register Pt::uint32_t  cnt  = length;
@@ -375,7 +366,6 @@ class Argb32Model
                             case 1 :      *dst_++ = src_;
                                      } while (--n > 0);
                     }
-#endif
                     break;
                 }
 
@@ -387,15 +377,14 @@ class Argb32Model
                     const Pt::uint32_t  srcB     = from[0] * blend;
                     const Pt::uint32_t  srcA     = blend   * blend;
                           Pt::uint8_t*  dst      = to;
-#ifndef USE_DUFFS_DEVICE
-                    for(size_t i = 0; i < length; ++i) {
-                        dst[0] = (srcB + blendInv * dst[0]) >> 8;
-                        dst[1] = (srcG + blendInv * dst[1]) >> 8;
-                        dst[2] = (srcR + blendInv * dst[2]) >> 8;
-                        dst[3] = (srcA + blendInv * dst[3]) >> 8;
-                        dst += 4;
-                    }
-#else
+                    // Use Duff's device for:
+                    //     for(size_t i = 0; i < length; ++i) {
+                    //         dst[0] = (srcB + blendInv * dst[0]) >> 8;
+                    //         dst[1] = (srcG + blendInv * dst[1]) >> 8;
+                    //         dst[2] = (srcR + blendInv * dst[2]) >> 8;
+                    //         dst[3] = (srcA + blendInv * dst[3]) >> 8;
+                    //         dst += 4;
+                    //     }
                     #define STORE_VALUES()                            \
                         dst_[0] = (srcB_ + blendInv_ * dst_[0]) >> 8; \
                         dst_[1] = (srcG_ + blendInv_ * dst_[1]) >> 8; \
@@ -422,7 +411,6 @@ class Argb32Model
                                      } while (--n > 0);
                     }
                     #undef STORE_VALUES
-#endif
                     break;
                 }
             }
@@ -458,7 +446,6 @@ class Argb32Model
 #undef DIV_BY_257
 
 #undef USE_MULTIPLY_SHIFT_FOR_CONSTANT_DIVISION
-#undef USE_DUFFS_DEVICE
 };
 
 

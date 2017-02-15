@@ -28,7 +28,7 @@
   02110-1301 USA
 */
 
-#include "Rasterizer2_Config.h"
+#include "Rasterizer2_Common.h"
 
 namespace Pt {
 namespace Gfx {
@@ -318,22 +318,19 @@ void Rasterizer2::rasterScanline(
     }
 
     // Draw the span using solid color
-#ifdef USE_PUTPIXELS_FOR_SOLID_COLOR
     Pixel pixel(_image->view(), minX + iterL, minY + pixelY);
     _image->format().setPixels(pixel, _brush.color(), iterR - iterL + 1, _compositionMode);
-#else
-    Pt::int32_t iterX     = iterL;
-    Pt::int32_t spanWidth = iterR - iterL + 1;
-    while(spanWidth > 0) {
-        const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
-        if(n) {
-            Pixel pixel(_image->view(), minX + iterX, minY + pixelY);
-            _image->format().copy(pixel, _brushPixel, n, _compositionMode);
-        }
-        spanWidth -= n;
-        iterX     += n;
-    }
-#endif
+    //Pt::int32_t iterX     = iterL;
+    //Pt::int32_t spanWidth = iterR - iterL + 1;
+    //while(spanWidth > 0) {
+    //    const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
+    //    if(n) {
+    //        Pixel pixel(_image->view(), minX + iterX, minY + pixelY);
+    //        _image->format().copy(pixel, _brushPixel, n, _compositionMode);
+    //    }
+    //    spanWidth -= n;
+    //    iterX     += n;
+    //}
 }
 
 

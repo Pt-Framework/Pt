@@ -40,14 +40,6 @@ namespace Pt {
 namespace Gfx {
 
 
-// Uncomment this to use Duff's device
-// NOTE: Enabling this optimization does not seem to reduce or increase performance, EXCEPT when using -O0
-#define USE_DUFFS_DEVICE
-
-// Uncomment this to use putPixels() for drawing solid colors
-// NOTE: enabling this one seems to only improve performance for SourceOver
-#define USE_PUTPIXELS_FOR_SOLID_COLOR
-
 class DrawText;
 class Image;
 
@@ -194,7 +186,6 @@ void Rasterizer2::rasterScanline(
 
     // The minimum, middle, and maximum values for alpha
     #define RSL_MIN_ALPHA  MIN_ALPHA
-    #define RSL_MID_ALPHA (MIN_ALPHA * SUPERSAMPLE_SIZE    )
     #define RSL_MAX_ALPHA (MIN_ALPHA * SUPERSAMPLE_SIZE * SUPERSAMPLE_SIZE)
 
     //
@@ -202,9 +193,11 @@ void Rasterizer2::rasterScanline(
     //
     if(iterL < 0) iterL = 0;
 
-
     // Skip fully-transparent pixels
-#ifdef USE_DUFFS_DEVICE
+    // Use Duff's device for:
+    //     for(; iterL < sizeX; ++iterL) {
+    //         if(alphas[iterL]) break;
+    //     }
     if(true) {
         register const Pt::uint8_t* src  = &alphas[0];
         register       Pt::int32_t  cnt  = sizeX - 1;
@@ -223,13 +216,8 @@ void Rasterizer2::rasterScanline(
         }
         iterL = k;
     }
-#else
-    for(; iterL < sizeX; ++iterL) {
-        if(alphas[iterL]) break;
-    }
-#endif
 
-     // Texture or gradient
+    // Texture or gradient
     if(_isTexture || _isGradient) {
         for(; iterL < sizeX; ++iterL) {
             // Break if we have reached the non anti-aliased part of the span
@@ -262,7 +250,10 @@ void Rasterizer2::rasterScanline(
     if(iterR >= sizeX) iterR = sizeX - 1;
 
     // Skip fully-transparent pixels
-#ifdef USE_DUFFS_DEVICE
+    // Use Duff's device for:
+    //     for(; iterR >= 0; --iterR) {
+    //         if(alphas[iterR]) break;
+    //     }
     if(true) {
         register const Pt::uint8_t* src  = &alphas[0];
         register       Pt::int32_t  cnt  = sizeX - 1;
@@ -281,11 +272,6 @@ void Rasterizer2::rasterScanline(
         }
         iterR = k;
     }
-#else
-    for(; iterR >= 0; --iterR) {
-        if(alphas[iterR]) break;
-    }
-#endif
 
      // Texture or gradient
     if(_isTexture || _isGradient) {
@@ -368,28 +354,24 @@ void Rasterizer2::rasterScanline(
 
     // Draw the span using solid color
     else {
-#ifdef USE_PUTPIXELS_FOR_SOLID_COLOR
         Pixel pixel(_image->view(), minX + iterL, minY + pixelY);
         _image->format().setPixels(pixel, _brush.color(), iterR - iterL + 1, _compositionMode);
-#else
-        Pt::int32_t iterX     = minX + iterL;
-        Pt::int32_t spanWidth = iterR - iterL + 1;
-        while(spanWidth > 0) {
-            const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
-            if(n) {
-                Pixel pixel(_image->view(), iterX, minY + pixelY);
-                _image->format().copy(pixel, _brushPixel, n, _compositionMode);
-            }
-            spanWidth -= n;
-            iterX     += n;
-        }
-#endif
+        //Pt::int32_t iterX     = minX + iterL;
+        //Pt::int32_t spanWidth = iterR - iterL + 1;
+        //while(spanWidth > 0) {
+        //    const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
+        //    if(n) {
+        //        Pixel pixel(_image->view(), iterX, minY + pixelY);
+        //        _image->format().copy(pixel, _brushPixel, n, _compositionMode);
+        //    }
+        //    spanWidth -= n;
+        //    iterX     += n;
+        //}
     }
 
     // Undefine the macros
     #undef RSL_SCALE_ALPHA
     #undef RSL_MIN_ALPHA
-    #undef RSL_MID_ALPHA
     #undef RSL_MAX_ALPHA
 }
 

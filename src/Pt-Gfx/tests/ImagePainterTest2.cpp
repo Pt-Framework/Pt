@@ -27,7 +27,6 @@
 #include <Pt/System/Clock.h>
 
 #include <cairo.h>
-#include <gd.h>
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
@@ -37,10 +36,6 @@ using namespace Pt::Gfx;
 // Comparison with Cairo (solid-filled polygons and ellipses only)
 #define DO_BENCHMARKING_CAIRO                 1
 #define BENCHMARK_CAIRO_CHECK_RESULTING_IMAGE 0
-
-// Comparison with GD (solid-filled polygons only)
-#define DO_BENCHMARKING_GD                 0
-#define BENCHMARK_GD_CHECK_RESULTING_IMAGE 0
 
 // General settings for Pt-Gfx
 #define DO_TEST_DRAW    1
@@ -103,7 +98,6 @@ static Brush bmBrushTextureW;
 #include "ImagePainterTest2_Draw.cpp"
 #include "ImagePainterTest2_Benchmark.cpp"
 #include "ImagePainterTest2_Cairo.cpp"
-#include "ImagePainterTest2_GD.cpp"
 
 int main(int argc, char* args[])
 {
@@ -280,15 +274,6 @@ int main(int argc, char* args[])
         cairoBenchmark(CompositionMode::SourceOver);
     }
 
-    if(DO_BENCHMARKING_GD) {
-        std::clog << std::fixed << std::setprecision(0) << std::endl;
-
-        std::clog << "GD - CompositionMode::SourceCopy" << std::endl;
-        gdBenchmark(CompositionMode::SourceCopy);
-
-        std::clog << "GD - CompositionMode::SourceOver" << std::endl;
-        gdBenchmark(CompositionMode::SourceOver);
-    }
-
+    // All done
     return 0;
 }

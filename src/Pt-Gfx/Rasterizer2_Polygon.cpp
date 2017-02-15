@@ -254,75 +254,6 @@ void Rasterizer2::rasterPolygonAreaJaggies(const Point* points, const size_t* po
             const Pt::int32_t from = nodeX[i    ];
             const Pt::int32_t to   = nodeX[i + 1];
             rasterScanline(from - minX, to - minX, pixelY - minY, minX, minY, color);
-
-/*
-            // Determine the X coordinates
-            Pt::int32_t from = nodeX[i    ];
-            Pt::int32_t to   = nodeX[i + 1];
-            // Draw the span using texture
-            if(_isTexture) {
-                Pt::int32_t iterX     = from;
-                Pt::int32_t spanWidth = to - from + 1;
-                while(spanWidth > 0) {
-                    const Pt::int32_t tX = (iterX  - minX) % _brushImage->width ();
-                    const Pt::int32_t tY = (pixelY - minY) % _brushImage->height();
-                    const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tX);
-                    if(n) {
-                        ConstPixel srcPixel(_brushImage->view(), tX, tY);
-                        Pixel      dstPixel(_image->view(), iterX, pixelY);
-                        _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
-                    }
-                    spanWidth -= n;
-                    iterX     += n;
-                }
-                continue;
-            }
-            // Draw the span using gradient
-            if(_isGradient) {
-                Pt::int32_t iterX     = from;
-                Pt::int32_t spanWidth = to - from + 1;
-                // Fill the span - vertical gradient
-                if(_brush.fillStyle() == Pt::Gfx::Brush::VerticalGradient) {
-                    const Pt::int32_t textureY = (pixelY - minY) % _brushImage->height();
-                    ConstPixel        srcPixel(_brushImage->view(), 0, textureY);
-                    Pixel             dstPixel(_image->view(), iterX, pixelY);
-                    _image->format().setPixels(dstPixel, srcPixel, spanWidth, _compositionMode);
-                }
-                // Fill the span - horizontal gradient
-                else {
-                    while(spanWidth > 0) {
-                        const Pt::int32_t tX = (iterX  - minX) % _brushImage->width ();
-                        const Pt::int32_t tY = (pixelY - minY) % _brushImage->height();
-                        const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tX);
-                        if(n) {
-                            ConstPixel srcPixel(_brushImage->view(), tX, tY);
-                            Pixel      dstPixel(_image->view(), iterX, pixelY);
-                            _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
-                        }
-                        spanWidth -= n;
-                        iterX     += n;
-                    }
-                }
-                continue;
-            }
-            // Draw the span using solid color
-#ifdef USE_PUTPIXELS_FOR_SOLID_COLOR
-            Pixel pixel(_image->view(), from, pixelY);
-            _image->format().setPixels(pixel, _brush.color(), to - from + 1, _compositionMode);
-#else
-            Pt::int32_t iterX     = from;
-            Pt::int32_t spanWidth = to - from + 1;
-            while(spanWidth > 0) {
-                const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
-                if(n) {
-                    Pixel pixel(_image->view(), iterX, pixelY);
-                    _image->format().copy(pixel, _brushPixel, n, _compositionMode);
-                }
-                spanWidth -= n;
-                iterX     += n;
-            }
-#endif
-*/
         }
     }
 }
@@ -596,7 +527,10 @@ void Rasterizer2::rasterPolygonAreaSSAA4x4(const Point* points, const size_t* po
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
             const Pt::int32_t from = nodeX[i    ];
             const Pt::int32_t to   = nodeX[i + 1];
-#ifdef USE_DUFFS_DEVICE
+            // Use Duff's device for:
+            //     for(Pt::int32_t k = from; k <= to; ++k) {
+            //         alphas[k / SSAA4X4_SUPERSAMPLE_SIZE] += SSAA4X4_MIN_ALPHA;
+            //     }
             register Pt::uint8_t* dst = &alphas[0];
             register Pt::int32_t  cnt = to - from + 1;
             register Pt::int32_t  n   = (cnt + 7) / 8;
@@ -612,11 +546,6 @@ void Rasterizer2::rasterPolygonAreaSSAA4x4(const Point* points, const size_t* po
                     case 1 :      dst[k / SSAA4X4_SUPERSAMPLE_SIZE] += SSAA4X4_MIN_ALPHA; ++k;
                              } while (--n > 0);
             }
-#else
-            for(Pt::int32_t k = from; k <= to; ++k) {
-                alphas[k / SSAA4X4_SUPERSAMPLE_SIZE] += SSAA4X4_MIN_ALPHA;
-            }
-#endif
         }
         // Simply skip the next steps if we have not got all the needed samples
         if( ((pixelY + 1) % SSAA4X4_SUPERSAMPLE_SIZE) ) continue;
