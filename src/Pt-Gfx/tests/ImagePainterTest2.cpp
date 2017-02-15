@@ -35,11 +35,11 @@
 using namespace Pt::Gfx;
 
 // Comparison with Cairo (solid-filled polygons and ellipses only)
-#define DO_BENCHMARKING_CAIRO                 0
+#define DO_BENCHMARKING_CAIRO                 1
 #define BENCHMARK_CAIRO_CHECK_RESULTING_IMAGE 0
 
 // Comparison with GD (solid-filled polygons only)
-#define DO_BENCHMARKING_GD                 0
+#define DO_BENCHMARKING_GD                 1
 #define BENCHMARK_GD_CHECK_RESULTING_IMAGE 0
 
 // General settings for Pt-Gfx
@@ -67,23 +67,23 @@ using namespace Pt::Gfx;
 #define BENCHMARK_CHECK_RESULTING_IMAGE     0
 
 #define BENCHMARK_IMAGE_SIZE                Size(1280, 800)
-#define BENCHMARK_LOOP_COUNT                500
+#define BENCHMARK_LOOP_COUNT                5000
 
-#define BENCHMARK_TEXT                      0
+#define BENCHMARK_TEXT                      1
 #define BENCHMARK_LINE                      1
 
-#define BENCHMARK_RECTANGLE                 0
-#define BENCHMARK_SOLID_FILLED_RECTANGLE    0
-#define BENCHMARK_GRADIENT_FILLED_RECTANGLE 0
-#define BENCHMARK_TEXTURE_FILLED_RECTANGLE  0
+#define BENCHMARK_RECTANGLE                 1
+#define BENCHMARK_SOLID_FILLED_RECTANGLE    1
+#define BENCHMARK_GRADIENT_FILLED_RECTANGLE 1
+#define BENCHMARK_TEXTURE_FILLED_RECTANGLE  1
 
-#define BENCHMARK_SOLID_FILLED_POLYGON      0
-#define BENCHMARK_GRADIENT_FILLED_POLYGON   0
-#define BENCHMARK_TEXTURE_FILLED_POLYGON    0
+#define BENCHMARK_SOLID_FILLED_POLYGON      1
+#define BENCHMARK_GRADIENT_FILLED_POLYGON   1
+#define BENCHMARK_TEXTURE_FILLED_POLYGON    1
 
-#define BENCHMARK_SOLID_FILLED_ELLIPSE      0
-#define BENCHMARK_GRADIENT_FILLED_ELLIPSE   0
-#define BENCHMARK_TEXTURE_FILLED_ELLIPSE    0
+#define BENCHMARK_SOLID_FILLED_ELLIPSE      1
+#define BENCHMARK_GRADIENT_FILLED_ELLIPSE   1
+#define BENCHMARK_TEXTURE_FILLED_ELLIPSE    1
 
 // Configurations and objects
 #define FONT_DIR  "../src/Pt-Gfx/fonts"
