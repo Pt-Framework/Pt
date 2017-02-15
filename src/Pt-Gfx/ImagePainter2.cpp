@@ -173,30 +173,25 @@ void ImagePainter2::drawEllipse( const PointF& topLeftIn, const SizeF& sizeIn )
 {
 }
 
-void ImagePainter2::fillEllipse( const PointF& topLeftIn, const SizeF& sizeIn )
+void ImagePainter2::fillEllipse( const PointF& topLeftIn, const SizeF& sizeIn, Pt::uint8_t antiAliasingLevel )
 {
     // Generate a polygon that approximates the ellipse
     const Pt::int32_t radiusX = sizeIn.width () / 2;
     const Pt::int32_t radiusY = sizeIn.height() / 2;
     const Pt::int32_t centerX = topLeftIn.x() + radiusX;
     const Pt::int32_t centerY = topLeftIn.y() + radiusY;
-    const Pt::int32_t numSegs = 10;
+    const Pt::int32_t numSegs = std::max(radiusX, radiusY) / 2;
 
-    std::vector<Point> points(numSegs + 1);
+    std::vector<Point> points(numSegs);
 
     for (Pt::int32_t i = 0; i < numSegs; ++i) {
         const float angle = 2 * M_PI * i / numSegs;
-        points[i].setX( centerX + radiusX * cos(angle) );
-        points[i].setY( centerX + radiusX * sin(angle) );
+        points[i].setX( centerX + radiusX * fastCos<float, true>(angle) );
+        points[i].setY( centerY + radiusY * fastSin<float, true>(angle) );
     }
 
-    //points[pointCount].set(
-    //    ImagePainter2::PolygonSeparatorPointF.x(),
-    //    ImagePainter2::PolygonSeparatorPointF.y()
-    //);
-
     // Rasterize the polygon
-    _rasterizer->fillPolygon(points.data(), numSegs + 1, 0);
+    _rasterizer->fillPolygon(points.data(), numSegs, antiAliasingLevel);
 }
 
 void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount )
