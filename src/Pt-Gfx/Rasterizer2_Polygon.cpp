@@ -220,7 +220,7 @@ void Rasterizer2::rasterPolygonAreaJaggies(const Point* points, const size_t* po
                 const Pt::int32_t curXj = (curPointBase + j)->x();
                 const Pt::int32_t curYj = (curPointBase + j)->y();
                 // Calculate the node's coordinate
-                if( ( curYi < pixelY && curYj >= pixelY ) || ( curYj < pixelY && curYi >= pixelY ) ) {
+                if( ( pixelY >= curYi && pixelY < curYj ) || ( pixelY >= curYj && pixelY < curYi ) ) {
                     // Bail out if we have produced too many nodes
                     if((size_t) nodes >= nodeX.size()) return;
                     // Calculate the node's coordinate
@@ -228,8 +228,10 @@ void Rasterizer2::rasterPolygonAreaJaggies(const Point* points, const size_t* po
                     const Pt::int32_t deltaYj = curYj  - curYi;
                     const Pt::int32_t deltaXj = curXj  - curXi;
                     const Pt::int32_t interXf = FIXED_POINT_FROM_INT(curXi)
-                                              + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
-                    nodeX[nodes++] = FIXED_POINT_TO_INT(interXf + FIXED_POINT_CONSTANT_HALF);
+                                              + ( (FIXED_POINT_FROM_INT(deltaYp) + FIXED_POINT_CONSTANT_QUARTER) /
+                                                  deltaYj * deltaXj
+                                                );
+                    nodeX[nodes++] = FIXED_POINT_TO_INT(interXf + 0);
                 }
                 // Update the searching index
                 j = i;
@@ -253,6 +255,7 @@ void Rasterizer2::rasterPolygonAreaJaggies(const Point* points, const size_t* po
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
             const Pt::int32_t from = nodeX[i    ];
             const Pt::int32_t to   = nodeX[i + 1];
+            //lprintf("%03d %03d @ %03d\n", from - minX, to - minX, pixelY - minY);
             rasterScanline(from - minX, to - minX, pixelY - minY, minX, minY, color);
         }
     }
@@ -312,7 +315,7 @@ void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* po
                 const Pt::int32_t curXj = *(curPointBaseX + j);
                 const Pt::int32_t curYj = *(curPointBaseY + j);
                 // Row (Y)
-                if( ( curYi < iterY0 && curYj >= iterY0 ) || ( curYj < iterY0 && curYi >= iterY0 ) ) {
+                if( ( iterY0 >= curYi && iterY0 < curYj ) || ( iterY0 >= curYj && iterY0 < curYi ) ) {
                     // Bail out if we have produced too many nodes
                     if((size_t) nodes0 >= nodeX0.size()) return;
                     // Calculate the nodes' coordinates
@@ -320,11 +323,13 @@ void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* po
                     const Pt::int32_t deltaYj  = curYj  - curYi;
                     const Pt::int32_t deltaXj  = curXj  - curXi;
                     const Pt::int32_t interXf0 = FIXED_POINT_FROM_INT(curXi)
-                                               + FIXED_POINT_FROM_INT(deltaYp0) / deltaYj * deltaXj;
-                    nodeX0[nodes0++] = FIXED_POINT_TO_INT(interXf0 + FIXED_POINT_CONSTANT_HALF);
+                                               + ( (FIXED_POINT_FROM_INT(deltaYp0) + FIXED_POINT_CONSTANT_QUARTER) /
+                                                   deltaYj * deltaXj
+                                                 );
+                    nodeX0[nodes0++] = FIXED_POINT_TO_INT(interXf0);
                 }
                 // Row (Y + 1)
-                if( ( curYi < iterY1 && curYj >= iterY1 ) || ( curYj < iterY1 && curYi >= iterY1 ) ) {
+                if( ( iterY1 >= curYi && iterY1 < curYj ) || ( iterY1 >= curYj && iterY1 < curYi ) ) {
                     // Bail out if we have produced too many nodes
                     if((size_t) nodes1 >= nodeX1.size()) return;
                     // Calculate the nodes' coordinates
@@ -332,8 +337,10 @@ void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* po
                     const Pt::int32_t deltaYj  = curYj  - curYi;
                     const Pt::int32_t deltaXj  = curXj  - curXi;
                     const Pt::int32_t interXf1 = FIXED_POINT_FROM_INT(curXi)
-                                               + FIXED_POINT_FROM_INT(deltaYp1) / deltaYj * deltaXj;
-                    nodeX1[nodes1++] = FIXED_POINT_TO_INT(interXf1 + FIXED_POINT_CONSTANT_HALF);
+                                               + ( (FIXED_POINT_FROM_INT(deltaYp1) + FIXED_POINT_CONSTANT_QUARTER) /
+                                                   deltaYj * deltaXj
+                                                 );
+                    nodeX1[nodes1++] = FIXED_POINT_TO_INT(interXf1);
                 }
                 // Update the searching index
                 j = i;
@@ -492,7 +499,7 @@ void Rasterizer2::rasterPolygonAreaSSAA4x4(const Point* points, const size_t* po
                 const Pt::int32_t curYi = *(curPointBaseY + i);
                 const Pt::int32_t curXj = *(curPointBaseX + j);
                 const Pt::int32_t curYj = *(curPointBaseY + j);
-                if( ( curYi < pixelY && curYj >= pixelY ) || ( curYj < pixelY && curYi >= pixelY ) ) {
+                if( ( pixelY >= curYi && pixelY < curYj ) || ( pixelY >= curYj && pixelY < curYi ) ) {
                     // Bail out if we have produced too many nodes
                     if((size_t) nodes >= nodeX.size()) return;
                     // Calculate the node's coordinate
@@ -501,7 +508,9 @@ void Rasterizer2::rasterPolygonAreaSSAA4x4(const Point* points, const size_t* po
                     const Pt::int32_t deltaXj = curXj  - curXi;
                     // Calculate the node's coordinate
                     const Pt::int32_t interXf = FIXED_POINT_FROM_INT(curXi)
-                                              + FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj;
+                                              + ( (FIXED_POINT_FROM_INT(deltaYp) + FIXED_POINT_CONSTANT_QUARTER) /
+                                                  deltaYj * deltaXj
+                                                );
                     nodeX[nodes++] = FIXED_POINT_TO_INT(interXf + FIXED_POINT_CONSTANT_HALF);
                 }
                 // Update the searching index
