@@ -1,4 +1,8 @@
-// ./jam.sh configure --with-rasterizer2 --with-hmi -sGUI=linux-fb -sOPTIM=-O2
+// CentOS 7
+//     ./jam.sh configure --with-rasterizer2 --with-hmi -sGUI=linux-fb -sOPTIM=-O2
+//
+// Raspbian Jessie 2017/01/11
+//     ./jam.sh configure --with-rasterizer2 --with-hmi -sGUI=linux-fb -sOPTIM=-O2 -with-libpng
 //
 // while true; do ps -aF | grep "[I]magePainterTest2"; done
 //
