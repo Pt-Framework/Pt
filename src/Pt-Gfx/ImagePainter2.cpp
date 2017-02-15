@@ -169,12 +169,34 @@ void ImagePainter2::fillRect( const RectF& rect )
     _rasterizer->fillRect(tl, br);
 }
 
-void ImagePainter2::drawEllipse( const PointF& topLeftIn, const  SizeF& sizeIn )
+void ImagePainter2::drawEllipse( const PointF& topLeftIn, const SizeF& sizeIn )
 {
 }
 
-void ImagePainter2::fillEllipse( const PointF& topLeftIn, const  SizeF& sizeIn )
+void ImagePainter2::fillEllipse( const PointF& topLeftIn, const SizeF& sizeIn )
 {
+    // Generate a polygon that approximates the ellipse
+    const Pt::int32_t radiusX = sizeIn.width () / 2;
+    const Pt::int32_t radiusY = sizeIn.height() / 2;
+    const Pt::int32_t centerX = topLeftIn.x() + radiusX;
+    const Pt::int32_t centerY = topLeftIn.y() + radiusY;
+    const Pt::int32_t numSegs = 10;
+
+    std::vector<Point> points(numSegs + 1);
+
+    for (Pt::int32_t i = 0; i < numSegs; ++i) {
+        const float angle = 2 * M_PI * i / numSegs;
+        points[i].setX( centerX + radiusX * cos(angle) );
+        points[i].setY( centerX + radiusX * sin(angle) );
+    }
+
+    //points[pointCount].set(
+    //    ImagePainter2::PolygonSeparatorPointF.x(),
+    //    ImagePainter2::PolygonSeparatorPointF.y()
+    //);
+
+    // Rasterize the polygon
+    _rasterizer->fillPolygon(points.data(), numSegs + 1, 0);
 }
 
 void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount )
@@ -183,25 +205,14 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount )
 
 void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount, Pt::uint8_t antiAliasingLevel )
 {
-    // Check if we need to add a closing separator point
-    const bool   addCSP = !( ps[pointCount - 1].x() > ImagePainter2::MaximumCoordinate &&
-                             ps[pointCount - 1].y() > ImagePainter2::MaximumCoordinate
-                           );
-    const size_t effPC  = addCSP ? (pointCount + 1) : pointCount;
-
-    // Copy the points and add a closing separator point as needed
-    std::vector<Point> points(effPC);
+    // Copy the points
+    std::vector<Point> points(pointCount);
 
     for(size_t i = 0; i < pointCount; ++i)
         points[i].set( ps[i].x(), ps[i].y() );
 
-    if(addCSP) points[pointCount].set(
-        ImagePainter2::PolygonSeparatorPointF.x(),
-        ImagePainter2::PolygonSeparatorPointF.y()
-    );
-
     // Rasterize the polygon
-    _rasterizer->fillPolygon(points.data(), effPC, antiAliasingLevel);
+    _rasterizer->fillPolygon(points.data(), pointCount, antiAliasingLevel);
 }
 
 void ImagePainter2::drawImage( const PointF& toIn, const Image& image)

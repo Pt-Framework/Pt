@@ -42,6 +42,7 @@ void Rasterizer2::strokePolygon(const Point* points, size_t pointCount)
 {
     switch( _pen.style() ) {
         case Pen::Solid:
+            // Draw a simple, one-pixel line
             if( _pen.size() == 1 && pointCount == 2 ) {
                 rasterOnePixelLine(points[0], points[1]);
             }
@@ -65,9 +66,9 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount, Pt::uint8_
     std::vector<Point > clippedPoints;
     std::vector<size_t> clippedCounts;
     size_t              startIndex = 0;
-    for(size_t i = 0; i < pointCount; ++i) {
-        // Search for the separator point
-        if(points[i].x() > COORDINATE_LIMIT && points[i].y() > COORDINATE_LIMIT) {
+    for(size_t i = 0; i <= pointCount; ++i) {
+        // Search for the end and/or separator points
+        if( i == pointCount || (points[i].x() > COORDINATE_LIMIT && points[i].y() > COORDINATE_LIMIT) ) {
             // Calculate the number of points for this polygon
             const size_t curPC = i - startIndex;
             // Clip the coordinates
@@ -123,8 +124,8 @@ void Rasterizer2::fillPolygonSeparate(const Point* points, size_t pointCount, Pt
     size_t startIndex = 0;
 
     for(size_t i = 0; i < pointCount; ++i) {
-        // Search for the separator point
-        if(points[i].x() > COORDINATE_LIMIT && points[i].y() > COORDINATE_LIMIT) {
+        // Search for the end and/or separator points
+        if( i == pointCount || (points[i].x() > COORDINATE_LIMIT && points[i].y() > COORDINATE_LIMIT) ) {
             // Calculate the number of points for this polygon
             const size_t curPC = i - startIndex;
             // Clip the coordinates
