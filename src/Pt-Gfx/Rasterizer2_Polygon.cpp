@@ -325,6 +325,13 @@ void Rasterizer2::rasterPolygonAreaJaggies(const Point* points, const size_t* po
 // Public-domain code by Darel Rex Finley, 2007
 void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
 {
+    // Internal macros
+    #define FSAA2X2_SUPERSAMPLE_SIZE 2
+    #define FSAA2X2_MUL_ALPHA        255
+    #define FSAA2X2_MIN_ALPHA        1
+    #define FSAA2X2_MID_ALPHA        (FSAA2X2_MIN_ALPHA * FSAA2X2_SUPERSAMPLE_SIZE                           )
+    #define FSAA2X2_MAX_ALPHA        (FSAA2X2_MIN_ALPHA * FSAA2X2_SUPERSAMPLE_SIZE * FSAA2X2_SUPERSAMPLE_SIZE)
+
     // Calculate the size of the polygon
     Pt::int32_t sizeX = (maxX - minX + 1);
     Pt::int32_t sizeY = (maxY - minY + 1);
@@ -337,25 +344,18 @@ void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* po
     std::vector<Pt::int32_t> pointY(totalPointCount, 0);
 
     for(size_t i = 0; i < totalPointCount; ++i) {
-        pointX[i] = (points[i].x() - minX) * 2;
-        pointY[i] = (points[i].y() - minY) * 2;
+        pointX[i] = (points[i].x() - minX) * FSAA2X2_SUPERSAMPLE_SIZE;
+        pointY[i] = (points[i].y() - minY) * FSAA2X2_SUPERSAMPLE_SIZE;
     }
 
     // List of nodes that define the horizontal segments
-    std::vector<Pt::int32_t> nodeX0(totalPointCount * 2, 0); // Nodes' X coordinates for row (Y    )
-    std::vector<Pt::int32_t> nodeX1(totalPointCount * 2, 0); // Nodes' X coordinates for row (Y + 1)
-
-    // Anti-aliasing related macros
-    #define FSAA2X2_SUPERSAMPLE_SIZE 2
-    #define FSAA2X2_MUL_ALPHA        255
-    #define FSAA2X2_MIN_ALPHA        1
-    #define FSAA2X2_MID_ALPHA        (FSAA2X2_MIN_ALPHA * FSAA2X2_SUPERSAMPLE_SIZE                           )
-    #define FSAA2X2_MAX_ALPHA        (FSAA2X2_MIN_ALPHA * FSAA2X2_SUPERSAMPLE_SIZE * FSAA2X2_SUPERSAMPLE_SIZE)
+    std::vector<Pt::int32_t> nodeX0(totalPointCount * FSAA2X2_SUPERSAMPLE_SIZE, 0); // Row (Y    )
+    std::vector<Pt::int32_t> nodeX1(totalPointCount * FSAA2X2_SUPERSAMPLE_SIZE, 0); // Row (Y + 1)
 
     //  Loop through the rows of the image
     for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
         // We examine two rows at a time
-        const Pt::int32_t iterY0 = pixelY * 2;
+        const Pt::int32_t iterY0 = pixelY * FSAA2X2_SUPERSAMPLE_SIZE;
         const Pt::int32_t iterY1 = iterY0 + 1;
         // Base pointers for the polygons
         const Pt::int32_t* curPointBaseX = pointX.data();
@@ -437,14 +437,14 @@ void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* po
                 const Pt::int32_t from1      = std::max(nodeX0[i    ], nodeX1[i    ]);
                 const Pt::int32_t to0        = std::min(nodeX0[i + 1], nodeX1[i + 1]);
                 const Pt::int32_t to1        = std::max(nodeX0[i + 1], nodeX1[i + 1]);
-                const Pt::int32_t from0_cell = from0 / 2;
-                const Pt::int32_t from1_cell = from1 / 2;
-                const Pt::int32_t to0_cell   = to0   / 2;
-                const Pt::int32_t to1_cell   = to1   / 2;
-                const Pt::int32_t from0_area = ( (from0_cell * 2) < from0 ) ? FSAA2X2_MIN_ALPHA : FSAA2X2_MID_ALPHA;
-                const Pt::int32_t from1_area = ( (from1_cell * 2) < from1 ) ? FSAA2X2_MIN_ALPHA : FSAA2X2_MID_ALPHA;
-                const Pt::int32_t to0_area   = ( (to0_cell   * 2) < to0   ) ? FSAA2X2_MID_ALPHA : FSAA2X2_MIN_ALPHA;
-                const Pt::int32_t to1_area   = ( (to1_cell   * 2) < to1   ) ? FSAA2X2_MID_ALPHA : FSAA2X2_MIN_ALPHA;
+                const Pt::int32_t from0_cell = from0 / FSAA2X2_SUPERSAMPLE_SIZE;
+                const Pt::int32_t from1_cell = from1 / FSAA2X2_SUPERSAMPLE_SIZE;
+                const Pt::int32_t to0_cell   = to0   / FSAA2X2_SUPERSAMPLE_SIZE;
+                const Pt::int32_t to1_cell   = to1   / FSAA2X2_SUPERSAMPLE_SIZE;
+                const Pt::int32_t from0_area = ( (from0_cell * FSAA2X2_SUPERSAMPLE_SIZE) < from0 ) ? FSAA2X2_MIN_ALPHA : FSAA2X2_MID_ALPHA;
+                const Pt::int32_t from1_area = ( (from1_cell * FSAA2X2_SUPERSAMPLE_SIZE) < from1 ) ? FSAA2X2_MIN_ALPHA : FSAA2X2_MID_ALPHA;
+                const Pt::int32_t to0_area   = ( (to0_cell   * FSAA2X2_SUPERSAMPLE_SIZE) < to0   ) ? FSAA2X2_MID_ALPHA : FSAA2X2_MIN_ALPHA;
+                const Pt::int32_t to1_area   = ( (to1_cell   * FSAA2X2_SUPERSAMPLE_SIZE) < to1   ) ? FSAA2X2_MID_ALPHA : FSAA2X2_MIN_ALPHA;
                 // Calculate alphas for the left side
                 if(from0_cell == from1_cell) {
                     alphas[from0_cell] = from0_area + from1_area;
@@ -479,22 +479,22 @@ void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* po
                 const Pt::int32_t from = nodeX0[i    ];
                 const Pt::int32_t to   = nodeX0[i + 1];
                 for(Pt::int32_t k = from; k <= to; ++k) {
-                    alphas[k / 2] += FSAA2X2_MIN_ALPHA;
+                    alphas[k / FSAA2X2_SUPERSAMPLE_SIZE] += FSAA2X2_MIN_ALPHA;
                 }
             }
             for(Pt::int32_t i = 0; i < nodes1; i += 2) {
                 const Pt::int32_t from = nodeX1[i    ];
                 const Pt::int32_t to   = nodeX1[i + 1];
                 for(Pt::int32_t k = from; k <= to; ++k) {
-                    alphas[k / 2] += FSAA2X2_MIN_ALPHA;
+                    alphas[k / FSAA2X2_SUPERSAMPLE_SIZE] += FSAA2X2_MIN_ALPHA;
                 }
             }
         }
         // lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%d", alphas[k]); lprintf("\n");
         // Fill the pixels between the node pairs
         for(Pt::int32_t i = 0; i < nodes0; i += 2) {
-            const Pt::int32_t iterL = nodeX0[i    ] / 2 - 1;
-            const Pt::int32_t iterR = nodeX0[i + 1] / 2 + 1;
+            const Pt::int32_t iterL = nodeX0[i    ] / FSAA2X2_SUPERSAMPLE_SIZE - 1;
+            const Pt::int32_t iterR = nodeX0[i + 1] / FSAA2X2_SUPERSAMPLE_SIZE + 1;
             rasterScanline<FSAA2X2_SUPERSAMPLE_SIZE, FSAA2X2_MIN_ALPHA, FSAA2X2_MUL_ALPHA>(
                 iterL, iterR, pixelY, minX, minY, sizeX, color, alphas
             );
@@ -513,9 +513,14 @@ void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* po
 // Public-domain code by Darel Rex Finley, 2007
 void Rasterizer2::rasterPolygonAreaSSAA4x4(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
 {
+    // Internal macros
+    #define SSAA4X4_SUPERSAMPLE_SIZE 4
+    #define SSAA4X4_MUL_ALPHA        17
+    #define SSAA4X4_MIN_ALPHA        15
+
     // Calculate the size of the polygon
     Pt::int32_t sizeX = (maxX - minX + 1);
-    Pt::int32_t sizeY = (maxY - minY + 1) * 4;
+    Pt::int32_t sizeY = (maxY - minY + 1) * SSAA4X4_SUPERSAMPLE_SIZE;
 
     // Prepare a work buffer
     std::vector<Pt::uint8_t> alphas(sizeX, 0);
@@ -525,17 +530,12 @@ void Rasterizer2::rasterPolygonAreaSSAA4x4(const Point* points, const size_t* po
     std::vector<Pt::int32_t> pointY(totalPointCount, 0);
 
     for(size_t i = 0; i < totalPointCount; ++i) {
-        pointX[i] = (points[i].x() - minX) * 4;
-        pointY[i] = (points[i].y() - minY) * 4;
+        pointX[i] = (points[i].x() - minX) * SSAA4X4_SUPERSAMPLE_SIZE;
+        pointY[i] = (points[i].y() - minY) * SSAA4X4_SUPERSAMPLE_SIZE;
     }
 
     // List of nodes that define the horizontal segments
     std::vector<Pt::int32_t> nodeX(totalPointCount * 2, 0);
-
-    // Anti-aliasing related macros
-    #define SSAA4X4_SUPERSAMPLE_SIZE 4
-    #define SSAA4X4_MUL_ALPHA        17
-    #define SSAA4X4_MIN_ALPHA        15
 
     //  Loop through the rows of the image
     for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
@@ -596,32 +596,31 @@ void Rasterizer2::rasterPolygonAreaSSAA4x4(const Point* points, const size_t* po
             register Pt::int32_t  n   = (cnt + 7) / 8;
             register Pt::int32_t  k   = from;
             switch(cnt % 8) {
-                    case 0 : do { dst[k / 4] += SSAA4X4_MIN_ALPHA; ++k;
-                    case 7 :      dst[k / 4] += SSAA4X4_MIN_ALPHA; ++k;
-                    case 6 :      dst[k / 4] += SSAA4X4_MIN_ALPHA; ++k;
-                    case 5 :      dst[k / 4] += SSAA4X4_MIN_ALPHA; ++k;
-                    case 4 :      dst[k / 4] += SSAA4X4_MIN_ALPHA; ++k;
-                    case 3 :      dst[k / 4] += SSAA4X4_MIN_ALPHA; ++k;
-                    case 2 :      dst[k / 4] += SSAA4X4_MIN_ALPHA; ++k;
-                    case 1 :      dst[k / 4] += SSAA4X4_MIN_ALPHA; ++k;
+                    case 0 : do { dst[k / SSAA4X4_SUPERSAMPLE_SIZE] += SSAA4X4_MIN_ALPHA; ++k;
+                    case 7 :      dst[k / SSAA4X4_SUPERSAMPLE_SIZE] += SSAA4X4_MIN_ALPHA; ++k;
+                    case 6 :      dst[k / SSAA4X4_SUPERSAMPLE_SIZE] += SSAA4X4_MIN_ALPHA; ++k;
+                    case 5 :      dst[k / SSAA4X4_SUPERSAMPLE_SIZE] += SSAA4X4_MIN_ALPHA; ++k;
+                    case 4 :      dst[k / SSAA4X4_SUPERSAMPLE_SIZE] += SSAA4X4_MIN_ALPHA; ++k;
+                    case 3 :      dst[k / SSAA4X4_SUPERSAMPLE_SIZE] += SSAA4X4_MIN_ALPHA; ++k;
+                    case 2 :      dst[k / SSAA4X4_SUPERSAMPLE_SIZE] += SSAA4X4_MIN_ALPHA; ++k;
+                    case 1 :      dst[k / SSAA4X4_SUPERSAMPLE_SIZE] += SSAA4X4_MIN_ALPHA; ++k;
                              } while (--n > 0);
             }
 #else
             for(Pt::int32_t k = from; k <= to; ++k) {
-                alphas[k / 4] += SSAA4X4_MIN_ALPHA;
+                alphas[k / SSAA4X4_SUPERSAMPLE_SIZE] += SSAA4X4_MIN_ALPHA;
             }
 #endif
         }
         // Simply skip the next steps if we have not got all the needed samples
-        if( ((pixelY + 1) % 4) ) continue;
-        //lprintf("%03d: ", pixelY / 4); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%d", alphas[k] / 15); lprintf("\n");
-
+        if( ((pixelY + 1) % SSAA4X4_SUPERSAMPLE_SIZE) ) continue;
+        //lprintf("%03d: ", pixelY / SSAA4X4_SUPERSAMPLE_SIZE); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%d", alphas[k] / 15); lprintf("\n");
         // Fill the pixels between the node pairs
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
-            const Pt::int32_t iterL = nodeX[i    ] / 4 - 1;
-            const Pt::int32_t iterR = nodeX[i + 1] / 4 + 1;
+            const Pt::int32_t iterL = nodeX[i    ] / SSAA4X4_SUPERSAMPLE_SIZE - 1;
+            const Pt::int32_t iterR = nodeX[i + 1] / SSAA4X4_SUPERSAMPLE_SIZE + 1;
             rasterScanline<SSAA4X4_SUPERSAMPLE_SIZE, SSAA4X4_MIN_ALPHA, SSAA4X4_MUL_ALPHA>(
-                iterL, iterR, pixelY / 4, minX, minY, sizeX, color, alphas
+                iterL, iterR, pixelY / SSAA4X4_SUPERSAMPLE_SIZE, minX, minY, sizeX, color, alphas
             );
         }
         // Clear the work buffer
