@@ -3,7 +3,7 @@ static void testDrawLine(const char* title, Image& image, Painter& painter)
     resetImage(image);
 
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
-    if(ip2) ip2->setAntiAliasingLevel(0);
+    if(ip2) ip2->setAntiAliasingLevel(1);
 
 #if 1
     painter.setClip( RectF (20, image.width() - 20, 20, image.height() - 20) );

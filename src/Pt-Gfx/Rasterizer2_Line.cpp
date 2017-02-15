@@ -134,8 +134,16 @@ void Rasterizer2::rasterOnePixelGLineSegmentNOAA(Pt::int32_t fx1, Pt::int32_t fy
     // Convert fixed-points to integers
     const Pt::int32_t x1 = FIXED_POINT_TO_INT(fx1);
     const Pt::int32_t y1 = FIXED_POINT_TO_INT(fy1);
-    const Pt::int32_t x2 = FIXED_POINT_TO_INT(fx2);
-    const Pt::int32_t y2 = FIXED_POINT_TO_INT(fy2);
+          Pt::int32_t x2 = FIXED_POINT_TO_INT(fx2);
+          Pt::int32_t y2 = FIXED_POINT_TO_INT(fy2);
+
+    // Adjust the coordinates as needed
+    if(skipLastPoint) {
+        if(x1 < x2) --x2;
+        else        ++x2;
+        if(y1 < y2) --y2;
+        else        ++y2;
+    }
 
     // Calculate the deltas
     const Pt::int32_t dx = abs(x2 - x1);
@@ -149,27 +157,16 @@ void Rasterizer2::rasterOnePixelGLineSegmentNOAA(Pt::int32_t fx1, Pt::int32_t fy
     Pt::int32_t err1 = (dx > dy ? dx : -dy) / 2;
     Pt::int32_t err2;
 
-    // Prepare the initial and ending coordinates
-    Pt::int32_t x  = x1;
-    Pt::int32_t y  = y1;
-    Pt::int32_t xm = x2;
-    Pt::int32_t ym = y2;
-
-    if(skipLastPoint) {
-        if(sx > 0) --xm;
-        else       ++xm;
-        if(sy > 0) --ym;
-        else       ++ym;
-    }
-
     // Draw the pixels
+    Pt::int32_t x = x1;
+    Pt::int32_t y = y1;
     for(;;) {
         // Draw the pixel
         Pixel pixel(_image->view(), x, y);
         _image->format().setPixel(pixel, color, _compositionMode);
         // Stop if we have reached the end
-        if(x == xm && y == ym) break;
-        // Update the coordinate
+        if(x == x2 && y == y2) break;
+        // Update the coordinates
         err2 = err1;
         if(err2 > -dx) {
             err1 -= dy;
