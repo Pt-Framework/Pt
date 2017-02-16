@@ -558,12 +558,77 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
         // Reset the alphas
         memset(&alphas[0], 0, alphas.size());
         // Accumulate the alphas of the samples between the node pairs
+        // --- Check if all rows have the same number of nodes ---
+        const Pt::int32_t nodes0            = nodes[0];
+              bool        hasSameNumOfNodes = true;
+        for(Pt::int32_t s = 1; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
+            if(nodes[s] != nodes0) {
+                hasSameNumOfNodes = false;
+                break;
+            }
+        }
         // --- the number of nodes within all the rows are equal ---
-        //if(nodes0 == nodes1) {
-        //}
+        if(hasSameNumOfNodes) {
+            for(Pt::int32_t i = 0; i < nodes0; i += 2) {
+                // Calculate the cells
+                Pt::int32_t from     [FSAA4X4_SUPERSAMPLE_SIZE];
+                Pt::int32_t to       [FSAA4X4_SUPERSAMPLE_SIZE];
+                Pt::int32_t from_cell[FSAA4X4_SUPERSAMPLE_SIZE];
+                Pt::int32_t to_cell  [FSAA4X4_SUPERSAMPLE_SIZE];
+                for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
+                    from     [s] = nodeX[s][i    ];
+                    to       [s] = nodeX[s][i + 1];
+                    from_cell[s] = from[s] / FSAA4X4_SUPERSAMPLE_SIZE;
+                    to_cell  [s] = to  [s] / FSAA4X4_SUPERSAMPLE_SIZE;
+                }
+                // Sort the cells
+                for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE - 1;) {
+                    if(from_cell[s] > from_cell[s + 1]) {
+                        std::swap(from_cell[s], from_cell[s + 1]);
+                        if(s) --s;
+                    }
+                    else {
+                        ++s;
+                    }
+                }
+                for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE - 1;) {
+                    if(to_cell[s] > to_cell[s + 1]) {
+                        std::swap(to_cell[s], to_cell[s + 1]);
+                        if(s) --s;
+                    }
+                    else {
+                        ++s;
+                    }
+                }
+                // Accumulate the alphas for the left side
+                for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
+                    alphas[from_cell[s]] += FSAA4X4_MID_ALPHA - (from[s] - from_cell[s] * FSAA4X4_MID_ALPHA);
+                }
+                Pt::int32_t prevL = from_cell[0];
+                for(Pt::int32_t s = 1; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
+                    //
+                    if(from_cell[s] == prevL) continue;
+                    prevL = from_cell[s];
+                    //
+                    for(Pt::int32_t c = 1; c < s; ++c) {
+                        if(from_cell[c] < from_cell[s]) alphas[from_cell[s]] += FSAA4X4_MID_ALPHA;
+                    }
+                }
+                for(Pt::int32_t s = 0; s < (FSAA4X4_SUPERSAMPLE_SIZE - 1); ++s) {
+                    for(Pt::int32_t k = (from_cell[s] + 1); k <= (from_cell[s + 1] - 1); ++k) {
+                        for(Pt::int32_t c = 1; c < (s + 1); ++c) {
+                            if(from_cell[c] < from_cell[s + 1]) alphas[k] += FSAA4X4_MID_ALPHA;
+                        }
+                    }
+                }
+                // Accumulate the alphas for the right side
+
+
+            }
+        }
         // Accumulate the alphas of the samples between the node pairs
         // --- the number of nodes within all or some of the rows are not equal --
-        //else {
+        else {
             for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
                 for(Pt::int32_t i = 0; i < nodes[s]; i += 2) {
                     const Pt::int32_t from = nodeX[s][i    ];
@@ -573,7 +638,7 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
                     }
                 }
             }
-        //}
+        }
         // lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%d", alphas[k]); lprintf("\n");
         // Fill the pixels between the node pairs
         for(Pt::int32_t i = 0; i < nodes[0]; i += 2) {
