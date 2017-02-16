@@ -91,6 +91,8 @@ void Rasterizer2::rasterOnePixelLine(const Point& a, const Point& b)
         return;
     }
 
+    // ### TODO: XLINE !!! ###
+
     // Convert the coordinates to fixed-points
     const Pt::int32_t fx1 = FIXED_POINT_FROM_INT(x1);
     const Pt::int32_t fy1 = FIXED_POINT_FROM_INT(y1);
