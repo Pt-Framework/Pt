@@ -28,14 +28,10 @@
   02110-1301 USA
 */
 
-#include <cmath>
-
-#include <Pt/Gfx/Algorithm.h>
 #include <Pt/Gfx/ImagePainter2.h>
 
-#include "DrawText.h"
-#include "ClipShape.h"
 #include "Rasterizer2.h"
+
 
 namespace Pt {
 namespace Gfx {

@@ -31,10 +31,7 @@
 #ifndef PT_GFX_RASTERIZER_2_H
 #define PT_GFX_RASTERIZER_2_H
 
-#include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Painter.h>
-#include <Pt/String.h>
-#include <Pt/System/Path.h>
 
 // ======================================================================================
 // ===== Configurations and Macros ======================================================

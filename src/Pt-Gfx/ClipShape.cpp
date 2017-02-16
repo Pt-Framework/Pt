@@ -58,7 +58,8 @@ bool ClipShape::clipLine(Pt::int32_t& x0, Pt::int32_t& y0, Pt::int32_t& x1, Pt::
     int outcode1 = csComputeOutcode(x1, y1, clip);
 
     bool        accept = false;
-    Pt::int32_t x, y;
+    Pt::int32_t x      = 0;
+    Pt::int32_t y      = 0;
 
     while(true) {
         // Both endpoints are inside the clip region
