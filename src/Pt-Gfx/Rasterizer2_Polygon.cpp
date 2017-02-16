@@ -110,7 +110,7 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
         );
     }
     else {
-        rasterPolygonAreaSSAA4x4(
+        rasterPolygonAreaFSAA4x4(
             clippedPoints.data(), clippedCounts.data(),
             clippedCounts.size(), clippedPoints.size(),
             _brush.color(), minX, minY, maxX, maxY
@@ -524,7 +524,7 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
                                                   + ( (FIXED_POINT_FROM_INT(deltaYp) + FIXED_POINT_CONSTANT_HALF) /
                                                       deltaYj * deltaXj
                                                     );
-                        nodeX[s][nodes[s]++] = FIXED_POINT_TO_INT(interXf);
+                        nodeX[s][nodes[s]++] = FIXED_POINT_TO_INT(interXf + FIXED_POINT_CONSTANT_HALF);
                     }
                 }
                 // Update the searching index
@@ -567,7 +567,7 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
             break;
         }
         // --- The number of nodes within all the rows are equal ---
-        if(true && hasSameNumOfNodes) {
+        if(!true && hasSameNumOfNodes) {
             for(Pt::int32_t i = 0; i < nodes0; i += 2) {
                 // Calculate the cells
                 Pt::int32_t from     [FSAA4X4_SUPERSAMPLE_SIZE];
