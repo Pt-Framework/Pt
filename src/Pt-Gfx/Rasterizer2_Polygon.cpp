@@ -243,21 +243,12 @@ void Rasterizer2::rasterPolygonAreaJaggies(const Point* points, const size_t* po
         }
         // Skip if there is no node
         if(!nodes) continue;
-        // Sort the nodes using bubble sort
-        for(Pt::int32_t i = 0; i < nodes - 1;) {
-            if(nodeX[i] > nodeX[i + 1]) {
-                std::swap(nodeX[i], nodeX[i + 1]);
-                if(i) --i;
-            }
-            else {
-                ++i;
-            }
-        }
+        // Sort the nodes
+        bubbleSort(nodeX, nodes);
         // Fill the pixels between the node pairs
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
             const Pt::int32_t from = nodeX[i    ];
             const Pt::int32_t to   = nodeX[i + 1];
-            //lprintf("%03d %03d @ %03d\n", from - minX, to - minX, pixelY - minY);
             rasterScanline(from - minX, to - minX, pixelY - minY, minX, minY, color);
         }
     }
@@ -353,25 +344,9 @@ void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* po
         }
         // Skip if there is no node
         if(!nodes0 && !nodes1) continue;
-        // Sort the nodes using bubble sort
-        for(Pt::int32_t i = 0; i < nodes0 - 1;) {
-            if(nodeX0[i] > nodeX0[i + 1]) {
-                std::swap(nodeX0[i], nodeX0[i + 1]);
-                if(i) --i;
-            }
-            else {
-                ++i;
-            }
-        }
-        for(Pt::int32_t i = 0; i < nodes1 - 1;) {
-            if(nodeX1[i] > nodeX1[i + 1]) {
-                std::swap(nodeX1[i], nodeX1[i + 1]);
-                if(i) --i;
-            }
-            else {
-                ++i;
-            }
-        }
+        // Sort the nodes
+        bubbleSort(nodeX0, nodes0);
+        bubbleSort(nodeX1, nodes1);
         // Reset the alphas
         memset(&alphas[0], 0, alphas.size());
         // Accumulate the alphas of the samples between the node pairs
@@ -718,16 +693,8 @@ void Rasterizer2::rasterPolygonAreaSSAA4x4(const Point* points, const size_t* po
         }
         // Skip if there is no node
         if(!nodes) continue;
-        // Sort the nodes using bubble sort
-        for(Pt::int32_t i = 0; i < nodes - 1;) {
-            if(nodeX[i] > nodeX[i + 1]) {
-                std::swap(nodeX[i], nodeX[i + 1]);
-                if(i) --i;
-            }
-            else {
-                ++i;
-            }
-        }
+        // Sort the nodes
+        bubbleSort(nodeX, nodes);
         // Accumulate the alphas of the samples between the node pairs
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
             const Pt::int32_t from = nodeX[i    ];

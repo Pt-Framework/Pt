@@ -135,6 +135,9 @@ class Rasterizer2
         void getPolygonRectMinMax(const Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY);
 
     private:
+        template<typename T>
+        void bubbleSort(T& basket, Pt::int32_t size);
+
         void rasterScanline(
             Pt::int32_t  iterL, Pt::int32_t iterR, Pt::int32_t pixelY,
             Pt::int32_t  minX,  Pt::int32_t minY,
@@ -174,6 +177,20 @@ class Rasterizer2
 // ======================================================================================
 // ===== Templated Private Member Functions =============================================
 // ======================================================================================
+
+template<typename T>
+inline void Rasterizer2::bubbleSort(T& basket, Pt::int32_t size)
+{
+    for(Pt::int32_t i = 0; i < size - 1;) {
+        if(basket[i] > basket[i + 1]) {
+            std::swap(basket[i], basket[i + 1]);
+            if(i) --i;
+        }
+        else {
+            ++i;
+        }
+    }
+}
 
 template<Pt::uint8_t SUPERSAMPLE_SIZE, Pt::uint8_t MIN_ALPHA, Pt::uint8_t MUL_ALPHA>
 void Rasterizer2::rasterScanline(
