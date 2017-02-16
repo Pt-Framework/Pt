@@ -796,10 +796,7 @@ void Widget::resize(const Gfx::SizeF& s, Pt::uint64_t origin)
 
 
 void Widget::onResizeEvent(const ResizeEvent& ev)
-{    
-    if( _content ) 
-      _content->resize( _size );
-
+{   
     onLayout();
 
     Widget* parentWidget = parent();
@@ -908,6 +905,16 @@ Pt::Signal<const Pt::Event&>& Widget::eventReady()
 
 void Widget::onLayout()
 {
+    if(_content)
+    { 
+        Gfx::PointF contentPos(_padding.left(), _padding.top());
+        _content->move(contentPos);
+
+        Gfx::SizeF contentSize = _size;
+        contentSize.addHeight( - _padding.topBottom() );
+        contentSize.addWidth( - _padding.leftRight() );
+        _content->resize( contentSize );
+    }
 }
 
 

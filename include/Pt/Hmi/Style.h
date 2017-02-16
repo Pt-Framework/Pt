@@ -1,6 +1,6 @@
 /* Copyright (C) 2016 Laurentiu-Gheorghe Crisan
    Copyright (C) 2016 Marc Boris Duerner
- 	 Copyright (C) 2017 Ilja Maier
+    Copyright (C) 2017 Ilja Maier
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -32,6 +32,7 @@
 #define Pt_Hmi_Style_h
 
 #include <Pt/Hmi/Api.h>
+#include <Pt/Hmi/Spacing.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Pen.h>
@@ -711,46 +712,46 @@ class PT_HMI_API ProgressBarRenderer : public Style::Facet
 
         virtual ~ProgressBarRenderer();
 
-        void prepare(const ProgressBar&		p,
-                     const StyleOptions&	options,
-                     Gfx::Brush&					background,
-                     Gfx::Brush&					foreground,
-                     Gfx::Pen&						contour,
-										 Gfx::Pen&						textPen,
-										 Gfx::Font&						font
-										 ) const;
+        void prepare(const ProgressBar&    p,
+                     const StyleOptions&  options,
+                     Gfx::Brush&          background,
+                     Gfx::Brush&          foreground,
+                     Gfx::Pen&            contour,
+                     Gfx::Pen&            textPen,
+                     Gfx::Font&            font
+                     ) const;
 
-			 void render( const ProgressBar& p,
-															 const StyleOptions& options,
-															Painter& painter,
-															const Gfx::RectF& rect,
-															const Gfx::Brush& background,
-															const Gfx::Brush& foreground,
-															const Gfx::Pen& contour,
-															const Gfx::Pen&						textPen,
-															const Gfx::Font&						font
-																				 ) const;
+       void render( const ProgressBar& p,
+                               const StyleOptions& options,
+                              Painter& painter,
+                              const Gfx::RectF& rect,
+                              const Gfx::Brush& background,
+                              const Gfx::Brush& foreground,
+                              const Gfx::Pen& contour,
+                              const Gfx::Pen&            textPen,
+                              const Gfx::Font&            font
+                                         ) const;
 
     protected:
-        virtual void onPrepare(const ProgressBar&		p,
-                               const StyleOptions&	options,
-                               Gfx::Brush&					background,
-                               Gfx::Brush&					foreground,
-                               Gfx::Pen&						contour,
-															 Gfx::Pen&						textPen,
-															 Gfx::Font&						font
-															 ) const = 0;
+        virtual void onPrepare(const ProgressBar&    p,
+                               const StyleOptions&  options,
+                               Gfx::Brush&          background,
+                               Gfx::Brush&          foreground,
+                               Gfx::Pen&            contour,
+                               Gfx::Pen&            textPen,
+                               Gfx::Font&            font
+                               ) const = 0;
 
-				virtual void onRender( const ProgressBar& p,
-															 const StyleOptions& options,
-															Painter& painter,
-															const Gfx::RectF& rect,
-															const Gfx::Brush& background,
-															const Gfx::Brush& foreground,
-															const Gfx::Pen& contour,
-															const Gfx::Pen&						textPen,
-															const Gfx::Font&						font
-																				 ) const = 0;
+        virtual void onRender( const ProgressBar& p,
+                               const StyleOptions& options,
+                              Painter& painter,
+                              const Gfx::RectF& rect,
+                              const Gfx::Brush& background,
+                              const Gfx::Brush& foreground,
+                              const Gfx::Pen& contour,
+                              const Gfx::Pen&            textPen,
+                              const Gfx::Font&            font
+                                         ) const = 0;
 };
 
 
@@ -761,46 +762,46 @@ class PT_HMI_API SliderRenderer : public Style::Facet
 
         virtual ~SliderRenderer();
 
-        void prepare(	const Slider&				s,
-											const StyleOptions&	options,
-											Gfx::Brush&					background,
-											Gfx::Brush&					foreground,
-											Gfx::Pen&						contour,
-											Gfx::Pen&						textPen,
-											Gfx::Font&					font
-										 ) const;
+        void prepare(  const Slider&        s,
+                      const StyleOptions&  options,
+                      Gfx::Brush&          background,
+                      Gfx::Brush&          foreground,
+                      Gfx::Pen&            contour,
+                      Gfx::Pen&            textPen,
+                      Gfx::Font&          font
+                     ) const;
 
-			 void render( const Slider&				s,
-									  const StyleOptions& options,
-									  Painter&						painter,
-									  const Gfx::RectF&		rect,
-									  const Gfx::Brush&		background,
-									  const Gfx::Brush&		foreground,
-									  const Gfx::Pen&			contour,
-									  const Gfx::Pen&			textPen,
-									  const Gfx::Font&		font
-									) const;
+       void render( const Slider&        s,
+                    const StyleOptions& options,
+                    Painter&            painter,
+                    const Gfx::RectF&    rect,
+                    const Gfx::Brush&    background,
+                    const Gfx::Brush&    foreground,
+                    const Gfx::Pen&      contour,
+                    const Gfx::Pen&      textPen,
+                    const Gfx::Font&    font
+                  ) const;
 
     protected:
-        virtual void onPrepare( const Slider&				s,
-                                const StyleOptions&	options,
-                                Gfx::Brush&					background,
-                                Gfx::Brush&					foreground,
-                                Gfx::Pen&						contour,
-															  Gfx::Pen&						textPen,
-															  Gfx::Font&				  font
-															) const = 0;
+        virtual void onPrepare( const Slider&        s,
+                                const StyleOptions&  options,
+                                Gfx::Brush&          background,
+                                Gfx::Brush&          foreground,
+                                Gfx::Pen&            contour,
+                                Gfx::Pen&            textPen,
+                                Gfx::Font&          font
+                              ) const = 0;
 
-				virtual void onRender( const Slider&				 s,
-															 const StyleOptions&	 options,
-															 Painter&						   painter,
-															 const Gfx::RectF&		 rect,
-															 const Gfx::Brush&		 background,
-															 const Gfx::Brush&		 foreground,
-															 const Gfx::Pen&			 contour,
-															 const Gfx::Pen&			 textPen,
-															 const Gfx::Font&			 font
-														 ) const = 0;
+        virtual void onRender( const Slider&         s,
+                               const StyleOptions&   options,
+                               Painter&               painter,
+                               const Gfx::RectF&     rect,
+                               const Gfx::Brush&     background,
+                               const Gfx::Brush&     foreground,
+                               const Gfx::Pen&       contour,
+                               const Gfx::Pen&       textPen,
+                               const Gfx::Font&       font
+                             ) const = 0;
 };
 
 
@@ -810,6 +811,8 @@ class PT_HMI_API ListBoxRenderer : public Style::Facet
         ListBoxRenderer(std::size_t refs = 0);
 
         virtual ~ListBoxRenderer();
+
+        void prepareLayout(Spacing& frameSize);
 
         void renderBackground(const ListBox& lb,
                               const StyleOptions& options,
@@ -838,6 +841,8 @@ class PT_HMI_API ListBoxRenderer : public Style::Facet
                         Gfx::Pen& contour) const;
 
     protected:
+        virtual void onPrepareLayout(Spacing& frameSize) = 0;
+
         virtual void onRenderBackground(const ListBox& lb,
                                         const StyleOptions& options,
                                         Painter& painter, 
@@ -881,14 +886,15 @@ class PT_HMI_API ComboBoxRenderer : public Style::Facet
                      Gfx::Font& font,
                      Gfx::Pen& textPen) const;
         
+        void prepareLayout(const ComboBox& cb,
+                           Gfx::SizeF& buttonSize) const;
+        
         void renderBackground(const ComboBox& cb, 
                               const StyleOptions& options,
                               Painter& painter, 
                               const Gfx::RectF& rect,
                               const Gfx::Pen& contour,
                               const Gfx::Brush& brush) const;
-
-        Gfx::SizeF resizeButton(const ComboBox& cb) const;
 
         void renderButton(const ComboBox& cb, 
                           const StyleOptions& options,
@@ -897,11 +903,15 @@ class PT_HMI_API ComboBoxRenderer : public Style::Facet
                           const Gfx::Pen& contour,
                           const Gfx::Brush& foreground) const;
 
-        void renderCursor(const ComboBox& cb, 
-                          const StyleOptions& options,
-                          Painter& painter, 
-                          const Gfx::RectF& rect,
-                          const Gfx::RectF& cursorRect ) const;
+        void renderText(const ComboBox& cb,
+                        const StyleOptions& options,
+                        Painter& painter, 
+                        const Gfx::RectF& rect,
+                        const String& text,
+                        const Gfx::PointF& textPos,
+                        const Gfx::Font& font, 
+                        const Gfx::Pen& textPen,
+                        const Gfx::RectF& cursor) const;
     
     protected:
         virtual void onPrepare(const ComboBox& cb, 
@@ -912,14 +922,15 @@ class PT_HMI_API ComboBoxRenderer : public Style::Facet
                                Gfx::Font& font,
                                Gfx::Pen& textPen) const = 0;
 
+        virtual void onPrepareLayout(const ComboBox& cb,
+                                     Gfx::SizeF& buttonSize) const = 0;
+
         virtual void onRenderBackground(const ComboBox& cb, 
                                         const StyleOptions& options,
                                         Painter& painter, 
                                         const Gfx::RectF& rect,
                                         const Gfx::Pen& contour,
                                         const Gfx::Brush& brush) const = 0;
-
-        virtual Gfx::SizeF onResizeButton(const ComboBox& cb) const = 0;
 
         virtual void onRenderButton(const ComboBox& cb, 
                                     const StyleOptions& options,
@@ -928,11 +939,15 @@ class PT_HMI_API ComboBoxRenderer : public Style::Facet
                                     const Gfx::Pen& contour,
                                     const Gfx::Brush& foreground) const = 0;
 
-        virtual void onRenderCursor(const ComboBox& cb, 
-                                    const StyleOptions& options,
-                                    Painter& painter, 
-                                    const Gfx::RectF& rect,
-                                    const Gfx::RectF& cursorRect ) const = 0;
+        virtual void onRenderText(const ComboBox& cb,
+                                  const StyleOptions& options,
+                                  Painter& painter, 
+                                  const Gfx::RectF& rect,
+                                  const String& text,
+                                  const Gfx::PointF& textPos,
+                                  const Gfx::Font& font, 
+                                  const Gfx::Pen& textPen,
+                                  const Gfx::RectF& cursor) const = 0;
 };
 
 } // namespace

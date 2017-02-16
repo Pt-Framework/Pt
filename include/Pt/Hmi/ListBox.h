@@ -142,12 +142,7 @@ class PT_HMI_API ListBoxLayout : public FlowLayout
         virtual ~ListBoxLayout();
 
     protected:
-        virtual void onAddWidget(Widget& w);
-
-        virtual void onRemoveWidget(Widget& w);
-
-    private:
-        void onContentChanged();
+        virtual void onLayout();       
 };
 
 

@@ -1,6 +1,6 @@
 /* Copyright (C) 2016 Laurentiu-Gheorghe Crisan
    Copyright (C) 2016 Marc Boris Duerner
-	 Copyright (C) 2017 Ilja Maier
+   Copyright (C) 2017 Ilja Maier
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -385,25 +385,25 @@ class PT_HMI_API PlatinumProgressBarRenderer : public ProgressBarRenderer
         virtual ~PlatinumProgressBarRenderer();
 
     protected:
-        virtual void onPrepare(const ProgressBar&		p,
-                               const StyleOptions&	options,
-                               Gfx::Brush&					background,
-                               Gfx::Brush&					foreground,
-                               Gfx::Pen&						contour,
-															 Gfx::Pen&						textPen,
-															 Gfx::Font&						font
-															 ) const;
+        virtual void onPrepare(const ProgressBar&    p,
+                               const StyleOptions&  options,
+                               Gfx::Brush&          background,
+                               Gfx::Brush&          foreground,
+                               Gfx::Pen&            contour,
+                               Gfx::Pen&            textPen,
+                               Gfx::Font&            font
+                               ) const;
 
-				virtual void onRender( const ProgressBar& p,
-															 const StyleOptions& options,
-															Painter& painter,
-															const Gfx::RectF& rect,
-															const Gfx::Brush& background,
-															const Gfx::Brush& foreground,
-															const Gfx::Pen& contour,
-															const Gfx::Pen&						textPen,
-															const Gfx::Font&						font
-																				 ) const;
+        virtual void onRender( const ProgressBar& p,
+                               const StyleOptions& options,
+                              Painter& painter,
+                              const Gfx::RectF& rect,
+                              const Gfx::Brush& background,
+                              const Gfx::Brush& foreground,
+                              const Gfx::Pen& contour,
+                              const Gfx::Pen&            textPen,
+                              const Gfx::Font&            font
+                                         ) const;
 };
 
 
@@ -415,25 +415,25 @@ class PT_HMI_API PlatinumSliderRenderer : public SliderRenderer
         virtual ~PlatinumSliderRenderer();
 
     protected:
-        virtual void onPrepare( const Slider&				s,
-                                const StyleOptions&	options,
-                                Gfx::Brush&					background,
-                                Gfx::Brush&					foreground,
-                                Gfx::Pen&						contour,
-															  Gfx::Pen&						textPen,
-															  Gfx::Font&					font
-															 ) const;
+        virtual void onPrepare( const Slider&        s,
+                                const StyleOptions&  options,
+                                Gfx::Brush&          background,
+                                Gfx::Brush&          foreground,
+                                Gfx::Pen&            contour,
+                                Gfx::Pen&            textPen,
+                                Gfx::Font&          font
+                               ) const;
 
-				virtual void onRender( const Slider&				s,
-															 const StyleOptions&	options,
-															 Painter&							painter,
-															 const Gfx::RectF&		rect,
-															 const Gfx::Brush&		background,
-															 const Gfx::Brush&		foreground,
-															 const Gfx::Pen&			contour,
-															 const Gfx::Pen&			textPen,
-															 const Gfx::Font&			font
-															) const;
+        virtual void onRender( const Slider&        s,
+                               const StyleOptions&  options,
+                               Painter&              painter,
+                               const Gfx::RectF&    rect,
+                               const Gfx::Brush&    background,
+                               const Gfx::Brush&    foreground,
+                               const Gfx::Pen&      contour,
+                               const Gfx::Pen&      textPen,
+                               const Gfx::Font&      font
+                              ) const;
 };
 
 
@@ -445,6 +445,8 @@ class PT_HMI_API PlatinumListBoxRenderer : public ListBoxRenderer
         virtual ~PlatinumListBoxRenderer();
 
     protected:
+        virtual void onPrepareLayout(Spacing& frameSize);
+
         virtual void onRenderBackground(const ListBox& p,
                                         const StyleOptions& options,
                                         Painter& painter, 
@@ -490,15 +492,16 @@ class PT_HMI_API PlatinumComboBoxRenderer : public ComboBoxRenderer
                                Gfx::Pen& contour,
                                Gfx::Font& font,
                                Gfx::Pen& textPen) const;
-
+        
+        virtual void onPrepareLayout(const ComboBox& cb,
+                                     Gfx::SizeF& buttonSize) const;
+        
         virtual void onRenderBackground(const ComboBox& cb, 
                                         const StyleOptions& options,
                                         Painter& painter, 
                                         const Gfx::RectF& rect,
                                         const Gfx::Pen& contour,
                                         const Gfx::Brush& brush) const;
-
-        virtual Gfx::SizeF onResizeButton(const ComboBox& cb) const;
 
         virtual void onRenderButton(const ComboBox& cb, 
                                     const StyleOptions& options,
@@ -507,11 +510,16 @@ class PT_HMI_API PlatinumComboBoxRenderer : public ComboBoxRenderer
                                     const Gfx::Pen& contour,
                                     const Gfx::Brush& foreground) const;
 
-        virtual void onRenderCursor(const ComboBox& cb, 
-                                    const StyleOptions& options,
-                                    Painter& painter, 
-                                    const Gfx::RectF& rect,
-                                    const Gfx::RectF& cursorRect) const;
+        virtual void onRenderText(const ComboBox& cb,
+                                  const StyleOptions& options,
+                                  Painter& painter, 
+                                  const Gfx::RectF& rect,
+                                  const String& text,
+                                  const Gfx::PointF& textPos,
+                                  const Gfx::Font& font, 
+                                  const Gfx::Pen& textPen,
+                                  const Gfx::RectF& cursor) const;
+    
     private:
         PlatinumRendererBase _baseRenderer;
 };

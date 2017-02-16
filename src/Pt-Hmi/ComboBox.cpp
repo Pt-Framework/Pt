@@ -97,17 +97,17 @@ void ComboBoxMenu::onPaintContent(const Gfx::RectF& rect)
 {
     Base::onPaintContent(rect);
 
-    const StyleOptions& options = Application::instance().styleOptions();
+    //const StyleOptions& options = Application::instance().styleOptions();
 
-    Painter painter( surface() );
-    painter.setClip(rect);
+    //Painter painter( surface() );
+    //painter.setClip(rect);
 
     //
     // menu border
     //
-    Gfx::RectF borderRect(size());
-    painter.setPen( options.contour() );
-    painter.drawRect(borderRect);
+    //Gfx::RectF borderRect(size());
+    //painter.setPen( options.contour() );
+    //painter.drawRect(borderRect);
 }
 
 
@@ -492,40 +492,36 @@ void ComboBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 
     _renderer->renderButton( *this, options, painter, rect,
                              _pen, _foregroundBrush );
-   
-    //
-    // clipping rect for text
-    //
-    Gfx::PointF clipPos = _editor.position();
-    Gfx::SizeF clipSize = _editor.size();
-    clipSize.addWidth(_textPadding); // space for cursor at end
-    painter.setClip( Gfx::RectF(clipPos, clipSize) );
 
     //
-    // entered or selected item text
+    // text with cursor
     //
     
-    Gfx::PointF textPos = _line.position();
-    textPos.addY( _line.ascent() );
+    Gfx::RectF cursorRect;
 
-    painter.setPen(_textPen);
-    painter.setFont(_font);
-    painter.drawText(textPos, _editor.text());
-
-    //
-    // text cursor
-    //
+    Gfx::PointF clipPos = _editor.position();
+    Gfx::SizeF clipSize = _editor.size();
+    clipSize.addWidth(_textPadding); // cursor
 
     if( _isEditable && hasFocus() )
     {
         double cursorX = _line.cursorToX( _editor.cursorPosition() );
         cursorX += _line.position().x();
+        
+        double cursorWidth = 1;
 
-        Gfx::RectF cursorRect( Gfx::PointF(cursorX, _line.position().y()),
-                               Gfx::SizeF(0, _line.height()) );
-
-        _renderer->renderCursor(*this, options, painter, rect, cursorRect);
+        cursorRect.set(Gfx::PointF( cursorX, _line.position().y() ),
+                       Gfx::SizeF( cursorWidth, _line.height() ) );           
     }
+
+    Gfx::RectF clipRect(clipPos, clipSize);
+    painter.setClip( Gfx::RectF(clipPos, clipSize) );
+
+    Gfx::PointF textPos = _line.position();
+    textPos.addY( _line.ascent() );
+
+    _renderer->renderText(*this, options, painter, rect, 
+                          _editor.text(), textPos, _font, _textPen, cursorRect);
 }
 
 
@@ -542,17 +538,18 @@ void ComboBox::onResizeEvent(const ResizeEvent& ev)
     if( ! _renderer )
         return;
 
-    // TODO: use buttonRect member in onMouseEvent/onTouchEvent
-    Gfx::SizeF buttonSize = _renderer->resizeButton(*this);
+    _renderer->prepareLayout(*this, _buttonSize);
 
-    _textPadding = ev.size().height() / 4;
+    _textPadding = ev.size().height() / 5;
+    if(_textPadding < 2)
+        _textPadding = 2;
 
     Gfx::PointF editPosition(_textPadding, 0);
     _editor.setPosition(editPosition);
 
     Gfx::SizeF editSize = ev.size();
-    editSize.addWidth( -buttonSize.width() );
-    editSize.addWidth(-3 * _textPadding);
+    editSize.addWidth( - _buttonSize.width() );
+    editSize.addWidth(-3 * _textPadding); // left, right, cursor
     _editor.setSize(editSize);
 }
 
@@ -571,9 +568,7 @@ bool ComboBox::onMouseEvent(const MouseEvent& ev)
 
     if( ev.isPress() )
     {
-        double buttonX = _editor.size().width() + 
-                         _editor.position().x() + 
-                         2 * _textPadding;
+        double buttonX = size().width() - _buttonSize.width();
         
         if( ev.position().x() > buttonX )
         {
@@ -599,9 +594,7 @@ void ComboBox::onTouchEvent(const TouchEvent& ev)
 
     if( ev.isPress() )
     {
-        double buttonX = _editor.size().width() + 
-                         _editor.position().x() + 
-                         2 * _textPadding;
+        double buttonX = size().width() - _buttonSize.width();
 
         if( ev.position().x() > buttonX )
         {

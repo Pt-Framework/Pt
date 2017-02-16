@@ -181,6 +181,7 @@ class PT_HMI_API ComboBox : public Control
         LineEditor   _editor;
         TextLine     _line;
         ComboBoxMenu _popup;
+        Gfx::SizeF   _buttonSize;
         double       _maxHeight;
         double       _textPadding;
         bool         _isEditable;

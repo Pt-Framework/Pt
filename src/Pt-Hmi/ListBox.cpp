@@ -317,43 +317,27 @@ ListBoxLayout::~ListBoxLayout()
 }
 
 
-void ListBoxLayout::onAddWidget(Widget& w)
-{
-    Base::onAddWidget(w);
-
-    onContentChanged();
-}
-
-
-void ListBoxLayout::onRemoveWidget(Widget& w)
-{
-    Base::onRemoveWidget(w);
-    
-    onContentChanged();
-}
-
-
-void ListBoxLayout::onContentChanged()
+void ListBoxLayout::onLayout()
 {
     double itemsHeight = 0;
+
+    // TODO: get notified by items when size changes...
 
     for(std::size_t i = 0; i < widgets().size(); ++i)
     {
         Widget* item = widgets().at(i);
 
-        // item size with margin
-        Gfx::SizeF itemSize = item->preferredSize();
-        itemSize.addWidth( item->margin().leftRight() );
-        itemSize.addHeight( item->margin().topBottom() );
-
         // the sum of the item heights
-        itemsHeight += itemSize.height();
+        itemsHeight += item->preferredSize().height();
+        itemsHeight += item->margin().topBottom();
     }
 
     Gfx::SizeF size = this->size();
     size.setHeight(itemsHeight);
 
     resize(size);
+
+    Base::onLayout();
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -494,6 +478,14 @@ void ListBox::onInvalidate()
 
     if( ! _hasRenderer )
         _renderer.reset( style.get<ListBoxRenderer>() );
+
+    if( ! _renderer)
+        return;
+
+    Spacing frameSize;
+    _renderer->prepareLayout(frameSize);
+
+    setPadding(frameSize);
 }
 
 
@@ -523,12 +515,12 @@ void ListBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 
 void ListBox::onResizeEvent(const ResizeEvent& ev)
 {
+    Base::onResizeEvent(ev);
+
     Gfx::SizeF size = _layout.size();
-    size.setWidth( ev.size().width() );
+    size.setWidth( _scrollView.size().width() );
 
     _layout.resize(size);
-
-    Base::onResizeEvent(ev);
 }
 
 } // namespace

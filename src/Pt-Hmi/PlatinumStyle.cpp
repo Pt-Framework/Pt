@@ -1,6 +1,6 @@
 /* Copyright (C) 2013 Marc Boris Duerner 
    Copyright (C) 2013 Laurentiu-Gheorghe Crisan
-	 Copyright (C) 2017 Ilja Maier
+   Copyright (C) 2017 Ilja Maier
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -809,48 +809,48 @@ PlatinumProgressBarRenderer::~PlatinumProgressBarRenderer()
 }
 
 
-void PlatinumProgressBarRenderer::onPrepare(const ProgressBar&		p,
-																						const StyleOptions&	options,
-																						Gfx::Brush&					background,
-																						Gfx::Brush&					foreground,
-																						Gfx::Pen&						contour,
-																						Gfx::Pen&						textPen,
-																						Gfx::Font&						font
-																						) const
+void PlatinumProgressBarRenderer::onPrepare(const ProgressBar&    p,
+                                            const StyleOptions&  options,
+                                            Gfx::Brush&          background,
+                                            Gfx::Brush&          foreground,
+                                            Gfx::Pen&            contour,
+                                            Gfx::Pen&            textPen,
+                                            Gfx::Font&            font
+                                            ) const
 {
 }
 
 void PlatinumProgressBarRenderer::onRender( const ProgressBar& p,
-																					  const StyleOptions& options,
-																						Painter& painter,
-																						const Gfx::RectF& rect,
-																						const Gfx::Brush& background,
-																						const Gfx::Brush& foreground,
-																						const Gfx::Pen& contour,
-																						const Gfx::Pen& textPen,
-																						const Gfx::Font& font
-																				 ) const
+                                            const StyleOptions& options,
+                                            Painter& painter,
+                                            const Gfx::RectF& rect,
+                                            const Gfx::Brush& background,
+                                            const Gfx::Brush& foreground,
+                                            const Gfx::Pen& contour,
+                                            const Gfx::Pen& textPen,
+                                            const Gfx::Font& font
+                                         ) const
 {
-		
-		const double barHeight = 3.0;
-		const double progressWidth = p.size().width() * p.progress();
-		const double boxY = p.size().height()/2 - barHeight/2;
+    
+    const double barHeight = 3.0;
+    const double progressWidth = p.size().width() * p.progress();
+    const double boxY = p.size().height()/2 - barHeight/2;
 
-		Gfx::RectF boxRect( Gfx::PointF(0.0, boxY),
-		                    Gfx::SizeF(p.size().width(), barHeight) );
+    Gfx::RectF boxRect( Gfx::PointF(0.0, boxY),
+                        Gfx::SizeF(p.size().width(), barHeight) );
 
-		Gfx::RectF progressRect( Gfx::PointF(0.0, boxY),
-		                         Gfx::SizeF(progressWidth,barHeight) );
+    Gfx::RectF progressRect( Gfx::PointF(0.0, boxY),
+                             Gfx::SizeF(progressWidth,barHeight) );
 
     painter.setBrush(background);
     painter.fillRect(boxRect);
 
-		painter.setBrush(foreground);
-		painter.fillRect(progressRect);
+    painter.setBrush(foreground);
+    painter.fillRect(progressRect);
 
-		painter.setBrush(foreground);
-		painter.fillCircle(Gfx::PointF(progressWidth - barHeight/2, 
-			                             boxY), barHeight);
+    painter.setBrush(foreground);
+    painter.fillCircle(Gfx::PointF(progressWidth - barHeight/2, 
+                                   boxY), barHeight);
 }
 
 
@@ -869,50 +869,50 @@ PlatinumSliderRenderer::~PlatinumSliderRenderer()
 }
 
 
-void PlatinumSliderRenderer::onPrepare( const Slider&				s,
-																				const StyleOptions&	options,
-																				Gfx::Brush&					background,
-																				Gfx::Brush&					foreground,
-																				Gfx::Pen&						contour,
-																				Gfx::Pen&						textPen,
-																				Gfx::Font&					font
-																			) const
+void PlatinumSliderRenderer::onPrepare( const Slider&        s,
+                                        const StyleOptions&  options,
+                                        Gfx::Brush&          background,
+                                        Gfx::Brush&          foreground,
+                                        Gfx::Pen&            contour,
+                                        Gfx::Pen&            textPen,
+                                        Gfx::Font&          font
+                                      ) const
 {
 }
 
-void PlatinumSliderRenderer::onRender( const Slider&				s,
-																			 const StyleOptions&	options,
-																			 Painter&							painter,
-																			 const Gfx::RectF&		rect,
-																			 const Gfx::Brush&		background,
-																			 const Gfx::Brush&		foreground,
-																			 const Gfx::Pen&			contour,
-																			 const Gfx::Pen&			textPen,
-																			 const Gfx::Font&			font
-																		 ) const
+void PlatinumSliderRenderer::onRender( const Slider&        s,
+                                       const StyleOptions&  options,
+                                       Painter&              painter,
+                                       const Gfx::RectF&    rect,
+                                       const Gfx::Brush&    background,
+                                       const Gfx::Brush&    foreground,
+                                       const Gfx::Pen&      contour,
+                                       const Gfx::Pen&      textPen,
+                                       const Gfx::Font&      font
+                                     ) const
 {
-		
-		const double sliderHeight = 6.0;
-		const double boxY = s.size().height()/2 - sliderHeight/2;
+    
+    const double sliderHeight = 6.0;
+    const double boxY = s.size().height()/2 - sliderHeight/2;
 
-		Gfx::RectF boxRect( Gfx::PointF(0.0, boxY),
-		                    Gfx::SizeF(s.size().width(), sliderHeight) );
+    Gfx::RectF boxRect( Gfx::PointF(0.0, boxY),
+                        Gfx::SizeF(s.size().width(), sliderHeight) );
 
-		painter.setBrush(background);
+    painter.setBrush(background);
     painter.fillRect(boxRect);
 
-		const double knobeWidth = sliderHeight * s.position();
+    const double knobeWidth = sliderHeight * s.position();
 
-		//Gfx::RectF knobeRect( Gfx::PointF(s.position(), boxY),
-		//                      Gfx::SizeF(sliderHeight, sliderHeight) );
+    //Gfx::RectF knobeRect( Gfx::PointF(s.position(), boxY),
+    //                      Gfx::SizeF(sliderHeight, sliderHeight) );
 
    
-		painter.setBrush(foreground);
-		painter.fillRect( s.knobeRect() );
+    painter.setBrush(foreground);
+    painter.fillRect( s.knobeRect() );
 
-		//painter.setBrush(foreground);
-		//painter.fillRect(Gfx::PointF(progressWidth - barHeight/2, 
-			                             //boxY), barHeight);
+    //painter.setBrush(foreground);
+    //painter.fillRect(Gfx::PointF(progressWidth - barHeight/2, 
+                                   //boxY), barHeight);
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -930,15 +930,20 @@ PlatinumListBoxRenderer::~PlatinumListBoxRenderer()
 }
 
 
+void PlatinumListBoxRenderer::onPrepareLayout(Spacing& frameSize)
+{
+    frameSize = Spacing(1);
+}
+
+
 void PlatinumListBoxRenderer::onRenderBackground(const ListBox& lb,
                                                  const StyleOptions& options,
                                                  Painter& painter, 
                                                  const Gfx::RectF& rect,
                                                  const Gfx::Brush& brush) const 
-{
-    Gfx::RectF borderRect( lb.size() );
-    
-    _baseRenderer.renderPlane(painter, borderRect, brush);
+{   
+    painter.setBrush(brush);
+    painter.fillRect(rect);
 }
 
 
@@ -950,7 +955,8 @@ void PlatinumListBoxRenderer::onRenderFrame(const ListBox& lb,
 {
     Gfx::RectF borderRect( lb.size() );
     
-    _baseRenderer.renderFrame(painter, borderRect, pen);
+    painter.setPen(pen);
+    painter.drawRect(borderRect);
 }
 
 
@@ -1040,7 +1046,8 @@ void PlatinumComboBoxRenderer::onRenderBackground(const ComboBox& cb,
 }
 
 
-Gfx::SizeF PlatinumComboBoxRenderer::onResizeButton(const ComboBox& cb) const
+void PlatinumComboBoxRenderer::onPrepareLayout(const ComboBox& cb,
+                                               Gfx::SizeF& buttonSize) const
 {
     int indicatorWidth = static_cast<int>(cb.size().height()) / 3;
     if(indicatorWidth % 2 == 0)
@@ -1048,7 +1055,7 @@ Gfx::SizeF PlatinumComboBoxRenderer::onResizeButton(const ComboBox& cb) const
     
     double width = indicatorWidth * 2.5;
     double height = cb.size().height();
-    return Gfx::SizeF(width, height);
+    buttonSize = Gfx::SizeF(width, height);
 }
 
 
@@ -1086,17 +1093,33 @@ void PlatinumComboBoxRenderer::onRenderButton(const ComboBox& cb,
 }
 
 
-void PlatinumComboBoxRenderer::onRenderCursor(const ComboBox& cb, 
-                                              const StyleOptions& options,
-                                              Painter& painter, 
-                                              const Gfx::RectF& rect,
-                                              const Gfx::RectF& cursorRect) const
+void PlatinumComboBoxRenderer::onRenderText(const ComboBox& cb,
+                                            const StyleOptions& options,
+                                            Painter& painter, 
+                                            const Gfx::RectF& rect,
+                                            const String& text,
+                                            const Gfx::PointF& textPos,
+                                            const Gfx::Font& font, 
+                                            const Gfx::Pen& textPen,
+                                            const Gfx::RectF& cursor) const
 {
-    painter.setPen( options.textColor() );
-    
-    painter.drawLine( cursorRect.topLeft(),
-                      cursorRect.bottomLeft() );
+    //
+    // text
+    //
+    painter.setPen(textPen);
+    painter.setFont(font);
+    painter.drawText(textPos, text);
+
+    //
+    // cursor
+    //
+    if( cb.isEditable() && cb.hasFocus() )
+    {
+        painter.drawLine( cursor.topLeft(),
+                          cursor.bottomLeft() );
+    }
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 // PlatinumStyle

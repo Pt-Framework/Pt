@@ -1,6 +1,6 @@
 /* Copyright (C) 2016 Marc Boris Duerner 
    Copyright (C) 2016 Laurentiu-Gheorghe Crisan
-	 Copyright (C) 2017 Ilja Maier
+   Copyright (C) 2017 Ilja Maier
 
    This library is free software; you can redistribute it and/or
    modify it under the terms of the GNU Lesser General Public
@@ -595,29 +595,29 @@ ProgressBarRenderer::~ProgressBarRenderer()
 }
 
 
-void ProgressBarRenderer::prepare(const ProgressBar&	p,
-																	const StyleOptions&	options,
-																	Gfx::Brush&					background,
-																	Gfx::Brush&					foreground,
-																	Gfx::Pen&						contour,
-																	Gfx::Pen&						textPen,
-																	Gfx::Font&					font) const
+void ProgressBarRenderer::prepare(const ProgressBar&  p,
+                                  const StyleOptions&  options,
+                                  Gfx::Brush&          background,
+                                  Gfx::Brush&          foreground,
+                                  Gfx::Pen&            contour,
+                                  Gfx::Pen&            textPen,
+                                  Gfx::Font&          font) const
 { 
     onPrepare(p, options, background, foreground, contour, textPen, font); 
 }
 
 void ProgressBarRenderer::render( const ProgressBar& p,
-																					 const StyleOptions& options,
-																					Painter& painter,
-																					const Gfx::RectF& rect,
-																					const Gfx::Brush& background,
-																					const Gfx::Brush& foreground,
-																					const Gfx::Pen& contour,
-																					const Gfx::Pen&						textPen,
-																			const Gfx::Font&						font
-																				) const
+                                           const StyleOptions& options,
+                                          Painter& painter,
+                                          const Gfx::RectF& rect,
+                                          const Gfx::Brush& background,
+                                          const Gfx::Brush& foreground,
+                                          const Gfx::Pen& contour,
+                                          const Gfx::Pen&            textPen,
+                                      const Gfx::Font&            font
+                                        ) const
 {
-	onRender(p, options, painter, rect, background, foreground, contour, textPen, font); 
+  onRender(p, options, painter, rect, background, foreground, contour, textPen, font); 
 }
 
 
@@ -636,29 +636,29 @@ SliderRenderer::~SliderRenderer()
 }
 
 
-void SliderRenderer::prepare( const Slider&				s,
-															const StyleOptions&	options,
-															Gfx::Brush&					background,
-															Gfx::Brush&					foreground,
-															Gfx::Pen&						contour,
-															Gfx::Pen&						textPen,
-															Gfx::Font&					font) const
+void SliderRenderer::prepare( const Slider&        s,
+                              const StyleOptions&  options,
+                              Gfx::Brush&          background,
+                              Gfx::Brush&          foreground,
+                              Gfx::Pen&            contour,
+                              Gfx::Pen&            textPen,
+                              Gfx::Font&          font) const
 { 
     onPrepare(s, options, background, foreground, contour, textPen, font); 
 }
 
-void SliderRenderer::render( const Slider&				s,
-														 const StyleOptions&	options,
-														 Painter&							painter,
-														 const Gfx::RectF&		rect,
-														 const Gfx::Brush&		background,
-														 const Gfx::Brush&		foreground,
-														 const Gfx::Pen&			contour,
-														 const Gfx::Pen&			textPen,
-														 const Gfx::Font&			font
-														) const
+void SliderRenderer::render( const Slider&        s,
+                             const StyleOptions&  options,
+                             Painter&              painter,
+                             const Gfx::RectF&    rect,
+                             const Gfx::Brush&    background,
+                             const Gfx::Brush&    foreground,
+                             const Gfx::Pen&      contour,
+                             const Gfx::Pen&      textPen,
+                             const Gfx::Font&      font
+                            ) const
 {
-	onRender(s, options, painter, rect, background, foreground, contour, textPen, font); 
+  onRender(s, options, painter, rect, background, foreground, contour, textPen, font); 
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -673,6 +673,12 @@ ListBoxRenderer::ListBoxRenderer(std::size_t refs)
     
 ListBoxRenderer::~ListBoxRenderer()
 {
+}
+
+
+void ListBoxRenderer::prepareLayout(Spacing& frameSize)
+{
+    onPrepareLayout(frameSize);
 }
 
 
@@ -744,6 +750,13 @@ void ComboBoxRenderer::prepare(const ComboBox& cb,
 }
 
 
+void ComboBoxRenderer::prepareLayout(const ComboBox& cb,
+                                     Gfx::SizeF& buttonSize) const
+{
+    return onPrepareLayout(cb, buttonSize);
+}
+
+
 void ComboBoxRenderer::renderBackground(const ComboBox& cb, 
                                         const StyleOptions& options,
                                         Painter& painter, 
@@ -752,12 +765,6 @@ void ComboBoxRenderer::renderBackground(const ComboBox& cb,
                                         const Gfx::Brush& brush) const
 {
     onRenderBackground(cb, options, painter, rect, contour, brush);
-}
-
-
-Gfx::SizeF ComboBoxRenderer::resizeButton(const ComboBox& cb) const
-{
-    return onResizeButton(cb);
 }
 
 
@@ -772,13 +779,17 @@ void ComboBoxRenderer::renderButton(const ComboBox& cb,
 }
 
 
-void ComboBoxRenderer::renderCursor(const ComboBox& cb, 
-                                    const StyleOptions& options,
-                                    Painter& painter, 
-                                    const Gfx::RectF& rect,
-                                    const Gfx::RectF& cursorRect) const
+void ComboBoxRenderer::renderText(const ComboBox& cb,
+                                  const StyleOptions& options,
+                                  Painter& painter, 
+                                  const Gfx::RectF& rect,
+                                  const String& text,
+                                  const Gfx::PointF& textPos,
+                                  const Gfx::Font& font, 
+                                  const Gfx::Pen& textPen,
+                                  const Gfx::RectF& cursor) const
 {
-    onRenderCursor(cb, options, painter, rect, cursorRect);
+    onRenderText(cb, options, painter, rect, text, textPos, font, textPen, cursor);
 }
 
 } // namespace
