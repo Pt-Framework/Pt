@@ -92,7 +92,7 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
 
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(&painter);
 
-#if 1
+#if 0
     painter.setBrush( Color::fromRgb8(255, 255, 255) );
     const Pt::int32_t sx = 5;
     const PointF polyx[] = { PointF(10 * sx, 10 * sx), PointF(40 * sx, 40 * sx), PointF(30 * sx, 60 * sx) };
