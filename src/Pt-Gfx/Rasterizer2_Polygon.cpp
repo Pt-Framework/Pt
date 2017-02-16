@@ -438,7 +438,6 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
     #define FSAA4X4_SUPERSAMPLE_SIZE 4
     #define FSAA4X4_MUL_ALPHA        255
     #define FSAA4X4_MIN_ALPHA        1
-    #define FSAA4X4_MID_ALPHA        (FSAA4X4_MIN_ALPHA * FSAA4X4_SUPERSAMPLE_SIZE                           )
     #define FSAA4X4_MAX_ALPHA        (FSAA4X4_MIN_ALPHA * FSAA4X4_SUPERSAMPLE_SIZE * FSAA4X4_SUPERSAMPLE_SIZE)
 
     // Calculate the size of the polygon
@@ -522,19 +521,10 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
         if(!gotNodes) continue;
         // Sort the nodes using bubble sort
         for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
-            for(Pt::int32_t i = 0; i < nodes[s] - 1;) {
-                if(nodeX[s][i] > nodeX[s][i + 1]) {
-                    std::swap(nodeX[s][i], nodeX[s][i + 1]);
-                    if(i) --i;
-                }
-                else {
-                    ++i;
-                }
-            }
+            bubbleSort(nodeX[s], nodes[s]);
         }
         // Reset the alphas
         memset(&alphas[0], 0, alphas.size());
-
         // Accumulate the alphas of the samples between the node pairs
         // --- Check if all the rows have the same number of nodes ---
         const Pt::int32_t nodes0            = nodes[0];
@@ -555,37 +545,21 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
                     to  [s] = nodeX[s][i + 1];
                 }
                 // Sort the coordinates
-                for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE - 1;) {
-                    if(from[s] > from[s + 1]) {
-                        std::swap(from[s], from[s + 1]);
-                        if(s) --s;
-                    }
-                    else {
-                        ++s;
-                    }
-                }
-                for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE - 1;) {
-                    if(to[s] > to[s + 1]) {
-                        std::swap(to[s], to[s + 1]);
-                        if(s) --s;
-                    }
-                    else {
-                        ++s;
-                    }
-                }
-                // Accumulate the alphas for the left side
+                bubbleSort(from, FSAA4X4_SUPERSAMPLE_SIZE);
+                bubbleSort(to,   FSAA4X4_SUPERSAMPLE_SIZE);
+                // Accumulate alphas for the left side
                 for(Pt::int32_t s = 0; s < (FSAA4X4_SUPERSAMPLE_SIZE - 1); ++s) {
                     for(Pt::int32_t k = from[s]; k <= from[FSAA4X4_SUPERSAMPLE_SIZE - 1]; ++k) {
                         alphas[k / FSAA4X4_SUPERSAMPLE_SIZE] += FSAA4X4_MIN_ALPHA;
                     }
                 }
-                // Accumulate the alphas for the right side
+                // Accumulate alphas for the right side
                 for(Pt::int32_t s = (FSAA4X4_SUPERSAMPLE_SIZE - 1); s > 0; --s) {
                     for(Pt::int32_t k = to[0]; k <= to[s]; ++k) {
                         alphas[k / FSAA4X4_SUPERSAMPLE_SIZE] += FSAA4X4_MIN_ALPHA;
                     }
                 }
-                // Assign the alphas for the middle side
+                // Assign alphas for the middle side
                 const Pt::int32_t msMin = (from[FSAA4X4_SUPERSAMPLE_SIZE - 1] / FSAA4X4_SUPERSAMPLE_SIZE + 1);
                 const Pt::int32_t msMax = (to  [0                           ] / FSAA4X4_SUPERSAMPLE_SIZE - 1);
                 const Pt::int32_t msLen = msMax - msMin + 1;
@@ -605,7 +579,7 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
                 }
             }
         }
-        lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%02d ", alphas[k] / FSAA4X4_MIN_ALPHA); lprintf("\n");
+        //lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%02d ", alphas[k] / FSAA4X4_MIN_ALPHA); lprintf("\n");
         // Fill the pixels between the node pairs
         for(Pt::int32_t i = 0; i < nodes[0]; i += 2) {
             const Pt::int32_t iterL = nodeX[0][i    ] / FSAA4X4_SUPERSAMPLE_SIZE - 1;
