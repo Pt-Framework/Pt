@@ -110,7 +110,7 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
         );
     }
     else {
-        rasterPolygonAreaFSAA4x4(
+        rasterPolygonAreaSSAA4x4(
             clippedPoints.data(), clippedCounts.data(),
             clippedCounts.size(), clippedPoints.size(),
             _brush.color(), minX, minY, maxX, maxY
@@ -231,7 +231,7 @@ void Rasterizer2::rasterPolygonAreaJaggies(const Point* points, const size_t* po
                                               + ( (FIXED_POINT_FROM_INT(deltaYp) + FIXED_POINT_CONSTANT_HALF) /
                                                   deltaYj * deltaXj
                                                 );
-                    nodeX[nodes++] = FIXED_POINT_TO_INT(interXf + 0);
+                    nodeX[nodes++] = FIXED_POINT_TO_INT(interXf + FIXED_POINT_CONSTANT_HALF);
                 }
                 // Update the searching index
                 j = i;
@@ -326,7 +326,7 @@ void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* po
                                                + ( (FIXED_POINT_FROM_INT(deltaYp0) + FIXED_POINT_CONSTANT_HALF) /
                                                    deltaYj * deltaXj
                                                  );
-                    nodeX0[nodes0++] = FIXED_POINT_TO_INT(interXf0);
+                    nodeX0[nodes0++] = FIXED_POINT_TO_INT(interXf0 + FIXED_POINT_CONSTANT_HALF);
                 }
                 // Row (Y + 1)
                 if( ( iterY1 >= curYi && iterY1 < curYj ) || ( iterY1 >= curYj && iterY1 < curYi ) ) {
@@ -337,10 +337,10 @@ void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* po
                     const Pt::int32_t deltaYj  = curYj  - curYi;
                     const Pt::int32_t deltaXj  = curXj  - curXi;
                     const Pt::int32_t interXf1 = FIXED_POINT_FROM_INT(curXi)
-                                               + ( (FIXED_POINT_FROM_INT(deltaYp1) + FIXED_POINT_CONSTANT_HALF) /
+                                               + ( (FIXED_POINT_FROM_INT(deltaYp1) + FIXED_POINT_CONSTANT_QUARTER) /
                                                    deltaYj * deltaXj
                                                  );
-                    nodeX1[nodes1++] = FIXED_POINT_TO_INT(interXf1);
+                    nodeX1[nodes1++] = FIXED_POINT_TO_INT(interXf1 + FIXED_POINT_CONSTANT_HALF);
                 }
                 // Update the searching index
                 j = i;
@@ -602,7 +602,36 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
                 // Accumulate the alphas for the left side
                 // --- Accumulate from individual cells ----
                 for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
+
+                    //int mul = (from_cell[s] * FSAA4X4_SUPERSAMPLE_SIZE);
+                    //int delta = from[s] - mul;
+
+                    //alphas[from_cell[s]] += (FSAA4X4_SUPERSAMPLE_SIZE - delta) * FSAA4X4_MIN_ALPHA;
+
                     alphas[from_cell[s]] += FSAA4X4_MIN_ALPHA;
+                    if(pixelY == 0) lprintf("from=%03d to=%03d k=%03d k4=%03d alpha=%02d\n", from[s], to[s], 99, from_cell[s], alphas[from_cell[s]]);
+
+/*
+from=000 to=000 k=000 k4=000 alpha=01
+from=000 to=001 k=000 k4=000 alpha=02
+from=000 to=001 k=001 k4=000 alpha=03
+from=000 to=002 k=000 k4=000 alpha=04
+from=000 to=002 k=001 k4=000 alpha=05
+from=000 to=002 k=002 k4=000 alpha=06
+from=001 to=003 k=001 k4=000 alpha=07
+from=001 to=003 k=002 k4=000 alpha=08
+from=001 to=003 k=003 k4=000 alpha=09
+
+
+from=000 to=000 k=099 k4=000 alpha=01
+from=000 to=001 k=099 k4=000 alpha=02
+from=000 to=002 k=099 k4=000 alpha=03
+from=001 to=003 k=099 k4=000 alpha=04
+from=000 to=000 k=099 k4=000 alpha=05
+from=000 to=001 k=099 k4=000 alpha=06
+from=000 to=002 k=099 k4=000 alpha=07
+from=001 to=003 k=099 k4=000 alpha=08
+*/
                 }
                 // Accumulate the alphas for the left side
                 // --- Accumulate from cells on the left ----
@@ -634,7 +663,10 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
                 // Accumulate the alphas for the right side
                 // --- Accumulate from individual cells ----
                 for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
+                    //int mul = (to_cell[s] * FSAA4X4_SUPERSAMPLE_SIZE);
+
                     alphas[to_cell[s]] += FSAA4X4_MIN_ALPHA;
+                    if(pixelY == 0) lprintf("from=%03d to=%03d k=%03d k4=%03d alpha=%02d\n", from[s], to[s], 99, to_cell[s], alphas[to_cell[s]]);
                 }
                 // Accumulate the alphas for the right side
                 // --- Accumulate from cells on the right ----
@@ -682,7 +714,7 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
                 }
             }
         }
-        lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%02d ", alphas[k] / FSAA4X4_MIN_ALPHA); lprintf("\n");
+        //lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%02d ", alphas[k] / FSAA4X4_MIN_ALPHA); lprintf("\n");
         // Fill the pixels between the node pairs
         for(Pt::int32_t i = 0; i < nodes[0]; i += 2) {
             const Pt::int32_t iterL = nodeX[0][i    ] / FSAA4X4_SUPERSAMPLE_SIZE - 1;
