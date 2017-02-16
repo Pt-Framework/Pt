@@ -91,23 +91,34 @@ void Rasterizer2::rasterOnePixelLine(const Point& a, const Point& b)
         return;
     }
 
-    // ### TODO: XLINE !!! ###
-
-    // Convert the coordinates to fixed-points
-    const Pt::int32_t fx1 = FIXED_POINT_FROM_INT(x1);
-    const Pt::int32_t fy1 = FIXED_POINT_FROM_INT(y1);
-    const Pt::int32_t fx2 = FIXED_POINT_FROM_INT(x2);
-    const Pt::int32_t fy2 = FIXED_POINT_FROM_INT(y2);
+    // Check for 45-degree line
+    if(sizeX == sizeY) {
+        rasterOnePixelGLineSegmentNOAA(x1, y1, x2, y2, _pen.color(), false);
+        return;
+    }
 
     // Raster the line
-    if(_aaLevel)
-        rasterOnePixelGLineSegmentXWAA(fx1, fy1, fx2, fy2, _pen.color(), false);
-    else
-        rasterOnePixelGLineSegmentNOAA(fx1, fy1, fx2, fy2, _pen.color(), false);
+    if(_aaLevel) {
+        // Raster the line using anti-aliasing
+        rasterOnePixelGLineSegmentXWAA(x1, y1, x2, y2, _pen.color(), false);
+    }
+    else {
+        // Raster the line without using anti-aliasing
+        rasterOnePixelGLineSegmentNOAA(x1, y1, x2, y2, _pen.color(), false);
+    }
 }
 
 void Rasterizer2::rasterOnePixelHLineSegment(Pt::int32_t x1, Pt::int32_t x2, Pt::int32_t y, const Color& color, bool skipLastPoint)
 {
+    // Adjust the end coordinate as needed
+    if(skipLastPoint) {
+        if(x1 < x2) --x2;
+        else        ++x2;
+    }
+
+    // Swap the coordinates as needed
+    if(x1 > x2) std::swap(x1, x2);
+
     // Calculate the length of the line
     const Pt::int32_t sizeL = x2 - x1 + (skipLastPoint ? 0 : 1);
 
@@ -118,6 +129,15 @@ void Rasterizer2::rasterOnePixelHLineSegment(Pt::int32_t x1, Pt::int32_t x2, Pt:
 
 void Rasterizer2::rasterOnePixelVLineSegment(Pt::int32_t x, Pt::int32_t y1, Pt::int32_t y2, const Color& color, bool skipLastPoint)
 {
+    // Adjust the end coordinate as needed
+    if(skipLastPoint) {
+        if(y1 < y2) --y2;
+        else        ++y2;
+    }
+
+    // Swap the coordinates as needed
+    if(y1 > y2) std::swap(y1, y2);
+
     // Calculate the length of the line
     const Pt::int32_t sizeL = y2 - y1 + (skipLastPoint ? 0 : 1);
 
@@ -131,15 +151,9 @@ void Rasterizer2::rasterOnePixelVLineSegment(Pt::int32_t x, Pt::int32_t y1, Pt::
 // Bresenham's Line Aalgorithm
 // https://en.wikipedia.org/wiki/Bresenham's_line_algorithm
 // https://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm
-void Rasterizer2::rasterOnePixelGLineSegmentNOAA(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, const Color& color, bool skipLastPoint)
+void Rasterizer2::rasterOnePixelGLineSegmentNOAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, bool skipLastPoint)
 {
-    // Convert fixed-points to integers
-    const Pt::int32_t x1 = FIXED_POINT_TO_INT(fx1);
-    const Pt::int32_t y1 = FIXED_POINT_TO_INT(fy1);
-          Pt::int32_t x2 = FIXED_POINT_TO_INT(fx2);
-          Pt::int32_t y2 = FIXED_POINT_TO_INT(fy2);
-
-    // Adjust the coordinates as needed
+    // Adjust the end coordinates as needed
     if(skipLastPoint) {
         if(x1 < x2) --x2;
         else        ++x2;
@@ -183,8 +197,14 @@ void Rasterizer2::rasterOnePixelGLineSegmentNOAA(Pt::int32_t fx1, Pt::int32_t fy
 
 // Xiaolin Wu's Anti-Aliased Line Algorithm
 // https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
-void Rasterizer2::rasterOnePixelGLineSegmentXWAA(Pt::int32_t fx1, Pt::int32_t fy1, Pt::int32_t fx2, Pt::int32_t fy2, const Color& color, bool skipLastPoint)
+void Rasterizer2::rasterOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, bool skipLastPoint)
 {
+    // Convert the coordinates to fixed-points
+    Pt::int32_t fx1 = FIXED_POINT_FROM_INT(x1);
+    Pt::int32_t fy1 = FIXED_POINT_FROM_INT(y1);
+    Pt::int32_t fx2 = FIXED_POINT_FROM_INT(x2);
+    Pt::int32_t fy2 = FIXED_POINT_FROM_INT(y2);
+
     // A helper macro to set pixel
     #define XW_SET_PIXEL(IMG, COL, X, Y, A)                                        \
         do {                                                                       \

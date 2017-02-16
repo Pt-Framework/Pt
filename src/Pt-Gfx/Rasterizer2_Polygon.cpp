@@ -158,42 +158,36 @@ void Rasterizer2::fillPolygonSeparate(const Point* points, size_t pointCount)
 
 void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount, const Color& color)
 {
-    // Convert the coordinates to fixed-points
-    std::vector<Pt::int32_t> lineX(pointCount);
-    std::vector<Pt::int32_t> lineY(pointCount);
-
-    for(size_t i = 0; i < pointCount; ++i) {
-        lineX[i] = FIXED_POINT_FROM_INT(points[i].x());
-        lineY[i] = FIXED_POINT_FROM_INT(points[i].y());
-    }
-
-    // ### TODO: XLINE !!! ###
-
-    // Raster the outlines as multiple one-pixel lines
+    // From point N to point (N + 1), successively
     const size_t pc1 = pointCount - 1;
 
     for(size_t i = 0; i < pc1; ++i) {
-        if(lineY[i] == lineY[i + 1])
-            rasterOnePixelHLineSegment(lineX[i], lineX[i + 1], lineY[i], color, true);
-        else if(lineX[i] == lineX[i + 1])
-            rasterOnePixelVLineSegment(lineX[i], lineY[i], lineY[i + 1], color, true);
+        if(points[i].y() == points[i + 1].y())
+            rasterOnePixelHLineSegment(points[i].x(), points[i + 1].x(), points[i].y(), color, false);
+        else if(points[i].x() == points[i + 1].x())
+            rasterOnePixelVLineSegment(points[i].x(), points[i].y(), points[i + 1].y(), color, false);
         else {
-            if(_aaLevel)
-                rasterOnePixelGLineSegmentXWAA(lineX[i], lineY[i], lineX[i + 1], lineY[i + 1], color, true);
+            const bool xline = ( abs(points[i + 1].x() - points[i].x()) ==
+                                 abs(points[i + 1].y() - points[i].y()) );
+            if(xline || !_aaLevel)
+                rasterOnePixelGLineSegmentNOAA(points[i].x(), points[i].y(), points[i + 1].x(), points[i + 1].y(), color, true);
             else
-                rasterOnePixelGLineSegmentNOAA(lineX[i], lineY[i], lineX[i + 1], lineY[i + 1], color, true);
+                rasterOnePixelGLineSegmentXWAA(points[i].x(), points[i].y(), points[i + 1].x(), points[i + 1].y(), color, true);
         }
     }
 
-    if(lineY[0] == lineY[pc1])
-        rasterOnePixelHLineSegment(lineX[0], lineX[pc1], lineY[0], color, true);
-    else if(lineX[0] == lineX[pc1])
-        rasterOnePixelVLineSegment(lineX[0], lineY[0], lineY[pc1], color, true);
+    // From the last point to the first point
+    if(points[pc1].y() == points[0].y())
+        rasterOnePixelHLineSegment(points[pc1].x(), points[0].x(), points[pc1].y(), color, false);
+    else if(points[pc1].x() == points[0].x())
+         rasterOnePixelVLineSegment(points[pc1].x(), points[pc1].y(), points[0].y(), color, false);
     else {
-        if(_aaLevel)
-            rasterOnePixelGLineSegmentXWAA(lineX[0], lineY[0], lineX[pc1], lineY[pc1], color, true);
+        const bool xline = ( abs(points[pc1].x() - points[0].x()) ==
+                             abs(points[pc1].y() - points[0].y()) );
+        if(xline || !_aaLevel)
+            rasterOnePixelGLineSegmentNOAA(points[pc1].x(), points[pc1].y(), points[0].x(), points[0].y(), color, false);
         else
-            rasterOnePixelGLineSegmentNOAA(lineX[0], lineY[0], lineX[pc1], lineY[pc1], color, true);
+            rasterOnePixelGLineSegmentXWAA(points[pc1].x(), points[pc1].y(), points[0].x(), points[0].y(), color, false);
     }
 }
 
