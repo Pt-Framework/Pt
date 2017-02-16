@@ -601,10 +601,10 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
                     }
                 }
                 // Accumulate the alphas for the left side
+                Pt::int32_t prevL = from_cell[0];
                 for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
                     alphas[from_cell[s]] += FSAA4X4_MID_ALPHA - (from[s] - from_cell[s] * FSAA4X4_MID_ALPHA);
                 }
-                Pt::int32_t prevL = from_cell[0];
                 for(Pt::int32_t s = 1; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
                     //
                     if(from_cell[s] == prevL) continue;
@@ -622,8 +622,29 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
                     }
                 }
                 // Accumulate the alphas for the right side
-
-
+                Pt::int32_t prevR = to_cell[FSAA4X4_SUPERSAMPLE_SIZE - 1];
+                for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
+                    alphas[to_cell[s]] += (to[s] - to_cell[s] * FSAA4X4_MID_ALPHA) + 1;
+                }
+                for(Pt::int32_t s = (FSAA4X4_SUPERSAMPLE_SIZE - 2); s >= 0; --s) {
+                    //
+                    if(to_cell[s] == prevR) continue;
+                    prevR = to_cell[s];
+                    //
+                    for(Pt::int32_t c = (s + 1); c < FSAA4X4_SUPERSAMPLE_SIZE; ++c) {
+                        if(to_cell[c] > to_cell[s]) alphas[to_cell[s]] += FSAA4X4_MID_ALPHA;
+                    }
+                }
+                for(Pt::int32_t s = 0; s < (FSAA4X4_SUPERSAMPLE_SIZE - 1); ++s) {
+                    for(Pt::int32_t k = (to_cell[s] + 1); k <= (to_cell[s + 1] - 1); ++k) {
+                        for(Pt::int32_t c = (s + 1); c < FSAA4X4_SUPERSAMPLE_SIZE; ++c) {
+                            if(to_cell[c] > to_cell[s]) alphas[k] += FSAA4X4_MID_ALPHA;
+                        }
+                    }
+                }
+                // Assign the alphas for the middle side
+                const Pt::int32_t len = (to_cell[0] - 1) - (from_cell[FSAA4X4_SUPERSAMPLE_SIZE - 1] + 1) + 1;
+                if(len > 0) memset(&alphas[from_cell[FSAA4X4_SUPERSAMPLE_SIZE - 1] + 1], FSAA4X4_MAX_ALPHA, len);
             }
         }
         // Accumulate the alphas of the samples between the node pairs
