@@ -110,7 +110,7 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
         );
     }
     else {
-        rasterPolygonAreaSSAA4x4(
+        rasterPolygonAreaFSAA4x4(
             clippedPoints.data(), clippedCounts.data(),
             clippedCounts.size(), clippedPoints.size(),
             _brush.color(), minX, minY, maxX, maxY
@@ -199,7 +199,7 @@ void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount, c
 // Public-domain code by Darel Rex Finley, 2007
 void Rasterizer2::rasterPolygonAreaJaggies(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
 {
-    // List of nodes that define the horizontal segments
+    // List of nodes that define the horizontal spans
     std::vector<Pt::int32_t> nodeX(totalPointCount * 2, 0);
 
     //  Loop through the rows of the image
@@ -288,9 +288,9 @@ void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* po
         pointY[i] = (points[i].y() - minY) * FSAA2X2_SUPERSAMPLE_SIZE;
     }
 
-    // List of nodes that define the horizontal segments
-    std::vector<Pt::int32_t> nodeX0(totalPointCount * FSAA2X2_SUPERSAMPLE_SIZE, 0); // Row (Y    )
-    std::vector<Pt::int32_t> nodeX1(totalPointCount * FSAA2X2_SUPERSAMPLE_SIZE, 0); // Row (Y + 1)
+    // List of nodes that define the horizontal spans
+    std::vector<Pt::int32_t> nodeX0(totalPointCount * 2, 0); // Row (Y    )
+    std::vector<Pt::int32_t> nodeX1(totalPointCount * 2, 0); // Row (Y + 1)
 
     //  Loop through the rows of the image
     for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
@@ -455,6 +455,146 @@ void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* po
 
 // Inspired by http://alienryderflex.com/polygon_fill
 // Public-domain code by Darel Rex Finley, 2007
+void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
+{
+    // Internal macros
+    #define FSAA4X4_SUPERSAMPLE_SIZE 4
+    #define FSAA4X4_MUL_ALPHA        255
+    #define FSAA4X4_MIN_ALPHA        1
+    #define FSAA4X4_MID_ALPHA        (FSAA4X4_MIN_ALPHA * FSAA4X4_SUPERSAMPLE_SIZE                           )
+    #define FSAA4X4_MAX_ALPHA        (FSAA4X4_MIN_ALPHA * FSAA4X4_SUPERSAMPLE_SIZE * FSAA4X4_SUPERSAMPLE_SIZE)
+
+    // Calculate the size of the polygon
+    Pt::int32_t sizeX = (maxX - minX + 1);
+    Pt::int32_t sizeY = (maxY - minY + 1);
+
+    // Prepare a work buffer
+    std::vector<Pt::uint8_t> alphas(sizeX, 0);
+
+    // Scale the polygon to be twice as large and translate its origin to (0, 0)
+    std::vector<Pt::int32_t> pointX(totalPointCount, 0);
+    std::vector<Pt::int32_t> pointY(totalPointCount, 0);
+
+    for(size_t i = 0; i < totalPointCount; ++i) {
+        pointX[i] = (points[i].x() - minX) * FSAA4X4_SUPERSAMPLE_SIZE;
+        pointY[i] = (points[i].y() - minY) * FSAA4X4_SUPERSAMPLE_SIZE;
+    }
+
+    // List of nodes that define the horizontal spans
+    // Row (Y) ... Row (Y + FSAA4X4_SUPERSAMPLE_SIZE - 1)
+    std::vector< std::vector<Pt::int32_t> > nodeX(FSAA4X4_SUPERSAMPLE_SIZE);
+    for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
+        nodeX[s].resize(totalPointCount * 2);
+    }
+
+    //  Loop through the rows of the image
+    for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
+        // We examine multiple rows at a time
+        Pt::int32_t iterY[FSAA4X4_SUPERSAMPLE_SIZE];
+        iterY[0] = pixelY * FSAA4X4_SUPERSAMPLE_SIZE;
+        for(Pt::int32_t s = 1; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
+            iterY[s] = iterY[0] + s;
+        }
+        // Base pointers for the polygons
+        const Pt::int32_t* curPointBaseX = pointX.data();
+        const Pt::int32_t* curPointBaseY = pointY.data();
+        // Build a list of nodes using all the polygons
+        Pt::int32_t nodes[FSAA4X4_SUPERSAMPLE_SIZE] = { 0 };
+        for(size_t p = 0; p < polyCount; ++p) {
+            // Get the current point count
+            const size_t curPointCount = pointCount[p];
+            // Loop through the points
+            Pt::int32_t j = curPointCount - 1;
+            for(size_t i = 0; i < curPointCount; ++i) {
+                // Get the coordinates
+                const Pt::int32_t curXi = *(curPointBaseX + i);
+                const Pt::int32_t curYi = *(curPointBaseY + i);
+                const Pt::int32_t curXj = *(curPointBaseX + j);
+                const Pt::int32_t curYj = *(curPointBaseY + j);
+                // Row (Y) ... Row (Y + FSAA4X4_SUPERSAMPLE_SIZE - 1)
+                for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
+                    if( ( iterY[s] >= curYi && iterY[s] < curYj ) || ( iterY[s] >= curYj && iterY[s] < curYi ) ) {
+                        // Bail out if we have produced too many nodes
+                        if((size_t) nodes[s] >= nodeX[s].size()) return;
+                        // Calculate the nodes' coordinates
+                        const Pt::int32_t deltaYp = iterY[s] - curYi;
+                        const Pt::int32_t deltaYj = curYj    - curYi;
+                        const Pt::int32_t deltaXj = curXj    - curXi;
+                        const Pt::int32_t interXf = FIXED_POINT_FROM_INT(curXi)
+                                                  + ( (FIXED_POINT_FROM_INT(deltaYp) + FIXED_POINT_CONSTANT_HALF) /
+                                                      deltaYj * deltaXj
+                                                    );
+                        nodeX[s][nodes[s]++] = FIXED_POINT_TO_INT(interXf);
+                    }
+                }
+                // Update the searching index
+                j = i;
+            }
+            // Increment the base pointers
+            curPointBaseX += curPointCount;
+            curPointBaseY += curPointCount;
+        }
+        // Skip if there is no node
+        bool gotNodes = false;
+        for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
+            if(nodes[s]) {
+                gotNodes = true;
+                break;
+            }
+        }
+        if(!gotNodes) continue;
+        // Sort the nodes using bubble sort
+        for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
+            for(Pt::int32_t i = 0; i < nodes[s] - 1;) {
+                if(nodeX[s][i] > nodeX[s][i + 1]) {
+                    std::swap(nodeX[s][i], nodeX[s][i + 1]);
+                    if(i) --i;
+                }
+                else {
+                    ++i;
+                }
+            }
+        }
+        // Reset the alphas
+        memset(&alphas[0], 0, alphas.size());
+        // Accumulate the alphas of the samples between the node pairs
+        // --- the number of nodes within all the rows are equal ---
+        //if(nodes0 == nodes1) {
+        //}
+        // Accumulate the alphas of the samples between the node pairs
+        // --- the number of nodes within all or some of the rows are not equal --
+        //else {
+            for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
+                for(Pt::int32_t i = 0; i < nodes[s]; i += 2) {
+                    const Pt::int32_t from = nodeX[s][i    ];
+                    const Pt::int32_t to   = nodeX[s][i + 1];
+                    for(Pt::int32_t k = from; k <= to; ++k) {
+                        alphas[k / FSAA4X4_SUPERSAMPLE_SIZE] += FSAA4X4_MIN_ALPHA;
+                    }
+                }
+            }
+        //}
+        // lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%d", alphas[k]); lprintf("\n");
+        // Fill the pixels between the node pairs
+        for(Pt::int32_t i = 0; i < nodes[0]; i += 2) {
+            const Pt::int32_t iterL = nodeX[0][i    ] / FSAA4X4_SUPERSAMPLE_SIZE - 1;
+            const Pt::int32_t iterR = nodeX[0][i + 1] / FSAA4X4_SUPERSAMPLE_SIZE + 1;
+            rasterScanline<FSAA4X4_SUPERSAMPLE_SIZE, FSAA4X4_MIN_ALPHA, FSAA4X4_MUL_ALPHA>(
+                iterL, iterR, pixelY, minX, minY, sizeX, color, alphas
+            );
+        }
+    }
+
+    // Undefine the macros
+    #undef FSAA4X4_SUPERSAMPLE_SIZE
+    #undef FSAA4X4_MUL_ALPHA
+    #undef FSAA4X4_MIN_ALPHA
+    #undef FSAA4X4_MID_ALPHA
+    #undef FSAA4X4_MAX_ALPHA
+}
+
+// Inspired by http://alienryderflex.com/polygon_fill
+// Public-domain code by Darel Rex Finley, 2007
 void Rasterizer2::rasterPolygonAreaSSAA4x4(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
 {
     // Internal macros
@@ -478,7 +618,7 @@ void Rasterizer2::rasterPolygonAreaSSAA4x4(const Point* points, const size_t* po
         pointY[i] = (points[i].y() - minY) * SSAA4X4_SUPERSAMPLE_SIZE;
     }
 
-    // List of nodes that define the horizontal segments
+    // List of nodes that define the horizontal spans
     std::vector<Pt::int32_t> nodeX(totalPointCount * 2, 0);
 
     //  Loop through the rows of the image
