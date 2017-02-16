@@ -143,7 +143,7 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
     };
     if(ip2) ip2->setAntiAliasingLevel(2);
     painter.fillPolygon( poly1c, sizeof(poly1b) / sizeof(poly1b[0]) );
-    painter.drawText( PointF(30 + 391, 50), "SSAA 4x4" );
+    painter.drawText( PointF(30 + 391, 50), "FSAA 4x4" );
 
 
     painter.setBrush( brush2 );
@@ -176,7 +176,7 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
     };
     if(ip2) ip2->setAntiAliasingLevel(2);
     painter.fillPolygon( poly2c, sizeof(poly2b) / sizeof(poly2b[0]) );
-    painter.drawText( PointF(10, 250 + 300), "SSAA 4x4" );
+    painter.drawText( PointF(10, 250 + 300), "FSAA 4x4" );
 
 
     painter.setBrush( brush1 );
@@ -227,7 +227,7 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
     };
     if(ip2) ip2->setAntiAliasingLevel(2);
     painter.fillPolygon( poly3c, sizeof(poly3c) / sizeof(poly3c[0]) );
-    painter.drawText( PointF(330 + 460, 530), "SSAA 4x4" );
+    painter.drawText( PointF(330 + 460, 530), "FSAA 4x4" );
 
 
     painter.setBrush( brush2 );
@@ -285,7 +285,7 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
 
     if(ip2) ip2->setAntiAliasingLevel(2);
     painter.fillEllipse( PointF (30 + 400, 50), SizeF(120, 120) );
-    painter.drawText( PointF(30 + 400, 30), "SSAA 4x4" );
+    painter.drawText( PointF(30 + 400, 30), "FSAA 4x4" );
 
 
     painter.setBrush( brush2 );
@@ -300,7 +300,7 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
 
     if(ip2) ip2->setAntiAliasingLevel(2);
     painter.fillEllipse( PointF (30 + 400, 50 + 200), SizeF(120, 60) );
-    painter.drawText( PointF(30 + 400, 30 + 200), "SSAA 4x4" );
+    painter.drawText( PointF(30 + 400, 30 + 200), "FSAA 4x4" );
 
 
     painter.setBrush( brush2 );
@@ -315,7 +315,7 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
 
     if(ip2) ip2->setAntiAliasingLevel(2);
     painter.fillEllipse( PointF (30 + 400, 50 + 400), SizeF(60, 120) );
-    painter.drawText( PointF(30 + 400, 30 + 400), "SSAA 4x4" );
+    painter.drawText( PointF(30 + 400, 30 + 400), "FSAA 4x4" );
 
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
