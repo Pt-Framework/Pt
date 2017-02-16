@@ -453,7 +453,7 @@ void Rasterizer2::rasterPolygonAreaFSAAGen(const Point* points, const size_t* po
 
     // List of nodes that define the horizontal spans
     // Row (Y) ... Row (Y + SUPERSAMPLE_SIZE - 1)
-    std::vector< std::vector<Pt::int32_t> > nodeX(SUPERSAMPLE_SIZE);
+    std::vector<Pt::int32_t> nodeX[SUPERSAMPLE_SIZE];
     for(Pt::int32_t s = 0; s < SUPERSAMPLE_SIZE; ++s) {
         nodeX[s].resize(totalPointCount * 2);
     }

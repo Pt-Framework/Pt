@@ -113,17 +113,19 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
         );
     }
     else {
-#if 0
-        rasterPolygonAreaFSAAGen<4>(
-            clippedPoints.data(), clippedCounts.data(),
-            clippedCounts.size(), clippedPoints.size(),
-            _brush.color(), minX, minY, maxX, maxY
-        );
-#else
         rasterPolygonAreaSSAA4x4(
             clippedPoints.data(), clippedCounts.data(),
             clippedCounts.size(), clippedPoints.size(),
             _brush.color(), minX, minY, maxX, maxY
+        );
+#if 1
+        for(size_t i = 0; i < clippedPoints.size(); ++i) {
+            clippedPoints[i].set(clippedPoints[i].x() + 150, clippedPoints[i].y());
+        }
+        rasterPolygonAreaFSAAGen<4>(
+            clippedPoints.data(), clippedCounts.data(),
+            clippedCounts.size(), clippedPoints.size(),
+            _brush.color(), minX + 150, minY, maxX + 150, maxY
         );
 #endif
     }
