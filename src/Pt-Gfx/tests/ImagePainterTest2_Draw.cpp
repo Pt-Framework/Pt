@@ -251,9 +251,9 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(860 + 40 -  0, 130 - 20 + 40),
         PointF(860 + 40 - 30, 130 - 20 + 15)
     };
-    if(ip2) ip2->setAntiAliasingLevel(1);
+    if(ip2) ip2->setAntiAliasingLevel(3);
     painter.fillPolygon( poly4, sizeof(poly4) / sizeof(poly4[0]) );
-    painter.drawText( PointF(680, 70), "FSAA 2x2" );
+    painter.drawText( PointF(680, 70), "FSAA 8x8" );
 
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);

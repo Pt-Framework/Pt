@@ -112,8 +112,15 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
             _brush.color(), minX, minY, maxX, maxY
         );
     }
-    else {
+    else if(_aaLevel == 2) {
         rasterPolygonAreaFSAAGen<4>(
+            clippedPoints.data(), clippedCounts.data(),
+            clippedCounts.size(), clippedPoints.size(),
+            _brush.color(), minX, minY, maxX, maxY
+        );
+    }
+    else {
+        rasterPolygonAreaFSAAGen<8>(
             clippedPoints.data(), clippedCounts.data(),
             clippedCounts.size(), clippedPoints.size(),
             _brush.color(), minX, minY, maxX, maxY
@@ -149,10 +156,12 @@ void Rasterizer2::fillPolygonSeparate(const Point* points, size_t pointCount)
             // Draw the polygon
             if(_aaLevel == 0)
                 rasterPolygonAreaJaggies(clipped.data(), numPoint, 1, clipped.size(), _brush.color(), minX, minY, maxX, maxY);
-            else if(_aaLevel == 1) // Produces artifacts at almost every corner vertex
+            else if(_aaLevel == 1)
                 rasterPolygonAreaFSAA2x2(clipped.data(), numPoint, 1, clipped.size(), _brush.color(), minX, minY, maxX, maxY);
-            else
+            else if(_aaLevel == 2)
                 rasterPolygonAreaFSAAGen<4>(clipped.data(), numPoint, 1, clipped.size(), _brush.color(), minX, minY, maxX, maxY);
+            else
+                rasterPolygonAreaFSAAGen<8>(clipped.data(), numPoint, 1, clipped.size(), _brush.color(), minX, minY, maxX, maxY);
         }
     }
 }
