@@ -434,7 +434,7 @@ void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* po
                 }
             }
         }
-        // lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%d", alphas[k]); lprintf("\n");
+        //lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%02d ", alphas[k] / FSAA2X2_MIN_ALPHA); lprintf("\n");
         // Fill the pixels between the node pairs
         for(Pt::int32_t i = 0; i < nodes0; i += 2) {
             const Pt::int32_t iterL = nodeX0[i    ] / FSAA2X2_SUPERSAMPLE_SIZE - 1;
@@ -568,6 +568,51 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
             }
         }
         // --- the number of nodes within all the rows are equal ---
+        /*
+        SSAA
+        000: 11 01 00 00 00 00 00 00 00 00 00
+        001: 10 13 01 00 00 00 00 00 00 00 00
+        002: 06 16 13 01 00 00 00 00 00 00 00
+        003: 02 16 16 13 01 00 00 00 00 00 00
+        004: 00 14 16 16 13 01 00 00 00 00 00
+        005: 00 10 16 16 16 13 01 00 00 00 00
+        006: 00 06 16 16 16 16 13 01 00 00 00
+        007: 00 02 16 16 16 16 16 13 01 00 00
+        008: 00 00 14 16 16 16 16 16 13 01 00
+        009: 00 00 10 16 16 16 16 16 16 13 01
+        010: 00 00 06 16 16 16 16 16 16 15 01
+        011: 00 00 02 16 16 16 16 16 16 08 00
+        012: 00 00 00 14 16 16 16 16 15 01 00
+        013: 00 00 00 10 16 16 16 16 08 00 00
+        014: 00 00 00 06 16 16 16 15 01 00 00
+        015: 00 00 00 02 16 16 16 08 00 00 00
+        016: 00 00 00 00 14 16 15 01 00 00 00
+        017: 00 00 00 00 10 16 08 00 00 00 00
+        018: 00 00 00 00 06 15 01 00 00 00 00
+        019: 00 00 00 00 02 08 00 00 00 00 00
+
+        FSAA NAIVE
+        000: 10 00 00 00 00 00 00 00 00 00 00
+        001: 12 10 00 00 00 00 00 00 00 00 00
+        002: 08 16 10 00 00 00 00 00 00 00 00
+        003: 04 16 16 10 00 00 00 00 00 00 00
+        004: 00 16 16 16 10 00 00 00 00 00 00
+        005: 00 12 16 16 16 10 00 00 00 00 00
+        006: 00 08 16 16 16 16 10 00 00 00 00
+        007: 00 04 16 16 16 16 16 10 00 00 00
+        008: 00 00 16 16 16 16 16 16 10 00 00
+        009: 00 00 12 16 16 16 16 16 16 10 00
+        010: 00 00 08 16 16 16 16 16 16 14 00
+        011: 00 00 04 16 16 16 16 16 16 06 00
+        012: 00 00 00 16 16 16 16 16 14 00 00
+        013: 00 00 00 12 16 16 16 16 06 00 00
+        014: 00 00 00 08 16 16 16 14 00 00 00
+        015: 00 00 00 04 16 16 16 06 00 00 00
+        016: 00 00 00 00 16 16 14 00 00 00 00
+        017: 00 00 00 00 12 16 06 00 00 00 00
+        018: 00 00 00 00 08 14 00 00 00 00 00
+        019: 00 00 00 00 04 06 00 00 00 00 00
+        */
         if(hasSameNumOfNodes) {
             for(Pt::int32_t i = 0; i < nodes0; i += 2) {
                 // Calculate the cells
@@ -660,7 +705,7 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
                 }
             }
         }
-        // lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%d", alphas[k]); lprintf("\n");
+        lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%02d ", alphas[k] / FSAA4X4_MIN_ALPHA); lprintf("\n");
         // Fill the pixels between the node pairs
         for(Pt::int32_t i = 0; i < nodes[0]; i += 2) {
             const Pt::int32_t iterL = nodeX[0][i    ] / FSAA4X4_SUPERSAMPLE_SIZE - 1;
@@ -784,7 +829,7 @@ void Rasterizer2::rasterPolygonAreaSSAA4x4(const Point* points, const size_t* po
         }
         // Simply skip the next steps if we have not got all the needed samples
         if( ((pixelY + 1) % SSAA4X4_SUPERSAMPLE_SIZE) ) continue;
-        //lprintf("%03d: ", pixelY / SSAA4X4_SUPERSAMPLE_SIZE); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%d", alphas[k] / 15); lprintf("\n");
+        //lprintf("%03d: ", pixelY / SSAA4X4_SUPERSAMPLE_SIZE); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%02d ", alphas[k] / SSAA4X4_MIN_ALPHA); lprintf("\n");
         // Fill the pixels between the node pairs
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
             const Pt::int32_t iterL = nodeX[i    ] / SSAA4X4_SUPERSAMPLE_SIZE - 1;
