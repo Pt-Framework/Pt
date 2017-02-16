@@ -110,7 +110,7 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
         );
     }
     else {
-        rasterPolygonAreaFSAA4x4(
+        rasterPolygonAreaSSAA4x4(
             clippedPoints.data(), clippedCounts.data(),
             clippedCounts.size(), clippedPoints.size(),
             _brush.color(), minX, minY, maxX, maxY
@@ -256,8 +256,8 @@ void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* po
     #define FSAA2X2_SUPERSAMPLE_SIZE 2
     #define FSAA2X2_MUL_ALPHA        255
     #define FSAA2X2_MIN_ALPHA        1
-    #define FSAA2X2_MID_ALPHA        (FSAA2X2_MIN_ALPHA * FSAA2X2_SUPERSAMPLE_SIZE                           )
     #define FSAA2X2_MAX_ALPHA        (FSAA2X2_MIN_ALPHA * FSAA2X2_SUPERSAMPLE_SIZE * FSAA2X2_SUPERSAMPLE_SIZE)
+    #define FSAA2X2_MID_ALPHA        (FSAA2X2_MAX_ALPHA / 2                                                  )
 
     // Calculate the size of the polygon
     Pt::int32_t sizeX = (maxX - minX + 1);
@@ -420,8 +420,8 @@ void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* po
     #undef FSAA2X2_SUPERSAMPLE_SIZE
     #undef FSAA2X2_MUL_ALPHA
     #undef FSAA2X2_MIN_ALPHA
-    #undef FSAA2X2_MID_ALPHA
     #undef FSAA2X2_MAX_ALPHA
+    #undef FSAA2X2_MID_ALPHA
 }
 
 // Inspired by http://alienryderflex.com/polygon_fill
@@ -433,6 +433,7 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
     #define FSAA4X4_MUL_ALPHA        255
     #define FSAA4X4_MIN_ALPHA        1
     #define FSAA4X4_MAX_ALPHA        (FSAA4X4_MIN_ALPHA * FSAA4X4_SUPERSAMPLE_SIZE * FSAA4X4_SUPERSAMPLE_SIZE)
+    #define FSAA4X4_MID_ALPHA        (FSAA4X4_MAX_ALPHA / 2)
 
     // Calculate the size of the polygon
     Pt::int32_t sizeX = (maxX - minX + 1);
@@ -537,23 +538,26 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
                 for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
                     from[s] = nodeX[s][i    ];
                     to  [s] = nodeX[s][i + 1];
-
                 }
                 // Sort the coordinates
                 bubbleSortAscending(from, FSAA4X4_SUPERSAMPLE_SIZE);
                 bubbleSortAscending(to,   FSAA4X4_SUPERSAMPLE_SIZE);
                 // Accumulate alphas for the left side
-                for(Pt::int32_t s = 0; s < (FSAA4X4_SUPERSAMPLE_SIZE - 1); ++s) {
+                for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
                     for(Pt::int32_t k = from[s]; k <= from[FSAA4X4_SUPERSAMPLE_SIZE - 1]; ++k) {
                         alphas[k / FSAA4X4_SUPERSAMPLE_SIZE] += FSAA4X4_MIN_ALPHA;
                     }
                 }
+                //if( (from[0] / FSAA4X4_SUPERSAMPLE_SIZE) != (from[FSAA4X4_SUPERSAMPLE_SIZE - 1] / FSAA4X4_SUPERSAMPLE_SIZE) )
+                //    alphas[from[FSAA4X4_SUPERSAMPLE_SIZE - 1] / FSAA4X4_SUPERSAMPLE_SIZE] += FSAA4X4_MID_ALPHA;
                 // Accumulate alphas for the right side
-                for(Pt::int32_t s = (FSAA4X4_SUPERSAMPLE_SIZE - 1); s > 0; --s) {
+                for(Pt::int32_t s = (FSAA4X4_SUPERSAMPLE_SIZE - 1); s >= 0; --s) {
                     for(Pt::int32_t k = to[0]; k <= to[s]; ++k) {
-                       // alphas[k / FSAA4X4_SUPERSAMPLE_SIZE] += FSAA4X4_MIN_ALPHA;
+                        alphas[k / FSAA4X4_SUPERSAMPLE_SIZE] += FSAA4X4_MIN_ALPHA;
                     }
                 }
+                //if( (to[0] / FSAA4X4_SUPERSAMPLE_SIZE) != (to[FSAA4X4_SUPERSAMPLE_SIZE - 1] / FSAA4X4_SUPERSAMPLE_SIZE) )
+                //    alphas[to[0] / FSAA4X4_SUPERSAMPLE_SIZE] += FSAA4X4_MID_ALPHA;
                 // Assign alphas for the middle side
                 const Pt::int32_t msMin = (from[FSAA4X4_SUPERSAMPLE_SIZE - 1] / FSAA4X4_SUPERSAMPLE_SIZE + 1);
                 const Pt::int32_t msMax = (to  [0                           ] / FSAA4X4_SUPERSAMPLE_SIZE - 1);
@@ -574,7 +578,7 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
                 }
             }
         }
-        lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%02d ", alphas[k] / FSAA4X4_MIN_ALPHA); lprintf("\n");
+        //lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%02d ", alphas[k] / FSAA4X4_MIN_ALPHA); lprintf("\n");
         // Fill the pixels between the node pairs
         for(Pt::int32_t i = 0; i < nodes[0]; i += 2) {
             const Pt::int32_t iterL = nodeX[0][i    ] / FSAA4X4_SUPERSAMPLE_SIZE - 1;
@@ -589,8 +593,8 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
     #undef FSAA4X4_SUPERSAMPLE_SIZE
     #undef FSAA4X4_MUL_ALPHA
     #undef FSAA4X4_MIN_ALPHA
-    #undef FSAA4X4_MID_ALPHA
     #undef FSAA4X4_MAX_ALPHA
+    #undef FSAA4X4_MID_ALPHA
 }
 
 // Inspired by http://alienryderflex.com/polygon_fill
