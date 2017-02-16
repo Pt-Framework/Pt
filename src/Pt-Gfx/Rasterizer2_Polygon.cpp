@@ -110,7 +110,7 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
         );
     }
     else {
-        rasterPolygonAreaFSAA4x4(
+        rasterPolygonAreaSSAA4x4(
             clippedPoints.data(), clippedCounts.data(),
             clippedCounts.size(), clippedPoints.size(),
             _brush.color(), minX, minY, maxX, maxY
@@ -567,7 +567,7 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
             break;
         }
         // --- The number of nodes within all the rows are equal ---
-        if(!true && hasSameNumOfNodes) {
+        if(true && hasSameNumOfNodes) {
             for(Pt::int32_t i = 0; i < nodes0; i += 2) {
                 // Calculate the cells
                 Pt::int32_t from     [FSAA4X4_SUPERSAMPLE_SIZE];
@@ -583,6 +583,7 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
                 // Sort the cells
                 for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE - 1;) {
                     if(from_cell[s] > from_cell[s + 1]) {
+                        std::swap(from     [s], from     [s + 1]);
                         std::swap(from_cell[s], from_cell[s + 1]);
                         if(s) --s;
                     }
@@ -592,6 +593,7 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
                 }
                 for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE - 1;) {
                     if(to_cell[s] > to_cell[s + 1]) {
+                        std::swap(to     [s], to     [s + 1]);
                         std::swap(to_cell[s], to_cell[s + 1]);
                         if(s) --s;
                     }
@@ -601,37 +603,16 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
                 }
                 // Accumulate the alphas for the left side
                 // --- Accumulate from individual cells ----
+                bool sameL = true;
                 for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
-
-                    //int mul = (from_cell[s] * FSAA4X4_SUPERSAMPLE_SIZE);
-                    //int delta = from[s] - mul;
-
-                    //alphas[from_cell[s]] += (FSAA4X4_SUPERSAMPLE_SIZE - delta) * FSAA4X4_MIN_ALPHA;
-
-                    alphas[from_cell[s]] += FSAA4X4_MIN_ALPHA;
-                    if(pixelY == 0) lprintf("from=%03d to=%03d k=%03d k4=%03d alpha=%02d\n", from[s], to[s], 99, from_cell[s], alphas[from_cell[s]]);
-
-/*
-from=000 to=000 k=000 k4=000 alpha=01
-from=000 to=001 k=000 k4=000 alpha=02
-from=000 to=001 k=001 k4=000 alpha=03
-from=000 to=002 k=000 k4=000 alpha=04
-from=000 to=002 k=001 k4=000 alpha=05
-from=000 to=002 k=002 k4=000 alpha=06
-from=001 to=003 k=001 k4=000 alpha=07
-from=001 to=003 k=002 k4=000 alpha=08
-from=001 to=003 k=003 k4=000 alpha=09
-
-
-from=000 to=000 k=099 k4=000 alpha=01
-from=000 to=001 k=099 k4=000 alpha=02
-from=000 to=002 k=099 k4=000 alpha=03
-from=001 to=003 k=099 k4=000 alpha=04
-from=000 to=000 k=099 k4=000 alpha=05
-from=000 to=001 k=099 k4=000 alpha=06
-from=000 to=002 k=099 k4=000 alpha=07
-from=001 to=003 k=099 k4=000 alpha=08
-*/
+                    if(from_cell[s] == to_cell[s]) continue;
+                    sameL = false;
+                    break;
+                }
+                if(!sameL) {
+                    for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
+                        alphas[from_cell[s]] += FSAA4X4_SUPERSAMPLE_SIZE - (from[s] - from_cell[s] * FSAA4X4_SUPERSAMPLE_SIZE);
+                    }
                 }
                 // Accumulate the alphas for the left side
                 // --- Accumulate from cells on the left ----
@@ -645,8 +626,8 @@ from=001 to=003 k=099 k4=000 alpha=08
                     for(Pt::int32_t c = 1; c < s; ++c) {
                         if(from_cell[c] < from_cell[s]) acc += FSAA4X4_MID_ALPHA;
                     }
-                    alphas[from_cell[s]] += acc;
-                    if(alphas[from_cell[s]] > FSAA4X4_MAX_ALPHA) alphas[from_cell[s]] = FSAA4X4_MAX_ALPHA;
+                    //alphas[from_cell[s]] += acc;
+                    //if(alphas[from_cell[s]] > FSAA4X4_MAX_ALPHA) alphas[from_cell[s]] = FSAA4X4_MAX_ALPHA;
                 }
                 // Accumulate the alphas for the left side
                 // --- Accumulate from the intermediate cells ----
@@ -656,17 +637,17 @@ from=001 to=003 k=099 k4=000 alpha=08
                         for(Pt::int32_t c = 1; c < (s + 1); ++c) {
                             if(from_cell[c] < from_cell[s + 1]) acc += FSAA4X4_MID_ALPHA;
                         }
-                        alphas[k] += acc;
-                        if(alphas[k] > FSAA4X4_MAX_ALPHA) alphas[k] = FSAA4X4_MAX_ALPHA;
+                        //alphas[k] += acc;
+                        //if(alphas[k] > FSAA4X4_MAX_ALPHA) alphas[k] = FSAA4X4_MAX_ALPHA;
                     }
                 }
                 // Accumulate the alphas for the right side
                 // --- Accumulate from individual cells ----
-                for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
-                    //int mul = (to_cell[s] * FSAA4X4_SUPERSAMPLE_SIZE);
-
-                    alphas[to_cell[s]] += FSAA4X4_MIN_ALPHA;
-                    if(pixelY == 0) lprintf("from=%03d to=%03d k=%03d k4=%03d alpha=%02d\n", from[s], to[s], 99, to_cell[s], alphas[to_cell[s]]);
+                if(!sameL) {
+                    for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
+                        alphas[to_cell[s]] += (to[s] - to_cell[s] * FSAA4X4_SUPERSAMPLE_SIZE) + 1;
+                        //if(pixelY == 0) lprintf("from=%03d to=%03d k=%03d k4=%03d alpha=%02d\n", from[s], to[s], 99, to_cell[s], alphas[to_cell[s]]);
+                    }
                 }
                 // Accumulate the alphas for the right side
                 // --- Accumulate from cells on the right ----
@@ -680,8 +661,8 @@ from=001 to=003 k=099 k4=000 alpha=08
                     for(Pt::int32_t c = (s + 1); c < FSAA4X4_SUPERSAMPLE_SIZE; ++c) {
                         if(to_cell[c] > to_cell[s]) acc += FSAA4X4_MID_ALPHA;
                     }
-                    alphas[to_cell[s]] += acc;
-                    if(alphas[to_cell[s]] > FSAA4X4_MAX_ALPHA) alphas[to_cell[s]] = FSAA4X4_MAX_ALPHA;
+                    //alphas[to_cell[s]] += acc;
+                    //if(alphas[to_cell[s]] > FSAA4X4_MAX_ALPHA) alphas[to_cell[s]] = FSAA4X4_MAX_ALPHA;
                 }
                 // Accumulate the alphas for the right side
                 // --- Accumulate from the intermediate cells ----
@@ -691,8 +672,8 @@ from=001 to=003 k=099 k4=000 alpha=08
                         for(Pt::int32_t c = (s + 1); c < FSAA4X4_SUPERSAMPLE_SIZE; ++c) {
                             if(to_cell[c] > to_cell[s]) acc += FSAA4X4_MID_ALPHA;
                         }
-                        alphas[k] += acc;
-                        if(alphas[k] > FSAA4X4_MAX_ALPHA) alphas[k] = FSAA4X4_MAX_ALPHA;
+                        //alphas[k] += acc;
+                        //if(alphas[k] > FSAA4X4_MAX_ALPHA) alphas[k] = FSAA4X4_MAX_ALPHA;
                     }
                 }
                 // Assign the alphas for the middle side
@@ -714,7 +695,7 @@ from=001 to=003 k=099 k4=000 alpha=08
                 }
             }
         }
-        //lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%02d ", alphas[k] / FSAA4X4_MIN_ALPHA); lprintf("\n");
+        lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%02d ", alphas[k] / FSAA4X4_MIN_ALPHA); lprintf("\n");
         // Fill the pixels between the node pairs
         for(Pt::int32_t i = 0; i < nodes[0]; i += 2) {
             const Pt::int32_t iterL = nodeX[0][i    ] / FSAA4X4_SUPERSAMPLE_SIZE - 1;
