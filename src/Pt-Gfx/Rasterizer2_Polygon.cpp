@@ -567,7 +567,7 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
             break;
         }
         // --- The number of nodes within all the rows are equal ---
-        if(!true && hasSameNumOfNodes) {
+        if(true && hasSameNumOfNodes) {
             for(Pt::int32_t i = 0; i < nodes0; i += 2) {
                 // Calculate the cells
                 Pt::int32_t from     [FSAA4X4_SUPERSAMPLE_SIZE];
@@ -617,7 +617,7 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
                         if(from_cell[c] < from_cell[s]) acc += FSAA4X4_MID_ALPHA;
                     }
                     alphas[from_cell[s]] += acc;
-                    //if(alphas[from_cell[s]] > FSAA4X4_MAX_ALPHA) alphas[from_cell[s]] = FSAA4X4_MAX_ALPHA;
+                    if(alphas[from_cell[s]] > FSAA4X4_MAX_ALPHA) alphas[from_cell[s]] = FSAA4X4_MAX_ALPHA;
                 }
                 // Accumulate the alphas for the left side
                 // --- Accumulate from the intermediate cells ----
@@ -627,7 +627,7 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
                         for(Pt::int32_t c = 1; c < (s + 1); ++c) {
                             if(from_cell[c] < from_cell[s + 1]) acc += FSAA4X4_MID_ALPHA;
                         }
-                        //alphas[k] += acc;
+                        alphas[k] += acc;
                         if(alphas[k] > FSAA4X4_MAX_ALPHA) alphas[k] = FSAA4X4_MAX_ALPHA;
                     }
                 }
@@ -649,7 +649,7 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
                         if(to_cell[c] > to_cell[s]) acc += FSAA4X4_MID_ALPHA;
                     }
                     alphas[to_cell[s]] += acc;
-                    //if(alphas[to_cell[s]] > FSAA4X4_MAX_ALPHA) alphas[to_cell[s]] = FSAA4X4_MAX_ALPHA;
+                    if(alphas[to_cell[s]] > FSAA4X4_MAX_ALPHA) alphas[to_cell[s]] = FSAA4X4_MAX_ALPHA;
                 }
                 // Accumulate the alphas for the right side
                 // --- Accumulate from the intermediate cells ----
@@ -682,7 +682,7 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
                 }
             }
         }
-        //lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%02d ", alphas[k] / FSAA4X4_MIN_ALPHA); lprintf("\n");
+        lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%02d ", alphas[k] / FSAA4X4_MIN_ALPHA); lprintf("\n");
         // Fill the pixels between the node pairs
         for(Pt::int32_t i = 0; i < nodes[0]; i += 2) {
             const Pt::int32_t iterL = nodeX[0][i    ] / FSAA4X4_SUPERSAMPLE_SIZE - 1;
