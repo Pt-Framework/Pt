@@ -122,7 +122,7 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
         for(size_t i = 0; i < clippedPoints.size(); ++i) {
             clippedPoints[i].set(clippedPoints[i].x() + 150, clippedPoints[i].y());
         }
-        rasterPolygonAreaFSAAGen<4>(
+        rasterPolygonAreaFSAAGen(
             clippedPoints.data(), clippedCounts.data(),
             clippedCounts.size(), clippedPoints.size(),
             _brush.color(), minX + 150, minY, maxX + 150, maxY
@@ -551,6 +551,282 @@ void Rasterizer2::rasterPolygonAreaSSAA4x4(const Point* points, const size_t* po
     #undef SSAA4X4_SUPERSAMPLE_SIZE
     #undef SSAA4X4_MUL_ALPHA
     #undef SSAA4X4_MIN_ALPHA
+}
+
+
+
+
+
+// Inspired by http://alienryderflex.com/polygon_fill
+// Public-domain code by Darel Rex Finley, 2007
+//template<Pt::uint8_t SUPERSAMPLE_SIZE>
+#define SUPERSAMPLE_SIZE 4
+void Rasterizer2::rasterPolygonAreaFSAAGen(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
+{
+    // Internal macros
+    #define FSAA_MUL_ALPHA 255
+    #define FSAA_MIN_ALPHA 1
+    #define FSAA_MAX_ALPHA (FSAA_MIN_ALPHA * SUPERSAMPLE_SIZE * SUPERSAMPLE_SIZE)
+    #define FSAA_MID_ALPHA (FSAA_MAX_ALPHA / 2)
+
+    // Calculate the size of the polygon
+    Pt::int32_t sizeX = (maxX - minX + 1);
+    Pt::int32_t sizeY = (maxY - minY + 1);
+
+    // Prepare a work buffer
+    std::vector<Pt::uint8_t> alphas(sizeX, 0);
+
+    // Scale the polygon to be twice as large and translate its origin to (0, 0)
+    std::vector<Pt::int32_t> pointX(totalPointCount, 0);
+    std::vector<Pt::int32_t> pointY(totalPointCount, 0);
+
+    for(size_t i = 0; i < totalPointCount; ++i) {
+        pointX[i] = (points[i].x() - minX) * SUPERSAMPLE_SIZE;
+        pointY[i] = (points[i].y() - minY) * SUPERSAMPLE_SIZE;
+    }
+
+    // List of nodes that define the horizontal spans
+    // Row (Y) ... Row (Y + SUPERSAMPLE_SIZE - 1)
+    std::vector<Pt::int32_t> nodeX[SUPERSAMPLE_SIZE];
+    for(Pt::int32_t s = 0; s < SUPERSAMPLE_SIZE; ++s) {
+        nodeX[s].resize(totalPointCount * 2);
+    }
+
+    //  Loop through the rows of the image
+    for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
+        // We examine multiple rows at a time
+        Pt::int32_t iterY[SUPERSAMPLE_SIZE];
+        iterY[0] = pixelY * SUPERSAMPLE_SIZE;
+        for(Pt::int32_t s = 1; s < SUPERSAMPLE_SIZE; ++s) {
+            iterY[s] = iterY[0] + s;
+        }
+        // Base pointers for the polygons
+        const Pt::int32_t* curPointBaseX = pointX.data();
+        const Pt::int32_t* curPointBaseY = pointY.data();
+        // Build a list of nodes using all the polygons
+        Pt::int32_t nodes[SUPERSAMPLE_SIZE] = { 0 };
+        for(size_t p = 0; p < polyCount; ++p) {
+            // Get the current point count
+            const size_t curPointCount = pointCount[p];
+            // Loop through the points
+            Pt::int32_t j = curPointCount - 1;
+            for(size_t i = 0; i < curPointCount; ++i) {
+                // Get the coordinates
+                const Pt::int32_t curXi = *(curPointBaseX + i);
+                const Pt::int32_t curYi = *(curPointBaseY + i);
+                const Pt::int32_t curXj = *(curPointBaseX + j);
+                const Pt::int32_t curYj = *(curPointBaseY + j);
+                // Row (Y) ... Row (Y + SUPERSAMPLE_SIZE - 1)
+                for(Pt::int32_t s = 0; s < SUPERSAMPLE_SIZE; ++s) {
+                    if( ( iterY[s] >= curYi && iterY[s] < curYj ) || ( iterY[s] >= curYj && iterY[s] < curYi ) ) {
+                        // Bail out if we have produced too many nodes
+                        if((size_t) nodes[s] >= nodeX[s].size()) return;
+                        // Calculate the nodes' coordinates
+                        const Pt::int32_t deltaYp = iterY[s] - curYi;
+                        const Pt::int32_t deltaYj = curYj    - curYi;
+                        const Pt::int32_t deltaXj = curXj    - curXi;
+                        const Pt::int32_t interXf = FIXED_POINT_FROM_INT(curXi)
+                                                  + ( (FIXED_POINT_FROM_INT(deltaYp) + FIXED_POINT_CONSTANT_QUARTER) /
+                                                      deltaYj * deltaXj
+                                                    );
+                        nodeX[s][nodes[s]++] = FIXED_POINT_TO_INT(interXf);
+                    }
+                }
+                // Update the searching index
+                j = i;
+            }
+            // Increment the base pointers
+            curPointBaseX += curPointCount;
+            curPointBaseY += curPointCount;
+        }
+        // Skip if there is no node
+        bool gotNodes = false;
+        for(Pt::int32_t s = 0; s < SUPERSAMPLE_SIZE; ++s) {
+            if(nodes[s]) {
+                gotNodes = true;
+                break;
+            }
+        }
+        if(!gotNodes) continue;
+        // Sort the nodes using bubble sort
+        for(Pt::int32_t s = 0; s < SUPERSAMPLE_SIZE; ++s) {
+            bubbleSortAscending(nodeX[s], nodes[s]);
+        }
+        // Reset the alphas
+        memset(&alphas[0], 0, alphas.size());
+        // Accumulate the alphas of the samples between the node pairs
+        // --- Check if all the rows have the same number of nodes ---
+        const Pt::int32_t nodes0            = nodes[0];
+              bool        hasSameNumOfNodes = true;
+        for(Pt::int32_t s = 1; s < SUPERSAMPLE_SIZE; ++s) {
+            if(nodes[s] == nodes0) continue;
+            hasSameNumOfNodes = false;
+            break;
+        }
+        // --- The number of nodes within all the rows are equal ---
+        if(true && hasSameNumOfNodes) {
+            for(Pt::int32_t i = 0; i < nodes0; i += 2) {
+                // Get the coordinates
+                Pt::int32_t from[SUPERSAMPLE_SIZE];
+                Pt::int32_t to  [SUPERSAMPLE_SIZE];
+                for(Pt::int32_t s = 0; s < SUPERSAMPLE_SIZE; ++s) {
+                    from[s] = nodeX[s][i    ];
+                    to  [s] = nodeX[s][i + 1];
+                }
+                // Sort the coordinates
+                bubbleSortAscending(from, SUPERSAMPLE_SIZE);
+                bubbleSortAscending(to,   SUPERSAMPLE_SIZE);
+                // Calculate the cells
+                Pt::int32_t from_cell[SUPERSAMPLE_SIZE];
+                Pt::int32_t to_cell  [SUPERSAMPLE_SIZE];
+                for(Pt::int32_t s = 0; s < SUPERSAMPLE_SIZE; ++s) {
+                    from_cell[s] = from[s] / SUPERSAMPLE_SIZE;
+                    to_cell  [s] = to  [s] / SUPERSAMPLE_SIZE;
+                }
+                // Accumulate alphas for the left side of the span
+                // --- Each distinct cell ---
+                std::set<Pt::int32_t> proc_ds;
+                for(Pt::int32_t n = 0; n < SUPERSAMPLE_SIZE; ++n) {
+                    // Alpha contribution from this cell
+                    alphas[from_cell[n]] += SUPERSAMPLE_SIZE - ( from[n] - from_cell[n] * SUPERSAMPLE_SIZE );
+                    // Alpha Contribution from cells of the left side of this cell
+                    for(Pt::int32_t b = n; b > 0; --b) {
+                        // Ensure that each cell is not processed twice
+                        if(proc_ds.find(from_cell[b]) != proc_ds.end()) continue;
+                        proc_ds.insert(from_cell[b]);
+                        // Accumulate the alphas
+                        for(Pt::int32_t k = 0; k < b; ++k) {
+                            // Accumulate the alpha if the cell is on the left side of the reference cell
+                            if(from_cell[k] < from_cell[b]) alphas[from_cell[b]] += SUPERSAMPLE_SIZE;
+                        }
+                    }
+                }
+                // --- In-between cells ---
+                std::set<Pt::int32_t> proc_is;
+                for(Pt::int32_t n = (SUPERSAMPLE_SIZE - 1); n > 0; --n) {
+                    // Ensure that each cell is not processed twice
+                    if(proc_is.find(from_cell[n]) != proc_is.end()) continue;
+                    proc_is.insert(from_cell[n]);
+                    // Walk through the cells on the left side of the span up until the reference cell
+                    for(Pt::int32_t b = 0; b < n; ++b) {
+                        // Skip if the cell is not on the left side of the reference cell
+                        if(from_cell[b] >= from_cell[n]) continue;
+                        // Walk through the in-between cells
+                        for(Pt::int32_t k = (from_cell[b] + 1); k < from_cell[n]; ++k) {
+                            // Accumulate the alpha if the cell is not one of the reference cell
+                            if(proc_ds.find(k) == proc_ds.end()) alphas[k] += SUPERSAMPLE_SIZE;
+                        }
+                    }
+                }
+                // Accumulate alphas for the right side of the span
+                // --- Each distinct cell ---
+                proc_ds.clear();
+                for(Pt::int32_t n = 0; n < SUPERSAMPLE_SIZE; ++n) {
+                    // Alpha contribution from this cell
+                    alphas[to_cell[n]] += ( to[n] - to_cell[n] * SUPERSAMPLE_SIZE ) + 1;
+                    // Alpha Contribution from cells of the right side of this cell
+                    for(Pt::int32_t b = n; b < (SUPERSAMPLE_SIZE - 1); ++b) {
+                        // Ensure that each cell is not processed twice
+                        if(proc_ds.find(to_cell[b]) != proc_ds.end()) continue;
+                        proc_ds.insert(to_cell[b]);
+                        // Accumulate the alphas
+                        for(Pt::int32_t k = (b + 1); k < SUPERSAMPLE_SIZE; ++k) {
+                            // Accumulate the alpha if the cell is on the right side of the reference cell
+                            if(to_cell[k] > to_cell[b]) alphas[to_cell[b]] += SUPERSAMPLE_SIZE;
+                        }
+                    }
+                }
+                // --- In-between cells ---
+                proc_is.clear();
+                for(Pt::int32_t n = (SUPERSAMPLE_SIZE - 1); n > 0; --n) {
+                    /*
+                    // Ensure that each cell is not processed twice
+                    if(proc_is.find(from_cell[n]) != proc_is.end()) continue;
+                    proc_is.insert(from_cell[n]);
+                    // Walk through the cells on the right side of the span up until the reference cell
+                    for(Pt::int32_t b = 0; b < n; ++b) {
+                        // Skip if the cell is not on the right side of the reference cell
+                        if(from_cell[b] >= from_cell[n]) continue;
+                        // Walk through the in-between cells
+                        for(Pt::int32_t k = from_cell[b] + 1; k < from_cell[n]; ++k) {
+                            // Accumulate the alpha if the cell is not one of the reference cell
+                            if(proc_ds.find(k) == proc_ds.end()) alphas[k] += SUPERSAMPLE_SIZE;
+                        }
+                    }
+                    */
+                }
+            }
+/*
+                // Get the coordinates
+                Pt::int32_t from[SUPERSAMPLE_SIZE];
+                Pt::int32_t to  [SUPERSAMPLE_SIZE];
+                for(Pt::int32_t s = 0; s < SUPERSAMPLE_SIZE; ++s) {
+                    from[s] = nodeX[s][i    ];
+                    to  [s] = nodeX[s][i + 1];
+                }
+                // Sort the coordinates
+                bubbleSortAscending(from, SUPERSAMPLE_SIZE);
+                bubbleSortAscending(to,   SUPERSAMPLE_SIZE);
+                // Accumulate alphas for the left side of the span
+                for(Pt::int32_t s = 0; s < SUPERSAMPLE_SIZE; ++s) {
+                    for(Pt::int32_t k = from[s]; k <= from[SUPERSAMPLE_SIZE - 1]; ++k) {
+                        alphas[k / SUPERSAMPLE_SIZE] += FSAA_MIN_ALPHA;
+                    }
+                }
+                if( (from[0] / SUPERSAMPLE_SIZE) != (from[SUPERSAMPLE_SIZE - 1] / SUPERSAMPLE_SIZE) ) {
+                    alphas[
+                        (from[SUPERSAMPLE_SIZE - 1] + (SUPERSAMPLE_SIZE / 2)) / SUPERSAMPLE_SIZE
+                    ] += FSAA_MID_ALPHA;
+                }
+                // Accumulate alphas for the right side of the span
+                if(to[0] != from[0]) {
+                    for(Pt::int32_t s = (SUPERSAMPLE_SIZE - 1); s >= 0; --s) {
+                        for(Pt::int32_t k = to[s]; k >= to[0]; --k) {
+                            alphas[k / SUPERSAMPLE_SIZE] += FSAA_MIN_ALPHA;
+                        }
+                    }
+                    if( (to[0] / SUPERSAMPLE_SIZE) != (to[SUPERSAMPLE_SIZE - 1] / SUPERSAMPLE_SIZE) ) {
+                        alphas[
+                            (to[0] - (SUPERSAMPLE_SIZE / 2)) / SUPERSAMPLE_SIZE
+                        ] += FSAA_MID_ALPHA;
+                    }
+                }
+                // Assign alphas for the middle side of the span
+                const Pt::int32_t msMin = (from[SUPERSAMPLE_SIZE - 1] / SUPERSAMPLE_SIZE + 1);
+                const Pt::int32_t msMax = (to  [0                   ] / SUPERSAMPLE_SIZE - 1);
+                const Pt::int32_t msLen = msMax - msMin + 1;
+                if(msLen > 0) memset(&alphas[msMin], FSAA_MAX_ALPHA, msLen);
+*/
+        }
+        // Accumulate the alphas of the samples between the node pairs
+        // --- The number of nodes within all or some of the rows are not equal ---
+        else {
+            for(Pt::int32_t s = 0; s < SUPERSAMPLE_SIZE; ++s) {
+                for(Pt::int32_t i = 0; i < nodes[s]; i += 2) {
+                    const Pt::int32_t from = nodeX[s][i    ];
+                    const Pt::int32_t to   = nodeX[s][i + 1];
+                    for(Pt::int32_t k = from; k <= to; ++k) {
+                        alphas[k / SUPERSAMPLE_SIZE] += FSAA_MIN_ALPHA;
+                    }
+                }
+            }
+        }
+        //lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%02d ", alphas[k] / FSAA_MIN_ALPHA); lprintf("\n");
+        // Fill the pixels between the node pairs
+        for(Pt::int32_t i = 0; i < nodes[0]; i += 2) {
+            const Pt::int32_t iterL = nodeX[0][i    ] / SUPERSAMPLE_SIZE - 1;
+            const Pt::int32_t iterR = nodeX[0][i + 1] / SUPERSAMPLE_SIZE + 1;
+            rasterScanline<SUPERSAMPLE_SIZE, FSAA_MIN_ALPHA, FSAA_MUL_ALPHA>(
+                iterL, iterR, pixelY, minX, minY, sizeX, color, alphas
+            );
+        }
+    }
+
+    // Undefine the macros
+    #undef FSAA_MUL_ALPHA
+    #undef FSAA_MIN_ALPHA
+    #undef FSAA_MAX_ALPHA
+    #undef FSAA_MID_ALPHA
 }
 
 
