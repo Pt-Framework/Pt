@@ -569,29 +569,6 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
         }
         // --- the number of nodes within all the rows are equal ---
         /*
-        SSAA
-        000: 11 01 00 00 00 00 00 00 00 00 00
-        001: 10 13 01 00 00 00 00 00 00 00 00
-        002: 06 16 13 01 00 00 00 00 00 00 00
-        003: 02 16 16 13 01 00 00 00 00 00 00
-        004: 00 14 16 16 13 01 00 00 00 00 00
-        005: 00 10 16 16 16 13 01 00 00 00 00
-        006: 00 06 16 16 16 16 13 01 00 00 00
-        007: 00 02 16 16 16 16 16 13 01 00 00
-        008: 00 00 14 16 16 16 16 16 13 01 00
-        009: 00 00 10 16 16 16 16 16 16 13 01
-        010: 00 00 06 16 16 16 16 16 16 15 01
-        011: 00 00 02 16 16 16 16 16 16 08 00
-        012: 00 00 00 14 16 16 16 16 15 01 00
-        013: 00 00 00 10 16 16 16 16 08 00 00
-        014: 00 00 00 06 16 16 16 15 01 00 00
-        015: 00 00 00 02 16 16 16 08 00 00 00
-        016: 00 00 00 00 14 16 15 01 00 00 00
-        017: 00 00 00 00 10 16 08 00 00 00 00
-        018: 00 00 00 00 06 15 01 00 00 00 00
-        019: 00 00 00 00 02 08 00 00 00 00 00
-
-        FSAA NAIVE
         000: 10 00 00 00 00 00 00 00 00 00 00
         001: 12 10 00 00 00 00 00 00 00 00 00
         002: 08 16 10 00 00 00 00 00 00 00 00
@@ -649,42 +626,56 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
                 Pt::int32_t prevL = from_cell[0];
                 for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
                     alphas[from_cell[s]] += FSAA4X4_MID_ALPHA - (from[s] - from_cell[s] * FSAA4X4_MID_ALPHA);
+                    if(alphas[from_cell[s]] > FSAA4X4_MAX_ALPHA) alphas[from_cell[s]] = FSAA4X4_MAX_ALPHA;
                 }
                 for(Pt::int32_t s = 1; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
-                    //
+                    // We only want to process unique cells
                     if(from_cell[s] == prevL) continue;
                     prevL = from_cell[s];
-                    //
+                    // Accumulate the alphas
+                    Pt::int32_t acc = 0;
                     for(Pt::int32_t c = 1; c < s; ++c) {
-                        if(from_cell[c] < from_cell[s]) alphas[from_cell[s]] += FSAA4X4_MID_ALPHA;
+                        if(from_cell[c] < from_cell[s]) acc += FSAA4X4_MID_ALPHA;
                     }
+                    alphas[from_cell[s]] += acc;
+                    if(alphas[from_cell[s]] > FSAA4X4_MAX_ALPHA) alphas[from_cell[s]] = FSAA4X4_MAX_ALPHA;
                 }
                 for(Pt::int32_t s = 0; s < (FSAA4X4_SUPERSAMPLE_SIZE - 1); ++s) {
                     for(Pt::int32_t k = (from_cell[s] + 1); k <= (from_cell[s + 1] - 1); ++k) {
+                        Pt::int32_t acc = 0;
                         for(Pt::int32_t c = 1; c < (s + 1); ++c) {
-                            if(from_cell[c] < from_cell[s + 1]) alphas[k] += FSAA4X4_MID_ALPHA;
+                            if(from_cell[c] < from_cell[s + 1]) acc += FSAA4X4_MID_ALPHA;
                         }
+                        alphas[k] += acc;
+                        if(alphas[k] > FSAA4X4_MAX_ALPHA) alphas[k] = FSAA4X4_MAX_ALPHA;
                     }
                 }
                 // Accumulate the alphas for the right side
                 Pt::int32_t prevR = to_cell[FSAA4X4_SUPERSAMPLE_SIZE - 1];
                 for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
                     alphas[to_cell[s]] += (to[s] - to_cell[s] * FSAA4X4_MID_ALPHA) + 1;
+                    if(alphas[to_cell[s]] > FSAA4X4_MAX_ALPHA) alphas[to_cell[s]] = FSAA4X4_MAX_ALPHA;
                 }
                 for(Pt::int32_t s = (FSAA4X4_SUPERSAMPLE_SIZE - 2); s >= 0; --s) {
-                    //
+                    // We only want to process unique cells
                     if(to_cell[s] == prevR) continue;
                     prevR = to_cell[s];
-                    //
+                    // Accumulate the alphas
+                    Pt::int32_t acc = 0;
                     for(Pt::int32_t c = (s + 1); c < FSAA4X4_SUPERSAMPLE_SIZE; ++c) {
-                        if(to_cell[c] > to_cell[s]) alphas[to_cell[s]] += FSAA4X4_MID_ALPHA;
+                        if(to_cell[c] > to_cell[s]) acc += FSAA4X4_MID_ALPHA;
                     }
+                    alphas[to_cell[s]] += acc;
+                    if(alphas[to_cell[s]] > FSAA4X4_MAX_ALPHA) alphas[to_cell[s]] = FSAA4X4_MAX_ALPHA;
                 }
                 for(Pt::int32_t s = 0; s < (FSAA4X4_SUPERSAMPLE_SIZE - 1); ++s) {
                     for(Pt::int32_t k = (to_cell[s] + 1); k <= (to_cell[s + 1] - 1); ++k) {
+                        Pt::int32_t acc = 0;
                         for(Pt::int32_t c = (s + 1); c < FSAA4X4_SUPERSAMPLE_SIZE; ++c) {
-                            if(to_cell[c] > to_cell[s]) alphas[k] += FSAA4X4_MID_ALPHA;
+                            if(to_cell[c] > to_cell[s]) acc += FSAA4X4_MID_ALPHA;
                         }
+                        alphas[k] += acc;
+                        if(alphas[k] > FSAA4X4_MAX_ALPHA) alphas[k] = FSAA4X4_MAX_ALPHA;
                     }
                 }
                 // Assign the alphas for the middle side
@@ -705,7 +696,7 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
                 }
             }
         }
-        lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%02d ", alphas[k] / FSAA4X4_MIN_ALPHA); lprintf("\n");
+        //lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%02d ", alphas[k] / FSAA4X4_MIN_ALPHA); lprintf("\n");
         // Fill the pixels between the node pairs
         for(Pt::int32_t i = 0; i < nodes[0]; i += 2) {
             const Pt::int32_t iterL = nodeX[0][i    ] / FSAA4X4_SUPERSAMPLE_SIZE - 1;
