@@ -120,14 +120,13 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
         );
     }
     else {
+        // SSAA4x4 still produces somewhat better result than FSAAGen<8>, but it is about 70% slower
         rasterPolygonAreaFSAAGen<8>(
             clippedPoints.data(), clippedCounts.data(),
             clippedCounts.size(), clippedPoints.size(),
             _brush.color(), minX, minY, maxX, maxY
         );
     }
-    // 1302 ( 9.042)
-    // 1409 ( 3.505)
 }
 
 void Rasterizer2::fillPolygonSeparate(const Point* points, size_t pointCount)
