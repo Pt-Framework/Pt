@@ -113,12 +113,12 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
         );
     }
     else {
-        rasterPolygonAreaSSAA4x4(
+        rasterPolygonAreaFSAAGen(
             clippedPoints.data(), clippedCounts.data(),
             clippedCounts.size(), clippedPoints.size(),
             _brush.color(), minX, minY, maxX, maxY
         );
-#if 1
+#if 0
         for(size_t i = 0; i < clippedPoints.size(); ++i) {
             clippedPoints[i].set(clippedPoints[i].x() + 150, clippedPoints[i].y());
         }
@@ -709,7 +709,7 @@ void Rasterizer2::rasterPolygonAreaFSAAGen(const Point* points, const size_t* po
                     proc_is.insert(from_cell[n]);
                     // Walk through the cells on the left side of the span up until the reference cell
                     for(Pt::int32_t b = 0; b < n; ++b) {
-                        // Skip if the cell is not on the left side of the reference cell
+                        // Skip if the cell is not really on the left side of the reference cell
                         if(from_cell[b] >= from_cell[n]) continue;
                         // Walk through the in-between cells
                         for(Pt::int32_t k = (from_cell[b] + 1); k < from_cell[n]; ++k) {
@@ -738,65 +738,27 @@ void Rasterizer2::rasterPolygonAreaFSAAGen(const Point* points, const size_t* po
                 }
                 // --- In-between cells ---
                 proc_is.clear();
-                for(Pt::int32_t n = (SUPERSAMPLE_SIZE - 1); n > 0; --n) {
-                    /*
+                for(Pt::int32_t n = 0; n < (SUPERSAMPLE_SIZE - 1); ++n) {
                     // Ensure that each cell is not processed twice
-                    if(proc_is.find(from_cell[n]) != proc_is.end()) continue;
-                    proc_is.insert(from_cell[n]);
-                    // Walk through the cells on the right side of the span up until the reference cell
-                    for(Pt::int32_t b = 0; b < n; ++b) {
-                        // Skip if the cell is not on the right side of the reference cell
-                        if(from_cell[b] >= from_cell[n]) continue;
+                    if(proc_is.find(to_cell[n]) != proc_is.end()) continue;
+                    proc_is.insert(to_cell[n]);
+                    // Walk through the cells on the right side of the span down until the reference cell
+                    for(Pt::int32_t b = (SUPERSAMPLE_SIZE - 1); b > n; --b) {
+                        // Skip if the cell is not really on the right side of the reference cell
+                        if(to_cell[b] <= to_cell[n]) continue;
                         // Walk through the in-between cells
-                        for(Pt::int32_t k = from_cell[b] + 1; k < from_cell[n]; ++k) {
+                        for(Pt::int32_t k = (to_cell[b] - 1); k > to_cell[n]; --k) {
                             // Accumulate the alpha if the cell is not one of the reference cell
                             if(proc_ds.find(k) == proc_ds.end()) alphas[k] += SUPERSAMPLE_SIZE;
                         }
                     }
-                    */
-                }
-            }
-/*
-                // Get the coordinates
-                Pt::int32_t from[SUPERSAMPLE_SIZE];
-                Pt::int32_t to  [SUPERSAMPLE_SIZE];
-                for(Pt::int32_t s = 0; s < SUPERSAMPLE_SIZE; ++s) {
-                    from[s] = nodeX[s][i    ];
-                    to  [s] = nodeX[s][i + 1];
-                }
-                // Sort the coordinates
-                bubbleSortAscending(from, SUPERSAMPLE_SIZE);
-                bubbleSortAscending(to,   SUPERSAMPLE_SIZE);
-                // Accumulate alphas for the left side of the span
-                for(Pt::int32_t s = 0; s < SUPERSAMPLE_SIZE; ++s) {
-                    for(Pt::int32_t k = from[s]; k <= from[SUPERSAMPLE_SIZE - 1]; ++k) {
-                        alphas[k / SUPERSAMPLE_SIZE] += FSAA_MIN_ALPHA;
-                    }
-                }
-                if( (from[0] / SUPERSAMPLE_SIZE) != (from[SUPERSAMPLE_SIZE - 1] / SUPERSAMPLE_SIZE) ) {
-                    alphas[
-                        (from[SUPERSAMPLE_SIZE - 1] + (SUPERSAMPLE_SIZE / 2)) / SUPERSAMPLE_SIZE
-                    ] += FSAA_MID_ALPHA;
-                }
-                // Accumulate alphas for the right side of the span
-                if(to[0] != from[0]) {
-                    for(Pt::int32_t s = (SUPERSAMPLE_SIZE - 1); s >= 0; --s) {
-                        for(Pt::int32_t k = to[s]; k >= to[0]; --k) {
-                            alphas[k / SUPERSAMPLE_SIZE] += FSAA_MIN_ALPHA;
-                        }
-                    }
-                    if( (to[0] / SUPERSAMPLE_SIZE) != (to[SUPERSAMPLE_SIZE - 1] / SUPERSAMPLE_SIZE) ) {
-                        alphas[
-                            (to[0] - (SUPERSAMPLE_SIZE / 2)) / SUPERSAMPLE_SIZE
-                        ] += FSAA_MID_ALPHA;
-                    }
                 }
                 // Assign alphas for the middle side of the span
-                const Pt::int32_t msMin = (from[SUPERSAMPLE_SIZE - 1] / SUPERSAMPLE_SIZE + 1);
-                const Pt::int32_t msMax = (to  [0                   ] / SUPERSAMPLE_SIZE - 1);
+                const Pt::int32_t msMin = (from_cell[SUPERSAMPLE_SIZE - 1] + 1);
+                const Pt::int32_t msMax = (to_cell  [0                   ] - 1);
                 const Pt::int32_t msLen = msMax - msMin + 1;
                 if(msLen > 0) memset(&alphas[msMin], FSAA_MAX_ALPHA, msLen);
-*/
+            }
         }
         // Accumulate the alphas of the samples between the node pairs
         // --- The number of nodes within all or some of the rows are not equal ---
