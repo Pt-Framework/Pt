@@ -136,7 +136,7 @@ class Rasterizer2
 
     private:
         template<typename T>
-        void bubbleSort(T& basket, Pt::int32_t size);
+        inline void bubbleSortAscending(T& basket, Pt::int32_t size);
 
         void rasterScanline(
             Pt::int32_t  iterL, Pt::int32_t iterR, Pt::int32_t pixelY,
@@ -179,7 +179,7 @@ class Rasterizer2
 // ======================================================================================
 
 template<typename T>
-inline void Rasterizer2::bubbleSort(T& basket, Pt::int32_t size)
+void Rasterizer2::bubbleSortAscending(T& basket, Pt::int32_t size)
 {
     for(Pt::int32_t i = 0; i < size - 1;) {
         if(basket[i] > basket[i + 1]) {

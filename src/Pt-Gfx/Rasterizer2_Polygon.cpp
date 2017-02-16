@@ -110,7 +110,7 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
         );
     }
     else {
-        rasterPolygonAreaSSAA4x4(
+        rasterPolygonAreaFSAA4x4(
             clippedPoints.data(), clippedCounts.data(),
             clippedCounts.size(), clippedPoints.size(),
             _brush.color(), minX, minY, maxX, maxY
@@ -238,7 +238,7 @@ void Rasterizer2::rasterPolygonAreaJaggies(const Point* points, const size_t* po
         // Skip if there is no node
         if(!nodes) continue;
         // Sort the nodes
-        bubbleSort(nodeX, nodes);
+        bubbleSortAscending(nodeX, nodes);
         // Fill the pixels between the node pairs
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
             const Pt::int32_t from = nodeX[i    ];
@@ -339,8 +339,8 @@ void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* po
         // Skip if there is no node
         if(!nodes0 && !nodes1) continue;
         // Sort the nodes
-        bubbleSort(nodeX0, nodes0);
-        bubbleSort(nodeX1, nodes1);
+        bubbleSortAscending(nodeX0, nodes0);
+        bubbleSortAscending(nodeX1, nodes1);
         // Reset the alphas
         memset(&alphas[0], 0, alphas.size());
         // Accumulate the alphas of the samples between the node pairs
@@ -515,7 +515,7 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
         if(!gotNodes) continue;
         // Sort the nodes using bubble sort
         for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
-            bubbleSort(nodeX[s], nodes[s]);
+            bubbleSortAscending(nodeX[s], nodes[s]);
         }
         // Reset the alphas
         memset(&alphas[0], 0, alphas.size());
@@ -537,10 +537,11 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
                 for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
                     from[s] = nodeX[s][i    ];
                     to  [s] = nodeX[s][i + 1];
+
                 }
                 // Sort the coordinates
-                bubbleSort(from, FSAA4X4_SUPERSAMPLE_SIZE);
-                bubbleSort(to,   FSAA4X4_SUPERSAMPLE_SIZE);
+                bubbleSortAscending(from, FSAA4X4_SUPERSAMPLE_SIZE);
+                bubbleSortAscending(to,   FSAA4X4_SUPERSAMPLE_SIZE);
                 // Accumulate alphas for the left side
                 for(Pt::int32_t s = 0; s < (FSAA4X4_SUPERSAMPLE_SIZE - 1); ++s) {
                     for(Pt::int32_t k = from[s]; k <= from[FSAA4X4_SUPERSAMPLE_SIZE - 1]; ++k) {
@@ -550,7 +551,7 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
                 // Accumulate alphas for the right side
                 for(Pt::int32_t s = (FSAA4X4_SUPERSAMPLE_SIZE - 1); s > 0; --s) {
                     for(Pt::int32_t k = to[0]; k <= to[s]; ++k) {
-                        alphas[k / FSAA4X4_SUPERSAMPLE_SIZE] += FSAA4X4_MIN_ALPHA;
+                       // alphas[k / FSAA4X4_SUPERSAMPLE_SIZE] += FSAA4X4_MIN_ALPHA;
                     }
                 }
                 // Assign alphas for the middle side
@@ -573,7 +574,7 @@ void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* po
                 }
             }
         }
-        //lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%02d ", alphas[k] / FSAA4X4_MIN_ALPHA); lprintf("\n");
+        lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%02d ", alphas[k] / FSAA4X4_MIN_ALPHA); lprintf("\n");
         // Fill the pixels between the node pairs
         for(Pt::int32_t i = 0; i < nodes[0]; i += 2) {
             const Pt::int32_t iterL = nodeX[0][i    ] / FSAA4X4_SUPERSAMPLE_SIZE - 1;
@@ -662,7 +663,7 @@ void Rasterizer2::rasterPolygonAreaSSAA4x4(const Point* points, const size_t* po
         // Skip if there is no node
         if(!nodes) continue;
         // Sort the nodes
-        bubbleSort(nodeX, nodes);
+        bubbleSortAscending(nodeX, nodes);
         // Accumulate the alphas of the samples between the node pairs
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
             const Pt::int32_t from = nodeX[i    ];
