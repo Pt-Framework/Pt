@@ -28,7 +28,14 @@
   02110-1301 USA
 */
 
-#include "Rasterizer2_Common.h"
+#include <cmath>
+
+#include <Pt/Gfx/Algorithm.h>
+#include <Pt/Gfx/ImagePainter2.h>
+
+#include "DrawText.h"
+#include "ClipShape.h"
+#include "Rasterizer2.h"
 
 namespace Pt {
 namespace Gfx {
@@ -110,11 +117,19 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
         );
     }
     else {
-        rasterPolygonAreaFSAA4x4(
+#if 0
+        rasterPolygonAreaFSAAGen<4>(
             clippedPoints.data(), clippedCounts.data(),
             clippedCounts.size(), clippedPoints.size(),
             _brush.color(), minX, minY, maxX, maxY
         );
+#else
+        rasterPolygonAreaSSAA4x4(
+            clippedPoints.data(), clippedCounts.data(),
+            clippedCounts.size(), clippedPoints.size(),
+            _brush.color(), minX, minY, maxX, maxY
+        );
+#endif
     }
 }
 
@@ -360,7 +375,7 @@ void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* po
                 const Pt::int32_t from1_area = ( (from1_cell * FSAA2X2_SUPERSAMPLE_SIZE) < from1 ) ? FSAA2X2_MIN_ALPHA : FSAA2X2_MID_ALPHA;
                 const Pt::int32_t to0_area   = ( (to0_cell   * FSAA2X2_SUPERSAMPLE_SIZE) < to0   ) ? FSAA2X2_MID_ALPHA : FSAA2X2_MIN_ALPHA;
                 const Pt::int32_t to1_area   = ( (to1_cell   * FSAA2X2_SUPERSAMPLE_SIZE) < to1   ) ? FSAA2X2_MID_ALPHA : FSAA2X2_MIN_ALPHA;
-                // Calculate alphas for the left side
+                // Calculate alphas for the left side of the span
                 if(from0_cell == from1_cell) {
                     alphas[from0_cell] = from0_area + from1_area;
                 }
@@ -371,7 +386,7 @@ void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* po
                         alphas[k] = FSAA2X2_MID_ALPHA;
                     }
                 }
-                // Calculate alphas for the right side
+                // Calculate alphas for the right side of the span
                 if(to0_cell == to1_cell) {
                     alphas[to0_cell] = to0_area + to1_area;
                 }
@@ -382,7 +397,7 @@ void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* po
                         alphas[k] = FSAA2X2_MID_ALPHA;
                     }
                 }
-                // Assign alphas for the middle side
+                // Assign alphas for the middle side of the span
                 const Pt::int32_t len = (to0_cell - 1) - (from1_cell + 1) + 1;
                 if(len > 0) memset(&alphas[from1_cell + 1], FSAA2X2_MAX_ALPHA, len);
             }
@@ -422,187 +437,6 @@ void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* po
     #undef FSAA2X2_MIN_ALPHA
     #undef FSAA2X2_MAX_ALPHA
     #undef FSAA2X2_MID_ALPHA
-}
-
-// Inspired by http://alienryderflex.com/polygon_fill
-// Public-domain code by Darel Rex Finley, 2007
-void Rasterizer2::rasterPolygonAreaFSAA4x4(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
-{
-    // Internal macros
-    #define FSAA4X4_SUPERSAMPLE_SIZE 4
-    #define FSAA4X4_MUL_ALPHA        255
-    #define FSAA4X4_MIN_ALPHA        1
-    #define FSAA4X4_MAX_ALPHA        (FSAA4X4_MIN_ALPHA * FSAA4X4_SUPERSAMPLE_SIZE * FSAA4X4_SUPERSAMPLE_SIZE)
-    #define FSAA4X4_MID_ALPHA        (FSAA4X4_MAX_ALPHA / 2)
-
-    // Calculate the size of the polygon
-    Pt::int32_t sizeX = (maxX - minX + 1);
-    Pt::int32_t sizeY = (maxY - minY + 1);
-
-    // Prepare a work buffer
-    std::vector<Pt::uint8_t> alphas(sizeX, 0);
-
-    // Scale the polygon to be twice as large and translate its origin to (0, 0)
-    std::vector<Pt::int32_t> pointX(totalPointCount, 0);
-    std::vector<Pt::int32_t> pointY(totalPointCount, 0);
-
-    for(size_t i = 0; i < totalPointCount; ++i) {
-        pointX[i] = (points[i].x() - minX) * FSAA4X4_SUPERSAMPLE_SIZE;
-        pointY[i] = (points[i].y() - minY) * FSAA4X4_SUPERSAMPLE_SIZE;
-    }
-
-    // List of nodes that define the horizontal spans
-    // Row (Y) ... Row (Y + FSAA4X4_SUPERSAMPLE_SIZE - 1)
-    std::vector< std::vector<Pt::int32_t> > nodeX(FSAA4X4_SUPERSAMPLE_SIZE);
-    for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
-        nodeX[s].resize(totalPointCount * 2);
-    }
-
-    //  Loop through the rows of the image
-    for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
-        // We examine multiple rows at a time
-        Pt::int32_t iterY[FSAA4X4_SUPERSAMPLE_SIZE];
-        iterY[0] = pixelY * FSAA4X4_SUPERSAMPLE_SIZE;
-        for(Pt::int32_t s = 1; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
-            iterY[s] = iterY[0] + s;
-        }
-        // Base pointers for the polygons
-        const Pt::int32_t* curPointBaseX = pointX.data();
-        const Pt::int32_t* curPointBaseY = pointY.data();
-        // Build a list of nodes using all the polygons
-        Pt::int32_t nodes[FSAA4X4_SUPERSAMPLE_SIZE] = { 0 };
-        for(size_t p = 0; p < polyCount; ++p) {
-            // Get the current point count
-            const size_t curPointCount = pointCount[p];
-            // Loop through the points
-            Pt::int32_t j = curPointCount - 1;
-            for(size_t i = 0; i < curPointCount; ++i) {
-                // Get the coordinates
-                const Pt::int32_t curXi = *(curPointBaseX + i);
-                const Pt::int32_t curYi = *(curPointBaseY + i);
-                const Pt::int32_t curXj = *(curPointBaseX + j);
-                const Pt::int32_t curYj = *(curPointBaseY + j);
-                // Row (Y) ... Row (Y + FSAA4X4_SUPERSAMPLE_SIZE - 1)
-                for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
-                    if( ( iterY[s] >= curYi && iterY[s] < curYj ) || ( iterY[s] >= curYj && iterY[s] < curYi ) ) {
-                        // Bail out if we have produced too many nodes
-                        if((size_t) nodes[s] >= nodeX[s].size()) return;
-                        // Calculate the nodes' coordinates
-                        const Pt::int32_t deltaYp = iterY[s] - curYi;
-                        const Pt::int32_t deltaYj = curYj    - curYi;
-                        const Pt::int32_t deltaXj = curXj    - curXi;
-                        const Pt::int32_t interXf = FIXED_POINT_FROM_INT(curXi)
-                                                  + ( (FIXED_POINT_FROM_INT(deltaYp) + FIXED_POINT_CONSTANT_QUARTER) /
-                                                      deltaYj * deltaXj
-                                                    );
-                        nodeX[s][nodes[s]++] = FIXED_POINT_TO_INT(interXf);
-                    }
-                }
-                // Update the searching index
-                j = i;
-            }
-            // Increment the base pointers
-            curPointBaseX += curPointCount;
-            curPointBaseY += curPointCount;
-        }
-        // Skip if there is no node
-        bool gotNodes = false;
-        for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
-            if(nodes[s]) {
-                gotNodes = true;
-                break;
-            }
-        }
-        if(!gotNodes) continue;
-        // Sort the nodes using bubble sort
-        for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
-            bubbleSortAscending(nodeX[s], nodes[s]);
-        }
-        // Reset the alphas
-        memset(&alphas[0], 0, alphas.size());
-        // Accumulate the alphas of the samples between the node pairs
-        // --- Check if all the rows have the same number of nodes ---
-        const Pt::int32_t nodes0            = nodes[0];
-              bool        hasSameNumOfNodes = true;
-        for(Pt::int32_t s = 1; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
-            if(nodes[s] == nodes0) continue;
-            hasSameNumOfNodes = false;
-            break;
-        }
-        // --- The number of nodes within all the rows are equal ---
-        if(true && hasSameNumOfNodes) {
-            for(Pt::int32_t i = 0; i < nodes0; i += 2) {
-                // Get the coordinates
-                Pt::int32_t from[FSAA4X4_SUPERSAMPLE_SIZE];
-                Pt::int32_t to  [FSAA4X4_SUPERSAMPLE_SIZE];
-                for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
-                    from[s] = nodeX[s][i    ];
-                    to  [s] = nodeX[s][i + 1];
-                }
-                // Sort the coordinates
-                bubbleSortAscending(from, FSAA4X4_SUPERSAMPLE_SIZE);
-                bubbleSortAscending(to,   FSAA4X4_SUPERSAMPLE_SIZE);
-                // Accumulate alphas for the left side
-                for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
-                    for(Pt::int32_t k = from[s]; k <= from[FSAA4X4_SUPERSAMPLE_SIZE - 1]; ++k) {
-                        alphas[k / FSAA4X4_SUPERSAMPLE_SIZE] += FSAA4X4_MIN_ALPHA;
-                    }
-                }
-                if( (from[0] / FSAA4X4_SUPERSAMPLE_SIZE) != (from[FSAA4X4_SUPERSAMPLE_SIZE - 1] / FSAA4X4_SUPERSAMPLE_SIZE) ) {
-                    alphas[
-                        (from[FSAA4X4_SUPERSAMPLE_SIZE - 1] + (FSAA4X4_SUPERSAMPLE_SIZE / 2)) / FSAA4X4_SUPERSAMPLE_SIZE
-                    ] += FSAA4X4_MID_ALPHA;
-                }
-                // Accumulate alphas for the right side
-                if(to[0] != from[0]) {
-                    for(Pt::int32_t s = (FSAA4X4_SUPERSAMPLE_SIZE - 1); s >= 0; --s) {
-                        for(Pt::int32_t k = to[0]; k <= to[s]; ++k) {
-                            alphas[k / FSAA4X4_SUPERSAMPLE_SIZE] += FSAA4X4_MIN_ALPHA;
-                        }
-                    }
-                    if( (to[0] / FSAA4X4_SUPERSAMPLE_SIZE) != (to[FSAA4X4_SUPERSAMPLE_SIZE - 1] / FSAA4X4_SUPERSAMPLE_SIZE) ) {
-                        alphas[
-                            (to[0] - (FSAA4X4_SUPERSAMPLE_SIZE / 2)) / FSAA4X4_SUPERSAMPLE_SIZE
-                        ] += FSAA4X4_MID_ALPHA;
-                    }
-                }
-                // Assign alphas for the middle side
-                const Pt::int32_t msMin = (from[FSAA4X4_SUPERSAMPLE_SIZE - 1] / FSAA4X4_SUPERSAMPLE_SIZE + 1);
-                const Pt::int32_t msMax = (to  [0                           ] / FSAA4X4_SUPERSAMPLE_SIZE - 1);
-                const Pt::int32_t msLen = msMax - msMin + 1;
-                if(msLen > 0) memset(&alphas[msMin], FSAA4X4_MAX_ALPHA, msLen);
-            }
-        }
-        // Accumulate the alphas of the samples between the node pairs
-        // --- The number of nodes within all or some of the rows are not equal ---
-        else {
-            for(Pt::int32_t s = 0; s < FSAA4X4_SUPERSAMPLE_SIZE; ++s) {
-                for(Pt::int32_t i = 0; i < nodes[s]; i += 2) {
-                    const Pt::int32_t from = nodeX[s][i    ];
-                    const Pt::int32_t to   = nodeX[s][i + 1];
-                    for(Pt::int32_t k = from; k <= to; ++k) {
-                        alphas[k / FSAA4X4_SUPERSAMPLE_SIZE] += FSAA4X4_MIN_ALPHA;
-                    }
-                }
-            }
-        }
-        lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%02d ", alphas[k] / FSAA4X4_MIN_ALPHA); lprintf("\n");
-        // Fill the pixels between the node pairs
-        for(Pt::int32_t i = 0; i < nodes[0]; i += 2) {
-            const Pt::int32_t iterL = nodeX[0][i    ] / FSAA4X4_SUPERSAMPLE_SIZE - 1;
-            const Pt::int32_t iterR = nodeX[0][i + 1] / FSAA4X4_SUPERSAMPLE_SIZE + 1;
-            rasterScanline<FSAA4X4_SUPERSAMPLE_SIZE, FSAA4X4_MIN_ALPHA, FSAA4X4_MUL_ALPHA>(
-                iterL, iterR, pixelY, minX, minY, sizeX, color, alphas
-            );
-        }
-    }
-
-    // Undefine the macros
-    #undef FSAA4X4_SUPERSAMPLE_SIZE
-    #undef FSAA4X4_MUL_ALPHA
-    #undef FSAA4X4_MIN_ALPHA
-    #undef FSAA4X4_MAX_ALPHA
-    #undef FSAA4X4_MID_ALPHA
 }
 
 // Inspired by http://alienryderflex.com/polygon_fill
