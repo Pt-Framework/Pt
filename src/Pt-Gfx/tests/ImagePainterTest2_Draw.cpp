@@ -92,9 +92,9 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
 
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(&painter);
 
-#if 1
+#if 0
     painter.setBrush( Color::fromRgb8(255, 255, 255) );
-    const PointF polyx[] = { PointF(10, 10), PointF(20, 20), PointF(15, 30) };
+    const PointF polyx[] = { PointF(10, 10), PointF(40, 40), PointF(30, 60) };
     if(ip2) ip2->setAntiAliasingLevel(2);
     painter.fillPolygon( polyx, sizeof(polyx) / sizeof(polyx[0]) );
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
