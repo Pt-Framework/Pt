@@ -151,7 +151,8 @@ void ApplicationImpl::releasePointer(Window& grabber)
     // send mouse move event with current button state
     // so widget under the cursor gets an enter event 
     _lastMouse.setMove(); 
-    _eventReady.send(_lastMouse);
+
+    Application::instance().processMouseEvent(_lastMouse);
 }
 
 
@@ -168,7 +169,8 @@ void ApplicationImpl::releasePointer(Widget& grabber)
     // send mouse move event with current button state
     // so widget under the cursor gets an enter event 
     _lastMouse.setMove(); 
-    _eventReady.send(_lastMouse);
+    
+    Application::instance().processMouseEvent(_lastMouse);
 }
 
 

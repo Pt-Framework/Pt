@@ -67,11 +67,6 @@ class ApplicationImpl : public Pt::System::MainLoop
 			return _frameBuffer;
 		}
 
-	  Pt::Signal<const Pt::Event&>& eventReady()
-		{
-				return _eventReady;
-		}
-
     void nextEvent();
 
 	private:
@@ -84,7 +79,6 @@ class ApplicationImpl : public Pt::System::MainLoop
   private:
 		FrameBuffer                  _frameBuffer; 
 		std::vector<InputDevice*>    _inputDevices;
-		Pt::Signal<const Pt::Event&> _eventReady;
     Cursor                       _cursor;
     MouseEvent                   _lastMouse;
 };
