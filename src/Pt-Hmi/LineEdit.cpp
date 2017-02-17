@@ -31,25 +31,21 @@
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Gfx/ImagePainter.h>
 
-static const char maskChar = '*';
-
 namespace Pt {
 
 namespace Hmi {
 
 LineEdit::LineEdit()
-: _echoMode(Normal)
-, _textAdjustment(Adjustment::Left)
-, _isAccepted(true)
+: _isAccepted(true)
+, _hasPlaceholder(true)
 , _isTextChanged(false)
-, _cursorPosition(0)
-, _hscroll(0)
-, _halign(0)
+, _echoMode(Normal)
+, _textAdjustment(Adjustment::Left)
+, _spacing(0)
 , _hasRenderer(false)
 {
     setTextInput(true);
     setFocusPolicy(Widget::NormalFocus);
-    setPadding(5);
 }
 
 
@@ -60,23 +56,22 @@ LineEdit::~LineEdit()
 
 void LineEdit::setText(const Pt::String& str)
 {
-    _text = str;
-    setCursorPosition(0);
+    _editor.setText(str);
+    invalidate();
 }
 
 
 const Pt::String& LineEdit::text() const
 {
-    return _text;
+    return _editor.text();
 }
 
 
 const Pt::String& LineEdit::displayText() const
 {
-    if(_echoMode == Normal)
-        return _text;
-
-    return _displayText;
+    // TODO: handle hidden echomode 
+    
+    return _editor.displayText();
 }
 
 
@@ -89,7 +84,14 @@ const Pt::String& LineEdit::placeholderText() const
 void LineEdit::setPlaceholderText(const Pt::String& s)
 {
     _placeholderText = s;
-    update();
+
+    if( ! hasFocus() && _editor.text().empty() )
+    {
+        _editor.setText(_placeholderText);
+        _hasPlaceholder = true;
+    }
+
+    invalidate();
 }
 
 
@@ -101,12 +103,8 @@ LineEdit::EchoMode LineEdit::echoMode() const
 
 void LineEdit::setEchoMode(LineEdit::EchoMode mode)
 {
-    _echoMode = mode;
-
-    _displayText.clear();
-    
-    if(_echoMode == Masked)
-        _displayText.assign(_text.size(), maskChar);
+    _echoMode = mode;   
+    _editor.setMasked(_echoMode == Masked);
 
     invalidate();
 }
@@ -120,28 +118,21 @@ Adjustment LineEdit::textAdjustment() const
 
 void LineEdit::setTextAdjustment(Adjustment a)
 {
-    _textAdjustment = a;
-    
-    layoutText();
-    update();
+    _editor.setAdjustment(a);
+    invalidate();
 }
 
 
 std::size_t LineEdit::cursorPosition() const
 {
-    return _cursorPosition;
+    return _editor.cursorPosition();
 }
 
 
 void LineEdit::setCursorPosition(std::size_t n)
 {
-    if( n > _text.size() )
-        n = _text.size();
-
-    _cursorPosition = n;
-
-    layoutText();
-    update();
+    _editor.setCursorPosition(n);
+    invalidate();
 }
 
 
@@ -278,134 +269,6 @@ void LineEdit::setRenderer(LineEditRenderer* renderer)
 }
 
 
-void LineEdit::onKeyEvent(const KeyEvent& ev)
-{  
-    Base::onKeyEvent(ev);
-
-    if( ! ev.isPress() )
-        return;
-
-    if( ev.key().code() == Pt::Hmi::Key::ArrowLeft )
-    {
-        if(_cursorPosition > 0)
-            setCursorPosition(_cursorPosition - 1);
-    }
-    else if( ev.key().code() == Pt::Hmi::Key::ArrowRight )
-    {
-        setCursorPosition(_cursorPosition + 1);
-    }
-    else if( ev.key().code() == Pt::Hmi::Key::Return )
-    {
-        if( isAccepted() )
-            _returnPressed.send(_text);
-    }
-    else if( ev.key().code() == Pt::Hmi::Key::Delete )
-    {
-        if( ! _text.empty() )
-            _text.erase(_cursorPosition, 1);
-
-        if( ! _displayText.empty() )
-            _displayText.erase(_cursorPosition, 1);
-        
-        layoutText();
-        update();
-        _isTextChanged = true;
-        _textEdited.send(_text);
-    }
-    else if( ev.key().code() == Pt::Hmi::Key::Backspace )
-    {
-        if( _cursorPosition > 0 && ! _text.empty() )
-            _text.erase(_cursorPosition - 1, 1);
-
-        if( ! _displayText.empty() )
-            _displayText.resize( _displayText.size() - 1 );
-        
-        if(_cursorPosition > 0)
-            setCursorPosition(_cursorPosition - 1);
-
-        _isTextChanged = true;
-        _textEdited.send(_text);
-    }
-    else
-    {
-        Pt::Char ch = ev.unicode();
-        if( Pt::isprint(ch) )
-        {
-            _text.insert(_cursorPosition, 1, ch);
-
-            if(_echoMode == Masked)
-                _displayText += maskChar;
-
-            setCursorPosition(_cursorPosition + 1);
-            _isTextChanged = true;
-            _textEdited.send(_text);
-        }
-    }
-}
-
-
-bool LineEdit::onMouseEvent(const MouseEvent& mev)
-{
-    Base::onMouseEvent(mev);
-
-    if(_echoMode == Hidden)
-        return true;
-
-    if( ! mev.isPress() )
-        return true;
-
-    Application::instance().inputMethod().begin(*this);
-
-    std::size_t pos = xToCursor( mev.x() );
-    setCursorPosition(pos);
-    return true;
-}
-
-
-void LineEdit::onTouchEvent(const TouchEvent& tev)
-{
-    Base::onTouchEvent(tev);
-
-    if(_echoMode == Hidden)
-        return;
-
-    if( ! tev.isPress() )
-        return;
-
-    Application::instance().inputMethod().begin(*this);
-
-    std::size_t pos = xToCursor( tev.x() );
-    setCursorPosition(pos);
-}
-
-
-void LineEdit::onResizeEvent(const ResizeEvent& ev)
-{
-    Base::onResizeEvent(ev);
-    
-    layoutText();
-}
-
-
-void LineEdit::onFocusEvent(const FocusEvent& ev)
-{
-    Base::onFocusEvent(ev);
-
-    if( ! ev.isFocused() )
-    {
-        if( isAccepted() && _isTextChanged)
-        {
-            _isTextChanged = false;
-            _editingFinished.send(_text);
-        }
-    }
-    else
-    {
-        Application::instance().inputMethod().begin(*this);
-    }
-}
-
-
 void LineEdit::onInvalidate()
 {
     Base::onInvalidate();
@@ -425,7 +288,11 @@ void LineEdit::onInvalidate()
     if( ! _renderer )
         return;
 
-    _renderer->prepare(*this, options, _brush, _pen, _font, _textPen, _placeholderPen);
+    _renderer->prepare(*this, options, _brush, _pen, _font, 
+                       _textPen, _placeholderPen);
+
+    _editor.setFont(_font);
+    _editor.layout(_line);
 }
 
 
@@ -446,180 +313,185 @@ void LineEdit::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     _renderer->renderBackground( *this, options, painter, rect,
                                  _pen, _brush );
     
-    if(echoMode() == LineEdit::Hidden)
+    if(echoMode() == LineEdit::Hidden && ! _hasPlaceholder)
         return;
 
     //
-    // placeholder or entered text
+    // text with cursor
     //
-
-    const Pt::String& text = displayText().empty() ? _placeholderText
-                                                   : displayText();
     
-    Gfx::FontMetrics fm = painter.fontMetrics(_font, text);
+    Gfx::RectF cursorRect;
 
-    double textX = padding().left() + _halign - _hscroll;
-    
-    double textHeight = fm.ascent() + fm.descent();
-    double textY = ((size().height() - textHeight) / 2) + fm.ascent();
-
-    if( ! _text.empty() )
-    {
-        Gfx::PointF textPos(textX, textY);
-        
-        _renderer->renderText(*this, options, painter, rect, 
-                              text, textPos, _font, _textPen);
-    }
-    else if( ! hasFocus() && ! text.empty() )
-    {
-        std::size_t align = fm.width() / 2;
-
-        if(align < textX)
-            textX -= align;
-  
-        Gfx::PointF textPos(textX, textY);
-
-        _renderer->renderText(*this, options, painter, rect, 
-                              text, textPos, _font, _placeholderPen);
-    }
-
-    //
-    // text cursor
-    //
+    Gfx::PointF clipPos = _editor.position();
+    Gfx::SizeF clipSize = _editor.size();
+    clipSize.addWidth(_spacing); // cursor
 
     if( hasFocus() )
     {
-        double cursorX = textX;
+        double cursorX = _line.cursorToX( _editor.cursorPosition() );
+        cursorX += _line.position().x();
         
-        if( ! text.empty() )
-        {
-            Pt::String left = text.substr(0, _cursorPosition);
-            Gfx::FontMetrics fm = painter.fontMetrics(left);
-            cursorX += fm.width();
-        }
+        double cursorWidth = 1;
 
-        Gfx::RectF cursorRect( Gfx::PointF(cursorX, textY - fm.ascent()),
-                               Gfx::SizeF(0, textHeight) );
-
-        _renderer->renderCursor(*this, options, painter, rect, cursorRect);
+        cursorRect.set(Gfx::PointF( cursorX, _line.position().y() ),
+                       Gfx::SizeF( cursorWidth, _line.height() ) );           
     }
+
+    Gfx::RectF clipRect(clipPos, clipSize);
+    painter.setClip( Gfx::RectF(clipPos, clipSize) );
+
+    Gfx::PointF textPos = _line.position();
+    textPos.addY( _line.ascent() );
+
+    // TODO: renderer prepare can set placeholder color
+
+    if(_hasPlaceholder)
+        _renderer->renderText(*this, options, painter, rect, 
+                              _editor.displayText(), textPos, _font, _placeholderPen);
+    else
+        _renderer->renderText(*this, options, painter, rect, 
+                              _editor.displayText(), textPos, _font, _textPen);
+
+    if( hasFocus() )
+        _renderer->renderCursor(*this, options, painter, rect, cursorRect);
 }
 
 
-void LineEdit::layoutText()
+void LineEdit::onKeyEvent(const KeyEvent& ev)
+{  
+    Base::onKeyEvent(ev);
+
+    if( ! ev.isPress() )
+        return;
+
+    if( ev.key().code() == Pt::Hmi::Key::ArrowLeft )
+    {
+        _editor.left();
+    }
+    else if( ev.key().code() == Pt::Hmi::Key::ArrowRight )
+    {
+        _editor.right();
+    }
+    else if( ev.key().code() == Pt::Hmi::Key::Return )
+    {
+        if( isAccepted() )
+            _returnPressed.send( _editor.text() );
+    }
+    else if( ev.key().code() == Pt::Hmi::Key::Delete )
+    {
+        _editor.del();
+
+        _isTextChanged = true;
+        _textEdited.send( _editor.text() );
+    }
+    else if( ev.key().code() == Pt::Hmi::Key::Backspace )
+    {
+        _editor.backspace();
+
+        _isTextChanged = true;
+        _textEdited.send( _editor.text() );
+    }
+    else
+    {
+        Pt::Char ch = ev.unicode();
+        if( Pt::isprint(ch) )
+        {
+            if( _hasPlaceholder )
+                _editor.clear();
+
+            _editor.insert(ch);
+
+            _hasPlaceholder = false;
+            _isTextChanged = true;
+            _textEdited.send( _editor.text() );
+        }
+    }
+
+    invalidate();
+}
+
+
+bool LineEdit::onMouseEvent(const MouseEvent& mev)
 {
-    const Pt::String& str = displayText();
+    Base::onMouseEvent(mev);
+
+    if(_echoMode == Hidden)
+        return true;
+
+    if( ! mev.isPress() )
+        return true;
+
+    Application::instance().inputMethod().begin(*this);
+
+    std::size_t n = _line.xToCursor( mev.x() );
+    _editor.setCursorPosition(n);
+    update();
+    
+    return true;
+}
+
+
+void LineEdit::onTouchEvent(const TouchEvent& tev)
+{
+    Base::onTouchEvent(tev);
 
     if(_echoMode == Hidden)
         return;
 
-    Pt::String left;
-    if( _cursorPosition <= str.size() && ! str.empty() ) 
-        left = str.substr(0, _cursorPosition);
-    
-    Gfx::FontMetrics fmLeft = Hmi::Painter::fontMetrics( _font, left );
-    Gfx::FontMetrics fmText = Hmi::Painter::fontMetrics( _font, str );
-    
-    double maxWidth = size().width() - padding().leftRight();
+    if( ! tev.isPress() )
+        return;
 
-    if( fmText.width() < maxWidth )
+    Application::instance().inputMethod().begin(*this);
+
+    std::size_t n = _line.xToCursor( tev.x() );
+    _editor.setCursorPosition(n);
+    update();
+}
+
+
+void LineEdit::onResizeEvent(const ResizeEvent& ev)
+{
+    Base::onResizeEvent(ev);
+    
+    _spacing = ev.size().height() / 5;
+    if(_spacing < 2)
+        _spacing = 2;
+
+    Gfx::PointF editPosition(_spacing, 0);
+    _editor.setPosition(editPosition);
+
+    Gfx::SizeF editSize = ev.size();
+    editSize.addWidth(-3 * _spacing);
+    _editor.setSize(editSize);
+
+    _editor.layout(_line);
+}
+
+
+void LineEdit::onFocusEvent(const FocusEvent& ev)
+{
+    Base::onFocusEvent(ev);
+
+    if( ! ev.isFocused() )
     {
-        _hscroll = 0;
-
-        switch(_textAdjustment)
+        if( isAccepted() && _isTextChanged)
         {
-            case Adjustment::Left:
-                _halign = 0;
-                break;
-            
-            case Adjustment::Center:
-                _halign = (maxWidth - fmText.width()) / 2;
-                break;
-            
-            case Adjustment::Right:           
-                _halign = maxWidth - fmText.width();
-                break;
+            _isTextChanged = false;
+            _editingFinished.send( _editor.text() );
         }
     }
     else
     {
-        double pos1 = fmLeft.width() + padding().leftRight();
-        if(pos1 > size().width() + _hscroll)
-            _hscroll = pos1 - size().width();
-        else
-        {
-            double pos = fmLeft.width();
-            if( pos < _hscroll + padding().left() )
-            {
-                double delta = (_hscroll + padding().left()) - pos;
-                if(delta > _hscroll)
-                    _hscroll = 0;
-                else
-                    _hscroll -= delta;
-            }
-        }
-
-        _halign = 0;
-
-        if( _textAdjustment == Adjustment::Right )
-        {
-            _hscroll = fmText.width() - maxWidth;
-        }
-    }
-}
-
-
-std::size_t LineEdit::xToCursor(double x)
-{
-    const Pt::String& str = displayText();
-
-    if( str.empty() )
-        return 0;
-
-    // compensate for text aligmnet
-    x -= _halign;
-
-    std::size_t textX = _hscroll;
-    if( padding().left() < x)
-        textX += x - padding().left();
-
-    // estimate cursor position
-    Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( _font, str );
-    std::size_t widthPerChar = fm.width() / str.size();
-    std::size_t pos = textX / widthPerChar;
-
-    if( pos >= str.size() )
-        pos = str.size() - 1;
-
-    Pt::String left = str.substr(0, pos + 1);
-    fm = Hmi::Painter::fontMetrics( _font, left );
-
-    if( textX < fm.width() )
-    {
-        // cursor position was over estimated, so search left
-        for( ; pos > 0; --pos)
-        {
-            left = str.substr(0, pos);
-            fm = Hmi::Painter::fontMetrics( _font, left );
-      
-            if( textX >= fm.width() )
-                break;
-        }
-    }
-    else 
-    {
-        // cursor position was under estimated, so search right
-        for(++pos ; pos < str.size(); ++pos)
-        {
-            left = str.substr(0, pos + 1);
-            fm = Hmi::Painter::fontMetrics( _font, left );
-      
-            if( textX < fm.width() )
-                break;
-        }
+        Application::instance().inputMethod().begin(*this);
     }
 
-    return pos;
+    if(_hasPlaceholder)
+        _editor.clear();
+    
+    _hasPlaceholder = ! ev.isFocused() && _editor.text().empty();
+
+    if(_hasPlaceholder)
+        _editor.setText(_placeholderText);
 }
 
 } // namespace

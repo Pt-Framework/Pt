@@ -31,6 +31,7 @@
 #define PT_HMI_LINEEDIT_H
 
 #include <Pt/Hmi/Control.h>
+#include <Pt/Hmi/LineEditor.h>
 #include <Pt/Hmi/Adjustment.h>
 #include <Pt/SmartPtr.h>
 #include <Pt/String.h>
@@ -129,27 +130,21 @@ class PT_HMI_API LineEdit : public Control
         virtual void onInvalidate();
 
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& rect);
-    
-    private:
-        std::size_t xToCursor(double x);
-
-        void layoutText();
 
     private:
         Pt::Signal<const Pt::String&> _textEdited;
         Pt::Signal<const Pt::String&> _returnPressed;
         Pt::Signal<const Pt::String&> _editingFinished;
 
-        EchoMode                      _echoMode;
-        Adjustment                    _textAdjustment;
-        Pt::String                    _text;
-        Pt::String                    _displayText;
+        LineEditor                    _editor;
+        TextLine                      _line;
         Pt::String                    _placeholderText;
         bool                          _isAccepted;
+        bool                          _hasPlaceholder;
         bool                          _isTextChanged;
-        std::size_t                   _cursorPosition;
-        double                        _hscroll;
-        double                        _halign;
+        EchoMode                      _echoMode;
+        Adjustment                    _textAdjustment;
+        double                        _spacing;
 
         FacetPtr<LineEditRenderer>     _renderer;
         bool                           _hasRenderer;
@@ -166,7 +161,6 @@ class PT_HMI_API LineEdit : public Control
         Gfx::Pen                      _textPen;
         Gfx::Pen                      _placeholderPen;
         Gfx::Font                     _font;
-        
 };
 
 } // namespace

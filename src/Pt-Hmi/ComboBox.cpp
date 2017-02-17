@@ -554,6 +554,8 @@ void ComboBox::onResizeEvent(const ResizeEvent& ev)
     editSize.addWidth( - _buttonSize.width() );
     editSize.addWidth(-3 * _spacing); // left, right, cursor
     _editor.setSize(editSize);
+
+    _editor.layout(_line);
 }
 
 

@@ -33,10 +33,8 @@
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/ListBox.h>
 #include <Pt/Hmi/LineEditor.h>
-#include <Pt/Gfx/Color.h>
-#include <Pt/Gfx/Brush.h>
-#include <Pt/String.h>
 #include <Pt/SmartPtr.h>
+#include <Pt/String.h>
 
 namespace Pt {
 

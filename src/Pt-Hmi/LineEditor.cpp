@@ -162,8 +162,11 @@ std::size_t TextLine::xToCursor(double x) const
 // LineEditor
 //////////////////////////////////////////////////////////////////////////
 
+static const char maskChar = '*';
+
 LineEditor::LineEditor()
-: _cursorPosition(0)
+: _isMasked(false)
+, _cursorPosition(0)
 , _scrollOffset(0)
 {
 }
@@ -174,9 +177,29 @@ LineEditor::~LineEditor()
 }
 
 
-const Gfx::SizeF& LineEditor::size() const
+bool LineEditor::isMasked() const
 {
-    return _size;
+    return _isMasked;
+}
+
+
+void LineEditor::setMasked(bool m)
+{
+    _isMasked = m;
+
+    if(_isMasked)
+        _displayText.assign(_text.size(), maskChar);
+    else
+        _displayText.clear();
+}
+
+
+const Pt::String& LineEditor::displayText() const
+{
+    if(_isMasked)
+        return _displayText;
+    else
+        return _text;
 }
 
 
@@ -189,6 +212,12 @@ const Gfx::PointF& LineEditor::position() const
 void LineEditor::setPosition(const Gfx::PointF& p)
 {
     _position = p;
+}
+
+
+const Gfx::SizeF& LineEditor::size() const
+{
+    return _size;
 }
 
 
@@ -219,6 +248,10 @@ const Pt::String& LineEditor::text() const
 void LineEditor::setText(const Pt::String& s)
 {
     _text = s;
+    
+    if(_isMasked)
+        _displayText.assign(_text.size(), maskChar);
+    
     _cursorPosition = 0;
     _scrollOffset = 0;
 }
@@ -251,9 +284,22 @@ void LineEditor::setCursorPosition(std::size_t n)
 }
 
 
+void LineEditor::clear()
+{
+    _text.clear();
+    _displayText.clear();
+    _scrollOffset = 0;
+    _cursorPosition = 0;
+}
+
+
 void LineEditor::insert(Char ch)
 {
     _text.insert(_cursorPosition, 1, ch);
+
+    if(_isMasked)
+        _displayText += maskChar;
+
     _cursorPosition++;
 }
 
@@ -276,19 +322,30 @@ void LineEditor::del()
 {
     if( ! _text.empty() )
         _text.erase(_cursorPosition, 1);
+
+    if( ! _displayText.empty() )
+        _displayText.erase( _displayText.begin() );
 }
 
 
 void LineEditor::backspace()
 {
     if( _cursorPosition > 0 && ! _text.empty() )
+    {
         _text.erase(--_cursorPosition, 1);
+
+        if( ! _displayText.empty() )
+            _displayText.erase( _displayText.begin() );
+    }
 }
 
 
 void LineEditor::layout(TextLine& line)
 {
-    line.setText(_text, _font);
+    if(_isMasked)
+        line.setText(_displayText, _font);
+    else
+        line.setText(_text, _font);
     
     double cursorX = line.cursorToX(_cursorPosition);
     double maxX = _size.width() + _scrollOffset;

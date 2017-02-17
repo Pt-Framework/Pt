@@ -82,6 +82,12 @@ class LineEditor
         
         ~LineEditor();
 
+        bool isMasked() const;
+
+        void setMasked(bool m);
+
+        const Pt::String& displayText() const;
+
         const Gfx::PointF& position() const;
         
         void setPosition(const Gfx::PointF& p);
@@ -106,6 +112,8 @@ class LineEditor
         
         void setCursorPosition(std::size_t n);
 
+        void clear();
+
         void insert(Char ch);
 
         void left();
@@ -119,10 +127,12 @@ class LineEditor
         void layout(TextLine& line);
 
     private:
+        bool        _isMasked;
         Gfx::PointF _position;
         Gfx::SizeF  _size;
         Adjustment  _adjustment;
         Pt::String  _text;
+        Pt::String  _displayText;
         Gfx::Font   _font;
         std::size_t _cursorPosition;
         double      _scrollOffset;
