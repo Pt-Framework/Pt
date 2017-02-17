@@ -168,8 +168,6 @@ void Rasterizer2::strokeText( const Point& to, const Pt::String& text )
 
 void Rasterizer2::fillEllipseNoAA(const Point& topLeft, const Size& size)
 {
-    // ### TODO: _currentClip !!! ###
-
     // Update the gradient as needed
     if(_isGradient)
         updateGradientBrush(size.width(), size.height());
@@ -179,6 +177,12 @@ void Rasterizer2::fillEllipseNoAA(const Point& topLeft, const Size& size)
 
     const Pt::int32_t minX   =  topLeft.x();
     const Pt::int32_t minY   =  topLeft.y();
+
+    const Pt::int32_t clipXl = _currentClip.left  () - minX;
+    const Pt::int32_t clipYt = _currentClip.top   () - minY;
+    const Pt::int32_t clipXr = _currentClip.right () - minX;
+    const Pt::int32_t clipYb = _currentClip.bottom() - minY;
+
     const Pt::int32_t errorX = (size.width () % 2) ? 0 : 1;
     const Pt::int32_t errorY = (size.height() % 2) ? 0 : 1;
     const Pt::int32_t a      =  size.width () / 2;
@@ -207,15 +211,27 @@ void Rasterizer2::fillEllipseNoAA(const Point& topLeft, const Size& size)
             width += 2;
         }
         else if( (t - a2 * y) > crit2 )  {
-            rasterScanline(xc - x - minX, xc - x - minX + width - errorX - 1, yc - y - minY,          minX, minY, _brush.color());
-            rasterScanline(xc - x - minX, xc - x - minX + width - errorX - 1, yc + y - minY - errorY, minX, minY, _brush.color());
+            const Pt::int32_t iterY1 = yc - y - minY;
+            const Pt::int32_t iterY2 = yc + y - minY - errorY;
+                  Pt::int32_t iterL  = xc - x - minX;
+                  Pt::int32_t iterR  = xc - x - minX + width - errorX - 1;
+            if(iterL < clipXl) iterL = clipXl;
+            if(iterR > clipXr) iterR = clipXr;
+            if(iterY1 >= clipYt && iterY1 <= clipYb) rasterScanline(iterL, iterR, iterY1, minX, minY, _brush.color());
+            if(iterY2 >= clipYt && iterY2 <= clipYb) rasterScanline(iterL, iterR, iterY2, minX, minY, _brush.color());
             --y;
             dyt += d2yt;
             t   += dyt;
         }
         else {
-            rasterScanline(xc - x - minX, xc - x - minX + width - errorX - 1, yc - y - minY,          minX, minY, _brush.color());
-            rasterScanline(xc - x - minX, xc - x - minX + width - errorX - 1, yc + y - minY - errorY, minX, minY, _brush.color());
+            const Pt::int32_t iterY1 = yc - y - minY;
+            const Pt::int32_t iterY2 = yc + y - minY - errorY;
+                  Pt::int32_t iterL  = xc - x - minX;
+                  Pt::int32_t iterR  = xc - x - minX + width - errorX - 1;
+            if(iterL < clipXl) iterL = clipXl;
+            if(iterR > clipXr) iterR = clipXr;
+            if(iterY1 >= clipYt && iterY1 <= clipYb) rasterScanline(iterL, iterR, iterY1, minX, minY, _brush.color());
+            if(iterY2 >= clipYt && iterY2 <= clipYb) rasterScanline(iterL, iterR, iterY2, minX, minY, _brush.color());
             ++x;
             dxt   += d2xt;
             t     += dxt;
@@ -226,7 +242,16 @@ void Rasterizer2::fillEllipseNoAA(const Point& topLeft, const Size& size)
         }
     }
 
-    if( !b ) rasterScanline(xc - a - minX, xc - a - minX + 2 * a - 1, yc - minY, minX, minY, _brush.color());
+    if( !b ) {
+        const Pt::int32_t iterY = yc - minY;
+              Pt::int32_t iterL = xc - a - minX;
+              Pt::int32_t iterR = xc - a - minX + 2 * a - 1;
+        if(iterY >= clipYt && iterY <= clipYb) {
+            if(iterL < clipXl) iterL = clipXl;
+            if(iterR > clipXr) iterR = clipXr;
+            rasterScanline(iterL, iterR, iterY, minX, minY, _brush.color());
+        }
+    }
 }
 
 
