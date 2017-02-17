@@ -293,7 +293,7 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
 
     if(ip2) {
         ip2->setAntiAliasingLevel(0);
-        ip2->fillArc( PointF (30 + 800, 50), SizeF(120, 120), 0, 900 );
+        ip2->fillArc( PointF (30 + 800, 50), SizeF(120, 120), 0, 180 - 45, true );
         ip2->drawText( PointF(30 + 800, 30), "NOAA" );
     }
 
@@ -318,7 +318,7 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
 
     if(ip2) {
         ip2->setAntiAliasingLevel(1);
-        ip2->fillArc( PointF (30 + 800, 50 + 200), SizeF(120, 120), 0, 1800 - 450 );
+        ip2->fillArc( PointF (30 + 800, 50 + 200), SizeF(120, 120), 90 + 30, 360 - 30, true );
         ip2->drawText( PointF(30 + 800, 30 + 200), "FSAA 2x2" );
     }
 
@@ -343,7 +343,7 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
 
     if(ip2) {
         ip2->setAntiAliasingLevel(2);
-        ip2->fillArc( PointF (30 + 800, 50 + 400), SizeF(120, 120), 900 + 450, 3599 );
+        ip2->fillArc( PointF (30 + 800, 50 + 400), SizeF(120, 120), 90 + 30, 360 - 30, false );
         ip2->drawText( PointF(30 + 800, 30 + 400), "FSAA 4x4" );
     }
 

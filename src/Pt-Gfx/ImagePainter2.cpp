@@ -224,20 +224,23 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
     }
 
     // Rasterize the polygon
-    _rasterizer->fillPolygon(points.data(), numSegs);
+    _rasterizer->fillPolygon(points.data(), points.size());
 }
 
-void ImagePainter2::drawArc(const PointF& topLeft, const SizeF& size, Pt::uint16_t degBeginX10, Pt::uint16_t degEndX10)
+void ImagePainter2::drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
 {
 }
 
-void ImagePainter2::fillArc(const PointF& topLeft, const SizeF& size, Pt::uint16_t degBeginX10, Pt::uint16_t degEndX10)
+void ImagePainter2::fillArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, bool createPie)
 {
-    // Clip and swap the begin and end degrees as needed
-    if(degBeginX10 > 3600) degBeginX10 = 3600;
-    if(degEndX10   > 3600) degEndX10   = 3600;
+    // Ensure that the begin and end degrees are within acceptable range
+    while(degBegin <   0) degBegin += 360;
+    while(degBegin > 360) degBegin -= 360;
 
-    if(degEndX10 < degBeginX10) std::swap(degEndX10, degBeginX10);
+    while(degEnd <   0) degEnd += 360;
+    while(degEnd > 360) degEnd -= 360;
+
+    if(degEnd < degBegin) std::swap(degEnd, degBegin);
 
     // Calculate the arc's parameters
     const Pt::int32_t radiusX = size.width () / 2;
@@ -245,13 +248,13 @@ void ImagePainter2::fillArc(const PointF& topLeft, const SizeF& size, Pt::uint16
     const Pt::int32_t radiusM = std::max(radiusX, radiusY);
     const Pt::int32_t centerX = topLeft.x() + radiusX;
     const Pt::int32_t centerY = topLeft.y() + radiusY;
-    const Pt::int32_t degFac  = (degEndX10 - degBeginX10) / 360 / 3;
+    const Pt::int32_t degFac  = (degEnd - degBegin) / 36 / 3;
     const Pt::int32_t numSegs = (radiusM * (degFac ? degFac : 1) / 3 / 20) * 20;
-    const float       fdegInc = (Pt::Pi * (degEndX10 -  degBeginX10) / 1800.0f) / (numSegs - 1);
+    const float       fdegInc = (Pt::Pi * (degEnd -  degBegin) / 180) / (numSegs - 1);
 
     // Generate a polygon that approximates the arc
-    std::vector<Point> points(numSegs + 1);
-    float              angle = Pt::Pi * degBeginX10 / 1800.0f;
+    std::vector<Point> points(numSegs + (createPie ? 1 : 0));
+    float              angle = Pt::Pi * degBegin / 180;
     for(Pt::int32_t i = 0; i < numSegs; ++i) {
         // Calculate and store the coordinates
         points[i].set(
@@ -262,10 +265,11 @@ void ImagePainter2::fillArc(const PointF& topLeft, const SizeF& size, Pt::uint16
         angle += fdegInc;
     }
 
-    points[numSegs].set(centerX, centerY); // The last point is at the center of the arc
+    if(createPie) // For drawing a pie, add one more point at the center of the arc
+        points[numSegs].set(centerX, centerY);
 
     // Rasterize the polygon
-    _rasterizer->fillPolygon(points.data(), numSegs + 1);
+    _rasterizer->fillPolygon(points.data(), points.size());
 }
 
 void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount )
