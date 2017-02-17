@@ -187,27 +187,44 @@ void ImagePainter2::drawEllipse( const PointF& topLeftIn, const SizeF& sizeIn )
 
 void ImagePainter2::fillEllipse( const PointF& topLeftIn, const SizeF& sizeIn )
 {
-    // Generate a polygon that approximates the ellipse
+    // Caculate the parameters
     const Pt::int32_t radiusX = sizeIn.width () / 2;
     const Pt::int32_t radiusY = sizeIn.height() / 2;
+    const Pt::int32_t radiusM = std::max(radiusX, radiusY);
     const Pt::int32_t centerX = topLeftIn.x() + radiusX;
     const Pt::int32_t centerY = topLeftIn.y() + radiusY;
-    const Pt::int32_t numSegs = std::max(radiusX, radiusY) / 2;
+    const Pt::int32_t numSegs = (radiusM * 2 / 3 / 20) * 20;
+    const Pt::int32_t qtrSegs = (numSegs / 4);
 
-    std::vector<Point> points(numSegs);
-
-    for (Pt::int32_t i = 0; i < numSegs; ++i) {
+    // Calculate the coordinate displacements
+    std::vector<float> disX(qtrSegs);
+    std::vector<float> disY(qtrSegs);
+    for(Pt::int32_t i = 0; i < qtrSegs; ++i) {
         // Calculate the angle
-        const float angle = 2 * Pt::Pi * i / numSegs;
+        const float angle = 0.5 * Pt::Pi * i / qtrSegs;
         // Calculate the displacements
-        const Pt::int32_t disX = radiusX * fastCos<float, true>(angle);
-        const Pt::int32_t disY = radiusY * fastSin<float, true>(angle);
-        // Store the coordinate
-        points[i].set(centerX + disX, centerY + disY);
+        disX[i] =  radiusX * fastCos<float, true>(angle);
+        disY[i] = -radiusY * fastSin<float, true>(angle);
+    }
+
+    // Generate a polygon that approximates the ellipse
+    std::vector<Point> points(numSegs);
+    Pt::int32_t        p = 0;
+    for(Pt::int32_t i = 0; i < qtrSegs; ++i) { // Quadrant I
+        points[p++].set(centerX + disX[i], centerY + disY[i]);
+    }
+    for(Pt::int32_t i = 0; i < qtrSegs; ++i) { // Quadrant II
+        points[p++].set(centerX - disX[qtrSegs - 1 - i], centerY + disY[qtrSegs - 1 - i]);
+    }
+    for(Pt::int32_t i = 0; i < qtrSegs; ++i) { // Quadrant III
+        points[p++].set(centerX - disX[i], centerY - disY[i]);
+    }
+    for(Pt::int32_t i = 0; i < qtrSegs; ++i) { // Quadrant IV
+        points[p++].set(centerX + disX[qtrSegs - 1 - i], centerY - disY[qtrSegs - 1 - i]);
     }
 
     // Rasterize the polygon
-    _rasterizer->fillPolygon(points.data(), numSegs);
+    _rasterizer->fillPolygon(points.data(), qtrSegs*4);
 }
 
 void ImagePainter2::drawArc(const PointF& topLeft, const SizeF& size, Pt::int16_t degBegin, Pt::int16_t degEnd)
