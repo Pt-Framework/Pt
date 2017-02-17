@@ -171,6 +171,10 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void setPointerWidget(Widget* widget);
 
+        void processTouchEvent(const TouchEvent& ev);
+
+        void processMouseEvent(const MouseEvent& mev);
+
     private:
         typedef std::map<Pt::uint64_t, Visual*> VisualMap;
 
@@ -186,6 +190,9 @@ class PT_HMI_API Application : public Pt::System::Application
         StyleOptions       _styleOptions;
         DefaultInputMethod _defaultInputMethod;
         InputMethod*       _inputMethod;
+
+        Gfx::PointF        _scrollFrom;
+        bool               _onScroll;
 };
 
 } // namespace

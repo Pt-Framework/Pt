@@ -108,16 +108,33 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 
 void ApplicationImpl::onMouseEvent(const MouseEvent& ev)
 {
-    _lastMouse = ev;
+    MouseEvent mev = ev;
+    mev.setId( Application::instance().screen().vid() );
 
-    _eventReady.send(ev);
+    ScreenImpl* screen = Application::instance().screen().impl();
+    
+    Gfx::PointF pos = screen->screenPosition( ev.position() );
+    mev.setPosition(pos);
+
+    screen->drawCursor(mev);
+
+    _lastMouse = mev;
+
+    Application::instance().processMouseEvent(mev);
 }
-
 
 
 void ApplicationImpl::onTouchEvent(const TouchEvent& ev)
 {
-    _eventReady.send(ev);
+    TouchEvent tev = ev;
+    tev.setId( Application::instance().screen().vid() );
+
+    ScreenImpl* screen = Application::instance().screen().impl();
+
+    Gfx::PointF pos = screen->screenPosition( ev.position() );
+    tev.setPosition(pos);
+
+    Application::instance().processTouchEvent(tev);
 }
 
 

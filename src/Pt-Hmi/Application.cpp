@@ -27,12 +27,14 @@
 */
 
 #include "ApplicationImpl.h"
+#include "ScreenImpl.h"
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/PaintEvent.h>
 #include <Pt/Hmi/WindowStateEvent.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/InputMethod.h>
+#include <cmath>
 #include <cassert>
 
 namespace Pt {
@@ -48,6 +50,7 @@ Application::Application(int argc, char** argv)
 , _pointerWidget(0)
 , _pointerGrabber(0)
 , _inputMethod(0)
+, _onScroll(false)
 {
     this->init(*_impl);
 
@@ -222,7 +225,7 @@ void Application::releasePointer(Window& grabber)
 
 void Application::grabPointer(Widget& grabber)
 {
-    //std::clog << "GRAB:    " << typeid(grabber).name() << std::endl;
+    //std::clog << "GRAB:    " << typeid(grabber).name() << " " << grabber.vid() << std::endl;
 
     std::vector<Visual*>::iterator it =
         std::find(_grabbers.begin(), _grabbers.end(), &grabber);
@@ -278,6 +281,184 @@ void Application::grabLast()
             if(widget)
                 grabPointer(*widget);
         }
+    }
+}
+
+
+void Application::processTouchEvent(const TouchEvent& ev)
+{
+    VisualMap::iterator vit = _visuals.find( ev.vid() );
+    if( vit == _visuals.end() )
+        return;
+
+    //
+    // Detect scroll gestures
+    //
+
+    if( ev.isPress() )
+    {
+        //std::clog << "SCROLL START " << std::endl;
+        _scrollFrom = vit->second->toScreen( ev.position() );
+    }
+    else if( ev.isMove() )
+    {
+        Gfx::PointF scrollTo = vit->second->toScreen( ev.position() );
+        
+        double delta = scrollTo.y() - _scrollFrom.y();
+
+        if( ! _onScroll && std::fabs(delta) > 8 )
+        {
+            //std::clog << "SCROLL STARTED" << std::endl;
+            _onScroll = true;
+            _scrollFrom = scrollTo;
+        }
+        else if(_onScroll)
+        {
+            //std::clog << "SCROLLING: " << delta << std::endl;
+            Visual* grabber = pointerGrabber();
+
+            ScrollEvent sev(grabber ? grabber->vid() : ev.vid() );
+            sev.set(ScrollEvent::Vertical, delta);
+
+            if(grabber)
+                loop().commitEvent(sev);
+            else
+                _mainScreen->impl()->dispatchScrollEvent(sev);
+            
+            _scrollFrom = scrollTo;
+        }
+    }
+    else
+    {
+        //std::clog << "SCROLL STOP" << std::endl;
+        _onScroll = false;
+    }
+
+    //
+    // Dispatch event to the pointer grabber or the screen
+    //
+
+    TouchEvent tev = ev;
+
+    Visual* grabber = Application::instance().pointerGrabber();
+    if(grabber)
+    {
+        Gfx::PointF screenPos = vit->second->toScreen( ev.position() );
+
+        // ...unless input method editor is active
+        Window* ime = inputMethod().activeWindow();
+        if(ime)
+        {
+            Gfx::PointF p = ime->fromScreen(screenPos);
+            Gfx::RectF rect( ime->size() );
+            if( rect.contains(p) )
+            {
+                tev.setPosition(p);
+                tev.setId( ime->vid() );
+                grabber = 0;
+            }
+        }
+
+        if(grabber)
+        {
+            tev.setPosition( grabber->fromScreen(screenPos) ); 
+            tev.setId( grabber->vid() );
+        }
+
+        loop().commitEvent(tev);
+    }
+    else
+    {
+        _mainScreen->impl()->dispatchTouchEvent(tev);
+    }
+}
+
+
+void Application::processMouseEvent(const MouseEvent& ev)
+{
+    VisualMap::iterator vit = _visuals.find( ev.vid() );
+    if( vit == _visuals.end() )
+        return;
+
+    //
+    // Detect scroll gestures
+    //
+    
+    if( ev.isPress() )
+    {
+        //std::clog << "SCROLL START" << std::endl;
+        _scrollFrom = vit->second->toScreen( ev.position() );
+    }
+    else if( ev.isPressed() )
+    {
+        Gfx::PointF scrollTo = vit->second->toScreen( ev.position() );
+        
+        double delta = scrollTo.y() - _scrollFrom.y();
+        
+        if( ! _onScroll && std::fabs(delta) > 8 )
+        {
+            //std::clog << "SCROLL STARTED" << std::endl;
+            _onScroll = true;
+            _scrollFrom = scrollTo;
+        }
+        else if(_onScroll)
+        {
+            //std::clog << "SCROLLING: " << delta << std::endl;
+            Visual* grabber = pointerGrabber();
+
+            ScrollEvent sev(grabber ? grabber->vid() : ev.vid() );
+            sev.set(ScrollEvent::Vertical, delta);
+
+            if(grabber)
+                loop().commitEvent(sev);
+            else
+                _mainScreen->impl()->dispatchScrollEvent(sev);
+            
+            _scrollFrom = scrollTo;
+        }
+    }
+    else
+    {
+        //std::clog << "SCROLL STOP" << std::endl;
+        _onScroll = false;
+    }
+
+    //
+    // Dispatch event to the pointer grabber or the screen
+    //
+    
+    MouseEvent mev = ev;
+
+    Visual* grabber = pointerGrabber();
+    if(grabber)
+    {
+        Gfx::PointF screenPos = vit->second->toScreen( ev.position() );
+
+        // ...unless input method editor is active
+        Window* ime = inputMethod().activeWindow();
+        if(ime)
+        {
+            Gfx::PointF p = ime->fromScreen(screenPos);
+            Gfx::RectF rect( ime->size() );
+            if( rect.contains(p) )
+            {
+                mev.setPosition(p);
+                mev.setId( ime->vid() );
+                grabber = 0;
+            }
+        }
+        
+        if(grabber)
+        {
+            mev.setPosition( grabber->fromScreen(screenPos) );
+            mev.setId( grabber->vid() );
+        }
+
+        loop().commitEvent(mev);
+    }
+    else
+    {
+        _mainScreen->impl()->dispatchMouseEvent(mev);
     }
 }
 

@@ -65,6 +65,10 @@ class ScreenImpl : public Pt::Connectable
             return _frameBuffer;
         }
 
+        Gfx::PointF screenPosition(const Gfx::PointF& posRaw);
+
+        void drawCursor(const Pt::Hmi::MouseEvent& mev);
+
         Gfx::SizeF size() const
         {
             Gfx::Size fs = _frameBuffer.size();
@@ -138,6 +142,12 @@ class ScreenImpl : public Pt::Connectable
         }
 
     public:
+        void dispatchMouseEvent(const MouseEvent& ev);
+
+        void dispatchTouchEvent(const TouchEvent& ev);
+
+        void dispatchScrollEvent(const ScrollEvent& ev);
+
         Gfx::PointF toParent(const Window& w, const Gfx::PointF& pos) const;
 
         Gfx::PointF fromParent(const Window& w, const Gfx::PointF& pos) const;
@@ -161,10 +171,6 @@ class ScreenImpl : public Pt::Connectable
         void onEnable(Window& w, bool enable);
 
     protected:
-        void onMouseEvent(const Pt::Hmi::MouseEvent& mev);
-
-        void onTouchEvent(const Pt::Hmi::TouchEvent& mev);
-
         void onKeyEvent(const Pt::Hmi::KeyEvent& ev);
 
     private:

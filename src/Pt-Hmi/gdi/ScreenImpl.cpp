@@ -40,7 +40,7 @@ namespace Hmi {
 ScreenImpl::ScreenImpl(ApplicationImpl&)
 : _dpi(96.0)
 {
-      _size = screenResolution();
+    _size = screenResolution();
 
     _width  = _size.width() * unitSizeInch()*_dpi;
     _height = _size.height() * unitSizeInch()*_dpi;
@@ -73,6 +73,24 @@ Gfx::PointF ScreenImpl::toParent(const Window& w, const Gfx::PointF& pos) const
 Gfx::PointF ScreenImpl::fromParent(const Window& w, const Gfx::PointF& pos) const
 {
     return w.impl()->fromScreen(pos);
+}
+
+
+void ScreenImpl::dispatchMouseEvent(const MouseEvent& ev)
+{
+    Application::instance().loop().commitEvent(ev);
+}
+
+
+void ScreenImpl::dispatchTouchEvent(const TouchEvent& ev)
+{
+    Application::instance().loop().commitEvent(ev);
+}
+
+
+void ScreenImpl::dispatchScrollEvent(const ScrollEvent& ev)
+{
+    Application::instance().loop().commitEvent(ev);
 }
 
 

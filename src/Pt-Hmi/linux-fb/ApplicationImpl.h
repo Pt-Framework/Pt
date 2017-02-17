@@ -79,7 +79,7 @@ class ApplicationImpl : public Pt::System::MainLoop
 
     void onTouchEvent(const TouchEvent& ev);
 		
-    void showConsole( bool s);
+    void showConsole(bool s);
 
   private:
 		FrameBuffer                  _frameBuffer; 

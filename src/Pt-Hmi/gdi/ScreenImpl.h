@@ -42,6 +42,9 @@ namespace Hmi {
 class ApplicationImpl;
 class Window;
 class WindowBase;
+class MouseEvent;
+class TouchEvent;
+class ScrollEvent;
 
 class ScreenImpl
 {
@@ -77,6 +80,12 @@ class ScreenImpl
         void unregisterWindow(Window& w)
         {
         }
+
+        void dispatchMouseEvent(const MouseEvent& ev);
+
+        void dispatchTouchEvent(const TouchEvent& ev);
+
+        void dispatchScrollEvent(const ScrollEvent& ev);
 
         Gfx::PointF toParent(const Window& w, const Gfx::PointF& pos) const;
 

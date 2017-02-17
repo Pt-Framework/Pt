@@ -666,82 +666,18 @@ void ApplicationImpl::onMouse(Window& w, unsigned int msg, WPARAM wparam, LPARAM
         break;
     }
   
-    Gfx::PointF pos = Application::instance().screen().toUnit( Gfx::Point(xPos, yPos) );
+    Gfx::PointF pos(xPos, yPos);
 
+    _mouseEvent.setPosition(pos);
+    _mouseEvent.setId( w.vid() );
     
-    if( _mouseEvent.isPress() )
+    if( ! _pointerInWindow )
     {
-        //std::clog << "SCROLL START" << std::endl;
-        _scrollFrom = w.toScreen( pos );
-    }
-    else if( _mouseEvent.isPressed() )
-    {
-        Gfx::PointF scrollTo = w.toScreen( pos );
-        
-        double delta = scrollTo.y() - _scrollFrom.y();
-        
-        if( ! _onScroll && std::fabs(delta) > 8 )
-        {
-            //std::clog << "SCROLL STARTED" << std::endl;
-            _onScroll = true;
-            _scrollFrom = scrollTo;
-        }
-        else if(_onScroll)
-        {
-            //std::clog << "SCROLLING: " << delta << std::endl;
-            Visual* grabber = Application::instance().pointerGrabber();
-
-            ScrollEvent sev(grabber ? grabber->vid() : w.vid() );
-            sev.set(ScrollEvent::Vertical, delta);
-            commitEvent(sev);
-
-            _scrollFrom = scrollTo;
-        }
-    }
-    else
-    {
-        //std::clog << "SCROLL STOP" << std::endl;
-        _onScroll = false;
+        Application::instance().setPointerWindow(&w);
+        _pointerInWindow = true;
     }
 
-
-    Visual* grabber = Application::instance().pointerGrabber();
-    if(grabber)
-    {
-        Gfx::PointF screenPos = w.toScreen(pos);
-
-        Window* ime = Application::instance().inputMethod().activeWindow();
-        if(ime)
-        {
-            Gfx::PointF p = ime->fromScreen( w.toScreen(pos) );
-            Gfx::RectF rect( ime->size() );
-            if( rect.contains(p) )
-            {
-                _mouseEvent.setPosition(p);
-                _mouseEvent.setId( ime->vid() );
-                grabber = 0;
-            }
-        }
-        
-        if(grabber)
-        {
-            _mouseEvent.setPosition( grabber->fromScreen(screenPos) );
-            _mouseEvent.setId( grabber->vid() );
-        }
-    }
-    else        
-    {
-        _mouseEvent.setPosition(pos);
-        _mouseEvent.setId( w.vid() );
-    
-        if( ! _pointerInWindow )
-        {
-            Application::instance().setPointerWindow(&w);
-            _pointerInWindow = true;
-        }
-    }
-
-    commitEvent(_mouseEvent);
+    Application::instance().processMouseEvent(_mouseEvent);
 }
 
 

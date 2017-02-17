@@ -54,10 +54,6 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
 , _dpi(96.0)
 , _drawCursor(true)
 {
-    app.eventReady() += Pt::slot( *this, &ScreenImpl::onMouseEvent );
-    app.eventReady() += Pt::slot( *this, &ScreenImpl::onTouchEvent );
-    app.eventReady() += Pt::slot( *this, &ScreenImpl::onKeyEvent );
-
     _surface.pixmapImpl()->resize(_frameBuffer.size(), _frameBuffer.strideInBytes() );
 
     Painter painter(_surface);
@@ -124,7 +120,6 @@ void ScreenImpl::paint(const Gfx::RectF& updateRect)
 
     _windowManager.paint(_surface, updateRect);
 
-
  //   std::clog << "screen update2: " << clock.stop().toUSecs() << " usecs." << std::endl;
   //  std::clog << "update area2 " << updateRect.topLeft().x() << ',' << updateRect.topLeft().y()
   //            << ' ' << updateRect.width() << 'x' << updateRect.height() << std::endl;
@@ -133,17 +128,13 @@ void ScreenImpl::paint(const Gfx::RectF& updateRect)
 }
 
 
-Gfx::PointF _scrollFrom;
-bool _onScroll = false;
-
-
-void ScreenImpl::onTouchEvent(const TouchEvent& evRaw)
+Gfx::PointF ScreenImpl::screenPosition(const Gfx::PointF& posRaw)
 {     
-    const Gfx::SizeF screenSize = Application::instance().screen().size();
+    const Gfx::SizeF& screenSize = size();
     const double touchWidth  = 800;
     const double touchHeight = 480;
 
-    TouchEvent tev = evRaw;
+    Gfx::PointF pos = posRaw;
 
     switch( _frameBuffer.rotation() )
     {
@@ -151,8 +142,8 @@ void ScreenImpl::onTouchEvent(const TouchEvent& evRaw)
         {
             double scaleX =  screenSize.width() / touchWidth;
             double scaleY =  screenSize.height() / touchHeight;
-            tev.setX( std::floor(scaleX * evRaw.x()) );
-            tev.setY( std::floor(scaleY * evRaw.y()) );
+            pos.setX( std::floor(scaleX * posRaw.x()) );
+            pos.setY( std::floor(scaleY * posRaw.y()) );
             break;
         }
         
@@ -160,90 +151,17 @@ void ScreenImpl::onTouchEvent(const TouchEvent& evRaw)
         {
               double scaleX =  screenSize.width() / touchHeight;
               double scaleY =  screenSize.height() / touchWidth;
-              tev.setY( std::floor(evRaw.x() * scaleY) );
-              tev.setX( std::floor((touchHeight - evRaw.y()) * scaleX) );
+              pos.setX( std::floor((touchHeight - posRaw.y()) * scaleX) );
+              pos.setY( std::floor(posRaw.x() * scaleY) );
               break;
         }
     }
 
-    if( tev.isPress() )
-    {
-        //std::clog << "SCROLL START " << std::endl;
-        _scrollFrom = tev.position();
-    }
-    else if( tev.isMove() )
-    {
-        Gfx::PointF scrollTo = tev.position();
-        
-        double delta = scrollTo.y() - _scrollFrom.y();
-
-        if( ! _onScroll && std::fabs(delta) > 8 )
-        {
-            //std::clog << "SCROLL STARTED" << std::endl;
-            _onScroll = true;
-            _scrollFrom = scrollTo;
-        }
-        else if(_onScroll)
-        {
-            //std::clog << "SCROLLING: " << delta << std::endl;
-            Visual* grabber = Application::instance().pointerGrabber();
-            if(grabber)
-            {
-                ScrollEvent sev( grabber->vid() );
-                sev.set(ScrollEvent::Vertical, delta);
-                Application::instance().loop().commitEvent(sev);
-            }
-            else
-            {
-                ScrollEvent sev(0);
-                sev.set(ScrollEvent::Vertical, delta);
-                _windowManager.scrollEvent(sev);
-            }
-            
-            _scrollFrom = scrollTo;
-        }
-    }
-    else
-    {
-        //std::clog << "SCROLL STOP" << std::endl;
-        _onScroll = false;
-    }
-
-
-    Visual* grabber = Application::instance().pointerGrabber();
-    if(grabber)
-    {
-        Window* ime = Application::instance().inputMethod().activeWindow();
-        if(ime)
-        {
-            Gfx::PointF p = ime->fromScreen( tev.position() );
-            Gfx::RectF rect( ime->size() );
-            if( rect.contains(p) )
-            {
-                tev.setPosition(p);
-                tev.setId( ime->vid() );
-                grabber = 0;
-            }
-        }
-
-        if(grabber)
-        {
-            Gfx::PointF pos = grabber->fromScreen( tev.position() );
-            tev.setX( pos.x() );
-            tev.setY( pos.y() ); 
-            tev.setId( grabber->vid() );
-        }
-
-        Application::instance().loop().commitEvent(tev);
-    }
-    else
-    {
-        _windowManager.touchEvent( tev );
-    }
+    return pos;
 }
 
 
-void ScreenImpl::onMouseEvent( const Pt::Hmi::MouseEvent& mouseEvent )
+void ScreenImpl::drawCursor(const Pt::Hmi::MouseEvent& mev)
 {
     _drawCursor =  true;
 
@@ -258,32 +176,34 @@ void ScreenImpl::onMouseEvent( const Pt::Hmi::MouseEvent& mouseEvent )
     const Cursor& cursor = Application::instance().impl()->cursor();
 
     if( cursor.width() != 0 )
-        _cursorPos = Gfx::Point( mouseEvent.x() - cursor.xHotspot(), 
-                                 mouseEvent.y() - cursor.yHotspot() );
-
-    Visual* grabber = Application::instance().pointerGrabber();
-    if(grabber)
-    {
-        Pt::Hmi::MouseEvent mev = mouseEvent;
-
-        Gfx::PointF pos = grabber->fromScreen( mouseEvent.position() );
-        mev.setX( pos.x() );
-        mev.setY( pos.y() ); 
-        mev.setId( grabber->vid() );
-
-        Application::instance().loop().commitEvent(mev);
-    }
-    else
-    {
-        _windowManager.mouseEvent( mouseEvent );
-    }
-
+        _cursorPos = Gfx::Point( mev.x() - cursor.xHotspot(), 
+                                 mev.y() - cursor.yHotspot() );
 
     if( _drawCursor )
     {
       if( ! cursor.empty() )
-        updateScreen(Gfx::Rect( _cursorPos, Gfx::Size (cursor.width(), cursor.height() )));
+        updateScreen( Gfx::Rect(_cursorPos, 
+                                Gfx::Size(cursor.width(), 
+                                          cursor.height())) );
     }
+}
+
+
+void ScreenImpl::dispatchMouseEvent(const MouseEvent& ev)
+{
+    _windowManager.mouseEvent(ev);
+}
+
+
+void ScreenImpl::dispatchTouchEvent(const TouchEvent& ev)
+{
+    _windowManager.touchEvent(ev);
+}
+
+
+void ScreenImpl::dispatchScrollEvent(const ScrollEvent& ev)
+{
+    _windowManager.scrollEvent(ev);
 }
 
 
