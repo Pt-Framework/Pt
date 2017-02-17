@@ -13,14 +13,14 @@ int main()
     cairo_t*         cairo        = cairo_create(cairoSurface);
 
 
-    //if(cm == CompositionMode::SourceOver) {
-    //    cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
-    //    cairo_set_source_rgba(cairo, 1.0f, 1.0f, 1.0f, 175.0f / 255.0f);
-    //}
-    //else {
+    if(cm == CompositionMode::SourceOver) {
+        cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
+        cairo_set_source_rgba(cairo, 1.0f, 1.0f, 1.0f, 175.0f / 255.0f);
+    }
+    else {
         cairo_set_operator(cairo, CAIRO_OPERATOR_SOURCE);
         cairo_set_source_rgba(cairo, 1.0f, 1.0f, 1.0f, 1.0f);
-    //}
+    }
 
     cairo_reset_clip   (cairo);
     cairo_new_path     (cairo);
