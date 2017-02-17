@@ -4,9 +4,17 @@
  * This code is free software, available under zlib/libpng license.
  * http://www.libpng.org/pub/png/src/libpng-LICENSE.txt
  */
+
+/* REPLACED FOR USE WITH PT-GFX TEST */
 // #include <SDL.h>
-#include <SDL2/SDL.h> /* REPLACED FOR USE WITH PT-GFX TEST */
-#include <png.h>
+// #include <png.h>
+
+#include <SDL2/SDL.h>
+#ifdef WITH_BUILTIN_LIBPNG
+    #include "../../../libpng/png.h"
+#else
+    #include <png.h>
+#endif
 
 #define SUCCESS 0
 #define ERROR -1

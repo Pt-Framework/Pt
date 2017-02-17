@@ -17,12 +17,28 @@ MakeLocate ImagePainterTest : $(PT_OUTPUT_TARGET) ;
 
 if $(WITH_RASTERIZER2)
 {
-    SubDirC++Flags [ FIncludes "/usr/include/cairo" ] ;
+    if $(WITH_BUILTIN_LIBPNG)
+    {
+        SubDirCcFlags [ FDefines WITH_BUILTIN_LIBPNG ] ;
+    }
+    else
+    {
+        SubDirC++Flags [ FIncludes "/usr/include/cairo" ] ;
+    }
 
     Main ImagePainterTest2 : ImagePainterTest2.cpp SDL_SavePNG/savepng.c ;
     LinkSharedLibraries ImagePainterTest2 : Pt Pt-Gfx Pt-System ;
     MakeLocate ImagePainterTest2 : $(PT_OUTPUT_TARGET) ;
-    LinkFlags ImagePainterTest2 : -lcairo -lpng -lSDL2 -lX11 ;
+    LinkFlags ImagePainterTest2 : -lcairo -lSDL2 -lX11 ;
+
+    if $(WITH_BUILTIN_LIBPNG)
+    {
+        LinkLibraries ImagePainterTest2 : png ;
+    }
+    else
+    {
+        LinkLibraries ImagePainterTest2 : -lpng ;
+    }
 }
 
 # pkg-config --cflags cairo
