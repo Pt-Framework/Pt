@@ -12,6 +12,9 @@ static size_t cairoBenchFillPolygon(int loopCount, CompositionMode cm)
     cairo_surface_t* cairoSurface = cairo_image_surface_create_for_data ( &buffer[0], CAIRO_FORMAT_ARGB32, imgSize.width(), imgSize.height(), imgSize.width() * 4);
     cairo_t*         cairo        = cairo_create(cairoSurface);
 
+    //cairo_set_antialias(cairo, CAIRO_ANTIALIAS_NONE);
+    cairo_set_antialias(cairo, CAIRO_ANTIALIAS_DEFAULT);
+
     for(int i = 0; i < loopCount ; ++i) {
         Pt::System::Clock clock;
         clock.start();
@@ -93,6 +96,9 @@ static size_t cairoBenchFillEllipse(int loopCount, CompositionMode cm)
 
     cairo_surface_t* cairoSurface = cairo_image_surface_create_for_data ( &buffer[0], CAIRO_FORMAT_ARGB32, imgSize.width(), imgSize.height(), imgSize.width() * 4);
     cairo_t*         cairo        = cairo_create(cairoSurface);
+
+    //cairo_set_antialias(cairo, CAIRO_ANTIALIAS_NONE);
+    cairo_set_antialias(cairo, CAIRO_ANTIALIAS_DEFAULT);
 
     for(int i = 0; i < loopCount ; ++i) {
         Pt::System::Clock clock;
