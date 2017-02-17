@@ -37,7 +37,7 @@ if $(WITH_RASTERIZER2)
     }
     else
     {
-        LinkLibraries ImagePainterTest2 : -lpng ;
+        LinkFlags ImagePainterTest2 : -lpng ;
     }
 }
 
