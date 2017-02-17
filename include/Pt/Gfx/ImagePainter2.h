@@ -92,6 +92,10 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual void fillEllipse(const PointF& topLeft, const SizeF& size);
 
+        virtual void drawArc(const PointF& topLeft, const SizeF& size, Pt::int16_t degBegin, Pt::int16_t degEnd);
+
+        virtual void fillArc(const PointF& topLeft, const SizeF& size, Pt::int16_t degBegin, Pt::int16_t degEnd);
+
         virtual void drawPolyline(const PointF* points, const size_t pointCount);
 
         virtual void fillPolygon(const PointF* points, const size_t pointCount);

@@ -109,7 +109,10 @@ const Gfx::RectF& ImagePainter2::clip() const
 
 void ImagePainter2::setClip( const RectF& clipIn )
 {
-     Rect clip( Point( (int)(clipIn.x()), (int)(clipIn.y())), Size((int) (clipIn.width()),(int) (clipIn.height())) );
+     Rect clip(
+         Point( (Pt::int32_t)(clipIn.x    ()), (Pt::int32_t)(clipIn.y     ()) ),
+         Size ( (Pt::int32_t)(clipIn.width()), (Pt::int32_t)(clipIn.height()) )
+     );
     _rasterizer->setClip( clip );
     _clip = clipIn;
 }
@@ -151,13 +154,16 @@ FontMetrics ImagePainter2::fontMetrics(const String& text) const
 
 void ImagePainter2::drawText( const PointF& toIn, const String& text )
 {
-    const Point to( (int)(toIn.x()), (int)(toIn.y()) );
+    const Point to( (Pt::int32_t)(toIn.x()), (Pt::int32_t)(toIn.y()) );
     _rasterizer->strokeText( to, text );
 }
 
 void ImagePainter2::drawLine(const PointF& from, const PointF& to)
 {
-    const Point points[] = { Point( (int)(from.x()), (int)(from.y()) ) , Point( (int)(to.x()), (int)(to.y()) ) };
+    const Point points[] = {
+        Point( (Pt::int32_t)(from.x()), (Pt::int32_t)(from.y()) ),
+        Point( (Pt::int32_t)(to  .x()), (Pt::int32_t)(to  .y()) )
+    };
     _rasterizer->strokePolygon( points, 2 );
 }
 
@@ -204,6 +210,14 @@ void ImagePainter2::fillEllipse( const PointF& topLeftIn, const SizeF& sizeIn )
     _rasterizer->fillPolygon(points.data(), numSegs);
 }
 
+void ImagePainter2::drawArc(const PointF& topLeft, const SizeF& size, Pt::int16_t degBegin, Pt::int16_t degEnd)
+{
+}
+
+void ImagePainter2::fillArc(const PointF& topLeft, const SizeF& size, Pt::int16_t degBegin, Pt::int16_t degEnd)
+{
+}
+
 void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount )
 {
 }
@@ -222,13 +236,22 @@ void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
 
 void ImagePainter2::drawImage( const PointF& toIn, const Image& image)
 {
+    Point to( (Pt::int32_t)(toIn.x()), (Pt::int32_t)(toIn.y()) );
+    _rasterizer->image(to, image);
 }
 
 void ImagePainter2::drawImage(const PointF& toIn, const Image& image, const RectF& imageRectIn)
 {
+    Point to( (Pt::int32_t)(toIn.x()), (Pt::int32_t)(toIn.y()) );
+
+    Rect imageRect(
+        Point( (Pt::int32_t)(imageRectIn.    x()), (Pt::int32_t)(imageRectIn.     y()) ),
+        Size ( (Pt::int32_t)(imageRectIn.width()), (Pt::int32_t)(imageRectIn.height()) )
+    );
+
+    _rasterizer->image(to, image, imageRect);
 }
 
 
 } // namespace
-
 } // namespace
