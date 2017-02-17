@@ -44,8 +44,7 @@ namespace Gfx {
 // ======================================================================================
 
 Rasterizer2::Rasterizer2(Image& image)
-: _aaLevel(1)
-, _image(&image)
+: _image(&image)
 , _text( new DrawText() )
 , _font()
 , _compositionMode(CompositionMode::SourceCopy)
@@ -169,6 +168,14 @@ void Rasterizer2::strokeText( const Point& to, const Pt::String& text )
 
 void Rasterizer2::fillEllipseJaggies(const Point& topLeft, const Size& size)
 {
+
+    // Update the gradient as needed
+    if(_isGradient)
+        updateGradientBrush(size.width(), size.height());
+
+    Pt::int32_t minX = topLeft.x();
+    Pt::int32_t minY = topLeft.y();
+
     // e(X, Y) = ( b^2 * X^2 ) + ( a^2 * Y^2 ) - ( a^2 * b^2 )
 
     Pt::int32_t errorx = 1;
@@ -211,10 +218,10 @@ void Rasterizer2::fillEllipseJaggies(const Point& topLeft, const Size& size)
         }
         else if( t - a2*y > crit2 ) /* e(x+1/2,y-1) > 0 */
         {
-            rasterScanline(xc - x, xc - x + width - errorx, yc - y, 0, 0, _brush.color());
+            rasterScanline(xc - x - minX, xc - x - minX + width - errorx - 1, yc - y - minY, minX, minY, _brush.color());
 
             if(y != 0)
-            rasterScanline(xc - x, xc - x + width - errorx, yc + y - errory, 0, 0, _brush.color());
+            rasterScanline(xc - x- minX , xc - x - minX + width - errorx - 1, yc + y - minY - errory, minX, minY, _brush.color());
 
 
              //Increment Y
@@ -224,10 +231,10 @@ void Rasterizer2::fillEllipseJaggies(const Point& topLeft, const Size& size)
         }
         else
         {
-            rasterScanline(xc - x, xc - x + width - errorx, yc - y, 0, 0, _brush.color());
+            rasterScanline(xc - x - minX, xc - x - minX + width - errorx - 1, yc - y - minY, minX, minY, _brush.color());
 
             if(y != 0)
-            rasterScanline(xc - x, xc - x + width - errorx, yc + y - errory, 0, 0, _brush.color());
+            rasterScanline(xc - x- minX , xc - x - minX + width - errorx - 1, yc + y - minY - errory, minX, minY, _brush.color());
 
             //outputSpan(  topLeft, xc-x, yc-y, width -errorx );
 

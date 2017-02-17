@@ -45,7 +45,9 @@ const Pt::int32_t ImagePainter2::MaximumCoordinate = 65535;
 
 ImagePainter2::ImagePainter2(Image& image)
 : _rasterizer(new Rasterizer2(image))
-{}
+{
+    setAntiAliasingLevel();
+}
 
 ImagePainter2::~ImagePainter2()
 {
@@ -55,6 +57,7 @@ ImagePainter2::~ImagePainter2()
 void ImagePainter2::setAntiAliasingLevel(Pt::uint8_t level)
 {
     _rasterizer->setAntiAliasingLevel(level);
+    _aaLevel = level;
 }
 
 FontMetrics ImagePainter2::fontMetrics( const Font& font, const Pt::String& text )
@@ -129,7 +132,7 @@ const Pen& ImagePainter2::pen() const
 
 void ImagePainter2::setBrush(const Brush& brush)
 {
-    _rasterizer->setBrush( brush);
+    _rasterizer->setBrush(brush);
 }
 
 const Brush& ImagePainter2::brush() const
@@ -187,14 +190,17 @@ void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
 
 void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
 {
+    // Call the fast non-AA rasterizer as needed
+    if(!_aaLevel) {
+        // Convert the coordinates and size
+        const Point topLeft_( topLeft.x    (), topLeft.y     () );
+        const Size  size_   ( size   .width(), size   .height() );
+        // Rasterize the ellipse
+        _rasterizer->fillEllipseJaggies(topLeft_, size_);
+        // Done
+        return;
+    }
 
-#if 1
-    const Point topLeft_( topLeft.x    (), topLeft.y     () );
-    const Size  size_   ( size   .width(), size   .height() );
-
-    _rasterizer->fillEllipseJaggies(topLeft_, size_);
-
-#else
     // Calculate the ellipse's parameters
     const Pt::int32_t radiusX = size.width () / 2;
     const Pt::int32_t radiusY = size.height() / 2;
@@ -235,7 +241,6 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
 
     // Rasterize the polygon
     _rasterizer->fillPolygon(points.data(), points.size());
-#endif
 }
 
 void ImagePainter2::drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)

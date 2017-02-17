@@ -52,7 +52,7 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual ~ImagePainter2();
 
-        void setAntiAliasingLevel(Pt::uint8_t level);
+        void setAntiAliasingLevel(Pt::uint8_t level = 1);
 
         void setImage(Image& image);
 
@@ -116,8 +116,9 @@ class PT_GFX_API ImagePainter2 : public Painter
         static FontMetrics fontMetrics( const Font& font, const Pt::String& text );
 
     private:
-        Rasterizer2* _rasterizer;
+        Pt::uint8_t  _aaLevel;
         RectF        _clip;
+        Rasterizer2* _rasterizer;
 };
 
 
