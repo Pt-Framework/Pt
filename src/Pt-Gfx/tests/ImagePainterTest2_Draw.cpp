@@ -12,6 +12,9 @@ static void testDrawLine(const char* title, Image& image, Painter& painter)
     painter.setClip( RectF (0, image.width() - 1, 0, image.height() - 1) );
 #endif
 
+    painter.drawImage(PointF(image.width() - textureWithWhiteBackground.width(),   0), textureWithWhiteBackground);
+    painter.drawImage(PointF(image.width() - textureWithWhiteBackground.width(), 300), textureWithWhiteBackground, RectF(20, 70, 20, 70));
+
     painter.setPen( Color::fromRgb8(255, 0, 0, 175) );
 
     painter.drawLine( PointF(  0,   0), PointF(999,   0) );

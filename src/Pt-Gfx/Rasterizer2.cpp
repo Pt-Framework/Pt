@@ -168,6 +168,7 @@ void Rasterizer2::strokeText( const Point& to, const Pt::String& text )
 
 void Rasterizer2::fillEllipseNoAA(const Point& topLeft, const Size& size)
 {
+    // ### TODO: _currentClip !!! ###
 
     // Update the gradient as needed
     if(_isGradient)
