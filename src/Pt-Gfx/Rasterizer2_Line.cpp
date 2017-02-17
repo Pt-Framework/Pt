@@ -100,7 +100,7 @@ void Rasterizer2::rasterOnePixelLine(const Point& a, const Point& b)
     }
 
     // Raster the line
-    if(_aaLevel) {
+    if(_aaMode != AntiAliasingMode::None) {
         // Raster the line using anti-aliasing
         rasterOnePixelGLineSegmentXWAA(x1, y1, x2, y2, _pen.color(), false);
     }

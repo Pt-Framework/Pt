@@ -1,5 +1,4 @@
-/* Copyright (C) 2015 Marc Boris Duerner
-   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2017-2017 Aloysius Indrayanto
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -27,30 +26,30 @@
   02110-1301 USA
 */
 
-#ifndef PT_GFX_COMPOSITIONMODE_H
-#define PT_GFX_COMPOSITIONMODE_H
+#ifndef PT_GFX_ANTIALIASINGMODE_H
+#define PT_GFX_ANTIALIASINGMODE_H
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Types.h>
 
 namespace Pt {
-
 namespace Gfx {
 
-class CompositionMode
-{
-    public:
-        enum Mode
-        {
-            SourceCopy = 0, // use source pixel
-            SourceOver = 1, // use alpha of source pixel
-        };
 
-        CompositionMode(Mode m = SourceCopy)
+class AntiAliasingMode {
+    public:
+         enum Mode {
+             None    = 0, // No anti-aliasing
+             Fastest = 1, // Anti-aliasing using fast SSAA 2x2
+             Medium  = 2, // Anti-aliasing using fast SSAA 4x4
+             Maximum = 3  // Anti-aliasing using fast SSAA 8x8
+         };
+
+        AntiAliasingMode(Mode m = Fastest)
         : _mode(m)
         {}
 
-        CompositionMode& operator=(Mode m)
+        AntiAliasingMode& operator=(Mode m)
         {
             _mode = m;
             return *this;
@@ -65,8 +64,8 @@ class CompositionMode
         Mode _mode;
 };
 
-} // namespace
 
+} // namespace
 } // namespace
 
 #endif

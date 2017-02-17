@@ -46,7 +46,7 @@ const Pt::int32_t ImagePainter2::MaximumCoordinate = 65535;
 ImagePainter2::ImagePainter2(Image& image)
 : _rasterizer(new Rasterizer2(image))
 {
-    setAntiAliasingLevel();
+    setAntiAliasingMode();
 }
 
 ImagePainter2::~ImagePainter2()
@@ -54,10 +54,10 @@ ImagePainter2::~ImagePainter2()
     delete _rasterizer;
 }
 
-void ImagePainter2::setAntiAliasingLevel(Pt::uint8_t level)
+void ImagePainter2::setAntiAliasingMode(AntiAliasingMode mode)
 {
-    _rasterizer->setAntiAliasingLevel(level);
-    _aaLevel = level;
+    _rasterizer->setAntiAliasingMode(mode);
+    _aaMode = mode;
 }
 
 FontMetrics ImagePainter2::fontMetrics( const Font& font, const Pt::String& text )
@@ -191,7 +191,7 @@ void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
 void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
 {
     // Call the fast non-AA rasterizer as needed
-    if(!_aaLevel) {
+    if(_aaMode == AntiAliasingMode::None) {
         // Convert the coordinates and size
         const Point topLeft_( topLeft.x    (), topLeft.y     () );
         const Size  size_   ( size   .width(), size   .height() );

@@ -31,6 +31,10 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
 
+#ifdef None
+#undef None
+#endif
+
 #include "SDL_SavePNG/savepng.h"
 
 using namespace Pt::Gfx;

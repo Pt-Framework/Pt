@@ -31,7 +31,7 @@
 #ifndef PT_GFX_RASTERIZER_2_H
 #define PT_GFX_RASTERIZER_2_H
 
-#include <Pt/Gfx/Painter.h>
+#include <Pt/Gfx/ImagePainter2.h>
 
 // ======================================================================================
 // ===== Configurations and Macros ======================================================
@@ -77,9 +77,9 @@ class Rasterizer2
 
         ~Rasterizer2();
 
-        void setAntiAliasingLevel(Pt::uint8_t level)
+        void setAntiAliasingMode(AntiAliasingMode mode)
         {
-            _aaLevel = level;
+            _aaMode = mode;
         }
 
         void setImage(Image& image);
@@ -185,26 +185,26 @@ class Rasterizer2
         );
 
     private:
-        Pt::uint8_t     _aaLevel;
+        AntiAliasingMode _aaMode;
 
-        Image*          _image;
-        DrawText*       _text;
-        Font            _font;
-        CompositionMode _compositionMode;
+        Image*           _image;
+        DrawText*        _text;
+        Font             _font;
+        CompositionMode  _compositionMode;
 
-        Pen             _pen;
-        Image           _penBuffer;
-        ConstPixel      _penPixel;
+        Pen              _pen;
+        Image            _penBuffer;
+        ConstPixel       _penPixel;
 
-        Brush           _brush;
-        Image           _brushBuffer;
-        ConstPixel      _brushPixel;
-        const Image*    _brushImage;
-        bool            _isGradient;
-        bool            _isTexture;
+        Brush            _brush;
+        Image            _brushBuffer;
+        ConstPixel       _brushPixel;
+        const Image*     _brushImage;
+        bool             _isGradient;
+        bool             _isTexture;
 
-        Rect            _clip;
-        Rect            _currentClip;
+        Rect             _clip;
+        Rect             _currentClip;
 };
 
 // ======================================================================================

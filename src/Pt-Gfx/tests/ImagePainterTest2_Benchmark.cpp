@@ -37,7 +37,7 @@ static size_t benchDrawText(int loopCount, CompositionMode cm)
 }
 
 template <typename PainterT>
-static size_t benchDrawLine(int loopCount, CompositionMode cm, Pt::uint8_t antiAliasingLevel)
+static size_t benchDrawLine(int loopCount, CompositionMode cm, AntiAliasingMode antiAliasingMode)
 {
     size_t sum = 0;
 
@@ -58,7 +58,7 @@ static size_t benchDrawLine(int loopCount, CompositionMode cm, Pt::uint8_t antiA
         Pt::System::Clock clock;
         clock.start();
 
-        if(ip2) ip2->setAntiAliasingLevel(antiAliasingLevel);
+        if(ip2) ip2->setAntiAliasingMode(antiAliasingMode);
         painter.drawLine( PointF( 10,  10), PointF(789, 110) );
         painter.drawLine( PointF(789, 489), PointF( 10, 589) );
 
@@ -141,7 +141,7 @@ static size_t benchDrawFillRect(int loopCount, const Brush& brushH, const Brush&
 }
 
 template <typename PainterT>
-static size_t benchDrawFillPolygon(int loopCount, const Brush& brushH, const Brush& brushV, CompositionMode cm, Pt::uint8_t antiAliasingLevel)
+static size_t benchDrawFillPolygon(int loopCount, const Brush& brushH, const Brush& brushV, CompositionMode cm, AntiAliasingMode antiAliasingMode)
 {
     size_t sum = 0;
 
@@ -167,7 +167,7 @@ static size_t benchDrawFillPolygon(int loopCount, const Brush& brushH, const Bru
             PointF(250, 100),
             PointF( 50,  50)
         };
-        if(ip2) ip2->setAntiAliasingLevel(antiAliasingLevel);
+        if(ip2) ip2->setAntiAliasingMode(antiAliasingMode);
         painter.fillPolygon(poly1a, sizeof(poly1a) / sizeof(poly1a[0]));
 
         painter.setBrush(brushV);
@@ -186,7 +186,7 @@ static size_t benchDrawFillPolygon(int loopCount, const Brush& brushH, const Bru
             PointF(210, 310),
             PointF(140, 260)
         };
-        if(ip2) ip2->setAntiAliasingLevel(antiAliasingLevel);
+        if(ip2) ip2->setAntiAliasingMode(antiAliasingMode);
         painter.fillPolygon(poly2a, sizeof(poly2a) / sizeof(poly2a[0]));
 
         const PointF poly2b[] = { // CCW
@@ -207,7 +207,7 @@ static size_t benchDrawFillPolygon(int loopCount, const Brush& brushH, const Bru
 }
 
 template <typename PainterT>
-static size_t benchDrawFillEllipse(int loopCount, const Brush& brushH, const Brush& brushV, CompositionMode cm, Pt::uint8_t antiAliasingLevel)
+static size_t benchDrawFillEllipse(int loopCount, const Brush& brushH, const Brush& brushV, CompositionMode cm, AntiAliasingMode antiAliasingMode)
 {
     size_t sum = 0;
 
@@ -226,11 +226,11 @@ static size_t benchDrawFillEllipse(int loopCount, const Brush& brushH, const Bru
         clock.start();
 
         painter.setBrush(brushH);
-        if(ip2) ip2->setAntiAliasingLevel(antiAliasingLevel);
+        if(ip2) ip2->setAntiAliasingMode(antiAliasingMode);
         painter.fillEllipse( PointF (30, 60), SizeF(120, 60) );
 
         painter.setBrush(brushV);
-        if(ip2) ip2->setAntiAliasingLevel(antiAliasingLevel);
+        if(ip2) ip2->setAntiAliasingMode(antiAliasingMode);
         painter.fillEllipse( PointF (230, 60), SizeF(60, 120) );
 
         sum += clock.stop().toUSecs();
@@ -261,12 +261,12 @@ static void doBenchmark(CompositionMode cm)
 
     // Lines
     if(BENCHMARK_LINE) {
-        time1 = benchDrawLine<ImagePainter >(BENCHMARK_LOOP_COUNT, cm, 0);
-        time2 = benchDrawLine<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, 0);
+        time1 = benchDrawLine<ImagePainter >(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
+        time2 = benchDrawLine<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
         std::clog << "    Line                             @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         std::clog << "    Line NOAA                        @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawLine<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, 1);
+        time2 = benchDrawLine<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::Fastest);
         std::clog << "    Line XWAA                        @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
@@ -312,54 +312,54 @@ static void doBenchmark(CompositionMode cm)
 
     // Filled polygons
     if(BENCHMARK_SOLID_FILLED_POLYGON) {
-        time1 = benchDrawFillPolygon<ImagePainter >(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, 0);
-        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, 0);
+        time1 = benchDrawFillPolygon<ImagePainter >(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::None);
+        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::None);
         std::clog << "    Solid-filled    polygon          @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         std::clog << "    Solid-filled    polygon NOAA     @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, 1);
+        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::Fastest);
         std::clog << "    Solid-filled    polygon FSAA 2x2 @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, 2);
+        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::Medium);
         std::clog << "    Solid-filled    polygon FSAA 4x4 @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, 4);
+        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::Maximum);
         std::clog << "    Solid-filled    polygon FSAA 8x8 @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
 
     if(BENCHMARK_GRADIENT_FILLED_POLYGON) {
-        time1 = benchDrawFillPolygon<ImagePainter >(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm, 0);
-        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm, 0);
+        time1 = benchDrawFillPolygon<ImagePainter >(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm, AntiAliasingMode::None);
+        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm, AntiAliasingMode::None);
         std::clog << "    Gradient-filled polygon          @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         std::clog << "    Gradient-filled polygon NOAA     @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm, 1);
+        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm, AntiAliasingMode::Fastest);
         std::clog << "    Gradient-filled polygon FSAA 2x2 @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm, 2);
+        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm, AntiAliasingMode::Medium);
         std::clog << "    Gradient-filled polygon FSAA 4x4 @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm, 4);
+        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm, AntiAliasingMode::Maximum);
         std::clog << "    Gradient-filled polygon FSAA 8x8 @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
 
     if(BENCHMARK_TEXTURE_FILLED_POLYGON) {
-        time1 = benchDrawFillPolygon<ImagePainter >(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, 0);
-        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, 0);
+        time1 = benchDrawFillPolygon<ImagePainter >(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, AntiAliasingMode::None);
+        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, AntiAliasingMode::None);
         std::clog << "    Texture-filled  polygon          @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         std::clog << "    Texture-filled  polygon NOAA     @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, 1);
+        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, AntiAliasingMode::Fastest);
         std::clog << "    Texture-filled  polygon FSAA 2x2 @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, 2);
+        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, AntiAliasingMode::Medium);
         std::clog << "    Texture-filled  polygon FSAA 4x4 @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, 3);
+        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, AntiAliasingMode::Maximum);
         std::clog << "    Texture-filled  polygon FSAA 8x8 @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
@@ -367,54 +367,54 @@ static void doBenchmark(CompositionMode cm)
 
     // Filled ellpise
     if(BENCHMARK_SOLID_FILLED_ELLIPSE) {
-        time1 = benchDrawFillEllipse<ImagePainter >(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, 0);
-        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, 0);
+        time1 = benchDrawFillEllipse<ImagePainter >(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::None);
+        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::None);
         std::clog << "    Solid-filled    ellipse          @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         std::clog << "    Solid-filled    ellipse NOAA     @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, 1);
+        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::Fastest);
         std::clog << "    Solid-filled    ellipse FSAA 2x2 @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, 2);
+        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::Medium);
         std::clog << "    Solid-filled    ellipse FSAA 4x4 @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, 3);
+        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::Maximum);
         std::clog << "    Solid-filled    ellipse FSAA 8x8 @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
 
     if(BENCHMARK_GRADIENT_FILLED_ELLIPSE) {
-        time1 = benchDrawFillEllipse<ImagePainter >(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm, 0);
-        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm, 0);
+        time1 = benchDrawFillEllipse<ImagePainter >(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm, AntiAliasingMode::None);
+        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm, AntiAliasingMode::None);
         std::clog << "    Gradient-filled ellipse          @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         std::clog << "    Gradient-filled ellipse NOAA     @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm, 1);
+        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm, AntiAliasingMode::Fastest);
         std::clog << "    Gradient-filled ellipse FSAA 2x2 @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm, 2);
+        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm, AntiAliasingMode::Medium);
         std::clog << "    Gradient-filled ellipse FSAA 4x4 @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm, 3);
+        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm, AntiAliasingMode::Maximum);
         std::clog << "    Gradient-filled ellipse FSAA 8x8 @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
 
     if(BENCHMARK_TEXTURE_FILLED_ELLIPSE) {
-        time1 = benchDrawFillEllipse<ImagePainter >(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, 0);
-        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, 0);
+        time1 = benchDrawFillEllipse<ImagePainter >(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, AntiAliasingMode::None);
+        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, AntiAliasingMode::None);
         std::clog << "    Texture-filled  ellipse          @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         std::clog << "    Texture-filled  ellipse NOAA     @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, 1);
+        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, AntiAliasingMode::Fastest);
         std::clog << "    Texture-filled  ellipse FSAA 2x2 @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, 2);
+        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, AntiAliasingMode::Medium);
         std::clog << "    Texture-filled  ellipse FSAA 4x4 @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, 3);
+        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, AntiAliasingMode::Maximum);
         std::clog << "    Texture-filled  ellipse FSAA 8x8 @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;

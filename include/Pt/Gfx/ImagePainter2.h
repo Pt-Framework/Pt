@@ -32,7 +32,9 @@
 #define PT_GFX_IMAGEPAINTER_2_H
 
 #include <Pt/Gfx/Api.h>
+#include <Pt/Gfx/AntiAliasingMode.h>
 #include <Pt/Gfx/Painter.h>
+
 #include <Pt/System/Path.h>
 
 namespace Pt {
@@ -47,12 +49,13 @@ class PT_GFX_API ImagePainter2 : public Painter
          static const PointF      PolygonSeparatorPointF;
          static const Pt::int32_t MaximumCoordinate;
 
+
     public:
         ImagePainter2( Image& image );
 
         virtual ~ImagePainter2();
 
-        void setAntiAliasingLevel(Pt::uint8_t level = 1);
+        void setAntiAliasingMode(AntiAliasingMode mode = AntiAliasingMode::Fastest);
 
         void setImage(Image& image);
 
@@ -116,9 +119,9 @@ class PT_GFX_API ImagePainter2 : public Painter
         static FontMetrics fontMetrics( const Font& font, const Pt::String& text );
 
     private:
-        Pt::uint8_t  _aaLevel;
-        RectF        _clip;
-        Rasterizer2* _rasterizer;
+        AntiAliasingMode _aaMode;
+        RectF            _clip;
+        Rasterizer2*     _rasterizer;
 };
 
 

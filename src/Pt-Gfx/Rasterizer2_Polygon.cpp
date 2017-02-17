@@ -102,28 +102,28 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
         updateGradientBrush(maxX - minX + 1, maxY - minY + 1);
 
     // Draw the polygon
-    if(_aaLevel == 0) {
+    if(_aaMode == AntiAliasingMode::None) {
         rasterPolygonAreaNoAA(
             clippedPoints.data(), clippedCounts.data(),
             clippedCounts.size(), clippedPoints.size(),
             _brush.color(), minX, minY, maxX, maxY
         );
     }
-    else if(_aaLevel == 1) {
+    else if(_aaMode == AntiAliasingMode::Fastest) {
         rasterPolygonAreaFSAA2x2(
             clippedPoints.data(), clippedCounts.data(),
             clippedCounts.size(), clippedPoints.size(),
             _brush.color(), minX, minY, maxX, maxY
         );
     }
-    else if(_aaLevel == 2) {
+    else if(_aaMode == AntiAliasingMode::Medium) {
         rasterPolygonAreaFSAAGen<4>(
             clippedPoints.data(), clippedCounts.data(),
             clippedCounts.size(), clippedPoints.size(),
             _brush.color(), minX, minY, maxX, maxY
         );
     }
-    else {
+    else { // _aaMode == AntiAliasingMode::Maximum
         rasterPolygonAreaFSAAGen<8>(
             clippedPoints.data(), clippedCounts.data(),
             clippedCounts.size(), clippedPoints.size(),
@@ -156,13 +156,13 @@ void Rasterizer2::fillPolygonSeparate(const Point* points, size_t pointCount)
             // Get the number of points for drawing this polygon
             const size_t numPoint[1] = { clipped.size() };
             // Draw the polygon
-            if(_aaLevel == 0)
+            if(_aaMode == AntiAliasingMode::None)
                 rasterPolygonAreaNoAA(clipped.data(), numPoint, 1, clipped.size(), _brush.color(), minX, minY, maxX, maxY);
-            else if(_aaLevel == 1)
+            else if(_aaMode == AntiAliasingMode::Fastest)
                 rasterPolygonAreaFSAA2x2(clipped.data(), numPoint, 1, clipped.size(), _brush.color(), minX, minY, maxX, maxY);
-            else if(_aaLevel == 2)
+            else if(_aaMode == AntiAliasingMode::Medium)
                 rasterPolygonAreaFSAAGen<4>(clipped.data(), numPoint, 1, clipped.size(), _brush.color(), minX, minY, maxX, maxY);
-            else
+            else // _aaMode == AntiAliasingMode::Maximum
                 rasterPolygonAreaFSAAGen<8>(clipped.data(), numPoint, 1, clipped.size(), _brush.color(), minX, minY, maxX, maxY);
         }
     }
@@ -185,7 +185,7 @@ void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount, c
         else {
             const bool xline = ( abs(points[i + 1].x() - points[i].x()) ==
                                  abs(points[i + 1].y() - points[i].y()) );
-            if(xline || !_aaLevel)
+            if(xline || _aaMode == AntiAliasingMode::None)
                 rasterOnePixelGLineSegmentNOAA(points[i].x(), points[i].y(), points[i + 1].x(), points[i + 1].y(), color, true);
             else
                 rasterOnePixelGLineSegmentXWAA(points[i].x(), points[i].y(), points[i + 1].x(), points[i + 1].y(), color, true);
@@ -200,7 +200,7 @@ void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount, c
     else {
         const bool xline = ( abs(points[pc1].x() - points[0].x()) ==
                              abs(points[pc1].y() - points[0].y()) );
-        if(xline || !_aaLevel)
+        if(xline || _aaMode == AntiAliasingMode::None)
             rasterOnePixelGLineSegmentNOAA(points[pc1].x(), points[pc1].y(), points[0].x(), points[0].y(), color, false);
         else
             rasterOnePixelGLineSegmentXWAA(points[pc1].x(), points[pc1].y(), points[0].x(), points[0].y(), color, false);
