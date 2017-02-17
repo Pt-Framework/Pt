@@ -45,9 +45,13 @@ void Rasterizer2::strokePolygon(const Point* points, size_t pointCount)
 {
     switch( _pen.style() ) {
         case Pen::Solid:
-            // Draw a simple, one-pixel line
-            if( _pen.size() == 1 && pointCount == 2 ) {
-                rasterOnePixelLine(points[0], points[1]);
+            if(_pen.size() == 1) {
+                // Draw a one-pixel line
+                if(pointCount == 2)
+                    rasterOnePixelLine(points[0], points[1]);
+                // Draw a one-pixel polygon outline
+                else
+                    rasterPolygonOutline(points, pointCount, _pen.color());
             }
             break;
 
@@ -372,8 +376,9 @@ void Rasterizer2::rasterPolygonAreaFSAA2X2(const Point* points, const size_t* po
                 const Pt::int32_t from1_area = ( (from1_cell * FSAA2X2_SUPERSAMPLE_SIZE) < from1 ) ? FSAA2X2_MIN_ALPHA : FSAA2X2_MID_ALPHA;
                 const Pt::int32_t to0_area   = ( (to0_cell   * FSAA2X2_SUPERSAMPLE_SIZE) < to0   ) ? FSAA2X2_MID_ALPHA : FSAA2X2_MIN_ALPHA;
                 const Pt::int32_t to1_area   = ( (to1_cell   * FSAA2X2_SUPERSAMPLE_SIZE) < to1   ) ? FSAA2X2_MID_ALPHA : FSAA2X2_MIN_ALPHA;
-                // If the span is short, accumulate alphas for the whole span directly to avoid alpha-related artifacts
-                if( (to0 - from0 <= 2) || (to1 - from1 <= 2) ) {
+                // If the span is short, accumulate alphas for the whole span directly
+                // in order to avoid some alpha-related artifacts
+                if( (to0 - from0 <= FSAA2X2_SUPERSAMPLE_SIZE) || (to1 - from1 <= FSAA2X2_SUPERSAMPLE_SIZE) ) {
                     for(Pt::int32_t k = from0; k <= to0; ++k) {
                         alphas[k / FSAA2X2_SUPERSAMPLE_SIZE] += FSAA2X2_MIN_ALPHA;
                     }

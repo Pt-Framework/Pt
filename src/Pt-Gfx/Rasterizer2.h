@@ -233,8 +233,7 @@ void Rasterizer2::rasterScanline(
     // A helper macro to scale the alpha
     #define RSL_SCALE_ALPHA(A) ( Pt::uint16_t(A) * MUL_ALPHA / SUPERSAMPLE_SIZE / SUPERSAMPLE_SIZE )
 
-    // The minimum, middle, and maximum values for alpha
-    #define RSL_MIN_ALPHA  MIN_ALPHA
+    // The maximum value for alpha
     #define RSL_MAX_ALPHA (MIN_ALPHA * SUPERSAMPLE_SIZE * SUPERSAMPLE_SIZE)
 
     //
@@ -419,7 +418,6 @@ void Rasterizer2::rasterScanline(
 
     // Undefine the macros
     #undef RSL_SCALE_ALPHA
-    #undef RSL_MIN_ALPHA
     #undef RSL_MAX_ALPHA
 }
 
@@ -432,7 +430,6 @@ void Rasterizer2::rasterPolygonAreaFSAAGen(const Point* points, const size_t* po
     #define FSAA_MUL_ALPHA 255
     #define FSAA_MIN_ALPHA 1
     #define FSAA_MAX_ALPHA (FSAA_MIN_ALPHA * SUPERSAMPLE_SIZE * SUPERSAMPLE_SIZE)
-    #define FSAA_MID_ALPHA (FSAA_MAX_ALPHA / 2)
 
     // Calculate the size of the polygon
     Pt::int32_t sizeX = (maxX - minX + 1);
@@ -550,7 +547,8 @@ void Rasterizer2::rasterPolygonAreaFSAAGen(const Point* points, const size_t* po
                     to_cell  [s] = to  [s] / SUPERSAMPLE_SIZE;
                     if(abs(to_cell[s] - from_cell[s]) <= SUPERSAMPLE_SIZE) shortSpan = true;
                 }
-                // If the span is short, accumulate alphas for the whole span directly to avoid alpha-related artifacts
+                // If the span is short, accumulate alphas for the whole span directly
+                // in order to avoid some alpha-related artifacts
                 if(shortSpan) {
                     for(Pt::int32_t n = 0; n < SUPERSAMPLE_SIZE; ++n) {
                         for(Pt::int32_t k = from[n]; k <= to[n]; ++k) {
@@ -560,71 +558,71 @@ void Rasterizer2::rasterPolygonAreaFSAAGen(const Point* points, const size_t* po
                     continue;
                 }
                 // Accumulate alphas for the left side of the span
-                // --- Each distinct cell ---
+                // --- Each distinct cells ---
                 std::set<Pt::int32_t> proc_ds;
                 for(Pt::int32_t n = 0; n < SUPERSAMPLE_SIZE; ++n) {
                     // Alpha contribution from this cell
-                    alphas[from_cell[n]] += SUPERSAMPLE_SIZE - ( from[n] - from_cell[n] * SUPERSAMPLE_SIZE );
+                    alphas[ from_cell[n] ] += SUPERSAMPLE_SIZE - ( from[n] - from_cell[n] * SUPERSAMPLE_SIZE );
                     // Alpha Contribution from cells of the left side of this cell
                     for(Pt::int32_t b = n; b > 0; --b) {
-                        // Ensure that each cell is not processed twice
+                        // Ensure that each cell is not processed more than once
                         if(proc_ds.find(from_cell[b]) != proc_ds.end()) continue;
                         proc_ds.insert(from_cell[b]);
                         // Accumulate the alphas
                         for(Pt::int32_t k = 0; k < b; ++k) {
                             // Accumulate the alpha if the cell is on the left side of the reference cell
-                            if(from_cell[k] < from_cell[b]) alphas[from_cell[b]] += SUPERSAMPLE_SIZE;
+                            if(from_cell[k] < from_cell[b]) alphas[ from_cell[b] ] += SUPERSAMPLE_SIZE;
                         }
                     }
                 }
                 // --- In-between cells ---
                 std::set<Pt::int32_t> proc_is;
                 for(Pt::int32_t n = (SUPERSAMPLE_SIZE - 1); n > 0; --n) {
-                    // Ensure that each cell is not processed twice
+                    // Ensure that each reference cell is not processed more than once
                     if(proc_is.find(from_cell[n]) != proc_is.end()) continue;
                     proc_is.insert(from_cell[n]);
                     // Walk through the cells on the left side of the span up until the reference cell
                     for(Pt::int32_t b = 0; b < n; ++b) {
-                        // Skip if the cell is not really on the left side of the reference cell
+                        // Skip if this cell is not really on the left side of the reference cell
                         if(from_cell[b] >= from_cell[n]) continue;
                         // Walk through the in-between cells
                         for(Pt::int32_t k = (from_cell[b] + 1); k < from_cell[n]; ++k) {
-                            // Accumulate the alpha if the cell is not one of the reference cell
+                            // Accumulate the alpha only if the cell is not one of the reference cell
                             if(proc_ds.find(k) == proc_ds.end()) alphas[k] += SUPERSAMPLE_SIZE;
                         }
                     }
                 }
                 // Accumulate alphas for the right side of the span
-                // --- Each distinct cell ---
+                // --- Each distinct cells ---
                 proc_ds.clear();
                 for(Pt::int32_t n = 0; n < SUPERSAMPLE_SIZE; ++n) {
                     // Alpha contribution from this cell
-                    alphas[to_cell[n]] += ( to[n] - to_cell[n] * SUPERSAMPLE_SIZE ) + 1;
+                    alphas[ to_cell[n] ] += ( to[n] - to_cell[n] * SUPERSAMPLE_SIZE ) + 1;
                     // Alpha Contribution from cells of the right side of this cell
                     for(Pt::int32_t b = n; b < (SUPERSAMPLE_SIZE - 1); ++b) {
-                        // Ensure that each cell is not processed twice
+                        // Ensure that each cell is not processed more than once
                         if(proc_ds.find(to_cell[b]) != proc_ds.end()) continue;
                         proc_ds.insert(to_cell[b]);
                         // Accumulate the alphas
                         for(Pt::int32_t k = (b + 1); k < SUPERSAMPLE_SIZE; ++k) {
                             // Accumulate the alpha if the cell is on the right side of the reference cell
-                            if(to_cell[k] > to_cell[b]) alphas[to_cell[b]] += SUPERSAMPLE_SIZE;
+                            if(to_cell[k] > to_cell[b]) alphas[ to_cell[b] ] += SUPERSAMPLE_SIZE;
                         }
                     }
                 }
                 // --- In-between cells ---
                 proc_is.clear();
                 for(Pt::int32_t n = 0; n < (SUPERSAMPLE_SIZE - 1); ++n) {
-                    // Ensure that each cell is not processed twice
+                    // Ensure that each reference cell is not processed more than once
                     if(proc_is.find(to_cell[n]) != proc_is.end()) continue;
                     proc_is.insert(to_cell[n]);
                     // Walk through the cells on the right side of the span down until the reference cell
                     for(Pt::int32_t b = (SUPERSAMPLE_SIZE - 1); b > n; --b) {
-                        // Skip if the cell is not really on the right side of the reference cell
+                        // Skip if this cell is not really on the right side of the reference cell
                         if(to_cell[b] <= to_cell[n]) continue;
                         // Walk through the in-between cells
                         for(Pt::int32_t k = (to_cell[b] - 1); k > to_cell[n]; --k) {
-                            // Accumulate the alpha if the cell is not one of the reference cell
+                            // Accumulate the alpha only if the cell is not one of the reference cell
                             if(proc_ds.find(k) == proc_ds.end()) alphas[k] += SUPERSAMPLE_SIZE;
                         }
                     }
@@ -664,7 +662,6 @@ void Rasterizer2::rasterPolygonAreaFSAAGen(const Point* points, const size_t* po
     #undef FSAA_MUL_ALPHA
     #undef FSAA_MIN_ALPHA
     #undef FSAA_MAX_ALPHA
-    #undef FSAA_MID_ALPHA
 }
 
 
