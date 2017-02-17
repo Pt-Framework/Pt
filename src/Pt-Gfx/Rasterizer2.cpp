@@ -167,9 +167,95 @@ void Rasterizer2::strokeText( const Point& to, const Pt::String& text )
     _text->draw( *_image, _pen.color(), to, text, _compositionMode );
 }
 
+void Rasterizer2::fillEllipseJaggies(const Point& topLeft, const Size& size)
+{
+    // e(X, Y) = ( b^2 * X^2 ) + ( a^2 * Y^2 ) - ( a^2 * b^2 )
+
+    Pt::int32_t errorx = 1;
+    Pt::int32_t errory = 1;
+
+    if( (Pt::int32_t)size.width()%2 != 0 )
+        errorx  =  0;
+
+    if( (Pt::int32_t)size.height()%2 != 0)
+        errory  = 0;
+
+    const Pt::int32_t       a      = (Pt::int32_t)size.width() /2;
+    const Pt::int32_t       b      = (Pt::int32_t)size.height() /2;
+    const Pt::int32_t       xc     = (Pt::int32_t)topLeft.x() + a;
+    const Pt::int32_t       yc     = (Pt::int32_t)topLeft.y() + b;
+    Pt::int32_t             x      = 0;
+    Pt::int32_t             y      = b;
+    Pt::int32_t             width  = 1;
+    long            a2     = (long)a*a;
+    long            b2     = (long)b*b;
+    long            crit1  = -(a2/4 + a%2 + b2);
+    long            crit2  = -(b2/4 + b%2 + a2);
+    long            crit3  = -(b2/4 + b%2);
+    long            t      = -a2*y; /* e(x+1/2,y-1/2) - (a^2+b^2)/4 */
+    long            dxt    = 2*b2*x;
+    long            dyt    = -2*a2*y;
+    long            d2xt   = 2*b2;
+    long            d2yt   = 2*a2;
+
+    while( y >= 0 && x <= a )
+    {
+        if( t + b2*x <= crit1 /* e(x+1,y-1/2) <= 0 */ || t + a2*y <= crit3 /* e(x+1/2,y) <= 0 */ )
+        {
+            //Increment x
+            x++;
+            dxt += d2xt;
+            t   += dxt;
+
+            width += 2;
+        }
+        else if( t - a2*y > crit2 ) /* e(x+1/2,y-1) > 0 */
+        {
+            rasterScanline(xc - x, xc - x + width - errorx, yc - y, 0, 0, _brush.color());
+
+            if(y != 0)
+            rasterScanline(xc - x, xc - x + width - errorx, yc + y - errory, 0, 0, _brush.color());
+
+
+             //Increment Y
+            y--;
+            dyt += d2yt;
+            t   += dyt;
+        }
+        else
+        {
+            rasterScanline(xc - x, xc - x + width - errorx, yc - y, 0, 0, _brush.color());
+
+            if(y != 0)
+            rasterScanline(xc - x, xc - x + width - errorx, yc + y - errory, 0, 0, _brush.color());
+
+            //outputSpan(  topLeft, xc-x, yc-y, width -errorx );
+
+            //if( y != 0 )
+             //   outputSpan( topLeft, xc-x, yc+y -errory, width - errorx );
+
+             //Increment x
+            x++;
+            dxt += d2xt;
+            t   += dxt;
+
+            //Increment Y
+            y--;
+            dyt += d2yt;
+            t   += dyt;
+
+            width += 2;
+        }
+    }
+
+   // if( b == 0 )
+       // outputSpan(  topLeft, xc-a, yc, 2*a );
+
+}
+
 
 // ======================================================================================
-// ===== Private Member Functions - Utilities ===========================================
+// ===== Private Member Functions =======================================================
 // ======================================================================================
 
 void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)

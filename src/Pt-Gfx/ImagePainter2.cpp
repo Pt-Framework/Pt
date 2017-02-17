@@ -187,6 +187,14 @@ void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
 
 void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
 {
+
+#if 1
+    const Point topLeft_( topLeft.x    (), topLeft.y     () );
+    const Size  size_   ( size   .width(), size   .height() );
+
+    _rasterizer->fillEllipseJaggies(topLeft_, size_);
+
+#else
     // Calculate the ellipse's parameters
     const Pt::int32_t radiusX = size.width () / 2;
     const Pt::int32_t radiusY = size.height() / 2;
@@ -195,6 +203,7 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
     const Pt::int32_t centerY = topLeft.y() + radiusY;
     const Pt::int32_t numSegs = (radiusM * 2 / 3 / 20) * 20;
     const Pt::int32_t qtrSegs = (numSegs / 4);
+    const Pt::int32_t qtrSeg1 = qtrSegs - 1;
 
     // Calculate the coordinate displacements
     std::vector<float> disX(qtrSegs);
@@ -208,23 +217,25 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
     }
 
     // Generate a polygon that approximates the ellipse
+    // ### TODO: REMOVE DUPLICATED POINTS !!! ###
     std::vector<Point> points(numSegs);
     Pt::int32_t        p = 0;
     for(Pt::int32_t i = 0; i < qtrSegs; ++i) { // Quadrant I
         points[p++].set(centerX + disX[i], centerY + disY[i]);
     }
     for(Pt::int32_t i = 0; i < qtrSegs; ++i) { // Quadrant II
-        points[p++].set(centerX - disX[qtrSegs - 1 - i], centerY + disY[qtrSegs - 1 - i]);
+        points[p++].set(centerX - disX[qtrSeg1 - i], centerY + disY[qtrSeg1 - i]);
     }
     for(Pt::int32_t i = 0; i < qtrSegs; ++i) { // Quadrant III
         points[p++].set(centerX - disX[i], centerY - disY[i]);
     }
     for(Pt::int32_t i = 0; i < qtrSegs; ++i) { // Quadrant IV
-        points[p++].set(centerX + disX[qtrSegs - 1 - i], centerY - disY[qtrSegs - 1 - i]);
+        points[p++].set(centerX + disX[qtrSeg1 - i], centerY - disY[qtrSeg1 - i]);
     }
 
     // Rasterize the polygon
     _rasterizer->fillPolygon(points.data(), points.size());
+#endif
 }
 
 void ImagePainter2::drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)

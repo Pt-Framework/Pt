@@ -139,6 +139,8 @@ class Rasterizer2
         void fillPolygon(const Point* points, size_t pointCount);
         void fillPolygonSeparate(const Point* points, size_t pointCount);
 
+        void fillEllipseJaggies(const Point& topLeft, const Size& size);
+
     private:
         void rasterOnePixelLine(const Point& a, const Point& b);
         void rasterOnePixelHLineSegment(Pt::int32_t x1, Pt::int32_t x2, Pt::int32_t y, const Color& color, bool skipLastPoint);
