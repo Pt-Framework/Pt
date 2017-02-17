@@ -183,7 +183,7 @@ class PT_HMI_API ComboBox : public Control
         ComboBoxMenu _popup;
         Gfx::SizeF   _buttonSize;
         double       _maxHeight;
-        double       _textPadding;
+        double       _spacing;
         bool         _isEditable;
         
         AutoPtr<Gfx::Brush>       _background;
@@ -202,17 +202,6 @@ class PT_HMI_API ComboBox : public Control
         Gfx::Pen   _pen;
         Gfx::Pen   _textPen;
         Gfx::Font  _font;
-
-        ListBoxItem _item1;
-        ListBoxItem _item2;
-        ListBoxItem _item3;
-        ListBoxItem _item4;
-        ListBoxItem _item5;
-        ListBoxItem _item6;
-        ListBoxItem _item7;
-        ListBoxItem _item8;
-        ListBoxItem _item9;
-        ListBoxItem _item10;
 };
 
 } // namespace

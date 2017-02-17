@@ -163,7 +163,7 @@ void ComboBoxMenu::onShowEvent(const ShowEvent& ev)
 
 ComboBox::ComboBox()
 : _maxHeight(500)
-, _textPadding(2)
+, _spacing(2)
 , _isEditable(true)
 , _hasRenderer(false)
 {
@@ -504,7 +504,7 @@ void ComboBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 
     Gfx::PointF clipPos = _editor.position();
     Gfx::SizeF clipSize = _editor.size();
-    clipSize.addWidth(_textPadding); // cursor
+    clipSize.addWidth(_spacing); // cursor
 
     if( _isEditable && hasFocus() )
     {
@@ -543,16 +543,16 @@ void ComboBox::onResizeEvent(const ResizeEvent& ev)
 
     _renderer->prepareLayout(*this, _buttonSize);
 
-    _textPadding = ev.size().height() / 5;
-    if(_textPadding < 2)
-        _textPadding = 2;
+    _spacing = ev.size().height() / 5;
+    if(_spacing < 2)
+        _spacing = 2;
 
-    Gfx::PointF editPosition(_textPadding, 0);
+    Gfx::PointF editPosition(_spacing, 0);
     _editor.setPosition(editPosition);
 
     Gfx::SizeF editSize = ev.size();
     editSize.addWidth( - _buttonSize.width() );
-    editSize.addWidth(-3 * _textPadding); // left, right, cursor
+    editSize.addWidth(-3 * _spacing); // left, right, cursor
     _editor.setSize(editSize);
 }
 

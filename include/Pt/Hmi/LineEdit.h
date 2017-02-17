@@ -31,6 +31,7 @@
 #define PT_HMI_LINEEDIT_H
 
 #include <Pt/Hmi/Control.h>
+#include <Pt/Hmi/Adjustment.h>
 #include <Pt/SmartPtr.h>
 #include <Pt/String.h>
 
@@ -48,20 +49,6 @@ class PT_HMI_API LineEdit : public Control
             Normal = 0,
             Hidden = 1,
             Masked = 2
-        };
-
-        // TODO: separate class
-        enum Alignment
-        {
-            TopLeft,
-            TopCenter,
-            TopRight,
-            MiddleLeft,
-            MiddleCenter,
-            MiddleRight,
-            BottomLeft,
-            BottomCenter,
-            BottomRight
         };
 
     public:
@@ -83,9 +70,9 @@ class PT_HMI_API LineEdit : public Control
 
         void setEchoMode(EchoMode mode);
 
-        Alignment textAlignment() const;
+        Adjustment textAdjustment() const;
 
-        void setTextAlignment(Alignment a);
+        void setTextAdjustment(Adjustment a);
 
         std::size_t cursorPosition() const;
 
@@ -154,7 +141,7 @@ class PT_HMI_API LineEdit : public Control
         Pt::Signal<const Pt::String&> _editingFinished;
 
         EchoMode                      _echoMode;
-        Alignment                     _textAlignment;
+        Adjustment                    _textAdjustment;
         Pt::String                    _text;
         Pt::String                    _displayText;
         Pt::String                    _placeholderText;

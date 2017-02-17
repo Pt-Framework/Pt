@@ -129,7 +129,7 @@ ChildW::ChildW(const std::string& title)
     _lineEdit.setPlaceholderText("placeholder text");
     _lineEdit.resize( Gfx::SizeF(130, 26) );
     _lineEdit.setMargin(5);
-    _lineEdit.setTextAlignment(LineEdit::MiddleCenter);
+    _lineEdit.setTextAdjustment(Adjustment::Center);
     //_lineEdit.setEchoMode(Pt::Hmi::LineEdit::Masked);
     _lineEdit.editingFinished() += Pt::slot(_textLabel, &Pt::Hmi::Label::setText);
     _lineEdit.textEdited() += Pt::slot(*this, &ChildW::checkInput);

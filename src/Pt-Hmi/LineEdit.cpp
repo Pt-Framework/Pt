@@ -39,7 +39,7 @@ namespace Hmi {
 
 LineEdit::LineEdit()
 : _echoMode(Normal)
-, _textAlignment(TopLeft)
+, _textAdjustment(Adjustment::Left)
 , _isAccepted(true)
 , _isTextChanged(false)
 , _cursorPosition(0)
@@ -112,15 +112,15 @@ void LineEdit::setEchoMode(LineEdit::EchoMode mode)
 }
 
 
-LineEdit::Alignment LineEdit::textAlignment() const
+Adjustment LineEdit::textAdjustment() const
 {
-    return _textAlignment;
+    return _textAdjustment;
 }
 
 
-void LineEdit::setTextAlignment(Alignment a)
+void LineEdit::setTextAdjustment(Adjustment a)
 {
-    _textAlignment = a;
+    _textAdjustment = a;
     
     layoutText();
     update();
@@ -526,23 +526,17 @@ void LineEdit::layoutText()
     {
         _hscroll = 0;
 
-        switch(_textAlignment)
+        switch(_textAdjustment)
         {
-            case TopLeft:
-            case MiddleLeft:
-            case BottomLeft:
+            case Adjustment::Left:
                 _halign = 0;
                 break;
             
-            case TopCenter:
-            case MiddleCenter:
-            case BottomCenter:
+            case Adjustment::Center:
                 _halign = (maxWidth - fmText.width()) / 2;
                 break;
             
-            case TopRight:           
-            case MiddleRight:
-            case BottomRight:
+            case Adjustment::Right:           
                 _halign = maxWidth - fmText.width();
                 break;
         }
@@ -567,9 +561,7 @@ void LineEdit::layoutText()
 
         _halign = 0;
 
-        if( _textAlignment == TopRight ||
-            _textAlignment == MiddleRight ||
-            _textAlignment == BottomRight )
+        if( _textAdjustment == Adjustment::Right )
         {
             _hscroll = fmText.width() - maxWidth;
         }
