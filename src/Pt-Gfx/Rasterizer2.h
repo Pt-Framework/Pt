@@ -152,7 +152,6 @@ class Rasterizer2
         void rasterPolygonOutline(const Point* points, size_t pointCount, const Color& color);
         void rasterPolygonAreaJaggies(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
         void rasterPolygonAreaFSAA2x2(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
-        void rasterPolygonAreaSSAA4x4(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
 
         void updateGradientBrush(Pt::int32_t width, Pt::int32_t height);
 
@@ -545,9 +544,20 @@ void Rasterizer2::rasterPolygonAreaFSAAGen(const Point* points, const size_t* po
                 // Calculate the cells
                 Pt::int32_t from_cell[SUPERSAMPLE_SIZE];
                 Pt::int32_t to_cell  [SUPERSAMPLE_SIZE];
+                bool        shortSpan = false;
                 for(Pt::int32_t s = 0; s < SUPERSAMPLE_SIZE; ++s) {
                     from_cell[s] = from[s] / SUPERSAMPLE_SIZE;
                     to_cell  [s] = to  [s] / SUPERSAMPLE_SIZE;
+                    if(abs(to_cell[s] - from_cell[s]) <= SUPERSAMPLE_SIZE) shortSpan = true;
+                }
+                // If the span is short, accumulate alphas for the whole span directly
+                if(shortSpan) {
+                    for(Pt::int32_t n = 0; n < SUPERSAMPLE_SIZE; ++n) {
+                        for(Pt::int32_t k = from[n]; k <= to[n]; ++k) {
+                            alphas[k / SUPERSAMPLE_SIZE] += FSAA_MIN_ALPHA;
+                        }
+                    }
+                    continue;
                 }
                 // Accumulate alphas for the left side of the span
                 // --- Each distinct cell ---
