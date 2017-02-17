@@ -196,7 +196,7 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
         const Point topLeft_( topLeft.x    (), topLeft.y     () );
         const Size  size_   ( size   .width(), size   .height() );
         // Rasterize the ellipse
-        _rasterizer->fillEllipseJaggies(topLeft_, size_);
+        _rasterizer->fillEllipseNoAA(topLeft_, size_);
         // Done
         return;
     }

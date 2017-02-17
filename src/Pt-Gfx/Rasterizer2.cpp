@@ -166,7 +166,7 @@ void Rasterizer2::strokeText( const Point& to, const Pt::String& text )
     _text->draw( *_image, _pen.color(), to, text, _compositionMode );
 }
 
-void Rasterizer2::fillEllipseJaggies(const Point& topLeft, const Size& size)
+void Rasterizer2::fillEllipseNoAA(const Point& topLeft, const Size& size)
 {
 
     // Update the gradient as needed
