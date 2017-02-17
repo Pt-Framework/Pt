@@ -201,7 +201,7 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
     std::vector<float> disY(qtrSegs);
     for(Pt::int32_t i = 0; i < qtrSegs; ++i) {
         // Calculate the angle
-        const float angle = 0.5 * Pt::Pi * i / qtrSegs;
+        const float angle = 0.5f * Pt::Pi * i / qtrSegs;
         // Calculate the displacements
         disX[i] =  radiusX * fastCos<float, true>(angle);
         disY[i] = -radiusY * fastSin<float, true>(angle);
