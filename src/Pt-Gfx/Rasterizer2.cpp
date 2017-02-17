@@ -242,7 +242,7 @@ void Rasterizer2::fillEllipseNoAA(const Point& topLeft, const Size& size)
         }
     }
 
-    if( !b ) {
+    if( !errorY || !b ) {
         const Pt::int32_t iterY = yc - minY;
               Pt::int32_t iterL = xc - a - minX;
               Pt::int32_t iterR = xc - a - minX + 2 * a - 1;
