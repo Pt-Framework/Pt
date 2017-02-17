@@ -207,7 +207,7 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
     const Pt::int32_t radiusM = std::max(radiusX, radiusY);
     const Pt::int32_t centerX = topLeft.x() + radiusX;
     const Pt::int32_t centerY = topLeft.y() + radiusY;
-    const Pt::int32_t numSegs = (radiusM * 2 / 3 / 20) * 20;
+    const Pt::int32_t numSegs = (radiusM * 4 / 3 / 20) * 20;
     const Pt::int32_t qtrSegs = (numSegs / 4);
     const Pt::int32_t qtrSeg1 = qtrSegs - 1;
 
@@ -223,24 +223,60 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
     }
 
     // Generate a polygon that approximates the ellipse
-    // ### TODO: REMOVE DUPLICATED POINTS !!! ###
     std::vector<Point> points(numSegs);
-    Pt::int32_t        p = 0;
+    Pt::int32_t        prevX = ImagePainter2::MaximumCoordinate;
+    Pt::int32_t        prevY = ImagePainter2::MaximumCoordinate;
+    Pt::int32_t        p     = 0;
+
     for(Pt::int32_t i = 0; i < qtrSegs; ++i) { // Quadrant I
-        points[p++].set(centerX + disX[i], centerY + disY[i]);
+        // Calculate the coordinates
+        const Pt::int32_t x = centerX + disX[i];
+        const Pt::int32_t y = centerY + disY[i];
+        // Skip duplicated points
+        if(prevX == x && prevY == y) continue;
+        prevX = x;
+        prevY = y;
+        // Store the point and increment the index
+        points[p++].set(x, y);
     }
+
     for(Pt::int32_t i = 0; i < qtrSegs; ++i) { // Quadrant II
-        points[p++].set(centerX - disX[qtrSeg1 - i], centerY + disY[qtrSeg1 - i]);
+        // Calculate the coordinates
+        const Pt::int32_t x = centerX - disX[qtrSeg1 - i];
+        const Pt::int32_t y = centerY + disY[qtrSeg1 - i];
+        // Skip duplicated points
+        if(prevX == x && prevY == y) continue;
+        prevX = x;
+        prevY = y;
+        // Store the point and increment the index
+        points[p++].set(x, y);
     }
+
     for(Pt::int32_t i = 0; i < qtrSegs; ++i) { // Quadrant III
-        points[p++].set(centerX - disX[i], centerY - disY[i]);
+        // Calculate the coordinates
+        const Pt::int32_t x = centerX - disX[i];
+        const Pt::int32_t y = centerY - disY[i];
+        // Skip duplicated points
+        if(prevX == x && prevY == y) continue;
+        prevX = x;
+        prevY = y;
+        // Store the point and increment the index
+        points[p++].set(x, y);
     }
     for(Pt::int32_t i = 0; i < qtrSegs; ++i) { // Quadrant IV
-        points[p++].set(centerX + disX[qtrSeg1 - i], centerY - disY[qtrSeg1 - i]);
+        // Calculate the coordinates
+        const Pt::int32_t x = centerX + disX[qtrSeg1 - i];
+        const Pt::int32_t y = centerY - disY[qtrSeg1 - i];
+        // Skip duplicated points
+        if(prevX == x && prevY == y) continue;
+        prevX = x;
+        prevY = y;
+        // Store the point and increment the index
+        points[p++].set(x, y);
     }
 
     // Rasterize the polygon
-    _rasterizer->fillPolygon(points.data(), points.size());
+    _rasterizer->fillPolygon(points.data(), p);
 }
 
 void ImagePainter2::drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
@@ -264,28 +300,35 @@ void ImagePainter2::fillArc(const PointF& topLeft, const SizeF& size, float degB
     const Pt::int32_t radiusM = std::max(radiusX, radiusY);
     const Pt::int32_t centerX = topLeft.x() + radiusX;
     const Pt::int32_t centerY = topLeft.y() + radiusY;
-    const Pt::int32_t degFac  = (degEnd - degBegin) / 36 / 3;
+    const Pt::int32_t degFac  = (degEnd - degBegin) / 36 * 2;
     const Pt::int32_t numSegs = (radiusM * (degFac ? degFac : 1) / 3 / 20) * 20;
     const float       fdegInc = (Pt::Pi * (degEnd -  degBegin) / 180) / (numSegs - 1);
 
     // Generate a polygon that approximates the arc
     std::vector<Point> points(numSegs + (createPie ? 1 : 0));
+    Pt::int32_t        prevX = ImagePainter2::MaximumCoordinate;
+    Pt::int32_t        prevY = ImagePainter2::MaximumCoordinate;
     float              angle = Pt::Pi * degBegin / 180;
+    Pt::int32_t        p     = 0;
     for(Pt::int32_t i = 0; i < numSegs; ++i) {
-        // Calculate and store the coordinates
-        points[i].set(
-            centerX + radiusX * fastCos<float, true>(angle),
-            centerY - radiusY * fastSin<float, true>(angle)
-        );
+        // Calculate the coordinates
+        const Pt::int32_t x = centerX + radiusX * fastCos<float, true>(angle);
+        const Pt::int32_t y = centerY - radiusY * fastSin<float, true>(angle);
         // Update the angle
         angle += fdegInc;
+        // Skip duplicated points
+        if(prevX == x && prevY == y) continue;
+        prevX = x;
+        prevY = y;
+        // Store the point and increment the index
+        points[p++].set(x, y);
     }
 
     if(createPie) // For drawing a pie, add one more point at the center of the arc
         points[numSegs].set(centerX, centerY);
 
     // Rasterize the polygon
-    _rasterizer->fillPolygon(points.data(), points.size());
+    _rasterizer->fillPolygon(points.data(), p);
 }
 
 void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount )
