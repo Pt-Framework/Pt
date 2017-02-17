@@ -163,7 +163,7 @@ Gfx::PointF ScreenImpl::screenPosition(const Gfx::PointF& posRaw)
 
 void ScreenImpl::drawCursor(const Pt::Hmi::MouseEvent& mev)
 {
-    _drawCursor =  true;
+    _drawCursor = true;
 
     if( ! _cursorBackground.empty() )
     {
