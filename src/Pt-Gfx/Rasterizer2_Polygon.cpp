@@ -117,7 +117,7 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
         );
     }
     else if(_aaLevel == 2) {
-        rasterPolygonAreaFSAAGen<8>(
+        rasterPolygonAreaFSAAGen<4>(
             clippedPoints.data(), clippedCounts.data(),
             clippedCounts.size(), clippedPoints.size(),
             _brush.color(), minX, minY, maxX, maxY
