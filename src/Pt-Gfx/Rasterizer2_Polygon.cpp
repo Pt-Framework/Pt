@@ -106,7 +106,7 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
         );
     }
     else if(_aaLevel == 1) {
-        rasterPolygonAreaFSAA2x2(
+        rasterPolygonAreaFSAA2X2(
             clippedPoints.data(), clippedCounts.data(),
             clippedCounts.size(), clippedPoints.size(),
             _brush.color(), minX, minY, maxX, maxY
@@ -155,7 +155,7 @@ void Rasterizer2::fillPolygonSeparate(const Point* points, size_t pointCount)
             if(_aaLevel == 0)
                 rasterPolygonAreaJaggies(clipped.data(), numPoint, 1, clipped.size(), _brush.color(), minX, minY, maxX, maxY);
             else if(_aaLevel == 1)
-                rasterPolygonAreaFSAA2x2(clipped.data(), numPoint, 1, clipped.size(), _brush.color(), minX, minY, maxX, maxY);
+                rasterPolygonAreaFSAA2X2(clipped.data(), numPoint, 1, clipped.size(), _brush.color(), minX, minY, maxX, maxY);
             else if(_aaLevel == 2)
                 rasterPolygonAreaFSAAGen<4>(clipped.data(), numPoint, 1, clipped.size(), _brush.color(), minX, minY, maxX, maxY);
             else
@@ -262,7 +262,7 @@ void Rasterizer2::rasterPolygonAreaJaggies(const Point* points, const size_t* po
 
 // Inspired by http://alienryderflex.com/polygon_fill
 // Public-domain code by Darel Rex Finley, 2007
-void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
+void Rasterizer2::rasterPolygonAreaFSAA2X2(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
 {
     // Internal macros
     #define FSAA2X2_SUPERSAMPLE_SIZE 2

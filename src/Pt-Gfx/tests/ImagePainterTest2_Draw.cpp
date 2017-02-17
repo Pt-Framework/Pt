@@ -291,6 +291,12 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
     painter.fillEllipse( PointF (30 + 600, 50), SizeF(120, 120) );
     painter.drawText( PointF(30 + 600, 30), "FSAA 8x8" );
 
+    if(ip2) {
+        ip2->setAntiAliasingLevel(0);
+        ip2->fillArc( PointF (30 + 800, 50), SizeF(120, 120), 0, 900 );
+        ip2->drawText( PointF(30 + 800, 30), "NOAA" );
+    }
+
 
     painter.setBrush( brush2 );
 
@@ -310,6 +316,12 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
     painter.fillEllipse( PointF (30 + 600, 50 + 200), SizeF(120, 60) );
     painter.drawText( PointF(30 + 600, 30 + 200), "FSAA 8x8" );
 
+    if(ip2) {
+        ip2->setAntiAliasingLevel(1);
+        ip2->fillArc( PointF (30 + 800, 50 + 200), SizeF(120, 120), 0, 1800 - 450 );
+        ip2->drawText( PointF(30 + 800, 30 + 200), "FSAA 2x2" );
+    }
+
 
     painter.setBrush( brush2 );
 
@@ -328,6 +340,12 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
     if(ip2) ip2->setAntiAliasingLevel(3);
     painter.fillEllipse( PointF (30 + 600, 50 + 400), SizeF(60, 120) );
     painter.drawText( PointF(30 + 600, 30 + 400), "FSAA 8x8" );
+
+    if(ip2) {
+        ip2->setAntiAliasingLevel(2);
+        ip2->fillArc( PointF (30 + 800, 50 + 400), SizeF(120, 120), 900 + 450, 3599 );
+        ip2->drawText( PointF(30 + 800, 30 + 400), "FSAA 4x4" );
+    }
 
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);

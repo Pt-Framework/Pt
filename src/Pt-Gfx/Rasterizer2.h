@@ -151,7 +151,7 @@ class Rasterizer2
 
         void rasterPolygonOutline(const Point* points, size_t pointCount, const Color& color);
         void rasterPolygonAreaJaggies(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
-        void rasterPolygonAreaFSAA2x2(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
+        void rasterPolygonAreaFSAA2X2(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
 
         void updateGradientBrush(Pt::int32_t width, Pt::int32_t height);
 

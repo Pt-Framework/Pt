@@ -181,18 +181,18 @@ void ImagePainter2::fillRect( const RectF& rect )
     _rasterizer->fillRect(tl, br);
 }
 
-void ImagePainter2::drawEllipse( const PointF& topLeftIn, const SizeF& sizeIn )
+void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
 {
 }
 
-void ImagePainter2::fillEllipse( const PointF& topLeftIn, const SizeF& sizeIn )
+void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
 {
-    // Caculate the parameters
-    const Pt::int32_t radiusX = sizeIn.width () / 2;
-    const Pt::int32_t radiusY = sizeIn.height() / 2;
+    // Calculate the ellipse's parameters
+    const Pt::int32_t radiusX = size.width () / 2;
+    const Pt::int32_t radiusY = size.height() / 2;
     const Pt::int32_t radiusM = std::max(radiusX, radiusY);
-    const Pt::int32_t centerX = topLeftIn.x() + radiusX;
-    const Pt::int32_t centerY = topLeftIn.y() + radiusY;
+    const Pt::int32_t centerX = topLeft.x() + radiusX;
+    const Pt::int32_t centerY = topLeft.y() + radiusY;
     const Pt::int32_t numSegs = (radiusM * 2 / 3 / 20) * 20;
     const Pt::int32_t qtrSegs = (numSegs / 4);
 
@@ -224,15 +224,48 @@ void ImagePainter2::fillEllipse( const PointF& topLeftIn, const SizeF& sizeIn )
     }
 
     // Rasterize the polygon
-    _rasterizer->fillPolygon(points.data(), qtrSegs*4);
+    _rasterizer->fillPolygon(points.data(), numSegs);
 }
 
-void ImagePainter2::drawArc(const PointF& topLeft, const SizeF& size, Pt::int16_t degBegin, Pt::int16_t degEnd)
+void ImagePainter2::drawArc(const PointF& topLeft, const SizeF& size, Pt::uint16_t degBeginX10, Pt::uint16_t degEndX10)
 {
 }
 
-void ImagePainter2::fillArc(const PointF& topLeft, const SizeF& size, Pt::int16_t degBegin, Pt::int16_t degEnd)
+void ImagePainter2::fillArc(const PointF& topLeft, const SizeF& size, Pt::uint16_t degBeginX10, Pt::uint16_t degEndX10)
 {
+    // Clip and swap the begin and end degrees as needed
+    if(degBeginX10 > 3600) degBeginX10 = 3600;
+    if(degEndX10   > 3600) degEndX10   = 3600;
+
+    if(degEndX10 < degBeginX10) std::swap(degEndX10, degBeginX10);
+
+    // Calculate the arc's parameters
+    const Pt::int32_t radiusX = size.width () / 2;
+    const Pt::int32_t radiusY = size.height() / 2;
+    const Pt::int32_t radiusM = std::max(radiusX, radiusY);
+    const Pt::int32_t centerX = topLeft.x() + radiusX;
+    const Pt::int32_t centerY = topLeft.y() + radiusY;
+    const Pt::int32_t degFac  = (degEndX10 - degBeginX10) / 360 / 3;
+    const Pt::int32_t numSegs = (radiusM * (degFac ? degFac : 1) / 3 / 20) * 20;
+    const float       fdegInc = (Pt::Pi * (degEndX10 -  degBeginX10) / 1800.0f) / (numSegs - 1);
+
+    // Generate a polygon that approximates the arc
+    std::vector<Point> points(numSegs + 1);
+    float              angle = Pt::Pi * degBeginX10 / 1800.0f;
+    for(Pt::int32_t i = 0; i < numSegs; ++i) {
+        // Calculate and store the coordinates
+        points[i].set(
+            centerX + radiusX * fastCos<float, true>(angle),
+            centerY - radiusY * fastSin<float, true>(angle)
+        );
+        // Update the angle
+        angle += fdegInc;
+    }
+
+    points[numSegs].set(centerX, centerY); // The last point is at the center of the arc
+
+    // Rasterize the polygon
+    _rasterizer->fillPolygon(points.data(), numSegs + 1);
 }
 
 void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount )
