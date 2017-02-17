@@ -1,4 +1,4 @@
-static void sdlPreviewRGB888Buffer(const std::string& title, const uint8_t* argb8888Buff, int sizeX, int sizeY, bool saveImageAsBMP)
+static void sdlPreviewRGB888Buffer(const std::string& title, const uint8_t* argb8888Buff, int sizeX, int sizeY, bool saveImageAsPNG)
 {
     // Initialise SDL
     if(SDL_Init(SDL_INIT_VIDEO) < 0) return;
@@ -44,14 +44,16 @@ static void sdlPreviewRGB888Buffer(const std::string& title, const uint8_t* argb
         usleep(10000);
     }
 
-    // Save the image as a BMP file
-    if(saveImageAsBMP) {
+    // Save the image as a PNG file
+    if(saveImageAsPNG) {
         std::string eraseStr = " - ImagePainter2";
-        std::string fileName = std::string("IPT2 - ") + title + ".bmp";
+        std::string fileName = std::string("../src/Pt-Gfx/TEMPORARY/IPT2 - ") + title + ".png";
         fileName.erase(fileName.find(eraseStr), eraseStr.length());
-         SDL_Surface* sdlSurface = SDL_CreateRGBSurfaceFrom((void*) argb8888Buff, sizeX, sizeY, 32, sizeX * 4, 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
-        SDL_SaveBMP(sdlSurface, fileName.c_str());
-        SDL_FreeSurface(sdlSurface);
+        SDL_Surface* imageS = SDL_CreateRGBSurfaceFrom((void*) argb8888Buff, sizeX, sizeY, 32, sizeX * 4, 0x00FF0000, 0x0000FF00, 0x000000FF, 0x00000000);
+        SDL_Surface* imageD = SDL_PNGFormatAlpha(imageS);
+        SDL_SavePNG(imageD, fileName.c_str());
+        SDL_FreeSurface(imageS);
+        SDL_FreeSurface(imageD);
     }
 
     // Done

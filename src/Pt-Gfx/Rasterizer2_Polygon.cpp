@@ -372,6 +372,16 @@ void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* po
                 const Pt::int32_t from1_area = ( (from1_cell * FSAA2X2_SUPERSAMPLE_SIZE) < from1 ) ? FSAA2X2_MIN_ALPHA : FSAA2X2_MID_ALPHA;
                 const Pt::int32_t to0_area   = ( (to0_cell   * FSAA2X2_SUPERSAMPLE_SIZE) < to0   ) ? FSAA2X2_MID_ALPHA : FSAA2X2_MIN_ALPHA;
                 const Pt::int32_t to1_area   = ( (to1_cell   * FSAA2X2_SUPERSAMPLE_SIZE) < to1   ) ? FSAA2X2_MID_ALPHA : FSAA2X2_MIN_ALPHA;
+                // If the span is short, accumulate alphas for the whole span directly to avoid alpha-related artifacts
+                if( (to0 - from0 <= 2) || (to1 - from1 <= 2) ) {
+                    for(Pt::int32_t k = from0; k <= to0; ++k) {
+                        alphas[k / FSAA2X2_SUPERSAMPLE_SIZE] += FSAA2X2_MIN_ALPHA;
+                    }
+                    for(Pt::int32_t k = from1; k <= to1; ++k) {
+                        alphas[k / FSAA2X2_SUPERSAMPLE_SIZE] += FSAA2X2_MIN_ALPHA;
+                    }
+                    continue;
+                }
                 // Calculate alphas for the left side of the span
                 if(from0_cell == from1_cell) {
                     alphas[from0_cell] = from0_area + from1_area;

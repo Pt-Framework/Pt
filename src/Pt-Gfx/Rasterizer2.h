@@ -529,7 +529,7 @@ void Rasterizer2::rasterPolygonAreaFSAAGen(const Point* points, const size_t* po
             break;
         }
         // --- The number of nodes within all the rows are equal ---
-        if(true && hasSameNumOfNodes) {
+        if(hasSameNumOfNodes) {
             for(Pt::int32_t i = 0; i < nodes0; i += 2) {
                 // Get the coordinates
                 Pt::int32_t from[SUPERSAMPLE_SIZE];
@@ -550,7 +550,7 @@ void Rasterizer2::rasterPolygonAreaFSAAGen(const Point* points, const size_t* po
                     to_cell  [s] = to  [s] / SUPERSAMPLE_SIZE;
                     if(abs(to_cell[s] - from_cell[s]) <= SUPERSAMPLE_SIZE) shortSpan = true;
                 }
-                // If the span is short, accumulate alphas for the whole span directly
+                // If the span is short, accumulate alphas for the whole span directly to avoid alpha-related artifacts
                 if(shortSpan) {
                     for(Pt::int32_t n = 0; n < SUPERSAMPLE_SIZE; ++n) {
                         for(Pt::int32_t k = from[n]; k <= to[n]; ++k) {
