@@ -21,10 +21,7 @@ if $(WITH_RASTERIZER2)
     {
         SubDirCcFlags [ FDefines WITH_BUILTIN_LIBPNG ] ;
     }
-    else
-    {
-        SubDirC++Flags [ FIncludes "/usr/include/cairo" ] ;
-    }
+    SubDirC++Flags [ FIncludes "/usr/include/cairo" ] ;
 
     Main ImagePainterTest2 : ImagePainterTest2.cpp SDL_SavePNG/savepng.c ;
     LinkSharedLibraries ImagePainterTest2 : Pt Pt-Gfx Pt-System ;
