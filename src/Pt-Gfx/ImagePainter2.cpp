@@ -206,7 +206,9 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
 //#define USE_QSC_ALGORITHM
 
 #ifdef USE_XMI_ALGORITHM
-    // This algorithm seems to produce an even better image but about 9% slower than the original algorithm
+    // This algorithm seems to produce an even better image,
+    // It is ~9% slower than the original algorithm
+    // It shrinks the drawn ellipse by a few pixels :( :( :(
 
     // Calculate the coordinate displacements as per this equation:
     //     e(X, Y) = ( b^2 * X^2 ) + ( a^2 * Y^2 ) - ( a^2 * b^2 )
@@ -298,7 +300,8 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
 #endif
 
 #ifdef USE_XWU_ALGORITHM
-    // This algorithm seems to produce a better image and about 22% faster than the original algorithm
+    // This algorithm seems to produce a better image
+    // It is ~22% faster than the original algorithm
 
     // Calculate the ellipse's parameters
     const Pt::int32_t radiusX  = size.width () / 2;
