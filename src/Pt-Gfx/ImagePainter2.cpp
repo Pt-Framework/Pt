@@ -210,8 +210,9 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
     const Pt::int32_t radiusY2 = radiusY * radiusY;
     const Pt::int32_t centerX  = topLeft.x() + radiusX;
     const Pt::int32_t centerY  = topLeft.y() + radiusY;
-    const Pt::int32_t qtrSegsX = round((float) radiusX2 / sqrt(radiusX2 + radiusY2));
-    const Pt::int32_t qtrSegsY = round((float) radiusY2 / sqrt(radiusX2 + radiusY2));
+    const Pt::int32_t qtrDivF  = 4;
+    const Pt::int32_t qtrSegsX = round((float) radiusX2 / sqrt(radiusX2 + radiusY2) / qtrDivF);
+    const Pt::int32_t qtrSegsY = round((float) radiusY2 / sqrt(radiusX2 + radiusY2) / qtrDivF);
     const Pt::int32_t numSegs  = (qtrSegsX + 1 + qtrSegsY + 1) * 4;
 
     // Calculate the coordinate displacements
@@ -219,11 +220,11 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
     std::vector<float> disY(qtrSegsX + 1);
 
     for(Pt::int32_t x = 0; x <= qtrSegsX; ++x) {
-        disY[x] = round(radiusY * sqrt(1 - (float) x * x / radiusX2));
+        disY[x] = round(radiusY * sqrt(1 - (float) x * x * qtrDivF * qtrDivF / radiusX2));
     }
 
     for(Pt::int32_t y = 0; y <= qtrSegsY; ++y) {
-        disX[y] = round(radiusX * sqrt(1 - (float) y * y / radiusY2));
+        disX[y] = round(radiusX * sqrt(1 - (float) y * y * qtrDivF * qtrDivF / radiusY2));
     }
 
     // Generate a polygon that approximates the ellipse
@@ -235,7 +236,7 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
     // Top-right
     for(Pt::int32_t x = 0; x <= qtrSegsX; ++x) {
         // Calculate the coordinates
-        const Pt::int32_t px = centerX + x;
+        const Pt::int32_t px = centerX + x * qtrDivF;
         const Pt::int32_t py = centerY - disY[x];
         // Skip duplicated points
         if(prevX == px && prevY == py) continue;
@@ -247,7 +248,7 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
     for(Pt::int32_t y = qtrSegsY; y >= 0; --y) {
         // Calculate the coordinates
         const Pt::int32_t px = centerX + disX[y];
-        const Pt::int32_t py = centerY - y;
+        const Pt::int32_t py = centerY - y * qtrDivF;
         // Skip duplicated points
         if(prevX == px && prevY == py) continue;
         prevX = px;
@@ -260,7 +261,7 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
     for(Pt::int32_t y = 0; y <= qtrSegsY; ++y) {
         // Calculate the coordinates
         const Pt::int32_t px = centerX + disX[y];
-        const Pt::int32_t py = centerY + y;
+        const Pt::int32_t py = centerY + y * qtrDivF;
         // Skip duplicated points
         if(prevX == px && prevY == py) continue;
         prevX = px;
@@ -270,7 +271,7 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
     }
     for(Pt::int32_t x = qtrSegsX; x >=0 ; --x) {
         // Calculate the coordinates
-        const Pt::int32_t px = centerX + x;
+        const Pt::int32_t px = centerX + x * qtrDivF;
         const Pt::int32_t py = centerY + disY[x];
         // Skip duplicated points
         if(prevX == px && prevY == py) continue;
@@ -283,7 +284,7 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
     // Bottom-left
     for(Pt::int32_t x = 0; x < qtrSegsX; ++x) {
         // Calculate the coordinates
-        const Pt::int32_t px = centerX - x;
+        const Pt::int32_t px = centerX - x * qtrDivF;
         const Pt::int32_t py = centerY + disY[x];
         // Skip duplicated points
         if(prevX == px && prevY == py) continue;
@@ -295,7 +296,7 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
     for(Pt::int32_t y = qtrSegsY; y >= 0; --y) {
         // Calculate the coordinates
         const Pt::int32_t px = centerX - disX[y];
-        const Pt::int32_t py = centerY + y;
+        const Pt::int32_t py = centerY + y * qtrDivF;
         // Skip duplicated points
         if(prevX == px && prevY == py) continue;
         prevX = px;
@@ -308,7 +309,7 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
     for(Pt::int32_t y = 0; y < qtrSegsY; ++y) {
         // Calculate the coordinates
         const Pt::int32_t px = centerX - disX[y];
-        const Pt::int32_t py = centerY - y;
+        const Pt::int32_t py = centerY - y * qtrDivF;
         // Skip duplicated points
         if(prevX == px && prevY == py) continue;
         prevX = px;
@@ -318,7 +319,7 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
     }
     for(Pt::int32_t x = qtrSegsX; x >= 0; --x) {
         // Calculate the coordinates
-        const Pt::int32_t px = centerX - x;
+        const Pt::int32_t px = centerX - x * qtrDivF;
         const Pt::int32_t py = centerY - disY[x];
         // Skip duplicated points
         if(prevX == px && prevY == py) continue;
@@ -339,7 +340,8 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
     const Pt::int32_t radiusM = std::max(radiusX, radiusY);
     const Pt::int32_t centerX = topLeft.x() + radiusX;
     const Pt::int32_t centerY = topLeft.y() + radiusY;
-    const Pt::int32_t numSegs = (radiusM * 4 / 3 / 20) * 20;
+    const Pt::int32_t numSegD = (radiusM * 4 / 3 / 20) * 20;
+    const Pt::int32_t numSegs = (numSegD >= 16) ? numSegD : 16;
     const Pt::int32_t qtrSegs = (numSegs / 4);
     const Pt::int32_t qtrSeg1 = qtrSegs - 1;
 
@@ -395,6 +397,7 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
         // Store the point and increment the index
         points[p++].set(x, y);
     }
+
     for(Pt::int32_t i = 0; i < qtrSegs; ++i) { // Quadrant IV
         // Calculate the coordinates
         const Pt::int32_t x = centerX + disX[qtrSeg1 - i];
@@ -435,7 +438,8 @@ void ImagePainter2::fillArc(const PointF& topLeft, const SizeF& size, float degB
     const Pt::int32_t centerX = topLeft.x() + radiusX;
     const Pt::int32_t centerY = topLeft.y() + radiusY;
     const Pt::int32_t degFac  = (degEnd - degBegin) / 36 * 2;
-    const Pt::int32_t numSegs = (radiusM * (degFac ? degFac : 1) / 3 / 20) * 20;
+    const Pt::int32_t numSegD = (radiusM * (degFac ? degFac : 1) / 3 / 20) * 20;
+    const Pt::int32_t numSegs = (numSegD >= 16) ? numSegD : 16;
     const float       fdegInc = (Pt::Pi * (degEnd -  degBegin) / 180) / (numSegs - 1);
 
     // Generate a polygon that approximates the arc
@@ -459,7 +463,7 @@ void ImagePainter2::fillArc(const PointF& topLeft, const SizeF& size, float degB
     }
 
     if(createPie) // For drawing a pie, add one more point at the center of the arc
-        points[numSegs].set(centerX, centerY);
+        points[p++].set(centerX, centerY);
 
     // Rasterize the polygon
     _rasterizer->fillPolygon(points.data(), p);
