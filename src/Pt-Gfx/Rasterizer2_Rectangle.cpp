@@ -39,32 +39,7 @@ namespace Gfx {
 // ===== Public Member Functions ========================================================
 // ======================================================================================
 
-void Rasterizer2::strokeRect(const Point& tl, const Point& br)
-{
-    switch( _pen.style() ) {
-        case Pen::Solid:
-            rasterOnePixelRectOutline(tl, br);
-            break;
-
-        case Pen::Dash:
-        case Pen::DoubleDash:
-            break;
-    }
-}
-
-void Rasterizer2::fillRect(const Point& tl, const Point& br)
-{
-    if(_isGradient)
-        updateGradientBrush(br.x() - tl.x() + 1, br.y() - tl.y() + 1);
-
-    rasterRectArea(tl, br);
-}
-
-// ======================================================================================
-// ===== Private Member Functions =======================================================
-// ======================================================================================
-
-void Rasterizer2::rasterOnePixelRectOutline(const Point& tl, const Point& br)
+void Rasterizer2::strokeOnePixelSolidRect(const Point& tl, const Point& br)
 {
     // Get the minimum and maximum coordinates
     Pt::int32_t minX = tl.x();
@@ -86,6 +61,19 @@ void Rasterizer2::rasterOnePixelRectOutline(const Point& tl, const Point& br)
     rasterOnePixelVLineSegment(minX, minY + 1, maxY - 1, _pen.color(), false);
     rasterOnePixelVLineSegment(maxX, minY + 1, maxY - 1, _pen.color(), false);
 }
+
+void Rasterizer2::fillRect(const Point& tl, const Point& br)
+{
+    if(_isGradient)
+        updateGradientBrush(br.x() - tl.x() + 1, br.y() - tl.y() + 1);
+
+    rasterRectArea(tl, br);
+}
+
+
+// ======================================================================================
+// ===== Private Member Functions =======================================================
+// ======================================================================================
 
 void Rasterizer2::rasterRectArea(const Point& tl, const Point& br)
 {

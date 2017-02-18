@@ -138,7 +138,7 @@ class Rasterizer2
 
         void strokeText(const Point& to, const Pt::String& text);
         void strokeOnePixelSolidLine(const Point& a, const Point& b);
-        void strokeRect(const Point& tl, const Point& br);
+        void strokeOnePixelSolidRect(const Point& tl, const Point& br);
 
         void fillRect(const Point& tl, const Point& br);
         void fillPolygon(const Point* points, size_t pointCount);
@@ -152,7 +152,6 @@ class Rasterizer2
         void rasterOnePixelGLineSegmentNOAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, bool skipLastPoint);
         void rasterOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, bool skipLastPoint);
 
-        void rasterOnePixelRectOutline(const Point& tl, const Point& br);
         void rasterRectArea(const Point& tl, const Point& br);
 
         void rasterOnePixelSolidPolygonOutline(const Point* points, size_t pointCount, const Color& color);

@@ -171,7 +171,7 @@ void ImagePainter2::drawRect( const RectF& rect )
 {
     const Point tl( rect.topLeft    ().x(),rect.topLeft    ().y() );
     const Point br( rect.bottomRight().x(),rect.bottomRight().y() );
-    _rasterizer->strokeRect(tl, br);
+    _rasterizer->strokeOnePixelSolidRect(tl, br);
 }
 
 void ImagePainter2::fillRect( const RectF& rect )
