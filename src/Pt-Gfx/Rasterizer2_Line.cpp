@@ -89,7 +89,7 @@ void Rasterizer2::strokeOnePixelSolidLine(const Point& a, const Point& b)
 
     // Check for 45-degree line
     if(sizeX == sizeY) {
-        rasterOnePixelGLineSegmentNOAA(x1, y1, x2, y2, _pen.color(), false);
+        rasterOnePixelGLineSegmentNoAA(x1, y1, x2, y2, _pen.color(), false);
         return;
     }
 
@@ -100,7 +100,7 @@ void Rasterizer2::strokeOnePixelSolidLine(const Point& a, const Point& b)
     }
     else {
         // Raster the line without using anti-aliasing
-        rasterOnePixelGLineSegmentNOAA(x1, y1, x2, y2, _pen.color(), false);
+        rasterOnePixelGLineSegmentNoAA(x1, y1, x2, y2, _pen.color(), false);
     }
 }
 
@@ -152,7 +152,7 @@ void Rasterizer2::rasterOnePixelVLineSegment(Pt::int32_t x, Pt::int32_t y1, Pt::
 // Bresenham's Line Aalgorithm
 // https://en.wikipedia.org/wiki/Bresenham's_line_algorithm
 // https://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm
-void Rasterizer2::rasterOnePixelGLineSegmentNOAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, bool skipLastPoint)
+void Rasterizer2::rasterOnePixelGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, bool skipLastPoint)
 {
     // Adjust the end coordinates as needed
     if(skipLastPoint) {

@@ -151,7 +151,7 @@ class Rasterizer2
     private:
         void rasterOnePixelHLineSegment(Pt::int32_t x1, Pt::int32_t x2, Pt::int32_t y, const Color& color, bool skipLastPoint);
         void rasterOnePixelVLineSegment(Pt::int32_t x, Pt::int32_t y1, Pt::int32_t y2, const Color& color, bool skipLastPoint);
-        void rasterOnePixelGLineSegmentNOAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, bool skipLastPoint);
+        void rasterOnePixelGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, bool skipLastPoint);
         void rasterOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, bool skipLastPoint);
 
         void rasterRectArea(const Point& tl, const Point& br);
@@ -212,6 +212,7 @@ class Rasterizer2
         Rect             _clip;
         Rect             _currentClip;
 };
+
 
 // ======================================================================================
 // ===== Templated Private Member Functions =============================================

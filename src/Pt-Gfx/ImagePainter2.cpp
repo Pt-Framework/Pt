@@ -208,6 +208,22 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount )
 
 void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
 {
+    // Generate a polygon that approximates the ellipse
+    std::vector<Point> points;
+
+    // This is the original algorithm used for renderering ellipse
+    // Its result should be more consistent with ImagePainter2::fillArc()
+    genEllipseGeometryQSC(points, topLeft, size);
+
+    // This algorithm seems to render worse images in some cases, but it is a bit faster
+    //genEllipseGeometryXWU(points, topLeft, size);
+
+    // This algorithm seems to render the most crisp image, but it is more than two times
+    // slower than the original algorithm
+    //genEllipseGeometryXMI(points, topLeft, size);
+
+    // Rasterize the polygon
+    //_rasterizer->fillPolygon(points.data(), points.size());
 }
 
 void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd )

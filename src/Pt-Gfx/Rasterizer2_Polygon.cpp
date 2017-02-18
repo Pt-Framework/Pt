@@ -166,7 +166,7 @@ void Rasterizer2::rasterOnePixelSolidPolygonOutline(const Point* points, size_t 
             const bool xline = ( abs(points[i + 1].x() - points[i].x()) ==
                                  abs(points[i + 1].y() - points[i].y()) );
             if(xline || _aaMode == AntiAliasingMode::None)
-                rasterOnePixelGLineSegmentNOAA(points[i].x(), points[i].y(), points[i + 1].x(), points[i + 1].y(), color, true);
+                rasterOnePixelGLineSegmentNoAA(points[i].x(), points[i].y(), points[i + 1].x(), points[i + 1].y(), color, true);
             else
                 rasterOnePixelGLineSegmentXWAA(points[i].x(), points[i].y(), points[i + 1].x(), points[i + 1].y(), color, true);
         }
@@ -181,7 +181,7 @@ void Rasterizer2::rasterOnePixelSolidPolygonOutline(const Point* points, size_t 
         const bool xline = ( abs(points[pc1].x() - points[0].x()) ==
                              abs(points[pc1].y() - points[0].y()) );
         if(xline || _aaMode == AntiAliasingMode::None)
-            rasterOnePixelGLineSegmentNOAA(points[pc1].x(), points[pc1].y(), points[0].x(), points[0].y(), color, false);
+            rasterOnePixelGLineSegmentNoAA(points[pc1].x(), points[pc1].y(), points[0].x(), points[0].y(), color, false);
         else
             rasterOnePixelGLineSegmentXWAA(points[pc1].x(), points[pc1].y(), points[0].x(), points[0].y(), color, false);
     }

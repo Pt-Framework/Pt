@@ -40,6 +40,18 @@ namespace Gfx {
 
 
 // ======================================================================================
+// ===== Static Public Member Functions =================================================
+// ======================================================================================
+FontMetrics Rasterizer2::fontMetrics( const Font& font, const Pt::String& text )
+{
+    DrawText textRender;
+    textRender.setFont(font);
+
+    return textRender.fontMetrics(text);
+}
+
+
+// ======================================================================================
 // ===== Public Member Functions ========================================================
 // ======================================================================================
 
@@ -120,21 +132,15 @@ void Rasterizer2::setFont(const Font& font)
     _text->setFont(_font);
 }
 
+FontMetrics Rasterizer2::fontMetrics( const String& text ) const
+{
+    return _text->fontMetrics( text );
+}
+
 void Rasterizer2::setClip( const Rect& clip )
 {
     _clip = clip;
     updateClip();
-}
-
-FontMetrics Rasterizer2::fontMetrics( const String& text ) const
-{ return _text->fontMetrics( text ); }
-
-FontMetrics Rasterizer2::fontMetrics( const Font& font, const Pt::String& text )
-{
-    DrawText textRender;
-    textRender.setFont(font);
-
-    return textRender.fontMetrics(text);
 }
 
 void Rasterizer2::image(const Point& to, const Image& img)
