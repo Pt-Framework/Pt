@@ -199,15 +199,15 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
 
     // Draw ellipse with anti-aliasing
 
-    // This is the original algorithm used for drawing ellipse
-    // Its rendering should be more consistent with ImagePainter2::fillArc()
+    // This is the original algorithm used for renderering ellipse
+    // Its result should be more consistent with ImagePainter2::fillArc()
     fillEllipseQSCAA(topLeft, size);
 
-    // This algorithm seems to produce a bit better image and a bit faster too
+    // This algorithm seems to render worse images in some cases, but it is a bit faster
     //fillEllipseXWUAA(topLeft, size);
 
-    // This algorithm seems to produce the most crisp image, but it is
-    // more than 2 times slower than the original algorithm
+    // This algorithm seems to render the most crisp image, but it is more than two times
+    // slower than the original algorithm
     //fillEllipseXMIAA(topLeft, size);
 }
 
@@ -361,7 +361,7 @@ void ImagePainter2::fillEllipseNoAA( const PointF& topLeft, const SizeF& size, c
     }
 
     if( !errorY || !b )
-        _rasterizer->strokeScanlineNoAA(xc - a,  xc - a + 2 * a - 1, yc, minX, minY, color);
+        _rasterizer->strokeScanlineNoAA(xc - a,  xc + a, yc, minX, minY, color);
 }
 
 void ImagePainter2::fillEllipseQSCAA( const PointF& topLeft, const SizeF& size )
