@@ -202,15 +202,16 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
     }
 
 #if 1
+    // This algorithm seems to produce a better image
 
     // Calculate the ellipse's parameters
-    const Pt::int32_t radiusX  = size.width () / 2;
-    const Pt::int32_t radiusY  = size.height() / 2;
-    const Pt::int32_t radiusX2 = radiusX * radiusX;
-    const Pt::int32_t radiusY2 = radiusY * radiusY;
+    const float radiusX  = (float) size.width () / 2;
+    const float radiusY  = (float) size.height() / 2;
+    const float radiusX2 = radiusX * radiusX;
+    const float radiusY2 = radiusY * radiusY;
     const Pt::int32_t centerX  = topLeft.x() + radiusX;
     const Pt::int32_t centerY  = topLeft.y() + radiusY;
-    const Pt::int32_t qtrDivF  = 4;
+    const Pt::int32_t qtrDivF  = 8;
     const Pt::int32_t qtrSegsX = round((float) radiusX2 / sqrt(radiusX2 + radiusY2) / qtrDivF);
     const Pt::int32_t qtrSegsY = round((float) radiusY2 / sqrt(radiusX2 + radiusY2) / qtrDivF);
     const Pt::int32_t numSegs  = (qtrSegsX + 1 + qtrSegsY + 1) * 4;
@@ -220,11 +221,11 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
     std::vector<float> disY(qtrSegsX + 1);
 
     for(Pt::int32_t x = 0; x <= qtrSegsX; ++x) {
-        disY[x] = round(radiusY * sqrt(1 - (float) x * x * qtrDivF * qtrDivF / radiusX2));
+        disY[x] = ceil(radiusY * sqrt(1 - (float) x * x * qtrDivF * qtrDivF / radiusX2));
     }
 
     for(Pt::int32_t y = 0; y <= qtrSegsY; ++y) {
-        disX[y] = round(radiusX * sqrt(1 - (float) y * y * qtrDivF * qtrDivF / radiusY2));
+        disX[y] = ceil(radiusX * sqrt(1 - (float) y * y * qtrDivF * qtrDivF / radiusY2));
     }
 
     // Generate a polygon that approximates the ellipse
@@ -233,7 +234,7 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
     Pt::int32_t        prevY = ImagePainter2::MaximumCoordinate;
     Pt::int32_t        p     = 0;
 
-    // Top-right
+    // --- Top-right ---
     for(Pt::int32_t x = 0; x <= qtrSegsX; ++x) {
         // Calculate the coordinates
         const Pt::int32_t px = centerX + x * qtrDivF;
@@ -257,7 +258,7 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
         points[p++].set(px, py);
     }
 
-    // Bottom-right
+    // --- Bottom-right ---
     for(Pt::int32_t y = 0; y <= qtrSegsY; ++y) {
         // Calculate the coordinates
         const Pt::int32_t px = centerX + disX[y];
@@ -281,8 +282,8 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
         points[p++].set(px, py);
     }
 
-    // Bottom-left
-    for(Pt::int32_t x = 0; x < qtrSegsX; ++x) {
+    // --- Bottom-left ---
+    for(Pt::int32_t x = 0; x <= qtrSegsX; ++x) {
         // Calculate the coordinates
         const Pt::int32_t px = centerX - x * qtrDivF;
         const Pt::int32_t py = centerY + disY[x];
@@ -305,8 +306,8 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
         points[p++].set(px, py);
     }
 
-    // Top-left
-    for(Pt::int32_t y = 0; y < qtrSegsY; ++y) {
+    // --- Top-left ---
+    for(Pt::int32_t y = 0; y <= qtrSegsY; ++y) {
         // Calculate the coordinates
         const Pt::int32_t px = centerX - disX[y];
         const Pt::int32_t py = centerY - y * qtrDivF;
