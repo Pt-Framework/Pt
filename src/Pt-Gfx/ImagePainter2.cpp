@@ -185,16 +185,75 @@ void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
 {
 }
 
+void ImagePainter2::fillEllipseNoAA( const PointF& topLeft, const SizeF& size, const Color& color )
+{
+    // Update the gradient as needed
+    if( _rasterizer->brush().fillStyle() == Brush::HorizontalGradient ||
+        _rasterizer->brush().fillStyle() == Brush::VerticalGradient
+    )
+        _rasterizer->updateGradientBrush(size.width(), size.height());
+
+    // Draw the ellipse's spans as per this equation:
+    //     e(X, Y) = ( b^2 * X^2 ) + ( a^2 * Y^2 ) - ( a^2 * b^2 )
+
+    const Pt::int32_t minX   =  topLeft.x();
+    const Pt::int32_t minY   =  topLeft.y();
+    const Pt::int32_t errorX = ((Pt::int32_t) size.width () % 2) ? 0 : 1;
+    const Pt::int32_t errorY = ((Pt::int32_t) size.height() % 2) ? 0 : 1;
+    const Pt::int32_t a      =  size.width () / 2;
+    const Pt::int32_t b      =  size.height() / 2;
+    const Pt::int32_t a2     =  a * a;
+    const Pt::int32_t b2     =  b * b;
+    const Pt::int32_t xc     =  minX + a;
+    const Pt::int32_t yc     =  minY + b;
+    const Pt::int32_t crit1  = -(a2 / 4 + a % 2 + b2);
+    const Pt::int32_t crit2  = -(b2 / 4 + b % 2 + a2);
+    const Pt::int32_t crit3  = -(b2 / 4 + b % 2     );
+    const Pt::int32_t d2xt   =  2 * b2;
+    const Pt::int32_t d2yt   =  2 * a2;
+          Pt::int32_t dxt    =  0;
+          Pt::int32_t dyt    = -2 * a2 * b;
+          Pt::int32_t x      =  0;
+          Pt::int32_t y      =  b;
+          Pt::int32_t width  =  1;
+          Pt::int32_t t      = -a2 * b;
+
+    while( y > 0 && x <= a ) {
+        if( (t + b2 * x) <= crit1 || (t + a2 * y) <= crit3 ) {
+            ++x;
+            dxt   += d2xt;
+            t     += dxt;
+            width += 2;
+        }
+        else if( (t - a2 * y) > crit2 )  {
+            _rasterizer->strokeScanlineNoAA(xc - x, xc - x + width - errorX - 1, yc - y,          minX, minY, color);
+            _rasterizer->strokeScanlineNoAA(xc - x, xc - x + width - errorX - 1, yc + y - errorY, minX, minY, color);
+            --y;
+            dyt += d2yt;
+            t   += dyt;
+        }
+        else {
+            _rasterizer->strokeScanlineNoAA(xc - x, xc - x + width - errorX - 1, yc - y,          minX, minY, color);
+            _rasterizer->strokeScanlineNoAA(xc - x, xc - x + width - errorX - 1, yc + y - errorY, minX, minY, color);
+            ++x;
+            dxt   += d2xt;
+            t     += dxt;
+            width += 2;
+            --y;
+            dyt   += d2yt;
+            t     += dyt;
+        }
+    }
+
+    if( !errorY || !b )
+        _rasterizer->strokeScanlineNoAA(xc - a,  xc - a + 2 * a - 1, yc, minX, minY, color);
+}
+
 void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
 {
     // Call the fast non-AA rasterizer as needed
     if(_rasterizer->antiAliasingMode() == AntiAliasingMode::None) {
-        // Convert the coordinates and size
-        const Point topLeft_( topLeft.x    (), topLeft.y     () );
-        const Size  size_   ( size   .width(), size   .height() );
-        // Rasterize the ellipse
-        _rasterizer->fillEllipseNoAA(topLeft_, size_);
-        // Done
+        fillEllipseNoAA(topLeft, size, _rasterizer->brush().color());
         return;
     }
 

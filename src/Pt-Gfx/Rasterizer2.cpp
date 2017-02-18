@@ -179,73 +179,6 @@ void Rasterizer2::strokeScanlineNoAA(Pt::int32_t from, Pt::int32_t to, Pt::int32
     rasterScanline(from - minX, to - minX, pixelY - minY, minX, minY, color);
 }
 
-void Rasterizer2::fillEllipseNoAA(const Point& topLeft, const Size& size)
-{
-    // Update the gradient as needed
-    if(_isGradient)
-        updateGradientBrush(size.width(), size.height());
-
-    // Draw the ellipse's spans as per this equation:
-    //     e(X, Y) = ( b^2 * X^2 ) + ( a^2 * Y^2 ) - ( a^2 * b^2 )
-
-    const Pt::int32_t minX   =  topLeft.x();
-    const Pt::int32_t minY   =  topLeft.y();
-    const Pt::int32_t errorX = (size.width () % 2) ? 0 : 1;
-    const Pt::int32_t errorY = (size.height() % 2) ? 0 : 1;
-    const Pt::int32_t a      =  size.width () / 2;
-    const Pt::int32_t b      =  size.height() / 2;
-    const Pt::int32_t a2     =  a * a;
-    const Pt::int32_t b2     =  b * b;
-    const Pt::int32_t xc     =  minX + a;
-    const Pt::int32_t yc     =  minY + b;
-    const Pt::int32_t crit1  = -(a2 / 4 + a % 2 + b2);
-    const Pt::int32_t crit2  = -(b2 / 4 + b % 2 + a2);
-    const Pt::int32_t crit3  = -(b2 / 4 + b % 2     );
-    const Pt::int32_t d2xt   =  2 * b2;
-    const Pt::int32_t d2yt   =  2 * a2;
-          Pt::int32_t dxt    =  0;
-          Pt::int32_t dyt    = -2 * a2 * b;
-          Pt::int32_t x      =  0;
-          Pt::int32_t y      =  b;
-          Pt::int32_t width  =  1;
-          Pt::int32_t t      = -a2 * b;
-
-    while( y > 0 && x <= a ) {
-        if( (t + b2 * x) <= crit1 || (t + a2 * y) <= crit3 ) {
-            ++x;
-            dxt   += d2xt;
-            t     += dxt;
-            width += 2;
-        }
-        else if( (t - a2 * y) > crit2 )  {
-            strokeScanlineNoAA(xc - x, xc - x + width - errorX - 1, yc - y,          minX, minY, _brush.color());
-            strokeScanlineNoAA(xc - x, xc - x + width - errorX - 1, yc + y - errorY, minX, minY, _brush.color());
-            --y;
-            dyt += d2yt;
-            t   += dyt;
-        }
-        else {
-            strokeScanlineNoAA(xc - x, xc - x + width - errorX - 1, yc - y,          minX, minY, _brush.color());
-            strokeScanlineNoAA(xc - x, xc - x + width - errorX - 1, yc + y - errorY, minX, minY, _brush.color());
-            ++x;
-            dxt   += d2xt;
-            t     += dxt;
-            width += 2;
-            --y;
-            dyt   += d2yt;
-            t     += dyt;
-        }
-    }
-
-    if( !errorY || !b )
-        strokeScanlineNoAA(xc - a,  xc - a + 2 * a - 1, yc, minX, minY, _brush.color());
-}
-
-
-// ======================================================================================
-// ===== Private Member Functions =======================================================
-// ======================================================================================
-
 void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
 {
     // Start colors
@@ -310,6 +243,11 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
         *pixel++ = a1 + a2;
     }
 }
+
+
+// ======================================================================================
+// ===== Private Member Functions =======================================================
+// ======================================================================================
 
 void Rasterizer2::updateClip()
 {

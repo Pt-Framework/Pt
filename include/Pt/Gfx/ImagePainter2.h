@@ -118,6 +118,9 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         static FontMetrics fontMetrics( const Font& font, const Pt::String& text );
 
+    protected:
+        virtual void fillEllipseNoAA( const PointF& topLeft, const SizeF& size, const Color& color );
+
     private:
         RectF        _clip;
         Rasterizer2* _rasterizer;
