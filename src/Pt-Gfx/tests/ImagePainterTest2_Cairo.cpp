@@ -1,7 +1,7 @@
 #define BENCHMARK_CAIRO_DISPLAY_RESULTING_IMAGE \
     if(BENCHMARK_CAIRO_CHECK_RESULTING_IMAGE && !i) sdlPreviewRGB888Buffer(formatCaption("Cairo", cm, __FUNCTION__), buffer.data(), imgSize.width(), imgSize.height(), false)
 
-static size_t cairoBenchFillPolygon(int loopCount, CompositionMode cm)
+static size_t cairoBenchFillPolygon(int loopCount, CompositionMode cm, bool useAntiAliasing)
 {
     size_t sum = 0;
 
@@ -12,8 +12,7 @@ static size_t cairoBenchFillPolygon(int loopCount, CompositionMode cm)
     cairo_surface_t* cairoSurface = cairo_image_surface_create_for_data ( &buffer[0], CAIRO_FORMAT_ARGB32, imgSize.width(), imgSize.height(), imgSize.width() * 4);
     cairo_t*         cairo        = cairo_create(cairoSurface);
 
-    //cairo_set_antialias(cairo, CAIRO_ANTIALIAS_NONE);
-    cairo_set_antialias(cairo, CAIRO_ANTIALIAS_DEFAULT);
+    cairo_set_antialias(cairo, useAntiAliasing ? CAIRO_ANTIALIAS_DEFAULT : CAIRO_ANTIALIAS_NONE);
 
     for(int i = 0; i < loopCount ; ++i) {
         Pt::System::Clock clock;
@@ -86,7 +85,7 @@ static size_t cairoBenchFillPolygon(int loopCount, CompositionMode cm)
     return sum;
 }
 
-static size_t cairoBenchFillEllipse(int loopCount, CompositionMode cm)
+static size_t cairoBenchFillEllipse(int loopCount, CompositionMode cm, bool useAntiAliasing)
 {
     size_t sum = 0;
 
@@ -97,8 +96,7 @@ static size_t cairoBenchFillEllipse(int loopCount, CompositionMode cm)
     cairo_surface_t* cairoSurface = cairo_image_surface_create_for_data ( &buffer[0], CAIRO_FORMAT_ARGB32, imgSize.width(), imgSize.height(), imgSize.width() * 4);
     cairo_t*         cairo        = cairo_create(cairoSurface);
 
-    //cairo_set_antialias(cairo, CAIRO_ANTIALIAS_NONE);
-    cairo_set_antialias(cairo, CAIRO_ANTIALIAS_DEFAULT);
+    cairo_set_antialias(cairo, useAntiAliasing ? CAIRO_ANTIALIAS_DEFAULT : CAIRO_ANTIALIAS_NONE);
 
     for(int i = 0; i < loopCount ; ++i) {
         Pt::System::Clock clock;
@@ -154,8 +152,11 @@ static void cairoBenchmark(CompositionMode cm)
 
     // Filled polygons
     if(BENCHMARK_SOLID_FILLED_POLYGON) {
-        time1 = cairoBenchFillPolygon              (BENCHMARK_LOOP_COUNT, cm);
+        time1 = cairoBenchFillPolygon              (BENCHMARK_LOOP_COUNT, cm, true);
         std::clog << "    Solid-filled    polygon          @ Cairo         = " << std::setw(6) << time1 << std::endl;
+        time2 = cairoBenchFillPolygon              (BENCHMARK_LOOP_COUNT, cm, false);
+        std::clog << "    Solid-filled    polygon          @ Cairo - No AA = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         time2 = benchDrawFillPolygon<ImagePainter >(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::None);
         std::clog << "    Solid-filled    polygon          @ ImagePainter  = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
@@ -176,8 +177,11 @@ static void cairoBenchmark(CompositionMode cm)
 
     // Filled ellipses
     if(BENCHMARK_SOLID_FILLED_ELLIPSE) {
-        time1 = cairoBenchFillEllipse              (BENCHMARK_LOOP_COUNT, cm);
+        time1 = cairoBenchFillEllipse              (BENCHMARK_LOOP_COUNT, cm, true);
         std::clog << "    Solid-filled    ellipse          @ Cairo         = " << std::setw(6) << time1 << std::endl;
+        time2 = cairoBenchFillEllipse              (BENCHMARK_LOOP_COUNT, cm, false);
+        std::clog << "    Solid-filled    ellipse          @ Cairo - No AA = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         time2 = benchDrawFillEllipse<ImagePainter >(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::None);
         std::clog << "    Solid-filled    ellipse          @ ImagePainter  = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
