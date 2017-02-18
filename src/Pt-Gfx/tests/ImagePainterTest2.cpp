@@ -40,7 +40,7 @@
 using namespace Pt::Gfx;
 
 // Comparison with Cairo (solid-filled polygons and ellipses only)
-#define DO_BENCHMARKING_CAIRO                 1
+#define DO_BENCHMARKING_CAIRO                 0
 #define BENCHMARK_CAIRO_CHECK_RESULTING_IMAGE 0
 
 // General settings for Pt-Gfx
