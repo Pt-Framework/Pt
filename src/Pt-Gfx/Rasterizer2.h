@@ -139,6 +139,7 @@ class Rasterizer2
         void strokeText(const Point& to, const Pt::String& text);
         void strokeOnePixelSolidLine(const Point& a, const Point& b);
         void strokeOnePixelSolidRect(const Point& tl, const Point& br);
+        void strokeOnePixelSolidPolygon(const Point* points, size_t pointCount);
 
         void strokeScanlineNoAA(Pt::int32_t from, Pt::int32_t to, Pt::int32_t pixelY, Pt::int32_t minX, Pt::int32_t minY, const Color& color);
 

@@ -223,7 +223,7 @@ void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
     //genEllipseGeometryXMI(points, topLeft, size);
 
     // Rasterize the polygon
-    //_rasterizer->fillPolygon(points.data(), points.size());
+    _rasterizer->strokeOnePixelSolidPolygon(points.data(), points.size());
 }
 
 void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd )

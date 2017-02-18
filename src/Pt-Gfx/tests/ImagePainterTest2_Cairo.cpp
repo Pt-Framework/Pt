@@ -1,5 +1,10 @@
-#define BENCHMARK_CAIRO_DISPLAY_RESULTING_IMAGE \
-    if(BENCHMARK_CAIRO_CHECK_RESULTING_IMAGE && !i) sdlPreviewRGB888Buffer(formatCaption("Cairo", cm, __FUNCTION__), buffer.data(), imgSize.width(), imgSize.height(), false)
+#define BENCHMARK_CAIRO_DISPLAY_RESULTING_IMAGE       \
+    if(BENCHMARK_CAIRO_CHECK_RESULTING_IMAGE && !i)   \
+        sdlPreviewRGB888Buffer(                       \
+            formatCaption("Cairo", cm, __FUNCTION__), \
+            buffer.data(),                            \
+            imgSize.width(), imgSize.height(), false  \
+        )
 
 static size_t cairoBenchFillPolygon(int loopCount, CompositionMode cm, bool useAntiAliasing)
 {

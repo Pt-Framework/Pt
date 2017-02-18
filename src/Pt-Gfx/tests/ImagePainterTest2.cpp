@@ -58,7 +58,9 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_GRADIENT_FILLED_POLYGONS     0
 #define TEST_DRAW_TEXTURE_FILLED_POLYGONS      0
 
-#define TEST_DRAW_SOLID_FILLED_ELLIPSE         1
+#define TEST_DRAW_ELLIPSE                      1
+
+#define TEST_DRAW_SOLID_FILLED_ELLIPSE         0
 #define TEST_DRAW_GRADIENT_FILLED_ELLIPSE      0
 #define TEST_DRAW_TEXTURE_FILLED_ELLIPSE       0
 
@@ -101,7 +103,8 @@ static Brush bmBrushTextureW;
 
 // Include the other source files
 #include "ImagePainterTest2_Util.cpp"
-#include "ImagePainterTest2_Draw.cpp"
+#include "ImagePainterTest2_Draw_Outline.cpp"
+#include "ImagePainterTest2_Draw_Filled.cpp"
 #include "ImagePainterTest2_Benchmark.cpp"
 #include "ImagePainterTest2_Cairo.cpp"
 
@@ -129,6 +132,15 @@ int main(int argc, char* args[])
 
     Painter* painter1 = dynamic_cast<Painter*>(&painter1obj);
     Painter* painter2 = dynamic_cast<Painter*>(&painter2obj);
+
+    // Create the brushes used for drawing
+    const Brush brushSolid1   (Color::fromRgb8(  0, 255, 0, 175));
+    const Brush brushGradient1(Color::fromRgb8(  0, 255, 0, 175), Color::fromRgb8(0, 0, 0, 175), Brush::Vertical);
+    const Brush brushTexture1 (textureWithTransBackground);
+
+    const Brush brushSolid2   (Color::fromRgb8(  0, 255, 255, 175));
+    const Brush brushGradient2(Color::fromRgb8(  0, 255, 255, 175), Color::fromRgb8(0, 0, 0, 175), Brush::Horizontal);
+    const Brush brushTexture2 (textureWithWhiteBackground);
 
     // Lines
     if(DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_LINE_AND_TEXT) {
@@ -158,15 +170,6 @@ int main(int argc, char* args[])
             testDrawRect("Rectangles & Solid-Filled Rectangles - ImagePainter [SourceOver]", image, *painter1);
         }
     }
-
-    // Create the brushes used for drawing
-    const Brush brushSolid1   (Color::fromRgb8(  0, 255, 0, 175));
-    const Brush brushGradient1(Color::fromRgb8(  0, 255, 0, 175), Color::fromRgb8(0, 0, 0, 175), Brush::Vertical);
-    const Brush brushTexture1 (textureWithTransBackground);
-
-    const Brush brushSolid2   (Color::fromRgb8(  0, 255, 255, 175));
-    const Brush brushGradient2(Color::fromRgb8(  0, 255, 255, 175), Color::fromRgb8(0, 0, 0, 175), Brush::Horizontal);
-    const Brush brushTexture2 (textureWithWhiteBackground);
 
     // Solid-filled polygons
     if(DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_SOLID_FILLED_POLYGONS) {
@@ -211,6 +214,16 @@ int main(int argc, char* args[])
         if(TEST_COMPARE_WITH_OLD_PAINTER) {
             painter1->setCompositionMode(CompositionMode::SourceOver);
             testDrawFillPolygon("Texture-Filled Polygons - ImagePainter [SourceOver]", image, *painter1, brushTexture1, brushTexture2);
+        }
+    }
+
+    // Ellipse
+    if(DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_ELLIPSE) {
+        painter2->setCompositionMode(CompositionMode::SourceCopy);
+        testDrawEllipse("Ellipse & Arcs-Pies - ImagePainter2 [SourceCopy]", image, *painter2);
+        if(TEST_COMPARE_WITH_OLD_PAINTER) {
+            painter1->setCompositionMode(CompositionMode::SourceCopy);
+            testDrawEllipse("Ellipse & Arcs-Pies - ImagePainter [SourceCopy]", image, *painter1);
         }
     }
 

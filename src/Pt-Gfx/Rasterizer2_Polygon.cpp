@@ -41,6 +41,11 @@ namespace Gfx {
 // ===== Public Member Functions ========================================================
 // ======================================================================================
 
+void Rasterizer2::strokeOnePixelSolidPolygon(const Point* points, size_t pointCount)
+{
+    rasterOnePixelSolidPolygonOutline(points, pointCount, _pen.color());
+}
+
 void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
 {
     // Minimum and maximum coordinate values for all the polygons
