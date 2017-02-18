@@ -121,6 +121,10 @@ class PT_GFX_API ImagePainter2 : public Painter
     protected:
         virtual void fillEllipseNoAA( const PointF& topLeft, const SizeF& size, const Color& color );
 
+        virtual void fillEllipseQSCAA( const PointF& topLeft, const SizeF& size );
+        virtual void fillEllipseXWUAA( const PointF& topLeft, const SizeF& size );
+        virtual void fillEllipseXMIAA( const PointF& topLeft, const SizeF& size );
+
     private:
         RectF        _clip;
         Rasterizer2* _rasterizer;

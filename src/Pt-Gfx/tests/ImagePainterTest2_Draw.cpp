@@ -279,25 +279,25 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
     painter.setBrush( brush1 );
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
-    painter.fillEllipse( PointF (30, 50), SizeF(120, 120) );
+    painter.fillEllipse( PointF (30, 50), SizeF(125, 125) );
     painter.drawText( PointF(30, 30), "NOAA" );
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
-    painter.fillEllipse( PointF (30 + 200, 50), SizeF(120, 120) );
+    painter.fillEllipse( PointF (30 + 200, 50), SizeF(125, 125) );
     painter.drawText( PointF(30 + 200, 30), "FSAA 2x2" );
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Medium);
-    painter.fillEllipse( PointF (30 + 400, 50), SizeF(120, 120) );
+    painter.fillEllipse( PointF (30 + 400, 50), SizeF(125, 125) );
     painter.drawText( PointF(30 + 400, 30), "FSAA 4x4" );
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Maximum);
-    painter.fillEllipse( PointF (30 + 600, 50), SizeF(120, 120) );
+    painter.fillEllipse( PointF (30 + 600, 50), SizeF(125, 125) );
     painter.drawText( PointF(30 + 600, 30), "FSAA 8x8" );
 
     if(ip2) {
         painter.setBrush( brush2 );
         ip2->setAntiAliasingMode(AntiAliasingMode::None);
-        ip2->fillArc( PointF (30 + 800, 50), SizeF(120, 120), 0, 180 - 45, true );
+        ip2->fillArc( PointF (30 + 800, 50), SizeF(125, 125), 0, 180 - 45, true );
         ip2->drawText( PointF(30 + 800, 30), "NOAA" );
     }
 
@@ -305,25 +305,25 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
     painter.setBrush( brush2 );
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
-    painter.fillEllipse( PointF (30, 50 + 200), SizeF(120, 60) );
+    painter.fillEllipse( PointF (30, 50 + 200), SizeF(125, 63) );
     painter.drawText( PointF(30, 30 + 200), "NOAA" );
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
-    painter.fillEllipse( PointF (30 + 200, 50 + 200), SizeF(120, 60) );
+    painter.fillEllipse( PointF (30 + 200, 50 + 200), SizeF(125, 63) );
     painter.drawText( PointF(30 + 200, 30 + 200), "FSAA 2x2" );
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Medium);
-    painter.fillEllipse( PointF (30 + 400, 50 + 200), SizeF(120, 60) );
+    painter.fillEllipse( PointF (30 + 400, 50 + 200), SizeF(125, 63) );
     painter.drawText( PointF(30 + 400, 30 + 200), "FSAA 4x4" );
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Maximum);
-    painter.fillEllipse( PointF (30 + 600, 50 + 200), SizeF(120, 60) );
+    painter.fillEllipse( PointF (30 + 600, 50 + 200), SizeF(125, 63) );
     painter.drawText( PointF(30 + 600, 30 + 200), "FSAA 8x8" );
 
     if(ip2) {
         painter.setBrush( brush1 );
         ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
-        ip2->fillArc( PointF (30 + 800, 50 + 200), SizeF(120, 120), 90 + 30, 360 - 30, true );
+        ip2->fillArc( PointF (30 + 800, 50 + 200), SizeF(125, 125), 90 + 30, 360 - 30, true );
         ip2->drawText( PointF(30 + 800, 30 + 200), "FSAA 2x2" );
     }
 
@@ -331,25 +331,25 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
     painter.setBrush( brush2 );
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
-    painter.fillEllipse( PointF (30, 50 + 400), SizeF(60, 120) );
+    painter.fillEllipse( PointF (30, 50 + 400), SizeF(63, 125) );
     painter.drawText( PointF(30, 30 + 400), "NOAA" );
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
-    painter.fillEllipse( PointF (30 + 200, 50 + 400), SizeF(60, 120) );
+    painter.fillEllipse( PointF (30 + 200, 50 + 400), SizeF(63, 125) );
     painter.drawText( PointF(30 + 200, 30 + 400), "FSAA 2x2" );
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Medium);
-    painter.fillEllipse( PointF (30 + 400, 50 + 400), SizeF(60, 120) );
+    painter.fillEllipse( PointF (30 + 400, 50 + 400), SizeF(63, 125) );
     painter.drawText( PointF(30 + 400, 30 + 400), "FSAA 4x4" );
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Maximum);
-    painter.fillEllipse( PointF (30 + 600, 50 + 400), SizeF(60, 120) );
+    painter.fillEllipse( PointF (30 + 600, 50 + 400), SizeF(63, 125) );
     painter.drawText( PointF(30 + 600, 30 + 400), "FSAA 8x8" );
 
     if(ip2) {
         painter.setBrush( brush1 );
         ip2->setAntiAliasingMode(AntiAliasingMode::Medium);
-        ip2->fillArc( PointF (30 + 800, 50 + 400), SizeF(120, 120), 90 + 30, 360 - 30, false );
+        ip2->fillArc( PointF (30 + 800, 50 + 400), SizeF(125, 125), 90 + 30, 360 - 30, false );
         ip2->drawText( PointF(30 + 800, 30 + 400), "FSAA 4x4" );
     }
 
