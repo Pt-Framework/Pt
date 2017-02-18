@@ -201,7 +201,103 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
         return;
     }
 
-#if 1
+//#define USE_XMI_ALGORITHM
+#define USE_XWU_ALGORITHM
+//#define USE_QSC_ALGORITHM
+
+#ifdef USE_XMI_ALGORITHM
+    // This algorithm seems to produce an even better image
+
+    // Calculate the coordinate displacements as per this equation:
+    //     e(X, Y) = ( b^2 * X^2 ) + ( a^2 * Y^2 ) - ( a^2 * b^2 )
+
+    std::vector<Pt::int32_t> leftX;
+
+    const Pt::int32_t minX   =  (Pt::int32_t) topLeft.x();
+    const Pt::int32_t minY   =  (Pt::int32_t) topLeft.y();
+    const Pt::int32_t a      =  size.width () / 2;
+    const Pt::int32_t b      =  size.height() / 2;
+    const Pt::int32_t a2     =  a * a;
+    const Pt::int32_t b2     =  b * b;
+    const Pt::int32_t xc     =  a;
+    const Pt::int32_t crit1  = -(a2 / 4 + a % 2 + b2);
+    const Pt::int32_t crit2  = -(b2 / 4 + b % 2 + a2);
+    const Pt::int32_t crit3  = -(b2 / 4 + b % 2     );
+    const Pt::int32_t d2xt   =  2 * b2;
+    const Pt::int32_t d2yt   =  2 * a2;
+          Pt::int32_t dxt    =  0;
+          Pt::int32_t dyt    = -2 * a2 * b;
+          Pt::int32_t x      =  0;
+          Pt::int32_t y      =  b;
+          Pt::int32_t width  =  1;
+          Pt::int32_t t      = -a2 * b;
+
+    while( y > 0 && x <= a ) {
+        if( (t + b2 * x) <= crit1 || (t + a2 * y) <= crit3 ) {
+            ++x;
+            dxt   += d2xt;
+            t     += dxt;
+            width += 2;
+        }
+        else if( (t - a2 * y) > crit2 )  {
+            leftX.push_back(xc - x);
+            --y;
+            dyt += d2yt;
+            t   += dyt;
+        }
+        else {
+            leftX.push_back(xc - x);
+            ++x;
+            dxt   += d2xt;
+            t     += dxt;
+            width += 2;
+            --y;
+            dyt   += d2yt;
+            t     += dyt;
+        }
+    }
+
+    if( !b ) leftX.push_back(xc - a);
+
+    // Sort the coordinates
+    std::sort(leftX.begin(), leftX.end());
+
+    // Reduce the resolution
+    for(size_t i = 0; i < leftX.size(); ++i) {
+        if(i % 2) leftX[i / 2] = leftX[i];
+    }
+
+    // Generate a polygon that approximates the ellipse
+    std::vector<Point> points;
+
+    const size_t       eTotX = leftX.size() / 2;
+    const Pt::int32_t  addY  = ((Pt::int32_t) size.height() % 2) ? 1 : 0;
+    const Pt::int32_t  incY  = (size.height() + addY) * 65536 / eTotX / 2;
+          Pt::int32_t  iterY = minY * 65536;
+
+    for(size_t iterX = 0; iterX < eTotX; ++iterX) { // Top-left
+        points.push_back( Point( minX + leftX[eTotX - 1 - iterX], iterY / 65536 ) );
+        iterY += incY;
+    }
+    for(size_t iterX = 0; iterX < eTotX; ++iterX) { // Bottom-left
+        points.push_back( Point( minX + leftX[iterX], iterY / 65536 ) );
+        iterY += incY;
+    }
+    iterY -= incY;
+    for(size_t iterX = 0; iterX < eTotX; ++iterX) { // Bottom-right
+        points.push_back( Point( minX + 2 * a - leftX[eTotX - 1 - iterX], iterY / 65536 ) );
+        iterY -= incY;
+    }
+    for(size_t iterX = 0; iterX < eTotX; ++iterX) { // Top-right
+        points.push_back( Point( minX + 2 * a - leftX[iterX], iterY / 65536 ) );
+        iterY -= incY;
+    }
+
+    // Rasterize the polygon
+    _rasterizer->fillPolygon(points.data(), points.size());
+#endif
+
+#ifdef USE_XWU_ALGORITHM
     // This algorithm seems to produce a better image
 
     // Calculate the ellipse's parameters
@@ -332,9 +428,9 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
 
     // Rasterize the polygon
     _rasterizer->fillPolygon(points.data(), p);
+#endif
 
-#else
-
+#ifdef USE_QSC_ALGORITHM
     // Calculate the ellipse's parameters
     const Pt::int32_t radiusX = size.width () / 2;
     const Pt::int32_t radiusY = size.height() / 2;
@@ -413,7 +509,6 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
 
     // Rasterize the polygon
     _rasterizer->fillPolygon(points.data(), p);
-
 #endif
 }
 
