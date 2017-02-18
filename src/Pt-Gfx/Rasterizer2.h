@@ -146,7 +146,7 @@ class Rasterizer2
         void fillPolygon(const Point* points, size_t pointCount);
         void fillPolygonSeparate(const Point* points, size_t pointCount);
 
-        void updateGradientBrush(Pt::int32_t width, Pt::int32_t height);
+        void updateGradientBrushAsNeeded(Pt::int32_t width, Pt::int32_t height);
 
     private:
         void rasterOnePixelHLineSegment(Pt::int32_t x1, Pt::int32_t x2, Pt::int32_t y, const Color& color, bool skipLastPoint);
@@ -161,6 +161,8 @@ class Rasterizer2
         void rasterPolygonAreaFSAA2x2(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
 
     private:
+        void updateGradientBrush(Pt::int32_t width, Pt::int32_t height);
+
         void updateClip();
         void genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount) const;
 

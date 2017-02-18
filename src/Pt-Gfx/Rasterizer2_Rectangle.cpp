@@ -64,9 +64,11 @@ void Rasterizer2::strokeOnePixelSolidRect(const Point& tl, const Point& br)
 
 void Rasterizer2::fillRect(const Point& tl, const Point& br)
 {
+    // Update the gradient as needed
     if(_isGradient)
         updateGradientBrush(br.x() - tl.x() + 1, br.y() - tl.y() + 1);
 
+    // Draw the rectangle
     rasterRectArea(tl, br);
 }
 

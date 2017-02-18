@@ -77,7 +77,7 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
         }
     }
 
-    // Update gradient as needed
+    // Update the gradient as needed
     if(_isGradient)
         updateGradientBrush(maxX - minX + 1, maxY - minY + 1);
 
@@ -130,7 +130,7 @@ void Rasterizer2::fillPolygonSeparate(const Point* points, size_t pointCount)
             // Calculate the minimum and maximum coordinate values
             Pt::int32_t minX, minY, maxX, maxY;
             getPolygonRectMinMax(clipped.data(), clipped.size(), minX, minY, maxX, maxY);
-            // Update gradient as needed
+            // Update the gradient as needed
             if(_isGradient)
                 updateGradientBrush(maxX - minX + 1, maxY - minY + 1);
             // Get the number of points for drawing this polygon

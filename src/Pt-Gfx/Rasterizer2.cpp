@@ -179,6 +179,18 @@ void Rasterizer2::strokeScanlineNoAA(Pt::int32_t from, Pt::int32_t to, Pt::int32
     rasterScanline(from - minX, to - minX, pixelY - minY, minX, minY, color);
 }
 
+void Rasterizer2::updateGradientBrushAsNeeded(Pt::int32_t width, Pt::int32_t height)
+{
+    // Update the gradient as needed
+    if(_isGradient)
+        updateGradientBrush(width, height);
+}
+
+
+// ======================================================================================
+// ===== Private Member Functions =======================================================
+// ======================================================================================
+
 void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
 {
     // Start colors
@@ -243,11 +255,6 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
         *pixel++ = a1 + a2;
     }
 }
-
-
-// ======================================================================================
-// ===== Private Member Functions =======================================================
-// ======================================================================================
 
 void Rasterizer2::updateClip()
 {
