@@ -162,11 +162,9 @@ void ImagePainter2::drawText( const PointF& toIn, const String& text )
 
 void ImagePainter2::drawLine(const PointF& from, const PointF& to)
 {
-    const Point points[] = {
-        Point( (Pt::int32_t)(from.x()), (Pt::int32_t)(from.y()) ),
-        Point( (Pt::int32_t)(to  .x()), (Pt::int32_t)(to  .y()) )
-    };
-    _rasterizer->strokePolygon( points, 2 );
+    const Point a( (Pt::int32_t)(from.x()), (Pt::int32_t)(from.y()) );
+    const Point b( (Pt::int32_t)(to  .x()), (Pt::int32_t)(to  .y()) );
+    _rasterizer->strokeOnePixelSolidLine(a, b);
 }
 
 void ImagePainter2::drawRect( const RectF& rect )

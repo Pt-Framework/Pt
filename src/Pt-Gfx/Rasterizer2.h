@@ -137,8 +137,8 @@ class Rasterizer2
         void image(const Point& toIn, const Image& image, const Rect& imageRect);
 
         void strokeText(const Point& to, const Pt::String& text);
+        void strokeOnePixelSolidLine(const Point& a, const Point& b);
         void strokeRect(const Point& tl, const Point& br);
-        void strokePolygon(const Point* points, size_t pointCount);
 
         void fillRect(const Point& tl, const Point& br);
         void fillPolygon(const Point* points, size_t pointCount);
@@ -147,7 +147,6 @@ class Rasterizer2
         void fillEllipseNoAA(const Point& topLeft, const Size& size);
 
     private:
-        void rasterOnePixelLine(const Point& a, const Point& b);
         void rasterOnePixelHLineSegment(Pt::int32_t x1, Pt::int32_t x2, Pt::int32_t y, const Color& color, bool skipLastPoint);
         void rasterOnePixelVLineSegment(Pt::int32_t x, Pt::int32_t y1, Pt::int32_t y2, const Color& color, bool skipLastPoint);
         void rasterOnePixelGLineSegmentNOAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, bool skipLastPoint);
@@ -156,7 +155,7 @@ class Rasterizer2
         void rasterOnePixelRectOutline(const Point& tl, const Point& br);
         void rasterRectArea(const Point& tl, const Point& br);
 
-        void rasterPolygonOutline(const Point* points, size_t pointCount, const Color& color);
+        void rasterOnePixelSolidPolygonOutline(const Point* points, size_t pointCount, const Color& color);
         void rasterPolygonAreaNoAA(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
         void rasterPolygonAreaFSAA2x2(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
 

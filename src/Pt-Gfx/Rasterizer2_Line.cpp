@@ -39,13 +39,7 @@ namespace Gfx {
 // ======================================================================================
 // ===== Public Member Functions ========================================================
 // ======================================================================================
-
-
-// ======================================================================================
-// ===== Private Member Functions =======================================================
-// ======================================================================================
-
-void Rasterizer2::rasterOnePixelLine(const Point& a, const Point& b)
+void Rasterizer2::strokeOnePixelSolidLine(const Point& a, const Point& b)
 {
     // Clip the points
     Pt::int32_t x1 = a.x();
@@ -109,6 +103,11 @@ void Rasterizer2::rasterOnePixelLine(const Point& a, const Point& b)
         rasterOnePixelGLineSegmentNOAA(x1, y1, x2, y2, _pen.color(), false);
     }
 }
+
+
+// ======================================================================================
+// ===== Private Member Functions =======================================================
+// ======================================================================================
 
 void Rasterizer2::rasterOnePixelHLineSegment(Pt::int32_t x1, Pt::int32_t x2, Pt::int32_t y, const Color& color, bool skipLastPoint)
 {

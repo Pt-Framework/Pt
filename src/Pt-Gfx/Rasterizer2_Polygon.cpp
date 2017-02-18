@@ -41,26 +41,6 @@ namespace Gfx {
 // ===== Public Member Functions ========================================================
 // ======================================================================================
 
-void Rasterizer2::strokePolygon(const Point* points, size_t pointCount)
-{
-    switch( _pen.style() ) {
-        case Pen::Solid:
-            if(_pen.size() == 1) {
-                // Draw a one-pixel line
-                if(pointCount == 2)
-                    rasterOnePixelLine(points[0], points[1]);
-                // Draw a one-pixel polygon outline
-                else
-                    rasterPolygonOutline(points, pointCount, _pen.color());
-            }
-            break;
-
-        case Pen::Dash:
-        case Pen::DoubleDash:
-            break;
-    }
-}
-
 void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
 {
     // Minimum and maximum coordinate values for all the polygons
@@ -172,7 +152,7 @@ void Rasterizer2::fillPolygonSeparate(const Point* points, size_t pointCount)
 // ===== Private Member Functions =======================================================
 // ======================================================================================
 
-void Rasterizer2::rasterPolygonOutline(const Point* points, size_t pointCount, const Color& color)
+void Rasterizer2::rasterOnePixelSolidPolygonOutline(const Point* points, size_t pointCount, const Color& color)
 {
     // From point N to point (N + 1), successively
     const size_t pc1 = pointCount - 1;
