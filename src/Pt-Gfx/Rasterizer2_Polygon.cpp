@@ -273,7 +273,7 @@ void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* po
     #define FSAA2X2_MUL_ALPHA        255
     #define FSAA2X2_MIN_ALPHA        1
     #define FSAA2X2_MAX_ALPHA        (FSAA2X2_MIN_ALPHA * FSAA2X2_SUPERSAMPLE_SIZE * FSAA2X2_SUPERSAMPLE_SIZE)
-    #define FSAA2X2_MID_ALPHA        (FSAA2X2_MAX_ALPHA / 2                                                  )
+    #define FSAA2X2_MID_ALPHA        (FSAA2X2_MIN_ALPHA * FSAA2X2_SUPERSAMPLE_SIZE)
 
     // Calculate the size of the polygon
     Pt::int32_t sizeX = (maxX - minX + 1);

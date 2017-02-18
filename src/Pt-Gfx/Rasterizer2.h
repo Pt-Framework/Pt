@@ -432,6 +432,7 @@ void Rasterizer2::rasterPolygonAreaFSAAGen(const Point* points, const size_t* po
     #define FSAA_MUL_ALPHA 255
     #define FSAA_MIN_ALPHA 1
     #define FSAA_MAX_ALPHA (FSAA_MIN_ALPHA * SUPERSAMPLE_SIZE * SUPERSAMPLE_SIZE)
+    #define FSAA_MID_ALPHA (FSAA_MIN_ALPHA * SUPERSAMPLE_SIZE)
 
     // Calculate the size of the polygon
     Pt::int32_t sizeX = (maxX - minX + 1);
@@ -518,6 +519,36 @@ void Rasterizer2::rasterPolygonAreaFSAAGen(const Point* points, const size_t* po
         }
         // Reset the alphas
         memset(&alphas[0], 0, alphas.size());
+#if 1
+        // Accumulate the alphas of the samples between the node pairs
+        for(Pt::int32_t s = 0; s < SUPERSAMPLE_SIZE; ++s) {
+            for(Pt::int32_t i = 0; i < nodes[0]; i += 2) {
+
+                // Calculate the cells and coverage areas
+                const Pt::int32_t from      = nodeX[s][i    ];
+                const Pt::int32_t to        = nodeX[s][i + 1];
+                const Pt::int32_t from_cell = from / SUPERSAMPLE_SIZE;
+                const Pt::int32_t to_cell   = to   / SUPERSAMPLE_SIZE;
+                const Pt::int32_t from_area = SUPERSAMPLE_SIZE - ( from - from_cell * SUPERSAMPLE_SIZE );
+                const Pt::int32_t to_area   = ( to - to_cell * SUPERSAMPLE_SIZE ) + 1;
+                // If the span is short, accumulate alphas for the whole span directly
+                // in order to avoid some alpha-related artifacts
+                if( to - from <= SUPERSAMPLE_SIZE ) {
+                    for(Pt::int32_t k = from; k <= to; ++k) {
+                        alphas[k / SUPERSAMPLE_SIZE] += FSAA_MIN_ALPHA;
+                    }
+                    continue;
+                }
+                // Accumulate alphas for the left side and right side of the span
+                alphas[from_cell] += from_area;
+                alphas[to_cell  ] += to_area;
+                // Assign alphas for the middle side of the span
+                for(Pt::int32_t k = (from_cell + 1); k <= (to_cell - 1); ++k) {
+                    alphas[k] += FSAA_MID_ALPHA;
+                }
+            }
+        }
+#else
         // Accumulate the alphas of the samples between the node pairs
         // --- Check if all the rows have the same number of nodes ---
         const Pt::int32_t nodes0            = nodes[0];
@@ -640,15 +671,41 @@ void Rasterizer2::rasterPolygonAreaFSAAGen(const Point* points, const size_t* po
         // --- The number of nodes within all or some of the rows are not equal ---
         else {
             for(Pt::int32_t s = 0; s < SUPERSAMPLE_SIZE; ++s) {
-                for(Pt::int32_t i = 0; i < nodes[s]; i += 2) {
-                    const Pt::int32_t from = nodeX[s][i    ];
-                    const Pt::int32_t to   = nodeX[s][i + 1];
-                    for(Pt::int32_t k = from; k <= to; ++k) {
-                        alphas[k / SUPERSAMPLE_SIZE] += FSAA_MIN_ALPHA;
+                //for(Pt::int32_t i = 0; i < nodes[s]; i += 2) {
+                //    const Pt::int32_t from = nodeX[s][i    ];
+                //    const Pt::int32_t to   = nodeX[s][i + 1];
+                //    for(Pt::int32_t k = from; k <= to; ++k) {
+                //        alphas[k / SUPERSAMPLE_SIZE] += FSAA_MIN_ALPHA;
+                //    }
+                //}
+                for(Pt::int32_t i = 0; i < nodes0; i += 2) {
+
+                    // Calculate the cells and coverage areas
+                    const Pt::int32_t from      = nodeX[s][i    ];
+                    const Pt::int32_t to        = nodeX[s][i + 1];
+                    const Pt::int32_t from_cell = from / SUPERSAMPLE_SIZE;
+                    const Pt::int32_t to_cell   = to   / SUPERSAMPLE_SIZE;
+                    const Pt::int32_t from_area = SUPERSAMPLE_SIZE - ( from - from_cell * SUPERSAMPLE_SIZE );
+                    const Pt::int32_t to_area   = ( to - to_cell * SUPERSAMPLE_SIZE ) + 1;
+                    // If the span is short, accumulate alphas for the whole span directly
+                    // in order to avoid some alpha-related artifacts
+                    if( to - from <= SUPERSAMPLE_SIZE ) {
+                        for(Pt::int32_t k = from; k <= to; ++k) {
+                            alphas[k / SUPERSAMPLE_SIZE] += FSAA_MIN_ALPHA;
+                        }
+                        continue;
+                    }
+                    // Accumulate alphas for the left side and right side of the span
+                    alphas[from_cell] += from_area;
+                    alphas[to_cell  ] += to_area;
+                    // Assign alphas for the middle side of the span
+                    for(Pt::int32_t k = (from_cell + 1); k <= (to_cell - 1); ++k) {
+                        alphas[k] += FSAA_MID_ALPHA;
                     }
                 }
             }
         }
+#endif
         //lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%02d ", alphas[k] / FSAA_MIN_ALPHA); lprintf("\n");
         // Fill the pixels between the node pairs
         for(Pt::int32_t i = 0; i < nodes[0]; i += 2) {
@@ -664,6 +721,7 @@ void Rasterizer2::rasterPolygonAreaFSAAGen(const Point* points, const size_t* po
     #undef FSAA_MUL_ALPHA
     #undef FSAA_MIN_ALPHA
     #undef FSAA_MAX_ALPHA
+    #undef FSAA_MID_ALPHA
 }
 
 
