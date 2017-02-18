@@ -82,6 +82,11 @@ class Rasterizer2
             _aaMode = mode;
         }
 
+        const AntiAliasingMode& antiAliasingMode() const
+        {
+            return _aaMode;
+        }
+
         void setImage(Image& image);
 
         const ImageFormat& format() const;

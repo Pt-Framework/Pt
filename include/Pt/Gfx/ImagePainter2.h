@@ -119,9 +119,8 @@ class PT_GFX_API ImagePainter2 : public Painter
         static FontMetrics fontMetrics( const Font& font, const Pt::String& text );
 
     private:
-        AntiAliasingMode _aaMode;
-        RectF            _clip;
-        Rasterizer2*     _rasterizer;
+        RectF        _clip;
+        Rasterizer2* _rasterizer;
 };
 
 

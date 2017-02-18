@@ -57,7 +57,6 @@ ImagePainter2::~ImagePainter2()
 void ImagePainter2::setAntiAliasingMode(AntiAliasingMode mode)
 {
     _rasterizer->setAntiAliasingMode(mode);
-    _aaMode = mode;
 }
 
 FontMetrics ImagePainter2::fontMetrics( const Font& font, const Pt::String& text )
@@ -191,7 +190,7 @@ void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
 void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
 {
     // Call the fast non-AA rasterizer as needed
-    if(_aaMode == AntiAliasingMode::None) {
+    if(_rasterizer->antiAliasingMode() == AntiAliasingMode::None) {
         // Convert the coordinates and size
         const Point topLeft_( topLeft.x    (), topLeft.y     () );
         const Size  size_   ( size   .width(), size   .height() );
