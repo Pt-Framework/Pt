@@ -409,9 +409,11 @@ void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* po
                         alphas[k] = FSAA2X2_MID_ALPHA;
                     }
                 }
+#ifndef USE_ZERO_ALPHA_AS_THE_END_OF_AA_PART_MARKER
                 // Assign alphas for the middle side of the span
                 const Pt::int32_t len = (to0_cell - 1) - (from1_cell + 1) + 1;
                 if(len > 0) memset(&alphas[from1_cell + 1], FSAA2X2_MAX_ALPHA, len);
+#endif
             }
         }
         // Accumulate the alphas of the samples between the node pairs
