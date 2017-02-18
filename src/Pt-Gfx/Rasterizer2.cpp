@@ -166,6 +166,32 @@ void Rasterizer2::image(const Point& to, const Image& from, const Rect& fromRect
     _image->format().copy(_image->view(), toClip, from.view(), fromClip, _compositionMode);
 }
 
+void Rasterizer2::put4Pixels(Pt::int32_t centerX, Pt::int32_t centerY, Pt::int32_t deltaX, Pt::int32_t deltaY)
+{
+    Pixel pixel1(_image->view(), centerX + deltaX, centerY + deltaY);
+    Pixel pixel2(_image->view(), centerX + deltaX, centerY - deltaY);
+    Pixel pixel3(_image->view(), centerX - deltaX, centerY + deltaY);
+    Pixel pixel4(_image->view(), centerX - deltaX, centerY - deltaY);
+
+    _image->format().setPixel(pixel1, _pen.color(), _compositionMode);
+    _image->format().setPixel(pixel2, _pen.color(), _compositionMode);
+    _image->format().setPixel(pixel3, _pen.color(), _compositionMode);
+    _image->format().setPixel(pixel4, _pen.color(), _compositionMode);
+}
+
+void Rasterizer2::put4Pixels(Pt::int32_t centerX, Pt::int32_t centerY, Pt::int32_t deltaX, Pt::int32_t deltaY, Pt::uint8_t alpha)
+{
+    Pixel pixel1(_image->view(), centerX + deltaX, centerY + deltaY);
+    Pixel pixel2(_image->view(), centerX + deltaX, centerY - deltaY);
+    Pixel pixel3(_image->view(), centerX - deltaX, centerY + deltaY);
+    Pixel pixel4(_image->view(), centerX - deltaX, centerY - deltaY);
+
+    _image->format().setPixel(pixel1, _pen.color(), _compositionMode, alpha);
+    _image->format().setPixel(pixel2, _pen.color(), _compositionMode, alpha);
+    _image->format().setPixel(pixel3, _pen.color(), _compositionMode, alpha);
+    _image->format().setPixel(pixel4, _pen.color(), _compositionMode, alpha);
+}
+
 void Rasterizer2::strokeText( const Point& to, const Pt::String& text )
 {
     _text->setClip(_currentClip);

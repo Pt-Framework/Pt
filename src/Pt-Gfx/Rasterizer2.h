@@ -136,6 +136,9 @@ class Rasterizer2
         void image(const Point& to, const Image& image);
         void image(const Point& toIn, const Image& image, const Rect& imageRect);
 
+        void put4Pixels(Pt::int32_t centerX, Pt::int32_t centerY, Pt::int32_t deltaX, Pt::int32_t deltaY);
+        void put4Pixels(Pt::int32_t centerX, Pt::int32_t centerY, Pt::int32_t deltaX, Pt::int32_t deltaY, Pt::uint8_t alpha);
+
         void strokeText(const Point& to, const Pt::String& text);
         void strokeOnePixelSolidLine(const Point& a, const Point& b);
         void strokeOnePixelSolidRect(const Point& tl, const Point& br);

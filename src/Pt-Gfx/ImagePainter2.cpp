@@ -208,22 +208,47 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount )
 
 void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
 {
-    // Generate a polygon that approximates the ellipse
-    std::vector<Point> points;
+    Pt::int32_t minX  = topLeft.x();
+    Pt::int32_t minY  = topLeft.y();
+    Pt::int32_t radX  = size.width() / 2;
+    Pt::int32_t radY  = size.width() / 2;
+    Pt::int32_t ctrX  = minX + radX;
+    Pt::int32_t ctrY  = minY + radY;
 
-    // This is the original algorithm used for renderering ellipse
-    // Its result should be more consistent with ImagePainter2::fillArc()
-    genEllipseGeometryQSC(points, topLeft, size);
+    Pt::int32_t radX2 = radX * radX;
+    Pt::int32_t radY2 = radY * radY;
 
-    // This algorithm seems to render worse images in some cases, but it is a bit faster
-    //genEllipseGeometryXWU(points, topLeft, size);
+    // Top and bottom halves
+    Pt::int32_t quarters = round( (float) radX2 / sqrt(radX2 + radY2) );
+    for(Pt::int32_t x = 0; x <= quarters; ++x) {
+        float       y     = radY * sqrt(1 - (float) x * x / radX2);
+        float       error = y - floor(y);
+        Pt::uint8_t alpha = round(error * 255);
 
-    // This algorithm seems to render the most crisp image, but it is more than two times
-    // slower than the original algorithm
-    //genEllipseGeometryXMI(points, topLeft, size);
+        if(_rasterizer->antiAliasingMode() == AntiAliasingMode::None) {
+            _rasterizer->put4Pixels(ctrX, ctrY, x, round(y));
+        }
+        else {
+            _rasterizer->put4Pixels(ctrX, ctrY, x, floor(y),     255 - alpha);
+            _rasterizer->put4Pixels(ctrX, ctrY, x, floor(y) + 1,       alpha);
+        }
+    }
 
-    // Rasterize the polygon
-    _rasterizer->strokeOnePixelSolidPolygon(points.data(), points.size());
+    // Left and right halves
+    quarters = round( (float) radY2 / sqrt(radX2 + radY2) );
+    for(Pt::int32_t y = 0; y <= quarters; ++y) {
+        float       x     = radX * sqrt(1 - (float) y * y / radY2);
+        float       error = x - floor(x);
+        Pt::uint8_t alpha = round(error * 255);
+
+        if(_rasterizer->antiAliasingMode() == AntiAliasingMode::None) {
+            _rasterizer->put4Pixels(ctrX, ctrY, round(x), y);
+        }
+        else {
+            _rasterizer->put4Pixels(ctrX, ctrY, floor(x),     y, 255 - alpha);
+            _rasterizer->put4Pixels(ctrX, ctrY, floor(x) + 1, y,       alpha);
+        }
+    }
 }
 
 void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, bool createPie )

@@ -96,28 +96,27 @@ static void testDrawEllipse(const char* title, Image& image, Painter& painter)
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(&painter);
 
 
-    painter.setPen( Color::fromRgb8(255, 0, 0) );
+    Pen draw( Color::fromRgb8(127, 255, 191) );
+    Pen text( Color::fromRgb8(255,   0,   0) );
+
+
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
-    painter.drawEllipse( PointF (30, 50), SizeF(135, 135) );
-    painter.drawText( PointF(30, 30), "NOAA" );
+    painter.setPen(draw); painter.drawEllipse( PointF (30, 50), SizeF(135, 135) );
+    painter.setPen(text); painter.drawText( PointF(30, 30), "NOAA" );
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
-    painter.drawEllipse( PointF (30 + 200, 50), SizeF(135, 135) );
-    painter.drawText( PointF(30 + 200, 30), "FSAA 2x2" );
-
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Medium);
-    painter.drawEllipse( PointF (30 + 400, 50), SizeF(135, 135) );
-    painter.drawText( PointF(30 + 400, 30), "FSAA 4x4" );
-
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Maximum);
-    painter.drawEllipse( PointF (30 + 600, 50), SizeF(135, 135) );
-    painter.drawText( PointF(30 + 600, 30), "FSAA 8x8" );
+    painter.setPen(draw); painter.drawEllipse( PointF (30 + 200, 50), SizeF(135, 135) );
+    painter.setPen(text); painter.drawText( PointF(30 + 200, 30), "XWAA" );
 
     if(ip2) {
         ip2->setAntiAliasingMode(AntiAliasingMode::None);
-        ip2->drawArc( PointF (30 + 800, 50), SizeF(135, 135), 0, 180 - 45, true );
-        ip2->drawText( PointF(30 + 800, 30), "NOAA" );
+        painter.setPen(draw); ip2->drawArc( PointF (30 + 400, 50), SizeF(135, 135), 0, 180 - 45, true );
+        painter.setPen(text); ip2->drawText( PointF(30 + 400, 30), "NOAA" );
+
+        ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
+        painter.setPen(draw); ip2->drawArc( PointF (30 + 600, 50), SizeF(135, 135), 0, 180 - 45, true );
+        painter.setPen(text); ip2->drawText( PointF(30 + 600, 30), "XWAA" );
     }
 
 
