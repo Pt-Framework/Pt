@@ -205,15 +205,15 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
     // This algorithm seems to produce a better image
 
     // Calculate the ellipse's parameters
-    const float radiusX  = (float) size.width () / 2;
-    const float radiusY  = (float) size.height() / 2;
-    const float radiusX2 = radiusX * radiusX;
-    const float radiusY2 = radiusY * radiusY;
+    const Pt::int32_t radiusX  = size.width () / 2;
+    const Pt::int32_t radiusY  = size.height() / 2;
+    const Pt::int32_t radiusX2 = radiusX * radiusX;
+    const Pt::int32_t radiusY2 = radiusY * radiusY;
     const Pt::int32_t centerX  = topLeft.x() + radiusX;
     const Pt::int32_t centerY  = topLeft.y() + radiusY;
     const Pt::int32_t qtrDivF  = 8;
-    const Pt::int32_t qtrSegsX = round((float) radiusX2 / sqrt(radiusX2 + radiusY2) / qtrDivF);
-    const Pt::int32_t qtrSegsY = round((float) radiusY2 / sqrt(radiusX2 + radiusY2) / qtrDivF);
+    const Pt::int32_t qtrSegsX = round( (float) radiusX2 / sqrt(radiusX2 + radiusY2) / qtrDivF );
+    const Pt::int32_t qtrSegsY = round( (float) radiusY2 / sqrt(radiusX2 + radiusY2) / qtrDivF );
     const Pt::int32_t numSegs  = (qtrSegsX + 1 + qtrSegsY + 1) * 4;
 
     // Calculate the coordinate displacements
