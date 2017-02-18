@@ -96,7 +96,7 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual void drawEllipse(const PointF& topLeft, const SizeF& size);
 
-        virtual void drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
+        virtual void drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, bool createPie = false);
 
         virtual void fillRect(const RectF& rect);
 
