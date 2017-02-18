@@ -166,6 +166,19 @@ void Rasterizer2::strokeText( const Point& to, const Pt::String& text )
     _text->draw( *_image, _pen.color(), to, text, _compositionMode );
 }
 
+void Rasterizer2::strokeScanlineNoAA(Pt::int32_t from, Pt::int32_t to, Pt::int32_t pixelY, Pt::int32_t minX, Pt::int32_t minY, const Color& color)
+{
+    // Check if the Y coordinate is outside the clipping region
+    if(pixelY < _currentClip.top() || pixelY > _currentClip.bottom()) return;
+
+    // Limit the X coordinates
+    if(from < _currentClip.left ()) from = _currentClip.left ();
+    if(to   > _currentClip.right()) to   = _currentClip.right();
+
+    // Draw the scanline
+    rasterScanline(from - minX, to - minX, pixelY - minY, minX, minY, color);
+}
+
 void Rasterizer2::fillEllipseNoAA(const Point& topLeft, const Size& size)
 {
     // Update the gradient as needed
@@ -177,12 +190,6 @@ void Rasterizer2::fillEllipseNoAA(const Point& topLeft, const Size& size)
 
     const Pt::int32_t minX   =  topLeft.x();
     const Pt::int32_t minY   =  topLeft.y();
-
-    const Pt::int32_t clipXl = _currentClip.left  () - minX;
-    const Pt::int32_t clipYt = _currentClip.top   () - minY;
-    const Pt::int32_t clipXr = _currentClip.right () - minX;
-    const Pt::int32_t clipYb = _currentClip.bottom() - minY;
-
     const Pt::int32_t errorX = (size.width () % 2) ? 0 : 1;
     const Pt::int32_t errorY = (size.height() % 2) ? 0 : 1;
     const Pt::int32_t a      =  size.width () / 2;
@@ -211,27 +218,15 @@ void Rasterizer2::fillEllipseNoAA(const Point& topLeft, const Size& size)
             width += 2;
         }
         else if( (t - a2 * y) > crit2 )  {
-            const Pt::int32_t iterY1 = yc - y - minY;
-            const Pt::int32_t iterY2 = yc + y - minY - errorY;
-                  Pt::int32_t iterL  = xc - x - minX;
-                  Pt::int32_t iterR  = xc - x - minX + width - errorX - 1;
-            if(iterL < clipXl) iterL = clipXl;
-            if(iterR > clipXr) iterR = clipXr;
-            if(iterY1 >= clipYt && iterY1 <= clipYb) rasterScanline(iterL, iterR, iterY1, minX, minY, _brush.color());
-            if(iterY2 >= clipYt && iterY2 <= clipYb) rasterScanline(iterL, iterR, iterY2, minX, minY, _brush.color());
+            strokeScanlineNoAA(xc - x, xc - x + width - errorX - 1, yc - y,          minX, minY, _brush.color());
+            strokeScanlineNoAA(xc - x, xc - x + width - errorX - 1, yc + y - errorY, minX, minY, _brush.color());
             --y;
             dyt += d2yt;
             t   += dyt;
         }
         else {
-            const Pt::int32_t iterY1 = yc - y - minY;
-            const Pt::int32_t iterY2 = yc + y - minY - errorY;
-                  Pt::int32_t iterL  = xc - x - minX;
-                  Pt::int32_t iterR  = xc - x - minX + width - errorX - 1;
-            if(iterL < clipXl) iterL = clipXl;
-            if(iterR > clipXr) iterR = clipXr;
-            if(iterY1 >= clipYt && iterY1 <= clipYb) rasterScanline(iterL, iterR, iterY1, minX, minY, _brush.color());
-            if(iterY2 >= clipYt && iterY2 <= clipYb) rasterScanline(iterL, iterR, iterY2, minX, minY, _brush.color());
+            strokeScanlineNoAA(xc - x, xc - x + width - errorX - 1, yc - y,          minX, minY, _brush.color());
+            strokeScanlineNoAA(xc - x, xc - x + width - errorX - 1, yc + y - errorY, minX, minY, _brush.color());
             ++x;
             dxt   += d2xt;
             t     += dxt;
@@ -242,16 +237,8 @@ void Rasterizer2::fillEllipseNoAA(const Point& topLeft, const Size& size)
         }
     }
 
-    if( !errorY || !b ) {
-        const Pt::int32_t iterY = yc     - minY;
-              Pt::int32_t iterL = xc - a - minX;
-              Pt::int32_t iterR = xc - a - minX + 2 * a - 1;
-        if(iterY >= clipYt && iterY <= clipYb) {
-            if(iterL < clipXl) iterL = clipXl;
-            if(iterR > clipXr) iterR = clipXr;
-            rasterScanline(iterL, iterR, iterY, minX, minY, _brush.color());
-        }
-    }
+    if( !errorY || !b )
+        strokeScanlineNoAA(xc - a,  xc - a + 2 * a - 1, yc, minX, minY, _brush.color());
 }
 
 

@@ -140,6 +140,8 @@ class Rasterizer2
         void strokeOnePixelSolidLine(const Point& a, const Point& b);
         void strokeOnePixelSolidRect(const Point& tl, const Point& br);
 
+        void strokeScanlineNoAA(Pt::int32_t from, Pt::int32_t to, Pt::int32_t pixelY, Pt::int32_t minX, Pt::int32_t minY, const Color& color);
+
         void fillRect(const Point& tl, const Point& br);
         void fillPolygon(const Point* points, size_t pointCount);
         void fillPolygonSeparate(const Point* points, size_t pointCount);
@@ -158,13 +160,14 @@ class Rasterizer2
         void rasterPolygonAreaNoAA(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
         void rasterPolygonAreaFSAA2x2(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
 
+    private:
         void updateGradientBrush(Pt::int32_t width, Pt::int32_t height);
 
         void updateClip();
         void genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount) const;
+
         void getPolygonRectMinMax(const Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY);
 
-    private:
         template<typename T>
         inline void bubbleSortAscending(T& basket, Pt::int32_t size);
 
