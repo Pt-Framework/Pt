@@ -62,9 +62,6 @@
 #include <stdio.h>
 #define lprintf(...) fprintf (stderr, __VA_ARGS__)
 
-//
-#define USE_ZERO_ALPHA_AS_THE_END_OF_AA_PART_MARKER
-
 
 namespace Pt {
 namespace Gfx {
@@ -274,11 +271,7 @@ void Rasterizer2::rasterScanline(
     if(_isTexture || _isGradient) {
         for(; iterL < sizeX; ++iterL) {
             // Break if we have reached the non anti-aliased part of the span
-#ifdef USE_ZERO_ALPHA_AS_THE_END_OF_AA_PART_MARKER
-            if(!alphas[iterL]) break;
-#else
             if(alphas[iterL] >= RSL_MAX_ALPHA) break;
-#endif
             // Draw the pixel
             const Pt::int32_t iterX = minX + iterL;
             const Pt::int32_t iterY = minY + pixelY;
@@ -294,11 +287,7 @@ void Rasterizer2::rasterScanline(
     else {
         for(; iterL < sizeX; ++iterL) {
             // Break if we have reached the non anti-aliased part of the span
-#ifdef USE_ZERO_ALPHA_AS_THE_END_OF_AA_PART_MARKER
-            if(!alphas[iterL]) break;
-#else
             if(alphas[iterL] >= RSL_MAX_ALPHA) break;
-#endif
             // Draw the pixel
             Pixel pixel(_image->view(), minX + iterL, minY + pixelY);
             _image->format().setPixel(pixel, color, _compositionMode, RSL_SCALE_ALPHA(alphas[iterL]));
@@ -338,11 +327,7 @@ void Rasterizer2::rasterScanline(
     if(_isTexture || _isGradient) {
         for(; iterR >= 0; --iterR) {
             // Break if we have reached the non anti-aliased part of the span
-#ifdef USE_ZERO_ALPHA_AS_THE_END_OF_AA_PART_MARKER
-            if(!alphas[iterR]) break;
-#else
             if(alphas[iterR] >= RSL_MAX_ALPHA) break;
-#endif
             // Draw the pixel
             const Pt::int32_t iterX = minX + iterR;
             const Pt::int32_t iterY = minY + pixelY;
@@ -357,11 +342,8 @@ void Rasterizer2::rasterScanline(
     // Solid color
     else {
         for(; iterR >= 0; --iterR) {
-#ifdef USE_ZERO_ALPHA_AS_THE_END_OF_AA_PART_MARKER
-            if(!alphas[iterR]) break;
-#else
+            // Break if we have reached the non anti-aliased part of the span
             if(alphas[iterR] >= RSL_MAX_ALPHA) break;
-#endif
             // Draw the pixel
             Pixel pixel(_image->view(), minX + iterR, minY + pixelY);
             _image->format().setPixel(pixel, color, _compositionMode, RSL_SCALE_ALPHA(alphas[iterR]));
@@ -647,13 +629,11 @@ void Rasterizer2::rasterPolygonAreaFSAAGen(const Point* points, const size_t* po
                         }
                     }
                 }
-#ifndef USE_ZERO_ALPHA_AS_THE_END_OF_AA_PART_MARKER
                 // Assign alphas for the middle side of the span
                 const Pt::int32_t msMin = (from_cell[SUPERSAMPLE_SIZE - 1] + 1);
                 const Pt::int32_t msMax = (to_cell  [0                   ] - 1);
                 const Pt::int32_t msLen = msMax - msMin + 1;
                 if(msLen > 0) memset(&alphas[msMin], FSAA_MAX_ALPHA, msLen);
-#endif
             }
         }
         // Accumulate the alphas of the samples between the node pairs
