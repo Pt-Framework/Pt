@@ -361,7 +361,7 @@ void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* po
         memset(&alphas[0], 0, alphas.size());
         // Accumulate the alphas of the samples between the node pairs
         // --- The number of nodes within the two rows are equal ---
-        if(nodes0 == nodes1) {
+        if(!true && nodes0 == nodes1) {
             for(Pt::int32_t i = 0; i < nodes0; i += 2) {
                 // Calculate the cells and coverage areas
                 const Pt::int32_t from0      = std::min(nodeX0[i    ], nodeX1[i    ]);
@@ -420,18 +420,80 @@ void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* po
         // --- The number of nodes within the two rows are not equal ---
         else {
             for(Pt::int32_t i = 0; i < nodes0; i += 2) {
-                const Pt::int32_t from = nodeX0[i    ];
-                const Pt::int32_t to   = nodeX0[i + 1];
+                /*
+                const Pt::int32_t from  = nodeX0[i    ];
+                const Pt::int32_t to    = nodeX0[i + 1];
                 for(Pt::int32_t k = from; k <= to; ++k) {
                     alphas[k / FSAA2X2_SUPERSAMPLE_SIZE] += FSAA2X2_MIN_ALPHA;
                 }
+                */
+                // Calculate the cells and coverage areas
+                const Pt::int32_t from      = nodeX0[i    ];
+                const Pt::int32_t to        = nodeX0[i + 1];
+                const Pt::int32_t from_cell = from / FSAA2X2_SUPERSAMPLE_SIZE;
+                const Pt::int32_t to_cell   = to   / FSAA2X2_SUPERSAMPLE_SIZE;
+                const Pt::int32_t from_area = ( (from_cell * FSAA2X2_SUPERSAMPLE_SIZE) < from ) ? FSAA2X2_MIN_ALPHA : FSAA2X2_MID_ALPHA;
+                const Pt::int32_t to_area   = ( (to_cell   * FSAA2X2_SUPERSAMPLE_SIZE) < to   ) ? FSAA2X2_MID_ALPHA : FSAA2X2_MIN_ALPHA;
+                // If the span is short, accumulate alphas for the whole span directly
+                // in order to avoid some alpha-related artifacts
+                if( to - from <= FSAA2X2_SUPERSAMPLE_SIZE ) {
+                    for(Pt::int32_t k = from; k <= to; ++k) {
+                        alphas[k / FSAA2X2_SUPERSAMPLE_SIZE] += FSAA2X2_MIN_ALPHA;
+                    }
+                    continue;
+                }
+                // Accumulate alphas for the left side and right side of the span
+                alphas[from_cell] += from_area;
+                alphas[to_cell  ] += to_area;
+#ifndef USE_ZERO_ALPHA_AS_THE_END_OF_AA_PART_MARKER
+                // Assign alphas for the middle side of the span
+                for(Pt::int32_t k = (from_cell + 1); k <= (to_cell - 1); ++k) {
+                    alphas[k] += FSAA2X2_MID_ALPHA;
+                }
+#else
+                // Assign alphas for the middle side of the span
+                for(Pt::int32_t k = (from_cell + 1); k <= (to_cell - 1); ++k) {
+                    alphas[k] += FSAA2X2_MID_ALPHA;
+                }
+#endif
             }
             for(Pt::int32_t i = 0; i < nodes1; i += 2) {
-                const Pt::int32_t from = nodeX1[i    ];
-                const Pt::int32_t to   = nodeX1[i + 1];
+                /*
+                const Pt::int32_t from  = nodeX1[i    ];
+                const Pt::int32_t to    = nodeX1[i + 1];
                 for(Pt::int32_t k = from; k <= to; ++k) {
                     alphas[k / FSAA2X2_SUPERSAMPLE_SIZE] += FSAA2X2_MIN_ALPHA;
                 }
+                */
+                // Calculate the cells and coverage areas
+                const Pt::int32_t from      = nodeX1[i    ];
+                const Pt::int32_t to        = nodeX1[i + 1];
+                const Pt::int32_t from_cell = from / FSAA2X2_SUPERSAMPLE_SIZE;
+                const Pt::int32_t to_cell   = to   / FSAA2X2_SUPERSAMPLE_SIZE;
+                const Pt::int32_t from_area = ( (from_cell * FSAA2X2_SUPERSAMPLE_SIZE) < from ) ? FSAA2X2_MIN_ALPHA : FSAA2X2_MID_ALPHA;
+                const Pt::int32_t to_area   = ( (to_cell   * FSAA2X2_SUPERSAMPLE_SIZE) < to   ) ? FSAA2X2_MID_ALPHA : FSAA2X2_MIN_ALPHA;
+                // If the span is short, accumulate alphas for the whole span directly
+                // in order to avoid some alpha-related artifacts
+                if( to - from <= FSAA2X2_SUPERSAMPLE_SIZE ) {
+                    for(Pt::int32_t k = from; k <= to; ++k) {
+                        alphas[k / FSAA2X2_SUPERSAMPLE_SIZE] += FSAA2X2_MIN_ALPHA;
+                    }
+                    continue;
+                }
+                // Accumulate alphas for the left side and right side of the span
+                alphas[from_cell] += from_area;
+                alphas[to_cell  ] += to_area;
+#ifndef USE_ZERO_ALPHA_AS_THE_END_OF_AA_PART_MARKER
+                // Assign alphas for the middle side of the span
+                for(Pt::int32_t k = (from_cell + 1); k <= (to_cell - 1); ++k) {
+                    alphas[k] += FSAA2X2_MID_ALPHA;
+                }
+#else
+                // Assign alphas for the middle side of the span
+                for(Pt::int32_t k = (from_cell + 1); k <= (to_cell - 1); ++k) {
+                    alphas[k] += FSAA2X2_MID_ALPHA;
+                }
+#endif
             }
         }
         //lprintf("%03d: ", pixelY); for(size_t k = 0; k < alphas.size(); ++k) lprintf("%02d ", alphas[k] / FSAA2X2_MIN_ALPHA); lprintf("\n");
