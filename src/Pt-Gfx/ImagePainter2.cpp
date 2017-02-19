@@ -31,8 +31,8 @@
 #include <Pt/Math.h>
 #include <Pt/Gfx/ImagePainter2.h>
 
+#include "FixedPoint.h"
 #include "FreeType.h"
-
 #include "Rasterizer2.h"
 
 
@@ -650,26 +650,26 @@ void ImagePainter2::genEllipseGeometryXMI( std::vector<Point>& points, const Poi
 
     // Generate a polygon that approximates the ellipse
     const Pt::int32_t addY  = ((Pt::int32_t) size.height() % 2) ? 1 : 0;
-    const Pt::int32_t incY  = (size.height() + addY) * 65536 / disX.size() / 2;
-          Pt::int32_t iterY = minY * 65536;
+    const Pt::int32_t incY  = FIXED_POINT_FROM_INT((Pt::int32_t) (size.height() + addY)) / disX.size() / 2;
+          Pt::int32_t iterY = FIXED_POINT_FROM_INT(minY);
 
     points.clear();
 
     for(size_t iterX = 0; iterX < disX.size(); ++iterX) { // Top-left
-        points.push_back( Point( minX + disX[disX.size() - 1 - iterX], iterY / 65536 ) );
+        points.push_back( Point( minX + disX[disX.size() - 1 - iterX], FIXED_POINT_TO_INT(iterY) ) );
         iterY += incY;
     }
     for(size_t iterX = 0; iterX < disX.size(); ++iterX) { // Bottom-left
-        points.push_back( Point( minX + disX[iterX], iterY / 65536 ) );
+        points.push_back( Point( minX + disX[iterX], FIXED_POINT_TO_INT(iterY) ) );
         iterY += incY;
     }
     iterY -= incY;
     for(size_t iterX = 0; iterX < disX.size(); ++iterX) { // Bottom-right
-        points.push_back( Point( minX + 2 * a - disX[disX.size() - 1 - iterX], iterY / 65536 ) );
+        points.push_back( Point( minX + 2 * a - disX[disX.size() - 1 - iterX], FIXED_POINT_TO_INT(iterY) ) );
         iterY -= incY;
     }
     for(size_t iterX = 0; iterX < disX.size(); ++iterX) { // Top-right
-        points.push_back( Point( minX + 2 * a - disX[iterX], iterY / 65536 ) );
+        points.push_back( Point( minX + 2 * a - disX[iterX], FIXED_POINT_TO_INT(iterY) ) );
         iterY -= incY;
     }
 }
