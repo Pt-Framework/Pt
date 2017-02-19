@@ -101,8 +101,16 @@ void DrawText::draw(Image& image, const Color& color,
                     const Point& pos, const String& text, const CompositionMode& mode)
 {
     return FreeType::instance().draw(image, color, _fontAngle, pos, text,_clip, mode,
-                                     _matrix, _faceId, &_imageType);
+                                     _matrix, _faceId, &_imageType, false);
 }
+
+void DrawText::drawMono(Image& image, const Color& color,
+                    const Point& pos, const String& text, const CompositionMode& mode)
+{
+    return FreeType::instance().draw(image, color, _fontAngle, pos, text,_clip, mode,
+                                     _matrix, _faceId, &_imageType, true);
+}
+
 
 } //namespace
 

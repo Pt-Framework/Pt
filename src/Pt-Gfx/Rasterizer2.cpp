@@ -195,7 +195,11 @@ void Rasterizer2::put4Pixels(Pt::int32_t centerX, Pt::int32_t centerY, Pt::int32
 void Rasterizer2::strokeText( const Point& to, const Pt::String& text )
 {
     _text->setClip(_currentClip);
-    _text->draw( *_image, _pen.color(), to, text, _compositionMode );
+
+    if(_aaMode == AntiAliasingMode::None)
+        _text->drawMono( *_image, _pen.color(), to, text, _compositionMode );
+    else
+        _text->draw( *_image, _pen.color(), to, text, _compositionMode );
 }
 
 void Rasterizer2::strokeScanlineNoAA(Pt::int32_t from, Pt::int32_t to, Pt::int32_t pixelY, Pt::int32_t minX, Pt::int32_t minY, const Color& color)

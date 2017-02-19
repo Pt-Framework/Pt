@@ -72,7 +72,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_IMAGE_SIZE                Size(1280, 800)
 #define BENCHMARK_LOOP_COUNT                500
 
-#define BENCHMARK_TEXT                      0
+#define BENCHMARK_TEXT                      1
 #define BENCHMARK_LINE                      1
 #define BENCHMARK_ELLIPSE                   1
 

@@ -18,10 +18,13 @@ static void doBenchmark(CompositionMode cm)
 
     // Texts
     if(BENCHMARK_TEXT) {
-        time1 = benchDrawText<ImagePainter >(BENCHMARK_LOOP_COUNT, cm);
+        time1 = benchDrawText<ImagePainter >(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
         std::clog << "    Text                             @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
-        time2 = benchDrawText<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm);
-        std::clog << "    Text                             @ ImagePainter2 = " << std::setw(6) << time2
+        time2 = benchDrawText<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
+        std::clog << "    Text NOAA                        @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time2 = benchDrawText<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::Fastest);
+        std::clog << "    Text FTAA                        @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }

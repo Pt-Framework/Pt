@@ -1,5 +1,5 @@
 template <typename PainterT>
-static size_t benchDrawText(int loopCount, CompositionMode cm)
+static size_t benchDrawText(int loopCount, CompositionMode cm, AntiAliasingMode antiAliasingMode)
 {
     size_t sum = 0;
 
@@ -16,6 +16,9 @@ static size_t benchDrawText(int loopCount, CompositionMode cm)
 
     painter.setFontDir( Pt::System::Path(FONT_DIR) );
     painter.setFont( Pt::Gfx::Font(FONT_SPEC) );
+
+    ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
+    if(ip2) ip2->setAntiAliasingMode(antiAliasingMode);
 
     for(int i = 0; i < loopCount ; ++i) {
         Pt::System::Clock clock;
