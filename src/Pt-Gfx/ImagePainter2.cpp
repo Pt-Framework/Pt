@@ -208,13 +208,13 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount )
 
 void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
 {
+    // Calculate the ellipse's parameters
     Pt::int32_t minX  = topLeft.x();
     Pt::int32_t minY  = topLeft.y();
-    Pt::int32_t radX  = size.width() / 2;
-    Pt::int32_t radY  = size.width() / 2;
+    Pt::int32_t radX  = size.width () / 2;
+    Pt::int32_t radY  = size.height() / 2;
     Pt::int32_t ctrX  = minX + radX;
     Pt::int32_t ctrY  = minY + radY;
-
     Pt::int32_t radX2 = radX * radX;
     Pt::int32_t radY2 = radY * radY;
 
