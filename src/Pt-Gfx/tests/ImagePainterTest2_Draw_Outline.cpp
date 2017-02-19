@@ -96,7 +96,12 @@ static void testDrawEllipse(const char* title, Image& image, Painter& painter)
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(&painter);
 
     Pen draw( Color::fromRgb8(127, 255, 191, 175) );
-    Pen text( Color::fromRgb8(255,   0,   0, 175) );
+    Pen text( Color::fromRgb8(255,   0,   0, 255) );
+
+    painter.setBrush( Color::fromRgb8(63, 63, 255) );
+    painter.fillRect( RectF( PointF(0, 80), SizeF(image.width(), 60) ) );
+    painter.fillRect( RectF( PointF(0, 80 + 185), SizeF(image.width(), 30) ) );
+    painter.fillRect( RectF( PointF(0, 80 + 400), SizeF(image.width(), 60) ) );
 
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
