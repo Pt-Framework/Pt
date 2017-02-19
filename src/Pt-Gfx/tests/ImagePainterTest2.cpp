@@ -49,7 +49,7 @@ using namespace Pt::Gfx;
 
 // Detailed-test enable settings for Pt-Gfx
 #define TEST_SOURCECOPY                        1
-#define TEST_SOURCEOVER                        1
+#define TEST_SOURCEOVER                        0
 
 #define TEST_DRAW_LINE_AND_TEXT                0
 #define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES 0
@@ -60,7 +60,7 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_GRADIENT_FILLED_POLYGONS     0
 #define TEST_DRAW_TEXTURE_FILLED_POLYGONS      0
 
-#define TEST_DRAW_SOLID_FILLED_ELLIPSE         1
+#define TEST_DRAW_SOLID_FILLED_ELLIPSE         0
 #define TEST_DRAW_GRADIENT_FILLED_ELLIPSE      0
 #define TEST_DRAW_TEXTURE_FILLED_ELLIPSE       0
 
@@ -70,10 +70,10 @@ using namespace Pt::Gfx;
 #define BENCHMARK_CHECK_RESULTING_IMAGE     0
 
 #define BENCHMARK_IMAGE_SIZE                Size(1280, 800)
-#define BENCHMARK_LOOP_COUNT                500
+#define BENCHMARK_LOOP_COUNT                5000
 
-#define BENCHMARK_TEXT                      1
-#define BENCHMARK_LINE                      1
+#define BENCHMARK_TEXT                      0
+#define BENCHMARK_LINE                      0
 #define BENCHMARK_ELLIPSE                   1
 
 #define BENCHMARK_RECTANGLE                 0

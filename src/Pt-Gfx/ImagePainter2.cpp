@@ -206,6 +206,29 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount )
 {
 }
 
+Pt::int32_t isqrt(Pt::int32_t num)
+{
+    Pt::int32_t res = 0;
+    Pt::int32_t bit = 1 << 30; // Set the second-to-top bit (1 << 30 for 32 bits)
+
+    // Make "bit" starts at the highest power of four <= the argument.
+    while(bit > num)
+        bit >>= 2;
+
+    while(bit != 0) {
+        if(num >= res + bit) {
+            num -= res + bit;
+            res = (res >> 1) + bit;
+        }
+        else {
+            res >>= 1;
+        }
+        bit >>= 2;
+    }
+
+    return res;
+}
+
 void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
 {
     // Calculate the ellipse's parameters
@@ -219,12 +242,39 @@ void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
     Pt::int32_t radY2 = radY * radY;
 
     // Top and bottom halves
-    Pt::int32_t quarters = round( (float) radX2 / sqrt(radX2 + radY2) );
-    for(Pt::int32_t x = 0; x <= quarters; ++x) {
-        float       y     = radY * sqrt(1 - (float) x * x / radX2);
-        float       error = y - floor(y);
-        Pt::uint8_t alpha = round(error * 255);
+    //Pt::int32_t quarters = round( (float) radX2 / sqrt(radX2 + radY2) );
+    Pt::int32_t quarters = FIXED_POINT_TO_INT( FIXED_POINT_ROUND(
+        FIXED_POINT_FROM_INT(radX2) / isqrt(radX2 + radY2)
+    ) );
 
+    for(Pt::int32_t x = 0; x <= quarters; ++x) {
+        /*
+#define FIXED_POINT_IPART(V)        ( (V) & ~FIXED_POINT_FRACT_BITMASK )
+#define FIXED_POINT_FPART(V)        ( (V) &  FIXED_POINT_FRACT_BITMASK )
+#define FIXED_POINT_RFPART(V)       ( FIXED_POINT_FRACT_BITMASK - FIXED_POINT_FPART(V) )
+#define FIXED_POINT_ROUND(V)        ( FIXED_POINT_IPART( (V) + FIXED_POINT_CONSTANT_HALF ) )
+#define FIXED_POINT_FPART_TO_A8(V)  ( FIXED_POINT_FPART (V) >> 8 )
+#define FIXED_POINT_RFPART_TO_A8(V) ( FIXED_POINT_RFPART(V) >> 8 )
+#define FIXED_POINT_MUL_TO_A8(A, B) ( ( ( (Pt::uint32_t)(A) * (Pt::uint32_t)(B) + FIXED_POINT_FRACT_BITMASK ) >> FIXED_POINT_SHIFT_FACTOR ) )
+#define FIXED_POINT_FROM_INT(V)     ( (V) << FIXED_POINT_SHIFT_FACTOR )
+#define FIXED_POINT_TO_INT(V)       ( (V) >> FIXED_POINT_SHIFT_FACTOR )
+        */
+#if 0
+        const Pt::int32_t y     = (radY * sqrt(1 - (float) x * x / radX2)) * 65536;
+        const Pt::uint8_t alpha = FIXED_POINT_FPART_TO_A8(y - FIXED_POINT_IPART(y));
+        const Pt::int32_t yr    = FIXED_POINT_TO_INT( FIXED_POINT_ROUND(y) );
+        const Pt::int32_t yf    = FIXED_POINT_TO_INT( FIXED_POINT_IPART(y) );
+        if(_rasterizer->antiAliasingMode() == AntiAliasingMode::None) {
+            _rasterizer->put4Pixels(ctrX, ctrY, x, yr);
+        }
+        else {
+            _rasterizer->put4Pixels(ctrX, ctrY, x, yf,     255 - alpha);
+            _rasterizer->put4Pixels(ctrX, ctrY, x, yf + 1,       alpha);
+        }
+#else
+        const float       y     = radY * sqrt(1 - (float) x * x / radX2);
+        const float       error = y - floor(y);
+        const Pt::uint8_t alpha = round(error * 255);
         if(_rasterizer->antiAliasingMode() == AntiAliasingMode::None) {
             _rasterizer->put4Pixels(ctrX, ctrY, x, round(y));
         }
@@ -232,15 +282,22 @@ void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
             _rasterizer->put4Pixels(ctrX, ctrY, x, floor(y),     255 - alpha);
             _rasterizer->put4Pixels(ctrX, ctrY, x, floor(y) + 1,       alpha);
         }
+#endif
+
     }
 
     // Left and right halves
-    quarters = round( (float) radY2 / sqrt(radX2 + radY2) );
-    for(Pt::int32_t y = 0; y <= quarters; ++y) {
-        float       x     = radX * sqrt(1 - (float) y * y / radY2);
-        float       error = x - floor(x);
-        Pt::uint8_t alpha = round(error * 255);
+    //quarters = round( (float) radY2 / sqrt(radX2 + radY2) );
+    quarters = FIXED_POINT_TO_INT( FIXED_POINT_ROUND(
+        FIXED_POINT_FROM_INT(radY2) / isqrt(radX2 + radY2)
+    ) );
 
+    for(Pt::int32_t y = 0; y <= quarters; ++y) {
+#if 0
+#else
+        const float       x     = radX * sqrt(1 - (float) y * y / radY2);
+        const float       error = x - floor(x);
+        const Pt::uint8_t alpha = round(error * 255);
         if(_rasterizer->antiAliasingMode() == AntiAliasingMode::None) {
             _rasterizer->put4Pixels(ctrX, ctrY, round(x), y);
         }
@@ -248,6 +305,7 @@ void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
             _rasterizer->put4Pixels(ctrX, ctrY, floor(x),     y, 255 - alpha);
             _rasterizer->put4Pixels(ctrX, ctrY, floor(x) + 1, y,       alpha);
         }
+#endif
     }
 }
 
