@@ -31,20 +31,10 @@
 #ifndef PT_GFX_RASTERIZER_2_H
 #define PT_GFX_RASTERIZER_2_H
 
-#include <Pt/Gfx/ImagePainter2.h>
+#include <Pt/Gfx/AntiAliasingMode.h>
+#include <Pt/Gfx/Painter.h>
 
-#include "FixedPoint.h"
-
-// ======================================================================================
-// ===== Configurations and Macros ======================================================
-// ======================================================================================
-
-// Coordinate limit
-#define COORDINATE_LIMIT ImagePainter2::MaximumCoordinate
-
-// Just for easy and faster debugging ;)
-#include <stdio.h>
-#define lprintf(...) fprintf (stderr, __VA_ARGS__)
+#include "RasterSupport.h"
 
 
 namespace Pt {
@@ -120,15 +110,19 @@ class Rasterizer2
         void image(const Point& to, const Image& image);
         void image(const Point& toIn, const Image& image, const Rect& imageRect);
 
-        void put4Pixels(Pt::int32_t centerX, Pt::int32_t centerY, Pt::int32_t deltaX, Pt::int32_t deltaY);
-        void put4Pixels(Pt::int32_t centerX, Pt::int32_t centerY, Pt::int32_t deltaX, Pt::int32_t deltaY, Pt::uint8_t alpha);
+        void stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2);
+        void stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::uint8_t alpha);
+
+        void stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBeg, float degEnd);
+        void stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBeg, float degEnd, Pt::uint8_t alpha);
+
+        void fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, Pt::uint8_t alpha);
+        void fillOneScanlineNoAA(Pt::int32_t from, Pt::int32_t to, Pt::int32_t pixelY, Pt::int32_t minX, Pt::int32_t minY);
 
         void strokeText(const Point& to, const Pt::String& text);
         void strokeOnePixelSolidLine(const Point& a, const Point& b);
         void strokeOnePixelSolidRect(const Point& tl, const Point& br);
         void strokeOnePixelSolidPolygon(const Point* points, size_t pointCount);
-
-        void strokeScanlineNoAA(Pt::int32_t from, Pt::int32_t to, Pt::int32_t pixelY, Pt::int32_t minX, Pt::int32_t minY, const Color& color);
 
         void fillRect(const Point& tl, const Point& br);
         void fillPolygon(const Point* points, size_t pointCount);
@@ -318,7 +312,7 @@ void Rasterizer2::rasterScanline(
         iterR = k;
     }
 
-     // Texture or gradient
+    // Texture or gradient
     if(_isTexture || _isGradient) {
         for(; iterR >= 0; --iterR) {
             // Break if we have reached the non anti-aliased part of the span

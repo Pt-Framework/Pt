@@ -33,6 +33,7 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/AntiAliasingMode.h>
+#include <Pt/Gfx/ArcMode.h>
 #include <Pt/Gfx/Painter.h>
 
 #include <Pt/System/Path.h>
@@ -45,10 +46,6 @@ class Rasterizer2;
 
 class PT_GFX_API ImagePainter2 : public Painter
 {
-    public:
-         static const PointF      PolygonSeparatorPointF;
-         static const Pt::int32_t MaximumCoordinate;
-
     public:
         ImagePainter2( Image& image );
 
@@ -96,7 +93,7 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual void drawEllipse(const PointF& topLeft, const SizeF& size);
 
-        virtual void drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, bool createPie = false);
+        virtual void drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
         virtual void fillRect(const RectF& rect);
 
@@ -104,7 +101,7 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual void fillEllipse(const PointF& topLeft, const SizeF& size);
 
-        virtual void fillArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, bool createPie = false);
+        virtual void fillArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
     public:
         static void setFontDir(const System::Path& path);
@@ -115,16 +112,14 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         static std::vector<std::string> fontNames();
 
-        static FontMetrics fontMetrics( const Font& font, const Pt::String& text );
+        static FontMetrics fontMetrics(const Font& font, const Pt::String& text);
 
     protected:
-        virtual void fillEllipseImplNoAA( const PointF& topLeft, const SizeF& size, const Color& color );
+        virtual void drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
-        virtual void genEllipseGeometryQSC( std::vector<Point>& points, const PointF& topLeft, const SizeF& size );
-        virtual void genEllipseGeometryXWU( std::vector<Point>& points, const PointF& topLeft, const SizeF& size );
-        virtual void genEllipseGeometryXMI( std::vector<Point>& points, const PointF& topLeft, const SizeF& size );
+        virtual void fillEllipseImplNoAA(const PointF& topLeft, const SizeF& size);
 
-        virtual void genArcGeometryQSC( std::vector<Point>& points, const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, bool createPie );
+        virtual void genArcGeometryQSC(std::vector<Point>& points, const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, bool createPie);
 
     private:
         RectF        _clip;

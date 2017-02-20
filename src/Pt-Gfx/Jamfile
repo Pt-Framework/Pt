@@ -23,6 +23,7 @@ if $(WITH_RASTERIZER2)
     PT_GFX_RASTERIZER2_FILES = ClipShape.cpp
                                ImagePainter2.cpp
                                Rasterizer2.cpp
+                               Rasterizer2_PixelScanline.cpp
                                Rasterizer2_Line.cpp
                                Rasterizer2_Rectangle.cpp
                                Rasterizer2_Polygon.cpp
@@ -47,6 +48,7 @@ SharedLibrary Pt-Gfx : Argb32Format.cpp
                        Rgb32Format.cpp
                        Rgb16Format.cpp
                        Yuv12Format.cpp
+                       Painter.cpp
                        $(PT_GFX_RASTERIZER2_FILES)
                        ;
 

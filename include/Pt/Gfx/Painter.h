@@ -52,6 +52,10 @@ namespace Gfx {
 class PT_GFX_API Painter
 {
     public:
+         static const PointF      PolygonSeparatorPointF;
+         static const Pt::int32_t MaximumCoordinate;
+
+    public:
         //! @brief Destructor.
         virtual ~Painter()
         {}

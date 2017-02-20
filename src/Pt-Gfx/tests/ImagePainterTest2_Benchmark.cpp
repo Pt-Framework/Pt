@@ -65,6 +65,17 @@ static void doBenchmark(CompositionMode cm)
         std::clog << std::endl;
     }
 
+    // Arc
+    if(BENCHMARK_ARC) {
+        time1 = benchDrawArc<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
+        std::clog << "    Arc NOAA                         @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time2 = benchDrawArc<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::Fastest);
+        std::clog << "    Arc XWAA                         @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        std::clog << std::endl;
+    }
+
     // Filled rectangles
     if(BENCHMARK_SOLID_FILLED_RECTANGLE) {
         time1 = benchDrawFillRect<ImagePainter >(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm);
@@ -156,13 +167,7 @@ static void doBenchmark(CompositionMode cm)
         std::clog << "    Solid-filled    ellipse NOAA     @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::Fastest);
-        std::clog << "    Solid-filled    ellipse FSAA 2x2 @ ImagePainter2 = " << std::setw(6) << time2
-                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::Medium);
-        std::clog << "    Solid-filled    ellipse FSAA 4x4 @ ImagePainter2 = " << std::setw(6) << time2
-                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::Maximum);
-        std::clog << "    Solid-filled    ellipse FSAA 8x8 @ ImagePainter2 = " << std::setw(6) << time2
+        std::clog << "    Solid-filled    ellipse XWAA     @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
@@ -174,13 +179,7 @@ static void doBenchmark(CompositionMode cm)
         std::clog << "    Gradient-filled ellipse NOAA     @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm, AntiAliasingMode::Fastest);
-        std::clog << "    Gradient-filled ellipse FSAA 2x2 @ ImagePainter2 = " << std::setw(6) << time2
-                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm, AntiAliasingMode::Medium);
-        std::clog << "    Gradient-filled ellipse FSAA 4x4 @ ImagePainter2 = " << std::setw(6) << time2
-                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm, AntiAliasingMode::Maximum);
-        std::clog << "    Gradient-filled ellipse FSAA 8x8 @ ImagePainter2 = " << std::setw(6) << time2
+        std::clog << "    Gradient-filled ellipse XWAA     @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
@@ -192,13 +191,7 @@ static void doBenchmark(CompositionMode cm)
         std::clog << "    Texture-filled  ellipse NOAA     @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, AntiAliasingMode::Fastest);
-        std::clog << "    Texture-filled  ellipse FSAA 2x2 @ ImagePainter2 = " << std::setw(6) << time2
-                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, AntiAliasingMode::Medium);
-        std::clog << "    Texture-filled  ellipse FSAA 4x4 @ ImagePainter2 = " << std::setw(6) << time2
-                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, AntiAliasingMode::Maximum);
-        std::clog << "    Texture-filled  ellipse FSAA 8x8 @ ImagePainter2 = " << std::setw(6) << time2
+        std::clog << "    Texture-filled  ellipse XWAA     @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }

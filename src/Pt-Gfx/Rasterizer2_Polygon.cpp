@@ -28,8 +28,6 @@
   02110-1301 USA
 */
 
-#include <Pt/Gfx/ImagePainter2.h>
-
 #include "Rasterizer2.h"
 
 

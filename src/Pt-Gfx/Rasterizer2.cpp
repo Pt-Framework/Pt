@@ -28,8 +28,6 @@
   02110-1301 USA
 */
 
-#include <Pt/Gfx/Algorithm.h>
-
 #include "DrawText.h"
 #include "ClipShape.h"
 #include "Rasterizer2.h"
@@ -166,32 +164,6 @@ void Rasterizer2::image(const Point& to, const Image& from, const Rect& fromRect
     _image->format().copy(_image->view(), toClip, from.view(), fromClip, _compositionMode);
 }
 
-void Rasterizer2::put4Pixels(Pt::int32_t centerX, Pt::int32_t centerY, Pt::int32_t deltaX, Pt::int32_t deltaY)
-{
-    Pixel pixel1(_image->view(), centerX + deltaX, centerY + deltaY);
-    Pixel pixel2(_image->view(), centerX + deltaX, centerY - deltaY);
-    Pixel pixel3(_image->view(), centerX - deltaX, centerY + deltaY);
-    Pixel pixel4(_image->view(), centerX - deltaX, centerY - deltaY);
-
-    _image->format().setPixel(pixel1, _pen.color(), _compositionMode);
-    _image->format().setPixel(pixel2, _pen.color(), _compositionMode);
-    _image->format().setPixel(pixel3, _pen.color(), _compositionMode);
-    _image->format().setPixel(pixel4, _pen.color(), _compositionMode);
-}
-
-void Rasterizer2::put4Pixels(Pt::int32_t centerX, Pt::int32_t centerY, Pt::int32_t deltaX, Pt::int32_t deltaY, Pt::uint8_t alpha)
-{
-    Pixel pixel1(_image->view(), centerX + deltaX, centerY + deltaY);
-    Pixel pixel2(_image->view(), centerX + deltaX, centerY - deltaY);
-    Pixel pixel3(_image->view(), centerX - deltaX, centerY + deltaY);
-    Pixel pixel4(_image->view(), centerX - deltaX, centerY - deltaY);
-
-    _image->format().setPixel(pixel1, _pen.color(), _compositionMode, alpha);
-    _image->format().setPixel(pixel2, _pen.color(), _compositionMode, alpha);
-    _image->format().setPixel(pixel3, _pen.color(), _compositionMode, alpha);
-    _image->format().setPixel(pixel4, _pen.color(), _compositionMode, alpha);
-}
-
 void Rasterizer2::strokeText( const Point& to, const Pt::String& text )
 {
     _text->setClip(_currentClip);
@@ -200,19 +172,6 @@ void Rasterizer2::strokeText( const Point& to, const Pt::String& text )
         _text->drawMono( *_image, _pen.color(), to, text, _compositionMode );
     else
         _text->draw( *_image, _pen.color(), to, text, _compositionMode );
-}
-
-void Rasterizer2::strokeScanlineNoAA(Pt::int32_t from, Pt::int32_t to, Pt::int32_t pixelY, Pt::int32_t minX, Pt::int32_t minY, const Color& color)
-{
-    // Check if the Y coordinate is outside the clipping region
-    if(pixelY < _currentClip.top() || pixelY > _currentClip.bottom()) return;
-
-    // Limit the X coordinates
-    if(from < _currentClip.left ()) from = _currentClip.left ();
-    if(to   > _currentClip.right()) to   = _currentClip.right();
-
-    // Draw the scanline
-    rasterScanline(from - minX, to - minX, pixelY - minY, minX, minY, color);
 }
 
 void Rasterizer2::updateGradientBrushAsNeeded(Pt::int32_t width, Pt::int32_t height)

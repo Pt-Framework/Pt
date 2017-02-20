@@ -70,11 +70,12 @@ using namespace Pt::Gfx;
 #define BENCHMARK_CHECK_RESULTING_IMAGE     0
 
 #define BENCHMARK_IMAGE_SIZE                Size(1280, 800)
-#define BENCHMARK_LOOP_COUNT                5000
+#define BENCHMARK_LOOP_COUNT                500
 
 #define BENCHMARK_TEXT                      0
 #define BENCHMARK_LINE                      0
 #define BENCHMARK_ELLIPSE                   1
+#define BENCHMARK_ARC                       1
 
 #define BENCHMARK_RECTANGLE                 0
 #define BENCHMARK_SOLID_FILLED_RECTANGLE    0
@@ -85,7 +86,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_GRADIENT_FILLED_POLYGON   0
 #define BENCHMARK_TEXTURE_FILLED_POLYGON    0
 
-#define BENCHMARK_SOLID_FILLED_ELLIPSE      0
+#define BENCHMARK_SOLID_FILLED_ELLIPSE      1
 #define BENCHMARK_GRADIENT_FILLED_ELLIPSE   0
 #define BENCHMARK_TEXTURE_FILLED_ELLIPSE    0
 

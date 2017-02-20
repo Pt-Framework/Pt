@@ -28,10 +28,8 @@
   02110-1301 USA
 */
 
-#include <Pt/Math.h>
 #include <Pt/Gfx/ImagePainter2.h>
 
-#include "FixedPoint.h"
 #include "FreeType.h"
 #include "Rasterizer2.h"
 
@@ -43,10 +41,6 @@ namespace Gfx {
 // ======================================================================================
 // ===== Static Public Member Functions =================================================
 // ======================================================================================
-
-const PointF      ImagePainter2::PolygonSeparatorPointF(99999, 99999);
-const Pt::int32_t ImagePainter2::MaximumCoordinate = 65535;
-
 
 void ImagePainter2::setFontDir(const Pt::System::Path& path)
 {
@@ -185,6 +179,7 @@ void ImagePainter2::drawImage(const PointF& toIn, const Image& image, const Rect
 void ImagePainter2::drawText( const PointF& toIn, const String& text )
 {
     const Point to( (Pt::int32_t)(toIn.x()), (Pt::int32_t)(toIn.y()) );
+
     _rasterizer->strokeText( to, text );
 }
 
@@ -192,6 +187,7 @@ void ImagePainter2::drawLine(const PointF& from, const PointF& to)
 {
     const Point a( (Pt::int32_t)(from.x()), (Pt::int32_t)(from.y()) );
     const Point b( (Pt::int32_t)(to  .x()), (Pt::int32_t)(to  .y()) );
+
     _rasterizer->strokeOnePixelSolidLine(a, b);
 }
 
@@ -199,118 +195,8 @@ void ImagePainter2::drawRect( const RectF& rect )
 {
     const Point tl( rect.topLeft    ().x(),rect.topLeft    ().y() );
     const Point br( rect.bottomRight().x(),rect.bottomRight().y() );
+
     _rasterizer->strokeOnePixelSolidRect(tl, br);
-}
-
-void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount )
-{
-}
-
-Pt::int32_t isqrt(Pt::int32_t num)
-{
-    Pt::int32_t res = 0;
-    Pt::int32_t bit = 1 << 30; // Set the second-to-top bit (1 << 30 for 32 bits)
-
-    // Make "bit" starts at the highest power of four <= the argument.
-    while(bit > num)
-        bit >>= 2;
-
-    while(bit != 0) {
-        if(num >= res + bit) {
-            num -= res + bit;
-            res = (res >> 1) + bit;
-        }
-        else {
-            res >>= 1;
-        }
-        bit >>= 2;
-    }
-
-    return res;
-}
-
-void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
-{
-    // Calculate the ellipse's parameters
-    Pt::int32_t minX  = topLeft.x();
-    Pt::int32_t minY  = topLeft.y();
-    Pt::int32_t radX  = size.width () / 2;
-    Pt::int32_t radY  = size.height() / 2;
-    Pt::int32_t ctrX  = minX + radX;
-    Pt::int32_t ctrY  = minY + radY;
-    Pt::int32_t radX2 = radX * radX;
-    Pt::int32_t radY2 = radY * radY;
-
-    // Top and bottom halves
-    //Pt::int32_t quarters = round( (float) radX2 / sqrt(radX2 + radY2) );
-    Pt::int32_t quarters = FIXED_POINT_TO_INT( FIXED_POINT_ROUND(
-        FIXED_POINT_FROM_INT(radX2) / isqrt(radX2 + radY2)
-    ) );
-
-    for(Pt::int32_t x = 0; x <= quarters; ++x) {
-        /*
-#define FIXED_POINT_IPART(V)        ( (V) & ~FIXED_POINT_FRACT_BITMASK )
-#define FIXED_POINT_FPART(V)        ( (V) &  FIXED_POINT_FRACT_BITMASK )
-#define FIXED_POINT_RFPART(V)       ( FIXED_POINT_FRACT_BITMASK - FIXED_POINT_FPART(V) )
-#define FIXED_POINT_ROUND(V)        ( FIXED_POINT_IPART( (V) + FIXED_POINT_CONSTANT_HALF ) )
-#define FIXED_POINT_FPART_TO_A8(V)  ( FIXED_POINT_FPART (V) >> 8 )
-#define FIXED_POINT_RFPART_TO_A8(V) ( FIXED_POINT_RFPART(V) >> 8 )
-#define FIXED_POINT_MUL_TO_A8(A, B) ( ( ( (Pt::uint32_t)(A) * (Pt::uint32_t)(B) + FIXED_POINT_FRACT_BITMASK ) >> FIXED_POINT_SHIFT_FACTOR ) )
-#define FIXED_POINT_FROM_INT(V)     ( (V) << FIXED_POINT_SHIFT_FACTOR )
-#define FIXED_POINT_TO_INT(V)       ( (V) >> FIXED_POINT_SHIFT_FACTOR )
-        */
-#if 0
-        const Pt::int32_t y     = (radY * sqrt(1 - (float) x * x / radX2)) * 65536;
-        const Pt::uint8_t alpha = FIXED_POINT_FPART_TO_A8(y - FIXED_POINT_IPART(y));
-        const Pt::int32_t yr    = FIXED_POINT_TO_INT( FIXED_POINT_ROUND(y) );
-        const Pt::int32_t yf    = FIXED_POINT_TO_INT( FIXED_POINT_IPART(y) );
-        if(_rasterizer->antiAliasingMode() == AntiAliasingMode::None) {
-            _rasterizer->put4Pixels(ctrX, ctrY, x, yr);
-        }
-        else {
-            _rasterizer->put4Pixels(ctrX, ctrY, x, yf,     255 - alpha);
-            _rasterizer->put4Pixels(ctrX, ctrY, x, yf + 1,       alpha);
-        }
-#else
-        const float       y     = radY * sqrt(1 - (float) x * x / radX2);
-        const float       error = y - floor(y);
-        const Pt::uint8_t alpha = round(error * 255);
-        if(_rasterizer->antiAliasingMode() == AntiAliasingMode::None) {
-            _rasterizer->put4Pixels(ctrX, ctrY, x, round(y));
-        }
-        else {
-            _rasterizer->put4Pixels(ctrX, ctrY, x, floor(y),     255 - alpha);
-            _rasterizer->put4Pixels(ctrX, ctrY, x, floor(y) + 1,       alpha);
-        }
-#endif
-
-    }
-
-    // Left and right halves
-    //quarters = round( (float) radY2 / sqrt(radX2 + radY2) );
-    quarters = FIXED_POINT_TO_INT( FIXED_POINT_ROUND(
-        FIXED_POINT_FROM_INT(radY2) / isqrt(radX2 + radY2)
-    ) );
-
-    for(Pt::int32_t y = 0; y <= quarters; ++y) {
-#if 0
-#else
-        const float       x     = radX * sqrt(1 - (float) y * y / radY2);
-        const float       error = x - floor(x);
-        const Pt::uint8_t alpha = round(error * 255);
-        if(_rasterizer->antiAliasingMode() == AntiAliasingMode::None) {
-            _rasterizer->put4Pixels(ctrX, ctrY, round(x), y);
-        }
-        else {
-            _rasterizer->put4Pixels(ctrX, ctrY, floor(x),     y, 255 - alpha);
-            _rasterizer->put4Pixels(ctrX, ctrY, floor(x) + 1, y,       alpha);
-        }
-#endif
-    }
-}
-
-void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, bool createPie )
-{
 }
 
 void ImagePainter2::fillRect( const RectF& rect )
@@ -318,6 +204,10 @@ void ImagePainter2::fillRect( const RectF& rect )
     const Point tl( rect.topLeft    ().x(),rect.topLeft    ().y() );
     const Point br( rect.bottomRight().x(),rect.bottomRight().y() );
     _rasterizer->fillRect(tl, br);
+}
+
+void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount )
+{
 }
 
 void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
@@ -332,40 +222,135 @@ void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
     _rasterizer->fillPolygon(points.data(), pointCount);
 }
 
+// Inspired by http://create.stephan-brumme.com/antialiased-circle
+void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
+{
+    drawOnePixelSolidEllipseArcImpl(topLeft, size, 0, 0, ArcMode::Open);
+}
+
+// Inspired by http://create.stephan-brumme.com/antialiased-circle
 void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
 {
+    // Update the gradient as needed
+    _rasterizer->updateGradientBrushAsNeeded(size.width(), size.height());
+
     // Call the fast non-AA rasterizer as needed
     if(_rasterizer->antiAliasingMode() == AntiAliasingMode::None) {
-        fillEllipseImplNoAA(topLeft, size, _rasterizer->brush().color());
+        fillEllipseImplNoAA(topLeft, size);
         return;
     }
 
-    // Generate a polygon that approximates the ellipse
-    std::vector<Point> points;
+    // List of anti-aliased 4-pixels and spans to be drawn later
+    std::vector<AA4Pixels> aa4Pixels;
+    std::vector<AASpan>    aaSpans;
 
-    // This is the original algorithm used for renderering ellipse
-    // Its result should be more consistent with ImagePainter2::fillArc()
-    genEllipseGeometryQSC(points, topLeft, size);
+    // Calculate the ellipse's parameters
+    Pt::int32_t minX  = topLeft.x();
+    Pt::int32_t minY  = topLeft.y();
+    Pt::int32_t radX  = size.width () / 2;
+    Pt::int32_t radY  = size.height() / 2;
+    Pt::int32_t ctrX  = minX + radX;
+    Pt::int32_t ctrY  = minY + radY;
+    Pt::int32_t radX2 = radX * radX;
+    Pt::int32_t radY2 = radY * radY;
 
-    // This algorithm seems to render worse images in some cases, but it is a bit faster
-    //genEllipseGeometryXWU(points, topLeft, size);
+    // Top and bottom halves
+    Pt::int32_t quarters = round( radX2 * fastInvSqrt(radX2 + radY2) );
 
-    // This algorithm seems to render the most crisp image, but it is more than two times
-    // slower than the original algorithm
-    //genEllipseGeometryXMI(points, topLeft, size);
+    for(Pt::int32_t x = 0; x <= quarters; ++x) {
+        const float       y     = radY * fastSqrt(1 - (float) x * x / radX2);
+        const float       error = y - floor(y);
+        const Pt::uint8_t alpha = round(error * 255);
+        aa4Pixels.push_back( AA4Pixels( ctrX, ctrY, x, floor(y),     255 - alpha ) );
+        aa4Pixels.push_back( AA4Pixels( ctrX, ctrY, x, floor(y) + 1,       alpha ) );
+        aaSpans  .push_back( AASpan   ( ctrX - x, ctrX + x, ctrY - floor(y)      ) );
+        aaSpans  .push_back( AASpan   ( ctrX - x, ctrX + x, ctrY + floor(y)      ) );
+    }
 
-    // Rasterize the polygon
-    _rasterizer->fillPolygon(points.data(), points.size());
+    // Left and right halves
+    quarters = round( radY2 * fastInvSqrt(radX2 + radY2) );
+
+    for(Pt::int32_t y = 0; y <= quarters; ++y) {
+        const float       x     = radX * fastSqrt(1 - (float) y * y / radY2);
+        const float       error = x - floor(x);
+        const Pt::uint8_t alpha = round(error * 255);
+        aa4Pixels.push_back( AA4Pixels( ctrX, ctrY, floor(x),     y, 255 - alpha   ) );
+        aa4Pixels.push_back( AA4Pixels( ctrX, ctrY, floor(x) + 1, y,       alpha   ) );
+        aaSpans  .push_back( AASpan   ( ctrX - floor(x), ctrX + floor(x), ctrY - y ) );
+        aaSpans  .push_back( AASpan   ( ctrX - floor(x), ctrX + floor(x), ctrY + y ) );
+    }
+
+    // Sort the spans by ascending Y coordinates
+    std::sort(aaSpans.begin(), aaSpans.end());
+
+    // Combine multiple spans with the same Y coordinates into one
+    std::vector<AASpan> aaSpansCombined;
+    Pt::int32_t         prevPixelY = ImagePainter2::MaximumCoordinate;
+
+    for(std::vector<AASpan>::const_iterator it = aaSpans.begin(); it != aaSpans.end(); ++it) {
+        // Skip spans that are too short
+        if(it->to - it->from <= 2) continue;
+        // Check if it is on the same Y coordinate
+        if(prevPixelY == it->pixelY) {
+            // Update the span's "from" and "to" coordinates
+            if(it->from < aaSpansCombined.back().from) aaSpansCombined.back().from = it->from;
+            if(it->to   > aaSpansCombined.back().to  ) aaSpansCombined.back().to   = it->to;
+            continue;
+        }
+        prevPixelY = it->pixelY;
+        // Strore the span
+        aaSpansCombined.push_back(*it);
+    }
+
+    // Draw the spans
+    for(std::vector<AASpan>::const_iterator it = aaSpansCombined.begin(); it != aaSpansCombined.end(); ++it) {
+        _rasterizer->fillOneScanlineNoAA(it->from, it->to, it->pixelY, minX, minY);
+    }
+
+    // Draw the pixels
+    for(std::vector<AA4Pixels>::const_iterator it = aa4Pixels.begin(); it != aa4Pixels.end(); ++it) {
+        // Calculate the coordinates
+        const Pt::int32_t x1 = it->centerX - it->deltaX;
+        const Pt::int32_t x2 = it->centerX + it->deltaX;
+        const Pt::int32_t y1 = it->centerY - it->deltaY;
+        const Pt::int32_t y2 = it->centerY + it->deltaY;
+        // Check if the pixels shall really be drawn
+        bool drawIt = true;
+        for(std::vector<AASpan>::const_iterator jt = aaSpansCombined.begin(); jt != aaSpansCombined.end(); ++jt) {
+            if(jt->pixelY != y1 && jt->pixelY != y2) continue;
+            if(jt->from <= x1 || jt->to >= x2) {
+                drawIt = false;
+                break;
+            }
+        }
+        if(!drawIt) continue;
+        // Draw the pixel
+        _rasterizer->fill4Pixels(x1, y1, x2, y2, minX, minY, it->alpha);
+    }
 }
 
-void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, bool createPie )
+void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode )
 {
+    drawOnePixelSolidEllipseArcImpl(topLeft, size, degBegin, degEnd, arcMode);
+}
+
+void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode )
+{
+    // Check for invalid mode
+    if(arcMode == ArcMode::Open) return;
+
+#if 1
+
+#else
+
     // Generate a polygon that approximates the arc
     std::vector<Point> points;
-    genArcGeometryQSC(points, topLeft, size, degBegin, degEnd, createPie);
+    genArcGeometryQSC(points, topLeft, size, degBegin, degEnd, arcMode == ArcMode::Pie);
 
     // Rasterize the polygon
     _rasterizer->fillPolygon(points.data(), points.size());
+
+#endif
 }
 
 
@@ -373,11 +358,110 @@ void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float deg
 // ===== Private Member Functions =======================================================
 // ======================================================================================
 
-void ImagePainter2::fillEllipseImplNoAA( const PointF& topLeft, const SizeF& size, const Color& color )
+void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode)
 {
-    // Update the gradient as needed
-    _rasterizer->updateGradientBrushAsNeeded(size.width(), size.height());
+    // ### TODO: arcMode !!! ###
 
+    // Shall we draw an ellipse or arc?
+    const bool drawArc = (degBegin != 0) || (degEnd != 0);
+
+    // Ensure that the begin and end angle are within the acceptable range
+    if(drawArc) {
+        while(degBegin <   0) degBegin += 360;
+        while(degBegin > 360) degBegin -= 360;
+
+        while(degEnd <   0) degEnd += 360;
+        while(degEnd > 360) degEnd -= 360;
+    }
+
+    // Calculate the ellipse's parameters
+    Pt::int32_t minX  = topLeft.x();
+    Pt::int32_t minY  = topLeft.y();
+    Pt::int32_t radX  = size.width () / 2;
+    Pt::int32_t radY  = size.height() / 2;
+    Pt::int32_t ctrX  = minX + radX;
+    Pt::int32_t ctrY  = minY + radY;
+    Pt::int32_t radX2 = radX * radX;
+    Pt::int32_t radY2 = radY * radY;
+
+    // Top and bottom halves
+    Pt::int32_t quarters = round( radX2 * fastInvSqrt(radX2 + radY2) );
+
+    for(Pt::int32_t x = 0; x <= quarters; ++x) {
+        const float       y     = radY * fastSqrt(1 - (float) x * x / radX2);
+        const float       error = y - floor(y);
+        const Pt::uint8_t alpha = round(error * 255);
+        if(_rasterizer->antiAliasingMode() == AntiAliasingMode::None) {
+            const Pt::int32_t xl = ctrX - x;
+            const Pt::int32_t xr = ctrX + x;
+            const Pt::int32_t yt = ctrY - round(y);
+            const Pt::int32_t yb = ctrY + round(y);
+             if(drawArc) {
+                _rasterizer->stroke4Pixels(xl, yt, xr, yb, ctrX, ctrY, degBegin, degEnd);
+             }
+             else { // Ellipse
+                _rasterizer->stroke4Pixels(xl, yt, xr, yb);
+             }
+        }
+        else {
+            const Pt::int32_t xl  = ctrX - x;
+            const Pt::int32_t xr  = ctrX + x;
+            const Pt::int32_t yt0 = ctrY - floor(y);
+            const Pt::int32_t yb0 = ctrY + floor(y);
+            const Pt::int32_t yt1 = ctrY - floor(y) - 1;
+            const Pt::int32_t yb1 = ctrY + floor(y) + 1;
+             if(drawArc) {
+                _rasterizer->stroke4Pixels(xl, yt0, xr, yb0, ctrX, ctrY, degBegin, degEnd, 255 - alpha);
+                _rasterizer->stroke4Pixels(xl, yt1, xr, yb1, ctrX, ctrY, degBegin, degEnd,       alpha);
+             }
+             else { // Ellipse
+                _rasterizer->stroke4Pixels(xl, yt0, xr, yb0, 255 - alpha);
+                _rasterizer->stroke4Pixels(xl, yt1, xr, yb1,       alpha);
+             }
+        }
+    }
+
+    // Left and right halves
+    quarters = round( radY2 * fastInvSqrt(radX2 + radY2) );
+
+    for(Pt::int32_t y = 0; y <= quarters; ++y) {
+        const float       x     = radX * fastSqrt(1 - (float) y * y / radY2);
+        const float       error = x - floor(x);
+        const Pt::uint8_t alpha = round(error * 255);
+        if(_rasterizer->antiAliasingMode() == AntiAliasingMode::None) {
+            const Pt::int32_t xl = ctrX - round(x);
+            const Pt::int32_t xr = ctrX + round(x);
+            const Pt::int32_t yt = ctrY - y;
+            const Pt::int32_t yb = ctrY + y;
+             if(drawArc) {
+                _rasterizer->stroke4Pixels(xl, yt, xr, yb, ctrX, ctrY, degBegin, degEnd);
+             }
+             else { // Ellipse
+                _rasterizer->stroke4Pixels(xl, yt, xr, yb);
+             }
+
+        }
+        else {
+            const Pt::int32_t xl0 = ctrX - floor(x);
+            const Pt::int32_t xr0 = ctrX + floor(x);
+            const Pt::int32_t xl1 = ctrX - floor(x) - 1;
+            const Pt::int32_t xr1 = ctrX + floor(x) + 1;
+            const Pt::int32_t yt  = ctrY - y;
+            const Pt::int32_t yb  = ctrY + y;
+             if(drawArc) {
+                _rasterizer->stroke4Pixels(xl0, yt, xr0, yb, ctrX, ctrY, degBegin, degEnd, 255 - alpha);
+                _rasterizer->stroke4Pixels(xl1, yt, xr1, yb, ctrX, ctrY, degBegin, degEnd,       alpha);
+             }
+             else { // Ellipse
+                _rasterizer->stroke4Pixels(xl0, yt, xr0, yb, 255 - alpha);
+                _rasterizer->stroke4Pixels(xl1, yt, xr1, yb,       alpha);
+             }
+        }
+    }
+}
+
+void ImagePainter2::fillEllipseImplNoAA( const PointF& topLeft, const SizeF& size )
+{
     // Draw the ellipse's spans as per this equation:
     //     e(X, Y) = ( b^2 * X^2 ) + ( a^2 * Y^2 ) - ( a^2 * b^2 )
 
@@ -411,15 +495,15 @@ void ImagePainter2::fillEllipseImplNoAA( const PointF& topLeft, const SizeF& siz
             width += 2;
         }
         else if( (t - a2 * y) > crit2 )  {
-            _rasterizer->strokeScanlineNoAA(xc - x, xc - x + width - errorX - 1, yc - y,          minX, minY, color);
-            _rasterizer->strokeScanlineNoAA(xc - x, xc - x + width - errorX - 1, yc + y - errorY, minX, minY, color);
+            _rasterizer->fillOneScanlineNoAA(xc - x, xc - x + width - errorX - 1, yc - y,          minX, minY);
+            _rasterizer->fillOneScanlineNoAA(xc - x, xc - x + width - errorX - 1, yc + y - errorY, minX, minY);
             --y;
             dyt += d2yt;
             t   += dyt;
         }
         else {
-            _rasterizer->strokeScanlineNoAA(xc - x, xc - x + width - errorX - 1, yc - y,          minX, minY, color);
-            _rasterizer->strokeScanlineNoAA(xc - x, xc - x + width - errorX - 1, yc + y - errorY, minX, minY, color);
+            _rasterizer->fillOneScanlineNoAA(xc - x, xc - x + width - errorX - 1, yc - y,          minX, minY);
+            _rasterizer->fillOneScanlineNoAA(xc - x, xc - x + width - errorX - 1, yc + y - errorY, minX, minY);
             ++x;
             dxt   += d2xt;
             t     += dxt;
@@ -431,310 +515,12 @@ void ImagePainter2::fillEllipseImplNoAA( const PointF& topLeft, const SizeF& siz
     }
 
     if( !errorY || !b )
-        _rasterizer->strokeScanlineNoAA(xc - a,  xc + a, yc, minX, minY, color);
-}
-
-void ImagePainter2::genEllipseGeometryQSC( std::vector<Point>& points, const PointF& topLeft, const SizeF& size )
-{
-    // Calculate the ellipse's parameters
-    const Pt::int32_t radiusX = size.width () / 2;
-    const Pt::int32_t radiusY = size.height() / 2;
-    const Pt::int32_t radiusM = std::max(radiusX, radiusY);
-    const Pt::int32_t centerX = topLeft.x() + radiusX;
-    const Pt::int32_t centerY = topLeft.y() + radiusY;
-    const Pt::int32_t numSegD = (radiusM / 20) * 20;
-    const Pt::int32_t numSegs = (numSegD >= 16) ? numSegD : 16;
-    const Pt::int32_t qtrSegs = (numSegs / 4);
-    const Pt::int32_t qtrSeg1 = qtrSegs - 1;
-
-    // Calculate the coordinate displacements
-    std::vector<float> disX(qtrSegs);
-    std::vector<float> disY(qtrSegs);
-    for(Pt::int32_t i = 0; i < qtrSegs; ++i) {
-        // Calculate the angle
-        const float angle = 0.5f * Pt::Pi * i / qtrSegs;
-        // Calculate the displacements
-        disX[i] =  radiusX * fastCos<float, true>(angle);
-        disY[i] = -radiusY * fastSin<float, true>(angle);
-    }
-
-    // Generate a polygon that approximates the ellipse
-    Pt::int32_t prevX = ImagePainter2::MaximumCoordinate;
-    Pt::int32_t prevY = ImagePainter2::MaximumCoordinate;
-    Pt::int32_t p     = 0;
-
-    points.resize(numSegs);
-
-    for(Pt::int32_t i = 0; i < qtrSegs; ++i) { // Quadrant I
-        // Calculate the coordinates
-        const Pt::int32_t x = centerX + disX[i];
-        const Pt::int32_t y = centerY + disY[i];
-        // Skip duplicated points
-        if(prevX == x && prevY == y) continue;
-        prevX = x;
-        prevY = y;
-        // Store the point and increment the index
-        points[p++].set(x, y);
-    }
-
-    for(Pt::int32_t i = 0; i < qtrSegs; ++i) { // Quadrant II
-        // Calculate the coordinates
-        const Pt::int32_t x = centerX - disX[qtrSeg1 - i];
-        const Pt::int32_t y = centerY + disY[qtrSeg1 - i];
-        // Skip duplicated points
-        if(prevX == x && prevY == y) continue;
-        prevX = x;
-        prevY = y;
-        // Store the point and increment the index
-        points[p++].set(x, y);
-    }
-
-    for(Pt::int32_t i = 0; i < qtrSegs; ++i) { // Quadrant III
-        // Calculate the coordinates
-        const Pt::int32_t x = centerX - disX[i];
-        const Pt::int32_t y = centerY - disY[i];
-        // Skip duplicated points
-        if(prevX == x && prevY == y) continue;
-        prevX = x;
-        prevY = y;
-        // Store the point and increment the index
-        points[p++].set(x, y);
-    }
-
-    for(Pt::int32_t i = 0; i < qtrSegs; ++i) { // Quadrant IV
-        // Calculate the coordinates
-        const Pt::int32_t x = centerX + disX[qtrSeg1 - i];
-        const Pt::int32_t y = centerY - disY[qtrSeg1 - i];
-        // Skip duplicated points
-        if(prevX == x && prevY == y) continue;
-        prevX = x;
-        prevY = y;
-        // Store the point and increment the index
-        points[p++].set(x, y);
-    }
-
-    // Resize the vector to remove extra elements that may exist
-    points.resize(p);
-}
-
-void ImagePainter2::genEllipseGeometryXWU( std::vector<Point>& points, const PointF& topLeft, const SizeF& size )
-{
-    // Calculate the ellipse's parameters
-    const Pt::int32_t radiusX  = size.width () / 2;
-    const Pt::int32_t radiusY  = size.height() / 2;
-    const Pt::int32_t radiusX2 = radiusX * radiusX;
-    const Pt::int32_t radiusY2 = radiusY * radiusY;
-    const Pt::int32_t centerX  = topLeft.x() + radiusX;
-    const Pt::int32_t centerY  = topLeft.y() + radiusY;
-    const Pt::int32_t qtrDivF  = 8;
-    const Pt::int32_t qtrSegsX = round( (float) radiusX2 / sqrt(radiusX2 + radiusY2) / qtrDivF );
-    const Pt::int32_t qtrSegsY = round( (float) radiusY2 / sqrt(radiusX2 + radiusY2) / qtrDivF );
-    const Pt::int32_t numSegs  = (qtrSegsX + 1 + qtrSegsY + 1) * 4;
-
-    // Calculate the coordinate displacements
-    std::vector<float> disX(qtrSegsY + 1);
-    std::vector<float> disY(qtrSegsX + 1);
-
-    for(Pt::int32_t x = 0; x <= qtrSegsX; ++x) {
-        disY[x] = ceil(radiusY * sqrt(1 - (float) x * x * qtrDivF * qtrDivF / radiusX2));
-    }
-
-    for(Pt::int32_t y = 0; y <= qtrSegsY; ++y) {
-        disX[y] = ceil(radiusX * sqrt(1 - (float) y * y * qtrDivF * qtrDivF / radiusY2));
-    }
-
-    // Generate a polygon that approximates the ellipse
-    Pt::int32_t prevX = ImagePainter2::MaximumCoordinate;
-    Pt::int32_t prevY = ImagePainter2::MaximumCoordinate;
-    Pt::int32_t p     = 0;
-
-    points.resize(numSegs);
-
-    // --- Top-right ---
-    for(Pt::int32_t x = 0; x <= qtrSegsX; ++x) {
-        // Calculate the coordinates
-        const Pt::int32_t px = centerX + x * qtrDivF;
-        const Pt::int32_t py = centerY - disY[x];
-        // Skip duplicated points
-        if(prevX == px && prevY == py) continue;
-        prevX = px;
-        prevY = py;
-        // Store the point and increment the index
-        points[p++].set(px, py);
-    }
-    for(Pt::int32_t y = qtrSegsY; y >= 0; --y) {
-        // Calculate the coordinates
-        const Pt::int32_t px = centerX + disX[y];
-        const Pt::int32_t py = centerY - y * qtrDivF;
-        // Skip duplicated points
-        if(prevX == px && prevY == py) continue;
-        prevX = px;
-        prevY = py;
-        // Store the point and increment the index
-        points[p++].set(px, py);
-    }
-
-    // --- Bottom-right ---
-    for(Pt::int32_t y = 0; y <= qtrSegsY; ++y) {
-        // Calculate the coordinates
-        const Pt::int32_t px = centerX + disX[y];
-        const Pt::int32_t py = centerY + y * qtrDivF;
-        // Skip duplicated points
-        if(prevX == px && prevY == py) continue;
-        prevX = px;
-        prevY = py;
-        // Store the point and increment the index
-        points[p++].set(px, py);
-    }
-    for(Pt::int32_t x = qtrSegsX; x >=0 ; --x) {
-        // Calculate the coordinates
-        const Pt::int32_t px = centerX + x * qtrDivF;
-        const Pt::int32_t py = centerY + disY[x];
-        // Skip duplicated points
-        if(prevX == px && prevY == py) continue;
-        prevX = px;
-        prevY = py;
-        // Store the point and increment the index
-        points[p++].set(px, py);
-    }
-
-    // --- Bottom-left ---
-    for(Pt::int32_t x = 0; x <= qtrSegsX; ++x) {
-        // Calculate the coordinates
-        const Pt::int32_t px = centerX - x * qtrDivF;
-        const Pt::int32_t py = centerY + disY[x];
-        // Skip duplicated points
-        if(prevX == px && prevY == py) continue;
-        prevX = px;
-        prevY = py;
-        // Store the point and increment the index
-        points[p++].set(px, py);
-    }
-    for(Pt::int32_t y = qtrSegsY; y >= 0; --y) {
-        // Calculate the coordinates
-        const Pt::int32_t px = centerX - disX[y];
-        const Pt::int32_t py = centerY + y * qtrDivF;
-        // Skip duplicated points
-        if(prevX == px && prevY == py) continue;
-        prevX = px;
-        prevY = py;
-        // Store the point and increment the index
-        points[p++].set(px, py);
-    }
-
-    // --- Top-left ---
-    for(Pt::int32_t y = 0; y <= qtrSegsY; ++y) {
-        // Calculate the coordinates
-        const Pt::int32_t px = centerX - disX[y];
-        const Pt::int32_t py = centerY - y * qtrDivF;
-        // Skip duplicated points
-        if(prevX == px && prevY == py) continue;
-        prevX = px;
-        prevY = py;
-        // Store the point and increment the index
-        points[p++].set(px, py);
-    }
-    for(Pt::int32_t x = qtrSegsX; x >= 0; --x) {
-        // Calculate the coordinates
-        const Pt::int32_t px = centerX - x * qtrDivF;
-        const Pt::int32_t py = centerY - disY[x];
-        // Skip duplicated points
-        if(prevX == px && prevY == py) continue;
-        prevX = px;
-        prevY = py;
-        // Store the point and increment the index
-        points[p++].set(px, py);
-    }
-
-    // Resize the vector to remove extra elements that may exist
-    points.resize(p);
-}
-
-void ImagePainter2::genEllipseGeometryXMI( std::vector<Point>& points, const PointF& topLeft, const SizeF& size )
-{
-    // Calculate the coordinate displacements as per this equation:
-    //     e(X, Y) = ( b^2 * X^2 ) + ( a^2 * Y^2 ) - ( a^2 * b^2 )
-
-    std::vector<Pt::int32_t> disX;
-
-    const Pt::int32_t minX   =  (Pt::int32_t) topLeft.x();
-    const Pt::int32_t minY   =  (Pt::int32_t) topLeft.y();
-    const Pt::int32_t a      =  size.width () / 2;
-    const Pt::int32_t b      =  size.height() / 2;
-    const Pt::int32_t a2     =  a * a;
-    const Pt::int32_t b2     =  b * b;
-    const Pt::int32_t xc     =  a;
-    const Pt::int32_t crit1  = -(a2 / 4 + a % 2 + b2);
-    const Pt::int32_t crit2  = -(b2 / 4 + b % 2 + a2);
-    const Pt::int32_t crit3  = -(b2 / 4 + b % 2     );
-    const Pt::int32_t d2xt   =  2 * b2;
-    const Pt::int32_t d2yt   =  2 * a2;
-          Pt::int32_t dxt    =  0;
-          Pt::int32_t dyt    = -2 * a2 * b;
-          Pt::int32_t x      =  0;
-          Pt::int32_t y      =  b;
-          Pt::int32_t width  =  1;
-          Pt::int32_t t      = -a2 * b;
-
-    while( y > 0 && x <= a ) {
-        if( (t + b2 * x) <= crit1 || (t + a2 * y) <= crit3 ) {
-            ++x;
-            dxt   += d2xt;
-            t     += dxt;
-            width += 2;
-        }
-        else if( (t - a2 * y) > crit2 )  {
-            disX.push_back(xc - x);
-            --y;
-            dyt += d2yt;
-            t   += dyt;
-        }
-        else {
-            disX.push_back(xc - x);
-            ++x;
-            dxt   += d2xt;
-            t     += dxt;
-            width += 2;
-            --y;
-            dyt   += d2yt;
-            t     += dyt;
-        }
-    }
-
-    if( !b ) disX.push_back(xc - a);
-
-    // Sort the coordinates
-    std::sort(disX.begin(), disX.end());
-
-    // Generate a polygon that approximates the ellipse
-    const Pt::int32_t addY  = ((Pt::int32_t) size.height() % 2) ? 1 : 0;
-    const Pt::int32_t incY  = FIXED_POINT_FROM_INT((Pt::int32_t) (size.height() + addY)) / disX.size() / 2;
-          Pt::int32_t iterY = FIXED_POINT_FROM_INT(minY);
-
-    points.clear();
-
-    for(size_t iterX = 0; iterX < disX.size(); ++iterX) { // Top-left
-        points.push_back( Point( minX + disX[disX.size() - 1 - iterX], FIXED_POINT_TO_INT(iterY) ) );
-        iterY += incY;
-    }
-    for(size_t iterX = 0; iterX < disX.size(); ++iterX) { // Bottom-left
-        points.push_back( Point( minX + disX[iterX], FIXED_POINT_TO_INT(iterY) ) );
-        iterY += incY;
-    }
-    iterY -= incY;
-    for(size_t iterX = 0; iterX < disX.size(); ++iterX) { // Bottom-right
-        points.push_back( Point( minX + 2 * a - disX[disX.size() - 1 - iterX], FIXED_POINT_TO_INT(iterY) ) );
-        iterY -= incY;
-    }
-    for(size_t iterX = 0; iterX < disX.size(); ++iterX) { // Top-right
-        points.push_back( Point( minX + 2 * a - disX[iterX], FIXED_POINT_TO_INT(iterY) ) );
-        iterY -= incY;
-    }
+        _rasterizer->fillOneScanlineNoAA(xc - a,  xc + a, yc, minX, minY);
 }
 
 void ImagePainter2::genArcGeometryQSC( std::vector<Point>& points, const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, bool createPie )
 {
-    // Ensure that the begin and end degrees are within acceptable range
+    // Ensure that the begin and end degrees are within the acceptable range
     while(degBegin <   0) degBegin += 360;
     while(degBegin > 360) degBegin -= 360;
 

@@ -150,13 +150,13 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(960, 110),
         PointF(880, 230),
         PointF(760, 150),
-        ImagePainter2::PolygonSeparatorPointF,
+        Painter::PolygonSeparatorPointF,
         // Hole 1
         PointF(860 - 40 +  0, 130 - 20     ),
         PointF(860 - 40 + 30, 130 - 20 + 15),
         PointF(860 - 40 -  0, 130 - 20 + 40),
         PointF(860 - 40 - 20, 130 - 20 + 20),
-        ImagePainter2::PolygonSeparatorPointF,
+        Painter::PolygonSeparatorPointF,
         // Hole 2
         PointF(860 + 40 +  0, 130 - 20     ),
         PointF(860 + 40 + 20, 130 - 20 + 20),
@@ -193,21 +193,16 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
     painter.fillEllipse( PointF (30 + 200, 50), SizeF(135, 135) );
-    painter.drawText( PointF(30 + 200, 30), "FSAA 2x2" );
-
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Medium);
-    painter.fillEllipse( PointF (30 + 400, 50), SizeF(135, 135) );
-    painter.drawText( PointF(30 + 400, 30), "FSAA 4x4" );
-
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Maximum);
-    painter.fillEllipse( PointF (30 + 600, 50), SizeF(135, 135) );
-    painter.drawText( PointF(30 + 600, 30), "FSAA 8x8" );
+    painter.drawText( PointF(30 + 200, 30), "XWAA" );
 
     if(ip2) {
-        painter.setBrush( brush2 );
         ip2->setAntiAliasingMode(AntiAliasingMode::None);
-        ip2->fillArc( PointF (30 + 800, 50), SizeF(135, 135), 0, 180 - 45, true );
-        ip2->drawText( PointF(30 + 800, 30), "NOAA" );
+        ip2->fillArc( PointF (30 + 400, 50), SizeF(135, 135), 0, 180 - 45, ArcMode::Pie );
+        ip2->drawText( PointF(30 + 400, 30), "NOAA" );
+
+        ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
+        ip2->fillArc( PointF (30 + 600, 50), SizeF(135, 135), 0, 180 - 45, ArcMode::Pie );
+        ip2->drawText( PointF(30 + 600, 30), "XWAA" );
     }
 
 
@@ -219,21 +214,16 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
     painter.fillEllipse( PointF (30 + 200, 50 + 200), SizeF(135, 67) );
-    painter.drawText( PointF(30 + 200, 30 + 200), "FSAA 2x2" );
-
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Medium);
-    painter.fillEllipse( PointF (30 + 400, 50 + 200), SizeF(135, 67) );
-    painter.drawText( PointF(30 + 400, 30 + 200), "FSAA 4x4" );
-
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Maximum);
-    painter.fillEllipse( PointF (30 + 600, 50 + 200), SizeF(135, 67) );
-    painter.drawText( PointF(30 + 600, 30 + 200), "FSAA 8x8" );
+    painter.drawText( PointF(30 + 200, 30 + 200), "XWAA" );
 
     if(ip2) {
-        painter.setBrush( brush1 );
+        ip2->setAntiAliasingMode(AntiAliasingMode::None);
+        ip2->fillArc( PointF (30 + 400, 50 + 200), SizeF(135, 135), 90 + 30, 360 - 30, ArcMode::Pie );
+        ip2->drawText( PointF(30 + 400, 30 + 200), "NOAA" );
+
         ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
-        ip2->fillArc( PointF (30 + 800, 50 + 200), SizeF(135, 135), 90 + 30, 360 - 30, true );
-        ip2->drawText( PointF(30 + 800, 30 + 200), "FSAA 2x2" );
+        ip2->fillArc( PointF (30 + 600, 50 + 200), SizeF(135, 135), 90 + 30, 360 - 30, ArcMode::Pie );
+        ip2->drawText( PointF(30 + 600, 30 + 200), "XWAA" );
     }
 
 
@@ -245,21 +235,33 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
     painter.fillEllipse( PointF (30 + 200, 50 + 400), SizeF(67, 135) );
-    painter.drawText( PointF(30 + 200, 30 + 400), "FSAA 2x2" );
+    painter.drawText( PointF(30 + 200, 30 + 400), "XWAA" );
 
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Medium);
-    painter.fillEllipse( PointF (30 + 400, 50 + 400), SizeF(67, 135) );
-    painter.drawText( PointF(30 + 400, 30 + 400), "FSAA 4x4" );
+    if(ip2) {
+        ip2->setAntiAliasingMode(AntiAliasingMode::None);
+        ip2->fillArc( PointF (30 + 400, 50 + 400), SizeF(135, 135), 90 + 30, 360 - 30, ArcMode::Pie );
+        ip2->drawText( PointF(30 + 400, 30 + 400), "NOAA" );
 
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Maximum);
-    painter.fillEllipse( PointF (30 + 600, 50 + 400), SizeF(67, 135) );
-    painter.drawText( PointF(30 + 600, 30 + 400), "FSAA 8x8" );
+        ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
+        ip2->fillArc( PointF (30 + 600, 50 + 400), SizeF(135, 135), 90 + 30, 360 - 30, ArcMode::Pie );
+        ip2->drawText( PointF(30 + 600, 30 + 400), "XWAA" );
+    }
+
 
     if(ip2) {
         painter.setBrush( brush1 );
-        ip2->setAntiAliasingMode(AntiAliasingMode::Medium);
-        ip2->fillArc( PointF (30 + 800, 50 + 400), SizeF(135, 135), 90 + 30, 360 - 30, false );
-        ip2->drawText( PointF(30 + 800, 30 + 400), "FSAA 4x4" );
+
+        ip2->setAntiAliasingMode(AntiAliasingMode::None);
+        ip2->fillArc( PointF (30 + 800, 50), SizeF(135, 135), 180 + 60, 180 - 60, ArcMode::Chord );
+        ip2->drawText( PointF(30 + 800, 30), "XWAA" );
+
+        ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
+        ip2->fillArc( PointF (30 + 800, 50 + 200), SizeF(135, 135), 180 + 60, 180 - 60, ArcMode::Chord );
+        ip2->drawText( PointF(30 + 800, 30 + 200), "XWAA" );
+
+        ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
+        ip2->fillArc( PointF (30 + 800, 50 + 400), SizeF(135, 135), 180 + 60, 180 - 60, ArcMode::Pie );
+        ip2->drawText( PointF(30 + 800, 30 + 400), "XWAA" );
     }
 
 
