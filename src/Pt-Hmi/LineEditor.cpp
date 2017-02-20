@@ -159,6 +159,145 @@ std::size_t TextLine::xToCursor(double x) const
 }
 
 //////////////////////////////////////////////////////////////////////////
+// TextBlock
+//////////////////////////////////////////////////////////////////////////
+
+TextBlock::TextBlock()
+: _position()
+, _size()
+, _maxWidth(10000)
+, _adjustment(Adjustment::Center)
+{
+}
+
+
+TextBlock::~TextBlock()
+{
+}
+
+
+const Gfx::PointF& TextBlock::position() const
+{
+    return _position;
+}
+
+      
+void TextBlock::setPosition(const Gfx::PointF& p)
+{
+    _position = p;
+}
+
+
+const Gfx::SizeF& TextBlock::size() const
+{
+    return _size;
+}
+
+
+double TextBlock::width() const
+{
+    return _size.width();
+}
+
+
+double TextBlock::height() const
+{
+    return _size.height();
+}
+
+        
+void TextBlock::setMaxWidth(double w)
+{
+    _maxWidth = w;
+}
+
+
+Adjustment TextBlock::adjustment() const
+{
+    return _adjustment;
+}
+
+
+void TextBlock::setAdjustment(Adjustment a)
+{
+    _adjustment = a;
+}
+
+
+void TextBlock::setText(const Pt::String& text, const Gfx::Font& font)
+{
+    _text = text;
+
+    double lineHeight = font.size() * 1.5;
+    double lineOffset = (lineHeight - font.size()) / 2;
+
+    double lineY = 0;
+    Pt::String line;
+    Pt::String segment;
+    
+    Pt::String::iterator consumed = _text.begin();
+    Pt::String::iterator it = _text.begin();
+    
+    while( consumed < _text.end() )
+    {
+        while( it != _text.end() && ! Pt::isspace(*it) )
+        {
+            segment += *it++;
+        }
+
+        Gfx::FontMetrics fm = Painter::fontMetrics(font, segment);
+        if(fm.width() < _maxWidth)
+        {
+            line = segment;
+            segment += *it;
+            continue;
+        }
+
+        Pt::String::size_type n = line.size();
+        if( line.size() < segment.size() )
+        {
+            Pt::Char ch = segment[ line.size() ];
+            if( Pt::isspace(ch) )
+            {
+                n++;
+            }
+        }
+        
+        segment.erase(0, n);
+        consumed += n;
+
+        TextLine textLine;
+        textLine.setText(line, font);
+        
+        double lineX = 0;
+
+        switch(_adjustment)
+        {
+            default:
+            case Adjustment::Left:
+                lineX = 0;
+                break;
+
+            case Adjustment::Right:
+                lineX = _maxWidth - textLine.width();
+                break;
+
+            case Adjustment::Center:
+                lineX = (_maxWidth - textLine.width()) / 2;
+                break;
+        } 
+        
+        textLine.setPosition(lineX, 
+                             lineY + lineOffset);
+
+        _lines.push_back(textLine);
+
+        lineY += lineHeight;
+        line.clear();
+    }
+}
+
+//////////////////////////////////////////////////////////////////////////
 // LineEditor
 //////////////////////////////////////////////////////////////////////////
 
@@ -174,32 +313,6 @@ LineEditor::LineEditor()
 
 LineEditor::~LineEditor()
 {
-}
-
-
-bool LineEditor::isMasked() const
-{
-    return _isMasked;
-}
-
-
-void LineEditor::setMasked(bool m)
-{
-    _isMasked = m;
-
-    if(_isMasked)
-        _displayText.assign(_text.size(), maskChar);
-    else
-        _displayText.clear();
-}
-
-
-const Pt::String& LineEditor::displayText() const
-{
-    if(_isMasked)
-        return _displayText;
-    else
-        return _text;
 }
 
 
@@ -227,15 +340,32 @@ void LineEditor::setSize(const Gfx::SizeF& s)
 }
 
 
+Adjustment LineEditor::adjustment() const
+{
+    return _adjustment;
+}
+
+
 void LineEditor::setAdjustment(Adjustment a)
 {
     _adjustment = a;
 }
 
 
-Adjustment LineEditor::adjustment() const
+bool LineEditor::isMasked() const
 {
-    return _adjustment;
+    return _isMasked;
+}
+
+
+void LineEditor::setMasked(bool m)
+{
+    _isMasked = m;
+
+    if(_isMasked)
+        _displayText.assign(_text.size(), maskChar);
+    else
+        _displayText.clear();
 }
 
 
@@ -254,6 +384,15 @@ void LineEditor::setText(const Pt::String& s)
     
     _cursorPosition = 0;
     _scrollOffset = 0;
+}
+
+
+const Pt::String& LineEditor::displayText() const
+{
+    if(_isMasked)
+        return _displayText;
+    else
+        return _text;
 }
 
 
@@ -281,6 +420,12 @@ void LineEditor::setCursorPosition(std::size_t n)
         n = _text.size();
 
     _cursorPosition = n;
+}
+
+
+bool LineEditor::isEmpty() const
+{
+    return _text.empty();
 }
 
 
@@ -342,44 +487,44 @@ void LineEditor::backspace()
 
 void LineEditor::layout(TextLine& line)
 {
-    if(_isMasked)
-        line.setText(_displayText, _font);
-    else
-        line.setText(_text, _font);
-    
-    double cursorX = line.cursorToX(_cursorPosition);
-    double maxX = _size.width() + _scrollOffset;
+    layout( displayText(), line );
+}
+
+
+void LineEditor::layout(const Pt::String& text, TextLine& line)
+{
+    line.setText(text, _font);
 
     double lineX = 0;
     double lineY = (_size.height() - line.height()) / 2;
 
-    if(line.width() < _size.width() )
+    switch(_adjustment)
     {
-        switch(_adjustment)
-        {
-            default:
-            case Adjustment::Left:
-                lineX = 0;
-                break;
+        default:
+        case Adjustment::Left:
+            lineX = 0;
+            break;
 
-            case Adjustment::Right:
-                lineX = _size.width() - line.width();
-                break;
+        case Adjustment::Right:
+            lineX = _size.width() - line.width();
+            break;
 
-            case Adjustment::Center:
-                lineX = (_size.width() - line.width()) / 2;
-                break;
-        }
+        case Adjustment::Center:
+            lineX = (_size.width() - line.width()) / 2;
+            break;
     }
-    else
+    
+    if( line.width() >= _size.width() )
     {
+        double cursorX = line.cursorToX(_cursorPosition);
+        double maxX = _size.width() + _scrollOffset;
+
         if( cursorX > maxX )
         {
             double delta = cursorX - maxX;
             _scrollOffset += delta;
         }
-
-        if( cursorX < _scrollOffset )
+        else if( cursorX < _scrollOffset )
         {
             double delta = _scrollOffset - cursorX;
             _scrollOffset -= delta;

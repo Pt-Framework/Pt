@@ -28,6 +28,7 @@
 */
 
 #include <Pt/Hmi/Label.h>
+#include <Pt/Hmi/LineEditor.h>
 #include <Pt/Hmi/Painter.h>
 #include <Pt/Gfx/FontMetrics.h>
 
@@ -218,10 +219,27 @@ void Label::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
                                painter, rect, *pen);
     }
     
-    Gfx::PointF pos = textPosition();
+    //Gfx::PointF pos = textPosition();
+    //_renderer->renderText(*this, options,  painter, rect,
+    //                      _text, pos, _font, _textPen);
 
-    _renderer->renderText(*this, options,  painter, rect,
-                          text(), pos, _font, _textPen);
+    TextBlock block;
+    block.setMaxWidth( size().width() );
+    block.setText(_text, _font);
+
+    std::vector<TextLine>::const_iterator it;
+    for(it = block.lines().begin(); it != block.lines().end(); ++it)
+    {
+        const Pt::String& lineText = it->text();
+
+        Gfx::PointF pos = it->position();
+        pos.addY( it->ascent() );
+
+        _renderer->renderText(*this, options,  painter, rect,
+                              lineText, pos, _font, _textPen);
+    }
+
+
 }
 
 

@@ -57,6 +57,8 @@ class PT_HMI_API LineEdit : public Control
 
         ~LineEdit();
 
+        bool isEmpty() const;
+
         const Pt::String& text() const;
 
         void setText(const Pt::String& str);
@@ -140,10 +142,8 @@ class PT_HMI_API LineEdit : public Control
         TextLine                      _line;
         Pt::String                    _placeholderText;
         bool                          _isAccepted;
-        bool                          _hasPlaceholder;
         bool                          _isTextChanged;
         EchoMode                      _echoMode;
-        Adjustment                    _textAdjustment;
         double                        _spacing;
 
         FacetPtr<LineEditRenderer>     _renderer;
@@ -159,7 +159,6 @@ class PT_HMI_API LineEdit : public Control
         Gfx::Brush                    _brush;
         Gfx::Pen                      _pen;
         Gfx::Pen                      _textPen;
-        Gfx::Pen                      _placeholderPen;
         Gfx::Font                     _font;
 };
 

@@ -91,7 +91,7 @@ void Control::onPaintEvent(const PaintEvent& ev)
 void Control::onFocusEvent(const FocusEvent& ev)
 {
     Widget::onFocusEvent(ev);
-        
+
     invalidate();
 }
 

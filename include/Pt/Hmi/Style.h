@@ -451,8 +451,7 @@ class PT_HMI_API LineEditRenderer : public Style::Facet
                      Gfx::Brush& brush,
                      Gfx::Pen& contour,
                      Gfx::Font& font,
-                     Gfx::Pen& textPen,
-                     Gfx::Pen& placeholderPen) const;
+                     Gfx::Pen& textPen) const;
         
         void renderBackground(const LineEdit& le, 
                               const StyleOptions& options,
@@ -482,8 +481,7 @@ class PT_HMI_API LineEditRenderer : public Style::Facet
                                Gfx::Brush& brush,
                                Gfx::Pen& contour,
                                Gfx::Font& font,
-                               Gfx::Pen& textPen,
-                               Gfx::Pen& placeholderPen) const = 0;
+                               Gfx::Pen& textPen) const = 0;
 
         virtual void onRenderBackground(const LineEdit& le, 
                                         const StyleOptions& options,

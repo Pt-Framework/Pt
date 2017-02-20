@@ -362,10 +362,9 @@ void LineEditRenderer::prepare(const LineEdit& le,
                                Gfx::Brush& brush,
                                Gfx::Pen& contour,
                                Gfx::Font& font,
-                               Gfx::Pen& textPen,
-                               Gfx::Pen& placeholderPen) const
+                               Gfx::Pen& textPen) const
 {
-    onPrepare(le, options, brush, contour, font, textPen, placeholderPen);
+    onPrepare(le, options, brush, contour, font, textPen);
 }
 
 

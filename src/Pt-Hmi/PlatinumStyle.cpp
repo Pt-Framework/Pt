@@ -488,9 +488,13 @@ void PlatinumLineEditRenderer::onPrepare(const LineEdit& le,
                                          Gfx::Brush& brush,
                                          Gfx::Pen& contour,
                                          Gfx::Font& font,
-                                         Gfx::Pen& textPen,
-                                         Gfx::Pen& placeholderPen) const
+                                         Gfx::Pen& textPen) const
 {
+    if( ! le.hasFocus() && le.isEmpty() )
+    {
+        textPen = contour;
+    }
+
     if( le.isEnabled() )
     {
         Gfx::Color color = contour.color();

@@ -35,11 +35,11 @@
 #include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/String.h>
+#include <vector>
 
 namespace Pt {
 
 namespace Hmi {
-
 
 class TextLine
 {
@@ -62,6 +62,11 @@ class TextLine
 
         double descent() const;
 
+        const Pt::String& text() const
+        {
+            return _text;
+        }
+
         void setText(const Pt::String& text, const Gfx::Font& font);
 
         double cursorToX(std::size_t n) const;
@@ -75,18 +80,51 @@ class TextLine
         Gfx::FontMetrics _textMetrics;
 };
 
+class TextBlock
+{
+    public:
+        TextBlock();
+
+        ~TextBlock();
+
+        const Gfx::PointF& position() const;
+        
+        void setPosition(const Gfx::PointF& p);
+
+        const Gfx::SizeF& size() const;
+
+        double width() const;
+
+        double height() const;
+
+        void setMaxWidth(double w);
+
+        void setAdjustment(Adjustment a);
+
+        Adjustment adjustment() const;
+
+        void setText(const Pt::String& text, const Gfx::Font& font);
+
+        const std::vector<TextLine>& lines() const
+        {
+            return _lines;
+        }
+
+    private:
+        Gfx::PointF           _position;
+        Gfx::SizeF            _size;
+        double                _maxWidth;
+        Adjustment            _adjustment;
+        std::vector<TextLine> _lines;
+        Pt::String            _text;
+};
+
 class LineEditor
 {
     public:
         LineEditor();
         
         ~LineEditor();
-
-        bool isMasked() const;
-
-        void setMasked(bool m);
-
-        const Pt::String& displayText() const;
 
         const Gfx::PointF& position() const;
         
@@ -96,13 +134,19 @@ class LineEditor
 
         void setSize(const Gfx::SizeF& s);
 
+        Adjustment adjustment() const;
+
         void setAdjustment(Adjustment a);
 
-        Adjustment adjustment() const;
+        bool isMasked() const;
+
+        void setMasked(bool m);
 
         const Pt::String& text() const;
 
         void setText(const Pt::String& s);
+
+        const Pt::String& displayText() const;
 
         const Gfx::Font& font() const;
 
@@ -111,6 +155,8 @@ class LineEditor
         std::size_t cursorPosition() const;
         
         void setCursorPosition(std::size_t n);
+
+        bool isEmpty() const;
 
         void clear();
 
@@ -126,11 +172,13 @@ class LineEditor
 
         void layout(TextLine& line);
 
+        void layout(const Pt::String& text, TextLine& line);
+
     private:
-        bool        _isMasked;
         Gfx::PointF _position;
         Gfx::SizeF  _size;
         Adjustment  _adjustment;
+        bool        _isMasked;
         Pt::String  _text;
         Pt::String  _displayText;
         Gfx::Font   _font;

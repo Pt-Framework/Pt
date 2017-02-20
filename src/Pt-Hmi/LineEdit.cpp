@@ -37,10 +37,8 @@ namespace Hmi {
 
 LineEdit::LineEdit()
 : _isAccepted(true)
-, _hasPlaceholder(true)
 , _isTextChanged(false)
 , _echoMode(Normal)
-, _textAdjustment(Adjustment::Left)
 , _spacing(0)
 , _hasRenderer(false)
 {
@@ -51,6 +49,12 @@ LineEdit::LineEdit()
 
 LineEdit::~LineEdit()
 {
+}
+
+
+bool LineEdit::isEmpty() const
+{
+    return _editor.isEmpty();
 }
 
 
@@ -68,9 +72,7 @@ const Pt::String& LineEdit::text() const
 
 
 const Pt::String& LineEdit::displayText() const
-{
-    // TODO: handle hidden echomode 
-    
+{   
     return _editor.displayText();
 }
 
@@ -84,13 +86,6 @@ const Pt::String& LineEdit::placeholderText() const
 void LineEdit::setPlaceholderText(const Pt::String& s)
 {
     _placeholderText = s;
-
-    if( ! hasFocus() && _editor.text().empty() )
-    {
-        _editor.setText(_placeholderText);
-        _hasPlaceholder = true;
-    }
-
     invalidate();
 }
 
@@ -112,7 +107,7 @@ void LineEdit::setEchoMode(LineEdit::EchoMode mode)
 
 Adjustment LineEdit::textAdjustment() const
 {
-    return _textAdjustment;
+    return _editor.adjustment();
 }
 
 
@@ -278,7 +273,6 @@ void LineEdit::onInvalidate()
 
     _brush = background();
     _pen = contour();
-    _placeholderPen = contour();
     _textPen = textColor();
     _font = Gfx::Font(font(), fontSize(), fontStyle());
 
@@ -288,11 +282,14 @@ void LineEdit::onInvalidate()
     if( ! _renderer )
         return;
 
-    _renderer->prepare(*this, options, _brush, _pen, _font, 
-                       _textPen, _placeholderPen);
+    _renderer->prepare(*this, options, _brush, _pen, _font, _textPen);
 
     _editor.setFont(_font);
-    _editor.layout(_line);
+
+    if( _editor.isEmpty() && ! hasFocus() )
+        _editor.layout(_placeholderText, _line);
+    else
+        _editor.layout(_line);
 }
 
 
@@ -312,9 +309,6 @@ void LineEdit::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 
     _renderer->renderBackground( *this, options, painter, rect,
                                  _pen, _brush );
-    
-    if(echoMode() == LineEdit::Hidden && ! _hasPlaceholder)
-        return;
 
     //
     // text with cursor
@@ -345,15 +339,40 @@ void LineEdit::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 
     // TODO: renderer prepare can set placeholder color
 
-    if(_hasPlaceholder)
+    if( _editor.isEmpty() && ! hasFocus() )
+    {
         _renderer->renderText(*this, options, painter, rect, 
-                              _editor.displayText(), textPos, _font, _placeholderPen);
+                              _placeholderText, textPos, _font, _textPen);
+    }
     else
+    {
         _renderer->renderText(*this, options, painter, rect, 
                               _editor.displayText(), textPos, _font, _textPen);
 
-    if( hasFocus() )
         _renderer->renderCursor(*this, options, painter, rect, cursorRect);
+    }
+}
+
+
+void LineEdit::onResizeEvent(const ResizeEvent& ev)
+{
+    Base::onResizeEvent(ev);
+    
+    _spacing = ev.size().height() / 5;
+    if(_spacing < 2)
+        _spacing = 2;
+
+    Gfx::PointF editPosition(_spacing, 0);
+    _editor.setPosition(editPosition);
+
+    Gfx::SizeF editSize = ev.size();
+    editSize.addWidth(-3 * _spacing);
+    _editor.setSize(editSize);
+
+    if( _editor.isEmpty() && ! hasFocus() )
+        _editor.layout(_placeholderText, _line);
+    else
+        _editor.layout(_line);
 }
 
 
@@ -396,12 +415,8 @@ void LineEdit::onKeyEvent(const KeyEvent& ev)
         Pt::Char ch = ev.unicode();
         if( Pt::isprint(ch) )
         {
-            if( _hasPlaceholder )
-                _editor.clear();
-
             _editor.insert(ch);
 
-            _hasPlaceholder = false;
             _isTextChanged = true;
             _textEdited.send( _editor.text() );
         }
@@ -449,25 +464,6 @@ void LineEdit::onTouchEvent(const TouchEvent& tev)
 }
 
 
-void LineEdit::onResizeEvent(const ResizeEvent& ev)
-{
-    Base::onResizeEvent(ev);
-    
-    _spacing = ev.size().height() / 5;
-    if(_spacing < 2)
-        _spacing = 2;
-
-    Gfx::PointF editPosition(_spacing, 0);
-    _editor.setPosition(editPosition);
-
-    Gfx::SizeF editSize = ev.size();
-    editSize.addWidth(-3 * _spacing);
-    _editor.setSize(editSize);
-
-    _editor.layout(_line);
-}
-
-
 void LineEdit::onFocusEvent(const FocusEvent& ev)
 {
     Base::onFocusEvent(ev);
@@ -484,14 +480,6 @@ void LineEdit::onFocusEvent(const FocusEvent& ev)
     {
         Application::instance().inputMethod().begin(*this);
     }
-
-    if(_hasPlaceholder)
-        _editor.clear();
-    
-    _hasPlaceholder = ! ev.isFocused() && _editor.text().empty();
-
-    if(_hasPlaceholder)
-        _editor.setText(_placeholderText);
 }
 
 } // namespace

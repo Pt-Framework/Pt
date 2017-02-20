@@ -407,48 +407,6 @@ void ComboBox::onItemSelected(ListBoxItem& item)
 }
 
 
-void ComboBox::processKeyEvent(const KeyEvent& ev)
-{
-    if( ! ev.isPress() || ! _isEditable )
-        return;
-
-    if( ev.key().code() == Pt::Hmi::Key::ArrowLeft )
-    {
-        _editor.left();
-    }
-    else if( ev.key().code() == Pt::Hmi::Key::ArrowRight )
-    {
-        _editor.right();
-    }
-    else if( ev.key().code() == Pt::Hmi::Key::Return )
-    {
-        _returnPressed.send( _editor.text() );
-    }
-    else if( ev.key().code() == Pt::Hmi::Key::Delete )
-    {
-        _editor.del();
-        _textEdited.send( _editor.text() );
-    }
-    else if( ev.key().code() == Pt::Hmi::Key::Backspace )
-    {
-        _editor.backspace();
-        _textEdited.send( _editor.text() );
-    }
-    else
-    {
-        Pt::Char ch = ev.unicode();
-
-        if( Pt::isprint(ch) )
-        {
-            _editor.insert(ch);
-            _textEdited.send( _editor.text() );
-        }
-    }
-
-    invalidate();
-}
-
-
 void ComboBox::onInvalidate()
 {
     Base::onInvalidate();
@@ -556,6 +514,47 @@ void ComboBox::onResizeEvent(const ResizeEvent& ev)
     _editor.setSize(editSize);
 
     _editor.layout(_line);
+}
+
+
+void ComboBox::processKeyEvent(const KeyEvent& ev)
+{
+    if( ! ev.isPress() || ! _isEditable )
+        return;
+
+    if( ev.key().code() == Pt::Hmi::Key::ArrowLeft )
+    {
+        _editor.left();
+    }
+    else if( ev.key().code() == Pt::Hmi::Key::ArrowRight )
+    {
+        _editor.right();
+    }
+    else if( ev.key().code() == Pt::Hmi::Key::Return )
+    {
+        _returnPressed.send( _editor.text() );
+    }
+    else if( ev.key().code() == Pt::Hmi::Key::Delete )
+    {
+        _editor.del();
+        _textEdited.send( _editor.text() );
+    }
+    else if( ev.key().code() == Pt::Hmi::Key::Backspace )
+    {
+        _editor.backspace();
+        _textEdited.send( _editor.text() );
+    }
+    else
+    {
+        Pt::Char ch = ev.unicode();
+        if( Pt::isprint(ch) )
+        {
+            _editor.insert(ch);
+            _textEdited.send( _editor.text() );
+        }
+    }
+
+    invalidate();
 }
 
 
