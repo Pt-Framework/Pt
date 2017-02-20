@@ -56,12 +56,12 @@ void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, 
         _image->format().setPixel(pixel, _pen.color(), _compositionMode);
     }
 
-    if( x2Valid && y1Valid && x1 != x2 ) {
+    if( x2Valid && y1Valid ) {
         Pixel pixel(_image->view(), x2, y1);
         _image->format().setPixel(pixel, _pen.color(), _compositionMode);
     }
 
-    if( x2Valid && y2Valid && x1 != x2 ) {
+    if( x2Valid && y2Valid ) {
         Pixel pixel(_image->view(), x2, y2);
         _image->format().setPixel(pixel, _pen.color(), _compositionMode);
     }
@@ -95,57 +95,57 @@ void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, 
     }
 }
 
-void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBeg, float degEnd)
+void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const bool mask[4])
 {
     const bool x1Valid = ClipShape::insideXRange(x1, _currentClip);
     const bool y1Valid = ClipShape::insideYRange(y1, _currentClip);
     const bool x2Valid = ClipShape::insideXRange(x2, _currentClip) && (x2 != x1);
     const bool y2Valid = ClipShape::insideYRange(y2, _currentClip) && (y2 != y1);
 
-    if( x1Valid && y1Valid && insideDegRange(x1, y1, ctrX, ctrY, degBeg, degEnd) ) {
+    if( x1Valid && y1Valid && mask[0] ) {
         Pixel pixel(_image->view(), x1, y1);
         _image->format().setPixel(pixel, _pen.color(), _compositionMode);
     }
 
-    if( x1Valid && y2Valid && insideDegRange(x1, y2, ctrX, ctrY, degBeg, degEnd) ) {
+    if( x1Valid && y2Valid && mask[1] ) {
         Pixel pixel(_image->view(), x1, y2);
         _image->format().setPixel(pixel, _pen.color(), _compositionMode);
     }
 
-    if( x2Valid && y1Valid && insideDegRange(x2, y1, ctrX, ctrY, degBeg, degEnd) ) {
+    if( x2Valid && y1Valid && mask[2] ) {
         Pixel pixel(_image->view(), x2, y1);
         _image->format().setPixel(pixel, _pen.color(), _compositionMode);
     }
 
-    if( x2Valid && y2Valid && insideDegRange(x2, y2, ctrX, ctrY, degBeg, degEnd) ) {
+    if( x2Valid && y2Valid && mask[3] ) {
         Pixel pixel(_image->view(), x2, y2);
         _image->format().setPixel(pixel, _pen.color(), _compositionMode);
     }
 }
 
-void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBeg, float degEnd, Pt::uint8_t alpha)
+void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::uint8_t alpha, const bool mask[4])
 {
     const bool x1Valid = ClipShape::insideXRange(x1, _currentClip);
     const bool y1Valid = ClipShape::insideYRange(y1, _currentClip);
     const bool x2Valid = ClipShape::insideXRange(x2, _currentClip) && (x2 != x1);
     const bool y2Valid = ClipShape::insideYRange(y2, _currentClip) && (y2 != y1);
 
-    if( x1Valid && y1Valid && insideDegRange(x1, y1, ctrX, ctrY, degBeg, degEnd) ) {
+    if( x1Valid && y1Valid && mask[0] ) {
         Pixel pixel(_image->view(), x1, y1);
         _image->format().setPixel(pixel, _pen.color(), _compositionMode, alpha);
     }
 
-    if( x1Valid && y2Valid && insideDegRange(x1, y2, ctrX, ctrY, degBeg, degEnd) ) {
+    if( x1Valid && y2Valid && mask[1] ) {
         Pixel pixel(_image->view(), x1, y2);
         _image->format().setPixel(pixel, _pen.color(), _compositionMode, alpha);
     }
 
-    if( x2Valid && y1Valid && insideDegRange(x2, y1, ctrX, ctrY, degBeg, degEnd) ) {
+    if( x2Valid && y1Valid && mask[2] ) {
         Pixel pixel(_image->view(), x2, y1);
         _image->format().setPixel(pixel, _pen.color(), _compositionMode, alpha);
     }
 
-    if( x2Valid && y2Valid && insideDegRange(x2, y2, ctrX, ctrY, degBeg, degEnd) ) {
+    if( x2Valid && y2Valid && mask[3] ) {
         Pixel pixel(_image->view(), x2, y2);
         _image->format().setPixel(pixel, _pen.color(), _compositionMode, alpha);
     }
