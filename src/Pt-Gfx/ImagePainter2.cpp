@@ -398,7 +398,6 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
             const Pt::int32_t yt = ctrY - round(y);
             const Pt::int32_t yb = ctrY + round(y);
              if(drawArc) {
-#if 1
                  const bool mask[4] = {
                      insideDegRange(xl, yt, ctrX, ctrY, degBegin, degEnd),
                      insideDegRange(xl, yb, ctrX, ctrY, degBegin, degEnd),
@@ -406,9 +405,6 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
                      insideDegRange(xr, yb, ctrX, ctrY, degBegin, degEnd)
                  };
                 _rasterizer->stroke4Pixels(xl, yt, xr, yb, mask);
-#else
-                _rasterizer->stroke4Pixels(xl, yt, xr, yb, ctrX, ctrY, degBegin, degEnd);
-#endif
              }
              else { // Ellipse
                 _rasterizer->stroke4Pixels(xl, yt, xr, yb);
@@ -423,7 +419,6 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
             const Pt::int32_t yt1 = ctrY - floor(y) - 1;
             const Pt::int32_t yb1 = ctrY + floor(y) + 1;
              if(drawArc) {
-#if 1
                  const bool mask0[4] = {
                      insideDegRange(xl, yt0, ctrX, ctrY, degBegin, degEnd),
                      insideDegRange(xl, yb0, ctrX, ctrY, degBegin, degEnd),
@@ -438,10 +433,6 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
                  };
                 _rasterizer->stroke4Pixels(xl, yt0, xr, yb0, 255 - alpha, mask0);
                 _rasterizer->stroke4Pixels(xl, yt1, xr, yb1,       alpha, mask1);
-#else
-                _rasterizer->stroke4Pixels(xl, yt0, xr, yb0, ctrX, ctrY, degBegin, degEnd, 255 - alpha);
-                _rasterizer->stroke4Pixels(xl, yt1, xr, yb1, ctrX, ctrY, degBegin, degEnd,       alpha);
-#endif
              }
              else { // Ellipse
                 _rasterizer->stroke4Pixels(xl, yt0, xr, yb0, 255 - alpha);
@@ -464,7 +455,6 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
             const Pt::int32_t yt = ctrY - y;
             const Pt::int32_t yb = ctrY + y;
              if(drawArc) {
-#if 1
                  const bool mask[4] = {
                      insideDegRange(xl, yt, ctrX, ctrY, degBegin, degEnd),
                      insideDegRange(xl, yb, ctrX, ctrY, degBegin, degEnd),
@@ -472,9 +462,6 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
                      insideDegRange(xr, yb, ctrX, ctrY, degBegin, degEnd)
                  };
                 _rasterizer->stroke4Pixels(xl, yt, xr, yb, mask);
-#else
-                _rasterizer->stroke4Pixels(xl, yt, xr, yb, ctrX, ctrY, degBegin, degEnd);
-#endif
              }
              else { // Ellipse
                 _rasterizer->stroke4Pixels(xl, yt, xr, yb);
@@ -490,7 +477,6 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
             const Pt::int32_t yt  = ctrY - y;
             const Pt::int32_t yb  = ctrY + y;
              if(drawArc) {
-#if 1
                  const bool mask0[4] = {
                      insideDegRange(xl0, yt, ctrX, ctrY, degBegin, degEnd),
                      insideDegRange(xl0, yb, ctrX, ctrY, degBegin, degEnd),
@@ -506,10 +492,6 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
                 _rasterizer->stroke4Pixels(xl0, yt, xr0, yb, 255 - alpha, mask0);
                 _rasterizer->stroke4Pixels(xl1, yt, xr1, yb,       alpha, mask1);
 
-#else
-                _rasterizer->stroke4Pixels(xl0, yt, xr0, yb, ctrX, ctrY, degBegin, degEnd, 255 - alpha);
-                _rasterizer->stroke4Pixels(xl1, yt, xr1, yb, ctrX, ctrY, degBegin, degEnd,       alpha);
-#endif
              }
              else { // Ellipse
                 _rasterizer->stroke4Pixels(xl0, yt, xr0, yb, 255 - alpha);
