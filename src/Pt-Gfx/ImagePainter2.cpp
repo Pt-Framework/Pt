@@ -362,8 +362,6 @@ void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float deg
 
 void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode)
 {
-    // ### TODO: arcMode !!! ###
-
     // Shall we draw an ellipse or arc?
     const bool drawArc = (degBegin != 0) || (degEnd != 0);
 
@@ -421,6 +419,7 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
                  };
                 _rasterizer->stroke4Pixels(xl, yt, xr, yb, mask);
                  // Determine the coordinates of the closing lines
+                if(arcMode == ArcMode::Open) continue;
                 if(abs(xl - bx) < x1d) { x1d = abs(xl - bx); x1 = xl; }
                 if(abs(xl - ex) < x2d) { x2d = abs(xl - ex); x2 = xl; }
                 if(abs(xr - bx) < x1d) { x1d = abs(xr - bx); x1 = xr; }
@@ -459,6 +458,7 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
                 _rasterizer->stroke4Pixels(xl, yt0, xr, yb0, 255 - alpha, mask0);
                 _rasterizer->stroke4Pixels(xl, yt1, xr, yb1,       alpha, mask1);
                  // Determine the coordinates of the closing lines
+                if(arcMode == ArcMode::Open) continue;
                 if(abs(xl  - bx) < x1d) { x1d = abs(xl  - bx); x1 = xl;  }
                 if(abs(xl  - ex) < x2d) { x2d = abs(xl  - ex); x2 = xl;  }
                 if(abs(xr  - bx) < x1d) { x1d = abs(xr  - bx); x1 = xr;  }
@@ -502,6 +502,7 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
                  };
                 _rasterizer->stroke4Pixels(xl, yt, xr, yb, mask);
                  // Determine the coordinates of the closing lines
+                if(arcMode == ArcMode::Open) continue;
                 if(abs(xl - bx) < x1d) { x1d = abs(xl - bx); x1 = xl; }
                 if(abs(xl - ex) < x2d) { x2d = abs(xl - ex); x2 = xl; }
                 if(abs(xr - bx) < x1d) { x1d = abs(xr - bx); x1 = xr; }
@@ -541,6 +542,7 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
                 _rasterizer->stroke4Pixels(xl0, yt, xr0, yb, 255 - alpha, mask0);
                 _rasterizer->stroke4Pixels(xl1, yt, xr1, yb,       alpha, mask1);
                  // Determine the coordinates of the closing lines
+                if(arcMode == ArcMode::Open) continue;
                 if(abs(xl0 - bx) < x1d) { x1d = abs(xl0 - bx); x1 = xl0; }
                 if(abs(xl0 - ex) < x2d) { x2d = abs(xl0 - ex); x2 = xl0; }
                 if(abs(xr0 - bx) < x1d) { x1d = abs(xr0 - bx); x1 = xr0; }
@@ -561,7 +563,7 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
         }
     }
 
-    // Draw the arc closing lines
+    // Draw the arc's closing lines
     if(drawArc) {
         if(arcMode == ArcMode::Chord) {
             const Point a(x1, y1);

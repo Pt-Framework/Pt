@@ -95,6 +95,7 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual void drawEllipse(const PointF& topLeft, const SizeF& size);
 
+        // NOTE: The begin and end angle must move in counter-clockwise direction!
         virtual void drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
         virtual void fillRect(const RectF& rect);
@@ -103,6 +104,7 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual void fillEllipse(const PointF& topLeft, const SizeF& size);
 
+        // NOTE: The begin and end angle must move in counter-clockwise direction!
         virtual void fillArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
     public:
@@ -136,7 +138,7 @@ class PT_GFX_API ImagePainter2 : public Painter
         static float fastAtan2(float y, float x);
 
         static float convertCartesianToPolar(float x, float y);
-        static bool insideDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBeg, float degEnd);
+        static bool insideDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd);
 
     private:
         RectF        _clip;
@@ -288,23 +290,23 @@ inline float ImagePainter2::convertCartesianToPolar(float x, float y)
     return fastAtan2(y, x) * 180 / Pt::Pi + 360;
 }
 
-inline bool ImagePainter2::insideDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBeg, float degEnd)
+inline bool ImagePainter2::insideDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd)
 {
     // The movement from begin to end must be in counter-clockwise (CCW)
 
     const float angle = convertCartesianToPolar(x - ctrX, -(y - ctrY));
 
-    if(degBeg < 0 && degEnd < 0) {
-        return angle >= (degBeg + 360) && angle <= (degEnd + 360);
+    if(degBegin < 0 && degEnd < 0) {
+        return angle >= (degBegin + 360) && angle <= (degEnd + 360);
     }
 
-    if(degBeg < 0 && degEnd >= 0) {
-        if( angle >= (degBeg + 360) && angle <= 360   ) return true;
+    if(degBegin < 0 && degEnd >= 0) {
+        if( angle >= (degBegin + 360) && angle <= 360   ) return true;
         if( angle >= 0              && angle <= degEnd) return true;
         return false;
     }
 
-    return angle >= degBeg && angle <= degEnd;
+    return angle >= degBegin && angle <= degEnd;
 }
 
 
