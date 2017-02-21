@@ -232,15 +232,19 @@ void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
 void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
 {
 /*
-Pt::Gfx - CompositionMode::SourceCopy
-    Solid-filled    ellipse          @ ImagePainter  =      5
-    Solid-filled    ellipse NOAA     @ ImagePainter2 =      6 ( 1.200)
-    Solid-filled    ellipse XWAA     @ ImagePainter2 =     36 ( 7.200)
+Cairo - CompositionMode::SourceCopy
+    Solid-filled    ellipse          @ Cairo         =     88
+    Solid-filled    ellipse          @ Cairo - No AA =     48 ( 0.545)
+    Solid-filled    ellipse          @ ImagePainter  =      5 ( 0.057)
+    Solid-filled    ellipse NOAA     @ ImagePainter2 =      7 ( 0.080)
+    Solid-filled    ellipse XWAA     @ ImagePainter2 =     34 ( 0.386)
 
-Pt::Gfx - CompositionMode::SourceOver
-    Solid-filled    ellipse          @ ImagePainter  =     37
-    Solid-filled    ellipse NOAA     @ ImagePainter2 =     24 ( 0.649)
-    Solid-filled    ellipse XWAA     @ ImagePainter2 =     54 ( 1.459)
+Cairo - CompositionMode::SourceOver
+    Solid-filled    ellipse          @ Cairo         =    153
+    Solid-filled    ellipse          @ Cairo - No AA =     70 ( 0.458)
+    Solid-filled    ellipse          @ ImagePainter  =     37 ( 0.242)
+    Solid-filled    ellipse NOAA     @ ImagePainter2 =     24 ( 0.157)
+    Solid-filled    ellipse XWAA     @ ImagePainter2 =     52 ( 0.340)
 */
 
     // Update the gradient as needed
@@ -252,10 +256,6 @@ Pt::Gfx - CompositionMode::SourceOver
         return;
     }
 
-    // List of anti-aliased 4-pixels and spans to be drawn later
-    AA4Pixels aa4Pixels;
-    AASpans   aaSpans;
-
     // Calculate the ellipse's parameters
     Pt::int32_t minX  = topLeft.x();
     Pt::int32_t minY  = topLeft.y();
@@ -266,18 +266,18 @@ Pt::Gfx - CompositionMode::SourceOver
     Pt::int32_t radX2 = radX * radX;
     Pt::int32_t radY2 = radY * radY;
 
-    // Top and bottom halves
-    Pt::int32_t quarters = round( radX2 * fastInvSqrt(radX2 + radY2) );
+    // === Process the spans ===
 
-    for(Pt::int32_t x = 0; x <= quarters; ++x) {
-        // Calculate the coordinate and alpha
-        const float       y     = radY * fastSqrt(1 - (float) x * x / radX2);
-        const Pt::int32_t fly   = floor(y);
-        const float       error = y - fly;
-        const Pt::uint8_t alpha = round(error * 255);
-        // Store the circumference's pixel coordinates
-        aa4Pixels.push_back( AA4PixelsElement( x, fly,     255 - alpha ) );
-        aa4Pixels.push_back( AA4PixelsElement( x, fly + 1,       alpha ) );
+    // List of spans to be drawn later
+    AASpans aaSpans;
+
+    // Top and bottom halves
+    Pt::int32_t quartersX = round( radX2 * fastInvSqrt(radX2 + radY2) );
+
+    for(Pt::int32_t x = 0; x <= quartersX; ++x) {
+        // Calculate the Y coordinate
+        const float       y   = radY * fastSqrt(1 - (float) x * x / radX2);
+        const Pt::int32_t fly = floor(y);
         // Store/update the span coordinates
         AASpans::iterator it1 = aaSpans.find(ctrY - fly);
         AASpans::iterator it2 = aaSpans.find(ctrY + fly);
@@ -298,17 +298,12 @@ Pt::Gfx - CompositionMode::SourceOver
     }
 
     // Left and right halves
-    quarters = round( radY2 * fastInvSqrt(radX2 + radY2) );
+    Pt::int32_t quartersY = round( radY2 * fastInvSqrt(radX2 + radY2) );
 
-    for(Pt::int32_t y = 0; y <= quarters; ++y) {
-        // Calculate the coordinate and alpha
-        const float       x     = radX * fastSqrt(1 - (float) y * y / radY2);
-        const Pt::int32_t flx   = floor(x);
-        const float       error = x - flx;
-        const Pt::uint8_t alpha = round(error * 255);
-        // Store the circumference's pixel coordinates
-        aa4Pixels.push_back( AA4PixelsElement( flx,     y, 255 - alpha   ) );
-        aa4Pixels.push_back( AA4PixelsElement( flx + 1, y,       alpha   ) );
+    for(Pt::int32_t y = 0; y <= quartersY; ++y) {
+        // Calculate the X coordinate
+        const float       x   = radX * fastSqrt(1 - (float) y * y / radY2);
+        const Pt::int32_t flx = floor(x);
         // Store/update the span coordinates
         AASpans::iterator it1 = aaSpans.find(ctrY - y);
         AASpans::iterator it2 = aaSpans.find(ctrY + y);
@@ -333,20 +328,58 @@ Pt::Gfx - CompositionMode::SourceOver
         _rasterizer->fillOneScanlineNoAA(it->second.from, it->second.to, it->first, minX, minY);
     }
 
-    // Draw the pixels
-    for(AA4Pixels::const_iterator it = aa4Pixels.begin(); it != aa4Pixels.end(); ++it) {
-        // Calculate the coordinates
-        const Pt::int32_t x1 = ctrX - it->deltaX;
-        const Pt::int32_t x2 = ctrX + it->deltaX;
-        const Pt::int32_t y1 = ctrY - it->deltaY;
-        const Pt::int32_t y2 = ctrY + it->deltaY;
-        // Check if the pixels shall really be drawn
+    // === Process the circumference's pixels ===
+
+    // Top and bottom halves
+    for(Pt::int32_t x = 0; x <= quartersX; ++x) {
+        // Calculate the Y coordinate and alpha
+        const float       y     = radY * fastSqrt(1 - (float) x * x / radX2);
+        const Pt::int32_t fly   = floor(y);
+        const float       error = y - fly;
+        const Pt::uint8_t alpha = round(error * 255);
+        // Draw the first part of the pixels
+        const Pt::int32_t x1  = ctrX - x;
+        const Pt::int32_t x2  = ctrX + x;
+        const Pt::int32_t y10 = ctrY - fly;
+        const Pt::int32_t y20 = ctrY + fly;
+        AASpans::const_iterator it10 = aaSpans.find(y10);
+        AASpans::const_iterator it20 = aaSpans.find(y20);
+        if( ( it10 == aaSpans.end() || (it10->second.from > x1 || it10->second.to < x2) ) ||
+            ( it20 == aaSpans.end() || (it20->second.from > x1 || it20->second.to < x2) )
+        ) _rasterizer->fill4Pixels(x1, y10, x2, y20, minX, minY, alpha);
+        // Draw the second part of the pixels
+        const Pt::int32_t y11 = ctrY - fly - 1;
+        const Pt::int32_t y21 = ctrY + fly + 1;
+        AASpans::const_iterator it11 = aaSpans.find(y11);
+        AASpans::const_iterator it21 = aaSpans.find(y21);
+        if( ( it11 == aaSpans.end() || (it11->second.from > x1 || it11->second.to < x2) ) ||
+            ( it21 == aaSpans.end() || (it21->second.from > x1 || it21->second.to < x2) )
+        ) _rasterizer->fill4Pixels(x1, y11, x2, y21, minX, minY, alpha);
+    }
+
+    // Left and right halves
+    for(Pt::int32_t y = 0; y <= quartersY; ++y) {
+        // Calculate the X coordinate and alpha
+        const float       x     = radX * fastSqrt(1 - (float) y * y / radY2);
+        const Pt::int32_t flx   = floor(x);
+        const float       error = x - flx;
+        const Pt::uint8_t alpha = round(error * 255);
+        // Draw the first part of the pixels
+        const Pt::int32_t x10 = ctrX - flx;
+        const Pt::int32_t x20 = ctrX + flx;
+        const Pt::int32_t y1  = ctrY - y;
+        const Pt::int32_t y2  = ctrY + y;
         AASpans::const_iterator it1 = aaSpans.find(y1);
         AASpans::const_iterator it2 = aaSpans.find(y2);
-        if( ( it1 != aaSpans.end() && (it1->second.from <= x1 || it1->second.to >= x2) ) ||
-            ( it2 != aaSpans.end() && (it2->second.from <= x1 || it2->second.to >= x2) ) ) continue;
-        // Draw the pixel
-        _rasterizer->fill4Pixels(x1, y1, x2, y2, minX, minY, it->alpha);
+        if( ( it1 == aaSpans.end() || (it1->second.from > x10 || it1->second.to < x20) ) ||
+            ( it2 == aaSpans.end() || (it2->second.from > x10 || it2->second.to < x20) )
+        ) _rasterizer->fill4Pixels(x10, y1, x20, y2, minX, minY, alpha);
+        // Draw the second part of the pixels
+        const Pt::int32_t x11 = ctrX - flx - 1;
+        const Pt::int32_t x21 = ctrX + flx + 1;
+        if( ( it1 == aaSpans.end() || (it1->second.from > x11 || it1->second.to < x21) ) ||
+            ( it2 == aaSpans.end() || (it2->second.from > x11 || it2->second.to < x21) )
+        ) _rasterizer->fill4Pixels(x11, y1, x21, y2, minX, minY, alpha);
     }
 }
 
