@@ -235,16 +235,16 @@ inline float ImagePainter2::fastCos(float x)
 #else
 
 inline float ImagePainter2::fastInvSqrt(float x)
-{ return 1.0f / sqrtf(x); }
+{ return 1.0f / ::sqrtf(x); }
 
 inline float ImagePainter2::fastSqrt(float x)
-{ return sqrtf(x); }
+{ return ::sqrtf(x); }
 
 inline float ImagePainter2::fastSin(float x)
-{ return sin(x); }
+{ return ::sin(x); }
 
 inline float ImagePainter2::fastCos(float x)
-{ return cos(x); }
+{ return ::cos(x); }
 
 #endif
 
@@ -290,11 +290,17 @@ inline float ImagePainter2::convertCartesianToPolar(float x, float y)
 
 inline bool ImagePainter2::insideDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBeg, float degEnd)
 {
+    // The movement from begin to end must be in counter-clockwise (CCW)
+
     const float angle = convertCartesianToPolar(x - ctrX, -(y - ctrY));
 
-    if(degEnd < degBeg) {
-        if(angle >= degBeg && angle <= 360   ) return true;
-        if(angle >= 0      && angle <= degEnd) return true;
+    if(degBeg < 0 && degEnd < 0) {
+        return angle >= (degBeg + 360) && angle <= (degEnd + 360);
+    }
+
+    if(degBeg < 0 && degEnd >= 0) {
+        if( angle >= (degBeg + 360) && angle <= 360   ) return true;
+        if( angle >= 0              && angle <= degEnd) return true;
         return false;
     }
 

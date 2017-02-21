@@ -341,9 +341,7 @@ void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float deg
     // Check for invalid mode
     if(arcMode == ArcMode::Open) return;
 
-#if 1
-
-#else
+#if 0
 
     // Generate a polygon that approximates the arc
     std::vector<Point> points;
@@ -351,6 +349,8 @@ void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float deg
 
     // Rasterize the polygon
     _rasterizer->fillPolygon(points.data(), points.size());
+
+#else
 
 #endif
 }
@@ -369,11 +369,15 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
 
     // Ensure that the begin and end angle are within the acceptable range
     if(drawArc) {
-        while(degBegin <   0) degBegin += 360;
-        while(degBegin > 360) degBegin -= 360;
+        while(degBegin < -360) degBegin += 360;
+        while(degBegin >  360) degBegin -= 360;
 
-        while(degEnd <   0) degEnd += 360;
-        while(degEnd > 360) degEnd -= 360;
+        while(degEnd < -360) degEnd += 360;
+        while(degEnd >  360) degEnd -= 360;
+
+       // if(degBegin > degEnd) std::swap(degEnd, degBegin);
+
+        fprintf(stderr, "%f %f\n", degBegin, degEnd);
     }
 
     // Calculate the ellipse's parameters
