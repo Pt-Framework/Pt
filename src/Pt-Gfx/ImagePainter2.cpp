@@ -188,7 +188,7 @@ void ImagePainter2::drawLine(const PointF& from, const PointF& to)
     const Point a( (Pt::int32_t)(from.x()), (Pt::int32_t)(from.y()) );
     const Point b( (Pt::int32_t)(to  .x()), (Pt::int32_t)(to  .y()) );
 
-    _rasterizer->strokeOnePixelSolidLine(a, b);
+    _rasterizer->strokeOnePixelSolidLine(a, b, 0);
 }
 
 void ImagePainter2::drawRect( const RectF& rect )
@@ -620,14 +620,14 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
         if(arcMode == ArcMode::Chord) {
             const Point a(x1, y1);
             const Point b(x2, y2);
-            _rasterizer->strokeOnePixelSolidLine(a, b, false, false);
+            _rasterizer->strokeOnePixelSolidLine(a, b, 0);
         }
         else if(arcMode == ArcMode::Pie) {
             const Point a(bx, by);
             const Point b(ex, ey);
             const Point o(ctrX, ctrY);
-            _rasterizer->strokeOnePixelSolidLine(a, o, false, false);
-            _rasterizer->strokeOnePixelSolidLine(b, o, false, true );
+            _rasterizer->strokeOnePixelSolidLine(a, o, 0);
+            _rasterizer->strokeOnePixelSolidLine(b, o, 0);
         }
     }
 }

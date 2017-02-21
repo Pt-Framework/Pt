@@ -48,19 +48,19 @@ using namespace Pt::Gfx;
 #define DO_BENCHMARKING 0
 
 // Detailed-test enable settings for Pt-Gfx
-#define TEST_SOURCECOPY                        1
+#define TEST_SOURCECOPY                        0
 #define TEST_SOURCEOVER                        1
 
 #define TEST_DRAW_LINE_AND_TEXT                0
 #define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES 0
 
-#define TEST_DRAW_ELLIPSES_ARCS                0
+#define TEST_DRAW_ELLIPSES_ARCS                1
 
 #define TEST_DRAW_SOLID_FILLED_POLYGONS        0
 #define TEST_DRAW_GRADIENT_FILLED_POLYGONS     0
 #define TEST_DRAW_TEXTURE_FILLED_POLYGONS      0
 
-#define TEST_DRAW_SOLID_FILLED_ELLIPSE         1
+#define TEST_DRAW_SOLID_FILLED_ELLIPSE         0
 #define TEST_DRAW_GRADIENT_FILLED_ELLIPSE      0
 #define TEST_DRAW_TEXTURE_FILLED_ELLIPSE       0
 

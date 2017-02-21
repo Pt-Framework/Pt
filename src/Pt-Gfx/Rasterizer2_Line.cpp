@@ -39,7 +39,7 @@ namespace Gfx {
 // ======================================================================================
 // ===== Public Member Functions ========================================================
 // ======================================================================================
-void Rasterizer2::strokeOnePixelSolidLine(const Point& a, const Point& b, bool skipFirstPoint, bool skipLastPoint)
+void Rasterizer2::strokeOnePixelSolidLine(const Point& a, const Point& b, DrawLineMask* maskInOut)
 {
     // Clip the points
     Pt::int32_t x1 = a.x();
@@ -77,30 +77,30 @@ void Rasterizer2::strokeOnePixelSolidLine(const Point& a, const Point& b, bool s
 
     // Check for horizontal line
     if(minY == maxY) {
-        rasterOnePixelHLineSegment(minX, maxX, minY, _pen.color(), skipFirstPoint, skipLastPoint);
+        rasterOnePixelHLineSegment(minX, maxX, minY, _pen.color(), maskInOut);
         return;
     }
 
     // Check for vertical line
     if(minX == maxX) {
-        rasterOnePixelVLineSegment(minX, minY, maxY, _pen.color(), skipFirstPoint, skipLastPoint);
+        rasterOnePixelVLineSegment(minX, minY, maxY, _pen.color(), maskInOut);
         return;
     }
 
     // Check for 45-degree line
     if(sizeX == sizeY) {
-        rasterOnePixelGLineSegmentNoAA(x1, y1, x2, y2, _pen.color(), skipFirstPoint, skipLastPoint);
+        rasterOnePixelGLineSegmentNoAA(x1, y1, x2, y2, _pen.color(), maskInOut);
         return;
     }
 
     // Raster the line
     if(_aaMode != AntiAliasingMode::None) {
         // Raster the line using anti-aliasing
-        rasterOnePixelGLineSegmentXWAA(x1, y1, x2, y2, _pen.color(), skipFirstPoint, skipLastPoint);
+        rasterOnePixelGLineSegmentXWAA(x1, y1, x2, y2, _pen.color(), maskInOut);
     }
     else {
         // Raster the line without using anti-aliasing
-        rasterOnePixelGLineSegmentNoAA(x1, y1, x2, y2, _pen.color(), skipFirstPoint, skipLastPoint);
+        rasterOnePixelGLineSegmentNoAA(x1, y1, x2, y2, _pen.color(), maskInOut);
     }
 }
 
@@ -109,47 +109,47 @@ void Rasterizer2::strokeOnePixelSolidLine(const Point& a, const Point& b, bool s
 // ===== Private Member Functions =======================================================
 // ======================================================================================
 
-void Rasterizer2::rasterOnePixelHLineSegment(Pt::int32_t x1, Pt::int32_t x2, Pt::int32_t y, const Color& color, bool skipFirstPoint, bool skipLastPoint)
+void Rasterizer2::rasterOnePixelHLineSegment(Pt::int32_t x1, Pt::int32_t x2, Pt::int32_t y, const Color& color, DrawLineMask* maskInOut)
 {
     // Swap the coordinates as needed
     if(x1 > x2) std::swap(x1, x2);
 
     // Adjust the start and end coordinates as needed
-    if(skipFirstPoint) ++x1;
-    if(skipLastPoint ) --x2;
+    //if(skipFirstPoint) ++x1;
+    //if(skipLastPoint ) --x2;
 
-    if(x1 > x2) return;
+    //if(x1 > x2) return;
 
     // Calculate the length of the line
-    const Pt::int32_t sizeL = x2 - x1 + (skipLastPoint ? 0 : 1);
+    const Pt::int32_t sizeL = x2 - x1 + 1;
 
     // Draw the line
     Pixel pixel(_image->view(), x1, y);
     _image->format().setPixels(pixel, color, sizeL, _compositionMode);
 }
 
-void Rasterizer2::rasterOnePixelVLineSegment(Pt::int32_t x, Pt::int32_t y1, Pt::int32_t y2, const Color& color, bool skipFirstPoint, bool skipLastPoint)
+void Rasterizer2::rasterOnePixelVLineSegment(Pt::int32_t x, Pt::int32_t y1, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut)
 {
     // Swap the coordinates as needed
     if(y1 > y2) std::swap(y1, y2);
 
     // Adjust the start and end coordinates as needed
-    if(skipFirstPoint) ++y1;
-    if(skipLastPoint ) --y2;
+    //if(skipFirstPoint) ++y1;
+    //if(skipLastPoint ) --y2;
 
-    if(y1 > y2) return;
+    //if(y1 > y2) return;
 
     // Adjust the end coordinate as needed
-    if(skipLastPoint) {
-        if(y1 < y2) --y2;
-        else        ++y2;
-    }
+    //if(skipLastPoint) {
+    //    if(y1 < y2) --y2;
+    //    else        ++y2;
+    //}
 
     // Swap the coordinates as needed
-    if(y1 > y2) std::swap(y1, y2);
+    //if(y1 > y2) std::swap(y1, y2);
 
     // Calculate the length of the line
-    const Pt::int32_t sizeL = y2 - y1 + (skipLastPoint ? 0 : 1);
+    const Pt::int32_t sizeL = y2 - y1 + 1;
 
     // Draw the line
     for(Pt::int32_t i = 0; i < sizeL; ++i) {
@@ -161,7 +161,7 @@ void Rasterizer2::rasterOnePixelVLineSegment(Pt::int32_t x, Pt::int32_t y1, Pt::
 // Bresenham's Line Aalgorithm
 // https://en.wikipedia.org/wiki/Bresenham's_line_algorithm
 // https://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm
-void Rasterizer2::rasterOnePixelGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, bool skipFirstPoint, bool skipLastPoint)
+void Rasterizer2::rasterOnePixelGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut)
 {
     // Calculate the deltas
     const Pt::int32_t dx = abs(x2 - x1);
@@ -180,13 +180,13 @@ void Rasterizer2::rasterOnePixelGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1,
     Pt::int32_t y = y1;
     for(;;) {
         // Check if we should skip drawing the pixel
-        const bool skipDrawing = (skipFirstPoint && x == x1 && y == y1) ||
-                                 (skipLastPoint  && x == x2 && y == y2);
+        //const bool skipDrawing = (skipFirstPoint && x == x1 && y == y1) ||
+        //                         (skipLastPoint  && x == x2 && y == y2);
         // Draw the pixel
-        if(!skipDrawing) {
+        //if(!skipDrawing) {
             Pixel pixel(_image->view(), x, y);
             _image->format().setPixel(pixel, color, _compositionMode);
-        }
+        //}
         // Stop if we have reached the end
         if(x == x2 && y == y2) break;
         // Update the coordinates
@@ -204,7 +204,7 @@ void Rasterizer2::rasterOnePixelGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1,
 
 // Xiaolin Wu's Anti-Aliased Line Algorithm
 // https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
-void Rasterizer2::rasterOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, bool skipFirstPoint, bool skipLastPoint)
+void Rasterizer2::rasterOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut)
 {
     // ### TODO: How to fix the "rope-like appearance" artifacts ??? ###
 
@@ -247,8 +247,8 @@ void Rasterizer2::rasterOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1,
     Pt::int32_t from = FIXED_POINT_TO_INT(FIXED_POINT_ROUND(fx1));
     Pt::int32_t to   = FIXED_POINT_TO_INT(xpxl2);
 
-    if(skipFirstPoint) ++from;
-    if(skipLastPoint ) --to;
+    //if(skipFirstPoint) ++from;
+    //if(skipLastPoint ) --to;
 
     if(steep) {
         for(Pt::int32_t i = from; i <= to; ++i) {

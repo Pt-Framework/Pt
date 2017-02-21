@@ -135,6 +135,8 @@ class Rasterizer2
             return _compositionMode;
         }
 
+        typedef Point DrawLineMask[4];
+
         void image(const Point& to, const Image& image);
         void image(const Point& toIn, const Image& image, const Rect& imageRect);
 
@@ -148,7 +150,7 @@ class Rasterizer2
         void fillOneScanlineNoAA(Pt::int32_t from, Pt::int32_t to, Pt::int32_t pixelY, Pt::int32_t minX, Pt::int32_t minY);
 
         void strokeText(const Point& to, const Pt::String& text);
-        void strokeOnePixelSolidLine(const Point& a, const Point& b, bool skipFirstPoint = false, bool skipLastPoint = false);
+        void strokeOnePixelSolidLine(const Point& a, const Point& b, DrawLineMask* maskInOut);
         void strokeOnePixelSolidRect(const Point& tl, const Point& br);
         void strokeOnePixelSolidPolygon(const Point* points, size_t pointCount);
 
@@ -159,10 +161,10 @@ class Rasterizer2
         void updateGradientBrushAsNeeded(Pt::int32_t width, Pt::int32_t height);
 
     private:
-        void rasterOnePixelHLineSegment(Pt::int32_t x1, Pt::int32_t x2, Pt::int32_t y, const Color& color, bool skipFirstPoint, bool skipLastPoint);
-        void rasterOnePixelVLineSegment(Pt::int32_t x, Pt::int32_t y1, Pt::int32_t y2, const Color& color, bool skipFirstPoint, bool skipLastPoint);
-        void rasterOnePixelGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, bool skipFirstPoint, bool skipLastPoint);
-        void rasterOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, bool skipFirstPoint, bool skipLastPoint);
+        void rasterOnePixelHLineSegment(Pt::int32_t x1, Pt::int32_t x2, Pt::int32_t y, const Color& color, DrawLineMask* maskInOut);
+        void rasterOnePixelVLineSegment(Pt::int32_t x, Pt::int32_t y1, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut);
+        void rasterOnePixelGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut);
+        void rasterOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut);
 
         void rasterRectArea(const Point& tl, const Point& br);
 
