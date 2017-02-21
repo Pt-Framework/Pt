@@ -39,11 +39,6 @@ namespace Gfx {
 
 
 // ======================================================================================
-// ===== Support Functions ==============================================================
-// ======================================================================================
-
-
-// ======================================================================================
 // ===== Static Public Member Functions =================================================
 // ======================================================================================
 
@@ -306,6 +301,8 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
         // Strore the span
         aaSpansCombined.push_back(*it);
     }
+
+    aaSpans.clear();
 
     // Draw the spans
     for(std::vector<AASpan>::const_iterator it = aaSpansCombined.begin(); it != aaSpansCombined.end(); ++it) {
