@@ -134,3 +134,42 @@ static size_t benchDrawFillEllipse(int loopCount, const Brush& brushH, const Bru
     return sum;
 }
 
+template <typename PainterT>
+static size_t benchDrawFillArc(int loopCount, const Brush& brushH, const Brush& brushV, CompositionMode cm, AntiAliasingMode antiAliasingMode)
+{
+    size_t sum = 0;
+
+    Image image( ImageFormat::argb32(), BENCHMARK_IMAGE_SIZE );
+
+    PainterT painter(image);
+    painter.setCompositionMode(cm);
+
+    Pen pen( Color::fromRgb8(255, 255, 255, 175) );
+    painter.setPen(pen);
+
+    ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
+    if(!ip2) return 0;
+
+    for(int i = 0; i < loopCount ; ++i) {
+        Pt::System::Clock clock;
+        clock.start();
+
+        painter.setBrush(brushH);
+        ip2->setAntiAliasingMode(antiAliasingMode);
+        ip2->fillArc( PointF (30, 60), SizeF(120, 120), 30, 330, ArcMode::Chord );
+        ip2->fillArc( PointF (30, 60 + 200), SizeF(120, 120), 330, 33, ArcMode::Pie );
+
+        painter.setBrush(brushV);
+        ip2->setAntiAliasingMode(antiAliasingMode);
+        ip2->fillArc( PointF (30 + 200, 60), SizeF(120, 120), 30, 330, ArcMode::Chord );
+        ip2->fillArc( PointF (30 + 200, 60 + 200), SizeF(120, 120), 330, 30, ArcMode::Pie );
+
+        sum += clock.stop().toUSecs();
+
+        BENCHMARK_DISPLAY_RESULTING_IMAGE;
+    }
+
+    sum /= loopCount;
+    return sum;
+}
+

@@ -54,7 +54,7 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_LINE_AND_TEXT                0
 #define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES 0
 
-#define TEST_DRAW_ELLIPSE                      1
+#define TEST_DRAW_ELLIPSES_ARCS                1
 
 #define TEST_DRAW_SOLID_FILLED_POLYGONS        0
 #define TEST_DRAW_GRADIENT_FILLED_POLYGONS     0
@@ -86,9 +86,13 @@ using namespace Pt::Gfx;
 #define BENCHMARK_GRADIENT_FILLED_POLYGON   0
 #define BENCHMARK_TEXTURE_FILLED_POLYGON    0
 
-#define BENCHMARK_SOLID_FILLED_ELLIPSE      1
+#define BENCHMARK_SOLID_FILLED_ELLIPSE      0
 #define BENCHMARK_GRADIENT_FILLED_ELLIPSE   0
 #define BENCHMARK_TEXTURE_FILLED_ELLIPSE    0
+
+#define BENCHMARK_SOLID_FILLED_ARC          0
+#define BENCHMARK_GRADIENT_FILLED_ARC       0
+#define BENCHMARK_TEXTURE_FILLED_ARC        0
 
 // Configurations and objects
 #define FONT_DIR  "../src/Pt-Gfx/fonts"
@@ -175,7 +179,7 @@ int main(int argc, char* args[])
     }
 
     // Ellipse
-    if(DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_ELLIPSE) {
+    if(DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_ELLIPSES_ARCS) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
         testDrawEllipse("Ellipse & Arcs-Pies - ImagePainter2 [SourceCopy]", image, *painter2);
         if(TEST_COMPARE_WITH_OLD_PAINTER) {
@@ -184,7 +188,7 @@ int main(int argc, char* args[])
         }
     }
 
-    if(DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_ELLIPSE) {
+    if(DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_ELLIPSES_ARCS) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
         testDrawEllipse("Ellipse & Arcs-Pies - ImagePainter2 [SourceOver]", image, *painter2);
         if(TEST_COMPARE_WITH_OLD_PAINTER) {

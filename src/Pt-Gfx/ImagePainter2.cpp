@@ -39,6 +39,11 @@ namespace Gfx {
 
 
 // ======================================================================================
+// ===== Support Functions ==============================================================
+// ======================================================================================
+
+
+// ======================================================================================
 // ===== Static Public Member Functions =================================================
 // ======================================================================================
 
@@ -591,8 +596,8 @@ void ImagePainter2::genArcGeometryQSC( std::vector<Point>& points, const PointF&
 
     for(Pt::int32_t i = 0; i < numSegs; ++i) {
         // Calculate the coordinates
-        const Pt::int32_t x = centerX + radiusX * fastCos<float, true>(angle);
-        const Pt::int32_t y = centerY - radiusY * fastSin<float, true>(angle);
+        const Pt::int32_t x = centerX + radiusX * fastCos(angle);
+        const Pt::int32_t y = centerY - radiusY * fastSin(angle);
         // Update the angle
         angle += fdegInc;
         // Skip duplicated points

@@ -31,6 +31,8 @@
 #ifndef PT_GFX_IMAGEPAINTER_2_H
 #define PT_GFX_IMAGEPAINTER_2_H
 
+#include <Pt/Math.h>
+
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/AntiAliasingMode.h>
 #include <Pt/Gfx/ArcMode.h>
@@ -121,10 +123,183 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual void genArcGeometryQSC(std::vector<Point>& points, const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, bool createPie);
 
+        // Helper structures
+        struct AA4Pixels; // Specify four pixels with alpha
+        struct AASpan;    // Specify a span (scanline)
+
+        // Helper functions
+        static float fastInvSqrt(float x);
+        static float fastSqrt(float x);
+        static float fastSin(float x);
+        static float fastCos(float x);
+
+        static float fastAtan2(float y, float x);
+
+        static float convertCartesianToPolar(float x, float y);
+        static bool insideDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBeg, float degEnd);
+
     private:
         RectF        _clip;
         Rasterizer2* _rasterizer;
 };
+
+// ======================================================================================
+// ===== Private Member Structures and Functions ========================================
+// ======================================================================================
+
+struct ImagePainter2::AA4Pixels {
+    Pt::int32_t centerX, centerY;
+    Pt::int32_t deltaX, deltaY;
+    Pt::uint8_t alpha;
+
+    AA4Pixels(Pt::int32_t centerX_, Pt::int32_t centerY_, Pt::int32_t deltaX_, Pt::int32_t deltaY_, Pt::uint8_t alpha_)
+    : centerX(centerX_), centerY(centerY_), deltaX(deltaX_), deltaY(deltaY_), alpha(alpha_)
+    {}
+};
+
+struct ImagePainter2::AASpan {
+    Pt::int32_t from;
+    Pt::int32_t to;
+    Pt::int32_t pixelY;
+
+    AASpan(Pt::int32_t from_, Pt::int32_t to_, Pt::int32_t pixelY_)
+    : from(from_), to(to_), pixelY(pixelY_)
+    {}
+
+    bool operator < (const AASpan& ref) const
+    {
+        if(pixelY < ref.pixelY) return true;
+        if(pixelY > ref.pixelY) return false;
+        return from < ref.to;
+    }
+};
+
+#if defined(__arm__) || defined(__thumb__) || defined(_M_ARM) || defined(_M_ARMT) || defined(__TARGET_ARCH_ARM) || defined(__TARGET_ARCH_THUMB) || defined(_ARM) || defined(__arm)
+
+// ### TODO: Check if these functions are actually faster in ARM CPUs !!! ###
+
+inline float ImagePainter2::fastInvSqrt(float x)
+{
+    // https://en.wikipedia.org/wiki/Fast_inverse_square_root
+
+    const float x2 = x * 0.5f;
+
+    union {
+        float       f;
+        Pt::int32_t i;
+    } u;
+
+    u.f = x;
+    u.i = 0x5F3759DF - ( u.i >> 1 );
+    u.f = u.f * ( 1.5f - ( x2 * u.f * u.f ) );
+
+    return u.f;
+}
+
+inline float ImagePainter2::fastSqrt(float x)
+{
+    // https://en.wikipedia.org/wiki/Methods_of_computing_square_roots
+
+    union {
+        float       f;
+        Pt::int32_t i;
+    } u;
+
+    u.f = x;
+    u.i = (1 << 29) + (u.i >> 1) - (1 << 22) - 0x0004C000;
+    u.f = (u.f + x / u.f) * 0.5;
+
+    return u.f;
+}
+
+inline float ImagePainter2::fastSin(float x)
+{
+    if (x > Pt::Pi) x -= Pt::PiDouble;
+
+    const float b =  4 / Pt::Pi;
+    const float c = -4 / Pt::PiSqr;
+    const float p = 0.225;
+    const float y = b * x + c * x * ::fabs(x);
+
+    return p * (y * ::fabs(y) - y) + y;
+}
+
+inline float ImagePainter2::fastCos(float x)
+{
+    x += Pt::PiHalf;
+    if(x > Pt::PiDouble) x -= Pt::PiDouble;
+
+    return fastSin(x);
+}
+
+#else
+
+inline float ImagePainter2::fastInvSqrt(float x)
+{ return 1.0f / sqrtf(x); }
+
+inline float ImagePainter2::fastSqrt(float x)
+{ return sqrtf(x); }
+
+inline float ImagePainter2::fastSin(float x)
+{ return sin(x); }
+
+inline float ImagePainter2::fastCos(float x)
+{ return cos(x); }
+
+#endif
+
+inline float ImagePainter2::fastAtan2(float y, float x)
+{
+    // From https://gist.github.com/volkansalma/2972237
+    // Original code by Volkan SALMA, 2012
+
+    if(x == 0.0f) {
+        if(y >  0.0f) return Pt::PiHalf;
+        if(y == 0.0f) return 0.0f;
+        return -Pt::PiHalf;
+    }
+
+    const float z = y / x;
+          float atan;
+
+    if(fabs(z) < 1.0f) {
+        atan = z / (1.0f + 0.28f * z * z);
+        if(x < 0.0f) {
+            if(y < 0.0f) return atan - Pt::Pi;
+            return atan + Pt::Pi;
+        }
+    }
+
+    else {
+        atan = Pt::PiHalf - z / (z * z + 0.28f);
+        if(y < 0.0f) return atan - Pt::Pi;
+    }
+
+    return atan;
+}
+
+inline float ImagePainter2::convertCartesianToPolar(float x, float y)
+{
+    // Quadrant I & II
+    if(y >= 0)
+        return fastAtan2(y, x) * 180 / Pt::Pi;
+
+    // Quadrant III && IV
+    return fastAtan2(y, x) * 180 / Pt::Pi + 360;
+}
+
+inline bool ImagePainter2::insideDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBeg, float degEnd)
+{
+    const float angle = convertCartesianToPolar(x - ctrX, -(y - ctrY));
+
+    if(degEnd < degBeg) {
+        if(angle >= degBeg && angle <= 360   ) return true;
+        if(angle >= 0      && angle <= degEnd) return true;
+        return false;
+    }
+
+    return angle >= degBeg && angle <= degEnd;
+}
 
 
 } // namespace
