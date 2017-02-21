@@ -362,6 +362,8 @@ void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float deg
 
 void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode)
 {
+    // ### TODO: How to fix the "rope-like appearance" artifacts ??? ###
+
     // Shall we draw an ellipse or arc?
     const bool drawArc = (degBegin != 0) || (degEnd != 0);
 
@@ -564,18 +566,19 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
     }
 
     // Draw the arc's closing lines
+    // ### TODO: How to fix the minor artifact(s) on SourceOver mode ??? ###
     if(drawArc) {
         if(arcMode == ArcMode::Chord) {
             const Point a(x1, y1);
             const Point b(x2, y2);
-            _rasterizer->strokeOnePixelSolidLine(a, b);
+            _rasterizer->strokeOnePixelSolidLine(a, b, false, false);
         }
         else if(arcMode == ArcMode::Pie) {
             const Point a(bx, by);
             const Point b(ex, ey);
             const Point o(ctrX, ctrY);
-            _rasterizer->strokeOnePixelSolidLine(a, o);
-            _rasterizer->strokeOnePixelSolidLine(b, o);
+            _rasterizer->strokeOnePixelSolidLine(a, o, false, false);
+            _rasterizer->strokeOnePixelSolidLine(b, o, false, true );
         }
     }
 }

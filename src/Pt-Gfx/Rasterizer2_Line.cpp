@@ -206,6 +206,8 @@ void Rasterizer2::rasterOnePixelGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1,
 // https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
 void Rasterizer2::rasterOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, bool skipFirstPoint, bool skipLastPoint)
 {
+    // ### TODO: How to fix the "rope-like appearance" artifacts ??? ###
+
     // Convert the coordinates to fixed-points
     Pt::int32_t fx1 = FIXED_POINT_FROM_INT(x1);
     Pt::int32_t fy1 = FIXED_POINT_FROM_INT(y1);
