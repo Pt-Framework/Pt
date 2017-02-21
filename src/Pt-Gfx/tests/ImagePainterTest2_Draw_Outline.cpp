@@ -126,7 +126,6 @@ static void testDrawEllipse(const char* title, Image& image, Painter& painter)
         painter.setPen(text); ip2->drawText( PointF(30 + 800, 30), "XWAA" );
     }
 
-
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
     painter.setPen(draw); painter.drawEllipse( PointF (30, 50 + 200), SizeF(135, 67) );
     painter.setPen(text); painter.drawText( PointF(30, 30 + 200), "NOAA" );

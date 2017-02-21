@@ -367,19 +367,6 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
     // Shall we draw an ellipse or arc?
     const bool drawArc = (degBegin != 0) || (degEnd != 0);
 
-    // Ensure that the begin and end angle are within the acceptable range
-    if(drawArc) {
-        while(degBegin < -360) degBegin += 360;
-        while(degBegin >  360) degBegin -= 360;
-
-        while(degEnd < -360) degEnd += 360;
-        while(degEnd >  360) degEnd -= 360;
-
-       // if(degBegin > degEnd) std::swap(degEnd, degBegin);
-
-        fprintf(stderr, "%f %f\n", degBegin, degEnd);
-    }
-
     // Calculate the ellipse's parameters
     Pt::int32_t minX  = topLeft.x();
     Pt::int32_t minY  = topLeft.y();
@@ -389,6 +376,34 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
     Pt::int32_t ctrY  = minY + radY;
     Pt::int32_t radX2 = radX * radX;
     Pt::int32_t radY2 = radY * radY;
+
+    // Drawing an arc needs more calculation
+    float bx, by, ex, ey;
+
+    if(drawArc) {
+        // Ensure that the begin angle is within the acceptable range
+        while(degBegin < -360) degBegin += 360;
+        while(degBegin >  360) degBegin -= 360;
+        // Ensure that the end angle is within the acceptable range
+        while(degEnd < -360) degEnd += 360;
+        while(degEnd >  360) degEnd -= 360;
+        // Calculate the coordinate of the point loacted at the begin angle
+        bx = ctrX + radX * fastCos(degBegin * Pt::Pi / 180);
+        by = ctrY - radY * fastSin(degBegin * Pt::Pi / 180);
+        // Calculate the coordinate of the point loacted at the end angle
+        ex = ctrX + radX * fastCos(degEnd   * Pt::Pi / 180);
+        ey = ctrY - radY * fastSin(degEnd   * Pt::Pi / 180);
+    }
+
+    if(arcMode == ArcMode::Chord) {
+        const Point a(bx, by);
+        const Point b(ex, ey);
+       // _rasterizer->strokeOnePixelSolidLine(a, b);
+    }
+
+    if(arcMode == ArcMode::Pie) {
+    }
+
 
     // Top and bottom halves
     Pt::int32_t quarters = round( radX2 * fastInvSqrt(radX2 + radY2) );
