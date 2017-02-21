@@ -125,8 +125,10 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual void genArcGeometryQSC(std::vector<Point>& points, const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, bool createPie);
 
-        // Helper structures
-        struct AA4Pixels; // Specify four pixels with alpha
+        // Each element specifies four pixels with alpha;
+        // their coordinates are relative to a precalculated center point
+        struct AA4PixelsElement;
+        typedef std::vector<AA4PixelsElement> AA4Pixels;
 
         // Each key specify the Y coordinate of a span (scanline);
         // while its element specify the "from" and "to" X coordinates
@@ -153,13 +155,12 @@ class PT_GFX_API ImagePainter2 : public Painter
 // ===== Private Member Structures and Functions ========================================
 // ======================================================================================
 
-struct ImagePainter2::AA4Pixels {
-    Pt::int32_t centerX, centerY;
+struct ImagePainter2::AA4PixelsElement {
     Pt::int32_t deltaX, deltaY;
     Pt::uint8_t alpha;
 
-    AA4Pixels(Pt::int32_t centerX_, Pt::int32_t centerY_, Pt::int32_t deltaX_, Pt::int32_t deltaY_, Pt::uint8_t alpha_)
-    : centerX(centerX_), centerY(centerY_), deltaX(deltaX_), deltaY(deltaY_), alpha(alpha_)
+    AA4PixelsElement(Pt::int32_t deltaX_, Pt::int32_t deltaY_, Pt::uint8_t alpha_)
+    : deltaX(deltaX_), deltaY(deltaY_), alpha(alpha_)
     {}
 };
 

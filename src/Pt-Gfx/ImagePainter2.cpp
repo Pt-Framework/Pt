@@ -253,8 +253,8 @@ Pt::Gfx - CompositionMode::SourceOver
     }
 
     // List of anti-aliased 4-pixels and spans to be drawn later
-    std::vector<AA4Pixels> aa4Pixels;
-    AASpans                aaSpans;
+    AA4Pixels aa4Pixels;
+    AASpans   aaSpans;
 
     // Calculate the ellipse's parameters
     Pt::int32_t minX  = topLeft.x();
@@ -276,8 +276,8 @@ Pt::Gfx - CompositionMode::SourceOver
         const float       error = y - fly;
         const Pt::uint8_t alpha = round(error * 255);
         // Store the circumference's pixel coordinates
-        aa4Pixels.push_back( AA4Pixels( ctrX, ctrY, x, fly,     255 - alpha ) );
-        aa4Pixels.push_back( AA4Pixels( ctrX, ctrY, x, fly + 1,       alpha ) );
+        aa4Pixels.push_back( AA4PixelsElement( x, fly,     255 - alpha ) );
+        aa4Pixels.push_back( AA4PixelsElement( x, fly + 1,       alpha ) );
         // Store/update the span coordinates
         AASpans::iterator it1 = aaSpans.find(ctrY - fly);
         AASpans::iterator it2 = aaSpans.find(ctrY + fly);
@@ -307,9 +307,8 @@ Pt::Gfx - CompositionMode::SourceOver
         const float       error = x - flx;
         const Pt::uint8_t alpha = round(error * 255);
         // Store the circumference's pixel coordinates
-        aa4Pixels.push_back( AA4Pixels( ctrX, ctrY, flx,     y, 255 - alpha   ) );
-        aa4Pixels.push_back( AA4Pixels( ctrX, ctrY, flx + 1, y,       alpha   ) );
-
+        aa4Pixels.push_back( AA4PixelsElement( flx,     y, 255 - alpha   ) );
+        aa4Pixels.push_back( AA4PixelsElement( flx + 1, y,       alpha   ) );
         // Store/update the span coordinates
         AASpans::iterator it1 = aaSpans.find(ctrY - y);
         AASpans::iterator it2 = aaSpans.find(ctrY + y);
@@ -335,22 +334,17 @@ Pt::Gfx - CompositionMode::SourceOver
     }
 
     // Draw the pixels
-    for(std::vector<AA4Pixels>::const_iterator it = aa4Pixels.begin(); it != aa4Pixels.end(); ++it) {
+    for(AA4Pixels::const_iterator it = aa4Pixels.begin(); it != aa4Pixels.end(); ++it) {
         // Calculate the coordinates
-        const Pt::int32_t x1 = it->centerX - it->deltaX;
-        const Pt::int32_t x2 = it->centerX + it->deltaX;
-        const Pt::int32_t y1 = it->centerY - it->deltaY;
-        const Pt::int32_t y2 = it->centerY + it->deltaY;
+        const Pt::int32_t x1 = ctrX - it->deltaX;
+        const Pt::int32_t x2 = ctrX + it->deltaX;
+        const Pt::int32_t y1 = ctrY - it->deltaY;
+        const Pt::int32_t y2 = ctrY + it->deltaY;
         // Check if the pixels shall really be drawn
-        AASpans::iterator it1 = aaSpans.find(y1);
-        AASpans::iterator it2 = aaSpans.find(y2);
-
-        bool drawIt = true;
-
-        if( it1 != aaSpans.end() && (it1->second.from <= x1 || it1->second.to >= x2) ) drawIt = false;
-        if( it2 != aaSpans.end() && (it2->second.from <= x1 || it2->second.to >= x2) ) drawIt = false;
-
-        if(!drawIt) continue;
+        AASpans::const_iterator it1 = aaSpans.find(y1);
+        AASpans::const_iterator it2 = aaSpans.find(y2);
+        if( ( it1 != aaSpans.end() && (it1->second.from <= x1 || it1->second.to >= x2) ) ||
+            ( it2 != aaSpans.end() && (it2->second.from <= x1 || it2->second.to >= x2) ) ) continue;
         // Draw the pixel
         _rasterizer->fill4Pixels(x1, y1, x2, y2, minX, minY, it->alpha);
     }
