@@ -378,12 +378,10 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
     Pt::int32_t radY2 = radY * radY;
 
     // Drawing an arc requires more parameters and calculation
-    Pt::int32_t bx, by, ex, ey;
-
-    Pt::int32_t x1 = 100, x1d = COORDINATE_LIMIT;
-    Pt::int32_t y1 = 100, y1d = COORDINATE_LIMIT;
-    Pt::int32_t x2 = 100, x2d = COORDINATE_LIMIT;
-    Pt::int32_t y2 = 100, y2d = COORDINATE_LIMIT;
+    Pt::int32_t bx = 0, x1 = 0, x1d = COORDINATE_LIMIT;
+    Pt::int32_t by = 0, y1 = 0, y1d = COORDINATE_LIMIT;
+    Pt::int32_t ex = 0, x2 = 0, x2d = COORDINATE_LIMIT;
+    Pt::int32_t ey = 0, y2 = 0, y2d = COORDINATE_LIMIT;
 
     if(drawArc) {
         // Ensure that the begin angle is within the acceptable range
@@ -414,6 +412,7 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
             const Pt::int32_t yt = ctrY - round(y);
             const Pt::int32_t yb = ctrY + round(y);
              if(drawArc) {
+                 // Draw the pixels
                  const bool mask[4] = {
                      insideDegRange(xl, yt, ctrX, ctrY, degBegin, degEnd),
                      insideDegRange(xl, yb, ctrX, ctrY, degBegin, degEnd),
@@ -421,83 +420,15 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
                      insideDegRange(xr, yb, ctrX, ctrY, degBegin, degEnd)
                  };
                 _rasterizer->stroke4Pixels(xl, yt, xr, yb, mask);
-
-                if(!mask[0]) { // (xl, yt)
-                    if(abs(xl - bx) < x1d) {
-                        x1d = abs(xl - bx);
-                        x1 = xl;
-                    }
-                    if(abs(xl - ex) < x2d) {
-                        x2d = abs(xl - ex);
-                        x2 = xl;
-                    }
-                    if(abs(yt - by) < y1d) {
-                        y1d = abs(yt - by);
-                        y1 = yt;
-                    }
-                    if(abs(yt - ey) < y2d) {
-                        y2d = abs(yt - ey);
-                        y2 = yt;
-                    }
-                }
-
-                if(!mask[1]) { // (xl, yb)
-                    if(abs(xl - bx) < x1d) {
-                        x1d = abs(xl - bx);
-                        x1 = xl;
-                    }
-                    if(abs(xl - ex) < x2d) {
-                        x2d = abs(xl - ex);
-                        x2 = xl;
-                    }
-                    if(abs(yb - by) < y1d) {
-                        y1d = abs(yb - by);
-                        y1 = yb;
-                    }
-                    if(abs(yb - ey) < y2d) {
-                        y2d = abs(yb - ey);
-                        y2 = yb;
-                    }
-                }
-
-                if(!mask[2]) { // (xr, yt)
-                    if(abs(xr - bx) < x1d) {
-                        x1d = abs(xr - bx);
-                        x1 = xr;
-                    }
-                    if(abs(xr - ex) < x2d) {
-                        x2d = abs(xr - ex);
-                        x2 = xr;
-                    }
-                    if(abs(yt - by) < y1d) {
-                        y1d = abs(yt - by);
-                        y1 = yt;
-                    }
-                    if(abs(yt - ey) < y2d) {
-                        y2d = abs(yt - ey);
-                        y2 = yt;
-                    }
-                }
-
-                if(!mask[3]) { // (xr, yb)
-                    if(abs(xr - bx) < x1d) {
-                        x1d = abs(xr - bx);
-                        x1 = xr;
-                    }
-                    if(abs(xr - ex) < x2d) {
-                        x2d = abs(xr - ex);
-                        x2 = xr;
-                    }
-                    if(abs(yb - by) < y1d) {
-                        y1d = abs(yb - by);
-                        y1 = yb;
-                    }
-                    if(abs(yb - ey) < y2d) {
-                        y2d = abs(yb - ey);
-                        y2 = yb;
-                    }
-                }
-
+                 // Determine the coordinates of the closing lines
+                if(abs(xl - bx) < x1d) { x1d = abs(xl - bx); x1 = xl; }
+                if(abs(xl - ex) < x2d) { x2d = abs(xl - ex); x2 = xl; }
+                if(abs(xr - bx) < x1d) { x1d = abs(xr - bx); x1 = xr; }
+                if(abs(xr - ex) < x2d) { x2d = abs(xr - ex); x2 = xr; }
+                if(abs(yt - by) < y1d) { y1d = abs(yt - by); y1 = yt; }
+                if(abs(yt - ey) < y2d) { y2d = abs(yt - ey); y2 = yt; }
+                if(abs(yb - by) < y1d) { y1d = abs(yb - by); y1 = yb; }
+                if(abs(yb - ey) < y2d) { y2d = abs(yb - ey); y2 = yb; }
              }
              else { // Ellipse
                 _rasterizer->stroke4Pixels(xl, yt, xr, yb);
@@ -512,6 +443,7 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
             const Pt::int32_t yt1 = ctrY - floor(y) - 1;
             const Pt::int32_t yb1 = ctrY + floor(y) + 1;
              if(drawArc) {
+                 // Draw the pixels
                  const bool mask0[4] = {
                      insideDegRange(xl, yt0, ctrX, ctrY, degBegin, degEnd),
                      insideDegRange(xl, yb0, ctrX, ctrY, degBegin, degEnd),
@@ -526,6 +458,19 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
                  };
                 _rasterizer->stroke4Pixels(xl, yt0, xr, yb0, 255 - alpha, mask0);
                 _rasterizer->stroke4Pixels(xl, yt1, xr, yb1,       alpha, mask1);
+                 // Determine the coordinates of the closing lines
+                if(abs(xl  - bx) < x1d) { x1d = abs(xl  - bx); x1 = xl;  }
+                if(abs(xl  - ex) < x2d) { x2d = abs(xl  - ex); x2 = xl;  }
+                if(abs(xr  - bx) < x1d) { x1d = abs(xr  - bx); x1 = xr;  }
+                if(abs(xr  - ex) < x2d) { x2d = abs(xr  - ex); x2 = xr;  }
+                if(abs(yt0 - by) < y1d) { y1d = abs(yt0 - by); y1 = yt0; }
+                if(abs(yt0 - ey) < y2d) { y2d = abs(yt0 - ey); y2 = yt0; }
+                if(abs(yb0 - by) < y1d) { y1d = abs(yb0 - by); y1 = yb0; }
+                if(abs(yb0 - ey) < y2d) { y2d = abs(yb0 - ey); y2 = yb0; }
+                if(abs(yt1 - by) < y1d) { y1d = abs(yt1 - by); y1 = yt1; }
+                if(abs(yt1 - ey) < y2d) { y2d = abs(yt1 - ey); y2 = yt1; }
+                if(abs(yb1 - by) < y1d) { y1d = abs(yb1 - by); y1 = yb1; }
+                if(abs(yb1 - ey) < y2d) { y2d = abs(yb1 - ey); y2 = yb1; }
              }
              else { // Ellipse
                 _rasterizer->stroke4Pixels(xl, yt0, xr, yb0, 255 - alpha);
@@ -548,6 +493,7 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
             const Pt::int32_t yt = ctrY - y;
             const Pt::int32_t yb = ctrY + y;
              if(drawArc) {
+                 // Draw the pixels
                  const bool mask[4] = {
                      insideDegRange(xl, yt, ctrX, ctrY, degBegin, degEnd),
                      insideDegRange(xl, yb, ctrX, ctrY, degBegin, degEnd),
@@ -555,83 +501,15 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
                      insideDegRange(xr, yb, ctrX, ctrY, degBegin, degEnd)
                  };
                 _rasterizer->stroke4Pixels(xl, yt, xr, yb, mask);
-
-                if(!mask[0]) { // (xl, yt)
-                    if(abs(xl - bx) < x1d) {
-                        x1d = abs(xl - bx);
-                        x1 = xl;
-                    }
-                    if(abs(xl - ex) < x2d) {
-                        x2d = abs(xl - ex);
-                        x2 = xl;
-                    }
-                    if(abs(yt - by) < y1d) {
-                        y1d = abs(yt - by);
-                        y1 = yt;
-                    }
-                    if(abs(yt - ey) < y2d) {
-                        y2d = abs(yt - ey);
-                        y2 = yt;
-                    }
-                }
-
-                if(!mask[1]) { // (xl, yb)
-                    if(abs(xl - bx) < x1d) {
-                        x1d = abs(xl - bx);
-                        x1 = xl;
-                    }
-                    if(abs(xl - ex) < x2d) {
-                        x2d = abs(xl - ex);
-                        x2 = xl;
-                    }
-                    if(abs(yb - by) < y1d) {
-                        y1d = abs(yb - by);
-                        y1 = yb;
-                    }
-                    if(abs(yb - ey) < y2d) {
-                        y2d = abs(yb - ey);
-                        y2 = yb;
-                    }
-                }
-
-                if(!mask[2]) { // (xr, yt)
-                    if(abs(xr - bx) < x1d) {
-                        x1d = abs(xr - bx);
-                        x1 = xr;
-                    }
-                    if(abs(xr - ex) < x2d) {
-                        x2d = abs(xr - ex);
-                        x2 = xr;
-                    }
-                    if(abs(yt - by) < y1d) {
-                        y1d = abs(yt - by);
-                        y1 = yt;
-                    }
-                    if(abs(yt - ey) < y2d) {
-                        y2d = abs(yt - ey);
-                        y2 = yt;
-                    }
-                }
-
-                if(!mask[3]) { // (xr, yb)
-                    if(abs(xr - bx) < x1d) {
-                        x1d = abs(xr - bx);
-                        x1 = xr;
-                    }
-                    if(abs(xr - ex) < x2d) {
-                        x2d = abs(xr - ex);
-                        x2 = xr;
-                    }
-                    if(abs(yb - by) < y1d) {
-                        y1d = abs(yb - by);
-                        y1 = yb;
-                    }
-                    if(abs(yb - ey) < y2d) {
-                        y2d = abs(yb - ey);
-                        y2 = yb;
-                    }
-                }
-
+                 // Determine the coordinates of the closing lines
+                if(abs(xl - bx) < x1d) { x1d = abs(xl - bx); x1 = xl; }
+                if(abs(xl - ex) < x2d) { x2d = abs(xl - ex); x2 = xl; }
+                if(abs(xr - bx) < x1d) { x1d = abs(xr - bx); x1 = xr; }
+                if(abs(xr - ex) < x2d) { x2d = abs(xr - ex); x2 = xr; }
+                if(abs(yt - by) < y1d) { y1d = abs(yt - by); y1 = yt; }
+                if(abs(yt - ey) < y2d) { y2d = abs(yt - ey); y2 = yt; }
+                if(abs(yb - by) < y1d) { y1d = abs(yb - by); y1 = yb; }
+                if(abs(yb - ey) < y2d) { y2d = abs(yb - ey); y2 = yb; }
              }
              else { // Ellipse
                 _rasterizer->stroke4Pixels(xl, yt, xr, yb);
@@ -647,6 +525,7 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
             const Pt::int32_t yt  = ctrY - y;
             const Pt::int32_t yb  = ctrY + y;
              if(drawArc) {
+                 // Draw the pixels
                  const bool mask0[4] = {
                      insideDegRange(xl0, yt, ctrX, ctrY, degBegin, degEnd),
                      insideDegRange(xl0, yb, ctrX, ctrY, degBegin, degEnd),
@@ -661,7 +540,19 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
                  };
                 _rasterizer->stroke4Pixels(xl0, yt, xr0, yb, 255 - alpha, mask0);
                 _rasterizer->stroke4Pixels(xl1, yt, xr1, yb,       alpha, mask1);
-
+                 // Determine the coordinates of the closing lines
+                if(abs(xl0 - bx) < x1d) { x1d = abs(xl0 - bx); x1 = xl0; }
+                if(abs(xl0 - ex) < x2d) { x2d = abs(xl0 - ex); x2 = xl0; }
+                if(abs(xr0 - bx) < x1d) { x1d = abs(xr0 - bx); x1 = xr0; }
+                if(abs(xr0 - ex) < x2d) { x2d = abs(xr0 - ex); x2 = xr0; }
+                if(abs(xl1 - bx) < x1d) { x1d = abs(xl1 - bx); x1 = xl1; }
+                if(abs(xl1 - ex) < x2d) { x2d = abs(xl1 - ex); x2 = xl1; }
+                if(abs(xr1 - bx) < x1d) { x1d = abs(xr1 - bx); x1 = xr1; }
+                if(abs(xr1 - ex) < x2d) { x2d = abs(xr1 - ex); x2 = xr1; }
+                if(abs(yt  - by) < y1d) { y1d = abs(yt  - by); y1 = yt;  }
+                if(abs(yt  - ey) < y2d) { y2d = abs(yt  - ey); y2 = yt;  }
+                if(abs(yb  - by) < y1d) { y1d = abs(yb  - by); y1 = yb;  }
+                if(abs(yb  - ey) < y2d) { y2d = abs(yb  - ey); y2 = yb;  }
              }
              else { // Ellipse
                 _rasterizer->stroke4Pixels(xl0, yt, xr0, yb, 255 - alpha);
@@ -671,21 +562,18 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
     }
 
     // Draw the arc closing lines
-    if(drawArc && _rasterizer->antiAliasingMode() == AntiAliasingMode::None) {
-        fprintf(stderr, "(%d, %d) to (%d, %d)\n", x1, y1, x2, y2);
-      //  if(arcMode == ArcMode::Chord) {
+    if(drawArc) {
+        if(arcMode == ArcMode::Chord) {
             const Point a(x1, y1);
             const Point b(x2, y2);
             _rasterizer->strokeOnePixelSolidLine(a, b);
-       // }
-        if(arcMode == ArcMode::Pie) {
-            /*
+        }
+        else if(arcMode == ArcMode::Pie) {
             const Point a(bx, by);
             const Point b(ex, ey);
             const Point o(ctrX, ctrY);
             _rasterizer->strokeOnePixelSolidLine(a, o);
             _rasterizer->strokeOnePixelSolidLine(b, o);
-            */
         }
     }
 }
