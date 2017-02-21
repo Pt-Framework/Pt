@@ -127,7 +127,11 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         // Helper structures
         struct AA4Pixels; // Specify four pixels with alpha
-        struct AASpan;    // Specify a span (scanline)
+
+        // Each key specify the Y coordinate of a span (scanline);
+        // while its element specify the "from" and "to" X coordinates
+        struct AASpanElement;
+        typedef std::map<Pt::int32_t, AASpanElement> AASpans;
 
         // Helper functions
         static float fastInvSqrt(float x);
@@ -159,21 +163,13 @@ struct ImagePainter2::AA4Pixels {
     {}
 };
 
-struct ImagePainter2::AASpan {
+struct ImagePainter2::AASpanElement {
     Pt::int32_t from;
     Pt::int32_t to;
-    Pt::int32_t pixelY;
 
-    AASpan(Pt::int32_t from_, Pt::int32_t to_, Pt::int32_t pixelY_)
-    : from(from_), to(to_), pixelY(pixelY_)
+    AASpanElement(Pt::int32_t from_, Pt::int32_t to_)
+    : from(from_), to(to_)
     {}
-
-    bool operator < (const AASpan& ref) const
-    {
-        if(pixelY < ref.pixelY) return true;
-        if(pixelY > ref.pixelY) return false;
-        return from < ref.to;
-    }
 };
 
 #if defined(__arm__) || defined(__thumb__) || defined(_M_ARM) || defined(_M_ARMT) || defined(__TARGET_ARCH_ARM) || defined(__TARGET_ARCH_THUMB) || defined(_ARM) || defined(__arm)
