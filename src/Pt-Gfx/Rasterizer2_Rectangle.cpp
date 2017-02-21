@@ -54,12 +54,12 @@ void Rasterizer2::strokeOnePixelSolidRect(const Point& tl, const Point& br)
     if(maxY > _currentClip.bottom()) maxY = _currentClip.bottom();
 
     // Draw the rectangle's horizontal lines
-    rasterOnePixelHLineSegment(minX, maxX, minY, _pen.color(), false);
-    rasterOnePixelHLineSegment(minX, maxX, maxY, _pen.color(), false);
+    rasterOnePixelHLineSegment(minX, maxX, minY, _pen.color(), false, false);
+    rasterOnePixelHLineSegment(minX, maxX, maxY, _pen.color(), false, false);
 
     // Draw the rectangle's vertical lines
-    rasterOnePixelVLineSegment(minX, minY + 1, maxY - 1, _pen.color(), false);
-    rasterOnePixelVLineSegment(maxX, minY + 1, maxY - 1, _pen.color(), false);
+    rasterOnePixelVLineSegment(minX, minY + 1, maxY - 1, _pen.color(), false, false);
+    rasterOnePixelVLineSegment(maxX, minY + 1, maxY - 1, _pen.color(), false, false);
 }
 
 void Rasterizer2::fillRect(const Point& tl, const Point& br)

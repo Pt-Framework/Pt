@@ -39,7 +39,7 @@ namespace Gfx {
 // ======================================================================================
 // ===== Public Member Functions ========================================================
 // ======================================================================================
-void Rasterizer2::strokeOnePixelSolidLine(const Point& a, const Point& b)
+void Rasterizer2::strokeOnePixelSolidLine(const Point& a, const Point& b, bool skipFirstPoint, bool skipLastPoint)
 {
     // Clip the points
     Pt::int32_t x1 = a.x();
@@ -77,30 +77,30 @@ void Rasterizer2::strokeOnePixelSolidLine(const Point& a, const Point& b)
 
     // Check for horizontal line
     if(minY == maxY) {
-        rasterOnePixelHLineSegment(minX, maxX, minY, _pen.color());
+        rasterOnePixelHLineSegment(minX, maxX, minY, _pen.color(), skipFirstPoint, skipLastPoint);
         return;
     }
 
     // Check for vertical line
     if(minX == maxX) {
-        rasterOnePixelVLineSegment(minX, minY, maxY, _pen.color());
+        rasterOnePixelVLineSegment(minX, minY, maxY, _pen.color(), skipFirstPoint, skipLastPoint);
         return;
     }
 
     // Check for 45-degree line
     if(sizeX == sizeY) {
-        rasterOnePixelGLineSegmentNoAA(x1, y1, x2, y2, _pen.color());
+        rasterOnePixelGLineSegmentNoAA(x1, y1, x2, y2, _pen.color(), skipFirstPoint, skipLastPoint);
         return;
     }
 
     // Raster the line
     if(_aaMode != AntiAliasingMode::None) {
         // Raster the line using anti-aliasing
-        rasterOnePixelGLineSegmentXWAA(x1, y1, x2, y2, _pen.color());
+        rasterOnePixelGLineSegmentXWAA(x1, y1, x2, y2, _pen.color(), skipFirstPoint, skipLastPoint);
     }
     else {
         // Raster the line without using anti-aliasing
-        rasterOnePixelGLineSegmentNoAA(x1, y1, x2, y2, _pen.color());
+        rasterOnePixelGLineSegmentNoAA(x1, y1, x2, y2, _pen.color(), skipFirstPoint, skipLastPoint);
     }
 }
 
