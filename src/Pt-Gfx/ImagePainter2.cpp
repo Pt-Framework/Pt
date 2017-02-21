@@ -377,8 +377,13 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
     Pt::int32_t radX2 = radX * radX;
     Pt::int32_t radY2 = radY * radY;
 
-    // Drawing an arc needs more calculation
-    float bx, by, ex, ey;
+    // Drawing an arc requires more parameters and calculation
+    Pt::int32_t bx, by, ex, ey;
+
+    Pt::int32_t x1 = 100, x1d = COORDINATE_LIMIT;
+    Pt::int32_t y1 = 100, y1d = COORDINATE_LIMIT;
+    Pt::int32_t x2 = 100, x2d = COORDINATE_LIMIT;
+    Pt::int32_t y2 = 100, y2d = COORDINATE_LIMIT;
 
     if(drawArc) {
         // Ensure that the begin angle is within the acceptable range
@@ -388,22 +393,12 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
         while(degEnd < -360) degEnd += 360;
         while(degEnd >  360) degEnd -= 360;
         // Calculate the coordinate of the point loacted at the begin angle
-        bx = ctrX + radX * fastCos(degBegin * Pt::Pi / 180);
-        by = ctrY - radY * fastSin(degBegin * Pt::Pi / 180);
+        bx = round(ctrX + radX * fastCos(degBegin * Pt::Pi / 180));
+        by = round(ctrY - radY * fastSin(degBegin * Pt::Pi / 180));
         // Calculate the coordinate of the point loacted at the end angle
-        ex = ctrX + radX * fastCos(degEnd   * Pt::Pi / 180);
-        ey = ctrY - radY * fastSin(degEnd   * Pt::Pi / 180);
+        ex = round(ctrX + radX * fastCos(degEnd   * Pt::Pi / 180));
+        ey = round(ctrY - radY * fastSin(degEnd   * Pt::Pi / 180));
     }
-
-    if(arcMode == ArcMode::Chord) {
-        const Point a(bx, by);
-        const Point b(ex, ey);
-       // _rasterizer->strokeOnePixelSolidLine(a, b);
-    }
-
-    if(arcMode == ArcMode::Pie) {
-    }
-
 
     // Top and bottom halves
     Pt::int32_t quarters = round( radX2 * fastInvSqrt(radX2 + radY2) );
@@ -426,6 +421,83 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
                      insideDegRange(xr, yb, ctrX, ctrY, degBegin, degEnd)
                  };
                 _rasterizer->stroke4Pixels(xl, yt, xr, yb, mask);
+
+                if(!mask[0]) { // (xl, yt)
+                    if(abs(xl - bx) < x1d) {
+                        x1d = abs(xl - bx);
+                        x1 = xl;
+                    }
+                    if(abs(xl - ex) < x2d) {
+                        x2d = abs(xl - ex);
+                        x2 = xl;
+                    }
+                    if(abs(yt - by) < y1d) {
+                        y1d = abs(yt - by);
+                        y1 = yt;
+                    }
+                    if(abs(yt - ey) < y2d) {
+                        y2d = abs(yt - ey);
+                        y2 = yt;
+                    }
+                }
+
+                if(!mask[1]) { // (xl, yb)
+                    if(abs(xl - bx) < x1d) {
+                        x1d = abs(xl - bx);
+                        x1 = xl;
+                    }
+                    if(abs(xl - ex) < x2d) {
+                        x2d = abs(xl - ex);
+                        x2 = xl;
+                    }
+                    if(abs(yb - by) < y1d) {
+                        y1d = abs(yb - by);
+                        y1 = yb;
+                    }
+                    if(abs(yb - ey) < y2d) {
+                        y2d = abs(yb - ey);
+                        y2 = yb;
+                    }
+                }
+
+                if(!mask[2]) { // (xr, yt)
+                    if(abs(xr - bx) < x1d) {
+                        x1d = abs(xr - bx);
+                        x1 = xr;
+                    }
+                    if(abs(xr - ex) < x2d) {
+                        x2d = abs(xr - ex);
+                        x2 = xr;
+                    }
+                    if(abs(yt - by) < y1d) {
+                        y1d = abs(yt - by);
+                        y1 = yt;
+                    }
+                    if(abs(yt - ey) < y2d) {
+                        y2d = abs(yt - ey);
+                        y2 = yt;
+                    }
+                }
+
+                if(!mask[3]) { // (xr, yb)
+                    if(abs(xr - bx) < x1d) {
+                        x1d = abs(xr - bx);
+                        x1 = xr;
+                    }
+                    if(abs(xr - ex) < x2d) {
+                        x2d = abs(xr - ex);
+                        x2 = xr;
+                    }
+                    if(abs(yb - by) < y1d) {
+                        y1d = abs(yb - by);
+                        y1 = yb;
+                    }
+                    if(abs(yb - ey) < y2d) {
+                        y2d = abs(yb - ey);
+                        y2 = yb;
+                    }
+                }
+
              }
              else { // Ellipse
                 _rasterizer->stroke4Pixels(xl, yt, xr, yb);
@@ -483,6 +555,83 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
                      insideDegRange(xr, yb, ctrX, ctrY, degBegin, degEnd)
                  };
                 _rasterizer->stroke4Pixels(xl, yt, xr, yb, mask);
+
+                if(!mask[0]) { // (xl, yt)
+                    if(abs(xl - bx) < x1d) {
+                        x1d = abs(xl - bx);
+                        x1 = xl;
+                    }
+                    if(abs(xl - ex) < x2d) {
+                        x2d = abs(xl - ex);
+                        x2 = xl;
+                    }
+                    if(abs(yt - by) < y1d) {
+                        y1d = abs(yt - by);
+                        y1 = yt;
+                    }
+                    if(abs(yt - ey) < y2d) {
+                        y2d = abs(yt - ey);
+                        y2 = yt;
+                    }
+                }
+
+                if(!mask[1]) { // (xl, yb)
+                    if(abs(xl - bx) < x1d) {
+                        x1d = abs(xl - bx);
+                        x1 = xl;
+                    }
+                    if(abs(xl - ex) < x2d) {
+                        x2d = abs(xl - ex);
+                        x2 = xl;
+                    }
+                    if(abs(yb - by) < y1d) {
+                        y1d = abs(yb - by);
+                        y1 = yb;
+                    }
+                    if(abs(yb - ey) < y2d) {
+                        y2d = abs(yb - ey);
+                        y2 = yb;
+                    }
+                }
+
+                if(!mask[2]) { // (xr, yt)
+                    if(abs(xr - bx) < x1d) {
+                        x1d = abs(xr - bx);
+                        x1 = xr;
+                    }
+                    if(abs(xr - ex) < x2d) {
+                        x2d = abs(xr - ex);
+                        x2 = xr;
+                    }
+                    if(abs(yt - by) < y1d) {
+                        y1d = abs(yt - by);
+                        y1 = yt;
+                    }
+                    if(abs(yt - ey) < y2d) {
+                        y2d = abs(yt - ey);
+                        y2 = yt;
+                    }
+                }
+
+                if(!mask[3]) { // (xr, yb)
+                    if(abs(xr - bx) < x1d) {
+                        x1d = abs(xr - bx);
+                        x1 = xr;
+                    }
+                    if(abs(xr - ex) < x2d) {
+                        x2d = abs(xr - ex);
+                        x2 = xr;
+                    }
+                    if(abs(yb - by) < y1d) {
+                        y1d = abs(yb - by);
+                        y1 = yb;
+                    }
+                    if(abs(yb - ey) < y2d) {
+                        y2d = abs(yb - ey);
+                        y2 = yb;
+                    }
+                }
+
              }
              else { // Ellipse
                 _rasterizer->stroke4Pixels(xl, yt, xr, yb);
@@ -518,6 +667,25 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
                 _rasterizer->stroke4Pixels(xl0, yt, xr0, yb, 255 - alpha);
                 _rasterizer->stroke4Pixels(xl1, yt, xr1, yb,       alpha);
              }
+        }
+    }
+
+    // Draw the arc closing lines
+    if(drawArc && _rasterizer->antiAliasingMode() == AntiAliasingMode::None) {
+        fprintf(stderr, "(%d, %d) to (%d, %d)\n", x1, y1, x2, y2);
+      //  if(arcMode == ArcMode::Chord) {
+            const Point a(x1, y1);
+            const Point b(x2, y2);
+            _rasterizer->strokeOnePixelSolidLine(a, b);
+       // }
+        if(arcMode == ArcMode::Pie) {
+            /*
+            const Point a(bx, by);
+            const Point b(ex, ey);
+            const Point o(ctrX, ctrY);
+            _rasterizer->strokeOnePixelSolidLine(a, o);
+            _rasterizer->strokeOnePixelSolidLine(b, o);
+            */
         }
     }
 }
