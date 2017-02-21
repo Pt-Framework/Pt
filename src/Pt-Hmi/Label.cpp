@@ -191,6 +191,8 @@ void Label::onInvalidate()
     if( ! _renderer )
         return;
 
+    std::clog << "onInvalidate" << std::endl;
+
     _renderer->prepare(*this, options, _font, _textPen);
 }
 

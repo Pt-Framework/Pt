@@ -89,6 +89,12 @@ double TextLine::descent() const
 }
 
 
+const Pt::String& TextLine::text() const
+{
+    return _text;
+}
+
+
 void TextLine::setText(const Pt::String& text, const Gfx::Font& font)
 {
     _text = text;
@@ -224,78 +230,128 @@ void TextBlock::setAdjustment(Adjustment a)
 }
 
 
-void TextBlock::setText(const Pt::String& text, const Gfx::Font& font)
+void TextBlock::setText(const Pt::String& str, const Gfx::Font& font)
 {
-    _text = text;
+    std::string text = str.narrow();
 
-    double lineHeight = font.size() * 1.5;
-    double lineOffset = (lineHeight - font.size()) / 2;
+    typedef std::pair<std::size_t, std::size_t> Word;
+    typedef std::vector<Word> Words;
 
-    double lineY = 0;
-    Pt::String line;
-    Pt::String segment;
-    
-    Pt::String::iterator consumed = _text.begin();
-    Pt::String::iterator it = _text.begin();
-    
-    while( consumed < _text.end() )
+    Words words;
+    bool onSpace = true;
+    Word word(0,0);
+
+    for(std::size_t n = 0; n < text.size(); ++n)
     {
-        while( it != _text.end() && ! Pt::isspace(*it) )
+        if( std::isspace( text[n] ) )
         {
-            segment += *it++;
+            if(onSpace)
+                continue;
+          
+            word.second = n;
+            words.push_back(word);
+            onSpace = true;
         }
+        else
+        {
+            if( ! onSpace )
+                continue;
+                
+            word.first = n;     
+            onSpace = false;
+        }
+    }
 
-        Gfx::FontMetrics fm = Painter::fontMetrics(font, segment);
+    if( ! onSpace )
+    {
+        word.second = text.size();
+        words.push_back(word);
+    }
+
+
+    std::string line;
+    std::string segment;
+    std::size_t begin = 0;
+    Gfx::FontMetrics lineMetrics;
+
+    Words::iterator it;
+    for(it = words.begin(); it != words.end(); ++it)
+    {
+        std::size_t end = it->second;
+        
+        segment.append(&text[begin], end - begin);
+        
+        Gfx::FontMetrics fm = Painter::fontMetrics(font, Pt::String(segment.c_str()));
         if(fm.width() < _maxWidth)
         {
             line = segment;
-            segment += *it;
+            lineMetrics = fm;
+            begin = end;
             continue;
         }
 
-        Pt::String::size_type n = line.size();
-        if( line.size() < segment.size() )
+        if( line.empty() )
         {
-            Pt::Char ch = segment[ line.size() ];
-            if( Pt::isspace(ch) )
-            {
-                n++;
-            }
+            line = segment;
+            lineMetrics = fm;
+
+            segment.clear();
         }
-        
-        segment.erase(0, n);
-        consumed += n;
-
-        TextLine textLine;
-        textLine.setText(line, font);
-        
-        double lineX = 0;
-
-        switch(_adjustment)
+        else
         {
-            default:
-            case Adjustment::Left:
-                lineX = 0;
-                break;
+            segment.assign(&text[it->first], it->second - it->first );
+        }
 
-            case Adjustment::Right:
-                lineX = _maxWidth - textLine.width();
-                break;
+        addLine(Pt::String(line.c_str()), font, lineMetrics);
 
-            case Adjustment::Center:
-                lineX = (_maxWidth - textLine.width()) / 2;
-                break;
-        } 
-        
-        textLine.setPosition(lineX, 
-                             lineY + lineOffset);
-
-        _lines.push_back(textLine);
-
-        lineY += lineHeight;
-        line.clear();
+        line = segment;
+        lineMetrics = Painter::fontMetrics(font, Pt::String(segment.c_str()));
+        begin = end;
     }
+
+    addLine(Pt::String(line.c_str()), font, lineMetrics);
 }
+
+
+void TextBlock::addLine(const Pt::String& line, 
+                        const Gfx::Font& font, 
+                        const Gfx::FontMetrics& fm)
+{
+    double lineHeight = font.size() * 1.5;
+    double lineOffset = (lineHeight - font.size()) / 2;
+    double lineWidth = static_cast<double>( fm.width() );
+
+    TextLine textLine;
+    textLine.setText(line, font);
+        
+    double lineX = 0;
+    double lineY = _size.height();
+
+    switch(_adjustment)
+    {
+        default:
+        case Adjustment::Left:
+            lineX = 0;
+            break;
+
+        case Adjustment::Right:
+            lineX = _maxWidth - fm.width();
+            break;
+
+        case Adjustment::Center:
+            lineX = (_maxWidth - fm.width()) / 2;
+            break;
+    } 
+        
+    textLine.setPosition(lineX, 
+                          lineY + lineOffset);
+
+    _lines.push_back(textLine);
+
+    _size.setWidth( std::max(_size.width(), lineWidth) );
+    _size.addHeight(lineHeight);
+}
+
 
 //////////////////////////////////////////////////////////////////////////
 // LineEditor

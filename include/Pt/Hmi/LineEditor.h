@@ -62,10 +62,7 @@ class TextLine
 
         double descent() const;
 
-        const Pt::String& text() const
-        {
-            return _text;
-        }
+        const Pt::String& text() const;
 
         void setText(const Pt::String& text, const Gfx::Font& font);
 
@@ -111,12 +108,16 @@ class TextBlock
         }
 
     private:
+        void addLine(const Pt::String& line, 
+                     const Gfx::Font& font, 
+                     const Gfx::FontMetrics& fm);
+
+    private:
         Gfx::PointF           _position;
         Gfx::SizeF            _size;
         double                _maxWidth;
         Adjustment            _adjustment;
         std::vector<TextLine> _lines;
-        Pt::String            _text;
 };
 
 class LineEditor
