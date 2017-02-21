@@ -37,7 +37,7 @@ namespace Pt {
 namespace Hmi {
 
 Label::Label()
-: _textAlignment(MiddleCenter)
+: _alignment(Alignment::Left)
 , _hasRenderer(false)
 {
 }
@@ -61,16 +61,16 @@ void Label::setText(const Pt::String& text)
 }
 
 
-Label::Alignment Label::textAlignment() const
+Alignment Label::alignment() const
 {
-    return _textAlignment;
+    return _alignment;
 }
 
 
-void Label::setTextAlignment(Alignment a)
+void Label::setAlignment(Alignment a)
 {
-    _textAlignment = a;
-    update();
+    _alignment = a;
+    invalidate();
 }
 
 
@@ -175,6 +175,73 @@ Gfx::SizeF Label::onAutoSize() const
 }
 
 
+void Label::layoutText()
+{
+    _textBlock.setMaxWidth( size().width() - padding().leftRight() );
+
+    Adjustment adjustment = Adjustment::Left;
+    switch( _alignment )
+    {
+        default:
+        case Alignment::TopLeft:
+        case Alignment::Left:
+        case Alignment::BottomLeft:
+            adjustment = Adjustment::Left;
+            break;
+
+        case Alignment::Top:
+        case Alignment::Center:
+        case Alignment::Bottom:
+            adjustment = Adjustment::Center;
+            break;
+        
+        case Alignment::TopRight:
+        case Alignment::Right:
+        case Alignment::BottomRight:
+            adjustment = Adjustment::Right;
+            break;
+    }
+
+    _textBlock.setAdjustment(adjustment);
+    _textBlock.layout(_text, _font);
+
+    Gfx::PointF pos;
+
+    switch( _alignment )
+    {
+        default:
+        case Alignment::TopLeft:
+        case Alignment::Top:
+        case Alignment::TopRight:
+        {
+            pos.set(padding().left(), padding().top());
+            break;
+        }
+
+        case Alignment::Left:
+        case Alignment::Center:
+        case Alignment::Right:
+        {
+            double height = size().height() - padding().topBottom();
+            double y = (height - _textBlock.height()) / 2;
+            pos.set(padding().left(), y + padding().top());
+            break;
+        }
+
+        case Alignment::BottomLeft:
+        case Alignment::Bottom:
+        case Alignment::BottomRight:
+        {
+            double y = size().height() - _textBlock.height();
+            pos.set(padding().left(), y - padding().bottom());
+            break;
+        }
+    }
+
+    _textBlock.setPosition(pos);
+}
+
+
 void Label::onInvalidate()
 {
     Base::onInvalidate();
@@ -191,9 +258,9 @@ void Label::onInvalidate()
     if( ! _renderer )
         return;
 
-    std::clog << "onInvalidate" << std::endl;
-
     _renderer->prepare(*this, options, _font, _textPen);
+
+    layoutText();
 }
 
 
@@ -220,125 +287,25 @@ void Label::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
         _renderer->renderFrame(*this, options,
                                painter, rect, *pen);
     }
-    
-    //Gfx::PointF pos = textPosition();
-    //_renderer->renderText(*this, options,  painter, rect,
-    //                      _text, pos, _font, _textPen);
 
-    TextBlock block;
-    block.setMaxWidth( size().width() );
-    block.setText(_text, _font);
-
-    std::vector<TextLine>::const_iterator it;
-    for(it = block.lines().begin(); it != block.lines().end(); ++it)
+    TextBlock::ConstIterator it;
+    for(it = _textBlock.begin(); it != _textBlock.end(); ++it)
     {
         const Pt::String& lineText = it->text();
 
-        Gfx::PointF pos = it->position();
+        Gfx::PointF pos = it->position() + _textBlock.position();
         pos.addY( it->ascent() );
 
         _renderer->renderText(*this, options,  painter, rect,
                               lineText, pos, _font, _textPen);
     }
-
-
 }
 
 
-Gfx::PointF Label::textPosition() const
+void Label::onResizeEvent(const ResizeEvent& ev)
 {
-    Gfx::PointF pos(0, 0);
-    Gfx::FontMetrics metric = Hmi::Painter::fontMetrics(_font, _text);
-
-    switch( _textAlignment )
-    {
-        case Label::TopLeft:
-        {
-            pos = Gfx::PointF(0, metric.ascent());
-            break;
-        }
-        
-        case Label::TopCenter:
-        {
-            const double widthHalf     = size().width() / 2;
-            const double textWidthHalf = metric.width() / 2;
-            pos = Gfx::PointF(widthHalf - textWidthHalf, metric.ascent());
-            break;
-        }
-        break;
-
-        case Label::TopRight:
-        {
-            const double width     = size().width();
-            const double textWidth = metric.width();
-            pos = Gfx::PointF(width - textWidth, metric.ascent());
-            break;
-        }
-        break;
-
-        case Label::MiddleLeft:
-        {
-            const double heightHalf     = size().height() / 2;
-            const double textHeightHalf = metric.height() / 2;
-            pos = Gfx::PointF(0, (heightHalf - textHeightHalf) + metric.ascent());
-            break;
-        }
-
-        default:
-        case Label::MiddleCenter:
-        {            
-            const double widthHalf      = size().width() / 2;
-            const double heightHalf     = size().height() / 2;
-            const double textWidthHalf  = metric.width() / 2;
-            const double textHeightHalf = metric.height() / 2;
-            pos = Gfx::PointF(widthHalf - textWidthHalf, 
-                              heightHalf - textHeightHalf + metric.ascent());
-            break;
-        }
-
-        case Label::MiddleRight:
-        {
-            const double width          = size().width();
-            const double textWidth      = metric.width();
-            const double heightHalf     = size().height()/2;
-            const double textHeightHalf = metric.height()/2;
-            pos = Gfx::PointF(width - textWidth, 
-                              heightHalf - textHeightHalf + metric.ascent());
-            break;
-        }
-
-        case Label::BottomLeft:
-        {
-            const double height     = size().height();
-            const double textHeight = metric.height();
-            pos = Gfx::PointF(0, height- textHeight + metric.ascent());
-            break;
-        }
-
-        case Label::BottomCenter:
-        {
-            const double widthHalf     = size().width() / 2;
-            const double textWidthHalf = metric.width() / 2;
-            const double height        = size().height();
-            const double textHeight    = metric.height();
-            pos = Gfx::PointF(widthHalf - textWidthHalf, 
-                              height - textHeight + metric.ascent());
-            break;
-        }
-
-        case Label::BottomRight:
-        {
-            const double width      = size().width();
-            const double textWidth  = metric.width();
-            const double height     = size().height();
-            const double textHeight = metric.height();
-            pos = Gfx::PointF(width - textWidth, 
-                              height- textHeight + metric.ascent());
-            break;
-        }
-    }
-
-    return pos;
+    Base::onResizeEvent(ev);
+    layoutText();
 }
 
 } // namespace

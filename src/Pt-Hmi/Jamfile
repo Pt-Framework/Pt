@@ -39,6 +39,7 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
              PixmapSurface.cpp 
              PaintRegion.cpp
              Painter.cpp
+             TextBlock.cpp
              Label.cpp
              Panel.cpp
              Widget.cpp

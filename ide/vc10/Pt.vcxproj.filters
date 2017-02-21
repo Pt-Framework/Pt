@@ -1449,6 +1449,12 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Adjustment.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\Alignment.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\TextBlock.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2685,6 +2691,9 @@
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\LineEditor.cpp">
+      <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\TextBlock.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
   </ItemGroup>

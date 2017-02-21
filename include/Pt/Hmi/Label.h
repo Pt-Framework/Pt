@@ -31,6 +31,9 @@
 #define Pt_Hmi_Label_H
 
 #include <Pt/Hmi/Control.h>
+#include <Pt/Hmi/Alignment.h>
+#include <Pt/Hmi/Adjustment.h>
+#include <Pt/Hmi/TextBlock.h>
 #include <Pt/SmartPtr.h>
 #include <Pt/String.h>
 
@@ -43,21 +46,6 @@ class PT_HMI_API Label : public Control
     public:
         typedef Control Base;
 
-	  public:
-        // TODO: separate class
-        enum Alignment
-        {
-            TopLeft,
-            TopCenter,
-            TopRight,
-            MiddleLeft,
-            MiddleCenter,
-            MiddleRight,
-            BottomLeft,
-            BottomCenter,
-            BottomRight
-        };
-
     public:
         Label();
 
@@ -67,9 +55,9 @@ class PT_HMI_API Label : public Control
 
         void setText(const Pt::String& text);
 
-        Alignment textAlignment() const;
+        Alignment alignment() const;
 
-        void setTextAlignment(Alignment a);
+        void setAlignment(Alignment a);
 
     public:
         const Gfx::Brush* background() const;
@@ -104,13 +92,17 @@ class PT_HMI_API Label : public Control
         virtual void onInvalidate();
 
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+
+        virtual void onResizeEvent(const ResizeEvent& ev);
         
     private:
-        Gfx::PointF textPosition() const;
+        void layoutText();
 
     private:
         Pt::String  _text;
-        Alignment   _textAlignment;
+        Alignment   _alignment;
+        Adjustment  _adjustment;
+        TextBlock   _textBlock;
         
         AutoPtr<Gfx::Brush>       _background;
         AutoPtr<Gfx::Pen>         _contour;

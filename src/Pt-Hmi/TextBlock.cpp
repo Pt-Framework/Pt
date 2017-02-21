@@ -1,0 +1,405 @@
+/* Copyright (C) 2017 Marc Boris Duerner
+ 
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
+ 
+ As a special exception, you may use this file as part of a free
+ software library without restriction. Specifically, if other files
+ instantiate templates or use macros or inline functions from this
+ file, or you compile this file and link it with other files to
+ produce an executable, this file does not by itself cause the
+ resulting executable to be covered by the GNU General Public
+ License. This exception does not however invalidate any other
+ reasons why the executable file might be covered by the GNU Library
+ General Public License.
+ 
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
+ 
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+ MA 02110-1301 USA
+*/
+
+#include <Pt/Hmi/TextBlock.h>
+#include <Pt/Hmi/Painter.h>
+
+namespace Pt {
+
+namespace Hmi {
+
+//////////////////////////////////////////////////////////////////////////
+// TextLine
+//////////////////////////////////////////////////////////////////////////
+
+TextLine::TextLine()
+{
+}
+
+
+TextLine::~TextLine()
+{
+}
+
+
+const Gfx::PointF& TextLine::position() const
+{
+    return _position;
+}
+
+        
+void TextLine::setPosition(const Gfx::PointF& p)
+{
+    _position = p;
+}
+
+
+void TextLine::setPosition(double x, double y)
+{
+    _position.set(x, y);
+}
+   
+
+double TextLine::width() const
+{
+    return _textMetrics.width();
+}
+
+
+double TextLine::height() const
+{
+    return _textMetrics.ascent() + _textMetrics.descent();
+}
+
+
+double TextLine::ascent() const
+{
+    return _textMetrics.ascent();
+}
+
+
+double TextLine::descent() const
+{
+    return _textMetrics.descent();
+}
+
+
+const Pt::String& TextLine::text() const
+{
+    return _text;
+}
+
+
+void TextLine::setText(const Pt::String& text, const Gfx::Font& font)
+{
+    _text = text;
+    _font = font;
+
+    _textMetrics = Hmi::Painter::fontMetrics(_font, _text);
+}
+
+
+void TextLine::setText(const Pt::String& text, const Gfx::Font& font,
+                       const Gfx::FontMetrics& tm)
+{
+    _text = text;
+    _font = font;
+    _textMetrics = tm;
+}
+
+
+double TextLine::cursorToX(std::size_t cursorPosition) const
+{
+    Pt::String left;
+    if( cursorPosition <= _text.size() && ! _text.empty() ) 
+        left = _text.substr(0, cursorPosition);
+
+    Gfx::FontMetrics fmLeft = Hmi::Painter::fontMetrics(_font, left);
+
+    return fmLeft.width();
+}
+
+
+std::size_t TextLine::xToCursor(double x) const
+{
+    const Pt::String& str = _text;
+
+    if( str.empty() )
+        return 0;
+
+    std::size_t textX = x - _position.x();
+
+    // estimate cursor position
+    Gfx::FontMetrics fm = Hmi::Painter::fontMetrics( _font, str );
+    std::size_t widthPerChar = fm.width() / str.size();
+    std::size_t pos = textX / widthPerChar;
+
+    if( pos >= str.size() )
+        pos = str.size() - 1;
+
+    Pt::String left = str.substr(0, pos + 1);
+    fm = Hmi::Painter::fontMetrics( _font, left );
+
+    if( textX < fm.width() )
+    {
+        // cursor position was over estimated, so search left
+        for( ; pos > 0; --pos)
+        {
+            left = str.substr(0, pos);
+            fm = Hmi::Painter::fontMetrics( _font, left );
+      
+            if( textX >= fm.width() )
+                break;
+        }
+    }
+    else 
+    {
+        // cursor position was under estimated, so search right
+        for(++pos ; pos < str.size(); ++pos)
+        {
+            left = str.substr(0, pos + 1);
+            fm = Hmi::Painter::fontMetrics( _font, left );
+      
+            if( textX < fm.width() )
+                break;
+        }
+    }
+
+    return pos;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// TextBlock
+//////////////////////////////////////////////////////////////////////////
+
+TextBlock::TextBlock()
+: _position()
+, _size()
+, _maxWidth(10000)
+, _adjustment(Adjustment::Center)
+{
+}
+
+
+TextBlock::~TextBlock()
+{
+}
+
+
+const Gfx::PointF& TextBlock::position() const
+{
+    return _position;
+}
+
+      
+void TextBlock::setPosition(const Gfx::PointF& p)
+{
+    _position = p;
+}
+
+
+const Gfx::SizeF& TextBlock::size() const
+{
+    return _size;
+}
+
+
+double TextBlock::width() const
+{
+    return _size.width();
+}
+
+
+double TextBlock::height() const
+{
+    return _size.height();
+}
+
+        
+void TextBlock::setMaxWidth(double w)
+{
+    _maxWidth = w;
+}
+
+
+Adjustment TextBlock::adjustment() const
+{
+    return _adjustment;
+}
+
+
+void TextBlock::setAdjustment(Adjustment a)
+{
+    _adjustment = a;
+}
+
+
+TextBlock::Iterator TextBlock::begin()
+{
+    return _lines.empty() ? 0 : &_lines[0];
+}
+
+
+TextBlock::Iterator TextBlock::end()
+{
+    TextLine* line = _lines.empty() ? 0 
+                                    : &_lines[0] + _lines.size();
+    return line; 
+}
+
+
+TextBlock::ConstIterator TextBlock::begin() const
+{
+    return _lines.empty() ? 0 : &_lines[0];
+}
+
+
+TextBlock::ConstIterator TextBlock::end() const
+{
+    const TextLine* line = _lines.empty() ? 0 
+                                          : &_lines[0] + _lines.size();
+    return line; 
+}
+
+
+void TextBlock::layout(const Pt::String& text, const Gfx::Font& font)
+{
+    _lines.clear();
+    _size.set(0, 0);
+
+    typedef std::pair<std::size_t, std::size_t> Word;
+    typedef std::vector<Word> Words;
+
+    Words words;
+    Word word(0,0);
+    bool onSpace = true;
+
+    for(std::size_t n = 0; n < text.size(); ++n)
+    {
+        if( Pt::isspace( text[n] ) )
+        {
+            if(onSpace)
+                continue;
+          
+            word.second = n;
+            words.push_back(word);
+            onSpace = true;
+        }
+        else
+        {
+            if( ! onSpace )
+                continue;
+                
+            word.first = n;     
+            onSpace = false;
+        }
+    }
+
+    if( ! onSpace )
+    {
+        word.second = text.size();
+        words.push_back(word);
+    }
+
+    std::size_t lineBegin = 0;
+    std::size_t lineLength = 0;
+    Pt::String segment;
+    std::size_t pos = 0;
+    Gfx::FontMetrics lineMetrics;
+
+    Words::iterator it;
+    for(it = words.begin(); it != words.end(); ++it)
+    {
+        std::size_t end = it->second;
+        
+        segment.append(&text[pos], end - pos);
+        
+        Gfx::FontMetrics fm = Painter::fontMetrics(font, segment);
+        if(fm.width() < _maxWidth)
+        {
+            lineLength += end - pos;
+            lineMetrics = fm;
+            
+            pos = end;
+            continue;
+        }
+
+        if(lineLength == 0)
+        {
+            // next iteration catches whitespace
+            lineLength += segment.size();
+            lineMetrics = fm;
+
+            pos = end;
+            continue;
+        }
+
+        segment.assign(&text[it->first], it->second - it->first );
+        lineLength += it->first - (lineLength + lineBegin);
+
+        Pt::String line(&text[lineBegin], lineLength);
+        //line += ';';
+        addLine(line, font, lineMetrics);
+
+        lineBegin = it->first;
+        lineLength = segment.size();
+        lineMetrics = Painter::fontMetrics(font, Pt::String(segment.c_str()));
+        
+        pos = end;
+    }
+
+    Pt::String line(&text[lineBegin], lineLength);
+    //line += ';';
+    addLine(line, font, lineMetrics);
+}
+
+
+void TextBlock::addLine(const Pt::String& line, 
+                        const Gfx::Font& font, 
+                        const Gfx::FontMetrics& tm)
+{
+    double lineHeight = font.size() * 1.2;
+    double lineOffset = (lineHeight - font.size()) / 2;
+    double lineWidth = static_cast<double>( tm.width() );
+
+    TextLine textLine;
+    textLine.setText(line, font, tm);
+        
+    double lineX = 0;
+    double lineY = _size.height();
+
+    if( ! _lines.empty() )
+        lineY += lineOffset;
+
+    switch(_adjustment)
+    {
+        default:
+        case Adjustment::Left:
+            lineX = 0;
+            break;
+
+        case Adjustment::Right:
+            lineX = _maxWidth - tm.width();
+            break;
+
+        case Adjustment::Center:
+            lineX = (_maxWidth - tm.width()) / 2;
+            break;
+    } 
+        
+    textLine.setPosition(lineX, lineY);
+
+    _lines.push_back(textLine);
+
+    _size.setWidth( std::max(_size.width(), lineWidth) );
+    _size.addHeight(lineHeight);
+}
+
+} // namespace
+
+} // namespace

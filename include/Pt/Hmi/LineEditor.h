@@ -30,95 +30,15 @@
 #define Pt_Hmi_LineEditor_H
 
 #include <Pt/Hmi/Adjustment.h>
+#include <Pt/Hmi/TextBlock.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Size.h>
-#include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gfx/Point.h>
 #include <Pt/String.h>
-#include <vector>
 
 namespace Pt {
 
 namespace Hmi {
-
-class TextLine
-{
-    public:
-        TextLine();
-
-        ~TextLine();
-
-        const Gfx::PointF& position() const;
-        
-        void setPosition(const Gfx::PointF& p);
-
-        void setPosition(double x, double y);
-
-        double width() const;
-
-        double height() const;
-
-        double ascent() const;
-
-        double descent() const;
-
-        const Pt::String& text() const;
-
-        void setText(const Pt::String& text, const Gfx::Font& font);
-
-        double cursorToX(std::size_t n) const;
-
-        std::size_t xToCursor(double x) const;
-
-    private:
-        Gfx::PointF      _position;
-        Pt::String       _text;
-        Gfx::Font        _font;
-        Gfx::FontMetrics _textMetrics;
-};
-
-class TextBlock
-{
-    public:
-        TextBlock();
-
-        ~TextBlock();
-
-        const Gfx::PointF& position() const;
-        
-        void setPosition(const Gfx::PointF& p);
-
-        const Gfx::SizeF& size() const;
-
-        double width() const;
-
-        double height() const;
-
-        void setMaxWidth(double w);
-
-        void setAdjustment(Adjustment a);
-
-        Adjustment adjustment() const;
-
-        void setText(const Pt::String& text, const Gfx::Font& font);
-
-        const std::vector<TextLine>& lines() const
-        {
-            return _lines;
-        }
-
-    private:
-        void addLine(const Pt::String& line, 
-                     const Gfx::Font& font, 
-                     const Gfx::FontMetrics& fm);
-
-    private:
-        Gfx::PointF           _position;
-        Gfx::SizeF            _size;
-        double                _maxWidth;
-        Adjustment            _adjustment;
-        std::vector<TextLine> _lines;
-};
 
 class LineEditor
 {
