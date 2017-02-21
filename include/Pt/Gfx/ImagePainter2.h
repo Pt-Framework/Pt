@@ -125,10 +125,10 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual void genArcGeometryQSC(std::vector<Point>& points, const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, bool createPie);
 
-        // Each key specify the Y coordinate of a span (scanline);
+        // Each key specify the Y coordinate of a scanline;
         // while its element specify the "from" and "to" X coordinates
-        struct AASpanElement;
-        typedef std::map<Pt::int32_t, AASpanElement> AASpans;
+        struct ScanlineElement;
+        typedef std::map<Pt::int32_t, ScanlineElement> Scanlines;
 
         // Helper functions
         static float fastInvSqrt(float x);
@@ -150,11 +150,11 @@ class PT_GFX_API ImagePainter2 : public Painter
 // ===== Private Member Structures and Functions ========================================
 // ======================================================================================
 
-struct ImagePainter2::AASpanElement {
+struct ImagePainter2::ScanlineElement {
     Pt::int32_t from;
     Pt::int32_t to;
 
-    AASpanElement(Pt::int32_t from_, Pt::int32_t to_)
+    ScanlineElement(Pt::int32_t from_, Pt::int32_t to_)
     : from(from_), to(to_)
     {}
 };

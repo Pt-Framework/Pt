@@ -231,22 +231,6 @@ void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
 // Inspired by http://create.stephan-brumme.com/antialiased-circle
 void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
 {
-/*
-Cairo - CompositionMode::SourceCopy
-    Solid-filled    ellipse          @ Cairo         =     88
-    Solid-filled    ellipse          @ Cairo - No AA =     48 ( 0.545)
-    Solid-filled    ellipse          @ ImagePainter  =      5 ( 0.057)
-    Solid-filled    ellipse NOAA     @ ImagePainter2 =      7 ( 0.080)
-    Solid-filled    ellipse XWAA     @ ImagePainter2 =     34 ( 0.386)
-
-Cairo - CompositionMode::SourceOver
-    Solid-filled    ellipse          @ Cairo         =    153
-    Solid-filled    ellipse          @ Cairo - No AA =     70 ( 0.458)
-    Solid-filled    ellipse          @ ImagePainter  =     37 ( 0.242)
-    Solid-filled    ellipse NOAA     @ ImagePainter2 =     24 ( 0.157)
-    Solid-filled    ellipse XWAA     @ ImagePainter2 =     52 ( 0.340)
-*/
-
     // Update the gradient as needed
     _rasterizer->updateGradientBrushAsNeeded(size.width(), size.height());
 
@@ -266,10 +250,10 @@ Cairo - CompositionMode::SourceOver
     Pt::int32_t radX2 = radX * radX;
     Pt::int32_t radY2 = radY * radY;
 
-    // === Process the spans ===
+    // === Process the scanlines ===
 
-    // List of spans to be drawn later
-    AASpans aaSpans;
+    // List of scanlines to be drawn later
+    Scanlines scanlines;
 
     // Top and bottom halves
     Pt::int32_t quartersX = round( radX2 * fastInvSqrt(radX2 + radY2) );
@@ -278,20 +262,20 @@ Cairo - CompositionMode::SourceOver
         // Calculate the Y coordinate
         const float       y   = radY * fastSqrt(1 - (float) x * x / radX2);
         const Pt::int32_t fly = floor(y);
-        // Store/update the span coordinates
-        AASpans::iterator it1 = aaSpans.find(ctrY - fly);
-        AASpans::iterator it2 = aaSpans.find(ctrY + fly);
-        if(it1 == aaSpans.end()) { // Insert a new element
-            aaSpans.insert( std::make_pair( ctrY - fly, AASpanElement(ctrX - x, ctrX + x) ) );
+        // Store/update the scanline coordinates
+        Scanlines::iterator it1 = scanlines.find(ctrY - fly);
+        Scanlines::iterator it2 = scanlines.find(ctrY + fly);
+        if(it1 == scanlines.end()) { // Insert a new element
+            scanlines.insert( std::make_pair( ctrY - fly, ScanlineElement(ctrX - x, ctrX + x) ) );
         }
-        else { // Update the span's "from" and "to" coordinates
+        else { // Update the scanline's "from" and "to" coordinates
             if( ctrX - x < it1->second.from ) it1->second.from = ctrX - x;
             if( ctrX + x > it1->second.to   ) it1->second.to   = ctrX + x;
         }
-        if(it2 == aaSpans.end()) { // Insert a new element
-            aaSpans.insert( std::make_pair( ctrY + fly, AASpanElement(ctrX - x, ctrX + x) ) );
+        if(it2 == scanlines.end()) { // Insert a new element
+            scanlines.insert( std::make_pair( ctrY + fly, ScanlineElement(ctrX - x, ctrX + x) ) );
         }
-        else { // Update the span's "from" and "to" coordinates
+        else { // Update the scanline's "from" and "to" coordinates
             if( ctrX - x < it2->second.from ) it2->second.from = ctrX - x;
             if( ctrX + x > it2->second.to   ) it2->second.to   = ctrX + x;
         }
@@ -304,27 +288,27 @@ Cairo - CompositionMode::SourceOver
         // Calculate the X coordinate
         const float       x   = radX * fastSqrt(1 - (float) y * y / radY2);
         const Pt::int32_t flx = floor(x);
-        // Store/update the span coordinates
-        AASpans::iterator it1 = aaSpans.find(ctrY - y);
-        AASpans::iterator it2 = aaSpans.find(ctrY + y);
-        if(it1 == aaSpans.end()) { // Insert a new element
-            aaSpans.insert( std::make_pair( ctrY - y, AASpanElement(ctrX - flx, ctrX + flx) ) );
+        // Store/update the scanline coordinates
+        Scanlines::iterator it1 = scanlines.find(ctrY - y);
+        Scanlines::iterator it2 = scanlines.find(ctrY + y);
+        if(it1 == scanlines.end()) { // Insert a new element
+            scanlines.insert( std::make_pair( ctrY - y, ScanlineElement(ctrX - flx, ctrX + flx) ) );
         }
-        else { // Update the span's "from" and "to" coordinates
+        else { // Update the scanline's "from" and "to" coordinates
             if( ctrX - flx < it1->second.from ) it1->second.from = ctrX - flx;
             if( ctrX + flx > it1->second.to   ) it1->second.to   = ctrX + flx;
         }
-        if(it2 == aaSpans.end()) { // Insert a new element
-            aaSpans.insert( std::make_pair( ctrY + y, AASpanElement(ctrX - flx, ctrX + flx) ) );
+        if(it2 == scanlines.end()) { // Insert a new element
+            scanlines.insert( std::make_pair( ctrY + y, ScanlineElement(ctrX - flx, ctrX + flx) ) );
         }
-        else { // Update the span's "from" and "to" coordinates
+        else { // Update the scanline's "from" and "to" coordinates
             if( ctrX - flx < it2->second.from ) it2->second.from = ctrX - flx;
             if( ctrX + flx > it2->second.to   ) it2->second.to   = ctrX + flx;
         }
     }
 
-    // Draw the spans
-    for(AASpans::const_iterator it = aaSpans.begin(); it != aaSpans.end(); ++it) {
+    // Draw the scanlines
+    for(Scanlines::const_iterator it = scanlines.begin(); it != scanlines.end(); ++it) {
         _rasterizer->fillOneScanlineNoAA(it->second.from, it->second.to, it->first, minX, minY);
     }
 
@@ -342,18 +326,18 @@ Cairo - CompositionMode::SourceOver
         const Pt::int32_t x2  = ctrX + x;
         const Pt::int32_t y10 = ctrY - fly;
         const Pt::int32_t y20 = ctrY + fly;
-        AASpans::const_iterator it10 = aaSpans.find(y10);
-        AASpans::const_iterator it20 = aaSpans.find(y20);
-        if( ( it10 == aaSpans.end() || (it10->second.from > x1 || it10->second.to < x2) ) ||
-            ( it20 == aaSpans.end() || (it20->second.from > x1 || it20->second.to < x2) )
+        Scanlines::const_iterator it10 = scanlines.find(y10);
+        Scanlines::const_iterator it20 = scanlines.find(y20);
+        if( ( it10 == scanlines.end() || (it10->second.from > x1 || it10->second.to < x2) ) ||
+            ( it20 == scanlines.end() || (it20->second.from > x1 || it20->second.to < x2) )
         ) _rasterizer->fill4Pixels(x1, y10, x2, y20, minX, minY, alpha);
         // Draw the second part of the pixels
         const Pt::int32_t y11 = ctrY - fly - 1;
         const Pt::int32_t y21 = ctrY + fly + 1;
-        AASpans::const_iterator it11 = aaSpans.find(y11);
-        AASpans::const_iterator it21 = aaSpans.find(y21);
-        if( ( it11 == aaSpans.end() || (it11->second.from > x1 || it11->second.to < x2) ) ||
-            ( it21 == aaSpans.end() || (it21->second.from > x1 || it21->second.to < x2) )
+        Scanlines::const_iterator it11 = scanlines.find(y11);
+        Scanlines::const_iterator it21 = scanlines.find(y21);
+        if( ( it11 == scanlines.end() || (it11->second.from > x1 || it11->second.to < x2) ) ||
+            ( it21 == scanlines.end() || (it21->second.from > x1 || it21->second.to < x2) )
         ) _rasterizer->fill4Pixels(x1, y11, x2, y21, minX, minY, alpha);
     }
 
@@ -369,16 +353,16 @@ Cairo - CompositionMode::SourceOver
         const Pt::int32_t x20 = ctrX + flx;
         const Pt::int32_t y1  = ctrY - y;
         const Pt::int32_t y2  = ctrY + y;
-        AASpans::const_iterator it1 = aaSpans.find(y1);
-        AASpans::const_iterator it2 = aaSpans.find(y2);
-        if( ( it1 == aaSpans.end() || (it1->second.from > x10 || it1->second.to < x20) ) ||
-            ( it2 == aaSpans.end() || (it2->second.from > x10 || it2->second.to < x20) )
+        Scanlines::const_iterator it1 = scanlines.find(y1);
+        Scanlines::const_iterator it2 = scanlines.find(y2);
+        if( ( it1 == scanlines.end() || (it1->second.from > x10 || it1->second.to < x20) ) ||
+            ( it2 == scanlines.end() || (it2->second.from > x10 || it2->second.to < x20) )
         ) _rasterizer->fill4Pixels(x10, y1, x20, y2, minX, minY, alpha);
         // Draw the second part of the pixels
         const Pt::int32_t x11 = ctrX - flx - 1;
         const Pt::int32_t x21 = ctrX + flx + 1;
-        if( ( it1 == aaSpans.end() || (it1->second.from > x11 || it1->second.to < x21) ) ||
-            ( it2 == aaSpans.end() || (it2->second.from > x11 || it2->second.to < x21) )
+        if( ( it1 == scanlines.end() || (it1->second.from > x11 || it1->second.to < x21) ) ||
+            ( it2 == scanlines.end() || (it2->second.from > x11 || it2->second.to < x21) )
         ) _rasterizer->fill4Pixels(x11, y1, x21, y2, minX, minY, alpha);
     }
 }
@@ -650,7 +634,7 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
 
 void ImagePainter2::fillEllipseImplNoAA( const PointF& topLeft, const SizeF& size )
 {
-    // Draw the ellipse's spans as per this equation:
+    // Draw the ellipse's scanlines as per this equation:
     //     e(X, Y) = ( b^2 * X^2 ) + ( a^2 * Y^2 ) - ( a^2 * b^2 )
 
     const Pt::int32_t minX   =  topLeft.x();
