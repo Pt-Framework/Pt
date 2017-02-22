@@ -238,84 +238,6 @@ void Rasterizer2::rasterOnePixelGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1,
     }
 }
 
-static inline void adjustAAAlpha(Pt::uint8_t& a1, Pt::uint8_t& a2)
-{
-#if 0
-    // Use this to generate the LUTs
-    lprintf("    static const Pt::uint8_t aaAF10[256] = {\n        ");
-    for(int c = 0, i = 0; i <= 255; ++i) {
-        const int a = i + i * 1 / 10; ++c;
-        lprintf("%3d%c ", (a > 255) ? 255 : a, (i == 255) ? ' ' : ',');
-        if(c >= 20) { c = 0; lprintf("\n        "); }
-    }
-    lprintf("\n    };\n");
-    lprintf("    static const Pt::uint8_t aaAF20[256] = {\n        ");
-    for(int c = 0, i = 0; i <= 255; ++i) {
-        const int a = i + i * 2 / 10; ++c;
-        lprintf("%3d%c ", (a > 255) ? 255 : a, (i == 255) ? ' ' : ',');
-        if(c >= 20) { c = 0; lprintf("\n        "); }
-    }
-    lprintf("\n    };\n"); exit(0);
-#endif
-
-    /*
-    // Using equation is about 8% slower
-    if(abs(a2 - a1) < 25) {
-        const uint16_t aa1 = a1 + (uint16_t) a1 * 2 / 10;
-        const uint16_t aa2 = a2 + (uint16_t) a2 * 2 / 10;
-        a1 = (aa1 >= 255) ? 255 : aa1;
-        a2 = (aa2 >= 255) ? 255 : aa2;
-        return;
-    }
-
-    const uint16_t aa1 = a1 + (uint16_t) a1 * 1 / 10;
-    const uint16_t aa2 = a2 + (uint16_t) a2 * 1 / 10;
-    a1 = (aa1 >= 255) ? 255 : aa1;
-    a2 = (aa2 >= 255) ? 255 : aa2;
-    //*/
-
-    static const Pt::uint8_t aaAF10[256] = {
-          0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  11,  12,  13,  14,  15,  16,  17,  18,  19,  20,
-         22,  23,  24,  25,  26,  27,  28,  29,  30,  31,  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,
-         44,  45,  46,  47,  48,  49,  50,  51,  52,  53,  55,  56,  57,  58,  59,  60,  61,  62,  63,  64,
-         66,  67,  68,  69,  70,  71,  72,  73,  74,  75,  77,  78,  79,  80,  81,  82,  83,  84,  85,  86,
-         88,  89,  90,  91,  92,  93,  94,  95,  96,  97,  99, 100, 101, 102, 103, 104, 105, 106, 107, 108,
-        110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130,
-        132, 133, 134, 135, 136, 137, 138, 139, 140, 141, 143, 144, 145, 146, 147, 148, 149, 150, 151, 152,
-        154, 155, 156, 157, 158, 159, 160, 161, 162, 163, 165, 166, 167, 168, 169, 170, 171, 172, 173, 174,
-        176, 177, 178, 179, 180, 181, 182, 183, 184, 185, 187, 188, 189, 190, 191, 192, 193, 194, 195, 196,
-        198, 199, 200, 201, 202, 203, 204, 205, 206, 207, 209, 210, 211, 212, 213, 214, 215, 216, 217, 218,
-        220, 221, 222, 223, 224, 225, 226, 227, 228, 229, 231, 232, 233, 234, 235, 236, 237, 238, 239, 240,
-        242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 253, 254, 255, 255, 255, 255, 255, 255, 255, 255,
-        255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255
-    };
-
-    static const Pt::uint8_t aaAF20[256] = {
-          0,   1,   2,   3,   4,   6,   7,   8,   9,  10,  12,  13,  14,  15,  16,  18,  19,  20,  21,  22,
-         24,  25,  26,  27,  28,  30,  31,  32,  33,  34,  36,  37,  38,  39,  40,  42,  43,  44,  45,  46,
-         48,  49,  50,  51,  52,  54,  55,  56,  57,  58,  60,  61,  62,  63,  64,  66,  67,  68,  69,  70,
-         72,  73,  74,  75,  76,  78,  79,  80,  81,  82,  84,  85,  86,  87,  88,  90,  91,  92,  93,  94,
-         96,  97,  98,  99, 100, 102, 103, 104, 105, 106, 108, 109, 110, 111, 112, 114, 115, 116, 117, 118,
-        120, 121, 122, 123, 124, 126, 127, 128, 129, 130, 132, 133, 134, 135, 136, 138, 139, 140, 141, 142,
-        144, 145, 146, 147, 148, 150, 151, 152, 153, 154, 156, 157, 158, 159, 160, 162, 163, 164, 165, 166,
-        168, 169, 170, 171, 172, 174, 175, 176, 177, 178, 180, 181, 182, 183, 184, 186, 187, 188, 189, 190,
-        192, 193, 194, 195, 196, 198, 199, 200, 201, 202, 204, 205, 206, 207, 208, 210, 211, 212, 213, 214,
-        216, 217, 218, 219, 220, 222, 223, 224, 225, 226, 228, 229, 230, 231, 232, 234, 235, 236, 237, 238,
-        240, 241, 242, 243, 244, 246, 247, 248, 249, 250, 252, 253, 254, 255, 255, 255, 255, 255, 255, 255,
-        255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255,
-        255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255
-    };
-
-    if(abs(a2 - a1) < 25) {
-        a1 = aaAF20[a1];
-        a2 = aaAF20[a2];
-        return;
-    }
-
-    a1 = aaAF10[a1];
-    a2 = aaAF10[a2];
-}
-
 // Xiaolin Wu's Anti-Aliased Line Algorithm
 // https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
 void Rasterizer2::rasterOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut)
@@ -387,7 +309,7 @@ void Rasterizer2::rasterOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1,
         for(Pt::int32_t i = from; i <= to; ++i) {
             Pt::uint8_t a1 = FIXED_POINT_RFPART_TO_A8(ypxli);
             Pt::uint8_t a2 = FIXED_POINT_FPART_TO_A8 (ypxli);
-            adjustAAAlpha(a1, a2);
+            adjustXWAlphas(a1, a2);
             XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           ), i, a1);
             XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE), i, a2);
             ypxli += grad;
@@ -405,7 +327,7 @@ void Rasterizer2::rasterOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1,
         for(Pt::int32_t i = from; i <= to; ++i) {
             Pt::uint8_t a1 = FIXED_POINT_RFPART_TO_A8(ypxli);
             Pt::uint8_t a2 = FIXED_POINT_FPART_TO_A8 (ypxli);
-            adjustAAAlpha(a1, a2);
+            adjustXWAlphas(a1, a2);
             XW_SET_PIXEL(_image, color, i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           ), a1);
             XW_SET_PIXEL(_image, color, i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE), a2);
             ypxli += grad;
