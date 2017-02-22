@@ -40,7 +40,7 @@
 using namespace Pt::Gfx;
 
 // Comparison with Cairo (solid-filled polygons and ellipses only)
-#define DO_BENCHMARKING_CAIRO                 1
+#define DO_BENCHMARKING_CAIRO                 0
 #define BENCHMARK_CAIRO_CHECK_RESULTING_IMAGE 0
 
 // General settings for Pt-Gfx
@@ -48,49 +48,49 @@ using namespace Pt::Gfx;
 #define DO_BENCHMARKING 1
 
 // Detailed-test enable settings for Pt-Gfx
-#define TEST_SOURCECOPY                        1
-#define TEST_SOURCEOVER                        0
+#define TEST_SOURCECOPY                         1
+#define TEST_SOURCEOVER                         0
 
-#define TEST_DRAW_LINE_AND_TEXT                0
-#define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES 0
+#define TEST_DRAW_LINE_AND_TEXT                 0
+#define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES  0
 
-#define TEST_DRAW_ELLIPSES_ARCS                0
+#define TEST_DRAW_ELLIPSES_ARCS                 1
 
-#define TEST_DRAW_SOLID_FILLED_POLYGONS        0
-#define TEST_DRAW_GRADIENT_FILLED_POLYGONS     0
-#define TEST_DRAW_TEXTURE_FILLED_POLYGONS      0
+#define TEST_DRAW_SOLID_FILLED_POLYGONS         0
+#define TEST_DRAW_GRADIENT_FILLED_POLYGONS      0
+#define TEST_DRAW_TEXTURE_FILLED_POLYGONS       0
 
-#define TEST_DRAW_SOLID_FILLED_ELLIPSE         0
-#define TEST_DRAW_GRADIENT_FILLED_ELLIPSE      0
-#define TEST_DRAW_TEXTURE_FILLED_ELLIPSE       0
+#define TEST_DRAW_SOLID_FILLED_ELLIPSES_ARCS    1
+#define TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS 0
+#define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  0
 
-#define TEST_COMPARE_WITH_OLD_PAINTER          0 // (for some shapes only)
+#define TEST_COMPARE_WITH_OLD_PAINTER           0 // (for some shapes only)
 
 // Detailed-test benchmark settings for Pt-Gfx and some for Cairo/GD
 #define BENCHMARK_CHECK_RESULTING_IMAGE     0
 
 #define BENCHMARK_IMAGE_SIZE                Size(1280, 800)
-#define BENCHMARK_LOOP_COUNT                50000
+#define BENCHMARK_LOOP_COUNT                500
 
-#define BENCHMARK_TEXT                      1
-#define BENCHMARK_LINE                      1
+#define BENCHMARK_TEXT                      0
+#define BENCHMARK_LINE                      0
 #define BENCHMARK_ELLIPSE                   1
 #define BENCHMARK_ARC                       1
 
-#define BENCHMARK_RECTANGLE                 1
-#define BENCHMARK_SOLID_FILLED_RECTANGLE    1
-#define BENCHMARK_GRADIENT_FILLED_RECTANGLE 1
-#define BENCHMARK_TEXTURE_FILLED_RECTANGLE  1
+#define BENCHMARK_RECTANGLE                 0
+#define BENCHMARK_SOLID_FILLED_RECTANGLE    0
+#define BENCHMARK_GRADIENT_FILLED_RECTANGLE 0
+#define BENCHMARK_TEXTURE_FILLED_RECTANGLE  0
 
-#define BENCHMARK_SOLID_FILLED_POLYGON      1
-#define BENCHMARK_GRADIENT_FILLED_POLYGON   1
-#define BENCHMARK_TEXTURE_FILLED_POLYGON    1
+#define BENCHMARK_SOLID_FILLED_POLYGON      0
+#define BENCHMARK_GRADIENT_FILLED_POLYGON   0
+#define BENCHMARK_TEXTURE_FILLED_POLYGON    0
 
-#define BENCHMARK_SOLID_FILLED_ELLIPSE      1
-#define BENCHMARK_GRADIENT_FILLED_ELLIPSE   1
-#define BENCHMARK_TEXTURE_FILLED_ELLIPSE    1
+#define BENCHMARK_SOLID_FILLED_ELLIPSE      0
+#define BENCHMARK_GRADIENT_FILLED_ELLIPSE   0
+#define BENCHMARK_TEXTURE_FILLED_ELLIPSE    0
 
-#define BENCHMARK_SOLID_FILLED_ARC          0
+#define BENCHMARK_SOLID_FILLED_ARC          1
 #define BENCHMARK_GRADIENT_FILLED_ARC       0
 #define BENCHMARK_TEXTURE_FILLED_ARC        0
 
@@ -181,19 +181,19 @@ int main(int argc, char* args[])
     // Ellipse
     if(DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_ELLIPSES_ARCS) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
-        testDrawEllipse("Ellipse & Arcs-Pies - ImagePainter2 [SourceCopy]", image, *painter2);
+        testDrawEllipse("Ellipse & Arcs - ImagePainter2 [SourceCopy]", image, *painter2);
         if(TEST_COMPARE_WITH_OLD_PAINTER) {
             painter1->setCompositionMode(CompositionMode::SourceCopy);
-            testDrawEllipse("Ellipse & Arcs-Pies - ImagePainter [SourceCopy]", image, *painter1);
+            testDrawEllipse("Ellipse & Arcs - ImagePainter [SourceCopy]", image, *painter1);
         }
     }
 
     if(DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_ELLIPSES_ARCS) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
-        testDrawEllipse("Ellipse & Arcs-Pies - ImagePainter2 [SourceOver]", image, *painter2);
+        testDrawEllipse("Ellipse & Arcs - ImagePainter2 [SourceOver]", image, *painter2);
         if(TEST_COMPARE_WITH_OLD_PAINTER) {
             painter1->setCompositionMode(CompositionMode::SourceOver);
-            testDrawEllipse("Ellipse & Arcs-Pies - ImagePainter [SourceOver]", image, *painter1);
+            testDrawEllipse("Ellipse & Arcs - ImagePainter [SourceOver]", image, *painter1);
         }
     }
 
@@ -247,44 +247,44 @@ int main(int argc, char* args[])
     }
 
     // Solid-filled ellipses
-    if(DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_SOLID_FILLED_ELLIPSE) {
+    if(DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_SOLID_FILLED_ELLIPSES_ARCS) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
-        testDrawFillEllipse("Solid-Filled Ellipse & Arcs-Pies - ImagePainter2 [SourceCopy]", image, *painter2, brushSolid1, brushSolid2);
+        testDrawFillEllipse("Solid-Filled Ellipse & Arcs - ImagePainter2 [SourceCopy]", image, *painter2, brushSolid1, brushSolid2);
         if(TEST_COMPARE_WITH_OLD_PAINTER) {
             painter1->setCompositionMode(CompositionMode::SourceCopy);
-            testDrawFillEllipse("Solid-Filled Ellipse & Arcs-Pies - ImagePainter [SourceCopy]", image, *painter1, brushSolid1, brushSolid2);
+            testDrawFillEllipse("Solid-Filled Ellipse & Arcs - ImagePainter [SourceCopy]", image, *painter1, brushSolid1, brushSolid2);
         }
     }
 
-    if(DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_SOLID_FILLED_ELLIPSE) {
+    if(DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_SOLID_FILLED_ELLIPSES_ARCS) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
-        testDrawFillEllipse("Solid-Filled Ellipse & Arcs-Pies - ImagePainter2 [SourceOver]", image, *painter2, brushSolid1,  brushSolid2);
+        testDrawFillEllipse("Solid-Filled Ellipse & Arcs - ImagePainter2 [SourceOver]", image, *painter2, brushSolid1,  brushSolid2);
         if(TEST_COMPARE_WITH_OLD_PAINTER) {
             painter1->setCompositionMode(CompositionMode::SourceCopy);
-            testDrawFillEllipse("Solid-Filled Ellipse & Arcs-Pies - ImagePainter [SourceOver]", image, *painter1, brushSolid1, brushSolid2);
+            testDrawFillEllipse("Solid-Filled Ellipse & Arcs - ImagePainter [SourceOver]", image, *painter1, brushSolid1, brushSolid2);
         }
     }
 
     // Gradient-filled ellipses
-    if(DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_GRADIENT_FILLED_ELLIPSE) {
+    if(DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
-        testDrawFillEllipse("Gradient-Filled Ellipse & Arcs-Pies - ImagePainter2 [SourceCopy]", image, *painter2, brushGradient1, brushGradient2);
+        testDrawFillEllipse("Gradient-Filled Ellipse & Arcs - ImagePainter2 [SourceCopy]", image, *painter2, brushGradient1, brushGradient2);
     }
 
-    if(DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_GRADIENT_FILLED_ELLIPSE) {
+    if(DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
-        testDrawFillEllipse("Gradient-Filled Ellipse & Arcs-Pies - ImagePainter2 [SourceOver]", image, *painter2, brushGradient1, brushGradient2);
+        testDrawFillEllipse("Gradient-Filled Ellipse & Arcs - ImagePainter2 [SourceOver]", image, *painter2, brushGradient1, brushGradient2);
     }
 
     // Texture-filled ellipses
-    if(DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_TEXTURE_FILLED_ELLIPSE) {
+    if(DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
-        testDrawFillEllipse("Texture-Filled Ellipse & Arcs-Pies - ImagePainter2 [SourceCopy]", image, *painter2, brushTexture1, brushTexture2);
+        testDrawFillEllipse("Texture-Filled Ellipse & Arcs - ImagePainter2 [SourceCopy]", image, *painter2, brushTexture1, brushTexture2);
     }
 
-    if(DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_TEXTURE_FILLED_ELLIPSE) {
+    if(DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
-        testDrawFillEllipse("Texture-Filled Ellipse & Arcs-Pies - ImagePainter2 [SourceOver]", image, *painter2, brushTexture1, brushTexture2);
+        testDrawFillEllipse("Texture-Filled Ellipse & Arcs - ImagePainter2 [SourceOver]", image, *painter2, brushTexture1, brushTexture2);
     }
 
     // Create the brushes used for benchmarking
