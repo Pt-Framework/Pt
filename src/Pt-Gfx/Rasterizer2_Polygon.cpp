@@ -281,7 +281,7 @@ void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* po
 
     for(size_t i = 0; i < totalPointCount; ++i) {
         pointX[i] = (points[i].x() - minX) * FSAA2X2_SUPERSAMPLE_SIZE;
-        pointY[i] = (points[i].y() - minY) * FSAA2X2_SUPERSAMPLE_SIZE;
+        pointY[i] = (points[i].y() - minY) * FSAA2X2_SUPERSAMPLE_SIZE * 2;
     }
 
     // List of nodes that define the horizontal spans
@@ -289,10 +289,10 @@ void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* po
     std::vector<Pt::int32_t> nodeX1(totalPointCount * 2, 0); // Row (Y + 1)
 
     //  Loop through the rows of the image
-    for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
+    for(Pt::int32_t pixelY = 0; pixelY <= sizeY; ++pixelY) {
         // We examine two rows at a time
-        const Pt::int32_t iterY0 = pixelY * FSAA2X2_SUPERSAMPLE_SIZE;
-        const Pt::int32_t iterY1 = iterY0 + 1;
+        const Pt::int32_t iterY0 = pixelY * FSAA2X2_SUPERSAMPLE_SIZE * 2 - 1;
+        const Pt::int32_t iterY1 = pixelY * FSAA2X2_SUPERSAMPLE_SIZE * 2 + 1;
         // Base pointers for the polygons
         const Pt::int32_t* curPointBaseX = pointX.data();
         const Pt::int32_t* curPointBaseY = pointY.data();
@@ -475,7 +475,7 @@ void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* po
             const Pt::int32_t iterL = nodeX0[i    ] / FSAA2X2_SUPERSAMPLE_SIZE - 1;
             const Pt::int32_t iterR = nodeX0[i + 1] / FSAA2X2_SUPERSAMPLE_SIZE + 1;
             rasterScanline<FSAA2X2_SUPERSAMPLE_SIZE, FSAA2X2_MIN_ALPHA, FSAA2X2_MUL_ALPHA>(
-                iterL, iterR, pixelY, minX, minY, sizeX, color, alphas
+                iterL, iterR, pixelY - 1, minX, minY, sizeX, color, alphas
             );
         }
     }

@@ -487,7 +487,7 @@ void Rasterizer2::rasterPolygonAreaFSAAGen(const Point* points, const size_t* po
     }
 
     //  Loop through the rows of the image
-    for(Pt::int32_t pixelY = 0; pixelY < sizeY; ++pixelY) {
+    for(Pt::int32_t pixelY = 0; pixelY <= sizeY; ++pixelY) {
         // We examine multiple rows at a time
         Pt::int32_t iterY[SUPERSAMPLE_SIZE];
         iterY[0] = pixelY * SUPERSAMPLE_SIZE;
