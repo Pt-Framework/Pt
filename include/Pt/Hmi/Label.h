@@ -34,6 +34,7 @@
 #include <Pt/Hmi/Alignment.h>
 #include <Pt/Hmi/Adjustment.h>
 #include <Pt/Hmi/TextBlock.h>
+#include <Pt/Hmi/Picture.h>
 #include <Pt/SmartPtr.h>
 #include <Pt/String.h>
 
@@ -51,13 +52,15 @@ class PT_HMI_API Label : public Control
 
         virtual ~Label(); 
 
+        Alignment alignment() const;
+
+        void setAlignment(Alignment a);
+
         const Pt::String& text() const;
 
         void setText(const Pt::String& text);
 
-        Alignment alignment() const;
-
-        void setAlignment(Alignment a);
+        void setImage(const Gfx::Image& image); 
 
     public:
         const Gfx::Brush* background() const;
@@ -98,11 +101,18 @@ class PT_HMI_API Label : public Control
     private:
         void layoutText();
 
+        void layoutImage();
+
     private:
-        Pt::String  _text;
         Alignment   _alignment;
+        bool        _hasImage;
+
+        Pt::String  _text;
         Adjustment  _adjustment;
         TextBlock   _textBlock;
+
+        Gfx::Image  _image;
+        Gfx::PointF _imagePos;
         
         AutoPtr<Gfx::Brush>       _background;
         AutoPtr<Gfx::Pen>         _contour;
@@ -114,8 +124,9 @@ class PT_HMI_API Label : public Control
         FacetPtr<LabelRenderer>  _renderer;
         bool                     _hasRenderer;
 
-        Gfx::Pen    _textPen;
-        Gfx::Font   _font;
+        Gfx::Pen  _textPen;
+        Gfx::Font _font;
+        Picture   _picture;
 };
 
 } // namespace

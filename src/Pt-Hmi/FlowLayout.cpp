@@ -50,9 +50,10 @@ void StackLeft(Widget& parent)
         double x = posLeft + item->margin().left();
         double y = parent.padding().top() + item->margin().top(); 
                 
-        posLeft += item->size().width() + item->margin().left() + item->margin().right();
+        posLeft += item->preferredSize().width() + 
+                   item->margin().left() + item->margin().right();
 
-        const Gfx::SizeF childSize( item->size().width(), 
+        const Gfx::SizeF childSize( item->preferredSize().width(), 
                                     parent.size().height() - 
                                     parent.padding().top() - 
                                     parent.padding().bottom() -
@@ -79,7 +80,7 @@ void StackRight(Widget& parent)
         if( ! item->isVisible() )
             continue; 
 
-        posRight -= item->size().width();
+        posRight -= item->preferredSize().width();
         posRight -= item->margin().right();
                 
         double x = posRight;              
@@ -87,7 +88,7 @@ void StackRight(Widget& parent)
                 
         posRight -= item->margin().left();
 
-        const Gfx::SizeF childSize( item->size().width(), 
+        const Gfx::SizeF childSize( item->preferredSize().width(), 
                                     parent.size().height() - 
                                     parent.padding().top() - 
                                     parent.padding().bottom() - 
@@ -117,14 +118,15 @@ void StackTop(Widget& parent)
         double x = parent.padding().left() + item->margin().left();
         double y = posTop + item->margin().top();
                 
-        posTop += item->size().height() + item->margin().top() + item->margin().bottom();
+        posTop += item->preferredSize().height() + 
+                  item->margin().top() + item->margin().bottom();
                 
         const Gfx::SizeF childSize( parent.size().width() - 
                                     parent.padding().left() -
                                     parent.padding().right() -
                                     item->margin().left() - 
                                     item->margin().right(), 
-                                    item->size().height());
+                                    item->preferredSize().height());
 
         Gfx::PointF pos(x, y);                   
         item->setGeometry(pos, childSize, parent.vid());
@@ -146,7 +148,7 @@ void StackBottom(Widget& parent)
         if( ! item->isVisible() )
             continue; 
         
-        posBottom -= item->size().height();
+        posBottom -= item->preferredSize().height();
         posBottom -= item->margin().bottom();
                 
         double x = parent.padding().left() + item->margin().left();
@@ -159,7 +161,7 @@ void StackBottom(Widget& parent)
                                     parent.padding().right() -
                                     item->margin().left() - 
                                     item->margin().right(), 
-                                    item->size().height() );
+                                    item->preferredSize().height() );
                                          
         Gfx::PointF pos(x, y);                   
         item->setGeometry(pos, childSize, parent.vid());

@@ -50,69 +50,75 @@ ProgressBar::~ProgressBar()
 
 int ProgressBar::maximum() const
 {
-	return _max;
+    return _max;
 }
 
 
 int ProgressBar::minimum() const
 {
-	return _min;
+    return _min;
 }
 
 
 void ProgressBar::setRange(int minpos, int maxpos)
 {
-	_min = minpos;
-	_max = maxpos;
+    _min = minpos;
+    _max = maxpos;
 
-	invalidate();
+    invalidate();
 }
 
 
 int ProgressBar::value() const
 {
-	return _value;
+    return _value;
 }
 
 
 void ProgressBar::setValue(int n)
 {
-	if( n < _min )
-		n = _min;
+    if( n < _min )
+        n = _min;
 
-	if( n > _max )
-		n = _max;
-		
-	_value = n;
+    if( n > _max )
+        n = _max;
+        
+    _value = n;
 
-	invalidate();
+    invalidate();
 
-	_valueChanged.send(_value);
+    _valueChanged.send(_value);
 }
 
 
 float ProgressBar::progress() const
 {
-	if( _value <= _min )
-		return 0.f;
+    if( _value <= _min )
+        return 0.f;
 
-	if(_value > _max)
-		return 1.f;
+    if(_value > _max)
+        return 1.f;
 
-	return static_cast<float>(_value - _min)/(_max - _min);
+    return static_cast<float>(_value - _min)/(_max - _min);
+}
+
+
+void ProgressBar::reset()
+{
+    setValue( minimum() );
 }
 
 
 Signal<int>& ProgressBar::valueChanged()
 {
-	return _valueChanged;
+    return _valueChanged;
 }
 
 
 const Gfx::Brush& ProgressBar::background() const
 {
     return _background ? *_background
-											 : Application::instance().styleOptions().foreground();
+                       : Application::instance().styleOptions().foreground();
 }
 
 
@@ -125,7 +131,7 @@ void ProgressBar::setBackground(const Gfx::Brush& b)
 const Gfx::Color& ProgressBar::foreground() const
 {
     return _foreground ? *_foreground
-											 : Application::instance().styleOptions().accentColor();
+                       : Application::instance().styleOptions().accentColor();
 }
 
 
@@ -139,7 +145,7 @@ void ProgressBar::setForeground(const Gfx::Color& b)
 const Gfx::Pen& ProgressBar::contour() const
 {
     return _contour ? *_contour 
-										: Application::instance().styleOptions().contour();
+                    : Application::instance().styleOptions().contour();
 }
 
 
@@ -216,12 +222,6 @@ void ProgressBar::setRenderer(ProgressBarRenderer* renderer)
 }
 
 
-Gfx::SizeF ProgressBar::onAutoSize() const
-{
-    return Base::onAutoSize();
-}
-
-
 void ProgressBar::onInvalidate()
 {
     Base::onInvalidate();
@@ -229,9 +229,9 @@ void ProgressBar::onInvalidate()
     const StyleOptions& options = Application::instance().styleOptions();
     const Style& style = Application::instance().style();
 
-		_backgroundBrush = background();
-		_foregroundBrush = foreground();
-		_contourPen = contour();
+    _backgroundBrush = background();
+    _foregroundBrush = foreground();
+    _contourPen = contour();
     _textPen = textColor();
     _font = Gfx::Font(font(), fontSize(), fontStyle());
 
@@ -242,7 +242,7 @@ void ProgressBar::onInvalidate()
         return;
 
     _renderer->prepare(*this, options, _backgroundBrush, _foregroundBrush,
-												_contourPen, _textPen, _font);
+                       _contourPen, _textPen, _font);
 }
 
 
@@ -256,8 +256,8 @@ void ProgressBar::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     Painter painter(surface);
     painter.setClip(rect);
 
-		_renderer->render(*this, options, painter, rect, 
-											_backgroundBrush, _foregroundBrush, _contourPen, _textPen, _font);
+    _renderer->render(*this, options, painter, rect, 
+                       _backgroundBrush, _foregroundBrush, _contourPen, _textPen, _font);
 }
 
 } // namespace

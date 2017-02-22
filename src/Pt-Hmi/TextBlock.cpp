@@ -325,7 +325,7 @@ void TextBlock::layout(const Pt::String& text, const Gfx::Font& font)
         segment.append(&text[prevWordEnd], wordEnd - prevWordEnd);
         
         Gfx::FontMetrics fm = Painter::fontMetrics(font, segment);
-        if(fm.width() < _maxWidth || lineLength == 0)
+        if(fm.width() <= _maxWidth || lineLength == 0)
         {
             lineLength = segment.size();
             lineMetrics = fm;

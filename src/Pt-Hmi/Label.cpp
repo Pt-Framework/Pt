@@ -38,6 +38,7 @@ namespace Hmi {
 
 Label::Label()
 : _alignment(Alignment::Left)
+, _hasImage(false)
 , _hasRenderer(false)
 {
 }
@@ -45,19 +46,6 @@ Label::Label()
 
 Label::~Label()
 {
-}
-
-
-const Pt::String& Label::text() const
-{
-    return _text;
-}
-
-
-void Label::setText(const Pt::String& text)
-{
-    _text = text;
-    invalidate();
 }
 
 
@@ -70,6 +58,28 @@ Alignment Label::alignment() const
 void Label::setAlignment(Alignment a)
 {
     _alignment = a;
+    invalidate();
+}
+
+
+const Pt::String& Label::text() const
+{
+    return _text;
+}
+
+
+void Label::setText(const Pt::String& text)
+{
+    _text = text;
+    _hasImage = false;
+    invalidate();
+}
+
+
+void Label::setImage(const Gfx::Image& image)
+{
+    _picture.set(image);
+    _hasImage = true;
     invalidate();
 }
 
@@ -168,10 +178,25 @@ void Label::setRenderer(LabelRenderer* renderer)
 
 Gfx::SizeF Label::onAutoSize() const
 {
-    Gfx::FontMetrics fm = Hmi::Painter::fontMetrics(_font, _text);
+    Gfx::SizeF size;
+    double w = 0;
+    double h = 0;
 
-    return Gfx::SizeF( fm.width() + padding().leftRight(), 
-                       fm.height() + padding().topBottom() );
+    if(_hasImage)
+    {
+        w = static_cast<double>( _picture.width() );
+        h = static_cast<double>( _picture.height() );
+
+    }
+    else
+    {
+        Gfx::FontMetrics fm = Hmi::Painter::fontMetrics(_font, _text);
+        w = static_cast<double>( fm.width() ); 
+        h = static_cast<double>( fm.height() );
+    }
+
+    return Gfx::SizeF( w + padding().leftRight(), 
+                       h + padding().topBottom() );
 }
 
 
@@ -232,13 +257,105 @@ void Label::layoutText()
         case Alignment::Bottom:
         case Alignment::BottomRight:
         {
-            double y = size().height() - _textBlock.height();
-            pos.set(padding().left(), y - padding().bottom());
+            double height = size().height() - padding().topBottom();
+            double y = height - _textBlock.height();
+
+            pos.set( padding().left(), padding().top() + y);
             break;
         }
     }
 
     _textBlock.setPosition(pos);
+}
+
+
+void Label::layoutImage()
+{
+    switch( _alignment )
+    {
+        default:
+        case Alignment::TopLeft:
+        {
+            _imagePos.set(padding().left(), padding().top());
+            break;
+        }
+        case Alignment::Top:
+        {
+            double width = size().width() - padding().leftRight();
+            double x = (width - _picture.width()) / 2;
+
+            _imagePos.set( padding().left() + x, padding().top() );
+            break;
+        }
+        case Alignment::TopRight:
+        {
+            double width = size().width() - padding().leftRight();
+            double x = width - _picture.width();
+
+            _imagePos.set( padding().left() + x, padding().top() );
+            break;
+        }
+        case Alignment::Left:
+        {
+            double height = size().height() - padding().topBottom();
+            double y = (height - _picture.height()) / 2;
+
+            _imagePos.set( padding().left(), padding().top() + y);
+            break;
+        }
+        case Alignment::Center:
+        {
+            double width = size().width() - padding().leftRight();
+            double x = (width - _picture.width()) / 2;
+            
+            double height = size().height() - padding().topBottom();
+            double y = (height - _picture.height()) / 2;
+
+            _imagePos.set( padding().left() + x, padding().top() + y);
+            break;
+        }
+        case Alignment::Right:
+        {
+            double width = size().width() - padding().leftRight();
+            double x = width - _picture.width();
+
+            double height = size().height() - padding().topBottom();
+            double y = (height - _picture.height()) / 2;
+
+            _imagePos.set( padding().left() + x, padding().top() + y);
+            break;
+        }
+        case Alignment::BottomLeft:
+        {
+            double height = size().height() - padding().topBottom();
+            double y = height - _picture.height();
+
+            _imagePos.set(padding().left(), padding().top() + y);
+            break;
+        }
+        case Alignment::Bottom:
+        {
+            double width = size().width() - padding().leftRight();
+            double x = (width - _picture.width()) / 2;
+
+            double height = size().height() - padding().topBottom();
+            double y = height - _picture.height();
+
+            _imagePos.set( padding().left() + x, padding().top() + y);
+            break;
+        }
+        case Alignment::BottomRight:
+        {
+            double width = size().width() - padding().leftRight();
+            double x = width - _picture.width();
+
+            double height = size().height() - padding().topBottom();
+            double y = height - _picture.height();
+
+            _imagePos.set( padding().left() + x, padding().top() + y);
+            break;
+        }
+    }
 }
 
 
@@ -260,7 +377,10 @@ void Label::onInvalidate()
 
     _renderer->prepare(*this, options, _font, _textPen);
 
-    layoutText();
+    if(_hasImage)
+        layoutImage();
+    else
+        layoutText();
 }
 
 
@@ -287,17 +407,26 @@ void Label::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
         _renderer->renderFrame(*this, options,
                                painter, rect, *pen);
     }
-
-    TextBlock::ConstIterator it;
-    for(it = _textBlock.begin(); it != _textBlock.end(); ++it)
+    
+    if(_hasImage)
     {
-        const Pt::String& lineText = it->text();
+        painter.setCompositionMode(Gfx::CompositionMode::SourceOver);
+        painter.drawPicture(_imagePos, _picture);
+        painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
+    }
+    else
+    {
+        TextBlock::ConstIterator it;
+        for(it = _textBlock.begin(); it != _textBlock.end(); ++it)
+        {
+            const Pt::String& lineText = it->text();
 
-        Gfx::PointF pos = it->position() + _textBlock.position();
-        pos.addY( it->ascent() );
+            Gfx::PointF pos = _textBlock.position() + it->position();
+            pos.addY( it->ascent() );
 
-        _renderer->renderText(*this, options,  painter, rect,
-                              lineText, pos, _font, _textPen);
+            _renderer->renderText(*this, options,  painter, rect,
+                                  lineText, pos, _font, _textPen);
+        }
     }
 }
 
@@ -305,7 +434,11 @@ void Label::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 void Label::onResizeEvent(const ResizeEvent& ev)
 {
     Base::onResizeEvent(ev);
-    layoutText();
+
+    if(_hasImage)
+        layoutImage();
+    else
+        layoutText();
 }
 
 } // namespace

@@ -48,26 +48,28 @@ class PT_HMI_API ProgressBar : public Control
 
         virtual ~ProgressBar();
 
-				int maximum() const;
+        int maximum() const;
 
-				int minimum() const;
+        int minimum() const;
 
-				void setRange(int minpos, int maxpos);
+        void setRange(int minpos, int maxpos);
 
         int value() const;
 
         void setValue(int n);
-			
-				float progress() const;
 
-				Signal<int>& valueChanged();
+        float progress() const;
+
+        void reset();
+
+        Signal<int>& valueChanged();
 
     public:
         const Gfx::Brush& background() const;
 
         void setBackground(const Gfx::Brush& b);
 
-				const Gfx::Color& foreground() const;
+        const Gfx::Color& foreground() const;
 
         void setForeground(const Gfx::Color& b);
 
@@ -94,35 +96,30 @@ class PT_HMI_API ProgressBar : public Control
         void setRenderer(ProgressBarRenderer* renderer);
 
     protected:
-        virtual Gfx::SizeF onAutoSize() const;
-
         virtual void onInvalidate();
 
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
-        
-    private:
-        Gfx::PointF textPosition() const;
 
     private:
-				Signal<int> _valueChanged;
-				int _value;
-				int _min;
-				int _max;
+        Signal<int> _valueChanged;
+        int _value;
+        int _min;
+        int _max;
 
         AutoPtr<Gfx::Brush>       _background;
-				AutoPtr<Gfx::Color>       _foreground;
+        AutoPtr<Gfx::Color>       _foreground;
         AutoPtr<Gfx::Pen>         _contour;
         AutoPtr<Gfx::Color>       _textColor;
         AutoPtr<std::string>      _fontName;
         AutoPtr<std::size_t>      _fontSize;
         AutoPtr<Gfx::Font::Style> _fontStyle;
         
-        FacetPtr<ProgressBarRenderer>  _renderer;
-        bool													_hasRenderer;
+        FacetPtr<ProgressBarRenderer> _renderer;
+        bool                          _hasRenderer;
 
-				Gfx::Brush	_backgroundBrush;
-				Gfx::Brush	_foregroundBrush;
-				Gfx::Pen    _contourPen;
+        Gfx::Brush  _backgroundBrush;
+        Gfx::Brush  _foregroundBrush;
+        Gfx::Pen    _contourPen;
         Gfx::Pen    _textPen;
         Gfx::Font   _font;
 };
