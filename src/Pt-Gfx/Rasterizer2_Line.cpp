@@ -307,9 +307,8 @@ void Rasterizer2::rasterOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1,
     if(steep) {
         // Draw the pixels
         for(Pt::int32_t i = from; i <= to; ++i) {
-            Pt::uint8_t a1 = FIXED_POINT_RFPART_TO_A8(ypxli);
-            Pt::uint8_t a2 = FIXED_POINT_FPART_TO_A8 (ypxli);
-            adjustXWAlphas(a1, a2);
+            const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_FPART_TO_A8 (ypxli) ];
+            const Pt::uint8_t a2 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_RFPART_TO_A8(ypxli) ];
             XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           ), i, a1);
             XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE), i, a2);
             ypxli += grad;
@@ -325,9 +324,8 @@ void Rasterizer2::rasterOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1,
     else {
         // Draw the pixels
         for(Pt::int32_t i = from; i <= to; ++i) {
-            Pt::uint8_t a1 = FIXED_POINT_RFPART_TO_A8(ypxli);
-            Pt::uint8_t a2 = FIXED_POINT_FPART_TO_A8 (ypxli);
-            adjustXWAlphas(a1, a2);
+            const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_FPART_TO_A8 (ypxli) ];
+            const Pt::uint8_t a2 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_RFPART_TO_A8(ypxli) ];
             XW_SET_PIXEL(_image, color, i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           ), a1);
             XW_SET_PIXEL(_image, color, i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE), a2);
             ypxli += grad;

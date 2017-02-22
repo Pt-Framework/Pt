@@ -497,9 +497,8 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
                     insideDegRange(xr, yt1, ctrX, ctrY, degBegin, degEnd),
                     insideDegRange(xr, yb1, ctrX, ctrY, degBegin, degEnd)
                 };
-                Pt::uint8_t a0 = 255 - alpha;
-                Pt::uint8_t a1 = alpha;
-                _rasterizer->adjustXWAlphas(a0, a1);
+                const Pt::uint8_t a0 = Rasterizer2::XWAA_WFILTER[      alpha];
+                const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[255 - alpha];
                 _rasterizer->stroke4Pixels(xl, yt0, xr, yb0, a0, mask0);
                 _rasterizer->stroke4Pixels(xl, yt1, xr, yb1, a1, mask1);
                 // Determine the coordinates of the closing lines
@@ -519,9 +518,8 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
             }
             // Ellipse
             else {
-                 Pt::uint8_t a0 = 255 - alpha;
-                 Pt::uint8_t a1 = alpha;
-                 _rasterizer->adjustXWAlphas(a0, a1);
+                const Pt::uint8_t a0 = Rasterizer2::XWAA_WFILTER[      alpha];
+                const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[255 - alpha];
                 _rasterizer->stroke4Pixels(xl, yt0, xr, yb0, a0);
                 _rasterizer->stroke4Pixels(xl, yt1, xr, yb1, a1);
             }
@@ -593,11 +591,10 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
                      insideDegRange(xr1, yt, ctrX, ctrY, degBegin, degEnd),
                      insideDegRange(xr1, yb, ctrX, ctrY, degBegin, degEnd)
                  };
-                 Pt::uint8_t a0 = 255 - alpha;
-                 Pt::uint8_t a1 = alpha;
-                 _rasterizer->adjustXWAlphas(a0, a1);
-                 _rasterizer->stroke4Pixels(xl0, yt, xr0, yb, a0, mask0);
-                 _rasterizer->stroke4Pixels(xl1, yt, xr1, yb, a1, mask1);
+                const Pt::uint8_t a0 = Rasterizer2::XWAA_WFILTER[      alpha];
+                const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[255 - alpha];
+                _rasterizer->stroke4Pixels(xl0, yt, xr0, yb, a0, mask0);
+                _rasterizer->stroke4Pixels(xl1, yt, xr1, yb, a1, mask1);
                 // Determine the coordinates of the closing lines
                 if(arcMode == ArcMode::Open) continue;
                 if(abs(xl0 - bx) < x1d) { x1d = abs(xl0 - bx); x1 = xl0; }
@@ -615,9 +612,8 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
             }
             // Ellipse
             else {
-                 Pt::uint8_t a0 = 255 - alpha;
-                 Pt::uint8_t a1 = alpha;
-                 _rasterizer->adjustXWAlphas(a0, a1);
+                const Pt::uint8_t a0 = Rasterizer2::XWAA_WFILTER[      alpha];
+                const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[255 - alpha];
                 _rasterizer->stroke4Pixels(xl0, yt, xr0, yb, a0);
                 _rasterizer->stroke4Pixels(xl1, yt, xr1, yb, a1);
             }
