@@ -28,6 +28,7 @@
 
 #include <Pt/Hmi/TextBlock.h>
 #include <Pt/Hmi/Painter.h>
+#include <cassert>
 
 namespace Pt {
 
@@ -276,7 +277,7 @@ void TextBlock::layout(const Pt::String& text, const Gfx::Font& font)
     typedef std::vector<Word> Words;
 
     Words words;
-    Word word(0,0);
+    Word word(0, 0);
     bool onSpace = true;
 
     for(std::size_t n = 0; n < text.size(); ++n)
@@ -308,51 +309,47 @@ void TextBlock::layout(const Pt::String& text, const Gfx::Font& font)
 
     std::size_t lineBegin = 0;
     std::size_t lineLength = 0;
+    std::size_t wordBegin = 0;
+    std::size_t wordEnd = 0;
+    std::size_t prevWordEnd = 0;
     Pt::String segment;
-    std::size_t pos = 0;
     Gfx::FontMetrics lineMetrics;
 
     Words::iterator it;
     for(it = words.begin(); it != words.end(); ++it)
     {
-        std::size_t end = it->second;
-        
-        segment.append(&text[pos], end - pos);
+        prevWordEnd = wordEnd;
+        wordBegin = it->first;
+        wordEnd = it->second;
+
+        segment.append(&text[prevWordEnd], wordEnd - prevWordEnd);
         
         Gfx::FontMetrics fm = Painter::fontMetrics(font, segment);
-        if(fm.width() < _maxWidth)
+        if(fm.width() < _maxWidth || lineLength == 0)
         {
-            lineLength += end - pos;
+            lineLength = segment.size();
             lineMetrics = fm;
-            
-            pos = end;
             continue;
         }
 
-        if(lineLength == 0)
-        {
-            // next iteration catches whitespace
-            lineLength += segment.size();
-            lineMetrics = fm;
+        // remove the line from the segment
+        segment.assign(&text[wordBegin], wordEnd - wordBegin );
 
-            pos = end;
-            continue;
-        }
-
-        segment.assign(&text[it->first], it->second - it->first );
-        lineLength += it->first - (lineLength + lineBegin);
+        // add the whitespace after the last word of the line 
+        lineLength += wordBegin - prevWordEnd;
 
         Pt::String line(&text[lineBegin], lineLength);
         //line += ';';
         addLine(line, font, lineMetrics);
 
-        lineBegin = it->first;
-        lineLength = segment.size();
+        lineBegin = wordBegin;
+        lineLength = wordEnd - wordBegin;
         lineMetrics = Painter::fontMetrics(font, Pt::String(segment.c_str()));
-        
-        pos = end;
     }
 
+    // add the whitespace after the last word
+    lineLength += text.size() - wordEnd;
+    
     Pt::String line(&text[lineBegin], lineLength);
     //line += ';';
     addLine(line, font, lineMetrics);
@@ -367,14 +364,16 @@ void TextBlock::addLine(const Pt::String& line,
     double lineOffset = (lineHeight - font.size()) / 2;
     double lineWidth = static_cast<double>( tm.width() );
 
-    TextLine textLine;
-    textLine.setText(line, font, tm);
-        
     double lineX = 0;
     double lineY = _size.height();
 
     if( ! _lines.empty() )
         lineY += lineOffset;
+
+    _lines.resize(_lines.size() + 1);
+    TextLine& textLine = _lines.back();
+    
+    textLine.setText(line, font, tm);
 
     switch(_adjustment)
     {
@@ -393,8 +392,6 @@ void TextBlock::addLine(const Pt::String& line,
     } 
         
     textLine.setPosition(lineX, lineY);
-
-    _lines.push_back(textLine);
 
     _size.setWidth( std::max(_size.width(), lineWidth) );
     _size.addHeight(lineHeight);

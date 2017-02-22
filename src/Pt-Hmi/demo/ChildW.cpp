@@ -66,7 +66,7 @@ ChildW::ChildW(const std::string& title)
     _textLabel.setAutoSize(true);
     _textLabel.resize( Gfx::SizeF(100,40) );
     _textLabel.setName("TextLabel");
-    _textLabel.setText("Platinum C++     Framework"); 
+    _textLabel.setText("Platinum C++     Framework");
     _textLabel.setAlignment(Alignment::Center);
     _textLabel.setPadding(10);
     _textLabel.move( Gfx::PointF(60,60) );
