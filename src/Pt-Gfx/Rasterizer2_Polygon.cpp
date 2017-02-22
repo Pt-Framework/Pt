@@ -47,10 +47,10 @@ void Rasterizer2::strokeOnePixelSolidPolygon(const Point* points, size_t pointCo
 void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
 {
     // Minimum and maximum coordinate values for all the polygons
-    Pt::int32_t minX =  COORDINATE_LIMIT;
-    Pt::int32_t minY =  COORDINATE_LIMIT;
-    Pt::int32_t maxX = -COORDINATE_LIMIT;
-    Pt::int32_t maxY = -COORDINATE_LIMIT;
+    Pt::int32_t minX =  MAXIMUM_COORD;
+    Pt::int32_t minY =  MAXIMUM_COORD;
+    Pt::int32_t maxX = -MAXIMUM_COORD;
+    Pt::int32_t maxY = -MAXIMUM_COORD;
 
     // Separate the polygons and clip their coordinates
     std::vector<Point > clippedPoints;
@@ -58,7 +58,7 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
     size_t              startIndex = 0;
     for(size_t i = 0; i <= pointCount; ++i) {
         // Search for the end and/or separator points
-        if( i == pointCount || (points[i].x() > COORDINATE_LIMIT && points[i].y() > COORDINATE_LIMIT) ) {
+        if( i == pointCount || (points[i].x() > MAXIMUM_COORD && points[i].y() > MAXIMUM_COORD) ) {
             // Calculate the number of points for this polygon
             const size_t curPC = i - startIndex;
             // Clip the coordinates
@@ -122,7 +122,7 @@ void Rasterizer2::fillPolygonSeparate(const Point* points, size_t pointCount)
 
     for(size_t i = 0; i < pointCount; ++i) {
         // Search for the end and/or separator points
-        if( i == pointCount || (points[i].x() > COORDINATE_LIMIT && points[i].y() > COORDINATE_LIMIT) ) {
+        if( i == pointCount || (points[i].x() > MAXIMUM_COORD && points[i].y() > MAXIMUM_COORD) ) {
             // Calculate the number of points for this polygon
             const size_t curPC = i - startIndex;
             // Clip the coordinates

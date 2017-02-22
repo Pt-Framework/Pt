@@ -53,6 +53,7 @@ class PT_GFX_API Painter
 {
     public:
          static const PointF      PolygonSeparatorPointF;
+         static const Point       MaximumPointCoordinate;
          static const Pt::int32_t MaximumCoordinate;
 
     public:

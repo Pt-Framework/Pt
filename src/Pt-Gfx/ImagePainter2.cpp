@@ -414,10 +414,10 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
     Pt::int32_t radY2 = radY * radY;
 
     // Drawing an arc requires more parameters and calculation
-    Pt::int32_t bx = 0, x1 = 0, x1d = COORDINATE_LIMIT;
-    Pt::int32_t by = 0, y1 = 0, y1d = COORDINATE_LIMIT;
-    Pt::int32_t ex = 0, x2 = 0, x2d = COORDINATE_LIMIT;
-    Pt::int32_t ey = 0, y2 = 0, y2d = COORDINATE_LIMIT;
+    Pt::int32_t bx = 0, x1 = 0, x1d = MAXIMUM_COORD;
+    Pt::int32_t by = 0, y1 = 0, y1d = MAXIMUM_COORD;
+    Pt::int32_t ex = 0, x2 = 0, x2d = MAXIMUM_COORD;
+    Pt::int32_t ey = 0, y2 = 0, y2d = MAXIMUM_COORD;
 
     if(drawArc) {
         // Ensure that the begin angle is within the acceptable range

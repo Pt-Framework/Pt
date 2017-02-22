@@ -36,7 +36,8 @@ namespace Gfx {
 
 
 const PointF      Painter::PolygonSeparatorPointF(99999, 99999);
-const Pt::int32_t Painter::MaximumCoordinate = 65535;
+const Point       Painter::MaximumPointCoordinate(65535, 65535);
+const Pt::int32_t Painter::MaximumCoordinate     (65535);
 
 
 } // namespace

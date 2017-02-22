@@ -58,7 +58,8 @@
 #define FIXED_POINT_TO_INT(V)       ( (V) >> FIXED_POINT_SHIFT_FACTOR )
 
 // Coordinate limit
-#define COORDINATE_LIMIT Painter::MaximumCoordinate
+#define MAXIMUM_COORD Painter::MaximumCoordinate
+#define MAXIMUM_POINT Painter::MaximumPointCoordinate
 
 // Just for easy and faster debugging ;)
 #include <stdio.h>
@@ -74,6 +75,11 @@ class Image;
 
 class Rasterizer2
 {
+    public:
+        // Mask for excluding pixels when drawing line;
+        // elements: { start0, start1, end0, end1 }
+        typedef Point DrawLineMask[4];
+
     public:
         Rasterizer2( Image& image );
 
@@ -134,8 +140,6 @@ class Rasterizer2
         {
             return _compositionMode;
         }
-
-        typedef Point DrawLineMask[4];
 
         void image(const Point& to, const Image& image);
         void image(const Point& toIn, const Image& image, const Rect& imageRect);
