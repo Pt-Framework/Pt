@@ -51,8 +51,8 @@ using namespace Pt::Gfx;
 #define TEST_SOURCECOPY                        0
 #define TEST_SOURCEOVER                        1
 
-#define TEST_DRAW_LINE_AND_TEXT                1
-#define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES 1
+#define TEST_DRAW_LINE_AND_TEXT                0
+#define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES 0
 
 #define TEST_DRAW_ELLIPSES_ARCS                1
 

@@ -615,19 +615,19 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
     }
 
     // Draw the arc's closing lines
-    // ### TODO: How to fix the minor artifact(s) on SourceOver mode ??? ###
     if(drawArc) {
+        Rasterizer2::DrawLineMask mask = Rasterizer2::NullLineMask;
         if(arcMode == ArcMode::Chord) {
             const Point a(x1, y1);
             const Point b(x2, y2);
-            _rasterizer->strokeOnePixelSolidLine(a, b, 0);
+            _rasterizer->strokeOnePixelSolidLine(a, b, &mask);
         }
         else if(arcMode == ArcMode::Pie) {
             const Point a(bx, by);
             const Point b(ex, ey);
             const Point o(ctrX, ctrY);
-            _rasterizer->strokeOnePixelSolidLine(a, o, 0);
-            _rasterizer->strokeOnePixelSolidLine(b, o, 0);
+            _rasterizer->strokeOnePixelSolidLine(a, o, &mask);
+            _rasterizer->strokeOnePixelSolidLine(b, o, &mask);
         }
     }
 }

@@ -297,31 +297,45 @@ void Rasterizer2::rasterOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1,
     const Pt::int32_t grad = (fy2 - fy1) / FIXED_POINT_TO_INT(fx2 - fx1);
     const Pt::int32_t xpxl1 = FIXED_POINT_ROUND(fx1);
     const Pt::int32_t xpxl2 = FIXED_POINT_ROUND(fx2);
-          Pt::int32_t ypxl  = fy1 + grad * FIXED_POINT_TO_INT(xpxl1 - fx1);
+    const Pt::int32_t ypxl  = fy1 + grad * FIXED_POINT_TO_INT(xpxl1 - fx1);
 
     // Draw the pixels
-    Pt::int32_t from = FIXED_POINT_TO_INT(FIXED_POINT_ROUND(fx1));
-    Pt::int32_t to   = FIXED_POINT_TO_INT(xpxl2);
-
-    //if(skipFirstPoint) ++from;
-    //if(skipLastPoint ) --to;
+    Pt::int32_t from  = FIXED_POINT_TO_INT(FIXED_POINT_ROUND(fx1));
+    Pt::int32_t to    = FIXED_POINT_TO_INT(xpxl2);
+    Pt::int32_t ypxli = ypxl;
 
     if(steep) {
+        // Draw the pixels
         for(Pt::int32_t i = from; i <= to; ++i) {
-            const Pt::uint8_t a1 = FIXED_POINT_RFPART_TO_A8(ypxl);
-            const Pt::uint8_t a2 = FIXED_POINT_FPART_TO_A8 (ypxl);
-            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl)                           ), i, a1);
-            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl) + FIXED_POINT_CONSTANT_ONE), i, a2);
-            ypxl += grad;
+            const Pt::uint8_t a1 = FIXED_POINT_RFPART_TO_A8(ypxli);
+            const Pt::uint8_t a2 = FIXED_POINT_FPART_TO_A8 (ypxli);
+            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           ), i, a1);
+            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE), i, a2);
+            ypxli += grad;
+        }
+        // Store back the start and end coordinates as needed
+        if(maskInOut) {
+            (*maskInOut)[0].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl        )                           ), from);
+            (*maskInOut)[1].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl        ) + FIXED_POINT_CONSTANT_ONE), from);
+            (*maskInOut)[2].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli - grad)                           ), to  );
+            (*maskInOut)[3].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli - grad) + FIXED_POINT_CONSTANT_ONE), to  );
         }
     }
     else {
+        // Draw the pixels
         for(Pt::int32_t i = from; i <= to; ++i) {
-            const Pt::uint8_t a1 = FIXED_POINT_RFPART_TO_A8(ypxl);
-            const Pt::uint8_t a2 = FIXED_POINT_FPART_TO_A8 (ypxl);
-            XW_SET_PIXEL(_image, color, i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl)                           ), a1);
-            XW_SET_PIXEL(_image, color, i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl) + FIXED_POINT_CONSTANT_ONE), a2);
-            ypxl += grad;
+            const Pt::uint8_t a1 = FIXED_POINT_RFPART_TO_A8(ypxli);
+            const Pt::uint8_t a2 = FIXED_POINT_FPART_TO_A8 (ypxli);
+            XW_SET_PIXEL(_image, color, i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           ), a1);
+            XW_SET_PIXEL(_image, color, i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE), a2);
+            ypxli += grad;
+        }
+        // Store back the start and end coordinates as needed
+        if(maskInOut) {
+            (*maskInOut)[0].set(from, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl        )                           ));
+            (*maskInOut)[1].set(from, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl        ) + FIXED_POINT_CONSTANT_ONE));
+            (*maskInOut)[2].set(to,   FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli - grad)                           ));
+            (*maskInOut)[3].set(to,   FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli - grad) + FIXED_POINT_CONSTANT_ONE));
         }
     }
 

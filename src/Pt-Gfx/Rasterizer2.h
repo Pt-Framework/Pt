@@ -80,6 +80,8 @@ class Rasterizer2
         // elements: { start0, start1, end0, end1 }
         typedef Point DrawLineMask[4];
 
+        static const DrawLineMask NullLineMask;
+
     public:
         Rasterizer2( Image& image );
 

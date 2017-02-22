@@ -40,6 +40,10 @@ namespace Gfx {
 // ======================================================================================
 // ===== Static Public Member Functions =================================================
 // ======================================================================================
+const Rasterizer2::DrawLineMask Rasterizer2::NullLineMask = {
+    MAXIMUM_POINT, MAXIMUM_POINT, MAXIMUM_POINT, MAXIMUM_POINT
+};
+
 FontMetrics Rasterizer2::fontMetrics( const Font& font, const Pt::String& text )
 {
     DrawText textRender;

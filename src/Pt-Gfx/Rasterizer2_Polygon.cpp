@@ -158,38 +158,45 @@ void Rasterizer2::fillPolygonSeparate(const Point* points, size_t pointCount)
 void Rasterizer2::rasterOnePixelSolidPolygonOutline(const Point* points, size_t pointCount, const Color& color)
 {
     // Mask
-    DrawLineMask* maskInOut = 0;
+    Rasterizer2::DrawLineMask mask_zero = Rasterizer2::NullLineMask;
+    Rasterizer2::DrawLineMask mask_nnp1 = Rasterizer2::NullLineMask;
 
     // From point N to point (N + 1), successively
     const size_t pc1 = pointCount - 1;
 
     for(size_t i = 0; i < pc1; ++i) {
         if(points[i].y() == points[i + 1].y())
-            rasterOnePixelHLineSegment(points[i].x(), points[i + 1].x(), points[i].y(), color, maskInOut);
+            rasterOnePixelHLineSegment(points[i].x(), points[i + 1].x(), points[i].y(), color, &mask_nnp1);
         else if(points[i].x() == points[i + 1].x())
-            rasterOnePixelVLineSegment(points[i].x(), points[i].y(), points[i + 1].y(), color, maskInOut);
+            rasterOnePixelVLineSegment(points[i].x(), points[i].y(), points[i + 1].y(), color, &mask_nnp1);
         else {
             const bool xline = ( abs(points[i + 1].x() - points[i].x()) ==
                                  abs(points[i + 1].y() - points[i].y()) );
             if(xline || _aaMode == AntiAliasingMode::None)
-                rasterOnePixelGLineSegmentNoAA(points[i].x(), points[i].y(), points[i + 1].x(), points[i + 1].y(), color, maskInOut);
+                rasterOnePixelGLineSegmentNoAA(points[i].x(), points[i].y(), points[i + 1].x(), points[i + 1].y(), color, &mask_nnp1);
             else
-                rasterOnePixelGLineSegmentXWAA(points[i].x(), points[i].y(), points[i + 1].x(), points[i + 1].y(), color, maskInOut);
+                rasterOnePixelGLineSegmentXWAA(points[i].x(), points[i].y(), points[i + 1].x(), points[i + 1].y(), color, &mask_nnp1);
         }
+        if(!i) memcpy(&mask_zero, &mask_nnp1, sizeof(mask_zero));
     }
+
+    mask_zero[2] = mask_zero[0];
+    mask_zero[3] = mask_zero[1];
+    mask_zero[0] = mask_nnp1[2];
+    mask_zero[1] = mask_nnp1[3];
 
     // From the last point to the first point
     if(points[pc1].y() == points[0].y())
-        rasterOnePixelHLineSegment(points[pc1].x(), points[0].x(), points[pc1].y(), color, maskInOut);
+        rasterOnePixelHLineSegment(points[pc1].x(), points[0].x(), points[pc1].y(), color, &mask_zero);
     else if(points[pc1].x() == points[0].x())
-         rasterOnePixelVLineSegment(points[pc1].x(), points[pc1].y(), points[0].y(), color, maskInOut);
+         rasterOnePixelVLineSegment(points[pc1].x(), points[pc1].y(), points[0].y(), color, &mask_zero);
     else {
         const bool xline = ( abs(points[pc1].x() - points[0].x()) ==
                              abs(points[pc1].y() - points[0].y()) );
         if(xline || _aaMode == AntiAliasingMode::None)
-            rasterOnePixelGLineSegmentNoAA(points[pc1].x(), points[pc1].y(), points[0].x(), points[0].y(), color, maskInOut);
+            rasterOnePixelGLineSegmentNoAA(points[pc1].x(), points[pc1].y(), points[0].x(), points[0].y(), color, &mask_zero);
         else
-            rasterOnePixelGLineSegmentXWAA(points[pc1].x(), points[pc1].y(), points[0].x(), points[0].y(), color, maskInOut);
+            rasterOnePixelGLineSegmentXWAA(points[pc1].x(), points[pc1].y(), points[0].x(), points[0].y(), color, &mask_zero);
     }
 }
 
