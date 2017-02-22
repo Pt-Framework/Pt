@@ -89,7 +89,7 @@ void Rasterizer2::strokeOnePixelSolidLine(const Point& a, const Point& b, DrawLi
 
     // Check for 45-degree line
     if(sizeX == sizeY) {
-        rasterOnePixelGLineSegmentNoAA(x1, y1, x2, y2, _pen.color(), maskInOut);
+        rasterOnePixelXLineSegment(x1, y1, x2, y2, _pen.color(), maskInOut);
         return;
     }
 
@@ -123,7 +123,7 @@ void Rasterizer2::rasterOnePixelHLineSegment(Pt::int32_t x1, Pt::int32_t x2, Pt:
         if(x1 > x2) return;
     }
 
-    // Store back the start and end coordinates as needed
+    // Store back the start and end coordinates to the mask as needed
     if(maskInOut) {
         (*maskInOut)[0].set(x1, y);
         (*maskInOut)[1] = MAXIMUM_POINT;
@@ -153,7 +153,7 @@ void Rasterizer2::rasterOnePixelVLineSegment(Pt::int32_t x, Pt::int32_t y1, Pt::
         if(y1 > y2) return;
     }
 
-    // Store back the start and end coordinates as needed
+    // Store back the start and end coordinates to the mask as needed
     if(maskInOut) {
         (*maskInOut)[0].set(x, y1);
         (*maskInOut)[1] = MAXIMUM_POINT;
@@ -171,23 +171,8 @@ void Rasterizer2::rasterOnePixelVLineSegment(Pt::int32_t x, Pt::int32_t y1, Pt::
     }
 }
 
-// Bresenham's Line Aalgorithm
-// https://en.wikipedia.org/wiki/Bresenham's_line_algorithm
-// https://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm
-void Rasterizer2::rasterOnePixelGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut)
+void Rasterizer2::rasterOnePixelXLineSegment(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut)
 {
-    // Calculate the deltas
-    const Pt::int32_t dx = abs(x2 - x1);
-    const Pt::int32_t dy = abs(y2 - y1);
-
-    // Calculate the directions
-    const Pt::int32_t sx = (x1 < x2) ? 1 : -1;
-    const Pt::int32_t sy = (y1 < y2) ? 1 : -1;
-
-    // Calculate the initial error
-    Pt::int32_t err1 = (dx > dy ? dx : -dy) / 2;
-    Pt::int32_t err2;
-
     // Get the mask's coordinate as needed
     Pt::int32_t mx[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
     Pt::int32_t my[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
@@ -198,6 +183,79 @@ void Rasterizer2::rasterOnePixelGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1,
             my[i] = (*maskInOut)[i].y();
         }
     }
+
+    // Determine the directions
+    const Pt::int32_t sx = (x1 < x2) ? 1 : -1;
+    const Pt::int32_t sy = (y1 < y2) ? 1 : -1;
+
+    // Draw the pixels
+    Pt::int32_t x = x1;
+    Pt::int32_t y = y1;
+    for(;;) {
+        // Check if we should skip drawing the pixel
+        bool skipDrawing = false;
+        for(Pt::int32_t i = 0; i < 4; ++i) {
+            if(x != mx[i] || y != my[i]) continue;
+            skipDrawing = true;
+            break;
+        }
+        // Draw the pixel as needed
+        if(!skipDrawing) {
+            // Draw the primary pixel
+            Pixel pixel(_image->view(), x, y);
+            _image->format().setPixel(pixel, color, _compositionMode);
+            // Draw the secondary pixels as needed
+            if( _aaMode != AntiAliasingMode::None && ((x * y) & 1) ) {
+                Pixel pixel1(_image->view(), x + 1, y);
+                Pixel pixel2(_image->view(), x - 1, y);
+                _image->format().setPixel(pixel1, color, _compositionMode, 63);
+                _image->format().setPixel(pixel2, color, _compositionMode, 63);
+            }
+        }
+        // Stop if we have reached the end
+        if(x == x2 && y == y2) break;
+        // Update the coordinates
+        x += sx;
+        y += sy;
+    }
+
+    // Store back the start and end coordinates to the mask as needed
+    if(maskInOut) {
+        (*maskInOut)[0].set(x1, y1);
+        (*maskInOut)[1] = MAXIMUM_POINT;
+        (*maskInOut)[2].set(x2, y2);
+        (*maskInOut)[3] = MAXIMUM_POINT;
+    }
+
+}
+
+// Bresenham's Line Aalgorithm
+// https://en.wikipedia.org/wiki/Bresenham's_line_algorithm
+// https://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm
+void Rasterizer2::rasterOnePixelGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut)
+{
+    // Get the mask's coordinate as needed
+    Pt::int32_t mx[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
+    Pt::int32_t my[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
+
+    if(maskInOut) {
+        for(Pt::int32_t i = 0; i < 4; ++i) {
+            mx[i] = (*maskInOut)[i].x();
+            my[i] = (*maskInOut)[i].y();
+        }
+    }
+
+    // Calculate the deltas
+    const Pt::int32_t dx = abs(x2 - x1);
+    const Pt::int32_t dy = abs(y2 - y1);
+
+    // Determine the directions
+    const Pt::int32_t sx = (x1 < x2) ? 1 : -1;
+    const Pt::int32_t sy = (y1 < y2) ? 1 : -1;
+
+    // Calculate the initial error
+    Pt::int32_t err1 = (dx > dy ? dx : -dy) / 2;
+    Pt::int32_t err2;
 
     // Draw the pixels
     Pt::int32_t x = x1;
@@ -229,7 +287,7 @@ void Rasterizer2::rasterOnePixelGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1,
         }
     }
 
-    // Store back the start and end coordinates as needed
+    // Store back the start and end coordinates to the mask as needed
     if(maskInOut) {
         (*maskInOut)[0].set(x1, y1);
         (*maskInOut)[1] = MAXIMUM_POINT;
@@ -242,8 +300,6 @@ void Rasterizer2::rasterOnePixelGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1,
 // https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
 void Rasterizer2::rasterOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut)
 {
-    // ### TODO: How to fix the "rope-like appearance" artifacts ??? ###
-
     // Get the mask's coordinate as needed
     Pt::int32_t mx[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
     Pt::int32_t my[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
@@ -313,7 +369,7 @@ void Rasterizer2::rasterOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1,
             XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE), i, a2);
             ypxli += grad;
         }
-        // Store back the start and end coordinates as needed
+        // Store back the start and end coordinates to the mask as needed
         if(maskInOut) {
             (*maskInOut)[0].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl        )                           ), from);
             (*maskInOut)[1].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl        ) + FIXED_POINT_CONSTANT_ONE), from);
@@ -330,7 +386,7 @@ void Rasterizer2::rasterOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1,
             XW_SET_PIXEL(_image, color, i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE), a2);
             ypxli += grad;
         }
-        // Store back the start and end coordinates as needed
+        // Store back the start and end coordinates to the mask as needed
         if(maskInOut) {
             (*maskInOut)[0].set(from, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl        )                           ));
             (*maskInOut)[1].set(from, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl        ) + FIXED_POINT_CONSTANT_ONE));
