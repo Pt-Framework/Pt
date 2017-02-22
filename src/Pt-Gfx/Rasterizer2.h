@@ -164,7 +164,10 @@ class Rasterizer2
         void fillPolygon(const Point* points, size_t pointCount);
         void fillPolygonSeparate(const Point* points, size_t pointCount);
 
+    public:
         void updateGradientBrushAsNeeded(Pt::int32_t width, Pt::int32_t height);
+
+        static inline void adjustXWAlphas(Pt::uint8_t& a1, Pt::uint8_t& a2);
 
     private:
         void rasterOnePixelHLineSegment(Pt::int32_t x1, Pt::int32_t x2, Pt::int32_t y, const Color& color, DrawLineMask* maskInOut);
@@ -185,8 +188,6 @@ class Rasterizer2
         void genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount) const;
 
         void getPolygonRectMinMax(const Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY);
-
-        static inline void adjustXWAlphas(Pt::uint8_t& a1, Pt::uint8_t& a2);
 
         template<typename T>
         static inline void bubbleSortAscending(T& basket, Pt::int32_t size);
@@ -238,6 +239,7 @@ class Rasterizer2
 // ===== Inlined and Templated Private Member Functions =================================
 // ======================================================================================
 
+#include <math.h>
 void Rasterizer2::adjustXWAlphas(Pt::uint8_t& a1, Pt::uint8_t& a2)
 {
 #if 0
@@ -252,6 +254,15 @@ void Rasterizer2::adjustXWAlphas(Pt::uint8_t& a1, Pt::uint8_t& a2)
     lprintf("    static const Pt::uint8_t aaAF20[256] = {\n        ");
     for(int c = 0, i = 0; i <= 255; ++i) {
         const int a = i + i * 2 / 10; ++c;
+        lprintf("%3d%c ", (a > 255) ? 255 : a, (i == 255) ? ' ' : ',');
+        if(c >= 20) { c = 0; lprintf("\n        "); }
+    }
+    lprintf("\n    };\n");
+    lprintf("    static const Pt::uint8_t aaAF1931[256] = {\n        ");
+    for(int c = 0, i = 0; i <= 255; ++i) {
+        double v = i * 100.0 / 255.0;
+        v = (v <= 8.0) ? (v / 902.3) : pow((v + 16.0) / 116.0, 3.0);
+        const int a = round(v * 255.0); ++c;
         lprintf("%3d%c ", (a > 255) ? 255 : a, (i == 255) ? ' ' : ',');
         if(c >= 20) { c = 0; lprintf("\n        "); }
     }
@@ -274,6 +285,7 @@ void Rasterizer2::adjustXWAlphas(Pt::uint8_t& a1, Pt::uint8_t& a2)
     a2 = (aa2 >= 255) ? 255 : aa2;
     //*/
 
+
     static const Pt::uint8_t aaAF10[256] = {
           0,   1,   2,   3,   4,   5,   6,   7,   8,   9,  11,  12,  13,  14,  15,  16,  17,  18,  19,  20,
          22,  23,  24,  25,  26,  27,  28,  29,  30,  31,  33,  34,  35,  36,  37,  38,  39,  40,  41,  42,
@@ -289,7 +301,6 @@ void Rasterizer2::adjustXWAlphas(Pt::uint8_t& a1, Pt::uint8_t& a2)
         242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 253, 254, 255, 255, 255, 255, 255, 255, 255, 255,
         255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255
     };
-
     static const Pt::uint8_t aaAF20[256] = {
           0,   1,   2,   3,   4,   6,   7,   8,   9,  10,  12,  13,  14,  15,  16,  18,  19,  20,  21,  22,
          24,  25,  26,  27,  28,  30,  31,  32,  33,  34,  36,  37,  38,  39,  40,  42,  43,  44,  45,  46,
@@ -307,13 +318,13 @@ void Rasterizer2::adjustXWAlphas(Pt::uint8_t& a1, Pt::uint8_t& a2)
     };
 
     if(abs(a2 - a1) < 25) {
-        a1 = aaAF20[a1];
-        a2 = aaAF20[a2];
-        return;
+        a1 = aaAF10[a1];
+        a2 = aaAF10[a2];
+        //return;
     }
 
-    a1 = aaAF10[a1];
-    a2 = aaAF10[a2];
+    a1 = aaAF20[a1];
+    a2 = aaAF20[a2];
 }
 
 template<typename T>
