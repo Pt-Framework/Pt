@@ -997,7 +997,7 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
         const Pt::int32_t xpxl1 = FIXED_POINT_ROUND(fx1);
         const Pt::int32_t xpxl2 = FIXED_POINT_ROUND(fx2);
         const Pt::int32_t ypxl  = fy1 + grad * FIXED_POINT_TO_INT(xpxl1 - fx1);
-        // Draw the pixels
+        // Walk through the coordinates
         Pt::int32_t from  = FIXED_POINT_TO_INT(FIXED_POINT_ROUND(fx1));
         Pt::int32_t to    = FIXED_POINT_TO_INT(xpxl2);
         Pt::int32_t ypxli = ypxl;
