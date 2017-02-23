@@ -132,22 +132,21 @@ class PT_GFX_API ImagePainter2 : public Painter
         typedef std::map<Pt::int32_t, ScanlineElement> Scanlines;
 
         // Helper functions
-        static float fastInvSqrt(float x);
-        static float fastSqrt(float x);
-        static float fastSin(float x);
-        static float fastCos(float x);
+        static inline float fastInvSqrt(float x);
+        static inline float fastSqrt(float x);
+        static inline float fastSin(float x);
+        static inline float fastCos(float x);
 
-        static float fastAtan2(float y, float x);
+        static inline float fastAtan2(float y, float x);
 
-        static float convertCartesianToPolar(float x, float y);
-        static bool insideDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd);
+        static inline float convertCartesianToPolar(float x, float y);
+        static inline bool insideDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd);
 
-
-        static void arcUtilCalcScanlines(Pt::int32_t radX, Pt::int32_t radY, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd, bool useAntiAliasing, Pt::int32_t& quartersX, Pt::int32_t& quartersY, Pt::int32_t& x1, Pt::int32_t& y1, Pt::int32_t& x2, Pt::int32_t& y2, Scanlines& scanlines);
-
-        static void arcUtilDetermineHoleDirection(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, bool& faceL, bool& faceR, bool& faceT, bool& faceB);
+        static inline void arcUtilDetermineHoleDirection(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, bool& faceL, bool& faceR, bool& faceT, bool& faceB);
+        static inline void arcUtilMarkOutsideScanlinesRL(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, bool faceL, bool faceR, bool faceT, bool faceB, Scanlines& scanlines);
 
         static void arcUtilCropScanlinesUsingXWu(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, bool faceL, bool faceR, bool faceT, bool faceB, Scanlines& scanlines);
+        static void arcUtilCalcScanlines(Pt::int32_t radX, Pt::int32_t radY, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd, bool useAntiAliasing, Pt::int32_t& quartersX, Pt::int32_t& quartersY, Pt::int32_t& x1, Pt::int32_t& y1, Pt::int32_t& x2, Pt::int32_t& y2, Scanlines& scanlines);
 
     private:
         RectF        _clip;
@@ -318,6 +317,37 @@ inline void ImagePainter2::arcUtilDetermineHoleDirection(Pt::int32_t x1, Pt::int
     faceB = cy > 0;
     faceL = cx < 0;
     faceR = cx > 0;
+}
+
+inline void ImagePainter2::arcUtilMarkOutsideScanlinesRL(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, bool faceL, bool faceR, bool faceT, bool faceB, Scanlines& scanlines)
+{
+    // Mark the all scanlines to the left and right side that will be completely outside the shape
+    const Pt::int32_t xlMin = std::min(x1, x2);
+    const Pt::int32_t xlMax = std::max(x1, x2);
+
+    // Smaller Y
+    for(Scanlines::iterator it = scanlines.begin(); it != scanlines.lower_bound(std::min(y1, y2) + 1); ++it) {
+        if(faceL && it->second.to < xlMin) {
+            it->second.from =  Painter::MaximumCoordinate;
+            it->second.to   = -Painter::MaximumCoordinate;
+        }
+        if(faceR && it->second.from > xlMax) {
+            it->second.from =  Painter::MaximumCoordinate;
+            it->second.to   = -Painter::MaximumCoordinate;
+        }
+    }
+
+    // Larger Y
+    for(Scanlines::iterator it = scanlines.upper_bound(std::max(y1, y2) - 1); it != scanlines.end(); ++it) {
+        if(faceL && it->second.to < xlMin) {
+            it->second.from =  Painter::MaximumCoordinate;
+            it->second.to   = -Painter::MaximumCoordinate;
+        }
+        if(faceR && it->second.from > xlMax) {
+            it->second.from =  Painter::MaximumCoordinate;
+            it->second.to   = -Painter::MaximumCoordinate;
+        }
+    }
 }
 
 

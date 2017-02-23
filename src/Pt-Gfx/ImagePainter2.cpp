@@ -703,6 +703,14 @@ void ImagePainter2::fillEllipseImplNoAA( const PointF& topLeft, const SizeF& siz
 
 void ImagePainter2::arcUtilCalcScanlines(Pt::int32_t radX, Pt::int32_t radY, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd, bool useAntiAliasing, Pt::int32_t& quartersX, Pt::int32_t& quartersY, Pt::int32_t& x1, Pt::int32_t& y1, Pt::int32_t& x2, Pt::int32_t& y2, Scanlines& scanlines)
 {
+    // IMPORTANT NOTES:
+    //     * In Cartesian coordinate system, the Y coordinate goes from low to high,
+    //       from the middle axis (X) to the top
+    //     * In computer coordinate system, the Y coordinate goes from low to high,
+    //       from the top of the screen to the bottom
+    //     * This will cause addition and subtraction to be reversed when calculating
+    //       for the Y coordinate using trigonometry
+
     // Calculate the square of the radius
     Pt::int32_t radX2 = radX * radX;
     Pt::int32_t radY2 = radY * radY;
@@ -874,8 +882,6 @@ void ImagePainter2::arcUtilCalcScanlines(Pt::int32_t radX, Pt::int32_t radY, Pt:
     }
 }
 
-
-
 void ImagePainter2::arcUtilCropScanlinesUsingXWu(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, bool faceL, bool faceR, bool faceT, bool faceB, Scanlines& scanlines)
 {
     // Convert the coordinates to fixed-points
@@ -943,17 +949,11 @@ void ImagePainter2::arcUtilCropScanlinesUsingXWu(Pt::int32_t x1, Pt::int32_t y1,
     }
 }
 
+
+
 // Inspired by http://create.stephan-brumme.com/antialiased-circle
 void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
 {
-    // IMPORTANT NOTES:
-    //     * In Cartesian coordinate system, the Y coordinate goes from low to high,
-    //       from the middle axis (X) to the top
-    //     * In computer coordinate system, the Y coordinate goes from low to high,
-    //       from the top of the screen to the bottom
-    //     * This will cause addition and subtraction to be reversed when calculating
-    //       for the Y coordinate using trigonometry
-
     // Update the gradient as needed
     _rasterizer->updateGradientBrushAsNeeded(size.width(), size.height());
 
@@ -964,7 +964,6 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
     // Ensure that the end angle is within the acceptable range
     while(degEnd < -360) degEnd += 360;
     while(degEnd >  360) degEnd -= 360;
-
 
     // Calculate the ellipse's parameters
     Pt::int32_t minX  = topLeft.x();
@@ -1010,30 +1009,7 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
     }
 
     // Mark the all scanlines to the left and right side that will be completely outside the shape
-    const Pt::int32_t xlMin = std::min(x1, x2);
-    const Pt::int32_t xlMax = std::max(x1, x2);
-
-    for(Scanlines::iterator it = scanlines.begin(); it != scanlines.lower_bound(std::min(y1, y2) + 1); ++it) {
-        if(faceL && it->second.to < xlMin) {
-            it->second.from =  Painter::MaximumCoordinate;
-            it->second.to   = -Painter::MaximumCoordinate;
-        }
-        if(faceR && it->second.from > xlMax) {
-            it->second.from =  Painter::MaximumCoordinate;
-            it->second.to   = -Painter::MaximumCoordinate;
-        }
-    }
-
-    for(Scanlines::iterator it = scanlines.upper_bound(std::max(y1, y2) - 1); it != scanlines.end(); ++it) {
-        if(faceL && it->second.to < xlMin) {
-            it->second.from =  Painter::MaximumCoordinate;
-            it->second.to   = -Painter::MaximumCoordinate;
-        }
-        if(faceR && it->second.from > xlMax) {
-            it->second.from =  Painter::MaximumCoordinate;
-            it->second.to   = -Painter::MaximumCoordinate;
-        }
-    }
+    arcUtilMarkOutsideScanlinesRL(x1, y1, x2, y2, faceL, faceR, faceT, faceB, scanlines);
 
     // Draw the scanlines
     for(Scanlines::const_iterator it = scanlines.begin(); it != scanlines.end(); ++it) {
@@ -1142,14 +1118,6 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
 
 void ImagePainter2::fillArcPieImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
 {
-    // IMPORTANT NOTES:
-    //     * In Cartesian coordinate system, the Y coordinate goes from low to high,
-    //       from the middle axis (X) to the top
-    //     * In computer coordinate system, the Y coordinate goes from low to high,
-    //       from the top of the screen to the bottom
-    //     * This will cause addition and subtraction to be reversed when calculating
-    //       for the Y coordinate using trigonometry
-
     // Update the gradient as needed
     _rasterizer->updateGradientBrushAsNeeded(size.width(), size.height());
 
@@ -1206,30 +1174,7 @@ void ImagePainter2::fillArcPieImpl(const PointF& topLeft, const SizeF& size, flo
     }
 
     // Mark the all scanlines to the left and right side that will be completely outside the shape
-    const Pt::int32_t xlMin = std::min(x1, x2);
-    const Pt::int32_t xlMax = std::max(x1, x2);
-
-    for(Scanlines::iterator it = scanlines.begin(); it != scanlines.lower_bound(std::min(y1, y2) + 1); ++it) {
-        if(faceL && it->second.to < xlMin) {
-            it->second.from =  Painter::MaximumCoordinate;
-            it->second.to   = -Painter::MaximumCoordinate;
-        }
-        if(faceR && it->second.from > xlMax) {
-            it->second.from =  Painter::MaximumCoordinate;
-            it->second.to   = -Painter::MaximumCoordinate;
-        }
-    }
-
-    for(Scanlines::iterator it = scanlines.upper_bound(std::max(y1, y2) - 1); it != scanlines.end(); ++it) {
-        if(faceL && it->second.to < xlMin) {
-            it->second.from =  Painter::MaximumCoordinate;
-            it->second.to   = -Painter::MaximumCoordinate;
-        }
-        if(faceR && it->second.from > xlMax) {
-            it->second.from =  Painter::MaximumCoordinate;
-            it->second.to   = -Painter::MaximumCoordinate;
-        }
-    }
+    arcUtilMarkOutsideScanlinesRL(x1, y1, x2, y2, faceL, faceR, faceT, faceB, scanlines);
 
     // Draw the scanlines
     for(Scanlines::const_iterator it = scanlines.begin(); it != scanlines.end(); ++it) {
