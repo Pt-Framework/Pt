@@ -149,6 +149,11 @@ class Rasterizer2
         void image(const Point& to, const Image& image);
         void image(const Point& toIn, const Image& image, const Rect& imageRect);
 
+        // Mask layout for store4Pixels/fill4Pixels function variants that take mask as the last argument:
+        //     Mask element        : #0         #1         #2         #3
+        //     Affected coordinate : (x1, y1)   (x1, y2)   (x2, y1)   (x2, y2)
+        // In this case, "true" means the pixel will be drawn and "false" means it will not be drawn
+
         void stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2);
         void stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const bool mask[4]);
         void stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::uint8_t alpha);
