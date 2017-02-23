@@ -1104,7 +1104,6 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
         const Pt::int32_t x20 = ctrX + flx;
         const Pt::int32_t y1  = ctrY - y;
         const Pt::int32_t y2  = ctrY + y;
-
         Scanlines::const_iterator it1 = scanlines.find(y1);
         Scanlines::const_iterator it2 = scanlines.find(y2);
         if( ( it1 == scanlines.end() || (it1->second.from > x10 || it1->second.to < x20) ) ||

@@ -125,8 +125,8 @@ void Rasterizer2::fillOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, P
     Pt::int32_t fx2 = FIXED_POINT_FROM_INT(x2);
     Pt::int32_t fy2 = FIXED_POINT_FROM_INT(y2);
 
-    // A helper macro to set pixel
-    #define XW_SET_PIXEL(IMG, X, Y, A)                                                      \
+    // A helper macro to fill pixel
+    #define XW_FILL_PIXEL(IMG, X, Y, A)                                                     \
         do {                                                                                \
             /* Check the boundary limit, just in case */                                    \
             if( (X) < 0 || (X) >= IMG->width() || (Y) < 0 || (Y) >= IMG->height() ) break;  \
@@ -182,8 +182,8 @@ void Rasterizer2::fillOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, P
         for(Pt::int32_t i = from; i <= to; ++i) {
             const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_FPART_TO_A8 (ypxli) ];
             const Pt::uint8_t a2 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_RFPART_TO_A8(ypxli) ];
-            XW_SET_PIXEL(_image, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           ), i, a1);
-            XW_SET_PIXEL(_image, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE), i, a2);
+            XW_FILL_PIXEL(_image, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           ), i, a1);
+            XW_FILL_PIXEL(_image, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE), i, a2);
             ypxli += grad;
         }
         // Store back the start and end coordinates to the mask as needed
@@ -199,8 +199,8 @@ void Rasterizer2::fillOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, P
         for(Pt::int32_t i = from; i <= to; ++i) {
             const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_FPART_TO_A8 (ypxli) ];
             const Pt::uint8_t a2 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_RFPART_TO_A8(ypxli) ];
-            XW_SET_PIXEL(_image, i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           ), a1);
-            XW_SET_PIXEL(_image, i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE), a2);
+            XW_FILL_PIXEL(_image, i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           ), a1);
+            XW_FILL_PIXEL(_image, i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE), a2);
             ypxli += grad;
         }
         // Store back the start and end coordinates to the mask as needed
@@ -213,7 +213,7 @@ void Rasterizer2::fillOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, P
     }
 
     // Undefine the helper macro
-    #undef XW_SET_PIXEL
+    #undef XW_FILL_PIXEL
 }
 
 
