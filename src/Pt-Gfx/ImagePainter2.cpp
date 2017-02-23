@@ -1047,8 +1047,7 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
                 insideDegRange(x2, y10, ctrX, ctrY, degBegin, degEnd),
                 insideDegRange(x2, y20, ctrX, ctrY, degBegin, degEnd)
             };
-            const Pt::uint8_t a = Rasterizer2::XWAA_WFILTER[alpha];
-            _rasterizer->fill4Pixels(x1, y10, x2, y20, minX, minY, a, mask);
+            _rasterizer->fill4Pixels(x1, y10, x2, y20, minX, minY, 255 - alpha, mask);
         }
         // Draw the second part of the pixels
         const Pt::int32_t y11 = ctrY - fly - 1;
@@ -1064,8 +1063,7 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
                 insideDegRange(x2, y11, ctrX, ctrY, degBegin, degEnd),
                 insideDegRange(x2, y21, ctrX, ctrY, degBegin, degEnd)
             };
-            const Pt::uint8_t a = Rasterizer2::XWAA_WFILTER[255 - alpha];
-            _rasterizer->fill4Pixels(x1, y11, x2, y21, minX, minY, a, mask);
+            _rasterizer->fill4Pixels(x1, y11, x2, y21, minX, minY, alpha, mask);
         }
     }
 
@@ -1092,8 +1090,7 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
                 insideDegRange(x20, y1, ctrX, ctrY, degBegin, degEnd),
                 insideDegRange(x20, y2, ctrX, ctrY, degBegin, degEnd)
             };
-            const Pt::uint8_t a = Rasterizer2::XWAA_WFILTER[alpha];
-            _rasterizer->fill4Pixels(x10, y1, x20, y2, minX, minY, a, mask);
+            _rasterizer->fill4Pixels(x10, y1, x20, y2, minX, minY, 255 - alpha, mask);
         }
         // Draw the second part of the pixels
         const Pt::int32_t x11 = ctrX - flx - 1;
@@ -1107,8 +1104,7 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
                 insideDegRange(x21, y1, ctrX, ctrY, degBegin, degEnd),
                 insideDegRange(x21, y2, ctrX, ctrY, degBegin, degEnd)
             };
-            const Pt::uint8_t a = Rasterizer2::XWAA_WFILTER[255 - alpha];
-            _rasterizer->fill4Pixels(x11, y1, x21, y2, minX, minY, a, mask);
+            _rasterizer->fill4Pixels(x11, y1, x21, y2, minX, minY, alpha, mask);
         }
     }
 
