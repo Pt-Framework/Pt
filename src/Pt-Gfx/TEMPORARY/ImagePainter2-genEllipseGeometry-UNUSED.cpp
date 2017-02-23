@@ -1,3 +1,76 @@
+#if 0
+
+    // Generate a polygon that approximates the arc
+    std::vector<Point> points;
+    genArcGeometryQSC(points, topLeft, size, degBegin, degEnd, arcMode == ArcMode::Pie);
+
+    // Rasterize the polygon
+    _rasterizer->fillPolygon(points.data(), points.size());
+
+#else
+
+#endif
+
+        virtual void genArcGeometryQSC(std::vector<Point>& points, const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, bool createPie);
+
+void ImagePainter2::genArcGeometryQSC( std::vector<Point>& points, const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, bool createPie )
+{
+    // Ensure that the begin and end degrees are within the acceptable range
+    while(degBegin <   0) degBegin += 360;
+    while(degBegin > 360) degBegin -= 360;
+
+    while(degEnd <   0) degEnd += 360;
+    while(degEnd > 360) degEnd -= 360;
+
+    if(degEnd < degBegin) std::swap(degEnd, degBegin);
+
+    // Calculate the arc's parameters
+    const Pt::int32_t radiusX = size.width () / 2;
+    const Pt::int32_t radiusY = size.height() / 2;
+    const Pt::int32_t radiusM = std::max(radiusX, radiusY);
+    const Pt::int32_t centerX = topLeft.x() + radiusX;
+    const Pt::int32_t centerY = topLeft.y() + radiusY;
+    const Pt::int32_t degFac  = (degEnd - degBegin) / 36;
+    const Pt::int32_t numSegD = (radiusM * (degFac ? degFac : 1) / 10 / 20) * 20;
+    const Pt::int32_t numSegs = (numSegD >= 16) ? numSegD : 16;
+    const float       fdegInc = (Pt::Pi * (degEnd -  degBegin) / 180) / (numSegs - 1);
+
+    // Generate a polygon that approximates the arc
+    Pt::int32_t prevX = ImagePainter2::MaximumCoordinate;
+    Pt::int32_t prevY = ImagePainter2::MaximumCoordinate;
+    float       angle = Pt::Pi * degBegin / 180;
+    Pt::int32_t p     = 0;
+
+    points.resize(numSegs + (createPie ? 1 : 0));
+
+    for(Pt::int32_t i = 0; i < numSegs; ++i) {
+        // Calculate the coordinates
+        const Pt::int32_t x = centerX + radiusX * fastCos(angle);
+        const Pt::int32_t y = centerY - radiusY * fastSin(angle);
+        // Update the angle
+        angle += fdegInc;
+        // Skip duplicated points
+        if(prevX == x && prevY == y) continue;
+        prevX = x;
+        prevY = y;
+        // Store the point and increment the index
+        points[p++].set(x, y);
+    }
+
+    if(createPie) // For drawing a pie, add one more point at the center of the arc
+        points[p++].set(centerX, centerY);
+
+    // Resize the vector to remove extra elements that may exist
+    points.resize(p);
+}
+
+
+
+
+
+
+
+
 void ImagePainter2::genEllipseGeometryQSC( std::vector<Point>& points, const PointF& topLeft, const SizeF& size )
 {
     // Calculate the ellipse's parameters

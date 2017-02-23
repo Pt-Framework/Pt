@@ -123,7 +123,8 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual void fillEllipseImplNoAA(const PointF& topLeft, const SizeF& size);
 
-        virtual void genArcGeometryQSC(std::vector<Point>& points, const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, bool createPie);
+        virtual void fillArcChordImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
+        virtual void fillArcPieImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
 
         // Each key specify the Y coordinate of a scanline;
         // while its element specify the "from" and "to" X coordinates
