@@ -132,11 +132,44 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         typedef std::map<Pt::int32_t, ScanlineElement> Scanlines;
 
-        // Xiaolin Wu's anti-aliased line data
-        struct XWLineData;
-
         // Filled-arc information structure
-        struct FilledArcInfo;
+        struct FilledArcInfo {
+            bool        antiAlias;    // A flag that indicate if the arc will be anti-aliased
+
+            Pt::int32_t minX, minY;   // Top-left coordinate of the arc
+            Pt::int32_t ctrX, ctrY;   // Center coordinate of the arc
+            Pt::int32_t radX, radY;   // Radius of the arc
+            Pt::int32_t radX2, radY2; // Squared radius of the arc
+
+            Pt::int32_t x1, y1;       // Coordinate of the begin point
+            Pt::int32_t x2, y2;       // Coordinate of the end point
+
+            Pt::int32_t quartersX;    // The number of quarter points in the X direction
+            Pt::int32_t quartersY;    // The number of quarter points in the Y direction
+        };
+
+        // Xiaolin Wu's anti-aliased line data structure
+        struct XWLineData {
+            // Point data
+            struct XWPoint {
+                Pt::int32_t x, y;
+                Pt::uint8_t a1, a2;
+
+                XWPoint(Pt::int32_t x_, Pt::int32_t y_, Pt::uint8_t a1_, Pt::uint8_t a2_)
+                : x(x_), y(y_), a1(a1_), a2(a2_)
+                {}
+            };
+
+            std::vector<XWPoint> points; // The line's points
+
+            bool                 steep; // If "true"  then the a2 belongs to (x + 1, y)
+                                        // If "false" then the a2 belongs to (x, y + 1)
+
+            bool                 faceL; // The direction that the line is facing to
+            bool                 faceR; // ---
+            bool                 faceT; // ---
+            bool                 faceB; // ---
+        };
 
     protected:
         // Inline helper functions
@@ -154,6 +187,8 @@ class PT_GFX_API ImagePainter2 : public Painter
         static void arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai, float degBegin, float degEnd);
         static void arcUtil_runXWLineAlgorithm(XWLineData& dst, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2);
 
+        static inline void arcUtil_detXWLineDirection(XWLineData& xwLineData, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2);
+
         // Drawing functions
         virtual void drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
@@ -162,19 +197,12 @@ class PT_GFX_API ImagePainter2 : public Painter
         virtual void fillArcChordImpl(FilledArcInfo& fai);
         virtual void fillArcPieImpl(FilledArcInfo& fai);
 
-
-
         /*
-        virtual void fillArcChordImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
-        virtual void fillArcPieImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
-
-        static inline void arcUtilDetermineHoleDirection(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, bool& faceL, bool& faceR, bool& faceT, bool& faceB);
         static inline void arcUtilMarkOutsideScanlinesRL(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, bool faceL, bool faceR, bool faceT, bool faceB, Scanlines& scanlines);
-
         static void arcUtilCropScanlinesUsingXWu(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, bool faceL, bool faceR, bool faceT, bool faceB, Scanlines& scanlines);
         static void arcUtilCalcScanlines(Pt::int32_t radX, Pt::int32_t radY, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd, bool useAntiAliasing, Pt::int32_t& quartersX, Pt::int32_t& quartersY, Pt::int32_t& x1, Pt::int32_t& y1, Pt::int32_t& x2, Pt::int32_t& y2, Scanlines& scanlines);
                void arcUtilDrawCircumferencePixels(Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t radX, Pt::int32_t radY, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd, Pt::int32_t quartersX, Pt::int32_t quartersY, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Scanlines& scanlinesRef);
-               */
+       */
 
     private:
         RectF        _clip;
@@ -324,8 +352,7 @@ inline bool ImagePainter2::pointIsInsideArcDegRange(Pt::int32_t x, Pt::int32_t y
     return angle >= degBegin && angle <= degEnd;
 }
 
-/*
-inline void ImagePainter2::arcUtilDetermineHoleDirection(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, bool& faceL, bool& faceR, bool& faceT, bool& faceB)
+inline void ImagePainter2::arcUtil_detXWLineDirection(XWLineData& xwLineData, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2)
 {
     // Calculate the direction vector
     const Pt::int32_t vx = x2 - x1;           // Vector from the begin point to the end point
@@ -339,12 +366,14 @@ inline void ImagePainter2::arcUtilDetermineHoleDirection(Pt::int32_t x1, Pt::int
   //const Pt::int32_t cz = vx * ry - vy * rx; // ---
 
     // Determine where the direction that the hole faces to
-    faceT = cy < 0;
-    faceB = cy > 0;
-    faceL = cx < 0;
-    faceR = cx > 0;
+    xwLineData.faceT = cy < 0;
+    xwLineData.faceB = cy > 0;
+    xwLineData.faceL = cx < 0;
+    xwLineData.faceR = cx > 0;
 }
 
+
+/*
 inline void ImagePainter2::arcUtilMarkOutsideScanlinesRL(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, bool faceL, bool faceR, bool faceT, bool faceB, Scanlines& scanlines)
 {
     // Mark the all scanlines to the left and right side that will be completely outside the shape
