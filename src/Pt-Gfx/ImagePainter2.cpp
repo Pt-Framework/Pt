@@ -327,16 +327,16 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
         const Pt::int32_t y20 = ctrY + fly;
         Scanlines::const_iterator it10 = scanlines.find(y10);
         Scanlines::const_iterator it20 = scanlines.find(y20);
-        if( ( it10 == scanlines.end() || (it10->second.from > x1 || it10->second.to < x2) ) ||
-            ( it20 == scanlines.end() || (it20->second.from > x1 || it20->second.to < x2) )
+        if( ( it10 == scanlines.end() || (it10->second.from > x1 && it10->second.to < x2) ) ||
+            ( it20 == scanlines.end() || (it20->second.from > x1 && it20->second.to < x2) )
         ) _rasterizer->fill4Pixels(x1, y10, x2, y20, minX, minY, alpha);
         // Draw the second part of the pixels
         const Pt::int32_t y11 = ctrY - fly - 1;
         const Pt::int32_t y21 = ctrY + fly + 1;
         Scanlines::const_iterator it11 = scanlines.find(y11);
         Scanlines::const_iterator it21 = scanlines.find(y21);
-        if( ( it11 == scanlines.end() || (it11->second.from > x1 || it11->second.to < x2) ) ||
-            ( it21 == scanlines.end() || (it21->second.from > x1 || it21->second.to < x2) )
+        if( ( it11 == scanlines.end() || (it11->second.from > x1 && it11->second.to < x2) ) ||
+            ( it21 == scanlines.end() || (it21->second.from > x1 && it21->second.to < x2) )
         ) _rasterizer->fill4Pixels(x1, y11, x2, y21, minX, minY, alpha);
     }
 
@@ -354,14 +354,14 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
         const Pt::int32_t y2  = ctrY + y;
         Scanlines::const_iterator it1 = scanlines.find(y1);
         Scanlines::const_iterator it2 = scanlines.find(y2);
-        if( ( it1 == scanlines.end() || (it1->second.from > x10 || it1->second.to < x20) ) ||
-            ( it2 == scanlines.end() || (it2->second.from > x10 || it2->second.to < x20) )
+        if( ( it1 == scanlines.end() || (it1->second.from > x10 && it1->second.to < x20) ) ||
+            ( it2 == scanlines.end() || (it2->second.from > x10 && it2->second.to < x20) )
         ) _rasterizer->fill4Pixels(x10, y1, x20, y2, minX, minY, alpha);
         // Draw the second part of the pixels
         const Pt::int32_t x11 = ctrX - flx - 1;
         const Pt::int32_t x21 = ctrX + flx + 1;
-        if( ( it1 == scanlines.end() || (it1->second.from > x11 || it1->second.to < x21) ) ||
-            ( it2 == scanlines.end() || (it2->second.from > x11 || it2->second.to < x21) )
+        if( ( it1 == scanlines.end() || (it1->second.from > x11 && it1->second.to < x21) ) ||
+            ( it2 == scanlines.end() || (it2->second.from > x11 && it2->second.to < x21) )
         ) _rasterizer->fill4Pixels(x11, y1, x21, y2, minX, minY, alpha);
     }
 }
@@ -921,12 +921,15 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
 
     // lprintf("l=%d r=%d t=%d b=%d\n", faceL, faceR, faceT, faceB);
 
+    // Copy the list of scanlines to be drawn later
+    const Scanlines scanlinesRef = scanlines;
+
     // Remove the all scanlines to the top and bottom side that will be completely outside the shape
     if(faceT) scanlines.erase(scanlines.begin(),                           scanlines.lower_bound(std::min(y1, y2) + 1));
     if(faceB) scanlines.erase(scanlines.upper_bound(std::max(y1, y2) - 1), scanlines.end()                            );
 
     // Crop the scanlines to the left and right side by running the Xiaolin Wu's anti-aliased line algorithm
-    if(faceL || faceR) {
+    if(faceL || faceR ) {
         // Convert the coordinates to fixed-points
         Pt::int32_t fx1 = FIXED_POINT_FROM_INT(x1);
         Pt::int32_t fy1 = FIXED_POINT_FROM_INT(y1);
@@ -1036,10 +1039,10 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
         const Pt::int32_t x2  = ctrX + x;
         const Pt::int32_t y10 = ctrY - fly;
         const Pt::int32_t y20 = ctrY + fly;
-        Scanlines::const_iterator it10 = scanlines.find(y10);
-        Scanlines::const_iterator it20 = scanlines.find(y20);
-        if( ( it10 == scanlines.end() || (it10->second.from > x1 || it10->second.to < x2) ) ||
-            ( it20 == scanlines.end() || (it20->second.from > x1 || it20->second.to < x2) )
+        Scanlines::const_iterator it10 = scanlinesRef.find(y10);
+        Scanlines::const_iterator it20 = scanlinesRef.find(y20);
+        if( ( it10 == scanlinesRef.end() || (it10->second.from > x1 && it10->second.to < x2) ) ||
+            ( it20 == scanlinesRef.end() || (it20->second.from > x1 && it20->second.to < x2) )
         ) {
             const bool mask[4] = {
                 insideDegRange(x1, y10, ctrX, ctrY, degBegin, degEnd),
@@ -1052,10 +1055,10 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
         // Draw the second part of the pixels
         const Pt::int32_t y11 = ctrY - fly - 1;
         const Pt::int32_t y21 = ctrY + fly + 1;
-        Scanlines::const_iterator it11 = scanlines.find(y11);
-        Scanlines::const_iterator it21 = scanlines.find(y21);
-        if( ( it11 == scanlines.end() || (it11->second.from > x1 || it11->second.to < x2) ) ||
-            ( it21 == scanlines.end() || (it21->second.from > x1 || it21->second.to < x2) )
+        Scanlines::const_iterator it11 = scanlinesRef.find(y11);
+        Scanlines::const_iterator it21 = scanlinesRef.find(y21);
+        if( ( it11 == scanlinesRef.end() || (it11->second.from > x1 && it11->second.to < x2) ) ||
+            ( it21 == scanlinesRef.end() || (it21->second.from > x1 && it21->second.to < x2) )
         ) {
             const bool mask[4] = {
                 insideDegRange(x1, y11, ctrX, ctrY, degBegin, degEnd),
@@ -1079,10 +1082,10 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
         const Pt::int32_t x20 = ctrX + flx;
         const Pt::int32_t y1  = ctrY - y;
         const Pt::int32_t y2  = ctrY + y;
-        Scanlines::const_iterator it1 = scanlines.find(y1);
-        Scanlines::const_iterator it2 = scanlines.find(y2);
-        if( ( it1 == scanlines.end() || (it1->second.from > x10 || it1->second.to < x20) ) ||
-            ( it2 == scanlines.end() || (it2->second.from > x10 || it2->second.to < x20) )
+        Scanlines::const_iterator it1 = scanlinesRef.find(y1);
+        Scanlines::const_iterator it2 = scanlinesRef.find(y2);
+        if( ( it1 == scanlinesRef.end() || (it1->second.from > x10 && it1->second.to < x20) ) ||
+            ( it2 == scanlinesRef.end() || (it2->second.from > x10 && it2->second.to < x20) )
         ) {
             const bool mask[4] = {
                 insideDegRange(x10, y1, ctrX, ctrY, degBegin, degEnd),
@@ -1095,8 +1098,8 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
         // Draw the second part of the pixels
         const Pt::int32_t x11 = ctrX - flx - 1;
         const Pt::int32_t x21 = ctrX + flx + 1;
-        if( ( it1 == scanlines.end() || (it1->second.from > x11 || it1->second.to < x21) ) ||
-            ( it2 == scanlines.end() || (it2->second.from > x11 || it2->second.to < x21) )
+        if( ( it1 == scanlinesRef.end() || (it1->second.from > x11 && it1->second.to < x21) ) ||
+            ( it2 == scanlinesRef.end() || (it2->second.from > x11 && it2->second.to < x21) )
         ) {
             const bool mask[4] = {
                 insideDegRange(x11, y1, ctrX, ctrY, degBegin, degEnd),
