@@ -186,6 +186,7 @@ class PT_GFX_API ImagePainter2 : public Painter
         // Arc-related helper functions
         static void arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai, float degBegin, float degEnd);
         static void arcUtil_runXWLineAlgorithm(XWLineData& dst, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2);
+        static void arcUtil_genScanlinesForChord(FilledArcInfo& fai, XWLineData& xwLine, Scanlines& scanlines);
 
         static inline void arcUtil_detXWLineDirection(XWLineData& xwLineData, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2);
 

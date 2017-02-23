@@ -106,6 +106,14 @@ void ImagePainter2::fillArcChordImpl(FilledArcInfo& fai)
     // Find the direction that the line is facing to
     arcUtil_detXWLineDirection(line, fai.x1, fai.y1, fai.x2, fai.y2);
 
+    // Generate scanlines data
+    Scanlines scanlines;
+    arcUtil_genScanlinesForChord(fai, line, scanlines);
+
+    // Draw the scanlines
+    for(Scanlines::const_iterator it = scanlines.begin(); it != scanlines.end(); ++it) {
+        _rasterizer->fillOneScanlineNoAA(it->second.from, it->second.to, it->first, fai.minX, fai.minY);
+    }
 }
 
 void ImagePainter2::fillArcPieImpl(FilledArcInfo& fai)
@@ -139,7 +147,7 @@ void ImagePainter2::arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai, 
     // Top and bottom halves
     for(Pt::int32_t x = 0; x <= fai.quartersX; ++x) {
         // Calculate the coordinate
-        const float y = fai.radY * fastSqrt(1 - (float) x * x / fai.radX2);
+        const float       y  = fai.radY * fastSqrt(1 - (float) x * x / fai.radX2);
         const Pt::int32_t xl = fai.ctrX - x;
         const Pt::int32_t xr = fai.ctrX + x;
         const Pt::int32_t yt = fai.ctrY - ( fai.antiAlias ? floor(y) : round(y) );
@@ -158,7 +166,7 @@ void ImagePainter2::arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai, 
     // Left and right halves
     for(Pt::int32_t y = 0; y <= fai.quartersY; ++y) {
         // Calculate the coordinate
-        const float x = fai.radX * fastSqrt(1 - (float) y * y / fai.radY2);
+        const float       x  = fai.radX * fastSqrt(1 - (float) y * y / fai.radY2);
         const Pt::int32_t xl = fai.ctrX - ( fai.antiAlias ? floor(x) : round(x) );
         const Pt::int32_t xr = fai.ctrX + ( fai.antiAlias ? floor(x) : round(x) );
         const Pt::int32_t yt = fai.ctrY - y;
@@ -229,6 +237,203 @@ void ImagePainter2::arcUtil_runXWLineAlgorithm(XWLineData& dst, Pt::int32_t x1, 
             ypxli += grad;
         }
     }
+}
+
+void ImagePainter2::arcUtil_genScanlinesForChord(FilledArcInfo& fai, XWLineData& xwLine, Scanlines& scanlines)
+{
+    // Top and bottom halves
+    for(Pt::int32_t x = 0; x <= fai.quartersX; ++x) {
+        // Calculate the coordinate
+        const float       y  = fai.radY * fastSqrt(1 - (float) x * x / fai.radX2);
+        const Pt::int32_t xl = fai.ctrX - x;
+        const Pt::int32_t xr = fai.ctrX + x;
+        const Pt::int32_t yt = fai.ctrY - ( fai.antiAlias ? floor(y) : round(y) );
+        const Pt::int32_t yb = fai.ctrY + ( fai.antiAlias ? floor(y) : round(y) );
+        // Store/update the scanline coordinates
+        Scanlines::iterator it1 = scanlines.find(yt);
+        Scanlines::iterator it2 = scanlines.find(yb);
+        if(it1 == scanlines.end()) { // Insert a new element
+            scanlines.insert( std::make_pair( yt, ScanlineElement(xl, xr) ) );
+        }
+        else { // Update the scanline's "from" and "to" coordinates
+            if( xl < it1->second.from ) it1->second.from = xl;
+            if( xr > it1->second.to   ) it1->second.to   = xr;
+        }
+        if(it2 == scanlines.end()) { // Insert a new element
+            scanlines.insert( std::make_pair( yb, ScanlineElement(xl, xr) ) );
+        }
+        else { // Update the scanline's "from" and "to" coordinates
+            if( xl < it2->second.from ) it2->second.from = xl;
+            if( xr > it2->second.to   ) it2->second.to   = xr;
+        }
+    }
+
+    // Left and right halves
+    for(Pt::int32_t y = 0; y <= fai.quartersY; ++y) {
+        // Calculate the coordinate
+        const float       x  = fai.radX * fastSqrt(1 - (float) y * y / fai.radY2);
+        const Pt::int32_t xl = fai.ctrX - ( fai.antiAlias ? floor(x) : round(x) );
+        const Pt::int32_t xr = fai.ctrX + ( fai.antiAlias ? floor(x) : round(x) );
+        const Pt::int32_t yt = fai.ctrY - y;
+        const Pt::int32_t yb = fai.ctrY + y;
+        // Store/update the scanline coordinates
+        Scanlines::iterator it1 = scanlines.find(yt);
+        Scanlines::iterator it2 = scanlines.find(yb);
+        if(it1 == scanlines.end()) { // Insert a new element
+            scanlines.insert( std::make_pair( yt, ScanlineElement(xl, xr) ) );
+        }
+        else { // Update the scanline's "from" and "to" coordinates
+            if( xl < it1->second.from ) it1->second.from = xl;
+            if( xr > it1->second.to   ) it1->second.to   = xr;
+        }
+        if(it2 == scanlines.end()) { // Insert a new element
+            scanlines.insert( std::make_pair( yb, ScanlineElement(xl, xr) ) );
+        }
+        else { // Update the scanline's "from" and "to" coordinates
+            if( xl < it2->second.from ) it2->second.from = xl;
+            if( xr > it2->second.to   ) it2->second.to   = xr;
+        }
+    }
+
+    /*
+    // Top and bottom halves
+    for(Pt::int32_t x = 0; x <= quartersX; ++x) {
+        // Calculate the coordinate
+        const float y = fai.radY * fastSqrt(1 - (float) x * x / fai.radX2);
+        const Pt::int32_t xl = fai.ctrX - x;
+        const Pt::int32_t xr = fai.ctrX + x;
+        const Pt::int32_t yt = fai.ctrY - ( fai.antiAlias ? floor(y) : round(y) );
+        const Pt::int32_t yb = fai.ctrY + ( fai.antiAlias ? floor(y) : round(y) );
+
+        // Without anti-aliasing
+        if(!useAntiAliasing) {
+            // Calculate the coordinates
+            const Pt::int32_t xl = ctrX - x;
+            const Pt::int32_t xr = ctrX + x;
+            const Pt::int32_t yt = ctrY - round(y);
+            const Pt::int32_t yb = ctrY + round(y);
+            // Store/update the scanline coordinates
+            Scanlines::iterator it1 = scanlines.find(yt);
+            Scanlines::iterator it2 = scanlines.find(yb);
+            if(it1 == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yt, ScanlineElement(xl, xr) ) );
+            }
+            else { // Update the scanline's "from" and "to" coordinates
+                if( xl < it1->second.from ) it1->second.from = xl;
+                if( xr > it1->second.to   ) it1->second.to   = xr;
+            }
+            if(it2 == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yb, ScanlineElement(xl, xr) ) );
+            }
+            else { // Update the scanline's "from" and "to" coordinates
+                if( xl < it2->second.from ) it2->second.from = xl;
+                if( xr > it2->second.to   ) it2->second.to   = xr;
+            }
+        }
+        // With anti-aliasing
+        else {
+            // Calculate the coordinates
+            const Pt::int32_t xl = ctrX - x;
+            const Pt::int32_t xr = ctrX + x;
+            const Pt::int32_t yt = ctrY - floor(y);
+            const Pt::int32_t yb = ctrY + floor(y);
+            // Store/update the scanline coordinates
+            Scanlines::iterator it1 = scanlines.find(yt);
+            Scanlines::iterator it2 = scanlines.find(yb);
+            if(it1 == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yt, ScanlineElement(xl, xr) ) );
+            }
+            else { // Update the scanline's "from" and "to" coordinates
+                if( xl < it1->second.from ) it1->second.from = xl;
+                if( xr > it1->second.to   ) it1->second.to   = xr;
+            }
+            if(it2 == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yb, ScanlineElement(xl, xr) ) );
+            }
+            else { // Update the scanline's "from" and "to" coordinates
+                if( xl < it2->second.from ) it2->second.from = xl;
+                if( xr > it2->second.to   ) it2->second.to   = xr;
+            }
+        }
+    }
+
+    /*
+    // Left and right halves
+    quartersY = round( radY2 * fastInvSqrt(radX2 + radY2) );
+
+    for(Pt::int32_t y = 0; y <= quartersY; ++y) {
+        // Calculate the coordinate
+        const float x = radX * fastSqrt(1 - (float) y * y / radY2);
+        // Without anti-aliasing
+        if(!useAntiAliasing) {
+            // Calculate the coordinates
+            const Pt::int32_t xl = ctrX - round(x);
+            const Pt::int32_t xr = ctrX + round(x);
+            const Pt::int32_t yt = ctrY - y;
+            const Pt::int32_t yb = ctrY + y;
+            // Determine the exact coordinates of the closing lines
+            if(abs(xl - bx) < x1d) { x1d = abs(xl - bx); x1 = xl; }
+            if(abs(xl - ex) < x2d) { x2d = abs(xl - ex); x2 = xl; }
+            if(abs(xr - bx) < x1d) { x1d = abs(xr - bx); x1 = xr; }
+            if(abs(xr - ex) < x2d) { x2d = abs(xr - ex); x2 = xr; }
+            if(abs(yt - by) < y1d) { y1d = abs(yt - by); y1 = yt; }
+            if(abs(yt - ey) < y2d) { y2d = abs(yt - ey); y2 = yt; }
+            if(abs(yb - by) < y1d) { y1d = abs(yb - by); y1 = yb; }
+            if(abs(yb - ey) < y2d) { y2d = abs(yb - ey); y2 = yb; }
+            // Store/update the scanline coordinates
+            Scanlines::iterator it1 = scanlines.find(yt);
+            Scanlines::iterator it2 = scanlines.find(yb);
+            if(it1 == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yt, ScanlineElement(xl, xr) ) );
+            }
+            else { // Update the scanline's "from" and "to" coordinates
+                if( xl < it1->second.from ) it1->second.from = xl;
+                if( xr > it1->second.to   ) it1->second.to   = xr;
+            }
+            if(it2 == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yb, ScanlineElement(xl, xr) ) );
+            }
+            else { // Update the scanline's "from" and "to" coordinates
+                if( xl < it2->second.from ) it2->second.from = xl;
+                if( xr > it2->second.to   ) it2->second.to   = xr;
+            }
+        }
+        // With anti-aliasing
+        else {
+            // Calculate the coordinates
+            const Pt::int32_t xl = ctrX - floor(x);
+            const Pt::int32_t xr = ctrX + floor(x);
+            const Pt::int32_t yt = ctrY - y;
+            const Pt::int32_t yb = ctrY + y;
+            // Determine the exact coordinates of the closing lines
+            if(abs(xl - bx) < x1d) { x1d = abs(xl - bx); x1 = xl; }
+            if(abs(xl - ex) < x2d) { x2d = abs(xl - ex); x2 = xl; }
+            if(abs(xr - bx) < x1d) { x1d = abs(xr - bx); x1 = xr; }
+            if(abs(xr - ex) < x2d) { x2d = abs(xr - ex); x2 = xr; }
+            if(abs(yt - by) < y1d) { y1d = abs(yt - by); y1 = yt; }
+            if(abs(yt - ey) < y2d) { y2d = abs(yt - ey); y2 = yt; }
+            if(abs(yb - by) < y1d) { y1d = abs(yb - by); y1 = yb; }
+            if(abs(yb - ey) < y2d) { y2d = abs(yb - ey); y2 = yb; }
+            // Store/update the scanline coordinates
+            Scanlines::iterator it1 = scanlines.find(yt);
+            Scanlines::iterator it2 = scanlines.find(yb);
+            if(it1 == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yt, ScanlineElement(xl, xr) ) );
+            }
+            else { // Update the scanline's "from" and "to" coordinates
+                if( xl < it1->second.from ) it1->second.from = xl;
+                if( xr > it1->second.to   ) it1->second.to   = xr;
+            }
+            if(it2 == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yb, ScanlineElement(xl, xr) ) );
+            }
+            else { // Update the scanline's "from" and "to" coordinates
+                if( xl < it2->second.from ) it2->second.from = xl;
+                if( xr > it2->second.to   ) it2->second.to   = xr;
+            }
+        }
+    }
+    */
 }
 
 
