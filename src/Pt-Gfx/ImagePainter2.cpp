@@ -373,6 +373,17 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
 
 void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode )
 {
+    // Update the gradient as needed
+    _rasterizer->updateGradientBrushAsNeeded(size.width(), size.height());
+
+    // Ensure that the begin angle is within the acceptable range
+    while(degBegin < -360) degBegin += 360;
+    while(degBegin >  360) degBegin -= 360;
+
+    // Ensure that the end angle is within the acceptable range
+    while(degEnd < -360) degEnd += 360;
+    while(degEnd >  360) degEnd -= 360;
+
     // Draw based on the mode
     switch(arcMode) {
         case ArcMode::Chord:
@@ -949,6 +960,96 @@ void ImagePainter2::arcUtilCropScanlinesUsingXWu(Pt::int32_t x1, Pt::int32_t y1,
     }
 }
 
+void ImagePainter2::arcUtilDrawCircumferencePixels(Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t radX, Pt::int32_t radY, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd, Pt::int32_t quartersX, Pt::int32_t quartersY, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Scanlines& scanlinesRef)
+{
+    // Calculate the square of the radius
+    Pt::int32_t radX2 = radX * radX;
+    Pt::int32_t radY2 = radY * radY;
+
+    // Top and bottom halves
+    for(Pt::int32_t x = 0; x <= quartersX; ++x) {
+        // Calculate the Y coordinate and alpha
+        const float       y     = radY * fastSqrt(1 - (float) x * x / radX2);
+        const Pt::int32_t fly   = floor(y);
+        const float       error = y - fly;
+        const Pt::uint8_t alpha = round(error * 255);
+        // Draw the first part of the pixels
+        const Pt::int32_t x1  = ctrX - x;
+        const Pt::int32_t x2  = ctrX + x;
+        const Pt::int32_t y10 = ctrY - fly;
+        const Pt::int32_t y20 = ctrY + fly;
+        Scanlines::const_iterator it10 = scanlinesRef.find(y10);
+        Scanlines::const_iterator it20 = scanlinesRef.find(y20);
+        if( ( it10 == scanlinesRef.end() || (it10->second.from > x1 && it10->second.to < x2) ) ||
+            ( it20 == scanlinesRef.end() || (it20->second.from > x1 && it20->second.to < x2) )
+        ) {
+            const bool mask[4] = {
+                insideDegRange(x1, y10, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(x1, y20, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(x2, y10, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(x2, y20, ctrX, ctrY, degBegin, degEnd)
+            };
+            _rasterizer->fill4Pixels(x1, y10, x2, y20, minX, minY, 255 - alpha, mask);
+        }
+        // Draw the second part of the pixels
+        const Pt::int32_t y11 = ctrY - fly - 1;
+        const Pt::int32_t y21 = ctrY + fly + 1;
+        Scanlines::const_iterator it11 = scanlinesRef.find(y11);
+        Scanlines::const_iterator it21 = scanlinesRef.find(y21);
+        if( ( it11 == scanlinesRef.end() || (it11->second.from > x1 && it11->second.to < x2) ) ||
+            ( it21 == scanlinesRef.end() || (it21->second.from > x1 && it21->second.to < x2) )
+        ) {
+            const bool mask[4] = {
+                insideDegRange(x1, y11, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(x1, y21, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(x2, y11, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(x2, y21, ctrX, ctrY, degBegin, degEnd)
+            };
+            _rasterizer->fill4Pixels(x1, y11, x2, y21, minX, minY, alpha, mask);
+        }
+    }
+
+    // Left and right halves
+    for(Pt::int32_t y = 0; y <= quartersY; ++y) {
+        // Calculate the X coordinate and alpha
+        const float       x     = radX * fastSqrt(1 - (float) y * y / radY2);
+        const Pt::int32_t flx   = floor(x);
+        const float       error = x - flx;
+        const Pt::uint8_t alpha = round(error * 255);
+        // Draw the first part of the pixels
+        const Pt::int32_t x10 = ctrX - flx;
+        const Pt::int32_t x20 = ctrX + flx;
+        const Pt::int32_t y1  = ctrY - y;
+        const Pt::int32_t y2  = ctrY + y;
+        Scanlines::const_iterator it1 = scanlinesRef.find(y1);
+        Scanlines::const_iterator it2 = scanlinesRef.find(y2);
+        if( ( it1 == scanlinesRef.end() || (it1->second.from > x10 && it1->second.to < x20) ) ||
+            ( it2 == scanlinesRef.end() || (it2->second.from > x10 && it2->second.to < x20) )
+        ) {
+            const bool mask[4] = {
+                insideDegRange(x10, y1, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(x10, y2, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(x20, y1, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(x20, y2, ctrX, ctrY, degBegin, degEnd)
+            };
+            _rasterizer->fill4Pixels(x10, y1, x20, y2, minX, minY, 255 - alpha, mask);
+        }
+        // Draw the second part of the pixels
+        const Pt::int32_t x11 = ctrX - flx - 1;
+        const Pt::int32_t x21 = ctrX + flx + 1;
+        if( ( it1 == scanlinesRef.end() || (it1->second.from > x11 && it1->second.to < x21) ) ||
+            ( it2 == scanlinesRef.end() || (it2->second.from > x11 && it2->second.to < x21) )
+        ) {
+            const bool mask[4] = {
+                insideDegRange(x11, y1, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(x11, y2, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(x21, y1, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(x21, y2, ctrX, ctrY, degBegin, degEnd)
+            };
+            _rasterizer->fill4Pixels(x11, y1, x21, y2, minX, minY, alpha, mask);
+        }
+    }
+}
 
 
 // Inspired by http://create.stephan-brumme.com/antialiased-circle
@@ -972,8 +1073,6 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
     Pt::int32_t radY  = size.height() / 2;
     Pt::int32_t ctrX  = minX + radX;
     Pt::int32_t ctrY  = minY + radY;
-    Pt::int32_t radX2 = radX * radX;
-    Pt::int32_t radY2 = radY * radY;
 
     // === Process the scanlines ===
 
@@ -1020,90 +1119,7 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
     if(_rasterizer->antiAliasingMode() == AntiAliasingMode::None)  return;
 
     // === Process the circumference's pixels ===
-
-    // Top and bottom halves
-    for(Pt::int32_t x = 0; x <= quartersX; ++x) {
-        // Calculate the Y coordinate and alpha
-        const float       y     = radY * fastSqrt(1 - (float) x * x / radX2);
-        const Pt::int32_t fly   = floor(y);
-        const float       error = y - fly;
-        const Pt::uint8_t alpha = round(error * 255);
-        // Draw the first part of the pixels
-        const Pt::int32_t x1  = ctrX - x;
-        const Pt::int32_t x2  = ctrX + x;
-        const Pt::int32_t y10 = ctrY - fly;
-        const Pt::int32_t y20 = ctrY + fly;
-        Scanlines::const_iterator it10 = scanlinesRef.find(y10);
-        Scanlines::const_iterator it20 = scanlinesRef.find(y20);
-        if( ( it10 == scanlinesRef.end() || (it10->second.from > x1 && it10->second.to < x2) ) ||
-            ( it20 == scanlinesRef.end() || (it20->second.from > x1 && it20->second.to < x2) )
-        ) {
-            const bool mask[4] = {
-                insideDegRange(x1, y10, ctrX, ctrY, degBegin, degEnd),
-                insideDegRange(x1, y20, ctrX, ctrY, degBegin, degEnd),
-                insideDegRange(x2, y10, ctrX, ctrY, degBegin, degEnd),
-                insideDegRange(x2, y20, ctrX, ctrY, degBegin, degEnd)
-            };
-            _rasterizer->fill4Pixels(x1, y10, x2, y20, minX, minY, 255 - alpha, mask);
-        }
-        // Draw the second part of the pixels
-        const Pt::int32_t y11 = ctrY - fly - 1;
-        const Pt::int32_t y21 = ctrY + fly + 1;
-        Scanlines::const_iterator it11 = scanlinesRef.find(y11);
-        Scanlines::const_iterator it21 = scanlinesRef.find(y21);
-        if( ( it11 == scanlinesRef.end() || (it11->second.from > x1 && it11->second.to < x2) ) ||
-            ( it21 == scanlinesRef.end() || (it21->second.from > x1 && it21->second.to < x2) )
-        ) {
-            const bool mask[4] = {
-                insideDegRange(x1, y11, ctrX, ctrY, degBegin, degEnd),
-                insideDegRange(x1, y21, ctrX, ctrY, degBegin, degEnd),
-                insideDegRange(x2, y11, ctrX, ctrY, degBegin, degEnd),
-                insideDegRange(x2, y21, ctrX, ctrY, degBegin, degEnd)
-            };
-            _rasterizer->fill4Pixels(x1, y11, x2, y21, minX, minY, alpha, mask);
-        }
-    }
-
-    // Left and right halves
-    for(Pt::int32_t y = 0; y <= quartersY; ++y) {
-        // Calculate the X coordinate and alpha
-        const float       x     = radX * fastSqrt(1 - (float) y * y / radY2);
-        const Pt::int32_t flx   = floor(x);
-        const float       error = x - flx;
-        const Pt::uint8_t alpha = round(error * 255);
-        // Draw the first part of the pixels
-        const Pt::int32_t x10 = ctrX - flx;
-        const Pt::int32_t x20 = ctrX + flx;
-        const Pt::int32_t y1  = ctrY - y;
-        const Pt::int32_t y2  = ctrY + y;
-        Scanlines::const_iterator it1 = scanlinesRef.find(y1);
-        Scanlines::const_iterator it2 = scanlinesRef.find(y2);
-        if( ( it1 == scanlinesRef.end() || (it1->second.from > x10 && it1->second.to < x20) ) ||
-            ( it2 == scanlinesRef.end() || (it2->second.from > x10 && it2->second.to < x20) )
-        ) {
-            const bool mask[4] = {
-                insideDegRange(x10, y1, ctrX, ctrY, degBegin, degEnd),
-                insideDegRange(x10, y2, ctrX, ctrY, degBegin, degEnd),
-                insideDegRange(x20, y1, ctrX, ctrY, degBegin, degEnd),
-                insideDegRange(x20, y2, ctrX, ctrY, degBegin, degEnd)
-            };
-            _rasterizer->fill4Pixels(x10, y1, x20, y2, minX, minY, 255 - alpha, mask);
-        }
-        // Draw the second part of the pixels
-        const Pt::int32_t x11 = ctrX - flx - 1;
-        const Pt::int32_t x21 = ctrX + flx + 1;
-        if( ( it1 == scanlinesRef.end() || (it1->second.from > x11 && it1->second.to < x21) ) ||
-            ( it2 == scanlinesRef.end() || (it2->second.from > x11 && it2->second.to < x21) )
-        ) {
-            const bool mask[4] = {
-                insideDegRange(x11, y1, ctrX, ctrY, degBegin, degEnd),
-                insideDegRange(x11, y2, ctrX, ctrY, degBegin, degEnd),
-                insideDegRange(x21, y1, ctrX, ctrY, degBegin, degEnd),
-                insideDegRange(x21, y2, ctrX, ctrY, degBegin, degEnd)
-            };
-            _rasterizer->fill4Pixels(x11, y1, x21, y2, minX, minY, alpha, mask);
-        }
-    }
+    arcUtilDrawCircumferencePixels(minX, minY, radX, radY, ctrX, ctrY, degBegin, degEnd, quartersX, quartersY, x1, y1, x2, y2, scanlinesRef);
 
     // Draw the closing line
     std::map<Pt::int32_t, Pt::int32_t> exclusionZone;
@@ -1136,8 +1152,6 @@ void ImagePainter2::fillArcPieImpl(const PointF& topLeft, const SizeF& size, flo
     Pt::int32_t radY  = size.height() / 2;
     Pt::int32_t ctrX  = minX + radX;
     Pt::int32_t ctrY  = minY + radY;
-    Pt::int32_t radX2 = radX * radX;
-    Pt::int32_t radY2 = radY * radY;
 
     // === Process the scanlines ===
 
@@ -1184,103 +1198,7 @@ void ImagePainter2::fillArcPieImpl(const PointF& topLeft, const SizeF& size, flo
     // Exit here if we are not doing anti aliasing
     if(_rasterizer->antiAliasingMode() == AntiAliasingMode::None)  return;
 
-    /*
     // === Process the circumference's pixels ===
-
-    // Top and bottom halves
-    for(Pt::int32_t x = 0; x <= quartersX; ++x) {
-        // Calculate the Y coordinate and alpha
-        const float       y     = radY * fastSqrt(1 - (float) x * x / radX2);
-        const Pt::int32_t fly   = floor(y);
-        const float       error = y - fly;
-        const Pt::uint8_t alpha = round(error * 255);
-        // Draw the first part of the pixels
-        const Pt::int32_t x1  = ctrX - x;
-        const Pt::int32_t x2  = ctrX + x;
-        const Pt::int32_t y10 = ctrY - fly;
-        const Pt::int32_t y20 = ctrY + fly;
-        Scanlines::const_iterator it10 = scanlinesRef.find(y10);
-        Scanlines::const_iterator it20 = scanlinesRef.find(y20);
-        if( ( it10 == scanlinesRef.end() || (it10->second.from > x1 && it10->second.to < x2) ) ||
-            ( it20 == scanlinesRef.end() || (it20->second.from > x1 && it20->second.to < x2) )
-        ) {
-            const bool mask[4] = {
-                insideDegRange(x1, y10, ctrX, ctrY, degBegin, degEnd),
-                insideDegRange(x1, y20, ctrX, ctrY, degBegin, degEnd),
-                insideDegRange(x2, y10, ctrX, ctrY, degBegin, degEnd),
-                insideDegRange(x2, y20, ctrX, ctrY, degBegin, degEnd)
-            };
-            _rasterizer->fill4Pixels(x1, y10, x2, y20, minX, minY, 255 - alpha, mask);
-        }
-        // Draw the second part of the pixels
-        const Pt::int32_t y11 = ctrY - fly - 1;
-        const Pt::int32_t y21 = ctrY + fly + 1;
-        Scanlines::const_iterator it11 = scanlinesRef.find(y11);
-        Scanlines::const_iterator it21 = scanlinesRef.find(y21);
-        if( ( it11 == scanlinesRef.end() || (it11->second.from > x1 && it11->second.to < x2) ) ||
-            ( it21 == scanlinesRef.end() || (it21->second.from > x1 && it21->second.to < x2) )
-        ) {
-            const bool mask[4] = {
-                insideDegRange(x1, y11, ctrX, ctrY, degBegin, degEnd),
-                insideDegRange(x1, y21, ctrX, ctrY, degBegin, degEnd),
-                insideDegRange(x2, y11, ctrX, ctrY, degBegin, degEnd),
-                insideDegRange(x2, y21, ctrX, ctrY, degBegin, degEnd)
-            };
-            _rasterizer->fill4Pixels(x1, y11, x2, y21, minX, minY, alpha, mask);
-        }
-    }
-
-    // Left and right halves
-    for(Pt::int32_t y = 0; y <= quartersY; ++y) {
-        // Calculate the X coordinate and alpha
-        const float       x     = radX * fastSqrt(1 - (float) y * y / radY2);
-        const Pt::int32_t flx   = floor(x);
-        const float       error = x - flx;
-        const Pt::uint8_t alpha = round(error * 255);
-        // Draw the first part of the pixels
-        const Pt::int32_t x10 = ctrX - flx;
-        const Pt::int32_t x20 = ctrX + flx;
-        const Pt::int32_t y1  = ctrY - y;
-        const Pt::int32_t y2  = ctrY + y;
-        Scanlines::const_iterator it1 = scanlinesRef.find(y1);
-        Scanlines::const_iterator it2 = scanlinesRef.find(y2);
-        if( ( it1 == scanlinesRef.end() || (it1->second.from > x10 && it1->second.to < x20) ) ||
-            ( it2 == scanlinesRef.end() || (it2->second.from > x10 && it2->second.to < x20) )
-        ) {
-            const bool mask[4] = {
-                insideDegRange(x10, y1, ctrX, ctrY, degBegin, degEnd),
-                insideDegRange(x10, y2, ctrX, ctrY, degBegin, degEnd),
-                insideDegRange(x20, y1, ctrX, ctrY, degBegin, degEnd),
-                insideDegRange(x20, y2, ctrX, ctrY, degBegin, degEnd)
-            };
-            _rasterizer->fill4Pixels(x10, y1, x20, y2, minX, minY, 255 - alpha, mask);
-        }
-        // Draw the second part of the pixels
-        const Pt::int32_t x11 = ctrX - flx - 1;
-        const Pt::int32_t x21 = ctrX + flx + 1;
-        if( ( it1 == scanlinesRef.end() || (it1->second.from > x11 && it1->second.to < x21) ) ||
-            ( it2 == scanlinesRef.end() || (it2->second.from > x11 && it2->second.to < x21) )
-        ) {
-            const bool mask[4] = {
-                insideDegRange(x11, y1, ctrX, ctrY, degBegin, degEnd),
-                insideDegRange(x11, y2, ctrX, ctrY, degBegin, degEnd),
-                insideDegRange(x21, y1, ctrX, ctrY, degBegin, degEnd),
-                insideDegRange(x21, y2, ctrX, ctrY, degBegin, degEnd)
-            };
-            _rasterizer->fill4Pixels(x11, y1, x21, y2, minX, minY, alpha, mask);
-        }
-    }
-
-    // Draw the closing line
-    std::map<Pt::int32_t, Pt::int32_t> exclusionZone;
-
-    for(Scanlines::const_iterator it = scanlines.begin(); it != scanlines.end(); ++it) {
-        if(faceL) exclusionZone[it->first] = it->second.from;
-        if(faceR) exclusionZone[it->first] = it->second.to;
-    }
-
-    _rasterizer->fillOnePixelGLineSegmentXWAA(x1, y1, x2, y2, minX, minY, &exclusionZone, 0);
-*/
 }
 
 
