@@ -710,10 +710,6 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
     //     * This will cause addition and subtraction to be reversed when calculating
     //       for the Y coordinate using trigonometry
 
-
-    // XXXXX    * This will also cause >= and < comparison operators to be interchanged when
-    //      XXXXXX determining quadrant using the Y coordinate
-
     // Update the gradient as needed
     _rasterizer->updateGradientBrushAsNeeded(size.width(), size.height());
 
@@ -906,97 +902,7 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
         }
     }
 
-    /*
-    // Determine the location of the begin and end points
-    Pt::int32_t qBeg = 0, qEnd = 0;
-
-         if(x1 >= ctrX && y1 <  ctrY) qBeg = 1; // See the notes on the beginning of this function
-    else if(x1 <  ctrX && y1 <  ctrY) qBeg = 2; // See the notes on the beginning of this function
-    else if(x1 <  ctrX && y1 >= ctrY) qBeg = 3; // See the notes on the beginning of this function
-    else if(x1 >= ctrX && y1 >= ctrY) qBeg = 4; // See the notes on the beginning of this function
-
-         if(x2 >= ctrX && y2 <  ctrY) qEnd = 1; // See the notes on the beginning of this function
-    else if(x2 <  ctrX && y2 <  ctrY) qEnd = 2; // See the notes on the beginning of this function
-    else if(x2 <  ctrX && y2 >= ctrY) qEnd = 3; // See the notes on the beginning of this function
-    else if(x2 >= ctrX && y2 >= ctrY) qEnd = 4; // See the notes on the beginning of this function
-
-    // Determine where the direction that the hole faces to
-    bool faceL = false, faceR = false, faceT = false, faceB = false;
-
-    switch(qBeg) {
-        case 1 : switch(qEnd) {
-                     case 1 : faceL = true ; faceR = false; faceT = false; faceB = true ; break;
-                     case 2 : faceL = true ; faceR = false; faceT = false; faceB = true ; break;
-                     case 3 : faceL = false; faceR = true ; faceT = false; faceB = true ; break;
-                     case 4 : faceL = false; faceR = true ; faceT = false; faceB = true ; break;
-                 }
-                 break;
-        case 2 : switch(qEnd) {
-                     case 1 : faceL = false; faceR = true ; faceT = true ; faceB = false; break;
-                     case 2 : faceL = false; faceR = true ; faceT = false; faceB = true ; break;
-                     case 3 : faceL = false; faceR = true ; faceT = false; faceB = true ; break;
-                     case 4 : faceL = false; faceR = true ; faceT = true ; faceB = false; break;
-                 }
-                 break;
-        case 3 : switch(qEnd) {
-                     case 1 : faceL = true ; faceR = false; faceT = true ; faceB = false; break;
-                     case 2 : faceL = true ; faceR = false; faceT = true ; faceB = false; break;
-                     case 3 : faceL = false; faceR = true ; faceT = true ; faceB = false; break;
-                     case 4 : faceL = false; faceR = true ; faceT = true ; faceB = false; break;
-                 }
-                 break;
-        case 4 : switch(qEnd) {
-                     case 1 : faceL = true ; faceR = false; faceT = true ; faceB = false; break;
-                     case 2 : faceL = true ; faceR = false; faceT = false; faceB = true ; break;
-                     case 3 : faceL = true ; faceR = false; faceT = false; faceB = true ; break;
-                     case 4 : faceL = true ; faceR = false; faceT = true ; faceB = false; break;
-                 }
-                 break;
-    }
-
-    if(x1 == x2) {
-        faceT = false;
-        faceB = false;
-    }
-
-    if(y1 == y2) {
-        faceL = false;
-        faceR = false;
-    }
-    switch(qBeg) {
-        case 1 : switch(qEnd) {
-                     case 1 : faceL = x2 < x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
-                     case 2 : faceL = x2 < x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
-                     case 3 : faceL = x2 > x1; faceR = x2 < x1; faceT = y2 > y1; faceB = y2 > y1; break;
-                     case 4 : faceL = x2 > x1; faceR = x2 < x1; faceT = y2 > y1; faceB = y2 > y1; break;
-                 }
-                 break;
-        case 2 : switch(qEnd) {
-                     case 1 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
-                     case 2 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
-                     case 3 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
-                     case 4 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
-                 }
-                 break;
-        case 3 : switch(qEnd) {
-                     case 1 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
-                     case 2 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
-                     case 3 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
-                     case 4 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
-                 }
-                 break;
-        case 4 : switch(qEnd) {
-                     case 1 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
-                     case 2 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
-                     case 3 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
-                     case 4 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
-                 }
-                 break;
-    }
-    */
-
-    // Determine where the direction that the hole faces to
-
+    // Calculate the direction vector
     const Pt::int32_t vx = x2 - x1;           // Vector from the begin point to the end point
     const Pt::int32_t vy = y2 - y1;           // ---
     const Pt::int32_t vz = 0;                 // ---
@@ -1005,27 +911,23 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
     const Pt::int32_t rz = 1;                 // ---
     const Pt::int32_t cx = vy * rz - vz * ry; // Cross product of the above vectors
     const Pt::int32_t cy = vz * rx - vx * rz; // ---
-    const Pt::int32_t cz = vx * ry - vy * rx; // ---
+  //const Pt::int32_t cz = vx * ry - vy * rx; // ---
 
-    bool faceT = cy < 0;
-    bool faceB = cy > 0;
-    bool faceL = cx < 0;
-    bool faceR = cx > 0;
+    // Determine where the direction that the hole faces to
+    const bool faceT = cy < 0;
+    const bool faceB = cy > 0;
+    const bool faceL = cx < 0;
+    const bool faceR = cx > 0;
 
-    //lprintf("qb=%d qe=%d : l=%d r=%d t=%d b=%d\n", qBeg, qEnd, faceL, faceR, faceT, faceB);
-    lprintf("l=%d r=%d t=%d b=%d\n", faceL, faceR, faceT, faceB);
+    // lprintf("l=%d r=%d t=%d b=%d\n", faceL, faceR, faceT, faceB);
 
-    // Crop the spans to the top and bottom as needed
-    if(faceL || faceR) {
-        scanlines.erase(scanlines.begin(),                       scanlines.lower_bound(std::min(y1, y2)));
-        scanlines.erase(scanlines.upper_bound(std::max(y1, y2)), scanlines.end()                        );
-    }
-    else {
-        if(faceT) scanlines.erase(scanlines.begin(),                       scanlines.lower_bound(std::min(y1, y2)));
-        if(faceB) scanlines.erase(scanlines.upper_bound(std::max(y1, y2)), scanlines.end()                        );
-    }
+    // Remove the all scanlines to the top and bottom side that will be completely outside the shape
+    if(faceT) scanlines.erase(scanlines.begin(),                           scanlines.lower_bound(std::min(y1, y2) + 1));
+    if(faceB) scanlines.erase(scanlines.upper_bound(std::max(y1, y2) - 1), scanlines.end()                            );
 
-    // Crop the spans to the left and right by running the Xiaolin Wu's anti-aliased line algorithm
+    // Remove the all scanlines to the left and right side that will be completely outside the shape
+
+    // Crop the scanlines to the left and right side by running the Xiaolin Wu's anti-aliased line algorithm
     if(faceL || faceR) {
         // Convert the coordinates to fixed-points
         Pt::int32_t fx1 = FIXED_POINT_FROM_INT(x1);

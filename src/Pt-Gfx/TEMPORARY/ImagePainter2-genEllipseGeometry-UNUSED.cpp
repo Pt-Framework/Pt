@@ -1,3 +1,113 @@
+    // XXXXX    * This will also cause >= and < comparison operators to be interchanged when
+    //      XXXXXX determining quadrant using the Y coordinate
+
+    /*
+    // Determine the location of the begin and end points
+    Pt::int32_t qBeg = 0, qEnd = 0;
+
+         if(x1 >= ctrX && y1 <  ctrY) qBeg = 1; // See the notes on the beginning of this function
+    else if(x1 <  ctrX && y1 <  ctrY) qBeg = 2; // See the notes on the beginning of this function
+    else if(x1 <  ctrX && y1 >= ctrY) qBeg = 3; // See the notes on the beginning of this function
+    else if(x1 >= ctrX && y1 >= ctrY) qBeg = 4; // See the notes on the beginning of this function
+
+         if(x2 >= ctrX && y2 <  ctrY) qEnd = 1; // See the notes on the beginning of this function
+    else if(x2 <  ctrX && y2 <  ctrY) qEnd = 2; // See the notes on the beginning of this function
+    else if(x2 <  ctrX && y2 >= ctrY) qEnd = 3; // See the notes on the beginning of this function
+    else if(x2 >= ctrX && y2 >= ctrY) qEnd = 4; // See the notes on the beginning of this function
+
+    // Determine where the direction that the hole faces to
+    bool faceL = false, faceR = false, faceT = false, faceB = false;
+
+    switch(qBeg) {
+        case 1 : switch(qEnd) {
+                     case 1 : faceL = true ; faceR = false; faceT = false; faceB = true ; break;
+                     case 2 : faceL = true ; faceR = false; faceT = false; faceB = true ; break;
+                     case 3 : faceL = false; faceR = true ; faceT = false; faceB = true ; break;
+                     case 4 : faceL = false; faceR = true ; faceT = false; faceB = true ; break;
+                 }
+                 break;
+        case 2 : switch(qEnd) {
+                     case 1 : faceL = false; faceR = true ; faceT = true ; faceB = false; break;
+                     case 2 : faceL = false; faceR = true ; faceT = false; faceB = true ; break;
+                     case 3 : faceL = false; faceR = true ; faceT = false; faceB = true ; break;
+                     case 4 : faceL = false; faceR = true ; faceT = true ; faceB = false; break;
+                 }
+                 break;
+        case 3 : switch(qEnd) {
+                     case 1 : faceL = true ; faceR = false; faceT = true ; faceB = false; break;
+                     case 2 : faceL = true ; faceR = false; faceT = true ; faceB = false; break;
+                     case 3 : faceL = false; faceR = true ; faceT = true ; faceB = false; break;
+                     case 4 : faceL = false; faceR = true ; faceT = true ; faceB = false; break;
+                 }
+                 break;
+        case 4 : switch(qEnd) {
+                     case 1 : faceL = true ; faceR = false; faceT = true ; faceB = false; break;
+                     case 2 : faceL = true ; faceR = false; faceT = false; faceB = true ; break;
+                     case 3 : faceL = true ; faceR = false; faceT = false; faceB = true ; break;
+                     case 4 : faceL = true ; faceR = false; faceT = true ; faceB = false; break;
+                 }
+                 break;
+    }
+
+    if(x1 == x2) {
+        faceT = false;
+        faceB = false;
+    }
+
+    if(y1 == y2) {
+        faceL = false;
+        faceR = false;
+    }
+    switch(qBeg) {
+        case 1 : switch(qEnd) {
+                     case 1 : faceL = x2 < x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
+                     case 2 : faceL = x2 < x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
+                     case 3 : faceL = x2 > x1; faceR = x2 < x1; faceT = y2 > y1; faceB = y2 > y1; break;
+                     case 4 : faceL = x2 > x1; faceR = x2 < x1; faceT = y2 > y1; faceB = y2 > y1; break;
+                 }
+                 break;
+        case 2 : switch(qEnd) {
+                     case 1 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
+                     case 2 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
+                     case 3 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
+                     case 4 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
+                 }
+                 break;
+        case 3 : switch(qEnd) {
+                     case 1 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
+                     case 2 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
+                     case 3 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
+                     case 4 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
+                 }
+                 break;
+        case 4 : switch(qEnd) {
+                     case 1 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
+                     case 2 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
+                     case 3 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
+                     case 4 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
+                 }
+                 break;
+    }
+    */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #if 0
 
     // Generate a polygon that approximates the arc
