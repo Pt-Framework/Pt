@@ -78,10 +78,6 @@ struct ImagePainter2::XWLineData {
     std::vector<XWPoint> points; // The line's points
 };
 
-
-
-
-
 void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode )
 {
     // Update the gradient as needed
@@ -95,7 +91,7 @@ void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float deg
     while(degEnd < -360) degEnd += 360;
     while(degEnd >  360) degEnd -= 360;
 
-    // Calculate the arc's parameters
+    // Calculate the general arc's parameters
     FilledArcInfo fai;
 
     fai.antiAlias = (_rasterizer->antiAliasingMode() != AntiAliasingMode::None);
@@ -111,6 +107,9 @@ void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float deg
 
     fai.quartersX = round( fai.radX2 * fastInvSqrt(fai.radX2 + fai.radY2) );
     fai.quartersY = round( fai.radY2 * fastInvSqrt(fai.radX2 + fai.radY2) );
+
+    // Find the exact coordinate of the begin and end point
+    arcUtil_findExactBegEndPointsCoordinate(fai, degBegin, degEnd);
 
     // Draw based on the mode
     switch(arcMode) {
@@ -129,6 +128,61 @@ void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float deg
 // ======================================================================================
 // ===== Private Member Functions =======================================================
 // ======================================================================================
+
+void ImagePainter2::arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai, float degBegin, float degEnd)
+{
+    // Calculate the approximate coordinate of the point which is located at the begin angle
+    const Pt::int32_t bx = round(fai.ctrX + fai.radX * fastCos(degBegin * Pt::Pi / 180));
+    const Pt::int32_t by = round(fai.ctrY - fai.radY * fastSin(degBegin * Pt::Pi / 180)); // Sign inversion due to differences between cartesian and computer coordinate systems
+
+    // Calculate the approximate coordinate of the point which is located at the end angle
+    const Pt::int32_t ex = round(fai.ctrX + fai.radX * fastCos(degEnd   * Pt::Pi / 180));
+    const Pt::int32_t ey = round(fai.ctrY - fai.radY * fastSin(degEnd   * Pt::Pi / 180)); // Sign inversion due to differences between cartesian and computer coordinate systems
+
+    // Used for finding the exact coordinate of the points which are located at the begin and end angle
+    Pt::int32_t x1d = MAXIMUM_COORD; // Begin point
+    Pt::int32_t y1d = MAXIMUM_COORD;
+    Pt::int32_t x2d = MAXIMUM_COORD; // End point
+    Pt::int32_t y2d = MAXIMUM_COORD;
+
+    // Top and bottom halves
+    for(Pt::int32_t x = 0; x <= fai.quartersX; ++x) {
+        // Calculate the coordinate
+        const float y = fai.radY * fastSqrt(1 - (float) x * x / fai.radX2);
+        const Pt::int32_t xl = fai.ctrX - x;
+        const Pt::int32_t xr = fai.ctrX + x;
+        const Pt::int32_t yt = fai.ctrY - ( fai.antiAlias ? floor(y) : round(y) );
+        const Pt::int32_t yb = fai.ctrY + ( fai.antiAlias ? floor(y) : round(y) );
+        // Determine the exact coordinates of the closing lines
+        if(abs(xl - bx) < x1d) { x1d = abs(xl - bx); fai.x1 = xl; }
+        if(abs(xl - ex) < x2d) { x2d = abs(xl - ex); fai.x2 = xl; }
+        if(abs(xr - bx) < x1d) { x1d = abs(xr - bx); fai.x1 = xr; }
+        if(abs(xr - ex) < x2d) { x2d = abs(xr - ex); fai.x2 = xr; }
+        if(abs(yt - by) < y1d) { y1d = abs(yt - by); fai.y1 = yt; }
+        if(abs(yt - ey) < y2d) { y2d = abs(yt - ey); fai.y2 = yt; }
+        if(abs(yb - by) < y1d) { y1d = abs(yb - by); fai.y1 = yb; }
+        if(abs(yb - ey) < y2d) { y2d = abs(yb - ey); fai.y2 = yb; }
+    }
+
+    // Left and right halves
+    for(Pt::int32_t y = 0; y <= fai.quartersY; ++y) {
+        // Calculate the coordinate
+        const float x = fai.radX * fastSqrt(1 - (float) y * y / fai.radY2);
+        const Pt::int32_t xl = fai.ctrX - ( fai.antiAlias ? floor(x) : round(x) );
+        const Pt::int32_t xr = fai.ctrX + ( fai.antiAlias ? floor(x) : round(x) );
+        const Pt::int32_t yt = fai.ctrY - y;
+        const Pt::int32_t yb = fai.ctrY + y;
+        // Determine the exact coordinates of the closing lines
+        if(abs(xl - bx) < x1d) { x1d = abs(xl - bx); fai.x1 = xl; }
+        if(abs(xl - ex) < x2d) { x2d = abs(xl - ex); fai.x2 = xl; }
+        if(abs(xr - bx) < x1d) { x1d = abs(xr - bx); fai.x1 = xr; }
+        if(abs(xr - ex) < x2d) { x2d = abs(xr - ex); fai.x2 = xr; }
+        if(abs(yt - by) < y1d) { y1d = abs(yt - by); fai.y1 = yt; }
+        if(abs(yt - ey) < y2d) { y2d = abs(yt - ey); fai.y2 = yt; }
+        if(abs(yb - by) < y1d) { y1d = abs(yb - by); fai.y1 = yb; }
+        if(abs(yb - ey) < y2d) { y2d = abs(yb - ey); fai.y2 = yb; }
+    }
+}
 
 // Xiaolin Wu's Anti-Aliased Line Algorithm
 // https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
