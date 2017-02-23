@@ -72,10 +72,16 @@ struct ImagePainter2::XWLineData {
         {}
     };
 
-    bool steep; // If "true"  then the a2 belongs to (x + 1, y)
-                // If "false" then the a2 belongs to (x, y + 1)
-
     std::vector<XWPoint> points; // The line's points
+
+    bool                 steep; // If "true"  then the a2 belongs to (x + 1, y)
+                                // If "false" then the a2 belongs to (x, y + 1)
+
+    bool                 faceL; // The direction that the line is facing to
+    bool                 faceR; // ---
+    bool                 faceT; // ---
+    bool                 faceB; // ---
+
 };
 
 void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode )
@@ -114,20 +120,34 @@ void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float deg
     // Draw based on the mode
     switch(arcMode) {
         case ArcMode::Chord:
-            //fillArcChordImpl(topLeft, size, degBegin, degEnd);
+            fillArcChordImpl(fai);
             break;
 
         case ArcMode::Pie:
-            //fillArcPieImpl(topLeft, size, degBegin, degEnd);
+            fillArcPieImpl(fai);
             break;
     }
-
 }
 
 
 // ======================================================================================
 // ===== Private Member Functions =======================================================
 // ======================================================================================
+
+void ImagePainter2::fillArcChordImpl(FilledArcInfo& fai)
+{
+    // Calculate points for the closing line
+    XWLineData line;
+    arcUtil_runXWLineAlgorithm(line, fai.x1, fai.y1, fai.x2, fai.y2);
+}
+
+void ImagePainter2::fillArcPieImpl(FilledArcInfo& fai)
+{
+    // Calculate points for the closing lines
+    XWLineData line1, line2;
+    arcUtil_runXWLineAlgorithm(line1, fai.x1, fai.y1, fai.ctrX, fai.ctrY);
+    arcUtil_runXWLineAlgorithm(line2, fai.x2, fai.y2, fai.ctrX, fai.ctrY);
+}
 
 void ImagePainter2::arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai, float degBegin, float degEnd)
 {
@@ -186,7 +206,7 @@ void ImagePainter2::arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai, 
 
 // Xiaolin Wu's Anti-Aliased Line Algorithm
 // https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
-void ImagePainter2::arcUtil_runXWLineAlgorithm(XWLineData& dst, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY)
+void ImagePainter2::arcUtil_runXWLineAlgorithm(XWLineData& dst, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2)
 {
     // Convert the coordinates to fixed-points
     Pt::int32_t fx1 = FIXED_POINT_FROM_INT(x1);

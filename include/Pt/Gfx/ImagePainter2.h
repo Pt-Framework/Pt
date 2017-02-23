@@ -152,12 +152,15 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         // Arc-related helper functions
         static void arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai, float degBegin, float degEnd);
-        static void arcUtil_runXWLineAlgorithm(XWLineData& dst, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY);
+        static void arcUtil_runXWLineAlgorithm(XWLineData& dst, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2);
 
         // Drawing functions
         virtual void drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
         virtual void fillEllipseImplNoAA(const PointF& topLeft, const SizeF& size);
+
+        virtual void fillArcChordImpl(FilledArcInfo& fai);
+        virtual void fillArcPieImpl(FilledArcInfo& fai);
 
 
 
