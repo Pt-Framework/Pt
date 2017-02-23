@@ -142,6 +142,8 @@ class PT_GFX_API ImagePainter2 : public Painter
         static float convertCartesianToPolar(float x, float y);
         static bool insideDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd);
 
+        static void runXWuAlgoToCropScanlines(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, bool faceL, bool faceR, bool faceT, bool faceB, Scanlines& scanlines);
+
     private:
         RectF        _clip;
         Rasterizer2* _rasterizer;

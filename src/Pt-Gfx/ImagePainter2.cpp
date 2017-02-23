@@ -699,6 +699,74 @@ void ImagePainter2::fillEllipseImplNoAA( const PointF& topLeft, const SizeF& siz
         _rasterizer->fillOneScanlineNoAA(xc - a,  xc + a, yc, minX, minY);
 }
 
+
+void ImagePainter2::runXWuAlgoToCropScanlines(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, bool faceL, bool faceR, bool faceT, bool faceB, Scanlines& scanlines)
+{
+    // Convert the coordinates to fixed-points
+    Pt::int32_t fx1 = FIXED_POINT_FROM_INT(x1);
+    Pt::int32_t fy1 = FIXED_POINT_FROM_INT(y1);
+    Pt::int32_t fx2 = FIXED_POINT_FROM_INT(x2);
+    Pt::int32_t fy2 = FIXED_POINT_FROM_INT(y2);
+
+    // Swap the values as needed
+    const Pt::int32_t deltaX = (fx2 >= fx1) ? (fx2 - fx1) : (fx1 - fx2);
+    const Pt::int32_t deltaY = (fy2 >= fy1) ? (fy2 - fy1) : (fy1 - fy2);
+    const bool        steep  = deltaY > deltaX;
+
+    if(steep) {
+        std::swap(fx1, fy1);
+        std::swap(fx2, fy2);
+    }
+    if(fx1 > fx2) {
+        std::swap(fx1, fx2);
+        std::swap(fy1, fy2);
+    }
+
+    // Handle the gradient, starting point, and ending point
+    const Pt::int32_t grad = (fy2 - fy1) / FIXED_POINT_TO_INT(fx2 - fx1);
+    const Pt::int32_t xpxl1 = FIXED_POINT_ROUND(fx1);
+    const Pt::int32_t xpxl2 = FIXED_POINT_ROUND(fx2);
+    const Pt::int32_t ypxl  = fy1 + grad * FIXED_POINT_TO_INT(xpxl1 - fx1);
+
+    // Walk through the coordinates
+    Pt::int32_t from  = FIXED_POINT_TO_INT(FIXED_POINT_ROUND(fx1));
+    Pt::int32_t to    = FIXED_POINT_TO_INT(xpxl2);
+    Pt::int32_t ypxli = ypxl;
+    if(steep) {
+        for(Pt::int32_t i = from; i <= to; ++i) {
+            // Calculate the coordinates
+            Pt::int32_t refX = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli));
+            Pt::int32_t refY = i;
+            ypxli += grad;
+            // Crop the corresponding scanline
+            Scanlines::iterator it = scanlines.find(refY);
+            if(it == scanlines.end()) continue;
+            if(faceL && it->second.from < refX) it->second.from = refX;
+            if(faceR && it->second.to   > refX) it->second.to   = refX;
+        }
+    }
+    else {
+        for(Pt::int32_t i = from; i <= to; ++i) {
+            // Calculate the coordinates
+            Pt::int32_t refX  = i;
+            Pt::int32_t refYt = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           );
+            Pt::int32_t refYb = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE);
+            ypxli += grad;
+            // Crop the corresponding scanlines
+            Scanlines::iterator itt = scanlines.find(refYt);
+            Scanlines::iterator itb = scanlines.find(refYb);
+            if(itt != scanlines.end()) {
+                if(faceL && itt->second.from < refX - 1) itt->second.from = refX - 1;
+                if(faceR && itt->second.to   > refX    ) itt->second.to   = refX;
+            }
+            if(itb != scanlines.end()) {
+                if(faceL && itb->second.from < refX - 1) itb->second.from = refX - 1;
+                if(faceR && itb->second.to   > refX    ) itb->second.to   = refX;
+            }
+        }
+    }
+}
+
 // Inspired by http://create.stephan-brumme.com/antialiased-circle
 void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
 {
@@ -930,65 +998,7 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
 
     // Crop the scanlines to the left and right side by running the Xiaolin Wu's anti-aliased line algorithm
     if(faceL || faceR) {
-        // Convert the coordinates to fixed-points
-        Pt::int32_t fx1 = FIXED_POINT_FROM_INT(x1);
-        Pt::int32_t fy1 = FIXED_POINT_FROM_INT(y1);
-        Pt::int32_t fx2 = FIXED_POINT_FROM_INT(x2);
-        Pt::int32_t fy2 = FIXED_POINT_FROM_INT(y2);
-        // Swap the values as needed
-        const Pt::int32_t deltaX = (fx2 >= fx1) ? (fx2 - fx1) : (fx1 - fx2);
-        const Pt::int32_t deltaY = (fy2 >= fy1) ? (fy2 - fy1) : (fy1 - fy2);
-        const bool        steep  = deltaY > deltaX;
-        if(steep) {
-            std::swap(fx1, fy1);
-            std::swap(fx2, fy2);
-        }
-        if(fx1 > fx2) {
-            std::swap(fx1, fx2);
-            std::swap(fy1, fy2);
-        }
-        // Handle the gradient, starting point, and ending point
-        const Pt::int32_t grad = (fy2 - fy1) / FIXED_POINT_TO_INT(fx2 - fx1);
-        const Pt::int32_t xpxl1 = FIXED_POINT_ROUND(fx1);
-        const Pt::int32_t xpxl2 = FIXED_POINT_ROUND(fx2);
-        const Pt::int32_t ypxl  = fy1 + grad * FIXED_POINT_TO_INT(xpxl1 - fx1);
-        // Walk through the coordinates
-        Pt::int32_t from  = FIXED_POINT_TO_INT(FIXED_POINT_ROUND(fx1));
-        Pt::int32_t to    = FIXED_POINT_TO_INT(xpxl2);
-        Pt::int32_t ypxli = ypxl;
-        if(steep) {
-            for(Pt::int32_t i = from; i <= to; ++i) {
-                // Calculate the coordinates
-                Pt::int32_t refX = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli));
-                Pt::int32_t refY = i;
-                ypxli += grad;
-                // Crop the corresponding scanline
-                Scanlines::iterator it = scanlines.find(refY);
-                if(it == scanlines.end()) continue;
-                if(faceL && it->second.from < refX) it->second.from = refX;
-                if(faceR && it->second.to   > refX) it->second.to   = refX;
-            }
-        }
-        else {
-            for(Pt::int32_t i = from; i <= to; ++i) {
-                // Calculate the coordinates
-                Pt::int32_t refX  = i;
-                Pt::int32_t refYt = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           );
-                Pt::int32_t refYb = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE);
-                ypxli += grad;
-                // Crop the corresponding scanlines
-                Scanlines::iterator itt = scanlines.find(refYt);
-                Scanlines::iterator itb = scanlines.find(refYb);
-                if(itt != scanlines.end()) {
-                    if(faceL && itt->second.from < refX - 1) itt->second.from = refX - 1;
-                    if(faceR && itt->second.to   > refX    ) itt->second.to   = refX;
-                }
-                if(itb != scanlines.end()) {
-                    if(faceL && itb->second.from < refX - 1) itb->second.from = refX - 1;
-                    if(faceR && itb->second.to   > refX    ) itb->second.to   = refX;
-                }
-            }
-        }
+        runXWuAlgoToCropScanlines(x1, y1, x2, y2, faceL, faceR, faceT, faceB, scanlines);
     }
 
     // Mark the all scanlines to the left and right side that will be completely outside the shape
@@ -1351,131 +1361,9 @@ void ImagePainter2::fillArcPieImpl(const PointF& topLeft, const SizeF& size, flo
     if(faceB) scanlines.erase(scanlines.upper_bound(std::max(y1, y2) - 1), scanlines.end()                            );
 
     // Crop the scanlines to the left and right side by running the Xiaolin Wu's anti-aliased line algorithm
-    // --- from (x1, y1) to (ctrX, ctrY) ---
     if(faceL || faceR) {
-        // Convert the coordinates to fixed-points
-        Pt::int32_t fx1 = FIXED_POINT_FROM_INT(x1);
-        Pt::int32_t fy1 = FIXED_POINT_FROM_INT(y1);
-        Pt::int32_t fx2 = FIXED_POINT_FROM_INT(ctrX);
-        Pt::int32_t fy2 = FIXED_POINT_FROM_INT(ctrY);
-        // Swap the values as needed
-        const Pt::int32_t deltaX = (fx2 >= fx1) ? (fx2 - fx1) : (fx1 - fx2);
-        const Pt::int32_t deltaY = (fy2 >= fy1) ? (fy2 - fy1) : (fy1 - fy2);
-        const bool        steep  = deltaY > deltaX;
-        if(steep) {
-            std::swap(fx1, fy1);
-            std::swap(fx2, fy2);
-        }
-        if(fx1 > fx2) {
-            std::swap(fx1, fx2);
-            std::swap(fy1, fy2);
-        }
-        // Handle the gradient, starting point, and ending point
-        const Pt::int32_t grad = (fy2 - fy1) / FIXED_POINT_TO_INT(fx2 - fx1);
-        const Pt::int32_t xpxl1 = FIXED_POINT_ROUND(fx1);
-        const Pt::int32_t xpxl2 = FIXED_POINT_ROUND(fx2);
-        const Pt::int32_t ypxl  = fy1 + grad * FIXED_POINT_TO_INT(xpxl1 - fx1);
-        // Walk through the coordinates
-        Pt::int32_t from  = FIXED_POINT_TO_INT(FIXED_POINT_ROUND(fx1));
-        Pt::int32_t to    = FIXED_POINT_TO_INT(xpxl2);
-        Pt::int32_t ypxli = ypxl;
-        if(steep) {
-            for(Pt::int32_t i = from; i <= to; ++i) {
-                // Calculate the coordinates
-                Pt::int32_t refX = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli));
-                Pt::int32_t refY = i;
-                ypxli += grad;
-                // Crop the corresponding scanline
-                Scanlines::iterator it = scanlines.find(refY);
-                if(it == scanlines.end()) continue;
-                if(faceL && it->second.from < refX) it->second.from = refX;
-                if(faceR && it->second.to   > refX) it->second.to   = refX;
-            }
-        }
-        else {
-            for(Pt::int32_t i = from; i <= to; ++i) {
-                // Calculate the coordinates
-                Pt::int32_t refX  = i;
-                Pt::int32_t refYt = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           );
-                Pt::int32_t refYb = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE);
-                ypxli += grad;
-                // Crop the corresponding scanlines
-                Scanlines::iterator itt = scanlines.find(refYt);
-                Scanlines::iterator itb = scanlines.find(refYb);
-                if(itt != scanlines.end()) {
-                    if(faceL && itt->second.from < refX - 1) itt->second.from = refX - 1;
-                    if(faceR && itt->second.to   > refX    ) itt->second.to   = refX;
-                }
-                if(itb != scanlines.end()) {
-                    if(faceL && itb->second.from < refX - 1) itb->second.from = refX - 1;
-                    if(faceR && itb->second.to   > refX    ) itb->second.to   = refX;
-                }
-            }
-        }
-    }
-
-    // Crop the scanlines to the left and right side by running the Xiaolin Wu's anti-aliased line algorithm
-    // --- from (ctrX, ctrY) to (x2, y2) ---
-    if(faceL || faceR) {
-        // Convert the coordinates to fixed-points
-        Pt::int32_t fx1 = FIXED_POINT_FROM_INT(ctrX);
-        Pt::int32_t fy1 = FIXED_POINT_FROM_INT(ctrY);
-        Pt::int32_t fx2 = FIXED_POINT_FROM_INT(x2);
-        Pt::int32_t fy2 = FIXED_POINT_FROM_INT(y2);
-        // Swap the values as needed
-        const Pt::int32_t deltaX = (fx2 >= fx1) ? (fx2 - fx1) : (fx1 - fx2);
-        const Pt::int32_t deltaY = (fy2 >= fy1) ? (fy2 - fy1) : (fy1 - fy2);
-        const bool        steep  = deltaY > deltaX;
-        if(steep) {
-            std::swap(fx1, fy1);
-            std::swap(fx2, fy2);
-        }
-        if(fx1 > fx2) {
-            std::swap(fx1, fx2);
-            std::swap(fy1, fy2);
-        }
-        // Handle the gradient, starting point, and ending point
-        const Pt::int32_t grad = (fy2 - fy1) / FIXED_POINT_TO_INT(fx2 - fx1);
-        const Pt::int32_t xpxl1 = FIXED_POINT_ROUND(fx1);
-        const Pt::int32_t xpxl2 = FIXED_POINT_ROUND(fx2);
-        const Pt::int32_t ypxl  = fy1 + grad * FIXED_POINT_TO_INT(xpxl1 - fx1);
-        // Walk through the coordinates
-        Pt::int32_t from  = FIXED_POINT_TO_INT(FIXED_POINT_ROUND(fx1));
-        Pt::int32_t to    = FIXED_POINT_TO_INT(xpxl2);
-        Pt::int32_t ypxli = ypxl;
-        if(steep) {
-            for(Pt::int32_t i = from; i <= to; ++i) {
-                // Calculate the coordinates
-                Pt::int32_t refX = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli));
-                Pt::int32_t refY = i;
-                ypxli += grad;
-                // Crop the corresponding scanline
-                Scanlines::iterator it = scanlines.find(refY);
-                if(it == scanlines.end()) continue;
-                if(faceL && it->second.from < refX) it->second.from = refX;
-                if(faceR && it->second.to   > refX) it->second.to   = refX;
-            }
-        }
-        else {
-            for(Pt::int32_t i = from; i <= to; ++i) {
-                // Calculate the coordinates
-                Pt::int32_t refX  = i;
-                Pt::int32_t refYt = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           );
-                Pt::int32_t refYb = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE);
-                ypxli += grad;
-                // Crop the corresponding scanlines
-                Scanlines::iterator itt = scanlines.find(refYt);
-                Scanlines::iterator itb = scanlines.find(refYb);
-                if(itt != scanlines.end()) {
-                    if(faceL && itt->second.from < refX - 1) itt->second.from = refX - 1;
-                    if(faceR && itt->second.to   > refX    ) itt->second.to   = refX;
-                }
-                if(itb != scanlines.end()) {
-                    if(faceL && itb->second.from < refX - 1) itb->second.from = refX - 1;
-                    if(faceR && itb->second.to   > refX    ) itb->second.to   = refX;
-                }
-            }
-        }
+        runXWuAlgoToCropScanlines(x1, y1, ctrX, ctrY, faceL, faceR, faceT, faceB, scanlines);
+        runXWuAlgoToCropScanlines(ctrX, ctrY, x2, y2, faceL, faceR, faceT, faceB, scanlines);
     }
 
     // Mark the all scanlines to the left and right side that will be completely outside the shape
