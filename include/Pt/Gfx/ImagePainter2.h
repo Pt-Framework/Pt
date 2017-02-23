@@ -132,6 +132,12 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         typedef std::map<Pt::int32_t, ScanlineElement> Scanlines;
 
+        // Xiaolin Wu's anti-aliased line data
+        struct XWLineData;
+
+        // Filled-arc information structure
+        struct FilledArcInfo;
+
     protected:
         // Inline helper functions
         static inline float fastInvSqrt(float x);
@@ -144,10 +150,14 @@ class PT_GFX_API ImagePainter2 : public Painter
         static inline float convertCartesianToPolarCoordinate(float x, float y);
         static inline bool pointIsInsideArcDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd);
 
+        // Arc-related helper functions
+        static void arcUtil_runXWLineAlgorithm(XWLineData& dst, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY);
+
         // Drawing functions
         virtual void drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
         virtual void fillEllipseImplNoAA(const PointF& topLeft, const SizeF& size);
+
 
 
         /*

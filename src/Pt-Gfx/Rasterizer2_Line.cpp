@@ -142,6 +142,7 @@ void Rasterizer2::fillOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, P
                 break;                                                                          \
             }                                                                                   \
             if(skipDrawing) break;                                                              \
+            /* Fill the pixel */                                                                \
             if(_isTexture || _isGradient) {                                                     \
                 const Pt::int32_t bw = _brushImage->width();                                    \
                 const Pt::int32_t bh = _brushImage->height();                                   \
@@ -446,6 +447,7 @@ void Rasterizer2::rasterOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1,
                 break;                                                                     \
             }                                                                              \
             if(skipDrawing) break;                                                         \
+            /* Set the pixel */                                                            \
             Pixel PIX(IMG->view(), X, Y);                                                  \
             IMG->format().setPixel(PIX, COL, _compositionMode, A);                         \
         } while(false)
