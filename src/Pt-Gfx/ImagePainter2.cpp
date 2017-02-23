@@ -419,10 +419,10 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
         // Ensure that the end angle is within the acceptable range
         while(degEnd < -360) degEnd += 360;
         while(degEnd >  360) degEnd -= 360;
-        // Calculate the coordinate of the point loacted at the begin angle
+        // Calculate the approximate coordinate of the point which is located at the begin angle
         bx = round(ctrX + radX * fastCos(degBegin * Pt::Pi / 180));
         by = round(ctrY - radY * fastSin(degBegin * Pt::Pi / 180));
-        // Calculate the coordinate of the point loacted at the end angle
+        // Calculate the approximate coordinate of the point which is located at the end angle
         ex = round(ctrX + radX * fastCos(degEnd   * Pt::Pi / 180));
         ey = round(ctrY - radY * fastSin(degEnd   * Pt::Pi / 180));
     }
@@ -693,6 +693,187 @@ void ImagePainter2::fillEllipseImplNoAA( const PointF& topLeft, const SizeF& siz
 
 void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
 {
+    // Ensure that the begin angle is within the acceptable range
+    while(degBegin < -360) degBegin += 360;
+    while(degBegin >  360) degBegin -= 360;
+
+    // Ensure that the end angle is within the acceptable range
+    while(degEnd < -360) degEnd += 360;
+    while(degEnd >  360) degEnd -= 360;
+
+    // Calculate the ellipse's parameters
+    Pt::int32_t minX  = topLeft.x();
+    Pt::int32_t minY  = topLeft.y();
+    Pt::int32_t radX  = size.width () / 2;
+    Pt::int32_t radY  = size.height() / 2;
+    Pt::int32_t ctrX  = minX + radX;
+    Pt::int32_t ctrY  = minY + radY;
+    Pt::int32_t radX2 = radX * radX;
+    Pt::int32_t radY2 = radY * radY;
+
+    // Calculate the approximate coordinate of the point which is located at the begin angle
+    const Pt::int32_t bx = round(ctrX + radX * fastCos(degBegin * Pt::Pi / 180));
+    const Pt::int32_t by = round(ctrY - radY * fastSin(degBegin * Pt::Pi / 180));
+
+    // Calculate the approximate coordinate of the point which is located at the end angle
+    const Pt::int32_t ex = round(ctrX + radX * fastCos(degEnd   * Pt::Pi / 180));
+    const Pt::int32_t ey = round(ctrY - radY * fastSin(degEnd   * Pt::Pi / 180));
+
+    // Used for finding the exact coordinate of the points which are located at the begin and end angle
+    Pt::int32_t x1 = 0, x1d = MAXIMUM_COORD;
+    Pt::int32_t y1 = 0, y1d = MAXIMUM_COORD;
+    Pt::int32_t x2 = 0, x2d = MAXIMUM_COORD;
+    Pt::int32_t y2 = 0, y2d = MAXIMUM_COORD;
+
+    // Top and bottom halves
+    Pt::int32_t quarters = round( radX2 * fastInvSqrt(radX2 + radY2) );
+
+    for(Pt::int32_t x = 0; x <= quarters; ++x) {
+        // Calculate the coordinate and alpha
+        const float       y     = radY * fastSqrt(1 - (float) x * x / radX2);
+        const float       error = y - floor(y);
+        const Pt::uint8_t alpha = round(error * 255);
+        // Without anti-aliasing
+        if(_rasterizer->antiAliasingMode() == AntiAliasingMode::None) {
+            // Calculate the coordinates
+            const Pt::int32_t xl = ctrX - x;
+            const Pt::int32_t xr = ctrX + x;
+            const Pt::int32_t yt = ctrY - round(y);
+            const Pt::int32_t yb = ctrY + round(y);
+             // Draw the pixels
+             const bool mask[4] = {
+                 insideDegRange(xl, yt, ctrX, ctrY, degBegin, degEnd),
+                 insideDegRange(xl, yb, ctrX, ctrY, degBegin, degEnd),
+                 insideDegRange(xr, yt, ctrX, ctrY, degBegin, degEnd),
+                 insideDegRange(xr, yb, ctrX, ctrY, degBegin, degEnd)
+             };
+            _rasterizer->fill4Pixels(xl, yt, xr, yb, minX, minY, mask);
+             // Determine the coordinates of the closing lines
+            if(abs(xl - bx) < x1d) { x1d = abs(xl - bx); x1 = xl; }
+            if(abs(xl - ex) < x2d) { x2d = abs(xl - ex); x2 = xl; }
+            if(abs(xr - bx) < x1d) { x1d = abs(xr - bx); x1 = xr; }
+            if(abs(xr - ex) < x2d) { x2d = abs(xr - ex); x2 = xr; }
+            if(abs(yt - by) < y1d) { y1d = abs(yt - by); y1 = yt; }
+            if(abs(yt - ey) < y2d) { y2d = abs(yt - ey); y2 = yt; }
+            if(abs(yb - by) < y1d) { y1d = abs(yb - by); y1 = yb; }
+            if(abs(yb - ey) < y2d) { y2d = abs(yb - ey); y2 = yb; }
+        }
+        // With anti-aliasing
+        else {
+            // Calculate the coordinates
+            const Pt::int32_t xl  = ctrX - x;
+            const Pt::int32_t xr  = ctrX + x;
+            const Pt::int32_t yt0 = ctrY - floor(y);
+            const Pt::int32_t yb0 = ctrY + floor(y);
+            const Pt::int32_t yt1 = ctrY - floor(y) - 1;
+            const Pt::int32_t yb1 = ctrY + floor(y) + 1;
+            // Draw the pixels
+            const bool mask0[4] = {
+                insideDegRange(xl, yt0, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(xl, yb0, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(xr, yt0, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(xr, yb0, ctrX, ctrY, degBegin, degEnd)
+            };
+            const bool mask1[4] = {
+                insideDegRange(xl, yt1, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(xl, yb1, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(xr, yt1, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(xr, yb1, ctrX, ctrY, degBegin, degEnd)
+            };
+            const Pt::uint8_t a0 = Rasterizer2::XWAA_WFILTER[      alpha];
+            const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[255 - alpha];
+            _rasterizer->fill4Pixels(xl, yt0, xr, yb0, minX, minY, a0, mask0);
+            _rasterizer->fill4Pixels(xl, yt1, xr, yb1, minX, minY, a1, mask1);
+            // Determine the coordinates of the closing lines
+            if(abs(xl  - bx) < x1d) { x1d = abs(xl  - bx); x1 = xl;  }
+            if(abs(xl  - ex) < x2d) { x2d = abs(xl  - ex); x2 = xl;  }
+            if(abs(xr  - bx) < x1d) { x1d = abs(xr  - bx); x1 = xr;  }
+            if(abs(xr  - ex) < x2d) { x2d = abs(xr  - ex); x2 = xr;  }
+            if(abs(yt0 - by) < y1d) { y1d = abs(yt0 - by); y1 = yt0; }
+            if(abs(yt0 - ey) < y2d) { y2d = abs(yt0 - ey); y2 = yt0; }
+            if(abs(yb0 - by) < y1d) { y1d = abs(yb0 - by); y1 = yb0; }
+            if(abs(yb0 - ey) < y2d) { y2d = abs(yb0 - ey); y2 = yb0; }
+            if(abs(yt1 - by) < y1d) { y1d = abs(yt1 - by); y1 = yt1; }
+            if(abs(yt1 - ey) < y2d) { y2d = abs(yt1 - ey); y2 = yt1; }
+            if(abs(yb1 - by) < y1d) { y1d = abs(yb1 - by); y1 = yb1; }
+            if(abs(yb1 - ey) < y2d) { y2d = abs(yb1 - ey); y2 = yb1; }
+        }
+    }
+
+    // Left and right halves
+    quarters = round( radY2 * fastInvSqrt(radX2 + radY2) );
+
+    for(Pt::int32_t y = 0; y <= quarters; ++y) {
+        // Calculate the coordinate and alpha
+        const float       x     = radX * fastSqrt(1 - (float) y * y / radY2);
+        const float       error = x - floor(x);
+        const Pt::uint8_t alpha = round(error * 255);
+        // Without anti-aliasing
+        if(_rasterizer->antiAliasingMode() == AntiAliasingMode::None) {
+            // Calculate the coordinates
+            const Pt::int32_t xl = ctrX - round(x);
+            const Pt::int32_t xr = ctrX + round(x);
+            const Pt::int32_t yt = ctrY - y;
+            const Pt::int32_t yb = ctrY + y;
+             // Draw the pixels
+             const bool mask[4] = {
+                 insideDegRange(xl, yt, ctrX, ctrY, degBegin, degEnd),
+                 insideDegRange(xl, yb, ctrX, ctrY, degBegin, degEnd),
+                 insideDegRange(xr, yt, ctrX, ctrY, degBegin, degEnd),
+                 insideDegRange(xr, yb, ctrX, ctrY, degBegin, degEnd)
+             };
+            _rasterizer->fill4Pixels(xl, yt, xr, yb, minX, minY, mask);
+             // Determine the coordinates of the closing lines
+            if(abs(xl - bx) < x1d) { x1d = abs(xl - bx); x1 = xl; }
+            if(abs(xl - ex) < x2d) { x2d = abs(xl - ex); x2 = xl; }
+            if(abs(xr - bx) < x1d) { x1d = abs(xr - bx); x1 = xr; }
+            if(abs(xr - ex) < x2d) { x2d = abs(xr - ex); x2 = xr; }
+            if(abs(yt - by) < y1d) { y1d = abs(yt - by); y1 = yt; }
+            if(abs(yt - ey) < y2d) { y2d = abs(yt - ey); y2 = yt; }
+            if(abs(yb - by) < y1d) { y1d = abs(yb - by); y1 = yb; }
+            if(abs(yb - ey) < y2d) { y2d = abs(yb - ey); y2 = yb; }
+        }
+        // With anti-aliasing
+        else {
+            // Calculate the coordinates
+            const Pt::int32_t xl0 = ctrX - floor(x);
+            const Pt::int32_t xr0 = ctrX + floor(x);
+            const Pt::int32_t xl1 = ctrX - floor(x) - 1;
+            const Pt::int32_t xr1 = ctrX + floor(x) + 1;
+            const Pt::int32_t yt  = ctrY - y;
+            const Pt::int32_t yb  = ctrY + y;
+             // Draw the pixels
+             const bool mask0[4] = {
+                 insideDegRange(xl0, yt, ctrX, ctrY, degBegin, degEnd),
+                 insideDegRange(xl0, yb, ctrX, ctrY, degBegin, degEnd),
+                 insideDegRange(xr0, yt, ctrX, ctrY, degBegin, degEnd),
+                 insideDegRange(xr0, yb, ctrX, ctrY, degBegin, degEnd)
+             };
+             const bool mask1[4] = {
+                 insideDegRange(xl1, yt, ctrX, ctrY, degBegin, degEnd),
+                 insideDegRange(xl1, yb, ctrX, ctrY, degBegin, degEnd),
+                 insideDegRange(xr1, yt, ctrX, ctrY, degBegin, degEnd),
+                 insideDegRange(xr1, yb, ctrX, ctrY, degBegin, degEnd)
+             };
+            const Pt::uint8_t a0 = Rasterizer2::XWAA_WFILTER[      alpha];
+            const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[255 - alpha];
+            _rasterizer->fill4Pixels(xl0, yt, xr0, yb, minX, minY, a0, mask0);
+            _rasterizer->fill4Pixels(xl1, yt, xr1, yb, minX, minY, a1, mask1);
+            // Determine the coordinates of the closing lines
+            if(abs(xl0 - bx) < x1d) { x1d = abs(xl0 - bx); x1 = xl0; }
+            if(abs(xl0 - ex) < x2d) { x2d = abs(xl0 - ex); x2 = xl0; }
+            if(abs(xr0 - bx) < x1d) { x1d = abs(xr0 - bx); x1 = xr0; }
+            if(abs(xr0 - ex) < x2d) { x2d = abs(xr0 - ex); x2 = xr0; }
+            if(abs(xl1 - bx) < x1d) { x1d = abs(xl1 - bx); x1 = xl1; }
+            if(abs(xl1 - ex) < x2d) { x2d = abs(xl1 - ex); x2 = xl1; }
+            if(abs(xr1 - bx) < x1d) { x1d = abs(xr1 - bx); x1 = xr1; }
+            if(abs(xr1 - ex) < x2d) { x2d = abs(xr1 - ex); x2 = xr1; }
+            if(abs(yt  - by) < y1d) { y1d = abs(yt  - by); y1 = yt;  }
+            if(abs(yt  - ey) < y2d) { y2d = abs(yt  - ey); y2 = yt;  }
+            if(abs(yb  - by) < y1d) { y1d = abs(yb  - by); y1 = yb;  }
+            if(abs(yb  - ey) < y2d) { y2d = abs(yb  - ey); y2 = yb;  }
+        }
+    }
 }
 
 void ImagePainter2::fillArcPieImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
