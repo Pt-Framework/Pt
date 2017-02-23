@@ -646,7 +646,7 @@ void Widget::show(bool s)
     ShowEvent ev(vid(), s);
     Application::instance().loop().commitEvent(ev);
 
-    invalidate();
+    update();
 }
 
 
