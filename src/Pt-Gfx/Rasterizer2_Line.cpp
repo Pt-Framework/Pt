@@ -106,7 +106,7 @@ void Rasterizer2::strokeOnePixelSolidLine(const Point& a, const Point& b, DrawLi
 
 // Xiaolin Wu's Anti-Aliased Line Algorithm
 // https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
-void Rasterizer2::fillOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, DrawLineMask* maskInOut)
+void Rasterizer2::fillOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const std::map<Pt::int32_t, Pt::int32_t>* exclusionZone, DrawLineMask* maskInOut)
 {
     // Get the mask's coordinate as needed
     Pt::int32_t mx[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
@@ -126,29 +126,33 @@ void Rasterizer2::fillOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, P
     Pt::int32_t fy2 = FIXED_POINT_FROM_INT(y2);
 
     // A helper macro to fill pixel
-    #define XW_FILL_PIXEL(IMG, X, Y, A)                                                     \
-        do {                                                                                \
-            /* Check the boundary limit, just in case */                                    \
-            if( (X) < 0 || (X) >= IMG->width() || (Y) < 0 || (Y) >= IMG->height() ) break;  \
-            /* Check if we should skip drawing the pixel */                                 \
-            bool skipDrawing = false;                                                       \
-            for(Pt::int32_t j = 0; j < 4; ++j) {                                            \
-                if( (X) != mx[j] || (Y) != my[j] ) continue;                                \
-                skipDrawing = true;                                                         \
-                break;                                                                      \
-            }                                                                               \
-            if(skipDrawing) break;                                                          \
-            if(_isTexture || _isGradient) {                                                 \
-                const Pt::int32_t bw = _brushImage->width();                                \
-                const Pt::int32_t bh = _brushImage->height();                               \
-                ConstPixel srcPixel(_brushImage->view(), (X - minX) % bw, (Y - minY) % bh); \
-                Pixel      dstPixel(IMG->view(), X, Y);                                     \
-                _image->format().setPixel(dstPixel, srcPixel, _compositionMode, A);         \
-            }                                                                               \
-            else {                                                                          \
-                Pixel pixel(IMG->view(), X, Y);                                             \
-                _image->format().setPixel(pixel, _brush.color(), _compositionMode, A);      \
-            }                                                                               \
+    #define XW_FILL_PIXEL(IMG, X, Y, A)                                                         \
+        do {                                                                                    \
+            /* Check the boundary limit, just in case */                                        \
+            if( (X) < 0 || (X) >= IMG->width() || (Y) < 0 || (Y) >= IMG->height() ) break;      \
+            /* Check if we should skip drawing the pixel */                                     \
+            bool skipDrawing = false;                                                           \
+            if(exclusionZone) {                                                                 \
+                std::map<Pt::int32_t, Pt::int32_t>::const_iterator xt = exclusionZone->find(Y); \
+                skipDrawing = ( xt != exclusionZone->end() ) && ( xt->second == X );            \
+            }                                                                                   \
+            for(Pt::int32_t j = 0; !skipDrawing && j < 4; ++j) {                                \
+                if( (X) != mx[j] || (Y) != my[j] ) continue;                                    \
+                skipDrawing = true;                                                             \
+                break;                                                                          \
+            }                                                                                   \
+            if(skipDrawing) break;                                                              \
+            if(_isTexture || _isGradient) {                                                     \
+                const Pt::int32_t bw = _brushImage->width();                                    \
+                const Pt::int32_t bh = _brushImage->height();                                   \
+                ConstPixel srcPixel(_brushImage->view(), (X - minX) % bw, (Y - minY) % bh);     \
+                Pixel      dstPixel(IMG->view(), X, Y);                                         \
+                _image->format().setPixel(dstPixel, srcPixel, _compositionMode, A);             \
+            }                                                                                   \
+            else {                                                                              \
+                Pixel pixel(IMG->view(), X, Y);                                                 \
+                _image->format().setPixel(pixel, _brush.color(), _compositionMode, A);          \
+            }                                                                                   \
         } while(false)
 
     // Swap the values as needed

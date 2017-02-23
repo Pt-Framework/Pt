@@ -1113,7 +1113,14 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
     }
 
     // Draw the closing line
-    _rasterizer->fillOnePixelGLineSegmentXWAA(x1, y1, x2, y2, minX, minY, 0);
+    std::map<Pt::int32_t, Pt::int32_t> exclusionZone;
+
+    for(Scanlines::const_iterator it = scanlines.begin(); it != scanlines.end(); ++it) {
+        if(faceL) exclusionZone[it->first] = it->second.from;
+        if(faceR) exclusionZone[it->first] = it->second.to;
+    }
+
+    _rasterizer->fillOnePixelGLineSegmentXWAA(x1, y1, x2, y2, minX, minY, &exclusionZone, 0);
 }
 
 void ImagePainter2::fillArcPieImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
