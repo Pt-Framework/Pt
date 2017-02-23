@@ -222,7 +222,6 @@ void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
     _rasterizer->fillPolygon(points.data(), pointCount);
 }
 
-// Inspired by http://create.stephan-brumme.com/antialiased-circle
 void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
 {
     drawOnePixelSolidEllipseArcImpl(topLeft, size, 0, 0, ArcMode::Open);
@@ -391,6 +390,7 @@ void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float deg
 // ===== Private Member Functions =======================================================
 // ======================================================================================
 
+// Inspired by http://create.stephan-brumme.com/antialiased-circle
 void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode)
 {
     // IMPORTANT NOTES:
@@ -460,7 +460,7 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
                     insideDegRange(xr, yb, ctrX, ctrY, degBegin, degEnd)
                 };
                 _rasterizer->stroke4Pixels(xl, yt, xr, yb, mask);
-                // Determine the coordinates of the closing lines
+                // Determine the exact coordinates of the closing lines
                 if(arcMode == ArcMode::Open) continue;
                 if(abs(xl - bx) < x1d) { x1d = abs(xl - bx); x1 = xl; }
                 if(abs(xl - ex) < x2d) { x2d = abs(xl - ex); x2 = xl; }
@@ -504,7 +504,7 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
                 const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[255 - alpha];
                 _rasterizer->stroke4Pixels(xl, yt0, xr, yb0, a0, mask0);
                 _rasterizer->stroke4Pixels(xl, yt1, xr, yb1, a1, mask1);
-                // Determine the coordinates of the closing lines
+                // Determine the exact coordinates of the closing lines
                 if(arcMode == ArcMode::Open) continue;
                 if(abs(xl  - bx) < x1d) { x1d = abs(xl  - bx); x1 = xl;  }
                 if(abs(xl  - ex) < x2d) { x2d = abs(xl  - ex); x2 = xl;  }
@@ -554,7 +554,7 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
                     insideDegRange(xr, yb, ctrX, ctrY, degBegin, degEnd)
                 };
                 _rasterizer->stroke4Pixels(xl, yt, xr, yb, mask);
-                // Determine the coordinates of the closing lines
+                // Determine the exact coordinates of the closing lines
                 if(arcMode == ArcMode::Open) continue;
                 if(abs(xl - bx) < x1d) { x1d = abs(xl - bx); x1 = xl; }
                 if(abs(xl - ex) < x2d) { x2d = abs(xl - ex); x2 = xl; }
@@ -598,7 +598,7 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
                 const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[255 - alpha];
                 _rasterizer->stroke4Pixels(xl0, yt, xr0, yb, a0, mask0);
                 _rasterizer->stroke4Pixels(xl1, yt, xr1, yb, a1, mask1);
-                // Determine the coordinates of the closing lines
+                // Determine the exact coordinates of the closing lines
                 if(arcMode == ArcMode::Open) continue;
                 if(abs(xl0 - bx) < x1d) { x1d = abs(xl0 - bx); x1 = xl0; }
                 if(abs(xl0 - ex) < x2d) { x2d = abs(xl0 - ex); x2 = xl0; }
@@ -699,6 +699,7 @@ void ImagePainter2::fillEllipseImplNoAA( const PointF& topLeft, const SizeF& siz
         _rasterizer->fillOneScanlineNoAA(xc - a,  xc + a, yc, minX, minY);
 }
 
+// Inspired by http://create.stephan-brumme.com/antialiased-circle
 void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
 {
     // IMPORTANT NOTES:
@@ -761,7 +762,7 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
             const Pt::int32_t xr = ctrX + x;
             const Pt::int32_t yt = ctrY - round(y);
             const Pt::int32_t yb = ctrY + round(y);
-             // Determine the coordinates of the closing lines
+            // Determine the exact coordinates of the closing lines
             if(abs(xl - bx) < x1d) { x1d = abs(xl - bx); x1 = xl; }
             if(abs(xl - ex) < x2d) { x2d = abs(xl - ex); x2 = xl; }
             if(abs(xr - bx) < x1d) { x1d = abs(xr - bx); x1 = xr; }
@@ -791,62 +792,36 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
         // With anti-aliasing
         else {
             // Calculate the coordinates
-            const Pt::int32_t xl  = ctrX - x;
-            const Pt::int32_t xr  = ctrX + x;
-            const Pt::int32_t yt0 = ctrY - floor(y);
-            const Pt::int32_t yb0 = ctrY + floor(y);
-            const Pt::int32_t yt1 = ctrY - floor(y) - 1;
-            const Pt::int32_t yb1 = ctrY + floor(y) + 1;
-            // Determine the coordinates of the closing lines
-            if(abs(xl  - bx) < x1d) { x1d = abs(xl  - bx); x1 = xl;  }
-            if(abs(xl  - ex) < x2d) { x2d = abs(xl  - ex); x2 = xl;  }
-            if(abs(xr  - bx) < x1d) { x1d = abs(xr  - bx); x1 = xr;  }
-            if(abs(xr  - ex) < x2d) { x2d = abs(xr  - ex); x2 = xr;  }
-            if(abs(yt0 - by) < y1d) { y1d = abs(yt0 - by); y1 = yt0; }
-            if(abs(yt0 - ey) < y2d) { y2d = abs(yt0 - ey); y2 = yt0; }
-            if(abs(yb0 - by) < y1d) { y1d = abs(yb0 - by); y1 = yb0; }
-            if(abs(yb0 - ey) < y2d) { y2d = abs(yb0 - ey); y2 = yb0; }
-            /*
-            if(abs(yt1 - by) < y1d) { y1d = abs(yt1 - by); y1 = yt1; }
-            if(abs(yt1 - ey) < y2d) { y2d = abs(yt1 - ey); y2 = yt1; }
-            if(abs(yb1 - by) < y1d) { y1d = abs(yb1 - by); y1 = yb1; }
-            if(abs(yb1 - ey) < y2d) { y2d = abs(yb1 - ey); y2 = yb1; }
-            */
+            const Pt::int32_t xl = ctrX - x;
+            const Pt::int32_t xr = ctrX + x;
+            const Pt::int32_t yt = ctrY - floor(y);
+            const Pt::int32_t yb = ctrY + floor(y);
+            // Determine the exact coordinates of the closing lines
+            if(abs(xl - bx) < x1d) { x1d = abs(xl - bx); x1 = xl; }
+            if(abs(xl - ex) < x2d) { x2d = abs(xl - ex); x2 = xl; }
+            if(abs(xr - bx) < x1d) { x1d = abs(xr - bx); x1 = xr; }
+            if(abs(xr - ex) < x2d) { x2d = abs(xr - ex); x2 = xr; }
+            if(abs(yt - by) < y1d) { y1d = abs(yt - by); y1 = yt; }
+            if(abs(yt - ey) < y2d) { y2d = abs(yt - ey); y2 = yt; }
+            if(abs(yb - by) < y1d) { y1d = abs(yb - by); y1 = yb; }
+            if(abs(yb - ey) < y2d) { y2d = abs(yb - ey); y2 = yb; }
             // Store/update the scanline coordinates
-            Scanlines::iterator it10 = scanlines.find(yt0);
-            Scanlines::iterator it20 = scanlines.find(yb0);
-            if(it10 == scanlines.end()) { // Insert a new element
-                scanlines.insert( std::make_pair( yt0, ScanlineElement(xl, xr) ) );
+            Scanlines::iterator it1 = scanlines.find(yt);
+            Scanlines::iterator it2 = scanlines.find(yb);
+            if(it1 == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yt, ScanlineElement(xl, xr) ) );
             }
             else { // Update the scanline's "from" and "to" coordinates
-                if( xl < it10->second.from ) it10->second.from = xl;
-                if( xr > it10->second.to   ) it10->second.to   = xr;
+                if( xl < it1->second.from ) it1->second.from = xl;
+                if( xr > it1->second.to   ) it1->second.to   = xr;
             }
-            if(it20 == scanlines.end()) { // Insert a new element
-                scanlines.insert( std::make_pair( yb0, ScanlineElement(xl, xr) ) );
-            }
-            else { // Update the scanline's "from" and "to" coordinates
-                if( xl < it20->second.from ) it20->second.from = xl;
-                if( xr > it20->second.to   ) it20->second.to   = xr;
-            }
-            /*
-            Scanlines::iterator it11 = scanlines.find(yt1);
-            Scanlines::iterator it21 = scanlines.find(yb1);
-            if(it11 == scanlines.end()) { // Insert a new element
-                scanlines.insert( std::make_pair( yt1, ScanlineElement(xl, xr) ) );
+            if(it2 == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yb, ScanlineElement(xl, xr) ) );
             }
             else { // Update the scanline's "from" and "to" coordinates
-                if( xl < it11->second.from ) it11->second.from = xl;
-                if( xr > it11->second.to   ) it11->second.to   = xr;
+                if( xl < it2->second.from ) it2->second.from = xl;
+                if( xr > it2->second.to   ) it2->second.to   = xr;
             }
-            if(it21 == scanlines.end()) { // Insert a new element
-                scanlines.insert( std::make_pair( yb1, ScanlineElement(xl, xr) ) );
-            }
-            else { // Update the scanline's "from" and "to" coordinates
-                if( xl < it21->second.from ) it21->second.from = xl;
-                if( xr > it21->second.to   ) it21->second.to   = xr;
-            }
-            */
         }
     }
 
@@ -863,7 +838,7 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
             const Pt::int32_t xr = ctrX + round(x);
             const Pt::int32_t yt = ctrY - y;
             const Pt::int32_t yb = ctrY + y;
-             // Determine the coordinates of the closing lines
+            // Determine the exact coordinates of the closing lines
             if(abs(xl - bx) < x1d) { x1d = abs(xl - bx); x1 = xl; }
             if(abs(xl - ex) < x2d) { x2d = abs(xl - ex); x2 = xl; }
             if(abs(xr - bx) < x1d) { x1d = abs(xr - bx); x1 = xr; }
@@ -893,45 +868,35 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
         // With anti-aliasing
         else {
             // Calculate the coordinates
-            const Pt::int32_t xl0 = ctrX - floor(x);
-            const Pt::int32_t xr0 = ctrX + floor(x);
-            const Pt::int32_t xl1 = ctrX - floor(x) - 1;
-            const Pt::int32_t xr1 = ctrX + floor(x) + 1;
-            const Pt::int32_t yt  = ctrY - y;
-            const Pt::int32_t yb  = ctrY + y;
-            // Determine the coordinates of the closing lines
-            if(abs(xl0 - bx) < x1d) { x1d = abs(xl0 - bx); x1 = xl0; }
-            if(abs(xl0 - ex) < x2d) { x2d = abs(xl0 - ex); x2 = xl0; }
-            if(abs(xr0 - bx) < x1d) { x1d = abs(xr0 - bx); x1 = xr0; }
-            if(abs(xr0 - ex) < x2d) { x2d = abs(xr0 - ex); x2 = xr0; }
-            /*
-            if(abs(xl1 - bx) < x1d) { x1d = abs(xl1 - bx); x1 = xl1; }
-            if(abs(xl1 - ex) < x2d) { x2d = abs(xl1 - ex); x2 = xl1; }
-            if(abs(xr1 - bx) < x1d) { x1d = abs(xr1 - bx); x1 = xr1; }
-            if(abs(xr1 - ex) < x2d) { x2d = abs(xr1 - ex); x2 = xr1; }
-            */
-            if(abs(yt  - by) < y1d) { y1d = abs(yt  - by); y1 = yt;  }
-            if(abs(yt  - ey) < y2d) { y2d = abs(yt  - ey); y2 = yt;  }
-            if(abs(yb  - by) < y1d) { y1d = abs(yb  - by); y1 = yb;  }
-            if(abs(yb  - ey) < y2d) { y2d = abs(yb  - ey); y2 = yb;  }
+            const Pt::int32_t xl = ctrX - floor(x);
+            const Pt::int32_t xr = ctrX + floor(x);
+            const Pt::int32_t yt = ctrY - y;
+            const Pt::int32_t yb = ctrY + y;
+            // Determine the exact coordinates of the closing lines
+            if(abs(xl - bx) < x1d) { x1d = abs(xl - bx); x1 = xl; }
+            if(abs(xl - ex) < x2d) { x2d = abs(xl - ex); x2 = xl; }
+            if(abs(xr - bx) < x1d) { x1d = abs(xr - bx); x1 = xr; }
+            if(abs(xr - ex) < x2d) { x2d = abs(xr - ex); x2 = xr; }
+            if(abs(yt - by) < y1d) { y1d = abs(yt - by); y1 = yt; }
+            if(abs(yt - ey) < y2d) { y2d = abs(yt - ey); y2 = yt; }
+            if(abs(yb - by) < y1d) { y1d = abs(yb - by); y1 = yb; }
+            if(abs(yb - ey) < y2d) { y2d = abs(yb - ey); y2 = yb; }
             // Store/update the scanline coordinates
-            const Pt::int32_t   xlm = std::max(xl0, xl1);
-            const Pt::int32_t   xrm = std::min(xr0, xr1);
             Scanlines::iterator it1 = scanlines.find(yt);
             Scanlines::iterator it2 = scanlines.find(yb);
             if(it1 == scanlines.end()) { // Insert a new element
-                scanlines.insert( std::make_pair( yt, ScanlineElement(xlm, xrm) ) );
+                scanlines.insert( std::make_pair( yt, ScanlineElement(xl, xr) ) );
             }
             else { // Update the scanline's "from" and "to" coordinates
-                if( xlm < it1->second.from ) it1->second.from = xlm;
-                if( xrm > it1->second.to   ) it1->second.to   = xrm;
+                if( xl < it1->second.from ) it1->second.from = xl;
+                if( xr > it1->second.to   ) it1->second.to   = xr;
             }
             if(it2 == scanlines.end()) { // Insert a new element
-                scanlines.insert( std::make_pair( yb, ScanlineElement(xlm, xrm) ) );
+                scanlines.insert( std::make_pair( yb, ScanlineElement(xl, xr) ) );
             }
             else { // Update the scanline's "from" and "to" coordinates
-                if( xlm < it2->second.from ) it2->second.from = xlm;
-                if( xrm > it2->second.to   ) it2->second.to   = xrm;
+                if( xl < it2->second.from ) it2->second.from = xl;
+                if( xr > it2->second.to   ) it2->second.to   = xr;
             }
         }
     }
