@@ -260,7 +260,7 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
         ip2->drawText( PointF(30 + 800, 30 + 200), "XWAA" );
 
         ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
-        ip2->fillArc( PointF (30 + 800, 50 + 400), SizeF(135, 135), 120 + 0, 240 + 0, ArcMode::Chord/*Pie*/ );
+        ip2->fillArc( PointF (30 + 800, 50 + 400), SizeF(135, 135), 120 + 3, 240 + 3, ArcMode::Chord/*Pie*/ );
         ip2->drawText( PointF(30 + 800, 30 + 400), "XWAA" );
     }
 

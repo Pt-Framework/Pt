@@ -925,8 +925,6 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
     if(faceT) scanlines.erase(scanlines.begin(),                           scanlines.lower_bound(std::min(y1, y2) + 1));
     if(faceB) scanlines.erase(scanlines.upper_bound(std::max(y1, y2) - 1), scanlines.end()                            );
 
-    // Remove the all scanlines to the left and right side that will be completely outside the shape
-
     // Crop the scanlines to the left and right side by running the Xiaolin Wu's anti-aliased line algorithm
     if(faceL || faceR) {
         // Convert the coordinates to fixed-points
@@ -987,6 +985,32 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
                     if(faceR && itb->second.to   > refX    ) itb->second.to   = refX;
                 }
             }
+        }
+    }
+
+    // Mark the all scanlines to the left and right side that will be completely outside the shape
+    const Pt::int32_t xlMin = std::min(x1, x2);
+    const Pt::int32_t xlMax = std::max(x1, x2);
+
+    for(Scanlines::iterator it = scanlines.begin(); it != scanlines.lower_bound(std::min(y1, y2) + 1); ++it) {
+        if(faceL && it->second.to < xlMin) {
+            it->second.from =  Painter::MaximumCoordinate;
+            it->second.to   = -Painter::MaximumCoordinate;
+        }
+        if(faceR && it->second.from > xlMax) {
+            it->second.from =  Painter::MaximumCoordinate;
+            it->second.to   = -Painter::MaximumCoordinate;
+        }
+    }
+
+    for(Scanlines::iterator it = scanlines.upper_bound(std::max(y1, y2) - 1); it != scanlines.end(); ++it) {
+        if(faceL && it->second.to < xlMin) {
+            it->second.from =  Painter::MaximumCoordinate;
+            it->second.to   = -Painter::MaximumCoordinate;
+        }
+        if(faceR && it->second.from > xlMax) {
+            it->second.from =  Painter::MaximumCoordinate;
+            it->second.to   = -Painter::MaximumCoordinate;
         }
     }
 
