@@ -90,6 +90,9 @@ void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float deg
             fillArcPieImpl(fai);
             break;
     }
+
+    // Just for debugging
+    drawArc(topLeft, size, degBegin, degEnd, arcMode);
 }
 
 
@@ -105,6 +108,8 @@ void ImagePainter2::fillArcChordImpl(FilledArcInfo& fai)
 
     // Find the direction that the line is facing to
     arcUtil_detXWLineDirection(line, fai.x1, fai.y1, fai.x2, fai.y2);
+
+    //lprintf("l=%d r=%d t=%d b=%d\n", line.faceL, line.faceR, line.faceT, line.faceB);
 
     // Generate scanlines data
     Scanlines scanlines;
@@ -241,6 +246,18 @@ void ImagePainter2::arcUtil_runXWLineAlgorithm(XWLineData& dst, Pt::int32_t x1, 
 
 void ImagePainter2::arcUtil_genScanlinesForChord(FilledArcInfo& fai, XWLineData& xwLine, Scanlines& scanlines)
 {
+    // Find the line's minimum and maximum Y coordinates
+    Pt::int32_t lineMinY, lineMaxY;
+
+    if(xwLine.steep) {
+        lineMinY = xwLine.points.front().y;
+        lineMaxY = xwLine.points.back ().y;
+    }
+    else {
+        lineMinY = xwLine.points.front().y;
+        lineMaxY = xwLine.points.back ().y + 1;
+    }
+
     // Top and bottom halves
     for(Pt::int32_t x = 0; x <= fai.quartersX; ++x) {
         // Calculate the coordinate
@@ -250,21 +267,25 @@ void ImagePainter2::arcUtil_genScanlinesForChord(FilledArcInfo& fai, XWLineData&
         const Pt::int32_t yt = fai.ctrY - ( fai.antiAlias ? floor(y) : round(y) );
         const Pt::int32_t yb = fai.ctrY + ( fai.antiAlias ? floor(y) : round(y) );
         // Store/update the scanline coordinates
-        Scanlines::iterator it1 = scanlines.find(yt);
-        Scanlines::iterator it2 = scanlines.find(yb);
-        if(it1 == scanlines.end()) { // Insert a new element
-            scanlines.insert( std::make_pair( yt, ScanlineElement(xl, xr) ) );
+        if( (!xwLine.faceT && !xwLine.faceB) || (xwLine.faceT && yt >= lineMinY) || (xwLine.faceB && yt <= lineMaxY) ) {
+            Scanlines::iterator it = scanlines.find(yt);
+            if(it == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yt, ScanlineElement(xl, xr) ) );
+            }
+            else { // Update the scanline's "from" and "to" coordinates
+                if( xl < it->second.from ) it->second.from = xl;
+                if( xr > it->second.to   ) it->second.to   = xr;
+            }
         }
-        else { // Update the scanline's "from" and "to" coordinates
-            if( xl < it1->second.from ) it1->second.from = xl;
-            if( xr > it1->second.to   ) it1->second.to   = xr;
-        }
-        if(it2 == scanlines.end()) { // Insert a new element
-            scanlines.insert( std::make_pair( yb, ScanlineElement(xl, xr) ) );
-        }
-        else { // Update the scanline's "from" and "to" coordinates
-            if( xl < it2->second.from ) it2->second.from = xl;
-            if( xr > it2->second.to   ) it2->second.to   = xr;
+        if( (!xwLine.faceT && !xwLine.faceB) || (xwLine.faceT && yb >= lineMinY) || (xwLine.faceB && yb <= lineMaxY) ) {
+            Scanlines::iterator it = scanlines.find(yb);
+            if(it == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yb, ScanlineElement(xl, xr) ) );
+            }
+            else { // Update the scanline's "from" and "to" coordinates
+                if( xl < it->second.from ) it->second.from = xl;
+                if( xr > it->second.to   ) it->second.to   = xr;
+            }
         }
     }
 
@@ -277,21 +298,25 @@ void ImagePainter2::arcUtil_genScanlinesForChord(FilledArcInfo& fai, XWLineData&
         const Pt::int32_t yt = fai.ctrY - y;
         const Pt::int32_t yb = fai.ctrY + y;
         // Store/update the scanline coordinates
-        Scanlines::iterator it1 = scanlines.find(yt);
-        Scanlines::iterator it2 = scanlines.find(yb);
-        if(it1 == scanlines.end()) { // Insert a new element
-            scanlines.insert( std::make_pair( yt, ScanlineElement(xl, xr) ) );
+        if( (!xwLine.faceT && !xwLine.faceB) || (xwLine.faceT && yt >= lineMinY) || (xwLine.faceB && yt <= lineMaxY) ) {
+            Scanlines::iterator it = scanlines.find(yt);
+            if(it == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yt, ScanlineElement(xl, xr) ) );
+            }
+            else { // Update the scanline's "from" and "to" coordinates
+                if( xl < it->second.from ) it->second.from = xl;
+                if( xr > it->second.to   ) it->second.to   = xr;
+            }
         }
-        else { // Update the scanline's "from" and "to" coordinates
-            if( xl < it1->second.from ) it1->second.from = xl;
-            if( xr > it1->second.to   ) it1->second.to   = xr;
-        }
-        if(it2 == scanlines.end()) { // Insert a new element
-            scanlines.insert( std::make_pair( yb, ScanlineElement(xl, xr) ) );
-        }
-        else { // Update the scanline's "from" and "to" coordinates
-            if( xl < it2->second.from ) it2->second.from = xl;
-            if( xr > it2->second.to   ) it2->second.to   = xr;
+        if( (!xwLine.faceT && !xwLine.faceB) || (xwLine.faceT && yb >= lineMinY) || (xwLine.faceB && yb <= lineMaxY) ) {
+            Scanlines::iterator it = scanlines.find(yb);
+            if(it == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yb, ScanlineElement(xl, xr) ) );
+            }
+            else { // Update the scanline's "from" and "to" coordinates
+                if( xl < it->second.from ) it->second.from = xl;
+                if( xr > it->second.to   ) it->second.to   = xr;
+            }
         }
     }
 
