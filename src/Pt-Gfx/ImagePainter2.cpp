@@ -806,10 +806,12 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
             if(abs(yt0 - ey) < y2d) { y2d = abs(yt0 - ey); y2 = yt0; }
             if(abs(yb0 - by) < y1d) { y1d = abs(yb0 - by); y1 = yb0; }
             if(abs(yb0 - ey) < y2d) { y2d = abs(yb0 - ey); y2 = yb0; }
+            /*
             if(abs(yt1 - by) < y1d) { y1d = abs(yt1 - by); y1 = yt1; }
             if(abs(yt1 - ey) < y2d) { y2d = abs(yt1 - ey); y2 = yt1; }
             if(abs(yb1 - by) < y1d) { y1d = abs(yb1 - by); y1 = yb1; }
             if(abs(yb1 - ey) < y2d) { y2d = abs(yb1 - ey); y2 = yb1; }
+            */
             // Store/update the scanline coordinates
             Scanlines::iterator it10 = scanlines.find(yt0);
             Scanlines::iterator it20 = scanlines.find(yb0);
@@ -827,6 +829,7 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
                 if( xl < it20->second.from ) it20->second.from = xl;
                 if( xr > it20->second.to   ) it20->second.to   = xr;
             }
+            /*
             Scanlines::iterator it11 = scanlines.find(yt1);
             Scanlines::iterator it21 = scanlines.find(yb1);
             if(it11 == scanlines.end()) { // Insert a new element
@@ -843,6 +846,7 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
                 if( xl < it21->second.from ) it21->second.from = xl;
                 if( xr > it21->second.to   ) it21->second.to   = xr;
             }
+            */
         }
     }
 
@@ -900,17 +904,19 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
             if(abs(xl0 - ex) < x2d) { x2d = abs(xl0 - ex); x2 = xl0; }
             if(abs(xr0 - bx) < x1d) { x1d = abs(xr0 - bx); x1 = xr0; }
             if(abs(xr0 - ex) < x2d) { x2d = abs(xr0 - ex); x2 = xr0; }
+            /*
             if(abs(xl1 - bx) < x1d) { x1d = abs(xl1 - bx); x1 = xl1; }
             if(abs(xl1 - ex) < x2d) { x2d = abs(xl1 - ex); x2 = xl1; }
             if(abs(xr1 - bx) < x1d) { x1d = abs(xr1 - bx); x1 = xr1; }
             if(abs(xr1 - ex) < x2d) { x2d = abs(xr1 - ex); x2 = xr1; }
+            */
             if(abs(yt  - by) < y1d) { y1d = abs(yt  - by); y1 = yt;  }
             if(abs(yt  - ey) < y2d) { y2d = abs(yt  - ey); y2 = yt;  }
             if(abs(yb  - by) < y1d) { y1d = abs(yb  - by); y1 = yb;  }
             if(abs(yb  - ey) < y2d) { y2d = abs(yb  - ey); y2 = yb;  }
             // Store/update the scanline coordinates
-            const Pt::int32_t   xlm = std::min(xl0, xl1);
-            const Pt::int32_t   xrm = std::max(xr0, xr1);
+            const Pt::int32_t   xlm = std::max(xl0, xl1);
+            const Pt::int32_t   xrm = std::min(xr0, xr1);
             Scanlines::iterator it1 = scanlines.find(yt);
             Scanlines::iterator it2 = scanlines.find(yb);
             if(it1 == scanlines.end()) { // Insert a new element
@@ -1063,20 +1069,13 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
         }
     }
 
-
     // Draw the scanlines
-    if(_rasterizer->antiAliasingMode() == AntiAliasingMode::None) {
-        for(Scanlines::const_iterator it = scanlines.begin(); it != scanlines.end(); ++it) {
-            _rasterizer->fillOneScanlineNoAA(it->second.from, it->second.to, it->first, minX, minY);
-        }
-        // We are done here if not doing anti aliasing
-        return;
+    for(Scanlines::const_iterator it = scanlines.begin(); it != scanlines.end(); ++it) {
+        _rasterizer->fillOneScanlineNoAA(it->second.from, it->second.to, it->first, minX, minY);
     }
-    else {
-        for(Scanlines::const_iterator it = scanlines.begin(); it != scanlines.end(); ++it) {
-            _rasterizer->fillOneScanlineNoAA(it->second.from + 1, it->second.to - 1, it->first, minX, minY);
-        }
-    }
+
+    // Exit here if we are not doing anti aliasing
+    if(_rasterizer->antiAliasingMode() == AntiAliasingMode::None)  return;
 
     // === Process the circumference's pixels ===
 
