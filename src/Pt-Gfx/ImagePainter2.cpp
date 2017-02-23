@@ -1006,128 +1006,133 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
     else if(x2 >= ctrX && y2 >= ctrY) qEnd = 4; // See the notes on the beginning of this function
 
     // Determine where the direction that the hole faces to
-    enum ChordHoleDir {
-        Invalid, Left, Right, Top, Bottom
-    } chd = Invalid;
+    bool faceL = false, faceR = false, faceT = false, faceB = false;
+
+    switch(qBeg) {
+        case 1 : switch(qEnd) {
+                     case 1 : faceL = true ; faceR = false; faceT = false; faceB = true ; break;
+                     case 2 : faceL = true ; faceR = false; faceT = false; faceB = true ; break;
+                     case 3 : faceL = false; faceR = true ; faceT = false; faceB = true ; break;
+                     case 4 : faceL = false; faceR = true ; faceT = false; faceB = true ; break;
+                 }
+                 break;
+        case 2 : switch(qEnd) {
+                     case 1 : faceL = false; faceR = true ; faceT = true ; faceB = false; break;
+                     case 2 : faceL = false; faceR = true ; faceT = false; faceB = true ; break;
+                     case 3 : faceL = false; faceR = true ; faceT = false; faceB = true ; break;
+                     case 4 : faceL = false; faceR = true ; faceT = true ; faceB = false; break;
+                 }
+                 break;
+        case 3 : switch(qEnd) {
+                     case 1 : faceL = true ; faceR = false; faceT = true ; faceB = false; break;
+                     case 2 : faceL = true ; faceR = false; faceT = true ; faceB = false; break;
+                     case 3 : faceL = false; faceR = true ; faceT = true ; faceB = false; break;
+                     case 4 : faceL = false; faceR = true ; faceT = true ; faceB = false; break;
+                 }
+                 break;
+        case 4 : switch(qEnd) {
+                     case 1 : faceL = true ; faceR = false; faceT = true ; faceB = false; break;
+                     case 2 : faceL = true ; faceR = false; faceT = false; faceB = true ; break;
+                     case 3 : faceL = true ; faceR = false; faceT = false; faceB = true ; break;
+                     case 4 : faceL = true ; faceR = false; faceT = true ; faceB = false; break;
+                 }
+                 break;
+    }
+
+    if(x1 == x2) {
+        faceT = false;
+        faceB = false;
+    }
 
     if(y1 == y2) {
-             if( (qBeg == 2 && qEnd == 1) || (qBeg == 3 && qEnd == 4) ) chd = Top;
-        else if( (qBeg == 1 && qEnd == 2) || (qBeg == 4 && qEnd == 3) ) chd = Bottom;
-    }
-    else {
-             if( (qBeg == 1 && qEnd == 1) || (qBeg == 1 && qEnd == 2) ||
-                 (qBeg == 3 && qEnd == 1) || (qBeg == 3 && qEnd == 2) ||
-                 (qBeg == 4 && qEnd == 1) || (qBeg == 4 && qEnd == 2) ||
-                 (qBeg == 4 && qEnd == 3) || (qBeg == 4 && qEnd == 4) ) chd = Left;
-        else if( (qBeg == 1 && qEnd == 3) || (qBeg == 1 && qEnd == 4) ||
-                 (qBeg == 2 && qEnd == 1) || (qBeg == 2 && qEnd == 2) ||
-                 (qBeg == 2 && qEnd == 3) || (qBeg == 2 && qEnd == 4) ||
-                 (qBeg == 3 && qEnd == 3) || (qBeg == 3 && qEnd == 4) ) chd = Right;
+        faceL = false;
+        faceR = false;
     }
 
-    lprintf("%d %d : %d\n", qBeg, qEnd, chd);
-
-
-
-    // Crop the spans using the closing line
-
-    //scanlines.erase(scanlines.begin(), scanlines.lower_bound(std::min(y1, y2)));
-    //scanlines.erase(scanlines.lower_bound(std::max(y1, y2)), scanlines.end());
-
-
-
-
-    // Convert the coordinates to fixed-points
-    Pt::int32_t fx1 = FIXED_POINT_FROM_INT(x1);
-    Pt::int32_t fy1 = FIXED_POINT_FROM_INT(y1);
-    Pt::int32_t fx2 = FIXED_POINT_FROM_INT(x2);
-    Pt::int32_t fy2 = FIXED_POINT_FROM_INT(y2);
-
-    // Swap the values as needed
-    const Pt::int32_t deltaX = (fx2 >= fx1) ? (fx2 - fx1) : (fx1 - fx2);
-    const Pt::int32_t deltaY = (fy2 >= fy1) ? (fy2 - fy1) : (fy1 - fy2);
-    const bool        steep  = deltaY > deltaX;
-
-    if(steep) {
-        std::swap(fx1, fy1);
-        std::swap(fx2, fy2);
+    // Crop the spans to the top and bottom
+    if(!faceT && !faceB) {
+        scanlines.erase(scanlines.begin(), scanlines.lower_bound(std::min(y1, y2)));
+        scanlines.erase(scanlines.upper_bound(std::max(y1, y2)), scanlines.end());
+    }
+    else if(faceT) {
+        scanlines.erase(scanlines.begin(), scanlines.lower_bound(std::min(y1, y2)));
+    }
+    else if(faceB) {
+        scanlines.erase(scanlines.upper_bound(std::max(y1, y2)), scanlines.end());
     }
 
-    if(fx1 > fx2) {
-        std::swap(fx1, fx2);
-        std::swap(fy1, fy2);
-    }
-
-    // Handle the gradient, starting point, and ending point
-    const Pt::int32_t grad = (fy2 - fy1) / FIXED_POINT_TO_INT(fx2 - fx1);
-    const Pt::int32_t xpxl1 = FIXED_POINT_ROUND(fx1);
-    const Pt::int32_t xpxl2 = FIXED_POINT_ROUND(fx2);
-    const Pt::int32_t ypxl  = fy1 + grad * FIXED_POINT_TO_INT(xpxl1 - fx1);
-
-    // Draw the pixels
-    Pt::int32_t from  = FIXED_POINT_TO_INT(FIXED_POINT_ROUND(fx1));
-    Pt::int32_t to    = FIXED_POINT_TO_INT(xpxl2);
-    Pt::int32_t ypxli = ypxl;
-
-    if(steep) {
+    // Crop the spans to the left and right by running the Xiaolin Wu's anti-aliased line algorithm
+    if(faceL || faceR) {
+        // Convert the coordinates to fixed-points
+        Pt::int32_t fx1 = FIXED_POINT_FROM_INT(x1);
+        Pt::int32_t fy1 = FIXED_POINT_FROM_INT(y1);
+        Pt::int32_t fx2 = FIXED_POINT_FROM_INT(x2);
+        Pt::int32_t fy2 = FIXED_POINT_FROM_INT(y2);
+        // Swap the values as needed
+        const Pt::int32_t deltaX = (fx2 >= fx1) ? (fx2 - fx1) : (fx1 - fx2);
+        const Pt::int32_t deltaY = (fy2 >= fy1) ? (fy2 - fy1) : (fy1 - fy2);
+        const bool        steep  = deltaY > deltaX;
+        if(steep) {
+            std::swap(fx1, fy1);
+            std::swap(fx2, fy2);
+        }
+        if(fx1 > fx2) {
+            std::swap(fx1, fx2);
+            std::swap(fy1, fy2);
+        }
+        // Handle the gradient, starting point, and ending point
+        const Pt::int32_t grad = (fy2 - fy1) / FIXED_POINT_TO_INT(fx2 - fx1);
+        const Pt::int32_t xpxl1 = FIXED_POINT_ROUND(fx1);
+        const Pt::int32_t xpxl2 = FIXED_POINT_ROUND(fx2);
+        const Pt::int32_t ypxl  = fy1 + grad * FIXED_POINT_TO_INT(xpxl1 - fx1);
         // Draw the pixels
-        for(Pt::int32_t i = from; i <= to; ++i) {
-            // Calculate the coordinates
-            Pt::int32_t refXl = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           );
-            Pt::int32_t refXr = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE);
-            Pt::int32_t refY  = i;
-            ypxli += grad;
-            //
-            Scanlines::iterator it = scanlines.find(refY);
-            if(it == scanlines.end()) continue;
-
-            switch(chd) {
-                case Left   : if(it->second.from < refXr) it->second.from = refXr; break;
-                case Right  : if(it->second.to   > refXl) it->second.to   = refXl; break;
-              //  case Top    : scanlines.erase(it); break;
-              //  case Bottom : scanlines.erase(it); break;
-                default     : break;
+        Pt::int32_t from  = FIXED_POINT_TO_INT(FIXED_POINT_ROUND(fx1));
+        Pt::int32_t to    = FIXED_POINT_TO_INT(xpxl2);
+        Pt::int32_t ypxli = ypxl;
+        if(steep) {
+            for(Pt::int32_t i = from; i <= to; ++i) {
+                // Calculate the coordinates
+                Pt::int32_t refXl = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           );
+                Pt::int32_t refXr = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE);
+                Pt::int32_t refY  = i;
+                ypxli += grad;
+                // Crop the corresponding scanline
+                Scanlines::iterator it = scanlines.find(refY);
+                if(it == scanlines.end()) continue;
+                if(faceL && it->second.from < refXr) it->second.from = refXr;
+                if(faceR && it->second.to   > refXl) it->second.to   = refXl;
             }
         }
-    }
-    else {
-        // Draw the pixels
-        for(Pt::int32_t i = from; i <= to; ++i) {
-            // Calculate the coordinates
-            Pt::int32_t refX  = i;
-            Pt::int32_t refYt = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           );
-            Pt::int32_t refYb = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE);
-            ypxli += grad;
-            //
-            Scanlines::iterator itt = scanlines.find(refYt);
-            if(itt != scanlines.end()) {
-                switch(chd) {
-                    case Left   : if(itt->second.from < refX) itt->second.from = refX; break;
-                    case Right  : if(itt->second.to   > refX) itt->second.to   = refX; break;
-                   // case Top    : scanlines.erase(itt); break;
-                    //case Bottom : scanlines.erase(itt); break;
-                    default     : break;
+        else {
+            for(Pt::int32_t i = from; i <= to; ++i) {
+                // Calculate the coordinates
+                Pt::int32_t refX  = i;
+                Pt::int32_t refYt = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           );
+                Pt::int32_t refYb = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE);
+                ypxli += grad;
+                // Crop the corresponding scanlines
+                Scanlines::iterator itt = scanlines.find(refYt);
+                Scanlines::iterator itb = scanlines.find(refYb);
+                if(itt != scanlines.end()) {
+                    if(faceL && itt->second.from < refX) itt->second.from = refX;
+                    if(faceR && itt->second.to   > refX) itt->second.to   = refX;
                 }
-            }
-            Scanlines::iterator itb = scanlines.find(refYb);
-            if(itb != scanlines.end()) {
-                switch(chd) {
-                    case Left   : if(itb->second.from < refX) itb->second.from = refX; break;
-                    case Right  : if(itb->second.to   > refX) itb->second.to   = refX; break;
-                  //  case Top    : scanlines.erase(itb); break;
-                  //  case Bottom : scanlines.erase(itb); break;
-                    default     : break;
+                if(itb != scanlines.end()) {
+                    if(faceL && itb->second.from < refX) itb->second.from = refX;
+                    if(faceR && itb->second.to   > refX) itb->second.to   = refX;
                 }
             }
         }
     }
-
 
 
     // Draw the scanlines
     for(Scanlines::const_iterator it = scanlines.begin(); it != scanlines.end(); ++it) {
         _rasterizer->fillOneScanlineNoAA(it->second.from, it->second.to, it->first, minX, minY);
     }
+
+    // We are done here if not doing anti aliasing
+    if(_rasterizer->antiAliasingMode() == AntiAliasingMode::None) return;
 
     // === Process the circumference's pixels ===
 
