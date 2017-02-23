@@ -229,7 +229,10 @@ void ImagePainter2::arcUtil_runXWLineAlgorithm(XWLineData& dst, Pt::int32_t x1, 
         for(Pt::int32_t i = from; i <= to; ++i) {
             const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_FPART_TO_A8 (ypxli) ];
             const Pt::uint8_t a2 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_RFPART_TO_A8(ypxli) ];
-            dst.points.push_back( XWLineData::XWPoint( FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)), i, a1, a2 ) );
+            dst.points.insert( std::make_pair(
+                i,
+                XWLineData::XWPointXAA( FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)), a1, a2 )
+            ) );
             ypxli += grad;
         }
     }
@@ -238,7 +241,10 @@ void ImagePainter2::arcUtil_runXWLineAlgorithm(XWLineData& dst, Pt::int32_t x1, 
         for(Pt::int32_t i = from; i <= to; ++i) {
             const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_FPART_TO_A8 (ypxli) ];
             const Pt::uint8_t a2 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_RFPART_TO_A8(ypxli) ];
-            dst.points.push_back( XWLineData::XWPoint( i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)), a1, a2 ) );
+            dst.points.insert( std::make_pair(
+                FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)),
+                XWLineData::XWPointXAA( i, a1, a2 )
+            ) );
             ypxli += grad;
         }
     }
@@ -250,22 +256,30 @@ void ImagePainter2::arcUtil_genScanlinesForChord(FilledArcInfo& fai, XWLineData&
     Pt::int32_t lineMinY, lineMaxY;
 
     if(xwLine.steep) {
-        lineMinY = xwLine.points.front().y;
-        lineMaxY = xwLine.points.back ().y;
+        lineMinY = xwLine.points.begin ()->first;
+        lineMaxY = xwLine.points.rbegin()->first;
     }
     else {
-        lineMinY = xwLine.points.front().y;
-        lineMaxY = xwLine.points.back ().y + 1;
+        lineMinY = xwLine.points.begin ()->first;
+        lineMaxY = xwLine.points.rbegin()->first + 1;
     }
+
+    //lprintf("%d %d\n", lineMinY, lineMaxY);
 
     // Top and bottom halves
     for(Pt::int32_t x = 0; x <= fai.quartersX; ++x) {
         // Calculate the coordinate
         const float       y  = fai.radY * fastSqrt(1 - (float) x * x / fai.radX2);
-        const Pt::int32_t xl = fai.ctrX - x;
-        const Pt::int32_t xr = fai.ctrX + x;
         const Pt::int32_t yt = fai.ctrY - ( fai.antiAlias ? floor(y) : round(y) );
         const Pt::int32_t yb = fai.ctrY + ( fai.antiAlias ? floor(y) : round(y) );
+        const Pt::int32_t xl = fai.ctrX - x;
+        const Pt::int32_t xr = fai.ctrX + x;
+
+        // For clipping the coordinates
+    //    XWLineData::XWPoints::const_iterator itYt = xwLine.points.find(yt);
+     //   XWLineData::XWPoints::const_iterator itYb = xwLine.points.find(yb);
+
+        //if( xwLine.faceL && xl < xwLine.
         // Store/update the scanline coordinates
         if( (!xwLine.faceT && !xwLine.faceB) || (xwLine.faceT && yt >= lineMinY) || (xwLine.faceB && yt <= lineMaxY) ) {
             Scanlines::iterator it = scanlines.find(yt);
@@ -293,10 +307,10 @@ void ImagePainter2::arcUtil_genScanlinesForChord(FilledArcInfo& fai, XWLineData&
     for(Pt::int32_t y = 0; y <= fai.quartersY; ++y) {
         // Calculate the coordinate
         const float       x  = fai.radX * fastSqrt(1 - (float) y * y / fai.radY2);
-        const Pt::int32_t xl = fai.ctrX - ( fai.antiAlias ? floor(x) : round(x) );
-        const Pt::int32_t xr = fai.ctrX + ( fai.antiAlias ? floor(x) : round(x) );
         const Pt::int32_t yt = fai.ctrY - y;
         const Pt::int32_t yb = fai.ctrY + y;
+        const Pt::int32_t xl = fai.ctrX - ( fai.antiAlias ? floor(x) : round(x) );
+        const Pt::int32_t xr = fai.ctrX + ( fai.antiAlias ? floor(x) : round(x) );
         // Store/update the scanline coordinates
         if( (!xwLine.faceT && !xwLine.faceB) || (xwLine.faceT && yt >= lineMinY) || (xwLine.faceB && yt <= lineMaxY) ) {
             Scanlines::iterator it = scanlines.find(yt);

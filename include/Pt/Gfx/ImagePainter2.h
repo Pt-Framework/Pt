@@ -151,24 +151,26 @@ class PT_GFX_API ImagePainter2 : public Painter
         // Xiaolin Wu's anti-aliased line data structure
         struct XWLineData {
             // Point data
-            struct XWPoint {
-                Pt::int32_t x, y;
+            struct XWPointXAA {
+                Pt::int32_t x;
                 Pt::uint8_t a1, a2;
 
-                XWPoint(Pt::int32_t x_, Pt::int32_t y_, Pt::uint8_t a1_, Pt::uint8_t a2_)
-                : x(x_), y(y_), a1(a1_), a2(a2_)
+                XWPointXAA(Pt::int32_t x_, Pt::uint8_t a1_, Pt::uint8_t a2_)
+                : x(x_), a1(a1_), a2(a2_)
                 {}
             };
 
-            std::vector<XWPoint> points; // The line's points
+            typedef std::map<Pt::int32_t, XWPointXAA> XWPoints; // The key is the Y coordinate
 
-            bool                 steep; // If "true"  then the a2 belongs to (x + 1, y)
-                                        // If "false" then the a2 belongs to (x, y + 1)
+            XWPoints points; // The line's points
 
-            bool                 faceL; // The direction that the line is facing to
-            bool                 faceR; // ---
-            bool                 faceT; // ---
-            bool                 faceB; // ---
+            bool     steep;  // If "true"  then the a2 belongs to (x + 1, y)
+                             // If "false" then the a2 belongs to (x, y + 1)
+
+            bool     faceL;  // The direction that the line is facing to
+            bool     faceR;  // ---
+            bool     faceT;  // ---
+            bool     faceB;  // ---
         };
 
     protected:
