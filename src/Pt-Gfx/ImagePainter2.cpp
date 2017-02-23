@@ -444,15 +444,15 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
             const Pt::int32_t yb = ctrY + round(y);
             // Arc
             if(drawArc) {
-                 // Draw the pixels
-                 const bool mask[4] = {
-                     insideDegRange(xl, yt, ctrX, ctrY, degBegin, degEnd),
-                     insideDegRange(xl, yb, ctrX, ctrY, degBegin, degEnd),
-                     insideDegRange(xr, yt, ctrX, ctrY, degBegin, degEnd),
-                     insideDegRange(xr, yb, ctrX, ctrY, degBegin, degEnd)
-                 };
+                // Draw the pixels
+                const bool mask[4] = {
+                    insideDegRange(xl, yt, ctrX, ctrY, degBegin, degEnd),
+                    insideDegRange(xl, yb, ctrX, ctrY, degBegin, degEnd),
+                    insideDegRange(xr, yt, ctrX, ctrY, degBegin, degEnd),
+                    insideDegRange(xr, yb, ctrX, ctrY, degBegin, degEnd)
+                };
                 _rasterizer->stroke4Pixels(xl, yt, xr, yb, mask);
-                 // Determine the coordinates of the closing lines
+                // Determine the coordinates of the closing lines
                 if(arcMode == ArcMode::Open) continue;
                 if(abs(xl - bx) < x1d) { x1d = abs(xl - bx); x1 = xl; }
                 if(abs(xl - ex) < x2d) { x2d = abs(xl - ex); x2 = xl; }
@@ -462,11 +462,11 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
                 if(abs(yt - ey) < y2d) { y2d = abs(yt - ey); y2 = yt; }
                 if(abs(yb - by) < y1d) { y1d = abs(yb - by); y1 = yb; }
                 if(abs(yb - ey) < y2d) { y2d = abs(yb - ey); y2 = yb; }
-             }
-             // Ellipse
-             else {
-                _rasterizer->stroke4Pixels(xl, yt, xr, yb);
-             }
+            }
+            // Ellipse
+            else {
+               _rasterizer->stroke4Pixels(xl, yt, xr, yb);
+            }
         }
         // With anti-aliasing
         else {
@@ -538,15 +538,15 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
             const Pt::int32_t yb = ctrY + y;
             // Arc
             if(drawArc) {
-                 // Draw the pixels
-                 const bool mask[4] = {
-                     insideDegRange(xl, yt, ctrX, ctrY, degBegin, degEnd),
-                     insideDegRange(xl, yb, ctrX, ctrY, degBegin, degEnd),
-                     insideDegRange(xr, yt, ctrX, ctrY, degBegin, degEnd),
-                     insideDegRange(xr, yb, ctrX, ctrY, degBegin, degEnd)
-                 };
+                // Draw the pixels
+                const bool mask[4] = {
+                    insideDegRange(xl, yt, ctrX, ctrY, degBegin, degEnd),
+                    insideDegRange(xl, yb, ctrX, ctrY, degBegin, degEnd),
+                    insideDegRange(xr, yt, ctrX, ctrY, degBegin, degEnd),
+                    insideDegRange(xr, yb, ctrX, ctrY, degBegin, degEnd)
+                };
                 _rasterizer->stroke4Pixels(xl, yt, xr, yb, mask);
-                 // Determine the coordinates of the closing lines
+                // Determine the coordinates of the closing lines
                 if(arcMode == ArcMode::Open) continue;
                 if(abs(xl - bx) < x1d) { x1d = abs(xl - bx); x1 = xl; }
                 if(abs(xl - ex) < x2d) { x2d = abs(xl - ex); x2 = xl; }
@@ -556,11 +556,11 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
                 if(abs(yt - ey) < y2d) { y2d = abs(yt - ey); y2 = yt; }
                 if(abs(yb - by) < y1d) { y1d = abs(yb - by); y1 = yb; }
                 if(abs(yb - ey) < y2d) { y2d = abs(yb - ey); y2 = yb; }
-             }
-             // Ellipse
-             else {
+            }
+            // Ellipse
+            else {
                 _rasterizer->stroke4Pixels(xl, yt, xr, yb);
-             }
+            }
         }
         // With anti-aliasing
         else {
@@ -573,19 +573,19 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
             const Pt::int32_t yb  = ctrY + y;
             // Arc
             if(drawArc) {
-                 // Draw the pixels
-                 const bool mask0[4] = {
-                     insideDegRange(xl0, yt, ctrX, ctrY, degBegin, degEnd),
-                     insideDegRange(xl0, yb, ctrX, ctrY, degBegin, degEnd),
-                     insideDegRange(xr0, yt, ctrX, ctrY, degBegin, degEnd),
-                     insideDegRange(xr0, yb, ctrX, ctrY, degBegin, degEnd)
-                 };
-                 const bool mask1[4] = {
-                     insideDegRange(xl1, yt, ctrX, ctrY, degBegin, degEnd),
-                     insideDegRange(xl1, yb, ctrX, ctrY, degBegin, degEnd),
-                     insideDegRange(xr1, yt, ctrX, ctrY, degBegin, degEnd),
-                     insideDegRange(xr1, yb, ctrX, ctrY, degBegin, degEnd)
-                 };
+                // Draw the pixels
+                const bool mask0[4] = {
+                    insideDegRange(xl0, yt, ctrX, ctrY, degBegin, degEnd),
+                    insideDegRange(xl0, yb, ctrX, ctrY, degBegin, degEnd),
+                    insideDegRange(xr0, yt, ctrX, ctrY, degBegin, degEnd),
+                    insideDegRange(xr0, yb, ctrX, ctrY, degBegin, degEnd)
+                };
+                const bool mask1[4] = {
+                    insideDegRange(xl1, yt, ctrX, ctrY, degBegin, degEnd),
+                    insideDegRange(xl1, yb, ctrX, ctrY, degBegin, degEnd),
+                    insideDegRange(xr1, yt, ctrX, ctrY, degBegin, degEnd),
+                    insideDegRange(xr1, yb, ctrX, ctrY, degBegin, degEnd)
+                };
                 const Pt::uint8_t a0 = Rasterizer2::XWAA_WFILTER[      alpha];
                 const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[255 - alpha];
                 _rasterizer->stroke4Pixels(xl0, yt, xr0, yb, a0, mask0);
@@ -725,14 +725,19 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
     Pt::int32_t x2 = 0, x2d = MAXIMUM_COORD;
     Pt::int32_t y2 = 0, y2d = MAXIMUM_COORD;
 
+    // === Process the scanlines ===
+
+    // List of scanlines to be drawn later
+    Scanlines scanlines;
+
     // Top and bottom halves
     Pt::int32_t quarters = round( radX2 * fastInvSqrt(radX2 + radY2) );
 
     for(Pt::int32_t x = 0; x <= quarters; ++x) {
         // Calculate the coordinate and alpha
-        const float       y     = radY * fastSqrt(1 - (float) x * x / radX2);
-        const float       error = y - floor(y);
-        const Pt::uint8_t alpha = round(error * 255);
+        const float y = radY * fastSqrt(1 - (float) x * x / radX2);
+        //const float       error = y - floor(y);
+        //const Pt::uint8_t alpha = round(error * 255);
         // Without anti-aliasing
         if(_rasterizer->antiAliasingMode() == AntiAliasingMode::None) {
             // Calculate the coordinates
@@ -740,14 +745,16 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
             const Pt::int32_t xr = ctrX + x;
             const Pt::int32_t yt = ctrY - round(y);
             const Pt::int32_t yb = ctrY + round(y);
-             // Draw the pixels
-             const bool mask[4] = {
-                 insideDegRange(xl, yt, ctrX, ctrY, degBegin, degEnd),
-                 insideDegRange(xl, yb, ctrX, ctrY, degBegin, degEnd),
-                 insideDegRange(xr, yt, ctrX, ctrY, degBegin, degEnd),
-                 insideDegRange(xr, yb, ctrX, ctrY, degBegin, degEnd)
-             };
+            /*
+            // Draw the pixels
+            const bool mask[4] = {
+                insideDegRange(xl, yt, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(xl, yb, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(xr, yt, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(xr, yb, ctrX, ctrY, degBegin, degEnd)
+            };
             _rasterizer->fill4Pixels(xl, yt, xr, yb, minX, minY, mask);
+            */
              // Determine the coordinates of the closing lines
             if(abs(xl - bx) < x1d) { x1d = abs(xl - bx); x1 = xl; }
             if(abs(xl - ex) < x2d) { x2d = abs(xl - ex); x2 = xl; }
@@ -757,6 +764,23 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
             if(abs(yt - ey) < y2d) { y2d = abs(yt - ey); y2 = yt; }
             if(abs(yb - by) < y1d) { y1d = abs(yb - by); y1 = yb; }
             if(abs(yb - ey) < y2d) { y2d = abs(yb - ey); y2 = yb; }
+            // Store/update the scanline coordinates
+            Scanlines::iterator it1 = scanlines.find(yt);
+            Scanlines::iterator it2 = scanlines.find(yb);
+            if(it1 == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yt, ScanlineElement(xl, xr) ) );
+            }
+            else { // Update the scanline's "from" and "to" coordinates
+                if( xl < it1->second.from ) it1->second.from = xl;
+                if( xr > it1->second.to   ) it1->second.to   = xr;
+            }
+            if(it2 == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yb, ScanlineElement(xl, xr) ) );
+            }
+            else { // Update the scanline's "from" and "to" coordinates
+                if( xl < it2->second.from ) it2->second.from = xl;
+                if( xr > it2->second.to   ) it2->second.to   = xr;
+            }
         }
         // With anti-aliasing
         else {
@@ -767,6 +791,7 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
             const Pt::int32_t yb0 = ctrY + floor(y);
             const Pt::int32_t yt1 = ctrY - floor(y) - 1;
             const Pt::int32_t yb1 = ctrY + floor(y) + 1;
+            /*
             // Draw the pixels
             const bool mask0[4] = {
                 insideDegRange(xl, yt0, ctrX, ctrY, degBegin, degEnd),
@@ -784,6 +809,7 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
             const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[255 - alpha];
             _rasterizer->fill4Pixels(xl, yt0, xr, yb0, minX, minY, a0, mask0);
             _rasterizer->fill4Pixels(xl, yt1, xr, yb1, minX, minY, a1, mask1);
+            */
             // Determine the coordinates of the closing lines
             if(abs(xl  - bx) < x1d) { x1d = abs(xl  - bx); x1 = xl;  }
             if(abs(xl  - ex) < x2d) { x2d = abs(xl  - ex); x2 = xl;  }
@@ -797,6 +823,39 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
             if(abs(yt1 - ey) < y2d) { y2d = abs(yt1 - ey); y2 = yt1; }
             if(abs(yb1 - by) < y1d) { y1d = abs(yb1 - by); y1 = yb1; }
             if(abs(yb1 - ey) < y2d) { y2d = abs(yb1 - ey); y2 = yb1; }
+            // Store/update the scanline coordinates
+            Scanlines::iterator it10 = scanlines.find(yt0);
+            Scanlines::iterator it20 = scanlines.find(yb0);
+            if(it10 == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yt0, ScanlineElement(xl, xr) ) );
+            }
+            else { // Update the scanline's "from" and "to" coordinates
+                if( xl < it10->second.from ) it10->second.from = xl;
+                if( xr > it10->second.to   ) it10->second.to   = xr;
+            }
+            if(it20 == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yb0, ScanlineElement(xl, xr) ) );
+            }
+            else { // Update the scanline's "from" and "to" coordinates
+                if( xl < it20->second.from ) it20->second.from = xl;
+                if( xr > it20->second.to   ) it20->second.to   = xr;
+            }
+            Scanlines::iterator it11 = scanlines.find(yt1);
+            Scanlines::iterator it21 = scanlines.find(yb1);
+            if(it11 == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yt1, ScanlineElement(xl, xr) ) );
+            }
+            else { // Update the scanline's "from" and "to" coordinates
+                if( xl < it11->second.from ) it11->second.from = xl;
+                if( xr > it11->second.to   ) it11->second.to   = xr;
+            }
+            if(it21 == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yb1, ScanlineElement(xl, xr) ) );
+            }
+            else { // Update the scanline's "from" and "to" coordinates
+                if( xl < it21->second.from ) it21->second.from = xl;
+                if( xr > it21->second.to   ) it21->second.to   = xr;
+            }
         }
     }
 
@@ -805,9 +864,9 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
 
     for(Pt::int32_t y = 0; y <= quarters; ++y) {
         // Calculate the coordinate and alpha
-        const float       x     = radX * fastSqrt(1 - (float) y * y / radY2);
-        const float       error = x - floor(x);
-        const Pt::uint8_t alpha = round(error * 255);
+        const float x = radX * fastSqrt(1 - (float) y * y / radY2);
+        //const float       error = x - floor(x);
+        //const Pt::uint8_t alpha = round(error * 255);
         // Without anti-aliasing
         if(_rasterizer->antiAliasingMode() == AntiAliasingMode::None) {
             // Calculate the coordinates
@@ -815,14 +874,16 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
             const Pt::int32_t xr = ctrX + round(x);
             const Pt::int32_t yt = ctrY - y;
             const Pt::int32_t yb = ctrY + y;
-             // Draw the pixels
-             const bool mask[4] = {
-                 insideDegRange(xl, yt, ctrX, ctrY, degBegin, degEnd),
-                 insideDegRange(xl, yb, ctrX, ctrY, degBegin, degEnd),
-                 insideDegRange(xr, yt, ctrX, ctrY, degBegin, degEnd),
-                 insideDegRange(xr, yb, ctrX, ctrY, degBegin, degEnd)
-             };
+            /*
+            // Draw the pixels
+            const bool mask[4] = {
+                insideDegRange(xl, yt, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(xl, yb, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(xr, yt, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(xr, yb, ctrX, ctrY, degBegin, degEnd)
+            };
             _rasterizer->fill4Pixels(xl, yt, xr, yb, minX, minY, mask);
+            */
              // Determine the coordinates of the closing lines
             if(abs(xl - bx) < x1d) { x1d = abs(xl - bx); x1 = xl; }
             if(abs(xl - ex) < x2d) { x2d = abs(xl - ex); x2 = xl; }
@@ -832,6 +893,23 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
             if(abs(yt - ey) < y2d) { y2d = abs(yt - ey); y2 = yt; }
             if(abs(yb - by) < y1d) { y1d = abs(yb - by); y1 = yb; }
             if(abs(yb - ey) < y2d) { y2d = abs(yb - ey); y2 = yb; }
+            // Store/update the scanline coordinates
+            Scanlines::iterator it1 = scanlines.find(yt);
+            Scanlines::iterator it2 = scanlines.find(yb);
+            if(it1 == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yt, ScanlineElement(xl, xr) ) );
+            }
+            else { // Update the scanline's "from" and "to" coordinates
+                if( xl < it1->second.from ) it1->second.from = xl;
+                if( xr > it1->second.to   ) it1->second.to   = xr;
+            }
+            if(it2 == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yb, ScanlineElement(xl, xr) ) );
+            }
+            else { // Update the scanline's "from" and "to" coordinates
+                if( xl < it2->second.from ) it2->second.from = xl;
+                if( xr > it2->second.to   ) it2->second.to   = xr;
+            }
         }
         // With anti-aliasing
         else {
@@ -842,23 +920,25 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
             const Pt::int32_t xr1 = ctrX + floor(x) + 1;
             const Pt::int32_t yt  = ctrY - y;
             const Pt::int32_t yb  = ctrY + y;
-             // Draw the pixels
-             const bool mask0[4] = {
-                 insideDegRange(xl0, yt, ctrX, ctrY, degBegin, degEnd),
-                 insideDegRange(xl0, yb, ctrX, ctrY, degBegin, degEnd),
-                 insideDegRange(xr0, yt, ctrX, ctrY, degBegin, degEnd),
-                 insideDegRange(xr0, yb, ctrX, ctrY, degBegin, degEnd)
-             };
-             const bool mask1[4] = {
-                 insideDegRange(xl1, yt, ctrX, ctrY, degBegin, degEnd),
-                 insideDegRange(xl1, yb, ctrX, ctrY, degBegin, degEnd),
-                 insideDegRange(xr1, yt, ctrX, ctrY, degBegin, degEnd),
-                 insideDegRange(xr1, yb, ctrX, ctrY, degBegin, degEnd)
-             };
+            /*
+            // Draw the pixels
+            const bool mask0[4] = {
+                insideDegRange(xl0, yt, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(xl0, yb, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(xr0, yt, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(xr0, yb, ctrX, ctrY, degBegin, degEnd)
+            };
+            const bool mask1[4] = {
+                insideDegRange(xl1, yt, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(xl1, yb, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(xr1, yt, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(xr1, yb, ctrX, ctrY, degBegin, degEnd)
+            };
             const Pt::uint8_t a0 = Rasterizer2::XWAA_WFILTER[      alpha];
             const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[255 - alpha];
             _rasterizer->fill4Pixels(xl0, yt, xr0, yb, minX, minY, a0, mask0);
             _rasterizer->fill4Pixels(xl1, yt, xr1, yb, minX, minY, a1, mask1);
+            */
             // Determine the coordinates of the closing lines
             if(abs(xl0 - bx) < x1d) { x1d = abs(xl0 - bx); x1 = xl0; }
             if(abs(xl0 - ex) < x2d) { x2d = abs(xl0 - ex); x2 = xl0; }
@@ -872,8 +952,72 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
             if(abs(yt  - ey) < y2d) { y2d = abs(yt  - ey); y2 = yt;  }
             if(abs(yb  - by) < y1d) { y1d = abs(yb  - by); y1 = yb;  }
             if(abs(yb  - ey) < y2d) { y2d = abs(yb  - ey); y2 = yb;  }
+            // Store/update the scanline coordinates
+            const Pt::int32_t   xlm = std::min(xl0, xl1);
+            const Pt::int32_t   xrm = std::max(xr0, xr1);
+            Scanlines::iterator it1 = scanlines.find(yt);
+            Scanlines::iterator it2 = scanlines.find(yb);
+            if(it1 == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yt, ScanlineElement(xlm, xrm) ) );
+            }
+            else { // Update the scanline's "from" and "to" coordinates
+                if( xlm < it1->second.from ) it1->second.from = xlm;
+                if( xrm > it1->second.to   ) it1->second.to   = xrm;
+            }
+            if(it2 == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yb, ScanlineElement(xlm, xrm) ) );
+            }
+            else { // Update the scanline's "from" and "to" coordinates
+                if( xlm < it2->second.from ) it2->second.from = xlm;
+                if( xrm > it2->second.to   ) it2->second.to   = xrm;
+            }
         }
     }
+
+    // Determine the location of the begin and end points
+    Pt::int32_t qBeg = 0, qEnd = 0;
+
+         if(x1 >= ctrX && y1 >= ctrY) qBeg = 1;
+    else if(x1 <  ctrX && y1 >= ctrY) qBeg = 2;
+    else if(x1 <  ctrX && y1 <  ctrY) qBeg = 3;
+    else if(x1 >= ctrX && y1 <  ctrY) qBeg = 4;
+
+         if(x2 >= ctrX && y2 >= ctrY) qEnd = 1;
+    else if(x2 <  ctrX && y2 >= ctrY) qEnd = 2;
+    else if(x2 <  ctrX && y2 <  ctrY) qEnd = 3;
+    else if(x2 >= ctrX && y2 <  ctrY) qEnd = 4;
+
+    // Determine where the direction that the hole faces to
+    enum ChordHoleDir {
+        Invalid, Left, Right, Top, Bottom
+    } chd = Invalid;
+
+    if(y1 == y2) {
+             if( (qBeg == 2 && qEnd == 1) || (qBeg == 3 && qEnd == 4) ) chd = Top;
+        else if( (qBeg == 1 && qEnd == 2) || (qBeg == 4 && qEnd == 3) ) chd = Bottom;
+    }
+    else {
+             if( (qBeg == 1 && qEnd == 1) || (qBeg == 1 && qEnd == 2) ||
+                 (qBeg == 3 && qEnd == 1) || (qBeg == 3 && qEnd == 2) ||
+                 (qBeg == 4 && qEnd == 1) || (qBeg == 4 && qEnd == 2) ||
+                 (qBeg == 4 && qEnd == 3) || (qBeg == 4 && qEnd == 4) ) chd = Left;
+        else if( (qBeg == 1 && qEnd == 3) || (qBeg == 1 && qEnd == 4) ||
+                 (qBeg == 2 && qEnd == 1) || (qBeg == 2 && qEnd == 2) ||
+                 (qBeg == 2 && qEnd == 3) || (qBeg == 2 && qEnd == 4) ||
+                 (qBeg == 3 && qEnd == 3) || (qBeg == 3 && qEnd == 4) ) chd = Right;
+    }
+
+    //if(chd == Invalid) lprintf("%d %d\n", qBeg, qEnd);
+
+    // Crop the spans using the closing line
+
+    // Draw the scanlines
+    for(Scanlines::const_iterator it = scanlines.begin(); it != scanlines.end(); ++it) {
+        _rasterizer->fillOneScanlineNoAA(it->second.from, it->second.to, it->first, minX, minY);
+    }
+
+    // === Process the circumference's pixels ===
+
 }
 
 void ImagePainter2::fillArcPieImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
