@@ -206,7 +206,6 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
 
         ip2->setAntiAliasingMode(AntiAliasingMode::None);
         ip2->fillArc( PointF (30 + 700, 50), SizeF(105, 105), 0 + 3, 135 + 3, ArcMode::Pie );
-        ip2->drawArc( PointF (30 + 700, 50), SizeF(105, 105), 0 + 3, 135 + 3, ArcMode::Pie );
         ip2->drawText( PointF(30 + 700, 40), "NOAA" );
 
         ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
@@ -236,7 +235,6 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
 
         ip2->setAntiAliasingMode(AntiAliasingMode::None);
         ip2->fillArc( PointF (30 + 700, 50 + 140), SizeF(105, 105), 120 + 3, 330 + 3, ArcMode::Pie );
-        ip2->drawArc( PointF (30 + 700, 50 + 140), SizeF(105, 105), 120 + 3, 330 + 3, ArcMode::Pie );
         ip2->drawText( PointF(30 + 700, 40 + 150), "NOAA" );
 
         ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
@@ -266,7 +264,6 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
 
         ip2->setAntiAliasingMode(AntiAliasingMode::None);
         ip2->fillArc( PointF (30 + 700, 50 + 270), SizeF(105, 105), -150 + 3, 30 + 3, ArcMode::Pie );
-        ip2->drawArc( PointF (30 + 700, 50 + 270), SizeF(105, 105), -150 + 3, 30 + 3, ArcMode::Pie );
         ip2->drawText( PointF(30 + 700, 40 + 300), "NOAA" );
 
         ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
@@ -288,7 +285,6 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
 
         ip2->setAntiAliasingMode(AntiAliasingMode::None);
         ip2->fillArc( PointF (30 + 700, 50 + 440), SizeF(105, 105), 120 + 3, 240 + 3, ArcMode::Pie );
-        ip2->drawArc( PointF (30 + 700, 50 + 440), SizeF(105, 105), 120 + 3, 240 + 3, ArcMode::Pie );
         ip2->drawText( PointF(30 + 700, 40 + 440), "NOAA" );
 
         ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);

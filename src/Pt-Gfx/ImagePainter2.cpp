@@ -710,7 +710,139 @@ void ImagePainter2::fillEllipseImplNoAA( const PointF& topLeft, const SizeF& siz
         _rasterizer->fillOneScanlineNoAA(xc - a,  xc + a, yc, minX, minY);
 }
 
+// Inspired by http://create.stephan-brumme.com/antialiased-circle
+void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
+{
+    // Calculate the ellipse's parameters
+    Pt::int32_t minX  = topLeft.x();
+    Pt::int32_t minY  = topLeft.y();
+    Pt::int32_t radX  = size.width () / 2;
+    Pt::int32_t radY  = size.height() / 2;
+    Pt::int32_t ctrX  = minX + radX;
+    Pt::int32_t ctrY  = minY + radY;
 
+    // === Process the scanlines ===
+
+    // Exact coordinate of the points which are located at the begin and end angle
+    Pt::int32_t x1 = 0; // Begin point
+    Pt::int32_t y1 = 0;
+    Pt::int32_t x2 = 0; // End point
+    Pt::int32_t y2 = 0;
+
+    // Generate a list of scanlines that will be drawn later
+    const bool  useAntiAliasing = ( _rasterizer->antiAliasingMode() != AntiAliasingMode::None );
+    Pt::int32_t quartersX;
+    Pt::int32_t quartersY;
+    Scanlines   scanlines;
+    arcUtilCalcScanlines(radX, radY, ctrX, ctrY, degBegin, degEnd, useAntiAliasing, quartersX, quartersY, x1, y1, x2, y2, scanlines);
+
+    // Determine where the direction that the hole faces to
+    bool faceL, faceR, faceT, faceB;
+    arcUtilDetermineHoleDirection(x1, y1, x2, y2, faceL, faceR, faceT, faceB);
+
+    // lprintf("l=%d r=%d t=%d b=%d\n", faceL, faceR, faceT, faceB);
+
+    // Copy the list of scanlines to be drawn later
+    const Scanlines scanlinesRef = scanlines;
+
+    // Remove the all scanlines to the top and bottom side that will be completely outside the shape
+    if(faceT) scanlines.erase(scanlines.begin(),                           scanlines.lower_bound(std::min(y1, y2) + 1));
+    if(faceB) scanlines.erase(scanlines.upper_bound(std::max(y1, y2) - 1), scanlines.end()                            );
+
+    // Crop the scanlines to the left and right side by running the Xiaolin Wu's anti-aliased line algorithm
+    if(faceL || faceR) {
+        arcUtilCropScanlinesUsingXWu(x1, y1, x2, y2, faceL, faceR, faceT, faceB, scanlines);
+    }
+
+    // Mark the all scanlines to the left and right side that will be completely outside the shape
+    arcUtilMarkOutsideScanlinesRL(x1, y1, x2, y2, faceL, faceR, faceT, faceB, scanlines);
+
+    // Draw the scanlines
+    for(Scanlines::const_iterator it = scanlines.begin(); it != scanlines.end(); ++it) {
+        _rasterizer->fillOneScanlineNoAA(it->second.from, it->second.to, it->first, minX, minY);
+    }
+
+    // Exit here if we are not doing anti aliasing
+    if(_rasterizer->antiAliasingMode() == AntiAliasingMode::None)  return;
+
+    // === Process the circumference's pixels ===
+
+    // Pixels from the ellipse's circumference
+    arcUtilDrawCircumferencePixels(minX, minY, radX, radY, ctrX, ctrY, degBegin, degEnd, quartersX, quartersY, x1, y1, x2, y2, scanlinesRef);
+
+    // Draw the closing line
+    std::map<Pt::int32_t, Pt::int32_t> exclusionZone;
+
+    for(Scanlines::const_iterator it = scanlines.begin(); it != scanlines.end(); ++it) {
+        if(faceL) exclusionZone[it->first] = it->second.from;
+        if(faceR) exclusionZone[it->first] = it->second.to;
+    }
+
+    _rasterizer->fillOnePixelGLineSegmentXWAA(x1, y1, x2, y2, minX, minY, &exclusionZone, 0);
+}
+
+void ImagePainter2::fillArcPieImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
+{
+    // Calculate the ellipse's parameters
+    Pt::int32_t minX  = topLeft.x();
+    Pt::int32_t minY  = topLeft.y();
+    Pt::int32_t radX  = size.width () / 2;
+    Pt::int32_t radY  = size.height() / 2;
+    Pt::int32_t ctrX  = minX + radX;
+    Pt::int32_t ctrY  = minY + radY;
+
+    // === Process the scanlines ===
+
+    // Exact coordinate of the points which are located at the begin and end angle
+    Pt::int32_t x1 = 0; // Begin point
+    Pt::int32_t y1 = 0;
+    Pt::int32_t x2 = 0; // End point
+    Pt::int32_t y2 = 0;
+
+    // Generate a list of scanlines that will be drawn later
+    const bool  useAntiAliasing = ( _rasterizer->antiAliasingMode() != AntiAliasingMode::None );
+    Pt::int32_t quartersX;
+    Pt::int32_t quartersY;
+    Scanlines   scanlines;
+    arcUtilCalcScanlines(radX, radY, ctrX, ctrY, degBegin, degEnd, useAntiAliasing, quartersX, quartersY, x1, y1, x2, y2, scanlines);
+
+    // Determine where the direction that the hole faces to
+    bool faceL, faceR, faceT, faceB;
+    arcUtilDetermineHoleDirection(x1, y1, x2, y2, faceL, faceR, faceT, faceB);
+
+    // lprintf("l=%d r=%d t=%d b=%d\n", faceL, faceR, faceT, faceB);
+
+    // Copy the list of scanlines to be drawn later
+    const Scanlines scanlinesRef = scanlines;
+
+    // Remove the all scanlines to the top and bottom side that will be completely outside the shape
+    if(faceT) scanlines.erase(scanlines.begin(),                           scanlines.lower_bound(std::min(y1, y2) + 1));
+    if(faceB) scanlines.erase(scanlines.upper_bound(std::max(y1, y2) - 1), scanlines.end()                            );
+
+    // Crop the scanlines to the left and right side by running the Xiaolin Wu's anti-aliased line algorithm
+    if(faceL || faceR) {
+        arcUtilCropScanlinesUsingXWu(x1, y1, ctrX, ctrY, faceL, faceR, faceT, faceB, scanlines);
+        arcUtilCropScanlinesUsingXWu(ctrX, ctrY, x2, y2, faceL, faceR, faceT, faceB, scanlines);
+    }
+
+    // Mark the all scanlines to the left and right side that will be completely outside the shape
+    arcUtilMarkOutsideScanlinesRL(x1, y1, x2, y2, faceL, faceR, faceT, faceB, scanlines);
+
+    // Draw the scanlines
+    for(Scanlines::const_iterator it = scanlines.begin(); it != scanlines.end(); ++it) {
+        _rasterizer->fillOneScanlineNoAA(it->second.from, it->second.to, it->first, minX, minY);
+    }
+
+    // Exit here if we are not doing anti aliasing
+    if(_rasterizer->antiAliasingMode() == AntiAliasingMode::None)  return;
+
+    // === Process the circumference's pixels ===
+
+    // Pixels from the ellipse's circumference
+    arcUtilDrawCircumferencePixels(minX, minY, radX, radY, ctrX, ctrY, degBegin, degEnd, quartersX, quartersY, x1, y1, x2, y2, scanlinesRef);
+
+    // Draw the closing line
+}
 
 void ImagePainter2::arcUtilCalcScanlines(Pt::int32_t radX, Pt::int32_t radY, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd, bool useAntiAliasing, Pt::int32_t& quartersX, Pt::int32_t& quartersY, Pt::int32_t& x1, Pt::int32_t& y1, Pt::int32_t& x2, Pt::int32_t& y2, Scanlines& scanlines)
 {
@@ -1049,156 +1181,6 @@ void ImagePainter2::arcUtilDrawCircumferencePixels(Pt::int32_t minX, Pt::int32_t
             _rasterizer->fill4Pixels(x11, y1, x21, y2, minX, minY, alpha, mask);
         }
     }
-}
-
-
-// Inspired by http://create.stephan-brumme.com/antialiased-circle
-void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
-{
-    // Update the gradient as needed
-    _rasterizer->updateGradientBrushAsNeeded(size.width(), size.height());
-
-    // Ensure that the begin angle is within the acceptable range
-    while(degBegin < -360) degBegin += 360;
-    while(degBegin >  360) degBegin -= 360;
-
-    // Ensure that the end angle is within the acceptable range
-    while(degEnd < -360) degEnd += 360;
-    while(degEnd >  360) degEnd -= 360;
-
-    // Calculate the ellipse's parameters
-    Pt::int32_t minX  = topLeft.x();
-    Pt::int32_t minY  = topLeft.y();
-    Pt::int32_t radX  = size.width () / 2;
-    Pt::int32_t radY  = size.height() / 2;
-    Pt::int32_t ctrX  = minX + radX;
-    Pt::int32_t ctrY  = minY + radY;
-
-    // === Process the scanlines ===
-
-    // Exact coordinate of the points which are located at the begin and end angle
-    Pt::int32_t x1 = 0; // Begin point
-    Pt::int32_t y1 = 0;
-    Pt::int32_t x2 = 0; // End point
-    Pt::int32_t y2 = 0;
-
-    // Generate a list of scanlines that will be drawn later
-    const bool  useAntiAliasing = ( _rasterizer->antiAliasingMode() != AntiAliasingMode::None );
-    Pt::int32_t quartersX;
-    Pt::int32_t quartersY;
-    Scanlines   scanlines;
-    arcUtilCalcScanlines(radX, radY, ctrX, ctrY, degBegin, degEnd, useAntiAliasing, quartersX, quartersY, x1, y1, x2, y2, scanlines);
-
-    // Determine where the direction that the hole faces to
-    bool faceL, faceR, faceT, faceB;
-    arcUtilDetermineHoleDirection(x1, y1, x2, y2, faceL, faceR, faceT, faceB);
-
-    // lprintf("l=%d r=%d t=%d b=%d\n", faceL, faceR, faceT, faceB);
-
-    // Copy the list of scanlines to be drawn later
-    const Scanlines scanlinesRef = scanlines;
-
-    // Remove the all scanlines to the top and bottom side that will be completely outside the shape
-    if(faceT) scanlines.erase(scanlines.begin(),                           scanlines.lower_bound(std::min(y1, y2) + 1));
-    if(faceB) scanlines.erase(scanlines.upper_bound(std::max(y1, y2) - 1), scanlines.end()                            );
-
-    // Crop the scanlines to the left and right side by running the Xiaolin Wu's anti-aliased line algorithm
-    if(faceL || faceR) {
-        arcUtilCropScanlinesUsingXWu(x1, y1, x2, y2, faceL, faceR, faceT, faceB, scanlines);
-    }
-
-    // Mark the all scanlines to the left and right side that will be completely outside the shape
-    arcUtilMarkOutsideScanlinesRL(x1, y1, x2, y2, faceL, faceR, faceT, faceB, scanlines);
-
-    // Draw the scanlines
-    for(Scanlines::const_iterator it = scanlines.begin(); it != scanlines.end(); ++it) {
-        _rasterizer->fillOneScanlineNoAA(it->second.from, it->second.to, it->first, minX, minY);
-    }
-
-    // Exit here if we are not doing anti aliasing
-    if(_rasterizer->antiAliasingMode() == AntiAliasingMode::None)  return;
-
-    // === Process the circumference's pixels ===
-    arcUtilDrawCircumferencePixels(minX, minY, radX, radY, ctrX, ctrY, degBegin, degEnd, quartersX, quartersY, x1, y1, x2, y2, scanlinesRef);
-
-    // Draw the closing line
-    std::map<Pt::int32_t, Pt::int32_t> exclusionZone;
-
-    for(Scanlines::const_iterator it = scanlines.begin(); it != scanlines.end(); ++it) {
-        if(faceL) exclusionZone[it->first] = it->second.from;
-        if(faceR) exclusionZone[it->first] = it->second.to;
-    }
-
-    _rasterizer->fillOnePixelGLineSegmentXWAA(x1, y1, x2, y2, minX, minY, &exclusionZone, 0);
-}
-
-void ImagePainter2::fillArcPieImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
-{
-    // Update the gradient as needed
-    _rasterizer->updateGradientBrushAsNeeded(size.width(), size.height());
-
-    // Ensure that the begin angle is within the acceptable range
-    while(degBegin < -360) degBegin += 360;
-    while(degBegin >  360) degBegin -= 360;
-
-    // Ensure that the end angle is within the acceptable range
-    while(degEnd < -360) degEnd += 360;
-    while(degEnd >  360) degEnd -= 360;
-
-    // Calculate the ellipse's parameters
-    Pt::int32_t minX  = topLeft.x();
-    Pt::int32_t minY  = topLeft.y();
-    Pt::int32_t radX  = size.width () / 2;
-    Pt::int32_t radY  = size.height() / 2;
-    Pt::int32_t ctrX  = minX + radX;
-    Pt::int32_t ctrY  = minY + radY;
-
-    // === Process the scanlines ===
-
-    // Exact coordinate of the points which are located at the begin and end angle
-    Pt::int32_t x1 = 0; // Begin point
-    Pt::int32_t y1 = 0;
-    Pt::int32_t x2 = 0; // End point
-    Pt::int32_t y2 = 0;
-
-    // Generate a list of scanlines that will be drawn later
-    const bool  useAntiAliasing = ( _rasterizer->antiAliasingMode() != AntiAliasingMode::None );
-    Pt::int32_t quartersX;
-    Pt::int32_t quartersY;
-    Scanlines   scanlines;
-    arcUtilCalcScanlines(radX, radY, ctrX, ctrY, degBegin, degEnd, useAntiAliasing, quartersX, quartersY, x1, y1, x2, y2, scanlines);
-
-    // Determine where the direction that the hole faces to
-    bool faceL, faceR, faceT, faceB;
-    arcUtilDetermineHoleDirection(x1, y1, x2, y2, faceL, faceR, faceT, faceB);
-
-    // lprintf("l=%d r=%d t=%d b=%d\n", faceL, faceR, faceT, faceB);
-
-    // Copy the list of scanlines to be drawn later
-    const Scanlines scanlinesRef = scanlines;
-
-    // Remove the all scanlines to the top and bottom side that will be completely outside the shape
-    if(faceT) scanlines.erase(scanlines.begin(),                           scanlines.lower_bound(std::min(y1, y2) + 1));
-    if(faceB) scanlines.erase(scanlines.upper_bound(std::max(y1, y2) - 1), scanlines.end()                            );
-
-    // Crop the scanlines to the left and right side by running the Xiaolin Wu's anti-aliased line algorithm
-    if(faceL || faceR) {
-        arcUtilCropScanlinesUsingXWu(x1, y1, ctrX, ctrY, faceL, faceR, faceT, faceB, scanlines);
-        arcUtilCropScanlinesUsingXWu(ctrX, ctrY, x2, y2, faceL, faceR, faceT, faceB, scanlines);
-    }
-
-    // Mark the all scanlines to the left and right side that will be completely outside the shape
-    arcUtilMarkOutsideScanlinesRL(x1, y1, x2, y2, faceL, faceR, faceT, faceB, scanlines);
-
-    // Draw the scanlines
-    for(Scanlines::const_iterator it = scanlines.begin(); it != scanlines.end(); ++it) {
-        _rasterizer->fillOneScanlineNoAA(it->second.from, it->second.to, it->first, minX, minY);
-    }
-
-    // Exit here if we are not doing anti aliasing
-    if(_rasterizer->antiAliasingMode() == AntiAliasingMode::None)  return;
-
-    // === Process the circumference's pixels ===
 }
 
 
