@@ -754,7 +754,7 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
     const Pt::int32_t quartersX = round( radX2 * fastInvSqrt(radX2 + radY2) );
 
     for(Pt::int32_t x = 0; x <= quartersX; ++x) {
-        // Calculate the coordinate and alpha
+        // Calculate the coordinate
         const float y = radY * fastSqrt(1 - (float) x * x / radX2);
         // Without anti-aliasing
         if(_rasterizer->antiAliasingMode() == AntiAliasingMode::None) {
@@ -830,7 +830,7 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
     const Pt::int32_t quartersY = round( radY2 * fastInvSqrt(radX2 + radY2) );
 
     for(Pt::int32_t y = 0; y <= quartersY; ++y) {
-        // Calculate the coordinate and alpha
+        // Calculate the coordinate
         const float x = radX * fastSqrt(1 - (float) y * y / radY2);
         // Without anti-aliasing
         if(_rasterizer->antiAliasingMode() == AntiAliasingMode::None) {
@@ -929,7 +929,7 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
     if(faceB) scanlines.erase(scanlines.upper_bound(std::max(y1, y2) - 1), scanlines.end()                            );
 
     // Crop the scanlines to the left and right side by running the Xiaolin Wu's anti-aliased line algorithm
-    if(faceL || faceR ) {
+    if(faceL || faceR) {
         // Convert the coordinates to fixed-points
         Pt::int32_t fx1 = FIXED_POINT_FROM_INT(x1);
         Pt::int32_t fy1 = FIXED_POINT_FROM_INT(y1);
@@ -1124,6 +1124,491 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
 
 void ImagePainter2::fillArcPieImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
 {
+    // IMPORTANT NOTES:
+    //     * In Cartesian coordinate system, the Y coordinate goes from low to high,
+    //       from the middle axis (X) to the top
+    //     * In computer coordinate system, the Y coordinate goes from low to high,
+    //       from the top of the screen to the bottom
+    //     * This will cause addition and subtraction to be reversed when calculating
+    //       for the Y coordinate using trigonometry
+
+    // Update the gradient as needed
+    _rasterizer->updateGradientBrushAsNeeded(size.width(), size.height());
+
+    // Ensure that the begin angle is within the acceptable range
+    while(degBegin < -360) degBegin += 360;
+    while(degBegin >  360) degBegin -= 360;
+
+    // Ensure that the end angle is within the acceptable range
+    while(degEnd < -360) degEnd += 360;
+    while(degEnd >  360) degEnd -= 360;
+
+    // Calculate the ellipse's parameters
+    Pt::int32_t minX  = topLeft.x();
+    Pt::int32_t minY  = topLeft.y();
+    Pt::int32_t radX  = size.width () / 2;
+    Pt::int32_t radY  = size.height() / 2;
+    Pt::int32_t ctrX  = minX + radX;
+    Pt::int32_t ctrY  = minY + radY;
+    Pt::int32_t radX2 = radX * radX;
+    Pt::int32_t radY2 = radY * radY;
+
+    // Calculate the approximate coordinate of the point which is located at the begin angle
+    const Pt::int32_t bx = round(ctrX + radX * fastCos(degBegin * Pt::Pi / 180));
+    const Pt::int32_t by = round(ctrY - radY * fastSin(degBegin * Pt::Pi / 180)); // See the notes on the beginning of this function
+
+    // Calculate the approximate coordinate of the point which is located at the end angle
+    const Pt::int32_t ex = round(ctrX + radX * fastCos(degEnd   * Pt::Pi / 180));
+    const Pt::int32_t ey = round(ctrY - radY * fastSin(degEnd   * Pt::Pi / 180)); // See the notes on the beginning of this function
+
+    // Used for finding the exact coordinate of the points which are located at the begin and end angle
+    Pt::int32_t x1 = 0, x1d = MAXIMUM_COORD; // Begin point
+    Pt::int32_t y1 = 0, y1d = MAXIMUM_COORD;
+    Pt::int32_t x2 = 0, x2d = MAXIMUM_COORD; // End point
+    Pt::int32_t y2 = 0, y2d = MAXIMUM_COORD;
+
+    // === Process the scanlines ===
+
+    // List of scanlines to be drawn later
+    Scanlines scanlines;
+
+    // Top and bottom halves
+    const Pt::int32_t quartersX = round( radX2 * fastInvSqrt(radX2 + radY2) );
+
+    for(Pt::int32_t x = 0; x <= quartersX; ++x) {
+        // Calculate the coordinate
+        const float y = radY * fastSqrt(1 - (float) x * x / radX2);
+        // Without anti-aliasing
+        if(_rasterizer->antiAliasingMode() == AntiAliasingMode::None) {
+            // Calculate the coordinates
+            const Pt::int32_t xl = ctrX - x;
+            const Pt::int32_t xr = ctrX + x;
+            const Pt::int32_t yt = ctrY - round(y);
+            const Pt::int32_t yb = ctrY + round(y);
+            // Determine the exact coordinates of the closing lines
+            if(abs(xl - bx) < x1d) { x1d = abs(xl - bx); x1 = xl; }
+            if(abs(xl - ex) < x2d) { x2d = abs(xl - ex); x2 = xl; }
+            if(abs(xr - bx) < x1d) { x1d = abs(xr - bx); x1 = xr; }
+            if(abs(xr - ex) < x2d) { x2d = abs(xr - ex); x2 = xr; }
+            if(abs(yt - by) < y1d) { y1d = abs(yt - by); y1 = yt; }
+            if(abs(yt - ey) < y2d) { y2d = abs(yt - ey); y2 = yt; }
+            if(abs(yb - by) < y1d) { y1d = abs(yb - by); y1 = yb; }
+            if(abs(yb - ey) < y2d) { y2d = abs(yb - ey); y2 = yb; }
+            // Store/update the scanline coordinates
+            Scanlines::iterator it1 = scanlines.find(yt);
+            Scanlines::iterator it2 = scanlines.find(yb);
+            if(it1 == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yt, ScanlineElement(xl, xr) ) );
+            }
+            else { // Update the scanline's "from" and "to" coordinates
+                if( xl < it1->second.from ) it1->second.from = xl;
+                if( xr > it1->second.to   ) it1->second.to   = xr;
+            }
+            if(it2 == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yb, ScanlineElement(xl, xr) ) );
+            }
+            else { // Update the scanline's "from" and "to" coordinates
+                if( xl < it2->second.from ) it2->second.from = xl;
+                if( xr > it2->second.to   ) it2->second.to   = xr;
+            }
+        }
+        // With anti-aliasing
+        else {
+            // Calculate the coordinates
+            const Pt::int32_t xl = ctrX - x;
+            const Pt::int32_t xr = ctrX + x;
+            const Pt::int32_t yt = ctrY - floor(y);
+            const Pt::int32_t yb = ctrY + floor(y);
+            // Determine the exact coordinates of the closing lines
+            if(abs(xl - bx) < x1d) { x1d = abs(xl - bx); x1 = xl; }
+            if(abs(xl - ex) < x2d) { x2d = abs(xl - ex); x2 = xl; }
+            if(abs(xr - bx) < x1d) { x1d = abs(xr - bx); x1 = xr; }
+            if(abs(xr - ex) < x2d) { x2d = abs(xr - ex); x2 = xr; }
+            if(abs(yt - by) < y1d) { y1d = abs(yt - by); y1 = yt; }
+            if(abs(yt - ey) < y2d) { y2d = abs(yt - ey); y2 = yt; }
+            if(abs(yb - by) < y1d) { y1d = abs(yb - by); y1 = yb; }
+            if(abs(yb - ey) < y2d) { y2d = abs(yb - ey); y2 = yb; }
+            // Store/update the scanline coordinates
+            Scanlines::iterator it1 = scanlines.find(yt);
+            Scanlines::iterator it2 = scanlines.find(yb);
+            if(it1 == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yt, ScanlineElement(xl, xr) ) );
+            }
+            else { // Update the scanline's "from" and "to" coordinates
+                if( xl < it1->second.from ) it1->second.from = xl;
+                if( xr > it1->second.to   ) it1->second.to   = xr;
+            }
+            if(it2 == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yb, ScanlineElement(xl, xr) ) );
+            }
+            else { // Update the scanline's "from" and "to" coordinates
+                if( xl < it2->second.from ) it2->second.from = xl;
+                if( xr > it2->second.to   ) it2->second.to   = xr;
+            }
+        }
+    }
+
+    // Left and right halves
+    const Pt::int32_t quartersY = round( radY2 * fastInvSqrt(radX2 + radY2) );
+
+    for(Pt::int32_t y = 0; y <= quartersY; ++y) {
+        // Calculate the coordinate
+        const float x = radX * fastSqrt(1 - (float) y * y / radY2);
+        // Without anti-aliasing
+        if(_rasterizer->antiAliasingMode() == AntiAliasingMode::None) {
+            // Calculate the coordinates
+            const Pt::int32_t xl = ctrX - round(x);
+            const Pt::int32_t xr = ctrX + round(x);
+            const Pt::int32_t yt = ctrY - y;
+            const Pt::int32_t yb = ctrY + y;
+            // Determine the exact coordinates of the closing lines
+            if(abs(xl - bx) < x1d) { x1d = abs(xl - bx); x1 = xl; }
+            if(abs(xl - ex) < x2d) { x2d = abs(xl - ex); x2 = xl; }
+            if(abs(xr - bx) < x1d) { x1d = abs(xr - bx); x1 = xr; }
+            if(abs(xr - ex) < x2d) { x2d = abs(xr - ex); x2 = xr; }
+            if(abs(yt - by) < y1d) { y1d = abs(yt - by); y1 = yt; }
+            if(abs(yt - ey) < y2d) { y2d = abs(yt - ey); y2 = yt; }
+            if(abs(yb - by) < y1d) { y1d = abs(yb - by); y1 = yb; }
+            if(abs(yb - ey) < y2d) { y2d = abs(yb - ey); y2 = yb; }
+            // Store/update the scanline coordinates
+            Scanlines::iterator it1 = scanlines.find(yt);
+            Scanlines::iterator it2 = scanlines.find(yb);
+            if(it1 == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yt, ScanlineElement(xl, xr) ) );
+            }
+            else { // Update the scanline's "from" and "to" coordinates
+                if( xl < it1->second.from ) it1->second.from = xl;
+                if( xr > it1->second.to   ) it1->second.to   = xr;
+            }
+            if(it2 == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yb, ScanlineElement(xl, xr) ) );
+            }
+            else { // Update the scanline's "from" and "to" coordinates
+                if( xl < it2->second.from ) it2->second.from = xl;
+                if( xr > it2->second.to   ) it2->second.to   = xr;
+            }
+        }
+        // With anti-aliasing
+        else {
+            // Calculate the coordinates
+            const Pt::int32_t xl = ctrX - floor(x);
+            const Pt::int32_t xr = ctrX + floor(x);
+            const Pt::int32_t yt = ctrY - y;
+            const Pt::int32_t yb = ctrY + y;
+            // Determine the exact coordinates of the closing lines
+            if(abs(xl - bx) < x1d) { x1d = abs(xl - bx); x1 = xl; }
+            if(abs(xl - ex) < x2d) { x2d = abs(xl - ex); x2 = xl; }
+            if(abs(xr - bx) < x1d) { x1d = abs(xr - bx); x1 = xr; }
+            if(abs(xr - ex) < x2d) { x2d = abs(xr - ex); x2 = xr; }
+            if(abs(yt - by) < y1d) { y1d = abs(yt - by); y1 = yt; }
+            if(abs(yt - ey) < y2d) { y2d = abs(yt - ey); y2 = yt; }
+            if(abs(yb - by) < y1d) { y1d = abs(yb - by); y1 = yb; }
+            if(abs(yb - ey) < y2d) { y2d = abs(yb - ey); y2 = yb; }
+            // Store/update the scanline coordinates
+            Scanlines::iterator it1 = scanlines.find(yt);
+            Scanlines::iterator it2 = scanlines.find(yb);
+            if(it1 == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yt, ScanlineElement(xl, xr) ) );
+            }
+            else { // Update the scanline's "from" and "to" coordinates
+                if( xl < it1->second.from ) it1->second.from = xl;
+                if( xr > it1->second.to   ) it1->second.to   = xr;
+            }
+            if(it2 == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yb, ScanlineElement(xl, xr) ) );
+            }
+            else { // Update the scanline's "from" and "to" coordinates
+                if( xl < it2->second.from ) it2->second.from = xl;
+                if( xr > it2->second.to   ) it2->second.to   = xr;
+            }
+        }
+    }
+
+    // Calculate the direction vector
+    const Pt::int32_t vx = x2 - x1;           // Vector from the begin point to the end point
+    const Pt::int32_t vy = y2 - y1;           // ---
+    const Pt::int32_t vz = 0;                 // ---
+    const Pt::int32_t rx = 0;                 // Vector from the point of origin (0, 0, 0) that points out of the monitor
+    const Pt::int32_t ry = 0;                 // ---
+    const Pt::int32_t rz = 1;                 // ---
+    const Pt::int32_t cx = vy * rz - vz * ry; // Cross product of the above vectors
+    const Pt::int32_t cy = vz * rx - vx * rz; // ---
+  //const Pt::int32_t cz = vx * ry - vy * rx; // ---
+
+    // Determine where the direction that the hole faces to
+    const bool faceT = cy < 0;
+    const bool faceB = cy > 0;
+    const bool faceL = cx < 0;
+    const bool faceR = cx > 0;
+
+    // lprintf("l=%d r=%d t=%d b=%d\n", faceL, faceR, faceT, faceB);
+
+    // Copy the list of scanlines to be drawn later
+    const Scanlines scanlinesRef = scanlines;
+
+    // Remove the all scanlines to the top and bottom side that will be completely outside the shape
+    if(faceT) scanlines.erase(scanlines.begin(),                           scanlines.lower_bound(std::min(y1, y2) + 1));
+    if(faceB) scanlines.erase(scanlines.upper_bound(std::max(y1, y2) - 1), scanlines.end()                            );
+
+    // Crop the scanlines to the left and right side by running the Xiaolin Wu's anti-aliased line algorithm
+    // --- from (x1, y1) to (ctrX, ctrY) ---
+    if(faceL || faceR) {
+        // Convert the coordinates to fixed-points
+        Pt::int32_t fx1 = FIXED_POINT_FROM_INT(x1);
+        Pt::int32_t fy1 = FIXED_POINT_FROM_INT(y1);
+        Pt::int32_t fx2 = FIXED_POINT_FROM_INT(ctrX);
+        Pt::int32_t fy2 = FIXED_POINT_FROM_INT(ctrY);
+        // Swap the values as needed
+        const Pt::int32_t deltaX = (fx2 >= fx1) ? (fx2 - fx1) : (fx1 - fx2);
+        const Pt::int32_t deltaY = (fy2 >= fy1) ? (fy2 - fy1) : (fy1 - fy2);
+        const bool        steep  = deltaY > deltaX;
+        if(steep) {
+            std::swap(fx1, fy1);
+            std::swap(fx2, fy2);
+        }
+        if(fx1 > fx2) {
+            std::swap(fx1, fx2);
+            std::swap(fy1, fy2);
+        }
+        // Handle the gradient, starting point, and ending point
+        const Pt::int32_t grad = (fy2 - fy1) / FIXED_POINT_TO_INT(fx2 - fx1);
+        const Pt::int32_t xpxl1 = FIXED_POINT_ROUND(fx1);
+        const Pt::int32_t xpxl2 = FIXED_POINT_ROUND(fx2);
+        const Pt::int32_t ypxl  = fy1 + grad * FIXED_POINT_TO_INT(xpxl1 - fx1);
+        // Walk through the coordinates
+        Pt::int32_t from  = FIXED_POINT_TO_INT(FIXED_POINT_ROUND(fx1));
+        Pt::int32_t to    = FIXED_POINT_TO_INT(xpxl2);
+        Pt::int32_t ypxli = ypxl;
+        if(steep) {
+            for(Pt::int32_t i = from; i <= to; ++i) {
+                // Calculate the coordinates
+                Pt::int32_t refX = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli));
+                Pt::int32_t refY = i;
+                ypxli += grad;
+                // Crop the corresponding scanline
+                Scanlines::iterator it = scanlines.find(refY);
+                if(it == scanlines.end()) continue;
+                if(faceL && it->second.from < refX) it->second.from = refX;
+                if(faceR && it->second.to   > refX) it->second.to   = refX;
+            }
+        }
+        else {
+            for(Pt::int32_t i = from; i <= to; ++i) {
+                // Calculate the coordinates
+                Pt::int32_t refX  = i;
+                Pt::int32_t refYt = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           );
+                Pt::int32_t refYb = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE);
+                ypxli += grad;
+                // Crop the corresponding scanlines
+                Scanlines::iterator itt = scanlines.find(refYt);
+                Scanlines::iterator itb = scanlines.find(refYb);
+                if(itt != scanlines.end()) {
+                    if(faceL && itt->second.from < refX - 1) itt->second.from = refX - 1;
+                    if(faceR && itt->second.to   > refX    ) itt->second.to   = refX;
+                }
+                if(itb != scanlines.end()) {
+                    if(faceL && itb->second.from < refX - 1) itb->second.from = refX - 1;
+                    if(faceR && itb->second.to   > refX    ) itb->second.to   = refX;
+                }
+            }
+        }
+    }
+
+    // Crop the scanlines to the left and right side by running the Xiaolin Wu's anti-aliased line algorithm
+    // --- from (ctrX, ctrY) to (x2, y2) ---
+    if(faceL || faceR) {
+        // Convert the coordinates to fixed-points
+        Pt::int32_t fx1 = FIXED_POINT_FROM_INT(ctrX);
+        Pt::int32_t fy1 = FIXED_POINT_FROM_INT(ctrY);
+        Pt::int32_t fx2 = FIXED_POINT_FROM_INT(x2);
+        Pt::int32_t fy2 = FIXED_POINT_FROM_INT(y2);
+        // Swap the values as needed
+        const Pt::int32_t deltaX = (fx2 >= fx1) ? (fx2 - fx1) : (fx1 - fx2);
+        const Pt::int32_t deltaY = (fy2 >= fy1) ? (fy2 - fy1) : (fy1 - fy2);
+        const bool        steep  = deltaY > deltaX;
+        if(steep) {
+            std::swap(fx1, fy1);
+            std::swap(fx2, fy2);
+        }
+        if(fx1 > fx2) {
+            std::swap(fx1, fx2);
+            std::swap(fy1, fy2);
+        }
+        // Handle the gradient, starting point, and ending point
+        const Pt::int32_t grad = (fy2 - fy1) / FIXED_POINT_TO_INT(fx2 - fx1);
+        const Pt::int32_t xpxl1 = FIXED_POINT_ROUND(fx1);
+        const Pt::int32_t xpxl2 = FIXED_POINT_ROUND(fx2);
+        const Pt::int32_t ypxl  = fy1 + grad * FIXED_POINT_TO_INT(xpxl1 - fx1);
+        // Walk through the coordinates
+        Pt::int32_t from  = FIXED_POINT_TO_INT(FIXED_POINT_ROUND(fx1));
+        Pt::int32_t to    = FIXED_POINT_TO_INT(xpxl2);
+        Pt::int32_t ypxli = ypxl;
+        if(steep) {
+            for(Pt::int32_t i = from; i <= to; ++i) {
+                // Calculate the coordinates
+                Pt::int32_t refX = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli));
+                Pt::int32_t refY = i;
+                ypxli += grad;
+                // Crop the corresponding scanline
+                Scanlines::iterator it = scanlines.find(refY);
+                if(it == scanlines.end()) continue;
+                if(faceL && it->second.from < refX) it->second.from = refX;
+                if(faceR && it->second.to   > refX) it->second.to   = refX;
+            }
+        }
+        else {
+            for(Pt::int32_t i = from; i <= to; ++i) {
+                // Calculate the coordinates
+                Pt::int32_t refX  = i;
+                Pt::int32_t refYt = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           );
+                Pt::int32_t refYb = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE);
+                ypxli += grad;
+                // Crop the corresponding scanlines
+                Scanlines::iterator itt = scanlines.find(refYt);
+                Scanlines::iterator itb = scanlines.find(refYb);
+                if(itt != scanlines.end()) {
+                    if(faceL && itt->second.from < refX - 1) itt->second.from = refX - 1;
+                    if(faceR && itt->second.to   > refX    ) itt->second.to   = refX;
+                }
+                if(itb != scanlines.end()) {
+                    if(faceL && itb->second.from < refX - 1) itb->second.from = refX - 1;
+                    if(faceR && itb->second.to   > refX    ) itb->second.to   = refX;
+                }
+            }
+        }
+    }
+
+    // Mark the all scanlines to the left and right side that will be completely outside the shape
+    const Pt::int32_t xlMin = std::min(x1, x2);
+    const Pt::int32_t xlMax = std::max(x1, x2);
+
+    for(Scanlines::iterator it = scanlines.begin(); it != scanlines.lower_bound(std::min(y1, y2) + 1); ++it) {
+        if(faceL && it->second.to < xlMin) {
+            it->second.from =  Painter::MaximumCoordinate;
+            it->second.to   = -Painter::MaximumCoordinate;
+        }
+        if(faceR && it->second.from > xlMax) {
+            it->second.from =  Painter::MaximumCoordinate;
+            it->second.to   = -Painter::MaximumCoordinate;
+        }
+    }
+
+    for(Scanlines::iterator it = scanlines.upper_bound(std::max(y1, y2) - 1); it != scanlines.end(); ++it) {
+        if(faceL && it->second.to < xlMin) {
+            it->second.from =  Painter::MaximumCoordinate;
+            it->second.to   = -Painter::MaximumCoordinate;
+        }
+        if(faceR && it->second.from > xlMax) {
+            it->second.from =  Painter::MaximumCoordinate;
+            it->second.to   = -Painter::MaximumCoordinate;
+        }
+    }
+
+    // Draw the scanlines
+    for(Scanlines::const_iterator it = scanlines.begin(); it != scanlines.end(); ++it) {
+        _rasterizer->fillOneScanlineNoAA(it->second.from, it->second.to, it->first, minX, minY);
+    }
+
+    // Exit here if we are not doing anti aliasing
+    if(_rasterizer->antiAliasingMode() == AntiAliasingMode::None)  return;
+
+    /*
+    // === Process the circumference's pixels ===
+
+    // Top and bottom halves
+    for(Pt::int32_t x = 0; x <= quartersX; ++x) {
+        // Calculate the Y coordinate and alpha
+        const float       y     = radY * fastSqrt(1 - (float) x * x / radX2);
+        const Pt::int32_t fly   = floor(y);
+        const float       error = y - fly;
+        const Pt::uint8_t alpha = round(error * 255);
+        // Draw the first part of the pixels
+        const Pt::int32_t x1  = ctrX - x;
+        const Pt::int32_t x2  = ctrX + x;
+        const Pt::int32_t y10 = ctrY - fly;
+        const Pt::int32_t y20 = ctrY + fly;
+        Scanlines::const_iterator it10 = scanlinesRef.find(y10);
+        Scanlines::const_iterator it20 = scanlinesRef.find(y20);
+        if( ( it10 == scanlinesRef.end() || (it10->second.from > x1 && it10->second.to < x2) ) ||
+            ( it20 == scanlinesRef.end() || (it20->second.from > x1 && it20->second.to < x2) )
+        ) {
+            const bool mask[4] = {
+                insideDegRange(x1, y10, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(x1, y20, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(x2, y10, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(x2, y20, ctrX, ctrY, degBegin, degEnd)
+            };
+            _rasterizer->fill4Pixels(x1, y10, x2, y20, minX, minY, 255 - alpha, mask);
+        }
+        // Draw the second part of the pixels
+        const Pt::int32_t y11 = ctrY - fly - 1;
+        const Pt::int32_t y21 = ctrY + fly + 1;
+        Scanlines::const_iterator it11 = scanlinesRef.find(y11);
+        Scanlines::const_iterator it21 = scanlinesRef.find(y21);
+        if( ( it11 == scanlinesRef.end() || (it11->second.from > x1 && it11->second.to < x2) ) ||
+            ( it21 == scanlinesRef.end() || (it21->second.from > x1 && it21->second.to < x2) )
+        ) {
+            const bool mask[4] = {
+                insideDegRange(x1, y11, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(x1, y21, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(x2, y11, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(x2, y21, ctrX, ctrY, degBegin, degEnd)
+            };
+            _rasterizer->fill4Pixels(x1, y11, x2, y21, minX, minY, alpha, mask);
+        }
+    }
+
+    // Left and right halves
+    for(Pt::int32_t y = 0; y <= quartersY; ++y) {
+        // Calculate the X coordinate and alpha
+        const float       x     = radX * fastSqrt(1 - (float) y * y / radY2);
+        const Pt::int32_t flx   = floor(x);
+        const float       error = x - flx;
+        const Pt::uint8_t alpha = round(error * 255);
+        // Draw the first part of the pixels
+        const Pt::int32_t x10 = ctrX - flx;
+        const Pt::int32_t x20 = ctrX + flx;
+        const Pt::int32_t y1  = ctrY - y;
+        const Pt::int32_t y2  = ctrY + y;
+        Scanlines::const_iterator it1 = scanlinesRef.find(y1);
+        Scanlines::const_iterator it2 = scanlinesRef.find(y2);
+        if( ( it1 == scanlinesRef.end() || (it1->second.from > x10 && it1->second.to < x20) ) ||
+            ( it2 == scanlinesRef.end() || (it2->second.from > x10 && it2->second.to < x20) )
+        ) {
+            const bool mask[4] = {
+                insideDegRange(x10, y1, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(x10, y2, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(x20, y1, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(x20, y2, ctrX, ctrY, degBegin, degEnd)
+            };
+            _rasterizer->fill4Pixels(x10, y1, x20, y2, minX, minY, 255 - alpha, mask);
+        }
+        // Draw the second part of the pixels
+        const Pt::int32_t x11 = ctrX - flx - 1;
+        const Pt::int32_t x21 = ctrX + flx + 1;
+        if( ( it1 == scanlinesRef.end() || (it1->second.from > x11 && it1->second.to < x21) ) ||
+            ( it2 == scanlinesRef.end() || (it2->second.from > x11 && it2->second.to < x21) )
+        ) {
+            const bool mask[4] = {
+                insideDegRange(x11, y1, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(x11, y2, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(x21, y1, ctrX, ctrY, degBegin, degEnd),
+                insideDegRange(x21, y2, ctrX, ctrY, degBegin, degEnd)
+            };
+            _rasterizer->fill4Pixels(x11, y1, x21, y2, minX, minY, alpha, mask);
+        }
+    }
+
+    // Draw the closing line
+    std::map<Pt::int32_t, Pt::int32_t> exclusionZone;
+
+    for(Scanlines::const_iterator it = scanlines.begin(); it != scanlines.end(); ++it) {
+        if(faceL) exclusionZone[it->first] = it->second.from;
+        if(faceR) exclusionZone[it->first] = it->second.to;
+    }
+
+    _rasterizer->fillOnePixelGLineSegmentXWAA(x1, y1, x2, y2, minX, minY, &exclusionZone, 0);
+*/
 }
 
 
