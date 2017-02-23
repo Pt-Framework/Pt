@@ -41,7 +41,7 @@ namespace Pt {
 
 namespace Hmi {
 
-class TextLine
+class PT_HMI_API TextLine
 {
     public:
         TextLine();
@@ -80,7 +80,7 @@ class TextLine
         Gfx::FontMetrics _textMetrics;
 };
 
-class TextBlock
+class PT_HMI_API TextBlock
 {
     public:
         typedef TextLine* Iterator;
