@@ -393,6 +393,14 @@ void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float deg
 
 void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode)
 {
+    // IMPORTANT NOTES:
+    //     * In Cartesian coordinate system, the Y coordinate goes from low to high,
+    //       from the middle axis (X) to the top
+    //     * In computer coordinate system, the Y coordinate goes from low to high,
+    //       from the top of the screen to the bottom
+    //     * This will cause addition and subtraction to be interchanged when calculating
+    //       for the Y coordinate using trigonometry
+
     // Shall we draw an ellipse or arc?
     const bool drawArc = (degBegin != 0) || (degEnd != 0);
 
@@ -421,10 +429,10 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
         while(degEnd >  360) degEnd -= 360;
         // Calculate the approximate coordinate of the point which is located at the begin angle
         bx = round(ctrX + radX * fastCos(degBegin * Pt::Pi / 180));
-        by = round(ctrY - radY * fastSin(degBegin * Pt::Pi / 180));
+        by = round(ctrY - radY * fastSin(degBegin * Pt::Pi / 180)); // See the notes on the beginning of this function
         // Calculate the approximate coordinate of the point which is located at the end angle
         ex = round(ctrX + radX * fastCos(degEnd   * Pt::Pi / 180));
-        ey = round(ctrY - radY * fastSin(degEnd   * Pt::Pi / 180));
+        ey = round(ctrY - radY * fastSin(degEnd   * Pt::Pi / 180)); // See the notes on the beginning of this function
     }
 
     // Top and bottom halves
@@ -693,6 +701,16 @@ void ImagePainter2::fillEllipseImplNoAA( const PointF& topLeft, const SizeF& siz
 
 void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
 {
+    // IMPORTANT NOTES:
+    //     * In Cartesian coordinate system, the Y coordinate goes from low to high,
+    //       from the middle axis (X) to the top
+    //     * In computer coordinate system, the Y coordinate goes from low to high,
+    //       from the top of the screen to the bottom
+    //     * This will cause addition and subtraction to be reversed when calculating
+    //       for the Y coordinate using trigonometry
+    //     * This will also cause >= and < comparison operators to be interchanged when
+    //       determining quadrant using the Y coordinate
+
     // Ensure that the begin angle is within the acceptable range
     while(degBegin < -360) degBegin += 360;
     while(degBegin >  360) degBegin -= 360;
@@ -713,11 +731,11 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
 
     // Calculate the approximate coordinate of the point which is located at the begin angle
     const Pt::int32_t bx = round(ctrX + radX * fastCos(degBegin * Pt::Pi / 180));
-    const Pt::int32_t by = round(ctrY - radY * fastSin(degBegin * Pt::Pi / 180));
+    const Pt::int32_t by = round(ctrY - radY * fastSin(degBegin * Pt::Pi / 180)); // See the notes on the beginning of this function
 
     // Calculate the approximate coordinate of the point which is located at the end angle
     const Pt::int32_t ex = round(ctrX + radX * fastCos(degEnd   * Pt::Pi / 180));
-    const Pt::int32_t ey = round(ctrY - radY * fastSin(degEnd   * Pt::Pi / 180));
+    const Pt::int32_t ey = round(ctrY - radY * fastSin(degEnd   * Pt::Pi / 180)); // See the notes on the beginning of this function
 
     // Used for finding the exact coordinate of the points which are located at the begin and end angle
     Pt::int32_t x1 = 0, x1d = MAXIMUM_COORD;
@@ -977,15 +995,15 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
     // Determine the location of the begin and end points
     Pt::int32_t qBeg = 0, qEnd = 0;
 
-         if(x1 >= ctrX && y1 >= ctrY) qBeg = 1;
-    else if(x1 <  ctrX && y1 >= ctrY) qBeg = 2;
-    else if(x1 <  ctrX && y1 <  ctrY) qBeg = 3;
-    else if(x1 >= ctrX && y1 <  ctrY) qBeg = 4;
+         if(x1 >= ctrX && y1 <  ctrY) qBeg = 1; // See the notes on the beginning of this function
+    else if(x1 <  ctrX && y1 <  ctrY) qBeg = 2; // See the notes on the beginning of this function
+    else if(x1 <  ctrX && y1 >= ctrY) qBeg = 3; // See the notes on the beginning of this function
+    else if(x1 >= ctrX && y1 >= ctrY) qBeg = 4; // See the notes on the beginning of this function
 
-         if(x2 >= ctrX && y2 >= ctrY) qEnd = 1;
-    else if(x2 <  ctrX && y2 >= ctrY) qEnd = 2;
-    else if(x2 <  ctrX && y2 <  ctrY) qEnd = 3;
-    else if(x2 >= ctrX && y2 <  ctrY) qEnd = 4;
+         if(x2 >= ctrX && y2 <  ctrY) qEnd = 1; // See the notes on the beginning of this function
+    else if(x2 <  ctrX && y2 <  ctrY) qEnd = 2; // See the notes on the beginning of this function
+    else if(x2 <  ctrX && y2 >= ctrY) qEnd = 3; // See the notes on the beginning of this function
+    else if(x2 >= ctrX && y2 >= ctrY) qEnd = 4; // See the notes on the beginning of this function
 
     // Determine where the direction that the hole faces to
     enum ChordHoleDir {
@@ -1007,9 +1025,104 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
                  (qBeg == 3 && qEnd == 3) || (qBeg == 3 && qEnd == 4) ) chd = Right;
     }
 
-    //if(chd == Invalid) lprintf("%d %d\n", qBeg, qEnd);
+    lprintf("%d %d : %d\n", qBeg, qEnd, chd);
+
+
 
     // Crop the spans using the closing line
+
+    //scanlines.erase(scanlines.begin(), scanlines.lower_bound(std::min(y1, y2)));
+    //scanlines.erase(scanlines.lower_bound(std::max(y1, y2)), scanlines.end());
+
+
+
+
+    // Convert the coordinates to fixed-points
+    Pt::int32_t fx1 = FIXED_POINT_FROM_INT(x1);
+    Pt::int32_t fy1 = FIXED_POINT_FROM_INT(y1);
+    Pt::int32_t fx2 = FIXED_POINT_FROM_INT(x2);
+    Pt::int32_t fy2 = FIXED_POINT_FROM_INT(y2);
+
+    // Swap the values as needed
+    const Pt::int32_t deltaX = (fx2 >= fx1) ? (fx2 - fx1) : (fx1 - fx2);
+    const Pt::int32_t deltaY = (fy2 >= fy1) ? (fy2 - fy1) : (fy1 - fy2);
+    const bool        steep  = deltaY > deltaX;
+
+    if(steep) {
+        std::swap(fx1, fy1);
+        std::swap(fx2, fy2);
+    }
+
+    if(fx1 > fx2) {
+        std::swap(fx1, fx2);
+        std::swap(fy1, fy2);
+    }
+
+    // Handle the gradient, starting point, and ending point
+    const Pt::int32_t grad = (fy2 - fy1) / FIXED_POINT_TO_INT(fx2 - fx1);
+    const Pt::int32_t xpxl1 = FIXED_POINT_ROUND(fx1);
+    const Pt::int32_t xpxl2 = FIXED_POINT_ROUND(fx2);
+    const Pt::int32_t ypxl  = fy1 + grad * FIXED_POINT_TO_INT(xpxl1 - fx1);
+
+    // Draw the pixels
+    Pt::int32_t from  = FIXED_POINT_TO_INT(FIXED_POINT_ROUND(fx1));
+    Pt::int32_t to    = FIXED_POINT_TO_INT(xpxl2);
+    Pt::int32_t ypxli = ypxl;
+
+    if(steep) {
+        // Draw the pixels
+        for(Pt::int32_t i = from; i <= to; ++i) {
+            // Calculate the coordinates
+            Pt::int32_t refXl = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           );
+            Pt::int32_t refXr = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE);
+            Pt::int32_t refY  = i;
+            ypxli += grad;
+            //
+            Scanlines::iterator it = scanlines.find(refY);
+            if(it == scanlines.end()) continue;
+
+            switch(chd) {
+                case Left   : if(it->second.from < refXr) it->second.from = refXr; break;
+                case Right  : if(it->second.to   > refXl) it->second.to   = refXl; break;
+              //  case Top    : scanlines.erase(it); break;
+              //  case Bottom : scanlines.erase(it); break;
+                default     : break;
+            }
+        }
+    }
+    else {
+        // Draw the pixels
+        for(Pt::int32_t i = from; i <= to; ++i) {
+            // Calculate the coordinates
+            Pt::int32_t refX  = i;
+            Pt::int32_t refYt = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           );
+            Pt::int32_t refYb = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE);
+            ypxli += grad;
+            //
+            Scanlines::iterator itt = scanlines.find(refYt);
+            if(itt != scanlines.end()) {
+                switch(chd) {
+                    case Left   : if(itt->second.from < refX) itt->second.from = refX; break;
+                    case Right  : if(itt->second.to   > refX) itt->second.to   = refX; break;
+                   // case Top    : scanlines.erase(itt); break;
+                    //case Bottom : scanlines.erase(itt); break;
+                    default     : break;
+                }
+            }
+            Scanlines::iterator itb = scanlines.find(refYb);
+            if(itb != scanlines.end()) {
+                switch(chd) {
+                    case Left   : if(itb->second.from < refX) itb->second.from = refX; break;
+                    case Right  : if(itb->second.to   > refX) itb->second.to   = refX; break;
+                  //  case Top    : scanlines.erase(itb); break;
+                  //  case Bottom : scanlines.erase(itb); break;
+                    default     : break;
+                }
+            }
+        }
+    }
+
+
 
     // Draw the scanlines
     for(Scanlines::const_iterator it = scanlines.begin(); it != scanlines.end(); ++it) {
