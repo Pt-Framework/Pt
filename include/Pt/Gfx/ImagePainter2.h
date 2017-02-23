@@ -95,7 +95,7 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual void drawEllipse(const PointF& topLeft, const SizeF& size);
 
-        // NOTE: The begin and end angle must move in counter-clockwise direction or something will fail!
+        // NOTE: The begin and end angle must move in counter-clockwise direction or something wrong will be drawn!
         virtual void drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
         virtual void fillRect(const RectF& rect);
@@ -104,7 +104,7 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual void fillEllipse(const PointF& topLeft, const SizeF& size);
 
-        // NOTE: The begin and end angle must move in counter-clockwise direction or something will fail!
+        // NOTE: The begin and end angle must move in counter-clockwise direction or something wrong will be drawn!
         virtual void fillArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
     public:
@@ -119,19 +119,21 @@ class PT_GFX_API ImagePainter2 : public Painter
         static FontMetrics fontMetrics(const Font& font, const Pt::String& text);
 
     protected:
-        virtual void drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode);
-
-        virtual void fillEllipseImplNoAA(const PointF& topLeft, const SizeF& size);
-
-        virtual void fillArcChordImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
-        virtual void fillArcPieImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
-
         // Each key specify the Y coordinate of a scanline;
         // while its element specify the "from" and "to" X coordinates
-        struct ScanlineElement;
+        struct ScanlineElement {
+            Pt::int32_t from;
+            Pt::int32_t to;
+
+            ScanlineElement(Pt::int32_t from_, Pt::int32_t to_)
+            : from(from_), to(to_)
+            {}
+        };
+
         typedef std::map<Pt::int32_t, ScanlineElement> Scanlines;
 
-        // Helper functions
+    protected:
+        // Inline helper functions
         static inline float fastInvSqrt(float x);
         static inline float fastSqrt(float x);
         static inline float fastSin(float x);
@@ -139,8 +141,18 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         static inline float fastAtan2(float y, float x);
 
-        static inline float convertCartesianToPolar(float x, float y);
-        static inline bool insideDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd);
+        static inline float convertCartesianToPolarCoordinate(float x, float y);
+        static inline bool pointIsInsideArcDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd);
+
+        // Drawing functions
+        virtual void drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode);
+
+        virtual void fillEllipseImplNoAA(const PointF& topLeft, const SizeF& size);
+
+
+        /*
+        virtual void fillArcChordImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
+        virtual void fillArcPieImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd);
 
         static inline void arcUtilDetermineHoleDirection(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, bool& faceL, bool& faceR, bool& faceT, bool& faceB);
         static inline void arcUtilMarkOutsideScanlinesRL(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, bool faceL, bool faceR, bool faceT, bool faceB, Scanlines& scanlines);
@@ -148,6 +160,7 @@ class PT_GFX_API ImagePainter2 : public Painter
         static void arcUtilCropScanlinesUsingXWu(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, bool faceL, bool faceR, bool faceT, bool faceB, Scanlines& scanlines);
         static void arcUtilCalcScanlines(Pt::int32_t radX, Pt::int32_t radY, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd, bool useAntiAliasing, Pt::int32_t& quartersX, Pt::int32_t& quartersY, Pt::int32_t& x1, Pt::int32_t& y1, Pt::int32_t& x2, Pt::int32_t& y2, Scanlines& scanlines);
                void arcUtilDrawCircumferencePixels(Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t radX, Pt::int32_t radY, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd, Pt::int32_t quartersX, Pt::int32_t quartersY, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Scanlines& scanlinesRef);
+               */
 
     private:
         RectF        _clip;
@@ -157,15 +170,6 @@ class PT_GFX_API ImagePainter2 : public Painter
 // ======================================================================================
 // ===== Private Member Structures and Functions ========================================
 // ======================================================================================
-
-struct ImagePainter2::ScanlineElement {
-    Pt::int32_t from;
-    Pt::int32_t to;
-
-    ScanlineElement(Pt::int32_t from_, Pt::int32_t to_)
-    : from(from_), to(to_)
-    {}
-};
 
 #if defined(__arm__) || defined(__thumb__) || defined(_M_ARM) || defined(_M_ARMT) || defined(__TARGET_ARCH_ARM) || defined(__TARGET_ARCH_THUMB) || defined(_ARM) || defined(__arm)
 
@@ -271,7 +275,7 @@ inline float ImagePainter2::fastAtan2(float y, float x)
     return atan;
 }
 
-inline float ImagePainter2::convertCartesianToPolar(float x, float y)
+inline float ImagePainter2::convertCartesianToPolarCoordinate(float x, float y)
 {
     // Quadrant I & II
     if(y >= 0)
@@ -281,11 +285,17 @@ inline float ImagePainter2::convertCartesianToPolar(float x, float y)
     return fastAtan2(y, x) * 180 / Pt::Pi + 360;
 }
 
-inline bool ImagePainter2::insideDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd)
+inline bool ImagePainter2::pointIsInsideArcDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd)
 {
-    // The movement from begin to end must be in counter-clockwise (CCW)
+    // IMPORTANT NOTES:
+    //     * The Y coordinate goes from low to high according to the coordinate system being used:
+    //           - cartesian coordinate system: from the horizontal axis (the X axis) to the top;
+    //           - computer  coordinate system: from the top of the screen to the bottom of the screen;
+    //       This will cause sign inversion for trigonometry-based calculations in the Y coordinate.
+    //     * The movement from begin angle to end angle must be in counter-clockwise (CCW), otherwise
+    //       something wrong will be drawn.
 
-    const float angle = convertCartesianToPolar(x - ctrX, -(y - ctrY));
+    const float angle = convertCartesianToPolarCoordinate( x - ctrX, -(y - ctrY) );
 
     if(degBegin < 0 && degEnd < 0) {
         return angle >= (degBegin + 360) && angle <= (degEnd + 360);
@@ -300,6 +310,7 @@ inline bool ImagePainter2::insideDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int3
     return angle >= degBegin && angle <= degEnd;
 }
 
+/*
 inline void ImagePainter2::arcUtilDetermineHoleDirection(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, bool& faceL, bool& faceR, bool& faceT, bool& faceB)
 {
     // Calculate the direction vector
@@ -350,6 +361,7 @@ inline void ImagePainter2::arcUtilMarkOutsideScanlinesRL(Pt::int32_t x1, Pt::int
         }
     }
 }
+*/
 
 
 } // namespace

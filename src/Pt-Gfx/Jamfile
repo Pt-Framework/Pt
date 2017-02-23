@@ -22,6 +22,8 @@ if $(WITH_RASTERIZER2)
 {
     PT_GFX_RASTERIZER2_FILES = ClipShape.cpp
                                ImagePainter2.cpp
+                               ImagePainter2_Arc.cpp
+                               ImagePainter2_Ellipse.cpp
                                Rasterizer2.cpp
                                Rasterizer2_PixelScanline.cpp
                                Rasterizer2_Line.cpp
