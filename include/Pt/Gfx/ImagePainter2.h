@@ -142,7 +142,12 @@ class PT_GFX_API ImagePainter2 : public Painter
         static float convertCartesianToPolar(float x, float y);
         static bool insideDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd);
 
-        static void runXWuAlgoToCropScanlines(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, bool faceL, bool faceR, bool faceT, bool faceB, Scanlines& scanlines);
+
+        static void arcUtilCalcScanlines(Pt::int32_t radX, Pt::int32_t radY, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd, bool useAntiAliasing, Pt::int32_t& quartersX, Pt::int32_t& quartersY, Pt::int32_t& x1, Pt::int32_t& y1, Pt::int32_t& x2, Pt::int32_t& y2, Scanlines& scanlines);
+
+        static void arcUtilDetermineHoleDirection(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, bool& faceL, bool& faceR, bool& faceT, bool& faceB);
+
+        static void arcUtilCropScanlinesUsingXWu(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, bool faceL, bool faceR, bool faceT, bool faceB, Scanlines& scanlines);
 
     private:
         RectF        _clip;
@@ -293,6 +298,26 @@ inline bool ImagePainter2::insideDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int3
     }
 
     return angle >= degBegin && angle <= degEnd;
+}
+
+inline void ImagePainter2::arcUtilDetermineHoleDirection(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, bool& faceL, bool& faceR, bool& faceT, bool& faceB)
+{
+    // Calculate the direction vector
+    const Pt::int32_t vx = x2 - x1;           // Vector from the begin point to the end point
+    const Pt::int32_t vy = y2 - y1;           // ---
+    const Pt::int32_t vz = 0;                 // ---
+    const Pt::int32_t rx = 0;                 // Vector from the point of origin (0, 0, 0) that points out of the monitor
+    const Pt::int32_t ry = 0;                 // ---
+    const Pt::int32_t rz = 1;                 // ---
+    const Pt::int32_t cx = vy * rz - vz * ry; // Cross product of the above vectors
+    const Pt::int32_t cy = vz * rx - vx * rz; // ---
+  //const Pt::int32_t cz = vx * ry - vy * rx; // ---
+
+    // Determine where the direction that the hole faces to
+    faceT = cy < 0;
+    faceB = cy > 0;
+    faceL = cx < 0;
+    faceR = cx > 0;
 }
 
 
