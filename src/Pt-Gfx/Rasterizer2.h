@@ -171,6 +171,8 @@ class Rasterizer2
         void strokeOnePixelSolidRect(const Point& tl, const Point& br);
         void strokeOnePixelSolidPolygon(const Point* points, size_t pointCount);
 
+        void fillOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, DrawLineMask* maskInOut);
+
         void fillRect(const Point& tl, const Point& br);
         void fillPolygon(const Point* points, size_t pointCount);
         void fillPolygonSeparate(const Point* points, size_t pointCount);

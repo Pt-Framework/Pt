@@ -712,6 +712,9 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
     //     * This will also cause >= and < comparison operators to be interchanged when
     //       determining quadrant using the Y coordinate
 
+    // Update the gradient as needed
+    _rasterizer->updateGradientBrushAsNeeded(size.width(), size.height());
+
     // Ensure that the begin angle is within the acceptable range
     while(degBegin < -360) degBegin += 360;
     while(degBegin >  360) degBegin -= 360;
@@ -1134,9 +1137,7 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
     }
 
     // Draw the closing line
-    const Point a(x1, y1);
-    const Point b(x2, y2);
-    _rasterizer->strokeOnePixelSolidLine(a, b, 0);
+    _rasterizer->fillOnePixelGLineSegmentXWAA(x1, y1, x2, y2, minX, minY, 0);
 }
 
 void ImagePainter2::fillArcPieImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
