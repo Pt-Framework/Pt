@@ -415,9 +415,9 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
     Pt::int32_t radY2 = radY * radY;
 
     // Drawing an arc requires more parameters and calculation
-    Pt::int32_t bx = 0, x1 = 0, x1d = MAXIMUM_COORD;
+    Pt::int32_t bx = 0, x1 = 0, x1d = MAXIMUM_COORD; // Begin point
     Pt::int32_t by = 0, y1 = 0, y1d = MAXIMUM_COORD;
-    Pt::int32_t ex = 0, x2 = 0, x2d = MAXIMUM_COORD;
+    Pt::int32_t ex = 0, x2 = 0, x2d = MAXIMUM_COORD; // End point
     Pt::int32_t ey = 0, y2 = 0, y2d = MAXIMUM_COORD;
 
     if(drawArc) {
@@ -709,8 +709,10 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
     //       from the top of the screen to the bottom
     //     * This will cause addition and subtraction to be reversed when calculating
     //       for the Y coordinate using trigonometry
-    //     * This will also cause >= and < comparison operators to be interchanged when
-    //       determining quadrant using the Y coordinate
+
+
+    // XXXXX    * This will also cause >= and < comparison operators to be interchanged when
+    //      XXXXXX determining quadrant using the Y coordinate
 
     // Update the gradient as needed
     _rasterizer->updateGradientBrushAsNeeded(size.width(), size.height());
@@ -742,9 +744,9 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
     const Pt::int32_t ey = round(ctrY - radY * fastSin(degEnd   * Pt::Pi / 180)); // See the notes on the beginning of this function
 
     // Used for finding the exact coordinate of the points which are located at the begin and end angle
-    Pt::int32_t x1 = 0, x1d = MAXIMUM_COORD;
+    Pt::int32_t x1 = 0, x1d = MAXIMUM_COORD; // Begin point
     Pt::int32_t y1 = 0, y1d = MAXIMUM_COORD;
-    Pt::int32_t x2 = 0, x2d = MAXIMUM_COORD;
+    Pt::int32_t x2 = 0, x2d = MAXIMUM_COORD; // End point
     Pt::int32_t y2 = 0, y2d = MAXIMUM_COORD;
 
     // === Process the scanlines ===
@@ -904,6 +906,7 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
         }
     }
 
+    /*
     // Determine the location of the begin and end points
     Pt::int32_t qBeg = 0, qEnd = 0;
 
@@ -960,17 +963,66 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
         faceL = false;
         faceR = false;
     }
+    switch(qBeg) {
+        case 1 : switch(qEnd) {
+                     case 1 : faceL = x2 < x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
+                     case 2 : faceL = x2 < x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
+                     case 3 : faceL = x2 > x1; faceR = x2 < x1; faceT = y2 > y1; faceB = y2 > y1; break;
+                     case 4 : faceL = x2 > x1; faceR = x2 < x1; faceT = y2 > y1; faceB = y2 > y1; break;
+                 }
+                 break;
+        case 2 : switch(qEnd) {
+                     case 1 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
+                     case 2 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
+                     case 3 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
+                     case 4 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
+                 }
+                 break;
+        case 3 : switch(qEnd) {
+                     case 1 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
+                     case 2 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
+                     case 3 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
+                     case 4 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
+                 }
+                 break;
+        case 4 : switch(qEnd) {
+                     case 1 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
+                     case 2 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
+                     case 3 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
+                     case 4 : faceL = x2 > x1; faceR = x2 > x1; faceT = y2 > y1; faceB = y2 > y1; break;
+                 }
+                 break;
+    }
+    */
+
+    // Determine where the direction that the hole faces to
+
+    const Pt::int32_t vx = x2 - x1;           // Vector from the begin point to the end point
+    const Pt::int32_t vy = y2 - y1;           // ---
+    const Pt::int32_t vz = 0;                 // ---
+    const Pt::int32_t rx = 0;                 // Vector from the point of origin (0, 0, 0) that points out of the monitor
+    const Pt::int32_t ry = 0;                 // ---
+    const Pt::int32_t rz = 1;                 // ---
+    const Pt::int32_t cx = vy * rz - vz * ry; // Cross product of the above vectors
+    const Pt::int32_t cy = vz * rx - vx * rz; // ---
+    const Pt::int32_t cz = vx * ry - vy * rx; // ---
+
+    bool faceT = cy < 0;
+    bool faceB = cy > 0;
+    bool faceL = cx < 0;
+    bool faceR = cx > 0;
+
+    //lprintf("qb=%d qe=%d : l=%d r=%d t=%d b=%d\n", qBeg, qEnd, faceL, faceR, faceT, faceB);
+    lprintf("l=%d r=%d t=%d b=%d\n", faceL, faceR, faceT, faceB);
 
     // Crop the spans to the top and bottom as needed
-    if(!faceT && !faceB) {
-        scanlines.erase(scanlines.begin(), scanlines.lower_bound(std::min(y1, y2)));
-        scanlines.erase(scanlines.upper_bound(std::max(y1, y2)), scanlines.end());
+    if(faceL || faceR) {
+        scanlines.erase(scanlines.begin(),                       scanlines.lower_bound(std::min(y1, y2)));
+        scanlines.erase(scanlines.upper_bound(std::max(y1, y2)), scanlines.end()                        );
     }
-    else if(faceT) {
-        scanlines.erase(scanlines.begin(), scanlines.lower_bound(std::min(y1, y2)));
-    }
-    else if(faceB) {
-        scanlines.erase(scanlines.upper_bound(std::max(y1, y2)), scanlines.end());
+    else {
+        if(faceT) scanlines.erase(scanlines.begin(),                       scanlines.lower_bound(std::min(y1, y2)));
+        if(faceB) scanlines.erase(scanlines.upper_bound(std::max(y1, y2)), scanlines.end()                        );
     }
 
     // Crop the spans to the left and right by running the Xiaolin Wu's anti-aliased line algorithm
@@ -1004,15 +1056,14 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
         if(steep) {
             for(Pt::int32_t i = from; i <= to; ++i) {
                 // Calculate the coordinates
-                Pt::int32_t refXl = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           );
-                Pt::int32_t refXr = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE);
-                Pt::int32_t refY  = i;
+                Pt::int32_t refX = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli));
+                Pt::int32_t refY = i;
                 ypxli += grad;
                 // Crop the corresponding scanline
                 Scanlines::iterator it = scanlines.find(refY);
                 if(it == scanlines.end()) continue;
-                if(faceL && it->second.from < refXr) it->second.from = refXr;
-                if(faceR && it->second.to   > refXl) it->second.to   = refXl;
+                if(faceL && it->second.from < refX) it->second.from = refX;
+                if(faceR && it->second.to   > refX) it->second.to   = refX;
             }
         }
         else {
@@ -1026,12 +1077,12 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
                 Scanlines::iterator itt = scanlines.find(refYt);
                 Scanlines::iterator itb = scanlines.find(refYb);
                 if(itt != scanlines.end()) {
-                    if(faceL && itt->second.from < refX) itt->second.from = refX;
-                    if(faceR && itt->second.to   > refX) itt->second.to   = refX;
+                    if(faceL && itt->second.from < refX - 1) itt->second.from = refX - 1;
+                    if(faceR && itt->second.to   > refX    ) itt->second.to   = refX;
                 }
                 if(itb != scanlines.end()) {
-                    if(faceL && itb->second.from < refX) itb->second.from = refX;
-                    if(faceR && itb->second.to   > refX) itb->second.to   = refX;
+                    if(faceL && itb->second.from < refX - 1) itb->second.from = refX - 1;
+                    if(faceR && itb->second.to   > refX    ) itb->second.to   = refX;
                 }
             }
         }
