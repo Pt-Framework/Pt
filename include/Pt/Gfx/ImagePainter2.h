@@ -95,7 +95,7 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual void drawEllipse(const PointF& topLeft, const SizeF& size);
 
-        // NOTE: The begin and end angle must move in counter-clockwise direction!
+        // NOTE: The begin and end angle must move in counter-clockwise direction or something will fail!
         virtual void drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
         virtual void fillRect(const RectF& rect);
@@ -104,7 +104,7 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual void fillEllipse(const PointF& topLeft, const SizeF& size);
 
-        // NOTE: The begin and end angle must move in counter-clockwise direction!
+        // NOTE: The begin and end angle must move in counter-clockwise direction or something will fail!
         virtual void fillArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
     public:

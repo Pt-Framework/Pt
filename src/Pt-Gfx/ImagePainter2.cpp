@@ -739,7 +739,6 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
     // Determine where the direction that the hole faces to
     bool faceL, faceR, faceT, faceB;
     arcUtilDetermineHoleDirection(x1, y1, x2, y2, faceL, faceR, faceT, faceB);
-
     // lprintf("l=%d r=%d t=%d b=%d\n", faceL, faceR, faceT, faceB);
 
     // Copy the list of scanlines to be drawn later
@@ -771,6 +770,12 @@ void ImagePainter2::fillArcChordImpl(const PointF& topLeft, const SizeF& size, f
     arcUtilDrawCircumferencePixels(minX, minY, radX, radY, ctrX, ctrY, degBegin, degEnd, quartersX, quartersY, x1, y1, x2, y2, scanlinesRef);
 
     // Draw the closing line
+    // --- SourceCopy ---
+    if(_rasterizer->compositionMode() == CompositionMode::SourceCopy) {
+        _rasterizer->fillOnePixelGLineSegmentXWAA(x1, y1, x2, y2, minX, minY, 0, 0);
+    }
+
+    // --- SourceOver ---
     std::map<Pt::int32_t, Pt::int32_t> exclusionZone;
 
     for(Scanlines::const_iterator it = scanlines.begin(); it != scanlines.end(); ++it) {
@@ -809,7 +814,6 @@ void ImagePainter2::fillArcPieImpl(const PointF& topLeft, const SizeF& size, flo
     // Determine where the direction that the hole faces to
     bool faceL, faceR, faceT, faceB;
     arcUtilDetermineHoleDirection(x1, y1, x2, y2, faceL, faceR, faceT, faceB);
-
     // lprintf("l=%d r=%d t=%d b=%d\n", faceL, faceR, faceT, faceB);
 
     // Copy the list of scanlines to be drawn later
@@ -821,6 +825,8 @@ void ImagePainter2::fillArcPieImpl(const PointF& topLeft, const SizeF& size, flo
 
     // Crop the scanlines to the left and right side by running the Xiaolin Wu's anti-aliased line algorithm
     if(faceL || faceR) {
+        // TODO: FAILED TO CROP PROPERLY FOR V SHAPES !!!
+        // TODO: FAILED TO CROP PROPERLY IF THE LINE IS STEEP !!!
         arcUtilCropScanlinesUsingXWu(x1, y1, ctrX, ctrY, faceL, faceR, faceT, faceB, scanlines);
         arcUtilCropScanlinesUsingXWu(ctrX, ctrY, x2, y2, faceL, faceR, faceT, faceB, scanlines);
     }
@@ -842,6 +848,29 @@ void ImagePainter2::fillArcPieImpl(const PointF& topLeft, const SizeF& size, flo
     arcUtilDrawCircumferencePixels(minX, minY, radX, radY, ctrX, ctrY, degBegin, degEnd, quartersX, quartersY, x1, y1, x2, y2, scanlinesRef);
 
     // Draw the closing line
+    Rasterizer2::DrawLineMask mask = Rasterizer2::NullLineMask;
+
+    // --- SourceCopy ---
+    if(_rasterizer->compositionMode() == CompositionMode::SourceCopy) {
+        _rasterizer->fillOnePixelGLineSegmentXWAA(x1, y1, ctrX, ctrY, minX, minY, 0, &mask);
+        _rasterizer->fillOnePixelGLineSegmentXWAA(ctrX, ctrY, x2, y2, minX, minY, 0, &mask);
+    }
+
+    // --- SourceOver ---
+
+    // TODO: USE TWO EXCLUZION ZONE, ONE FOR EACH LINE !!!
+    // TODO: FIRST, NEEDS TO DETERMINE TO WHICH SIDE THE LINES ARE FACING TO !!!
+
+    std::map<Pt::int32_t, Pt::int32_t> exclusionZone;
+
+    for(Scanlines::const_iterator it = scanlines.begin(); it != scanlines.end(); ++it) {
+        if(faceL) exclusionZone[it->first] = it->second.from;
+        if(faceR) exclusionZone[it->first] = it->second.to;
+    }
+
+    _rasterizer->fillOnePixelGLineSegmentXWAA(x1, y1, ctrX, ctrY, minX, minY, &exclusionZone, &mask);
+    _rasterizer->fillOnePixelGLineSegmentXWAA(ctrX, ctrY, x2, y2, minX, minY, &exclusionZone, &mask);
+
 }
 
 void ImagePainter2::arcUtilCalcScanlines(Pt::int32_t radX, Pt::int32_t radY, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd, bool useAntiAliasing, Pt::int32_t& quartersX, Pt::int32_t& quartersY, Pt::int32_t& x1, Pt::int32_t& y1, Pt::int32_t& x2, Pt::int32_t& y2, Scanlines& scanlines)
