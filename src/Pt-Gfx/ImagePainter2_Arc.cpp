@@ -543,20 +543,18 @@ void ImagePainter2::arcUtil_drawXWLine(const FilledArcInfo& fai, const XWLineDat
         const Pt::int32_t a1 = it->second.a1;
         const Pt::int32_t a2 = it->second.a2;
         if(xwLine.steep) {
-            //if(xwLine.faceL && !pointIsInsideArcDegRange(x, y, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd))
-            //    _rasterizer->fillPixel(x, y, fai.minX, fai.minY, a1);
-
-            //if(xwLine.faceR && !pointIsInsideArcDegRange(x + 1, y, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd))
-            //    _rasterizer->fillPixel(x + 1, y, fai.minX, fai.minY, a2);
-
-            if(xwLine.faceL) _rasterizer->fillPixel(x    , y, fai.minX, fai.minY, a1);
-            if(xwLine.faceR) _rasterizer->fillPixel(x + 1, y, fai.minX, fai.minY, a2);
+            if( xwLine.faceL && (x != fai.x1 || y != fai.y1) && (x != fai.x2 || y != fai.y2) )
+                _rasterizer->fillPixel(x, y, fai.minX, fai.minY, a1);
+            if( xwLine.faceR && (x + 1 != fai.x1 || y != fai.y1) && (x + 1 != fai.x2 || y != fai.y2) )
+                _rasterizer->fillPixel(x + 1, y, fai.minX, fai.minY, a2);
             //_rasterizer->fillPixel(x,     y, fai.minX, fai.minY, a1);
             //_rasterizer->fillPixel(x + 1, y, fai.minX, fai.minY, a2);
         }
         else {
-            if(xwLine.faceT) _rasterizer->fillPixel(x, y, fai.minX, fai.minY, a1);
-            if(xwLine.faceB) _rasterizer->fillPixel(x, y, fai.minX, fai.minY, a2);
+            if( (x != fai.x1 || y != fai.y1) && (x != fai.x2 || y != fai.y2) ) {
+                if(xwLine.faceT) _rasterizer->fillPixel(x, y, fai.minX, fai.minY, a1);
+                if(xwLine.faceB) _rasterizer->fillPixel(x, y, fai.minX, fai.minY, a2);
+            }
             //_rasterizer->fillPixel(x, y,     fai.minX, fai.minY, a1);
             //_rasterizer->fillPixel(x, y + 1, fai.minX, fai.minY, a2);
         }

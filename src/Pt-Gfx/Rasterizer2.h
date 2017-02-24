@@ -35,6 +35,8 @@
 #include <Pt/Gfx/AntiAliasingMode.h>
 #include <Pt/Gfx/Painter.h>
 
+#include "ClipShape.h"
+
 // ======================================================================================
 // ===== Configurations and Macros ======================================================
 // ======================================================================================
@@ -159,7 +161,7 @@ class Rasterizer2
         void stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::uint8_t alpha);
         void stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::uint8_t alpha, const bool mask[4]);
 
-        void fillPixel(Pt::int32_t x, Pt::int32_t y, Pt::int32_t minX, Pt::int32_t minY, Pt::uint8_t alpha);
+        inline void fillPixel(Pt::int32_t x, Pt::int32_t y, Pt::int32_t minX, Pt::int32_t minY, Pt::uint8_t alpha);
 
         void fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY);
         void fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const bool mask[4]);
@@ -172,8 +174,6 @@ class Rasterizer2
         void strokeOnePixelSolidLine(const Point& a, const Point& b, DrawLineMask* maskInOut);
         void strokeOnePixelSolidRect(const Point& tl, const Point& br);
         void strokeOnePixelSolidPolygon(const Point* points, size_t pointCount);
-
-        //void fillOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const std::map<Pt::int32_t, Pt::int32_t>* exclusionZone, DrawLineMask* maskInOut);
 
         void fillRect(const Point& tl, const Point& br);
         void fillPolygon(const Point* points, size_t pointCount);
@@ -247,6 +247,33 @@ class Rasterizer2
         Rect             _clip;
         Rect             _currentClip;
 };
+
+
+// ======================================================================================
+// ===== Inlined and/or Templated Public Member Functions ===============================
+// ======================================================================================
+
+void Rasterizer2::fillPixel(Pt::int32_t x, Pt::int32_t y, Pt::int32_t minX, Pt::int32_t minY, Pt::uint8_t alpha)
+{
+    // Check the clipping
+    if(!ClipShape::insideXRange(x, _currentClip)) return;
+    if(!ClipShape::insideYRange(y, _currentClip)) return;
+
+    // Draw the pixels using texture or gradient
+    if(_isTexture || _isGradient) {
+        const Pt::int32_t bw = _brushImage->width();
+        const Pt::int32_t bh = _brushImage->height();
+        ConstPixel srcPixel(_brushImage->view(), (x - minX) % bw, (y - minY) % bh);
+        Pixel      dstPixel(_image->view(), x, y);
+        _image->format().setPixel(dstPixel, srcPixel, _compositionMode, alpha);
+    }
+
+    // Draw the pixels using solid color
+    else {
+        Pixel pixel(_image->view(), x, y);
+        _image->format().setPixel(pixel, _brush.color(), _compositionMode, alpha);
+    }
+}
 
 
 // ======================================================================================

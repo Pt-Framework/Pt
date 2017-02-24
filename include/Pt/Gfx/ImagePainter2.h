@@ -348,7 +348,7 @@ inline bool ImagePainter2::pointIsInsideArcDegRange(Pt::int32_t x, Pt::int32_t y
 
     if(degBegin < 0 && degEnd >= 0) {
         if( angle >= (degBegin + 360) && angle <= 360   ) return true;
-        if( angle >= 0              && angle <= degEnd) return true;
+        if( angle >= 0                && angle <= degEnd) return true;
         return false;
     }
 

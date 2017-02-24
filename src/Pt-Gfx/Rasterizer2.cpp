@@ -29,7 +29,6 @@
 */
 
 #include "DrawText.h"
-#include "ClipShape.h"
 #include "Rasterizer2.h"
 
 
