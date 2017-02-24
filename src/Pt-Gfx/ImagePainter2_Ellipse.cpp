@@ -130,6 +130,8 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
         _rasterizer->fillOneScanlineNoAA(it->second.from, it->second.to, it->first, minX, minY);
     }
 
+    scanlines.clear();
+
     // === Process the circumference's pixels ===
 
     // Top and bottom halves
@@ -139,6 +141,13 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
         const Pt::int32_t fly   = floor(y);
         const float       error = y - fly;
         const Pt::uint8_t alpha = round(error * 255);
+        // Draw the the pixels
+        const Pt::int32_t x1 = ctrX - x;
+        const Pt::int32_t x2 = ctrX + x;
+        const Pt::int32_t y1 = ctrY - fly - 1;
+        const Pt::int32_t y2 = ctrY + fly + 1;
+        _rasterizer->fill4Pixels(x1, y1, x2, y2, minX, minY, alpha);
+        /*
         // Draw the first part of the pixels
         const Pt::int32_t x1  = ctrX - x;
         const Pt::int32_t x2  = ctrX + x;
@@ -157,6 +166,7 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
         if( ( it11 == scanlines.end() || (it11->second.from > x1 && it11->second.to < x2) ) ||
             ( it21 == scanlines.end() || (it21->second.from > x1 && it21->second.to < x2) )
         ) _rasterizer->fill4Pixels(x1, y11, x2, y21, minX, minY, alpha);
+        */
     }
 
     // Left and right halves
@@ -166,6 +176,13 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
         const Pt::int32_t flx   = floor(x);
         const float       error = x - flx;
         const Pt::uint8_t alpha = round(error * 255);
+        // Draw the the pixels
+        const Pt::int32_t x1 = ctrX - flx - 1;
+        const Pt::int32_t x2 = ctrX + flx + 1;
+        const Pt::int32_t y1 = ctrY - y;
+        const Pt::int32_t y2 = ctrY + y;
+        _rasterizer->fill4Pixels(x1, y1, x2, y2, minX, minY, alpha);
+        /*
         // Draw the first part of the pixels
         const Pt::int32_t x10 = ctrX - flx;
         const Pt::int32_t x20 = ctrX + flx;
@@ -182,6 +199,7 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
         if( ( it1 == scanlines.end() || (it1->second.from > x11 && it1->second.to < x21) ) ||
             ( it2 == scanlines.end() || (it2->second.from > x11 && it2->second.to < x21) )
         ) _rasterizer->fill4Pixels(x11, y1, x21, y2, minX, minY, alpha);
+        */
     }
 }
 
