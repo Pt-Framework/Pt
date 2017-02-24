@@ -285,10 +285,12 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
 
         ip2->setAntiAliasingMode(AntiAliasingMode::None);
         ip2->fillArc( PointF (30 + 350, 50 + 440), SizeF(105, 105), 120 + 3, 240 + 3, ArcMode::Chord );
+        ip2->fillArc( PointF (30 + 350, 50 + 440), SizeF(105, 105), -60 - 3, 60 - 3, ArcMode::Chord );
         ip2->drawText( PointF(30 + 350, 40 + 440), "NOAA" );
 
         ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
         ip2->fillArc( PointF (30 + 500, 50 + 440), SizeF(105, 105), 120 + 3, 240 + 3, ArcMode::Chord );
+        ip2->fillArc( PointF (30 + 500, 50 + 440), SizeF(105, 105), -60 - 3, 60 - 3, ArcMode::Chord );
         ip2->drawText( PointF(30 + 500, 40 + 440), "XWAA" );
 
         ip2->setAntiAliasingMode(AntiAliasingMode::None);

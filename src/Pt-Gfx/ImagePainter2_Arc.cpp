@@ -557,12 +557,16 @@ void ImagePainter2::arcUtil_drawXWLine(const XWLineData& xwLine, Pt::int32_t min
         const Pt::int32_t a1 = it->second.a1;
         const Pt::int32_t a2 = it->second.a2;
         if(xwLine.steep) {
-            _rasterizer->fillPixel(x,     y, minX, minY, a1);
-            _rasterizer->fillPixel(x + 1, y, minX, minY, a2);
+            if(xwLine.faceL) _rasterizer->fillPixel(x    , y, minX, minY, a1);
+            if(xwLine.faceR) _rasterizer->fillPixel(x + 1, y, minX, minY, a2);
+            //_rasterizer->fillPixel(x,     y, minX, minY, a1);
+            //_rasterizer->fillPixel(x + 1, y, minX, minY, a2);
         }
         else {
-            _rasterizer->fillPixel(x, y,     minX, minY, a1);
-            _rasterizer->fillPixel(x, y + 1, minX, minY, a2);
+            if(xwLine.faceT) _rasterizer->fillPixel(x, y, minX, minY, a1);
+            if(xwLine.faceB) _rasterizer->fillPixel(x, y, minX, minY, a2);
+            //_rasterizer->fillPixel(x, y,     minX, minY, a1);
+            //_rasterizer->fillPixel(x, y + 1, minX, minY, a2);
         }
     }
 }
