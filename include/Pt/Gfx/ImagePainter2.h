@@ -136,6 +136,9 @@ class PT_GFX_API ImagePainter2 : public Painter
         struct FilledArcInfo {
             bool        antiAlias;    // A flag that indicate if the arc will be anti-aliased
 
+            float       degBegin;     // Begin angle
+            float       degEnd;       // End angle
+
             Pt::int32_t minX, minY;   // Top-left coordinate of the arc
             Pt::int32_t ctrX, ctrY;   // Center coordinate of the arc
             Pt::int32_t radX, radY;   // Radius of the arc
@@ -186,12 +189,14 @@ class PT_GFX_API ImagePainter2 : public Painter
         static inline bool pointIsInsideArcDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd);
 
         // Arc-related helper functions
-        static void arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai, float degBegin, float degEnd);
+        static inline void arcUtil_detXWLineDirection(XWLineData& xwLineData, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2);
+
+        static void arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai);
         static void arcUtil_runXWLineAlgorithm(XWLineData& dst, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2);
-        static void arcUtil_genScanlinesForChord(FilledArcInfo& fai, XWLineData& xwLine, Scanlines& scanlines);
+        static void arcUtil_genScanlinesForChord(const FilledArcInfo& fai, XWLineData& xwLine, Scanlines& scanlines);
         static void arcUtil_cropAndStoreScanlineForChord(XWLineData& xwLine, Scanlines& scanlines, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t yt, Pt::int32_t yb);
 
-        static inline void arcUtil_detXWLineDirection(XWLineData& xwLineData, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2);
+        void arcUtil_drawCircumferencePixels(FilledArcInfo& fai, const Scanlines& scanlinesRef);
 
         // Drawing functions
         virtual void drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode);
@@ -375,40 +380,6 @@ inline void ImagePainter2::arcUtil_detXWLineDirection(XWLineData& xwLineData, Pt
     xwLineData.faceL = cx < 0;
     xwLineData.faceR = cx > 0;
 }
-
-
-/*
-inline void ImagePainter2::arcUtilMarkOutsideScanlinesRL(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, bool faceL, bool faceR, bool faceT, bool faceB, Scanlines& scanlines)
-{
-    // Mark the all scanlines to the left and right side that will be completely outside the shape
-    const Pt::int32_t xlMin = std::min(x1, x2);
-    const Pt::int32_t xlMax = std::max(x1, x2);
-
-    // Smaller Y
-    for(Scanlines::iterator it = scanlines.begin(); it != scanlines.lower_bound(std::min(y1, y2) + 1); ++it) {
-        if(faceL && it->second.to < xlMin) {
-            it->second.from =  Painter::MaximumCoordinate;
-            it->second.to   = -Painter::MaximumCoordinate;
-        }
-        if(faceR && it->second.from > xlMax) {
-            it->second.from =  Painter::MaximumCoordinate;
-            it->second.to   = -Painter::MaximumCoordinate;
-        }
-    }
-
-    // Larger Y
-    for(Scanlines::iterator it = scanlines.upper_bound(std::max(y1, y2) - 1); it != scanlines.end(); ++it) {
-        if(faceL && it->second.to < xlMin) {
-            it->second.from =  Painter::MaximumCoordinate;
-            it->second.to   = -Painter::MaximumCoordinate;
-        }
-        if(faceR && it->second.from > xlMax) {
-            it->second.from =  Painter::MaximumCoordinate;
-            it->second.to   = -Painter::MaximumCoordinate;
-        }
-    }
-}
-*/
 
 
 } // namespace

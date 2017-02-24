@@ -65,6 +65,9 @@ void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float deg
 
     fai.antiAlias = (_rasterizer->antiAliasingMode() != AntiAliasingMode::None);
 
+    fai.degBegin  = degBegin;
+    fai.degEnd    = degEnd;
+
     fai.minX      = topLeft.x();
     fai.minY      = topLeft.y();
     fai.radX      = size.width () / 2;
@@ -78,7 +81,7 @@ void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float deg
     fai.quartersY = round( fai.radY2 * fastInvSqrt(fai.radX2 + fai.radY2) );
 
     // Find the exact coordinate of the begin and end point
-    arcUtil_findExactBegEndPointsCoordinate(fai, degBegin, degEnd);
+    arcUtil_findExactBegEndPointsCoordinate(fai);
 
     // Draw based on the mode
     switch(arcMode) {
@@ -118,6 +121,13 @@ void ImagePainter2::fillArcChordImpl(FilledArcInfo& fai)
     for(Scanlines::const_iterator it = scanlines.begin(); it != scanlines.end(); ++it) {
         _rasterizer->fillOneScanlineNoAA(it->second.from, it->second.to, it->first, fai.minX, fai.minY);
     }
+
+    // Exit here if we are not doing anti-aliasing
+    if(!fai.antiAlias) return;
+
+    // Draw the anti-aliased circumference pixels
+    arcUtil_drawCircumferencePixels(fai, scanlines);
+
 }
 
 void ImagePainter2::fillArcPieImpl(FilledArcInfo& fai)
@@ -132,15 +142,15 @@ void ImagePainter2::fillArcPieImpl(FilledArcInfo& fai)
     arcUtil_detXWLineDirection(line2, fai.x2, fai.y2, fai.ctrX, fai.ctrY);
 }
 
-void ImagePainter2::arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai, float degBegin, float degEnd)
+void ImagePainter2::arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai)
 {
     // Calculate the approximate coordinate of the point which is located at the begin angle
-    const Pt::int32_t bx = round(fai.ctrX + fai.radX * fastCos(degBegin * Pt::Pi / 180));
-    const Pt::int32_t by = round(fai.ctrY - fai.radY * fastSin(degBegin * Pt::Pi / 180)); // Sign inversion due to differences between cartesian and computer coordinate systems
+    const Pt::int32_t bx = round(fai.ctrX + fai.radX * fastCos(fai.degBegin * Pt::Pi / 180));
+    const Pt::int32_t by = round(fai.ctrY - fai.radY * fastSin(fai.degBegin * Pt::Pi / 180)); // Sign inversion due to differences between cartesian and computer coordinate systems
 
     // Calculate the approximate coordinate of the point which is located at the end angle
-    const Pt::int32_t ex = round(fai.ctrX + fai.radX * fastCos(degEnd   * Pt::Pi / 180));
-    const Pt::int32_t ey = round(fai.ctrY - fai.radY * fastSin(degEnd   * Pt::Pi / 180)); // Sign inversion due to differences between cartesian and computer coordinate systems
+    const Pt::int32_t ex = round(fai.ctrX + fai.radX * fastCos(fai.degEnd   * Pt::Pi / 180));
+    const Pt::int32_t ey = round(fai.ctrY - fai.radY * fastSin(fai.degEnd   * Pt::Pi / 180)); // Sign inversion due to differences between cartesian and computer coordinate systems
 
     // Used for finding the exact coordinate of the points which are located at the begin and end angle
     Pt::int32_t x1d = MAXIMUM_COORD; // Begin point
@@ -249,7 +259,7 @@ void ImagePainter2::arcUtil_runXWLineAlgorithm(XWLineData& dst, Pt::int32_t x1, 
     }
 }
 
-void ImagePainter2::arcUtil_genScanlinesForChord(FilledArcInfo& fai, XWLineData& xwLine, Scanlines& scanlines)
+void ImagePainter2::arcUtil_genScanlinesForChord(const FilledArcInfo& fai, XWLineData& xwLine, Scanlines& scanlines)
 {
     // Find the line's minimum and maximum Y coordinates
     Pt::int32_t lineMinY, lineMaxY;
@@ -369,6 +379,93 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForChord(XWLineData& xwLine, Sca
                 if( xlc < sit->second.from ) sit->second.from = xlc;
                 if( xrc > sit->second.to   ) sit->second.to   = xrc;
             }
+        }
+    }
+}
+
+void ImagePainter2::arcUtil_drawCircumferencePixels(FilledArcInfo& fai, const Scanlines& scanlinesRef)
+{
+    // Top and bottom halves
+    for(Pt::int32_t x = 0; x <= fai.quartersX; ++x) {
+        // Calculate the Y coordinate and alpha
+        const float       y     = fai.radY * fastSqrt(1 - (float) x * x / fai.radX2);
+        const Pt::int32_t fly   = floor(y);
+        const float       error = y - fly;
+        const Pt::uint8_t alpha = round(error * 255);
+        // Draw the first part of the pixels
+        const Pt::int32_t x1  = fai.ctrX - x;
+        const Pt::int32_t x2  = fai.ctrX + x;
+        const Pt::int32_t y10 = fai.ctrY - fly;
+        const Pt::int32_t y20 = fai.ctrY + fly;
+        Scanlines::const_iterator it10 = scanlinesRef.find(y10);
+        Scanlines::const_iterator it20 = scanlinesRef.find(y20);
+        if( ( it10 == scanlinesRef.end() || (it10->second.from > x1 && it10->second.to < x2) ) ||
+            ( it20 == scanlinesRef.end() || (it20->second.from > x1 && it20->second.to < x2) )
+        ) {
+            const bool mask[4] = {
+                pointIsInsideArcDegRange(x1, y10, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd),
+                pointIsInsideArcDegRange(x1, y20, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd),
+                pointIsInsideArcDegRange(x2, y10, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd),
+                pointIsInsideArcDegRange(x2, y20, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd)
+            };
+            _rasterizer->fill4Pixels(x1, y10, x2, y20, fai.minX, fai.minY, 255 - alpha, mask);
+        }
+        // Draw the second part of the pixels
+        const Pt::int32_t y11 = fai.ctrY - fly - 1;
+        const Pt::int32_t y21 = fai.ctrY + fly + 1;
+        Scanlines::const_iterator it11 = scanlinesRef.find(y11);
+        Scanlines::const_iterator it21 = scanlinesRef.find(y21);
+        if( ( it11 == scanlinesRef.end() || (it11->second.from > x1 && it11->second.to < x2) ) ||
+            ( it21 == scanlinesRef.end() || (it21->second.from > x1 && it21->second.to < x2) )
+        ) {
+            const bool mask[4] = {
+                pointIsInsideArcDegRange(x1, y11, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd),
+                pointIsInsideArcDegRange(x1, y21, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd),
+                pointIsInsideArcDegRange(x2, y11, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd),
+                pointIsInsideArcDegRange(x2, y21, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd)
+            };
+            _rasterizer->fill4Pixels(x1, y11, x2, y21, fai.minX, fai.minY, alpha, mask);
+        }
+    }
+
+    // Left and right halves
+    for(Pt::int32_t y = 0; y <= fai.quartersY; ++y) {
+        // Calculate the X coordinate and alpha
+        const float       x     = fai.radX * fastSqrt(1 - (float) y * y / fai.radY2);
+        const Pt::int32_t flx   = floor(x);
+        const float       error = x - flx;
+        const Pt::uint8_t alpha = round(error * 255);
+        // Draw the first part of the pixels
+        const Pt::int32_t x10 = fai.ctrX - flx;
+        const Pt::int32_t x20 = fai.ctrX + flx;
+        const Pt::int32_t y1  = fai.ctrY - y;
+        const Pt::int32_t y2  = fai.ctrY + y;
+        Scanlines::const_iterator it1 = scanlinesRef.find(y1);
+        Scanlines::const_iterator it2 = scanlinesRef.find(y2);
+        if( ( it1 == scanlinesRef.end() || (it1->second.from > x10 && it1->second.to < x20) ) ||
+            ( it2 == scanlinesRef.end() || (it2->second.from > x10 && it2->second.to < x20) )
+        ) {
+            const bool mask[4] = {
+                pointIsInsideArcDegRange(x10, y1, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd),
+                pointIsInsideArcDegRange(x10, y2, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd),
+                pointIsInsideArcDegRange(x20, y1, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd),
+                pointIsInsideArcDegRange(x20, y2, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd)
+            };
+            _rasterizer->fill4Pixels(x10, y1, x20, y2, fai.minX, fai.minY, 255 - alpha, mask);
+        }
+        // Draw the second part of the pixels
+        const Pt::int32_t x11 = fai.ctrX - flx - 1;
+        const Pt::int32_t x21 = fai.ctrX + flx + 1;
+        if( ( it1 == scanlinesRef.end() || (it1->second.from > x11 && it1->second.to < x21) ) ||
+            ( it2 == scanlinesRef.end() || (it2->second.from > x11 && it2->second.to < x21) )
+        ) {
+            const bool mask[4] = {
+                pointIsInsideArcDegRange(x11, y1, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd),
+                pointIsInsideArcDegRange(x11, y2, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd),
+                pointIsInsideArcDegRange(x21, y1, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd),
+                pointIsInsideArcDegRange(x21, y2, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd)
+            };
+            _rasterizer->fill4Pixels(x11, y1, x21, y2, fai.minX, fai.minY, alpha, mask);
         }
     }
 }
