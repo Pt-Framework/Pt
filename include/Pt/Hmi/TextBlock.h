@@ -58,6 +58,8 @@ class PT_HMI_API TextLine
 
         double height() const;
 
+        double maxHeight() const;
+
         double ascent() const;
 
         double descent() const;
@@ -100,6 +102,8 @@ class PT_HMI_API TextBlock
         double width() const;
 
         double height() const;
+
+        double maxWidth() const;
 
         void setMaxWidth(double w);
 

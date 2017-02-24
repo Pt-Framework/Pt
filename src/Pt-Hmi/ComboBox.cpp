@@ -472,7 +472,7 @@ void ComboBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
         double cursorWidth = 1;
 
         cursorRect.set(Gfx::PointF( cursorX, _line.position().y() ),
-                       Gfx::SizeF( cursorWidth, _line.height() ) );           
+                       Gfx::SizeF( cursorWidth, _line.maxHeight() ) );           
     }
 
     Gfx::RectF clipRect(clipPos, clipSize);

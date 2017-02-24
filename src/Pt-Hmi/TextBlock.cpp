@@ -74,6 +74,12 @@ double TextLine::width() const
 
 double TextLine::height() const
 {
+    return _textMetrics.height();
+}
+
+
+double TextLine::maxHeight() const
+{
     return _textMetrics.ascent() + _textMetrics.descent();
 }
 
@@ -221,7 +227,13 @@ double TextBlock::height() const
     return _size.height();
 }
 
-        
+
+double TextBlock::maxWidth() const
+{
+    return _maxWidth;
+}
+
+
 void TextBlock::setMaxWidth(double w)
 {
     _maxWidth = w;

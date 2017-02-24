@@ -321,8 +321,6 @@ void ListBoxLayout::onLayout()
 {
     double itemsHeight = 0;
 
-    // TODO: get notified by items when size changes...
-
     for(std::size_t i = 0; i < widgets().size(); ++i)
     {
         Widget* item = widgets().at(i);

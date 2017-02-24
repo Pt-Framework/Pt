@@ -227,7 +227,7 @@ void LineEditor::layout(const Pt::String& text, TextLine& line)
     line.setText(text, _font);
 
     double lineX = 0;
-    double lineY = (_size.height() - line.height()) / 2;
+    double lineY = (_size.height() - line.maxHeight()) / 2;
 
     switch(_adjustment)
     {
