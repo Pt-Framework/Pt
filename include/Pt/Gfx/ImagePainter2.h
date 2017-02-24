@@ -193,8 +193,8 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         static void arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai);
         static void arcUtil_runXWLineAlgorithm(XWLineData& dst, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2);
-        static void arcUtil_genScanlinesForChord(const FilledArcInfo& fai, XWLineData& xwLine, Scanlines& scanlines);
-        static void arcUtil_cropAndStoreScanlineForChord(XWLineData& xwLine, Scanlines& scanlines, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t yt, Pt::int32_t yb);
+        static void arcUtil_genScanlinesForChord(const FilledArcInfo& fai, XWLineData& xwLine, Scanlines& scanlines, Scanlines& scanlinesRef);
+        static void arcUtil_cropAndStoreScanlineForChord(XWLineData& xwLine, Scanlines& scanlines, Scanlines& scanlinesRef, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t yt, Pt::int32_t yb);
 
         void arcUtil_drawCircumferencePixels(FilledArcInfo& fai, const Scanlines& scanlinesRef);
 

@@ -114,8 +114,8 @@ void ImagePainter2::fillArcChordImpl(FilledArcInfo& fai)
     //lprintf("l=%d r=%d t=%d b=%d\n", line.faceL, line.faceR, line.faceT, line.faceB);
 
     // Generate scanlines data
-    Scanlines scanlines;
-    arcUtil_genScanlinesForChord(fai, line, scanlines);
+    Scanlines scanlines, scanlinesRef;
+    arcUtil_genScanlinesForChord(fai, line, scanlines, scanlinesRef);
 
     // Draw the scanlines
     for(Scanlines::const_iterator it = scanlines.begin(); it != scanlines.end(); ++it) {
@@ -126,8 +126,7 @@ void ImagePainter2::fillArcChordImpl(FilledArcInfo& fai)
     if(!fai.antiAlias) return;
 
     // Draw the anti-aliased circumference pixels
-    arcUtil_drawCircumferencePixels(fai, scanlines);
-
+    arcUtil_drawCircumferencePixels(fai, scanlinesRef);
 }
 
 void ImagePainter2::fillArcPieImpl(FilledArcInfo& fai)
@@ -259,7 +258,7 @@ void ImagePainter2::arcUtil_runXWLineAlgorithm(XWLineData& dst, Pt::int32_t x1, 
     }
 }
 
-void ImagePainter2::arcUtil_genScanlinesForChord(const FilledArcInfo& fai, XWLineData& xwLine, Scanlines& scanlines)
+void ImagePainter2::arcUtil_genScanlinesForChord(const FilledArcInfo& fai, XWLineData& xwLine, Scanlines& scanlines, Scanlines& scanlinesRef)
 {
     // Find the line's minimum and maximum Y coordinates
     Pt::int32_t lineMinY, lineMaxY;
@@ -285,7 +284,7 @@ void ImagePainter2::arcUtil_genScanlinesForChord(const FilledArcInfo& fai, XWLin
         if(xwLine.faceL && xr < xlMin) continue;
         if(xwLine.faceR && xl > xlMax) continue;
         // Store/update the scanline coordinates
-        arcUtil_cropAndStoreScanlineForChord(xwLine, scanlines, lineMinY, lineMaxY, xl, xr, yt, yb);
+        arcUtil_cropAndStoreScanlineForChord(xwLine, scanlines, scanlinesRef, lineMinY, lineMaxY, xl, xr, yt, yb);
     }
 
     // Left and right halves
@@ -300,12 +299,31 @@ void ImagePainter2::arcUtil_genScanlinesForChord(const FilledArcInfo& fai, XWLin
         if(xwLine.faceL && xr < xlMin) continue;
         if(xwLine.faceR && xl > xlMax) continue;
         // Store/update the scanline coordinates
-        arcUtil_cropAndStoreScanlineForChord(xwLine, scanlines, lineMinY, lineMaxY, xl, xr, yt, yb);
+        arcUtil_cropAndStoreScanlineForChord(xwLine, scanlines, scanlinesRef, lineMinY, lineMaxY, xl, xr, yt, yb);
     }
 }
 
-void ImagePainter2::arcUtil_cropAndStoreScanlineForChord(XWLineData& xwLine, Scanlines& scanlines, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t yt, Pt::int32_t yb)
+void ImagePainter2::arcUtil_cropAndStoreScanlineForChord(XWLineData& xwLine, Scanlines& scanlines, Scanlines& scanlinesRef, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t yt, Pt::int32_t yb)
 {
+    // Store/update the reference scanline coordinates
+    Scanlines::iterator rit1 = scanlinesRef.find(yt);
+    if(rit1 == scanlinesRef.end()) { // Insert a new element
+        scanlinesRef.insert( std::make_pair( yt, ScanlineElement(xl, xr) ) );
+    }
+    else { // Update the scanline's "from" and "to" coordinates
+        if( xl < rit1->second.from ) rit1->second.from = xl;
+        if( xr > rit1->second.to   ) rit1->second.to   = xr;
+    }
+
+    Scanlines::iterator rit2 = scanlinesRef.find(yb);
+    if(rit2 == scanlinesRef.end()) { // Insert a new element
+        scanlinesRef.insert( std::make_pair( yb, ScanlineElement(xl, xr) ) );
+    }
+    else { // Update the scanline's "from" and "to" coordinates
+        if( xl < rit2->second.from ) rit2->second.from = xl;
+        if( xr > rit2->second.to   ) rit2->second.to   = xr;
+    }
+
     // Store/update the scanline coordinates
     if( (!xwLine.faceT && !xwLine.faceB) || (xwLine.faceT && yt >= lineMinY) || (xwLine.faceB && yt <= lineMaxY) ) {
         // Crop the coordinates
@@ -399,8 +417,8 @@ void ImagePainter2::arcUtil_drawCircumferencePixels(FilledArcInfo& fai, const Sc
         const Pt::int32_t y20 = fai.ctrY + fly;
         Scanlines::const_iterator it10 = scanlinesRef.find(y10);
         Scanlines::const_iterator it20 = scanlinesRef.find(y20);
-        if( ( it10 == scanlinesRef.end() || (it10->second.from > x1 && it10->second.to < x2) ) ||
-            ( it20 == scanlinesRef.end() || (it20->second.from > x1 && it20->second.to < x2) )
+        if( ( it10 == scanlinesRef.end() || (it10->second.from > x1+1 && it10->second.to < x2-1) ) ||
+            ( it20 == scanlinesRef.end() || (it20->second.from > x1+1 && it20->second.to < x2-1) )
         ) {
             const bool mask[4] = {
                 pointIsInsideArcDegRange(x1, y10, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd),
