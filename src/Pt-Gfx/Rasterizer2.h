@@ -193,9 +193,6 @@ class Rasterizer2
 
         void rasterOnePixelSolidPolygonOutline(const Point* points, size_t pointCount, const Color& color);
 
-        void fillOnePixelGLineSegmentXWAAOutsideOnly(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, DrawLineMask* maskInOut);
-        void fillOnePixelSolidPolygonOutlineOutsideAAOnly(const Point* points, size_t pointCount, Pt::int32_t minX, Pt::int32_t minY);
-
         void rasterPolygonAreaNoAA(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
         void rasterPolygonAreaFSAA2x2(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
 
