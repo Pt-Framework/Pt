@@ -376,10 +376,10 @@ void Rasterizer2::fillOneScanlineNoAA(Pt::int32_t from, Pt::int32_t to, Pt::int3
     if(pixelY < _currentClip.top() || pixelY > _currentClip.bottom()) return;
 
     // Check and limit the X coordinates
-    if(to < from) return;
-
     if(from < _currentClip.left ()) from = _currentClip.left ();
     if(to   > _currentClip.right()) to   = _currentClip.right();
+
+    if(to < from) return;
 
     // Draw the scanline
     rasterScanline(from - minX, to - minX, pixelY - minY, minX, minY, _brush.color());

@@ -313,6 +313,7 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForChord(XWLineData& xwLine, Sca
     typedef XWLineData::XWPoints::iterator XWPointsIterator;
 
     // Store/update the scanline coordinates
+
     if( (!xwLine.faceT && !xwLine.faceB) || (xwLine.faceT && yt >= lineMinY) || (xwLine.faceB && yt <= lineMaxY) ) {
         // Get the element with the wanted coordinate
         XWPointsIterator lwb = xwLine.points.lower_bound(yt);
