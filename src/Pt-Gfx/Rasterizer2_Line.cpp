@@ -104,6 +104,7 @@ void Rasterizer2::strokeOnePixelSolidLine(const Point& a, const Point& b, DrawLi
     }
 }
 
+#if 0
 // Xiaolin Wu's Anti-Aliased Line Algorithm
 // https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
 void Rasterizer2::fillOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const std::map<Pt::int32_t, Pt::int32_t>* exclusionZone, DrawLineMask* maskInOut)
@@ -220,7 +221,7 @@ void Rasterizer2::fillOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, P
     // Undefine the helper macro
     #undef XW_FILL_PIXEL
 }
-
+#endif
 
 // ======================================================================================
 // ===== Private Member Functions =======================================================

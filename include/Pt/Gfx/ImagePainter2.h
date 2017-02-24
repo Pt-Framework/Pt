@@ -163,7 +163,7 @@ class PT_GFX_API ImagePainter2 : public Painter
                 {}
             };
 
-            typedef std::map<Pt::int32_t, XWPointXAA> XWPoints; // The key is the Y coordinate
+            typedef std::multimap<Pt::int32_t, XWPointXAA> XWPoints; // The key is the Y coordinate
 
             XWPoints points; // The line's points
 
@@ -197,6 +197,7 @@ class PT_GFX_API ImagePainter2 : public Painter
         static void arcUtil_cropAndStoreScanlineForChord(XWLineData& xwLine, Scanlines& scanlines, Scanlines& scanlinesRef, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t yt, Pt::int32_t yb);
 
         void arcUtil_drawCircumferencePixels(FilledArcInfo& fai, const Scanlines& scanlinesRef);
+        void arcUtil_drawXWLine(const XWLineData& xwLine, Pt::int32_t minX, Pt::int32_t minY);
 
         // Drawing functions
         virtual void drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode);

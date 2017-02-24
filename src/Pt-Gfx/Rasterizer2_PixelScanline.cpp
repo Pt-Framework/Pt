@@ -151,6 +151,28 @@ void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, 
     }
 }
 
+void Rasterizer2::fillPixel(Pt::int32_t x, Pt::int32_t y, Pt::int32_t minX, Pt::int32_t minY, Pt::uint8_t alpha)
+{
+    // Check the clipping
+    if(!ClipShape::insideXRange(x, _currentClip)) return;
+    if(!ClipShape::insideYRange(y, _currentClip)) return;
+
+    // Draw the pixels using texture or gradient
+    if(_isTexture || _isGradient) {
+        const Pt::int32_t bw = _brushImage->width();
+        const Pt::int32_t bh = _brushImage->height();
+        ConstPixel srcPixel(_brushImage->view(), (x - minX) % bw, (y - minY) % bh);
+        Pixel      dstPixel(_image->view(), x, y);
+        _image->format().setPixel(dstPixel, srcPixel, _compositionMode, alpha);
+    }
+
+    // Draw the pixels using solid color
+    else {
+        Pixel pixel(_image->view(), x, y);
+        _image->format().setPixel(pixel, _brush.color(), _compositionMode, alpha);
+    }
+}
+
 void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY)
 {
     // Check the clipping

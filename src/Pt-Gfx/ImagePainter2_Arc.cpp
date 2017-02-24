@@ -126,6 +126,9 @@ void ImagePainter2::fillArcChordImpl(FilledArcInfo& fai)
 
     // Draw the anti-aliased circumference pixels
     arcUtil_drawCircumferencePixels(fai, scanlinesRef);
+
+    // Draw the closing line
+    arcUtil_drawXWLine(line, fai.minX, fai.minY);
 }
 
 void ImagePainter2::fillArcPieImpl(FilledArcInfo& fai)
@@ -325,12 +328,21 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForChord(XWLineData& xwLine, Sca
         if( xr > rit2->second.to   ) rit2->second.to   = xr;
     }
 
+    typedef XWLineData::XWPoints::iterator XWPointsIterator;
+    typedef std::pair<XWPointsIterator, XWPointsIterator> XWPointsRange;
+
     // Store/update the scanline coordinates
     if( (!xwLine.faceT && !xwLine.faceB) || (xwLine.faceT && yt >= lineMinY) || (xwLine.faceB && yt <= lineMaxY) ) {
+        // Get the element with the wanted coordinate
+        XWPointsRange    xwr = xwLine.points.equal_range(yt);
+        XWPointsIterator lit = xwr.first;
+        for(XWPointsIterator cit = xwr.first; cit != xwr.second; ++cit) {
+            if(xwLine.faceL && cit->second.x > lit->second.x) lit = cit;
+            if(xwLine.faceR && cit->second.x < lit->second.x) lit = cit;
+        }
         // Crop the coordinates
-        XWLineData::XWPoints::iterator lit = xwLine.points.find(yt);
-        Pt::int32_t                    xlc = xl;
-        Pt::int32_t                    xrc = xr;
+        Pt::int32_t xlc = xl;
+        Pt::int32_t xrc = xr;
         if(lit != xwLine.points.end()) {
             if(xwLine.faceL) {
                 if(xwLine.steep) { // (X), (X + 1)
@@ -365,9 +377,16 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForChord(XWLineData& xwLine, Sca
     }
 
     if( (!xwLine.faceT && !xwLine.faceB) || (xwLine.faceT && yb >= lineMinY) || (xwLine.faceB && yb <= lineMaxY) ) {
-        XWLineData::XWPoints::iterator lit = xwLine.points.find(yb);
-        Pt::int32_t                    xlc = xl;
-        Pt::int32_t                    xrc = xr;
+        // Get the element with the wanted coordinate
+        XWPointsRange    xwr = xwLine.points.equal_range(yb);
+        XWPointsIterator lit = xwr.first;
+        for(XWPointsIterator cit = xwr.first; cit != xwr.second; ++cit) {
+            if(xwLine.faceL && cit->second.x > lit->second.x) lit = cit;
+            if(xwLine.faceR && cit->second.x < lit->second.x) lit = cit;
+        }
+        // Crop the coordinates
+        Pt::int32_t xlc = xl;
+        Pt::int32_t xrc = xr;
         if(lit != xwLine.points.end()) {
             if(xwLine.faceL) {
                 if(xwLine.steep) { // (X), (X + 1)
@@ -485,6 +504,24 @@ void ImagePainter2::arcUtil_drawCircumferencePixels(FilledArcInfo& fai, const Sc
                 pointIsInsideArcDegRange(x21, y2, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd)
             };
             _rasterizer->fill4Pixels(x11, y1, x21, y2, fai.minX, fai.minY, alpha, mask);
+        }
+    }
+}
+
+void ImagePainter2::arcUtil_drawXWLine(const XWLineData& xwLine, Pt::int32_t minX, Pt::int32_t minY)
+{
+    for(XWLineData::XWPoints::const_iterator it = xwLine.points.begin(); it != xwLine.points.end(); ++it) {
+        const Pt::int32_t y  = it->first;
+        const Pt::int32_t x  = it->second.x;
+        const Pt::int32_t a1 = it->second.a1;
+        const Pt::int32_t a2 = it->second.a2;
+        if(xwLine.steep) {
+            _rasterizer->fillPixel(x,     y, minX, minY, a1);
+            _rasterizer->fillPixel(x + 1, y, minX, minY, a2);
+        }
+        else {
+            _rasterizer->fillPixel(x, y,     minX, minY, a1);
+            _rasterizer->fillPixel(x, y + 1, minX, minY, a2);
         }
     }
 }
