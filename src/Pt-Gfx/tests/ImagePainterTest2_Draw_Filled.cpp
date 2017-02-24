@@ -196,6 +196,23 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
     painter.drawText( PointF(30 + 150, 40), "XWAA" );
 
     if(ip2) {
+#if 0
+        ip2->setAntiAliasingMode(AntiAliasingMode::None);
+        ip2->drawArc( PointF (30 + 350, 50), SizeF(100, 200), 0 + 3, 135 + 3, ArcMode::Chord );
+        ip2->drawText( PointF(30 + 350, 40), "NOAA" );
+
+        ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
+        ip2->fillArc( PointF (30 + 500, 50), SizeF(100, 200), 0 + 3, 135 + 3, ArcMode::Chord );
+        ip2->drawText( PointF(30 + 500, 40), "XWAA" );
+
+        ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
+        ip2->drawArc( PointF (30 + 700, 50), SizeF(200, 100), 0 + 3, 135 + 3, ArcMode::Chord );
+        ip2->drawText( PointF(30 + 700, 40), "XWAA" );
+
+        ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
+        ip2->fillArc( PointF (30 + 700, 50+50), SizeF(200, 100), 0 + 3, 135 + 3, ArcMode::Chord );
+        ip2->drawText( PointF(30 + 850, 40), "XWAA" );
+#else
         ip2->setAntiAliasingMode(AntiAliasingMode::None);
         ip2->fillArc( PointF (30 + 350, 50), SizeF(105, 105), 0 + 3, 135 + 3, ArcMode::Chord );
         ip2->fillArc( PointF (30 + 350, 50), SizeF(105, 105), -135 - 3, 0 - 3, ArcMode::Chord );
@@ -213,6 +230,7 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
         ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
         ip2->fillArc( PointF (30 + 850, 50), SizeF(105, 105), 0 + 3, 135 + 3, ArcMode::Pie );
         ip2->drawText( PointF(30 + 850, 40), "XWAA" );
+#endif
     }
 
 

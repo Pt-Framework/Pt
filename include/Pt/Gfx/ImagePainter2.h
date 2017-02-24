@@ -143,6 +143,7 @@ class PT_GFX_API ImagePainter2 : public Painter
             Pt::int32_t ctrX, ctrY;   // Center coordinate of the arc
             Pt::int32_t radX, radY;   // Radius of the arc
             Pt::int32_t radX2, radY2; // Squared radius of the arc
+            float       xyRat;        // Ratio of the X and Y radius
 
             Pt::int32_t x1, y1;       // Coordinate of the begin point
             Pt::int32_t x2, y2;       // Coordinate of the end point
@@ -186,17 +187,17 @@ class PT_GFX_API ImagePainter2 : public Painter
         static inline float fastAtan2(float y, float x);
 
         static inline float convertCartesianToPolarCoordinate(float x, float y);
-        static inline bool pointIsInsideArcDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd);
+        static inline bool pointIsInsideArcDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd, float xyRatio);
 
         // Arc-related helper functions
         static inline void arcUtil_detXWLineDirection(XWLineData& xwLineData, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2);
 
         static void arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai);
         static void arcUtil_runXWLineAlgorithm(XWLineData& xwLine, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2);
-        static void arcUtil_genScanlinesForChord(const FilledArcInfo& fai, XWLineData& xwLine, Scanlines& scanlines/*, Scanlines& scanlinesRef*/);
-        static void arcUtil_cropAndStoreScanlineForChord(XWLineData& xwLine, Scanlines& scanlines, /*Scanlines& scanlinesRef,*/ Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t yt, Pt::int32_t yb);
+        static void arcUtil_genScanlinesForChord(const FilledArcInfo& fai, XWLineData& xwLine, Scanlines& scanlines);
+        static void arcUtil_cropAndStoreScanlineForChord(XWLineData& xwLine, Scanlines& scanlines, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t yt, Pt::int32_t yb);
 
-        void arcUtil_drawCircumferencePixels(FilledArcInfo& fai/*, const Scanlines& scanlinesRef*/);
+        void arcUtil_drawCircumferencePixels(FilledArcInfo& fai);
         void arcUtil_drawXWLine(const FilledArcInfo& fai, const XWLineData& xwLine);
 
         // Drawing functions
@@ -330,7 +331,7 @@ inline float ImagePainter2::convertCartesianToPolarCoordinate(float x, float y)
     return fastAtan2(y, x) * 180 / Pt::Pi + 360;
 }
 
-inline bool ImagePainter2::pointIsInsideArcDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd)
+inline bool ImagePainter2::pointIsInsideArcDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd, float xyRatio)
 {
     // IMPORTANT NOTES:
     //     * The Y coordinate goes from low to high according to the coordinate system being used:
@@ -340,7 +341,7 @@ inline bool ImagePainter2::pointIsInsideArcDegRange(Pt::int32_t x, Pt::int32_t y
     //     * The movement from begin angle to end angle must be in counter-clockwise (CCW), otherwise
     //       something wrong will be drawn.
 
-    const float angle = convertCartesianToPolarCoordinate( x - ctrX, -(y - ctrY) );
+    const float angle = convertCartesianToPolarCoordinate( (x - ctrX), -(y - ctrY) * xyRatio);
 
     if(degBegin < 0 && degEnd < 0) {
         return angle >= (degBegin + 360) && angle <= (degEnd + 360);

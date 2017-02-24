@@ -147,26 +147,6 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
         const Pt::int32_t y1 = ctrY - fly - 1;
         const Pt::int32_t y2 = ctrY + fly + 1;
         _rasterizer->fill4Pixels(x1, y1, x2, y2, minX, minY, alpha);
-        /*
-        // Draw the first part of the pixels
-        const Pt::int32_t x1  = ctrX - x;
-        const Pt::int32_t x2  = ctrX + x;
-        const Pt::int32_t y10 = ctrY - fly;
-        const Pt::int32_t y20 = ctrY + fly;
-        Scanlines::const_iterator it10 = scanlines.find(y10);
-        Scanlines::const_iterator it20 = scanlines.find(y20);
-        if( ( it10 == scanlines.end() || (it10->second.from > x1 && it10->second.to < x2) ) ||
-            ( it20 == scanlines.end() || (it20->second.from > x1 && it20->second.to < x2) )
-        ) _rasterizer->fill4Pixels(x1, y10, x2, y20, minX, minY, alpha);
-        // Draw the second part of the pixels
-        const Pt::int32_t y11 = ctrY - fly - 1;
-        const Pt::int32_t y21 = ctrY + fly + 1;
-        Scanlines::const_iterator it11 = scanlines.find(y11);
-        Scanlines::const_iterator it21 = scanlines.find(y21);
-        if( ( it11 == scanlines.end() || (it11->second.from > x1 && it11->second.to < x2) ) ||
-            ( it21 == scanlines.end() || (it21->second.from > x1 && it21->second.to < x2) )
-        ) _rasterizer->fill4Pixels(x1, y11, x2, y21, minX, minY, alpha);
-        */
     }
 
     // Left and right halves
@@ -182,24 +162,6 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
         const Pt::int32_t y1 = ctrY - y;
         const Pt::int32_t y2 = ctrY + y;
         _rasterizer->fill4Pixels(x1, y1, x2, y2, minX, minY, alpha);
-        /*
-        // Draw the first part of the pixels
-        const Pt::int32_t x10 = ctrX - flx;
-        const Pt::int32_t x20 = ctrX + flx;
-        const Pt::int32_t y1  = ctrY - y;
-        const Pt::int32_t y2  = ctrY + y;
-        Scanlines::const_iterator it1 = scanlines.find(y1);
-        Scanlines::const_iterator it2 = scanlines.find(y2);
-        if( ( it1 == scanlines.end() || (it1->second.from > x10 && it1->second.to < x20) ) ||
-            ( it2 == scanlines.end() || (it2->second.from > x10 && it2->second.to < x20) )
-        ) _rasterizer->fill4Pixels(x10, y1, x20, y2, minX, minY, alpha);
-        // Draw the second part of the pixels
-        const Pt::int32_t x11 = ctrX - flx - 1;
-        const Pt::int32_t x21 = ctrX + flx + 1;
-        if( ( it1 == scanlines.end() || (it1->second.from > x11 && it1->second.to < x21) ) ||
-            ( it2 == scanlines.end() || (it2->second.from > x11 && it2->second.to < x21) )
-        ) _rasterizer->fill4Pixels(x11, y1, x21, y2, minX, minY, alpha);
-        */
     }
 }
 
@@ -223,14 +185,15 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
     const bool drawArc = (degBegin != 0) || (degEnd != 0);
 
     // Calculate the ellipse's parameters
-    Pt::int32_t minX  = topLeft.x();
-    Pt::int32_t minY  = topLeft.y();
-    Pt::int32_t radX  = size.width () / 2;
-    Pt::int32_t radY  = size.height() / 2;
-    Pt::int32_t ctrX  = minX + radX;
-    Pt::int32_t ctrY  = minY + radY;
-    Pt::int32_t radX2 = radX * radX;
-    Pt::int32_t radY2 = radY * radY;
+    const Pt::int32_t minX  = topLeft.x();
+    const Pt::int32_t minY  = topLeft.y();
+    const Pt::int32_t radX  = size.width () / 2;
+    const Pt::int32_t radY  = size.height() / 2;
+    const Pt::int32_t ctrX  = minX + radX;
+    const Pt::int32_t ctrY  = minY + radY;
+    const Pt::int32_t radX2 = radX * radX;
+    const Pt::int32_t radY2 = radY * radY;
+    const float       xyRat = (float) radX / (float) radY;
 
     // Drawing an arc requires more parameters and calculation
     Pt::int32_t bx = 0, x1 = 0, x1d = MAXIMUM_COORD; // Begin point
@@ -272,10 +235,10 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
             if(drawArc) {
                 // Draw the pixels
                 const bool mask[4] = {
-                    pointIsInsideArcDegRange(xl, yt, ctrX, ctrY, degBegin, degEnd),
-                    pointIsInsideArcDegRange(xl, yb, ctrX, ctrY, degBegin, degEnd),
-                    pointIsInsideArcDegRange(xr, yt, ctrX, ctrY, degBegin, degEnd),
-                    pointIsInsideArcDegRange(xr, yb, ctrX, ctrY, degBegin, degEnd)
+                    pointIsInsideArcDegRange(xl, yt, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    pointIsInsideArcDegRange(xl, yb, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    pointIsInsideArcDegRange(xr, yt, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    pointIsInsideArcDegRange(xr, yb, ctrX, ctrY, degBegin, degEnd, xyRat)
                 };
                 _rasterizer->stroke4Pixels(xl, yt, xr, yb, mask);
                 // Determine the exact coordinates of the closing lines
@@ -307,16 +270,16 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
             if(drawArc) {
                 // Draw the pixels
                 const bool mask0[4] = {
-                    pointIsInsideArcDegRange(xl, yt0, ctrX, ctrY, degBegin, degEnd),
-                    pointIsInsideArcDegRange(xl, yb0, ctrX, ctrY, degBegin, degEnd),
-                    pointIsInsideArcDegRange(xr, yt0, ctrX, ctrY, degBegin, degEnd),
-                    pointIsInsideArcDegRange(xr, yb0, ctrX, ctrY, degBegin, degEnd)
+                    pointIsInsideArcDegRange(xl, yt0, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    pointIsInsideArcDegRange(xl, yb0, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    pointIsInsideArcDegRange(xr, yt0, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    pointIsInsideArcDegRange(xr, yb0, ctrX, ctrY, degBegin, degEnd, xyRat)
                 };
                 const bool mask1[4] = {
-                    pointIsInsideArcDegRange(xl, yt1, ctrX, ctrY, degBegin, degEnd),
-                    pointIsInsideArcDegRange(xl, yb1, ctrX, ctrY, degBegin, degEnd),
-                    pointIsInsideArcDegRange(xr, yt1, ctrX, ctrY, degBegin, degEnd),
-                    pointIsInsideArcDegRange(xr, yb1, ctrX, ctrY, degBegin, degEnd)
+                    pointIsInsideArcDegRange(xl, yt1, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    pointIsInsideArcDegRange(xl, yb1, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    pointIsInsideArcDegRange(xr, yt1, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    pointIsInsideArcDegRange(xr, yb1, ctrX, ctrY, degBegin, degEnd, xyRat)
                 };
                 const Pt::uint8_t a0 = Rasterizer2::XWAA_WFILTER[      alpha];
                 const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[255 - alpha];
@@ -366,10 +329,10 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
             if(drawArc) {
                 // Draw the pixels
                 const bool mask[4] = {
-                    pointIsInsideArcDegRange(xl, yt, ctrX, ctrY, degBegin, degEnd),
-                    pointIsInsideArcDegRange(xl, yb, ctrX, ctrY, degBegin, degEnd),
-                    pointIsInsideArcDegRange(xr, yt, ctrX, ctrY, degBegin, degEnd),
-                    pointIsInsideArcDegRange(xr, yb, ctrX, ctrY, degBegin, degEnd)
+                    pointIsInsideArcDegRange(xl, yt, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    pointIsInsideArcDegRange(xl, yb, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    pointIsInsideArcDegRange(xr, yt, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    pointIsInsideArcDegRange(xr, yb, ctrX, ctrY, degBegin, degEnd, xyRat)
                 };
                 _rasterizer->stroke4Pixels(xl, yt, xr, yb, mask);
                 // Determine the exact coordinates of the closing lines
@@ -401,16 +364,16 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
             if(drawArc) {
                 // Draw the pixels
                 const bool mask0[4] = {
-                    pointIsInsideArcDegRange(xl0, yt, ctrX, ctrY, degBegin, degEnd),
-                    pointIsInsideArcDegRange(xl0, yb, ctrX, ctrY, degBegin, degEnd),
-                    pointIsInsideArcDegRange(xr0, yt, ctrX, ctrY, degBegin, degEnd),
-                    pointIsInsideArcDegRange(xr0, yb, ctrX, ctrY, degBegin, degEnd)
+                    pointIsInsideArcDegRange(xl0, yt, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    pointIsInsideArcDegRange(xl0, yb, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    pointIsInsideArcDegRange(xr0, yt, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    pointIsInsideArcDegRange(xr0, yb, ctrX, ctrY, degBegin, degEnd, xyRat)
                 };
                 const bool mask1[4] = {
-                    pointIsInsideArcDegRange(xl1, yt, ctrX, ctrY, degBegin, degEnd),
-                    pointIsInsideArcDegRange(xl1, yb, ctrX, ctrY, degBegin, degEnd),
-                    pointIsInsideArcDegRange(xr1, yt, ctrX, ctrY, degBegin, degEnd),
-                    pointIsInsideArcDegRange(xr1, yb, ctrX, ctrY, degBegin, degEnd)
+                    pointIsInsideArcDegRange(xl1, yt, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    pointIsInsideArcDegRange(xl1, yb, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    pointIsInsideArcDegRange(xr1, yt, ctrX, ctrY, degBegin, degEnd, xyRat),
+                    pointIsInsideArcDegRange(xr1, yb, ctrX, ctrY, degBegin, degEnd, xyRat)
                 };
                 const Pt::uint8_t a0 = Rasterizer2::XWAA_WFILTER[      alpha];
                 const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[255 - alpha];
