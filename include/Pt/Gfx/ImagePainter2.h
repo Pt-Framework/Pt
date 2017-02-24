@@ -154,31 +154,16 @@ class PT_GFX_API ImagePainter2 : public Painter
         // Xiaolin Wu's anti-aliased line data structure (currently it is only used for drawing filled arc)
         struct XWLineData {
             // Point data
-            struct XWPointXY {
-                Pt::int32_t x;
-                Pt::int32_t y;
-
-                XWPointXY(Pt::uint32_t x_, Pt::uint32_t y_)
-                : x(x_), y(y_)
-                {}
-
-                bool operator < (const XWPointXY& ref) const
-                {
-                    if(y < ref.y) return true;
-                    if(y > ref.y) return false;
-                    return x < ref.x;
-                }
-            };
-
             struct XWPointAA {
+                Pt::int32_t x;
                 Pt::uint8_t a1, a2;
 
-                XWPointAA(Pt::uint8_t a1_, Pt::uint8_t a2_)
-                : a1(a1_), a2(a2_)
+                XWPointAA(Pt::int32_t x_, Pt::uint8_t a1_, Pt::uint8_t a2_)
+                : x(x_), a1(a1_), a2(a2_)
                 {}
             };
 
-            typedef std::multimap<XWPointXY, XWPointAA> XWPoints;
+            typedef std::multimap<Pt::int32_t, XWPointAA> XWPoints; // The key is the Y coordinate
 
             XWPoints points; // The line's points
 
