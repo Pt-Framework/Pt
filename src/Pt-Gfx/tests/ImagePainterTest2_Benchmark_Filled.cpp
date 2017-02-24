@@ -157,12 +157,12 @@ static size_t benchDrawFillArc(int loopCount, const Brush& brushH, const Brush& 
         painter.setBrush(brushH);
         ip2->setAntiAliasingMode(antiAliasingMode);
         ip2->fillArc( PointF (30, 60), SizeF(120, 120), 30, 330, ArcMode::Chord );
-        ip2->fillArc( PointF (30, 60 + 200), SizeF(120, 120), 330, 33, ArcMode::Pie );
+        ip2->fillArc( PointF (30, 60 + 200), SizeF(120, 120), 30, 330, ArcMode::Pie );
 
         painter.setBrush(brushV);
         ip2->setAntiAliasingMode(antiAliasingMode);
         ip2->fillArc( PointF (30 + 200, 60), SizeF(120, 120), 30, 330, ArcMode::Chord );
-        ip2->fillArc( PointF (30 + 200, 60 + 200), SizeF(120, 120), 330, 30, ArcMode::Pie );
+        ip2->fillArc( PointF (30 + 200, 60 + 200), SizeF(120, 120), 30, 330, ArcMode::Pie );
 
         sum += clock.stop().toUSecs();
 

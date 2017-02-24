@@ -138,6 +138,8 @@ void ImagePainter2::fillArcPieImpl(FilledArcInfo& fai)
     // Find the direction that the lines are facing to
     arcUtil_detXWLineDirection(line1, fai.x1, fai.y1, fai.ctrX, fai.ctrY);
     arcUtil_detXWLineDirection(line2, fai.x2, fai.y2, fai.ctrX, fai.ctrY);
+
+    // ### TODO ###
 }
 
 void ImagePainter2::arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai)
