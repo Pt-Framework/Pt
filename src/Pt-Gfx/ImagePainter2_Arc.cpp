@@ -93,7 +93,6 @@ void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float deg
             drawArc(topLeft, size, degBegin, degEnd, arcMode); // Just for easier debugging & verification
             break;
     }
-
 }
 
 
@@ -202,7 +201,7 @@ void ImagePainter2::arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai)
 
 // Use Xiaolin Wu's anti-aliased line algorithm to calculate the line's points
 // https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
-void ImagePainter2::arcUtil_runXWLineAlgorithm(XWLineData& dst, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2)
+void ImagePainter2::arcUtil_runXWLineAlgorithm(XWLineData& xwLine, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2)
 {
     // Convert the coordinates to fixed-points
     Pt::int32_t fx1 = FIXED_POINT_FROM_INT(x1);
@@ -214,9 +213,9 @@ void ImagePainter2::arcUtil_runXWLineAlgorithm(XWLineData& dst, Pt::int32_t x1, 
     const Pt::int32_t deltaX = (fx2 >= fx1) ? (fx2 - fx1) : (fx1 - fx2);
     const Pt::int32_t deltaY = (fy2 >= fy1) ? (fy2 - fy1) : (fy1 - fy2);
 
-    dst.steep = deltaY > deltaX;
+    xwLine.steep = deltaY > deltaX;
 
-    if(dst.steep) {
+    if(xwLine.steep) {
         std::swap(fx1, fy1);
         std::swap(fx2, fy2);
     }
@@ -237,13 +236,13 @@ void ImagePainter2::arcUtil_runXWLineAlgorithm(XWLineData& dst, Pt::int32_t x1, 
     Pt::int32_t to    = FIXED_POINT_TO_INT(xpxl2);
     Pt::int32_t ypxli = ypxl;
 
-    if(dst.steep) {
+    if(xwLine.steep) {
         for(Pt::int32_t i = from; i <= to; ++i) {
             const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_FPART_TO_A8 (ypxli) ];
             const Pt::uint8_t a2 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_RFPART_TO_A8(ypxli) ];
-            dst.points.insert( std::make_pair(
-                i,
-                XWLineData::XWPointXAA( FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)), a1, a2 )
+            xwLine.points.insert( std::make_pair(
+                XWLineData::XWPointXY( FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)), i ),
+                XWLineData::XWPointAA( a1, a2 )
             ) );
             ypxli += grad;
         }
@@ -253,9 +252,9 @@ void ImagePainter2::arcUtil_runXWLineAlgorithm(XWLineData& dst, Pt::int32_t x1, 
         for(Pt::int32_t i = from; i <= to; ++i) {
             const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_FPART_TO_A8 (ypxli) ];
             const Pt::uint8_t a2 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_RFPART_TO_A8(ypxli) ];
-            dst.points.insert( std::make_pair(
-                FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)),
-                XWLineData::XWPointXAA( i, a1, a2 )
+            xwLine.points.insert( std::make_pair(
+                XWLineData::XWPointXY( i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)) ),
+                XWLineData::XWPointAA( a1, a2 )
             ) );
             ypxli += grad;
         }
@@ -267,8 +266,8 @@ void ImagePainter2::arcUtil_genScanlinesForChord(const FilledArcInfo& fai, XWLin
     // Find the line's minimum and maximum Y coordinates
     Pt::int32_t lineMinY, lineMaxY;
 
-    lineMinY = xwLine.points.begin ()->first;
-    lineMaxY = xwLine.points.rbegin()->first;
+    lineMinY = xwLine.points.begin ()->first.y;
+    lineMaxY = xwLine.points.rbegin()->first.y;
 
     //lprintf("%d %d\n", lineMinY, lineMaxY);
 
@@ -310,11 +309,12 @@ void ImagePainter2::arcUtil_genScanlinesForChord(const FilledArcInfo& fai, XWLin
 void ImagePainter2::arcUtil_cropAndStoreScanlineForChord(XWLineData& xwLine, Scanlines& scanlines, Scanlines& scanlinesRef, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t yt, Pt::int32_t yb)
 {
     // Store/update the reference scanline coordinates
+    // ### TODO: CHECK WHY CANNOT JUST USE THE SHAPE SCANLINE PROCESSED BELOW ??? ###
     Scanlines::iterator rit1 = scanlinesRef.find(yt);
     if(rit1 == scanlinesRef.end()) { // Insert a new element
         scanlinesRef.insert( std::make_pair( yt, ScanlineElement(xl, xr) ) );
     }
-    else { // Update the scanline's "from" and "to" coordinates
+    else { // Update the reference scanline's "from" and "to" coordinates
         if( xl < rit1->second.from ) rit1->second.from = xl;
         if( xr > rit1->second.to   ) rit1->second.to   = xr;
     }
@@ -323,43 +323,49 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForChord(XWLineData& xwLine, Sca
     if(rit2 == scanlinesRef.end()) { // Insert a new element
         scanlinesRef.insert( std::make_pair( yb, ScanlineElement(xl, xr) ) );
     }
-    else { // Update the scanline's "from" and "to" coordinates
+    else { // Update the reference scanline's "from" and "to" coordinates
         if( xl < rit2->second.from ) rit2->second.from = xl;
         if( xr > rit2->second.to   ) rit2->second.to   = xr;
     }
 
+    // For convenience
     typedef XWLineData::XWPoints::iterator XWPointsIterator;
-    typedef std::pair<XWPointsIterator, XWPointsIterator> XWPointsRange;
 
     // Store/update the scanline coordinates
     if( (!xwLine.faceT && !xwLine.faceB) || (xwLine.faceT && yt >= lineMinY) || (xwLine.faceB && yt <= lineMaxY) ) {
         // Get the element with the wanted coordinate
-        XWPointsRange    xwr = xwLine.points.equal_range(yt);
-        XWPointsIterator lit = xwr.first;
-        for(XWPointsIterator cit = xwr.first; cit != xwr.second; ++cit) {
-            if(xwLine.faceL && cit->second.x > lit->second.x) lit = cit;
-            if(xwLine.faceR && cit->second.x < lit->second.x) lit = cit;
+        XWPointsIterator lwb = xwLine.points.lower_bound( XWLineData::XWPointXY(0,                          yt) );
+        XWPointsIterator upb = xwLine.points.upper_bound( XWLineData::XWPointXY(Painter::MaximumCoordinate, yt) );
+        //*
+        XWPointsIterator lit = lwb;
+        for(XWPointsIterator cit = lwb; cit != upb; ++cit) {
+            if(xwLine.faceL && cit->first.x > lit->first.x) lit = cit;
+            if(xwLine.faceR && cit->first.x < lit->first.x) lit = cit;
         }
+        //*/
+        //XWPointsIterator lit;
+        //if(xwLine.faceL) lit = lwb;
+        //if(xwLine.faceR) lit = upb;
         // Crop the coordinates
         Pt::int32_t xlc = xl;
         Pt::int32_t xrc = xr;
         if(lit != xwLine.points.end()) {
             if(xwLine.faceL) {
                 if(xwLine.steep) { // (X), (X + 1)
-                    if(xlc < lit->second.x + 1) xlc = lit->second.x + 1;
-                    lit->second.a2 = 0;
+                    if(xlc < lit->first.x + 1) xlc = lit->first.x + 1;
+                    //lit->second.a2 = 0;
                 }
                 else { // (X)
-                    if(xlc <= lit->second.x) xlc = lit->second.x + 1;
+                    if(xlc <= lit->first.x) xlc = lit->first.x + 1;
                 }
             }
             if(xwLine.faceR) {
                 if(xwLine.steep) { // (X), (X + 1)
-                    if(xrc > lit->second.x) xrc = lit->second.x;
-                    lit->second.a1 = 0;
+                    if(xrc > lit->first.x) xrc = lit->first.x;
+                    //lit->second.a1 = 0;
                 }
                 else { // (X)
-                    if(xrc >= lit->second.x) xrc = lit->second.x - 1;
+                    if(xrc >= lit->first.x) xrc = lit->first.x - 1;
                 }
             }
         }
@@ -378,32 +384,38 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForChord(XWLineData& xwLine, Sca
 
     if( (!xwLine.faceT && !xwLine.faceB) || (xwLine.faceT && yb >= lineMinY) || (xwLine.faceB && yb <= lineMaxY) ) {
         // Get the element with the wanted coordinate
-        XWPointsRange    xwr = xwLine.points.equal_range(yb);
-        XWPointsIterator lit = xwr.first;
-        for(XWPointsIterator cit = xwr.first; cit != xwr.second; ++cit) {
-            if(xwLine.faceL && cit->second.x > lit->second.x) lit = cit;
-            if(xwLine.faceR && cit->second.x < lit->second.x) lit = cit;
+        XWPointsIterator lwb = xwLine.points.lower_bound( XWLineData::XWPointXY(0,                          yb) );
+        XWPointsIterator upb = xwLine.points.upper_bound( XWLineData::XWPointXY(Painter::MaximumCoordinate, yb) );
+        //*
+        XWPointsIterator lit = lwb;
+        for(XWPointsIterator cit = lwb; cit != upb; ++cit) {
+            if(xwLine.faceL && cit->first.x > lit->first.x) lit = cit;
+            if(xwLine.faceR && cit->first.x < lit->first.x) lit = cit;
         }
+        //*/
+        //XWPointsIterator lit;
+        //if(xwLine.faceL) lit = lwb;
+        //if(xwLine.faceR) lit = upb;
         // Crop the coordinates
         Pt::int32_t xlc = xl;
         Pt::int32_t xrc = xr;
         if(lit != xwLine.points.end()) {
             if(xwLine.faceL) {
                 if(xwLine.steep) { // (X), (X + 1)
-                    if(xlc < lit->second.x + 1) xlc = lit->second.x + 1;
-                    lit->second.a2 = 0;
+                    if(xlc < lit->first.x + 1) xlc = lit->first.x + 1;
+                    //lit->second.a2 = 0;
                 }
                 else { // (X)
-                    if(xlc <= lit->second.x) xlc = lit->second.x + 1;
+                    if(xlc <= lit->first.x) xlc = lit->first.x + 1;
                 }
             }
             if(xwLine.faceR) {
                 if(xwLine.steep) { // (X), (X + 1)
-                    if(xrc > lit->second.x) xrc = lit->second.x;
-                    lit->second.a1 = 0;
+                    if(xrc > lit->first.x) xrc = lit->first.x;
+                    //lit->second.a1 = 0;
                 }
                 else { // (X)
-                    if(xrc >= lit->second.x) xrc = lit->second.x - 1;
+                    if(xrc >= lit->first.x) xrc = lit->first.x - 1;
                 }
             }
         }
@@ -511,8 +523,8 @@ void ImagePainter2::arcUtil_drawCircumferencePixels(FilledArcInfo& fai, const Sc
 void ImagePainter2::arcUtil_drawXWLine(const XWLineData& xwLine, Pt::int32_t minX, Pt::int32_t minY)
 {
     for(XWLineData::XWPoints::const_iterator it = xwLine.points.begin(); it != xwLine.points.end(); ++it) {
-        const Pt::int32_t y  = it->first;
-        const Pt::int32_t x  = it->second.x;
+        const Pt::int32_t x  = it->first.x;
+        const Pt::int32_t y  = it->first.y;
         const Pt::int32_t a1 = it->second.a1;
         const Pt::int32_t a2 = it->second.a2;
         if(xwLine.steep) {

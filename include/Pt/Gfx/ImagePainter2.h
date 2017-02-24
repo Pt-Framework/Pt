@@ -151,19 +151,34 @@ class PT_GFX_API ImagePainter2 : public Painter
             Pt::int32_t quartersY;    // The number of quarter points in the Y direction
         };
 
-        // Xiaolin Wu's anti-aliased line data structure
+        // Xiaolin Wu's anti-aliased line data structure (currently it is only used for drawing filled arc)
         struct XWLineData {
             // Point data
-            struct XWPointXAA {
+            struct XWPointXY {
                 Pt::int32_t x;
+                Pt::int32_t y;
+
+                XWPointXY(Pt::uint32_t x_, Pt::uint32_t y_)
+                : x(x_), y(y_)
+                {}
+
+                bool operator < (const XWPointXY& ref) const
+                {
+                    if(y < ref.y) return true;
+                    if(y > ref.y) return false;
+                    return x < ref.x;
+                }
+            };
+
+            struct XWPointAA {
                 Pt::uint8_t a1, a2;
 
-                XWPointXAA(Pt::int32_t x_, Pt::uint8_t a1_, Pt::uint8_t a2_)
-                : x(x_), a1(a1_), a2(a2_)
+                XWPointAA(Pt::uint8_t a1_, Pt::uint8_t a2_)
+                : a1(a1_), a2(a2_)
                 {}
             };
 
-            typedef std::multimap<Pt::int32_t, XWPointXAA> XWPoints; // The key is the Y coordinate
+            typedef std::multimap<XWPointXY, XWPointAA> XWPoints;
 
             XWPoints points; // The line's points
 
@@ -192,7 +207,7 @@ class PT_GFX_API ImagePainter2 : public Painter
         static inline void arcUtil_detXWLineDirection(XWLineData& xwLineData, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2);
 
         static void arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai);
-        static void arcUtil_runXWLineAlgorithm(XWLineData& dst, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2);
+        static void arcUtil_runXWLineAlgorithm(XWLineData& xwLine, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2);
         static void arcUtil_genScanlinesForChord(const FilledArcInfo& fai, XWLineData& xwLine, Scanlines& scanlines, Scanlines& scanlinesRef);
         static void arcUtil_cropAndStoreScanlineForChord(XWLineData& xwLine, Scanlines& scanlines, Scanlines& scanlinesRef, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t yt, Pt::int32_t yb);
 
