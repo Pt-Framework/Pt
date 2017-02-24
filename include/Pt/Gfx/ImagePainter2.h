@@ -206,13 +206,6 @@ class PT_GFX_API ImagePainter2 : public Painter
         virtual void fillArcChordImpl(FilledArcInfo& fai);
         virtual void fillArcPieImpl(FilledArcInfo& fai);
 
-        /*
-        static inline void arcUtilMarkOutsideScanlinesRL(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, bool faceL, bool faceR, bool faceT, bool faceB, Scanlines& scanlines);
-        static void arcUtilCropScanlinesUsingXWu(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, bool faceL, bool faceR, bool faceT, bool faceB, Scanlines& scanlines);
-        static void arcUtilCalcScanlines(Pt::int32_t radX, Pt::int32_t radY, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd, bool useAntiAliasing, Pt::int32_t& quartersX, Pt::int32_t& quartersY, Pt::int32_t& x1, Pt::int32_t& y1, Pt::int32_t& x2, Pt::int32_t& y2, Scanlines& scanlines);
-               void arcUtilDrawCircumferencePixels(Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t radX, Pt::int32_t radY, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd, Pt::int32_t quartersX, Pt::int32_t quartersY, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Scanlines& scanlinesRef);
-       */
-
     private:
         RectF        _clip;
         Rasterizer2* _rasterizer;

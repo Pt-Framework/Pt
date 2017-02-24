@@ -30,7 +30,6 @@
 
 #include <Pt/Gfx/ImagePainter2.h>
 
-#include "FreeType.h"
 #include "Rasterizer2.h"
 
 
