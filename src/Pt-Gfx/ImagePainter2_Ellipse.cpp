@@ -141,7 +141,7 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
         const Pt::int32_t fly   = floor(y);
         const float       error = y - fly;
         const Pt::uint8_t alpha = round(error * 255);
-        // Draw the the pixels
+        // Draw the pixels
         const Pt::int32_t x1 = ctrX - x;
         const Pt::int32_t x2 = ctrX + x;
         const Pt::int32_t y1 = ctrY - fly - 1;
@@ -176,7 +176,7 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
         const Pt::int32_t flx   = floor(x);
         const float       error = x - flx;
         const Pt::uint8_t alpha = round(error * 255);
-        // Draw the the pixels
+        // Draw the pixels
         const Pt::int32_t x1 = ctrX - flx - 1;
         const Pt::int32_t x2 = ctrX + flx + 1;
         const Pt::int32_t y1 = ctrY - y;

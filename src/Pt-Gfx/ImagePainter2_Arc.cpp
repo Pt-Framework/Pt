@@ -112,8 +112,8 @@ void ImagePainter2::fillArcChordImpl(FilledArcInfo& fai)
     //lprintf("l=%d r=%d t=%d b=%d\n", line.faceL, line.faceR, line.faceT, line.faceB);
 
     // Generate scanlines data
-    Scanlines scanlines, scanlinesRef;
-    arcUtil_genScanlinesForChord(fai, line, scanlines, scanlinesRef);
+    Scanlines scanlines;
+    arcUtil_genScanlinesForChord(fai, line, scanlines);
 
     // Draw the scanlines
     for(Scanlines::const_iterator it = scanlines.begin(); it != scanlines.end(); ++it) {
@@ -124,7 +124,7 @@ void ImagePainter2::fillArcChordImpl(FilledArcInfo& fai)
     if(!fai.antiAlias) return;
 
     // Draw the anti-aliased circumference pixels
-    arcUtil_drawCircumferencePixels(fai, scanlinesRef);
+    arcUtil_drawCircumferencePixels(fai);
 
     // Draw the closing line
     arcUtil_drawXWLine(line, fai.minX, fai.minY);
@@ -261,7 +261,7 @@ void ImagePainter2::arcUtil_runXWLineAlgorithm(XWLineData& xwLine, Pt::int32_t x
     }
 }
 
-void ImagePainter2::arcUtil_genScanlinesForChord(const FilledArcInfo& fai, XWLineData& xwLine, Scanlines& scanlines, Scanlines& scanlinesRef)
+void ImagePainter2::arcUtil_genScanlinesForChord(const FilledArcInfo& fai, XWLineData& xwLine, Scanlines& scanlines/*, Scanlines& scanlinesRef*/)
 {
     // Find the line's minimum and maximum Y coordinates
     Pt::int32_t lineMinY, lineMaxY;
@@ -287,7 +287,7 @@ void ImagePainter2::arcUtil_genScanlinesForChord(const FilledArcInfo& fai, XWLin
         if(xwLine.faceL && xr < xlMin) continue;
         if(xwLine.faceR && xl > xlMax) continue;
         // Store/update the scanline coordinates
-        arcUtil_cropAndStoreScanlineForChord(xwLine, scanlines, scanlinesRef, lineMinY, lineMaxY, xl, xr, yt, yb);
+        arcUtil_cropAndStoreScanlineForChord(xwLine, scanlines, /*scanlinesRef,*/ lineMinY, lineMaxY, xl, xr, yt, yb);
     }
 
     // Left and right halves
@@ -302,14 +302,14 @@ void ImagePainter2::arcUtil_genScanlinesForChord(const FilledArcInfo& fai, XWLin
         if(xwLine.faceL && xr < xlMin) continue;
         if(xwLine.faceR && xl > xlMax) continue;
         // Store/update the scanline coordinates
-        arcUtil_cropAndStoreScanlineForChord(xwLine, scanlines, scanlinesRef, lineMinY, lineMaxY, xl, xr, yt, yb);
+        arcUtil_cropAndStoreScanlineForChord(xwLine, scanlines, /*scanlinesRef,*/ lineMinY, lineMaxY, xl, xr, yt, yb);
     }
 }
 
-void ImagePainter2::arcUtil_cropAndStoreScanlineForChord(XWLineData& xwLine, Scanlines& scanlines, Scanlines& scanlinesRef, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t yt, Pt::int32_t yb)
+void ImagePainter2::arcUtil_cropAndStoreScanlineForChord(XWLineData& xwLine, Scanlines& scanlines, /*Scanlines& scanlinesRef,*/ Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t yt, Pt::int32_t yb)
 {
+    /*
     // Store/update the reference scanline coordinates
-    // ### TODO: CHECK WHY CANNOT JUST USE THE SHAPE SCANLINE PROCESSED BELOW ??? ###
     Scanlines::iterator rit1 = scanlinesRef.find(yt);
     if(rit1 == scanlinesRef.end()) { // Insert a new element
         scanlinesRef.insert( std::make_pair( yt, ScanlineElement(xl, xr) ) );
@@ -327,6 +327,7 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForChord(XWLineData& xwLine, Sca
         if( xl < rit2->second.from ) rit2->second.from = xl;
         if( xr > rit2->second.to   ) rit2->second.to   = xr;
     }
+    */
 
     // For convenience
     typedef XWLineData::XWPoints::iterator XWPointsIterator;
@@ -433,7 +434,7 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForChord(XWLineData& xwLine, Sca
     }
 }
 
-void ImagePainter2::arcUtil_drawCircumferencePixels(FilledArcInfo& fai, const Scanlines& scanlinesRef)
+void ImagePainter2::arcUtil_drawCircumferencePixels(FilledArcInfo& fai/*, const Scanlines& scanlinesRef*/)
 {
     // Top and bottom halves
     for(Pt::int32_t x = 0; x <= fai.quartersX; ++x) {
@@ -442,6 +443,19 @@ void ImagePainter2::arcUtil_drawCircumferencePixels(FilledArcInfo& fai, const Sc
         const Pt::int32_t fly   = floor(y);
         const float       error = y - fly;
         const Pt::uint8_t alpha = round(error * 255);
+        // Draw the pixels
+        const Pt::int32_t x1 = fai.ctrX - x;
+        const Pt::int32_t x2 = fai.ctrX + x;
+        const Pt::int32_t y1 = fai.ctrY - fly - 1;
+        const Pt::int32_t y2 = fai.ctrY + fly + 1;
+        const bool mask[4] = {
+            pointIsInsideArcDegRange(x1, y1, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd),
+            pointIsInsideArcDegRange(x1, y2, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd),
+            pointIsInsideArcDegRange(x2, y1, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd),
+            pointIsInsideArcDegRange(x2, y2, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd)
+        };
+        _rasterizer->fill4Pixels(x1, y1, x2, y2, fai.minX, fai.minY, alpha, mask);
+        /*
         // Draw the first part of the pixels
         const Pt::int32_t x1  = fai.ctrX - x;
         const Pt::int32_t x2  = fai.ctrX + x;
@@ -476,6 +490,7 @@ void ImagePainter2::arcUtil_drawCircumferencePixels(FilledArcInfo& fai, const Sc
             };
             _rasterizer->fill4Pixels(x1, y11, x2, y21, fai.minX, fai.minY, alpha, mask);
         }
+        */
     }
 
     // Left and right halves
@@ -485,6 +500,19 @@ void ImagePainter2::arcUtil_drawCircumferencePixels(FilledArcInfo& fai, const Sc
         const Pt::int32_t flx   = floor(x);
         const float       error = x - flx;
         const Pt::uint8_t alpha = round(error * 255);
+        // Draw the pixels
+        const Pt::int32_t x1 = fai.ctrX - flx - 1;
+        const Pt::int32_t x2 = fai.ctrX + flx + 1;
+        const Pt::int32_t y1 = fai.ctrY - y;
+        const Pt::int32_t y2 = fai.ctrY + y;
+        const bool mask[4] = {
+            pointIsInsideArcDegRange(x1, y1, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd),
+            pointIsInsideArcDegRange(x1, y2, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd),
+            pointIsInsideArcDegRange(x2, y1, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd),
+            pointIsInsideArcDegRange(x2, y2, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd)
+        };
+        _rasterizer->fill4Pixels(x1, y1, x2, y2, fai.minX, fai.minY, alpha, mask);
+        /*
         // Draw the first part of the pixels
         const Pt::int32_t x10 = fai.ctrX - flx;
         const Pt::int32_t x20 = fai.ctrX + flx;
@@ -517,6 +545,7 @@ void ImagePainter2::arcUtil_drawCircumferencePixels(FilledArcInfo& fai, const Sc
             };
             _rasterizer->fill4Pixels(x11, y1, x21, y2, fai.minX, fai.minY, alpha, mask);
         }
+        */
     }
 }
 
