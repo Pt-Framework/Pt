@@ -395,6 +395,8 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForChord(Scanlines& scanlines, c
 
 void ImagePainter2::arcUtil_genScanlinesForPie(Scanlines& scanlines1, Scanlines& scanlines2, const FilledArcInfo& fai, const XWLineData& xwLine1, const XWLineData& xwLine2)
 {
+    // Check for a horizontal "v-shape"
+
     // Find the line's minimum and maximum Y coordinates
     Pt::int32_t lineMinY, lineMaxY;
 
@@ -438,7 +440,7 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForPie(Scanlines& scanlines1, Sc
     // Check if the scanline will be completely outside the shape
     if( (xwLine1.faceT && y <= lineMinY) || (xwLine2.faceT && y <= lineMinY) ||
         (xwLine1.faceB && y >= lineMaxY) || (xwLine2.faceB && y >= lineMaxY)
-      ) return;
+    ) return;
 
     // Get the element with the wanted coordinate from the left-side closing line
     XWPointsIterator lwb1 = xwLine1.points.lower_bound(y);
@@ -494,6 +496,7 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForPie(Scanlines& scanlines1, Sc
     }
 
     // Left-side line is facing left and right-side line is facing right
+    //  => we have got a vertical "v-shape" DETECT HOW ???
     else if( xwLine1.faceL && xwLine2.faceR ) {
         // Left
         if( lit1 != xwLine1.points.end() && xwLine1.insideYRange(y) ) {
@@ -507,7 +510,8 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForPie(Scanlines& scanlines1, Sc
         }
     }
 
-    // Left-side line is facing right and right-side line is facing left => we have got a vertical "V-shape"
+    // Left-side line is facing right and right-side line is facing left
+    //  => we have got a vertical "v-shape"
     else if( xwLine1.faceR && xwLine2.faceL ) {
         // Right
         if( lit1 != xwLine1.points.end() && xwLine1.insideYRange(y) ) {
@@ -518,6 +522,10 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForPie(Scanlines& scanlines1, Sc
         if( lit2 != xwLine2.points.end() && xwLine2.insideYRange(y) ) {
             if(xwLine2.steep) { if(xlc2 <  lit2->second.x + 1) xlc2 = lit2->second.x + 1; } // (X), (X + 1)
             else              { if(xlc2 <= lit2->second.x    ) xlc2 = lit2->second.x + 1; } // (X)
+        }
+        if( lit2 != xwLine2.points.end() && xwLine2.insideYRange(y) && !xwLine1.insideYRange(y) ) {
+            if(xwLine2.steep) { if(xlc1 <  lit2->second.x + 1) xlc1 = lit2->second.x + 1; } // (X), (X + 1)
+            else              { if(xlc1 <= lit2->second.x    ) xlc1 = lit2->second.x + 1; } // (X)
         }
     }
 
