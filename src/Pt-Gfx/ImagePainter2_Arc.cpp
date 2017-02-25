@@ -120,6 +120,8 @@ void ImagePainter2::fillArcChordImpl(FilledArcInfo& fai)
         _rasterizer->fillOneScanlineNoAA(it->second.from, it->second.to, it->first, fai.minX, fai.minY);
     }
 
+    scanlines.clear();
+
     // Exit here if we are not doing anti-aliasing
     if(!fai.antiAlias) return;
 
@@ -161,8 +163,15 @@ void ImagePainter2::fillArcPieImpl(FilledArcInfo& fai)
     }
 
     for(Scanlines::const_iterator it = scanlines2.begin(); it != scanlines2.end(); ++it) {
+        Scanlines::const_iterator ct = scanlines1.find(it->first);
+        if(ct != scanlines1.end()) {
+            if(it->second.from >= ct->second.from && it->second.to <= ct->second.to) continue;
+        }
         _rasterizer->fillOneScanlineNoAA(it->second.from, it->second.to, it->first, fai.minX, fai.minY);
     }
+
+    scanlines1.clear();
+    scanlines2.clear();
 
     // Just for easier debugging & verification
     //drawArc(PointF(fai.minX, fai.minY), SizeF(fai.radX * 2, fai.radY * 2), fai.degBegin, fai.degEnd, ArcMode::Pie);
@@ -496,7 +505,6 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForPie(Scanlines& scanlines1, Sc
     }
 
     // Left-side line is facing left and right-side line is facing right
-    //  => we have got a vertical "v-shape" DETECT HOW ???
     else if( xwLine1.faceL && xwLine2.faceR ) {
         // Left
         if( lit1 != xwLine1.points.end() && xwLine1.insideYRange(y) ) {
@@ -510,8 +518,7 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForPie(Scanlines& scanlines1, Sc
         }
     }
 
-    // Left-side line is facing right and right-side line is facing left
-    //  => we have got a vertical "v-shape"
+    // Left-side line is facing right and right-side line is facing left => we have got a vertical "v-shape"
     else if( xwLine1.faceR && xwLine2.faceL ) {
         // Right
         if( lit1 != xwLine1.points.end() && xwLine1.insideYRange(y) ) {
@@ -526,6 +533,38 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForPie(Scanlines& scanlines1, Sc
         if( lit2 != xwLine2.points.end() && xwLine2.insideYRange(y) && !xwLine1.insideYRange(y) ) {
             if(xwLine2.steep) { if(xlc1 <  lit2->second.x + 1) xlc1 = lit2->second.x + 1; } // (X), (X + 1)
             else              { if(xlc1 <= lit2->second.x    ) xlc1 = lit2->second.x + 1; } // (X)
+        }
+    }
+
+    // Other conditions
+    else {
+        // Left
+        if( xwLine1.faceL ) {
+            if( lit1 != xwLine1.points.end() && xwLine1.insideYRange(y) ) {
+                if(xwLine1.steep) { if(xlc1 <  lit1->second.x + 1) xlc1 = lit1->second.x + 1; } // (X), (X + 1)
+                else              { if(xlc1 <= lit1->second.x    ) xlc1 = lit1->second.x + 1; } // (X)
+            }
+        }
+        // Right
+        else if( xwLine1.faceR ) {
+            if( lit1 != xwLine1.points.end() && xwLine1.insideYRange(y) ) {
+                if(xwLine1.steep) { if(xrc1 >  lit1->second.x) xrc1 = lit1->second.x;     } // (X), (X + 1)
+                else              { if(xrc1 >= lit1->second.x) xrc1 = lit1->second.x - 1; } // (X)
+            }
+        }
+        // Left
+        if( xwLine2.faceL ) {
+            if( lit2 != xwLine2.points.end() && xwLine2.insideYRange(y) ) {
+                if(xwLine2.steep) { if(xlc1 <  lit2->second.x + 1) xlc1 = lit2->second.x + 1; } // (X), (X + 1)
+                else              { if(xlc1 <= lit2->second.x    ) xlc1 = lit2->second.x + 1; } // (X)
+            }
+        }
+        // Right
+        else if( xwLine2.faceR ) {
+            if( lit2 != xwLine2.points.end() && xwLine2.insideYRange(y) ) {
+                if(xwLine2.steep) { if(xrc1 >  lit2->second.x) xrc1 = lit2->second.x;     } // (X), (X + 1)
+                else              { if(xrc1 >= lit2->second.x) xrc1 = lit2->second.x - 1; } // (X)
+            }
         }
     }
 
