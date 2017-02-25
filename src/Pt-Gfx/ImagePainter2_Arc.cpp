@@ -433,6 +433,7 @@ void ImagePainter2::arcUtil_genScanlinesForPie(Scanlines& scanlines1, Scanlines&
         }
     }
     else {
+        // Face top
         if(xwLine1.faceT && xwLine2.faceT) {
             const Pt::int32_t cy1 = std::min(xwLine1.y1, xwLine1.y2);
             const Pt::int32_t cy2 = std::min(xwLine2.y1, xwLine2.y2);
@@ -447,6 +448,7 @@ void ImagePainter2::arcUtil_genScanlinesForPie(Scanlines& scanlines1, Scanlines&
             const Pt::int32_t cy = std::min(xwLine2.y1, xwLine2.y2);
             if(lineMinY < cy) lineMinY = cy;
         }
+        // Face bottom
         if(xwLine1.faceB && xwLine2.faceB) {
             const Pt::int32_t cy1 = std::max(xwLine1.y1, xwLine1.y2);
             const Pt::int32_t cy2 = std::max(xwLine2.y1, xwLine2.y2);
@@ -699,18 +701,44 @@ void ImagePainter2::arcUtil_drawXWLine(const FilledArcInfo& fai, const XWLineDat
         const Pt::int32_t a2 = it->second.a2;
         // Check for exclusion
         if(xwLineExclusion) {
-            // Get the element with the wanted coordinate from the closing line
+            // By default we do not exclude the pixel
+            bool excludePixel = false;
+            // Check for overlapping pixels
             for( XWLineData::XWPoints::const_iterator cit  = xwLineExclusion->points.lower_bound(y);
                                                       cit != xwLineExclusion->points.upper_bound(y);
                                                     ++cit
             ) {
                 if(xwLine.steep && xwLine.faceR) {
-                    if(cit->second.x == x + 1) return;
+                    if(xwLineExclusion->steep) {
+                        if( cit->second.x + 1 == x + 1 ) {
+                            excludePixel = true;
+                            break;
+                        }
+                    }
+                    else {
+                        if( cit->second.x == x + 1 ) {
+                            excludePixel = true;
+                            break;
+                        }
+                    }
                 }
                 else {
-                    if(cit->second.x == x) return;
+                    if(xwLineExclusion->steep) {
+                        if( cit->second.x + 1 == x ) {
+                            excludePixel = true;
+                            break;
+                        }
+                    }
+                    else {
+                        if( cit->second.x == x ) {
+                            excludePixel = true;
+                            break;
+                        }
+                    }
                 }
             }
+            // Exclude the pixel as needed
+            if(excludePixel) continue;
         }
         // deltaY > deltaX
         if(xwLine.steep) {
