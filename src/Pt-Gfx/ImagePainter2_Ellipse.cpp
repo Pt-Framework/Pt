@@ -71,31 +71,35 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
     // === Process the scanlines ===
 
     // List of scanlines to be drawn later
-    Scanlines scanlines;
+    Scanlines scanlines(radY * 2 + 2);
 
     // Top and bottom halves
     const Pt::int32_t quartersX = round( radX2 * fastInvSqrt(radX2 + radY2) );
 
     for(Pt::int32_t x = 0; x <= quartersX; ++x) {
-        // Calculate the Y coordinate
+        // Calculate the coordinates
         const float       y   = radY * fastSqrt(1 - (float) x * x / radX2);
         const Pt::int32_t fly = floor(y);
+        const Pt::int32_t x1  = ctrX - x;
+        const Pt::int32_t x2  = ctrX + x;
+        const Pt::int32_t y1  = ctrY - fly - minY + 1;
+        const Pt::int32_t y2  = ctrY + fly - minY + 1;
         // Store/update the scanline coordinates
-        Scanlines::iterator it1 = scanlines.find(ctrY - fly);
-        Scanlines::iterator it2 = scanlines.find(ctrY + fly);
-        if(it1 == scanlines.end()) { // Insert a new element
-            scanlines.insert( std::make_pair( ctrY - fly, ScanlineElement(ctrX - x, ctrX + x) ) );
+        if(scanlines[y1].isNull()) { // Insert a new element
+            scanlines[y1].from = x1;
+            scanlines[y1].to   = x2;
         }
         else { // Update the scanline's "from" and "to" coordinates
-            if( ctrX - x < it1->second.from ) it1->second.from = ctrX - x;
-            if( ctrX + x > it1->second.to   ) it1->second.to   = ctrX + x;
+            if( x1 < scanlines[y1].from ) scanlines[y1].from = x1;
+            if( x2 > scanlines[y1].to   ) scanlines[y1].to   = x2;
         }
-        if(it2 == scanlines.end()) { // Insert a new element
-            scanlines.insert( std::make_pair( ctrY + fly, ScanlineElement(ctrX - x, ctrX + x) ) );
+        if(scanlines[y2].isNull()) { // Insert a new element
+            scanlines[y2].from = x1;
+            scanlines[y2].to   = x2;
         }
         else { // Update the scanline's "from" and "to" coordinates
-            if( ctrX - x < it2->second.from ) it2->second.from = ctrX - x;
-            if( ctrX + x > it2->second.to   ) it2->second.to   = ctrX + x;
+            if( x1 < scanlines[y2].from ) scanlines[y2].from = x1;
+            if( x2 > scanlines[y2].to   ) scanlines[y2].to   = x2;
         }
     }
 
@@ -103,31 +107,37 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
     const Pt::int32_t quartersY = round( radY2 * fastInvSqrt(radX2 + radY2) );
 
     for(Pt::int32_t y = 0; y <= quartersY; ++y) {
-        // Calculate the X coordinate
+        // Calculate the coordinates
         const float       x   = radX * fastSqrt(1 - (float) y * y / radY2);
         const Pt::int32_t flx = floor(x);
+        const Pt::int32_t x1  = ctrX - flx;
+        const Pt::int32_t x2  = ctrX + flx;
+        const Pt::int32_t y1  = ctrY - y - minY + 1;
+        const Pt::int32_t y2  = ctrY + y - minY + 1;
         // Store/update the scanline coordinates
-        Scanlines::iterator it1 = scanlines.find(ctrY - y);
-        Scanlines::iterator it2 = scanlines.find(ctrY + y);
-        if(it1 == scanlines.end()) { // Insert a new element
-            scanlines.insert( std::make_pair( ctrY - y, ScanlineElement(ctrX - flx, ctrX + flx) ) );
+        if(scanlines[y1].isNull()) { // Insert a new element
+            scanlines[y1].from = x1;
+            scanlines[y1].to   = x2;
         }
         else { // Update the scanline's "from" and "to" coordinates
-            if( ctrX - flx < it1->second.from ) it1->second.from = ctrX - flx;
-            if( ctrX + flx > it1->second.to   ) it1->second.to   = ctrX + flx;
+            if( x1 < scanlines[y1].from ) scanlines[y1].from = x1;
+            if( x2 > scanlines[y1].to   ) scanlines[y1].to   = x2;
         }
-        if(it2 == scanlines.end()) { // Insert a new element
-            scanlines.insert( std::make_pair( ctrY + y, ScanlineElement(ctrX - flx, ctrX + flx) ) );
+        if(scanlines[y2].isNull()) { // Insert a new element
+            scanlines[y2].from = x1;
+            scanlines[y2].to   = x2;
         }
         else { // Update the scanline's "from" and "to" coordinates
-            if( ctrX - flx < it2->second.from ) it2->second.from = ctrX - flx;
-            if( ctrX + flx > it2->second.to   ) it2->second.to   = ctrX + flx;
+            if( x1 < scanlines[y2].from ) scanlines[y2].from = x1;
+            if( x2 > scanlines[y2].to   ) scanlines[y2].to   = x2;
         }
     }
 
     // Draw the scanlines
-    for(Scanlines::const_iterator it = scanlines.begin(); it != scanlines.end(); ++it) {
-        _rasterizer->fillOneScanlineNoAA(it->second.from, it->second.to, it->first, minX, minY);
+    for(size_t i = 0; i < scanlines.size(); ++i) {
+        const ScanlineElement& sle = scanlines[i];
+        if(sle.isNull()) continue;
+        _rasterizer->fillOneScanlineNoAA(sle.from, sle.to, i + minY - 1, minX, minY);
     }
 
     scanlines.clear();

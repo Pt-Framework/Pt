@@ -84,21 +84,31 @@ void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float deg
     arcUtil_findExactBegEndPointsCoordinate(fai);
 
     // Draw based on the mode
-    switch(arcMode) {
-        case ArcMode::Chord:
-            fillArcChordImpl(fai);
-            break;
-
-        case ArcMode::Pie:
-            fillArcPieImpl(fai);
-            break;
-    }
+         if(arcMode == ArcMode::Chord) fillArcChordImpl(fai);
+    else if(arcMode == ArcMode::Pie  ) fillArcPieImpl  (fai);
 }
 
 
 // ======================================================================================
 // ===== Private Member Functions =======================================================
 // ======================================================================================
+/*
+Pt::Gfx - CompositionMode::SourceCopy
+    Solid-filled    ellipse          @ ImagePainter  =      5
+    Solid-filled    ellipse NOAA     @ ImagePainter2 =      6 ( 1.200)
+    Solid-filled    ellipse XWAA     @ ImagePainter2 =     28 ( 5.600)
+
+    Solid-filled    arc     NOAA     @ ImagePainter2 =    115
+    Solid-filled    arc     XWAA     @ ImagePainter2 =    167 ( 1.452)
+
+Pt::Gfx - CompositionMode::SourceOver
+    Solid-filled    ellipse          @ ImagePainter  =     38
+    Solid-filled    ellipse NOAA     @ ImagePainter2 =     24 ( 0.632)
+    Solid-filled    ellipse XWAA     @ ImagePainter2 =     46 ( 1.211)
+
+    Solid-filled    arc     NOAA     @ ImagePainter2 =    180
+    Solid-filled    arc     XWAA     @ ImagePainter2 =    232 ( 1.289)
+*/
 
 void ImagePainter2::fillArcChordImpl(FilledArcInfo& fai)
 {
@@ -109,15 +119,15 @@ void ImagePainter2::fillArcChordImpl(FilledArcInfo& fai)
     // Find the direction that the line is facing to
     arcUtil_detXWLineDirection(line);
 
-    //lprintf("l=%d r=%d t=%d b=%d\n", line.faceL, line.faceR, line.faceT, line.faceB);
-
     // Generate scanlines data
-    Scanlines scanlines;
+    Scanlines scanlines(fai.radY * 2 + 2);
     arcUtil_genScanlinesForChord(scanlines, fai, line);
 
     // Draw the scanlines
-    for(Scanlines::const_iterator it = scanlines.begin(); it != scanlines.end(); ++it) {
-        _rasterizer->fillOneScanlineNoAA(it->second.from, it->second.to, it->first, fai.minX, fai.minY);
+    for(size_t i = 0; i < scanlines.size(); ++i) {
+        const ScanlineElement& sle = scanlines[i];
+        if(sle.isNull()) continue;
+        _rasterizer->fillOneScanlineNoAA(sle.from, sle.to, i + fai.minY - 1, fai.minX, fai.minY);
     }
 
     scanlines.clear();
@@ -150,31 +160,27 @@ void ImagePainter2::fillArcPieImpl(FilledArcInfo& fai)
     arcUtil_detXWLineDirection(line1);
     arcUtil_detXWLineDirection(line2);
 
-    //lprintf("(%d, %d) (%d, %d) | (%d, %d) (%d, %d)\n", line1.x1, line1.y1, line1.x2, line1.y2, line2.x1, line2.y1, line2.x2, line2.y2);
-    //lprintf("l=%d r=%d t=%d b=%d | l=%d r=%d t=%d b=%d\n", line1.faceL, line1.faceR, line1.faceT, line1.faceB, line2.faceL, line2.faceR, line2.faceT, line2.faceB);
-
     // Generate scanlines data
-    Scanlines scanlines1, scanlines2;
+    Scanlines scanlines1(fai.radY * 2 + 2);
+    Scanlines scanlines2(fai.radY * 2 + 2);
     arcUtil_genScanlinesForPie(scanlines1, scanlines2, fai, line1, line2);
 
     // Draw the scanlines
-    for(Scanlines::const_iterator it = scanlines1.begin(); it != scanlines1.end(); ++it) {
-        _rasterizer->fillOneScanlineNoAA(it->second.from, it->second.to, it->first, fai.minX, fai.minY);
+    for(size_t i = 0; i < scanlines1.size(); ++i) {
+        const ScanlineElement& sle = scanlines1[i];
+        if(sle.isNull()) continue;
+        _rasterizer->fillOneScanlineNoAA(sle.from, sle.to, i + fai.minY - 1, fai.minX, fai.minY);
     }
 
-    for(Scanlines::const_iterator it = scanlines2.begin(); it != scanlines2.end(); ++it) {
-        Scanlines::const_iterator ct = scanlines1.find(it->first);
-        if(ct != scanlines1.end()) {
-            if(it->second.from >= ct->second.from && it->second.to <= ct->second.to) continue;
-        }
-        _rasterizer->fillOneScanlineNoAA(it->second.from, it->second.to, it->first, fai.minX, fai.minY);
+    for(size_t i = 0; i < scanlines2.size(); ++i) {
+        const ScanlineElement& sle = scanlines2[i];
+        if(sle.isNull()) continue;
+        if(!scanlines1[i].isNull() && sle.from >= scanlines1[i].from && sle.to <= scanlines1[i].to) continue;
+        _rasterizer->fillOneScanlineNoAA(sle.from, sle.to, i + fai.minY - 1, fai.minX, fai.minY);
     }
 
     scanlines1.clear();
     scanlines2.clear();
-
-    // Just for easier debugging & verification
-    //drawArc(PointF(fai.minX, fai.minY), SizeF(fai.radX * 2, fai.radY * 2), fai.degBegin, fai.degEnd, ArcMode::Pie);
 
     // Exit here if we are not doing anti-aliasing
     if(!fai.antiAlias) return;
@@ -319,8 +325,6 @@ void ImagePainter2::arcUtil_genScanlinesForChord(Scanlines& scanlines, const Fil
     lineMinY = xwLine.points.begin ()->first;
     lineMaxY = xwLine.points.rbegin()->first;
 
-    //lprintf("%d %d\n", lineMinY, lineMaxY);
-
     // Minimum and maximum X coordinates of the shape
     const Pt::int32_t xlMin = std::min(fai.x1, fai.x2);
     const Pt::int32_t xlMax = std::max(fai.x1, fai.x2);
@@ -337,8 +341,8 @@ void ImagePainter2::arcUtil_genScanlinesForChord(Scanlines& scanlines, const Fil
         if(xwLine.faceL && xr < xlMin) continue;
         if(xwLine.faceR && xl > xlMax) continue;
         // Store/update the scanline coordinates
-        arcUtil_cropAndStoreScanlineForChord(scanlines, xwLine, lineMinY, lineMaxY, xl, xr, yt);
-        arcUtil_cropAndStoreScanlineForChord(scanlines, xwLine, lineMinY, lineMaxY, xl, xr, yb);
+        arcUtil_cropAndStoreScanlineForChord(scanlines, fai, xwLine, lineMinY, lineMaxY, xl, xr, yt);
+        arcUtil_cropAndStoreScanlineForChord(scanlines, fai, xwLine, lineMinY, lineMaxY, xl, xr, yb);
     }
 
     // Left and right halves
@@ -353,12 +357,12 @@ void ImagePainter2::arcUtil_genScanlinesForChord(Scanlines& scanlines, const Fil
         if(xwLine.faceL && xr < xlMin) continue;
         if(xwLine.faceR && xl > xlMax) continue;
         // Store/update the scanline coordinates
-        arcUtil_cropAndStoreScanlineForChord(scanlines, xwLine, lineMinY, lineMaxY, xl, xr, yt);
-        arcUtil_cropAndStoreScanlineForChord(scanlines, xwLine, lineMinY, lineMaxY, xl, xr, yb);
+        arcUtil_cropAndStoreScanlineForChord(scanlines, fai, xwLine, lineMinY, lineMaxY, xl, xr, yt);
+        arcUtil_cropAndStoreScanlineForChord(scanlines, fai, xwLine, lineMinY, lineMaxY, xl, xr, yb);
     }
 }
 
-void ImagePainter2::arcUtil_cropAndStoreScanlineForChord(Scanlines& scanlines, const XWLineData& xwLine, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t y)
+void ImagePainter2::arcUtil_cropAndStoreScanlineForChord(Scanlines& scanlines, const FilledArcInfo& fai, const XWLineData& xwLine, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t y)
 {
     // For convenience
     typedef XWLineData::XWPoints::const_iterator XWPointsIterator;
@@ -391,13 +395,14 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForChord(Scanlines& scanlines, c
 
     // Store/update the scanline coordinates as needed
     if(xrc >= xlc) {
-        Scanlines::iterator sit = scanlines.find(y);
-        if(sit == scanlines.end()) { // Insert a new element
-            scanlines.insert( std::make_pair( y, ScanlineElement(xlc, xrc) ) );
+        y = y - fai.minY + 1;
+        if(scanlines[y].isNull()) { // Insert a new element
+            scanlines[y].from = xlc;
+            scanlines[y].to   = xrc;
         }
         else { // Update the scanline's "from" and "to" coordinates
-            if( xlc < sit->second.from ) sit->second.from = xlc;
-            if( xrc > sit->second.to   ) sit->second.to   = xrc;
+            if( xlc < scanlines[y].from ) scanlines[y].from = xlc;
+            if( xrc > scanlines[y].to   ) scanlines[y].to   = xrc;
         }
     }
 }
@@ -465,8 +470,6 @@ void ImagePainter2::arcUtil_genScanlinesForPie(Scanlines& scanlines1, Scanlines&
         }
     }
 
-    //lprintf("%d %d\n", lineMinY, lineMaxY);
-
     // Top and bottom halves
     for(Pt::int32_t x = 0; x <= fai.quartersX; ++x) {
         // Calculate the coordinate
@@ -476,8 +479,8 @@ void ImagePainter2::arcUtil_genScanlinesForPie(Scanlines& scanlines1, Scanlines&
         const Pt::int32_t xl = fai.ctrX - x;
         const Pt::int32_t xr = fai.ctrX + x;
         // Store/update the scanline coordinates
-        arcUtil_cropAndStoreScanlineForPie(scanlines1, scanlines2, xwLine1, xwLine2, lineMinY, lineMaxY, xl, xr, yt);
-        arcUtil_cropAndStoreScanlineForPie(scanlines1, scanlines2, xwLine1, xwLine2, lineMinY, lineMaxY, xl, xr, yb);
+        arcUtil_cropAndStoreScanlineForPie(scanlines1, scanlines2, fai, xwLine1, xwLine2, lineMinY, lineMaxY, xl, xr, yt);
+        arcUtil_cropAndStoreScanlineForPie(scanlines1, scanlines2, fai, xwLine1, xwLine2, lineMinY, lineMaxY, xl, xr, yb);
     }
 
     // Left and right halves
@@ -489,12 +492,12 @@ void ImagePainter2::arcUtil_genScanlinesForPie(Scanlines& scanlines1, Scanlines&
         const Pt::int32_t xl = fai.ctrX - ( fai.antiAlias ? floor(x) : round(x) );
         const Pt::int32_t xr = fai.ctrX + ( fai.antiAlias ? floor(x) : round(x) );
         // Store/update the scanline coordinates
-        arcUtil_cropAndStoreScanlineForPie(scanlines1, scanlines2, xwLine1, xwLine2, lineMinY, lineMaxY, xl, xr, yt);
-        arcUtil_cropAndStoreScanlineForPie(scanlines1, scanlines2, xwLine1, xwLine2, lineMinY, lineMaxY, xl, xr, yb);
+        arcUtil_cropAndStoreScanlineForPie(scanlines1, scanlines2, fai, xwLine1, xwLine2, lineMinY, lineMaxY, xl, xr, yt);
+        arcUtil_cropAndStoreScanlineForPie(scanlines1, scanlines2, fai, xwLine1, xwLine2, lineMinY, lineMaxY, xl, xr, yb);
     }
 }
 
-void ImagePainter2::arcUtil_cropAndStoreScanlineForPie(Scanlines& scanlines1, Scanlines& scanlines2, const XWLineData& xwLine1, const XWLineData& xwLine2, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t y)
+void ImagePainter2::arcUtil_cropAndStoreScanlineForPie(Scanlines& scanlines1, Scanlines& scanlines2, const FilledArcInfo& fai, const XWLineData& xwLine1, const XWLineData& xwLine2, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t y)
 {
     // For convenience
     typedef XWLineData::XWPoints::const_iterator XWPointsIterator;
@@ -622,26 +625,28 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForPie(Scanlines& scanlines1, Sc
     }
 
     // Store/update the first scanline coordinates as needed
+    y = y - fai.minY + 1;
+
     if(xrc1 >= xlc1) {
-        Scanlines::iterator sit = scanlines1.find(y);
-        if(sit == scanlines1.end()) { // Insert a new element
-            scanlines1.insert( std::make_pair( y, ScanlineElement(xlc1, xrc1) ) );
+        if(scanlines1[y].isNull()) { // Insert a new element
+            scanlines1[y].from = xlc1;
+            scanlines1[y].to   = xrc1;
         }
         else { // Update the scanline's "from" and "to" coordinates
-            if( xlc1 < sit->second.from ) sit->second.from = xlc1;
-            if( xrc1 > sit->second.to   ) sit->second.to   = xrc1;
+            if( xlc1 < scanlines1[y].from ) scanlines1[y].from = xlc1;
+            if( xrc1 > scanlines1[y].to   ) scanlines1[y].to   = xrc1;
         }
     }
 
     // Store/update the second scanline coordinates as needed
     if(xlc2 != -1 && xrc2 >= xlc2) {
-        Scanlines::iterator sit = scanlines2.find(y);
-        if(sit == scanlines2.end()) { // Insert a new element
-            scanlines2.insert( std::make_pair( y, ScanlineElement(xlc2, xrc2) ) );
+        if(scanlines2[y].isNull()) { // Insert a new element
+            scanlines2[y].from = xlc2;
+            scanlines2[y].to   = xrc2;
         }
         else { // Update the scanline's "from" and "to" coordinates
-            if( xlc2 < sit->second.from ) sit->second.from = xlc2;
-            if( xrc2 > sit->second.to   ) sit->second.to   = xrc2;
+            if( xlc2 < scanlines2[y].from ) scanlines2[y].from = xlc2;
+            if( xrc2 > scanlines2[y].to   ) scanlines2[y].to   = xrc2;
         }
     }
 }
@@ -699,45 +704,35 @@ void ImagePainter2::arcUtil_drawXWLine(const FilledArcInfo& fai, const XWLineDat
         const Pt::int32_t x  = it->second.x;
         const Pt::int32_t a1 = it->second.a1;
         const Pt::int32_t a2 = it->second.a2;
-        // Check for exclusion
+        // Exclude the pixel as needed
         if(xwLineExclusion) {
-            // By default we do not exclude the pixel
             bool excludePixel = false;
-            // Check for overlapping pixels
             for( XWLineData::XWPoints::const_iterator cit  = xwLineExclusion->points.lower_bound(y);
                                                       cit != xwLineExclusion->points.upper_bound(y);
                                                     ++cit
             ) {
-                if(xwLine.steep && xwLine.faceR) {
-                    if(xwLineExclusion->steep) {
-                        if( cit->second.x + 1 == x + 1 ) {
-                            excludePixel = true;
-                            break;
-                        }
+                if(xwLine.steep) {
+                    if(xwLine.faceL) {
+                        if(xwLineExclusion->steep)
+                            excludePixel = ( y == cit->first && (x == cit->second.x || x == cit->second.x + 1) );
+                        else
+                            excludePixel = ( x == cit->second.x && (y == cit->first || y == cit->first + 1) );
                     }
-                    else {
-                        if( cit->second.x == x + 1 ) {
-                            excludePixel = true;
-                            break;
-                        }
+                    else if(xwLine.faceR) {
+                        if(xwLineExclusion->steep)
+                            excludePixel = ( y == cit->first && (x + 1 == cit->second.x || x + 1 == cit->second.x + 1) );
+                        else
+                            excludePixel = ( x + 1 == cit->second.x && (y == cit->first || y == cit->first + 1) );
                     }
                 }
                 else {
-                    if(xwLineExclusion->steep) {
-                        if( cit->second.x + 1 == x ) {
-                            excludePixel = true;
-                            break;
-                        }
-                    }
-                    else {
-                        if( cit->second.x == x ) {
-                            excludePixel = true;
-                            break;
-                        }
-                    }
+                    if(xwLineExclusion->steep)
+                        excludePixel = ( y == cit->first && (x == cit->second.x || x == cit->second.x + 1) );
+                    else
+                        excludePixel = ( x == cit->second.x && (y == cit->first || y == cit->first + 1) );
                 }
+                if(excludePixel) break;
             }
-            // Exclude the pixel as needed
             if(excludePixel) continue;
         }
         // deltaY > deltaX

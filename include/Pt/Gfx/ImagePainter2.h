@@ -121,12 +121,15 @@ class PT_GFX_API ImagePainter2 : public Painter
             Pt::int32_t from;
             Pt::int32_t to;
 
-            ScanlineElement(Pt::int32_t from_, Pt::int32_t to_)
+            ScanlineElement(Pt::int32_t from_ = -1, Pt::int32_t to_ = -1)
             : from(from_), to(to_)
             {}
+
+            bool isNull() const
+            { return from == -1 && to == -1; }
         };
 
-        typedef std::map<Pt::int32_t, ScanlineElement> Scanlines;
+        typedef std::vector<ScanlineElement> Scanlines;
 
         // Filled-arc information structure
         struct FilledArcInfo {
@@ -199,9 +202,9 @@ class PT_GFX_API ImagePainter2 : public Painter
         static void arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai);
         static void arcUtil_runXWLineAlgorithm(XWLineData& xwLine, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2);
         static void arcUtil_genScanlinesForChord(Scanlines& scanlines, const FilledArcInfo& fai, const XWLineData& xwLine);
-        static void arcUtil_cropAndStoreScanlineForChord(Scanlines& scanlines, const XWLineData& xwLine, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t y);
+        static void arcUtil_cropAndStoreScanlineForChord(Scanlines& scanlines, const FilledArcInfo& fai, const XWLineData& xwLine, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t y);
         static void arcUtil_genScanlinesForPie(Scanlines& scanlines1, Scanlines& scanlines2, const FilledArcInfo& fai, const XWLineData& xwLine1, const XWLineData& xwLine2);
-        static void arcUtil_cropAndStoreScanlineForPie(Scanlines& scanlines1, Scanlines& scanlines2, const XWLineData& xwLine1, const XWLineData& xwLine2, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t y);
+        static void arcUtil_cropAndStoreScanlineForPie(Scanlines& scanlines1, Scanlines& scanlines2, const FilledArcInfo& fai, const XWLineData& xwLine1, const XWLineData& xwLine2, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t y);
 
         void arcUtil_drawCircumferencePixels(FilledArcInfo& fai);
         void arcUtil_drawXWLine(const FilledArcInfo& fai, const XWLineData& xwLine, const XWLineData* xwLineExclusion);
