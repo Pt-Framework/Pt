@@ -402,8 +402,8 @@ void ImagePainter2::arcUtil_genScanlinesForPie(Scanlines& scanlines1, Scanlines&
     //lprintf("%d %d\n", lineMinY, lineMaxY);
 
     // Minimum and maximum X coordinates of the shape
-    const Pt::int32_t xlMin = std::min(fai.x1, fai.x2);
-    const Pt::int32_t xlMax = std::max(fai.x1, fai.x2);
+    //const Pt::int32_t xlMin = std::min(fai.x1, fai.x2);
+    //const Pt::int32_t xlMax = std::max(fai.x1, fai.x2);
 
     // Top and bottom halves
     for(Pt::int32_t x = 0; x <= fai.quartersX; ++x) {
@@ -467,59 +467,59 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForPie(Scanlines& scanlines1, Sc
     }
 
     // Copy the coordinates for cropping
-    Pt::int32_t xlc = xl;
-    Pt::int32_t xrc = xr;
+    Pt::int32_t xlc1 = xl;
+    Pt::int32_t xrc1 = xr;
+
+    Pt::int32_t xlc2 =  1;
+    Pt::int32_t xrc2 = -1;
 
     //
     if( xwLine1.faceL && xwLine2.faceL ) {
         if( lit1 != xwLine1.points.end() && xwLine1.insideYRange(y) ) {
-            if(xwLine1.steep) { if(xlc <  lit1->second.x + 1) xlc = lit1->second.x + 1; } // (X), (X + 1)
-            else              { if(xlc <= lit1->second.x    ) xlc = lit1->second.x + 1; } // (X)
+            if(xwLine1.steep) { if(xlc1 <  lit1->second.x + 1) xlc1 = lit1->second.x + 1; } // (X), (X + 1)
+            else              { if(xlc1 <= lit1->second.x    ) xlc1 = lit1->second.x + 1; } // (X)
         }
         if( lit2 != xwLine2.points.end() && xwLine2.insideYRange(y) ) {
-            if(xwLine2.steep) { if(xlc <  lit2->second.x + 1) xlc = lit2->second.x + 1; } // (X), (X + 1)
-            else              { if(xlc <= lit2->second.x    ) xlc = lit2->second.x + 1; } // (X)
+            if(xwLine2.steep) { if(xlc1 <  lit2->second.x + 1) xlc1 = lit2->second.x + 1; } // (X), (X + 1)
+            else              { if(xlc1 <= lit2->second.x    ) xlc1 = lit2->second.x + 1; } // (X)
         }
     }
 
     //
     else if( xwLine1.faceR && xwLine2.faceR ) {
         if( lit1 != xwLine1.points.end() && xwLine1.insideYRange(y) ) {
-            if(xwLine1.steep) { if(xrc >  lit1->second.x) xrc = lit1->second.x;     } // (X), (X + 1)
-            else              { if(xrc >= lit1->second.x) xrc = lit1->second.x - 1; } // (X)
+            if(xwLine1.steep) { if(xrc1 >  lit1->second.x) xrc1 = lit1->second.x;     } // (X), (X + 1)
+            else              { if(xrc1 >= lit1->second.x) xrc1 = lit1->second.x - 1; } // (X)
         }
         if( lit2 != xwLine2.points.end() && xwLine2.insideYRange(y) ) {
-            if(xwLine2.steep) { if(xrc >  lit2->second.x) xrc = lit2->second.x;     } // (X), (X + 1)
-            else              { if(xrc >= lit2->second.x) xrc = lit2->second.x - 1; } // (X)
+            if(xwLine2.steep) { if(xrc1 >  lit2->second.x) xrc1 = lit2->second.x;     } // (X), (X + 1)
+            else              { if(xrc1 >= lit2->second.x) xrc1 = lit2->second.x - 1; } // (X)
+        }
+    }
+
+    //
+    if( xwLine1.faceL && xwLine2.faceR ) {
+        if( lit1 != xwLine1.points.end() && xwLine1.insideYRange(y) ) {
+            if(xwLine1.steep) { if(xlc1 <  lit1->second.x + 1) xlc1 = lit1->second.x + 1; } // (X), (X + 1)
+            else              { if(xlc1 <= lit1->second.x    ) xlc1 = lit1->second.x + 1; } // (X)
+        }
+        if( lit2 != xwLine2.points.end() && xwLine2.insideYRange(y) ) {
+            if(xwLine2.steep) { if(xrc1 >  lit2->second.x) xrc1 = lit2->second.x;     } // (X), (X + 1)
+            else              { if(xrc1 >= lit2->second.x) xrc1 = lit2->second.x - 1; } // (X)
         }
     }
 
     // Store/update the scanline coordinates as needed
-    if(xrc >= xlc) {
+    if(xrc1 >= xlc1) {
         Scanlines::iterator sit = scanlines1.find(y);
         if(sit == scanlines1.end()) { // Insert a new element
-            scanlines1.insert( std::make_pair( y, ScanlineElement(xlc, xrc) ) );
+            scanlines1.insert( std::make_pair( y, ScanlineElement(xlc1, xrc1) ) );
         }
         else { // Update the scanline's "from" and "to" coordinates
-            if( xlc < sit->second.from ) sit->second.from = xlc;
-            if( xrc > sit->second.to   ) sit->second.to   = xrc;
+            if( xlc1 < sit->second.from ) sit->second.from = xlc1;
+            if( xrc1 > sit->second.to   ) sit->second.to   = xrc1;
         }
     }
-
-    /*
-    // Crop the scanline coordinates to the closing line
-    Pt::int32_t xlc = xl;
-    Pt::int32_t xrc = xr;
-    if(lit != xwLine.points.end()) {
-        if(xwLine.faceL) {
-            if(xwLine.steep) { if(xlc <  lit->second.x + 1) xlc = lit->second.x + 1; } // (X), (X + 1)
-            else             { if(xlc <= lit->second.x    ) xlc = lit->second.x + 1; } // (X)
-        }
-        if(xwLine.faceR) {
-        }
-    }
-
-   */
 }
 
 void ImagePainter2::arcUtil_drawCircumferencePixels(FilledArcInfo& fai)
