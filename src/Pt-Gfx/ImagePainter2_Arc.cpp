@@ -444,8 +444,9 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForPie(Scanlines& scanlines1, Sc
     typedef XWLineData::XWPoints::const_iterator XWPointsIterator;
 
     // Check if the scanline will be completely outside the shape
-    if(  ( (xwLine1.faceT && y < lineMinY) || (xwLine1.faceB && y > lineMaxY) ) &&
-         ( (xwLine2.faceT && y < lineMinY) || (xwLine2.faceB && y > lineMaxY) ) ) return;
+    if( (xwLine1.faceT && y < lineMinY) || (xwLine2.faceT && y < lineMinY) ||
+        (xwLine1.faceB && y > lineMaxY) || (xwLine2.faceB && y > lineMaxY)
+      ) return;
 
     // Get the element with the wanted coordinate from the left-side closing line
     XWPointsIterator lwb1 = xwLine1.points.lower_bound(y);
@@ -459,10 +460,10 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForPie(Scanlines& scanlines1, Sc
     // Get the element with the wanted coordinate from the right-side closing line
     XWPointsIterator lwb2 = xwLine2.points.lower_bound(y);
     XWPointsIterator upb2 = xwLine2.points.upper_bound(y);
-    XWPointsIterator lit2 = lwb1;
+    XWPointsIterator lit2 = lwb2;
     for(XWPointsIterator cit = lwb2; cit != upb2; ++cit) {
-        if(xwLine1.faceL && cit->second.x > lit2->second.x) lit2 = cit;
-        if(xwLine1.faceR && cit->second.x < lit2->second.x) lit2 = cit;
+        if(xwLine2.faceL && cit->second.x > lit2->second.x) lit2 = cit;
+        if(xwLine2.faceR && cit->second.x < lit2->second.x) lit2 = cit;
     }
 
     // Crop the coordinates
@@ -482,13 +483,14 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForPie(Scanlines& scanlines1, Sc
     }
 
     if(xwLine1.faceR && xwLine2.faceR) {
-
-        //if(xwLine1.steep) { if(xrc >  lit1->second.x) xrc = lit1->second.x;     } // (X), (X + 1)
-        //else              { if(xrc >= lit1->second.x) xrc = lit1->second.x - 1; } // (X)
-
-        //if(xwLine2.steep) { if(xrc >  lit2->second.x) xrc = lit2->second.x;     } // (X), (X + 1)
-        //else              { if(xrc >= lit2->second.x) xrc = lit2->second.x - 1; } // (X)
-
+        if(xwLine1.insideYRange(y)) {
+            if(xwLine1.steep) { if(xrc >  lit1->second.x) xrc = lit1->second.x;     } // (X), (X + 1)
+            else              { if(xrc >= lit1->second.x) xrc = lit1->second.x - 1; } // (X)
+        }
+        if(xwLine2.insideYRange(y)) {
+            if(xwLine2.steep) { if(xrc >  lit2->second.x) xrc = lit2->second.x;     } // (X), (X + 1)
+            else              { if(xrc >= lit2->second.x) xrc = lit2->second.x - 1; } // (X)
+        }
     }
 
     // Store/update the scanline coordinates as needed
