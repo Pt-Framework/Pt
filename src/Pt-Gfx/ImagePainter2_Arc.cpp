@@ -466,28 +466,29 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForPie(Scanlines& scanlines1, Sc
         if(xwLine2.faceR && cit->second.x < lit2->second.x) lit2 = cit;
     }
 
-    // Crop the coordinates
+    // Copy the coordinates for cropping
     Pt::int32_t xlc = xl;
     Pt::int32_t xrc = xr;
 
     //
-    if(xwLine1.faceL && xwLine2.faceL) {
-        if(xwLine1.insideYRange(y)) {
+    if( xwLine1.faceL && xwLine2.faceL ) {
+        if( lit1 != xwLine1.points.end() && xwLine1.insideYRange(y) ) {
             if(xwLine1.steep) { if(xlc <  lit1->second.x + 1) xlc = lit1->second.x + 1; } // (X), (X + 1)
             else              { if(xlc <= lit1->second.x    ) xlc = lit1->second.x + 1; } // (X)
         }
-        if(xwLine2.insideYRange(y)) {
+        if( lit2 != xwLine2.points.end() && xwLine2.insideYRange(y) ) {
             if(xwLine2.steep) { if(xlc <  lit2->second.x + 1) xlc = lit2->second.x + 1; } // (X), (X + 1)
             else              { if(xlc <= lit2->second.x    ) xlc = lit2->second.x + 1; } // (X)
         }
     }
 
-    if(xwLine1.faceR && xwLine2.faceR) {
-        if(xwLine1.insideYRange(y)) {
+    //
+    else if( xwLine1.faceR && xwLine2.faceR ) {
+        if( lit1 != xwLine1.points.end() && xwLine1.insideYRange(y) ) {
             if(xwLine1.steep) { if(xrc >  lit1->second.x) xrc = lit1->second.x;     } // (X), (X + 1)
             else              { if(xrc >= lit1->second.x) xrc = lit1->second.x - 1; } // (X)
         }
-        if(xwLine2.insideYRange(y)) {
+        if( lit2 != xwLine2.points.end() && xwLine2.insideYRange(y) ) {
             if(xwLine2.steep) { if(xrc >  lit2->second.x) xrc = lit2->second.x;     } // (X), (X + 1)
             else              { if(xrc >= lit2->second.x) xrc = lit2->second.x - 1; } // (X)
         }
