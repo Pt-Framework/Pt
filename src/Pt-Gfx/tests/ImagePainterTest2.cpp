@@ -49,7 +49,7 @@ using namespace Pt::Gfx;
 
 // Detailed-test enable settings for Pt-Gfx
 #define TEST_SOURCECOPY                         1
-#define TEST_SOURCEOVER                         0
+#define TEST_SOURCEOVER                         1
 
 #define TEST_DRAW_LINE_AND_TEXT                 0
 #define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES  0

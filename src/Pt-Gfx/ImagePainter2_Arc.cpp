@@ -401,10 +401,6 @@ void ImagePainter2::arcUtil_genScanlinesForPie(Scanlines& scanlines1, Scanlines&
 
     //lprintf("%d %d\n", lineMinY, lineMaxY);
 
-    // Minimum and maximum X coordinates of the shape
-    //const Pt::int32_t xlMin = std::min(fai.x1, fai.x2);
-    //const Pt::int32_t xlMax = std::max(fai.x1, fai.x2);
-
     // Top and bottom halves
     for(Pt::int32_t x = 0; x <= fai.quartersX; ++x) {
         // Calculate the coordinate
@@ -413,9 +409,6 @@ void ImagePainter2::arcUtil_genScanlinesForPie(Scanlines& scanlines1, Scanlines&
         const Pt::int32_t yb = fai.ctrY + ( fai.antiAlias ? floor(y) : round(y) );
         const Pt::int32_t xl = fai.ctrX - x;
         const Pt::int32_t xr = fai.ctrX + x;
-        // Skip if the scanline will be completely outside the shape
-        //if(xwLine.faceL && xr < xlMin) continue;
-        //if(xwLine.faceR && xl > xlMax) continue;
         // Store/update the scanline coordinates
         arcUtil_cropAndStoreScanlineForPie(scanlines1, scanlines2, xwLine1, xwLine2, lineMinY, lineMaxY, xl, xr, yt);
         arcUtil_cropAndStoreScanlineForPie(scanlines1, scanlines2, xwLine1, xwLine2, lineMinY, lineMaxY, xl, xr, yb);
@@ -429,9 +422,6 @@ void ImagePainter2::arcUtil_genScanlinesForPie(Scanlines& scanlines1, Scanlines&
         const Pt::int32_t yb = fai.ctrY + y;
         const Pt::int32_t xl = fai.ctrX - ( fai.antiAlias ? floor(x) : round(x) );
         const Pt::int32_t xr = fai.ctrX + ( fai.antiAlias ? floor(x) : round(x) );
-        // Skip if the scanline will be completely outside the shape
-        //if(xwLine.faceL && xr < xlMin) continue;
-        //if(xwLine.faceR && xl > xlMax) continue;
         // Store/update the scanline coordinates
         arcUtil_cropAndStoreScanlineForPie(scanlines1, scanlines2, xwLine1, xwLine2, lineMinY, lineMaxY, xl, xr, yt);
         arcUtil_cropAndStoreScanlineForPie(scanlines1, scanlines2, xwLine1, xwLine2, lineMinY, lineMaxY, xl, xr, yb);
@@ -444,8 +434,8 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForPie(Scanlines& scanlines1, Sc
     typedef XWLineData::XWPoints::const_iterator XWPointsIterator;
 
     // Check if the scanline will be completely outside the shape
-    if( (xwLine1.faceT && y < lineMinY) || (xwLine2.faceT && y < lineMinY) ||
-        (xwLine1.faceB && y > lineMaxY) || (xwLine2.faceB && y > lineMaxY)
+    if( (xwLine1.faceT && y <= lineMinY) || (xwLine2.faceT && y <= lineMinY) ||
+        (xwLine1.faceB && y >= lineMaxY) || (xwLine2.faceB && y >= lineMaxY)
       ) return;
 
     // Get the element with the wanted coordinate from the left-side closing line
@@ -470,7 +460,7 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForPie(Scanlines& scanlines1, Sc
     Pt::int32_t xlc1 = xl;
     Pt::int32_t xrc1 = xr;
 
-    Pt::int32_t xlc2 = -1;
+    Pt::int32_t xlc2 = -1; // By default we do not have a second scanline
     Pt::int32_t xrc2 = xr;
 
     // Both lines are facing left
