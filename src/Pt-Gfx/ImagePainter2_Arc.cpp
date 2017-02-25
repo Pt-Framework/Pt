@@ -94,20 +94,20 @@ void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float deg
 // ======================================================================================
 /*
 Pt::Gfx - CompositionMode::SourceCopy
-    Solid-filled    ellipse          @ ImagePainter  =      5
-    Solid-filled    ellipse NOAA     @ ImagePainter2 =      6 ( 1.200)
-    Solid-filled    ellipse XWAA     @ ImagePainter2 =     28 ( 5.600)
+    Solid-filled    ellipse          @ ImagePainter  =      6
+    Solid-filled    ellipse NOAA     @ ImagePainter2 =      7 ( 1.167)
+    Solid-filled    ellipse XWAA     @ ImagePainter2 =     18 ( 3.000)
 
-    Solid-filled    arc     NOAA     @ ImagePainter2 =    115
-    Solid-filled    arc     XWAA     @ ImagePainter2 =    167 ( 1.452)
+    Solid-filled    arc     NOAA     @ ImagePainter2 =     73
+    Solid-filled    arc     XWAA     @ ImagePainter2 =    143 ( 1.959)
 
 Pt::Gfx - CompositionMode::SourceOver
-    Solid-filled    ellipse          @ ImagePainter  =     38
-    Solid-filled    ellipse NOAA     @ ImagePainter2 =     24 ( 0.632)
-    Solid-filled    ellipse XWAA     @ ImagePainter2 =     46 ( 1.211)
+    Solid-filled    ellipse          @ ImagePainter  =     40
+    Solid-filled    ellipse NOAA     @ ImagePainter2 =     26 ( 0.650)
+    Solid-filled    ellipse XWAA     @ ImagePainter2 =     36 ( 0.900)
 
-    Solid-filled    arc     NOAA     @ ImagePainter2 =    180
-    Solid-filled    arc     XWAA     @ ImagePainter2 =    232 ( 1.289)
+    Solid-filled    arc     NOAA     @ ImagePainter2 =    139
+    Solid-filled    arc     XWAA     @ ImagePainter2 =    205 ( 1.475)
 */
 
 void ImagePainter2::fillArcChordImpl(FilledArcInfo& fai)
@@ -698,6 +698,9 @@ void ImagePainter2::arcUtil_drawCircumferencePixels(FilledArcInfo& fai)
 
 void ImagePainter2::arcUtil_drawXWLine(const FilledArcInfo& fai, const XWLineData& xwLine, const XWLineData* xwLineExclusion)
 {
+    // For convenience
+    typedef XWLineData::XWPoints::const_iterator XWPointsIterator;
+
     for(XWLineData::XWPoints::const_iterator it = xwLine.points.begin(); it != xwLine.points.end(); ++it) {
         // Get the coordinate and alpha
         const Pt::int32_t y  = it->first;
@@ -707,29 +710,26 @@ void ImagePainter2::arcUtil_drawXWLine(const FilledArcInfo& fai, const XWLineDat
         // Exclude the pixel as needed
         if(xwLineExclusion) {
             bool excludePixel = false;
-            for( XWLineData::XWPoints::const_iterator cit  = xwLineExclusion->points.lower_bound(y);
-                                                      cit != xwLineExclusion->points.upper_bound(y);
-                                                    ++cit
-            ) {
-                if(xwLine.steep) {
-                    if(xwLine.faceL) {
-                        if(xwLineExclusion->steep)
-                            excludePixel = ( y == cit->first && (x == cit->second.x || x == cit->second.x + 1) );
-                        else
-                            excludePixel = ( x == cit->second.x && (y == cit->first || y == cit->first + 1) );
-                    }
-                    else if(xwLine.faceR) {
-                        if(xwLineExclusion->steep)
-                            excludePixel = ( y == cit->first && (x + 1 == cit->second.x || x + 1 == cit->second.x + 1) );
-                        else
-                            excludePixel = ( x + 1 == cit->second.x && (y == cit->first || y == cit->first + 1) );
-                    }
-                }
-                else {
+            for(XWPointsIterator cit = xwLineExclusion->points.begin(); cit != xwLineExclusion->points.end(); ++cit) {
+                if(xwLine.steep && xwLine.faceR) {
                     if(xwLineExclusion->steep)
-                        excludePixel = ( y == cit->first && (x == cit->second.x || x == cit->second.x + 1) );
+                        excludePixel = (
+                            y == cit->first && ( (xwLineExclusion->faceL && x + 1 == cit->second.x    ) ||
+                                                 (xwLineExclusion->faceR && x + 1 == cit->second.x + 1)
+                                               )
+                        );
                     else
-                        excludePixel = ( x == cit->second.x && (y == cit->first || y == cit->first + 1) );
+                        excludePixel = ( x + 1 == cit->second.x && y == cit->first );
+                }
+                else if(!xwLine.faceR) {
+                    if(xwLineExclusion->steep)
+                        excludePixel = (
+                            y == cit->first && ( (false && xwLineExclusion->faceL && x == cit->second.x    ) ||
+                                                 (false && xwLineExclusion->faceR && x == cit->second.x + 1)
+                                               )
+                        );
+                    else
+                        excludePixel = ( x == cit->second.x && y == cit->first );
                 }
                 if(excludePixel) break;
             }
