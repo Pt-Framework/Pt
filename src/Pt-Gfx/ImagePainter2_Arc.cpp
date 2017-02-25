@@ -404,13 +404,64 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForChord(Scanlines& scanlines, c
 
 void ImagePainter2::arcUtil_genScanlinesForPie(Scanlines& scanlines1, Scanlines& scanlines2, const FilledArcInfo& fai, const XWLineData& xwLine1, const XWLineData& xwLine2)
 {
-    // Check for a horizontal "v-shape"
-
     // Find the line's minimum and maximum Y coordinates
-    Pt::int32_t lineMinY, lineMaxY;
+    Pt::int32_t lineMinY = fai.minY;
+    Pt::int32_t lineMaxY = fai.minY + fai.radY + fai.radY;
 
-    lineMinY = std::min(xwLine1.points.begin ()->first, xwLine2.points.begin ()->first);
-    lineMaxY = std::max(xwLine1.points.rbegin()->first, xwLine2.points.rbegin()->first);
+    if( (xwLine1.faceT && xwLine2.faceB) || (xwLine1.faceB && xwLine2.faceT) ) {
+        Pt::int32_t y1avg = (xwLine1.y1 + xwLine1.y2) / 2;
+        Pt::int32_t y2avg = (xwLine2.y1 + xwLine2.y2) / 2;
+        if(y1avg < y2avg) { // The first line is on lower Y coordinate
+            if(xwLine1.faceT) {
+                const Pt::int32_t cy = std::min(xwLine1.y1, xwLine1.y2);
+                if(lineMinY < cy) lineMinY = cy;
+            }
+            if(xwLine2.faceB) {
+                const Pt::int32_t cy = std::max(xwLine2.y1, xwLine2.y2);
+                if(lineMaxY > cy) lineMaxY = cy;
+            }
+        }
+        else { // The second line is on lower Y coordinate
+            if(xwLine1.faceB) {
+                const Pt::int32_t cy = std::max(xwLine1.y1, xwLine1.y2);
+                if(lineMaxY > cy) lineMaxY = cy;
+            }
+            if(xwLine2.faceT) {
+                const Pt::int32_t cy = std::min(xwLine2.y1, xwLine2.y2);
+                if(lineMinY < cy) lineMinY = cy;
+            }
+        }
+    }
+    else {
+        if(xwLine1.faceT && xwLine2.faceT) {
+            const Pt::int32_t cy1 = std::min(xwLine1.y1, xwLine1.y2);
+            const Pt::int32_t cy2 = std::min(xwLine2.y1, xwLine2.y2);
+            const Pt::int32_t cy  = std::min(cy1, cy2);
+            if(lineMinY < cy) lineMinY = cy;
+        }
+        else if(xwLine1.faceT) {
+            const Pt::int32_t cy = std::min(xwLine1.y1, xwLine1.y2);
+            if(lineMinY < cy) lineMinY = cy;
+        }
+        else if(xwLine2.faceT) {
+            const Pt::int32_t cy = std::min(xwLine2.y1, xwLine2.y2);
+            if(lineMinY < cy) lineMinY = cy;
+        }
+        if(xwLine1.faceB && xwLine2.faceB) {
+            const Pt::int32_t cy1 = std::max(xwLine1.y1, xwLine1.y2);
+            const Pt::int32_t cy2 = std::max(xwLine2.y1, xwLine2.y2);
+            const Pt::int32_t cy  = std::max(cy1, cy2);
+            if(lineMaxY > cy) lineMaxY = cy;
+        }
+        else if(xwLine1.faceB) {
+            const Pt::int32_t cy = std::max(xwLine1.y1, xwLine1.y2);
+            if(lineMaxY > cy) lineMaxY = cy;
+        }
+        else if(xwLine2.faceB) {
+            const Pt::int32_t cy = std::max(xwLine2.y1, xwLine2.y2);
+            if(lineMaxY > cy) lineMaxY = cy;
+        }
+    }
 
     //lprintf("%d %d\n", lineMinY, lineMaxY);
 

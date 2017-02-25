@@ -305,22 +305,22 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
         ip2->fillArc( PointF (30 , 50 + 440), SizeF(105, 105), -225 + 30, 45 + 30, ArcMode::Pie );
         ip2->fillArc( PointF (30 + 90 , 50 + 390), SizeF(55, 55), 30 + 30, 330 + 30, ArcMode::Pie );
         ip2->drawText( PointF(30 , 40 + 440), "XWAA" );
-
+        /*
         const CompositionMode cm = ip2->compositionMode();
-        ip2->setPen( Color::fromRgb8(0, 255, 255, 127) );
+        ip2->setPen( Color::fromRgb8(0, 255, 255, 127) ); // Draw some arc outlines for comparison
         ip2->setCompositionMode(CompositionMode::SourceOver);
         ip2->drawArc( PointF (30 + 90 , 50 + 390), SizeF(55, 55), 30 + 30, 330 + 30, ArcMode::Pie );
         ip2->drawArc( PointF (30 , 50 + 440), SizeF(105, 105), -225 + 30, 45 + 30, ArcMode::Pie );
         ip2->setCompositionMode(cm);
         ip2->setPen( Color::fromRgb8(255, 0, 0) );
+        //*/
 
-        //*
         ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
         ip2->fillArc( PointF (30 + 150, 50 + 440), SizeF(105, 105), -45 + 30, 225 + 30, ArcMode::Pie );
         ip2->fillArc( PointF (30 + 150 + 90, 50 + 390), SizeF(55, 55), -150 - 30, 150 - 30, ArcMode::Pie );
         ip2->drawText( PointF(30 + 150, 40 + 440), "XWAA" );
-
-        ip2->setPen( Color::fromRgb8(0, 255, 255, 127) );
+        /*
+        ip2->setPen( Color::fromRgb8(0, 255, 255, 127) ); // Draw some arc outlines for comparison
         ip2->setCompositionMode(CompositionMode::SourceOver);
         ip2->drawArc( PointF (30 + 150, 50 + 440), SizeF(105, 105), -45 + 30, 225 + 30, ArcMode::Pie );
         ip2->drawArc( PointF (30 + 150 + 90, 50 + 390), SizeF(55, 55), -150 - 30, 150 - 30, ArcMode::Pie );
