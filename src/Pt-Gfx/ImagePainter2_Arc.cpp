@@ -124,10 +124,11 @@ void ImagePainter2::fillArcChordImpl(FilledArcInfo& fai)
     if(!fai.antiAlias) return;
 
     // Draw the anti-aliased circumference pixels
+    // ### TODO: There are out-of-place brighter-pixel artifacts in SourceOverMode !!! ###
     arcUtil_drawCircumferencePixels(fai);
 
     // Draw the closing line
-    arcUtil_drawXWLine(fai, line);
+    arcUtil_drawXWLine(fai, line, 0);
 }
 
 void ImagePainter2::fillArcPieImpl(FilledArcInfo& fai)
@@ -170,11 +171,12 @@ void ImagePainter2::fillArcPieImpl(FilledArcInfo& fai)
     if(!fai.antiAlias) return;
 
     // Draw the anti-aliased circumference pixels
+    // ### TODO: There are out-of-place brighter-pixel artifacts in SourceOverMode !!! ###
     arcUtil_drawCircumferencePixels(fai);
 
     // Draw the closing lines
-    arcUtil_drawXWLine(fai, line1);
-    arcUtil_drawXWLine(fai, line2);
+    arcUtil_drawXWLine(fai, line1, 0     );
+    arcUtil_drawXWLine(fai, line2, &line1);
 }
 
 void ImagePainter2::arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai)
@@ -589,19 +591,37 @@ void ImagePainter2::arcUtil_drawCircumferencePixels(FilledArcInfo& fai)
     }
 }
 
-void ImagePainter2::arcUtil_drawXWLine(const FilledArcInfo& fai, const XWLineData& xwLine)
+void ImagePainter2::arcUtil_drawXWLine(const FilledArcInfo& fai, const XWLineData& xwLine, const XWLineData* xwLineExclusion)
 {
     for(XWLineData::XWPoints::const_iterator it = xwLine.points.begin(); it != xwLine.points.end(); ++it) {
+        // Get the coordinate and alpha
         const Pt::int32_t y  = it->first;
         const Pt::int32_t x  = it->second.x;
         const Pt::int32_t a1 = it->second.a1;
         const Pt::int32_t a2 = it->second.a2;
+        // Check for exclusion
+        if(xwLineExclusion) {
+            // Get the element with the wanted coordinate from the closing line
+            for( XWLineData::XWPoints::const_iterator cit  = xwLineExclusion->points.lower_bound(y);
+                                                      cit != xwLineExclusion->points.upper_bound(y);
+                                                    ++cit
+            ) {
+                if(xwLine.steep && xwLine.faceR) {
+                    if(cit->second.x == x + 1) return;
+                }
+                else {
+                    if(cit->second.x == x) return;
+                }
+            }
+        }
+        // deltaY > deltaX
         if(xwLine.steep) {
             if( xwLine.faceL && (x != fai.x1 || y != fai.y1) && (x != fai.x2 || y != fai.y2) )
                 _rasterizer->fillPixel(x, y, fai.minX, fai.minY, a1);
             if( xwLine.faceR && (x + 1 != fai.x1 || y != fai.y1) && (x + 1 != fai.x2 || y != fai.y2) )
                 _rasterizer->fillPixel(x + 1, y, fai.minX, fai.minY, a2);
         }
+        // deltaY <= deltaX
         else {
             if( (x != fai.x1 || y != fai.y1) && (x != fai.x2 || y != fai.y2) ) {
                 if(xwLine.faceT) _rasterizer->fillPixel(x, y, fai.minX, fai.minY, a1);
