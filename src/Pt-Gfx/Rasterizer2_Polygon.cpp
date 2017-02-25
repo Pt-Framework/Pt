@@ -41,7 +41,23 @@ namespace Gfx {
 
 void Rasterizer2::strokeOnePixelSolidPolygon(const Point* points, size_t pointCount)
 {
-    rasterOnePixelSolidPolygonOutline(points, pointCount, _pen.color());
+    // Separate the polygons, clip their coordinates, and raster them
+    size_t startIndex = 0;
+
+    for(size_t i = 0; i < pointCount; ++i) {
+        // Search for the end and/or separator points
+        if( i == pointCount || (points[i].x() > MAXIMUM_COORD && points[i].y() > MAXIMUM_COORD) ) {
+            // Calculate the number of points for this polygon
+            const size_t curPC = i - startIndex;
+            // Clip the coordinates
+            std::vector<Point> clipped;
+            genClippedPolygonPoints(clipped, points + startIndex, curPC);
+            // Increment the start index
+            startIndex += curPC + 1;
+            // Draw the polygon
+            rasterOnePixelSolidPolygonOutline(clipped.data(), clipped.size(), _pen.color());
+        }
+    }
 }
 
 void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
