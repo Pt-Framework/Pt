@@ -173,6 +173,12 @@ class PT_GFX_API ImagePainter2 : public Painter
 
             // The line's coordinates
             Pt::int32_t x1, y1, x2, y2;
+
+            bool insideYRange(Pt::int32_t y) const
+            {
+                if(y1 <= y2) return (y >= y1) && (y <= y2);
+                return (y >= y2) && (y <= y1);
+            }
         };
 
     protected:
