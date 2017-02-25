@@ -169,7 +169,12 @@ void ImagePainter2::fillArcPieImpl(FilledArcInfo& fai)
     // Exit here if we are not doing anti-aliasing
     if(!fai.antiAlias) return;
 
-    // ### TODO ###
+    // Draw the anti-aliased circumference pixels
+    arcUtil_drawCircumferencePixels(fai);
+
+    // Draw the closing lines
+    arcUtil_drawXWLine(fai, line1);
+    arcUtil_drawXWLine(fai, line2);
 }
 
 void ImagePainter2::arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai)
@@ -361,20 +366,12 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForChord(Scanlines& scanlines, c
         Pt::int32_t xrc = xr;
         if(lit != xwLine.points.end()) {
             if(xwLine.faceL) {
-                if(xwLine.steep) { // (X), (X + 1)
-                    if(xlc < lit->second.x + 1) xlc = lit->second.x + 1;
-                }
-                else { // (X)
-                    if(xlc <= lit->second.x) xlc = lit->second.x + 1;
-                }
+                if(xwLine.steep) { if(xlc <  lit->second.x + 1) xlc = lit->second.x + 1; } // (X), (X + 1)
+                else             { if(xlc <= lit->second.x    ) xlc = lit->second.x + 1; } // (X)
             }
             if(xwLine.faceR) {
-                if(xwLine.steep) { // (X), (X + 1)
-                    if(xrc > lit->second.x) xrc = lit->second.x;
-                }
-                else { // (X)
-                    if(xrc >= lit->second.x) xrc = lit->second.x - 1;
-                }
+                if(xwLine.steep) { if(xrc >  lit->second.x) xrc = lit->second.x;     } // (X), (X + 1)
+                else             { if(xrc >= lit->second.x) xrc = lit->second.x - 1; } // (X)
             }
         }
         // Store/update the scanline coordinates as needed
@@ -406,20 +403,12 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForChord(Scanlines& scanlines, c
         Pt::int32_t xrc = xr;
         if(lit != xwLine.points.end()) {
             if(xwLine.faceL) {
-                if(xwLine.steep) { // (X), (X + 1)
-                    if(xlc < lit->second.x + 1) xlc = lit->second.x + 1;
-                }
-                else { // (X)
-                    if(xlc <= lit->second.x) xlc = lit->second.x + 1;
-                }
+                if(xwLine.steep) { if(xlc <  lit->second.x + 1) xlc = lit->second.x + 1; } // (X), (X + 1)
+                else             { if(xlc <= lit->second.x    ) xlc = lit->second.x + 1; } // (X)
             }
             if(xwLine.faceR) {
-                if(xwLine.steep) { // (X), (X + 1)
-                    if(xrc > lit->second.x) xrc = lit->second.x;
-                }
-                else { // (X)
-                    if(xrc >= lit->second.x) xrc = lit->second.x - 1;
-                }
+                if(xwLine.steep) { if(xrc >  lit->second.x) xrc = lit->second.x;     } // (X), (X + 1)
+                else             { if(xrc >= lit->second.x) xrc = lit->second.x - 1; } // (X)
             }
         }
         // Store/update the scanline coordinates as needed
@@ -435,7 +424,6 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForChord(Scanlines& scanlines, c
         }
     }
 }
-
 
 void ImagePainter2::arcUtil_genScanlinesForPie(Scanlines& scanlines1, Scanlines& scanlines2, const FilledArcInfo& fai, const XWLineData& xwLine1, const XWLineData& xwLine2)
 {
@@ -487,6 +475,43 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForPie(Scanlines& scanlines1, Sc
     // For convenience
     typedef XWLineData::XWPoints::const_iterator XWPointsIterator;
 
+    // Store/update the scanline coordinates
+    // --- Left-line at top Y ---
+    if( (!xwLine1.faceT && !xwLine1.faceB) || (xwLine1.faceT && yt >= lineMinY) || (xwLine1.faceB && yt <= lineMaxY) ) {
+        // Get the element with the wanted coordinate
+        XWPointsIterator lwb = xwLine1.points.lower_bound(yt);
+        XWPointsIterator upb = xwLine1.points.upper_bound(yt);
+        XWPointsIterator lit = lwb;
+        for(XWPointsIterator cit = lwb; cit != upb; ++cit) {
+            if(xwLine1.faceL && cit->second.x > lit->second.x) lit = cit;
+            if(xwLine1.faceR && cit->second.x < lit->second.x) lit = cit;
+        }
+        // Crop the coordinates
+        Pt::int32_t xlc = xl;
+        Pt::int32_t xrc = xr;
+        if(lit != xwLine1.points.end()) {
+            if(xwLine1.faceL) {
+                if(xwLine1.steep) { if(xlc <  lit->second.x + 1) xlc = lit->second.x + 1; } // (X), (X + 1)
+                else              { if(xlc <= lit->second.x    ) xlc = lit->second.x + 1; } // (X)
+            }
+            if(xwLine1.faceR) {
+                if(xwLine1.steep) { if(xrc >  lit->second.x) xrc = lit->second.x;     } // (X), (X + 1)
+                else              { if(xrc >= lit->second.x) xrc = lit->second.x - 1; } // (X)
+            }
+        }
+        // Store/update the scanline coordinates as needed
+        if(xrc >= xlc) {
+            Scanlines::iterator sit = scanlines1.find(yt);
+            if(sit == scanlines1.end()) { // Insert a new element
+                scanlines1.insert( std::make_pair( yt, ScanlineElement(xlc, xrc) ) );
+            }
+            else { // Update the scanline's "from" and "to" coordinates
+                if( xlc < sit->second.from ) sit->second.from = xlc;
+                if( xrc > sit->second.to   ) sit->second.to   = xrc;
+            }
+        }
+    }
+
     /*
     // Store/update the scanline coordinates
     // --- Top Y ---
@@ -504,20 +529,12 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForPie(Scanlines& scanlines1, Sc
         Pt::int32_t xrc = xr;
         if(lit != xwLine.points.end()) {
             if(xwLine.faceL) {
-                if(xwLine.steep) { // (X), (X + 1)
-                    if(xlc < lit->second.x + 1) xlc = lit->second.x + 1;
-                }
-                else { // (X)
-                    if(xlc <= lit->second.x) xlc = lit->second.x + 1;
-                }
+                if(xwLine.steep) { if(xlc <  lit->second.x + 1) xlc = lit->second.x + 1; } // (X), (X + 1)
+                else             { if(xlc <= lit->second.x    ) xlc = lit->second.x + 1; } // (X)
             }
             if(xwLine.faceR) {
-                if(xwLine.steep) { // (X), (X + 1)
-                    if(xrc > lit->second.x) xrc = lit->second.x;
-                }
-                else { // (X)
-                    if(xrc >= lit->second.x) xrc = lit->second.x - 1;
-                }
+                if(xwLine.steep) { if(xrc >  lit->second.x) xrc = lit->second.x;     } // (X), (X + 1)
+                else             { if(xrc >= lit->second.x) xrc = lit->second.x - 1; } // (X)
             }
         }
         // Store/update the scanline coordinates as needed
@@ -549,20 +566,12 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForPie(Scanlines& scanlines1, Sc
         Pt::int32_t xrc = xr;
         if(lit != xwLine.points.end()) {
             if(xwLine.faceL) {
-                if(xwLine.steep) { // (X), (X + 1)
-                    if(xlc < lit->second.x + 1) xlc = lit->second.x + 1;
-                }
-                else { // (X)
-                    if(xlc <= lit->second.x) xlc = lit->second.x + 1;
-                }
+                if(xwLine.steep) { if(xlc <  lit->second.x + 1) xlc = lit->second.x + 1; } // (X), (X + 1)
+                else             { if(xlc <= lit->second.x    ) xlc = lit->second.x + 1; } // (X)
             }
             if(xwLine.faceR) {
-                if(xwLine.steep) { // (X), (X + 1)
-                    if(xrc > lit->second.x) xrc = lit->second.x;
-                }
-                else { // (X)
-                    if(xrc >= lit->second.x) xrc = lit->second.x - 1;
-                }
+                if(xwLine.steep) { if(xrc >  lit->second.x) xrc = lit->second.x;     } // (X), (X + 1)
+                else             { if(xrc >= lit->second.x) xrc = lit->second.x - 1; } // (X)
             }
         }
         // Store/update the scanline coordinates as needed
