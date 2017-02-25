@@ -164,7 +164,7 @@ void ImagePainter2::fillArcPieImpl(FilledArcInfo& fai)
     }
 
     // Just for easier debugging & verification
-    drawArc(PointF(fai.minX, fai.minY), SizeF(fai.radX * 2, fai.radY * 2), fai.degBegin, fai.degEnd, ArcMode::Pie);
+    //drawArc(PointF(fai.minX, fai.minY), SizeF(fai.radX * 2, fai.radY * 2), fai.degBegin, fai.degEnd, ArcMode::Pie);
 
     // Exit here if we are not doing anti-aliasing
     if(!fai.antiAlias) return;
@@ -470,46 +470,66 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForPie(Scanlines& scanlines1, Sc
     Pt::int32_t xlc1 = xl;
     Pt::int32_t xrc1 = xr;
 
-    Pt::int32_t xlc2 =  1;
-    Pt::int32_t xrc2 = -1;
+    Pt::int32_t xlc2 = -1;
+    Pt::int32_t xrc2 = xr;
 
-    //
+    // Both lines are facing left
     if( xwLine1.faceL && xwLine2.faceL ) {
+        // Left
         if( lit1 != xwLine1.points.end() && xwLine1.insideYRange(y) ) {
             if(xwLine1.steep) { if(xlc1 <  lit1->second.x + 1) xlc1 = lit1->second.x + 1; } // (X), (X + 1)
             else              { if(xlc1 <= lit1->second.x    ) xlc1 = lit1->second.x + 1; } // (X)
         }
+        // Left
         if( lit2 != xwLine2.points.end() && xwLine2.insideYRange(y) ) {
             if(xwLine2.steep) { if(xlc1 <  lit2->second.x + 1) xlc1 = lit2->second.x + 1; } // (X), (X + 1)
             else              { if(xlc1 <= lit2->second.x    ) xlc1 = lit2->second.x + 1; } // (X)
         }
     }
 
-    //
+    // Both lines are facing right
     else if( xwLine1.faceR && xwLine2.faceR ) {
+        // Right
         if( lit1 != xwLine1.points.end() && xwLine1.insideYRange(y) ) {
             if(xwLine1.steep) { if(xrc1 >  lit1->second.x) xrc1 = lit1->second.x;     } // (X), (X + 1)
             else              { if(xrc1 >= lit1->second.x) xrc1 = lit1->second.x - 1; } // (X)
         }
+        // Right
         if( lit2 != xwLine2.points.end() && xwLine2.insideYRange(y) ) {
             if(xwLine2.steep) { if(xrc1 >  lit2->second.x) xrc1 = lit2->second.x;     } // (X), (X + 1)
             else              { if(xrc1 >= lit2->second.x) xrc1 = lit2->second.x - 1; } // (X)
         }
     }
 
-    //
-    if( xwLine1.faceL && xwLine2.faceR ) {
+    // Left-side line is facing left and right-side line is facing right
+    else if( xwLine1.faceL && xwLine2.faceR ) {
+        // Left
         if( lit1 != xwLine1.points.end() && xwLine1.insideYRange(y) ) {
             if(xwLine1.steep) { if(xlc1 <  lit1->second.x + 1) xlc1 = lit1->second.x + 1; } // (X), (X + 1)
             else              { if(xlc1 <= lit1->second.x    ) xlc1 = lit1->second.x + 1; } // (X)
         }
+        // Right
         if( lit2 != xwLine2.points.end() && xwLine2.insideYRange(y) ) {
             if(xwLine2.steep) { if(xrc1 >  lit2->second.x) xrc1 = lit2->second.x;     } // (X), (X + 1)
             else              { if(xrc1 >= lit2->second.x) xrc1 = lit2->second.x - 1; } // (X)
         }
     }
 
-    // Store/update the scanline coordinates as needed
+    // Left-side line is facing right and right-side line is facing left => we have got a vertical "V-shape"
+    else if( xwLine1.faceR && xwLine2.faceL ) {
+        // Right
+        if( lit1 != xwLine1.points.end() && xwLine1.insideYRange(y) ) {
+            if(xwLine1.steep) { if(xrc1 >  lit1->second.x) xrc1 = lit1->second.x;     } // (X), (X + 1)
+            else              { if(xrc1 >= lit1->second.x) xrc1 = lit1->second.x - 1; } // (X)
+        }
+        // Left
+        if( lit2 != xwLine2.points.end() && xwLine2.insideYRange(y) ) {
+            if(xwLine2.steep) { if(xlc2 <  lit2->second.x + 1) xlc2 = lit2->second.x + 1; } // (X), (X + 1)
+            else              { if(xlc2 <= lit2->second.x    ) xlc2 = lit2->second.x + 1; } // (X)
+        }
+    }
+
+    // Store/update the first scanline coordinates as needed
     if(xrc1 >= xlc1) {
         Scanlines::iterator sit = scanlines1.find(y);
         if(sit == scanlines1.end()) { // Insert a new element
@@ -518,6 +538,18 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForPie(Scanlines& scanlines1, Sc
         else { // Update the scanline's "from" and "to" coordinates
             if( xlc1 < sit->second.from ) sit->second.from = xlc1;
             if( xrc1 > sit->second.to   ) sit->second.to   = xrc1;
+        }
+    }
+
+    // Store/update the second scanline coordinates as needed
+    if(xlc2 != -1 && xrc2 >= xlc2) {
+        Scanlines::iterator sit = scanlines2.find(y);
+        if(sit == scanlines2.end()) { // Insert a new element
+            scanlines2.insert( std::make_pair( y, ScanlineElement(xlc2, xrc2) ) );
+        }
+        else { // Update the scanline's "from" and "to" coordinates
+            if( xlc2 < sit->second.from ) sit->second.from = xlc2;
+            if( xrc2 > sit->second.to   ) sit->second.to   = xrc2;
         }
     }
 }
