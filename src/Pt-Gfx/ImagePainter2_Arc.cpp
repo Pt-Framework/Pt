@@ -91,7 +91,6 @@ void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float deg
 
         case ArcMode::Pie:
             fillArcPieImpl(fai);
-            drawArc(topLeft, size, degBegin, degEnd, arcMode); // Just for easier debugging & verification
             break;
     }
 }
@@ -114,7 +113,7 @@ void ImagePainter2::fillArcChordImpl(FilledArcInfo& fai)
 
     // Generate scanlines data
     Scanlines scanlines;
-    arcUtil_genScanlinesForChord(fai, line, scanlines);
+    arcUtil_genScanlinesForChord(scanlines, fai, line);
 
     // Draw the scanlines
     for(Scanlines::const_iterator it = scanlines.begin(); it != scanlines.end(); ++it) {
@@ -141,6 +140,25 @@ void ImagePainter2::fillArcPieImpl(FilledArcInfo& fai)
     // Find the direction that the lines are facing to
     arcUtil_detXWLineDirection(line1, fai.x1, fai.y1, fai.ctrX, fai.ctrY);
     arcUtil_detXWLineDirection(line2, fai.x2, fai.y2, fai.ctrX, fai.ctrY);
+
+    // Generate scanlines data
+    Scanlines scanlines1, scanlines2;
+    arcUtil_genScanlinesForPie(scanlines1, scanlines2, fai, line1, line2);
+
+    // Draw the scanlines
+    for(Scanlines::const_iterator it = scanlines1.begin(); it != scanlines1.end(); ++it) {
+        _rasterizer->fillOneScanlineNoAA(it->second.from, it->second.to, it->first, fai.minX, fai.minY);
+    }
+
+    for(Scanlines::const_iterator it = scanlines2.begin(); it != scanlines2.end(); ++it) {
+        _rasterizer->fillOneScanlineNoAA(it->second.from, it->second.to, it->first, fai.minX, fai.minY);
+    }
+
+    // Just for easier debugging & verification
+    drawArc(PointF(fai.minX, fai.minY), SizeF(fai.radX * 2, fai.radY * 2), fai.degBegin, fai.degEnd, ArcMode::Pie);
+
+    // Exit here if we are not doing anti-aliasing
+    if(!fai.antiAlias) return;
 
     // ### TODO ###
 }
@@ -262,7 +280,7 @@ void ImagePainter2::arcUtil_runXWLineAlgorithm(XWLineData& xwLine, Pt::int32_t x
     }
 }
 
-void ImagePainter2::arcUtil_genScanlinesForChord(const FilledArcInfo& fai, XWLineData& xwLine, Scanlines& scanlines)
+void ImagePainter2::arcUtil_genScanlinesForChord(Scanlines& scanlines, const FilledArcInfo& fai, const XWLineData& xwLine)
 {
     // Find the line's minimum and maximum Y coordinates
     Pt::int32_t lineMinY, lineMaxY;
@@ -288,7 +306,7 @@ void ImagePainter2::arcUtil_genScanlinesForChord(const FilledArcInfo& fai, XWLin
         if(xwLine.faceL && xr < xlMin) continue;
         if(xwLine.faceR && xl > xlMax) continue;
         // Store/update the scanline coordinates
-        arcUtil_cropAndStoreScanlineForChord(xwLine, scanlines, lineMinY, lineMaxY, xl, xr, yt, yb);
+        arcUtil_cropAndStoreScanlineForChord(scanlines, xwLine, lineMinY, lineMaxY, xl, xr, yt, yb);
     }
 
     // Left and right halves
@@ -303,17 +321,17 @@ void ImagePainter2::arcUtil_genScanlinesForChord(const FilledArcInfo& fai, XWLin
         if(xwLine.faceL && xr < xlMin) continue;
         if(xwLine.faceR && xl > xlMax) continue;
         // Store/update the scanline coordinates
-        arcUtil_cropAndStoreScanlineForChord(xwLine, scanlines, lineMinY, lineMaxY, xl, xr, yt, yb);
+        arcUtil_cropAndStoreScanlineForChord(scanlines, xwLine, lineMinY, lineMaxY, xl, xr, yt, yb);
     }
 }
 
-void ImagePainter2::arcUtil_cropAndStoreScanlineForChord(XWLineData& xwLine, Scanlines& scanlines, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t yt, Pt::int32_t yb)
+void ImagePainter2::arcUtil_cropAndStoreScanlineForChord(Scanlines& scanlines, const XWLineData& xwLine, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t yt, Pt::int32_t yb)
 {
     // For convenience
-    typedef XWLineData::XWPoints::iterator XWPointsIterator;
+    typedef XWLineData::XWPoints::const_iterator XWPointsIterator;
 
     // Store/update the scanline coordinates
-
+    // --- Top Y ---
     if( (!xwLine.faceT && !xwLine.faceB) || (xwLine.faceT && yt >= lineMinY) || (xwLine.faceB && yt <= lineMaxY) ) {
         // Get the element with the wanted coordinate
         XWPointsIterator lwb = xwLine.points.lower_bound(yt);
@@ -357,6 +375,8 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForChord(XWLineData& xwLine, Sca
         }
     }
 
+    // Store/update the scanline coordinates
+    // --- Bottom Y ---
     if( (!xwLine.faceT && !xwLine.faceB) || (xwLine.faceT && yb >= lineMinY) || (xwLine.faceB && yb <= lineMaxY) ) {
         // Get the element with the wanted coordinate
         XWPointsIterator lwb = xwLine.points.lower_bound(yb);
@@ -399,6 +419,150 @@ void ImagePainter2::arcUtil_cropAndStoreScanlineForChord(XWLineData& xwLine, Sca
             }
         }
     }
+}
+
+
+void ImagePainter2::arcUtil_genScanlinesForPie(Scanlines& scanlines1, Scanlines& scanlines2, const FilledArcInfo& fai, const XWLineData& xwLine1, const XWLineData& xwLine2)
+{
+    // Find the line's minimum and maximum Y coordinates
+    Pt::int32_t lineMinY, lineMaxY;
+
+    lineMinY = std::min(xwLine1.points.begin ()->first, xwLine2.points.begin ()->first);
+    lineMaxY = std::max(xwLine1.points.rbegin()->first, xwLine2.points.rbegin()->first);
+
+    //lprintf("%d %d\n", lineMinY, lineMaxY);
+
+    // Minimum and maximum X coordinates of the shape
+    const Pt::int32_t xlMin = std::min(fai.x1, fai.x2);
+    const Pt::int32_t xlMax = std::max(fai.x1, fai.x2);
+
+    // Top and bottom halves
+    for(Pt::int32_t x = 0; x <= fai.quartersX; ++x) {
+        // Calculate the coordinate
+        const float       y  = fai.radY * fastSqrt(1 - (float) x * x / fai.radX2);
+        const Pt::int32_t yt = fai.ctrY - ( fai.antiAlias ? floor(y) : round(y) );
+        const Pt::int32_t yb = fai.ctrY + ( fai.antiAlias ? floor(y) : round(y) );
+        const Pt::int32_t xl = fai.ctrX - x;
+        const Pt::int32_t xr = fai.ctrX + x;
+        // Skip if the scanline will be completely outside the shape
+        //if(xwLine.faceL && xr < xlMin) continue;
+        //if(xwLine.faceR && xl > xlMax) continue;
+        // Store/update the scanline coordinates
+        arcUtil_cropAndStoreScanlineForPie(scanlines1, scanlines2, xwLine1, xwLine2, lineMinY, lineMaxY, xl, xr, yt, yb);
+    }
+
+    // Left and right halves
+    for(Pt::int32_t y = 0; y <= fai.quartersY; ++y) {
+        // Calculate the coordinate
+        const float       x  = fai.radX * fastSqrt(1 - (float) y * y / fai.radY2);
+        const Pt::int32_t yt = fai.ctrY - y;
+        const Pt::int32_t yb = fai.ctrY + y;
+        const Pt::int32_t xl = fai.ctrX - ( fai.antiAlias ? floor(x) : round(x) );
+        const Pt::int32_t xr = fai.ctrX + ( fai.antiAlias ? floor(x) : round(x) );
+        // Skip if the scanline will be completely outside the shape
+        //if(xwLine.faceL && xr < xlMin) continue;
+        //if(xwLine.faceR && xl > xlMax) continue;
+        // Store/update the scanline coordinates
+        arcUtil_cropAndStoreScanlineForPie(scanlines1, scanlines2, xwLine1, xwLine2, lineMinY, lineMaxY, xl, xr, yt, yb);
+    }
+}
+
+void ImagePainter2::arcUtil_cropAndStoreScanlineForPie(Scanlines& scanlines1, Scanlines& scanlines2, const XWLineData& xwLine1, const XWLineData& xwLine2, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t yt, Pt::int32_t yb)
+{
+    // For convenience
+    typedef XWLineData::XWPoints::const_iterator XWPointsIterator;
+
+    /*
+    // Store/update the scanline coordinates
+    // --- Top Y ---
+    if( (!xwLine.faceT && !xwLine.faceB) || (xwLine.faceT && yt >= lineMinY) || (xwLine.faceB && yt <= lineMaxY) ) {
+        // Get the element with the wanted coordinate
+        XWPointsIterator lwb = xwLine.points.lower_bound(yt);
+        XWPointsIterator upb = xwLine.points.upper_bound(yt);
+        XWPointsIterator lit = lwb;
+        for(XWPointsIterator cit = lwb; cit != upb; ++cit) {
+            if(xwLine.faceL && cit->second.x > lit->second.x) lit = cit;
+            if(xwLine.faceR && cit->second.x < lit->second.x) lit = cit;
+        }
+        // Crop the coordinates
+        Pt::int32_t xlc = xl;
+        Pt::int32_t xrc = xr;
+        if(lit != xwLine.points.end()) {
+            if(xwLine.faceL) {
+                if(xwLine.steep) { // (X), (X + 1)
+                    if(xlc < lit->second.x + 1) xlc = lit->second.x + 1;
+                }
+                else { // (X)
+                    if(xlc <= lit->second.x) xlc = lit->second.x + 1;
+                }
+            }
+            if(xwLine.faceR) {
+                if(xwLine.steep) { // (X), (X + 1)
+                    if(xrc > lit->second.x) xrc = lit->second.x;
+                }
+                else { // (X)
+                    if(xrc >= lit->second.x) xrc = lit->second.x - 1;
+                }
+            }
+        }
+        // Store/update the scanline coordinates as needed
+        if(xrc >= xlc) {
+            Scanlines::iterator sit = scanlines.find(yt);
+            if(sit == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yt, ScanlineElement(xlc, xrc) ) );
+            }
+            else { // Update the scanline's "from" and "to" coordinates
+                if( xlc < sit->second.from ) sit->second.from = xlc;
+                if( xrc > sit->second.to   ) sit->second.to   = xrc;
+            }
+        }
+    }
+
+    // Store/update the scanline coordinates
+    // --- Bottom Y ---
+    if( (!xwLine.faceT && !xwLine.faceB) || (xwLine.faceT && yb >= lineMinY) || (xwLine.faceB && yb <= lineMaxY) ) {
+        // Get the element with the wanted coordinate
+        XWPointsIterator lwb = xwLine.points.lower_bound(yb);
+        XWPointsIterator upb = xwLine.points.upper_bound(yb);
+        XWPointsIterator lit = lwb;
+        for(XWPointsIterator cit = lwb; cit != upb; ++cit) {
+            if(xwLine.faceL && cit->second.x > lit->second.x) lit = cit;
+            if(xwLine.faceR && cit->second.x < lit->second.x) lit = cit;
+        }
+        // Crop the coordinates
+        Pt::int32_t xlc = xl;
+        Pt::int32_t xrc = xr;
+        if(lit != xwLine.points.end()) {
+            if(xwLine.faceL) {
+                if(xwLine.steep) { // (X), (X + 1)
+                    if(xlc < lit->second.x + 1) xlc = lit->second.x + 1;
+                }
+                else { // (X)
+                    if(xlc <= lit->second.x) xlc = lit->second.x + 1;
+                }
+            }
+            if(xwLine.faceR) {
+                if(xwLine.steep) { // (X), (X + 1)
+                    if(xrc > lit->second.x) xrc = lit->second.x;
+                }
+                else { // (X)
+                    if(xrc >= lit->second.x) xrc = lit->second.x - 1;
+                }
+            }
+        }
+        // Store/update the scanline coordinates as needed
+        if(xrc >= xlc) {
+            Scanlines::iterator sit = scanlines.find(yb);
+            if(sit == scanlines.end()) { // Insert a new element
+                scanlines.insert( std::make_pair( yb, ScanlineElement(xlc, xrc) ) );
+            }
+            else { // Update the scanline's "from" and "to" coordinates
+                if( xlc < sit->second.from ) sit->second.from = xlc;
+                if( xrc > sit->second.to   ) sit->second.to   = xrc;
+            }
+        }
+    }
+   */
 }
 
 void ImagePainter2::arcUtil_drawCircumferencePixels(FilledArcInfo& fai)
