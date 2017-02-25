@@ -107,7 +107,7 @@ void ImagePainter2::fillArcChordImpl(FilledArcInfo& fai)
     arcUtil_runXWLineAlgorithm(line, fai.x1, fai.y1, fai.x2, fai.y2);
 
     // Find the direction that the line is facing to
-    arcUtil_detXWLineDirection(line, fai.x1, fai.y1, fai.x2, fai.y2);
+    arcUtil_detXWLineDirection(line);
 
     //lprintf("l=%d r=%d t=%d b=%d\n", line.faceL, line.faceR, line.faceT, line.faceB);
 
@@ -134,12 +134,21 @@ void ImagePainter2::fillArcPieImpl(FilledArcInfo& fai)
 {
     // Calculate points for the closing lines
     XWLineData line1, line2;
-    arcUtil_runXWLineAlgorithm(line1, fai.x1, fai.y1, fai.ctrX, fai.ctrY);
-    arcUtil_runXWLineAlgorithm(line2, fai.x2, fai.y2, fai.ctrX, fai.ctrY);
+    if(fai.x1 < fai.x2) {
+        arcUtil_runXWLineAlgorithm(line1, fai.x1, fai.y1, fai.ctrX, fai.ctrY);
+        arcUtil_runXWLineAlgorithm(line2, fai.ctrX, fai.ctrY, fai.x2, fai.y2);
+    }
+    else {
+        arcUtil_runXWLineAlgorithm(line2, fai.x1, fai.y1, fai.ctrX, fai.ctrY);
+        arcUtil_runXWLineAlgorithm(line1, fai.ctrX, fai.ctrY, fai.x2, fai.y2);
+    }
 
     // Find the direction that the lines are facing to
-    arcUtil_detXWLineDirection(line1, fai.x1, fai.y1, fai.ctrX, fai.ctrY);
-    arcUtil_detXWLineDirection(line2, fai.x2, fai.y2, fai.ctrX, fai.ctrY);
+    arcUtil_detXWLineDirection(line1);
+    arcUtil_detXWLineDirection(line2);
+
+    //lprintf("(%d, %d) (%d, %d) | (%d, %d) (%d, %d)\n", line1.x1, line1.y1, line1.x2, line1.y2, line2.x1, line2.y1, line2.x2, line2.y2);
+    //lprintf("l=%d r=%d t=%d b=%d | l=%d r=%d t=%d b=%d\n", line1.faceL, line1.faceR, line1.faceT, line1.faceB, line2.faceL, line2.faceR, line2.faceT, line2.faceB);
 
     // Generate scanlines data
     Scanlines scanlines1, scanlines2;
@@ -222,6 +231,12 @@ void ImagePainter2::arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai)
 // https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
 void ImagePainter2::arcUtil_runXWLineAlgorithm(XWLineData& xwLine, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2)
 {
+    // Copy the coordinates
+    xwLine.x1 = x1;
+    xwLine.y1 = y1;
+    xwLine.x2 = x2;
+    xwLine.y2 = y2;
+
     // Convert the coordinates to fixed-points
     Pt::int32_t fx1 = FIXED_POINT_FROM_INT(x1);
     Pt::int32_t fy1 = FIXED_POINT_FROM_INT(y1);

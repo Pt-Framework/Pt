@@ -163,14 +163,16 @@ class PT_GFX_API ImagePainter2 : public Painter
             typedef std::multimap<Pt::int32_t, XWPointAA> XWPoints; // The key is the Y coordinate
 
             XWPoints points; // The line's points
-
             bool     steep;  // If "true"  then the a2 belongs to (x + 1, y)
                              // If "false" then the a2 belongs to (x, y + 1)
 
-            bool     faceL;  // The direction that the line is facing to
-            bool     faceR;  // ---
-            bool     faceT;  // ---
-            bool     faceB;  // ---
+            bool faceL;  // The direction that the line is facing to
+            bool faceR;  // ---
+            bool faceT;  // ---
+            bool faceB;  // ---
+
+            // The line's coordinates
+            Pt::int32_t x1, y1, x2, y2;
         };
 
     protected:
@@ -186,7 +188,7 @@ class PT_GFX_API ImagePainter2 : public Painter
         static inline bool pointIsInsideArcDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd, float xyRatio);
 
         // Arc-related helper functions
-        static inline void arcUtil_detXWLineDirection(XWLineData& xwLineData, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2);
+        static inline void arcUtil_detXWLineDirection(XWLineData& xwLineData);
 
         static void arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai);
         static void arcUtil_runXWLineAlgorithm(XWLineData& xwLine, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2);
@@ -354,20 +356,20 @@ inline bool ImagePainter2::pointIsInsideArcDegRange(Pt::int32_t x, Pt::int32_t y
     return angle >= degBegin && angle <= degEnd;
 }
 
-inline void ImagePainter2::arcUtil_detXWLineDirection(XWLineData& xwLineData, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2)
+inline void ImagePainter2::arcUtil_detXWLineDirection(XWLineData& xwLineData)
 {
     // Calculate the direction vector
-    const Pt::int32_t vx = x2 - x1;           // Vector from the begin point to the end point
-    const Pt::int32_t vy = y2 - y1;           // ---
-    const Pt::int32_t vz = 0;                 // ---
-    const Pt::int32_t rx = 0;                 // Vector from the point of origin (0, 0, 0) that points out of the monitor
-    const Pt::int32_t ry = 0;                 // ---
-    const Pt::int32_t rz = 1;                 // ---
-    const Pt::int32_t cx = vy * rz - vz * ry; // Cross product of the above vectors
-    const Pt::int32_t cy = vz * rx - vx * rz; // ---
-  //const Pt::int32_t cz = vx * ry - vy * rx; // ---
+    const Pt::int32_t vx = xwLineData.x2 - xwLineData.x1; // Vector from the begin point to the end point
+    const Pt::int32_t vy = xwLineData.y2 - xwLineData.y1; // ---
+    const Pt::int32_t vz = 0;                             // ---
+    const Pt::int32_t rx = 0;                             // Vector from the point of origin (0, 0, 0) that points out of the monitor
+    const Pt::int32_t ry = 0;                             // ---
+    const Pt::int32_t rz = 1;                             // ---
+    const Pt::int32_t cx = vy * rz - vz * ry;             // Cross product of the above two vectors
+    const Pt::int32_t cy = vz * rx - vx * rz;             // ---
+  //const Pt::int32_t cz = vx * ry - vy * rx;             // ---
 
-    // Determine where the direction that the hole faces to
+    // Determine the direction that the line is facing to
     xwLineData.faceT = cy < 0;
     xwLineData.faceB = cy > 0;
     xwLineData.faceL = cx < 0;
