@@ -208,6 +208,14 @@ void ImagePainter2::fillRect( const RectF& rect )
 
 void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount )
 {
+    // Copy the points
+    std::vector<Point> points(pointCount);
+
+    for(size_t i = 0; i < pointCount; ++i)
+        points[i].set( ps[i].x(), ps[i].y() );
+
+    // Rasterize the polygon
+    _rasterizer->strokeOnePixelSolidPolygon(points.data(), pointCount);
 }
 
 void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )

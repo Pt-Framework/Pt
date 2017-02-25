@@ -44,7 +44,7 @@ void Rasterizer2::strokeOnePixelSolidPolygon(const Point* points, size_t pointCo
     // Separate the polygons, clip their coordinates, and raster them
     size_t startIndex = 0;
 
-    for(size_t i = 0; i < pointCount; ++i) {
+    for(size_t i = 0; i <= pointCount; ++i) {
         // Search for the end and/or separator points
         if( i == pointCount || (points[i].x() > MAXIMUM_COORD && points[i].y() > MAXIMUM_COORD) ) {
             // Calculate the number of points for this polygon
@@ -136,7 +136,7 @@ void Rasterizer2::fillPolygonSeparate(const Point* points, size_t pointCount)
     // Separate the polygons, clip their coordinates, and raster them
     size_t startIndex = 0;
 
-    for(size_t i = 0; i < pointCount; ++i) {
+    for(size_t i = 0; i <= pointCount; ++i) {
         // Search for the end and/or separator points
         if( i == pointCount || (points[i].x() > MAXIMUM_COORD && points[i].y() > MAXIMUM_COORD) ) {
             // Calculate the number of points for this polygon
