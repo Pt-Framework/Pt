@@ -30,7 +30,7 @@
 
 #include <Pt/Gfx/ImagePainter2.h>
 
-#include "FreeType.h"
+#include "FreeType2.h"
 #include "Rasterizer2.h"
 
 
@@ -44,22 +44,22 @@ namespace Gfx {
 
 void ImagePainter2::setFontDir(const Pt::System::Path& path)
 {
-    FreeType::instance().setFontDir(path);
+    FreeType2::instance().setFontDir(path);
 }
 
 void ImagePainter2::setDefaultFont(const std::string& f)
 {
-    FreeType::instance().setDefaultFont(f);
+    FreeType2::instance().setDefaultFont(f);
 }
 
 std::string ImagePainter2::defaultFont()
 {
-    return FreeType::instance().defaultFont();
+    return FreeType2::instance().defaultFont();
 }
 
 std::vector<std::string> ImagePainter2::fontNames()
 {
-    return FreeType::instance().fontNames();
+    return FreeType2::instance().fontNames();
 }
 
 FontMetrics ImagePainter2::fontMetrics( const Font& font, const Pt::String& text )

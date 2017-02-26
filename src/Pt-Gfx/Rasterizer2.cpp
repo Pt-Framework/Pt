@@ -28,7 +28,7 @@
   02110-1301 USA
 */
 
-#include "DrawText.h"
+#include "DrawText2.h"
 #include "Rasterizer2.h"
 
 
@@ -77,7 +77,7 @@ const Rasterizer2::DrawLineMask Rasterizer2::NullLineMask = {
 
 FontMetrics Rasterizer2::fontMetrics( const Font& font, const Pt::String& text )
 {
-    DrawText textRender;
+    DrawText2 textRender;
     textRender.setFont(font);
 
     return textRender.fontMetrics(text);
@@ -90,7 +90,7 @@ FontMetrics Rasterizer2::fontMetrics( const Font& font, const Pt::String& text )
 
 Rasterizer2::Rasterizer2(Image& image)
 : _image(&image)
-, _text( new DrawText() )
+, _text( new DrawText2() )
 , _font()
 , _compositionMode(CompositionMode::SourceCopy)
 , _penPixel(_image->view(), 0, 0)
@@ -290,6 +290,8 @@ void Rasterizer2::updateClip()
 {
     const Rect imageRect( Point(0,0) , _image->size() );
     _currentClip = _clip.isNull() ? imageRect : _clip.intersect( imageRect );
+
+    _text->setClip(_currentClip);
 }
 
 void Rasterizer2::genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount) const

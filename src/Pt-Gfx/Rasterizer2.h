@@ -72,7 +72,7 @@ namespace Pt {
 namespace Gfx {
 
 
-class DrawText;
+class DrawText2;
 class Image;
 
 class Rasterizer2
@@ -230,7 +230,7 @@ class Rasterizer2
         AntiAliasingMode _aaMode;
 
         Image*           _image;
-        DrawText*        _text;
+        DrawText2*       _text;
         Font             _font;
         CompositionMode  _compositionMode;
 
