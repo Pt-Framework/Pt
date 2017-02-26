@@ -483,7 +483,7 @@ void ListBox::onInvalidate()
     Spacing frameSize;
     _renderer->prepareLayout(frameSize);
 
-    setPadding(frameSize);
+    _scrollView.setMargin(frameSize);
 }
 
 

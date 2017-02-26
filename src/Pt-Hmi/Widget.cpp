@@ -907,13 +907,18 @@ void Widget::onLayout()
 {
     if(_content)
     { 
-        Gfx::PointF contentPos(_padding.left(), _padding.top());
+        Gfx::PointF contentPos(_padding.left() + _content->margin().left(), 
+                               _padding.top()  + _content->margin().top());
+        
         _content->move(contentPos);
 
-        Gfx::SizeF contentSize = _size;
-        contentSize.addHeight( - _padding.topBottom() );
-        contentSize.addWidth( - _padding.leftRight() );
-        _content->resize( contentSize );
+        double hspace = _padding.leftRight() + _content->margin().leftRight();
+        double vspace = _padding.topBottom() + _content->margin().topBottom();
+        
+        Gfx::SizeF contentSize(_size.width() - hspace,
+                               _size.height() - vspace);
+
+        _content->resize(contentSize);
     }
 }
 
