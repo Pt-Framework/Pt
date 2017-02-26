@@ -211,7 +211,7 @@ class PT_GFX_API ImagePainter2 : public Painter
         static void arcUtil_cropAndStoreScanlineForPie(Scanlines& scanlines1, Scanlines& scanlines2, const FilledArcInfo& fai, const XWLineData& xwLine1, const XWLineData& xwLine2, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t y);
 
         void arcUtil_drawCircumferencePixels(FilledArcInfo& fai);
-        void arcUtil_drawXWLine(const FilledArcInfo& fai, const XWLineData& xwLine, const XWLineData* xwLineExclusion);
+        void arcUtil_drawXWLine(const FilledArcInfo& fai, const XWLineData& xwLine, Point maskInOut[4], const XWLineData* xwLineExclusion);
 
         // Drawing functions
         virtual void drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode);

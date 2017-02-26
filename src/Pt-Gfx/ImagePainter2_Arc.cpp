@@ -142,7 +142,8 @@ void ImagePainter2::fillArcChordImpl(FilledArcInfo& fai)
     arcUtil_drawCircumferencePixels(fai);
 
     // Draw the closing line
-    arcUtil_drawXWLine(fai, line, 0);
+    Rasterizer2::DrawLineMask maskInOut = Rasterizer2::NullLineMask;
+    arcUtil_drawXWLine(fai, line, maskInOut, 0);
 }
 
 void ImagePainter2::fillArcPieImpl(FilledArcInfo& fai)
@@ -196,8 +197,10 @@ void ImagePainter2::fillArcPieImpl(FilledArcInfo& fai)
     arcUtil_drawCircumferencePixels(fai);
 
     // Draw the closing lines
-    arcUtil_drawXWLine(fai, line1, 0     );
-    arcUtil_drawXWLine(fai, line2, &line1);
+    Rasterizer2::DrawLineMask maskInOut = Rasterizer2::NullLineMask;
+
+    arcUtil_drawXWLine(fai, line1, maskInOut, 0     );
+    arcUtil_drawXWLine(fai, line2, maskInOut, &line1);
 }
 
 void ImagePainter2::arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai)
@@ -697,14 +700,38 @@ void ImagePainter2::arcUtil_drawCircumferencePixels(FilledArcInfo& fai)
     }
 }
 
-void ImagePainter2::arcUtil_drawXWLine(const FilledArcInfo& fai, const XWLineData& xwLine, const XWLineData* xwLineExclusion)
+void ImagePainter2::arcUtil_drawXWLine(const FilledArcInfo& fai, const XWLineData& xwLine, Point maskInOut[4], const XWLineData* xwLineExclusion)
 {
     // For convenience
     typedef std::vector<XWLineData::XWPoint> XWPoints;
     typedef XWPoints::const_iterator         XWPointsIterator;
 
+    // Get the mask's coordinate
+    const Pt::int32_t mx[4] = { (Pt::int32_t) maskInOut[0].x(), (Pt::int32_t) maskInOut[1].x(), (Pt::int32_t) maskInOut[2].x(), (Pt::int32_t) maskInOut[3].x() };
+    const Pt::int32_t my[4] = { (Pt::int32_t) maskInOut[0].y(), (Pt::int32_t) maskInOut[1].y(), (Pt::int32_t) maskInOut[2].y(), (Pt::int32_t) maskInOut[3].y() };
+
+    // A helper macro to skip a pixel
+    #define CHECK_SKIP_PIXEL(X, Y)                 \
+        {                                          \
+            bool skipPixel = false;                \
+            for(Pt::int32_t i = 0; i < 4; ++i) {   \
+                if(mx[i] == (X) && my[i] == (Y)) { \
+                    skipPixel = true;              \
+                    break;                         \
+                }                                  \
+            }                                      \
+            if(skipPixel) continue;                \
+        }                                          \
+        do {} while(false)
+
     // Draw the pixels in all coordinates
-    Pt::int32_t y = fai.minY - 1;
+    Pt::int32_t y   = fai.minY - 1;
+
+    Pt::int32_t pCnt = 0;
+
+    Pt::int32_t lx[4];
+    Pt::int32_t ly[4];
+
     for(std::vector<XWPoints>::const_iterator it = xwLine.points.begin(); it != xwLine.points.end(); ++it) {
         // Skip if this Y coordinate has no pixel
         const XWPoints& xwPoint = *it;
@@ -720,6 +747,7 @@ void ImagePainter2::arcUtil_drawXWLine(const FilledArcInfo& fai, const XWLineDat
             const Pt::int32_t x  = pt->x;
             const Pt::int32_t a1 = pt->a1;
             const Pt::int32_t a2 = pt->a2;
+            /*
             // Exclude the pixel as needed
             if(xwLineExclusion) {
                 bool        excludePixel = false;
@@ -762,24 +790,79 @@ void ImagePainter2::arcUtil_drawXWLine(const FilledArcInfo& fai, const XWLineDat
                 }
                 if(excludePixel) continue;
             }
+            */
             // deltaY > deltaX
             if(xwLine.steep) {
-                if( xwLine.faceL && (x != fai.x1 || y != fai.y1) && (x != fai.x2 || y != fai.y2) )
+                if( xwLine.faceL && (x != fai.x1 || y != fai.y1) && (x != fai.x2 || y != fai.y2) ) {
+                    CHECK_SKIP_PIXEL(x, y);
                     _rasterizer->fillPixel(x, y, fai.minX, fai.minY, a1);
-                if( xwLine.faceR && (x + 1 != fai.x1 || y != fai.y1) && (x + 1 != fai.x2 || y != fai.y2) )
+
+                    lx[2] = lx[3]; lx[3] = x;
+                    ly[2] = ly[3]; ly[3] = y;
+                    if(pCnt < 2) {
+                        lx[pCnt] = x;
+                        ly[pCnt] = y;
+                        ++pCnt;
+                    }
+
+                }
+                if( xwLine.faceR && (x + 1 != fai.x1 || y != fai.y1) && (x + 1 != fai.x2 || y != fai.y2) ) {
+                    CHECK_SKIP_PIXEL(x, y);
                     _rasterizer->fillPixel(x + 1, y, fai.minX, fai.minY, a2);
+
+                    lx[2] = lx[3]; lx[3] = x;
+                    ly[2] = ly[3]; ly[3] = y;
+                    if(pCnt < 2) {
+                        lx[pCnt] = x;
+                        ly[pCnt] = y;
+                        ++pCnt;
+                    }
+
+                }
             }
             // deltaY <= deltaX
             else {
                 if( (x != fai.x1 || y != fai.y1) && (x != fai.x2 || y != fai.y2) ) {
-                    if(xwLine.faceT) _rasterizer->fillPixel(x, y, fai.minX, fai.minY, a1);
-                    if(xwLine.faceB) _rasterizer->fillPixel(x, y, fai.minX, fai.minY, a2);
+                    CHECK_SKIP_PIXEL(x, y);
+
+                    if(xwLine.faceT) {
+                        _rasterizer->fillPixel(x, y, fai.minX, fai.minY, a1);
+
+                        lx[2] = lx[3]; lx[3] = x;
+                        ly[2] = ly[3]; ly[3] = y;
+                        if(pCnt < 2) {
+                            lx[pCnt] = x;
+                            ly[pCnt] = y;
+                            ++pCnt;
+                        }
+
+                    }
+
+                    if(xwLine.faceB) {
+                        _rasterizer->fillPixel(x, y, fai.minX, fai.minY, a2);
+
+                        lx[2] = lx[3]; lx[3] = x;
+                        ly[2] = ly[3]; ly[3] = y;
+                        if(pCnt < 2) {
+                            lx[pCnt] = x;
+                            ly[pCnt] = y;
+                            ++pCnt;
+                        }
+
+                    }
                 }
             }
         }
         // Increment the Y coordinate
         ++y;
     }
+
+    for(Pt::int32_t i = 0; i < 4; ++i) {
+        maskInOut[i].set(lx[i], ly[i]);
+    }
+
+    // Undefine the helper macro
+    #undef CHECK_SKIP_PIXEL
 }
 
 

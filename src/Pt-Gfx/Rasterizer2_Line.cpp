@@ -172,7 +172,7 @@ void Rasterizer2::rasterOnePixelVLineSegment(Pt::int32_t x, Pt::int32_t y1, Pt::
 
 void Rasterizer2::rasterOnePixelXLineSegment(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut)
 {
-    // Get the mask's coordinate as needed
+    // Get the mask's coordinates as needed
     Pt::int32_t mx[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
     Pt::int32_t my[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
 
@@ -233,7 +233,7 @@ void Rasterizer2::rasterOnePixelXLineSegment(Pt::int32_t x1, Pt::int32_t y1, Pt:
 // https://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm
 void Rasterizer2::rasterOnePixelGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut)
 {
-    // Get the mask's coordinate as needed
+    // Get the mask's coordinates as needed
     Pt::int32_t mx[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
     Pt::int32_t my[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
 
@@ -299,7 +299,7 @@ void Rasterizer2::rasterOnePixelGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1,
 // https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
 void Rasterizer2::rasterOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut)
 {
-    // Get the mask's coordinate as needed
+    // Get the mask's coordinates as needed
     Pt::int32_t mx[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
     Pt::int32_t my[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
 

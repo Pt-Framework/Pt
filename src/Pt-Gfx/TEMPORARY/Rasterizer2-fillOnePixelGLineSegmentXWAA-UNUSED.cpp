@@ -5,7 +5,7 @@ void fillOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2
 // https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
 void Rasterizer2::fillOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const std::map<Pt::int32_t, Pt::int32_t>* exclusionZone, DrawLineMask* maskInOut)
 {
-    // Get the mask's coordinate as needed
+    // Get the mask's coordinates as needed
     Pt::int32_t mx[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
     Pt::int32_t my[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
 
@@ -147,7 +147,7 @@ void Rasterizer2::fillOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, P
 // https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
 void Rasterizer2::fillOnePixelGLineSegmentXWAAOutsideOnly(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, DrawLineMask* maskInOut)
 {
-    // Get the mask's coordinate as needed
+    // Get the mask's coordinates as needed
     Pt::int32_t mx[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
     Pt::int32_t my[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
 
