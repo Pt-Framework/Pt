@@ -16,11 +16,13 @@ static size_t cairoBenchRandCallOverheadTimes1000(int loopCount)
     // the same sequence at the start of every benchmark
     srand(13579);
 
+    dummy = 0;
+
     for(int i = 0; i < loopCount; ++i) {
         Pt::System::Clock clock;
         clock.start();
 
-        for(int j = 0; j < 1000; ++j) dummy = (rand() % 21 - 10);
+        for(int j = 0; j < 1000; ++j) dummy += (rand() % 21 - 10);
 
         sum += clock.stop().toUSecs();
     }
@@ -210,8 +212,7 @@ static void cairoBenchmark(CompositionMode cm)
         std::clog << "    Solid-filled    polygon FSAA 8x8 @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
-
-        std::clog << "    >>> +Random: Factor => Relative to Self Non-Random] (Time) (Factor)" << std::endl << std::endl;
+        std::clog << "    >>> +Random : Factor => Relative to Self Non-Random (Time) (Factor)" << std::endl << std::endl;
         time1 = cairoBenchRandCallOverheadTimes1000(BENCHMARK_LOOP_COUNT);
         std::clog << "    Overhead for calling the rand() function in libc = " << std::setw(6) << std::setprecision(3) << (time1 / 1000.0f) <<  std::setprecision(0) << std::endl;
         time1 = cairoBenchFillPolygon<false>(BENCHMARK_LOOP_COUNT, cm, true );
