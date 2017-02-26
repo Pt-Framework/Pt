@@ -524,7 +524,7 @@ bool ApplicationImpl::processMessage(HWND hwnd, unsigned int msg,
 
         case WM_MOUSELEAVE:
             handled = true;  
-            _mouseEvent.clear();
+            //_mouseEvent.clear();
             Application::instance().setCursor(0);
             Application::instance().setPointerWindow(0);
             _pointerInWindow = false;
