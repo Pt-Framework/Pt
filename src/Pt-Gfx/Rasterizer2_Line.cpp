@@ -225,7 +225,6 @@ void Rasterizer2::rasterOnePixelXLineSegment(Pt::int32_t x1, Pt::int32_t y1, Pt:
         (*maskInOut)[2].set(x2, y2);
         (*maskInOut)[3] = MAXIMUM_POINT;
     }
-
 }
 
 // Bresenham's Line Aalgorithm

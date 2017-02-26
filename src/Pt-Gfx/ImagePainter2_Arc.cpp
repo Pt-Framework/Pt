@@ -121,8 +121,9 @@ void ImagePainter2::fillArcChordImpl(FilledArcInfo& fai)
     // Find the direction that the line is facing to
     arcUtil_detXWLineDirection(line);
 
-    // Generate scanlines data
+    // Generate the scanlines data
     Scanlines scanlines(fai.radY * 2 + 2);
+
     arcUtil_genScanlinesForChord(scanlines, fai, line);
 
     // Draw the scanlines
@@ -142,8 +143,12 @@ void ImagePainter2::fillArcChordImpl(FilledArcInfo& fai)
     arcUtil_drawCircumferencePixels(fai);
 
     // Draw the closing line
-    Rasterizer2::DrawLineMask maskInOut = Rasterizer2::NullLineMask;
-    arcUtil_drawXWLine(fai, line, maskInOut, 0);
+    Point maskInOut[4] = {
+        Painter::MaximumPointCoordinate, Painter::MaximumPointCoordinate,
+        Painter::MaximumPointCoordinate, Painter::MaximumPointCoordinate
+    };
+
+    arcUtil_drawXWLine(fai, line, maskInOut);
 }
 
 void ImagePainter2::fillArcPieImpl(FilledArcInfo& fai)
@@ -167,9 +172,10 @@ void ImagePainter2::fillArcPieImpl(FilledArcInfo& fai)
     arcUtil_detXWLineDirection(line1);
     arcUtil_detXWLineDirection(line2);
 
-    // Generate scanlines data
+    // Generate the scanlines data
     Scanlines scanlines1(fai.radY * 2 + 2);
     Scanlines scanlines2(fai.radY * 2 + 2);
+
     arcUtil_genScanlinesForPie(scanlines1, scanlines2, fai, line1, line2);
 
     // Draw the scanlines
@@ -197,10 +203,13 @@ void ImagePainter2::fillArcPieImpl(FilledArcInfo& fai)
     arcUtil_drawCircumferencePixels(fai);
 
     // Draw the closing lines
-    Rasterizer2::DrawLineMask maskInOut = Rasterizer2::NullLineMask;
+    Point maskInOut[4] = {
+        Painter::MaximumPointCoordinate, Painter::MaximumPointCoordinate,
+        Painter::MaximumPointCoordinate, Painter::MaximumPointCoordinate
+    };
 
-    arcUtil_drawXWLine(fai, line1, maskInOut, 0     );
-    arcUtil_drawXWLine(fai, line2, maskInOut, &line1);
+    arcUtil_drawXWLine(fai, line2, maskInOut);
+    arcUtil_drawXWLine(fai, line1, maskInOut);
 }
 
 void ImagePainter2::arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai)
@@ -700,18 +709,29 @@ void ImagePainter2::arcUtil_drawCircumferencePixels(FilledArcInfo& fai)
     }
 }
 
-void ImagePainter2::arcUtil_drawXWLine(const FilledArcInfo& fai, const XWLineData& xwLine, Point maskInOut[4], const XWLineData* xwLineExclusion)
+void ImagePainter2::arcUtil_drawXWLine(const FilledArcInfo& fai, const XWLineData& xwLine, Point maskInOut[4])
 {
     // For convenience
     typedef std::vector<XWLineData::XWPoint> XWPoints;
     typedef XWPoints::const_iterator         XWPointsIterator;
 
     // Get the mask's coordinate
-    const Pt::int32_t mx[4] = { (Pt::int32_t) maskInOut[0].x(), (Pt::int32_t) maskInOut[1].x(), (Pt::int32_t) maskInOut[2].x(), (Pt::int32_t) maskInOut[3].x() };
-    const Pt::int32_t my[4] = { (Pt::int32_t) maskInOut[0].y(), (Pt::int32_t) maskInOut[1].y(), (Pt::int32_t) maskInOut[2].y(), (Pt::int32_t) maskInOut[3].y() };
+    const Pt::int32_t mx[4] = {
+        (Pt::int32_t) maskInOut[0].x(), (Pt::int32_t) maskInOut[1].x(),
+        (Pt::int32_t) maskInOut[2].x(), (Pt::int32_t) maskInOut[3].x()
+    };
+    const Pt::int32_t my[4] = {
+        (Pt::int32_t) maskInOut[0].y(), (Pt::int32_t) maskInOut[1].y(),
+        (Pt::int32_t) maskInOut[2].y(), (Pt::int32_t) maskInOut[3].y()
+    };
+
+    // Used for storing back the mask's coordinates
+    Pt::int32_t pCnt = 0;
+    Pt::int32_t lx[4];
+    Pt::int32_t ly[4];
 
     // A helper macro to skip a pixel
-    #define CHECK_SKIP_PIXEL(X, Y)                 \
+    #define CHECK_SKIP_PIXEL(X, Y, A)              \
         {                                          \
             bool skipPixel = false;                \
             for(Pt::int32_t i = 0; i < 4; ++i) {   \
@@ -721,16 +741,19 @@ void ImagePainter2::arcUtil_drawXWLine(const FilledArcInfo& fai, const XWLineDat
                 }                                  \
             }                                      \
             if(skipPixel) continue;                \
+            if(!(A)) continue;                     \
+            lx[2] = lx[3]; lx[3] = x;              \
+            ly[2] = ly[3]; ly[3] = y;              \
+            if(pCnt < 2) {                         \
+                lx[pCnt] = x;                      \
+                ly[pCnt] = y;                      \
+                ++pCnt;                            \
+            }                                      \
         }                                          \
         do {} while(false)
 
     // Draw the pixels in all coordinates
-    Pt::int32_t y   = fai.minY - 1;
-
-    Pt::int32_t pCnt = 0;
-
-    Pt::int32_t lx[4];
-    Pt::int32_t ly[4];
+    Pt::int32_t y = fai.minY - 1;
 
     for(std::vector<XWPoints>::const_iterator it = xwLine.points.begin(); it != xwLine.points.end(); ++it) {
         // Skip if this Y coordinate has no pixel
@@ -747,108 +770,27 @@ void ImagePainter2::arcUtil_drawXWLine(const FilledArcInfo& fai, const XWLineDat
             const Pt::int32_t x  = pt->x;
             const Pt::int32_t a1 = pt->a1;
             const Pt::int32_t a2 = pt->a2;
-            /*
-            // Exclude the pixel as needed
-            if(xwLineExclusion) {
-                bool        excludePixel = false;
-                Pt::int32_t ry           = fai.minY - 1;
-                for(std::vector<XWPoints>::const_iterator ct = xwLineExclusion->points.begin(); ct != xwLineExclusion->points.end(); ++ct) {
-                    // Skip if this Y coordinate has no pixel
-                    const XWPoints& xwPointC = *ct;
-                    if(xwPointC.empty()) {
-                        ++ry;
-                        continue;
-                    }
-                    // Check through the pixels in this Y coordinate
-                    for(XWPointsIterator xt = xwPointC.begin(); xt != xwPointC.end(); ++xt) {
-                        // Skip if this is a null pixel
-                        if(xt->isNull()) continue;
-                        // Perform overllaping check
-                        if(xwLine.steep && xwLine.faceR) {
-                            if(xwLineExclusion->steep)
-                                excludePixel = (
-                                    y == ry && ( (xwLineExclusion->faceL && x + 1 == xt->x    ) ||
-                                                 (xwLineExclusion->faceR && x + 1 == xt->x + 1)
-                                               )
-                                );
-                            else
-                                excludePixel = ( x + 1 == xt->x && y == ry );
-                        }
-                        else if(!xwLine.faceR) {
-                            if(xwLineExclusion->steep)
-                                excludePixel = (
-                                    y == ry && ( (xwLineExclusion->faceL && x == xt->x    ) ||
-                                                 (xwLineExclusion->faceR && x == xt->x + 1)
-                                               )
-                                );
-                            else
-                                excludePixel = ( x == xt->x && y == ry );
-                        }
-                        if(excludePixel) break;
-                    }
-                    if(excludePixel) break;
-                }
-                if(excludePixel) continue;
-            }
-            */
             // deltaY > deltaX
             if(xwLine.steep) {
                 if( xwLine.faceL && (x != fai.x1 || y != fai.y1) && (x != fai.x2 || y != fai.y2) ) {
-                    CHECK_SKIP_PIXEL(x, y);
+                    CHECK_SKIP_PIXEL(x, y, a1);
                     _rasterizer->fillPixel(x, y, fai.minX, fai.minY, a1);
-
-                    lx[2] = lx[3]; lx[3] = x;
-                    ly[2] = ly[3]; ly[3] = y;
-                    if(pCnt < 2) {
-                        lx[pCnt] = x;
-                        ly[pCnt] = y;
-                        ++pCnt;
-                    }
-
                 }
                 if( xwLine.faceR && (x + 1 != fai.x1 || y != fai.y1) && (x + 1 != fai.x2 || y != fai.y2) ) {
-                    CHECK_SKIP_PIXEL(x, y);
+                    CHECK_SKIP_PIXEL(x + 1, y, a2);
                     _rasterizer->fillPixel(x + 1, y, fai.minX, fai.minY, a2);
-
-                    lx[2] = lx[3]; lx[3] = x;
-                    ly[2] = ly[3]; ly[3] = y;
-                    if(pCnt < 2) {
-                        lx[pCnt] = x;
-                        ly[pCnt] = y;
-                        ++pCnt;
-                    }
-
                 }
             }
             // deltaY <= deltaX
             else {
                 if( (x != fai.x1 || y != fai.y1) && (x != fai.x2 || y != fai.y2) ) {
-                    CHECK_SKIP_PIXEL(x, y);
-
                     if(xwLine.faceT) {
+                        CHECK_SKIP_PIXEL(x, y, a1);
                         _rasterizer->fillPixel(x, y, fai.minX, fai.minY, a1);
-
-                        lx[2] = lx[3]; lx[3] = x;
-                        ly[2] = ly[3]; ly[3] = y;
-                        if(pCnt < 2) {
-                            lx[pCnt] = x;
-                            ly[pCnt] = y;
-                            ++pCnt;
-                        }
-
                     }
-
                     if(xwLine.faceB) {
+                        CHECK_SKIP_PIXEL(x, y, a2);
                         _rasterizer->fillPixel(x, y, fai.minX, fai.minY, a2);
-
-                        lx[2] = lx[3]; lx[3] = x;
-                        ly[2] = ly[3]; ly[3] = y;
-                        if(pCnt < 2) {
-                            lx[pCnt] = x;
-                            ly[pCnt] = y;
-                            ++pCnt;
-                        }
-
                     }
                 }
             }
@@ -857,6 +799,7 @@ void ImagePainter2::arcUtil_drawXWLine(const FilledArcInfo& fai, const XWLineDat
         ++y;
     }
 
+    // Store back the start and end coordinates to the mask
     for(Pt::int32_t i = 0; i < 4; ++i) {
         maskInOut[i].set(lx[i], ly[i]);
     }
