@@ -60,10 +60,6 @@ class PT_HMI_API ComboBoxMenu : public Window
         Pt::Signal<ListBoxItem&>& selected();
 
     protected:
-        void onPaintBackground(const Gfx::RectF& rect);
-
-        void onPaintContent(const Gfx::RectF& rect);
-
         void onShowEvent(const ShowEvent& ev);
 
         bool onMouseEvent(const MouseEvent& ev);

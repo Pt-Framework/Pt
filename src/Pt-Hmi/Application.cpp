@@ -340,37 +340,33 @@ void Application::processTouchEvent(const TouchEvent& ev)
 
     TouchEvent tev = ev;
 
+    // IME window always has priority
+    Window* ime = inputMethod().activeWindow();
+    if(ime)
+    {
+        Gfx::PointF screenPos = vit->second->toScreen( ev.position() );
+        Gfx::PointF p = ime->fromScreen(screenPos);
+        Gfx::RectF rect( ime->size() );
+        if( rect.contains(p) )
+        {
+            tev.setPosition(p);
+            tev.setId( ime->vid() );
+            loop().commitEvent(tev);
+            return;
+        }
+    }
+
     Visual* grabber = Application::instance().pointerGrabber();
     if(grabber)
     {
         Gfx::PointF screenPos = vit->second->toScreen( ev.position() );
-
-        // ...unless input method editor is active
-        Window* ime = inputMethod().activeWindow();
-        if(ime)
-        {
-            Gfx::PointF p = ime->fromScreen(screenPos);
-            Gfx::RectF rect( ime->size() );
-            if( rect.contains(p) )
-            {
-                tev.setPosition(p);
-                tev.setId( ime->vid() );
-                grabber = 0;
-            }
-        }
-
-        if(grabber)
-        {
-            tev.setPosition( grabber->fromScreen(screenPos) ); 
-            tev.setId( grabber->vid() );
-        }
-
+        tev.setPosition( grabber->fromScreen(screenPos) ); 
+        tev.setId( grabber->vid() );
         loop().commitEvent(tev);
+        return;
     }
-    else
-    {
-        _mainScreen->impl()->dispatchTouchEvent(tev);
-    }
+
+    _mainScreen->impl()->dispatchTouchEvent(tev);
 }
 
 
@@ -429,37 +425,33 @@ void Application::processMouseEvent(const MouseEvent& ev)
     
     MouseEvent mev = ev;
 
+    // IME window always has priority
+    Window* ime = inputMethod().activeWindow();
+    if(ime)
+    {
+        Gfx::PointF screenPos = vit->second->toScreen( ev.position() );
+        Gfx::PointF p = ime->fromScreen(screenPos);
+        Gfx::RectF rect( ime->size() );
+        if( rect.contains(p) )
+        {
+            mev.setPosition(p);
+            mev.setId( ime->vid() );
+            loop().commitEvent(mev);
+            return;
+        }
+    }
+
     Visual* grabber = pointerGrabber();
     if(grabber)
     {
         Gfx::PointF screenPos = vit->second->toScreen( ev.position() );
-
-        // ...unless input method editor is active
-        Window* ime = inputMethod().activeWindow();
-        if(ime)
-        {
-            Gfx::PointF p = ime->fromScreen(screenPos);
-            Gfx::RectF rect( ime->size() );
-            if( rect.contains(p) )
-            {
-                mev.setPosition(p);
-                mev.setId( ime->vid() );
-                grabber = 0;
-            }
-        }
-        
-        if(grabber)
-        {
-            mev.setPosition( grabber->fromScreen(screenPos) );
-            mev.setId( grabber->vid() );
-        }
-
+        mev.setPosition( grabber->fromScreen(screenPos) );
+        mev.setId( grabber->vid() );
         loop().commitEvent(mev);
+        return;
     }
-    else
-    {
-        _mainScreen->impl()->dispatchMouseEvent(mev);
-    }
+
+    _mainScreen->impl()->dispatchMouseEvent(mev);
 }
 
 

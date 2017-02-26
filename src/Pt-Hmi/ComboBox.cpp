@@ -87,18 +87,6 @@ Pt::Signal<ListBoxItem&>& ComboBoxMenu::selected()
 }
 
 
-void ComboBoxMenu::onPaintBackground(const Gfx::RectF& rect)
-{
-    Base::onPaintBackground(rect);
-}
-
-
-void ComboBoxMenu::onPaintContent(const Gfx::RectF& rect)
-{
-    Base::onPaintContent(rect);
-}
-
-
 bool ComboBoxMenu::onMouseEvent(const MouseEvent& ev)
 {
     Base::onMouseEvent(ev);

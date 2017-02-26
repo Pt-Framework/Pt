@@ -153,8 +153,6 @@ DefaultInputMethod::DefaultInputMethod()
     //_window->setTopMost(true);
     //_window->move( Gfx::PointF(500, 500) );
     //_window->resize( Gfx::SizeF(100, 100) );
-
-    //_window->keyPressed += Pt::slot(*this, &DefaultInputMethod::onKeyPress);
 }
 
 
@@ -190,6 +188,8 @@ void DefaultInputMethod::onShow(bool show)
     //    _window->setMainWidget(_keyButton);
     //    _keyButton->clicked() += Pt::slot(*this, &DefaultInputMethod::onKeyPress);
     //}
+    //
+    //_window->show(show);
 
     if(show)
     {
@@ -199,8 +199,6 @@ void DefaultInputMethod::onShow(bool show)
     {
         std::clog << "INPUTMETHOD HIDE" << std::endl;
     }
-
-    //_window->show(show);
 }
 
 
