@@ -301,7 +301,7 @@ void FreeType2::draw(
 
         if(fontAngle == 0) {
             if(mono) {
-                imageType->flags = FT_LOAD_RENDER | FT_LOAD_MONOCHROME | FT_LOAD_TARGET_MONO;
+                imageType->flags = FT_LOAD_RENDER | FT_LOAD_TARGET_MONO;
 
                 if(FTC_SBitCache_Lookup(_bitmapCache, imageType, glyph_index, &smalGlyphBitmap, &node))
                     continue;
@@ -313,19 +313,19 @@ void FreeType2::draw(
                     continue;
             }
 
-            incX        = smalGlyphBitmap->xadvance << 16;
-            incY        = smalGlyphBitmap->yadvance << 16;
+            incX   = smalGlyphBitmap->xadvance << 16;
+            incY   = smalGlyphBitmap->yadvance << 16;
 
-            left        = (glyphPos.x >> 16) + smalGlyphBitmap->left;
-            top         = (glyphPos.y >> 16) - smalGlyphBitmap->top;
-            pitch       = smalGlyphBitmap->pitch;
-            height      = smalGlyphBitmap->height;
-            width       = smalGlyphBitmap->width;
-            buffer      = smalGlyphBitmap->buffer;
+            left   = (glyphPos.x >> 16) + smalGlyphBitmap->left;
+            top    = (glyphPos.y >> 16) - smalGlyphBitmap->top;
+            pitch  = smalGlyphBitmap->pitch;
+            height = smalGlyphBitmap->height;
+            width  = smalGlyphBitmap->width;
+            buffer = smalGlyphBitmap->buffer;
         }
         else {
             if(mono) {
-                imageType->flags = FT_LOAD_RENDER | FT_LOAD_MONOCHROME | FT_LOAD_TARGET_MONO;
+                imageType->flags = FT_LOAD_TARGET_MONO;
 
                 FTC_ImageCache_Lookup(_imageCache, imageType, glyph_index, &glyph, &node);
                 FT_Glyph_Copy( glyph, &glyphCopy );
@@ -333,7 +333,7 @@ void FreeType2::draw(
                 FT_Glyph_To_Bitmap( &glyphCopy, FT_RENDER_MODE_MONO, 0, 1 );
             }
             else {
-                imageType->flags = FT_LOAD_RENDER | FT_LOAD_TARGET_NORMAL;
+                imageType->flags = FT_LOAD_TARGET_NORMAL;
 
                 FTC_ImageCache_Lookup(_imageCache, imageType, glyph_index, &glyph, &node);
                 FT_Glyph_Copy( glyph, &glyphCopy );
@@ -343,15 +343,15 @@ void FreeType2::draw(
 
             glyphBitmap = (FT_BitmapGlyph) glyphCopy;
 
-            incX        = glyphCopy->advance.x;
-            incY        = glyphCopy->advance.y;
+            incX   = glyphCopy->advance.x;
+            incY   = glyphCopy->advance.y;
 
-            left        = (glyphPos.x >> 16) + glyphBitmap->left;
-            top         = (glyphPos.y >> 16) - glyphBitmap->top;
-            pitch       = glyphBitmap->bitmap.pitch;
-            height      = glyphBitmap->bitmap.rows;
-            width       = glyphBitmap->bitmap.width;
-            buffer      = glyphBitmap->bitmap.buffer;
+            left   = (glyphPos.x >> 16) + glyphBitmap->left;
+            top    = (glyphPos.y >> 16) - glyphBitmap->top;
+            pitch  = glyphBitmap->bitmap.pitch;
+            height = glyphBitmap->bitmap.rows;
+            width  = glyphBitmap->bitmap.width;
+            buffer = glyphBitmap->bitmap.buffer;
         }
 
         if(!isspace(*it)) {
@@ -369,7 +369,6 @@ void FreeType2::draw(
     }
 }
 
-#include <stdio.h>
 void FreeType2::drawGlyph(
     Image& image, const Color& color, int xpos, int ypos,
     int bmPitch, int height, int width,
@@ -411,8 +410,8 @@ void FreeType2::drawGlyph(
 
         dsx = xpos;
 
+        // Without anti-aliasing
         if(mono) {
-
             for(Pt::int32_t x = ofsx; x < bmPitch; ++x) {
                 const int     px    = yOffset + x;
                 unsigned char value = buffer[px];
@@ -430,35 +429,9 @@ void FreeType2::drawGlyph(
                     if(valMono) image.format().setPixel(pixel, color, mode);
                 }
             }
-/*
-            for(Pt::int32_t x = ofsx; x < width; ++x, ++dsx) {
-                if(dsx < clip.x()) continue;
-                if(dsx > x2) break;
-
-                Pixel pixel(image.view(), dsx, dsy);
-
-                const int     px    = yOffset + x / 8;
-                unsigned char value = buffer[px];
-
-                value &= (1 << (7 - x % 8));
-
-                switch(mode) {
-                    default:
-                    case CompositionMode::SourceCopy:
-                        if(value)
-                            image.format().setPixel(pixel, color, CompositionMode::SourceCopy);
-                        break;
-
-                    case CompositionMode::SourceOver:
-                        if(value)
-                            image.format().setPixel(pixel, color, CompositionMode::SourceOver);
-                        break;
-                }
-            }
-*/
-
         }
 
+        // With anti-aliasing
         else {
             for(Pt::int32_t x = ofsx; x < width; ++x, ++dsx) {
                 if(dsx < clip.x()) continue;
@@ -486,10 +459,8 @@ void FreeType2::drawGlyph(
                         image.format().setPixel(pixel, pixelColor, CompositionMode::SourceOver);
                         break;
                 }
-
             }
         }
-
     }
 }
 

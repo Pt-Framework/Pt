@@ -281,7 +281,7 @@ FontMetrics FreeType::fontMetrics(const String& text,
 
 void FreeType::draw(Image& image, const Color& color, Pt::ssize_t fontAngle,
                     const Point& pos, const String& text, const Rect& clip, const CompositionMode& mode,
-                    FT_Matrix& matrix, FTC_FaceID faceId, FTC_ImageType imageType, bool mono)
+                    FT_Matrix& matrix, FTC_FaceID faceId, FTC_ImageType imageType)
 {
     // LOCK
 
@@ -380,7 +380,7 @@ void FreeType::draw(Image& image, const Color& color, Pt::ssize_t fontAngle,
             //     bbox.yMax <= 0 || bbox.yMin >= my_target_height )
             //    continue;
 
-            drawGlyph(image, color, left, top, pitch, height, width, buffer, clip, mode, mono);
+            drawGlyph(image, color, left, top, pitch, height, width, buffer, clip, mode);
         }
 
         glyphPos.x  += incX;
@@ -400,8 +400,7 @@ void FreeType::draw(Image& image, const Color& color, Pt::ssize_t fontAngle,
 
 void FreeType::drawGlyph(Image& image, const Color& color, int xpos, int ypos,
                          int bmPitch, int height, int width,
-                         const unsigned char* buffer, const Rect& clip, const CompositionMode& mode,
-                         bool mono)
+                         const unsigned char* buffer, const Rect& clip, const CompositionMode& mode)
 {
     const int clipRight  = clip.x() + clip.width();
     const int clipBottom = clip.y() + clip.height();
@@ -470,42 +469,23 @@ void FreeType::drawGlyph(Image& image, const Color& color, int xpos, int ypos,
                 image.format().setPixel(pixel, color, CompositionMode::SourceCopy);
             }
 #else
-            if(mono)
+            switch(mode)
             {
-                switch(mode)
-                {
-                    default:
-                    case CompositionMode::SourceCopy:
-                        if(value >= 127)
-                            image.format().setPixel(pixel, color, CompositionMode::SourceCopy);
-                        break;
-
-                    case CompositionMode::SourceOver:
-                        if(value >= 127)
-                            image.format().setPixel(pixel, color, CompositionMode::SourceOver);
-                        break;
-                }
-            }
-            else
-            {
-                switch(mode)
-                {
-                    default:
-                    case CompositionMode::SourceCopy:
-                        if(value != 255) {
-                            pixelColor.setAlpha(value * 257);
-                            image.format().setPixel(pixel, pixelColor, CompositionMode::SourceOver);
-                        }
-                        else {
-                            image.format().setPixel(pixel, color, CompositionMode::SourceCopy);
-                        }
-                        break;
-
-                    case CompositionMode::SourceOver:
-                        pixelColor.setAlpha(color.alpha() * value / 255);
+                default:
+                case CompositionMode::SourceCopy:
+                    if(value != 255) {
+                        pixelColor.setAlpha(value * 257);
                         image.format().setPixel(pixel, pixelColor, CompositionMode::SourceOver);
-                        break;
-                }
+                    }
+                    else {
+                        image.format().setPixel(pixel, color, CompositionMode::SourceCopy);
+                    }
+                    break;
+
+                case CompositionMode::SourceOver:
+                    pixelColor.setAlpha(color.alpha() * value / 255);
+                    image.format().setPixel(pixel, pixelColor, CompositionMode::SourceOver);
+                    break;
             }
 #endif
         }

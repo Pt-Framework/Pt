@@ -39,6 +39,11 @@ static void testDrawLine(const char* title, Image& image, Painter& painter)
     painter.drawLine( PointF( 10, 540), PointF(781, 540) );
     painter.drawLine( PointF(781, 552), PointF( 10, 550) );
 
+    painter.setFont( Pt::Gfx::Font(FONT_SPEC_R) );
+    painter.setPen( Color::fromRgb8(0, 255, 255, 255) ); painter.drawText( PointF(100 + 200, 175 + 200), "Hello world!" );
+    painter.setPen( Color::fromRgb8(0, 255, 255, 175) ); painter.drawText( PointF(100 + 200, 225 + 200), "Hello world!" );
+
+    painter.setFont( Pt::Gfx::Font(FONT_SPEC_N) );
     painter.setPen( Color::fromRgb8(0, 255, 255, 255) ); painter.drawText( PointF(100, 175), "Hello world!" );
     painter.setPen( Color::fromRgb8(0, 255, 255, 175) ); painter.drawText( PointF(100, 225), "Hello world!" );
 

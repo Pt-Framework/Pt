@@ -85,7 +85,7 @@ class FreeType : public Pt::Singleton<FreeType>
 
         void draw(Image& image, const Color& color, Pt::ssize_t fontAngle,
                   const Point& pos, const String& text, const Rect& clip, const CompositionMode& mode,
-                  FT_Matrix& matrix, FTC_FaceID faceId, FTC_ImageType imageType, bool mono);
+                  FT_Matrix& matrix, FTC_FaceID faceId, FTC_ImageType imageType);
 
     protected:
         FreeType();
@@ -94,7 +94,7 @@ class FreeType : public Pt::Singleton<FreeType>
 
         void drawGlyph(Image& image, const Color& color, int xpos, int ypos,
                        int bmPitch, int height, int width,
-                       const unsigned char* buffer, const Rect& clip, const CompositionMode& mode, bool mono);
+                       const unsigned char* buffer, const Rect& clip, const CompositionMode& mode);
 
     private:
         typedef std::set<System::Path*> Files;

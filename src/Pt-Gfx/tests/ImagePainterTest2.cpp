@@ -45,24 +45,24 @@ using namespace Pt::Gfx;
 
 // General settings for Pt-Gfx
 #define DO_TEST_DRAW    1
-#define DO_BENCHMARKING 1
+#define DO_BENCHMARKING 0
 
 // Detailed-test enable settings for Pt-Gfx
 #define TEST_SOURCECOPY                         1
-#define TEST_SOURCEOVER                         0
+#define TEST_SOURCEOVER                         1
 
-#define TEST_DRAW_LINE_AND_TEXT                 0
-#define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES  0
+#define TEST_DRAW_LINE_AND_TEXT                 1
+#define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES  1
 
-#define TEST_DRAW_ELLIPSES_ARCS                 0
+#define TEST_DRAW_ELLIPSES_ARCS                 1
 
-#define TEST_DRAW_SOLID_FILLED_POLYGONS         0
-#define TEST_DRAW_GRADIENT_FILLED_POLYGONS      0
-#define TEST_DRAW_TEXTURE_FILLED_POLYGONS       0
+#define TEST_DRAW_SOLID_FILLED_POLYGONS         1
+#define TEST_DRAW_GRADIENT_FILLED_POLYGONS      1
+#define TEST_DRAW_TEXTURE_FILLED_POLYGONS       1
 
 #define TEST_DRAW_SOLID_FILLED_ELLIPSES_ARCS    1
-#define TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS 0
-#define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  0
+#define TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS 1
+#define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  1
 
 #define TEST_COMPARE_WITH_OLD_PAINTER           0 // (for some shapes only)
 
@@ -70,33 +70,34 @@ using namespace Pt::Gfx;
 #define BENCHMARK_CHECK_RESULTING_IMAGE     0
 
 #define BENCHMARK_IMAGE_SIZE                Size(1280, 800)
-#define BENCHMARK_LOOP_COUNT                500
+#define BENCHMARK_LOOP_COUNT                5000
 
 #define BENCHMARK_TEXT                      1
-#define BENCHMARK_LINE                      0
-#define BENCHMARK_ELLIPSE                   0
-#define BENCHMARK_ARC                       0
+#define BENCHMARK_LINE                      1
+#define BENCHMARK_ELLIPSE                   1
+#define BENCHMARK_ARC                       1
 
-#define BENCHMARK_RECTANGLE                 0
-#define BENCHMARK_SOLID_FILLED_RECTANGLE    0
-#define BENCHMARK_GRADIENT_FILLED_RECTANGLE 0
-#define BENCHMARK_TEXTURE_FILLED_RECTANGLE  0
+#define BENCHMARK_RECTANGLE                 1
+#define BENCHMARK_SOLID_FILLED_RECTANGLE    1
+#define BENCHMARK_GRADIENT_FILLED_RECTANGLE 1
+#define BENCHMARK_TEXTURE_FILLED_RECTANGLE  1
 
-#define BENCHMARK_SOLID_FILLED_POLYGON      0
-#define BENCHMARK_GRADIENT_FILLED_POLYGON   0
-#define BENCHMARK_TEXTURE_FILLED_POLYGON    0
+#define BENCHMARK_SOLID_FILLED_POLYGON      1
+#define BENCHMARK_GRADIENT_FILLED_POLYGON   1
+#define BENCHMARK_TEXTURE_FILLED_POLYGON    1
 
-#define BENCHMARK_SOLID_FILLED_ELLIPSE      0
-#define BENCHMARK_GRADIENT_FILLED_ELLIPSE   0
-#define BENCHMARK_TEXTURE_FILLED_ELLIPSE    0
+#define BENCHMARK_SOLID_FILLED_ELLIPSE      1
+#define BENCHMARK_GRADIENT_FILLED_ELLIPSE   1
+#define BENCHMARK_TEXTURE_FILLED_ELLIPSE    1
 
-#define BENCHMARK_SOLID_FILLED_ARC          0
-#define BENCHMARK_GRADIENT_FILLED_ARC       0
-#define BENCHMARK_TEXTURE_FILLED_ARC        0
+#define BENCHMARK_SOLID_FILLED_ARC          1
+#define BENCHMARK_GRADIENT_FILLED_ARC       1
+#define BENCHMARK_TEXTURE_FILLED_ARC        1
 
 // Configurations and objects
-#define FONT_DIR  "../src/Pt-Gfx/fonts"
-#define FONT_SPEC "DejaVu Serif", 24, Pt::Gfx::Font::BoldItalic
+#define FONT_DIR    "../src/Pt-Gfx/fonts"
+#define FONT_SPEC_N "DejaVu Serif", 24, Pt::Gfx::Font::BoldItalic, 0
+#define FONT_SPEC_R "DejaVu Serif", 24, Pt::Gfx::Font::BoldItalic, -150
 
 static Image textureWithTransBackground;
 static Image textureWithWhiteBackground;
@@ -131,10 +132,10 @@ int main(int argc, char* args[])
     ImagePainter2 painter2obj(image);
 
     painter1obj.setFontDir( Pt::System::Path(FONT_DIR) );
-    painter1obj.setFont( Pt::Gfx::Font(FONT_SPEC) );
+    painter1obj.setFont( Pt::Gfx::Font(FONT_SPEC_N) );
 
     painter2obj.setFontDir( Pt::System::Path(FONT_DIR) );
-    painter2obj.setFont( Pt::Gfx::Font(FONT_SPEC) );
+    painter2obj.setFont( Pt::Gfx::Font(FONT_SPEC_N) );
 
     Painter* painter1 = dynamic_cast<Painter*>(&painter1obj);
     Painter* painter2 = dynamic_cast<Painter*>(&painter2obj);
@@ -152,11 +153,19 @@ int main(int argc, char* args[])
     if(DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_LINE_AND_TEXT) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
         testDrawLine("Lines and Texts - ImagePainter2 [SourceCopy]", image, *painter2);
+        if(TEST_COMPARE_WITH_OLD_PAINTER) {
+            painter1->setCompositionMode(CompositionMode::SourceCopy);
+            testDrawLine("Lines and Texts - ImagePainter [SourceCopy]", image, *painter1);
+        }
     }
 
     if(DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_LINE_AND_TEXT) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
         testDrawLine("Lines and Texts - ImagePainter2 [SourceOver]", image, *painter2);
+        if(TEST_COMPARE_WITH_OLD_PAINTER) {
+            painter1->setCompositionMode(CompositionMode::SourceOver);
+            testDrawLine("Lines and Texts - ImagePainter [SourceOver]", image, *painter1);
+        }
     }
 
     // Rectangles and filled rectangles

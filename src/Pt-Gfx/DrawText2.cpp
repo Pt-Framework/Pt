@@ -61,25 +61,25 @@ void DrawText2::setFont(const Font& font)
         _faceId = FreeType2::instance().findFaceId(font);
     }
 
-    // setup the image type
+    // Setup the image type
     _imageType.face_id = _faceId;
     _imageType.width   = font.size();
     _imageType.height  = font.size();
     _imageType.flags   = FT_LOAD_DEFAULT;
 
-    // setup the rotation matrix
+    // Setup the rotation matrix
     _fontAngle = font.angle() % 3600;
 
     if(_fontAngle < 0) _fontAngle += 3600;
 
-    const double angle   = (_fontAngle / 10.0  *  3.14159) / 180.0;
-    const double cosinus = std::cos( angle ) * 0x10000L;
-    const double sinus   = std::sin( angle ) * 0x10000L;
+    const float angle   = (_fontAngle / 10.0  *  3.14159) / 180.0;
+    const float cosinus = ::cos( angle ) * 0x10000L;
+    const float sinus   = ::sin( angle ) * 0x10000L;
 
-    _matrix.xx = (FT_Fixed) std::ceil( cosinus);
-    _matrix.xy = (FT_Fixed) std::ceil(-sinus  );
-    _matrix.yx = (FT_Fixed) std::ceil( sinus  );
-    _matrix.yy = (FT_Fixed) std::ceil( cosinus);
+    _matrix.xx = (FT_Fixed) ( cosinus);
+    _matrix.xy = (FT_Fixed) (-sinus  );
+    _matrix.yx = (FT_Fixed) ( sinus  );
+    _matrix.yy = (FT_Fixed) ( cosinus);
 }
 
 FontMetrics DrawText2::fontMetrics(const String& text)

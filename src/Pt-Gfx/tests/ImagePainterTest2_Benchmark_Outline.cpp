@@ -15,7 +15,7 @@ static size_t benchDrawText(int loopCount, CompositionMode cm, AntiAliasingMode 
     painter.setPen(pen);
 
     painter.setFontDir( Pt::System::Path(FONT_DIR) );
-    painter.setFont( Pt::Gfx::Font(FONT_SPEC) );
+    painter.setFont( Pt::Gfx::Font(FONT_SPEC_N) );
 
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
     if(ip2) ip2->setAntiAliasingMode(antiAliasingMode);
