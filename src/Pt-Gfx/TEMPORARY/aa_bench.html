@@ -3,73 +3,11 @@
 <html><head>
 <meta charset='UTF-8'/>
 <style>
-    body {
-        background : #000;
-        color      : #FFF;
-    }
-    pre {
-        font-size : 14px;
-    }
-    pre:first-child {
-        font-size : 24px;
-    }
+    body            { background : #000; color : #FFF; }
+    pre             { font-size : 14px; }
+    pre:first-child { font-size : 24px; }
 </style>
 <script src='jquery-3.1.1.min.js'></script>
-<script>
-    function getScrollBarWidth()
-    {
-          var inner = document.createElement('p');
-          inner.style.width  = '100%';
-          inner.style.height = '200px';
-
-          var outer = document.createElement('div');
-          outer.style.position   = 'absolute';
-          outer.style.top        = '0px';
-          outer.style.left       = '0px';
-          outer.style.visibility = 'hidden';
-          outer.style.width      = '200px';
-          outer.style.height     = '150px';
-          outer.style.overflow   = 'hidden';
-          outer.appendChild(inner);
-
-          document.body.appendChild (outer);
-          var w1 = inner.offsetWidth;
-
-          outer.style.overflow = 'scroll';
-          var w2 = inner.offsetWidth;
-
-          if(w1 == w2) w2 = outer.clientWidth;
-
-          document.body.removeChild(outer);
-
-          return (w1 - w2);
-    };
-
-    function pairHScroll(uniqueID, wrapperTop, wrapperBot, contentTop, contentBot)
-    {
-        wrapperTop = '#' + wrapperTop + uniqueID;
-        wrapperBot = '#' + wrapperBot + uniqueID;
-        contentTop = '#' + contentTop + uniqueID;
-        contentBot = '#' + contentBot + uniqueID;
-
-        $(wrapperBot).css('overflow-x', 'scroll');
-        $(wrapperBot).css('width',      '1100px');
-        $(wrapperTop).css('overflow-x', 'scroll');
-        $(wrapperTop).css('width',      '1100px');
-
-        $(wrapperTop).css('height', getScrollBarWidth());
-
-        $(contentTop).css('visibility', 'hidden');
-        $(contentTop).html($(contentBot).html());
-
-        $(wrapperBot).scroll(function(){
-            $(wrapperTop).scrollLeft($(wrapperBot).scrollLeft());
-        });
-        $(wrapperTop).scroll(function(){
-            $(wrapperBot).scrollLeft($(wrapperTop).scrollLeft());
-        });
-    }
-</script>
 </head>
 
 <body>
@@ -85,6 +23,182 @@
 <h1><pre>
 <b>NEW ALGORITHMS FOR ELLIPSE AND ARC</b>
 </pre>
+
+<pre>
+<b>2017/02/26</b><br/>
+Pt::Gfx - CompositionMode::SourceCopy
+                                                       (Time) (Factor)
+                                                       ------ --------
+    Text                             @ ImagePainter  =     38
+    Text NOAA                        @ ImagePainter2 =     21 ( 0.553)
+    Text FTAA                        @ ImagePainter2 =     36 ( 0.947)
+
+    Line                             @ ImagePainter  =      8
+    Line NOAA                        @ ImagePainter2 =     11 ( 1.375)
+    Line XWAA                        @ ImagePainter2 =     26 ( 3.250)
+
+    Rectangle                        @ ImagePainter  =      6
+    Rectangle                        @ ImagePainter2 =      6 ( 1.000)
+
+    Ellipse                          @ ImagePainter  =      3
+    Ellipse NOAA                     @ ImagePainter2 =      5 ( 1.667)
+    Ellipse XWAA                     @ ImagePainter2 =     12 ( 4.000)
+
+    Arc     NOAA                     @ ImagePainter2 =     13
+    Arc     XWAA                     @ ImagePainter2 =     24 ( 1.846)
+
+    Solid-filled    Rectangle        @ ImagePainter  =     29
+    Solid-filled    Rectangle        @ ImagePainter2 =     27 ( 0.931)
+
+    Gradient-filled Rectangle        @ ImagePainter  =   1007
+    Gradient-filled Rectangle        @ ImagePainter2 =     28 ( 0.028)
+
+    Texture-filled  Rectangle        @ ImagePainter  =     25
+    Texture-filled  Rectangle        @ ImagePainter2 =     23 ( 0.920)
+
+    Solid-filled    polygon          @ ImagePainter  =     57
+    Solid-filled    polygon NOAA     @ ImagePainter2 =     47 ( 0.825)
+    Solid-filled    polygon FSAA 2x2 @ ImagePainter2 =    112 ( 1.965)
+    Solid-filled    polygon FSAA 4x4 @ ImagePainter2 =    357 ( 6.263)
+    Solid-filled    polygon FSAA 8x8 @ ImagePainter2 =    609 (10.684)
+
+    Gradient-filled polygon          @ ImagePainter  =   1072
+    Gradient-filled polygon NOAA     @ ImagePainter2 =     59 ( 0.055)
+    Gradient-filled polygon FSAA 2x2 @ ImagePainter2 =    185 ( 0.173)
+    Gradient-filled polygon FSAA 4x4 @ ImagePainter2 =    460 ( 0.429)
+    Gradient-filled polygon FSAA 8x8 @ ImagePainter2 =    718 ( 0.670)
+
+    Texture-filled  polygon          @ ImagePainter  =     73
+    Texture-filled  polygon NOAA     @ ImagePainter2 =     58 ( 0.795)
+    Texture-filled  polygon FSAA 2x2 @ ImagePainter2 =    186 ( 2.548)
+    Texture-filled  polygon FSAA 4x4 @ ImagePainter2 =    462 ( 6.329)
+    Texture-filled  polygon FSAA 8x8 @ ImagePainter2 =    713 ( 9.767)
+
+    Solid-filled    ellipse          @ ImagePainter  =      5
+    Solid-filled    ellipse NOAA     @ ImagePainter2 =      6 ( 1.200)
+    Solid-filled    ellipse XWAA     @ ImagePainter2 =     16 ( 3.200)
+
+    Gradient-filled ellipse          @ ImagePainter  =    149
+    Gradient-filled ellipse NOAA     @ ImagePainter2 =      9 ( 0.060)
+    Gradient-filled ellipse XWAA     @ ImagePainter2 =     21 ( 0.141)
+
+    Texture-filled  ellipse          @ ImagePainter  =      8
+    Texture-filled  ellipse NOAA     @ ImagePainter2 =      8 ( 1.000)
+    Texture-filled  ellipse XWAA     @ ImagePainter2 =     20 ( 2.500)
+
+    Solid-filled    arc     NOAA     @ ImagePainter2 =     56
+    Solid-filled    arc     XWAA     @ ImagePainter2 =     98 ( 1.750)
+
+    Gradient-filled arc     NOAA     @ ImagePainter2 =     63
+    Gradient-filled arc     XWAA     @ ImagePainter2 =    111 ( 1.762)
+
+    Texture-filled  arc     NOAA     @ ImagePainter2 =     65
+    Texture-filled  arc     XWAA     @ ImagePainter2 =    107 ( 1.646)
+
+Pt::Gfx - CompositionMode::SourceOver
+                                                       (Time) (Factor)
+                                                       ------ --------
+    Text                             @ ImagePainter  =     43
+    Text NOAA                        @ ImagePainter2 =     29 ( 0.674)
+    Text FTAA                        @ ImagePainter2 =     43 ( 1.000)
+
+    Line                             @ ImagePainter  =     12
+    Line NOAA                        @ ImagePainter2 =     13 ( 1.083)
+    Line XWAA                        @ ImagePainter2 =     28 ( 2.333)
+
+    Rectangle                        @ ImagePainter  =     12
+    Rectangle                        @ ImagePainter2 =     10 ( 0.833)
+
+    Ellipse                          @ ImagePainter  =      5
+    Ellipse NOAA                     @ ImagePainter2 =      7 ( 1.400)
+    Ellipse XWAA                     @ ImagePainter2 =     13 ( 2.600)
+
+    Arc     NOAA                     @ ImagePainter2 =     14
+    Arc     XWAA                     @ ImagePainter2 =     25 ( 1.786)
+
+    Solid-filled    Rectangle        @ ImagePainter  =    242
+    Solid-filled    Rectangle        @ ImagePainter2 =    240 ( 0.992)
+
+    Gradient-filled Rectangle        @ ImagePainter  =   1161
+    Gradient-filled Rectangle        @ ImagePainter2 =    194 ( 0.167)
+
+    Texture-filled  Rectangle        @ ImagePainter  =    232
+    Texture-filled  Rectangle        @ ImagePainter2 =    230 ( 0.991)
+
+    Solid-filled    polygon          @ ImagePainter  =    254
+    Solid-filled    polygon NOAA     @ ImagePainter2 =    164 ( 0.646)
+    Solid-filled    polygon FSAA 2x2 @ ImagePainter2 =    222 ( 0.874)
+    Solid-filled    polygon FSAA 4x4 @ ImagePainter2 =    480 ( 1.890)
+    Solid-filled    polygon FSAA 8x8 @ ImagePainter2 =    736 ( 2.898)
+
+    Gradient-filled polygon          @ ImagePainter  =   1197
+    Gradient-filled polygon NOAA     @ ImagePainter2 =    212 ( 0.177)
+    Gradient-filled polygon FSAA 2x2 @ ImagePainter2 =    333 ( 0.278)
+    Gradient-filled polygon FSAA 4x4 @ ImagePainter2 =    608 ( 0.508)
+    Gradient-filled polygon FSAA 8x8 @ ImagePainter2 =    865 ( 0.723)
+
+    Texture-filled  polygon          @ ImagePainter  =    265
+    Texture-filled  polygon NOAA     @ ImagePainter2 =    257 ( 0.970)
+    Texture-filled  polygon FSAA 2x2 @ ImagePainter2 =    375 ( 1.415)
+    Texture-filled  polygon FSAA 4x4 @ ImagePainter2 =    647 ( 2.442)
+    Texture-filled  polygon FSAA 8x8 @ ImagePainter2 =    906 ( 3.419)
+
+    Solid-filled    ellipse          @ ImagePainter  =     37
+    Solid-filled    ellipse NOAA     @ ImagePainter2 =     24 ( 0.649)
+    Solid-filled    ellipse XWAA     @ ImagePainter2 =     34 ( 0.919)
+
+    Gradient-filled ellipse          @ ImagePainter  =    173
+    Gradient-filled ellipse NOAA     @ ImagePainter2 =     34 ( 0.197)
+    Gradient-filled ellipse XWAA     @ ImagePainter2 =     46 ( 0.266)
+
+    Texture-filled  ellipse          @ ImagePainter  =     40
+    Texture-filled  ellipse NOAA     @ ImagePainter2 =     39 ( 0.975)
+    Texture-filled  ellipse XWAA     @ ImagePainter2 =     51 ( 1.275)
+
+    Solid-filled    arc     NOAA     @ ImagePainter2 =    122
+    Solid-filled    arc     XWAA     @ ImagePainter2 =    164 ( 1.344)
+
+    Gradient-filled arc     NOAA     @ ImagePainter2 =    152
+    Gradient-filled arc     XWAA     @ ImagePainter2 =    200 ( 1.316)
+
+    Texture-filled  arc     NOAA     @ ImagePainter2 =    180
+    Texture-filled  arc     XWAA     @ ImagePainter2 =    220 ( 1.222)
+
+
+Cairo - CompositionMode::SourceCopy
+                                                       (Time) (Factor)
+                                                       ------ --------
+    Solid-filled    polygon          @ Cairo         =    129
+    Solid-filled    polygon          @ Cairo - No AA =     38 ( 0.295)
+    Solid-filled    polygon          @ ImagePainter  =     57 ( 0.442)
+    Solid-filled    polygon NOAA     @ ImagePainter2 =     47 ( 0.364)
+    Solid-filled    polygon FSAA 2x2 @ ImagePainter2 =    112 ( 0.868)
+    Solid-filled    polygon FSAA 4x4 @ ImagePainter2 =    356 ( 2.760)
+    Solid-filled    polygon FSAA 8x8 @ ImagePainter2 =    608 ( 4.713)
+
+    Solid-filled    ellipse          @ Cairo         =     88
+    Solid-filled    ellipse          @ Cairo - No AA =     49 ( 0.557)
+    Solid-filled    ellipse          @ ImagePainter  =      6 ( 0.068)
+    Solid-filled    ellipse NOAA     @ ImagePainter2 =      6 ( 0.068)
+    Solid-filled    ellipse XWAA     @ ImagePainter2 =     16 ( 0.182)
+
+Cairo - CompositionMode::SourceOver
+                                                       (Time) (Factor)
+                                                       ------ --------
+    Solid-filled    polygon          @ Cairo         =    401
+    Solid-filled    polygon          @ Cairo - No AA =    135 ( 0.337)
+    Solid-filled    polygon          @ ImagePainter  =    254 ( 0.633)
+    Solid-filled    polygon NOAA     @ ImagePainter2 =    164 ( 0.409)
+    Solid-filled    polygon FSAA 2x2 @ ImagePainter2 =    222 ( 0.554)
+    Solid-filled    polygon FSAA 4x4 @ ImagePainter2 =    480 ( 1.197)
+    Solid-filled    polygon FSAA 8x8 @ ImagePainter2 =    736 ( 1.835)
+
+    Solid-filled    ellipse          @ Cairo         =    153
+    Solid-filled    ellipse          @ Cairo - No AA =     70 ( 0.458)
+    Solid-filled    ellipse          @ ImagePainter  =     38 ( 0.248)
+    Solid-filled    ellipse NOAA     @ ImagePainter2 =     24 ( 0.157)
+    Solid-filled    ellipse XWAA     @ ImagePainter2 =     34 ( 0.222)
+</pre><br/>
 
 <pre>
 <b>2017/02/25</b><br/>
@@ -3979,6 +4093,60 @@ CompositionMode::SourceOver
 
 
 <script>
+function getScrollBarWidth()
+{
+      var inner = document.createElement('p');
+      inner.style.width  = '100%';
+      inner.style.height = '200px';
+
+      var outer = document.createElement('div');
+      outer.style.position   = 'absolute';
+      outer.style.top        = '0px';
+      outer.style.left       = '0px';
+      outer.style.visibility = 'hidden';
+      outer.style.width      = '200px';
+      outer.style.height     = '150px';
+      outer.style.overflow   = 'hidden';
+      outer.appendChild(inner);
+
+      document.body.appendChild (outer);
+      var w1 = inner.offsetWidth;
+
+      outer.style.overflow = 'scroll';
+      var w2 = inner.offsetWidth;
+
+      if(w1 == w2) w2 = outer.clientWidth;
+
+      document.body.removeChild(outer);
+
+      return (w1 - w2);
+};
+
+function pairHScroll(uniqueID, wrapperTop, wrapperBot, contentTop, contentBot)
+{
+    wrapperTop = '#' + wrapperTop + uniqueID;
+    wrapperBot = '#' + wrapperBot + uniqueID;
+    contentTop = '#' + contentTop + uniqueID;
+    contentBot = '#' + contentBot + uniqueID;
+
+    $(wrapperBot).css('overflow-x', 'scroll');
+    $(wrapperBot).css('width',      '1100px');
+    $(wrapperTop).css('overflow-x', 'scroll');
+    $(wrapperTop).css('width',      '1100px');
+
+    $(wrapperTop).css('height', getScrollBarWidth());
+
+    $(contentTop).css('visibility', 'hidden');
+    $(contentTop).html($(contentBot).html());
+
+    $(wrapperBot).scroll(function(){
+        $(wrapperTop).scrollLeft($(wrapperBot).scrollLeft());
+    });
+    $(wrapperTop).scroll(function(){
+        $(wrapperBot).scrollLeft($(wrapperTop).scrollLeft());
+    });
+}
+
 document.body.innerHTML = document.body.innerHTML.replace(/😣/g, '<span style=\'color:#FF0000;\'>😣</span>')
                                                  .replace(/😏/g, '<span style=\'color:#FFFF00;\'>😏</span>')
                                                  .replace(/😶/g, '<span style=\'color:#FFFFFF;\'>😶</span>')
