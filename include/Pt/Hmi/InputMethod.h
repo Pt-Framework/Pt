@@ -68,8 +68,6 @@ class PT_HMI_API InputMethod
 
         void finish(Widget& widget);
 
-        //virtual bool mouseEvent(const MouseEvent& ev) = 0;
-
     protected:
         virtual void onShow(bool show) = 0;
         

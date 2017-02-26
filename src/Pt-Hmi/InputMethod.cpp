@@ -171,22 +171,6 @@ Window* DefaultInputMethod::onActiveWindow()
 }
 
 
-//bool DefaultInputMethod::mouseEvent(const MouseEvent& ev)
-//{
-//    Gfx::PointF pos = _window->fromScreen( ev.position() );
-//    Gfx::RectF rect( _window->size() );
-//    if( ! rect.contains(pos) )
-//        return false;
-//
-//    MouseEvent ev2(ev);
-//    ev2.setId( _window->vid() );
-//    ev2.setPosition( _window->fromScreen( ev.position() ) );
-//    
-//    Application::instance().loop().commitEvent(ev2);
-//    return true;
-//}
-
-
 void DefaultInputMethod::onKeyPress()
 {
     std::clog << "KEY PRESS" << std::endl;
