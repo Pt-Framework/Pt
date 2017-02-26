@@ -165,7 +165,23 @@ class PT_GFX_API ImagePainter2 : public Painter
 
             typedef std::multimap<Pt::int32_t, XWPointAA> XWPoints; // The key is the Y coordinate
 
+            struct XWPoint {
+                Pt::int32_t x;
+                Pt::uint8_t a1, a2;
+
+                XWPoint(Pt::int32_t x_ = -1, Pt::uint8_t a1_ = 0, Pt::uint8_t a2_ = 0)
+                : x(x_), a1(a1_), a2(a2_)
+                {}
+
+                bool isNull() const
+                { return x == -1 && a1 == 0 && a2 == 0; }
+            };
+
+            typedef std::vector< std::vector<XWPoint> > XWPointsV; // The vector index is the Y coordinate
+
+
             XWPoints points; // The line's points
+            XWPointsV pointsv;
             bool     steep;  // If "true"  then the a2 belongs to (x + 1, y)
                              // If "false" then the a2 belongs to (x, y + 1)
 
@@ -200,7 +216,7 @@ class PT_GFX_API ImagePainter2 : public Painter
         static inline void arcUtil_detXWLineDirection(XWLineData& xwLineData);
 
         static void arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai);
-        static void arcUtil_runXWLineAlgorithm(XWLineData& xwLine, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2);
+        static void arcUtil_runXWLineAlgorithm(XWLineData& xwLine, const FilledArcInfo& fai, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2);
         static void arcUtil_genScanlinesForChord(Scanlines& scanlines, const FilledArcInfo& fai, const XWLineData& xwLine);
         static void arcUtil_cropAndStoreScanlineForChord(Scanlines& scanlines, const FilledArcInfo& fai, const XWLineData& xwLine, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t y);
         static void arcUtil_genScanlinesForPie(Scanlines& scanlines1, Scanlines& scanlines2, const FilledArcInfo& fai, const XWLineData& xwLine1, const XWLineData& xwLine2);
