@@ -6,6 +6,30 @@
             imgSize.width(), imgSize.height(), false  \
         )
 
+static volatile Pt::int32_t dummy;
+
+static size_t cairoBenchRandCallOverheadTimes1000(int loopCount)
+{
+    size_t sum = 0;
+
+    // Reinitialize the random number generator here, so it will produce
+    // the same sequence at the start of every benchmark
+    srand(13579);
+
+    for(int i = 0; i < loopCount; ++i) {
+        Pt::System::Clock clock;
+        clock.start();
+
+        for(int j = 0; j < 1000; ++j) dummy = (rand() % 21 - 10);
+
+        sum += clock.stop().toUSecs();
+    }
+
+    sum /= loopCount;
+    return sum;
+}
+
+template <bool USE_RANDOM>
 static size_t cairoBenchFillPolygon(int loopCount, CompositionMode cm, bool useAntiAliasing)
 {
     size_t sum = 0;
@@ -18,6 +42,10 @@ static size_t cairoBenchFillPolygon(int loopCount, CompositionMode cm, bool useA
     cairo_t*         cairo        = cairo_create(cairoSurface);
 
     cairo_set_antialias(cairo, useAntiAliasing ? CAIRO_ANTIALIAS_DEFAULT : CAIRO_ANTIALIAS_NONE);
+
+    // Reinitialize the random number generator here, so it will produce
+    // the same sequence at the start of every benchmark
+    if(USE_RANDOM) srand(13579);
 
     for(int i = 0; i < loopCount ; ++i) {
         Pt::System::Clock clock;
@@ -36,47 +64,51 @@ static size_t cairoBenchFillPolygon(int loopCount, CompositionMode cm, bool useA
         //       * They are put here so that the benchmarking process will be a fair one,
         //         due to the fact that Pt-Gfx always perform clipping.
 
+#define RV (USE_RANDOM ? (rand() % 21 - 10) : 0)
+
         cairo_reset_clip   (cairo);
         cairo_new_path     (cairo);
-        cairo_move_to      (cairo, 150, 100); // CCW
-        cairo_line_to      (cairo, 350, 350);
-        cairo_line_to      (cairo, 450, 250);
-        cairo_line_to      (cairo, 250, 100);
-        cairo_line_to      (cairo,  50,  50);
+        cairo_move_to      (cairo, 150 + RV, 100 + RV); // CCW
+        cairo_line_to      (cairo, 350 + RV, 350 + RV);
+        cairo_line_to      (cairo, 450 + RV, 250 + RV);
+        cairo_line_to      (cairo, 250 + RV, 100 + RV);
+        cairo_line_to      (cairo,  50 + RV,  50 + RV);
         cairo_close_path   (cairo);
         cairo_clip_preserve(cairo);
         cairo_fill         (cairo);
 
         cairo_reset_clip   (cairo);
         cairo_new_path     (cairo);
-        cairo_move_to      (cairo, 350, 100); // CCW
-        cairo_line_to      (cairo, 550, 350);
-        cairo_line_to      (cairo, 650, 250);
-        cairo_line_to      (cairo, 450, 100);
-        cairo_line_to      (cairo, 250,  50);
+        cairo_move_to      (cairo, 350 + RV, 100 + RV); // CCW
+        cairo_line_to      (cairo, 550 + RV, 350 + RV);
+        cairo_line_to      (cairo, 650 + RV, 250 + RV);
+        cairo_line_to      (cairo, 450 + RV, 100 + RV);
+        cairo_line_to      (cairo, 250 + RV,  50 + RV);
         cairo_close_path   (cairo);
         cairo_clip_preserve(cairo);
         cairo_fill         (cairo);
 
         cairo_reset_clip   (cairo);
         cairo_new_path     (cairo);
-        cairo_move_to      (cairo, 110, 310); // CCW
-        cairo_line_to      (cairo, 160, 340);
-        cairo_line_to      (cairo, 210, 310);
-        cairo_line_to      (cairo, 140, 260);
+        cairo_move_to      (cairo, 110 + RV, 310 + RV); // CCW
+        cairo_line_to      (cairo, 160 + RV, 340 + RV);
+        cairo_line_to      (cairo, 210 + RV, 310 + RV);
+        cairo_line_to      (cairo, 140 + RV, 260 + RV);
         cairo_close_path   (cairo);
         cairo_clip_preserve(cairo);
         cairo_fill         (cairo);
 
         cairo_reset_clip   (cairo);
         cairo_new_path     (cairo);
-        cairo_move_to      (cairo, 110, 410); // CCW
-        cairo_line_to      (cairo, 160, 440);
-        cairo_line_to      (cairo, 210, 410);
-        cairo_line_to      (cairo, 140, 360);
+        cairo_move_to      (cairo, 110 + RV, 410 + RV); // CCW
+        cairo_line_to      (cairo, 160 + RV, 440 + RV);
+        cairo_line_to      (cairo, 210 + RV, 410 + RV);
+        cairo_line_to      (cairo, 140 + RV, 360 + RV);
         cairo_close_path   (cairo);
         cairo_clip_preserve(cairo);
         cairo_fill         (cairo);
+
+#undef RV
 
         sum += clock.stop().toUSecs();
 
@@ -157,25 +189,50 @@ static void cairoBenchmark(CompositionMode cm)
 
     // Filled polygons
     if(BENCHMARK_SOLID_FILLED_POLYGON) {
-        time1 = cairoBenchFillPolygon              (BENCHMARK_LOOP_COUNT, cm, true);
+        time1 = cairoBenchFillPolygon<false>(BENCHMARK_LOOP_COUNT, cm, true );
         std::clog << "    Solid-filled    polygon          @ Cairo         = " << std::setw(6) << time1 << std::endl;
-        time2 = cairoBenchFillPolygon              (BENCHMARK_LOOP_COUNT, cm, false);
+        time2 = cairoBenchFillPolygon<false>(BENCHMARK_LOOP_COUNT, cm, false);
         std::clog << "    Solid-filled    polygon          @ Cairo - No AA = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillPolygon<ImagePainter >(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::None);
+        time2 = benchDrawFillPolygon<ImagePainter , false>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::None);
         std::clog << "    Solid-filled    polygon          @ ImagePainter  = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::None);
+        time2 = benchDrawFillPolygon<ImagePainter2, false>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::None);
         std::clog << "    Solid-filled    polygon NOAA     @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::Fastest);
+        time2 = benchDrawFillPolygon<ImagePainter2, false>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::Fastest);
         std::clog << "    Solid-filled    polygon FSAA 2x2 @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::Medium);
+        time2 = benchDrawFillPolygon<ImagePainter2, false>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::Medium);
         std::clog << "    Solid-filled    polygon FSAA 4x4 @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillPolygon<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::Maximum);
+        time2 = benchDrawFillPolygon<ImagePainter2, false>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::Maximum);
         std::clog << "    Solid-filled    polygon FSAA 8x8 @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        std::clog << std::endl;
+
+        std::clog << "    >>> +Random: Factor => Relative to Self Non-Random] (Time) (Factor)" << std::endl << std::endl;
+        time1 = cairoBenchRandCallOverheadTimes1000(BENCHMARK_LOOP_COUNT);
+        std::clog << "    Overhead for calling the rand() function in libc = " << std::setw(6) << std::setprecision(3) << (time1 / 1000.0f) <<  std::setprecision(0) << std::endl;
+        time1 = cairoBenchFillPolygon<false>(BENCHMARK_LOOP_COUNT, cm, true );
+        time2 = cairoBenchFillPolygon<true >(BENCHMARK_LOOP_COUNT, cm, true );
+        std::clog << "    Solid-filled  R-polygon          @ Cairo         = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time1 = cairoBenchFillPolygon<false>(BENCHMARK_LOOP_COUNT, cm, false);
+        time2 = cairoBenchFillPolygon<true >(BENCHMARK_LOOP_COUNT, cm, false);
+        std::clog << "    Solid-filled  R-polygon          @ Cairo - No AA = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time1 = benchDrawFillPolygon<ImagePainter , false>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::None);
+        time2 = benchDrawFillPolygon<ImagePainter , true >(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::None);
+        std::clog << "    Solid-filled  R-polygon          @ ImagePainter  = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time1 = benchDrawFillPolygon<ImagePainter2, false>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::None);
+        time2 = benchDrawFillPolygon<ImagePainter2, true >(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::None);
+        std::clog << "    Solid-filled  R-polygon NOAA     @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time1 = benchDrawFillPolygon<ImagePainter2, false>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::Fastest);
+        time2 = benchDrawFillPolygon<ImagePainter2, true >(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::Fastest);
+        std::clog << "    Solid-filled  R-polygon FSAA 2x2 @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }

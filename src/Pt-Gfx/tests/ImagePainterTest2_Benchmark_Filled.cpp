@@ -32,7 +32,7 @@ static size_t benchDrawFillRect(int loopCount, const Brush& brushH, const Brush&
     return sum;
 }
 
-template <typename PainterT>
+template <typename PainterT, bool USE_RANDOM>
 static size_t benchDrawFillPolygon(int loopCount, const Brush& brushH, const Brush& brushV, CompositionMode cm, AntiAliasingMode antiAliasingMode)
 {
     size_t sum = 0;
@@ -47,47 +47,55 @@ static size_t benchDrawFillPolygon(int loopCount, const Brush& brushH, const Bru
 
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
 
+    // Reinitialize the random number generator here, so it will produce
+    // the same sequence at the start of every benchmark
+    if(USE_RANDOM) srand(13579);
+
     for(int i = 0; i < loopCount ; ++i) {
         Pt::System::Clock clock;
         clock.start();
 
+#define RV (USE_RANDOM ? (rand() % 21 - 10) : 0)
+
         painter.setBrush(brushH);
         const PointF poly1a[] = { // CCW
-            PointF(150, 100),
-            PointF(350, 350),
-            PointF(450, 250),
-            PointF(250, 100),
-            PointF( 50,  50)
+            PointF(150 + RV, 100 + RV),
+            PointF(350 + RV, 350 + RV),
+            PointF(450 + RV, 250 + RV),
+            PointF(250 + RV, 100 + RV),
+            PointF( 50 + RV,  50 + RV)
         };
         if(ip2) ip2->setAntiAliasingMode(antiAliasingMode);
         painter.fillPolygon(poly1a, sizeof(poly1a) / sizeof(poly1a[0]));
 
         painter.setBrush(brushV);
         const PointF poly1b[] = { // CCW
-            PointF(350, 100),
-            PointF(550, 350),
-            PointF(650, 250),
-            PointF(450, 100),
-            PointF(250,  50)
+            PointF(350 + RV, 100 + RV),
+            PointF(550 + RV, 350 + RV),
+            PointF(650 + RV, 250 + RV),
+            PointF(450 + RV, 100 + RV),
+            PointF(250 + RV,  50 + RV)
         };
         painter.fillPolygon(poly1b, sizeof(poly1b) / sizeof(poly1b[0]));
 
         const PointF poly2a[] = { // CCW
-            PointF(110, 310),
-            PointF(160, 340),
-            PointF(210, 310),
-            PointF(140, 260)
+            PointF(110 + RV, 310 + RV),
+            PointF(160 + RV, 340 + RV),
+            PointF(210 + RV, 310 + RV),
+            PointF(140 + RV, 260 + RV)
         };
         if(ip2) ip2->setAntiAliasingMode(antiAliasingMode);
         painter.fillPolygon(poly2a, sizeof(poly2a) / sizeof(poly2a[0]));
 
         const PointF poly2b[] = { // CCW
-            PointF(110, 410),
-            PointF(160, 440),
-            PointF(210, 410),
-            PointF(140, 360)
+            PointF(110 + RV, 410 + RV),
+            PointF(160 + RV, 440 + RV),
+            PointF(210 + RV, 410 + RV),
+            PointF(140 + RV, 360 + RV)
         };
         painter.fillPolygon(poly2b, sizeof(poly2b) / sizeof(poly2b[0]));
+
+#undef RV
 
         sum += clock.stop().toUSecs();
 
