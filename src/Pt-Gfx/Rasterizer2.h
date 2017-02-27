@@ -198,11 +198,18 @@ class Rasterizer2
 
 
 
-        typedef std::set<Pt::int32_t> ScanlineEdges;
-        typedef std::map<Pt::int32_t, ScanlineEdges> PolygonEdges;
+        struct PolySpanElement {
+            Pt::int32_t from, to;
+
+            PolySpanElement(Pt::int32_t from_, Pt::int32_t to_)
+            : from(from_), to(to_)
+            {}
+        };
+
+        typedef std::vector< std::vector<PolySpanElement> > PolySpans; // The vector index is the Y coordinate
 
         void rasterPolygonAreaXWAANaive(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
-        void fillOnePixelGLineSegmentXWAAExt(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const PolygonEdges& polyEdges, DrawLineMask& maskInOut);
+        void fillOnePixelGLineSegmentXWAAExt(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const PolySpans& polySpans, DrawLineMask& maskInOut);
 
 
 

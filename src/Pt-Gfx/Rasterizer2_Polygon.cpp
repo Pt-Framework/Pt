@@ -102,13 +102,6 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
 
     // Draw the polygon
     if(_aaMode == AntiAliasingMode::None) {
-        rasterPolygonAreaXWAANaive(
-            clippedPoints.data(), clippedCounts.data(),
-            clippedCounts.size(), clippedPoints.size(),
-            _brush.color(), minX, minY, maxX, maxY
-        );
-        return;
-
         rasterPolygonAreaNoAA(
             clippedPoints.data(), clippedCounts.data(),
             clippedCounts.size(), clippedPoints.size(),
@@ -123,6 +116,13 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
         );
     }
     else if(_aaMode == AntiAliasingMode::Medium) {
+        rasterPolygonAreaXWAANaive(
+            clippedPoints.data(), clippedCounts.data(),
+            clippedCounts.size(), clippedPoints.size(),
+            _brush.color(), minX, minY, maxX, maxY
+        );
+        return;
+
         rasterPolygonAreaFSAAGen<4>(
             clippedPoints.data(), clippedCounts.data(),
             clippedCounts.size(), clippedPoints.size(),
@@ -522,8 +522,8 @@ void Rasterizer2::rasterPolygonAreaXWAANaive(const Point* points, const size_t* 
     // List of nodes that define the horizontal spans
     std::vector<Pt::int32_t> nodeX(totalPointCount * 2, 0);
 
-    // List of polygon edges
-    PolygonEdges polyEdges;
+    // List of polygon spans
+    PolySpans polySpans(maxY - minY + 1);
 
     //  Loop through the rows of the image
     for(Pt::int32_t pixelY = minY; pixelY <= maxY; ++pixelY) {
@@ -566,23 +566,14 @@ void Rasterizer2::rasterPolygonAreaXWAANaive(const Point* points, const size_t* 
         bubbleSortAscending(nodeX, nodes);
         // Fill the pixels between the node pairs
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
+            //
             const Pt::int32_t from = nodeX[i    ] + 1;
             const Pt::int32_t to   = nodeX[i + 1];
             if(to < from) continue;
-
-            PolygonEdges::iterator it = polyEdges.find(pixelY);
-            if(it != polyEdges.end()) {
-                it->second.insert(from);
-                it->second.insert(to);
-            }
-            else {
-                ScanlineEdges sle;
-                sle.insert(from);
-                sle.insert(to);
-                polyEdges.insert(make_pair(pixelY, sle));
-            }
-
+            //
             rasterScanline(from - minX, to - minX, pixelY - minY, minX, minY, color);
+            //
+            polySpans[pixelY - minY].push_back(PolySpanElement(from, to));
         }
     }
 
@@ -596,7 +587,7 @@ void Rasterizer2::rasterPolygonAreaXWAANaive(const Point* points, const size_t* 
         // From point N to point (N + 1), successively
         const size_t pc1 = pointCount[p] - 1;
         for(size_t i = 0; i < pc1; ++i) {
-            fillOnePixelGLineSegmentXWAAExt(curPointBase[i].x(), curPointBase[i].y(), curPointBase[i + 1].x(), curPointBase[i + 1].y(), minX, minY, polyEdges, mask_nnp1);
+            fillOnePixelGLineSegmentXWAAExt(curPointBase[i].x(), curPointBase[i].y(), curPointBase[i + 1].x(), curPointBase[i + 1].y(), minX, minY, polySpans, mask_nnp1);
             if(!i) memcpy(&mask_zero, &mask_nnp1, sizeof(mask_zero));
         }
         mask_zero[2] = mask_zero[0];
@@ -604,7 +595,7 @@ void Rasterizer2::rasterPolygonAreaXWAANaive(const Point* points, const size_t* 
         mask_zero[0] = mask_nnp1[2];
         mask_zero[1] = mask_nnp1[3];
         // From the last point to the first point
-        fillOnePixelGLineSegmentXWAAExt(curPointBase[pc1].x(), curPointBase[pc1].y(), curPointBase[0].x(), curPointBase[0].y(), minX, minY, polyEdges, mask_zero);
+        fillOnePixelGLineSegmentXWAAExt(curPointBase[pc1].x(), curPointBase[pc1].y(), curPointBase[0].x(), curPointBase[0].y(), minX, minY, polySpans, mask_zero);
         // Increment the base pointer
         curPointBase += pointCount[p];
     }
@@ -612,7 +603,7 @@ void Rasterizer2::rasterPolygonAreaXWAANaive(const Point* points, const size_t* 
 
 // Xiaolin Wu's Anti-Aliased Line Algorithm
 // https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
-void Rasterizer2::fillOnePixelGLineSegmentXWAAExt(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const PolygonEdges& polyEdges, DrawLineMask& maskInOut)
+void Rasterizer2::fillOnePixelGLineSegmentXWAAExt(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const PolySpans& polySpans, DrawLineMask& maskInOut)
 {
     // Get the mask's coordinate
     Pt::int32_t mx[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
@@ -693,15 +684,15 @@ void Rasterizer2::fillOnePixelGLineSegmentXWAAExt(Pt::int32_t x1, Pt::int32_t y1
             const Pt::int32_t y  = i;
             ypxli += grad;
             // Draw the pixels as needed
-            PolygonEdges::const_iterator it = polyEdges.find(y);
-            if(it != polyEdges.end()) {
-                if(it->second.find(x1) == it->second.end()) XW_FILL_PIXEL(_image, x1, y, a1);
-                if(it->second.find(x2) == it->second.end()) XW_FILL_PIXEL(_image, x2, y, a2);
-            }
-            else {
+            //PolygonEdges::const_iterator it = polyEdges.find(y);
+            //if(it != polyEdges.end()) {
+            //    if(it->second.find(x1) == it->second.end()) XW_FILL_PIXEL(_image, x1, y, a1);
+            //    if(it->second.find(x2) == it->second.end()) XW_FILL_PIXEL(_image, x2, y, a2);
+            //}
+            //else {
                 XW_FILL_PIXEL(_image, x1, y, a1);
                 XW_FILL_PIXEL(_image, x2, y, a2);
-            }
+            //}
         }
         // Store back the start and end coordinates to the mask as needed
         maskInOut[0].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl        )                           ), from);
@@ -720,10 +711,12 @@ void Rasterizer2::fillOnePixelGLineSegmentXWAAExt(Pt::int32_t x1, Pt::int32_t y1
             const Pt::int32_t y2 = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE);
             ypxli += grad;
             // Draw the pixels as needed
-            PolygonEdges::const_iterator it1 = polyEdges.find(y1);
-            PolygonEdges::const_iterator it2 = polyEdges.find(y2);
-            if(it1 != polyEdges.end() && it1->second.find(x) == it1->second.end()) XW_FILL_PIXEL(_image, x, y1, a1);
-            if(it2 != polyEdges.end() && it2->second.find(x) == it2->second.end()) XW_FILL_PIXEL(_image, x, y2, a2);
+            //PolygonEdges::const_iterator it1 = polyEdges.find(y1);
+            //PolygonEdges::const_iterator it2 = polyEdges.find(y2);
+            //if(it1 != polyEdges.end() && it1->second.find(x) == it1->second.end()) XW_FILL_PIXEL(_image, x, y1, a1);
+            //if(it2 != polyEdges.end() && it2->second.find(x) == it2->second.end()) XW_FILL_PIXEL(_image, x, y2, a2);
+            XW_FILL_PIXEL(_image, x, y1, a1);
+            XW_FILL_PIXEL(_image, x, y2, a2);
         }
         // Store back the start and end coordinates to the mask as needed
         maskInOut[0].set(from, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl        )                           ));
