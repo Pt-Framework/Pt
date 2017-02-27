@@ -72,7 +72,7 @@ void DrawText2::setFont(const Font& font)
 
     if(_fontAngle < 0) _fontAngle += 3600;
 
-    const float angle   = (_fontAngle / 10.0  *  3.14159) / 180.0;
+    const float angle   = (_fontAngle / 10.0f  *  3.14159f) / 180.0f;
     const float cosinus = ::cos( angle ) * 0x10000L;
     const float sinus   = ::sin( angle ) * 0x10000L;
 
@@ -89,12 +89,13 @@ FontMetrics DrawText2::fontMetrics(const String& text)
 
 void DrawText2::draw(Image& image, const Color& color, const Point& pos, const String& text, const CompositionMode& mode)
 {
-    return FreeType2::instance().draw(image, color, _fontAngle, pos, text,_clip, mode, _matrix, _faceId, &_imageType, false);
+    return FreeType2::instance().draw(image, _clip, pos, color, _fontAngle, mode, text, _matrix, _faceId, &_imageType, false);
 }
+
 
 void DrawText2::drawMono(Image& image, const Color& color, const Point& pos, const String& text, const CompositionMode& mode)
 {
-    return FreeType2::instance().draw(image, color, _fontAngle, pos, text,_clip, mode, _matrix, _faceId, &_imageType, true);
+    return FreeType2::instance().draw(image, _clip, pos, color, _fontAngle, mode, text, _matrix, _faceId, &_imageType, true);
 }
 
 

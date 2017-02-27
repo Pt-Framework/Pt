@@ -31,8 +31,6 @@
 #ifndef PT_GFX_DRAWTEXT2_H
 #define PT_GFX_DRAWTEXT2_H
 
-#include <cassert>
-
 #include "FreeType2.h"
 
 
@@ -46,12 +44,10 @@ class DrawText2 {
 
         ~DrawText2();
 
-        void setFont(const Font& font);
-
         void setClip(const Rect& clip)
-        {
-            _clip = clip;
-        }
+        { _clip = clip; }
+
+        void setFont(const Font& font);
 
         FontMetrics fontMetrics(const String& text);
 

@@ -43,6 +43,7 @@
 #include <Pt/Types.h>
 #include <Pt/Singleton.h>
 
+#include <Pt/System/Mutex.h>
 #include <Pt/System/Path.h>
 
 #include <Pt/Gfx/Api.h>
@@ -66,25 +67,24 @@ class FreeType2 : public Pt::Singleton<FreeType2> {
 
         ~FreeType2();
 
-        std::string defaultFont() const;
-
-        void setDefaultFont(const std::string& font);
+        void setFontDir(const System::Path& path);
 
         std::vector<std::string> fontNames() const;
 
-        void setFontDir(const System::Path& path);
+        void setDefaultFont(const std::string& font);
 
-        FontMetrics fontMetrics(const String& text, FTC_FaceID faceId, FTC_ImageType imageType);
-
-        static FT_Error fontRequest(FTC_FaceID face_id, FT_Library library, FT_Pointer request_data, FT_Face* face);
+        std::string defaultFont() const;
 
         FTC_FaceID findFaceId(const Font& font);
 
+        FontMetrics fontMetrics(const String& text, FTC_FaceID faceId, FTC_ImageType imageType);
+
         void draw(
-            Image& image, const Color& color, Pt::ssize_t fontAngle,
-            const Point& pos, const String& text, const Rect& clip, const CompositionMode& mode,
-            FT_Matrix& matrix, FTC_FaceID faceId, FTC_ImageType imageType, bool mono
+            Image& image, const Rect& clip, const Point& pos, const Color& color, Pt::ssize_t fontAngle, const CompositionMode& mode,
+            const String& text, FT_Matrix& matrix, FTC_FaceID faceId, FTC_ImageType imageType, bool mono
         );
+
+        static FT_Error fontRequest(FTC_FaceID face_id, FT_Library library, FT_Pointer request_data, FT_Face* face);
 
     protected:
         FreeType2();
@@ -92,20 +92,22 @@ class FreeType2 : public Pt::Singleton<FreeType2> {
         FT_Error onFontRequest(FTC_FaceID face_id, FT_Face* face);
 
         void drawGlyph(
-            Image& image, const Color& color, int xpos, int ypos,
-            int bmPitch, int height, int width,
-            const unsigned char* buffer, const Rect& clip, const CompositionMode& mode, bool mono
+            Image& image, const Rect& clip, int xpos, int ypos, const Color& color, const CompositionMode& mode,
+            int pitch, int width, int height, const unsigned char* buffer, bool mono
         );
 
     private:
         typedef std::set<System::Path*> Files;
         typedef std::map<Font, System::Path> Fonts;
 
+        mutable System::Mutex _mutex;
+
         FT_Library     _ft;
         FTC_Manager    _manager;
-        FTC_ImageCache _imageCache;
         FTC_CMapCache  _charMapCache;
         FTC_SBitCache  _bitmapCache;
+        FTC_ImageCache _imageCache;
+
         System::Path   _fontDir;
         std::string    _defaultFont;
         Fonts          _fonts;
