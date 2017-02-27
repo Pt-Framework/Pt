@@ -370,10 +370,10 @@ void Rasterizer2::rasterOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1,
         }
         // Store back the start and end coordinates to the mask as needed
         if(maskInOut) {
-            (*maskInOut)[0].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl        )                           ), from);
-            (*maskInOut)[1].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl        ) + FIXED_POINT_CONSTANT_ONE), from);
-            (*maskInOut)[2].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli - grad)                           ), to  );
-            (*maskInOut)[3].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli - grad) + FIXED_POINT_CONSTANT_ONE), to  );
+            (*maskInOut)[0].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl )                           ), from);
+            (*maskInOut)[1].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl ) + FIXED_POINT_CONSTANT_ONE), from);
+            (*maskInOut)[2].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           ), to  );
+            (*maskInOut)[3].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE), to  );
         }
     }
     else {
@@ -387,10 +387,10 @@ void Rasterizer2::rasterOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1,
         }
         // Store back the start and end coordinates to the mask as needed
         if(maskInOut) {
-            (*maskInOut)[0].set(from, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl        )                           ));
-            (*maskInOut)[1].set(from, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl        ) + FIXED_POINT_CONSTANT_ONE));
-            (*maskInOut)[2].set(to,   FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli - grad)                           ));
-            (*maskInOut)[3].set(to,   FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli - grad) + FIXED_POINT_CONSTANT_ONE));
+            (*maskInOut)[0].set(from, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl )                           ));
+            (*maskInOut)[1].set(from, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl ) + FIXED_POINT_CONSTANT_ONE));
+            (*maskInOut)[2].set(to,   FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           ));
+            (*maskInOut)[3].set(to,   FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE));
         }
     }
 
@@ -482,19 +482,21 @@ void Rasterizer2::fillOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, P
             // Draw the pixels as needed
             bool skipPixel1 = false;
             bool skipPixel2 = false;
-            for(std::vector<PolygonScanline>::const_iterator it = exclusionZone[y - minY].begin(); it != exclusionZone[y - minY].end(); ++it) {
-                if(x1 >= it->from && x1 <= it->to) skipPixel1 = true;
-                if(x2 >= it->from && x2 <= it->to) skipPixel2 = true;
-                if(skipPixel1 && skipPixel2) break;
+            if(!exclusionZone.empty()) {
+                for(std::vector<PolygonScanline>::const_iterator it = exclusionZone[y - minY].begin(); it != exclusionZone[y - minY].end(); ++it) {
+                    if(x1 >= it->from && x1 <= it->to) skipPixel1 = true;
+                    if(x2 >= it->from && x2 <= it->to) skipPixel2 = true;
+                    if(skipPixel1 && skipPixel2) break;
+                }
             }
             if(!skipPixel1) XW_FILL_PIXEL(_image, x1, y, a1);
             if(!skipPixel2) XW_FILL_PIXEL(_image, x2, y, a2);
         }
         // Store back the start and end coordinates to the mask as needed
-        maskInOut[0].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl        )                           ), from);
-        maskInOut[1].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl        ) + FIXED_POINT_CONSTANT_ONE), from);
-        maskInOut[2].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli - grad)                           ), to  );
-        maskInOut[3].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli - grad) + FIXED_POINT_CONSTANT_ONE), to  );
+        maskInOut[0].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl )                           ), from);
+        maskInOut[1].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl ) + FIXED_POINT_CONSTANT_ONE), from);
+        maskInOut[2].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           ), to  );
+        maskInOut[3].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE), to  );
     }
     else {
         // Draw the pixels
@@ -508,25 +510,29 @@ void Rasterizer2::fillOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, P
             ypxli += grad;
             // Draw the pixels as needed
             bool skipPixel = false;
-            for(std::vector<PolygonScanline>::const_iterator it = exclusionZone[y1 - minY].begin(); it != exclusionZone[y1 - minY].end(); ++it) {
-                if (x < it->from || x > it->to) continue;
-                skipPixel = true;
-                break;
+            if(!exclusionZone.empty()) {
+                for(std::vector<PolygonScanline>::const_iterator it = exclusionZone[y1 - minY].begin(); it != exclusionZone[y1 - minY].end(); ++it) {
+                    if (x < it->from || x > it->to) continue;
+                    skipPixel = true;
+                    break;
+                }
             }
             if(!skipPixel) XW_FILL_PIXEL(_image, x, y1, a1);
             skipPixel = false;
-            for(std::vector<PolygonScanline>::const_iterator it = exclusionZone[y2 - minY].begin(); it != exclusionZone[y2 - minY].end(); ++it) {
-                if (x < it->from || x > it->to) continue;
-                skipPixel = true;
-                break;
+            if(!exclusionZone.empty()) {
+                for(std::vector<PolygonScanline>::const_iterator it = exclusionZone[y2 - minY].begin(); it != exclusionZone[y2 - minY].end(); ++it) {
+                    if (x < it->from || x > it->to) continue;
+                    skipPixel = true;
+                    break;
+                }
             }
             if(!skipPixel) XW_FILL_PIXEL(_image, x, y2, a2);
         }
         // Store back the start and end coordinates to the mask as needed
-        maskInOut[0].set(from, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl        )                           ));
-        maskInOut[1].set(from, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl        ) + FIXED_POINT_CONSTANT_ONE));
-        maskInOut[2].set(to,   FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli - grad)                           ));
-        maskInOut[3].set(to,   FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli - grad) + FIXED_POINT_CONSTANT_ONE));
+        maskInOut[0].set(from, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl )                           ));
+        maskInOut[1].set(from, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl ) + FIXED_POINT_CONSTANT_ONE));
+        maskInOut[2].set(to,   FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           ));
+        maskInOut[3].set(to,   FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE));
     }
 
     // Undefine the helper macro

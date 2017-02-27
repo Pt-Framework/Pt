@@ -169,7 +169,8 @@ void Rasterizer2::fillPolygonSeparate(const Point* points, size_t pointCount)
             else if(_aaMode == AntiAliasingMode::Medium)
                 rasterPolygonAreaFSAAGen<4>(clipped.data(), numPoint, 1, clipped.size(), _brush.color(), minX, minY, maxX, maxY);
             else // _aaMode == AntiAliasingMode::Maximum
-                rasterPolygonAreaFSAAGen<8>(clipped.data(), numPoint, 1, clipped.size(), _brush.color(), minX, minY, maxX, maxY);
+                rasterPolygonAreaXWAA(clipped.data(), numPoint, 1, clipped.size(), _brush.color(), minX, minY, maxX, maxY);
+                //rasterPolygonAreaFSAAGen<8>(clipped.data(), numPoint, 1, clipped.size(), _brush.color(), minX, minY, maxX, maxY);
         }
     }
 }
@@ -519,7 +520,10 @@ void Rasterizer2::rasterPolygonAreaXWAA(const Point* points, const size_t* point
     std::vector<Pt::int32_t> nodeX(totalPointCount * 2, 0);
 
     // List of polygon scanlines
-    PolygonScanlines scanlines(maxY - minY + 1 + 2);
+    PolygonScanlines scanlines;
+
+    if(_compositionMode != CompositionMode::SourceCopy)
+        scanlines.resize(maxY - minY + 1 + 2);
 
     //  Loop through the rows of the image
     for(Pt::int32_t pixelY = minY; pixelY <= maxY; ++pixelY) {
@@ -566,8 +570,9 @@ void Rasterizer2::rasterPolygonAreaXWAA(const Point* points, const size_t* point
             const Pt::int32_t from = nodeX[i    ] + 1;
             const Pt::int32_t to   = nodeX[i + 1];
             if(to < from) continue;
-            // Store the coordinate
-            scanlines[pixelY - minY].push_back(PolygonScanline(from, to));
+            // Store the scanline coordinate as needed
+            if(_compositionMode != CompositionMode::SourceCopy)
+                scanlines[pixelY - minY].push_back(PolygonScanline(from, to));
             // Draw the scanline
             rasterScanline(from - minX, to - minX, pixelY - minY, minX, minY, color);
         }
