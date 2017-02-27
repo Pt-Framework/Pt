@@ -14,6 +14,7 @@
 //     wherever you need to run 'perf report' on.
 //
 
+#include <ctime>
 #include <fstream>
 #include <iomanip>
 
@@ -67,6 +68,9 @@ using namespace Pt::Gfx;
 #define TEST_COMPARE_WITH_OLD_PAINTER           0 // (for some shapes only)
 
 // Detailed-test benchmark settings for Pt-Gfx and some for Cairo
+#define BENCHMARK_RESULT_HTML               0
+#define BENCHMARK_RESULT_HTML_SIDE_BY_SIDE  0
+
 #define BENCHMARK_CHECK_RESULTING_IMAGE     0
 
 #define BENCHMARK_IMAGE_SIZE                Size(1280, 800)
@@ -74,8 +78,8 @@ using namespace Pt::Gfx;
 
 #define BENCHMARK_TEXT                      0
 #define BENCHMARK_LINE                      0
-#define BENCHMARK_ELLIPSE                   1
-#define BENCHMARK_ARC                       1
+#define BENCHMARK_ELLIPSE                   0
+#define BENCHMARK_ARC                       0
 
 #define BENCHMARK_RECTANGLE                 0
 #define BENCHMARK_SOLID_FILLED_RECTANGLE    0
@@ -304,14 +308,60 @@ int main(int argc, char* args[])
     bmBrushTextureW  = Brush(textureWithWhiteBackground);
 
     // Benchmark
+    char hexStr[33];
+    srand(time(NULL));
+    sprintf(hexStr, "%08x", rand());
+
+    char   dateStr[19];
+    time_t rawtime;
+    time(&rawtime);
+    strftime(dateStr, sizeof(dateStr), "%Y/%m/%d - %H:%M", localtime(&rawtime));
+
+    if(DO_BENCHMARKING && BENCHMARK_RESULT_HTML) {
+        std::clog << std::endl;
+        if(BENCHMARK_RESULT_HTML_SIDE_BY_SIDE) {
+            std::clog << "<pre>" << std::endl;
+            std::clog << "<b>" << dateStr << "</b><br/>" << std::endl;
+            std::clog << "<div id='wrapperTop" << hexStr << "'>" << std::endl;
+            std::clog << "    <table id='contentTop" << hexStr << "'></table>" << std::endl;
+            std::clog << "</div>" << std::endl;
+            std::clog << "<div id='wrapperBot" << hexStr << "'>" << std::endl;
+            std::clog << "<table id='contentBot" << hexStr << "'>" << std::endl;
+            std::clog << "<tr>" << std::endl;
+            std::clog << "    <td><i><b>Pt::Gfx - CompositionMode::SourceCopy</b></i></td><td>&nbsp;&nbsp;&nbsp;</td>" << std::endl;
+            std::clog << "    <td><i><b>Pt::Gfx - CompositionMode::SourceOver</b></i></td><td>&nbsp;&nbsp;&nbsp;</td>" << std::endl;
+            std::clog << "    <td><i><b>Comparison with Cairo</b></i></td>" << std::endl;
+            std::clog << "</tr>" << std::endl;
+            std::clog << "<tr>" << std::endl;
+            std::clog << "    <!-- Pt::Gfx - CompositionMode::SourceCopy -->" << std::endl;
+            std::clog << "    <td>" << std::endl;
+        }
+        else {
+            std::clog << "<pre>" << std::endl;
+            std::clog << "<b>" << dateStr << "</b><br/>" << std::endl;
+        }
+    }
+
     if(DO_BENCHMARKING) {
         std::clog << std::fixed << std::setprecision(0) << std::endl;
 
-        std::clog << "Pt::Gfx - CompositionMode::SourceCopy" << std::endl;
+        if(!BENCHMARK_RESULT_HTML || !BENCHMARK_RESULT_HTML_SIDE_BY_SIDE) std::clog << "Pt::Gfx - CompositionMode::SourceCopy" << std::endl;
         doBenchmark(CompositionMode::SourceCopy);
 
-        std::clog << "Pt::Gfx - CompositionMode::SourceOver" << std::endl;
+        if(BENCHMARK_RESULT_HTML && BENCHMARK_RESULT_HTML_SIDE_BY_SIDE) {
+            std::clog << "    </td><td>&nbsp;&nbsp;&nbsp;</td>" << std::endl;
+            std::clog << "    <!-- Pt::Gfx - CompositionMode::SourceOver -->" << std::endl;
+            std::clog << "    <td>" << std::endl;
+        }
+
+        if(!BENCHMARK_RESULT_HTML || !BENCHMARK_RESULT_HTML_SIDE_BY_SIDE) std::clog << "Pt::Gfx - CompositionMode::SourceOver" << std::endl;
         doBenchmark(CompositionMode::SourceOver);
+
+        if(BENCHMARK_RESULT_HTML && BENCHMARK_RESULT_HTML_SIDE_BY_SIDE) {
+            std::clog << "    </td><td>&nbsp;&nbsp;&nbsp;</td>" << std::endl;
+            std::clog << "    <!-- Comparison with Cairo -->" << std::endl;
+            std::clog << "    <td>" << std::endl;
+        }
     }
 
     if(DO_BENCHMARKING_CAIRO) {
@@ -322,6 +372,20 @@ int main(int argc, char* args[])
 
         std::clog << "Cairo - CompositionMode::SourceOver" << std::endl;
         cairoBenchmark(CompositionMode::SourceOver);
+    }
+
+    if(DO_BENCHMARKING && BENCHMARK_RESULT_HTML) {
+        if(BENCHMARK_RESULT_HTML_SIDE_BY_SIDE) {
+            std::clog << "    </td>" << std::endl;
+            std::clog << "</tr>" << std::endl;
+            std::clog << "</table>" << std::endl;
+            std::clog << "</div></pre><br/>" << std::endl;
+            std::clog << "<script>$(document).ready(function() { pairHScroll('" << hexStr << "', 'wrapperTop', 'wrapperBot', 'contentTop', 'contentBot'); });</script>" << std::endl;
+        }
+        else {
+            std::clog << "</pre><br/>" << std::endl;
+        }
+        std::clog << std::endl;
     }
 
     // All done
