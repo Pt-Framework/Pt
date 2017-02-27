@@ -44,7 +44,7 @@ using namespace Pt::Gfx;
 #define DO_MATH_BENCHMARKING_ONLY 0
 
 // Comparison with Cairo (solid-filled polygons and ellipses only)
-#define DO_BENCHMARKING_CAIRO                 1
+#define DO_BENCHMARKING_CAIRO                 0
 #define BENCHMARK_CAIRO_CHECK_RESULTING_IMAGE 0
 
 // General settings for Pt-Gfx
@@ -53,53 +53,53 @@ using namespace Pt::Gfx;
 
 // Detailed-test enable settings for Pt-Gfx
 #define TEST_SOURCECOPY                         1
-#define TEST_SOURCEOVER                         1
+#define TEST_SOURCEOVER                         0
 
-#define TEST_DRAW_LINE_AND_TEXT                 1
-#define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES  1
+#define TEST_DRAW_LINE_AND_TEXT                 0
+#define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES  0
 
-#define TEST_DRAW_ELLIPSES_ARCS                 1
+#define TEST_DRAW_ELLIPSES_ARCS                 0
 
-#define TEST_DRAW_SOLID_FILLED_POLYGONS         1
-#define TEST_DRAW_GRADIENT_FILLED_POLYGONS      1
-#define TEST_DRAW_TEXTURE_FILLED_POLYGONS       1
+#define TEST_DRAW_SOLID_FILLED_POLYGONS         0
+#define TEST_DRAW_GRADIENT_FILLED_POLYGONS      0
+#define TEST_DRAW_TEXTURE_FILLED_POLYGONS       0
 
 #define TEST_DRAW_SOLID_FILLED_ELLIPSES_ARCS    1
-#define TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS 1
-#define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  1
+#define TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS 0
+#define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  0
 
 #define TEST_COMPARE_WITH_OLD_PAINTER           0 // (for some shapes only)
 
 // Detailed-test benchmark settings for Pt-Gfx and some for Cairo
-#define BENCHMARK_RESULT_HTML               1
-#define BENCHMARK_RESULT_HTML_SIDE_BY_SIDE  1
+#define BENCHMARK_RESULT_HTML               0
+#define BENCHMARK_RESULT_HTML_SIDE_BY_SIDE  0
 
 #define BENCHMARK_CHECK_RESULTING_IMAGE     0
 
 #define BENCHMARK_IMAGE_SIZE                Size(1280, 800)
 #define BENCHMARK_LOOP_COUNT                5000
 
-#define BENCHMARK_TEXT                      1
-#define BENCHMARK_LINE                      1
+#define BENCHMARK_TEXT                      0
+#define BENCHMARK_LINE                      0
 #define BENCHMARK_ELLIPSE                   1
 #define BENCHMARK_ARC                       1
 
-#define BENCHMARK_RECTANGLE                 1
-#define BENCHMARK_SOLID_FILLED_RECTANGLE    1
-#define BENCHMARK_GRADIENT_FILLED_RECTANGLE 1
-#define BENCHMARK_TEXTURE_FILLED_RECTANGLE  1
+#define BENCHMARK_RECTANGLE                 0
+#define BENCHMARK_SOLID_FILLED_RECTANGLE    0
+#define BENCHMARK_GRADIENT_FILLED_RECTANGLE 0
+#define BENCHMARK_TEXTURE_FILLED_RECTANGLE  0
 
-#define BENCHMARK_SOLID_FILLED_POLYGON      1
-#define BENCHMARK_GRADIENT_FILLED_POLYGON   1
-#define BENCHMARK_TEXTURE_FILLED_POLYGON    1
+#define BENCHMARK_SOLID_FILLED_POLYGON      0
+#define BENCHMARK_GRADIENT_FILLED_POLYGON   0
+#define BENCHMARK_TEXTURE_FILLED_POLYGON    0
 
 #define BENCHMARK_SOLID_FILLED_ELLIPSE      1
-#define BENCHMARK_GRADIENT_FILLED_ELLIPSE   1
-#define BENCHMARK_TEXTURE_FILLED_ELLIPSE    1
+#define BENCHMARK_GRADIENT_FILLED_ELLIPSE   0
+#define BENCHMARK_TEXTURE_FILLED_ELLIPSE    0
 
-#define BENCHMARK_SOLID_FILLED_ARC          1
-#define BENCHMARK_GRADIENT_FILLED_ARC       1
-#define BENCHMARK_TEXTURE_FILLED_ARC        1
+#define BENCHMARK_SOLID_FILLED_ARC          0
+#define BENCHMARK_GRADIENT_FILLED_ARC       0
+#define BENCHMARK_TEXTURE_FILLED_ARC        0
 
 // Configurations and objects
 #define FONT_DIR    "../src/Pt-Gfx/fonts"
