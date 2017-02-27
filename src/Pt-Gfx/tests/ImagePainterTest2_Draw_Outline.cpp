@@ -32,7 +32,8 @@ static void testDrawLine(const char* title, Image& image, Painter& painter)
     painter.setPen( Color::fromRgb8( 63,  63,  63, 175) ); painter.drawLine( PointF(500-50, 500), PointF(200-50, 200) );
     painter.setPen( Color::fromRgb8(127, 127, 127, 175) ); painter.drawLine( PointF(500   , 500), PointF(200   , 200) );
     painter.setPen( Color::fromRgb8(255, 255, 255, 175) ); painter.drawLine( PointF(500+50, 500), PointF(200+50, 200) );
-                                                                painter.drawLine( PointF(300   , 200), PointF(700   , 100) );
+                                                           painter.drawLine( PointF(300   , 200), PointF(700   , 100) );
+
     painter.drawLine( PointF(770,  11), PointF(770, 500) );
     painter.drawLine( PointF(780,  11), PointF(782, 500) );
 
@@ -46,6 +47,52 @@ static void testDrawLine(const char* title, Image& image, Painter& painter)
     painter.setFont( Pt::Gfx::Font(FONT_SPEC_N) );
     painter.setPen( Color::fromRgb8(0, 255, 255, 255) ); painter.drawText( PointF(100, 175), "Hello world!" );
     painter.setPen( Color::fromRgb8(0, 255, 255, 175) ); painter.drawText( PointF(100, 225), "Hello world!" );
+
+    sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
+}
+
+static void testDrawPatternedLine(const char* title, Image& image, Painter& painter)
+{
+    resetImage(image);
+
+    ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
+    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
+
+    painter.setClip( RectF (20, image.width() - 20, 20, image.height() - 20) );
+    painter.setPen( Pen( Color::fromRgb8(0, 255, 0, 175), 1, Pen::Dash )  );
+    painter.drawLine( PointF(  0,   0), PointF(999, 599) );
+    painter.setClip( RectF (0, image.width() - 1, 0, image.height() - 1) );
+
+    painter.setPen( Pen( Color::fromRgb8(255, 0, 0, 175), 1, Pen::Dash )  );
+    painter.drawLine( PointF(  0,   0), PointF(999,   0) );
+    painter.drawLine( PointF(  0, 599), PointF(999, 599) );
+    painter.drawLine( PointF(  0,   0), PointF(  0, 599) );
+    painter.drawLine( PointF(999,   0), PointF(999, 599) );
+
+    painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::Dash )  );
+    painter.drawLine( PointF( 10, 110), PointF(100, 150) );
+    painter.drawLine( PointF( 10, 250), PointF(100, 210) );
+    painter.drawLine( PointF(100,  10), PointF(110,  20) );
+
+    painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::Dash )  );
+    painter.drawLine( PointF(500, 500), PointF(200, 200) );
+    painter.drawLine( PointF(300, 150), PointF(700,  50) );
+
+    painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::DoubleDash )  );
+    painter.drawLine( PointF(550, 500), PointF(250, 200) );
+    painter.drawLine( PointF(300, 200), PointF(700, 100) );
+
+    painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::Dash )  );
+    painter.drawLine( PointF(870,  11), PointF(870, 500) );
+    painter.drawLine( PointF(880,  11), PointF(882, 500) );
+    painter.drawLine( PointF( 10, 540), PointF(781, 540) );
+    painter.drawLine( PointF(781, 552), PointF( 10, 550) );
+
+    painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::DoubleDash )  );
+    painter.drawLine( PointF(970,  11), PointF(970, 500) );
+    painter.drawLine( PointF(980,  11), PointF(982, 500) );
+    painter.drawLine( PointF( 10, 440), PointF(781, 440) );
+    painter.drawLine( PointF(781, 452), PointF( 10, 450) );
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
 }

@@ -175,6 +175,8 @@ class Rasterizer2
         void strokeOnePixelSolidRect(const Point& tl, const Point& br);
         void strokeOnePixelSolidPolygon(const Point* points, size_t pointCount);
 
+        void strokeOnePixelPatternedLine(const Point& a, const Point& b, DrawLineMask* maskInOut);
+
         void fillRect(const Point& tl, const Point& br);
         void fillPolygon(const Point* points, size_t pointCount);
         void fillPolygonSeparate(const Point* points, size_t pointCount);

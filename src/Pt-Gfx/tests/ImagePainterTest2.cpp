@@ -56,6 +56,7 @@ using namespace Pt::Gfx;
 #define TEST_SOURCEOVER                         0
 
 #define TEST_DRAW_LINE_AND_TEXT                 0
+#define TEST_DRAW_PATTERNED_LINE                1
 #define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES  0
 
 #define TEST_DRAW_ELLIPSES_ARCS                 0
@@ -64,7 +65,7 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_GRADIENT_FILLED_POLYGONS      0
 #define TEST_DRAW_TEXTURE_FILLED_POLYGONS       0
 
-#define TEST_DRAW_SOLID_FILLED_ELLIPSES_ARCS    1
+#define TEST_DRAW_SOLID_FILLED_ELLIPSES_ARCS    0
 #define TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS 0
 #define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  0
 
@@ -178,6 +179,25 @@ int main(int argc, char* args[])
         if(TEST_COMPARE_WITH_OLD_PAINTER) {
             painter1->setCompositionMode(CompositionMode::SourceOver);
             testDrawLine("Lines and Texts - ImagePainter [SourceOver]", image, *painter1);
+        }
+    }
+
+    // Patterned lines
+    if(DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_PATTERNED_LINE) {
+        painter2->setCompositionMode(CompositionMode::SourceCopy);
+        testDrawPatternedLine("Patterned Lines - ImagePainter2 [SourceCopy]", image, *painter2);
+        if(TEST_COMPARE_WITH_OLD_PAINTER) {
+            painter1->setCompositionMode(CompositionMode::SourceCopy);
+            testDrawPatternedLine("Patterned Lines - ImagePainter [SourceCopy]", image, *painter1);
+        }
+    }
+
+    if(DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_PATTERNED_LINE) {
+        painter2->setCompositionMode(CompositionMode::SourceOver);
+        testDrawPatternedLine("Patterned Lines - ImagePainter2 [SourceOver]", image, *painter2);
+        if(TEST_COMPARE_WITH_OLD_PAINTER) {
+            painter1->setCompositionMode(CompositionMode::SourceOver);
+            testDrawPatternedLine("Patterned Lines - ImagePainter [SourceOver]", image, *painter1);
         }
     }
 
