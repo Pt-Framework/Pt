@@ -275,8 +275,8 @@ static void benchMarkMathFunctions()
     std::clog << std::endl;
 
     /*
-    Result on x86_64 (i5-4460)
-    --------------------------
+    Result on x86_64 (i5-4460; 64-Bit Mode)
+    ---------------------------------------
 
                    (Time) (Factor)
                    ------ --------
@@ -297,8 +297,8 @@ static void benchMarkMathFunctions()
     fastAtan2    = 0.00818 ( 0.259)
 
 
-    Result on v7l (RaspberryPi 3)
-    -----------------------------
+    Result on v7l (A53; BCM2709; RaspberryPi 3; 32-bit Mode)
+    --------------------------------------------------------
     sqrtf        = 0.01780
     fastSqrt     = 0.02708 ( 1.522)
 
