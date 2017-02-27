@@ -20,7 +20,7 @@ static size_t benchDrawText(int loopCount, CompositionMode cm, AntiAliasingMode 
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
     if(ip2) ip2->setAntiAliasingMode(antiAliasingMode);
 
-    for(int i = 0; i < loopCount ; ++i) {
+    for(int i = 0; i < loopCount; ++i) {
         Pt::System::Clock clock;
         clock.start();
 
@@ -54,7 +54,7 @@ static size_t benchDrawLine(int loopCount, CompositionMode cm, AntiAliasingMode 
 
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
 
-    for(int i = 0; i < loopCount ; ++i) {
+    for(int i = 0; i < loopCount; ++i) {
         Pt::System::Clock clock;
         clock.start();
 
@@ -87,7 +87,7 @@ static size_t benchDrawRect(int loopCount, CompositionMode cm)
     Pen pen( Color::fromRgb8(255, 255, 255, 175) );
     painter.setPen(pen);
 
-    for(int i = 0; i < loopCount ; ++i) {
+    for(int i = 0; i < loopCount; ++i) {
         Pt::System::Clock clock;
         clock.start();
 
@@ -121,7 +121,7 @@ static size_t benchDrawEllipse(int loopCount, CompositionMode cm, AntiAliasingMo
 
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
 
-    for(int i = 0; i < loopCount ; ++i) {
+    for(int i = 0; i < loopCount; ++i) {
         Pt::System::Clock clock;
         clock.start();
 
@@ -156,7 +156,7 @@ static size_t benchDrawArc(int loopCount, CompositionMode cm, AntiAliasingMode a
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
     if(!ip2) return 0;
 
-    for(int i = 0; i < loopCount ; ++i) {
+    for(int i = 0; i < loopCount; ++i) {
         Pt::System::Clock clock;
         clock.start();
 

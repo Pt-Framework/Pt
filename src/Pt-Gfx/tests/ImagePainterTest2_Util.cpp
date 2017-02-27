@@ -106,3 +106,192 @@ static const std::string formatCaption(const Painter& painter, CompositionMode c
     // Call the overload function
     return formatCaption(className, cm, funcName);
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+inline float fastInvSqrt(float x)
+{
+    // https://en.wikipedia.org/wiki/Fast_inverse_square_root
+
+    const float x2 = x * 0.5f;
+
+    union {
+        float       f;
+        Pt::int32_t i;
+    } u;
+
+    u.f = x;
+    u.i = 0x5F3759DF - ( u.i >> 1 );
+    u.f = u.f * ( 1.5f - ( x2 * u.f * u.f ) );
+
+    return u.f;
+}
+
+inline float fastSqrt(float x)
+{
+    // https://en.wikipedia.org/wiki/Methods_of_computing_square_roots
+
+    union {
+        float       f;
+        Pt::int32_t i;
+    } u;
+
+    u.f = x;
+    u.i = (1 << 29) + (u.i >> 1) - (1 << 22) - 0x0004C000;
+    u.f = (u.f + x / u.f) * 0.5;
+
+    return u.f;
+}
+
+inline float fastSin(float x)
+{
+    if (x > Pt::Pi) x -= Pt::PiDouble;
+
+    const float b =  4 / Pt::Pi;
+    const float c = -4 / Pt::PiSqr;
+    const float p = 0.225;
+    const float y = b * x + c * x * ::fabs(x);
+
+    return p * (y * ::fabs(y) - y) + y;
+}
+
+inline float fastCos(float x)
+{
+    x += Pt::PiHalf;
+    if(x > Pt::PiDouble) x -= Pt::PiDouble;
+
+    return fastSin(x);
+}
+
+inline float fastAtan2(float y, float x)
+{
+    // From https://gist.github.com/volkansalma/2972237
+    // Original code by Volkan SALMA, 2012
+
+    if(x == 0.0f) {
+        if(y >  0.0f) return Pt::PiHalf;
+        if(y == 0.0f) return 0.0f;
+        return -Pt::PiHalf;
+    }
+
+    const float z = y / x;
+          float atan;
+
+    if(fabs(z) < 1.0f) {
+        atan = z / (1.0f + 0.28f * z * z);
+        if(x < 0.0f) {
+            if(y < 0.0f) return atan - Pt::Pi;
+            return atan + Pt::Pi;
+        }
+    }
+
+    else {
+        atan = Pt::PiHalf - z / (z * z + 0.28f);
+        if(y < 0.0f) return atan - Pt::Pi;
+    }
+
+    return atan;
+}
+
+static volatile float dummyMathValue;
+
+template<int MIN, int MAX, int DIV, typename F>
+static double benchMarkMathFunction(F f)
+{
+    const int loopCount = 100000;
+
+    if(DIV) {
+        Pt::System::Clock clock;
+        clock.start();
+
+        for(int i = 0; i < loopCount ; ++i) {
+            for(int j = MIN; j <= MAX; ++j) {
+                dummyMathValue = f((float) j / ((float) DIV / 100000.0f));
+            }
+        }
+
+        return (double) clock.stop().toUSecs() / ( loopCount * (MAX - MIN + 1) );
+    }
+
+    Pt::System::Clock clock;
+    clock.start();
+
+    for(int i = 0; i < loopCount ; ++i) {
+        for(int j = MIN; j <= MAX; ++j) {
+            dummyMathValue = f(j);
+        }
+    }
+
+    return (double) clock.stop().toUSecs() / ( loopCount * (MAX - MIN + 1) );
+}
+
+struct F_isqrtf      { float operator() (float x) { return 1.0f / ::sqrtf(x);   } };
+struct F_fastInvSqrt { float operator() (float x) { return fastInvSqrt(x);      } };
+
+struct F_sqrtf       { float operator() (float x) { return ::sqrtf (x);         } };
+struct F_fastSqrt    { float operator() (float x) { return fastSqrt(x);         } };
+
+struct F_sinf        { float operator() (float x) { return ::sinf (x);          } };
+struct F_fastSin     { float operator() (float x) { return fastSin(x);          } };
+
+struct F_cosf        { float operator() (float x) { return ::cosf (x);          } };
+struct F_fastCos     { float operator() (float x) { return fastCos(x);          } };
+
+struct F_atan2f      { float operator() (float x) { return ::atan2f (100.0f, x); } };
+struct F_fastAtan2   { float operator() (float x) { return fastAtan2(100.0f, x); } };
+
+static void benchMarkMathFunctions()
+{
+    double time1, time2;
+
+    std::clog << "               (Time) (Factor)" << std::endl;
+    std::clog << "               ------ --------" << std::endl << std::endl;
+
+    time1 = benchMarkMathFunction<0, 100, 0>(F_sqrtf   ());
+    time2 = benchMarkMathFunction<0, 100, 0>(F_fastSqrt());
+    printf("sqrtf        = %6.5f\n", time1);
+    printf("fastSqrt     = %6.5f (%6.3f)\n\n", time2, time2 / time1);
+
+    time1 = benchMarkMathFunction<0, 100, 0>(F_isqrtf   ());
+    time2 = benchMarkMathFunction<0, 100, 0>(F_fastInvSqrt());
+    printf("1.0f / sqrtf = %6.5f\n", time1);
+    printf("fastInvSqrt  = %6.5f (%6.3f)\n\n", time2, time2 / time1);
+
+    time1 = benchMarkMathFunction<-360, 360, 1745>(F_sinf   ());
+    time2 = benchMarkMathFunction<-360, 360, 1745>(F_fastSin());
+    printf("sinf         = %6.5f\n", time1);
+    printf("fastSin      = %6.5f (%6.3f)\n\n", time2, time2 / time1);
+
+    time1 = benchMarkMathFunction<-360, 360, 1745>(F_cosf   ());
+    time2 = benchMarkMathFunction<-360, 360, 1745>(F_fastCos());
+    printf("cosf         = %6.5f\n", time1);
+    printf("fastCos      = %6.5f (%6.3f)\n\n", time2, time2 / time1);
+
+    time1 = benchMarkMathFunction<-360, 360, 1745>(F_atan2f   ());
+    time2 = benchMarkMathFunction<-360, 360, 1745>(F_fastAtan2());
+    printf("atan2f       = %6.5f\n", time1);
+    printf("fastAtan2    = %6.5f (%6.3f)\n\n", time2, time2 / time1);
+
+    std::clog << std::endl;
+
+    /* Result on x86_64
+     *
+     *                (Time) (Factor)
+     *                ------ --------
+     *
+     * sqrtf        = 0.00417
+     * fastSqrt     = 0.01129 ( 2.708)
+     *
+     * 1.0f / sqrtf = 0.00904
+     * fastInvSqrt  = 0.01037 ( 1.146)
+     *
+     * sinf         = 0.02702
+     * fastSin      = 0.01442 ( 0.534)
+     *
+     * cosf         = 0.02693
+     * fastCos      = 0.01951 ( 0.724)
+     *
+     * atan2f       = 0.02833
+     * fastAtan2    = 0.00786 ( 0.278)
+     */
+}

@@ -295,10 +295,10 @@ inline float ImagePainter2::fastSqrt(float x)
 { return ::sqrtf(x); }
 
 inline float ImagePainter2::fastSin(float x)
-{ return ::sin(x); }
+{ return ::sinf(x); }
 
 inline float ImagePainter2::fastCos(float x)
-{ return ::cos(x); }
+{ return ::cosf(x); }
 
 #endif
 

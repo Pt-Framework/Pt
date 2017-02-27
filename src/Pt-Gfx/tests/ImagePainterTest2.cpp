@@ -121,6 +121,10 @@ static Brush bmBrushTextureW;
 
 int main(int argc, char* args[])
 {
+    // Benchmark some mathematical functions
+    benchMarkMathFunctions();
+    return 0;
+
     // Load the textures
     std::ifstream tbgrIfs("../etc/images/bleech-200x200-tbgr.png");
     PngReader     tbgrPng(tbgrIfs, textureWithTransBackground);

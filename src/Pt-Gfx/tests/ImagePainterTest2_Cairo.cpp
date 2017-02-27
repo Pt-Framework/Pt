@@ -6,7 +6,7 @@
             imgSize.width(), imgSize.height(), false  \
         )
 
-static volatile Pt::int32_t dummy;
+static volatile Pt::int32_t dummyRandomValue;
 
 static size_t cairoBenchRandCallOverheadTimes1000(int loopCount)
 {
@@ -16,13 +16,13 @@ static size_t cairoBenchRandCallOverheadTimes1000(int loopCount)
     // the same sequence at the start of every benchmark
     srand(13579);
 
-    dummy = 0;
+    dummyRandomValue = 0;
 
     for(int i = 0; i < loopCount; ++i) {
         Pt::System::Clock clock;
         clock.start();
 
-        for(int j = 0; j < 1000; ++j) dummy += (rand() % 21 - 10);
+        for(int j = 0; j < 1000; ++j) dummyRandomValue += (rand() % 21 - 10);
 
         sum += clock.stop().toUSecs();
     }
@@ -49,7 +49,7 @@ static size_t cairoBenchFillPolygon(int loopCount, CompositionMode cm, bool useA
     // the same sequence at the start of every benchmark
     if(USE_RANDOM) srand(13579);
 
-    for(int i = 0; i < loopCount ; ++i) {
+    for(int i = 0; i < loopCount; ++i) {
         Pt::System::Clock clock;
         clock.start();
 
@@ -137,7 +137,7 @@ static size_t cairoBenchFillEllipse(int loopCount, CompositionMode cm, bool useA
 
     cairo_set_antialias(cairo, useAntiAliasing ? CAIRO_ANTIALIAS_DEFAULT : CAIRO_ANTIALIAS_NONE);
 
-    for(int i = 0; i < loopCount ; ++i) {
+    for(int i = 0; i < loopCount; ++i) {
         Pt::System::Clock clock;
         clock.start();
 
