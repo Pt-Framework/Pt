@@ -196,8 +196,6 @@ class Rasterizer2
         void rasterPolygonAreaNoAA(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
         void rasterPolygonAreaFSAA2x2(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
 
-
-
         struct PolySpanElement {
             Pt::int32_t from, to;
 
@@ -208,10 +206,8 @@ class Rasterizer2
 
         typedef std::vector< std::vector<PolySpanElement> > PolySpans; // The vector index is the Y coordinate
 
-        void rasterPolygonAreaXWAANaive(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
-        void fillOnePixelGLineSegmentXWAAExt(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const PolySpans& polySpans, DrawLineMask& maskInOut);
-
-
+        void rasterPolygonAreaXWAA(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
+        void fillOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const PolySpans& polySpans, DrawLineMask& maskInOut);
 
     private:
         void updateGradientBrush(Pt::int32_t width, Pt::int32_t height);

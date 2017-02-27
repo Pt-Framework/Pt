@@ -116,7 +116,7 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
         );
     }
     else if(_aaMode == AntiAliasingMode::Medium) {
-        rasterPolygonAreaXWAANaive(
+        rasterPolygonAreaXWAA(
             clippedPoints.data(), clippedCounts.data(),
             clippedCounts.size(), clippedPoints.size(),
             _brush.color(), minX, minY, maxX, maxY
@@ -517,13 +517,13 @@ void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* po
 
 // Inspired by http://alienryderflex.com/polygon_fill
 // Public-domain code by Darel Rex Finley, 2007
-void Rasterizer2::rasterPolygonAreaXWAANaive(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
+void Rasterizer2::rasterPolygonAreaXWAA(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
 {
     // List of nodes that define the horizontal spans
     std::vector<Pt::int32_t> nodeX(totalPointCount * 2, 0);
 
     // List of polygon spans
-    PolySpans polySpans(maxY - minY + 1);
+    PolySpans polySpans(maxY - minY + 1 + 2);
 
     //  Loop through the rows of the image
     for(Pt::int32_t pixelY = minY; pixelY <= maxY; ++pixelY) {
@@ -566,14 +566,14 @@ void Rasterizer2::rasterPolygonAreaXWAANaive(const Point* points, const size_t* 
         bubbleSortAscending(nodeX, nodes);
         // Fill the pixels between the node pairs
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
-            //
+            // Calculate the coordinate
             const Pt::int32_t from = nodeX[i    ] + 1;
             const Pt::int32_t to   = nodeX[i + 1];
             if(to < from) continue;
-            //
-            rasterScanline(from - minX, to - minX, pixelY - minY, minX, minY, color);
-            //
+            // Store the coordinate
             polySpans[pixelY - minY].push_back(PolySpanElement(from, to));
+            // Draw the scanline
+            rasterScanline(from - minX, to - minX, pixelY - minY, minX, minY, color);
         }
     }
 
@@ -587,7 +587,7 @@ void Rasterizer2::rasterPolygonAreaXWAANaive(const Point* points, const size_t* 
         // From point N to point (N + 1), successively
         const size_t pc1 = pointCount[p] - 1;
         for(size_t i = 0; i < pc1; ++i) {
-            fillOnePixelGLineSegmentXWAAExt(curPointBase[i].x(), curPointBase[i].y(), curPointBase[i + 1].x(), curPointBase[i + 1].y(), minX, minY, polySpans, mask_nnp1);
+            fillOnePixelGLineSegmentXWAA(curPointBase[i].x(), curPointBase[i].y(), curPointBase[i + 1].x(), curPointBase[i + 1].y(), minX, minY, polySpans, mask_nnp1);
             if(!i) memcpy(&mask_zero, &mask_nnp1, sizeof(mask_zero));
         }
         mask_zero[2] = mask_zero[0];
@@ -595,7 +595,7 @@ void Rasterizer2::rasterPolygonAreaXWAANaive(const Point* points, const size_t* 
         mask_zero[0] = mask_nnp1[2];
         mask_zero[1] = mask_nnp1[3];
         // From the last point to the first point
-        fillOnePixelGLineSegmentXWAAExt(curPointBase[pc1].x(), curPointBase[pc1].y(), curPointBase[0].x(), curPointBase[0].y(), minX, minY, polySpans, mask_zero);
+        fillOnePixelGLineSegmentXWAA(curPointBase[pc1].x(), curPointBase[pc1].y(), curPointBase[0].x(), curPointBase[0].y(), minX, minY, polySpans, mask_zero);
         // Increment the base pointer
         curPointBase += pointCount[p];
     }
@@ -603,7 +603,7 @@ void Rasterizer2::rasterPolygonAreaXWAANaive(const Point* points, const size_t* 
 
 // Xiaolin Wu's Anti-Aliased Line Algorithm
 // https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
-void Rasterizer2::fillOnePixelGLineSegmentXWAAExt(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const PolySpans& polySpans, DrawLineMask& maskInOut)
+void Rasterizer2::fillOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const PolySpans& polySpans, DrawLineMask& maskInOut)
 {
     // Get the mask's coordinate
     Pt::int32_t mx[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
@@ -672,7 +672,6 @@ void Rasterizer2::fillOnePixelGLineSegmentXWAAExt(Pt::int32_t x1, Pt::int32_t y1
     Pt::int32_t from  = FIXED_POINT_TO_INT(FIXED_POINT_ROUND(fx1));
     Pt::int32_t to    = FIXED_POINT_TO_INT(xpxl2);
     Pt::int32_t ypxli = ypxl;
-
     if(steep) {
         // Draw the pixels
         for(Pt::int32_t i = from; i <= to; ++i) {
@@ -684,15 +683,15 @@ void Rasterizer2::fillOnePixelGLineSegmentXWAAExt(Pt::int32_t x1, Pt::int32_t y1
             const Pt::int32_t y  = i;
             ypxli += grad;
             // Draw the pixels as needed
-            //PolygonEdges::const_iterator it = polyEdges.find(y);
-            //if(it != polyEdges.end()) {
-            //    if(it->second.find(x1) == it->second.end()) XW_FILL_PIXEL(_image, x1, y, a1);
-            //    if(it->second.find(x2) == it->second.end()) XW_FILL_PIXEL(_image, x2, y, a2);
-            //}
-            //else {
-                XW_FILL_PIXEL(_image, x1, y, a1);
-                XW_FILL_PIXEL(_image, x2, y, a2);
-            //}
+            bool skipPixel1 = false;
+            bool skipPixel2 = false;
+            for(std::vector<PolySpanElement>::const_iterator it = polySpans[y - minY].begin(); it != polySpans[y - minY].end(); ++it) {
+                if(x1 >= it->from && x1 <= it->to) skipPixel1 = true;
+                if(x2 >= it->from && x2 <= it->to) skipPixel2 = true;
+                if(skipPixel1 && skipPixel2) break;
+            }
+            if(!skipPixel1) XW_FILL_PIXEL(_image, x1, y, a1);
+            if(!skipPixel2) XW_FILL_PIXEL(_image, x2, y, a2);
         }
         // Store back the start and end coordinates to the mask as needed
         maskInOut[0].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl        )                           ), from);
@@ -711,12 +710,20 @@ void Rasterizer2::fillOnePixelGLineSegmentXWAAExt(Pt::int32_t x1, Pt::int32_t y1
             const Pt::int32_t y2 = FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE);
             ypxli += grad;
             // Draw the pixels as needed
-            //PolygonEdges::const_iterator it1 = polyEdges.find(y1);
-            //PolygonEdges::const_iterator it2 = polyEdges.find(y2);
-            //if(it1 != polyEdges.end() && it1->second.find(x) == it1->second.end()) XW_FILL_PIXEL(_image, x, y1, a1);
-            //if(it2 != polyEdges.end() && it2->second.find(x) == it2->second.end()) XW_FILL_PIXEL(_image, x, y2, a2);
-            XW_FILL_PIXEL(_image, x, y1, a1);
-            XW_FILL_PIXEL(_image, x, y2, a2);
+            bool skipPixel = false;
+            for(std::vector<PolySpanElement>::const_iterator it = polySpans[y1 - minY].begin(); it != polySpans[y1 - minY].end(); ++it) {
+                if (x < it->from || x > it->to) continue;
+                skipPixel = true;
+                break;
+            }
+            if(!skipPixel) XW_FILL_PIXEL(_image, x, y1, a1);
+            skipPixel = false;
+            for(std::vector<PolySpanElement>::const_iterator it = polySpans[y2 - minY].begin(); it != polySpans[y2 - minY].end(); ++it) {
+                if (x < it->from || x > it->to) continue;
+                skipPixel = true;
+                break;
+            }
+            if(!skipPixel) XW_FILL_PIXEL(_image, x, y2, a2);
         }
         // Store back the start and end coordinates to the mask as needed
         maskInOut[0].set(from, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl        )                           ));
