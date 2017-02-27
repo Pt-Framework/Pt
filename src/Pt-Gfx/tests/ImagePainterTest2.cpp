@@ -48,19 +48,19 @@ using namespace Pt::Gfx;
 #define DO_BENCHMARKING 1
 
 // Detailed-test enable settings for Pt-Gfx
-#define TEST_SOURCECOPY                         0
-#define TEST_SOURCEOVER                         1
+#define TEST_SOURCECOPY                         1
+#define TEST_SOURCEOVER                         0
 
 #define TEST_DRAW_LINE_AND_TEXT                 0
 #define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES  0
 
 #define TEST_DRAW_ELLIPSES_ARCS                 0
 
-#define TEST_DRAW_SOLID_FILLED_POLYGONS         0
+#define TEST_DRAW_SOLID_FILLED_POLYGONS         1
 #define TEST_DRAW_GRADIENT_FILLED_POLYGONS      0
 #define TEST_DRAW_TEXTURE_FILLED_POLYGONS       0
 
-#define TEST_DRAW_SOLID_FILLED_ELLIPSES_ARCS    1
+#define TEST_DRAW_SOLID_FILLED_ELLIPSES_ARCS    0
 #define TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS 0
 #define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  0
 
@@ -72,7 +72,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_IMAGE_SIZE                Size(1280, 800)
 #define BENCHMARK_LOOP_COUNT                500
 
-#define BENCHMARK_TEXT                      1
+#define BENCHMARK_TEXT                      0
 #define BENCHMARK_LINE                      0
 #define BENCHMARK_ELLIPSE                   0
 #define BENCHMARK_ARC                       0
@@ -82,7 +82,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_GRADIENT_FILLED_RECTANGLE 0
 #define BENCHMARK_TEXTURE_FILLED_RECTANGLE  0
 
-#define BENCHMARK_SOLID_FILLED_POLYGON      0
+#define BENCHMARK_SOLID_FILLED_POLYGON      1
 #define BENCHMARK_GRADIENT_FILLED_POLYGON   0
 #define BENCHMARK_TEXTURE_FILLED_POLYGON    0
 
