@@ -228,8 +228,12 @@ class PT_GFX_API ImagePainter2 : public Painter
 // ===== Private Member Structures and Functions ========================================
 // ======================================================================================
 
+inline float ImagePainter2::fastSqrt(float x)
+{ return ::sqrtf(x); }
+
 #if defined(__arm__) || defined(__thumb__) || defined(_M_ARM) || defined(_M_ARMT) || defined(__TARGET_ARCH_ARM) || defined(__TARGET_ARCH_THUMB) || defined(_ARM) || defined(__arm)
 
+/*
 inline float ImagePainter2::fastSqrt(float x)
 {
     // https://en.wikipedia.org/wiki/Methods_of_computing_square_roots
@@ -245,6 +249,7 @@ inline float ImagePainter2::fastSqrt(float x)
 
     return u.f;
 }
+*/
 
 inline float ImagePainter2::fastInvSqrt(float x)
 {
@@ -263,6 +268,13 @@ inline float ImagePainter2::fastInvSqrt(float x)
 
     return u.f;
 }
+
+#else
+
+inline float ImagePainter2::fastInvSqrt(float x)
+{ return 1.0f / ::sqrtf(x); }
+
+#endif
 
 inline float ImagePainter2::fastSin(float x)
 {
@@ -283,22 +295,6 @@ inline float ImagePainter2::fastCos(float x)
 
     return fastSin(x);
 }
-
-#else
-
-inline float ImagePainter2::fastSqrt(float x)
-{ return ::sqrtf(x); }
-
-inline float ImagePainter2::fastInvSqrt(float x)
-{ return 1.0f / ::sqrtf(x); }
-
-inline float ImagePainter2::fastSin(float x)
-{ return ::sinf(x); }
-
-inline float ImagePainter2::fastCos(float x)
-{ return ::cosf(x); }
-
-#endif
 
 inline float ImagePainter2::fastAtan2(float y, float x)
 {

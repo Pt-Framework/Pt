@@ -120,7 +120,7 @@ inline float fastSqrt(float x)
 
     u.f = x;
     u.i = (1 << 29) + (u.i >> 1) - (1 << 22) - 0x0004C000;
-  //  u.f = (u.f + x / u.f) * 0.5;
+    u.f = (u.f + x / u.f) * 0.5;
 
     return u.f;
 }
