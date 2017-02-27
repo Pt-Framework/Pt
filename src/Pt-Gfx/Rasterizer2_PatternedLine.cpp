@@ -36,79 +36,11 @@ namespace Gfx {
 
 
 // ======================================================================================
-// ===== Public Member Functions ========================================================
-// ======================================================================================
-void Rasterizer2::strokeOnePixelPatternedLine(const Point& a, const Point& b, DrawLineMask* maskInOut)
-{
-    // Clip the points
-    Pt::int32_t x1 = a.x();
-    Pt::int32_t y1 = a.y();
-    Pt::int32_t x2 = b.x();
-    Pt::int32_t y2 = b.y();
-
-    if(!ClipShape::clipLine(x1, y1, x2, y2, _currentClip)) return;
-
-    // Find the minimum and maximum coordinates
-    Pt::int32_t minX, minY, maxX, maxY;
-
-    if(x2 > x1) {
-        minX = x1;
-        maxX = x2;
-    }
-    else {
-        minX = x2;
-        maxX = x1;
-    }
-
-    if(y2 > y1) {
-        minY = y1;
-        maxY = y2;
-    }
-    else {
-        minY = y2;
-        maxY = y1;
-    }
-
-    // Calculate the size of the line
-    const Pt::int32_t sizeX = maxX - minX + 1;
-    const Pt::int32_t sizeY = maxY - minY + 1;
-    if(!sizeX && !sizeY) return;
-
-/*
-    // Check for horizontal line
-    if(minY == maxY) {
-        rasterOnePixelHLineSegment(minX, maxX, minY, _pen.color(), maskInOut);
-        return;
-    }
-
-    // Check for vertical line
-    if(minX == maxX) {
-        rasterOnePixelVLineSegment(minX, minY, maxY, _pen.color(), maskInOut);
-        return;
-    }
-
-    // Check for 45-degree line
-    if(sizeX == sizeY) {
-        rasterOnePixelXLineSegment(x1, y1, x2, y2, _pen.color(), maskInOut);
-        return;
-    }
-
-    // Raster the line
-    if(_aaMode != AntiAliasingMode::None) {
-        // Raster the line using anti-aliasing
-        rasterOnePixelGLineSegmentXWAA(x1, y1, x2, y2, _pen.color(), maskInOut);
-    }
-    else {
-        // Raster the line without using anti-aliasing
-        rasterOnePixelGLineSegmentNoAA(x1, y1, x2, y2, _pen.color(), maskInOut);
-    }
-*/
-}
-
-
-// ======================================================================================
 // ===== Private Member Functions =======================================================
 // ======================================================================================
+void Rasterizer2::rasterOnePixelPatternedLine(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY, Pt::int32_t sizeX, Pt::int32_t sizeY, DrawLineMask* maskInOut)
+{
+}
 
 #if 0
 void Rasterizer2::rasterOnePixelHLineSegment(Pt::int32_t x1, Pt::int32_t x2, Pt::int32_t y, const Color& color, DrawLineMask* maskInOut)

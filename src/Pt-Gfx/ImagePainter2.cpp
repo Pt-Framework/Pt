@@ -188,10 +188,7 @@ void ImagePainter2::drawLine(const PointF& from, const PointF& to)
     const Point a( (Pt::int32_t)(from.x()), (Pt::int32_t)(from.y()) );
     const Point b( (Pt::int32_t)(to  .x()), (Pt::int32_t)(to  .y()) );
 
-    if(_rasterizer->pen().style() != Pen::Solid)
-        _rasterizer->strokeOnePixelPatternedLine(a, b, 0);
-    else
-        _rasterizer->strokeOnePixelSolidLine(a, b, 0);
+    _rasterizer->strokeOnePixelLine(a, b, 0);
 }
 
 void ImagePainter2::drawRect( const RectF& rect )
