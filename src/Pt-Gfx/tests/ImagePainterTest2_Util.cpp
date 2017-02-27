@@ -109,6 +109,22 @@ static const std::string formatCaption(const Painter& painter, CompositionMode c
 
 ////////////////////////////////////////////////////////////////////////////////
 
+inline float fastSqrt(float x)
+{
+    // https://en.wikipedia.org/wiki/Methods_of_computing_square_roots
+
+    union {
+        float       f;
+        Pt::int32_t i;
+    } u;
+
+    u.f = x;
+    u.i = (1 << 29) + (u.i >> 1) - (1 << 22) - 0x0004C000;
+  //  u.f = (u.f + x / u.f) * 0.5;
+
+    return u.f;
+}
+
 inline float fastInvSqrt(float x)
 {
     // https://en.wikipedia.org/wiki/Fast_inverse_square_root
@@ -123,22 +139,6 @@ inline float fastInvSqrt(float x)
     u.f = x;
     u.i = 0x5F3759DF - ( u.i >> 1 );
     u.f = u.f * ( 1.5f - ( x2 * u.f * u.f ) );
-
-    return u.f;
-}
-
-inline float fastSqrt(float x)
-{
-    // https://en.wikipedia.org/wiki/Methods_of_computing_square_roots
-
-    union {
-        float       f;
-        Pt::int32_t i;
-    } u;
-
-    u.f = x;
-    u.i = (1 << 29) + (u.i >> 1) - (1 << 22) - 0x0004C000;
-    u.f = (u.f + x / u.f) * 0.5;
 
     return u.f;
 }
@@ -225,11 +225,11 @@ static double benchMarkMathFunction(F f)
     return (double) clock.stop().toUSecs() / ( loopCount * (MAX - MIN + 1) );
 }
 
-struct F_isqrtf      { float operator() (float x) { return 1.0f / ::sqrtf(x);   } };
-struct F_fastInvSqrt { float operator() (float x) { return fastInvSqrt(x);      } };
-
 struct F_sqrtf       { float operator() (float x) { return ::sqrtf (x);         } };
 struct F_fastSqrt    { float operator() (float x) { return fastSqrt(x);         } };
+
+struct F_isqrtf      { float operator() (float x) { return 1.0f / ::sqrtf(x);   } };
+struct F_fastInvSqrt { float operator() (float x) { return fastInvSqrt(x);      } };
 
 struct F_sinf        { float operator() (float x) { return ::sinf (x);          } };
 struct F_fastSin     { float operator() (float x) { return fastSin(x);          } };
@@ -274,24 +274,44 @@ static void benchMarkMathFunctions()
 
     std::clog << std::endl;
 
-    /* Result on x86_64
-     *
-     *                (Time) (Factor)
-     *                ------ --------
-     *
-     * sqrtf        = 0.00417
-     * fastSqrt     = 0.01129 ( 2.708)
-     *
-     * 1.0f / sqrtf = 0.00904
-     * fastInvSqrt  = 0.01037 ( 1.146)
-     *
-     * sinf         = 0.02702
-     * fastSin      = 0.01442 ( 0.534)
-     *
-     * cosf         = 0.02693
-     * fastCos      = 0.01951 ( 0.724)
-     *
-     * atan2f       = 0.02833
-     * fastAtan2    = 0.00786 ( 0.278)
-     */
+    /*
+    Result on x86_64 (i5-4460)
+    --------------------------
+
+                   (Time) (Factor)
+                   ------ --------
+
+    sqrtf        = 0.00389
+    fastSqrt     = 0.01103 ( 2.837)
+
+    1.0f / sqrtf = 0.00864
+    fastInvSqrt  = 0.01009 ( 1.168)
+
+    sinf         = 0.02746
+    fastSin      = 0.01495 ( 0.544)
+
+    cosf         = 0.02766
+    fastCos      = 0.01967 ( 0.711)
+
+    atan2f       = 0.03156
+    fastAtan2    = 0.00818 ( 0.259)
+
+
+    Result on v7l (RaspberryPi 3)
+    -----------------------------
+    sqrtf        = 0.01780
+    fastSqrt     = 0.02708 ( 1.522)
+
+    1.0f / sqrtf = 0.02789
+    fastInvSqrt  = 0.02522 ( 0.904)
+
+    sinf         = 1.72843
+    fastSin      = 0.06808 ( 0.039)
+
+    cosf         = 1.72667
+    fastCos      = 0.08795 ( 0.051)
+
+    atan2f       = 0.14623
+    fastAtan2    = 0.05048 ( 0.345)
+    */
 }

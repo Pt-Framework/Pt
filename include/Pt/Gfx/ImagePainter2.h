@@ -230,7 +230,21 @@ class PT_GFX_API ImagePainter2 : public Painter
 
 #if defined(__arm__) || defined(__thumb__) || defined(_M_ARM) || defined(_M_ARMT) || defined(__TARGET_ARCH_ARM) || defined(__TARGET_ARCH_THUMB) || defined(_ARM) || defined(__arm)
 
-// ### TODO: Check if these functions are actually faster in ARM CPUs !!! ###
+inline float ImagePainter2::fastSqrt(float x)
+{
+    // https://en.wikipedia.org/wiki/Methods_of_computing_square_roots
+
+    union {
+        float       f;
+        Pt::int32_t i;
+    } u;
+
+    u.f = x;
+    u.i = (1 << 29) + (u.i >> 1) - (1 << 22) - 0x0004C000;
+    u.f = (u.f + x / u.f) * 0.5;
+
+    return u.f;
+}
 
 inline float ImagePainter2::fastInvSqrt(float x)
 {
@@ -246,22 +260,6 @@ inline float ImagePainter2::fastInvSqrt(float x)
     u.f = x;
     u.i = 0x5F3759DF - ( u.i >> 1 );
     u.f = u.f * ( 1.5f - ( x2 * u.f * u.f ) );
-
-    return u.f;
-}
-
-inline float ImagePainter2::fastSqrt(float x)
-{
-    // https://en.wikipedia.org/wiki/Methods_of_computing_square_roots
-
-    union {
-        float       f;
-        Pt::int32_t i;
-    } u;
-
-    u.f = x;
-    u.i = (1 << 29) + (u.i >> 1) - (1 << 22) - 0x0004C000;
-    u.f = (u.f + x / u.f) * 0.5;
 
     return u.f;
 }
@@ -288,11 +286,11 @@ inline float ImagePainter2::fastCos(float x)
 
 #else
 
-inline float ImagePainter2::fastInvSqrt(float x)
-{ return 1.0f / ::sqrtf(x); }
-
 inline float ImagePainter2::fastSqrt(float x)
 { return ::sqrtf(x); }
+
+inline float ImagePainter2::fastInvSqrt(float x)
+{ return 1.0f / ::sqrtf(x); }
 
 inline float ImagePainter2::fastSin(float x)
 { return ::sinf(x); }
