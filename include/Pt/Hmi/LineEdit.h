@@ -57,11 +57,15 @@ class PT_HMI_API LineEdit : public Control
 
         ~LineEdit();
 
-        bool isEmpty() const;
+        bool isEditable() const;
+
+        void setEditable(bool e);
 
         const Pt::String& text() const;
 
         void setText(const Pt::String& str);
+
+        bool isEmpty() const;
 
         const Pt::String& displayText() const;
 
@@ -141,6 +145,7 @@ class PT_HMI_API LineEdit : public Control
         LineEditor                    _editor;
         TextLine                      _line;
         Pt::String                    _placeholderText;
+        bool                          _isEditable;
         bool                          _isAccepted;
         bool                          _isTextChanged;
         EchoMode                      _echoMode;

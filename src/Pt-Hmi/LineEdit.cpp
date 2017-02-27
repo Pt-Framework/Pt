@@ -36,13 +36,14 @@ namespace Pt {
 namespace Hmi {
 
 LineEdit::LineEdit()
-: _isAccepted(true)
+: _isEditable(true)
+, _isAccepted(true)
 , _isTextChanged(false)
 , _echoMode(Normal)
 , _spacing(0)
 , _hasRenderer(false)
 {
-    setTextInput(true);
+    setTextInput(_isEditable);
     setFocusPolicy(Widget::NormalFocus);
 }
 
@@ -52,9 +53,23 @@ LineEdit::~LineEdit()
 }
 
 
-bool LineEdit::isEmpty() const
+bool LineEdit::isEditable() const
 {
-    return _editor.isEmpty();
+    return _isEditable;
+}
+
+
+void LineEdit::setEditable(bool e)
+{
+    _isEditable = e;
+    setTextInput(_isEditable);
+    update();
+}
+
+
+const Pt::String& LineEdit::text() const
+{
+    return _editor.text();
 }
 
 
@@ -65,9 +80,9 @@ void LineEdit::setText(const Pt::String& str)
 }
 
 
-const Pt::String& LineEdit::text() const
+bool LineEdit::isEmpty() const
 {
-    return _editor.text();
+    return _editor.isEmpty();
 }
 
 
@@ -320,7 +335,7 @@ void LineEdit::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     Gfx::SizeF clipSize = _editor.size();
     clipSize.addWidth(_spacing); // cursor
 
-    if( hasFocus() )
+    if( _isEditable && hasFocus() )
     {
         double cursorX = _line.cursorToX( _editor.cursorPosition() );
         cursorX += _line.position().x();
@@ -380,7 +395,7 @@ void LineEdit::onKeyEvent(const KeyEvent& ev)
 {  
     Base::onKeyEvent(ev);
 
-    if( ! ev.isPress() )
+    if( ! ev.isPress() || ! _isEditable )
         return;
 
     if( ev.key().code() == Pt::Hmi::Key::ArrowLeft )
@@ -436,11 +451,14 @@ bool LineEdit::onMouseEvent(const MouseEvent& mev)
     if( ! mev.isPress() )
         return true;
 
-    Application::instance().inputMethod().begin(*this);
+    if(_isEditable)
+    {
+        std::size_t n = _line.xToCursor( mev.x() );
+        _editor.setCursorPosition(n);
+        update();
 
-    std::size_t n = _line.xToCursor( mev.x() );
-    _editor.setCursorPosition(n);
-    update();
+        Application::instance().inputMethod().begin(*this);
+    }
     
     return true;
 }
@@ -456,11 +474,14 @@ void LineEdit::onTouchEvent(const TouchEvent& tev)
     if( ! tev.isPress() )
         return;
 
-    Application::instance().inputMethod().begin(*this);
+    if(_isEditable)
+    {
+        std::size_t n = _line.xToCursor( tev.x() );
+        _editor.setCursorPosition(n);
+        update();
 
-    std::size_t n = _line.xToCursor( tev.x() );
-    _editor.setCursorPosition(n);
-    update();
+        Application::instance().inputMethod().begin(*this);
+    }
 }
 
 
@@ -476,7 +497,7 @@ void LineEdit::onFocusEvent(const FocusEvent& ev)
             _editingFinished.send( _editor.text() );
         }
     }
-    else
+    else if(_isEditable)
     {
         Application::instance().inputMethod().begin(*this);
     }

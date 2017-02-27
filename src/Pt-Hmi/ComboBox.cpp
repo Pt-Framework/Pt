@@ -546,22 +546,22 @@ bool ComboBox::onMouseEvent(const MouseEvent& ev)
 {    
     Base::onMouseEvent(ev);
 
-    if( ev.isPress() )
-    {
-        double buttonX = size().width() - _buttonSize.width();
+    if( ! ev.isPress() )
+        return true;
+
+    double buttonX = size().width() - _buttonSize.width();
         
-        if( ev.position().x() > buttonX )
-        {
-            showPopup();
-        }
-        else if(_isEditable)
-        {
-            std::size_t n = _line.xToCursor( ev.x() );
-            _editor.setCursorPosition(n);
-            update();
+    if( ev.position().x() > buttonX )
+    {
+        showPopup();
+    }
+    else if(_isEditable)
+    {
+        std::size_t n = _line.xToCursor( ev.x() );
+        _editor.setCursorPosition(n);
+        update();
             
-            Application::instance().inputMethod().begin(*this);
-        }
+        Application::instance().inputMethod().begin(*this);
     }
 
     return true;
@@ -572,22 +572,22 @@ void ComboBox::onTouchEvent(const TouchEvent& ev)
 {    
     Base::onTouchEvent(ev);
 
-    if( ev.isPress() )
+    if( ! ev.isPress() )
+        return;
+
+    double buttonX = size().width() - _buttonSize.width();
+
+    if( ev.position().x() > buttonX )
     {
-        double buttonX = size().width() - _buttonSize.width();
+        showPopup();
+    }
+    else if(_isEditable)
+    {
+        std::size_t n = _line.xToCursor( ev.x() );
+        _editor.setCursorPosition(n);
+        update();
 
-        if( ev.position().x() > buttonX )
-        {
-            showPopup();
-        }
-        else if(_isEditable)
-        {
-            std::size_t n = _line.xToCursor( ev.x() );
-            _editor.setCursorPosition(n);
-            update();
-
-            Application::instance().inputMethod().begin(*this);
-        }
+        Application::instance().inputMethod().begin(*this);
     }
 }
 
