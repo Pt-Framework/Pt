@@ -212,7 +212,34 @@ static void cairoBenchmark(CompositionMode cm)
         std::clog << "    Solid-filled    polygon XWAA     @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
-        std::clog << "    >>> +Random : Factor => Relative to Self Non-Random (Time) (Factor)" << std::endl << std::endl;
+    }
+
+    // Filled ellipses
+    if(BENCHMARK_SOLID_FILLED_ELLIPSE) {
+        time1 = cairoBenchFillEllipse              (BENCHMARK_LOOP_COUNT, cm, true);
+        std::clog << "    Solid-filled    ellipse          @ Cairo         = " << std::setw(6) << time1 << std::endl;
+        time2 = cairoBenchFillEllipse              (BENCHMARK_LOOP_COUNT, cm, false);
+        std::clog << "    Solid-filled    ellipse          @ Cairo - No AA = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time2 = benchDrawFillEllipse<ImagePainter >(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::None);
+        std::clog << "    Solid-filled    ellipse          @ ImagePainter  = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::None);
+        std::clog << "    Solid-filled    ellipse NOAA     @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::Fastest);
+        std::clog << "    Solid-filled    ellipse XWAA     @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        std::clog << std::endl;
+    }
+
+    // --- With random factor ---
+
+    std::clog << "    >>> +Random: Factor => Relative to Self Non-Random (Time) (Factor)" << std::endl;
+    std::clog << "                                                       ------ --------" << std::endl;
+
+    // Filled polygons
+    if(BENCHMARK_SOLID_FILLED_POLYGON) {
         time1 = cairoBenchRandCallOverheadTimes1000(BENCHMARK_LOOP_COUNT);
         std::clog << "    Overhead for calling the rand() function in libc = " << std::setw(6) << std::setprecision(3) << (time1 / 1000.0f) <<  std::setprecision(0) << std::endl;
         time1 = cairoBenchFillPolygon<false>(BENCHMARK_LOOP_COUNT, cm, true );
@@ -234,25 +261,6 @@ static void cairoBenchmark(CompositionMode cm)
         time1 = benchDrawFillPolygon<ImagePainter2, false>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::Fastest);
         time2 = benchDrawFillPolygon<ImagePainter2, true >(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::Fastest);
         std::clog << "    Solid-filled  R-polygon FSAA 2x2 @ ImagePainter2 = " << std::setw(6) << time2
-                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        std::clog << std::endl;
-    }
-
-    // Filled ellipses
-    if(BENCHMARK_SOLID_FILLED_ELLIPSE) {
-        time1 = cairoBenchFillEllipse              (BENCHMARK_LOOP_COUNT, cm, true);
-        std::clog << "    Solid-filled    ellipse          @ Cairo         = " << std::setw(6) << time1 << std::endl;
-        time2 = cairoBenchFillEllipse              (BENCHMARK_LOOP_COUNT, cm, false);
-        std::clog << "    Solid-filled    ellipse          @ Cairo - No AA = " << std::setw(6) << time2
-                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillEllipse<ImagePainter >(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::None);
-        std::clog << "    Solid-filled    ellipse          @ ImagePainter  = " << std::setw(6) << time2
-                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::None);
-        std::clog << "    Solid-filled    ellipse NOAA     @ ImagePainter2 = " << std::setw(6) << time2
-                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::Fastest);
-        std::clog << "    Solid-filled    ellipse XWAA     @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }

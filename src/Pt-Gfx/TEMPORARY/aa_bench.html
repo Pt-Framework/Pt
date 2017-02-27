@@ -18,11 +18,11 @@
 <!--
 <pre>
 <b>2017/02/XX - X</b><br/>
-<div id='wrapperTop9eea3161'>
-    <table id='contentTop9eea3161'></table>
+<div id='wrapperTopc3baa3e67'>
+    <table id='contentTopc3baa3e67'></table>
 </div>
-<div id='wrapperBot9eea3161'>
-<table id='contentBot9eea3161'>
+<div id='wrapperBotc3baa3e67'>
+<table id='contentBotc3baa3e67'>
 <tr>
     <td><i><b>Pt::Gfx - CompositionMode::SourceCopy</b></i></td><td>&nbsp;&nbsp;&nbsp;</td>
     <td><i><b>Pt::Gfx - CompositionMode::SourceOver</b></i></td><td>&nbsp;&nbsp;&nbsp;</td>
@@ -41,7 +41,7 @@
 </tr>
 </table>
 </div></pre><br/>
-<script>$(document).ready(function() { pairHScroll('9eea3161', 'wrapperTop', 'wrapperBot', 'contentTop', 'contentBot'); });</script>
+<script>$(document).ready(function() { pairHScroll('c3baa3e67', 'wrapperTop', 'wrapperBot', 'contentTop', 'contentBot'); });</script>
 -->
 
 <!--
@@ -49,6 +49,224 @@
 <b>2017/02/XX - X</b><br/>
 </pre><br/>
 -->
+
+<h1><pre>
+<b>XWAA ALGORITHM FOR FILLED POLYGON AND A BIT IMPROVEMENT IN FREETYPE</b>
+</pre>
+
+<pre>
+<b>2017/02/27</b><br/>
+<div id='wrapperTopc3baa3e67'>
+    <table id='contentTopc3baa3e67'></table>
+</div>
+<div id='wrapperBotc3baa3e67'>
+<table id='contentBotc3baa3e67'>
+<tr>
+    <td><i><b>Pt::Gfx - CompositionMode::SourceCopy</b></i></td><td>&nbsp;&nbsp;&nbsp;</td>
+    <td><i><b>Pt::Gfx - CompositionMode::SourceOver</b></i></td><td>&nbsp;&nbsp;&nbsp;</td>
+    <td><i><b>Comparison with Cairo</b></i></td>
+</tr>
+<tr>
+    <!-- Pt::Gfx - CompositionMode::SourceCopy -->
+    <td>
+                                                       (Time) (Factor)
+                                                       ------ --------
+    Text                             @ ImagePainter  =     36
+    Text NOAA                        @ ImagePainter2 =     19 ( 0.528)
+    Text FTAA                        @ ImagePainter2 =     22 ( 0.611)
+
+    Line                             @ ImagePainter  =      7
+    Line NOAA                        @ ImagePainter2 =     10 ( 1.429)
+    Line XWAA                        @ ImagePainter2 =     28 ( 4.000)
+
+    Rectangle                        @ ImagePainter  =      6
+    Rectangle                        @ ImagePainter2 =      6 ( 1.000)
+
+    Ellipse                          @ ImagePainter  =      3
+    Ellipse NOAA                     @ ImagePainter2 =      6 ( 2.000)
+    Ellipse XWAA                     @ ImagePainter2 =     12 ( 4.000)
+
+    Arc     NOAA                     @ ImagePainter2 =     13
+    Arc     XWAA                     @ ImagePainter2 =     24 ( 1.846)
+
+    Solid-filled    Rectangle        @ ImagePainter  =     28
+    Solid-filled    Rectangle        @ ImagePainter2 =     27 ( 0.964)
+
+    Gradient-filled Rectangle        @ ImagePainter  =    999
+    Gradient-filled Rectangle        @ ImagePainter2 =     27 ( 0.027)
+
+    Texture-filled  Rectangle        @ ImagePainter  =     25
+    Texture-filled  Rectangle        @ ImagePainter2 =     23 ( 0.920)
+
+    Solid-filled    polygon          @ ImagePainter  =     60
+    Solid-filled    polygon NOAA     @ ImagePainter2 =     47 ( 0.783)
+    Solid-filled    polygon FSAA 2x2 @ ImagePainter2 =    112 ( 1.867)
+    Solid-filled    polygon FSAA 4x4 @ ImagePainter2 =    361 ( 6.017)
+    Solid-filled    polygon XWAA     @ ImagePainter2 =    100 ( 1.667)
+
+    Gradient-filled polygon          @ ImagePainter  =   1064
+    Gradient-filled polygon NOAA     @ ImagePainter2 =     58 ( 0.055)
+    Gradient-filled polygon FSAA 2x2 @ ImagePainter2 =    182 ( 0.171)
+    Gradient-filled polygon FSAA 4x4 @ ImagePainter2 =    457 ( 0.430)
+    Gradient-filled polygon XWAA     @ ImagePainter2 =    129 ( 0.121)
+
+    Texture-filled  polygon          @ ImagePainter  =     71
+    Texture-filled  polygon NOAA     @ ImagePainter2 =     57 ( 0.803)
+    Texture-filled  polygon FSAA 2x2 @ ImagePainter2 =    180 ( 2.535)
+    Texture-filled  polygon FSAA 4x4 @ ImagePainter2 =    460 ( 6.479)
+    Texture-filled  polygon XWAA     @ ImagePainter2 =    128 ( 1.803)
+
+    Solid-filled    ellipse          @ ImagePainter  =      5
+    Solid-filled    ellipse NOAA     @ ImagePainter2 =      6 ( 1.200)
+    Solid-filled    ellipse XWAA     @ ImagePainter2 =     16 ( 3.200)
+
+    Gradient-filled ellipse          @ ImagePainter  =    148
+    Gradient-filled ellipse NOAA     @ ImagePainter2 =     10 ( 0.068)
+    Gradient-filled ellipse XWAA     @ ImagePainter2 =     21 ( 0.142)
+
+    Texture-filled  ellipse          @ ImagePainter  =      8
+    Texture-filled  ellipse NOAA     @ ImagePainter2 =      8 ( 1.000)
+    Texture-filled  ellipse XWAA     @ ImagePainter2 =     20 ( 2.500)
+
+    Solid-filled    arc     NOAA     @ ImagePainter2 =     52
+    Solid-filled    arc     XWAA     @ ImagePainter2 =     94 ( 1.808)
+
+    Gradient-filled arc     NOAA     @ ImagePainter2 =     60
+    Gradient-filled arc     XWAA     @ ImagePainter2 =    107 ( 1.783)
+
+    Texture-filled  arc     NOAA     @ ImagePainter2 =     56
+    Texture-filled  arc     XWAA     @ ImagePainter2 =    103 ( 1.839)
+    </td><td>&nbsp;&nbsp;&nbsp;</td>
+    <!-- Pt::Gfx - CompositionMode::SourceOver -->
+    <td>
+                                                       (Time) (Factor)
+                                                       ------ --------
+    Text                             @ ImagePainter  =     43
+    Text NOAA                        @ ImagePainter2 =     24 ( 0.558)
+    Text FTAA                        @ ImagePainter2 =     32 ( 0.744)
+
+    Line                             @ ImagePainter  =     12
+    Line NOAA                        @ ImagePainter2 =     13 ( 1.083)
+    Line XWAA                        @ ImagePainter2 =     28 ( 2.333)
+
+    Rectangle                        @ ImagePainter  =     12
+    Rectangle                        @ ImagePainter2 =      9 ( 0.750)
+
+    Ellipse                          @ ImagePainter  =      5
+    Ellipse NOAA                     @ ImagePainter2 =      7 ( 1.400)
+    Ellipse XWAA                     @ ImagePainter2 =     12 ( 2.400)
+
+    Arc     NOAA                     @ ImagePainter2 =     14
+    Arc     XWAA                     @ ImagePainter2 =     25 ( 1.786)
+
+    Solid-filled    Rectangle        @ ImagePainter  =    243
+    Solid-filled    Rectangle        @ ImagePainter2 =    240 ( 0.988)
+
+    Gradient-filled Rectangle        @ ImagePainter  =   1149
+    Gradient-filled Rectangle        @ ImagePainter2 =    194 ( 0.169)
+
+    Texture-filled  Rectangle        @ ImagePainter  =    232
+    Texture-filled  Rectangle        @ ImagePainter2 =    230 ( 0.991)
+
+    Solid-filled    polygon          @ ImagePainter  =    255
+    Solid-filled    polygon NOAA     @ ImagePainter2 =    163 ( 0.639)
+    Solid-filled    polygon FSAA 2x2 @ ImagePainter2 =    224 ( 0.878)
+    Solid-filled    polygon FSAA 4x4 @ ImagePainter2 =    476 ( 1.867)
+    Solid-filled    polygon XWAA     @ ImagePainter2 =    243 ( 0.953)
+
+    Gradient-filled polygon          @ ImagePainter  =   1165
+    Gradient-filled polygon NOAA     @ ImagePainter2 =    211 ( 0.181)
+    Gradient-filled polygon FSAA 2x2 @ ImagePainter2 =    332 ( 0.285)
+    Gradient-filled polygon FSAA 4x4 @ ImagePainter2 =    609 ( 0.523)
+    Gradient-filled polygon XWAA     @ ImagePainter2 =    300 ( 0.258)
+
+    Texture-filled  polygon          @ ImagePainter  =    265
+    Texture-filled  polygon NOAA     @ ImagePainter2 =    257 ( 0.970)
+    Texture-filled  polygon FSAA 2x2 @ ImagePainter2 =    374 ( 1.411)
+    Texture-filled  polygon FSAA 4x4 @ ImagePainter2 =    651 ( 2.457)
+    Texture-filled  polygon XWAA     @ ImagePainter2 =    346 ( 1.306)
+
+    Solid-filled    ellipse          @ ImagePainter  =     37
+    Solid-filled    ellipse NOAA     @ ImagePainter2 =     24 ( 0.649)
+    Solid-filled    ellipse XWAA     @ ImagePainter2 =     34 ( 0.919)
+
+    Gradient-filled ellipse          @ ImagePainter  =    169
+    Gradient-filled ellipse NOAA     @ ImagePainter2 =     35 ( 0.207)
+    Gradient-filled ellipse XWAA     @ ImagePainter2 =     47 ( 0.278)
+
+    Texture-filled  ellipse          @ ImagePainter  =     40
+    Texture-filled  ellipse NOAA     @ ImagePainter2 =     39 ( 0.975)
+    Texture-filled  ellipse XWAA     @ ImagePainter2 =     52 ( 1.300)
+
+    Solid-filled    arc     NOAA     @ ImagePainter2 =    119
+    Solid-filled    arc     XWAA     @ ImagePainter2 =    161 ( 1.353)
+
+    Gradient-filled arc     NOAA     @ ImagePainter2 =    156
+    Gradient-filled arc     XWAA     @ ImagePainter2 =    202 ( 1.295)
+
+    Texture-filled  arc     NOAA     @ ImagePainter2 =    169
+    Texture-filled  arc     XWAA     @ ImagePainter2 =    216 ( 1.278)
+    </td><td>&nbsp;&nbsp;&nbsp;</td>
+    <!-- Comparison with Cairo -->
+    <td>
+Cairo - CompositionMode::SourceCopy
+                                                       (Time) (Factor)
+                                                       ------ --------
+    Solid-filled    polygon          @ Cairo         =    140
+    Solid-filled    polygon          @ Cairo - No AA =     39 ( 0.279)
+    Solid-filled    polygon          @ ImagePainter  =     58 ( 0.414)
+    Solid-filled    polygon NOAA     @ ImagePainter2 =     47 ( 0.336)
+    Solid-filled    polygon FSAA 2x2 @ ImagePainter2 =    112 ( 0.800)
+    Solid-filled    polygon FSAA 4x4 @ ImagePainter2 =    360 ( 2.571)
+    Solid-filled    polygon XWAA     @ ImagePainter2 =     99 ( 0.707)
+
+    Solid-filled    ellipse          @ Cairo         =     88
+    Solid-filled    ellipse          @ Cairo - No AA =     49 ( 0.557)
+    Solid-filled    ellipse          @ ImagePainter  =      5 ( 0.057)
+    Solid-filled    ellipse NOAA     @ ImagePainter2 =      6 ( 0.068)
+    Solid-filled    ellipse XWAA     @ ImagePainter2 =     16 ( 0.182)
+
+    >>> +Random: Factor => Relative to Self Non-Random (Time) (Factor)
+                                                       ------ --------
+    Overhead for calling the rand() function in libc =  0.008
+    Solid-filled  R-polygon          @ Cairo         =    163 ( 1.264)
+    Solid-filled  R-polygon          @ Cairo - No AA =     50 ( 1.282)
+    Solid-filled  R-polygon          @ ImagePainter  =     62 ( 1.069)
+    Solid-filled  R-polygon NOAA     @ ImagePainter2 =     51 ( 1.085)
+    Solid-filled  R-polygon FSAA 2x2 @ ImagePainter2 =    123 ( 1.098)
+
+Cairo - CompositionMode::SourceOver
+                                                       (Time) (Factor)
+                                                       ------ --------
+    Solid-filled    polygon          @ Cairo         =    360
+    Solid-filled    polygon          @ Cairo - No AA =    125 ( 0.347)
+    Solid-filled    polygon          @ ImagePainter  =    254 ( 0.706)
+    Solid-filled    polygon NOAA     @ ImagePainter2 =    163 ( 0.453)
+    Solid-filled    polygon FSAA 2x2 @ ImagePainter2 =    224 ( 0.622)
+    Solid-filled    polygon FSAA 4x4 @ ImagePainter2 =    476 ( 1.322)
+    Solid-filled    polygon XWAA     @ ImagePainter2 =    242 ( 0.672)
+
+    Solid-filled    ellipse          @ Cairo         =    144
+    Solid-filled    ellipse          @ Cairo - No AA =     68 ( 0.472)
+    Solid-filled    ellipse          @ ImagePainter  =     37 ( 0.257)
+    Solid-filled    ellipse NOAA     @ ImagePainter2 =     24 ( 0.167)
+    Solid-filled    ellipse XWAA     @ ImagePainter2 =     34 ( 0.236)
+
+    >>> +Random: Factor => Relative to Self Non-Random (Time) (Factor)
+                                                       ------ --------
+    Overhead for calling the rand() function in libc =  0.008
+    Solid-filled  R-polygon          @ Cairo         =    390 ( 1.083)
+    Solid-filled  R-polygon          @ Cairo - No AA =    132 ( 1.048)
+    Solid-filled  R-polygon          @ ImagePainter  =    256 ( 1.008)
+    Solid-filled  R-polygon NOAA     @ ImagePainter2 =    168 ( 1.031)
+    Solid-filled  R-polygon FSAA 2x2 @ ImagePainter2 =    235 ( 1.049)
+    </td>
+</tr>
+</table>
+</div></pre><br/>
+<script>$(document).ready(function() { pairHScroll('c3baa3e67', 'wrapperTop', 'wrapperBot', 'contentTop', 'contentBot'); });</script>
+
+
 
 <h1><pre>
 <b>NEW ALGORITHMS FOR ELLIPSE AND ARC</b>
