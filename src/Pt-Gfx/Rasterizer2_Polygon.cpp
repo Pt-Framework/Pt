@@ -116,13 +116,6 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
         );
     }
     else if(_aaMode == AntiAliasingMode::Medium) {
-        rasterPolygonAreaXWAA(
-            clippedPoints.data(), clippedCounts.data(),
-            clippedCounts.size(), clippedPoints.size(),
-            _brush.color(), minX, minY, maxX, maxY
-        );
-        return;
-
         rasterPolygonAreaFSAAGen<4>(
             clippedPoints.data(), clippedCounts.data(),
             clippedCounts.size(), clippedPoints.size(),
@@ -130,11 +123,18 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
         );
     }
     else { // _aaMode == AntiAliasingMode::Maximum
+        rasterPolygonAreaXWAA(
+            clippedPoints.data(), clippedCounts.data(),
+            clippedCounts.size(), clippedPoints.size(),
+            _brush.color(), minX, minY, maxX, maxY
+        );
+        /*
         rasterPolygonAreaFSAAGen<8>(
             clippedPoints.data(), clippedCounts.data(),
             clippedCounts.size(), clippedPoints.size(),
             _brush.color(), minX, minY, maxX, maxY
         );
+        */
     }
 }
 

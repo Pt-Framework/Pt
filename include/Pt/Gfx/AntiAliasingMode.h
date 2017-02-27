@@ -39,10 +39,10 @@ namespace Gfx {
 class AntiAliasingMode {
     public:
          enum Mode {
-             None    = 0, // No anti-aliasing
-             Fastest = 1, // Anti-aliasing using fast SSAA 2x2
-             Medium  = 2, // Anti-aliasing using fast SSAA 4x4
-             Maximum = 3  // Anti-aliasing using fast SSAA 8x8
+             None    = 0, // No anti-aliasing             (speed: very fast ; memory : very low ; visual quality : lowest           )
+             Fastest = 1, // Anti-aliasing using FSAA 2x2 (speed: moderate  ; memory : low      ; visual quality : a bit better     )
+             Medium  = 2, // Anti-aliasing using FSAA 4x4 (speed: slow      ; memory : low      ; visual quality : maybe even better)
+             Maximum = 3  // Anti-aliasing using XWAA     (speed: moderate  ; memory : moderate ; visual quality : best             )
          };
 
         AntiAliasingMode(Mode m = Fastest)
