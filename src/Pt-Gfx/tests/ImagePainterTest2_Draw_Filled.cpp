@@ -86,9 +86,9 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(210, 310 + 200),
         PointF(140, 260 + 200)
     };
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Medium);
+    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Maximum);
     painter.fillPolygon( poly2c, sizeof(poly2b) / sizeof(poly2b[0]) );
-    painter.drawText( PointF(10, 250 + 300), "FSAA 4x4" );
+    painter.drawText( PointF(10, 250 + 300), "XWAA" );
 
 
     painter.setBrush( brush1 );
@@ -163,9 +163,9 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(860 + 40 -  0, 130 - 20 + 40),
         PointF(860 + 40 - 30, 130 - 20 + 15)
     };
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Maximum);
+    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Medium);
     painter.fillPolygon( poly4, sizeof(poly4) / sizeof(poly4[0]) );
-    painter.drawText( PointF(680, 70), "XWAA" );
+    painter.drawText( PointF(680, 70), "FSAA 4x4" );
 
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
