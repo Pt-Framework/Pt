@@ -400,7 +400,7 @@ void Rasterizer2::rasterOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1,
 
 // Xiaolin Wu's Anti-Aliased Line Algorithm
 // https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
-void Rasterizer2::fillOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const PolygonScanlines& exclusionZone, DrawLineMask& maskInOut)
+void Rasterizer2::fillOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const PolygonScanline16s& exclusionZone, DrawLineMask& maskInOut)
 {
     // Get the mask's coordinate
     Pt::int32_t mx[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
@@ -483,7 +483,7 @@ void Rasterizer2::fillOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, P
             bool skipPixel1 = false;
             bool skipPixel2 = false;
             if(!exclusionZone.empty()) {
-                for(std::vector<PolygonScanline>::const_iterator it = exclusionZone[y - minY].begin(); it != exclusionZone[y - minY].end(); ++it) {
+                for(std::vector<PolygonScanline16>::const_iterator it = exclusionZone[y - minY].begin(); it != exclusionZone[y - minY].end(); ++it) {
                     if(x1 >= it->from && x1 <= it->to) skipPixel1 = true;
                     if(x2 >= it->from && x2 <= it->to) skipPixel2 = true;
                     if(skipPixel1 && skipPixel2) break;
@@ -511,7 +511,7 @@ void Rasterizer2::fillOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, P
             // Draw the pixels as needed
             bool skipPixel = false;
             if(!exclusionZone.empty()) {
-                for(std::vector<PolygonScanline>::const_iterator it = exclusionZone[y1 - minY].begin(); it != exclusionZone[y1 - minY].end(); ++it) {
+                for(std::vector<PolygonScanline16>::const_iterator it = exclusionZone[y1 - minY].begin(); it != exclusionZone[y1 - minY].end(); ++it) {
                     if (x < it->from || x > it->to) continue;
                     skipPixel = true;
                     break;
@@ -520,7 +520,7 @@ void Rasterizer2::fillOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, P
             if(!skipPixel) XW_FILL_PIXEL(_image, x, y1, a1);
             skipPixel = false;
             if(!exclusionZone.empty()) {
-                for(std::vector<PolygonScanline>::const_iterator it = exclusionZone[y2 - minY].begin(); it != exclusionZone[y2 - minY].end(); ++it) {
+                for(std::vector<PolygonScanline16>::const_iterator it = exclusionZone[y2 - minY].begin(); it != exclusionZone[y2 - minY].end(); ++it) {
                     if (x < it->from || x > it->to) continue;
                     skipPixel = true;
                     break;

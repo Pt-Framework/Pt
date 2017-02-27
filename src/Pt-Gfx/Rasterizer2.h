@@ -184,15 +184,15 @@ class Rasterizer2
 
     private:
         // Polygon scanlines
-        struct PolygonScanline {
+        struct PolygonScanline16 {
             Pt::int16_t from, to;
 
-            PolygonScanline(Pt::int16_t from_, Pt::int16_t to_)
+            PolygonScanline16(Pt::int16_t from_, Pt::int16_t to_)
             : from(from_), to(to_)
             {}
         };
 
-        typedef std::vector< std::vector<PolygonScanline> > PolygonScanlines; // The vector index is the Y coordinate
+        typedef std::vector< std::vector<PolygonScanline16> > PolygonScanline16s; // The vector index is the Y coordinate
 
     private:
         void rasterOnePixelHLineSegment(Pt::int32_t x1, Pt::int32_t x2, Pt::int32_t y, const Color& color, DrawLineMask* maskInOut);
@@ -201,7 +201,7 @@ class Rasterizer2
         void rasterOnePixelGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut);
         void rasterOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut);
 
-        void fillOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const PolygonScanlines& exclusionZone, DrawLineMask& maskInOut);
+        void fillOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const PolygonScanline16s& exclusionZone, DrawLineMask& maskInOut);
 
         void rasterRectArea(const Point& tl, const Point& br);
 

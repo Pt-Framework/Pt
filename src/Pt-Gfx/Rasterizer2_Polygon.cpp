@@ -520,7 +520,7 @@ void Rasterizer2::rasterPolygonAreaXWAA(const Point* points, const size_t* point
     std::vector<Pt::int32_t> nodeX(totalPointCount * 2, 0);
 
     // List of polygon scanlines
-    PolygonScanlines scanlines;
+    PolygonScanline16s scanlines;
 
     if(_compositionMode != CompositionMode::SourceCopy)
         scanlines.resize(maxY - minY + 1 + 2);
@@ -572,7 +572,7 @@ void Rasterizer2::rasterPolygonAreaXWAA(const Point* points, const size_t* point
             if(to < from) continue;
             // Store the scanline coordinate as needed
             if(_compositionMode != CompositionMode::SourceCopy)
-                scanlines[pixelY - minY].push_back(PolygonScanline(from, to));
+                scanlines[pixelY - minY].push_back(PolygonScanline16(from, to));
             // Draw the scanline
             rasterScanline(from - minX, to - minX, pixelY - minY, minX, minY, color);
         }
