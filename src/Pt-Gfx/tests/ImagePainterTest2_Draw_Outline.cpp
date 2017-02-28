@@ -98,6 +98,8 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
 
     painter.setPen( Pen( Color::fromRgb8(0, 255, 255, 175), 1, Pen::DotDash )  );
+//    painter.setPen( Pen( Color::fromRgb8(0, 255, 255, 175), 1, Pen::DotDash )  );
+
     const PointF poly[] = { // CCW
         PointF(110, 310),
         PointF(160, 340),
@@ -107,6 +109,10 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
     painter.drawPolyline( poly, sizeof(poly) / sizeof(poly[0]) );
 
     painter.drawRect( RectF(PointF(550, 170), SizeF(100, 50)) );
+
+    painter.drawEllipse( PointF (730,  50), SizeF(95, 95) );
+    if(ip2) ip2->drawArc( PointF (730, 170), SizeF(95, 43), 30, 330, ArcMode::Chord );
+    if(ip2) ip2->drawArc( PointF (753, 243), SizeF(43, 95), 30, 330, ArcMode::Pie );
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
 }
