@@ -34,12 +34,24 @@
 namespace Pt {
 namespace Gfx {
 
-
+#include <math.h>
 // ======================================================================================
 // ===== Private Member Functions =======================================================
 // ======================================================================================
 void Rasterizer2::rasterOnePixelPatternedLine(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut)
 {
+    // Check the size of the line
+    const Pt::int32_t sizeX = abs(x2 - x1) + 1;
+    const Pt::int32_t sizeY = abs(y2 - y1) + 1;
+
+    // Calculate the factor
+    const Pt::int32_t f = 181 * (sizeX + sizeY) / sqrtf(sizeX * sizeX + sizeY * sizeY);
+    lprintf("%d\n", f);
+
+    // 0   - 100 : 100 / 100     = 1
+    // 100 - 100 : 200 / 141.421 = 1.414
+    // 100 - 200 : 300 / 223.607 = 1.342
+    // 200 - 200 : 400 / 282.843 = 1.414
 }
 
 #if 0
