@@ -121,7 +121,8 @@ void ImagePainter2::fillArcChordImpl(FilledArcInfo& fai)
     if(!fai.antiAlias) return;
 
     // Draw the anti-aliased circumference pixels
-    // ### TODO: There are out-of-place brighter-pixel artifacts in SourceOverMode !!! ###
+    // ### TODO: * Fix missing pixels in all mode !!! ###
+    // ### TODO: * Fix out-of-place brighter-pixel artifacts in SourceOver mode !!! ###
     arcUtil_drawCircumferencePixels(fai);
 
     // Draw the closing line
@@ -178,7 +179,8 @@ void ImagePainter2::fillArcPieImpl(FilledArcInfo& fai)
     if(!fai.antiAlias) return;
 
     // Draw the anti-aliased circumference pixels
-    // ### TODO: There are out-of-place brighter-pixel artifacts in SourceOverMode !!! ###
+    // ### TODO: * Fix missing pixels in all mode !!! ###
+    // ### TODO: * Fix out-of-place brighter-pixel artifacts in SourceOver mode !!! ###
     arcUtil_drawCircumferencePixels(fai);
 
     // Draw the closing lines

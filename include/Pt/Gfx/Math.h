@@ -159,6 +159,16 @@ inline float fastCos(float x)
 inline float fastAtan2(float y, float x)
 { return Gfx::Math::fastAtan2_impl(y, x); }
 
+inline float convertCartesianToPolarCoordinate(float x, float y)
+{
+    // Quadrant I & II
+    if(y >= 0)
+        return Gfx::Math::fastAtan2(y, x) * 180 / Pt::Pi;
+
+    // Quadrant III && IV
+    return Gfx::Math::fastAtan2(y, x) * 180 / Pt::Pi + 360;
+}
+
 
 } // namespace
 } // namespace

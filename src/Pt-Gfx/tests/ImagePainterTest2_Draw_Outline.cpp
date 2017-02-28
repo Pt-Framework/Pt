@@ -65,7 +65,7 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
 
-    painter.setPen( Pen( Color::fromRgb8(255, 0, 0, 175), 1, Pen::Dash )  );
+    painter.setPen( Pen( Color::fromRgb8(255, 0, 0, 175), 1, Pen::DotDash )  );
     painter.drawLine( PointF(  5,   5), PointF(994,   5) );
     painter.drawLine( PointF(  5, 594), PointF(994, 594) );
     painter.drawLine( PointF(  5,   5), PointF(  5, 594) );
@@ -75,11 +75,11 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
     painter.drawLine( PointF( 10, 110), PointF(100, 150) );
     painter.drawLine( PointF( 10, 250), PointF(100, 210) );
 
-    painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::Dash )  );
+    painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::Dot )  );
     painter.drawLine( PointF(500, 500), PointF(200, 200) );
     painter.drawLine( PointF(300, 150), PointF(700,  50) );
 
-    painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::DoubleDash )  );
+    painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::DoubleDot )  );
     painter.drawLine( PointF(550, 500), PointF(250, 200) );
     painter.drawLine( PointF(300, 200), PointF(700, 100) );
 
@@ -96,7 +96,7 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
     painter.drawLine( PointF(781, 452), PointF( 10, 450) );
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
-    painter.setPen( Pen( Color::fromRgb8(0, 255, 255, 175), 1, Pen::DotDash )  );
+    painter.setPen( Pen( Color::fromRgb8(0, 255, 255, 175), 1, Pen::Dash )  );
 
     const PointF poly[] = { // CCW
         PointF(110, 310),

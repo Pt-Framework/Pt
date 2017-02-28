@@ -185,11 +185,17 @@ class Rasterizer2
     public:
         void updateGradientBrushAsNeeded(Pt::int32_t width, Pt::int32_t height);
 
-        inline Pt::uint8_t patternBufferValue(Pt::int32_t idx)
+        inline Pt::uint8_t patternBufferAlpha(Pt::int32_t idx)
         { return _patternBuffer[idx % FIXED_POINT_TO_INT(_fpatternMaxCtr)];  }
 
-        inline Pt::uint8_t patternBufferValue(Pt::int32_t idx, Pt::uint8_t alpha)
+        inline Pt::uint8_t patternBufferAlpha(Pt::int32_t idx, Pt::uint8_t alpha)
         { return (Pt::uint32_t) _patternBuffer[idx % FIXED_POINT_TO_INT(_fpatternMaxCtr)] * alpha / 255;  }
+
+        inline Pt::uint8_t patternBufferAlphaPolar(Pt::int32_t x, Pt::int32_t y, float scale)
+        {  return patternBufferAlpha( Gfx::Math::convertCartesianToPolarCoordinate(x, y) * scale ); }
+
+        inline Pt::uint8_t patternBufferAlphaPolar(Pt::int32_t x, Pt::int32_t y, float scale, Pt::uint8_t alpha)
+        {  return patternBufferAlpha( Gfx::Math::convertCartesianToPolarCoordinate(x, y) * scale, alpha ); }
 
     private:
         // Polygon scanlines

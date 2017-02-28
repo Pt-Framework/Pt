@@ -188,7 +188,6 @@ class PT_GFX_API ImagePainter2 : public Painter
 
     protected:
         // Inline helper functions
-        static inline float convertCartesianToPolarCoordinate(float x, float y);
         static inline bool pointIsInsideArcDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd, float xyRatio);
 
         // Arc-related helper functions
@@ -221,16 +220,6 @@ class PT_GFX_API ImagePainter2 : public Painter
 // ===== Private Member Structures and Functions ========================================
 // ======================================================================================
 
-inline float ImagePainter2::convertCartesianToPolarCoordinate(float x, float y)
-{
-    // Quadrant I & II
-    if(y >= 0)
-        return Gfx::Math::fastAtan2(y, x) * 180 / Pt::Pi;
-
-    // Quadrant III && IV
-    return Gfx::Math::fastAtan2(y, x) * 180 / Pt::Pi + 360;
-}
-
 inline bool ImagePainter2::pointIsInsideArcDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd, float xyRatio)
 {
     // IMPORTANT NOTES:
@@ -241,7 +230,7 @@ inline bool ImagePainter2::pointIsInsideArcDegRange(Pt::int32_t x, Pt::int32_t y
     //     * The movement from begin angle to end angle must be in counter-clockwise (CCW), otherwise
     //       something wrong will be drawn.
 
-    const float angle = convertCartesianToPolarCoordinate( (x - ctrX), -(y - ctrY) * xyRatio);
+    const float angle = Gfx::Math::convertCartesianToPolarCoordinate( (x - ctrX), -(y - ctrY) * xyRatio);
 
     if(degBegin < 0 && degEnd < 0) {
         return angle >= (degBegin + 360) && angle <= (degEnd + 360);
