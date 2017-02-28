@@ -172,11 +172,15 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentXWAA(Pt::int32_t x1, Pt::in
     if(steep) {
         std::swap(fx1, fy1);
         std::swap(fx2, fy2);
+
+        fpiCtrInOut = _fpatternMaxCtr - fpiCtrInOut;
     }
 
     if(fx1 > fx2) {
         std::swap(fx1, fx2);
         std::swap(fy1, fy2);
+
+        fpiCtrInOut = _fpatternMaxCtr - fpiCtrInOut;
     }
 
     // Handle the gradient, starting point, and ending point
