@@ -32,6 +32,8 @@
 #define PT_GFX_RASTERIZER_2_H
 
 #include <Pt/Gfx/Algorithm.h>
+#include <Pt/Gfx/Math.h>
+
 #include <Pt/Gfx/AntiAliasingMode.h>
 #include <Pt/Gfx/Painter.h>
 
@@ -210,7 +212,7 @@ class Rasterizer2
 
         void rasterRectArea(const Point& tl, const Point& br);
 
-        void rasterOnePixelSolidPolygonOutline(const Point* points, size_t pointCount, const Color& color);
+        void rasterOnePixelPolygonOutline(const Point* points, size_t pointCount, const Color& color);
 
         void rasterPolygonAreaNoAA(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
         void rasterPolygonAreaFSAA2x2(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);

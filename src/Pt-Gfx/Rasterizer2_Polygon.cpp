@@ -55,7 +55,7 @@ void Rasterizer2::strokeOnePixelSolidPolygon(const Point* points, size_t pointCo
             // Increment the start index
             startIndex += curPC + 1;
             // Draw the polygon
-            rasterOnePixelSolidPolygonOutline(clipped.data(), clipped.size(), _pen.color());
+            rasterOnePixelPolygonOutline(clipped.data(), clipped.size(), _pen.color());
         }
     }
 }
@@ -179,17 +179,22 @@ void Rasterizer2::fillPolygonSeparate(const Point* points, size_t pointCount)
 // ===== Private Member Functions =======================================================
 // ======================================================================================
 
-void Rasterizer2::rasterOnePixelSolidPolygonOutline(const Point* points, size_t pointCount, const Color& color)
+void Rasterizer2::rasterOnePixelPolygonOutline(const Point* points, size_t pointCount, const Color& color)
 {
     // Mask
     Rasterizer2::DrawLineMask mask_zero = Rasterizer2::NullLineMask;
     Rasterizer2::DrawLineMask mask_nnp1 = Rasterizer2::NullLineMask;
 
+    // Pattern indexing counter
+    const bool        solid       = (_pen.style() == Pen::Solid);
+          Pt::int32_t fpiCtrInOut = 0;
+
     // From point N to point (N + 1), successively
     const size_t pc1 = pointCount - 1;
 
     for(size_t i = 0; i < pc1; ++i) {
-        rasterOnePixelSolidLine(points[i].x(), points[i].y(), points[i + 1].x(), points[i + 1].y(), color, &mask_nnp1);
+        if(solid) rasterOnePixelSolidLine    (points[i].x(), points[i].y(), points[i + 1].x(), points[i + 1].y(), color,              &mask_nnp1);
+        else      rasterOnePixelPatternedLine(points[i].x(), points[i].y(), points[i + 1].x(), points[i + 1].y(), color, fpiCtrInOut, &mask_nnp1);
         if(!i) memcpy(&mask_zero, &mask_nnp1, sizeof(mask_zero));
     }
 
@@ -199,7 +204,8 @@ void Rasterizer2::rasterOnePixelSolidPolygonOutline(const Point* points, size_t 
     mask_zero[0] = mask_nnp1[2];
     mask_zero[1] = mask_nnp1[3];
 
-    rasterOnePixelSolidLine(points[pc1].x(), points[pc1].y(), points[0].x(), points[0].y(), color, &mask_zero);
+    if(solid) rasterOnePixelSolidLine    (points[pc1].x(), points[pc1].y(), points[0].x(), points[0].y(), color,              &mask_zero);
+    else      rasterOnePixelPatternedLine(points[pc1].x(), points[pc1].y(), points[0].x(), points[0].y(), color, fpiCtrInOut, &mask_zero);
 }
 
 // Inspired by http://alienryderflex.com/polygon_fill

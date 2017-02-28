@@ -34,7 +34,7 @@
 namespace Pt {
 namespace Gfx {
 
-#include <math.h>
+
 // ======================================================================================
 // ===== Private Member Functions =======================================================
 // ======================================================================================
@@ -45,7 +45,7 @@ void Rasterizer2::rasterOnePixelPatternedLine(Pt::int32_t x1, Pt::int32_t y1, Pt
     const Pt::int32_t sizeY = abs(y2 - y1) + 1;
 
     // Calculate the incremental factor of the pattern indexing counter
-    const Pt::int32_t fpiCtrInc = FIXED_POINT_FROM_INT(sizeX + sizeY) / sqrtf(sizeX * sizeX + sizeY * sizeY);
+    const Pt::int32_t fpiCtrInc = FIXED_POINT_FROM_INT(sizeX + sizeY) / Gfx::Math::fastSqrt(sizeX * sizeX + sizeY * sizeY);
 
     // Draw the line
     if(_aaMode == AntiAliasingMode::None)

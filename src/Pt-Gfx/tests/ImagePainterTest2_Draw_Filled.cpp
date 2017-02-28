@@ -87,7 +87,7 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(140, 260 + 200)
     };
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Maximum);
-    painter.fillPolygon( poly2c, sizeof(poly2b) / sizeof(poly2b[0]) );
+    painter.fillPolygon( poly2c, sizeof(poly2c) / sizeof(poly2c[0]) );
     painter.drawText( PointF(10, 250 + 300), "XWAA" );
 
 

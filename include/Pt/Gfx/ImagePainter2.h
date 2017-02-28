@@ -32,11 +32,11 @@
 #define PT_GFX_IMAGEPAINTER_2_H
 
 #include <Pt/Gfx/Api.h>
+#include <Pt/Gfx/Math.h>
+
 #include <Pt/Gfx/AntiAliasingMode.h>
 #include <Pt/Gfx/ArcMode.h>
 #include <Pt/Gfx/Painter.h>
-
-#include <Pt/Gfx/Math.h>
 
 #include <Pt/System/Path.h>
 

@@ -96,6 +96,15 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
     painter.drawLine( PointF( 10, 440), PointF(781, 440) );
     painter.drawLine( PointF(781, 452), PointF( 10, 450) );
 
+    painter.setPen( Pen( Color::fromRgb8(0, 255, 255, 175), 1, Pen::DotDash )  );
+    const PointF poly[] = { // CCW
+        PointF(110, 310),
+        PointF(160, 340),
+        PointF(210, 310),
+        PointF(140, 260)
+    };
+    painter.drawPolyline( poly, sizeof(poly) / sizeof(poly[0]) );
+
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
 }
 
