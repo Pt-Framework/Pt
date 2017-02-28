@@ -117,11 +117,11 @@ class Argb32Model
  *     => RESULT = (((uint32_t) VALUE * 0x0000FF01) >> 16) >> 8
  */
 #ifdef USE_MULTIPLY_SHIFT_FOR_CONSTANT_DIVISION
-    #define DIV_BY_255(V) ( (((uint32_t) V * 0x00008081) >> 16) >> 7 )
-    #define DIV_BY_257(V) ( (((uint32_t) V * 0x0000FF01) >> 16) >> 8 )
+    #define DIV_BY_255(V) ( (((Pt::uint32_t) V * 0x00008081) >> 16) >> 7 )
+    #define DIV_BY_257(V) ( (((Pt::uint32_t) V * 0x0000FF01) >> 16) >> 8 )
 #else
-    #define DIV_BY_255(V) ( (uint32_t) V / 255 )
-    #define DIV_BY_257(V) ( (uint32_t) V / 257 )
+    #define DIV_BY_255(V) ( (Pt::uint32_t) V / 255 )
+    #define DIV_BY_257(V) ( (Pt::uint32_t) V / 257 )
 #endif
 
         static Color toColor(const Pt::uint8_t* p)

@@ -96,9 +96,7 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
     painter.drawLine( PointF(781, 452), PointF( 10, 450) );
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
-
     painter.setPen( Pen( Color::fromRgb8(0, 255, 255, 175), 1, Pen::DotDash )  );
-//    painter.setPen( Pen( Color::fromRgb8(0, 255, 255, 175), 1, Pen::DotDash )  );
 
     const PointF poly[] = { // CCW
         PointF(110, 310),

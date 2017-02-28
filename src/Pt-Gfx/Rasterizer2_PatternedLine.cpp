@@ -47,6 +47,8 @@ void Rasterizer2::rasterOnePixelPatternedLine(Pt::int32_t x1, Pt::int32_t y1, Pt
     // Calculate the incremental factor of the pattern indexing counter
     const Pt::int32_t fpiCtrInc = FIXED_POINT_FROM_INT(sizeX + sizeY) / Gfx::Math::fastSqrt(sizeX * sizeX + sizeY * sizeY);
 
+    // ### TODO: SIDE AA FOR X-LINE !!! ###
+
     // Draw the line
     if(_aaMode == AntiAliasingMode::None)
         rasterOnePixelPatternedGLineSegmentNoAA(x1, y1, x2, y2, color, fpiCtrInc, fpiCtrInOut, maskInOut);

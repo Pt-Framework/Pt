@@ -205,7 +205,7 @@ class PT_GFX_API ImagePainter2 : public Painter
         void arcUtil_drawXWLine(const FilledArcInfo& fai, const XWLineData& xwLine, Point maskInOut[4]);
 
         // Drawing functions
-        virtual void drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode);
+        virtual void drawOnePixelEllipseArcImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
         virtual void fillEllipseImplNoAA(const PointF& topLeft, const SizeF& size);
 

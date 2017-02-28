@@ -43,7 +43,7 @@ namespace Gfx {
 
 void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode )
 {
-    drawOnePixelSolidEllipseArcImpl(topLeft, size, degBegin, degEnd, arcMode);
+    drawOnePixelEllipseArcImpl(topLeft, size, degBegin, degEnd, arcMode);
 }
 
 void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode )

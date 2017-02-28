@@ -185,6 +185,12 @@ class Rasterizer2
     public:
         void updateGradientBrushAsNeeded(Pt::int32_t width, Pt::int32_t height);
 
+        inline Pt::uint8_t patternBufferValue(Pt::int32_t idx)
+        { return _patternBuffer[idx % FIXED_POINT_TO_INT(_fpatternMaxCtr)];  }
+
+        inline Pt::uint8_t patternBufferValue(Pt::int32_t idx, Pt::uint8_t alpha)
+        { return (Pt::uint32_t) _patternBuffer[idx % FIXED_POINT_TO_INT(_fpatternMaxCtr)] * alpha / 255;  }
+
     private:
         // Polygon scanlines
         struct PolygonScanline16 {
