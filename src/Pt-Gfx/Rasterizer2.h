@@ -296,18 +296,10 @@ Pt::uint8_t Rasterizer2::patternBufferAlphaPolar(Pt::int32_t x, Pt::int32_t y, f
 
 Pt::uint8_t Rasterizer2::patternBufferAlphaPolar(Pt::int32_t x, Pt::int32_t y, float scale, float xyRat)
 {
-    // ### TODO: * Fix the adjustment factor formula !!! ###
-
     const float angle = Gfx::Math::convertCartesianToPolarCoordinate(x, y);
-          float ajFac = 1.0f;
 
-         if(angle >=   0 && angle <  90) ajFac = fabs( 45 - angle) / 90.0f;
-    else if(angle >=  90 && angle < 180) ajFac = fabs(135 - angle) / 90.0f;
-    else if(angle >= 180 && angle < 270) ajFac = fabs(225 - angle) / 90.0f;
-    else if(angle >= 270 && angle < 360) ajFac = fabs(315 - angle) / 90.0f;
-
-    if(xyRat > 1.0f) scale /= (xyRat * ajFac + 1.0f - ajFac);
-    else             scale *= (xyRat * (1.0f - ajFac) + ajFac);
+    if(xyRat >= 1.0 && angle >= 45) scale /= xyRat;
+    if(xyRat <  1.0 && angle <  45) scale *= xyRat;
 
     return patternBufferAlpha(angle * scale);
 }
@@ -323,18 +315,10 @@ void Rasterizer2::patternBufferAlphaPolar(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::
 
 void Rasterizer2::patternBufferAlphaPolar(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t x, Pt::int32_t y, float scale, float xyRat, Pt::uint8_t alpha0, Pt::uint8_t alpha1)
 {
-    // ### TODO: * Fix the adjustment factor formula !!! ###
-
     const float angle = Gfx::Math::convertCartesianToPolarCoordinate(x, y);
-          float ajFac = 1.0f;
 
-         if(angle >=   0 && angle <  90) ajFac = fabs( 45 - angle) / 90.0f;
-    else if(angle >=  90 && angle < 180) ajFac = fabs(135 - angle) / 90.0f;
-    else if(angle >= 180 && angle < 270) ajFac = fabs(225 - angle) / 90.0f;
-    else if(angle >= 270 && angle < 360) ajFac = fabs(315 - angle) / 90.0f;
-
-    if(xyRat > 1.0f) scale /= (xyRat * ajFac + 1.0f - ajFac);
-    else             scale *= (xyRat * (1.0f - ajFac) + ajFac);
+    if(xyRat >= 1.0 && angle >= 45) scale /= xyRat;
+    if(xyRat <  1.0 && angle <  45) scale *= xyRat;
 
     patternBufferAlpha(a0, a1, angle * scale, alpha0, alpha1);
 }

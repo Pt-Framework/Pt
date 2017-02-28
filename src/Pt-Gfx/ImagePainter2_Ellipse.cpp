@@ -209,7 +209,7 @@ void ImagePainter2::drawOnePixelEllipseArcImpl(const PointF& topLeft, const Size
     const bool solid = (_rasterizer->pen().style() == Pen::Solid);
 
     // Calculate the scaling factor for retrieving alphas from the pattern buffer
-    const float pbScale = solid ? 1.0f : (radX + radY) / 100.0f;
+    const float pbScale = solid ? 1.0f : std::max(radX, radY) / 55.0f;
 
     // Determine we need to scale the indexes to the pattern buffer
     const bool scaleWP = (radX != radY);
