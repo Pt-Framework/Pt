@@ -185,17 +185,13 @@ class Rasterizer2
     public:
         void updateGradientBrushAsNeeded(Pt::int32_t width, Pt::int32_t height);
 
-        inline Pt::uint8_t patternBufferAlpha(Pt::int32_t idx)
-        { return _patternBuffer[idx % FIXED_POINT_TO_INT(_fpatternMaxCtr)];  }
+        inline Pt::uint8_t patternBufferAlpha(Pt::int32_t idx);
+        inline Pt::uint8_t patternBufferAlphaPolar(Pt::int32_t x, Pt::int32_t y, float scale);
+        inline Pt::uint8_t patternBufferAlphaPolar(Pt::int32_t x, Pt::int32_t y, float scale, float xyRat);
 
-        inline Pt::uint8_t patternBufferAlpha(Pt::int32_t idx, Pt::uint8_t alpha)
-        { return (Pt::uint32_t) _patternBuffer[idx % FIXED_POINT_TO_INT(_fpatternMaxCtr)] * alpha / 255;  }
-
-        inline Pt::uint8_t patternBufferAlphaPolar(Pt::int32_t x, Pt::int32_t y, float scale)
-        {  return patternBufferAlpha( Gfx::Math::convertCartesianToPolarCoordinate(x, y) * scale ); }
-
-        inline Pt::uint8_t patternBufferAlphaPolar(Pt::int32_t x, Pt::int32_t y, float scale, Pt::uint8_t alpha)
-        {  return patternBufferAlpha( Gfx::Math::convertCartesianToPolarCoordinate(x, y) * scale, alpha ); }
+        inline void patternBufferAlpha(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t idx, Pt::uint8_t alpha0, Pt::uint8_t alpha1);
+        inline void patternBufferAlphaPolar(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t x, Pt::int32_t y, float scale, Pt::uint8_t alpha0, Pt::uint8_t alpha1);
+        inline void patternBufferAlphaPolar(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t x, Pt::int32_t y, float scale, float xyRat, Pt::uint8_t alpha0, Pt::uint8_t alpha1);
 
     private:
         // Polygon scanlines
@@ -291,6 +287,58 @@ class Rasterizer2
 // ======================================================================================
 // ===== Inlined and/or Templated Public Member Functions ===============================
 // ======================================================================================
+
+Pt::uint8_t Rasterizer2::patternBufferAlpha(Pt::int32_t idx)
+{ return _patternBuffer[idx % FIXED_POINT_TO_INT(_fpatternMaxCtr)]; }
+
+Pt::uint8_t Rasterizer2::patternBufferAlphaPolar(Pt::int32_t x, Pt::int32_t y, float scale)
+{ return patternBufferAlpha(Gfx::Math::convertCartesianToPolarCoordinate(x, y) * scale); }
+
+Pt::uint8_t Rasterizer2::patternBufferAlphaPolar(Pt::int32_t x, Pt::int32_t y, float scale, float xyRat)
+{
+    const float angle = Gfx::Math::convertCartesianToPolarCoordinate(x, y);
+          float ajFac = 1.0f;
+
+         if(angle >=  45 && angle < 135) ajFac = fabs( 90 - angle) / 90.0f;
+    else if(angle >= 135 && angle < 225) ajFac = fabs(180 - angle) / 90.0f;
+    else if(angle >= 225 && angle < 315) ajFac = fabs(270 - angle) / 90.0f;
+    else if(angle >= 315 && angle < 360) ajFac = fabs(360 - angle) / 90.0f;
+    else if(angle >=   0 && angle <  90) ajFac =            angle  / 90.0f;
+
+    if(xyRat >= 1.0f) scale *= xyRat * (ajFac + 0.5f);
+    else              scale *= xyRat * (2.0f - ajFac * 2.0f);
+
+    return patternBufferAlpha(angle * scale);
+}
+
+void Rasterizer2::patternBufferAlpha(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t idx, Pt::uint8_t alpha0, Pt::uint8_t alpha1)
+{
+    a0 = (Pt::uint32_t) _patternBuffer[idx % FIXED_POINT_TO_INT(_fpatternMaxCtr)] * alpha0 / 255;
+    a1 = (Pt::uint32_t) _patternBuffer[idx % FIXED_POINT_TO_INT(_fpatternMaxCtr)] * alpha1 / 255;
+}
+
+void Rasterizer2::patternBufferAlphaPolar(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t x, Pt::int32_t y, float scale, Pt::uint8_t alpha0, Pt::uint8_t alpha1)
+{
+    const float angle = Gfx::Math::convertCartesianToPolarCoordinate(x, y);
+    patternBufferAlpha(a0, a1, angle * scale, alpha0, alpha1);
+}
+
+void Rasterizer2::patternBufferAlphaPolar(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t x, Pt::int32_t y, float scale, float xyRat, Pt::uint8_t alpha0, Pt::uint8_t alpha1)
+{
+    const float angle = Gfx::Math::convertCartesianToPolarCoordinate(x, y);
+          float ajFac = 1.0f;
+
+         if(angle >=  45 && angle < 135) ajFac = fabs( 90 - angle) / 90.0f;
+    else if(angle >= 135 && angle < 225) ajFac = fabs(180 - angle) / 90.0f;
+    else if(angle >= 225 && angle < 315) ajFac = fabs(270 - angle) / 90.0f;
+    else if(angle >= 315 && angle < 360) ajFac = fabs(360 - angle) / 90.0f;
+    else if(angle >=   0 && angle <  90) ajFac =            angle  / 90.0f;
+
+    if(xyRat >= 1.0f) scale *= xyRat * (ajFac + 0.5f);
+    else              scale *= xyRat * (2.0f - ajFac * 2.0f);
+
+    patternBufferAlpha(a0, a1, angle * scale, alpha0, alpha1);
+}
 
 void Rasterizer2::fillPixel(Pt::int32_t x, Pt::int32_t y, Pt::int32_t minX, Pt::int32_t minY, Pt::uint8_t alpha)
 {

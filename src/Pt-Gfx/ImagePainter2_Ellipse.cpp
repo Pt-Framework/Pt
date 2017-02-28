@@ -211,6 +211,9 @@ void ImagePainter2::drawOnePixelEllipseArcImpl(const PointF& topLeft, const Size
     // Calculate the scaling factor for retrieving alphas from the pattern buffer
     const float pbScale = solid ? 1.0f : (radX + radY) / 100.0f;
 
+    // Determine we need to scale the indexes to the pattern buffer
+    const bool scaleWP = (radX != radY);
+
     // Drawing an arc requires more parameters and calculation
     Pt::int32_t bx = 0, x1 = 0, x1d = MAXIMUM_COORD; // Begin point
     Pt::int32_t by = 0, y1 = 0, y1d = MAXIMUM_COORD;
@@ -259,7 +262,9 @@ void ImagePainter2::drawOnePixelEllipseArcImpl(const PointF& topLeft, const Size
                 if(solid)
                     _rasterizer->stroke4Pixels(xl, yt, xr, yb, mask);
                 else {
-                    const Pt::uint8_t pba = _rasterizer->patternBufferAlphaPolar(x, y, pbScale);
+                    const Pt::uint8_t pba = scaleWP
+                                          ? _rasterizer->patternBufferAlphaPolar(x, y, pbScale, xyRat)
+                                          : _rasterizer->patternBufferAlphaPolar(x, y, pbScale       );
                     if(pba) _rasterizer->stroke4Pixels(xl, yt, xr, yb, mask);
                 }
                 // Determine the exact coordinates of the closing lines
@@ -278,7 +283,9 @@ void ImagePainter2::drawOnePixelEllipseArcImpl(const PointF& topLeft, const Size
                 if(solid)
                    _rasterizer->stroke4Pixels(xl, yt, xr, yb);
                 else {
-                    const Pt::uint8_t pba = _rasterizer->patternBufferAlphaPolar(x, y, pbScale);
+                    const Pt::uint8_t pba = scaleWP
+                                          ? _rasterizer->patternBufferAlphaPolar(x, y, pbScale, xyRat)
+                                          : _rasterizer->patternBufferAlphaPolar(x, y, pbScale       );
                     if(pba) _rasterizer->stroke4Pixels(xl, yt, xr, yb);
                 }
             }
@@ -314,8 +321,9 @@ void ImagePainter2::drawOnePixelEllipseArcImpl(const PointF& topLeft, const Size
                     _rasterizer->stroke4Pixels(xl, yt1, xr, yb1, a1, mask1);
                 }
                 else {
-                    const Pt::uint8_t pba0 = _rasterizer->patternBufferAlphaPolar(x, y, pbScale, a0);
-                    const Pt::uint8_t pba1 = _rasterizer->patternBufferAlphaPolar(x, y, pbScale, a1);
+                    Pt::uint8_t pba0, pba1;
+                    if(scaleWP) _rasterizer->patternBufferAlphaPolar(pba0, pba1, x, y, pbScale, xyRat, a0, a1);
+                    else        _rasterizer->patternBufferAlphaPolar(pba0, pba1, x, y, pbScale,        a0, a1);
                     _rasterizer->stroke4Pixels(xl, yt0, xr, yb0, pba0, mask0);
                     _rasterizer->stroke4Pixels(xl, yt1, xr, yb1, pba1, mask1);
                 }
@@ -343,8 +351,9 @@ void ImagePainter2::drawOnePixelEllipseArcImpl(const PointF& topLeft, const Size
                     _rasterizer->stroke4Pixels(xl, yt1, xr, yb1, a1);
                 }
                 else {
-                    const Pt::uint8_t pba0 = _rasterizer->patternBufferAlphaPolar(x, y, pbScale, a0);
-                    const Pt::uint8_t pba1 = _rasterizer->patternBufferAlphaPolar(x, y, pbScale, a1);
+                    Pt::uint8_t pba0, pba1;
+                    if(scaleWP) _rasterizer->patternBufferAlphaPolar(pba0, pba1, x, y, pbScale, xyRat, a0, a1);
+                    else        _rasterizer->patternBufferAlphaPolar(pba0, pba1, x, y, pbScale,        a0, a1);
                     _rasterizer->stroke4Pixels(xl, yt0, xr, yb0, pba0);
                     _rasterizer->stroke4Pixels(xl, yt1, xr, yb1, pba1);
                 }
@@ -379,7 +388,9 @@ void ImagePainter2::drawOnePixelEllipseArcImpl(const PointF& topLeft, const Size
                 if(solid)
                     _rasterizer->stroke4Pixels(xl, yt, xr, yb, mask);
                 else {
-                    const Pt::uint8_t pba = _rasterizer->patternBufferAlphaPolar(x, y, pbScale);
+                    const Pt::uint8_t pba = scaleWP
+                                          ? _rasterizer->patternBufferAlphaPolar(x, y, pbScale, xyRat)
+                                          : _rasterizer->patternBufferAlphaPolar(x, y, pbScale       );
                     if(pba) _rasterizer->stroke4Pixels(xl, yt, xr, yb, mask);
                 }
                 // Determine the exact coordinates of the closing lines
@@ -398,7 +409,9 @@ void ImagePainter2::drawOnePixelEllipseArcImpl(const PointF& topLeft, const Size
                 if(solid)
                     _rasterizer->stroke4Pixels(xl, yt, xr, yb);
                 else {
-                    const Pt::uint8_t pba = _rasterizer->patternBufferAlphaPolar(x, y, pbScale);
+                    const Pt::uint8_t pba = scaleWP
+                                          ? _rasterizer->patternBufferAlphaPolar(x, y, pbScale, xyRat)
+                                          : _rasterizer->patternBufferAlphaPolar(x, y, pbScale       );
                     if(pba) _rasterizer->stroke4Pixels(xl, yt, xr, yb);
                 }
             }
@@ -434,8 +447,9 @@ void ImagePainter2::drawOnePixelEllipseArcImpl(const PointF& topLeft, const Size
                     _rasterizer->stroke4Pixels(xl1, yt, xr1, yb, a1, mask1);
                 }
                 else {
-                    const Pt::uint8_t pba0 = _rasterizer->patternBufferAlphaPolar(x, y, pbScale, a0);
-                    const Pt::uint8_t pba1 = _rasterizer->patternBufferAlphaPolar(x, y, pbScale, a1);
+                    Pt::uint8_t pba0, pba1;
+                    if(scaleWP) _rasterizer->patternBufferAlphaPolar(pba0, pba1, x, y, pbScale, xyRat, a0, a1);
+                    else        _rasterizer->patternBufferAlphaPolar(pba0, pba1, x, y, pbScale,        a0, a1);
                     _rasterizer->stroke4Pixels(xl0, yt, xr0, yb, pba0, mask0);
                     _rasterizer->stroke4Pixels(xl1, yt, xr1, yb, pba1, mask1);
                 }
@@ -463,8 +477,9 @@ void ImagePainter2::drawOnePixelEllipseArcImpl(const PointF& topLeft, const Size
                     _rasterizer->stroke4Pixels(xl1, yt, xr1, yb, a1);
                 }
                 else {
-                    const Pt::uint8_t pba0 = _rasterizer->patternBufferAlphaPolar(x, y, pbScale, a0);
-                    const Pt::uint8_t pba1 = _rasterizer->patternBufferAlphaPolar(x, y, pbScale, a1);
+                    Pt::uint8_t pba0, pba1;
+                    if(scaleWP) _rasterizer->patternBufferAlphaPolar(pba0, pba1, x, y, pbScale, xyRat, a0, a1);
+                    else        _rasterizer->patternBufferAlphaPolar(pba0, pba1, x, y, pbScale,        a0, a1);
                     _rasterizer->stroke4Pixels(xl0, yt, xr0, yb, pba0);
                     _rasterizer->stroke4Pixels(xl1, yt, xr1, yb, pba1);
                 }

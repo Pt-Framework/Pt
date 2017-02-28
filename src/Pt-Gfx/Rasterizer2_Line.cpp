@@ -422,12 +422,6 @@ void Rasterizer2::rasterFillOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::in
         my[i] = maskInOut[i].y();
     }
 
-    // Convert the coordinates to fixed-points
-    Pt::int32_t fx1 = FIXED_POINT_FROM_INT(x1);
-    Pt::int32_t fy1 = FIXED_POINT_FROM_INT(y1);
-    Pt::int32_t fx2 = FIXED_POINT_FROM_INT(x2);
-    Pt::int32_t fy2 = FIXED_POINT_FROM_INT(y2);
-
     // A helper macro to fill pixel
     #define XW_FILL_PIXEL(IMG, X, Y, A)                                                     \
         do {                                                                                \
@@ -454,6 +448,18 @@ void Rasterizer2::rasterFillOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::in
                 _image->format().setPixel(pixel, _brush.color(), _compositionMode, A);      \
             }                                                                               \
         } while(false)
+
+    // Check if both coordinates are on the same location
+    if(x1 == x2 && y1 == y2) {
+        XW_FILL_PIXEL(_image, x1, y1, 255);
+        return;
+    }
+
+    // Convert the coordinates to fixed-points
+    Pt::int32_t fx1 = FIXED_POINT_FROM_INT(x1);
+    Pt::int32_t fy1 = FIXED_POINT_FROM_INT(y1);
+    Pt::int32_t fx2 = FIXED_POINT_FROM_INT(x2);
+    Pt::int32_t fy2 = FIXED_POINT_FROM_INT(y2);
 
     // Swap the values as needed
     const Pt::int32_t deltaX = (fx2 >= fx1) ? (fx2 - fx1) : (fx1 - fx2);
@@ -500,8 +506,8 @@ void Rasterizer2::rasterFillOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::in
                     if(skipPixel1 && skipPixel2) break;
                 }
             }
-            if(!skipPixel1) XW_FILL_PIXEL(_image, x1, y, a1);
-            if(!skipPixel2) XW_FILL_PIXEL(_image, x2, y, a2);
+            if(!skipPixel1            ) XW_FILL_PIXEL(_image, x1, y, a1);
+            if(!skipPixel2 && x2 != x1) XW_FILL_PIXEL(_image, x2, y, a2);
         }
         // Store back the start and end coordinates to the mask as needed
         maskInOut[0].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl )                           ), from);
@@ -537,7 +543,7 @@ void Rasterizer2::rasterFillOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::in
                     break;
                 }
             }
-            if(!skipPixel) XW_FILL_PIXEL(_image, x, y2, a2);
+            if(!skipPixel && y2 != y1) XW_FILL_PIXEL(_image, x, y2, a2);
         }
         // Store back the start and end coordinates to the mask as needed
         maskInOut[0].set(from, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl )                           ));
