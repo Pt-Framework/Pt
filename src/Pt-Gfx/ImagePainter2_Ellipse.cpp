@@ -416,16 +416,16 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
 
     // Draw the arc's closing lines
     if(drawArc) {
-        Rasterizer2::DrawLineMask mask = Rasterizer2::NullLineMask;
         if(arcMode == ArcMode::Chord) {
             const Point a(x1, y1);
             const Point b(x2, y2);
-            _rasterizer->strokeOnePixelLine(a, b, &mask);
+            _rasterizer->strokeOnePixelLine(a, b, 0);
         }
         else if(arcMode == ArcMode::Pie) {
-            const Point a(bx, by);
-            const Point b(ex, ey);
-            const Point o(ctrX, ctrY);
+            Rasterizer2::DrawLineMask mask = Rasterizer2::NullLineMask;
+            const Point               a(bx,   by  );
+            const Point               b(ex,   ey  );
+            const Point               o(ctrX, ctrY);
             _rasterizer->strokeOnePixelLine(a, o, &mask);
             _rasterizer->strokeOnePixelLine(b, o, &mask);
         }

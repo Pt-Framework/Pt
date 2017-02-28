@@ -189,39 +189,17 @@ void Rasterizer2::rasterOnePixelSolidPolygonOutline(const Point* points, size_t 
     const size_t pc1 = pointCount - 1;
 
     for(size_t i = 0; i < pc1; ++i) {
-        if(points[i].y() == points[i + 1].y())
-            rasterOnePixelSolidHLineSegment(points[i].x(), points[i + 1].x(), points[i].y(), color, &mask_nnp1);
-        else if(points[i].x() == points[i + 1].x())
-            rasterOnePixelSolidVLineSegment(points[i].x(), points[i].y(), points[i + 1].y(), color, &mask_nnp1);
-        else {
-            const bool xline = ( abs(points[i + 1].x() - points[i].x()) ==
-                                 abs(points[i + 1].y() - points[i].y()) );
-            if(xline || _aaMode == AntiAliasingMode::None)
-                rasterOnePixelSolidGLineSegmentNoAA(points[i].x(), points[i].y(), points[i + 1].x(), points[i + 1].y(), color, &mask_nnp1);
-            else
-                rasterOnePixelSolidGLineSegmentXWAA(points[i].x(), points[i].y(), points[i + 1].x(), points[i + 1].y(), color, &mask_nnp1);
-        }
+        rasterOnePixelSolidLine(points[i].x(), points[i].y(), points[i + 1].x(), points[i + 1].y(), color, &mask_nnp1);
         if(!i) memcpy(&mask_zero, &mask_nnp1, sizeof(mask_zero));
     }
 
+    // From the last point to the first point
     mask_zero[2] = mask_zero[0];
     mask_zero[3] = mask_zero[1];
     mask_zero[0] = mask_nnp1[2];
     mask_zero[1] = mask_nnp1[3];
 
-    // From the last point to the first point
-    if(points[pc1].y() == points[0].y())
-        rasterOnePixelSolidHLineSegment(points[pc1].x(), points[0].x(), points[pc1].y(), color, &mask_zero);
-    else if(points[pc1].x() == points[0].x())
-         rasterOnePixelSolidVLineSegment(points[pc1].x(), points[pc1].y(), points[0].y(), color, &mask_zero);
-    else {
-        const bool xline = ( abs(points[pc1].x() - points[0].x()) ==
-                             abs(points[pc1].y() - points[0].y()) );
-        if(xline || _aaMode == AntiAliasingMode::None)
-            rasterOnePixelSolidGLineSegmentNoAA(points[pc1].x(), points[pc1].y(), points[0].x(), points[0].y(), color, &mask_zero);
-        else
-            rasterOnePixelSolidGLineSegmentXWAA(points[pc1].x(), points[pc1].y(), points[0].x(), points[0].y(), color, &mask_zero);
-    }
+    rasterOnePixelSolidLine(points[pc1].x(), points[pc1].y(), points[0].x(), points[0].y(), color, &mask_zero);
 }
 
 // Inspired by http://alienryderflex.com/polygon_fill
@@ -588,15 +566,15 @@ void Rasterizer2::rasterPolygonAreaXWAA(const Point* points, const size_t* point
         // From point N to point (N + 1), successively
         const size_t pc1 = pointCount[p] - 1;
         for(size_t i = 0; i < pc1; ++i) {
-            fillOnePixelSolidGLineSegmentXWAA(curPointBase[i].x(), curPointBase[i].y(), curPointBase[i + 1].x(), curPointBase[i + 1].y(), minX, minY, scanlines, mask_nnp1);
+            rasterFillOnePixelSolidGLineSegmentXWAA(curPointBase[i].x(), curPointBase[i].y(), curPointBase[i + 1].x(), curPointBase[i + 1].y(), minX, minY, scanlines, mask_nnp1);
             if(!i) memcpy(&mask_zero, &mask_nnp1, sizeof(mask_zero));
         }
+        // From the last point to the first point
         mask_zero[2] = mask_zero[0];
         mask_zero[3] = mask_zero[1];
         mask_zero[0] = mask_nnp1[2];
         mask_zero[1] = mask_nnp1[3];
-        // From the last point to the first point
-        fillOnePixelSolidGLineSegmentXWAA(curPointBase[pc1].x(), curPointBase[pc1].y(), curPointBase[0].x(), curPointBase[0].y(), minX, minY, scanlines, mask_zero);
+        rasterFillOnePixelSolidGLineSegmentXWAA(curPointBase[pc1].x(), curPointBase[pc1].y(), curPointBase[0].x(), curPointBase[0].y(), minX, minY, scanlines, mask_zero);
         // Increment the base pointer
         curPointBase += pointCount[p];
     }

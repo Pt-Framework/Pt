@@ -69,16 +69,16 @@ void Rasterizer2::strokeOnePixelLine(const Point& a, const Point& b, DrawLineMas
         maxY = y1;
     }
 
-    // Calculate the size of the line
+    // Check the size of the line
     const Pt::int32_t sizeX = maxX - minX + 1;
     const Pt::int32_t sizeY = maxY - minY + 1;
     if(!sizeX && !sizeY) return;
 
-    // Check for horizontal line
+    // Draw the line
     if(_pen.style() == Pen::Solid)
-        rasterOnePixelSolidLine(x1, y1, x2, y2, minX, minY, maxX, maxY, sizeX, sizeY, maskInOut);
+        rasterOnePixelSolidLine(x1, y1, x2, y2, _pen.color(), maskInOut);
     else
-        rasterOnePixelPatternedLine(x1, y1, x2, y2, minX, minY, maxX, maxY, sizeX, sizeY, maskInOut);
+        rasterOnePixelPatternedLine(x1, y1, x2, y2, _pen.color(), maskInOut);
 }
 
 
@@ -86,34 +86,34 @@ void Rasterizer2::strokeOnePixelLine(const Point& a, const Point& b, DrawLineMas
 // ===== Private Member Functions =======================================================
 // ======================================================================================
 
-void Rasterizer2::rasterOnePixelSolidLine(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY, Pt::int32_t sizeX, Pt::int32_t sizeY, DrawLineMask* maskInOut)
+void Rasterizer2::rasterOnePixelSolidLine(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut)
 {
     // Check for horizontal line
-    if(minY == maxY) {
-        rasterOnePixelSolidHLineSegment(minX, maxX, minY, _pen.color(), maskInOut);
+    if(y1 == y2) {
+        rasterOnePixelSolidHLineSegment(x1, x2, y1, color, maskInOut);
         return;
     }
 
     // Check for vertical line
-    if(minX == maxX) {
-        rasterOnePixelSolidVLineSegment(minX, minY, maxY, _pen.color(), maskInOut);
+    if(x1 == x2) {
+        rasterOnePixelSolidVLineSegment(x1, y1, y2, color, maskInOut);
         return;
     }
 
     // Check for 45-degree line
-    if(sizeX == sizeY) {
-        rasterOnePixelSolidXLineSegment(x1, y1, x2, y2, _pen.color(), maskInOut);
+    if(abs(x2 - x1) == abs(y2 - y1)) {
+        rasterOnePixelSolidXLineSegment(x1, y1, x2, y2, color, maskInOut);
         return;
     }
 
-    // Raster the line
-    if(_aaMode != AntiAliasingMode::None) {
-        // Raster the line using anti-aliasing
-        rasterOnePixelSolidGLineSegmentXWAA(x1, y1, x2, y2, _pen.color(), maskInOut);
+    // Generic line
+    if(_aaMode == AntiAliasingMode::None) {
+        // Raster the line without using anti-aliasing
+        rasterOnePixelSolidGLineSegmentNoAA(x1, y1, x2, y2, color, maskInOut);
     }
     else {
-        // Raster the line without using anti-aliasing
-        rasterOnePixelSolidGLineSegmentNoAA(x1, y1, x2, y2, _pen.color(), maskInOut);
+        // Raster the line using anti-aliasing
+        rasterOnePixelSolidGLineSegmentXWAA(x1, y1, x2, y2, color, maskInOut);
     }
 }
 
@@ -409,7 +409,7 @@ void Rasterizer2::rasterOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_
 
 // Xiaolin Wu's Anti-Aliased Line Algorithm
 // https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
-void Rasterizer2::fillOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const PolygonScanline16s& exclusionZone, DrawLineMask& maskInOut)
+void Rasterizer2::rasterFillOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const PolygonScanline16s& exclusionZone, DrawLineMask& maskInOut)
 {
     // Get the mask's coordinate
     Pt::int32_t mx[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
