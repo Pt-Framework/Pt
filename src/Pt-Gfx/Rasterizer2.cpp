@@ -122,6 +122,8 @@ void Rasterizer2::setPen( const Pen& pen )
     Gfx::fill(_penBuffer.begin(), _penBuffer.end(), pen.color());
 
     _penPixel.reset(_penBuffer.view(), 0, 0);
+
+    updatePenPattern();
 }
 
 void Rasterizer2::setBrush( const Brush& brush )
@@ -220,6 +222,37 @@ void Rasterizer2::updateGradientBrushAsNeeded(Pt::int32_t width, Pt::int32_t hei
 // ======================================================================================
 // ===== Private Member Functions =======================================================
 // ======================================================================================
+
+// These value should produce numbers between 1 to 5 when calculating the incremental factor
+// of the pattern indexing counter (therefore PI_GEN_PAT_MUL_FACTOR is set to 5)
+const Pt::int32_t Rasterizer2::PI_CTR_INC_MUL_FACTOR = 11;
+const Pt::int32_t Rasterizer2::PI_CTR_INC_SUB_FACTOR = 10;
+
+const Pt::int32_t Rasterizer2::PI_GEN_PAT_MUL_FACTOR = 5;
+const Pt::int32_t Rasterizer2::PI_GEN_PAT_UNIT_WIDTH = 3;
+const Pt::int32_t Rasterizer2::PI_GEN_PAT_UNIT_COUNT = 2;
+
+const Pt::int32_t Rasterizer2::PI_PAT_TOTAL_BUF_SIZE = Rasterizer2::PI_GEN_PAT_MUL_FACTOR
+                                                     * Rasterizer2::PI_GEN_PAT_UNIT_WIDTH
+                                                     * Rasterizer2::PI_GEN_PAT_UNIT_COUNT;
+
+void Rasterizer2::updatePenPattern()
+{
+    if(_aaMode == AntiAliasingMode::None) {
+    }
+
+    else {
+    }
+
+    Pt::int32_t gctr = 0;
+    for(int i = 0; i < PI_GEN_PAT_UNIT_WIDTH * PI_GEN_PAT_MUL_FACTOR; ++i) {
+        _patternBuffer[gctr++] = XWAA_WFILTER[i * 255 / 25];
+    }
+    for(int i = 0; i < PI_GEN_PAT_UNIT_WIDTH * PI_GEN_PAT_MUL_FACTOR; ++i) {
+        _patternBuffer[gctr++] = XWAA_WFILTER[255 - i * 255 / 25];
+    }
+
+}
 
 void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
 {

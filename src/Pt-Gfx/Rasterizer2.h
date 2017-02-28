@@ -95,6 +95,7 @@ class Rasterizer2
         void setAntiAliasingMode(AntiAliasingMode mode)
         {
             _aaMode = mode;
+            updatePenPattern();
         }
 
         const AntiAliasingMode& antiAliasingMode() const
@@ -183,6 +184,16 @@ class Rasterizer2
         void updateGradientBrushAsNeeded(Pt::int32_t width, Pt::int32_t height);
 
     private:
+        // Pattern-related constants
+        static const Pt::int32_t PI_CTR_INC_MUL_FACTOR;
+        static const Pt::int32_t PI_CTR_INC_SUB_FACTOR;
+
+        static const Pt::int32_t PI_GEN_PAT_MUL_FACTOR;
+        static const Pt::int32_t PI_GEN_PAT_UNIT_WIDTH;
+        static const Pt::int32_t PI_GEN_PAT_UNIT_COUNT;
+
+        static const Pt::int32_t PI_PAT_TOTAL_BUF_SIZE;
+
         // Polygon scanlines
         struct PolygonScanline16 {
             Pt::int16_t from, to;
@@ -215,6 +226,7 @@ class Rasterizer2
         void rasterPolygonAreaXWAA(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
 
     private:
+        void updatePenPattern();
         void updateGradientBrush(Pt::int32_t width, Pt::int32_t height);
 
         void updateClip();
@@ -255,7 +267,7 @@ class Rasterizer2
         Pen              _pen;
         Image            _penBuffer;
         ConstPixel       _penPixel;
-        Pt::uint8_t      _patternBuffer[25];
+        Pt::uint8_t      _patternBuffer[256];
 
         Brush            _brush;
         Image            _brushBuffer;

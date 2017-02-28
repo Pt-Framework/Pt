@@ -45,12 +45,8 @@ void Rasterizer2::rasterOnePixelPatternedLine(Pt::int32_t x1, Pt::int32_t y1, Pt
     const Pt::int32_t sizeY = abs(y2 - y1) + 1;
 
     // Calculate the incremental factor of the pattern indexing counter
-    // This one should produce numbers between 1 to 5
-    const Pt::int32_t piCtrInc = 11 * (sizeX + sizeY) / sqrtf(sizeX * sizeX + sizeY * sizeY) - 10;
+    const Pt::int32_t piCtrInc = PI_CTR_INC_MUL_FACTOR * (sizeX + sizeY) / sqrtf(sizeX * sizeX + sizeY * sizeY) - PI_CTR_INC_SUB_FACTOR;
 
-    for(int i = 0; i < 5 * 5; ++i) {
-        _patternBuffer[i] = XWAA_WFILTER[i * 255 / 25];
-    }
 
     //
     Pt::int32_t piCtrInOut = 0;
@@ -93,7 +89,7 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentNoAA(Pt::int32_t x1, Pt::in
 
         Pt::uint8_t alpha = _patternBuffer[piCtrInOut];
         piCtrInOut += piCtrInc;
-        if(piCtrInOut >= (Pt::int32_t) sizeof(_patternBuffer)) piCtrInOut = 0;
+        if(piCtrInOut >= PI_PAT_TOTAL_BUF_SIZE) piCtrInOut = 0;
 
         // Check if we should skip drawing the pixel
         bool skipDrawing = false;
