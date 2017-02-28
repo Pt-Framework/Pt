@@ -225,37 +225,86 @@ void Rasterizer2::updateGradientBrushAsNeeded(Pt::int32_t width, Pt::int32_t hei
 
 void Rasterizer2::updatePenPattern()
 {
+    // Predefined patterns
+    static const Pt::uint8_t patternDot       [] = { 0, 1, 0, 0                };
+    static const Pt::uint8_t patternDoubleDot [] = { 0, 1, 0, 0, 1, 0, 0, 0, 0 };
+    static const Pt::uint8_t patternDash      [] = { 0, 1, 1, 1, 0, 0                         };
+    static const Pt::uint8_t patternDoubleDash[] = { 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0 };
+    static const Pt::uint8_t patternDotDash   [] = { 0, 1, 0, 0, 1, 1, 1, 0, 0 };
+
+    // Select the pattern
+    const Pt::uint8_t* patternSel;
+          Pt::uint8_t  patternLen;
+
+    switch(_pen.style()) {
+        default:
+        case Pen::Dot:
+            patternSel =        patternDot;
+            patternLen = sizeof(patternDot);
+            break;
+
+        case Pen::DoubleDot:
+            patternSel =        patternDoubleDot;
+            patternLen = sizeof(patternDoubleDot);
+            break;
+
+        case Pen::Dash:
+            patternSel =        patternDash;
+            patternLen = sizeof(patternDash);
+            break;
+
+        case Pen::DoubleDash:
+            patternSel =        patternDoubleDash;
+            patternLen = sizeof(patternDoubleDash);
+            break;
+
+        case Pen::DotDash:
+            patternSel =        patternDotDash;
+            patternLen = sizeof(patternDotDash);
+            break;
+    }
+
     // Counter for generating the pattern
     Pt::int32_t gctr = 0;
 
     // Generate the pattern
-    switch(_pen.style()) {
-        default:
-        case Pen::Dash: {
-            const Pt::int32_t max = 5;
-            for(Pt::int32_t i = 0; i <= max; ++i) _patternBuffer[gctr++] = XWAA_WFILTER[255 - i * 255 / max];
-            for(Pt::int32_t i = 0; i <= max; ++i) _patternBuffer[gctr++] = XWAA_WFILTER[      i * 255 / max];
-            for(Pt::int32_t i = 0; i <= max; ++i) _patternBuffer[gctr++] = 0;
-            break;
+    Pt::uint8_t previous = 0;
+    for(Pt::int8_t i = 0; i < patternLen; ++i) {
+        // Get the pattern cell value
+        const Pt::uint8_t current = patternSel[i];
+        const Pt::uint8_t max     = 1;
+        // 1 1
+        if(previous && current) {
+            for(Pt::uint8_t i = 0; i <= max; ++i) _patternBuffer[gctr++] = 255;
         }
-
-        case Pen::DoubleDash: {
-            const Pt::int32_t max = 5;
-            for(Pt::int32_t i = 0; i <= max; ++i) _patternBuffer[gctr++] = XWAA_WFILTER[255 - i * 255 / max];
-            for(Pt::int32_t i = 0; i <= max; ++i) _patternBuffer[gctr++] = XWAA_WFILTER[      i * 255 / max];
-            for(Pt::int32_t i = 0; i <= max; ++i) _patternBuffer[gctr++] = XWAA_WFILTER[255 - i * 255 / max];
-            for(Pt::int32_t i = 0; i <= max; ++i) _patternBuffer[gctr++] = XWAA_WFILTER[      i * 255 / max];
-            for(Pt::int32_t i = 0; i <= max; ++i) _patternBuffer[gctr++] = 0;
-            for(Pt::int32_t i = 0; i <= max; ++i) _patternBuffer[gctr++] = 0;
-            break;
+        // 0 1
+        else if(!previous && current) {
+            for(Pt::int32_t i = 0; i <= max; ++i) _patternBuffer[gctr++] = i * 255 / max;
         }
+        // 1 0
+        else if(previous && !current) {
+            for(Pt::int32_t i = 0; i <= max; ++i) _patternBuffer[gctr++] = 255 - i * 255 / max;
+        }
+        // 0 0
+        else if(!previous && !current) {
+            for(Pt::uint8_t i = 0; i <= max; ++i) _patternBuffer[gctr++] = 0;
+        }
+        // Copy the pattern cell value
+        previous = current;
     }
 
-    // If without anti-aliasing, convert the pattern to "black and white"
+    // Without anti-aliasing
     if(_aaMode == AntiAliasingMode::None) {
         for(Pt::int32_t i = 0; i < gctr; ++i) {
             if(_patternBuffer[i] > 127) _patternBuffer[i] = 255;
-            else _patternBuffer[i] = 0;
+            else                        _patternBuffer[i] = 0;
+        }
+    }
+
+    // With anti-aliasing
+    else {
+        for(Pt::int32_t i = 0; i < gctr; ++i) {
+            _patternBuffer[i] = XWAA_WFILTER[ 255 - _patternBuffer[i] ];
         }
     }
 

@@ -55,8 +55,11 @@ class PT_GFX_API Pen
         /** @brief Pen line style.
         */
         enum Style { Solid      = 0,
-                     Dash       = 1,
-                     DoubleDash = 2
+                     Dot        = 1,
+                     DoubleDot  = 2,
+                     Dash       = 3,
+                     DoubleDash = 4,
+                     DotDash    = 5
                    };
 
         /** @brief Pen cap style.
