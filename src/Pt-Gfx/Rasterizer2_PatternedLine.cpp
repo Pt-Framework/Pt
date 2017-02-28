@@ -91,8 +91,8 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentNoAA(Pt::int32_t x1, Pt::in
         fpiCtrInOut += fpiCtrInc;
         if(fpiCtrInOut > _fpatternMaxCtr) fpiCtrInOut = 0;
         // Check if we should skip drawing the pixel
-        bool skipDrawing = false;
-        for(Pt::int32_t i = 0; i < 4; ++i) {
+        bool skipDrawing = !!patAlpha;
+        for(Pt::int32_t i = 0; !skipDrawing && i < 4; ++i) {
             if(x != mx[i] || y != my[i]) continue;
             skipDrawing = true;
             break;
@@ -100,7 +100,7 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentNoAA(Pt::int32_t x1, Pt::in
         // Draw the pixel as needed
         if(!skipDrawing) {
             Pixel pixel(_image->view(), x, y);
-            _image->format().setPixel(pixel, color, _compositionMode, patAlpha);
+            _image->format().setPixel(pixel, color, _compositionMode);
         }
         // Stop if we have reached the end
         if(x == x2 && y == y2) break;

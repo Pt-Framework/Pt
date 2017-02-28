@@ -225,20 +225,41 @@ void Rasterizer2::updateGradientBrushAsNeeded(Pt::int32_t width, Pt::int32_t hei
 
 void Rasterizer2::updatePenPattern()
 {
-    if(_aaMode == AntiAliasingMode::None) {
-    }
-
-    else {
-    }
-
+    // Counter for generating the pattern
     Pt::int32_t gctr = 0;
-    for(int i = 0; i < 5 * 5; ++i) {
-        _patternBuffer[gctr++] = XWAA_WFILTER[i * 255 / 25];
-    }
-    for(int i = 0; i < 5 * 5; ++i) {
-        _patternBuffer[gctr++] = XWAA_WFILTER[255 - i * 255 / 25];
+
+    // Generate the pattern
+    switch(_pen.style()) {
+        default:
+        case Pen::Dash: {
+            const Pt::int32_t max = 5;
+            for(Pt::int32_t i = 0; i <= max; ++i) _patternBuffer[gctr++] = XWAA_WFILTER[255 - i * 255 / max];
+            for(Pt::int32_t i = 0; i <= max; ++i) _patternBuffer[gctr++] = XWAA_WFILTER[      i * 255 / max];
+            for(Pt::int32_t i = 0; i <= max; ++i) _patternBuffer[gctr++] = 0;
+            break;
+        }
+
+        case Pen::DoubleDash: {
+            const Pt::int32_t max = 5;
+            for(Pt::int32_t i = 0; i <= max; ++i) _patternBuffer[gctr++] = XWAA_WFILTER[255 - i * 255 / max];
+            for(Pt::int32_t i = 0; i <= max; ++i) _patternBuffer[gctr++] = XWAA_WFILTER[      i * 255 / max];
+            for(Pt::int32_t i = 0; i <= max; ++i) _patternBuffer[gctr++] = XWAA_WFILTER[255 - i * 255 / max];
+            for(Pt::int32_t i = 0; i <= max; ++i) _patternBuffer[gctr++] = XWAA_WFILTER[      i * 255 / max];
+            for(Pt::int32_t i = 0; i <= max; ++i) _patternBuffer[gctr++] = 0;
+            for(Pt::int32_t i = 0; i <= max; ++i) _patternBuffer[gctr++] = 0;
+            break;
+        }
     }
 
+    // If without anti-aliasing, convert the pattern to "black and white"
+    if(_aaMode == AntiAliasingMode::None) {
+        for(Pt::int32_t i = 0; i < gctr; ++i) {
+            if(_patternBuffer[i] > 127) _patternBuffer[i] = 255;
+            else _patternBuffer[i] = 0;
+        }
+    }
+
+    // Store the maximum value of the counter in fixed-point
     _fpatternMaxCtr = FIXED_POINT_FROM_INT(gctr - 1);
 }
 

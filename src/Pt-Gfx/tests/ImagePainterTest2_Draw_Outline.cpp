@@ -66,10 +66,10 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
 
     painter.setPen( Pen( Color::fromRgb8(255, 0, 0, 175), 1, Pen::Dash )  );
-    painter.drawLine( PointF(  0,   0), PointF(999,   0) );
-    painter.drawLine( PointF(  0, 599), PointF(999, 599) );
-    painter.drawLine( PointF(  0,   0), PointF(  0, 599) );
-    painter.drawLine( PointF(999,   0), PointF(999, 599) );
+    painter.drawLine( PointF(  5,   5), PointF(994,   5) );
+    painter.drawLine( PointF(  5, 594), PointF(994, 594) );
+    painter.drawLine( PointF(  5,   5), PointF(  5, 594) );
+    painter.drawLine( PointF(994,   5), PointF(994, 594) );
 
     painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::Dash )  );
     painter.drawLine( PointF( 10, 110), PointF(100, 150) );
