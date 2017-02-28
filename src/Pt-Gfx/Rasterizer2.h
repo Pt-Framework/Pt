@@ -65,6 +65,9 @@
 #define MAXIMUM_COORD Painter::MaximumCoordinate
 #define MAXIMUM_POINT Painter::MaximumPointCoordinate
 
+// Scale for the pattern buffer
+#define PATTERN_BUFFER_SCALE_FACTOR 8
+
 // Just for easy and faster debugging ;)
 #include <stdio.h>
 #define lprintf(...) fprintf (stderr, __VA_ARGS__)
@@ -289,7 +292,7 @@ class Rasterizer2
 // ======================================================================================
 
 Pt::uint8_t Rasterizer2::patternBufferAlpha(Pt::int32_t idx)
-{ return _patternBuffer[idx % FIXED_POINT_TO_INT(_fpatternMaxCtr)]; }
+{ return _patternBuffer[ idx % FIXED_POINT_TO_INT(_fpatternMaxCtr) ]; }
 
 Pt::uint8_t Rasterizer2::patternBufferAlphaPolar(Pt::int32_t x, Pt::int32_t y, float scale)
 { return patternBufferAlpha(Gfx::Math::convertCartesianToPolarCoordinate(x, y) * scale); }
@@ -306,8 +309,8 @@ Pt::uint8_t Rasterizer2::patternBufferAlphaPolar(Pt::int32_t x, Pt::int32_t y, f
 
 void Rasterizer2::patternBufferAlpha(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t idx, Pt::uint8_t alpha0, Pt::uint8_t alpha1)
 {
-    a0 = (Pt::uint32_t) _patternBuffer[idx % FIXED_POINT_TO_INT(_fpatternMaxCtr)] * alpha0 / 255;
-    a1 = (Pt::uint32_t) _patternBuffer[idx % FIXED_POINT_TO_INT(_fpatternMaxCtr)] * alpha1 / 255;
+    a0 = (Pt::uint32_t) _patternBuffer[ idx % FIXED_POINT_TO_INT(_fpatternMaxCtr) ] * alpha0 / 255;
+    a1 = (Pt::uint32_t) _patternBuffer[ idx % FIXED_POINT_TO_INT(_fpatternMaxCtr) ] * alpha1 / 255;
 }
 
 void Rasterizer2::patternBufferAlphaPolar(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t x, Pt::int32_t y, float scale, Pt::uint8_t alpha0, Pt::uint8_t alpha1)

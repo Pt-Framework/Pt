@@ -265,37 +265,69 @@ void Rasterizer2::updatePenPattern()
     }
 
     // Counter for generating the pattern
-    Pt::int32_t gctr = 0;
+    size_t gctr = 0;
 
     // Generate the pattern
     Pt::uint8_t previous = 0;
+    bool        tooBig   = false;
     for(Pt::int8_t i = 0; i < patternLen; ++i) {
         // Get the pattern cell value
         const Pt::uint8_t current = patternSel[i];
-        const Pt::uint8_t max     = 1;
+        const Pt::uint8_t max     = PATTERN_BUFFER_SCALE_FACTOR;
         // Pattern cell change from 0 to 0
         if(!previous && !current) {
-            for(Pt::uint8_t i = 0; i <= max; ++i) _patternBuffer[gctr++] = 0;
+            for(Pt::uint8_t i = 1; i <= max; ++i) {
+                if(gctr >= sizeof(_patternBuffer)) {
+                    tooBig = true;
+                    break;
+                }
+                _patternBuffer[gctr++] = 0;
+            }
         }
         // Pattern cell change from 1 to 1
         else if(previous && current) {
-            for(Pt::uint8_t i = 0; i <= max; ++i) _patternBuffer[gctr++] = 255;
+            for(Pt::uint8_t i = 1; i <= max; ++i) {
+                if(gctr >= sizeof(_patternBuffer)) {
+                    tooBig = true;
+                    break;
+                }
+                _patternBuffer[gctr++] = 255;
+            }
         }
         // Pattern cell change from 0 to 1
         else if(!previous && current) {
-            for(Pt::int32_t i = 0; i <= max; ++i) _patternBuffer[gctr++] = i * 255 / max;
+            for(Pt::int32_t i = 1; i <= max; ++i) {
+                if(gctr >= sizeof(_patternBuffer)) {
+                    tooBig = true;
+                    break;
+                }
+                _patternBuffer[gctr++] = i * 255 / max;
+            }
         }
         // Pattern cell change from 1 to 0
         else if(previous && !current) {
-            for(Pt::int32_t i = 0; i <= max; ++i) _patternBuffer[gctr++] = 255 - i * 255 / max;
+            for(Pt::int32_t i = 1; i <= max; ++i) {
+                if(gctr >= sizeof(_patternBuffer)) {
+                    tooBig = true;
+                    break;
+                }
+                _patternBuffer[gctr++] = 255 - i * 255 / max;
+            }
         }
         // Copy the pattern cell value
         previous = current;
     }
 
+    // Check if the size of the generated pattern is too big to be stored in the pattern buffer
+    if(tooBig) {
+        _patternBuffer[0] = 0;
+        _fpatternMaxCtr   = FIXED_POINT_FROM_INT(1);
+        return;
+    }
+
     // Without anti-aliasing
     if(_aaMode == AntiAliasingMode::None) {
-        for(Pt::int32_t i = 0; i < gctr; ++i) {
+        for(size_t i = 0; i < gctr; ++i) {
             if(_patternBuffer[i] > 127) _patternBuffer[i] = 255;
             else                        _patternBuffer[i] = 0;
         }
@@ -303,7 +335,7 @@ void Rasterizer2::updatePenPattern()
 
     // With anti-aliasing
     else {
-        for(Pt::int32_t i = 0; i < gctr; ++i) {
+        for(size_t i = 0; i < gctr; ++i) {
             _patternBuffer[i] = XWAA_WFILTER[ 255 - _patternBuffer[i] ];
         }
     }
