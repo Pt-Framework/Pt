@@ -44,14 +44,90 @@ void Rasterizer2::rasterOnePixelPatternedLine(Pt::int32_t x1, Pt::int32_t y1, Pt
     const Pt::int32_t sizeX = abs(x2 - x1) + 1;
     const Pt::int32_t sizeY = abs(y2 - y1) + 1;
 
-    // Calculate the factor
-    const Pt::int32_t f = 181 * (sizeX + sizeY) / sqrtf(sizeX * sizeX + sizeY * sizeY);
-    lprintf("%d\n", f);
+    // Calculate the incremental factor of the pattern indexing counter
+    // This one should produce numbers between 1 to 5
+    const Pt::int32_t piCtrInc = 11 * (sizeX + sizeY) / sqrtf(sizeX * sizeX + sizeY * sizeY) - 10;
 
-    // 0   - 100 : 100 / 100     = 1
-    // 100 - 100 : 200 / 141.421 = 1.414
-    // 100 - 200 : 300 / 223.607 = 1.342
-    // 200 - 200 : 400 / 282.843 = 1.414
+    for(int i = 0; i < 5 * 5; ++i) {
+        _patternBuffer[i] = XWAA_WFILTER[i * 255 / 25];
+    }
+
+    //
+    Pt::int32_t piCtrInOut = 0;
+    rasterOnePixelPatternedGLineSegmentNoAA(x1, y1, x2, y2, color, piCtrInc, piCtrInOut, maskInOut);
+
+}
+
+// Bresenham's Line Aalgorithm
+// https://en.wikipedia.org/wiki/Bresenham's_line_algorithm
+// https://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm
+void Rasterizer2::rasterOnePixelPatternedGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t piCtrInc, Pt::int32_t& piCtrInOut, DrawLineMask* maskInOut)
+{
+    // Get the mask's coordinates as needed
+    Pt::int32_t mx[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
+    Pt::int32_t my[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
+
+    if(maskInOut) {
+        for(Pt::int32_t i = 0; i < 4; ++i) {
+            mx[i] = (*maskInOut)[i].x();
+            my[i] = (*maskInOut)[i].y();
+        }
+    }
+
+    // Calculate the deltas
+    const Pt::int32_t dx = abs(x2 - x1);
+    const Pt::int32_t dy = abs(y2 - y1);
+
+    // Determine the directions
+    const Pt::int32_t sx = (x1 < x2) ? 1 : -1;
+    const Pt::int32_t sy = (y1 < y2) ? 1 : -1;
+
+    // Calculate the initial error
+    Pt::int32_t err1 = (dx > dy ? dx : -dy) / 2;
+    Pt::int32_t err2;
+
+    // Draw the pixels
+    Pt::int32_t x = x1;
+    Pt::int32_t y = y1;
+    for(;;) {
+
+        Pt::uint8_t alpha = _patternBuffer[piCtrInOut];
+        piCtrInOut += piCtrInc;
+        if(piCtrInOut >= (Pt::int32_t) sizeof(_patternBuffer)) piCtrInOut = 0;
+
+        // Check if we should skip drawing the pixel
+        bool skipDrawing = false;
+        for(Pt::int32_t i = 0; i < 4; ++i) {
+            if(x != mx[i] || y != my[i]) continue;
+            skipDrawing = true;
+            break;
+        }
+        // Draw the pixel as needed
+        if(!skipDrawing) {
+            Pixel pixel(_image->view(), x, y);
+            _image->format().setPixel(pixel, color, _compositionMode, alpha);
+        }
+        // Stop if we have reached the end
+        if(x == x2 && y == y2) break;
+        // Update the coordinates
+        err2 = err1;
+        if(err2 > -dx) {
+            err1 -= dy;
+            x    += sx;
+        }
+        if(err2 <  dy) {
+            err1 += dx;
+            y    += sy;
+        }
+    }
+
+    // Store back the start and end coordinates to the mask as needed
+    if(maskInOut) {
+        (*maskInOut)[0].set(x1, y1);
+        (*maskInOut)[1] = MAXIMUM_POINT;
+        (*maskInOut)[2].set(x2, y2);
+        (*maskInOut)[3] = MAXIMUM_POINT;
+    }
 }
 
 #if 0

@@ -204,6 +204,7 @@ class Rasterizer2
         void rasterFillOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const PolygonScanline16s& exclusionZone, DrawLineMask& maskInOut);
 
         void rasterOnePixelPatternedLine(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut);
+        void rasterOnePixelPatternedGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t piCtrInc, Pt::int32_t& piCtrInOut, DrawLineMask* maskInOut);
 
         void rasterRectArea(const Point& tl, const Point& br);
 
@@ -254,6 +255,7 @@ class Rasterizer2
         Pen              _pen;
         Image            _penBuffer;
         ConstPixel       _penPixel;
+        Pt::uint8_t      _patternBuffer[25];
 
         Brush            _brush;
         Image            _brushBuffer;
