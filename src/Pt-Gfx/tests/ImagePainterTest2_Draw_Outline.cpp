@@ -105,6 +105,8 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
     };
     painter.drawPolyline( poly, sizeof(poly) / sizeof(poly[0]) );
 
+    painter.drawRect( RectF(PointF(550, 170), SizeF(100, 50)) );
+
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
 }
 

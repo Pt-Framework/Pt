@@ -53,13 +53,25 @@ void Rasterizer2::strokeOnePixelSolidRect(const Point& tl, const Point& br)
     if(maxX > _currentClip.right ()) maxX = _currentClip.right ();
     if(maxY > _currentClip.bottom()) maxY = _currentClip.bottom();
 
-    // Draw the rectangle's horizontal lines
-    rasterOnePixelSolidHLineSegment(minX, maxX, minY, _pen.color(), 0);
-    rasterOnePixelSolidHLineSegment(minX, maxX, maxY, _pen.color(), 0);
+    // Solid line
+    if(_pen.style() == Pen::Solid) {
+        // Draw the rectangle's horizontal lines
+        rasterOnePixelSolidHLineSegment(minX, maxX, minY, _pen.color(), 0);
+        rasterOnePixelSolidHLineSegment(minX, maxX, maxY, _pen.color(), 0);
+        // Draw the rectangle's vertical lines
+        rasterOnePixelSolidVLineSegment(minX, minY + 1, maxY - 1, _pen.color(), 0);
+        rasterOnePixelSolidVLineSegment(maxX, minY + 1, maxY - 1, _pen.color(), 0);
+    }
 
-    // Draw the rectangle's vertical lines
-    rasterOnePixelSolidVLineSegment(minX, minY + 1, maxY - 1, _pen.color(), 0);
-    rasterOnePixelSolidVLineSegment(maxX, minY + 1, maxY - 1, _pen.color(), 0);
+    // Patterned line
+    else {
+        Pt::int32_t  fpiCtrInOut = 0;
+        DrawLineMask mask        = Rasterizer2::NullLineMask;
+        rasterOnePixelPatternedLine(minX, minY, maxX, minY, _pen.color(), fpiCtrInOut, &mask);
+        rasterOnePixelPatternedLine(maxX, minY, maxX, maxY, _pen.color(), fpiCtrInOut, &mask);
+        rasterOnePixelPatternedLine(maxX, maxY, minX, maxY, _pen.color(), fpiCtrInOut, &mask);
+        rasterOnePixelPatternedLine(minX, maxY, minX, minY, _pen.color(), fpiCtrInOut, &mask);
+    }
 }
 
 void Rasterizer2::fillRect(const Point& tl, const Point& br)

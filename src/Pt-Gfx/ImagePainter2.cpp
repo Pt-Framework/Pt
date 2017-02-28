@@ -203,6 +203,7 @@ void ImagePainter2::fillRect( const RectF& rect )
 {
     const Point tl( rect.topLeft    ().x(),rect.topLeft    ().y() );
     const Point br( rect.bottomRight().x(),rect.bottomRight().y() );
+
     _rasterizer->fillRect(tl, br);
 }
 

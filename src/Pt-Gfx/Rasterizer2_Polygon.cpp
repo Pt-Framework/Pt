@@ -182,8 +182,8 @@ void Rasterizer2::fillPolygonSeparate(const Point* points, size_t pointCount)
 void Rasterizer2::rasterOnePixelPolygonOutline(const Point* points, size_t pointCount, const Color& color)
 {
     // Mask
-    Rasterizer2::DrawLineMask mask_zero = Rasterizer2::NullLineMask;
-    Rasterizer2::DrawLineMask mask_nnp1 = Rasterizer2::NullLineMask;
+    DrawLineMask mask_zero = Rasterizer2::NullLineMask;
+    DrawLineMask mask_nnp1 = Rasterizer2::NullLineMask;
 
     // Pattern indexing counter
     const bool        solid       = (_pen.style() == Pen::Solid);
@@ -567,8 +567,8 @@ void Rasterizer2::rasterPolygonAreaXWAA(const Point* points, const size_t* point
 
     for(size_t p = 0; p < polyCount; ++p) {
         // Mask
-        Rasterizer2::DrawLineMask mask_zero = Rasterizer2::NullLineMask;
-        Rasterizer2::DrawLineMask mask_nnp1 = Rasterizer2::NullLineMask;
+        DrawLineMask mask_zero = Rasterizer2::NullLineMask;
+        DrawLineMask mask_nnp1 = Rasterizer2::NullLineMask;
         // From point N to point (N + 1), successively
         const size_t pc1 = pointCount[p] - 1;
         for(size_t i = 0; i < pc1; ++i) {
