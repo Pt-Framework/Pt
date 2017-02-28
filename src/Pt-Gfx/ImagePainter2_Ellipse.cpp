@@ -74,11 +74,11 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
     Scanlines scanlines(radY * 2 + 2);
 
     // Top and bottom halves
-    const Pt::int32_t quartersX = round( radX2 * fastInvSqrt(radX2 + radY2) );
+    const Pt::int32_t quartersX = round( radX2 * Gfx::Math::fastInvSqrt(radX2 + radY2) );
 
     for(Pt::int32_t x = 0; x <= quartersX; ++x) {
         // Calculate the coordinates
-        const float       y   = radY * fastSqrt(1 - (float) x * x / radX2);
+        const float       y   = radY * Gfx::Math::fastSqrt(1 - (float) x * x / radX2);
         const Pt::int32_t fly = floor(y);
         const Pt::int32_t x1  = ctrX - x;
         const Pt::int32_t x2  = ctrX + x;
@@ -104,11 +104,11 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
     }
 
     // Left and right halves
-    const Pt::int32_t quartersY = round( radY2 * fastInvSqrt(radX2 + radY2) );
+    const Pt::int32_t quartersY = round( radY2 * Gfx::Math::fastInvSqrt(radX2 + radY2) );
 
     for(Pt::int32_t y = 0; y <= quartersY; ++y) {
         // Calculate the coordinates
-        const float       x   = radX * fastSqrt(1 - (float) y * y / radY2);
+        const float       x   = radX * Gfx::Math::fastSqrt(1 - (float) y * y / radY2);
         const Pt::int32_t flx = floor(x);
         const Pt::int32_t x1  = ctrX - flx;
         const Pt::int32_t x2  = ctrX + flx;
@@ -147,7 +147,7 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
     // Top and bottom halves
     for(Pt::int32_t x = 0; x <= quartersX; ++x) {
         // Calculate the Y coordinate and alpha
-        const float       y     = radY * fastSqrt(1 - (float) x * x / radX2);
+        const float       y     = radY * Gfx::Math::fastSqrt(1 - (float) x * x / radX2);
         const Pt::int32_t fly   = floor(y);
         const float       error = y - fly;
         const Pt::uint8_t alpha = round(error * 255);
@@ -162,7 +162,7 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
     // Left and right halves
     for(Pt::int32_t y = 0; y <= quartersY; ++y) {
         // Calculate the X coordinate and alpha
-        const float       x     = radX * fastSqrt(1 - (float) y * y / radY2);
+        const float       x     = radX * Gfx::Math::fastSqrt(1 - (float) y * y / radY2);
         const Pt::int32_t flx   = floor(x);
         const float       error = x - flx;
         const Pt::uint8_t alpha = round(error * 255);
@@ -219,19 +219,19 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
         while(degEnd < -360) degEnd += 360;
         while(degEnd >  360) degEnd -= 360;
         // Calculate the approximate coordinate of the point which is located at the begin angle
-        bx = round(ctrX + radX * fastCos(degBegin * Pt::Pi / 180));
-        by = round(ctrY - radY * fastSin(degBegin * Pt::Pi / 180)); // See the notes on the beginning of this function
+        bx = round(ctrX + radX * Gfx::Math::fastCos(degBegin * Pt::Pi / 180));
+        by = round(ctrY - radY * Gfx::Math::fastSin(degBegin * Pt::Pi / 180)); // See the notes on the beginning of this function
         // Calculate the approximate coordinate of the point which is located at the end angle
-        ex = round(ctrX + radX * fastCos(degEnd   * Pt::Pi / 180));
-        ey = round(ctrY - radY * fastSin(degEnd   * Pt::Pi / 180)); // See the notes on the beginning of this function
+        ex = round(ctrX + radX * Gfx::Math::fastCos(degEnd   * Pt::Pi / 180));
+        ey = round(ctrY - radY * Gfx::Math::fastSin(degEnd   * Pt::Pi / 180)); // See the notes on the beginning of this function
     }
 
     // Top and bottom halves
-    const Pt::int32_t quartersX = round( radX2 * fastInvSqrt(radX2 + radY2) );
+    const Pt::int32_t quartersX = round( radX2 * Gfx::Math::fastInvSqrt(radX2 + radY2) );
 
     for(Pt::int32_t x = 0; x <= quartersX; ++x) {
         // Calculate the coordinate and alpha
-        const float       y     = radY * fastSqrt(1 - (float) x * x / radX2);
+        const float       y     = radY * Gfx::Math::fastSqrt(1 - (float) x * x / radX2);
         const float       error = y - floor(y);
         const Pt::uint8_t alpha = round(error * 255);
         // Without anti-aliasing
@@ -321,11 +321,11 @@ void ImagePainter2::drawOnePixelSolidEllipseArcImpl(const PointF& topLeft, const
     }
 
     // Left and right halves
-    const Pt::int32_t quartersY = round( radY2 * fastInvSqrt(radX2 + radY2) );
+    const Pt::int32_t quartersY = round( radY2 * Gfx::Math::fastInvSqrt(radX2 + radY2) );
 
     for(Pt::int32_t y = 0; y <= quartersY; ++y) {
         // Calculate the coordinate and alpha
-        const float       x     = radX * fastSqrt(1 - (float) y * y / radY2);
+        const float       x     = radX * Gfx::Math::fastSqrt(1 - (float) y * y / radY2);
         const float       error = x - floor(x);
         const Pt::uint8_t alpha = round(error * 255);
         // Without anti-aliasing

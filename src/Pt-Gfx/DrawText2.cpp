@@ -28,11 +28,14 @@
   MA 02110-1301 USA
 */
 
-#include "DrawText2.h"
-#include <Pt/Gfx/Font.h>
-#include <Pt/String.h>
 #include <algorithm>
-#include <cmath>
+
+#include <Pt/String.h>
+
+#include <Pt/Gfx/Font.h>
+#include <Pt/Gfx/Math.h>
+
+#include "DrawText2.h"
 
 
 namespace Pt {
@@ -73,8 +76,8 @@ void DrawText2::setFont(const Font& font)
     if(_fontAngle < 0) _fontAngle += 3600;
 
     const float angle   = (_fontAngle / 10.0f  *  3.14159f) / 180.0f;
-    const float cosinus = ::cos( angle ) * 0x10000L;
-    const float sinus   = ::sin( angle ) * 0x10000L;
+    const float cosinus = Gfx::Math::fastCos( angle ) * 0x10000L;
+    const float sinus   = Gfx::Math::fastSin( angle ) * 0x10000L;
 
     _matrix.xx = (FT_Fixed) ( cosinus);
     _matrix.xy = (FT_Fixed) (-sinus  );

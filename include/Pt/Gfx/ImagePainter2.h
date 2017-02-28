@@ -31,12 +31,12 @@
 #ifndef PT_GFX_IMAGEPAINTER_2_H
 #define PT_GFX_IMAGEPAINTER_2_H
 
-#include <Pt/Math.h>
-
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/AntiAliasingMode.h>
 #include <Pt/Gfx/ArcMode.h>
 #include <Pt/Gfx/Painter.h>
+
+#include <Pt/Gfx/Math.h>
 
 #include <Pt/System/Path.h>
 
@@ -188,13 +188,6 @@ class PT_GFX_API ImagePainter2 : public Painter
 
     protected:
         // Inline helper functions
-        static inline float fastInvSqrt(float x);
-        static inline float fastSqrt(float x);
-        static inline float fastSin(float x);
-        static inline float fastCos(float x);
-
-        static inline float fastAtan2(float y, float x);
-
         static inline float convertCartesianToPolarCoordinate(float x, float y);
         static inline bool pointIsInsideArcDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd, float xyRatio);
 
@@ -228,112 +221,14 @@ class PT_GFX_API ImagePainter2 : public Painter
 // ===== Private Member Structures and Functions ========================================
 // ======================================================================================
 
-inline float ImagePainter2::fastSqrt(float x)
-{ return ::sqrtf(x); }
-
-#if defined(__arm__) || defined(__thumb__) || defined(_M_ARM) || defined(_M_ARMT) || defined(__TARGET_ARCH_ARM) || defined(__TARGET_ARCH_THUMB) || defined(_ARM) || defined(__arm)
-
-/*
-inline float ImagePainter2::fastSqrt(float x)
-{
-    // https://en.wikipedia.org/wiki/Methods_of_computing_square_roots
-
-    union {
-        float       f;
-        Pt::int32_t i;
-    } u;
-
-    u.f = x;
-    u.i = (1 << 29) + (u.i >> 1) - (1 << 22) - 0x0004C000;
-    u.f = (u.f + x / u.f) * 0.5;
-
-    return u.f;
-}
-*/
-
-inline float ImagePainter2::fastInvSqrt(float x)
-{
-    // https://en.wikipedia.org/wiki/Fast_inverse_square_root
-
-    const float x2 = x * 0.5f;
-
-    union {
-        float       f;
-        Pt::int32_t i;
-    } u;
-
-    u.f = x;
-    u.i = 0x5F3759DF - ( u.i >> 1 );
-    u.f = u.f * ( 1.5f - ( x2 * u.f * u.f ) );
-
-    return u.f;
-}
-
-#else
-
-inline float ImagePainter2::fastInvSqrt(float x)
-{ return 1.0f / ::sqrtf(x); }
-
-#endif
-
-inline float ImagePainter2::fastSin(float x)
-{
-    if (x > Pt::Pi) x -= Pt::PiDouble;
-
-    const float b =  4 / Pt::Pi;
-    const float c = -4 / Pt::PiSqr;
-    const float p = 0.225;
-    const float y = b * x + c * x * ::fabs(x);
-
-    return p * (y * ::fabs(y) - y) + y;
-}
-
-inline float ImagePainter2::fastCos(float x)
-{
-    x += Pt::PiHalf;
-    if(x > Pt::PiDouble) x -= Pt::PiDouble;
-
-    return fastSin(x);
-}
-
-inline float ImagePainter2::fastAtan2(float y, float x)
-{
-    // From https://gist.github.com/volkansalma/2972237
-    // Original code by Volkan SALMA, 2012
-
-    if(x == 0.0f) {
-        if(y >  0.0f) return Pt::PiHalf;
-        if(y == 0.0f) return 0.0f;
-        return -Pt::PiHalf;
-    }
-
-    const float z = y / x;
-          float atan;
-
-    if(fabs(z) < 1.0f) {
-        atan = z / (1.0f + 0.28f * z * z);
-        if(x < 0.0f) {
-            if(y < 0.0f) return atan - Pt::Pi;
-            return atan + Pt::Pi;
-        }
-    }
-
-    else {
-        atan = Pt::PiHalf - z / (z * z + 0.28f);
-        if(y < 0.0f) return atan - Pt::Pi;
-    }
-
-    return atan;
-}
-
 inline float ImagePainter2::convertCartesianToPolarCoordinate(float x, float y)
 {
     // Quadrant I & II
     if(y >= 0)
-        return fastAtan2(y, x) * 180 / Pt::Pi;
+        return Gfx::Math::fastAtan2(y, x) * 180 / Pt::Pi;
 
     // Quadrant III && IV
-    return fastAtan2(y, x) * 180 / Pt::Pi + 360;
+    return Gfx::Math::fastAtan2(y, x) * 180 / Pt::Pi + 360;
 }
 
 inline bool ImagePainter2::pointIsInsideArcDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd, float xyRatio)

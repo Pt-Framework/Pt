@@ -77,8 +77,8 @@ void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float deg
     fai.ctrY      = fai.minY + fai.radY;
     fai.xyRat     = (float) fai.radX / (float) fai.radY;
 
-    fai.quartersX = round( fai.radX2 * fastInvSqrt(fai.radX2 + fai.radY2) );
-    fai.quartersY = round( fai.radY2 * fastInvSqrt(fai.radX2 + fai.radY2) );
+    fai.quartersX = round( fai.radX2 * Gfx::Math::fastInvSqrt(fai.radX2 + fai.radY2) );
+    fai.quartersY = round( fai.radY2 * Gfx::Math::fastInvSqrt(fai.radX2 + fai.radY2) );
 
     // Find the exact coordinate of the begin and end point
     arcUtil_findExactBegEndPointsCoordinate(fai);
@@ -194,12 +194,12 @@ void ImagePainter2::fillArcPieImpl(FilledArcInfo& fai)
 void ImagePainter2::arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai)
 {
     // Calculate the approximate coordinate of the point which is located at the begin angle
-    const Pt::int32_t bx = round(fai.ctrX + fai.radX * fastCos(fai.degBegin * Pt::Pi / 180));
-    const Pt::int32_t by = round(fai.ctrY - fai.radY * fastSin(fai.degBegin * Pt::Pi / 180)); // Sign inversion due to differences between cartesian and computer coordinate systems
+    const Pt::int32_t bx = round(fai.ctrX + fai.radX * Gfx::Math::fastCos(fai.degBegin * Pt::Pi / 180));
+    const Pt::int32_t by = round(fai.ctrY - fai.radY * Gfx::Math::fastSin(fai.degBegin * Pt::Pi / 180)); // Sign inversion due to differences between cartesian and computer coordinate systems
 
     // Calculate the approximate coordinate of the point which is located at the end angle
-    const Pt::int32_t ex = round(fai.ctrX + fai.radX * fastCos(fai.degEnd   * Pt::Pi / 180));
-    const Pt::int32_t ey = round(fai.ctrY - fai.radY * fastSin(fai.degEnd   * Pt::Pi / 180)); // Sign inversion due to differences between cartesian and computer coordinate systems
+    const Pt::int32_t ex = round(fai.ctrX + fai.radX * Gfx::Math::fastCos(fai.degEnd   * Pt::Pi / 180));
+    const Pt::int32_t ey = round(fai.ctrY - fai.radY * Gfx::Math::fastSin(fai.degEnd   * Pt::Pi / 180)); // Sign inversion due to differences between cartesian and computer coordinate systems
 
     // Used for finding the exact coordinate of the points which are located at the begin and end angle
     Pt::int32_t x1d = MAXIMUM_COORD; // Begin point
@@ -210,7 +210,7 @@ void ImagePainter2::arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai)
     // Top and bottom halves
     for(Pt::int32_t x = 0; x <= fai.quartersX; ++x) {
         // Calculate the coordinate
-        const float       y  = fai.radY * fastSqrt(1 - (float) x * x / fai.radX2);
+        const float       y  = fai.radY * Gfx::Math::fastSqrt(1 - (float) x * x / fai.radX2);
         const Pt::int32_t xl = fai.ctrX - x;
         const Pt::int32_t xr = fai.ctrX + x;
         const Pt::int32_t yt = fai.ctrY - ( fai.antiAlias ? floor(y) : round(y) );
@@ -229,7 +229,7 @@ void ImagePainter2::arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai)
     // Left and right halves
     for(Pt::int32_t y = 0; y <= fai.quartersY; ++y) {
         // Calculate the coordinate
-        const float       x  = fai.radX * fastSqrt(1 - (float) y * y / fai.radY2);
+        const float       x  = fai.radX * Gfx::Math::fastSqrt(1 - (float) y * y / fai.radY2);
         const Pt::int32_t xl = fai.ctrX - ( fai.antiAlias ? floor(x) : round(x) );
         const Pt::int32_t xr = fai.ctrX + ( fai.antiAlias ? floor(x) : round(x) );
         const Pt::int32_t yt = fai.ctrY - y;
@@ -331,7 +331,7 @@ void ImagePainter2::arcUtil_genScanlinesForChord(Scanlines& scanlines, const Fil
     // Top and bottom halves
     for(Pt::int32_t x = 0; x <= fai.quartersX; ++x) {
         // Calculate the coordinate
-        const float       y  = fai.radY * fastSqrt(1 - (float) x * x / fai.radX2);
+        const float       y  = fai.radY * Gfx::Math::fastSqrt(1 - (float) x * x / fai.radX2);
         const Pt::int32_t yt = fai.ctrY - ( fai.antiAlias ? floor(y) : round(y) );
         const Pt::int32_t yb = fai.ctrY + ( fai.antiAlias ? floor(y) : round(y) );
         const Pt::int32_t xl = fai.ctrX - x;
@@ -347,7 +347,7 @@ void ImagePainter2::arcUtil_genScanlinesForChord(Scanlines& scanlines, const Fil
     // Left and right halves
     for(Pt::int32_t y = 0; y <= fai.quartersY; ++y) {
         // Calculate the coordinate
-        const float       x  = fai.radX * fastSqrt(1 - (float) y * y / fai.radY2);
+        const float       x  = fai.radX * Gfx::Math::fastSqrt(1 - (float) y * y / fai.radY2);
         const Pt::int32_t yt = fai.ctrY - y;
         const Pt::int32_t yb = fai.ctrY + y;
         const Pt::int32_t xl = fai.ctrX - ( fai.antiAlias ? floor(x) : round(x) );
@@ -476,7 +476,7 @@ void ImagePainter2::arcUtil_genScanlinesForPie(Scanlines& scanlines1, Scanlines&
     // Top and bottom halves
     for(Pt::int32_t x = 0; x <= fai.quartersX; ++x) {
         // Calculate the coordinate
-        const float       y  = fai.radY * fastSqrt(1 - (float) x * x / fai.radX2);
+        const float       y  = fai.radY * Gfx::Math::fastSqrt(1 - (float) x * x / fai.radX2);
         const Pt::int32_t yt = fai.ctrY - ( fai.antiAlias ? floor(y) : round(y) );
         const Pt::int32_t yb = fai.ctrY + ( fai.antiAlias ? floor(y) : round(y) );
         const Pt::int32_t xl = fai.ctrX - x;
@@ -489,7 +489,7 @@ void ImagePainter2::arcUtil_genScanlinesForPie(Scanlines& scanlines1, Scanlines&
     // Left and right halves
     for(Pt::int32_t y = 0; y <= fai.quartersY; ++y) {
         // Calculate the coordinate
-        const float       x  = fai.radX * fastSqrt(1 - (float) y * y / fai.radY2);
+        const float       x  = fai.radX * Gfx::Math::fastSqrt(1 - (float) y * y / fai.radY2);
         const Pt::int32_t yt = fai.ctrY - y;
         const Pt::int32_t yb = fai.ctrY + y;
         const Pt::int32_t xl = fai.ctrX - ( fai.antiAlias ? floor(x) : round(x) );
@@ -666,7 +666,7 @@ void ImagePainter2::arcUtil_drawCircumferencePixels(FilledArcInfo& fai)
     // Top and bottom halves
     for(Pt::int32_t x = 0; x <= fai.quartersX; ++x) {
         // Calculate the Y coordinate and alpha
-        const float       y     = fai.radY * fastSqrt(1 - (float) x * x / fai.radX2);
+        const float       y     = fai.radY * Gfx::Math::fastSqrt(1 - (float) x * x / fai.radX2);
         const Pt::int32_t fly   = floor(y);
         const float       error = y - fly;
         const Pt::uint8_t alpha = round(error * 255);
@@ -687,7 +687,7 @@ void ImagePainter2::arcUtil_drawCircumferencePixels(FilledArcInfo& fai)
     // Left and right halves
     for(Pt::int32_t y = 0; y <= fai.quartersY; ++y) {
         // Calculate the X coordinate and alpha
-        const float       x     = fai.radX * fastSqrt(1 - (float) y * y / fai.radY2);
+        const float       x     = fai.radX * Gfx::Math::fastSqrt(1 - (float) y * y / fai.radY2);
         const Pt::int32_t flx   = floor(x);
         const float       error = x - flx;
         const Pt::uint8_t alpha = round(error * 255);
