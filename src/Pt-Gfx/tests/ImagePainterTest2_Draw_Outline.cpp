@@ -56,12 +56,14 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
     resetImage(image);
 
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
 
     painter.setClip( RectF (20, image.width() - 20, 20, image.height() - 20) );
     painter.setPen( Pen( Color::fromRgb8(0, 255, 0, 175), 1, Pen::Dash )  );
-    painter.drawLine( PointF(  0,   0), PointF(999, 599) );
+    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None   ); painter.drawLine( PointF(  0, -50), PointF(999, 599 - 50) );
+    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Fastest); painter.drawLine( PointF(  0,  50), PointF(999, 599 + 50) );
     painter.setClip( RectF (0, image.width() - 1, 0, image.height() - 1) );
+
+    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
 
     painter.setPen( Pen( Color::fromRgb8(255, 0, 0, 175), 1, Pen::Dash )  );
     painter.drawLine( PointF(  0,   0), PointF(999,   0) );

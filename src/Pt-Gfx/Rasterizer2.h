@@ -184,16 +184,6 @@ class Rasterizer2
         void updateGradientBrushAsNeeded(Pt::int32_t width, Pt::int32_t height);
 
     private:
-        // Pattern-related constants
-        static const Pt::int32_t PI_CTR_INC_MUL_FACTOR;
-        static const Pt::int32_t PI_CTR_INC_SUB_FACTOR;
-
-        static const Pt::int32_t PI_GEN_PAT_MUL_FACTOR;
-        static const Pt::int32_t PI_GEN_PAT_UNIT_WIDTH;
-        static const Pt::int32_t PI_GEN_PAT_UNIT_COUNT;
-
-        static const Pt::int32_t PI_PAT_TOTAL_BUF_SIZE;
-
         // Polygon scanlines
         struct PolygonScanline16 {
             Pt::int16_t from, to;
@@ -214,8 +204,9 @@ class Rasterizer2
         void rasterOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut);
         void rasterFillOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const PolygonScanline16s& exclusionZone, DrawLineMask& maskInOut);
 
-        void rasterOnePixelPatternedLine(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut);
-        void rasterOnePixelPatternedGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t piCtrInc, Pt::int32_t& piCtrInOut, DrawLineMask* maskInOut);
+        void rasterOnePixelPatternedLine(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut);
+        void rasterOnePixelPatternedGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t fpiCtrInc, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut);
+        void rasterOnePixelPatternedGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t fpiCtrInc, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut);
 
         void rasterRectArea(const Point& tl, const Point& br);
 
@@ -268,6 +259,7 @@ class Rasterizer2
         Image            _penBuffer;
         ConstPixel       _penPixel;
         Pt::uint8_t      _patternBuffer[256];
+        Pt::int32_t      _fpatternMaxCtr; // In fixed-point
 
         Brush            _brush;
         Image            _brushBuffer;

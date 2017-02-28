@@ -38,26 +38,26 @@ namespace Gfx {
 // ======================================================================================
 // ===== Private Member Functions =======================================================
 // ======================================================================================
-void Rasterizer2::rasterOnePixelPatternedLine(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut)
+void Rasterizer2::rasterOnePixelPatternedLine(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut)
 {
     // Check the size of the line
     const Pt::int32_t sizeX = abs(x2 - x1) + 1;
     const Pt::int32_t sizeY = abs(y2 - y1) + 1;
 
     // Calculate the incremental factor of the pattern indexing counter
-    const Pt::int32_t piCtrInc = PI_CTR_INC_MUL_FACTOR * (sizeX + sizeY) / sqrtf(sizeX * sizeX + sizeY * sizeY) - PI_CTR_INC_SUB_FACTOR;
+    const Pt::int32_t fpiCtrInc = FIXED_POINT_FROM_INT(sizeX + sizeY) / sqrtf(sizeX * sizeX + sizeY * sizeY);
 
-
-    //
-    Pt::int32_t piCtrInOut = 0;
-    rasterOnePixelPatternedGLineSegmentNoAA(x1, y1, x2, y2, color, piCtrInc, piCtrInOut, maskInOut);
-
+    // Draw the line
+    if(_aaMode == AntiAliasingMode::None)
+        rasterOnePixelPatternedGLineSegmentNoAA(x1, y1, x2, y2, color, fpiCtrInc, fpiCtrInOut, maskInOut);
+    else
+        rasterOnePixelPatternedGLineSegmentXWAA(x1, y1, x2, y2, color, fpiCtrInc, fpiCtrInOut, maskInOut);
 }
 
 // Bresenham's Line Aalgorithm
 // https://en.wikipedia.org/wiki/Bresenham's_line_algorithm
 // https://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm
-void Rasterizer2::rasterOnePixelPatternedGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t piCtrInc, Pt::int32_t& piCtrInOut, DrawLineMask* maskInOut)
+void Rasterizer2::rasterOnePixelPatternedGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t fpiCtrInc, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut)
 {
     // Get the mask's coordinates as needed
     Pt::int32_t mx[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
@@ -86,11 +86,10 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentNoAA(Pt::int32_t x1, Pt::in
     Pt::int32_t x = x1;
     Pt::int32_t y = y1;
     for(;;) {
-
-        Pt::uint8_t alpha = _patternBuffer[piCtrInOut];
-        piCtrInOut += piCtrInc;
-        if(piCtrInOut >= PI_PAT_TOTAL_BUF_SIZE) piCtrInOut = 0;
-
+        // Get alpha from the pattern
+        Pt::uint8_t patAlpha = _patternBuffer[FIXED_POINT_TO_INT(fpiCtrInOut)];
+        fpiCtrInOut += fpiCtrInc;
+        if(fpiCtrInOut > _fpatternMaxCtr) fpiCtrInOut = 0;
         // Check if we should skip drawing the pixel
         bool skipDrawing = false;
         for(Pt::int32_t i = 0; i < 4; ++i) {
@@ -101,194 +100,7 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentNoAA(Pt::int32_t x1, Pt::in
         // Draw the pixel as needed
         if(!skipDrawing) {
             Pixel pixel(_image->view(), x, y);
-            _image->format().setPixel(pixel, color, _compositionMode, alpha);
-        }
-        // Stop if we have reached the end
-        if(x == x2 && y == y2) break;
-        // Update the coordinates
-        err2 = err1;
-        if(err2 > -dx) {
-            err1 -= dy;
-            x    += sx;
-        }
-        if(err2 <  dy) {
-            err1 += dx;
-            y    += sy;
-        }
-    }
-
-    // Store back the start and end coordinates to the mask as needed
-    if(maskInOut) {
-        (*maskInOut)[0].set(x1, y1);
-        (*maskInOut)[1] = MAXIMUM_POINT;
-        (*maskInOut)[2].set(x2, y2);
-        (*maskInOut)[3] = MAXIMUM_POINT;
-    }
-}
-
-#if 0
-void Rasterizer2::rasterOnePixelHLineSegment(Pt::int32_t x1, Pt::int32_t x2, Pt::int32_t y, const Color& color, DrawLineMask* maskInOut)
-{
-    // Swap the coordinates as needed
-    if(x1 > x2) std::swap(x1, x2);
-
-    // Adjust the start and end coordinates as needed
-    if(maskInOut) {
-        if((*maskInOut)[0].x() == x1) ++x1;
-        if((*maskInOut)[1].x() == x1) ++x1;
-        if((*maskInOut)[2].x() == x2) --x2;
-        if((*maskInOut)[3].x() == x2) --x2;
-        if(x1 > x2) return;
-    }
-
-    // Store back the start and end coordinates to the mask as needed
-    if(maskInOut) {
-        (*maskInOut)[0].set(x1, y);
-        (*maskInOut)[1] = MAXIMUM_POINT;
-        (*maskInOut)[2].set(x2, y);
-        (*maskInOut)[3] = MAXIMUM_POINT;
-    }
-
-    // Calculate the length of the line
-    const Pt::int32_t sizeL = x2 - x1 + 1;
-
-    // Draw the line
-    Pixel pixel(_image->view(), x1, y);
-    _image->format().setPixels(pixel, color, sizeL, _compositionMode);
-}
-
-void Rasterizer2::rasterOnePixelVLineSegment(Pt::int32_t x, Pt::int32_t y1, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut)
-{
-    // Swap the coordinates as needed
-    if(y1 > y2) std::swap(y1, y2);
-
-    // Adjust the start and end coordinates as needed
-    if(maskInOut) {
-        if((*maskInOut)[0].y() == y1) ++y1;
-        if((*maskInOut)[1].y() == y1) ++y1;
-        if((*maskInOut)[2].y() == y2) --y2;
-        if((*maskInOut)[3].y() == y2) --y2;
-        if(y1 > y2) return;
-    }
-
-    // Store back the start and end coordinates to the mask as needed
-    if(maskInOut) {
-        (*maskInOut)[0].set(x, y1);
-        (*maskInOut)[1] = MAXIMUM_POINT;
-        (*maskInOut)[2].set(x, y2);
-        (*maskInOut)[3] = MAXIMUM_POINT;
-    }
-
-    // Calculate the length of the line
-    const Pt::int32_t sizeL = y2 - y1 + 1;
-
-    // Draw the line
-    for(Pt::int32_t i = 0; i < sizeL; ++i) {
-        Pixel pixel(_image->view(), x, y1++);
-        _image->format().setPixel(pixel, color, _compositionMode);
-    }
-}
-
-void Rasterizer2::rasterOnePixelXLineSegment(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut)
-{
-    // Get the mask's coordinates as needed
-    Pt::int32_t mx[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
-    Pt::int32_t my[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
-
-    if(maskInOut) {
-        for(Pt::int32_t i = 0; i < 4; ++i) {
-            mx[i] = (*maskInOut)[i].x();
-            my[i] = (*maskInOut)[i].y();
-        }
-    }
-
-    // Determine the directions
-    const Pt::int32_t sx = (x1 < x2) ? 1 : -1;
-    const Pt::int32_t sy = (y1 < y2) ? 1 : -1;
-
-    // Draw the pixels
-    Pt::int32_t x = x1;
-    Pt::int32_t y = y1;
-    for(;;) {
-        // Check if we should skip drawing the pixel
-        bool skipDrawing = false;
-        for(Pt::int32_t i = 0; i < 4; ++i) {
-            if(x != mx[i] || y != my[i]) continue;
-            skipDrawing = true;
-            break;
-        }
-        // Draw the pixel as needed
-        if(!skipDrawing) {
-            // Draw the primary pixel
-            Pixel pixel(_image->view(), x, y);
-            _image->format().setPixel(pixel, color, _compositionMode);
-            // Draw the secondary pixels as needed
-            if( _aaMode != AntiAliasingMode::None && ((x * y) & 1) ) {
-                Pixel pixel1(_image->view(), x + 1, y);
-                Pixel pixel2(_image->view(), x - 1, y);
-                _image->format().setPixel(pixel1, color, _compositionMode, 63);
-                _image->format().setPixel(pixel2, color, _compositionMode, 63);
-            }
-        }
-        // Stop if we have reached the end
-        if(x == x2 && y == y2) break;
-        // Update the coordinates
-        x += sx;
-        y += sy;
-    }
-
-    // Store back the start and end coordinates to the mask as needed
-    if(maskInOut) {
-        (*maskInOut)[0].set(x1, y1);
-        (*maskInOut)[1] = MAXIMUM_POINT;
-        (*maskInOut)[2].set(x2, y2);
-        (*maskInOut)[3] = MAXIMUM_POINT;
-    }
-}
-
-// Bresenham's Line Aalgorithm
-// https://en.wikipedia.org/wiki/Bresenham's_line_algorithm
-// https://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm
-void Rasterizer2::rasterOnePixelGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut)
-{
-    // Get the mask's coordinates as needed
-    Pt::int32_t mx[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
-    Pt::int32_t my[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
-
-    if(maskInOut) {
-        for(Pt::int32_t i = 0; i < 4; ++i) {
-            mx[i] = (*maskInOut)[i].x();
-            my[i] = (*maskInOut)[i].y();
-        }
-    }
-
-    // Calculate the deltas
-    const Pt::int32_t dx = abs(x2 - x1);
-    const Pt::int32_t dy = abs(y2 - y1);
-
-    // Determine the directions
-    const Pt::int32_t sx = (x1 < x2) ? 1 : -1;
-    const Pt::int32_t sy = (y1 < y2) ? 1 : -1;
-
-    // Calculate the initial error
-    Pt::int32_t err1 = (dx > dy ? dx : -dy) / 2;
-    Pt::int32_t err2;
-
-    // Draw the pixels
-    Pt::int32_t x = x1;
-    Pt::int32_t y = y1;
-    for(;;) {
-        // Check if we should skip drawing the pixel
-        bool skipDrawing = false;
-        for(Pt::int32_t i = 0; i < 4; ++i) {
-            if(x != mx[i] || y != my[i]) continue;
-            skipDrawing = true;
-            break;
-        }
-        // Draw the pixel as needed
-        if(!skipDrawing) {
-            Pixel pixel(_image->view(), x, y);
-            _image->format().setPixel(pixel, color, _compositionMode);
+            _image->format().setPixel(pixel, color, _compositionMode, patAlpha);
         }
         // Stop if we have reached the end
         if(x == x2 && y == y2) break;
@@ -315,7 +127,7 @@ void Rasterizer2::rasterOnePixelGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1,
 
 // Xiaolin Wu's Anti-Aliased Line Algorithm
 // https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
-void Rasterizer2::rasterOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut)
+void Rasterizer2::rasterOnePixelPatternedGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t fpiCtrInc, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut)
 {
     // Get the mask's coordinates as needed
     Pt::int32_t mx[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
@@ -335,21 +147,21 @@ void Rasterizer2::rasterOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1,
     Pt::int32_t fy2 = FIXED_POINT_FROM_INT(y2);
 
     // A helper macro to set pixel
-    #define XW_SET_PIXEL(IMG, COL, X, Y, A)                                                \
-        do {                                                                               \
-            /* Check the boundary limit, just in case */                                   \
-            if( (X) < 0 || (X) >= IMG->width() || (Y) < 0 || (Y) >= IMG->height() ) break; \
-            /* Check if we should skip drawing the pixel */                                \
-            bool skipDrawing = false;                                                      \
-            for(Pt::int32_t j = 0; j < 4; ++j) {                                           \
-                if( (X) != mx[j] || (Y) != my[j] ) continue;                               \
-                skipDrawing = true;                                                        \
-                break;                                                                     \
-            }                                                                              \
-            if(skipDrawing) break;                                                         \
-            /* Set the pixel */                                                            \
-            Pixel PIX(IMG->view(), X, Y);                                                  \
-            IMG->format().setPixel(PIX, COL, _compositionMode, A);                         \
+    #define XW_SET_PIXEL(IMG, COL, X, Y, A, PA)                                              \
+        do {                                                                                 \
+            /* Check the boundary limit, just in case */                                     \
+            if( (X) < 0 || (X) >= IMG->width() || (Y) < 0 || (Y) >= IMG->height() ) break;   \
+            /* Check if we should skip drawing the pixel */                                  \
+            bool skipDrawing = false;                                                        \
+            for(Pt::int32_t j = 0; j < 4; ++j) {                                             \
+                if( (X) != mx[j] || (Y) != my[j] ) continue;                                 \
+                skipDrawing = true;                                                          \
+                break;                                                                       \
+            }                                                                                \
+            if(skipDrawing) break;                                                           \
+            /* Set the pixel */                                                              \
+            Pixel PIX(IMG->view(), X, Y);                                                    \
+            IMG->format().setPixel(PIX, COL, _compositionMode, (Pt::uint32_t) A * PA / 255); \
         } while(false)
 
     // Swap the values as needed
@@ -381,10 +193,15 @@ void Rasterizer2::rasterOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1,
     if(steep) {
         // Draw the pixels
         for(Pt::int32_t i = from; i <= to; ++i) {
+            // Get alpha from the pattern
+            Pt::uint8_t pa = _patternBuffer[FIXED_POINT_TO_INT(fpiCtrInOut)];
+            fpiCtrInOut += fpiCtrInc;
+            if(fpiCtrInOut > _fpatternMaxCtr) fpiCtrInOut = 0;
+            // Draw the pixels
             const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_FPART_TO_A8 (ypxli) ];
             const Pt::uint8_t a2 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_RFPART_TO_A8(ypxli) ];
-            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           ), i, a1);
-            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE), i, a2);
+            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           ), i, a1, pa);
+            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE), i, a2, pa);
             ypxli += grad;
         }
         // Store back the start and end coordinates to the mask as needed
@@ -398,10 +215,15 @@ void Rasterizer2::rasterOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1,
     else {
         // Draw the pixels
         for(Pt::int32_t i = from; i <= to; ++i) {
+            // Get alpha from the pattern
+            Pt::uint8_t pa = _patternBuffer[FIXED_POINT_TO_INT(fpiCtrInOut)];
+            fpiCtrInOut += fpiCtrInc;
+            if(fpiCtrInOut > _fpatternMaxCtr) fpiCtrInOut = 0;
+            // Draw the pixels
             const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_FPART_TO_A8 (ypxli) ];
             const Pt::uint8_t a2 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_RFPART_TO_A8(ypxli) ];
-            XW_SET_PIXEL(_image, color, i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           ), a1);
-            XW_SET_PIXEL(_image, color, i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE), a2);
+            XW_SET_PIXEL(_image, color, i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           ), a1, pa);
+            XW_SET_PIXEL(_image, color, i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE), a2, pa);
             ypxli += grad;
         }
         // Store back the start and end coordinates to the mask as needed
@@ -416,7 +238,6 @@ void Rasterizer2::rasterOnePixelGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1,
     // Undefine the helper macro
     #undef XW_SET_PIXEL
 }
-#endif
 
 
 } // namespace
