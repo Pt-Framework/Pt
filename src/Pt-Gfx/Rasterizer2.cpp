@@ -273,21 +273,21 @@ void Rasterizer2::updatePenPattern()
         // Get the pattern cell value
         const Pt::uint8_t current = patternSel[i];
         const Pt::uint8_t max     = 1;
-        // 1 1
-        if(previous && current) {
+        // Pattern cell change from 0 to 0
+        if(!previous && !current) {
+            for(Pt::uint8_t i = 0; i <= max; ++i) _patternBuffer[gctr++] = 0;
+        }
+        // Pattern cell change from 1 to 1
+        else if(previous && current) {
             for(Pt::uint8_t i = 0; i <= max; ++i) _patternBuffer[gctr++] = 255;
         }
-        // 0 1
+        // Pattern cell change from 0 to 1
         else if(!previous && current) {
             for(Pt::int32_t i = 0; i <= max; ++i) _patternBuffer[gctr++] = i * 255 / max;
         }
-        // 1 0
+        // Pattern cell change from 1 to 0
         else if(previous && !current) {
             for(Pt::int32_t i = 0; i <= max; ++i) _patternBuffer[gctr++] = 255 - i * 255 / max;
-        }
-        // 0 0
-        else if(!previous && !current) {
-            for(Pt::uint8_t i = 0; i <= max; ++i) _patternBuffer[gctr++] = 0;
         }
         // Copy the pattern cell value
         previous = current;

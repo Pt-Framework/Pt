@@ -1,4 +1,4 @@
-static void testDrawLine(const char* title, Image& image, Painter& painter)
+static void testDrawSolidLine(const char* title, Image& image, Painter& painter)
 {
     resetImage(image);
 

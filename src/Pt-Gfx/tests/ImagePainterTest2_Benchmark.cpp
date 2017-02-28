@@ -29,18 +29,32 @@ static void doBenchmark(CompositionMode cm)
         std::clog << std::endl;
     }
 
-    // Lines
-    if(BENCHMARK_LINE) {
-        time1 = benchDrawLine<ImagePainter >(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
-        std::clog << "    Line                             @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
-        time2 = benchDrawLine<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
-        std::clog << "    Line NOAA                        @ ImagePainter2 = " << std::setw(6) << time2
+    // Solid lines
+    if(BENCHMARK_SOLID_LINE) {
+        time1 = benchDrawSolidLine<ImagePainter >(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
+        std::clog << "    Solid     line                   @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
+        time2 = benchDrawSolidLine<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
+        std::clog << "    Solid     line NOAA              @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawLine<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::Fastest);
-        std::clog << "    Line XWAA                        @ ImagePainter2 = " << std::setw(6) << time2
+        time2 = benchDrawSolidLine<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::Fastest);
+        std::clog << "    Solid     line XWAA              @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
+
+    // Patterned lines
+    if(BENCHMARK_PATTERNED_LINE) {
+        time1 = benchDrawPatternedLine<ImagePainter >(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
+        std::clog << "    Patterned line                   @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
+        time2 = benchDrawPatternedLine<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
+        std::clog << "    Patterned line NOAA              @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time2 = benchDrawPatternedLine<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::Fastest);
+        std::clog << "    Patterned line XWAA              @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        std::clog << std::endl;
+    }
+
 
     // Rectangles
     if(BENCHMARK_RECTANGLE) {

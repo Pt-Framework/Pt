@@ -49,13 +49,13 @@ using namespace Pt::Gfx;
 
 // General settings for Pt-Gfx
 #define DO_TEST_DRAW    1
-#define DO_BENCHMARKING 0
+#define DO_BENCHMARKING 1
 
 // Detailed-test enable settings for Pt-Gfx
 #define TEST_SOURCECOPY                         1
 #define TEST_SOURCEOVER                         0
 
-#define TEST_DRAW_LINE_AND_TEXT                 0
+#define TEST_DRAW_SOLID_LINE_AND_TEXT           0
 #define TEST_DRAW_PATTERNED_LINE                1
 #define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES  0
 
@@ -78,10 +78,11 @@ using namespace Pt::Gfx;
 #define BENCHMARK_CHECK_RESULTING_IMAGE     0
 
 #define BENCHMARK_IMAGE_SIZE                Size(1280, 800)
-#define BENCHMARK_LOOP_COUNT                5000
+#define BENCHMARK_LOOP_COUNT                500
 
 #define BENCHMARK_TEXT                      0
-#define BENCHMARK_LINE                      0
+#define BENCHMARK_SOLID_LINE                1
+#define BENCHMARK_PATTERNED_LINE            1
 #define BENCHMARK_ELLIPSE                   0
 #define BENCHMARK_ARC                       0
 
@@ -94,7 +95,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_GRADIENT_FILLED_POLYGON   0
 #define BENCHMARK_TEXTURE_FILLED_POLYGON    0
 
-#define BENCHMARK_SOLID_FILLED_ELLIPSE      1
+#define BENCHMARK_SOLID_FILLED_ELLIPSE      0
 #define BENCHMARK_GRADIENT_FILLED_ELLIPSE   0
 #define BENCHMARK_TEXTURE_FILLED_ELLIPSE    0
 
@@ -163,22 +164,22 @@ int main(int argc, char* args[])
     const Brush brushGradient2(Color::fromRgb8(  0, 255, 255, 175), Color::fromRgb8(0, 0, 0, 175), Brush::Horizontal);
     const Brush brushTexture2 (textureWithWhiteBackground);
 
-    // Lines
-    if(DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_LINE_AND_TEXT) {
+    // Solid lines
+    if(DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_SOLID_LINE_AND_TEXT) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
-        testDrawLine("Lines and Texts - ImagePainter2 [SourceCopy]", image, *painter2);
+        testDrawSolidLine("Solid Lines and Texts - ImagePainter2 [SourceCopy]", image, *painter2);
         if(TEST_COMPARE_WITH_OLD_PAINTER) {
             painter1->setCompositionMode(CompositionMode::SourceCopy);
-            testDrawLine("Lines and Texts - ImagePainter [SourceCopy]", image, *painter1);
+            testDrawSolidLine("Solid Lines and Texts - ImagePainter [SourceCopy]", image, *painter1);
         }
     }
 
-    if(DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_LINE_AND_TEXT) {
+    if(DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_SOLID_LINE_AND_TEXT) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
-        testDrawLine("Lines and Texts - ImagePainter2 [SourceOver]", image, *painter2);
+        testDrawSolidLine("Solid Lines and Texts - ImagePainter2 [SourceOver]", image, *painter2);
         if(TEST_COMPARE_WITH_OLD_PAINTER) {
             painter1->setCompositionMode(CompositionMode::SourceOver);
-            testDrawLine("Lines and Texts - ImagePainter [SourceOver]", image, *painter1);
+            testDrawSolidLine("Solid Lines and Texts - ImagePainter [SourceOver]", image, *painter1);
         }
     }
 

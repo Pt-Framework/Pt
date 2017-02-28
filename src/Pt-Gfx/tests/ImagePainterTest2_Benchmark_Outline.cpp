@@ -37,7 +37,7 @@ static size_t benchDrawText(int loopCount, CompositionMode cm, AntiAliasingMode 
 }
 
 template <typename PainterT>
-static size_t benchDrawLine(int loopCount, CompositionMode cm, AntiAliasingMode antiAliasingMode)
+static size_t benchDrawSolidLine(int loopCount, CompositionMode cm, AntiAliasingMode antiAliasingMode)
 {
     size_t sum = 0;
 
@@ -60,6 +60,45 @@ static size_t benchDrawLine(int loopCount, CompositionMode cm, AntiAliasingMode 
 
         if(ip2) ip2->setAntiAliasingMode(antiAliasingMode);
         painter.drawLine( PointF( 10,  10), PointF(789, 110) );
+        painter.drawLine( PointF(789, 489), PointF( 10, 589) );
+
+        sum += clock.stop().toUSecs();
+
+        BENCHMARK_DISPLAY_RESULTING_IMAGE;
+    }
+
+    sum /= loopCount;
+    return sum;
+}
+
+template <typename PainterT>
+static size_t benchDrawPatternedLine(int loopCount, CompositionMode cm, AntiAliasingMode antiAliasingMode)
+{
+    size_t sum = 0;
+
+    Image image( ImageFormat::argb32(), BENCHMARK_IMAGE_SIZE );
+
+    PainterT painter(image);
+    painter.setCompositionMode(cm);
+
+    Brush brush( Color::fromRgb8(255, 255, 255, 175) );
+    painter.setBrush(brush);
+
+    Pen pen( Color::fromRgb8(255, 255, 255, 175) );
+    painter.setPen(pen);
+
+    ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
+
+    for(int i = 0; i < loopCount; ++i) {
+        Pt::System::Clock clock;
+        clock.start();
+
+        if(ip2) ip2->setAntiAliasingMode(antiAliasingMode);
+
+        painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::Dash )  );
+        painter.drawLine( PointF( 10,  10), PointF(789, 110) );
+
+        painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::DoubleDash )  );
         painter.drawLine( PointF(789, 489), PointF( 10, 589) );
 
         sum += clock.stop().toUSecs();
