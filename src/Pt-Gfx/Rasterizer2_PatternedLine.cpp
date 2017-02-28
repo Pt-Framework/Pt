@@ -47,13 +47,79 @@ void Rasterizer2::rasterOnePixelPatternedLine(Pt::int32_t x1, Pt::int32_t y1, Pt
     // Calculate the incremental factor of the pattern indexing counter
     const Pt::int32_t fpiCtrInc = FIXED_POINT_FROM_INT(sizeX + sizeY) / Gfx::Math::fastSqrt(sizeX * sizeX + sizeY * sizeY);
 
-    // ### TODO: SIDE AA FOR X-LINE !!! ###
+    // Check for 45-degree line
+    if(abs(x2 - x1) == abs(y2 - y1)) {
+        rasterOnePixelPatternedXLineSegment(x1, y1, x2, y2, color, fpiCtrInc, fpiCtrInOut, maskInOut);
+        return;
+    }
 
-    // Draw the line
+    // Generic line - raster the line without using anti-aliasing
     if(_aaMode == AntiAliasingMode::None)
         rasterOnePixelPatternedGLineSegmentNoAA(x1, y1, x2, y2, color, fpiCtrInc, fpiCtrInOut, maskInOut);
+    // Generic line - raster the line using anti-aliasing
     else
         rasterOnePixelPatternedGLineSegmentXWAA(x1, y1, x2, y2, color, fpiCtrInc, fpiCtrInOut, maskInOut);
+}
+
+void Rasterizer2::rasterOnePixelPatternedXLineSegment(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t fpiCtrInc, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut)
+{
+    // Get the mask's coordinates as needed
+    Pt::int32_t mx[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
+    Pt::int32_t my[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
+
+    if(maskInOut) {
+        for(Pt::int32_t i = 0; i < 4; ++i) {
+            mx[i] = (*maskInOut)[i].x();
+            my[i] = (*maskInOut)[i].y();
+        }
+    }
+
+    // Determine the directions
+    const Pt::int32_t sx = (x1 < x2) ? 1 : -1;
+    const Pt::int32_t sy = (y1 < y2) ? 1 : -1;
+
+    // Draw the pixels
+    Pt::int32_t x = x1;
+    Pt::int32_t y = y1;
+    for(;;) {
+        // Get alpha from the pattern
+        Pt::uint8_t patAlpha = _patternBuffer[FIXED_POINT_TO_INT(fpiCtrInOut)];
+        fpiCtrInOut += fpiCtrInc;
+        if(fpiCtrInOut > _fpatternMaxCtr) fpiCtrInOut = 0;
+        // Check if we should skip drawing the pixel
+        bool skipDrawing = !patAlpha;
+        for(Pt::int32_t i = 0; !skipDrawing && i < 4; ++i) {
+            if(x != mx[i] || y != my[i]) continue;
+            skipDrawing = true;
+            break;
+        }
+        // Draw the pixel as needed
+        if(!skipDrawing) {
+            // Draw the primary pixel
+            Pixel pixel(_image->view(), x, y);
+            _image->format().setPixel(pixel, color, _compositionMode);
+            // Draw the secondary pixels as needed
+            if( _aaMode != AntiAliasingMode::None && ((x * y) & 1) ) {
+                Pixel pixel1(_image->view(), x + 1, y);
+                Pixel pixel2(_image->view(), x - 1, y);
+                _image->format().setPixel(pixel1, color, _compositionMode, 63);
+                _image->format().setPixel(pixel2, color, _compositionMode, 63);
+            }
+        }
+        // Stop if we have reached the end
+        if(x == x2 && y == y2) break;
+        // Update the coordinates
+        x += sx;
+        y += sy;
+    }
+
+    // Store back the start and end coordinates to the mask as needed
+    if(maskInOut) {
+        (*maskInOut)[0].set(x1, y1);
+        (*maskInOut)[1] = MAXIMUM_POINT;
+        (*maskInOut)[2].set(x2, y2);
+        (*maskInOut)[3] = MAXIMUM_POINT;
+    }
 }
 
 // Bresenham's Line Aalgorithm
