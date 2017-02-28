@@ -296,17 +296,18 @@ Pt::uint8_t Rasterizer2::patternBufferAlphaPolar(Pt::int32_t x, Pt::int32_t y, f
 
 Pt::uint8_t Rasterizer2::patternBufferAlphaPolar(Pt::int32_t x, Pt::int32_t y, float scale, float xyRat)
 {
+    // ### TODO: * Fix the adjustment factor formula !!! ###
+
     const float angle = Gfx::Math::convertCartesianToPolarCoordinate(x, y);
           float ajFac = 1.0f;
 
-         if(angle >=  45 && angle < 135) ajFac = fabs( 90 - angle) / 45.0f;
-    else if(angle >= 135 && angle < 225) ajFac = fabs(180 - angle) / 45.0f;
-    else if(angle >= 225 && angle < 315) ajFac = fabs(270 - angle) / 45.0f;
-    else if(angle >= 315 && angle < 360) ajFac = fabs(360 - angle) / 45.0f;
-    else if(angle >=   0 && angle <  90) ajFac =            angle  / 45.0f;
+         if(angle >=   0 && angle <  90) ajFac = fabs( 45 - angle) / 90.0f;
+    else if(angle >=  90 && angle < 180) ajFac = fabs(135 - angle) / 90.0f;
+    else if(angle >= 180 && angle < 270) ajFac = fabs(225 - angle) / 90.0f;
+    else if(angle >= 270 && angle < 360) ajFac = fabs(315 - angle) / 90.0f;
 
-    ajFac *= ajFac;
-    scale *= (xyRat * ajFac + 1.0f - ajFac);
+    if(xyRat > 1.0f) scale /= (xyRat * ajFac + 1.0f - ajFac);
+    else             scale *= (xyRat * (1.0f - ajFac) + ajFac);
 
     return patternBufferAlpha(angle * scale);
 }
@@ -322,17 +323,18 @@ void Rasterizer2::patternBufferAlphaPolar(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::
 
 void Rasterizer2::patternBufferAlphaPolar(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t x, Pt::int32_t y, float scale, float xyRat, Pt::uint8_t alpha0, Pt::uint8_t alpha1)
 {
+    // ### TODO: * Fix the adjustment factor formula !!! ###
+
     const float angle = Gfx::Math::convertCartesianToPolarCoordinate(x, y);
           float ajFac = 1.0f;
 
-         if(angle >=  45 && angle < 135) ajFac = fabs( 90 - angle) / 45.0f;
-    else if(angle >= 135 && angle < 225) ajFac = fabs(180 - angle) / 45.0f;
-    else if(angle >= 225 && angle < 315) ajFac = fabs(270 - angle) / 45.0f;
-    else if(angle >= 315 && angle < 360) ajFac = fabs(360 - angle) / 45.0f;
-    else if(angle >=   0 && angle <  90) ajFac =            angle  / 45.0f;
+         if(angle >=   0 && angle <  90) ajFac = fabs( 45 - angle) / 90.0f;
+    else if(angle >=  90 && angle < 180) ajFac = fabs(135 - angle) / 90.0f;
+    else if(angle >= 180 && angle < 270) ajFac = fabs(225 - angle) / 90.0f;
+    else if(angle >= 270 && angle < 360) ajFac = fabs(315 - angle) / 90.0f;
 
-    ajFac *= ajFac;
-    scale *= (xyRat * ajFac + 1.0f - ajFac);
+    if(xyRat > 1.0f) scale /= (xyRat * ajFac + 1.0f - ajFac);
+    else             scale *= (xyRat * (1.0f - ajFac) + ajFac);
 
     patternBufferAlpha(a0, a1, angle * scale, alpha0, alpha1);
 }
