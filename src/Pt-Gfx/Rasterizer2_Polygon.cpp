@@ -73,10 +73,12 @@ void Rasterizer2::strokeOnePixelPolybezier(const Point* points, size_t pointCoun
     for(size_t i = 0; i < (pointCount - 1); i += 2) {
         // Adjust the current mask for the last curve as needed
         if(i == pointCount - 3) {
+            // Rearrange
             mask_zero[2] = mask_zero[0];
             mask_zero[3] = mask_zero[1];
             mask_zero[0] = mask_nnp1[2];
             mask_zero[1] = mask_nnp1[3];
+            // Swap
             mask_nnp1[0] = mask_zero[0];
             mask_nnp1[1] = mask_zero[1];
             mask_nnp1[2] = mask_zero[2];

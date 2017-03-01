@@ -85,7 +85,7 @@ static void testDrawSolidLine(const char* title, Image& image, Painter& painter)
             // Center left
             PointF(400,  70)
         };
-        if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
+        if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
         ip2->setPen( Pen( Color::fromRgb8(255, 127, 255, 175), 1, Pen::Dash ) );
         ip2->drawPolybezier( bezier2, sizeof(bezier2) / sizeof(bezier2[0]), true );
     }
