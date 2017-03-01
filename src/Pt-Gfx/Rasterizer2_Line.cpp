@@ -615,8 +615,10 @@ void Rasterizer2::rasterOnePixelSolidBezierCurve(Pt::int32_t x0, Pt::int32_t y0,
     if(xx * sx > 0 || yy * sy > 0) return;
     // Begin with longer part; swap the begn and end points as needed
     if(sx * sx + sy * sy > xx * xx + yy * yy) {
-        x2  = x0; x0 = sx + x1;
-        y2  = y0; y0 = sy + y1;
+        x2  = x0;
+        y2  = y0;
+        x0  = sx + x1;
+        y0  = sy + y1;
         cur = -cur;
     }
 
@@ -628,11 +630,13 @@ void Rasterizer2::rasterOnePixelSolidBezierCurve(Pt::int32_t x0, Pt::int32_t y0,
 
     // X step direction
     xx += sx;
-    xx *= sx = x0 < x2 ? 1 : -1;
+    sx  = x0 < x2 ? 1 : -1;
+    xx *= sx;
 
     // Y step direction
     yy += sy;
-    yy *= sy = y0 < y2 ? 1 : -1;
+    sy  = y0 < y2 ? 1 : -1;
+    yy *= sy;
 
     // Differences 2nd degree
     xy  = 2 * xx * yy;
@@ -641,9 +645,9 @@ void Rasterizer2::rasterOnePixelSolidBezierCurve(Pt::int32_t x0, Pt::int32_t y0,
 
     // Negated curvature?
     if(cur * sx * sy < 0) {
-      xx = -xx;
-      yy = -yy;
-      xy = -xy;
+      xx  = -xx;
+      yy  = -yy;
+      xy  = -xy;
       cur = -cur;
     }
 
@@ -658,31 +662,45 @@ void Rasterizer2::rasterOnePixelSolidBezierCurve(Pt::int32_t x0, Pt::int32_t y0,
 
     // Draw with anti-aliasing
     if(useAA) {
+        Pt::uint8_t alpha;
         do {
             // Approximate error distance
             cur = std::min(dx + xy, -xy - dy);
             ed  = std::max(dx + xy, -xy - dy);
             ed  = (ed + 2 * ed * cur * cur / (4 * ed * ed + cur * cur));
             // Plot curve
-            XW_SET_PIXEL( _image, color, x0, y0, (Pt::uint8_t) (255 / ed * ::fabs(err - dx - dy - xy)) );
+            alpha = 255 / ed * ::fabs(err - dx - dy - xy);
+            XW_SET_PIXEL( _image, color, x0, y0, alpha );
             // Check if we have just drawn the last pixel
             if(x0 == x2 && y0 == y2) return;
             x1  = x0;
             cur = dx - err;
-            y1  = 2 * err + dy < 0;
+            y1  = (2 * err + dy) < 0 ? 1 : 0;
             // X step
             if(2 * err + dx > 0) {
-                if(err - dy < ed) XW_SET_PIXEL( _image, color, x0, y0 + sy, (Pt::uint8_t) (255 / ed * ::fabs(err - dy)) );
+                // Plot curve
+                if(err - dy < ed) {
+                    alpha = 255 / ed * ::fabs(err - dy);
+                    XW_SET_PIXEL( _image, color, x0, y0 + sy, alpha );
+                }
+                // X step
                 x0  += sx;
                 dx  -= xy;
-                err += dy += yy;
+                dy  += yy;
+                err += dy;
             }
             // Y step
             if(y1) {
-                if(cur < ed) XW_SET_PIXEL( _image, color, x1 + sx, y0, (Pt::uint8_t) (255 / ed * ::fabs(cur)) );
-                y0 += sy;
-                dy -= xy;
-                err += dx += xx;
+                // Plot curve
+                if(cur < ed) {
+                    alpha = 255 / ed * ::fabs(cur);
+                    XW_SET_PIXEL( _image, color, x1 + sx, y0, alpha );
+                }
+                // Y step
+                y0  += sy;
+                dy  -= xy;
+                dx  += xx;
+                err += dx;
             }
         } while(dy < dx); // Done if the gradient negates
     }
@@ -695,18 +713,20 @@ void Rasterizer2::rasterOnePixelSolidBezierCurve(Pt::int32_t x0, Pt::int32_t y0,
             // Check if we have just drawn the last pixel
             if(x0 == x2 && y0 == y2) return;
             // Save value for test of Y step
-            y1 = 2 * err < dx;
+            y1 = (2 * err < dx) ? 1 : 0;
             // X step
             if(2 * err > dy) {
                 x0  += sx;
                 dx  -= xy;
-                err += dy += yy;
+                dy  += yy;
+                err += dy;
             }
             // Y step
             if(y1) {
-                y0 += sy;
-                dy -= xy;
-                err += dx += xx;
+                y0  += sy;
+                dy  -= xy;
+                dx  += xx;
+                err += dx;
             }
         } while(dy < dx); // Done if the gradient negates
     }
