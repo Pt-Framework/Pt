@@ -32,6 +32,7 @@ if $(WITH_RASTERIZER2)
                                Rasterizer2_PatternedLine.cpp
                                Rasterizer2_Rectangle.cpp
                                Rasterizer2_Polygon.cpp
+                               Rasterizer2_Bezier.cpp
                                ;
 }
 

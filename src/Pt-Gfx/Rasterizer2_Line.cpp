@@ -327,21 +327,22 @@ void Rasterizer2::rasterOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_
     Pt::int32_t fy2 = FIXED_POINT_FROM_INT(y2);
 
     // A helper macro to set pixel
-    #define XW_SET_PIXEL(IMG, COL, X, Y, A)                                                \
-        do {                                                                               \
-            /* Check the boundary limit, just in case */                                   \
-            if( (X) < 0 || (X) >= IMG->width() || (Y) < 0 || (Y) >= IMG->height() ) break; \
-            /* Check if we should skip drawing the pixel */                                \
-            bool skipDrawing = false;                                                      \
-            for(Pt::int32_t j = 0; j < 4; ++j) {                                           \
-                if( (X) != mx[j] || (Y) != my[j] ) continue;                               \
-                skipDrawing = true;                                                        \
-                break;                                                                     \
-            }                                                                              \
-            if(skipDrawing) break;                                                         \
-            /* Set the pixel */                                                            \
-            Pixel PIX(IMG->view(), X, Y);                                                  \
-            IMG->format().setPixel(PIX, COL, _compositionMode, A);                         \
+    #define XW_SET_PIXEL(IMG, COL, X, Y, A)                                       \
+        do {                                                                      \
+            /* Clip the point */                                                  \
+            if( (X) < _currentClip.left() || (X) > _currentClip.right () ||       \
+                (Y) < _currentClip.top () || (Y) > _currentClip.bottom() ) break; \
+            /* Check if we should skip drawing the pixel */                       \
+            bool skipDrawing = false;                                             \
+            for(Pt::int32_t j = 0; j < 4; ++j) {                                  \
+                if( (X) != mx[j] || (Y) != my[j] ) continue;                      \
+                skipDrawing = true;                                               \
+                break;                                                            \
+            }                                                                     \
+            if(skipDrawing) break;                                                \
+            /* Set the pixel */                                                   \
+            Pixel PIX(IMG->view(), X, Y);                                         \
+            IMG->format().setPixel(PIX, COL, _compositionMode, A);                \
         } while(false)
 
     // Swap the values as needed
@@ -425,8 +426,9 @@ void Rasterizer2::rasterFillOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::in
     // A helper macro to fill pixel
     #define XW_FILL_PIXEL(IMG, X, Y, A)                                                     \
         do {                                                                                \
-            /* Check the boundary limit, just in case */                                    \
-            if( (X) < 0 || (X) >= IMG->width() || (Y) < 0 || (Y) >= IMG->height() ) break;  \
+            /* Clip the point */                                                            \
+            if( (X) < _currentClip.left() || (X) > _currentClip.right () ||                 \
+                (Y) < _currentClip.top () || (Y) > _currentClip.bottom() ) break;           \
             /* Check if we should skip drawing the pixel */                                 \
             bool skipDrawing = false;                                                       \
             for(Pt::int32_t j = 0; j < 4; ++j) {                                            \
@@ -554,223 +556,6 @@ void Rasterizer2::rasterFillOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::in
 
     // Undefine the helper macro
     #undef XW_FILL_PIXEL
-}
-
-// The Beauty of Bresenham's Algorithm
-// http://members.chello.at/easyfilter/bresenham.html
-void Rasterizer2::rasterOnePixelSolidBezierCurve(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t x3, Pt::int32_t y3, const Color& color, DrawLineMask* maskInOut)
-{
-    // Get the mask's coordinates as needed
-    Pt::int32_t mx[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
-    Pt::int32_t my[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
-
-    if(maskInOut) {
-        for(Pt::int32_t i = 0; i < 4; ++i) {
-            mx[i] = (*maskInOut)[i].x();
-            my[i] = (*maskInOut)[i].y();
-        }
-    }
-
-    // A helper macro to set pixel
-    #define XW_SET_PIXEL(IMG, COL, X, Y, A)                                       \
-        do {                                                                      \
-            /* Clip the point */                                                  \
-            if( (X) < _currentClip.left() || (X) > _currentClip.right () ||       \
-                (Y) < _currentClip.top () || (Y) > _currentClip.bottom() ) break; \
-            /* Check if we should skip drawing the pixel */                       \
-            bool skipDrawing = false;                                             \
-            for(Pt::int32_t j = 0; j < 4; ++j) {                                  \
-                if( (X) != mx[j] || (Y) != my[j] ) continue;                      \
-                skipDrawing = true;                                               \
-                break;                                                            \
-            }                                                                     \
-            if(skipDrawing) break;                                                \
-            /* Set the pixel */                                                   \
-            Pixel PIX(IMG->view(), X, Y);                                         \
-            if(A == 255)                                                          \
-                IMG->format().setPixel(PIX, COL, _compositionMode);               \
-            else {                                                                \
-                const Pt::uint8_t falpha = Rasterizer2::XWAA_WFILTER[A];          \
-                IMG->format().setPixel(PIX, COL, _compositionMode, falpha);       \
-            }                                                                     \
-        } while(false)
-
-    // Use anti-aliasing?
-    const bool useAA = (_aaMode != AntiAliasingMode::None);
-
-    // Get the steps
-    Pt::int32_t sx = x3 - x2;
-    Pt::int32_t sy = y3 - y2;
-
-    // Relative values for checks
-    Pt::int32_t xx = x1 - x2;
-    Pt::int32_t yy = y1 - y2;
-    Pt::int32_t xy;
-
-    // Curvature
-    float dx, dy, ed, err;
-    float cur = xx * sy - yy * sx;
-
-    // Sign of gradient must not change
-    if(xx * sx > 0 || yy * sy > 0) return;
-
-    // Begin with longer part; swap the begin and end points as needed
-    if(sx * sx + sy * sy > xx * xx + yy * yy) {
-        x3  = x1;
-        y3  = y1;
-        x1  = sx + x2;
-        y1  = sy + y2;
-        cur = -cur;
-    }
-
-    // Check if the curve is actually a straight line
-    if(!cur) {
-        rasterOnePixelSolidLine(x1, y1, x3, y3, color, maskInOut);
-        return;
-    }
-
-    // X step direction
-    xx += sx;
-    sx  = x1 < x3 ? 1 : -1;
-    xx *= sx;
-
-    // Y step direction
-    yy += sy;
-    sy  = y1 < y3 ? 1 : -1;
-    yy *= sy;
-
-    // Differences 2nd degree
-    xy  = 2 * xx * yy;
-    xx *= xx;
-    yy *= yy;
-
-    // Negated curvature?
-    if(cur * sx * sy < 0) {
-      xx  = -xx;
-      yy  = -yy;
-      xy  = -xy;
-      cur = -cur;
-    }
-
-    // Differences 1st degree
-    dx = 4 * sy * cur * (x2 - x1) + xx - xy;
-    dy = 4 * sx * cur * (y1 - y2) + yy - xy;
-
-    // Error 1st step
-    xx  += xx;
-    yy  += yy;
-    err  = dx + dy + xy;
-
-    // Draw with anti-aliasing
-    if(useAA) {
-        Pt::uint8_t alpha;
-        bool        firstPixel0 = true;
-        bool        firstPixel1 = true;
-        do {
-            // Approximate the error distance
-            cur = std::min(dx + xy, -xy - dy);
-            ed  = std::max(dx + xy, -xy - dy);
-            ed  = (ed + 2 * ed * cur * cur / (4 * ed * ed + cur * cur));
-            // Plot curve
-            alpha = 255 / ed * ::fabs(err - dx - dy - xy);
-            XW_SET_PIXEL(_image, color, x1, y1, alpha);
-            if(maskInOut) {
-                if(firstPixel0) {
-                    (*maskInOut)[0].set(x1, y1);
-                    firstPixel0 = false;
-                }
-                (*maskInOut)[2].set(x1, y1);
-            }
-            // Check if we have just drawn the last pixel
-            if(x1 == x3 && y1 == y3) return;
-            x2  = x1;
-            cur = dx - err;
-            y2  = (2 * err + dy) < 0 ? 1 : 0;
-            // X step
-            if(2 * err + dx > 0) {
-                // Plot curve
-                if(err - dy < ed) {
-                    // Set pixel
-                    alpha = 255 / ed * ::fabs(err - dy);
-                    XW_SET_PIXEL(_image, color, x1, y1 + sy, alpha);
-                    // Store back the start and end coordinates to the mask as needed
-                    if(maskInOut) {
-                        if(firstPixel1) {
-                            (*maskInOut)[1].set(x1, y1 + sy);
-                            firstPixel1 = false;
-                        }
-                        (*maskInOut)[3].set(x1, y1 + sy);
-                    }
-                }
-                // X step
-                x1  += sx;
-                dx  -= xy;
-                dy  += yy;
-                err += dy;
-            }
-            // Y step
-            if(y2) {
-                // Plot curve
-                if(cur < ed) {
-                    // Set pixel
-                    alpha = 255 / ed * ::fabs(cur);
-                    XW_SET_PIXEL(_image, color, x2 + sx, y1, alpha);
-                    // Store back the start and end coordinates to the mask as needed
-                    if(maskInOut) {
-                        if(firstPixel1) {
-                            (*maskInOut)[1].set(x1, y1 + sy);
-                            firstPixel1 = false;
-                        }
-                        (*maskInOut)[3].set(x1, y1 + sy);
-                    }
-                }
-                // Y step
-                y1  += sy;
-                dy  -= xy;
-                dx  += xx;
-                err += dx;
-            }
-        } while(dy < dx); // Done if the gradient negates itself
-    }
-
-    // Draw without anti-aliasing
-    else {
-        // Store back the start and end coordinates to the mask as needed
-        if(maskInOut) {
-            (*maskInOut)[0].set(x1, y1);
-            (*maskInOut)[1] = MAXIMUM_POINT;
-            (*maskInOut)[2].set(x3, y3);
-            (*maskInOut)[3] = MAXIMUM_POINT;
-        }
-        // Draw the pixels
-        do {
-            // Plot curve
-            XW_SET_PIXEL(_image, color, x1, y1, 255);
-            // Check if we have just drawn the last pixel
-            if(x1 == x3 && y1 == y3) {
-                return;
-            }
-            // Save value for test of Y step
-            y2 = (2 * err < dx) ? 1 : 0;
-            // X step
-            if(2 * err > dy) {
-                x1  += sx;
-                dx  -= xy;
-                dy  += yy;
-                err += dy;
-            }
-            // Y step
-            if(y2) {
-                y1  += sy;
-                dy  -= xy;
-                dx  += xx;
-                err += dx;
-            }
-        } while(dy < dx); // Done if the gradient negates itself
-    }
-
-    // Undefine the helper macro
-    #undef XW_SET_PIXEL
 }
 
 
