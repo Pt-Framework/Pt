@@ -558,11 +558,110 @@ void Rasterizer2::rasterFillOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::in
 
 // The Beauty of Bresenham's Algorithm
 // http://members.chello.at/easyfilter/bresenham.html
-void Rasterizer2::rasterOnePixelSolidBezierCurve(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t x3, Pt::int32_t y3, const Color& color, DrawLineMask* maskInOut)
+void Rasterizer2::rasterOnePixelSolidBezierCurve(Pt::int32_t x0, Pt::int32_t y0, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut)
 {
-    rasterOnePixelSolidLine(x1, y1, x2, y2, color, maskInOut);
-    rasterOnePixelSolidLine(x2, y2, x3, y3, color, maskInOut);
-    // ### !!! TODO !!! ###
+    // Use anti-aliasing?
+    const bool useAA = (_aaMode != AntiAliasingMode::None);
+
+    //rasterOnePixelSolidLine(x1, y1, x2, y2, color, maskInOut);
+    //rasterOnePixelSolidLine(x2, y2, x3, y3, color, maskInOut);
+
+    Pt::int32_t sx = x2 - x1;
+    Pt::int32_t sy = y2 - y1;
+
+    // Relative values for checks
+    Pt::int32_t xx = x0 - x1;
+    Pt::int32_t yy = y0 - y1;
+    Pt::int32_t xy;
+
+    // Curvature
+    float dx, dy, err;
+    float cur = xx * sy - yy * sx;
+
+    // Sign of gradient must not change
+    if(xx * sx > 0 || yy * sy > 0) return;
+
+    // Begin with longer part
+    if(sx * sx + sy * sy > xx * xx + yy * yy) {  // Swap P0 P2
+        x2  = x0; x0  = sx + x1;
+        y2  = y0; y0  = sy + y1;
+        cur = -cur;
+    }
+
+    // No straight line
+    if(cur != 0) {
+        // X step direction
+        xx += sx;
+        xx *= sx = x0 < x2 ? 1 : -1;
+        // Y step direction
+        yy += sy;
+        yy *= sy = y0 < y2 ? 1 : -1;
+        // Differences 2nd degree
+        xy  = 2 * xx * yy;
+        xx *= xx;
+        yy *= yy;
+        // Negated curvature?
+        if(cur * sx * sy < 0) {
+          xx = -xx;
+          yy = -yy;
+          xy = -xy;
+          cur = -cur;
+        }
+        // Differences 1st degree
+        dx = 4 * sy * cur * (x1 - x0) + xx - xy;
+        dy = 4 * sx * cur * (y0 - y1) + yy - xy;
+        // Error 1st step
+        xx += xx;
+        yy += yy;
+        err = dx + dy + xy;
+
+        if(useAA) {
+            /*
+do {
+cur = fmin(dx+xy,-xy-dy);
+ed = fmax(dx+xy,-xy-dy);           // approximate error distance
+ed = 255/(ed+2*ed*cur*cur/(4.*ed*ed+cur*cur));
+setPixelAA(x0,y0, ed*fabs(err-dx-dy-xy));          // plot curve
+if (x0 == x2 && y0 == y2) return;// Check if we have just drawn the last pixel
+x1 = x0; cur = dx-err; y1 = 2*err+dy < 0;
+if (2*err+dx > 0) {                                    // x step
+if (err-dy < ed) setPixelAA(x0,y0+sy, ed*fabs(err-dy));
+x0 += sx; dx -= xy; err += dy += yy;
+}
+if (y1) {                                              // y step
+if (cur < ed) setPixelAA(x1+sx,y0, ed*fabs(cur));
+y0 += sy; dy -= xy; err += dx += xx;
+}
+} while (dy < dx);              // gradient negates -> close curves
+*/
+        }
+        else {
+            do {
+                // Plot curve
+                //setPixel(x0,y0);
+                // Check if we have just drawn the last pixel
+                if(x0 == x2 && y0 == y2) return;
+                //
+                // Save value for test of Y step
+                y1 = 2 * err < dx;
+                // X step
+                if(2 * err > dy) {
+                    x0  += sx;
+                    dx  -= xy;
+                    err += dy += yy;
+                }
+                // Y step
+                if(y1) {
+                    y0 += sy;
+                    dy -= xy;
+                    err += dx += xx;
+
+                }
+            } while(dy < dx); // If the gradient negates, the has algorithm failed
+        }
+    }
+  //plotLine(x0,y0, x2,y2);                  /* plot remaining part to end */
+//..   plotLineAA(x0,y0, x2,y2);              /* plot remaining needle to end */
 }
 
 
