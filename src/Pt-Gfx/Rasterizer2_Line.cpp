@@ -238,7 +238,7 @@ void Rasterizer2::rasterOnePixelSolidXLineSegment(Pt::int32_t x1, Pt::int32_t y1
     }
 }
 
-// Using algorithm from: Bresenham's Line Aalgorithm
+// Using algorithm from: Bresenham's Line Algorithm
 //                       https://en.wikipedia.org/wiki/Bresenham's_line_algorithm
 //                       Last modified on February 21, 2017
 void Rasterizer2::rasterOnePixelSolidGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut)
@@ -305,7 +305,7 @@ void Rasterizer2::rasterOnePixelSolidGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_
     }
 }
 
-// Using algorithm from: Xiaolin Wu's line algorithm
+// Using algorithm from: Xiaolin Wu's Line Algorithm
 //                       https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
 //                       Last modified on January 19, 2017
 void Rasterizer2::rasterOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut)
@@ -411,7 +411,7 @@ void Rasterizer2::rasterOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_
     #undef XW_SET_PIXEL
 }
 
-// Using algorithm from: Xiaolin Wu's line algorithm
+// Using algorithm from: Xiaolin Wu's Line Algorithm
 //                       https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
 //                       Last modified on January 19, 2017
 void Rasterizer2::rasterFillOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const PolygonScanline16s& exclusionZone, DrawLineMask& maskInOut)

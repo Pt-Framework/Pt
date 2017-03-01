@@ -45,9 +45,11 @@ namespace Math {
 
 inline float fastSqrt_impl(float x)
 {
-    // NOTE: This function is not actually faster on any CPU
+    // NOTE: This function is NOT actually faster on any CPU
 
-    // https://en.wikipedia.org/wiki/Methods_of_computing_square_roots
+    // Using algorithm from: Methods of Computing Square Roots
+    //                       https://en.wikipedia.org/wiki/Methods_of_computing_square_roots
+    //                       Last modified on February 25, 2017
 
     union {
         float       f;
@@ -65,7 +67,9 @@ inline float fastInvSqrt_impl(float x)
 {
     // NOTE: This function is only slightly faster on an ARM CPU
 
-    // https://en.wikipedia.org/wiki/Fast_inverse_square_root
+    // Using algorithm from: Fast Inverse Square Root
+    //                       https://en.wikipedia.org/wiki/Fast_inverse_square_root
+    //                       Last modified on February 17, 2017
 
     const float x2 = x * 0.5f;
 
@@ -103,8 +107,10 @@ inline float fastCos_impl(float x)
 
 inline float fastAtan2_impl(float y, float x)
 {
-    // From https://gist.github.com/volkansalma/2972237
-    // Original code by Volkan SALMA, 2012
+
+    // Based on: atan2_approximation.c
+    //           https://gist.github.com/volkansalma/2972237
+    //           Original code by Volkan SALMA, 2012
 
     if(x == 0.0f) {
         if(y >  0.0f) return Pt::PiHalf;
