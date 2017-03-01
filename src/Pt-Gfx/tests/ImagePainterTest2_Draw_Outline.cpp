@@ -58,45 +58,45 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
 
     painter.setClip( RectF (20, image.width() - 20, 20, image.height() - 20) );
-    painter.setPen( Pen( Color::fromRgb8(0, 255, 0, 175), 1, Pen::Dash )  );
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None   ); painter.drawLine( PointF(  0, -50), PointF(999, 599 - 50) );
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Fastest); painter.drawLine( PointF(  0,  50), PointF(999, 599 + 50) );
+    painter.setPen( Pen( Color::fromRgb8(0, 255, 0, 175), 1, Pen::Dash ) );
+    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None   ); painter.drawLine( PointF(  0, -30), PointF(999, 599 - 30) );
+    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Fastest); painter.drawLine( PointF(  0,  30), PointF(999, 599 + 30) );
     painter.setClip( RectF (0, image.width() - 1, 0, image.height() - 1) );
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
 
-    painter.setPen( Pen( Color::fromRgb8(255, 0, 0, 175), 1, Pen::DotDash )  );
+    painter.setPen( Pen( Color::fromRgb8(255, 0, 0, 175), 1, Pen::DotDash ) );
     painter.drawLine( PointF(  5,   5), PointF(994,   5) );
     painter.drawLine( PointF(  5, 594), PointF(994, 594) );
     painter.drawLine( PointF(  5,   5), PointF(  5, 594) );
     painter.drawLine( PointF(994,   5), PointF(994, 594) );
 
-    painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::Dash )  );
+    painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::Dash ) );
     painter.drawLine( PointF( 10, 110), PointF(100, 150) );
     painter.drawLine( PointF( 10, 250), PointF(100, 210) );
 
-    painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::Dot )  );
+    painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::Dot ) );
     painter.drawLine( PointF(500, 500), PointF(200, 200) );
     painter.drawLine( PointF(300, 150), PointF(700,  50) );
 
-    painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::DoubleDot )  );
+    painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::DoubleDot ) );
     painter.drawLine( PointF(550, 500), PointF(250, 200) );
     painter.drawLine( PointF(300, 200), PointF(700, 100) );
 
-    painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::Dash )  );
+    painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::Dash ) );
     painter.drawLine( PointF(870,  11), PointF(870, 500) );
     painter.drawLine( PointF(880,  11), PointF(882, 500) );
     painter.drawLine( PointF( 10, 540), PointF(781, 540) );
     painter.drawLine( PointF(781, 552), PointF( 10, 550) );
 
-    painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::DoubleDash )  );
+    painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::DoubleDash ) );
     painter.drawLine( PointF(970,  11), PointF(970, 500) );
     painter.drawLine( PointF(980,  11), PointF(982, 500) );
     painter.drawLine( PointF( 10, 440), PointF(781, 440) );
     painter.drawLine( PointF(781, 452), PointF( 10, 450) );
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
-    painter.setPen( Pen( Color::fromRgb8(0, 255, 255, 175), 1, Pen::Dash )  );
+    painter.setPen( Pen( Color::fromRgb8(0, 255, 255, 175), 1, Pen::Dash ) );
 
     const PointF poly[] = { // CCW
         PointF(110, 310),
@@ -111,6 +111,9 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
     painter.drawEllipse( PointF (730,  50), SizeF(95, 95) );
     if(ip2) ip2->drawArc( PointF (730, 170), SizeF(95, 43), 30, 330, ArcMode::Chord );
     if(ip2) ip2->drawArc( PointF (753, 243), SizeF(43, 95), 30, 330, ArcMode::Pie );
+
+    painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, 0x4470871C ) );
+    painter.drawRect( RectF(PointF(260, 20), SizeF(180, 80)) );
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
 }

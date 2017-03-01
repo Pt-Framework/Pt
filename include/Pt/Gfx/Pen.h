@@ -1,6 +1,6 @@
 /* Copyright (C) 2006-2015 Laurentiu-Gheorghe Crisan
    Copyright (C) 2006-2015 Marc Boris Duerner
-   Copyright (C) 2010 Aloysius Indrayanto
+   Copyright (C) 2017-2017 Aloysius Indrayanto
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -54,12 +54,13 @@ class PT_GFX_API Pen
     public:
         /** @brief Pen line style.
         */
-        enum Style { Solid      = 0,
-                     Dot        = 1,
-                     DoubleDot  = 2,
-                     Dash       = 3,
-                     DoubleDash = 4,
-                     DotDash    = 5
+        enum Style { Solid       = 0,
+                     Dot         = 1,
+                     DoubleDot   = 2,
+                     Dash        = 3,
+                     DoubleDash  = 4,
+                     DotDash     = 5,
+                     UserDefined = 6
                    };
 
         /** @brief Pen cap style.
@@ -100,6 +101,12 @@ class PT_GFX_API Pen
             Style style = Solid, CapStyle cap = FlatCap,
             JoinStyle join = BevelJoin);
 
+        /** @brief Constructs a Pen with the specified size, color and custom styles.
+        */
+        Pen(const Color& color, std::size_t width,
+            Pt::uint32_t stylePattern, CapStyle cap = FlatCap,
+            JoinStyle join = BevelJoin);
+
         /** @brief Returns the size of the pen.
         */
         std::size_t size() const;
@@ -111,6 +118,10 @@ class PT_GFX_API Pen
         /** @brief Returns the pen style.
         */
         Style style() const;
+
+        /** @brief Returns the pen style user pattern.
+        */
+        Pt::uint32_t userPattern() const;
 
         /** @brief Returns the cap style.
         */
@@ -131,10 +142,11 @@ class PT_GFX_API PenData
 {
   public:
       PenData(const Color& color, std::size_t size,
-              Pen::Style style, Pen::CapStyle cap, Pen::JoinStyle join)
+              Pen::Style style, Pt::uint32_t userPattern, Pen::CapStyle cap, Pen::JoinStyle join)
       : _color(color)
       , _size(size)
       , _style(style )
+      , _userPattern(userPattern)
       , _capStyle(cap)
       , _joinStyle(join)
       { }
@@ -148,6 +160,9 @@ class PT_GFX_API PenData
       Pen::Style style() const
       { return _style; }
 
+      Pt::uint32_t userPattern() const
+      { return _userPattern; }
+
       Pen::CapStyle capStyle() const
       { return _capStyle;}
 
@@ -158,6 +173,7 @@ class PT_GFX_API PenData
       Color          _color;
       std::size_t    _size;
       Pen::Style     _style;
+      Pt::uint32_t   _userPattern;
       Pen::CapStyle  _capStyle;
       Pen::JoinStyle _joinStyle;
 };
