@@ -572,29 +572,33 @@ void Rasterizer2::rasterOnePixelSolidBezierCurve(Pt::int32_t x0, Pt::int32_t y0,
     }
 
     // A helper macro to set pixel
-    #define XW_SET_PIXEL(IMG, COL, X, Y, A)                                                \
-        do {                                                                               \
-            /* Check the boundary limit, just in case */                                   \
-            if( (X) < 0 || (X) >= IMG->width() || (Y) < 0 || (Y) >= IMG->height() ) break; \
-            /* Check if we should skip drawing the pixel */                                \
-            bool skipDrawing = false;                                                      \
-            for(Pt::int32_t j = 0; j < 4; ++j) {                                           \
-                if( (X) != mx[j] || (Y) != my[j] ) continue;                               \
-                skipDrawing = true;                                                        \
-                break;                                                                     \
-            }                                                                              \
-            if(skipDrawing) break;                                                         \
-            /* Set the pixel */                                                            \
-            Pixel PIX(IMG->view(), X, Y);                                                  \
-            IMG->format().setPixel(PIX, COL, _compositionMode, A);                         \
+    #define XW_SET_PIXEL(IMG, COL, X, Y, A)                                       \
+        do {                                                                      \
+            /* Clip the point */                                                  \
+            if( (X) < _currentClip.left() || (X) > _currentClip.right () ||       \
+                (Y) < _currentClip.top () || (Y) > _currentClip.bottom() ) break; \
+            /* Check if we should skip drawing the pixel */                       \
+            bool skipDrawing = false;                                             \
+            for(Pt::int32_t j = 0; j < 4; ++j) {                                  \
+                if( (X) != mx[j] || (Y) != my[j] ) continue;                      \
+                skipDrawing = true;                                               \
+                break;                                                            \
+            }                                                                     \
+            if(skipDrawing) break;                                                \
+            /* Set the pixel */                                                   \
+            Pixel PIX(IMG->view(), X, Y);                                         \
+            if(A == 255)                                                          \
+                IMG->format().setPixel(PIX, COL, _compositionMode);               \
+            else {                                                                \
+                const Pt::uint8_t fa = Rasterizer2::XWAA_WFILTER[A];              \
+                IMG->format().setPixel(PIX, COL, _compositionMode, fa);           \
+            }                                                                     \
         } while(false)
 
     // Use anti-aliasing?
     const bool useAA = (_aaMode != AntiAliasingMode::None);
 
-    //rasterOnePixelSolidLine(x1, y1, x2, y2, color, maskInOut);
-    //rasterOnePixelSolidLine(x2, y2, x3, y3, color, maskInOut);
-
+    // Get the deltas
     Pt::int32_t sx = x2 - x1;
     Pt::int32_t sy = y2 - y1;
 
@@ -609,97 +613,103 @@ void Rasterizer2::rasterOnePixelSolidBezierCurve(Pt::int32_t x0, Pt::int32_t y0,
 
     // Sign of gradient must not change
     if(xx * sx > 0 || yy * sy > 0) return;
-
-    // Begin with longer part
-    if(sx * sx + sy * sy > xx * xx + yy * yy) {  // Swap P0 P2
-        x2  = x0; x0  = sx + x1;
-        y2  = y0; y0  = sy + y1;
+    // Begin with longer part; swap the begn and end points as needed
+    if(sx * sx + sy * sy > xx * xx + yy * yy) {
+        x2  = x0; x0 = sx + x1;
+        y2  = y0; y0 = sy + y1;
         cur = -cur;
     }
 
-    // No straight line
-    if(cur != 0) {
-        // X step direction
-        xx += sx;
-        xx *= sx = x0 < x2 ? 1 : -1;
-        // Y step direction
-        yy += sy;
-        yy *= sy = y0 < y2 ? 1 : -1;
-        // Differences 2nd degree
-        xy  = 2 * xx * yy;
-        xx *= xx;
-        yy *= yy;
-        // Negated curvature?
-        if(cur * sx * sy < 0) {
-          xx = -xx;
-          yy = -yy;
-          xy = -xy;
-          cur = -cur;
-        }
-        // Differences 1st degree
-        dx = 4 * sy * cur * (x1 - x0) + xx - xy;
-        dy = 4 * sx * cur * (y0 - y1) + yy - xy;
-        // Error 1st step
-        xx += xx;
-        yy += yy;
-        err = dx + dy + xy;
-        // Draw with anti-aliasing
-        if(useAA) {
-            do {
-                // Approximate error distance
-                cur = std::min(dx + xy, -xy - dy);
-                ed  = std::max(dx + xy, -xy - dy);
-                ed  = 255 / (ed + 2 * ed * cur * cur / (4 * ed * ed + cur * cur));
-                // Plot curve
-                //XW_SET_PIXEL(_image, color, x0, y0, ed * ::fabs(err - dx - dy - xy));
-                // Check if we have just drawn the last pixel
-                if(x0 == x2 && y0 == y2) return;
-                x1  = x0;
-                cur = dx - err;
-                y1  = 2 * err + dy < 0;
-                // X step
-                if(2 * err + dx > 0) {
-                    if(err - dy < ed) XW_SET_PIXEL(_image, color, x0, y0 + sy, ed * ::fabs(err - dy));
-                    x0  += sx;
-                    dx  -= xy;
-                    err += dy += yy;
-                }
-                // Y step
-                if(y1) {
-                    if(cur < ed) XW_SET_PIXEL(_image, color, x1 + sx, y0, ed * ::fabs(cur));
-                    y0 += sy;
-                    dy -= xy;
-                    err += dx += xx;
-                }
-            } while(dy < dx); // Done if the gradient negates
-        }
-        // Draw without anti-aliasing
-        else {
-            do {
-                // Plot curve
-                XW_SET_PIXEL(_image, color, x0, y0, 255);
-                // Check if we have just drawn the last pixel
-                if(x0 == x2 && y0 == y2) return;
-                // Save value for test of Y step
-                y1 = 2 * err < dx;
-                // X step
-                if(2 * err > dy) {
-                    x0  += sx;
-                    dx  -= xy;
-                    err += dy += yy;
-                }
-                // Y step
-                if(y1) {
-                    y0 += sy;
-                    dy -= xy;
-                    err += dx += xx;
-                }
-            } while(dy < dx); // Done if the gradient negates
-        }
+    // Check if the curve is actually a straight line
+    if(!cur) {
+        rasterOnePixelSolidLine(x0, y0, x2, y2, color, maskInOut);
+        return;
     }
 
-    // If we got here, it the curve is actually a straight line
-    rasterOnePixelSolidLine(x0, y0, x2, y2, color, maskInOut);
+    // X step direction
+    xx += sx;
+    xx *= sx = x0 < x2 ? 1 : -1;
+
+    // Y step direction
+    yy += sy;
+    yy *= sy = y0 < y2 ? 1 : -1;
+
+    // Differences 2nd degree
+    xy  = 2 * xx * yy;
+    xx *= xx;
+    yy *= yy;
+
+    // Negated curvature?
+    if(cur * sx * sy < 0) {
+      xx = -xx;
+      yy = -yy;
+      xy = -xy;
+      cur = -cur;
+    }
+
+    // Differences 1st degree
+    dx = 4 * sy * cur * (x1 - x0) + xx - xy;
+    dy = 4 * sx * cur * (y0 - y1) + yy - xy;
+
+    // Error 1st step
+    xx  += xx;
+    yy  += yy;
+    err  = dx + dy + xy;
+
+    // Draw with anti-aliasing
+    if(useAA) {
+        do {
+            // Approximate error distance
+            cur = std::min(dx + xy, -xy - dy);
+            ed  = std::max(dx + xy, -xy - dy);
+            ed  = (ed + 2 * ed * cur * cur / (4 * ed * ed + cur * cur));
+            // Plot curve
+            XW_SET_PIXEL( _image, color, x0, y0, (Pt::uint8_t) (255 / ed * ::fabs(err - dx - dy - xy)) );
+            // Check if we have just drawn the last pixel
+            if(x0 == x2 && y0 == y2) return;
+            x1  = x0;
+            cur = dx - err;
+            y1  = 2 * err + dy < 0;
+            // X step
+            if(2 * err + dx > 0) {
+                if(err - dy < ed) XW_SET_PIXEL( _image, color, x0, y0 + sy, (Pt::uint8_t) (255 / ed * ::fabs(err - dy)) );
+                x0  += sx;
+                dx  -= xy;
+                err += dy += yy;
+            }
+            // Y step
+            if(y1) {
+                if(cur < ed) XW_SET_PIXEL( _image, color, x1 + sx, y0, (Pt::uint8_t) (255 / ed * ::fabs(cur)) );
+                y0 += sy;
+                dy -= xy;
+                err += dx += xx;
+            }
+        } while(dy < dx); // Done if the gradient negates
+    }
+
+    // Draw without anti-aliasing
+    else {
+        do {
+            // Plot curve
+            XW_SET_PIXEL(_image, color, x0, y0, 255);
+            // Check if we have just drawn the last pixel
+            if(x0 == x2 && y0 == y2) return;
+            // Save value for test of Y step
+            y1 = 2 * err < dx;
+            // X step
+            if(2 * err > dy) {
+                x0  += sx;
+                dx  -= xy;
+                err += dy += yy;
+            }
+            // Y step
+            if(y1) {
+                y0 += sy;
+                dy -= xy;
+                err += dx += xx;
+            }
+        } while(dy < dx); // Done if the gradient negates
+    }
 
     // Undefine the helper macro
     #undef XW_SET_PIXEL
