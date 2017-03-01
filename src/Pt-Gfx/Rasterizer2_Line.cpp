@@ -126,10 +126,10 @@ void Rasterizer2::rasterOnePixelSolidHLineSegment(Pt::int32_t x1, Pt::int32_t x2
 
     // Adjust the start and end coordinates as needed
     if(maskInOut) {
-        if((*maskInOut)[0].x() == x1) ++x1;
-        if((*maskInOut)[1].x() == x1) ++x1;
-        if((*maskInOut)[2].x() == x2) --x2;
-        if((*maskInOut)[3].x() == x2) --x2;
+        for(Pt::int32_t i = 0; i < 4; ++i) {
+            if( x1 == (*maskInOut)[i].x() && y == (*maskInOut)[i].y() ) ++x1;
+            if( x2 == (*maskInOut)[i].x() && y == (*maskInOut)[i].y() ) --x2;
+        }
         if(x1 > x2) return;
     }
 
@@ -156,10 +156,10 @@ void Rasterizer2::rasterOnePixelSolidVLineSegment(Pt::int32_t x, Pt::int32_t y1,
 
     // Adjust the start and end coordinates as needed
     if(maskInOut) {
-        if((*maskInOut)[0].y() == y1) ++y1;
-        if((*maskInOut)[1].y() == y1) ++y1;
-        if((*maskInOut)[2].y() == y2) --y2;
-        if((*maskInOut)[3].y() == y2) --y2;
+        for(Pt::int32_t i = 0; i < 4; ++i) {
+            if( x == (*maskInOut)[i].x() && y1 == (*maskInOut)[i].y() ) ++y1;
+            if( x == (*maskInOut)[i].x() && y2 == (*maskInOut)[i].y() ) --y2;
+        }
         if(y1 > y2) return;
     }
 
@@ -598,7 +598,11 @@ void Rasterizer2::rasterOnePixelSolidBezierCurve(Pt::int32_t x0, Pt::int32_t y0,
     // Use anti-aliasing?
     const bool useAA = (_aaMode != AntiAliasingMode::None);
 
-    // Get the deltas
+    // Save the begin point coordinate
+    const Pt::int32_t x0s = x0;
+    const Pt::int32_t y0s = y0;
+
+    // Get the steps
     Pt::int32_t sx = x2 - x1;
     Pt::int32_t sy = y2 - y1;
 
@@ -613,7 +617,8 @@ void Rasterizer2::rasterOnePixelSolidBezierCurve(Pt::int32_t x0, Pt::int32_t y0,
 
     // Sign of gradient must not change
     if(xx * sx > 0 || yy * sy > 0) return;
-    // Begin with longer part; swap the begn and end points as needed
+
+    // Begin with longer part; swap the begin and end points as needed
     if(sx * sx + sy * sy > xx * xx + yy * yy) {
         x2  = x0;
         y2  = y0;
@@ -702,16 +707,26 @@ void Rasterizer2::rasterOnePixelSolidBezierCurve(Pt::int32_t x0, Pt::int32_t y0,
                 dx  += xx;
                 err += dx;
             }
-        } while(dy < dx); // Done if the gradient negates
+        } while(dy < dx); // Done if the gradient negates itself
     }
 
     // Draw without anti-aliasing
     else {
+        // Store back the start and end coordinates to the mask as needed
+        if(maskInOut) {
+            (*maskInOut)[0].set(x0, y0);
+            (*maskInOut)[1] = MAXIMUM_POINT;
+            (*maskInOut)[2].set(x2, y2);
+            (*maskInOut)[3] = MAXIMUM_POINT;
+        }
+        // Draw the pixels
         do {
             // Plot curve
             XW_SET_PIXEL(_image, color, x0, y0, 255);
             // Check if we have just drawn the last pixel
-            if(x0 == x2 && y0 == y2) return;
+            if(x0 == x2 && y0 == y2) {
+                return;
+            }
             // Save value for test of Y step
             y1 = (2 * err < dx) ? 1 : 0;
             // X step
@@ -728,7 +743,7 @@ void Rasterizer2::rasterOnePixelSolidBezierCurve(Pt::int32_t x0, Pt::int32_t y0,
                 dx  += xx;
                 err += dx;
             }
-        } while(dy < dx); // Done if the gradient negates
+        } while(dy < dx); // Done if the gradient negates itself
     }
 
     // Undefine the helper macro

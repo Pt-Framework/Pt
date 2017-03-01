@@ -252,7 +252,7 @@ void ImagePainter2::drawPolybezier(const PointF* ps, const size_t pointCount, bo
     if(autoClose) points[pointCount].set( ps[0].x(), ps[0].y() );
 
     // Rasterize the polygon
-    _rasterizer->strokeOnePixelPolybezier(points.data(), pointCount);
+    _rasterizer->strokeOnePixelPolybezier(points.data(), points.size());
 }
 
 

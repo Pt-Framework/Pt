@@ -83,8 +83,8 @@ class Image;
 class Rasterizer2
 {
     public:
-        // Mask for excluding pixels when drawing line;
-        // elements: { start0, start1, end0, end1 }
+        // Mask for excluding pixels when drawing line; each element corresponds to
+        // the coordinate of one of the pixel(s) of the start and end points
         typedef Point DrawLineMask[4];
 
         static const DrawLineMask NullLineMask;
