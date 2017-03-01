@@ -49,19 +49,19 @@ using namespace Pt::Gfx;
 
 // General settings for Pt-Gfx
 #define DO_TEST_DRAW    1
-#define DO_BENCHMARKING 1
+#define DO_BENCHMARKING 0
 
 // Detailed-test enable settings for Pt-Gfx
 #define TEST_SOURCECOPY                         1
 #define TEST_SOURCEOVER                         0
 
-#define TEST_DRAW_SOLID_LINE_AND_TEXT           0
-#define TEST_DRAW_PATTERNED_LINE                0
+#define TEST_DRAW_SOLID_LINE_AND_TEXT           1
+#define TEST_DRAW_PATTERNED_LINE                1
 #define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES  0
 
 #define TEST_DRAW_ELLIPSES_ARCS                 0
 
-#define TEST_DRAW_SOLID_FILLED_POLYGONS         1
+#define TEST_DRAW_SOLID_FILLED_POLYGONS         0
 #define TEST_DRAW_GRADIENT_FILLED_POLYGONS      0
 #define TEST_DRAW_TEXTURE_FILLED_POLYGONS       0
 
@@ -72,7 +72,7 @@ using namespace Pt::Gfx;
 #define TEST_COMPARE_WITH_OLD_PAINTER           0 // (for some shapes only)
 
 // Detailed-test benchmark settings for Pt-Gfx and some for Cairo
-#define BENCHMARK_RESULT_HTML               0
+#define BENCHMARK_RESULT_HTML               0 // (automatically disabling test drawing and enabling Cairo comparison)
 #define BENCHMARK_RESULT_HTML_SIDE_BY_SIDE  0
 
 #define BENCHMARK_CHECK_RESULTING_IMAGE     0
@@ -91,7 +91,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_GRADIENT_FILLED_RECTANGLE 0
 #define BENCHMARK_TEXTURE_FILLED_RECTANGLE  0
 
-#define BENCHMARK_SOLID_FILLED_POLYGON      1
+#define BENCHMARK_SOLID_FILLED_POLYGON      0
 #define BENCHMARK_GRADIENT_FILLED_POLYGON   0
 #define BENCHMARK_TEXTURE_FILLED_POLYGON    0
 
@@ -99,9 +99,9 @@ using namespace Pt::Gfx;
 #define BENCHMARK_GRADIENT_FILLED_ELLIPSE   0
 #define BENCHMARK_TEXTURE_FILLED_ELLIPSE    0
 
-#define BENCHMARK_SOLID_FILLED_ARC          0
-#define BENCHMARK_GRADIENT_FILLED_ARC       0
-#define BENCHMARK_TEXTURE_FILLED_ARC        0
+#define BENCHMARK_SOLID_FILLED_ARC          1
+#define BENCHMARK_GRADIENT_FILLED_ARC       1
+#define BENCHMARK_TEXTURE_FILLED_ARC        1
 
 // Configurations and objects
 #define FONT_DIR    "../src/Pt-Gfx/fonts"
@@ -394,7 +394,7 @@ int main(int argc, char* args[])
         }
     }
 
-    if(DO_BENCHMARKING_CAIRO) {
+    if(DO_BENCHMARKING_CAIRO || (DO_BENCHMARKING && BENCHMARK_RESULT_HTML)) {
         std::clog << std::fixed << std::setprecision(0) << std::endl;
 
         std::clog << "Cairo - CompositionMode::SourceCopy" << std::endl;
