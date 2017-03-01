@@ -9,7 +9,6 @@ void plotQuadBezierSeg(int x0, int y0, int x1, int y1, int x2, int y2)
   if (sx*(long)sx+sy*(long)sy > xx*xx+yy*yy) { /* begin with longer part */
     x2 = x0; x0 = sx+x1; y2 = y0; y0 = sy+y1; cur = -cur;  /* swap P0 P2 */
   }
-
   if (cur != 0) {                                    /* no straight line */
     xx += sx; xx *= sx = x0 < x2 ? 1 : -1;           /* x step direction */
     yy += sy; yy *= sy = y0 < y2 ? 1 : -1;           /* y step direction */
@@ -29,7 +28,7 @@ void plotQuadBezierSeg(int x0, int y0, int x1, int y1, int x2, int y2)
     } while (dy < dx );           /* gradient negates -> algorithm fails */
   }
   plotLine(x0,y0, x2,y2);                  /* plot remaining part to end */
-}
+}  
 
 void plotQuadBezierSegAA(int x0, int y0, int x1, int y1, int x2, int y2)
 {
@@ -42,7 +41,6 @@ void plotQuadBezierSegAA(int x0, int y0, int x1, int y1, int x2, int y2)
    if (sx*(long)sx+sy*(long)sy > xx*xx+yy*yy) { /* begin with longer part */
       x2 = x0; x0 = sx+x1; y2 = y0; y0 = sy+y1; cur = -cur; /* swap P0 P2 */
    }
-
    if (cur != 0)
    {                                                  /* no straight line */
       xx += sx; xx *= sx = x0 < x2 ? 1 : -1;          /* x step direction */
