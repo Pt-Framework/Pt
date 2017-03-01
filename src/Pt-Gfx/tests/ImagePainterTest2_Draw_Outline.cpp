@@ -48,6 +48,27 @@ static void testDrawSolidLine(const char* title, Image& image, Painter& painter)
     painter.setPen( Color::fromRgb8(0, 255, 255, 255) ); painter.drawText( PointF(100, 175), "Hello world!" );
     painter.setPen( Color::fromRgb8(0, 255, 255, 175) ); painter.drawText( PointF(100, 225), "Hello world!" );
 
+
+    if(ip2) {
+        const PointF bezier1[] = {
+            PointF(200,  50),
+            PointF(265,  65),
+            PointF(300, 100)
+        };
+        ip2->setPen( Pen( Color::fromRgb8(255, 127, 255, 175), 1, Pen::Solid ) );
+        ip2->drawPolybezier( bezier1, sizeof(bezier1) / sizeof(bezier1[0]), false );
+
+        const PointF bezier2[] = {
+            PointF(400,  30),
+            PointF(465,  45),
+            PointF(500, 110),
+            PointF(415,  85)
+        };
+        ip2->setPen( Pen( Color::fromRgb8(255, 127, 255, 175), 1, Pen::Dash ) );
+        ip2->drawPolybezier( bezier2, sizeof(bezier2) / sizeof(bezier2[0]), true );
+    }
+
+
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
 }
 

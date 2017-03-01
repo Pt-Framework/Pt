@@ -313,6 +313,14 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentXWAA(Pt::int32_t x1, Pt::in
     #undef XW_SET_PIXEL
 }
 
+// The Beauty of Bresenham's Algorithm
+// http://members.chello.at/easyfilter/bresenham.html
+void Rasterizer2::rasterOnePixelPatternedBezierCurve(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t x3, Pt::int32_t y3, const Color& color, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut)
+{
+    // ### !!! TODO !!! ###
+    rasterOnePixelSolidBezierCurve(x1, y1, x2, y2, x3, y3, color, maskInOut);
+}
+
 
 } // namespace
 } // namespace

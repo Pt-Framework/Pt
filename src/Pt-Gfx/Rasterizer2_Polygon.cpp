@@ -60,6 +60,31 @@ void Rasterizer2::strokeOnePixelPolygon(const Point* points, size_t pointCount, 
     }
 }
 
+void Rasterizer2::strokeOnePixelPolybezier(const Point* points, size_t pointCount)
+{
+    DrawLineMask mask        = Rasterizer2::NullLineMask;
+    Pt::int32_t  fpiCtrInOut = 0;
+
+    for(size_t i = 0; i < (pointCount - 1); i += 2) {
+        if(_pen.style() == Pen::Solid) {
+            rasterOnePixelSolidBezierCurve(
+                points[i    ].x(), points[i    ].y(),
+                points[i + 1].x(), points[i + 1].y(),
+                points[i + 2].x(), points[i + 2].y(),
+                _pen.color(), &mask
+            );
+        }
+        else {
+            rasterOnePixelPatternedBezierCurve(
+                points[i    ].x(), points[i    ].y(),
+                points[i + 1].x(), points[i + 1].y(),
+                points[i + 2].x(), points[i + 2].y(),
+                _pen.color(), fpiCtrInOut, &mask
+            );
+        }
+    }
+}
+
 void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
 {
     // Minimum and maximum coordinate values for all the polygons

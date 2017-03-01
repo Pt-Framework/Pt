@@ -83,10 +83,6 @@ void Rasterizer2::strokeOnePixelLine(const Point& a, const Point& b, DrawLineMas
     }
 }
 
-void Rasterizer2::strokeOnePixelPolybezier(const Point* points, size_t pointCount)
-{
-}
-
 
 // ======================================================================================
 // ===== Private Member Functions =======================================================
@@ -558,6 +554,15 @@ void Rasterizer2::rasterFillOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::in
 
     // Undefine the helper macro
     #undef XW_FILL_PIXEL
+}
+
+// The Beauty of Bresenham's Algorithm
+// http://members.chello.at/easyfilter/bresenham.html
+void Rasterizer2::rasterOnePixelSolidBezierCurve(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t x3, Pt::int32_t y3, const Color& color, DrawLineMask* maskInOut)
+{
+    rasterOnePixelSolidLine(x1, y1, x2, y2, color, maskInOut);
+    rasterOnePixelSolidLine(x2, y2, x3, y3, color, maskInOut);
+    // ### !!! TODO !!! ###
 }
 
 

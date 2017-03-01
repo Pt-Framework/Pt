@@ -93,6 +93,8 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual void drawPolyline(const PointF* points, const size_t pointCount, bool autoClose);
 
+        // autoClose == false : the number of points must be >= 3 and odd
+        // autoClose == true  : the number of points must be >= 4 and even
         virtual void drawPolybezier(const PointF* points, const size_t pointCount, bool autoClose);
 
         virtual void drawEllipse(const PointF& topLeft, const SizeF& size);
