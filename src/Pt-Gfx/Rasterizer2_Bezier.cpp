@@ -89,8 +89,9 @@ void Rasterizer2::strokeOnePixelPolybezier(const Point* points, size_t pointCoun
 // ===== Private Member Functions =======================================================
 // ======================================================================================
 
-// The Beauty of Bresenham's Algorithm
-// http://members.chello.at/easyfilter/bresenham.html
+// Based on: The Beauty of Bresenham's Algorithm
+//           http://members.chello.at/easyfilter/bresenham.html
+//           Original code by Alois Zingl, 2016.
 void Rasterizer2::rasterOnePixelSolidBezierCurve(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t x3, Pt::int32_t y3, const Color& color, DrawLineMask* maskInOut)
 {
     // Get the mask's coordinates as needed
@@ -306,8 +307,9 @@ void Rasterizer2::rasterOnePixelSolidBezierCurve(Pt::int32_t x1, Pt::int32_t y1,
     #undef XW_SET_PIXEL
 }
 
-// The Beauty of Bresenham's Algorithm
-// http://members.chello.at/easyfilter/bresenham.html
+// Based on: The Beauty of Bresenham's Algorithm
+//           http://members.chello.at/easyfilter/bresenham.html
+//           Original code by Alois Zingl, 2016.
 void Rasterizer2::rasterOnePixelPatternedBezierCurve(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t x3, Pt::int32_t y3, const Color& color, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut)
 {
     // Get the mask's coordinates as needed

@@ -124,9 +124,9 @@ void Rasterizer2::rasterOnePixelPatternedXLineSegment(Pt::int32_t x1, Pt::int32_
     }
 }
 
-// Bresenham's Line Aalgorithm
-// https://en.wikipedia.org/wiki/Bresenham's_line_algorithm
-// https://rosettacode.org/wiki/Bitmap/Bresenham%27s_line_algorithm
+// Using algorithm from: Bresenham's Line Aalgorithm
+//                       https://en.wikipedia.org/wiki/Bresenham's_line_algorithm
+//                       Last modified on February 21, 2017
 void Rasterizer2::rasterOnePixelPatternedGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t fpiCtrInc, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut)
 {
     // Get the mask's coordinates as needed
@@ -195,8 +195,9 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentNoAA(Pt::int32_t x1, Pt::in
     }
 }
 
-// Xiaolin Wu's Anti-Aliased Line Algorithm
-// https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
+// Using algorithm from: Xiaolin Wu's line algorithm
+//                       https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
+//                       Last modified on January 19, 2017
 void Rasterizer2::rasterOnePixelPatternedGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t fpiCtrInc, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut)
 {
     // Get the mask's coordinates as needed

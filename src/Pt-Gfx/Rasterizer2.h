@@ -569,8 +569,9 @@ void Rasterizer2::rasterScanline(
     #undef RSL_MAX_ALPHA
 }
 
-// Inspired by http://alienryderflex.com/polygon_fill
-// Public-domain code by Darel Rex Finley, 2007
+// Inspired by: Efficient Polygon Fill Algorithm With C Code Sample
+//              http://alienryderflex.com/polygon_fill
+//              Public-domain code by Darel Rex Finley, 2007
 template<Pt::uint8_t SUPERSAMPLE_SIZE>
 void Rasterizer2::rasterPolygonAreaFSAAGen(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
 {

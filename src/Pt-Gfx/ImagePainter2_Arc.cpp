@@ -248,8 +248,9 @@ void ImagePainter2::arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai)
     }
 }
 
-// Use Xiaolin Wu's anti-aliased line algorithm to calculate the line's points
-// https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
+// Using algorithm from: Xiaolin Wu's line algorithm
+//                       https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
+//                       Last modified on January 19, 2017
 void ImagePainter2::arcUtil_runXWLineAlgorithm(XWLineData& xwLine, const FilledArcInfo& fai, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2)
 {
     // Copy the coordinates

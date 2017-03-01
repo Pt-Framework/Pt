@@ -210,8 +210,9 @@ void Rasterizer2::rasterOnePixelPolygonOutline(const Point* points, size_t point
     else      rasterOnePixelPatternedLine(points[pc1].x(), points[pc1].y(), points[0].x(), points[0].y(), color, fpiCtrInOut, &mask_zero);
 }
 
-// Inspired by http://alienryderflex.com/polygon_fill
-// Public-domain code by Darel Rex Finley, 2007
+// Inspired by: Efficient Polygon Fill Algorithm With C Code Sample
+//              http://alienryderflex.com/polygon_fill
+//              Public-domain code by Darel Rex Finley, 2007
 void Rasterizer2::rasterPolygonAreaNoAA(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
 {
     // List of nodes that define the horizontal spans
@@ -267,8 +268,9 @@ void Rasterizer2::rasterPolygonAreaNoAA(const Point* points, const size_t* point
     }
 }
 
-// Inspired by http://alienryderflex.com/polygon_fill
-// Public-domain code by Darel Rex Finley, 2007
+// Inspired by: Efficient Polygon Fill Algorithm With C Code Sample
+//              http://alienryderflex.com/polygon_fill
+//              Public-domain code by Darel Rex Finley, 2007
 void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
 {
     // Internal macros
@@ -498,8 +500,9 @@ void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* po
     #undef FSAA2X2_MID_ALPHA
 }
 
-// Inspired by http://alienryderflex.com/polygon_fill
-// Public-domain code by Darel Rex Finley, 2007
+// Inspired by: Efficient Polygon Fill Algorithm With C Code Sample
+//              http://alienryderflex.com/polygon_fill
+//              Public-domain code by Darel Rex Finley, 2007
 void Rasterizer2::rasterPolygonAreaXWAA(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
 {
     // List of nodes that define the horizontal spans

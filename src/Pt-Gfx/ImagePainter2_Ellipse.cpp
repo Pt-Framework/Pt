@@ -46,7 +46,9 @@ void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
     drawOnePixelEllipseArcImpl(topLeft, size, 0, 0, ArcMode::Open);
 }
 
-// Inspired by http://create.stephan-brumme.com/antialiased-circle
+// Inspired by: Drawing Antialiased Circles and Ellipses
+//              http://create.stephan-brumme.com/antialiased-circle
+//              Original code by Stephan Brumme, 2011
 void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
 {
     // Update the gradient as needed
@@ -180,7 +182,9 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
 // ===== Private Member Functions =======================================================
 // ======================================================================================
 
-// Inspired by http://create.stephan-brumme.com/antialiased-circle
+// Inspired by: Drawing Antialiased Circles and Ellipses
+//              http://create.stephan-brumme.com/antialiased-circle
+//              Original code by Stephan Brumme, 2011
 void ImagePainter2::drawOnePixelEllipseArcImpl(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode)
 {
     // IMPORTANT NOTES:
