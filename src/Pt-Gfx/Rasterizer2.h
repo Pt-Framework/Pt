@@ -481,27 +481,8 @@ void Rasterizer2::rasterScanline(
     if(iterL < 0) iterL = 0;
 
     // Skip fully-transparent pixels
-    // Use Duff's device for:
-    //     for(; iterL < sizeX; ++iterL) {
-    //         if(alphas[iterL]) break;
-    //     }
-    if(true) {
-        register const Pt::uint8_t* src  = &alphas[0];
-        register       Pt::int32_t  cnt  = sizeX - 1;
-        register       Pt::int32_t  n    = (cnt + 7) / 8;
-        register       Pt::int32_t  k    = iterL;
-        switch(cnt % 8) {
-                case 0 : do { if(src[k]) {n = 0; break; } ++k;
-                case 7 :      if(src[k]) {n = 0; break; } ++k;
-                case 6 :      if(src[k]) {n = 0; break; } ++k;
-                case 5 :      if(src[k]) {n = 0; break; } ++k;
-                case 4 :      if(src[k]) {n = 0; break; } ++k;
-                case 3 :      if(src[k]) {n = 0; break; } ++k;
-                case 2 :      if(src[k]) {n = 0; break; } ++k;
-                case 1 :      if(src[k]) {n = 0; break; } ++k;
-                         } while (--n > 0);
-        }
-        iterL = k;
+    for(; iterL < sizeX; ++iterL) {
+        if(alphas[iterL]) break;
     }
 
     // Texture or gradient
@@ -537,27 +518,8 @@ void Rasterizer2::rasterScanline(
     if(iterR >= sizeX) iterR = sizeX - 1;
 
     // Skip fully-transparent pixels
-    // Use Duff's device for:
-    //     for(; iterR >= 0; --iterR) {
-    //         if(alphas[iterR]) break;
-    //     }
-    if(true) {
-        register const Pt::uint8_t* src  = &alphas[0];
-        register       Pt::int32_t  cnt  = sizeX - 1;
-        register       Pt::int32_t  n    = (cnt + 7) / 8;
-        register       Pt::int32_t  k    = iterR;
-        switch(cnt % 8) {
-                case 0 : do { if(src[k]) {n = 0; break; } --k;
-                case 7 :      if(src[k]) {n = 0; break; } --k;
-                case 6 :      if(src[k]) {n = 0; break; } --k;
-                case 5 :      if(src[k]) {n = 0; break; } --k;
-                case 4 :      if(src[k]) {n = 0; break; } --k;
-                case 3 :      if(src[k]) {n = 0; break; } --k;
-                case 2 :      if(src[k]) {n = 0; break; } --k;
-                case 1 :      if(src[k]) {n = 0; break; } --k;
-                         } while (--n > 0);
-        }
-        iterR = k;
+    for(; iterR >= 0; --iterR) {
+        if(alphas[iterR]) break;
     }
 
     // Texture or gradient
