@@ -38,6 +38,7 @@ namespace Gfx {
 // ======================================================================================
 // ===== Public Member Functions ========================================================
 // ======================================================================================
+
 void Rasterizer2::strokeOnePixelLine(const Point& a, const Point& b, DrawLineMask* maskInOut)
 {
     // Clip the points

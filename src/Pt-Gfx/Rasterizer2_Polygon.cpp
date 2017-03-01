@@ -179,6 +179,31 @@ void Rasterizer2::fillPolygonSeparate(const Point* points, size_t pointCount)
 // ===== Private Member Functions =======================================================
 // ======================================================================================
 
+void Rasterizer2::genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount) const
+{
+    for(size_t i = 0; i < pointCount; ++i)
+        dst.push_back( Point( src[i].x(), src[i].y() ) );
+
+    ClipShape::clipPolygon(dst, _currentClip);
+}
+
+void Rasterizer2::getPolygonRectMinMax(const Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY)
+{
+    minX =  65535;
+    minY =  65535;
+    maxX = -65535;
+    maxY = -65535;
+
+    for(size_t i = 0; i < pointCount; ++i) {
+        const Pt::int32_t x = points[i].x();
+        const Pt::int32_t y = points[i].y();
+        if(x < minX) minX = x;
+        if(y < minY) minY = y;
+        if(x > maxX) maxX = x;
+        if(y > maxY) maxY = y;
+    }
+}
+
 void Rasterizer2::rasterOnePixelPolygonOutline(const Point* points, size_t pointCount, const Color& color, bool autoClose)
 {
     // Mask

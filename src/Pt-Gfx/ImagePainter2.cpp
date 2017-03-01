@@ -193,16 +193,16 @@ void ImagePainter2::drawLine(const PointF& from, const PointF& to)
 
 void ImagePainter2::drawRect( const RectF& rect )
 {
-    const Point tl( rect.topLeft    ().x(),rect.topLeft    ().y() );
-    const Point br( rect.bottomRight().x(),rect.bottomRight().y() );
+    const Point tl( rect.topLeft    ().x(), rect.topLeft    ().y() );
+    const Point br( rect.bottomRight().x(), rect.bottomRight().y() );
 
     _rasterizer->strokeOnePixelRect(tl, br);
 }
 
 void ImagePainter2::fillRect( const RectF& rect )
 {
-    const Point tl( rect.topLeft    ().x(),rect.topLeft    ().y() );
-    const Point br( rect.bottomRight().x(),rect.bottomRight().y() );
+    const Point tl( rect.topLeft    ().x(), rect.topLeft    ().y() );
+    const Point br( rect.bottomRight().x(), rect.bottomRight().y() );
 
     _rasterizer->fillRect(tl, br);
 }
@@ -253,6 +253,38 @@ void ImagePainter2::drawPolybezier(const PointF* ps, const size_t pointCount, bo
 
     // Rasterize the polygon
     _rasterizer->strokeOnePixelPolybezier(points.data(), points.size());
+}
+
+void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
+{
+    const Point tl( topLeft.x    (), topLeft.y     () );
+    const Size  sz( size   .width(), size   .height() );
+
+    _rasterizer->strokeOnePixelEllipseArc(tl, sz, 0, 0, ArcMode::Open);
+}
+
+void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
+{
+    const Point tl( topLeft.x    (), topLeft.y     () );
+    const Size  sz( size   .width(), size   .height() );
+
+    _rasterizer->fillEllipse(tl, sz);
+}
+
+void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode )
+{
+    const Point tl( topLeft.x    (), topLeft.y     () );
+    const Size  sz( size   .width(), size   .height() );
+
+    _rasterizer->strokeOnePixelEllipseArc(tl, sz, degBegin, degEnd, arcMode);
+}
+
+void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode )
+{
+    const Point tl( topLeft.x    (), topLeft.y     () );
+    const Size  sz( size   .width(), size   .height() );
+
+    _rasterizer->fillArc(tl, sz, degBegin, degEnd, arcMode);
 }
 
 

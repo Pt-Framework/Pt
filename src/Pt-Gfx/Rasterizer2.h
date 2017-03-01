@@ -34,6 +34,7 @@
 #include <Pt/Gfx/Algorithm.h>
 #include <Pt/Gfx/Math.h>
 
+#include <Pt/Gfx/ArcMode.h>
 #include <Pt/Gfx/AntiAliasingMode.h>
 #include <Pt/Gfx/Painter.h>
 
@@ -181,14 +182,15 @@ class Rasterizer2
         void strokeOnePixelRect(const Point& tl, const Point& br);
         void strokeOnePixelPolygon(const Point* points, size_t pointCount, bool autoClose);
         void strokeOnePixelPolybezier(const Point* points, size_t pointCount);
+        void strokeOnePixelEllipseArc(const Point& topLeft, const Size& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
         void fillRect(const Point& tl, const Point& br);
         void fillPolygon(const Point* points, size_t pointCount);
         void fillPolygonSeparate(const Point* points, size_t pointCount);
+        void fillEllipse(const Point& topLeft, const Size& size);
+        void fillArc(const Point& topLeft, const Size& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
     public:
-        void updateGradientBrushAsNeeded(Pt::int32_t width, Pt::int32_t height);
-
         inline Pt::uint8_t patternBufferAlpha(Pt::int32_t idx);
         inline Pt::uint8_t patternBufferAlphaPolar(Pt::int32_t x, Pt::int32_t y, float scale);
         inline Pt::uint8_t patternBufferAlphaPolar(Pt::int32_t x, Pt::int32_t y, float scale, float xyRat);
@@ -208,6 +210,77 @@ class Rasterizer2
         };
 
         typedef std::vector< std::vector<PolygonScanline16> > PolygonScanline16s; // The vector index is the Y coordinate
+
+        // Each key specify the Y coordinate of a scanline;
+        // while its element specify the "from" and "to" X coordinates
+        struct ScanlineElement {
+            Pt::int32_t from;
+            Pt::int32_t to;
+
+            ScanlineElement(Pt::int32_t from_ = -1, Pt::int32_t to_ = -1)
+            : from(from_), to(to_)
+            {}
+
+            bool isNull() const
+            { return from == -1 && to == -1; }
+        };
+
+        typedef std::vector<ScanlineElement> Scanlines;
+
+        // Filled-arc information structure
+        struct FilledArcInfo {
+            bool        antiAlias;    // A flag that indicate if the arc will be anti-aliased
+
+            float       degBegin;     // Begin angle
+            float       degEnd;       // End angle
+
+            Pt::int32_t minX, minY;   // Top-left coordinate of the arc
+            Pt::int32_t ctrX, ctrY;   // Center coordinate of the arc
+            Pt::int32_t radX, radY;   // Radius of the arc
+            Pt::int32_t radX2, radY2; // Squared radius of the arc
+            float       xyRat;        // Ratio of the X and Y radius
+
+            Pt::int32_t x1, y1;       // Coordinate of the begin point
+            Pt::int32_t x2, y2;       // Coordinate of the end point
+
+            Pt::int32_t quartersX;    // The number of quarter points in the X direction
+            Pt::int32_t quartersY;    // The number of quarter points in the Y direction
+        };
+
+        // Xiaolin Wu's anti-aliased line data structure (currently it is only used for drawing filled arc)
+        struct XWLineData {
+            // Point data
+            struct XWPoint {
+                Pt::int32_t x;
+                Pt::uint8_t a1, a2;
+
+                XWPoint(Pt::int32_t x_ = -1, Pt::uint8_t a1_ = 0, Pt::uint8_t a2_ = 0)
+                : x(x_), a1(a1_), a2(a2_)
+                {}
+
+                bool isNull() const
+                { return x == -1 && a1 == 0 && a2 == 0; }
+            };
+
+            typedef std::vector< std::vector<XWPoint> > XWPoints; // The vector index is the Y coordinate
+
+
+            XWPoints points; // The line's points
+            bool     steep;  // If "true"  then the a2 belongs to (x + 1, y)
+                             // If "false" then the a2 belongs to (x, y + 1)
+
+            bool faceL;  // The direction that the line is facing to
+            bool faceR;  // ---
+            bool faceT;  // ---
+            bool faceB;  // ---
+
+            // The line's coordinates
+            Pt::int32_t x1, y1, x2, y2;
+            Pt::int32_t minY, maxY;
+
+            bool insideYRange(Pt::int32_t y) const
+            { return (y >= minY) && (y <= maxY); }
+        };
 
     private:
         void rasterOnePixelSolidLine(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut);
@@ -234,14 +307,16 @@ class Rasterizer2
         void rasterOnePixelSolidBezierCurve(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t x3, Pt::int32_t y3, const Color& color, DrawLineMask* maskInOut);
         void rasterOnePixelPatternedBezierCurve(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t x3, Pt::int32_t y3, const Color& color, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut);
 
+        void rasterEllipseAreaNoAA(const Point& topLeft, const Size& size);
+
+        void rasterArcAreaChord(FilledArcInfo& fai);
+        void rasterArcAreaPie(FilledArcInfo& fai);
+
     private:
+        // Common helper functions
         void updatePenPattern();
         void updateGradientBrush(Pt::int32_t width, Pt::int32_t height);
-
         void updateClip();
-        void genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount) const;
-
-        void getPolygonRectMinMax(const Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY);
 
         template<typename T>
         static inline void bubbleSortAscending(T& basket, Pt::int32_t size);
@@ -264,6 +339,24 @@ class Rasterizer2
             const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount,
             const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY
         );
+
+        // Polygon-related helper functions
+        void genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount) const;
+        void getPolygonRectMinMax(const Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY);
+
+        // Arc-related helper functions
+        static inline bool arcUtil_pointIsInsideDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd, float xyRatio);
+        static inline void arcUtil_detXWLineDirection(XWLineData& xwLineData);
+
+        static void arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai);
+        static void arcUtil_runXWLineAlgorithm(XWLineData& xwLine, const FilledArcInfo& fai, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2);
+        static void arcUtil_genScanlinesForChord(Scanlines& scanlines, const FilledArcInfo& fai, const XWLineData& xwLine);
+        static void arcUtil_cropAndStoreScanlineForChord(Scanlines& scanlines, const FilledArcInfo& fai, const XWLineData& xwLine, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t y);
+        static void arcUtil_genScanlinesForPie(Scanlines& scanlines1, Scanlines& scanlines2, const FilledArcInfo& fai, const XWLineData& xwLine1, const XWLineData& xwLine2);
+        static void arcUtil_cropAndStoreScanlineForPie(Scanlines& scanlines1, Scanlines& scanlines2, const FilledArcInfo& fai, const XWLineData& xwLine1, const XWLineData& xwLine2, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t y);
+
+        void arcUtil_drawCircumferencePixels(FilledArcInfo& fai);
+        void arcUtil_drawXWLine(const FilledArcInfo& fai, const XWLineData& xwLine, Point maskInOut[4]);
 
     private:
         AntiAliasingMode _aaMode;
@@ -869,6 +962,51 @@ void Rasterizer2::rasterPolygonAreaFSAAGen(const Point* points, const size_t* po
     #undef FSAA_MIN_ALPHA
     #undef FSAA_MAX_ALPHA
     #undef FSAA_MID_ALPHA
+}
+
+inline bool Rasterizer2::arcUtil_pointIsInsideDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd, float xyRatio)
+{
+    // IMPORTANT NOTES:
+    //     * The Y coordinate goes from low to high according to the coordinate system being used:
+    //           - cartesian coordinate system: from the horizontal axis (the X axis) to the top;
+    //           - computer  coordinate system: from the top of the screen to the bottom of the screen;
+    //       This will cause sign inversion for trigonometry-based calculations in the Y coordinate.
+    //     * The movement from begin angle to end angle must be in counter-clockwise (CCW), otherwise
+    //       something wrong will be drawn.
+
+    const float angle = Gfx::Math::convertCartesianToPolarCoordinate( (x - ctrX), -(y - ctrY) * xyRatio);
+
+    if(degBegin < 0 && degEnd < 0) {
+        return angle >= (degBegin + 360) && angle <= (degEnd + 360);
+    }
+
+    if(degBegin < 0 && degEnd >= 0) {
+        if( angle >= (degBegin + 360) && angle <= 360   ) return true;
+        if( angle >= 0                && angle <= degEnd) return true;
+        return false;
+    }
+
+    return angle >= degBegin && angle <= degEnd;
+}
+
+inline void Rasterizer2::arcUtil_detXWLineDirection(XWLineData& xwLineData)
+{
+    // Calculate the direction vector
+    const Pt::int32_t vx = xwLineData.x2 - xwLineData.x1; // Vector from the begin point to the end point
+    const Pt::int32_t vy = xwLineData.y2 - xwLineData.y1; // ---
+    const Pt::int32_t vz = 0;                             // ---
+    const Pt::int32_t rx = 0;                             // Vector from the point of origin (0, 0, 0) that points out of the monitor
+    const Pt::int32_t ry = 0;                             // ---
+    const Pt::int32_t rz = 1;                             // ---
+    const Pt::int32_t cx = vy * rz - vz * ry;             // Cross product of the above two vectors
+    const Pt::int32_t cy = vz * rx - vx * rz;             // ---
+  //const Pt::int32_t cz = vx * ry - vy * rx;             // ---
+
+    // Determine the direction that the line is facing to
+    xwLineData.faceT = cy < 0;
+    xwLineData.faceB = cy > 0;
+    xwLineData.faceL = cx < 0;
+    xwLineData.faceR = cx > 0;
 }
 
 

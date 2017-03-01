@@ -38,6 +38,7 @@ namespace Gfx {
 // ======================================================================================
 // ===== Private Member Functions =======================================================
 // ======================================================================================
+
 void Rasterizer2::rasterOnePixelPatternedLine(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut)
 {
     // Check the size of the line

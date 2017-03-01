@@ -211,13 +211,6 @@ void Rasterizer2::strokeText( const Point& to, const Pt::String& text )
         _text->draw( *_image, _pen.color(), to, text, _compositionMode );
 }
 
-void Rasterizer2::updateGradientBrushAsNeeded(Pt::int32_t width, Pt::int32_t height)
-{
-    // Update the gradient as needed
-    if(_isGradient)
-        updateGradientBrush(width, height);
-}
-
 
 // ======================================================================================
 // ===== Private Member Functions =======================================================
@@ -428,31 +421,6 @@ void Rasterizer2::updateClip()
     _currentClip = _clip.isNull() ? imageRect : _clip.intersect( imageRect );
 
     _text->setClip(_currentClip);
-}
-
-void Rasterizer2::genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount) const
-{
-    for(size_t i = 0; i < pointCount; ++i)
-        dst.push_back( Point( src[i].x(), src[i].y() ) );
-
-    ClipShape::clipPolygon(dst, _currentClip);
-}
-
-void Rasterizer2::getPolygonRectMinMax(const Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY)
-{
-    minX =  65535;
-    minY =  65535;
-    maxX = -65535;
-    maxY = -65535;
-
-    for(size_t i = 0; i < pointCount; ++i) {
-        const Pt::int32_t x = points[i].x();
-        const Pt::int32_t y = points[i].y();
-        if(x < minX) minX = x;
-        if(y < minY) minY = y;
-        if(x > maxX) maxX = x;
-        if(y > maxY) maxY = y;
-    }
 }
 
 
