@@ -60,11 +60,14 @@ class PT_HMI_API FlowLayout : public Layout
 
         void setDirection(Direction d);
 
+        void setCenter(bool b);
+
     protected:
         virtual void onLayout();
 
     private:
         Direction _direction;
+        bool      _center;
 };
 
 } // namespace

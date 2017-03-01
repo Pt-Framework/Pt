@@ -1139,7 +1139,7 @@ bool Window::onMouseEvent(const MouseEvent& ev)
         }
         else if( ! widget->isTextInput() )
         {
-            Application::instance().inputMethod().finish(*widget);
+            Application::instance().inputMethod().finish();
         }
     }
 
@@ -1173,7 +1173,7 @@ void Window::onTouchEvent(const TouchEvent& tev)
         }
         else if( ! widget->isTextInput() )
         {
-            Application::instance().inputMethod().finish(*widget);
+            Application::instance().inputMethod().finish();
         }
     }
 
@@ -1258,8 +1258,8 @@ void Window::onKeyEvent(const KeyEvent& ev)
             {
                 _focusWidget->update();
 
-                if(!_focusWidget->isTextInput() )
-                    Application::instance().inputMethod().finish(*_focusWidget);
+                if( ! _focusWidget->isTextInput() )
+                    Application::instance().inputMethod().finish();
             }
         }
     }

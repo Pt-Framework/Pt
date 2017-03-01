@@ -54,28 +54,22 @@ class PT_HMI_API InputMethod
 
         virtual ~InputMethod();
 
-        void begin(Widget& widget);
-
         bool isVisible() const;
 
         Window* activeWindow();
 
-        void grab();
-
-        void release();
+        void begin(Widget& widget);
 
         void finish();
 
-        void finish(Widget& widget);
+        void sendEvent(const KeyEvent& ev);
 
     protected:
-        virtual void onShow(bool show) = 0;
-        
-        virtual bool onFinish(Widget& widget) = 0;
+        virtual void onBegin() = 0;
+
+        virtual void onFinish() = 0;
 
         virtual Window* onActiveWindow() = 0;
-
-        void sendKeyEvent(const KeyEvent& ev);
 
     private:
         void registerApplication(Application& app);
@@ -87,7 +81,6 @@ class PT_HMI_API InputMethod
         Pt::uint64_t _receiver;
         KeyEvent     _keyEvent;
         bool         _isVisible;
-        bool         _isGrabbed;
 };
 
 
@@ -99,12 +92,10 @@ class DefaultInputMethod : public InputMethod
 
         ~DefaultInputMethod();
 
-        //virtual bool mouseEvent(const MouseEvent& ev);
-
     protected:
-        virtual void onShow(bool show);
-        
-        virtual bool onFinish(Widget& widget);
+        virtual void onBegin();
+
+        virtual void onFinish();
 
         virtual Window* onActiveWindow();
 

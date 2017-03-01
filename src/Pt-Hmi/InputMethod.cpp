@@ -43,7 +43,6 @@ InputMethod::InputMethod()
 , _receiver(0)
 , _keyEvent(0)
 , _isVisible(false)
-, _isGrabbed(false)
 {
 }
 
@@ -55,15 +54,9 @@ InputMethod::~InputMethod()
 }
 
 
-void InputMethod::grab()
+bool InputMethod::isVisible() const
 {
-    _isGrabbed = true;
-}
-
-
-void InputMethod::release()
-{
-    _isGrabbed = false;
+    return _isVisible;
 }
 
 
@@ -76,12 +69,6 @@ Window* InputMethod::activeWindow()
 }
 
 
-bool InputMethod::isVisible() const
-{
-    return _isVisible;
-}
-
-
 void InputMethod::begin(Widget& w)
 {
     _receiver = w.vid();
@@ -89,40 +76,24 @@ void InputMethod::begin(Widget& w)
     if(_isVisible)
         return;
 
-    onShow(true);
+    onBegin();
     _isVisible = true;
 }
 
 
 void InputMethod::finish()
 {
-    if(_isGrabbed)
-        return;
-
     _receiver = 0;
 
     if( ! _isVisible )
         return;
 
-    onShow(false);
+    onFinish();
     _isVisible = false;
 }
 
-// TODO: this might not be neccessary if the virtual keyboard
-//       is a text widget aka Widget::isTextInput returns true !!!
-void InputMethod::finish(Widget& w)
-{
-    if(_isGrabbed)
-        return;
 
-    if( ! onFinish(w) )
-      return;
-
-    finish();
-}
-
-
-void InputMethod::sendKeyEvent(const KeyEvent& ev)
+void InputMethod::sendEvent(const KeyEvent& ev)
 {
     if(_receiver == 0)
         return;
@@ -163,48 +134,42 @@ DefaultInputMethod::~DefaultInputMethod()
 }
 
 
-Window* DefaultInputMethod::onActiveWindow()
-{
-    return _window;
-}
-
-
 void DefaultInputMethod::onKeyPress()
 {
     std::clog << "KEY PRESS" << std::endl;
     KeyEvent kev(0);
     kev.setPress(Key(Key::A), 'a');
 
-    sendKeyEvent(kev);
+    sendEvent(kev);
 }
 
 
-void DefaultInputMethod::onShow(bool show)
+void DefaultInputMethod::onBegin()
 {
     //if( ! _keyButton)
     //{
     //    _keyButton = new PushButton();
     //    _keyButton->setText("a");
+    //    _keyButton->setTextInput(true);
     //    _window->setMainWidget(_keyButton);
     //    _keyButton->clicked() += Pt::slot(*this, &DefaultInputMethod::onKeyPress);
     //}
     //
-    //_window->show(show);
+    //_window->show(true);
 
-    if(show)
-    {
-        std::clog << "INPUTMETHOD SHOW" << std::endl;
-    }
-    else
-    {
-        std::clog << "INPUTMETHOD HIDE" << std::endl;
-    }
+    std::clog << "INPUTMETHOD BEGIN" << std::endl;
+}
+
+void DefaultInputMethod::onFinish()
+{
+    //_window->show(false);
+    std::clog << "INPUTMETHOD FINISH" << std::endl;
 }
 
 
-bool DefaultInputMethod::onFinish(Widget& widget)
+Window* DefaultInputMethod::onActiveWindow()
 {
-    return widget.window() != _window;
+    return _window;
 }
 
 } // namespace

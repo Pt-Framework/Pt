@@ -33,13 +33,28 @@ namespace Pt {
 
 namespace Hmi {
 
-void StackLeft(Widget& parent)
+void StackLeft(Widget& parent, bool center)
 {
+    double posX = parent.padding().left();
+    
+    if(center)
+    {
+        double itemsWidth = 0;
+
+        std::vector<Pt::Hmi::Widget*>::const_iterator it;
+        for(it = parent.widgets().begin(); it != parent.widgets().end(); ++it)
+        {
+          Widget* item = *it;
+          itemsWidth += item->preferredSize().width();
+          itemsWidth += item->margin().leftRight();
+        }
+
+        posX = (parent.size().width() - itemsWidth) / 2;
+    }
+
     std::vector<Widget*>::const_iterator it = parent.widgets().begin();
     std::vector<Widget*>::const_iterator end = parent.widgets().end();
 
-    double posLeft = parent.padding().left();
-    
     for( ; it != end; ++it)
     {
         Widget* item = *it;
@@ -47,11 +62,8 @@ void StackLeft(Widget& parent)
         if( ! item->isVisible() )
             continue;  
 
-        double x = posLeft + item->margin().left();
+        double x = posX + item->margin().left();
         double y = parent.padding().top() + item->margin().top(); 
-                
-        posLeft += item->preferredSize().width() + 
-                   item->margin().left() + item->margin().right();
 
         const Gfx::SizeF childSize( item->preferredSize().width(), 
                                     parent.size().height() - 
@@ -62,11 +74,13 @@ void StackLeft(Widget& parent)
                  
         Gfx::PointF pos(x, y);
         item->setGeometry(pos, childSize, parent.vid());
+
+        posX += item->preferredSize().width() + item->margin().leftRight();
     }
 }
 
 
-void StackRight(Widget& parent)
+void StackRight(Widget& parent, bool center)
 {
     std::vector<Widget*>::const_iterator it = parent.widgets().begin();
     std::vector<Widget*>::const_iterator end = parent.widgets().end();
@@ -101,7 +115,7 @@ void StackRight(Widget& parent)
 }
 
 
-void StackTop(Widget& parent)
+void StackTop(Widget& parent, bool center)
 {
     std::vector<Widget*>::const_iterator it = parent.widgets().begin();
     std::vector<Widget*>::const_iterator end = parent.widgets().end();
@@ -134,7 +148,7 @@ void StackTop(Widget& parent)
 }
 
 
-void StackBottom(Widget& parent)
+void StackBottom(Widget& parent, bool center)
 {
     std::vector<Widget*>::const_iterator it = parent.widgets().begin();
     std::vector<Widget*>::const_iterator end = parent.widgets().end();
@@ -171,6 +185,7 @@ void StackBottom(Widget& parent)
 
 FlowLayout::FlowLayout(Direction d)
 : _direction(d)
+, _center(false)
 {
 }
 
@@ -188,25 +203,31 @@ void FlowLayout::setDirection(Direction d)
 }
 
 
+void FlowLayout::setCenter(bool b)
+{
+    _center = b;
+}
+
+
 void FlowLayout::onLayout()
 {
     switch(_direction)
     {
         default:
         case Left:
-            StackLeft(*this);
+            StackLeft(*this, _center);
             break;
 
         case Right:
-            StackRight(*this);
+            StackRight(*this, _center);
             break;
 
         case Top:
-            StackTop(*this);
+            StackTop(*this, _center);
             break;
 
         case Bottom:
-            StackBottom(*this);
+            StackBottom(*this, _center);
             break;
     }
 }
