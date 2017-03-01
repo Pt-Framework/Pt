@@ -268,8 +268,8 @@ void Rasterizer2::updatePenPattern()
         case Pen::UserDefined: {
             const Pt::int32_t upat = _pen.userPattern();
             for(Pt::int32_t i = 0; i < 32; ++i) {
-                if( upat & (1 << i) ) patternUserDefined[i] = 1;
-                else                  patternUserDefined[i] = 0;
+                if( upat & (1 << i) ) patternUserDefined[31 - i] = 1;
+                else                  patternUserDefined[31 - i] = 0;
             }
             patternSel =        patternUserDefined;
             patternLen = sizeof(patternUserDefined);
@@ -338,7 +338,7 @@ void Rasterizer2::updatePenPattern()
         return;
     }
 
-    // Without anti-aliasing
+    // Transfom the pattern - without anti-aliasing
     if(_aaMode == AntiAliasingMode::None) {
         for(size_t i = 0; i < gctr; ++i) {
             if(_patternBuffer[i] > 127) _patternBuffer[i] = 255;
@@ -346,7 +346,7 @@ void Rasterizer2::updatePenPattern()
         }
     }
 
-    // With anti-aliasing
+    // Transfom the pattern - with anti-aliasing
     else {
         for(size_t i = 0; i < gctr; ++i) {
             _patternBuffer[i] = XWAA_WFILTER[ 255 - _patternBuffer[i] ];
