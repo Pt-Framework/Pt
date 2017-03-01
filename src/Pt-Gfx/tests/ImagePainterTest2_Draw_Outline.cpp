@@ -60,10 +60,30 @@ static void testDrawSolidLine(const char* title, Image& image, Painter& painter)
         ip2->drawPolybezier( bezier1, sizeof(bezier1) / sizeof(bezier1[0]), false );
 
         const PointF bezier2[] = {
+            // Top left
+            PointF(400,  50),
             PointF(400,  30),
-            PointF(465,  45),
+            PointF(420,  30),
+            // Top middle
+            PointF(450,  30),
+            // Top right
+            PointF(480,  30),
+            PointF(500,  30),
+            PointF(500,  50),
+            // Center right
+            PointF(500,  70),
+            // Bottom right
+            PointF(500,  90),
             PointF(500, 110),
-            PointF(415,  85)
+            PointF(480, 110),
+            // Bottom middle
+            PointF(450, 110),
+            // Bottom left
+            PointF(420, 110),
+            PointF(400, 110),
+            PointF(400,  90),
+            // Center left
+            PointF(400,  70)
         };
         if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
         ip2->setPen( Pen( Color::fromRgb8(255, 127, 255, 175), 1, Pen::Dash ) );
