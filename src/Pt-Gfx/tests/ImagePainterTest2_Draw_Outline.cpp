@@ -3,7 +3,7 @@ static void testDrawSolidLine(const char* title, Image& image, Painter& painter)
     resetImage(image);
 
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
+    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
 
 #if 1
     painter.setClip( RectF (20, image.width() - 20, 20, image.height() - 20) );
@@ -63,7 +63,7 @@ static void testDrawSolidLine(const char* title, Image& image, Painter& painter)
             PointF(265 + 100,  65),
             PointF(300 + 100, 100)
         };
-        ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
+        ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
         ip2->setPen( Pen( Color::fromRgb8(255, 127, 255, 175), 1, Pen::Solid ) );
         ip2->drawPolybezier( bezier1b, sizeof(bezier1b) / sizeof(bezier1b[0]), false );
     }
@@ -79,11 +79,11 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
 
     painter.setClip( RectF (20, image.width() - 20, 20, image.height() - 20) );
     painter.setPen( Pen( Color::fromRgb8(0, 255, 0, 175), 1, Pen::Dash ) );
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None   ); painter.drawLine( PointF(  0, -30), PointF(999, 599 - 30) );
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Fastest); painter.drawLine( PointF(  0,  30), PointF(999, 599 + 30) );
+    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None    ); painter.drawLine( PointF(  0, -30), PointF(999, 599 - 30) );
+    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Standard); painter.drawLine( PointF(  0,  30), PointF(999, 599 + 30) );
     painter.setClip( RectF (0, image.width() - 1, 0, image.height() - 1) );
 
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
+    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
 
     painter.setPen( Pen( Color::fromRgb8(255, 0, 0, 175), 1, Pen::DotDash ) );
     painter.drawLine( PointF(  5,   5), PointF(994,   5) );
@@ -115,7 +115,7 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
     painter.drawLine( PointF( 10, 440), PointF(781, 440) );
     painter.drawLine( PointF(781, 452), PointF( 10, 450) );
 
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
+    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
     painter.setPen( Pen( Color::fromRgb8(0, 255, 255, 175), 1, Pen::Dash ) );
 
     const PointF poly[] = { // CCW
@@ -193,7 +193,7 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
             // Center left
             PointF(400 - 200,  70 + 300)
         };
-        ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
+        ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
         ip2->setPen( Pen( Color::fromRgb8(255, 127, 255, 175), 1, Pen::Dash ) );
         ip2->drawPolybezier( bezier2b, sizeof(bezier2b) / sizeof(bezier2b[0]), true );
     }
@@ -206,7 +206,7 @@ static void testDrawRect(const char* title, Image& image, Painter& painter)
     resetImage(image);
 
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
+    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
 
     // Solid
     painter.setPen  ( Color::fromRgb8(255, 255,   0, 175) );
@@ -264,7 +264,7 @@ static void testDrawEllipse(const char* title, Image& image, Painter& painter)
     painter.setPen(draw); painter.drawEllipse( PointF (30, 50), SizeF(135, 135) );
     painter.setPen(text); painter.drawText( PointF(30, 30), "NOAA" );
 
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
+    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
     painter.setPen(draw); painter.drawEllipse( PointF (30 + 200, 50), SizeF(135, 135) );
     painter.setPen(text); painter.drawText( PointF(30 + 200, 30), "XWAA" );
 
@@ -273,11 +273,11 @@ static void testDrawEllipse(const char* title, Image& image, Painter& painter)
         painter.setPen(draw); ip2->drawArc( PointF (30 + 400, 50), SizeF(135, 135), 0, 135, ArcMode::Open );
         painter.setPen(text); ip2->drawText( PointF(30 + 400, 30), "NOAA" );
 
-        ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
+        ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
         painter.setPen(draw); ip2->drawArc( PointF (30 + 600, 50), SizeF(135, 135), 0, 135, ArcMode::Open );
         painter.setPen(text); ip2->drawText( PointF(30 + 600, 30), "XWAA" );
 
-        ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
+        ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
         painter.setPen(draw); ip2->drawArc( PointF (30 + 800, 50), SizeF(135, 135), -135, 135, ArcMode::Open );
         painter.setPen(text); ip2->drawText( PointF(30 + 800, 30), "XWAA" );
     }
@@ -286,7 +286,7 @@ static void testDrawEllipse(const char* title, Image& image, Painter& painter)
     painter.setPen(draw); painter.drawEllipse( PointF (30, 50 + 200), SizeF(135, 67) );
     painter.setPen(text); painter.drawText( PointF(30, 30 + 200), "NOAA" );
 
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
+    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
     painter.setPen(draw); painter.drawEllipse( PointF (30 + 200, 50 + 200), SizeF(135, 67) );
     painter.setPen(text); painter.drawText( PointF(30 + 200, 30 + 200), "XWAA" );
 
@@ -295,11 +295,11 @@ static void testDrawEllipse(const char* title, Image& image, Painter& painter)
         painter.setPen(draw); ip2->drawArc( PointF (30 + 400, 50 + 200), SizeF(135, 135), 120, 330, ArcMode::Open );
         painter.setPen(text); ip2->drawText( PointF(30 + 400, 30 + 200), "NOAA" );
 
-        ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
+        ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
         painter.setPen(draw); ip2->drawArc( PointF (30 + 600, 50 + 200), SizeF(135, 135), 120, 330, ArcMode::Open );
         painter.setPen(text); ip2->drawText( PointF(30 + 600, 30 + 200), "XWAA" );
 
-        ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
+        ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
         painter.setPen(draw); ip2->drawArc( PointF (30 + 800, 50 + 200), SizeF(135, 135), -135, 135, ArcMode::Chord );
         painter.setPen(text); ip2->drawText( PointF(30 + 800, 30 + 200), "XWAA" );
     }
@@ -309,7 +309,7 @@ static void testDrawEllipse(const char* title, Image& image, Painter& painter)
     painter.setPen(draw); painter.drawEllipse( PointF (30, 50 + 400), SizeF(67, 135) );
     painter.setPen(text); painter.drawText( PointF(30, 30 + 400), "NOAA" );
 
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
+    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
     painter.setPen(draw); painter.drawEllipse( PointF (30 + 200, 50 + 400), SizeF(67, 135) );
     painter.setPen(text); painter.drawText( PointF(30 + 200, 30 + 400), "XWAA" );
 
@@ -318,11 +318,11 @@ static void testDrawEllipse(const char* title, Image& image, Painter& painter)
         painter.setPen(draw); ip2->drawArc( PointF (30 + 400, 50 + 400), SizeF(135, 135), -150, 30, ArcMode::Open );
         painter.setPen(text); ip2->drawText( PointF(30 + 400, 30 + 400), "NOAA" );
 
-        ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
+        ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
         painter.setPen(draw); ip2->drawArc( PointF (30 + 600, 50 + 400), SizeF(135, 135), -150, 30, ArcMode::Open );
         painter.setPen(text); ip2->drawText( PointF(30 + 600, 30 + 400), "XWAA" );
 
-        ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
+        ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
         painter.setPen(draw); ip2->drawArc( PointF (30 + 800, 50 + 400), SizeF(135, 135), -135, 135, ArcMode::Pie );
         painter.setPen(text); ip2->drawText( PointF(30 + 800, 30 + 400), "XWAA" );
     }

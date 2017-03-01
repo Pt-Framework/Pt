@@ -108,33 +108,19 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
             _brush.color(), minX, minY, maxX, maxY
         );
     }
-    else if(_aaMode == AntiAliasingMode::Fastest) {
-        rasterPolygonAreaFSAA2x2(
-            clippedPoints.data(), clippedCounts.data(),
-            clippedCounts.size(), clippedPoints.size(),
-            _brush.color(), minX, minY, maxX, maxY
-        );
-    }
-    else if(_aaMode == AntiAliasingMode::Medium) {
-        rasterPolygonAreaFSAAGen<4>(
-            clippedPoints.data(), clippedCounts.data(),
-            clippedCounts.size(), clippedPoints.size(),
-            _brush.color(), minX, minY, maxX, maxY
-        );
-    }
-    else { // _aaMode == AntiAliasingMode::Maximum
+    else if(_aaMode == AntiAliasingMode::Standard) {
         rasterPolygonAreaXWAA(
             clippedPoints.data(), clippedCounts.data(),
             clippedCounts.size(), clippedPoints.size(),
             _brush.color(), minX, minY, maxX, maxY
         );
-        /*
-        rasterPolygonAreaFSAAGen<8>(
+    }
+    else { // _aaMode == AntiAliasingMode::LowMemory
+        rasterPolygonAreaFSAA2x2(
             clippedPoints.data(), clippedCounts.data(),
             clippedCounts.size(), clippedPoints.size(),
             _brush.color(), minX, minY, maxX, maxY
         );
-        */
     }
 }
 
@@ -164,13 +150,10 @@ void Rasterizer2::fillPolygonSeparate(const Point* points, size_t pointCount)
             // Draw the polygon
             if(_aaMode == AntiAliasingMode::None)
                 rasterPolygonAreaNoAA(clipped.data(), numPoint, 1, clipped.size(), _brush.color(), minX, minY, maxX, maxY);
-            else if(_aaMode == AntiAliasingMode::Fastest)
-                rasterPolygonAreaFSAA2x2(clipped.data(), numPoint, 1, clipped.size(), _brush.color(), minX, minY, maxX, maxY);
-            else if(_aaMode == AntiAliasingMode::Medium)
-                rasterPolygonAreaFSAAGen<4>(clipped.data(), numPoint, 1, clipped.size(), _brush.color(), minX, minY, maxX, maxY);
-            else // _aaMode == AntiAliasingMode::Maximum
+            else if(_aaMode == AntiAliasingMode::Standard)
                 rasterPolygonAreaXWAA(clipped.data(), numPoint, 1, clipped.size(), _brush.color(), minX, minY, maxX, maxY);
-                //rasterPolygonAreaFSAAGen<8>(clipped.data(), numPoint, 1, clipped.size(), _brush.color(), minX, minY, maxX, maxY);
+            else // _aaMode == AntiAliasingMode::LowMemory
+                rasterPolygonAreaFSAA2x2(clipped.data(), numPoint, 1, clipped.size(), _brush.color(), minX, minY, maxX, maxY);
         }
     }
 }
