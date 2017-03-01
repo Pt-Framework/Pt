@@ -411,41 +411,28 @@ void Rasterizer2::rasterOnePixelPatternedBezierCurve(Pt::int32_t x1, Pt::int32_t
     yy  += yy;
     err  = dx + dy + xy;
 
-    // Calculate the increment factor
-    const Pt::int32_t dx12 = x2 - x1;
-    const Pt::int32_t dy12 = y2 - y1;
-    const Pt::int32_t dx23 = x3 - x2;
-    const Pt::int32_t dy23 = y3 - y2;
-
-    const Pt::int32_t dx13 = x3 - x1;
-    const Pt::int32_t dy13 = y3 - y1;
-
-
-    // Check the size of the line
+    // Calculate the incremental factor of the pattern indexing counter
+    /*
     const Pt::int32_t dx31 = abs(x3 - x1) + 1;
     const Pt::int32_t dy31 = abs(y3 - y1) + 1;
-    const Pt::int32_t d31  = Gfx::Math::fastSqrt(dx31 * dx31 + dy31 * dy31);
-
-    const Pt::int32_t dx21 = abs(x2 - x1) + 1;
-    const Pt::int32_t dy21 = abs(y2 - y1) + 1;
-    const Pt::int32_t d21  = Gfx::Math::fastSqrt(dx21 * dx21 + dy21 * dy21);
+    const Pt::int32_t s31  = dx31 + dy31;
+    const Pt::int32_t l31  = Gfx::Math::fastSqrt(dx31 * dx31 + dy31 * dy31);
+    */
 
     const Pt::int32_t dx32 = abs(x3 - x2) + 1;
     const Pt::int32_t dy32 = abs(y3 - y2) + 1;
-    const Pt::int32_t d32  = Gfx::Math::fastSqrt(dx32 * dx32 + dy32 * dy32);
+    const Pt::int32_t s32  = dx32 + dy32;
+    const Pt::int32_t l32  = Gfx::Math::fastSqrt(dx32 * dx32 + dy32 * dy32);
 
-    // Calculate the incremental factor of the pattern indexing counter
-  //  const Pt::int32_t fpiCtrInc = FIXED_POINT_FROM_INT(PATTERN_BUFFER_SCALE_FACTOR * sizeL)
-                                /// Gfx::Math::fastSqrt(sizeX * sizeX + sizeY * sizeY);
+    const Pt::int32_t dx21 = abs(x2 - x1) + 1;
+    const Pt::int32_t dy21 = abs(y2 - y1) + 1;
+    const Pt::int32_t s21  = dx21 + dy21;
+    const Pt::int32_t l21  = Gfx::Math::fastSqrt(dx21 * dx21 + dy21 * dy21);
 
+    const Pt::int32_t s321 = s32 + s21;
+    const Pt::int32_t l321 = l32 + l21;
 
-
-
-  //  const Pt::int32_t alen = ( sqrt(dx12 * dx12 + dy12 * dy12) +
-                          //     sqrt(dx23 * dx23 + dy23 * dy23
-                           //  )
-                              // / sqrt(dx13 * dx13 + dy13 * dy13
-    const Pt::int32_t fpiCtrInc = FIXED_POINT_FROM_INT(PATTERN_BUFFER_SCALE_FACTOR);
+    const Pt::int32_t fpiCtrInc = FIXED_POINT_FROM_INT(PATTERN_BUFFER_SCALE_FACTOR * s321) / l321;
 
     // Draw with anti-aliasing
     if(useAA) {
@@ -539,7 +526,7 @@ void Rasterizer2::rasterOnePixelPatternedBezierCurve(Pt::int32_t x1, Pt::int32_t
             fpiCtrInOut += fpiCtrInc;
             if(fpiCtrInOut > _fpatternMaxCtr) fpiCtrInOut = 0;
             // Plot curve
-            XW_SET_PIXEL(_image, color, x1, y1, 255, patAlpha);
+            XW_SET_PIXEL(_image, color, x1, y1, 0, patAlpha);
             // Check if we have just drawn the last pixel
             if(x1 == x3 && y1 == y3) {
                 return;

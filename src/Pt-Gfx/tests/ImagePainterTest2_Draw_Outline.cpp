@@ -48,48 +48,25 @@ static void testDrawSolidLine(const char* title, Image& image, Painter& painter)
     painter.setPen( Color::fromRgb8(0, 255, 255, 255) ); painter.drawText( PointF(100, 175), "Hello world!" );
     painter.setPen( Color::fromRgb8(0, 255, 255, 175) ); painter.drawText( PointF(100, 225), "Hello world!" );
 
-
     if(ip2) {
-        const PointF bezier1[] = {
+        const PointF bezier1a[] = {
             PointF(200,  50),
             PointF(265,  65),
             PointF(300, 100)
         };
-        if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
+        ip2->setAntiAliasingMode(AntiAliasingMode::None);
         ip2->setPen( Pen( Color::fromRgb8(255, 127, 255, 175), 1, Pen::Solid ) );
-        ip2->drawPolybezier( bezier1, sizeof(bezier1) / sizeof(bezier1[0]), false );
+        ip2->drawPolybezier( bezier1a, sizeof(bezier1a) / sizeof(bezier1a[0]), false );
 
-        const PointF bezier2[] = {
-            // Top left
-            PointF(400,  50),
-            PointF(400,  30),
-            PointF(420,  30),
-            // Top middle
-            PointF(450,  30),
-            // Top right
-            PointF(480,  30),
-            PointF(500,  30),
-            PointF(500,  50),
-            // Center right
-            PointF(500,  70),
-            // Bottom right
-            PointF(500,  90),
-            PointF(500, 110),
-            PointF(480, 110),
-            // Bottom middle
-            PointF(450, 110),
-            // Bottom left
-            PointF(420, 110),
-            PointF(400, 110),
-            PointF(400,  90),
-            // Center left
-            PointF(400,  70)
+        const PointF bezier1b[] = {
+            PointF(200 + 100,  50),
+            PointF(265 + 100,  65),
+            PointF(300 + 100, 100)
         };
-        if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
-        ip2->setPen( Pen( Color::fromRgb8(255, 127, 255, 175), 1, Pen::Dash ) );
-        ip2->drawPolybezier( bezier2, sizeof(bezier2) / sizeof(bezier2[0]), true );
+        ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
+        ip2->setPen( Pen( Color::fromRgb8(255, 127, 255, 175), 1, Pen::Solid ) );
+        ip2->drawPolybezier( bezier1b, sizeof(bezier1b) / sizeof(bezier1b[0]), false );
     }
-
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
 }
@@ -142,10 +119,10 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
     painter.setPen( Pen( Color::fromRgb8(0, 255, 255, 175), 1, Pen::Dash ) );
 
     const PointF poly[] = { // CCW
-        PointF(110, 310),
-        PointF(160, 340),
-        PointF(210, 310),
-        PointF(140, 260)
+        PointF(110 - 0, 310 - 70),
+        PointF(160 - 0, 340 - 70),
+        PointF(210 - 0, 310 - 70),
+        PointF(140 - 0, 260 - 70)
     };
     if(ip2) ip2->drawPolyline( poly, sizeof(poly) / sizeof(poly[0]), true );
     else painter.drawPolyline( poly, sizeof(poly) / sizeof(poly[0]) );
@@ -158,6 +135,68 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
 
     painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, 0x4470871C ) );
     painter.drawRect( RectF(PointF(260, 20), SizeF(180, 80)) );
+
+    if(ip2) {
+        const PointF bezier2a[] = {
+            // Top left
+            PointF(400 - 350,  50 + 300),
+            PointF(400 - 350,  30 + 300),
+            PointF(420 - 350,  30 + 300),
+            // Top middle
+            PointF(450 - 350,  30 + 300),
+            // Top right
+            PointF(480 - 350,  30 + 300),
+            PointF(500 - 350,  30 + 300),
+            PointF(500 - 350,  50 + 300),
+            // Center right
+            PointF(500 - 350,  70 + 300),
+            // Bottom right
+            PointF(500 - 350,  90 + 300),
+            PointF(500 - 350, 110 + 300),
+            PointF(480 - 350, 110 + 300),
+            // Bottom middle
+            PointF(450 - 350, 110 + 300),
+            // Bottom left
+            PointF(420 - 350, 110 + 300),
+            PointF(400 - 350, 110 + 300),
+            PointF(400 - 350,  90 + 300),
+            // Center left
+            PointF(400 - 350,  70 + 300)
+        };
+        ip2->setAntiAliasingMode(AntiAliasingMode::None);
+        ip2->setPen( Pen( Color::fromRgb8(255, 127, 255, 175), 1, Pen::Dash ) );
+        ip2->drawPolybezier( bezier2a, sizeof(bezier2a) / sizeof(bezier2a[0]), true );
+
+        const PointF bezier2b[] = {
+            // Top left
+            PointF(400 - 200,  50 + 300),
+            PointF(400 - 200,  30 + 300),
+            PointF(420 - 200,  30 + 300),
+            // Top middle
+            PointF(450 - 200,  30 + 300),
+            // Top right
+            PointF(480 - 200,  30 + 300),
+            PointF(500 - 200,  30 + 300),
+            PointF(500 - 200,  50 + 300),
+            // Center right
+            PointF(500 - 200,  70 + 300),
+            // Bottom right
+            PointF(500 - 200,  90 + 300),
+            PointF(500 - 200, 110 + 300),
+            PointF(480 - 200, 110 + 300),
+            // Bottom middle
+            PointF(450 - 200, 110 + 300),
+            // Bottom left
+            PointF(420 - 200, 110 + 300),
+            PointF(400 - 200, 110 + 300),
+            PointF(400 - 200,  90 + 300),
+            // Center left
+            PointF(400 - 200,  70 + 300)
+        };
+        ip2->setAntiAliasingMode(AntiAliasingMode::Fastest);
+        ip2->setPen( Pen( Color::fromRgb8(255, 127, 255, 175), 1, Pen::Dash ) );
+        ip2->drawPolybezier( bezier2b, sizeof(bezier2b) / sizeof(bezier2b[0]), true );
+    }
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
 }
