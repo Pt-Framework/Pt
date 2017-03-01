@@ -104,7 +104,8 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
         PointF(210, 310),
         PointF(140, 260)
     };
-    painter.drawPolyline( poly, sizeof(poly) / sizeof(poly[0]) );
+    if(ip2) ip2->drawPolyline( poly, sizeof(poly) / sizeof(poly[0]), true );
+    else painter.drawPolyline( poly, sizeof(poly) / sizeof(poly[0]) );
 
     painter.drawRect( RectF(PointF(550, 170), SizeF(100, 50)) );
 

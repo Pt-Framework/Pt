@@ -196,7 +196,7 @@ void ImagePainter2::drawRect( const RectF& rect )
     const Point tl( rect.topLeft    ().x(),rect.topLeft    ().y() );
     const Point br( rect.bottomRight().x(),rect.bottomRight().y() );
 
-    _rasterizer->strokeOnePixelSolidRect(tl, br);
+    _rasterizer->strokeOnePixelRect(tl, br);
 }
 
 void ImagePainter2::fillRect( const RectF& rect )
@@ -207,7 +207,7 @@ void ImagePainter2::fillRect( const RectF& rect )
     _rasterizer->fillRect(tl, br);
 }
 
-void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount )
+void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount, bool autoClose )
 {
     // Copy the points
     std::vector<Point> points(pointCount);
@@ -216,7 +216,7 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount )
         points[i].set( ps[i].x(), ps[i].y() );
 
     // Rasterize the polygon
-    _rasterizer->strokeOnePixelSolidPolygon(points.data(), pointCount);
+    _rasterizer->strokeOnePixelPolygon(points.data(), pointCount, autoClose);
 }
 
 void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
@@ -229,6 +229,30 @@ void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
 
     // Rasterize the polygon
     _rasterizer->fillPolygon(points.data(), pointCount);
+}
+
+void ImagePainter2::drawPolybezier(const PointF* ps, const size_t pointCount, bool autoClose)
+{
+    // Check the number of points
+    if(autoClose) {
+        // The number of points must be >= 4 and even
+        if(pointCount < 4 || (pointCount & 1)) return;
+    }
+    else {
+        // The number of points must be >= 3 and odd
+        if(pointCount < 3 || !(pointCount & 1)) return;
+    }
+
+    // Copy the points
+    std::vector<Point> points(autoClose ? (pointCount + 1) : pointCount);
+
+    for(size_t i = 0; i < pointCount; ++i)
+        points[i].set( ps[i].x(), ps[i].y() );
+
+    if(autoClose) points[pointCount].set( ps[0].x(), ps[0].y() );
+
+    // Rasterize the polygon
+    _rasterizer->strokeOnePixelPolybezier(points.data(), pointCount);
 }
 
 

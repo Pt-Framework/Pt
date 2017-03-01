@@ -83,6 +83,10 @@ void Rasterizer2::strokeOnePixelLine(const Point& a, const Point& b, DrawLineMas
     }
 }
 
+void Rasterizer2::strokeOnePixelPolybezier(const Point* points, size_t pointCount)
+{
+}
+
 
 // ======================================================================================
 // ===== Private Member Functions =======================================================

@@ -39,7 +39,7 @@ namespace Gfx {
 // ===== Public Member Functions ========================================================
 // ======================================================================================
 
-void Rasterizer2::strokeOnePixelSolidRect(const Point& tl, const Point& br)
+void Rasterizer2::strokeOnePixelRect(const Point& tl, const Point& br)
 {
     // Get the minimum and maximum coordinates
     Pt::int32_t minX = tl.x();

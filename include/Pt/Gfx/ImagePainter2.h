@@ -91,7 +91,9 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual void drawRect(const RectF& rect);
 
-        virtual void drawPolyline(const PointF* points, const size_t pointCount);
+        virtual void drawPolyline(const PointF* points, const size_t pointCount, bool autoClose);
+
+        virtual void drawPolybezier(const PointF* points, const size_t pointCount, bool autoClose);
 
         virtual void drawEllipse(const PointF& topLeft, const SizeF& size);
 
@@ -106,6 +108,11 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         // NOTE: The begin and end angle must move in counter-clockwise direction or something wrong will be drawn!
         virtual void fillArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode);
+
+    public:
+        // Just to make the API match the interface defined by the Pt::GfxPainter class
+        virtual void drawPolyline(const PointF* points, const size_t pointCount)
+        { drawPolyline(points, pointCount, false); }
 
     public:
         static void setFontDir(const System::Path& path);

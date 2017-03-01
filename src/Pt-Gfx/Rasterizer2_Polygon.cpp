@@ -39,7 +39,7 @@ namespace Gfx {
 // ===== Public Member Functions ========================================================
 // ======================================================================================
 
-void Rasterizer2::strokeOnePixelSolidPolygon(const Point* points, size_t pointCount)
+void Rasterizer2::strokeOnePixelPolygon(const Point* points, size_t pointCount, bool autoClose)
 {
     // Separate the polygons, clip their coordinates, and raster them
     size_t startIndex = 0;
@@ -55,7 +55,7 @@ void Rasterizer2::strokeOnePixelSolidPolygon(const Point* points, size_t pointCo
             // Increment the start index
             startIndex += curPC + 1;
             // Draw the polygon
-            rasterOnePixelPolygonOutline(clipped.data(), clipped.size(), _pen.color());
+            rasterOnePixelPolygonOutline(clipped.data(), clipped.size(), _pen.color(), autoClose);
         }
     }
 }
@@ -179,7 +179,7 @@ void Rasterizer2::fillPolygonSeparate(const Point* points, size_t pointCount)
 // ===== Private Member Functions =======================================================
 // ======================================================================================
 
-void Rasterizer2::rasterOnePixelPolygonOutline(const Point* points, size_t pointCount, const Color& color)
+void Rasterizer2::rasterOnePixelPolygonOutline(const Point* points, size_t pointCount, const Color& color, bool autoClose)
 {
     // Mask
     DrawLineMask mask_zero = Rasterizer2::NullLineMask;
@@ -199,6 +199,8 @@ void Rasterizer2::rasterOnePixelPolygonOutline(const Point* points, size_t point
     }
 
     // From the last point to the first point
+    if(!autoClose) return;
+
     mask_zero[2] = mask_zero[0];
     mask_zero[3] = mask_zero[1];
     mask_zero[0] = mask_nnp1[2];
