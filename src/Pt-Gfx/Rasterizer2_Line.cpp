@@ -558,7 +558,7 @@ void Rasterizer2::rasterFillOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::in
 
 // The Beauty of Bresenham's Algorithm
 // http://members.chello.at/easyfilter/bresenham.html
-void Rasterizer2::rasterOnePixelSolidBezierCurve(Pt::int32_t x0, Pt::int32_t y0, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut)
+void Rasterizer2::rasterOnePixelSolidBezierCurve(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t x3, Pt::int32_t y3, const Color& color, DrawLineMask* maskInOut)
 {
     // Get the mask's coordinates as needed
     Pt::int32_t mx[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
@@ -590,8 +590,8 @@ void Rasterizer2::rasterOnePixelSolidBezierCurve(Pt::int32_t x0, Pt::int32_t y0,
             if(A == 255)                                                          \
                 IMG->format().setPixel(PIX, COL, _compositionMode);               \
             else {                                                                \
-                const Pt::uint8_t fa = Rasterizer2::XWAA_WFILTER[A];              \
-                IMG->format().setPixel(PIX, COL, _compositionMode, fa);           \
+                const Pt::uint8_t falpha = Rasterizer2::XWAA_WFILTER[A];          \
+                IMG->format().setPixel(PIX, COL, _compositionMode, falpha);       \
             }                                                                     \
         } while(false)
 
@@ -599,12 +599,12 @@ void Rasterizer2::rasterOnePixelSolidBezierCurve(Pt::int32_t x0, Pt::int32_t y0,
     const bool useAA = (_aaMode != AntiAliasingMode::None);
 
     // Get the steps
-    Pt::int32_t sx = x2 - x1;
-    Pt::int32_t sy = y2 - y1;
+    Pt::int32_t sx = x3 - x2;
+    Pt::int32_t sy = y3 - y2;
 
     // Relative values for checks
-    Pt::int32_t xx = x0 - x1;
-    Pt::int32_t yy = y0 - y1;
+    Pt::int32_t xx = x1 - x2;
+    Pt::int32_t yy = y1 - y2;
     Pt::int32_t xy;
 
     // Curvature
@@ -616,27 +616,27 @@ void Rasterizer2::rasterOnePixelSolidBezierCurve(Pt::int32_t x0, Pt::int32_t y0,
 
     // Begin with longer part; swap the begin and end points as needed
     if(sx * sx + sy * sy > xx * xx + yy * yy) {
-        x2  = x0;
-        y2  = y0;
-        x0  = sx + x1;
-        y0  = sy + y1;
+        x3  = x1;
+        y3  = y1;
+        x1  = sx + x2;
+        y1  = sy + y2;
         cur = -cur;
     }
 
     // Check if the curve is actually a straight line
     if(!cur) {
-        rasterOnePixelSolidLine(x0, y0, x2, y2, color, maskInOut);
+        rasterOnePixelSolidLine(x1, y1, x3, y3, color, maskInOut);
         return;
     }
 
     // X step direction
     xx += sx;
-    sx  = x0 < x2 ? 1 : -1;
+    sx  = x1 < x3 ? 1 : -1;
     xx *= sx;
 
     // Y step direction
     yy += sy;
-    sy  = y0 < y2 ? 1 : -1;
+    sy  = y1 < y3 ? 1 : -1;
     yy *= sy;
 
     // Differences 2nd degree
@@ -653,8 +653,8 @@ void Rasterizer2::rasterOnePixelSolidBezierCurve(Pt::int32_t x0, Pt::int32_t y0,
     }
 
     // Differences 1st degree
-    dx = 4 * sy * cur * (x1 - x0) + xx - xy;
-    dy = 4 * sx * cur * (y0 - y1) + yy - xy;
+    dx = 4 * sy * cur * (x2 - x1) + xx - xy;
+    dy = 4 * sx * cur * (y1 - y2) + yy - xy;
 
     // Error 1st step
     xx  += xx;
@@ -667,65 +667,65 @@ void Rasterizer2::rasterOnePixelSolidBezierCurve(Pt::int32_t x0, Pt::int32_t y0,
         bool        firstPixel0 = true;
         bool        firstPixel1 = true;
         do {
-            // Approximate error distance
+            // Approximate the error distance
             cur = std::min(dx + xy, -xy - dy);
             ed  = std::max(dx + xy, -xy - dy);
             ed  = (ed + 2 * ed * cur * cur / (4 * ed * ed + cur * cur));
             // Plot curve
             alpha = 255 / ed * ::fabs(err - dx - dy - xy);
-            XW_SET_PIXEL( _image, color, x0, y0, alpha );
+            XW_SET_PIXEL(_image, color, x1, y1, alpha);
             if(maskInOut) {
                 if(firstPixel0) {
-                    (*maskInOut)[0].set(x0, y0);
+                    (*maskInOut)[0].set(x1, y1);
                     firstPixel0 = false;
                 }
-                (*maskInOut)[2].set(x0, y0);
+                (*maskInOut)[2].set(x1, y1);
             }
             // Check if we have just drawn the last pixel
-            if(x0 == x2 && y0 == y2) return;
-            x1  = x0;
+            if(x1 == x3 && y1 == y3) return;
+            x2  = x1;
             cur = dx - err;
-            y1  = (2 * err + dy) < 0 ? 1 : 0;
+            y2  = (2 * err + dy) < 0 ? 1 : 0;
             // X step
             if(2 * err + dx > 0) {
                 // Plot curve
                 if(err - dy < ed) {
                     // Set pixel
                     alpha = 255 / ed * ::fabs(err - dy);
-                    XW_SET_PIXEL( _image, color, x0, y0 + sy, alpha );
+                    XW_SET_PIXEL(_image, color, x1, y1 + sy, alpha);
                     // Store back the start and end coordinates to the mask as needed
                     if(maskInOut) {
                         if(firstPixel1) {
-                            (*maskInOut)[1].set(x0, y0 + sy);
+                            (*maskInOut)[1].set(x1, y1 + sy);
                             firstPixel1 = false;
                         }
-                        (*maskInOut)[3].set(x0, y0 + sy);
+                        (*maskInOut)[3].set(x1, y1 + sy);
                     }
                 }
                 // X step
-                x0  += sx;
+                x1  += sx;
                 dx  -= xy;
                 dy  += yy;
                 err += dy;
             }
             // Y step
-            if(y1) {
+            if(y2) {
                 // Plot curve
                 if(cur < ed) {
                     // Set pixel
                     alpha = 255 / ed * ::fabs(cur);
-                    XW_SET_PIXEL( _image, color, x1 + sx, y0, alpha );
+                    XW_SET_PIXEL(_image, color, x2 + sx, y1, alpha);
                     // Store back the start and end coordinates to the mask as needed
                     if(maskInOut) {
                         if(firstPixel1) {
-                            (*maskInOut)[1].set(x0, y0 + sy);
+                            (*maskInOut)[1].set(x1, y1 + sy);
                             firstPixel1 = false;
                         }
-                        (*maskInOut)[3].set(x0, y0 + sy);
+                        (*maskInOut)[3].set(x1, y1 + sy);
                     }
                 }
                 // Y step
-                y0  += sy;
+                y1  += sy;
                 dy  -= xy;
                 dx  += xx;
                 err += dx;
@@ -737,31 +737,31 @@ void Rasterizer2::rasterOnePixelSolidBezierCurve(Pt::int32_t x0, Pt::int32_t y0,
     else {
         // Store back the start and end coordinates to the mask as needed
         if(maskInOut) {
-            (*maskInOut)[0].set(x0, y0);
+            (*maskInOut)[0].set(x1, y1);
             (*maskInOut)[1] = MAXIMUM_POINT;
-            (*maskInOut)[2].set(x2, y2);
+            (*maskInOut)[2].set(x3, y3);
             (*maskInOut)[3] = MAXIMUM_POINT;
         }
         // Draw the pixels
         do {
             // Plot curve
-            XW_SET_PIXEL(_image, color, x0, y0, 255);
+            XW_SET_PIXEL(_image, color, x1, y1, 255);
             // Check if we have just drawn the last pixel
-            if(x0 == x2 && y0 == y2) {
+            if(x1 == x3 && y1 == y3) {
                 return;
             }
             // Save value for test of Y step
-            y1 = (2 * err < dx) ? 1 : 0;
+            y2 = (2 * err < dx) ? 1 : 0;
             // X step
             if(2 * err > dy) {
-                x0  += sx;
+                x1  += sx;
                 dx  -= xy;
                 dy  += yy;
                 err += dy;
             }
             // Y step
-            if(y1) {
-                y0  += sy;
+            if(y2) {
+                y1  += sy;
                 dy  -= xy;
                 dx  += xx;
                 err += dx;

@@ -67,7 +67,7 @@ void Rasterizer2::strokeOnePixelPolybezier(const Point* points, size_t pointCoun
     DrawLineMask mask_nnp1 = Rasterizer2::NullLineMask;
 
     // Counter for pattern buffer
-    Pt::int32_t  fpiCtrInOut = 0;
+    Pt::int32_t fpiCtrInOut = 0;
 
     // Draw the curves
     for(size_t i = 0; i < (pointCount - 1); i += 2) {
