@@ -90,7 +90,7 @@ void Rasterizer2::fillArc(const Point& topLeft, const Size& size, float degBegin
 void Rasterizer2::rasterArcAreaChord(FilledArcInfo& fai)
 {
     // Calculate points for the closing line
-    XWLineData line;
+    ArcXWLineData line;
 
     arcUtil_runXWLineAlgorithm(line, fai, fai.x1, fai.y1, fai.x2, fai.y2);
 
@@ -98,13 +98,13 @@ void Rasterizer2::rasterArcAreaChord(FilledArcInfo& fai)
     arcUtil_detXWLineDirection(line);
 
     // Generate the scanlines data
-    Scanlines scanlines(fai.radY * 2 + 2);
+    EAScanlines scanlines(fai.radY * 2 + 2);
 
     arcUtil_genScanlinesForChord(scanlines, fai, line);
 
     // Draw the scanlines
     for(size_t i = 0; i < scanlines.size(); ++i) {
-        const ScanlineElement& sle = scanlines[i];
+        const EAScanlineElement& sle = scanlines[i];
         if(sle.isNull()) continue;
         fillOneScanlineNoAA(sle.from, sle.to, i + fai.minY - 1, fai.minX, fai.minY);
     }
@@ -117,7 +117,7 @@ void Rasterizer2::rasterArcAreaChord(FilledArcInfo& fai)
     // Draw the anti-aliased circumference pixels
     // ### TODO: * Fix missing pixels in all mode !!! ###
     // ### TODO: * Fix out-of-place brighter-pixel artifacts in SourceOver mode !!! ###
-    arcUtil_drawCircumferencePixels(fai);
+    arcUtil_rasterCircumferencePixels(fai);
 
     // Draw the closing line
     Point maskInOut[4] = {
@@ -125,13 +125,13 @@ void Rasterizer2::rasterArcAreaChord(FilledArcInfo& fai)
         Painter::MaximumPointCoordinate, Painter::MaximumPointCoordinate
     };
 
-    arcUtil_drawXWLine(fai, line, maskInOut);
+    arcUtil_rasterClosingXWLine(fai, line, maskInOut);
 }
 
 void Rasterizer2::rasterArcAreaPie(FilledArcInfo& fai)
 {
     // Calculate points for the closing lines
-    XWLineData line1, line2;
+    ArcXWLineData line1, line2;
 
     if(fai.x1 < fai.x2) {
         arcUtil_runXWLineAlgorithm(line1, fai, fai.x1, fai.y1, fai.ctrX, fai.ctrY);
@@ -147,20 +147,20 @@ void Rasterizer2::rasterArcAreaPie(FilledArcInfo& fai)
     arcUtil_detXWLineDirection(line2);
 
     // Generate the scanlines data
-    Scanlines scanlines1(fai.radY * 2 + 2);
-    Scanlines scanlines2(fai.radY * 2 + 2);
+    EAScanlines scanlines1(fai.radY * 2 + 2);
+    EAScanlines scanlines2(fai.radY * 2 + 2);
 
     arcUtil_genScanlinesForPie(scanlines1, scanlines2, fai, line1, line2);
 
     // Draw the scanlines
     for(size_t i = 0; i < scanlines1.size(); ++i) {
-        const ScanlineElement& sle = scanlines1[i];
+        const EAScanlineElement& sle = scanlines1[i];
         if(sle.isNull()) continue;
         fillOneScanlineNoAA(sle.from, sle.to, i + fai.minY - 1, fai.minX, fai.minY);
     }
 
     for(size_t i = 0; i < scanlines2.size(); ++i) {
-        const ScanlineElement& sle = scanlines2[i];
+        const EAScanlineElement& sle = scanlines2[i];
         if(sle.isNull()) continue;
         if(!scanlines1[i].isNull() && sle.from >= scanlines1[i].from && sle.to <= scanlines1[i].to) continue;
         fillOneScanlineNoAA(sle.from, sle.to, i + fai.minY - 1, fai.minX, fai.minY);
@@ -175,7 +175,7 @@ void Rasterizer2::rasterArcAreaPie(FilledArcInfo& fai)
     // Draw the anti-aliased circumference pixels
     // ### TODO: * Fix missing pixels in all mode !!! ###
     // ### TODO: * Fix out-of-place brighter-pixel artifacts in SourceOver mode !!! ###
-    arcUtil_drawCircumferencePixels(fai);
+    arcUtil_rasterCircumferencePixels(fai);
 
     // Draw the closing lines
     Point maskInOut[4] = {
@@ -183,8 +183,8 @@ void Rasterizer2::rasterArcAreaPie(FilledArcInfo& fai)
         Painter::MaximumPointCoordinate, Painter::MaximumPointCoordinate
     };
 
-    arcUtil_drawXWLine(fai, line2, maskInOut);
-    arcUtil_drawXWLine(fai, line1, maskInOut);
+    arcUtil_rasterClosingXWLine(fai, line2, maskInOut);
+    arcUtil_rasterClosingXWLine(fai, line1, maskInOut);
 }
 
 void Rasterizer2::arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai)
@@ -245,7 +245,7 @@ void Rasterizer2::arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai)
 // Using algorithm from: Xiaolin Wu's Line Algorithm
 //                       https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
 //                       Last modified on January 19, 2017
-void Rasterizer2::arcUtil_runXWLineAlgorithm(XWLineData& xwLine, const FilledArcInfo& fai, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2)
+void Rasterizer2::arcUtil_runXWLineAlgorithm(ArcXWLineData& xwLine, const FilledArcInfo& fai, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2)
 {
     // Copy the coordinates
     xwLine.x1 = x1;
@@ -297,7 +297,7 @@ void Rasterizer2::arcUtil_runXWLineAlgorithm(XWLineData& xwLine, const FilledArc
             const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_FPART_TO_A8 (ypxli) ];
             const Pt::uint8_t a2 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_RFPART_TO_A8(ypxli) ];
             xwLine.points[ i - xwLine.minY + 1 ].push_back(
-                XWLineData::XWPoint( FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)), a1, a2 )
+                ArcXWLineData::XWPoint( FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)), a1, a2 )
             );
             ypxli += grad;
         }
@@ -308,14 +308,14 @@ void Rasterizer2::arcUtil_runXWLineAlgorithm(XWLineData& xwLine, const FilledArc
             const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_FPART_TO_A8 (ypxli) ];
             const Pt::uint8_t a2 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_RFPART_TO_A8(ypxli) ];
             xwLine.points[ FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)) - xwLine.minY + 1 ].push_back(
-                XWLineData::XWPoint( i, a1, a2 )
+                ArcXWLineData::XWPoint( i, a1, a2 )
             );
             ypxli += grad;
         }
     }
 }
 
-void Rasterizer2::arcUtil_genScanlinesForChord(Scanlines& scanlines, const FilledArcInfo& fai, const XWLineData& xwLine)
+void Rasterizer2::arcUtil_genScanlinesForChord(EAScanlines& scanlines, const FilledArcInfo& fai, const ArcXWLineData& xwLine)
 {
     // Find the line's minimum and maximum Y coordinates
     const Pt::int32_t lineMinY = xwLine.minY + 1;
@@ -358,10 +358,10 @@ void Rasterizer2::arcUtil_genScanlinesForChord(Scanlines& scanlines, const Fille
     }
 }
 
-void Rasterizer2::arcUtil_cropAndStoreScanlineForChord(Scanlines& scanlines, const FilledArcInfo& fai, const XWLineData& xwLine, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t y)
+void Rasterizer2::arcUtil_cropAndStoreScanlineForChord(EAScanlines& scanlines, const FilledArcInfo& fai, const ArcXWLineData& xwLine, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t y)
 {
     // For convenience
-    typedef std::vector<XWLineData::XWPoint> XWPoints;
+    typedef std::vector<ArcXWLineData::XWPoint> XWPoints;
     typedef XWPoints::const_iterator         XWPointsIterator;
 
     // Check if the scanline will be completely outside the shape
@@ -407,7 +407,7 @@ void Rasterizer2::arcUtil_cropAndStoreScanlineForChord(Scanlines& scanlines, con
     }
 }
 
-void Rasterizer2::arcUtil_genScanlinesForPie(Scanlines& scanlines1, Scanlines& scanlines2, const FilledArcInfo& fai, const XWLineData& xwLine1, const XWLineData& xwLine2)
+void Rasterizer2::arcUtil_genScanlinesForPie(EAScanlines& scanlines1, EAScanlines& scanlines2, const FilledArcInfo& fai, const ArcXWLineData& xwLine1, const ArcXWLineData& xwLine2)
 {
     // Find the line's minimum and maximum Y coordinates
     Pt::int32_t lineMinY = fai.minY;
@@ -497,10 +497,10 @@ void Rasterizer2::arcUtil_genScanlinesForPie(Scanlines& scanlines1, Scanlines& s
     }
 }
 
-void Rasterizer2::arcUtil_cropAndStoreScanlineForPie(Scanlines& scanlines1, Scanlines& scanlines2, const FilledArcInfo& fai, const XWLineData& xwLine1, const XWLineData& xwLine2, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t y)
+void Rasterizer2::arcUtil_cropAndStoreScanlineForPie(EAScanlines& scanlines1, EAScanlines& scanlines2, const FilledArcInfo& fai, const ArcXWLineData& xwLine1, const ArcXWLineData& xwLine2, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t y)
 {
     // For convenience
-    typedef std::vector<XWLineData::XWPoint> XWPoints;
+    typedef std::vector<ArcXWLineData::XWPoint> XWPoints;
     typedef XWPoints::const_iterator         XWPointsIterator;
 
     // Check if the scanline will be completely outside the shape
@@ -658,7 +658,7 @@ void Rasterizer2::arcUtil_cropAndStoreScanlineForPie(Scanlines& scanlines1, Scan
     }
 }
 
-void Rasterizer2::arcUtil_drawCircumferencePixels(FilledArcInfo& fai)
+void Rasterizer2::arcUtil_rasterCircumferencePixels(FilledArcInfo& fai)
 {
     // Top and bottom halves
     for(Pt::int32_t x = 0; x <= fai.quartersX; ++x) {
@@ -703,10 +703,10 @@ void Rasterizer2::arcUtil_drawCircumferencePixels(FilledArcInfo& fai)
     }
 }
 
-void Rasterizer2::arcUtil_drawXWLine(const FilledArcInfo& fai, const XWLineData& xwLine, Point maskInOut[4])
+void Rasterizer2::arcUtil_rasterClosingXWLine(const FilledArcInfo& fai, const ArcXWLineData& xwLine, Point maskInOut[4])
 {
     // For convenience
-    typedef std::vector<XWLineData::XWPoint> XWPoints;
+    typedef std::vector<ArcXWLineData::XWPoint> XWPoints;
     typedef XWPoints::const_iterator         XWPointsIterator;
 
     // Get the mask's coordinate

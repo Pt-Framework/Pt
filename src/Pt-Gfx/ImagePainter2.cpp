@@ -110,11 +110,12 @@ const CompositionMode& ImagePainter2::compositionMode() const
 
 void ImagePainter2::setClip( const RectF& clipIn )
 {
-     Rect clip(
+     const Rect clip(
          Point( (Pt::int32_t)(clipIn.x    ()), (Pt::int32_t)(clipIn.y     ()) ),
          Size ( (Pt::int32_t)(clipIn.width()), (Pt::int32_t)(clipIn.height()) )
      );
-    _rasterizer->setClip( clip );
+
+    _rasterizer->setClip(clip);
     _clip = clipIn;
 }
 
@@ -160,15 +161,16 @@ FontMetrics ImagePainter2::fontMetrics(const String& text) const
 
 void ImagePainter2::drawImage( const PointF& toIn, const Image& image)
 {
-    Point to( (Pt::int32_t)(toIn.x()), (Pt::int32_t)(toIn.y()) );
+    const Point to( (Pt::int32_t)(toIn.x()), (Pt::int32_t)(toIn.y()) );
+
     _rasterizer->image(to, image);
 }
 
 void ImagePainter2::drawImage(const PointF& toIn, const Image& image, const RectF& imageRectIn)
 {
-    Point to( (Pt::int32_t)(toIn.x()), (Pt::int32_t)(toIn.y()) );
+    const Point to( (Pt::int32_t)(toIn.x()), (Pt::int32_t)(toIn.y()) );
 
-    Rect imageRect(
+    const Rect imageRect(
         Point( (Pt::int32_t)(imageRectIn.    x()), (Pt::int32_t)(imageRectIn.     y()) ),
         Size ( (Pt::int32_t)(imageRectIn.width()), (Pt::int32_t)(imageRectIn.height()) )
     );
@@ -227,7 +229,7 @@ void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
     for(size_t i = 0; i < pointCount; ++i)
         points[i].set( ps[i].x(), ps[i].y() );
 
-    // Rasterize the polygon
+    // Rasterize the bezier
     _rasterizer->fillPolygon(points.data(), pointCount);
 }
 
@@ -251,7 +253,7 @@ void ImagePainter2::drawPolybezier(const PointF* ps, const size_t pointCount, bo
 
     if(autoClose) points[pointCount].set( ps[0].x(), ps[0].y() );
 
-    // Rasterize the polygon
+    // Rasterize the bezier
     _rasterizer->strokeOnePixelPolybezier(points.data(), points.size());
 }
 

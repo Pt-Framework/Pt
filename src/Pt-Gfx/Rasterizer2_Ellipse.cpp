@@ -394,7 +394,7 @@ void Rasterizer2::fillEllipse(const Point& topLeft, const Size& size)
     // === Process the scanlines ===
 
     // List of scanlines to be drawn later
-    Scanlines scanlines(radY * 2 + 2);
+    EAScanlines scanlines(radY * 2 + 2);
 
     // Top and bottom halves
     const Pt::int32_t quartersX = round( radX2 * Gfx::Math::fastInvSqrt(radX2 + radY2) );
@@ -458,7 +458,7 @@ void Rasterizer2::fillEllipse(const Point& topLeft, const Size& size)
 
     // Draw the scanlines
     for(size_t i = 0; i < scanlines.size(); ++i) {
-        const ScanlineElement& sle = scanlines[i];
+        const EAScanlineElement& sle = scanlines[i];
         if(sle.isNull()) continue;
         fillOneScanlineNoAA(sle.from, sle.to, i + minY - 1, minX, minY);
     }

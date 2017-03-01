@@ -200,7 +200,7 @@ class Rasterizer2
         inline void patternBufferAlphaPolar(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t x, Pt::int32_t y, float scale, float xyRat, Pt::uint8_t alpha0, Pt::uint8_t alpha1);
 
     private:
-        // Polygon scanlines
+        // Polygon scanlines (used for drawing filled polygons with XWAA)
         struct PolygonScanline16 {
             Pt::int16_t from, to;
 
@@ -211,13 +211,13 @@ class Rasterizer2
 
         typedef std::vector< std::vector<PolygonScanline16> > PolygonScanline16s; // The vector index is the Y coordinate
 
-        // Each key specify the Y coordinate of a scanline;
-        // while its element specify the "from" and "to" X coordinates
-        struct ScanlineElement {
+        // Arc scanlines (used for drawing filled ellipse and arcs)
+        // Each key specify the Y coordinate of a scanline; while its element specify the "from" and "to" X coordinates
+        struct EAScanlineElement {
             Pt::int32_t from;
             Pt::int32_t to;
 
-            ScanlineElement(Pt::int32_t from_ = -1, Pt::int32_t to_ = -1)
+            EAScanlineElement(Pt::int32_t from_ = -1, Pt::int32_t to_ = -1)
             : from(from_), to(to_)
             {}
 
@@ -225,7 +225,7 @@ class Rasterizer2
             { return from == -1 && to == -1; }
         };
 
-        typedef std::vector<ScanlineElement> Scanlines;
+        typedef std::vector<EAScanlineElement> EAScanlines;
 
         // Filled-arc information structure
         struct FilledArcInfo {
@@ -247,8 +247,8 @@ class Rasterizer2
             Pt::int32_t quartersY;    // The number of quarter points in the Y direction
         };
 
-        // Xiaolin Wu's anti-aliased line data structure (currently it is only used for drawing filled arc)
-        struct XWLineData {
+        // Xiaolin Wu's anti-aliased line data structure (used for drawing filled arcs)
+        struct ArcXWLineData {
             // Point data
             struct XWPoint {
                 Pt::int32_t x;
@@ -299,7 +299,6 @@ class Rasterizer2
         void rasterRectArea(const Point& tl, const Point& br);
 
         void rasterOnePixelPolygonOutline(const Point* points, size_t pointCount, const Color& color, bool autoClose);
-
         void rasterPolygonAreaNoAA(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
         void rasterPolygonAreaFSAA2x2(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
         void rasterPolygonAreaXWAA(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
@@ -308,7 +307,6 @@ class Rasterizer2
         void rasterOnePixelPatternedBezierCurve(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t x3, Pt::int32_t y3, const Color& color, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut);
 
         void rasterEllipseAreaNoAA(const Point& topLeft, const Size& size);
-
         void rasterArcAreaChord(FilledArcInfo& fai);
         void rasterArcAreaPie(FilledArcInfo& fai);
 
@@ -334,29 +332,29 @@ class Rasterizer2
             const Color& color, const std::vector<Pt::uint8_t>& alphas
         );
 
+        // Polygon-related helper functions
         template<Pt::uint8_t SUPERSAMPLE_SIZE>
         void rasterPolygonAreaFSAAGen(
             const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount,
             const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY
         );
 
-        // Polygon-related helper functions
         void genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount) const;
         void getPolygonRectMinMax(const Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY);
 
         // Arc-related helper functions
         static inline bool arcUtil_pointIsInsideDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd, float xyRatio);
-        static inline void arcUtil_detXWLineDirection(XWLineData& xwLineData);
+        static inline void arcUtil_detXWLineDirection(ArcXWLineData& xwLineData);
 
         static void arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai);
-        static void arcUtil_runXWLineAlgorithm(XWLineData& xwLine, const FilledArcInfo& fai, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2);
-        static void arcUtil_genScanlinesForChord(Scanlines& scanlines, const FilledArcInfo& fai, const XWLineData& xwLine);
-        static void arcUtil_cropAndStoreScanlineForChord(Scanlines& scanlines, const FilledArcInfo& fai, const XWLineData& xwLine, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t y);
-        static void arcUtil_genScanlinesForPie(Scanlines& scanlines1, Scanlines& scanlines2, const FilledArcInfo& fai, const XWLineData& xwLine1, const XWLineData& xwLine2);
-        static void arcUtil_cropAndStoreScanlineForPie(Scanlines& scanlines1, Scanlines& scanlines2, const FilledArcInfo& fai, const XWLineData& xwLine1, const XWLineData& xwLine2, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t y);
+        static void arcUtil_runXWLineAlgorithm(ArcXWLineData& xwLine, const FilledArcInfo& fai, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2);
+        static void arcUtil_genScanlinesForChord(EAScanlines& scanlines, const FilledArcInfo& fai, const ArcXWLineData& xwLine);
+        static void arcUtil_cropAndStoreScanlineForChord(EAScanlines& scanlines, const FilledArcInfo& fai, const ArcXWLineData& xwLine, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t y);
+        static void arcUtil_genScanlinesForPie(EAScanlines& scanlines1, EAScanlines& scanlines2, const FilledArcInfo& fai, const ArcXWLineData& xwLine1, const ArcXWLineData& xwLine2);
+        static void arcUtil_cropAndStoreScanlineForPie(EAScanlines& scanlines1, EAScanlines& scanlines2, const FilledArcInfo& fai, const ArcXWLineData& xwLine1, const ArcXWLineData& xwLine2, Pt::int32_t lineMinY, Pt::int32_t lineMaxY, Pt::int32_t xl, Pt::int32_t xr, Pt::int32_t y);
 
-        void arcUtil_drawCircumferencePixels(FilledArcInfo& fai);
-        void arcUtil_drawXWLine(const FilledArcInfo& fai, const XWLineData& xwLine, Point maskInOut[4]);
+        void arcUtil_rasterCircumferencePixels(FilledArcInfo& fai);
+        void arcUtil_rasterClosingXWLine(const FilledArcInfo& fai, const ArcXWLineData& xwLine, Point maskInOut[4]);
 
     private:
         AntiAliasingMode _aaMode;
@@ -989,7 +987,7 @@ inline bool Rasterizer2::arcUtil_pointIsInsideDegRange(Pt::int32_t x, Pt::int32_
     return angle >= degBegin && angle <= degEnd;
 }
 
-inline void Rasterizer2::arcUtil_detXWLineDirection(XWLineData& xwLineData)
+inline void Rasterizer2::arcUtil_detXWLineDirection(ArcXWLineData& xwLineData)
 {
     // Calculate the direction vector
     const Pt::int32_t vx = xwLineData.x2 - xwLineData.x1; // Vector from the begin point to the end point
