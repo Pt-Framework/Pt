@@ -1455,6 +1455,9 @@
     <ClInclude Include="..\..\include\Pt\Hmi\TextBlock.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\LayoutEvent.h">
+      <Filter>Pt-Hmi\Events</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">

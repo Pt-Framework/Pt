@@ -380,9 +380,26 @@ void ListBox::removeItem(ListBoxItem& item)
 }
 
 
-const Gfx::SizeF& ListBox::itemsSize() const
+Gfx::SizeF ListBox::itemsSize() const
 {
-    return _layout.size();
+    Gfx::SizeF contentSize;
+
+    std::vector<Pt::Hmi::Widget*>::const_iterator it;
+    for(it = _layout.widgets().begin(); it != _layout.widgets().end(); ++it)
+    {
+      Widget* item = *it;
+      Pt::Gfx::SizeF itemSize = item->preferredSize();
+
+      contentSize.addHeight( itemSize.height() );
+      contentSize.addHeight( item->margin().topBottom() );
+
+      contentSize.setWidth( std::max( contentSize.width(), itemSize.width() ) );
+    }
+
+    contentSize.addWidth( _layout.padding().leftRight() );
+    contentSize.addHeight( _layout.padding().topBottom() );
+
+    return contentSize;
 }
 
 
@@ -459,6 +476,17 @@ void ListBox::setRenderer(ListBoxRenderer* renderer)
 }
 
 
+void ListBox::onLayout()
+{
+    Base::onLayout();
+
+    Gfx::SizeF s = _layout.size();
+    s.setWidth( size().width() - _scrollView.margin().leftRight() );
+
+    _layout.resize(s);
+}
+
+
 void ListBox::onInvalidate()
 {
     Base::onInvalidate();
@@ -508,17 +536,6 @@ void ListBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
         _renderer->renderFrame(*this, options,
                                painter, rect, _pen);
     }
-}
-
-
-void ListBox::onResizeEvent(const ResizeEvent& ev)
-{
-    Base::onResizeEvent(ev);
-
-    Gfx::SizeF size = _layout.size();
-    size.setWidth( _scrollView.size().width() );
-
-    _layout.resize(size);
 }
 
 } // namespace

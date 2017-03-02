@@ -81,6 +81,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\KeyEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Label.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Layout.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\LayoutEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\LeaveEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\LineEdit.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\LineEditor.h" />

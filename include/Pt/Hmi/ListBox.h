@@ -161,7 +161,7 @@ class PT_HMI_API ListBox : public Control
 
         void removeItem(ListBoxItem& item);
 
-        const Gfx::SizeF& itemsSize() const;
+        Gfx::SizeF itemsSize() const;
 
         Pt::Signal<ListBoxItem&>& selected();
 
@@ -181,12 +181,11 @@ class PT_HMI_API ListBox : public Control
         void setRenderer(ListBoxRenderer* renderer);
 
     protected:
+        virtual void onLayout();
+
         virtual void onInvalidate();
     
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
-    
-    protected:
-        virtual void onResizeEvent(const ResizeEvent& ev);
 
     private:
         void onItemSelected(ListBoxItem& item);

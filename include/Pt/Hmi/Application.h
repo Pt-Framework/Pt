@@ -46,6 +46,7 @@
 #include <Pt/Hmi/LeaveEvent.h>
 #include <Pt/Hmi/FocusEvent.h>
 #include <Pt/Hmi/InvalidateEvent.h>
+#include <Pt/Hmi/LayoutEvent.h>
 #include <Pt/Hmi/Style.h>
 #include <Pt/Hmi/StyleOptions.h>
 #include <Pt/Hmi/PlatinumStyle.h>
@@ -159,6 +160,8 @@ class PT_HMI_API Application : public Pt::System::Application
         void onWindowStateEvent(const WindowStateEvent& ev);
 
         void onInvalidateEvent(const InvalidateEvent& ev);
+
+        void onLayoutEvent(const LayoutEvent& ev);
 
     private:
         void registerVisual(Visual& visual);

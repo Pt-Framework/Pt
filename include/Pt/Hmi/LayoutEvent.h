@@ -1,5 +1,4 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
-   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2017 Marc Boris Duerner 
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -27,8 +26,8 @@
   MA 02110-1301 USA
 */
 
-#ifndef Pt_Hmi_InvalidateEvent_h
-#define Pt_Hmi_InvalidateEvent_h
+#ifndef Pt_Hmi_LayoutEvent_h
+#define Pt_Hmi_LayoutEvent_h
 
 #include <Pt/Types.h>
 #include <Pt/Hmi/Api.h>
@@ -38,15 +37,15 @@ namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API InvalidateEvent : public Pt::BasicEvent<InvalidateEvent>
+class PT_HMI_API LayoutEvent : public Pt::BasicEvent<LayoutEvent>
 {
   public:
-    InvalidateEvent(Pt::uint64_t vid)
+    LayoutEvent(Pt::uint64_t vid)
     : _vid(vid)
     {
     }
 
-    virtual ~InvalidateEvent()
+    virtual ~LayoutEvent()
     {
     }
 

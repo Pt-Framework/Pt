@@ -41,6 +41,7 @@
 #include <Pt/Hmi/LeaveEvent.h>
 #include <Pt/Hmi/EnableEvent.h>
 #include <Pt/Hmi/InvalidateEvent.h>
+#include <Pt/Hmi/LayoutEvent.h>
 #include <Pt/Hmi/ShowEvent.h>
 #include <Pt/Hmi/FocusEvent.h>
 #include <Pt/Hmi/Cursor.h>
@@ -160,6 +161,8 @@ class PT_HMI_API Widget : public Visual
 
         void invalidate();
 
+        void layout();
+
         void update();
 
         void update(const Gfx::RectF& rect);
@@ -271,6 +274,8 @@ class PT_HMI_API Widget : public Visual
 
         virtual void onInvalidateEvent(const InvalidateEvent& ev);
 
+        virtual void onLayoutEvent(const LayoutEvent& ev);
+
         virtual void onEnableEvent(const EnableEvent& ev);
 
         virtual void onShowEvent(const ShowEvent& ev );
@@ -315,6 +320,7 @@ class PT_HMI_API Widget : public Visual
         Widget*                      _content;
 
         int                          _invalidates;
+        int                          _layouts;
 
         bool                         _visible;
         bool                         _enabled;

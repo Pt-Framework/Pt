@@ -44,6 +44,7 @@ Widget::Widget()
 , _window(0)
 , _content(0)
 , _invalidates(0)
+, _layouts(0)
 , _visible(true)
 , _enabled(true)
 , _enabledState(true)
@@ -70,6 +71,7 @@ Widget::Widget()
     _eventReady += Pt::slot(*this, &Widget::onFocusEvent);
     _eventReady += Pt::slot(*this, &Widget::onShowEvent);
     _eventReady += Pt::slot(*this, &Widget::onInvalidateEvent);
+    _eventReady += Pt::slot(*this, &Widget::onLayoutEvent);
 }
 
 
@@ -135,7 +137,7 @@ void Widget::add(Widget& widget)
 
     onAddWidget(widget);
 
-    onLayout();
+    layout();
 }
 
 
@@ -162,7 +164,7 @@ void Widget::remove(Widget& widget)
     
     onRemoveWidget(widget);
 
-    onLayout();
+    layout();
 }
 
 
@@ -545,8 +547,28 @@ void Widget::onInvalidate()
     if( size != preferredSize() )
     {
         if( parent() )
-           parent()->onLayout();
+           parent()->layout();
     }
+}
+
+
+void Widget::layout()
+{
+    ++_layouts;
+
+    LayoutEvent ev(vid());
+    Application::instance().loop().commitEvent(ev);
+} 
+
+
+void Widget::onLayoutEvent(const LayoutEvent& ev)
+{
+    --_layouts;
+
+    if(_layouts > 0)
+      return;
+
+    onLayout();
 }
 
 
@@ -568,7 +590,7 @@ void Widget::setAutoSize(bool a)
     if( size != preferredSize() )
     {
         if( parent() )
-            parent()->onLayout();
+            parent()->layout();
     }
 }
 
@@ -660,7 +682,7 @@ void Widget::show(bool s)
 void Widget::onShowEvent(const ShowEvent& ev )
 {
     if( parent() )
-        parent()->onLayout();
+        parent()->layout();
 }
 
 
@@ -772,7 +794,7 @@ void Widget::onMoveEvent(const MoveEvent& ev)
     Widget* parentWidget = parent();
     if( parentWidget /*&& parentWidget->vid() != ev.origin()*/ )
     {
-        parentWidget->onLayout();
+        parentWidget->layout();
     }
 }
 
@@ -804,12 +826,12 @@ void Widget::resize(const Gfx::SizeF& s, Pt::uint64_t origin)
 
 void Widget::onResizeEvent(const ResizeEvent& ev)
 {   
-    onLayout();
+    layout();
 
     Widget* parentWidget = parent();
     if( parentWidget /*&& parentWidget->vid() != ev.origin()*/ )
     {
-        parentWidget->onLayout();
+        parentWidget->layout();
     }
 }
 
@@ -855,7 +877,7 @@ void Widget::setMargin(const Spacing& s)
     _margin = s;
 
     if( parent() )
-       parent()->onLayout();
+       parent()->layout();
 }
 
 
@@ -864,7 +886,7 @@ void Widget::setMargin(double n)
     _margin.set(n);
 
     if( parent() )
-       parent()->onLayout();
+       parent()->layout();
 }
 
 
@@ -873,7 +895,7 @@ void Widget::setMargin(double horiz, double vertical)
     _margin.set(horiz, vertical);
 
     if( parent() )
-       parent()->onLayout();
+       parent()->layout();
 }
 
 
@@ -886,21 +908,21 @@ const Spacing& Widget::padding() const
 void Widget::setPadding( const Spacing& p )
 {
     _padding = p;
-    onLayout();
+    layout();
 }
 
 
 void Widget::setPadding(double n)
 {
     _padding.set(n);
-    onLayout();
+    layout();
 }
 
 
 void Widget::setPadding(double horiz, double vertical)
 {
     _padding.set(horiz, vertical);
-    onLayout();
+    layout();
 }
 
 

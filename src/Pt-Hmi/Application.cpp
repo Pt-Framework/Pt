@@ -76,6 +76,7 @@ Application::Application(int argc, char** argv)
     loop().eventReceived() += Pt::slot(*this, &Application::onFocusEvent );
     loop().eventReceived() += Pt::slot(*this, &Application::onWindowStateEvent);
     loop().eventReceived() += Pt::slot(*this, &Application::onInvalidateEvent);
+    loop().eventReceived() += Pt::slot(*this, &Application::onLayoutEvent);
 
     setInputMethod(_defaultInputMethod);
 }
@@ -740,6 +741,17 @@ void Application::onWindowStateEvent(const WindowStateEvent& ev )
 
 
 void Application::onInvalidateEvent(const InvalidateEvent& ev)
+{
+    VisualMap::iterator it = _visuals.find( ev.vid() );
+
+    if( it == _visuals.end() )
+        return;
+
+    it->second->processEvent(ev);
+}
+
+
+void Application::onLayoutEvent(const LayoutEvent& ev)
 {
     VisualMap::iterator it = _visuals.find( ev.vid() );
 

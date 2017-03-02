@@ -63,7 +63,7 @@ void ComboBoxMenu::removeItem(ListBoxItem& item)
 }
 
 
-const Gfx::SizeF& ComboBoxMenu::itemsSize() const
+Gfx::SizeF ComboBoxMenu::itemsSize() const
 {
     return _items.itemsSize();
 }
