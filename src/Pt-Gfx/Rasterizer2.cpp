@@ -219,11 +219,11 @@ void Rasterizer2::strokeText( const Point& to, const Pt::String& text )
 void Rasterizer2::updatePenPattern()
 {
     // Predefined patterns
-    static const Pt::uint8_t patternDot       [] = { 0, 1, 0, 0                };
-    static const Pt::uint8_t patternDoubleDot [] = { 0, 1, 0, 0, 1, 0, 0, 0, 0 };
-    static const Pt::uint8_t patternDash      [] = { 0, 1, 1, 1, 0, 0                         };
-    static const Pt::uint8_t patternDoubleDash[] = { 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0 };
-    static const Pt::uint8_t patternDotDash   [] = { 0, 1, 0, 0, 1, 1, 1, 0, 0 };
+    static const Pt::uint8_t patternDot       [] = { 0, 1, 0, 0, 0, 0                                 };
+    static const Pt::uint8_t patternDoubleDot [] = { 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0               };
+    static const Pt::uint8_t patternDash      [] = { 0, 1, 1, 1, 0, 0, 0, 0,                          };
+    static const Pt::uint8_t patternDoubleDash[] = { 0, 1, 1, 1, 0, 0,  0, 1, 1, 1, 0, 0, 0, 0, 0, 0  };
+    static const Pt::uint8_t patternDotDash   [] = { 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0               };
 
     Pt::uint8_t patternUserDefined[32];
 
