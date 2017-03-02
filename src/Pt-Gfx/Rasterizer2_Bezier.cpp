@@ -133,12 +133,11 @@ void Rasterizer2::rasterOnePixelBezierCurve(Pt::int32_t x1, Pt::int32_t y1, Pt::
     Pt::int32_t yy = y1 - y2;
     Pt::int32_t xy;
 
-    // Curvature
-    float dx, dy, ed, err;
-    float cur = xx * sy - yy * sx;
-
     // Sign of gradient must not change
     if(xx * sx > 0 || yy * sy > 0) return;
+
+    // Curvature
+    float cur = xx * sy - yy * sx;
 
     // Begin with longer part; swap the begin and end points as needed
     if(sx * sx + sy * sy > xx * xx + yy * yy) {
@@ -182,13 +181,14 @@ void Rasterizer2::rasterOnePixelBezierCurve(Pt::int32_t x1, Pt::int32_t y1, Pt::
     }
 
     // Differences 1st degree
-    dx = 4 * sy * cur * (x2 - x1) + xx - xy;
-    dy = 4 * sx * cur * (y1 - y2) + yy - xy;
+    float dx = 4.0f * sy * cur * (x2 - x1) + xx - xy;
+    float dy = 4.0f * sx * cur * (y1 - y2) + yy - xy;
 
     // Error 1st step
-    xx  += xx;
-    yy  += yy;
-    err  = dx + dy + xy;
+    float err = dx + dy + xy;
+
+    xx += xx;
+    yy += yy;
 
     // Calculate the incremental factor of the pattern indexing counter as needed
     Pt::int32_t fpiCtrInc = 0;
@@ -207,6 +207,9 @@ void Rasterizer2::rasterOnePixelBezierCurve(Pt::int32_t x1, Pt::int32_t y1, Pt::
         fpiCtrInc = FIXED_POINT_FROM_INT(PATTERN_BUFFER_SCALE_FACTOR * s321) / l321;
     }
 
+    // Approximated error distance
+    float ed;
+
     // Draw with anti-aliasing
     if(useAA) {
         Pt::uint8_t alpha;
@@ -223,9 +226,9 @@ void Rasterizer2::rasterOnePixelBezierCurve(Pt::int32_t x1, Pt::int32_t y1, Pt::
             // Approximate the error distance
             cur = std::min(dx + xy, -xy - dy);
             ed  = std::max(dx + xy, -xy - dy);
-            ed  = (ed + 2 * ed * cur * cur / (4 * ed * ed + cur * cur));
+            ed  = (ed + 2.0f * ed * cur * cur / (4.0f * ed * ed + cur * cur));
             // Plot curve
-            alpha = 255 / ed * ::fabs(err - dx - dy - xy);
+            alpha = 255.0f / ed * ::fabs(err - dx - dy - xy);
             XW_SET_PIXEL(_image, color, x1, y1, alpha, patAlpha);
             if(maskInOut) {
                 if(firstPixel0) {
@@ -238,13 +241,13 @@ void Rasterizer2::rasterOnePixelBezierCurve(Pt::int32_t x1, Pt::int32_t y1, Pt::
             if(x1 == x3 && y1 == y3) return;
             x2  = x1;
             cur = dx - err;
-            y2  = (2 * err + dy) < 0 ? 1 : 0;
+            y2  = ( (2.0f * err + dy) < 0 ) ? 1 : 0;
             // X step
-            if(2 * err + dx > 0) {
+            if( (2.0f * err + dx) > 0 ) {
                 // Plot curve
                 if(err - dy < ed) {
                     // Set pixel
-                    alpha = 255 / ed * ::fabs(err - dy);
+                    alpha = 255.0f / ed * ::fabs(err - dy);
                     XW_SET_PIXEL(_image, color, x1, y1 + sy, alpha, patAlpha);
                     // Store back the start and end coordinates to the mask as needed
                     if(maskInOut) {
@@ -266,7 +269,7 @@ void Rasterizer2::rasterOnePixelBezierCurve(Pt::int32_t x1, Pt::int32_t y1, Pt::
                 // Plot curve
                 if(cur < ed) {
                     // Set pixel
-                    alpha = 255 / ed * ::fabs(cur);
+                    alpha = 255.0f / ed * ::fabs(cur);
                     XW_SET_PIXEL(_image, color, x2 + sx, y1, alpha, patAlpha);
                     // Store back the start and end coordinates to the mask as needed
                     if(maskInOut) {
@@ -283,7 +286,7 @@ void Rasterizer2::rasterOnePixelBezierCurve(Pt::int32_t x1, Pt::int32_t y1, Pt::
                 dx  += xx;
                 err += dx;
             }
-        } while(dy < dx); // Done if the gradient negates itself
+        } while(dy < dx); // Done when the gradient has negated itself
     }
 
     // Draw without anti-aliasing
@@ -306,13 +309,11 @@ void Rasterizer2::rasterOnePixelBezierCurve(Pt::int32_t x1, Pt::int32_t y1, Pt::
             }            // Plot curve
             XW_SET_PIXEL(_image, color, x1, y1, 0, patAlpha);
             // Check if we have just drawn the last pixel
-            if(x1 == x3 && y1 == y3) {
-                return;
-            }
+            if(x1 == x3 && y1 == y3) return;
             // Save value for test of Y step
-            y2 = (2 * err < dx) ? 1 : 0;
+            y2 = (2.0f * err < dx) ? 1 : 0;
             // X step
-            if(2 * err > dy) {
+            if( (2.0f * err) > dy ) {
                 x1  += sx;
                 dx  -= xy;
                 dy  += yy;
@@ -325,7 +326,7 @@ void Rasterizer2::rasterOnePixelBezierCurve(Pt::int32_t x1, Pt::int32_t y1, Pt::
                 dx  += xx;
                 err += dx;
             }
-        } while(dy < dx); // Done if the gradient negates itself
+        } while(dy < dx); // Done when the gradient has negated itself
     }
 
     // Undefine the helper macro

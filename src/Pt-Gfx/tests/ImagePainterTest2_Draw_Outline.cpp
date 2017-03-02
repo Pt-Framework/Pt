@@ -99,17 +99,17 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
     painter.drawLine( PointF(500, 500), PointF(200, 200) );
     painter.drawLine( PointF(300, 150), PointF(700,  50) );
 
-    painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::DoubleDot ) );
+    painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::DoubleDash ) );
     painter.drawLine( PointF(550, 500), PointF(250, 200) );
     painter.drawLine( PointF(300, 200), PointF(700, 100) );
 
-    painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::Dash ) );
-    painter.drawLine( PointF(870,  11), PointF(870, 500) );
+    painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::Dot ) );
+    //painter.drawLine( PointF(870,  11), PointF(870, 500) );
     painter.drawLine( PointF(880,  11), PointF(882, 500) );
     painter.drawLine( PointF( 10, 540), PointF(781, 540) );
     painter.drawLine( PointF(781, 552), PointF( 10, 550) );
 
-    painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::DoubleDash ) );
+    painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::DoubleDot ) );
     painter.drawLine( PointF(970,  11), PointF(970, 500) );
     painter.drawLine( PointF(980,  11), PointF(982, 500) );
     painter.drawLine( PointF( 10, 440), PointF(781, 440) );

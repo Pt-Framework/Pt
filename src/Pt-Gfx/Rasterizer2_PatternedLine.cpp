@@ -221,21 +221,25 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentXWAA(Pt::int32_t x1, Pt::in
     Pt::int32_t fy2 = FIXED_POINT_FROM_INT(y2);
 
     // A helper macro to set pixel
-    #define XW_SET_PIXEL(IMG, COL, X, Y, A, PA)                                                  \
-        do {                                                                                     \
-            /* Check the boundary limit, just in case */                                         \
-            if( (X) < 0 || (X) >= IMG->width() || (Y) < 0 || (Y) >= IMG->height() ) break;       \
-            /* Check if we should skip drawing the pixel */                                      \
-            bool skipDrawing = false;                                                            \
-            for(Pt::int32_t j = 0; j < 4; ++j) {                                                 \
-                if( (X) != mx[j] || (Y) != my[j] ) continue;                                     \
-                skipDrawing = true;                                                              \
-                break;                                                                           \
-            }                                                                                    \
-            if(skipDrawing) break;                                                               \
-            /* Set the pixel */                                                                  \
-            Pixel PIX(IMG->view(), X, Y);                                                        \
-            IMG->format().setPixel(PIX, COL, _compositionMode, (Pt::uint32_t) (A) * (PA) / 255); \
+    #define XW_SET_PIXEL(IMG, COL, X, Y, A, PA)                                   \
+        do {                                                                      \
+            /* Clip the point */                                                  \
+            if( (X) < _currentClip.left() || (X) > _currentClip.right () ||       \
+                (Y) < _currentClip.top () || (Y) > _currentClip.bottom() ) break; \
+            /* Check if we should skip drawing the pixel */                       \
+            bool skipDrawing = false;                                             \
+            for(Pt::int32_t j = 0; j < 4; ++j) {                                  \
+                if( (X) != mx[j] || (Y) != my[j] ) continue;                      \
+                skipDrawing = true;                                               \
+                break;                                                            \
+            }                                                                     \
+            if(skipDrawing) break;                                                \
+            /* Combine and check the alpha */                                     \
+            Pt::uint8_t calpha = (Pt::uint32_t) (A) * (PA) / 255;                 \
+            if(!calpha) break;                                                    \
+            /* Set the pixel */                                                   \
+            Pixel PIX(IMG->view(), X, Y);                                         \
+            IMG->format().setPixel(PIX, COL, _compositionMode, calpha);           \
         } while(false)
 
     // Swap the values as needed
@@ -246,13 +250,18 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentXWAA(Pt::int32_t x1, Pt::in
     if(steep) {
         std::swap(fx1, fy1);
         std::swap(fx2, fy2);
-        //fpiCtrInOut = _fpatternMaxCtr - fpiCtrInOut;
     }
 
     if(fx1 > fx2) {
         std::swap(fx1, fx2);
         std::swap(fy1, fy2);
-        //fpiCtrInOut = _fpatternMaxCtr - fpiCtrInOut;
+
+        while(true) {
+            fpiCtrInOut += fpiCtrInc;
+            if(fpiCtrInOut <= _fpatternMaxCtr) continue;
+            fpiCtrInOut = 0;
+            break;
+        }
     }
 
     // Handle the gradient, starting point, and ending point
