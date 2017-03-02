@@ -225,37 +225,37 @@ static size_t benchDrawBezier(int loopCount, Pen::Style style, CompositionMode c
 
         ip2->setAntiAliasingMode(antiAliasingMode);
 
-        const PointF bezier1[] = {
-            PointF(200 + 100,  50),
+        const PointF bezier1[] = { // CCW
+            PointF(300 + 100, 100),
             PointF(265 + 100,  65),
-            PointF(300 + 100, 100)
+            PointF(200 + 100,  50)
         };
         ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
         ip2->drawPolybezier( bezier1, sizeof(bezier1) / sizeof(bezier1[0]), false );
 
-        const PointF bezier2[] = {
-            // Top left
-            PointF(400 - 350,  50 + 300),
-            PointF(400 - 350,  30 + 300),
-            PointF(420 - 350,  30 + 300),
-            // Top middle
-            PointF(450 - 350,  30 + 300),
-            // Top right
-            PointF(480 - 350,  30 + 300),
-            PointF(500 - 350,  30 + 300),
-            PointF(500 - 350,  50 + 300),
-            // Center right
-            PointF(500 - 350,  70 + 300),
-            // Bottom right
-            PointF(500 - 350,  90 + 300),
-            PointF(500 - 350, 110 + 300),
-            PointF(480 - 350, 110 + 300),
+        const PointF bezier2[] = { // CCW
+            // Bottom left
+            PointF(400 - 350,  90 + 300),
+            PointF(400 - 350, 110 + 300),
+            PointF(420 - 350, 110 + 300),
             // Bottom middle
             PointF(450 - 350, 110 + 300),
-            // Bottom left
-            PointF(420 - 350, 110 + 300),
-            PointF(400 - 350, 110 + 300),
-            PointF(400 - 350,  90 + 300),
+            // Bottom right
+            PointF(480 - 350, 110 + 300),
+            PointF(500 - 350, 110 + 300),
+            PointF(500 - 350,  90 + 300),
+            // Center right
+            PointF(500 - 350,  70 + 300),
+            // Top right
+            PointF(500 - 350,  50 + 300),
+            PointF(500 - 350,  30 + 300),
+            PointF(480 - 350,  30 + 300),
+            // Top middle
+            PointF(450 - 350,  30 + 300),
+            // Top left
+            PointF(420 - 350,  30 + 300),
+            PointF(400 - 350,  30 + 300),
+            PointF(400 - 350,  50 + 300),
             // Center left
             PointF(400 - 350,  70 + 300)
         };

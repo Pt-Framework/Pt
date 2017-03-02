@@ -49,19 +49,19 @@ static void testDrawSolidLine(const char* title, Image& image, Painter& painter)
     painter.setPen( Color::fromRgb8(0, 255, 255, 175) ); painter.drawText( PointF(100, 225), "Hello world!" );
 
     if(ip2) {
-        const PointF bezier1a[] = {
-            PointF(200,  50),
+        const PointF bezier1a[] = { // CCW
+            PointF(300, 100),
             PointF(265,  65),
-            PointF(300, 100)
+            PointF(200,  50)
         };
         ip2->setAntiAliasingMode(AntiAliasingMode::None);
         ip2->setPen( Pen( Color::fromRgb8(255, 127, 255, 175), 1, Pen::Solid ) );
         ip2->drawPolybezier( bezier1a, sizeof(bezier1a) / sizeof(bezier1a[0]), false );
 
-        const PointF bezier1b[] = {
-            PointF(200 + 100,  50),
+        const PointF bezier1b[] = { // CCW
+            PointF(300 + 100, 100),
             PointF(265 + 100,  65),
-            PointF(300 + 100, 100)
+            PointF(200 + 100,  50)
         };
         ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
         ip2->setPen( Pen( Color::fromRgb8(255, 127, 255, 175), 1, Pen::Solid ) );
@@ -137,29 +137,29 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
     painter.drawRect( RectF(PointF(260, 20), SizeF(180, 80)) );
 
     if(ip2) {
-        const PointF bezier2a[] = {
-            // Top left
-            PointF(400 - 350,  50 + 300),
-            PointF(400 - 350,  30 + 300),
-            PointF(420 - 350,  30 + 300),
-            // Top middle
-            PointF(450 - 350,  30 + 300),
-            // Top right
-            PointF(480 - 350,  30 + 300),
-            PointF(500 - 350,  30 + 300),
-            PointF(500 - 350,  50 + 300),
-            // Center right
-            PointF(500 - 350,  70 + 300),
-            // Bottom right
-            PointF(500 - 350,  90 + 300),
-            PointF(500 - 350, 110 + 300),
-            PointF(480 - 350, 110 + 300),
+        const PointF bezier2a[] = { // CCW
+            // Bottom left
+            PointF(400 - 350,  90 + 300),
+            PointF(400 - 350, 110 + 300),
+            PointF(420 - 350, 110 + 300),
             // Bottom middle
             PointF(450 - 350, 110 + 300),
-            // Bottom left
-            PointF(420 - 350, 110 + 300),
-            PointF(400 - 350, 110 + 300),
-            PointF(400 - 350,  90 + 300),
+            // Bottom right
+            PointF(480 - 350, 110 + 300),
+            PointF(500 - 350, 110 + 300),
+            PointF(500 - 350,  90 + 300),
+            // Center right
+            PointF(500 - 350,  70 + 300),
+            // Top right
+            PointF(500 - 350,  50 + 300),
+            PointF(500 - 350,  30 + 300),
+            PointF(480 - 350,  30 + 300),
+            // Top middle
+            PointF(450 - 350,  30 + 300),
+            // Top left
+            PointF(420 - 350,  30 + 300),
+            PointF(400 - 350,  30 + 300),
+            PointF(400 - 350,  50 + 300),
             // Center left
             PointF(400 - 350,  70 + 300)
         };
@@ -167,29 +167,29 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
         ip2->setPen( Pen( Color::fromRgb8(255, 127, 255, 175), 1, Pen::Dash ) );
         ip2->drawPolybezier( bezier2a, sizeof(bezier2a) / sizeof(bezier2a[0]), true );
 
-        const PointF bezier2b[] = {
-            // Top left
-            PointF(400 - 200,  50 + 300),
-            PointF(400 - 200,  30 + 300),
-            PointF(420 - 200,  30 + 300),
-            // Top middle
-            PointF(450 - 200,  30 + 300),
-            // Top right
-            PointF(480 - 200,  30 + 300),
-            PointF(500 - 200,  30 + 300),
-            PointF(500 - 200,  50 + 300),
-            // Center right
-            PointF(500 - 200,  70 + 300),
-            // Bottom right
-            PointF(500 - 200,  90 + 300),
-            PointF(500 - 200, 110 + 300),
-            PointF(480 - 200, 110 + 300),
+        const PointF bezier2b[] = { // CCW
+            // Bottom left
+            PointF(400 - 200,  90 + 300),
+            PointF(400 - 200, 110 + 300),
+            PointF(420 - 200, 110 + 300),
             // Bottom middle
             PointF(450 - 200, 110 + 300),
-            // Bottom left
-            PointF(420 - 200, 110 + 300),
-            PointF(400 - 200, 110 + 300),
-            PointF(400 - 200,  90 + 300),
+            // Bottom right
+            PointF(480 - 200, 110 + 300),
+            PointF(500 - 200, 110 + 300),
+            PointF(500 - 200,  90 + 300),
+            // Center right
+            PointF(500 - 200,  70 + 300),
+            // Top right
+            PointF(500 - 200,  50 + 300),
+            PointF(500 - 200,  30 + 300),
+            PointF(480 - 200,  30 + 300),
+            // Top middle
+            PointF(450 - 200,  30 + 300),
+            // Top left
+            PointF(420 - 200,  30 + 300),
+            PointF(400 - 200,  30 + 300),
+            PointF(400 - 200,  50 + 300),
             // Center left
             PointF(400 - 200,  70 + 300)
         };
