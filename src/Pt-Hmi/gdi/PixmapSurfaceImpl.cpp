@@ -164,13 +164,12 @@ PixmapSurfaceImpl::PixmapSurfaceImpl()
 , _dc(0)
 , _gradientBrush(false)
 {
-    _size = Gfx::SizeF(10,10);
+    _size = Gfx::SizeF(10 ,10);
 
-    HDC screenDC = CreateDC(_T("DISPLAY"), NULL, NULL, NULL);
+    HDC screenDC = GetDC(NULL);
     _dc = CreateCompatibleDC(screenDC);
     _bitmap = CreateCompatibleBitmap(screenDC, (int)_size.width(), (int)_size.height());
-    
-    DeleteDC(screenDC);
+    ReleaseDC(NULL, screenDC);
 
     _oldPen    = (HPEN) GetCurrentObject(_dc, OBJ_PEN);
     _oldBrush  = (HBRUSH) GetCurrentObject(_dc, OBJ_BRUSH);
@@ -235,7 +234,10 @@ void PixmapSurfaceImpl::resize(const Gfx::SizeF& size)
     _size = size;
     Gfx::Size nsize = Application::instance().screen().fromUnit(_size);
     
-    HBITMAP bitmap = CreateCompatibleBitmap(_dc, nsize.width(), nsize.height());
+    HDC screenDC = GetDC(NULL);
+    HBITMAP bitmap = CreateCompatibleBitmap(screenDC, nsize.width(), nsize.height());
+    ReleaseDC(NULL, screenDC);
+
     SelectObject(_dc, bitmap);
     
     DeleteObject(_bitmap);
