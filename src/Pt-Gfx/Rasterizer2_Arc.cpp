@@ -115,8 +115,8 @@ void Rasterizer2::rasterArcAreaChord(FilledArcInfo& fai)
     if(!fai.antiAlias) return;
 
     // Draw the anti-aliased circumference pixels
-    // ### TODO: * Fix missing pixels in all mode !!! ###
-    // ### TODO: * Fix out-of-place brighter-pixel artifacts in SourceOver mode !!! ###
+    // TODO: * Fix missing pixels in all mode !
+    //       * Fix out-of-place brighter-pixel artifacts in SourceOver mode !
     arcUtil_rasterCircumferencePixels(fai);
 
     // Draw the closing line
@@ -173,8 +173,8 @@ void Rasterizer2::rasterArcAreaPie(FilledArcInfo& fai)
     if(!fai.antiAlias) return;
 
     // Draw the anti-aliased circumference pixels
-    // ### TODO: * Fix missing pixels in all mode !!! ###
-    // ### TODO: * Fix out-of-place brighter-pixel artifacts in SourceOver mode !!! ###
+    // TODO: * Fix missing pixels in all mode !
+    //       * Fix out-of-place brighter-pixel artifacts in SourceOver mode !
     arcUtil_rasterCircumferencePixels(fai);
 
     // Draw the closing lines
