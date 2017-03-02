@@ -36,7 +36,7 @@ namespace Gfx {
 
 
 // ======================================================================================
-// ===== Public Member Functions ========================================================
+// ===== Private Member Functions =======================================================
 // ======================================================================================
 
 void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2)
@@ -371,26 +371,6 @@ void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt
     }
 }
 
-void Rasterizer2::fillOneScanlineNoAA(Pt::int32_t from, Pt::int32_t to, Pt::int32_t pixelY, Pt::int32_t minX, Pt::int32_t minY)
-{
-    // Check if the Y coordinate is outside the clipping region
-    if(pixelY < _currentClip.top() || pixelY > _currentClip.bottom()) return;
-
-    // Check and limit the X coordinates
-    if(from < _currentClip.left ()) from = _currentClip.left ();
-    if(to   > _currentClip.right()) to   = _currentClip.right();
-
-    if(to < from) return;
-
-    // Draw the scanline
-    rasterScanline(from - minX, to - minX, pixelY - minY, minX, minY, _brush.color());
-}
-
-
-// ======================================================================================
-// ===== Private Member Functions =======================================================
-// ======================================================================================
-
 void Rasterizer2::rasterScanline(
     Pt::int32_t  iterL, Pt::int32_t iterR, Pt::int32_t pixelY,
     Pt::int32_t  minX,  Pt::int32_t minY,
@@ -459,6 +439,21 @@ void Rasterizer2::rasterScanline(
     //    spanWidth -= n;
     //    iterX     += n;
     //}
+}
+
+void Rasterizer2::rasterScanlineWithClipping(Pt::int32_t from, Pt::int32_t to, Pt::int32_t pixelY, Pt::int32_t minX, Pt::int32_t minY)
+{
+    // Check if the Y coordinate is outside the clipping region
+    if(pixelY < _currentClip.top() || pixelY > _currentClip.bottom()) return;
+
+    // Check and limit the X coordinates
+    if(from < _currentClip.left ()) from = _currentClip.left ();
+    if(to   > _currentClip.right()) to   = _currentClip.right();
+
+    if(to < from) return;
+
+    // Draw the scanline
+    rasterScanline(from - minX, to - minX, pixelY - minY, minX, minY, _brush.color());
 }
 
 

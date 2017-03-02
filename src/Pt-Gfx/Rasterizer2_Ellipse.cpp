@@ -460,7 +460,7 @@ void Rasterizer2::fillEllipse(const Point& topLeft, const Size& size)
     for(size_t i = 0; i < scanlines.size(); ++i) {
         const EAScanlineElement& sle = scanlines[i];
         if(sle.isNull()) continue;
-        fillOneScanlineNoAA(sle.from, sle.to, i + minY - 1, minX, minY);
+        rasterScanlineWithClipping(sle.from, sle.to, i + minY - 1, minX, minY);
     }
 
     scanlines.clear();
@@ -538,15 +538,15 @@ void Rasterizer2::rasterEllipseAreaNoAA(const Point& topLeft, const Size& size)
             width += 2;
         }
         else if( (t - a2 * y) > crit2 )  {
-            fillOneScanlineNoAA(xc - x, xc - x + width - errorX - 1, yc - y,          minX, minY);
-            fillOneScanlineNoAA(xc - x, xc - x + width - errorX - 1, yc + y - errorY, minX, minY);
+            rasterScanlineWithClipping(xc - x, xc - x + width - errorX - 1, yc - y,          minX, minY);
+            rasterScanlineWithClipping(xc - x, xc - x + width - errorX - 1, yc + y - errorY, minX, minY);
             --y;
             dyt += d2yt;
             t   += dyt;
         }
         else {
-            fillOneScanlineNoAA(xc - x, xc - x + width - errorX - 1, yc - y,          minX, minY);
-            fillOneScanlineNoAA(xc - x, xc - x + width - errorX - 1, yc + y - errorY, minX, minY);
+            rasterScanlineWithClipping(xc - x, xc - x + width - errorX - 1, yc - y,          minX, minY);
+            rasterScanlineWithClipping(xc - x, xc - x + width - errorX - 1, yc + y - errorY, minX, minY);
             ++x;
             dxt   += d2xt;
             t     += dxt;
@@ -558,7 +558,7 @@ void Rasterizer2::rasterEllipseAreaNoAA(const Point& topLeft, const Size& size)
     }
 
     if( !errorY || !b )
-        fillOneScanlineNoAA(xc - a,  xc + a, yc, minX, minY);
+        rasterScanlineWithClipping(xc - a,  xc + a, yc, minX, minY);
 }
 
 

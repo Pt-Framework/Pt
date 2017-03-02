@@ -106,7 +106,7 @@ void Rasterizer2::rasterArcAreaChord(FilledArcInfo& fai)
     for(size_t i = 0; i < scanlines.size(); ++i) {
         const EAScanlineElement& sle = scanlines[i];
         if(sle.isNull()) continue;
-        fillOneScanlineNoAA(sle.from, sle.to, i + fai.minY - 1, fai.minX, fai.minY);
+        rasterScanlineWithClipping(sle.from, sle.to, i + fai.minY - 1, fai.minX, fai.minY);
     }
 
     scanlines.clear();
@@ -156,14 +156,14 @@ void Rasterizer2::rasterArcAreaPie(FilledArcInfo& fai)
     for(size_t i = 0; i < scanlines1.size(); ++i) {
         const EAScanlineElement& sle = scanlines1[i];
         if(sle.isNull()) continue;
-        fillOneScanlineNoAA(sle.from, sle.to, i + fai.minY - 1, fai.minX, fai.minY);
+        rasterScanlineWithClipping(sle.from, sle.to, i + fai.minY - 1, fai.minX, fai.minY);
     }
 
     for(size_t i = 0; i < scanlines2.size(); ++i) {
         const EAScanlineElement& sle = scanlines2[i];
         if(sle.isNull()) continue;
         if(!scanlines1[i].isNull() && sle.from >= scanlines1[i].from && sle.to <= scanlines1[i].to) continue;
-        fillOneScanlineNoAA(sle.from, sle.to, i + fai.minY - 1, fai.minX, fai.minY);
+        rasterScanlineWithClipping(sle.from, sle.to, i + fai.minY - 1, fai.minX, fai.minY);
     }
 
     scanlines1.clear();
