@@ -501,23 +501,30 @@ void ComboBox::processKeyEvent(const KeyEvent& ev)
     if( ev.key().code() == Pt::Hmi::Key::ArrowLeft )
     {
         _editor.left();
+        invalidate();
     }
     else if( ev.key().code() == Pt::Hmi::Key::ArrowRight )
     {
         _editor.right();
+        invalidate();
     }
     else if( ev.key().code() == Pt::Hmi::Key::Return )
     {
+        invalidate();
         _returnPressed.send( _editor.text() );
     }
     else if( ev.key().code() == Pt::Hmi::Key::Delete )
     {
         _editor.del();
+        invalidate();
+
         _textEdited.send( _editor.text() );
     }
     else if( ev.key().code() == Pt::Hmi::Key::Backspace )
     {
         _editor.backspace();
+        invalidate();
+
         _textEdited.send( _editor.text() );
     }
     else
@@ -526,11 +533,11 @@ void ComboBox::processKeyEvent(const KeyEvent& ev)
         if( Pt::isprint(ch) )
         {
             _editor.insert(ch);
+            invalidate();
+
             _textEdited.send( _editor.text() );
         }
     }
-
-    invalidate();
 }
 
 

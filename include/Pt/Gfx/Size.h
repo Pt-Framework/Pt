@@ -111,6 +111,12 @@ class BasicSize {
             return *this;
         }
 
+        void add(const BasicSize& s)
+        {
+            _w += s._w;
+            _h += s._h;
+        }
+
         const BasicSize& operator=(const BasicSize& other)
         {
             _w = other._w; _h = other._h;

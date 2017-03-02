@@ -401,28 +401,34 @@ void LineEdit::onKeyEvent(const KeyEvent& ev)
     if( ev.key().code() == Pt::Hmi::Key::ArrowLeft )
     {
         _editor.left();
+        invalidate();
     }
     else if( ev.key().code() == Pt::Hmi::Key::ArrowRight )
     {
         _editor.right();
+        invalidate();
     }
     else if( ev.key().code() == Pt::Hmi::Key::Return )
     {
+        invalidate();
+        
         if( isAccepted() )
             _returnPressed.send( _editor.text() );
     }
     else if( ev.key().code() == Pt::Hmi::Key::Delete )
     {
-        _editor.del();
-
         _isTextChanged = true;
+        _editor.del();
+        invalidate();
+
         _textEdited.send( _editor.text() );
     }
     else if( ev.key().code() == Pt::Hmi::Key::Backspace )
     {
-        _editor.backspace();
-
         _isTextChanged = true;
+        _editor.backspace();
+        invalidate();
+
         _textEdited.send( _editor.text() );
     }
     else
@@ -430,14 +436,13 @@ void LineEdit::onKeyEvent(const KeyEvent& ev)
         Pt::Char ch = ev.unicode();
         if( Pt::isprint(ch) )
         {
-            _editor.insert(ch);
-
             _isTextChanged = true;
+            _editor.insert(ch);
+            invalidate();
+
             _textEdited.send( _editor.text() );
         }
     }
-
-    invalidate();
 }
 
 

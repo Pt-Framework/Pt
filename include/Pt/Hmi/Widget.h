@@ -314,6 +314,8 @@ class PT_HMI_API Widget : public Visual
         Window*                      _window; 
         Widget*                      _content;
 
+        int                          _invalidates;
+
         bool                         _visible;
         bool                         _enabled;
         bool                         _enabledState;

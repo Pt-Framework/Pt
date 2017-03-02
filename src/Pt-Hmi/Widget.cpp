@@ -43,6 +43,7 @@ Widget::Widget()
 : _parent(0)
 , _window(0)
 , _content(0)
+, _invalidates(0)
 , _visible(true)
 , _enabled(true)
 , _enabledState(true)
@@ -516,6 +517,8 @@ void Widget::onMnemonic()
 
 void Widget::invalidate()
 {
+    ++_invalidates;
+
     InvalidateEvent ev(vid());
     Application::instance().loop().commitEvent(ev);
 } 
@@ -523,7 +526,11 @@ void Widget::invalidate()
 
 void Widget::onInvalidateEvent(const InvalidateEvent& ev)
 {
-    // derived class might call update() if required
+    --_invalidates;
+
+    if(_invalidates > 0)
+      return;
+
     onInvalidate();
 }
 
