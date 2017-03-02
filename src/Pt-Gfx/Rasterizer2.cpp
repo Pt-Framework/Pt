@@ -347,7 +347,7 @@ void Rasterizer2::updatePenPattern()
     }
 
     // Store the maximum value of the counter in fixed-point
-    _fpatternMaxCtr = FIXED_POINT_FROM_INT(gctr - 1);
+    _fpatternMaxCtr = FIXED_POINT_FROM_INT(gctr);
 }
 
 void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)

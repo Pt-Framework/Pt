@@ -90,7 +90,7 @@ void Rasterizer2::rasterOnePixelPatternedXLineSegment(Pt::int32_t x1, Pt::int32_
         // Get alpha from the pattern
         Pt::uint8_t patAlpha = _patternBuffer[FIXED_POINT_TO_INT(fpiCtrInOut)];
         fpiCtrInOut += fpiCtrInc;
-        if(fpiCtrInOut > _fpatternMaxCtr) fpiCtrInOut = 0;
+        if(fpiCtrInOut >= _fpatternMaxCtr) fpiCtrInOut -= _fpatternMaxCtr;
         // Check if we should skip drawing the pixel
         bool skipDrawing = !patAlpha;
         for(Pt::int32_t i = 0; !skipDrawing && i < 4; ++i) {
@@ -162,7 +162,7 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentNoAA(Pt::int32_t x1, Pt::in
         // Get alpha from the pattern
         Pt::uint8_t patAlpha = _patternBuffer[FIXED_POINT_TO_INT(fpiCtrInOut)];
         fpiCtrInOut += fpiCtrInc;
-        if(fpiCtrInOut > _fpatternMaxCtr) fpiCtrInOut = 0;
+        if(fpiCtrInOut >= _fpatternMaxCtr) fpiCtrInOut -= _fpatternMaxCtr;
         // Check if we should skip drawing the pixel
         bool skipDrawing = !patAlpha;
         for(Pt::int32_t i = 0; !skipDrawing && i < 4; ++i) {
@@ -242,6 +242,9 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentXWAA(Pt::int32_t x1, Pt::in
             IMG->format().setPixel(PIX, COL, _compositionMode, calpha);           \
         } while(false)
 
+    // A flag that indicates if the line direction is swapped
+    bool swapDir = false;
+
     // Swap the values as needed
     const Pt::int32_t deltaX = (fx2 >= fx1) ? (fx2 - fx1) : (fx1 - fx2);
     const Pt::int32_t deltaY = (fy2 >= fy1) ? (fy2 - fy1) : (fy1 - fy2);
@@ -256,12 +259,7 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentXWAA(Pt::int32_t x1, Pt::in
         std::swap(fx1, fx2);
         std::swap(fy1, fy2);
 
-        while(true) {
-            fpiCtrInOut += fpiCtrInc;
-            if(fpiCtrInOut <= _fpatternMaxCtr) continue;
-            fpiCtrInOut = 0;
-            break;
-        }
+        swapDir = true;
     }
 
     // Handle the gradient, starting point, and ending point
@@ -270,18 +268,34 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentXWAA(Pt::int32_t x1, Pt::in
     const Pt::int32_t xpxl2 = FIXED_POINT_ROUND(fx2);
     const Pt::int32_t ypxl  = fy1 + grad * FIXED_POINT_TO_INT(xpxl1 - fx1);
 
-    // Draw the pixels
+    // Calculate the starting coordinates
     Pt::int32_t from  = FIXED_POINT_TO_INT(FIXED_POINT_ROUND(fx1));
     Pt::int32_t to    = FIXED_POINT_TO_INT(xpxl2);
     Pt::int32_t ypxli = ypxl;
 
+    // If the line direction is swapped, determine the ending and starting value of the pattern indexing counter
+    Pt::int32_t fpiCtrNextOut = 0;
+    if(swapDir) {
+        const Pt::int32_t lineLen = to - from + 1;
+        fpiCtrNextOut = (fpiCtrInOut + fpiCtrInc * lineLen) % _fpatternMaxCtr;
+        fpiCtrInOut   = fpiCtrNextOut - fpiCtrInc;
+        if(fpiCtrInOut < 0) fpiCtrInOut += _fpatternMaxCtr;
+    }
+
+    // Draw the pixels
     if(steep) {
         // Draw the pixels
         for(Pt::int32_t i = from; i <= to; ++i) {
             // Get alpha from the pattern
             Pt::uint8_t pa = _patternBuffer[FIXED_POINT_TO_INT(fpiCtrInOut)];
-            fpiCtrInOut += fpiCtrInc;
-            if(fpiCtrInOut > _fpatternMaxCtr) fpiCtrInOut = 0;
+            if(swapDir) {
+                fpiCtrInOut -= fpiCtrInc;
+                if(fpiCtrInOut < 0) fpiCtrInOut += _fpatternMaxCtr;
+            }
+            else {
+                fpiCtrInOut += fpiCtrInc;
+                if(fpiCtrInOut >= _fpatternMaxCtr) fpiCtrInOut -= _fpatternMaxCtr;
+            }
             // Draw the pixels
             const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_FPART_TO_A8 (ypxli) ];
             const Pt::uint8_t a2 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_RFPART_TO_A8(ypxli) ];
@@ -302,8 +316,14 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentXWAA(Pt::int32_t x1, Pt::in
         for(Pt::int32_t i = from; i <= to; ++i) {
             // Get alpha from the pattern
             Pt::uint8_t pa = _patternBuffer[FIXED_POINT_TO_INT(fpiCtrInOut)];
-            fpiCtrInOut += fpiCtrInc;
-            if(fpiCtrInOut > _fpatternMaxCtr) fpiCtrInOut = 0;
+            if(swapDir) {
+                fpiCtrInOut -= fpiCtrInc;
+                if(fpiCtrInOut < 0) fpiCtrInOut += _fpatternMaxCtr;
+            }
+            else {
+                fpiCtrInOut += fpiCtrInc;
+                if(fpiCtrInOut >= _fpatternMaxCtr) fpiCtrInOut -= _fpatternMaxCtr;
+            }
             // Draw the pixels
             const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_FPART_TO_A8 (ypxli) ];
             const Pt::uint8_t a2 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_RFPART_TO_A8(ypxli) ];
@@ -319,6 +339,9 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentXWAA(Pt::int32_t x1, Pt::in
             (*maskInOut)[3].set(to,   FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE));
         }
     }
+
+    // If the line direction is swapped, send out the ending value of the pattern indexing counter which was previously calculated
+    if(swapDir) fpiCtrInOut = fpiCtrNextOut;
 
     // Undefine the helper macro
     #undef XW_SET_PIXEL
