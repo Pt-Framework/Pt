@@ -18,13 +18,26 @@ static void doBenchmark(CompositionMode cm)
 
     // Texts
     if(BENCHMARK_TEXT) {
-        time1 = benchDrawText<ImagePainter >(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
+        time1 = benchDrawText<ImagePainter >(BENCHMARK_LOOP_COUNT, false, cm, AntiAliasingMode::None);
         std::clog << "    Text                             @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
-        time2 = benchDrawText<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
+        time2 = benchDrawText<ImagePainter2>(BENCHMARK_LOOP_COUNT, false, cm, AntiAliasingMode::None);
         std::clog << "    Text NOAA                        @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawText<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::Standard);
+        time2 = benchDrawText<ImagePainter2>(BENCHMARK_LOOP_COUNT, false, cm, AntiAliasingMode::Standard);
         std::clog << "    Text FTAA                        @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        std::clog << std::endl;
+    }
+
+    // Rotated texts
+    if(BENCHMARK_ROTATED_TEXT) {
+        time1 = benchDrawText<ImagePainter >(BENCHMARK_LOOP_COUNT, true, cm, AntiAliasingMode::None);
+        std::clog << "    Rotated Text (FAILED)            @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
+        time2 = benchDrawText<ImagePainter2>(BENCHMARK_LOOP_COUNT, true, cm, AntiAliasingMode::None);
+        std::clog << "    Rotated Text NOAA                @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time2 = benchDrawText<ImagePainter2>(BENCHMARK_LOOP_COUNT, true, cm, AntiAliasingMode::Standard);
+        std::clog << "    Rotated Text FTAA                @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
@@ -55,7 +68,6 @@ static void doBenchmark(CompositionMode cm)
         std::clog << std::endl;
     }
 
-
     // Rectangles
     if(BENCHMARK_RECTANGLE) {
         time1 = benchDrawRect<ImagePainter >(BENCHMARK_LOOP_COUNT, cm);
@@ -85,6 +97,26 @@ static void doBenchmark(CompositionMode cm)
         std::clog << "    Arc     NOAA                     @ ImagePainter2 = " << std::setw(6) << time1 << std::endl;
         time2 = benchDrawArc<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::Standard);
         std::clog << "    Arc     XWAA                     @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        std::clog << std::endl;
+    }
+
+    // Solid bezier curve
+    if(BENCHMARK_SOLID_BEZIER) {
+        time1 = benchDrawBezier<ImagePainter2>(BENCHMARK_LOOP_COUNT, Pen::Solid, cm, AntiAliasingMode::None);
+        std::clog << "    Solid     Bezier NOAA            @ ImagePainter2 = " << std::setw(6) << time1 << std::endl;
+        time2 = benchDrawBezier<ImagePainter2>(BENCHMARK_LOOP_COUNT, Pen::Solid, cm, AntiAliasingMode::Standard);
+        std::clog << "    Solid     Bezier XWAA            @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        std::clog << std::endl;
+    }
+
+    // Patterned bezier curve
+    if(BENCHMARK_PATTERNED_BEZIER) {
+        time1 = benchDrawBezier<ImagePainter2>(BENCHMARK_LOOP_COUNT, Pen::Dash, cm, AntiAliasingMode::None);
+        std::clog << "    Patterned Bezier NOAA            @ ImagePainter2 = " << std::setw(6) << time1 << std::endl;
+        time2 = benchDrawBezier<ImagePainter2>(BENCHMARK_LOOP_COUNT, Pen::Dash, cm, AntiAliasingMode::Standard);
+        std::clog << "    Patterned Bezier XWAA            @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }

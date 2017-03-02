@@ -8,9 +8,6 @@ static size_t benchDrawFillRect(int loopCount, const Brush& brushH, const Brush&
     PainterT painter(image);
     painter.setCompositionMode(cm);
 
-    Pen pen( Color::fromRgb8(255, 255, 255, 175) );
-    painter.setPen(pen);
-
     for(int i = 0; i < loopCount; ++i) {
         Pt::System::Clock clock;
         clock.start();
@@ -41,9 +38,6 @@ static size_t benchDrawFillPolygon(int loopCount, const Brush& brushH, const Bru
 
     PainterT painter(image);
     painter.setCompositionMode(cm);
-
-    Pen pen( Color::fromRgb8(255, 255, 255, 175) );
-    painter.setPen(pen);
 
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
 
@@ -116,9 +110,6 @@ static size_t benchDrawFillEllipse(int loopCount, const Brush& brushH, const Bru
     PainterT painter(image);
     painter.setCompositionMode(cm);
 
-    Pen pen( Color::fromRgb8(255, 255, 255, 175) );
-    painter.setPen(pen);
-
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
 
     for(int i = 0; i < loopCount; ++i) {
@@ -151,9 +142,6 @@ static size_t benchDrawFillArc(int loopCount, const Brush& brushH, const Brush& 
 
     PainterT painter(image);
     painter.setCompositionMode(cm);
-
-    Pen pen( Color::fromRgb8(255, 255, 255, 175) );
-    painter.setPen(pen);
 
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
     if(!ip2) return 0;
