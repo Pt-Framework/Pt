@@ -137,7 +137,7 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
     painter.drawRect( RectF(PointF(260, 20), SizeF(180, 80)) );
 
     if(ip2) {
-        const PointF bezier2a[] = { // CCW
+        const PointF bezier1a[] = { // CCW
             // Bottom left
             PointF(400 - 350,  90 + 300),
             PointF(400 - 350, 110 + 300),
@@ -165,9 +165,9 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
         };
         ip2->setAntiAliasingMode(AntiAliasingMode::None);
         ip2->setPen( Pen( Color::fromRgb8(255, 127, 255, 175), 1, Pen::Dash ) );
-        ip2->drawPolybezier( bezier2a, sizeof(bezier2a) / sizeof(bezier2a[0]), true );
+        ip2->drawPolybezier( bezier1a, sizeof(bezier1a) / sizeof(bezier1a[0]), true );
 
-        const PointF bezier2b[] = { // CCW
+        const PointF bezier1b[] = { // CCW
             // Bottom left
             PointF(400 - 200,  90 + 300),
             PointF(400 - 200, 110 + 300),
@@ -195,7 +195,7 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
         };
         ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
         ip2->setPen( Pen( Color::fromRgb8(255, 127, 255, 175), 1, Pen::Dash ) );
-        ip2->drawPolybezier( bezier2b, sizeof(bezier2b) / sizeof(bezier2b[0]), true );
+        ip2->drawPolybezier( bezier1b, sizeof(bezier1b) / sizeof(bezier1b[0]), true );
     }
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
