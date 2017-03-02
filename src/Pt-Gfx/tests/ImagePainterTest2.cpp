@@ -1,10 +1,12 @@
-// CentOS 7
+// In CentOS 7 64-bit:
 //     ./jam.sh configure --with-rasterizer2 --with-hmi -sGUI=linux-fb -sOPTIM=-O2
 //
-// Raspbian Jessie 2017/01/11
-//     ./jam.sh configure --with-rasterizer2 --with-hmi -sGUI=linux-fb -sOPTIM=-O2 -with-libpng
+// On a system where its FreeType engine is not compatible:
+//     ./jam.sh configure --with-rasterizer2 --with-hmi -sGUI=linux-fb -sOPTIM=-O2 --with-freetype
 //
-// while true; do ps -aF | grep "[I]magePainterTest2"; done
+// On a system where its libpng package is also not compatible (e.g. Raspbian Jessie 2017/01/11):
+//     ./jam.sh configure --with-rasterizer2 --with-hmi -sGUI=linux-fb -sOPTIM=-O2 --with-freetype --with-libpng
+//
 //
 // perf record -d -g -T -e cycles,instructions,cache-references,cache-misses,bus-cycles ./ImagePainterTest2
 // perf report
@@ -12,6 +14,9 @@
 // perf archive
 //     Now please run: 'tar xvf perf.data.tar.bz2 -C ~/.debug'
 //     wherever you need to run 'perf report' on.
+//
+//
+// while true; do ps -aF | grep "[I]magePainterTest2"; done
 //
 
 #include <ctime>
@@ -32,11 +37,12 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
 
+#include "SDL_SavePNG/savepng.h"
+
+// Grmph ..., macro from X11 is interfering with us ;)
 #ifdef None
 #undef None
 #endif
-
-#include "SDL_SavePNG/savepng.h"
 
 using namespace Pt::Gfx;
 
@@ -55,8 +61,8 @@ using namespace Pt::Gfx;
 #define TEST_SOURCECOPY                         1
 #define TEST_SOURCEOVER                         0
 
-#define TEST_DRAW_SOLID_LINE_AND_TEXT           1
-#define TEST_DRAW_PATTERNED_LINE                1
+#define TEST_DRAW_SOLID_LINE_AND_TEXT           1 // (including bezier)
+#define TEST_DRAW_PATTERNED_LINE                1 // (including bezier)
 #define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES  0
 
 #define TEST_DRAW_ELLIPSES_ARCS                 0
@@ -82,8 +88,8 @@ using namespace Pt::Gfx;
 
 #define BENCHMARK_TEXT                      0
 #define BENCHMARK_ROTATED_TEXT              0
-#define BENCHMARK_SOLID_LINE                0
-#define BENCHMARK_PATTERNED_LINE            0
+#define BENCHMARK_SOLID_LINE                1
+#define BENCHMARK_PATTERNED_LINE            1
 #define BENCHMARK_ELLIPSE                   0
 #define BENCHMARK_ARC                       0
 #define BENCHMARK_SOLID_BEZIER              1
