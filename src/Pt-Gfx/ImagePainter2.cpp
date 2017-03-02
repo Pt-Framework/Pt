@@ -43,29 +43,19 @@ namespace Gfx {
 // ======================================================================================
 
 void ImagePainter2::setFontDir(const Pt::System::Path& path)
-{
-    FreeType2::instance().setFontDir(path);
-}
+{ FreeType2::instance().setFontDir(path); }
 
 void ImagePainter2::setDefaultFont(const std::string& f)
-{
-    FreeType2::instance().setDefaultFont(f);
-}
+{ FreeType2::instance().setDefaultFont(f); }
 
 std::string ImagePainter2::defaultFont()
-{
-    return FreeType2::instance().defaultFont();
-}
+{ return FreeType2::instance().defaultFont(); }
 
 std::vector<std::string> ImagePainter2::fontNames()
-{
-    return FreeType2::instance().fontNames();
-}
+{ return FreeType2::instance().fontNames(); }
 
 FontMetrics ImagePainter2::fontMetrics( const Font& font, const Pt::String& text )
-{
-    return Rasterizer2::fontMetrics(font, text);
-}
+{ return Rasterizer2::fontMetrics(font, text); }
 
 
 // ======================================================================================
@@ -74,137 +64,120 @@ FontMetrics ImagePainter2::fontMetrics( const Font& font, const Pt::String& text
 
 ImagePainter2::ImagePainter2(Image& image)
 : _rasterizer(new Rasterizer2(image))
-{
-    setAntiAliasingMode();
-}
+{ setAntiAliasingMode(); /* Call the setter to enable the default anti-aliasing mode */ }
 
 ImagePainter2::~ImagePainter2()
-{
-    delete _rasterizer;
-}
+{ delete _rasterizer; }
 
 void ImagePainter2::setAntiAliasingMode(AntiAliasingMode mode)
-{
-    _rasterizer->setAntiAliasingMode(mode);
-}
+{ _rasterizer->setAntiAliasingMode(mode); }
 
 void ImagePainter2::setImage(Image& image)
-{
-    _rasterizer->setImage(image);
-}
+{ _rasterizer->setImage(image); }
 
 const ImageFormat& ImagePainter2::format() const
-{
-    return _rasterizer->format();
-}
+{ return _rasterizer->format(); }
 
 void ImagePainter2::setCompositionMode(const CompositionMode& mode)
-{
-    _rasterizer->setCompositionMode(mode);
-}
+{ _rasterizer->setCompositionMode(mode); }
 
 const CompositionMode& ImagePainter2::compositionMode() const
-{
-    return _rasterizer->compositionMode();
-}
+{ return _rasterizer->compositionMode(); }
 
 void ImagePainter2::setClip( const RectF& clipIn )
 {
-     const Rect clip(
-         Point( (Pt::int32_t)(clipIn.x    ()), (Pt::int32_t)(clipIn.y     ()) ),
-         Size ( (Pt::int32_t)(clipIn.width()), (Pt::int32_t)(clipIn.height()) )
-     );
+    const Rect clip(
+        Point( (Pt::int32_t) clipIn.x    (), (Pt::int32_t) clipIn.y     () ),
+        Size ( (Pt::int32_t) clipIn.width(), (Pt::int32_t) clipIn.height() )
+    );
 
     _rasterizer->setClip(clip);
     _clip = clipIn;
 }
 
 const Gfx::RectF& ImagePainter2::clip() const
-{
-    return _clip;
-}
+{ return _clip; }
 
 void ImagePainter2::setPen( const Pen& pen )
-{
-    _rasterizer->setPen( pen ) ;
-}
+{ _rasterizer->setPen(pen) ; }
 
 const Pen& ImagePainter2::pen() const
-{
-    return _rasterizer->pen();
-}
+{ return _rasterizer->pen(); }
 
 void ImagePainter2::setBrush(const Brush& brush)
-{
-    _rasterizer->setBrush(brush);
-}
+{ _rasterizer->setBrush(brush); }
 
 const Brush& ImagePainter2::brush() const
-{
-    return _rasterizer->brush();
-}
+{ return _rasterizer->brush(); }
 
 void ImagePainter2::setFont(const Font& font)
-{
-    _rasterizer->setFont( font );
-}
+{ _rasterizer->setFont( font ); }
 
 const Font& ImagePainter2::font() const
-{
-    return _rasterizer->font();
-}
+{ return _rasterizer->font(); }
 
 FontMetrics ImagePainter2::fontMetrics(const String& text) const
-{
-    return _rasterizer->fontMetrics( text );
-}
+{ return _rasterizer->fontMetrics( text ); }
 
-void ImagePainter2::drawImage( const PointF& toIn, const Image& image)
+void ImagePainter2::drawImage( const PointF& toIn, const Image& image )
 {
-    const Point to( (Pt::int32_t)(toIn.x()), (Pt::int32_t)(toIn.y()) );
+    const Point to( (Pt::int32_t) toIn.x(), (Pt::int32_t) toIn.y() );
 
     _rasterizer->image(to, image);
 }
 
-void ImagePainter2::drawImage(const PointF& toIn, const Image& image, const RectF& imageRectIn)
+void ImagePainter2::drawImage( const PointF& toIn, const Image& image, const RectF& imageRect )
 {
-    const Point to( (Pt::int32_t)(toIn.x()), (Pt::int32_t)(toIn.y()) );
-
-    const Rect imageRect(
-        Point( (Pt::int32_t)(imageRectIn.    x()), (Pt::int32_t)(imageRectIn.     y()) ),
-        Size ( (Pt::int32_t)(imageRectIn.width()), (Pt::int32_t)(imageRectIn.height()) )
+    const Point to( (Pt::int32_t) toIn.x(), (Pt::int32_t) toIn.y() );
+    const Rect  ir(
+        Point( (Pt::int32_t) imageRect.    x(), (Pt::int32_t) imageRect.     y() ),
+        Size ( (Pt::int32_t) imageRect.width(), (Pt::int32_t) imageRect.height() )
     );
 
-    _rasterizer->image(to, image, imageRect);
+    _rasterizer->image(to, image, ir);
 }
 
 void ImagePainter2::drawText( const PointF& toIn, const String& text )
 {
-    const Point to( (Pt::int32_t)(toIn.x()), (Pt::int32_t)(toIn.y()) );
+    const Point to( (Pt::int32_t) toIn.x(), (Pt::int32_t) toIn.y() );
 
     _rasterizer->strokeText( to, text );
 }
 
-void ImagePainter2::drawLine(const PointF& from, const PointF& to)
+void ImagePainter2::drawLine( const PointF& from, const PointF& to )
 {
-    const Point a( (Pt::int32_t)(from.x()), (Pt::int32_t)(from.y()) );
-    const Point b( (Pt::int32_t)(to  .x()), (Pt::int32_t)(to  .y()) );
+    // Copy the points
+    const Point a( (Pt::int32_t) from.x(), (Pt::int32_t) from.y() );
+    const Point b( (Pt::int32_t) to  .x(), (Pt::int32_t) to  .y() );
 
-    _rasterizer->strokeOnePixelLine(a, b, 0);
+    // Rasterize the line
+    if(_rasterizer->pen().size() == 1) {
+        _rasterizer->strokeOnePixelLine(a, b, 0);
+        return;
+    }
+
+    // TODO: Implement thick line with caps using polygon here!
 }
 
 void ImagePainter2::drawRect( const RectF& rect )
 {
-    const Point tl( rect.topLeft    ().x(), rect.topLeft    ().y() );
-    const Point br( rect.bottomRight().x(), rect.bottomRight().y() );
+    // Copy the points
+    const Point tl( (Pt::int32_t) rect.topLeft    ().x(), (Pt::int32_t) rect.topLeft    ().y() );
+    const Point br( (Pt::int32_t) rect.bottomRight().x(), (Pt::int32_t) rect.bottomRight().y() );
 
-    _rasterizer->strokeOnePixelRect(tl, br);
+    // Rasterize the rectangle
+    if(_rasterizer->pen().size() == 1) {
+        _rasterizer->strokeOnePixelRect(tl, br);
+        return;
+    }
+
+    // TODO: Implement rectangle with thick lines and joins using polygon here!
 }
 
 void ImagePainter2::fillRect( const RectF& rect )
 {
-    const Point tl( rect.topLeft    ().x(), rect.topLeft    ().y() );
-    const Point br( rect.bottomRight().x(), rect.bottomRight().y() );
+    const Point tl( (Pt::int32_t) rect.topLeft    ().x(), (Pt::int32_t) rect.topLeft    ().y() );
+    const Point br( (Pt::int32_t) rect.bottomRight().x(), (Pt::int32_t) rect.bottomRight().y() );
 
     _rasterizer->fillRect(tl, br);
 }
@@ -215,10 +188,15 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount, boo
     std::vector<Point> points(pointCount);
 
     for(size_t i = 0; i < pointCount; ++i)
-        points[i].set( ps[i].x(), ps[i].y() );
+        points[i].set( (Pt::int32_t) ps[i].x(), (Pt::int32_t) ps[i].y() );
 
     // Rasterize the polygon
-    _rasterizer->strokeOnePixelPolygon(points.data(), pointCount, autoClose);
+    if(_rasterizer->pen().size() == 1) {
+        _rasterizer->strokeOnePixelPolygon(points.data(), pointCount, autoClose);
+        return;
+    }
+
+    // TODO: Implement polyline with thick lines, joins, and caps here!
 }
 
 void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
@@ -227,65 +205,82 @@ void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
     std::vector<Point> points(pointCount);
 
     for(size_t i = 0; i < pointCount; ++i)
-        points[i].set( ps[i].x(), ps[i].y() );
+        points[i].set( (Pt::int32_t) ps[i].x(), (Pt::int32_t) ps[i].y() );
 
-    // Rasterize the bezier
+    // Rasterize the polygon
     _rasterizer->fillPolygon(points.data(), pointCount);
 }
 
 void ImagePainter2::drawPolybezier(const PointF* ps, const size_t pointCount, bool autoClose)
 {
     // Check the number of points
-    if(autoClose) {
-        // The number of points must be >= 4 and even
-        if(pointCount < 4 || (pointCount & 1)) return;
-    }
-    else {
-        // The number of points must be >= 3 and odd
-        if(pointCount < 3 || !(pointCount & 1)) return;
-    }
+    if(  autoClose && (pointCount < 4 ||  (pointCount & 1)) ) return; // The number of points must be >= 4 and even
+    if( !autoClose && (pointCount < 3 || !(pointCount & 1)) ) return; // The number of points must be >= 3 and odd
 
     // Copy the points
     std::vector<Point> points(autoClose ? (pointCount + 1) : pointCount);
 
     for(size_t i = 0; i < pointCount; ++i)
-        points[i].set( ps[i].x(), ps[i].y() );
+        points[i].set( (Pt::int32_t) ps[i].x(), (Pt::int32_t) ps[i].y() );
 
-    if(autoClose) points[pointCount].set( ps[0].x(), ps[0].y() );
+    if(autoClose) points[pointCount].set( (Pt::int32_t) ps[0].x(), (Pt::int32_t) ps[0].y() );
 
     // Rasterize the bezier
-    _rasterizer->strokeOnePixelPolybezier(points.data(), points.size());
+    if(_rasterizer->pen().size() == 1) {
+        _rasterizer->strokeOnePixelPolybezier(points.data(), points.size());
+        return;
+    }
+
+    // TODO: Implement polybezier with thick lines using polygon here!
 }
 
 void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
 {
-    const Point tl( topLeft.x    (), topLeft.y     () );
-    const Size  sz( size   .width(), size   .height() );
+    // Copy the points
+    const Point tl( (Pt::int32_t) topLeft.x    (), (Pt::int32_t) topLeft.y     () );
+    const Size  sz( (Pt::int32_t) size   .width(), (Pt::int32_t) size   .height() );
 
-    _rasterizer->strokeOnePixelEllipseArc(tl, sz, 0, 0, ArcMode::Open);
+    // Rasterize the ellipse
+    if(_rasterizer->pen().size() == 1) {
+        _rasterizer->strokeOnePixelEllipseArc(tl, sz, 0, 0, ArcMode::Open);
+        return;
+    }
+
+    // TODO: Implement ellipse with thick lines using polygon here!
 }
 
 void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
 {
-    const Point tl( topLeft.x    (), topLeft.y     () );
-    const Size  sz( size   .width(), size   .height() );
+    // Copy the points
+    const Point tl( (Pt::int32_t) topLeft.x    (), (Pt::int32_t) topLeft.y     () );
+    const Size  sz( (Pt::int32_t) size   .width(), (Pt::int32_t) size   .height() );
 
+    // Rasterize the ellipse
     _rasterizer->fillEllipse(tl, sz);
 }
 
 void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode )
 {
-    const Point tl( topLeft.x    (), topLeft.y     () );
-    const Size  sz( size   .width(), size   .height() );
+    // Copy the points
+    const Point tl( (Pt::int32_t) topLeft.x    (), (Pt::int32_t) topLeft.y     () );
+    const Size  sz( (Pt::int32_t) size   .width(), (Pt::int32_t) size   .height() );
 
-    _rasterizer->strokeOnePixelEllipseArc(tl, sz, degBegin, degEnd, arcMode);
+    // Rasterize the arc
+    if(_rasterizer->pen().size() == 1) {
+        _rasterizer->strokeOnePixelEllipseArc(tl, sz, degBegin, degEnd, arcMode);
+        return;
+    }
+
+    // TODO: Implement arc with thick lines using polygon here!
 }
 
 void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode )
 {
-    const Point tl( topLeft.x    (), topLeft.y     () );
-    const Size  sz( size   .width(), size   .height() );
+    // Copy the points
+    const Point tl( (Pt::int32_t) topLeft.x    (), (Pt::int32_t) topLeft.y     () );
+    const Size  sz( (Pt::int32_t) size   .width(), (Pt::int32_t) size   .height() );
 
+    // Rasterize the arc
     _rasterizer->fillArc(tl, sz, degBegin, degEnd, arcMode);
 }
 

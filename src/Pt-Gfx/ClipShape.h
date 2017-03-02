@@ -45,14 +45,10 @@ class ClipShape {
         static void clipPolygon(std::vector<Point>& in, const Rect& clippingArea);
 
         static bool insideXRange(Pt::int32_t v, const Rect& clippingArea)
-        {
-            return ( v >= clippingArea.left() && v <= clippingArea.right() );
-        }
+        { return ( v >= clippingArea.left() && v <= clippingArea.right() ); }
 
         static bool insideYRange(Pt::int32_t v, const Rect& clippingArea)
-        {
-            return ( v >= clippingArea.top() && v <= clippingArea.bottom() );
-        }
+        { return ( v >= clippingArea.top() && v <= clippingArea.bottom() ); }
 
     private:
         static int csComputeOutcode(Pt::int32_t x, Pt::int32_t y, const Rect& clip);

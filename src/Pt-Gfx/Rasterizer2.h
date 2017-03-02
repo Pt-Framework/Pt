@@ -105,9 +105,7 @@ class Rasterizer2
         }
 
         const AntiAliasingMode& antiAliasingMode() const
-        {
-            return _aaMode;
-        }
+        { return _aaMode; }
 
         void setImage(Image& image);
 
@@ -116,23 +114,17 @@ class Rasterizer2
         void setPen( const Pen& pen );
 
         const Pen& pen() const
-        {
-            return _pen;
-        }
+        { return _pen; }
 
         void setBrush( const Brush& brush );
 
         const Brush& brush() const
-        {
-            return _brush;
-        }
+        { return _brush; }
 
         void setFont( const Font& font );
 
         const Font& font() const
-        {
-            return _font;
-        }
+        { return _font; }
 
         FontMetrics fontMetrics( const String& text ) const;
 
@@ -141,19 +133,13 @@ class Rasterizer2
         void setClip( const Rect& clip );
 
         const Rect& clip() const
-        {
-            return _clip;
-        }
+        { return _clip; }
 
         void setCompositionMode(const CompositionMode& mode)
-        {
-            _compositionMode = mode;
-        }
+        { _compositionMode = mode; }
 
         const CompositionMode& compositionMode() const
-        {
-            return _compositionMode;
-        }
+        { return _compositionMode; }
 
         void image(const Point& to, const Image& image);
         void image(const Point& toIn, const Image& image, const Rect& imageRect);
@@ -270,7 +256,8 @@ class Rasterizer2
         void rasterOnePixelSolidXLineSegment(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut);
         void rasterOnePixelSolidGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut);
         void rasterOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut);
-        void rasterFillOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const PolygonScanline16s& exclusionZone, DrawLineMask& maskInOut);
+
+        void rasterOnePixelAreaGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const PolygonScanline16s& exclusionZone, DrawLineMask& maskInOut);
 
         void rasterOnePixelPatternedLine(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut);
         void rasterOnePixelPatternedXLineSegment(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t fpiCtrInc, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut);
@@ -280,6 +267,7 @@ class Rasterizer2
         void rasterRectArea(const Point& tl, const Point& br);
 
         void rasterOnePixelPolygonOutline(const Point* points, size_t pointCount, const Color& color, bool autoClose);
+
         void rasterPolygonAreaNoAA(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
         void rasterPolygonAreaFSAA2x2(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
         void rasterPolygonAreaXWAA(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
@@ -291,7 +279,7 @@ class Rasterizer2
         void rasterArcAreaPie(FilledArcInfo& fai);
 
     private:
-        // Generic helper functions
+        // --- Generic helper functions ---
         void updatePenPattern();
         void updateGradientBrush(Pt::int32_t width, Pt::int32_t height);
         void updateClip();
@@ -299,7 +287,7 @@ class Rasterizer2
         template<typename T>
         static inline void bubbleSortAscending(T& basket, Pt::int32_t size);
 
-        // Rasterization-related helper functions
+        // --- Rasterization-related helper functions ---
 
         // Mask layout for store4Pixels/fill4Pixels function variants that take mask as the last argument:
         //     Mask element        : #0         #1         #2         #3
@@ -333,7 +321,7 @@ class Rasterizer2
 
         void rasterScanlineWithClipping(Pt::int32_t from, Pt::int32_t to, Pt::int32_t pixelY, Pt::int32_t minX, Pt::int32_t minY);
 
-        // Polygon-related helper functions
+        // --- Polygon-related helper functions ---
         void genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount) const;
         void getPolygonRectMinMax(const Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY);
 
@@ -617,7 +605,7 @@ void Rasterizer2::rasterScanline(
     #undef RSL_MAX_ALPHA
 }
 
-inline bool Rasterizer2::arcUtil_pointIsInsideDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd, float xyRatio)
+bool Rasterizer2::arcUtil_pointIsInsideDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd, float xyRatio)
 {
     // IMPORTANT NOTES:
     //     * The Y coordinate goes from low to high according to the coordinate system being used:
@@ -642,7 +630,7 @@ inline bool Rasterizer2::arcUtil_pointIsInsideDegRange(Pt::int32_t x, Pt::int32_
     return angle >= degBegin && angle <= degEnd;
 }
 
-inline void Rasterizer2::arcUtil_detXWLineDirection(ArcXWLineData& xwLineData)
+void Rasterizer2::arcUtil_detXWLineDirection(ArcXWLineData& xwLineData)
 {
     // Calculate the direction vector
     const Pt::int32_t vx = xwLineData.x2 - xwLineData.x1; // Vector from the begin point to the end point
