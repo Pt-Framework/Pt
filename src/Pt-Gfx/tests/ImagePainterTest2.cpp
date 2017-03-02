@@ -49,25 +49,25 @@ using namespace Pt::Gfx;
 
 // General settings for Pt-Gfx
 #define DO_TEST_DRAW    1
-#define DO_BENCHMARKING 0
+#define DO_BENCHMARKING 1
 
 // Detailed-test enable settings for Pt-Gfx
-#define TEST_SOURCECOPY                         1
+#define TEST_SOURCECOPY                         0
 #define TEST_SOURCEOVER                         1
 
 #define TEST_DRAW_SOLID_LINE_AND_TEXT           1
 #define TEST_DRAW_PATTERNED_LINE                1
-#define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES  1
+#define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES  0
 
 #define TEST_DRAW_ELLIPSES_ARCS                 1
 
-#define TEST_DRAW_SOLID_FILLED_POLYGONS         1
-#define TEST_DRAW_GRADIENT_FILLED_POLYGONS      1
-#define TEST_DRAW_TEXTURE_FILLED_POLYGONS       1
+#define TEST_DRAW_SOLID_FILLED_POLYGONS         0
+#define TEST_DRAW_GRADIENT_FILLED_POLYGONS      0
+#define TEST_DRAW_TEXTURE_FILLED_POLYGONS       0
 
-#define TEST_DRAW_SOLID_FILLED_ELLIPSES_ARCS    1
-#define TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS 1
-#define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  1
+#define TEST_DRAW_SOLID_FILLED_ELLIPSES_ARCS    0
+#define TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS 0
+#define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  0
 
 #define TEST_COMPARE_WITH_OLD_PAINTER           0 // (for some shapes only)
 
@@ -80,31 +80,31 @@ using namespace Pt::Gfx;
 #define BENCHMARK_IMAGE_SIZE                Size(1280, 800)
 #define BENCHMARK_LOOP_COUNT                ( 500 * (BENCHMARK_RESULT_HTML ? 10 : 1) )
 
-#define BENCHMARK_TEXT                      0
-#define BENCHMARK_ROTATED_TEXT              0
-#define BENCHMARK_SOLID_LINE                0
-#define BENCHMARK_PATTERNED_LINE            0
-#define BENCHMARK_ELLIPSE                   0
-#define BENCHMARK_ARC                       0
+#define BENCHMARK_TEXT                      1
+#define BENCHMARK_ROTATED_TEXT              1
+#define BENCHMARK_SOLID_LINE                1
+#define BENCHMARK_PATTERNED_LINE            1
+#define BENCHMARK_ELLIPSE                   1
+#define BENCHMARK_ARC                       1
 #define BENCHMARK_SOLID_BEZIER              1
 #define BENCHMARK_PATTERNED_BEZIER          1
 
-#define BENCHMARK_RECTANGLE                 0
-#define BENCHMARK_SOLID_FILLED_RECTANGLE    0
-#define BENCHMARK_GRADIENT_FILLED_RECTANGLE 0
-#define BENCHMARK_TEXTURE_FILLED_RECTANGLE  0
+#define BENCHMARK_RECTANGLE                 1
+#define BENCHMARK_SOLID_FILLED_RECTANGLE    1
+#define BENCHMARK_GRADIENT_FILLED_RECTANGLE 1
+#define BENCHMARK_TEXTURE_FILLED_RECTANGLE  1
 
-#define BENCHMARK_SOLID_FILLED_POLYGON      0
-#define BENCHMARK_GRADIENT_FILLED_POLYGON   0
-#define BENCHMARK_TEXTURE_FILLED_POLYGON    0
+#define BENCHMARK_SOLID_FILLED_POLYGON      1
+#define BENCHMARK_GRADIENT_FILLED_POLYGON   1
+#define BENCHMARK_TEXTURE_FILLED_POLYGON    1
 
-#define BENCHMARK_SOLID_FILLED_ELLIPSE      0
-#define BENCHMARK_GRADIENT_FILLED_ELLIPSE   0
-#define BENCHMARK_TEXTURE_FILLED_ELLIPSE    0
+#define BENCHMARK_SOLID_FILLED_ELLIPSE      1
+#define BENCHMARK_GRADIENT_FILLED_ELLIPSE   1
+#define BENCHMARK_TEXTURE_FILLED_ELLIPSE    1
 
-#define BENCHMARK_SOLID_FILLED_ARC          0
-#define BENCHMARK_GRADIENT_FILLED_ARC       0
-#define BENCHMARK_TEXTURE_FILLED_ARC        0
+#define BENCHMARK_SOLID_FILLED_ARC          1
+#define BENCHMARK_GRADIENT_FILLED_ARC       1
+#define BENCHMARK_TEXTURE_FILLED_ARC        1
 
 // Configurations and objects
 #define FONT_DIR    "../src/Pt-Gfx/fonts"
@@ -168,7 +168,7 @@ int main(int argc, char* args[])
     const Brush brushTexture2 (textureWithWhiteBackground);
 
     // Solid lines
-    if(!BENCHMARK_RESULT_HTML && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_SOLID_LINE_AND_TEXT) {
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_SOLID_LINE_AND_TEXT) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
         testDrawSolidLine("Solid Lines and Texts - ImagePainter2 [SourceCopy]", image, *painter2);
         if(TEST_COMPARE_WITH_OLD_PAINTER) {
@@ -177,7 +177,7 @@ int main(int argc, char* args[])
         }
     }
 
-    if(!BENCHMARK_RESULT_HTML && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_SOLID_LINE_AND_TEXT) {
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_SOLID_LINE_AND_TEXT) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
         testDrawSolidLine("Solid Lines and Texts - ImagePainter2 [SourceOver]", image, *painter2);
         if(TEST_COMPARE_WITH_OLD_PAINTER) {
@@ -187,7 +187,7 @@ int main(int argc, char* args[])
     }
 
     // Patterned lines
-    if(!BENCHMARK_RESULT_HTML && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_PATTERNED_LINE) {
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_PATTERNED_LINE) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
         testDrawPatternedLine("Patterned Lines - ImagePainter2 [SourceCopy]", image, *painter2);
         if(TEST_COMPARE_WITH_OLD_PAINTER) {
@@ -196,7 +196,7 @@ int main(int argc, char* args[])
         }
     }
 
-    if(!BENCHMARK_RESULT_HTML && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_PATTERNED_LINE) {
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_PATTERNED_LINE) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
         testDrawPatternedLine("Patterned Lines - ImagePainter2 [SourceOver]", image, *painter2);
         if(TEST_COMPARE_WITH_OLD_PAINTER) {
@@ -206,7 +206,7 @@ int main(int argc, char* args[])
     }
 
     // Rectangles and filled rectangles
-    if(!BENCHMARK_RESULT_HTML && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_RECTANGLES_FILLED_RECTANGLES) {
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_RECTANGLES_FILLED_RECTANGLES) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
         testDrawRect("Rectangles & Solid-Filled Rectangles - ImagePainter2 [SourceCopy]", image, *painter2);
         if(TEST_COMPARE_WITH_OLD_PAINTER) {
@@ -215,7 +215,7 @@ int main(int argc, char* args[])
         }
     }
 
-    if(!BENCHMARK_RESULT_HTML && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_RECTANGLES_FILLED_RECTANGLES) {
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_RECTANGLES_FILLED_RECTANGLES) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
         testDrawRect("Rectangles & Solid-Filled Rectangles - ImagePainter2 [SourceOver]", image, *painter2);
         if(TEST_COMPARE_WITH_OLD_PAINTER) {
@@ -225,7 +225,7 @@ int main(int argc, char* args[])
     }
 
     // Ellipse
-    if(!BENCHMARK_RESULT_HTML && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_ELLIPSES_ARCS) {
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_ELLIPSES_ARCS) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
         testDrawEllipse("Ellipse & Arcs - ImagePainter2 [SourceCopy]", image, *painter2);
         if(TEST_COMPARE_WITH_OLD_PAINTER) {
@@ -234,7 +234,7 @@ int main(int argc, char* args[])
         }
     }
 
-    if(!BENCHMARK_RESULT_HTML && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_ELLIPSES_ARCS) {
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_ELLIPSES_ARCS) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
         testDrawEllipse("Ellipse & Arcs - ImagePainter2 [SourceOver]", image, *painter2);
         if(TEST_COMPARE_WITH_OLD_PAINTER) {
@@ -244,18 +244,18 @@ int main(int argc, char* args[])
     }
 
     // Solid-filled polygons
-    if(!BENCHMARK_RESULT_HTML && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_SOLID_FILLED_POLYGONS) {
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_SOLID_FILLED_POLYGONS) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
         testDrawFillPolygon("Solid-Filled Polygons - ImagePainter2 [SourceCopy]", image, *painter2, brushSolid1, brushSolid2);
     }
 
-    if(!BENCHMARK_RESULT_HTML && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_SOLID_FILLED_POLYGONS) {
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_SOLID_FILLED_POLYGONS) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
         testDrawFillPolygon("Solid-Filled Polygons - ImagePainter2 [SourceOver]", image, *painter2, brushSolid1, brushSolid2);
     }
 
     // Gradient-filled polygons
-    if(!BENCHMARK_RESULT_HTML && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_GRADIENT_FILLED_POLYGONS) {
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_GRADIENT_FILLED_POLYGONS) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
         testDrawFillPolygon("Gradient-Filled Polygons - ImagePainter2 [SourceCopy]", image, *painter2, brushGradient1, brushGradient2);
         if(TEST_COMPARE_WITH_OLD_PAINTER) {
@@ -264,7 +264,7 @@ int main(int argc, char* args[])
         }
     }
 
-    if(!BENCHMARK_RESULT_HTML && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_GRADIENT_FILLED_POLYGONS) {
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_GRADIENT_FILLED_POLYGONS) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
         testDrawFillPolygon("Gradient-Filled Polygons - ImagePainter2 [SourceOver]", image, *painter2, brushGradient1, brushGradient2);
         if(TEST_COMPARE_WITH_OLD_PAINTER) {
@@ -274,7 +274,7 @@ int main(int argc, char* args[])
     }
 
     // Texture-filled polygons
-    if(!BENCHMARK_RESULT_HTML && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_TEXTURE_FILLED_POLYGONS) {
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_TEXTURE_FILLED_POLYGONS) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
         testDrawFillPolygon("Texture-Filled Polygons - ImagePainter2 [SourceCopy]", image, *painter2, brushTexture1, brushTexture2);
         if(TEST_COMPARE_WITH_OLD_PAINTER) {
@@ -283,7 +283,7 @@ int main(int argc, char* args[])
         }
     }
 
-    if(!BENCHMARK_RESULT_HTML && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_TEXTURE_FILLED_POLYGONS) {
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_TEXTURE_FILLED_POLYGONS) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
         testDrawFillPolygon("Texture-Filled Polygons - ImagePainter2 [SourceOver]", image, *painter2, brushTexture1, brushTexture2);
         if(TEST_COMPARE_WITH_OLD_PAINTER) {
@@ -293,7 +293,7 @@ int main(int argc, char* args[])
     }
 
     // Solid-filled ellipses
-    if(!BENCHMARK_RESULT_HTML && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_SOLID_FILLED_ELLIPSES_ARCS) {
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_SOLID_FILLED_ELLIPSES_ARCS) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
         testDrawFillEllipse("Solid-Filled Ellipse & Arcs - ImagePainter2 [SourceCopy]", image, *painter2, brushSolid1, brushSolid2);
         if(TEST_COMPARE_WITH_OLD_PAINTER) {
@@ -302,7 +302,7 @@ int main(int argc, char* args[])
         }
     }
 
-    if(!BENCHMARK_RESULT_HTML && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_SOLID_FILLED_ELLIPSES_ARCS) {
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_SOLID_FILLED_ELLIPSES_ARCS) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
         testDrawFillEllipse("Solid-Filled Ellipse & Arcs - ImagePainter2 [SourceOver]", image, *painter2, brushSolid1,  brushSolid2);
         if(TEST_COMPARE_WITH_OLD_PAINTER) {
@@ -312,23 +312,23 @@ int main(int argc, char* args[])
     }
 
     // Gradient-filled ellipses
-    if(!BENCHMARK_RESULT_HTML && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS) {
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
         testDrawFillEllipse("Gradient-Filled Ellipse & Arcs - ImagePainter2 [SourceCopy]", image, *painter2, brushGradient1, brushGradient2);
     }
 
-    if(!BENCHMARK_RESULT_HTML && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS) {
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
         testDrawFillEllipse("Gradient-Filled Ellipse & Arcs - ImagePainter2 [SourceOver]", image, *painter2, brushGradient1, brushGradient2);
     }
 
     // Texture-filled ellipses
-    if(!BENCHMARK_RESULT_HTML && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS) {
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
         testDrawFillEllipse("Texture-Filled Ellipse & Arcs - ImagePainter2 [SourceCopy]", image, *painter2, brushTexture1, brushTexture2);
     }
 
-    if(!BENCHMARK_RESULT_HTML && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS) {
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
         testDrawFillEllipse("Texture-Filled Ellipse & Arcs - ImagePainter2 [SourceOver]", image, *painter2, brushTexture1, brushTexture2);
     }
