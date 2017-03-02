@@ -168,86 +168,22 @@ class Rasterizer2
 
     private:
         // Polygon scanlines (used for drawing filled polygons with XWAA)
-        struct PolygonScanline16 {
-            Pt::int16_t from, to;
+        // The vector index is the Y coordinate
+        struct PolygonScanline16;
 
-            PolygonScanline16(Pt::int16_t from_, Pt::int16_t to_)
-            : from(from_), to(to_)
-            {}
-        };
+        typedef std::vector< std::vector<PolygonScanline16> > PolygonScanline16s;
 
-        typedef std::vector< std::vector<PolygonScanline16> > PolygonScanline16s; // The vector index is the Y coordinate
-
-        // Arc scanlines (used for drawing filled ellipse and arcs)
+        // Ellipse & arc scanlines (used for drawing filled ellipse and arcs)
         // Each key specify the Y coordinate of a scanline; while its element specify the "from" and "to" X coordinates
-        struct EAScanlineElement {
-            Pt::int32_t from;
-            Pt::int32_t to;
-
-            EAScanlineElement(Pt::int32_t from_ = -1, Pt::int32_t to_ = -1)
-            : from(from_), to(to_)
-            {}
-
-            bool isNull() const
-            { return from == -1 && to == -1; }
-        };
+        struct EAScanlineElement;
 
         typedef std::vector<EAScanlineElement> EAScanlines;
 
-        // Filled-arc information structure
-        struct FilledArcInfo {
-            bool        antiAlias;    // A flag that indicate if the arc will be anti-aliased
-
-            float       degBegin;     // Begin angle
-            float       degEnd;       // End angle
-
-            Pt::int32_t minX, minY;   // Top-left coordinate of the arc
-            Pt::int32_t ctrX, ctrY;   // Center coordinate of the arc
-            Pt::int32_t radX, radY;   // Radius of the arc
-            Pt::int32_t radX2, radY2; // Squared radius of the arc
-            float       xyRat;        // Ratio of the X and Y radius
-
-            Pt::int32_t x1, y1;       // Coordinate of the begin point
-            Pt::int32_t x2, y2;       // Coordinate of the end point
-
-            Pt::int32_t quartersX;    // The number of quarter points in the X direction
-            Pt::int32_t quartersY;    // The number of quarter points in the Y direction
-        };
+        // Filled-arc information structure (used for drawing filled arcs)
+        struct FilledArcInfo;
 
         // Xiaolin Wu's anti-aliased line data structure (used for drawing filled arcs)
-        struct ArcXWLineData {
-            // Point data
-            struct XWPoint {
-                Pt::int32_t x;
-                Pt::uint8_t a1, a2;
-
-                XWPoint(Pt::int32_t x_ = -1, Pt::uint8_t a1_ = 0, Pt::uint8_t a2_ = 0)
-                : x(x_), a1(a1_), a2(a2_)
-                {}
-
-                bool isNull() const
-                { return x == -1 && a1 == 0 && a2 == 0; }
-            };
-
-            typedef std::vector< std::vector<XWPoint> > XWPoints; // The vector index is the Y coordinate
-
-
-            XWPoints points; // The line's points
-            bool     steep;  // If "true"  then the a2 belongs to (x + 1, y)
-                             // If "false" then the a2 belongs to (x, y + 1)
-
-            bool faceL;  // The direction that the line is facing to
-            bool faceR;  // ---
-            bool faceT;  // ---
-            bool faceB;  // ---
-
-            // The line's coordinates
-            Pt::int32_t x1, y1, x2, y2;
-            Pt::int32_t minY, maxY;
-
-            bool insideYRange(Pt::int32_t y) const
-            { return (y >= minY) && (y <= maxY); }
-        };
+        struct ArcXWLineData;
 
     private:
         void rasterOnePixelSolidLine(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut);
@@ -366,7 +302,89 @@ class Rasterizer2
 
 
 // ======================================================================================
-// ===== Inlined and/or Templated Public Member Functions ===============================
+// ===== Private Member Structure Definitions ===========================================
+// ======================================================================================
+
+// Polygon scanline structure (used for drawing filled polygons with XWAA)
+struct Rasterizer2::PolygonScanline16 {
+    Pt::int16_t from, to;
+
+    PolygonScanline16(Pt::int16_t from_, Pt::int16_t to_)
+    : from(from_), to(to_)
+    {}
+};
+
+// Ellipse & arc scanline element (used for drawing filled ellipse and arcs)
+struct Rasterizer2::EAScanlineElement {
+    Pt::int32_t from;
+    Pt::int32_t to;
+
+    EAScanlineElement(Pt::int32_t from_ = -1, Pt::int32_t to_ = -1)
+    : from(from_), to(to_)
+    {}
+
+    bool isNull() const
+    { return from == -1 && to == -1; }
+};
+
+// Filled-arc information structure (used for drawing filled arcs)
+struct Rasterizer2::FilledArcInfo {
+    bool        antiAlias;    // A flag that indicate if the arc will be anti-aliased
+
+    float       degBegin;     // Begin angle
+    float       degEnd;       // End angle
+
+    Pt::int32_t minX, minY;   // Top-left coordinate of the arc
+    Pt::int32_t ctrX, ctrY;   // Center coordinate of the arc
+    Pt::int32_t radX, radY;   // Radius of the arc
+    Pt::int32_t radX2, radY2; // Squared radius of the arc
+    float       xyRat;        // Ratio of the X and Y radius
+
+    Pt::int32_t x1, y1;       // Coordinate of the begin point
+    Pt::int32_t x2, y2;       // Coordinate of the end point
+
+    Pt::int32_t quartersX;    // The number of quarter points in the X direction
+    Pt::int32_t quartersY;    // The number of quarter points in the Y direction
+};
+
+// Xiaolin Wu's anti-aliased line data structure (used for drawing filled arcs)
+struct Rasterizer2::ArcXWLineData {
+    // --- Point data sub-structure ---
+    struct XWPoint {
+        Pt::int32_t x;
+        Pt::uint8_t a1, a2;
+
+        XWPoint(Pt::int32_t x_ = -1, Pt::uint8_t a1_ = 0, Pt::uint8_t a2_ = 0)
+        : x(x_), a1(a1_), a2(a2_)
+        {}
+
+        bool isNull() const
+        { return x == -1 && a1 == 0 && a2 == 0; }
+    };
+
+    typedef std::vector< std::vector<XWPoint> > XWPoints; // The vector index is the Y coordinate
+
+    // --- Data ---
+    XWPoints points; // The line's points
+    bool     steep;  // If "true"  then the a2 belongs to (x + 1, y)
+                     // If "false" then the a2 belongs to (x, y + 1)
+
+    bool faceL; // The direction that the line is facing to
+    bool faceR; // ---
+    bool faceT; // ---
+    bool faceB; // ---
+
+    // The line's coordinates
+    Pt::int32_t x1, y1, x2, y2;
+    Pt::int32_t minY, maxY;
+
+    bool insideYRange(Pt::int32_t y) const
+    { return (y >= minY) && (y <= maxY); }
+};
+
+
+// ======================================================================================
+// ===== Inlined Public Member Functions ================================================
 // ======================================================================================
 
 Pt::uint8_t Rasterizer2::patternBufferAlpha(Pt::int32_t idx)
@@ -404,6 +422,25 @@ void Rasterizer2::patternBufferAlphaPolar(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::
     patternBufferAlpha(a0, a1, angle * scale, alpha0, alpha1);
 }
 
+
+// ======================================================================================
+// ===== Inlined and/or Templated Private Member Functions ==============================
+// ======================================================================================
+
+template<typename T>
+void Rasterizer2::bubbleSortAscending(T& basket, Pt::int32_t size)
+{
+    for(Pt::int32_t i = 0; i < size - 1;) {
+        if(basket[i] > basket[i + 1]) {
+            std::swap(basket[i], basket[i + 1]);
+            if(i) --i;
+        }
+        else {
+            ++i;
+        }
+    }
+}
+
 void Rasterizer2::fillPixel(Pt::int32_t x, Pt::int32_t y, Pt::int32_t minX, Pt::int32_t minY, Pt::uint8_t alpha)
 {
     // Check the clipping
@@ -423,25 +460,6 @@ void Rasterizer2::fillPixel(Pt::int32_t x, Pt::int32_t y, Pt::int32_t minX, Pt::
     else {
         Pixel pixel(_image->view(), x, y);
         _image->format().setPixel(pixel, _brush.color(), _compositionMode, alpha);
-    }
-}
-
-
-// ======================================================================================
-// ===== Inlined and/or Templated Private Member Functions ==============================
-// ======================================================================================
-
-template<typename T>
-void Rasterizer2::bubbleSortAscending(T& basket, Pt::int32_t size)
-{
-    for(Pt::int32_t i = 0; i < size - 1;) {
-        if(basket[i] > basket[i + 1]) {
-            std::swap(basket[i], basket[i + 1]);
-            if(i) --i;
-        }
-        else {
-            ++i;
-        }
     }
 }
 
