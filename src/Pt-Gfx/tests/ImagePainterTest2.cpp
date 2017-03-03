@@ -58,8 +58,8 @@ using namespace Pt::Gfx;
 #define DO_BENCHMARKING 1
 
 // Detailed-test enable settings for Pt-Gfx
-#define TEST_SOURCECOPY                         0
-#define TEST_SOURCEOVER                         1
+#define TEST_SOURCECOPY                         1
+#define TEST_SOURCEOVER                         0
 
 #define TEST_DRAW_SOLID_LINE_AND_TEXT           0 // (including bezier)
 #define TEST_DRAW_PATTERNED_LINE                0 // (including bezier)
@@ -88,8 +88,8 @@ using namespace Pt::Gfx;
 
 #define BENCHMARK_TEXT                      0
 #define BENCHMARK_ROTATED_TEXT              0
-#define BENCHMARK_SOLID_LINE                1
-#define BENCHMARK_PATTERNED_LINE            1
+#define BENCHMARK_SOLID_LINE                0
+#define BENCHMARK_PATTERNED_LINE            0
 #define BENCHMARK_ELLIPSE                   0
 #define BENCHMARK_ARC                       0
 #define BENCHMARK_SOLID_BEZIER              1
@@ -100,15 +100,15 @@ using namespace Pt::Gfx;
 #define BENCHMARK_GRADIENT_FILLED_RECTANGLE 0
 #define BENCHMARK_TEXTURE_FILLED_RECTANGLE  0
 
-#define BENCHMARK_SOLID_FILLED_POLYGON      1
+#define BENCHMARK_SOLID_FILLED_POLYGON      0
 #define BENCHMARK_GRADIENT_FILLED_POLYGON   0
 #define BENCHMARK_TEXTURE_FILLED_POLYGON    0
 
-#define BENCHMARK_SOLID_FILLED_ELLIPSE      0
+#define BENCHMARK_SOLID_FILLED_ELLIPSE      1
 #define BENCHMARK_GRADIENT_FILLED_ELLIPSE   0
 #define BENCHMARK_TEXTURE_FILLED_ELLIPSE    0
 
-#define BENCHMARK_SOLID_FILLED_ARC          0
+#define BENCHMARK_SOLID_FILLED_ARC          1
 #define BENCHMARK_GRADIENT_FILLED_ARC       0
 #define BENCHMARK_TEXTURE_FILLED_ARC        0
 
