@@ -1,12 +1,23 @@
+#define BENCHMARK_SDL
+
 static void sdlPreviewRGB888Buffer(const std::string& title, const uint8_t* argb8888Buff, int sizeX, int sizeY, bool saveImageAsPNG)
 {
     // Initialise SDL
     if(SDL_Init(SDL_INIT_VIDEO) < 0) return;
 
     // Create window, renderer, and texture objects
+#ifdef BENCHMARK_SDL
+    bool              firstFrame = true;
+    Pt::System::Clock clock;
+    clock.start();
+#endif
     SDL_Window*   sdlWindow     = SDL_CreateWindow  (title.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, sizeX, sizeY, 0);
     SDL_Renderer* sdlRenderer   = SDL_CreateRenderer(sdlWindow, -1, 0);
     SDL_Texture*  sdlTexture    = SDL_CreateTexture (sdlRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, sizeX, sizeY);
+#ifdef BENCHMARK_SDL
+    std::clog << std::endl;
+    std::clog << "SDL main system initialization     = " << std::setw(8) << clock.stop().toUSecs() << " uS" << std::endl;
+#endif
 
     // Bring the window on top by force
     SDL_SysWMinfo info;
@@ -26,9 +37,15 @@ static void sdlPreviewRGB888Buffer(const std::string& title, const uint8_t* argb
     XSendEvent(info.info.x11.display, DefaultRootWindow(info.info.x11.display), False, SubstructureRedirectMask | SubstructureNotifyMask, (XEvent*) &xclient);
 
     // Render the image data
+#ifdef BENCHMARK_SDL
+    clock.start();
+#endif
     SDL_UpdateTexture(sdlTexture, 0, argb8888Buff, sizeX * 4);
     SDL_RenderClear  (sdlRenderer);
     SDL_RenderCopy   (sdlRenderer, sdlTexture,    0, 0);
+#ifdef BENCHMARK_SDL
+    std::clog << "SDL texture creation and rendering = " << std::setw(8) << clock.stop().toUSecs() << " uS" << std::endl;
+#endif
 
     // Display the image
     for(;;) {
@@ -40,7 +57,14 @@ static void sdlPreviewRGB888Buffer(const std::string& title, const uint8_t* argb
             (event.type == SDL_MOUSEBUTTONUP && event.button.button  == SDL_BUTTON_LEFT)
         ) break;
         // Display the frame and wait for a while
+#ifdef BENCHMARK_SDL
+        if(firstFrame) clock.start();
+#endif
         SDL_RenderPresent(sdlRenderer);
+#ifdef BENCHMARK_SDL
+        if(firstFrame) std::clog << "SDL displaying rendered texture    = " << std::setw(8) << clock.stop().toUSecs() << " uS" << std::endl;
+        firstFrame = false;
+#endif
         usleep(10000);
     }
 
@@ -49,18 +73,31 @@ static void sdlPreviewRGB888Buffer(const std::string& title, const uint8_t* argb
         std::string eraseStr = " - ImagePainter2";
         std::string fileName = std::string("../src/Pt-Gfx/TEMPORARY/IPT2 - ") + title + ".png";
         fileName.erase(fileName.find(eraseStr), eraseStr.length());
+#ifdef BENCHMARK_SDL
+        clock.start();
+#endif
         SDL_Surface* imageS = SDL_CreateRGBSurfaceFrom((void*) argb8888Buff, sizeX, sizeY, 32, sizeX * 4, 0x00FF0000, 0x0000FF00, 0x000000FF, 0x00000000);
         SDL_Surface* imageD = SDL_PNGFormatAlpha(imageS);
         SDL_SavePNG(imageD, fileName.c_str());
         SDL_FreeSurface(imageS);
         SDL_FreeSurface(imageD);
+#ifdef BENCHMARK_SDL
+        std::clog << "SDL saving image as PNG file       = " << std::setw(8) << clock.stop().toUSecs() << " uS" << std::endl;
+#endif
     }
 
     // Done
+#ifdef BENCHMARK_SDL
+    clock.start();
+#endif
     SDL_DestroyTexture (sdlTexture   );
     SDL_DestroyRenderer(sdlRenderer  );
     SDL_DestroyWindow  (sdlWindow    );
     SDL_Quit           (             );
+#ifdef BENCHMARK_SDL
+    std::clog << "SDL system shutdown and clean-up   = " << std::setw(8) << clock.stop().toUSecs() << " uS" << std::endl;
+    std::clog << std::endl;
+#endif
 }
 
 static void resetImage(Image& image)
