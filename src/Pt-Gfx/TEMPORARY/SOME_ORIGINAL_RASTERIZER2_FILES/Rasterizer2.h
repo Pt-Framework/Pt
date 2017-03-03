@@ -166,18 +166,17 @@ class Rasterizer2
         inline void patternBufferAlphaPolar(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t x, Pt::int32_t y, float scale, float xyRat, Pt::uint8_t alpha0, Pt::uint8_t alpha1);
 
     private:
-        // Scanline element
-        struct ScanlineElement;
-
         // Polygon scanlines (used for drawing filled polygons with XWAA)
-        //     * The vector index specify the Y coordinate of the scanline
-        //     * The vector element specify a set of "from" and "to" X coordinates
-        typedef std::vector< std::vector<ScanlineElement> > PolygonScanlines;
+        // The vector index is the Y coordinate
+        struct PolygonScanline16;
+
+        typedef std::vector< std::vector<PolygonScanline16> > PolygonScanline16s;
 
         // Ellipse & arc scanlines (used for drawing filled ellipse and arcs)
-        //    * The vector index specify the Y coordinate of the scanline
-        //    * The vector element specify the "from" and "to" X coordinates
-        typedef std::vector<ScanlineElement> EAScanlines;
+        // Each key specify the Y coordinate of a scanline; while its element specify the "from" and "to" X coordinates
+        struct EAScanlineElement;
+
+        typedef std::vector<EAScanlineElement> EAScanlines;
 
         // Filled-arc information structure (used for drawing filled arcs)
         struct FilledArcInfo;
@@ -193,7 +192,7 @@ class Rasterizer2
         void rasterOnePixelSolidGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut);
         void rasterOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut);
 
-        void rasterOnePixelAreaGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const PolygonScanlines& exclusionZone, DrawLineMask& maskInOut);
+        void rasterOnePixelAreaGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const PolygonScanline16s& exclusionZone, DrawLineMask& maskInOut);
 
         void rasterOnePixelPatternedLine(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut);
         void rasterOnePixelPatternedXLineSegment(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t fpiCtrInc, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut);
@@ -305,12 +304,21 @@ class Rasterizer2
 // ===== Private Member Structure Definitions ===========================================
 // ======================================================================================
 
-// Scanline element
-struct Rasterizer2::ScanlineElement {
+// Polygon scanline structure (used for drawing filled polygons with XWAA)
+struct Rasterizer2::PolygonScanline16 {
+    Pt::int32_t from, to;
+
+    PolygonScanline16(Pt::int16_t from_, Pt::int16_t to_)
+    : from(from_), to(to_)
+    {}
+};
+
+// Ellipse & arc scanline element (used for drawing filled ellipse and arcs)
+struct Rasterizer2::EAScanlineElement {
     Pt::int32_t from;
     Pt::int32_t to;
 
-    ScanlineElement(Pt::int32_t from_ = -1, Pt::int32_t to_ = -1)
+    EAScanlineElement(Pt::int32_t from_ = -1, Pt::int32_t to_ = -1)
     : from(from_), to(to_)
     {}
 
