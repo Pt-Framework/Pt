@@ -43,20 +43,20 @@
 // ======================================================================================
 // ===== Configurations and Macros ======================================================
 // ======================================================================================
-// Fixed-Point 20.12 Settings
-#define FIXED_POINT_SHIFT_FACTOR     12         // Shift factor
-#define FIXED_POINT_FRACT_BITMASK    0x00000FFF // Bit mask for the fractional value; must be (2 ^ FIXED_POINT_SHIFT_FACTOR - 1)
-#define FIXED_POINT_CONSTANT_ONE     4096       // The value 1.0  in fixed-point ( 2 ^ FIXED_POINT_SHIFT_FACTOR    )
-#define FIXED_POINT_CONSTANT_HALF    2048       // The value 0.5  in fixed-point ( 2 ^ FIXED_POINT_SHIFT_FACTOR / 2)
-#define FIXED_POINT_CONSTANT_QUARTER 1024       // The value 0.25 in fixed-point ( 2 ^ FIXED_POINT_SHIFT_FACTOR / 4)
+// Fixed-Point 16.16 Settings
+#define FIXED_POINT_SHIFT_FACTOR     16         // Shift factor
+#define FIXED_POINT_FRACT_BITMASK    0x0000FFFF // Bit mask for the fractional value; must be (2 ^ FIXED_POINT_SHIFT_FACTOR - 1)
+#define FIXED_POINT_CONSTANT_ONE     65536      // The value 1.0  in fixed-point ( 2 ^ FIXED_POINT_SHIFT_FACTOR    )
+#define FIXED_POINT_CONSTANT_HALF    32768      // The value 0.5  in fixed-point ( 2 ^ FIXED_POINT_SHIFT_FACTOR / 2)
+#define FIXED_POINT_CONSTANT_QUARTER 16384      // The value 0.25 in fixed-point ( 2 ^ FIXED_POINT_SHIFT_FACTOR / 4)
 
-// Fixed-Point 20.12 Helper Macros
+// Fixed-Point 16.16 Helper Macros
 #define FIXED_POINT_IPART(V)        ( (V) & ~FIXED_POINT_FRACT_BITMASK )
 #define FIXED_POINT_FPART(V)        ( (V) &  FIXED_POINT_FRACT_BITMASK )
 #define FIXED_POINT_RFPART(V)       ( FIXED_POINT_FRACT_BITMASK - FIXED_POINT_FPART(V) )
 #define FIXED_POINT_ROUND(V)        ( FIXED_POINT_IPART( (V) + FIXED_POINT_CONSTANT_HALF ) )
-#define FIXED_POINT_FPART_TO_A8(V)  ( FIXED_POINT_FPART (V) >> 4 )
-#define FIXED_POINT_RFPART_TO_A8(V) ( FIXED_POINT_RFPART(V) >> 4 )
+#define FIXED_POINT_FPART_TO_A8(V)  ( FIXED_POINT_FPART (V) >> 8 )
+#define FIXED_POINT_RFPART_TO_A8(V) ( FIXED_POINT_RFPART(V) >> 8 )
 #define FIXED_POINT_MUL_TO_A8(A, B) ( ( ( (Pt::uint32_t)(A) * (Pt::uint32_t)(B) + FIXED_POINT_FRACT_BITMASK ) >> FIXED_POINT_SHIFT_FACTOR ) )
 #define FIXED_POINT_FROM_INT(V)     ( (V) << FIXED_POINT_SHIFT_FACTOR )
 #define FIXED_POINT_TO_INT(V)       ( (V) >> FIXED_POINT_SHIFT_FACTOR )
