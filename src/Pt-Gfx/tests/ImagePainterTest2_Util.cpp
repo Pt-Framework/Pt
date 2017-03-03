@@ -1,4 +1,5 @@
-#define BENCHMARK_SDL
+// Uncomment this to benchmark SDL
+// #define BENCHMARK_SDL
 
 static void sdlPreviewRGB888Buffer(const std::string& title, const uint8_t* argb8888Buff, int sizeX, int sizeY, bool saveImageAsPNG)
 {
