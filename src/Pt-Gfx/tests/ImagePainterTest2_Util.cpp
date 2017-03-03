@@ -1,5 +1,5 @@
 // Uncomment this to benchmark SDL
-// #define BENCHMARK_SDL
+ #define BENCHMARK_SDL
 
 static void sdlPreviewRGB888Buffer(const std::string& title, const uint8_t* argb8888Buff, int sizeX, int sizeY, bool saveImageAsPNG)
 {
@@ -9,6 +9,8 @@ static void sdlPreviewRGB888Buffer(const std::string& title, const uint8_t* argb
     // Create window, renderer, and texture objects
 #ifdef BENCHMARK_SDL
     bool              firstFrame = true;
+    size_t            etime      = 0;
+    size_t            sum        = 0;
     Pt::System::Clock clock;
     clock.start();
 #endif
@@ -17,7 +19,9 @@ static void sdlPreviewRGB888Buffer(const std::string& title, const uint8_t* argb
     SDL_Texture*  sdlTexture    = SDL_CreateTexture (sdlRenderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STATIC, sizeX, sizeY);
 #ifdef BENCHMARK_SDL
     std::clog << std::endl;
-    std::clog << "SDL main system initialization     = " << std::setw(8) << clock.stop().toUSecs() << " uS" << std::endl;
+    etime  = clock.stop().toUSecs();
+    sum   += etime;
+    std::clog << "SDL main system initialization     = " << std::setw(8) << etime << " uS" << std::endl;
 #endif
 
     // Bring the window on top by force
@@ -45,7 +49,9 @@ static void sdlPreviewRGB888Buffer(const std::string& title, const uint8_t* argb
     SDL_RenderClear  (sdlRenderer);
     SDL_RenderCopy   (sdlRenderer, sdlTexture,    0, 0);
 #ifdef BENCHMARK_SDL
-    std::clog << "SDL texture creation and rendering = " << std::setw(8) << clock.stop().toUSecs() << " uS" << std::endl;
+    etime  = clock.stop().toUSecs();
+    sum   += etime;
+    std::clog << "SDL texture creation and rendering = " << std::setw(8) << etime << " uS" << std::endl;
 #endif
 
     // Display the image
@@ -63,8 +69,12 @@ static void sdlPreviewRGB888Buffer(const std::string& title, const uint8_t* argb
 #endif
         SDL_RenderPresent(sdlRenderer);
 #ifdef BENCHMARK_SDL
-        if(firstFrame) std::clog << "SDL displaying rendered texture    = " << std::setw(8) << clock.stop().toUSecs() << " uS" << std::endl;
-        firstFrame = false;
+        if(firstFrame) {
+            etime  = clock.stop().toUSecs();
+            sum   += etime;
+            std::clog << "SDL displaying rendered texture    = " << std::setw(8) << etime << " uS" << std::endl;
+            firstFrame = false;
+        }
 #endif
         usleep(10000);
     }
@@ -83,7 +93,9 @@ static void sdlPreviewRGB888Buffer(const std::string& title, const uint8_t* argb
         SDL_FreeSurface(imageS);
         SDL_FreeSurface(imageD);
 #ifdef BENCHMARK_SDL
-        std::clog << "SDL saving image as PNG file       = " << std::setw(8) << clock.stop().toUSecs() << " uS" << std::endl;
+        etime  = clock.stop().toUSecs();
+        sum   += etime;
+        std::clog << "SDL saving image as PNG file       = " << std::setw(8) << etime << " uS" << std::endl;
 #endif
     }
 
@@ -96,7 +108,10 @@ static void sdlPreviewRGB888Buffer(const std::string& title, const uint8_t* argb
     SDL_DestroyWindow  (sdlWindow    );
     SDL_Quit           (             );
 #ifdef BENCHMARK_SDL
-    std::clog << "SDL system shutdown and clean-up   = " << std::setw(8) << clock.stop().toUSecs() << " uS" << std::endl;
+    etime  = clock.stop().toUSecs();
+    sum   += etime;
+    std::clog << "SDL system shutdown and clean-up   = " << std::setw(8) << etime << " uS" << std::endl;
+    std::clog << "SDL total consumed time            = " << std::setw(8) << sum << " uS" << std::endl;
     std::clog << std::endl;
 #endif
 }
