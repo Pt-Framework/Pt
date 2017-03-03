@@ -571,7 +571,7 @@ void Rasterizer2::rasterPolygonAreaXWAA(const Point* points, const size_t* point
             if(to < from) continue;
             // Store the scanline coordinate as needed
             if(_compositionMode != CompositionMode::SourceCopy)
-                scanlines[pixelY - minY].push_back(ScanlineElement(from, to));
+                scanlines[pixelY - minY].push_back(ScanlineElement16(from, to));
             // Draw the scanline
             rasterScanline(from - minX, to - minX, pixelY - minY, minX, minY, color);
         }

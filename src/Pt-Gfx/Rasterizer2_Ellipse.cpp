@@ -458,7 +458,7 @@ void Rasterizer2::fillEllipse(const Point& topLeft, const Size& size)
 
     // Draw the scanlines
     for(size_t i = 0; i < scanlines.size(); ++i) {
-        const ScanlineElement& sle = scanlines[i];
+        const ScanlineElement32& sle = scanlines[i];
         if(sle.isNull()) continue;
         rasterScanlineWithClipping(sle.from, sle.to, i + minY - 1, minX, minY);
     }

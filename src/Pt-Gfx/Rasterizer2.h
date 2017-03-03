@@ -167,17 +167,21 @@ class Rasterizer2
 
     private:
         // Scanline element
+        template <typename T>
         struct ScanlineElement;
+
+        typedef ScanlineElement<Pt::int16_t> ScanlineElement16;
+        typedef ScanlineElement<Pt::int32_t> ScanlineElement32;
 
         // Polygon scanlines (used for drawing filled polygons with XWAA)
         //     * The vector index specify the Y coordinate of the scanline
         //     * The vector element specify a set of "from" and "to" X coordinates
-        typedef std::vector< std::vector<ScanlineElement> > PolygonScanlines;
+        typedef std::vector< std::vector<ScanlineElement16> > PolygonScanlines;
 
         // Ellipse & arc scanlines (used for drawing filled ellipse and arcs)
         //    * The vector index specify the Y coordinate of the scanline
         //    * The vector element specify the "from" and "to" X coordinates
-        typedef std::vector<ScanlineElement> EAScanlines;
+        typedef std::vector<ScanlineElement32> EAScanlines;
 
         // Filled-arc information structure (used for drawing filled arcs)
         struct FilledArcInfo;
@@ -306,11 +310,12 @@ class Rasterizer2
 // ======================================================================================
 
 // Scanline element
+template <typename T>
 struct Rasterizer2::ScanlineElement {
-    Pt::int32_t from;
-    Pt::int32_t to;
+    T from;
+    T to;
 
-    ScanlineElement(Pt::int32_t from_ = -1, Pt::int32_t to_ = -1)
+    ScanlineElement(T from_ = -1, T to_ = -1)
     : from(from_), to(to_)
     {}
 
