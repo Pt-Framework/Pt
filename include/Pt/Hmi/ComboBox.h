@@ -53,7 +53,7 @@ class PT_HMI_API ComboBoxMenu : public Window
 
         void removeItem(ListBoxItem& item);
 
-        Gfx::SizeF itemsSize() const;
+        Gfx::SizeF itemsSize(const SizePolicy& policy) const;
 
         void setScrollBars(bool hasScrollBars);
 

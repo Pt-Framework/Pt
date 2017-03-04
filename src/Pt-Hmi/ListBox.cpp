@@ -201,8 +201,8 @@ Gfx::SizeF ListBoxItem::onAutoSize() const
 {
     std::clog << "auto-height: " << size().width() << std::endl;
     if( sizePolicy().horizontalPolicy() == SizePolicy::Fixed )
-        return Gfx::SizeF(sizePolicy().sizeHint().width(),
-                          sizePolicy().sizeHint().width() / 4);
+        return Gfx::SizeF(sizePolicy().size().width(),
+                          sizePolicy().size().width() / 4);
 
     return Gfx::SizeF(size().width(), size().width() / 4);
 }
@@ -377,26 +377,32 @@ void ListBox::removeItem(ListBoxItem& item)
 }
 
 
-Gfx::SizeF ListBox::itemsSize() const
+Gfx::SizeF ListBox::itemsSize(const SizePolicy& policy) const
 {
-    Gfx::SizeF contentSize;
+    SizePolicy itemPolicy(policy);
+
+    double width = policy.size().width() - _scrollView.margin().leftRight();
+    itemPolicy.setWidth(width);
+
+    double height = policy.size().height() / _layout.widgets().size();
+    itemPolicy.setHeight(height);
+
+    double itemsHeight = 0;
 
     std::vector<Pt::Hmi::Widget*>::const_iterator it;
     for(it = _layout.widgets().begin(); it != _layout.widgets().end(); ++it)
     {
-      Widget* item = *it;
-      Pt::Gfx::SizeF itemSize = item->preferredSize();
+        Widget* item = *it;
+        item->setSizePolicy(itemPolicy);
 
-      contentSize.addHeight( itemSize.height() );
-      contentSize.addHeight( item->margin().topBottom() );
-
-      contentSize.setWidth( std::max( contentSize.width(), itemSize.width() ) );
+        itemsHeight += item->preferredSize().height();
+        itemsHeight += item->margin().topBottom();
     }
 
-    contentSize.addWidth( _layout.padding().leftRight() );
-    contentSize.addHeight( _layout.padding().topBottom() );
-
-    return contentSize;
+    Gfx::SizeF s = _layout.size();
+    s.setWidth( policy.size().width() );
+    s.setHeight(itemsHeight + _scrollView.margin().topBottom());
+    return s;
 }
 
 
@@ -480,18 +486,18 @@ void ListBox::onLayout()
     double itemsWidth = size().width() - _scrollView.margin().leftRight();
     double itemsHeight = 0;
 
-    for(std::size_t i = 0; i < _layout.widgets().size(); ++i)
+    std::vector<Pt::Hmi::Widget*>::const_iterator it;
+    for(it = _layout.widgets().begin(); it != _layout.widgets().end(); ++it)
     {
-        Widget* item = _layout.widgets().at(i);
+        Widget* item = *it;
 
         Gfx::SizeF itemSize = item->size();
         itemSize.setWidth(itemsWidth);
 
         SizePolicy policy(SizePolicy::Fixed, SizePolicy::Expanding);
-        policy.setSizeHint(itemSize);
+        policy.setSize(itemSize);
         item->setSizePolicy(policy);
 
-        // the sum of the item heights
         itemsHeight += item->preferredSize().height();
         itemsHeight += item->margin().topBottom();
     }
@@ -500,7 +506,8 @@ void ListBox::onLayout()
     s.setWidth(itemsWidth);
     s.setHeight(itemsHeight);
 
-    std::clog << "ListBox::onLayout: " << itemsHeight << std::endl;
+    std::clog << "ListBox::onLayout w: " << itemsWidth << 
+                                  " h: " << itemsHeight << std::endl;
     _layout.resize(s);
 }
 

@@ -63,9 +63,9 @@ void ComboBoxMenu::removeItem(ListBoxItem& item)
 }
 
 
-Gfx::SizeF ComboBoxMenu::itemsSize() const
+Gfx::SizeF ComboBoxMenu::itemsSize(const SizePolicy& policy) const
 {
-    return _items.itemsSize();
+    return _items.itemsSize(policy);
 }
 
 
@@ -224,10 +224,11 @@ void ComboBox::setMaxHeight(double height)
 
 void ComboBox::showPopup()
 {
-    double height = std::min(_popup.itemsSize().height(), _maxHeight);
-    //height = 50;
+    SizePolicy policy(SizePolicy::Fixed, SizePolicy::Expanding);
+    policy.setSize( size() );
 
-    Gfx::SizeF popupSize(size().width(), height);
+    Gfx::SizeF popupSize = _popup.itemsSize(policy);
+    popupSize.setHeight( std::min(popupSize.height(), _maxHeight) );
     _popup.resize(popupSize);
     
     Gfx::PointF popupPos(0, size().height() );

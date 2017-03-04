@@ -101,14 +101,24 @@ class SizePolicy
             _v = policy;
         }
         
-        const Gfx::SizeF& sizeHint() const
+        const Gfx::SizeF& size() const
         {
             return _sizeHint;
         }
 
-        void setSizeHint(const Gfx::SizeF& hint)
+        void setSize(const Gfx::SizeF& hint)
         {
             _sizeHint = hint;
+        }
+
+        void setWidth(double w)
+        {
+            _sizeHint.setWidth(w);
+        }
+
+        void setHeight(double h)
+        {
+            _sizeHint.setHeight(h);
         }
 
     private:

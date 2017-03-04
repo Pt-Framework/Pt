@@ -163,7 +163,7 @@ class PT_HMI_API ListBox : public Control
 
         void removeItem(ListBoxItem& item);
 
-        Gfx::SizeF itemsSize() const;
+        Gfx::SizeF itemsSize(const SizePolicy& policy) const;
 
         Pt::Signal<ListBoxItem&>& selected();
 
