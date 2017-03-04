@@ -512,53 +512,53 @@ void Rasterizer2::rasterEllipseAreaNoAA(const Point& topLeft, const Size& size)
     const Pt::int32_t minY   =  topLeft.y();
     const Pt::int32_t errorX = ((Pt::int32_t) size.width () % 2) ? 0 : 1;
     const Pt::int32_t errorY = ((Pt::int32_t) size.height() % 2) ? 0 : 1;
-    const Pt::int32_t a      =  size.width () / 2;
-    const Pt::int32_t b      =  size.height() / 2;
-    const Pt::int32_t a2     =  a * a;
-    const Pt::int32_t b2     =  b * b;
-    const Pt::int32_t xc     =  minX + a;
-    const Pt::int32_t yc     =  minY + b;
-    const Pt::int32_t crit1  = -(a2 / 4 + a % 2 + b2);
-    const Pt::int32_t crit2  = -(b2 / 4 + b % 2 + a2);
-    const Pt::int32_t crit3  = -(b2 / 4 + b % 2     );
-    const Pt::int32_t d2xt   =  2 * b2;
-    const Pt::int32_t d2yt   =  2 * a2;
-          Pt::int32_t dxt    =  0;
-          Pt::int32_t dyt    = -2 * a2 * b;
-          Pt::int32_t x      =  0;
-          Pt::int32_t y      =  b;
-          Pt::int32_t width  =  1;
-          Pt::int32_t t      = -a2 * b;
+    const Pt::int32_t radX   =  size.width () / 2;
+    const Pt::int32_t radY   =  size.height() / 2;
+    const Pt::int32_t radX2  =  radX * radX;
+    const Pt::int32_t radY2  =  radY * radY;
+    const Pt::int32_t ctrX   =  minX + radX;
+    const Pt::int32_t ctrY   =  minY + radY;
+    const Pt::int32_t crit1  = -(radX2 / 4 + radX % 2 + radY2);
+    const Pt::int32_t crit2  = -(radY2 / 4 + radY % 2 + radX2);
+    const Pt::int32_t crit3  = -(radY2 / 4 + radY % 2     );
+    const Pt::int32_t radX2t =  2 * radY2;
+    const Pt::int32_t radY2t =  2 * radX2;
+          Pt::int32_t incXt  =  0;
+          Pt::int32_t incYt  = -2 * radX2 * radY;
+          Pt::int32_t itrX   =  0;
+          Pt::int32_t itrY   =  radY;
+          Pt::int32_t itrT   = -radX2 * radY;
+          Pt::int32_t itrW   =  1;
 
-    while( y > 0 && x <= a ) {
-        if( (t + b2 * x) <= crit1 || (t + a2 * y) <= crit3 ) {
-            ++x;
-            dxt   += d2xt;
-            t     += dxt;
-            width += 2;
+    while( itrY > 0 && itrX <= radX ) {
+        if( (itrT + radY2 * itrX) <= crit1 || (itrT + radX2 * itrY) <= crit3 ) {
+            ++itrX;
+            incXt += radX2t;
+            itrT  += incXt;
+            itrW  += 2;
         }
-        else if( (t - a2 * y) > crit2 )  {
-            rasterScanlineWithClipping(xc - x, xc - x + width - errorX - 1, yc - y,          minX, minY);
-            rasterScanlineWithClipping(xc - x, xc - x + width - errorX - 1, yc + y - errorY, minX, minY);
-            --y;
-            dyt += d2yt;
-            t   += dyt;
+        else if( (itrT - radX2 * itrY) > crit2 )  {
+            rasterScanlineWithClipping(ctrX - itrX, ctrX - itrX + itrW - errorX - 1, ctrY - itrY,          minX, minY);
+            rasterScanlineWithClipping(ctrX - itrX, ctrX - itrX + itrW - errorX - 1, ctrY + itrY - errorY, minX, minY);
+            --itrY;
+            incYt += radY2t;
+            itrT  += incYt;
         }
         else {
-            rasterScanlineWithClipping(xc - x, xc - x + width - errorX - 1, yc - y,          minX, minY);
-            rasterScanlineWithClipping(xc - x, xc - x + width - errorX - 1, yc + y - errorY, minX, minY);
-            ++x;
-            dxt   += d2xt;
-            t     += dxt;
-            width += 2;
-            --y;
-            dyt   += d2yt;
-            t     += dyt;
+            rasterScanlineWithClipping(ctrX - itrX, ctrX - itrX + itrW - errorX - 1, ctrY - itrY,          minX, minY);
+            rasterScanlineWithClipping(ctrX - itrX, ctrX - itrX + itrW - errorX - 1, ctrY + itrY - errorY, minX, minY);
+            ++itrX;
+            incXt += radX2t;
+            itrT  += incXt;
+            itrW  += 2;
+            --itrY;
+            incYt += radY2t;
+            itrT  += incYt;
         }
     }
 
-    if( !errorY || !b )
-        rasterScanlineWithClipping(xc - a,  xc + a, yc, minX, minY);
+    if( !errorY || !radY )
+        rasterScanlineWithClipping(ctrX - radX,  ctrX + radX, ctrY, minX, minY);
 }
 
 
