@@ -145,7 +145,7 @@ ChildW::ChildW(const std::string& title)
     for(unsigned n = 0; n < 2; ++n)
     {
         ListBoxItem* item = new ListBoxItem;
-        //item->resize( Gfx::SizeF(20, 5) );
+        //item->resize( Gfx::SizeF(20, 30) );
         item->setAutoSize(true);
         
         std::ostringstream oss;

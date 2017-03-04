@@ -109,7 +109,7 @@ class PT_HMI_API MenuItem : public Control
         
         virtual void onShortcut(const KeyEvent& kev);
 
-        virtual Gfx::SizeF onAutoSize() const;
+        virtual Gfx::SizeF onAutoSize(const SizePolicy& policy) const;
 
     protected:
         virtual void onInvalidate();

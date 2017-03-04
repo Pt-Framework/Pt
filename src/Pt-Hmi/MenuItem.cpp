@@ -281,7 +281,7 @@ void MenuItem::onShortcut(const KeyEvent& kev)
 }
 
 
-Gfx::SizeF MenuItem::onAutoSize() const
+Gfx::SizeF MenuItem::onAutoSize(const SizePolicy& policy) const
 {
     Gfx::FontMetrics fm = Painter::fontMetrics(_font, _text);
 

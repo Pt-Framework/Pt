@@ -216,9 +216,9 @@ void Slider::setRenderer(SliderRenderer* renderer)
 }
 
 
-Gfx::SizeF Slider::onAutoSize() const
+Gfx::SizeF Slider::onAutoSize(const SizePolicy& policy) const
 {
-    return Base::onAutoSize();
+    return Base::onAutoSize(policy);
 }
 
 

@@ -283,6 +283,8 @@ class PT_HMI_API Widget : public Visual
 
         Gfx::SizeF preferredSize() const;
 
+        Gfx::SizeF preferredSize(const SizePolicy& policy) const;
+
         // outer spacing
         const Spacing& margin() const;
 
@@ -325,7 +327,7 @@ class PT_HMI_API Widget : public Visual
 
         virtual void onInvalidate();
 
-        virtual Pt::Gfx::SizeF onAutoSize() const;
+        virtual Pt::Gfx::SizeF onAutoSize(const SizePolicy& policy) const;
 
         virtual void onLayout();
 

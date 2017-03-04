@@ -42,6 +42,7 @@ ComboBoxMenu::ComboBoxMenu()
 {
     setMainWidget(&_items);
 
+    _items.setAutoSize(true);
     _items.selected() += Pt::slot(*this, &ComboBoxMenu::onItemSelected);
 }
 
@@ -63,9 +64,10 @@ void ComboBoxMenu::removeItem(ListBoxItem& item)
 }
 
 
-Gfx::SizeF ComboBoxMenu::itemsSize(const SizePolicy& policy) const
+Gfx::SizeF ComboBoxMenu::itemsSize(const SizePolicy& policy)
 {
-    return _items.itemsSize(policy);
+    _items.setSizePolicy(policy);
+    return _items.preferredSize();
 }
 
 
@@ -237,6 +239,11 @@ void ComboBox::showPopup()
 
     _popup.show();
     _popup.activate();
+
+    //_itemX.resize( Gfx::SizeF(20, 30) );
+    //_itemX.setAutoSize(true);
+    //_itemX.setText("Item X");
+    //addItem(_itemX);
 }
 
 

@@ -107,7 +107,7 @@ void MenuBarItem::close()
 }
 
 
-Gfx::SizeF MenuBarItem::onAutoSize() const
+Gfx::SizeF MenuBarItem::onAutoSize(const SizePolicy& policy) const
 {
     Gfx::FontMetrics fm = Painter::fontMetrics(_font, _text);
 

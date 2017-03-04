@@ -94,7 +94,7 @@ class MenuBarItem : public Control
         void setRenderer(MenuBarRenderer* renderer);
 
     protected:
-        virtual Gfx::SizeF onAutoSize() const;
+        virtual Gfx::SizeF onAutoSize(const SizePolicy& policy) const;
 
         virtual void onInvalidate();
 

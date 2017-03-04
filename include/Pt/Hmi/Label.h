@@ -90,7 +90,7 @@ class PT_HMI_API Label : public Control
         void setRenderer(LabelRenderer* renderer);
 
     protected:
-        virtual Gfx::SizeF onAutoSize() const;
+        virtual Gfx::SizeF onAutoSize(const SizePolicy& policy) const;
 
         virtual void onInvalidate();
 

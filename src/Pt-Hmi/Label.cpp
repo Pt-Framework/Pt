@@ -176,7 +176,7 @@ void Label::setRenderer(LabelRenderer* renderer)
 }
 
 
-Gfx::SizeF Label::onAutoSize() const
+Gfx::SizeF Label::onAutoSize(const SizePolicy& policy) const
 {
     double w = 0;
     double h = 0;

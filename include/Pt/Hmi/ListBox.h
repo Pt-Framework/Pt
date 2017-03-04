@@ -99,7 +99,7 @@ class PT_HMI_API ListBoxItem : public Button
         virtual void onCanceled();
 
     protected:
-        virtual Gfx::SizeF onAutoSize() const;
+        virtual Gfx::SizeF onAutoSize(const SizePolicy& policy) const;
 
         virtual void onInvalidate();
     
@@ -163,8 +163,6 @@ class PT_HMI_API ListBox : public Control
 
         void removeItem(ListBoxItem& item);
 
-        Gfx::SizeF itemsSize(const SizePolicy& policy) const;
-
         Pt::Signal<ListBoxItem&>& selected();
 
     public:
@@ -183,6 +181,8 @@ class PT_HMI_API ListBox : public Control
         void setRenderer(ListBoxRenderer* renderer);
 
     protected:
+        virtual Gfx::SizeF onAutoSize(const SizePolicy& policy) const;
+
         virtual void onLayout();
 
         virtual void onInvalidate();
