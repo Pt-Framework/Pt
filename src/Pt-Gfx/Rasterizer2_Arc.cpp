@@ -171,7 +171,6 @@ void Rasterizer2::rasterArcAreaPie(FilledArcInfo& fai)
     if(!fai.antiAlias) return;
 
     // Draw the anti-aliased circumference pixels
-    // TODO: * Fix missing pixels in all mode !
     arcUtil_rasterCircumferencePixels(fai);
 
     // Draw the closing lines
@@ -318,6 +317,7 @@ void Rasterizer2::arcUtil_genScanlinesForChord(EAScanlines& scanlines, const Fil
     Pt::int32_t lineMinY = fai.minY;
     Pt::int32_t lineMaxY = fai.minY + fai.radY * 2;
 
+    // TODO: * Fix cut-out scanlines in all mode !
     if(xwLine.faceT) {
         if(lineMinY < xwLine.minY + 1) lineMinY = xwLine.minY + 1;
     }
@@ -417,7 +417,7 @@ void Rasterizer2::arcUtil_genScanlinesForPie(EAScanlines& scanlines1, EAScanline
     Pt::int32_t lineMinY = fai.minY;
     Pt::int32_t lineMaxY = fai.minY + fai.radY * 2;
 
-    // Facing different directions
+    // Facing top-bottom or bottom-top
     if( (xwLine1.faceT && xwLine2.faceB) || (xwLine1.faceB && xwLine2.faceT) ) {
         Pt::int32_t y1avg = (xwLine1.y1 + xwLine1.y2) / 2;
         Pt::int32_t y2avg = (xwLine2.y1 + xwLine2.y2) / 2;
@@ -438,12 +438,12 @@ void Rasterizer2::arcUtil_genScanlinesForPie(EAScanlines& scanlines1, EAScanline
             }
         }
     }
-    // Facing the same direction
+    // Facing other directions
     else {
         // Face top
         if(xwLine1.faceT && xwLine2.faceT) {
             const Pt::int32_t cy = std::min(xwLine1.minY, xwLine2.minY);
-            if(lineMinY < cy) lineMinY = cy;
+            if(lineMinY < cy) lineMinY = cy + 1;
         }
         else if(xwLine1.faceT) {
             if(lineMinY < xwLine1.minY) lineMinY = xwLine1.minY;
@@ -454,7 +454,7 @@ void Rasterizer2::arcUtil_genScanlinesForPie(EAScanlines& scanlines1, EAScanline
         // Face bottom
         if(xwLine1.faceB && xwLine2.faceB) {
             const Pt::int32_t cy = std::max(xwLine1.maxY, xwLine2.maxY);
-            if(lineMaxY > cy) lineMaxY = cy;
+            if(lineMaxY > cy) lineMaxY = cy - 1;
         }
         else if(xwLine1.faceB) {
             if(lineMaxY > xwLine1.maxY) lineMaxY = xwLine1.maxY;
@@ -498,8 +498,8 @@ void Rasterizer2::arcUtil_cropAndStoreScanlineForPie(EAScanlines& scanlines1, EA
     typedef XWPoints::const_iterator            XWPointsIterator;
 
     // Check if the scanline will be completely outside the shape
-    if( (xwLine1.faceT && y <= lineMinY) || (xwLine2.faceT && y <= lineMinY) ||
-        (xwLine1.faceB && y >= lineMaxY) || (xwLine2.faceB && y >= lineMaxY)
+    if( (xwLine1.faceT && y < lineMinY) || (xwLine2.faceT && y < lineMinY) ||
+        (xwLine1.faceB && y > lineMaxY) || (xwLine2.faceB && y > lineMaxY)
     ) return;
 
     // Get the element with the wanted coordinate from the left-side closing line
