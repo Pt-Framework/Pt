@@ -315,8 +315,15 @@ void Rasterizer2::arcUtil_runXWLineAlgorithm(ArcXWLineData& xwLine, const Filled
 void Rasterizer2::arcUtil_genScanlinesForChord(EAScanlines& scanlines, const FilledArcInfo& fai, const ArcXWLineData& xwLine)
 {
     // Find the line's minimum and maximum Y coordinates
-    const Pt::int32_t lineMinY = xwLine.minY + 1;
-    const Pt::int32_t lineMaxY = xwLine.maxY - 1;
+    Pt::int32_t lineMinY = fai.minY;
+    Pt::int32_t lineMaxY = fai.minY + fai.radY * 2;
+
+    if(xwLine.faceT) {
+        if(lineMinY < xwLine.minY + 1) lineMinY = xwLine.minY + 1;
+    }
+    if(xwLine.faceB) {
+        if(lineMaxY > xwLine.maxY - 1) lineMaxY = xwLine.maxY - 1;
+    }
 
     // Minimum and maximum X coordinates of the shape
     const Pt::int32_t xlMin = std::min(fai.x1, fai.x2);
@@ -359,7 +366,7 @@ void Rasterizer2::arcUtil_cropAndStoreScanlineForChord(EAScanlines& scanlines, c
 {
     // For convenience
     typedef std::vector<ArcXWLineData::XWPoint> XWPoints;
-    typedef XWPoints::const_iterator         XWPointsIterator;
+    typedef XWPoints::const_iterator            XWPointsIterator;
 
     // Check if the scanline will be completely outside the shape
     if( (xwLine.faceT && y < lineMinY) || (xwLine.faceB && y > lineMaxY) ) return;
@@ -410,60 +417,50 @@ void Rasterizer2::arcUtil_genScanlinesForPie(EAScanlines& scanlines1, EAScanline
     Pt::int32_t lineMinY = fai.minY;
     Pt::int32_t lineMaxY = fai.minY + fai.radY * 2;
 
+    // Facing different directions
     if( (xwLine1.faceT && xwLine2.faceB) || (xwLine1.faceB && xwLine2.faceT) ) {
         Pt::int32_t y1avg = (xwLine1.y1 + xwLine1.y2) / 2;
         Pt::int32_t y2avg = (xwLine2.y1 + xwLine2.y2) / 2;
         if(y1avg < y2avg) { // The first line is on lower Y coordinate
             if(xwLine1.faceT) {
-                const Pt::int32_t cy = std::min(xwLine1.y1, xwLine1.y2);
-                if(lineMinY < cy) lineMinY = cy;
+                if(lineMinY < xwLine1.minY) lineMinY = xwLine1.minY;
             }
             if(xwLine2.faceB) {
-                const Pt::int32_t cy = std::max(xwLine2.y1, xwLine2.y2);
-                if(lineMaxY > cy) lineMaxY = cy;
+                if(lineMaxY > xwLine2.maxY) lineMaxY = xwLine2.maxY;
             }
         }
         else { // The second line is on lower Y coordinate
             if(xwLine1.faceB) {
-                const Pt::int32_t cy = std::max(xwLine1.y1, xwLine1.y2);
-                if(lineMaxY > cy) lineMaxY = cy;
+                if(lineMaxY > xwLine1.maxY) lineMaxY = xwLine1.maxY;
             }
             if(xwLine2.faceT) {
-                const Pt::int32_t cy = std::min(xwLine2.y1, xwLine2.y2);
-                if(lineMinY < cy) lineMinY = cy;
+                if(lineMinY < xwLine2.minY) lineMinY = xwLine2.minY;
             }
         }
     }
+    // Facing the same direction
     else {
         // Face top
         if(xwLine1.faceT && xwLine2.faceT) {
-            const Pt::int32_t cy1 = std::min(xwLine1.y1, xwLine1.y2);
-            const Pt::int32_t cy2 = std::min(xwLine2.y1, xwLine2.y2);
-            const Pt::int32_t cy  = std::min(cy1, cy2);
+            const Pt::int32_t cy = std::min(xwLine1.minY, xwLine2.minY);
             if(lineMinY < cy) lineMinY = cy;
         }
         else if(xwLine1.faceT) {
-            const Pt::int32_t cy = std::min(xwLine1.y1, xwLine1.y2);
-            if(lineMinY < cy) lineMinY = cy;
+            if(lineMinY < xwLine1.minY) lineMinY = xwLine1.minY;
         }
         else if(xwLine2.faceT) {
-            const Pt::int32_t cy = std::min(xwLine2.y1, xwLine2.y2);
-            if(lineMinY < cy) lineMinY = cy;
+            if(lineMinY < xwLine2.minY) lineMinY = xwLine2.minY;
         }
         // Face bottom
         if(xwLine1.faceB && xwLine2.faceB) {
-            const Pt::int32_t cy1 = std::max(xwLine1.y1, xwLine1.y2);
-            const Pt::int32_t cy2 = std::max(xwLine2.y1, xwLine2.y2);
-            const Pt::int32_t cy  = std::max(cy1, cy2);
+            const Pt::int32_t cy = std::max(xwLine1.maxY, xwLine2.maxY);
             if(lineMaxY > cy) lineMaxY = cy;
         }
         else if(xwLine1.faceB) {
-            const Pt::int32_t cy = std::max(xwLine1.y1, xwLine1.y2);
-            if(lineMaxY > cy) lineMaxY = cy;
+            if(lineMaxY > xwLine1.maxY) lineMaxY = xwLine1.maxY;
         }
         else if(xwLine2.faceB) {
-            const Pt::int32_t cy = std::max(xwLine2.y1, xwLine2.y2);
-            if(lineMaxY > cy) lineMaxY = cy;
+            if(lineMaxY > xwLine2.maxY) lineMaxY = xwLine2.maxY;
         }
     }
 
@@ -498,7 +495,7 @@ void Rasterizer2::arcUtil_cropAndStoreScanlineForPie(EAScanlines& scanlines1, EA
 {
     // For convenience
     typedef std::vector<ArcXWLineData::XWPoint> XWPoints;
-    typedef XWPoints::const_iterator         XWPointsIterator;
+    typedef XWPoints::const_iterator            XWPointsIterator;
 
     // Check if the scanline will be completely outside the shape
     if( (xwLine1.faceT && y <= lineMinY) || (xwLine2.faceT && y <= lineMinY) ||
