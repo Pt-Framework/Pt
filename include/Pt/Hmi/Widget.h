@@ -61,6 +61,62 @@ namespace Hmi {
 class Window;
 class Layout;
 
+class SizePolicy
+{
+    public:
+        enum Policy
+        {
+            Fixed,
+            Expanding
+        };
+    
+    public:
+        SizePolicy()
+        : _h(Expanding)
+        , _v(Expanding)
+        { }
+        
+        SizePolicy(Policy horizontal, Policy vertical)
+        : _h(horizontal)
+        , _v(vertical)
+        { }
+
+        Policy horizontalPolicy() const
+        {
+            return _h;
+        }
+
+        void setHorizontalPolicy(Policy policy)
+        {
+            _h = policy;
+        }
+        
+        Policy verticalPolicy() const
+        {
+            return _v;
+        }
+        
+        void setVerticalPolicy(Policy policy)
+        {
+            _v = policy;
+        }
+        
+        const Gfx::SizeF& sizeHint() const
+        {
+            return _sizeHint;
+        }
+
+        void setSizeHint(const Gfx::SizeF& hint)
+        {
+            _sizeHint = hint;
+        }
+
+    private:
+        Policy     _h;
+        Policy     _v;
+        Gfx::SizeF _sizeHint;
+};
+
 class PT_HMI_API Widget : public Visual
 {
     friend class Window;
@@ -207,6 +263,10 @@ class PT_HMI_API Widget : public Visual
         // layouting
         //
  
+        const SizePolicy& sizePolicy() const;
+
+        void setSizePolicy(const SizePolicy& policy);
+
         bool isAutoSize() const;
 
         void setAutoSize(bool a);
@@ -327,6 +387,7 @@ class PT_HMI_API Widget : public Visual
         bool                         _enabledState;
         Gfx::PointF                  _position;
         Gfx::SizeF                   _size;
+        SizePolicy                   _sizePolicy;
         Gfx::SizeF                   _preferredSize;
         bool                         _autoSize;
 

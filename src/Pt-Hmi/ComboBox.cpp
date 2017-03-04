@@ -225,9 +225,10 @@ void ComboBox::setMaxHeight(double height)
 void ComboBox::showPopup()
 {
     double height = std::min(_popup.itemsSize().height(), _maxHeight);
+    //height = 50;
 
     Gfx::SizeF popupSize(size().width(), height);
-    _popup.resize( popupSize );
+    _popup.resize(popupSize);
     
     Gfx::PointF popupPos(0, size().height() );
     popupPos = this->toScreen(popupPos);

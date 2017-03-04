@@ -572,12 +572,36 @@ void Widget::onLayoutEvent(const LayoutEvent& ev)
 }
 
 
+const SizePolicy& Widget::sizePolicy() const
+{
+    return _sizePolicy;
+}
+
+
+void Widget::setSizePolicy(const SizePolicy& policy)
+{
+    Gfx::SizeF size = preferredSize();
+
+    _sizePolicy = policy;
+
+    if(_autoSize)
+        _preferredSize = onAutoSize();
+
+    if( size != preferredSize() )
+    {
+        if( parent() )
+            parent()->layout();
+    }
+}
+
+
 bool Widget::isAutoSize() const
 {
     return _autoSize;
 }
 
 
+// TODO: is setSizePolicy same as setAutoSize ?
 void Widget::setAutoSize(bool a)
 {
     Gfx::SizeF size = preferredSize();

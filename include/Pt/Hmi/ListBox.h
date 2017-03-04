@@ -99,6 +99,8 @@ class PT_HMI_API ListBoxItem : public Button
         virtual void onCanceled();
 
     protected:
+        virtual Gfx::SizeF onAutoSize() const;
+
         virtual void onInvalidate();
     
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);

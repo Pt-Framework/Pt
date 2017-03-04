@@ -197,6 +197,17 @@ void ListBoxItem::setRenderer(ListBoxRenderer* renderer)
 }
 
 
+Gfx::SizeF ListBoxItem::onAutoSize() const
+{
+    std::clog << "auto-height: " << size().width() << std::endl;
+    if( sizePolicy().horizontalPolicy() == SizePolicy::Fixed )
+        return Gfx::SizeF(sizePolicy().sizeHint().width(),
+                          sizePolicy().sizeHint().width() / 4);
+
+    return Gfx::SizeF(size().width(), size().width() / 4);
+}
+
+
 void ListBoxItem::onInvalidate()
 {
     Base::onInvalidate();
@@ -319,22 +330,6 @@ ListBoxLayout::~ListBoxLayout()
 
 void ListBoxLayout::onLayout()
 {
-    double itemsHeight = 0;
-
-    for(std::size_t i = 0; i < widgets().size(); ++i)
-    {
-        Widget* item = widgets().at(i);
-
-        // the sum of the item heights
-        itemsHeight += item->preferredSize().height();
-        itemsHeight += item->margin().topBottom();
-    }
-
-    Gfx::SizeF size = this->size();
-    size.setHeight(itemsHeight);
-
-    resize(size);
-
     Base::onLayout();
 }
 
@@ -352,6 +347,8 @@ ListBox::ListBox()
     _scrollView.setWidget(_layout);
 
     setContent(_scrollView);
+
+    _layout.resize( Pt::Gfx::SizeF(188, 6) );
 }
 
 
@@ -480,9 +477,30 @@ void ListBox::onLayout()
 {
     Base::onLayout();
 
-    Gfx::SizeF s = _layout.size();
-    s.setWidth( size().width() - _scrollView.margin().leftRight() );
+    double itemsWidth = size().width() - _scrollView.margin().leftRight();
+    double itemsHeight = 0;
 
+    for(std::size_t i = 0; i < _layout.widgets().size(); ++i)
+    {
+        Widget* item = _layout.widgets().at(i);
+
+        Gfx::SizeF itemSize = item->size();
+        itemSize.setWidth(itemsWidth);
+
+        SizePolicy policy(SizePolicy::Fixed, SizePolicy::Expanding);
+        policy.setSizeHint(itemSize);
+        item->setSizePolicy(policy);
+
+        // the sum of the item heights
+        itemsHeight += item->preferredSize().height();
+        itemsHeight += item->margin().topBottom();
+    }
+
+    Gfx::SizeF s = _layout.size();
+    s.setWidth(itemsWidth);
+    s.setHeight(itemsHeight);
+
+    std::clog << "ListBox::onLayout: " << itemsHeight << std::endl;
     _layout.resize(s);
 }
 
