@@ -245,6 +245,7 @@ class Rasterizer2
         void fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const bool mask[4]);
         void fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, Pt::uint8_t alpha);
         void fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, Pt::uint8_t alpha, const bool mask[4]);
+        void fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const Pt::uint8_t alphaMask[4]);
 
         void rasterScanline(
             Pt::int32_t  iterL, Pt::int32_t iterR, Pt::int32_t pixelY,
@@ -266,8 +267,10 @@ class Rasterizer2
         void getPolygonRectMinMax(const Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY);
 
         // Arc-related helper functions
-        static inline bool arcUtil_pointIsInsideDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd, float xyRatio);
         static inline void arcUtil_detXWLineDirection(ArcXWLineData& xwLineData);
+
+        static inline bool arcUtil_pointIsInsideDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd, float xyRatio);
+        static inline Pt::uint8_t arcUtil_pointIsInsideDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, Pt::uint8_t alpha, float degBegin, float degEnd, float xyRatio);
 
         static void arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai);
         static void arcUtil_runXWLineAlgorithm(ArcXWLineData& xwLine, const FilledArcInfo& fai, Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2);
@@ -619,31 +622,6 @@ void Rasterizer2::rasterScanline(
     #undef RSL_MAX_ALPHA
 }
 
-bool Rasterizer2::arcUtil_pointIsInsideDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd, float xyRatio)
-{
-    // IMPORTANT NOTES:
-    //     * The Y coordinate goes from low to high according to the coordinate system being used:
-    //           - cartesian coordinate system: from the horizontal axis (the X axis) to the top;
-    //           - computer  coordinate system: from the top of the screen to the bottom of the screen;
-    //       This will cause sign inversion for trigonometry-based calculations in the Y coordinate.
-    //     * The movement from begin angle to end angle must be in counter-clockwise (CCW), otherwise
-    //       something wrong will be drawn.
-
-    const float angle = Gfx::Math::convertCartesianToPolarCoordinate( (x - ctrX), -(y - ctrY) * xyRatio);
-
-    if(degBegin < 0 && degEnd < 0) {
-        return angle >= (degBegin + 360) && angle <= (degEnd + 360);
-    }
-
-    if(degBegin < 0 && degEnd >= 0) {
-        if( angle >= (degBegin + 360) && angle <= 360   ) return true;
-        if( angle >= 0                && angle <= degEnd) return true;
-        return false;
-    }
-
-    return angle >= degBegin && angle <= degEnd;
-}
-
 void Rasterizer2::arcUtil_detXWLineDirection(ArcXWLineData& xwLineData)
 {
     // Calculate the direction vector
@@ -662,6 +640,89 @@ void Rasterizer2::arcUtil_detXWLineDirection(ArcXWLineData& xwLineData)
     xwLineData.faceB = cy > 0;
     xwLineData.faceL = cx < 0;
     xwLineData.faceR = cx > 0;
+}
+
+bool Rasterizer2::arcUtil_pointIsInsideDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd, float xyRatio)
+{
+    // IMPORTANT NOTES:
+    //     * The Y coordinate goes from low to high according to the coordinate system being used:
+    //           - cartesian coordinate system: from the horizontal axis (the X axis) to the top;
+    //           - computer  coordinate system: from the top of the screen to the bottom of the screen;
+    //       This will cause sign inversion for trigonometry-based calculations in the Y coordinate.
+    //     * The movement from begin angle to end angle must be in counter-clockwise (CCW), otherwise
+    //       something wrong will be drawn.
+
+    const float angle = Gfx::Math::convertCartesianToPolarCoordinate( (x - ctrX), -(y - ctrY) * xyRatio);
+
+    // Both begin and end angle are negative
+    if(degBegin < 0 && degEnd < 0) {
+        return angle >= (degBegin + 360) && angle <= (degEnd + 360);
+    }
+
+    // Begin angle is negative but end angle is positive
+    if(degBegin < 0 && degEnd >= 0) {
+        if(angle >= (degBegin + 360) && angle <= 360   ) return true;
+        if(angle >= 0                && angle <= degEnd) return true;
+        return false;
+    }
+
+    // Both begin and end angle are positive
+    return angle >= degBegin && angle <= degEnd;
+}
+
+Pt::uint8_t Rasterizer2::arcUtil_pointIsInsideDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, Pt::uint8_t alpha, float degBegin, float degEnd, float xyRatio)
+{
+    // IMPORTANT NOTES:
+    //     * The Y coordinate goes from low to high according to the coordinate system being used:
+    //           - cartesian coordinate system: from the horizontal axis (the X axis) to the top;
+    //           - computer  coordinate system: from the top of the screen to the bottom of the screen;
+    //       This will cause sign inversion for trigonometry-based calculations in the Y coordinate.
+    //     * The movement from begin angle to end angle must be in counter-clockwise (CCW), otherwise
+    //       something wrong will be drawn.
+
+    const float angle = Gfx::Math::convertCartesianToPolarCoordinate( (x - ctrX), -(y - ctrY) * xyRatio);
+    const float limit = 4.0f;
+    const float addFc = 0.1f;
+
+    // Both begin and end angle are negative
+    if(degBegin < 0 && degEnd < 0) {
+        degBegin += 360;
+        degEnd   += 360;
+        if(angle >= degBegin && angle <= degEnd) {
+            const float db = angle  - degBegin;
+            const float de = degEnd - angle;
+            const float dm = std::min(db, de);
+            if(dm > limit) return alpha;
+            return alpha * ( (dm / limit) + addFc );
+        }
+        return 0;
+    }
+
+    // Begin angle is negative but end angle is positive
+    if(degBegin < 0 && degEnd >= 0) {
+        degBegin += 360;
+        if(angle >= degBegin && angle <= 360) {
+            const float dm = angle - degBegin;
+            if(dm > limit) return alpha;
+            return alpha * ( (dm / limit) + addFc );
+        }
+        if(angle >= 0  && angle <= degEnd) {
+            const float dm = degEnd - angle;
+            if(dm > limit) return alpha;
+            return alpha * ( (dm / limit) + addFc );
+        }
+        return 0;
+    }
+
+    // Both begin and end angle are positive
+    if(angle >= degBegin && angle <= degEnd) {
+        const float db = angle  - degBegin;
+        const float de = degEnd - angle;
+        const float dm = std::min(db, de);
+        if(dm > limit) return alpha;
+        return alpha * ( (dm / limit) + addFc );
+    }
+    return 0;
 }
 
 

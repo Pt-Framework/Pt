@@ -371,6 +371,61 @@ void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt
     }
 }
 
+void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const Pt::uint8_t alphaMask[4])
+{
+    // Check the clipping
+    const bool x1Valid = ClipShape::insideXRange(x1, _currentClip);
+    const bool y1Valid = ClipShape::insideYRange(y1, _currentClip);
+    const bool x2Valid = ClipShape::insideXRange(x2, _currentClip) && (x2 != x1);
+    const bool y2Valid = ClipShape::insideYRange(y2, _currentClip) && (y2 != y1);
+
+    // Draw the pixels using texture or gradient
+    if(_isTexture || _isGradient) {
+        const Pt::int32_t bw = _brushImage->width();
+        const Pt::int32_t bh = _brushImage->height();
+        if( x1Valid && y1Valid && alphaMask[0] ) {
+            ConstPixel srcPixel(_brushImage->view(), (x1 - minX) % bw, (y1 - minY) % bh);
+            Pixel      dstPixel(_image->view(), x1, y1);
+            _image->format().setPixel(dstPixel, srcPixel, _compositionMode, alphaMask[0]);
+        }
+        if( x1Valid && y2Valid && alphaMask[1] ) {
+            ConstPixel srcPixel(_brushImage->view(), (x1 - minX) % bw, (y2 - minY) % bh);
+            Pixel      dstPixel(_image->view(), x1, y2);
+            _image->format().setPixel(dstPixel, srcPixel, _compositionMode, alphaMask[1]);
+        }
+        if( x2Valid && y1Valid && alphaMask[2] ) {
+            ConstPixel srcPixel(_brushImage->view(), (x2 - minX) % bw, (y1 - minY) % bh);
+            Pixel      dstPixel(_image->view(), x2, y1);
+            _image->format().setPixel(dstPixel, srcPixel, _compositionMode, alphaMask[2]);
+        }
+        if( x2Valid && y2Valid && alphaMask[3] ) {
+            ConstPixel srcPixel(_brushImage->view(), (x2 - minX) % bw, (y2 - minY) % bh);
+            Pixel      dstPixel(_image->view(), x2, y2);
+            _image->format().setPixel(dstPixel, srcPixel, _compositionMode, alphaMask[3]);
+        }
+    }
+
+    // Draw the pixels using solid color
+    else {
+        if( x1Valid && y1Valid && alphaMask[0] ) {
+            Pixel pixel(_image->view(), x1, y1);
+            _image->format().setPixel(pixel, _brush.color(), _compositionMode, alphaMask[0]);
+        }
+        if( x1Valid && y2Valid && alphaMask[1] ) {
+            Pixel pixel(_image->view(), x1, y2);
+            _image->format().setPixel(pixel, _brush.color(), _compositionMode, alphaMask[1]);
+        }
+        if( x2Valid && y1Valid && alphaMask[2] ) {
+            Pixel pixel(_image->view(), x2, y1);
+            _image->format().setPixel(pixel, _brush.color(), _compositionMode, alphaMask[2]);
+        }
+        if( x2Valid && y2Valid && alphaMask[3] ) {
+            Pixel pixel(_image->view(), x2, y2);
+            _image->format().setPixel(pixel, _brush.color(), _compositionMode, alphaMask[3]);
+        }
+    }
+}
+
 void Rasterizer2::rasterScanline(
     Pt::int32_t  iterL, Pt::int32_t iterR, Pt::int32_t pixelY,
     Pt::int32_t  minX,  Pt::int32_t minY,

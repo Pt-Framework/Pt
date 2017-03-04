@@ -65,7 +65,7 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_PATTERNED_LINE                0 // (including bezier)
 #define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES  0
 
-#define TEST_DRAW_ELLIPSES_ARCS                 1
+#define TEST_DRAW_ELLIPSES_ARCS                 0
 
 #define TEST_DRAW_SOLID_FILLED_POLYGONS         0
 #define TEST_DRAW_GRADIENT_FILLED_POLYGONS      0
@@ -92,8 +92,8 @@ using namespace Pt::Gfx;
 #define BENCHMARK_PATTERNED_LINE            0
 #define BENCHMARK_ELLIPSE                   0
 #define BENCHMARK_ARC                       0
-#define BENCHMARK_SOLID_BEZIER              1
-#define BENCHMARK_PATTERNED_BEZIER          1
+#define BENCHMARK_SOLID_BEZIER              0
+#define BENCHMARK_PATTERNED_BEZIER          0
 
 #define BENCHMARK_RECTANGLE                 0
 #define BENCHMARK_SOLID_FILLED_RECTANGLE    0

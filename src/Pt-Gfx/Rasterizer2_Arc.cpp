@@ -115,8 +115,6 @@ void Rasterizer2::rasterArcAreaChord(FilledArcInfo& fai)
     if(!fai.antiAlias) return;
 
     // Draw the anti-aliased circumference pixels
-    // TODO: * Fix missing pixels in all mode !
-    //       * Fix out-of-place brighter-pixel artifacts in SourceOver mode !
     arcUtil_rasterCircumferencePixels(fai);
 
     // Draw the closing line
@@ -174,7 +172,6 @@ void Rasterizer2::rasterArcAreaPie(FilledArcInfo& fai)
 
     // Draw the anti-aliased circumference pixels
     // TODO: * Fix missing pixels in all mode !
-    //       * Fix out-of-place brighter-pixel artifacts in SourceOver mode !
     arcUtil_rasterCircumferencePixels(fai);
 
     // Draw the closing lines
@@ -672,6 +669,7 @@ void Rasterizer2::arcUtil_rasterCircumferencePixels(FilledArcInfo& fai)
         const Pt::int32_t x2 = fai.ctrX + x;
         const Pt::int32_t y1 = fai.ctrY - fly - 1;
         const Pt::int32_t y2 = fai.ctrY + fly + 1;
+#if 0
         const bool mask[4] = {
             arcUtil_pointIsInsideDegRange(x1, y1, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd, fai.xyRat),
             arcUtil_pointIsInsideDegRange(x1, y2, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd, fai.xyRat),
@@ -679,6 +677,15 @@ void Rasterizer2::arcUtil_rasterCircumferencePixels(FilledArcInfo& fai)
             arcUtil_pointIsInsideDegRange(x2, y2, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd, fai.xyRat)
         };
         fill4Pixels(x1, y1, x2, y2, fai.minX, fai.minY, alpha, mask);
+#else
+        const Pt::uint8_t alphas[4] = {
+            arcUtil_pointIsInsideDegRange(x1, y1, fai.ctrX, fai.ctrY, alpha, fai.degBegin, fai.degEnd, fai.xyRat),
+            arcUtil_pointIsInsideDegRange(x1, y2, fai.ctrX, fai.ctrY, alpha, fai.degBegin, fai.degEnd, fai.xyRat),
+            arcUtil_pointIsInsideDegRange(x2, y1, fai.ctrX, fai.ctrY, alpha, fai.degBegin, fai.degEnd, fai.xyRat),
+            arcUtil_pointIsInsideDegRange(x2, y2, fai.ctrX, fai.ctrY, alpha, fai.degBegin, fai.degEnd, fai.xyRat)
+        };
+        fill4Pixels(x1, y1, x2, y2, fai.minX, fai.minY, alphas);
+#endif
     }
 
     // Left and right halves
@@ -693,6 +700,7 @@ void Rasterizer2::arcUtil_rasterCircumferencePixels(FilledArcInfo& fai)
         const Pt::int32_t x2 = fai.ctrX + flx + 1;
         const Pt::int32_t y1 = fai.ctrY - y;
         const Pt::int32_t y2 = fai.ctrY + y;
+#if 0
         const bool mask[4] = {
             arcUtil_pointIsInsideDegRange(x1, y1, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd, fai.xyRat),
             arcUtil_pointIsInsideDegRange(x1, y2, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd, fai.xyRat),
@@ -700,6 +708,15 @@ void Rasterizer2::arcUtil_rasterCircumferencePixels(FilledArcInfo& fai)
             arcUtil_pointIsInsideDegRange(x2, y2, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd, fai.xyRat)
         };
         fill4Pixels(x1, y1, x2, y2, fai.minX, fai.minY, alpha, mask);
+#else
+        const Pt::uint8_t alphas[4] = {
+            arcUtil_pointIsInsideDegRange(x1, y1, fai.ctrX, fai.ctrY, alpha, fai.degBegin, fai.degEnd, fai.xyRat),
+            arcUtil_pointIsInsideDegRange(x1, y2, fai.ctrX, fai.ctrY, alpha, fai.degBegin, fai.degEnd, fai.xyRat),
+            arcUtil_pointIsInsideDegRange(x2, y1, fai.ctrX, fai.ctrY, alpha, fai.degBegin, fai.degEnd, fai.xyRat),
+            arcUtil_pointIsInsideDegRange(x2, y2, fai.ctrX, fai.ctrY, alpha, fai.degBegin, fai.degEnd, fai.xyRat)
+        };
+        fill4Pixels(x1, y1, x2, y2, fai.minX, fai.minY, alphas);
+#endif
     }
 }
 
