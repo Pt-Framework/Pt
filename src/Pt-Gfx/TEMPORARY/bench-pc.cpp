@@ -139,4 +139,48 @@ int main() {
 
     RaspberryPi 3 32-bit Mode
     -------------------------
+         int8_t add =   1.677 uS
+         int8_t sub =   1.721 uS
+         int8_t mul =   2.337 uS
+         int8_t div =   6.592 uS
+        uint8_t add =   1.669 uS
+        uint8_t sub =   1.669 uS
+        uint8_t mul =   2.336 uS
+        uint8_t div =   6.565 uS
+        int16_t add =   1.669 uS
+        int16_t sub =   1.669 uS
+        int16_t mul =   2.337 uS
+        int16_t div =   7.364 uS
+       uint16_t add =   1.669 uS
+       uint16_t sub =   1.669 uS
+       uint16_t mul =   2.670 uS
+       uint16_t div =   6.583 uS
+        int32_t add =   1.335 uS
+        int32_t sub =   1.335 uS
+        int32_t mul =   2.003 uS
+        int32_t div =   6.592 uS
+       uint32_t add =   1.335 uS
+       uint32_t sub =   1.335 uS
+       uint32_t mul =   2.003 uS
+       uint32_t div =   6.524 uS
+        int64_t add =   1.752 uS
+        int64_t sub =   1.752 uS
+        int64_t mul =   3.338 uS
+        int64_t div =  21.446 uS
+       uint64_t add =   1.752 uS
+       uint64_t sub =   1.752 uS
+       uint64_t mul =   3.338 uS
+       uint64_t div =  17.441 uS
+          float add =   2.670 uS
+          float sub =   2.670 uS
+          float mul =   2.670 uS
+          float div =   5.674 uS
+         double add =   2.670 uS
+         double sub =   2.670 uS
+         double mul =   2.670 uS
+         double div =   8.678 uS
+    long double add =   2.670 uS
+    long double sub =   2.670 uS
+    long double mul =   2.670 uS
+    long double div =   8.678 uS
  */
