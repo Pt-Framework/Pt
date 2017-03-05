@@ -121,6 +121,11 @@ class SizePolicy
             _sizeHint.setHeight(h);
         }
 
+        bool operator== (const SizePolicy& s) const
+        {
+            return _h == s._h && _v == s._v && _sizeHint == s._sizeHint;
+        }
+
     private:
         Policy     _h;
         Policy     _v;
@@ -226,6 +231,8 @@ class PT_HMI_API Widget : public Visual
         //
 
         void invalidate();
+
+        void layout2();
 
         void layout();
 

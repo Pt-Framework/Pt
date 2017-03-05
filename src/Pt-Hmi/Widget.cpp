@@ -552,6 +552,28 @@ void Widget::onInvalidate()
 }
 
 
+void Widget::layout2()
+{
+    Gfx::SizeF size = preferredSize();
+
+    if(_autoSize)
+        _preferredSize = onAutoSize(_sizePolicy);
+
+    if( parent() )
+        parent()->layout2();
+    else
+    {
+        Window* w = window();
+        if( w )
+        {
+            // TODO:
+            //w->layout2();
+            onLayout();
+        }
+    }
+} 
+
+
 void Widget::layout()
 {
     ++_layouts;
@@ -572,6 +594,26 @@ void Widget::onLayoutEvent(const LayoutEvent& ev)
 }
 
 
+void Widget::onLayout()
+{
+    if(_content)
+    { 
+        Gfx::PointF contentPos(_padding.left() + _content->margin().left(), 
+                               _padding.top()  + _content->margin().top());
+        
+        _content->move(contentPos);
+
+        double hspace = _padding.leftRight() + _content->margin().leftRight();
+        double vspace = _padding.topBottom() + _content->margin().topBottom();
+        
+        Gfx::SizeF contentSize(_size.width() - hspace,
+                               _size.height() - vspace);
+
+        _content->resize(contentSize);
+    }
+}
+
+
 const SizePolicy& Widget::sizePolicy() const
 {
     return _sizePolicy;
@@ -580,6 +622,9 @@ const SizePolicy& Widget::sizePolicy() const
 
 void Widget::setSizePolicy(const SizePolicy& policy)
 {
+    if(policy == _sizePolicy)
+        return;
+
     Gfx::SizeF size = preferredSize();
 
     _sizePolicy = policy;
@@ -604,18 +649,19 @@ bool Widget::isAutoSize() const
 // TODO: is setSizePolicy same as setAutoSize ?
 void Widget::setAutoSize(bool a)
 {
-    Gfx::SizeF size = preferredSize();
+    //Gfx::SizeF size = preferredSize();
 
     _autoSize = a;
+    invalidate();
 
-    if(_autoSize)
-        _preferredSize = onAutoSize(_sizePolicy);
+    //if(_autoSize)
+    //    _preferredSize = onAutoSize(_sizePolicy);
 
-    if( size != preferredSize() )
-    {
-        if( parent() )
-            parent()->layout();
-    }
+    //if( size != preferredSize() )
+    //{
+    //    if( parent() )
+    //        parent()->layout();
+    //}
 }
 
 
@@ -959,26 +1005,6 @@ void Widget::setPadding(double horiz, double vertical)
 Pt::Signal<const Pt::Event&>& Widget::eventReady()
 {
     return _eventReady;
-}
-
-
-void Widget::onLayout()
-{
-    if(_content)
-    { 
-        Gfx::PointF contentPos(_padding.left() + _content->margin().left(), 
-                               _padding.top()  + _content->margin().top());
-        
-        _content->move(contentPos);
-
-        double hspace = _padding.leftRight() + _content->margin().leftRight();
-        double vspace = _padding.topBottom() + _content->margin().topBottom();
-        
-        Gfx::SizeF contentSize(_size.width() - hspace,
-                               _size.height() - vspace);
-
-        _content->resize(contentSize);
-    }
 }
 
 

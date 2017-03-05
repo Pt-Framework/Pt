@@ -127,7 +127,7 @@ void ScrollView::onLayout()
         width -= _scrollBarY.size().width();
 
     _scrollLayout.move( Gfx::PointF(0,0), vid() );
-    _scrollLayout.resize( Gfx::SizeF( width, height), vid() );
+    _scrollLayout.resize( Gfx::SizeF(width, height), vid() );
 
     if( _scrollBarX.isVisible() )
     {

@@ -142,7 +142,7 @@ ChildW::ChildW(const std::string& title)
     _comboBox.setMaxHeight(100);
     _comboBox.selected() += Pt::slot(*this, &ChildW::onComboSelected);
 
-    for(unsigned n = 0; n < 2; ++n)
+    for(unsigned n = 0; n < 9; ++n)
     {
         ListBoxItem* item = new ListBoxItem;
         //item->resize( Gfx::SizeF(20, 30) );
