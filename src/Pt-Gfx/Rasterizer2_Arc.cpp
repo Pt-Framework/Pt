@@ -317,12 +317,44 @@ void Rasterizer2::arcUtil_genScanlinesForChord(EAScanlines& scanlines, const Fil
     Pt::int32_t lineMinY = fai.minY;
     Pt::int32_t lineMaxY = fai.minY + fai.radY * 2;
 
-    // TODO: * Fix cut-out scanlines in all mode !
+    // Face top
     if(xwLine.faceT) {
-        if(lineMinY < xwLine.minY + 1) lineMinY = xwLine.minY + 1;
+        if(xwLine.faceL) {
+            const float angle = Gfx::Math::convertCartesianToPolarCoordinate(
+                (std::max(xwLine.x1, xwLine.x2) - fai.ctrX), -(xwLine.minY - fai.ctrY) * fai.xyRat
+            );
+            if(angle < 90 && lineMinY < xwLine.minY + 1) lineMinY = xwLine.minY + 1;
+
+        }
+        else if(xwLine.faceR) {
+            const float angle = Gfx::Math::convertCartesianToPolarCoordinate(
+                (std::min(xwLine.x1, xwLine.x2) - fai.ctrX), -(xwLine.minY - fai.ctrY) * fai.xyRat
+            );
+            if(angle > 90 && lineMinY < xwLine.minY + 1) lineMinY = xwLine.minY + 1;
+        }
+        else {
+            if(lineMinY < xwLine.minY + 1) lineMinY = xwLine.minY + 1;
+        }
     }
+
+    // Face bottom
     if(xwLine.faceB) {
-        if(lineMaxY > xwLine.maxY - 1) lineMaxY = xwLine.maxY - 1;
+        if(xwLine.faceL) {
+            const float angle = Gfx::Math::convertCartesianToPolarCoordinate(
+                (std::max(xwLine.x1, xwLine.x2) - fai.ctrX), -(xwLine.maxY - fai.ctrY) * fai.xyRat
+            );
+            if(angle > 270 && lineMaxY > xwLine.maxY - 1) lineMaxY = xwLine.maxY - 1;
+
+        }
+        else if(xwLine.faceR) {
+            const float angle = Gfx::Math::convertCartesianToPolarCoordinate(
+                (std::min(xwLine.x1, xwLine.x2) - fai.ctrX), -(xwLine.maxY - fai.ctrY) * fai.xyRat
+            );
+            if(angle < 270 && lineMaxY > xwLine.maxY - 1) lineMaxY = xwLine.maxY - 1;
+        }
+        else {
+            if(lineMaxY > xwLine.maxY - 1) lineMaxY = xwLine.maxY - 1;
+        }
     }
 
     // Minimum and maximum X coordinates of the shape
