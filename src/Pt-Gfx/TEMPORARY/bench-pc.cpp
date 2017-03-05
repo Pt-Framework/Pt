@@ -92,8 +92,51 @@ int main() {
 /*
     Core i5 64-bit Mode
     -------------------
+         int8_t add =   0.807 uS
+         int8_t sub =   0.820 uS
+         int8_t mul =   0.945 uS
+         int8_t div =   3.216 uS
+        uint8_t add =   0.816 uS
+        uint8_t sub =   0.816 uS
+        uint8_t mul =   0.946 uS
+        uint8_t div =   2.960 uS
+        int16_t add =   0.802 uS
+        int16_t sub =   0.818 uS
+        int16_t mul =   0.945 uS
+        int16_t div =   3.216 uS
+       uint16_t add =   0.816 uS
+       uint16_t sub =   0.816 uS
+       uint16_t mul =   0.945 uS
+       uint16_t div =   3.097 uS
+        int32_t add =   0.823 uS
+        int32_t sub =   0.792 uS
+        int32_t mul =   0.945 uS
+        int32_t div =   3.217 uS
+       uint32_t add =   0.792 uS
+       uint32_t sub =   0.804 uS
+       uint32_t mul =   0.945 uS
+       uint32_t div =   3.104 uS
+        int64_t add =   0.818 uS
+        int64_t sub =   0.814 uS
+        int64_t mul =   0.945 uS
+        int64_t div =   5.275 uS
+       uint64_t add =   0.811 uS
+       uint64_t sub =   0.781 uS
+       uint64_t mul =   0.945 uS
+       uint64_t div =   4.255 uS
+          float add =   1.064 uS
+          float sub =   1.064 uS
+          float mul =   1.299 uS
+          float div =   1.944 uS
+         double add =   1.063 uS
+         double sub =   1.063 uS
+         double mul =   1.299 uS
+         double div =   1.940 uS
+    long double add =   1.418 uS
+    long double sub =   1.418 uS
+    long double mul =  39.092 uS
+    long double div =  40.748 uS
 
     RaspberryPi 3 32-bit Mode
     -------------------------
-
  */
