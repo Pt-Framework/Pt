@@ -33,6 +33,7 @@
 #include <Pt/Types.h>
 #include <Pt/Allocator.h>
 #include <typeinfo>
+#include <new>
 
 namespace Pt {
 
