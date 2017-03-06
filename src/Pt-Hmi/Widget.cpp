@@ -548,30 +548,32 @@ void Widget::onInvalidate()
     {
         if( parent() )
            parent()->layout();
+
+        _layoutChanged.send();
     }
 }
 
 
-void Widget::layout2()
-{
-    Gfx::SizeF size = preferredSize();
-
-    if(_autoSize)
-        _preferredSize = onAutoSize(_sizePolicy);
-
-    if( parent() )
-        parent()->layout2();
-    else
-    {
-        Window* w = window();
-        if( w )
-        {
-            // TODO:
-            //w->layout2();
-            onLayout();
-        }
-    }
-} 
+//void Widget::layout2()
+//{
+//    Gfx::SizeF size = preferredSize();
+//
+//    if(_autoSize)
+//        _preferredSize = onAutoSize(_sizePolicy);
+//
+//    if( parent() )
+//        parent()->layout2();
+//    else
+//    {
+//        Window* w = window();
+//        if( w )
+//        {
+//            // TODO:
+//            //w->layout2();
+//            onLayout();
+//        }
+//    }
+//} 
 
 
 void Widget::layout()
@@ -611,6 +613,8 @@ void Widget::onLayout()
 
         _content->resize(contentSize);
     }
+
+    _layoutChanged.send();
 }
 
 
@@ -636,6 +640,8 @@ void Widget::setSizePolicy(const SizePolicy& policy)
     {
         if( parent() )
             parent()->layout();
+
+        _layoutChanged.send();
     }
 }
 
@@ -676,7 +682,10 @@ Gfx::SizeF Widget::preferredSize() const
 
 Gfx::SizeF Widget::preferredSize(const SizePolicy& policy) const
 {
-    return onAutoSize(policy);
+    if(_autoSize)
+        return onAutoSize(policy);
+
+    return _size;
 }
 
 
@@ -872,6 +881,8 @@ void Widget::onMoveEvent(const MoveEvent& ev)
     {
         parentWidget->layout();
     }
+
+    _layoutChanged.send();
 }
 
 
@@ -999,6 +1010,12 @@ void Widget::setPadding(double horiz, double vertical)
 {
     _padding.set(horiz, vertical);
     layout();
+}
+
+
+Pt::Signal<>& Widget::layoutChanged()
+{ 
+    return _layoutChanged; 
 }
 
 

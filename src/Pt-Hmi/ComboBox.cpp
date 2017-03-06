@@ -42,6 +42,7 @@ ComboBoxMenu::ComboBoxMenu()
 {
     setMainWidget(&_items);
 
+    _items.setAutoSize(true);
     _items.selected() += Pt::slot(*this, &ComboBoxMenu::onItemSelected);
 }
 
@@ -63,12 +64,6 @@ void ComboBoxMenu::removeItem(ListBoxItem& item)
 }
 
 
-Gfx::SizeF ComboBoxMenu::itemsSize(const SizePolicy& policy)
-{
-    return _items.preferredSize(policy);
-}
-
-
 void ComboBoxMenu::onItemSelected(ListBoxItem&)
 {
     show(false);
@@ -84,6 +79,27 @@ void ComboBoxMenu::setScrollBars(bool hasScrollBars)
 Pt::Signal<ListBoxItem&>& ComboBoxMenu::selected()
 {
     return _items.selected();
+}
+
+
+Gfx::SizeF ComboBoxMenu::preferredSize(const SizePolicy& policy) const
+{
+    return _items.preferredSize(policy);
+}
+
+
+void ComboBoxMenu::onShowEvent(const ShowEvent& ev)
+{
+    Base::onShowEvent(ev);
+
+    if( ev.visible() )
+    {
+        grabPointer();
+    }
+    else
+    {
+        releasePointer();
+    }
 }
 
 
@@ -118,20 +134,6 @@ void ComboBoxMenu::onTouchEvent(const TouchEvent& ev)
     }
 }
 
-
-void ComboBoxMenu::onShowEvent(const ShowEvent& ev)
-{
-    Base::onShowEvent(ev);
-
-    if( ev.visible() )
-    {
-        grabPointer();
-    }
-    else
-    {
-        releasePointer();
-    }
-}
 
 /////////////////////////////////////////////////////////////////////////////
 // ComboBox
@@ -227,7 +229,7 @@ void ComboBox::showPopup()
     SizePolicy policy(SizePolicy::Fixed, SizePolicy::Expanding);
     policy.setSize( size() );
 
-    Gfx::SizeF popupSize = _popup.itemsSize(policy);
+    Gfx::SizeF popupSize = _popup.preferredSize(policy);
     popupSize.setHeight( std::min(popupSize.height(), _maxHeight) );
     _popup.resize(popupSize);
     

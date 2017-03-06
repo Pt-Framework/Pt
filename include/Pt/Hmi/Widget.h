@@ -232,7 +232,7 @@ class PT_HMI_API Widget : public Visual
 
         void invalidate();
 
-        void layout2();
+        //void layout2();
 
         void layout();
 
@@ -316,6 +316,14 @@ class PT_HMI_API Widget : public Visual
         // inner spacing
         void setPadding(double horiz, double vertical);
 
+        /** @brief Position, size or preferred size has changed.
+        */
+        Pt::Signal<>& layoutChanged();
+
+        //
+        // event processing
+        //
+
         Pt::Signal<const Pt::Event&>& eventReady();
 
     public:
@@ -392,6 +400,7 @@ class PT_HMI_API Widget : public Visual
 
     private:
         Pt::Signal<const Pt::Event&> _eventReady;
+        Pt::Signal<>                 _layoutChanged;
 
         std::vector<Widget*>         _children;
         Widget*                      _parent; 

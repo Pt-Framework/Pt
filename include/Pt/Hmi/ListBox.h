@@ -64,9 +64,6 @@ class PT_HMI_API ListBoxItem : public Button
 
         Pt::Signal<ListBoxItem&>& selected();
 
-        Pt::Signal<>& geometryChanged()
-        { return _geometryChanged; }
-
     public:
         const Gfx::Brush& background() const;
 
@@ -110,12 +107,8 @@ class PT_HMI_API ListBoxItem : public Button
 
         virtual void onPaintContent(Painter& painter);
 
-    protected:
-        virtual void onResizeEvent(const ResizeEvent& ev);
-
     private:
         Pt::Signal<ListBoxItem&> _selected;
-        Pt::Signal<>             _geometryChanged;
         String                   _text;
         Gfx::Image               _image;
         Gfx::SizeF               _iconSize;
@@ -135,22 +128,6 @@ class PT_HMI_API ListBoxItem : public Button
         Gfx::Brush _brush;
         Gfx::Pen   _pen;
         Picture    _picture;
-};
-
-
-class PT_HMI_API ListBoxLayout : public FlowLayout
-{
-    typedef FlowLayout Base;
-
-    public:
-        ListBoxLayout();
-        
-        virtual ~ListBoxLayout();
-
-    protected:
-        virtual Gfx::SizeF onAutoSize(const SizePolicy& policy) const;
-       
-        virtual void onLayout();       
 };
 
 
@@ -195,16 +172,13 @@ class PT_HMI_API ListBox : public Control
     
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
-    protected:
-        virtual void onResizeEvent(const ResizeEvent& ev);
-
     private:
         void onItemSelected(ListBoxItem& item);
     
     private:
         Pt::Signal<ListBoxItem&> _selected;
         ScrollView               _scrollView;
-        ListBoxLayout            _layout;
+        FlowLayout               _layout;
         
         FacetPtr<ListBoxRenderer> _renderer;
         bool                      _hasRenderer;

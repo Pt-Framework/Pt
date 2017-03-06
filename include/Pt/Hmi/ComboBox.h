@@ -53,11 +53,11 @@ class PT_HMI_API ComboBoxMenu : public Window
 
         void removeItem(ListBoxItem& item);
 
-        Gfx::SizeF itemsSize(const SizePolicy& policy);
-
         void setScrollBars(bool hasScrollBars);
 
         Pt::Signal<ListBoxItem&>& selected();
+
+        Gfx::SizeF preferredSize(const SizePolicy& policy) const;
 
     protected:
         void onShowEvent(const ShowEvent& ev);
@@ -197,7 +197,7 @@ class PT_HMI_API ComboBox : public Control
         Gfx::Pen   _textPen;
         Gfx::Font  _font;
 
-        ListBoxItem _itemX;
+        //ListBoxItem _itemX;
 };
 
 } // namespace

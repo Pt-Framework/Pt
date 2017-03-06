@@ -201,18 +201,21 @@ Gfx::SizeF ListBoxItem::onAutoSize(const SizePolicy& policy) const
 {
     std::clog << "ListBoxItem: auto-height: " << size().width() << std::endl;
     
-    if( policy.horizontalPolicy() == SizePolicy::Fixed )
-        return Gfx::SizeF(policy.size().width(),
-                          policy.size().width() / 4);
+    Gfx::FontMetrics fm = Painter::fontMetrics( _font, _text );
 
-    return Gfx::SizeF(size().width(), size().width() / 4);
+    double spacing = _picture.empty() || _text.empty() ? 0 : fm.height() * 0.5;
+    double pictureWidth = _iconSize.isNull() ? _picture.width() : _iconSize.width();
+    double pictureHeight = _iconSize.isNull() ? _picture.height() : _iconSize.height();
+    double itemsWidth = fm.width() + spacing + pictureWidth;
+    double itemsHeight = std::max<double>(fm.height(), pictureHeight);
+
+    return Gfx::SizeF( itemsWidth + padding().leftRight(),
+                       itemsHeight + padding().topBottom() );
 }
 
 
 void ListBoxItem::onInvalidate()
 {
-    Base::onInvalidate();
-
     // TODO: use renderer and options from parent
 
     const StyleOptions& options = Application::instance().styleOptions();
@@ -231,7 +234,7 @@ void ListBoxItem::onInvalidate()
 
     _renderer->prepareItem(*this, options, _brush, _pen, _font, _textPen);
 
-    _geometryChanged.send();
+    Base::onInvalidate();
 }
 
 
@@ -274,7 +277,7 @@ void ListBoxItem::onPaintContent(Painter& painter)
     double pictureWidth = _iconSize.isNull() ? _picture.width() : _iconSize.width();
     double pictureHeight = _iconSize.isNull() ? _picture.height() : _iconSize.height();
     double itemsWidth = fm.width() + spacing + pictureWidth;
-    double itemsHeight = fm.height() + spacing + pictureHeight;
+    double itemsHeight = std::max<double>( fm.height(), pictureHeight);
 
     pictureX = padding().left();
     pictureY = (size().height() - pictureHeight) / 2;
@@ -310,47 +313,13 @@ void ListBoxItem::onPaintContent(Painter& painter)
     painter.drawText(textPos, _text);
 }
 
-
-void ListBoxItem::onResizeEvent(const ResizeEvent& ev)
-{
-    std::clog << "ListBoxItem::onResizeEvent: " << size().width() << std::endl;
-
-    Base::onResizeEvent(ev);
-    _geometryChanged.send();
-}
-
-/////////////////////////////////////////////////////////////////////////////
-// ListBoxLayout
-/////////////////////////////////////////////////////////////////////////////
-
-ListBoxLayout::ListBoxLayout()
-: FlowLayout(FlowLayout::Top)
-{
-}
-
-
-ListBoxLayout::~ListBoxLayout()
-{
-}
-
-
-Gfx::SizeF ListBoxLayout::onAutoSize(const SizePolicy& policy) const
-{
-    return Base::onAutoSize(policy);
-}
-
-
-void ListBoxLayout::onLayout()
-{
-    Base::onLayout();
-}
-
 /////////////////////////////////////////////////////////////////////////////
 // ListBox
 /////////////////////////////////////////////////////////////////////////////
 
 ListBox::ListBox()
-: _hasBackground(true)
+: _layout(FlowLayout::Top)
+, _hasBackground(true)
 , _hasFrame(true)
 , _hasRenderer(false)
 {
@@ -378,7 +347,7 @@ void ListBox::addItem(ListBoxItem& item)
 {   
     _layout.add(item);
     item.selected() += Pt::slot(*this, &ListBox::onItemSelected);
-    item.geometryChanged() += Pt::slot(*this, &ListBox::layout);
+    item.layoutChanged() += Pt::slot(*this, &ListBox::layout);
 }
 
 
@@ -386,7 +355,7 @@ void ListBox::removeItem(ListBoxItem& item)
 {
     _layout.remove(item);
     item.selected() -= Pt::slot(*this, &ListBox::onItemSelected);
-    item.geometryChanged() -= Pt::slot(*this, &ListBox::layout);
+    item.layoutChanged() -= Pt::slot(*this, &ListBox::layout);
 }
 
 
@@ -515,18 +484,10 @@ void ListBox::onLayout()
         itemsHeight += item->margin().topBottom();
     }
 
-    std::clog << "items: w: " << itemsWidth << " h: " << itemsHeight << std::endl;
-
     Gfx::SizeF s;
     s.setWidth(itemsWidth);
     s.setHeight(itemsHeight);
     _layout.resize(s);
-}
-
-
-void ListBox::onResizeEvent(const ResizeEvent& ev)
-{
-    Base::onResizeEvent(ev);
 }
 
 

@@ -146,10 +146,10 @@ Pt::Signal<int>& ScrollLayout::scrolledY()
 }
 
 
-Pt::Signal<>& ScrollLayout::layoutChanged() 
-{
-    return _layoutChanged;
-}
+//Pt::Signal<>& ScrollLayout::layoutChanged() 
+//{
+//    return _layoutChanged;
+//}
 
 
 void ScrollLayout::onAddWidget(Widget& w)
@@ -189,8 +189,8 @@ void ScrollLayout::onLayout()
     _maxX = static_cast<int>(maxWidth);
     _maxY = static_cast<int>(maxHeight);
 
-    if(hasChanged)
-        _layoutChanged.send();
+    //if(hasChanged)
+    //    _layoutChanged.send();
 }
 
 
