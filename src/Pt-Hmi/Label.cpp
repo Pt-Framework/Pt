@@ -221,10 +221,11 @@ Gfx::SizeF Label::onAutoSize(const SizePolicy& policy) const
 
         TextBlock block;
         block.setAdjustment(a);
-        block.layout(_text, _font);
-
+        
         if(policy.horizontalPolicy() == Pt::Hmi::SizePolicy::Fixed)
             block.setMaxWidth( policy.size().width() );
+
+        block.layout(_text, _font);
 
         w = static_cast<double>( block.size().width() ); 
         h = static_cast<double>( block.size().height() );
