@@ -325,6 +325,7 @@ ListBox::ListBox()
 {
     setAcceptInput(false);
 
+    //TODO: get margin from renderer
     _scrollView.setMargin(1);
     _scrollView.setWidget(_layout);
 
@@ -465,8 +466,6 @@ void ListBox::onLayout()
 {
     std::clog << "ListBox::onLayout" << std::endl;
 
-    Base::onLayout();
-
     double itemsWidth = size().width() - _scrollView.margin().leftRight();
     double itemsHeight = 0;
 
@@ -488,6 +487,8 @@ void ListBox::onLayout()
     s.setWidth(itemsWidth);
     s.setHeight(itemsHeight);
     _layout.resize(s);
+
+    Base::onLayout();
 }
 
 
