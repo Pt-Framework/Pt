@@ -533,13 +533,9 @@ void Widget::onInvalidateEvent(const InvalidateEvent& ev)
     if(_invalidates > 0)
       return;
 
-    onInvalidate();
-}
-
-
-void Widget::onInvalidate()
-{
     Gfx::SizeF size = preferredSize();
+
+    onInvalidate();
 
     if(_autoSize)
         _preferredSize = onAutoSize(_sizePolicy);
@@ -551,6 +547,11 @@ void Widget::onInvalidate()
 
         _layoutChanged.send();
     }
+}
+
+
+void Widget::onInvalidate()
+{
 }
 
 
@@ -593,6 +594,8 @@ void Widget::onLayoutEvent(const LayoutEvent& ev)
       return;
 
     onLayout();
+
+    _layoutChanged.send();
 }
 
 
@@ -613,8 +616,6 @@ void Widget::onLayout()
 
         _content->resize(contentSize);
     }
-
-    _layoutChanged.send();
 }
 
 

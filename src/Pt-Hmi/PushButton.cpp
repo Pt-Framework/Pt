@@ -66,7 +66,7 @@ void PushButton::setToggle(bool toggle)
 
 void PushButton::setIcon(const Gfx::Image& image)
 {
-    _image = image;
+    _icon = image;
     _picture.set(image);
 
     const StyleOptions& options = Application::instance().styleOptions();
@@ -256,65 +256,59 @@ void PushButton::onSetStyleOptions(const StyleOptions& o)
 }
 
 
-void PushButton::onInvalidate()
+Pt::Gfx::SizeF PushButton::onAutoSize(const SizePolicy& policy) const
 {
-    Base::onInvalidate();
+    Gfx::FontMetrics fm = Painter::fontMetrics( _font, text() );
 
-    const StyleOptions& options = Application::instance().styleOptions();
-    const Style& style = Application::instance().style();
+    double spacing = _picture.empty() || text().empty() ? 0 : fm.height() * 0.5;
+    double pictureWidth = _iconSize.isNull() ? _picture.width() : _iconSize.width();
+    double pictureHeight = _iconSize.isNull() ? _picture.height() : _iconSize.height();
+    double itemsWidth = 0;
+    double itemsHeight = 0;
 
-    _brush = foreground();
-    _pen = contour();
-    _textPen = textColor();
-    _font = Gfx::Font(font(), fontSize(), fontStyle());
+    switch(_direction)
+    {
+        default:
+        case Left:
+        case Right:
+            itemsWidth = fm.width() + spacing + pictureWidth;
+            itemsHeight = std::max<double>(fm.height(), pictureHeight);
+            break;
 
-    if( ! _hasRenderer )
-        _renderer.reset( style.get<ButtonRenderer>() );
-    
-    if( ! _renderer )
-        return;
+        case Top:
+        case Bottom:
+            itemsWidth = std::max<double>(fm.width(), pictureWidth);
+            itemsHeight = fm.height() + spacing + pictureHeight;
+            break;  
+    }
 
-    _renderer->prepare(*this, options, _brush, _pen, _font, _textPen);
+    return Gfx::SizeF( itemsWidth + padding().leftRight(), 
+                       itemsHeight + padding().topBottom() );
 }
 
 
-void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void PushButton::onLayout()
 {
-    const StyleOptions& options = Application::instance().styleOptions();
+    Base::onLayout();
 
-    if( ! _renderer )
-        return;
+    layoutContent();
+}
 
-    Painter painter(surface);
-    painter.setClip(rect);
 
-    //
-    // button shape
-    //
-
-    if( ! _isFlat )
-    {
-        _renderer->renderBackground(*this, options, painter, rect, 
-                                    _brush, _pen);
-    }
-
-    painter.setFont(_font);
-    Gfx::FontMetrics fm = painter.fontMetrics( text() );
-
-    //
-    // layout icon and text
-    //
-
-    double pictureX = 0;
-    double pictureY = 0;
-    double textX = 0;
-    double textY = 0;
+void PushButton::layoutContent()
+{
+    Gfx::FontMetrics fm = Painter::fontMetrics( _font, text() );
 
     double spacing = _picture.empty() || text().empty() ? 0 : fm.height() * 0.5;
     double pictureWidth = _iconSize.isNull() ? _picture.width() : _iconSize.width();
     double pictureHeight = _iconSize.isNull() ? _picture.height() : _iconSize.height();
     double itemsWidth = fm.width() + spacing + pictureWidth;
     double itemsHeight = fm.height() + spacing + pictureHeight;
+
+    double pictureX = 0;
+    double pictureY = 0;
+    double textX = 0;
+    double textY = 0;
 
     switch(_direction)
     {
@@ -352,6 +346,68 @@ void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
             break;  
     }
 
+    if( ! _picture.empty() )
+    {
+        double pictureXOff = (pictureWidth - _picture.width()) / 2;
+        double pictureYOff = (pictureHeight - _picture.height()) / 2;
+
+        _iconPos.set(pictureX + pictureXOff, 
+                     pictureY + pictureYOff);
+    }
+
+    _textPos.set(textX, textY);
+
+    return Base::onLayout();
+}
+
+
+void PushButton::onInvalidate()
+{
+    const StyleOptions& options = Application::instance().styleOptions();
+    const Style& style = Application::instance().style();
+
+    _brush = foreground();
+    _pen = contour();
+    _textPen = textColor();
+    _font = Gfx::Font(font(), fontSize(), fontStyle());
+
+    if( ! _hasRenderer )
+        _renderer.reset( style.get<ButtonRenderer>() );
+    
+    if( ! _renderer )
+        return;
+
+    _renderer->prepare(*this, options, _brush, _pen, _font, _textPen);
+
+    layoutContent();
+
+    Base::onInvalidate();
+}
+
+
+void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+{
+    const StyleOptions& options = Application::instance().styleOptions();
+
+    if( ! _renderer )
+        return;
+
+    Painter painter(surface);
+    painter.setClip(rect);
+
+    //
+    // button shape
+    //
+
+    if( ! _isFlat )
+    {
+        _renderer->renderBackground(*this, options, painter, rect, 
+                                    _brush, _pen);
+    }
+
+    painter.setFont(_font);
+    Gfx::FontMetrics fm = painter.fontMetrics( text() );
+
     //
     // button icon
     //
@@ -359,14 +415,7 @@ void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     if( ! _picture.empty() )
     {
         painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceOver);
-        
-        double pictureXOff = (pictureWidth - _picture.width()) / 2;
-        double pictureYOff = (pictureHeight - _picture.height()) / 2;
-
-        Gfx::PointF picturePos(pictureX + pictureXOff, 
-                               pictureY + pictureYOff);
-        painter.drawPicture(picturePos, _picture);
-        
+        painter.drawPicture(_iconPos, _picture);
         painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceCopy);
     }
 
@@ -374,9 +423,7 @@ void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     // button text including menomnic
     //
 
-    Gfx::RectF mnemonicRect;
-    Gfx::PointF textPos(textX, textY);
-    
+    Gfx::RectF mnemonicRect;   
     const Char* m = mnemonic();
     if(m)
     {
@@ -389,15 +436,15 @@ void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
             mnemonicText = *m;
             Gfx::FontMetrics fmChar = painter.fontMetrics(mnemonicText);
 
-            mnemonicRect.set( Gfx::PointF(textPos.x() + fmLeft.width(), 
-                                          textPos.y() - fmChar.ascent()),
+            mnemonicRect.set( Gfx::PointF(_textPos.x() + fmLeft.width(), 
+                                          _textPos.y() - fmChar.ascent()),
                               Gfx::SizeF(fmChar.width(), 
                                          fmChar.height()) );
         }
     }
 
     _renderer->renderText(*this, options, painter, rect,
-                          text(), textPos, _font, _textPen,
+                          text(), _textPos, _font, _textPen,
                           mnemonicRect);
 }
 
@@ -409,7 +456,7 @@ void PushButton::onEnableEvent(const EnableEvent& ev)
     const StyleOptions& options = Application::instance().styleOptions();
 
     if(_renderer)
-        _renderer->prepareIcon(*this, options, _image, _picture);
+        _renderer->prepareIcon(*this, options, _icon, _picture);
 }
 
 } // namespace

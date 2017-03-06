@@ -176,33 +176,8 @@ void Label::setRenderer(LabelRenderer* renderer)
 }
 
 
-Gfx::SizeF Label::onAutoSize(const SizePolicy& policy) const
+Adjustment Label::adjustment() const
 {
-    double w = 0;
-    double h = 0;
-
-    if(_hasImage)
-    {
-        w = static_cast<double>( _picture.width() );
-        h = static_cast<double>( _picture.height() );
-
-    }
-    else
-    {
-        Gfx::FontMetrics fm = Hmi::Painter::fontMetrics(_font, _text);
-        w = static_cast<double>( fm.width() ); 
-        h = static_cast<double>( fm.height() );
-    }
-
-    return Gfx::SizeF( w + padding().leftRight(), 
-                       h + padding().topBottom() );
-}
-
-
-void Label::layoutText()
-{
-    _textBlock.setMaxWidth( size().width() - padding().leftRight() );
-
     Adjustment adjustment = Adjustment::Left;
     switch( _alignment )
     {
@@ -226,7 +201,46 @@ void Label::layoutText()
             break;
     }
 
-    _textBlock.setAdjustment(adjustment);
+    return adjustment;
+}
+
+
+Gfx::SizeF Label::onAutoSize(const SizePolicy& policy) const
+{
+    double w = 0;
+    double h = 0;
+
+    if(_hasImage)
+    {
+        w = static_cast<double>( _picture.width() );
+        h = static_cast<double>( _picture.height() );
+    }
+    else
+    {
+        Adjustment a = adjustment();
+
+        TextBlock block;
+        block.setAdjustment(a);
+        block.layout(_text, _font);
+
+        if(policy.horizontalPolicy() == Pt::Hmi::SizePolicy::Fixed)
+            block.setMaxWidth( policy.size().width() );
+
+        w = static_cast<double>( block.size().width() ); 
+        h = static_cast<double>( block.size().height() );
+    }
+
+    return Gfx::SizeF( w + padding().leftRight(), 
+                       h + padding().topBottom() );
+}
+
+
+void Label::layoutText()
+{
+    Adjustment a = adjustment();
+
+    _textBlock.setMaxWidth( size().width() - padding().leftRight() );
+    _textBlock.setAdjustment(a);
     _textBlock.layout(_text, _font);
 
     Gfx::PointF pos;
@@ -358,6 +372,17 @@ void Label::layoutImage()
 }
 
 
+void Label::onLayout()
+{
+    Base::onLayout();
+
+    if(_hasImage)
+        layoutImage();
+    else
+        layoutText();
+}
+
+
 void Label::onInvalidate()
 {
     Base::onInvalidate();
@@ -427,17 +452,6 @@ void Label::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
                                   lineText, pos, _font, _textPen);
         }
     }
-}
-
-
-void Label::onResizeEvent(const ResizeEvent& ev)
-{
-    Base::onResizeEvent(ev);
-
-    if(_hasImage)
-        layoutImage();
-    else
-        layoutText();
 }
 
 } // namespace

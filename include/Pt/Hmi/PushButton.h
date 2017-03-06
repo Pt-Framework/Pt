@@ -112,6 +112,10 @@ class PT_HMI_API PushButton : public Button
     protected:
         virtual void onSetStyleOptions(const StyleOptions& options);
 
+        virtual Pt::Gfx::SizeF onAutoSize(const SizePolicy& policy) const;
+
+        virtual void onLayout();
+
         virtual void onInvalidate();
 
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
@@ -120,12 +124,17 @@ class PT_HMI_API PushButton : public Button
         virtual void onEnableEvent(const EnableEvent& ev);
 
     private:
+        void layoutContent();
+
+    private:
         bool                      _isToggle;
         bool                      _isBeingToggled;
         bool                      _isFlat;
         Direction                 _direction;
-        Gfx::Image                _image;
+        Gfx::Image                _icon;
         Gfx::SizeF                _iconSize;
+        Gfx::PointF               _iconPos;
+        Gfx::PointF               _textPos;
                                   
         FacetPtr<ButtonRenderer>  _renderer;
         bool                      _hasRenderer;

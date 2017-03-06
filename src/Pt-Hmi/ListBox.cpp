@@ -277,7 +277,6 @@ void ListBoxItem::onPaintContent(Painter& painter)
     double pictureWidth = _iconSize.isNull() ? _picture.width() : _iconSize.width();
     double pictureHeight = _iconSize.isNull() ? _picture.height() : _iconSize.height();
     double itemsWidth = fm.width() + spacing + pictureWidth;
-    double itemsHeight = std::max<double>( fm.height(), pictureHeight);
 
     pictureX = padding().left();
     pictureY = (size().height() - pictureHeight) / 2;

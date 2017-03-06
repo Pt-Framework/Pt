@@ -92,13 +92,15 @@ class PT_HMI_API Label : public Control
     protected:
         virtual Gfx::SizeF onAutoSize(const SizePolicy& policy) const;
 
+        virtual void onLayout();
+
         virtual void onInvalidate();
 
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
-
-        virtual void onResizeEvent(const ResizeEvent& ev);
         
     private:
+        Adjustment adjustment() const;
+
         void layoutText();
 
         void layoutImage();
