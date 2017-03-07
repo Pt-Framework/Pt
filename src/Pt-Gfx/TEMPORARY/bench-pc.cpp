@@ -15,7 +15,7 @@
 static inline double getUTime()
 {
     struct timeval tv;
-    if(gettimeofday(&tv, 0) < 0)  perror("oops");
+    gettimeofday(&tv, 0);
     return (double) tv.tv_sec + ((double) tv.tv_usec * 0.000001);
 }
 
