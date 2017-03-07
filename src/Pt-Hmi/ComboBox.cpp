@@ -239,13 +239,6 @@ void ComboBox::showPopup()
 
     _popup.show();
     _popup.activate();
-
-    //_itemX.resize( Gfx::SizeF(20, 20) );
-    //_itemX.setAutoSize(true);
-    //_itemX.setText("Item X");
-    
-    //addItem(_itemX);
-    //_itemX.layout2();
 }
 
 

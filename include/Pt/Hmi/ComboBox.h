@@ -196,8 +196,6 @@ class PT_HMI_API ComboBox : public Control
         Gfx::Pen   _pen;
         Gfx::Pen   _textPen;
         Gfx::Font  _font;
-
-        //ListBoxItem _itemX;
 };
 
 } // namespace

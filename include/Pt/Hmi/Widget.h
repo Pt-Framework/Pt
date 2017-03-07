@@ -69,36 +69,81 @@ class SizePolicy
             Fixed,
             Expanding
         };
+
+        class Mode
+        {
+            public:
+                Mode(Policy horizontal = Expanding,
+                     Policy vertical = Expanding)
+                : _h(horizontal)
+                , _v(vertical)
+                {}
+
+                Policy horizontal() const
+                {
+                    return _h;
+                }
+
+                void setHorizontal(Policy policy)
+                {
+                    _h = policy;
+                }
+        
+                Policy vertical() const
+                {
+                    return _v;
+                }
+        
+                void setVertical(Policy policy)
+                {
+                    _v = policy;
+                }
+
+                bool operator== (const Mode& m) const
+                {
+                    return _h == m._h && _v == m._v;
+                }
+
+            private:
+                Policy _h;
+                Policy _v;
+        };
     
     public:
         SizePolicy()
-        : _h(Expanding)
-        , _v(Expanding)
         { }
         
+        SizePolicy(const Mode& mode)
+        : _mode(mode)
+        { }
+
         SizePolicy(Policy horizontal, Policy vertical)
-        : _h(horizontal)
-        , _v(vertical)
+        : _mode(horizontal, vertical)
         { }
 
-        Policy horizontalPolicy() const
+        Mode mode() const
         {
-            return _h;
+            return _mode;
         }
 
-        void setHorizontalPolicy(Policy policy)
+        Policy horizontal() const
         {
-            _h = policy;
+            return _mode.horizontal();
+        }
+
+        void setHorizontal(Policy policy)
+        {
+            _mode.setHorizontal(policy);
         }
         
-        Policy verticalPolicy() const
+        Policy vertical() const
         {
-            return _v;
+            return _mode.vertical();
         }
         
-        void setVerticalPolicy(Policy policy)
+        void setVertical(Policy policy)
         {
-            _v = policy;
+            _mode.setVertical(policy);
         }
         
         const Gfx::SizeF& size() const
@@ -111,9 +156,19 @@ class SizePolicy
             _sizeHint = hint;
         }
 
+        double width() const
+        { 
+            return _sizeHint.width(); 
+        }
+
         void setWidth(double w)
         {
             _sizeHint.setWidth(w);
+        }
+
+        double height() const
+        { 
+            return _sizeHint.height(); 
         }
 
         void setHeight(double h)
@@ -123,12 +178,11 @@ class SizePolicy
 
         bool operator== (const SizePolicy& s) const
         {
-            return _h == s._h && _v == s._v && _sizeHint == s._sizeHint;
+            return _mode == s._mode && _sizeHint == s._sizeHint;
         }
 
     private:
-        Policy     _h;
-        Policy     _v;
+        Mode       _mode;
         Gfx::SizeF _sizeHint;
 };
 

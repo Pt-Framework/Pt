@@ -197,6 +197,10 @@ class PT_HMI_API Window : public WindowBase
 
     virtual void onParentChanged(Window* w);
 
+    virtual void onAddWidget(Widget& w);
+
+    virtual void onRemoveWidget(Widget& w);
+
   public:
     virtual Gfx::PointF toScreen(const Gfx::PointF& pos) const;
     

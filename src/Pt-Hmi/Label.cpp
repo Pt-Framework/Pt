@@ -222,7 +222,7 @@ Gfx::SizeF Label::onAutoSize(const SizePolicy& policy) const
         TextBlock block;
         block.setAdjustment(a);
         
-        if(policy.horizontalPolicy() == Pt::Hmi::SizePolicy::Fixed)
+        if(policy.horizontal() == Pt::Hmi::SizePolicy::Fixed)
             block.setMaxWidth( policy.size().width() );
 
         block.layout(_text, _font);

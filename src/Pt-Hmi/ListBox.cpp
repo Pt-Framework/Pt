@@ -198,9 +198,7 @@ void ListBoxItem::setRenderer(ListBoxRenderer* renderer)
 
 
 Gfx::SizeF ListBoxItem::onAutoSize(const SizePolicy& policy) const
-{
-    std::clog << "ListBoxItem: auto-height: " << size().width() << std::endl;
-    
+{   
     Gfx::FontMetrics fm = Painter::fontMetrics( _font, _text );
 
     double spacing = _picture.empty() || _text.empty() ? 0 : fm.height() * 0.5;
@@ -463,11 +461,10 @@ Gfx::SizeF ListBox::onAutoSize(const SizePolicy& policy) const
 
 void ListBox::onLayout()
 {
-    std::clog << "ListBox::onLayout" << std::endl;
-
-    double itemsWidth = size().width() - _scrollView.margin().leftRight();
     double itemsHeight = 0;
-
+    double itemsWidth = size().width() - _scrollView.margin().leftRight()
+                                       - padding().leftRight();
+    
     SizePolicy policy(SizePolicy::Fixed, SizePolicy::Expanding);
     policy.setWidth(itemsWidth);
 
@@ -475,7 +472,6 @@ void ListBox::onLayout()
     for(it = _layout.widgets().begin(); it != _layout.widgets().end(); ++it)
     {
         Widget* item = *it;
-
         item->setSizePolicy(policy);
 
         itemsHeight += item->preferredSize().height();

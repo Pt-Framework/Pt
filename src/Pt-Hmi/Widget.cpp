@@ -653,22 +653,13 @@ bool Widget::isAutoSize() const
 }
 
 
-// TODO: is setSizePolicy same as setAutoSize ?
 void Widget::setAutoSize(bool a)
 {
-    //Gfx::SizeF size = preferredSize();
-
     _autoSize = a;
+
+    // it is cheaper to invalidate than to just update the auto size, because
+    // setAutoSize is usually called with other invalidating operations
     invalidate();
-
-    //if(_autoSize)
-    //    _preferredSize = onAutoSize(_sizePolicy);
-
-    //if( size != preferredSize() )
-    //{
-    //    if( parent() )
-    //        parent()->layout();
-    //}
 }
 
 

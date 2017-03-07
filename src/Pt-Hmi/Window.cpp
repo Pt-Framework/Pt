@@ -277,17 +277,27 @@ void Window::remove(Window& child)
 }
 
 
-void Window::onAddWindow(Window& w)
+void Window::onAddWindow(Window&)
 {
 }
 
 
-void Window::onRemoveWindow(Window& w)
+void Window::onRemoveWindow(Window& )
 {
 }
 
 
-void Window::onParentChanged(Window* w)
+void Window::onParentChanged(Window* )
+{
+}
+
+
+void Window::onAddWidget(Widget& w)
+{
+}
+
+
+void Window::onRemoveWidget(Widget& w)
 {
 }
 
@@ -370,6 +380,8 @@ void Window::addWidget(Widget& w)
 
     setShortcut( w, w.shortcut() );
     setMnemonic( w, w.mnemonic() );
+
+    onAddWidget(w);
 }
 
 
@@ -389,6 +401,8 @@ void Window::removeWidget(Widget& w)
 
     setShortcut(w, 0);
     setMnemonic(w, 0);
+
+    onRemoveWidget(w);
 }
 
 
