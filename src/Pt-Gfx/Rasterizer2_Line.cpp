@@ -363,7 +363,7 @@ void Rasterizer2::rasterOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_
     }
 
     // Handle the gradient, starting point, and ending point
-    const Pt::int32_t grad = (fy2 - fy1) / FIXED_POINT_TO_INT(fx2 - fx1);
+    const Pt::int32_t grad  = (fy2 - fy1) / FIXED_POINT_TO_INT(fx2 - fx1);
     const Pt::int32_t xpxl1 = FIXED_POINT_ROUND(fx1);
     const Pt::int32_t xpxl2 = FIXED_POINT_ROUND(fx2);
     const Pt::int32_t ypxl  = fy1 + grad * FIXED_POINT_TO_INT(xpxl1 - fx1);
@@ -482,7 +482,7 @@ void Rasterizer2::rasterOnePixelAreaGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t
     }
 
     // Handle the gradient, starting point, and ending point
-    const Pt::int32_t grad = (fy2 - fy1) / FIXED_POINT_TO_INT(fx2 - fx1);
+    const Pt::int32_t grad  = (fy2 - fy1) / FIXED_POINT_TO_INT(fx2 - fx1);
     const Pt::int32_t xpxl1 = FIXED_POINT_ROUND(fx1);
     const Pt::int32_t xpxl2 = FIXED_POINT_ROUND(fx2);
     const Pt::int32_t ypxl  = fy1 + grad * FIXED_POINT_TO_INT(xpxl1 - fx1);

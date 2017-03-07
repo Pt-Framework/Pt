@@ -124,8 +124,15 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
     }
 }
 
-void Rasterizer2::fillPolygonSeparate(const Point* points, size_t pointCount)
+void Rasterizer2::fillSolidPolygonSeparate(const Point* points, size_t pointCount)
 {
+    // Disable texture/gradient
+    const bool isTexture  = _isTexture;
+    const bool isGradient = _isGradient;
+
+    _isTexture  = false;
+    _isGradient = false;
+
     // Separate the polygons, clip their coordinates, and raster them
     size_t startIndex = 0;
 
@@ -142,9 +149,6 @@ void Rasterizer2::fillPolygonSeparate(const Point* points, size_t pointCount)
             // Calculate the minimum and maximum coordinate values
             Pt::int32_t minX, minY, maxX, maxY;
             getPolygonRectMinMax(clipped.data(), clipped.size(), minX, minY, maxX, maxY);
-            // Update the gradient as needed
-            if(_isGradient)
-                updateGradientBrush(maxX - minX + 1, maxY - minY + 1);
             // Get the number of points for drawing this polygon
             const size_t numPoint[1] = { clipped.size() };
             // Draw the polygon
@@ -156,6 +160,10 @@ void Rasterizer2::fillPolygonSeparate(const Point* points, size_t pointCount)
                 rasterPolygonAreaFSAA2x2(clipped.data(), numPoint, 1, clipped.size(), _brush.color(), minX, minY, maxX, maxY);
         }
     }
+
+    // Restore texture/gradient
+    _isTexture  = isTexture;
+    _isGradient = isGradient;
 }
 
 // ======================================================================================
@@ -570,8 +578,9 @@ void Rasterizer2::rasterPolygonAreaXWAA(const Point* points, const size_t* point
             const Pt::int32_t to   = nodeX[i + 1];
             if(to < from) continue;
             // Store the scanline coordinate as needed
-            if(_compositionMode != CompositionMode::SourceCopy)
+            if(_compositionMode != CompositionMode::SourceCopy) {
                 scanlines[pixelY - minY].push_back(ScanlineElement16(from, to));
+            }
             // Draw the scanline
             rasterScanline(from - minX, to - minX, pixelY - minY, minX, minY, color);
         }

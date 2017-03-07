@@ -152,7 +152,7 @@ class Rasterizer2
 
         void fillRect(const Point& tl, const Point& br);
         void fillPolygon(const Point* points, size_t pointCount);
-        void fillPolygonSeparate(const Point* points, size_t pointCount);
+        void fillSolidPolygonSeparate(const Point* points, size_t pointCount);
         void fillEllipse(const Point& topLeft, const Size& size);
         void fillArc(const Point& topLeft, const Size& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
