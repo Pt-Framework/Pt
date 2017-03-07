@@ -128,6 +128,28 @@ static void benchASMD(const char* name)
     volatile size_t i;
     volatile double t1, td;
 
+    // Loop and assignment overhead
+    t1 = getUTime();
+    for(i = 0; i < LOOP_COUNT; ++i) {
+        v = v0;
+        v = v2;
+        v = v4;
+        v = v6;
+    }
+    td = (getUTime() - t1);
+
+    t1 = getUTime();
+    for(i = 0; i < LOOP_COUNT; ++i) {
+        v = v1;
+        v = v3;
+        v = v5;
+        v = v7;
+    }
+    td += (getUTime() - t1);
+
+    td /= (LOOP_COUNT * 8.0);
+    printf("%s LOOP = %12.10f nS (%8.3f TOPS)\n", name, td * 1000, 1.0 / td / 1000000.0);
+
     // Addition
     t1 = getUTime();
     for(i = 0; i < LOOP_COUNT; ++i) {
@@ -191,6 +213,28 @@ static void benchSQRT(const char* name)
 
     volatile size_t i;
     volatile double t1, td;
+
+    // Loop and assignment overhead
+    t1 = getUTime();
+    for(i = 0; i < LOOP_COUNT; ++i) {
+        v = v0;
+        v = v2;
+        v = v4;
+        v = v6;
+    }
+    td = (getUTime() - t1);
+
+    t1 = getUTime();
+    for(i = 0; i < LOOP_COUNT; ++i) {
+        v = v1;
+        v = v3;
+        v = v5;
+        v = v7;
+    }
+    td += (getUTime() - t1);
+
+    td /= (LOOP_COUNT * 8.0);
+    printf("%s LOOP = %12.10f nS (%8.3f TOPS)\n", name, td * 1000, 1.0 / td / 1000000.0);
 
     // Square-root
     t1 = getUTime();
