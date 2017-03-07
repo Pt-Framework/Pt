@@ -1,186 +1,222 @@
-// g++ -O2 bench-pc.cpp -o bench-pc && ./bench-pc && rm -f bench-pc
-
+// g++ -march=native -O3 bench-pc.cpp -o bench-pc && ./bench-pc && rm -f bench-pc
+//
 // Results are below the program
+//
 
+#include <math.h>
 #include <stdint.h>
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/time.h>
-#include <time.h>
+#include <typeinfo>
 
-double mygettime()
+#define LOOP_COUNT 100000000
+
+static inline double getUTime()
 {
-  struct timeval tv;
-  if(gettimeofday(&tv, 0) < 0) {
-    perror("oops");
-  }
-  return (double)tv.tv_sec + (0.000001 * (double)tv.tv_usec);
+    struct timeval tv;
+    if(gettimeofday(&tv, 0) < 0)  perror("oops");
+    return (double) tv.tv_sec + ((double) tv.tv_usec * 0.000001);
 }
 
-template< typename Type >
-void my_test(const char* name) {
-  volatile Type v  = 0;
-  // Do not use constants or repeating values
-  //  to avoid loop unroll optimizations.
-  // All values >0 to avoid division by 0
-  Type v0 = (Type)(rand() % 128)/16 + 1;
-  Type v1 = (Type)(rand() % 128)/16 + 1;
-  Type v2 = (Type)(rand() % 128)/16 + 1;
-  Type v3 = (Type)(rand() % 128)/16 + 1;
-  Type v4 = (Type)(rand() % 128)/16 + 1;
-  Type v5 = (Type)(rand() % 128)/16 + 1;
-  Type v6 = (Type)(rand() % 128)/16 + 1;
-  Type v7 = (Type)(rand() % 128)/16 + 1;
+static inline       float xsqrt(      float v) { return sqrtf(v); }
+static inline      double xsqrt(     double v) { return sqrt (v); }
+static inline long double xsqrt(long double v) { return sqrtl(v); }
 
-  double t1 = mygettime();
-  for (size_t i = 0; i < 100000000; ++i) {
-    v += v0;
-    v += v2;
-    v += v4;
-    v += v6;
-  }
-  printf("%s add = %7.3f uS\n", name, mygettime() - t1);
+template<typename TYPE>
+static void benchSHIF(const char* name)
+{
+    volatile TYPE v = 0;
 
-  t1 = mygettime();
-  for (size_t i = 0; i < 100000000; ++i) {
-    v -= v1;
-    v -= v3;
-    v -= v5;
-    v -= v7;
-  }
-  printf("%s sub = %7.3f uS\n", name, mygettime() - t1);
+    // Do not use constants or repeating values to avoid loop unroll optimizations
+    // All values > 0 to avoid division by 0
+    TYPE v0 = (TYPE) (rand() % 128) / 16 + 1;
+    TYPE v1 = (TYPE) (rand() % 128) / 16 + 1;
+    TYPE v2 = (TYPE) (rand() % 128) / 16 + 1;
+    TYPE v3 = (TYPE) (rand() % 128) / 16 + 1;
+    TYPE v4 = (TYPE) (rand() % 128) / 16 + 1;
+    TYPE v5 = (TYPE) (rand() % 128) / 16 + 1;
+    TYPE v6 = (TYPE) (rand() % 128) / 16 + 1;
+    TYPE v7 = (TYPE) (rand() % 128) / 16 + 1;
 
-  t1 = mygettime();
-  for (size_t i = 0; i < 100000000; ++i) {
-    v *= v0;
-    v *= v2;
-    v *= v4;
-    v *= v6;
-  }
-  printf("%s mul = %7.3f uS\n", name, mygettime() - t1);
+    double t1, td;
 
-  t1 = mygettime();
-  for (size_t i = 0; i < 100000000; ++i) {
-    v /= v1;
-    v /= v3;
-    v /= v5;
-    v /= v7;
-  }
-  printf("%s div = %7.3f uS\n", name, mygettime() - t1);
+    t1 = getUTime();
+    for (size_t i = 0; i < LOOP_COUNT; ++i) {
+        v = v0 << 4;
+        v = v2 << 4;
+        v = v4 << 4;
+        v = v6 << 4;
+    }
+    td = (getUTime() - t1) / 4.0;
+    printf("%s shl  = %6.3f uS (%6.3f MIPS)\n", name, td, 1.0 / td);
+
+    t1 = getUTime();
+    for (size_t i = 0; i < LOOP_COUNT; ++i) {
+        v = v1 >> 4;
+        v = v3 >> 4;
+        v = v5 >> 4;
+        v = v7 >> 4;
+    }
+    td = (getUTime() - t1) / 4.0;
+    printf("%s shr  = %6.3f uS (%6.3f MIPS)\n", name, td, 1.0 / td);
+
+
+    t1 = getUTime();
+    for (size_t i = 0; i < LOOP_COUNT; ++i) {
+        v <<= v0;
+        v <<= v2;
+        v <<= v4;
+        v <<= v6;
+    }
+    td = (getUTime() - t1) / 4.0;
+    printf("%s shlx = %6.3f uS (%6.3f MIPS)\n", name, td, 1.0 / td);
+
+    t1 = getUTime();
+    for (size_t i = 0; i < LOOP_COUNT; ++i) {
+        v >>= v1;
+        v >>= v3;
+        v >>= v5;
+        v >>= v7;
+    }
+    td = (getUTime() - t1) / 4.0;
+    printf("%s shrx = %6.3f uS (%6.3f MIPS)\n", name, td, 1.0 / td);
 }
 
-int main() {
-  my_test<     int8_t>("     int8_t");
-  my_test<    uint8_t>("    uint8_t");
+template<typename TYPE>
+static void benchASMD(const char* name)
+{
+    volatile TYPE v = 0;
 
-  my_test<    int16_t>("    int16_t");
-  my_test<   uint16_t>("   uint16_t");
+    // Do not use constants or repeating values to avoid loop unroll optimizations
+    // All values > 0 to avoid division by 0
+    TYPE v0 = (TYPE) (rand() % 128) / 16 + 1;
+    TYPE v1 = (TYPE) (rand() % 128) / 16 + 1;
+    TYPE v2 = (TYPE) (rand() % 128) / 16 + 1;
+    TYPE v3 = (TYPE) (rand() % 128) / 16 + 1;
+    TYPE v4 = (TYPE) (rand() % 128) / 16 + 1;
+    TYPE v5 = (TYPE) (rand() % 128) / 16 + 1;
+    TYPE v6 = (TYPE) (rand() % 128) / 16 + 1;
+    TYPE v7 = (TYPE) (rand() % 128) / 16 + 1;
 
-  my_test<    int32_t>("    int32_t");
-  my_test<   uint32_t>("   uint32_t");
+    double t1, td;
 
-  my_test<    int64_t>("    int64_t");
-  my_test<   uint64_t>("   uint64_t");
+    t1 = getUTime();
+    for (size_t i = 0; i < LOOP_COUNT; ++i) {
+        v += v0;
+        v += v2;
+        v += v4;
+        v += v6;
+    }
+    td = (getUTime() - t1) / 4.0;
+    printf("%s add  = %6.3f uS (%6.3f MIPS)\n", name, td, 1.0 / td);
 
-  my_test<      float>("      float");
-  my_test<     double>("     double");
-  my_test<long double>("long double");
+    t1 = getUTime();
+    for(size_t i = 0; i < LOOP_COUNT; ++i) {
+        v -= v1;
+        v -= v3;
+        v -= v5;
+        v -= v7;
+    }
+    td = (getUTime() - t1) / 4.0;
+    printf("%s sub  = %6.3f uS (%6.3f MIPS)\n", name, td, 1.0 / td);
 
-  return 0;
+    t1 = getUTime();
+    for(size_t i = 0; i < LOOP_COUNT; ++i) {
+        v *= v0;
+        v *= v2;
+        v *= v4;
+        v *= v6;
+    }
+    td = (getUTime() - t1) / 4.0;
+    printf("%s mul  = %6.3f uS (%6.3f MIPS)\n", name, td, 1.0 / td);
+
+    t1 = getUTime();
+    for(size_t i = 0; i < LOOP_COUNT; ++i) {
+        v /= v1;
+        v /= v3;
+        v /= v5;
+        v /= v7;
+    }
+    td = (getUTime() - t1) / 4.0;
+    printf("%s div  = %6.3f uS (%6.3f MIPS)\n", name, td, 1.0 / td);
+}
+
+template<typename TYPE>
+static void benchSQRT(const char* name)
+{
+    volatile TYPE v = 0;
+
+    // Do not use constants or repeating values to avoid loop unroll optimizations
+    // All values > 0 to avoid division by 0
+    TYPE v0 = (TYPE) (rand() % 128) / 16 + 1;
+    TYPE v1 = (TYPE) (rand() % 128) / 16 + 1;
+    TYPE v2 = (TYPE) (rand() % 128) / 16 + 1;
+    TYPE v3 = (TYPE) (rand() % 128) / 16 + 1;
+    TYPE v4 = (TYPE) (rand() % 128) / 16 + 1;
+    TYPE v5 = (TYPE) (rand() % 128) / 16 + 1;
+    TYPE v6 = (TYPE) (rand() % 128) / 16 + 1;
+    TYPE v7 = (TYPE) (rand() % 128) / 16 + 1;
+
+    double t1, td;
+
+    t1 = getUTime();
+    for(size_t i = 0; i < LOOP_COUNT; ++i) {
+        v = xsqrt(v0);
+        v = xsqrt(v2);
+        v = xsqrt(v4);
+        v = xsqrt(v6);
+    }
+    td = (getUTime() - t1) / 4.0;
+    printf("%s sqrt = %6.3f uS (%6.3f MIPS)\n", name, td, 1.0 / td);
+}
+
+
+int main()
+{
+    benchSHIF<     int8_t>("     int8_t");
+    benchASMD<     int8_t>("     int8_t");
+    benchSHIF<    uint8_t>("     int8_t");
+    benchASMD<    uint8_t>("    uint8_t");
+    printf("\n");
+
+    benchSHIF<    int16_t>("    int16_t");
+    benchASMD<    int16_t>("    int16_t");
+    benchSHIF<   uint16_t>("   uint16_t");
+    benchASMD<   uint16_t>("   uint16_t");
+    printf("\n");
+
+    benchSHIF<    int32_t>("    int32_t");
+    benchASMD<    int32_t>("    int32_t");
+    benchSHIF<   uint32_t>("   uint32_t");
+    benchASMD<   uint32_t>("   uint32_t");
+    printf("\n");
+
+    benchSHIF<    int64_t>("    int64_t");
+    benchASMD<    int64_t>("    int64_t");
+    benchSHIF<   uint64_t>("   uint64_t");
+    benchASMD<   uint64_t>("   uint64_t");
+    printf("\n");
+
+    benchASMD<      float>("      float");
+    benchSQRT<      float>("      float");
+    printf("\n");
+
+    benchASMD<     double>("     double");
+    benchSQRT<     double>("     double");
+    printf("\n");
+
+    benchASMD<long double>("long double");
+    benchSQRT<long double>("long double");
+    printf("\n");
+
+    return 0;
 }
 
 /*
     Core i5 64-bit Mode
     -------------------
-         int8_t add =   0.807 uS
-         int8_t sub =   0.820 uS
-         int8_t mul =   0.945 uS
-         int8_t div =   3.216 uS
-        uint8_t add =   0.816 uS
-        uint8_t sub =   0.816 uS
-        uint8_t mul =   0.946 uS
-        uint8_t div =   2.960 uS
-        int16_t add =   0.802 uS
-        int16_t sub =   0.818 uS
-        int16_t mul =   0.945 uS
-        int16_t div =   3.216 uS
-       uint16_t add =   0.816 uS
-       uint16_t sub =   0.816 uS
-       uint16_t mul =   0.945 uS
-       uint16_t div =   3.097 uS
-        int32_t add =   0.823 uS
-        int32_t sub =   0.792 uS
-        int32_t mul =   0.945 uS
-        int32_t div =   3.217 uS
-       uint32_t add =   0.792 uS
-       uint32_t sub =   0.804 uS
-       uint32_t mul =   0.945 uS
-       uint32_t div =   3.104 uS
-        int64_t add =   0.818 uS
-        int64_t sub =   0.814 uS
-        int64_t mul =   0.945 uS
-        int64_t div =   5.275 uS
-       uint64_t add =   0.811 uS
-       uint64_t sub =   0.781 uS
-       uint64_t mul =   0.945 uS
-       uint64_t div =   4.255 uS
-          float add =   1.064 uS
-          float sub =   1.064 uS
-          float mul =   1.299 uS
-          float div =   1.944 uS
-         double add =   1.063 uS
-         double sub =   1.063 uS
-         double mul =   1.299 uS
-         double div =   1.940 uS
-    long double add =   1.418 uS
-    long double sub =   1.418 uS
-    long double mul =  39.092 uS
-    long double div =  40.748 uS
 
     RaspberryPi 3 32-bit Mode
     -------------------------
-         int8_t add =   1.677 uS
-         int8_t sub =   1.721 uS
-         int8_t mul =   2.337 uS
-         int8_t div =   6.592 uS
-        uint8_t add =   1.669 uS
-        uint8_t sub =   1.669 uS
-        uint8_t mul =   2.336 uS
-        uint8_t div =   6.565 uS
-        int16_t add =   1.669 uS
-        int16_t sub =   1.669 uS
-        int16_t mul =   2.337 uS
-        int16_t div =   7.364 uS
-       uint16_t add =   1.669 uS
-       uint16_t sub =   1.669 uS
-       uint16_t mul =   2.670 uS
-       uint16_t div =   6.583 uS
-        int32_t add =   1.335 uS
-        int32_t sub =   1.335 uS
-        int32_t mul =   2.003 uS
-        int32_t div =   6.592 uS
-       uint32_t add =   1.335 uS
-       uint32_t sub =   1.335 uS
-       uint32_t mul =   2.003 uS
-       uint32_t div =   6.524 uS
-        int64_t add =   1.752 uS
-        int64_t sub =   1.752 uS
-        int64_t mul =   3.338 uS
-        int64_t div =  21.446 uS
-       uint64_t add =   1.752 uS
-       uint64_t sub =   1.752 uS
-       uint64_t mul =   3.338 uS
-       uint64_t div =  17.441 uS
-          float add =   2.670 uS
-          float sub =   2.670 uS
-          float mul =   2.670 uS
-          float div =   5.674 uS
-         double add =   2.670 uS
-         double sub =   2.670 uS
-         double mul =   2.670 uS
-         double div =   8.678 uS
-    long double add =   2.670 uS
-    long double sub =   2.670 uS
-    long double mul =   2.670 uS
-    long double div =   8.678 uS
  */
