@@ -465,7 +465,7 @@ void ListBox::onLayout()
     double itemsWidth = size().width() - _scrollView.margin().leftRight()
                                        - padding().leftRight();
     
-    SizePolicy policy(SizePolicy::Fixed, SizePolicy::Expanding);
+    SizePolicy policy(SizePolicy::Fixed, SizePolicy::Preferred);
     policy.setWidth(itemsWidth);
 
     std::vector<Pt::Hmi::Widget*>::const_iterator it;

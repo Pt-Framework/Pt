@@ -226,7 +226,7 @@ void ComboBox::setMaxHeight(double height)
 
 void ComboBox::showPopup()
 {
-    SizePolicy policy(SizePolicy::Fixed, SizePolicy::Expanding);
+    SizePolicy policy(SizePolicy::Fixed, SizePolicy::Preferred);
     policy.setSize( size() );
 
     Gfx::SizeF popupSize = _popup.preferredSize(policy);

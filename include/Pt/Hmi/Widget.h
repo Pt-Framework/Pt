@@ -67,83 +67,41 @@ class SizePolicy
         enum Policy
         {
             Fixed,
-            Expanding
+            Preferred
+            // Expanding
+            // Maximum
+            // Minimum
         };
 
-        class Mode
-        {
-            public:
-                Mode(Policy horizontal = Expanding,
-                     Policy vertical = Expanding)
-                : _h(horizontal)
-                , _v(vertical)
-                {}
-
-                Policy horizontal() const
-                {
-                    return _h;
-                }
-
-                void setHorizontal(Policy policy)
-                {
-                    _h = policy;
-                }
-        
-                Policy vertical() const
-                {
-                    return _v;
-                }
-        
-                void setVertical(Policy policy)
-                {
-                    _v = policy;
-                }
-
-                bool operator== (const Mode& m) const
-                {
-                    return _h == m._h && _v == m._v;
-                }
-
-            private:
-                Policy _h;
-                Policy _v;
-        };
-    
     public:
         SizePolicy()
-        { }
-        
-        SizePolicy(const Mode& mode)
-        : _mode(mode)
+        : _h(Preferred)
+        , _v(Preferred)
         { }
 
         SizePolicy(Policy horizontal, Policy vertical)
-        : _mode(horizontal, vertical)
+        : _h(horizontal)
+        , _v(vertical)
         { }
-
-        Mode mode() const
-        {
-            return _mode;
-        }
 
         Policy horizontal() const
         {
-            return _mode.horizontal();
+            return _h;
         }
 
         void setHorizontal(Policy policy)
         {
-            _mode.setHorizontal(policy);
+            _h = policy;
         }
         
         Policy vertical() const
         {
-            return _mode.vertical();
+            return _v;
         }
         
         void setVertical(Policy policy)
         {
-            _mode.setVertical(policy);
+            _v = policy;
         }
         
         const Gfx::SizeF& size() const
@@ -178,11 +136,12 @@ class SizePolicy
 
         bool operator== (const SizePolicy& s) const
         {
-            return _mode == s._mode && _sizeHint == s._sizeHint;
+            return _h == s._h && _v == s._v && _sizeHint == s._sizeHint;
         }
 
     private:
-        Mode       _mode;
+        Policy     _h;
+        Policy     _v;
         Gfx::SizeF _sizeHint;
 };
 

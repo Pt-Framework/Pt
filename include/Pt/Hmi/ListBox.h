@@ -42,9 +42,6 @@ namespace Pt {
 
 namespace Hmi {
 
-//
-// TODO: auto-sizing
-//
 class PT_HMI_API ListBoxItem : public Button
 {
     typedef Button Base;
