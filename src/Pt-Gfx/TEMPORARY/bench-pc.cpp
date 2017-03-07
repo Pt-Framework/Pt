@@ -1,4 +1,4 @@
-// g++ -march=native -O3 bench-pc.cpp -o bench-pc && ./bench-pc && rm -f bench-pc
+// clear && g++ -O2 bench-pc.cpp -o bench-pc && ./bench-pc && rm -f bench-pc
 //
 // Results are below the program
 //
