@@ -24,42 +24,42 @@ static inline      double xsqrt(     double v) { return sqrt (v); }
 static inline long double xsqrt(long double v) { return sqrtl(v); }
 
 template<typename TYPE>
-static void benchSHIF(const char* name)
+static void benchSALR(const char* name)
 {
     volatile TYPE v = 0;
 
     // Do not use constants or repeating values to avoid loop unroll optimizations
     // All values > 0 to avoid division by 0
-    TYPE v0 = (TYPE) (rand() % 128) / 16 + 1;
-    TYPE v1 = (TYPE) (rand() % 128) / 16 + 1;
-    TYPE v2 = (TYPE) (rand() % 128) / 16 + 1;
-    TYPE v3 = (TYPE) (rand() % 128) / 16 + 1;
-    TYPE v4 = (TYPE) (rand() % 128) / 16 + 1;
-    TYPE v5 = (TYPE) (rand() % 128) / 16 + 1;
-    TYPE v6 = (TYPE) (rand() % 128) / 16 + 1;
-    TYPE v7 = (TYPE) (rand() % 128) / 16 + 1;
+    volatile TYPE v0 = (TYPE) (rand() % 128) / 16 + 1;
+    volatile TYPE v1 = (TYPE) (rand() % 128) / 16 + 1;
+    volatile TYPE v2 = (TYPE) (rand() % 128) / 16 + 1;
+    volatile TYPE v3 = (TYPE) (rand() % 128) / 16 + 1;
+    volatile TYPE v4 = (TYPE) (rand() % 128) / 16 + 1;
+    volatile TYPE v5 = (TYPE) (rand() % 128) / 16 + 1;
+    volatile TYPE v6 = (TYPE) (rand() % 128) / 16 + 1;
+    volatile TYPE v7 = (TYPE) (rand() % 128) / 16 + 1;
 
     double t1, td;
 
     t1 = getUTime();
     for (size_t i = 0; i < LOOP_COUNT; ++i) {
-        v = v0 * 16; // These will be converted to (<< 4) by the compiler
-        v = v2 * 16; // ---
-        v = v4 * 16; // ---
-        v = v6 * 16; // ---
+        v = v0 << 4;
+        v = v2 << 4;
+        v = v4 << 4;
+        v = v6 << 4;
     }
     td = (getUTime() - t1) / 4.0;
-    printf("%s shl  = %6.3f uS (%6.3f MIPS)\n", name, td, 1.0 / td);
+    printf("%s sal  = %6.3f uS (%6.3f MIPS)\n", name, td, 1.0 / td);
 
     t1 = getUTime();
     for (size_t i = 0; i < LOOP_COUNT; ++i) {
-        v = v1 / 16; // These will be converted to (>> 4) by the compiler
-        v = v3 / 16; // ---
-        v = v5 / 16; // ---
-        v = v7 / 16; // ---
+        v = v1 >> 4;
+        v = v3 >> 4;
+        v = v5 >> 4;
+        v = v7 >> 4;
     }
     td = (getUTime() - t1) / 4.0;
-    printf("%s shr  = %6.3f uS (%6.3f MIPS)\n", name, td, 1.0 / td);
+    printf("%s sar  = %6.3f uS (%6.3f MIPS)\n", name, td, 1.0 / td);
 
 
     t1 = getUTime();
@@ -70,7 +70,7 @@ static void benchSHIF(const char* name)
         v <<= v6;
     }
     td = (getUTime() - t1) / 4.0;
-    printf("%s shlx = %6.3f uS (%6.3f MIPS)\n", name, td, 1.0 / td);
+    printf("%s salx = %6.3f uS (%6.3f MIPS)\n", name, td, 1.0 / td);
 
     t1 = getUTime();
     for (size_t i = 0; i < LOOP_COUNT; ++i) {
@@ -80,7 +80,7 @@ static void benchSHIF(const char* name)
         v >>= v7;
     }
     td = (getUTime() - t1) / 4.0;
-    printf("%s shrx = %6.3f uS (%6.3f MIPS)\n", name, td, 1.0 / td);
+    printf("%s sarx = %6.3f uS (%6.3f MIPS)\n", name, td, 1.0 / td);
 }
 
 template<typename TYPE>
@@ -174,27 +174,27 @@ static void benchSQRT(const char* name)
 
 int main()
 {
-    benchSHIF<     int8_t>("     int8_t");
+    benchSALR<     int8_t>("     int8_t");
     benchASMD<     int8_t>("     int8_t");
-    benchSHIF<    uint8_t>("    uint8_t");
+    benchSALR<    uint8_t>("    uint8_t");
     benchASMD<    uint8_t>("    uint8_t");
     printf("\n");
 
-    benchSHIF<    int16_t>("    int16_t");
+    benchSALR<    int16_t>("    int16_t");
     benchASMD<    int16_t>("    int16_t");
-    benchSHIF<   uint16_t>("   uint16_t");
+    benchSALR<   uint16_t>("   uint16_t");
     benchASMD<   uint16_t>("   uint16_t");
     printf("\n");
 
-    benchSHIF<    int32_t>("    int32_t");
+    benchSALR<    int32_t>("    int32_t");
     benchASMD<    int32_t>("    int32_t");
-    benchSHIF<   uint32_t>("   uint32_t");
+    benchSALR<   uint32_t>("   uint32_t");
     benchASMD<   uint32_t>("   uint32_t");
     printf("\n");
 
-    benchSHIF<    int64_t>("    int64_t");
+    benchSALR<    int64_t>("    int64_t");
     benchASMD<    int64_t>("    int64_t");
-    benchSHIF<   uint64_t>("   uint64_t");
+    benchSALR<   uint64_t>("   uint64_t");
     benchASMD<   uint64_t>("   uint64_t");
     printf("\n");
 
