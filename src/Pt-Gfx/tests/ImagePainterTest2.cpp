@@ -65,13 +65,16 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_PATTERNED_LINE                0 // (including bezier)
 #define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES  0
 
+#define TEST_DRAW_SOLID_THICK_LINE              1 // (including bezier)
+#define TEST_DRAW_PATTERNED_THICK_LINE          0 // (including bezier)
+
 #define TEST_DRAW_ELLIPSES_ARCS                 0
 
 #define TEST_DRAW_SOLID_FILLED_POLYGONS         0
 #define TEST_DRAW_GRADIENT_FILLED_POLYGONS      0
 #define TEST_DRAW_TEXTURE_FILLED_POLYGONS       0
 
-#define TEST_DRAW_SOLID_FILLED_ELLIPSES_ARCS    1
+#define TEST_DRAW_SOLID_FILLED_ELLIPSES_ARCS    0
 #define TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS 0
 #define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  0
 
@@ -90,6 +93,8 @@ using namespace Pt::Gfx;
 #define BENCHMARK_ROTATED_TEXT              0
 #define BENCHMARK_SOLID_LINE                0
 #define BENCHMARK_PATTERNED_LINE            0
+#define BENCHMARK_SOLID_THICK_LINE          0
+#define BENCHMARK_PATTERNED_THICK_LINE      0
 #define BENCHMARK_ELLIPSE                   0
 #define BENCHMARK_ARC                       0
 #define BENCHMARK_SOLID_BEZIER              0
@@ -104,11 +109,11 @@ using namespace Pt::Gfx;
 #define BENCHMARK_GRADIENT_FILLED_POLYGON   0
 #define BENCHMARK_TEXTURE_FILLED_POLYGON    0
 
-#define BENCHMARK_SOLID_FILLED_ELLIPSE      1
+#define BENCHMARK_SOLID_FILLED_ELLIPSE      0
 #define BENCHMARK_GRADIENT_FILLED_ELLIPSE   0
 #define BENCHMARK_TEXTURE_FILLED_ELLIPSE    0
 
-#define BENCHMARK_SOLID_FILLED_ARC          1
+#define BENCHMARK_SOLID_FILLED_ARC          0
 #define BENCHMARK_GRADIENT_FILLED_ARC       0
 #define BENCHMARK_TEXTURE_FILLED_ARC        0
 
@@ -130,6 +135,7 @@ static Brush bmBrushTextureW;
 #include "ImagePainterTest2_Util.cpp"
 #include "ImagePainterTest2_Draw_Outline.cpp"
 #include "ImagePainterTest2_Draw_Filled.cpp"
+#include "ImagePainterTest2_Draw_Thick.cpp"
 #include "ImagePainterTest2_Benchmark.cpp"
 #include "ImagePainterTest2_Cairo.cpp"
 
@@ -211,7 +217,29 @@ int main(int argc, char* args[])
         }
     }
 
-    // Rectangles and filled rectangles
+    // Solid thick lines
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_SOLID_THICK_LINE) {
+        painter2->setCompositionMode(CompositionMode::SourceCopy);
+        testDrawSolidThickLine("Solid Thick Lines - ImagePainter2 [SourceCopy]", image, *painter2);
+    }
+
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_SOLID_THICK_LINE) {
+        painter2->setCompositionMode(CompositionMode::SourceOver);
+        testDrawSolidThickLine("Solid Thick Lines - ImagePainter2 [SourceOver]", image, *painter2);
+    }
+
+    // Patterned thick lines
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_PATTERNED_THICK_LINE) {
+        painter2->setCompositionMode(CompositionMode::SourceCopy);
+        testDrawPatternedThickLine("Patterned Thick Lines - ImagePainter2 [SourceCopy]", image, *painter2);
+    }
+
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_PATTERNED_THICK_LINE) {
+        painter2->setCompositionMode(CompositionMode::SourceOver);
+        testDrawPatternedThickLine("Patterned Thick Lines - ImagePainter2 [SourceOver]", image, *painter2);
+    }
+
+        // Rectangles and filled rectangles
     if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_RECTANGLES_FILLED_RECTANGLES) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
         testDrawRect("Rectangles & Solid-Filled Rectangles - ImagePainter2 [SourceCopy]", image, *painter2);

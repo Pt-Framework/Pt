@@ -65,21 +65,25 @@ class PT_GFX_API Pen
 
         /** @brief Pen cap style.
         */
-        enum CapStyle { FlatCap       = 0,
-                        ButtCap       = 0,
-                        RoundCap      = 1,
-                        SquareCap     = 2,
-                        TriangularCap = 3,
-                        ProjectingCap = 4,
-                        NotLastCap    = 5
+        enum CapStyle { FlatCap          = 0,
+                        ButtCap          = 1,
+                        SquareCap        = 2,
+                        RoundCap         = 3,
+                        TriangularOutCap = 4,
+                        TriangularInCap  = 5,
+                        NoCap            = 0, // NoCap         and FlatCap          are the same
+                        ProjectingCap    = 2, // ProjectingCap and SquareCap        are the same
+                        TriangularCap    = 4, // TriangularCap and TriangularOutCap are the same
+                        NotLastCap       = 9  // What is this ???
                       };
 
         /** @brief Pen join style.
         */
-        enum JoinStyle { RoundJoin      = 0,
+        enum JoinStyle { NoJoin         = 0,
                          BevelJoin      = 1,
                          MiterJoin      = 2,
-                         TriangularJoin = 3
+                         RoundJoin      = 3,
+                         TriangularJoin = 9  // What is this ???
                        };
 
         /** @brief Constructs a null pen.

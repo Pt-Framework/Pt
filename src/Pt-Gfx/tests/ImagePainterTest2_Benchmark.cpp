@@ -8,6 +8,7 @@
 
 #include "ImagePainterTest2_Benchmark_Outline.cpp"
 #include "ImagePainterTest2_Benchmark_Filled.cpp"
+#include "ImagePainterTest2_Benchmark_Thick.cpp"
 
 static void doBenchmark(CompositionMode cm)
 {
@@ -68,6 +69,31 @@ static void doBenchmark(CompositionMode cm)
         std::clog << std::endl;
     }
 
+    // Solid thick lines
+    if(BENCHMARK_SOLID_THICK_LINE) {
+        time1 = benchDrawSolidThickLine<ImagePainter >(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
+        std::clog << "    Solid     thick line             @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
+        time2 = benchDrawSolidLine<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
+        std::clog << "    Solid     thick line NOAA        @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time2 = benchDrawSolidThickLine<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::Standard);
+        std::clog << "    Solid     thick line XWAA        @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        std::clog << std::endl;
+    }
+
+    // Patterned thick lines
+    if(BENCHMARK_PATTERNED_THICK_LINE) {
+        time1 = benchDrawPatternedThickLine<ImagePainter >(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
+        std::clog << "    Patterned thick line             @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
+        time2 = benchDrawPatternedThickLine<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
+        std::clog << "    Patterned thick line NOAA        @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time2 = benchDrawPatternedThickLine<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::Standard);
+        std::clog << "    Patterned thick line XWAA        @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        std::clog << std::endl;
+    }
     // Rectangles
     if(BENCHMARK_RECTANGLE) {
         time1 = benchDrawRect<ImagePainter >(BENCHMARK_LOOP_COUNT, cm);
