@@ -751,24 +751,25 @@ void Rasterizer2::arcUtil_rasterClosingXWLine(const FilledArcInfo& fai, const Ar
     Pt::int32_t ly[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
 
     // A helper macro to skip a pixel
-    #define CHECK_SKIP_PIXEL(X, Y, A)              \
-        {                                          \
-            bool skipPixel = false;                \
-            for(Pt::int32_t i = 0; i < 4; ++i) {   \
-                if(mx[i] == (X) && my[i] == (Y)) { \
-                    skipPixel = true;              \
-                    break;                         \
-                }                                  \
-            }                                      \
-            if(skipPixel || !(A)) continue;        \
-            lx[2] = lx[3]; lx[3] = x;              \
-            ly[2] = ly[3]; ly[3] = y;              \
-            if(pCnt < 2) {                         \
-                lx[pCnt] = x;                      \
-                ly[pCnt] = y;                      \
-                ++pCnt;                            \
-            }                                      \
-        }                                          \
+    #define CHECK_SKIP_PIXEL(X, Y, A)                       \
+        {                                                   \
+            /* Check if we should skip drawing the pixel */ \
+            bool skipPixel = false;                         \
+            for(Pt::int32_t i = 0; i < 4; ++i) {            \
+                if(mx[i] != (X) || my[i] != (Y)) continue;  \
+                skipPixel = true;                           \
+                break;                                      \
+            }                                               \
+            if(skipPixel || !(A)) continue;                 \
+            /* Store back the mask's coordinates */         \
+            lx[2] = lx[3]; lx[3] = X;                       \
+            ly[2] = ly[3]; ly[3] = Y;                       \
+            if(pCnt < 2) {                                  \
+                lx[pCnt] = X;                               \
+                ly[pCnt] = Y;                               \
+                ++pCnt;                                     \
+            }                                               \
+        }                                                   \
         do {} while(false)
 
     // Draw the pixels in all coordinates

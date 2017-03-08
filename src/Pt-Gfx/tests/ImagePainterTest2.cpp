@@ -63,7 +63,7 @@ using namespace Pt::Gfx;
 
 #define TEST_DRAW_SOLID_LINE_AND_TEXT           0 // (including bezier)
 #define TEST_DRAW_PATTERNED_LINE                0 // (including bezier)
-#define TEST_DRAW_SOLID_THICK_LINE              0 // (including bezier)
+#define TEST_DRAW_SOLID_THICK_LINE              1 // (including bezier)
 #define TEST_DRAW_PATTERNED_THICK_LINE          0 // (including bezier)
 
 #define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES  0
@@ -73,7 +73,7 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_GRADIENT_FILLED_POLYGONS      0
 #define TEST_DRAW_TEXTURE_FILLED_POLYGONS       0
 
-#define TEST_DRAW_SOLID_FILLED_ELLIPSES_ARCS    1
+#define TEST_DRAW_SOLID_FILLED_ELLIPSES_ARCS    0
 #define TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS 0
 #define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  0
 

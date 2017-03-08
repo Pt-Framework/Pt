@@ -328,6 +328,11 @@ void Rasterizer2::rasterOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_
         }
     }
 
+    // Used for storing back the mask's coordinates
+    Pt::int32_t pCnt  = 0;
+    Pt::int32_t lx[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
+    Pt::int32_t ly[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
+
     // A helper macro to set pixel
     #define XW_SET_PIXEL(IMG, COL, X, Y, A)                                       \
         do {                                                                      \
@@ -341,7 +346,15 @@ void Rasterizer2::rasterOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_
                 skipDrawing = true;                                               \
                 break;                                                            \
             }                                                                     \
-            if(skipDrawing) break;                                                \
+            if(skipDrawing || !(A)) break;                                        \
+            /* Store back the mask's coordinates */                               \
+            lx[2] = lx[3]; lx[3] = X;                                             \
+            ly[2] = ly[3]; ly[3] = Y;                                             \
+            if(pCnt < 2) {                                                        \
+                lx[pCnt] = X;                                                     \
+                ly[pCnt] = Y;                                                     \
+                ++pCnt;                                                           \
+            }                                                                     \
             /* Set the pixel */                                                   \
             Pixel PIX(IMG->view(), X, Y);                                         \
             IMG->format().setPixel(PIX, COL, _compositionMode, A);                \
@@ -390,13 +403,6 @@ void Rasterizer2::rasterOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_
             XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE), i, a2);
             ypxli += grad;
         }
-        // Store back the start and end coordinates to the mask as needed
-        if(maskInOut) {
-            (*maskInOut)[swapDir ? 2 : 0].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl )                           ), from);
-            (*maskInOut)[swapDir ? 3 : 1].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl ) + FIXED_POINT_CONSTANT_ONE), from);
-            (*maskInOut)[swapDir ? 0 : 2].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           ), to  );
-            (*maskInOut)[swapDir ? 1 : 3].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE), to  );
-        }
     }
     else {
         // Draw the pixels
@@ -407,12 +413,21 @@ void Rasterizer2::rasterOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_
             XW_SET_PIXEL(_image, color, i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE), a2);
             ypxli += grad;
         }
-        // Store back the start and end coordinates to the mask as needed
-        if(maskInOut) {
-            (*maskInOut)[swapDir ? 2 : 0].set(from, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl )                           ));
-            (*maskInOut)[swapDir ? 3 : 1].set(from, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl ) + FIXED_POINT_CONSTANT_ONE));
-            (*maskInOut)[swapDir ? 0 : 2].set(to,   FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           ));
-            (*maskInOut)[swapDir ? 1 : 3].set(to,   FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE));
+    }
+
+    // Store back the start and end coordinates to the mask
+    if(maskInOut) {
+        if(swapDir) {
+            (*maskInOut)[2].set(lx[0], ly[0]);
+            (*maskInOut)[3].set(lx[1], ly[1]);
+            (*maskInOut)[0].set(lx[2], ly[2]);
+            (*maskInOut)[1].set(lx[3], ly[3]);
+        }
+        else {
+            (*maskInOut)[0].set(lx[0], ly[0]);
+            (*maskInOut)[1].set(lx[1], ly[1]);
+            (*maskInOut)[2].set(lx[2], ly[2]);
+            (*maskInOut)[3].set(lx[3], ly[3]);
         }
     }
 
@@ -434,6 +449,11 @@ void Rasterizer2::rasterOnePixelAreaGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t
         my[i] = maskInOut[i].y();
     }
 
+    // Used for storing back the mask's coordinates
+    Pt::int32_t pCnt  = 0;
+    Pt::int32_t lx[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
+    Pt::int32_t ly[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
+
     // A helper macro to fill pixel
     #define XW_FILL_PIXEL(IMG, X, Y, A)                                                     \
         do {                                                                                \
@@ -447,7 +467,15 @@ void Rasterizer2::rasterOnePixelAreaGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t
                 skipDrawing = true;                                                         \
                 break;                                                                      \
             }                                                                               \
-            if(skipDrawing) break;                                                          \
+            if(skipDrawing || !(A)) break;                                                  \
+            /* Store back the mask's coordinates */                                         \
+            lx[2] = lx[3]; lx[3] = X;                                                       \
+            ly[2] = ly[3]; ly[3] = Y;                                                       \
+            if(pCnt < 2) {                                                                  \
+                lx[pCnt] = X;                                                               \
+                ly[pCnt] = Y;                                                               \
+                ++pCnt;                                                                     \
+            }                                                                               \
             /* Fill the pixel */                                                            \
             if(_isTexture || _isGradient) {                                                 \
                 const Pt::int32_t bw = _brushImage->width();                                \
@@ -461,12 +489,6 @@ void Rasterizer2::rasterOnePixelAreaGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t
                 _image->format().setPixel(pixel, color, _compositionMode, A);               \
             }                                                                               \
         } while(false)
-
-    // Check if both coordinates are on the same location
-    if(x1 == x2 && y1 == y2) {
-        XW_FILL_PIXEL(_image, x1, y1, 255);
-        return;
-    }
 
     // Convert the coordinates to fixed-points
     Pt::int32_t fx1 = FIXED_POINT_FROM_INT(x1);
@@ -524,11 +546,6 @@ void Rasterizer2::rasterOnePixelAreaGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t
             if(!skipPixel1) XW_FILL_PIXEL(_image, x1, y, a1);
             if(!skipPixel2) XW_FILL_PIXEL(_image, x2, y, a2);
         }
-        // Store back the start and end coordinates to the mask as needed
-        maskInOut[swapDir ? 2 : 0].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl        )                           ), from);
-        maskInOut[swapDir ? 3 : 1].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl        ) + FIXED_POINT_CONSTANT_ONE), from);
-        maskInOut[swapDir ? 0 : 2].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli - grad)                           ), to  );
-        maskInOut[swapDir ? 1 : 3].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli - grad) + FIXED_POINT_CONSTANT_ONE), to  );
     }
     else {
         // Draw the pixels
@@ -560,11 +577,20 @@ void Rasterizer2::rasterOnePixelAreaGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t
             }
             if(!skipPixel) XW_FILL_PIXEL(_image, x, y2, a2);
         }
-        // Store back the start and end coordinates to the mask as needed
-        maskInOut[swapDir ? 2 : 0].set(from, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl        )                           ));
-        maskInOut[swapDir ? 3 : 1].set(from, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl        ) + FIXED_POINT_CONSTANT_ONE));
-        maskInOut[swapDir ? 0 : 2].set(to,   FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli - grad)                           ));
-        maskInOut[swapDir ? 1 : 3].set(to,   FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli - grad) + FIXED_POINT_CONSTANT_ONE));
+    }
+
+    // Store back the start and end coordinates to the mask
+    if(swapDir) {
+        maskInOut[2].set(lx[0], ly[0]);
+        maskInOut[3].set(lx[1], ly[1]);
+        maskInOut[0].set(lx[2], ly[2]);
+        maskInOut[1].set(lx[3], ly[3]);
+    }
+    else {
+        maskInOut[0].set(lx[0], ly[0]);
+        maskInOut[1].set(lx[1], ly[1]);
+        maskInOut[2].set(lx[2], ly[2]);
+        maskInOut[3].set(lx[3], ly[3]);
     }
 
     // Undefine the helper macro
