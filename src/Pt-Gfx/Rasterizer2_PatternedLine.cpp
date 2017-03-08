@@ -214,12 +214,6 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentXWAA(Pt::int32_t x1, Pt::in
         }
     }
 
-    // Convert the coordinates to fixed-points
-    Pt::int32_t fx1 = FIXED_POINT_FROM_INT(x1);
-    Pt::int32_t fy1 = FIXED_POINT_FROM_INT(y1);
-    Pt::int32_t fx2 = FIXED_POINT_FROM_INT(x2);
-    Pt::int32_t fy2 = FIXED_POINT_FROM_INT(y2);
-
     // A helper macro to set pixel
     #define XW_SET_PIXEL(IMG, COL, X, Y, A, PA)                                   \
         do {                                                                      \
@@ -242,8 +236,11 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentXWAA(Pt::int32_t x1, Pt::in
             IMG->format().setPixel(PIX, COL, _compositionMode, calpha);           \
         } while(false)
 
-    // A flag that indicates if the line direction is swapped
-    bool swapDir = false;
+    // Convert the coordinates to fixed-points
+    Pt::int32_t fx1 = FIXED_POINT_FROM_INT(x1);
+    Pt::int32_t fy1 = FIXED_POINT_FROM_INT(y1);
+    Pt::int32_t fx2 = FIXED_POINT_FROM_INT(x2);
+    Pt::int32_t fy2 = FIXED_POINT_FROM_INT(y2);
 
     // Swap the values as needed
     const Pt::int32_t deltaX = (fx2 >= fx1) ? (fx2 - fx1) : (fx1 - fx2);
@@ -255,11 +252,11 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentXWAA(Pt::int32_t x1, Pt::in
         std::swap(fx2, fy2);
     }
 
-    if(fx1 > fx2) {
+    const bool swapDir = (fx1 > fx2);
+
+    if(swapDir) {
         std::swap(fx1, fx2);
         std::swap(fy1, fy2);
-
-        swapDir = true;
     }
 
     // Handle the gradient, starting point, and ending point
@@ -305,10 +302,10 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentXWAA(Pt::int32_t x1, Pt::in
         }
         // Store back the start and end coordinates to the mask as needed
         if(maskInOut) {
-            (*maskInOut)[0].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl )                           ), from);
-            (*maskInOut)[1].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl ) + FIXED_POINT_CONSTANT_ONE), from);
-            (*maskInOut)[2].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           ), to  );
-            (*maskInOut)[3].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE), to  );
+            (*maskInOut)[swapDir ? 2 : 0].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl )                           ), from);
+            (*maskInOut)[swapDir ? 3 : 1].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl ) + FIXED_POINT_CONSTANT_ONE), from);
+            (*maskInOut)[swapDir ? 0 : 2].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           ), to  );
+            (*maskInOut)[swapDir ? 1 : 3].set(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE), to  );
         }
     }
     else {
@@ -333,10 +330,10 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentXWAA(Pt::int32_t x1, Pt::in
         }
         // Store back the start and end coordinates to the mask as needed
         if(maskInOut) {
-            (*maskInOut)[0].set(from, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl )                           ));
-            (*maskInOut)[1].set(from, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl ) + FIXED_POINT_CONSTANT_ONE));
-            (*maskInOut)[2].set(to,   FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           ));
-            (*maskInOut)[3].set(to,   FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE));
+            (*maskInOut)[swapDir ? 2 : 0].set(from, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl )                           ));
+            (*maskInOut)[swapDir ? 3 : 1].set(from, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxl ) + FIXED_POINT_CONSTANT_ONE));
+            (*maskInOut)[swapDir ? 0 : 2].set(to,   FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           ));
+            (*maskInOut)[swapDir ? 1 : 3].set(to,   FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE));
         }
     }
 
