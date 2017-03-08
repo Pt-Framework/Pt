@@ -4,19 +4,19 @@ static void testDrawSolidThickLine(const char* title, Image& image, Painter& pai
 
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
 
-    Pen penText     (Color::fromRgb8(255,   0, 0, 175));
+    Pen penText(Color::fromRgb8(255,   0, 0, 175));
 
-    Pen penBCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 10, Pen::Solid, Pen::ButtCap,          Pen::BevelJoin);
-    Pen penSCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 10, Pen::Solid, Pen::SquareCap,        Pen::BevelJoin);
-    Pen penRCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 10, Pen::Solid, Pen::RoundCap,         Pen::BevelJoin);
-    Pen penICapBJoin(Color::fromRgb8(  0, 255, 0, 175), 10, Pen::Solid, Pen::TriangularInCap,  Pen::BevelJoin);
+    Pen penBCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::ButtCap,          Pen::BevelJoin);
+    Pen penSCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::SquareCap,        Pen::BevelJoin);
+    Pen penRCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::RoundCap,         Pen::BevelJoin);
+    Pen penICapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::TriangularInCap,  Pen::BevelJoin);
 
-    Pen penOCapNJoin(Color::fromRgb8(  0, 255, 0, 175), 10, Pen::Solid, Pen::TriangularOutCap, Pen::NoJoin   );
-    Pen penOCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 10, Pen::Solid, Pen::TriangularOutCap, Pen::BevelJoin);
-    Pen penOCapMJoin(Color::fromRgb8(  0, 255, 0, 175), 10, Pen::Solid, Pen::TriangularOutCap, Pen::MiterJoin);
-    Pen penOCapRJoin(Color::fromRgb8(  0, 255, 0, 175), 10, Pen::Solid, Pen::TriangularOutCap, Pen::RoundJoin);
+    Pen penOCapNJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::TriangularOutCap, Pen::NoJoin   );
+    Pen penOCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::TriangularOutCap, Pen::BevelJoin);
+    Pen penOCapMJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::TriangularOutCap, Pen::MiterJoin);
+    Pen penOCapRJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::TriangularOutCap, Pen::RoundJoin);
 
-
+    // Test anti-aliasing
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
     painter.setPen(penBCapBJoin);
     painter.drawLine( PointF( 20,  20), PointF(200, 120) );
@@ -35,30 +35,36 @@ static void testDrawSolidThickLine(const char* title, Image& image, Painter& pai
     painter.drawLine( PointF(420, 240), PointF(600, 140) );
     painter.setPen(penText); painter.drawText( PointF(420, 135), "FSAA2x2" );
 
-
+    // Test caps
+    painter.setFont( Pt::Gfx::Font(FONT_SPEC_S) );
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
 
     painter.setPen(penBCapBJoin);
     painter.drawLine( PointF( 20, 300 - 30), PointF(100, 350 - 30) );
     painter.drawLine( PointF( 20, 430 - 30), PointF(100, 370 - 30) );
+    painter.setPen(penText); painter.drawText( PointF(20, 365 - 30), "Butt" );
 
     painter.setPen(penSCapBJoin);
     painter.drawLine( PointF(120, 300 - 30), PointF(200, 350 - 30) );
     painter.drawLine( PointF(120, 430 - 30), PointF(200, 370 - 30) );
+    painter.setPen(penText); painter.drawText( PointF(120, 365 - 30), "Square" );
 
     painter.setPen(penRCapBJoin);
     painter.drawLine( PointF(220, 300 - 30), PointF(300, 350 - 30) );
     painter.drawLine( PointF(220, 430 - 30), PointF(300, 370 - 30) );
+    painter.setPen(penText); painter.drawText( PointF(220, 365 - 30), "Round" );
 
     painter.setPen(penOCapBJoin);
     painter.drawLine( PointF(320, 300 - 30), PointF(400, 350 - 30) );
     painter.drawLine( PointF(320, 430 - 30), PointF(400, 370 - 30) );
+    painter.setPen(penText); painter.drawText( PointF(320, 365 - 30), "Tri-Out" );
 
     painter.setPen(penICapBJoin);
     painter.drawLine( PointF(420, 300 - 30), PointF(500, 350 - 30) );
     painter.drawLine( PointF(420, 430 - 30), PointF(500, 370 - 30) );
+    painter.setPen(penText); painter.drawText( PointF(420, 365 - 30), "Tri-In" );
 
-
+    // Test joins
     painter.setPen(penOCapBJoin);
     const PointF poly1a[] = { // CCW
         PointF(650,  20),
@@ -75,6 +81,8 @@ static void testDrawSolidThickLine(const char* title, Image& image, Painter& pai
     };
     if(ip2) ip2->drawPolyline( poly1b, sizeof(poly1b) / sizeof(poly1b[0]), true );
     else painter.drawPolyline( poly1b, sizeof(poly1b) / sizeof(poly1b[0]) );
+
+    painter.setPen(penText); painter.drawText( PointF(650, 100), "Bevel" );
 
     painter.setPen(penOCapMJoin);
     const PointF poly2a[] = { // CCW
@@ -93,6 +101,8 @@ static void testDrawSolidThickLine(const char* title, Image& image, Painter& pai
     if(ip2) ip2->drawPolyline( poly2b, sizeof(poly2b) / sizeof(poly2b[0]), true );
     else painter.drawPolyline( poly2b, sizeof(poly2b) / sizeof(poly2b[0]) );
 
+    painter.setPen(penText); painter.drawText( PointF(650, 100 + 200), "Miter" );
+
     painter.setPen(penOCapRJoin);
     const PointF poly3a[] = { // CCW
         PointF(650,  20 + 400),
@@ -110,6 +120,7 @@ static void testDrawSolidThickLine(const char* title, Image& image, Painter& pai
     if(ip2) ip2->drawPolyline( poly3b, sizeof(poly3b) / sizeof(poly3b[0]), true );
     else painter.drawPolyline( poly3b, sizeof(poly3b) / sizeof(poly3b[0]) );
 
+    painter.setPen(penText); painter.drawText( PointF(650, 100 + 400), "Round" );
 
     painter.setPen(penOCapNJoin);
     const PointF poly4a[] = { // CCW
@@ -128,6 +139,10 @@ static void testDrawSolidThickLine(const char* title, Image& image, Painter& pai
     if(ip2) ip2->drawPolyline( poly4b, sizeof(poly4b) / sizeof(poly4b[0]), true );
     else painter.drawPolyline( poly4b, sizeof(poly4b) / sizeof(poly4b[0]) );
 
+    painter.setPen(penText); painter.drawText( PointF(650 - 600, 100 + 400), "None" );
+
+    // Done
+    painter.setFont( Pt::Gfx::Font(FONT_SPEC_N) );
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
 }

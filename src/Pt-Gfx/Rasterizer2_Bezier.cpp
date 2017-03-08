@@ -38,7 +38,7 @@ namespace Gfx {
 // ===== Public Member Functions ========================================================
 // ======================================================================================
 
-void Rasterizer2::strokeOnePixelPolybezier(const Point* points, size_t pointCount)
+void Rasterizer2::strokeOnePixelQuadraticPolybezier(const Point* points, size_t pointCount)
 {
     // Mask
     DrawLineMask mask_zero = Rasterizer2::NullLineMask;
@@ -63,7 +63,7 @@ void Rasterizer2::strokeOnePixelPolybezier(const Point* points, size_t pointCoun
             mask_nnp1[3] = mask_zero[3];
         }
         // Draw one curve
-        rasterOnePixelBezierCurve(
+        rasterOnePixelQuadraticBezierCurve(
             points[i    ].x(), points[i    ].y(),
             points[i + 1].x(), points[i + 1].y(),
             points[i + 2].x(), points[i + 2].y(),
@@ -81,8 +81,8 @@ void Rasterizer2::strokeOnePixelPolybezier(const Point* points, size_t pointCoun
 
 // Based on: The Beauty of Bresenham's Algorithm
 //           http://members.chello.at/easyfilter/bresenham.html
-//           Original code by Alois Zingl, 2016.
-void Rasterizer2::rasterOnePixelBezierCurve(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t x3, Pt::int32_t y3, const Color& color, Pt::int32_t* fpiCtrInOut, DrawLineMask* maskInOut)
+//           Original code by Alois Zingl, 2016
+void Rasterizer2::rasterOnePixelQuadraticBezierCurve(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t x3, Pt::int32_t y3, const Color& color, Pt::int32_t* fpiCtrInOut, DrawLineMask* maskInOut)
 {
     // Get the mask's coordinates as needed
     Pt::int32_t mx[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
@@ -306,7 +306,8 @@ void Rasterizer2::rasterOnePixelBezierCurve(Pt::int32_t x1, Pt::int32_t y1, Pt::
                 patAlpha = _patternBuffer[FIXED_POINT_TO_INT(*fpiCtrInOut)];
                 *fpiCtrInOut += fpiCtrInc;
                 if(*fpiCtrInOut > _fpatternMaxCtr) *fpiCtrInOut = 0;
-            }            // Plot curve
+            }
+            // Plot curve
             XW_SET_PIXEL(_image, color, x1, y1, 0, patAlpha);
             // Check if we have just drawn the last pixel
             if(x1 == x3 && y1 == y3) return;

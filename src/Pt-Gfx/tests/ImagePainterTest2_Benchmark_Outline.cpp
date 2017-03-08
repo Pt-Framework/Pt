@@ -231,7 +231,7 @@ static size_t benchDrawBezier(int loopCount, Pen::Style style, CompositionMode c
             PointF(200 + 100,  50)
         };
         ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
-        ip2->drawPolybezier( bezier1, sizeof(bezier1) / sizeof(bezier1[0]), false );
+        ip2->drawQuadraticPolybezier( bezier1, sizeof(bezier1) / sizeof(bezier1[0]), false );
 
         const PointF bezier2[] = { // CCW
             // Bottom left
@@ -259,7 +259,7 @@ static size_t benchDrawBezier(int loopCount, Pen::Style style, CompositionMode c
             // Center left
             PointF(400 - 350,  70 + 300)
         };
-        ip2->drawPolybezier( bezier2, sizeof(bezier2) / sizeof(bezier2[0]), true );
+        ip2->drawQuadraticPolybezier( bezier2, sizeof(bezier2) / sizeof(bezier2[0]), true );
 
         sum += clock.stop().toUSecs();
 

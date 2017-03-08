@@ -218,7 +218,7 @@ void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
     _rasterizer->fillPolygon(points.data(), pointCount);
 }
 
-void ImagePainter2::drawPolybezier(const PointF* ps, const size_t pointCount, bool autoClose)
+void ImagePainter2::drawQuadraticPolybezier(const PointF* ps, const size_t pointCount, bool autoClose)
 {
     // Check the number of points
     if(  autoClose && (pointCount < 4 ||  (pointCount & 1)) ) return; // The number of points must be >= 4 and even
@@ -233,7 +233,7 @@ void ImagePainter2::drawPolybezier(const PointF* ps, const size_t pointCount, bo
 
     // Rasterize the bezier
     if(_rasterizer->pen().size() == 1) {
-        _rasterizer->strokeOnePixelPolybezier(points.data(), points.size());
+        _rasterizer->strokeOnePixelQuadraticPolybezier(points.data(), points.size());
         return;
     }
 
@@ -320,56 +320,88 @@ void ImagePainter2::generateLineSegment(std::vector<PointF>& dst, float x1, floa
     // --- Begin point ---
     if(openingCap) {
         switch(_rasterizer->pen().capStyle()) {
-            case Pen::SquareCap        : generateLineSquareCap       (dst, x1, y1, dx, dy, nx, ny); break;
-            case Pen::RoundCap         : generateLineRoundCap        (dst, x1, y1, dx, dy, nx, ny); break;
-            case Pen::TriangularOutCap : generateLineTriangularOutCap(dst, x1, y1, dx, dy, nx, ny); break;
-            case Pen::TriangularInCap  : generateLineTriangularInCap (dst, x1, y1, dx, dy, nx, ny); break;
+            case Pen::SquareCap        : generateLineSquareCap       (dst, x1, y1, wh, dx, dy, nx, ny); break;
+            case Pen::RoundCap         : generateLineRoundCap        (dst, x1, y1, wh, dx, dy, nx, ny); break;
+            case Pen::TriangularOutCap : generateLineTriangularOutCap(dst, x1, y1, wh, dx, dy, nx, ny); break;
+            case Pen::TriangularInCap  : generateLineTriangularInCap (dst, x1, y1, wh, dx, dy, nx, ny); break;
             default                    : openingCap = false;
         }
     }
-    if(!openingCap) generateLineButtCap(dst, x1, y1, dx, dy, nx, ny);
+    if(!openingCap) generateLineButtCap(dst, x1, y1, wh, dx, dy, nx, ny);
     // --- End point ---
     if(closingCap) {
         switch(_rasterizer->pen().capStyle()) {
-            case Pen::SquareCap        : generateLineSquareCap       (dst, x2, y2, -dx, -dy, -nx, -ny); break;
-            case Pen::RoundCap         : generateLineRoundCap        (dst, x2, y2, -dx, -dy, -nx, -ny); break;
-            case Pen::TriangularOutCap : generateLineTriangularOutCap(dst, x2, y2, -dx, -dy, -nx, -ny); break;
-            case Pen::TriangularInCap  : generateLineTriangularInCap (dst, x2, y2, -dx, -dy, -nx, -ny); break;
+            case Pen::SquareCap        : generateLineSquareCap       (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
+            case Pen::RoundCap         : generateLineRoundCap        (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
+            case Pen::TriangularOutCap : generateLineTriangularOutCap(dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
+            case Pen::TriangularInCap  : generateLineTriangularInCap (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
             default                    : closingCap = false;
         }
     }
-    if(!closingCap) generateLineButtCap(dst, x2, y2, -dx, -dy, -nx, -ny);
+    if(!closingCap) generateLineButtCap(dst, x2, y2, wh, -dx, -dy, -nx, -ny);
 }
 
-
-void ImagePainter2::generateLineButtCap(std::vector<PointF>& dst, float x, float y, float/*dx*/, float/*dy*/, float nx, float ny)
+void ImagePainter2::generateLineButtCap(std::vector<PointF>& dst, float x, float y, float wh, float px, float py, float nx, float ny)
 {
+    (void) wh;
+    (void) px;
+    (void) py;
+
     dst.push_back( PointF(x + nx, y + ny) );
     dst.push_back( PointF(x - nx, y - ny) );
 }
 
-
-void ImagePainter2::generateLineSquareCap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
+void ImagePainter2::generateLineSquareCap(std::vector<PointF>& dst, float x, float y, float wh, float px, float py, float nx, float ny)
 {
-    dst.push_back( PointF(x - dx + nx, y - dy + ny) );
-    dst.push_back( PointF(x - dx - nx, y - dy - ny) );
+    (void) wh;
+
+    dst.push_back( PointF(x - px + nx, y - py + ny) );
+    dst.push_back( PointF(x - px - nx, y - py - ny) );
 }
 
-void ImagePainter2::generateLineRoundCap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
+// Based on: Bitmap/Bézier curves/Quadratic
+//           https://rosettacode.org/wiki/Bitmap/B%C3%A9zier_curves/Quadratic#C
+//           Last modified on February 17, 2017
+void ImagePainter2::generateLineRoundCap(std::vector<PointF>& dst, float x, float y, float wh, float px, float py, float nx, float ny)
 {
+    // Determine the coordinates
+    const float x1 = round(x + nx);
+    const float y1 = round(y + ny);
+    const float x2 = round(x - px * 2.0f);
+    const float y2 = round(y - py * 2.0f);
+    const float x3 = round(x - nx);
+    const float y3 = round(y - ny);
+
+    // Generate the points
+    Pt::int32_t nSeg = round(wh) - 1;
+    if(nSeg < 3) nSeg = 3;
+
+    for(Pt::int32_t i = 0; i <= nSeg; ++i) {
+        const float t = (float) i / (float) nSeg;
+        const float a = (1.0f - t) * (1.0f - t);
+        const float b =  2.0f * t  * (1.0f - t);
+        const float c = t * t;
+        const float x = a * x1 + b * x2 + c * x3;
+        const float y = a * y1 + b * y2 + c * y3;
+        dst.push_back( PointF(x, y) );
+    }
 }
 
-void ImagePainter2::generateLineTriangularOutCap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
+void ImagePainter2::generateLineTriangularOutCap(std::vector<PointF>& dst, float x, float y, float wh, float px, float py, float nx, float ny)
 {
+    (void) wh;
+
     dst.push_back( PointF(x + nx, y + ny) );
-    dst.push_back( PointF(x - dx, y - dy) );
+    dst.push_back( PointF(x - px, y - py) );
     dst.push_back( PointF(x - nx, y - ny) );
 }
 
-void ImagePainter2::generateLineTriangularInCap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
+void ImagePainter2::generateLineTriangularInCap(std::vector<PointF>& dst, float x, float y, float wh, float px, float py, float nx, float ny)
 {
+    (void) wh;
+
     dst.push_back( PointF(x + nx, y + ny) );
-    dst.push_back( PointF(x + dx, y + dy) );
+    dst.push_back( PointF(x + px, y + py) );
     dst.push_back( PointF(x - nx, y - ny) );
 }
 

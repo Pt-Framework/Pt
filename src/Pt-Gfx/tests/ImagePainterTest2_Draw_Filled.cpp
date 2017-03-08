@@ -184,7 +184,7 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
     painter.fillRect( RectF( PointF(0, 80 + 135), SizeF(image.width(), 30) ) );
     painter.fillRect( RectF( PointF(0, 80 + 300), SizeF(image.width(), 60) ) );
 
-
+    // First row
     painter.setBrush( brush1 );
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
@@ -215,7 +215,7 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
         ip2->drawText( PointF(30 + 850, 40), "XWAA" );
     }
 
-
+    // Second row
     painter.setBrush( brush2 );
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
@@ -244,7 +244,7 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
         ip2->drawText( PointF(30 + 850, 40 + 150), "XWAA" );
     }
 
-
+    // Third row
     painter.setBrush( brush2 );
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
@@ -273,7 +273,7 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
         ip2->drawText( PointF(30 + 850, 40 + 300), "XWAA" );
     }
 
-
+    // Fourth row
     painter.setBrush( brush1 );
 
     if(ip2) {
@@ -325,6 +325,6 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
         ip2->drawText( PointF(30 + 850, 40 + 440), "XWAA" );
     }
 
-
+    // Done
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }

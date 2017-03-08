@@ -95,7 +95,7 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         // autoClose == false : the number of points must be >= 3 and odd
         // autoClose == true  : the number of points must be >= 4 and even
-        virtual void drawPolybezier(const PointF* points, const size_t pointCount, bool autoClose);
+        virtual void drawQuadraticPolybezier(const PointF* points, const size_t pointCount, bool autoClose);
 
         virtual void drawEllipse(const PointF& topLeft, const SizeF& size);
 
@@ -129,11 +129,11 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         void generateLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, bool openingCap, bool closingCap);
 
-        void generateLineButtCap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny);
-        void generateLineSquareCap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny);
-        void generateLineRoundCap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny);
-        void generateLineTriangularOutCap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny);
-        void generateLineTriangularInCap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny);
+        void generateLineButtCap(std::vector<PointF>& dst, float x, float y, float wh, float px, float py, float nx, float ny);
+        void generateLineSquareCap(std::vector<PointF>& dst, float x, float y, float wh, float px, float py, float nx, float ny);
+        void generateLineRoundCap(std::vector<PointF>& dst, float x, float y, float wh, float px, float py, float nx, float ny);
+        void generateLineTriangularOutCap(std::vector<PointF>& dst, float x, float wh, float y, float px, float py, float nx, float ny);
+        void generateLineTriangularInCap(std::vector<PointF>& dst, float x, float wh, float y, float px, float py, float nx, float ny);
 
         void joinLineSegment(std::vector<PointF>& dst, const std::vector<PointF>& src);
 

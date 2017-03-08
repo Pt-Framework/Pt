@@ -56,7 +56,7 @@ static void testDrawSolidLine(const char* title, Image& image, Painter& painter)
         };
         ip2->setAntiAliasingMode(AntiAliasingMode::None);
         ip2->setPen( Pen( Color::fromRgb8(255, 127, 255, 175), 1, Pen::Solid ) );
-        ip2->drawPolybezier( bezier1a, sizeof(bezier1a) / sizeof(bezier1a[0]), false );
+        ip2->drawQuadraticPolybezier( bezier1a, sizeof(bezier1a) / sizeof(bezier1a[0]), false );
 
         const PointF bezier1b[] = { // CCW
             PointF(300 + 100, 100),
@@ -65,7 +65,7 @@ static void testDrawSolidLine(const char* title, Image& image, Painter& painter)
         };
         ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
         ip2->setPen( Pen( Color::fromRgb8(255, 127, 255, 175), 1, Pen::Solid ) );
-        ip2->drawPolybezier( bezier1b, sizeof(bezier1b) / sizeof(bezier1b[0]), false );
+        ip2->drawQuadraticPolybezier( bezier1b, sizeof(bezier1b) / sizeof(bezier1b[0]), false );
     }
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
@@ -165,7 +165,7 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
         };
         ip2->setAntiAliasingMode(AntiAliasingMode::None);
         ip2->setPen( Pen( Color::fromRgb8(255, 127, 255, 175), 1, Pen::Dash ) );
-        ip2->drawPolybezier( bezier1a, sizeof(bezier1a) / sizeof(bezier1a[0]), true );
+        ip2->drawQuadraticPolybezier( bezier1a, sizeof(bezier1a) / sizeof(bezier1a[0]), true );
 
         const PointF bezier1b[] = { // CCW
             // Bottom left
@@ -195,7 +195,7 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
         };
         ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
         ip2->setPen( Pen( Color::fromRgb8(255, 127, 255, 175), 1, Pen::Dash ) );
-        ip2->drawPolybezier( bezier1b, sizeof(bezier1b) / sizeof(bezier1b[0]), true );
+        ip2->drawQuadraticPolybezier( bezier1b, sizeof(bezier1b) / sizeof(bezier1b[0]), true );
     }
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));

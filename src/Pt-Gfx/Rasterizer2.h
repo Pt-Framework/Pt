@@ -147,7 +147,7 @@ class Rasterizer2
         void strokeOnePixelLine(const Point& a, const Point& b, DrawLineMask* maskInOut);
         void strokeOnePixelRect(const Point& tl, const Point& br);
         void strokeOnePixelPolygon(const Point* points, size_t pointCount, bool autoClose);
-        void strokeOnePixelPolybezier(const Point* points, size_t pointCount);
+        void strokeOnePixelQuadraticPolybezier(const Point* points, size_t pointCount);
         void strokeOnePixelEllipseArc(const Point& topLeft, const Size& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
         void strokePolygonSeparate(const Point* points, size_t pointCount);
@@ -213,7 +213,7 @@ class Rasterizer2
         void rasterPolygonAreaFSAA2x2(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
         void rasterPolygonAreaXWAA(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
 
-        void rasterOnePixelBezierCurve(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t x3, Pt::int32_t y3, const Color& color, Pt::int32_t* fpiCtrInOut, DrawLineMask* maskInOut);
+        void rasterOnePixelQuadraticBezierCurve(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t x3, Pt::int32_t y3, const Color& color, Pt::int32_t* fpiCtrInOut, DrawLineMask* maskInOut);
 
         void rasterEllipseAreaNoAA(const Point& topLeft, const Size& size);
         void rasterArcAreaChord(FilledArcInfo& fai);

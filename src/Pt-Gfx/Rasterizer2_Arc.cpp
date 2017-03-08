@@ -323,8 +323,7 @@ void Rasterizer2::arcUtil_genScanlinesForChord(EAScanlines& scanlines, const Fil
             const float angle = Gfx::Math::convertCartesianToPolarCoordinate(
                 (std::max(xwLine.x1, xwLine.x2) - fai.ctrX), -(xwLine.minY - fai.ctrY) * fai.xyRat
             );
-            if(angle < 90 && lineMinY < xwLine.minY + 1) lineMinY = xwLine.minY + 1;
-
+            if((angle < 90 || angle > 180) && lineMinY < xwLine.minY + 1) lineMinY = xwLine.minY + 1;
         }
         else if(xwLine.faceR) {
             const float angle = Gfx::Math::convertCartesianToPolarCoordinate(
@@ -343,8 +342,7 @@ void Rasterizer2::arcUtil_genScanlinesForChord(EAScanlines& scanlines, const Fil
             const float angle = Gfx::Math::convertCartesianToPolarCoordinate(
                 (std::max(xwLine.x1, xwLine.x2) - fai.ctrX), -(xwLine.maxY - fai.ctrY) * fai.xyRat
             );
-            if(angle > 270 && lineMaxY > xwLine.maxY - 1) lineMaxY = xwLine.maxY - 1;
-
+            if((angle < 180 || angle > 270) && lineMaxY > xwLine.maxY - 1) lineMaxY = xwLine.maxY - 1;
         }
         else if(xwLine.faceR) {
             const float angle = Gfx::Math::convertCartesianToPolarCoordinate(

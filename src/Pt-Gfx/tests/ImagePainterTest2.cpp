@@ -92,8 +92,8 @@ using namespace Pt::Gfx;
 #define BENCHMARK_ROTATED_TEXT              0
 #define BENCHMARK_SOLID_LINE                0
 #define BENCHMARK_PATTERNED_LINE            0
-#define BENCHMARK_SOLID_THICK_LINE          0
-#define BENCHMARK_PATTERNED_THICK_LINE      0
+#define BENCHMARK_SOLID_THICK_LINE          1
+#define BENCHMARK_PATTERNED_THICK_LINE      1
 #define BENCHMARK_ELLIPSE                   0
 #define BENCHMARK_ARC                       0
 #define BENCHMARK_SOLID_BEZIER              0
@@ -118,6 +118,7 @@ using namespace Pt::Gfx;
 
 // Configurations and objects
 #define FONT_DIR    "../src/Pt-Gfx/fonts"
+#define FONT_SPEC_S "DejaVu Serif", 12, Pt::Gfx::Font::BoldItalic, 0
 #define FONT_SPEC_N "DejaVu Serif", 24, Pt::Gfx::Font::BoldItalic, 0
 #define FONT_SPEC_R "DejaVu Serif", 24, Pt::Gfx::Font::BoldItalic, -150
 
