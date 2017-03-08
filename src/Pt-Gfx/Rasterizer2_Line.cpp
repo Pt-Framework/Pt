@@ -415,7 +415,7 @@ void Rasterizer2::rasterOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_
 // Using algorithm from: Xiaolin Wu's Line Algorithm
 //                       https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
 //                       Last modified on January 19, 2017
-void Rasterizer2::rasterOnePixelAreaGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const PolygonScanlines& exclusionZone, DrawLineMask& maskInOut)
+void Rasterizer2::rasterOnePixelAreaGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t minX, Pt::int32_t minY, const PolygonScanlines& exclusionZone, DrawLineMask& maskInOut)
 {
     // Get the mask's coordinate
     Pt::int32_t mx[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
@@ -450,7 +450,7 @@ void Rasterizer2::rasterOnePixelAreaGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t
             }                                                                               \
             else {                                                                          \
                 Pixel pixel(IMG->view(), X, Y);                                             \
-                _image->format().setPixel(pixel, _brush.color(), _compositionMode, A);      \
+                _image->format().setPixel(pixel, color, _compositionMode, A);               \
             }                                                                               \
         } while(false)
 

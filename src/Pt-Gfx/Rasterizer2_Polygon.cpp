@@ -606,7 +606,7 @@ void Rasterizer2::rasterPolygonAreaXWAA(const Point* points, const size_t* point
         // From point N to point (N + 1), successively
         const size_t pc1 = pointCount[p] - 1;
         for(size_t i = 0; i < pc1; ++i) {
-            rasterOnePixelAreaGLineSegmentXWAA(curPointBase[i].x(), curPointBase[i].y(), curPointBase[i + 1].x(), curPointBase[i + 1].y(), minX, minY, scanlines, mask_nnp1);
+            rasterOnePixelAreaGLineSegmentXWAA(curPointBase[i].x(), curPointBase[i].y(), curPointBase[i + 1].x(), curPointBase[i + 1].y(), color, minX, minY, scanlines, mask_nnp1);
             if(!i) memcpy(&mask_zero, &mask_nnp1, sizeof(mask_zero));
         }
         // From the last point to the first point
@@ -614,7 +614,7 @@ void Rasterizer2::rasterPolygonAreaXWAA(const Point* points, const size_t* point
         mask_zero[3] = mask_zero[1];
         mask_zero[0] = mask_nnp1[2];
         mask_zero[1] = mask_nnp1[3];
-        rasterOnePixelAreaGLineSegmentXWAA(curPointBase[pc1].x(), curPointBase[pc1].y(), curPointBase[0].x(), curPointBase[0].y(), minX, minY, scanlines, mask_zero);
+        rasterOnePixelAreaGLineSegmentXWAA(curPointBase[pc1].x(), curPointBase[pc1].y(), curPointBase[0].x(), curPointBase[0].y(), color, minX, minY, scanlines, mask_zero);
         // Increment the base pointer
         curPointBase += pointCount[p];
     }
