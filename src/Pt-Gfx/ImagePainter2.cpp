@@ -309,19 +309,65 @@ void ImagePainter2::generateLineSegment(std::vector<PointF>& dst, float x1, floa
     const float b  = x1 - x2;
   //const float c  = -(x1 * y2 - x2 * y1);
     const float il = 1.0f / Gfx::Math::fastSqrt(a * a + b * b);
-    const float wa = a * il * _rasterizer->pen().size() * 0.5f;
-    const float wb = b * il * _rasterizer->pen().size() * 0.5f;
+    const float w  = _rasterizer->pen().size();
+    const float wa = a * il * w * 0.5f;
+    const float wb = b * il * w * 0.5f;
 
-    // Determine the direction that the line is facing to
+    // Bail out if the line is not facing top
     const bool faceT = b < 0;
-    const bool faceR = a > 0;
     if(!faceT) return;
 
     // Generate points (CCW)
-    dst.push_back( PointF(x1 + wa, y1 + wb) );
-    dst.push_back( PointF(x1 - wa, y1 - wb) );
-    dst.push_back( PointF(x2 - wa, y2 - wb) );
-    dst.push_back( PointF(x2 + wa, y2 + wb) );
+    // --- Begin point ---
+    if(openingCap) {
+        switch(_rasterizer->pen().capStyle()) {
+            case Pen::ButtCap          : generateLineButtCap         (dst, x1, y1, w, wa, wb); break;
+            case Pen::SquareCap        : generateLineSquareCap       (dst, x1, y1, w, wa, wb); break;
+            case Pen::RoundCap         : generateLineRoundCap        (dst, x1, y1, w, wa, wb); break;
+            case Pen::TriangularOutCap : generateLineTriangularOutCap(dst, x1, y1, w, wa, wb); break;
+            case Pen::TriangularInCap  : generateLineTriangularInCap (dst, x1, y1, w, wa, wb); break;
+            default                    : openingCap = false;
+        }
+    }
+    if(!openingCap) {
+        dst.push_back( PointF(x1 + wa, y1 + wb) );
+        dst.push_back( PointF(x1 - wa, y1 - wb) );
+    }
+    // --- End point ---
+    if(closingCap) {
+        switch(_rasterizer->pen().capStyle()) {
+            case Pen::ButtCap          : generateLineButtCap         (dst, x1, y1, w, -wa, -wb); break;
+            case Pen::SquareCap        : generateLineSquareCap       (dst, x1, y1, w, -wa, -wb); break;
+            case Pen::RoundCap         : generateLineRoundCap        (dst, x1, y1, w, -wa, -wb); break;
+            case Pen::TriangularOutCap : generateLineTriangularOutCap(dst, x1, y1, w, -wa, -wb); break;
+            case Pen::TriangularInCap  : generateLineTriangularInCap (dst, x1, y1, w, -wa, -wb); break;
+            default                    : closingCap = false;
+        }
+    }
+    if(!closingCap) {
+        dst.push_back( PointF(x2 - wa, y2 - wb) );
+        dst.push_back( PointF(x2 + wa, y2 + wb) );
+    }
+}
+
+void ImagePainter2::generateLineButtCap(std::vector<PointF>& dst, float x, float y, float w, float wa, float wb)
+{
+}
+
+void ImagePainter2::generateLineSquareCap(std::vector<PointF>& dst, float x, float y, float w, float wa, float wb)
+{
+}
+
+void ImagePainter2::generateLineRoundCap(std::vector<PointF>& dst, float x, float y, float w, float wa, float wb)
+{
+}
+
+void ImagePainter2::generateLineTriangularOutCap(std::vector<PointF>& dst, float x, float w, float y, float wa, float wb)
+{
+}
+
+void ImagePainter2::generateLineTriangularInCap(std::vector<PointF>& dst, float x, float y, float w, float wa, float wb)
+{
 }
 
 void ImagePainter2::joinLineSegment(std::vector<PointF>& dst, const std::vector<PointF>& src)
