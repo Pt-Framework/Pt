@@ -124,9 +124,33 @@ class PT_GFX_API ImagePainter2 : public Painter
         static FontMetrics fontMetrics(const Font& font, const Pt::String& text);
 
     private:
+        inline void convertPointTrunc(std::vector<Point>& dst, const PointF* src, const size_t pointCount);
+        inline void convertPointRound(std::vector<Point>& dst, const PointF* src, const size_t pointCount);
+
+        void generateLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, bool openingCap, bool closingCap);
+        void joinLineSegment(std::vector<PointF>& dst, const std::vector<PointF>& src);
+
+    private:
         RectF        _clip;
         Rasterizer2* _rasterizer;
 };
+
+
+// ======================================================================================
+// ===== Inlined Private Member Functions ===============================================
+// ======================================================================================
+
+void ImagePainter2::convertPointTrunc(std::vector<Point>& dst, const PointF* src, const size_t pointCount)
+{
+    for(size_t i = 0; i < pointCount; ++i)
+        dst[i].set( (Pt::int32_t) src[i].x(), (Pt::int32_t) src[i].y() );
+}
+
+void ImagePainter2::convertPointRound(std::vector<Point>& dst, const PointF* src, const size_t pointCount)
+{
+    for(size_t i = 0; i < pointCount; ++i)
+        dst[i].set( (Pt::int32_t) round(src[i].x()), (Pt::int32_t) round(src[i].y()) );
+}
 
 
 } // namespace

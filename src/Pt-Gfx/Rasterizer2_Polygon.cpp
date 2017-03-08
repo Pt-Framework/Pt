@@ -41,6 +41,9 @@ namespace Gfx {
 
 void Rasterizer2::strokeOnePixelPolygon(const Point* points, size_t pointCount, bool autoClose)
 {
+    // Check if there is no actual point
+    if(!pointCount) return;
+
     // Separate the polygons, clip their coordinates, and raster them
     size_t startIndex = 0;
 
@@ -60,8 +63,56 @@ void Rasterizer2::strokeOnePixelPolygon(const Point* points, size_t pointCount, 
     }
 }
 
+void Rasterizer2::strokePolygonSeparate(const Point* points, size_t pointCount)
+{
+    // Check if there is no actual point
+    if(!pointCount) return;
+
+    // Disable texture/gradient
+    const bool isTexture  = _isTexture;
+    const bool isGradient = _isGradient;
+
+    _isTexture  = false;
+    _isGradient = false;
+
+    // Separate the polygons, clip their coordinates, and raster them
+    size_t startIndex = 0;
+
+    for(size_t i = 0; i <= pointCount; ++i) {
+        // Search for the end and/or separator points
+        if( i == pointCount || (points[i].x() > MAXIMUM_COORD && points[i].y() > MAXIMUM_COORD) ) {
+            // Calculate the number of points for this polygon
+            const size_t curPC = i - startIndex;
+            // Clip the coordinates
+            std::vector<Point> clipped;
+            genClippedPolygonPoints(clipped, points + startIndex, curPC);
+            // Increment the start index
+            startIndex += curPC + 1;
+            // Calculate the minimum and maximum coordinate values
+            Pt::int32_t minX, minY, maxX, maxY;
+            getPolygonRectMinMax(clipped.data(), clipped.size(), minX, minY, maxX, maxY);
+            // Get the number of points for drawing this polygon
+            const size_t numPoint[1] = { clipped.size() };
+            // Draw the polygon
+            if(_aaMode == AntiAliasingMode::None)
+                rasterPolygonAreaNoAA(clipped.data(), numPoint, 1, clipped.size(), _pen.color(), minX, minY, maxX, maxY);
+            else if(_aaMode == AntiAliasingMode::Standard)
+                rasterPolygonAreaXWAA(clipped.data(), numPoint, 1, clipped.size(), _pen.color(), minX, minY, maxX, maxY);
+            else // _aaMode == AntiAliasingMode::LowMemory
+                rasterPolygonAreaFSAA2x2(clipped.data(), numPoint, 1, clipped.size(), _pen.color(), minX, minY, maxX, maxY);
+        }
+    }
+
+    // Restore texture/gradient
+    _isTexture  = isTexture;
+    _isGradient = isGradient;
+}
+
 void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
 {
+    // Check if there is no actual point
+    if(!pointCount) return;
+
     // Minimum and maximum coordinate values for all the polygons
     Pt::int32_t minX =  MAXIMUM_COORD;
     Pt::int32_t minY =  MAXIMUM_COORD;
@@ -124,47 +175,6 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
     }
 }
 
-void Rasterizer2::fillSolidPolygonSeparate(const Point* points, size_t pointCount)
-{
-    // Disable texture/gradient
-    const bool isTexture  = _isTexture;
-    const bool isGradient = _isGradient;
-
-    _isTexture  = false;
-    _isGradient = false;
-
-    // Separate the polygons, clip their coordinates, and raster them
-    size_t startIndex = 0;
-
-    for(size_t i = 0; i <= pointCount; ++i) {
-        // Search for the end and/or separator points
-        if( i == pointCount || (points[i].x() > MAXIMUM_COORD && points[i].y() > MAXIMUM_COORD) ) {
-            // Calculate the number of points for this polygon
-            const size_t curPC = i - startIndex;
-            // Clip the coordinates
-            std::vector<Point> clipped;
-            genClippedPolygonPoints(clipped, points + startIndex, curPC);
-            // Increment the start index
-            startIndex += curPC + 1;
-            // Calculate the minimum and maximum coordinate values
-            Pt::int32_t minX, minY, maxX, maxY;
-            getPolygonRectMinMax(clipped.data(), clipped.size(), minX, minY, maxX, maxY);
-            // Get the number of points for drawing this polygon
-            const size_t numPoint[1] = { clipped.size() };
-            // Draw the polygon
-            if(_aaMode == AntiAliasingMode::None)
-                rasterPolygonAreaNoAA(clipped.data(), numPoint, 1, clipped.size(), _brush.color(), minX, minY, maxX, maxY);
-            else if(_aaMode == AntiAliasingMode::Standard)
-                rasterPolygonAreaXWAA(clipped.data(), numPoint, 1, clipped.size(), _brush.color(), minX, minY, maxX, maxY);
-            else // _aaMode == AntiAliasingMode::LowMemory
-                rasterPolygonAreaFSAA2x2(clipped.data(), numPoint, 1, clipped.size(), _brush.color(), minX, minY, maxX, maxY);
-        }
-    }
-
-    // Restore texture/gradient
-    _isTexture  = isTexture;
-    _isGradient = isGradient;
-}
 
 // ======================================================================================
 // ===== Private Member Functions =======================================================

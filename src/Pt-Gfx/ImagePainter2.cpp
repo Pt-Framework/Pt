@@ -146,17 +146,26 @@ void ImagePainter2::drawText( const PointF& toIn, const String& text )
 
 void ImagePainter2::drawLine( const PointF& from, const PointF& to )
 {
-    // Copy the points
-    const Point a( (Pt::int32_t) from.x(), (Pt::int32_t) from.y() );
-    const Point b( (Pt::int32_t) to  .x(), (Pt::int32_t) to  .y() );
-
-    // Rasterize the line
+    // Rasterize one pixel line
     if(_rasterizer->pen().size() == 1) {
+        // Copy the points
+        const Point a( (Pt::int32_t) from.x(), (Pt::int32_t) from.y() );
+        const Point b( (Pt::int32_t) to  .x(), (Pt::int32_t) to  .y() );
+        // Rasterize the line
         _rasterizer->strokeOnePixelLine(a, b, 0);
         return;
     }
 
-    // TODO: Implement thick line with caps using polygon here!
+    // Generate a polygon that represents the thick line
+    std::vector<PointF> pointsF;
+
+    generateLineSegment(pointsF, from.x(), from.y(), to.x(), to.y(), true, true);
+
+    // Rasterize the polygon
+    std::vector<Point> points(pointsF.size());
+
+    convertPointRound(points, pointsF.data(), pointsF.size());
+    _rasterizer->strokePolygonSeparate(points.data(), points.size());
 }
 
 void ImagePainter2::drawRect( const RectF& rect )
@@ -187,8 +196,7 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount, boo
     // Copy the points
     std::vector<Point> points(pointCount);
 
-    for(size_t i = 0; i < pointCount; ++i)
-        points[i].set( (Pt::int32_t) ps[i].x(), (Pt::int32_t) ps[i].y() );
+    convertPointTrunc(points, ps, pointCount);
 
     // Rasterize the polygon
     if(_rasterizer->pen().size() == 1) {
@@ -204,8 +212,7 @@ void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
     // Copy the points
     std::vector<Point> points(pointCount);
 
-    for(size_t i = 0; i < pointCount; ++i)
-        points[i].set( (Pt::int32_t) ps[i].x(), (Pt::int32_t) ps[i].y() );
+    convertPointTrunc(points, ps, pointCount);
 
     // Rasterize the polygon
     _rasterizer->fillPolygon(points.data(), pointCount);
@@ -220,8 +227,7 @@ void ImagePainter2::drawPolybezier(const PointF* ps, const size_t pointCount, bo
     // Copy the points
     std::vector<Point> points(autoClose ? (pointCount + 1) : pointCount);
 
-    for(size_t i = 0; i < pointCount; ++i)
-        points[i].set( (Pt::int32_t) ps[i].x(), (Pt::int32_t) ps[i].y() );
+    convertPointTrunc(points, ps, pointCount);
 
     if(autoClose) points[pointCount].set( (Pt::int32_t) ps[0].x(), (Pt::int32_t) ps[0].y() );
 
@@ -283,6 +289,20 @@ void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float deg
     // Rasterize the arc
     _rasterizer->fillArc(tl, sz, degBegin, degEnd, arcMode);
 }
+
+
+// ======================================================================================
+// ===== Private Member Functions ======================================================
+// ======================================================================================
+
+void ImagePainter2::generateLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, bool openingCap, bool closingCap)
+{
+}
+
+void ImagePainter2::joinLineSegment(std::vector<PointF>& dst, const std::vector<PointF>& src)
+{
+}
+
 
 
 } // namespace
