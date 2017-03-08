@@ -365,9 +365,10 @@ struct Rasterizer2::ArcXWLineData {
     typedef std::vector< std::vector<XWPoint> > XWPoints; // The vector index is the Y coordinate
 
     // --- Data ---
-    XWPoints points; // The line's points
-    bool     steep;  // If "true"  then the a2 belongs to (x + 1, y)
-                     // If "false" then the a2 belongs to (x, y + 1)
+    XWPoints points;  // The line's points
+    bool     steep;   // If "true"  then the a2 belongs to (x + 1, y)
+                      // If "false" then the a2 belongs to (x, y + 1)
+    bool     swapDir; // A flag that indicates if the line direction is swapped
 
     bool faceL; // The direction that the line is facing to
     bool faceR; // ---
@@ -682,7 +683,7 @@ Pt::uint8_t Rasterizer2::arcUtil_pointIsInsideDegRange(Pt::int32_t x, Pt::int32_
     //       something wrong will be drawn.
 
     const float angle = Gfx::Math::convertCartesianToPolarCoordinate( (x - ctrX), -(y - ctrY) * xyRatio);
-    const float limit = 4.0f;
+    const float limit = 5.0f;
     const float addFc = 0.1f;
 
     // Both begin and end angle are negative

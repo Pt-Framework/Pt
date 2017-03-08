@@ -272,7 +272,9 @@ void Rasterizer2::arcUtil_runXWLineAlgorithm(ArcXWLineData& xwLine, const Filled
         std::swap(fx2, fy2);
     }
 
-    if(fx1 > fx2) {
+    xwLine.swapDir = (fx1 > fx2);
+
+    if(xwLine.swapDir) {
         std::swap(fx1, fx2);
         std::swap(fy1, fy2);
     }
@@ -290,8 +292,13 @@ void Rasterizer2::arcUtil_runXWLineAlgorithm(ArcXWLineData& xwLine, const Filled
 
     if(xwLine.steep) {
         for(Pt::int32_t i = from; i <= to; ++i) {
-            const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_FPART_TO_A8 (ypxli) ];
-            const Pt::uint8_t a2 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_RFPART_TO_A8(ypxli) ];
+            const Pt::int32_t dx1 = abs(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)) - fai.x1);
+            const Pt::int32_t dx2 = abs(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)) - fai.x2);
+            const Pt::int32_t dy1 = abs(i - fai.y1);
+            const Pt::int32_t dy2 = abs(i - fai.y2);
+            const bool        ext = false && ( (dx1 < 1 && dy1 < 1) || (dx2 < 1 && dy2 < 1) );
+            const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_FPART_TO_A8 (ypxli) ] / (ext ? 2 : 1);
+            const Pt::uint8_t a2 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_RFPART_TO_A8(ypxli) ] / (ext ? 2 : 1);
             xwLine.points[ i - xwLine.minY + 1 ].push_back(
                 ArcXWLineData::XWPoint( FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)), a1, a2 )
             );
@@ -301,8 +308,13 @@ void Rasterizer2::arcUtil_runXWLineAlgorithm(ArcXWLineData& xwLine, const Filled
     else {
         // Draw the pixels
         for(Pt::int32_t i = from; i <= to; ++i) {
-            const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_FPART_TO_A8 (ypxli) ];
-            const Pt::uint8_t a2 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_RFPART_TO_A8(ypxli) ];
+            const Pt::int32_t dx1 = abs(i - fai.x1);
+            const Pt::int32_t dx2 = abs(i - fai.x2);
+            const Pt::int32_t dy1 = abs(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)) - fai.y1);
+            const Pt::int32_t dy2 = abs(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)) - fai.y2);
+            const bool        ext = false &&( (dx1 < 1 && dy1 < 1) || (dx2 < 1 && dy2 < 1) );
+            const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_FPART_TO_A8 (ypxli) ] / (ext ? 2 : 1);
+            const Pt::uint8_t a2 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_RFPART_TO_A8(ypxli) ] / (ext ? 2 : 1);
             xwLine.points[ FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)) - xwLine.minY + 1 ].push_back(
                 ArcXWLineData::XWPoint( i, a1, a2 )
             );
@@ -696,15 +708,6 @@ void Rasterizer2::arcUtil_rasterCircumferencePixels(FilledArcInfo& fai)
         const Pt::int32_t x2 = fai.ctrX + x;
         const Pt::int32_t y1 = fai.ctrY - fly - 1;
         const Pt::int32_t y2 = fai.ctrY + fly + 1;
-#if 0
-        const bool mask[4] = {
-            arcUtil_pointIsInsideDegRange(x1, y1, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd, fai.xyRat),
-            arcUtil_pointIsInsideDegRange(x1, y2, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd, fai.xyRat),
-            arcUtil_pointIsInsideDegRange(x2, y1, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd, fai.xyRat),
-            arcUtil_pointIsInsideDegRange(x2, y2, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd, fai.xyRat)
-        };
-        fill4Pixels(x1, y1, x2, y2, fai.minX, fai.minY, alpha, mask);
-#else
         const Pt::uint8_t alphas[4] = {
             arcUtil_pointIsInsideDegRange(x1, y1, fai.ctrX, fai.ctrY, alpha, fai.degBegin, fai.degEnd, fai.xyRat),
             arcUtil_pointIsInsideDegRange(x1, y2, fai.ctrX, fai.ctrY, alpha, fai.degBegin, fai.degEnd, fai.xyRat),
@@ -712,7 +715,6 @@ void Rasterizer2::arcUtil_rasterCircumferencePixels(FilledArcInfo& fai)
             arcUtil_pointIsInsideDegRange(x2, y2, fai.ctrX, fai.ctrY, alpha, fai.degBegin, fai.degEnd, fai.xyRat)
         };
         fill4Pixels(x1, y1, x2, y2, fai.minX, fai.minY, alphas);
-#endif
     }
 
     // Left and right halves
@@ -727,23 +729,13 @@ void Rasterizer2::arcUtil_rasterCircumferencePixels(FilledArcInfo& fai)
         const Pt::int32_t x2 = fai.ctrX + flx + 1;
         const Pt::int32_t y1 = fai.ctrY - y;
         const Pt::int32_t y2 = fai.ctrY + y;
-#if 0
-        const bool mask[4] = {
-            arcUtil_pointIsInsideDegRange(x1, y1, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd, fai.xyRat),
-            arcUtil_pointIsInsideDegRange(x1, y2, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd, fai.xyRat),
-            arcUtil_pointIsInsideDegRange(x2, y1, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd, fai.xyRat),
-            arcUtil_pointIsInsideDegRange(x2, y2, fai.ctrX, fai.ctrY, fai.degBegin, fai.degEnd, fai.xyRat)
-        };
-        fill4Pixels(x1, y1, x2, y2, fai.minX, fai.minY, alpha, mask);
-#else
-        const Pt::uint8_t alphas[4] = {
+        Pt::uint8_t alphas[4] = {
             arcUtil_pointIsInsideDegRange(x1, y1, fai.ctrX, fai.ctrY, alpha, fai.degBegin, fai.degEnd, fai.xyRat),
             arcUtil_pointIsInsideDegRange(x1, y2, fai.ctrX, fai.ctrY, alpha, fai.degBegin, fai.degEnd, fai.xyRat),
             arcUtil_pointIsInsideDegRange(x2, y1, fai.ctrX, fai.ctrY, alpha, fai.degBegin, fai.degEnd, fai.xyRat),
             arcUtil_pointIsInsideDegRange(x2, y2, fai.ctrX, fai.ctrY, alpha, fai.degBegin, fai.degEnd, fai.xyRat)
         };
         fill4Pixels(x1, y1, x2, y2, fai.minX, fai.minY, alphas);
-#endif
     }
 }
 
@@ -751,7 +743,7 @@ void Rasterizer2::arcUtil_rasterClosingXWLine(const FilledArcInfo& fai, const Ar
 {
     // For convenience
     typedef std::vector<ArcXWLineData::XWPoint> XWPoints;
-    typedef XWPoints::const_iterator         XWPointsIterator;
+    typedef XWPoints::const_iterator            XWPointsIterator;
 
     // Get the mask's coordinate
     const Pt::int32_t mx[4] = {
@@ -764,9 +756,9 @@ void Rasterizer2::arcUtil_rasterClosingXWLine(const FilledArcInfo& fai, const Ar
     };
 
     // Used for storing back the mask's coordinates
-    Pt::int32_t pCnt = 0;
-    Pt::int32_t lx[4];
-    Pt::int32_t ly[4];
+    Pt::int32_t pCnt  = 0;
+    Pt::int32_t lx[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
+    Pt::int32_t ly[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
 
     // A helper macro to skip a pixel
     #define CHECK_SKIP_PIXEL(X, Y, A)              \
@@ -778,8 +770,7 @@ void Rasterizer2::arcUtil_rasterClosingXWLine(const FilledArcInfo& fai, const Ar
                     break;                         \
                 }                                  \
             }                                      \
-            if(skipPixel) continue;                \
-            if(!(A)) continue;                     \
+            if(skipPixel || !(A)) continue;        \
             lx[2] = lx[3]; lx[3] = x;              \
             ly[2] = ly[3]; ly[3] = y;              \
             if(pCnt < 2) {                         \
@@ -800,8 +791,8 @@ void Rasterizer2::arcUtil_rasterClosingXWLine(const FilledArcInfo& fai, const Ar
             if(pt->isNull()) continue;
             // Get the coordinate and alpha
             const Pt::int32_t x  = pt->x;
-            const Pt::int32_t a1 = pt->a1;
-            const Pt::int32_t a2 = pt->a2;
+            const Pt::uint8_t a1 = pt->a1;
+            const Pt::uint8_t a2 = pt->a2;
             // deltaY > deltaX
             if(xwLine.steep) {
                 if( xwLine.faceL && (x != fai.x1 || y != fai.y1) && (x != fai.x2 || y != fai.y2) ) {
@@ -832,8 +823,17 @@ void Rasterizer2::arcUtil_rasterClosingXWLine(const FilledArcInfo& fai, const Ar
     }
 
     // Store back the start and end coordinates to the mask
-    for(Pt::int32_t i = 0; i < 4; ++i) {
-        maskInOut[i].set(lx[i], ly[i]);
+    if(xwLine.swapDir) {
+        maskInOut[2].set(lx[0], ly[0]);
+        maskInOut[3].set(lx[1], ly[1]);
+        maskInOut[0].set(lx[2], ly[2]);
+        maskInOut[1].set(lx[3], ly[3]);
+    }
+    else {
+        maskInOut[0].set(lx[0], ly[0]);
+        maskInOut[1].set(lx[1], ly[1]);
+        maskInOut[2].set(lx[2], ly[2]);
+        maskInOut[3].set(lx[3], ly[3]);
     }
 
     // Undefine the helper macro
