@@ -42,25 +42,79 @@ class PT_HMI_API TableLayout : public Layout
     typedef Layout Base;
 
     public:
-      TableLayout();
+        // TODO: could be the same as Pt::Hmi::SicePolicy::Mode
+        enum SizeMode
+        {
+            Fixed,
+            Preferred,
+            Fill
+        };
+
+        class SizePolicy
+        {
+            public:
+                SizePolicy()
+                : _mode(Preferred)
+                , _size(0)
+                { }
+
+                SizePolicy(SizeMode m)
+                : _mode(m)
+                , _size(0)
+                { }
+
+                SizePolicy(SizeMode m, double size)
+                : _mode(m)
+                , _size(size)
+                { }
+
+                SizeMode mode() const
+                {
+                    return _mode;
+                }
+
+                void setMode(SizeMode m)
+                {
+                    _mode = m;
+                }
+
+                double size() const
+                {
+                    return _size;
+                }
+
+                void setSize(double s)
+                {
+                    _size = s;
+                }
+            
+            private:
+                SizeMode _mode;
+                double   _size;
+        };
+
+    public:
+        TableLayout();
         
-      virtual ~TableLayout();
+        virtual ~TableLayout();
 
-      void addItem(Widget& w, std::size_t row, std::size_t column);
+        void addItem(Widget& w, std::size_t row, std::size_t column);
 
-      // Policy:
-      //    Fixed,
-      //    Expanding,
-      //    Preferred
+        void setColumn(std::size_t col, SizeMode mode, double size = 0);
 
-      //void setColumnMode(std::size_t col, Policy)
-      //void setColumnSize(std::size_t col, double size)
-      //void setColumnStrech(std::size_t col, double size)
+        void setRow(std::size_t row, SizeMode mode, double size = 0);
+
+    protected:
+        virtual void onRemoveWidget(Widget& w);
+
+        virtual void onLayout();
 
     private:
-      typedef std::vector<Widget*> Row;
+        std::vector<SizePolicy> _columnSizes;
+        std::vector<SizePolicy> _rowSizes;
 
-      std::vector<Row> _items;
+        typedef std::vector<Widget*> Row;
+        std::vector<Row> _rows;
 };
 
 } // namespace

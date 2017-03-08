@@ -33,8 +33,8 @@ namespace Pt {
 
 namespace Hmi {
 
-DockingLayout::DockingLayout(DockStyle ds)
-: _defaultDocking(ds)
+DockingLayout::DockingLayout(DockMode d)
+: _defaultDocking(d)
 {
 }
 
@@ -44,19 +44,18 @@ DockingLayout::~DockingLayout()
 }
 
 
-void DockingLayout::dock(Widget& w, DockStyle ds)
+void DockingLayout::dock(Widget& w, DockMode d)
 {
-    _docking[&w] = ds;
-
+    _docking[&w] = d;
     add(w);
 }
 
 
-void DockingLayout::setDockingStyle(Widget& w, DockStyle ds)
+void DockingLayout::setDockingStyle(Widget& w, DockMode d)
 {
-    std::map<Widget*, DockStyle>::iterator it = _docking.find(&w);
+    std::map<Widget*, DockMode>::iterator it = _docking.find(&w);
     if( it != _docking.end() )
-        it->second = ds;
+        it->second = d;
 }
 
 
@@ -67,7 +66,7 @@ void DockingLayout::onAddWidget(Widget& w)
 
 void DockingLayout::onRemoveWidget(Widget& w)
 {
-    std::map<Widget*, DockStyle>::iterator it = _docking.find(&w);
+    std::map<Widget*, DockMode>::iterator it = _docking.find(&w);
     
     if( it != _docking.end() )
         _docking.erase(it);
@@ -90,13 +89,13 @@ void DockingLayout::onLayout()
         if( ! (*it)->isVisible() )
             continue;
 
-        std::map<Widget*, DockStyle>::iterator d = _docking.find(*it);
-        if( d == _docking.end() )
+        std::map<Widget*, DockMode>::iterator docking = _docking.find(*it);
+        if( docking == _docking.end() )
             continue;
 
-        DockStyle ds = d->second;
+        DockMode d = docking->second;
 
-        switch(ds)
+        switch(d)
         {
             default:
             case DockingLayout::Fill:
@@ -180,13 +179,13 @@ void DockingLayout::onLayout()
 
     for(it = widgets().begin(); it != end; ++it)
     {
-        std::map<Widget*, DockStyle>::iterator d = _docking.find(*it);
-        if( d == _docking.end() )
+        std::map<Widget*, DockMode>::iterator docking = _docking.find(*it);
+        if( docking == _docking.end() )
             continue;
 
-        DockStyle ds = d->second;
+        DockMode d = docking->second;
 
-        if(ds == DockingLayout::Fill)
+        if(d == DockingLayout::Fill)
         {
             if( ! (*it)->isVisible() )
                 continue;

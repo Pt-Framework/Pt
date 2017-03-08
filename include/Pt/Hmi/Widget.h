@@ -59,16 +59,15 @@ namespace Pt {
 namespace Hmi {
 
 class Window;
-class Layout;
 
 class SizePolicy
 {
     public:
-        enum Policy
+        enum Mode
         {
             Fixed,
             Preferred
-            // Expanding
+            // Fill
             // Maximum
             // Minimum
         };
@@ -79,29 +78,29 @@ class SizePolicy
         , _v(Preferred)
         { }
 
-        SizePolicy(Policy horizontal, Policy vertical)
+        SizePolicy(Mode horizontal, Mode vertical)
         : _h(horizontal)
         , _v(vertical)
         { }
 
-        Policy horizontal() const
+        Mode horizontal() const
         {
             return _h;
         }
 
-        void setHorizontal(Policy policy)
+        void setHorizontal(Mode m)
         {
-            _h = policy;
+            _h = m;
         }
         
-        Policy vertical() const
+        Mode vertical() const
         {
             return _v;
         }
         
-        void setVertical(Policy policy)
+        void setVertical(Mode m)
         {
-            _v = policy;
+            _v = m;
         }
         
         const Gfx::SizeF& size() const
@@ -140,8 +139,8 @@ class SizePolicy
         }
 
     private:
-        Policy     _h;
-        Policy     _v;
+        Mode       _h;
+        Mode       _v;
         Gfx::SizeF _sizeHint;
 };
 
@@ -355,9 +354,9 @@ class PT_HMI_API Widget : public Visual
 
         virtual void onInvalidate();
 
-        virtual Pt::Gfx::SizeF onAutoSize(const SizePolicy& policy) const;
-
         virtual void onLayout();
+
+        virtual Pt::Gfx::SizeF onAutoSize(const SizePolicy& policy) const;
 
         virtual void onSetActionKey(const Key& ak);
 

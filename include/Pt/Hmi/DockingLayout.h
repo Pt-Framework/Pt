@@ -41,7 +41,7 @@ namespace Hmi {
 class PT_HMI_API DockingLayout : public Layout
 {
     public:
-        enum DockStyle
+        enum DockMode
         {
             None = 0,
             Left,
@@ -52,13 +52,13 @@ class PT_HMI_API DockingLayout : public Layout
         };
 
     public:
-        explicit DockingLayout(DockStyle ds = None);
+        explicit DockingLayout(DockMode ds = None);
 
         virtual ~DockingLayout();
 
-        void dock(Widget& w, DockStyle ds);
+        void dock(Widget& w, DockMode ds);
 
-        void setDockingStyle(Widget& w, DockStyle ds);
+        void setDockingStyle(Widget& w, DockMode ds);
 
     protected:
         virtual void onAddWidget(Widget& w);
@@ -68,8 +68,8 @@ class PT_HMI_API DockingLayout : public Layout
         virtual void onLayout();
 
     private:
-        std::map<Widget*, DockStyle> _docking;
-        DockStyle                    _defaultDocking;
+        std::map<Widget*, DockMode> _docking;
+        DockMode                    _defaultDocking;
 };
 
 } // namespace

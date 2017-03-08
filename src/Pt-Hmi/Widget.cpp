@@ -555,28 +555,6 @@ void Widget::onInvalidate()
 }
 
 
-//void Widget::layout2()
-//{
-//    Gfx::SizeF size = preferredSize();
-//
-//    if(_autoSize)
-//        _preferredSize = onAutoSize(_sizePolicy);
-//
-//    if( parent() )
-//        parent()->layout2();
-//    else
-//    {
-//        Window* w = window();
-//        if( w )
-//        {
-//            // TODO:
-//            //w->layout2();
-//            onLayout();
-//        }
-//    }
-//} 
-
-
 void Widget::layout()
 {
     ++_layouts;
@@ -663,6 +641,12 @@ void Widget::setAutoSize(bool a)
 }
 
 
+Gfx::SizeF Widget::onAutoSize(const SizePolicy&) const
+{
+    return _size;
+}
+
+
 Gfx::SizeF Widget::preferredSize() const
 {
     if(_autoSize)
@@ -677,12 +661,6 @@ Gfx::SizeF Widget::preferredSize(const SizePolicy& policy) const
     if(_autoSize)
         return onAutoSize(policy);
 
-    return _size;
-}
-
-
-Gfx::SizeF Widget::onAutoSize(const SizePolicy&) const
-{
     return _size;
 }
 
