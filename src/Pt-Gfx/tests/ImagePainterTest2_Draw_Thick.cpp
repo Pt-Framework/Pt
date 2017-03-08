@@ -4,22 +4,135 @@ static void testDrawSolidThickLine(const char* title, Image& image, Painter& pai
 
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
 
-    painter.setPen( Pen(Color::fromRgb8(0, 255, 0, 175), 10, Pen::Solid, Pen::FlatCap, Pen::BevelJoin) );
+    Pen penText     (Color::fromRgb8(255,   0, 0, 175));
 
-    // FlatCap, ButtCap, SquareCap, RoundCap, TriangularOutCap, TriangularInCap
-    // NoJoin, BevelJoin, MiterJoin, RoundJoin
+    Pen penFCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 10, Pen::Solid, Pen::FlatCap,          Pen::BevelJoin);
+    Pen penBCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 10, Pen::Solid, Pen::ButtCap,          Pen::BevelJoin);
+    Pen penSCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 10, Pen::Solid, Pen::SquareCap,        Pen::BevelJoin);
+    Pen penRCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 10, Pen::Solid, Pen::RoundCap,         Pen::BevelJoin);
+    Pen penICapBJoin(Color::fromRgb8(  0, 255, 0, 175), 10, Pen::Solid, Pen::TriangularInCap,  Pen::BevelJoin);
+
+    Pen penOCapNJoin(Color::fromRgb8(  0, 255, 0, 175), 10, Pen::Solid, Pen::TriangularOutCap, Pen::NoJoin   );
+    Pen penOCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 10, Pen::Solid, Pen::TriangularOutCap, Pen::BevelJoin);
+    Pen penOCapMJoin(Color::fromRgb8(  0, 255, 0, 175), 10, Pen::Solid, Pen::TriangularOutCap, Pen::MiterJoin);
+    Pen penOCapRJoin(Color::fromRgb8(  0, 255, 0, 175), 10, Pen::Solid, Pen::TriangularOutCap, Pen::RoundJoin);
+
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
+    painter.setPen(penFCapBJoin);
     painter.drawLine( PointF( 20,  20), PointF(200, 120) );
-    painter.drawLine( PointF( 20, 250), PointF(200, 150) );
+    painter.drawLine( PointF( 20, 240), PointF(200, 140) );
+    painter.setPen(penText); painter.drawText( PointF( 20, 135), "NOAA" );
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
+    painter.setPen(penFCapBJoin);
     painter.drawLine( PointF(220,  20), PointF(400, 120) );
-    painter.drawLine( PointF(220, 250), PointF(400, 150) );
+    painter.drawLine( PointF(220, 240), PointF(400, 140) );
+    painter.setPen(penText); painter.drawText( PointF(220, 135), "XWAA" );
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::LowMemory);
+    painter.setPen(penFCapBJoin);
     painter.drawLine( PointF(420,  20), PointF(600, 120) );
-    painter.drawLine( PointF(420, 250), PointF(600, 150) );
+    painter.drawLine( PointF(420, 240), PointF(600, 140) );
+    painter.setPen(penText); painter.drawText( PointF(420, 135), "FSAA2x2" );
+
+
+    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
+
+    painter.setPen(penFCapBJoin);
+    painter.drawLine( PointF( 20, 300 - 30), PointF(100, 350 - 30) );
+    painter.drawLine( PointF( 20, 430 - 30), PointF(100, 370 - 30) );
+
+    painter.setPen(penBCapBJoin);
+    painter.drawLine( PointF(120, 300 - 30), PointF(200, 350 - 30) );
+    painter.drawLine( PointF(120, 430 - 30), PointF(200, 370 - 30) );
+
+    painter.setPen(penSCapBJoin);
+    painter.drawLine( PointF(220, 300 - 30), PointF(300, 350 - 30) );
+    painter.drawLine( PointF(220, 430 - 30), PointF(300, 370 - 30) );
+
+    painter.setPen(penRCapBJoin);
+    painter.drawLine( PointF(320, 300 - 30), PointF(400, 350 - 30) );
+    painter.drawLine( PointF(320, 430 - 30), PointF(400, 370 - 30) );
+
+    painter.setPen(penOCapBJoin);
+    painter.drawLine( PointF(420, 300 - 30), PointF(500, 350 - 30) );
+    painter.drawLine( PointF(420, 430 - 30), PointF(500, 370 - 30) );
+
+    painter.setPen(penICapBJoin);
+    painter.drawLine( PointF(520, 300 - 30), PointF(600, 350 - 30) );
+    painter.drawLine( PointF(520, 430 - 30), PointF(600, 370 - 30) );
+
+
+    painter.setPen(penOCapBJoin);
+    const PointF poly1a[] = { // CCW
+        PointF(650,  20),
+        PointF(800, 130),
+        PointF(700, 180)
+    };
+    if(ip2) ip2->drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]), false );
+    else painter.drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]) );
+
+    const PointF poly1b[] = { // CCW
+        PointF(650 + 170,  20),
+        PointF(800 + 170, 130),
+        PointF(700 + 170, 180)
+    };
+    if(ip2) ip2->drawPolyline( poly1b, sizeof(poly1b) / sizeof(poly1b[0]), true );
+    else painter.drawPolyline( poly1b, sizeof(poly1b) / sizeof(poly1b[0]) );
+
+    painter.setPen(penOCapMJoin);
+    const PointF poly2a[] = { // CCW
+        PointF(650,  20 + 200),
+        PointF(800, 130 + 200),
+        PointF(700, 180 + 200)
+    };
+    if(ip2) ip2->drawPolyline( poly2a, sizeof(poly2a) / sizeof(poly2a[0]), false );
+    else painter.drawPolyline( poly2a, sizeof(poly2a) / sizeof(poly2a[0]) );
+
+    const PointF poly2b[] = { // CCW
+        PointF(650 + 170,  20 + 200),
+        PointF(800 + 170, 130 + 200),
+        PointF(700 + 170, 180 + 200)
+    };
+    if(ip2) ip2->drawPolyline( poly2b, sizeof(poly2b) / sizeof(poly2b[0]), true );
+    else painter.drawPolyline( poly2b, sizeof(poly2b) / sizeof(poly2b[0]) );
+
+    painter.setPen(penOCapRJoin);
+    const PointF poly3a[] = { // CCW
+        PointF(650,  20 + 400),
+        PointF(800, 130 + 400),
+        PointF(700, 180 + 400)
+    };
+    if(ip2) ip2->drawPolyline( poly3a, sizeof(poly3a) / sizeof(poly3a[0]), false );
+    else painter.drawPolyline( poly3a, sizeof(poly3a) / sizeof(poly3a[0]) );
+
+    const PointF poly3b[] = { // CCW
+        PointF(650 + 170,  20 + 400),
+        PointF(800 + 170, 130 + 400),
+        PointF(700 + 170, 180 + 400)
+    };
+    if(ip2) ip2->drawPolyline( poly3b, sizeof(poly3b) / sizeof(poly3b[0]), true );
+    else painter.drawPolyline( poly3b, sizeof(poly3b) / sizeof(poly3b[0]) );
+
+
+    painter.setPen(penOCapNJoin);
+    const PointF poly4a[] = { // CCW
+        PointF(650 - 600,  20 + 400),
+        PointF(800 - 600, 130 + 400),
+        PointF(700 - 600, 180 + 400)
+    };
+    if(ip2) ip2->drawPolyline( poly4a, sizeof(poly4a) / sizeof(poly4a[0]), false );
+    else painter.drawPolyline( poly4a, sizeof(poly4a) / sizeof(poly4a[0]) );
+
+    const PointF poly4b[] = { // CCW
+        PointF(650 - 430,  20 + 400),
+        PointF(800 - 430, 130 + 400),
+        PointF(700 - 430, 180 + 400)
+    };
+    if(ip2) ip2->drawPolyline( poly4b, sizeof(poly4b) / sizeof(poly4b[0]), true );
+    else painter.drawPolyline( poly4b, sizeof(poly4b) / sizeof(poly4b[0]) );
+
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
 }
