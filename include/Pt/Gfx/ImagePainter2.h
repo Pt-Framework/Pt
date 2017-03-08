@@ -127,7 +127,7 @@ class PT_GFX_API ImagePainter2 : public Painter
         inline void convertPointTrunc(std::vector<Point>& dst, const PointF* src, const size_t pointCount);
         inline void convertPointRound(std::vector<Point>& dst, const PointF* src, const size_t pointCount);
 
-        void generateLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, bool openingCap, bool closingCap);
+        void generateSolidLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, bool openingCap, bool closingCap);
 
         void generateLineButtCap(std::vector<PointF>& dst, float x, float y, float wh, float px, float py, float nx, float ny);
         void generateLineSquareCap(std::vector<PointF>& dst, float x, float y, float wh, float px, float py, float nx, float ny);
@@ -135,7 +135,11 @@ class PT_GFX_API ImagePainter2 : public Painter
         void generateLineTriangularOutCap(std::vector<PointF>& dst, float x, float wh, float y, float px, float py, float nx, float ny);
         void generateLineTriangularInCap(std::vector<PointF>& dst, float x, float wh, float y, float px, float py, float nx, float ny);
 
-        void joinLineSegment(std::vector<PointF>& dst, const std::vector<PointF>& src);
+        void combineLineSegmentForOpenPolygon(std::vector<PointF>& polygon, std::vector<PointF>& outer, const std::vector<PointF>& segment);
+        void finalizeLineSegmentForOpenPolygon(std::vector<PointF>& polygon, const std::vector<PointF>& outer);
+
+        void combineLineSegmentForClosedPolygon(std::vector<PointF>& outer, std::vector<PointF>& inner, const std::vector<PointF>& segment);
+        void finalizeLineSegmentForClosedPolygon(std::vector<PointF>& outer, std::vector<PointF>& inner, const std::vector<PointF>& segment);
 
     private:
         RectF        _clip;

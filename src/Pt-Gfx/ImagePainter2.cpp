@@ -159,7 +159,7 @@ void ImagePainter2::drawLine( const PointF& from, const PointF& to )
     // Generate a polygon that represents the thick line
     std::vector<PointF> pointsF;
 
-    generateLineSegment(pointsF, from.x(), from.y(), to.x(), to.y(), true, true);
+    generateSolidLineSegment(pointsF, from.x(), from.y(), to.x(), to.y(), true, true);
 
     // Rasterize the polygon
     std::vector<Point> points(pointsF.size());
@@ -295,7 +295,7 @@ void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float deg
 // ===== Private Member Functions ======================================================
 // ======================================================================================
 
-void ImagePainter2::generateLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, bool openingCap, bool closingCap)
+void ImagePainter2::generateSolidLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, bool openingCap, bool closingCap)
 {
     // Swap the points as needed; this also make sure that the line always faces top
     if(x1 > x2) {
@@ -405,7 +405,19 @@ void ImagePainter2::generateLineTriangularInCap(std::vector<PointF>& dst, float 
     dst.push_back( PointF(x - nx, y - ny) );
 }
 
-void ImagePainter2::joinLineSegment(std::vector<PointF>& dst, const std::vector<PointF>& src)
+void ImagePainter2::combineLineSegmentForOpenPolygon(std::vector<PointF>& polygon, std::vector<PointF>& outer, const std::vector<PointF>& segment)
+{
+}
+
+void ImagePainter2::finalizeLineSegmentForOpenPolygon(std::vector<PointF>& polygon, const std::vector<PointF>& outer)
+{
+}
+
+void ImagePainter2::combineLineSegmentForClosedPolygon(std::vector<PointF>& outer, std::vector<PointF>& inner, const std::vector<PointF>& segment)
+{
+}
+
+void ImagePainter2::finalizeLineSegmentForClosedPolygon(std::vector<PointF>& outer, std::vector<PointF>& inner, const std::vector<PointF>& segment)
 {
 }
 
