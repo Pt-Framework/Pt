@@ -297,12 +297,36 @@ void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float deg
 
 void ImagePainter2::generateLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, bool openingCap, bool closingCap)
 {
+    // Swap the points as needed
+    if(x1 > x2) {
+        std::swap(x1, x2);
+        std::swap(y1, y2);
+    }
+
+    // Line equation : 0 = aX + By + c
+    // Normal        : n = ai + bj
+    const float a  = y2 - y1;
+    const float b  = x1 - x2;
+  //const float c  = -(x1 * y2 - x2 * y1);
+    const float il = 1.0f / Gfx::Math::fastSqrt(a * a + b * b);
+    const float wa = a * il * _rasterizer->pen().size() * 0.5f;
+    const float wb = b * il * _rasterizer->pen().size() * 0.5f;
+
+    // Determine the direction that the line is facing to
+    const bool faceT = b < 0;
+    const bool faceR = a > 0;
+    if(!faceT) return;
+
+    // Generate points (CCW)
+    dst.push_back( PointF(x1 + wa, y1 + wb) );
+    dst.push_back( PointF(x1 - wa, y1 - wb) );
+    dst.push_back( PointF(x2 - wa, y2 - wb) );
+    dst.push_back( PointF(x2 + wa, y2 + wb) );
 }
 
 void ImagePainter2::joinLineSegment(std::vector<PointF>& dst, const std::vector<PointF>& src)
 {
 }
-
 
 
 } // namespace

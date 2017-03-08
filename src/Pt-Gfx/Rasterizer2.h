@@ -604,7 +604,7 @@ void Rasterizer2::rasterScanline(
     // Draw the span using solid color
     else {
         Pixel pixel(_image->view(), minX + iterL, minY + pixelY);
-        _image->format().setPixels(pixel, _brush.color(), iterR - iterL + 1, _compositionMode);
+        _image->format().setPixels(pixel, color, iterR - iterL + 1, _compositionMode);
         //Pt::int32_t iterX     = minX + iterL;
         //Pt::int32_t spanWidth = iterR - iterL + 1;
         //while(spanWidth > 0) {
