@@ -65,15 +65,14 @@ class PT_GFX_API Pen
 
         /** @brief Pen cap style.
         */
-        enum CapStyle { FlatCap          = 0,
-                        ButtCap          = 1,
-                        SquareCap        = 2,
-                        RoundCap         = 3,
-                        TriangularOutCap = 4,
-                        TriangularInCap  = 5,
-                        NoCap            = 0, // NoCap         and FlatCap          are the same
-                        ProjectingCap    = 2, // ProjectingCap and SquareCap        are the same
-                        TriangularCap    = 4, // TriangularCap and TriangularOutCap are the same
+        enum CapStyle { ButtCap          = 0,
+                        SquareCap        = 1,
+                        RoundCap         = 2,
+                        TriangularOutCap = 3,
+                        TriangularInCap  = 4,
+                        FlatCap          = 0, // FlatCap       and ButtCap          are the same
+                        ProjectingCap    = 1, // ProjectingCap and SquareCap        are the same
+                        TriangularCap    = 3, // TriangularCap and TriangularOutCap are the same
                         NotLastCap       = 9  // What is this ???
                       };
 

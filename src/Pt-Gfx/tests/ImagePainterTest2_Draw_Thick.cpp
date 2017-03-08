@@ -6,7 +6,6 @@ static void testDrawSolidThickLine(const char* title, Image& image, Painter& pai
 
     Pen penText     (Color::fromRgb8(255,   0, 0, 175));
 
-    Pen penFCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 10, Pen::Solid, Pen::FlatCap,          Pen::BevelJoin);
     Pen penBCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 10, Pen::Solid, Pen::ButtCap,          Pen::BevelJoin);
     Pen penSCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 10, Pen::Solid, Pen::SquareCap,        Pen::BevelJoin);
     Pen penRCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 10, Pen::Solid, Pen::RoundCap,         Pen::BevelJoin);
@@ -19,19 +18,19 @@ static void testDrawSolidThickLine(const char* title, Image& image, Painter& pai
 
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
-    painter.setPen(penFCapBJoin);
+    painter.setPen(penBCapBJoin);
     painter.drawLine( PointF( 20,  20), PointF(200, 120) );
     painter.drawLine( PointF( 20, 240), PointF(200, 140) );
     painter.setPen(penText); painter.drawText( PointF( 20, 135), "NOAA" );
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
-    painter.setPen(penFCapBJoin);
+    painter.setPen(penBCapBJoin);
     painter.drawLine( PointF(220,  20), PointF(400, 120) );
     painter.drawLine( PointF(220, 240), PointF(400, 140) );
     painter.setPen(penText); painter.drawText( PointF(220, 135), "XWAA" );
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::LowMemory);
-    painter.setPen(penFCapBJoin);
+    painter.setPen(penBCapBJoin);
     painter.drawLine( PointF(420,  20), PointF(600, 120) );
     painter.drawLine( PointF(420, 240), PointF(600, 140) );
     painter.setPen(penText); painter.drawText( PointF(420, 135), "FSAA2x2" );
@@ -39,29 +38,25 @@ static void testDrawSolidThickLine(const char* title, Image& image, Painter& pai
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
 
-    painter.setPen(penFCapBJoin);
+    painter.setPen(penBCapBJoin);
     painter.drawLine( PointF( 20, 300 - 30), PointF(100, 350 - 30) );
     painter.drawLine( PointF( 20, 430 - 30), PointF(100, 370 - 30) );
 
-    painter.setPen(penBCapBJoin);
+    painter.setPen(penSCapBJoin);
     painter.drawLine( PointF(120, 300 - 30), PointF(200, 350 - 30) );
     painter.drawLine( PointF(120, 430 - 30), PointF(200, 370 - 30) );
 
-    painter.setPen(penSCapBJoin);
+    painter.setPen(penRCapBJoin);
     painter.drawLine( PointF(220, 300 - 30), PointF(300, 350 - 30) );
     painter.drawLine( PointF(220, 430 - 30), PointF(300, 370 - 30) );
 
-    painter.setPen(penRCapBJoin);
+    painter.setPen(penOCapBJoin);
     painter.drawLine( PointF(320, 300 - 30), PointF(400, 350 - 30) );
     painter.drawLine( PointF(320, 430 - 30), PointF(400, 370 - 30) );
 
-    painter.setPen(penOCapBJoin);
+    painter.setPen(penICapBJoin);
     painter.drawLine( PointF(420, 300 - 30), PointF(500, 350 - 30) );
     painter.drawLine( PointF(420, 430 - 30), PointF(500, 370 - 30) );
-
-    painter.setPen(penICapBJoin);
-    painter.drawLine( PointF(520, 300 - 30), PointF(600, 350 - 30) );
-    painter.drawLine( PointF(520, 430 - 30), PointF(600, 370 - 30) );
 
 
     painter.setPen(penOCapBJoin);

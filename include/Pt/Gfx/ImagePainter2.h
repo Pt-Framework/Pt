@@ -129,11 +129,11 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         void generateLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, bool openingCap, bool closingCap);
 
-        void generateLineButtCap(std::vector<PointF>& dst, float x, float y, float w, float wa, float wb);
-        void generateLineSquareCap(std::vector<PointF>& dst, float x, float y, float w, float wa, float wb);
-        void generateLineRoundCap(std::vector<PointF>& dst, float x, float y, float w, float wa, float wb);
-        void generateLineTriangularOutCap(std::vector<PointF>& dst, float x, float w, float y, float wa, float wb);
-        void generateLineTriangularInCap(std::vector<PointF>& dst, float x, float y, float w, float wa, float wb);
+        void generateLineButtCap(std::vector<PointF>& dst, float x, float y, float wh, float dx, float dy, float nx, float ny);
+        void generateLineSquareCap(std::vector<PointF>& dst, float x, float y, float wh, float dx, float dy, float nx, float ny);
+        void generateLineRoundCap(std::vector<PointF>& dst, float x, float y, float wh, float dx, float dy, float nx, float ny);
+        void generateLineTriangularOutCap(std::vector<PointF>& dst, float x, float y, float wh, float dx, float dy, float nx, float ny);
+        void generateLineTriangularInCap(std::vector<PointF>& dst, float x, float y, float wh, float dx, float dy, float nx, float ny);
 
         void joinLineSegment(std::vector<PointF>& dst, const std::vector<PointF>& src);
 
