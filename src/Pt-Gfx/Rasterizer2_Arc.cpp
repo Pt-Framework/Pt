@@ -292,13 +292,8 @@ void Rasterizer2::arcUtil_runXWLineAlgorithm(ArcXWLineData& xwLine, const Filled
 
     if(xwLine.steep) {
         for(Pt::int32_t i = from; i <= to; ++i) {
-            const Pt::int32_t dx1 = abs(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)) - fai.x1);
-            const Pt::int32_t dx2 = abs(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)) - fai.x2);
-            const Pt::int32_t dy1 = abs(i - fai.y1);
-            const Pt::int32_t dy2 = abs(i - fai.y2);
-            const bool        ext = false && ( (dx1 < 1 && dy1 < 1) || (dx2 < 1 && dy2 < 1) );
-            const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_FPART_TO_A8 (ypxli) ] / (ext ? 2 : 1);
-            const Pt::uint8_t a2 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_RFPART_TO_A8(ypxli) ] / (ext ? 2 : 1);
+            const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_FPART_TO_A8 (ypxli) ];
+            const Pt::uint8_t a2 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_RFPART_TO_A8(ypxli) ];
             xwLine.points[ i - xwLine.minY + 1 ].push_back(
                 ArcXWLineData::XWPoint( FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)), a1, a2 )
             );
@@ -308,13 +303,8 @@ void Rasterizer2::arcUtil_runXWLineAlgorithm(ArcXWLineData& xwLine, const Filled
     else {
         // Draw the pixels
         for(Pt::int32_t i = from; i <= to; ++i) {
-            const Pt::int32_t dx1 = abs(i - fai.x1);
-            const Pt::int32_t dx2 = abs(i - fai.x2);
-            const Pt::int32_t dy1 = abs(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)) - fai.y1);
-            const Pt::int32_t dy2 = abs(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)) - fai.y2);
-            const bool        ext = false &&( (dx1 < 1 && dy1 < 1) || (dx2 < 1 && dy2 < 1) );
-            const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_FPART_TO_A8 (ypxli) ] / (ext ? 2 : 1);
-            const Pt::uint8_t a2 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_RFPART_TO_A8(ypxli) ] / (ext ? 2 : 1);
+            const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_FPART_TO_A8 (ypxli) ];
+            const Pt::uint8_t a2 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_RFPART_TO_A8(ypxli) ];
             xwLine.points[ FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)) - xwLine.minY + 1 ].push_back(
                 ArcXWLineData::XWPoint( i, a1, a2 )
             );
