@@ -48,6 +48,7 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
                        Picture.cpp
                        PixmapSurface.cpp
                        PlatinumStyle.cpp
+                       Popup.cpp
 			           ProgressBar.cpp
                        PushButton.cpp
                        Screen.cpp 

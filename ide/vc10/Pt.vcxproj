@@ -100,6 +100,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Picture.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PixmapSurface.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PlatinumStyle.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\Popup.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ProgressBar.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\PushButton.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ResizeEvent.h" />
@@ -594,6 +595,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Picture.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\PixmapSurface.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\PlatinumStyle.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\Popup.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\ProgressBar.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\PushButton.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Screen.cpp" />

@@ -34,106 +34,58 @@ namespace Pt {
 namespace Hmi {
 
 /////////////////////////////////////////////////////////////////////////////
-// ComboBoxMenu
+// ComboBoxPopup
 /////////////////////////////////////////////////////////////////////////////
 
-ComboBoxMenu::ComboBoxMenu()
-: Window(0, Window::Popup)
+ComboBoxPopup::ComboBoxPopup()
+: Popup()
 {
     setMainWidget(&_items);
 
     _items.setAutoSize(true);
-    _items.selected() += Pt::slot(*this, &ComboBoxMenu::onItemSelected);
+    _items.selected() += Pt::slot(*this, &ComboBoxPopup::onItemSelected);
 }
 
 		
-ComboBoxMenu::~ComboBoxMenu()
+ComboBoxPopup::~ComboBoxPopup()
 {
 }
 
 
-void ComboBoxMenu::addItem(ListBoxItem& item)
+void ComboBoxPopup::addItem(ListBoxItem& item)
 {   
     _items.addItem(item);
 }
 
 
-void ComboBoxMenu::removeItem(ListBoxItem& item)
+void ComboBoxPopup::removeItem(ListBoxItem& item)
 {   
     _items.removeItem(item);
 }
 
 
-void ComboBoxMenu::onItemSelected(ListBoxItem&)
+void ComboBoxPopup::onItemSelected(ListBoxItem&)
 {
     show(false);
 }
 
 
-void ComboBoxMenu::setScrollBars(bool hasScrollBars)
+void ComboBoxPopup::setScrollBars(bool hasScrollBars)
 {
     _items.setScrollBars(hasScrollBars);
 }
 
 
-Pt::Signal<ListBoxItem&>& ComboBoxMenu::selected()
+Pt::Signal<ListBoxItem&>& ComboBoxPopup::selected()
 {
     return _items.selected();
 }
 
 
-Gfx::SizeF ComboBoxMenu::preferredSize(const SizePolicy& policy) const
+Gfx::SizeF ComboBoxPopup::preferredSize(const SizePolicy& policy) const
 {
     return _items.preferredSize(policy);
 }
-
-
-void ComboBoxMenu::onShowEvent(const ShowEvent& ev)
-{
-    Base::onShowEvent(ev);
-
-    if( ev.visible() )
-    {
-        grabPointer();
-    }
-    else
-    {
-        releasePointer();
-    }
-}
-
-
-bool ComboBoxMenu::onMouseEvent(const MouseEvent& ev)
-{
-    Base::onMouseEvent(ev);
-
-    Gfx::RectF rect( size() );
-    if( rect.contains( ev.position() ) )
-        return true;
-
-    if( ev.isPress() )
-    {
-        show(false);
-    }
-
-    return true;
-}
-
-
-void ComboBoxMenu::onTouchEvent(const TouchEvent& ev)
-{
-    Base::onTouchEvent(ev);
-
-    Gfx::RectF rect( size() );
-    if( rect.contains( ev.position() ) )
-        return;
-
-    if( ev.isPress() )
-    {
-        show(false);          
-    }
-}
-
 
 /////////////////////////////////////////////////////////////////////////////
 // ComboBox

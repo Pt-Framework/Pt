@@ -30,7 +30,7 @@
 #define Pt_Hmi_ComboBox_H
 
 #include <Pt/Hmi/Control.h>
-#include <Pt/Hmi/Window.h>
+#include <Pt/Hmi/Popup.h>
 #include <Pt/Hmi/ListBox.h>
 #include <Pt/Hmi/LineEditor.h>
 #include <Pt/SmartPtr.h>
@@ -40,14 +40,14 @@ namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API ComboBoxMenu : public Window
+class PT_HMI_API ComboBoxPopup : public Popup
 {
     typedef Window Base;
 
     public:
-        ComboBoxMenu();
+        ComboBoxPopup();
 		
-        virtual ~ComboBoxMenu();
+        virtual ~ComboBoxPopup();
 
         void addItem(ListBoxItem& item);
 
@@ -58,13 +58,6 @@ class PT_HMI_API ComboBoxMenu : public Window
         Pt::Signal<ListBoxItem&>& selected();
 
         Gfx::SizeF preferredSize(const SizePolicy& policy) const;
-
-    protected:
-        void onShowEvent(const ShowEvent& ev);
-
-        bool onMouseEvent(const MouseEvent& ev);
-
-        void onTouchEvent(const TouchEvent& ev);
 
     private:
         void onItemSelected(ListBoxItem& item);
@@ -172,13 +165,13 @@ class PT_HMI_API ComboBox : public Control
         Pt::Signal<const Pt::String&> _returnPressed;
         Pt::Signal<const Pt::String&> _editingFinished;
 
-        LineEditor   _editor;
-        TextLine     _line;
-        ComboBoxMenu _popup;
-        Gfx::SizeF   _buttonSize;
-        double       _maxHeight;
-        double       _spacing;
-        bool         _isEditable;
+        LineEditor    _editor;
+        TextLine      _line;
+        ComboBoxPopup _popup;
+        Gfx::SizeF    _buttonSize;
+        double        _maxHeight;
+        double        _spacing;
+        bool          _isEditable;
         
         AutoPtr<Gfx::Brush>       _background;
         AutoPtr<Gfx::Brush>       _foreground;
