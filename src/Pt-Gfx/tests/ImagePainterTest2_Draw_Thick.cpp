@@ -67,9 +67,9 @@ static void testDrawSolidThickLine(const char* title, Image& image, Painter& pai
     // Test joins
     painter.setPen(penOCapBJoin);
     const PointF poly1a[] = { // CCW
-        PointF(650,  20),
-        PointF(800, 130),
-        PointF(700, 180)
+        PointF(650 + 10,  20),
+        PointF(800 + 10, 130),
+        PointF(700 + 10, 180)
     };
     if(ip2) ip2->drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]), false );
     else painter.drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]) );
@@ -82,13 +82,13 @@ static void testDrawSolidThickLine(const char* title, Image& image, Painter& pai
     if(ip2) ip2->drawPolyline( poly1b, sizeof(poly1b) / sizeof(poly1b[0]), true );
     else painter.drawPolyline( poly1b, sizeof(poly1b) / sizeof(poly1b[0]) );
 
-    painter.setPen(penText); painter.drawText( PointF(650, 100), "Bevel" );
+    painter.setPen(penText); painter.drawText( PointF(650 + 20, 100), "Bevel" );
 
     painter.setPen(penOCapMJoin);
     const PointF poly2a[] = { // CCW
-        PointF(650,  20 + 200),
-        PointF(800, 130 + 200),
-        PointF(700, 180 + 200)
+        PointF(650 + 10,  20 + 200),
+        PointF(800 + 10, 130 + 200),
+        PointF(700 + 10, 180 + 200)
     };
     if(ip2) ip2->drawPolyline( poly2a, sizeof(poly2a) / sizeof(poly2a[0]), false );
     else painter.drawPolyline( poly2a, sizeof(poly2a) / sizeof(poly2a[0]) );
@@ -101,13 +101,13 @@ static void testDrawSolidThickLine(const char* title, Image& image, Painter& pai
     if(ip2) ip2->drawPolyline( poly2b, sizeof(poly2b) / sizeof(poly2b[0]), true );
     else painter.drawPolyline( poly2b, sizeof(poly2b) / sizeof(poly2b[0]) );
 
-    painter.setPen(penText); painter.drawText( PointF(650, 100 + 200), "Miter" );
+    painter.setPen(penText); painter.drawText( PointF(650 + 20, 100 + 200), "Miter" );
 
     painter.setPen(penOCapRJoin);
     const PointF poly3a[] = { // CCW
-        PointF(650,  20 + 400),
-        PointF(800, 130 + 400),
-        PointF(700, 180 + 400)
+        PointF(650 + 10,  20 + 400),
+        PointF(800 + 10, 130 + 400),
+        PointF(700 + 10, 180 + 400)
     };
     if(ip2) ip2->drawPolyline( poly3a, sizeof(poly3a) / sizeof(poly3a[0]), false );
     else painter.drawPolyline( poly3a, sizeof(poly3a) / sizeof(poly3a[0]) );
@@ -120,26 +120,99 @@ static void testDrawSolidThickLine(const char* title, Image& image, Painter& pai
     if(ip2) ip2->drawPolyline( poly3b, sizeof(poly3b) / sizeof(poly3b[0]), true );
     else painter.drawPolyline( poly3b, sizeof(poly3b) / sizeof(poly3b[0]) );
 
-    painter.setPen(penText); painter.drawText( PointF(650, 100 + 400), "Round" );
+    painter.setPen(penText); painter.drawText( PointF(650 + 20, 100 + 400), "Round" );
 
     painter.setPen(penOCapNJoin);
     const PointF poly4a[] = { // CCW
-        PointF(650 - 600,  20 + 400),
-        PointF(800 - 600, 130 + 400),
-        PointF(700 - 600, 180 + 400)
+        PointF(650 - 600 - 30,  20 + 400),
+        PointF(800 - 600 - 30, 130 + 400),
+        PointF(700 - 600 - 30, 180 + 400)
     };
     if(ip2) ip2->drawPolyline( poly4a, sizeof(poly4a) / sizeof(poly4a[0]), false );
     else painter.drawPolyline( poly4a, sizeof(poly4a) / sizeof(poly4a[0]) );
 
     const PointF poly4b[] = { // CCW
-        PointF(650 - 430,  20 + 400),
-        PointF(800 - 430, 130 + 400),
-        PointF(700 - 430, 180 + 400)
+        PointF(650 - 430 - 40,  20 + 400),
+        PointF(800 - 430 - 40, 130 + 400),
+        PointF(700 - 430 - 40, 180 + 400)
     };
     if(ip2) ip2->drawPolyline( poly4b, sizeof(poly4b) / sizeof(poly4b[0]), true );
     else painter.drawPolyline( poly4b, sizeof(poly4b) / sizeof(poly4b[0]) );
 
-    painter.setPen(penText); painter.drawText( PointF(650 - 600, 100 + 400), "None" );
+    painter.setPen(penText); painter.drawText( PointF(650 - 600 - 20, 100 + 400), "None" );
+
+    // Test bezier
+    if(ip2) {
+        // Test caps
+        const PointF bezier1a[] = { // CCW
+            PointF(150 + 310, 150 + 330),
+            PointF(150 + 310, 100 + 330),
+            PointF(100 + 310, 100 + 330)
+        };
+        ip2->setPen(penSCapBJoin);
+        ip2->drawQuadraticPolybezier( bezier1a, sizeof(bezier1a) / sizeof(bezier1a[0]), false );
+
+        const PointF bezier1b[] = { // CCW
+            PointF(100 + 280, 100 + 340),
+            PointF(100 + 280, 150 + 340),
+            PointF(150 + 280, 150 + 340)
+        };
+        ip2->setPen(penRCapBJoin);
+        ip2->drawQuadraticPolybezier( bezier1b, sizeof(bezier1b) / sizeof(bezier1b[0]), false );
+
+        const PointF bezier1c[] = { // CCW
+            PointF(150 + 310, 150 + 420),
+            PointF(150 + 310, 100 + 420),
+            PointF(100 + 310, 100 + 420)
+        };
+        ip2->setPen(penICapBJoin);
+        ip2->drawQuadraticPolybezier( bezier1c, sizeof(bezier1c) / sizeof(bezier1c[0]), false );
+
+        const PointF bezier1d[] = { // CCW
+            PointF(100 + 280, 100 + 430),
+            PointF(100 + 280, 150 + 430),
+            PointF(150 + 280, 150 + 430)
+        };
+        ip2->setPen(penOCapBJoin);
+        ip2->drawQuadraticPolybezier( bezier1d, sizeof(bezier1d) / sizeof(bezier1d[0]), false );
+
+        // Test joins
+        const PointF bezier2a[] = { // CCW
+            PointF(100 + 390, 100 + 330),
+            PointF(100 + 390, 150 + 330),
+            PointF(150 + 390, 150 + 330),
+            PointF(150 + 390, 100 + 330)
+        };
+        ip2->setPen(penOCapBJoin);
+        ip2->drawQuadraticPolybezier( bezier2a, sizeof(bezier2a) / sizeof(bezier2a[0]), true );
+
+        const PointF bezier2b[] = { // CCW
+            PointF(100 + 390, 100 + 430),
+            PointF(100 + 390, 150 + 430),
+            PointF(150 + 390, 150 + 430),
+            PointF(150 + 390, 100 + 430)
+        };
+        ip2->setPen(penOCapMJoin);
+        ip2->drawQuadraticPolybezier( bezier2b, sizeof(bezier2b) / sizeof(bezier2b[0]), true );
+
+        const PointF bezier2c[] = { // CCW
+            PointF(100 + 470, 100 + 330),
+            PointF(100 + 470, 150 + 330),
+            PointF(150 + 470, 150 + 330),
+            PointF(150 + 470, 100 + 330)
+        };
+        ip2->setPen(penOCapRJoin);
+        ip2->drawQuadraticPolybezier( bezier2c, sizeof(bezier2c) / sizeof(bezier2c[0]), true );
+
+        const PointF bezier2d[] = { // CCW
+            PointF(100 + 470, 100 + 430),
+            PointF(100 + 470, 150 + 430),
+            PointF(150 + 470, 150 + 430),
+            PointF(150 + 470, 100 + 430)
+        };
+        ip2->setPen(penOCapNJoin);
+        ip2->drawQuadraticPolybezier( bezier2d, sizeof(bezier2d) / sizeof(bezier2d[0]), true );
+    }
 
     // Done
     painter.setFont( Pt::Gfx::Font(FONT_SPEC_N) );
