@@ -295,8 +295,8 @@ class Rasterizer2
         Pen              _pen;
         Image            _penBuffer;
         ConstPixel       _penPixel;
-        Pt::uint8_t      _patternBuffer[64 * PATTERN_BUFFER_SCALE_FACTOR];
-        Pt::int32_t      _fpatternMaxCtr; // In fixed-point
+        Pt::uint8_t      _patternBuffer[64 * PATTERN_BUFFER_SCALE_FACTOR]; // The user-defined pattern has 64 points
+        Pt::int32_t      _fpatternMaxCtr;                                  // In fixed-point number
 
         Brush            _brush;
         Image            _brushBuffer;

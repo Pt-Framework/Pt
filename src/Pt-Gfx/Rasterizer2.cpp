@@ -225,7 +225,7 @@ void Rasterizer2::updatePenPattern()
     static const Pt::uint8_t patternDoubleDash[] = { 0, 1, 1, 1, 0, 0,  0, 1, 1, 1, 0, 0, 0, 0, 0, 0  };
     static const Pt::uint8_t patternDotDash   [] = { 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0               };
 
-    Pt::uint8_t patternUserDefined[64];
+    Pt::uint8_t patternUserDefined[64]; // The user-defined pattern has 64 points
 
     // Select the pattern
     const Pt::uint8_t* patternSel;
