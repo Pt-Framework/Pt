@@ -383,7 +383,7 @@ void ImagePainter2::generateLineRoundCap(std::vector<PointF>& dst, float x, floa
         const float c = t * t;
         const float x = a * x1 + b * x2 + c * x3;
         const float y = a * y1 + b * y2 + c * y3;
-        dst.push_back( PointF(x, y) );
+        if( dst.empty() || (dst.back().x() != x && dst.back().y() != y) ) dst.push_back( PointF(x, y) );
     }
 }
 

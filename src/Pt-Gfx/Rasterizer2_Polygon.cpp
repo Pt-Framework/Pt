@@ -531,9 +531,6 @@ void Rasterizer2::rasterPolygonAreaFSAA2x2(const Point* points, const size_t* po
 //              Public-domain code by Darel Rex Finley, 2007
 void Rasterizer2::rasterPolygonAreaXWAA(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
 {
-    // TODO: * Fix missing pixel artifacts in all mode !
-    //       * Fix out-of-place brighter-pixel artifacts in SourceOver mode !
-
     // List of nodes that define the horizontal spans
     std::vector<Pt::int32_t> nodeX(totalPointCount * 2, 0);
 
