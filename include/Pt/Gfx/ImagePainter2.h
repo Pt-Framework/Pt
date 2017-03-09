@@ -128,6 +128,7 @@ class PT_GFX_API ImagePainter2 : public Painter
         inline void convertPointRound(std::vector<Point>& dst, const PointF* src, const size_t pointCount);
 
         void generateSolidLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, bool openingCap, bool closingCap);
+        void generatePatternedLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, bool openingCap, bool closingCap);
 
         void generateLineButtCap(std::vector<PointF>& dst, float x, float y, float wh, float px, float py, float nx, float ny);
         void generateLineSquareCap(std::vector<PointF>& dst, float x, float y, float wh, float px, float py, float nx, float ny);

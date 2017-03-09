@@ -213,7 +213,7 @@ void Rasterizer2::rasterOnePixelPolygonOutline(const Point* points, size_t point
 
     // Pattern indexing counter
     const bool        solid       = (_pen.style() == Pen::Solid);
-          Pt::int32_t fpiCtrInOut = 0;
+          Pt::int32_t fpiCtrInOut = PATTERN_BUFFER_COUNTER_START;
 
     // From point N to point (N + 1), successively
     const size_t pc1 = pointCount - 1;

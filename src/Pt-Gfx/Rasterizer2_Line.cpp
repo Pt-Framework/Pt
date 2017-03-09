@@ -79,7 +79,7 @@ void Rasterizer2::strokeOnePixelLine(const Point& a, const Point& b, DrawLineMas
     if(_pen.style() == Pen::Solid)
         rasterOnePixelSolidLine(x1, y1, x2, y2, _pen.color(), maskInOut);
     else {
-        Pt::int32_t fpiCtrInOut = 0;
+        Pt::int32_t fpiCtrInOut = PATTERN_BUFFER_COUNTER_START;
         rasterOnePixelPatternedLine(x1, y1, x2, y2, _pen.color(), fpiCtrInOut, maskInOut);
     }
 }

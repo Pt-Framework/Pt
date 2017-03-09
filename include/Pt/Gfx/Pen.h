@@ -124,7 +124,7 @@ class PT_GFX_API Pen
 
         /** @brief Returns the pen style user pattern.
         */
-        Pt::uint32_t userPattern() const;
+        Pt::uint64_t userPattern() const;
 
         /** @brief Returns the cap style.
         */
@@ -145,7 +145,7 @@ class PT_GFX_API PenData
 {
   public:
       PenData(const Color& color, std::size_t size,
-              Pen::Style style, Pt::uint32_t userPattern, Pen::CapStyle cap, Pen::JoinStyle join)
+              Pen::Style style, Pt::uint64_t userPattern, Pen::CapStyle cap, Pen::JoinStyle join)
       : _color(color)
       , _size(size)
       , _style(style )
@@ -163,7 +163,7 @@ class PT_GFX_API PenData
       Pen::Style style() const
       { return _style; }
 
-      Pt::uint32_t userPattern() const
+      Pt::uint64_t userPattern() const
       { return _userPattern; }
 
       Pen::CapStyle capStyle() const
@@ -176,7 +176,7 @@ class PT_GFX_API PenData
       Color          _color;
       std::size_t    _size;
       Pen::Style     _style;
-      Pt::uint32_t   _userPattern;
+      Pt::uint64_t   _userPattern;
       Pen::CapStyle  _capStyle;
       Pen::JoinStyle _joinStyle;
 };

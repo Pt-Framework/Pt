@@ -225,7 +225,7 @@ void Rasterizer2::updatePenPattern()
     static const Pt::uint8_t patternDoubleDash[] = { 0, 1, 1, 1, 0, 0,  0, 1, 1, 1, 0, 0, 0, 0, 0, 0  };
     static const Pt::uint8_t patternDotDash   [] = { 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0               };
 
-    Pt::uint8_t patternUserDefined[32];
+    Pt::uint8_t patternUserDefined[64];
 
     // Select the pattern
     const Pt::uint8_t* patternSel;
@@ -259,10 +259,10 @@ void Rasterizer2::updatePenPattern()
             break;
 
         case Pen::UserDefined: {
-            const Pt::int32_t upat = _pen.userPattern();
-            for(Pt::int32_t i = 0; i < 32; ++i) {
-                if( upat & (1 << i) ) patternUserDefined[31 - i] = 1;
-                else                  patternUserDefined[31 - i] = 0;
+            const Pt::uint64_t upat = _pen.userPattern();
+            for(Pt::int32_t i = 0; i < 64; ++i) {
+                if( upat & ((Pt::uint64_t) 1 << i) ) patternUserDefined[63 - i] = 1;
+                else                                 patternUserDefined[63 - i] = 0;
             }
             patternSel =        patternUserDefined;
             patternLen = sizeof(patternUserDefined);

@@ -159,7 +159,10 @@ void ImagePainter2::drawLine( const PointF& from, const PointF& to )
     // Generate a polygon that represents the thick line
     std::vector<PointF> pointsF;
 
-    generateSolidLineSegment(pointsF, from.x(), from.y(), to.x(), to.y(), true, true);
+    if(_rasterizer->pen().style() == Pen::Solid)
+        generateSolidLineSegment(pointsF, from.x(), from.y(), to.x(), to.y(), true, true);
+    else
+        generatePatternedLineSegment(pointsF, from.x(), from.y(), to.x(), to.y(), true, true);
 
     // Rasterize the polygon
     std::vector<Point> points(pointsF.size());
@@ -341,6 +344,11 @@ void ImagePainter2::generateSolidLineSegment(std::vector<PointF>& dst, float x1,
     if(!closingCap) generateLineButtCap(dst, x2, y2, wh, -dx, -dy, -nx, -ny);
 }
 
+void ImagePainter2::generatePatternedLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, bool openingCap, bool closingCap)
+{
+    // ### TODO ###
+}
+
 void ImagePainter2::generateLineButtCap(std::vector<PointF>& dst, float x, float y, float wh, float px, float py, float nx, float ny)
 {
     (void) wh;
@@ -407,18 +415,22 @@ void ImagePainter2::generateLineTriangularInCap(std::vector<PointF>& dst, float 
 
 void ImagePainter2::combineLineSegmentForOpenPolygon(std::vector<PointF>& polygon, std::vector<PointF>& outer, const std::vector<PointF>& segment)
 {
+    // ### TODO ###
 }
 
 void ImagePainter2::finalizeLineSegmentForOpenPolygon(std::vector<PointF>& polygon, const std::vector<PointF>& outer)
 {
+    // ### TODO ###
 }
 
 void ImagePainter2::combineLineSegmentForClosedPolygon(std::vector<PointF>& outer, std::vector<PointF>& inner, const std::vector<PointF>& segment)
 {
+    // ### TODO ###
 }
 
 void ImagePainter2::finalizeLineSegmentForClosedPolygon(std::vector<PointF>& outer, std::vector<PointF>& inner, const std::vector<PointF>& segment)
 {
+    // ### TODO ###
 }
 
 

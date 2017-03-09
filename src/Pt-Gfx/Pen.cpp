@@ -70,7 +70,7 @@ Pen::Style Pen::style() const
 }
 
 
-Pt::uint32_t Pen::userPattern() const
+Pt::uint64_t Pen::userPattern() const
 {
     return _penData->userPattern();
 }
