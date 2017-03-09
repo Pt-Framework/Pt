@@ -258,7 +258,7 @@ rule Moc
     local _mocFile = [ FGristFiles $(<) ] ;
     local _header = [ FGristFiles  $(>) ] ;
 
-    MakeLocate $(_mocFile) : $(LOCATE_SOURCE) ;
+    MakeLocate $(_mocFile) : $(LOCATE_OBJECTS) ;
     SEARCH on $(_header) = $(SEARCH_SOURCE) ;
     Depends $(_mocFile) : $(_header) ;
     Moc1 $(_mocFile) : $(_header) ;

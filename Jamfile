@@ -18,6 +18,9 @@ actions BuildMoc
 rule Moc
 {
     BuildFile $(<) : $(>) : BuildMoc ;
+
+    local _mocFile = [ FGristFiles $(<) ] ;
+    MakeLocate $(_mocFile) : $(LOCATE_OBJECTS) ;
 }
 
 #############################################################################
