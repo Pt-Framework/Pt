@@ -42,8 +42,8 @@ namespace Gfx {
 void Rasterizer2::rasterOnePixelPatternedLine(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut)
 {
     // Check the size of the line
-    const Pt::int32_t sizeX = abs(x2 - x1) + 1;
-    const Pt::int32_t sizeY = abs(y2 - y1) + 1;
+    const Pt::int32_t sizeX = abs(x2 - x1);
+    const Pt::int32_t sizeY = abs(y2 - y1);
     const Pt::int32_t sizeS = sizeX + sizeY;
     const Pt::int32_t sizeL = Gfx::Math::fastSqrt(sizeX * sizeX + sizeY * sizeY);
 

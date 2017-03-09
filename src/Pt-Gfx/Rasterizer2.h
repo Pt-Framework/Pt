@@ -66,8 +66,8 @@
 #define MAXIMUM_POINT Painter::MaximumPointCoordinate
 
 // Scaling factor and starting value for the pattern buffer
-#define PATTERN_BUFFER_SCALE_FACTOR  2
-#define PATTERN_BUFFER_COUNTER_START FIXED_POINT_FROM_INT(PATTERN_BUFFER_SCALE_FACTOR / 2)
+#define PATTERN_BUFFER_SCALE_FACTOR  4
+#define PATTERN_BUFFER_COUNTER_START 0
 
 // Just for easy and faster debugging ;)
 #include <stdio.h>
@@ -295,7 +295,7 @@ class Rasterizer2
         Pen              _pen;
         Image            _penBuffer;
         ConstPixel       _penPixel;
-        Pt::uint8_t      _patternBuffer[64 * PATTERN_BUFFER_SCALE_FACTOR]; // The user-defined pattern has 64 points
+        Pt::uint8_t      _patternBuffer[64 * PATTERN_BUFFER_SCALE_FACTOR]; // The pattern has 64 points
         Pt::int32_t      _fpatternMaxCtr;                                  // In fixed-point number
 
         Brush            _brush;

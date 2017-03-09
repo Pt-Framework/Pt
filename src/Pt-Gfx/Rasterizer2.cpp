@@ -219,116 +219,59 @@ void Rasterizer2::strokeText( const Point& to, const Pt::String& text )
 void Rasterizer2::updatePenPattern()
 {
     // Predefined patterns
-    static const Pt::uint8_t patternDot       [] = { 0, 1, 0, 0, 0, 0                                 };
-    static const Pt::uint8_t patternDoubleDot [] = { 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0               };
-    static const Pt::uint8_t patternDash      [] = { 0, 1, 1, 1, 0, 0, 0, 0,                          };
-    static const Pt::uint8_t patternDoubleDash[] = { 0, 1, 1, 1, 0, 0,  0, 1, 1, 1, 0, 0, 0, 0, 0, 0  };
-    static const Pt::uint8_t patternDotDash   [] = { 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0               };
-
-    Pt::uint8_t patternUserDefined[64]; // The user-defined pattern has 64 points
+    static const Pt::uint64_t patternDot        = 0xC0C0C0C0C0C0C0C0; // 1100000011000000110000001100000011000000110000001100000011000000
+    static const Pt::uint64_t patternDoubleDot  = 0xC600C600C600C600; // 1100011000000000110001100000000011000110000000001100011000000000
+    static const Pt::uint64_t patternDash       = 0xFF00FF00FF00FF00; // 1111111100000000111111110000000011111111000000001111111100000000
+    static const Pt::uint64_t patternDoubleDash = 0xFF0FF000FF0FF000; // 1111111100001111111100000000000011111111000011111111000000000000
+    static const Pt::uint64_t patternDotDash    = 0xC00FF000C00FF000; // 1100000000001111111100000000000011000000000011111111000000000000
 
     // Select the pattern
-    const Pt::uint8_t* patternSel;
-          Pt::uint8_t  patternLen;
+    Pt::uint64_t patternSel;
 
     switch(_pen.style()) {
         default:
-        case Pen::Dot:
-            patternSel =        patternDot;
-            patternLen = sizeof(patternDot);
-            break;
-
-        case Pen::DoubleDot:
-            patternSel =        patternDoubleDot;
-            patternLen = sizeof(patternDoubleDot);
-            break;
-
-        case Pen::Dash:
-            patternSel =        patternDash;
-            patternLen = sizeof(patternDash);
-            break;
-
-        case Pen::DoubleDash:
-            patternSel =        patternDoubleDash;
-            patternLen = sizeof(patternDoubleDash);
-            break;
-
-        case Pen::DotDash:
-            patternSel =        patternDotDash;
-            patternLen = sizeof(patternDotDash);
-            break;
-
-        case Pen::UserDefined: {
-            const Pt::uint64_t upat = _pen.userPattern();
-            for(Pt::int32_t i = 0; i < 64; ++i) {
-                if( upat & ((Pt::uint64_t) 1 << i) ) patternUserDefined[63 - i] = 1;
-                else                                 patternUserDefined[63 - i] = 0;
-            }
-            patternSel =        patternUserDefined;
-            patternLen = sizeof(patternUserDefined);
-            break;
-        }
+        case Pen::Dot         : patternSel = patternDot;         break;
+        case Pen::DoubleDot   : patternSel = patternDoubleDot;   break;
+        case Pen::Dash        : patternSel = patternDash;        break;
+        case Pen::DoubleDash  : patternSel = patternDoubleDash;  break;
+        case Pen::DotDash     : patternSel = patternDotDash;     break;
+        case Pen::UserDefined : patternSel = _pen.userPattern(); break;
     }
 
     // Counter for generating the pattern
     size_t gctr = 0;
 
     // Generate the pattern
-    Pt::uint8_t previous = 0;
-    bool        tooBig   = false;
-    for(Pt::int8_t i = 0; i < patternLen; ++i) {
+    bool previous = 0;
+    for(Pt::int8_t p = 0; p < 64; ++p) { // The pattern has 64 points
         // Get the pattern cell value
-        const Pt::uint8_t current = patternSel[i];
-        const Pt::uint8_t max     = PATTERN_BUFFER_SCALE_FACTOR;
+        const bool current = patternSel & ((Pt::uint64_t) 1 << p);
         // Pattern cell change from 0 to 0
         if(!previous && !current) {
-            for(Pt::uint8_t i = 1; i <= max; ++i) {
-                if(gctr >= sizeof(_patternBuffer)) {
-                    tooBig = true;
-                    break;
-                }
+            for(Pt::uint8_t i = 1; i <= PATTERN_BUFFER_SCALE_FACTOR; ++i) {
                 _patternBuffer[gctr++] = 0;
             }
         }
         // Pattern cell change from 1 to 1
         else if(previous && current) {
-            for(Pt::uint8_t i = 1; i <= max; ++i) {
-                if(gctr >= sizeof(_patternBuffer)) {
-                    tooBig = true;
-                    break;
-                }
+            for(Pt::uint8_t i = 1; i <= PATTERN_BUFFER_SCALE_FACTOR; ++i) {
                 _patternBuffer[gctr++] = 255;
             }
         }
         // Pattern cell change from 0 to 1
         else if(!previous && current) {
-            for(Pt::int32_t i = 1; i <= max; ++i) {
-                if(gctr >= sizeof(_patternBuffer)) {
-                    tooBig = true;
-                    break;
-                }
-                _patternBuffer[gctr++] = i * 255 / max;
+            for(Pt::int32_t i = 1; i <= PATTERN_BUFFER_SCALE_FACTOR; ++i) {
+                _patternBuffer[gctr++] = i * 255 / PATTERN_BUFFER_SCALE_FACTOR;
             }
         }
         // Pattern cell change from 1 to 0
         else if(previous && !current) {
-            for(Pt::int32_t i = 1; i <= max; ++i) {
-                if(gctr >= sizeof(_patternBuffer)) {
-                    tooBig = true;
-                    break;
-                }
-                _patternBuffer[gctr++] = 255 - i * 255 / max;
+            for(Pt::int32_t i = 1; i <= PATTERN_BUFFER_SCALE_FACTOR; ++i) {
+                _patternBuffer[gctr++] = 255 - i * 255 / PATTERN_BUFFER_SCALE_FACTOR;
             }
         }
         // Copy the pattern cell value
         previous = current;
-    }
-
-    // Check if the size of the generated pattern is too big to be stored in the pattern buffer
-    if(tooBig) {
-        _patternBuffer[0] = 0;
-        _fpatternMaxCtr   = FIXED_POINT_FROM_INT(1);
-        return;
     }
 
     // Transfom the pattern - without anti-aliasing
