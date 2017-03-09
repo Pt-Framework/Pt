@@ -107,7 +107,7 @@ class PT_GFX_API Pen
         /** @brief Constructs a Pen with the specified size, color and custom styles.
         */
         Pen(const Color& color, std::size_t width,
-            Pt::uint32_t stylePattern, CapStyle cap = FlatCap,
+            Pt::uint64_t stylePattern, CapStyle cap = FlatCap,
             JoinStyle join = BevelJoin);
 
         /** @brief Returns the size of the pen.

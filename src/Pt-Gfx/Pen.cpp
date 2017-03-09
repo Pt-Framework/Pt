@@ -48,7 +48,7 @@ Pen::Pen(const Color& color, std::size_t size, Style style, CapStyle cap, JoinSt
 : _penData(new PenData(color, size, style, 0, cap, join))
 { }
 
-Pen::Pen(const Color& color, std::size_t size, Pt::uint32_t stylePattern, CapStyle cap, JoinStyle join)
+Pen::Pen(const Color& color, std::size_t size, Pt::uint64_t stylePattern, CapStyle cap, JoinStyle join)
 : _penData(new PenData(color, size, UserDefined, stylePattern, cap, join))
 { }
 
