@@ -186,12 +186,14 @@ void Rasterizer2::rasterArcAreaPie(FilledArcInfo& fai)
 void Rasterizer2::arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai)
 {
     // Calculate the approximate coordinate of the point which is located at the begin angle
-    const Pt::int32_t bx = round(fai.ctrX + fai.radX * Gfx::Math::fastCos(fai.degBegin * Pt::Pi / 180));
-    const Pt::int32_t by = round(fai.ctrY - fai.radY * Gfx::Math::fastSin(fai.degBegin * Pt::Pi / 180)); // Sign inversion due to differences between cartesian and computer coordinate systems
+    const float rBeg = fai.degBegin * Pt::Pi / 180;
+    const Pt::int32_t bx = round(fai.ctrX + fai.radX * Gfx::Math::fastCos(rBeg));
+    const Pt::int32_t by = round(fai.ctrY - fai.radY * Gfx::Math::fastSin(rBeg)); // Sign inversion due to differences between cartesian and computer coordinate systems
 
     // Calculate the approximate coordinate of the point which is located at the end angle
-    const Pt::int32_t ex = round(fai.ctrX + fai.radX * Gfx::Math::fastCos(fai.degEnd   * Pt::Pi / 180));
-    const Pt::int32_t ey = round(fai.ctrY - fai.radY * Gfx::Math::fastSin(fai.degEnd   * Pt::Pi / 180)); // Sign inversion due to differences between cartesian and computer coordinate systems
+    const float rEnd = fai.degEnd * Pt::Pi / 180;
+    const Pt::int32_t ex = round(fai.ctrX + fai.radX * Gfx::Math::fastCos(rEnd));
+    const Pt::int32_t ey = round(fai.ctrY - fai.radY * Gfx::Math::fastSin(rEnd)); // Sign inversion due to differences between cartesian and computer coordinate systems
 
     // Used for finding the exact coordinate of the points which are located at the begin and end angle
     Pt::int32_t x1d = MAXIMUM_COORD; // Begin point

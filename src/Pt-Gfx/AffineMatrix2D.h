@@ -30,6 +30,8 @@
 #ifndef PT_GFX_AFFINEMATRIX2D_H
 #define PT_GFX_AFFINEMATRIX2D_H
 
+#include <vector>
+
 #include <Pt/Gfx/Math.h>
 
 
@@ -52,22 +54,32 @@ class AffineMatrix2D {
         inline void identity();
 
         inline void translate(float x, float y, MatrixUpdateMode mode = MultiplyOnLeft);
+
         inline void scaleAboutOrigin(float x, float y, MatrixUpdateMode mode = MultiplyOnLeft);
+
         inline void rotateAboutOrigin(float deg, MatrixUpdateMode mode = MultiplyOnLeft);
+
         inline void shearXDirection(float deg, MatrixUpdateMode mode = MultiplyOnLeft);
         inline void shearYDirection(float deg, MatrixUpdateMode mode = MultiplyOnLeft);
+
         inline void reflectAboutOrigin(MatrixUpdateMode mode = MultiplyOnLeft);
         inline void reflectAboutXAxis(MatrixUpdateMode mode = MultiplyOnLeft);
         inline void reflectAboutYAxis(MatrixUpdateMode mode = MultiplyOnLeft);
 
+        inline void push();
+        inline bool pop();
+
     private:
-        typedef float MatrixData[3][3];
+        struct MatrixData {
+            float v[3][3];
+        };
 
     private:
         inline void multiplyWith(const MatrixData& n, MatrixUpdateMode mode);
 
     private:
-        MatrixData _mdata;
+        MatrixData              _mdata;
+        std::vector<MatrixData> _mstack;
 };
 
 
@@ -83,18 +95,18 @@ AffineMatrix2D::~AffineMatrix2D()
 
 void AffineMatrix2D::identity()
 {
-    _mdata[0][0] = 1; _mdata[0][1] = 0;  _mdata[0][2] = 0;
-    _mdata[1][0] = 0; _mdata[1][1] = 1;  _mdata[1][2] = 0;
-    _mdata[2][0] = 0; _mdata[2][1] = 0;  _mdata[2][2] = 1;
+    _mdata.v[0][0] = 1; _mdata.v[0][1] = 0;  _mdata.v[0][2] = 0;
+    _mdata.v[1][0] = 0; _mdata.v[1][1] = 1;  _mdata.v[1][2] = 0;
+    _mdata.v[2][0] = 0; _mdata.v[2][1] = 0;  _mdata.v[2][2] = 1;
 }
 
 void AffineMatrix2D::translate(float x, float y, MatrixUpdateMode mode)
 {
     MatrixData n;
 
-    n[0][0] = 1; n[0][1] = 0;  n[0][2] = x;
-    n[1][0] = 0; n[1][1] = 1;  n[1][2] = y;
-    n[2][0] = 0; n[2][1] = 0;  n[2][2] = 1;
+    n.v[0][0] = 1; n.v[0][1] = 0;  n.v[0][2] = x;
+    n.v[1][0] = 0; n.v[1][1] = 1;  n.v[1][2] = y;
+    n.v[2][0] = 0; n.v[2][1] = 0;  n.v[2][2] = 1;
 
     multiplyWith(n, mode);
 }
@@ -103,9 +115,9 @@ void AffineMatrix2D::scaleAboutOrigin(float x, float y, MatrixUpdateMode mode)
 {
     MatrixData n;
 
-    n[0][0] = x; n[0][1] = 0;  n[0][2] = 0;
-    n[1][0] = 0; n[1][1] = y;  n[1][2] = 0;
-    n[2][0] = 0; n[2][1] = 0;  n[2][2] = 1;
+    n.v[0][0] = x; n.v[0][1] = 0;  n.v[0][2] = 0;
+    n.v[1][0] = 0; n.v[1][1] = y;  n.v[1][2] = 0;
+    n.v[2][0] = 0; n.v[2][1] = 0;  n.v[2][2] = 1;
 
     multiplyWith(n, mode);
 }
@@ -114,12 +126,13 @@ void AffineMatrix2D::rotateAboutOrigin(float deg, MatrixUpdateMode mode)
 {
     MatrixData n;
 
-    const float s = Gfx::Math::fastSin(deg * Pt::Pi / 180);
-    const float c = Gfx::Math::fastCos(deg * Pt::Pi / 180);
+    const float r = deg * Pt::Pi / 180;
+    const float s = Gfx::Math::fastSin(r);
+    const float c = Gfx::Math::fastCos(r);
 
-    n[0][0] =  c; n[0][1] = s;  n[0][2] = 0;
-    n[1][0] = -s; n[1][1] = c;  n[1][2] = 0;
-    n[2][0] =  0; n[2][1] = 0;  n[2][2] = 1;
+    n.v[0][0] =  c; n.v[0][1] = s;  n.v[0][2] = 0;
+    n.v[1][0] = -s; n.v[1][1] = c;  n.v[1][2] = 0;
+    n.v[2][0] =  0; n.v[2][1] = 0;  n.v[2][2] = 1;
 
     multiplyWith(n, mode);
 }
@@ -128,11 +141,12 @@ void AffineMatrix2D::shearXDirection(float deg, MatrixUpdateMode mode)
 {
     MatrixData n;
 
-    const float t = Gfx::Math::fastSin(deg * Pt::Pi / 180) / Gfx::Math::fastCos(deg * Pt::Pi / 180);
+    const float r = deg * Pt::Pi / 180;
+    const float t = Gfx::Math::fastSin(r) / Gfx::Math::fastCos(r);
 
-    n[0][0] = 1; n[0][1] = t;  n[0][2] = 0;
-    n[1][0] = 0; n[1][1] = 1;  n[1][2] = 0;
-    n[2][0] = 0; n[2][1] = 0;  n[2][2] = 1;
+    n.v[0][0] = 1; n.v[0][1] = t;  n.v[0][2] = 0;
+    n.v[1][0] = 0; n.v[1][1] = 1;  n.v[1][2] = 0;
+    n.v[2][0] = 0; n.v[2][1] = 0;  n.v[2][2] = 1;
 
     multiplyWith(n, mode);
 }
@@ -141,11 +155,12 @@ void AffineMatrix2D::shearYDirection(float deg, MatrixUpdateMode mode)
 {
     MatrixData n;
 
-    const float t = Gfx::Math::fastSin(deg * Pt::Pi / 180) / Gfx::Math::fastCos(deg * Pt::Pi / 180);
+    const float r = deg * Pt::Pi / 180;
+    const float t = Gfx::Math::fastSin(r) / Gfx::Math::fastCos(r);
 
-    n[0][0] = 1; n[0][1] = 0;  n[0][2] = 0;
-    n[1][0] = t; n[1][1] = 1;  n[1][2] = 0;
-    n[2][0] = 0; n[2][1] = 0;  n[2][2] = 1;
+    n.v[0][0] = 1; n.v[0][1] = 0;  n.v[0][2] = 0;
+    n.v[1][0] = t; n.v[1][1] = 1;  n.v[1][2] = 0;
+    n.v[2][0] = 0; n.v[2][1] = 0;  n.v[2][2] = 1;
 
     multiplyWith(n, mode);
 }
@@ -154,9 +169,9 @@ void AffineMatrix2D::reflectAboutOrigin(MatrixUpdateMode mode)
 {
     MatrixData n;
 
-    n[0][0] = -1; n[0][1] =  0;  n[0][2] = 0;
-    n[1][0] =  0; n[1][1] = -1;  n[1][2] = 0;
-    n[2][0] =  0; n[2][1] =  0;  n[2][2] = 1;
+    n.v[0][0] = -1; n.v[0][1] =  0;  n.v[0][2] = 0;
+    n.v[1][0] =  0; n.v[1][1] = -1;  n.v[1][2] = 0;
+    n.v[2][0] =  0; n.v[2][1] =  0;  n.v[2][2] = 1;
 
     multiplyWith(n, mode);
 }
@@ -165,9 +180,9 @@ void AffineMatrix2D::reflectAboutXAxis(MatrixUpdateMode mode)
 {
     MatrixData n;
 
-    n[0][0] = 1; n[0][1] =  0;  n[0][2] = 0;
-    n[1][0] = 0; n[1][1] = -1;  n[1][2] = 0;
-    n[2][0] = 0; n[2][1] =  0;  n[2][2] = 1;
+    n.v[0][0] = 1; n.v[0][1] =  0;  n.v[0][2] = 0;
+    n.v[1][0] = 0; n.v[1][1] = -1;  n.v[1][2] = 0;
+    n.v[2][0] = 0; n.v[2][1] =  0;  n.v[2][2] = 1;
 
     multiplyWith(n, mode);
 }
@@ -176,11 +191,24 @@ void AffineMatrix2D::reflectAboutYAxis(MatrixUpdateMode mode)
 {
     MatrixData n;
 
-    n[0][0] = -1; n[0][1] = 0;  n[0][2] = 0;
-    n[1][0] =  0; n[1][1] = 1;  n[1][2] = 0;
-    n[2][0] =  0; n[2][1] = 0;  n[2][2] = 1;
+    n.v[0][0] = -1; n.v[0][1] = 0;  n.v[0][2] = 0;
+    n.v[1][0] =  0; n.v[1][1] = 1;  n.v[1][2] = 0;
+    n.v[2][0] =  0; n.v[2][1] = 0;  n.v[2][2] = 1;
 
     multiplyWith(n, mode);
+}
+
+void AffineMatrix2D::push()
+{ _mstack.push_back(_mdata); }
+
+bool AffineMatrix2D::pop()
+{
+    if(_mstack.empty()) return false;
+
+    _mdata = _mstack.back();
+    _mstack.pop_back();
+
+    return true;
 }
 
 
@@ -194,33 +222,33 @@ void AffineMatrix2D::multiplyWith(const MatrixData& n, MatrixUpdateMode mode)
 
     switch(mode) {
         case MultiplyOnLeft  :
-            m[0][0] = n[0][0] * _mdata [0][0] + n[0][1] * _mdata [1][0] + n[0][2] * _mdata [2][0];
-            m[0][1] = n[0][0] * _mdata [0][1] + n[0][1] * _mdata [1][1] + n[0][2] * _mdata [2][1];
-            m[0][2] = n[0][0] * _mdata [0][2] + n[0][1] * _mdata [1][2] + n[0][2] * _mdata [2][2];
-            m[1][0] = n[1][0] * _mdata [0][0] + n[1][1] * _mdata [1][0] + n[1][2] * _mdata [2][0];
-            m[1][1] = n[1][0] * _mdata [0][1] + n[1][1] * _mdata [1][1] + n[1][2] * _mdata [2][1];
-            m[1][2] = n[1][0] * _mdata [0][2] + n[1][1] * _mdata [1][2] + n[1][2] * _mdata [2][2];
-            m[2][0] = n[2][0] * _mdata [0][0] + n[2][1] * _mdata [1][0] + n[2][2] * _mdata [2][0];
-            m[2][1] = n[2][0] * _mdata [0][1] + n[2][1] * _mdata [1][1] + n[2][2] * _mdata [2][1];
-            m[2][2] = n[2][0] * _mdata [0][2] + n[2][1] * _mdata [1][2] + n[2][2] * _mdata [2][2];
-            memcpy(&_mdata[0], &m[0], sizeof(_mdata));
+            m.v[0][0] = n.v[0][0] * _mdata.v[0][0] + n.v[0][1] * _mdata.v[1][0] + n.v[0][2] * _mdata.v[2][0];
+            m.v[0][1] = n.v[0][0] * _mdata.v[0][1] + n.v[0][1] * _mdata.v[1][1] + n.v[0][2] * _mdata.v[2][1];
+            m.v[0][2] = n.v[0][0] * _mdata.v[0][2] + n.v[0][1] * _mdata.v[1][2] + n.v[0][2] * _mdata.v[2][2];
+            m.v[1][0] = n.v[1][0] * _mdata.v[0][0] + n.v[1][1] * _mdata.v[1][0] + n.v[1][2] * _mdata.v[2][0];
+            m.v[1][1] = n.v[1][0] * _mdata.v[0][1] + n.v[1][1] * _mdata.v[1][1] + n.v[1][2] * _mdata.v[2][1];
+            m.v[1][2] = n.v[1][0] * _mdata.v[0][2] + n.v[1][1] * _mdata.v[1][2] + n.v[1][2] * _mdata.v[2][2];
+            m.v[2][0] = n.v[2][0] * _mdata.v[0][0] + n.v[2][1] * _mdata.v[1][0] + n.v[2][2] * _mdata.v[2][0];
+            m.v[2][1] = n.v[2][0] * _mdata.v[0][1] + n.v[2][1] * _mdata.v[1][1] + n.v[2][2] * _mdata.v[2][1];
+            m.v[2][2] = n.v[2][0] * _mdata.v[0][2] + n.v[2][1] * _mdata.v[1][2] + n.v[2][2] * _mdata.v[2][2];
+            _mdata = m;
             break;
 
         case MultiplyOnRight :
-            m[0][0] = _mdata[0][0] * n [0][0] + _mdata[0][1] * n [1][0] + _mdata[0][2] * n [2][0];
-            m[0][1] = _mdata[0][0] * n [0][1] + _mdata[0][1] * n [1][1] + _mdata[0][2] * n [2][1];
-            m[0][2] = _mdata[0][0] * n [0][2] + _mdata[0][1] * n [1][2] + _mdata[0][2] * n [2][2];
-            m[1][0] = _mdata[1][0] * n [0][0] + _mdata[1][1] * n [1][0] + _mdata[1][2] * n [2][0];
-            m[1][1] = _mdata[1][0] * n [0][1] + _mdata[1][1] * n [1][1] + _mdata[1][2] * n [2][1];
-            m[1][2] = _mdata[1][0] * n [0][2] + _mdata[1][1] * n [1][2] + _mdata[1][2] * n [2][2];
-            m[2][0] = _mdata[2][0] * n [0][0] + _mdata[2][1] * n [1][0] + _mdata[2][2] * n [2][0];
-            m[2][1] = _mdata[2][0] * n [0][1] + _mdata[2][1] * n [1][1] + _mdata[2][2] * n [2][1];
-            m[2][2] = _mdata[2][0] * n [0][2] + _mdata[2][1] * n [1][2] + _mdata[2][2] * n [2][2];
-            memcpy(&_mdata[0], &m[0], sizeof(_mdata));
+            m.v[0][0] = _mdata.v[0][0] * n.v[0][0] + _mdata.v[0][1] * n.v[1][0] + _mdata.v[0][2] * n.v[2][0];
+            m.v[0][1] = _mdata.v[0][0] * n.v[0][1] + _mdata.v[0][1] * n.v[1][1] + _mdata.v[0][2] * n.v[2][1];
+            m.v[0][2] = _mdata.v[0][0] * n.v[0][2] + _mdata.v[0][1] * n.v[1][2] + _mdata.v[0][2] * n.v[2][2];
+            m.v[1][0] = _mdata.v[1][0] * n.v[0][0] + _mdata.v[1][1] * n.v[1][0] + _mdata.v[1][2] * n.v[2][0];
+            m.v[1][1] = _mdata.v[1][0] * n.v[0][1] + _mdata.v[1][1] * n.v[1][1] + _mdata.v[1][2] * n.v[2][1];
+            m.v[1][2] = _mdata.v[1][0] * n.v[0][2] + _mdata.v[1][1] * n.v[1][2] + _mdata.v[1][2] * n.v[2][2];
+            m.v[2][0] = _mdata.v[2][0] * n.v[0][0] + _mdata.v[2][1] * n.v[1][0] + _mdata.v[2][2] * n.v[2][0];
+            m.v[2][1] = _mdata.v[2][0] * n.v[0][1] + _mdata.v[2][1] * n.v[1][1] + _mdata.v[2][2] * n.v[2][1];
+            m.v[2][2] = _mdata.v[2][0] * n.v[0][2] + _mdata.v[2][1] * n.v[1][2] + _mdata.v[2][2] * n.v[2][2];
+            _mdata = m;
             break;
 
-        default:
-            memcpy(&_mdata[0], &n[0], sizeof(_mdata));
+        default: // Replace
+            _mdata = n;
             break;
     }
 }
