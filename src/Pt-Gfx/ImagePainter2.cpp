@@ -305,12 +305,6 @@ void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float deg
 
 void ImagePainter2::generateSolidLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, bool openingCap, bool closingCap)
 {
-    // Swap the points as needed; this also make sure that the line always faces top
-    if(x1 > x2) {
-        std::swap(x1, x2);
-        std::swap(y1, y2);
-    }
-
     // Line equation : 0 = aX + By + c
     // Normal        : n = ai + bj
     const float w  = _rasterizer->pen().size();
@@ -356,6 +350,20 @@ void ImagePainter2::generatePatternedLineSegment(std::vector<PointF>& dst, float
 
 void ImagePainter2::generateLineButtCap(std::vector<PointF>& dst, float x, float y, float wh, float px, float py, float nx, float ny)
 {
+    /*
+    static bool f = true;
+    if(f) {
+        f = false;
+        _rasterizer->strokeText(Point(x + nx, y + ny), "0");
+        _rasterizer->strokeText(Point(x - nx, y - ny), "1");
+    }
+    else {
+        _rasterizer->strokeText(Point(x + nx, y + ny), "2");
+        _rasterizer->strokeText(Point(x - nx, y - ny), "3");
+    }
+    return;
+    */
+
     (void) wh;
     (void) px;
     (void) py;
@@ -402,6 +410,22 @@ void ImagePainter2::generateLineRoundCap(std::vector<PointF>& dst, float x, floa
 
 void ImagePainter2::generateLineTriangularOutCap(std::vector<PointF>& dst, float x, float y, float wh, float px, float py, float nx, float ny)
 {
+    /*
+    static bool f = true;
+    if(f) {
+        f = false;
+        _rasterizer->strokeText(Point(x + nx, y + ny), "0");
+        _rasterizer->strokeText(Point(x - px, y - py), "1");
+        _rasterizer->strokeText(Point(x - nx, y - ny), "2");
+    }
+    else {
+        _rasterizer->strokeText(Point(x + nx, y + ny), "3");
+        _rasterizer->strokeText(Point(x - px, y - py), "4");
+        _rasterizer->strokeText(Point(x - nx, y - ny), "5");
+    }
+    return;
+    */
+
     (void) wh;
 
     dst.push_back( PointF(x + nx, y + ny) );

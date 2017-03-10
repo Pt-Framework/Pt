@@ -16,6 +16,22 @@ static void testDrawSolidThickLine(const char* title, Image& image, Painter& pai
     Pen penOCapMJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::TriangularOutCap, Pen::MiterJoin);
     Pen penOCapRJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::TriangularOutCap, Pen::RoundJoin);
 
+    /*
+    painter.setFont( Pt::Gfx::Font(FONT_SPEC_S) );
+    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
+    painter.setPen(penOCapBJoin);
+    //painter.drawLine( PointF( 100, 100), PointF(300, 100) );
+    //painter.drawLine( PointF( 300, 100), PointF(100, 100) );
+    //painter.drawLine( PointF( 100, 100), PointF(100, 300) );
+    //painter.drawLine( PointF( 100, 300), PointF(100, 100) );
+    //painter.drawLine( PointF( 100, 100), PointF(300, 300) );
+    //painter.drawLine( PointF( 100, 300), PointF(300, 100) );
+    //painter.drawLine( PointF( 300, 300), PointF(100, 100) );
+    //painter.drawLine( PointF( 300, 100), PointF(100, 300) );
+    sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
+    return;
+    */
+
     // Test anti-aliasing
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
     painter.setPen(penBCapBJoin);
