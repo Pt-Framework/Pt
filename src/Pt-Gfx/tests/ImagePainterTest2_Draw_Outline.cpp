@@ -133,7 +133,7 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
     if(ip2) ip2->drawArc( PointF (730, 170), SizeF(95, 43), 30, 330, ArcMode::Chord );
     if(ip2) ip2->drawArc( PointF (753, 243), SizeF(43, 95), 30, 330, ArcMode::Pie );
 
-    painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, 0xCE3C3E0FC0FE0000 ) ); // 1100111000111100001111100000111111000000111111100000000000000000
+    painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, 0xB38F0F83F03F8000 ) ); // 1011001110001111000011111000001111110000001111111000000000000000
     painter.drawRect( RectF(PointF(260, 20), SizeF(180, 80)) );
 
     if(ip2) {

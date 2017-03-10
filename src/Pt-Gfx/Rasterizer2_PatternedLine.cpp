@@ -48,7 +48,7 @@ void Rasterizer2::rasterOnePixelPatternedLine(Pt::int32_t x1, Pt::int32_t y1, Pt
     const Pt::int32_t sizeL = Gfx::Math::fastSqrt(sizeX * sizeX + sizeY * sizeY);
 
     // Calculate the incremental factor of the pattern indexing counter
-    const Pt::int32_t fpiCtrInc = FIXED_POINT_FROM_INT(PATTERN_BUFFER_SCALE_FACTOR * sizeS) / sizeL;
+    const Pt::int32_t fpiCtrInc = FIXED_POINT_CONSTANT_ISQRT2 * PATTERN_BUFFER_SCALE_FACTOR * sizeS / sizeL;
 
     // Check for 45-degree line
     if(abs(x2 - x1) == abs(y2 - y1)) {
