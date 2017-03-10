@@ -548,8 +548,12 @@ bool ImagePainter2::thickenOpenPolygon(std::vector<PointF>& pointsF, const Point
         const PointF& to   = *basePtr;
         if(_rasterizer->pen().style() == Pen::Solid) {
             pointsFSegment.clear();
-            generateSolidLineSegment(pointsFSegment, from.x(), from.y(), to.x(), to.y(), i == 0, i == curPC2);
-            if(!combineLineSegmentForOpenPolygon(pointsFPolygon, pointsFInner, pointsFSegment, i == 1, i == curPC2)) return false;
+            generateSolidLineSegment(
+                pointsFSegment, from.x(), from.y(), to.x(), to.y(), i == 0, i == curPC2
+            );
+            if(!combineLineSegmentForOpenPolygon(
+                pointsFPolygon, pointsFInner, pointsFSegment, from, i == 1, i == curPC2
+            )) return false;
         }
         else {
             // ### TODO ###
@@ -567,7 +571,7 @@ bool ImagePainter2::thickenOpenPolygon(std::vector<PointF>& pointsF, const Point
     return true;
 }
 
-bool ImagePainter2::combineLineSegmentForOpenPolygon(std::vector<PointF>& polygon, std::vector<PointF>& inner, const std::vector<PointF>& segment, bool isBeg, bool isEnd)
+bool ImagePainter2::combineLineSegmentForOpenPolygon(std::vector<PointF>& polygon, std::vector<PointF>& inner, const std::vector<PointF>& segment, const PointF& origMeetingPoint, bool isBeg, bool isEnd)
 {
     // If the main polygon buffer is still empty, simply copy the points
     if(polygon.empty()) {
@@ -608,7 +612,9 @@ bool ImagePainter2::combineLineSegmentForOpenPolygon(std::vector<PointF>& polygo
     else {
         switch(_rasterizer->pen().joinStyle()) {
             case Pen::NoJoin:
-                return false;
+                proc.push_back(*line1b);
+                proc.push_back(origMeetingPoint);
+                proc.push_back(*line2a);
                 break;
 
             case Pen::BevelJoin:
@@ -617,7 +623,7 @@ bool ImagePainter2::combineLineSegmentForOpenPolygon(std::vector<PointF>& polygo
                 break;
 
             case Pen::MiterJoin:
-                return false;
+                proc.push_back(intersect);
                 break;
 
             case Pen::RoundJoin:
@@ -665,7 +671,9 @@ bool ImagePainter2::combineLineSegmentForOpenPolygon(std::vector<PointF>& polygo
     else {
         switch(_rasterizer->pen().joinStyle()) {
             case Pen::NoJoin:
-                return false;
+                inner.push_back(*line1b);
+                inner.push_back(origMeetingPoint);
+                inner.push_back(*line2a);
                 break;
 
             case Pen::BevelJoin:
@@ -674,7 +682,7 @@ bool ImagePainter2::combineLineSegmentForOpenPolygon(std::vector<PointF>& polygo
                 break;
 
             case Pen::MiterJoin:
-                return false;
+                inner.push_back(intersect);
                 break;
 
             case Pen::RoundJoin:
