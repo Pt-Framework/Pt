@@ -881,6 +881,12 @@ void Widget::resize(const Gfx::SizeF& s, Pt::uint64_t origin)
 }
 
 
+void Widget::resize(double width, double height)
+{
+    resize( Gfx::SizeF(width, height) );
+}
+
+
 void Widget::onResizeEvent(const ResizeEvent& ev)
 {   
     layout();

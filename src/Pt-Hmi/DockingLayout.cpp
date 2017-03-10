@@ -107,11 +107,11 @@ void DockingLayout::onLayout()
                 double x = posLeft + (*it)->margin().left();
                 double y = posTop  + (*it)->margin().top();            
 
-                const Gfx::SizeF childSize( (*it)->size().width(), 
+                const Gfx::SizeF childSize( (*it)->preferredSize().width(), 
                                             (posBottom - posTop) - 
                                             (*it)->margin().topBottom() );
 
-                posLeft += (*it)->size().width() + (*it)->margin().leftRight(); 
+                posLeft += (*it)->preferredSize().width() + (*it)->margin().leftRight(); 
                             
                 Gfx::PointF pos(x, y);                   
                 (*it)->setGeometry(pos, childSize, vid());              

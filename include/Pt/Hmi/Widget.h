@@ -278,6 +278,8 @@ class PT_HMI_API Widget : public Visual
         void resize(const Gfx::SizeF& s, 
                     Pt::uint64_t origin = NoneId);
 
+        void resize(double width, double height);
+
         const Gfx::RectF geometry() const;
 
         void setGeometry(const Gfx::PointF& pos, 
