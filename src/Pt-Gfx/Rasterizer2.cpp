@@ -89,12 +89,12 @@ FontMetrics Rasterizer2::fontMetrics( const Font& font, const Pt::String& text )
 // ======================================================================================
 
 Rasterizer2::Rasterizer2(Image& image)
-: _image(&image)
-, _text( new DrawText2() )
-, _font()
-, _compositionMode(CompositionMode::SourceCopy)
-, _penPixel(_image->view(), 0, 0)
-, _brushPixel(_image->view(), 0, 0)
+: _image          ( &image )
+, _text           ( new DrawText2() )
+, _font           ( )
+, _compositionMode( CompositionMode::SourceCopy )
+, _penPixel       ( _image->view(), 0, 0 )
+, _brushPixel     ( _image->view(), 0, 0 )
 {
     _text->setFont(_font);
     updateClip();

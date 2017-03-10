@@ -46,7 +46,6 @@
 #include <Pt/System/Mutex.h>
 #include <Pt/System/Path.h>
 
-#include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gfx/Rect.h>

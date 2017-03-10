@@ -44,6 +44,7 @@ namespace Pt {
 namespace Gfx {
 
 
+class AffineMatrix2D;
 class Rasterizer2;
 
 class PT_GFX_API ImagePainter2 : public Painter
@@ -143,8 +144,9 @@ class PT_GFX_API ImagePainter2 : public Painter
         void finalizeLineSegmentForClosedPolygon(std::vector<PointF>& outer, std::vector<PointF>& inner, const std::vector<PointF>& segment);
 
     private:
-        RectF        _clip;
-        Rasterizer2* _rasterizer;
+        RectF           _clip;
+        AffineMatrix2D* _affineMatrix2D;
+        Rasterizer2*    _rasterizer;
 };
 
 
