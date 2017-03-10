@@ -151,7 +151,7 @@ void ImagePainter2::drawText( const PointF& toIn, const String& text )
 
 void ImagePainter2::drawLine( const PointF& from, const PointF& to )
 {
-    // Rasterize one pixel line
+    // Rasterize one-pixel line
     if(_rasterizer->pen().size() == 1) {
         // Copy the points
         const Point a( (Pt::int32_t) from.x(), (Pt::int32_t) from.y() );
@@ -170,7 +170,7 @@ void ImagePainter2::drawLine( const PointF& from, const PointF& to )
         generatePatternedLineSegment(pointsF, from.x(), from.y(), to.x(), to.y(), true, true);
 
     // Rasterize the polygon
-    std::vector<Point> points(pointsF.size());
+    std::vector<Point> points;
 
     convertPointRound(points, pointsF.data(), pointsF.size());
     _rasterizer->strokePolygonSeparate(points.data(), points.size());
@@ -201,24 +201,54 @@ void ImagePainter2::fillRect( const RectF& rect )
 
 void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount, bool autoClose )
 {
-    // Copy the points
-    std::vector<Point> points(pointCount);
-
-    convertPointTrunc(points, ps, pointCount);
-
-    // Rasterize the polygon
+    // Rasterize one-pixel polyline
     if(_rasterizer->pen().size() == 1) {
+        // Copy the points
+        std::vector<Point> points;
+        convertPointTrunc(points, ps, pointCount);
+        // Rasterize the polygon
         _rasterizer->strokeOnePixelPolygon(points.data(), pointCount, autoClose);
         return;
     }
 
-    // TODO: Implement polyline with thick lines, joins, and caps here!
+
+    // Separate the polygons convert them and recombine them
+    size_t startIndex = 0;
+
+    std::vector<PointF> pointsF;
+    pointsF.reserve(pointCount * 2);
+
+    for(size_t i = 0; i <= pointCount; ++i) {
+        // Search for the end and/or separator points
+        if( i == pointCount || (ps[i].x() > MAXIMUM_COORD && ps[i].y() > MAXIMUM_COORD) ) {
+            // Get the base pointer and the number of points for this polygon
+            const PointF* basePtr = ps + startIndex;
+                  size_t  curPCnt = i - startIndex;
+            // Determine if this polygon is a closed polygon
+            bool closedPolygon = autoClose;
+            if(basePtr[0] == basePtr[curPCnt - 1]) {
+                closedPolygon = true;
+                --curPCnt;
+            }
+            // Thicken the polygon
+            if(closedPolygon) thickenClosedPolygon(pointsF, basePtr, curPCnt);
+            else              thickenOpenPolygon  (pointsF, basePtr, curPCnt);
+            // Update the start index
+            startIndex = i + 1;
+        }
+    }
+
+    // Rasterize the polygon
+    std::vector<Point> points;
+
+    convertPointRound(points, pointsF.data(), pointsF.size());
+    _rasterizer->strokePolygonSeparate(points.data(), points.size());
 }
 
 void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
 {
     // Copy the points
-    std::vector<Point> points(pointCount);
+    std::vector<Point> points;
 
     convertPointTrunc(points, ps, pointCount);
 
@@ -233,11 +263,12 @@ void ImagePainter2::drawQuadraticPolybezier(const PointF* ps, const size_t point
     if( !autoClose && (pointCount < 3 || !(pointCount & 1)) ) return; // The number of points must be >= 3 and odd
 
     // Copy the points
-    std::vector<Point> points(autoClose ? (pointCount + 1) : pointCount);
+    std::vector<Point> points;
+    if(autoClose) points.reserve(pointCount + 1);
 
     convertPointTrunc(points, ps, pointCount);
 
-    if(autoClose) points[pointCount].set( (Pt::int32_t) ps[0].x(), (Pt::int32_t) ps[0].y() );
+    if(autoClose) points.push_back( Point( (Pt::int32_t) ps[0].x(), (Pt::int32_t) ps[0].y() ) );
 
     // Rasterize the bezier
     if(_rasterizer->pen().size() == 1) {
@@ -442,12 +473,22 @@ void ImagePainter2::generateLineTriangularInCap(std::vector<PointF>& dst, float 
     dst.push_back( PointF(x - nx, y - ny) );
 }
 
+void ImagePainter2::thickenOpenPolygon(std::vector<PointF>& pointsF, const PointF* basePtr, size_t curPCnt)
+{
+    // ### TODO ###
+}
+
 void ImagePainter2::combineLineSegmentForOpenPolygon(std::vector<PointF>& polygon, std::vector<PointF>& outer, const std::vector<PointF>& segment)
 {
     // ### TODO ###
 }
 
 void ImagePainter2::finalizeLineSegmentForOpenPolygon(std::vector<PointF>& polygon, const std::vector<PointF>& outer)
+{
+    // ### TODO ###
+}
+
+void ImagePainter2::thickenClosedPolygon(std::vector<PointF>& pointsF, const PointF* basePtr, size_t curPCnt)
 {
     // ### TODO ###
 }

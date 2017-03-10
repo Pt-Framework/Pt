@@ -137,9 +137,11 @@ class PT_GFX_API ImagePainter2 : public Painter
         void generateLineTriangularOutCap(std::vector<PointF>& dst, float x, float wh, float y, float px, float py, float nx, float ny);
         void generateLineTriangularInCap(std::vector<PointF>& dst, float x, float wh, float y, float px, float py, float nx, float ny);
 
+        void thickenOpenPolygon(std::vector<PointF>& pointsF, const PointF* basePtr, size_t curPCnt);
         void combineLineSegmentForOpenPolygon(std::vector<PointF>& polygon, std::vector<PointF>& outer, const std::vector<PointF>& segment);
         void finalizeLineSegmentForOpenPolygon(std::vector<PointF>& polygon, const std::vector<PointF>& outer);
 
+        void thickenClosedPolygon(std::vector<PointF>& pointsF, const PointF* basePtr, size_t curPCnt);
         void combineLineSegmentForClosedPolygon(std::vector<PointF>& outer, std::vector<PointF>& inner, const std::vector<PointF>& segment);
         void finalizeLineSegmentForClosedPolygon(std::vector<PointF>& outer, std::vector<PointF>& inner, const std::vector<PointF>& segment);
 
@@ -156,14 +158,20 @@ class PT_GFX_API ImagePainter2 : public Painter
 
 void ImagePainter2::convertPointTrunc(std::vector<Point>& dst, const PointF* src, const size_t pointCount)
 {
+    const size_t ofs = dst.size();
+    dst.resize(ofs + pointCount);
+
     for(size_t i = 0; i < pointCount; ++i)
-        dst[i].set( (Pt::int32_t) src[i].x(), (Pt::int32_t) src[i].y() );
+        dst[i + ofs].set( (Pt::int32_t) src[i].x(), (Pt::int32_t) src[i].y() );
 }
 
 void ImagePainter2::convertPointRound(std::vector<Point>& dst, const PointF* src, const size_t pointCount)
 {
+    const size_t ofs = dst.size();
+    dst.resize(ofs + pointCount);
+
     for(size_t i = 0; i < pointCount; ++i)
-        dst[i].set( (Pt::int32_t) round(src[i].x()), (Pt::int32_t) round(src[i].y()) );
+        dst[i + ofs].set( (Pt::int32_t) round(src[i].x()), (Pt::int32_t) round(src[i].y()) );
 }
 
 
