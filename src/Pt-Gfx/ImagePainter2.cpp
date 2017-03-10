@@ -39,6 +39,53 @@ namespace Pt {
 namespace Gfx {
 
 
+
+// ======================================================================================
+// ===== Internal Helper Functions ======================================================
+// ======================================================================================
+
+static bool intersectLine(bool& inLine, PointF& intersect, const PointF& line1a, const PointF& line1b, const PointF& line2a, const PointF& line2b)
+{
+    // The first line
+    const float x11   = line1a.x();
+    const float y11   = line1a.y();
+    const float x12   = line1b.x();
+    const float y12   = line1b.y();
+    const float minX1 = std::min(x11, x12);
+    const float minY1 = std::min(y11, y12);
+    const float maxX1 = std::max(x11, x12);
+    const float maxY1 = std::max(y11, y12);
+    const float a1    = y12 - y11;
+    const float b1    = x11 - x12;
+    const float c1    = -(x11 * y12 - x12 * y11);
+
+    // The second line
+    const float x21   = line1a.x();
+    const float y21   = line1a.y();
+    const float x22   = line1b.x();
+    const float y22   = line1b.y();
+    const float minX2 = std::min(x21, x22);
+    const float minY2 = std::min(y21, y22);
+    const float maxX2 = std::max(x21, x22);
+    const float maxY2 = std::max(y21, y22);
+    const float a2    = y22 - y21;
+    const float b2    = x21 - x22;
+    const float c2    = -(x21 * y22 - x22 * y21);
+
+    // Check if there is intersection
+    const float denom = a1 * b2 - a2 * b1;
+    if(denom == 0.0f) return false;
+
+    // Calculate the intersection point
+    const float intX  = (b1 * c2 - b2 * c1) / denom;
+    const float intY  = (a2 * c1 - a1 * c2) / denom;
+
+    // Determine if the intersection point is inside the line
+    inLine = (intX >= minX1 && intX <= maxX1 && intY >= minY1 && intY <= maxY1)
+           | (intX >= minX2 && intX <= maxX2 && intY >= minY2 && intY <= maxY2);
+}
+
+
 // ======================================================================================
 // ===== Static Public Member Functions =================================================
 // ======================================================================================
@@ -475,11 +522,38 @@ void ImagePainter2::generateLineTriangularInCap(std::vector<PointF>& dst, float 
 
 void ImagePainter2::thickenOpenPolygon(std::vector<PointF>& pointsF, const PointF* basePtr, size_t curPCnt)
 {
-    // ### TODO ###
+    std::vector<PointF> pointsFPolygon;
+    std::vector<PointF> pointsFOuter;
+    std::vector<PointF> pointsFSegment;
+
+    const size_t curPC1 = curPCnt - 1;
+    const size_t curPC2 = curPCnt - 2;
+
+    // Walk thorugh the polygon's lines
+    for(size_t i = 0; i < curPC1; ++i) {
+        const PointF& from = *basePtr++;
+        const PointF& to   = *basePtr;
+        if(_rasterizer->pen().style() == Pen::Solid) {
+            generateSolidLineSegment(pointsFSegment, from.x(), from.y(), to.x(), to.y(), !i, i == curPC2);
+            combineLineSegmentForOpenPolygon(pointsFPolygon, pointsFOuter, pointsFSegment);
+        }
+        else {
+            // ### TODO ###
+        }
+    }
+
+    finalizeLineSegmentForOpenPolygon(pointsFPolygon, pointsFOuter);
+
+    // Combine the polygon data
+    if(!pointsF.empty()) pointsF.push_back(Painter::PolygonSeparatorPointF);
+    pointsF.insert(pointsF.end(), pointsFPolygon.begin(), pointsFPolygon.end());
 }
 
 void ImagePainter2::combineLineSegmentForOpenPolygon(std::vector<PointF>& polygon, std::vector<PointF>& outer, const std::vector<PointF>& segment)
 {
+
+//    static bool intersectLine(bool& inLine, PointF& intersect, const PointF& line1a, const PointF& line1b, const PointF& line2a, const PointF& line2b)
+
     // ### TODO ###
 }
 
