@@ -39,6 +39,10 @@ namespace Pt {
 namespace Gfx {
 namespace Math {
 
+    
+// The constant Pi in 32-bit floating-point
+static const float Pi = 3.14159265f;
+
 
 // The real implementation
 // NOTE: They are separated from the real public API so that we can benchmark them easily

@@ -89,11 +89,11 @@ void Rasterizer2::strokeOnePixelEllipseArc(const Point& topLeft, const Size& siz
         while(degEnd < -360) degEnd += 360;
         while(degEnd >  360) degEnd -= 360;
         // Calculate the approximate coordinate of the point which is located at the begin angle
-        const float rBeg = degBegin * Pt::Pi / 180;
+        const float rBeg = degBegin * Gfx::Math::Pi / 180;
         bx = round(ctrX + radX * Gfx::Math::fastCos(rBeg));
         by = round(ctrY - radY * Gfx::Math::fastSin(rBeg)); // Sign inversion due to differences between cartesian and computer coordinate systems
         // Calculate the approximate coordinate of the point which is located at the end angle
-        const float rEnd = degEnd * Pt::Pi / 180;
+        const float rEnd = degEnd * Gfx::Math::Pi / 180;
         ex = round(ctrX + radX * Gfx::Math::fastCos(rEnd));
         ey = round(ctrY - radY * Gfx::Math::fastSin(rEnd)); // Sign inversion due to differences between cartesian and computer coordinate systems
     }
