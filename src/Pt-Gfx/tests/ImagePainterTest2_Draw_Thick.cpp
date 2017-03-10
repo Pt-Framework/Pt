@@ -83,17 +83,17 @@ static void testDrawSolidThickLine(const char* title, Image& image, Painter& pai
     // Test joins
     painter.setPen(penOCapBJoin);
     const PointF poly1a[] = { // CCW
-        PointF(650 + 10,  20),
+        PointF(700 + 10, 180),
         PointF(800 + 10, 130),
-        PointF(700 + 10, 180)
+        PointF(650 + 10,  20)
     };
     if(ip2) ip2->drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]), false );
     else painter.drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]) );
 
     const PointF poly1b[] = { // CCW
-        PointF(650 + 170,  20),
+        PointF(700 + 170, 180),
         PointF(800 + 170, 130),
-        PointF(700 + 170, 180)
+        PointF(650 + 170,  20)
     };
     if(ip2) ip2->drawPolyline( poly1b, sizeof(poly1b) / sizeof(poly1b[0]), true );
     else painter.drawPolyline( poly1b, sizeof(poly1b) / sizeof(poly1b[0]) );
@@ -102,17 +102,17 @@ static void testDrawSolidThickLine(const char* title, Image& image, Painter& pai
 
     painter.setPen(penOCapMJoin);
     const PointF poly2a[] = { // CCW
-        PointF(650 + 10,  20 + 200),
+        PointF(700 + 10, 180 + 200),
         PointF(800 + 10, 130 + 200),
-        PointF(700 + 10, 180 + 200)
+        PointF(650 + 10,  20 + 200)
     };
     if(ip2) ip2->drawPolyline( poly2a, sizeof(poly2a) / sizeof(poly2a[0]), false );
     else painter.drawPolyline( poly2a, sizeof(poly2a) / sizeof(poly2a[0]) );
 
     const PointF poly2b[] = { // CCW
-        PointF(650 + 170,  20 + 200),
+        PointF(700 + 170, 180 + 200),
         PointF(800 + 170, 130 + 200),
-        PointF(700 + 170, 180 + 200)
+        PointF(650 + 170,  20 + 200)
     };
     if(ip2) ip2->drawPolyline( poly2b, sizeof(poly2b) / sizeof(poly2b[0]), true );
     else painter.drawPolyline( poly2b, sizeof(poly2b) / sizeof(poly2b[0]) );
@@ -129,9 +129,9 @@ static void testDrawSolidThickLine(const char* title, Image& image, Painter& pai
     else painter.drawPolyline( poly3a, sizeof(poly3a) / sizeof(poly3a[0]) );
 
     const PointF poly3b[] = { // CCW
-        PointF(650 + 170,  20 + 400),
+        PointF(700 + 170, 180 + 400),
         PointF(800 + 170, 130 + 400),
-        PointF(700 + 170, 180 + 400)
+        PointF(650 + 170,  20 + 400)
     };
     if(ip2) ip2->drawPolyline( poly3b, sizeof(poly3b) / sizeof(poly3b[0]), true );
     else painter.drawPolyline( poly3b, sizeof(poly3b) / sizeof(poly3b[0]) );
@@ -140,17 +140,17 @@ static void testDrawSolidThickLine(const char* title, Image& image, Painter& pai
 
     painter.setPen(penOCapNJoin);
     const PointF poly4a[] = { // CCW
-        PointF(650 - 600 - 30,  20 + 400),
+        PointF(700 - 600 - 30, 180 + 400),
         PointF(800 - 600 - 30, 130 + 400),
-        PointF(700 - 600 - 30, 180 + 400)
+        PointF(650 - 600 - 30,  20 + 400)
     };
     if(ip2) ip2->drawPolyline( poly4a, sizeof(poly4a) / sizeof(poly4a[0]), false );
     else painter.drawPolyline( poly4a, sizeof(poly4a) / sizeof(poly4a[0]) );
 
     const PointF poly4b[] = { // CCW
-        PointF(650 - 430 - 40,  20 + 400),
+        PointF(700 - 430 - 40, 180 + 400),
         PointF(800 - 430 - 40, 130 + 400),
-        PointF(700 - 430 - 40, 180 + 400)
+        PointF(650 - 430 - 40,  20 + 400)
     };
     if(ip2) ip2->drawPolyline( poly4b, sizeof(poly4b) / sizeof(poly4b[0]), true );
     else painter.drawPolyline( poly4b, sizeof(poly4b) / sizeof(poly4b[0]) );

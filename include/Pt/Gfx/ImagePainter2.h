@@ -92,24 +92,27 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual void drawRect(const RectF& rect);
 
+        // NOTE: The points must move in counter-clockwise (CCW) direction or something wrong will be drawn!
         virtual void drawPolyline(const PointF* points, const size_t pointCount, bool autoClose);
 
-        // autoClose == false : the number of points must be >= 3 and odd
-        // autoClose == true  : the number of points must be >= 4 and even
+        // NOTE: The points must move in counter-clockwise (CCW) direction or something wrong will be drawn!
+        //       When autoClose == false : the number of points must be >= 3 and odd
+        //       When autoClose == true  : the number of points must be >= 4 and even
         virtual void drawQuadraticPolybezier(const PointF* points, const size_t pointCount, bool autoClose);
 
         virtual void drawEllipse(const PointF& topLeft, const SizeF& size);
 
-        // NOTE: The begin and end angle must move in counter-clockwise direction or something wrong will be drawn!
+        // NOTE: The begin and end angle must move in counter-clockwise (CCW) direction or something wrong will be drawn!
         virtual void drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
         virtual void fillRect(const RectF& rect);
 
+        // NOTE: The points must move in counter-clockwise (CCW) direction or something wrong will be drawn!
         virtual void fillPolygon(const PointF* points, const size_t pointCount);
 
         virtual void fillEllipse(const PointF& topLeft, const SizeF& size);
 
-        // NOTE: The begin and end angle must move in counter-clockwise direction or something wrong will be drawn!
+        // NOTE: The begin and end angle must move in counter-clockwise (CCW) direction or something wrong will be drawn!
         virtual void fillArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
     public:

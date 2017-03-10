@@ -678,7 +678,7 @@ bool ImagePainter2::combineLineSegmentForOpenPolygon(std::vector<PointF>& polygo
 
 void ImagePainter2::finalizeLineSegmentForOpenPolygon(std::vector<PointF>& polygon, const std::vector<PointF>& inner)
 {
-    polygon.insert(polygon.end(), inner.rbegin(), inner.rend());
+   // polygon.insert(polygon.end(), inner.rbegin(), inner.rend());
 }
 
 bool ImagePainter2::thickenClosedPolygon(std::vector<PointF>& pointsF, const PointF* basePtr, size_t curPCnt)
