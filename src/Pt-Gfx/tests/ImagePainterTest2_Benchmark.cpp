@@ -73,7 +73,7 @@ static void doBenchmark(CompositionMode cm)
     if(BENCHMARK_SOLID_THICK_LINE) {
         time1 = benchDrawSolidThickLine<ImagePainter >(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
         std::clog << "    Solid     thick line             @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
-        time2 = benchDrawSolidLine<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
+        time2 = benchDrawSolidThickLine<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
         std::clog << "    Solid     thick line NOAA        @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         time2 = benchDrawSolidThickLine<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::Standard);

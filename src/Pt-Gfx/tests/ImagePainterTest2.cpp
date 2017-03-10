@@ -90,8 +90,8 @@ using namespace Pt::Gfx;
 
 #define BENCHMARK_TEXT                      0
 #define BENCHMARK_ROTATED_TEXT              0
-#define BENCHMARK_SOLID_LINE                0
-#define BENCHMARK_PATTERNED_LINE            0
+#define BENCHMARK_SOLID_LINE                1
+#define BENCHMARK_PATTERNED_LINE            1
 #define BENCHMARK_SOLID_THICK_LINE          1
 #define BENCHMARK_PATTERNED_THICK_LINE      1
 #define BENCHMARK_ELLIPSE                   0

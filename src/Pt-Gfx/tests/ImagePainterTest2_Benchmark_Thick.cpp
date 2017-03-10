@@ -15,7 +15,7 @@ static size_t benchDrawSolidThickLine(int loopCount, CompositionMode cm, AntiAli
         clock.start();
 
         if(ip2) ip2->setAntiAliasingMode(antiAliasingMode);
-        painter.setPen( Pen(Color::fromRgb8(255, 255, 255, 175), 5, Pen::Solid, Pen::FlatCap, Pen::BevelJoin) );
+        painter.setPen( Pen(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Solid, Pen::FlatCap, Pen::BevelJoin) );
         painter.drawLine( PointF(50, 50), PointF(400, 150) );
 
         sum += clock.stop().toUSecs();
