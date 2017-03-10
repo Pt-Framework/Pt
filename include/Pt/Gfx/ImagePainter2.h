@@ -138,8 +138,8 @@ class PT_GFX_API ImagePainter2 : public Painter
         void generateLineTriangularInCap(std::vector<PointF>& dst, float x, float wh, float y, float px, float py, float nx, float ny);
 
         bool thickenOpenPolygon(std::vector<PointF>& pointsF, const PointF* basePtr, size_t curPCnt);
-        bool combineLineSegmentForOpenPolygon(std::vector<PointF>& polygon, std::vector<PointF>& outer, const std::vector<PointF>& segment, bool isBeg, bool isEnd);
-        void finalizeLineSegmentForOpenPolygon(std::vector<PointF>& polygon, const std::vector<PointF>& outer);
+        bool combineLineSegmentForOpenPolygon(std::vector<PointF>& polygon, std::vector<PointF>& inner, const std::vector<PointF>& segment, bool isBeg, bool isEnd);
+        void finalizeLineSegmentForOpenPolygon(std::vector<PointF>& polygon, const std::vector<PointF>& inner);
 
         bool thickenClosedPolygon(std::vector<PointF>& pointsF, const PointF* basePtr, size_t curPCnt);
         bool combineLineSegmentForClosedPolygon(std::vector<PointF>& outer, std::vector<PointF>& inner, const std::vector<PointF>& segment);

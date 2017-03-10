@@ -60,10 +60,10 @@ static bool intersectLine(bool& inLine, PointF& intersect, const PointF& line1a,
     const float c1    = -(x11 * y12 - x12 * y11);
 
     // The second line
-    const float x21   = line1a.x();
-    const float y21   = line1a.y();
-    const float x22   = line1b.x();
-    const float y22   = line1b.y();
+    const float x21   = line2a.x();
+    const float y21   = line2a.y();
+    const float x22   = line2b.x();
+    const float y22   = line2b.y();
     const float minX2 = std::min(x21, x22);
     const float minY2 = std::min(y21, y22);
     const float maxX2 = std::max(x21, x22);
@@ -74,7 +74,12 @@ static bool intersectLine(bool& inLine, PointF& intersect, const PointF& line1a,
 
     // Check if there is intersection
     const float denom = a1 * b2 - a2 * b1;
-    if(denom == 0.0f) return false;
+    if(denom == 0.0f) {
+        //lprintf("(%f, %f) - (%f, %f)\n", x11, y11, x12, y12);
+        //lprintf("(%f, %f) - (%f, %f)\n", x21, y21, x22, y22);
+        //lprintf("\n");
+        return false;
+    }
 
     // Calculate the intersection point
     const float intX  = (b1 * c2 - b2 * c1) / denom;
@@ -561,7 +566,7 @@ bool ImagePainter2::thickenOpenPolygon(std::vector<PointF>& pointsF, const Point
     return true;
 }
 
-bool ImagePainter2::combineLineSegmentForOpenPolygon(std::vector<PointF>& polygon, std::vector<PointF>& outer, const std::vector<PointF>& segment, bool isBeg, bool isEnd)
+bool ImagePainter2::combineLineSegmentForOpenPolygon(std::vector<PointF>& polygon, std::vector<PointF>& inner, const std::vector<PointF>& segment, bool isBeg, bool isEnd)
 {
     // If the target polygon is still empty, simply copy the points
     if(polygon.empty()) {
@@ -577,8 +582,8 @@ bool ImagePainter2::combineLineSegmentForOpenPolygon(std::vector<PointF>& polygo
     proc.reserve(polygon.size() + segment.size() + penWidth + 3);
 
     // Store points #0 to #(N-2) from the current polygon
-    const size_t N = polygon.size() - 1;
-    for(size_t i = 0; i <= N - 2; ++i) proc.push_back(polygon[i]);
+    const size_t N1 = polygon.size() - 1;
+    for(size_t i = 0; i <= N1 - 2; ++i) proc.push_back(polygon[i]);
 
     // Get the "outside" lines
     const PointF* line1a = &polygon[1];
@@ -586,8 +591,8 @@ bool ImagePainter2::combineLineSegmentForOpenPolygon(std::vector<PointF>& polygo
     const PointF* line2a = &segment[1];
     const PointF* line2b = &segment[2];
     if(isBeg) {
-        line1a = &polygon[N - 2];
-        line1b = &polygon[N - 1];
+        line1a = &polygon[N1 - 2];
+        line1b = &polygon[N1 - 1];
     }
 
     // Intersect the "outside" lines
@@ -596,14 +601,84 @@ bool ImagePainter2::combineLineSegmentForOpenPolygon(std::vector<PointF>& polygo
     if(!intersectLine(inLine, intersect, *line1a, *line1b, *line2a, *line2b)) return false;
 
     // Store the "outside" line's points
+    if(inLine) {
+        proc.push_back(intersect);
+    }
+    else {
+        switch(_rasterizer->pen().joinStyle()) {
+            case Pen::NoJoin:
+                return false;
+                break;
+
+            case Pen::BevelJoin:
+                proc.push_back(*line1b);
+                proc.push_back(*line2a);
+                break;
+
+            case Pen::MiterJoin:
+                return false;
+                break;
+
+            case Pen::RoundJoin:
+                return false;
+                break;
+
+            default:
+                return false;
+                break;
+        }
+    }
+
+    // Store points #2 to #N from the segment
+    const size_t N2 = segment.size() - 1;
+    for(size_t i = 2; i <= N2; ++i) proc.push_back(segment[i]);
+
+    // Get the "inside" lines
+    line1a = &polygon[0 ];
+    line1b = &polygon[N1];
+    line2a = &segment[0 ];
+    line2b = &segment[N2];
+    if(!inner.empty()) line1a = &inner.back();
+
+    // Intersect the "inside" lines
+    if(!intersectLine(inLine, intersect, *line1a, *line1b, *line2a, *line2b)) return false;
+
+    // Store the "inside" line's points
+    if(inLine) {
+        inner.push_back(intersect);
+    }
+    else {
+        switch(_rasterizer->pen().joinStyle()) {
+            case Pen::NoJoin:
+                return false;
+                break;
+
+            case Pen::BevelJoin:
+                inner.push_back(*line1b);
+                inner.push_back(*line2a);
+                break;
+
+            case Pen::MiterJoin:
+                return false;
+                break;
+
+            case Pen::RoundJoin:
+                return false;
+                break;
+
+            default:
+                return false;
+                break;
+        }
+    }
 
     // Done
     return true;
 }
 
-void ImagePainter2::finalizeLineSegmentForOpenPolygon(std::vector<PointF>& polygon, const std::vector<PointF>& outer)
+void ImagePainter2::finalizeLineSegmentForOpenPolygon(std::vector<PointF>& polygon, const std::vector<PointF>& inner)
 {
-    // ### TODO ###
+    polygon.insert(polygon.end(), inner.rbegin(), inner.rend());
 }
 
 bool ImagePainter2::thickenClosedPolygon(std::vector<PointF>& pointsF, const PointF* basePtr, size_t curPCnt)
