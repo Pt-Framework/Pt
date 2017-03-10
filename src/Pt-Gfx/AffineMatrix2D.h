@@ -51,6 +51,8 @@ class AffineMatrix2D {
         inline AffineMatrix2D();
         inline ~AffineMatrix2D();
 
+        inline void clear();
+
         inline void identity();
 
         inline void translate(float x, float y, MatrixUpdateMode mode = MultiplyOnLeft);
@@ -68,6 +70,10 @@ class AffineMatrix2D {
 
         inline void push();
         inline bool pop();
+
+        inline void transformPoint(float& x, float &y);
+        inline void transformPoint(float& dx, float& dy, float sx, float sy);
+
 
     private:
         struct MatrixData {
@@ -92,6 +98,12 @@ AffineMatrix2D::AffineMatrix2D()
 
 AffineMatrix2D::~AffineMatrix2D()
 {}
+
+void AffineMatrix2D::clear()
+{
+    identity();
+    _mstack.clear();
+}
 
 void AffineMatrix2D::identity()
 {
@@ -209,6 +221,21 @@ bool AffineMatrix2D::pop()
     _mstack.pop_back();
 
     return true;
+}
+
+void AffineMatrix2D::transformPoint(float& x, float &y)
+{
+    const float tx = _mdata.v[0][0] * x + _mdata.v[0][1] * y + _mdata.v[0][2];
+    const float ty = _mdata.v[1][0] * x + _mdata.v[1][1] * y + _mdata.v[1][2];
+
+    x = tx;
+    y = ty;
+}
+
+void AffineMatrix2D::transformPoint(float& dx, float& dy, float sx, float sy)
+{
+    dx = _mdata.v[0][0] * sx + _mdata.v[0][1] * sy + _mdata.v[0][2];
+    dy = _mdata.v[1][0] * sx + _mdata.v[1][1] * sy + _mdata.v[1][2];
 }
 
 
