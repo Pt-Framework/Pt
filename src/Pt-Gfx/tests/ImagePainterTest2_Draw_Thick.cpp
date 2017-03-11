@@ -121,9 +121,9 @@ static void testDrawSolidThickLine(const char* title, Image& image, Painter& pai
 
     painter.setPen(penOCapRJoin);
     const PointF poly3a[] = { // CCW
-        PointF(650 + 10,  20 + 400),
+        PointF(700 + 10, 180 + 400),
         PointF(800 + 10, 130 + 400),
-        PointF(700 + 10, 180 + 400)
+        PointF(650 + 10,  20 + 400)
     };
     if(ip2) ip2->drawPolyline( poly3a, sizeof(poly3a) / sizeof(poly3a[0]), false );
     else painter.drawPolyline( poly3a, sizeof(poly3a) / sizeof(poly3a[0]) );

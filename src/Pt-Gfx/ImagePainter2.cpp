@@ -82,16 +82,15 @@ static bool intersectLine(bool& inLine, PointF& intersect, const PointF& line1a,
 
     intersect.set(ipX, ipY);
 
-    //lprintf("(%f, %f) - (%f, %f)\n", x11, y11, x12, y12);
-    //lprintf("(%f, %f) - (%f, %f)\n", x21, y21, x22, y22);
-    //lprintf("(%f, %f)\n", ipX, ipY);
-    //lprintf("\n");
-
     // Determine if the intersection point is inside the line
     inLine = (ipX >= minX1 && ipX <= maxX1 && ipY >= minY1 && ipY <= maxY1)
            | (ipX >= minX2 && ipX <= maxX2 && ipY >= minY2 && ipY <= maxY2);
 
     // Done
+    //lprintf("Line 1       : (%7.3f, %7.3f) - (%7.3f, %7.3f)\n", x11, y11, x12, y12);
+    //lprintf("Line 2       : (%7.3f, %7.3f) - (%7.3f, %7.3f)\n", x21, y21, x22, y22);
+    //lprintf("Intersection : (%7.3f, %7.3f) - %s \n", ipX, ipY, inLine ? "inline" : "outline");
+    //lprintf("\n");
     return true;
 }
 
@@ -485,7 +484,7 @@ void ImagePainter2::generateLineRoundCap(std::vector<PointF>& dst, float x, floa
     const float y3 = round(y - ny);
 
     // Generate the points
-    Pt::int32_t nSeg = round(wh) - 1;
+    Pt::int32_t nSeg = ceil(wh) - 1;
     if(nSeg < 3) nSeg = 3;
 
     for(Pt::int32_t i = 0; i <= nSeg; ++i) {
@@ -544,8 +543,10 @@ bool ImagePainter2::thickenOpenPolygon(std::vector<PointF>& pointsF, const Point
 
     // Walk thorugh the polygon's lines
     for(size_t i = 0; i < curPC1; ++i) {
+        // Get the coordinates
         const PointF& from = *basePtr++;
         const PointF& to   = *basePtr;
+        // Solid line
         if(_rasterizer->pen().style() == Pen::Solid) {
             pointsFSegment.clear();
             generateSolidLineSegment(
@@ -555,6 +556,7 @@ bool ImagePainter2::thickenOpenPolygon(std::vector<PointF>& pointsF, const Point
                 pointsFPolygon, pointsFInner, pointsFSegment, from, i == 1, i == curPC2
             )) return false;
         }
+        // Patterned line
         else {
             // ### TODO ###
             return false;
@@ -611,28 +613,47 @@ bool ImagePainter2::combineLineSegmentForOpenPolygon(std::vector<PointF>& polygo
     }
     else {
         switch(_rasterizer->pen().joinStyle()) {
+            // No join
             case Pen::NoJoin:
                 proc.push_back(*line1b);
                 proc.push_back(origMeetingPoint);
                 proc.push_back(*line2a);
                 break;
-
+            // Bevel join
             case Pen::BevelJoin:
                 proc.push_back(*line1b);
                 proc.push_back(*line2a);
                 break;
-
+            // Miter join
             case Pen::MiterJoin:
                 proc.push_back(intersect);
                 break;
-
-            case Pen::RoundJoin:
-                return false;
+            // Round join
+            case Pen::RoundJoin: {
+                // Determine the coordinates
+                const float x1 = line1b->x();
+                const float y1 = line1b->y();
+                const float x2 = intersect.x();
+                const float y2 = intersect.y();
+                const float x3 = line2a->x();
+                const float y3 = line2a->y();
+                // Generate the points
+                Pt::int32_t nSeg = penWidth - 1;
+                if(nSeg < 3) nSeg = 3;
+                for(Pt::int32_t i = 0; i <= nSeg; ++i) {
+                    const float t = (float) i / (float) nSeg;
+                    const float a = (1.0f - t) * (1.0f - t);
+                    const float b =  2.0f * t  * (1.0f - t);
+                    const float c = t * t;
+                    const float x = a * x1 + b * x2 + c * x3;
+                    const float y = a * y1 + b * y2 + c * y3;
+                    if( proc.empty() || (proc.back().x() != x && proc.back().y() != y) ) proc.push_back( PointF(x, y) );
+                }
                 break;
-
+            }
+            // Invalid join type
             default:
                 return false;
-                break;
         }
     }
 
@@ -647,22 +668,8 @@ bool ImagePainter2::combineLineSegmentForOpenPolygon(std::vector<PointF>& polygo
     line2b = &segment[N2];
     if(!inner.empty()) line1a = &inner.back();
 
-    //lprintf("%zd %zd\n", N2, segment.size());
-
     // Intersect the "inside" lines
     if(!intersectLine(inLine, intersect, *line1a, *line1b, *line2a, *line2b)) return false;
-
-    //(707.316711, 174.633438) - (807.316711, 124.633438)
-    //(806.451843, 134.838425) - (656.451843, 24.838428)
-    //lprintf("(%f, %f) - (%f, %f)\n", line1a->x(), line1a->y(), line1b->x(), line1b->y());
-    //lprintf("(%f, %f) - (%f, %f)\n", line2a->x(), line2a->y(), line2b->x(), line2b->y());
-    //lprintf("%f %f\n", intersect.x(), intersect.y());
-    //setPen(Color::fromRgb8(255,0,0));
-    //drawLine(*line1a, *line1b);
-    //drawLine(*line2a, *line2b);
-    //setPen(Color::fromRgb8(0,255,0));
-    //drawLine(intersect, intersect);
-    //lprintf("\n");
 
     // Store the "inside" line's points
     if(inLine) {
@@ -670,28 +677,48 @@ bool ImagePainter2::combineLineSegmentForOpenPolygon(std::vector<PointF>& polygo
     }
     else {
         switch(_rasterizer->pen().joinStyle()) {
+            // No join
             case Pen::NoJoin:
                 inner.push_back(*line1b);
                 inner.push_back(origMeetingPoint);
                 inner.push_back(*line2a);
                 break;
-
+            // Bevel join
             case Pen::BevelJoin:
                 inner.push_back(*line1b);
                 inner.push_back(*line2a);
                 break;
-
+            // Miter join
             case Pen::MiterJoin:
                 inner.push_back(intersect);
                 break;
-
-            case Pen::RoundJoin:
+            // Round join
+            case Pen::RoundJoin: {
                 return false;
+                // Determine the coordinates
+                const float x1 = line1b->x();
+                const float y1 = line1b->y();
+                const float x2 = intersect.x();
+                const float y2 = intersect.y();
+                const float x3 = line2a->x();
+                const float y3 = line2a->y();
+                // Generate the points
+                Pt::int32_t nSeg = penWidth - 1;
+                if(nSeg < 3) nSeg = 3;
+                for(Pt::int32_t i = 0; i <= nSeg; ++i) {
+                    const float t = (float) i / (float) nSeg;
+                    const float a = (1.0f - t) * (1.0f - t);
+                    const float b =  2.0f * t  * (1.0f - t);
+                    const float c = t * t;
+                    const float x = a * x1 + b * x2 + c * x3;
+                    const float y = a * y1 + b * y2 + c * y3;
+                    if( inner.empty() || (inner.back().x() != x && inner.back().y() != y) ) inner.push_back( PointF(x, y) );
+                }
                 break;
-
+            }
+            // Invalid join type
             default:
                 return false;
-                break;
         }
     }
 
@@ -714,7 +741,7 @@ bool ImagePainter2::thickenClosedPolygon(std::vector<PointF>& pointsF, const Poi
     return false;
 }
 
-bool ImagePainter2::combineLineSegmentForClosedPolygon(std::vector<PointF>& outer, std::vector<PointF>& inner, const std::vector<PointF>& segment)
+bool ImagePainter2::combineLineSegmentForClosedPolygon(std::vector<PointF>& outer, std::vector<PointF>& inner, const std::vector<PointF>& segment, const PointF& origMeetingPoint)
 {
     // ### TODO ###
     return false;
