@@ -94,6 +94,9 @@ static bool intersectLine(bool& inLine, PointF& intersect, const PointF& line1a,
     return true;
 }
 
+// Based on: Bitmap/Bézier curves/Quadratic
+//           https://rosettacode.org/wiki/Bitmap/B%C3%A9zier_curves/Quadratic#C
+//           Last modified on February 17, 2017
 static void generateQuadraticBezierPoints(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, float x3, float y3, Pt::int32_t nSeg)
 {
     if(nSeg < 3) nSeg = 3;
@@ -107,6 +110,43 @@ static void generateQuadraticBezierPoints(std::vector<PointF>& dst, float x1, fl
         const float y = a * y1 + b * y2 + c * y3;
         if( dst.empty() || (dst.back().x() != x && dst.back().y() != y) ) dst.push_back( PointF(x, y) );
     }
+}
+
+static inline void generateLineButtCap(std::vector<PointF>& dst, float x, float y, float nx, float ny)
+{
+    dst.push_back( PointF(x + nx, y + ny) );
+    dst.push_back( PointF(x - nx, y - ny) );
+}
+
+static inline void generateLineSquareCap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
+{
+    dst.push_back( PointF(x - dx + nx, y - dy + ny) );
+    dst.push_back( PointF(x - dx - nx, y - dy - ny) );
+}
+
+static inline void generateLineRoundCap(std::vector<PointF>& dst, float x, float y, float wh, float dx, float dy, float nx, float ny)
+{
+    generateQuadraticBezierPoints(
+        dst,
+        round(x + nx       ), round(y + ny       ),
+        round(x - dx * 2.0f), round(y - dy * 2.0f),
+        round(x - nx       ), round(y - ny       ),
+        ceil(wh) - 1
+    );
+}
+
+static inline void generateLineTriangularOutCap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
+{
+    dst.push_back( PointF(x + nx, y + ny) );
+    dst.push_back( PointF(x - dx, y - dy) );
+    dst.push_back( PointF(x - nx, y - ny) );
+}
+
+static inline void generateLineTriangularInCap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
+{
+    dst.push_back( PointF(x + nx, y + ny) );
+    dst.push_back( PointF(x + dx, y + dy) );
+    dst.push_back( PointF(x - nx, y - ny) );
 }
 
 
@@ -427,119 +467,30 @@ void ImagePainter2::generateSolidLineSegment(std::vector<PointF>& dst, float x1,
     // --- Begin point ---
     if(openingCap) {
         switch(_rasterizer->pen().capStyle()) {
-            case Pen::SquareCap        : generateLineSquareCap       (dst, x1, y1, wh, dx, dy, nx, ny); break;
+            case Pen::SquareCap        : generateLineSquareCap       (dst, x1, y1,     dx, dy, nx, ny); break;
             case Pen::RoundCap         : generateLineRoundCap        (dst, x1, y1, wh, dx, dy, nx, ny); break;
-            case Pen::TriangularOutCap : generateLineTriangularOutCap(dst, x1, y1, wh, dx, dy, nx, ny); break;
-            case Pen::TriangularInCap  : generateLineTriangularInCap (dst, x1, y1, wh, dx, dy, nx, ny); break;
+            case Pen::TriangularOutCap : generateLineTriangularOutCap(dst, x1, y1,     dx, dy, nx, ny); break;
+            case Pen::TriangularInCap  : generateLineTriangularInCap (dst, x1, y1,     dx, dy, nx, ny); break;
             default                    : openingCap = false;
         }
     }
-    if(!openingCap) generateLineButtCap(dst, x1, y1, wh, dx, dy, nx, ny);
+    if(!openingCap) generateLineButtCap(dst, x1, y1, nx, ny);
     // --- End point ---
     if(closingCap) {
         switch(_rasterizer->pen().capStyle()) {
-            case Pen::SquareCap        : generateLineSquareCap       (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
+            case Pen::SquareCap        : generateLineSquareCap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
             case Pen::RoundCap         : generateLineRoundCap        (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
-            case Pen::TriangularOutCap : generateLineTriangularOutCap(dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
-            case Pen::TriangularInCap  : generateLineTriangularInCap (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
+            case Pen::TriangularOutCap : generateLineTriangularOutCap(dst, x2, y2,     -dx, -dy, -nx, -ny); break;
+            case Pen::TriangularInCap  : generateLineTriangularInCap (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
             default                    : closingCap = false;
         }
     }
-    if(!closingCap) generateLineButtCap(dst, x2, y2, wh, -dx, -dy, -nx, -ny);
+    if(!closingCap) generateLineButtCap(dst, x2, y2, -nx, -ny);
 }
 
 void ImagePainter2::generatePatternedLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, bool openingCap, bool closingCap)
 {
     // ### TODO ###
-}
-
-void ImagePainter2::generateLineButtCap(std::vector<PointF>& dst, float x, float y, float wh, float px, float py, float nx, float ny)
-{
-    /*
-    static bool f = true;
-    if(f) {
-        f = false;
-        _rasterizer->strokeText(Point(x + nx, y + ny), "0");
-        _rasterizer->strokeText(Point(x - nx, y - ny), "1");
-    }
-    else {
-        _rasterizer->strokeText(Point(x + nx, y + ny), "2");
-        _rasterizer->strokeText(Point(x - nx, y - ny), "3");
-    }
-    return;
-    */
-
-    (void) wh;
-    (void) px;
-    (void) py;
-
-    dst.push_back( PointF(x + nx, y + ny) );
-    dst.push_back( PointF(x - nx, y - ny) );
-}
-
-void ImagePainter2::generateLineSquareCap(std::vector<PointF>& dst, float x, float y, float wh, float px, float py, float nx, float ny)
-{
-    (void) wh;
-
-    dst.push_back( PointF(x - px + nx, y - py + ny) );
-    dst.push_back( PointF(x - px - nx, y - py - ny) );
-}
-
-// Based on: Bitmap/Bézier curves/Quadratic
-//           https://rosettacode.org/wiki/Bitmap/B%C3%A9zier_curves/Quadratic#C
-//           Last modified on February 17, 2017
-void ImagePainter2::generateLineRoundCap(std::vector<PointF>& dst, float x, float y, float wh, float px, float py, float nx, float ny)
-{
-    // Determine the coordinates
-    const float x1 = round(x + nx);
-    const float y1 = round(y + ny);
-    const float x2 = round(x - px * 2.0f);
-    const float y2 = round(y - py * 2.0f);
-    const float x3 = round(x - nx);
-    const float y3 = round(y - ny);
-
-    // Generate the points
-    generateQuadraticBezierPoints(
-        dst,
-        x1, y1,
-        x2, y2,
-        x3, y3,
-        ceil(wh) - 1
-    );
-}
-
-void ImagePainter2::generateLineTriangularOutCap(std::vector<PointF>& dst, float x, float y, float wh, float px, float py, float nx, float ny)
-{
-    /*
-    static bool f = true;
-    if(f) {
-        f = false;
-        _rasterizer->strokeText(Point(x + nx, y + ny), "0");
-        _rasterizer->strokeText(Point(x - px, y - py), "1");
-        _rasterizer->strokeText(Point(x - nx, y - ny), "2");
-    }
-    else {
-        _rasterizer->strokeText(Point(x + nx, y + ny), "3");
-        _rasterizer->strokeText(Point(x - px, y - py), "4");
-        _rasterizer->strokeText(Point(x - nx, y - ny), "5");
-    }
-    return;
-    */
-
-    (void) wh;
-
-    dst.push_back( PointF(x + nx, y + ny) );
-    dst.push_back( PointF(x - px, y - py) );
-    dst.push_back( PointF(x - nx, y - ny) );
-}
-
-void ImagePainter2::generateLineTriangularInCap(std::vector<PointF>& dst, float x, float y, float wh, float px, float py, float nx, float ny)
-{
-    (void) wh;
-
-    dst.push_back( PointF(x + nx, y + ny) );
-    dst.push_back( PointF(x + px, y + py) );
-    dst.push_back( PointF(x - nx, y - ny) );
 }
 
 bool ImagePainter2::thickenOpenPolygon(std::vector<PointF>& pointsF, const PointF* basePtr, size_t curPCnt)
@@ -642,9 +593,9 @@ bool ImagePainter2::combineLineSegmentForOpenPolygon(std::vector<PointF>& polygo
             case Pen::RoundJoin:
                 generateQuadraticBezierPoints(
                     proc,
-                    line1b  ->x(), line1b  ->y(),
-                    intersect.x(), intersect.y(),
-                    line2a  ->x(), line2a  ->y(),
+                    round(line1b  ->x()), round(line1b  ->y()),
+                    round(intersect.x()), round(intersect.y()),
+                    round(line2a  ->x()), round(line2a  ->y()),
                     ceil(penWidth / 2.0f) - 1
                 );
                 break;
@@ -693,9 +644,9 @@ bool ImagePainter2::combineLineSegmentForOpenPolygon(std::vector<PointF>& polygo
             case Pen::RoundJoin:
                 generateQuadraticBezierPoints(
                     inner,
-                    line1b  ->x(), line1b  ->y(),
-                    intersect.x(), intersect.y(),
-                    line2a  ->x(), line2a  ->y(),
+                    round(line1b  ->x()), round(line1b  ->y()),
+                    round(intersect.x()), round(intersect.y()),
+                    round(line2a  ->x()), round(line2a  ->y()),
                     ceil(penWidth / 2.0f) - 1
                 );
                 break;
