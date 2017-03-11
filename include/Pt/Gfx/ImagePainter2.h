@@ -135,7 +135,7 @@ class PT_GFX_API ImagePainter2 : public Painter
         void generatePatternedLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, bool openingCap, bool closingCap);
 
         bool thickenOpenPolygon(std::vector<PointF>& pointsF, const PointF* basePtr, size_t curPCnt);
-        bool combineLineSegmentForOpenPolygon(std::vector<PointF>& polygon, std::vector<PointF>& inner, const std::vector<PointF>& segment, const PointF& origMeetingPoint, bool isBeg, bool isEnd);
+        bool combineLineSegmentForOpenPolygon(std::vector<PointF>& polygon, std::vector<PointF>& inner, const std::vector<PointF>& segment, const PointF& origMeetingPoint);
         void finalizeLineSegmentForOpenPolygon(std::vector<PointF>& polygon, const std::vector<PointF>& inner);
 
         bool thickenClosedPolygon(std::vector<PointF>& pointsF, const PointF* basePtr, size_t curPCnt);

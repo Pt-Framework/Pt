@@ -510,12 +510,8 @@ bool ImagePainter2::thickenOpenPolygon(std::vector<PointF>& pointsF, const Point
         // Solid line
         if(_rasterizer->pen().style() == Pen::Solid) {
             pointsFSegment.clear();
-            generateSolidLineSegment(
-                pointsFSegment, from.x(), from.y(), to.x(), to.y(), i == 0, i == curPC2
-            );
-            if(!combineLineSegmentForOpenPolygon(
-                pointsFPolygon, pointsFInner, pointsFSegment, from, i == 1, i == curPC2
-            )) return false;
+            generateSolidLineSegment(pointsFSegment, from.x(), from.y(), to.x(), to.y(), i == 0, i == curPC2);
+            if(!combineLineSegmentForOpenPolygon(pointsFPolygon, pointsFInner, pointsFSegment, from)) return false;
         }
         // Patterned line
         else {
@@ -524,7 +520,9 @@ bool ImagePainter2::thickenOpenPolygon(std::vector<PointF>& pointsF, const Point
         }
     }
 
-    finalizeLineSegmentForOpenPolygon(pointsFPolygon, pointsFInner);
+    if(_rasterizer->pen().style() == Pen::Solid) {
+        finalizeLineSegmentForOpenPolygon(pointsFPolygon, pointsFInner);
+    }
 
     // Combine the polygon data
     if(!pointsF.empty()) pointsF.push_back(Painter::PolygonSeparatorPointF);
@@ -534,7 +532,7 @@ bool ImagePainter2::thickenOpenPolygon(std::vector<PointF>& pointsF, const Point
     return true;
 }
 
-bool ImagePainter2::combineLineSegmentForOpenPolygon(std::vector<PointF>& polygon, std::vector<PointF>& inner, const std::vector<PointF>& segment, const PointF& origMeetingPoint, bool isBeg, bool isEnd)
+bool ImagePainter2::combineLineSegmentForOpenPolygon(std::vector<PointF>& polygon, std::vector<PointF>& inner, const std::vector<PointF>& segment, const PointF& origMeetingPoint)
 {
     // If the main polygon buffer is still empty, simply copy the points
     if(polygon.empty()) {
@@ -554,14 +552,10 @@ bool ImagePainter2::combineLineSegmentForOpenPolygon(std::vector<PointF>& polygo
     for(size_t i = 0; i <= N1 - 2; ++i) proc.push_back(polygon[i]);
 
     // Get the "outside" lines
-    const PointF* line1a = &polygon[1];
-    const PointF* line1b = &polygon[2];
+    const PointF* line1a = &polygon[N1 - 2];
+    const PointF* line1b = &polygon[N1 - 1];
     const PointF* line2a = &segment[1];
     const PointF* line2b = &segment[2];
-    if(isBeg) {
-        line1a = &polygon[N1 - 2];
-        line1b = &polygon[N1 - 1];
-    }
 
     // Intersect the "outside" lines
     bool   inLine;
