@@ -495,14 +495,20 @@ void ImagePainter2::generatePatternedLineSegment(std::vector<PointF>& dst, float
 
 bool ImagePainter2::thickenOpenPolygon(std::vector<PointF>& pointsF, const PointF* basePtr, size_t curPCnt)
 {
+    // Prepare the buffers
     std::vector<PointF> pointsFPolygon;
     std::vector<PointF> pointsFInner;
     std::vector<PointF> pointsFSegment;
 
+    pointsFPolygon.reserve(curPCnt * 2              );
+    pointsFInner  .reserve(curPCnt * 2              );
+    pointsFSegment.reserve(_rasterizer->pen().size());
+
+    // Get the number of point
     const size_t curPC1 = curPCnt - 1;
     const size_t curPC2 = curPCnt - 2;
 
-    // Walk thorugh the polygon's lines
+    // Walk through the polygon's lines
     for(size_t i = 0; i < curPC1; ++i) {
         // Get the coordinates
         const PointF& from = *basePtr++;
@@ -563,6 +569,211 @@ bool ImagePainter2::combineLineSegmentForOpenPolygon(std::vector<PointF>& polygo
     if(!intersectLine(inLine, intersect, *line1a, *line1b, *line2a, *line2b)) return false;
 
     // Store the "outside" line's points
+    const Pen::JoinStyle js1 = inLine ? Pen::MiterJoin : _rasterizer->pen().joinStyle();
+    switch(js1) {
+        // No join
+        case Pen::NoJoin:
+            proc.push_back(*line1b);
+            proc.push_back(origMeetingPoint);
+            proc.push_back(*line2a);
+            break;
+        // Bevel join
+        case Pen::BevelJoin:
+            proc.push_back(*line1b);
+            proc.push_back(*line2a);
+            break;
+        // Miter join
+        case Pen::MiterJoin:
+            proc.push_back(intersect);
+            break;
+        // Round join
+        case Pen::RoundJoin:
+            generateQuadraticBezierPoints(
+                proc,
+                round(line1b  ->x()), round(line1b  ->y()),
+                round(intersect.x()), round(intersect.y()),
+                round(line2a  ->x()), round(line2a  ->y()),
+                ceil(penWidth / 2.0f) - 1
+            );
+            break;
+        // Invalid join type
+        default:
+            return false;
+    }
+
+    // Store points #2 to #N from the segment
+    const size_t N2 = segment.size() - 1;
+    for(size_t i = 2; i <= N2; ++i) proc.push_back(segment[i]);
+
+    // Get the "inside" lines
+    line1a = &polygon[0 ];
+    line1b = &polygon[N1];
+    line2a = &segment[0 ];
+    line2b = &segment[N2];
+    if(!inner.empty()) line1a = &inner.back();
+
+    // Intersect the "inside" lines
+    if(!intersectLine(inLine, intersect, *line1a, *line1b, *line2a, *line2b)) return false;
+
+    // Store the "inside" line's points
+    const Pen::JoinStyle js2 = inLine ? Pen::MiterJoin : _rasterizer->pen().joinStyle();
+    switch(js2) {
+        // No join
+        case Pen::NoJoin:
+            inner.push_back(*line1b);
+            inner.push_back(origMeetingPoint);
+            inner.push_back(*line2a);
+            break;
+        // Bevel join
+        case Pen::BevelJoin:
+            inner.push_back(*line1b);
+            inner.push_back(*line2a);
+            break;
+        // Miter join
+        case Pen::MiterJoin:
+            inner.push_back(intersect);
+            break;
+        // Round join
+        case Pen::RoundJoin:
+            generateQuadraticBezierPoints(
+                inner,
+                round(line1b  ->x()), round(line1b  ->y()),
+                round(intersect.x()), round(intersect.y()),
+                round(line2a  ->x()), round(line2a  ->y()),
+                ceil(penWidth / 2.0f) - 1
+            );
+            break;
+        // Invalid join type
+        default:
+            return false;
+    }
+
+    // Transfer the points back to the main polygon buffer
+    polygon.resize(proc.size());
+    for(size_t i = 0; i < proc.size(); ++i) polygon[i] = proc[i];
+
+    // Done
+    return true;
+}
+
+void ImagePainter2::finalizeLineSegmentForOpenPolygon(std::vector<PointF>& polygon, const std::vector<PointF>& inner)
+{
+    // Store the "inside" line's points to the main polygon buffer in reverse
+    polygon.insert(polygon.end(), inner.rbegin(), inner.rend());
+}
+
+bool ImagePainter2::thickenClosedPolygon(std::vector<PointF>& pointsF, const PointF* basePtr, size_t curPCnt)
+{
+    // Prepare the buffers
+    std::vector<PointF> pointsFOuter;
+    std::vector<PointF> pointsFInner;
+    std::vector<PointF> pointsFSegment;
+
+    pointsFOuter  .reserve(curPCnt * 2              );
+    pointsFInner  .reserve(curPCnt * 2              );
+    pointsFSegment.reserve(_rasterizer->pen().size());
+
+    // Get the number of point
+    const size_t curPC1 = curPCnt - 1;
+
+    // Walk through the polygon's lines
+    const PointF* ptrZero = basePtr;
+    for(size_t i = 0; i <= curPC1; ++i) {
+        // Get the coordinates
+        const PointF& from = *basePtr++;
+        const PointF& to   = (i == curPC1) ? *ptrZero : *basePtr;
+        // Solid line
+        if(_rasterizer->pen().style() == Pen::Solid) {
+            pointsFSegment.clear();
+            generateSolidLineSegment(pointsFSegment, from.x(), from.y(), to.x(), to.y(), false, false);
+            if(!combineLineSegmentForClosedPolygon(pointsFOuter, pointsFInner, pointsFSegment, from)) return false;
+        }
+        // Patterned line
+        else {
+            // ### TODO ###
+            return false;
+        }
+    }
+
+    // Combine the polygon data
+    if(!pointsF.empty()) pointsF.push_back(Painter::PolygonSeparatorPointF);
+    pointsF.insert(pointsF.end(), pointsFOuter.begin(), pointsFOuter.end());
+
+   //    if(!pointsF.empty()) pointsF.push_back(Painter::PolygonSeparatorPointF);
+   // pointsF.insert(pointsF.end(), pointsFInner.begin(), pointsFInner.end());
+
+    // Done
+    return true;
+}
+
+bool ImagePainter2::combineLineSegmentForClosedPolygon(std::vector<PointF>& outer, std::vector<PointF>& inner, const std::vector<PointF>& segment, const PointF& origMeetingPoint)
+{
+    // If the main polygon buffer is still empty, simply copy the points
+    if(outer.empty()) {
+        outer.push_back(segment[1]);
+        outer.push_back(segment[2]);
+        inner.push_back(segment[0]);
+        inner.push_back(segment[3]);
+        return true;
+    }
+
+    // Get the width of the pen
+    const size_t penWidth = _rasterizer->pen().size();
+
+    // Get the "outside" lines
+    const size_t  N1     = outer.size() - 1;
+    const PointF* line1a = &outer[N1 - 1];
+    const PointF* line1b = &outer[N1 - 0];
+    const PointF* line2a = &segment[1];
+    const PointF* line2b = &segment[2];
+
+    // Intersect the "outside" lines
+    bool   inLine;
+    PointF intersect;
+    if(!intersectLine(inLine, intersect, *line1a, *line1b, *line2a, *line2b)) return false;
+
+    // Store the "outside" line's points
+    const Pen::JoinStyle js = inLine ? Pen::MiterJoin : _rasterizer->pen().joinStyle();
+    outer.pop_back();
+    switch(js) {
+        // No join
+        case Pen::NoJoin:
+            return false;
+            outer.push_back(*line1b);
+            outer.push_back(origMeetingPoint);
+            outer.push_back(*line2a);
+            break;
+        // Bevel join
+        case Pen::BevelJoin:
+            outer.push_back(*line1b);
+            outer.push_back(*line2a);
+            break;
+        // Miter join
+        case Pen::MiterJoin:
+            return false;
+            outer.push_back(intersect);
+            break;
+        // Round join
+        case Pen::RoundJoin:
+            return false;
+            generateQuadraticBezierPoints(
+                outer,
+                round(line1b  ->x()), round(line1b  ->y()),
+                round(intersect.x()), round(intersect.y()),
+                round(line2a  ->x()), round(line2a  ->y()),
+                ceil(penWidth / 2.0f) - 1
+            );
+            break;
+        // Invalid join type
+        default:
+            return false;
+    }
+
+    // Done
+    return true;
+
+    /*
+    // Store the "outside" line's points
     if(inLine) {
         proc.push_back(intersect);
     }
@@ -598,7 +809,13 @@ bool ImagePainter2::combineLineSegmentForOpenPolygon(std::vector<PointF>& polygo
                 return false;
         }
     }
+*/
+    // Transfer the points back to the outer polygon buffer
+    //outer.resize(0);
+   // outer.insert(outer.begin(), proc.begin(), proc.end());
 
+
+    /*
     // Store points #2 to #N from the segment
     const size_t N2 = segment.size() - 1;
     for(size_t i = 2; i <= N2; ++i) proc.push_back(segment[i]);
@@ -650,34 +867,7 @@ bool ImagePainter2::combineLineSegmentForOpenPolygon(std::vector<PointF>& polygo
         }
     }
 
-    // Transfer the points
-    polygon = proc;
-
-    // Done
-    return true;
-}
-
-void ImagePainter2::finalizeLineSegmentForOpenPolygon(std::vector<PointF>& polygon, const std::vector<PointF>& inner)
-{
-    // Store the "inside" line's points to the main polygon buffer in reverse
-    polygon.insert(polygon.end(), inner.rbegin(), inner.rend());
-}
-
-bool ImagePainter2::thickenClosedPolygon(std::vector<PointF>& pointsF, const PointF* basePtr, size_t curPCnt)
-{
-    // ### TODO ###
-    return false;
-}
-
-bool ImagePainter2::combineLineSegmentForClosedPolygon(std::vector<PointF>& outer, std::vector<PointF>& inner, const std::vector<PointF>& segment, const PointF& origMeetingPoint)
-{
-    // ### TODO ###
-    return false;
-}
-
-void ImagePainter2::finalizeLineSegmentForClosedPolygon(std::vector<PointF>& outer, std::vector<PointF>& inner, const std::vector<PointF>& segment)
-{
-    // ### TODO ###
+*/
 }
 
 

@@ -140,7 +140,6 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         bool thickenClosedPolygon(std::vector<PointF>& pointsF, const PointF* basePtr, size_t curPCnt);
         bool combineLineSegmentForClosedPolygon(std::vector<PointF>& outer, std::vector<PointF>& inner, const std::vector<PointF>& segment, const PointF& origMeetingPoint);
-        void finalizeLineSegmentForClosedPolygon(std::vector<PointF>& outer, std::vector<PointF>& inner, const std::vector<PointF>& segment);
 
     private:
         RectF           _clip;
