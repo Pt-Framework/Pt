@@ -241,6 +241,15 @@ static void testDrawRect(const char* title, Image& image, Painter& painter)
     painter.setBrush( Brush(textureWithTransBackground) );
     painter.fillRect( RectF(PointF(450, 440), SizeF(200, 100)) );
 
+    // Thick
+    painter.setPen  ( Pen(Color::fromRgb8(0, 255, 0, 175), 12, Pen::Solid, Pen::ButtCap, Pen::BevelJoin) );
+    painter.drawRect( RectF(PointF(700,  50), SizeF(200, 100)) );
+
+    painter.setPen  ( Pen(Color::fromRgb8(0, 255, 0, 175), 12, Pen::Solid, Pen::ButtCap, Pen::MiterJoin) );
+    painter.drawRect( RectF(PointF(700, 220), SizeF(200, 100)) );
+
+    painter.setPen  ( Pen(Color::fromRgb8(0, 255, 0, 175), 12, Pen::Solid, Pen::ButtCap, Pen::RoundJoin) );
+    painter.drawRect( RectF(PointF(700, 390), SizeF(200, 100)) );
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
 }

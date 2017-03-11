@@ -289,17 +289,21 @@ void ImagePainter2::drawLine( const PointF& from, const PointF& to )
 
 void ImagePainter2::drawRect( const RectF& rect )
 {
-    // Copy the points
-    const Point tl( (Pt::int32_t) rect.topLeft    ().x(), (Pt::int32_t) rect.topLeft    ().y() );
-    const Point br( (Pt::int32_t) rect.bottomRight().x(), (Pt::int32_t) rect.bottomRight().y() );
-
-    // Rasterize the rectangle
+    // Rasterize one-pixel rectangle
     if(_rasterizer->pen().size() == 1) {
+        // Copy the points
+        const Point tl( (Pt::int32_t) rect.topLeft    ().x(), (Pt::int32_t) rect.topLeft    ().y() );
+        const Point br( (Pt::int32_t) rect.bottomRight().x(), (Pt::int32_t) rect.bottomRight().y() );
+        // Rasterize the rectangle
         _rasterizer->strokeOnePixelRect(tl, br);
         return;
     }
 
-    // TODO: Implement rectangle with thick lines and joins using polygon here!
+    // Generate a polygon that represents the rectangle
+    const PointF pointsF[4] = {
+        rect.bottomLeft(), rect.bottomRight(), rect.topRight(), rect.topLeft()
+    };
+    drawPolyline(pointsF, 4, true);
 }
 
 void ImagePainter2::fillRect( const RectF& rect )
@@ -693,10 +697,12 @@ bool ImagePainter2::thickenClosedPolygon(std::vector<PointF>& pointsF, const Poi
     }
 
     // Combine the polygon data
-    if(!pointsF.empty()) pointsF.push_back(Painter::PolygonSeparatorPointF);
-    pointsF.insert(pointsF.end(), pointsFOuter.begin(), pointsFOuter.end());
+    if(pointsFOuter.empty() || pointsFInner.empty()) return false;
 
     if(!pointsF.empty()) pointsF.push_back(Painter::PolygonSeparatorPointF);
+    //pointsF.insert(pointsF.end(), pointsFOuter.begin(), pointsFOuter.end());
+
+    //pointsF.push_back(Painter::PolygonSeparatorPointF);
     pointsF.insert(pointsF.end(), pointsFInner.begin(), pointsFInner.end());
 
     // Done
