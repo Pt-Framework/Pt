@@ -527,7 +527,8 @@ bool ImagePainter2::thickenOpenPolygon(std::vector<PointF>& pointsF, const Point
     }
 
     if(_rasterizer->pen().style() == Pen::Solid) {
-        finalizeLineSegmentForOpenPolygon(pointsFPolygon, pointsFInner);
+        // Store the "inside" line's points to the main polygon buffer in reverse
+        pointsFPolygon.insert(pointsFPolygon.end(), pointsFInner.rbegin(), pointsFInner.rend());
     }
 
     // Combine the polygon data
@@ -656,12 +657,6 @@ bool ImagePainter2::combineLineSegmentForOpenPolygon(std::vector<PointF>& polygo
     return true;
 }
 
-void ImagePainter2::finalizeLineSegmentForOpenPolygon(std::vector<PointF>& polygon, const std::vector<PointF>& inner)
-{
-    // Store the "inside" line's points to the main polygon buffer in reverse
-    polygon.insert(polygon.end(), inner.rbegin(), inner.rend());
-}
-
 bool ImagePainter2::thickenClosedPolygon(std::vector<PointF>& pointsF, const PointF* basePtr, size_t curPCnt)
 {
     // Prepare the buffers
@@ -699,8 +694,8 @@ bool ImagePainter2::thickenClosedPolygon(std::vector<PointF>& pointsF, const Poi
     if(!pointsF.empty()) pointsF.push_back(Painter::PolygonSeparatorPointF);
     pointsF.insert(pointsF.end(), pointsFOuter.begin(), pointsFOuter.end());
 
-   //    if(!pointsF.empty()) pointsF.push_back(Painter::PolygonSeparatorPointF);
-   // pointsF.insert(pointsF.end(), pointsFInner.begin(), pointsFInner.end());
+    if(!pointsF.empty()) pointsF.push_back(Painter::PolygonSeparatorPointF);
+    pointsF.insert(pointsF.end(), pointsFInner.begin(), pointsFInner.end());
 
     // Done
     return true;
