@@ -94,6 +94,21 @@ static bool intersectLine(bool& inLine, PointF& intersect, const PointF& line1a,
     return true;
 }
 
+static void generateQuadraticBezierPoints(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, float x3, float y3, Pt::int32_t nSeg)
+{
+    if(nSeg < 3) nSeg = 3;
+
+    for(Pt::int32_t i = 0; i <= nSeg; ++i) {
+        const float t = (float) i / (float) nSeg;
+        const float a = (1.0f - t) * (1.0f - t);
+        const float b =  2.0f * t  * (1.0f - t);
+        const float c = t * t;
+        const float x = a * x1 + b * x2 + c * x3;
+        const float y = a * y1 + b * y2 + c * y3;
+        if( dst.empty() || (dst.back().x() != x && dst.back().y() != y) ) dst.push_back( PointF(x, y) );
+    }
+}
+
 
 // ======================================================================================
 // ===== Static Public Member Functions =================================================
@@ -484,18 +499,13 @@ void ImagePainter2::generateLineRoundCap(std::vector<PointF>& dst, float x, floa
     const float y3 = round(y - ny);
 
     // Generate the points
-    Pt::int32_t nSeg = ceil(wh) - 1;
-    if(nSeg < 3) nSeg = 3;
-
-    for(Pt::int32_t i = 0; i <= nSeg; ++i) {
-        const float t = (float) i / (float) nSeg;
-        const float a = (1.0f - t) * (1.0f - t);
-        const float b =  2.0f * t  * (1.0f - t);
-        const float c = t * t;
-        const float x = a * x1 + b * x2 + c * x3;
-        const float y = a * y1 + b * y2 + c * y3;
-        if( dst.empty() || (dst.back().x() != x && dst.back().y() != y) ) dst.push_back( PointF(x, y) );
-    }
+    generateQuadraticBezierPoints(
+        dst,
+        x1, y1,
+        x2, y2,
+        x3, y3,
+        ceil(wh) - 1
+    );
 }
 
 void ImagePainter2::generateLineTriangularOutCap(std::vector<PointF>& dst, float x, float y, float wh, float px, float py, float nx, float ny)
@@ -629,28 +639,15 @@ bool ImagePainter2::combineLineSegmentForOpenPolygon(std::vector<PointF>& polygo
                 proc.push_back(intersect);
                 break;
             // Round join
-            case Pen::RoundJoin: {
-                // Determine the coordinates
-                const float x1 = line1b->x();
-                const float y1 = line1b->y();
-                const float x2 = intersect.x();
-                const float y2 = intersect.y();
-                const float x3 = line2a->x();
-                const float y3 = line2a->y();
-                // Generate the points
-                Pt::int32_t nSeg = penWidth - 1;
-                if(nSeg < 3) nSeg = 3;
-                for(Pt::int32_t i = 0; i <= nSeg; ++i) {
-                    const float t = (float) i / (float) nSeg;
-                    const float a = (1.0f - t) * (1.0f - t);
-                    const float b =  2.0f * t  * (1.0f - t);
-                    const float c = t * t;
-                    const float x = a * x1 + b * x2 + c * x3;
-                    const float y = a * y1 + b * y2 + c * y3;
-                    if( proc.empty() || (proc.back().x() != x && proc.back().y() != y) ) proc.push_back( PointF(x, y) );
-                }
+            case Pen::RoundJoin:
+                generateQuadraticBezierPoints(
+                    proc,
+                    line1b  ->x(), line1b  ->y(),
+                    intersect.x(), intersect.y(),
+                    line2a  ->x(), line2a  ->y(),
+                    ceil(penWidth / 2.0f) - 1
+                );
                 break;
-            }
             // Invalid join type
             default:
                 return false;
@@ -693,29 +690,15 @@ bool ImagePainter2::combineLineSegmentForOpenPolygon(std::vector<PointF>& polygo
                 inner.push_back(intersect);
                 break;
             // Round join
-            case Pen::RoundJoin: {
-                return false;
-                // Determine the coordinates
-                const float x1 = line1b->x();
-                const float y1 = line1b->y();
-                const float x2 = intersect.x();
-                const float y2 = intersect.y();
-                const float x3 = line2a->x();
-                const float y3 = line2a->y();
-                // Generate the points
-                Pt::int32_t nSeg = penWidth - 1;
-                if(nSeg < 3) nSeg = 3;
-                for(Pt::int32_t i = 0; i <= nSeg; ++i) {
-                    const float t = (float) i / (float) nSeg;
-                    const float a = (1.0f - t) * (1.0f - t);
-                    const float b =  2.0f * t  * (1.0f - t);
-                    const float c = t * t;
-                    const float x = a * x1 + b * x2 + c * x3;
-                    const float y = a * y1 + b * y2 + c * y3;
-                    if( inner.empty() || (inner.back().x() != x && inner.back().y() != y) ) inner.push_back( PointF(x, y) );
-                }
+            case Pen::RoundJoin:
+                generateQuadraticBezierPoints(
+                    inner,
+                    line1b  ->x(), line1b  ->y(),
+                    intersect.x(), intersect.y(),
+                    line2a  ->x(), line2a  ->y(),
+                    ceil(penWidth / 2.0f) - 1
+                );
                 break;
-            }
             // Invalid join type
             default:
                 return false;
