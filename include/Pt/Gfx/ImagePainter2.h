@@ -39,6 +39,7 @@
 #include <Pt/Gfx/Painter.h>
 
 #include <Pt/System/Path.h>
+#include<stdio.h>
 
 namespace Pt {
 namespace Gfx {
@@ -137,7 +138,7 @@ class PT_GFX_API ImagePainter2 : public Painter
         bool thickenSolidClosedPolygon(std::vector<PointF>& pointsF, const PointF* basePtr, size_t curPCnt);
 
         bool combineLineSegmentForSolidOpenPolygon(std::vector<PointF>& polygon, std::vector<PointF>& inner, const std::vector<PointF>& segment, const PointF& origMeetingPoint);
-        bool combineLineSegmentForSolidClosedPolygon(std::vector<PointF>& outer, std::vector<PointF>& inner, const std::vector<PointF>& segment, const PointF& origMeetingPoint);
+        bool combineLineSegmentForSolidClosedPolygon(std::vector<PointF>& outer, std::vector<PointF>& inner, const std::vector<PointF>& segment, const PointF& origMeetingPoint, bool isFirst, bool isLast);
 
         void generatePatternedLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, bool openingCap, bool closingCap);
 
@@ -154,20 +155,54 @@ class PT_GFX_API ImagePainter2 : public Painter
 
 void ImagePainter2::convertPointTrunc(std::vector<Point>& dst, const PointF* src, const size_t pointCount)
 {
+    // Prepare the buffer
     const size_t ofs = dst.size();
     dst.resize(ofs + pointCount);
 
-    for(size_t i = 0; i < pointCount; ++i)
-        dst[i + ofs].set( (Pt::int32_t) src[i].x(), (Pt::int32_t) src[i].y() );
+    // Process the coordinates
+    size_t putCnt = 0;
+    for(size_t i = 0; i < pointCount; ++i) {
+        // Truncate the coordinates
+        const Pt::int32_t x = src[i].x();
+        const Pt::int32_t y = src[i].y();
+        // Skip duplicated coordinates
+        if( ofs + putCnt >= 1 && dst[ofs + putCnt - 1].x() == x && dst[ofs + putCnt - 1].y() == y ) continue;
+        // Store the coordinate and increment the "put" counter
+        dst[ofs + putCnt].set(x, y);
+        ++putCnt;
+    }
+
+    // Discard the last point if it has the same coordinate with the first point
+    if(dst[ofs + putCnt - 1] == dst[ofs]) --putCnt;
+
+    // Resize the buffer to discard unused elements
+    dst.resize(ofs + putCnt);
 }
 
 void ImagePainter2::convertPointRound(std::vector<Point>& dst, const PointF* src, const size_t pointCount)
 {
+    // Prepare the buffer
     const size_t ofs = dst.size();
     dst.resize(ofs + pointCount);
 
-    for(size_t i = 0; i < pointCount; ++i)
-        dst[i + ofs].set( (Pt::int32_t) round(src[i].x()), (Pt::int32_t) round(src[i].y()) );
+    // Process the coordinates
+    size_t putCnt = 0;
+    for(size_t i = 0; i < pointCount; ++i) {
+        // Round the coordinates
+        const Pt::int32_t x = round(src[i].x());
+        const Pt::int32_t y = round(src[i].y());
+        // Skip duplicated coordinates
+        if( ofs + putCnt >= 1 && dst[ofs + putCnt - 1].x() == x && dst[ofs + putCnt - 1].y() == y ) continue;
+        // Store the coordinate and increment the "put" counter
+        dst[ofs + putCnt].set(x, y);
+        ++putCnt;
+    }
+
+    // Discard the last point if it has the same coordinate with the first point
+    if(dst[ofs] == dst[ofs + putCnt - 1]) --putCnt;
+
+    // Resize the buffer to discard unused elements
+    dst.resize(ofs + putCnt);
 }
 
 

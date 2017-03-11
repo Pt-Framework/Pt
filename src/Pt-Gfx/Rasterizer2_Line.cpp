@@ -503,6 +503,7 @@ void Rasterizer2::rasterOnePixelAreaGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t
             }                                                                               \
         } while(false)
 
+        /*
     // Check if the start and end coordinates are the same
     if(x1 == x2 && y1 == y2) {
         // Draw the pixel
@@ -513,6 +514,7 @@ void Rasterizer2::rasterOnePixelAreaGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t
         // Exit here
         return;
     }
+    */
 
     // Convert the coordinates to fixed-points
     Pt::int32_t fx1 = FIXED_POINT_FROM_INT(x1);

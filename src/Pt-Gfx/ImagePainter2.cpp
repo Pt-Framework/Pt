@@ -555,7 +555,6 @@ bool ImagePainter2::thickenSolidClosedPolygon(std::vector<PointF>& pointsF, cons
     const size_t curPC1 = curPCnt - 1;
 
     // Walk through the polygon's lines
-
     const PointF* ptrZero = basePtr;
     for(size_t i = 0; i <= curPC1; ++i) {
         // Get the coordinates
@@ -565,7 +564,7 @@ bool ImagePainter2::thickenSolidClosedPolygon(std::vector<PointF>& pointsF, cons
         if(_rasterizer->pen().style() == Pen::Solid) {
             pointsFSegment.clear();
             generateSolidLineSegment(pointsFSegment, from.x(), from.y(), to.x(), to.y(), false, false);
-            if(!combineLineSegmentForSolidClosedPolygon(pointsFOuter, pointsFInner, pointsFSegment, from)) return false;
+            if(!combineLineSegmentForSolidClosedPolygon(pointsFOuter, pointsFInner, pointsFSegment, from, i == 1, false)) return false;
         }
         // Patterned line
         else {
@@ -574,12 +573,13 @@ bool ImagePainter2::thickenSolidClosedPolygon(std::vector<PointF>& pointsF, cons
         }
     }
 
+    // Reprocess the first and second segments to generate the last join
     const PointF& from = *ptrZero++;
     const PointF& to   = *ptrZero;
     if(_rasterizer->pen().style() == Pen::Solid) {
         pointsFSegment.clear();
         generateSolidLineSegment(pointsFSegment, from.x(), from.y(), to.x(), to.y(), false, false);
-        if(!combineLineSegmentForSolidClosedPolygon(pointsFOuter, pointsFInner, pointsFSegment, from)) return false;
+        if(!combineLineSegmentForSolidClosedPolygon(pointsFOuter, pointsFInner, pointsFSegment, from, false, true)) return false;
     }
     // Patterned line
     else {
@@ -588,22 +588,13 @@ bool ImagePainter2::thickenSolidClosedPolygon(std::vector<PointF>& pointsF, cons
     }
 
     // Combine the polygon data
+    if(pointsFOuter.empty() || pointsFInner.empty()) return false;
 
-    // ### TODO: Check why it can generate more than one points at the same location !!! ###
-
-    if(pointsFOuter.size() <= 2 || pointsFInner.size() <= 2) return false;
-
-    const size_t N1 = pointsFOuter.size() - 1;
     if(!pointsF.empty()) pointsF.push_back(Painter::PolygonSeparatorPointF);
-    for(size_t i = 1; i < N1; ++i) {
-        pointsF.push_back(pointsFOuter[i]);
-    }
+    pointsF.insert(pointsF.end(), pointsFOuter.begin(), pointsFOuter.end());
 
-    const size_t N2 = pointsFInner.size() - 1;
     pointsF.push_back(Painter::PolygonSeparatorPointF);
-    for(size_t i = 01; i < N2; ++i) {
-        pointsF.push_back(pointsFInner[i]);
-    }
+    pointsF.insert(pointsF.end(), pointsFInner.begin(), pointsFInner.end());
 
     // Done
     return true;
@@ -727,7 +718,7 @@ bool ImagePainter2::combineLineSegmentForSolidOpenPolygon(std::vector<PointF>& p
     return true;
 }
 
-bool ImagePainter2::combineLineSegmentForSolidClosedPolygon(std::vector<PointF>& outer, std::vector<PointF>& inner, const std::vector<PointF>& segment, const PointF& origMeetingPoint)
+bool ImagePainter2::combineLineSegmentForSolidClosedPolygon(std::vector<PointF>& outer, std::vector<PointF>& inner, const std::vector<PointF>& segment, const PointF& origMeetingPoint, bool isFirst, bool isLast)
 {
     // If the main polygon buffer is still empty, simply copy the points
     if(outer.empty()) {
@@ -755,6 +746,7 @@ bool ImagePainter2::combineLineSegmentForSolidClosedPolygon(std::vector<PointF>&
     // Store the "outside" line's points
     const Pen::JoinStyle js1 = inLine ? Pen::MiterJoin : _rasterizer->pen().joinStyle();
     outer.pop_back();
+    if(isFirst) outer.pop_back();
     switch(js1) {
         // No join
         case Pen::NoJoin:
@@ -785,7 +777,7 @@ bool ImagePainter2::combineLineSegmentForSolidClosedPolygon(std::vector<PointF>&
         default:
             return false;
     }
-    outer.push_back(*line2b);
+    if(!isLast) outer.push_back(*line2b);
 
     // Get the "inside" lines
     line1a = &inner[inner.size() - 2];
@@ -799,6 +791,7 @@ bool ImagePainter2::combineLineSegmentForSolidClosedPolygon(std::vector<PointF>&
     // Store the "inside" line's points
     const Pen::JoinStyle js2 = inLine ? Pen::MiterJoin : _rasterizer->pen().joinStyle();
     inner.pop_back();
+    if(isFirst) inner.pop_back();
     switch(js2) {
         // No join
         case Pen::NoJoin:
@@ -829,7 +822,7 @@ bool ImagePainter2::combineLineSegmentForSolidClosedPolygon(std::vector<PointF>&
         default:
             return false;
     }
-    inner.push_back(*line2b);
+    if(!isLast) inner.push_back(*line2b);
 
     // Done
     return true;
