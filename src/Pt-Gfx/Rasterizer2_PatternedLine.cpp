@@ -215,7 +215,7 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentXWAA(Pt::int32_t x1, Pt::in
     }
 
     // A helper macro to set pixel
-    #define XW_SET_PIXEL(IMG, COL, X, Y, A, PA)                                   \
+    #define XW_SET_PIXEL(X, Y, A, PA)                                             \
         do {                                                                      \
             /* Clip the point */                                                  \
             if( (X) < _currentClip.left() || (X) > _currentClip.right () ||       \
@@ -232,9 +232,12 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentXWAA(Pt::int32_t x1, Pt::in
             Pt::uint8_t calpha = (Pt::uint32_t) (A) * (PA) / 255;                 \
             if(!calpha) break;                                                    \
             /* Set the pixel */                                                   \
-            Pixel PIX(IMG->view(), X, Y);                                         \
-            IMG->format().setPixel(PIX, COL, _compositionMode, calpha);           \
+            Pixel PIX(_image->view(), X, Y);                                      \
+            _image->format().setPixel(PIX, color, _compositionMode, calpha);      \
         } while(false)
+
+    // Check if the start and end coordinates are the same
+    if(x1 == x2 && y1 == y2) return;
 
     // Convert the coordinates to fixed-points
     Pt::int32_t fx1 = FIXED_POINT_FROM_INT(x1);
@@ -296,8 +299,8 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentXWAA(Pt::int32_t x1, Pt::in
             // Draw the pixels
             const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_FPART_TO_A8 (ypxli) ];
             const Pt::uint8_t a2 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_RFPART_TO_A8(ypxli) ];
-            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           ), i, a1, pa);
-            XW_SET_PIXEL(_image, color, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE), i, a2, pa);
+            XW_SET_PIXEL(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           ), i, a1, pa);
+            XW_SET_PIXEL(FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE), i, a2, pa);
             ypxli += grad;
         }
         // Store back the start and end coordinates to the mask as needed
@@ -324,8 +327,8 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentXWAA(Pt::int32_t x1, Pt::in
             // Draw the pixels
             const Pt::uint8_t a1 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_FPART_TO_A8 (ypxli) ];
             const Pt::uint8_t a2 = Rasterizer2::XWAA_WFILTER[ FIXED_POINT_RFPART_TO_A8(ypxli) ];
-            XW_SET_PIXEL(_image, color, i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           ), a1, pa);
-            XW_SET_PIXEL(_image, color, i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE), a2, pa);
+            XW_SET_PIXEL(i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli)                           ), a1, pa);
+            XW_SET_PIXEL(i, FIXED_POINT_TO_INT(FIXED_POINT_IPART(ypxli) + FIXED_POINT_CONSTANT_ONE), a2, pa);
             ypxli += grad;
         }
         // Store back the start and end coordinates to the mask as needed

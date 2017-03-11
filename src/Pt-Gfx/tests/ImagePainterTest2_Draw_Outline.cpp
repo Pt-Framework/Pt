@@ -251,6 +251,11 @@ static void testDrawRect(const char* title, Image& image, Painter& painter)
     painter.setPen  ( Pen(Color::fromRgb8(0, 255, 0, 175), 12, Pen::Solid, Pen::ButtCap, Pen::RoundJoin) );
     painter.drawRect( RectF(PointF(700, 390), SizeF(200, 100)) );
 
+    painter.setPen  ( Pen(Color::fromRgb8(255, 0, 0, 175), 6, Pen::Solid, Pen::ButtCap, Pen::NoJoin) );
+    painter.drawRect( RectF(PointF(750, 100), SizeF(200, 100)) );
+    painter.drawRect( RectF(PointF(750, 270), SizeF(200, 100)) );
+    painter.drawRect( RectF(PointF(750, 440), SizeF(200, 100)) );
+
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
 }
 

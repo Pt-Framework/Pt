@@ -96,7 +96,7 @@ void Rasterizer2::rasterOnePixelQuadraticBezierCurve(Pt::int32_t x1, Pt::int32_t
     }
 
     // A helper macro to set pixel
-    #define XW_SET_PIXEL(IMG, COL, X, Y, A, PA)                                   \
+    #define XW_SET_PIXEL(X, Y, A, PA)                                             \
         do {                                                                      \
             /* Clip the point */                                                  \
             if( (X) < _currentClip.left() || (X) > _currentClip.right () ||       \
@@ -110,15 +110,15 @@ void Rasterizer2::rasterOnePixelQuadraticBezierCurve(Pt::int32_t x1, Pt::int32_t
             }                                                                     \
             if(skipDrawing) break;                                                \
             /* Set a fully-opaque pixel? */                                       \
-            Pixel PIX(IMG->view(), X, Y);                                         \
+            Pixel PIX(_image->view(), X, Y);                                      \
             if((A) == 0 && (PA) == 255) {                                         \
-                IMG->format().setPixel(PIX, COL, _compositionMode);               \
+                _image->format().setPixel(PIX, color, _compositionMode);          \
                 break;                                                            \
             }                                                                     \
             /* Combine the alpha and set the pixel */                             \
             const Pt::uint8_t falpha = Rasterizer2::XWAA_WFILTER[A];              \
             const Pt::uint8_t calpha = (Pt::uint32_t) falpha * (PA) / 255;        \
-            IMG->format().setPixel(PIX, COL, _compositionMode, calpha);           \
+            _image->format().setPixel(PIX, color, _compositionMode, calpha);      \
         } while(false)
 
     // Use anti-aliasing?
@@ -229,7 +229,7 @@ void Rasterizer2::rasterOnePixelQuadraticBezierCurve(Pt::int32_t x1, Pt::int32_t
             ed  = (ed + 2.0f * ed * cur * cur / (4.0f * ed * ed + cur * cur));
             // Plot curve
             alpha = 255.0f / ed * ::fabs(err - dx - dy - xy);
-            XW_SET_PIXEL(_image, color, x1, y1, alpha, patAlpha);
+            XW_SET_PIXEL(x1, y1, alpha, patAlpha);
             if(maskInOut) {
                 if(firstPixel0) {
                     (*maskInOut)[0].set(x1, y1);
@@ -248,7 +248,7 @@ void Rasterizer2::rasterOnePixelQuadraticBezierCurve(Pt::int32_t x1, Pt::int32_t
                 if(err - dy < ed) {
                     // Set pixel
                     alpha = 255.0f / ed * ::fabs(err - dy);
-                    XW_SET_PIXEL(_image, color, x1, y1 + sy, alpha, patAlpha);
+                    XW_SET_PIXEL(x1, y1 + sy, alpha, patAlpha);
                     // Store back the start and end coordinates to the mask as needed
                     if(maskInOut) {
                         if(firstPixel1) {
@@ -270,7 +270,7 @@ void Rasterizer2::rasterOnePixelQuadraticBezierCurve(Pt::int32_t x1, Pt::int32_t
                 if(cur < ed) {
                     // Set pixel
                     alpha = 255.0f / ed * ::fabs(cur);
-                    XW_SET_PIXEL(_image, color, x2 + sx, y1, alpha, patAlpha);
+                    XW_SET_PIXEL(x2 + sx, y1, alpha, patAlpha);
                     // Store back the start and end coordinates to the mask as needed
                     if(maskInOut) {
                         if(firstPixel1) {
@@ -308,7 +308,7 @@ void Rasterizer2::rasterOnePixelQuadraticBezierCurve(Pt::int32_t x1, Pt::int32_t
                 if(*fpiCtrInOut > _fpatternMaxCtr) *fpiCtrInOut = 0;
             }
             // Plot curve
-            XW_SET_PIXEL(_image, color, x1, y1, 0, patAlpha);
+            XW_SET_PIXEL(x1, y1, 0, patAlpha);
             // Check if we have just drawn the last pixel
             if(x1 == x3 && y1 == y3) return;
             // Save value for test of Y step

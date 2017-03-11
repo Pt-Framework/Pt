@@ -44,7 +44,7 @@ namespace Gfx {
 // ===== Internal Helper Functions ======================================================
 // ======================================================================================
 
-static bool intersectLine(bool& inLine, PointF& intersect, const PointF& line1a, const PointF& line1b, const PointF& line2a, const PointF& line2b)
+static inline bool intersectLine(bool& inLine, PointF& intersect, const PointF& line1a, const PointF& line1b, const PointF& line2a, const PointF& line2b)
 {
     // The first line
     const float x11   = line1a.x();
@@ -97,7 +97,7 @@ static bool intersectLine(bool& inLine, PointF& intersect, const PointF& line1a,
 // Based on: Bitmap/Bézier curves/Quadratic
 //           https://rosettacode.org/wiki/Bitmap/B%C3%A9zier_curves/Quadratic#C
 //           Last modified on February 17, 2017
-static void generateQuadraticBezierPoints(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, float x3, float y3, Pt::int32_t nSeg)
+static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, float x3, float y3, Pt::int32_t nSeg)
 {
     if(nSeg < 3) nSeg = 3;
 
@@ -330,7 +330,7 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount, boo
     size_t startIndex = 0;
 
     std::vector<PointF> pointsF;
-    pointsF.reserve(pointCount * 2);
+    pointsF.reserve(pointCount * 2); // ### TODO : Improve memory usage? ###
 
     for(size_t i = 0; i <= pointCount; ++i) {
         // Search for the end and/or separator points
@@ -506,9 +506,9 @@ bool ImagePainter2::thickenOpenPolygon(std::vector<PointF>& pointsF, const Point
     std::vector<PointF> pointsFInner;
     std::vector<PointF> pointsFSegment;
 
-    pointsFPolygon.reserve(curPCnt * 2              );
-    pointsFInner  .reserve(curPCnt * 2              );
-    pointsFSegment.reserve(_rasterizer->pen().size());
+    pointsFPolygon.reserve(curPCnt * 2              ); // ### TODO : Improve memory usage? ###
+    pointsFInner  .reserve(curPCnt * 2              ); // ### TODO : Improve memory usage? ###
+    pointsFSegment.reserve(_rasterizer->pen().size()); // ### TODO : Improve memory usage? ###
 
     // Get the number of point
     const size_t curPC1 = curPCnt - 1;
@@ -558,7 +558,7 @@ bool ImagePainter2::combineLineSegmentForOpenPolygon(std::vector<PointF>& polygo
 
     // Combine the segments
     std::vector<PointF> proc;
-    proc.reserve(polygon.size() + segment.size() + penWidth + 3);
+    proc.reserve(polygon.size() + segment.size() + penWidth + 3); // ### TODO : Improve memory usage? ###
 
     // Store points #0 to #(N-2) from the main polygon buffer
     const size_t N1 = polygon.size() - 1;
@@ -670,14 +670,15 @@ bool ImagePainter2::thickenClosedPolygon(std::vector<PointF>& pointsF, const Poi
     std::vector<PointF> pointsFInner;
     std::vector<PointF> pointsFSegment;
 
-    pointsFOuter  .reserve(curPCnt * 2              );
-    pointsFInner  .reserve(curPCnt * 2              );
-    pointsFSegment.reserve(_rasterizer->pen().size());
+    pointsFOuter  .reserve(curPCnt * 2              ); // ### TODO : Improve memory usage? ###
+    pointsFInner  .reserve(curPCnt * 2              ); // ### TODO : Improve memory usage? ###
+    pointsFSegment.reserve(_rasterizer->pen().size()); // ### TODO : Improve memory usage? ###
 
     // Get the number of point
     const size_t curPC1 = curPCnt - 1;
 
     // Walk through the polygon's lines
+
     const PointF* ptrZero = basePtr;
     for(size_t i = 0; i <= curPC1; ++i) {
         // Get the coordinates
@@ -696,14 +697,36 @@ bool ImagePainter2::thickenClosedPolygon(std::vector<PointF>& pointsF, const Poi
         }
     }
 
+    const PointF& from = *ptrZero++;
+    const PointF& to   = *ptrZero;
+    if(_rasterizer->pen().style() == Pen::Solid) {
+        pointsFSegment.clear();
+        generateSolidLineSegment(pointsFSegment, from.x(), from.y(), to.x(), to.y(), false, false);
+        if(!combineLineSegmentForClosedPolygon(pointsFOuter, pointsFInner, pointsFSegment, from)) return false;
+    }
+    // Patterned line
+    else {
+        // ### TODO ###
+        return false;
+    }
+
     // Combine the polygon data
-    if(pointsFOuter.empty() || pointsFInner.empty()) return false;
 
+    // ### TODO: Check why it can generate more than one points at the same location !!! ###
+
+    if(pointsFOuter.size() <= 2 || pointsFInner.size() <= 2) return false;
+
+    const size_t N1 = pointsFOuter.size() - 1;
     if(!pointsF.empty()) pointsF.push_back(Painter::PolygonSeparatorPointF);
-    //pointsF.insert(pointsF.end(), pointsFOuter.begin(), pointsFOuter.end());
+    for(size_t i = 1; i < N1; ++i) {
+        pointsF.push_back(pointsFOuter[i]);
+    }
 
-    //pointsF.push_back(Painter::PolygonSeparatorPointF);
-    pointsF.insert(pointsF.end(), pointsFInner.begin(), pointsFInner.end());
+    const size_t N2 = pointsFInner.size() - 1;
+    pointsF.push_back(Painter::PolygonSeparatorPointF);
+    for(size_t i = 01; i < N2; ++i) {
+        pointsF.push_back(pointsFInner[i]);
+    }
 
     // Done
     return true;
