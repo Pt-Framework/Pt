@@ -152,6 +152,7 @@ class Rasterizer2
         void strokeOnePixelQuadraticPolybezier(const Point* points, size_t pointCount);
         void strokeOnePixelEllipseArc(const Point& topLeft, const Size& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
+        void strokePolygon(const Point* points, size_t pointCount);
         void strokePolygonSeparate(const Point* points, size_t pointCount);
 
         void fillRect(const Point& tl, const Point& br);
@@ -266,8 +267,9 @@ class Rasterizer2
         void rasterScanlineWithClipping(Pt::int32_t from, Pt::int32_t to, Pt::int32_t pixelY, Pt::int32_t minX, Pt::int32_t minY);
 
         // --- Polygon-related helper functions ---
-        void genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount) const;
         void getPolygonRectMinMax(const Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY);
+        void genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount) const;
+        void separateAndClipPolygons(Pt::int32_t& minX, Pt::int32_t& maxX, Pt::int32_t& minY, Pt::int32_t& maxY, std::vector<Point>& clippedPoints, std::vector<size_t>& clippedCounts, const Point* points, size_t pointCount);
 
         // Arc-related helper functions
         static inline void arcUtil_detXWLineDirection(ArcXWLineData& xwLineData);

@@ -356,7 +356,9 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount, boo
     std::vector<Point> points;
 
     convertPointRound(points, pointsF.data(), pointsF.size());
-    _rasterizer->strokePolygonSeparate(points.data(), points.size());
+    //_rasterizer->strokeOnePixelPolygon(points.data(), points.size(), true);
+    //_rasterizer->strokePolygonSeparate(points.data(), points.size());
+    _rasterizer->strokePolygon(points.data(), points.size());
 }
 
 void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
@@ -716,9 +718,8 @@ bool ImagePainter2::combineLineSegmentForClosedPolygon(std::vector<PointF>& oute
     const size_t penWidth = _rasterizer->pen().size();
 
     // Get the "outside" lines
-    const size_t  N1     = outer.size() - 1;
-    const PointF* line1a = &outer[N1 - 1];
-    const PointF* line1b = &outer[N1 - 0];
+    const PointF* line1a = &outer[outer.size() - 2];
+    const PointF* line1b = &outer[outer.size() - 1];
     const PointF* line2a = &segment[1];
     const PointF* line2b = &segment[2];
 
@@ -728,12 +729,11 @@ bool ImagePainter2::combineLineSegmentForClosedPolygon(std::vector<PointF>& oute
     if(!intersectLine(inLine, intersect, *line1a, *line1b, *line2a, *line2b)) return false;
 
     // Store the "outside" line's points
-    const Pen::JoinStyle js = inLine ? Pen::MiterJoin : _rasterizer->pen().joinStyle();
+    const Pen::JoinStyle js1 = inLine ? Pen::MiterJoin : _rasterizer->pen().joinStyle();
     outer.pop_back();
-    switch(js) {
+    switch(js1) {
         // No join
         case Pen::NoJoin:
-            return false;
             outer.push_back(*line1b);
             outer.push_back(origMeetingPoint);
             outer.push_back(*line2a);
@@ -745,12 +745,10 @@ bool ImagePainter2::combineLineSegmentForClosedPolygon(std::vector<PointF>& oute
             break;
         // Miter join
         case Pen::MiterJoin:
-            return false;
             outer.push_back(intersect);
             break;
         // Round join
         case Pen::RoundJoin:
-            return false;
             generateQuadraticBezierPoints(
                 outer,
                 round(line1b  ->x()), round(line1b  ->y()),
@@ -763,106 +761,54 @@ bool ImagePainter2::combineLineSegmentForClosedPolygon(std::vector<PointF>& oute
         default:
             return false;
     }
-
-    // Done
-    return true;
-
-    /*
-    // Store the "outside" line's points
-    if(inLine) {
-        proc.push_back(intersect);
-    }
-    else {
-        switch(_rasterizer->pen().joinStyle()) {
-            // No join
-            case Pen::NoJoin:
-                proc.push_back(*line1b);
-                proc.push_back(origMeetingPoint);
-                proc.push_back(*line2a);
-                break;
-            // Bevel join
-            case Pen::BevelJoin:
-                proc.push_back(*line1b);
-                proc.push_back(*line2a);
-                break;
-            // Miter join
-            case Pen::MiterJoin:
-                proc.push_back(intersect);
-                break;
-            // Round join
-            case Pen::RoundJoin:
-                generateQuadraticBezierPoints(
-                    proc,
-                    round(line1b  ->x()), round(line1b  ->y()),
-                    round(intersect.x()), round(intersect.y()),
-                    round(line2a  ->x()), round(line2a  ->y()),
-                    ceil(penWidth / 2.0f) - 1
-                );
-                break;
-            // Invalid join type
-            default:
-                return false;
-        }
-    }
-*/
-    // Transfer the points back to the outer polygon buffer
-    //outer.resize(0);
-   // outer.insert(outer.begin(), proc.begin(), proc.end());
-
-
-    /*
-    // Store points #2 to #N from the segment
-    const size_t N2 = segment.size() - 1;
-    for(size_t i = 2; i <= N2; ++i) proc.push_back(segment[i]);
+    outer.push_back(*line2b);
 
     // Get the "inside" lines
-    line1a = &polygon[0 ];
-    line1b = &polygon[N1];
-    line2a = &segment[0 ];
-    line2b = &segment[N2];
-    if(!inner.empty()) line1a = &inner.back();
+    line1a = &inner[inner.size() - 2];
+    line1b = &inner[inner.size() - 1];
+    line2a = &segment[0];
+    line2b = &segment[3];
 
     // Intersect the "inside" lines
     if(!intersectLine(inLine, intersect, *line1a, *line1b, *line2a, *line2b)) return false;
 
     // Store the "inside" line's points
-    if(inLine) {
-        inner.push_back(intersect);
+    const Pen::JoinStyle js2 = inLine ? Pen::MiterJoin : _rasterizer->pen().joinStyle();
+    inner.pop_back();
+    switch(js2) {
+        // No join
+        case Pen::NoJoin:
+            inner.push_back(*line1b);
+            inner.push_back(origMeetingPoint);
+            inner.push_back(*line2a);
+            break;
+        // Bevel join
+        case Pen::BevelJoin:
+            inner.push_back(*line1b);
+            inner.push_back(*line2a);
+            break;
+        // Miter join
+        case Pen::MiterJoin:
+            inner.push_back(intersect);
+            break;
+        // Round join
+        case Pen::RoundJoin:
+            generateQuadraticBezierPoints(
+                inner,
+                round(line1b  ->x()), round(line1b  ->y()),
+                round(intersect.x()), round(intersect.y()),
+                round(line2a  ->x()), round(line2a  ->y()),
+                ceil(penWidth / 2.0f) - 1
+            );
+            break;
+        // Invalid join type
+        default:
+            return false;
     }
-    else {
-        switch(_rasterizer->pen().joinStyle()) {
-            // No join
-            case Pen::NoJoin:
-                inner.push_back(*line1b);
-                inner.push_back(origMeetingPoint);
-                inner.push_back(*line2a);
-                break;
-            // Bevel join
-            case Pen::BevelJoin:
-                inner.push_back(*line1b);
-                inner.push_back(*line2a);
-                break;
-            // Miter join
-            case Pen::MiterJoin:
-                inner.push_back(intersect);
-                break;
-            // Round join
-            case Pen::RoundJoin:
-                generateQuadraticBezierPoints(
-                    inner,
-                    round(line1b  ->x()), round(line1b  ->y()),
-                    round(intersect.x()), round(intersect.y()),
-                    round(line2a  ->x()), round(line2a  ->y()),
-                    ceil(penWidth / 2.0f) - 1
-                );
-                break;
-            // Invalid join type
-            default:
-                return false;
-        }
-    }
+    inner.push_back(*line2b);
 
-*/
+    // Done
+    return true;
 }
 
 

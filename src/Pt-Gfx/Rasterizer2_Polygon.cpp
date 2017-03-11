@@ -63,6 +63,57 @@ void Rasterizer2::strokeOnePixelPolygon(const Point* points, size_t pointCount, 
     }
 }
 
+void Rasterizer2::strokePolygon(const Point* points, size_t pointCount)
+{
+    // Check if there is no actual point
+    if(!pointCount) return;
+
+    // Disable texture/gradient
+    const bool isTexture  = _isTexture;
+    const bool isGradient = _isGradient;
+
+    _isTexture  = false;
+    _isGradient = false;
+
+    // Separate the polygons and clip their coordinates
+    Pt::int32_t         minX;
+    Pt::int32_t         minY;
+    Pt::int32_t         maxX;
+    Pt::int32_t         maxY;
+
+    std::vector<Point > clippedPoints;
+    std::vector<size_t> clippedCounts;
+
+    separateAndClipPolygons(minX, maxX, minY, maxY, clippedPoints, clippedCounts, points, pointCount);
+
+    // Draw the polygon
+    if(_aaMode == AntiAliasingMode::None) {
+        rasterPolygonAreaNoAA(
+            clippedPoints.data(), clippedCounts.data(),
+            clippedCounts.size(), clippedPoints.size(),
+            _pen.color(), minX, minY, maxX, maxY
+        );
+    }
+    else if(_aaMode == AntiAliasingMode::Standard) {
+        rasterPolygonAreaXWAA(
+            clippedPoints.data(), clippedCounts.data(),
+            clippedCounts.size(), clippedPoints.size(),
+            _pen.color(), minX, minY, maxX, maxY
+        );
+    }
+    else { // _aaMode == AntiAliasingMode::LowMemory
+        rasterPolygonAreaFSAA2x2(
+            clippedPoints.data(), clippedCounts.data(),
+            clippedCounts.size(), clippedPoints.size(),
+            _pen.color(), minX, minY, maxX, maxY
+        );
+    }
+
+    // Restore texture/gradient
+    _isTexture  = isTexture;
+    _isGradient = isGradient;
+}
+
 void Rasterizer2::strokePolygonSeparate(const Point* points, size_t pointCount)
 {
     // Check if there is no actual point
@@ -113,39 +164,16 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
     // Check if there is no actual point
     if(!pointCount) return;
 
-    // Minimum and maximum coordinate values for all the polygons
-    Pt::int32_t minX =  MAXIMUM_COORD;
-    Pt::int32_t minY =  MAXIMUM_COORD;
-    Pt::int32_t maxX = -MAXIMUM_COORD;
-    Pt::int32_t maxY = -MAXIMUM_COORD;
-
     // Separate the polygons and clip their coordinates
+    Pt::int32_t         minX;
+    Pt::int32_t         minY;
+    Pt::int32_t         maxX;
+    Pt::int32_t         maxY;
+
     std::vector<Point > clippedPoints;
     std::vector<size_t> clippedCounts;
-    size_t              startIndex = 0;
-    for(size_t i = 0; i <= pointCount; ++i) {
-        // Search for the end and/or separator points
-        if( i == pointCount || (points[i].x() > MAXIMUM_COORD && points[i].y() > MAXIMUM_COORD) ) {
-            // Calculate the number of points for this polygon
-            const size_t curPC = i - startIndex;
-            // Clip the coordinates
-            std::vector<Point> clipped;
-            genClippedPolygonPoints(clipped, points + startIndex, curPC);
-            // Increment the start index
-            startIndex += curPC + 1;
-            // Calculate the minimum and maximum coordinate values
-            Pt::int32_t curMinX, curMinY, curMaxX, curMaxY;
-            getPolygonRectMinMax(clipped.data(), clipped.size(), curMinX, curMinY, curMaxX, curMaxY);
-            if(curMinX < minX) minX = curMinX;
-            if(curMinY < minY) minY = curMinY;
-            if(curMaxX > maxX) maxX = curMaxX;
-            if(curMaxY > maxY) maxY = curMaxY;
-            // Store the clipped points
-            clippedPoints.insert(clippedPoints.end(), clipped.begin(), clipped.end());
-            // Store the number of points
-            clippedCounts.push_back(curPC);
-        }
-    }
+
+    separateAndClipPolygons(minX, maxX, minY, maxY, clippedPoints, clippedCounts, points, pointCount);
 
     // Update the gradient as needed
     if(_isGradient)
@@ -180,14 +208,6 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
 // ===== Private Member Functions =======================================================
 // ======================================================================================
 
-void Rasterizer2::genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount) const
-{
-    for(size_t i = 0; i < pointCount; ++i)
-        dst.push_back( Point( src[i].x(), src[i].y() ) );
-
-    ClipShape::clipPolygon(dst, _currentClip);
-}
-
 void Rasterizer2::getPolygonRectMinMax(const Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY)
 {
     minX =  65535;
@@ -202,6 +222,49 @@ void Rasterizer2::getPolygonRectMinMax(const Point* points, size_t pointCount, P
         if(y < minY) minY = y;
         if(x > maxX) maxX = x;
         if(y > maxY) maxY = y;
+    }
+}
+
+void Rasterizer2::genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount) const
+{
+    for(size_t i = 0; i < pointCount; ++i)
+        dst.push_back( Point( src[i].x(), src[i].y() ) );
+
+    ClipShape::clipPolygon(dst, _currentClip);
+}
+
+void Rasterizer2::separateAndClipPolygons(Pt::int32_t& minX, Pt::int32_t& maxX, Pt::int32_t& minY, Pt::int32_t& maxY, std::vector<Point>& clippedPoints, std::vector<size_t>& clippedCounts, const Point* points, size_t pointCount)
+{
+    // Minimum and maximum coordinate values for all the polygons
+    minX =  MAXIMUM_COORD;
+    minY =  MAXIMUM_COORD;
+    maxX = -MAXIMUM_COORD;
+    maxY = -MAXIMUM_COORD;
+
+    // Separate the polygons and clip their coordinates
+    size_t startIndex = 0;
+    for(size_t i = 0; i <= pointCount; ++i) {
+        // Search for the end and/or separator points
+        if( i == pointCount || (points[i].x() > MAXIMUM_COORD && points[i].y() > MAXIMUM_COORD) ) {
+            // Calculate the number of points for this polygon
+            const size_t curPC = i - startIndex;
+            // Clip the coordinates
+            std::vector<Point> clipped;
+            genClippedPolygonPoints(clipped, points + startIndex, curPC);
+            // Increment the start index
+            startIndex += curPC + 1;
+            // Calculate the minimum and maximum coordinate values
+            Pt::int32_t curMinX, curMinY, curMaxX, curMaxY;
+            getPolygonRectMinMax(clipped.data(), clipped.size(), curMinX, curMinY, curMaxX, curMaxY);
+            if(curMinX < minX) minX = curMinX;
+            if(curMinY < minY) minY = curMinY;
+            if(curMaxX > maxX) maxX = curMaxX;
+            if(curMaxY > maxY) maxY = curMaxY;
+            // Store the clipped points
+            clippedPoints.insert(clippedPoints.end(), clipped.begin(), clipped.end());
+            // Store the number of points
+            clippedCounts.push_back(curPC);
+        }
     }
 }
 
