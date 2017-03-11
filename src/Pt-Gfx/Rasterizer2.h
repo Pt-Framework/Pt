@@ -658,7 +658,7 @@ bool Rasterizer2::arcUtil_pointIsInsideDegRange(Pt::int32_t x, Pt::int32_t y, Pt
     //     * The movement from begin angle to end angle must be in counter-clockwise (CCW), otherwise
     //       something wrong will be drawn.
 
-    const float angle = Gfx::Math::convertCartesianToPolarCoordinate( (x - ctrX), -(y - ctrY) * xyRatio);
+    const float angle = Gfx::Math::convertCartesianToPolarCoordinate( (x - ctrX), -(y - ctrY) * xyRatio );
 
     // Both begin and end angle are negative
     if(degBegin < 0 && degEnd < 0) {
@@ -686,9 +686,11 @@ Pt::uint8_t Rasterizer2::arcUtil_pointIsInsideDegRange(Pt::int32_t x, Pt::int32_
     //     * The movement from begin angle to end angle must be in counter-clockwise (CCW), otherwise
     //       something wrong will be drawn.
 
-    const float angle = Gfx::Math::convertCartesianToPolarCoordinate( (x - ctrX), -(y - ctrY) * xyRatio);
-    const float limit = 5.0f;
-    const float addFc = 0.1f;
+    const float relX  = x - ctrX;
+    const float relY  = y - ctrY;
+    const float relM  = std::max( ::fabs(relX), ::fabs(relY) );
+    const float angle = Gfx::Math::convertCartesianToPolarCoordinate(relX, -relY * xyRatio);
+    const float limit = 100.0f / relM;
 
     // Both begin and end angle are negative
     if(degBegin < 0 && degEnd < 0) {
@@ -699,7 +701,7 @@ Pt::uint8_t Rasterizer2::arcUtil_pointIsInsideDegRange(Pt::int32_t x, Pt::int32_
             const float de = degEnd - angle;
             const float dm = std::min(db, de);
             if(dm > limit) return alpha;
-            return alpha * ( (dm / limit) + addFc );
+            return (dm > limit) ? alpha : (alpha * dm / limit);
         }
         return 0;
     }
@@ -710,12 +712,12 @@ Pt::uint8_t Rasterizer2::arcUtil_pointIsInsideDegRange(Pt::int32_t x, Pt::int32_
         if(angle >= degBegin && angle <= 360) {
             const float dm = angle - degBegin;
             if(dm > limit) return alpha;
-            return alpha * ( (dm / limit) + addFc );
+            return (dm > limit) ? alpha : (alpha * dm / limit);
         }
         if(angle >= 0  && angle <= degEnd) {
             const float dm = degEnd - angle;
             if(dm > limit) return alpha;
-            return alpha * ( (dm / limit) + addFc );
+            return (dm > limit) ? alpha : (alpha * dm / limit);
         }
         return 0;
     }
@@ -725,8 +727,7 @@ Pt::uint8_t Rasterizer2::arcUtil_pointIsInsideDegRange(Pt::int32_t x, Pt::int32_
         const float db = angle  - degBegin;
         const float de = degEnd - angle;
         const float dm = std::min(db, de);
-        if(dm > limit) return alpha;
-        return alpha * ( (dm / limit) + addFc );
+        return (dm > limit) ? alpha : (alpha * dm / limit);
     }
     return 0;
 }

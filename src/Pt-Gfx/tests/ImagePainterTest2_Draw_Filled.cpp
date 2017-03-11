@@ -179,6 +179,19 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
 
     painter.setPen( Color::fromRgb8(255, 0, 0) );
 
+#if 0
+    // Test big shape
+    // ### TODO: Produce extra pixels !!! ###
+    painter.setBrush( brush1 );
+    ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
+    ip2->fillArc( PointF ( 20,  20), SizeF(800, 800), -225 + 30, 45 + 30, ArcMode::Pie );
+    ip2->fillArc( PointF (100, 100), SizeF(105, 105), -225 + 30, 45 + 30, ArcMode::Pie );
+    ip2->fillArc( PointF (300, 100), SizeF(105, 105), 0 + 3, 135 + 3, ArcMode::Pie );
+    sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
+    return;
+#endif
+
+    // Background filled rectangles
     painter.setBrush( Color::fromRgb8(63, 63, 255) );
     painter.fillRect( RectF( PointF(0, 80), SizeF(image.width(), 60) ) );
     painter.fillRect( RectF( PointF(0, 80 + 135), SizeF(image.width(), 30) ) );

@@ -39,7 +39,7 @@ namespace Pt {
 namespace Gfx {
 namespace Math {
 
-    
+
 // The constant Pi in 32-bit floating-point
 static const float Pi = 3.14159265f;
 
@@ -161,10 +161,12 @@ inline float fastInvSqrt(float x)
 #endif
 
 inline float fastSin(float x)
-{ return Gfx::Math::fastSin_impl(x); }
+{ return ::sinf(x); }
+//{ return Gfx::Math::fastSin_impl(x); } // Causes artifacts
 
 inline float fastCos(float x)
-{ return Gfx::Math::fastCos_impl(x); }
+{ return ::cosf(x); }
+//{ return Gfx::Math::fastCos_impl(x); } // Causes artifacts
 
 inline float fastAtan2(float y, float x)
 { return Gfx::Math::fastAtan2_impl(y, x); }
