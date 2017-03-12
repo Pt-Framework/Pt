@@ -107,6 +107,8 @@ static size_t benchDrawSolidThickLineSimple(int loopCount, CompositionMode cm, A
     Pen penBCapBJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Solid, Pen::ButtCap,   Pen::BevelJoin);
     Pen penSCapBJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Solid, Pen::SquareCap, Pen::BevelJoin);
     Pen penRCapBJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Solid, Pen::RoundCap,  Pen::BevelJoin);
+    Pen penRCapMJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Solid, Pen::RoundCap,  Pen::MiterJoin);
+    Pen penRCapRJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Solid, Pen::RoundCap,  Pen::RoundJoin);
 
     size_t sum = 0;
 
@@ -131,6 +133,33 @@ static size_t benchDrawSolidThickLineSimple(int loopCount, CompositionMode cm, A
 
         painter.setPen(penRCapBJoin);
         painter.drawLine( PointF(100, 100 + 400), PointF(300, 200 + 400) );
+
+        painter.setPen(penRCapBJoin);
+        const PointF poly1a[] = { // CCW
+            PointF(100 + 400, 100),
+            PointF(300 + 400, 200),
+            PointF(200 + 400, 300)
+        };
+        if(ip2) ip2->drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]), false );
+        else painter.drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]) );
+
+        painter.setPen(penRCapMJoin);
+        const PointF poly1b[] = { // CCW
+            PointF(100 + 400, 100 + 200),
+            PointF(300 + 400, 200 + 200),
+            PointF(200 + 400, 300 + 200)
+        };
+        if(ip2) ip2->drawPolyline( poly1b, sizeof(poly1b) / sizeof(poly1b[0]), false );
+        else painter.drawPolyline( poly1b, sizeof(poly1b) / sizeof(poly1b[0]) );
+
+        painter.setPen(penRCapRJoin);
+        const PointF poly1c[] = { // CCW
+            PointF(100 + 400, 100 + 400),
+            PointF(300 + 400, 200 + 400),
+            PointF(200 + 400, 300 + 400)
+        };
+        if(ip2) ip2->drawPolyline( poly1c, sizeof(poly1c) / sizeof(poly1c[0]), false );
+        else painter.drawPolyline( poly1c, sizeof(poly1c) / sizeof(poly1c[0]) );
 
         sum += clock.stop().toUSecs();
 

@@ -77,6 +77,24 @@ static size_t cairoBenchThickLine(int loopCount, CompositionMode cm, bool useAnt
         cairo_line_to     (cairo, 300, 200 + 400);
         cairo_stroke      (cairo);
 
+        cairo_set_line_join(cairo, CAIRO_LINE_JOIN_BEVEL);
+        cairo_move_to      (cairo, 100 + 400, 100);
+        cairo_line_to      (cairo, 300 + 400, 200);
+        cairo_line_to      (cairo, 200 + 400, 300);
+        cairo_stroke       (cairo);
+
+        cairo_set_line_join(cairo, CAIRO_LINE_JOIN_MITER);
+        cairo_move_to      (cairo, 100 + 400, 100 + 200);
+        cairo_line_to      (cairo, 300 + 400, 200 + 200);
+        cairo_line_to      (cairo, 200 + 400, 300 + 200);
+        cairo_stroke       (cairo);
+
+        cairo_set_line_join(cairo, CAIRO_LINE_JOIN_ROUND);
+        cairo_move_to      (cairo, 100 + 400, 100 + 400);
+        cairo_line_to      (cairo, 300 + 400, 200 + 400);
+        cairo_line_to      (cairo, 200 + 400, 300 + 400);
+        cairo_stroke       (cairo);
+
         sum += clock.stop().toUSecs();
 
         BENCHMARK_CAIRO_DISPLAY_RESULTING_IMAGE;
