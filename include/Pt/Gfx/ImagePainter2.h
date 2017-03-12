@@ -155,6 +155,9 @@ class PT_GFX_API ImagePainter2 : public Painter
 
 void ImagePainter2::convertPointTrunc(std::vector<Point>& dst, const PointF* src, const size_t pointCount)
 {
+    // Check if there is no actual point
+    if(!pointCount) return;
+
     // Prepare the buffer
     const size_t ofs = dst.size();
     dst.resize(ofs + pointCount);
@@ -181,6 +184,9 @@ void ImagePainter2::convertPointTrunc(std::vector<Point>& dst, const PointF* src
 
 void ImagePainter2::convertPointRound(std::vector<Point>& dst, const PointF* src, const size_t pointCount)
 {
+    // Check if there is no actual point
+    if(!pointCount) return;
+
     // Prepare the buffer
     const size_t ofs = dst.size();
     dst.resize(ofs + pointCount);

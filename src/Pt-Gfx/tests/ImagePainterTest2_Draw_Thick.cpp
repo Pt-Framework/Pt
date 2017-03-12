@@ -1,20 +1,20 @@
-static void testDrawSolidThickLine(const char* title, Image& image, Painter& painter)
+static void testDrawThickLine_impl(
+    const char* title, Image& image, Painter& painter,
+    const Pen& penBCapBJoin,
+    const Pen& penSCapBJoin,
+    const Pen& penRCapBJoin,
+    const Pen& penICapBJoin,
+    const Pen& penOCapNJoin,
+    const Pen& penOCapBJoin,
+    const Pen& penOCapMJoin,
+    const Pen& penOCapRJoin
+)
 {
     resetImage(image);
 
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
 
-    Pen penText(Color::fromRgb8(255,   0, 0, 175));
-
-    Pen penBCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::ButtCap,          Pen::BevelJoin);
-    Pen penSCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::SquareCap,        Pen::BevelJoin);
-    Pen penRCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::RoundCap,         Pen::BevelJoin);
-    Pen penICapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::TriangularInCap,  Pen::BevelJoin);
-
-    Pen penOCapNJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::TriangularOutCap, Pen::NoJoin   );
-    Pen penOCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::TriangularOutCap, Pen::BevelJoin);
-    Pen penOCapMJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::TriangularOutCap, Pen::MiterJoin);
-    Pen penOCapRJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::TriangularOutCap, Pen::RoundJoin);
+    Pen penText(Color::fromRgb8(255, 0, 0, 175));
 
     /*
     painter.setFont( Pt::Gfx::Font(FONT_SPEC_S) );
@@ -244,14 +244,53 @@ static void testDrawSolidThickLine(const char* title, Image& image, Painter& pai
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
 }
 
+static void testDrawSolidThickLine(const char* title, Image& image, Painter& painter)
+{
+    Pen penBCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::ButtCap,          Pen::BevelJoin);
+    Pen penSCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::SquareCap,        Pen::BevelJoin);
+    Pen penRCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::RoundCap,         Pen::BevelJoin);
+    Pen penICapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::TriangularInCap,  Pen::BevelJoin);
+
+    Pen penOCapNJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::TriangularOutCap, Pen::NoJoin   );
+    Pen penOCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::TriangularOutCap, Pen::BevelJoin);
+    Pen penOCapMJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::TriangularOutCap, Pen::MiterJoin);
+    Pen penOCapRJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Solid, Pen::TriangularOutCap, Pen::RoundJoin);
+
+    testDrawThickLine_impl(
+        title, image, painter,
+        penBCapBJoin,
+        penSCapBJoin,
+        penRCapBJoin,
+        penICapBJoin,
+        penOCapNJoin,
+        penOCapBJoin,
+        penOCapMJoin,
+        penOCapRJoin
+    );
+}
+
 static void testDrawPatternedThickLine(const char* title, Image& image, Painter& painter)
 {
-    resetImage(image);
+    Pen penBCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dash, Pen::ButtCap,          Pen::BevelJoin);
+    Pen penSCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dash, Pen::SquareCap,        Pen::BevelJoin);
+    Pen penRCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dash, Pen::RoundCap,         Pen::BevelJoin);
+    Pen penICapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dash, Pen::TriangularInCap,  Pen::BevelJoin);
 
-    ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
+    Pen penOCapNJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dash, Pen::TriangularOutCap, Pen::NoJoin   );
+    Pen penOCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dash, Pen::TriangularOutCap, Pen::BevelJoin);
+    Pen penOCapMJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dash, Pen::TriangularOutCap, Pen::MiterJoin);
+    Pen penOCapRJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dash, Pen::TriangularOutCap, Pen::RoundJoin);
 
-
-    sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
+    testDrawThickLine_impl(
+        title, image, painter,
+        penBCapBJoin,
+        penSCapBJoin,
+        penRCapBJoin,
+        penICapBJoin,
+        penOCapNJoin,
+        penOCapBJoin,
+        penOCapMJoin,
+        penOCapRJoin
+    );
 }
 
