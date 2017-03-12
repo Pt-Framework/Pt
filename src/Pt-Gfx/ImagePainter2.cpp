@@ -513,6 +513,7 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
     if(_rasterizer->pen().style() == Pen::Solid) {
         // Calculate the ellipse's parameters
         const size_t      penSize  = _rasterizer->pen().size();
+        const size_t      penSize2 = penSize / 2;
         const Pt::int32_t radiusXo = ( size.width () + penSize ) / 2;
         const Pt::int32_t radiusYo = ( size.height() + penSize ) / 2;
         const Pt::int32_t radiusXi = ( size.width () - penSize ) / 2;
@@ -529,20 +530,22 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
             generateArcPoints(points, radiusXi, radiusYi, centerX + shiftX, centerY + shiftY, degBegin, degEnd);
         }
         else if(arcMode == ArcMode::Pie) {
-            // Outer perimeter
-            generateArcPoints(points, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd);
-            points.push_back(Point(centerX, centerY));
-            // Adjust the begin and end angle
+            // Calculate the angle adjustment factor
             const float a = size.width () / 2.0f;
             const float b = size.height() / 2.0f;
             const float c = Gfx::Math::PiMul2 * Gfx::Math::fastSqrt( (a * a + b * b) / 2.0f );
-            const float d = 360.0f * penSize / c;
-            degBegin = (degBegin < 0) ? (degBegin + d) : (degBegin - d);
-            degEnd   = (degEnd   < 0) ? (degEnd   + d) : (degEnd   - d);
+            const float d = 360.0f * penSize2 / c;
+            // Outer perimeter
+            const float odegBegin = (degBegin < 0) ? (degBegin - d) : (degBegin + d);
+            const float odegEnd   = (degEnd   < 0) ? (degEnd   - d) : (degEnd   + d);
+            generateArcPoints(points, radiusXo, radiusYo, centerX, centerY, odegBegin, odegEnd);
+            points.push_back(Point(round(centerX - shiftX * penSize2), round(centerY - shiftY * penSize2)));
             // Inner perimeter
+            const float idegBegin = (degBegin < 0) ? (degBegin + d) : (degBegin - d);
+            const float idegEnd   = (degEnd   < 0) ? (degEnd   + d) : (degEnd   - d);
             points.push_back(Painter::PolygonSeparatorPoint);
-            generateArcPoints(points, radiusXi, radiusYi, centerX, centerY, degBegin, degEnd);
-            points.push_back(Point(round(centerX + shiftX * penSize), round(centerY + shiftY * penSize)));
+            generateArcPoints(points, radiusXi, radiusYi, centerX, centerY, idegBegin, idegEnd);
+            points.push_back(Point(round(centerX + shiftX * penSize2), round(centerY + shiftY * penSize2)));
         }
         else { // ArcMode::Open
             // ### TODO ###
