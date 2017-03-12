@@ -43,6 +43,29 @@ namespace Gfx {
 // ===== Internal Helper Functions ======================================================
 // ======================================================================================
 
+static inline void calculateLineParams(float& wh, float& dx, float& dy, float& nx, float& ny, float x1, float y1, float x2, float y2, size_t w)
+{
+    // Line equation : 0 = aX + By + c
+    // Normal        : n = ai + bj
+    const float a = y2 - y1;
+    const float b = x1 - x2;
+  //const float c = -(x1 * y2 - x2 * y1);
+
+    // Inverse line length
+    const float il = 1.0f / Gfx::Math::fastSqrt(a * a + b * b);
+
+    // Half line width
+    wh = (float) w * 0.5f;
+
+    // Direction vector
+    dx = -b * il * wh;
+    dy =  a * il * wh;
+
+    // Normal vector vector
+    nx =  a * il * wh;
+    ny =  b * il * wh;
+}
+
 static inline bool intersectLine(bool& inLine, PointF& intersect, const PointF& line1a, const PointF& line1b, const PointF& line2a, const PointF& line2b)
 {
     // The first line
@@ -579,18 +602,10 @@ void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float deg
 
 void ImagePainter2::generateSolidLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, bool openingCap, bool closingCap)
 {
-    // Line equation : 0 = aX + By + c
-    // Normal        : n = ai + bj
-    const float w  = _rasterizer->pen().size();
-    const float wh = w * 0.5f;
-    const float a  = y2 - y1;
-    const float b  = x1 - x2;
-  //const float c  = -(x1 * y2 - x2 * y1);
-    const float il = 1.0f / Gfx::Math::fastSqrt(a * a + b * b);
-    const float dx = -b * il * wh;
-    const float dy =  a * il * wh;
-    const float nx =  a * il * wh;
-    const float ny =  b * il * wh;
+    // Calculate the line's parameters
+    float wh, dx, dy, nx, ny;
+
+    calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2,  _rasterizer->pen().size());
 
     // Generate points (CCW)
     // --- Begin point ---
