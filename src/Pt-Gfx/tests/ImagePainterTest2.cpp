@@ -66,7 +66,7 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_SOLID_THICK_LINE              1 // (including bezier)
 #define TEST_DRAW_PATTERNED_THICK_LINE          0 // (including bezier)
 
-#define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES  0
+#define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES  1
 #define TEST_DRAW_ELLIPSES_ARCS                 0
 
 #define TEST_DRAW_SOLID_FILLED_POLYGONS         0
@@ -90,10 +90,10 @@ using namespace Pt::Gfx;
 
 #define BENCHMARK_TEXT                      0
 #define BENCHMARK_ROTATED_TEXT              0
-#define BENCHMARK_SOLID_LINE                1
-#define BENCHMARK_PATTERNED_LINE            1
+#define BENCHMARK_SOLID_LINE                0
+#define BENCHMARK_PATTERNED_LINE            0
 #define BENCHMARK_SOLID_THICK_LINE          1
-#define BENCHMARK_PATTERNED_THICK_LINE      1
+#define BENCHMARK_PATTERNED_THICK_LINE      0
 #define BENCHMARK_ELLIPSE                   0
 #define BENCHMARK_ARC                       0
 #define BENCHMARK_SOLID_BEZIER              0
