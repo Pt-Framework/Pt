@@ -96,10 +96,10 @@ inline float fastInvSqrt_impl(float x)
 
 inline float fastSin_impl(float x)
 {
-    if (x > Pt::Pi) x -= Pt::PiDouble;
+    if (x > Gfx::Math::Pi) x -= Gfx::Math::PiMul2;
 
-    const float b =  4 / Pt::Pi;
-    const float c = -4 / Pt::PiSqr;
+    const float b =  4 / Gfx::Math::Pi;
+    const float c = -4 / Gfx::Math::PiSqr;
     const float p = 0.225;
     const float y = b * x + c * x * ::fabs(x);
 
@@ -108,8 +108,8 @@ inline float fastSin_impl(float x)
 
 inline float fastCos_impl(float x)
 {
-    x += Pt::PiHalf;
-    if(x > Pt::PiDouble) x -= Pt::PiDouble;
+    x += Gfx::Math::PiDiv2;
+    if(x > Gfx::Math::PiMul2) x -= Gfx::Math::PiMul2;
 
     return Gfx::Math::fastSin_impl(x);
 }
@@ -122,9 +122,9 @@ inline float fastAtan2_impl(float y, float x)
     //           Original code by Volkan SALMA, 2012
 
     if(x == 0.0f) {
-        if(y >  0.0f) return Pt::PiHalf;
+        if(y >  0.0f) return Gfx::Math::PiDiv2;
         if(y == 0.0f) return 0.0f;
-        return -Pt::PiHalf;
+        return -Gfx::Math::PiDiv2;
     }
 
     const float z = y / x;
@@ -133,14 +133,14 @@ inline float fastAtan2_impl(float y, float x)
     if(fabs(z) < 1.0f) {
         atan = z / (1.0f + 0.28f * z * z);
         if(x < 0.0f) {
-            if(y < 0.0f) return atan - Pt::Pi;
-            return atan + Pt::Pi;
+            if(y < 0.0f) return atan - Gfx::Math::Pi;
+            return atan + Gfx::Math::Pi;
         }
     }
 
     else {
-        atan = Pt::PiHalf - z / (z * z + 0.28f);
-        if(y < 0.0f) return atan - Pt::Pi;
+        atan = Gfx::Math::PiDiv2 - z / (z * z + 0.28f);
+        if(y < 0.0f) return atan - Gfx::Math::Pi;
     }
 
     return atan;
@@ -167,11 +167,11 @@ inline float fastInvSqrt(float x)
 
 inline float fastSin(float x)
 { return ::sinf(x); }
-//{ return Gfx::Math::fastSin_impl(x); } // Causes artifacts
+//{ return Gfx::Math::fastSin_impl(x); } // Causes artifacts when used for drawing large shapes
 
 inline float fastCos(float x)
 { return ::cosf(x); }
-//{ return Gfx::Math::fastCos_impl(x); } // Causes artifacts
+//{ return Gfx::Math::fastCos_impl(x); } // Causes artifacts when used for drawing large shapes
 
 inline float fastAtan2(float y, float x)
 { return Gfx::Math::fastAtan2_impl(y, x); }
@@ -180,10 +180,10 @@ inline float convertCartesianToPolarCoordinate(float x, float y)
 {
     // Quadrant I & II
     if(y >= 0)
-        return Gfx::Math::fastAtan2(y, x) * 180 / Pt::Pi;
+        return Gfx::Math::fastAtan2(y, x) * 180.0f / Gfx::Math::Pi;
 
     // Quadrant III && IV
-    return Gfx::Math::fastAtan2(y, x) * 180 / Pt::Pi + 360;
+    return Gfx::Math::fastAtan2(y, x) * 180.0f / Gfx::Math::Pi + 360.0f;
 }
 
 

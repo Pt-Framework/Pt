@@ -312,69 +312,84 @@ static void testDrawThickEllipseArc(const char* title, Image& image, Painter& pa
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
     painter.setPen(draw); painter.drawEllipse( PointF (30, 50), SizeF(135, 135) );
     painter.setPen(text); painter.drawText( PointF(30, 30), "NOAA" );
+                          painter.drawEllipse( PointF (30, 50), SizeF(135, 135) );
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
     painter.setPen(draw); painter.drawEllipse( PointF (30 + 200, 50), SizeF(135, 135) );
     painter.setPen(text); painter.drawText( PointF(30 + 200, 30), "XWAA" );
+                          painter.drawEllipse( PointF (30 + 200, 50), SizeF(135, 135) );
 
     if(ip2) {
         ip2->setAntiAliasingMode(AntiAliasingMode::None);
         painter.setPen(draw); ip2->drawArc( PointF (30 + 400, 50), SizeF(135, 135), 0, 135, ArcMode::Open );
         painter.setPen(text); ip2->drawText( PointF(30 + 400, 30), "NOAA" );
+                              ip2->drawArc( PointF (30 + 400, 50), SizeF(135, 135), 0, 135, ArcMode::Open );
 
         ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
         painter.setPen(draw); ip2->drawArc( PointF (30 + 600, 50), SizeF(135, 135), 0, 135, ArcMode::Open );
         painter.setPen(text); ip2->drawText( PointF(30 + 600, 30), "XWAA" );
+                              ip2->drawArc( PointF (30 + 600, 50), SizeF(135, 135), 0, 135, ArcMode::Open );
 
         ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
         painter.setPen(draw); ip2->drawArc( PointF (30 + 800, 50), SizeF(135, 135), -135, 135, ArcMode::Open );
         painter.setPen(text); ip2->drawText( PointF(30 + 800, 30), "XWAA" );
+                              ip2->drawArc( PointF (30 + 800, 50), SizeF(135, 135), -135, 135, ArcMode::Open );
     }
 
     // Second row
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
     painter.setPen(draw); painter.drawEllipse( PointF (30, 50 + 200), SizeF(135, 67) );
     painter.setPen(text); painter.drawText( PointF(30, 30 + 200), "NOAA" );
+                          painter.drawEllipse( PointF (30, 50 + 200), SizeF(135, 67) );
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
     painter.setPen(draw); painter.drawEllipse( PointF (30 + 200, 50 + 200), SizeF(135, 67) );
     painter.setPen(text); painter.drawText( PointF(30 + 200, 30 + 200), "XWAA" );
+                          painter.drawEllipse( PointF (30 + 200, 50 + 200), SizeF(135, 67) );
 
     if(ip2) {
         ip2->setAntiAliasingMode(AntiAliasingMode::None);
         painter.setPen(draw); ip2->drawArc( PointF (30 + 400, 50 + 200), SizeF(135, 135), 120, 330, ArcMode::Open );
         painter.setPen(text); ip2->drawText( PointF(30 + 400, 30 + 200), "NOAA" );
+                              ip2->drawArc( PointF (30 + 400, 50 + 200), SizeF(135, 135), 120, 330, ArcMode::Open );
 
         ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
         painter.setPen(draw); ip2->drawArc( PointF (30 + 600, 50 + 200), SizeF(135, 135), 120, 330, ArcMode::Open );
         painter.setPen(text); ip2->drawText( PointF(30 + 600, 30 + 200), "XWAA" );
+                              ip2->drawArc( PointF (30 + 600, 50 + 200), SizeF(135, 135), 120, 330, ArcMode::Open );
 
         ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
         painter.setPen(draw); ip2->drawArc( PointF (30 + 800, 50 + 200), SizeF(135, 135), -135, 135, ArcMode::Chord );
         painter.setPen(text); ip2->drawText( PointF(30 + 800, 30 + 200), "XWAA" );
+                              ip2->drawArc( PointF (30 + 800, 50 + 200), SizeF(135, 135), -135, 135, ArcMode::Chord );
     }
 
     // Third row
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
     painter.setPen(draw); painter.drawEllipse( PointF (30, 50 + 400), SizeF(67, 135) );
     painter.setPen(text); painter.drawText( PointF(30, 30 + 400), "NOAA" );
+                          painter.drawEllipse( PointF (30, 50 + 400), SizeF(67, 135) );
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
     painter.setPen(draw); painter.drawEllipse( PointF (30 + 200, 50 + 400), SizeF(67, 135) );
     painter.setPen(text); painter.drawText( PointF(30 + 200, 30 + 400), "XWAA" );
+                          painter.drawEllipse( PointF (30 + 200, 50 + 400), SizeF(67, 135) );
 
     if(ip2) {
         ip2->setAntiAliasingMode(AntiAliasingMode::None);
         painter.setPen(draw); ip2->drawArc( PointF (30 + 400, 50 + 400), SizeF(135, 135), -150, 30, ArcMode::Open );
         painter.setPen(text); ip2->drawText( PointF(30 + 400, 30 + 400), "NOAA" );
+                              ip2->drawArc( PointF (30 + 400, 50 + 400), SizeF(135, 135), -150, 30, ArcMode::Open );
 
         ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
         painter.setPen(draw); ip2->drawArc( PointF (30 + 600, 50 + 400), SizeF(135, 135), -150, 30, ArcMode::Open );
         painter.setPen(text); ip2->drawText( PointF(30 + 600, 30 + 400), "XWAA" );
+                              ip2->drawArc( PointF (30 + 600, 50 + 400), SizeF(135, 135), -150, 30, ArcMode::Open );
 
         ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
         painter.setPen(draw); ip2->drawArc( PointF (30 + 800, 50 + 400), SizeF(135, 135), -135, 135, ArcMode::Pie );
         painter.setPen(text); ip2->drawText( PointF(30 + 800, 30 + 400), "XWAA" );
+                              ip2->drawArc( PointF (30 + 800, 50 + 400), SizeF(135, 135), -135, 135, ArcMode::Pie );
     }
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
