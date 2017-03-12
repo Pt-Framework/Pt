@@ -155,56 +155,20 @@ static void generateEllipsePoints(std::vector<Point>& dst, Pt::int32_t radiusX, 
     // Calculate the ellipse's parameters
     const Pt::int32_t radiusM = std::max(radiusX, radiusY);
     const Pt::int32_t numSegs = (radiusM * 2 / 3 / 20) * 20;
-    const Pt::int32_t qtrSegs = (numSegs / 4);
-
-    // Calculate the coordinate displacements
-    std::vector<float> disX(qtrSegs);
-    std::vector<float> disY(qtrSegs);
-    for(Pt::int32_t i = 0; i < qtrSegs; ++i) {
-        // Calculate the angle
-        const float angle = 0.5f * Gfx::Math::Pi * i / qtrSegs;
-        // Calculate the displacements
-        disX[i] =  radiusX * Gfx::Math::fastCos(angle);
-        disY[i] = -radiusY * Gfx::Math::fastSin(angle);
-    }
 
     // Generate a polygon that approximates the ellipse
-    Pt::int32_t  p = 0;
-    for(Pt::int32_t i = 0; i < qtrSegs; ++i) { // Quadrant I
+    for(Pt::int32_t i = 0; i <= numSegs; ++i) {
+        const float angle = 2.0f * Gfx::Math::Pi * i / numSegs;
         // Calculate the coordinate
-        const Pt::int32_t x = round( centerX + disX[i] );
-        const Pt::int32_t y = round( centerY + disY[i] );
-        // Store the coordinate only if it is different with the previous one
-        if( !dst.empty() && dst.back().x() == x && dst.back().y() == y ) continue;
-        dst.push_back( Point(x, y) );
-    }
-    for(Pt::int32_t i = 0; i < qtrSegs; ++i) { // Quadrant II
-        // Calculate the coordinate
-        const Pt::int32_t x = round( centerX - disX[qtrSegs - 1 - i] );
-        const Pt::int32_t y = round( centerY + disY[qtrSegs - 1 - i] );
-        // Store the coordinate only if it is different with the previous one
-        if( !dst.empty() && dst.back().x() == x && dst.back().y() == y ) continue;
-        dst.push_back( Point(x, y) );
-    }
-    for(Pt::int32_t i = 0; i < qtrSegs; ++i) { // Quadrant III
-        // Calculate the coordinate
-        const Pt::int32_t x = round( centerX - disX[i] );
-        const Pt::int32_t y = round( centerY - disY[i] );
-        // Store the coordinate only if it is different with the previous one
-        if( !dst.empty() && dst.back().x() == x && dst.back().y() == y ) continue;
-        dst.push_back( Point(x, y) );
-    }
-    for(Pt::int32_t i = 0; i < qtrSegs; ++i) { // Quadrant IV
-        // Calculate the coordinate
-        const Pt::int32_t x = round( centerX + disX[qtrSegs - 1 - i] );
-        const Pt::int32_t y = round( centerY - disY[qtrSegs - 1 - i] );
+        const Pt::int32_t x = round( centerX + radiusX * Gfx::Math::fastCos(angle) );
+        const Pt::int32_t y = round( centerY + radiusY * Gfx::Math::fastSin(angle) );
         // Store the coordinate only if it is different with the previous one
         if( !dst.empty() && dst.back().x() == x && dst.back().y() == y ) continue;
         dst.push_back( Point(x, y) );
     }
 
     // Discard the last point if it has the same coordinate with the first one
-    if(dst[p - 1] == dst[0]) dst.pop_back();
+    if(dst.back() == dst[0]) dst.pop_back();
 }
 
 
