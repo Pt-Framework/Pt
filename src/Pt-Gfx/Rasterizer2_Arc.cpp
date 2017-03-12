@@ -186,12 +186,12 @@ void Rasterizer2::rasterArcAreaPie(FilledArcInfo& fai)
 void Rasterizer2::arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai)
 {
     // Calculate the approximate coordinate of the point which is located at the begin angle
-    const float rBeg = fai.degBegin * Gfx::Math::Pi / 180;
+    const float rBeg = fai.degBegin * Gfx::Math::PiDiv180;
     const Pt::int32_t bx = round(fai.ctrX + fai.radX * Gfx::Math::fastCos(rBeg));
     const Pt::int32_t by = round(fai.ctrY - fai.radY * Gfx::Math::fastSin(rBeg)); // Sign inversion due to differences between cartesian and computer coordinate systems
 
     // Calculate the approximate coordinate of the point which is located at the end angle
-    const float rEnd = fai.degEnd * Gfx::Math::Pi / 180;
+    const float rEnd = fai.degEnd * Gfx::Math::PiDiv180;
     const Pt::int32_t ex = round(fai.ctrX + fai.radX * Gfx::Math::fastCos(rEnd));
     const Pt::int32_t ey = round(fai.ctrY - fai.radY * Gfx::Math::fastSin(rEnd)); // Sign inversion due to differences between cartesian and computer coordinate systems
 

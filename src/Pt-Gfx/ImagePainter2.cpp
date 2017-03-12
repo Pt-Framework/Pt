@@ -157,7 +157,7 @@ static void generateEllipsePoints(std::vector<Point>& dst, Pt::int32_t radiusX, 
 
     // Generate a polygon that approximates the ellipse
     for(Pt::int32_t i = 0; i <= numSegs; ++i) {
-        const float angle = 2.0f * Gfx::Math::Pi * i / numSegs;
+        const float angle = Gfx::Math::PiMul2 * i / numSegs;
         // Calculate the coordinate
         const Pt::int32_t x = round( centerX + radiusX * Gfx::Math::fastCos(angle) );
         const Pt::int32_t y = round( centerY + radiusY * Gfx::Math::fastSin(angle) );
@@ -176,10 +176,10 @@ static void generateArcPoints(std::vector<Point>& dst, Pt::int32_t radiusX, Pt::
     const Pt::int32_t radiusM = std::max(radiusX, radiusY);
     const Pt::int32_t deltaDg = degEnd - degBegin;
     const Pt::int32_t numSegs = (radiusM * 2 * deltaDg / 180 / 3 / 20) * 20;
-    const float       fdegInc = (Pt::Pi * deltaDg / 180.0f) / numSegs;
+    const float       fdegInc = (deltaDg * Gfx::Math::PiDiv180) / numSegs;
 
     // Generate a polygon that approximates the ellipse
-    float angle = degBegin * Gfx::Math::Pi / 180.0f;
+    float angle = degBegin * Gfx::Math::PiDiv180;
 
     for(Pt::int32_t i = 0; i <= numSegs; ++i) {
         // Calculate the coordinate
@@ -504,6 +504,9 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
         return;
     }
 
+    //
+    const float degMid = (degBegin + degEnd) / 2.0f;
+
     // Solid
     if(_rasterizer->pen().style() == Pen::Solid) {
         // Calculate the ellipse's parameters
@@ -530,6 +533,7 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
             points.push_back(Point(centerX + penSize, centerY + 0));
         }
         else { // ArcMode::Open
+            // ### TODO ###
         }
         // Rasterize the polygon
         _rasterizer->strokePolygon(points.data(), points.size());

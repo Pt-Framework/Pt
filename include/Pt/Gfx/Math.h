@@ -40,8 +40,13 @@ namespace Gfx {
 namespace Math {
 
 
-// The constant Pi in 32-bit floating-point
-static const float Pi = 3.14159265f;
+// The constant Pi and its variations in 32-bit floating-point
+static const float Pi       = 3.14159265f;
+static const float PiMul2   = 6.28318531f;
+static const float PiDiv2   = 1.57079633f;
+static const float PiDiv4   = 0.78539816f;
+static const float PiDiv180 = 0.01745329f;
+static const float PiSqr    = 9.86960440f;
 
 
 // The real implementation
