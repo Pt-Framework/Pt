@@ -504,11 +504,10 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
         return;
     }
 
-    //
+    // Calculate the coordinate shift
     const float degMid = (degBegin + degEnd) / 2.0f * Gfx::Math::PiDiv180;
     const float shiftX = Gfx::Math::fastCos(degMid);
     const float shiftY = Gfx::Math::fastSin(degMid);
-    //if(arcMode != ArcMode::Open) lprintf("%f %f\n", shiftX, shiftY);
 
     // Solid
     if(_rasterizer->pen().style() == Pen::Solid) {
@@ -523,14 +522,24 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
         // Generate the polygon
         std::vector<Point> points;
         if(arcMode == ArcMode::Chord) {
+            // Outer perimeter
             generateArcPoints(points, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd);
+            // Inner perimeter
             points.push_back(Painter::PolygonSeparatorPoint);
             generateArcPoints(points, radiusXi, radiusYi, centerX + shiftX, centerY + shiftY, degBegin, degEnd);
         }
         else if(arcMode == ArcMode::Pie) {
+            // Outer perimeter
             generateArcPoints(points, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd);
             points.push_back(Point(centerX, centerY));
-
+            // Adjust the begin and end angle
+            const float a = size.width () / 2.0f;
+            const float b = size.height() / 2.0f;
+            const float c = Gfx::Math::PiMul2 * Gfx::Math::fastSqrt( (a * a + b * b) / 2.0f );
+            const float d = 360.0f * penSize / c;
+            degBegin = (degBegin < 0) ? (degBegin + d) : (degBegin - d);
+            degEnd   = (degEnd   < 0) ? (degEnd   + d) : (degEnd   - d);
+            // Inner perimeter
             points.push_back(Painter::PolygonSeparatorPoint);
             generateArcPoints(points, radiusXi, radiusYi, centerX, centerY, degBegin, degEnd);
             points.push_back(Point(round(centerX + shiftX * penSize), round(centerY + shiftY * penSize)));
