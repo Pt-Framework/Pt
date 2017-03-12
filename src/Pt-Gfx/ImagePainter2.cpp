@@ -505,7 +505,10 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
     }
 
     //
-    const float degMid = (degBegin + degEnd) / 2.0f;
+    const float degMid = (degBegin + degEnd) / 2.0f * Gfx::Math::PiDiv180;
+    const float shiftX = Gfx::Math::fastCos(degMid);
+    const float shiftY = Gfx::Math::fastSin(degMid);
+    //if(arcMode != ArcMode::Open) lprintf("%f %f\n", shiftX, shiftY);
 
     // Solid
     if(_rasterizer->pen().style() == Pen::Solid) {
@@ -522,7 +525,7 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
         if(arcMode == ArcMode::Chord) {
             generateArcPoints(points, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd);
             points.push_back(Painter::PolygonSeparatorPoint);
-            generateArcPoints(points, radiusXi, radiusYi, centerX, centerY, degBegin, degEnd);
+            generateArcPoints(points, radiusXi, radiusYi, centerX + shiftX, centerY + shiftY, degBegin, degEnd);
         }
         else if(arcMode == ArcMode::Pie) {
             generateArcPoints(points, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd);
@@ -530,7 +533,7 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
 
             points.push_back(Painter::PolygonSeparatorPoint);
             generateArcPoints(points, radiusXi, radiusYi, centerX, centerY, degBegin, degEnd);
-            points.push_back(Point(centerX + penSize, centerY + 0));
+            points.push_back(Point(round(centerX + shiftX * penSize), round(centerY + shiftY * penSize)));
         }
         else { // ArcMode::Open
             // ### TODO ###
