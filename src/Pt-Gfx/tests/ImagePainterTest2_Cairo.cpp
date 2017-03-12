@@ -31,6 +31,64 @@ static size_t cairoBenchRandCallOverheadTimes1000(int loopCount)
     return sum;
 }
 
+static size_t cairoBenchThickLine(int loopCount, CompositionMode cm, bool useAntiAliasing)
+{
+    size_t sum = 0;
+
+    const Size& imgSize = BENCHMARK_IMAGE_SIZE;
+
+    std::vector<Pt::uint8_t> buffer(imgSize.width() * imgSize.height() * 4, 0);
+
+    cairo_surface_t* cairoSurface = cairo_image_surface_create_for_data ( &buffer[0], CAIRO_FORMAT_ARGB32, imgSize.width(), imgSize.height(), imgSize.width() * 4);
+    cairo_t*         cairo        = cairo_create(cairoSurface);
+
+    cairo_set_antialias(cairo, useAntiAliasing ? CAIRO_ANTIALIAS_DEFAULT : CAIRO_ANTIALIAS_NONE);
+    cairo_set_line_width(cairo, 12);
+
+    for(int i = 0; i < loopCount; ++i) {
+        Pt::System::Clock clock;
+        clock.start();
+
+        if(cm == CompositionMode::SourceOver) {
+            cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
+            cairo_set_source_rgba(cairo, 1.0f, 1.0f, 1.0f, 175.0f / 255.0f);
+        }
+        else {
+            cairo_set_operator(cairo, CAIRO_OPERATOR_SOURCE);
+            cairo_set_source_rgba(cairo, 1.0f, 1.0f, 1.0f, 1.0f);
+        }
+
+        // NOTE: * The calls to Cairo's clipping functions are not actually needed.
+        //       * They are put here so that the benchmarking process will be a fair one,
+        //         due to the fact that Pt-Gfx always perform clipping.
+
+        cairo_set_line_cap(cairo, CAIRO_LINE_CAP_BUTT);
+        cairo_move_to     (cairo, 100, 100);
+        cairo_line_to     (cairo, 300, 200);
+        cairo_stroke      (cairo);
+
+        cairo_set_line_cap(cairo, CAIRO_LINE_CAP_SQUARE);
+        cairo_move_to     (cairo, 100, 100 + 200);
+        cairo_line_to     (cairo, 300, 200 + 200);
+        cairo_stroke      (cairo);
+
+        cairo_set_line_cap(cairo, CAIRO_LINE_CAP_ROUND);
+        cairo_move_to     (cairo, 100, 100 + 400);
+        cairo_line_to     (cairo, 300, 200 + 400);
+        cairo_stroke      (cairo);
+
+        sum += clock.stop().toUSecs();
+
+        BENCHMARK_CAIRO_DISPLAY_RESULTING_IMAGE;
+    }
+
+    cairo_destroy (cairo);
+    cairo_surface_destroy (cairoSurface);
+
+    sum /= loopCount;
+    return sum;
+}
+
 template <bool USE_RANDOM>
 static size_t cairoBenchFillPolygon(int loopCount, CompositionMode cm, bool useAntiAliasing)
 {
@@ -188,6 +246,28 @@ static void cairoBenchmark(CompositionMode cm)
 
     std::clog << "                                                       (Time) (Factor)" << std::endl;
     std::clog << "                                                       ------ --------" << std::endl;
+
+    // Thick lines
+    if(BENCHMARK_SOLID_THICK_LINE) {
+        time1 = cairoBenchThickLine(BENCHMARK_LOOP_COUNT, cm, true );
+        std::clog << "    Solid thick line                 @ Cairo         = " << std::setw(6) << time1 << std::endl;
+        time2 = cairoBenchThickLine(BENCHMARK_LOOP_COUNT, cm, false);
+        std::clog << "    Solid thick line                 @ Cairo - No AA = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time2 = benchDrawSolidThickLineSimple<ImagePainter >(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
+        std::clog << "    Solid thick line                 @ ImagePainter  = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time2 = benchDrawSolidThickLineSimple<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
+        std::clog << "    Solid thick line NOAA            @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time2 = benchDrawSolidThickLineSimple<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::Standard);
+        std::clog << "    Solid thick line XWAA            @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time2 = benchDrawSolidThickLineSimple<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::LowMemory);
+        std::clog << "    Solid thick line FSAA2x2         @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        std::clog << std::endl;
+    }
 
     // Filled polygons
     if(BENCHMARK_SOLID_FILLED_POLYGON) {

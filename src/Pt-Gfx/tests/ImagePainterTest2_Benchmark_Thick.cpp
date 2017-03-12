@@ -102,6 +102,46 @@ static size_t benchDrawThickLine_impl(
 }
 
 template <typename PainterT>
+static size_t benchDrawSolidThickLineSimple(int loopCount, CompositionMode cm, AntiAliasingMode antiAliasingMode)
+{
+    Pen penBCapBJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Solid, Pen::ButtCap,   Pen::BevelJoin);
+    Pen penSCapBJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Solid, Pen::SquareCap, Pen::BevelJoin);
+    Pen penRCapBJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Solid, Pen::RoundCap,  Pen::BevelJoin);
+
+    size_t sum = 0;
+
+    Image image( ImageFormat::argb32(), BENCHMARK_IMAGE_SIZE );
+
+    PainterT painter(image);
+    painter.setCompositionMode(cm);
+
+    ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
+
+    for(int i = 0; i < loopCount; ++i) {
+        Pt::System::Clock clock;
+        clock.start();
+
+        if(ip2) ip2->setAntiAliasingMode(antiAliasingMode);
+
+        painter.setPen(penBCapBJoin);
+        painter.drawLine( PointF(100, 100), PointF(300, 200) );
+
+        painter.setPen(penSCapBJoin);
+        painter.drawLine( PointF(100, 100 + 200), PointF(300, 200 + 200) );
+
+        painter.setPen(penRCapBJoin);
+        painter.drawLine( PointF(100, 100 + 400), PointF(300, 200 + 400) );
+
+        sum += clock.stop().toUSecs();
+
+        BENCHMARK_DISPLAY_RESULTING_IMAGE;
+    }
+
+    sum /= loopCount;
+    return sum;
+}
+
+template <typename PainterT>
 static size_t benchDrawSolidThickLine(int loopCount, CompositionMode cm, AntiAliasingMode antiAliasingMode)
 {
     Pen penRCapBJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Solid, Pen::RoundCap,  Pen::BevelJoin);
