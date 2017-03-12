@@ -503,6 +503,17 @@ void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
     else {
         // ### TODO ###
     }
+
+#if 1
+    // ### For visual comparison only ###
+    const Point tl( (Pt::int32_t) topLeft.x    (), (Pt::int32_t) topLeft.y     () );
+    const Size  sz( (Pt::int32_t) size   .width(), (Pt::int32_t) size   .height() );
+    const Pen op = _rasterizer->pen();
+    _rasterizer->setPen(Color::fromRgb8(255, 0, 0, 127));
+    _rasterizer->strokeOnePixelEllipseArc(tl, sz, 0, 0, ArcMode::Open);
+    _rasterizer->setPen(op);
+#endif
+
 }
 
 void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
@@ -581,6 +592,16 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
     else {
         // ### TODO ###
     }
+
+#if 1
+    // ### For visual comparison only ###
+    const Point tl( (Pt::int32_t) topLeft.x    (), (Pt::int32_t) topLeft.y     () );
+    const Size  sz( (Pt::int32_t) size   .width(), (Pt::int32_t) size   .height() );
+    const Pen op = _rasterizer->pen();
+    _rasterizer->setPen(Color::fromRgb8(255, 0, 0, 127));
+    _rasterizer->strokeOnePixelEllipseArc(tl, sz, degBegin, degEnd, arcMode);
+    _rasterizer->setPen(op);
+#endif
 }
 
 void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode )
