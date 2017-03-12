@@ -150,6 +150,63 @@ static inline void generateLineTriangularInCap(std::vector<PointF>& dst, float x
     dst.push_back( PointF(x - nx, y - ny) );
 }
 
+static void generateEllipsePoints(std::vector<Point>& dst, Pt::int32_t radiusX, Pt::int32_t radiusY, Pt::int32_t centerX, Pt::int32_t centerY)
+{
+    // Calculate the ellipse's parameters
+    const Pt::int32_t radiusM = std::max(radiusX, radiusY);
+    const Pt::int32_t numSegs = (radiusM * 2 / 3 / 20) * 20;
+    const Pt::int32_t qtrSegs = (numSegs / 4);
+
+    // Calculate the coordinate displacements
+    std::vector<float> disX(qtrSegs);
+    std::vector<float> disY(qtrSegs);
+    for(Pt::int32_t i = 0; i < qtrSegs; ++i) {
+        // Calculate the angle
+        const float angle = 0.5f * Gfx::Math::Pi * i / qtrSegs;
+        // Calculate the displacements
+        disX[i] =  radiusX * Gfx::Math::fastCos(angle);
+        disY[i] = -radiusY * Gfx::Math::fastSin(angle);
+    }
+
+    // Generate a polygon that approximates the ellipse
+    Pt::int32_t  p = 0;
+    for(Pt::int32_t i = 0; i < qtrSegs; ++i) { // Quadrant I
+        // Calculate the coordinate
+        const Pt::int32_t x = round( centerX + disX[i] );
+        const Pt::int32_t y = round( centerY + disY[i] );
+        // Store the coordinate only if it is different with the previous one
+        if( !dst.empty() && dst.back().x() == x && dst.back().y() == y ) continue;
+        dst.push_back( Point(x, y) );
+    }
+    for(Pt::int32_t i = 0; i < qtrSegs; ++i) { // Quadrant II
+        // Calculate the coordinate
+        const Pt::int32_t x = round( centerX - disX[qtrSegs - 1 - i] );
+        const Pt::int32_t y = round( centerY + disY[qtrSegs - 1 - i] );
+        // Store the coordinate only if it is different with the previous one
+        if( !dst.empty() && dst.back().x() == x && dst.back().y() == y ) continue;
+        dst.push_back( Point(x, y) );
+    }
+    for(Pt::int32_t i = 0; i < qtrSegs; ++i) { // Quadrant III
+        // Calculate the coordinate
+        const Pt::int32_t x = round( centerX - disX[i] );
+        const Pt::int32_t y = round( centerY - disY[i] );
+        // Store the coordinate only if it is different with the previous one
+        if( !dst.empty() && dst.back().x() == x && dst.back().y() == y ) continue;
+        dst.push_back( Point(x, y) );
+    }
+    for(Pt::int32_t i = 0; i < qtrSegs; ++i) { // Quadrant IV
+        // Calculate the coordinate
+        const Pt::int32_t x = round( centerX + disX[qtrSegs - 1 - i] );
+        const Pt::int32_t y = round( centerY - disY[qtrSegs - 1 - i] );
+        // Store the coordinate only if it is different with the previous one
+        if( !dst.empty() && dst.back().x() == x && dst.back().y() == y ) continue;
+        dst.push_back( Point(x, y) );
+    }
+
+    // Discard the last point if it has the same coordinate with the first one
+    if(dst[p - 1] == dst[0]) dst.pop_back();
+}
+
 
 // ======================================================================================
 // ===== Static Public Member Functions =================================================
@@ -401,17 +458,38 @@ void ImagePainter2::drawQuadraticPolybezier(const PointF* ps, const size_t point
 
 void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
 {
-    // Copy the points
-    const Point tl( (Pt::int32_t) topLeft.x    (), (Pt::int32_t) topLeft.y     () );
-    const Size  sz( (Pt::int32_t) size   .width(), (Pt::int32_t) size   .height() );
-
-    // Rasterize the ellipse
+    // Rasterize one-pixel ellipse
     if(_rasterizer->pen().size() == 1) {
+        // Copy the points
+        const Point tl( (Pt::int32_t) topLeft.x    (), (Pt::int32_t) topLeft.y     () );
+        const Size  sz( (Pt::int32_t) size   .width(), (Pt::int32_t) size   .height() );
+        // Rasterize the ellipse
         _rasterizer->strokeOnePixelEllipseArc(tl, sz, 0, 0, ArcMode::Open);
         return;
     }
 
-    // TODO: Implement ellipse with thick lines using polygon here!
+    // Solid
+    if(_rasterizer->pen().style() == Pen::Solid) {
+        // Calculate the ellipse's parameters
+        const Pt::int32_t radiusXo = ( size.width () + _rasterizer->pen().size() ) / 2;
+        const Pt::int32_t radiusYo = ( size.height() + _rasterizer->pen().size() ) / 2;
+        const Pt::int32_t radiusXi = ( size.width () - _rasterizer->pen().size() ) / 2;
+        const Pt::int32_t radiusYi = ( size.height() - _rasterizer->pen().size() ) / 2;
+        const Pt::int32_t centerX  = topLeft.x() + size.width () / 2;
+        const Pt::int32_t centerY  = topLeft.y() + size.height() / 2;
+        // Generate the polygon
+        std::vector<Point> points;
+        generateEllipsePoints(points, radiusXo, radiusYo, centerX, centerY);
+        points.push_back(Painter::PolygonSeparatorPoint);
+        generateEllipsePoints(points, radiusXi, radiusYi, centerX, centerY);
+        // Rasterize the polygon
+        _rasterizer->strokePolygon(points.data(), points.size());
+    }
+
+    // Patterned
+    else {
+        // ### TODO ###
+    }
 }
 
 void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
@@ -498,18 +576,6 @@ void ImagePainter2::generateSolidLineSegment(std::vector<PointF>& dst, float x1,
 
 bool ImagePainter2::thickenSolidOpenPolygon(std::vector<PointF>& pointsF, const PointF* basePtr, size_t curPCnt)
 {
-/*
-Pt::Gfx - CompositionMode::SourceCopy
-    Solid     thick line             @ ImagePainter  =     42
-    Solid     thick line NOAA        @ ImagePainter2 =    111 ( 2.643)
-    Solid     thick line XWAA        @ ImagePainter2 =    247 ( 5.881)
-
-Pt::Gfx - CompositionMode::SourceOver
-    Solid     thick line             @ ImagePainter  =    143
-    Solid     thick line NOAA        @ ImagePainter2 =    192 ( 1.343)
-    Solid     thick line XWAA        @ ImagePainter2 =    400 ( 2.797)
-*/
-
     // Prepare the buffers
     std::vector<PointF> pointsFPolygon;
     std::vector<PointF> pointsFInner;

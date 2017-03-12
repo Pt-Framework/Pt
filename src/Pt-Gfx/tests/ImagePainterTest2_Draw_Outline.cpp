@@ -259,7 +259,7 @@ static void testDrawRect(const char* title, Image& image, Painter& painter)
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
 }
 
-static void testDrawEllipse(const char* title, Image& image, Painter& painter)
+static void testDrawEllipseArc(const char* title, Image& image, Painter& painter)
 {
     resetImage(image);
 
@@ -273,7 +273,7 @@ static void testDrawEllipse(const char* title, Image& image, Painter& painter)
     painter.fillRect( RectF( PointF(0, 80 + 185), SizeF(image.width(), 30) ) );
     painter.fillRect( RectF( PointF(0, 80 + 400), SizeF(image.width(), 60) ) );
 
-
+    // First row
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
     painter.setPen(draw); painter.drawEllipse( PointF (30, 50), SizeF(135, 135) );
     painter.setPen(text); painter.drawText( PointF(30, 30), "NOAA" );
@@ -296,6 +296,7 @@ static void testDrawEllipse(const char* title, Image& image, Painter& painter)
         painter.setPen(text); ip2->drawText( PointF(30 + 800, 30), "XWAA" );
     }
 
+    // Second row
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
     painter.setPen(draw); painter.drawEllipse( PointF (30, 50 + 200), SizeF(135, 67) );
     painter.setPen(text); painter.drawText( PointF(30, 30 + 200), "NOAA" );
@@ -318,7 +319,7 @@ static void testDrawEllipse(const char* title, Image& image, Painter& painter)
         painter.setPen(text); ip2->drawText( PointF(30 + 800, 30 + 200), "XWAA" );
     }
 
-
+    // Third row
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
     painter.setPen(draw); painter.drawEllipse( PointF (30, 50 + 400), SizeF(67, 135) );
     painter.setPen(text); painter.drawText( PointF(30, 30 + 400), "NOAA" );
@@ -340,7 +341,6 @@ static void testDrawEllipse(const char* title, Image& image, Painter& painter)
         painter.setPen(draw); ip2->drawArc( PointF (30 + 800, 50 + 400), SizeF(135, 135), -135, 135, ArcMode::Pie );
         painter.setPen(text); ip2->drawText( PointF(30 + 800, 30 + 400), "XWAA" );
     }
-
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }

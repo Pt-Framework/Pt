@@ -261,6 +261,31 @@ void Rasterizer2::rasterOnePixelSolidGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_
         }
     }
 
+    // Check if the start and end coordinates are the same
+    if(x1 == x2 && y1 == y2) {
+        // Check if we should skip drawing the pixel
+        bool skipDrawing = false;
+        for(Pt::int32_t i = 0; i < 4; ++i) {
+            if(x1 != mx[i] || y1 != my[i]) continue;
+            skipDrawing = true;
+            break;
+        }
+        // Draw the pixel as needed
+        if(!skipDrawing) {
+            Pixel pixel(_image->view(), x1, y1);
+            _image->format().setPixel(pixel, color, _compositionMode);
+        }
+        // Store back the start and end coordinates to the mask as needed
+        if(maskInOut) {
+            (*maskInOut)[0].set(x1, y1);
+            (*maskInOut)[1] = MAXIMUM_POINT;
+            (*maskInOut)[2].set(x1, y1);
+            (*maskInOut)[3] = MAXIMUM_POINT;
+        }
+        // Exit here
+        return;
+    }
+
     // Calculate the deltas
     const Pt::int32_t dx = abs(x2 - x1);
     const Pt::int32_t dy = abs(y2 - y1);
@@ -367,7 +392,9 @@ void Rasterizer2::rasterOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_
         // Store back the start and end coordinates to the mask as needed
         if(maskInOut) {
             (*maskInOut)[0].set(lx[0], ly[0]);
+            (*maskInOut)[1].set(lx[0], ly[0]);
             (*maskInOut)[2].set(lx[0], ly[0]);
+            (*maskInOut)[3].set(lx[0], ly[0]);
         }
         // Exit here
         return;
@@ -503,18 +530,18 @@ void Rasterizer2::rasterOnePixelAreaGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t
             }                                                                               \
         } while(false)
 
-        /*
     // Check if the start and end coordinates are the same
     if(x1 == x2 && y1 == y2) {
         // Draw the pixel
         XW_FILL_PIXEL(x1, y1, 255);
         // Store back the start and end coordinates to the mask
         maskInOut[0].set(lx[0], ly[0]);
+        maskInOut[1].set(lx[0], ly[0]);
         maskInOut[2].set(lx[0], ly[0]);
+        maskInOut[3].set(lx[0], ly[0]);
         // Exit here
         return;
     }
-    */
 
     // Convert the coordinates to fixed-points
     Pt::int32_t fx1 = FIXED_POINT_FROM_INT(x1);
