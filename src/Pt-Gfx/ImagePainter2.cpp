@@ -39,7 +39,6 @@ namespace Pt {
 namespace Gfx {
 
 
-
 // ======================================================================================
 // ===== Internal Helper Functions ======================================================
 // ======================================================================================
@@ -162,6 +161,32 @@ static void generateEllipsePoints(std::vector<Point>& dst, Pt::int32_t radiusX, 
         // Calculate the coordinate
         const Pt::int32_t x = round( centerX + radiusX * Gfx::Math::fastCos(angle) );
         const Pt::int32_t y = round( centerY + radiusY * Gfx::Math::fastSin(angle) );
+        // Store the coordinate only if it is different with the previous one
+        if( !dst.empty() && dst.back().x() == x && dst.back().y() == y ) continue;
+        dst.push_back( Point(x, y) );
+    }
+
+    // Discard the last point if it has the same coordinate with the first one
+    if(dst.back() == dst[0]) dst.pop_back();
+}
+
+static void generateArcPoints(std::vector<Point>& dst, Pt::int32_t radiusX, Pt::int32_t radiusY, Pt::int32_t centerX, Pt::int32_t centerY, float degBegin, float degEnd)
+{
+    // Calculate the ellipse's parameters
+    const Pt::int32_t radiusM = std::max(radiusX, radiusY);
+    const Pt::int32_t deltaDg = degEnd - degBegin;
+    const Pt::int32_t numSegs = (radiusM * 2 * deltaDg / 180 / 3 / 20) * 20;
+    const float       fdegInc = (Pt::Pi * deltaDg / 180.0f) / numSegs;
+
+    // Generate a polygon that approximates the ellipse
+    float angle = degBegin * Gfx::Math::Pi / 180.0f;
+
+    for(Pt::int32_t i = 0; i <= numSegs; ++i) {
+        // Calculate the coordinate
+        const Pt::int32_t x = round( centerX + radiusX * Gfx::Math::fastCos(angle) );
+        const Pt::int32_t y = round( centerY + radiusY * Gfx::Math::fastSin(angle) );
+        // Update the angle
+        angle += fdegInc;
         // Store the coordinate only if it is different with the previous one
         if( !dst.empty() && dst.back().x() == x && dst.back().y() == y ) continue;
         dst.push_back( Point(x, y) );
@@ -435,10 +460,11 @@ void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
     // Solid
     if(_rasterizer->pen().style() == Pen::Solid) {
         // Calculate the ellipse's parameters
-        const Pt::int32_t radiusXo = ( size.width () + _rasterizer->pen().size() ) / 2;
-        const Pt::int32_t radiusYo = ( size.height() + _rasterizer->pen().size() ) / 2;
-        const Pt::int32_t radiusXi = ( size.width () - _rasterizer->pen().size() ) / 2;
-        const Pt::int32_t radiusYi = ( size.height() - _rasterizer->pen().size() ) / 2;
+        const size_t      penSize  = _rasterizer->pen().size();
+        const Pt::int32_t radiusXo = ( size.width () + penSize ) / 2;
+        const Pt::int32_t radiusYo = ( size.height() + penSize ) / 2;
+        const Pt::int32_t radiusXi = ( size.width () - penSize ) / 2;
+        const Pt::int32_t radiusYi = ( size.height() - penSize ) / 2;
         const Pt::int32_t centerX  = topLeft.x() + size.width () / 2;
         const Pt::int32_t centerY  = topLeft.y() + size.height() / 2;
         // Generate the polygon
@@ -468,17 +494,51 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
 
 void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode )
 {
-    // Copy the points
-    const Point tl( (Pt::int32_t) topLeft.x    (), (Pt::int32_t) topLeft.y     () );
-    const Size  sz( (Pt::int32_t) size   .width(), (Pt::int32_t) size   .height() );
-
-    // Rasterize the arc
+    // Rasterize one-pixel arc
     if(_rasterizer->pen().size() == 1) {
+        // Copy the points
+        const Point tl( (Pt::int32_t) topLeft.x    (), (Pt::int32_t) topLeft.y     () );
+        const Size  sz( (Pt::int32_t) size   .width(), (Pt::int32_t) size   .height() );
+        // Rasterize the arc
         _rasterizer->strokeOnePixelEllipseArc(tl, sz, degBegin, degEnd, arcMode);
         return;
     }
 
-    // TODO: Implement arc with thick lines using polygon here!
+    // Solid
+    if(_rasterizer->pen().style() == Pen::Solid) {
+        // Calculate the ellipse's parameters
+        const size_t      penSize  = _rasterizer->pen().size();
+        const Pt::int32_t radiusXo = ( size.width () + penSize ) / 2;
+        const Pt::int32_t radiusYo = ( size.height() + penSize ) / 2;
+        const Pt::int32_t radiusXi = ( size.width () - penSize ) / 2;
+        const Pt::int32_t radiusYi = ( size.height() - penSize ) / 2;
+        const Pt::int32_t centerX  = topLeft.x() + size.width () / 2;
+        const Pt::int32_t centerY  = topLeft.y() + size.height() / 2;
+        // Generate the polygon
+        std::vector<Point> points;
+        if(arcMode == ArcMode::Chord) {
+            generateArcPoints(points, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd);
+            points.push_back(Painter::PolygonSeparatorPoint);
+            generateArcPoints(points, radiusXi, radiusYi, centerX, centerY, degBegin, degEnd);
+        }
+        else if(arcMode == ArcMode::Pie) {
+            generateArcPoints(points, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd);
+            points.push_back(Point(centerX, centerY));
+
+            points.push_back(Painter::PolygonSeparatorPoint);
+            generateArcPoints(points, radiusXi, radiusYi, centerX, centerY, degBegin, degEnd);
+            points.push_back(Point(centerX + penSize, centerY + 0));
+        }
+        else { // ArcMode::Open
+        }
+        // Rasterize the polygon
+        _rasterizer->strokePolygon(points.data(), points.size());
+    }
+
+    // Patterned
+    else {
+        // ### TODO ###
+    }
 }
 
 void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode )
