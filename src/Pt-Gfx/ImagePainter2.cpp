@@ -527,24 +527,51 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
         return;
     }
 
+    // Ensure that the begin angle is within the acceptable range
+    while(degBegin < -360) degBegin += 360;
+    while(degBegin >  360) degBegin -= 360;
+
+    // Ensure that the end angle is within the acceptable range
+    while(degEnd < -360) degEnd += 360;
+    while(degEnd >  360) degEnd -= 360;
+
     // Calculate the coordinate shift
-    const float degMid = (degBegin + degEnd) / 2.0f * Gfx::Math::PiDiv180;
-    const float shiftX = Gfx::Math::fastCos(degMid);
-    const float shiftY = Gfx::Math::fastSin(degMid);
+    const size_t penSize    = _rasterizer->pen().size();
+    const size_t penSize2   = penSize / 2;
+    const float  degMid   = (degBegin + degEnd) / 2.0f * Gfx::Math::PiDiv180;
+    const float  shiftX   = Gfx::Math::fastCos(degMid);
+    const float  shiftY   = Gfx::Math::fastSin(degMid);
+    const float  shiftXps = shiftX * penSize2;
+    const float  shiftYps = shiftY * penSize2;
+
+    // Calculate the angle adjustment factor
+    const float aafa = size.width () / 2.0f;
+    const float aafb = size.height() / 2.0f;
+    const float aafc = Gfx::Math::PiMul2 * Gfx::Math::fastSqrt( (aafa * aafa + aafb * aafb) / 2.0f );
+    const float aafd = 360.0f * penSize2 / aafc;
+
+    // Calculate the adjusted angle
+    const float odegBegin = (degBegin < 0) ? (degBegin - aafd) : (degBegin + aafd);
+    const float odegEnd   = (degEnd   < 0) ? (degEnd   - aafd) : (degEnd   + aafd);
+    const float idegBegin = (degBegin < 0) ? (degBegin + aafd) : (degBegin - aafd);
+    const float idegEnd   = (degEnd   < 0) ? (degEnd   + aafd) : (degEnd   - aafd);
 
     // Solid
     if(_rasterizer->pen().style() == Pen::Solid) {
         // Calculate the ellipse's parameters
-        const size_t      penSize  = _rasterizer->pen().size();
-        const size_t      penSize2 = penSize / 2;
-        const Pt::int32_t radiusXo = ( size.width () + penSize ) / 2;
-        const Pt::int32_t radiusYo = ( size.height() + penSize ) / 2;
-        const Pt::int32_t radiusXi = ( size.width () - penSize ) / 2;
-        const Pt::int32_t radiusYi = ( size.height() - penSize ) / 2;
-        const Pt::int32_t centerX  = topLeft.x() + size.width () / 2;
-        const Pt::int32_t centerY  = topLeft.y() + size.height() / 2;
-        // Generate the polygon
+        const Pt::int32_t radiusXo   = ( size.width () + penSize ) / 2;
+        const Pt::int32_t radiusYo   = ( size.height() + penSize ) / 2;
+        const Pt::int32_t radiusXi   = ( size.width () - penSize ) / 2;
+        const Pt::int32_t radiusYi   = ( size.height() - penSize ) / 2;
+        const Pt::int32_t centerX    = topLeft.x() + size.width () / 2;
+        const Pt::int32_t centerY    = topLeft.y() + size.height() / 2;
+        const Pt::int32_t centerXsub = round(centerX - shiftXps);
+        const Pt::int32_t centerYsub = round(centerY - shiftYps);
+        const Pt::int32_t centerXadd = round(centerX + shiftXps);
+        const Pt::int32_t centerYadd = round(centerY + shiftYps);
+        // The arc's points
         std::vector<Point> points;
+        // Generate the polygon
         if(arcMode == ArcMode::Chord) {
             // Outer perimeter
             generateArcPoints(points, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd);
@@ -553,25 +580,39 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
             generateArcPoints(points, radiusXi, radiusYi, centerX + shiftX, centerY + shiftY, degBegin, degEnd);
         }
         else if(arcMode == ArcMode::Pie) {
-            // Calculate the angle adjustment factor
-            const float a = size.width () / 2.0f;
-            const float b = size.height() / 2.0f;
-            const float c = Gfx::Math::PiMul2 * Gfx::Math::fastSqrt( (a * a + b * b) / 2.0f );
-            const float d = 360.0f * penSize2 / c;
             // Outer perimeter
-            const float odegBegin = (degBegin < 0) ? (degBegin - d) : (degBegin + d);
-            const float odegEnd   = (degEnd   < 0) ? (degEnd   - d) : (degEnd   + d);
             generateArcPoints(points, radiusXo, radiusYo, centerX, centerY, odegBegin, odegEnd);
-            points.push_back(Point(round(centerX - shiftX * penSize2), round(centerY - shiftY * penSize2)));
+            points.push_back(Point(centerXsub, centerYsub));
             // Inner perimeter
-            const float idegBegin = (degBegin < 0) ? (degBegin + d) : (degBegin - d);
-            const float idegEnd   = (degEnd   < 0) ? (degEnd   + d) : (degEnd   - d);
             points.push_back(Painter::PolygonSeparatorPoint);
             generateArcPoints(points, radiusXi, radiusYi, centerX, centerY, idegBegin, idegEnd);
-            points.push_back(Point(round(centerX + shiftX * penSize2), round(centerY + shiftY * penSize2)));
+            points.push_back(Point(centerXadd, centerYadd));
         }
         else { // ArcMode::Open
-            // ### TODO ###
+            // The arc's temporary points
+           // std::vector<Point> middle;
+           // generateArcPoints(middle, radiusX, radiusY, centerX, centerY, degBegin, degEnd);
+
+            // Calculate the middle line's parameters
+           // float mwh, mdx, mdy, mnx, mny;
+           // calculateLineParams(mwh, mdx, mdy, mnx, mny, middle.front().x(), middle.front().y(), middle.back().x(), middle.back().y(), _rasterizer->pen().size());
+           // mnx *= 0.0f;
+           // mny *= 0.0f;
+
+            // The arc's temporary points
+            std::vector<Point> outer, inner;
+            // Generate the arc points
+            generateArcPoints(outer, radiusXo, radiusYo, centerX, centerY, odegBegin, odegEnd);
+            generateArcPoints(inner, radiusXi, radiusYi, centerX, centerY, idegBegin, idegEnd);
+
+#if 1
+            points.insert(points.end(), outer.rbegin(), outer.rend());
+            points.insert(points.end(), inner. begin(), inner. end());
+#else
+            points.insert(points.end(), inner.rbegin(), inner.rend());
+            points.insert(points.end(), outer. begin(), outer. end());
+#endif
+
         }
         // Rasterize the polygon
         _rasterizer->strokePolygon(points.data(), points.size());
