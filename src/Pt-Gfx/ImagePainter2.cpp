@@ -183,7 +183,7 @@ static void generateEllipsePoints(std::vector<Point>& dst, Pt::int32_t radiusX, 
         const float angle = Gfx::Math::PiMul2 * i / numSegs;
         // Calculate the coordinate
         const Pt::int32_t x = round( centerX + radiusX * Gfx::Math::fastCos(angle) );
-        const Pt::int32_t y = round( centerY + radiusY * Gfx::Math::fastSin(angle) );
+        const Pt::int32_t y = round( centerY - radiusY * Gfx::Math::fastSin(angle) ); // Sign inversion due to differences between cartesian and computer coordinate systems
         // Store the coordinate only if it is different with the previous one
         if( !dst.empty() && dst.back().x() == x && dst.back().y() == y ) continue;
         dst.push_back( Point(x, y) );
@@ -207,7 +207,7 @@ static void generateArcPoints(std::vector<Point>& dst, Pt::int32_t radiusX, Pt::
     for(Pt::int32_t i = 0; i <= numSegs; ++i) {
         // Calculate the coordinate
         const Pt::int32_t x = round( centerX + radiusX * Gfx::Math::fastCos(angle) );
-        const Pt::int32_t y = round( centerY + radiusY * Gfx::Math::fastSin(angle) );
+        const Pt::int32_t y = round( centerY - radiusY * Gfx::Math::fastSin(angle) ); // Sign inversion due to differences between cartesian and computer coordinate systems
         // Update the angle
         angle += fdegInc;
         // Store the coordinate only if it is different with the previous one
@@ -528,16 +528,16 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
     }
 
     // Ensure that the begin angle is within the acceptable range
-    while(degBegin < -360) degBegin += 360;
-    while(degBegin >  360) degBegin -= 360;
+    while(degBegin < -360.0f) degBegin += 360.0f;
+    while(degBegin >  360.0f) degBegin -= 360.0f;
 
     // Ensure that the end angle is within the acceptable range
-    while(degEnd < -360) degEnd += 360;
-    while(degEnd >  360) degEnd -= 360;
+    while(degEnd < -360.0f) degEnd += 360.0f;
+    while(degEnd >  360.0f) degEnd -= 360.0f;
 
     // Calculate the coordinate shift
-    const size_t penSize    = _rasterizer->pen().size();
-    const size_t penSize2   = penSize / 2;
+    const size_t penSize  = _rasterizer->pen().size();
+    const size_t penSize2 = penSize / 2;
     const float  degMid   = (degBegin + degEnd) / 2.0f * Gfx::Math::PiDiv180;
     const float  shiftX   = Gfx::Math::fastCos(degMid);
     const float  shiftY   = Gfx::Math::fastSin(degMid);
@@ -590,29 +590,42 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
         }
         else { // ArcMode::Open
             // The arc's temporary points
-           // std::vector<Point> middle;
-           // generateArcPoints(middle, radiusX, radiusY, centerX, centerY, degBegin, degEnd);
-
-            // Calculate the middle line's parameters
-           // float mwh, mdx, mdy, mnx, mny;
-           // calculateLineParams(mwh, mdx, mdy, mnx, mny, middle.front().x(), middle.front().y(), middle.back().x(), middle.back().y(), _rasterizer->pen().size());
-           // mnx *= 0.0f;
-           // mny *= 0.0f;
-
-            // The arc's temporary points
             std::vector<Point> outer, inner;
             // Generate the arc points
             generateArcPoints(outer, radiusXo, radiusYo, centerX, centerY, odegBegin, odegEnd);
             generateArcPoints(inner, radiusXi, radiusYi, centerX, centerY, idegBegin, idegEnd);
-
-#if 1
+            // Calculate the lines' parameters
+            const float ox1a = outer[               0].x();
+            const float oy1a = outer[               0].y();
+            const float ox1b = outer[               1].x();
+            const float oy1b = outer[               1].y();
+            const float ox2a = outer[outer.size() - 1].x();
+            const float oy2a = outer[outer.size() - 1].y();
+            const float ox2b = outer[outer.size() - 2].x();
+            const float oy2b = outer[outer.size() - 2].y();
+            const float ix1a = inner[               0].x();
+            const float iy1a = inner[               0].y();
+            const float ix1b = inner[               1].x();
+            const float iy1b = inner[               1].y();
+            const float ix2a = inner[inner.size() - 1].x();
+            const float iy2a = inner[inner.size() - 1].y();
+            const float ix2b = inner[inner.size() - 2].x();
+            const float iy2b = inner[inner.size() - 2].y();
+            // Generate begin cap
+            switch(_rasterizer->pen().capStyle()) {
+                case Pen::SquareCap:
+                    break;
+                case Pen::RoundCap:
+                    break;
+                case Pen::TriangularOutCap:
+                    break;
+                case Pen::TriangularInCap:
+                    break;
+            }
+            // Store the "outside" points
             points.insert(points.end(), outer.rbegin(), outer.rend());
+            // Store the "inside" points
             points.insert(points.end(), inner. begin(), inner. end());
-#else
-            points.insert(points.end(), inner.rbegin(), inner.rend());
-            points.insert(points.end(), outer. begin(), outer. end());
-#endif
-
         }
         // Rasterize the polygon
         _rasterizer->strokePolygon(points.data(), points.size());

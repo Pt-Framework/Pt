@@ -46,12 +46,12 @@ void Rasterizer2::fillArc(const Point& topLeft, const Size& size, float degBegin
         updateGradientBrush(size.width(), size.height());
 
     // Ensure that the begin angle is within the acceptable range
-    while(degBegin < -360) degBegin += 360;
-    while(degBegin >  360) degBegin -= 360;
+    while(degBegin < -360.0f) degBegin += 360.0f;
+    while(degBegin >  360.0f) degBegin -= 360.0f;
 
     // Ensure that the end angle is within the acceptable range
-    while(degEnd < -360) degEnd += 360;
-    while(degEnd >  360) degEnd -= 360;
+    while(degEnd < -360.0f) degEnd += 360.0f;
+    while(degEnd >  360.0f) degEnd -= 360.0f;
 
     // Calculate the general arc's parameters
     FilledArcInfo fai;
