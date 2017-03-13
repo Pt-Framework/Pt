@@ -298,6 +298,8 @@ static void testDrawThickEllipseArc(const char* title, Image& image, Painter& pa
 {
     resetImage(image);
 
+    const CompositionMode cm = painter.compositionMode();
+
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(&painter);
 
     Pen drawB( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Solid, Pen::ButtCap         ) );
@@ -307,100 +309,129 @@ static void testDrawThickEllipseArc(const char* title, Image& image, Painter& pa
     Pen drawI( Pen(Color::fromRgb8(127, 255, 191, 175), 12, Pen::Solid, Pen::TriangularInCap ) );
 
     Pen text (     Color::fromRgb8(255,   0,   0, 255) );
+    Pen vref (     Color::fromRgb8(255, 127, 127, 127) );
 
     painter.setBrush( Color::fromRgb8(63, 63, 255) );
     painter.fillRect( RectF( PointF(0, 80), SizeF(image.width(), 60) ) );
     painter.fillRect( RectF( PointF(0, 80 + 185), SizeF(image.width(), 30) ) );
     painter.fillRect( RectF( PointF(0, 80 + 400), SizeF(image.width(), 60) ) );
 
-    const bool visualComparison = true;
-
     // First row
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
     painter.setPen(drawB); painter.drawEllipse( PointF (30, 50), SizeF(135, 135) );
     painter.setPen(text ); painter.drawText( PointF(30, 30), "NOAA" );
-    if(visualComparison)  painter.drawEllipse( PointF (30, 50), SizeF(135, 135) );
+    painter.setCompositionMode(CompositionMode::SourceOver);
+    painter.setPen(vref ); painter.drawEllipse( PointF (30, 50), SizeF(135, 135) );
+    painter.setCompositionMode(cm);
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
     painter.setPen(drawB); painter.drawEllipse( PointF (30 + 200, 50), SizeF(135, 135) );
     painter.setPen(text ); painter.drawText( PointF(30 + 200, 30), "XWAA" );
-    if(visualComparison)  painter.drawEllipse( PointF (30 + 200, 50), SizeF(135, 135) );
+    painter.setCompositionMode(CompositionMode::SourceOver);
+    painter.setPen(vref ); painter.drawEllipse( PointF (30 + 200, 50), SizeF(135, 135) );
+    painter.setCompositionMode(cm);
 
     if(ip2) {
         ip2->setAntiAliasingMode(AntiAliasingMode::None);
         painter.setPen(drawB); ip2->drawArc( PointF (30 + 400,  50), SizeF(135, 135), 0, 135, ArcMode::Open );
         painter.setPen(drawS); ip2->drawArc( PointF (30 + 400, 120), SizeF(135, 135), 0, 135, ArcMode::Open );
         painter.setPen(text ); ip2->drawText( PointF(30 + 400,  30), "NOAA" );
-        if(visualComparison)   ip2->drawArc( PointF (30 + 400,  50), SizeF(135, 135), 0, 135, ArcMode::Open );
-        if(visualComparison)   ip2->drawArc( PointF (30 + 400, 120), SizeF(135, 135), 0, 135, ArcMode::Open );
+        painter.setCompositionMode(CompositionMode::SourceOver);
+        painter.setPen(vref ); ip2->drawArc( PointF (30 + 400,  50), SizeF(135, 135), 0, 135, ArcMode::Open );
+                               ip2->drawArc( PointF (30 + 400, 120), SizeF(135, 135), 0, 135, ArcMode::Open );
+        painter.setCompositionMode(cm);
 
         ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
         painter.setPen(drawB); ip2->drawArc( PointF (30 + 600,  50), SizeF(135, 135), 0, 135, ArcMode::Open );
         painter.setPen(drawS); ip2->drawArc( PointF (30 + 600, 120), SizeF(135, 135), 0, 135, ArcMode::Open );
         painter.setPen(text ); ip2->drawText( PointF(30 + 600,  30), "XWAA" );
-        if(visualComparison)   ip2->drawArc( PointF (30 + 600,  50), SizeF(135, 135), 0, 135, ArcMode::Open );
-        if(visualComparison)   ip2->drawArc( PointF (30 + 600, 120), SizeF(135, 135), 0, 135, ArcMode::Open );
+        painter.setCompositionMode(CompositionMode::SourceOver);
+        painter.setPen(vref ); ip2->drawArc( PointF (30 + 600,  50), SizeF(135, 135), 0, 135, ArcMode::Open );
+                               ip2->drawArc( PointF (30 + 600, 120), SizeF(135, 135), 0, 135, ArcMode::Open );
+        painter.setCompositionMode(cm);
 
         ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
         painter.setPen(drawR); ip2->drawArc( PointF (30 + 800, 50), SizeF(135, 135), -135, 135, ArcMode::Open );
         painter.setPen(text ); ip2->drawText( PointF(30 + 800, 30), "XWAA" );
-        if(visualComparison)   ip2->drawArc( PointF (30 + 800, 50), SizeF(135, 135), -135, 135, ArcMode::Open );
+        painter.setCompositionMode(CompositionMode::SourceOver);
+        painter.setPen(vref ); ip2->drawArc( PointF (30 + 800, 50), SizeF(135, 135), -135, 135, ArcMode::Open );
+        painter.setCompositionMode(cm);
     }
 
     // Second row
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
     painter.setPen(drawO); painter.drawEllipse( PointF (30, 50 + 200), SizeF(135, 67) );
     painter.setPen(text ); painter.drawText( PointF(30, 30 + 200), "NOAA" );
-    if(visualComparison)   painter.drawEllipse( PointF (30, 50 + 200), SizeF(135, 67) );
+    painter.setCompositionMode(CompositionMode::SourceOver);
+    painter.setPen(vref ); painter.drawEllipse( PointF (30, 50 + 200), SizeF(135, 67) );
+    painter.setCompositionMode(cm);
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
     painter.setPen(drawO); painter.drawEllipse( PointF (30 + 200, 50 + 200), SizeF(135, 67) );
     painter.setPen(text ); painter.drawText( PointF(30 + 200, 30 + 200), "XWAA" );
-    if(visualComparison)   painter.drawEllipse( PointF (30 + 200, 50 + 200), SizeF(135, 67) );
+    painter.setCompositionMode(CompositionMode::SourceOver);
+    painter.setPen(vref ); painter.drawEllipse( PointF (30 + 200, 50 + 200), SizeF(135, 67) );
+    painter.setCompositionMode(cm);
 
     if(ip2) {
         ip2->setAntiAliasingMode(AntiAliasingMode::None);
         painter.setPen(drawO); ip2->drawArc( PointF (30 + 400, 50 + 200), SizeF(135, 135), 120, 330, ArcMode::Open );
         painter.setPen(text ); ip2->drawText( PointF(30 + 400, 30 + 200), "NOAA" );
-        if(visualComparison)   ip2->drawArc( PointF (30 + 400, 50 + 200), SizeF(135, 135), 120, 330, ArcMode::Open );
+        painter.setCompositionMode(CompositionMode::SourceOver);
+        painter.setPen(vref ); ip2->drawArc( PointF (30 + 400, 50 + 200), SizeF(135, 135), 120, 330, ArcMode::Open );
+        painter.setCompositionMode(cm);
 
         ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
         painter.setPen(drawO); ip2->drawArc( PointF (30 + 600, 50 + 200), SizeF(135, 135), 120, 330, ArcMode::Open );
         painter.setPen(text ); ip2->drawText( PointF(30 + 600, 30 + 200), "XWAA" );
-        if(visualComparison)   ip2->drawArc( PointF (30 + 600, 50 + 200), SizeF(135, 135), 120, 330, ArcMode::Open );
+        painter.setCompositionMode(CompositionMode::SourceOver);
+        painter.setPen(vref ); ip2->drawArc( PointF (30 + 600, 50 + 200), SizeF(135, 135), 120, 330, ArcMode::Open );
+        painter.setCompositionMode(cm);
 
         ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
         painter.setPen(drawO); ip2->drawArc( PointF (30 + 800, 50 + 200), SizeF(135, 135), -135, 135, ArcMode::Chord );
         painter.setPen(text ); ip2->drawText( PointF(30 + 800, 30 + 200), "XWAA" );
-        if(visualComparison)   ip2->drawArc( PointF (30 + 800, 50 + 200), SizeF(135, 135), -135, 135, ArcMode::Chord );
+        painter.setCompositionMode(CompositionMode::SourceOver);
+        painter.setPen(vref ); ip2->drawArc( PointF (30 + 800, 50 + 200), SizeF(135, 135), -135, 135, ArcMode::Chord );
+        painter.setCompositionMode(cm);
     }
 
     // Third row
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
     painter.setPen(drawI); painter.drawEllipse( PointF (30, 50 + 400), SizeF(67, 135) );
     painter.setPen(text ); painter.drawText( PointF(30, 30 + 400), "NOAA" );
-    if(visualComparison)   painter.drawEllipse( PointF (30, 50 + 400), SizeF(67, 135) );
+    painter.setCompositionMode(CompositionMode::SourceOver);
+    painter.setPen(vref ); painter.drawEllipse( PointF (30, 50 + 400), SizeF(67, 135) );
+    painter.setCompositionMode(cm);
 
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
     painter.setPen(drawI); painter.drawEllipse( PointF (30 + 200, 50 + 400), SizeF(67, 135) );
     painter.setPen(text ); painter.drawText( PointF(30 + 200, 30 + 400), "XWAA" );
-    if(visualComparison)   painter.drawEllipse( PointF (30 + 200, 50 + 400), SizeF(67, 135) );
+    painter.setCompositionMode(CompositionMode::SourceOver);
+    painter.setPen(vref ); painter.drawEllipse( PointF (30 + 200, 50 + 400), SizeF(67, 135) );
+    painter.setCompositionMode(cm);
 
     if(ip2) {
         ip2->setAntiAliasingMode(AntiAliasingMode::None);
         painter.setPen(drawI); ip2->drawArc( PointF (30 + 400, 50 + 400), SizeF(135, 135), -150, 30, ArcMode::Open );
         painter.setPen(text ); ip2->drawText( PointF(30 + 400, 30 + 400), "NOAA" );
-        if(visualComparison)   ip2->drawArc( PointF (30 + 400, 50 + 400), SizeF(135, 135), -150, 30, ArcMode::Open );
+        painter.setCompositionMode(CompositionMode::SourceOver);
+        painter.setPen(vref ); ip2->drawArc( PointF (30 + 400, 50 + 400), SizeF(135, 135), -150, 30, ArcMode::Open );
+        painter.setCompositionMode(cm);
 
         ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
         painter.setPen(drawI); ip2->drawArc( PointF (30 + 600, 50 + 400), SizeF(135, 135), -150, 30, ArcMode::Open );
         painter.setPen(text ); ip2->drawText( PointF(30 + 600, 30 + 400), "XWAA" );
-        if(visualComparison)   ip2->drawArc( PointF (30 + 600, 50 + 400), SizeF(135, 135), -150, 30, ArcMode::Open );
+        painter.setCompositionMode(CompositionMode::SourceOver);
+        painter.setPen(vref ); ip2->drawArc( PointF (30 + 600, 50 + 400), SizeF(135, 135), -150, 30, ArcMode::Open );
+        painter.setCompositionMode(cm);
 
         ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
         painter.setPen(drawI); ip2->drawArc( PointF (30 + 800, 50 + 400), SizeF(135, 135), -135, 135, ArcMode::Pie );
         painter.setPen(text ); ip2->drawText( PointF(30 + 800, 30 + 400), "XWAA" );
-        if(visualComparison)   ip2->drawArc( PointF (30 + 800, 50 + 400), SizeF(135, 135), -135, 135, ArcMode::Pie );
+        painter.setCompositionMode(CompositionMode::SourceOver);
+        painter.setPen(vref ); ip2->drawArc( PointF (30 + 800, 50 + 400), SizeF(135, 135), -135, 135, ArcMode::Pie );
+        painter.setCompositionMode(cm);
     }
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
