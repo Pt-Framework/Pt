@@ -68,7 +68,7 @@ using namespace Pt::Gfx;
 
 #define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES  0
 #define TEST_DRAW_ELLIPSES_ARCS                 0
-#define TEST_DRAW_THICK_ELLIPSES_ARCS           1
+#define TEST_DRAW_THICK_ELLIPSES_ARCS           0
 
 #define TEST_DRAW_SOLID_FILLED_POLYGONS         0
 #define TEST_DRAW_GRADIENT_FILLED_POLYGONS      0
@@ -93,12 +93,14 @@ using namespace Pt::Gfx;
 #define BENCHMARK_ROTATED_TEXT              0
 #define BENCHMARK_SOLID_LINE                0
 #define BENCHMARK_PATTERNED_LINE            0
-#define BENCHMARK_SOLID_THICK_LINE          1
-#define BENCHMARK_PATTERNED_THICK_LINE      1
+#define BENCHMARK_SOLID_THICK_LINE          0
+#define BENCHMARK_PATTERNED_THICK_LINE      0
 #define BENCHMARK_ELLIPSE                   0
 #define BENCHMARK_ARC                       0
 #define BENCHMARK_SOLID_BEZIER              0
 #define BENCHMARK_PATTERNED_BEZIER          0
+#define BENCHMARK_SOLID_THICK_BEZIER        1
+#define BENCHMARK_PATTERNED_THICK_BEZIER    0
 
 #define BENCHMARK_RECTANGLE                 0
 #define BENCHMARK_SOLID_FILLED_RECTANGLE    0
@@ -240,7 +242,7 @@ int main(int argc, char* args[])
         testDrawPatternedThickLine("Patterned Thick Lines - ImagePainter2 [SourceOver]", image, *painter2);
     }
 
-        // Rectangles, thick rectangles and filled rectangles
+    // Rectangles, thick rectangles and filled rectangles
     if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_RECTANGLES_FILLED_RECTANGLES) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
         testDrawRect("Rectangles & Solid-Filled Rectangles - ImagePainter2 [SourceCopy]", image, *painter2);
@@ -430,7 +432,8 @@ int main(int argc, char* args[])
     }
 
     if(DO_BENCHMARKING) {
-        std::clog << std::fixed << std::setprecision(0) << std::endl;
+        std::clog << std::fixed << std::setprecision(0);
+        if(!BENCHMARK_RESULT_HTML) std::clog << std::endl;
 
         if(!BENCHMARK_RESULT_HTML || !BENCHMARK_RESULT_HTML_SIDE_BY_SIDE) std::clog << "Pt::Gfx - CompositionMode::SourceCopy" << std::endl;
         doBenchmark(CompositionMode::SourceCopy);
@@ -452,7 +455,8 @@ int main(int argc, char* args[])
     }
 
     if(DO_BENCHMARKING_CAIRO || (DO_BENCHMARKING && BENCHMARK_RESULT_HTML)) {
-        std::clog << std::fixed << std::setprecision(0) << std::endl;
+        std::clog << std::fixed << std::setprecision(0);
+        if(!BENCHMARK_RESULT_HTML) std::clog << std::endl;
 
         std::clog << "Cairo - CompositionMode::SourceCopy" << std::endl;
         cairoBenchmark(CompositionMode::SourceCopy);

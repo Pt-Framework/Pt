@@ -192,6 +192,8 @@ static size_t benchDrawSolidThickLine(int loopCount, CompositionMode cm, AntiAli
 template <typename PainterT>
 static size_t benchDrawPatternedThickLine(int loopCount, CompositionMode cm, AntiAliasingMode antiAliasingMode)
 {
+    return 1;
+
     Pen penRCapBJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Dash, Pen::RoundCap,  Pen::BevelJoin);
     Pen penSCapBJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Dash, Pen::SquareCap, Pen::BevelJoin);
     Pen penBCapBJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Dash, Pen::ButtCap,   Pen::BevelJoin);
@@ -206,4 +208,71 @@ static size_t benchDrawPatternedThickLine(int loopCount, CompositionMode cm, Ant
         penBCapMJoin,
         penBCapRJoin
     );
+}
+
+template <typename PainterT>
+static size_t benchDrawThickBezier(int loopCount, Pen::Style style, CompositionMode cm, AntiAliasingMode antiAliasingMode)
+{
+    size_t sum = 0;
+
+    Image image( ImageFormat::argb32(), BENCHMARK_IMAGE_SIZE );
+
+    PainterT painter(image);
+    painter.setCompositionMode(cm);
+
+    Pen pen( Pen( Color::fromRgb8(255, 255, 255, 175), 12, style ) );
+    painter.setPen(pen);
+
+    ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
+    if(!ip2) return 0;
+
+    for(int i = 0; i < loopCount; ++i) {
+        Pt::System::Clock clock;
+        clock.start();
+
+        ip2->setAntiAliasingMode(antiAliasingMode);
+
+        const PointF bezier1[] = { // CCW
+            PointF(300 + 100, 100),
+            PointF(265 + 100,  65),
+            PointF(200 + 100,  50)
+        };
+        ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
+        ip2->drawQuadraticPolybezier( bezier1, sizeof(bezier1) / sizeof(bezier1[0]), false );
+
+        const PointF bezier2[] = { // CCW
+            // Bottom left
+            PointF(400 - 350,  90 + 300),
+            PointF(400 - 350, 110 + 300),
+            PointF(420 - 350, 110 + 300),
+            // Bottom middle
+            PointF(450 - 350, 110 + 300),
+            // Bottom right
+            PointF(480 - 350, 110 + 300),
+            PointF(500 - 350, 110 + 300),
+            PointF(500 - 350,  90 + 300),
+            // Center right
+            PointF(500 - 350,  70 + 300),
+            // Top right
+            PointF(500 - 350,  50 + 300),
+            PointF(500 - 350,  30 + 300),
+            PointF(480 - 350,  30 + 300),
+            // Top middle
+            PointF(450 - 350,  30 + 300),
+            // Top left
+            PointF(420 - 350,  30 + 300),
+            PointF(400 - 350,  30 + 300),
+            PointF(400 - 350,  50 + 300),
+            // Center left
+            PointF(400 - 350,  70 + 300)
+        };
+        ip2->drawQuadraticPolybezier( bezier2, sizeof(bezier2) / sizeof(bezier2[0]), true );
+
+        sum += clock.stop().toUSecs();
+
+        BENCHMARK_DISPLAY_RESULTING_IMAGE;
+    }
+
+    sum /= loopCount;
+    return sum;
 }

@@ -18,7 +18,7 @@ static void doBenchmark(CompositionMode cm)
     std::clog << "                                                       ------ --------" << std::endl;
 
     // Texts
-    if(BENCHMARK_TEXT) {
+    if(BENCHMARK_RESULT_HTML || BENCHMARK_TEXT) {
         time1 = benchDrawText<ImagePainter >(BENCHMARK_LOOP_COUNT, false, cm, AntiAliasingMode::None);
         std::clog << "    Text                             @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         time2 = benchDrawText<ImagePainter2>(BENCHMARK_LOOP_COUNT, false, cm, AntiAliasingMode::None);
@@ -31,20 +31,20 @@ static void doBenchmark(CompositionMode cm)
     }
 
     // Rotated texts
-    if(BENCHMARK_ROTATED_TEXT) {
+    if(BENCHMARK_RESULT_HTML || BENCHMARK_ROTATED_TEXT) {
         time1 = benchDrawText<ImagePainter >(BENCHMARK_LOOP_COUNT, true, cm, AntiAliasingMode::None);
-        std::clog << "    Rotated Text (FAILED)            @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
+        std::clog << "    Rotated text (FAILED)            @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         time2 = benchDrawText<ImagePainter2>(BENCHMARK_LOOP_COUNT, true, cm, AntiAliasingMode::None);
-        std::clog << "    Rotated Text NOAA                @ ImagePainter2 = " << std::setw(6) << time2
+        std::clog << "    Rotated text NOAA                @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         time2 = benchDrawText<ImagePainter2>(BENCHMARK_LOOP_COUNT, true, cm, AntiAliasingMode::Standard);
-        std::clog << "    Rotated Text FTAA                @ ImagePainter2 = " << std::setw(6) << time2
+        std::clog << "    Rotated text FTAA                @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
 
     // Solid lines
-    if(BENCHMARK_SOLID_LINE) {
+    if(BENCHMARK_RESULT_HTML || BENCHMARK_SOLID_LINE) {
         time1 = benchDrawSolidLine<ImagePainter >(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
         std::clog << "    Solid     line                   @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         time2 = benchDrawSolidLine<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
@@ -57,7 +57,7 @@ static void doBenchmark(CompositionMode cm)
     }
 
     // Patterned lines
-    if(BENCHMARK_PATTERNED_LINE) {
+    if(BENCHMARK_RESULT_HTML || BENCHMARK_PATTERNED_LINE) {
         time1 = benchDrawPatternedLine<ImagePainter >(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
         std::clog << "    Patterned line                   @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         time2 = benchDrawPatternedLine<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
@@ -70,7 +70,7 @@ static void doBenchmark(CompositionMode cm)
     }
 
     // Solid thick lines
-    if(BENCHMARK_SOLID_THICK_LINE) {
+    if(BENCHMARK_RESULT_HTML || BENCHMARK_SOLID_THICK_LINE) {
         time1 = benchDrawSolidThickLine<ImagePainter >(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
         std::clog << "    Solid     thick line             @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         time2 = benchDrawSolidThickLine<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
@@ -83,7 +83,7 @@ static void doBenchmark(CompositionMode cm)
     }
 
     // Patterned thick lines
-    if(BENCHMARK_PATTERNED_THICK_LINE) {
+    if(BENCHMARK_RESULT_HTML || BENCHMARK_PATTERNED_THICK_LINE) {
         time1 = benchDrawPatternedThickLine<ImagePainter >(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
         std::clog << "    Patterned thick line             @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         time2 = benchDrawPatternedThickLine<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
@@ -95,7 +95,7 @@ static void doBenchmark(CompositionMode cm)
         std::clog << std::endl;
     }
     // Rectangles
-    if(BENCHMARK_RECTANGLE) {
+    if(BENCHMARK_RESULT_HTML || BENCHMARK_RECTANGLE) {
         time1 = benchDrawRect<ImagePainter >(BENCHMARK_LOOP_COUNT, cm);
         std::clog << "    Rectangle                        @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         time2 = benchDrawRect<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm);
@@ -105,7 +105,7 @@ static void doBenchmark(CompositionMode cm)
     }
 
     // Ellipse
-    if(BENCHMARK_ELLIPSE) {
+    if(BENCHMARK_RESULT_HTML || BENCHMARK_ELLIPSE) {
         time1 = benchDrawEllipse<ImagePainter >(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
         std::clog << "    Ellipse                          @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         time2 = benchDrawEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
@@ -118,7 +118,7 @@ static void doBenchmark(CompositionMode cm)
     }
 
     // Arc
-    if(BENCHMARK_ARC) {
+    if(BENCHMARK_RESULT_HTML || BENCHMARK_ARC) {
         time1 = benchDrawArc<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
         std::clog << "    Arc     NOAA                     @ ImagePainter2 = " << std::setw(6) << time1 << std::endl;
         time2 = benchDrawArc<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::Standard);
@@ -128,55 +128,74 @@ static void doBenchmark(CompositionMode cm)
     }
 
     // Solid bezier curve
-    if(BENCHMARK_SOLID_BEZIER) {
+    if(BENCHMARK_RESULT_HTML || BENCHMARK_SOLID_BEZIER) {
         time1 = benchDrawBezier<ImagePainter2>(BENCHMARK_LOOP_COUNT, Pen::Solid, cm, AntiAliasingMode::None);
-        std::clog << "    Solid     Bezier NOAA            @ ImagePainter2 = " << std::setw(6) << time1 << std::endl;
+        std::clog << "    Solid     bezier NOAA            @ ImagePainter2 = " << std::setw(6) << time1 << std::endl;
         time2 = benchDrawBezier<ImagePainter2>(BENCHMARK_LOOP_COUNT, Pen::Solid, cm, AntiAliasingMode::Standard);
-        std::clog << "    Solid     Bezier XWAA            @ ImagePainter2 = " << std::setw(6) << time2
+        std::clog << "    Solid     bezier XWAA            @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
 
     // Patterned bezier curve
-    if(BENCHMARK_PATTERNED_BEZIER) {
+    if(BENCHMARK_RESULT_HTML || BENCHMARK_PATTERNED_BEZIER) {
         time1 = benchDrawBezier<ImagePainter2>(BENCHMARK_LOOP_COUNT, Pen::Dash, cm, AntiAliasingMode::None);
-        std::clog << "    Patterned Bezier NOAA            @ ImagePainter2 = " << std::setw(6) << time1 << std::endl;
+        std::clog << "    Patterned bezier NOAA            @ ImagePainter2 = " << std::setw(6) << time1 << std::endl;
         time2 = benchDrawBezier<ImagePainter2>(BENCHMARK_LOOP_COUNT, Pen::Dash, cm, AntiAliasingMode::Standard);
-        std::clog << "    Patterned Bezier XWAA            @ ImagePainter2 = " << std::setw(6) << time2
+        std::clog << "    Patterned bezier XWAA            @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
 
+    // Solid thick bezier curve
+    if(BENCHMARK_RESULT_HTML || BENCHMARK_SOLID_THICK_BEZIER) {
+        time1 = benchDrawThickBezier<ImagePainter2>(BENCHMARK_LOOP_COUNT, Pen::Solid, cm, AntiAliasingMode::None);
+        std::clog << "    Solid     thick bezier NOAA      @ ImagePainter2 = " << std::setw(6) << time1 << std::endl;
+        time2 = benchDrawThickBezier<ImagePainter2>(BENCHMARK_LOOP_COUNT, Pen::Solid, cm, AntiAliasingMode::Standard);
+        std::clog << "    Solid     thick bezier XWAA      @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        std::clog << std::endl;
+    }
+
+    // Patterned thick bezier curve
+    if(BENCHMARK_RESULT_HTML || BENCHMARK_PATTERNED_THICK_BEZIER) {
+        time1 = benchDrawThickBezier<ImagePainter2>(BENCHMARK_LOOP_COUNT, Pen::Dash, cm, AntiAliasingMode::None);
+        std::clog << "    Patterned thick bezier NOAA      @ ImagePainter2 = " << std::setw(6) << time1 << std::endl;
+        time2 = benchDrawThickBezier<ImagePainter2>(BENCHMARK_LOOP_COUNT, Pen::Dash, cm, AntiAliasingMode::Standard);
+        std::clog << "    Patterned thick bezier XWAA      @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        std::clog << std::endl;
+    }
     // Filled rectangles
-    if(BENCHMARK_SOLID_FILLED_RECTANGLE) {
+    if(BENCHMARK_RESULT_HTML || BENCHMARK_SOLID_FILLED_RECTANGLE) {
         time1 = benchDrawFillRect<ImagePainter >(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm);
-        std::clog << "    Solid-filled    Rectangle        @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
+        std::clog << "    Solid-filled    rectangle        @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         time2 = benchDrawFillRect<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm);
-        std::clog << "    Solid-filled    Rectangle        @ ImagePainter2 = " << std::setw(6) << time2
+        std::clog << "    Solid-filled    rectangle        @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
 
-    if(BENCHMARK_GRADIENT_FILLED_RECTANGLE) {
+    if(BENCHMARK_RESULT_HTML || BENCHMARK_GRADIENT_FILLED_RECTANGLE) {
         time1 = benchDrawFillRect<ImagePainter >(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm);
-        std::clog << "    Gradient-filled Rectangle        @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
+        std::clog << "    Gradient-filled rectangle        @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         time2 = benchDrawFillRect<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm);
-        std::clog << "    Gradient-filled Rectangle        @ ImagePainter2 = " << std::setw(6) << time2
+        std::clog << "    Gradient-filled rectangle        @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
 
-    if(BENCHMARK_TEXTURE_FILLED_RECTANGLE) {
+    if(BENCHMARK_RESULT_HTML || BENCHMARK_TEXTURE_FILLED_RECTANGLE) {
         time1 = benchDrawFillRect<ImagePainter >(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm);
-        std::clog << "    Texture-filled  Rectangle        @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
+        std::clog << "    Texture-filled  rectangle        @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         time2 = benchDrawFillRect<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm);
-        std::clog << "    Texture-filled  Rectangle        @ ImagePainter2 = " << std::setw(6) << time2
+        std::clog << "    Texture-filled  rectangle        @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
 
     // Filled polygons
-    if(BENCHMARK_SOLID_FILLED_POLYGON) {
+    if(BENCHMARK_RESULT_HTML || BENCHMARK_SOLID_FILLED_POLYGON) {
         time1 = benchDrawFillPolygon<ImagePainter , false>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::None);
         std::clog << "    Solid-filled    polygon          @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         time2 = benchDrawFillPolygon<ImagePainter2, false>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::None);
@@ -191,7 +210,7 @@ static void doBenchmark(CompositionMode cm)
         std::clog << std::endl;
     }
 
-    if(BENCHMARK_GRADIENT_FILLED_POLYGON) {
+    if(BENCHMARK_RESULT_HTML || BENCHMARK_GRADIENT_FILLED_POLYGON) {
         time1 = benchDrawFillPolygon<ImagePainter , false>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm, AntiAliasingMode::None);
         std::clog << "    Gradient-filled polygon          @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         time2 = benchDrawFillPolygon<ImagePainter2, false>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm, AntiAliasingMode::None);
@@ -206,7 +225,7 @@ static void doBenchmark(CompositionMode cm)
         std::clog << std::endl;
     }
 
-    if(BENCHMARK_TEXTURE_FILLED_POLYGON) {
+    if(BENCHMARK_RESULT_HTML || BENCHMARK_TEXTURE_FILLED_POLYGON) {
         time1 = benchDrawFillPolygon<ImagePainter , false>(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, AntiAliasingMode::None);
         std::clog << "    Texture-filled  polygon          @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         time2 = benchDrawFillPolygon<ImagePainter2, false>(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, AntiAliasingMode::None);
@@ -222,7 +241,7 @@ static void doBenchmark(CompositionMode cm)
     }
 
     // Filled ellipse
-    if(BENCHMARK_SOLID_FILLED_ELLIPSE) {
+    if(BENCHMARK_RESULT_HTML || BENCHMARK_SOLID_FILLED_ELLIPSE) {
         time1 = benchDrawFillEllipse<ImagePainter >(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::None);
         std::clog << "    Solid-filled    ellipse          @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::None);
@@ -234,7 +253,7 @@ static void doBenchmark(CompositionMode cm)
         std::clog << std::endl;
     }
 
-    if(BENCHMARK_GRADIENT_FILLED_ELLIPSE) {
+    if(BENCHMARK_RESULT_HTML || BENCHMARK_GRADIENT_FILLED_ELLIPSE) {
         time1 = benchDrawFillEllipse<ImagePainter >(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm, AntiAliasingMode::None);
         std::clog << "    Gradient-filled ellipse          @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm, AntiAliasingMode::None);
@@ -246,7 +265,7 @@ static void doBenchmark(CompositionMode cm)
         std::clog << std::endl;
     }
 
-    if(BENCHMARK_TEXTURE_FILLED_ELLIPSE) {
+    if(BENCHMARK_RESULT_HTML || BENCHMARK_TEXTURE_FILLED_ELLIPSE) {
         time1 = benchDrawFillEllipse<ImagePainter >(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, AntiAliasingMode::None);
         std::clog << "    Texture-filled  ellipse          @ ImagePainter  = " << std::setw(6) << time1 << std::endl;
         time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, AntiAliasingMode::None);
@@ -259,7 +278,7 @@ static void doBenchmark(CompositionMode cm)
     }
 
     // Filled arc
-    if(BENCHMARK_SOLID_FILLED_ARC) {
+    if(BENCHMARK_RESULT_HTML || BENCHMARK_SOLID_FILLED_ARC) {
         time1 = benchDrawFillArc<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::None);
         std::clog << "    Solid-filled    arc     NOAA     @ ImagePainter2 = " << std::setw(6) << time1 << std::endl;
         time2 = benchDrawFillArc<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::Standard);
@@ -268,7 +287,7 @@ static void doBenchmark(CompositionMode cm)
         std::clog << std::endl;
     }
 
-    if(BENCHMARK_GRADIENT_FILLED_ARC) {
+    if(BENCHMARK_RESULT_HTML || BENCHMARK_GRADIENT_FILLED_ARC) {
         time1 = benchDrawFillArc<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm, AntiAliasingMode::None);
         std::clog << "    Gradient-filled arc     NOAA     @ ImagePainter2 = " << std::setw(6) << time1 << std::endl;
         time2 = benchDrawFillArc<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushGradientV, cm, AntiAliasingMode::Standard);
@@ -277,13 +296,13 @@ static void doBenchmark(CompositionMode cm)
         std::clog << std::endl;
     }
 
-    if(BENCHMARK_TEXTURE_FILLED_ARC) {
+    if(BENCHMARK_RESULT_HTML || BENCHMARK_TEXTURE_FILLED_ARC) {
         time1 = benchDrawFillArc<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, AntiAliasingMode::None);
         std::clog << "    Texture-filled  arc     NOAA     @ ImagePainter2 = " << std::setw(6) << time1 << std::endl;
         time2 = benchDrawFillArc<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushTextureT, bmBrushTextureW, cm, AntiAliasingMode::Standard);
         std::clog << "    Texture-filled  arc     XWAA     @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        std::clog << std::endl;
+        if(!BENCHMARK_RESULT_HTML) std::clog << std::endl;
     }
 }
 
