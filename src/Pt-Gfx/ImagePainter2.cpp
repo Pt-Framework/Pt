@@ -248,7 +248,7 @@ static inline void combineLinePointsAndAddCaps(std::vector<Point>& dst, const st
 
         case Pen::RoundCap: {
             std::vector<PointF> tmp;
-            generateQuadraticBezierPoints(tmp, ix2a, iy2a, x2a - dx2, y2a - dy2, ox2a, oy2a, ceil(penSize / 2.0f) - 1);
+            generateQuadraticBezierPoints(tmp, ix2a, iy2a, x2a - dx2 * 2.0f, y2a - dy2 * 2.0f, ox2a, oy2a, ceil(penSize / 2.0f) - 1);
             if(tmp.size() <= 2) break;
             for(size_t i = 1; i < tmp.size() - 1; ++i) {
                 dst.push_back( Point( round(tmp[i].x()), round(tmp[i].y()) ) );
@@ -298,7 +298,7 @@ static inline void combineLinePointsAndAddCaps(std::vector<Point>& dst, const st
 
         case Pen::RoundCap: {
             std::vector<PointF> tmp;
-            generateQuadraticBezierPoints(tmp, ox1a, oy1a, x1a + dx1, y1a + dy1, ix1a, iy1a, ceil(penSize / 2.0f) - 1);
+            generateQuadraticBezierPoints(tmp, ox1a, oy1a, x1a + dx1 * 2.0f, y1a + dy1 * 2.0f, ix1a, iy1a, ceil(penSize / 2.0f) - 1);
             if(tmp.size() <= 2) break;
             for(size_t i = 1; i < tmp.size() - 1; ++i) {
                 dst.push_back( Point( round(tmp[i].x()), round(tmp[i].y()) ) );
