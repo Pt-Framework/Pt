@@ -131,7 +131,7 @@ static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, float
         const float c = t * t;
         const float x = a * x1 + b * x2 + c * x3;
         const float y = a * y1 + b * y2 + c * y3;
-        if( dst.empty() || (dst.back().x() != x && dst.back().y() != y) ) dst.push_back( PointF(x, y) );
+        if( dst.empty() || dst.back().x() != x || dst.back().y() != y ) dst.push_back( PointF(x, y) );
     }
 }
 
@@ -566,10 +566,8 @@ void ImagePainter2::drawQuadraticPolybezier(const PointF* ps, const size_t point
         convertPointTrunc(points, ps, pointCount);
         if(autoClose) points.push_back( Point( (Pt::int32_t) ps[0].x(), (Pt::int32_t) ps[0].y() ) );
         // Rasterize the bezier
-        if(_rasterizer->pen().size() == 1) {
-            _rasterizer->strokeOnePixelQuadraticPolybezier(points.data(), points.size());
-            return;
-        }
+        _rasterizer->strokeOnePixelQuadraticPolybezier(points.data(), points.size());
+        return;
     }
 
     // Check if there is no actual point
@@ -577,7 +575,7 @@ void ImagePainter2::drawQuadraticPolybezier(const PointF* ps, const size_t point
 
     // Generate a polygon that approximates the polybezier
     const size_t        adjPC = autoClose ? pointCount : (pointCount - 1);
-    std::vector<PointF> pointsF;
+    std::vector<PointF> pointsF, pointsFTmp;
 
     for(size_t i = 0; i < adjPC; i += 2) {
         // Calculate the coordinates and length
@@ -596,8 +594,19 @@ void ImagePainter2::drawQuadraticPolybezier(const PointF* ps, const size_t point
         const float l21  = Gfx::Math::fastSqrt(dx21 * dx21 + dy21 * dy21);
         const float l31  = l32 + l21;
         // Generate points for one quadratic bezier curve
-        std::vector<PointF> pointsFTmp;
-        generateQuadraticBezierPoints(pointsFTmp, x1, y1, x2, y2, x3, y3, ceil(l31 / 20.0f) + 1);
+        pointsFTmp.clear();
+        generateQuadraticBezierPoints(pointsFTmp, x1, y1, x2, y2, x3, y3, ceil(l31 / 16.0f) + 1);
+        // Concat the points
+        for(size_t j = 0; j < pointsFTmp.size(); ++j) {
+            // Skip similar points
+            if(!pointsF.empty()) {
+                const float dx = ::fabs( pointsF.back().x() - pointsFTmp[j].x() );
+                const float dy = ::fabs( pointsF.back().y() - pointsFTmp[j].y() );
+                if(dx < 0.5f && dy < 0.5f) continue;
+            }
+            // Store the points
+            pointsF.push_back(pointsFTmp[j]);
+        }
     }
 
     // Rasterize the polygon
@@ -948,6 +957,12 @@ bool ImagePainter2::combineLineSegmentForSolidOpenPolygon(std::vector<PointF>& p
     PointF intersect;
     if(!intersectLine(inLine, intersect, oline1a, oline1b, oline2a, oline2b)) return false;
 
+    const PointF& ochk1 = oline1b - intersect;
+    const PointF& ochk2 = oline2a - intersect;
+
+    inLine |= ( fabs(ochk1.x()) <= 0.8f && fabs(ochk1.y()) <= 0.8f ) || // For preventing artifacts
+              ( fabs(ochk2.x()) <= 0.8f && fabs(ochk2.y()) <= 0.8f );
+
     // Store the "outside" line's points to the main polygon buffer
     const Pen::JoinStyle js1 = inLine ? Pen::MiterJoin : _rasterizer->pen().joinStyle();
     switch(js1) {
@@ -993,6 +1008,12 @@ bool ImagePainter2::combineLineSegmentForSolidOpenPolygon(std::vector<PointF>& p
 
     // Intersect the "inside" lines
     if(!intersectLine(inLine, intersect, iline1a, iline1b, iline2a, iline2b)) return false;
+
+    const PointF& ichk1 = iline1b - intersect;
+    const PointF& ichk2 = iline2a - intersect;
+
+    inLine |= ( fabs(ichk1.x()) <= 0.8f && fabs(ichk1.y()) <= 0.8f ) || // For preventing artifacts
+              ( fabs(ichk2.x()) <= 0.8f && fabs(ichk2.y()) <= 0.8f );
 
     // Store the "inside" line's points to the auxiliary polygon buffer
     const Pen::JoinStyle js2 = inLine ? Pen::MiterJoin : _rasterizer->pen().joinStyle();
@@ -1056,6 +1077,12 @@ bool ImagePainter2::combineLineSegmentForSolidClosedPolygon(std::vector<PointF>&
     PointF intersect;
     if(!intersectLine(inLine, intersect, oline1a, oline1b, oline2a, oline2b)) return false;
 
+    const PointF& ochk1 = oline1b - intersect;
+    const PointF& ochk2 = oline2a - intersect;
+
+    inLine |= ( fabs(ochk1.x()) <= 0.8f && fabs(ochk1.y()) <= 0.8f ) || // For preventing artifacts
+              ( fabs(ochk2.x()) <= 0.8f && fabs(ochk2.y()) <= 0.8f );
+
     // Store the "outside" line's points
     const Pen::JoinStyle js1 = inLine ? Pen::MiterJoin : _rasterizer->pen().joinStyle();
     outer.pop_back();
@@ -1100,6 +1127,12 @@ bool ImagePainter2::combineLineSegmentForSolidClosedPolygon(std::vector<PointF>&
 
     // Intersect the "inside" lines
     if(!intersectLine(inLine, intersect, iline1a, iline1b, iline2a, iline2b)) return false;
+
+    const PointF& ichk1 = iline1b - intersect;
+    const PointF& ichk2 = iline2a - intersect;
+
+    inLine |= ( fabs(ichk1.x()) <= 0.8f && fabs(ichk1.y()) <= 0.8f ) || // For preventing artifacts
+              ( fabs(ichk2.x()) <= 0.8f && fabs(ichk2.y()) <= 0.8f );
 
     // Store the "inside" line's points
     const Pen::JoinStyle js2 = inLine ? Pen::MiterJoin : _rasterizer->pen().joinStyle();
