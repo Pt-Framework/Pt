@@ -298,7 +298,7 @@ static void testDrawRoundRect(const char* title, Image& image, Painter& painter)
     ip2->drawRoundRect( RectF(PointF(550, 200), SizeF(200, 100)), 10 );
 
     ip2->setPen  ( Pen(Color::fromRgb8(0, 255, 0, 175), 12, Pen::Solid ));
-    ip2->drawRoundRect( RectF(PointF(550, 350), SizeF(200, 100)), 15 );
+    ip2->drawRoundRect( RectF(PointF(550, 350), SizeF(200, 100)), 25 );
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
 }

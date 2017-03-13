@@ -262,7 +262,7 @@ static inline void combineLinePointsAndAddCaps(std::vector<Point>& dst, const st
 
         case Pen::RoundCap: {
             std::vector<PointF> tmp;
-            generateQuadraticBezierPoints(tmp, ix2a, iy2a, x2a - dx2 * 2.0f, y2a - dy2 * 2.0f, ox2a, oy2a, ceil(penSize / 2.0f) - 1);
+            generateQuadraticBezierPoints(tmp, ix2a, iy2a, x2a - dx2 * 2.0f, y2a - dy2 * 2.0f, ox2a, oy2a, ceil(penSize * 0.5f) - 1);
             if(tmp.size() <= 2) break;
             for(size_t i = 1; i < tmp.size() - 1; ++i) {
                 dst.push_back( Point( round(tmp[i].x()), round(tmp[i].y()) ) );
@@ -312,7 +312,7 @@ static inline void combineLinePointsAndAddCaps(std::vector<Point>& dst, const st
 
         case Pen::RoundCap: {
             std::vector<PointF> tmp;
-            generateQuadraticBezierPoints(tmp, ox1a, oy1a, x1a + dx1 * 2.0f, y1a + dy1 * 2.0f, ix1a, iy1a, ceil(penSize / 2.0f) - 1);
+            generateQuadraticBezierPoints(tmp, ox1a, oy1a, x1a + dx1 * 2.0f, y1a + dy1 * 2.0f, ix1a, iy1a, ceil(penSize * 0.5f) - 1);
             if(tmp.size() <= 2) break;
             for(size_t i = 1; i < tmp.size() - 1; ++i) {
                 dst.push_back( Point( round(tmp[i].x()), round(tmp[i].y()) ) );
@@ -550,7 +550,48 @@ void ImagePainter2::drawRoundRect( const RectF& rect, float radius )
 
 void ImagePainter2::fillRoundRect( const RectF& rect, float radius )
 {
+    // Extract the coordinates
+    const float x1 = rect.topLeft    ().x();
+    const float y1 = rect.topLeft    ().y();
+    const float x2 = rect.bottomRight().x();
+    const float y2 = rect.bottomRight().y();
 
+    // Generate a polygon that represents the rounded-rectangle
+    const Pt::int32_t   penSize = ceil(_rasterizer->pen().size() * 0.5f) - 1;
+    std::vector<PointF> pointsF;
+
+   // generateQuadraticBezierPoints(pointsF, ix2a, iy2a, x2a - dx2 * 2.0f, y2a - dy2 * 2.0f, ox2a, oy2a, ceil(penSize * 0.5f) - 1);
+
+    /*
+    const PointF pbz[] = { // CCW
+        // Bottom left
+        PointF(x1,          y2 - radius),
+        PointF(x1,          y2         ),
+        PointF(x1 + radius, y2         ),
+        // Bottom middle
+        PointF((x1 + x2) * 0.5f, y2),
+        // Bottom right
+        PointF(x2 - radius, y2         ),
+        PointF(x2,          y2         ),
+        PointF(x2,          y2 - radius),
+        // Center right
+        PointF(x2, (y1 + y2) * 0.5f),
+        // Top right
+        PointF(x2,          y1 + radius),
+        PointF(x2,          y1         ),
+        PointF(x2 - radius, y1         ),
+        // Top middle
+        PointF((x1 + x2) * 0.5f, y1),
+        // Top left
+        PointF(x1 + radius, y1         ),
+        PointF(x1,          y1         ),
+        PointF(x1,          y1 + radius),
+        // Center left
+        PointF(x1, (y1 + y2) * 0.5f)
+    };*/
+
+    // Draw the polygon
+    fillPolygon(pointsF.data(), pointsF.size());
 }
 
 void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount, bool autoClose )
@@ -1088,7 +1129,7 @@ bool ImagePainter2::combineLineSegmentForSolidOpenPolygon(std::vector<PointF>& p
                 round(oline1b  .x()), round(oline1b  .y()),
                 round(intersect.x()), round(intersect.y()),
                 round(oline2a  .x()), round(oline2a  .y()),
-                ceil(penSize / 2.0f) - 1
+                ceil(penSize * 0.5f) - 1
             );
             break;
         // Invalid join type
@@ -1142,7 +1183,7 @@ bool ImagePainter2::combineLineSegmentForSolidOpenPolygon(std::vector<PointF>& p
                 round(iline1b  .x()), round(iline1b  .y()),
                 round(intersect.x()), round(intersect.y()),
                 round(iline2a  .x()), round(iline2a  .y()),
-                ceil(penSize / 2.0f) - 1
+                ceil(penSize * 0.5f) - 1
             );
             break;
         // Invalid join type
@@ -1214,7 +1255,7 @@ bool ImagePainter2::combineLineSegmentForSolidClosedPolygon(std::vector<PointF>&
                 round(oline1b  .x()), round(oline1b  .y()),
                 round(intersect.x()), round(intersect.y()),
                 round(oline2a  .x()), round(oline2a  .y()),
-                ceil(penSize / 2.0f) - 1
+                ceil(penSize * 0.5f) - 1
             );
             break;
         // Invalid join type
@@ -1267,7 +1308,7 @@ bool ImagePainter2::combineLineSegmentForSolidClosedPolygon(std::vector<PointF>&
                 round(iline1b  .x()), round(iline1b  .y()),
                 round(intersect.x()), round(intersect.y()),
                 round(iline2a  .x()), round(iline2a  .y()),
-                ceil(penSize / 2.0f) - 1
+                ceil(penSize * 0.5f) - 1
             );
             break;
         // Invalid join type
