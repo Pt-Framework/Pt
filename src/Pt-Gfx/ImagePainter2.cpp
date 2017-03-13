@@ -201,7 +201,7 @@ static inline void generateArcPoints(std::vector<Point>& dst, Pt::int32_t radius
     const Pt::int32_t numSegs = (radiusM * 2 * deltaDg / 180 / 3 / 20) * 20;
     const float       fdegInc = (deltaDg * Gfx::Math::PiDiv180) / numSegs;
 
-    // Generate a polygon that approximates the ellipse
+    // Generate a polygon that approximates the arc
     float angle = degBegin * Gfx::Math::PiDiv180;
 
     for(Pt::int32_t i = 0; i <= numSegs; ++i) {
@@ -499,6 +499,9 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount, boo
         return;
     }
 
+    // Check if there is no actual point
+    if(!pointCount) return;
+
     // Prepare the buffer
     std::vector<PointF> pointsF;
     pointsF.reserve( pointCount * _rasterizer->pen().size() );
@@ -554,21 +557,51 @@ void ImagePainter2::drawQuadraticPolybezier(const PointF* ps, const size_t point
     if(  autoClose && (pointCount < 4 ||  (pointCount & 1)) ) return; // The number of points must be >= 4 and even
     if( !autoClose && (pointCount < 3 || !(pointCount & 1)) ) return; // The number of points must be >= 3 and odd
 
-    // Copy the points
-    std::vector<Point> points;
-    if(autoClose) points.reserve(pointCount + 1);
-
-    convertPointTrunc(points, ps, pointCount);
-
-    if(autoClose) points.push_back( Point( (Pt::int32_t) ps[0].x(), (Pt::int32_t) ps[0].y() ) );
-
-    // Rasterize the bezier
+    // Rasterize one-pixel polybezier
     if(_rasterizer->pen().size() == 1) {
-        _rasterizer->strokeOnePixelQuadraticPolybezier(points.data(), points.size());
-        return;
+        // Prepare the buffer
+        std::vector<Point> points;
+        points.reserve(autoClose ? (pointCount + 1) : pointCount);
+        // Copy the points
+        convertPointTrunc(points, ps, pointCount);
+        if(autoClose) points.push_back( Point( (Pt::int32_t) ps[0].x(), (Pt::int32_t) ps[0].y() ) );
+        // Rasterize the bezier
+        if(_rasterizer->pen().size() == 1) {
+            _rasterizer->strokeOnePixelQuadraticPolybezier(points.data(), points.size());
+            return;
+        }
     }
 
-    // TODO: Implement polybezier with thick lines using polygon here!
+    // Check if there is no actual point
+    if(!pointCount) return;
+
+    // Generate a polygon that approximates the polybezier
+    const size_t        adjPC = autoClose ? pointCount : (pointCount - 1);
+    std::vector<PointF> pointsF;
+
+    for(size_t i = 0; i < adjPC; i += 2) {
+        // Calculate the coordinates and length
+        const bool  lp   = ( autoClose && i == (adjPC - 2) );
+        const float x1   = ps[           i      ].x();
+        const float y1   = ps[           i      ].y();
+        const float x2   = ps[           i + 1  ].x();
+        const float y2   = ps[           i + 1  ].y();
+        const float x3   = ps[ lp ? 0 : (i + 2) ].x();
+        const float y3   = ps[ lp ? 0 : (i + 2) ].y();
+        const float dx32 = x3 - x2;
+        const float dy32 = y3 - y2;
+        const float dx21 = x2 - x1;
+        const float dy21 = y2 - y1;
+        const float l32  = Gfx::Math::fastSqrt(dx32 * dx32 + dy32 * dy32);
+        const float l21  = Gfx::Math::fastSqrt(dx21 * dx21 + dy21 * dy21);
+        const float l31  = l32 + l21;
+        // Generate points for one quadratic bezier curve
+        std::vector<PointF> pointsFTmp;
+        generateQuadraticBezierPoints(pointsFTmp, x1, y1, x2, y2, x3, y3, ceil(l31 / 20.0f) + 1);
+    }
+
+    // Rasterize the polygon
+    drawPolyline(pointsF.data(), pointsF.size(), false);
 }
 
 void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
@@ -593,7 +626,7 @@ void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
         const Pt::int32_t radiusYi = ( size.height() - penSize ) / 2;
         const Pt::int32_t centerX  = topLeft.x() + size.width () / 2;
         const Pt::int32_t centerY  = topLeft.y() + size.height() / 2;
-        // Generate the polygon
+        // Generate a polygon that approximates the ellipse
         std::vector<Point> points;
         generateEllipsePoints(points, radiusXo, radiusYo, centerX, centerY);
         points.push_back(Painter::PolygonSeparatorPoint);
@@ -661,7 +694,7 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
 
     // Solid
     if(_rasterizer->pen().style() == Pen::Solid) {
-        // Calculate the ellipse's parameters
+        // Calculate the arc's parameters
         const Pt::int32_t radiusXo   = ( size.width () + penSize ) / 2;
         const Pt::int32_t radiusYo   = ( size.height() + penSize ) / 2;
         const Pt::int32_t radiusXi   = ( size.width () - penSize ) / 2;
@@ -674,7 +707,7 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
         const Pt::int32_t centerYadd = round(centerY + shiftYps);
         // The arc's points
         std::vector<Point> points;
-        // Generate the polygon
+        // Generate a polygon that approximates the arc
         if(arcMode == ArcMode::Chord) {
             // The arc's "outside" lines
             generateArcPoints(points, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd);
