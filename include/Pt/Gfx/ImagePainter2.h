@@ -93,6 +93,8 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual void drawRect(const RectF& rect);
 
+        virtual void drawRoundRect(const RectF& rect, float radius);
+
         // NOTE: The points must move in counter-clockwise (CCW) direction or something wrong will be drawn!
         virtual void drawPolyline(const PointF* points, const size_t pointCount, bool autoClose);
 
@@ -107,6 +109,8 @@ class PT_GFX_API ImagePainter2 : public Painter
         virtual void drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
         virtual void fillRect(const RectF& rect);
+
+        virtual void fillRoundRect(const RectF& rect, float radius);
 
         // NOTE: The points must move in counter-clockwise (CCW) direction or something wrong will be drawn!
         virtual void fillPolygon(const PointF* points, const size_t pointCount);

@@ -259,6 +259,50 @@ static void testDrawRect(const char* title, Image& image, Painter& painter)
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
 }
 
+static void testDrawRoundRect(const char* title, Image& image, Painter& painter)
+{
+    resetImage(image);
+
+    ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
+    if(!ip2) return;
+
+    ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
+
+    // Solid
+    ip2->setBrush( Color::fromRgb8(255,   0, 255, 175) );
+    ip2->fillRoundRect( RectF(PointF( 50,  50), SizeF(200, 100)), 10 );
+
+    ip2->setBrush( Color::fromRgb8(255, 255,   0, 175) );
+    ip2->fillRoundRect( RectF(PointF(300,  50), SizeF(200, 100)), 10 );
+
+    // Gradient
+    ip2->setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Horizontal) );
+    ip2->fillRoundRect( RectF(PointF( 50, 200), SizeF(200, 100)), 10 );
+
+    ip2->setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Vertical) );
+    ip2->fillRoundRect( RectF(PointF(300, 200), SizeF(200, 100)), 10 );
+
+    // Texture
+    ip2->setBrush( Brush(textureWithWhiteBackground) );
+    ip2->fillRoundRect( RectF(PointF( 50, 350), SizeF(200, 100)), 10 );
+
+    ip2->setBrush( Brush(textureWithTransBackground) );
+    ip2->fillRoundRect( RectF(PointF(300, 350), SizeF(200, 100)), 10 );
+
+    // Outline - thin
+    ip2->setPen  ( Pen(Color::fromRgb8(0, 255, 0, 175), 1, Pen::Solid ) );
+    ip2->drawRoundRect( RectF(PointF(550,  50), SizeF(200, 100)), 10 );
+
+    // Outline - thick
+    ip2->setPen  ( Pen(Color::fromRgb8(0, 255, 0, 175), 12, Pen::Solid ));
+    ip2->drawRoundRect( RectF(PointF(550, 200), SizeF(200, 100)), 10 );
+
+    ip2->setPen  ( Pen(Color::fromRgb8(0, 255, 0, 175), 12, Pen::Solid ));
+    ip2->drawRoundRect( RectF(PointF(550, 350), SizeF(200, 100)), 15 );
+
+    sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
+}
+
 static void testDrawEllipseArc(const char* title, Image& image, Painter& painter)
 {
     resetImage(image);

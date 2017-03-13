@@ -501,6 +501,14 @@ void ImagePainter2::fillRect( const RectF& rect )
     _rasterizer->fillRect(tl, br);
 }
 
+void ImagePainter2::drawRoundRect( const RectF& rect, float radius )
+{
+}
+
+void ImagePainter2::fillRoundRect( const RectF& rect, float radius )
+{
+}
+
 void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount, bool autoClose )
 {
     // Rasterize one-pixel polyline
