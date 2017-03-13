@@ -230,7 +230,7 @@ static size_t benchDrawBezier(int loopCount, Pen::Style style, CompositionMode c
             PointF(265 + 100,  65),
             PointF(200 + 100,  50)
         };
-        ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
+        ip2->setAntiAliasingMode(antiAliasingMode);
         ip2->drawQuadraticPolybezier( bezier1, sizeof(bezier1) / sizeof(bezier1[0]), false );
 
         const PointF bezier2[] = { // CCW
