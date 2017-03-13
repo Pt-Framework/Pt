@@ -172,7 +172,7 @@ static inline void generateLineTriangularInCap(std::vector<PointF>& dst, float x
     dst.push_back( PointF(x - nx, y - ny) );
 }
 
-static void generateEllipsePoints(std::vector<Point>& dst, Pt::int32_t radiusX, Pt::int32_t radiusY, Pt::int32_t centerX, Pt::int32_t centerY)
+static inline void generateEllipsePoints(std::vector<Point>& dst, Pt::int32_t radiusX, Pt::int32_t radiusY, Pt::int32_t centerX, Pt::int32_t centerY)
 {
     // Calculate the ellipse's parameters
     const Pt::int32_t radiusM = std::max(radiusX, radiusY);
@@ -193,7 +193,7 @@ static void generateEllipsePoints(std::vector<Point>& dst, Pt::int32_t radiusX, 
     if(dst.back() == dst[0]) dst.pop_back();
 }
 
-static void generateArcPoints(std::vector<Point>& dst, Pt::int32_t radiusX, Pt::int32_t radiusY, Pt::int32_t centerX, Pt::int32_t centerY, float degBegin, float degEnd)
+static inline void generateArcPoints(std::vector<Point>& dst, Pt::int32_t radiusX, Pt::int32_t radiusY, Pt::int32_t centerX, Pt::int32_t centerY, float degBegin, float degEnd)
 {
     // Calculate the ellipse's parameters
     const Pt::int32_t radiusM = std::max(radiusX, radiusY);
@@ -219,6 +219,70 @@ static void generateArcPoints(std::vector<Point>& dst, Pt::int32_t radiusX, Pt::
     if(dst.back() == dst[0]) dst.pop_back();
 }
 
+static inline void combineLinePointsAndAddCaps(std::vector<Point>& dst, const std::vector<Point>& inner, const std::vector<Point>& outer, Pen::CapStyle begCap, Pen::CapStyle endCap, size_t penSize)
+{
+    // Calculate the end lines' parameters
+    const Pt::int32_t ox2a = outer[outer.size() - 1].x();
+    const Pt::int32_t oy2a = outer[outer.size() - 1].y();
+    const Pt::int32_t ox2b = outer[outer.size() - 2].x();
+    const Pt::int32_t oy2b = outer[outer.size() - 2].y();
+    const Pt::int32_t ix2a = inner[inner.size() - 1].x();
+    const Pt::int32_t iy2a = inner[inner.size() - 1].y();
+    const Pt::int32_t ix2b = inner[inner.size() - 2].x();
+    const Pt::int32_t iy2b = inner[inner.size() - 2].y();
+    const float       x2a  = (float) (ox2a + ix2a) * 0.5f;
+    const float       y2a  = (float) (oy2a + iy2a) * 0.5f;
+    const float       x2b  = (float) (ox2b + ix2b) * 0.5f;
+    const float       y2b  = (float) (oy2b + iy2b) * 0.5f;
+
+    // Intersect the end lines
+    float wh2, dx2, dy2, nx2, ny2;
+    calculateLineParams(wh2, dx2, dy2, nx2, ny2, x2a, y2a, x2b, y2b, penSize);
+
+    // Generate the end cap
+    switch(endCap) {
+        case Pen::SquareCap        : break;
+        case Pen::RoundCap         : break;
+        case Pen::TriangularOutCap : dst.push_back(Point( x2a - dx2, y2a - dy2 )); break;
+        case Pen::TriangularInCap  : dst.push_back(Point( x2a + dx2, y2a + dy2 )); break;
+        default                    : break;
+    }
+
+    // Store the "outside" points
+    dst.insert(dst.end(), outer.rbegin(), outer.rend());
+
+    // Calculate the begin lines' parameters
+    const Pt::int32_t ox1a = outer[0].x();
+    const Pt::int32_t oy1a = outer[0].y();
+    const Pt::int32_t ox1b = outer[1].x();
+    const Pt::int32_t oy1b = outer[1].y();
+    const Pt::int32_t ix1a = inner[0].x();
+    const Pt::int32_t iy1a = inner[0].y();
+    const Pt::int32_t ix1b = inner[1].x();
+    const Pt::int32_t iy1b = inner[1].y();
+    const float       x1a  = (float) (ox1a + ix1a) * 0.5f;
+    const float       y1a  = (float) (oy1a + iy1a) * 0.5f;
+    const float       x1b  = (float) (ox1b + ix1b) * 0.5f;
+    const float       y1b  = (float) (oy1b + iy1b) * 0.5f;
+
+    // Intersect the begin lines
+    float wh1, dx1, dy1, nx1, ny1;
+    calculateLineParams(wh1, dx1, dy1, nx1, ny1, x1b, y1b, x1a, y1a, penSize);
+
+    // Generate the begin cap
+    switch(begCap) {
+        case Pen::SquareCap        : dst.push_back( Point( ox1a + dx1, oy1a + dy1 ) );
+                                     dst.push_back( Point( ix1a + dx1, iy1a + dy1 ) ); break;
+
+        case Pen::RoundCap         : break;
+        case Pen::TriangularOutCap : dst.push_back( Point( x1a + dx1, y1a + dy1 ) ); break;
+        case Pen::TriangularInCap  : dst.push_back( Point( x1a - dx1, y1a - dy1 ) ); break;
+        default                    : break;
+    }
+
+    // Store the "inside" points
+    dst.insert(dst.end(), inner. begin(), inner. end());
+}
 
 // ======================================================================================
 // ===== Static Public Member Functions =================================================
@@ -573,87 +637,28 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
         std::vector<Point> points;
         // Generate the polygon
         if(arcMode == ArcMode::Chord) {
-            // Outer perimeter
+            // The arc's "outside" lines
             generateArcPoints(points, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd);
-            // Inner perimeter
+            // The arc's "inside" lines
             points.push_back(Painter::PolygonSeparatorPoint);
             generateArcPoints(points, radiusXi, radiusYi, centerX + shiftX, centerY + shiftY, degBegin, degEnd);
         }
         else if(arcMode == ArcMode::Pie) {
-            // Outer perimeter
+            // The arc's "outside" lines
             generateArcPoints(points, radiusXo, radiusYo, centerX, centerY, odegBegin, odegEnd);
             points.push_back(Point(centerXsub, centerYsub));
-            // Inner perimeter
+            // The arc's "inside" lines
             points.push_back(Painter::PolygonSeparatorPoint);
             generateArcPoints(points, radiusXi, radiusYi, centerX, centerY, idegBegin, idegEnd);
             points.push_back(Point(centerXadd, centerYadd));
         }
         else { // ArcMode::Open
-            // The arc's temporary points
-            std::vector<Point> outer, inner;
-            // Generate the arc points
-            generateArcPoints(outer, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd);
+            // The arc's "inside" and "outside" lines
+            std::vector<Point> inner, outer;
             generateArcPoints(inner, radiusXi, radiusYi, centerX, centerY, degBegin, degEnd);
-            // Calculate the end lines' parameters
-            const float ox2a = outer[outer.size() - 1].x();
-            const float oy2a = outer[outer.size() - 1].y();
-            const float ox2b = outer[outer.size() - 2].x();
-            const float oy2b = outer[outer.size() - 2].y();
-            const float ix2a = inner[inner.size() - 1].x();
-            const float iy2a = inner[inner.size() - 1].y();
-            const float ix2b = inner[inner.size() - 2].x();
-            const float iy2b = inner[inner.size() - 2].y();
-            const float x2a  = (ox2a + ix2a) * 0.5f;
-            const float y2a  = (oy2a + iy2a) * 0.5f;
-            const float x2b  = (ox2b + ix2b) * 0.5f;
-            const float y2b  = (oy2b + iy2b) * 0.5f;
-            // Intersect the end lines
-            float wh2, dx2, dy2, nx2, ny2;
-            calculateLineParams(wh2, dx2, dy2, nx2, ny2, x2a, y2a, x2b, y2b, penSize);
-            // Generate the end cap
-            switch(_rasterizer->pen().capStyle()) {
-                case Pen::SquareCap:
-                    break;
-                case Pen::RoundCap:
-                    break;
-                case Pen::TriangularOutCap:
-                    points.push_back(Point( x2a - dx2, y2a - dy2 ));
-                    break;
-                case Pen::TriangularInCap:
-                    break;
-            }
-            // Store the "outside" points
-            points.insert(points.end(), outer.rbegin(), outer.rend());
-            // Calculate the begin lines' parameters
-            const float ox1a = outer[0].x();
-            const float oy1a = outer[0].y();
-            const float ox1b = outer[1].x();
-            const float oy1b = outer[1].y();
-            const float ix1a = inner[0].x();
-            const float iy1a = inner[0].y();
-            const float ix1b = inner[1].x();
-            const float iy1b = inner[1].y();
-            const float x1a  = (ox1a + ix1a) * 0.5f;
-            const float y1a  = (oy1a + iy1a) * 0.5f;
-            const float x1b  = (ox1b + ix1b) * 0.5f;
-            const float y1b  = (oy1b + iy1b) * 0.5f;
-            // Intersect the end lines
-            float wh1, dx1, dy1, nx1, ny1;
-            calculateLineParams(wh1, dx1, dy1, nx1, ny1, x1b, y1b, x1a, y1a, penSize);
-            // Generate the end cap
-            switch(_rasterizer->pen().capStyle()) {
-                case Pen::SquareCap:
-                    break;
-                case Pen::RoundCap:
-                    break;
-                case Pen::TriangularOutCap:
-                    points.push_back( Point( x1a + dx1, y1a + dy1 ) );
-                    break;
-                case Pen::TriangularInCap:
-                    break;
-            }
-            // Store the "inside" points
-            points.insert(points.end(), inner. begin(), inner. end());
+            generateArcPoints(outer, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd);
+            // Combine the arc's lines and add caps
+            combineLinePointsAndAddCaps(points, inner, outer, _rasterizer->pen().capStyle(), _rasterizer->pen().capStyle(), penSize);
         }
         // Rasterize the polygon
         _rasterizer->strokePolygon(points.data(), points.size());
