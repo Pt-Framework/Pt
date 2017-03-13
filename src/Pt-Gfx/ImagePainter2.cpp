@@ -122,6 +122,20 @@ static inline bool intersectLine(bool& inLine, PointF& intersect, const PointF& 
 //           Last modified on February 17, 2017
 static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, float x3, float y3, Pt::int32_t nSeg)
 {
+    // Check if the points actually specify a straight line
+    const Pt::int32_t sx = x3 - x2;
+    const Pt::int32_t sy = y3 - y2;
+    const Pt::int32_t xx = x1 - x2;
+    const Pt::int32_t yy = y1 - y2;
+
+    // Curvature
+    if( !(xx * sy - yy * sx) ) {
+        if( dst.empty() || dst.back().x() != x1 || dst.back().y() != y1 ) dst.push_back( PointF(x1, y1) );
+        if( dst.empty() || dst.back().x() != x3 || dst.back().y() != y3 ) dst.push_back( PointF(x3, y3) );
+        return;
+    }
+
+    // Process as a quadratic bezier curve
     if(nSeg < 3) nSeg = 3;
 
     for(Pt::int32_t i = 0; i <= nSeg; ++i) {

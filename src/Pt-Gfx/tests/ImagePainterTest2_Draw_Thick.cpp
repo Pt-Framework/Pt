@@ -236,40 +236,6 @@ static void testDrawThickLine_impl(
         };
         ip2->setPen(penOCapNJoin);
         ip2->drawQuadraticPolybezier( bezier2d, sizeof(bezier2d) / sizeof(bezier2d[0]), true );
-
-
-
-        ip2->setPen(penOCapNJoin);
-        //ip2->setPen(Color::fromRgb8(255,255,0));
-        const PointF bezier3[] = { // CCW
-            // Bottom left
-            PointF(400 - 350,  90 + 300),
-            PointF(400 - 350, 110 + 300),
-            PointF(420 - 350, 110 + 300),
-            // Bottom middle
-            PointF(450 - 350, 110 + 300),
-            // Bottom right
-            PointF(480 - 350, 110 + 300),
-            PointF(500 - 350, 110 + 300),
-            PointF(500 - 350,  90 + 300),
-            // Center right
-            PointF(500 - 350,  70 + 300),
-            // Top right
-            PointF(500 - 350,  50 + 300),
-            PointF(500 - 350,  30 + 300),
-            PointF(480 - 350,  30 + 300),
-            // Top middle
-            PointF(450 - 350,  30 + 300),
-            // Top left
-            PointF(420 - 350,  30 + 300),
-            PointF(400 - 350,  30 + 300),
-            PointF(400 - 350,  50 + 300),
-            // Center left
-            PointF(400 - 350,  70 + 300)
-        };
-        ip2->drawQuadraticPolybezier( bezier3, sizeof(bezier3) / sizeof(bezier3[0]), true );
-
-
     }
 
     // Done
