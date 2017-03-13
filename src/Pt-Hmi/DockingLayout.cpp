@@ -124,9 +124,9 @@ void DockingLayout::onLayout()
                 double y = posTop  + (*it)->margin().top();         
                      
                 const Gfx::SizeF childSize( (posRight - posLeft) - (*it)->margin().leftRight(), 
-                                            (*it)->size().height() );
+                                            (*it)->preferredSize().height() );
 
-                posTop += (*it)->size().height() + (*it)->margin().topBottom();      
+                posTop += (*it)->preferredSize().height() + (*it)->margin().topBottom();      
         
                 Gfx::PointF pos(x, y);                   
                 (*it)->setGeometry(pos, childSize, vid());              
@@ -135,14 +135,14 @@ void DockingLayout::onLayout()
           
             case DockingLayout::Right:
             {
-                posRight -= (*it)->size().width()  + (*it)->margin().right();  
+                posRight -= (*it)->preferredSize().width()  + (*it)->margin().right();  
                      
                 double x = posRight;
                 double y = posTop + (*it)->margin().top();                             
                     
                 posRight -=  (*it)->margin().left();
 
-                const Gfx::SizeF childSize( (*it)->size().width(), 
+                const Gfx::SizeF childSize( (*it)->preferredSize().width(), 
                                             (posBottom - posTop) - 
                                             (*it)->margin().topBottom() );
 
@@ -153,7 +153,7 @@ void DockingLayout::onLayout()
 
             case DockingLayout::Bottom:
             {
-                posBottom -= (*it)->size().height() + (*it)->margin().bottom();   
+                posBottom -= (*it)->preferredSize().height() + (*it)->margin().bottom();   
                    
                 double x = posLeft + (*it)->margin().left();
                 double y = posBottom;       
@@ -161,7 +161,7 @@ void DockingLayout::onLayout()
                 posBottom -= (*it)->margin().top();                      
 
                 const Gfx::SizeF childSize( (posRight - posLeft) - (*it)->margin().leftRight(), 
-                                            (*it)->size().height() );
+                                            (*it)->preferredSize().height() );
 
                 Gfx::PointF pos(x, y);                   
                 (*it)->setGeometry(pos, childSize, vid());              
