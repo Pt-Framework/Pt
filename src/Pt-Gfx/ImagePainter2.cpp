@@ -592,41 +592,66 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
             // The arc's temporary points
             std::vector<Point> outer, inner;
             // Generate the arc points
-            generateArcPoints(outer, radiusXo, radiusYo, centerX, centerY, odegBegin, odegEnd);
-            generateArcPoints(inner, radiusXi, radiusYi, centerX, centerY, idegBegin, idegEnd);
-            // Calculate the lines' parameters
-            const float ox1a = outer[               0].x();
-            const float oy1a = outer[               0].y();
-            const float ox1b = outer[               1].x();
-            const float oy1b = outer[               1].y();
+            generateArcPoints(outer, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd);
+            generateArcPoints(inner, radiusXi, radiusYi, centerX, centerY, degBegin, degEnd);
+            // Calculate the end lines' parameters
             const float ox2a = outer[outer.size() - 1].x();
             const float oy2a = outer[outer.size() - 1].y();
             const float ox2b = outer[outer.size() - 2].x();
             const float oy2b = outer[outer.size() - 2].y();
-            const float ix1a = inner[               0].x();
-            const float iy1a = inner[               0].y();
-            const float ix1b = inner[               1].x();
-            const float iy1b = inner[               1].y();
             const float ix2a = inner[inner.size() - 1].x();
             const float iy2a = inner[inner.size() - 1].y();
             const float ix2b = inner[inner.size() - 2].x();
             const float iy2b = inner[inner.size() - 2].y();
-            // Generate the begin cap
-            // ### TODO ###
+            const float x2a  = (ox2a + ix2a) * 0.5f;
+            const float y2a  = (oy2a + iy2a) * 0.5f;
+            const float x2b  = (ox2b + ix2b) * 0.5f;
+            const float y2b  = (oy2b + iy2b) * 0.5f;
+            // Intersect the end lines
+            float wh2, dx2, dy2, nx2, ny2;
+            calculateLineParams(wh2, dx2, dy2, nx2, ny2, x2a, y2a, x2b, y2b, penSize);
+            // Generate the end cap
             switch(_rasterizer->pen().capStyle()) {
                 case Pen::SquareCap:
                     break;
                 case Pen::RoundCap:
                     break;
                 case Pen::TriangularOutCap:
+                    points.push_back(Point( x2a - dx2, y2a - dy2 ));
                     break;
                 case Pen::TriangularInCap:
                     break;
             }
             // Store the "outside" points
             points.insert(points.end(), outer.rbegin(), outer.rend());
+            // Calculate the begin lines' parameters
+            const float ox1a = outer[0].x();
+            const float oy1a = outer[0].y();
+            const float ox1b = outer[1].x();
+            const float oy1b = outer[1].y();
+            const float ix1a = inner[0].x();
+            const float iy1a = inner[0].y();
+            const float ix1b = inner[1].x();
+            const float iy1b = inner[1].y();
+            const float x1a  = (ox1a + ix1a) * 0.5f;
+            const float y1a  = (oy1a + iy1a) * 0.5f;
+            const float x1b  = (ox1b + ix1b) * 0.5f;
+            const float y1b  = (oy1b + iy1b) * 0.5f;
+            // Intersect the end lines
+            float wh1, dx1, dy1, nx1, ny1;
+            calculateLineParams(wh1, dx1, dy1, nx1, ny1, x1b, y1b, x1a, y1a, penSize);
             // Generate the end cap
-            // ### TODO ###
+            switch(_rasterizer->pen().capStyle()) {
+                case Pen::SquareCap:
+                    break;
+                case Pen::RoundCap:
+                    break;
+                case Pen::TriangularOutCap:
+                    points.push_back( Point( x1a + dx1, y1a + dy1 ) );
+                    break;
+                case Pen::TriangularInCap:
+                    break;
+            }
             // Store the "inside" points
             points.insert(points.end(), inner. begin(), inner. end());
         }
