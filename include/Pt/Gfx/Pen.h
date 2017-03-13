@@ -110,13 +110,29 @@ class PT_GFX_API Pen
             Pt::uint64_t stylePattern, CapStyle cap = FlatCap,
             JoinStyle join = BevelJoin);
 
+        /** @brief Sets the size of the pen.
+        */
+        void setSize(std::size_t size);
+
         /** @brief Returns the size of the pen.
         */
         std::size_t size() const;
 
+        /** @brief Sets the color of the pen.
+        */
+        void setColor(const Color& color);
+
         /** @brief Returns the color of the pen.
         */
         const Color& color() const;
+
+        /** @brief Sets the pen style.
+        */
+        void setStyle(Style style = Solid);
+
+        /** @brief Sets the pen style.
+        */
+        void setStyle(Pt::uint64_t stylePattern);
 
         /** @brief Returns the pen style.
         */
@@ -124,11 +140,19 @@ class PT_GFX_API Pen
 
         /** @brief Returns the pen style user pattern.
         */
-        Pt::uint64_t userPattern() const;
+        Pt::uint64_t styleUserPattern() const;
+
+        /** @brief Sets the cap style.
+        */
+        void setCapStyle(CapStyle cap = FlatCap);
 
         /** @brief Returns the cap style.
         */
         CapStyle capStyle() const;
+
+        /** @brief Sets the join style.
+        */
+        void setJoinStyle(JoinStyle join = BevelJoin);
 
         /** @brief Returns the join style.
         */
@@ -154,20 +178,38 @@ class PT_GFX_API PenData
       , _joinStyle(join)
       { }
 
+      void setColor(const Color& color)
+      { _color = color; }
+
       const Color& color() const
       { return _color; }
+
+      void setSize(std::size_t size)
+      { _size = size; }
 
       std::size_t size() const
       { return _size; }
 
+      void setStyle(Pen::Style style, Pt::uint64_t userPattern)
+      {
+          _style       = style;
+          _userPattern = userPattern;
+      }
+
       Pen::Style style() const
       { return _style; }
 
-      Pt::uint64_t userPattern() const
+      Pt::uint64_t styleUserPattern() const
       { return _userPattern; }
+
+      void setCapStyle(Pen::CapStyle cap)
+      { _capStyle = cap;}
 
       Pen::CapStyle capStyle() const
       { return _capStyle;}
+
+      void setJoinStyle(Pen::JoinStyle join)
+      { _joinStyle = join; }
 
       Pen::JoinStyle joinStyle() const
       { return _joinStyle; }

@@ -503,10 +503,54 @@ void ImagePainter2::fillRect( const RectF& rect )
 
 void ImagePainter2::drawRoundRect( const RectF& rect, float radius )
 {
+    // Extract the coordinates
+    const float x1 = rect.topLeft    ().x();
+    const float y1 = rect.topLeft    ().y();
+    const float x2 = rect.bottomRight().x();
+    const float y2 = rect.bottomRight().y();
+
+    // Generate a quadratic polybezier that represents the rounded-rectangle
+    const PointF pbz[] = { // CCW
+        // Bottom left
+        PointF(x1,          y2 - radius),
+        PointF(x1,          y2         ),
+        PointF(x1 + radius, y2         ),
+        // Bottom middle
+        PointF((x1 + x2) * 0.5f, y2),
+        // Bottom right
+        PointF(x2 - radius, y2         ),
+        PointF(x2,          y2         ),
+        PointF(x2,          y2 - radius),
+        // Center right
+        PointF(x2, (y1 + y2) * 0.5f),
+        // Top right
+        PointF(x2,          y1 + radius),
+        PointF(x2,          y1         ),
+        PointF(x2 - radius, y1         ),
+        // Top middle
+        PointF((x1 + x2) * 0.5f, y1),
+        // Top left
+        PointF(x1 + radius, y1         ),
+        PointF(x1,          y1         ),
+        PointF(x1,          y1 + radius),
+        // Center left
+        PointF(x1, (y1 + y2) * 0.5f)
+    };
+
+    // Draw the quadratic polybezier
+    const Pen orgPen = _rasterizer->pen();
+
+    Pen newPen = orgPen;
+    newPen.setJoinStyle(Pen::MiterJoin);
+
+    _rasterizer->setPen(newPen);
+    drawQuadraticPolybezier(pbz, sizeof(pbz) / sizeof(pbz[0]), true);
+    _rasterizer->setPen(orgPen);
 }
 
 void ImagePainter2::fillRoundRect( const RectF& rect, float radius )
 {
+
 }
 
 void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount, bool autoClose )

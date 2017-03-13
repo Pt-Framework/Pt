@@ -31,8 +31,8 @@
 #include <Pt/Gfx/Pen.h>
 
 namespace Pt {
-
 namespace Gfx {
+
 
 Pen::Pen()
 : _penData(new PenData(Color(0,0,0), 0, Solid, 0, RoundCap, RoundJoin))
@@ -45,16 +45,18 @@ Pen::Pen(const Color& color)
 
 
 Pen::Pen(const Color& color, std::size_t size, Style style, CapStyle cap, JoinStyle join)
-: _penData(new PenData(color, size, style, 0, cap, join))
+: _penData(new PenData(color, size, (style != UserDefined) ? style : Solid, 0, cap, join))
 { }
+
 
 Pen::Pen(const Color& color, std::size_t size, Pt::uint64_t stylePattern, CapStyle cap, JoinStyle join)
 : _penData(new PenData(color, size, UserDefined, stylePattern, cap, join))
 { }
 
-std::size_t Pen::size() const
+
+void Pen::setColor(const Color& color)
 {
-    return _penData->size();
+    _penData->setColor(color);
 }
 
 
@@ -64,21 +66,57 @@ const Color& Pen::color() const
 }
 
 
+void Pen::setSize(std::size_t size)
+{
+    _penData->setSize(size);
+}
+
+
+std::size_t Pen::size() const
+{
+    return _penData->size();
+}
+
+
+void Pen::setStyle(Style style)
+{
+    _penData->setStyle( (style != UserDefined) ? style : Solid, 0 );
+}
+
+
+void Pen::setStyle(Pt::uint64_t stylePattern)
+{
+    _penData->setStyle(UserDefined, stylePattern);
+}
+
+
 Pen::Style Pen::style() const
 {
     return _penData->style();
 }
 
 
-Pt::uint64_t Pen::userPattern() const
+Pt::uint64_t Pen::styleUserPattern() const
 {
-    return _penData->userPattern();
+    return _penData->styleUserPattern();
+}
+
+
+void Pen::setCapStyle(CapStyle cap)
+{
+    _penData->setCapStyle(cap);
 }
 
 
 Pen::CapStyle Pen::capStyle() const
 {
     return _penData->capStyle();
+}
+
+
+void Pen::setJoinStyle(JoinStyle join)
+{
+    _penData->setJoinStyle(join);
 }
 
 
@@ -93,6 +131,6 @@ bool Pen::isNull() const
     return size() == 0;
 }
 
-} // namespace
 
+} // namespace
 } // namespace
