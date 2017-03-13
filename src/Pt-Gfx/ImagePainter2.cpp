@@ -611,7 +611,8 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
             const float iy2a = inner[inner.size() - 1].y();
             const float ix2b = inner[inner.size() - 2].x();
             const float iy2b = inner[inner.size() - 2].y();
-            // Generate begin cap
+            // Generate the begin cap
+            // ### TODO ###
             switch(_rasterizer->pen().capStyle()) {
                 case Pen::SquareCap:
                     break;
@@ -624,6 +625,8 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
             }
             // Store the "outside" points
             points.insert(points.end(), outer.rbegin(), outer.rend());
+            // Generate the end cap
+            // ### TODO ###
             // Store the "inside" points
             points.insert(points.end(), inner. begin(), inner. end());
         }
