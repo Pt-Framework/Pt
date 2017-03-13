@@ -241,11 +241,31 @@ static inline void combineLinePointsAndAddCaps(std::vector<Point>& dst, const st
 
     // Generate the end cap
     switch(endCap) {
-        case Pen::SquareCap        : break;
-        case Pen::RoundCap         : break;
-        case Pen::TriangularOutCap : dst.push_back(Point( x2a - dx2, y2a - dy2 )); break;
-        case Pen::TriangularInCap  : dst.push_back(Point( x2a + dx2, y2a + dy2 )); break;
-        default                    : break;
+        case Pen::SquareCap:
+            dst.push_back( Point( ix2a - dx2, iy2a - dy2 ) );
+            dst.push_back( Point( ox2a - dx2, oy2a - dy2 ) );
+            break;
+
+        case Pen::RoundCap: {
+            std::vector<PointF> tmp;
+            generateQuadraticBezierPoints(tmp, ix2a, iy2a, x2a - dx2, y2a - dy2, ox2a, oy2a, ceil(penSize / 2.0f) - 1);
+            if(tmp.size() <= 2) break;
+            for(size_t i = 1; i < tmp.size() - 1; ++i) {
+                dst.push_back( Point( round(tmp[i].x()), round(tmp[i].y()) ) );
+            }
+            break;
+        }
+
+        case Pen::TriangularOutCap:
+            dst.push_back( Point( x2a - dx2, y2a - dy2 ) );
+            break;
+
+        case Pen::TriangularInCap:
+            dst.push_back( Point( x2a + dx2, y2a + dy2 ) );
+            break;
+
+        default:
+            break;
     }
 
     // Store the "outside" points
@@ -271,18 +291,37 @@ static inline void combineLinePointsAndAddCaps(std::vector<Point>& dst, const st
 
     // Generate the begin cap
     switch(begCap) {
-        case Pen::SquareCap        : dst.push_back( Point( ox1a + dx1, oy1a + dy1 ) );
-                                     dst.push_back( Point( ix1a + dx1, iy1a + dy1 ) ); break;
+        case Pen::SquareCap:
+            dst.push_back( Point( ox1a + dx1, oy1a + dy1 ) );
+            dst.push_back( Point( ix1a + dx1, iy1a + dy1 ) );
+            break;
 
-        case Pen::RoundCap         : break;
-        case Pen::TriangularOutCap : dst.push_back( Point( x1a + dx1, y1a + dy1 ) ); break;
-        case Pen::TriangularInCap  : dst.push_back( Point( x1a - dx1, y1a - dy1 ) ); break;
-        default                    : break;
+        case Pen::RoundCap: {
+            std::vector<PointF> tmp;
+            generateQuadraticBezierPoints(tmp, ox1a, oy1a, x1a + dx1, y1a + dy1, ix1a, iy1a, ceil(penSize / 2.0f) - 1);
+            if(tmp.size() <= 2) break;
+            for(size_t i = 1; i < tmp.size() - 1; ++i) {
+                dst.push_back( Point( round(tmp[i].x()), round(tmp[i].y()) ) );
+            }
+            break;
+        }
+
+        case Pen::TriangularOutCap:
+            dst.push_back( Point( x1a + dx1, y1a + dy1 ) );
+            break;
+
+        case Pen::TriangularInCap:
+            dst.push_back( Point( x1a - dx1, y1a - dy1 ) );
+            break;
+
+        default:
+            break;
     }
 
     // Store the "inside" points
     dst.insert(dst.end(), inner. begin(), inner. end());
 }
+
 
 // ======================================================================================
 // ===== Static Public Member Functions =================================================
@@ -853,7 +892,7 @@ bool ImagePainter2::combineLineSegmentForSolidOpenPolygon(std::vector<PointF>& p
     }
 
     // Get the width of the pen
-    const size_t penWidth = _rasterizer->pen().size();
+    const size_t penSize = _rasterizer->pen().size();
 
     // Copy point #(N-1) and #(N-2) from the main polygon buffer
     const size_t N1           = polygon.size() - 1;
@@ -901,7 +940,7 @@ bool ImagePainter2::combineLineSegmentForSolidOpenPolygon(std::vector<PointF>& p
                 round(oline1b  .x()), round(oline1b  .y()),
                 round(intersect.x()), round(intersect.y()),
                 round(oline2a  .x()), round(oline2a  .y()),
-                ceil(penWidth / 2.0f) - 1
+                ceil(penSize / 2.0f) - 1
             );
             break;
         // Invalid join type
@@ -947,7 +986,7 @@ bool ImagePainter2::combineLineSegmentForSolidOpenPolygon(std::vector<PointF>& p
                 round(iline1b  .x()), round(iline1b  .y()),
                 round(intersect.x()), round(intersect.y()),
                 round(iline2a  .x()), round(iline2a  .y()),
-                ceil(penWidth / 2.0f) - 1
+                ceil(penSize / 2.0f) - 1
             );
             break;
         // Invalid join type
@@ -971,7 +1010,7 @@ bool ImagePainter2::combineLineSegmentForSolidClosedPolygon(std::vector<PointF>&
     }
 
     // Get the width of the pen
-    const size_t penWidth = _rasterizer->pen().size();
+    const size_t penSize = _rasterizer->pen().size();
 
     // Get the "outside" lines
     const PointF& oline1a = outer[outer.size() - 2];
@@ -1011,7 +1050,7 @@ bool ImagePainter2::combineLineSegmentForSolidClosedPolygon(std::vector<PointF>&
                 round(oline1b  .x()), round(oline1b  .y()),
                 round(intersect.x()), round(intersect.y()),
                 round(oline2a  .x()), round(oline2a  .y()),
-                ceil(penWidth / 2.0f) - 1
+                ceil(penSize / 2.0f) - 1
             );
             break;
         // Invalid join type
@@ -1056,7 +1095,7 @@ bool ImagePainter2::combineLineSegmentForSolidClosedPolygon(std::vector<PointF>&
                 round(iline1b  .x()), round(iline1b  .y()),
                 round(intersect.x()), round(intersect.y()),
                 round(iline2a  .x()), round(iline2a  .y()),
-                ceil(penWidth / 2.0f) - 1
+                ceil(penSize / 2.0f) - 1
             );
             break;
         // Invalid join type
