@@ -361,7 +361,6 @@ static void cairoBenchmark(CompositionMode cm)
         time2 = benchDrawFillPolygon<ImagePainter2, true >(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::LowMemory);
         std::clog << "    Solid-filled  R-polygon FSAA 2x2 @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        if(!BENCHMARK_RESULT_HTML) std::clog << std::endl;
     }
 }
 

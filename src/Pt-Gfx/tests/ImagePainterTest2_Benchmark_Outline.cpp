@@ -204,7 +204,7 @@ static size_t benchDrawArc(int loopCount, CompositionMode cm, AntiAliasingMode a
 }
 
 template <typename PainterT>
-static size_t benchDrawBezier(int loopCount, Pen::Style style, CompositionMode cm, AntiAliasingMode antiAliasingMode)
+static size_t benchDrawBezier(int loopCount, Pen::Style style, CompositionMode cm, AntiAliasingMode antiAliasingMode, size_t penSize = 1)
 {
     size_t sum = 0;
 
@@ -213,7 +213,7 @@ static size_t benchDrawBezier(int loopCount, Pen::Style style, CompositionMode c
     PainterT painter(image);
     painter.setCompositionMode(cm);
 
-    Pen pen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, style ) );
+    Pen pen( Pen( Color::fromRgb8(255, 255, 255, 175), penSize, style ) );
     painter.setPen(pen);
 
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));

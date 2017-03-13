@@ -82,7 +82,7 @@ using namespace Pt::Gfx;
 
 // Detailed-test benchmark settings for Pt-Gfx and some for Cairo
 #define BENCHMARK_RESULT_HTML               0 // (automatically disabling test drawing and enabling Cairo comparison)
-#define BENCHMARK_RESULT_HTML_SIDE_BY_SIDE  0
+#define BENCHMARK_RESULT_HTML_SIDE_BY_SIDE  1
 
 #define BENCHMARK_CHECK_RESULTING_IMAGE     0
 
@@ -460,9 +460,11 @@ int main(int argc, char* args[])
 
         std::clog << "Cairo - CompositionMode::SourceCopy" << std::endl;
         cairoBenchmark(CompositionMode::SourceCopy);
+        std::clog << std::endl;
 
         std::clog << "Cairo - CompositionMode::SourceOver" << std::endl;
         cairoBenchmark(CompositionMode::SourceOver);
+        if(!BENCHMARK_RESULT_HTML) std::clog << std::endl;
     }
 
     if(DO_BENCHMARKING && BENCHMARK_RESULT_HTML) {
