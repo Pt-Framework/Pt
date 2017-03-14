@@ -35,7 +35,16 @@ if $(WITH_RASTERIZER2)
                                Rasterizer2_Ellipse.cpp
                                ;
 
-    SubDirC++Flags [ FDefines RASTERIZER2 ] ;
+    if $(TARGET_OS:L) = arm
+    {
+        SubDirCcFlags  [ -mfpu=neon ] ;
+        SubDirC++Flags [ -mfpu=neon FDefines RASTERIZER2 ] ;
+    }
+    else
+    {
+        SubDirC++Flags [ FDefines RASTERIZER2 ] ;
+
+    }
 }
 
 SharedLibrary Pt-Gfx : Argb32Format.cpp

@@ -7,12 +7,6 @@
 // On a system where its libpng package is also not compatible (e.g. Raspbian Jessie 2017/01/11):
 //     ./jam.sh configure --with-rasterizer2 --with-hmi -sGUI=linux-fb -sOPTIM=-O2 --with-freetype --with-libpng
 //
-// To target native CPU architecture:
-//     ./jam.sh configure --with-rasterizer2 --with-hmi -sGUI=linux-fb -sOPTIM=-O2 --with-freetype --with-libpng -sCCFLAGS=-march=native -sC++FLAGS=-march=native
-//
-// To enable NEON:
-//     ./jam.sh configure --with-rasterizer2 --with-hmi -sGUI=linux-fb -sOPTIM=-O2 --with-freetype --with-libpng -sCCFLAGS=-mfpu=neon -sC++FLAGS=-mfpu=neon
-//
 //
 // perf record -d -g -T -e cycles,instructions,cache-references,cache-misses,bus-cycles ./ImagePainterTest2
 // perf report

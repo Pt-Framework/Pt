@@ -17,11 +17,26 @@ MakeLocate ImagePainterTest : $(PT_OUTPUT_TARGET) ;
 
 if $(WITH_RASTERIZER2)
 {
-    if $(WITH_BUILTIN_LIBPNG)
+    if $(TARGET_OS:L) = arm
     {
-        SubDirCcFlags [ FDefines WITH_BUILTIN_LIBPNG ] ;
+        if $(WITH_BUILTIN_LIBPNG)
+        {
+            SubDirCcFlags [ -mfpu=neon FDefines WITH_BUILTIN_LIBPNG ] ;
+        }
+        else
+        {
+            SubDirCcFlags [ -mfpu=neon ] ;
+        }
+        SubDirC++Flags [ -mfpu=neon FIncludes "/usr/include/cairo" ] ;
     }
-    SubDirC++Flags [ FIncludes "/usr/include/cairo" ] ;
+    else
+    {
+        if $(WITH_BUILTIN_LIBPNG)
+        {
+            SubDirCcFlags [ FDefines WITH_BUILTIN_LIBPNG ] ;
+        }
+        SubDirC++Flags [ FIncludes "/usr/include/cairo" ] ;
+    }
 
     Main ImagePainterTest2 : ImagePainterTest2.cpp SDL_SavePNG/savepng.c ;
     LinkSharedLibraries ImagePainterTest2 : Pt Pt-Gfx Pt-System ;
