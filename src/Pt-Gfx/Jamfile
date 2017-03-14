@@ -34,6 +34,8 @@ if $(WITH_RASTERIZER2)
                                Rasterizer2_Arc.cpp
                                Rasterizer2_Ellipse.cpp
                                ;
+
+    SubDirC++Flags [ FDefines RASTERIZER2 ] ;
 }
 
 SharedLibrary Pt-Gfx : Argb32Format.cpp

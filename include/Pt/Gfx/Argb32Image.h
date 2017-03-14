@@ -37,7 +37,7 @@
 
 
 // ### !!! EXPERIMENTAL SIMD SUPPORT !!! ###
-#if 1
+#ifdef RASTERIZER2
 
 #if defined(__arm__) || defined(__thumb__) || defined(_M_ARM) || defined(_M_ARMT) || defined(__TARGET_ARCH_ARM) || defined(__TARGET_ARCH_THUMB) || defined(_ARM) || defined(__arm)
 
