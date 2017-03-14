@@ -270,35 +270,46 @@ static void testDrawRoundRect(const char* title, Image& image, Painter& painter)
 
     // Solid
     ip2->setBrush( Color::fromRgb8(255,   0, 255, 175) );
-    ip2->fillRoundRect( RectF(PointF( 50,  50), SizeF(200, 100)), 10 );
+    ip2->fillRoundRect( RectF(PointF( 20,  20), SizeF(200, 100)), 10 );
 
     ip2->setBrush( Color::fromRgb8(255, 255,   0, 175) );
-    ip2->fillRoundRect( RectF(PointF(300,  50), SizeF(200, 100)), 10 );
+    ip2->fillRoundRect( RectF(PointF(240,  20), SizeF(200, 100)), 10 );
 
     // Gradient
     ip2->setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Horizontal) );
-    ip2->fillRoundRect( RectF(PointF( 50, 200), SizeF(200, 100)), 10 );
+    ip2->fillRoundRect( RectF(PointF( 20, 160), SizeF(200, 100)), 10 );
 
     ip2->setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Vertical) );
-    ip2->fillRoundRect( RectF(PointF(300, 200), SizeF(200, 100)), 10 );
+    ip2->fillRoundRect( RectF(PointF(240, 160), SizeF(200, 100)), 10 );
 
     // Texture
     ip2->setBrush( Brush(textureWithWhiteBackground) );
-    ip2->fillRoundRect( RectF(PointF( 50, 350), SizeF(200, 100)), 10 );
+    ip2->fillRoundRect( RectF(PointF( 20, 290), SizeF(200, 100)), 10 );
 
     ip2->setBrush( Brush(textureWithTransBackground) );
-    ip2->fillRoundRect( RectF(PointF(300, 350), SizeF(200, 100)), 10 );
+    ip2->fillRoundRect( RectF(PointF(240, 290), SizeF(200, 100)), 10 );
 
     // Outline - thin
     ip2->setPen  ( Pen(Color::fromRgb8(0, 255, 0, 175), 1, Pen::Solid ) );
-    ip2->drawRoundRect( RectF(PointF(550,  50), SizeF(200, 100)), 10 );
+    ip2->drawRoundRect( RectF(PointF(480,  20), SizeF(200, 100)), 10 );
 
     // Outline - thick
     ip2->setPen  ( Pen(Color::fromRgb8(0, 255, 0, 175), 12, Pen::Solid ));
-    ip2->drawRoundRect( RectF(PointF(550, 200), SizeF(200, 100)), 10 );
+    ip2->drawRoundRect( RectF(PointF(480, 160), SizeF(200, 100)), 10 );
 
     ip2->setPen  ( Pen(Color::fromRgb8(0, 255, 0, 175), 12, Pen::Solid ));
-    ip2->drawRoundRect( RectF(PointF(550, 350), SizeF(200, 100)), 25 );
+    ip2->drawRoundRect( RectF(PointF(480, 290), SizeF(200, 100)), 25 );
+
+    // Outline - thin - patterned
+    ip2->setPen  ( Pen(Color::fromRgb8(0, 255, 0, 175), 1, Pen::DotDash ) );
+    ip2->drawRoundRect( RectF(PointF(712,  20), SizeF(200, 100)), 10 );
+
+    // Outline - thick - patterned
+    ip2->setPen  ( Pen(Color::fromRgb8(0, 255, 0, 175), 12, Pen::DotDash ));
+    ip2->drawRoundRect( RectF(PointF(712, 160), SizeF(200, 100)), 10 );
+
+    ip2->setPen  ( Pen(Color::fromRgb8(0, 255, 0, 175), 12, Pen::DotDash ));
+    ip2->drawRoundRect( RectF(PointF(712, 290), SizeF(200, 100)), 25 );
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
 }

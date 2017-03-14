@@ -120,7 +120,7 @@ static inline bool intersectLine(bool& inLine, PointF& intersect, const PointF& 
 // Based on: Bitmap/Bézier curves/Quadratic
 //           https://rosettacode.org/wiki/Bitmap/B%C3%A9zier_curves/Quadratic#C
 //           Last modified on February 17, 2017
-static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, float x3, float y3, Pt::int32_t nSeg)
+static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, float x3, float y3, Pt::int32_t nSegs)
 {
     // Check if the points actually specify a straight line
     const Pt::int32_t sx = x3 - x2;
@@ -136,10 +136,10 @@ static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, float
     }
 
     // Process as a quadratic bezier curve
-    if(nSeg < 3) nSeg = 3;
+    if(nSegs < 3) nSegs = 3;
 
-    for(Pt::int32_t i = 0; i <= nSeg; ++i) {
-        const float t = (float) i / (float) nSeg;
+    for(Pt::int32_t i = 0; i <= nSegs; ++i) {
+        const float t = (float) i / (float) nSegs;
         const float a = (1.0f - t) * (1.0f - t);
         const float b =  2.0f * t  * (1.0f - t);
         const float c = t * t;
@@ -512,27 +512,27 @@ void ImagePainter2::drawRoundRect( const RectF& rect, float radius )
     // Generate a quadratic polybezier that represents the rounded-rectangle
     const PointF pbz[] = { // CCW
         // Bottom left
-        PointF(x1,          y2 - radius),
-        PointF(x1,          y2         ),
+        PointF(x1         , y2 - radius),
+        PointF(x1         , y2         ),
         PointF(x1 + radius, y2         ),
         // Bottom middle
         PointF((x1 + x2) * 0.5f, y2),
         // Bottom right
         PointF(x2 - radius, y2         ),
-        PointF(x2,          y2         ),
-        PointF(x2,          y2 - radius),
+        PointF(x2         , y2         ),
+        PointF(x2         , y2 - radius),
         // Center right
         PointF(x2, (y1 + y2) * 0.5f),
         // Top right
-        PointF(x2,          y1 + radius),
-        PointF(x2,          y1         ),
+        PointF(x2         , y1 + radius),
+        PointF(x2         , y1         ),
         PointF(x2 - radius, y1         ),
         // Top middle
         PointF((x1 + x2) * 0.5f, y1),
         // Top left
         PointF(x1 + radius, y1         ),
-        PointF(x1,          y1         ),
-        PointF(x1,          y1 + radius),
+        PointF(x1         , y1         ),
+        PointF(x1         , y1 + radius),
         // Center left
         PointF(x1, (y1 + y2) * 0.5f)
     };
@@ -557,38 +557,49 @@ void ImagePainter2::fillRoundRect( const RectF& rect, float radius )
     const float y2 = rect.bottomRight().y();
 
     // Generate a polygon that represents the rounded-rectangle
-    const Pt::int32_t   penSize = ceil(_rasterizer->pen().size() * 0.5f) - 1;
-    std::vector<PointF> pointsF;
+    const Pt::int32_t   nSegs = ceil(_rasterizer->pen().size() * 0.5f) - 1;
+    std::vector<PointF> pointsF; // CCW
 
-   // generateQuadraticBezierPoints(pointsF, ix2a, iy2a, x2a - dx2 * 2.0f, y2a - dy2 * 2.0f, ox2a, oy2a, ceil(penSize * 0.5f) - 1);
-
-    /*
-    const PointF pbz[] = { // CCW
-        // Bottom left
-        PointF(x1,          y2 - radius),
-        PointF(x1,          y2         ),
-        PointF(x1 + radius, y2         ),
-        // Bottom middle
-        PointF((x1 + x2) * 0.5f, y2),
-        // Bottom right
-        PointF(x2 - radius, y2         ),
-        PointF(x2,          y2         ),
-        PointF(x2,          y2 - radius),
-        // Center right
-        PointF(x2, (y1 + y2) * 0.5f),
-        // Top right
-        PointF(x2,          y1 + radius),
-        PointF(x2,          y1         ),
-        PointF(x2 - radius, y1         ),
-        // Top middle
-        PointF((x1 + x2) * 0.5f, y1),
-        // Top left
-        PointF(x1 + radius, y1         ),
-        PointF(x1,          y1         ),
-        PointF(x1,          y1 + radius),
-        // Center left
-        PointF(x1, (y1 + y2) * 0.5f)
-    };*/
+    // --- Bottom left ---
+    generateQuadraticBezierPoints(
+        pointsF,
+        x1         , y2 - radius,
+        x1         , y2         ,
+        x1 + radius, y2         ,
+        nSegs
+    );
+    // --- Bottom middle ---
+    pointsF.push_back( PointF((x1 + x2) * 0.5f, y2) );
+    // --- Bottom left ---
+    generateQuadraticBezierPoints(
+        pointsF,
+        x2 - radius, y2         ,
+        x2,          y2         ,
+        x2,          y2 - radius,
+        nSegs
+    );
+    // --- Center right ---
+    pointsF.push_back( PointF(x2, (y1 + y2) * 0.5f) );
+    // --- Top right ---
+    generateQuadraticBezierPoints(
+        pointsF,
+        x2,          y1 + radius,
+        x2,          y1         ,
+        x2 - radius, y1         ,
+        nSegs
+    );
+    // --- Top middle ---
+    pointsF.push_back( PointF((x1 + x2) * 0.5f, y1) );
+    // --- Top left ---
+    generateQuadraticBezierPoints(
+        pointsF,
+        x1 + radius, y1         ,
+        x1,          y1         ,
+        x1,          y1 + radius,
+        nSegs
+    );
+    // --- Center left ---
+    pointsF.push_back( PointF(x1, (y1 + y2) * 0.5f) );
 
     // Draw the polygon
     fillPolygon(pointsF.data(), pointsF.size());
