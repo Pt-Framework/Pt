@@ -16,8 +16,8 @@ LinkSharedLibraries ImagePainterTest : Pt Pt-Gfx Pt-System ;
 MakeLocate ImagePainterTest : $(PT_OUTPUT_TARGET) ;
 
 if $(WITH_RASTERIZER2)
-{
-    if $(TARGET_OS:L) = arm
+
+    if $({TARGET_OSPLAT:L) = arm
     {
         if $(WITH_BUILTIN_LIBPNG)
         {
