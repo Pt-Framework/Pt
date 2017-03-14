@@ -35,7 +35,7 @@ if $(WITH_RASTERIZER2)
                                Rasterizer2_Ellipse.cpp
                                ;
 
-    if $({TARGET_OSPLAT:L) = arm
+    if $(TARGET_OSPLAT:L) = arm
     {
         SubDirCcFlags  [ FGeneric neon ] ;
         SubDirC++Flags [ FGeneric neon ] ;
