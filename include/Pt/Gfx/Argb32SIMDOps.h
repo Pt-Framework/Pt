@@ -167,7 +167,7 @@ inline void fastBlendPixels(Pt::uint8_t* toBuffer, Pt::uint32_t srcA, Pt::uint32
 // Copy source pixels to destination pixels
 inline void fastCopyPixels(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBuffer, size_t length)
 {
-#ifdef USE_SSE2
+#if defined(USE_SSE2)
 
     const size_t   len4     = length / 4;
     const __m128i* srcvARGB = reinterpret_cast<const __m128i*>(fromBuffer);
@@ -180,6 +180,22 @@ inline void fastCopyPixels(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBuffer,
         ++dstvARGB;
     }
 
+    const Pt::uint32_t* src = reinterpret_cast<const Pt::uint32_t*>(srcvARGB);
+          Pt::uint32_t* dst = reinterpret_cast<      Pt::uint32_t*>(dstvARGB);
+          Pt::uint32_t* dsm = dst + length % 4;
+    while(dst < dsm) *dst++ = *src++;
+
+#elif defined(USE_NEON)
+
+    const size_t     len4     = length / 4;
+    const int32x4_t* srcvARGB = reinterpret_cast<const int32x4_t*>(fromBuffer);
+          int32x4_t* dstvARGB = reinterpret_cast<      int32x4_t*>(toBuffer  );
+
+    for(size_t i = 0; i < len4; ++i) {
+        vst1q_s32(reinterpret_cast<Pt::int32_t*>(dstvARGB), vld1q_s32(reinterpret_cast<const Pt::int32_t*>(srcvARGB)));
+        ++srcvARGB;
+        ++dstvARGB;
+    }
     const Pt::uint32_t* src = reinterpret_cast<const Pt::uint32_t*>(srcvARGB);
           Pt::uint32_t* dst = reinterpret_cast<      Pt::uint32_t*>(dstvARGB);
           Pt::uint32_t* dsm = dst + length % 4;
