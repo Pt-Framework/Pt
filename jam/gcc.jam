@@ -3,7 +3,7 @@
 #If possible, you'll build your dynamic library with the appropriate install_name
 #
 #$ gcc foo.c -dynamiclib -o libfoo.dylib -install_name @executable_path/../Libraries/libfoo.dylib
-#$ otool -L libfoo.dylib 
+#$ otool -L libfoo.dylib
 #libfoo.dylib:
 # @executable_path/../Libraries/libfoo.dylib (compatibility version 0.0.0, current version 0.0.0)
 # /usr/lib/libgcc_s.1.dylib (compatibility version 1.0.0, current version 1.0.0)
@@ -97,7 +97,7 @@ rule TryBuildC++
 rule Gcc-CheckCc
 {
     TOOLSET_ROOT ?= "" ;
-    
+
     if $(TOOLSET_ROOT) && $(OS:L) = nt
     {
       TOOLSET_ROOT = $(TOOLSET_ROOT:J=" ") ;
@@ -163,7 +163,7 @@ rule Gcc-CheckCc
     {
         OPTIM ?= -O2 ;
     }
-    else 
+    else
     {
         OPTIM ?= -O0 ;
     }
@@ -328,7 +328,7 @@ rule Gcc-SharedLibrary-LinkSharedLibraries
             for local _d in $(_deps)
             {
                 local _found = false ;
-    
+
                 for _r in $(RPATHLIBS)
                 {
                     if $(_r) = $(_d)
@@ -336,7 +336,7 @@ rule Gcc-SharedLibrary-LinkSharedLibraries
                         _found = true ;
                     }
                 }
-    
+
                 # only add if not added previously
                 if $(_found) = false
                 {

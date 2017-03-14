@@ -17,11 +17,14 @@ MakeLocate ImagePainterTest : $(PT_OUTPUT_TARGET) ;
 
 if $(WITH_RASTERIZER2)
 {
+    rule FMFPU
+    { return -mfpu=$(<) ; }
+
     if $(TARGET_OS:L) = arm
     {
         if $(WITH_BUILTIN_LIBPNG)
         {
-            SubDirCcFlags [ -mfpu=neon ] ;
+            SubDirCcFlags [ FMFPU neon ] ;
             SubDirCcFlags [ FDefines WITH_BUILTIN_LIBPNG ] ;
         }
         else
