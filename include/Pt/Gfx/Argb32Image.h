@@ -36,6 +36,8 @@
 #include <Pt/Gfx/BasicImage.h>
 #include <Pt/Types.h>
 
+#include <Pt/Gfx/Argb32SIMDOps.h>
+
 
 namespace Pt {
 namespace Gfx {
@@ -60,13 +62,6 @@ class Argb32Model
         {
             return 4;
         }
-
-    public:
-        static inline void fastCopyPixels(Pt::uint8_t* dst, Pt::uint32_t argb, size_t length);
-        static inline void fastBlendPixels(Pt::uint8_t* dst_, Pt::uint32_t srcA, Pt::uint32_t srcR, Pt::uint32_t srcG, Pt::uint32_t srcB, Pt::uint32_t blendInv, size_t length);
-
-        static inline void fastCopyPixels(Pt::uint8_t* dst, const Pt::uint8_t* src, size_t length);
-        static inline void fastBlendPixels(Pt::uint8_t* dst, const Pt::uint8_t* src, size_t length);
 
     public:
         static Color toColor(const Pt::uint8_t* p)
@@ -98,14 +93,13 @@ class Argb32Model
 
         static void sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from)
         {
-            const Pt::uint8_t  alpha    = *((const Pt::uint32_t*) (from)) >> 24;
-            const Pt::uint32_t alphaSrc = alpha;
-            const Pt::uint32_t alphaInv = 255 - alpha;
+            const Pt::uint32_t alphaSrc = from[3];
+            const Pt::uint32_t alphaInv = 255 - alphaSrc;
 
-            to[0] = (Pt::uint8_t) ( (alphaSrc * from[0] + alphaInv * to[0]) >> 8 );
-            to[1] = (Pt::uint8_t) ( (alphaSrc * from[1] + alphaInv * to[1]) >> 8 );
-            to[2] = (Pt::uint8_t) ( (alphaSrc * from[2] + alphaInv * to[2]) >> 8 );
-            to[3] = (Pt::uint8_t) ( (alphaSrc * from[3] + alphaInv * to[3]) >> 8 );
+            to[0] = (Pt::uint8_t) ( (alphaSrc * from[0]  + alphaInv * to[0]) >> 8 );
+            to[1] = (Pt::uint8_t) ( (alphaSrc * from[1]  + alphaInv * to[1]) >> 8 );
+            to[2] = (Pt::uint8_t) ( (alphaSrc * from[2]  + alphaInv * to[2]) >> 8 );
+            to[3] = (Pt::uint8_t) ( (alphaSrc * alphaSrc + alphaInv * to[3]) >> 8 );
         }
 
         static void sourceOver(Pt::uint8_t* to, const Pt::Gfx::Color& from)
@@ -218,7 +212,7 @@ class Argb32Model
                                              ( Pt::uint32_t(c.red  () & 0xFF00) <<  8 ) |
                                              ( Pt::uint32_t(c.green() & 0xFF00)       ) |
                                              ( Pt::uint32_t(c.blue ()         ) >>  8 );
-                    fastCopyPixels(to, src, length);
+                    Argb32::fastCopyPixels(to, src, length);
                     break;
                 }
 
@@ -229,7 +223,7 @@ class Argb32Model
                     const Pt::uint32_t srcG     = (Pt::uint32_t) c.green() * blend / 257;
                     const Pt::uint32_t srcB     = (Pt::uint32_t) c.blue () * blend / 257;
                     const Pt::uint32_t srcA     = blend * blend;
-                    fastBlendPixels(to, srcA, srcR, srcG, srcB, blendInv, length);
+                    Argb32::fastBlendPixels(to, srcA, srcR, srcG, srcB, blendInv, length);
                     break;
                 }
             }
@@ -242,7 +236,7 @@ class Argb32Model
                 default:
                 case CompositionMode::SourceCopy: {
                     const Pt::uint32_t src = *reinterpret_cast<const Pt::uint32_t*>(from);
-                    fastCopyPixels(to, src, length);
+                    Argb32::fastCopyPixels(to, src, length);
                     break;
                 }
 
@@ -253,7 +247,7 @@ class Argb32Model
                     const Pt::uint32_t srcG     = from[1] * blend;
                     const Pt::uint32_t srcB     = from[0] * blend;
                     const Pt::uint32_t srcA     = blend   * blend;
-                    fastBlendPixels(to, srcA, srcR, srcG, srcB, blendInv, length);
+                    Argb32::fastBlendPixels(to, srcA, srcR, srcG, srcB, blendInv, length);
                     break;
                 }
             }
@@ -560,9 +554,6 @@ class Argb32Image : public BasicImage<Argb32Model>
 
 } // namespace
 } // namespace
-
-
-#include <Pt/Gfx/Argb32ImageSIMDOperations.h>
 
 
 #endif

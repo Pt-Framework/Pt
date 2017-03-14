@@ -57,6 +57,7 @@
 
 namespace Pt {
 namespace Gfx {
+namespace Argb32 {
 
 
 #ifdef USE_SSE2
@@ -70,44 +71,41 @@ static const __m128i mask0B0R = _mm_set_epi32(0x00FF00FFU, 0x00FF00FFU, 0x00FF00
 
 
 // Copy a constant color to destination pixels
-inline void Argb32Model::fastCopyPixels(Pt::uint8_t* dst_, Pt::uint32_t srcARGB, size_t length)
+inline void fastCopyPixels(Pt::uint8_t* toBuffer, Pt::uint32_t fromARGB, size_t length)
 {
 #ifdef USE_SSE2
 
     const size_t   len4     = length / 4;
-
-    const __m128i  srcvARGB = _mm_set1_epi32(srcARGB);
-          __m128i* dstvARGB = reinterpret_cast<__m128i*>(dst_);
+    const __m128i  srcvARGB = _mm_set1_epi32(fromARGB);
+          __m128i* dstvARGB = reinterpret_cast<__m128i*>(toBuffer);
 
     for(size_t i = 0; i < len4; ++i) {
         _mm_storeu_si128(dstvARGB, srcvARGB);
         ++dstvARGB;
     }
 
-    length -= (len4 * 4);
-
+    length %= 4;
     Pt::uint32_t* dst = reinterpret_cast<Pt::uint32_t*>(dstvARGB);
 
 #else
 
-    Pt::uint32_t* dst = reinterpret_cast<Pt::uint32_t*>(dst_);
+    Pt::uint32_t* dst = reinterpret_cast<Pt::uint32_t*>(toBuffer);
 
 #endif
 
-    for(size_t i = 0; i < length; ++i) *dst++ = srcARGB;
+    for(size_t i = 0; i < length; ++i) *dst++ = fromARGB;
 }
 
 // Blend a constant color to destination pixels
-inline void Argb32Model::fastBlendPixels(Pt::uint8_t* dst_, Pt::uint32_t srcA, Pt::uint32_t srcR, Pt::uint32_t srcG, Pt::uint32_t srcB, Pt::uint32_t blendInv, size_t length)
+inline void fastBlendPixels(Pt::uint8_t* toBuffer, Pt::uint32_t srcA, Pt::uint32_t srcR, Pt::uint32_t srcG, Pt::uint32_t srcB, Pt::uint32_t blendInv, size_t length)
 {
 #ifdef USE_SSE2
 
     const size_t   len4     = length / 4;
-
     const __m128i  srcvAGAG = _mm_set_epi16(srcA, srcG, srcA, srcG, srcA, srcG, srcA, srcG); // [ AAGG AAGG AAGG AAGG ]
     const __m128i  srcvRBRB = _mm_set_epi16(srcR, srcB, srcR, srcB, srcR, srcB, srcR, srcB); // [ RRBB RRBB RRBB RRBB ]
     const __m128i  srci0A0A = _mm_set_epi32(blendInv, blendInv, blendInv, blendInv);         // [ 0I0I 0I0I 0I0I 0I0I ]
-          __m128i* dstvARGB = reinterpret_cast<__m128i*>(dst_);
+          __m128i* dstvARGB = reinterpret_cast<__m128i*>(toBuffer);
           __m128i  dstv4PIX;
           __m128i  dstvAGAG;
           __m128i  dstvRBRB;
@@ -136,13 +134,12 @@ inline void Argb32Model::fastBlendPixels(Pt::uint8_t* dst_, Pt::uint32_t srcA, P
         ++dstvARGB;
     }
 
-    length -= (len4 * 4);
-
+    length %= 4;
     Pt::uint8_t* dst = reinterpret_cast<Pt::uint8_t*>(dstvARGB);
 
 #else
 
-    Pt::uint8_t* dst = dst_;
+    Pt::uint8_t* dst = toBuffer;
 
 #endif
 
@@ -156,17 +153,13 @@ inline void Argb32Model::fastBlendPixels(Pt::uint8_t* dst_, Pt::uint32_t srcA, P
 }
 
 // Copy source pixels to destination pixels
-inline void Argb32Model::fastCopyPixels(Pt::uint8_t* dst, const Pt::uint8_t* src, size_t length)
+inline void fastCopyPixels(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBuffer, size_t length)
 {
-/*
 #ifdef USE_SSE2
 
-    // ### NOTE: This one is actually a bit slower than a simple memcpy() on an x86_64 ###
-
     const size_t   len4     = length / 4;
-
-    const __m128i* srcvARGB = reinterpret_cast<const __m128i*>(src);
-          __m128i* dstvARGB = reinterpret_cast<      __m128i*>(dst);
+    const __m128i* srcvARGB = reinterpret_cast<const __m128i*>(fromBuffer);
+          __m128i* dstvARGB = reinterpret_cast<      __m128i*>(toBuffer  );
 
     for(size_t i = 0; i < len4; ++i) {
         _mm_prefetch(srcvARGB + 1, _MM_HINT_T0);
@@ -175,27 +168,26 @@ inline void Argb32Model::fastCopyPixels(Pt::uint8_t* dst, const Pt::uint8_t* src
         ++dstvARGB;
     }
 
-    length -= (len4 * 4);
+    const Pt::uint32_t* src = reinterpret_cast<const Pt::uint32_t*>(srcvARGB);
+          Pt::uint32_t* dst = reinterpret_cast<      Pt::uint32_t*>(dstvARGB);
+          Pt::uint32_t* dsm = dst + length % 4;
+    while(dst < dsm) *dst++ = *src++;
 
-    src = reinterpret_cast<const Pt::uint8_t*>(srcvARGB);
-    dst = reinterpret_cast<      Pt::uint8_t*>(dstvARGB);
+#else
+
+    memcpy(toBuffer, fromBuffer, length * 4);
 
 #endif
-*/
-
-    memcpy(dst, src, length * 4);
 }
 
 // Blend source pixels to destination pixels
-inline void Argb32Model::fastBlendPixels(Pt::uint8_t* dst, const Pt::uint8_t* src, size_t length)
+inline void fastBlendPixels(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBuffer, size_t length)
 {
-
 #ifdef USE_SSE2
 
     const size_t   len4     = length / 4;
-
-    const __m128i* srcvARGB = reinterpret_cast<const __m128i*>(src);
-          __m128i* dstvARGB = reinterpret_cast<      __m128i*>(dst);
+    const __m128i* srcvARGB = reinterpret_cast<const __m128i*>(fromBuffer);
+          __m128i* dstvARGB = reinterpret_cast<      __m128i*>(toBuffer  );
           __m128i  srcv4PIX;
           __m128i  srcv0A0A;
           __m128i  srci0A0A;
@@ -248,21 +240,31 @@ inline void Argb32Model::fastBlendPixels(Pt::uint8_t* dst, const Pt::uint8_t* sr
         ++dstvARGB;
     }
 
-    length -= (len4 * 4);
+    length %= 4;
+    const Pt::uint8_t* src = reinterpret_cast<const Pt::uint8_t*>(srcvARGB);
+          Pt::uint8_t* dst = reinterpret_cast<      Pt::uint8_t*>(dstvARGB);
 
-    src = reinterpret_cast<const Pt::uint8_t*>(srcvARGB);
-    dst = reinterpret_cast<      Pt::uint8_t*>(dstvARGB);
+#else
+
+    const Pt::uint8_t* src = fromBuffer;
+          Pt::uint8_t* dst = toBuffer;
 
 #endif
 
     for(size_t i = 0; i < length; ++i) {
-        Argb32Model::sourceOver(dst, src);
+        const Pt::uint32_t alphaSrc = src[3];
+        const Pt::uint32_t alphaInv = 255 - alphaSrc;
+        dst[0] = (Pt::uint8_t) ( (alphaSrc * src[0]   + alphaInv * dst[0]) >> 8 );
+        dst[1] = (Pt::uint8_t) ( (alphaSrc * src[1]   + alphaInv * dst[1]) >> 8 );
+        dst[2] = (Pt::uint8_t) ( (alphaSrc * src[2]   + alphaInv * dst[2]) >> 8 );
+        dst[3] = (Pt::uint8_t) ( (alphaSrc * alphaSrc + alphaInv * dst[3]) >> 8 );
         src += 4;
         dst += 4;
     }
 }
 
 
+} // namespace
 } // namespace
 } // namespace
 

@@ -131,11 +131,11 @@ void Argb32Format::onCopy(Pixel& to, const Pixel& from, size_t length,
     switch(mode) {
         default:
         case CompositionMode::SourceCopy:
-            Argb32Model::fastCopyPixels(to.base(), from.base(), length);
+            Argb32::fastCopyPixels(to.base(), from.base(), length);
             break;
 
         case CompositionMode::SourceOver:
-            Argb32Model::fastBlendPixels(to.base(), from.base(), length);
+            Argb32::fastBlendPixels(to.base(), from.base(), length);
             break;
     }
 }
@@ -147,11 +147,11 @@ void Argb32Format::onCopy(Pixel& to, const ConstPixel& from, size_t length,
     switch(mode) {
         default:
         case CompositionMode::SourceCopy:
-            Argb32Model::fastCopyPixels(to.base(), from.base(), length);
+            Argb32::fastCopyPixels(to.base(), from.base(), length);
             break;
 
         case CompositionMode::SourceOver:
-            Argb32Model::fastBlendPixels(to.base(), from.base(), length);
+            Argb32::fastBlendPixels(to.base(), from.base(), length);
             break;
     }
 }
