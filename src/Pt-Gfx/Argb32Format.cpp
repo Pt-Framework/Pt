@@ -32,8 +32,8 @@
 #include <Pt/Gfx/ImageView.h>
 
 namespace Pt {
-
 namespace Gfx {
+
 
 Argb32Format::Argb32Format()
 : ImageFormat(4)
@@ -132,13 +132,29 @@ void Argb32Format::onCopy(Pixel& to, const Pixel& from, size_t length,
     switch(mode)
     {
         default:
-        case CompositionMode::SourceCopy:
+        case CompositionMode::SourceCopy: {
+#ifdef SSE2
+            const size_t   len4     = length / 4;
+            const __m128i* srcvARGB = reinterpret_cast<const __m128i*>(src);
+                  __m128i* dstvARGB = reinterpret_cast<      __m128i*>(dst);
+            for(size_t i = 0; i < len4; ++i) {
+                _mm_prefetch(srcvARGB + 1, _MM_HINT_T0);
+                _mm_storeu_si128(dstvARGB, _mm_loadu_si128(srcvARGB));
+                ++srcvARGB;
+                ++dstvARGB;
+            }
+            length -= (len4 * 4);
+
+            memcpy(dstvARGB, srcvARGB, length * 4);
+
+#else
             memcpy(dst, src, length * 4);
+#endif
             break;
+        }
 
         case CompositionMode::SourceOver:
-            for(size_t i = 0; i < length; ++i)
-            {
+            for(size_t i = 0; i < length; ++i) {
                 Argb32Model::sourceOver(dst, src);
                 src += 4;
                 dst += 4;
@@ -151,31 +167,97 @@ void Argb32Format::onCopy(Pixel& to, const Pixel& from, size_t length,
 void Argb32Format::onCopy(Pixel& to, const ConstPixel& from, size_t length,
                           CompositionMode mode) const
 {
-    Pt::uint8_t* dst = to.base();
+          Pt::uint8_t* dst = to  .base();
     const Pt::uint8_t* src = from.base();
 
     switch(mode)
     {
         default:
-        case CompositionMode::SourceCopy:
+        case CompositionMode::SourceCopy: {
+#ifdef SSE2
+            const size_t   len4     = length / 4;
+            const __m128i* srcvARGB = reinterpret_cast<const __m128i*>(src);
+                  __m128i* dstvARGB = reinterpret_cast<      __m128i*>(dst);
+            for(size_t i = 0; i < len4; ++i) {
+                _mm_prefetch(srcvARGB + 1, _MM_HINT_T0);
+                _mm_storeu_si128(dstvARGB, _mm_loadu_si128(srcvARGB));
+                ++srcvARGB;
+                ++dstvARGB;
+            }
+            length -= (len4 * 4);
+
+            memcpy(dstvARGB, srcvARGB, length * 4);
+
+#else
             memcpy(dst, src, length * 4);
+#endif
             break;
+        }
 
         case CompositionMode::SourceOver:
-            for(size_t i = 0; i < length; ++i)
-            {
+#ifdef SSE2_CUK
+            const size_t   len4     = length / 4;
+          //  const __m128i* srcvARGB = reinterpret_cast<__m128i*>(src);
+           //       __m128i* dstvARGB = reinterpret_cast<__m128i*>(dst);
+            for(size_t i = 0; i < len4; ++i) {
+                // Load 4 pixels
+              //  srcvARGB = _mm_loadu_si128 (srcvARGB          );
+              //  dstvABGR = _mm_loadu_si128 (dstvARGB          );
+                // Increment the pointers
+            //    ++srcvARGB;
+              //  ++dstvARGB;
+            }
+            length -= (len4 * 4);
+            /*
+            const size_t   len4     = length / 4;
+            const __m128i  srcvAGAG = _mm_set_epi16(srcA, srcG, srcA, srcG, srcA, srcG, srcA, srcG);
+            const __m128i  srcvRBRB = _mm_set_epi16(srcR, srcB, srcR, srcB, srcR, srcB, srcR, srcB);
+            const __m128i  srcv0A0A = _mm_set_epi16(0, blendInv, 0, blendInv, 0, blendInv, 0, blendInv);
+                  __m128i* dstvARGB = reinterpret_cast<__m128i*>(to);
+                  __m128i  dstv4PIX;
+                  __m128i  dstv0A0G;
+                  __m128i  dstv0R0B;
+            for(size_t i = 0; i < len4; ++i) {
+                // Load 4 pixels
+                dstv4PIX = _mm_loadu_si128 (dstvARGB          );
+                // Process A and G
+                dstv0A0G = _mm_and_si128   (dstv4PIX, maskA0G0);
+                dstv0A0G = _mm_srli_epi16  (dstv0A0G, 8       );
+                dstv0A0G = _mm_mullo_epi16 (dstv0A0G, srcv0A0A);
+                dstv0A0G = _mm_add_epi16   (dstv0A0G, srcvAGAG);
+                dstv0A0G = _mm_and_si128   (dstv0A0G, maskA0G0);
+                // Prefecth the next 4 pixels
+                _mm_prefetch(dstvARGB + 1, _MM_HINT_T0);
+                // Process R and B
+                dstv0R0B = _mm_and_si128   (dstv4PIX, mask0B0R);
+                dstv0R0B = _mm_mullo_epi16 (dstv0R0B, srcv0A0A);
+                dstv0R0B = _mm_add_epi16   (dstv0R0B, srcvRBRB);
+                dstv0R0B = _mm_srli_epi16  (dstv0R0B, 8       );
+                dstv0R0B = _mm_and_si128   (dstv0R0B, mask0B0R);
+                // Store 4 pixels
+                dstv4PIX = _mm_or_si128    (dstv0A0G, dstv0R0B);
+                           _mm_storeu_si128(dstvARGB, dstv4PIX);
+                // Increment the destination pointer
+                ++dstvARGB;
+            }
+            length -= (len4 * 4);
+            Pt::uint8_t* dst = reinterpret_cast<Pt::uint8_t*>(dstvARGB);
+            */
+#else
+            for(size_t i = 0; i < length; ++i) {
                 Argb32Model::sourceOver(dst, src);
                 src += 4;
                 dst += 4;
             }
+#endif
             break;
     }
 }
 
 
 void Argb32Format::onCopy(ImageView& to, const Point& toPoint,
-                            const ImageView& from, const Rect& fromRect,
-                            CompositionMode mode) const
+                          const ImageView& from, const Rect& fromRect,
+                          CompositionMode mode) const
 {
     Pt::ssize_t pixelSize = 4;
 
@@ -230,6 +312,6 @@ void Argb32Format::onCopy(ImageView& to, const Point& toPoint,
     }
 }
 
-} // namespace
 
+} // namespace
 } // namespace

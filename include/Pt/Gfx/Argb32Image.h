@@ -305,7 +305,7 @@ class Argb32Model
 #ifdef SSE2
                     const size_t   len4     = length / 4;
                     const __m128i  srcvARGB = _mm_set1_epi32(src);
-                          __m128i* dstvARGB =  reinterpret_cast<__m128i*>(to);
+                          __m128i* dstvARGB = reinterpret_cast<__m128i*>(to);
                     for(size_t i = 0; i < len4; ++i) {
                         _mm_storeu_si128(dstvARGB, srcvARGB);
                         ++dstvARGB;
@@ -332,14 +332,14 @@ class Argb32Model
                     const __m128i  srcvRBRB = _mm_set_epi16(srcR, srcB, srcR, srcB, srcR, srcB, srcR, srcB);
                     const __m128i  srcv0A0A = _mm_set_epi16(0, blendInv, 0, blendInv, 0, blendInv, 0, blendInv);
                           __m128i* dstvARGB = reinterpret_cast<__m128i*>(to);
-                          __m128i  dstvABGR;
+                          __m128i  dstv4PIX;
                           __m128i  dstv0A0G;
                           __m128i  dstv0R0B;
                     for(size_t i = 0; i < len4; ++i) {
                         // Load 4 pixels
-                        dstvABGR = _mm_loadu_si128 (dstvARGB          );
+                        dstv4PIX = _mm_loadu_si128 (dstvARGB          );
                         // Process A and G
-                        dstv0A0G = _mm_and_si128   (dstvABGR, maskA0G0);
+                        dstv0A0G = _mm_and_si128   (dstv4PIX, maskA0G0);
                         dstv0A0G = _mm_srli_epi16  (dstv0A0G, 8       );
                         dstv0A0G = _mm_mullo_epi16 (dstv0A0G, srcv0A0A);
                         dstv0A0G = _mm_add_epi16   (dstv0A0G, srcvAGAG);
@@ -347,14 +347,14 @@ class Argb32Model
                         // Prefecth the next 4 pixels
                         _mm_prefetch(dstvARGB + 1, _MM_HINT_T0);
                         // Process R and B
-                        dstv0R0B = _mm_and_si128   (dstvABGR, mask0B0R);
+                        dstv0R0B = _mm_and_si128   (dstv4PIX, mask0B0R);
                         dstv0R0B = _mm_mullo_epi16 (dstv0R0B, srcv0A0A);
                         dstv0R0B = _mm_add_epi16   (dstv0R0B, srcvRBRB);
                         dstv0R0B = _mm_srli_epi16  (dstv0R0B, 8       );
                         dstv0R0B = _mm_and_si128   (dstv0R0B, mask0B0R);
                         // Store 4 pixels
-                        dstvABGR = _mm_or_si128    (dstv0A0G, dstv0R0B);
-                                   _mm_storeu_si128(dstvARGB, dstvABGR);
+                        dstv4PIX = _mm_or_si128    (dstv0A0G, dstv0R0B);
+                                   _mm_storeu_si128(dstvARGB, dstv4PIX);
                         // Increment the destination pointer
                         ++dstvARGB;
                     }
@@ -381,8 +381,26 @@ class Argb32Model
             switch(mode) {
                 default:
                 case CompositionMode::SourceCopy: {
+#ifdef SSE2_CUK
+                    const size_t   len4     = length / 4;
+                    const __m128i* srcvARGB = reinterpret_cast<const __m128i*>(from);
+                          __m128i* dstvARGB = reinterpret_cast<      __m128i*>(to  );
+                    for(size_t i = 0; i < len4; ++i) {
+                                                _mm_prefetch(srcvARGB + 1, _MM_HINT_T0);
+
+                        const __m128i val = _mm_loadu_si128(srcvARGB++);
+
+                      //  _mm_storeu_si128(dstvARGB++, val);
+                        //++srcvARGB;
+                        //++dstvARGB;
+                    }
+                    length -= (len4 * 4);
+                    Pt::uint32_t  src = *reinterpret_cast<const Pt::uint32_t*>(srcvARGB);
+                    Pt::uint32_t* dst =  reinterpret_cast<      Pt::uint32_t*>(dstvARGB);
+#else
                     Pt::uint32_t  src = *reinterpret_cast<const Pt::uint32_t*>(from);
-                    Pt::uint32_t* dst =  reinterpret_cast<Pt::uint32_t*>(to);
+                    Pt::uint32_t* dst =  reinterpret_cast<      Pt::uint32_t*>(to  );
+#endif
                     for(size_t i = 0; i < length; ++i) *dst++ = src;
                     break;
                 }
