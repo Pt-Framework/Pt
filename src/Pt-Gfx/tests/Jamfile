@@ -31,7 +31,7 @@ if $(WITH_RASTERIZER2)
         {
             SubDirCcFlags [ FMFPU neon ] ;
         }
-        SubDirC++Flags [ -mfpu=neon FIncludes "/usr/include/cairo" ] ;
+        SubDirC++Flags [ FMFPU neon FIncludes "/usr/include/cairo" ] ;
     }
     else
     {
@@ -41,7 +41,6 @@ if $(WITH_RASTERIZER2)
         }
         SubDirC++Flags [ FIncludes "/usr/include/cairo" ] ;
     }
-            SubDirCcFlags [ FMFPU neon ] ;
 
     Main ImagePainterTest2 : ImagePainterTest2.cpp SDL_SavePNG/savepng.c ;
     LinkSharedLibraries ImagePainterTest2 : Pt Pt-Gfx Pt-System ;
