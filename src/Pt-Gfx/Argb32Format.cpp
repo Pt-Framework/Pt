@@ -126,14 +126,14 @@ Color Argb32Format::onGetColor(const ConstPixel& pixel) const
 void Argb32Format::onCopy(Pixel& to, const Pixel& from, size_t length,
                           CompositionMode mode) const
 {
-    Pt::uint8_t* dst = to.base();;
+          Pt::uint8_t* dst = to  .base();
     const Pt::uint8_t* src = from.base();
 
     switch(mode)
     {
         default:
         case CompositionMode::SourceCopy: {
-#ifdef SSE2
+#ifdef USE_SSE2
             const size_t   len4     = length / 4;
             const __m128i* srcvARGB = reinterpret_cast<const __m128i*>(src);
                   __m128i* dstvARGB = reinterpret_cast<      __m128i*>(dst);
@@ -144,17 +144,15 @@ void Argb32Format::onCopy(Pixel& to, const Pixel& from, size_t length,
                 ++dstvARGB;
             }
             length -= (len4 * 4);
-
-            memcpy(dstvARGB, srcvARGB, length * 4);
-
-#else
-            memcpy(dst, src, length * 4);
+            src = reinterpret_cast<const Pt::uint8_t*>(srcvARGB);
+            dst = reinterpret_cast<      Pt::uint8_t*>(dstvARGB);
 #endif
+            memcpy(dst, src, length * 4);
             break;
         }
 
         case CompositionMode::SourceOver: {
-#ifdef SSE2
+#ifdef USE_SSE2
             const size_t   len4     = length / 4;
             const __m128i* srcvARGB = reinterpret_cast<const __m128i*>(src);
                   __m128i* dstvARGB = reinterpret_cast<      __m128i*>(dst);
@@ -233,7 +231,7 @@ void Argb32Format::onCopy(Pixel& to, const ConstPixel& from, size_t length,
     {
         default:
         case CompositionMode::SourceCopy: {
-#ifdef SSE2
+#ifdef USE_SSE2
             const size_t   len4     = length / 4;
             const __m128i* srcvARGB = reinterpret_cast<const __m128i*>(src);
                   __m128i* dstvARGB = reinterpret_cast<      __m128i*>(dst);
@@ -244,15 +242,15 @@ void Argb32Format::onCopy(Pixel& to, const ConstPixel& from, size_t length,
                 ++dstvARGB;
             }
             length -= (len4 * 4);
-            memcpy(dstvARGB, srcvARGB, length * 4);
-#else
-            memcpy(dst, src, length * 4);
+            src = reinterpret_cast<const Pt::uint8_t*>(srcvARGB);
+            dst = reinterpret_cast<      Pt::uint8_t*>(dstvARGB);
 #endif
+            memcpy(dst, src, length * 4);
             break;
         }
 
         case CompositionMode::SourceOver: {
-#ifdef SSE2
+#ifdef USE_SSE2
             const size_t   len4     = length / 4;
             const __m128i* srcvARGB = reinterpret_cast<const __m128i*>(src);
                   __m128i* dstvARGB = reinterpret_cast<      __m128i*>(dst);

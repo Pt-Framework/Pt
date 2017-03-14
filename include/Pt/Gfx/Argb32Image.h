@@ -36,27 +36,26 @@
 #include <Pt/Types.h>
 
 
-// ### !!! EXPERIMENTAL SIMD SUPPORT !!! ###
 #ifdef RASTERIZER2
 
 #if defined(__arm__) || defined(__thumb__) || defined(_M_ARM) || defined(_M_ARMT) || defined(__TARGET_ARCH_ARM) || defined(__TARGET_ARCH_THUMB) || defined(_ARM) || defined(__arm)
 
     #include <arm_neon.h>
-    #define NEON __attribute__((target("fpu=neon")))
+    #define USE_NEON __attribute__((target("fpu=neon")))
 
 #elif defined(i386) || defined(__i386) || defined(__i386__) || defined(_X86_) || defined(__x86_64) || defined(__x86_64__) || defined(__amd64) || defined(__amd64__)
 
     #include <x86intrin.h>
-    #define SSE2
+    #define USE_SSE2
 
 #elif defined(_M_IX86) || defined(_M_AMD64) || defined(_M_X64)
 
     #include <intrin.h>
-    #define SSE2
+    #define USE_SSE2
 
 #endif
 
-#ifdef SSE2
+#ifdef USE_SSE2
 static const __m128i maskA000 = _mm_set_epi32(0xFF000000U, 0xFF000000U, 0xFF000000U, 0xFF000000U);
 static const __m128i maskA0G0 = _mm_set_epi32(0xFF00FF00U, 0xFF00FF00U, 0xFF00FF00U, 0xFF00FF00U);
 static const __m128i mask0B0R = _mm_set_epi32(0x00FF00FFU, 0x00FF00FFU, 0x00FF00FFU, 0x00FF00FFU);
@@ -303,7 +302,7 @@ class Argb32Model
                                        ( Pt::uint32_t(c.red  () & 0xFF00) <<  8 ) |
                                        ( Pt::uint32_t(c.green() & 0xFF00)       ) |
                                        ( Pt::uint32_t(c.blue ()         ) >>  8 );
-#ifdef SSE2
+#ifdef USE_SSE2
                     const size_t   len4     = length / 4;
                     const __m128i  srcvARGB = _mm_set1_epi32(src);
                           __m128i* dstvARGB = reinterpret_cast<__m128i*>(to);
@@ -327,7 +326,7 @@ class Argb32Model
                     const Pt::uint32_t  srcG     = DIV_BY_257(c.green()) * blend;
                     const Pt::uint32_t  srcB     = DIV_BY_257(c.blue ()) * blend;
                     const Pt::uint32_t  srcA     = blend * blend;
-#ifdef SSE2
+#ifdef USE_SSE2
                     const size_t   len4     = length / 4;
                     const __m128i  srcvAGAG = _mm_set_epi16(srcA, srcG, srcA, srcG, srcA, srcG, srcA, srcG); // [ AAGG AAGG AAGG AAGG ]
                     const __m128i  srcvRBRB = _mm_set_epi16(srcR, srcB, srcR, srcB, srcR, srcB, srcR, srcB); // [ RRBB RRBB RRBB RRBB ]
@@ -382,7 +381,7 @@ class Argb32Model
             switch(mode) {
                 default:
                 case CompositionMode::SourceCopy: {
-#ifdef SSE2_CUK
+#ifdef USE_SSE2_CUK
                     const size_t   len4     = length / 4;
                     const __m128i* srcvARGB = reinterpret_cast<const __m128i*>(from);
                           __m128i* dstvARGB = reinterpret_cast<      __m128i*>(to  );
