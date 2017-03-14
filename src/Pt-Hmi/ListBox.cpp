@@ -78,6 +78,12 @@ void ListBoxItem::setIconSize(const Gfx::SizeF& size)
 }
 
 
+void ListBoxItem::setIconSize(double width, double height)
+{
+    setIconSize( Gfx::SizeF(width, height) );
+}
+
+
 Pt::Signal<ListBoxItem&>& ListBoxItem::selected()
 {
     return _selected;

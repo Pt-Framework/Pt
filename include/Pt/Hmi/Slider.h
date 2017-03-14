@@ -48,13 +48,15 @@ class PT_HMI_API Slider : public Control
 
         virtual ~Slider();
 
+        int position() const;
+
 				void setPosition(int pos);
 
-        float position() const;
+				int minimum() const;
+
+        int maximum() const;
 
         void setRange(int min, int max);
-			
-				int interval() const;
 
 				Signal<int>& positionChanged();
 

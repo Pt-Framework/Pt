@@ -873,46 +873,55 @@ PlatinumSliderRenderer::~PlatinumSliderRenderer()
 }
 
 
-void PlatinumSliderRenderer::onPrepare( const Slider&        s,
-                                        const StyleOptions&  options,
-                                        Gfx::Brush&          background,
-                                        Gfx::Brush&          foreground,
-                                        Gfx::Pen&            contour,
-                                        Gfx::Pen&            textPen,
+void PlatinumSliderRenderer::onPrepare( const Slider&       s,
+                                        const StyleOptions& options,
+                                        Gfx::Brush&         background,
+                                        Gfx::Brush&         foreground,
+                                        Gfx::Pen&           contour,
+                                        Gfx::Pen&           textPen,
                                         Gfx::Font&          font
                                       ) const
 {
 }
 
+
 void PlatinumSliderRenderer::onRender( const Slider&        s,
                                        const StyleOptions&  options,
-                                       Painter&              painter,
+                                       Painter&             painter,
                                        const Gfx::RectF&    rect,
                                        const Gfx::Brush&    background,
                                        const Gfx::Brush&    foreground,
                                        const Gfx::Pen&      contour,
                                        const Gfx::Pen&      textPen,
-                                       const Gfx::Font&      font
+                                       const Gfx::Font&     font
                                      ) const
 {
-    
-    const double sliderHeight = 6.0;
-    const double boxY = s.size().height()/2 - sliderHeight/2;
+    double handleWidth = 7.0;
+    double handleHeight = 15.0;
+    double sliderHeight = 5.0;
 
-    Gfx::RectF boxRect( Gfx::PointF(0.0, boxY),
-                        Gfx::SizeF(s.size().width(), sliderHeight) );
+    double sliderX = handleWidth/2;
+    double sliderY = s.size().height() / 2 - sliderHeight / 2;
+    double sliderWidth = s.size().width() - handleWidth;
+
+    Gfx::RectF boxRect( Gfx::PointF(sliderX, sliderY),
+                        Gfx::SizeF(sliderWidth, sliderHeight) );
 
     painter.setBrush(background);
     painter.fillRect(boxRect);
 
-    const double knobeWidth = sliderHeight * s.position();
+    int range = s.maximum() - s.minimum();
+    int offset = s.position() - s.minimum();
+    double handleOffset = sliderWidth * offset / range;
 
-    //Gfx::RectF knobeRect( Gfx::PointF(s.position(), boxY),
-    //                      Gfx::SizeF(sliderHeight, sliderHeight) );
+    double handleX = handleOffset;
+    double handleY = s.size().height() / 2 - handleHeight / 2;
 
-   
+    Gfx::RectF handleRect( Gfx::PointF(handleX, handleY),
+                           Gfx::SizeF(handleWidth, handleHeight) );
+
     painter.setBrush(foreground);
-    painter.fillRect( s.knobeRect() );
+    painter.fillRect(handleRect);
 
     //painter.setBrush(foreground);
     //painter.fillRect(Gfx::PointF(progressWidth - barHeight/2, 

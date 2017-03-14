@@ -42,7 +42,7 @@ Slider::Slider()
 , _hasRenderer(false)
 , _dragingMode(false)
 {
-	_knobeRect.set(0, 6, 11, 17);
+    _knobeRect.set(0, 6, 11, 17);
 }
 
 
@@ -51,68 +51,67 @@ Slider::~Slider()
 }
 
 
-void Slider::setPosition(int pos)
+int Slider::position() const
 {
-	if( pos > _max)
-	{
-		_position = _max;
-	}
-	if(pos < 0 )
-	{
-		_position = 0;
-	}
-
-	_position = pos;
-
-	invalidate();
+    return _position;
 }
 
 
-
-float Slider::position() const
+void Slider::setPosition(int pos)
 {
-	if( _position <= _min )
-		return 0.f;
+    if(pos > _max)
+    {
+        pos = _max;
+    }
+    
+    if(pos < _min)
+    {
+        pos = _min;
+    }
 
-	if(_position > _max)
-		return 1.f;
+    _position = pos;
 
-	return static_cast<float>(_position );
-	//return static_cast<float>(_position - _min)/(_max - _min);
+    invalidate();
+}
+
+
+int Slider::minimum() const
+{
+    return _min;
+}
+
+
+int Slider::maximum() const
+{
+    return _max;
 }
 
 
 void Slider::setRange(int min, int max)
 {
-	_min = min;
-	_max = max;
+    _min = min;
+    _max = max;
 
-	invalidate();
-}
-
-
-int Slider::interval() const
-{
-	return _max - _min;
+    invalidate();
 }
 
 
 const Gfx::RectF& Slider::knobeRect() const
 { 
-	return _knobeRect;
+    return _knobeRect;
 }
 
 
 Signal<int>& Slider::positionChanged()
 {
-	return _positionChanged;
+    return _positionChanged;
 }
 
 
 const Gfx::Brush& Slider::background() const
 {
     return _background ? *_background
-											 : Application::instance().styleOptions().foreground();
+                       : Application::instance().styleOptions().foreground();
 }
 
 
@@ -125,7 +124,7 @@ void Slider::setBackground(const Gfx::Brush& b)
 const Gfx::Color& Slider::foreground() const
 {
     return _foreground ? *_foreground
-											 : Application::instance().styleOptions().accentColor();
+                       : Application::instance().styleOptions().accentColor();
 }
 
 
@@ -139,7 +138,7 @@ void Slider::setForeground(const Gfx::Color& b)
 const Gfx::Pen& Slider::contour() const
 {
     return _contour ? *_contour 
-										: Application::instance().styleOptions().contour();
+                    : Application::instance().styleOptions().contour();
 }
 
 
@@ -229,9 +228,9 @@ void Slider::onInvalidate()
     const StyleOptions& options = Application::instance().styleOptions();
     const Style& style = Application::instance().style();
 
-		_backgroundBrush = background();
-		_foregroundBrush = foreground();
-		_contourPen = contour();
+    _backgroundBrush = background();
+    _foregroundBrush = foreground();
+    _contourPen = contour();
     _textPen = textColor();
     _font = Gfx::Font(font(), fontSize(), fontStyle());
 
@@ -242,7 +241,7 @@ void Slider::onInvalidate()
         return;
 
     _renderer->prepare(*this, options, _backgroundBrush, _foregroundBrush,
-												_contourPen, _textPen, _font);
+                       _contourPen, _textPen, _font);
 }
 
 
@@ -256,32 +255,32 @@ void Slider::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     Painter painter(surface);
     painter.setClip(rect);
 
-		_renderer->render(*this, options, painter, rect, 
-											_backgroundBrush, _foregroundBrush, _contourPen, _textPen, _font);
+    _renderer->render(*this, options, painter, rect, 
+                      _backgroundBrush, _foregroundBrush, _contourPen, _textPen, _font);
 }
 
 
 bool Slider::onMouseEvent(const MouseEvent& ev)
 {
-	Base::onMouseEvent(ev);
+    Base::onMouseEvent(ev);
 
-	if( ev.isPress() && _knobeRect.contains( ev.position() ))
-	{
-		_dragingMode = true;
-		_beginDrag = ev.position();
-	}
+    if( ev.isPress() && _knobeRect.contains( ev.position() ))
+    {
+        _dragingMode = true;
+        _beginDrag = ev.position();
+    }
 
-	if( ev.isReleased() )
-		_dragingMode = false;
+    if( ev.isReleased() )
+        _dragingMode = false;
 
-	if( _dragingMode )
-	{
-		_position  +=  ev.position().x() - _beginDrag.x();
+    if( _dragingMode )
+    {
+        _position  +=  ev.position().x() - _beginDrag.x();
 
-		_knobeRect.set(_position, _position+6 , _knobeRect.top(), _knobeRect.bottom() );
+        _knobeRect.set(_position, _position+6 , _knobeRect.top(), _knobeRect.bottom() );
 
-		invalidate();
-	}
+        invalidate();
+    }
 
   return true;
 }
@@ -289,7 +288,7 @@ bool Slider::onMouseEvent(const MouseEvent& ev)
 
 void Slider::onTouchEvent(const TouchEvent& ev)
 {
-	Base::onTouchEvent(ev);
+    Base::onTouchEvent(ev);
 }
 
 } // namespace

@@ -59,6 +59,8 @@ class PT_HMI_API ListBoxItem : public Button
 
         void setIconSize(const Gfx::SizeF& size);
 
+        void setIconSize(double width, double height);
+
         Pt::Signal<ListBoxItem&>& selected();
 
     public:
