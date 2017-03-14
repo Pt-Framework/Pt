@@ -7,6 +7,9 @@
 // On a system where its libpng package is also not compatible (e.g. Raspbian Jessie 2017/01/11):
 //     ./jam.sh configure --with-rasterizer2 --with-hmi -sGUI=linux-fb -sOPTIM=-O2 --with-freetype --with-libpng
 //
+// To enable use native CPU architecture:
+//     ./jam.sh configure --with-rasterizer2 --with-hmi -sGUI=linux-fb -sOPTIM=-O2 --with-freetype --with-libpng -sCCFLAGS=-march=native -sC++FLAGS=-march=native
+//
 //
 // perf record -d -g -T -e cycles,instructions,cache-references,cache-misses,bus-cycles ./ImagePainterTest2
 // perf report
@@ -59,7 +62,7 @@ using namespace Pt::Gfx;
 
 // Detailed-test enable settings for Pt-Gfx
 #define TEST_SOURCECOPY                         1
-#define TEST_SOURCEOVER                         0
+#define TEST_SOURCEOVER                         1
 
 #define TEST_DRAW_SOLID_LINE_AND_TEXT           0 // (including bezier)
 #define TEST_DRAW_PATTERNED_LINE                0 // (including bezier)
@@ -67,11 +70,11 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_PATTERNED_THICK_LINE          0 // (including bezier)
 
 #define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES  0
-#define TEST_DRAW_ROUND_RECTANGLES              1 // (including filled)
+#define TEST_DRAW_ROUND_RECTANGLES              0 // (including filled)
 #define TEST_DRAW_ELLIPSES_ARCS                 0
 #define TEST_DRAW_THICK_ELLIPSES_ARCS           0
 
-#define TEST_DRAW_SOLID_FILLED_POLYGONS         0
+#define TEST_DRAW_SOLID_FILLED_POLYGONS         1
 #define TEST_DRAW_GRADIENT_FILLED_POLYGONS      0
 #define TEST_DRAW_TEXTURE_FILLED_POLYGONS       0
 
@@ -95,7 +98,7 @@ using namespace Pt::Gfx;
 
 #define BENCHMARK_SOLID_LINE                0
 #define BENCHMARK_PATTERNED_LINE            0
-#define BENCHMARK_SOLID_THICK_LINE          1
+#define BENCHMARK_SOLID_THICK_LINE          0
 #define BENCHMARK_PATTERNED_THICK_LINE      0
 
 #define BENCHMARK_ELLIPSE                   0
@@ -103,7 +106,7 @@ using namespace Pt::Gfx;
 
 #define BENCHMARK_SOLID_BEZIER              0
 #define BENCHMARK_PATTERNED_BEZIER          0
-#define BENCHMARK_SOLID_THICK_BEZIER        1
+#define BENCHMARK_SOLID_THICK_BEZIER        0
 #define BENCHMARK_PATTERNED_THICK_BEZIER    0
 
 #define BENCHMARK_RECTANGLE                 0
@@ -111,7 +114,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_GRADIENT_FILLED_RECTANGLE 0
 #define BENCHMARK_TEXTURE_FILLED_RECTANGLE  0
 
-#define BENCHMARK_SOLID_FILLED_POLYGON      0
+#define BENCHMARK_SOLID_FILLED_POLYGON      1
 #define BENCHMARK_GRADIENT_FILLED_POLYGON   0
 #define BENCHMARK_TEXTURE_FILLED_POLYGON    0
 

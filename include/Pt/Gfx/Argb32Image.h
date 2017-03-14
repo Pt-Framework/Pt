@@ -35,6 +35,36 @@
 #include <Pt/Gfx/BasicImage.h>
 #include <Pt/Types.h>
 
+// ### !!! EXPERIMENTAL SIMD SUPPORT !!! ###
+#if 1
+
+#if defined(__arm__) || defined(__thumb__) || defined(_M_ARM) || defined(_M_ARMT) || defined(__TARGET_ARCH_ARM) || defined(__TARGET_ARCH_THUMB) || defined(_ARM) || defined(__arm)
+
+    #include <arm_neon.h>
+    #define SIMD __attribute__((target("fpu=neon")))
+
+#elif defined(i386) || defined(__i386) || defined(__i386__) || defined(_X86_) || defined(__x86_64) || defined(__x86_64__) || defined(__amd64) || defined(__amd64__)
+
+    #include <x86intrin.h>
+    #define SSE2
+
+#elif defined(_M_IX86) || defined(_M_AMD64) || defined(_M_X64)
+
+    #include <intrin.h>
+    #define SSE2
+
+#endif
+
+#ifdef SSE2
+static const __m128i maskA0G0 = _mm_set_epi32(0xFF00FF00U, 0xFF00FF00U, 0xFF00FF00U, 0xFF00FF00U);
+static const __m128i mask0B0R = _mm_set_epi32(0x00FF00FFU, 0x00FF00FFU, 0x00FF00FFU, 0x00FF00FFU);
+#endif
+
+#endif
+
+
+
+
 namespace Pt {
 namespace Gfx {
 
@@ -271,9 +301,21 @@ class Argb32Model
                 case CompositionMode::SourceCopy: {
                     Pt::uint32_t src = ( Pt::uint32_t(c.alpha() & 0xFF00) << 16 ) |
                                        ( Pt::uint32_t(c.red  () & 0xFF00) <<  8 ) |
-                                       ( Pt::uint32_t(c.green() & 0xFF00)       )  |
+                                       ( Pt::uint32_t(c.green() & 0xFF00)       ) |
                                        ( Pt::uint32_t(c.blue ()         ) >>  8 );
-                    Pt::uint32_t* dst =  reinterpret_cast<Pt::uint32_t*>(to);
+#ifdef SSE2
+                    const size_t   len4     = length / 4;
+                    const __m128i  srcvARGB = _mm_set1_epi32(src);
+                          __m128i* dstvARGB =  reinterpret_cast<__m128i*>(to);
+                    for(size_t i = 0; i < len4; ++i) {
+                        _mm_storeu_si128(dstvARGB, srcvARGB);
+                        ++dstvARGB;
+                    }
+                    length -= (len4 * 4);
+                    Pt::uint32_t* dst = reinterpret_cast<Pt::uint32_t*>(dstvARGB);
+#else
+                    Pt::uint32_t* dst = reinterpret_cast<Pt::uint32_t*>(to);
+#endif
                     for(size_t i = 0; i < length; ++i) *dst++ = src;
                     break;
                 }
@@ -285,7 +327,35 @@ class Argb32Model
                     const Pt::uint32_t  srcG     = DIV_BY_257(c.green()) * blend;
                     const Pt::uint32_t  srcB     = DIV_BY_257(c.blue ()) * blend;
                     const Pt::uint32_t  srcA     = blend * blend;
-                          Pt::uint8_t*  dst      = to;
+#ifdef SSE2
+                    const size_t   len4     = length / 4;
+                    const __m128i  srcvAGAG = _mm_set_epi16(srcA, srcG, srcA, srcG, srcA, srcG, srcA, srcG);
+                    const __m128i  srcvRBRB = _mm_set_epi16(srcR, srcB, srcR, srcB, srcR, srcB, srcR, srcB);
+                    const __m128i  srcv0A0A = _mm_set_epi16(0, blendInv, 0, blendInv, 0, blendInv, 0, blendInv);
+                          __m128i* dstvARGB = reinterpret_cast<__m128i*>(to);
+                    for(size_t i = 0; i < len4; ++i) {
+                        __m128i dstABGR = _mm_loadu_si128(dstvARGB         );
+
+                        __m128i dst0A0G = _mm_and_si128  (dstABGR, maskA0G0);
+                                dst0A0G = _mm_srli_epi16 (dst0A0G, 8       );
+                                dst0A0G = _mm_mullo_epi16(dst0A0G, srcv0A0A);
+                                dst0A0G = _mm_add_epi16  (dst0A0G, srcvAGAG);
+                                dst0A0G = _mm_and_si128  (dst0A0G, maskA0G0);
+
+                        __m128i dst0B0R = _mm_and_si128  (dstABGR, mask0B0R);
+                                dst0B0R = _mm_mullo_epi16(dst0B0R, srcv0A0A);
+                                dst0B0R = _mm_add_epi16  (dst0B0R, srcvRBRB);
+                                dst0B0R = _mm_srli_epi16 (dst0B0R, 8       );
+                                dst0B0R = _mm_and_si128  (dst0B0R, mask0B0R);
+
+                        _mm_storeu_si128(dstvARGB, _mm_or_si128(dst0A0G, dst0B0R));
+                        ++dstvARGB;
+                    }
+                    length -= (len4 * 4);
+                    Pt::uint8_t* dst = reinterpret_cast<Pt::uint8_t*>(dstvARGB);
+#else
+                    Pt::uint8_t* dst = to;
+#endif
                     for(size_t i = 0; i < length; ++i) {
                         dst[0] = (srcB + blendInv * dst[0]) >> 8;
                         dst[1] = (srcG + blendInv * dst[1]) >> 8;
