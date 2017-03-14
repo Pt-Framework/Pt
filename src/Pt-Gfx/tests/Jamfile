@@ -25,11 +25,11 @@ if $(WITH_RASTERIZER2)
         if $(WITH_BUILTIN_LIBPNG)
         {
             SubDirCcFlags [ FMFPU neon ] ;
-            SubDirCcFlags [ FDefines WITH_BUILTIN_LIBPNG ] ;
+            SubDirCcFlags [ FMFPU neon FDefines WITH_BUILTIN_LIBPNG ] ;
         }
         else
         {
-            SubDirCcFlags [ -mfpu=neon ] ;
+            SubDirCcFlags [ FMFPU neon ] ;
         }
         SubDirC++Flags [ -mfpu=neon FIncludes "/usr/include/cairo" ] ;
     }
