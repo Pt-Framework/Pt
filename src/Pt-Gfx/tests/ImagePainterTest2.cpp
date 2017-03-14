@@ -61,7 +61,7 @@ using namespace Pt::Gfx;
 #define DO_BENCHMARKING 1
 
 // Detailed-test enable settings for Pt-Gfx
-#define TEST_SOURCECOPY                         1
+#define TEST_SOURCECOPY                         0
 #define TEST_SOURCEOVER                         1
 
 #define TEST_DRAW_SOLID_LINE_AND_TEXT           0 // (including bezier)
@@ -74,7 +74,7 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_ELLIPSES_ARCS                 0
 #define TEST_DRAW_THICK_ELLIPSES_ARCS           0
 
-#define TEST_DRAW_SOLID_FILLED_POLYGONS         1
+#define TEST_DRAW_SOLID_FILLED_POLYGONS         0
 #define TEST_DRAW_GRADIENT_FILLED_POLYGONS      1
 #define TEST_DRAW_TEXTURE_FILLED_POLYGONS       0
 
@@ -116,7 +116,7 @@ using namespace Pt::Gfx;
 
 #define BENCHMARK_SOLID_FILLED_POLYGON      1
 #define BENCHMARK_GRADIENT_FILLED_POLYGON   1
-#define BENCHMARK_TEXTURE_FILLED_POLYGON    0
+#define BENCHMARK_TEXTURE_FILLED_POLYGON    1
 
 #define BENCHMARK_SOLID_FILLED_ELLIPSE      0
 #define BENCHMARK_GRADIENT_FILLED_ELLIPSE   0

@@ -381,25 +381,19 @@ class Argb32Model
             switch(mode) {
                 default:
                 case CompositionMode::SourceCopy: {
-#ifdef USE_SSE2_CUK
+                    Pt::uint32_t   src   = *reinterpret_cast<const Pt::uint32_t*>(from);
+#ifdef USE_SSE2
                     const size_t   len4     = length / 4;
-                    const __m128i* srcvARGB = reinterpret_cast<const __m128i*>(from);
-                          __m128i* dstvARGB = reinterpret_cast<      __m128i*>(to  );
+                    const __m128i  srcvARGB = _mm_set1_epi32(src);
+                          __m128i* dstvARGB = reinterpret_cast<__m128i*>(to);
                     for(size_t i = 0; i < len4; ++i) {
-                                                _mm_prefetch(srcvARGB + 1, _MM_HINT_T0);
-
-                        const __m128i val = _mm_loadu_si128(srcvARGB++);
-
-                      //  _mm_storeu_si128(dstvARGB++, val);
-                        //++srcvARGB;
-                        //++dstvARGB;
+                        _mm_storeu_si128(dstvARGB, srcvARGB);
+                        ++dstvARGB;
                     }
                     length -= (len4 * 4);
-                    Pt::uint32_t  src = *reinterpret_cast<const Pt::uint32_t*>(srcvARGB);
-                    Pt::uint32_t* dst =  reinterpret_cast<      Pt::uint32_t*>(dstvARGB);
+                    Pt::uint32_t* dst =  reinterpret_cast<Pt::uint32_t*>(dstvARGB);
 #else
-                    Pt::uint32_t  src = *reinterpret_cast<const Pt::uint32_t*>(from);
-                    Pt::uint32_t* dst =  reinterpret_cast<      Pt::uint32_t*>(to  );
+                    Pt::uint32_t* dst =  reinterpret_cast<Pt::uint32_t*>(to  );
 #endif
                     for(size_t i = 0; i < length; ++i) *dst++ = src;
                     break;
