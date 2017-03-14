@@ -21,7 +21,8 @@ if $(WITH_RASTERIZER2)
     {
         if $(WITH_BUILTIN_LIBPNG)
         {
-            SubDirCcFlags [ -mfpu=neon FDefines WITH_BUILTIN_LIBPNG ] ;
+            SubDirCcFlags [ -mfpu=neon ] ;
+            SubDirCcFlags [ FDefines WITH_BUILTIN_LIBPNG ] ;
         }
         else
         {
