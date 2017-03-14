@@ -158,7 +158,10 @@ inline void Argb32Model::fastBlendPixels(Pt::uint8_t* dst_, Pt::uint32_t srcA, P
 // Copy source pixels to destination pixels
 inline void Argb32Model::fastCopyPixels(Pt::uint8_t* dst, const Pt::uint8_t* src, size_t length)
 {
+/*
 #ifdef USE_SSE2
+
+    // ### NOTE: This one is actually a bit slower than a simple memcpy() on an x86_64 ###
 
     const size_t   len4     = length / 4;
 
@@ -178,6 +181,7 @@ inline void Argb32Model::fastCopyPixels(Pt::uint8_t* dst, const Pt::uint8_t* src
     dst = reinterpret_cast<      Pt::uint8_t*>(dstvARGB);
 
 #endif
+*/
 
     memcpy(dst, src, length * 4);
 }
