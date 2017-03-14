@@ -197,15 +197,60 @@ void Argb32Format::onCopy(Pixel& to, const ConstPixel& from, size_t length,
         case CompositionMode::SourceOver:
 #ifdef SSE2_CUK
             const size_t   len4     = length / 4;
-          //  const __m128i* srcvARGB = reinterpret_cast<__m128i*>(src);
-           //       __m128i* dstvARGB = reinterpret_cast<__m128i*>(dst);
+            const __m128i* srcvARGB = reinterpret_cast<const __m128i*>(src);
+                  __m128i* dstvARGB = reinterpret_cast<      __m128i*>(dst);
+                  __m128i  srcv4PIX;
+                  __m128i  srcv0A0A;
+                  __m128i  srci0A0A;
+                  __m128i  srcv0A0G;
+                  __m128i  srcv0R0B;
+                  __m128i  dstv4PIX;
+                  __m128i  dstv0A0G;
+                  __m128i  dstv0R0B;
+
+static const __m128i const255 = _mm_set_epi32(0x00FF0000U, 0x00FF0000U, 0x00FF0000U, 0x00FF0000U);
+static const __m128i maskA000 = _mm_set_epi32(0xFF000000U, 0xFF000000U, 0xFF000000U, 0xFF000000U);
+
             for(size_t i = 0; i < len4; ++i) {
                 // Load 4 pixels
-              //  srcvARGB = _mm_loadu_si128 (srcvARGB          );
-              //  dstvABGR = _mm_loadu_si128 (dstvARGB          );
+                srcv4PIX = _mm_loadu_si128 (srcvARGB          );
+                dstv4PIX = _mm_loadu_si128 (dstvARGB          );
+                //
+
+                // Get the source alpha
+                srcv0A0A = _mm_and_si128   (srcv4PIX, maskA000);
+                srcv0A0A = _mm_srli_epi16  (srcv0A0A, 8       );
+                srci0A0A = _mm_sub_epi16   (const255, srcv0A0A);
+
+                // Process A and G
+                srcv0A0G = _mm_and_si128   (srcv4PIX, maskA0G0);
+                srcv0A0G = _mm_srli_epi16  (srcv0A0G, 8       );
+                srcv0A0G = _mm_mullo_epi16 (srcv0A0G, srcv0A0A);
+
+               // dstv0A0G = _mm_and_si128   (dstv4PIX, maskA0G0);
+               // dstv0A0G = _mm_srli_epi16  (dstv0A0G, 8       );
+               // dstv0A0G = _mm_mullo_epi16 (dstv0A0G, srcv0A0A);
+               // dstv0A0G = _mm_add_epi16   (dstv0A0G, srcvAGAG);
+               // dstv0A0G = _mm_and_si128   (dstv0A0G, maskA0G0);
+
+
+            //const __m128i  srcv0A0A = _mm_set_epi16(0, blendInv, 0, blendInv, 0, blendInv, 0, blendInv);
+
+                // Process A and G
+          //      dstv0A0G = _mm_and_si128   (dstv4PIX, maskA0G0);
+            //    dstv0A0G = _mm_srli_epi16  (dstv0A0G, 8       );
+            //    dstv0A0G = _mm_mullo_epi16 (dstv0A0G, srcv0A0A);
+             //   dstv0A0G = _mm_add_epi16   (dstv0A0G, srcvAGAG);
+              //  dstv0A0G = _mm_and_si128   (dstv0A0G, maskA0G0);
+
+            //to[0] = (Pt::uint8_t)((alphaSrc * from[0] + alphaInv * to[0]) >> 8);
+            //to[1] = (Pt::uint8_t)((alphaSrc * from[1] + alphaInv * to[1]) >> 8);
+            //to[2] = (Pt::uint8_t)((alphaSrc * from[2] + alphaInv * to[2]) >> 8);
+            //to[3] = (Pt::uint8_t)((alphaSrc * from[3] + alphaInv * to[3]) >> 8);
+
                 // Increment the pointers
-            //    ++srcvARGB;
-              //  ++dstvARGB;
+                ++srcvARGB;
+                ++dstvARGB;
             }
             length -= (len4 * 4);
             /*

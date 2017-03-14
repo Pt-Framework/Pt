@@ -328,32 +328,32 @@ class Argb32Model
                     const Pt::uint32_t  srcA     = blend * blend;
 #ifdef SSE2
                     const size_t   len4     = length / 4;
-                    const __m128i  srcvAGAG = _mm_set_epi16(srcA, srcG, srcA, srcG, srcA, srcG, srcA, srcG);
-                    const __m128i  srcvRBRB = _mm_set_epi16(srcR, srcB, srcR, srcB, srcR, srcB, srcR, srcB);
-                    const __m128i  srcv0A0A = _mm_set_epi16(0, blendInv, 0, blendInv, 0, blendInv, 0, blendInv);
+                    const __m128i  srcvAGAG = _mm_set_epi16(srcA, srcG, srcA, srcG, srcA, srcG, srcA, srcG); // [ AAGG AAGG AAGG AAGG ]
+                    const __m128i  srcvRBRB = _mm_set_epi16(srcR, srcB, srcR, srcB, srcR, srcB, srcR, srcB); // [ RRBB RRBB RRBB RRBB ]
+                    const __m128i  srci0A0A = _mm_set_epi32(blendInv, blendInv, blendInv, blendInv);         // [ 0I0I 0I0I 0I0I 0I0I ]
                           __m128i* dstvARGB = reinterpret_cast<__m128i*>(to);
                           __m128i  dstv4PIX;
-                          __m128i  dstv0A0G;
-                          __m128i  dstv0R0B;
+                          __m128i  dstvAGAG;
+                          __m128i  dstvRBRB;
                     for(size_t i = 0; i < len4; ++i) {
                         // Load 4 pixels
-                        dstv4PIX = _mm_loadu_si128 (dstvARGB          );
+                        dstv4PIX = _mm_loadu_si128 (dstvARGB          ); // [ ARGB ARGB ARGB ARGB ]
                         // Process A and G
-                        dstv0A0G = _mm_and_si128   (dstv4PIX, maskA0G0);
-                        dstv0A0G = _mm_srli_epi16  (dstv0A0G, 8       );
-                        dstv0A0G = _mm_mullo_epi16 (dstv0A0G, srcv0A0A);
-                        dstv0A0G = _mm_add_epi16   (dstv0A0G, srcvAGAG);
-                        dstv0A0G = _mm_and_si128   (dstv0A0G, maskA0G0);
+                        dstvAGAG = _mm_and_si128   (dstv4PIX, maskA0G0); // [ A0G0 A0G0 A0G0 A0G0 ]
+                        dstvAGAG = _mm_srli_epi16  (dstvAGAG, 8       ); // [ 0A0G 0A0G 0A0G 0A0G ]
+                        dstvAGAG = _mm_mullo_epi16 (dstvAGAG, srci0A0A); // [ AAGG AAGG AAGG AAGG ]
+                        dstvAGAG = _mm_add_epi16   (dstvAGAG, srcvAGAG); // [ AAGG AAGG AAGG AAGG ]
+                        dstvAGAG = _mm_and_si128   (dstvAGAG, maskA0G0); // [ A0G0 A0G0 A0G0 AAG0 ]
                         // Prefecth the next 4 pixels
                         _mm_prefetch(dstvARGB + 1, _MM_HINT_T0);
                         // Process R and B
-                        dstv0R0B = _mm_and_si128   (dstv4PIX, mask0B0R);
-                        dstv0R0B = _mm_mullo_epi16 (dstv0R0B, srcv0A0A);
-                        dstv0R0B = _mm_add_epi16   (dstv0R0B, srcvRBRB);
-                        dstv0R0B = _mm_srli_epi16  (dstv0R0B, 8       );
-                        dstv0R0B = _mm_and_si128   (dstv0R0B, mask0B0R);
+                        dstvRBRB = _mm_and_si128   (dstv4PIX, mask0B0R); // [ 0R0B 0R0B 0R0B 0R0B ]
+                        dstvRBRB = _mm_mullo_epi16 (dstvRBRB, srci0A0A); // [ RRBB RRBB RRBB RRBB ]
+                        dstvRBRB = _mm_add_epi16   (dstvRBRB, srcvRBRB); // [ RRBB RRBB RRBB RRBB ]
+                        dstvRBRB = _mm_srli_epi16  (dstvRBRB, 8       ); // [ .R.B .R.B .R.B .R.B ]
+                        dstvRBRB = _mm_and_si128   (dstvRBRB, mask0B0R); // [ 0R0B 0R0B 0R0B 0R0B ]
                         // Store 4 pixels
-                        dstv4PIX = _mm_or_si128    (dstv0A0G, dstv0R0B);
+                        dstv4PIX = _mm_or_si128    (dstvAGAG, dstvRBRB); // [ ARGB ARGB ARGB ARGB ]
                                    _mm_storeu_si128(dstvARGB, dstv4PIX);
                         // Increment the destination pointer
                         ++dstvARGB;
