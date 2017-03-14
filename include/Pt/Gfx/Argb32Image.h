@@ -337,7 +337,7 @@ class Argb32Model
                           __m128i  dstv0R0B;
                     for(size_t i = 0; i < len4; ++i) {
                         // Load 4 pixels
-                        dstvABGR = _mm_loadu_si128 (dstvARGB         );
+                        dstvABGR = _mm_loadu_si128 (dstvARGB          );
                         // Process A and G
                         dstv0A0G = _mm_and_si128   (dstvABGR, maskA0G0);
                         dstv0A0G = _mm_srli_epi16  (dstv0A0G, 8       );
