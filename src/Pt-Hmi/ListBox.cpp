@@ -354,6 +354,8 @@ void ListBox::removeItem(ListBoxItem& item)
     _layout.remove(item);
     item.selected() -= Pt::slot(*this, &ListBox::onItemSelected);
     item.layoutChanged() -= Pt::slot(*this, &ListBox::layout);
+
+    layout();
 }
 
 

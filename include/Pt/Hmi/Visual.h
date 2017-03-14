@@ -44,9 +44,6 @@ namespace Hmi {
 class PT_HMI_API Visual : public virtual Pt::Connectable
 {
     public:
-        const static Pt::uint64_t NoneId = 0;
-
-    public:
         virtual ~Visual();
 
         void processEvent(const Pt::Event& ev);    

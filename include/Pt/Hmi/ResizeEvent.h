@@ -43,11 +43,9 @@ class ResizeEvent : public Pt::BasicEvent<ResizeEvent>
 {
     public:
         ResizeEvent(Pt::uint64_t vid, 
-                    const Gfx::SizeF& size,
-                    Pt::uint64_t origin = 0)
+                    const Gfx::SizeF& size)
         : _vid(vid)
         , _size(size)
-        , _origin(origin)
         {
         }
 
@@ -75,20 +73,9 @@ class ResizeEvent : public Pt::BasicEvent<ResizeEvent>
             _size = size;
         }
 
-        Pt::uint64_t origin() const
-        {
-            return _origin;
-        }
-
-        void setOrigin(Pt::uint64_t id)
-        {
-            _origin = id;
-        }
-
     private:
         Pt::uint64_t _vid;
         Gfx::SizeF   _size;
-        Pt::uint64_t _origin;
 };
 
 } // namespace
@@ -96,4 +83,3 @@ class ResizeEvent : public Pt::BasicEvent<ResizeEvent>
 } // namespace
 
 #endif
-

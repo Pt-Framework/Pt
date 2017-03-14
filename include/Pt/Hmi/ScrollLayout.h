@@ -65,8 +65,6 @@ class PT_HMI_API ScrollLayout : public Layout
 
         Pt::Signal<int>& scrolledY();
 
-        //Pt::Signal<>& layoutChanged();
-
     protected:
         virtual void onAddWidget(Widget& w);
         
@@ -85,7 +83,7 @@ class PT_HMI_API ScrollLayout : public Layout
         Pt::Signal<int> _scrolledX;
         Pt::Signal<int> _scrolledY;
         Pt::Signal<> _layoutChanged;
-        Gfx::PointF _lastScrollPos;
+        Gfx::PointF _scrollPos;
         Gfx::PointF _lastPos;
         bool _enableX;
         bool _enableY;

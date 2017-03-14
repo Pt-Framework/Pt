@@ -114,7 +114,7 @@ void DockingLayout::onLayout()
                 posLeft += (*it)->preferredSize().width() + (*it)->margin().leftRight(); 
                             
                 Gfx::PointF pos(x, y);                   
-                (*it)->setGeometry(pos, childSize, vid());              
+                (*it)->setGeometry(pos, childSize);              
                 break;  
             }
 
@@ -129,7 +129,7 @@ void DockingLayout::onLayout()
                 posTop += (*it)->preferredSize().height() + (*it)->margin().topBottom();      
         
                 Gfx::PointF pos(x, y);                   
-                (*it)->setGeometry(pos, childSize, vid());              
+                (*it)->setGeometry(pos, childSize);              
                 break;
             }
           
@@ -147,7 +147,7 @@ void DockingLayout::onLayout()
                                             (*it)->margin().topBottom() );
 
                 Gfx::PointF pos(x, y);                   
-                (*it)->setGeometry(pos, childSize, vid());              
+                (*it)->setGeometry(pos, childSize);              
                 break;
             }
 
@@ -164,7 +164,7 @@ void DockingLayout::onLayout()
                                             (*it)->preferredSize().height() );
 
                 Gfx::PointF pos(x, y);                   
-                (*it)->setGeometry(pos, childSize, vid());              
+                (*it)->setGeometry(pos, childSize);              
                 break;
             }
         }
@@ -198,7 +198,7 @@ void DockingLayout::onLayout()
             Gfx::SizeF size( fillSize.width() - margin.leftRight(), 
                              fillSize.height() - margin.topBottom()  );
 
-            (*it)->setGeometry(pos, size, vid());            
+            (*it)->setGeometry(pos, size);            
         }
     }
 }

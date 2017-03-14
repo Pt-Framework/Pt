@@ -34,7 +34,7 @@ namespace Pt {
 namespace Hmi {
 
 ScrollLayout::ScrollLayout()
-: _lastScrollPos(0,0)
+: _scrollPos(0,0)
 , _enableX(true)
 , _enableY(true)
 , _maxX(0)
@@ -78,7 +78,7 @@ void ScrollLayout::scrollX(int xpos)
     if(xpos < 0)
         xpos = 0;
 
-    double delta = xpos - _lastScrollPos.x();
+    double delta = xpos - _scrollPos.x();
 
     for( size_t i = 0; i < widgets().size();  ++i)
     {
@@ -86,10 +86,10 @@ void ScrollLayout::scrollX(int xpos)
             
         Gfx::PointF pos = w->position();
         pos.subX(delta);
-        w->move(pos, vid());
+        w->move(pos);
     }
 
-    _lastScrollPos.setX(xpos);
+    _scrollPos.setX(xpos);
 
     _scrolledX.send(xpos);
 }
@@ -105,7 +105,7 @@ void ScrollLayout::scrollY(int ypos)
     if(ypos < 0)
         ypos = 0;
 
-    double delta = ypos - _lastScrollPos.y();
+    double delta = ypos - _scrollPos.y();
 
     for( size_t i = 0; i < widgets().size();  ++ i)
     {
@@ -113,10 +113,10 @@ void ScrollLayout::scrollY(int ypos)
             
         Gfx::PointF pos = w->position();
         pos.subY(delta);
-        w->move(pos, vid());
+        w->move(pos);
     }
 
-    _lastScrollPos.setY(ypos);
+    _scrollPos.setY(ypos);
 
     _scrolledY.send(ypos);
 }
@@ -124,13 +124,13 @@ void ScrollLayout::scrollY(int ypos)
 
 int ScrollLayout::scrollPosX() const
 {
-  return _lastScrollPos.x();
+  return _scrollPos.x();
 }
 
 
 int ScrollLayout::scrollPosY() const
 {
-  return _lastScrollPos.y();
+  return _scrollPos.y();
 }
 
 
@@ -146,20 +146,16 @@ Pt::Signal<int>& ScrollLayout::scrolledY()
 }
 
 
-//Pt::Signal<>& ScrollLayout::layoutChanged() 
-//{
-//    return _layoutChanged;
-//}
-
-
 void ScrollLayout::onAddWidget(Widget& w)
 {
     Base::onAddWidget(w);
+    //w.layoutChanged() += Pt::slot(*this, &ScrollLayout::layout);
 }
 
 
 void ScrollLayout::onRemoveWidget(Widget& w)
 {
+    //w.layoutChanged() -= Pt::slot(*this, &ScrollLayout::layout);
     Base::onRemoveWidget(w);
 }
 
@@ -173,24 +169,30 @@ void ScrollLayout::onLayout()
     {
         Widget* w =  widgets()[i];
 
-        Gfx::PointF pos = w->position();
+        const Gfx::PointF& wpos = w->position();
+        const Gfx::SizeF& wsize = w->size();
 
-        maxWidth = std::max( maxWidth, w->position().x() +
-                                       w->size().width() +
-                                       _lastScrollPos.x() );
+        maxWidth = std::max( maxWidth, wpos.x() +
+                                       wsize.width() +
+                                       _scrollPos.x() );
         
-        maxHeight= std::max( maxHeight, w->position().y() +
-                                        w->size().height() +
-                                        _lastScrollPos.y() );
+        maxHeight = std::max( maxHeight, wpos.y() +
+                                         wsize.height() +
+                                         _scrollPos.y() );
     }
-
-    bool hasChanged = maxWidth != _maxX || maxHeight != _maxY;
 
     _maxX = static_cast<int>(maxWidth);
     _maxY = static_cast<int>(maxHeight);
 
-    //if(hasChanged)
-    //    _layoutChanged.send();
+    if( _maxX < size().width() && _scrollPos.x() != 0 )
+    {
+        scrollX(0);
+    }
+
+    if( _maxY < size().height() && _scrollPos.y() != 0 )
+    {
+        scrollY(0);
+    }
 }
 
 
@@ -215,7 +217,7 @@ bool ScrollLayout::onScrollEvent(const ScrollEvent& ev)
     {
         if(_enableX)
         {
-            double deltaX = _lastScrollPos.x() - ev.delta();
+            double deltaX = _scrollPos.x() - ev.delta();
             scrollX(deltaX);
         }
     }
@@ -224,7 +226,7 @@ bool ScrollLayout::onScrollEvent(const ScrollEvent& ev)
     {
         if(_enableY)
         {
-            double deltaY = _lastScrollPos.y() - ev.delta();
+            double deltaY = _scrollPos.y() - ev.delta();
             scrollY(deltaY);
         }
     }

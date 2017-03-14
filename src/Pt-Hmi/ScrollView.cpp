@@ -126,19 +126,19 @@ void ScrollView::onLayout()
     if( _scrollBarY.isVisible() )
         width -= _scrollBarY.size().width();
 
-    _scrollLayout.move( Gfx::PointF(0,0), vid() );
-    _scrollLayout.resize( Gfx::SizeF(width, height), vid() );
+    _scrollLayout.move( Gfx::PointF(0,0) );
+    _scrollLayout.resize( Gfx::SizeF(width, height) );
 
     if( _scrollBarX.isVisible() )
     {
-        _scrollBarX.move( Gfx::PointF(0, height), vid() );
-        _scrollBarX.resize( Gfx::SizeF(width, _scrollBarX.size().height()), vid() );
+        _scrollBarX.move( Gfx::PointF(0, height) );
+        _scrollBarX.resize( Gfx::SizeF(width, _scrollBarX.size().height()) );
     }
 
     if( _scrollBarY.isVisible() )
     {
-        _scrollBarY.move( Gfx::PointF(width, 0), vid() );
-        _scrollBarY.resize( Gfx::SizeF(_scrollBarY.size().width(), height), vid());
+        _scrollBarY.move( Gfx::PointF(width, 0) );
+        _scrollBarY.resize( Gfx::SizeF(_scrollBarY.size().width(), height) );
     }
 
     double hrange = _scrollLayout.maximumX() -_scrollLayout.size().width();

@@ -244,8 +244,6 @@ class PT_HMI_API Widget : public Visual
 
         void invalidate();
 
-        //void layout2();
-
         void layout();
 
         void update();
@@ -270,21 +268,20 @@ class PT_HMI_API Widget : public Visual
 
         const Gfx::PointF& position() const;
 
-        void move(const Gfx::PointF& p, 
-                  Pt::uint64_t origin = NoneId);
+        void move(const Gfx::PointF& p);
+
+        void move(double x, double y);
 
         const Gfx::SizeF& size() const;
 
-        void resize(const Gfx::SizeF& s, 
-                    Pt::uint64_t origin = NoneId);
+        void resize(const Gfx::SizeF& s);
 
         void resize(double width, double height);
 
         const Gfx::RectF geometry() const;
 
         void setGeometry(const Gfx::PointF& pos, 
-                         const Gfx::SizeF& size, 
-                         Pt::uint64_t origin = NoneId);
+                         const Gfx::SizeF& size);
 
         const Cursor& cursor() const;
 

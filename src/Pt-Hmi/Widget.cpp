@@ -824,7 +824,7 @@ const Gfx::PointF& Widget::position() const
 }
 
 
-void Widget::move(const Gfx::PointF& pos, Pt::uint64_t origin)
+void Widget::move(const Gfx::PointF& pos)
 {
     if(pos == _position)
         return;
@@ -834,7 +834,7 @@ void Widget::move(const Gfx::PointF& pos, Pt::uint64_t origin)
     Gfx::PointF to = pos - _position;
     updateRect.unify( Gfx::RectF(to, _size) ); 
     
-    MoveEvent mev(vid(), pos, origin);
+    MoveEvent mev(vid(), pos);
     Application::instance().loop().commitEvent(mev);
 
     // update needs to refer to previous position
@@ -844,10 +844,16 @@ void Widget::move(const Gfx::PointF& pos, Pt::uint64_t origin)
 }
 
 
+void Widget::move(double x, double y)
+{
+    move( Gfx::PointF(x, y) );
+}
+
+
 void Widget::onMoveEvent(const MoveEvent& ev)
 {        
     Widget* parentWidget = parent();
-    if( parentWidget /*&& parentWidget->vid() != ev.origin()*/ )
+    if(parentWidget)
     {
         parentWidget->layout();
     }
@@ -862,7 +868,7 @@ const Gfx::SizeF& Widget::size() const
 }
 
 
-void Widget::resize(const Gfx::SizeF& s, Pt::uint64_t origin)
+void Widget::resize(const Gfx::SizeF& s)
 {
     if(_size == s)
         return;
@@ -874,7 +880,7 @@ void Widget::resize(const Gfx::SizeF& s, Pt::uint64_t origin)
 
     _size = s;
 
-    ResizeEvent rev(vid(), s, origin);
+    ResizeEvent rev(vid(), s);
     Application::instance().loop().commitEvent(rev);
     
     update(updateRect);
@@ -892,7 +898,7 @@ void Widget::onResizeEvent(const ResizeEvent& ev)
     layout();
 
     Widget* parentWidget = parent();
-    if( parentWidget /*&& parentWidget->vid() != ev.origin()*/ )
+    if(parentWidget)
     {
         parentWidget->layout();
     }
@@ -906,11 +912,10 @@ const Gfx::RectF Widget::geometry() const
 
 
 void Widget::setGeometry(const Gfx::PointF& pos, 
-                        const Gfx::SizeF& size, 
-                        Pt::uint64_t origin)
+                        const Gfx::SizeF& size)
 {
-    move(pos, origin);
-    resize(size, origin);
+    move(pos);
+    resize(size);
 }
 
 

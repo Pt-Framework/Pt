@@ -42,19 +42,17 @@ namespace Hmi {
 
 class MoveEvent : public Pt::BasicEvent<MoveEvent>
 {
-	public:	
-		MoveEvent(Pt::uint64_t vid, 
-                  const Gfx::PointF& pos,
-                  Pt::uint64_t origin = 0)
-		: _vid(vid)
+    public:    
+        MoveEvent(Pt::uint64_t vid, 
+                  const Gfx::PointF& pos)
+        : _vid(vid)
         , _position(pos)
-        , _origin(origin)	
-		{
-		}
+        {
+        }
 
-		virtual ~MoveEvent()
-		{
-		}
+        virtual ~MoveEvent()
+        {
+        }
         
         Pt::uint64_t vid() const
         {
@@ -66,30 +64,19 @@ class MoveEvent : public Pt::BasicEvent<MoveEvent>
             _vid = vid;
         }
 
-		const Gfx::PointF& position() const
-		{
-			return _position;
-		}	
+        const Gfx::PointF& position() const
+        {
+            return _position;
+        }    
 
         void setPosition(const Gfx::PointF& p)
         {
             _position = p;
         }
 
-        Pt::uint64_t origin() const
-        {
-            return _origin;
-        }
-
-        void setOrigin(Pt::uint64_t id)
-        {
-            _origin = id;
-        }
-
-	private:
+    private:
         Pt::uint64_t _vid;
-		Gfx::PointF _position;
-        Pt::uint64_t _origin;
+        Gfx::PointF _position;
 };
 
 } // namespace

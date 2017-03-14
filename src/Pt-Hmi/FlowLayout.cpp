@@ -73,7 +73,7 @@ void StackLeft(Widget& parent, bool center)
                                     item->margin().bottom() );
                  
         Gfx::PointF pos(x, y);
-        item->setGeometry(pos, childSize, parent.vid());
+        item->setGeometry(pos, childSize);
 
         posX += item->preferredSize().width() + item->margin().leftRight();
     }
@@ -110,7 +110,7 @@ void StackRight(Widget& parent, bool center)
                                     item->margin().bottom());
                    
         Gfx::PointF pos(x, y);                   
-        item->setGeometry(pos, childSize, parent.vid());
+        item->setGeometry(pos, childSize);
     }
 }
 
@@ -143,7 +143,7 @@ void StackTop(Widget& parent, bool center)
                                     item->preferredSize().height());
 
         Gfx::PointF pos(x, y);                   
-        item->setGeometry(pos, childSize, parent.vid());
+        item->setGeometry(pos, childSize);
     }
 }
 
@@ -178,7 +178,7 @@ void StackBottom(Widget& parent, bool center)
                                     item->preferredSize().height() );
                                          
         Gfx::PointF pos(x, y);                   
-        item->setGeometry(pos, childSize, parent.vid());
+        item->setGeometry(pos, childSize);
     }
 }
 
