@@ -35,13 +35,14 @@
 #include <Pt/Gfx/BasicImage.h>
 #include <Pt/Types.h>
 
+
 // ### !!! EXPERIMENTAL SIMD SUPPORT !!! ###
 #if 1
 
 #if defined(__arm__) || defined(__thumb__) || defined(_M_ARM) || defined(_M_ARMT) || defined(__TARGET_ARCH_ARM) || defined(__TARGET_ARCH_THUMB) || defined(_ARM) || defined(__arm)
 
     #include <arm_neon.h>
-    #define SIMD __attribute__((target("fpu=neon")))
+    #define NEON __attribute__((target("fpu=neon")))
 
 #elif defined(i386) || defined(__i386) || defined(__i386__) || defined(_X86_) || defined(__x86_64) || defined(__x86_64__) || defined(__amd64) || defined(__amd64__)
 
@@ -61,8 +62,6 @@ static const __m128i mask0B0R = _mm_set_epi32(0x00FF00FFU, 0x00FF00FFU, 0x00FF00
 #endif
 
 #endif
-
-
 
 
 namespace Pt {
@@ -333,22 +332,30 @@ class Argb32Model
                     const __m128i  srcvRBRB = _mm_set_epi16(srcR, srcB, srcR, srcB, srcR, srcB, srcR, srcB);
                     const __m128i  srcv0A0A = _mm_set_epi16(0, blendInv, 0, blendInv, 0, blendInv, 0, blendInv);
                           __m128i* dstvARGB = reinterpret_cast<__m128i*>(to);
+                          __m128i  dstvABGR;
+                          __m128i  dstv0A0G;
+                          __m128i  dstv0R0B;
                     for(size_t i = 0; i < len4; ++i) {
-                        __m128i dstABGR = _mm_loadu_si128(dstvARGB         );
-
-                        __m128i dst0A0G = _mm_and_si128  (dstABGR, maskA0G0);
-                                dst0A0G = _mm_srli_epi16 (dst0A0G, 8       );
-                                dst0A0G = _mm_mullo_epi16(dst0A0G, srcv0A0A);
-                                dst0A0G = _mm_add_epi16  (dst0A0G, srcvAGAG);
-                                dst0A0G = _mm_and_si128  (dst0A0G, maskA0G0);
-
-                        __m128i dst0B0R = _mm_and_si128  (dstABGR, mask0B0R);
-                                dst0B0R = _mm_mullo_epi16(dst0B0R, srcv0A0A);
-                                dst0B0R = _mm_add_epi16  (dst0B0R, srcvRBRB);
-                                dst0B0R = _mm_srli_epi16 (dst0B0R, 8       );
-                                dst0B0R = _mm_and_si128  (dst0B0R, mask0B0R);
-
-                        _mm_storeu_si128(dstvARGB, _mm_or_si128(dst0A0G, dst0B0R));
+                        // Load 4 pixels
+                        dstvABGR = _mm_loadu_si128 (dstvARGB         );
+                        // Process A and G
+                        dstv0A0G = _mm_and_si128   (dstvABGR, maskA0G0);
+                        dstv0A0G = _mm_srli_epi16  (dstv0A0G, 8       );
+                        dstv0A0G = _mm_mullo_epi16 (dstv0A0G, srcv0A0A);
+                        dstv0A0G = _mm_add_epi16   (dstv0A0G, srcvAGAG);
+                        dstv0A0G = _mm_and_si128   (dstv0A0G, maskA0G0);
+                        // Prefecth the next 4 pixels
+                        _mm_prefetch(dstvARGB + 1, _MM_HINT_T0);
+                        // Process R and B
+                        dstv0R0B = _mm_and_si128   (dstvABGR, mask0B0R);
+                        dstv0R0B = _mm_mullo_epi16 (dstv0R0B, srcv0A0A);
+                        dstv0R0B = _mm_add_epi16   (dstv0R0B, srcvRBRB);
+                        dstv0R0B = _mm_srli_epi16  (dstv0R0B, 8       );
+                        dstv0R0B = _mm_and_si128   (dstv0R0B, mask0B0R);
+                        // Store 4 pixels
+                        dstvABGR = _mm_or_si128    (dstv0A0G, dstv0R0B);
+                                   _mm_storeu_si128(dstvARGB, dstvABGR);
+                        // Increment the destination pointer
                         ++dstvARGB;
                     }
                     length -= (len4 * 4);
