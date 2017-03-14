@@ -19,28 +19,15 @@ if $(WITH_RASTERIZER2)
 {
     if $(TARGET_OSPLAT:L) = arm
     {
-        if $(WITH_BUILTIN_LIBPNG)
-        {
-            SubDirCcFlags [ FGeneric neon ] ;
-            SubDirCcFlags [ FDefines WITH_BUILTIN_LIBPNG ] ;
-        }
-        else
-        {
-            SubDirCcFlags [ FGeneric neon ] ;
-        }
-        SubDirC++Flags [ FGeneric neon ] ;
-        SubDirC++Flags [ FIncludes "/usr/include/cairo" ] ;
+        SubDirCcFlags  [ FFPU neon ] ;
+        SubDirC++Flags [ FFPU neon ] ;
     }
-    else
+
+    if $(WITH_BUILTIN_LIBPNG)
     {
-        if $(WITH_BUILTIN_LIBPNG)
-        {
-            SubDirCcFlags [ FGeneric neon ] ;
-            SubDirCcFlags [ FDefines WITH_BUILTIN_LIBPNG ] ;
-        }
-        SubDirC++Flags [ FGeneric neon ] ;
-        SubDirC++Flags [ FIncludes "/usr/include/cairo" ] ;
+        SubDirCcFlags [ FDefines WITH_BUILTIN_LIBPNG ] ;
     }
+    SubDirC++Flags [ FIncludes "/usr/include/cairo" ] ;
 
     Main ImagePainterTest2 : ImagePainterTest2.cpp SDL_SavePNG/savepng.c ;
     LinkSharedLibraries ImagePainterTest2 : Pt Pt-Gfx Pt-System ;

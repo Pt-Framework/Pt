@@ -37,15 +37,10 @@ if $(WITH_RASTERIZER2)
 
     if $(TARGET_OSPLAT:L) = arm
     {
-        SubDirCcFlags  [ FGeneric neon ] ;
-        SubDirC++Flags [ FGeneric neon ] ;
-        SubDirC++Flags [ FDefines RASTERIZER2 ] ;
+        SubDirCcFlags  [ FFPU neon ] ;
+        SubDirC++Flags [ FFPU neon ] ;
     }
-    else
-    {
-        SubDirC++Flags [ FDefines RASTERIZER2 ] ;
-
-    }
+    SubDirC++Flags [ FDefines RASTERIZER2 ] ;
 }
 
 SharedLibrary Pt-Gfx : Argb32Format.cpp

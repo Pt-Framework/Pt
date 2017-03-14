@@ -234,7 +234,7 @@ rule CheckC++
 # Build rules
 ##############################################################################
 
-rule FGeneric
+rule FFPU
 { return -mfpu=$(<) ; }
 
 
