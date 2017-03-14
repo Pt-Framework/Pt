@@ -1,4 +1,5 @@
-/* Copyright (C) 2016 Marc Boris Duerner
+/* Copyright (C) 2016-2016 Marc Boris Duerner
+   Copyright (C) 2017-2017 Aloysius Indrayanto
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -36,35 +37,6 @@
 #include <Pt/Types.h>
 
 
-#ifdef RASTERIZER2
-
-#if defined(__arm__) || defined(__thumb__) || defined(_M_ARM) || defined(_M_ARMT) || defined(__TARGET_ARCH_ARM) || defined(__TARGET_ARCH_THUMB) || defined(_ARM) || defined(__arm)
-
-    #include <arm_neon.h>
-    #define USE_NEON
-
-#elif defined(i386) || defined(__i386) || defined(__i386__) || defined(_X86_) || defined(__x86_64) || defined(__x86_64__) || defined(__amd64) || defined(__amd64__)
-
-    #include <x86intrin.h>
-    #define USE_SSE2
-
-#elif defined(_M_IX86) || defined(_M_AMD64) || defined(_M_X64)
-
-    #include <intrin.h>
-    #define USE_SSE2
-
-#endif
-
-#ifdef USE_SSE2
-// SSE related constants
-static const __m128i maskA000 = _mm_set_epi32(0xFF000000U, 0xFF000000U, 0xFF000000U, 0xFF000000U);
-static const __m128i maskA0G0 = _mm_set_epi32(0xFF00FF00U, 0xFF00FF00U, 0xFF00FF00U, 0xFF00FF00U);
-static const __m128i mask0B0R = _mm_set_epi32(0x00FF00FFU, 0x00FF00FFU, 0x00FF00FFU, 0x00FF00FFU);
-#endif
-
-#endif
-
-
 namespace Pt {
 namespace Gfx {
 
@@ -90,78 +62,20 @@ class Argb32Model
         }
 
     public:
+        static inline void fastCopyPixels(Pt::uint8_t* dst, Pt::uint32_t argb, size_t length);
+        static inline void fastBlendPixels(Pt::uint8_t* dst_, Pt::uint32_t srcA, Pt::uint32_t srcR, Pt::uint32_t srcG, Pt::uint32_t srcB, Pt::uint32_t blendInv, size_t length);
 
-// Uncomment this to replace constant division with multiply-and-shift
-// NOTE: Enabling this optimization deos not seem to reduce or increase performance on an x86_64
-//#define USE_MULTIPLY_SHIFT_FOR_CONSTANT_DIVISION
-
-/*
- * http://embeddedgurus.com/stack-overflow/2009/06/division-of-integers-by-constants
- *
- * Convert to binary using Javascript console: alert((1/255).toString(2))
- *     1/255
- *     => 0.00000001000000010000000100000001000000010000000100000001
- *
- * Take all the bits to the right of the binary point:
- *     => 00000001000000010000000100000001000000010000000100000001
- *
- * Left shift them until the bit to the right of the binary point is 1 and
- * record the required number of shifts as S:
- *        00000001000000010000000100000001000000010000000100000001
- *        *******
- *     => 1000000010000000100000001000000010000000100000001
- *     => S = 7
- *
- * Take the most significant 17 bits:
- *        1000000010000000100000001000000010000000100000001
- *        *****************
- *     => 10000000100000001
- *
- * Add one:
- *        10000000100000001
- *                        1
- *        ----------------- +
- *     => 10000000100000010
- *
- * Truncate to 16 bits and convert to 4-digit hexadecimal as M:
- *        10000000100000010
- *        ****************
- *     => 8081
- *
- * The formula will be RESULT = (((uint32_t) VALUE * (uint32_t) M) >> 16) >> S:
- *     => RESULT = (((uint32_t) VALUE * 0x00008081) >> 16) >> 7
- *
- *
- * For 1/257:
- *     => 0.00000000111111110000000011111111000000001111111100000001
- *     => 00000000111111110000000011111111000000001111111100000001
- *        ********
- *     => 111111110000000011111111000000001111111100000001 (S = 8)
- *        *****************
- *     => 11111111000000001
- *                        1
- *        ----------------- +
- *     => 11111111000000010
- *        ****************
- *     => FF01
- *     => RESULT = (((uint32_t) VALUE * 0x0000FF01) >> 16) >> 8
- */
-#ifdef USE_MULTIPLY_SHIFT_FOR_CONSTANT_DIVISION
-    #define DIV_BY_255(V) ( (((Pt::uint32_t) V * 0x00008081) >> 16) >> 7 )
-    #define DIV_BY_257(V) ( (((Pt::uint32_t) V * 0x0000FF01) >> 16) >> 8 )
-#else
-    #define DIV_BY_255(V) ( (Pt::uint32_t) V / 255 )
-    #define DIV_BY_257(V) ( (Pt::uint32_t) V / 257 )
-#endif
+        static inline void fastCopyPixels(Pt::uint8_t* dst, const Pt::uint8_t* src, size_t length);
+        static inline void fastBlendPixels(Pt::uint8_t* dst, const Pt::uint8_t* src, size_t length);
 
         static Color toColor(const Pt::uint8_t* p)
         {
-            Pt::uint32_t pixel = *reinterpret_cast<const Pt::uint32_t*>(p);
+            const Pt::uint32_t pixel = *reinterpret_cast<const Pt::uint32_t*>(p);
 
-            const uint16_t ta =  pixel               >> 24;
-            const uint16_t tr = (pixel & 0x00FF0000) >> 16;
-            const uint16_t tg = (pixel & 0x0000FF00) >>  8;
-            const uint16_t tb =  pixel & 0x000000FF;
+            const Pt::uint16_t ta =  pixel               >> 24;
+            const Pt::uint16_t tr = (pixel & 0x00FF0000) >> 16;
+            const Pt::uint16_t tg = (pixel & 0x0000FF00) >>  8;
+            const Pt::uint16_t tb =  pixel & 0x000000FF;
 
             Pt::uint16_t a = (ta << 8) + ta;
             Pt::uint16_t r = (tr << 8) + tr;
@@ -183,26 +97,26 @@ class Argb32Model
 
         static void sourceOver(Pt::uint8_t* to, const Pt::uint8_t* from)
         {
-            Pt::uint8_t  alpha    = *((const Pt::uint32_t*) (from)) >> 24;
-            Pt::uint32_t alphaSrc = alpha;
-            Pt::uint32_t alphaInv = 255 - alpha;
+            const Pt::uint8_t  alpha    = *((const Pt::uint32_t*) (from)) >> 24;
+            const Pt::uint32_t alphaSrc = alpha;
+            const Pt::uint32_t alphaInv = 255 - alpha;
 
-            to[0] = (Pt::uint8_t)((alphaSrc * from[0] + alphaInv * to[0]) >> 8);
-            to[1] = (Pt::uint8_t)((alphaSrc * from[1] + alphaInv * to[1]) >> 8);
-            to[2] = (Pt::uint8_t)((alphaSrc * from[2] + alphaInv * to[2]) >> 8);
-            to[3] = (Pt::uint8_t)((alphaSrc * from[3] + alphaInv * to[3]) >> 8);
+            to[0] = (Pt::uint8_t) ( (alphaSrc * from[0] + alphaInv * to[0]) >> 8 );
+            to[1] = (Pt::uint8_t) ( (alphaSrc * from[1] + alphaInv * to[1]) >> 8 );
+            to[2] = (Pt::uint8_t) ( (alphaSrc * from[2] + alphaInv * to[2]) >> 8 );
+            to[3] = (Pt::uint8_t) ( (alphaSrc * from[3] + alphaInv * to[3]) >> 8 );
         }
 
         static void sourceOver(Pt::uint8_t* to, const Pt::Gfx::Color& from)
         {
-            Pt::uint32_t alpha    = DIV_BY_257(from.alpha());
-            Pt::uint32_t alphaSrc = alpha;
-            Pt::uint32_t alphaInv = 255 - alpha;
+            const Pt::uint32_t alpha    = from.alpha() / 257;
+            const Pt::uint32_t alphaSrc = alpha;
+            const Pt::uint32_t alphaInv = 255 - alpha;
 
-            to[0] = (Pt::uint8_t)((alphaSrc * DIV_BY_257(from.blue ()) + alphaInv * to[0]) >> 8);
-            to[1] = (Pt::uint8_t)((alphaSrc * DIV_BY_257(from.green()) + alphaInv * to[1]) >> 8);
-            to[2] = (Pt::uint8_t)((alphaSrc * DIV_BY_257(from.red  ()) + alphaInv * to[2]) >> 8);
-            to[3] = (Pt::uint8_t)((alphaSrc * alpha                    + alphaInv * to[3]) >> 8);
+            to[0] = (Pt::uint8_t) ( (alphaSrc * from.blue () / 257 + alphaInv * to[0]) >> 8 );
+            to[1] = (Pt::uint8_t) ( (alphaSrc * from.green() / 257 + alphaInv * to[1]) >> 8 );
+            to[2] = (Pt::uint8_t) ( (alphaSrc * from.red  () / 257 + alphaInv * to[2]) >> 8 );
+            to[3] = (Pt::uint8_t) ( (alphaSrc * alpha              + alphaInv * to[3]) >> 8 );
         }
 
         static void assign(Pt::uint8_t* to, const Color& c,
@@ -243,22 +157,22 @@ class Argb32Model
                 case CompositionMode::SourceCopy: {
                     const Pt::uint32_t blendAlphaSrc = blendingAlpha;
                     const Pt::uint32_t blendAlphaInv = 255 - blendingAlpha;
-                    to[0] = (blendAlphaSrc * DIV_BY_257(c.blue ()) + blendAlphaInv * to[0]) >> 8;
-                    to[1] = (blendAlphaSrc * DIV_BY_257(c.green()) + blendAlphaInv * to[1]) >> 8;
-                    to[2] = (blendAlphaSrc * DIV_BY_257(c.red  ()) + blendAlphaInv * to[2]) >> 8;
-                    to[3] = (blendAlphaSrc * DIV_BY_257(c.alpha()) + blendAlphaInv * to[3]) >> 8;
+                    to[0] = (blendAlphaSrc * c.blue () / 257 + blendAlphaInv * to[0]) >> 8;
+                    to[1] = (blendAlphaSrc * c.green() / 257 + blendAlphaInv * to[1]) >> 8;
+                    to[2] = (blendAlphaSrc * c.red  () / 257 + blendAlphaInv * to[2]) >> 8;
+                    to[3] = (blendAlphaSrc * c.alpha() / 257 + blendAlphaInv * to[3]) >> 8;
                     break;
                 }
 
                 case CompositionMode::SourceOver:
                 {
-                    const Pt::uint32_t colorAlpha    = DIV_BY_257(c.alpha());
-                    const Pt::uint32_t blendAlphaSrc = DIV_BY_255(colorAlpha * blendingAlpha);
+                    const Pt::uint32_t colorAlpha    = c.alpha() / 257;
+                    const Pt::uint32_t blendAlphaSrc = colorAlpha * blendingAlpha / 255;
                     const Pt::uint32_t blendAlphaInv = 255 - blendAlphaSrc;
-                    to[0] = (blendAlphaSrc * DIV_BY_257(c.blue ()) + blendAlphaInv * to[0]) >> 8;
-                    to[1] = (blendAlphaSrc * DIV_BY_257(c.green()) + blendAlphaInv * to[1]) >> 8;
-                    to[2] = (blendAlphaSrc * DIV_BY_257(c.red  ()) + blendAlphaInv * to[2]) >> 8;
-                    to[3] = (blendAlphaSrc * colorAlpha            + blendAlphaInv * to[3]) >> 8;
+                    to[0] = (blendAlphaSrc * c.blue () / 257 + blendAlphaInv * to[0]) >> 8;
+                    to[1] = (blendAlphaSrc * c.green() / 257 + blendAlphaInv * to[1]) >> 8;
+                    to[2] = (blendAlphaSrc * c.red  () / 257 + blendAlphaInv * to[2]) >> 8;
+                    to[3] = (blendAlphaSrc * colorAlpha      + blendAlphaInv * to[3]) >> 8;
                     break;
                 }
             }
@@ -282,7 +196,7 @@ class Argb32Model
                 case CompositionMode::SourceOver:
                 {
                     const Pt::uint32_t colorAlpha    = from[3];
-                    const Pt::uint32_t blendAlphaSrc = DIV_BY_255(colorAlpha * blendingAlpha);
+                    const Pt::uint32_t blendAlphaSrc = colorAlpha * blendingAlpha / 255;
                     const Pt::uint32_t blendAlphaInv = 255 - blendAlphaSrc;
                     to[0] = (blendAlphaSrc * from[0]    + blendAlphaInv * to[0]) >> 8;
                     to[1] = (blendAlphaSrc * from[1]    + blendAlphaInv * to[1]) >> 8;
@@ -299,78 +213,22 @@ class Argb32Model
             switch(mode) {
                 default:
                 case CompositionMode::SourceCopy: {
-                    Pt::uint32_t src = ( Pt::uint32_t(c.alpha() & 0xFF00) << 16 ) |
-                                       ( Pt::uint32_t(c.red  () & 0xFF00) <<  8 ) |
-                                       ( Pt::uint32_t(c.green() & 0xFF00)       ) |
-                                       ( Pt::uint32_t(c.blue ()         ) >>  8 );
-#ifdef USE_SSE2
-                    const size_t   len4     = length / 4;
-                    const __m128i  srcvARGB = _mm_set1_epi32(src);
-                          __m128i* dstvARGB = reinterpret_cast<__m128i*>(to);
-                    for(size_t i = 0; i < len4; ++i) {
-                        _mm_storeu_si128(dstvARGB, srcvARGB);
-                        ++dstvARGB;
-                    }
-                    length -= (len4 * 4);
-                    Pt::uint32_t* dst = reinterpret_cast<Pt::uint32_t*>(dstvARGB);
-#else
-                    Pt::uint32_t* dst = reinterpret_cast<Pt::uint32_t*>(to);
-#endif
-                    for(size_t i = 0; i < length; ++i) *dst++ = src;
+                    const Pt::uint32_t src = ( Pt::uint32_t(c.alpha() & 0xFF00) << 16 ) |
+                                             ( Pt::uint32_t(c.red  () & 0xFF00) <<  8 ) |
+                                             ( Pt::uint32_t(c.green() & 0xFF00)       ) |
+                                             ( Pt::uint32_t(c.blue ()         ) >>  8 );
+                    fastCopyPixels(to, src, length);
                     break;
                 }
 
                 case CompositionMode::SourceOver: {
-                    const Pt::uint32_t blend    = DIV_BY_257(c.alpha());
+                    const Pt::uint32_t blend    = c.alpha() / 257;
                     const Pt::uint32_t blendInv = 255 - blend;
-                    const Pt::uint32_t srcR     = DIV_BY_257(c.red  ()) * blend;
-                    const Pt::uint32_t srcG     = DIV_BY_257(c.green()) * blend;
-                    const Pt::uint32_t srcB     = DIV_BY_257(c.blue ()) * blend;
+                    const Pt::uint32_t srcR     = (Pt::uint32_t) c.red  () * blend / 257;
+                    const Pt::uint32_t srcG     = (Pt::uint32_t) c.green() * blend / 257;
+                    const Pt::uint32_t srcB     = (Pt::uint32_t) c.blue () * blend / 257;
                     const Pt::uint32_t srcA     = blend * blend;
-#ifdef USE_SSE2
-                    const size_t   len4     = length / 4;
-                    const __m128i  srcvAGAG = _mm_set_epi16(srcA, srcG, srcA, srcG, srcA, srcG, srcA, srcG); // [ AAGG AAGG AAGG AAGG ]
-                    const __m128i  srcvRBRB = _mm_set_epi16(srcR, srcB, srcR, srcB, srcR, srcB, srcR, srcB); // [ RRBB RRBB RRBB RRBB ]
-                    const __m128i  srci0A0A = _mm_set_epi32(blendInv, blendInv, blendInv, blendInv);         // [ 0I0I 0I0I 0I0I 0I0I ]
-                          __m128i* dstvARGB = reinterpret_cast<__m128i*>(to);
-                          __m128i  dstv4PIX;
-                          __m128i  dstvAGAG;
-                          __m128i  dstvRBRB;
-                    for(size_t i = 0; i < len4; ++i) {
-                        // Load 4 pixels
-                        dstv4PIX = _mm_loadu_si128 (dstvARGB          ); // [ ARGB ARGB ARGB ARGB ]
-                        // Process A and G
-                        dstvAGAG = _mm_and_si128   (dstv4PIX, maskA0G0); // [ A0G0 A0G0 A0G0 A0G0 ]
-                        dstvAGAG = _mm_srli_epi16  (dstvAGAG, 8       ); // [ 0A0G 0A0G 0A0G 0A0G ]
-                        dstvAGAG = _mm_mullo_epi16 (dstvAGAG, srci0A0A); // [ AAGG AAGG AAGG AAGG ]
-                        dstvAGAG = _mm_add_epi16   (dstvAGAG, srcvAGAG); // [ AAGG AAGG AAGG AAGG ]
-                        dstvAGAG = _mm_and_si128   (dstvAGAG, maskA0G0); // [ A0G0 A0G0 A0G0 AAG0 ]
-                        // Prefetch the next 4 pixels
-                        _mm_prefetch(dstvARGB + 1, _MM_HINT_T0);
-                        // Process R and B
-                        dstvRBRB = _mm_and_si128   (dstv4PIX, mask0B0R); // [ 0R0B 0R0B 0R0B 0R0B ]
-                        dstvRBRB = _mm_mullo_epi16 (dstvRBRB, srci0A0A); // [ RRBB RRBB RRBB RRBB ]
-                        dstvRBRB = _mm_add_epi16   (dstvRBRB, srcvRBRB); // [ RRBB RRBB RRBB RRBB ]
-                        dstvRBRB = _mm_srli_epi16  (dstvRBRB, 8       ); // [ .R.B .R.B .R.B .R.B ]
-                        dstvRBRB = _mm_and_si128   (dstvRBRB, mask0B0R); // [ 0R0B 0R0B 0R0B 0R0B ]
-                        // Store 4 pixels
-                        dstv4PIX = _mm_or_si128    (dstvAGAG, dstvRBRB); // [ ARGB ARGB ARGB ARGB ]
-                                   _mm_storeu_si128(dstvARGB, dstv4PIX);
-                        // Increment the destination pointer
-                        ++dstvARGB;
-                    }
-                    length -= (len4 * 4);
-                    Pt::uint8_t* dst = reinterpret_cast<Pt::uint8_t*>(dstvARGB);
-#else
-                    Pt::uint8_t* dst = to;
-#endif
-                    for(size_t i = 0; i < length; ++i) {
-                        dst[0] = (srcB + blendInv * dst[0]) >> 8;
-                        dst[1] = (srcG + blendInv * dst[1]) >> 8;
-                        dst[2] = (srcR + blendInv * dst[2]) >> 8;
-                        dst[3] = (srcA + blendInv * dst[3]) >> 8;
-                        dst += 4;
-                    }
+                    fastBlendPixels(to, srcA, srcR, srcG, srcB, blendInv, length);
                     break;
                 }
             }
@@ -382,21 +240,8 @@ class Argb32Model
             switch(mode) {
                 default:
                 case CompositionMode::SourceCopy: {
-                    Pt::uint32_t src = *reinterpret_cast<const Pt::uint32_t*>(from);
-#ifdef USE_SSE2
-                    const size_t   len4     = length / 4;
-                    const __m128i  srcvARGB = _mm_set1_epi32(src);
-                          __m128i* dstvARGB = reinterpret_cast<__m128i*>(to);
-                    for(size_t i = 0; i < len4; ++i) {
-                        _mm_storeu_si128(dstvARGB, srcvARGB);
-                        ++dstvARGB;
-                    }
-                    length -= (len4 * 4);
-                    Pt::uint32_t* dst = reinterpret_cast<Pt::uint32_t*>(dstvARGB);
-#else
-                    Pt::uint32_t* dst = reinterpret_cast<Pt::uint32_t*>(to  );
-#endif
-                    for(size_t i = 0; i < length; ++i) *dst++ = src;
+                    const Pt::uint32_t src = *reinterpret_cast<const Pt::uint32_t*>(from);
+                    fastCopyPixels(to, src, length);
                     break;
                 }
 
@@ -407,50 +252,7 @@ class Argb32Model
                     const Pt::uint32_t srcG     = from[1] * blend;
                     const Pt::uint32_t srcB     = from[0] * blend;
                     const Pt::uint32_t srcA     = blend   * blend;
-#ifdef USE_SSE2
-                    const size_t   len4     = length / 4;
-                    const __m128i  srcvAGAG = _mm_set_epi16(srcA, srcG, srcA, srcG, srcA, srcG, srcA, srcG); // [ AAGG AAGG AAGG AAGG ]
-                    const __m128i  srcvRBRB = _mm_set_epi16(srcR, srcB, srcR, srcB, srcR, srcB, srcR, srcB); // [ RRBB RRBB RRBB RRBB ]
-                    const __m128i  srci0A0A = _mm_set_epi32(blendInv, blendInv, blendInv, blendInv);         // [ 0I0I 0I0I 0I0I 0I0I ]
-                          __m128i* dstvARGB = reinterpret_cast<__m128i*>(to);
-                          __m128i  dstv4PIX;
-                          __m128i  dstvAGAG;
-                          __m128i  dstvRBRB;
-                    for(size_t i = 0; i < len4; ++i) {
-                        // Load 4 pixels
-                        dstv4PIX = _mm_loadu_si128 (dstvARGB          ); // [ ARGB ARGB ARGB ARGB ]
-                        // Process A and G
-                        dstvAGAG = _mm_and_si128   (dstv4PIX, maskA0G0); // [ A0G0 A0G0 A0G0 A0G0 ]
-                        dstvAGAG = _mm_srli_epi16  (dstvAGAG, 8       ); // [ 0A0G 0A0G 0A0G 0A0G ]
-                        dstvAGAG = _mm_mullo_epi16 (dstvAGAG, srci0A0A); // [ AAGG AAGG AAGG AAGG ]
-                        dstvAGAG = _mm_add_epi16   (dstvAGAG, srcvAGAG); // [ AAGG AAGG AAGG AAGG ]
-                        dstvAGAG = _mm_and_si128   (dstvAGAG, maskA0G0); // [ A0G0 A0G0 A0G0 AAG0 ]
-                        // Prefetch the next 4 pixels
-                        _mm_prefetch(dstvARGB + 1, _MM_HINT_T0);
-                        // Process R and B
-                        dstvRBRB = _mm_and_si128   (dstv4PIX, mask0B0R); // [ 0R0B 0R0B 0R0B 0R0B ]
-                        dstvRBRB = _mm_mullo_epi16 (dstvRBRB, srci0A0A); // [ RRBB RRBB RRBB RRBB ]
-                        dstvRBRB = _mm_add_epi16   (dstvRBRB, srcvRBRB); // [ RRBB RRBB RRBB RRBB ]
-                        dstvRBRB = _mm_srli_epi16  (dstvRBRB, 8       ); // [ .R.B .R.B .R.B .R.B ]
-                        dstvRBRB = _mm_and_si128   (dstvRBRB, mask0B0R); // [ 0R0B 0R0B 0R0B 0R0B ]
-                        // Store 4 pixels
-                        dstv4PIX = _mm_or_si128    (dstvAGAG, dstvRBRB); // [ ARGB ARGB ARGB ARGB ]
-                                   _mm_storeu_si128(dstvARGB, dstv4PIX);
-                        // Increment the destination pointer
-                        ++dstvARGB;
-                    }
-                    length -= (len4 * 4);
-                    Pt::uint8_t* dst = reinterpret_cast<Pt::uint8_t*>(dstvARGB);
-#else
-                    Pt::uint8_t* dst = to;
-#endif
-                    for(size_t i = 0; i < length; ++i) {
-                        dst[0] = (srcB + blendInv * dst[0]) >> 8;
-                        dst[1] = (srcG + blendInv * dst[1]) >> 8;
-                        dst[2] = (srcR + blendInv * dst[2]) >> 8;
-                        dst[3] = (srcA + blendInv * dst[3]) >> 8;
-                        dst += 4;
-                    }
+                    fastBlendPixels(to, srcA, srcR, srcG, srcB, blendInv, length);
                     break;
                 }
             }
@@ -481,11 +283,6 @@ class Argb32Model
 
             p = data + view.stride() * ypos + xpos * 4;
         }
-
-#undef DIV_BY_255
-#undef DIV_BY_257
-
-#undef USE_MULTIPLY_SHIFT_FOR_CONSTANT_DIVISION
 };
 
 
@@ -762,5 +559,9 @@ class Argb32Image : public BasicImage<Argb32Model>
 
 } // namespace
 } // namespace
+
+
+#include <Pt/Gfx/Argb32ImageSIMDOperations.h>
+
 
 #endif
