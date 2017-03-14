@@ -21,24 +21,24 @@ if $(WITH_RASTERIZER2)
     {
         if $(WITH_BUILTIN_LIBPNG)
         {
-            SubDirCcFlags [ FGeneric -mfpu=neon ] ;
+            SubDirCcFlags [ FGeneric neon ] ;
             SubDirCcFlags [ FDefines WITH_BUILTIN_LIBPNG ] ;
         }
         else
         {
-            SubDirCcFlags [ FGeneric -mfpu=neon ] ;
+            SubDirCcFlags [ FGeneric neon ] ;
         }
-        SubDirC++Flags [ FGeneric -mfpu=neon ] ;
+        SubDirC++Flags [ FGeneric neon ] ;
         SubDirC++Flags [ FIncludes "/usr/include/cairo" ] ;
     }
     else
     {
         if $(WITH_BUILTIN_LIBPNG)
         {
-            SubDirCcFlags [ FGeneric -mfpu=neon ] ;
+            SubDirCcFlags [ FGeneric neon ] ;
             SubDirCcFlags [ FDefines WITH_BUILTIN_LIBPNG ] ;
         }
-        SubDirC++Flags [ FGeneric -mfpu=neon ] ;
+        SubDirC++Flags [ FGeneric neon ] ;
         SubDirC++Flags [ FIncludes "/usr/include/cairo" ] ;
     }
 

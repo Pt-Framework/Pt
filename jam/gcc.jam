@@ -235,7 +235,7 @@ rule CheckC++
 ##############################################################################
 
 rule FGeneric
-{ return $(<) ; }
+{ return -mfpu=$(<) ; }
 
 
 rule FDefines

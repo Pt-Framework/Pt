@@ -37,8 +37,8 @@ if $(WITH_RASTERIZER2)
 
     if $(TARGET_OS:L) = arm
     {
-        SubDirCcFlags  [ FGeneric -mfpu=neon ] ;
-        SubDirC++Flags [ FGeneric -mfpu=neon ] ;
+        SubDirCcFlags  [ FGeneric neon ] ;
+        SubDirC++Flags [ FGeneric neon ] ;
         SubDirC++Flags [ FDefines RASTERIZER2 ] ;
     }
     else
