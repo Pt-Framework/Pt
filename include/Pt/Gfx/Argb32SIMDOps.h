@@ -38,8 +38,6 @@
     #include <arm_neon.h>
     #define USE_NEON
 
-    // ### TODO ###
-
 #elif defined(i386) || defined(__i386) || defined(__i386__) || defined(_X86_) || defined(__x86_64) || defined(__x86_64__) || defined(__amd64) || defined(__amd64__)
 
     #include <x86intrin.h>
@@ -73,7 +71,7 @@ static const __m128i mask0B0R = _mm_set_epi32(0x00FF00FFU, 0x00FF00FFU, 0x00FF00
 // Copy a constant color to destination pixels
 inline void fastCopyPixels(Pt::uint8_t* toBuffer, Pt::uint32_t fromARGB, size_t length)
 {
-#ifdef USE_SSE2
+#if defined(USE_SSE2)
 
     const size_t   len4     = length / 4;
     const __m128i  srcvARGB = _mm_set1_epi32(fromARGB);
@@ -81,6 +79,20 @@ inline void fastCopyPixels(Pt::uint8_t* toBuffer, Pt::uint32_t fromARGB, size_t 
 
     for(size_t i = 0; i < len4; ++i) {
         _mm_storeu_si128(dstvARGB, srcvARGB);
+        ++dstvARGB;
+    }
+
+    length %= 4;
+    Pt::uint32_t* dst = reinterpret_cast<Pt::uint32_t*>(dstvARGB);
+
+#elif defined(USE_NEON)
+
+    const size_t     len4     = length / 4;
+    const int32x4_t  srcvARGB = vdupq_n_s32(fromARGB);
+          int32x4_t* dstvARGB = reinterpret_cast<int32x4_t*>(toBuffer);
+
+    for(size_t i = 0; i < len4; ++i) {
+        vst1q_s32(reinterpret_cast<Pt::int32_t*>(dstvARGB), srcvARGB);
         ++dstvARGB;
     }
 
