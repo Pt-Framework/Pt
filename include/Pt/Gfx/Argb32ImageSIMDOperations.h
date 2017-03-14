@@ -27,8 +27,8 @@
   02110-1301 USA
 */
 
-#ifndef PT_GFX_ARGB32IMAGESIMDOPERATIONS_H
-#define PT_GFX_ARGB32IMAGESIMDOPERATIONS_H
+#ifndef PT_GFX_ARGB32IMAGE_SIMDOPERATIONS_H
+#define PT_GFX_ARGB32IMAGE_SIMDOPERATIONS_H
 
 
 #ifdef RASTERIZER2
@@ -37,6 +37,8 @@
 
     #include <arm_neon.h>
     #define USE_NEON
+
+    // ### TODO ###
 
 #elif defined(i386) || defined(__i386) || defined(__i386__) || defined(_X86_) || defined(__x86_64) || defined(__x86_64__) || defined(__amd64) || defined(__amd64__)
 
@@ -58,13 +60,16 @@ namespace Gfx {
 
 
 #ifdef USE_SSE2
-// SSE related constants
+
+// SSE mask
 static const __m128i maskA000 = _mm_set_epi32(0xFF000000U, 0xFF000000U, 0xFF000000U, 0xFF000000U);
 static const __m128i maskA0G0 = _mm_set_epi32(0xFF00FF00U, 0xFF00FF00U, 0xFF00FF00U, 0xFF00FF00U);
 static const __m128i mask0B0R = _mm_set_epi32(0x00FF00FFU, 0x00FF00FFU, 0x00FF00FFU, 0x00FF00FFU);
+
 #endif
 
 
+// Copy a constant color to destination pixels
 inline void Argb32Model::fastCopyPixels(Pt::uint8_t* dst_, Pt::uint32_t srcARGB, size_t length)
 {
 #ifdef USE_SSE2
@@ -92,7 +97,7 @@ inline void Argb32Model::fastCopyPixels(Pt::uint8_t* dst_, Pt::uint32_t srcARGB,
     for(size_t i = 0; i < length; ++i) *dst++ = srcARGB;
 }
 
-
+// Blend a constant color to destination pixels
 inline void Argb32Model::fastBlendPixels(Pt::uint8_t* dst_, Pt::uint32_t srcA, Pt::uint32_t srcR, Pt::uint32_t srcG, Pt::uint32_t srcB, Pt::uint32_t blendInv, size_t length)
 {
 #ifdef USE_SSE2
@@ -150,7 +155,7 @@ inline void Argb32Model::fastBlendPixels(Pt::uint8_t* dst_, Pt::uint32_t srcA, P
     }
 }
 
-
+// Copy source pixels to destination pixels
 inline void Argb32Model::fastCopyPixels(Pt::uint8_t* dst, const Pt::uint8_t* src, size_t length)
 {
 #ifdef USE_SSE2
@@ -177,7 +182,7 @@ inline void Argb32Model::fastCopyPixels(Pt::uint8_t* dst, const Pt::uint8_t* src
     memcpy(dst, src, length * 4);
 }
 
-
+// Blend source pixels to destination pixels
 inline void Argb32Model::fastBlendPixels(Pt::uint8_t* dst, const Pt::uint8_t* src, size_t length)
 {
 

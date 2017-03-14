@@ -68,6 +68,7 @@ class Argb32Model
         static inline void fastCopyPixels(Pt::uint8_t* dst, const Pt::uint8_t* src, size_t length);
         static inline void fastBlendPixels(Pt::uint8_t* dst, const Pt::uint8_t* src, size_t length);
 
+    public:
         static Color toColor(const Pt::uint8_t* p)
         {
             const Pt::uint32_t pixel = *reinterpret_cast<const Pt::uint32_t*>(p);

@@ -59,7 +59,7 @@ using namespace Pt::Gfx;
 
 // Detailed-test enable settings for Pt-Gfx
 #define TEST_SOURCECOPY                         1
-#define TEST_SOURCEOVER                         1
+#define TEST_SOURCEOVER                         0
 
 #define TEST_DRAW_SOLID_LINE_AND_TEXT           0 // (including bezier)
 #define TEST_DRAW_PATTERNED_LINE                0 // (including bezier)
@@ -69,7 +69,7 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES  0
 #define TEST_DRAW_ROUND_RECTANGLES              0 // (including filled)
 #define TEST_DRAW_ELLIPSES_ARCS                 0
-#define TEST_DRAW_THICK_ELLIPSES_ARCS           1
+#define TEST_DRAW_THICK_ELLIPSES_ARCS           0
 
 #define TEST_DRAW_SOLID_FILLED_POLYGONS         1
 #define TEST_DRAW_GRADIENT_FILLED_POLYGONS      0
@@ -88,7 +88,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_CHECK_RESULTING_IMAGE     0
 
 #define BENCHMARK_IMAGE_SIZE                Size(1280, 800)
-#define BENCHMARK_LOOP_COUNT                ( 500 * (BENCHMARK_RESULT_HTML ? 10 : 1) )
+#define BENCHMARK_LOOP_COUNT                ( 5000 * (BENCHMARK_RESULT_HTML ? 10 : 1) )
 
 #define BENCHMARK_TEXT                      0
 #define BENCHMARK_ROTATED_TEXT              0
