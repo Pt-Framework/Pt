@@ -17,29 +17,29 @@ MakeLocate ImagePainterTest : $(PT_OUTPUT_TARGET) ;
 
 if $(WITH_RASTERIZER2)
 {
-    rule FMFPU
-    { return -mfpu=$(<) ; }
-
     if $(TARGET_OS:L) = arm
     {
         if $(WITH_BUILTIN_LIBPNG)
         {
             SubDirCcFlags [ FMFPU neon ] ;
-            SubDirCcFlags [ FMFPU neon FDefines WITH_BUILTIN_LIBPNG ] ;
+            SubDirCcFlags [ FDefines WITH_BUILTIN_LIBPNG ] ;
         }
         else
         {
             SubDirCcFlags [ FMFPU neon ] ;
         }
-        SubDirC++Flags [ FMFPU neon FIncludes "/usr/include/cairo" ] ;
+        SubDirC++Flags [ FMFPU neon ] ;
+        SubDirC++Flags [ FIncludes "/usr/include/cairo" ] ;
     }
     else
     {
         if $(WITH_BUILTIN_LIBPNG)
         {
-            SubDirCcFlags [ FMFPU neon FDefines WITH_BUILTIN_LIBPNG ] ;
+            SubDirCcFlags [ FMFPU neon ] ;
+            SubDirCcFlags [ FDefines WITH_BUILTIN_LIBPNG ] ;
         }
-        SubDirC++Flags [ FMFPU neon FIncludes "/usr/include/cairo" ] ;
+        SubDirC++Flags [ FMFPU neon ] ;
+        SubDirC++Flags [ FIncludes "/usr/include/cairo" ] ;
     }
 
     Main ImagePainterTest2 : ImagePainterTest2.cpp SDL_SavePNG/savepng.c ;
