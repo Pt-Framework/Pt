@@ -320,12 +320,12 @@ class Argb32Model
                 }
 
                 case CompositionMode::SourceOver: {
-                    const Pt::uint32_t  blend    = DIV_BY_257(c.alpha());
-                    const Pt::uint32_t  blendInv = 255 - blend;
-                    const Pt::uint32_t  srcR     = DIV_BY_257(c.red  ()) * blend;
-                    const Pt::uint32_t  srcG     = DIV_BY_257(c.green()) * blend;
-                    const Pt::uint32_t  srcB     = DIV_BY_257(c.blue ()) * blend;
-                    const Pt::uint32_t  srcA     = blend * blend;
+                    const Pt::uint32_t blend    = DIV_BY_257(c.alpha());
+                    const Pt::uint32_t blendInv = 255 - blend;
+                    const Pt::uint32_t srcR     = DIV_BY_257(c.red  ()) * blend;
+                    const Pt::uint32_t srcG     = DIV_BY_257(c.green()) * blend;
+                    const Pt::uint32_t srcB     = DIV_BY_257(c.blue ()) * blend;
+                    const Pt::uint32_t srcA     = blend * blend;
 #ifdef USE_SSE2
                     const size_t   len4     = length / 4;
                     const __m128i  srcvAGAG = _mm_set_epi16(srcA, srcG, srcA, srcG, srcA, srcG, srcA, srcG); // [ AAGG AAGG AAGG AAGG ]
@@ -381,7 +381,7 @@ class Argb32Model
             switch(mode) {
                 default:
                 case CompositionMode::SourceCopy: {
-                    Pt::uint32_t   src   = *reinterpret_cast<const Pt::uint32_t*>(from);
+                    Pt::uint32_t src = *reinterpret_cast<const Pt::uint32_t*>(from);
 #ifdef USE_SSE2
                     const size_t   len4     = length / 4;
                     const __m128i  srcvARGB = _mm_set1_epi32(src);
@@ -391,22 +391,58 @@ class Argb32Model
                         ++dstvARGB;
                     }
                     length -= (len4 * 4);
-                    Pt::uint32_t* dst =  reinterpret_cast<Pt::uint32_t*>(dstvARGB);
+                    Pt::uint32_t* dst = reinterpret_cast<Pt::uint32_t*>(dstvARGB);
 #else
-                    Pt::uint32_t* dst =  reinterpret_cast<Pt::uint32_t*>(to  );
+                    Pt::uint32_t* dst = reinterpret_cast<Pt::uint32_t*>(to  );
 #endif
                     for(size_t i = 0; i < length; ++i) *dst++ = src;
                     break;
                 }
 
                 case CompositionMode::SourceOver: {
-                    const Pt::uint32_t  blend    = from[3];
-                    const Pt::uint32_t  blendInv = 255 - blend;
-                    const Pt::uint32_t  srcR     = from[2] * blend;
-                    const Pt::uint32_t  srcG     = from[1] * blend;
-                    const Pt::uint32_t  srcB     = from[0] * blend;
-                    const Pt::uint32_t  srcA     = blend   * blend;
-                          Pt::uint8_t*  dst      = to;
+                    const Pt::uint32_t blend    = from[3];
+                    const Pt::uint32_t blendInv = 255 - blend;
+                    const Pt::uint32_t srcR     = from[2] * blend;
+                    const Pt::uint32_t srcG     = from[1] * blend;
+                    const Pt::uint32_t srcB     = from[0] * blend;
+                    const Pt::uint32_t srcA     = blend   * blend;
+#ifdef USE_SSE2
+                    const size_t   len4     = length / 4;
+                    const __m128i  srcvAGAG = _mm_set_epi16(srcA, srcG, srcA, srcG, srcA, srcG, srcA, srcG); // [ AAGG AAGG AAGG AAGG ]
+                    const __m128i  srcvRBRB = _mm_set_epi16(srcR, srcB, srcR, srcB, srcR, srcB, srcR, srcB); // [ RRBB RRBB RRBB RRBB ]
+                    const __m128i  srci0A0A = _mm_set_epi32(blendInv, blendInv, blendInv, blendInv);         // [ 0I0I 0I0I 0I0I 0I0I ]
+                          __m128i* dstvARGB = reinterpret_cast<__m128i*>(to);
+                          __m128i  dstv4PIX;
+                          __m128i  dstvAGAG;
+                          __m128i  dstvRBRB;
+                    for(size_t i = 0; i < len4; ++i) {
+                        // Load 4 pixels
+                        dstv4PIX = _mm_loadu_si128 (dstvARGB          ); // [ ARGB ARGB ARGB ARGB ]
+                        // Process A and G
+                        dstvAGAG = _mm_and_si128   (dstv4PIX, maskA0G0); // [ A0G0 A0G0 A0G0 A0G0 ]
+                        dstvAGAG = _mm_srli_epi16  (dstvAGAG, 8       ); // [ 0A0G 0A0G 0A0G 0A0G ]
+                        dstvAGAG = _mm_mullo_epi16 (dstvAGAG, srci0A0A); // [ AAGG AAGG AAGG AAGG ]
+                        dstvAGAG = _mm_add_epi16   (dstvAGAG, srcvAGAG); // [ AAGG AAGG AAGG AAGG ]
+                        dstvAGAG = _mm_and_si128   (dstvAGAG, maskA0G0); // [ A0G0 A0G0 A0G0 AAG0 ]
+                        // Prefetch the next 4 pixels
+                        _mm_prefetch(dstvARGB + 1, _MM_HINT_T0);
+                        // Process R and B
+                        dstvRBRB = _mm_and_si128   (dstv4PIX, mask0B0R); // [ 0R0B 0R0B 0R0B 0R0B ]
+                        dstvRBRB = _mm_mullo_epi16 (dstvRBRB, srci0A0A); // [ RRBB RRBB RRBB RRBB ]
+                        dstvRBRB = _mm_add_epi16   (dstvRBRB, srcvRBRB); // [ RRBB RRBB RRBB RRBB ]
+                        dstvRBRB = _mm_srli_epi16  (dstvRBRB, 8       ); // [ .R.B .R.B .R.B .R.B ]
+                        dstvRBRB = _mm_and_si128   (dstvRBRB, mask0B0R); // [ 0R0B 0R0B 0R0B 0R0B ]
+                        // Store 4 pixels
+                        dstv4PIX = _mm_or_si128    (dstvAGAG, dstvRBRB); // [ ARGB ARGB ARGB ARGB ]
+                                   _mm_storeu_si128(dstvARGB, dstv4PIX);
+                        // Increment the destination pointer
+                        ++dstvARGB;
+                    }
+                    length -= (len4 * 4);
+                    Pt::uint8_t* dst = reinterpret_cast<Pt::uint8_t*>(dstvARGB);
+#else
+                    Pt::uint8_t* dst = to;
+#endif
                     for(size_t i = 0; i < length; ++i) {
                         dst[0] = (srcB + blendInv * dst[0]) >> 8;
                         dst[1] = (srcG + blendInv * dst[1]) >> 8;
