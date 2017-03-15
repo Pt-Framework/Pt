@@ -119,14 +119,15 @@ inline void fastCopyPixels(Pt::uint8_t* toBuffer, Pt::uint32_t fromARGB, size_t 
 }
 
 // Blend a constant color to destination pixels
-inline void fastBlendPixels(Pt::uint8_t* toBuffer, Pt::uint32_t srcA, Pt::uint32_t srcR, Pt::uint32_t srcG, Pt::uint32_t srcB, Pt::uint32_t blendInv, size_t length)
+// (the source color must have been premultiplied with the non-inverted blending factor)
+inline void fastBlendPixels(Pt::uint8_t* toBuffer, Pt::uint32_t srcA, Pt::uint32_t srcR, Pt::uint32_t srcG, Pt::uint32_t srcB, Pt::uint32_t bfcI, size_t length)
 {
 #if defined(USE_SSE2)
 
     const size_t   len4     = length / 4;
     const __m128i  srcvAGAG = _mm_set_epi16(srcA, srcG, srcA, srcG, srcA, srcG, srcA, srcG); // [ AAGG AAGG AAGG AAGG ]
     const __m128i  srcvRBRB = _mm_set_epi16(srcR, srcB, srcR, srcB, srcR, srcB, srcR, srcB); // [ RRBB RRBB RRBB RRBB ]
-    const __m128i  srci0A0A = _mm_set_epi32(blendInv, blendInv, blendInv, blendInv);         // [ 0I0I 0I0I 0I0I 0I0I ]
+    const __m128i  srci0A0A = _mm_set_epi16(bfcI, bfcI, bfcI, bfcI, bfcI, bfcI, bfcI, bfcI); // [ 0I0I 0I0I 0I0I 0I0I ]
           __m128i* dstvARGB = reinterpret_cast<__m128i*>(toBuffer);
           __m128i  dstv4PIX;
           __m128i  dstvAGAG;
@@ -164,7 +165,7 @@ inline void fastBlendPixels(Pt::uint8_t* toBuffer, Pt::uint32_t srcA, Pt::uint32
     const size_t     len4     = length / 4;
     const int16x8_t  srcvAGAG = SET_16X8(srcA, srcG, srcA, srcG, srcA, srcG, srcA, srcG); // [ AAGG AAGG AAGG AAGG ]
     const int16x8_t  srcvRBRB = SET_16X8(srcR, srcB, srcR, srcB, srcR, srcB, srcR, srcB); // [ RRBB RRBB RRBB RRBB ]
-    const int16x8_t  srci0A0A = SET_16X8(blendInv, blendInv, blendInv, blendInv, blendInv, blendInv, blendInv, blendInv);         // [ 0I0I 0I0I 0I0I 0I0I ]
+    const int16x8_t  srci0A0A = SET_16X8(bfcI, bfcI, bfcI, bfcI, bfcI, bfcI, bfcI, bfcI);         // [ 0I0I 0I0I 0I0I 0I0I ]
           int32x4_t* dstvARGB = reinterpret_cast<int32x4_t*>(toBuffer);
           int32x4_t  dstv4PIX;
           int32x4_t  dstvAGAG;
@@ -202,10 +203,10 @@ inline void fastBlendPixels(Pt::uint8_t* toBuffer, Pt::uint32_t srcA, Pt::uint32
 #endif
 
     for(size_t i = 0; i < length; ++i) {
-        dst[0] = (srcB + blendInv * dst[0]) >> 8;
-        dst[1] = (srcG + blendInv * dst[1]) >> 8;
-        dst[2] = (srcR + blendInv * dst[2]) >> 8;
-        dst[3] = (srcA + blendInv * dst[3]) >> 8;
+        dst[0] = (srcB + bfcI * dst[0]) >> 8;
+        dst[1] = (srcG + bfcI * dst[1]) >> 8;
+        dst[2] = (srcR + bfcI * dst[2]) >> 8;
+        dst[3] = (srcA + bfcI * dst[3]) >> 8;
         dst += 4;
     }
 }
