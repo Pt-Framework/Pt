@@ -343,12 +343,12 @@ inline void fastBlendPixels(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBuffer
         srcv0A0A =             vandq_s32  (            srcv4PIX,             maskA000); // [ A000 A000 A000 A000 ]
         srci0A0A =             vsubq_s32  (            maskA000,             srcv0A0A); // [ I000 I000 I000 I000 ]
         srcv0A0A =             vorrq_s32  (                                             // [ 0A0A 0A0A 0A0A 0A0A ]
-                                   vshrq_n_s32(srcv0A0A,  8),
-                                   vshrq_n_s32(srcv0A0A, 24)
+                                   (int32x4_t) vshrq_n_u32((uint32x4_t) srcv0A0A,  8),
+                                   (int32x4_t) vshrq_n_u32((uint32x4_t) srcv0A0A, 24)
                                );
         srci0A0A =             vorrq_s32  (                                             // [ 0I0I 0I0I 0I0I 0I0I ]
-                                   vshrq_n_s32(srci0A0A,  8),
-                                   vshrq_n_s32(srci0A0A, 24)
+                                   (int32x4_t) vshrq_n_u32((uint32x4_t) srci0A0A,  8),
+                                   (int32x4_t) vshrq_n_u32((uint32x4_t) srci0A0A, 24)
                                );
         // Process A and G
         srcvAGAG =             vandq_s32  (            srcv4PIX,             maskA0G0); // [ A0G0 A0G0 A0G0 A0G0 ]
@@ -369,7 +369,7 @@ inline void fastBlendPixels(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBuffer
         dstvRBRB =             vandq_s32  (            dstvRBRB,             mask0B0R); // [ 0R0B 0R0B 0R0B 0R0B ]
         // Store 4 pixels
         dstv4PIX =             vorrq_s32  (            dstvAGAG,             dstvRBRB); // [ ARGB ARGB ARGB ARGB ]
-                               vst1q_s32  ((int32_t* ) dstvARGB,             dstvAGAG);
+                               vst1q_s32  ((int32_t* ) dstvARGB,             dstv4PIX);
         // Increment the pointers
         ++srcvARGB;
         ++dstvARGB;
