@@ -39,7 +39,7 @@
 #include <Pt/Gfx/Painter.h>
 
 #include <Pt/System/Path.h>
-#include<stdio.h>
+
 
 namespace Pt {
 namespace Gfx {

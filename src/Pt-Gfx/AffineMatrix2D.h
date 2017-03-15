@@ -33,6 +33,7 @@
 #include <vector>
 
 #include <Pt/Gfx/Math.h>
+#include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/SIMDConfig.h>
 
 
@@ -75,8 +76,8 @@ class AffineMatrix2D {
         inline void transformPoint(float& x, float &y);
         inline void transformPoint(float& dx, float& dy, float sx, float sy);
 
-        // ### TODO: Add transform points with SSE & NEON !!! ###
-
+        inline void transformPoint(PointF& p);
+        inline void transformPoint(PointF& dp, const PointF& sp);
 
     private:
         struct MatrixData {
@@ -228,6 +229,8 @@ bool AffineMatrix2D::pop()
 
 void AffineMatrix2D::transformPoint(float& x, float &y)
 {
+    // ### TODO: SIMD !!! ###
+
     const float tx = _mdata.v[0][0] * x + _mdata.v[0][1] * y + _mdata.v[0][2];
     const float ty = _mdata.v[1][0] * x + _mdata.v[1][1] * y + _mdata.v[1][2];
 
@@ -237,8 +240,28 @@ void AffineMatrix2D::transformPoint(float& x, float &y)
 
 void AffineMatrix2D::transformPoint(float& dx, float& dy, float sx, float sy)
 {
+    // ### TODO: SIMD !!! ###
+
     dx = _mdata.v[0][0] * sx + _mdata.v[0][1] * sy + _mdata.v[0][2];
     dy = _mdata.v[1][0] * sx + _mdata.v[1][1] * sy + _mdata.v[1][2];
+}
+
+void AffineMatrix2D::transformPoint(PointF& p)
+{
+    float x = p.x();
+    float y = p.x();
+
+    transformPoint(x, y);
+    p.set(x, y);
+}
+
+void AffineMatrix2D::transformPoint(PointF& dp, const PointF& sp)
+{
+    float x = sp.x();
+    float y = sp.x();
+
+    transformPoint(x, y);
+    dp.set(x, y);
 }
 
 
@@ -248,6 +271,8 @@ void AffineMatrix2D::transformPoint(float& dx, float& dy, float sx, float sy)
 
 void AffineMatrix2D::multiplyWith(const MatrixData& n, MatrixUpdateMode mode)
 {
+    // ### TODO: SIMD !!! ###
+
     MatrixData m;
 
     switch(mode) {

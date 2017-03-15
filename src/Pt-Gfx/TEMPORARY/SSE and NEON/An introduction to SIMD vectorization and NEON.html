@@ -1,0 +1,633 @@
+<!--doctype.tpl starts-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html><!--doctype.tpl ends--><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<!--html_header.tpl starts-->
+	<meta charset="utf-8">
+	<meta name="copyright" content="(C) Fixstars. All Rights Reserved.">
+	<!--<meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+	<meta http-equiv="Content-Language" content="en">
+	<link rel="shortcut icon" href="http://www.fixstars.com/images/favicon.ico">
+	<link href="http://www.fixstars.com/images/apple-touch-icon-152x152.png" rel="apple-touch-icon-precomposed" sizes="152x152">
+	<link href="http://www.fixstars.com/images/apple-touch-icon-120x120.png" rel="apple-touch-icon-precomposed" sizes="120x120">
+	<link href="http://www.fixstars.com/images/apple-touch-icon-114x114.png" rel="apple-touch-icon-precomposed" sizes="114x114">
+	<link href="http://www.fixstars.com/images/apple-touch-icon-144x144.png" rel="apple-touch-icon-precomposed" sizes="144x144">
+	<link href="http://www.fixstars.com/images/apple-touch-icon-76x76.png" rel="apple-touch-icon-precomposed" sizes="76x76">
+	<link href="http://www.fixstars.com/images/apple-touch-icon-72x72.png" rel="apple-touch-icon-precomposed" sizes="72x72">
+	<link href="http://www.fixstars.com/images/apple-touch-icon-57x57.png" rel="apple-touch-icon-precomposed" sizes="57x57">
+	<!-- Le styles -->
+<!-- External files -->
+     <link rel="stylesheet" href="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/style.css">
+<title>News – Fixstars – [Tech blog] An introduction to SIMD vectorization and NEON</title>
+
+<!--html_header.tpl ends-->
+	<meta name="keywords" content="">
+	<meta name="description" content="">
+<link rel="dns-prefetch" href="http://apis.google.com/">
+<link rel="dns-prefetch" href="http://platform.twitter.com/">
+<link rel="dns-prefetch" href="http://platform.linkedin.com/">
+<link rel="dns-prefetch" href="http://fonts.googleapis.com/">
+<link rel="dns-prefetch" href="http://s.w.org/">
+<link rel="alternate" type="application/rss+xml" title="News - Fixstars » [Tech blog] An introduction to SIMD vectorization and NEON Comments Feed" href="http://www.fixstars.com/en/news/?feed=rss2&amp;p=125">
+		<script async="" src="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/async-ads.js"></script><script src="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/cbgapi.loaded_1" async=""></script><script type="text/javascript" async="" src="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/ga.js"></script><script id="twitter-wjs" src="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/widgets.js"></script><script id="facebook-jssdk" src="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/all.js"></script><script type="text/javascript" async="" src="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/cse.js"></script><script src="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/cbgapi.loaded_0" async=""></script><script type="text/javascript">
+			window._wpemojiSettings = {"baseUrl":"https:\/\/s.w.org\/images\/core\/emoji\/2.2.1\/72x72\/","ext":".png","svgUrl":"https:\/\/s.w.org\/images\/core\/emoji\/2.2.1\/svg\/","svgExt":".svg","source":{"concatemoji":"http:\/\/www.fixstars.com\/en\/news\/wp-includes\/js\/wp-emoji-release.min.js?ver=4.7.3"}};
+			!function(a,b,c){function d(a){var b,c,d,e,f=String.fromCharCode;if(!k||!k.fillText)return!1;switch(k.clearRect(0,0,j.width,j.height),k.textBaseline="top",k.font="600 32px Arial",a){case"flag":return k.fillText(f(55356,56826,55356,56819),0,0),!(j.toDataURL().length<3e3)&&(k.clearRect(0,0,j.width,j.height),k.fillText(f(55356,57331,65039,8205,55356,57096),0,0),b=j.toDataURL(),k.clearRect(0,0,j.width,j.height),k.fillText(f(55356,57331,55356,57096),0,0),c=j.toDataURL(),b!==c);case"emoji4":return k.fillText(f(55357,56425,55356,57341,8205,55357,56507),0,0),d=j.toDataURL(),k.clearRect(0,0,j.width,j.height),k.fillText(f(55357,56425,55356,57341,55357,56507),0,0),e=j.toDataURL(),d!==e}return!1}function e(a){var c=b.createElement("script");c.src=a,c.defer=c.type="text/javascript",b.getElementsByTagName("head")[0].appendChild(c)}var f,g,h,i,j=b.createElement("canvas"),k=j.getContext&&j.getContext("2d");for(i=Array("flag","emoji4"),c.supports={everything:!0,everythingExceptFlag:!0},h=0;h<i.length;h++)c.supports[i[h]]=d(i[h]),c.supports.everything=c.supports.everything&&c.supports[i[h]],"flag"!==i[h]&&(c.supports.everythingExceptFlag=c.supports.everythingExceptFlag&&c.supports[i[h]]);c.supports.everythingExceptFlag=c.supports.everythingExceptFlag&&!c.supports.flag,c.DOMReady=!1,c.readyCallback=function(){c.DOMReady=!0},c.supports.everything||(g=function(){c.readyCallback()},b.addEventListener?(b.addEventListener("DOMContentLoaded",g,!1),a.addEventListener("load",g,!1)):(a.attachEvent("onload",g),b.attachEvent("onreadystatechange",function(){"complete"===b.readyState&&c.readyCallback()})),f=c.source||{},f.concatemoji?e(f.concatemoji):f.wpemoji&&f.twemoji&&(e(f.twemoji),e(f.wpemoji)))}(window,document,window._wpemojiSettings);
+		</script><script src="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/wp-emoji-release.js" type="text/javascript" defer="defer"></script>
+		<style type="text/css">
+img.wp-smiley,
+img.emoji {
+	display: inline !important;
+	border: none !important;
+	box-shadow: none !important;
+	height: 1em !important;
+	width: 1em !important;
+	margin: 0 .07em !important;
+	vertical-align: -0.1em !important;
+	background: none !important;
+	padding: 0 !important;
+}
+</style>
+<link rel="stylesheet" id="googlefonts-css" href="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/css.css" type="text/css" media="all">
+<link rel="stylesheet" id="font-awesome-styles-css" href="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/font-awesome.css" type="text/css" media="all">
+<!--[if lte IE 7]>
+<link rel='stylesheet' id='font-awesome-ie7-css'  href='http://www.fixstars.com/en/news/wp-content/plugins/font-awesome/assets/css/font-awesome-ie7.min.css?ver=3.2.1' type='text/css' media='all' />
+<![endif]-->
+<script type="text/javascript" src="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/plusone.js" gapi_processed="true"></script>
+<script type="text/javascript" src="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/widgets_002.js"></script>
+<script type="text/javascript" src="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/in.js"></script><script src="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/secureAnonymousFramework"></script>
+<link rel="https://api.w.org/" href="http://www.fixstars.com/en/news/?rest_route=/">
+<link rel="EditURI" type="application/rsd+xml" title="RSD" href="http://www.fixstars.com/en/news/xmlrpc.php?rsd">
+<link rel="wlwmanifest" type="application/wlwmanifest+xml" href="http://www.fixstars.com/en/news/wp-includes/wlwmanifest.xml"> 
+<link rel="prev" title="Geometric Performance Primitives, the world’s fastest multi-core geometry engine" href="http://www.fixstars.com/en/news/?p=108">
+<link rel="next" title="Fixstars to Launch “FlashAir™ Developers”, a Technical Information Website Supporting App Development Using the Toshiba FlashAir SDHC Memory Card." href="http://www.fixstars.com/en/news/?p=168">
+<meta name="generator" content="WordPress 4.7.3">
+<link rel="canonical" href="http://www.fixstars.com/en/news/?p=125">
+<link rel="shortlink" href="http://www.fixstars.com/en/news/?p=125">
+<link rel="alternate" type="application/json+oembed" href="http://www.fixstars.com/en/news/?rest_route=%2Foembed%2F1.0%2Fembed&amp;url=http%3A%2F%2Fwww.fixstars.com%2Fen%2Fnews%2F%3Fp%3D125">
+<link rel="alternate" type="text/xml+oembed" href="http://www.fixstars.com/en/news/?rest_route=%2Foembed%2F1.0%2Fembed&amp;url=http%3A%2F%2Fwww.fixstars.com%2Fen%2Fnews%2F%3Fp%3D125&amp;format=xml">
+<link rel="stylesheet" type="text/css" href="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/simple_likebuttons.css">
+<style type="text/css" media="screen">
+	body{ font-family:"Open Sans", arial, sans-serif;}
+</style>
+<!-- fonts delivered by Wordpress Google Fonts, a plugin by Adrian3.com -->		<style type="text/css">.recentcomments a{display:inline !important;padding:0 !important;margin:0 !important;}</style>
+		<link rel="stylesheet" type="text/css" href="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/shCore.css"><link rel="stylesheet" type="text/css" href="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/shThemeDefault.css"><style type="text/css" id="syntaxhighlighteranchor"></style>
+<script src="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/jsapi" type="text/javascript"></script><style type="text/css">* html #li_ui_li_gen_1489555144964_0 a#li_ui_li_gen_1489555144964_0-link{height:1% !important;}#li_ui_li_gen_1489555144964_0{position:relative !important;overflow:visible !important;display:block !important;}#li_ui_li_gen_1489555144964_0 span{-webkit-box-sizing:content-box !important;-moz-box-sizing:content-box !important;box-sizing:content-box !important;}#li_ui_li_gen_1489555144964_0 a#li_ui_li_gen_1489555144964_0-link{border:0 !important;height:20px !important;text-decoration:none !important;padding:0 !important;margin:0 !important;display:inline-block !important;}#li_ui_li_gen_1489555144964_0 a#li_ui_li_gen_1489555144964_0-link:link, #li_ui_li_gen_1489555144964_0 a#li_ui_li_gen_1489555144964_0-link:visited, #li_ui_li_gen_1489555144964_0 a#li_ui_li_gen_1489555144964_0-link:hover, #li_ui_li_gen_1489555144964_0 a#li_ui_li_gen_1489555144964_0-link:active{border:0 !important;text-decoration:none !important;}#li_ui_li_gen_1489555144964_0 a#li_ui_li_gen_1489555144964_0-link:after{content:"." !important;display:block !important;clear:both !important;visibility:hidden !important;line-height:0 !important;height:0 !important;}#li_ui_li_gen_1489555144964_0 #li_ui_li_gen_1489555144964_0-logo{background-image:url(https://static.licdn.com/scds/common/u/images/apps/connect/sprites/sprite_connect_v14.png) !important;background-position:0px -593px !important;background-repeat:no-repeat !important;background-color:#0077b5 !important;background-size:initial !important;cursor:pointer !important;border:0 !important;border-right:1px solid #066094 !important;text-indent:-9999em !important;overflow:hidden !important;padding:0 !important;margin:0 !important;position:absolute !important;left:0px !important;top:0px !important;display:block !important;width:20px !important;height:20px !important;float:right !important;border-radius:2px !important;-moz-border-radius:2px !important;border-top-right-radius:2px !important;border-bottom-right-radius:2px !important;-moz-border-radius-topright:2px !important;-moz-border-radius-bottomright:2px !important;}#li_ui_li_gen_1489555144964_0 #li_ui_li_gen_1489555144964_0-title{color:#fff !important;cursor:pointer !important;display:block !important;white-space:nowrap !important;float:left !important;margin-left:1px !important;vertical-align:top !important;overflow:hidden !important;text-align:center !important;height:18px !important;padding:0 4px 0 23px !important;border:1px solid #000 !important;border-top-color:#0077b5 !important;border-right-color:#0077b5 !important;border-bottom-color:#0077b5 !important;border-left-color:#0077b5 !important;text-shadow:0 -1px #005887 !important;line-height:20px !important;border-radius:2px !important;-moz-border-radius:2px !important;border-top-right-radius:2px !important;border-bottom-right-radius:2px !important;-moz-border-radius-topright:2px !important;-moz-border-radius-bottomright:2px !important;background-color:#0077b5 !important;background-image:-moz-linear-gradient(top, #0077b5 0%, #0077b5 100%) !important;}#li_ui_li_gen_1489555144964_0.hovered #li_ui_li_gen_1489555144964_0-title{border:1px solid #000 !important;border-top-color:#0369a0 !important;border-right-color:#0369a0 !important;border-bottom-color:#0369a0 !important;border-left-color:#0369a0 !important;background-color:#0369a0 !important;background-image:-moz-linear-gradient(top, #0369a0 0%, #0369a0 100%) !important;}#li_ui_li_gen_1489555144964_0.clicked #li_ui_li_gen_1489555144964_0-title, #li_ui_li_gen_1489555144964_0.down #li_ui_li_gen_1489555144964_0-title{color:#fff !important;border:1px solid #000 !important;border-top-color:#066094 !important;border-right-color:#066094 !important;border-bottom-color:#066094 !important;border-left-color:#066094 !important;background-color:#066094 !important;background-image:-moz-linear-gradient(top, #066094 0%, #066094 100%) !important;}.IN-shadowed #li_ui_li_gen_1489555144964_0 #li_ui_li_gen_1489555144964_0-title{}.IN-shadowed #li_ui_li_gen_1489555144964_0.hovered #li_ui_li_gen_1489555144964_0-title{}.IN-shadowed #li_ui_li_gen_1489555144964_0.clicked #li_ui_li_gen_1489555144964_0-title, .IN-shadowed #li_ui_li_gen_1489555144964_0.down #li_ui_li_gen_1489555144964_0-title{}#li_ui_li_gen_1489555144964_0 #li_ui_li_gen_1489555144964_0-title-text, #li_ui_li_gen_1489555144964_0 #li_ui_li_gen_1489555144964_0-title-text *{color:#fff !important;font-size:11px !important;font-family:Arial, sans-serif !important;font-weight:bold !important;font-style:normal !important;-webkit-font-smoothing:antialiased !important;display:inline-block !important;background:transparent none !important;vertical-align:top !important;height:18px !important;line-height:20px !important;float:none !important;}#li_ui_li_gen_1489555144964_0 #li_ui_li_gen_1489555144964_0-title-text strong{font-weight:bold !important;}#li_ui_li_gen_1489555144964_0 #li_ui_li_gen_1489555144964_0-title-text em{font-style:italic !important;}#li_ui_li_gen_1489555144964_0.hovered #li_ui_li_gen_1489555144964_0-title-text, #li_ui_li_gen_1489555144964_0.hovered #li_ui_li_gen_1489555144964_0-title-text *{color:#fff !important;}#li_ui_li_gen_1489555144964_0.clicked #li_ui_li_gen_1489555144964_0-title-text, #li_ui_li_gen_1489555144964_0.down #li_ui_li_gen_1489555144964_0-title-text, #li_ui_li_gen_1489555144964_0.clicked #li_ui_li_gen_1489555144964_0-title-text *, #li_ui_li_gen_1489555144964_0.down #li_ui_li_gen_1489555144964_0-title-text *{color:#fff !important;}#li_ui_li_gen_1489555144964_0 #li_ui_li_gen_1489555144964_0-title #li_ui_li_gen_1489555144964_0-mark{display:inline-block !important;width:0px !important;overflow:hidden !important;}.success #li_ui_li_gen_1489555144964_0 #li_ui_li_gen_1489555144964_0-title{color:#fff !important;border-top-color:#0077b5 !important;border-right-color:#0077b5 !important;border-bottom-color:#0077b5 !important;border-left-color:#0077b5 !important;background-color:#0077b5 !important;background-image:-moz-linear-gradient(top, #0077b5 0%, #0077b5 100%) !important;}.success #li_ui_li_gen_1489555144964_0 #li_ui_li_gen_1489555144964_0-title-text, .success #li_ui_li_gen_1489555144964_0 #li_ui_li_gen_1489555144964_0-title-text *{color:#fff !important;}.IN-shadowed .success #li_ui_li_gen_1489555144964_0 #li_ui_li_gen_1489555144964_0-title{}.success #li_ui_li_gen_1489555144964_0.hovered #li_ui_li_gen_1489555144964_0-title{color:#fff !important;border-top-color:#0369a0 !important;border-right-color:#0369a0 !important;border-bottom-color:#0369a0 !important;border-left-color:#0369a0 !important;background-color:#0369a0 !important;background-image:-moz-linear-gradient(top, #0369a0 0%, #0369a0 100%) !important;}.success #li_ui_li_gen_1489555144964_0.hovered #li_ui_li_gen_1489555144964_0-title-text, .success #li_ui_li_gen_1489555144964_0.hovered #li_ui_li_gen_1489555144964_0-title-text *{color:#fff !important;}.success #li_ui_li_gen_1489555144964_0.clicked #li_ui_li_gen_1489555144964_0-title, .success #li_ui_li_gen_1489555144964_0.down #li_ui_li_gen_1489555144964_0-title{color:#fff !important;border-top-color:#066094 !important;border-right-color:#066094 !important;border-bottom-color:#066094 !important;border-left-color:#066094 !important;background-color:#066094 !important;background-image:-moz-linear-gradient(top, #066094 0%, #066094 100%) !important;}.success #li_ui_li_gen_1489555144964_0.clicked #li_ui_li_gen_1489555144964_0-title-text, .success #li_ui_li_gen_1489555144964_0.down #li_ui_li_gen_1489555144964_0-title-text, .success #li_ui_li_gen_1489555144964_0.clicked #li_ui_li_gen_1489555144964_0-title-text *, .success #li_ui_li_gen_1489555144964_0.down #li_ui_li_gen_1489555144964_0-title-text *{color:#fff !important;}.IN-shadowed .success #li_ui_li_gen_1489555144964_0.clicked #li_ui_li_gen_1489555144964_0-title, .IN-shadowed .success #li_ui_li_gen_1489555144964_0.down #li_ui_li_gen_1489555144964_0-title{}#li_ui_li_gen_1489555144976_1-container.IN-top {display:inline-block !important;overflow:visible !important;position:relative !important;height:42px !important;line-height:1px !important;cursor:pointer !important;}#li_ui_li_gen_1489555144976_1.IN-top {display:inline-block !important;height:42px !important;width:60px !important;text-align:center !important;background-image:url(https://static.licdn.com/scds/common/u/images/apps/connect/sprites/sprite_connect_v14.png) !important;background-color:transparent !important;background-repeat:no-repeat !important;background-position:-207px -470px !important;}#li_ui_li_gen_1489555144976_1-content.IN-top {display:inline !important;font-size:16px !important;color:#4e4e4e !important;font-weight:bold !important;font-family:Arial, sans-serif !important;line-height:38px !important;}#li_ui_li_gen_1489555144976_1-container.IN-empty #li_ui_li_gen_1489555144976_1-inner.IN-top {background-image:url(https://static.licdn.com/scds/common/u/images/apps/connect/sprites/sprite_connect_v14.png) !important;background-color:transparent !important;background-repeat:no-repeat !important;background-position:0px -560px !important;background-size:initial !important;overflow:hidden !important;margin:4px auto 0 auto !important;width:28px !important;height:28px !important;display:block !important;}#li_ui_li_gen_1489555144976_1-container.IN-empty #li_ui_li_gen_1489555144976_1-content.IN-top {text-indent:-999px !important;display:inline-block !important;}#li_ui_li_gen_1489555144976_1-container.IN-hidden #li_ui_li_gen_1489555144976_1 {display:none !important;}</style><link type="text/css" href="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/defaulten.css" rel="stylesheet"><link type="text/css" href="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/minimalist.css" rel="stylesheet"><script type="text/javascript" src="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/defaulten.js"></script><style type="text/css">
+</style><script type="text/javascript" charset="utf-8" async="" src="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/timeline.js"></script><script type="text/javascript" charset="utf-8" async="" src="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/button.js"></script><style type="text/css">.fb_hidden{position:absolute;top:-10000px;z-index:10001}.fb_reposition{overflow:hidden;position:relative}.fb_invisible{display:none}.fb_reset{background:none;border:0;border-spacing:0;color:#000;cursor:auto;direction:ltr;font-family:"lucida grande", tahoma, verdana, arial, sans-serif;font-size:11px;font-style:normal;font-variant:normal;font-weight:normal;letter-spacing:normal;line-height:1;margin:0;overflow:visible;padding:0;text-align:left;text-decoration:none;text-indent:0;text-shadow:none;text-transform:none;visibility:visible;white-space:normal;word-spacing:normal}.fb_reset>div{overflow:hidden}.fb_link img{border:none}@keyframes fb_transform{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}.fb_animate{animation:fb_transform .3s forwards}
+.fb_dialog{background:rgba(82, 82, 82, .7);position:absolute;top:-10000px;z-index:10001}.fb_reset .fb_dialog_legacy{overflow:visible}.fb_dialog_advanced{padding:10px;-moz-border-radius:8px;-webkit-border-radius:8px;border-radius:8px}.fb_dialog_content{background:#fff;color:#333}.fb_dialog_close_icon{background:url(https://static.xx.fbcdn.net/rsrc.php/v3/yq/r/IE9JII6Z1Ys.png) no-repeat scroll 0 0 transparent;_background-image:url(https://static.xx.fbcdn.net/rsrc.php/v3/yL/r/s816eWC-2sl.gif);cursor:pointer;display:block;height:15px;position:absolute;right:18px;top:17px;width:15px}.fb_dialog_mobile .fb_dialog_close_icon{top:5px;left:5px;right:auto}.fb_dialog_padding{background-color:transparent;position:absolute;width:1px;z-index:-1}.fb_dialog_close_icon:hover{background:url(https://static.xx.fbcdn.net/rsrc.php/v3/yq/r/IE9JII6Z1Ys.png) no-repeat scroll 0 -15px transparent;_background-image:url(https://static.xx.fbcdn.net/rsrc.php/v3/yL/r/s816eWC-2sl.gif)}.fb_dialog_close_icon:active{background:url(https://static.xx.fbcdn.net/rsrc.php/v3/yq/r/IE9JII6Z1Ys.png) no-repeat scroll 0 -30px transparent;_background-image:url(https://static.xx.fbcdn.net/rsrc.php/v3/yL/r/s816eWC-2sl.gif)}.fb_dialog_loader{background-color:#f6f7f9;border:1px solid #606060;font-size:24px;padding:20px}.fb_dialog_top_left,.fb_dialog_top_right,.fb_dialog_bottom_left,.fb_dialog_bottom_right{height:10px;width:10px;overflow:hidden;position:absolute}.fb_dialog_top_left{background:url(https://static.xx.fbcdn.net/rsrc.php/v3/ye/r/8YeTNIlTZjm.png) no-repeat 0 0;left:-10px;top:-10px}.fb_dialog_top_right{background:url(https://static.xx.fbcdn.net/rsrc.php/v3/ye/r/8YeTNIlTZjm.png) no-repeat 0 -10px;right:-10px;top:-10px}.fb_dialog_bottom_left{background:url(https://static.xx.fbcdn.net/rsrc.php/v3/ye/r/8YeTNIlTZjm.png) no-repeat 0 -20px;bottom:-10px;left:-10px}.fb_dialog_bottom_right{background:url(https://static.xx.fbcdn.net/rsrc.php/v3/ye/r/8YeTNIlTZjm.png) no-repeat 0 -30px;right:-10px;bottom:-10px}.fb_dialog_vert_left,.fb_dialog_vert_right,.fb_dialog_horiz_top,.fb_dialog_horiz_bottom{position:absolute;background:#525252;filter:alpha(opacity=70);opacity:.7}.fb_dialog_vert_left,.fb_dialog_vert_right{width:10px;height:100%}.fb_dialog_vert_left{margin-left:-10px}.fb_dialog_vert_right{right:0;margin-right:-10px}.fb_dialog_horiz_top,.fb_dialog_horiz_bottom{width:100%;height:10px}.fb_dialog_horiz_top{margin-top:-10px}.fb_dialog_horiz_bottom{bottom:0;margin-bottom:-10px}.fb_dialog_iframe{line-height:0}.fb_dialog_content .dialog_title{background:#6d84b4;border:1px solid #365899;color:#fff;font-size:14px;font-weight:bold;margin:0}.fb_dialog_content .dialog_title>span{background:url(https://static.xx.fbcdn.net/rsrc.php/v3/yd/r/Cou7n-nqK52.gif) no-repeat 5px 50%;float:left;padding:5px 0 7px 26px}body.fb_hidden{-webkit-transform:none;height:100%;margin:0;overflow:visible;position:absolute;top:-10000px;left:0;width:100%}.fb_dialog.fb_dialog_mobile.loading{background:url(https://static.xx.fbcdn.net/rsrc.php/v3/ya/r/3rhSv5V8j3o.gif) white no-repeat 50% 50%;min-height:100%;min-width:100%;overflow:hidden;position:absolute;top:0;z-index:10001}.fb_dialog.fb_dialog_mobile.loading.centered{width:auto;height:auto;min-height:initial;min-width:initial;background:none}.fb_dialog.fb_dialog_mobile.loading.centered #fb_dialog_loader_spinner{width:100%}.fb_dialog.fb_dialog_mobile.loading.centered .fb_dialog_content{background:none}.loading.centered #fb_dialog_loader_close{color:#fff;display:block;padding-top:20px;clear:both;font-size:18px}#fb-root #fb_dialog_ipad_overlay{background:rgba(0, 0, 0, .45);position:absolute;bottom:0;left:0;right:0;top:0;width:100%;min-height:100%;z-index:10000}#fb-root #fb_dialog_ipad_overlay.hidden{display:none}.fb_dialog.fb_dialog_mobile.loading iframe{visibility:hidden}.fb_dialog_content .dialog_header{-webkit-box-shadow:white 0 1px 1px -1px inset;background:-webkit-gradient(linear, 0% 0%, 0% 100%, from(#738ABA), to(#2C4987));border-bottom:1px solid;border-color:#1d4088;color:#fff;font:14px Helvetica, sans-serif;font-weight:bold;text-overflow:ellipsis;text-shadow:rgba(0, 30, 84, .296875) 0 -1px 0;vertical-align:middle;white-space:nowrap}.fb_dialog_content .dialog_header table{-webkit-font-smoothing:subpixel-antialiased;height:43px;width:100%}.fb_dialog_content .dialog_header td.header_left{font-size:12px;padding-left:5px;vertical-align:middle;width:60px}.fb_dialog_content .dialog_header td.header_right{font-size:12px;padding-right:5px;vertical-align:middle;width:60px}.fb_dialog_content .touchable_button{background:-webkit-gradient(linear, 0% 0%, 0% 100%, from(#4966A6), color-stop(.5, #355492), to(#2A4887));border:1px solid #29487d;-webkit-background-clip:padding-box;-webkit-border-radius:3px;-webkit-box-shadow:rgba(0, 0, 0, .117188) 0 1px 1px inset, rgba(255, 255, 255, .167969) 0 1px 0;display:inline-block;margin-top:3px;max-width:85px;line-height:18px;padding:4px 12px;position:relative}.fb_dialog_content .dialog_header .touchable_button input{border:none;background:none;color:#fff;font:12px Helvetica, sans-serif;font-weight:bold;margin:2px -12px;padding:2px 6px 3px 6px;text-shadow:rgba(0, 30, 84, .296875) 0 -1px 0}.fb_dialog_content .dialog_header .header_center{color:#fff;font-size:16px;font-weight:bold;line-height:18px;text-align:center;vertical-align:middle}.fb_dialog_content .dialog_content{background:url(https://static.xx.fbcdn.net/rsrc.php/v3/y9/r/jKEcVPZFk-2.gif) no-repeat 50% 50%;border:1px solid #555;border-bottom:0;border-top:0;height:150px}.fb_dialog_content .dialog_footer{background:#f6f7f9;border:1px solid #555;border-top-color:#ccc;height:40px}#fb_dialog_loader_close{float:left}.fb_dialog.fb_dialog_mobile .fb_dialog_close_button{text-shadow:rgba(0, 30, 84, .296875) 0 -1px 0}.fb_dialog.fb_dialog_mobile .fb_dialog_close_icon{visibility:hidden}#fb_dialog_loader_spinner{animation:rotateSpinner 1.2s linear infinite;background-color:transparent;background-image:url(https://static.xx.fbcdn.net/rsrc.php/v3/yD/r/t-wz8gw1xG1.png);background-repeat:no-repeat;background-position:50% 50%;height:24px;width:24px}@keyframes rotateSpinner{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+.fb_iframe_widget{display:inline-block;position:relative}.fb_iframe_widget span{display:inline-block;position:relative;text-align:justify}.fb_iframe_widget iframe{position:absolute}.fb_iframe_widget_fluid_desktop,.fb_iframe_widget_fluid_desktop span,.fb_iframe_widget_fluid_desktop iframe{max-width:100%}.fb_iframe_widget_fluid_desktop iframe{min-width:220px;position:relative}.fb_iframe_widget_lift{z-index:1}.fb_hide_iframes iframe{position:relative;left:-10000px}.fb_iframe_widget_loader{position:relative;display:inline-block}.fb_iframe_widget_fluid{display:inline}.fb_iframe_widget_fluid span{width:100%}.fb_iframe_widget_loader iframe{min-height:32px;z-index:2;zoom:1}.fb_iframe_widget_loader .FB_Loader{background:url(https://static.xx.fbcdn.net/rsrc.php/v3/y9/r/jKEcVPZFk-2.gif) no-repeat;height:32px;width:32px;margin-left:-16px;position:absolute;left:50%;z-index:4}</style><style type="text/css">.gscb_a{display:inline-block;font:27px/13px arial,sans-serif}.gsst_a .gscb_a{color:#a1b9ed;cursor:pointer}.gsst_a:hover .gscb_a,.gsst_a:focus .gscb_a{color:#36c}.gsst_a{display:inline-block}.gsst_a{cursor:pointer;padding:0 4px}.gsst_a:hover{text-decoration:none!important}.gsst_b{font-size:16px;padding:0 2px;position:relative;user-select:none;-moz-user-select:none;white-space:nowrap}.gsst_e{opacity:0.55;}.gsst_a:hover .gsst_e,.gsst_a:focus .gsst_e{opacity:0.72;}.gsst_a:active .gsst_e{opacity:1;}.gsst_f{background:white;text-align:left}.gsst_g{background-color:white;border:1px solid #ccc;border-top-color:#d9d9d9;box-shadow:0 2px 4px rgba(0,0,0,0.2);-moz-box-shadow:0 2px 4px rgba(0,0,0,0.2);margin:-1px -3px;padding:0 6px}.gsst_h{background-color:white;height:1px;margin-bottom:-1px;position:relative;top:-1px}.gsib_a{width:100%;padding:4px 6px 0}.gsib_a,.gsib_b{vertical-align:top}.gssb_c{border:0;position:absolute;z-index:989}.gssb_e{border:1px solid #ccc;border-top-color:#d9d9d9;box-shadow:0 2px 4px rgba(0,0,0,0.2);-moz-box-shadow:0 2px 4px rgba(0,0,0,0.2);cursor:default}.gssb_f{visibility:hidden;white-space:nowrap}.gssb_k{border:0;display:block;position:absolute;top:0;z-index:988}.gsdd_a{border:none!important}.gsq_a{padding:0}.gscsep_a{display:none}.gssb_a{padding:0 7px}.gssb_a,.gssb_a td{white-space:nowrap;overflow:hidden;line-height:22px}#gssb_b{font-size:11px;color:#36c;text-decoration:none}#gssb_b:hover{font-size:11px;color:#36c;text-decoration:underline}.gssb_g{text-align:center;padding:8px 0 7px;position:relative}.gssb_h{font-size:15px;height:28px;margin:0.2em}.gssb_i{background:#eee}.gss_ifl{visibility:hidden;padding-left:5px}.gssb_i .gss_ifl{visibility:visible}a.gssb_j{font-size:13px;color:#36c;text-decoration:none;line-height:100%}a.gssb_j:hover{text-decoration:underline}.gssb_l{height:1px;background-color:#e5e5e5}.gssb_m{color:#000;background:#fff}.gsfe_a{border:1px solid #b9b9b9;border-top-color:#a0a0a0;box-shadow:inset 0px 1px 2px rgba(0,0,0,0.1);-moz-box-shadow:inset 0px 1px 2px rgba(0,0,0,0.1);-webkit-box-shadow:inset 0px 1px 2px rgba(0,0,0,0.1);}.gsfe_b{border:1px solid #4d90fe;outline:none;box-shadow:inset 0px 1px 2px rgba(0,0,0,0.3);-moz-box-shadow:inset 0px 1px 2px rgba(0,0,0,0.3);-webkit-box-shadow:inset 0px 1px 2px rgba(0,0,0,0.3);}.gssb_a{padding:0 7px}.gssb_e{border:0}.gssb_l{margin:5px 0}#gsc-i-id1::-webkit-input-placeholder{font-size:14px}#gsc-i-id1:-moz-placeholder{font-size:14px}#gsc-i-id1::-moz-placeholder{font-size:14px}#gsc-i-id1:-ms-input-placeholder{font-size:14px}#gsc-i-id1:focus::-webkit-input-placeholder{color:transparent}#gsc-i-id1:focus:-moz-placeholder{color:transparent}#gsc-i-id1:focus::-moz-placeholder{color:transparent}#gsc-i-id1:focus:-ms-input-placeholder{color:transparent}.gssb_c .gsc-completion-container{position:static}.gssb_c{z-index:5000}.gsc-completion-container table{background:transparent;font-size:inherit;font-family:inherit}.gssb_c > tbody > tr,.gssb_c > tbody > tr > td,.gssb_d,.gssb_d > tbody > tr,.gssb_d > tbody > tr > td,.gssb_e,.gssb_e > tbody > tr,.gssb_e > tbody > tr > td{padding:0;margin:0;border:0}.gssb_a table,.gssb_a table tr,.gssb_a table tr td{padding:0;margin:0;border:0}</style></head>
+
+<body>
+	<div id="header">
+<!--header.tpl starts-->
+<div class="container">
+	<div class="row">
+		<div class="span3 brand">
+			<a href="http://www.fixstars.com/en/"><img src="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/co_logo.jpg" alt="Fixstars logo"></a>
+		</div>
+		<div class="span9 upper-nav">
+			<ul class="inline unstyled pull-right small">
+				<li>
+				<a href="http://www.fixstars.com/ja/?sw=ja">Japanese</a>  | 
+				</li>
+				<li>
+				<a href="http://www.fixstars.com/en/contact/input/">Contact us</a>
+				</li>
+				<li class="google-cse">
+				<!-- Google CSE code begins -->
+					<script>
+					  (function() {
+						var cx = '001608660648483145435:5kejqted9ao';
+						var gcse = document.createElement('script');
+						gcse.type = 'text/javascript';
+						gcse.async = true;
+						gcse.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') +
+							'//www.google.com/cse/cse.js?cx=' + cx;
+						var s = document.getElementsByTagName('script')[0];
+						s.parentNode.insertBefore(gcse, s);
+					  })();
+					</script>
+					<div id="___gcse_0"><div class="gsc-control-cse gsc-control-cse-en"><div class="gsc-control-wrapper-cse" dir="ltr"><form class="gsc-search-box" accept-charset="utf-8"><table class="gsc-search-box" cellspacing="0" cellpadding="0"><tbody><tr><td class="gsc-input"><input autocomplete="off" size="10" class=" gsc-input" name="search" title="search" id="gsc-i-id1" dir="ltr" spellcheck="false" style="outline: medium none; background: rgb(255, 255, 255) url(&quot;http://www.google.com/cse/static/images/1x/googlelogo_lightgrey_46x16dp.png&quot;) no-repeat scroll left center; text-indent: 48px;" placeholder="Custom Search" type="text"><input name="bgresponse" id="bgresponse" type="hidden"></td><td class="gsc-search-button"><input value="Search" class="gsc-search-button" title="search" type="button"></td><td class="gsc-clear-button"><div class="gsc-clear-button" title="clear results">&nbsp;</div></td></tr></tbody></table><table class="gsc-branding" cellspacing="0" cellpadding="0"><tbody><tr><td class="gsc-branding-user-defined"></td><td class="gsc-branding-text"><div class="gsc-branding-text">powered by</div></td><td class="gsc-branding-img"><img src="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/googlelogo_grey_46x15dp.png" class="gsc-branding-img" srcset="https://www.google.com/cse/static/images/2x/googlelogo_grey_46x15dp.png 2x"></td></tr></tbody></table></form><div class="gsc-results-wrapper-overlay"><div class="gsc-results-close-btn" tabindex="0"></div><div class="gsc-tabsAreaInvisible"><div class="gsc-tabHeader gsc-inline-block gsc-tabhActive">Custom Search</div><span class="gs-spacer"> </span></div><div class="gsc-tabsAreaInvisible"></div><div class="gsc-above-wrapper-area-invisible"><table class="gsc-above-wrapper-area-container" cellspacing="0" cellpadding="0"><tbody><tr><td class="gsc-result-info-container"><div class="gsc-result-info-invisible"></div></td></tr></tbody></table></div><div class="gsc-adBlockInvisible"></div><div class="gsc-wrapper"><div class="gsc-adBlockInvisible"></div><div class="gsc-resultsbox-invisible"><div class="gsc-resultsRoot gsc-tabData gsc-tabdActive"><table class="gsc-resultsHeader" cellspacing="0" cellpadding="0"><tbody><tr><td class="gsc-twiddleRegionCell"><div class="gsc-twiddle"><div class="gsc-title">Web</div></div><div class="gsc-stats"></div><div class="gsc-results-selector gsc-all-results-active"><div class="gsc-result-selector gsc-one-result" title="show one result">&nbsp;</div><div class="gsc-result-selector gsc-more-results" title="show more results">&nbsp;</div><div class="gsc-result-selector gsc-all-results" title="show all results">&nbsp;</div></div></td><td class="gsc-configLabelCell"></td></tr></tbody></table><div><div class="gsc-expansionArea"></div></div></div></div></div></div><div class="gsc-modal-background-image" tabindex="0"></div></div></div></div>
+				<!-- Google CSE Code ends -->
+				</li>
+			</ul>
+		</div>
+	</div>
+	
+	<div class="row">
+		<div id="navbar" class="offset3">
+			<ul class="main">
+				<li><a href="http://www.fixstars.com/en/" {%if="" $content="=&quot;home&quot;" %}class="active" {%="" if%}="">Home</a></li>
+				<li><a href="http://www.fixstars.com/en/products/" style="vertical-align: top;" {%if="" $content="=&quot;products&quot;" %}class="active" {%="" if%}="">Products <i class="icon-caret-down"></i></a>
+					<ul class="dropdown">
+						<li><a href="http://www.fixstars.com/en/ssd/" {%if="" $content="=&quot;ssd&quot;" %}class="active" {%="" if%}="">Fixstars Solid State Drive</a></li>
+						<li><a href="http://www.fixstars.com/en/ssd/iris/" {%if="" $content="=&quot;iris&quot;" %}class="active" {%="" if%}="">IRIS-DRIVE</a></li>
+						<li><a href="http://www.fixstars.com/en/products/m-cubed/" {%if="" $content="=&quot;m-cubed&quot;" %}class="active" {%="" if%}="">M³ (M-cubed)</a></li>
+						<li><a href="http://www.fixstars.com/en/products/gpp/" {%if="" $content="=&quot;gpp&quot;" %}class="active" {%="" if%}="">Geometric Performance Primitives</a></li>
+						<li><a href="http://www.fixstars.com/en/products/yda/" {%if="" $content="=&quot;yda&quot;" %}class="active" {%="" if%}="">Yellow Dog Appliance Server</a></li>
+					</ul>
+				</li>
+				<li><a href="http://www.fixstars.com/en/services/" {%if="" $content="=&quot;services&quot;" %}class="active" {%="" if%}="">Services <i class="icon-caret-down"></i></a>
+					<ul class="dropdown">
+						<li><a href="http://www.fixstars.com/en/cloud/">Cloud Cost Saving Service</a></li>
+						<li><a href="http://www.fixstars.com/en/linux/">Linux Expert Consulting</a></li>
+						<li><a href="http://www.fixstars.com/en/services/acceleration/">Software Acceleration</a></li>
+						<li><a href="http://www.fixstars.com/en/services/opencl-on-fpga/">OpenCL on FPGA</a></li>
+					</ul>
+				</li>
+				<li><a href="http://www.fixstars.com/en/technologies/" {%if="" $content="=&quot;technologies&quot;" %}class="active" {%="" if%}="">Technologies <i class="icon-caret-down"></i></a>
+					<ul class="dropdown">
+						<li><a href="http://www.fixstars.com/en/technologies/linux/what/overview/">Yellow Dog Linux</a></li>
+						<li><a href="http://www.fixstars.com/en/opencl/book/">OpenCL</a></li>
+					</ul>
+				</li>
+
+				<li><a href="http://www.fixstars.com/en/news/" {%if="" $content="=&quot;news&quot;" %}class="active" {%="" if%}="">News <i class="icon-caret-down"></i></a>
+					<ul class="dropdown">
+						<li><a href="http://www.fixstars.com/en/news/?cat=8">Press Releases</a></li>
+						<li><a href="http://www.fixstars.com/en/news/?cat=25">Tech blog</a></li>
+						<li><a href="http://www.fixstars.com/en/news/?cat=7">Events</a></li>
+					</ul>
+				</li>
+				<li><a href="http://www.fixstars.com/en/company/" {%if="" $content="=&quot;company&quot;" %}class="active" {%="" if%}="">Company <i class="icon-caret-down"></i></a>
+					<ul class="dropdown">
+						<li><a href="http://www.fixstars.com/en/company/">About Us</a></li>
+						<li><a href="http://www.fixstars.com/en/company/managements/">Managements</a></li>
+						<li><a href="http://www.fixstars.com/en/contact/input/">Contact us</a></li>
+					</ul>
+				</li>
+			</ul>
+
+		</div><!--/.navbar-->
+	</div><!--/.row-->
+</div><!--/.container-->
+<!--header.tpl ends-->
+	</div><!--/.header-->
+	<div id="body">
+		<div id="pagetitle-blue">
+			<div class="container">
+				<h1>News</h1>
+			</div>
+		</div>
+		<div class="container">
+			<div class="breadcrumbs">
+				<ul class="inline">
+					<li><a href="http://www.fixstars.com/en/">Home</a> /</li>
+					<li class="active">News /</li>
+				</ul>
+			</div>
+			<div class="row">
+				<div class="span3">
+					<div class="widget-area subnav">
+		<ul>
+<!--		<li class="categories">Categories<ul>	<li class="cat-item cat-item-7"><a href="http://www.fixstars.com/en/news/?cat=7" >Events</a>
+</li>
+	<li class="cat-item cat-item-8"><a href="http://www.fixstars.com/en/news/?cat=8" >Press release</a>
+</li>
+	<li class="cat-item cat-item-9"><a href="http://www.fixstars.com/en/news/?cat=9" >Books</a>
+</li>
+	<li class="cat-item cat-item-25"><a href="http://www.fixstars.com/en/news/?cat=25" >Tech blog</a>
+</li>
+</ul></li> 
+-->
+		<li class="widget-container"><h3>Categories</h3>		<ul>
+	<li class="cat-item cat-item-9"><a href="http://www.fixstars.com/en/news/?cat=9">Books</a>
+</li>
+	<li class="cat-item cat-item-7"><a href="http://www.fixstars.com/en/news/?cat=7">Events</a>
+</li>
+	<li class="cat-item cat-item-8"><a href="http://www.fixstars.com/en/news/?cat=8">Press release</a>
+</li>
+	<li class="cat-item cat-item-25"><a href="http://www.fixstars.com/en/news/?cat=25">Tech blog</a>
+</li>
+	<li class="cat-item cat-item-1"><a href="http://www.fixstars.com/en/news/?cat=1">Uncategorized</a>
+</li>
+		</ul>
+</li>		<li class="widget-container">		<h3>Recent News</h3>		<ul>
+					<li>
+				<a href="http://www.fixstars.com/en/news/?p=760">Fixstars Cambridge Office is launched</a>
+						</li>
+					<li>
+				<a href="http://www.fixstars.com/en/news/?p=718">The World’s Smallest Object Storage Solution, “Ceph on Olive”, is Released</a>
+						</li>
+					<li>
+				<a href="http://www.fixstars.com/en/news/?p=709">Fixstars at the NAB Show</a>
+						</li>
+					<li>
+				<a href="http://www.fixstars.com/en/news/?p=682">Fixstars is Now a Member of OpenPOWER</a>
+						</li>
+					<li>
+				<a href="http://www.fixstars.com/en/news/?p=669">Fixstars Launches Cloud Solutions</a>
+						</li>
+				</ul>
+		</li>		<li class="widget-container"><h3>By Month</h3>		<label class="screen-reader-text" for="archives-dropdown-3">By Month</label>
+		<select id="archives-dropdown-3" name="archive-dropdown" onchange="document.location.href=this.options[this.selectedIndex].value;">
+			
+			<option value="" selected="selected">Select Month</option>
+				<option value="http://www.fixstars.com/en/news/?m=201703"> March 2017 &nbsp;(1)</option>
+	<option value="http://www.fixstars.com/en/news/?m=201604"> April 2016 &nbsp;(3)</option>
+	<option value="http://www.fixstars.com/en/news/?m=201602"> February 2016 &nbsp;(1)</option>
+	<option value="http://www.fixstars.com/en/news/?m=201601"> January 2016 &nbsp;(1)</option>
+	<option value="http://www.fixstars.com/en/news/?m=201511"> November 2015 &nbsp;(2)</option>
+	<option value="http://www.fixstars.com/en/news/?m=201510"> October 2015 &nbsp;(2)</option>
+	<option value="http://www.fixstars.com/en/news/?m=201509"> September 2015 &nbsp;(2)</option>
+	<option value="http://www.fixstars.com/en/news/?m=201508"> August 2015 &nbsp;(1)</option>
+	<option value="http://www.fixstars.com/en/news/?m=201507"> July 2015 &nbsp;(1)</option>
+	<option value="http://www.fixstars.com/en/news/?m=201505"> May 2015 &nbsp;(1)</option>
+	<option value="http://www.fixstars.com/en/news/?m=201504"> April 2015 &nbsp;(2)</option>
+	<option value="http://www.fixstars.com/en/news/?m=201503"> March 2015 &nbsp;(1)</option>
+	<option value="http://www.fixstars.com/en/news/?m=201502"> February 2015 &nbsp;(2)</option>
+	<option value="http://www.fixstars.com/en/news/?m=201412"> December 2014 &nbsp;(1)</option>
+	<option value="http://www.fixstars.com/en/news/?m=201411"> November 2014 &nbsp;(2)</option>
+	<option value="http://www.fixstars.com/en/news/?m=201408"> August 2014 &nbsp;(1)</option>
+	<option value="http://www.fixstars.com/en/news/?m=201406"> June 2014 &nbsp;(1)</option>
+	<option value="http://www.fixstars.com/en/news/?m=201403"> March 2014 &nbsp;(1)</option>
+	<option value="http://www.fixstars.com/en/news/?m=201311"> November 2013 &nbsp;(1)</option>
+	<option value="http://www.fixstars.com/en/news/?m=201309"> September 2013 &nbsp;(1)</option>
+	<option value="http://www.fixstars.com/en/news/?m=201308"> August 2013 &nbsp;(1)</option>
+	<option value="http://www.fixstars.com/en/news/?m=201303"> March 2013 &nbsp;(2)</option>
+	<option value="http://www.fixstars.com/en/news/?m=201212"> December 2012 &nbsp;(1)</option>
+	<option value="http://www.fixstars.com/en/news/?m=201211"> November 2012 &nbsp;(1)</option>
+	<option value="http://www.fixstars.com/en/news/?m=201208"> August 2012 &nbsp;(3)</option>
+	<option value="http://www.fixstars.com/en/news/?m=201207"> July 2012 &nbsp;(1)</option>
+	<option value="http://www.fixstars.com/en/news/?m=201204"> April 2012 &nbsp;(1)</option>
+	<option value="http://www.fixstars.com/en/news/?m=201203"> March 2012 &nbsp;(1)</option>
+
+		</select>
+		</li><li class="widget-container"><h3>Search</h3><form role="search" method="get" id="searchform" class="searchform" action="http://www.fixstars.com/en/news/">
+				<div>
+					<label class="screen-reader-text" for="s">Search for:</label>
+					<input name="s" id="s" type="text">
+					<input id="searchsubmit" value="Search" type="submit">
+				</div>
+			</form></li><li class="widget-container"><h3>Archives</h3><div class="menu-archives-container"><ul id="menu-archives" class="menu"><li id="menu-item-218" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-218"><a href="http://www.fixstars.com/en/news/archive/2011/">2011</a></li>
+<li id="menu-item-219" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-219"><a href="http://www.fixstars.com/en/news/archive/2010/">2010</a></li>
+<li id="menu-item-220" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-220"><a href="http://www.fixstars.com/en/news/archive/2009/">2009</a></li>
+<li id="menu-item-221" class="menu-item menu-item-type-custom menu-item-object-custom menu-item-221"><a href="http://www.fixstars.com/en/news/archive/2008/">2008</a></li>
+</ul></div></li>				</ul>
+<!--
+                 <form action="#" id="searchform" method="get">
+                 <div class="search btnArea">
+	                 <input type="text" id="s" name="s" value="" size="25" class="box">
+	                 <input type="submit" value="search" id="searchsubmit" class="btn btn-primary">
+                 </div>
+                 </form>
+-->
+</div><!-- /.widget-area -->	
+
+             
+
+
+				</div>
+				<div class="span9">
+					<div class="main-content">	         
+				<div class="post">
+			<h2>
+        			<a href="http://www.fixstars.com/en/news/?p=125" title="[Tech blog] An introduction to SIMD vectorization and NEON">
+	        		[Tech blog] An introduction to SIMD vectorization and NEON        			</a>
+			</h2>
+			<p class="post-info">
+				<span class="posted-date">Wednesday, March 20, 2013</span>
+			</p>
+								
+		<p><span style="font-size: small;"><strong>1. What is vectorization?</strong></span></p>
+<p>Vectorization is a type of parallel computing where a single process 
+performs multiple tasks at the same time. This is done by packing a set 
+of elements together into an array and operating on them all at once. 
+It’s especially useful for multimedia purposes such as gaming, image 
+processing, video encoding/decoding and much more.&nbsp; The process 
+looks something like Figure A.</p>
+<div style="width: 463px" class="wp-caption aligncenter"><img title="SIMD Sample" src="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/smd.png" alt="Fig A: SIMD Sample" width="453" height="237"><p class="wp-caption-text">Fig A: SIMD Sample</p></div>
+<p>So how do we do this in actual code? And how does it compare with a 
+scalar, one at a time approach? Let’s take a look. I’m going to be doing
+ two implementations of the same addition function, one scalar and one 
+with vectorization using ARM’s NEON intrinsics and gcc 4.7.2-2 (on 
+Yellowdog Linux for ARM*).</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>The scalar function is very simple, it’s just a for loop adding two 16 member arrays.</p>
+<div><div id="highlighter_22039" class="syntaxhighlighter  cpp"><table cellspacing="0" cellpadding="0" border="0"><tbody><tr><td class="gutter"><div class="line number1 index0 alt2">1</div><div class="line number2 index1 alt1">2</div><div class="line number3 index2 alt2">3</div><div class="line number4 index3 alt1">4</div><div class="line number5 index4 alt2">5</div></td><td class="code"><div class="container"><div class="line number1 index0 alt2"><code class="cpp keyword bold">void</code> <code class="cpp plain">add_scalar(uint8_t * A, uint8_t * B, uint8_t * C){</code></div><div class="line number2 index1 alt1"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp keyword bold">for</code><code class="cpp plain">(</code><code class="cpp color1 bold">int</code> <code class="cpp plain">i=0; i&lt;16; i++){</code></div><div class="line number3 index2 alt2"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">C[i] = A[i] + B[i];</code></div><div class="line number4 index3 alt1"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">}</code></div><div class="line number5 index4 alt2"><code class="cpp plain">}</code></div></div></td></tr></tbody></table></div></div>
+<p>The NEON function however looks a lot more complicated.</p>
+<div><div id="highlighter_602606" class="syntaxhighlighter  cpp"><table cellspacing="0" cellpadding="0" border="0"><tbody><tr><td class="gutter"><div class="line number1 index0 alt2">01</div><div class="line number2 index1 alt1">02</div><div class="line number3 index2 alt2">03</div><div class="line number4 index3 alt1">04</div><div class="line number5 index4 alt2">05</div><div class="line number6 index5 alt1">06</div><div class="line number7 index6 alt2">07</div><div class="line number8 index7 alt1">08</div><div class="line number9 index8 alt2">09</div><div class="line number10 index9 alt1">10</div><div class="line number11 index10 alt2">11</div></td><td class="code"><div class="container"><div class="line number1 index0 alt2"><code class="cpp keyword bold">void</code> <code class="cpp plain">add_neon(uint8_t * A, uint8_t * B, uint8_t *C){</code></div><div class="line number2 index1 alt1"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp comments">//Setup a couple vectors to hold our data</code></div><div class="line number3 index2 alt2"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">uint8x16_t vectorA, vectorB vectorC;</code></div><div class="line number4 index3 alt1">&nbsp;</div><div class="line number5 index4 alt2"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp comments">//Load our data into the vector's register</code></div><div class="line number6 index5 alt1"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">vectorA = vld1q_u8(A);</code></div><div class="line number7 index6 alt2"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">vectorB = vld1q_u8(B);</code></div><div class="line number8 index7 alt1">&nbsp;</div><div class="line number9 index8 alt2"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp comments">//Add A and B together</code></div><div class="line number10 index9 alt1"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">vectorC = vaddq_u8(vectorA, vectorB);</code></div><div class="line number11 index10 alt2"><code class="cpp plain">}</code></div></div></td></tr></tbody></table></div></div>
+<p>Those strange looking functions are NEON’s Intrinsics, they form an 
+intermediate layer between assembly and C. They’re a bit confusing, but 
+ARM’s infocenter goes into some detail about them and GCC has a great 
+reference available here. So what do they do? Well, “uint8x16_t” is a 
+vector type containing 16 8bit uints in an array and “ald1q_u8” loads 
+8bit uints into a vector. Finally, “vaddq_u8” adds two vectors made of 
+8bit uints together all at once, and returns the result. If you test 
+this out you’ll notice that the neon function isn’t really any faster. 
+This is because those two load functions take up a lot of time, and 
+we’re doing so little work that the scalar solution catches up. If we 
+could avoid those (by structuring our program to use vectors in the 
+first place) we’d see a greater improvement.</p>
+<p>Now lets take a look at another case where neon can really shine, 
+matrix multiplication. Specifically 4×4 matrix multiplication, a common 
+case in computer graphics.</p>
+<div><div id="highlighter_879310" class="syntaxhighlighter  cpp"><table cellspacing="0" cellpadding="0" border="0"><tbody><tr><td class="gutter"><div class="line number1 index0 alt2">01</div><div class="line number2 index1 alt1">02</div><div class="line number3 index2 alt2">03</div><div class="line number4 index3 alt1">04</div><div class="line number5 index4 alt2">05</div><div class="line number6 index5 alt1">06</div><div class="line number7 index6 alt2">07</div><div class="line number8 index7 alt1">08</div><div class="line number9 index8 alt2">09</div><div class="line number10 index9 alt1">10</div><div class="line number11 index10 alt2">11</div><div class="line number12 index11 alt1">12</div></td><td class="code"><div class="container"><div class="line number1 index0 alt2"><code class="cpp comments">// Our test matrices</code></div><div class="line number2 index1 alt1"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">uint16_t matrixA[4][4] = {1,&nbsp; 2,&nbsp; 3,&nbsp; 4, \</code></div><div class="line number3 index2 alt2"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">5,&nbsp; 6,&nbsp; 7,&nbsp; 8, \</code></div><div class="line number4 index3 alt1"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">9,&nbsp; 10, 11, 12,\</code></div><div class="line number5 index4 alt2"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">13, 14, 15, 16 };</code></div><div class="line number6 index5 alt1">&nbsp;</div><div class="line number7 index6 alt2"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">uint16_t matrixB[4][4] = {16, 15, 14, 13,\</code></div><div class="line number8 index7 alt1"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">12, 11, 10, 9, \</code></div><div class="line number9 index8 alt2"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">8,&nbsp; 7,&nbsp; 6,&nbsp; 5, \</code></div><div class="line number10 index9 alt1"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">4,&nbsp; 3,&nbsp; 2, 1 };</code></div><div class="line number11 index10 alt2">&nbsp;</div><div class="line number12 index11 alt1"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">uint16_t matrixC[4][4];</code></div></div></td></tr></tbody></table></div></div>
+<p>Multiplying these together with a scalar function is fairly 
+straightforward, we calculate the dotproduct of each value in matrixA 
+(by rows) with each column in matrixB. We can do this in a somewhat 
+efficient manner using for loops:</p>
+<div><div id="highlighter_199007" class="syntaxhighlighter  cpp"><table cellspacing="0" cellpadding="0" border="0"><tbody><tr><td class="gutter"><div class="line number1 index0 alt2">01</div><div class="line number2 index1 alt1">02</div><div class="line number3 index2 alt2">03</div><div class="line number4 index3 alt1">04</div><div class="line number5 index4 alt2">05</div><div class="line number6 index5 alt1">06</div><div class="line number7 index6 alt2">07</div><div class="line number8 index7 alt1">08</div><div class="line number9 index8 alt2">09</div><div class="line number10 index9 alt1">10</div><div class="line number11 index10 alt2">11</div><div class="line number12 index11 alt1">12</div></td><td class="code"><div class="container"><div class="line number1 index0 alt2"><code class="cpp comments">//...</code></div><div class="line number2 index1 alt1"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp keyword bold">for</code><code class="cpp plain">(i=0; i&lt;4; i++){ </code><code class="cpp comments">//For each row in A</code></div><div class="line number3 index2 alt2"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp keyword bold">for</code><code class="cpp plain">(j=0; j&lt;4; j++){ </code><code class="cpp comments">//And each column in B</code></div><div class="line number4 index3 alt1"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">dotproduct=0;</code></div><div class="line number5 index4 alt2"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp keyword bold">for</code><code class="cpp plain">(k=0; k&lt;4; k++){ </code><code class="cpp comments">//for each item in that column</code></div><div class="line number6 index5 alt1"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">dotproduct = dotproduct + A[i][k]*B[k][j];</code></div><div class="line number7 index6 alt2"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp comments">//use a running total to calculate the dp.</code></div><div class="line number8 index7 alt1"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">}</code></div><div class="line number9 index8 alt2"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">C[i][j] = dotproduct; </code><code class="cpp comments">//fill in C with our results.</code></div><div class="line number10 index9 alt1"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">}</code></div><div class="line number11 index10 alt2"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">}</code></div><div class="line number12 index11 alt1"><code class="cpp comments">//...</code></div></div></td></tr></tbody></table></div></div>
+<p>Now using NEON…</p>
+<div><div id="highlighter_762088" class="syntaxhighlighter  cpp"><table cellspacing="0" cellpadding="0" border="0"><tbody><tr><td class="gutter"><div class="line number1 index0 alt2">01</div><div class="line number2 index1 alt1">02</div><div class="line number3 index2 alt2">03</div><div class="line number4 index3 alt1">04</div><div class="line number5 index4 alt2">05</div><div class="line number6 index5 alt1">06</div><div class="line number7 index6 alt2">07</div><div class="line number8 index7 alt1">08</div><div class="line number9 index8 alt2">09</div><div class="line number10 index9 alt1">10</div><div class="line number11 index10 alt2">11</div><div class="line number12 index11 alt1">12</div><div class="line number13 index12 alt2">13</div><div class="line number14 index13 alt1">14</div><div class="line number15 index14 alt2">15</div><div class="line number16 index15 alt1">16</div><div class="line number17 index16 alt2">17</div><div class="line number18 index17 alt1">18</div><div class="line number19 index18 alt2">19</div><div class="line number20 index19 alt1">20</div><div class="line number21 index20 alt2">21</div><div class="line number22 index21 alt1">22</div><div class="line number23 index22 alt2">23</div><div class="line number24 index23 alt1">24</div><div class="line number25 index24 alt2">25</div><div class="line number26 index25 alt1">26</div><div class="line number27 index26 alt2">27</div><div class="line number28 index27 alt1">28</div><div class="line number29 index28 alt2">29</div></td><td class="code"><div class="container"><div class="line number1 index0 alt2"><code class="cpp comments">//...</code></div><div class="line number2 index1 alt1"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp comments">//Load matrixB into four vectors</code></div><div class="line number3 index2 alt2"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">uint16x4_t vectorB1, vectorB2, vectorB3, vectorB4;</code></div><div class="line number4 index3 alt1">&nbsp;</div><div class="line number5 index4 alt2"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">vectorB1 = vld1_u16 (B[0]);</code></div><div class="line number6 index5 alt1"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">vectorB2 = vld1_u16 (B[1]);</code></div><div class="line number7 index6 alt2"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">vectorB3 = vld1_u16 (B[2]);</code></div><div class="line number8 index7 alt1"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">vectorB4 = vld1_u16 (B[3]);</code></div><div class="line number9 index8 alt2">&nbsp;</div><div class="line number10 index9 alt1"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp comments">//Temporary vectors to use with calculating the dotproduct</code></div><div class="line number11 index10 alt2"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">uint16x4_t vectorT1, vectorT2, vectorT3, vectorT4;</code></div><div class="line number12 index11 alt1">&nbsp;</div><div class="line number13 index12 alt2"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp comments">// For each row in A...</code></div><div class="line number14 index13 alt1"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp keyword bold">for</code> <code class="cpp plain">(i=0; i&lt;4; i++){</code></div><div class="line number15 index14 alt2"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp comments">//Multiply the rows in B by each value in A's row</code></div><div class="line number16 index15 alt1"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">vectorT1 = vmul_n_u16(vectorB1, A[i][0]);</code></div><div class="line number17 index16 alt2"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">vectorT2 = vmul_n_u16(vectorB2, A[i][1]);</code></div><div class="line number18 index17 alt1"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">vectorT3 = vmul_n_u16(vectorB3, A[i][2]);</code></div><div class="line number19 index18 alt2"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">vectorT4 = vmul_n_u16(vectorB4, A[i][3]);</code></div><div class="line number20 index19 alt1">&nbsp;</div><div class="line number21 index20 alt2"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp comments">//Add them together</code></div><div class="line number22 index21 alt1"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">vectorT1 = vadd_u16(vectorT1, vectorT2);</code></div><div class="line number23 index22 alt2"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">vectorT1 = vadd_u16(vectorT1, vectorT3);</code></div><div class="line number24 index23 alt1"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">vectorT1 = vadd_u16(vectorT1, vectorT4);</code></div><div class="line number25 index24 alt2">&nbsp;</div><div class="line number26 index25 alt1"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp comments">//Output the dotproduct</code></div><div class="line number27 index26 alt2"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">vst1_u16 (C[i], vectorT1);</code></div><div class="line number28 index27 alt1"><code class="cpp spaces">&nbsp;&nbsp;&nbsp;&nbsp;</code><code class="cpp plain">}</code></div><div class="line number29 index28 alt2"><code class="cpp comments">//...</code></div></div></td></tr></tbody></table></div></div>
+<p>That looks much more complicated, and in some ways it is. It’s also 
+about three times as fast (including loads) on my test machine. Instead 
+of stepping through each item in matrixA I’m stepping through each row, 
+and calculating the dot product for four of them at a time. If we break 
+down the matrix multiplication and look at the dotproduct calculations 
+for the first row, you can hopefully see why this works:</p>
+<p>C[0][0] = (1 * 16) + (2 * 12) + (3 * 8) + (4 * 4) (which is 80)<br>
+C[0][1] = (1 * 15) + (2 * 11) + (3 * 7) + (4 * 3) (70)<br>
+C[0][2] = (1 * 14) + (2 * 10) + (3 * 6) + (4 * 2) (60)<br>
+C[0][3] = (1 * 13) + (2 * 9) + (3 * 5) + (4 * 1) (50)<br>
+etc…</p>
+<p>We’re multiplying each row of matrixB with a single value from 
+matrixA at a time, something neon can do easily using “vmul_n_X”. We 
+hold this data in temp vectors, add those vectors together with “vadd_X”
+ (accumulating the result in vectorT1) then unload our new row into 
+matrixC using “vstl_X”. A very different approach than the scalar 
+solution but with the same results. My test program is <a title="sample c code." href="http://www.fixstars.com/en/news/wp-content/uploads/2013/03/matrix_example.c" target="_blank">attached to the blog post</a> if you’d like to give it a try yourself.</p>
+<p><span style="font-size: small;"><strong>2. Autovectorization</strong></span></p>
+<p>Interested in avoiding all this mess and still getting at least some 
+of the benefits? Luckily there’s something called Auto-Vectorization, an
+ automatic way to convert a scalar program into a Vectorized one. 
+Research into auto-vectorization is still ongoing (and probably will be 
+for quite some time), but there are several implementations available 
+already. Gcc is by far the most popular and gcc 4.7(+), which includes 
+support for autovectorization is already included in Yellowdog Linux 7.</p>
+<p>Enabling Autovectorization in gcc is quite simple, but there are 
+several tricks and hints you may need to give the compiler to get an 
+optimal result. In gcc 4.7(+), auto-vectorization can be enabled by 
+adding -03 or -ftree-vectorize to the command line (or CFLAGS). If 
+you’re planning to use neon you’ll need to enable it with -mfpu=neon, 
+although there are some issues. Gcc’s auto vectorization will ignore 
+floats with neon unless you enable -funsafe-math-optimizations. 
+Unfortunately using neon instructions with floats can lead to a loss of 
+precision as neon does not adhere to IEEE 754.</p>
+<p>Autovectorization can under the right circumstances significantly 
+speed up a program, but it’s imperfect. Luckily there are ways to 
+structure your code and hints you can give the compiler that will make 
+sure it behaves properly. In future posts I will be covering these 
+tricks and tips as well as going into detail about NEON assembly and how
+ using it directly instead of intrinsics can give your app an even 
+greater speed boost.</p>
+<p>* Yellowdog Linux (YDL) is a Linux distribution developed by Fixstars
+ Solutions. It is based on RHEL/Centos and used in Fixstars’ products. 
+See <a title="http://www.ydl.net/ydl7/" href="http://www.ydl.net/ydl7/">http://www.ydl.net/ydl7/</a> for more details. A version of Yellowdog Linux optimized for ARM servers is currently in development.</p>
+<div class="simple_likebuttons_container">
+      <div class="simple_likebuttons_facebook">
+        <div id="fb-root" class=" fb_reset"><div style="position: absolute; top: -10000px; height: 0px; width: 0px;"><div><iframe name="fb_xdm_frame_http" allowtransparency="true" allowfullscreen="true" scrolling="no" id="fb_xdm_frame_http" aria-hidden="true" title="Facebook Cross Domain Communication Frame" tabindex="-1" style="border: medium none;" src="http://staticxx.facebook.com/connect/xd_arbiter/r/ao6eUeuGXQq.js?version=42#channel=f4458f0a78a9d&amp;origin=http%3A%2F%2Fwww.fixstars.com" frameborder="0"></iframe><iframe name="fb_xdm_frame_https" allowtransparency="true" allowfullscreen="true" scrolling="no" id="fb_xdm_frame_https" aria-hidden="true" title="Facebook Cross Domain Communication Frame" tabindex="-1" style="border: medium none;" src="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/ao6eUeuGXQq_002.html" frameborder="0"></iframe></div></div><div style="position: absolute; top: -10000px; height: 0px; width: 0px;"><div></div></div></div>
+        <script>(function(d, s, id) {
+          var js, fjs = d.getElementsByTagName(s)[0];
+          if (d.getElementById(id)) {return;}
+          js = d.createElement(s); js.id = id;
+          js.src = "//connect.facebook.net/en_US/all.js#xfbml=1";
+          fjs.parentNode.insertBefore(js, fjs);
+        }(document, "script", "facebook-jssdk"));</script>
+        <div class="fb-like fb_iframe_widget" data-href="http://www.fixstars.com/en/news/?p=125" data-send="false" data-layout="box_count" data-show-faces="false" data-width="55" fb-xfbml-state="rendered" fb-iframe-plugin-query="app_id=&amp;container_width=0&amp;href=http%3A%2F%2Fwww.fixstars.com%2Fen%2Fnews%2F%3Fp%3D125&amp;layout=box_count&amp;locale=en_US&amp;sdk=joey&amp;send=false&amp;show_faces=false&amp;width=55"><span style="vertical-align: bottom; width: 49px; height: 61px;"><iframe name="f2d080eb61d67d" allowtransparency="true" allowfullscreen="true" scrolling="no" title="fb:like Facebook Social Plugin" style="border: medium none; visibility: visible; width: 49px; height: 61px;" src="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/like.html" class="" width="55px" height="1000px" frameborder="0"></iframe></span></div>
+      </div>
+    
+      <div class="simple_likebuttons_twitter">
+        <iframe id="twitter-widget-0" scrolling="no" allowtransparency="true" class="twitter-share-button twitter-share-button-rendered twitter-tweet-button" style="position: static; visibility: visible; width: 61px; height: 20px;" title="Twitter Tweet Button" src="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/tweet_button.html" data-url="http://www.fixstars.com/en/news/?p=125" frameborder="0"></iframe>
+      </div>
+    
+      <div class="simple_likebuttons_googleplus">
+        <div style="text-indent: 0px; margin: 0px; padding: 0px; background: transparent none repeat scroll 0% 0%; border-style: none; float: none; line-height: normal; font-size: 1px; vertical-align: baseline; display: inline-block; width: 50px; height: 60px;" id="___plusone_0"><iframe ng-non-bindable="" hspace="0" marginheight="0" marginwidth="0" scrolling="no" style="position: static; top: 0px; width: 50px; margin: 0px; border-style: none; left: 0px; visibility: visible; height: 60px;" tabindex="0" vspace="0" id="I0_1489555145635" name="I0_1489555145635" src="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/fastbutton.html" data-gapiattached="true" title="+1" width="100%" frameborder="0"></iframe></div>
+      </div>
+    
+      <div class="simple_likebuttons_linkedin">
+        <span style="line-height: 1; vertical-align: baseline; display: inline-block; text-align: center;" class="IN-widget"><span style="padding: 0px ! important; margin: 0px ! important; text-indent: 0px ! important; display: inline-block ! important; vertical-align: baseline ! important; font-size: 1px ! important;"><span id="li_ui_li_gen_1489555144976_1-container" class="IN-top IN-empty"><span id="li_ui_li_gen_1489555144976_1" class="IN-top"><span id="li_ui_li_gen_1489555144976_1-inner" class="IN-top"><span id="li_ui_li_gen_1489555144976_1-content" class="IN-top">0</span></span></span></span></span><br><span style="padding: 0px ! important; margin: 0px ! important; text-indent: 0px ! important; display: inline-block ! important; vertical-align: baseline ! important; font-size: 1px ! important;"><span id="li_ui_li_gen_1489555144964_0"><a id="li_ui_li_gen_1489555144964_0-link" href="javascript:void(0);"><span id="li_ui_li_gen_1489555144964_0-logo">in</span><span id="li_ui_li_gen_1489555144964_0-title"><span id="li_ui_li_gen_1489555144964_0-mark"></span><span id="li_ui_li_gen_1489555144964_0-title-text">Share</span></span></a></span></span></span><script type="IN/Share+init" data-url="http://www.fixstars.com/en/news/?p=125" data-counter="top"></script>
+      </div>
+    </div>	</div><!-- /.post -->
+					
+		<div class="nav-below">
+                <span class="nav-previous"><a href="http://www.fixstars.com/en/news/?p=108" rel="prev">Previous</a></span>
+                <span class="nav-next"><a href="http://www.fixstars.com/en/news/?p=168" rel="next">Next</a></span>
+                </div><!-- /.nav-below -->
+                
+<!-- You can start editing here. -->
+
+
+			<!-- If comments are closed. -->
+		<p class="nocomments">Comments are closed.</p>
+
+	
+ 
+	                           
+ 
+		</div></div><!--/.container-->		
+	</div><!--/.body-->
+
+<script type="text/javascript" src="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/shCore.js"></script>
+<script type="text/javascript" src="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/shBrushCpp.js"></script>
+<script type="text/javascript">
+	(function(){
+		var corecss = document.createElement('link');
+		var themecss = document.createElement('link');
+		var corecssurl = "http://www.fixstars.com/en/news/wp-content/plugins/syntaxhighlighter/syntaxhighlighter3/styles/shCore.css?ver=3.0.9b";
+		if ( corecss.setAttribute ) {
+				corecss.setAttribute( "rel", "stylesheet" );
+				corecss.setAttribute( "type", "text/css" );
+				corecss.setAttribute( "href", corecssurl );
+		} else {
+				corecss.rel = "stylesheet";
+				corecss.href = corecssurl;
+		}
+		document.getElementsByTagName("head")[0].insertBefore( corecss, document.getElementById("syntaxhighlighteranchor") );
+		var themecssurl = "http://www.fixstars.com/en/news/wp-content/plugins/syntaxhighlighter/syntaxhighlighter3/styles/shThemeDefault.css?ver=3.0.9b";
+		if ( themecss.setAttribute ) {
+				themecss.setAttribute( "rel", "stylesheet" );
+				themecss.setAttribute( "type", "text/css" );
+				themecss.setAttribute( "href", themecssurl );
+		} else {
+				themecss.rel = "stylesheet";
+				themecss.href = themecssurl;
+		}
+		//document.getElementById("syntaxhighlighteranchor").appendChild(themecss);
+		document.getElementsByTagName("head")[0].insertBefore( themecss, document.getElementById("syntaxhighlighteranchor") );
+	})();
+	SyntaxHighlighter.config.strings.expandSource = '+ expand source';
+	SyntaxHighlighter.config.strings.help = '?';
+	SyntaxHighlighter.config.strings.alert = 'SyntaxHighlighter\n\n';
+	SyntaxHighlighter.config.strings.noBrush = 'Can\'t find brush for: ';
+	SyntaxHighlighter.config.strings.brushNotHtmlScript = 'Brush wasn\'t configured for html-script option: ';
+	SyntaxHighlighter.defaults['pad-line-numbers'] = true;
+	SyntaxHighlighter.defaults['toolbar'] = false;
+	SyntaxHighlighter.all();
+</script>
+<script type="text/javascript" src="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/wp-embed.js"></script>
+		</div><!--/.container-->		
+	</div><!--/.body-->
+	<div id="footer">
+<!--footer.tpl starts-->
+<div class="container">
+	<div class="row">
+		<div class="span4">
+			<h2 class="sectiontitle">About Fixstars</h2>
+			<p>Fixstars is a software company devoted to "Speed up your 
+Business". Through its software parallelization/optimization expertise, 
+its highly effective use of multi-core processors, and application 
+acceleration for the next generation of memory technology that delivers 
+high speed IO as well as power savings, Fixstars provides "Green IT," 
+while accelerating customers' business in various fields. 
+			</p>
+		</div>
+		<div class="span4">
+			<h2 class="sectiontitle">Tweets about Fixstars</h2>
+			<iframe id="twitter-widget-1" scrolling="no" allowtransparency="true" allowfullscreen="true" class="twitter-timeline twitter-timeline-rendered" style="position: static; visibility: visible; display: inline-block; width: 520px; height: 200px; padding: 0px; border: medium none; max-width: 100%; min-width: 180px; margin-top: 0px; margin-bottom: 0px; min-height: 200px;" data-widget-id="365348746554400768" title="Twitter Timeline" frameborder="0"></iframe>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+
+		</div>
+		<div class="span4">
+			<h2 class="sectiontitle">Contact Fixstars</h2>
+			<h3>
+				Fixstars Solutions Inc.
+			</h3>
+			<ul class="unstyled">
+				<li>
+					<i class="icon-map-marker"></i> 440 N. Wolfe Road, Sunnyvale, California 94085
+				</li>
+				<li>
+					<a href="http://www.fixstars.com/en/contact/input/"><i class="icon-envelope"></i> Contact form</a>
+				</li>
+				<li>
+					<a href="https://twitter.com/Fixstars_US" target="_blank"><i class="icon-twitter"></i> Follow us on Twitter</a>
+				</li>
+			</ul>
+		</div>
+	</div><!--/.row-->
+</div><!--/.container-->
+<div class="footer-copyright">
+	<div class="container">
+		<div class="row">
+				<div class="span6">
+				© 2014 Fixstars Corporation, All rights reserved.
+				</div>
+				<div class="span6">
+					<ul class="inline unstyled  pull-right">
+						<li>
+						<a href="http://www.fixstars.com/ja/">Japanese</a> |
+						</li>
+						<li>
+						<a href="http://www.fixstars.com/en/legal/">Legal</a> |
+						</li>
+						<li>
+						<a href="http://www.fixstars.com/en/legal/">Privacy</a>
+						</li>
+					</ul>
+				</div>
+			</div><!--/.row-->
+		</div><!--/.container-->
+</div><!--/.footer-copyright-->
+
+<!-- Le javascript
+================================================== -->
+
+<script type="text/javascript" src="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/jquery.js"></script>
+<script type="text/javascript" src="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/jquery.html"></script>
+
+<script type="text/javascript">
+<!-- Google Analytics-->
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-498925-1']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+	var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+	ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+	var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+ <!-- News Feed-->
+	$(function(){
+		$.ajax({
+			url: "/en/news?feed=rss2",
+			cache: false,
+			dataType:"xml",
+			success: function(xml){
+			  $(xml).find('item').each(function(){
+				var title = $(this).find('title').text();
+				var url = $(this).find('link').text();
+				var pubdate = dateParse($(this).find('pubDate').text());
+				$('<li class="date"></li>').html(pubdate[0] +'&nbsp;'+pubdate[1] ).appendTo('ul#feedList');
+				$('<li class="title"></li>').html('<a href="'+url+'">'+title+'</a>').appendTo('ul#feedList');
+				});
+			}
+		});
+	  
+	});
+	function dateParse(str){
+		var objDate = new Date(str);
+		var nowDate = new Date();
+		//現在の日付との差を計算
+		myDay = Math.floor((nowDate.getTime()-objDate.getTime()) / (1000*60*60*24)) + 1;
+		//もし2週間以内なら"new!"マーク
+		if (myDay < 15 ){
+			var newMsg = '<span class="new-feed">New</span>';
+		} else {
+			var newMsg = '';
+		}
+		var year = objDate.getFullYear();
+		var month = objDate.getMonth() + 1;
+		var date = objDate.getDate();
+		if ( month < 10 ) { month = " " + month; }
+		if ( date < 10 ) { date = " " + date; }
+		str = month + '/' + date + '/' + year;
+		rtnValue = new Array(2);
+		rtnValue[0] = str;
+		rtnValue[1] = newMsg;
+		return rtnValue;
+	}
+	<!-- Slider-->
+	$(function(){
+	  // assign the slider to a variable
+	  var slider = $('.slider').bxSlider({
+		controls: false,
+		auto: true,
+		pause: 10000
+	  });
+	  
+	  var timer;
+	  $(window).resize(function(){
+		clearTimeout(timer);
+		timer=setTimeout(function(){slider.reloadShow()},100);
+		
+		}); //end resize function
+
+	  // assign a click event to the external thumbnails
+	  $('.thumbs a').click(function(){
+	   var thumbIndex = $('.thumbs a').index(this);
+		// call the "goToSlide" public function
+		slider.goToSlide(thumbIndex);
+	 
+		// remove all active classes
+		$('.thumbs a').removeClass('pager-active');
+		// assisgn "pager-active" to clicked thumb
+		$(this).addClass('pager-active');
+		// very important! you must kill the links default behavior
+		return false;
+	  });
+
+	  // assign "pager-active" class to the first thumb
+	  $('.thumbs a:first').addClass('pager-active');
+	});
+  </script>
+<!--Side Accordion-->
+<script type="text/javascript">
+$(function(){
+        $('.sub_menu').hide();        
+        $('.main_menu').click(function(){
+                $('ul.sub_menu').slideUp();
+                if($('+ul.sub_menu',this).css('display') == 'none'){
+                        $('+ul.sub_menu',this).slideDown();
+                }
+        });
+});
+</script>
+<!--Code style-->
+<script type="text/javascript" src="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/prettify.js"></script>
+<script>prettyPrint();</script>
+<!--footer.tpl emds-->
+  </div><!--/.footer-->
+<table style="width: 218px; display: none; top: 43px; left: 859px; position: absolute;" class="gstl_50 gssb_c" cellspacing="0" cellpadding="0"><tbody><tr><td class="gssb_f"></td><td class="gssb_e" style="width: 100%;"></td></tr></tbody></table><iframe name="oauth2relay744920212" id="oauth2relay744920212" src="An%20introduction%20to%20SIMD%20vectorization%20and%20NEON_files/postmessageRelay.html" style="width: 1px; height: 1px; position: absolute; top: -100px;" tabindex="-1" aria-hidden="true"></iframe><iframe id="rufous-sandbox" scrolling="no" allowtransparency="true" allowfullscreen="true" style="position: absolute; visibility: hidden; display: none; width: 0px; height: 0px; padding: 0px; border: medium none;" title="Twitter analytics iframe" frameborder="0"></iframe></body></html>
