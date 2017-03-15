@@ -67,6 +67,7 @@ static const __m128i mask0B0R = _mm_set_epi32(0x00FF00FFU, 0x00FF00FFU, 0x00FF00
 
 #elif defined(USE_NEON)
 
+// NEON macros
 #define SET_16X8(A, B, C, D, E, F, G, H) { (int16_t) H, (int16_t) G, (int16_t) F, (int16_t) E, (int16_t) D, (int16_t) C, (int16_t) B, (int16_t) A }
 #define SET_32X4(A, B, C, D)             { (int32_t) D, (int32_t) C, (int32_t) B, (int32_t) A }
 
@@ -284,7 +285,7 @@ inline void fastBlendPixels(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBuffer
                        _mm_srli_epi32(srcv0A0A,  8),
                        _mm_srli_epi32(srcv0A0A, 24)
                    );
-        srci0A0A = _mm_or_si128    (                     // [ 0I0I 0I0I 0I0I 0A0I ]
+        srci0A0A = _mm_or_si128    (                     // [ 0I0I 0I0I 0I0I 0I0I ]
                        _mm_srli_epi32(srci0A0A,  8),
                        _mm_srli_epi32(srci0A0A, 24)
                    );
@@ -336,41 +337,39 @@ inline void fastBlendPixels(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBuffer
 
     for(size_t i = 0; i < len4; ++i) {
         // Load 4 pixels
-        srcv4PIX =             vld1q_s32 ((int32_t* ) srcvARGB                      ); // [ ARGB ARGB ARGB ARGB ]
-        dstv4PIX =             vld1q_s32 ((int32_t* ) dstvARGB                      ); // [ ARGB ARGB ARGB ARGB ]
+        srcv4PIX =             vld1q_s32  ((int32_t* ) srcvARGB                      ); // [ ARGB ARGB ARGB ARGB ]
+        dstv4PIX =             vld1q_s32  ((int32_t* ) dstvARGB                      ); // [ ARGB ARGB ARGB ARGB ]
         // Get the source alpha
-        srcv0A0A =             vandq_s32 (            srcv4PIX,             maskA000); // [ A000 A000 A000 A000 ]
-        srci0A0A = (int32x4_t) vsubq_s16 ((int16x8_t) maskA000, (int16x8_t) srcv0A0A); // [ I000 I000 I000 I000 ]
-        /*
-        srcv0A0A = _mm_or_si128    (                     // [ 0A0A 0A0A 0A0A 0A0A ]
-                       _mm_srli_epi16(srcv0A0A,  8),
-                       _mm_srli_epi32(srcv0A0A, 24)
-                   );
-        srci0A0A = _mm_or_si128    (                     // [ 0I0I 0I0I 0I0I 0A0I ]
-                       _mm_srli_epi16(srci0A0A,  8),
-                       _mm_srli_epi32(srci0A0A, 24)
-                   );
+        srcv0A0A =             vandq_s32  (            srcv4PIX,             maskA000); // [ A000 A000 A000 A000 ]
+        srci0A0A = (int32x4_t) vsubq_s16  ((int16x8_t) maskA000, (int16x8_t) srcv0A0A); // [ I000 I000 I000 I000 ]
+        srcv0A0A =             vorrq_s32  (                                             // [ 0A0A 0A0A 0A0A 0A0A ]
+                                   vshrq_n_s32(srcv0A0A,  8),
+                                   vshrq_n_s32(srcv0A0A, 24)
+                               );
+        srci0A0A =             vorrq_s32  (                                             // [ 0I0I 0I0I 0I0I 0I0I ]
+                                   vshrq_n_s32(srci0A0A,  8),
+                                   vshrq_n_s32(srci0A0A, 24)
+                               );
         // Process A and G
-        srcvAGAG = _mm_and_si128   (srcv4PIX, maskA0G0); // [ A0G0 A0G0 A0G0 A0G0 ]
-        srcvAGAG = _mm_srli_epi16  (srcvAGAG, 8       ); // [ A0G0 A0G0 A0G0 A0G0 ]
-        srcvAGAG = _mm_mullo_epi16 (srcvAGAG, srcv0A0A); // [ AAGG AAGG AAGG AAGG ]
-        dstvAGAG = _mm_and_si128   (dstv4PIX, maskA0G0); // [ A0G0 A0G0 A0G0 A0G0 ]
-        dstvAGAG = _mm_srli_epi16  (dstvAGAG, 8       ); // [ 0A0G 0A0G 0A0G 0A0G ]
-        dstvAGAG = _mm_mullo_epi16 (dstvAGAG, srci0A0A); // [ AAGG AAGG AAGG AAGG ]
-        dstvAGAG = _mm_add_epi16   (dstvAGAG, srcvAGAG); // [ AAGG AAGG AAGG AAGG ]
-        dstvAGAG = _mm_and_si128   (dstvAGAG, maskA0G0); // [ A0G0 A0G0 A0G0 AAG0 ]
+        srcvAGAG =             vandq_s32  (            srcv4PIX,             maskA0G0); // [ A0G0 A0G0 A0G0 A0G0 ]
+        srcvAGAG =             vshrq_n_s32(            srcvAGAG, 8                   ); // [ A0G0 A0G0 A0G0 A0G0 ]
+        srcvAGAG = (int32x4_t) vmulq_s16  ((int16x8_t) srcvAGAG, (int16x8_t) srcv0A0A); // [ AAGG AAGG AAGG AAGG ]
+        dstvAGAG =             vandq_s32  (            dstv4PIX,             maskA0G0); // [ A0G0 A0G0 A0G0 A0G0 ]
+        dstvAGAG =             vshrq_n_s32(            dstvAGAG, 8                   ); // [ 0A0G 0A0G 0A0G 0A0G ]
+        dstvAGAG = (int32x4_t) vmulq_s16  ((int16x8_t) dstvAGAG, (int16x8_t) srci0A0A); // [ AAGG AAGG AAGG AAGG ]
+        dstvAGAG = (int32x4_t) vaddq_s16  ((int16x8_t) dstvAGAG, (int16x8_t) srcvAGAG); // [ AAGG AAGG AAGG AAGG ]
+        dstvAGAG =             vandq_s32  (            dstvAGAG,             maskA0G0); // [ A0G0 A0G0 A0G0 AAG0 ]
         // Process R and B
-        srcvRBRB = _mm_and_si128   (srcv4PIX, mask0B0R); // [ 0R0B 0R0B 0R0B 0R0B ]
-        srcvRBRB = _mm_mullo_epi16 (srcvRBRB, srcv0A0A); // [ RRBB RRBB RRBB RRBB ]
-        dstvRBRB = _mm_and_si128   (dstv4PIX, mask0B0R); // [ 0R0B 0R0B 0R0B 0R0B ]
-        dstvRBRB = _mm_mullo_epi16 (dstvRBRB, srci0A0A); // [ RRBB RRBB RRBB RRBB ]
-        dstvRBRB = _mm_add_epi16   (dstvRBRB, srcvRBRB); // [ RRBB RRBB RRBB RRBB ]
-        dstvRBRB = _mm_srli_epi16  (dstvRBRB, 8       ); // [ .R.B .R.B .R.B .R.B ]
-        dstvRBRB = _mm_and_si128   (dstvRBRB, mask0B0R); // [ 0R0B 0R0B 0R0B 0R0B ]
+        srcvRBRB =             vandq_s32  (            srcv4PIX,             mask0B0R); // [ 0R0B 0R0B 0R0B 0R0B ]
+        srcvRBRB = (int32x4_t) vmulq_s16  ((int16x8_t) srcvRBRB, (int16x8_t) srcv0A0A); // [ RRBB RRBB RRBB RRBB ]
+        dstvRBRB =             vandq_s32  (            dstv4PIX,             mask0B0R); // [ 0R0B 0R0B 0R0B 0R0B ]
+        dstvRBRB = (int32x4_t) vmulq_s16  ((int16x8_t) dstvRBRB, (int16x8_t) srci0A0A); // [ RRBB RRBB RRBB RRBB ]
+        dstvRBRB = (int32x4_t) vaddq_s16  ((int16x8_t) dstvRBRB, (int16x8_t) srcvRBRB); // [ RRBB RRBB RRBB RRBB ]
+        dstvRBRB =             vshrq_n_s32(            dstvRBRB, 8                   ); // [ .R.B .R.B .R.B .R.B ]
+        dstvRBRB =             vandq_s32  (            dstvRBRB,             mask0B0R); // [ 0R0B 0R0B 0R0B 0R0B ]
         // Store 4 pixels
-        dstv4PIX = _mm_or_si128    (dstvAGAG, dstvRBRB); // [ ARGB ARGB ARGB ARGB ]
-                   _mm_storeu_si128(dstvARGB, dstv4PIX);
-       */
+        dstv4PIX =             vorrq_s32  (            dstvAGAG,             dstvRBRB); // [ ARGB ARGB ARGB ARGB ]
+                               vst1q_s32  ((int32_t* ) dstvARGB,             dstv4PIX);
         // Increment the pointers
         ++srcvARGB;
         ++dstvARGB;
