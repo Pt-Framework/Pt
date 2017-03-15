@@ -873,34 +873,36 @@ PlatinumSliderRenderer::~PlatinumSliderRenderer()
 }
 
 
-void PlatinumSliderRenderer::onPrepare( const Slider&       s,
+void PlatinumSliderRenderer::onPrepare( const Slider& s,
                                         const StyleOptions& options,
-                                        Gfx::Brush&         background,
-                                        Gfx::Brush&         foreground,
-                                        Gfx::Pen&           contour,
-                                        Gfx::Pen&           textPen,
-                                        Gfx::Font&          font
-                                      ) const
+                                        Gfx::Brush& background,
+                                        Gfx::Brush& foreground,
+                                        Gfx::Pen& contour,
+                                        Gfx::Pen& textPen,
+                                        Gfx::Font& font) const
 {
+    bool highlight = s.isHighlighted() && s.isEnabled();
+
+    foreground = highlight ? options.accentColor() 
+                           : options.contour().color();
 }
 
 
-void PlatinumSliderRenderer::onRender( const Slider&        s,
-                                       const StyleOptions&  options,
-                                       Painter&             painter,
-                                       const Gfx::RectF&    rect,
-                                       const Gfx::Brush&    background,
-                                       const Gfx::Brush&    foreground,
-                                       const Gfx::Pen&      contour,
-                                       const Gfx::Pen&      textPen,
-                                       const Gfx::Font&     font
-                                     ) const
+void PlatinumSliderRenderer::onRender( const Slider& s,
+                                       const StyleOptions& options,
+                                       Painter& painter,
+                                       const Gfx::RectF& rect,
+                                       const Gfx::Brush& background,
+                                       const Gfx::Brush& foreground,
+                                       const Gfx::Pen& contour,
+                                       const Gfx::Pen& textPen,
+                                       const Gfx::Font& font) const
 {
     double handleWidth = 7.0;
     double handleHeight = 15.0;
     double sliderHeight = 5.0;
 
-    double sliderX = handleWidth/2;
+    double sliderX = handleWidth / 2;
     double sliderY = s.size().height() / 2 - sliderHeight / 2;
     double sliderWidth = s.size().width() - handleWidth;
 
@@ -922,10 +924,6 @@ void PlatinumSliderRenderer::onRender( const Slider&        s,
 
     painter.setBrush(foreground);
     painter.fillRect(handleRect);
-
-    //painter.setBrush(foreground);
-    //painter.fillRect(Gfx::PointF(progressWidth - barHeight/2, 
-                                   //boxY), barHeight);
 }
 
 ///////////////////////////////////////////////////////////////////////////////

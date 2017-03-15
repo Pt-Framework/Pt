@@ -60,8 +60,6 @@ class PT_HMI_API Slider : public Control
 
 				Signal<int>& positionChanged();
 
-				const Gfx::RectF& knobeRect() const;
-
     public:
         const Gfx::Brush& background() const;
 
@@ -112,7 +110,6 @@ class PT_HMI_API Slider : public Control
 				int					_position;
 				int					_min;
 				int					_max;
-				int					_interval;
 
         AutoPtr<Gfx::Brush>       _background;
 				AutoPtr<Gfx::Color>       _foreground;
@@ -124,10 +121,6 @@ class PT_HMI_API Slider : public Control
         
         FacetPtr<SliderRenderer>  _renderer;
         bool										  _hasRenderer;
-				bool											_dragingMode;
-
-				Gfx::PointF								_beginDrag;
-				Gfx::RectF								_knobeRect;
 
 				Gfx::Brush	_backgroundBrush;
 				Gfx::Brush	_foregroundBrush;

@@ -38,11 +38,8 @@ Slider::Slider()
 : _position(50)
 , _min(0)
 , _max(100)
-, _interval(0)
 , _hasRenderer(false)
-, _dragingMode(false)
 {
-    _knobeRect.set(0, 6, 11, 17);
 }
 
 
@@ -96,12 +93,6 @@ void Slider::setRange(int min, int max)
 }
 
 
-const Gfx::RectF& Slider::knobeRect() const
-{ 
-    return _knobeRect;
-}
-
-
 Signal<int>& Slider::positionChanged()
 {
     return _positionChanged;
@@ -120,6 +111,7 @@ void Slider::setBackground(const Gfx::Brush& b)
     _background.reset( new Gfx::Brush(b) );
     update();
 }
+
 
 const Gfx::Color& Slider::foreground() const
 {
@@ -264,31 +256,43 @@ bool Slider::onMouseEvent(const MouseEvent& ev)
 {
     Base::onMouseEvent(ev);
 
-    if( ev.isPress() && _knobeRect.contains( ev.position() ))
+    if( ev.isPress() )
+        grabPointer();
+    
+    if( ev.isRelease() )
+        releasePointer();
+
+    if( ev.isPressed() )
     {
-        _dragingMode = true;
-        _beginDrag = ev.position();
+        double x = ev.position().x();
+        double width = size().width();
+
+        double offset = x * (_max - _min) / width;
+        setPosition(_min + offset);
     }
 
-    if( ev.isReleased() )
-        _dragingMode = false;
-
-    if( _dragingMode )
-    {
-        _position  +=  ev.position().x() - _beginDrag.x();
-
-        _knobeRect.set(_position, _position+6 , _knobeRect.top(), _knobeRect.bottom() );
-
-        invalidate();
-    }
-
-  return true;
+    return true;
 }
 
 
 void Slider::onTouchEvent(const TouchEvent& ev)
 {
     Base::onTouchEvent(ev);
+
+    if( ev.isPress() )
+        grabPointer();
+    
+    if( ev.isRelease() )
+        releasePointer();
+
+    if( ev.isPressed() )
+    {
+        double x = ev.position().x();
+        double width = size().width();
+
+        double offset = x * (_max - _min) / width;
+        setPosition(_min + offset);
+    }
 }
 
 } // namespace
