@@ -280,7 +280,7 @@ inline void fastBlendPixels(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBuffer
         dstv4PIX = _mm_loadu_si128 (dstvARGB          ); // [ ARGB ARGB ARGB ARGB ]
         // Get the source alpha
         srcv0A0A = _mm_and_si128   (srcv4PIX, maskA000); // [ A000 A000 A000 A000 ]
-        srci0A0A = _mm_sub_epi16   (maskA000, srcv0A0A); // [ I000 I000 I000 I000 ]
+        srci0A0A = _mm_sub_epi32   (maskA000, srcv0A0A); // [ I000 I000 I000 I000 ]
         srcv0A0A = _mm_or_si128    (                     // [ 0A0A 0A0A 0A0A 0A0A ]
                        _mm_srli_epi32(srcv0A0A,  8),
                        _mm_srli_epi32(srcv0A0A, 24)
