@@ -28,6 +28,7 @@
 
 #include <Pt/Hmi/TableLayout.h>
 #include <algorithm>
+#include <cmath>
 
 namespace Pt {
 
@@ -141,9 +142,10 @@ void TableLayout::onLayout()
             {
                 double height = item->preferredSize().height() +
                                 item->margin().topBottom();
+
                 height = std::max(rowPolicy.size(), height);
-                
-                rowPolicy.setSize(height);
+
+                rowPolicy.setSize( std::floor(height + 0.5) );
             }
         }
 

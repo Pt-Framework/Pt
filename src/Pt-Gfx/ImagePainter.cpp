@@ -87,7 +87,11 @@ const Gfx::RectF& ImagePainter::clip() const
 
 void ImagePainter::setClip( const RectF& clipIn )
 {
-  Rect clip(clipIn.left(), clipIn.right(), clipIn.top(), clipIn.bottom());
+   Rect  clip( Point( (int) (clipIn.x()), 
+                      (int) (clipIn.y()) ), 
+               Size( (int) (clipIn.width()),
+                     (int) (clipIn.height()) ));
+
   _rasterizer->setClip( clip );
   _clip = clipIn;
 }
