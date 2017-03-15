@@ -67,8 +67,8 @@ static const __m128i mask0B0R = _mm_set_epi32(0x00FF00FFU, 0x00FF00FFU, 0x00FF00
 
 #elif defined(USE_NEON)
 
-#define SET_16X8(A, B, C, D, E, F, G, H) { (int16_t) A, (int16_t) B, (int16_t) C, (int16_t) D, (int16_t) E, (int16_t) F, (int16_t) G, (int16_t) H }
-#define SET_32X4(A, B, C, D)             { (int32_t) A, (int32_t) B, (int32_t) C, (int32_t) D }
+#define SET_16X8(A, B, C, D, E, F, G, H) { (int16_t) H, (int16_t) G, (int16_t) F, (int16_t) E, (int16_t) D, (int16_t) C, (int16_t) B, (int16_t) A }
+#define SET_32X4(A, B, C, D)             { (int32_t) D, (int32_t) C, (int32_t) B, (int32_t) A }
 
 // NEON mask
 static const int32x4_t maskA000 = SET_32X4(0xFF000000U, 0xFF000000U, 0xFF000000U, 0xFF000000U);
@@ -164,7 +164,7 @@ inline void fastBlendPixels(Pt::uint8_t* toBuffer, Pt::uint32_t srcA, Pt::uint32
     const size_t     len4     = length / 4;
     const int16x8_t  srcvAGAG = SET_16X8(srcA, srcG, srcA, srcG, srcA, srcG, srcA, srcG); // [ AAGG AAGG AAGG AAGG ]
     const int16x8_t  srcvRBRB = SET_16X8(srcR, srcB, srcR, srcB, srcR, srcB, srcR, srcB); // [ RRBB RRBB RRBB RRBB ]
-    const int32x4_t  srci0A0A = SET_32X4(blendInv, blendInv, blendInv, blendInv);         // [ 0I0I 0I0I 0I0I 0I0I ]
+    const int16x8_t  srci0A0A = SET_16X8(blendInv, blendInv, blendInv, blendInv, blendInv, blendInv, blendInv, blendInv);         // [ 0I0I 0I0I 0I0I 0I0I ]
           int32x4_t* dstvARGB = reinterpret_cast<int32x4_t*>(toBuffer);
           int32x4_t  dstv4PIX;
           int32x4_t  dstvAGAG;
@@ -172,22 +172,22 @@ inline void fastBlendPixels(Pt::uint8_t* toBuffer, Pt::uint32_t srcA, Pt::uint32
 
     for(size_t i = 0; i < len4; ++i) {
         // Load 4 pixels
-        dstv4PIX = vld1q_s32  ((int32_t*) dstvARGB); // [ ARGB ARGB ARGB ARGB ]
+        dstv4PIX =             vld1q_s32  (                      (int32_t* ) dstvARGB); // [ ARGB ARGB ARGB ARGB ]
         // Process A and G
-        dstvAGAG = vandq_s32  (dstv4PIX, maskA0G0 ); // [ A0G0 A0G0 A0G0 A0G0 ]
-        dstvAGAG = vshrq_n_s32(dstvAGAG, 8        ); // [ 0A0G 0A0G 0A0G 0A0G ]
-        dstvAGAG = (int32x4_t) vmulq_s16  ((int16x8_t) dstvAGAG, (int16x8_t) srci0A0A ); // [ AAGG AAGG AAGG AAGG ]
-        dstvAGAG = (int32x4_t) vaddq_s16  ((int16x8_t) dstvAGAG, (int16x8_t) srcvAGAG ); // [ AAGG AAGG AAGG AAGG ]
-        dstvAGAG = vandq_s32  (dstvAGAG, maskA0G0 ); // [ A0G0 A0G0 A0G0 AAG0 ]
+        dstvAGAG =             vandq_s32  (            dstv4PIX,             maskA0G0); // [ A0G0 A0G0 A0G0 A0G0 ]
+        dstvAGAG =             vshrq_n_s32(            dstvAGAG, 8                   ); // [ 0A0G 0A0G 0A0G 0A0G ]
+        dstvAGAG = (int32x4_t) vmulq_s16  ((int16x8_t) dstvAGAG, (int16x8_t) srci0A0A); // [ AAGG AAGG AAGG AAGG ]
+        dstvAGAG = (int32x4_t) vaddq_s16  ((int16x8_t) dstvAGAG, (int16x8_t) srcvAGAG); // [ AAGG AAGG AAGG AAGG ]
+        dstvAGAG =             vandq_s32  (            dstvAGAG,             maskA0G0); // [ A0G0 A0G0 A0G0 AAG0 ]
         // Process R and B
-        dstvRBRB = vandq_s32  (dstv4PIX, mask0B0R ); // [ 0R0B 0R0B 0R0B 0R0B ]
-        dstvRBRB = (int32x4_t) vmulq_s16  ((int16x8_t) dstvRBRB, (int16x8_t) srci0A0A ); // [ RRBB RRBB RRBB RRBB ]
-        dstvRBRB = (int32x4_t) vaddq_s16  ((int16x8_t) dstvRBRB, (int16x8_t) srcvRBRB ); // [ RRBB RRBB RRBB RRBB ]
-        dstvRBRB = vshrq_n_s32(dstvRBRB, 8        ); // [ .R.B .R.B .R.B .R.B ]
-        dstvRBRB = vandq_s32  (dstvRBRB, mask0B0R ); // [ 0R0B 0R0B 0R0B 0R0B ]
+        dstvRBRB =             vandq_s32  (            dstv4PIX,             mask0B0R); // [ 0R0B 0R0B 0R0B 0R0B ]
+        dstvRBRB = (int32x4_t) vmulq_s16  ((int16x8_t) dstvRBRB, (int16x8_t) srci0A0A); // [ RRBB RRBB RRBB RRBB ]
+        dstvRBRB = (int32x4_t) vaddq_s16  ((int16x8_t) dstvRBRB, (int16x8_t) srcvRBRB); // [ RRBB RRBB RRBB RRBB ]
+        dstvRBRB =             vshrq_n_s32(            dstvRBRB, 8                   ); // [ .R.B .R.B .R.B .R.B ]
+        dstvRBRB =             vandq_s32  (            dstvRBRB,             mask0B0R); // [ 0R0B 0R0B 0R0B 0R0B ]
         // Store 4 pixels
-        dstv4PIX = vorrq_s32  (dstvAGAG, dstvRBRB); // [ ARGB ARGB ARGB ARGB ]
-                   vst1q_s32  ((int32_t*) dstvARGB, dstv4PIX);
+        dstv4PIX =             vorrq_s32  (            dstvAGAG,             dstvRBRB); // [ ARGB ARGB ARGB ARGB ]
+                               vst1q_s32  ((int32_t* ) dstvARGB,             dstv4PIX);
         // Increment the destination pointer
         ++dstvARGB;
     }
