@@ -54,12 +54,12 @@ using namespace Pt::Gfx;
 #define BENCHMARK_CAIRO_CHECK_RESULTING_IMAGE 0
 
 // General settings for Pt-Gfx
-#define DO_TEST_DRAW    1
+#define DO_TEST_DRAW    0
 #define DO_BENCHMARKING 1
 
 // Detailed-test enable settings for Pt-Gfx
 #define TEST_SOURCECOPY                         1
-#define TEST_SOURCEOVER                         0
+#define TEST_SOURCEOVER                         1
 
 #define TEST_DRAW_SOLID_LINE_AND_TEXT           0 // (including bezier)
 #define TEST_DRAW_PATTERNED_LINE                0 // (including bezier)
@@ -111,9 +111,9 @@ using namespace Pt::Gfx;
 #define BENCHMARK_GRADIENT_FILLED_RECTANGLE 0
 #define BENCHMARK_TEXTURE_FILLED_RECTANGLE  0
 
-#define BENCHMARK_SOLID_FILLED_POLYGON      1
-#define BENCHMARK_GRADIENT_FILLED_POLYGON   1
-#define BENCHMARK_TEXTURE_FILLED_POLYGON    1
+#define BENCHMARK_SOLID_FILLED_POLYGON      0
+#define BENCHMARK_GRADIENT_FILLED_POLYGON   0
+#define BENCHMARK_TEXTURE_FILLED_POLYGON    0
 
 #define BENCHMARK_SOLID_FILLED_ELLIPSE      0
 #define BENCHMARK_GRADIENT_FILLED_ELLIPSE   0

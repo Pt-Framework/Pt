@@ -537,12 +537,13 @@ void ImagePainter2::drawRoundRect( const RectF& rect, float radius )
         PointF(x1, (y1 + y2) * 0.5f)
     };
 
-    // Draw the quadratic polybezier
+    // Save the original pen and create a new pen with miter join
     const Pen orgPen = _rasterizer->pen();
 
     Pen newPen = orgPen;
     newPen.setJoinStyle(Pen::MiterJoin);
 
+    // Draw the quadratic polybezier
     _rasterizer->setPen(newPen);
     drawQuadraticPolybezier(pbz, sizeof(pbz) / sizeof(pbz[0]), true);
     _rasterizer->setPen(orgPen);
@@ -710,6 +711,12 @@ void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
         return;
     }
 
+    // Save the original pen and create a new pen with miter join
+    const Pen orgPen = _rasterizer->pen();
+
+    Pen newPen = orgPen;
+    newPen.setJoinStyle(Pen::MiterJoin);
+
     // Solid
     if(_rasterizer->pen().style() == Pen::Solid) {
         // Calculate the ellipse's parameters
@@ -726,7 +733,9 @@ void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
         points.push_back(Painter::PolygonSeparatorPoint);
         generateEllipsePoints(points, radiusXi, radiusYi, centerX, centerY);
         // Rasterize the polygon
+        _rasterizer->setPen(newPen);
         _rasterizer->strokePolygon(points.data(), points.size());
+        _rasterizer->setPen(orgPen);
     }
 
     // Patterned
@@ -756,6 +765,12 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
         _rasterizer->strokeOnePixelEllipseArc(tl, sz, degBegin, degEnd, arcMode);
         return;
     }
+
+    // Save the original pen and create a new pen with miter join
+    const Pen orgPen = _rasterizer->pen();
+
+    Pen newPen = orgPen;
+    newPen.setJoinStyle(Pen::MiterJoin);
 
     // Ensure that the begin angle is within the acceptable range
     while(degBegin < -360.0f) degBegin += 360.0f;
@@ -827,7 +842,9 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
             combineLinePointsAndAddCaps(points, inner, outer, _rasterizer->pen().capStyle(), _rasterizer->pen().capStyle(), penSize);
         }
         // Rasterize the polygon
+        _rasterizer->setPen(newPen);
         _rasterizer->strokePolygon(points.data(), points.size());
+        _rasterizer->setPen(orgPen);
     }
 
     // Patterned
