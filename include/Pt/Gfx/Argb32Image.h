@@ -30,13 +30,13 @@
 #ifndef PT_GFX_ARGB32IMAGE_H
 #define PT_GFX_ARGB32IMAGE_H
 
+#include <Pt/Types.h>
+
 #include <Pt/Gfx/Api.h>
+#include <Pt/Gfx/Argb32SIMDOps.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Gfx/BasicImage.h>
-#include <Pt/Types.h>
-
-#include <Pt/Gfx/Argb32SIMDOps.h>
 
 
 namespace Pt {
@@ -212,7 +212,7 @@ class Argb32Model
                                              ( Pt::uint32_t(c.red  () & 0xFF00) <<  8 ) |
                                              ( Pt::uint32_t(c.green() & 0xFF00)       ) |
                                              ( Pt::uint32_t(c.blue ()         ) >>  8 );
-                    Argb32::fastCopyPixels(to, src, length);
+                    Argb32::pixelOps_SourceCopy(to, src, length);
                     break;
                 }
 
@@ -223,7 +223,7 @@ class Argb32Model
                     const Pt::uint32_t srcG     = (Pt::uint32_t) c.green() * blend / 257;
                     const Pt::uint32_t srcB     = (Pt::uint32_t) c.blue () * blend / 257;
                     const Pt::uint32_t srcA     = blend * blend;
-                    Argb32::fastBlendPixels(to, srcA, srcR, srcG, srcB, blendInv, length);
+                    Argb32::pixelOps_SourceOver(to, srcA, srcR, srcG, srcB, blendInv, length);
                     break;
                 }
             }
@@ -236,7 +236,7 @@ class Argb32Model
                 default:
                 case CompositionMode::SourceCopy: {
                     const Pt::uint32_t src = *reinterpret_cast<const Pt::uint32_t*>(from);
-                    Argb32::fastCopyPixels(to, src, length);
+                    Argb32::pixelOps_SourceCopy(to, src, length);
                     break;
                 }
 
@@ -247,7 +247,7 @@ class Argb32Model
                     const Pt::uint32_t srcG     = from[1] * blend;
                     const Pt::uint32_t srcB     = from[0] * blend;
                     const Pt::uint32_t srcA     = blend   * blend;
-                    Argb32::fastBlendPixels(to, srcA, srcR, srcG, srcB, blendInv, length);
+                    Argb32::pixelOps_SourceOver(to, srcA, srcR, srcG, srcB, blendInv, length);
                     break;
                 }
             }

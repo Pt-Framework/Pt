@@ -31,26 +31,9 @@
 #define PT_GFX_ARGB32IMAGE_SIMDOPERATIONS_H
 
 
-#ifdef RASTERIZER2
+#include <cstring>
 
-#if defined(__arm__) || defined(__thumb__) || defined(_M_ARM) || defined(_M_ARMT) || defined(__TARGET_ARCH_ARM) || defined(__TARGET_ARCH_THUMB) || defined(_ARM) || defined(__arm)
-
-    #include <arm_neon.h>
-    #define USE_NEON
-
-#elif defined(i386) || defined(__i386) || defined(__i386__) || defined(_X86_) || defined(__x86_64) || defined(__x86_64__) || defined(__amd64) || defined(__amd64__)
-
-    #include <x86intrin.h>
-    #define USE_SSE2
-
-#elif defined(_M_IX86) || defined(_M_AMD64) || defined(_M_X64)
-
-    #include <intrin.h>
-    #define USE_SSE2
-
-#endif
-
-#endif
+#include <Pt/Gfx/SIMDConfig.h>
 
 
 namespace Pt {
@@ -58,31 +41,31 @@ namespace Gfx {
 namespace Argb32 {
 
 
-#if defined(USE_SSE2)
+#if defined(PT_GFX_USE_SSE2)
 
 // SSE mask
-static const __m128i maskA000 = _mm_set_epi32(0xFF000000U, 0xFF000000U, 0xFF000000U, 0xFF000000U);
-static const __m128i maskA0G0 = _mm_set_epi32(0xFF00FF00U, 0xFF00FF00U, 0xFF00FF00U, 0xFF00FF00U);
-static const __m128i mask0B0R = _mm_set_epi32(0x00FF00FFU, 0x00FF00FFU, 0x00FF00FFU, 0x00FF00FFU);
+static const __m128i maskA000 = _mm_set_epi32(0xFF000000, 0xFF000000, 0xFF000000, 0xFF000000);
+static const __m128i maskA0G0 = _mm_set_epi32(0xFF00FF00, 0xFF00FF00, 0xFF00FF00, 0xFF00FF00);
+static const __m128i mask0B0R = _mm_set_epi32(0x00FF00FF, 0x00FF00FF, 0x00FF00FF, 0x00FF00FF);
 
-#elif defined(USE_NEON)
+#elif defined(PT_GFX_USE_NEON)
 
 // NEON macros
 #define SET_16X8(A, B, C, D, E, F, G, H) { (int16_t) H, (int16_t) G, (int16_t) F, (int16_t) E, (int16_t) D, (int16_t) C, (int16_t) B, (int16_t) A }
 #define SET_32X4(A, B, C, D)             { (int32_t) D, (int32_t) C, (int32_t) B, (int32_t) A }
 
 // NEON mask
-static const int32x4_t maskA000 = SET_32X4(0xFF000000U, 0xFF000000U, 0xFF000000U, 0xFF000000U);
-static const int32x4_t maskA0G0 = SET_32X4(0xFF00FF00U, 0xFF00FF00U, 0xFF00FF00U, 0xFF00FF00U);
-static const int32x4_t mask0B0R = SET_32X4(0x00FF00FFU, 0x00FF00FFU, 0x00FF00FFU, 0x00FF00FFU);
+static const int32x4_t maskA000 = SET_32X4(0xFF000000, 0xFF000000, 0xFF000000, 0xFF000000);
+static const int32x4_t maskA0G0 = SET_32X4(0xFF00FF00, 0xFF00FF00, 0xFF00FF00, 0xFF00FF00);
+static const int32x4_t mask0B0R = SET_32X4(0x00FF00FF, 0x00FF00FF, 0x00FF00FF, 0x00FF00FF);
 
 #endif
 
 
 // Copy a constant color to destination pixels
-inline void fastCopyPixels(Pt::uint8_t* toBuffer, Pt::uint32_t fromARGB, size_t length)
+inline void pixelOps_SourceCopy(Pt::uint8_t* toBuffer, Pt::uint32_t fromARGB, size_t length)
 {
-#if defined(USE_SSE2)
+#if defined(PT_GFX_USE_SSE2)
 
     const size_t   len4     = length / 4;
     const __m128i  srcvARGB = _mm_set1_epi32(fromARGB);
@@ -96,7 +79,7 @@ inline void fastCopyPixels(Pt::uint8_t* toBuffer, Pt::uint32_t fromARGB, size_t 
     length %= 4;
     Pt::uint32_t* dst = reinterpret_cast<Pt::uint32_t*>(dstvARGB);
 
-#elif defined(USE_NEON)
+#elif defined(PT_GFX_USE_NEON)
 
     const size_t     len4     = length / 4;
     const int32x4_t  srcvARGB = vdupq_n_s32(fromARGB);
@@ -121,9 +104,9 @@ inline void fastCopyPixels(Pt::uint8_t* toBuffer, Pt::uint32_t fromARGB, size_t 
 
 // Blend a constant color to destination pixels
 // (the source color must have been premultiplied with the non-inverted blending factor)
-inline void fastBlendPixels(Pt::uint8_t* toBuffer, Pt::uint32_t srcA, Pt::uint32_t srcR, Pt::uint32_t srcG, Pt::uint32_t srcB, Pt::uint32_t bfcI, size_t length)
+inline void pixelOps_SourceOver(Pt::uint8_t* toBuffer, Pt::uint32_t srcA, Pt::uint32_t srcR, Pt::uint32_t srcG, Pt::uint32_t srcB, Pt::uint32_t bfcI, size_t length)
 {
-#if defined(USE_SSE2)
+#if defined(PT_GFX_USE_SSE2)
 
     const size_t   len4     = length / 4;
     const __m128i  srcvAGAG = _mm_set_epi16(srcA, srcG, srcA, srcG, srcA, srcG, srcA, srcG); // [ AAGG AAGG AAGG AAGG ]
@@ -161,7 +144,7 @@ inline void fastBlendPixels(Pt::uint8_t* toBuffer, Pt::uint32_t srcA, Pt::uint32
     length %= 4;
     Pt::uint8_t* dst = reinterpret_cast<Pt::uint8_t*>(dstvARGB);
 
-#elif defined(USE_NEON)
+#elif defined(PT_GFX_USE_NEON)
 
     const size_t     len4     = length / 4;
     const int16x8_t  srcvAGAG = SET_16X8(srcA, srcG, srcA, srcG, srcA, srcG, srcA, srcG); // [ AAGG AAGG AAGG AAGG ]
@@ -213,9 +196,9 @@ inline void fastBlendPixels(Pt::uint8_t* toBuffer, Pt::uint32_t srcA, Pt::uint32
 }
 
 // Copy source pixels to destination pixels
-inline void fastCopyPixels(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBuffer, size_t length)
+inline void pixelOps_SourceCopy(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBuffer, size_t length)
 {
-#if defined(USE_SSE2)
+#if defined(PT_GFX_USE_SSE2)
 
     const size_t   len4     = length / 4;
     const __m128i* srcvARGB = reinterpret_cast<const __m128i*>(fromBuffer);
@@ -233,7 +216,7 @@ inline void fastCopyPixels(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBuffer,
           Pt::uint32_t* dsm = dst + length % 4;
     while(dst < dsm) *dst++ = *src++;
 
-#elif defined(USE_NEON)
+#elif defined(PT_GFX_USE_NEON)
 
     const size_t     len4     = length / 4;
     const int32x4_t* srcvARGB = reinterpret_cast<const int32x4_t*>(fromBuffer);
@@ -258,9 +241,9 @@ inline void fastCopyPixels(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBuffer,
 }
 
 // Blend source pixels to destination pixels
-inline void fastBlendPixels(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBuffer, size_t length)
+inline void pixelOps_SourceOver(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBuffer, size_t length)
 {
-#if defined(USE_SSE2)
+#if defined(PT_GFX_USE_SSE2)
 
     const size_t   len4     = length / 4;
     const __m128i* srcvARGB = reinterpret_cast<const __m128i*>(fromBuffer);
@@ -321,7 +304,7 @@ inline void fastBlendPixels(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBuffer
     const Pt::uint8_t* src = reinterpret_cast<const Pt::uint8_t*>(srcvARGB);
           Pt::uint8_t* dst = reinterpret_cast<      Pt::uint8_t*>(dstvARGB);
 
-#elif defined(USE_NEON)
+#elif defined(PT_GFX_USE_NEON)
 
     const size_t     len4     = length / 4;
     const int32x4_t* srcvARGB = reinterpret_cast<const int32x4_t*>(fromBuffer);

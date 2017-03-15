@@ -33,6 +33,7 @@
 #include <vector>
 
 #include <Pt/Gfx/Math.h>
+#include <Pt/Gfx/SIMDConfig.h>
 
 
 namespace Pt{

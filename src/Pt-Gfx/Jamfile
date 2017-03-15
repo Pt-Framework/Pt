@@ -20,6 +20,20 @@ if $(FREETYPE_INCLUDES)
 
 if $(WITH_RASTERIZER2)
 {
+    SubDirC++Flags [ FDefines RASTERIZER2 ] ;
+
+    if $(TARGET_OSPLAT:L) = arm
+    {
+        SubDirCcFlags  [ FGeneric -mfpu=neon ] ;
+        SubDirC++Flags [ FGeneric -mfpu=neon ] ;
+    }
+
+    if $(TARGET_OSPLAT:L) = x86_64
+    {
+        SubDirCcFlags  [ FGeneric -msse2 ] ;
+        SubDirC++Flags [ FGeneric -msse2 ] ;
+    }
+
     PT_GFX_RASTERIZER2_FILES = ClipShape.cpp
                                FreeType2.cpp
                                DrawText2.cpp
@@ -34,13 +48,6 @@ if $(WITH_RASTERIZER2)
                                Rasterizer2_Arc.cpp
                                Rasterizer2_Ellipse.cpp
                                ;
-
-    if $(TARGET_OSPLAT:L) = arm
-    {
-        SubDirCcFlags  [ FFPU neon ] ;
-        SubDirC++Flags [ FFPU neon ] ;
-    }
-    SubDirC++Flags [ FDefines RASTERIZER2 ] ;
 }
 
 SharedLibrary Pt-Gfx : Argb32Format.cpp
