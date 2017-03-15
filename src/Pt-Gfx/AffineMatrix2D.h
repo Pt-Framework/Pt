@@ -74,6 +74,8 @@ class AffineMatrix2D {
         inline void transformPoint(float& x, float &y);
         inline void transformPoint(float& dx, float& dy, float sx, float sy);
 
+        // ### TODO: Add transform points with SSE & NEON !!! ###
+
 
     private:
         struct MatrixData {

@@ -134,6 +134,8 @@ int ClipShape::csComputeOutcode(Pt::int32_t x, Pt::int32_t y, const Rect& clip)
 // ===== Clip Polygon ===================================================================
 // ======================================================================================
 
+// ### TODO: The polygon clipper may not work on some cases !!! ###
+
 void ClipShape::clipPolygon(std::vector<Point>& in, const Rect& clippingArea)
 {
     if(clippingArea.isNull()) {
