@@ -43,18 +43,31 @@ namespace Argb32 {
 
 #if defined(PT_GFX_USE_SSE2)
 
-// SSE mask
+// SSE masks
 static const __m128i maskA000 = _mm_set_epi32(0xFF000000, 0xFF000000, 0xFF000000, 0xFF000000);
 static const __m128i maskA0G0 = _mm_set_epi32(0xFF00FF00, 0xFF00FF00, 0xFF00FF00, 0xFF00FF00);
 static const __m128i mask0B0R = _mm_set_epi32(0x00FF00FF, 0x00FF00FF, 0x00FF00FF, 0x00FF00FF);
 
 #elif defined(PT_GFX_USE_NEON)
 
-// NEON macros
-#define SET_16X8(A, B, C, D, E, F, G, H) { (int16_t) H, (int16_t) G, (int16_t) F, (int16_t) E, (int16_t) D, (int16_t) C, (int16_t) B, (int16_t) A }
-#define SET_32X4(A, B, C, D)             { (int32_t) D, (int32_t) C, (int32_t) B, (int32_t) A }
+// NEON helper functions
+static inline int16x8_t SET_16X8(int32_t a, int32_t b, int32_t c, int32_t d, int32_t e, int32_t f, int32_t g,  int32_t h)
+{
+    const int16x8_t vec = {
+        (int16_t) h, (int16_t) g, (int16_t) f, (int16_t) e, (int16_t) d, (int16_t) c, (int16_t) b, (int16_t) a
+    };
+    return vec;
+}
 
-// NEON mask
+static inline int32x4_t SET_32X4(int32_t a, int32_t b, int32_t c, int32_t d)
+{
+    const int32x4_t vec = {
+        (int32_t) d, (int32_t) c, (int32_t) b, (int32_t) a
+    };
+    return vec;
+}
+
+// NEON masks
 static const int32x4_t maskA000 = SET_32X4(0xFF000000, 0xFF000000, 0xFF000000, 0xFF000000);
 static const int32x4_t maskA0G0 = SET_32X4(0xFF00FF00, 0xFF00FF00, 0xFF00FF00, 0xFF00FF00);
 static const int32x4_t mask0B0R = SET_32X4(0x00FF00FF, 0x00FF00FF, 0x00FF00FF, 0x00FF00FF);
