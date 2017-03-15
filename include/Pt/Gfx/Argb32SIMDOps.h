@@ -411,7 +411,7 @@ inline void fastBlendPixels(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBuffer
 Result on x86_64 (i5-4460; 64-Bit Mode)
 ---------------------------------------
 Pt::Gfx - CompositionMode::SourceCopy                  Without SSE        With SSE
-                                                       ------ --------    ------ -------
+                                                       ------ --------    ------ --------
                                                        (Time) (Factor)    (Time) (Factor)
                                                        ------ --------    ------ --------
     Solid-filled    polygon          @ ImagePainter  =     62                 57
@@ -430,7 +430,7 @@ Pt::Gfx - CompositionMode::SourceCopy                  Without SSE        With S
     Texture-filled  polygon FSAA 2x2 @ ImagePainter2 =    186 ( 2.548)       186 ( 2.620)
 
 Pt::Gfx - CompositionMode::SourceOver                  Without SSE        With SSE
-                                                       ------ --------    ------ -------
+                                                       ------ --------    ------ --------
                                                        (Time) (Factor)    (Time) (Factor)
                                                        ------ --------    ------ --------
     Solid-filled    polygon          @ ImagePainter  =    255                117
@@ -453,7 +453,7 @@ Pt::Gfx - CompositionMode::SourceOver                  Without SSE        With S
 Result on v7l (A53; BCM2709; RaspberryPi 3; 32-bit Mode)
 --------------------------------------------------------
 Pt::Gfx - CompositionMode::SourceCopy                  Without NEON       With NEON
-                                                       ------ --------    ------ -------
+                                                       ------ --------    ------ --------
                                                        (Time) (Factor)    (Time) (Factor)
                                                        ------ --------    ------ --------
     Solid-filled    polygon          @ ImagePainter  =    520                436
@@ -472,21 +472,21 @@ Pt::Gfx - CompositionMode::SourceCopy                  Without NEON       With N
     Texture-filled  polygon FSAA 2x2 @ ImagePainter2 =   1682 ( 2.641)      1693 ( 2.654)
 
 Pt::Gfx - CompositionMode::SourceOver                  Without NEON       With NEON
-                                                       ------ --------    ------ -------
+                                                       ------ --------    ------ --------
                                                        (Time) (Factor)    (Time) (Factor)
-                                                       ------ --------    ------ -------
-    Solid-filled    polygon          @ ImagePainter  =   2002              1072
-    Solid-filled    polygon NOAA     @ ImagePainter2 =   1343 ( 0.671)      781 ( 0.729)
-    Solid-filled    polygon XWAA     @ ImagePainter2 =   2141 ( 1.069)     1598 ( 1.491)
-    Solid-filled    polygon FSAA 2x2 @ ImagePainter2 =   2050 ( 1.024)     1524 ( 1.422)
+                                                       ------ --------    ------ --------
+    Solid-filled    polygon          @ ImagePainter  =   2002               1072
+    Solid-filled    polygon NOAA     @ ImagePainter2 =   1343 ( 0.671)       781 ( 0.729)
+    Solid-filled    polygon XWAA     @ ImagePainter2 =   2141 ( 1.069)      1598 ( 1.491)
+    Solid-filled    polygon FSAA 2x2 @ ImagePainter2 =   2050 ( 1.024)      1524 ( 1.422)
 
-    Gradient-filled polygon          @ ImagePainter  =   5790              5414
-    Gradient-filled polygon NOAA     @ ImagePainter2 =   1721 ( 0.297)     1016 ( 0.188)
-    Gradient-filled polygon XWAA     @ ImagePainter2 =   2612 ( 0.451)     1915 ( 0.354)
-    Gradient-filled polygon FSAA 2x2 @ ImagePainter2 =   2559 ( 0.442)     1886 ( 0.348)
+    Gradient-filled polygon          @ ImagePainter  =   5790               5414
+    Gradient-filled polygon NOAA     @ ImagePainter2 =   1721 ( 0.297)      1016 ( 0.188)
+    Gradient-filled polygon XWAA     @ ImagePainter2 =   2612 ( 0.451)      1915 ( 0.354)
+    Gradient-filled polygon FSAA 2x2 @ ImagePainter2 =   2559 ( 0.442)      1886 ( 0.348)
 
-    Texture-filled  polygon          @ ImagePainter  =   2349              1406
-    Texture-filled  polygon NOAA     @ ImagePainter2 =   2366 ( 1.007)     1421 ( 1.011)
-    Texture-filled  polygon XWAA     @ ImagePainter2 =   3290 ( 1.401)     2379 ( 1.692)
-    Texture-filled  polygon FSAA 2x2 @ ImagePainter2 =   3312 ( 1.410)     2418 ( 1.720)
+    Texture-filled  polygon          @ ImagePainter  =   2349               1406
+    Texture-filled  polygon NOAA     @ ImagePainter2 =   2366 ( 1.007)      1421 ( 1.011)
+    Texture-filled  polygon XWAA     @ ImagePainter2 =   3290 ( 1.401)      2379 ( 1.692)
+    Texture-filled  polygon FSAA 2x2 @ ImagePainter2 =   3312 ( 1.410)      2418 ( 1.720)
 */
