@@ -59,7 +59,7 @@ using namespace Pt::Gfx;
 
 // Detailed-test enable settings for Pt-Gfx
 #define TEST_SOURCECOPY                         1
-#define TEST_SOURCEOVER                         1
+#define TEST_SOURCEOVER                         0
 
 #define TEST_DRAW_SOLID_LINE_AND_TEXT           0 // (including bezier)
 #define TEST_DRAW_PATTERNED_LINE                0 // (including bezier)
@@ -72,8 +72,8 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_THICK_ELLIPSES_ARCS           0
 
 #define TEST_DRAW_SOLID_FILLED_POLYGONS         1
-#define TEST_DRAW_GRADIENT_FILLED_POLYGONS      1
-#define TEST_DRAW_TEXTURE_FILLED_POLYGONS       1
+#define TEST_DRAW_GRADIENT_FILLED_POLYGONS      0
+#define TEST_DRAW_TEXTURE_FILLED_POLYGONS       0
 
 #define TEST_DRAW_SOLID_FILLED_ELLIPSES_ARCS    0
 #define TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS 0

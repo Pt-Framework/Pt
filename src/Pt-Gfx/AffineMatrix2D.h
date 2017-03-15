@@ -79,6 +79,12 @@ class AffineMatrix2D {
         inline void transformPoint(PointF& p);
         inline void transformPoint(PointF& dp, const PointF& sp);
 
+        inline void transformPoints(float* xy, size_t pointCount);
+        inline void transformPoints(float* dxy, const float* sxy, size_t pointCount);
+
+        inline void transformPoints(PointF* xy, size_t pointCount);
+        inline void transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount);
+
     private:
         struct MatrixData {
             float v[3][3];
@@ -139,8 +145,7 @@ void AffineMatrix2D::scaleAboutOrigin(float x, float y, MatrixUpdateMode mode)
 }
 
 void AffineMatrix2D::rotateAboutOrigin(float deg, MatrixUpdateMode mode)
-{
-    MatrixData n;
+{    MatrixData n;
 
     const float r = deg * Pt::Pi / 180;
     const float s = Gfx::Math::fastSin(r);
@@ -262,6 +267,26 @@ void AffineMatrix2D::transformPoint(PointF& dp, const PointF& sp)
 
     transformPoint(x, y);
     dp.set(x, y);
+}
+
+void AffineMatrix2D::transformPoints(float* xy, size_t pointCount)
+{
+    // ### TODO ###
+}
+
+void AffineMatrix2D::transformPoints(float* dxy, const float* sxy, size_t pointCount)
+{
+    // ### TODO ###
+}
+
+void AffineMatrix2D::transformPoints(PointF* xy, size_t pointCount)
+{
+    // ### TODO ###
+}
+
+void AffineMatrix2D::transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount)
+{
+    // ### TODO ###
 }
 
 
