@@ -373,25 +373,29 @@ void Rasterizer2::strokeOnePixelEllipseArc(const Point& topLeft, const Size& siz
 //              Original code by Stephan Brumme, 2011
 void Rasterizer2::fillEllipse(const Point& topLeft, const Size& size)
 {
-    // Update the gradient as needed
-    if(_isGradient)
-        updateGradientBrush(size.width(), size.height());
-
     // Call the fast non-AA rasterizer as needed
     if(_aaMode == AntiAliasingMode::None) {
+        // Update the gradient as needed
+        if(_isGradient)
+            updateGradientBrush(size.width(), size.height());
+        // Raster the ellipse
         rasterEllipseAreaNoAA(topLeft, size);
         return;
     }
 
+    // Update the gradient as needed
+    if(_isGradient)
+        updateGradientBrush(size.width() + 2, size.height() + 2);
+
     // Calculate the ellipse's parameters
-    Pt::int32_t minX  = topLeft.x();
-    Pt::int32_t minY  = topLeft.y();
-    Pt::int32_t radX  = size.width () / 2;
-    Pt::int32_t radY  = size.height() / 2;
-    Pt::int32_t ctrX  = minX + radX;
-    Pt::int32_t ctrY  = minY + radY;
-    Pt::int32_t radX2 = radX * radX;
-    Pt::int32_t radY2 = radY * radY;
+    const Pt::int32_t minX  = topLeft.x();
+    const Pt::int32_t minY  = topLeft.y();
+    const Pt::int32_t radX  = size.width () / 2;
+    const Pt::int32_t radY  = size.height() / 2;
+    const Pt::int32_t ctrX  = minX + radX;
+    const Pt::int32_t ctrY  = minY + radY;
+    const Pt::int32_t radX2 = radX * radX;
+    const Pt::int32_t radY2 = radY * radY;
 
     // === Process the scanlines ===
 
@@ -481,7 +485,7 @@ void Rasterizer2::fillEllipse(const Point& topLeft, const Size& size)
         const Pt::int32_t x2 = ctrX + x;
         const Pt::int32_t y1 = ctrY - fly - 1;
         const Pt::int32_t y2 = ctrY + fly + 1;
-        fill4Pixels(x1, y1, x2, y2, minX, minY, alpha);
+        fill4Pixels(x1, y1, x2, y2, minX - 1, minY - 1, alpha);
     }
 
     // Left and right halves
@@ -496,7 +500,7 @@ void Rasterizer2::fillEllipse(const Point& topLeft, const Size& size)
         const Pt::int32_t x2 = ctrX + flx + 1;
         const Pt::int32_t y1 = ctrY - y;
         const Pt::int32_t y2 = ctrY + y;
-        fill4Pixels(x1, y1, x2, y2, minX, minY, alpha);
+        fill4Pixels(x1, y1, x2, y2, minX - 1, minY - 1, alpha);
     }
 }
 

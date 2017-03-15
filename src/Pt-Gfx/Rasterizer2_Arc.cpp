@@ -408,19 +408,19 @@ void Rasterizer2::arcUtil_cropAndStoreScanlineForChord(EAScanlines& scanlines, c
     // Get the element with the wanted coordinate from the closing line
     const Pt::int32_t lineY    = y - xwLine.minY + 1;
     const bool        lineYvld = ( lineY >= 0 && lineY < (Pt::int32_t) xwLine.points.size() );
-    const XWPoints&   xwPoints = xwLine.points[lineY];
-    XWPointsIterator  lit      = xwPoints.end();
-    if(lineYvld) {
-        for(XWPointsIterator cit = xwPoints.begin(); cit != xwPoints.end(); ++cit) {
+    const XWPoints*   xwPoints = lineYvld ? &xwLine.points[lineY] : 0;
+    XWPointsIterator  lit      = xwPoints ? xwPoints->end() : XWPointsIterator();
+    if(xwPoints) {
+        for(XWPointsIterator cit = xwPoints->begin(); cit != xwPoints->end(); ++cit) {
             if(cit->isNull()) continue;
-            if( lit == xwPoints.end() || (xwLine.faceL && cit->x > lit->x) || (xwLine.faceR && cit->x < lit->x) ) lit = cit;
+            if( lit == xwPoints->end() || (xwLine.faceL && cit->x > lit->x) || (xwLine.faceR && cit->x < lit->x) ) lit = cit;
         }
     }
 
     // Crop the scanline coordinates to the closing line
     Pt::int32_t xlc = xl;
     Pt::int32_t xrc = xr;
-    if(lineYvld && lit != xwPoints.end()) {
+    if(xwPoints && lit != xwPoints->end()) {
         if(xwLine.faceL) {
             if(xwLine.steep) { if(xlc <  lit->x + 1) xlc = lit->x + 1; } // (X), (X + 1)
             else             { if(xlc <= lit->x    ) xlc = lit->x + 1; } // (X)
@@ -539,24 +539,24 @@ void Rasterizer2::arcUtil_cropAndStoreScanlineForPie(EAScanlines& scanlines1, EA
     // Get the element with the wanted coordinate from the left-side closing line
     const Pt::int32_t lineY1    = y - xwLine1.minY + 1;
     const bool        lineYvld1 = ( lineY1 >= 0 && lineY1 < (Pt::int32_t) xwLine1.points.size() );
-    const XWPoints&   xwPoints1 = xwLine1.points[lineY1];
-    XWPointsIterator  lit1      = xwPoints1.end();
-    if(lineYvld1) {
-        for(XWPointsIterator cit = xwPoints1.begin(); cit != xwPoints1.end(); ++cit) {
+    const XWPoints*   xwPoints1 = lineYvld1 ? &xwLine1.points[lineY1] : 0;
+    XWPointsIterator  lit1      = xwPoints1 ? xwPoints1->end() : XWPointsIterator();
+    if(xwPoints1) {
+        for(XWPointsIterator cit = xwPoints1->begin(); cit != xwPoints1->end(); ++cit) {
             if(cit->isNull()) continue;
-            if( lit1 == xwPoints1.end() || (xwLine1.faceL && cit->x > lit1->x) || (xwLine1.faceR && cit->x < lit1->x) ) lit1 = cit;
+            if( lit1 == xwPoints1->end() || (xwLine1.faceL && cit->x > lit1->x) || (xwLine1.faceR && cit->x < lit1->x) ) lit1 = cit;
         }
     }
 
     // Get the element with the wanted coordinate from the right-side closing line
     const Pt::int32_t lineY2    = y - xwLine2.minY + 1;
     const bool        lineYvld2 = ( lineY2 >= 0 && lineY2 < (Pt::int32_t) xwLine2.points.size() );
-    const XWPoints&   xwPoints2 = xwLine2.points[lineY2];
-    XWPointsIterator  lit2      = xwPoints2.end();
-    if(lineYvld2) {
-        for(XWPointsIterator cit = xwPoints2.begin(); cit != xwPoints2.end(); ++cit) {
+    const XWPoints*   xwPoints2 = lineYvld2 ? &xwLine2.points[lineY2] : 0;
+    XWPointsIterator  lit2      = xwPoints2 ? xwPoints2->end() : XWPointsIterator();
+    if(xwPoints2) {
+        for(XWPointsIterator cit = xwPoints2->begin(); cit != xwPoints2->end(); ++cit) {
             if(cit->isNull()) continue;
-            if( lit2 == xwPoints2.end() || (xwLine2.faceL && cit->x > lit2->x) || (xwLine2.faceR && cit->x < lit2->x) ) lit2 = cit;
+            if( lit2 == xwPoints2->end() || (xwLine2.faceL && cit->x > lit2->x) || (xwLine2.faceR && cit->x < lit2->x) ) lit2 = cit;
         }
     }
 
@@ -570,12 +570,12 @@ void Rasterizer2::arcUtil_cropAndStoreScanlineForPie(EAScanlines& scanlines1, EA
     // Both lines are facing left
     if( xwLine1.faceL && xwLine2.faceL ) {
         // Left
-        if( lineYvld1 && lit1 != xwPoints1.end() && xwLine1.insideYRange(y) ) {
+        if( xwPoints1 && lit1 != xwPoints1->end() && xwLine1.insideYRange(y) ) {
             if(xwLine1.steep) { if(xlc1 <  lit1->x + 1) xlc1 = lit1->x + 1; } // (X), (X + 1)
             else              { if(xlc1 <= lit1->x    ) xlc1 = lit1->x + 1; } // (X)
         }
         // Left
-        if( lineYvld2 && lit2 != xwPoints2.end() && xwLine2.insideYRange(y) ) {
+        if( xwPoints2 && lit2 != xwPoints2->end() && xwLine2.insideYRange(y) ) {
             if(xwLine2.steep) { if(xlc1 <  lit2->x + 1) xlc1 = lit2->x + 1; } // (X), (X + 1)
             else              { if(xlc1 <= lit2->x    ) xlc1 = lit2->x + 1; } // (X)
         }
@@ -584,12 +584,12 @@ void Rasterizer2::arcUtil_cropAndStoreScanlineForPie(EAScanlines& scanlines1, EA
     // Both lines are facing right
     else if( xwLine1.faceR && xwLine2.faceR ) {
         // Right
-        if( lineYvld1 && lit1 != xwPoints1.end() && xwLine1.insideYRange(y) ) {
+        if( xwPoints1 && lit1 != xwPoints1->end() && xwLine1.insideYRange(y) ) {
             if(xwLine1.steep) { if(xrc1 >  lit1->x) xrc1 = lit1->x;     } // (X), (X + 1)
             else              { if(xrc1 >= lit1->x) xrc1 = lit1->x - 1; } // (X)
         }
         // Right
-        if( lineYvld2 && lit2 != xwPoints2.end() && xwLine2.insideYRange(y) ) {
+        if( xwPoints2 && lit2 != xwPoints2->end() && xwLine2.insideYRange(y) ) {
             if(xwLine2.steep) { if(xrc1 >  lit2->x) xrc1 = lit2->x;     } // (X), (X + 1)
             else              { if(xrc1 >= lit2->x) xrc1 = lit2->x - 1; } // (X)
         }
@@ -598,12 +598,12 @@ void Rasterizer2::arcUtil_cropAndStoreScanlineForPie(EAScanlines& scanlines1, EA
     // Left-side line is facing left and right-side line is facing right
     else if( xwLine1.faceL && xwLine2.faceR ) {
         // Left
-        if( lineYvld1 && lit1 != xwPoints1.end() && xwLine1.insideYRange(y) ) {
+        if( xwPoints1 && lit1 != xwPoints1->end() && xwLine1.insideYRange(y) ) {
             if(xwLine1.steep) { if(xlc1 <  lit1->x + 1) xlc1 = lit1->x + 1; } // (X), (X + 1)
             else              { if(xlc1 <= lit1->x    ) xlc1 = lit1->x + 1; } // (X)
         }
         // Right
-        if( lineYvld2 && lit2 != xwPoints2.end() && xwLine2.insideYRange(y) ) {
+        if( xwPoints2 && lit2 != xwPoints2->end() && xwLine2.insideYRange(y) ) {
             if(xwLine2.steep) { if(xrc1 >  lit2->x) xrc1 = lit2->x;     } // (X), (X + 1)
             else              { if(xrc1 >= lit2->x) xrc1 = lit2->x - 1; } // (X)
         }
@@ -612,16 +612,16 @@ void Rasterizer2::arcUtil_cropAndStoreScanlineForPie(EAScanlines& scanlines1, EA
     // Left-side line is facing right and right-side line is facing left => we have got a vertical "v-shape"
     else if( xwLine1.faceR && xwLine2.faceL ) {
         // Right
-        if( lineYvld1 && lit1 != xwPoints1.end() && xwLine1.insideYRange(y) ) {
+        if( xwPoints1 && lit1 != xwPoints1->end() && xwLine1.insideYRange(y) ) {
             if(xwLine1.steep) { if(xrc1 >  lit1->x) xrc1 = lit1->x;     } // (X), (X + 1)
             else              { if(xrc1 >= lit1->x) xrc1 = lit1->x - 1; } // (X)
         }
         // Left
-        if( lineYvld2 && lit2 != xwPoints2.end() && xwLine2.insideYRange(y) ) {
+        if( xwPoints2 && lit2 != xwPoints2->end() && xwLine2.insideYRange(y) ) {
             if(xwLine2.steep) { if(xlc2 <  lit2->x + 1) xlc2 = lit2->x + 1; } // (X), (X + 1)
             else              { if(xlc2 <= lit2->x    ) xlc2 = lit2->x + 1; } // (X)
         }
-        if( lineYvld2 && lit2 != xwPoints2.end() && xwLine2.insideYRange(y) && !xwLine1.insideYRange(y) ) {
+        if( xwPoints2 && lit2 != xwPoints2->end() && xwLine2.insideYRange(y) && !xwLine1.insideYRange(y) ) {
             if(xwLine2.steep) { if(xlc1 <  lit2->x + 1) xlc1 = lit2->x + 1; } // (X), (X + 1)
             else              { if(xlc1 <= lit2->x    ) xlc1 = lit2->x + 1; } // (X)
         }
@@ -631,28 +631,28 @@ void Rasterizer2::arcUtil_cropAndStoreScanlineForPie(EAScanlines& scanlines1, EA
     else {
         // Left
         if( xwLine1.faceL ) {
-            if( lineYvld1 && lit1 != xwPoints1.end() && xwLine1.insideYRange(y) ) {
+            if( xwPoints1 && lit1 != xwPoints1->end() && xwLine1.insideYRange(y) ) {
                 if(xwLine1.steep) { if(xlc1 <  lit1->x + 1) xlc1 = lit1->x + 1; } // (X), (X + 1)
                 else              { if(xlc1 <= lit1->x    ) xlc1 = lit1->x + 1; } // (X)
             }
         }
         // Right
         else if( xwLine1.faceR ) {
-            if( lineYvld1 && lit1 != xwPoints1.end() && xwLine1.insideYRange(y) ) {
+            if( xwPoints1 && lit1 != xwPoints1->end() && xwLine1.insideYRange(y) ) {
                 if(xwLine1.steep) { if(xrc1 >  lit1->x) xrc1 = lit1->x;     } // (X), (X + 1)
                 else              { if(xrc1 >= lit1->x) xrc1 = lit1->x - 1; } // (X)
             }
         }
         // Left
         if( xwLine2.faceL ) {
-            if( lineYvld2 && lit2 != xwPoints2.end() && xwLine2.insideYRange(y) ) {
+            if( xwPoints2 && lit2 != xwPoints2->end() && xwLine2.insideYRange(y) ) {
                 if(xwLine2.steep) { if(xlc1 <  lit2->x + 1) xlc1 = lit2->x + 1; } // (X), (X + 1)
                 else              { if(xlc1 <= lit2->x    ) xlc1 = lit2->x + 1; } // (X)
             }
         }
         // Right
         else if( xwLine2.faceR ) {
-            if( lineYvld2 && lit2 != xwPoints2.end() && xwLine2.insideYRange(y) ) {
+            if( xwPoints2 && lit2 != xwPoints2->end() && xwLine2.insideYRange(y) ) {
                 if(xwLine2.steep) { if(xrc1 >  lit2->x) xrc1 = lit2->x;     } // (X), (X + 1)
                 else              { if(xrc1 >= lit2->x) xrc1 = lit2->x - 1; } // (X)
             }
