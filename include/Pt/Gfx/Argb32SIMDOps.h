@@ -341,7 +341,7 @@ inline void fastBlendPixels(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBuffer
         dstv4PIX =             vld1q_s32  ((int32_t* ) dstvARGB                      ); // [ ARGB ARGB ARGB ARGB ]
         // Get the source alpha
         srcv0A0A =             vandq_s32  (            srcv4PIX,             maskA000); // [ A000 A000 A000 A000 ]
-        srci0A0A = (int32x4_t) vsubq_s16  ((int16x8_t) maskA000, (int16x8_t) srcv0A0A); // [ I000 I000 I000 I000 ]
+        srci0A0A =             vsubq_s32  (            maskA000,             srcv0A0A); // [ I000 I000 I000 I000 ]
         srcv0A0A =             vorrq_s32  (                                             // [ 0A0A 0A0A 0A0A 0A0A ]
                                    vshrq_n_s32(srcv0A0A,  8),
                                    vshrq_n_s32(srcv0A0A, 24)
@@ -369,7 +369,7 @@ inline void fastBlendPixels(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBuffer
         dstvRBRB =             vandq_s32  (            dstvRBRB,             mask0B0R); // [ 0R0B 0R0B 0R0B 0R0B ]
         // Store 4 pixels
         dstv4PIX =             vorrq_s32  (            dstvAGAG,             dstvRBRB); // [ ARGB ARGB ARGB ARGB ]
-                               vst1q_s32  ((int32_t* ) dstvARGB,             dstv4PIX);
+                               vst1q_s32  ((int32_t* ) dstvARGB,             dstvAGAG);
         // Increment the pointers
         ++srcvARGB;
         ++dstvARGB;
