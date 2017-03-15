@@ -4,6 +4,9 @@
 // Enable debugging information for use with Valgrind:
 //     ./jam.sh configure --with-rasterizer2 --with-hmi -sGUI=linux-fb -sOPTIM=-g --with-freetype --with-libpng
 //
+//      valgrind --leak-check=full --show-leak-kinds=all --gen-suppressions=yes --demangle=no ./ImagePainterTest2
+//      valgrind --leak-check=full --show-leak-kinds=definite,possible --suppressions=../src/Pt-Gfx/tests/ImagePainterTest2.supp ./ImagePainterTest2
+//
 //
 // perf record -d -g -T -e cycles,instructions,cache-references,cache-misses,bus-cycles ./ImagePainterTest2
 // perf report
@@ -85,7 +88,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_CHECK_RESULTING_IMAGE     0
 
 #define BENCHMARK_IMAGE_SIZE                Size(1280, 800)
-#define BENCHMARK_LOOP_COUNT                ( 500 * (BENCHMARK_RESULT_HTML ? 10 : 1) )
+#define BENCHMARK_LOOP_COUNT                ( 1 * (BENCHMARK_RESULT_HTML ? 10 : 1) )
 
 #define BENCHMARK_TEXT                      0
 #define BENCHMARK_ROTATED_TEXT              0

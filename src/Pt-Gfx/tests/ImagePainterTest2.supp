@@ -1,0 +1,25 @@
+{
+   libc
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*
+   obj:/usr/lib64/libc-2.17.so
+}
+
+{
+   libstdc++
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*
+   obj:/usr/lib64/libstdc++.so.6.0.19
+}
+
+{
+   libpixman
+   Memcheck:Leak
+   match-leak-kinds: reachable
+   fun:*
+   obj:/usr/lib64/libpixman-1.so.0.34.0
+   fun:*
+   obj:/usr/lib64/ld-2.17.so
+}
