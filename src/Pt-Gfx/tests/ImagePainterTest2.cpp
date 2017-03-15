@@ -1,11 +1,8 @@
-// In CentOS 7 64-bit:
-//     ./jam.sh configure --with-rasterizer2 --with-hmi -sGUI=linux-fb -sOPTIM=-O2
-//
-// On a system where its FreeType engine is not compatible:
-//     ./jam.sh configure --with-rasterizer2 --with-hmi -sGUI=linux-fb -sOPTIM=-O2 --with-freetype
-//
-// On a system where its libpng package is also not compatible (e.g. Raspbian Jessie 2017/01/11):
+// Use the buillt-in FreeType engine and libpng included with Pt:
 //     ./jam.sh configure --with-rasterizer2 --with-hmi -sGUI=linux-fb -sOPTIM=-O2 --with-freetype --with-libpng
+//
+// Enable debugging information for use with Valgrind:
+//     ./jam.sh configure --with-rasterizer2 --with-hmi -sGUI=linux-fb -sOPTIM=-g --with-freetype --with-libpng
 //
 //
 // perf record -d -g -T -e cycles,instructions,cache-references,cache-misses,bus-cycles ./ImagePainterTest2
