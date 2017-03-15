@@ -281,11 +281,11 @@ inline void fastBlendPixels(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBuffer
         srcv0A0A = _mm_and_si128   (srcv4PIX, maskA000); // [ A000 A000 A000 A000 ]
         srci0A0A = _mm_sub_epi16   (maskA000, srcv0A0A); // [ I000 I000 I000 I000 ]
         srcv0A0A = _mm_or_si128    (                     // [ 0A0A 0A0A 0A0A 0A0A ]
-                       _mm_srli_epi16(srcv0A0A,  8),
+                       _mm_srli_epi32(srcv0A0A,  8),
                        _mm_srli_epi32(srcv0A0A, 24)
                    );
         srci0A0A = _mm_or_si128    (                     // [ 0I0I 0I0I 0I0I 0A0I ]
-                       _mm_srli_epi16(srci0A0A,  8),
+                       _mm_srli_epi32(srci0A0A,  8),
                        _mm_srli_epi32(srci0A0A, 24)
                    );
         // Process A and G
