@@ -31,7 +31,7 @@
 #define PT_GFX_ARGB32IMAGE_SIMDOPERATIONS_H
 
 
-#ifdef RASTERIZER2
+#ifdef RASTERIZER2A
 
 #if defined(__arm__) || defined(__thumb__) || defined(_M_ARM) || defined(_M_ARMT) || defined(__TARGET_ARCH_ARM) || defined(__TARGET_ARCH_THUMB) || defined(_ARM) || defined(__arm)
 
@@ -404,3 +404,88 @@ inline void fastBlendPixels(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBuffer
 } // namespace
 
 #endif
+
+
+/*
+---------------------------------------
+Result on x86_64 (i5-4460; 64-Bit Mode)
+---------------------------------------
+Pt::Gfx - CompositionMode::SourceCopy                  Without SSE        With SSE
+                                                       ------ --------    ------ -------
+                                                       (Time) (Factor)    (Time) (Factor)
+                                                       ------ --------    ------ --------
+    Solid-filled    polygon          @ ImagePainter  =     62                 57
+    Solid-filled    polygon NOAA     @ ImagePainter2 =     51 ( 0.823)        35 ( 0.614)
+    Solid-filled    polygon XWAA     @ ImagePainter2 =     99 ( 1.597)        82 ( 1.439)
+    Solid-filled    polygon FSAA 2x2 @ ImagePainter2 =    119 ( 1.919)        96 ( 1.684)
+
+    Gradient-filled polygon          @ ImagePainter  =   1085               1019
+    Gradient-filled polygon NOAA     @ ImagePainter2 =     62 ( 0.057)        55 ( 0.054)
+    Gradient-filled polygon XWAA     @ ImagePainter2 =    128 ( 0.118)       123 ( 0.121)
+    Gradient-filled polygon FSAA 2x2 @ ImagePainter2 =    188 ( 0.173)       179 ( 0.176)
+
+    Texture-filled  polygon          @ ImagePainter  =     73                 71
+    Texture-filled  polygon NOAA     @ ImagePainter2 =     59 ( 0.808)        62 ( 0.873)
+    Texture-filled  polygon XWAA     @ ImagePainter2 =    128 ( 1.753)       141 ( 1.986)
+    Texture-filled  polygon FSAA 2x2 @ ImagePainter2 =    186 ( 2.548)       186 ( 2.620)
+
+Pt::Gfx - CompositionMode::SourceOver                  Without SSE        With SSE
+                                                       ------ --------    ------ -------
+                                                       (Time) (Factor)    (Time) (Factor)
+                                                       ------ --------    ------ --------
+    Solid-filled    polygon          @ ImagePainter  =    255                117
+    Solid-filled    polygon NOAA     @ ImagePainter2 =    174 ( 0.682)        70 ( 0.598)
+    Solid-filled    polygon XWAA     @ ImagePainter2 =    251 ( 0.984)       147 ( 1.256)
+    Solid-filled    polygon FSAA 2x2 @ ImagePainter2 =    229 ( 0.898)       130 ( 1.111)
+
+    Gradient-filled polygon          @ ImagePainter  =   1200               1129
+    Gradient-filled polygon NOAA     @ ImagePainter2 =    218 ( 0.182)       104 ( 0.092)
+    Gradient-filled polygon XWAA     @ ImagePainter2 =    301 ( 0.251)       195 ( 0.173)
+    Gradient-filled polygon FSAA 2x2 @ ImagePainter2 =    334 ( 0.278)       227 ( 0.201)
+
+    Texture-filled  polygon          @ ImagePainter  =    265                138
+    Texture-filled  polygon NOAA     @ ImagePainter2 =    259 ( 0.977)       130 ( 0.942)
+    Texture-filled  polygon XWAA     @ ImagePainter2 =    338 ( 1.275)       228 ( 1.652)
+    Texture-filled  polygon FSAA 2x2 @ ImagePainter2 =    375 ( 1.415)       251 ( 1.819)
+
+
+--------------------------------------------------------
+Result on v7l (A53; BCM2709; RaspberryPi 3; 32-bit Mode)
+--------------------------------------------------------
+Pt::Gfx - CompositionMode::SourceCopy                  Without NEON       With NEON
+                                                       ------ --------    ------ -------
+                                                       (Time) (Factor)    (Time) (Factor)
+                                                       ------ --------    ------ --------
+    Solid-filled    polygon          @ ImagePainter  =    520
+    Solid-filled    polygon NOAA     @ ImagePainter2 =    408 ( 0.785)
+    Solid-filled    polygon XWAA     @ ImagePainter2 =    966 ( 1.858)
+    Solid-filled    polygon FSAA 2x2 @ ImagePainter2 =   1151 ( 2.213)
+
+    Gradient-filled polygon          @ ImagePainter  =   7057
+    Gradient-filled polygon NOAA     @ ImagePainter2 =    552 ( 0.078)
+    Gradient-filled polygon XWAA     @ ImagePainter2 =   1233 ( 0.175)
+    Gradient-filled polygon FSAA 2x2 @ ImagePainter2 =   1405 ( 0.199)
+
+    Texture-filled  polygon          @ ImagePainter  =    637
+    Texture-filled  polygon NOAA     @ ImagePainter2 =    612 ( 0.961)
+    Texture-filled  polygon XWAA     @ ImagePainter2 =   1362 ( 2.138)
+    Texture-filled  polygon FSAA 2x2 @ ImagePainter2 =   1682 ( 2.641)
+
+Pt::Gfx - CompositionMode::SourceOver                  Without NEON       With NEON
+                                                       ------ --------    ------ -------
+                                                       (Time) (Factor)    (Time) (Factor)
+    Solid-filled    polygon          @ ImagePainter  =   2002
+    Solid-filled    polygon NOAA     @ ImagePainter2 =   1343 ( 0.671)
+    Solid-filled    polygon XWAA     @ ImagePainter2 =   2141 ( 1.069)
+    Solid-filled    polygon FSAA 2x2 @ ImagePainter2 =   2050 ( 1.024)
+
+    Gradient-filled polygon          @ ImagePainter  =   5790
+    Gradient-filled polygon NOAA     @ ImagePainter2 =   1721 ( 0.297)
+    Gradient-filled polygon XWAA     @ ImagePainter2 =   2612 ( 0.451)
+    Gradient-filled polygon FSAA 2x2 @ ImagePainter2 =   2559 ( 0.442)
+
+    Texture-filled  polygon          @ ImagePainter  =   2349
+    Texture-filled  polygon NOAA     @ ImagePainter2 =   2366 ( 1.007)
+    Texture-filled  polygon XWAA     @ ImagePainter2 =   3290 ( 1.401)
+    Texture-filled  polygon FSAA 2x2 @ ImagePainter2 =   3312 ( 1.410)                                                       ------ --------    ------ --------
+*/
