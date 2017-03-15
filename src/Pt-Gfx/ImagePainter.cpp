@@ -87,7 +87,7 @@ const Gfx::RectF& ImagePainter::clip() const
 
 void ImagePainter::setClip( const RectF& clipIn )
 {
-   Rect  clip( Point( (int)(clipIn.x()), (int)(clipIn.y())), Size((int) (clipIn.width()),(int) (clipIn.height())));
+  Rect clip(clipIn.left(), clipIn.right(), clipIn.top(), clipIn.bottom());
   _rasterizer->setClip( clip );
   _clip = clipIn;
 }
@@ -157,6 +157,7 @@ void ImagePainter::drawRect( const  RectF& rect )
                         Point(rect.bottomLeft().x(),rect.bottomLeft().y()) ,
                         Point(rect.topLeft().x(),rect.topLeft().y()),
                         };
+
 	_rasterizer->stroke( points, 5);
 }
 
