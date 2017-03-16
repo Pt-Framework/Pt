@@ -70,6 +70,12 @@ class AffineMatrix2D {
         inline void reflectAboutXAxis(MatrixUpdateMode mode = MultiplyOnLeft);
         inline void reflectAboutYAxis(MatrixUpdateMode mode = MultiplyOnLeft);
 
+        inline void getRaw(float m[3][3]);
+        inline void updateUsingRaw(const float m[3][3], MatrixUpdateMode mode = MultiplyOnLeft);
+
+        inline void operator=(const AffineMatrix2D& m);
+        inline bool operator==(const AffineMatrix2D& m) const;
+
         inline void push();
         inline bool pop();
 
@@ -218,6 +224,30 @@ void AffineMatrix2D::reflectAboutYAxis(MatrixUpdateMode mode)
 
     multiplyWith(n, mode);
 }
+
+void AffineMatrix2D::getRaw(float m[3][3])
+{
+    m[0][0] = _mdata.v[0][0]; m[0][1] = _mdata.v[0][1]; m[0][2] = _mdata.v[0][2];
+    m[1][0] = _mdata.v[1][0]; m[1][1] = _mdata.v[1][1]; m[1][2] = _mdata.v[1][2];
+    m[2][0] = _mdata.v[2][0]; m[2][1] = _mdata.v[2][1]; m[2][2] = _mdata.v[2][2];
+}
+
+void AffineMatrix2D::updateUsingRaw(const float m[3][3], MatrixUpdateMode mode)
+{
+    MatrixData n;
+
+    n.v[0][0] = m[0][0]; n.v[0][1] = m[0][1]; n.v[0][2] = m[0][2];
+    n.v[1][0] = m[1][0]; n.v[1][1] = m[1][1]; n.v[1][2] = m[1][2];
+    n.v[2][0] = m[2][0]; n.v[2][1] = m[2][1]; n.v[2][2] = m[2][2];
+
+    multiplyWith(n, mode);
+}
+
+void AffineMatrix2D::operator=(const AffineMatrix2D& m)
+{ updateUsingRaw(m._mdata.v, Replace); }
+
+bool AffineMatrix2D::operator==(const AffineMatrix2D& m) const
+{ return memcmp(&_mdata, &m._mdata, sizeof(_mdata)) == 0; }
 
 void AffineMatrix2D::push()
 { _mstack.push_back(_mdata); }
