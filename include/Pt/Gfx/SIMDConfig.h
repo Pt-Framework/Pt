@@ -52,6 +52,7 @@
 #elif defined(_M_IX86) || defined(_M_AMD64) || defined(_M_X64)
 
     #include <intrin.h>
+
     #define PT_GFX_USE_AVX2
     #define PT_GFX_USE_AVX
 
