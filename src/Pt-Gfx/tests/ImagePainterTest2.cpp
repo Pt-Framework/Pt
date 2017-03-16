@@ -79,8 +79,8 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_SOLID_THICK_LINE              0 // (including bezier)
 #define TEST_DRAW_PATTERNED_THICK_LINE          0 // (including bezier)
 
-#define TEST_DRAW_RECTANGLES_FILLED_RECTANGLES  0
-#define TEST_DRAW_ROUND_RECTANGLES              0 // (including filled)
+#define TEST_DRAW_OMPF_RECTANGLES               0 // (including thick and filled)
+#define TEST_DRAW_ROUND_OMPF_RECTANGLES         0 // (including thick and filled)
 #define TEST_DRAW_ELLIPSES_ARCS                 0
 #define TEST_DRAW_THICK_ELLIPSES_ARCS           0
 
@@ -266,7 +266,7 @@ int main(int argc, char* args[])
     }
 
     // Rectangles, thick rectangles and filled rectangles
-    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_RECTANGLES_FILLED_RECTANGLES) {
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_OMPF_RECTANGLES) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
         testDrawRect("Rectangles & Filled Rectangles - ImagePainter2 [SourceCopy]", image, *painter2);
         if(TEST_COMPARE_WITH_OLD_PAINTER) {
@@ -275,7 +275,7 @@ int main(int argc, char* args[])
         }
     }
 
-    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_RECTANGLES_FILLED_RECTANGLES) {
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_OMPF_RECTANGLES) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
         testDrawRect("Rectangles & Filled Rectangles - ImagePainter2 [SourceOver]", image, *painter2);
         if(TEST_COMPARE_WITH_OLD_PAINTER) {
@@ -285,12 +285,12 @@ int main(int argc, char* args[])
     }
 
     // Round rectangles, thick round rectangles and filled round rectangles
-    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_ROUND_RECTANGLES) {
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_ROUND_OMPF_RECTANGLES) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
         testDrawRoundRect("Round Rectangles & Filled Round Rectangles - ImagePainter2 [SourceCopy]", image, *painter2);
     }
 
-    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_ROUND_RECTANGLES) {
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_ROUND_OMPF_RECTANGLES) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
         testDrawRoundRect("Round Rectangles & Filled Round Rectangles - ImagePainter2 [SourceOver]", image, *painter2);
     }
