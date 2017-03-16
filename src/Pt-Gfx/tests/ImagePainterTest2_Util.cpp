@@ -362,7 +362,11 @@ static void dumpMatrix(const AffineMatrix2D& mat)
 
 static void benchMatrixOps()
 {
+#if defined(__arm__) || defined(__thumb__) || defined(_M_ARM) || defined(_M_ARMT) || defined(__TARGET_ARCH_ARM) || defined(__TARGET_ARCH_THUMB) || defined(_ARM) || defined(__arm)
+    const int loopCount = 10000000;
+#else
     const int loopCount = 100000000;
+#endif
 
     // Reinitialize the random number generator here, so it will produce
     // the same sequence at the start of every benchmark
@@ -382,7 +386,6 @@ static void benchMatrixOps()
 
     printf("Initial value\n");
     dumpMatrix(const_cast<const AffineMatrix2D&>(mat));
-    printf("\n");
 
     Pt::System::Clock clock;
     clock.start();
@@ -397,8 +400,26 @@ static void benchMatrixOps()
 
     printf("After operations\n");
     dumpMatrix(const_cast<const AffineMatrix2D&>(mat));
-    printf("\n");
 
     printf("Time = %8.6f nS\n", (double) clock.stop().toUSecs() / loopCount * 1000.0 / 4.0);
     printf("\n");
+
+    /*
+    -----------------
+    Result for x86_64
+    -----------------
+    Initial value
+        |   1.000   0.000   0.000 |
+        |   0.000   1.000   0.000 |
+        |   0.000   0.000   1.000 |
+    After operations
+        |   0.000   0.000   0.000 |
+        |   0.000   0.559   0.435 |
+        |   0.000   0.000   1.000 |
+    Time = 5.062468 nS
+
+    ---------------
+    Result with SSE
+    ---------------
+    */
 }
