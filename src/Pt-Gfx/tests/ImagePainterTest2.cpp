@@ -59,6 +59,9 @@ using namespace Pt::Gfx;
 // Benchmark mathematical functions only
 #define DO_MATH_BENCHMARKING_ONLY 0
 
+// Benchmark matrix operations only
+#define DO_MATRIX_BENCHMARKING_ONLY 1
+
 // Comparison with Cairo (solid-filled polygons and ellipses only)
 #define DO_BENCHMARKING_CAIRO                 0
 #define BENCHMARK_CAIRO_CHECK_RESULTING_IMAGE 0
@@ -160,7 +163,13 @@ int main(int argc, char* args[])
 {
     // Benchmark some mathematical functions only
     if(DO_MATH_BENCHMARKING_ONLY) {
-        benchMarkMathFunctions();
+        benchMathFunctions();
+        return 0;
+    }
+
+    // Benchmark matrix operations only
+    if(DO_MATRIX_BENCHMARKING_ONLY) {
+        benchMatrixOps();
         return 0;
     }
 

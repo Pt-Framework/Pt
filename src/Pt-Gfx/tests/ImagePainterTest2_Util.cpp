@@ -219,14 +219,10 @@ static void sdlPreviewRGB888Buffer(const std::string& title, const uint8_t* argb
 
 ////////////////////////////////////////////////////////////////////////////////
 
-
-
-////////////////////////////////////////////////////////////////////////////////
-
 static volatile float dummyMathValue;
 
 template<int LOOP_COUNT, int MIN, int MAX, int DIV, typename F>
-static double benchMarkMathFunction(F f)
+static double benchMathFunction(F f)
 {
     const int loopCount = LOOP_COUNT;
 
@@ -270,35 +266,35 @@ struct F_fastCos     { float operator() (float x) { return Pt::Gfx::Math::fastCo
 struct F_atan2f      { float operator() (float x) { return ::atan2f (100.0f, x);                     } };
 struct F_fastAtan2   { float operator() (float x) { return Pt::Gfx::Math::fastAtan2_impl(100.0f, x); } };
 
-static void benchMarkMathFunctions()
+static void benchMathFunctions()
 {
     double time1, time2;
 
     std::clog << "                Time    Factor " << std::endl;
     std::clog << "               ------- --------" << std::endl << std::endl;
 
-    time1 = benchMarkMathFunction<100000, 0, 100, 0>(F_sqrtf   ());
-    time2 = benchMarkMathFunction<100000, 0, 100, 0>(F_fastSqrt());
+    time1 = benchMathFunction<100000, 0, 100, 0>(F_sqrtf   ());
+    time2 = benchMathFunction<100000, 0, 100, 0>(F_fastSqrt());
     printf("sqrtf        = %6.5f\n", time1);
     printf("fastSqrt     = %6.5f (%6.3f)\n\n", time2, time2 / time1);
 
-    time1 = benchMarkMathFunction<100000, 0, 100, 0>(F_isqrtf   ());
-    time2 = benchMarkMathFunction<100000, 0, 100, 0>(F_fastInvSqrt());
+    time1 = benchMathFunction<100000, 0, 100, 0>(F_isqrtf   ());
+    time2 = benchMathFunction<100000, 0, 100, 0>(F_fastInvSqrt());
     printf("1.0f / sqrtf = %6.5f\n", time1);
     printf("fastInvSqrt  = %6.5f (%6.3f)\n\n", time2, time2 / time1);
 
-    time1 = benchMarkMathFunction<10000, -360, 360, 1745>(F_sinf   ());
-    time2 = benchMarkMathFunction<10000, -360, 360, 1745>(F_fastSin());
+    time1 = benchMathFunction<10000, -360, 360, 1745>(F_sinf   ());
+    time2 = benchMathFunction<10000, -360, 360, 1745>(F_fastSin());
     printf("sinf         = %6.5f\n", time1);
     printf("fastSin      = %6.5f (%6.3f)\n\n", time2, time2 / time1);
 
-    time1 = benchMarkMathFunction<10000, -360, 360, 1745>(F_cosf   ());
-    time2 = benchMarkMathFunction<10000, -360, 360, 1745>(F_fastCos());
+    time1 = benchMathFunction<10000, -360, 360, 1745>(F_cosf   ());
+    time2 = benchMathFunction<10000, -360, 360, 1745>(F_fastCos());
     printf("cosf         = %6.5f\n", time1);
     printf("fastCos      = %6.5f (%6.3f)\n\n", time2, time2 / time1);
 
-    time1 = benchMarkMathFunction<10000, 0, 100, 0>(F_atan2f   ());
-    time2 = benchMarkMathFunction<10000, 0, 100, 0>(F_fastAtan2());
+    time1 = benchMathFunction<10000, 0, 100, 0>(F_atan2f   ());
+    time2 = benchMathFunction<10000, 0, 100, 0>(F_fastAtan2());
     printf("atan2f       = %6.5f\n", time1);
     printf("fastAtan2    = %6.5f (%6.3f)\n\n", time2, time2 / time1);
 
@@ -351,3 +347,10 @@ static void benchMarkMathFunctions()
     fastAtan2    = 0.05048 ( 0.345)
     */
 }
+
+////////////////////////////////////////////////////////////////////////////////
+
+static void benchMatrixOps()
+{
+}
+
