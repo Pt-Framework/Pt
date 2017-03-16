@@ -36,21 +36,25 @@
 #if defined(__arm__) || defined(__thumb__) || defined(_M_ARM) || defined(_M_ARMT) || defined(__TARGET_ARCH_ARM) || defined(__TARGET_ARCH_THUMB) || defined(_ARM) || defined(__arm)
 
     #include <arm_neon.h>
+
     #define PT_GFX_USE_NEON
 
 #elif defined(i386) || defined(__i386) || defined(__i386__) || defined(_X86_) || defined(__x86_64) || defined(__x86_64__) || defined(__amd64) || defined(__amd64__)
 
     #include <x86intrin.h>
-    #define PT_GFX_USE_AVX
+
     #define PT_GFX_USE_AVX2
+    #define PT_GFX_USE_AVX
+
     #define PT_GFX_USE_SSE3
     #define PT_GFX_USE_SSE2
 
 #elif defined(_M_IX86) || defined(_M_AMD64) || defined(_M_X64)
 
     #include <intrin.h>
-    #define PT_GFX_USE_AVX
     #define PT_GFX_USE_AVX2
+    #define PT_GFX_USE_AVX
+
     #define PT_GFX_USE_SSE3
     #define PT_GFX_USE_SSE2
 

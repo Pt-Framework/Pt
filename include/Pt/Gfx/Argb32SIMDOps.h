@@ -351,38 +351,38 @@ inline void pixelOps_SourceOver(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBu
 
     for(size_t i = 0; i < len8; ++i) {
         // Load 8 pixels
-        srcv8PIX = _mm256_loadu_si256 (srcvARGB             ); // [ ARGB ARGB ARGB ARGB ]
-        dstv8PIX = _mm256_loadu_si256 (dstvARGB             ); // [ ARGB ARGB ARGB ARGB ]
+        srcv8PIX = _mm256_loadu_si256 (srcvARGB             ); // [ ARGB ARGB ARGB ARGB ARGB ARGB ARGB ARGB ]
+        dstv8PIX = _mm256_loadu_si256 (dstvARGB             ); // [ ARGB ARGB ARGB ARGB ARGB ARGB ARGB ARGB ]
         // Get the source alpha
-        srcv0A0A = _mm256_and_si256   (srcv8PIX, avxMaskA000); // [ A000 A000 A000 A000 ]
-        srci0A0A = _mm256_sub_epi32   (avxMaskA000, srcv0A0A); // [ I000 I000 I000 I000 ]
-        srcv0A0A = _mm256_or_si256    (                        // [ 0A0A 0A0A 0A0A 0A0A ]
+        srcv0A0A = _mm256_and_si256   (srcv8PIX, avxMaskA000); // [ A000 A000 A000 A000 A000 A000 A000 A000 ]
+        srci0A0A = _mm256_sub_epi32   (avxMaskA000, srcv0A0A); // [ I000 I000 I000 I000 I000 I000 I000 I000 ]
+        srcv0A0A = _mm256_or_si256    (                        // [ 0A0A 0A0A 0A0A 0A0A 0A0A 0A0A 0A0A 0A0A ]
                        _mm256_srli_epi32(srcv0A0A,  8),
                        _mm256_srli_epi32(srcv0A0A, 24)
                    );
-        srci0A0A = _mm256_or_si256    (                        // [ 0I0I 0I0I 0I0I 0I0I ]
+        srci0A0A = _mm256_or_si256    (                        // [ 0I0I 0I0I 0I0I 0I0I 0I0I 0I0I 0I0I 0I0I ]
                        _mm256_srli_epi32(srci0A0A,  8),
                        _mm256_srli_epi32(srci0A0A, 24)
                    );
         // Process A and G
-        srcvAGAG = _mm256_and_si256   (srcv8PIX, avxMaskA0G0); // [ A0G0 A0G0 A0G0 A0G0 ]
-        srcvAGAG = _mm256_srli_epi16  (srcvAGAG, 8          ); // [ A0G0 A0G0 A0G0 A0G0 ]
-        srcvAGAG = _mm256_mullo_epi16 (srcvAGAG, srcv0A0A   ); // [ AAGG AAGG AAGG AAGG ]
-        dstvAGAG = _mm256_and_si256   (dstv8PIX, avxMaskA0G0); // [ A0G0 A0G0 A0G0 A0G0 ]
-        dstvAGAG = _mm256_srli_epi16  (dstvAGAG, 8          ); // [ 0A0G 0A0G 0A0G 0A0G ]
-        dstvAGAG = _mm256_mullo_epi16 (dstvAGAG, srci0A0A   ); // [ AAGG AAGG AAGG AAGG ]
-        dstvAGAG = _mm256_add_epi16   (dstvAGAG, srcvAGAG   ); // [ AAGG AAGG AAGG AAGG ]
-        dstvAGAG = _mm256_and_si256   (dstvAGAG, avxMaskA0G0); // [ A0G0 A0G0 A0G0 AAG0 ]
+        srcvAGAG = _mm256_and_si256   (srcv8PIX, avxMaskA0G0); // [ A0G0 A0G0 A0G0 A0G0 A0G0 A0G0 A0G0 A0G0 ]
+        srcvAGAG = _mm256_srli_epi16  (srcvAGAG, 8          ); // [ A0G0 A0G0 A0G0 A0G0 A0G0 A0G0 A0G0 A0G0 ]
+        srcvAGAG = _mm256_mullo_epi16 (srcvAGAG, srcv0A0A   ); // [ AAGG AAGG AAGG AAGG AAGG AAGG AAGG AAGG ]
+        dstvAGAG = _mm256_and_si256   (dstv8PIX, avxMaskA0G0); // [ A0G0 A0G0 A0G0 A0G0 A0G0 A0G0 A0G0 A0G0 ]
+        dstvAGAG = _mm256_srli_epi16  (dstvAGAG, 8          ); // [ 0A0G 0A0G 0A0G 0A0G 0A0G 0A0G 0A0G 0A0G ]
+        dstvAGAG = _mm256_mullo_epi16 (dstvAGAG, srci0A0A   ); // [ AAGG AAGG AAGG AAGG AAGG AAGG AAGG AAGG ]
+        dstvAGAG = _mm256_add_epi16   (dstvAGAG, srcvAGAG   ); // [ AAGG AAGG AAGG AAGG AAGG AAGG AAGG AAGG ]
+        dstvAGAG = _mm256_and_si256   (dstvAGAG, avxMaskA0G0); // [ A0G0 A0G0 A0G0 AAG0 A0G0 A0G0 A0G0 AAG0 ]
         // Process R and B
-        srcvRBRB = _mm256_and_si256   (srcv8PIX, avxMask0B0R); // [ 0R0B 0R0B 0R0B 0R0B ]
-        srcvRBRB = _mm256_mullo_epi16 (srcvRBRB, srcv0A0A   ); // [ RRBB RRBB RRBB RRBB ]
-        dstvRBRB = _mm256_and_si256   (dstv8PIX, avxMask0B0R); // [ 0R0B 0R0B 0R0B 0R0B ]
-        dstvRBRB = _mm256_mullo_epi16 (dstvRBRB, srci0A0A   ); // [ RRBB RRBB RRBB RRBB ]
-        dstvRBRB = _mm256_add_epi16   (dstvRBRB, srcvRBRB   ); // [ RRBB RRBB RRBB RRBB ]
-        dstvRBRB = _mm256_srli_epi16  (dstvRBRB, 8          ); // [ .R.B .R.B .R.B .R.B ]
-        dstvRBRB = _mm256_and_si256   (dstvRBRB, avxMask0B0R); // [ 0R0B 0R0B 0R0B 0R0B ]
+        srcvRBRB = _mm256_and_si256   (srcv8PIX, avxMask0B0R); // [ 0R0B 0R0B 0R0B 0R0B 0R0B 0R0B 0R0B 0R0B ]
+        srcvRBRB = _mm256_mullo_epi16 (srcvRBRB, srcv0A0A   ); // [ RRBB RRBB RRBB RRBB RRBB RRBB RRBB RRBB ]
+        dstvRBRB = _mm256_and_si256   (dstv8PIX, avxMask0B0R); // [ 0R0B 0R0B 0R0B 0R0B 0R0B 0R0B 0R0B 0R0B ]
+        dstvRBRB = _mm256_mullo_epi16 (dstvRBRB, srci0A0A   ); // [ RRBB RRBB RRBB RRBB RRBB RRBB RRBB RRBB ]
+        dstvRBRB = _mm256_add_epi16   (dstvRBRB, srcvRBRB   ); // [ RRBB RRBB RRBB RRBB RRBB RRBB RRBB RRBB ]
+        dstvRBRB = _mm256_srli_epi16  (dstvRBRB, 8          ); // [ .R.B .R.B .R.B .R.B .R.B .R.B .R.B .R.B ]
+        dstvRBRB = _mm256_and_si256   (dstvRBRB, avxMask0B0R); // [ 0R0B 0R0B 0R0B 0R0B 0R0B 0R0B 0R0B 0R0B ]
         // Store 8 pixels
-        dstv8PIX = _mm256_or_si256    (dstvAGAG, dstvRBRB   ); // [ ARGB ARGB ARGB ARGB ]
+        dstv8PIX = _mm256_or_si256    (dstvAGAG, dstvRBRB   ); // [ ARGB ARGB ARGB ARGB ARGB ARGB ARGB ARGB ]
                    _mm256_storeu_si256(dstvARGB, dstv8PIX   );
         // Increment the pointers
         ++srcvARGB;
@@ -543,44 +543,43 @@ inline void pixelOps_SourceOver(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBu
 ---------------------------------------
 Result on x86_64 (i5-4460; 64-Bit Mode)
 ---------------------------------------
-Pt::Gfx - CompositionMode::SourceCopy                  Without SSE        With SSE
-                                                       ------ --------    ------ --------
-                                                       (Time) (Factor)    (Time) (Factor)
-                                                       ------ --------    ------ --------
-    Solid-filled    polygon          @ ImagePainter  =     62                 57
-    Solid-filled    polygon NOAA     @ ImagePainter2 =     51 ( 0.823)        35 ( 0.614)
-    Solid-filled    polygon XWAA     @ ImagePainter2 =     99 ( 1.597)        82 ( 1.439)
-    Solid-filled    polygon FSAA 2x2 @ ImagePainter2 =    119 ( 1.919)        96 ( 1.684)
+Pt::Gfx - CompositionMode::SourceCopy                  Normal x86_64      With SSE2          With AVX2
+                                                       ------ --------    ------ --------    ------ --------
+                                                       (Time) (Factor)    (Time) (Factor)    (Time) (Factor)
+                                                       ------ --------    ------ --------    ------ --------
+    Solid-filled    polygon          @ ImagePainter  =     62                 57                 50
+    Solid-filled    polygon NOAA     @ ImagePainter2 =     51 ( 0.823)        35 ( 0.614)        31 ( 0.620)
+    Solid-filled    polygon XWAA     @ ImagePainter2 =     99 ( 1.597)        82 ( 1.439)        80 ( 1.600)
+    Solid-filled    polygon FSAA 2x2 @ ImagePainter2 =    119 ( 1.919)        96 ( 1.684)        97 ( 1.940)
 
-    Gradient-filled polygon          @ ImagePainter  =   1085               1019
-    Gradient-filled polygon NOAA     @ ImagePainter2 =     62 ( 0.057)        55 ( 0.054)
-    Gradient-filled polygon XWAA     @ ImagePainter2 =    128 ( 0.118)       123 ( 0.121)
-    Gradient-filled polygon FSAA 2x2 @ ImagePainter2 =    188 ( 0.173)       179 ( 0.176)
+    Gradient-filled polygon          @ ImagePainter  =   1085               1019               1037
+    Gradient-filled polygon NOAA     @ ImagePainter2 =     62 ( 0.057)        55 ( 0.054)        49 ( 0.047)
+    Gradient-filled polygon XWAA     @ ImagePainter2 =    128 ( 0.118)       123 ( 0.121)       118 ( 0.114)
+    Gradient-filled polygon FSAA 2x2 @ ImagePainter2 =    188 ( 0.173)       179 ( 0.176)       174 ( 0.168)
 
-    Texture-filled  polygon          @ ImagePainter  =     73                 71
-    Texture-filled  polygon NOAA     @ ImagePainter2 =     59 ( 0.808)        62 ( 0.873)
-    Texture-filled  polygon XWAA     @ ImagePainter2 =    128 ( 1.753)       141 ( 1.986)
-    Texture-filled  polygon FSAA 2x2 @ ImagePainter2 =    186 ( 2.548)       186 ( 2.620)
+    Texture-filled  polygon          @ ImagePainter  =     73                 71                 64
+    Texture-filled  polygon NOAA     @ ImagePainter2 =     59 ( 0.808)        62 ( 0.873)        54 ( 0.844)
+    Texture-filled  polygon XWAA     @ ImagePainter2 =    128 ( 1.753)       141 ( 1.986)       122 ( 1.906)
+    Texture-filled  polygon FSAA 2x2 @ ImagePainter2 =    186 ( 2.548)       186 ( 2.620)       182 ( 2.844)
 
-Pt::Gfx - CompositionMode::SourceOver                  Without SSE        With SSE
-                                                       ------ --------    ------ --------
-                                                       (Time) (Factor)    (Time) (Factor)
-                                                       ------ --------    ------ --------
-    Solid-filled    polygon          @ ImagePainter  =    255                117
-    Solid-filled    polygon NOAA     @ ImagePainter2 =    174 ( 0.682)        70 ( 0.598)
-    Solid-filled    polygon XWAA     @ ImagePainter2 =    251 ( 0.984)       147 ( 1.256)
-    Solid-filled    polygon FSAA 2x2 @ ImagePainter2 =    229 ( 0.898)       130 ( 1.111)
+Pt::Gfx - CompositionMode::SourceOver                  Normal x86_64      With SSE2          With AVX2
+                                                       ------ --------    ------ --------    ------ --------
+                                                       (Time) (Factor)    (Time) (Factor)    (Time) (Factor)
+                                                       ------ --------    ------ --------    ------ --------
+    Solid-filled    polygon          @ ImagePainter  =    255                117                 83
+    Solid-filled    polygon NOAA     @ ImagePainter2 =    174 ( 0.682)        70 ( 0.598)        60 ( 0.723)
+    Solid-filled    polygon XWAA     @ ImagePainter2 =    251 ( 0.984)       147 ( 1.256)       146 ( 1.759)
+    Solid-filled    polygon FSAA 2x2 @ ImagePainter2 =    229 ( 0.898)       130 ( 1.111)       124 ( 1.494)
 
-    Gradient-filled polygon          @ ImagePainter  =   1200               1129
-    Gradient-filled polygon NOAA     @ ImagePainter2 =    218 ( 0.182)       104 ( 0.092)
-    Gradient-filled polygon XWAA     @ ImagePainter2 =    301 ( 0.251)       195 ( 0.173)
-    Gradient-filled polygon FSAA 2x2 @ ImagePainter2 =    334 ( 0.278)       227 ( 0.201)
+    Gradient-filled polygon          @ ImagePainter  =   1200               1129               1101
+    Gradient-filled polygon NOAA     @ ImagePainter2 =    218 ( 0.182)       104 ( 0.092)        84 ( 0.076)
+    Gradient-filled polygon XWAA     @ ImagePainter2 =    301 ( 0.251)       195 ( 0.173)       178 ( 0.162)
+    Gradient-filled polygon FSAA 2x2 @ ImagePainter2 =    334 ( 0.278)       227 ( 0.201)       209 ( 0.190)
 
-    Texture-filled  polygon          @ ImagePainter  =    265                138
-    Texture-filled  polygon NOAA     @ ImagePainter2 =    259 ( 0.977)       130 ( 0.942)
-    Texture-filled  polygon XWAA     @ ImagePainter2 =    338 ( 1.275)       228 ( 1.652)
-    Texture-filled  polygon FSAA 2x2 @ ImagePainter2 =    375 ( 1.415)       251 ( 1.819)
-
+    Texture-filled  polygon          @ ImagePainter  =    265                138                109
+    Texture-filled  polygon NOAA     @ ImagePainter2 =    259 ( 0.977)       130 ( 0.942)       100 ( 0.917)
+    Texture-filled  polygon XWAA     @ ImagePainter2 =    338 ( 1.275)       228 ( 1.652)       194 ( 1.780)
+    Texture-filled  polygon FSAA 2x2 @ ImagePainter2 =    375 ( 1.415)       251 ( 1.819)       223 ( 2.046)
 
 --------------------------------------------------------
 Result on v7l (A53; BCM2709; RaspberryPi 3; 32-bit Mode)
