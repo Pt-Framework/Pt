@@ -41,7 +41,7 @@ namespace Gfx {
 namespace Argb32 {
 
 
-#if defined(PT_GFX_USE_AVX2) || defined(PT_GFX_USE_AVX)
+#if defined(PT_GFX_USE_AVX2) || defined(PT_GFX_USE_AVX1)
 
 // AVX masks
 static const __m256i avxMaskA000 = _mm256_set_epi32(0xFF000000, 0xFF000000, 0xFF000000, 0xFF000000, 0xFF000000, 0xFF000000, 0xFF000000, 0xFF000000);
@@ -51,7 +51,7 @@ static const __m256i avxMask0B0R = _mm256_set_epi32(0x00FF00FF, 0x00FF00FF, 0x00
 #endif
 
 
-#if defined(PT_GFX_USE_SSE3) || defined(PT_GFX_USE_SSE2)
+#if defined(PT_GFX_USE_SSE3) || defined(PT_GFX_USE_SSE2) || defined(PT_GFX_USE_SSE1)
 
 // SSE masks
 static const __m128i sseMaskA000 = _mm_set_epi32(0xFF000000, 0xFF000000, 0xFF000000, 0xFF000000);
@@ -91,7 +91,7 @@ static const int32x4_t neonMask0B0R = SET_32X4(0x00FF00FF, 0x00FF00FF, 0x00FF00F
 // Copy a constant color to destination pixels
 inline void pixelOps_SourceCopy(Pt::uint8_t* toBuffer, Pt::uint32_t fromARGB, size_t length)
 {
-#if defined (PT_GFX_USE_AVX)
+#if defined (PT_GFX_USE_AVX1)
 
     const size_t   len8     = length / 8;
     const __m256i  srcvARGB = _mm256_set1_epi32(fromARGB);
@@ -274,7 +274,7 @@ inline void pixelOps_SourceOver(Pt::uint8_t* toBuffer, Pt::uint32_t srcA, Pt::ui
 // Copy source pixels to destination pixels
 inline void pixelOps_SourceCopy(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBuffer, size_t length)
 {
-#if defined (PT_GFX_USE_AVX)
+#if defined (PT_GFX_USE_AVX1)
 
     const size_t   len8     = length / 8;
     const __m256i* srcvARGB = reinterpret_cast<const __m256i*>(fromBuffer);

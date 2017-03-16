@@ -44,20 +44,22 @@
     #include <x86intrin.h>
 
     #define PT_GFX_USE_AVX2
-    #define PT_GFX_USE_AVX
+    #define PT_GFX_USE_AVX1
 
     #define PT_GFX_USE_SSE3
     #define PT_GFX_USE_SSE2
+    #define PT_GFX_USE_SSE1
 
 #elif defined(_M_IX86) || defined(_M_AMD64) || defined(_M_X64)
 
     #include <intrin.h>
 
     #define PT_GFX_USE_AVX2
-    #define PT_GFX_USE_AVX
+    #define PT_GFX_USE_AVX1
 
     #define PT_GFX_USE_SSE3
     #define PT_GFX_USE_SSE2
+    #define PT_GFX_USE_SSE1
 
 #endif
 
