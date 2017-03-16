@@ -20,6 +20,9 @@ if $(FREETYPE_INCLUDES)
 
 if $(WITH_RASTERIZER2)
 {
+    rule FGeneric
+    { return $(<) ; }
+
     SubDirC++Flags [ FDefines RASTERIZER2 ] ;
 
     if $(TARGET_OSPLAT:L) = arm

@@ -234,9 +234,6 @@ rule CheckC++
 # Build rules
 ##############################################################################
 
-rule FGeneric
-{ return $(<) ; }
-
 rule FDefines
 { return -D$(<) ; }
 
