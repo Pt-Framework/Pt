@@ -1,5 +1,7 @@
-#include <immintrin.h>
-#include <intrin.h>
+// g++ -msse -mavx2 -O3 gistfile1.cpp -o gistfile1 && ./gistfile1 && rm -f gistfile1
+
+#include <x86intrin.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

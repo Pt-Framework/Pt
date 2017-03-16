@@ -93,16 +93,19 @@ class AffineMatrix2D {
         inline void transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount);
 
     private:
-        struct MatrixData {
-#if defined(PT_GFX_USE_SSE1)
+        union MatrixData {
             float v[4][4];
-#else
-            float v[3][3];
+#if defined(PT_GFX_USE_AVX1) || defined(PT_GFX_USE_SSE1)
+            __m128 row[4];
 #endif
         };
 
     private:
         inline void multiplyWith(const MatrixData& n, MatrixUpdateMode mode);
+
+#if defined(PT_GFX_USE_AVX1) || defined(PT_GFX_USE_SSE1)
+        static inline const __m128 linComb(const __m128& a, const MatrixData& b);
+#endif
 
     private:
         MatrixData              _mdata;
@@ -351,44 +354,57 @@ void AffineMatrix2D::transformPoints(PointF* dxy, const PointF* sxy, size_t poin
 // ===== Inlined Private Member Functions ===============================================
 // ======================================================================================
 
-/*
-// linear combination:
-// a[0] * B.row[0] + a[1] * B.row[1] + a[2] * B.row[2] + a[3] * B.row[3]
-static inline __m128 lincomb_SSE(const __m128 &a, const Mat44 &B)
+#if defined(PT_GFX_USE_AVX1)
+const __m128 AffineMatrix2D::linComb(const __m128& a, const MatrixData& b)
 {
+    // a[0] * b.row[0] + a[1] * b.row[1] + a[2] * b.row[2] + a[3] * b.row[3]
+
     __m128 result;
-    result = _mm_mul_ps(_mm_shuffle_ps(a, a, 0x00), B.row[0]);
-    result = _mm_add_ps(result, _mm_mul_ps(_mm_shuffle_ps(a, a, 0x55), B.row[1]));
-    result = _mm_add_ps(result, _mm_mul_ps(_mm_shuffle_ps(a, a, 0xaa), B.row[2]));
-    result = _mm_add_ps(result, _mm_mul_ps(_mm_shuffle_ps(a, a, 0xff), B.row[3]));
+
+    result = _mm_mul_ps                    (_mm_broadcast_ss(&a[0]), b.row[0]  );
+    result = _mm_add_ps( result, _mm_mul_ps(_mm_broadcast_ss(&a[1]), b.row[1]) );
+    result = _mm_add_ps( result, _mm_mul_ps(_mm_broadcast_ss(&a[2]), b.row[2]) );
+    result = _mm_add_ps( result, _mm_mul_ps(_mm_broadcast_ss(&a[3]), b.row[3]) );
+
+
     return result;
 }
-
-// this is the right approach for SSE ... SSE4.2
-void matmult_SSE(Mat44 &out, const Mat44 &A, const Mat44 &B)
+#elif defined(PT_GFX_USE_SSE1)
+const __m128 AffineMatrix2D::linComb(const __m128& a, const MatrixData& b)
 {
-    // out_ij = sum_k a_ik b_kj
-    // => out_0j = a_00 * b_0j + a_01 * b_1j + a_02 * b_2j + a_03 * b_3j
-    __m128 out0x = lincomb_SSE(A.row[0], B);
-    __m128 out1x = lincomb_SSE(A.row[1], B);
-    __m128 out2x = lincomb_SSE(A.row[2], B);
-    __m128 out3x = lincomb_SSE(A.row[3], B);
+    // a[0] * b.row[0] + a[1] * b.row[1] + a[2] * b.row[2] + a[3] * b.row[3]
 
-    out.row[0] = out0x;
-    out.row[1] = out1x;
-    out.row[2] = out2x;
-    out.row[3] = out3x;
+    __m128 result;
+
+    result = _mm_mul_ps(                    _mm_shuffle_ps(a, a, 0x00), b.row[0]  );
+    result = _mm_add_ps( result, _mm_mul_ps(_mm_shuffle_ps(a, a, 0x55), b.row[1]) );
+    result = _mm_add_ps( result, _mm_mul_ps(_mm_shuffle_ps(a, a, 0xAA), b.row[2]) );
+    result = _mm_add_ps( result, _mm_mul_ps(_mm_shuffle_ps(a, a, 0xFF), b.row[3]) );
+
+    return result;
 }
-*/
+#endif
 
 void AffineMatrix2D::multiplyWith(const MatrixData& n, MatrixUpdateMode mode)
 {
     // ### TODO: SIMD !!! ###
 
-    MatrixData m;
-
     switch(mode) {
-        case MultiplyOnLeft  :
+        case MultiplyOnLeft  : {
+#if defined(PT_GFX_USE_AVX1) || defined(PT_GFX_USE_SSE1)
+#if defined(PT_GFX_USE_AVX1)
+            _mm256_zeroupper();
+#endif
+            const __m128 out0x = linComb(n.row[0], _mdata);
+            const __m128 out1x = linComb(n.row[1], _mdata);
+            const __m128 out2x = linComb(n.row[2], _mdata);
+            const __m128 out3x = linComb(n.row[3], _mdata);
+            _mdata.row[0] = out0x;
+            _mdata.row[1] = out1x;
+            _mdata.row[2] = out2x;
+            _mdata.row[3] = out3x;
+#else
+            MatrixData m;
             m.v[0][0] = n.v[0][0] * _mdata.v[0][0] + n.v[0][1] * _mdata.v[1][0] + n.v[0][2] * _mdata.v[2][0];
             m.v[0][1] = n.v[0][0] * _mdata.v[0][1] + n.v[0][1] * _mdata.v[1][1] + n.v[0][2] * _mdata.v[2][1];
             m.v[0][2] = n.v[0][0] * _mdata.v[0][2] + n.v[0][1] * _mdata.v[1][2] + n.v[0][2] * _mdata.v[2][2];
@@ -399,9 +415,12 @@ void AffineMatrix2D::multiplyWith(const MatrixData& n, MatrixUpdateMode mode)
             m.v[2][1] = n.v[2][0] * _mdata.v[0][1] + n.v[2][1] * _mdata.v[1][1] + n.v[2][2] * _mdata.v[2][1];
             m.v[2][2] = n.v[2][0] * _mdata.v[0][2] + n.v[2][1] * _mdata.v[1][2] + n.v[2][2] * _mdata.v[2][2];
             _mdata = m;
+#endif
             break;
+        }
 
-        case MultiplyOnRight :
+        case MultiplyOnRight : {
+            MatrixData m;
             m.v[0][0] = _mdata.v[0][0] * n.v[0][0] + _mdata.v[0][1] * n.v[1][0] + _mdata.v[0][2] * n.v[2][0];
             m.v[0][1] = _mdata.v[0][0] * n.v[0][1] + _mdata.v[0][1] * n.v[1][1] + _mdata.v[0][2] * n.v[2][1];
             m.v[0][2] = _mdata.v[0][0] * n.v[0][2] + _mdata.v[0][1] * n.v[1][2] + _mdata.v[0][2] * n.v[2][2];
@@ -413,6 +432,7 @@ void AffineMatrix2D::multiplyWith(const MatrixData& n, MatrixUpdateMode mode)
             m.v[2][2] = _mdata.v[2][0] * n.v[0][2] + _mdata.v[2][1] * n.v[1][2] + _mdata.v[2][2] * n.v[2][2];
             _mdata = m;
             break;
+        }
 
         default: // Replace
             _mdata = n;

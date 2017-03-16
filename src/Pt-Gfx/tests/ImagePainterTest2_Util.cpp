@@ -363,9 +363,9 @@ static void dumpMatrix(const AffineMatrix2D& mat)
 static void benchMatrixOps()
 {
 #if defined(__arm__) || defined(__thumb__) || defined(_M_ARM) || defined(_M_ARMT) || defined(__TARGET_ARCH_ARM) || defined(__TARGET_ARCH_THUMB) || defined(_ARM) || defined(__arm)
-    const int loopCount = 10000000;
+    const int loopCount = 4096;
 #else
-    const int loopCount = 100000000;
+    const int loopCount = 8192;//00;
 #endif
 
     // Reinitialize the random number generator here, so it will produce
@@ -373,53 +373,84 @@ static void benchMatrixOps()
     srand(13579);
 
     // Do not use constants or repeating values to avoid loop unroll optimizations
-    volatile float v0 = (float) (rand() % 16) / 16;
-    volatile float v1 = (float) (rand() % 16) / 16;
-    volatile float v2 = (float) (rand() % 16) / 16;
-    volatile float v3 = (float) (rand() % 16) / 16;
-    volatile float v4 = (float) (rand() % 16) / 16;
-    volatile float v5 = (float) (rand() % 16) / 16;
-    volatile float v6 = (float) (rand() % 16) / 16;
-    volatile float v7 = (float) (rand() % 16) / 16;
+    float a[3][3];
+    float b[3][3];
+    for(int i = 0; i < 3; ++i) {
+        for(int j = 0; j < 3; ++j) {
+            a[i][j] = (rand() - 16384.0f) / 1024.0f;
+            b[i][j] = (rand() - 16384.0f) / 1024.0f;
+        }
+    }
 
+    // Correctness check
     AffineMatrix2D mat;
 
     printf("Initial value\n");
     dumpMatrix(const_cast<const AffineMatrix2D&>(mat));
 
-    Pt::System::Clock clock;
-    clock.start();
-
-    for(int i = 0; i < loopCount ; ++i) {
-        mat.identity        ();
-        mat.translate       (v0, v1, AffineMatrix2D::MultiplyOnLeft);
-        mat.scaleAboutOrigin(v2, v3, AffineMatrix2D::MultiplyOnLeft);
-        mat.translate       (v4, v5, AffineMatrix2D::MultiplyOnLeft);
-        mat.scaleAboutOrigin(v6, v7, AffineMatrix2D::MultiplyOnLeft);
-    }
-
     printf("After operations\n");
+    mat.translate       (10.0f, 20.0f, AffineMatrix2D::MultiplyOnLeft);
+    mat.scaleAboutOrigin( 0.5f,  2.0f, AffineMatrix2D::MultiplyOnLeft);
     dumpMatrix(const_cast<const AffineMatrix2D&>(mat));
 
-    printf("Time = %8.6f nS\n", (double) clock.stop().toUSecs() / loopCount * 1000.0 / 4.0);
+    // Performance check
+    Pt::System::Clock clock;
+
+    Pt::uint64_t bestTime = ~0ULL;
+
+    for(int i = 0; i < loopCount ; ++i) {
+        mat.identity();
+        mat.updateUsingRaw(a, AffineMatrix2D::Replace);
+        clock.start();
+        for(int j = 0; j < loopCount ; ++j) {
+            mat.updateUsingRaw(b, AffineMatrix2D::MultiplyOnLeft);
+        }
+        const Pt::uint64_t curTime = clock.stop().toUSecs();
+        if(curTime < bestTime) bestTime = curTime;
+    }
+
+    printf("Time = %8.6f nS\n", (double) bestTime / loopCount * 1000.0);
     printf("\n");
 
     /*
-    -----------------
-    Result for x86_64
-    -----------------
+    -------------
+    Normal x86_64
+    -------------
     Initial value
         |   1.000   0.000   0.000 |
         |   0.000   1.000   0.000 |
         |   0.000   0.000   1.000 |
     After operations
-        |   0.000   0.000   0.000 |
-        |   0.000   0.559   0.435 |
+        |   0.500   0.000   5.000 |
+        |   0.000   2.000  40.000 |
         |   0.000   0.000   1.000 |
-    Time = 5.062468 nS
+    Time = 6.835938 nS
 
-    ---------------
-    Result with SSE
-    ---------------
+    --------
+    With SSE
+    --------
+    Initial value
+        |   1.000   0.000   0.000 |
+        |   0.000   1.000   0.000 |
+        |   0.000   0.000   1.000 |
+    After operations
+        |   0.500   0.000   5.000 |
+        |   0.000   2.000  40.000 |
+        |   0.000   0.000   1.000 |
+    Time = 18.432617 nS
+
+    --------
+    With AVX
+    --------
+    Initial value
+        |   1.000   0.000   0.000 |
+        |   0.000   1.000   0.000 |
+        |   0.000   0.000   1.000 |
+    After operations
+        |   0.500   0.000   5.000 |
+        |   0.000   2.000  40.000 |
+        |   0.000   0.000   1.000 |
+    Time = 7.568359 nS
+
     */
 }
