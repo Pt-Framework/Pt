@@ -403,7 +403,6 @@ static void benchMatrixOps()
     Pt::uint64_t bestTime = ~0ULL;
 
     for(int i = 0; i < loopCount ; ++i) {
-        mat.identity();
         mat.updateUsingRaw(a, AffineMatrix2D::Replace);
         clock.start();
         for(int j = 0; j < loopCount ; ++j) {
@@ -413,12 +412,27 @@ static void benchMatrixOps()
         if(curTime < bestTime) bestTime = curTime;
     }
 
-    printf("Time M * M = %8.6f nS\n", (double) bestTime / loopCount * 1000.0);
+    printf("Time M * M = %9.6f nS\n", (double) bestTime / loopCount * 1000.0);
+
+    bestTime = ~0ULL;
+
+    for(int i = 0; i < loopCount ; ++i) {
+        clock.start();
+        for(int j = 0; j < loopCount ; ++j) {
+            mat.updateUsingRaw(a, AffineMatrix2D::Replace);
+            mat.transformPoint(xx, yy, x, y);
+        }
+        const Pt::uint64_t curTime = clock.stop().toUSecs();
+        if(curTime < bestTime) bestTime = curTime;
+    }
+
+    printf("Time M * V = %9.6f nS\n", (double) bestTime / loopCount * 1000.0);
+
     printf("\n");
 
     /*
     -------------
-    Normal x86_64 -> GCC seems to auto-vectorize this to AVX
+    Normal x86_64
     -------------
     Initial value
         |   1.000   0.000   0.000 |
@@ -429,11 +443,12 @@ static void benchMatrixOps()
         |   0.000   2.000  40.000 |
         |   0.000   0.000   1.000 |
     Point (10.000, 10.000) -> (10.000, 60.000)
-    Time M * M = 6.835938 nS
+    Time M * M =  6.835938 nS
+    Time M * V =  2.563477 nS
 
-    --------
-    With SSE
-    --------
+    ---------------
+    With SSE + SSE3
+    ---------------
     Initial value
         |   1.000   0.000   0.000 |
         |   0.000   1.000   0.000 |
@@ -442,19 +457,20 @@ static void benchMatrixOps()
         |   0.500   0.000   5.000 |
         |   0.000   2.000  40.000 |
         |   0.000   0.000   1.000 |
-    Time = 18.432617 nS
+    Point (10.000, 10.000) -> (10.000, 60.000)
+    Time M * M = 18.432617 nS
+    Time M * V = 12.207031 nS
 
-    --------
-    With AVX
-    --------
     Initial value
         |   1.000   0.000   0.000 |
         |   0.000   1.000   0.000 |
         |   0.000   0.000   1.000 |
     After operations
         |   0.500   0.000   5.000 |
-        |   0.000   2.000  40.000 |
-        |   0.000   0.000   1.000 |
-    Time = 6.713867 nS
+        |  -0.000   2.000  40.000 |
+        |  -0.000   0.000   1.000 |
+    Point (10.000, 10.000) -> (10.000, 60.000)
+    Time M * M =  6.713867 nS
+    Time M * V = 12.207031 nS
     */
 }

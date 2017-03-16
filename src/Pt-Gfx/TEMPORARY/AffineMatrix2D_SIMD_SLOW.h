@@ -34,6 +34,7 @@
 
 #include <Pt/Gfx/Math.h>
 #include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/SIMDConfig.h>
 
 
 namespace Pt{
@@ -92,12 +93,19 @@ class AffineMatrix2D {
         inline void transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount);
 
     private:
-        struct MatrixData {
+        union MatrixData {
             float v[4][4];
+#if defined(PT_GFX_USE_AVX1) || defined(PT_GFX_USE_SSE1)
+            __m128 row[4];
+#endif
         };
 
     private:
         inline void multiplyWith(const MatrixData& n, MatrixUpdateMode mode);
+
+#if defined(PT_GFX_USE_AVX1) || defined(PT_GFX_USE_SSE1)
+        static inline const __m128 linComb(const __m128& a, const MatrixData& b);
+#endif
 
     private:
         MatrixData              _mdata;
@@ -110,7 +118,20 @@ class AffineMatrix2D {
 // ======================================================================================
 
 AffineMatrix2D::AffineMatrix2D()
-{ identity(); }
+{
+    identity();
+
+#if defined(PT_GFX_USE_SSE1)
+    _mdata.v[0][3] = 0;
+    _mdata.v[1][3] = 0;
+    _mdata.v[2][3] = 0;
+
+    _mdata.v[3][0] = 0;
+    _mdata.v[3][1] = 0;
+    _mdata.v[3][2] = 0;
+    _mdata.v[3][3] = 0;
+#endif
+}
 
 AffineMatrix2D::~AffineMatrix2D()
 {}
@@ -273,6 +294,8 @@ bool AffineMatrix2D::pop()
 
 void AffineMatrix2D::transformPoint(float& x, float &y)
 {
+    // ### TODO: SIMD !!! ###
+
     const float tx = _mdata.v[0][0] * x + _mdata.v[0][1] * y + _mdata.v[0][2];
     const float ty = _mdata.v[1][0] * x + _mdata.v[1][1] * y + _mdata.v[1][2];
 
@@ -282,8 +305,39 @@ void AffineMatrix2D::transformPoint(float& x, float &y)
 
 void AffineMatrix2D::transformPoint(float& dx, float& dy, float sx, float sy)
 {
+#if defined(PT_GFX_USE_SSE3)
+
+     // Load vector into SSE register
+     float vxy[4] = { sx, sy, 1, 0 };
+
+     const __m128 v = _mm_loadu_ps(vxy);
+
+     // Load matrix into SSE registers
+     const __m128 a0 = _mm_loadu_ps(_mdata.v[0]);
+     const __m128 a1 = _mm_loadu_ps(_mdata.v[1]);
+     const __m128 a2 = _mm_loadu_ps(_mdata.v[2]);
+
+     // Multiply each matrix row with the vector
+     const __m128 m0 = _mm_mul_ps(a0, v);
+     const __m128 m1 = _mm_mul_ps(a1, v);
+     const __m128 m2 = _mm_mul_ps(a2, v);
+
+     // Add four floats at a time
+     const __m128 s01 = _mm_hadd_ps(m0,  m1);
+     const __m128 res = _mm_hadd_ps(s01, m2);
+
+     // Finally, store the result
+     _mm_storeu_ps(vxy, res);
+
+     dx = vxy[0];
+     dy = vxy[1];
+
+#else
+
     dx = _mdata.v[0][0] * sx + _mdata.v[0][1] * sy + _mdata.v[0][2];
     dy = _mdata.v[1][0] * sx + _mdata.v[1][1] * sy + _mdata.v[1][2];
+
+#endif
 }
 
 void AffineMatrix2D::transformPoint(PointF& p)
@@ -329,10 +383,43 @@ void AffineMatrix2D::transformPoints(PointF* dxy, const PointF* sxy, size_t poin
 // ===== Inlined Private Member Functions ===============================================
 // ======================================================================================
 
+#if defined(PT_GFX_USE_AVX1) || defined(PT_GFX_USE_SSE1)
+
+const __m128 AffineMatrix2D::linComb(const __m128& a, const MatrixData& b)
+{
+    __m128 result;
+
+#if defined(PT_GFX_USE_AVX1)
+    result = _mm_mul_ps                    (_mm_broadcast_ss(&a[0]), b.row[0]  );
+    result = _mm_add_ps( result, _mm_mul_ps(_mm_broadcast_ss(&a[1]), b.row[1]) );
+    result = _mm_add_ps( result, _mm_mul_ps(_mm_broadcast_ss(&a[2]), b.row[2]) );
+    result = _mm_add_ps( result, _mm_mul_ps(_mm_broadcast_ss(&a[3]), b.row[3]) );
+#else
+    result = _mm_mul_ps(                    _mm_shuffle_ps(a, a, 0x00), b.row[0]  );
+    result = _mm_add_ps( result, _mm_mul_ps(_mm_shuffle_ps(a, a, 0x55), b.row[1]) );
+    result = _mm_add_ps( result, _mm_mul_ps(_mm_shuffle_ps(a, a, 0xAA), b.row[2]) );
+    result = _mm_add_ps( result, _mm_mul_ps(_mm_shuffle_ps(a, a, 0xFF), b.row[3]) );
+#endif
+
+    return result;
+}
+
+#endif
+
 void AffineMatrix2D::multiplyWith(const MatrixData& n, MatrixUpdateMode mode)
 {
     switch(mode) {
         case MultiplyOnLeft  : {
+#if defined(PT_GFX_USE_AVX1) || defined(PT_GFX_USE_SSE1)
+            const __m128 out0x = linComb(n.row[0], _mdata);
+            const __m128 out1x = linComb(n.row[1], _mdata);
+            const __m128 out2x = linComb(n.row[2], _mdata);
+            const __m128 out3x = linComb(n.row[3], _mdata);
+            _mdata.row[0] = out0x;
+            _mdata.row[1] = out1x;
+            _mdata.row[2] = out2x;
+            _mdata.row[3] = out3x;
+#else
             MatrixData m;
             m.v[0][0] = n.v[0][0] * _mdata.v[0][0] + n.v[0][1] * _mdata.v[1][0] + n.v[0][2] * _mdata.v[2][0];
             m.v[0][1] = n.v[0][0] * _mdata.v[0][1] + n.v[0][1] * _mdata.v[1][1] + n.v[0][2] * _mdata.v[2][1];
@@ -344,10 +431,21 @@ void AffineMatrix2D::multiplyWith(const MatrixData& n, MatrixUpdateMode mode)
             m.v[2][1] = n.v[2][0] * _mdata.v[0][1] + n.v[2][1] * _mdata.v[1][1] + n.v[2][2] * _mdata.v[2][1];
             m.v[2][2] = n.v[2][0] * _mdata.v[0][2] + n.v[2][1] * _mdata.v[1][2] + n.v[2][2] * _mdata.v[2][2];
             _mdata = m;
+#endif
             break;
         }
 
         case MultiplyOnRight : {
+#if defined(PT_GFX_USE_AVX1) || defined(PT_GFX_USE_SSE1)
+            const __m128 out0x = linComb(_mdata.row[0], n);
+            const __m128 out1x = linComb(_mdata.row[1], n);
+            const __m128 out2x = linComb(_mdata.row[2], n);
+            const __m128 out3x = linComb(_mdata.row[3], n);
+            _mdata.row[0] = out0x;
+            _mdata.row[1] = out1x;
+            _mdata.row[2] = out2x;
+            _mdata.row[3] = out3x;
+#else
             MatrixData m;
             m.v[0][0] = _mdata.v[0][0] * n.v[0][0] + _mdata.v[0][1] * n.v[1][0] + _mdata.v[0][2] * n.v[2][0];
             m.v[0][1] = _mdata.v[0][0] * n.v[0][1] + _mdata.v[0][1] * n.v[1][1] + _mdata.v[0][2] * n.v[2][1];
@@ -360,6 +458,7 @@ void AffineMatrix2D::multiplyWith(const MatrixData& n, MatrixUpdateMode mode)
             m.v[2][2] = _mdata.v[2][0] * n.v[0][2] + _mdata.v[2][1] * n.v[1][2] + _mdata.v[2][2] * n.v[2][2];
             _mdata = m;
             break;
+#endif
         }
 
         default: // Replace
