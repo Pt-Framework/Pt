@@ -340,52 +340,50 @@ inline void pixelOps_SourceOver(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBu
     const size_t   len8     = length / 8;
     const __m256i* srcvARGB = reinterpret_cast<const __m256i*>(fromBuffer);
           __m256i* dstvARGB = reinterpret_cast<      __m256i*>(toBuffer  );
-          __m256i  srcv4PIX;
+          __m256i  srcv8PIX;
           __m256i  srcv0A0A;
           __m256i  srci0A0A;
           __m256i  srcvAGAG;
           __m256i  srcvRBRB;
-          __m256i  dstv4PIX;
+          __m256i  dstv8PIX;
           __m256i  dstvAGAG;
           __m256i  dstvRBRB;
 
     for(size_t i = 0; i < len8; ++i) {
-        /*
-        // Load 4 pixels
-        srcv4PIX = _mm_loadu_si128 (srcvARGB             ); // [ ARGB ARGB ARGB ARGB ]
-        dstv4PIX = _mm_loadu_si128 (dstvARGB             ); // [ ARGB ARGB ARGB ARGB ]
+        // Load 8 pixels
+        srcv8PIX = _mm256_loadu_si256 (srcvARGB             ); // [ ARGB ARGB ARGB ARGB ]
+        dstv8PIX = _mm256_loadu_si256 (dstvARGB             ); // [ ARGB ARGB ARGB ARGB ]
         // Get the source alpha
-        srcv0A0A = _mm_and_si128   (srcv4PIX, avxMaskA000); // [ A000 A000 A000 A000 ]
-        srci0A0A = _mm_sub_epi32   (avxMaskA000, srcv0A0A); // [ I000 I000 I000 I000 ]
-        srcv0A0A = _mm_or_si128    (                        // [ 0A0A 0A0A 0A0A 0A0A ]
-                       _mm_srli_epi32(srcv0A0A,  8),
-                       _mm_srli_epi32(srcv0A0A, 24)
+        srcv0A0A = _mm256_and_si256   (srcv8PIX, avxMaskA000); // [ A000 A000 A000 A000 ]
+        srci0A0A = _mm256_sub_epi32   (avxMaskA000, srcv0A0A); // [ I000 I000 I000 I000 ]
+        srcv0A0A = _mm256_or_si256    (                        // [ 0A0A 0A0A 0A0A 0A0A ]
+                       _mm256_srli_epi32(srcv0A0A,  8),
+                       _mm256_srli_epi32(srcv0A0A, 24)
                    );
-        srci0A0A = _mm_or_si128    (                        // [ 0I0I 0I0I 0I0I 0I0I ]
-                       _mm_srli_epi32(srci0A0A,  8),
-                       _mm_srli_epi32(srci0A0A, 24)
+        srci0A0A = _mm256_or_si256    (                        // [ 0I0I 0I0I 0I0I 0I0I ]
+                       _mm256_srli_epi32(srci0A0A,  8),
+                       _mm256_srli_epi32(srci0A0A, 24)
                    );
         // Process A and G
-        srcvAGAG = _mm_and_si128   (srcv4PIX, avxMaskA0G0); // [ A0G0 A0G0 A0G0 A0G0 ]
-        srcvAGAG = _mm_srli_epi16  (srcvAGAG, 8          ); // [ A0G0 A0G0 A0G0 A0G0 ]
-        srcvAGAG = _mm_mullo_epi16 (srcvAGAG, srcv0A0A   ); // [ AAGG AAGG AAGG AAGG ]
-        dstvAGAG = _mm_and_si128   (dstv4PIX, avxMaskA0G0); // [ A0G0 A0G0 A0G0 A0G0 ]
-        dstvAGAG = _mm_srli_epi16  (dstvAGAG, 8          ); // [ 0A0G 0A0G 0A0G 0A0G ]
-        dstvAGAG = _mm_mullo_epi16 (dstvAGAG, srci0A0A   ); // [ AAGG AAGG AAGG AAGG ]
-        dstvAGAG = _mm_add_epi16   (dstvAGAG, srcvAGAG   ); // [ AAGG AAGG AAGG AAGG ]
-        dstvAGAG = _mm_and_si128   (dstvAGAG, avxMaskA0G0); // [ A0G0 A0G0 A0G0 AAG0 ]
+        srcvAGAG = _mm256_and_si256   (srcv8PIX, avxMaskA0G0); // [ A0G0 A0G0 A0G0 A0G0 ]
+        srcvAGAG = _mm256_srli_epi16  (srcvAGAG, 8          ); // [ A0G0 A0G0 A0G0 A0G0 ]
+        srcvAGAG = _mm256_mullo_epi16 (srcvAGAG, srcv0A0A   ); // [ AAGG AAGG AAGG AAGG ]
+        dstvAGAG = _mm256_and_si256   (dstv8PIX, avxMaskA0G0); // [ A0G0 A0G0 A0G0 A0G0 ]
+        dstvAGAG = _mm256_srli_epi16  (dstvAGAG, 8          ); // [ 0A0G 0A0G 0A0G 0A0G ]
+        dstvAGAG = _mm256_mullo_epi16 (dstvAGAG, srci0A0A   ); // [ AAGG AAGG AAGG AAGG ]
+        dstvAGAG = _mm256_add_epi16   (dstvAGAG, srcvAGAG   ); // [ AAGG AAGG AAGG AAGG ]
+        dstvAGAG = _mm256_and_si256   (dstvAGAG, avxMaskA0G0); // [ A0G0 A0G0 A0G0 AAG0 ]
         // Process R and B
-        srcvRBRB = _mm_and_si128   (srcv4PIX, avxMask0B0R); // [ 0R0B 0R0B 0R0B 0R0B ]
-        srcvRBRB = _mm_mullo_epi16 (srcvRBRB, srcv0A0A   ); // [ RRBB RRBB RRBB RRBB ]
-        dstvRBRB = _mm_and_si128   (dstv4PIX, avxMask0B0R); // [ 0R0B 0R0B 0R0B 0R0B ]
-        dstvRBRB = _mm_mullo_epi16 (dstvRBRB, srci0A0A   ); // [ RRBB RRBB RRBB RRBB ]
-        dstvRBRB = _mm_add_epi16   (dstvRBRB, srcvRBRB   ); // [ RRBB RRBB RRBB RRBB ]
-        dstvRBRB = _mm_srli_epi16  (dstvRBRB, 8          ); // [ .R.B .R.B .R.B .R.B ]
-        dstvRBRB = _mm_and_si128   (dstvRBRB, avxMask0B0R); // [ 0R0B 0R0B 0R0B 0R0B ]
-        // Store 4 pixels
-        dstv4PIX = _mm_or_si128    (dstvAGAG, dstvRBRB   ); // [ ARGB ARGB ARGB ARGB ]
-                   _mm_storeu_si128(dstvARGB, dstv4PIX   );
-       */
+        srcvRBRB = _mm256_and_si256   (srcv8PIX, avxMask0B0R); // [ 0R0B 0R0B 0R0B 0R0B ]
+        srcvRBRB = _mm256_mullo_epi16 (srcvRBRB, srcv0A0A   ); // [ RRBB RRBB RRBB RRBB ]
+        dstvRBRB = _mm256_and_si256   (dstv8PIX, avxMask0B0R); // [ 0R0B 0R0B 0R0B 0R0B ]
+        dstvRBRB = _mm256_mullo_epi16 (dstvRBRB, srci0A0A   ); // [ RRBB RRBB RRBB RRBB ]
+        dstvRBRB = _mm256_add_epi16   (dstvRBRB, srcvRBRB   ); // [ RRBB RRBB RRBB RRBB ]
+        dstvRBRB = _mm256_srli_epi16  (dstvRBRB, 8          ); // [ .R.B .R.B .R.B .R.B ]
+        dstvRBRB = _mm256_and_si256   (dstvRBRB, avxMask0B0R); // [ 0R0B 0R0B 0R0B 0R0B ]
+        // Store 8 pixels
+        dstv8PIX = _mm256_or_si256    (dstvAGAG, dstvRBRB   ); // [ ARGB ARGB ARGB ARGB ]
+                   _mm256_storeu_si256(dstvARGB, dstv8PIX   );
         // Increment the pointers
         ++srcvARGB;
         ++dstvARGB;
