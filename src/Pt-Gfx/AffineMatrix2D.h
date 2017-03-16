@@ -305,10 +305,41 @@ void AffineMatrix2D::transformPoint(float& x, float &y)
 
 void AffineMatrix2D::transformPoint(float& dx, float& dy, float sx, float sy)
 {
-    // ### TODO: SIMD !!! ###
+#if defined(PT_GFX_USE_SSE3)
+
+     // Load matrix into SSE registers
+     __m128 a0 = _mm_loadu_ps(_mdata.v[0]);
+     __m128 a1 = _mm_loadu_ps(_mdata.v[1]);
+     __m128 a2 = _mm_loadu_ps(_mdata.v[2]);
+     __m128 a3 = _mm_loadu_ps(_mdata.v[3]);
+
+     // Load vector into SSE register
+     float v[4] = { sx, sy, 1, 0 };
+     __m128 x =  _mm_loadu_ps(v);
+
+     // Multiply each matrix row with the vector x
+     __m128 m0 = _mm_mul_ps(a0, x);
+     __m128 m1 = _mm_mul_ps(a1, x);
+     __m128 m2 = _mm_mul_ps(a2, x);
+     __m128 m3 = _mm_mul_ps(a3, x);
+
+     // Using HADD, we add four floats at a time
+     __m128 sum_01 = _mm_hadd_ps(m0, m1);
+     __m128 sum_23 = _mm_hadd_ps(m2, m3);
+     __m128 result = _mm_hadd_ps(sum_01, sum_23);
+
+     // Finally, store the result
+     _mm_storeu_ps(v, result);
+
+     dx = v[0];
+     dy = v[1];
+
+#else
 
     dx = _mdata.v[0][0] * sx + _mdata.v[0][1] * sy + _mdata.v[0][2];
     dy = _mdata.v[1][0] * sx + _mdata.v[1][1] * sy + _mdata.v[1][2];
+
+#endif
 }
 
 void AffineMatrix2D::transformPoint(PointF& p)

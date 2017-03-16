@@ -393,6 +393,10 @@ static void benchMatrixOps()
     mat.scaleAboutOrigin( 0.5f,  2.0f, AffineMatrix2D::MultiplyOnLeft);
     dumpMatrix(const_cast<const AffineMatrix2D&>(mat));
 
+    float xx, yy, x = 10.0f, y = 10.0f;
+    mat.transformPoint(xx, yy, x, y);
+    printf("Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", x, y, xx, yy);
+
     // Performance check
     Pt::System::Clock clock;
 
@@ -409,7 +413,7 @@ static void benchMatrixOps()
         if(curTime < bestTime) bestTime = curTime;
     }
 
-    printf("Time = %8.6f nS\n", (double) bestTime / loopCount * 1000.0);
+    printf("Time M * M = %8.6f nS\n", (double) bestTime / loopCount * 1000.0);
     printf("\n");
 
     /*
@@ -424,7 +428,8 @@ static void benchMatrixOps()
         |   0.500   0.000   5.000 |
         |   0.000   2.000  40.000 |
         |   0.000   0.000   1.000 |
-    Time = 6.835938 nS
+    Point (10.000, 10.000) -> (10.000, 60.000)
+    Time M * M = 6.835938 nS
 
     --------
     With SSE
