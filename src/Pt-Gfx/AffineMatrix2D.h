@@ -75,6 +75,7 @@ class AffineMatrix2D {
 
         inline void operator=(const AffineMatrix2D& m);
         inline bool operator==(const AffineMatrix2D& m) const;
+        inline bool operator!=(const AffineMatrix2D& m) const;
 
         inline void push();
         inline bool pop();
@@ -248,6 +249,9 @@ void AffineMatrix2D::operator=(const AffineMatrix2D& m)
 
 bool AffineMatrix2D::operator==(const AffineMatrix2D& m) const
 { return memcmp(&_mdata, &m._mdata, sizeof(_mdata)) == 0; }
+
+bool AffineMatrix2D::operator!=(const AffineMatrix2D& m) const
+{ return memcmp(&_mdata, &m._mdata, sizeof(_mdata)) != 0; }
 
 void AffineMatrix2D::push()
 { _mstack.push_back(_mdata); }
