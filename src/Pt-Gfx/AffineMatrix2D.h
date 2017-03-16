@@ -314,41 +314,39 @@ void AffineMatrix2D::transformPoints(PointF* dxy, const PointF* sxy, size_t poin
 
 void AffineMatrix2D::multiplyWith(const MatrixData& n, MatrixUpdateMode mode)
 {
-    switch(mode) {
-        case MultiplyOnLeft  : {
-            MatrixData m;
-            m.v[0][0] = n.v[0][0] * _mdata.v[0][0] + n.v[0][1] * _mdata.v[1][0] + n.v[0][2] * _mdata.v[2][0];
-            m.v[0][1] = n.v[0][0] * _mdata.v[0][1] + n.v[0][1] * _mdata.v[1][1] + n.v[0][2] * _mdata.v[2][1];
-            m.v[0][2] = n.v[0][0] * _mdata.v[0][2] + n.v[0][1] * _mdata.v[1][2] + n.v[0][2] * _mdata.v[2][2];
-            m.v[1][0] = n.v[1][0] * _mdata.v[0][0] + n.v[1][1] * _mdata.v[1][0] + n.v[1][2] * _mdata.v[2][0];
-            m.v[1][1] = n.v[1][0] * _mdata.v[0][1] + n.v[1][1] * _mdata.v[1][1] + n.v[1][2] * _mdata.v[2][1];
-            m.v[1][2] = n.v[1][0] * _mdata.v[0][2] + n.v[1][1] * _mdata.v[1][2] + n.v[1][2] * _mdata.v[2][2];
-            m.v[2][0] = n.v[2][0] * _mdata.v[0][0] + n.v[2][1] * _mdata.v[1][0] + n.v[2][2] * _mdata.v[2][0];
-            m.v[2][1] = n.v[2][0] * _mdata.v[0][1] + n.v[2][1] * _mdata.v[1][1] + n.v[2][2] * _mdata.v[2][1];
-            m.v[2][2] = n.v[2][0] * _mdata.v[0][2] + n.v[2][1] * _mdata.v[1][2] + n.v[2][2] * _mdata.v[2][2];
-            _mdata = m;
-            break;
-        }
-
-        case MultiplyOnRight : {
-            MatrixData m;
-            m.v[0][0] = _mdata.v[0][0] * n.v[0][0] + _mdata.v[0][1] * n.v[1][0] + _mdata.v[0][2] * n.v[2][0];
-            m.v[0][1] = _mdata.v[0][0] * n.v[0][1] + _mdata.v[0][1] * n.v[1][1] + _mdata.v[0][2] * n.v[2][1];
-            m.v[0][2] = _mdata.v[0][0] * n.v[0][2] + _mdata.v[0][1] * n.v[1][2] + _mdata.v[0][2] * n.v[2][2];
-            m.v[1][0] = _mdata.v[1][0] * n.v[0][0] + _mdata.v[1][1] * n.v[1][0] + _mdata.v[1][2] * n.v[2][0];
-            m.v[1][1] = _mdata.v[1][0] * n.v[0][1] + _mdata.v[1][1] * n.v[1][1] + _mdata.v[1][2] * n.v[2][1];
-            m.v[1][2] = _mdata.v[1][0] * n.v[0][2] + _mdata.v[1][1] * n.v[1][2] + _mdata.v[1][2] * n.v[2][2];
-            m.v[2][0] = _mdata.v[2][0] * n.v[0][0] + _mdata.v[2][1] * n.v[1][0] + _mdata.v[2][2] * n.v[2][0];
-            m.v[2][1] = _mdata.v[2][0] * n.v[0][1] + _mdata.v[2][1] * n.v[1][1] + _mdata.v[2][2] * n.v[2][1];
-            m.v[2][2] = _mdata.v[2][0] * n.v[0][2] + _mdata.v[2][1] * n.v[1][2] + _mdata.v[2][2] * n.v[2][2];
-            _mdata = m;
-            break;
-        }
-
-        default: // Replace
-            _mdata = n;
-            break;
+    // Replace mode
+    if(mode == Replace) {
+        _mdata = n;
+        return;
     }
+
+    // Multiply mode
+    const MatrixData* l;
+    const MatrixData* r;
+          MatrixData  o;
+
+    if(mode == MultiplyOnLeft) {
+        l = &n;
+        r = &_mdata;
+    }
+    else { // MultiplyOnRight
+        l = &_mdata;
+        r = &n;
+    }
+
+    o.v[0][0] = l->v[0][0] * r->v[0][0] + l->v[0][1] * r->v[1][0] + l->v[0][2] * r->v[2][0];
+    o.v[0][1] = l->v[0][0] * r->v[0][1] + l->v[0][1] * r->v[1][1] + l->v[0][2] * r->v[2][1];
+    o.v[0][2] = l->v[0][0] * r->v[0][2] + l->v[0][1] * r->v[1][2] + l->v[0][2] * r->v[2][2];
+
+    o.v[1][0] = l->v[1][0] * r->v[0][0] + l->v[1][1] * r->v[1][0] + l->v[1][2] * r->v[2][0];
+    o.v[1][1] = l->v[1][0] * r->v[0][1] + l->v[1][1] * r->v[1][1] + l->v[1][2] * r->v[2][1];
+    o.v[1][2] = l->v[1][0] * r->v[0][2] + l->v[1][1] * r->v[1][2] + l->v[1][2] * r->v[2][2];
+
+    o.v[2][0] = l->v[2][0] * r->v[0][0] + l->v[2][1] * r->v[1][0] + l->v[2][2] * r->v[2][0];
+    o.v[2][1] = l->v[2][0] * r->v[0][1] + l->v[2][1] * r->v[1][1] + l->v[2][2] * r->v[2][1];
+    o.v[2][2] = l->v[2][0] * r->v[0][2] + l->v[2][1] * r->v[1][2] + l->v[2][2] * r->v[2][2];
+
+    _mdata = o;
 }
 
 
