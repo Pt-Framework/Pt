@@ -85,9 +85,6 @@ class AffineMatrix2D {
         inline void transformPoint(PointF& p);
         inline void transformPoint(PointF& dp, const PointF& sp);
 
-        inline void transformPoints(float* xy, size_t pointCount);
-        inline void transformPoints(float* dxy, const float* sxy, size_t pointCount);
-
         inline void transformPoints(PointF* xy, size_t pointCount);
         inline void transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount);
 
@@ -304,25 +301,11 @@ void AffineMatrix2D::transformPoint(PointF& dp, const PointF& sp)
     dp.set(x, y);
 }
 
-void AffineMatrix2D::transformPoints(float* xy, size_t pointCount)
-{
-    // ### TODO ###
-}
-
-void AffineMatrix2D::transformPoints(float* dxy, const float* sxy, size_t pointCount)
-{
-    // ### TODO ###
-}
-
 void AffineMatrix2D::transformPoints(PointF* xy, size_t pointCount)
-{
-    // ### TODO ###
-}
+{ for(size_t i = 0; i < pointCount; ++i) transformPoint(xy[i]); }
 
 void AffineMatrix2D::transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount)
-{
-    // ### TODO ###
-}
+{ for(size_t i = 0; i < pointCount; ++i) transformPoint(dxy[i], sxy[i]); }
 
 
 // ======================================================================================
