@@ -414,7 +414,7 @@ static void benchMatrixOps()
 
     /*
     -------------
-    Normal x86_64
+    Normal x86_64 -> GCC seems to auto-vectorize this to AVX
     -------------
     Initial value
         |   1.000   0.000   0.000 |
@@ -450,7 +450,6 @@ static void benchMatrixOps()
         |   0.500   0.000   5.000 |
         |   0.000   2.000  40.000 |
         |   0.000   0.000   1.000 |
-    Time = 7.568359 nS
-
+    Time = 6.713867 nS
     */
 }

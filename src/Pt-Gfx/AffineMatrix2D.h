@@ -354,47 +354,34 @@ void AffineMatrix2D::transformPoints(PointF* dxy, const PointF* sxy, size_t poin
 // ===== Inlined Private Member Functions ===============================================
 // ======================================================================================
 
-#if defined(PT_GFX_USE_AVX1)
+#if defined(PT_GFX_USE_AVX1) || defined(PT_GFX_USE_SSE1)
+
 const __m128 AffineMatrix2D::linComb(const __m128& a, const MatrixData& b)
 {
-    // a[0] * b.row[0] + a[1] * b.row[1] + a[2] * b.row[2] + a[3] * b.row[3]
-
     __m128 result;
 
+#if defined(PT_GFX_USE_AVX1)
     result = _mm_mul_ps                    (_mm_broadcast_ss(&a[0]), b.row[0]  );
     result = _mm_add_ps( result, _mm_mul_ps(_mm_broadcast_ss(&a[1]), b.row[1]) );
     result = _mm_add_ps( result, _mm_mul_ps(_mm_broadcast_ss(&a[2]), b.row[2]) );
     result = _mm_add_ps( result, _mm_mul_ps(_mm_broadcast_ss(&a[3]), b.row[3]) );
-
-
-    return result;
-}
-#elif defined(PT_GFX_USE_SSE1)
-const __m128 AffineMatrix2D::linComb(const __m128& a, const MatrixData& b)
-{
-    // a[0] * b.row[0] + a[1] * b.row[1] + a[2] * b.row[2] + a[3] * b.row[3]
-
-    __m128 result;
-
+#else
     result = _mm_mul_ps(                    _mm_shuffle_ps(a, a, 0x00), b.row[0]  );
     result = _mm_add_ps( result, _mm_mul_ps(_mm_shuffle_ps(a, a, 0x55), b.row[1]) );
     result = _mm_add_ps( result, _mm_mul_ps(_mm_shuffle_ps(a, a, 0xAA), b.row[2]) );
     result = _mm_add_ps( result, _mm_mul_ps(_mm_shuffle_ps(a, a, 0xFF), b.row[3]) );
+#endif
 
     return result;
 }
+
 #endif
 
 void AffineMatrix2D::multiplyWith(const MatrixData& n, MatrixUpdateMode mode)
 {
-    // ### TODO: SIMD !!! ###
-
     switch(mode) {
         case MultiplyOnLeft  : {
 #if defined(PT_GFX_USE_AVX1) || defined(PT_GFX_USE_SSE1)
-#if defined(PT_GFX_USE_AVX1)
-            _mm256_zeroupper();
-#endif
             const __m128 out0x = linComb(n.row[0], _mdata);
             const __m128 out1x = linComb(n.row[1], _mdata);
             const __m128 out2x = linComb(n.row[2], _mdata);
@@ -420,6 +407,16 @@ void AffineMatrix2D::multiplyWith(const MatrixData& n, MatrixUpdateMode mode)
         }
 
         case MultiplyOnRight : {
+#if defined(PT_GFX_USE_AVX1) || defined(PT_GFX_USE_SSE1)
+            const __m128 out0x = linComb(_mdata.row[0], n);
+            const __m128 out1x = linComb(_mdata.row[1], n);
+            const __m128 out2x = linComb(_mdata.row[2], n);
+            const __m128 out3x = linComb(_mdata.row[3], n);
+            _mdata.row[0] = out0x;
+            _mdata.row[1] = out1x;
+            _mdata.row[2] = out2x;
+            _mdata.row[3] = out3x;
+#else
             MatrixData m;
             m.v[0][0] = _mdata.v[0][0] * n.v[0][0] + _mdata.v[0][1] * n.v[1][0] + _mdata.v[0][2] * n.v[2][0];
             m.v[0][1] = _mdata.v[0][0] * n.v[0][1] + _mdata.v[0][1] * n.v[1][1] + _mdata.v[0][2] * n.v[2][1];
@@ -432,6 +429,7 @@ void AffineMatrix2D::multiplyWith(const MatrixData& n, MatrixUpdateMode mode)
             m.v[2][2] = _mdata.v[2][0] * n.v[0][2] + _mdata.v[2][1] * n.v[1][2] + _mdata.v[2][2] * n.v[2][2];
             _mdata = m;
             break;
+#endif
         }
 
         default: // Replace
