@@ -77,7 +77,7 @@ using namespace Pt::Gfx;
 
 #define TEST_DRAW_SOLID_FILLED_POLYGONS         1
 #define TEST_DRAW_GRADIENT_FILLED_POLYGONS      0
-#define TEST_DRAW_TEXTURE_FILLED_POLYGONS       0
+#define TEST_DRAW_TEXTURE_FILLED_POLYGONS       1
 
 #define TEST_DRAW_SOLID_FILLED_ELLIPSES_ARCS    0
 #define TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS 0
@@ -92,7 +92,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_CHECK_RESULTING_IMAGE     0
 
 #define BENCHMARK_IMAGE_SIZE                Size(1280, 800)
-#define BENCHMARK_LOOP_COUNT                ( 500 * (BENCHMARK_RESULT_HTML ? 10 : 1) )
+#define BENCHMARK_LOOP_COUNT                ( 5000 * (BENCHMARK_RESULT_HTML ? 10 : 1) )
 
 #define BENCHMARK_TEXT                      0
 #define BENCHMARK_ROTATED_TEXT              0

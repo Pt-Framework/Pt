@@ -27,8 +27,8 @@ if $(WITH_RASTERIZER2)
 
     if $(TARGET_OSPLAT:L) = x86_64
     {
-        SubDirCcFlags  [ FGeneric -msse2 ] ;
-        SubDirC++Flags [ FGeneric -msse2 ] ;
+        SubDirCcFlags  [ FGeneric -msse2 -msse3 -mavx ] ;
+        SubDirC++Flags [ FGeneric -msse2 -msse3 -mavx ] ;
     }
 
     if $(WITH_BUILTIN_LIBPNG)

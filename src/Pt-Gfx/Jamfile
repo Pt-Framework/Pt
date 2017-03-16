@@ -30,8 +30,8 @@ if $(WITH_RASTERIZER2)
 
     if $(TARGET_OSPLAT:L) = x86_64
     {
-        SubDirCcFlags  [ FGeneric -msse2 ] ;
-        SubDirC++Flags [ FGeneric -msse2 ] ;
+        SubDirCcFlags  [ FGeneric -msse2 -msse3 -mavx ] ;
+        SubDirC++Flags [ FGeneric -msse2 -msse3 -mavx ] ;
     }
 
     PT_GFX_RASTERIZER2_FILES = ClipShape.cpp

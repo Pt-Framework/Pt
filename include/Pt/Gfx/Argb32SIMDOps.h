@@ -78,7 +78,21 @@ static const int32x4_t mask0B0R = SET_32X4(0x00FF00FF, 0x00FF00FF, 0x00FF00FF, 0
 // Copy a constant color to destination pixels
 inline void pixelOps_SourceCopy(Pt::uint8_t* toBuffer, Pt::uint32_t fromARGB, size_t length)
 {
-#if defined(PT_GFX_USE_SSE2)
+#if defined (PT_GFX_USE_AVX)
+
+    const size_t   len8     = length / 8;
+    const __m256i  srcvARGB = _mm256_set1_epi32(fromARGB);
+          __m256i* dstvARGB = reinterpret_cast<__m256i*>(toBuffer);
+
+    for(size_t i = 0; i < len8; ++i) {
+        _mm256_storeu_si256(dstvARGB, srcvARGB);
+        ++dstvARGB;
+    }
+
+    length %= 8;
+    Pt::uint32_t* dst = reinterpret_cast<Pt::uint32_t*>(dstvARGB);
+
+#elif defined(PT_GFX_USE_SSE2)
 
     const size_t   len4     = length / 4;
     const __m128i  srcvARGB = _mm_set1_epi32(fromARGB);
@@ -140,7 +154,7 @@ inline void pixelOps_SourceOver(Pt::uint8_t* toBuffer, Pt::uint32_t srcA, Pt::ui
         dstvAGAG = _mm_add_epi16   (dstvAGAG, srcvAGAG); // [ AAGG AAGG AAGG AAGG ]
         dstvAGAG = _mm_and_si128   (dstvAGAG, maskA0G0); // [ A0G0 A0G0 A0G0 AAG0 ]
         // Prefetch the next 4 pixels
-        _mm_prefetch(dstvARGB + 1, _MM_HINT_T0);
+        //_mm_prefetch(dstvARGB + 1, _MM_HINT_T0);
         // Process R and B
         dstvRBRB = _mm_and_si128   (dstv4PIX, mask0B0R); // [ 0R0B 0R0B 0R0B 0R0B ]
         dstvRBRB = _mm_mullo_epi16 (dstvRBRB, srci0A0A); // [ RRBB RRBB RRBB RRBB ]
@@ -211,14 +225,30 @@ inline void pixelOps_SourceOver(Pt::uint8_t* toBuffer, Pt::uint32_t srcA, Pt::ui
 // Copy source pixels to destination pixels
 inline void pixelOps_SourceCopy(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBuffer, size_t length)
 {
-#if defined(PT_GFX_USE_SSE2)
+#if defined (PT_GFX_USE_AVX)
+
+    const size_t   len8     = length / 8;
+    const __m256i* srcvARGB = reinterpret_cast<const __m256i*>(fromBuffer);
+          __m256i* dstvARGB = reinterpret_cast<      __m256i*>(toBuffer  );
+
+    for(size_t i = 0; i < len8; ++i) {
+        _mm256_storeu_si256(dstvARGB, _mm256_loadu_si256(srcvARGB));
+        ++srcvARGB;
+        ++dstvARGB;
+    }
+
+    const Pt::uint32_t* src = reinterpret_cast<const Pt::uint32_t*>(srcvARGB);
+          Pt::uint32_t* dst = reinterpret_cast<      Pt::uint32_t*>(dstvARGB);
+          Pt::uint32_t* dsm = dst + length % 8;
+    while(dst < dsm) *dst++ = *src++;
+
+#elif defined(PT_GFX_USE_SSE2)
 
     const size_t   len4     = length / 4;
     const __m128i* srcvARGB = reinterpret_cast<const __m128i*>(fromBuffer);
           __m128i* dstvARGB = reinterpret_cast<      __m128i*>(toBuffer  );
 
     for(size_t i = 0; i < len4; ++i) {
-        _mm_prefetch(srcvARGB + 1, _MM_HINT_T0);
         _mm_storeu_si128(dstvARGB, _mm_loadu_si128(srcvARGB));
         ++srcvARGB;
         ++dstvARGB;
@@ -295,8 +325,8 @@ inline void pixelOps_SourceOver(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBu
         dstvAGAG = _mm_add_epi16   (dstvAGAG, srcvAGAG); // [ AAGG AAGG AAGG AAGG ]
         dstvAGAG = _mm_and_si128   (dstvAGAG, maskA0G0); // [ A0G0 A0G0 A0G0 AAG0 ]
         // Prefetch the next 4 pixels
-        _mm_prefetch(srcvARGB + 1, _MM_HINT_T0);
-        _mm_prefetch(dstvARGB + 1, _MM_HINT_T0);
+        //_mm_prefetch(srcvARGB + 1, _MM_HINT_T0);
+        //_mm_prefetch(dstvARGB + 1, _MM_HINT_T0);
         // Process R and B
         srcvRBRB = _mm_and_si128   (srcv4PIX, mask0B0R); // [ 0R0B 0R0B 0R0B 0R0B ]
         srcvRBRB = _mm_mullo_epi16 (srcvRBRB, srcv0A0A); // [ RRBB RRBB RRBB RRBB ]
