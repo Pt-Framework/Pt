@@ -350,7 +350,55 @@ static void benchMathFunctions()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static void benchMatrixOps()
+static void dumpMatrix(const AffineMatrix2D& mat)
 {
+    float r[3][3];
+    mat.getRaw(r);
+
+    printf("    | %7.3f %7.3f %7.3f |\n", r[0][0], r[0][1], r[0][2]);
+    printf("    | %7.3f %7.3f %7.3f |\n", r[1][0], r[1][1], r[1][2]);
+    printf("    | %7.3f %7.3f %7.3f |\n", r[2][0], r[2][1], r[2][2]);
 }
 
+static void benchMatrixOps()
+{
+    const int loopCount = 100000000;
+
+    // Reinitialize the random number generator here, so it will produce
+    // the same sequence at the start of every benchmark
+    srand(13579);
+
+    // Do not use constants or repeating values to avoid loop unroll optimizations
+    volatile float v0 = (float) (rand() % 16) / 16;
+    volatile float v1 = (float) (rand() % 16) / 16;
+    volatile float v2 = (float) (rand() % 16) / 16;
+    volatile float v3 = (float) (rand() % 16) / 16;
+    volatile float v4 = (float) (rand() % 16) / 16;
+    volatile float v5 = (float) (rand() % 16) / 16;
+    volatile float v6 = (float) (rand() % 16) / 16;
+    volatile float v7 = (float) (rand() % 16) / 16;
+
+    AffineMatrix2D mat;
+
+    printf("Initial value\n");
+    dumpMatrix(const_cast<const AffineMatrix2D&>(mat));
+    printf("\n");
+
+    Pt::System::Clock clock;
+    clock.start();
+
+    for(int i = 0; i < loopCount ; ++i) {
+        mat.identity        ();
+        mat.translate       (v0, v1, AffineMatrix2D::MultiplyOnLeft);
+        mat.scaleAboutOrigin(v2, v3, AffineMatrix2D::MultiplyOnLeft);
+        mat.translate       (v4, v5, AffineMatrix2D::MultiplyOnLeft);
+        mat.scaleAboutOrigin(v6, v7, AffineMatrix2D::MultiplyOnLeft);
+    }
+
+    printf("After operations\n");
+    dumpMatrix(const_cast<const AffineMatrix2D&>(mat));
+    printf("\n");
+
+    printf("Time = %8.6f nS\n", (double) clock.stop().toUSecs() / loopCount * 1000.0 / 4.0);
+    printf("\n");
+}

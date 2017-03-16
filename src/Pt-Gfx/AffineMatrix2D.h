@@ -70,7 +70,7 @@ class AffineMatrix2D {
         inline void reflectAboutXAxis(MatrixUpdateMode mode = MultiplyOnLeft);
         inline void reflectAboutYAxis(MatrixUpdateMode mode = MultiplyOnLeft);
 
-        inline void getRaw(float m[3][3]);
+        inline void getRaw(float m[3][3]) const;
         inline void updateUsingRaw(const float m[3][3], MatrixUpdateMode mode = MultiplyOnLeft);
 
         inline void operator=(const AffineMatrix2D& m);
@@ -226,7 +226,7 @@ void AffineMatrix2D::reflectAboutYAxis(MatrixUpdateMode mode)
     multiplyWith(n, mode);
 }
 
-void AffineMatrix2D::getRaw(float m[3][3])
+void AffineMatrix2D::getRaw(float m[3][3]) const
 {
     m[0][0] = _mdata.v[0][0]; m[0][1] = _mdata.v[0][1]; m[0][2] = _mdata.v[0][2];
     m[1][0] = _mdata.v[1][0]; m[1][1] = _mdata.v[1][1]; m[1][2] = _mdata.v[1][2];
