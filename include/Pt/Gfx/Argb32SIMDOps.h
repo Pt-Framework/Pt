@@ -51,7 +51,7 @@ static const __m256i avxMask0B0R = _mm256_set_epi32(0x00FF00FF, 0x00FF00FF, 0x00
 #endif
 
 
-#if defined(PT_GFX_USE_SSE3) || defined(PT_GFX_USE_SSE2) || defined(PT_GFX_USE_SSE1)
+#if defined(PT_GFX_USE_SSE2) || defined(PT_GFX_USE_SSE1)
 
 // SSE masks
 static const __m128i sseMaskA000 = _mm_set_epi32(0xFF000000, 0xFF000000, 0xFF000000, 0xFF000000);
