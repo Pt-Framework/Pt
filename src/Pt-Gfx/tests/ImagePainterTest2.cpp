@@ -19,6 +19,10 @@
 // while true; do ps -aF | grep "[I]magePainterTest2"; done
 //
 
+#ifdef __GNUC__
+#include <cxxabi.h>
+#endif
+
 #include <ctime>
 #include <fstream>
 #include <iomanip>
@@ -42,6 +46,8 @@
 #else
     #include <png.h>
 #endif
+
+#include "../AffineMatrix2D.h"
 
 // Grmph ..., macro from X11 is interfering with us ;)
 #ifdef None
