@@ -222,9 +222,9 @@ void Rasterizer2::rasterOnePixelQuadraticBezierCurve(Pt::int32_t x1, Pt::int32_t
             // Get alpha from the pattern as needed
             Pt::uint8_t patAlpha = 255;
             if(fpiCtrInOut) {
-                patAlpha = _patternBuffer[FIXED_POINT_TO_INT(*fpiCtrInOut)];
+                patAlpha = _patternBuffer1P[FIXED_POINT_TO_INT(*fpiCtrInOut)];
                 *fpiCtrInOut += fpiCtrInc;
-                if(*fpiCtrInOut > _fpatternMaxCtr) *fpiCtrInOut = 0;
+                if(*fpiCtrInOut >= PATTERN_BUFFER_COUNTER_MAX1P) *fpiCtrInOut -= PATTERN_BUFFER_COUNTER_MAX1P;
             }
             // Approximate the error distance
             cur = std::min(dx + xy, -xy - dy);
@@ -306,9 +306,9 @@ void Rasterizer2::rasterOnePixelQuadraticBezierCurve(Pt::int32_t x1, Pt::int32_t
             // Get alpha from the pattern
             Pt::uint8_t patAlpha = 255;
             if(fpiCtrInOut) {
-                patAlpha = _patternBuffer[FIXED_POINT_TO_INT(*fpiCtrInOut)];
+                patAlpha = _patternBuffer1P[FIXED_POINT_TO_INT(*fpiCtrInOut)];
                 *fpiCtrInOut += fpiCtrInc;
-                if(*fpiCtrInOut > _fpatternMaxCtr) *fpiCtrInOut = 0;
+                if(*fpiCtrInOut >= PATTERN_BUFFER_COUNTER_MAX1P) *fpiCtrInOut -= PATTERN_BUFFER_COUNTER_MAX1P;
             }
             // Plot curve
             XW_SET_PIXEL(x1, y1, 0, patAlpha);

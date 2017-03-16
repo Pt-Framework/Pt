@@ -70,6 +70,9 @@
 #define PATTERN_BUFFER_SCALE_FACTOR  4
 #define PATTERN_BUFFER_COUNTER_START 0
 
+#define PATTERN_BUFFER_COUNTER_MAX1P FIXED_POINT_FROM_INT(64 * PATTERN_BUFFER_SCALE_FACTOR)
+
+
 // Just for easy and faster debugging ;)
 #include <stdio.h>
 #define lprintf(...) fprintf (stderr, __VA_ARGS__)
@@ -298,8 +301,8 @@ class Rasterizer2
         Pen              _pen;
         Image            _penBuffer;
         ConstPixel       _penPixel;
-        Pt::uint8_t      _patternBuffer[64 * PATTERN_BUFFER_SCALE_FACTOR]; // The pattern has 64 points
-        Pt::int32_t      _fpatternMaxCtr;                                  // In fixed-point number
+        Pt::uint8_t      _patternBuffer1P[64 * PATTERN_BUFFER_SCALE_FACTOR]; // Pattern buffer for one-pixel line The (it has 64 points)
+        Pt::uint8_t      _patternBufferMP[64];                               // Pattern buffer for thick     line The (it has 64 points)
 
         Brush            _brush;
         Image            _brushBuffer;
@@ -393,7 +396,7 @@ struct Rasterizer2::ArcXWLineData {
 // ======================================================================================
 
 Pt::uint8_t Rasterizer2::patternBufferAlpha(Pt::int32_t idx)
-{ return _patternBuffer[ idx % FIXED_POINT_TO_INT(_fpatternMaxCtr) ]; }
+{ return _patternBuffer1P[ idx % FIXED_POINT_TO_INT(PATTERN_BUFFER_COUNTER_MAX1P) ]; }
 
 Pt::uint8_t Rasterizer2::patternBufferAlphaPolar(Pt::int32_t x, Pt::int32_t y, float scale)
 { return patternBufferAlpha(Gfx::Math::convertCartesianToPolarCoordinate(x, y) * scale); }
@@ -410,8 +413,8 @@ Pt::uint8_t Rasterizer2::patternBufferAlphaPolar(Pt::int32_t x, Pt::int32_t y, f
 
 void Rasterizer2::patternBufferAlpha(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t idx, Pt::uint8_t alpha0, Pt::uint8_t alpha1)
 {
-    a0 = (Pt::uint32_t) _patternBuffer[ idx % FIXED_POINT_TO_INT(_fpatternMaxCtr) ] * alpha0 / 255;
-    a1 = (Pt::uint32_t) _patternBuffer[ idx % FIXED_POINT_TO_INT(_fpatternMaxCtr) ] * alpha1 / 255;
+    a0 = (Pt::uint32_t) _patternBuffer1P[ idx % FIXED_POINT_TO_INT(PATTERN_BUFFER_COUNTER_MAX1P) ] * alpha0 / 255;
+    a1 = (Pt::uint32_t) _patternBuffer1P[ idx % FIXED_POINT_TO_INT(PATTERN_BUFFER_COUNTER_MAX1P) ] * alpha1 / 255;
 }
 
 void Rasterizer2::patternBufferAlphaPolar(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t x, Pt::int32_t y, float scale, Pt::uint8_t alpha0, Pt::uint8_t alpha1)

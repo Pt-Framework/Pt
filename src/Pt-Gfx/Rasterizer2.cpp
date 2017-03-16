@@ -238,36 +238,41 @@ void Rasterizer2::updatePenPattern()
         case Pen::UserDefined : patternSel = _pen.styleUserPattern(); break;
     }
 
-    // Counter for generating the pattern
-    size_t gctr = 0;
+    // Counter for generating the patterns
+    size_t gctr1P = 0;
+    size_t gctrMP = 0;
 
     // Generate the pattern
     bool previous = 0;
     for(Pt::int8_t p = 0; p < 64; ++p) { // The pattern has 64 points
         // Get the pattern cell value
         const bool current = patternSel & ((Pt::uint64_t) 1 << p);
+        // --- Multi-pixel pattern ---
+        // It is a simple expanded copy of the pattern above
+        _patternBufferMP[gctrMP++] = current ? 1 : 0;
+        // --- One-pixel pattern ---
         // Pattern cell change from 0 to 0
         if(!previous && !current) {
             for(Pt::uint8_t i = 1; i <= PATTERN_BUFFER_SCALE_FACTOR; ++i) {
-                _patternBuffer[gctr++] = 0;
+                _patternBuffer1P[gctr1P++] = 0;
             }
         }
         // Pattern cell change from 1 to 1
         else if(previous && current) {
             for(Pt::uint8_t i = 1; i <= PATTERN_BUFFER_SCALE_FACTOR; ++i) {
-                _patternBuffer[gctr++] = 255;
+                _patternBuffer1P[gctr1P++] = 255;
             }
         }
         // Pattern cell change from 0 to 1
         else if(!previous && current) {
             for(Pt::int32_t i = 1; i <= PATTERN_BUFFER_SCALE_FACTOR; ++i) {
-                _patternBuffer[gctr++] = i * 255 / PATTERN_BUFFER_SCALE_FACTOR;
+                _patternBuffer1P[gctr1P++] = i * 255 / PATTERN_BUFFER_SCALE_FACTOR;
             }
         }
         // Pattern cell change from 1 to 0
         else if(previous && !current) {
             for(Pt::int32_t i = 1; i <= PATTERN_BUFFER_SCALE_FACTOR; ++i) {
-                _patternBuffer[gctr++] = 255 - i * 255 / PATTERN_BUFFER_SCALE_FACTOR;
+                _patternBuffer1P[gctr1P++] = 255 - i * 255 / PATTERN_BUFFER_SCALE_FACTOR;
             }
         }
         // Copy the pattern cell value
@@ -276,21 +281,18 @@ void Rasterizer2::updatePenPattern()
 
     // Transfom the pattern - without anti-aliasing
     if(_aaMode == AntiAliasingMode::None) {
-        for(size_t i = 0; i < gctr; ++i) {
-            if(_patternBuffer[i] > 127) _patternBuffer[i] = 255;
-            else                        _patternBuffer[i] = 0;
+        for(size_t i = 0; i < gctr1P; ++i) {
+            if(_patternBuffer1P[i] > 127) _patternBuffer1P[i] = 255;
+            else                          _patternBuffer1P[i] = 0;
         }
     }
 
     // Transfom the pattern - with anti-aliasing
     else {
-        for(size_t i = 0; i < gctr; ++i) {
-            _patternBuffer[i] = XWAA_WFILTER[ 255 - _patternBuffer[i] ];
+        for(size_t i = 0; i < gctr1P; ++i) {
+            _patternBuffer1P[i] = XWAA_WFILTER[ 255 - _patternBuffer1P[i] ];
         }
     }
-
-    // Store the maximum value of the counter in fixed-point
-    _fpatternMaxCtr = FIXED_POINT_FROM_INT(gctr);
 }
 
 void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
