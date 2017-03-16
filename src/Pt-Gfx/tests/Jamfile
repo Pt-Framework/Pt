@@ -33,12 +33,13 @@ if $(WITH_RASTERIZER2)
 
     if $(WITH_BUILTIN_LIBPNG)
     {
-        SubDirCcFlags [ FDefines WITH_BUILTIN_LIBPNG ] ;
+        SubDirCcFlags  [ FDefines WITH_BUILTIN_LIBPNG ] ;
+        SubDirC++Flags [ FDefines WITH_BUILTIN_LIBPNG ] ;
     }
 
     SubDirC++Flags [ FIncludes "/usr/include/cairo" ] ;
 
-    Main ImagePainterTest2 : ImagePainterTest2.cpp SDL_SavePNG/savepng.c ;
+    Main ImagePainterTest2 : ImagePainterTest2.cpp ;
     LinkSharedLibraries ImagePainterTest2 : Pt Pt-Gfx Pt-System ;
     MakeLocate ImagePainterTest2 : $(PT_OUTPUT_TARGET) ;
     LinkFlags ImagePainterTest2 : -lcairo -lSDL2 -lX11 ;

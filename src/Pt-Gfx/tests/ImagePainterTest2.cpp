@@ -37,7 +37,11 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
 
-#include "SDL_SavePNG/savepng.h"
+#ifdef WITH_BUILTIN_LIBPNG
+    #include "../../libpng/png.h"
+#else
+    #include <png.h>
+#endif
 
 // Grmph ..., macro from X11 is interfering with us ;)
 #ifdef None
@@ -61,7 +65,7 @@ using namespace Pt::Gfx;
 #define TEST_SOURCECOPY                         1
 #define TEST_SOURCEOVER                         0
 
-#define TEST_DRAW_SOLID_LINE_AND_TEXT           1 // (including bezier)
+#define TEST_DRAW_SOLID_LINE_AND_TEXT           0 // (including bezier)
 #define TEST_DRAW_PATTERNED_LINE                0 // (including bezier)
 #define TEST_DRAW_SOLID_THICK_LINE              0 // (including bezier)
 #define TEST_DRAW_PATTERNED_THICK_LINE          0 // (including bezier)
@@ -71,7 +75,7 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_ELLIPSES_ARCS                 0
 #define TEST_DRAW_THICK_ELLIPSES_ARCS           0
 
-#define TEST_DRAW_SOLID_FILLED_POLYGONS         0
+#define TEST_DRAW_SOLID_FILLED_POLYGONS         1
 #define TEST_DRAW_GRADIENT_FILLED_POLYGONS      0
 #define TEST_DRAW_TEXTURE_FILLED_POLYGONS       0
 

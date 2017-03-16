@@ -81,3 +81,13 @@
    fun:_ZN2Pt10InitLocaleC1Ev
    obj:*
 }
+
+{
+   application: write_png
+   Memcheck:Leak
+   match-leak-kinds: all
+   fun:malloc
+   fun:png_malloc_base
+   fun:png_create_info_struct
+   fun:*
+}

@@ -1,8 +1,89 @@
 // Uncomment this to benchmark SDL
 // #define BENCHMARK_SDL
 
+int writePNG(const char* filename, int width, int height, const uint8_t* argb8888Buff)
+{
+    int         code     = 0;
+    FILE*       fp       = 0;
+    png_structp png_ptr  = 0;
+    png_infop   info_ptr = 0;
+    png_bytep   row      = 0;
+
+    // Open file for writing (binary mode)
+    fp = fopen(filename, "wb");
+    if(!fp) {
+        fprintf(stderr, "Could not open file %s for writing\n", filename);
+        code = -1;
+        goto finalise;
+    }
+
+    // Initialize write structure
+    png_ptr = png_create_write_struct(PNG_LIBPNG_VER_STRING, 0, 0, 0);
+    if(!png_ptr) {
+        fprintf(stderr, "Could not allocate write struct\n");
+        code = -1;
+        goto finalise;
+    }
+
+    // Initialize info structure
+    info_ptr = png_create_info_struct(png_ptr);
+    if(!info_ptr) {
+        fprintf(stderr, "Could not allocate info struct\n");
+        code = -1;
+        goto finalise;
+    }
+
+    // Setup Exception handling
+    if(setjmp(png_jmpbuf(png_ptr))) {
+        fprintf(stderr, "Error during png creation\n");
+        code = -1;
+        goto finalise;
+    }
+
+    png_init_io(png_ptr, fp);
+
+    // Write header (8 bit colour depth)
+    png_set_IHDR(png_ptr, info_ptr, width, height, 8, PNG_COLOR_TYPE_RGB, PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_BASE, PNG_FILTER_TYPE_BASE);
+
+    // Write information
+    png_write_info(png_ptr, info_ptr);
+
+    // Allocate memory for one row (3 bytes per pixel - RGB)
+    row = (png_bytep) malloc(3 * width * sizeof(png_byte));
+
+    // Write image data
+    for(int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            row[x * 3 + 2] = *argb8888Buff++;
+            row[x * 3 + 1] = *argb8888Buff++;
+            row[x * 3 + 0] = *argb8888Buff++;
+            ++argb8888Buff;
+        }
+        png_write_row(png_ptr, row);
+    }
+
+    // End write
+    png_write_end(png_ptr, 0);
+
+finalise:
+    if(fp      ) fclose(fp);
+    if(info_ptr) png_free_data(png_ptr, info_ptr, PNG_FREE_ALL, -1);
+    if(png_ptr ) png_destroy_write_struct(&png_ptr, 0);
+    if(row     ) free(row);
+
+    return code;
+}
+
 static void sdlPreviewRGB888Buffer(const std::string& title, const uint8_t* argb8888Buff, int sizeX, int sizeY, bool saveImageAsPNG)
 {
+    // Save the image as a PNG file
+    if(saveImageAsPNG) {
+        std::string eraseStr = " - ImagePainter2";
+        std::string fileName = std::string("../src/Pt-Gfx/TEMPORARY/IPT2 - ") + title + ".png";
+        fileName.erase(fileName.find(eraseStr), eraseStr.length());
+        if(writePNG(fileName.c_str(), sizeX, sizeY, argb8888Buff) < 0) return;
+    }
+
     // Initialise SDL
     if(SDL_Init(SDL_INIT_VIDEO) < 0) return;
 
@@ -77,26 +158,6 @@ static void sdlPreviewRGB888Buffer(const std::string& title, const uint8_t* argb
         }
 #endif
         usleep(10000);
-    }
-
-    // Save the image as a PNG file
-    if(saveImageAsPNG) {
-        std::string eraseStr = " - ImagePainter2";
-        std::string fileName = std::string("../src/Pt-Gfx/TEMPORARY/IPT2 - ") + title + ".png";
-        fileName.erase(fileName.find(eraseStr), eraseStr.length());
-#ifdef BENCHMARK_SDL
-        clock.start();
-#endif
-        SDL_Surface* imageS = SDL_CreateRGBSurfaceFrom((void*) argb8888Buff, sizeX, sizeY, 32, sizeX * 4, 0x00FF0000, 0x0000FF00, 0x000000FF, 0x00000000);
-        SDL_Surface* imageD = SDL_PNGFormatAlpha(imageS);
-        SDL_SavePNG(imageD, fileName.c_str());
-        SDL_FreeSurface(imageS);
-        SDL_FreeSurface(imageD);
-#ifdef BENCHMARK_SDL
-        etime  = clock.stop().toUSecs();
-        sum   += etime;
-        std::clog << "SDL saving image as PNG file       = " << std::setw(8) << etime << " uS" << std::endl;
-#endif
     }
 
     // Done
