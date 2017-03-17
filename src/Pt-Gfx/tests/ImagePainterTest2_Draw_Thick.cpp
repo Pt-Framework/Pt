@@ -16,11 +16,11 @@ static void testDrawThickLine_impl(
 
     Pen penText(Color::fromRgb8(255, 0, 0, 175));
 
-    /*
+    //*
     painter.setFont( Pt::Gfx::Font(FONT_SPEC_S) );
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
     painter.setPen(penOCapBJoin);
-    //painter.drawLine( PointF( 100, 100), PointF(300, 100) );
+    painter.drawLine( PointF( 100, 100), PointF(300, 100) );
     //painter.drawLine( PointF( 300, 100), PointF(100, 100) );
     //painter.drawLine( PointF( 100, 100), PointF(100, 300) );
     //painter.drawLine( PointF( 100, 300), PointF(100, 100) );
@@ -30,7 +30,7 @@ static void testDrawThickLine_impl(
     //painter.drawLine( PointF( 300, 100), PointF(100, 300) );
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
     return;
-    */
+    //*/
 
     // Test anti-aliasing
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);

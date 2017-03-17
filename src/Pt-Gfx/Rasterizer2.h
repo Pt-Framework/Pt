@@ -67,11 +67,12 @@
 #define MAXIMUM_POINT Painter::MaximumPointCoordinate
 
 // Scaling factor and starting value for the pattern buffer
+#define PATTERN_BUFFER_NUM_OF_CELLS  64
 #define PATTERN_BUFFER_SCALE_FACTOR  4
 #define PATTERN_BUFFER_COUNTER_START 0
 
-#define PATTERN_BUFFER_COUNTER_MAX1P FIXED_POINT_FROM_INT(64 * PATTERN_BUFFER_SCALE_FACTOR)
-#define PATTERN_BUFFER_COUNTER_MAXMP PATTERN_BUFFER_SCALE_FACTOR
+#define PATTERN_BUFFER_COUNTER_MAX1P FIXED_POINT_FROM_INT(PATTERN_BUFFER_NUM_OF_CELLS * PATTERN_BUFFER_SCALE_FACTOR)
+#define PATTERN_BUFFER_COUNTER_MAXMP PATTERN_BUFFER_NUM_OF_CELLS
 
 // Just for easy and faster debugging ;)
 #include <stdio.h>
@@ -303,8 +304,8 @@ class Rasterizer2
         Pen              _pen;
         Image            _penBuffer;
         ConstPixel       _penPixel;
-        Pt::uint8_t      _patternBuffer1P[64 * PATTERN_BUFFER_SCALE_FACTOR]; // Pattern buffer for one-pixel line The (it has 64 points)
-        Pt::uint8_t      _patternBufferMP[64];                               // Pattern buffer for thick     line The (it has 64 points)
+        Pt::uint8_t      _patternBuffer1P[PATTERN_BUFFER_NUM_OF_CELLS * PATTERN_BUFFER_SCALE_FACTOR]; // Pattern buffer for one-pixel line
+        Pt::uint8_t      _patternBufferMP[PATTERN_BUFFER_NUM_OF_CELLS];                               // Pattern buffer for thick line
 
         Brush            _brush;
         Image            _brushBuffer;

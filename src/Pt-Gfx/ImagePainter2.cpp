@@ -920,7 +920,7 @@ void ImagePainter2::generateSolidLineSegment(std::vector<PointF>& dst, float x1,
     // Calculate the line's parameters
     float wh, dx, dy, nx, ny;
 
-    calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2,  _rasterizer->pen().size());
+    calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, _rasterizer->pen().size());
 
     // Generate points (CCW)
     // --- Begin point ---
@@ -1357,41 +1357,82 @@ void ImagePainter2::generatePatternedLineSegment(std::vector<PointF>& dst, float
     // Calculate the line's parameters
     float wh, dx, dy, nx, ny;
 
-    calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2,  _rasterizer->pen().size());
+    calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, _rasterizer->pen().size());
 
+    // Get the pattern buffer and calculate the number of "pattern" segments
+    const Pt::uint8_t* pBuff = _rasterizer->patternBufferMP64();
+    const float        lLen  = Gfx::Math::fastSqrt( (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1) );
+    const size_t       nSegs = round(lLen / _rasterizer->pen().size() * 2);
+    const float        xInc  = (x2 - x1) / nSegs;
+    const float        yInc  = (y2 - y1) / nSegs;
 
+    lprintf("nSegs = %zd\n", nSegs);
 
-/*
-    const Pt::uint64_t* pBuf = _rasterizer->patternBufferMP64();
-    //PATTERN_BUFFER_COUNTER_MAXMP
+  //  for(int i = 0; i < 64; ++i) lprintf("%d\n", pBuff[i]);
+  //  return;
+    // Generate the segments
+    size_t      pbCnt  = 0;
+    Pt::uint8_t prvPat = 0;
+    float       xs     = x1;
+    float       ys     = y1;
+    x2 = x1;
+    y2 = y1;
+    for(size_t i = 0; i <= nSegs; ++i) {
+        // Get the pattern
+        const Pt::uint8_t curPat = pBuff[pbCnt++];
+        if(pbCnt > PATTERN_BUFFER_COUNTER_MAXMP) pbCnt -= PATTERN_BUFFER_COUNTER_MAXMP;
+        lprintf("%d\n", curPat);
+        //++pbCnt;
+//// 001100110011
+///// 110011001100
 
-    // Generate points (CCW)
-    // --- Begin point ---
-    if(openingCap) {
-        switch(_rasterizer->pen().capStyle()) {
-            case Pen::SquareCap        : generateLineSquareCap       (dst, x1, y1,     dx, dy, nx, ny); break;
-            case Pen::RoundCap         : generateLineRoundCap        (dst, x1, y1, wh, dx, dy, nx, ny); break;
-            case Pen::TriangularOutCap : generateLineTriangularOutCap(dst, x1, y1,     dx, dy, nx, ny); break;
-            case Pen::TriangularInCap  : generateLineTriangularInCap (dst, x1, y1,     dx, dy, nx, ny); break;
-            default                    : openingCap = false;
+        // Update the coordinates
+        if(!prvPat && curPat) {
+            x1 = xs;
+            y1 = ys;
         }
-    }
-    if(!openingCap) generateLineButtCap(dst, x1, y1, nx, ny);
-    // --- End point ---
-    if(closingCap) {
-        switch(_rasterizer->pen().capStyle()) {
-            case Pen::SquareCap        : generateLineSquareCap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
-            case Pen::RoundCap         : generateLineRoundCap        (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
-            case Pen::TriangularOutCap : generateLineTriangularOutCap(dst, x2, y2,     -dx, -dy, -nx, -ny); break;
-            case Pen::TriangularInCap  : generateLineTriangularInCap (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
-            default                    : closingCap = false;
+        xs += xInc;
+        ys += yInc;
+        if(prvPat && !curPat) {
+            x2 = xs;
+            y2 = ys;
         }
+
+        //
+        const bool draw = (x1 != x2) || (y1 != y2);
+        prvPat = curPat;
+        if(!draw) continue;
+
+        lprintf("%5.1f, %5.1f - %5.1f, %5.1f\n", x1, y1, x2, y2);
+
+        // Generate points (CCW)
+        // --- Begin point ---
+        if(openingCap) {
+            switch(_rasterizer->pen().capStyle()) {
+                case Pen::SquareCap        : generateLineSquareCap       (dst, x1, y1,     dx, dy, nx, ny); break;
+                case Pen::RoundCap         : generateLineRoundCap        (dst, x1, y1, wh, dx, dy, nx, ny); break;
+                case Pen::TriangularOutCap : generateLineTriangularOutCap(dst, x1, y1,     dx, dy, nx, ny); break;
+                case Pen::TriangularInCap  : generateLineTriangularInCap (dst, x1, y1,     dx, dy, nx, ny); break;
+                default                    : openingCap = false;
+            }
+        }
+        if(!openingCap) generateLineButtCap(dst, x1, y1, nx, ny);
+        // --- End point ---
+        if(closingCap) {
+            switch(_rasterizer->pen().capStyle()) {
+                case Pen::SquareCap        : generateLineSquareCap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
+                case Pen::RoundCap         : generateLineRoundCap        (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
+                case Pen::TriangularOutCap : generateLineTriangularOutCap(dst, x2, y2,     -dx, -dy, -nx, -ny); break;
+                case Pen::TriangularInCap  : generateLineTriangularInCap (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
+                default                    : closingCap = false;
+            }
+        }
+        if(!closingCap) generateLineButtCap(dst, x2, y2, -nx, -ny);
+        //
+        x2 = x1;
+        y2 = y1;
     }
-    if(!closingCap) generateLineButtCap(dst, x2, y2, -nx, -ny);
-*/
-
-
-    // ### TODO ###
+        lprintf("\n");
 }
 
 
