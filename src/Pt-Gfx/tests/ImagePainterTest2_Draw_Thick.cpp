@@ -16,7 +16,7 @@ static void testDrawThickLine_impl(
 
     Pen penText(Color::fromRgb8(255, 0, 0, 175));
 
-    /*
+    //*
     painter.setFont( Pt::Gfx::Font(FONT_SPEC_S) );
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
     painter.setPen(penOCapBJoin);

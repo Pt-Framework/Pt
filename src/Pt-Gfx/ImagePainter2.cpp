@@ -472,6 +472,11 @@ void ImagePainter2::drawLine( const PointF& from, const PointF& to )
 
     convertPointRound(points, pointsF.data(), pointsF.size());
     _rasterizer->strokePolygonSeparate(points.data(), points.size());
+
+    // ### JUST FOR DEBUGGING ###
+    const Point a( (Pt::int32_t) from.x(), (Pt::int32_t) from.y() );
+    const Point b( (Pt::int32_t) to  .x(), (Pt::int32_t) to  .y() );
+    _rasterizer->strokeOnePixelLine(a, b, 0);
 }
 
 void ImagePainter2::drawRect( const RectF& rect )
@@ -1362,11 +1367,11 @@ void ImagePainter2::generatePatternedLineSegment(std::vector<PointF>& dst, float
     // Get the pattern buffer and calculate the number of "pattern" segments
     const Pt::uint8_t* pBuff = _rasterizer->patternBufferMP64();
     const float        lLen  = Gfx::Math::fastSqrt( (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1) );
-    const size_t       nSegs = round(lLen / _rasterizer->pen().size() * 2);
+    const size_t       nSegs = round(lLen / wh);
     const float        xInc  = (x2 - x1) / nSegs;
     const float        yInc  = (y2 - y1) / nSegs;
 
-    lprintf("nSegs = %zd\n", nSegs);
+    lprintf("(%5.1f, %5.1f) - (%5.1f, %5.1f) : %zd\n", x1, y1, x2, y2, nSegs);
 
     // Generate the segments
     size_t      pbCnt  = 0;
@@ -1379,12 +1384,8 @@ void ImagePainter2::generatePatternedLineSegment(std::vector<PointF>& dst, float
         // Get the pattern
         const Pt::uint8_t curPat = pBuff[pbCnt++];
         if(pbCnt >= PATTERN_BUFFER_COUNTER_MAXMP) pbCnt -= PATTERN_BUFFER_COUNTER_MAXMP;
-        lprintf("%d\n", curPat);
-        //++pbCnt;
-//// 001100110011
-///// 110011001100
+        //lprintf("%d\n", curPat);
 
-       // bool draw = false
 
         if(!curPat && !prvPat) {
             prvPat = curPat;
@@ -1409,17 +1410,14 @@ void ImagePainter2::generatePatternedLineSegment(std::vector<PointF>& dst, float
 
         if( (!curPat && prvPat) || (i == nSegs) ) {
             prvPat = curPat;
-          //  draw = true;
             x2 = xs;
             y2 = ys;
         }
 
-        //
-//        const bool draw = (x1 != x2) || (y1 != y2);
-  //      prvPat = curPat;
-      //  if(!draw) continue;
 
-        lprintf("%5.1f, %5.1f - %5.1f, %5.1f\n", x1, y1, x2, y2);
+        lprintf("    Segment #%2zd : (%5.1f, %5.1f) - (%5.1f, %5.1f)\n", i, x1, y1, x2, y2);
+
+        if(!dst.empty()) dst.push_back(Painter::PolygonSeparatorPointF);
 
         // Generate points (CCW)
         // --- Begin point ---
