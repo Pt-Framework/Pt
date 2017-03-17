@@ -235,7 +235,11 @@ void Screen::onUpdate(const Gfx::RectF& updateRect)
 {
     _updateRect.unify(updateRect);
     ++_updates;
-    
+
+#ifdef LOG_EVENTS
+    std::clog << "onUpdate SCREEN " << _updates << std::endl;
+#endif
+
     UpdateEvent uev(vid(), _updateRect);
     Application::instance().loop().commitEvent(uev);
 }
@@ -268,7 +272,11 @@ void Screen::onEvent(const Event& ev)
 void Screen::onUpdateEvent(const UpdateEvent& ev)
 {
     --_updates;
-    
+
+#ifdef LOG_EVENTS
+    std::clog << "onUpdateEvent SCREEN " << _updates << std::endl;
+#endif
+
     // skip all updates except the last one
     if(_updates > 0)
       return ;

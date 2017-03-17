@@ -756,7 +756,7 @@ void ApplicationImpl::onPaint(Window& w, HWND hwnd)
     HDC bitmapContext = w.surface().pixmapImpl()->deviceContext();
     BitBlt(windowContext, 0, 0, info.right, info.bottom, bitmapContext, 0, 0, SRCCOPY);    
     
-    EndPaint(hwnd, &ps);    
+    EndPaint(hwnd, &ps);
 }
 
 } // namespace

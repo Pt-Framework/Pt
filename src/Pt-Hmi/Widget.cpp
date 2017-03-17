@@ -557,15 +557,25 @@ void Widget::onInvalidate()
 
 void Widget::layout()
 {
+#ifdef LOG_EVENTS
+    std::clog << "layout " << this << std::endl;
+#endif
+
     ++_layouts;
 
     LayoutEvent ev(vid());
     Application::instance().loop().commitEvent(ev);
+
+    update( Gfx::RectF() );
 } 
 
 
 void Widget::onLayoutEvent(const LayoutEvent& ev)
 {
+#ifdef LOG_EVENTS
+    std::clog << "onLayoutEvent " << this << std::endl;
+#endif
+
     --_layouts;
 
     if(_layouts > 0)
@@ -674,6 +684,10 @@ void Widget::update()
 
 void Widget::update(const Gfx::RectF& rect)
 {   
+#ifdef LOG_EVENTS
+    std::clog << "update " << this << std::endl;
+#endif
+
     Window* w = window();
     if( ! w )
         return;
@@ -722,6 +736,10 @@ bool Widget::isVisible() const
 
 void Widget::show(bool s)
 {
+#ifdef LOG_EVENTS
+    std::clog << "show " << this << std::endl;
+#endif
+
     if(_visible == s)
         return;
 
@@ -736,6 +754,10 @@ void Widget::show(bool s)
 
 void Widget::onShowEvent(const ShowEvent& ev )
 {
+#ifdef LOG_EVENTS
+    std::clog << "onShowEvent " << this << std::endl;
+#endif
+
     if( parent() )
         parent()->layout();
 }
@@ -826,8 +848,16 @@ const Gfx::PointF& Widget::position() const
 
 void Widget::move(const Gfx::PointF& pos)
 {
+#ifdef LOG_EVENTS
+    std::clog << "move " << this << std::endl;
+#endif
+
     if(pos == _position)
         return;
+    
+#ifdef LOG_EVENTS
+    std::clog << "MOVE " << this << std::endl;
+#endif
 
     Gfx::RectF updateRect(Gfx::PointF(0, 0), _size);
 
@@ -852,6 +882,10 @@ void Widget::move(double x, double y)
 
 void Widget::onMoveEvent(const MoveEvent& ev)
 {        
+#ifdef LOG_EVENTS
+    std::clog << "onMoveEvent " << this << std::endl;
+#endif
+
     Widget* parentWidget = parent();
     if(parentWidget)
     {
@@ -870,8 +904,16 @@ const Gfx::SizeF& Widget::size() const
 
 void Widget::resize(const Gfx::SizeF& s)
 {
+#ifdef LOG_EVENTS
+    std::clog << "resize " << this << std::endl;
+#endif
+
     if(_size == s)
         return;
+
+#ifdef LOG_EVENTS
+    std::clog << "RESIZE " << this << std::endl;
+#endif
 
     Gfx::SizeF updateSize( std::max( size().width(), s.width()), 
                            std::max( size().height(), s.height()) );
@@ -895,6 +937,10 @@ void Widget::resize(double width, double height)
 
 void Widget::onResizeEvent(const ResizeEvent& ev)
 {   
+#ifdef LOG_EVENTS
+    std::clog << "onResizeEvent " << this << std::endl;
+#endif
+
     layout();
 
     Widget* parentWidget = parent();
