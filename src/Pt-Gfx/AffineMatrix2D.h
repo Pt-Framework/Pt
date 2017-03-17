@@ -41,7 +41,7 @@
 namespace Pt{
 namespace Gfx{
 
-#if defined(PT_GFX_USE_AVX2) || defined(PT_GFX_USE_AVX1)
+#if defined(PT_GFX_USE_AVX1)
 
 // AVX constants
 static const __m256 avxOneZero = _mm256_set_ps(0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f);

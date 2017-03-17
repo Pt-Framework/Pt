@@ -63,4 +63,18 @@
 
 #endif
 
+
+#if defined(PT_GFX_USE_AVX2) && !defined(PT_GFX_USE_AVX1)
+#define PT_GFX_USE_AVX1
+#endif
+
+#if defined(PT_GFX_USE_AVX1) && !defined(PT_GFX_USE_SSE2)
+#define PT_GFX_USE_SSE2
+#endif
+
+#if defined(PT_GFX_USE_SSE2) && !defined(PT_GFX_USE_SSE1)
+#define PT_GFX_USE_SSE1
+#endif
+
+
 #endif
