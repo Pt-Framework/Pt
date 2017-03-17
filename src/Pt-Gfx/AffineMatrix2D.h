@@ -109,6 +109,13 @@ class AffineMatrix2D {
             float  v[4][4];
             __m128 r[4];
         };
+/*
+#elif defined(PT_GFX_USE_NEON)
+        union MatrixData {
+            float       v[4][4];
+            float32x4_t r[4];
+        };
+*/
 #else
         struct MatrixData {
             float v[3][3];
@@ -132,7 +139,7 @@ AffineMatrix2D::AffineMatrix2D()
 {
     identity();
 
-#if defined(PT_GFX_USE_AVX1)
+#if defined(PT_GFX_USE_AVX1) /*|| defined(PT_GFX_USE_NEON)*/
     _mdata.v[0][3] = 0; _mdata.v[1][3] = 0; _mdata.v[2][3] = 0;
     _mdata.v[3][0] = 0; _mdata.v[3][1] = 0; _mdata.v[3][2] = 0; _mdata.v[3][3] = 0;
 #endif
@@ -453,6 +460,29 @@ void AffineMatrix2D::multiplyWith(const MatrixData& n, MatrixUpdateMode mode)
     _mm_storeu_ps(_mdata.v[2], out2x);
 
      _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
+
+/*
+#elif defined(PT_GFX_USE_NEON)
+
+    // ### The NEON version is actually slower than the plain Arm version ###
+
+    float32x4_t out0x =                   vmulq_f32(vld1q_dup_f32(&l->v[0][0]), r->r[0])  ;
+                out0x = vaddq_f32( out0x, vmulq_f32(vld1q_dup_f32(&l->v[0][1]), r->r[1]) );
+                out0x = vaddq_f32( out0x, vmulq_f32(vld1q_dup_f32(&l->v[0][2]), r->r[2]) );
+
+
+    float32x4_t out1x =                   vmulq_f32(vld1q_dup_f32(&l->v[1][0]), r->r[0])  ;
+                out1x = vaddq_f32( out1x, vmulq_f32(vld1q_dup_f32(&l->v[1][1]), r->r[1]) );
+                out1x = vaddq_f32( out1x, vmulq_f32(vld1q_dup_f32(&l->v[1][2]), r->r[2]) );
+
+    float32x4_t out2x =                   vmulq_f32(vld1q_dup_f32(&l->v[2][0]), r->r[0])  ;
+                out2x = vaddq_f32( out2x, vmulq_f32(vld1q_dup_f32(&l->v[2][1]), r->r[1]) );
+                out2x = vaddq_f32( out2x, vmulq_f32(vld1q_dup_f32(&l->v[2][2]), r->r[2]) );
+
+    vst1q_f32(_mdata.v[0], out0x);
+    vst1q_f32(_mdata.v[1], out1x);
+    vst1q_f32(_mdata.v[2], out2x);
+*/
 
 #else
 

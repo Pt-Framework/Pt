@@ -323,7 +323,6 @@ static void benchMathFunctions()
     atan2f       = 0.03156
     fastAtan2    = 0.00818 ( 0.259)
 
-
     --------------------------------------------------------
     Result on v7l (A53; BCM2709; RaspberryPi 3; 32-bit Mode)
     --------------------------------------------------------
@@ -363,7 +362,7 @@ static void dumpMatrix(const AffineMatrix2D& mat)
 static void benchMatrixOps()
 {
 #if defined(__arm__) || defined(__thumb__) || defined(_M_ARM) || defined(_M_ARMT) || defined(__TARGET_ARCH_ARM) || defined(__TARGET_ARCH_THUMB) || defined(_ARM) || defined(__arm)
-    const int loopCount = 1024;
+    const int loopCount = 2048;
 #else
     const int loopCount = 8192;
 #endif
@@ -520,6 +519,10 @@ static void benchMatrixOps()
     printf("\n");
 
     /*
+    ---------------------------------------
+    Result on x86_64 (i5-4460; 64-Bit Mode)
+    ---------------------------------------
+
     -------------
     Normal x86_64
     -------------
@@ -583,5 +586,73 @@ static void benchMatrixOps()
     Time VD[] = M * VS[] :  0.244141 nS
     Time VS[] = M * VS[] :  0.244141 nS
     Time VS[] = M * VS[] :  0.244141 nS
+
+    --------------------------------------------------------
+    Result on v7l (A53; BCM2709; RaspberryPi 3; 32-bit Mode)
+    --------------------------------------------------------
+
+    ----------
+    Normal Arm
+    ----------
+    Initial value
+        |   1.000   0.000   0.000 |
+        |   0.000   1.000   0.000 |
+        |   0.000   0.000   1.000 |
+    After operations
+        |   0.500   0.000   5.000 |
+        |   0.000   2.000  40.000 |
+        |   0.000   0.000   1.000 |
+    A: Point ( 8.000,  8.000) -> ( 9.000, 56.000)
+    B: Point (11.000, 12.000) -> (10.500, 64.000)
+    B: Point (13.000, 24.000) -> (11.500, 88.000)
+    B: Point (25.000, 16.000) -> (17.500, 72.000)
+    B: Point (27.000, 28.000) -> (18.500, 96.000)
+    B: Point ( 5.000,  5.000) -> ( 7.500, 50.000)
+    C: Point                  -> (10.500, 64.000)
+    C: Point                  -> (11.500, 88.000)
+    C: Point                  -> (17.500, 72.000)
+    C: Point                  -> (18.500, 96.000)
+    C: Point                  -> ( 7.500, 50.000)
+    D: Point                  -> (10.500, 64.000)
+    D: Point                  -> (11.500, 88.000)
+    D: Point                  -> (17.500, 72.000)
+    D: Point                  -> (18.500, 96.000)
+    D: Point                  -> ( 7.500, 50.000)
+    Time M    = M * M    : 26.855469 nS
+    Time VD[] = M * VS[] :  8.300781 nS
+    Time VS[] = M * VS[] :  8.300781 nS
+    Time VS[] = M * VS[] :  8.300781 nS
+
+    ---------
+    With NEON
+    ---------
+    Initial value
+        |   1.000   0.000   0.000 |
+        |   0.000   1.000   0.000 |
+        |   0.000   0.000   1.000 |
+    After operations
+        |   0.500   0.000   5.000 |
+        |   0.000   2.000  40.000 |
+        |   0.000   0.000   1.000 |
+    A: Point ( 8.000,  8.000) -> ( 9.000, 56.000)
+    B: Point (11.000, 12.000) -> (10.500, 64.000)
+    B: Point (13.000, 24.000) -> (11.500, 88.000)
+    B: Point (25.000, 16.000) -> (17.500, 72.000)
+    B: Point (27.000, 28.000) -> (18.500, 96.000)
+    B: Point ( 5.000,  5.000) -> ( 7.500, 50.000)
+    C: Point                  -> (10.500, 64.000)
+    C: Point                  -> (11.500, 88.000)
+    C: Point                  -> (17.500, 72.000)
+    C: Point                  -> (18.500, 96.000)
+    C: Point                  -> ( 7.500, 50.000)
+    D: Point                  -> (10.500, 64.000)
+    D: Point                  -> (11.500, 88.000)
+    D: Point                  -> (17.500, 72.000)
+    D: Point                  -> (18.500, 96.000)
+    D: Point                  -> ( 7.500, 50.000)
+    Time M    = M * M    : 46.386719 nS ### SLOWER ###
+    Time VD[] = M * VS[] :  8.300781 nS
+    Time VS[] = M * VS[] :  8.300781 nS
+    Time VS[] = M * VS[] :  8.300781 nS
     */
 }
