@@ -104,7 +104,7 @@ class AffineMatrix2D {
         inline void transformPoints(PointF* xy, size_t pointCount);
 
     private:
-#if defined(PT_GFX_USE_AVX1) || defined(PT_GFX_USE_SSE1)
+#if defined(PT_GFX_USE_AVX1)
         union MatrixData {
             float  v[4][4];
             __m128 r[4];
@@ -132,7 +132,7 @@ AffineMatrix2D::AffineMatrix2D()
 {
     identity();
 
-#if defined(PT_GFX_USE_AVX1) || defined(PT_GFX_USE_SSE1)
+#if defined(PT_GFX_USE_AVX1)
     _mdata.v[0][3] = 0; _mdata.v[1][3] = 0; _mdata.v[2][3] = 0;
     _mdata.v[3][0] = 0; _mdata.v[3][1] = 0; _mdata.v[3][2] = 0; _mdata.v[3][3] = 0;
 #endif
