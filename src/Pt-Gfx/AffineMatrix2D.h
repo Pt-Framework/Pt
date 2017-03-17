@@ -41,6 +41,16 @@
 namespace Pt{
 namespace Gfx{
 
+#if defined(PT_GFX_USE_AVX2) || defined(PT_GFX_USE_AVX1)
+
+// AVX constants
+static const __m256 avxOneZero = _mm256_set_ps(0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f);
+
+//static const float  fltOnzeZero[8] = { 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f };
+//static const __m256 avxOneZero     = _mm256_loadu_ps(fltOnzeZero);
+
+#endif
+
 
 class AffineMatrix2D {
     public:
@@ -81,17 +91,17 @@ class AffineMatrix2D {
         inline void push();
         inline bool pop();
 
-        inline void transformPoint(float& x, float &y);
         inline void transformPoint(float& dx, float& dy, float sx, float sy);
+        inline void transformPoint(float& x, float &y);
 
-        inline void transformPoint(PointF& p);
         inline void transformPoint(PointF& dp, const PointF& sp);
+        inline void transformPoint(PointF& p);
 
-        inline void transformPoints(float* xy, size_t pointCount);
         inline void transformPoints(float* dxy, const float* sxy, size_t pointCount);
+        inline void transformPoints(float* xy, size_t pointCount);
 
-        inline void transformPoints(PointF* xy, size_t pointCount);
         inline void transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount);
+        inline void transformPoints(PointF* xy, size_t pointCount);
 
     private:
 #if defined(PT_GFX_USE_AVX1) || defined(PT_GFX_USE_SSE1)
@@ -287,6 +297,12 @@ bool AffineMatrix2D::pop()
     return true;
 }
 
+void AffineMatrix2D::transformPoint(float& dx, float& dy, float sx, float sy)
+{
+    dx = _mdata.v[0][0] * sx + _mdata.v[0][1] * sy + _mdata.v[0][2];
+    dy = _mdata.v[1][0] * sx + _mdata.v[1][1] * sy + _mdata.v[1][2];
+}
+
 void AffineMatrix2D::transformPoint(float& x, float &y)
 {
     const float tx = _mdata.v[0][0] * x + _mdata.v[0][1] * y + _mdata.v[0][2];
@@ -296,65 +312,41 @@ void AffineMatrix2D::transformPoint(float& x, float &y)
     y = ty;
 }
 
-void AffineMatrix2D::transformPoint(float& dx, float& dy, float sx, float sy)
-{
-    dx = _mdata.v[0][0] * sx + _mdata.v[0][1] * sy + _mdata.v[0][2];
-    dy = _mdata.v[1][0] * sx + _mdata.v[1][1] * sy + _mdata.v[1][2];
-}
-
-void AffineMatrix2D::transformPoint(PointF& p)
-{
-    float x = p.x();
-    float y = p.x();
-
-    transformPoint(x, y);
-    p.set(x, y);
-}
-
 void AffineMatrix2D::transformPoint(PointF& dp, const PointF& sp)
 {
     float x = sp.x();
-    float y = sp.x();
+    float y = sp.y();
 
     transformPoint(x, y);
     dp.set(x, y);
 }
 
-void AffineMatrix2D::transformPoints(float* xy, size_t pointCount)
-{
-   for(size_t i = 0; i < pointCount; i += 2) transformPoint(xy[i], xy[i + 1]);
-
-}
+void AffineMatrix2D::transformPoint(PointF& p)
+{ transformPoint(p, p); }
 
 void AffineMatrix2D::transformPoints(float* dxy, const float* sxy, size_t pointCount)
 {
 
 #if defined(PT_GFX_USE_AVX1)
-    const float avxOneZero[8] = { 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f };
 
-    const __m128 m0 = _mm_loadu_ps(_mdata.v[0]);
-    const __m128 m1 = _mm_loadu_ps(_mdata.v[1]);
-    const __m128 m2 = _mm_loadu_ps(_mdata.v[2]);
+    // Load the matrix's rows
+    const __m128 m0 = _mm_loadu_ps(_mdata.v[0]); // [ 00 01 02 03 ]
+    const __m128 m1 = _mm_loadu_ps(_mdata.v[1]); // [ 10 11 12 13 ]
 
     _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
 
-    __m256 m00 = _mm256_castps128_ps256(m0);         // [ .. .. .. .. 00 01 02 03 ]
-           m00 = _mm256_insertf128_ps  (m00, m0, 1); // [ 00 01 02 03 00 01 02 03 ]
+    // Extend the matrix's rows
+    const __m256 m00 = _mm256_insertf128_ps(_mm256_castps128_ps256(m0), m0, 1); // [ 00 01 02 03 00 01 02 03 ]
+    const __m256 m11 = _mm256_insertf128_ps(_mm256_castps128_ps256(m1), m1, 1); // [ 10 11 12 13 10 11 12 13 ]
 
-    __m256 m11 = _mm256_castps128_ps256(m1);         // [ .. .. .. .. 10 11 12 13 ]
-           m11 = _mm256_insertf128_ps  (m11, m1, 1); // [ 10 11 12 13 10 11 12 13 ]
-
-    __m256 m22 = _mm256_castps128_ps256(m2);         // [ .. .. .. .. 20 21 22 23 ]
-           m22 = _mm256_insertf128_ps  (m22, m2, 1); // [ 20 21 22 23 20 21 22 23 ]
-
+    // Loop through 8 floats at a time
     const size_t  pointCount8 = pointCount / 8;
-    const __m256  coz8        = _mm256_loadu_ps(avxOneZero);
 
     for(size_t i = 0; i < pointCount8; ++i) {
         /// Load 8 floats from the source vector
-        const __m256 s3210 = _mm256_loadu_ps  (sxy                                 ); // [ X0 Y0 X1 Y1 X2 Y2 X3 Y3 ]
-        const __m256 s32   = _mm256_shuffle_ps(s3210, coz8, _MM_SHUFFLE(3, 2, 3, 2)); // [ X0 Y0 1  0  X2 Y2 1  0  ]
-        const __m256 s10   = _mm256_shuffle_ps(s3210, coz8, _MM_SHUFFLE(1, 0, 1, 0)); // [ X1 Y1 1  0  X3 Y3 1  0  ]
+        const __m256 s3210 = _mm256_loadu_ps  (sxy                                       ); // [ X0 Y0 X1 Y1 X2 Y2 X3 Y3 ]
+        const __m256 s32   = _mm256_shuffle_ps(s3210, avxOneZero, _MM_SHUFFLE(3, 2, 3, 2)); // [ X0 Y0 1  0  X2 Y2 1  0  ]
+        const __m256 s10   = _mm256_shuffle_ps(s3210, avxOneZero, _MM_SHUFFLE(1, 0, 1, 0)); // [ X1 Y1 1  0  X3 Y3 1  0  ]
         // Multiply them to the matrix's rows
         const __m256 r32_0 = _mm256_mul_ps(m00, s32);
         const __m256 r32_1 = _mm256_mul_ps(m11, s32);
@@ -363,25 +355,17 @@ void AffineMatrix2D::transformPoints(float* dxy, const float* sxy, size_t pointC
         // Horizontal add the multiplication results
         const __m256 r32   = _mm256_hadd_ps(r32_0, r32_1);
         const __m256 r10   = _mm256_hadd_ps(r10_0, r10_1);
-        const __m256 r3210 = _mm256_hadd_ps(r10,    r32);
+        const __m256 r3210 = _mm256_hadd_ps(r10  , r32  );
         // Store 8 floats to the destination vector
         _mm256_storeu_ps(dxy, r3210);
-/*
-Point (11.000, 12.000) -> (10.500, 64.000) REF
-Point (13.000, 24.000) -> (11.500, 88.000)
-Point (25.000, 16.000) -> (17.500, 72.000)
-Point (27.000, 28.000) -> (18.500, 96.000)
-
-
-
-*/
-
+        // Increment the pointers
         sxy += 8;
         dxy += 8;
     }
 
-     _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
+    _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
 
+    // Process the remaining floats using normal code
     pointCount %= 8;
 
 #endif
@@ -389,11 +373,21 @@ Point (27.000, 28.000) -> (18.500, 96.000)
     for(size_t i = 0; i < pointCount; i += 2) transformPoint(dxy[i], dxy[i + 1], sxy[i], sxy[i + 1]);
 }
 
-void AffineMatrix2D::transformPoints(PointF* xy, size_t pointCount)
-{ for(size_t i = 0; i < pointCount; ++i) transformPoint(xy[i]); }
+void AffineMatrix2D::transformPoints(float* xy, size_t pointCount)
+{ transformPoints(xy, xy, pointCount); }
 
 void AffineMatrix2D::transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount)
-{ for(size_t i = 0; i < pointCount; ++i) transformPoint(dxy[i], sxy[i]); }
+{
+#if defined(PT_GFX_USE_AVX1)
+#endif
+
+    for(size_t i = 0; i < pointCount; ++i) transformPoint(dxy[i], sxy[i]);
+
+}
+
+void AffineMatrix2D::transformPoints(PointF* xy, size_t pointCount)
+{ transformPoints(xy, xy, pointCount); }
+
 
 // ======================================================================================
 // ===== Inlined Private Member Functions ===============================================

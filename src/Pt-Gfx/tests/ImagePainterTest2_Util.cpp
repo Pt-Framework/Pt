@@ -396,16 +396,23 @@ static void benchMatrixOps()
     volatile float x = 8.0f, y = 8.0f;
              float xx, yy;
     mat.transformPoint(xx, yy, x, y);
-    printf("Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", x, y, xx, yy);
+    printf("A: Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", x, y, xx, yy);
 
     float xya  [10] = { 11.0f, 12.0f, 13.0f, 24.0f, 25.0f, 16.0f, 27.0f, 28.0f, 5.0f, 5.0f };
     float xxyya[10];
     mat.transformPoints(xxyya, xya, 10);
-    printf("Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", xya[0], xya[1], xxyya[0], xxyya[1]);
-    printf("Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", xya[2], xya[3], xxyya[2], xxyya[3]);
-    printf("Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", xya[4], xya[5], xxyya[4], xxyya[5]);
-    printf("Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", xya[6], xya[7], xxyya[6], xxyya[7]);
-    printf("Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", xya[8], xya[9], xxyya[8], xxyya[9]);
+    printf("B: Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", xya[0], xya[1], xxyya[0], xxyya[1]);
+    printf("B: Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", xya[2], xya[3], xxyya[2], xxyya[3]);
+    printf("B: Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", xya[4], xya[5], xxyya[4], xxyya[5]);
+    printf("B: Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", xya[6], xya[7], xxyya[6], xxyya[7]);
+    printf("B: Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", xya[8], xya[9], xxyya[8], xxyya[9]);
+
+    mat.transformPoints(xya, 10);
+    printf("C: Point                  -> (%6.3f, %6.3f)\n", xya[0], xya[1]);
+    printf("C: Point                  -> (%6.3f, %6.3f)\n", xya[2], xya[3]);
+    printf("C: Point                  -> (%6.3f, %6.3f)\n", xya[4], xya[5]);
+    printf("C: Point                  -> (%6.3f, %6.3f)\n", xya[6], xya[7]);
+    printf("C: Point                  -> (%6.3f, %6.3f)\n", xya[8], xya[9]);
 
     // Performance check
     Pt::System::Clock clock;
@@ -425,7 +432,7 @@ static void benchMatrixOps()
         if(curTime < bestTime) bestTime = curTime;
     }
 
-    printf("Time M * M = %9.6f nS\n", (double) bestTime / loopCount * 1000.0);
+    printf("Time M    = M * M    : %9.6f nS\n", (double) bestTime / loopCount * 1000.0);
 
     bestTime = ~0ULL;
 
@@ -436,7 +443,7 @@ static void benchMatrixOps()
         // Reset the matrix
         if(i % 1) mat.updateUsingRaw(a, AffineMatrix2D::Replace);
         else      mat.updateUsingRaw(b, AffineMatrix2D::Replace);
-        // Reset the source vector
+        // Reset the source vectors
         for(int j = 0; j < loopCount * 2; j += 2) {
             sxya[j    ] = (rand() - 16384.0f) / 1024.0f;
             sxya[j + 1] = (rand() - 16384.0f) / 1024.0f;
@@ -446,14 +453,61 @@ static void benchMatrixOps()
         mat.transformPoints(dxya, sxya, loopCount);
         const Pt::uint64_t curTime = clock.stop().toUSecs();
         if(curTime < bestTime) bestTime = curTime;
-        // Copy the destination vector to a volatile memory location
+        // Copy the destination vectors to a volatile memory location
         for(int j = 0; j < loopCount * 2; j += 2) {
             dmyx += dxya[j    ];
             dmyy += dxya[j + 1];
         }
     }
 
-    printf("Time M * V = %9.6f nS\n", (double) bestTime / loopCount * 1000.0);
+    printf("Time VD[] = M * VS[] : %9.6f nS\n", (double) bestTime / loopCount * 1000.0);
+
+    for(int i = 0; i < loopCount ; ++i) {
+        // Reset the matrix
+        if(i % 1) mat.updateUsingRaw(a, AffineMatrix2D::Replace);
+        else      mat.updateUsingRaw(b, AffineMatrix2D::Replace);
+        // Reset the source vectors
+        for(int j = 0; j < loopCount * 2; j += 2) {
+            sxya[j    ] = (rand() - 16384.0f) / 1024.0f;
+            sxya[j + 1] = (rand() - 16384.0f) / 1024.0f;
+        }
+        // Perform benchmark
+        clock.start();
+        mat.transformPoints(sxya, loopCount);
+        const Pt::uint64_t curTime = clock.stop().toUSecs();
+        if(curTime < bestTime) bestTime = curTime;
+        // Copy the result vectors to a volatile memory location
+        for(int j = 0; j < loopCount * 2; j += 2) {
+            dmyx += sxya[j    ];
+            dmyy += sxya[j + 1];
+        }
+    }
+
+    printf("Time VS[] = M * VS[] : %9.6f nS\n", (double) bestTime / loopCount * 1000.0);
+
+    PointF pointsF[loopCount];
+
+    for(int i = 0; i < loopCount ; ++i) {
+        // Reset the matrix
+        if(i % 1) mat.updateUsingRaw(a, AffineMatrix2D::Replace);
+        else      mat.updateUsingRaw(b, AffineMatrix2D::Replace);
+        // Reset the source vectors
+        for(int j = 0; j < loopCount; ++j) {
+            pointsF[j].set( (rand() - 16384.0f) / 1024.0f, (rand() - 16384.0f) / 1024.0f );
+        }
+        // Perform benchmark
+        clock.start();
+        mat.transformPoints(pointsF, loopCount);
+        const Pt::uint64_t curTime = clock.stop().toUSecs();
+        if(curTime < bestTime) bestTime = curTime;
+        // Copy the result vectors to a volatile memory location
+        for(int j = 0; j < loopCount; ++j) {
+            dmyx += pointsF[j].x();
+            dmyy += pointsF[j].y();
+        }
+    }
+
+    printf("Time VS[] = M * VS[] : %9.6f nS\n", (double) bestTime / loopCount * 1000.0);
 
     printf("\n");
 
@@ -461,37 +515,54 @@ static void benchMatrixOps()
     -------------
     Normal x86_64
     -------------
-    Initial value
-        |   1.000   0.000   0.000 |
-        |   0.000   1.000   0.000 |
-        |   0.000   0.000   1.000 |
-    After operations
-        |   0.500   0.000   5.000 |
-        |   0.000   2.000  40.000 |
-        |   0.000   0.000   1.000 |
-    Point ( 8.000,  8.000) -> ( 9.000, 56.000)
-    Point (11.000, 12.000) -> (10.500, 64.000)
-    Point (13.000, 24.000) -> (11.500, 88.000)
-    Point (25.000, 16.000) -> (17.500, 72.000)
-    Point (27.000, 28.000) -> (18.500, 96.000)
-    Point ( 5.000,  5.000) -> ( 7.500, 50.000)
-    Time M * M =  6.835938 nS
-    Time M * V =  0.610352 nS
+Initial value
+    |   1.000   0.000   0.000 |
+    |   0.000   1.000   0.000 |
+    |   0.000   0.000   1.000 |
+After operations
+    |   0.500   0.000   5.000 |
+    |   0.000   2.000  40.000 |
+    |   0.000   0.000   1.000 |
+A: Point ( 8.000,  8.000) -> ( 9.000, 56.000)
+B: Point (11.000, 12.000) -> (10.500, 64.000)
+B: Point (13.000, 24.000) -> (11.500, 88.000)
+B: Point (25.000, 16.000) -> (17.500, 72.000)
+B: Point (27.000, 28.000) -> (18.500, 96.000)
+B: Point ( 5.000,  5.000) -> ( 7.500, 50.000)
+C: Point                  -> (10.500, 64.000)
+C: Point                  -> (11.500, 88.000)
+C: Point                  -> (17.500, 72.000)
+C: Point                  -> (18.500, 96.000)
+C: Point                  -> ( 7.500, 50.000)
+Time M    = M * M    :  6.835938 nS
+Time VD[] = M * VS[] :  0.610352 nS
+Time VS[] = M * VS[] :  0.488281 nS
+Time VS[] = M * VS[] :  0.488281 nS
 
     --------
     With AVX
     --------
-    Initial value
-        |   1.000   0.000   0.000 |
-        |   0.000   1.000   0.000 |
-        |   0.000   0.000   1.000 |
-    After operations
-        |   0.500   0.000   5.000 |
-        |   0.000   2.000  40.000 |
-        |   0.000   0.000   1.000 |
-    Point (10.000, 10.000) -> (10.000, 60.000)
-    Point (10.000, 10.000) -> (10.000, 60.000)
-    Time M * M =  5.493164 nS
-    Time M * V =  0.610352 nS
+Initial value
+    |   1.000   0.000   0.000 |
+    |   0.000   1.000   0.000 |
+    |   0.000   0.000   1.000 |
+After operations
+    |   0.500   0.000   5.000 |
+    |   0.000   2.000  40.000 |
+    |   0.000   0.000   1.000 |
+A: Point ( 8.000,  8.000) -> ( 9.000, 56.000)
+B: Point (11.000, 12.000) -> (10.500, 64.000)
+B: Point (13.000, 24.000) -> (11.500, 88.000)
+B: Point (25.000, 16.000) -> (17.500, 72.000)
+B: Point (27.000, 28.000) -> (18.500, 96.000)
+B: Point ( 5.000,  5.000) -> ( 7.500, 50.000)
+C: Point                  -> (10.500, 64.000)
+C: Point                  -> (11.500, 88.000)
+C: Point                  -> (17.500, 72.000)
+C: Point                  -> (18.500, 96.000)
+C: Point                  -> ( 7.500, 50.000)
+Time M * M =  5.493164 nS
+Time M * V =  0.244141 nS
+Time M * V =  0.244141 nS
     */
 }
