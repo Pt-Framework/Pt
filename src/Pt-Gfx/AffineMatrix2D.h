@@ -379,10 +379,28 @@ void AffineMatrix2D::transformPoints(float* xy, size_t pointCount)
 void AffineMatrix2D::transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount)
 {
 #if defined(PT_GFX_USE_AVX1)
-#endif
+
+    float xy[pointCount * 2];
+
+    float* pxy = xy;
+    for(size_t i = 0; i < pointCount; ++i) {
+        *pxy++ = sxy[i].x();
+        *pxy++ = sxy[i].y();
+    }
+
+    transformPoints(xy, xy, pointCount);
+
+    pxy = xy;
+    for(size_t i = 0; i < pointCount; ++i) {
+        dxy[i].setX( *pxy++ );
+        dxy[i].setY( *pxy++ );
+    }
+
+#else
 
     for(size_t i = 0; i < pointCount; ++i) transformPoint(dxy[i], sxy[i]);
 
+#endif
 }
 
 void AffineMatrix2D::transformPoints(PointF* xy, size_t pointCount)
