@@ -41,13 +41,19 @@
 namespace Pt{
 namespace Gfx{
 
+
 #if defined(PT_GFX_USE_AVX1)
 
 // AVX constants
 static const __m256 avxOneZero = _mm256_set_ps(0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f);
 
-//static const float  fltOnzeZero[8] = { 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f };
-//static const __m256 avxOneZero     = _mm256_loadu_ps(fltOnzeZero);
+#endif
+
+
+#if defined(PT_GFX_USE_NEON)
+
+// NEON constants
+static const float32x4_t neonOneZero = { 0.0f, 1.0f, 0.0f, 1.0f };
 
 #endif
 
@@ -109,13 +115,11 @@ class AffineMatrix2D {
             float  v[4][4];
             __m128 r[4];
         };
-/*
 #elif defined(PT_GFX_USE_NEON)
         union MatrixData {
             float       v[4][4];
             float32x4_t r[4];
         };
-*/
 #else
         struct MatrixData {
             float v[3][3];
@@ -139,7 +143,7 @@ AffineMatrix2D::AffineMatrix2D()
 {
     identity();
 
-#if defined(PT_GFX_USE_AVX1) /*|| defined(PT_GFX_USE_NEON)*/
+#if defined(PT_GFX_USE_AVX1) || defined(PT_GFX_USE_NEON)
     _mdata.v[0][3] = 0; _mdata.v[1][3] = 0; _mdata.v[2][3] = 0;
     _mdata.v[3][0] = 0; _mdata.v[3][1] = 0; _mdata.v[3][2] = 0; _mdata.v[3][3] = 0;
 #endif
@@ -350,7 +354,7 @@ void AffineMatrix2D::transformPoints(float* dxy, const float* sxy, size_t pointC
     const size_t  pointCount8 = pointCount / 8;
 
     for(size_t i = 0; i < pointCount8; ++i) {
-        /// Load 8 floats from the source vector
+        // Load 8 floats from the source vector
         const __m256 s3210 = _mm256_loadu_ps  (sxy                                       ); // [ X0 Y0 X1 Y1 X2 Y2 X3 Y3 ]
         const __m256 s32   = _mm256_shuffle_ps(s3210, avxOneZero, _MM_SHUFFLE(3, 2, 3, 2)); // [ X0 Y0 1  0  X2 Y2 1  0  ]
         const __m256 s10   = _mm256_shuffle_ps(s3210, avxOneZero, _MM_SHUFFLE(1, 0, 1, 0)); // [ X1 Y1 1  0  X3 Y3 1  0  ]
@@ -374,6 +378,39 @@ void AffineMatrix2D::transformPoints(float* dxy, const float* sxy, size_t pointC
 
     // Process the remaining floats using normal code
     pointCount %= 8;
+
+#elif defined(PT_GFX_USE_NEON)
+
+    // Load the matrix's rows
+    const float32x4_t m0 = vld1q_f32(_mdata.v[0]); // [ 00 01 02 03 ]
+    const float32x4_t m1 = vld1q_f32(_mdata.v[1]); // [ 10 11 12 13 ]
+
+    // Loop through 4 floats at a time
+    const size_t  pointCount4 = pointCount / 4;
+
+    for(size_t i = 0; i < pointCount4; ++i) {
+        // Load 4 floats from the source vector
+        const float32x4_t s3210 = vld1q_f32   (sxy                                             ); // [ X0 Y0 X1 Y1 ]
+        const float32x4_t s32   = vcombine_f32(vget_high_f32(s3210), vget_high_f32(neonOneZero)); // [ X0 Y0 1  0  ]
+        const float32x4_t s10   = vcombine_f32(vget_low_f32 (s3210), vget_low_f32 (neonOneZero)); // [ X1 Y1 1  0  ]
+        // Multiply them to the matrix's rows
+        const float32x4_t r32_0 = vmulq_f32(m0, s32);
+        const float32x4_t r32_1 = vmulq_f32(m1, s32);
+        const float32x4_t r10_0 = vmulq_f32(m0, s10);
+        const float32x4_t r10_1 = vmulq_f32(m1, s10);
+        // Horizontal add the multiplication results
+        const float32x4_t r32   = vcombine_f32( vpadd_f32( vget_low_f32(r32_0), vget_high_f32(r32_0) ), vpadd_f32( vget_low_f32(r32_1), vget_high_f32(r32_1) ) );
+        const float32x4_t r10   = vcombine_f32( vpadd_f32( vget_low_f32(r10_0), vget_high_f32(r10_0) ), vpadd_f32( vget_low_f32(r10_1), vget_high_f32(r10_1) ) );
+        const float32x4_t r3210 = vcombine_f32( vpadd_f32( vget_low_f32(r10  ), vget_high_f32(r10  ) ), vpadd_f32( vget_low_f32(r32  ), vget_high_f32(r32  ) ) );
+        // Store 4 floats to the destination vector
+        vst1q_f32(dxy, r3210);
+        // Increment the pointers
+        sxy += 4;
+        dxy += 4;
+    }
+
+    // Process the remaining floats using normal code
+    pointCount %= 4;
 
 #endif
 
@@ -464,7 +501,7 @@ void AffineMatrix2D::multiplyWith(const MatrixData& n, MatrixUpdateMode mode)
 /*
 #elif defined(PT_GFX_USE_NEON)
 
-    // ### The NEON version is actually slower than the plain Arm version ###
+    // ### The NEON version is actually slower than the normal Arm version ###
 
     float32x4_t out0x =                   vmulq_f32(vld1q_dup_f32(&l->v[0][0]), r->r[0])  ;
                 out0x = vaddq_f32( out0x, vmulq_f32(vld1q_dup_f32(&l->v[0][1]), r->r[1]) );
