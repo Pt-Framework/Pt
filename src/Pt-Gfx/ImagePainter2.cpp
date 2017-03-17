@@ -43,6 +43,122 @@ namespace Gfx {
 // ===== Internal Helper Functions ======================================================
 // ======================================================================================
 
+// Based on: Bitmap/Bézier curves/Quadratic
+//           https://rosettacode.org/wiki/Bitmap/B%C3%A9zier_curves/Quadratic#C
+//           Last modified on February 17, 2017
+static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, float x3, float y3, Pt::int32_t nSegs)
+{
+    // Check if the points actually specify a straight line
+    const Pt::int32_t sx = x3 - x2;
+    const Pt::int32_t sy = y3 - y2;
+    const Pt::int32_t xx = x1 - x2;
+    const Pt::int32_t yy = y1 - y2;
+
+    // Curvature
+    if( !(xx * sy - yy * sx) ) {
+        if( dst.empty() || dst.back().x() != x1 || dst.back().y() != y1 ) dst.push_back( PointF(x1, y1) );
+        if( dst.empty() || dst.back().x() != x3 || dst.back().y() != y3 ) dst.push_back( PointF(x3, y3) );
+        return;
+    }
+
+    // Process as a quadratic bezier curve
+    if(nSegs < 3) nSegs = 3;
+
+    for(Pt::int32_t i = 0; i <= nSegs; ++i) {
+        const float t = (float) i / (float) nSegs;
+        const float a = (1.0f - t) * (1.0f - t);
+        const float b =  2.0f * t  * (1.0f - t);
+        const float c = t * t;
+        const float x = a * x1 + b * x2 + c * x3;
+        const float y = a * y1 + b * y2 + c * y3;
+        if( dst.empty() || dst.back().x() != x || dst.back().y() != y ) dst.push_back( PointF(x, y) );
+    }
+}
+
+static inline void generateEllipsePoints(std::vector<Point>& dst, Pt::int32_t radiusX, Pt::int32_t radiusY, Pt::int32_t centerX, Pt::int32_t centerY)
+{
+    // Calculate the ellipse's parameters
+    const Pt::int32_t radiusM = std::max(radiusX, radiusY);
+    const Pt::int32_t numSegs = (radiusM * 2 / 3 / 20) * 20;
+
+    // Generate a polygon that approximates the ellipse
+    for(Pt::int32_t i = 0; i <= numSegs; ++i) {
+        const float angle = Gfx::Math::PiMul2 * i / numSegs;
+        // Calculate the coordinate
+        const Pt::int32_t x = round( centerX + radiusX * Gfx::Math::fastCos(angle) );
+        const Pt::int32_t y = round( centerY - radiusY * Gfx::Math::fastSin(angle) ); // Sign inversion due to differences between cartesian and computer coordinate systems
+        // Store the coordinate only if it is different with the previous one
+        if( !dst.empty() && dst.back().x() == x && dst.back().y() == y ) continue;
+        dst.push_back( Point(x, y) );
+    }
+
+    // Discard the last point if it has the same coordinate with the first one
+    if(dst.back() == dst[0]) dst.pop_back();
+}
+
+static inline void generateArcPoints(std::vector<Point>& dst, Pt::int32_t radiusX, Pt::int32_t radiusY, Pt::int32_t centerX, Pt::int32_t centerY, float degBegin, float degEnd)
+{
+    // Calculate the ellipse's parameters
+    const Pt::int32_t radiusM = std::max(radiusX, radiusY);
+    const Pt::int32_t deltaDg = degEnd - degBegin;
+    const Pt::int32_t numSegs = (radiusM * 2 * deltaDg / 180 / 3 / 20) * 20;
+    const float       fdegInc = (deltaDg * Gfx::Math::PiDiv180) / numSegs;
+
+    // Generate a polygon that approximates the arc
+    float angle = degBegin * Gfx::Math::PiDiv180;
+
+    for(Pt::int32_t i = 0; i <= numSegs; ++i) {
+        // Calculate the coordinate
+        const Pt::int32_t x = round( centerX + radiusX * Gfx::Math::fastCos(angle) );
+        const Pt::int32_t y = round( centerY - radiusY * Gfx::Math::fastSin(angle) ); // Sign inversion due to differences between cartesian and computer coordinate systems
+        // Update the angle
+        angle += fdegInc;
+        // Store the coordinate only if it is different with the previous one
+        if( !dst.empty() && dst.back().x() == x && dst.back().y() == y ) continue;
+        dst.push_back( Point(x, y) );
+    }
+
+    // Discard the last point if it has the same coordinate with the first one
+    if(dst.back() == dst[0]) dst.pop_back();
+}
+
+static inline void generateLineButtCap(std::vector<PointF>& dst, float x, float y, float nx, float ny)
+{
+    dst.push_back( PointF(x + nx, y + ny) );
+    dst.push_back( PointF(x - nx, y - ny) );
+}
+
+static inline void generateLineSquareCap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
+{
+    dst.push_back( PointF(x - dx + nx, y - dy + ny) );
+    dst.push_back( PointF(x - dx - nx, y - dy - ny) );
+}
+
+static inline void generateLineRoundCap(std::vector<PointF>& dst, float x, float y, float wh, float dx, float dy, float nx, float ny)
+{
+    generateQuadraticBezierPoints(
+        dst,
+        round(x + nx       ), round(y + ny       ),
+        round(x - dx * 2.0f), round(y - dy * 2.0f),
+        round(x - nx       ), round(y - ny       ),
+        ceil(wh) - 1
+    );
+}
+
+static inline void generateLineTriangularOutCap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
+{
+    dst.push_back( PointF(x + nx, y + ny) );
+    dst.push_back( PointF(x - dx, y - dy) );
+    dst.push_back( PointF(x - nx, y - ny) );
+}
+
+static inline void generateLineTriangularInCap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
+{
+    dst.push_back( PointF(x + nx, y + ny) );
+    dst.push_back( PointF(x + dx, y + dy) );
+    dst.push_back( PointF(x - nx, y - ny) );
+}
+
 static inline void calculateLineParams(float& wh, float& dx, float& dy, float& nx, float& ny, float x1, float y1, float x2, float y2, size_t w)
 {
     // Line equation : 0 = aX + By + c
@@ -115,122 +231,6 @@ static inline bool intersectLine(bool& inLine, PointF& intersect, const PointF& 
     //lprintf("Intersection : (%7.3f, %7.3f) - %s \n", ipX, ipY, inLine ? "inline" : "outline");
     //lprintf("\n");
     return true;
-}
-
-// Based on: Bitmap/Bézier curves/Quadratic
-//           https://rosettacode.org/wiki/Bitmap/B%C3%A9zier_curves/Quadratic#C
-//           Last modified on February 17, 2017
-static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, float x3, float y3, Pt::int32_t nSegs)
-{
-    // Check if the points actually specify a straight line
-    const Pt::int32_t sx = x3 - x2;
-    const Pt::int32_t sy = y3 - y2;
-    const Pt::int32_t xx = x1 - x2;
-    const Pt::int32_t yy = y1 - y2;
-
-    // Curvature
-    if( !(xx * sy - yy * sx) ) {
-        if( dst.empty() || dst.back().x() != x1 || dst.back().y() != y1 ) dst.push_back( PointF(x1, y1) );
-        if( dst.empty() || dst.back().x() != x3 || dst.back().y() != y3 ) dst.push_back( PointF(x3, y3) );
-        return;
-    }
-
-    // Process as a quadratic bezier curve
-    if(nSegs < 3) nSegs = 3;
-
-    for(Pt::int32_t i = 0; i <= nSegs; ++i) {
-        const float t = (float) i / (float) nSegs;
-        const float a = (1.0f - t) * (1.0f - t);
-        const float b =  2.0f * t  * (1.0f - t);
-        const float c = t * t;
-        const float x = a * x1 + b * x2 + c * x3;
-        const float y = a * y1 + b * y2 + c * y3;
-        if( dst.empty() || dst.back().x() != x || dst.back().y() != y ) dst.push_back( PointF(x, y) );
-    }
-}
-
-static inline void generateLineButtCap(std::vector<PointF>& dst, float x, float y, float nx, float ny)
-{
-    dst.push_back( PointF(x + nx, y + ny) );
-    dst.push_back( PointF(x - nx, y - ny) );
-}
-
-static inline void generateLineSquareCap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
-{
-    dst.push_back( PointF(x - dx + nx, y - dy + ny) );
-    dst.push_back( PointF(x - dx - nx, y - dy - ny) );
-}
-
-static inline void generateLineRoundCap(std::vector<PointF>& dst, float x, float y, float wh, float dx, float dy, float nx, float ny)
-{
-    generateQuadraticBezierPoints(
-        dst,
-        round(x + nx       ), round(y + ny       ),
-        round(x - dx * 2.0f), round(y - dy * 2.0f),
-        round(x - nx       ), round(y - ny       ),
-        ceil(wh) - 1
-    );
-}
-
-static inline void generateLineTriangularOutCap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
-{
-    dst.push_back( PointF(x + nx, y + ny) );
-    dst.push_back( PointF(x - dx, y - dy) );
-    dst.push_back( PointF(x - nx, y - ny) );
-}
-
-static inline void generateLineTriangularInCap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
-{
-    dst.push_back( PointF(x + nx, y + ny) );
-    dst.push_back( PointF(x + dx, y + dy) );
-    dst.push_back( PointF(x - nx, y - ny) );
-}
-
-static inline void generateEllipsePoints(std::vector<Point>& dst, Pt::int32_t radiusX, Pt::int32_t radiusY, Pt::int32_t centerX, Pt::int32_t centerY)
-{
-    // Calculate the ellipse's parameters
-    const Pt::int32_t radiusM = std::max(radiusX, radiusY);
-    const Pt::int32_t numSegs = (radiusM * 2 / 3 / 20) * 20;
-
-    // Generate a polygon that approximates the ellipse
-    for(Pt::int32_t i = 0; i <= numSegs; ++i) {
-        const float angle = Gfx::Math::PiMul2 * i / numSegs;
-        // Calculate the coordinate
-        const Pt::int32_t x = round( centerX + radiusX * Gfx::Math::fastCos(angle) );
-        const Pt::int32_t y = round( centerY - radiusY * Gfx::Math::fastSin(angle) ); // Sign inversion due to differences between cartesian and computer coordinate systems
-        // Store the coordinate only if it is different with the previous one
-        if( !dst.empty() && dst.back().x() == x && dst.back().y() == y ) continue;
-        dst.push_back( Point(x, y) );
-    }
-
-    // Discard the last point if it has the same coordinate with the first one
-    if(dst.back() == dst[0]) dst.pop_back();
-}
-
-static inline void generateArcPoints(std::vector<Point>& dst, Pt::int32_t radiusX, Pt::int32_t radiusY, Pt::int32_t centerX, Pt::int32_t centerY, float degBegin, float degEnd)
-{
-    // Calculate the ellipse's parameters
-    const Pt::int32_t radiusM = std::max(radiusX, radiusY);
-    const Pt::int32_t deltaDg = degEnd - degBegin;
-    const Pt::int32_t numSegs = (radiusM * 2 * deltaDg / 180 / 3 / 20) * 20;
-    const float       fdegInc = (deltaDg * Gfx::Math::PiDiv180) / numSegs;
-
-    // Generate a polygon that approximates the arc
-    float angle = degBegin * Gfx::Math::PiDiv180;
-
-    for(Pt::int32_t i = 0; i <= numSegs; ++i) {
-        // Calculate the coordinate
-        const Pt::int32_t x = round( centerX + radiusX * Gfx::Math::fastCos(angle) );
-        const Pt::int32_t y = round( centerY - radiusY * Gfx::Math::fastSin(angle) ); // Sign inversion due to differences between cartesian and computer coordinate systems
-        // Update the angle
-        angle += fdegInc;
-        // Store the coordinate only if it is different with the previous one
-        if( !dst.empty() && dst.back().x() == x && dst.back().y() == y ) continue;
-        dst.push_back( Point(x, y) );
-    }
-
-    // Discard the last point if it has the same coordinate with the first one
-    if(dst.back() == dst[0]) dst.pop_back();
 }
 
 static inline void combineLinePointsAndAddCaps(std::vector<Point>& dst, const std::vector<Point>& inner, const std::vector<Point>& outer, Pen::CapStyle begCap, Pen::CapStyle endCap, size_t penSize)
@@ -426,7 +426,7 @@ void ImagePainter2::drawImage( const PointF& toIn, const Image& image )
 {
     const Point to( (Pt::int32_t) toIn.x(), (Pt::int32_t) toIn.y() );
 
-    _rasterizer->image(to, image);
+    _rasterizer->blitImage(to, image);
 }
 
 void ImagePainter2::drawImage( const PointF& toIn, const Image& image, const RectF& imageRect )
@@ -437,7 +437,7 @@ void ImagePainter2::drawImage( const PointF& toIn, const Image& image, const Rec
         Size ( (Pt::int32_t) imageRect.width(), (Pt::int32_t) imageRect.height() )
     );
 
-    _rasterizer->image(to, image, ir);
+    _rasterizer->blitImage(to, image, ir);
 }
 
 void ImagePainter2::drawText( const PointF& toIn, const String& text )
@@ -1353,6 +1353,44 @@ bool ImagePainter2::combineLineSegmentForSolidClosedPolygon(std::vector<PointF>&
 
 void ImagePainter2::generatePatternedLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, bool openingCap, bool closingCap)
 {
+
+    // Calculate the line's parameters
+    float wh, dx, dy, nx, ny;
+
+    calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2,  _rasterizer->pen().size());
+
+
+
+/*
+    const Pt::uint64_t* pBuf = _rasterizer->patternBufferMP64();
+    //PATTERN_BUFFER_COUNTER_MAXMP
+
+    // Generate points (CCW)
+    // --- Begin point ---
+    if(openingCap) {
+        switch(_rasterizer->pen().capStyle()) {
+            case Pen::SquareCap        : generateLineSquareCap       (dst, x1, y1,     dx, dy, nx, ny); break;
+            case Pen::RoundCap         : generateLineRoundCap        (dst, x1, y1, wh, dx, dy, nx, ny); break;
+            case Pen::TriangularOutCap : generateLineTriangularOutCap(dst, x1, y1,     dx, dy, nx, ny); break;
+            case Pen::TriangularInCap  : generateLineTriangularInCap (dst, x1, y1,     dx, dy, nx, ny); break;
+            default                    : openingCap = false;
+        }
+    }
+    if(!openingCap) generateLineButtCap(dst, x1, y1, nx, ny);
+    // --- End point ---
+    if(closingCap) {
+        switch(_rasterizer->pen().capStyle()) {
+            case Pen::SquareCap        : generateLineSquareCap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
+            case Pen::RoundCap         : generateLineRoundCap        (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
+            case Pen::TriangularOutCap : generateLineTriangularOutCap(dst, x2, y2,     -dx, -dy, -nx, -ny); break;
+            case Pen::TriangularInCap  : generateLineTriangularInCap (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
+            default                    : closingCap = false;
+        }
+    }
+    if(!closingCap) generateLineButtCap(dst, x2, y2, -nx, -ny);
+*/
+
+
     // ### TODO ###
 }
 

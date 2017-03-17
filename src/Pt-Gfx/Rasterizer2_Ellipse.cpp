@@ -126,8 +126,8 @@ void Rasterizer2::strokeOnePixelEllipseArc(const Point& topLeft, const Size& siz
                     stroke4Pixels(xl, yt, xr, yb, mask);
                 else {
                     const Pt::uint8_t pba = scaleWP
-                                          ? patternBufferAlphaPolar(x, y, pbScale, xyRat)
-                                          : patternBufferAlphaPolar(x, y, pbScale       );
+                                          ? patternBuffer1PAlphaPolar(x, y, pbScale, xyRat)
+                                          : patternBuffer1PAlphaPolar(x, y, pbScale       );
                     if(pba) stroke4Pixels(xl, yt, xr, yb, mask);
                 }
                 // Determine the exact coordinates of the closing lines
@@ -147,8 +147,8 @@ void Rasterizer2::strokeOnePixelEllipseArc(const Point& topLeft, const Size& siz
                    stroke4Pixels(xl, yt, xr, yb);
                 else {
                     const Pt::uint8_t pba = scaleWP
-                                          ? patternBufferAlphaPolar(x, y, pbScale, xyRat)
-                                          : patternBufferAlphaPolar(x, y, pbScale       );
+                                          ? patternBuffer1PAlphaPolar(x, y, pbScale, xyRat)
+                                          : patternBuffer1PAlphaPolar(x, y, pbScale       );
                     if(pba) stroke4Pixels(xl, yt, xr, yb);
                 }
             }
@@ -185,8 +185,8 @@ void Rasterizer2::strokeOnePixelEllipseArc(const Point& topLeft, const Size& siz
                 }
                 else {
                     Pt::uint8_t pba0, pba1;
-                    if(scaleWP) patternBufferAlphaPolar(pba0, pba1, x, y, pbScale, xyRat, a0, a1);
-                    else        patternBufferAlphaPolar(pba0, pba1, x, y, pbScale,        a0, a1);
+                    if(scaleWP) patternBuffer1PAlphaPolar(pba0, pba1, x, y, pbScale, xyRat, a0, a1);
+                    else        patternBuffer1PAlphaPolar(pba0, pba1, x, y, pbScale,        a0, a1);
                     stroke4Pixels(xl, yt0, xr, yb0, pba0, mask0);
                     stroke4Pixels(xl, yt1, xr, yb1, pba1, mask1);
                 }
@@ -215,8 +215,8 @@ void Rasterizer2::strokeOnePixelEllipseArc(const Point& topLeft, const Size& siz
                 }
                 else {
                     Pt::uint8_t pba0, pba1;
-                    if(scaleWP) patternBufferAlphaPolar(pba0, pba1, x, y, pbScale, xyRat, a0, a1);
-                    else        patternBufferAlphaPolar(pba0, pba1, x, y, pbScale,        a0, a1);
+                    if(scaleWP) patternBuffer1PAlphaPolar(pba0, pba1, x, y, pbScale, xyRat, a0, a1);
+                    else        patternBuffer1PAlphaPolar(pba0, pba1, x, y, pbScale,        a0, a1);
                     stroke4Pixels(xl, yt0, xr, yb0, pba0);
                     stroke4Pixels(xl, yt1, xr, yb1, pba1);
                 }
@@ -252,8 +252,8 @@ void Rasterizer2::strokeOnePixelEllipseArc(const Point& topLeft, const Size& siz
                     stroke4Pixels(xl, yt, xr, yb, mask);
                 else {
                     const Pt::uint8_t pba = scaleWP
-                                          ? patternBufferAlphaPolar(x, y, pbScale, xyRat)
-                                          : patternBufferAlphaPolar(x, y, pbScale       );
+                                          ? patternBuffer1PAlphaPolar(x, y, pbScale, xyRat)
+                                          : patternBuffer1PAlphaPolar(x, y, pbScale       );
                     if(pba) stroke4Pixels(xl, yt, xr, yb, mask);
                 }
                 // Determine the exact coordinates of the closing lines
@@ -273,8 +273,8 @@ void Rasterizer2::strokeOnePixelEllipseArc(const Point& topLeft, const Size& siz
                     stroke4Pixels(xl, yt, xr, yb);
                 else {
                     const Pt::uint8_t pba = scaleWP
-                                          ? patternBufferAlphaPolar(x, y, pbScale, xyRat)
-                                          : patternBufferAlphaPolar(x, y, pbScale       );
+                                          ? patternBuffer1PAlphaPolar(x, y, pbScale, xyRat)
+                                          : patternBuffer1PAlphaPolar(x, y, pbScale       );
                     if(pba) stroke4Pixels(xl, yt, xr, yb);
                 }
             }
@@ -311,8 +311,8 @@ void Rasterizer2::strokeOnePixelEllipseArc(const Point& topLeft, const Size& siz
                 }
                 else {
                     Pt::uint8_t pba0, pba1;
-                    if(scaleWP) patternBufferAlphaPolar(pba0, pba1, x, y, pbScale, xyRat, a0, a1);
-                    else        patternBufferAlphaPolar(pba0, pba1, x, y, pbScale,        a0, a1);
+                    if(scaleWP) patternBuffer1PAlphaPolar(pba0, pba1, x, y, pbScale, xyRat, a0, a1);
+                    else        patternBuffer1PAlphaPolar(pba0, pba1, x, y, pbScale,        a0, a1);
                     stroke4Pixels(xl0, yt, xr0, yb, pba0, mask0);
                     stroke4Pixels(xl1, yt, xr1, yb, pba1, mask1);
                 }
@@ -341,8 +341,8 @@ void Rasterizer2::strokeOnePixelEllipseArc(const Point& topLeft, const Size& siz
                 }
                 else {
                     Pt::uint8_t pba0, pba1;
-                    if(scaleWP) patternBufferAlphaPolar(pba0, pba1, x, y, pbScale, xyRat, a0, a1);
-                    else        patternBufferAlphaPolar(pba0, pba1, x, y, pbScale,        a0, a1);
+                    if(scaleWP) patternBuffer1PAlphaPolar(pba0, pba1, x, y, pbScale, xyRat, a0, a1);
+                    else        patternBuffer1PAlphaPolar(pba0, pba1, x, y, pbScale,        a0, a1);
                     stroke4Pixels(xl0, yt, xr0, yb, pba0);
                     stroke4Pixels(xl1, yt, xr1, yb, pba1);
                 }

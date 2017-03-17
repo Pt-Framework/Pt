@@ -178,13 +178,13 @@ void Rasterizer2::setClip( const Rect& clip )
     updateClip();
 }
 
-void Rasterizer2::image(const Point& to, const Image& img)
+void Rasterizer2::blitImage(const Point& to, const Image& img)
 {
     const Rect imageRect( Point(0,0), img.size() );
-    image( to, img, imageRect );
+    blitImage( to, img, imageRect );
 }
 
-void Rasterizer2::image(const Point& to, const Image& from, const Rect& fromRect)
+void Rasterizer2::blitImage(const Point& to, const Image& from, const Rect& fromRect)
 {
     // Clip fromRect to fit into the clip/image rect
     const Point d       = _currentClip.topLeft() - to;

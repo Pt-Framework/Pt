@@ -71,7 +71,7 @@
 #define PATTERN_BUFFER_COUNTER_START 0
 
 #define PATTERN_BUFFER_COUNTER_MAX1P FIXED_POINT_FROM_INT(64 * PATTERN_BUFFER_SCALE_FACTOR)
-
+#define PATTERN_BUFFER_COUNTER_MAXMP PATTERN_BUFFER_SCALE_FACTOR
 
 // Just for easy and faster debugging ;)
 #include <stdio.h>
@@ -145,8 +145,8 @@ class Rasterizer2
         const CompositionMode& compositionMode() const
         { return _compositionMode; }
 
-        void image(const Point& to, const Image& image);
-        void image(const Point& toIn, const Image& image, const Rect& imageRect);
+        void blitImage(const Point& to, const Image& image);
+        void blitImage(const Point& to, const Image& image, const Rect& imageRect);
 
         void strokeText(const Point& to, const Pt::String& text);
         void strokeOnePixelLine(const Point& a, const Point& b, DrawLineMask* maskInOut);
@@ -164,13 +164,7 @@ class Rasterizer2
         void fillArc(const Point& topLeft, const Size& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
     public:
-        inline Pt::uint8_t patternBufferAlpha(Pt::int32_t idx);
-        inline Pt::uint8_t patternBufferAlphaPolar(Pt::int32_t x, Pt::int32_t y, float scale);
-        inline Pt::uint8_t patternBufferAlphaPolar(Pt::int32_t x, Pt::int32_t y, float scale, float xyRat);
-
-        inline void patternBufferAlpha(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t idx, Pt::uint8_t alpha0, Pt::uint8_t alpha1);
-        inline void patternBufferAlphaPolar(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t x, Pt::int32_t y, float scale, Pt::uint8_t alpha0, Pt::uint8_t alpha1);
-        inline void patternBufferAlphaPolar(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t x, Pt::int32_t y, float scale, float xyRat, Pt::uint8_t alpha0, Pt::uint8_t alpha1);
+        inline const Pt::uint8_t* patternBufferMP64() const;
 
     private:
         // Scanline element
@@ -231,6 +225,14 @@ class Rasterizer2
         void updateGradientBrush(Pt::int32_t width, Pt::int32_t height);
         void updateClip();
 
+        inline Pt::uint8_t patternBuffer1PAlpha(Pt::int32_t idx) const;
+        inline Pt::uint8_t patternBuffer1PAlphaPolar(Pt::int32_t x, Pt::int32_t y, float scale) const;
+        inline Pt::uint8_t patternBuffer1PAlphaPolar(Pt::int32_t x, Pt::int32_t y, float scale, float xyRat) const;
+
+        inline void patternBuffer1PAlpha(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t idx, Pt::uint8_t alpha0, Pt::uint8_t alpha1) const;
+        inline void patternBuffer1PAlphaPolar(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t x, Pt::int32_t y, float scale, Pt::uint8_t alpha0, Pt::uint8_t alpha1) const;
+        inline void patternBuffer1PAlphaPolar(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t x, Pt::int32_t y, float scale, float xyRat, Pt::uint8_t alpha0, Pt::uint8_t alpha1) const;
+
         template<typename T>
         static inline void bubbleSortAscending(T& basket, Pt::int32_t size);
 
@@ -270,9 +272,9 @@ class Rasterizer2
         void rasterScanlineWithClipping(Pt::int32_t from, Pt::int32_t to, Pt::int32_t pixelY, Pt::int32_t minX, Pt::int32_t minY);
 
         // --- Polygon-related helper functions ---
-        void getPolygonRectMinMax(const Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY);
+        void getPolygonRectMinMax(const Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY) const;
         void genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount) const;
-        void separateAndClipPolygons(Pt::int32_t& minX, Pt::int32_t& maxX, Pt::int32_t& minY, Pt::int32_t& maxY, std::vector<Point>& clippedPoints, std::vector<size_t>& clippedCounts, const Point* points, size_t pointCount);
+        void separateAndClipPolygons(Pt::int32_t& minX, Pt::int32_t& maxX, Pt::int32_t& minY, Pt::int32_t& maxY, std::vector<Point>& clippedPoints, std::vector<size_t>& clippedCounts, const Point* points, size_t pointCount) const;
 
         // Arc-related helper functions
         static inline void arcUtil_detXWLineDirection(ArcXWLineData& xwLineData);
@@ -395,45 +397,48 @@ struct Rasterizer2::ArcXWLineData {
 // ===== Inlined Public Member Functions ================================================
 // ======================================================================================
 
-Pt::uint8_t Rasterizer2::patternBufferAlpha(Pt::int32_t idx)
-{ return _patternBuffer1P[ idx % FIXED_POINT_TO_INT(PATTERN_BUFFER_COUNTER_MAX1P) ]; }
-
-Pt::uint8_t Rasterizer2::patternBufferAlphaPolar(Pt::int32_t x, Pt::int32_t y, float scale)
-{ return patternBufferAlpha(Gfx::Math::convertCartesianToPolarCoordinate(x, y) * scale); }
-
-Pt::uint8_t Rasterizer2::patternBufferAlphaPolar(Pt::int32_t x, Pt::int32_t y, float scale, float xyRat)
-{
-    const float angle = Gfx::Math::convertCartesianToPolarCoordinate(x, y);
-
-    if(xyRat >= 1.0 && angle >= 45) scale /= xyRat;
-    if(xyRat <  1.0 && angle <  45) scale *= xyRat;
-
-    return patternBufferAlpha(angle * scale);
-}
-
-void Rasterizer2::patternBufferAlpha(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t idx, Pt::uint8_t alpha0, Pt::uint8_t alpha1)
-{
-    a0 = (Pt::uint32_t) _patternBuffer1P[ idx % FIXED_POINT_TO_INT(PATTERN_BUFFER_COUNTER_MAX1P) ] * alpha0 / 255;
-    a1 = (Pt::uint32_t) _patternBuffer1P[ idx % FIXED_POINT_TO_INT(PATTERN_BUFFER_COUNTER_MAX1P) ] * alpha1 / 255;
-}
-
-void Rasterizer2::patternBufferAlphaPolar(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t x, Pt::int32_t y, float scale, Pt::uint8_t alpha0, Pt::uint8_t alpha1)
-{ patternBufferAlpha(a0, a1, Gfx::Math::convertCartesianToPolarCoordinate(x, y) * scale, alpha0, alpha1); }
-
-void Rasterizer2::patternBufferAlphaPolar(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t x, Pt::int32_t y, float scale, float xyRat, Pt::uint8_t alpha0, Pt::uint8_t alpha1)
-{
-    const float angle = Gfx::Math::convertCartesianToPolarCoordinate(x, y);
-
-    if(xyRat >= 1.0 && angle >= 45) scale /= xyRat;
-    if(xyRat <  1.0 && angle <  45) scale *= xyRat;
-
-    patternBufferAlpha(a0, a1, angle * scale, alpha0, alpha1);
-}
+const Pt::uint8_t* Rasterizer2::patternBufferMP64() const
+{ return _patternBufferMP; }
 
 
 // ======================================================================================
 // ===== Inlined and/or Templated Private Member Functions ==============================
 // ======================================================================================
+
+Pt::uint8_t Rasterizer2::patternBuffer1PAlpha(Pt::int32_t idx) const
+{ return _patternBuffer1P[ idx % FIXED_POINT_TO_INT(PATTERN_BUFFER_COUNTER_MAX1P) ]; }
+
+Pt::uint8_t Rasterizer2::patternBuffer1PAlphaPolar(Pt::int32_t x, Pt::int32_t y, float scale) const
+{ return patternBuffer1PAlpha(Gfx::Math::convertCartesianToPolarCoordinate(x, y) * scale); }
+
+Pt::uint8_t Rasterizer2::patternBuffer1PAlphaPolar(Pt::int32_t x, Pt::int32_t y, float scale, float xyRat) const
+{
+    const float angle = Gfx::Math::convertCartesianToPolarCoordinate(x, y);
+
+    if(xyRat >= 1.0 && angle >= 45) scale /= xyRat;
+    if(xyRat <  1.0 && angle <  45) scale *= xyRat;
+
+    return patternBuffer1PAlpha(angle * scale);
+}
+
+void Rasterizer2::patternBuffer1PAlpha(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t idx, Pt::uint8_t alpha0, Pt::uint8_t alpha1) const
+{
+    a0 = (Pt::uint32_t) _patternBuffer1P[ idx % FIXED_POINT_TO_INT(PATTERN_BUFFER_COUNTER_MAX1P) ] * alpha0 / 255;
+    a1 = (Pt::uint32_t) _patternBuffer1P[ idx % FIXED_POINT_TO_INT(PATTERN_BUFFER_COUNTER_MAX1P) ] * alpha1 / 255;
+}
+
+void Rasterizer2::patternBuffer1PAlphaPolar(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t x, Pt::int32_t y, float scale, Pt::uint8_t alpha0, Pt::uint8_t alpha1) const
+{ patternBuffer1PAlpha(a0, a1, Gfx::Math::convertCartesianToPolarCoordinate(x, y) * scale, alpha0, alpha1); }
+
+void Rasterizer2::patternBuffer1PAlphaPolar(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t x, Pt::int32_t y, float scale, float xyRat, Pt::uint8_t alpha0, Pt::uint8_t alpha1) const
+{
+    const float angle = Gfx::Math::convertCartesianToPolarCoordinate(x, y);
+
+    if(xyRat >= 1.0 && angle >= 45) scale /= xyRat;
+    if(xyRat <  1.0 && angle <  45) scale *= xyRat;
+
+    patternBuffer1PAlpha(a0, a1, angle * scale, alpha0, alpha1);
+}
 
 template<typename T>
 void Rasterizer2::bubbleSortAscending(T& basket, Pt::int32_t size)

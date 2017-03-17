@@ -271,8 +271,6 @@ static void testDrawSolidThickLine(const char* title, Image& image, Painter& pai
 
 static void testDrawPatternedThickLine(const char* title, Image& image, Painter& painter)
 {
-    return;
-
     Pen penBCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dash, Pen::ButtCap,          Pen::BevelJoin);
     Pen penSCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dash, Pen::SquareCap,        Pen::BevelJoin);
     Pen penRCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dash, Pen::RoundCap,         Pen::BevelJoin);
