@@ -60,7 +60,7 @@ using namespace Pt::Gfx;
 #define DO_MATH_BENCHMARKING_ONLY 0
 
 // Benchmark matrix operations only
-#define DO_MATRIX_BENCHMARKING_ONLY 1
+#define DO_MATRIX_BENCHMARKING_ONLY 0
 
 // Comparison with Cairo (solid-filled polygons and ellipses only)
 #define DO_BENCHMARKING_CAIRO                 0
@@ -101,7 +101,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_CHECK_RESULTING_IMAGE     0
 
 #define BENCHMARK_IMAGE_SIZE                Size(1280, 800)
-#define BENCHMARK_LOOP_COUNT                ( 500 * (BENCHMARK_RESULT_HTML ? 10 : 1) )
+#define BENCHMARK_LOOP_COUNT                ( 5000 * (BENCHMARK_RESULT_HTML ? 10 : 1) )
 
 #define BENCHMARK_TEXT                      0
 #define BENCHMARK_ROTATED_TEXT              0

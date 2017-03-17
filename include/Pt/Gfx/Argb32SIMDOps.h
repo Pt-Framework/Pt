@@ -93,6 +93,8 @@ inline void pixelOps_SourceCopy(Pt::uint8_t* toBuffer, Pt::uint32_t fromARGB, si
 {
 #if defined (PT_GFX_USE_AVX1)
 
+    _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
+
     const size_t   len8     = length / 8;
     const __m256i  srcvARGB = _mm256_set1_epi32(fromARGB);
           __m256i* dstvARGB = reinterpret_cast<__m256i*>(toBuffer);
@@ -101,6 +103,8 @@ inline void pixelOps_SourceCopy(Pt::uint8_t* toBuffer, Pt::uint32_t fromARGB, si
         _mm256_storeu_si256(dstvARGB, srcvARGB);
         ++dstvARGB;
     }
+
+    _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
 
     length %= 8;
     Pt::uint32_t* dst = reinterpret_cast<Pt::uint32_t*>(dstvARGB);
@@ -148,6 +152,8 @@ inline void pixelOps_SourceOver(Pt::uint8_t* toBuffer, Pt::uint32_t srcA, Pt::ui
 {
 #if defined (PT_GFX_USE_AVX2)
 
+    _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
+
     const size_t   len8     = length / 8;
     const __m256i  srcvAGAG = _mm256_set_epi16(srcA, srcG, srcA, srcG, srcA, srcG, srcA, srcG, srcA, srcG, srcA, srcG, srcA, srcG, srcA, srcG); // [ AAGG AAGG AAGG AAGG AAGG AAGG AAGG AAGG ]
     const __m256i  srcvRBRB = _mm256_set_epi16(srcR, srcB, srcR, srcB, srcR, srcB, srcR, srcB, srcR, srcB, srcR, srcB, srcR, srcB, srcR, srcB); // [ RRBB RRBB RRBB RRBB RRBB RRBB RRBB RRBB ]
@@ -178,6 +184,8 @@ inline void pixelOps_SourceOver(Pt::uint8_t* toBuffer, Pt::uint32_t srcA, Pt::ui
         // Increment the destination pointer
         ++dstvARGB;
     }
+
+    _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
 
     length %= 8;
     Pt::uint8_t* dst = reinterpret_cast<Pt::uint8_t*>(dstvARGB);
@@ -276,6 +284,8 @@ inline void pixelOps_SourceCopy(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBu
 {
 #if defined (PT_GFX_USE_AVX1)
 
+    _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
+
     const size_t   len8     = length / 8;
     const __m256i* srcvARGB = reinterpret_cast<const __m256i*>(fromBuffer);
           __m256i* dstvARGB = reinterpret_cast<      __m256i*>(toBuffer  );
@@ -285,6 +295,8 @@ inline void pixelOps_SourceCopy(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBu
         ++srcvARGB;
         ++dstvARGB;
     }
+
+    _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
 
     const Pt::uint32_t* src = reinterpret_cast<const Pt::uint32_t*>(srcvARGB);
           Pt::uint32_t* dst = reinterpret_cast<      Pt::uint32_t*>(dstvARGB);
@@ -337,6 +349,8 @@ inline void pixelOps_SourceOver(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBu
 {
 #if defined(PT_GFX_USE_AVX2)
 
+    _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
+
     const size_t   len8     = length / 8;
     const __m256i* srcvARGB = reinterpret_cast<const __m256i*>(fromBuffer);
           __m256i* dstvARGB = reinterpret_cast<      __m256i*>(toBuffer  );
@@ -388,6 +402,8 @@ inline void pixelOps_SourceOver(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBu
         ++srcvARGB;
         ++dstvARGB;
     }
+
+    _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
 
     length %= 8;
     const Pt::uint8_t* src = reinterpret_cast<const Pt::uint8_t*>(srcvARGB);

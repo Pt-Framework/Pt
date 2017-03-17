@@ -363,9 +363,9 @@ static void dumpMatrix(const AffineMatrix2D& mat)
 static void benchMatrixOps()
 {
 #if defined(__arm__) || defined(__thumb__) || defined(_M_ARM) || defined(_M_ARMT) || defined(__TARGET_ARCH_ARM) || defined(__TARGET_ARCH_THUMB) || defined(_ARM) || defined(__arm)
-    const int loopCount = 4096;
+    const int loopCount = 1024;
 #else
-    const int loopCount = 8192;//00;
+    const int loopCount = 8192;
 #endif
 
     // Reinitialize the random number generator here, so it will produce
@@ -393,7 +393,8 @@ static void benchMatrixOps()
     mat.scaleAboutOrigin( 0.5f,  2.0f, AffineMatrix2D::MultiplyOnLeft);
     dumpMatrix(const_cast<const AffineMatrix2D&>(mat));
 
-    float xx, yy, x = 10.0f, y = 10.0f;
+    volatile float x = 10.0f, y = 10.0f;
+             float xx, yy;
     mat.transformPoint(xx, yy, x, y);
     printf("Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", x, y, xx, yy);
 
@@ -444,11 +445,10 @@ static void benchMatrixOps()
         |   0.000   0.000   1.000 |
     Point (10.000, 10.000) -> (10.000, 60.000)
     Time M * M =  6.835938 nS
-    Time M * V =  2.563477 nS
 
-    ---------------
-    With SSE + SSE3
-    ---------------
+    --------
+    With SSE
+    --------
     Initial value
         |   1.000   0.000   0.000 |
         |   0.000   1.000   0.000 |
@@ -458,19 +458,20 @@ static void benchMatrixOps()
         |   0.000   2.000  40.000 |
         |   0.000   0.000   1.000 |
     Point (10.000, 10.000) -> (10.000, 60.000)
-    Time M * M = 18.432617 nS
-    Time M * V = 12.207031 nS
+    Time M * M = 11.230469 nS
 
+    --------
+    With AVX
+    --------
     Initial value
         |   1.000   0.000   0.000 |
         |   0.000   1.000   0.000 |
         |   0.000   0.000   1.000 |
     After operations
         |   0.500   0.000   5.000 |
-        |  -0.000   2.000  40.000 |
-        |  -0.000   0.000   1.000 |
+        |   0.000   2.000  40.000 |
+        |   0.000   0.000   1.000 |
     Point (10.000, 10.000) -> (10.000, 60.000)
-    Time M * M =  6.713867 nS
-    Time M * V = 12.207031 nS
+    Time M * M =  5.493164 nS
     */
 }
