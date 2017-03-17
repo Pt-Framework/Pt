@@ -249,7 +249,8 @@ void Rasterizer2::updatePenPattern()
         const bool current = patternSel & ((Pt::uint64_t) 1 << p);
         // --- Multi-pixel pattern ---
         // It is a simple expanded copy of the pattern above
-        _patternBufferMP[gctrMP++] = current ? 1 : 0;
+        _patternBufferMP[PATTERN_BUFFER_NUM_OF_CELLS - gctrMP - 1] = current ? 1 : 0;
+        ++gctrMP;
         // --- One-pixel pattern ---
         // Pattern cell change from 0 to 0
         if(!previous && !current) {

@@ -1368,8 +1368,6 @@ void ImagePainter2::generatePatternedLineSegment(std::vector<PointF>& dst, float
 
     lprintf("nSegs = %zd\n", nSegs);
 
-  //  for(int i = 0; i < 64; ++i) lprintf("%d\n", pBuff[i]);
-  //  return;
     // Generate the segments
     size_t      pbCnt  = 0;
     Pt::uint8_t prvPat = 0;
@@ -1380,28 +1378,46 @@ void ImagePainter2::generatePatternedLineSegment(std::vector<PointF>& dst, float
     for(size_t i = 0; i <= nSegs; ++i) {
         // Get the pattern
         const Pt::uint8_t curPat = pBuff[pbCnt++];
-        if(pbCnt > PATTERN_BUFFER_COUNTER_MAXMP) pbCnt -= PATTERN_BUFFER_COUNTER_MAXMP;
+        if(pbCnt >= PATTERN_BUFFER_COUNTER_MAXMP) pbCnt -= PATTERN_BUFFER_COUNTER_MAXMP;
         lprintf("%d\n", curPat);
         //++pbCnt;
 //// 001100110011
 ///// 110011001100
 
-        // Update the coordinates
-        if(!prvPat && curPat) {
+       // bool draw = false
+
+        if(!curPat && !prvPat) {
+            prvPat = curPat;
+            xs += xInc;
+            ys += yInc;
+            continue;
+        }
+
+        if(curPat && prvPat) {
+            prvPat = curPat;
+            xs += xInc;
+            ys += yInc;
+            continue;
+        }
+
+        if(curPat && !prvPat) {
+            prvPat = curPat;
             x1 = xs;
             y1 = ys;
+            continue;
         }
-        xs += xInc;
-        ys += yInc;
-        if(prvPat && !curPat) {
+
+        if( (!curPat && prvPat) || (i == nSegs) ) {
+            prvPat = curPat;
+          //  draw = true;
             x2 = xs;
             y2 = ys;
         }
 
         //
-        const bool draw = (x1 != x2) || (y1 != y2);
-        prvPat = curPat;
-        if(!draw) continue;
+//        const bool draw = (x1 != x2) || (y1 != y2);
+  //      prvPat = curPat;
+      //  if(!draw) continue;
 
         lprintf("%5.1f, %5.1f - %5.1f, %5.1f\n", x1, y1, x2, y2);
 
