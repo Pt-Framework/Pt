@@ -393,15 +393,19 @@ static void benchMatrixOps()
     mat.scaleAboutOrigin( 0.5f,  2.0f, AffineMatrix2D::MultiplyOnLeft);
     dumpMatrix(const_cast<const AffineMatrix2D&>(mat));
 
-    volatile float x = 10.0f, y = 10.0f;
+    volatile float x = 8.0f, y = 8.0f;
              float xx, yy;
     mat.transformPoint(xx, yy, x, y);
     printf("Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", x, y, xx, yy);
 
-    float xya  [2] = { 10.0f, 10.0f };
-    float xxyya[2];
-    mat.transformPoints(xxyya, xya, 2);
+    float xya  [10] = { 11.0f, 12.0f, 13.0f, 24.0f, 25.0f, 16.0f, 27.0f, 28.0f, 5.0f, 5.0f };
+    float xxyya[10];
+    mat.transformPoints(xxyya, xya, 10);
     printf("Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", xya[0], xya[1], xxyya[0], xxyya[1]);
+    printf("Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", xya[2], xya[3], xxyya[2], xxyya[3]);
+    printf("Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", xya[4], xya[5], xxyya[4], xxyya[5]);
+    printf("Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", xya[6], xya[7], xxyya[6], xxyya[7]);
+    printf("Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", xya[8], xya[9], xxyya[8], xxyya[9]);
 
     // Performance check
     Pt::System::Clock clock;
@@ -465,8 +469,12 @@ static void benchMatrixOps()
         |   0.500   0.000   5.000 |
         |   0.000   2.000  40.000 |
         |   0.000   0.000   1.000 |
-    Point (10.000, 10.000) -> (10.000, 60.000)
-    Point (10.000, 10.000) -> (10.000, 60.000)
+    Point ( 8.000,  8.000) -> ( 9.000, 56.000)
+    Point (11.000, 12.000) -> (10.500, 64.000)
+    Point (13.000, 24.000) -> (11.500, 88.000)
+    Point (25.000, 16.000) -> (17.500, 72.000)
+    Point (27.000, 28.000) -> (18.500, 96.000)
+    Point ( 5.000,  5.000) -> ( 7.500, 50.000)
     Time M * M =  6.835938 nS
     Time M * V =  0.610352 nS
 
