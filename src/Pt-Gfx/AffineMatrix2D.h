@@ -87,12 +87,15 @@ class AffineMatrix2D {
         inline void transformPoint(PointF& p);
         inline void transformPoint(PointF& dp, const PointF& sp);
 
+        inline void transformPoints(float* xy, size_t pointCount);
+        inline void transformPoints(float* dxy, const float* sxy, size_t pointCount);
+
         inline void transformPoints(PointF* xy, size_t pointCount);
         inline void transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount);
 
     private:
 #if defined(PT_GFX_USE_AVX1) || defined(PT_GFX_USE_SSE1)
-        union __attribute__ ((aligned (32))) MatrixData {
+        union MatrixData {
             float  v[4][4];
             __m128 r[4];
         };
@@ -317,12 +320,17 @@ void AffineMatrix2D::transformPoint(PointF& dp, const PointF& sp)
     dp.set(x, y);
 }
 
+void AffineMatrix2D::transformPoints(float* xy, size_t pointCount)
+{ for(size_t i = 0; i < pointCount; i += 2) transformPoint(xy[i], xy[i + 1]); }
+
+void AffineMatrix2D::transformPoints(float* dxy, const float* sxy, size_t pointCount)
+{ for(size_t i = 0; i < pointCount; i += 2) transformPoint(dxy[i], dxy[i + 1], sxy[i], sxy[i + 1]); }
+
 void AffineMatrix2D::transformPoints(PointF* xy, size_t pointCount)
 { for(size_t i = 0; i < pointCount; ++i) transformPoint(xy[i]); }
 
 void AffineMatrix2D::transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount)
 { for(size_t i = 0; i < pointCount; ++i) transformPoint(dxy[i], sxy[i]); }
-
 
 // ======================================================================================
 // ===== Inlined Private Member Functions ===============================================
@@ -352,24 +360,6 @@ void AffineMatrix2D::multiplyWith(const MatrixData& n, MatrixUpdateMode mode)
 #if defined(PT_GFX_USE_AVX1)
 
      _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
-/*
-    __m256 result;
-    result = _mm256_mul_ps(_mm256_shuffle_ps(A01, A01, 0x00), _mm256_broadcast_ps(&B.row[0]));
-    result = _mm256_add_ps(result, _mm256_mul_ps(_mm256_shuffle_ps(A01, A01, 0x55), _mm256_broadcast_ps(&B.row[1])));
-    result = _mm256_add_ps(result, _mm256_mul_ps(_mm256_shuffle_ps(A01, A01, 0xaa), _mm256_broadcast_ps(&B.row[2])));
-    result = _mm256_add_ps(result, _mm256_mul_ps(_mm256_shuffle_ps(A01, A01, 0xff), _mm256_broadcast_ps(&B.row[3])));
-    return result;
-
-        _mm256_zeroupper();
-    __m256 A01 = _mm256_loadu_ps(&A.m[0][0]);
-    __m256 A23 = _mm256_loadu_ps(&A.m[2][0]);
-
-    __m256 out01x = twolincomb_AVX_8(A01, B);
-    __m256 out23x = twolincomb_AVX_8(A23, B);
-
-    _mm256_storeu_ps(&out.m[0][0], out01x);
-    _mm256_storeu_ps(&out.m[2][0], out23x);
-    */
 
     __m128 out0x =                    _mm_mul_ps(_mm_broadcast_ss(&l->v[0][0]), r->r[0])  ;
            out0x = _mm_add_ps( out0x, _mm_mul_ps(_mm_broadcast_ss(&l->v[0][1]), r->r[1]) );
@@ -388,24 +378,6 @@ void AffineMatrix2D::multiplyWith(const MatrixData& n, MatrixUpdateMode mode)
     _mm_storeu_ps(_mdata.v[2], out2x);
 
      _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
-
-#elif defined(PT_GFX_USE_SSE1)
-
-    __m128 out0x =                    _mm_mul_ps(_mm_shuffle_ps(l->r[0], l->r[0], 0x00), r->r[0])  ;
-           out0x = _mm_add_ps( out0x, _mm_mul_ps(_mm_shuffle_ps(l->r[0], l->r[0], 0x55), r->r[1]) );
-           out0x = _mm_add_ps( out0x, _mm_mul_ps(_mm_shuffle_ps(l->r[0], l->r[0], 0xAA), r->r[2]) );
-
-    __m128 out1x =                    _mm_mul_ps(_mm_shuffle_ps(l->r[1], l->r[1], 0x00), r->r[0])  ;
-           out1x = _mm_add_ps( out1x, _mm_mul_ps(_mm_shuffle_ps(l->r[1], l->r[1], 0x55), r->r[1]) );
-           out1x = _mm_add_ps( out1x, _mm_mul_ps(_mm_shuffle_ps(l->r[1], l->r[1], 0xAA), r->r[2]) );
-
-    __m128 out2x =                    _mm_mul_ps(_mm_shuffle_ps(l->r[2], l->r[2], 0x00), r->r[0])  ;
-           out2x = _mm_add_ps( out2x, _mm_mul_ps(_mm_shuffle_ps(l->r[2], l->r[2], 0x55), r->r[1]) );
-           out2x = _mm_add_ps( out2x, _mm_mul_ps(_mm_shuffle_ps(l->r[2], l->r[2], 0xAA), r->r[2]) );
-
-    _mm_storeu_ps(_mdata.v[0], out0x);
-    _mm_storeu_ps(_mdata.v[1], out1x);
-    _mm_storeu_ps(_mdata.v[2], out2x);
 
 #else
 
