@@ -1393,19 +1393,9 @@ void ImagePainter2::generatePatternedLineSegment(std::vector<PointF>& dst, float
         else if(draw) {
             x2 = xs;
             y2 = ys;
-            switch(_rasterizer->pen().capStyle()) {
-                case Pen::ButtCap:
-                    x2 += xInc;
-                    y2 += yInc;
-                    break;
-                case Pen::TriangularInCap:
-                    //x1 -= xInc;
-                   // y1 -= yInc;
-                   // x2 += xInc;
-                   // y2 += yInc;
-                    break;
-                default:
-                    break;
+            if(_rasterizer->pen().capStyle() == Pen::ButtCap) {
+                x2 += xInc;
+                y2 += yInc;
             }
         }
         prvPat = curPat;
