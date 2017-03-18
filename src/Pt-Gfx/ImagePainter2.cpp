@@ -885,8 +885,11 @@ void ImagePainter2::drawThickPolyline_impl(const PointF* ps, const size_t pointC
     if(!pointCount) return;
 
     // Prepare the buffer
-    std::vector<PointF> pointsF;
+    std::vector<PointF> pointsF, pointsT;
     pointsF.reserve( pointCount * _rasterizer->pen().size() );
+
+    // Is the pen solid?
+    const bool solidPen = (_rasterizer->pen().style() == Pen::Solid);
 
     // Separate the polygons convert them and recombine them
     size_t startIndex = 0;
@@ -901,23 +904,37 @@ void ImagePainter2::drawThickPolyline_impl(const PointF* ps, const size_t pointC
             startIndex = i + 1;
             // Determine if this polygon is a closed polygon
             bool closedPolygon = autoClose;
-            if(basePtr[0] == basePtr[curPCnt - 1]) {
-                closedPolygon = true;
-                --curPCnt;
+            // Thicken polygon with solid line
+            if(solidPen) {
+                if(basePtr[0] == basePtr[curPCnt - 1]) {
+                    closedPolygon = true;
+                    --curPCnt;
+                }
+                if(closedPolygon) {
+                    if(!thickenSolidClosedPolygon(pointsF, basePtr, curPCnt, segmentIndexMarker)) return;
+                }
+                else {
+                    if(!thickenSolidOpenPolygon(pointsF, basePtr, curPCnt, segmentIndexMarker)) return;
+                }
             }
-            // Thicken the polygon
-            if(closedPolygon) {
-                if(!thickenSolidClosedPolygon(pointsF, basePtr, curPCnt, segmentIndexMarker)) return;
-            }
+            // Thicken polygon with patterned line
             else {
-                if(!thickenSolidOpenPolygon(pointsF, basePtr, curPCnt, segmentIndexMarker)) return;
+                if(closedPolygon && basePtr[0] != basePtr[curPCnt - 1]) {
+                    pointsT.clear();
+                    for(size_t j = 0; j < curPCnt; ++j) pointsT.push_back(*(basePtr + j));
+                    pointsT.push_back(*basePtr);
+                    if(!thickenPatternedPolygon(pointsF, pointsT.data(), pointsT.size())) return;
+                }
+                else {
+                    if(!thickenPatternedPolygon(pointsF, basePtr, curPCnt)) return;
+                }
             }
             // Convert the points
             std::vector<Point> points;
             convertPointRound(points, pointsF.data(), pointsF.size());
             // Rasterize the polygon
-            if(closedPolygon) _rasterizer->strokePolygon        (points.data(), points.size());
-            else              _rasterizer->strokePolygonSeparate(points.data(), points.size());
+            if(solidPen && closedPolygon) _rasterizer->strokePolygon        (points.data(), points.size());
+            else                          _rasterizer->strokePolygonSeparate(points.data(), points.size());
         }
     }
 }
@@ -985,34 +1002,16 @@ bool ImagePainter2::thickenSolidOpenPolygon(std::vector<PointF>& pointsF, const 
             inSameSegment = false;
             ++segmentIndexMarker;
         }
-        // Solid line
-        if(_rasterizer->pen().style() == Pen::Solid) {
-            pointsFSegment.clear();
-            generateSolidLineSegment(pointsFSegment, from.x(), from.y(), to.x(), to.y(), i == 0, i == curPC2);
-            if(!combineLineSegmentForSolidOpenPolygon(
-                pointsFPolygon, pointsFInner, pointsFSegment, from, inSameSegment
-            )) return false;
-        }
-        // Patterned line
-        else {
-            // ### TODO ###
-            return false;
-        }
+        // Generate and combine line segments
+        pointsFSegment.clear();
+        generateSolidLineSegment(pointsFSegment, from.x(), from.y(), to.x(), to.y(), i == 0, i == curPC2);
+        if(!combineLineSegmentForSolidOpenPolygon(
+            pointsFPolygon, pointsFInner, pointsFSegment, from, inSameSegment
+        )) return false;
     }
 
-    // Process the "inside" lines' points
-    if(true) {
-        // Solid line
-        if(_rasterizer->pen().style() == Pen::Solid) {
-            // Store the "inside" lines' points to the main polygon buffer in reverse
-            pointsFPolygon.insert(pointsFPolygon.end(), pointsFInner.rbegin(), pointsFInner.rend());
-        }
-        // Patterned line
-        else {
-            // ### TODO ###
-            return false;
-        }
-    }
+    // Process and store the "inside" lines' points to the main polygon buffer in reverse
+    pointsFPolygon.insert(pointsFPolygon.end(), pointsFInner.rbegin(), pointsFInner.rend());
 
     // Combine the polygon data
     if(!pointsF.empty()) pointsF.push_back(Painter::PolygonSeparatorPointF);
@@ -1053,19 +1052,12 @@ bool ImagePainter2::thickenSolidClosedPolygon(std::vector<PointF>& pointsF, cons
             inSameSegment = false;
             ++segmentIndexMarker;
         }
-        // Solid line
-        if(_rasterizer->pen().style() == Pen::Solid) {
-            pointsFSegment.clear();
-            generateSolidLineSegment(pointsFSegment, from.x(), from.y(), to.x(), to.y(), false, false);
-            if(!combineLineSegmentForSolidClosedPolygon(
-                pointsFOuter, pointsFInner, pointsFSegment, from, i == 1, false, inSameSegment
-            )) return false;
-        }
-        // Patterned line
-        else {
-            // ### TODO ###
-            return false;
-        }
+        // Generate and combine line segments
+        pointsFSegment.clear();
+        generateSolidLineSegment(pointsFSegment, from.x(), from.y(), to.x(), to.y(), false, false);
+        if(!combineLineSegmentForSolidClosedPolygon(
+            pointsFOuter, pointsFInner, pointsFSegment, from, i == 1, false, inSameSegment
+        )) return false;
     }
 
     // Reprocess the first and second segments to generate the last join
@@ -1073,19 +1065,12 @@ bool ImagePainter2::thickenSolidClosedPolygon(std::vector<PointF>& pointsF, cons
         // Get the coordinates
         const PointF& from = *ptrZero++;
         const PointF& to   = *ptrZero;
-        // Solid line
-        if(_rasterizer->pen().style() == Pen::Solid) {
-            pointsFSegment.clear();
-            generateSolidLineSegment(pointsFSegment, from.x(), from.y(), to.x(), to.y(), false, false);
-            if(!combineLineSegmentForSolidClosedPolygon(
-                pointsFOuter, pointsFInner, pointsFSegment, from, false, true, false
-            )) return false;
-        }
-        // Patterned line
-        else {
-            // ### TODO ###
-            return false;
-        }
+        // Generate and combine line segments
+        pointsFSegment.clear();
+        generateSolidLineSegment(pointsFSegment, from.x(), from.y(), to.x(), to.y(), false, false);
+        if(!combineLineSegmentForSolidClosedPolygon(
+            pointsFOuter, pointsFInner, pointsFSegment, from, false, true, false
+        )) return false;
     }
 
     // Combine the polygon data
@@ -1369,7 +1354,9 @@ void ImagePainter2::generatePatternedLineSegment(std::vector<PointF>& dst, float
 
     // Get the pattern buffer and calculate the number of "pattern" segments
     const Pt::uint8_t* pBuff = _rasterizer->patternBufferMP64();
-    const float        lLen  = Gfx::Math::fastSqrt( (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1) );
+    const float        xLen  = (x2 > x1) ? (x2 - x1) : (x1 - x2);
+    const float        yLen  = (y2 > y1) ? (y2 - y1) : (y1 - y2);
+    const float        lLen  = Gfx::Math::fastSqrt(xLen * xLen + yLen * yLen);
     const size_t       nSegs = round(lLen / wh) * 2;
     const float        xInc  = (x2 - x1) / nSegs;
     const float        yInc  = (y2 - y1) / nSegs;
@@ -1404,7 +1391,6 @@ void ImagePainter2::generatePatternedLineSegment(std::vector<PointF>& dst, float
         ys += yInc;
         // Skip if we are not going to draw this segment
         if(!draw) continue;
-        //lprintf("    Segment #%2zd : (%5.1f, %5.1f) - (%5.1f, %5.1f)\n", i, x1, y1, x2, y2);
         // Add polygon separator point as needed
         if(!dst.empty()) dst.push_back(Painter::PolygonSeparatorPointF);
         // Generate points (CCW)
@@ -1424,8 +1410,14 @@ void ImagePainter2::generatePatternedLineSegment(std::vector<PointF>& dst, float
             case Pen::TriangularInCap  : generateLineTriangularInCap (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
             default                    : generateLineButtCap         (dst, x2, y2,               -nx, -ny); break;
         }
+        //lprintf("    Segment #%2zd : (%5.1f, %5.1f) - (%5.1f, %5.1f)\n", i, x1, y1, x2, y2);
     }
     //lprintf("\n");
+}
+
+bool ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const PointF* src, size_t pointCount)
+{
+    return false;
 }
 
 

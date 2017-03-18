@@ -73,53 +73,53 @@ static void testDrawThickLine_impl(
 
     painter.setPen(penBCapBJoin);
     painter.drawLine( PointF( 20, 300 - 30), PointF(100, 350 - 30) );
-    painter.drawLine( PointF( 20, 430 - 30), PointF(100, 370 - 30) );
+    painter.drawLine( PointF( 20, 430 - 30), PointF(100, 380 - 30) );
     if(true || painter.pen().style() != Pen::Solid) {
         painter.setPen(penRef);
         painter.drawLine( PointF( 20, 300 - 30), PointF(100, 350 - 30) );
-        painter.drawLine( PointF( 20, 430 - 30), PointF(100, 370 - 30) );
+        painter.drawLine( PointF( 20, 430 - 30), PointF(100, 380 - 30) );
     }
-    painter.setPen(penText); painter.drawText( PointF(20, 365 - 30), "Butt" );
+    painter.setPen(penText); painter.drawText( PointF(20, 370 - 30), "Butt" );
 
     painter.setPen(penSCapBJoin);
     painter.drawLine( PointF(120, 300 - 30), PointF(200, 350 - 30) );
-    painter.drawLine( PointF(120, 430 - 30), PointF(200, 370 - 30) );
+    painter.drawLine( PointF(120, 430 - 30), PointF(200, 380 - 30) );
     if(true || painter.pen().style() != Pen::Solid) {
         painter.setPen(penRef);
         painter.drawLine( PointF(120, 300 - 30), PointF(200, 350 - 30) );
-        painter.drawLine( PointF(120, 430 - 30), PointF(200, 370 - 30) );
+        painter.drawLine( PointF(120, 430 - 30), PointF(200, 380 - 30) );
     }
-    painter.setPen(penText); painter.drawText( PointF(120, 365 - 30), "Square" );
+    painter.setPen(penText); painter.drawText( PointF(120, 370 - 30), "Square" );
 
     painter.setPen(penRCapBJoin);
     painter.drawLine( PointF(220, 300 - 30), PointF(300, 350 - 30) );
-    painter.drawLine( PointF(220, 430 - 30), PointF(300, 370 - 30) );
+    painter.drawLine( PointF(220, 430 - 30), PointF(300, 380 - 30) );
     if(true || painter.pen().style() != Pen::Solid) {
         painter.setPen(penRef);
         painter.drawLine( PointF(220, 300 - 30), PointF(300, 350 - 30) );
-        painter.drawLine( PointF(220, 430 - 30), PointF(300, 370 - 30) );
+        painter.drawLine( PointF(220, 430 - 30), PointF(300, 380 - 30) );
     }
-    painter.setPen(penText); painter.drawText( PointF(220, 365 - 30), "Round" );
+    painter.setPen(penText); painter.drawText( PointF(220, 370 - 30), "Round" );
 
     painter.setPen(penOCapBJoin);
     painter.drawLine( PointF(320, 300 - 30), PointF(400, 350 - 30) );
-    painter.drawLine( PointF(320, 430 - 30), PointF(400, 370 - 30) );
+    painter.drawLine( PointF(320, 430 - 30), PointF(400, 380 - 30) );
     if(true || painter.pen().style() != Pen::Solid) {
         painter.setPen(penRef);
         painter.drawLine( PointF(320, 300 - 30), PointF(400, 350 - 30) );
-        painter.drawLine( PointF(320, 430 - 30), PointF(400, 370 - 30) );
+        painter.drawLine( PointF(320, 430 - 30), PointF(400, 380 - 30) );
     }
-    painter.setPen(penText); painter.drawText( PointF(320, 365 - 30), "Tri-Out" );
+    painter.setPen(penText); painter.drawText( PointF(320, 370 - 30), "Tri-Out" );
 
     painter.setPen(penICapBJoin);
     painter.drawLine( PointF(420, 300 - 30), PointF(500, 350 - 30) );
-    painter.drawLine( PointF(420, 430 - 30), PointF(500, 370 - 30) );
+    painter.drawLine( PointF(420, 430 - 30), PointF(500, 380 - 30) );
     if(true || painter.pen().style() != Pen::Solid) {
         painter.setPen(penRef);
         painter.drawLine( PointF(420, 300 - 30), PointF(500, 350 - 30) );
-        painter.drawLine( PointF(420, 430 - 30), PointF(500, 370 - 30) );
+        painter.drawLine( PointF(420, 430 - 30), PointF(500, 380 - 30) );
     }
-    painter.setPen(penText); painter.drawText( PointF(420, 365 - 30), "Tri-In" );
+    painter.setPen(penText); painter.drawText( PointF(420, 370 - 30), "Tri-In" );
 
     // Test joins
     painter.setPen(penOCapBJoin);
@@ -388,15 +388,15 @@ static void testDrawSolidThickLine(const char* title, Image& image, Painter& pai
 
 static void testDrawPatternedThickLine(const char* title, Image& image, Painter& painter)
 {
-    Pen penBCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dash, Pen::ButtCap,          Pen::BevelJoin);
-    Pen penSCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dash, Pen::SquareCap,        Pen::BevelJoin);
-    Pen penRCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dash, Pen::RoundCap,         Pen::BevelJoin);
-    Pen penICapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dash, Pen::TriangularInCap,  Pen::BevelJoin);
+    Pen penBCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dot, Pen::ButtCap,          Pen::BevelJoin);
+    Pen penSCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dot, Pen::SquareCap,        Pen::BevelJoin);
+    Pen penRCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dot, Pen::RoundCap,         Pen::BevelJoin);
+    Pen penICapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dot, Pen::TriangularInCap,  Pen::BevelJoin);
 
-    Pen penOCapNJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dash, Pen::TriangularOutCap, Pen::NoJoin   );
-    Pen penOCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dash, Pen::TriangularOutCap, Pen::BevelJoin);
-    Pen penOCapMJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dash, Pen::TriangularOutCap, Pen::MiterJoin);
-    Pen penOCapRJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dash, Pen::TriangularOutCap, Pen::RoundJoin);
+    Pen penOCapNJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dot, Pen::TriangularOutCap, Pen::NoJoin   );
+    Pen penOCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dot, Pen::TriangularOutCap, Pen::BevelJoin);
+    Pen penOCapMJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dot, Pen::TriangularOutCap, Pen::MiterJoin);
+    Pen penOCapRJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dot, Pen::TriangularOutCap, Pen::RoundJoin);
 
     testDrawThickLine_impl(
         title, image, painter,
