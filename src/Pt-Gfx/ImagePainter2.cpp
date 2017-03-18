@@ -472,17 +472,6 @@ void ImagePainter2::drawLine( const PointF& from, const PointF& to )
 
     convertPointRound(points, pointsF.data(), pointsF.size());
     _rasterizer->strokePolygonSeparate(points.data(), points.size());
-
-#if 1
-    // ### NOTE: Just for testing patterned thick lines ###
-    if(_rasterizer->pen().style() == Pen::Solid) return;
-    const Pen pen = _rasterizer->pen();
-    const Point a( (Pt::int32_t) from.x(), (Pt::int32_t) from.y() );
-    const Point b( (Pt::int32_t) to  .x(), (Pt::int32_t) to  .y() );
-    _rasterizer->setPen(Color::fromRgb8(255, 0, 0));
-    _rasterizer->strokeOnePixelLine(a, b, 0);
-    _rasterizer->setPen(pen);
-#endif
 }
 
 void ImagePainter2::drawRect( const RectF& rect )
