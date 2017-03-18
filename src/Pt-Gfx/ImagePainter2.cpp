@@ -1419,44 +1419,61 @@ struct ImagePainter2::SAGOpState {
     std::vector<PointF>& dstPoints; // Destination vector
     const PointF*        srcPoints; // Source points
     size_t               srcCount;  // The number of source points
-    float                cellSize;  // Size of each cell (pattern bit)
 
     size_t               idx0;      // Index to the first point which is currently being processed
     size_t               idx1;      // Index to the second point which is currently being processed
     float                px, py;    // Coordinate between the above two points which has been processed
 
-    inline SAGOpState(std::vector<PointF>& pointsF, const PointF* src, size_t pointCount, size_t penSize)
-    : dstPoints(pointsF), srcPoints(src), srcCount(pointCount), cellSize(penSize * 0.5f),
-      idx0(0), idx1(1), px(srcPoints[0].x()), py(srcPoints[0].y())
+    inline SAGOpState(std::vector<PointF>& pointsF, const PointF* src, size_t pointCount)
+    : dstPoints(pointsF), srcPoints(src), srcCount(pointCount), idx0(0), idx1(1), px(srcPoints[0].x()), py(srcPoints[0].y())
     {}
 };
 
 bool ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const PointF* src, size_t pointCount)
 {
     // Initialize the operational state
-    SAGOpState state(pointsF, src, pointCount, _rasterizer->pen().size());
+    SAGOpState state(pointsF, src, pointCount);
+
+    // Calculate the cell size
+    const float cellSize = _rasterizer->pen().size() * 0.5f;
 
     // The pattern buffer and its counter
     const Pt::uint8_t* pBuff      = _rasterizer->patternBufferMP64();
           Pt::int32_t  piCtrInOut = 0;
 
     // Loop until all the polygon's points are processed
-  int debug = 0;
-    while(true) {
-        // Get the pattern
-        const Pt::uint8_t curPat = pBuff[piCtrInOut++];
-        if(piCtrInOut >= PATTERN_BUFFER_COUNTER_MAXMP) piCtrInOut -= PATTERN_BUFFER_COUNTER_MAXMP;
-
-        ++debug;
-        if(debug >100) break;
+    bool done = false;
+    while(!done) {
+        // Calculate the segment length
+        Pt::uint8_t refPat = pBuff[piCtrInOut];
+        float       segLen = cellSize;
+        while(true) {
+            // Update the pattern indexing counter
+            ++piCtrInOut;
+            if(piCtrInOut >= PATTERN_BUFFER_COUNTER_MAXMP) piCtrInOut -= PATTERN_BUFFER_COUNTER_MAXMP;
+            // Get and compare the pattern bit
+            const Pt::uint8_t curPat = pBuff[piCtrInOut];
+            if(curPat == refPat) {
+                segLen += cellSize;
+                continue;
+            }
+            // We have got a different pattern bit, exit to the segment
+            break;
+        }
+        // Process the segment
+        //lprintf("Cell size = %5.1f %5.1f\n", segLen, cellSize);
+        done = sagPolygonPoints(state, segLen);
     }
 
-    return false;
+    // Done
+    return true;
 }
 
-bool ImagePainter2::sagPolygonPoints(SAGOpState& state)
+bool ImagePainter2::sagPolygonPoints(SAGOpState& state, float segLen)
 {
-    return false;
+    static int i = 0;
+    ++i;
+    return !(i % 0x03);
 }
 
 
