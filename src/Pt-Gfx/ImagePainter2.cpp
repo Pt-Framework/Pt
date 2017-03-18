@@ -473,10 +473,16 @@ void ImagePainter2::drawLine( const PointF& from, const PointF& to )
     convertPointRound(points, pointsF.data(), pointsF.size());
     _rasterizer->strokePolygonSeparate(points.data(), points.size());
 
-    // ### JUST FOR DEBUGGING ###
+#if 1
+    // ### NOTE: Just for testing patterned thick lines ###
+    if(_rasterizer->pen().style() == Pen::Solid) return;
+    const Pen pen = _rasterizer->pen();
     const Point a( (Pt::int32_t) from.x(), (Pt::int32_t) from.y() );
     const Point b( (Pt::int32_t) to  .x(), (Pt::int32_t) to  .y() );
+    _rasterizer->setPen(Color::fromRgb8(255, 0, 0));
     _rasterizer->strokeOnePixelLine(a, b, 0);
+    _rasterizer->setPen(pen);
+#endif
 }
 
 void ImagePainter2::drawRect( const RectF& rect )
@@ -1367,7 +1373,7 @@ void ImagePainter2::generatePatternedLineSegment(std::vector<PointF>& dst, float
     // Get the pattern buffer and calculate the number of "pattern" segments
     const Pt::uint8_t* pBuff = _rasterizer->patternBufferMP64();
     const float        lLen  = Gfx::Math::fastSqrt( (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1) );
-    const size_t       nSegs = round(lLen / wh);
+    const size_t       nSegs = round(2.0f * lLen / wh);
     const float        xInc  = (x2 - x1) / nSegs;
     const float        yInc  = (y2 - y1) / nSegs;
 
@@ -1389,8 +1395,15 @@ void ImagePainter2::generatePatternedLineSegment(std::vector<PointF>& dst, float
             y1 = ys;
         }
         else if(draw) {
-            x2 = xs;
-            y2 = ys;
+            switch(_rasterizer->pen().capStyle()) {
+                case Pen::SquareCap        :
+                case Pen::RoundCap         :
+                case Pen::TriangularOutCap :
+                case Pen::TriangularInCap  :
+                default                    : break;
+            }
+
+            x2 = xs + xInc; y2 = ys + yInc;
         }
         prvPat = curPat;
         // Update the coordinates
