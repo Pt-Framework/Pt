@@ -1415,7 +1415,46 @@ void ImagePainter2::generatePatternedLineSegment(std::vector<PointF>& dst, float
     //lprintf("\n");
 }
 
+struct ImagePainter2::SAGOpState {
+    std::vector<PointF>& dstPoints; // Destination vector
+    const PointF*        srcPoints; // Source points
+    size_t               srcCount;  // The number of source points
+    float                cellSize;  // Size of each cell (pattern bit)
+
+    size_t               idx0;      // Index to the first point which is currently being processed
+    size_t               idx1;      // Index to the second point which is currently being processed
+    float                px, py;    // Coordinate between the above two points which has been processed
+
+    inline SAGOpState(std::vector<PointF>& pointsF, const PointF* src, size_t pointCount, size_t penSize)
+    : dstPoints(pointsF), srcPoints(src), srcCount(pointCount), cellSize(penSize * 0.5f),
+      idx0(0), idx1(1), px(srcPoints[0].x()), py(srcPoints[0].y())
+    {}
+};
+
 bool ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const PointF* src, size_t pointCount)
+{
+    // Initialize the operational state
+    SAGOpState state(pointsF, src, pointCount, _rasterizer->pen().size());
+
+    // The pattern buffer and its counter
+    const Pt::uint8_t* pBuff      = _rasterizer->patternBufferMP64();
+          Pt::int32_t  piCtrInOut = 0;
+
+    // Loop until all the polygon's points are processed
+  int debug = 0;
+    while(true) {
+        // Get the pattern
+        const Pt::uint8_t curPat = pBuff[piCtrInOut++];
+        if(piCtrInOut >= PATTERN_BUFFER_COUNTER_MAXMP) piCtrInOut -= PATTERN_BUFFER_COUNTER_MAXMP;
+
+        ++debug;
+        if(debug >100) break;
+    }
+
+    return false;
+}
+
+bool ImagePainter2::sagPolygonPoints(SAGOpState& state)
 {
     return false;
 }

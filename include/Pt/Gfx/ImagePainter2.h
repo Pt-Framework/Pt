@@ -133,22 +133,24 @@ class PT_GFX_API ImagePainter2 : public Painter
         static FontMetrics fontMetrics(const Font& font, const Pt::String& text);
 
     private:
+        // State for spread-and-gather operations on polygon points
+        struct SAGOpState;
+
+    private:
         inline void convertPointTrunc(std::vector<Point>& dst, const PointF* src, const size_t pointCount);
         inline void convertPointRound(std::vector<Point>& dst, const PointF* src, const size_t pointCount);
 
         void drawThickPolyline_impl(const PointF* ps, const size_t pointCount, bool autoClose, const int32_t* segmentIndexMarker);
 
         void generateSolidLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, bool openingCap, bool closingCap);
-
         bool thickenSolidOpenPolygon(std::vector<PointF>& pointsF, const PointF* basePtr, size_t curPCnt, const int32_t* segmentIndexMarker);
         bool thickenSolidClosedPolygon(std::vector<PointF>& pointsF, const PointF* basePtr, size_t curPCnt, const int32_t* segmentIndexMarker);
-
         bool combineLineSegmentForSolidOpenPolygon(std::vector<PointF>& polygon, std::vector<PointF>& inner, const std::vector<PointF>& segment, const PointF& origMeetingPoint, bool inSameSegment);
         bool combineLineSegmentForSolidClosedPolygon(std::vector<PointF>& outer, std::vector<PointF>& inner, const std::vector<PointF>& segment, const PointF& origMeetingPoint, bool isFirst, bool isLast, bool inSameSegment);
 
         void generatePatternedLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, Pt::int32_t& piCtrInOut);
-
         bool thickenPatternedPolygon(std::vector<PointF>& pointsF, const PointF* src, size_t pointCount);
+        bool sagPolygonPoints(SAGOpState& state);
 
     private:
         RectF           _clip;
