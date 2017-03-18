@@ -271,15 +271,15 @@ static void testDrawSolidThickLine(const char* title, Image& image, Painter& pai
 
 static void testDrawPatternedThickLine(const char* title, Image& image, Painter& painter)
 {
-    Pen penBCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dot, Pen::ButtCap,          Pen::BevelJoin);
-    Pen penSCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dot, Pen::SquareCap,        Pen::BevelJoin);
-    Pen penRCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dot, Pen::RoundCap,         Pen::BevelJoin);
-    Pen penICapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dot, Pen::TriangularInCap,  Pen::BevelJoin);
+    Pen penBCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dash, Pen::ButtCap,          Pen::BevelJoin);
+    Pen penSCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dash, Pen::SquareCap,        Pen::BevelJoin);
+    Pen penRCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dash, Pen::RoundCap,         Pen::BevelJoin);
+    Pen penICapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dash, Pen::TriangularInCap,  Pen::BevelJoin);
 
-    Pen penOCapNJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dot, Pen::TriangularOutCap, Pen::NoJoin   );
-    Pen penOCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dot, Pen::TriangularOutCap, Pen::BevelJoin);
-    Pen penOCapMJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dot, Pen::TriangularOutCap, Pen::MiterJoin);
-    Pen penOCapRJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dot, Pen::TriangularOutCap, Pen::RoundJoin);
+    Pen penOCapNJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dash, Pen::TriangularOutCap, Pen::NoJoin   );
+    Pen penOCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dash, Pen::TriangularOutCap, Pen::BevelJoin);
+    Pen penOCapMJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dash, Pen::TriangularOutCap, Pen::MiterJoin);
+    Pen penOCapRJoin(Color::fromRgb8(  0, 255, 0, 175), 12, Pen::Dash, Pen::TriangularOutCap, Pen::RoundJoin);
 
     testDrawThickLine_impl(
         title, image, painter,

@@ -146,7 +146,7 @@ class PT_GFX_API ImagePainter2 : public Painter
         bool combineLineSegmentForSolidOpenPolygon(std::vector<PointF>& polygon, std::vector<PointF>& inner, const std::vector<PointF>& segment, const PointF& origMeetingPoint, bool inSameSegment);
         bool combineLineSegmentForSolidClosedPolygon(std::vector<PointF>& outer, std::vector<PointF>& inner, const std::vector<PointF>& segment, const PointF& origMeetingPoint, bool isFirst, bool isLast, bool inSameSegment);
 
-        void generatePatternedLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, bool openingCap, bool closingCap);
+        void generatePatternedLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2);
 
     private:
         RectF           _clip;
