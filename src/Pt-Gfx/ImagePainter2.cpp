@@ -1420,12 +1420,17 @@ struct ImagePainter2::SAGOpState {
     const PointF*        srcPoints; // Source points
     size_t               srcCount;  // The number of source points
 
-    size_t               idx0;      // Index to the first point which is currently being processed
-    size_t               idx1;      // Index to the second point which is currently being processed
-    float                px, py;    // Coordinate between the above two points which has been processed
+    size_t               idx1;      // Index to the first point which is currently being processed
+    size_t               idx2;      // Index to the second point which is currently being processed
+    float                uvx, uvy;  // Unit vector from the first point to the second point
+    float                lvSize;    // Line vector size (distance between the the above two points)
+    float                px, py;    // Coordinate in-between the above two points which has been processed
+    float                mx, my;    // Coordinate of the second point
+
+    std::vector<PointF>  gather;    // Gathered polygon points
 
     inline SAGOpState(std::vector<PointF>& pointsF, const PointF* src, size_t pointCount)
-    : dstPoints(pointsF), srcPoints(src), srcCount(pointCount), idx0(0), idx1(1), px(srcPoints[0].x()), py(srcPoints[0].y())
+    : dstPoints(pointsF), srcPoints(src), srcCount(pointCount), idx1(0), idx2(1), lvSize(-1.0f)
     {}
 };
 
@@ -1457,20 +1462,57 @@ bool ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const 
                 segLen += cellSize;
                 continue;
             }
-            // We have got a different pattern bit, exit to the segment
+            // We have got a different pattern bit, exit to process the segment
             break;
         }
         // Process the segment
         //lprintf("Cell size = %5.1f %5.1f\n", segLen, cellSize);
         done = sagPolygonPoints(state, segLen);
+        // Generate a real line segment as needed
+        if(!refPat) continue;
     }
 
     // Done
     return true;
 }
 
+/*
+    std::vector<PointF>& dstPoints; // Destination vector
+    const PointF*        srcPoints; // Source points
+    size_t               srcCount;  // The number of source points
+
+    size_t               idx0;      // Index to the first point which is currently being processed
+    size_t               idx1;      // Index to the second point which is currently being processed
+    float                uvx, uvy;  // Unit vector from the first point to the second point
+    float                lvSize;    // Line vector size (distance between the the above two points)
+    float                px, py;    // Coordinate in-between the above two points which has been processed
+
+    std::vector<PointF>  gather;    // Gathered polygon points
+ */
 bool ImagePainter2::sagPolygonPoints(SAGOpState& state, float segLen)
 {
+    // Are at the start of a new operation?
+    if(state.lvSize <= 0.0f) {
+        // Calculate the vector, size, and coordinates
+        const float x1 = state.srcPoints[state.idx1].x();
+        const float y1 = state.srcPoints[state.idx1].y();
+        const float x2 = state.srcPoints[state.idx2].x();
+        const float y2 = state.srcPoints[state.idx2].y();
+        const float vx = x2 - x1;
+        const float vy = y2 - y1;
+        const float vz = Gfx::Math::fastSqrt(vx * vx + vy * vy);
+        state.uvx    = vx / vz;
+        state.uvy    = vy / vy;
+        state.lvSize = vz;
+        state.px     = x1;
+        state.py     = y1;
+        state.mx     = x2;
+        state.my     = y2;
+    }
+
+    // Process
+    
+
     static int i = 0;
     ++i;
     return !(i % 0x03);
