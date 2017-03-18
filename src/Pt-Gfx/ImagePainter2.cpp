@@ -154,9 +154,15 @@ static inline void generateLineTriangularOutCap(std::vector<PointF>& dst, float 
 
 static inline void generateLineTriangularInCap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
 {
+#if 1
+    dst.push_back( PointF(x + nx - dx, y + ny - dy) );
+    dst.push_back( PointF(x,           y          ) );
+    dst.push_back( PointF(x - nx - dx, y - ny - dy) );
+#else
     dst.push_back( PointF(x + nx, y + ny) );
     dst.push_back( PointF(x + dx, y + dy) );
     dst.push_back( PointF(x - nx, y - ny) );
+#endif
 }
 
 static inline void calculateLineParams(float& wh, float& dx, float& dy, float& nx, float& ny, float x1, float y1, float x2, float y2, size_t w)
@@ -1393,10 +1399,10 @@ void ImagePainter2::generatePatternedLineSegment(std::vector<PointF>& dst, float
                     y2 += yInc;
                     break;
                 case Pen::TriangularInCap:
-                    x1 -= xInc;
-                    y1 -= yInc;
-                    x2 += xInc;
-                    y2 += yInc;
+                    //x1 -= xInc;
+                   // y1 -= yInc;
+                   // x2 += xInc;
+                   // y2 += yInc;
                     break;
                 default:
                     break;

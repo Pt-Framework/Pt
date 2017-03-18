@@ -38,7 +38,7 @@ static void testDrawThickLine_impl(
     painter.setPen(penBCapBJoin);
     painter.drawLine( PointF( 20,  20), PointF(200, 120) );
     painter.drawLine( PointF( 20, 240), PointF(200, 140) );
-    if(painter.pen().style() != Pen::Solid) {
+    if(true || painter.pen().style() != Pen::Solid) {
         painter.setPen(penRef);
         painter.drawLine( PointF( 20,  20), PointF(200, 120) );
         painter.drawLine( PointF( 20, 240), PointF(200, 140) );
@@ -49,7 +49,7 @@ static void testDrawThickLine_impl(
     painter.setPen(penBCapBJoin);
     painter.drawLine( PointF(220,  20), PointF(400, 120) );
     painter.drawLine( PointF(220, 240), PointF(400, 140) );
-    if(painter.pen().style() != Pen::Solid) {
+    if(true || painter.pen().style() != Pen::Solid) {
         painter.setPen(penRef);
         painter.drawLine( PointF(220,  20), PointF(400, 120) );
         painter.drawLine( PointF(220, 240), PointF(400, 140) );
@@ -60,7 +60,7 @@ static void testDrawThickLine_impl(
     painter.setPen(penBCapBJoin);
     painter.drawLine( PointF(420,  20), PointF(600, 120) );
     painter.drawLine( PointF(420, 240), PointF(600, 140) );
-    if(painter.pen().style() != Pen::Solid) {
+    if(true || painter.pen().style() != Pen::Solid) {
         painter.setPen(penRef);
         painter.drawLine( PointF(420,  20), PointF(600, 120) );
         painter.drawLine( PointF(420, 240), PointF(600, 140) );
@@ -74,7 +74,7 @@ static void testDrawThickLine_impl(
     painter.setPen(penBCapBJoin);
     painter.drawLine( PointF( 20, 300 - 30), PointF(100, 350 - 30) );
     painter.drawLine( PointF( 20, 430 - 30), PointF(100, 370 - 30) );
-    if(painter.pen().style() != Pen::Solid) {
+    if(true || painter.pen().style() != Pen::Solid) {
         painter.setPen(penRef);
         painter.drawLine( PointF( 20, 300 - 30), PointF(100, 350 - 30) );
         painter.drawLine( PointF( 20, 430 - 30), PointF(100, 370 - 30) );
@@ -84,7 +84,7 @@ static void testDrawThickLine_impl(
     painter.setPen(penSCapBJoin);
     painter.drawLine( PointF(120, 300 - 30), PointF(200, 350 - 30) );
     painter.drawLine( PointF(120, 430 - 30), PointF(200, 370 - 30) );
-    if(painter.pen().style() != Pen::Solid) {
+    if(true || painter.pen().style() != Pen::Solid) {
         painter.setPen(penRef);
         painter.drawLine( PointF(120, 300 - 30), PointF(200, 350 - 30) );
         painter.drawLine( PointF(120, 430 - 30), PointF(200, 370 - 30) );
@@ -94,7 +94,7 @@ static void testDrawThickLine_impl(
     painter.setPen(penRCapBJoin);
     painter.drawLine( PointF(220, 300 - 30), PointF(300, 350 - 30) );
     painter.drawLine( PointF(220, 430 - 30), PointF(300, 370 - 30) );
-    if(painter.pen().style() != Pen::Solid) {
+    if(true || painter.pen().style() != Pen::Solid) {
         painter.setPen(penRef);
         painter.drawLine( PointF(220, 300 - 30), PointF(300, 350 - 30) );
         painter.drawLine( PointF(220, 430 - 30), PointF(300, 370 - 30) );
@@ -104,7 +104,7 @@ static void testDrawThickLine_impl(
     painter.setPen(penOCapBJoin);
     painter.drawLine( PointF(320, 300 - 30), PointF(400, 350 - 30) );
     painter.drawLine( PointF(320, 430 - 30), PointF(400, 370 - 30) );
-    if(painter.pen().style() != Pen::Solid) {
+    if(true || painter.pen().style() != Pen::Solid) {
         painter.setPen(penRef);
         painter.drawLine( PointF(320, 300 - 30), PointF(400, 350 - 30) );
         painter.drawLine( PointF(320, 430 - 30), PointF(400, 370 - 30) );
@@ -114,7 +114,7 @@ static void testDrawThickLine_impl(
     painter.setPen(penICapBJoin);
     painter.drawLine( PointF(420, 300 - 30), PointF(500, 350 - 30) );
     painter.drawLine( PointF(420, 430 - 30), PointF(500, 370 - 30) );
-    if(painter.pen().style() != Pen::Solid) {
+    if(true || painter.pen().style() != Pen::Solid) {
         painter.setPen(penRef);
         painter.drawLine( PointF(420, 300 - 30), PointF(500, 350 - 30) );
         painter.drawLine( PointF(420, 430 - 30), PointF(500, 370 - 30) );
@@ -131,12 +131,13 @@ static void testDrawThickLine_impl(
     };
     if(ip2) ip2->drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]), false );
     else painter.drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]) );
-    if(painter.pen().style() != Pen::Solid) {
+    if(true || painter.pen().style() != Pen::Solid) {
         painter.setPen(penRef);
         if(ip2) ip2->drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]), false );
         else painter.drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]) );
     }
 
+    painter.setPen(penOCapBJoin);
     const PointF poly1b[] = { // CCW
         PointF(670 + 170, 120),
         PointF(700 + 170, 180),
@@ -145,7 +146,7 @@ static void testDrawThickLine_impl(
     };
     if(ip2) ip2->drawPolyline( poly1b, sizeof(poly1b) / sizeof(poly1b[0]), true );
     else painter.drawPolyline( poly1b, sizeof(poly1b) / sizeof(poly1b[0]) );
-    if(painter.pen().style() != Pen::Solid) {
+    if(true || painter.pen().style() != Pen::Solid) {
         painter.setPen(penRef);
         if(ip2) ip2->drawPolyline( poly1b, sizeof(poly1b) / sizeof(poly1b[0]), true );
         else painter.drawPolyline( poly1b, sizeof(poly1b) / sizeof(poly1b[0]) );
@@ -162,12 +163,13 @@ static void testDrawThickLine_impl(
     };
     if(ip2) ip2->drawPolyline( poly2a, sizeof(poly2a) / sizeof(poly2a[0]), false );
     else painter.drawPolyline( poly2a, sizeof(poly2a) / sizeof(poly2a[0]) );
-    if(painter.pen().style() != Pen::Solid) {
+    if(true || painter.pen().style() != Pen::Solid) {
         painter.setPen(penRef);
         if(ip2) ip2->drawPolyline( poly2a, sizeof(poly2a) / sizeof(poly2a[0]), false );
         else painter.drawPolyline( poly2a, sizeof(poly2a) / sizeof(poly2a[0]) );
     }
 
+    painter.setPen(penOCapMJoin);
     const PointF poly2b[] = { // CCW
         PointF(670 + 170, 120 + 200),
         PointF(700 + 170, 180 + 200),
@@ -176,7 +178,7 @@ static void testDrawThickLine_impl(
     };
     if(ip2) ip2->drawPolyline( poly2b, sizeof(poly2b) / sizeof(poly2b[0]), true );
     else painter.drawPolyline( poly2b, sizeof(poly2b) / sizeof(poly2b[0]) );
-    if(painter.pen().style() != Pen::Solid) {
+    if(true || painter.pen().style() != Pen::Solid) {
         painter.setPen(penRef);
         if(ip2) ip2->drawPolyline( poly2b, sizeof(poly2b) / sizeof(poly2b[0]), true );
         else painter.drawPolyline( poly2b, sizeof(poly2b) / sizeof(poly2b[0]) );
@@ -193,12 +195,13 @@ static void testDrawThickLine_impl(
     };
     if(ip2) ip2->drawPolyline( poly3a, sizeof(poly3a) / sizeof(poly3a[0]), false );
     else painter.drawPolyline( poly3a, sizeof(poly3a) / sizeof(poly3a[0]) );
-    if(painter.pen().style() != Pen::Solid) {
+    if(true || painter.pen().style() != Pen::Solid) {
         painter.setPen(penRef);
         if(ip2) ip2->drawPolyline( poly3a, sizeof(poly3a) / sizeof(poly3a[0]), false );
         else painter.drawPolyline( poly3a, sizeof(poly3a) / sizeof(poly3a[0]) );
     }
 
+    painter.setPen(penOCapRJoin);
     const PointF poly3b[] = { // CCW
         PointF(670 + 170, 120 + 400),
         PointF(700 + 170, 180 + 400),
@@ -207,7 +210,7 @@ static void testDrawThickLine_impl(
     };
     if(ip2) ip2->drawPolyline( poly3b, sizeof(poly3b) / sizeof(poly3b[0]), true );
     else painter.drawPolyline( poly3b, sizeof(poly3b) / sizeof(poly3b[0]) );
-    if(painter.pen().style() != Pen::Solid) {
+    if(true || painter.pen().style() != Pen::Solid) {
         painter.setPen(penRef);
         if(ip2) ip2->drawPolyline( poly3b, sizeof(poly3b) / sizeof(poly3b[0]), true );
         else painter.drawPolyline( poly3b, sizeof(poly3b) / sizeof(poly3b[0]) );
@@ -224,12 +227,13 @@ static void testDrawThickLine_impl(
     };
     if(ip2) ip2->drawPolyline( poly4a, sizeof(poly4a) / sizeof(poly4a[0]), false );
     else painter.drawPolyline( poly4a, sizeof(poly4a) / sizeof(poly4a[0]) );
-    if(painter.pen().style() != Pen::Solid) {
+    if(true || painter.pen().style() != Pen::Solid) {
         painter.setPen(penRef);
         if(ip2) ip2->drawPolyline( poly4a, sizeof(poly4a) / sizeof(poly4a[0]), false );
         else painter.drawPolyline( poly4a, sizeof(poly4a) / sizeof(poly4a[0]) );
     }
 
+    painter.setPen(penOCapNJoin);
     const PointF poly4b[] = { // CCW
         PointF(670 - 430 - 40, 120 + 400),
         PointF(700 - 430 - 40, 180 + 400),
@@ -238,7 +242,7 @@ static void testDrawThickLine_impl(
     };
     if(ip2) ip2->drawPolyline( poly4b, sizeof(poly4b) / sizeof(poly4b[0]), true );
     else painter.drawPolyline( poly4b, sizeof(poly4b) / sizeof(poly4b[0]) );
-    if(painter.pen().style() != Pen::Solid) {
+    if(true || painter.pen().style() != Pen::Solid) {
         painter.setPen(penRef);
         if(ip2) ip2->drawPolyline( poly4b, sizeof(poly4b) / sizeof(poly4b[0]), true );
         else painter.drawPolyline( poly4b, sizeof(poly4b) / sizeof(poly4b[0]) );
@@ -256,7 +260,7 @@ static void testDrawThickLine_impl(
         };
         ip2->setPen(penSCapBJoin);
         ip2->drawQuadraticPolybezier( bezier1a, sizeof(bezier1a) / sizeof(bezier1a[0]), false );
-        if(ip2->pen().style() != Pen::Solid) {
+        if(true || ip2->pen().style() != Pen::Solid) {
             ip2->setPen(penRef);
             ip2->drawQuadraticPolybezier( bezier1a, sizeof(bezier1a) / sizeof(bezier1a[0]), false );
         }
@@ -268,7 +272,7 @@ static void testDrawThickLine_impl(
         };
         ip2->setPen(penRCapBJoin);
         ip2->drawQuadraticPolybezier( bezier1b, sizeof(bezier1b) / sizeof(bezier1b[0]), false );
-        if(ip2->pen().style() != Pen::Solid) {
+        if(true || ip2->pen().style() != Pen::Solid) {
             ip2->setPen(penRef);
             ip2->drawQuadraticPolybezier( bezier1b, sizeof(bezier1b) / sizeof(bezier1b[0]), false );
         }
@@ -280,7 +284,7 @@ static void testDrawThickLine_impl(
         };
         ip2->setPen(penICapBJoin);
         ip2->drawQuadraticPolybezier( bezier1c, sizeof(bezier1c) / sizeof(bezier1c[0]), false );
-        if(ip2->pen().style() != Pen::Solid) {
+        if(true || ip2->pen().style() != Pen::Solid) {
             ip2->setPen(penRef);
             ip2->drawQuadraticPolybezier( bezier1c, sizeof(bezier1c) / sizeof(bezier1c[0]), false );
         }
@@ -292,7 +296,7 @@ static void testDrawThickLine_impl(
         };
         ip2->setPen(penOCapBJoin);
         ip2->drawQuadraticPolybezier( bezier1d, sizeof(bezier1d) / sizeof(bezier1d[0]), false );
-        if(ip2->pen().style() != Pen::Solid) {
+        if(true || ip2->pen().style() != Pen::Solid) {
             ip2->setPen(penRef);
             ip2->drawQuadraticPolybezier( bezier1d, sizeof(bezier1d) / sizeof(bezier1d[0]), false );
         }
@@ -306,7 +310,7 @@ static void testDrawThickLine_impl(
         };
         ip2->setPen(penOCapBJoin);
         ip2->drawQuadraticPolybezier( bezier2a, sizeof(bezier2a) / sizeof(bezier2a[0]), true );
-        if(ip2->pen().style() != Pen::Solid) {
+        if(true || ip2->pen().style() != Pen::Solid) {
             ip2->setPen(penRef);
             ip2->drawQuadraticPolybezier( bezier2a, sizeof(bezier2a) / sizeof(bezier2a[0]), true );
         }
@@ -319,7 +323,7 @@ static void testDrawThickLine_impl(
         };
         ip2->setPen(penOCapMJoin);
         ip2->drawQuadraticPolybezier( bezier2b, sizeof(bezier2b) / sizeof(bezier2b[0]), true );
-        if(ip2->pen().style() != Pen::Solid) {
+        if(true || ip2->pen().style() != Pen::Solid) {
             ip2->setPen(penRef);
             ip2->drawQuadraticPolybezier( bezier2b, sizeof(bezier2b) / sizeof(bezier2b[0]), true );
         }
@@ -332,7 +336,7 @@ static void testDrawThickLine_impl(
         };
         ip2->setPen(penOCapRJoin);
         ip2->drawQuadraticPolybezier( bezier2c, sizeof(bezier2c) / sizeof(bezier2c[0]), true );
-        if(ip2->pen().style() != Pen::Solid) {
+        if(true || ip2->pen().style() != Pen::Solid) {
             ip2->setPen(penRef);
             ip2->drawQuadraticPolybezier( bezier2c, sizeof(bezier2c) / sizeof(bezier2c[0]), true );
         }
@@ -345,7 +349,7 @@ static void testDrawThickLine_impl(
         };
         ip2->setPen(penOCapNJoin);
         ip2->drawQuadraticPolybezier( bezier2d, sizeof(bezier2d) / sizeof(bezier2d[0]), true );
-        if(ip2->pen().style() != Pen::Solid) {
+        if(true || ip2->pen().style() != Pen::Solid) {
             ip2->setPen(penRef);
             ip2->drawQuadraticPolybezier( bezier2d, sizeof(bezier2d) / sizeof(bezier2d[0]), true );
         }
