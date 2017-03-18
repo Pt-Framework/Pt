@@ -1469,6 +1469,7 @@ bool ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const 
             break;
         }
         // Process the "pattern" segment
+        //lprintf("### Processing a new pattern segment:\n");
         done = sagPolygonPoints(state, !!refPat);
     }
 
@@ -1476,9 +1477,6 @@ bool ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const 
     return true;
 }
 
-/*
-
- */
 bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
 {
     // Cannot draw anything if the "pattern" segment is shorter than the cell size
@@ -1505,20 +1503,23 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
             state.cvy     = vy / round(vz / state.cellSize) * 2;
             state.cvl     = Gfx::Math::fastSqrt(state.cvx * state.cvx + state.cvy * state.cvy);
             state.remDist = vz;
-            // Clear the "gather" buffer
-            //state.gather.clear();
         }
         // Perform "gather" operation if the "pattern" segment is longer than the length of the current polygon's edge
         if(state.patSegLen > state.remDist) {
             // Store the current interpolation coordinate to the "gather" buffer
             state.gather.push_back(PointF(state.px, state.py));
+            lprintf("    Gather A  : patSegLen = %5.1f ; remDist = %5.1f ; new gather.size() = %zd\n", state.patSegLen, state.remDist, state.gather.size());
+
             //
             state.patSegLen -= state.remDist;
             state.remDist    = -1.0f;
             // Increment the indexes and check if all polygon's points have been processed
             ++state.idx1;
             ++state.idx2;
-            if(state.idx2 == state.srcCount) return true;
+            if(state.idx2 == state.srcCount) {
+                lprintf("### All points are processed!\n");
+                return true;
+            }
             // Skip for now
             continue;
         }
@@ -1527,12 +1528,18 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
         if(!state.gather.empty()) {
             // Store the current interpolation coordinate to the "gather" buffer
             state.gather.push_back(PointF(state.px, state.py));
+            lprintf("    Gather B  : patSegLen = %5.1f ; remDist = %5.1f ; new gather.size() = %zd\n", state.patSegLen, state.remDist, state.gather.size());
             //
             if(draw) {
                 // Add polygon separator point as needed
                 if(!state.dstPoints.empty()) state.dstPoints.push_back(Painter::PolygonSeparatorPointF);
                 //
+                lprintf("    Poly Draw : patSegLen = %5.1f ; remDist = %5.1f ; point count = %zd\n", state.patSegLen, state.remDist, state.gather.size());
+
                 thickenSolidOpenPolygon(state.dstPoints, state.gather.data(), state.gather.size(), 0);
+            }
+            else {
+                lprintf("    Poly Skip : patSegLen = %5.1f ; remDist = %5.1f ; point count = %zd\n", state.patSegLen, state.remDist, state.gather.size());
             }
             //
             state.gather.clear();
@@ -1540,11 +1547,11 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
         // --- The "gather" buffer is empty, generate a simple line segment as needed ---
         else {
             if(draw) {
-                lprintf("    Draw %5.1f : (%5.1f, %5.1f) - (%5.1f, %5.1f)\n", state.patSegLen, state.px, state.py, state.px + state.cvx, state.py + state.cvy);
                 sagGenerateSimpleLineSegment(state, state.px, state.py, state.px + state.cvx * 0.5f, state.py + state.cvy * 0.5f);
+                lprintf("    Line Draw : patSegLen = %5.1f ; remDist = %5.1f ; line (%5.1f, %5.1f) - (%5.1f, %5.1f)\n", state.patSegLen, state.remDist, state.px, state.py, state.px + state.cvx, state.py + state.cvy);
             }
             else {
-                lprintf("    Skip %5.1f : (%5.1f, %5.1f) - (%5.1f, %5.1f)\n", state.patSegLen, state.px, state.py, state.px + state.cvx, state.py + state.cvy);
+                lprintf("    Line Skip : patSegLen = %5.1f ; remDist = %5.1f ; line (%5.1f, %5.1f) - (%5.1f, %5.1f)\n", state.patSegLen, state.remDist, state.px, state.py, state.px + state.cvx, state.py + state.cvy);
             }
         }
         // --- Update the state ---
