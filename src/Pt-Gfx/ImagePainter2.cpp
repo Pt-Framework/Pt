@@ -1419,28 +1419,32 @@ struct ImagePainter2::SAGOpState {
     std::vector<PointF>& dstPoints; // Destination vector
     const PointF*        srcPoints; // Source points
     size_t               srcCount;  // The number of source points
+    float                cellSize;  // Cell size
 
     size_t               idx1;      // Index to the first point which is currently being processed
     size_t               idx2;      // Index to the second point which is currently being processed
+    float                lvLength;  // Line vector length (distance between the the above two points)
     float                uvx, uvy;  // Unit vector from the first point to the second point
-    float                lvSize;    // Line vector size (distance between the the above two points)
-    float                px, py;    // Coordinate in-between the above two points which has been processed
+    float                cvx, cvy;  // Cell vector from the first point to the second point
+    float                px, py;    // Coordinate in-between the above two points
     float                mx, my;    // Coordinate of the second point
+
+    float                patSegLen; // Pattern segment length yet to be processed
 
     std::vector<PointF>  gather;    // Gathered polygon points
 
-    inline SAGOpState(std::vector<PointF>& pointsF, const PointF* src, size_t pointCount)
-    : dstPoints(pointsF), srcPoints(src), srcCount(pointCount), idx1(0), idx2(1), lvSize(-1.0f)
+    inline SAGOpState(std::vector<PointF>& pointsF, const PointF* src, size_t pointCount, float cellSize_)
+    : dstPoints(pointsF), srcPoints(src), srcCount(pointCount), cellSize(cellSize_), idx1(0), idx2(1), lvLength(-1.0f)
     {}
 };
 
 bool ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const PointF* src, size_t pointCount)
 {
-    // Initialize the operational state
-    SAGOpState state(pointsF, src, pointCount);
-
     // Calculate the cell size
     const float cellSize = _rasterizer->pen().size() * 0.5f;
+
+    // Initialize the operational state
+    SAGOpState state(pointsF, src, pointCount, cellSize);
 
     // The pattern buffer and its counter
     const Pt::uint8_t* pBuff      = _rasterizer->patternBufferMP64();
@@ -1449,7 +1453,7 @@ bool ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const 
     // Loop until all the polygon's points are processed
     bool done = false;
     while(!done) {
-        // Calculate the segment length
+        // Calculate the "pattern" segment length
         Pt::uint8_t refPat = pBuff[piCtrInOut];
         float       segLen = cellSize;
         while(true) {
@@ -1462,14 +1466,27 @@ bool ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const 
                 segLen += cellSize;
                 continue;
             }
-            // We have got a different pattern bit, exit to process the segment
+            // We have got a different pattern bit, exit to process the "pattern" segment
             break;
         }
-        // Process the segment
+        // Process the "pattern" segment
+        state.patSegLen = segLen;
         //lprintf("Cell size = %5.1f %5.1f\n", segLen, cellSize);
-        done = sagPolygonPoints(state, segLen);
+
+        while(sagPolygonPoints(state)) {
+            done = (state.idx2 >= state.srcCount);
+            if(done) break;
+        }
+        done = (state.idx2 >= state.srcCount);
+
         // Generate a real line segment as needed
-        if(!refPat) continue;
+        if(!refPat || state.gather.size() < 2) continue;
+
+        if(state.gather.size() == 2) {
+        }
+        else {
+        }
+
     }
 
     // Done
@@ -1480,19 +1497,24 @@ bool ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const 
     std::vector<PointF>& dstPoints; // Destination vector
     const PointF*        srcPoints; // Source points
     size_t               srcCount;  // The number of source points
+    float                cellSize;  // Cell size
 
-    size_t               idx0;      // Index to the first point which is currently being processed
-    size_t               idx1;      // Index to the second point which is currently being processed
+    size_t               idx1;      // Index to the first point which is currently being processed
+    size_t               idx2;      // Index to the second point which is currently being processed
     float                uvx, uvy;  // Unit vector from the first point to the second point
-    float                lvSize;    // Line vector size (distance between the the above two points)
-    float                px, py;    // Coordinate in-between the above two points which has been processed
+    float                cvx, cvy;  // Cell vector from the first point to the second point
+    float                lvLength;  // Line vector size (distance between the the above two points)
+    float                px, py;    // Coordinate in-between the above two points
+    float                mx, my;    // Coordinate of the second point
+
+    float                patSegLen; // Segment length yet to be processed
 
     std::vector<PointF>  gather;    // Gathered polygon points
  */
-bool ImagePainter2::sagPolygonPoints(SAGOpState& state, float segLen)
+bool ImagePainter2::sagPolygonPoints(SAGOpState& state)
 {
-    // Are at the start of a new operation?
-    if(state.lvSize <= 0.0f) {
+    // (Re-)initialize some part of the operational state as needed
+    if(state.lvLength <= 0.0f) {
         // Calculate the vector, size, and coordinates
         const float x1 = state.srcPoints[state.idx1].x();
         const float y1 = state.srcPoints[state.idx1].y();
@@ -1501,21 +1523,56 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, float segLen)
         const float vx = x2 - x1;
         const float vy = y2 - y1;
         const float vz = Gfx::Math::fastSqrt(vx * vx + vy * vy);
-        state.uvx    = vx / vz;
-        state.uvy    = vy / vy;
-        state.lvSize = vz;
-        state.px     = x1;
-        state.py     = y1;
-        state.mx     = x2;
-        state.my     = y2;
+        state.lvLength =      vz;
+        state.uvx      = vx / vz;
+        state.uvy      = vy / vy;
+        state.cvx      = state.cellSize * state.uvx;
+        state.cvy      = state.cellSize * state.uvy;
+        state.px       = x1;
+        state.py       = y1;
+        state.mx       = x2;
+        state.my       = y2;
+        // Clear the "gather" buffer
+        state.gather.clear();
     }
 
-    // Process
-    
+    // Check if the "pattern" segment is shorter than the cell size
+    if(state.patSegLen < state.cellSize) {
+        // ### TODO: Spread! ###
+        lprintf("1\n");
+        state.idx2 = state.srcCount;
+        return false;
+    }
+
+    // Check if the "pattern" segment is longer than the length of the current polygon's edge
+    if(state.patSegLen > state.lvLength) {
+        // ### TODO: Gather! ###
+        lprintf("2\n");
+        state.idx2 = state.srcCount;
+        return false;
+    }
+
+    state.patSegLen -= state.cellSize;
+    state.px        += state.cvx;
+    state.py        += state.cvy;
+
+// Normal operation
+
+    //if(state.lvSize < state.cellSize) {
+    //    return false;
+   // }
+
+
+
+    //state.px +=
+
+
 
     static int i = 0;
     ++i;
-    return !(i % 0x03);
+    if (i % 0x03) state.idx2 = state.srcCount;
+
+    return true;
 }
 
 
