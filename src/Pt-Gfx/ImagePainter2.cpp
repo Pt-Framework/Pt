@@ -1371,54 +1371,36 @@ void ImagePainter2::generatePatternedLineSegment(std::vector<PointF>& dst, float
     const float        xInc  = (x2 - x1) / nSegs;
     const float        yInc  = (y2 - y1) / nSegs;
 
-    lprintf("(%5.1f, %5.1f) - (%5.1f, %5.1f) : %zd\n", x1, y1, x2, y2, nSegs);
+    //lprintf("(%5.1f, %5.1f) - (%5.1f, %5.1f) : %zd\n", x1, y1, x2, y2, nSegs);
 
     // Generate the segments
     size_t      pbCnt  = 0;
     Pt::uint8_t prvPat = 0;
     float       xs     = x1;
     float       ys     = y1;
-    x2 = x1;
-    y2 = y1;
     for(size_t i = 0; i <= nSegs; ++i) {
         // Get the pattern
         const Pt::uint8_t curPat = pBuff[pbCnt++];
         if(pbCnt >= PATTERN_BUFFER_COUNTER_MAXMP) pbCnt -= PATTERN_BUFFER_COUNTER_MAXMP;
-        //lprintf("%d\n", curPat);
-
-
-        if(!curPat && !prvPat) {
-            prvPat = curPat;
-            xs += xInc;
-            ys += yInc;
-            continue;
-        }
-
-        if(curPat && prvPat) {
-            prvPat = curPat;
-            xs += xInc;
-            ys += yInc;
-            continue;
-        }
-
+        // Determine whether we should draw this segment as well as its coordinate
+        const bool draw = (!curPat && prvPat);
         if(curPat && !prvPat) {
-            prvPat = curPat;
             x1 = xs;
             y1 = ys;
-            continue;
         }
-
-        if( (!curPat && prvPat) || (i == nSegs) ) {
-            prvPat = curPat;
+        else if(draw) {
             x2 = xs;
             y2 = ys;
         }
-
-
-        lprintf("    Segment #%2zd : (%5.1f, %5.1f) - (%5.1f, %5.1f)\n", i, x1, y1, x2, y2);
-
+        prvPat = curPat;
+        // Update the coordinates
+        xs += xInc;
+        ys += yInc;
+        // Skip if we are not going to draw this segment
+        if(!draw) continue;
+        //lprintf("    Segment #%2zd : (%5.1f, %5.1f) - (%5.1f, %5.1f)\n", i, x1, y1, x2, y2);
+        // Add polygon separator point as needed
         if(!dst.empty()) dst.push_back(Painter::PolygonSeparatorPointF);
-
         // Generate points (CCW)
         // --- Begin point ---
         if(openingCap) {
@@ -1442,11 +1424,8 @@ void ImagePainter2::generatePatternedLineSegment(std::vector<PointF>& dst, float
             }
         }
         if(!closingCap) generateLineButtCap(dst, x2, y2, -nx, -ny);
-        //
-        x2 = x1;
-        y2 = y1;
     }
-        lprintf("\n");
+    //lprintf("\n");
 }
 
 
