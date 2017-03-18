@@ -462,10 +462,13 @@ void ImagePainter2::drawLine( const PointF& from, const PointF& to )
     // Generate a polygon that represents the thick line
     std::vector<PointF> pointsF;
 
-    if(_rasterizer->pen().style() == Pen::Solid)
+    if(_rasterizer->pen().style() == Pen::Solid) {
         generateSolidLineSegment(pointsF, from.x(), from.y(), to.x(), to.y(), true, true);
-    else
-        generatePatternedLineSegment(pointsF, from.x(), from.y(), to.x(), to.y());
+    }
+    else {
+        Pt::int32_t piCtrInOut = 0;
+        generatePatternedLineSegment(pointsF, from.x(), from.y(), to.x(), to.y(), piCtrInOut);
+    }
 
     // Rasterize the polygon
     std::vector<Point> points;
@@ -1351,7 +1354,7 @@ bool ImagePainter2::combineLineSegmentForSolidClosedPolygon(std::vector<PointF>&
 
 // --- Patterned Line Thickener ---
 
-void ImagePainter2::generatePatternedLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2)
+void ImagePainter2::generatePatternedLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, Pt::int32_t& piCtrInOut)
 {
     // Calculate the line's parameters
     float wh, dx, dy, nx, ny;
@@ -1368,14 +1371,13 @@ void ImagePainter2::generatePatternedLineSegment(std::vector<PointF>& dst, float
     //lprintf("(%5.1f, %5.1f) - (%5.1f, %5.1f) : %zd\n", x1, y1, x2, y2, nSegs);
 
     // Generate the segments
-    size_t      pbCnt  = 0;
     Pt::uint8_t prvPat = 0;
     float       xs     = x1;
     float       ys     = y1;
     for(size_t i = 0; i <= nSegs; ++i) {
         // Get the pattern
-        const Pt::uint8_t curPat = pBuff[pbCnt++];
-        if(pbCnt >= PATTERN_BUFFER_COUNTER_MAXMP) pbCnt -= PATTERN_BUFFER_COUNTER_MAXMP;
+        const Pt::uint8_t curPat = pBuff[piCtrInOut++];
+        if(piCtrInOut >= PATTERN_BUFFER_COUNTER_MAXMP) piCtrInOut -= PATTERN_BUFFER_COUNTER_MAXMP;
         // Determine whether we should draw this segment as well as its coordinate
         const bool draw = (!curPat && prvPat);
         if(curPat && !prvPat) {

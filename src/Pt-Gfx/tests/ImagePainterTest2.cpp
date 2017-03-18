@@ -108,7 +108,7 @@ using namespace Pt::Gfx;
 
 #define BENCHMARK_SOLID_LINE                0
 #define BENCHMARK_PATTERNED_LINE            0
-#define BENCHMARK_SOLID_THICK_LINE          0
+#define BENCHMARK_SOLID_THICK_LINE          1
 #define BENCHMARK_PATTERNED_THICK_LINE      1
 
 #define BENCHMARK_ELLIPSE                   0
@@ -116,8 +116,8 @@ using namespace Pt::Gfx;
 
 #define BENCHMARK_SOLID_BEZIER              0
 #define BENCHMARK_PATTERNED_BEZIER          0
-#define BENCHMARK_SOLID_THICK_BEZIER        0
-#define BENCHMARK_PATTERNED_THICK_BEZIER    0
+#define BENCHMARK_SOLID_THICK_BEZIER        1
+#define BENCHMARK_PATTERNED_THICK_BEZIER    1
 
 #define BENCHMARK_RECTANGLE                 0
 #define BENCHMARK_SOLID_FILLED_RECTANGLE    0
