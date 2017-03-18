@@ -137,6 +137,11 @@ static void testDrawThickLine_impl(
         else painter.drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]) );
     }
 
+    painter.setFont( Pt::Gfx::Font(FONT_SPEC_N) );
+    sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
+    return;
+
+
     painter.setPen(penOCapBJoin);
     const PointF poly1b[] = { // CCW
         PointF(670 + 170, 120),

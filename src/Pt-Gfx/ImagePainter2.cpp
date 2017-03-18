@@ -1456,7 +1456,7 @@ bool ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const 
         // Calculate the "pattern" segment length
         Pt::uint8_t refPat = pBuff[piCtrInOut];
         float       segLen = cellSize;
-        while(true) {
+        for(;;) {
             // Update the pattern indexing counter
             ++piCtrInOut;
             if(piCtrInOut >= PATTERN_BUFFER_COUNTER_MAXMP) piCtrInOut -= PATTERN_BUFFER_COUNTER_MAXMP;
@@ -1472,21 +1472,7 @@ bool ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const 
         // Process the "pattern" segment
         state.patSegLen = segLen;
         //lprintf("Cell size = %5.1f %5.1f\n", segLen, cellSize);
-
-        while(sagPolygonPoints(state)) {
-            done = (state.idx2 >= state.srcCount);
-            if(done) break;
-        }
-        done = (state.idx2 >= state.srcCount);
-
-        // Generate a real line segment as needed
-        if(!refPat || state.gather.size() < 2) continue;
-
-        if(state.gather.size() == 2) {
-        }
-        else {
-        }
-
+        done = sagPolygonPoints(state, !!refPat);
     }
 
     // Done
@@ -1511,68 +1497,90 @@ bool ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const 
 
     std::vector<PointF>  gather;    // Gathered polygon points
  */
-bool ImagePainter2::sagPolygonPoints(SAGOpState& state)
+bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
 {
-    // (Re-)initialize some part of the operational state as needed
-    if(state.lvLength <= 0.0f) {
-        // Calculate the vector, size, and coordinates
-        const float x1 = state.srcPoints[state.idx1].x();
-        const float y1 = state.srcPoints[state.idx1].y();
-        const float x2 = state.srcPoints[state.idx2].x();
-        const float y2 = state.srcPoints[state.idx2].y();
-        const float vx = x2 - x1;
-        const float vy = y2 - y1;
-        const float vz = Gfx::Math::fastSqrt(vx * vx + vy * vy);
-        state.lvLength =      vz;
-        state.uvx      = vx / vz;
-        state.uvy      = vy / vy;
-        state.cvx      = state.cellSize * state.uvx;
-        state.cvy      = state.cellSize * state.uvy;
-        state.px       = x1;
-        state.py       = y1;
-        state.mx       = x2;
-        state.my       = y2;
-        // Clear the "gather" buffer
-        state.gather.clear();
-    }
-
-    // Check if the "pattern" segment is shorter than the cell size
+    // Cannot draw anything if the "pattern" segment is shorter than the cell size
     if(state.patSegLen < state.cellSize) {
-        // ### TODO: Spread! ###
-        lprintf("1\n");
-        state.idx2 = state.srcCount;
-        return false;
+        return true;
     }
 
-    // Check if the "pattern" segment is longer than the length of the current polygon's edge
-    if(state.patSegLen > state.lvLength) {
-        // ### TODO: Gather! ###
-        lprintf("2\n");
-        state.idx2 = state.srcCount;
-        return false;
+    // Loop until the current "pattern" segment are completely processed
+    for(;;) {
+
+        // (Re-)initialize some part of the operational state as needed
+        if(state.lvLength <= 0.0f) {
+            // Calculate the vector, size, and coordinates
+            const float x1 = state.srcPoints[state.idx1].x();
+            const float y1 = state.srcPoints[state.idx1].y();
+            const float x2 = state.srcPoints[state.idx2].x();
+            const float y2 = state.srcPoints[state.idx2].y();
+            const float vx = x2 - x1;
+            const float vy = y2 - y1;
+            const float vz = Gfx::Math::fastSqrt(vx * vx + vy * vy);
+            state.lvLength =      vz;
+            state.uvx      = vx / vz;
+            state.uvy      = vy / vy;
+            state.cvx      = state.cellSize * state.uvx;
+            state.cvy      = state.cellSize * state.uvy;
+            state.px       = x1;
+            state.py       = y1;
+            state.mx       = x2;
+            state.my       = y2;
+            // Clear the "gather" buffer
+            state.gather.clear();
+        }
+
+
+        // Perform "gather" operation if the "pattern" segment is longer than the length of the current polygon's edge
+        if(state.patSegLen > state.lvLength) {
+            // ### TODO: Gather! ###
+            return true;
+        }
+
+        // Perform "spread" operation
+        // --- Generate a real line segment as needed --
+        if(draw) sagGenerateSimpleLineSegment(state, state.px, state.py, state.px + state.cvx, state.py + state.cvy);
+        // Update the state
+        state.lvLength -= state.patSegLen;
+        state.px       += state.cvx;
+        state.py       += state.cvy;
+        // Done for now
+        break;
     }
 
-    state.patSegLen -= state.cellSize;
-    state.px        += state.cvx;
-    state.py        += state.cvy;
+    // Indicate that the current "pattern" segment are completely processed,
+    // but there are still unprocessed polygon's points
+    return false;
+}
 
-// Normal operation
+void ImagePainter2::sagGenerateSimpleLineSegment(SAGOpState& state, float x1, float y1, float x2, float y2)
+{
+    // Calculate the line's parameters
+    float wh, dx, dy, nx, ny;
 
-    //if(state.lvSize < state.cellSize) {
-    //    return false;
-   // }
+    calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, _rasterizer->pen().size());
 
+    // Add polygon separator point as needed
+    if(!state.dstPoints.empty()) state.dstPoints.push_back(Painter::PolygonSeparatorPointF);
 
-
-    //state.px +=
-
-
-
-    static int i = 0;
-    ++i;
-    if (i % 0x03) state.idx2 = state.srcCount;
-
-    return true;
+    // Generate points (CCW)
+    // --- Begin point ---
+    switch(_rasterizer->pen().capStyle()) {
+        case Pen::SquareCap        : generateLineSquareCap       (state.dstPoints, x1, y1,     dx, dy, nx, ny); break;
+        case Pen::RoundCap         : generateLineRoundCap        (state.dstPoints, x1, y1, wh, dx, dy, nx, ny); break;
+        case Pen::TriangularOutCap : generateLineTriangularOutCap(state.dstPoints, x1, y1,     dx, dy, nx, ny); break;
+        case Pen::TriangularInCap  : generateLineTriangularInCap (state.dstPoints, x1, y1,     dx, dy, nx, ny); break;
+        default                    : generateLineButtCap         (state.dstPoints, x1, y1,             nx, ny); break;
+    }
+    // --- End point ---
+    switch(_rasterizer->pen().capStyle()) {
+        case Pen::SquareCap        : generateLineSquareCap       (state.dstPoints, x2, y2,     -dx, -dy, -nx, -ny); break;
+        case Pen::RoundCap         : generateLineRoundCap        (state.dstPoints, x2, y2, wh, -dx, -dy, -nx, -ny); break;
+        case Pen::TriangularOutCap : generateLineTriangularOutCap(state.dstPoints, x2, y2,     -dx, -dy, -nx, -ny); break;
+        case Pen::TriangularInCap  : generateLineTriangularInCap (state.dstPoints, x2, y2,     -dx, -dy, -nx, -ny); break;
+        default                    : generateLineButtCap         (state.dstPoints, x2, y2,               -nx, -ny); break;
+    }
+    lprintf("    Segment (%5.1f, %5.1f) - (%5.1f, %5.1f)\n", x1, y1, x2, y2);
 }
 
 
