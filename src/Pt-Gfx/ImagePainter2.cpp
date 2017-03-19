@@ -1417,6 +1417,7 @@ void ImagePainter2::generatePatternedLineSegment(std::vector<PointF>& dst, float
     //lprintf("\n");
 }
 
+/*
 struct ImagePainter2::SAGOpState {
     std::vector<PointF>& dstPoints; // Destination vector
     const PointF*        srcPoints; // Source points
@@ -1439,15 +1440,47 @@ struct ImagePainter2::SAGOpState {
     : dstPoints(pointsF), srcPoints(src), srcCount(pointCount), cellSize(cellSize_), idx1(0), idx2(1), remDist(-1.0f)
     {}
 };
+*/
 
 bool ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const PointF* src, size_t pointCount)
 {
+    // Calculate the cell size
+    const float cellSize = _rasterizer->pen().size();
+
+    // The pattern indexing counter
     Pt::int32_t piCtrInOut = 0;
 
+    // Gathered points
+    std::vector<PointF> gatherP;
+    float               gatherL = 0.0f;
+
+    // Walk thorough the points
     for(size_t i = 0; i < pointCount - 1; ++i) {
         const PointF& p1 = *(src + i + 0);
         const PointF& p2 = *(src + i + 1);
-        generatePatternedLineSegment(pointsF, p1.x(), p1.y(), p2.x(), p2.y(), piCtrInOut);
+
+        const float   x1 = p1.x();
+        const float   y1 = p1.y();
+        const float   x2 = p2.x();
+        const float   y2 = p2.y();
+
+        const float   dx = x2 - x1;
+        const float   dy = y2 - y1;
+
+        const float   ln = Gfx::Math::fastSqrt(dx * dx + dy * dy);
+
+        if(ln < cellSize) {
+            gatherP.push_back(p1);
+            gatherL += ln;
+            continue;
+        }
+
+        if(!gatherP.empty() && gatherL > 0) {
+            lprintf("%zd\n", gatherP.size());
+            gatherP.clear();
+        }
+
+        generatePatternedLineSegment(pointsF, x1, y1, x2, y2, piCtrInOut);
     }
 
     // Done
@@ -1492,7 +1525,7 @@ bool ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const 
     return true;
     */
 }
-
+/*
 bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
 {
     // Cannot draw anything if the "pattern" segment is shorter than the cell size
@@ -1620,6 +1653,7 @@ void ImagePainter2::sagGenerateSimpleLineSegment(SAGOpState& state, float x1, fl
         default                    : generateLineButtCap         (state.dstPoints, x2, y2,               -nx, -ny); break;
     }
 }
+*/
 
 
 } // namespace
