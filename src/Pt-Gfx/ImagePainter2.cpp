@@ -1444,6 +1444,8 @@ struct ImagePainter2::SAGOpState {
 
 bool ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const PointF* src, size_t pointCount)
 {
+    // ### TODO: Discard the last generated polygon if it intersects the first one !!! ###
+
     // Calculate the cell size
     const float cellSize = _rasterizer->pen().size();
 
@@ -1461,18 +1463,18 @@ bool ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const 
         const PointF& p1 = *(src + i + 0);
         const PointF& p2 = *(src + i + 1);
         // Get the coordinates
-        const float x1 = p1.x();
-        const float y1 = p1.y();
-        const float x2 = p2.x();
-        const float y2 = p2.y();
+        const float px1 = p1.x();
+        const float py1 = p1.y();
+        const float px2 = p2.x();
+        const float py2 = p2.y();
         // Calculate the length of the current "polygon-edge" segment
-        const float dx = x2 - x1;
-        const float dy = y2 - y1;
-        const float ln = Gfx::Math::fastSqrt(dx * dx + dy * dy);
+        const float pdx = px2 - px1;
+        const float pdy = py2 - py1;
+        const float pln = Gfx::Math::fastSqrt(pdx * pdx + pdy * pdy);
         // Calculate length of the current "pattern" segment
               Pt::int32_t piCtrTest = piCtrInOut;
         const Pt::uint8_t refPat    = pBuff[piCtrTest];
-              float       patSegLen = 0.0f;
+              float       patSegLen = cellSize;
         for(;;) {
             // Update the "testing" pattern indexing counter
             ++piCtrTest;
@@ -1488,28 +1490,83 @@ bool ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const 
         }
         // If the length of the "gathered" segments has become enough, process it
         if(gatherL >= patSegLen && gatherP.size() >= 2) {
+            // Calculate the excess length
+            const float excessLen = gatherL - patSegLen;
+            // Adjust the gathered points as needed
+            PointF gatherLast;
+            lprintf("GRes: count = %zd ; gather = %5.1f ; pattern = %5.1f ; delta = %5.1f\n", gatherP.size(), gatherL, patSegLen, gatherL - patSegLen);
+            if(excessLen > 0.0f) {
+                //
+                const float x1 = gatherP[gatherP.size() - 2].x();
+                const float y1 = gatherP[gatherP.size() - 2].y();
+                const float x2 = gatherP[gatherP.size() - 1].x();
+                const float y2 = gatherP[gatherP.size() - 1].y();
+                const float vx = x2 - x1;
+                const float vy = y2 - y1;
+                const float vl = Gfx::Math::fastSqrt(vx * vx + vy * vy);
+                const float dx = patSegLen * vx / vl;
+                const float dy = patSegLen * vy / vl;
+                //
+                gatherP.back().set(x1 + dx, y1 + dy);
+                gatherLast = gatherP.back();
+                //
+                gatherL = patSegLen;
+            }
             // Generate a thick polygon
             if(refPat) thickenSolidOpenPolygon(pointsF, gatherP.data(), gatherP.size(), 0);
-            if(refPat) lprintf("Poly: count = %zd ; gather = %5.1f ; pattern = %5.1f\n", gatherP.size(), gatherL, patSegLen);
-            else       lprintf("Skip: count = %zd ; gather = %5.1f ; pattern = %5.1f\n", gatherP.size(), gatherL, patSegLen);
+            if(refPat) lprintf("Poly: count = %zd ; gather = %5.1f ; pattern = %5.1f ; delta = %5.1f\n", gatherP.size(), gatherL, patSegLen, gatherL - patSegLen);
             // Copy value from the "testing" pattern indexing counter to the real pattern indexing counter
             piCtrInOut = piCtrTest;
+            // Clear the gathered points
+            if(excessLen > 0.0f) {
+                gatherP.clear();
+                gatherP.push_back(gatherLast);
+                gatherL = excessLen;
+            }
+            else {
+                gatherP.clear();
+                gatherL = 0.0f;
+            }
             //
-            const float deltaLen = gatherL - patSegLen;
+
+            /*
+            // Adjust the gathered points
             if(deltaLen > 0.0f) {
+                //
+                const float x1 = gatherP[gatherP.size() - 2].x();
+                const float y1 = gatherP[gatherP.size() - 2].y();
+                const float x2 = gatherP[gatherP.size() - 1].x();
+                const float y2 = gatherP[gatherP.size() - 1].y();
+                const float vx = x2 - x1;
+                const float vy = y2 - y1;
+                const float vl = Gfx::Math::fastSqrt(vx * vx + vy * vy);
+                const float dx = patSegLen * vx / vl;
+                const float dy = patSegLen * vy / vl;
+                lprintf("Step: %5.1f, %5.1f => %5.1f\n", dx, dy, Gfx::Math::fastSqrt(dx * dx + dy * dy));
+                //
+                gatherP.clear();
+                gatherP.push_back(PointF(x1 + dx, y1 + dy));
+                gatherL = deltaLen;
+
+                gatherP.clear();
+                gatherL = 0.0f;
             }
             // Clear the gathered points
-            gatherP.clear();
-            gatherL = 0.0f;
+            else {
+                gatherP.clear();
+                gatherL = 0.0f;
+            }
+            */
         }
-        // If the "polygon-edge" segment is shorther than "pattern" segment, gather the point
-        else if(ln < patSegLen) {
+        // If the "polygon-edge" segment is shorther than "pattern" segment or if there is an
+        // active "gather" process, gather the current point
+        else if(pln < patSegLen || !gatherP.empty()) {
             gatherP.push_back(p1);
-            gatherL += ln;
+            gatherL += pln;
         }
         // Generate a simple patterned line segment
         else {
-            generatePatternedLineSegment(pointsF, x1, y1, x2, y2, piCtrInOut);
+            //generatePatternedLineSegment(pointsF, px1, py1, px2, py2, piCtrInOut);
         }
     }
 
