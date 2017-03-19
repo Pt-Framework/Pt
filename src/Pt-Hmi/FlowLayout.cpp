@@ -123,6 +123,7 @@ void StackTop(Widget& parent, bool center)
 
         Gfx::PointF pos(x, y);                   
         item->moveRequest(pos);
+        item->resizeRequest( item->measuredSize() );
     }
 }
 

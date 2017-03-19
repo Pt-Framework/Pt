@@ -310,6 +310,8 @@ class PT_HMI_API Widget : public Visual
 
         const Gfx::SizeF& measuredSize() const;
 
+        virtual void onLayout();
+
         // outer spacing
         const Spacing& margin() const;
 
@@ -369,7 +371,7 @@ class PT_HMI_API Widget : public Visual
 
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
-        virtual void onLayout();
+        
 
         virtual Pt::Gfx::SizeF onAutoSize(const SizePolicy& policy) const;
 

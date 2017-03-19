@@ -666,18 +666,18 @@ void Widget::onLayout()
                                _padding.top()  + _content->margin().top());
         
         _content->moveRequest(contentPos);
-        //_content->resizeRequest( _content->measuredSize() );
+        _content->resizeRequest( _content->measuredSize() );
     }
 
-    const std::vector<Widget*>& widgets = this->widgets();
-    std::vector<Widget*>::const_iterator it;
-    for(it = widgets.begin() ; it != widgets.end(); ++it)
-    {        
-        Widget* w = (*it);
-        w->onLayout();            
-    }
+    //const std::vector<Widget*>& widgets = this->widgets();
+    //std::vector<Widget*>::const_iterator it;
+    //for(it = widgets.begin() ; it != widgets.end(); ++it)
+    //{        
+    //    Widget* w = (*it);
+    //    w->onLayout();            
+    //}
 
-    resizeRequest(_measuredSize);
+    //resizeRequest(_measuredSize);
 }
 
 

@@ -157,15 +157,19 @@ void ScrollView::onLayout()
     }
 
     _scrollLayout.moveRequest( Gfx::PointF(0,0) );
+    _scrollLayout.resizeRequest( _scrollLayout.measuredSize() );
+    _scrollLayout.onLayout();
 
     if( _scrollBarX.isVisible() )
     {
         _scrollBarX.moveRequest( Gfx::PointF(0, height - _scrollBarX.size().height()) );
+        _scrollBarY.resizeRequest( _scrollBarX.measuredSize() );
     }
 
     if( _scrollBarY.isVisible() )
     {
         _scrollBarY.moveRequest( Gfx::PointF(width - _scrollBarY.size().width(), 0) );
+        _scrollBarY.resizeRequest( _scrollBarY.measuredSize() );
     }
 
     double hrange = _scrollLayout.maximumX() - _scrollLayout.measuredSize().width();

@@ -666,6 +666,8 @@ void Window::onLayoutEvent(const LayoutEvent& ev)
     policy.setSize(_size);
     _mainWidget->measure(policy);
 
+
+    _mainWidget->resizeRequest(_size);
     _mainWidget->onLayout();
 }
 

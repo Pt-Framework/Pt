@@ -215,6 +215,14 @@ void ScrollLayout::onLayout()
         scrollY(0);
     }        
 
+    const std::vector<Widget*>& widgets = this->widgets();
+    std::vector<Widget*>::const_iterator it;
+    for(it = widgets.begin() ; it != widgets.end(); ++it)
+    {        
+        Widget* w = (*it);
+        w->onLayout();            
+    }
+
     Base::onLayout();
 }
 
