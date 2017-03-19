@@ -1628,7 +1628,7 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
         // (Re-)initialize some part of the operational state as needed
         if(state.remLen <= 0.0f) {
             // Check if all polygon's points have been processed
-            if(state.idx1 + 1 == state.srcCount) {
+            if(state.idx1 + 1 >= state.srcCount) {
                 lprintf("### All points are processed!\n");
                 state.gather.clear();
                 state.gatherLen = 0.0f;
@@ -1669,13 +1669,21 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
             else {
                 lprintf("    Poly Skip : patSegLen = %5.1f ; remLen = %5.1f ; point count = %zd\n", state.patSegLen, state.remLen, state.gather.size());
             }
-            // Reset the length
-            state.remLen    = -1.0f;
-            state.patSegLen =  0.0f;
+            // Process excess length (if any)
+            state.remLen    = state.remLen - state.gatherLen;
+            state.patSegLen = 0.0f;
+            if(state.remLen > 0.0f) {
+                state.px = state.ex - state.uvx * state.remLen;
+                state.py = state.ey - state.uvy * state.remLen;
+                lprintf("    Excess    : px = %5.1f ; py = %5.1f ; remLen = %5.1f\n", state.px, state.py, state.remLen);
+            }
+            else {
+                state.remLen = -1.0f;
+                lprintf("    Consumed  : remLen = %5.1f\n", state.remLen);
+            }
             // Reset the gather buffer
             state.gather.clear();
             state.gatherLen = 0.0f;
-
             continue;
         }
         // If we have enough remainder length, process the polygon's edge
@@ -1711,7 +1719,7 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
             lprintf("    Gather P  : patSegLen = %5.1f ; remLen = %5.1f ; gatherLen = %5.1f ; segment (%5.1f, %5.1f) - (%5.1f, %5.1f) from index [%2zd, %2zd]; new gather.size() = %zd\n", state.patSegLen, state.remLen, state.gatherLen, state.px, state.py, state.ex, state.ey, state.idx1, state.idx1 + 1, state.gather.size());
         }
         // Store the next coordinate
-        if(state.remLen <= state.patSegLen) {
+        if(state.gatherLen + state.remLen <= state.patSegLen) {
             //
             state.gather.push_back(PointF(state.ex, state.ey));
             state.gatherLen += state.remLen;
@@ -1721,11 +1729,10 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
         }
         // Store the in-between coordinate
         else {
-            state.gather.push_back(PointF(
-                state.px + state.uvx * state.patSegLen,
-                state.py + state.uvy * state.patSegLen
-            ));
-            state.gatherLen += state.patSegLen;
+            state.px += state.uvx * state.patSegLen;
+            state.py += state.uvy * state.patSegLen;
+            state.gather.push_back(PointF(state.px, state.py));
+            state.gatherLen = state.patSegLen;
             lprintf("    Gather I  : patSegLen = %5.1f ; remLen = %5.1f ; gatherLen = %5.1f ; segment (%5.1f, %5.1f) - (%5.1f, %5.1f) from index [%2zd, %2zd]; new gather.size() = %zd\n", state.patSegLen, state.remLen, state.gatherLen, state.px, state.py, state.ex, state.ey, state.idx1, state.idx1 + 1, state.gather.size());
         }
     }

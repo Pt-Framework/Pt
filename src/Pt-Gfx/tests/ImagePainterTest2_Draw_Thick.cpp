@@ -124,7 +124,7 @@ static void testDrawThickLine_impl(
 //#define MINI_TEST
 
     fprintf(stderr, "\n\n##################\n\n");
-    if(!true) {
+    if(true) {
         ip2->setPen(penBCapBJoin);
         const PointF poly1a[] = { // CCW
             PointF(670 + 10, 120),
@@ -154,7 +154,7 @@ static void testDrawThickLine_impl(
             ip2->drawQuadraticPolybezier( bezier1a, sizeof(bezier1a) / sizeof(bezier1a[0]), false );
         }
     }
-    if(true && ip2) {
+    if(!true && ip2) {
         const PointF bezier2a[] = { // CCW
             PointF(100 + 390, 100 + 330),
             PointF(100 + 390, 150 + 330),
