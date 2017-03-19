@@ -49,10 +49,10 @@ namespace Gfx {
 static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, float x3, float y3, Pt::int32_t nSegs)
 {
     // Check if the points actually specify a straight line
-    const Pt::int32_t sx = x3 - x2;
-    const Pt::int32_t sy = y3 - y2;
-    const Pt::int32_t xx = x1 - x2;
-    const Pt::int32_t yy = y1 - y2;
+    const float sx = x3 - x2;
+    const float sy = y3 - y2;
+    const float xx = x1 - x2;
+    const float yy = y1 - y2;
 
     // Curvature
     if( !(xx * sy - yy * sx) ) {
@@ -62,15 +62,19 @@ static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, float
     }
 
     // Process as a quadratic bezier curve
-    if(nSegs < 3) nSegs = 3;
+    nSegs |= 1;
+    if(nSegs < 5) nSegs = 5;
 
-    for(Pt::int32_t i = 0; i <= nSegs; ++i) {
-        const float t = (float) i / (float) nSegs;
-        const float a = (1.0f - t) * (1.0f - t);
-        const float b =  2.0f * t  * (1.0f - t);
-        const float c = t * t;
-        const float x = a * x1 + b * x2 + c * x3;
-        const float y = a * y1 + b * y2 + c * y3;
+    const float nSegs1 = 1.0f / (nSegs - 1);
+
+    for(Pt::int32_t i = 0; i < nSegs; ++i) {
+        const float t  = i * nSegs1;
+        const float it = 1.0f - t;
+        const float a  = it * it;
+        const float b  = 2.0f * t  * it;
+        const float c  = t * t;
+        const float x  = a * x1 + b * x2 + c * x3;
+        const float y  = a * y1 + b * y2 + c * y3;
         if( dst.empty() || dst.back().x() != x || dst.back().y() != y ) dst.push_back( PointF(x, y) );
     }
 }
@@ -686,9 +690,7 @@ void ImagePainter2::drawQuadraticPolybezier(const PointF* ps, const size_t point
         const float l21  = Gfx::Math::fastSqrt(dx21 * dx21 + dy21 * dy21);
         const float l31  = l32 + l21;
         // Determine the number of segments
-        const Pt::int32_t nSegs = (_rasterizer->pen().style() == Pen::Solid)
-                                ? (ceil(l31 / 16.0f) + 1)
-                                : (ceil(l31 / 64.0f) + 1);
+        const Pt::int32_t nSegs = (ceil(l31 / 8.0f) + 1);
         // Generate points for one quadratic bezier curve
         pointsFTmp.clear();
         generateQuadraticBezierPoints(pointsFTmp, x1, y1, x2, y2, x3, y3, nSegs);
@@ -1479,12 +1481,12 @@ void ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const 
         //lprintf("### Processing a pattern segment with size %5.1f (from PI %2d to %2d):\n", state.patSegLen, oldPi, piCtrInOut - 1);
         done = sagPolygonPoints(state, !!refPat);
     }
-
-    // ### TODO: Handle intersecting polygons !!! ###
 }
 
 bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
 {
+    // ### TODO: Handle intersecting polygons !!! ###
+
     // Loop until the current "pattern" segment is completely processed
     while(state.patSegLen > 0.0f) {
 
@@ -1522,9 +1524,9 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
             // Generate one solid polygon segment as needed
             if(draw) {
                 // Add polygon separator point as needed
-                //if(!state.dstPoints.empty()) state.dstPoints.push_back(Painter::PolygonSeparatorPointF);
+                if(!state.dstPoints.empty()) state.dstPoints.push_back(Painter::PolygonSeparatorPointF);
                 // Generate the polygon
-               // thickenSolidOpenPolygon(state.dstPoints, state.gather.data(), state.gather.size(), 0);
+                thickenSolidOpenPolygon(state.dstPoints, state.gather.data(), state.gather.size(), 0);
                 //lprintf("    Poly Draw : patSegLen = %5.1f ; remLen = %5.1f ; point count = %zd\n", state.patSegLen, state.remLen, state.gather.size());
             }
             //else {
@@ -1561,9 +1563,11 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
             continue;
         }
 
+        // ------------------------------------------
         // If we got herem it means:
-        //     1. The remainder length is not enough
-        //     2. The "gather"  length is not enough
+        //     1. The remainder  length is not enough
+        //     2. The "gathered" length is not enough
+        // ------------------------------------------
 
         // Store the current interpolation coordinate to the "gather" buffer as needed
         if(state.gather.empty() || state.gather.back().x() != state.px || state.gather.back().y() != state.py) {
@@ -1592,6 +1596,7 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
             state.gatherLen += nl;
             // Substract the remainder length
             state.remLen -= nl;
+            if(state.remLen <= 0.0f) state.remLen = -1.0f;
             //lprintf("    Gather I  : patSegLen = %5.1f ; remLen = %5.1f ; gatherLen = %5.1f ; segment (%5.1f, %5.1f) - (%5.1f, %5.1f) from index [%2zd, %2zd]; new gather.size() = %zd\n", state.patSegLen, state.remLen, state.gatherLen, state.px, state.py, state.ex, state.ey, state.idx1, state.idx1 + 1, state.gather.size());
         }
 

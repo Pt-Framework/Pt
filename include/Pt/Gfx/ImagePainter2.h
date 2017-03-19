@@ -133,7 +133,7 @@ class PT_GFX_API ImagePainter2 : public Painter
         static FontMetrics fontMetrics(const Font& font, const Pt::String& text);
 
     private:
-        // State for spread-and-gather operations on polygon points
+        // State for spread-and-gather operations on polygon points (used to thicken patterned polygon)
         struct SAGOpState;
 
     private:
