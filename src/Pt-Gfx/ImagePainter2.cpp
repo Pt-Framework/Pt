@@ -1444,10 +1444,13 @@ struct ImagePainter2::SAGOpState {
 
 bool ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const PointF* src, size_t pointCount)
 {
-    // ### TODO: Discard the last generated polygon if it intersects the first one !!! ###
+    // ### TODO: Discard the last generated polygon if it intersects the previous one !!! ###
+    // ### TODO: Discard the last generated polygon if it intersects the first    one !!! ###
 
     // Calculate the cell size
-    const float cellSize = _rasterizer->pen().size();
+    const float cellSize = _rasterizer->pen().size() * 0.5f;
+
+    // 1000000010000000100000001000000010000000100000001000000010000000
 
     // The pattern buffer and its indexing counter
     const Pt::uint8_t* pBuff      = _rasterizer->patternBufferMP64();
@@ -1497,33 +1500,35 @@ bool ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const 
             PointF gatherLast;
             lprintf("Proc GRes: count = %2zd ; gather = %5.1f ; pattern = %5.1f ; delta = %5.1f ; piCtr = %d\n", gatherP.size(), gatherL, patSegLen, gatherL - patSegLen, piCtrInOut);
             if(excessLen > 0.0f) {
-                //
+                // Get the coordinates
                 const float x1 = gatherP[gatherP.size() - 2].x();
                 const float y1 = gatherP[gatherP.size() - 2].y();
                 const float x2 = gatherP[gatherP.size() - 1].x();
                 const float y2 = gatherP[gatherP.size() - 1].y();
+                // Calculate the vectors
                 const float vx = x2 - x1;
                 const float vy = y2 - y1;
                 const float vl = Gfx::Math::fastSqrt(vx * vx + vy * vy);
                 const float dx = patSegLen * vx / vl;
                 const float dy = patSegLen * vy / vl;
-                //
+                // Adjust the coordinate of the last "gathered" point
                 gatherP.back().set(x1 + dx, y1 + dy);
                 gatherLast = gatherP.back();
-                //
+                // Adjust the "gathered" length
                 gatherL = patSegLen;
             }
             // Generate a thick polygon
             if(refPat) thickenSolidOpenPolygon(pointsF, gatherP.data(), gatherP.size(), 0);
             if(refPat) lprintf("Draw Poly: count = %2zd ; gather = %5.1f ; pattern = %5.1f ; delta = %5.1f\n", gatherP.size(), gatherL, patSegLen, gatherL - patSegLen);
             else       lprintf("Skip Poly: count = %2zd ; gather = %5.1f ; pattern = %5.1f ; delta = %5.1f\n", gatherP.size(), gatherL, patSegLen, gatherL - patSegLen);
-            // Clear the gathered points
+            // Adjust the gathered points
             if(excessLen > 0.0f) {
                 gatherP.clear();
                 gatherP.push_back(gatherLast);
                 gatherL = excessLen;
                 lprintf("Re-gather: %5.1f, %5.1f [%2zd] : glen = %5.1f (expecting %5.1f) ; piCtr = %d\n", gatherP.back().x(), gatherP.back().y(), gatherP.size(), gatherL, patSegLen, piCtrInOut);
             }
+            // Clear the gathered points
             else {
                 gatherP.clear();
                 gatherL = 0.0f;
