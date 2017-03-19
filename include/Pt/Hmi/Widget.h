@@ -113,6 +113,11 @@ class SizePolicy
             _sizeHint = hint;
         }
 
+        void setSize(double w, double h)
+        {
+            _sizeHint.set(w, h);
+        }
+
         double width() const
         { 
             return _sizeHint.width(); 
@@ -274,7 +279,7 @@ class PT_HMI_API Widget : public Visual
 
         const Gfx::SizeF& size() const;
 
-        void resize(const Gfx::SizeF& s);
+        virtual void resize(const Gfx::SizeF& s);
 
         void resize(double width, double height);
 
@@ -302,6 +307,8 @@ class PT_HMI_API Widget : public Visual
         Gfx::SizeF preferredSize() const;
 
         Gfx::SizeF preferredSize(const SizePolicy& policy) const;
+
+        const Gfx::SizeF& measuredSize() const;
 
         // outer spacing
         const Spacing& margin() const;
@@ -342,8 +349,14 @@ class PT_HMI_API Widget : public Visual
 
         virtual Gfx::PointF fromScreen(const Gfx::PointF& pos) const;
 
+        void measure(const SizePolicy& policy);
+
+        void moveRequest(const Pt::Gfx::PointF& p);
+
+        virtual void resizeRequest(const Pt::Gfx::SizeF& s);
+
     protected:
-        virtual void onAddWidget(Widget& w);
+         virtual void onAddWidget(Widget& w);
 
         virtual void onRemoveWidget(Widget& w);
 
@@ -352,6 +365,9 @@ class PT_HMI_API Widget : public Visual
         virtual void onRaise(Widget& w);
 
         virtual void onInvalidate();
+        
+
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
         virtual void onLayout();
 
@@ -371,8 +387,6 @@ class PT_HMI_API Widget : public Visual
         virtual void onEvent( const Event& ev );
 
         virtual void onInvalidateEvent(const InvalidateEvent& ev);
-
-        virtual void onLayoutEvent(const LayoutEvent& ev);
 
         virtual void onEnableEvent(const EnableEvent& ev);
 
@@ -409,6 +423,9 @@ class PT_HMI_API Widget : public Visual
 
         Widget* findWidget( const Gfx::PointF& pos, bool input );
 
+        
+
+
     private:
         Pt::Signal<const Pt::Event&> _eventReady;
         Pt::Signal<>                 _layoutChanged;
@@ -419,7 +436,6 @@ class PT_HMI_API Widget : public Visual
         Widget*                      _content;
 
         int                          _invalidates;
-        int                          _layouts;
 
         bool                         _visible;
         bool                         _enabled;
@@ -429,6 +445,8 @@ class PT_HMI_API Widget : public Visual
         SizePolicy                   _sizePolicy;
         Gfx::SizeF                   _preferredSize;
         bool                         _autoSize;
+
+        Gfx::SizeF                   _measuredSize;
 
         bool                         _hasFocus;
         FocusPolicy                  _focusPolicy;

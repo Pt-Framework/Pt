@@ -50,6 +50,7 @@ namespace Hmi {
 
 Window::Window(Window* parent, Window::Type type)
 : _impl(0)
+, _layouts(0)
 , _parent(0)
 , _parentWindow(0)
 , _mainWidget(0)
@@ -81,6 +82,7 @@ Window::Window(Window* parent, Window::Type type)
     _eventReady += Pt::slot(*this, &Window::onLeaveEvent);
     _eventReady += Pt::slot(*this, &Window::onMoveEvent);
     _eventReady += Pt::slot(*this, &Window::onResizeEvent);
+    _eventReady += Pt::slot(*this, &Window::onLayoutEvent);
     _eventReady += Pt::slot(*this, &Window::onShowEvent);
     _eventReady += Pt::slot(*this, &Window::onEnableEvent);
     _eventReady += Pt::slot(*this, &Window::onWindowStateEvent);
@@ -638,6 +640,33 @@ void Window::onInvalidate()
 void Window::onInvalidateEvent(const InvalidateEvent& ev)
 {
     onInvalidate();
+}
+
+
+void Window::layout()
+{   
+    _layouts++;
+
+    LayoutEvent ev( vid() );
+    Application::instance().loop().commitEvent(ev); 
+}
+
+
+void Window::onLayoutEvent(const LayoutEvent& ev)
+{
+    --_layouts;
+
+    if(_layouts > 0)
+        return;
+
+    if( ! _mainWidget )
+        return;
+
+    SizePolicy policy(SizePolicy::Preferred, SizePolicy::Preferred);
+    policy.setSize(_size);
+    _mainWidget->measure(policy);
+
+    _mainWidget->onLayout();
 }
 
 

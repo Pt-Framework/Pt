@@ -86,8 +86,8 @@ void loadIcon(Gfx::Image& icon)
 
 
 MainWindow::MainWindow()
-: _child1("Child 1")
-, _scrollContainer(Hmi::FlowLayout::Top)
+: //_child1("Child 1")
+  _scrollContainer(Hmi::FlowLayout::Top)
 {
     loadIcon(_icon);
     _picture.set(_icon);
@@ -131,14 +131,14 @@ MainWindow::MainWindow()
     _child2.setMainWidget(&_scrollView);
     _child2.show(true);
 
-    add( _child1 );
+    //add( _child1 );
     
     //_child1.setTopMost(true);
-    _child1.move( Gfx::PointF(30,30));
-    _child1.resize( Gfx::SizeF(300, 600) );
-    _child1.show(true);
+    //_child1.move( Gfx::PointF(30,30));
+    //_child1.resize( Gfx::SizeF(300, 600) );
+//    _child1.show(true);
     
-    // context menu
+    // context menu   
     _menu.setName("All Music");
     
     _item1.setText("Heavy Metal");

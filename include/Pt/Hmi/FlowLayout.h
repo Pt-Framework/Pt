@@ -39,6 +39,8 @@ namespace Hmi {
 
 class PT_HMI_API FlowLayout : public Layout
 {
+    typedef Layout Base;
+
     public:
         // Horizontal          use all space in row, same size for elements
         // HorizontalCenter    place elements accoring to size
@@ -63,7 +65,14 @@ class PT_HMI_API FlowLayout : public Layout
         void setCenter(bool b);
 
     protected:
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+
         virtual void onLayout();
+
+    private:
+        void measureWidth(const SizePolicy& policy, bool center);
+
+        void measureHeight(const SizePolicy& policy, bool center);
 
     private:
         Direction _direction;

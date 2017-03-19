@@ -44,7 +44,6 @@ Widget::Widget()
 , _window(0)
 , _content(0)
 , _invalidates(0)
-, _layouts(0)
 , _visible(true)
 , _enabled(true)
 , _enabledState(true)
@@ -71,7 +70,6 @@ Widget::Widget()
     _eventReady += Pt::slot(*this, &Widget::onFocusEvent);
     _eventReady += Pt::slot(*this, &Widget::onShowEvent);
     _eventReady += Pt::slot(*this, &Widget::onInvalidateEvent);
-    _eventReady += Pt::slot(*this, &Widget::onLayoutEvent);
 }
 
 
@@ -555,58 +553,6 @@ void Widget::onInvalidate()
 }
 
 
-void Widget::layout()
-{
-#ifdef LOG_EVENTS
-    std::clog << "layout " << this << std::endl;
-#endif
-
-    ++_layouts;
-
-    LayoutEvent ev(vid());
-    Application::instance().loop().commitEvent(ev);
-
-    update( Gfx::RectF() );
-} 
-
-
-void Widget::onLayoutEvent(const LayoutEvent& ev)
-{
-#ifdef LOG_EVENTS
-    std::clog << "onLayoutEvent " << this << std::endl;
-#endif
-
-    --_layouts;
-
-    if(_layouts > 0)
-      return;
-
-    onLayout();
-
-    _layoutChanged.send();
-}
-
-
-void Widget::onLayout()
-{
-    if(_content)
-    { 
-        Gfx::PointF contentPos(_padding.left() + _content->margin().left(), 
-                               _padding.top()  + _content->margin().top());
-        
-        _content->move(contentPos);
-
-        double hspace = _padding.leftRight() + _content->margin().leftRight();
-        double vspace = _padding.topBottom() + _content->margin().topBottom();
-        
-        Gfx::SizeF contentSize(_size.width() - hspace,
-                               _size.height() - vspace);
-
-        _content->resize(contentSize);
-    }
-}
-
-
 const SizePolicy& Widget::sizePolicy() const
 {
     return _sizePolicy;
@@ -672,6 +618,82 @@ Gfx::SizeF Widget::preferredSize(const SizePolicy& policy) const
         return onAutoSize(policy);
 
     return _size;
+}
+
+
+void Widget::layout()
+{
+  if( window() )
+      window()->layout();   
+} 
+
+
+void Widget::measure(const SizePolicy& policy)
+{
+    _measuredSize = onMeasure(policy);
+}
+
+
+const Gfx::SizeF& Widget::measuredSize() const
+{
+    return _measuredSize;
+}
+
+
+Gfx::SizeF Widget::onMeasure(const SizePolicy& policy)
+{
+    if(_content)
+    { 
+        double hspace = _padding.leftRight() + _content->margin().leftRight();
+        double vspace = _padding.topBottom() + _content->margin().topBottom();
+
+        SizePolicy pol;
+        pol.setWidth( _size.width() - hspace );
+        pol.setHeight( _size.height() - vspace );
+        
+        _content->measure(policy);
+    }
+
+    return policy.size();
+}
+
+
+void Widget::onLayout()
+{
+    if(_content)
+    {
+        Gfx::PointF contentPos(_padding.left() + _content->margin().left(), 
+                               _padding.top()  + _content->margin().top());
+        
+        _content->moveRequest(contentPos);
+        //_content->resizeRequest( _content->measuredSize() );
+    }
+
+    const std::vector<Widget*>& widgets = this->widgets();
+    std::vector<Widget*>::const_iterator it;
+    for(it = widgets.begin() ; it != widgets.end(); ++it)
+    {        
+        Widget* w = (*it);
+        w->onLayout();            
+    }
+
+    resizeRequest(_measuredSize);
+}
+
+
+void Widget::moveRequest(const Pt::Gfx::PointF& p)
+{
+   _position = p;
+   MoveEvent ev(this->vid(), p);
+   Application::instance().loop().commitEvent(ev);   
+}
+
+
+void Widget::resizeRequest(const Pt::Gfx::SizeF& s)
+{
+   _size = s;
+   ResizeEvent ev(this->vid(), s);
+   Application::instance().loop().commitEvent(ev);
 }
 
 
@@ -848,29 +870,22 @@ const Gfx::PointF& Widget::position() const
 
 void Widget::move(const Gfx::PointF& pos)
 {
-#ifdef LOG_EVENTS
-    std::clog << "move " << this << std::endl;
-#endif
-
     if(pos == _position)
         return;
     
-#ifdef LOG_EVENTS
-    std::clog << "MOVE " << this << std::endl;
-#endif
+    //Gfx::RectF updateRect(Gfx::PointF(0, 0), _size);
 
-    Gfx::RectF updateRect(Gfx::PointF(0, 0), _size);
-
-    Gfx::PointF to = pos - _position;
-    updateRect.unify( Gfx::RectF(to, _size) ); 
+    //Gfx::PointF to = pos - _position;
+    //updateRect.unify( Gfx::RectF(to, _size) ); 
     
-    MoveEvent mev(vid(), pos);
-    Application::instance().loop().commitEvent(mev);
+    //MoveEvent mev(vid(), pos);
+    //Application::instance().loop().commitEvent(mev);
 
     // update needs to refer to previous position
-    update(updateRect);
+    //update(updateRect);
 
     _position = pos;
+    layout();
 }
 
 
@@ -882,17 +897,6 @@ void Widget::move(double x, double y)
 
 void Widget::onMoveEvent(const MoveEvent& ev)
 {        
-#ifdef LOG_EVENTS
-    std::clog << "onMoveEvent " << this << std::endl;
-#endif
-
-    Widget* parentWidget = parent();
-    if(parentWidget)
-    {
-        parentWidget->layout();
-    }
-
-    _layoutChanged.send();
 }
 
 
@@ -904,28 +908,12 @@ const Gfx::SizeF& Widget::size() const
 
 void Widget::resize(const Gfx::SizeF& s)
 {
-#ifdef LOG_EVENTS
-    std::clog << "resize " << this << std::endl;
-#endif
-
     if(_size == s)
         return;
 
-#ifdef LOG_EVENTS
-    std::clog << "RESIZE " << this << std::endl;
-#endif
-
-    Gfx::SizeF updateSize( std::max( size().width(), s.width()), 
-                           std::max( size().height(), s.height()) );
-
-    Gfx::RectF updateRect(Gfx::PointF(0,0), updateSize);
-
     _size = s;
 
-    ResizeEvent rev(vid(), s);
-    Application::instance().loop().commitEvent(rev);
-    
-    update(updateRect);
+    layout();
 }
 
 
@@ -937,17 +925,7 @@ void Widget::resize(double width, double height)
 
 void Widget::onResizeEvent(const ResizeEvent& ev)
 {   
-#ifdef LOG_EVENTS
-    std::clog << "onResizeEvent " << this << std::endl;
-#endif
-
-    layout();
-
-    Widget* parentWidget = parent();
-    if(parentWidget)
-    {
-        parentWidget->layout();
-    }
+  update();
 }
 
 

@@ -75,6 +75,10 @@ class PT_HMI_API PushButton : public Button
 
         void setLayout(Direction d);
 
+        virtual void resize(const Gfx::SizeF& s);
+
+        virtual void resizeRequest(const Pt::Gfx::SizeF& s);
+
     public:
         const Gfx::Brush& foreground() const;
 
@@ -113,6 +117,8 @@ class PT_HMI_API PushButton : public Button
         virtual void onSetStyleOptions(const StyleOptions& options);
 
         virtual Pt::Gfx::SizeF onAutoSize(const SizePolicy& policy) const;
+
+        virtual  Pt::Gfx::SizeF onMeasure(const SizePolicy& policy);
 
         virtual void onLayout();
 

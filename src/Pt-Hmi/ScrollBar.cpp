@@ -309,6 +309,14 @@ double ScrollBar::positionToPixel(int pos)
 }
 
 
+Gfx::SizeF ScrollBar::onMeasure(const SizePolicy& s)
+{
+    if( _orientation == Vertical)
+      return Gfx::SizeF( size().width(), s.size().height() );
+
+  return Gfx::SizeF( s.size().width(), size().height() );
+}
+
 void ScrollBar::updateScroll()
 {
     double buttonLength = _orientation == Vertical ? size().width()

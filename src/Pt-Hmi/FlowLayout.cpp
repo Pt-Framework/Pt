@@ -64,16 +64,9 @@ void StackLeft(Widget& parent, bool center)
 
         double x = posX + item->margin().left();
         double y = parent.padding().top() + item->margin().top(); 
-
-        const Gfx::SizeF childSize( item->preferredSize().width(), 
-                                    parent.size().height() - 
-                                    parent.padding().top() - 
-                                    parent.padding().bottom() -
-                                    item->margin().top() - 
-                                    item->margin().bottom() );
                  
         Gfx::PointF pos(x, y);
-        item->setGeometry(pos, childSize);
+        item->moveRequest(pos);
 
         posX += item->preferredSize().width() + item->margin().leftRight();
     }
@@ -101,16 +94,9 @@ void StackRight(Widget& parent, bool center)
         double y = parent.padding().top() + item->margin().top(); 
                 
         posRight -= item->margin().left();
-
-        const Gfx::SizeF childSize( item->preferredSize().width(), 
-                                    parent.size().height() - 
-                                    parent.padding().top() - 
-                                    parent.padding().bottom() - 
-                                    item->margin().top() - 
-                                    item->margin().bottom());
                    
         Gfx::PointF pos(x, y);                   
-        item->setGeometry(pos, childSize);
+        item->moveRequest(pos);
     }
 }
 
@@ -134,16 +120,9 @@ void StackTop(Widget& parent, bool center)
                 
         posTop += item->preferredSize().height() + 
                   item->margin().top() + item->margin().bottom();
-                
-        const Gfx::SizeF childSize( parent.size().width() - 
-                                    parent.padding().left() -
-                                    parent.padding().right() -
-                                    item->margin().left() - 
-                                    item->margin().right(), 
-                                    item->preferredSize().height());
 
         Gfx::PointF pos(x, y);                   
-        item->setGeometry(pos, childSize);
+        item->moveRequest(pos);
     }
 }
 
@@ -168,17 +147,10 @@ void StackBottom(Widget& parent, bool center)
         double x = parent.padding().left() + item->margin().left();
         double y = posBottom;
                 
-        posBottom -= item->margin().top();    
-
-        const Gfx::SizeF childSize( parent.size().width() - 
-                                    parent.padding().left() - 
-                                    parent.padding().right() -
-                                    item->margin().left() - 
-                                    item->margin().right(), 
-                                    item->preferredSize().height() );
+        posBottom -= item->margin().top();
                                          
         Gfx::PointF pos(x, y);                   
-        item->setGeometry(pos, childSize);
+        item->moveRequest(pos);
     }
 }
 
@@ -209,8 +181,36 @@ void FlowLayout::setCenter(bool b)
 }
 
 
+Gfx::SizeF FlowLayout::onMeasure(const SizePolicy& policy)
+{
+    switch(_direction)
+    {
+        default:
+        case Left:
+            measureWidth(policy, _center);
+            break;
+
+        case Right:
+            measureWidth(policy, _center);
+            break;
+
+        case Top:
+            measureHeight(policy, _center);
+            break;
+
+        case Bottom:
+            measureHeight(policy, _center);
+            break;
+    }
+
+    return Base::onMeasure(policy);
+}
+
+
 void FlowLayout::onLayout()
 {
+    Base::onLayout();
+
     switch(_direction)
     {
         default:
@@ -229,6 +229,60 @@ void FlowLayout::onLayout()
         case Bottom:
             StackBottom(*this, _center);
             break;
+    }
+}
+
+
+void FlowLayout::measureWidth(const SizePolicy& policy, bool center)
+{
+    std::vector<Widget*>::const_iterator it = widgets().begin();
+    std::vector<Widget*>::const_iterator end = widgets().end();
+
+    for( ; it != end; ++it)
+    {
+        Widget* item = *it;
+        
+        if( ! item->isVisible() )
+            continue;  
+
+        const Gfx::SizeF itemSize( item->preferredSize().width(), 
+                                   policy.size().height() - 
+                                   padding().top() - 
+                                   padding().bottom() -
+                                   item->margin().top() - 
+                                   item->margin().bottom() );
+
+        SizePolicy itemPolicy(SizePolicy::Fixed, SizePolicy::Fixed);
+        itemPolicy.setSize(itemSize);
+
+        item->measure(itemPolicy);
+    }
+}
+
+
+void FlowLayout::measureHeight(const SizePolicy& policy, bool center)
+{
+    std::vector<Widget*>::const_iterator it = widgets().begin();
+    std::vector<Widget*>::const_iterator end = widgets().end();
+
+    for( ; it != end; ++it)
+    {
+        Widget* item = *it; 
+
+        if( ! item->isVisible() )
+            continue; 
+
+        const Gfx::SizeF itemSize( policy.size().width() - 
+                                   padding().left() -
+                                   padding().right() -
+                                   item->margin().left() - 
+                                   item->margin().right(), 
+                                   item->preferredSize().height());
+
+        SizePolicy itemPolicy(SizePolicy::Fixed, SizePolicy::Fixed);
+        itemPolicy.setSize(itemSize);                  
+        
+        item->measure(itemPolicy);
     }
 }
 

@@ -65,10 +65,13 @@ class PT_HMI_API ScrollLayout : public Layout
 
         Pt::Signal<int>& scrolledY();
 
+
     protected:
         virtual void onAddWidget(Widget& w);
         
         virtual void onRemoveWidget(Widget& w);
+
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
         virtual void onLayout();
 

@@ -66,6 +66,8 @@ class PT_HMI_API ScrollView : public Widget
         void onScrolledY(int n);
 
     protected:
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+
         virtual void onLayout();
     
     private:

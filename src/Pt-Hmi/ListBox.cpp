@@ -218,6 +218,23 @@ Gfx::SizeF ListBoxItem::onAutoSize(const SizePolicy& policy) const
 }
 
 
+Gfx::SizeF ListBoxItem::onMeasure(const SizePolicy& p)
+{
+    Gfx::FontMetrics fm = Painter::fontMetrics( _font, _text );
+
+    double spacing = _picture.empty() || _text.empty() ? 0 : fm.height() * 0.5;
+    
+    double pictureWidth = _iconSize.isNull() ? _picture.width() : _iconSize.width();
+    double pictureHeight = _iconSize.isNull() ? _picture.height() : _iconSize.height();
+    
+    double itemsWidth = p.size().width();
+    double itemsHeight = std::max<double>(fm.height(), pictureHeight);
+
+    return Gfx::SizeF( itemsWidth,
+                       itemsHeight + padding().topBottom() );
+}
+
+
 void ListBoxItem::onInvalidate()
 {
     // TODO: use renderer and options from parent
@@ -467,30 +484,43 @@ Gfx::SizeF ListBox::onAutoSize(const SizePolicy& policy) const
 }
 
 
-void ListBox::onLayout()
+Gfx::SizeF ListBox::onMeasure(const SizePolicy& p)
 {
-    double itemsHeight = 0;
-    double itemsWidth = size().width() - _scrollView.margin().leftRight()
-                                       - padding().leftRight();
-    
-    SizePolicy policy(SizePolicy::Fixed, SizePolicy::Preferred);
-    policy.setWidth(itemsWidth);
+    Gfx::SizeF baseSize = Base::onMeasure(p);
 
+    double itemsHeight = 0;
+    double itemsWidth = p.size().width() - _scrollView.margin().leftRight()
+                                         - padding().leftRight();
+    
     std::vector<Pt::Hmi::Widget*>::const_iterator it;
     for(it = _layout.widgets().begin(); it != _layout.widgets().end(); ++it)
     {
         Widget* item = *it;
-        item->setSizePolicy(policy);
 
-        itemsHeight += item->preferredSize().height();
+        SizePolicy policy(SizePolicy::Fixed, SizePolicy::Preferred);
+        policy.setWidth(itemsWidth);
+        
+        item->measure(policy);
+
+        itemsHeight += item->measuredSize().height();
         itemsHeight += item->margin().topBottom();
     }
 
     Gfx::SizeF s;
     s.setWidth(itemsWidth);
     s.setHeight(itemsHeight);
-    _layout.resize(s);
 
+    SizePolicy policy(SizePolicy::Fixed, SizePolicy::Fixed);
+    policy.setSize(s);
+
+    _layout.measure(policy);
+
+    return baseSize;
+}
+
+
+void ListBox::onLayout()
+{
     Base::onLayout();
 }
 

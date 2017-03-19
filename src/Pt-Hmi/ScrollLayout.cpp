@@ -37,8 +37,8 @@ ScrollLayout::ScrollLayout()
 : _scrollPos(0,0)
 , _enableX(true)
 , _enableY(true)
-, _maxX(0)
-, _maxY(0)
+, _maxX(100)
+, _maxY(100)
 {
     setAcceptInput(true);
 }
@@ -86,12 +86,13 @@ void ScrollLayout::scrollX(int xpos)
             
         Gfx::PointF pos = w->position();
         pos.subX(delta);
-        w->move(pos);
+        w->moveRequest(pos);
     }
 
     _scrollPos.setX(xpos);
 
     _scrolledX.send(xpos);
+    update();
 }
 
 
@@ -113,12 +114,13 @@ void ScrollLayout::scrollY(int ypos)
             
         Gfx::PointF pos = w->position();
         pos.subY(delta);
-        w->move(pos);
+        w->moveRequest(pos);
     }
 
     _scrollPos.setY(ypos);
 
     _scrolledY.send(ypos);
+    update();
 }
 
 
@@ -149,20 +151,8 @@ Pt::Signal<int>& ScrollLayout::scrolledY()
 void ScrollLayout::onAddWidget(Widget& w)
 {
     Base::onAddWidget(w);
-    //w.layoutChanged() += Pt::slot(*this, &ScrollLayout::layout);
-}
 
-
-void ScrollLayout::onRemoveWidget(Widget& w)
-{
-    //w.layoutChanged() -= Pt::slot(*this, &ScrollLayout::layout);
-    Base::onRemoveWidget(w);
-}
-
-
-void ScrollLayout::onLayout()
-{
-    double maxWidth = 0;
+     double maxWidth = 0;
     double maxHeight = 0;
     
     for(std::size_t i = 0; i < widgets().size(); ++i)
@@ -184,6 +174,37 @@ void ScrollLayout::onLayout()
     _maxX = static_cast<int>(maxWidth);
     _maxY = static_cast<int>(maxHeight);
 
+    //w.layoutChanged() += Pt::slot(*this, &ScrollLayout::layout);
+}
+
+
+void ScrollLayout::onRemoveWidget(Widget& w)
+{
+    //w.layoutChanged() -= Pt::slot(*this, &ScrollLayout::layout);
+    Base::onRemoveWidget(w);
+}
+
+
+Gfx::SizeF ScrollLayout::onMeasure(const SizePolicy& policy)
+{
+  Gfx::SizeF s = Base::onMeasure(policy);
+
+
+    for(std::size_t i = 0; i < widgets().size(); ++i)
+    {
+        Widget* w =  widgets()[i];
+
+        SizePolicy  itemPolicy;
+        itemPolicy.setSize(w->size());
+        w->measure(itemPolicy);
+   }
+
+   return s;
+}
+
+
+void ScrollLayout::onLayout()
+{
     if( _maxX < size().width() && _scrollPos.x() != 0 )
     {
         scrollX(0);
@@ -192,7 +213,9 @@ void ScrollLayout::onLayout()
     if( _maxY < size().height() && _scrollPos.y() != 0 )
     {
         scrollY(0);
-    }
+    }        
+
+    Base::onLayout();
 }
 
 

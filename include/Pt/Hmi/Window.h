@@ -121,6 +121,8 @@ class PT_HMI_API Window : public WindowBase
 
     Gfx::PointF fromParent(const Gfx::PointF& pos) const;
 
+    void layout();
+
     void repaint();
 
     bool isActive() const;
@@ -255,6 +257,8 @@ class PT_HMI_API Window : public WindowBase
 
     void mouseEvent( const MouseEvent& ev );
 
+    virtual void onLayoutEvent(const LayoutEvent& ev);
+
     virtual void onTouchEvent( const TouchEvent& ev );
 
     virtual void onScrollEvent( const ScrollEvent& ev );
@@ -315,6 +319,7 @@ class PT_HMI_API Window : public WindowBase
     PixmapSurface                _surface;
     Gfx::RectF                   _damageRect;
     Pt::Signal<const Pt::Event&> _eventReady;
+    int                          _layouts;
 
     std::vector<Window*>         _windows;
     WindowBase*                  _parent;

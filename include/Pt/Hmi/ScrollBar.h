@@ -100,6 +100,9 @@ class PT_HMI_API ScrollBar : public Control
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& rect);
 
     protected:
+
+        Gfx::SizeF onMeasure(const SizePolicy& s);;
+
         virtual bool onMouseEvent(const MouseEvent& ev);
 
         virtual void onTouchEvent(const TouchEvent& ev);
