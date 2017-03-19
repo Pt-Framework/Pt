@@ -1482,7 +1482,7 @@ bool ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const 
               Pt::int32_t piCtrTest = piCtrInOut;
         const Pt::uint8_t refPat    = pBuff[piCtrTest];
               float       patSegLen = cellSize;
-        lprintf("Check A  : [%2zd] gather = %5.1f ; pattern = %5.1f ; piCtrTest = %d\n", gatherP.size(), gatherL, patSegLen, piCtrTest);
+        lprintf("Check A  : [%2zd] gather = %5.1f ; pattern = %5.1f ; piCtrTest = %2d ; refPat = %d\n", gatherP.size(), gatherL, patSegLen, piCtrTest, refPat);
         for(;;) {
             // Update the "testing" pattern indexing counter
             ++piCtrTest;
@@ -1497,7 +1497,7 @@ bool ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const 
             break;
         }
         // If the length of the "gathered" segments has become enough, process it
-        lprintf("Check B  : [%2zd] gather = %5.1f ; pattern = %5.1f ; piCtrTest = %d\n", gatherP.size(), gatherL, patSegLen, piCtrTest);
+        lprintf("Check B  : [%2zd] gather = %5.1f ; pattern = %5.1f ; piCtrTest = %2d ; refPat = %d\n", gatherP.size(), gatherL, patSegLen, piCtrTest, refPat);
         //if(gatherL >= patSegLen && gatherP.size() >= 2) {
         if(i == pointCount - 1 && gatherP.empty()) {
             break;
@@ -1507,7 +1507,7 @@ bool ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const 
             const float excessLen = gatherL - patSegLen;
             // Adjust the gathered points as needed
             PointF gatherLast;
-            lprintf("Proc GRes: count = %2zd ; gather = %5.1f ; pattern = %5.1f ; delta = %5.1f ; piCtr = %d\n", gatherP.size(), gatherL, patSegLen, gatherL - patSegLen, piCtrInOut);
+            lprintf("Proc GRes: count = %2zd ; gather = %5.1f ; pattern = %5.1f ; delta = %5.1f ; piCtr = %2d ; refPat = %d\n", gatherP.size(), gatherL, patSegLen, gatherL - patSegLen, piCtrInOut, refPat);
             if(excessLen > 0.0f) {
                 // Get the coordinates
                 const float x1 = gatherP[gatherP.size() - 2].x();
@@ -1536,7 +1536,7 @@ bool ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const 
                 gatherP.clear();
                 gatherP.push_back(gatherLast);
                 gatherL = excessLen;
-                lprintf("Re-gather: %5.1f, %5.1f [%2zd] : glen = %5.1f (expecting %5.1f) ; piCtr = %d\n", gatherP.back().x(), gatherP.back().y(), gatherP.size(), gatherL, patSegLen, piCtrInOut);
+                lprintf("Re-gather: %5.1f, %5.1f [%2zd] : glen = %5.1f (expecting %5.1f) ; piCtr = %2d ; refPat = %d\n", gatherP.back().x(), gatherP.back().y(), gatherP.size(), gatherL, patSegLen, piCtrInOut, refPat);
             }
             // Clear the gathered points
             else {
@@ -1544,8 +1544,11 @@ bool ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const 
                 gatherL = 0.0f;
             }
             // Copy value from the "testing" pattern indexing counter to the real pattern indexing counter
-            piCtrInOut = piCtrTest + 1;
-            if(piCtrInOut >= PATTERN_BUFFER_COUNTER_MAXMP) piCtrInOut -= PATTERN_BUFFER_COUNTER_MAXMP;
+            piCtrInOut = piCtrTest;// + 1;
+            //if(piCtrInOut >= PATTERN_BUFFER_COUNTER_MAXMP) piCtrInOut -= PATTERN_BUFFER_COUNTER_MAXMP;
+
+            //if(excessLen > 0.0f) piCtrInOut -= round(excessLen);
+            //if(piCtrInOut < 0) piCtrInOut += PATTERN_BUFFER_COUNTER_MAXMP;
             lprintf("Done GRes: piCtr = %d\n", piCtrInOut);
         }
         // If the "polygon-edge" segment is shorther than "pattern" segment or if there is an
@@ -1553,13 +1556,13 @@ bool ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const 
         else if(pln < patSegLen || !gatherP.empty()) {
             gatherP.push_back(p1);
             gatherL += pln;
-            lprintf("In-gather: %5.1f, %5.1f [%2zd] : glen = %5.1f (expecting %5.1f) ; piCtr = %d\n", gatherP.back().x(), gatherP.back().y(), gatherP.size(), gatherL, patSegLen, piCtrInOut);
+            lprintf("In-gather: %5.1f, %5.1f [%2zd] : glen = %5.1f (expecting %5.1f) ; piCtr = %2d ; refPat = %d\n", gatherP.back().x(), gatherP.back().y(), gatherP.size(), gatherL, patSegLen, piCtrInOut, refPat);
         }
         // Generate a simple patterned line segment
         else {
-            lprintf("Proc Line: (%5.1f, %5.1f) - (%5.1f, %5.1f) ; piCtr = %d\n", px1, py1, px2, py2, piCtrInOut);
+            lprintf("Proc Line: (%5.1f, %5.1f) - (%5.1f, %5.1f) ; piCtr = %2d ; refPat = %d\n", px1, py1, px2, py2, piCtrInOut, refPat);
             generatePatternedLineSegment(pointsF, px1, py1, px2, py2, piCtrInOut);
-            lprintf("Draw Line: (%5.1f, %5.1f) - (%5.1f, %5.1f) ; piCtr = %d\n", px1, py1, px2, py2, piCtrInOut);
+            lprintf("Draw Line: (%5.1f, %5.1f) - (%5.1f, %5.1f) ; piCtr = %2d ; refPat = %d\n", px1, py1, px2, py2, piCtrInOut, refPat);
         }
     }
 
