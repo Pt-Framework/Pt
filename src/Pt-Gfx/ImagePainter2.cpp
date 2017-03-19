@@ -1455,26 +1455,26 @@ bool ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const 
     std::vector<PointF> gatherP;
     float               gatherL = 0.0f;
 
-    // Walk thorough the points
+    // Walk through the points
     for(size_t i = 0; i < pointCount - 1; ++i) {
         // Get the points
         const PointF& p1 = *(src + i + 0);
         const PointF& p2 = *(src + i + 1);
         // Get the coordinates
-        const float   x1 = p1.x();
-        const float   y1 = p1.y();
-        const float   x2 = p2.x();
-        const float   y2 = p2.y();
-        // Calculate the current "polygon-edge" segment length
-        const float   dx = x2 - x1;
-        const float   dy = y2 - y1;
-        const float   ln = Gfx::Math::fastSqrt(dx * dx + dy * dy);
-        // Calculate the "pattern" segment length
+        const float x1 = p1.x();
+        const float y1 = p1.y();
+        const float x2 = p2.x();
+        const float y2 = p2.y();
+        // Calculate the length of the current "polygon-edge" segment
+        const float dx = x2 - x1;
+        const float dy = y2 - y1;
+        const float ln = Gfx::Math::fastSqrt(dx * dx + dy * dy);
+        // Calculate length of the current "pattern" segment
               Pt::int32_t piCtrTest = piCtrInOut;
         const Pt::uint8_t refPat    = pBuff[piCtrTest];
               float       patSegLen = 0.0f;
         for(;;) {
-            // Update the pattern indexing counter
+            // Update the "testing" pattern indexing counter
             ++piCtrTest;
             if(piCtrTest >= PATTERN_BUFFER_COUNTER_MAXMP) piCtrTest -= PATTERN_BUFFER_COUNTER_MAXMP;
             // Get and compare the pattern bit
@@ -1488,23 +1488,29 @@ bool ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const 
         }
         // If the length of the "gathered" segments has become enough, process it
         if(gatherL >= patSegLen && gatherP.size() >= 2) {
-            lprintf("count = %zd ; gather = %5.1f ; pattern = %5.1f\n", gatherP.size(), gatherL, patSegLen);
-
+            // Generate a thick polygon
             if(refPat) thickenSolidOpenPolygon(pointsF, gatherP.data(), gatherP.size(), 0);
+            if(refPat) lprintf("Poly: count = %zd ; gather = %5.1f ; pattern = %5.1f\n", gatherP.size(), gatherL, patSegLen);
+            else       lprintf("Skip: count = %zd ; gather = %5.1f ; pattern = %5.1f\n", gatherP.size(), gatherL, patSegLen);
+            // Copy value from the "testing" pattern indexing counter to the real pattern indexing counter
             piCtrInOut = piCtrTest;
-
+            //
+            const float deltaLen = gatherL - patSegLen;
+            if(deltaLen > 0.0f) {
+            }
+            // Clear the gathered points
             gatherP.clear();
             gatherL = 0.0f;
-            continue;
         }
         // If the "polygon-edge" segment is shorther than "pattern" segment, gather the point
-        if(ln < patSegLen) {
+        else if(ln < patSegLen) {
             gatherP.push_back(p1);
             gatherL += ln;
-            continue;
         }
         // Generate a simple patterned line segment
-        generatePatternedLineSegment(pointsF, x1, y1, x2, y2, piCtrInOut);
+        else {
+            generatePatternedLineSegment(pointsF, x1, y1, x2, y2, piCtrInOut);
+        }
     }
 
     // Done
