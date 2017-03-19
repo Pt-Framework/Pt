@@ -1423,6 +1423,8 @@ struct ImagePainter2::SAGOpState {
     size_t               srcCount;  // The number of source points
     float                cellSize;  // Cell size
 
+    float                patSegLen; // Length of the currently processed "pattern" segment
+
     size_t               idx1;      // Index to the first point which is currently being processed;
                                     // the index to the second point is always (idx1 + 1)
 
@@ -1431,15 +1433,13 @@ struct ImagePainter2::SAGOpState {
     float                uvx, uvy;  // Unit vector from the first point to the second point
     float                cvx, cvy;  // Cell vector from the first point to the second point
     float                cvl;       // Length of the cell vector
-    float                remDist;   // Remaining distance between the two points that has not been "consumed" by the "pattern" segment(s)
-
-    float                patSegLen; // Length of the currently processed "pattern" segment
+    float                remLen;    // Remaining length between the two points that has not been "consumed" by the "pattern" segment(s)
 
     std::vector<PointF>  gather;    // Gathered polygon points
     float                gatherLen; // Length of the gathered points
 
     inline SAGOpState(std::vector<PointF>& pointsF, const PointF* src, size_t pointCount, float cellSize_)
-    : dstPoints(pointsF), srcPoints(src), srcCount(pointCount), cellSize(cellSize_), idx1(0), remDist(-1.0f), gatherLen(0.0f)
+    : dstPoints(pointsF), srcPoints(src), srcCount(pointCount), cellSize(cellSize_), idx1(0), remLen(-1.0f), gatherLen(0.0f)
     {}
 };
 
@@ -1624,9 +1624,9 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
     if(state.patSegLen < state.cellSize) return true;
 
     // Loop until the current "pattern" segment are completely processed
-    while(state.patSegLen > 0.1f) {
+    while(state.patSegLen > 0.0f) {
         // (Re-)initialize some part of the operational state as needed
-        if(state.remDist <= 0.0f) {
+        if(state.remLen <= 0.0f) {
             // Calculate the vector, size, and coordinates
             const float x1 = state.srcPoints[state.idx1    ].x();
             const float y1 = state.srcPoints[state.idx1    ].y();
@@ -1636,65 +1636,64 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
             const float vy = y2 - y1;
             const float vz = Gfx::Math::fastSqrt(vx * vx + vy * vy);
             // Initialize some part of the operational state
-            state.px      = x1;
-            state.py      = y1;
-            state.ex      = x2;
-            state.ey      = y2;
-            state.uvx     = vx / vz;
-            state.uvy     = vy / vz;
-            state.cvx     = vx / round(vz / state.cellSize) * 2;
-            state.cvy     = vy / round(vz / state.cellSize) * 2;
-            state.cvl     = Gfx::Math::fastSqrt(state.cvx * state.cvx + state.cvy * state.cvy);
-            state.remDist = vz;
-            lprintf("    Initialize: px = %5.1f ; py = %5.1f ; ex = %5.1f ; ey = %5.1f ; cvx = %5.1f; cvy = %5.1f; cvl = %5.1f; remDist = %5.1f ; patSegLen = %5.1f\n",
-                    state.px, state.py, state.ex, state.ey, state.cvx, state.cvy, state.cvl, state.remDist, state.patSegLen);
+            state.px     = x1;
+            state.py     = y1;
+            state.ex     = x2;
+            state.ey     = y2;
+            state.uvx    = vx / vz;
+            state.uvy    = vy / vz;
+            state.cvx    = vx / round(vz / state.cellSize) * 2;
+            state.cvy    = vy / round(vz / state.cellSize) * 2;
+            state.cvl    = Gfx::Math::fastSqrt(state.cvx * state.cvx + state.cvy * state.cvy);
+            state.remLen = vz;
+            lprintf("    Initialize: px = %5.1f ; py = %5.1f ; ex = %5.1f ; ey = %5.1f ; cvx = %5.1f; cvy = %5.1f; cvl = %5.1f; remLen = %5.1f ; patSegLen = %5.1f\n",
+                    state.px, state.py, state.ex, state.ey, state.cvx, state.cvy, state.cvl, state.remLen, state.patSegLen);
         }
-        // Perform "gather" operation if the "pattern" segment is longer than the length of the current polygon's edge
-        if(state.patSegLen > state.remDist) {
-            // Store the current interpolation coordinate to the "gather" buffer
-            lprintf("    Gather A  : patSegLen = %5.1f ; remDist = %5.1f ; point = (%5.1f, %5.1f) from [%2zd, %2zd]; new gather.size() = %zd\n", state.patSegLen, state.remDist, state.px, state.py, state.idx1, state.idx1 + 1, state.gather.size());
-            state.gather.push_back(PointF(state.px, state.py));
-            state.gatherLen += state.remDist;
-
-            //
-            state.patSegLen -= state.remDist;
-            state.remDist    = -1.0f;
-            // Increment the indexes and check if all polygon's points have been processed
-            ++state.idx1;
-            if(state.idx1 + 1 == state.srcCount) {
-                lprintf("### All points are processed!\n");
-                state.gather.clear();
-                return true;
-            }
-            // Skip for now
-            continue;
-        }
-        // Perform "spread" operation
-        // --- Check if the "gather" buffer is not empty ---
-        if(!state.gather.empty()) {
-
-            // Store the current interpolation coordinate to the "gather" buffer
-            state.gather.push_back(PointF(state.px, state.py));
-            lprintf("    Gather B  : patSegLen = %5.1f ; remDist = %5.1f ; point = (%5.1f, %5.1f) from [%2zd, %2zd]; new gather.size() = %zd\n", state.patSegLen, state.remDist, state.px, state.py, state.idx1, state.idx1 + 1, state.gather.size());
-            //
-            if(true || draw) {
-                // Add polygon separator point as needed
-                if(!state.dstPoints.empty()) state.dstPoints.push_back(Painter::PolygonSeparatorPointF);
-                //
-                lprintf("    Poly Draw : patSegLen = %5.1f ; remDist = %5.1f ; point count = %zd\n", state.patSegLen, state.remDist, state.gather.size());
-
-                //thickenSolidOpenPolygon(state.dstPoints, state.gather.data(), state.gather.size(), 0);
+        // If we have enough remainder length, process the polygon's edge
+        if(state.remLen >= state.patSegLen) {
+            // Generate a simple line segment as needed
+            if(draw) {
+                sagGenerateSimpleLineSegment(state, state.px, state.py, state.px + state.cvx * 0.5f, state.py + state.cvy * 0.5f);
+                lprintf("    Line Draw : patSegLen = %5.1f ; remLen = %5.1f ; line (%5.1f, %5.1f) - (%5.1f, %5.1f)\n", state.patSegLen, state.remLen, state.px, state.py, state.px + state.cvx, state.py + state.cvy);
             }
             else {
-                lprintf("    Poly Skip : patSegLen = %5.1f ; remDist = %5.1f ; point count = %zd\n", state.patSegLen, state.remDist, state.gather.size());
+                lprintf("    Line Skip : patSegLen = %5.1f ; remLen = %5.1f ; line (%5.1f, %5.1f) - (%5.1f, %5.1f)\n", state.patSegLen, state.remLen, state.px, state.py, state.px + state.cvx, state.py + state.cvy);
+            }
+            // Process excess length (if any)
+            state.remLen    = state.remLen - state.patSegLen;
+            state.patSegLen = 0.0f;
+            if(state.remLen > 0.0f) {
+                state.px = state.ex - state.uvx * state.remLen;
+                state.py = state.ey - state.uvy * state.remLen;
+                lprintf("    Excess    : px = %5.1f ; py = %5.1f ; remLen = %5.1f\n", state.px, state.py, state.remLen);
+            }
+            else {
+                state.remLen = -1.0f;
+                lprintf("    Consumed  : remLen = %5.1f\n", state.remLen);
+            }
+            continue;
+        }
+
+        // If we have enough gathered points, process them
+        if(state.gatherLen >= state.patSegLen) {
+            // Generate one segment
+            if(draw) {
+                // Add polygon separator point as needed
+                if(!state.dstPoints.empty()) state.dstPoints.push_back(Painter::PolygonSeparatorPointF);
+                // Generate the polygon
+                thickenSolidOpenPolygon(state.dstPoints, state.gather.data(), state.gather.size(), 0);
+                lprintf("    Poly Draw : patSegLen = %5.1f ; remLen = %5.1f ; point count = %zd\n", state.patSegLen, state.remLen, state.gather.size());
+            }
+            else {
+                lprintf("    Poly Skip : patSegLen = %5.1f ; remLen = %5.1f ; point count = %zd\n", state.patSegLen, state.remLen, state.gather.size());
             }
             //
 
-            state.remDist   = state.remDist - state.patSegLen;
+            state.remLen   = state.gatherLen - state.patSegLen;
             state.patSegLen = 0.0f;
 
             // --- Update the state ---
-            state.remDist -= state.cvl;
+            state.remLen -= state.cvl;
             state.px      += state.cvx;
             state.py      += state.cvy;
 
@@ -1702,29 +1701,36 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
             state.gather.clear();
             state.gatherLen = 0.0f;
         }
-        // --- The "gather" buffer is empty, generate a simple line segment ---
-        else {
-            // Generate a simple line segment as needed
-            if(draw) {
-                //sagGenerateSimpleLineSegment(state, state.px, state.py, state.px + state.cvx * 0.5f, state.py + state.cvy * 0.5f);
-                lprintf("    Line Draw : patSegLen = %5.1f ; remDist = %5.1f ; line (%5.1f, %5.1f) - (%5.1f, %5.1f)\n", state.patSegLen, state.remDist, state.px, state.py, state.px + state.cvx, state.py + state.cvy);
+
+
+
+        // Perform "gather" operation if:
+        //     1. The length of the polygon's edge is shorther than the "pattern" segment length
+        //     2. The "gather" length              is shorther than the "pattern" segment length
+        if(state.remLen < state.patSegLen && state.gatherLen < state.patSegLen) {
+            // Store the current interpolation coordinate to the "gather" buffer
+            if(state.gather.empty() || state.gather.back().x() != state.px || state.gather.back().y() != state.py) {
+                state.gather.push_back(PointF(state.px, state.py));
             }
-            else {
-                lprintf("    Line Skip : patSegLen = %5.1f ; remDist = %5.1f ; line (%5.1f, %5.1f) - (%5.1f, %5.1f)\n", state.patSegLen, state.remDist, state.px, state.py, state.px + state.cvx, state.py + state.cvy);
+            state.gather.push_back(PointF(state.ex, state.ey));
+            state.gatherLen += state.remLen;
+            lprintf("    Gather    : patSegLen = %5.1f ; remLen = %5.1f ; segment (%5.1f, %5.1f) - (%5.1f, %5.1f) from index [%2zd, %2zd]; new gather.size() = %zd\n", state.patSegLen, state.remLen, state.px, state.py, state.ex, state.ey, state.idx1, state.idx1 + 1, state.gather.size());
+            // Reduce the "pattern" segment length and reset the remainder length
+            state.patSegLen -= state.remLen;
+            state.remLen    = -1.0f;
+            // Increment the point index and check if all polygon's points have been processed
+            ++state.idx1;
+            if(state.idx1 + 1 == state.srcCount) {
+                lprintf("### All points are processed!\n");
+                state.gather.clear();
+                state.gatherLen = 0.0f;
+                return true;
             }
-            // Process excess length
-            state.remDist   = state.remDist - state.patSegLen;
-            state.patSegLen = 0.0f;
-            if(state.remDist > 0.0f) {
-                state.px = state.ex - state.uvx * state.remDist;
-                state.py = state.ey - state.uvy * state.remDist;
-                lprintf("    Excess    : px = %5.1f ; py = %5.1f ; remDist = %5.1f\n", state.px, state.py, state.remDist);
-            }
-            else {
-                state.remDist = -1.0f;
-                lprintf("    Consumed  : remDist = %5.1f\n", state.remDist);
-            }
+            // Skip for now
+            continue;
         }
+
+
         // Done for now
         //break;
     }
