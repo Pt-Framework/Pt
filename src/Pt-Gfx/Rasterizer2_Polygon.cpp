@@ -659,7 +659,6 @@ void Rasterizer2::rasterPolygonAreaXWAA(const Point* points, const size_t* point
 
     // Raster the anti-aliased outline
     const Point* curPointBase = points;
-
     for(size_t p = 0; p < polyCount; ++p) {
         // Mask
         DrawLineMask mask_zero = Rasterizer2::NullLineMask;
@@ -667,6 +666,7 @@ void Rasterizer2::rasterPolygonAreaXWAA(const Point* points, const size_t* point
         // From point N to point (N + 1), successively
         const size_t pc1 = pointCount[p] - 1;
         for(size_t i = 0; i < pc1; ++i) {
+            lprintf("%3d, %3d    %3d, %3d\n", curPointBase[i].x(), curPointBase[i].y(), curPointBase[i + 1].x(), curPointBase[i + 1].y());
             rasterOnePixelAreaGLineSegmentXWAA(curPointBase[i].x(), curPointBase[i].y(), curPointBase[i + 1].x(), curPointBase[i + 1].y(), color, minX, minY, scanlines, mask_nnp1);
             if(!i) memcpy(&mask_zero, &mask_nnp1, sizeof(mask_zero));
         }

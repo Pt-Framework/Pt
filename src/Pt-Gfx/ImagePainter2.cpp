@@ -923,9 +923,11 @@ void ImagePainter2::drawThickPolyline_impl(const PointF* ps, const size_t pointC
                     pointsT.clear();
                     for(size_t j = 0; j < curPCnt; ++j) pointsT.push_back(*(basePtr + j));
                     pointsT.push_back(*basePtr);
+                    // ### TODO: segmentIndexMarker ###
                     if(!thickenPatternedPolygon(pointsF, pointsT.data(), pointsT.size())) return;
                 }
                 else {
+                    // ### TODO: segmentIndexMarker ###
                     if(!thickenPatternedPolygon(pointsF, basePtr, curPCnt)) return;
                 }
             }
@@ -1508,8 +1510,7 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
         if(state.patSegLen > state.remDist) {
             // Store the current interpolation coordinate to the "gather" buffer
             state.gather.push_back(PointF(state.px, state.py));
-            lprintf("    Gather A  : patSegLen = %5.1f ; remDist = %5.1f ; new gather.size() = %zd\n", state.patSegLen, state.remDist, state.gather.size());
-
+            lprintf("    Gather A  : patSegLen = %5.1f ; remDist = %5.1f ; point = (%5.1f, %5.1f) from [%2zd, %2zd]; new gather.size() = %zd\n", state.patSegLen, state.remDist, state.px, state.py, state.idx1, state.idx2, state.gather.size());
             //
             state.patSegLen -= state.remDist;
             state.remDist    = -1.0f;
@@ -1518,6 +1519,7 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
             ++state.idx2;
             if(state.idx2 == state.srcCount) {
                 lprintf("### All points are processed!\n");
+                state.gather.clear();
                 return true;
             }
             // Skip for now
@@ -1528,7 +1530,7 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
         if(!state.gather.empty()) {
             // Store the current interpolation coordinate to the "gather" buffer
             state.gather.push_back(PointF(state.px, state.py));
-            lprintf("    Gather B  : patSegLen = %5.1f ; remDist = %5.1f ; new gather.size() = %zd\n", state.patSegLen, state.remDist, state.gather.size());
+            lprintf("    Gather B  : patSegLen = %5.1f ; remDist = %5.1f ; point = (%5.1f, %5.1f) from [%2zd, %2zd]; new gather.size() = %zd\n", state.patSegLen, state.remDist, state.px, state.py, state.idx1, state.idx2, state.gather.size());
             //
             if(draw) {
                 // Add polygon separator point as needed
