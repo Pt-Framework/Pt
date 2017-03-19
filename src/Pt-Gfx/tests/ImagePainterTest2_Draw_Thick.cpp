@@ -121,7 +121,25 @@ static void testDrawThickLine_impl(
     }
     painter.setPen(penText); painter.drawText( PointF(420, 370 - 30), "Tri-In" );
 
-#define MINI_TEST
+//#define MINI_TEST
+
+    if(ip2) {
+        // Test caps
+        const PointF bezier1a[] = { // CCW
+            PointF(150 + 310, 150 + 330),
+            PointF(150 + 310, 100 + 330),
+            PointF(100 + 310, 100 + 330)
+        };
+        ip2->setPen(penBCapBJoin);
+        ip2->drawQuadraticPolybezier( bezier1a, sizeof(bezier1a) / sizeof(bezier1a[0]), false );
+        if(true) {
+            ip2->setPen(penRef);
+            ip2->drawQuadraticPolybezier( bezier1a, sizeof(bezier1a) / sizeof(bezier1a[0]), false );
+        }
+        painter.setFont( Pt::Gfx::Font(FONT_SPEC_N) );
+        sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
+        return;
+    }
 
     // Test joins
     painter.setPen(penOCapBJoin);
@@ -143,20 +161,6 @@ static void testDrawThickLine_impl(
         else painter.drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]) );
     }
 #ifdef MINI_TEST
-    if(ip2) {
-        // Test caps
-        const PointF bezier1a[] = { // CCW
-            PointF(150 + 310, 150 + 330),
-            PointF(150 + 310, 100 + 330),
-            PointF(100 + 310, 100 + 330)
-        };
-        ip2->setPen(penBCapBJoin);
-        ip2->drawQuadraticPolybezier( bezier1a, sizeof(bezier1a) / sizeof(bezier1a[0]), false );
-        if(true) {
-            ip2->setPen(penRef);
-            ip2->drawQuadraticPolybezier( bezier1a, sizeof(bezier1a) / sizeof(bezier1a[0]), false );
-        }
-    }
     painter.setFont( Pt::Gfx::Font(FONT_SPEC_N) );
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
     return;
