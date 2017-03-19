@@ -1653,8 +1653,8 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
             state.cvy    = vy / round(vz / state.cellSize) * 2;
             state.cvl    = Gfx::Math::fastSqrt(state.cvx * state.cvx + state.cvy * state.cvy);
             state.remLen = vz;
-            lprintf("    Initialize: px = %5.1f ; py = %5.1f ; ex = %5.1f ; ey = %5.1f ; cvx = %5.1f; cvy = %5.1f; cvl = %5.1f; remLen = %5.1f ; patSegLen = %5.1f\n",
-                    state.px, state.py, state.ex, state.ey, state.cvx, state.cvy, state.cvl, state.remLen, state.patSegLen);
+            lprintf("    Initialize: px = %5.1f ; py = %5.1f ; ex = %5.1f ; ey = %5.1f ; cvx = %5.1f; cvy = %5.1f; cvl = %5.1f; remLen = %5.1f ; patSegLen = %5.1f ; from index [%2zd, %2zd]\n",
+                    state.px, state.py, state.ex, state.ey, state.cvx, state.cvy, state.cvl, state.remLen, state.patSegLen, state.idx1, state.idx1 + 1);
         }
         // If we have enough length from the gathered points, process them
         if(state.gatherLen >= state.patSegLen) {
@@ -1670,24 +1670,24 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
                 lprintf("    Poly Skip : patSegLen = %5.1f ; remLen = %5.1f ; point count = %zd\n", state.patSegLen, state.remLen, state.gather.size());
             }
             // Process excess length (if any)
-            state.remLen    = state.remLen - state.gatherLen;
+          //  state.remLen    = state.remLen - state.gatherLen;
             state.patSegLen = 0.0f;
-            if(state.remLen > 0.0f) {
-                state.px = state.ex - state.uvx * state.remLen;
-                state.py = state.ey - state.uvy * state.remLen;
-                lprintf("    Excess    : px = %5.1f ; py = %5.1f ; remLen = %5.1f\n", state.px, state.py, state.remLen);
-            }
-            else {
-                state.remLen = -1.0f;
-                lprintf("    Consumed  : remLen = %5.1f\n", state.remLen);
-            }
+           // if(state.remLen > 0.0f) {
+           //     state.px = state.ex - state.uvx * state.remLen;
+            //    state.py = state.ey - state.uvy * state.remLen;
+             //   lprintf("    Excess    : px = %5.1f ; py = %5.1f ; remLen = %5.1f\n", state.px, state.py, state.remLen);
+           // }
+           // else {
+           //     state.remLen = -1.0f;
+            //    lprintf("    Consumed  : remLen = %5.1f\n", state.remLen);
+           // }
             // Reset the gather buffer
             state.gather.clear();
             state.gatherLen = 0.0f;
             continue;
         }
         // If we have enough remainder length, process the polygon's edge
-        if(state.remLen >= state.patSegLen) {
+        if(state.gather.empty() && state.remLen >= state.patSegLen) {
             // Generate a simple line segment as needed
             if(draw) {
                 sagGenerateSimpleLineSegment(state, state.px, state.py, state.px + state.cvx * 0.5f, state.py + state.cvy * 0.5f);
@@ -1724,8 +1724,9 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
             state.gather.push_back(PointF(state.ex, state.ey));
             state.gatherLen += state.remLen;
             lprintf("    Gather E  : patSegLen = %5.1f ; remLen = %5.1f ; gatherLen = %5.1f ; segment (%5.1f, %5.1f) - (%5.1f, %5.1f) from index [%2zd, %2zd]; new gather.size() = %zd\n", state.patSegLen, state.remLen, state.gatherLen, state.px, state.py, state.ex, state.ey, state.idx1, state.idx1 + 1, state.gather.size());
-            // Increment the point index
+            // Increment the point index and reset the remainder length
             ++state.idx1;
+            state.remLen = -1.0f;
         }
         // Store the in-between coordinate
         else {
@@ -1733,6 +1734,9 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
             state.py += state.uvy * state.patSegLen;
             state.gather.push_back(PointF(state.px, state.py));
             state.gatherLen = state.patSegLen;
+
+            state.remLen -= state.patSegLen;
+
             lprintf("    Gather I  : patSegLen = %5.1f ; remLen = %5.1f ; gatherLen = %5.1f ; segment (%5.1f, %5.1f) - (%5.1f, %5.1f) from index [%2zd, %2zd]; new gather.size() = %zd\n", state.patSegLen, state.remLen, state.gatherLen, state.px, state.py, state.ex, state.ey, state.idx1, state.idx1 + 1, state.gather.size());
         }
     }
