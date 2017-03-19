@@ -94,15 +94,15 @@ static size_t benchDrawThickLine_impl(
 
         painter.setPen(penRCapBJoin);
         painter.drawLine( PointF( 20, 300 - 30), PointF(100, 350 - 30) );
-        painter.drawLine( PointF( 20, 430 - 30), PointF(100, 370 - 30) );
+        painter.drawLine( PointF( 20, 430 - 30), PointF(100, 380 - 30) );
 
         painter.setPen(penSCapBJoin);
         painter.drawLine( PointF(120, 300 - 30), PointF(200, 350 - 30) );
-        painter.drawLine( PointF(120, 430 - 30), PointF(200, 370 - 30) );
+        painter.drawLine( PointF(120, 430 - 30), PointF(200, 380 - 30) );
 
         painter.setPen(penBCapBJoin);
         painter.drawLine( PointF(220, 300 - 30), PointF(300, 350 - 30) );
-        painter.drawLine( PointF(220, 430 - 30), PointF(300, 370 - 30) );
+        painter.drawLine( PointF(220, 430 - 30), PointF(300, 380 - 30) );
 
         painter.setPen(penBCapBJoin);
         const PointF poly1a[] = { // CCW

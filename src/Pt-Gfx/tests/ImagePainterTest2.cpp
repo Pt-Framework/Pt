@@ -68,7 +68,7 @@ using namespace Pt::Gfx;
 
 // General settings for Pt-Gfx
 #define DO_TEST_DRAW    1
-#define DO_BENCHMARKING 0
+#define DO_BENCHMARKING 1
 
 // Detailed-test enable settings for Pt-Gfx
 #define TEST_SOURCECOPY                         1
@@ -118,8 +118,8 @@ using namespace Pt::Gfx;
 
 #define BENCHMARK_SOLID_BEZIER              0
 #define BENCHMARK_PATTERNED_BEZIER          0
-#define BENCHMARK_SOLID_THICK_BEZIER        1
-#define BENCHMARK_PATTERNED_THICK_BEZIER    1
+#define BENCHMARK_SOLID_THICK_BEZIER        0
+#define BENCHMARK_PATTERNED_THICK_BEZIER    0
 
 #define BENCHMARK_RECTANGLE                 0
 #define BENCHMARK_SOLID_FILLED_RECTANGLE    0
@@ -249,22 +249,38 @@ int main(int argc, char* args[])
     if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_SOLID_THICK_LINE) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
         testDrawSolidThickLine("Solid Thick Lines - ImagePainter2 [SourceCopy]", image, *painter2);
+        if(TEST_COMPARE_WITH_OLD_PAINTER) {
+            painter1->setCompositionMode(CompositionMode::SourceCopy);
+            testDrawSolidThickLine("Patterned Lines - ImagePainter [SourceCopy]", image, *painter1);
+        }
     }
 
     if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_SOLID_THICK_LINE) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
         testDrawSolidThickLine("Solid Thick Lines - ImagePainter2 [SourceOver]", image, *painter2);
+        if(TEST_COMPARE_WITH_OLD_PAINTER) {
+            painter1->setCompositionMode(CompositionMode::SourceOver);
+            testDrawSolidThickLine("Patterned Lines - ImagePainter [SourceOver]", image, *painter1);
+        }
     }
 
     // Patterned thick lines
     if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_PATTERNED_THICK_LINE) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
         testDrawPatternedThickLine("Patterned Thick Lines - ImagePainter2 [SourceCopy]", image, *painter2);
+        if(TEST_COMPARE_WITH_OLD_PAINTER) {
+            painter1->setCompositionMode(CompositionMode::SourceCopy);
+            testDrawPatternedThickLine("Patterned Lines - ImagePainter [SourceCopy]", image, *painter1);
+        }
     }
 
     if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_PATTERNED_THICK_LINE) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
         testDrawPatternedThickLine("Patterned Thick Lines - ImagePainter2 [SourceOver]", image, *painter2);
+        if(TEST_COMPARE_WITH_OLD_PAINTER) {
+            painter1->setCompositionMode(CompositionMode::SourceOver);
+            testDrawPatternedThickLine("Patterned Lines - ImagePainter [SourceOver]", image, *painter1);
+        }
     }
 
     // Rectangles, thick rectangles and filled rectangles

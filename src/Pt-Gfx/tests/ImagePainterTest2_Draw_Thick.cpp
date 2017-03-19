@@ -39,7 +39,6 @@ static void testDrawThickLine_impl(
     painter.drawLine( PointF( 20,  20), PointF(200, 120) );
     painter.drawLine( PointF( 20, 240), PointF(200, 140) );
     if(true) {
-        //penRef.setStyle(painter.pen().style());
         painter.setPen(penRef);
         painter.drawLine( PointF( 20,  20), PointF(200, 120) );
         painter.drawLine( PointF( 20, 240), PointF(200, 140) );
@@ -51,7 +50,6 @@ static void testDrawThickLine_impl(
     painter.drawLine( PointF(220,  20), PointF(400, 120) );
     painter.drawLine( PointF(220, 240), PointF(400, 140) );
     if(true) {
-        //penRef.setStyle(painter.pen().style());
         painter.setPen(penRef);
         painter.drawLine( PointF(220,  20), PointF(400, 120) );
         painter.drawLine( PointF(220, 240), PointF(400, 140) );
@@ -63,7 +61,6 @@ static void testDrawThickLine_impl(
     painter.drawLine( PointF(420,  20), PointF(600, 120) );
     painter.drawLine( PointF(420, 240), PointF(600, 140) );
     if(true) {
-        //penRef.setStyle(painter.pen().style());
         painter.setPen(penRef);
         painter.drawLine( PointF(420,  20), PointF(600, 120) );
         painter.drawLine( PointF(420, 240), PointF(600, 140) );
@@ -78,7 +75,6 @@ static void testDrawThickLine_impl(
     painter.drawLine( PointF( 20, 300 - 30), PointF(100, 350 - 30) );
     painter.drawLine( PointF( 20, 430 - 30), PointF(100, 380 - 30) );
     if(true) {
-        //penRef.setStyle(painter.pen().style());
         painter.setPen(penRef);
         painter.drawLine( PointF( 20, 300 - 30), PointF(100, 350 - 30) );
         painter.drawLine( PointF( 20, 430 - 30), PointF(100, 380 - 30) );
@@ -89,7 +85,6 @@ static void testDrawThickLine_impl(
     painter.drawLine( PointF(120, 300 - 30), PointF(200, 350 - 30) );
     painter.drawLine( PointF(120, 430 - 30), PointF(200, 380 - 30) );
     if(true) {
-        //penRef.setStyle(painter.pen().style());
         painter.setPen(penRef);
         painter.drawLine( PointF(120, 300 - 30), PointF(200, 350 - 30) );
         painter.drawLine( PointF(120, 430 - 30), PointF(200, 380 - 30) );
@@ -100,7 +95,6 @@ static void testDrawThickLine_impl(
     painter.drawLine( PointF(220, 300 - 30), PointF(300, 350 - 30) );
     painter.drawLine( PointF(220, 430 - 30), PointF(300, 380 - 30) );
     if(true) {
-        //penRef.setStyle(painter.pen().style());
         painter.setPen(penRef);
         painter.drawLine( PointF(220, 300 - 30), PointF(300, 350 - 30) );
         painter.drawLine( PointF(220, 430 - 30), PointF(300, 380 - 30) );
@@ -111,7 +105,6 @@ static void testDrawThickLine_impl(
     painter.drawLine( PointF(320, 300 - 30), PointF(400, 350 - 30) );
     painter.drawLine( PointF(320, 430 - 30), PointF(400, 380 - 30) );
     if(true) {
-        //penRef.setStyle(painter.pen().style());
         painter.setPen(penRef);
         painter.drawLine( PointF(320, 300 - 30), PointF(400, 350 - 30) );
         painter.drawLine( PointF(320, 430 - 30), PointF(400, 380 - 30) );
@@ -122,18 +115,19 @@ static void testDrawThickLine_impl(
     painter.drawLine( PointF(420, 300 - 30), PointF(500, 350 - 30) );
     painter.drawLine( PointF(420, 430 - 30), PointF(500, 380 - 30) );
     if(true) {
-        //penRef.setStyle(painter.pen().style());
         painter.setPen(penRef);
         painter.drawLine( PointF(420, 300 - 30), PointF(500, 350 - 30) );
         painter.drawLine( PointF(420, 430 - 30), PointF(500, 380 - 30) );
     }
     painter.setPen(penText); painter.drawText( PointF(420, 370 - 30), "Tri-In" );
 
+//#define MINI_TEST
+
     // Test joins
     painter.setPen(penOCapBJoin);
-
+#ifdef MINI_TEST
     painter.setPen(penBCapBJoin);
-
+#endif
     const PointF poly1a[] = { // CCW
         PointF(670 + 10, 120),
         PointF(700 + 10, 180),
@@ -148,11 +142,11 @@ static void testDrawThickLine_impl(
         if(ip2) ip2->drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]), false );
         else painter.drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]) );
     }
-
+#ifdef MINI_TEST
     painter.setFont( Pt::Gfx::Font(FONT_SPEC_N) );
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
     return;
-
+#endif
 
     painter.setPen(penOCapBJoin);
     const PointF poly1b[] = { // CCW
@@ -235,37 +229,35 @@ static void testDrawThickLine_impl(
 
     painter.setPen(penText); painter.drawText( PointF(650 + 20, 100 + 400), "Round" );
 
-    painter.setPen(penOCapNJoin);
-    const PointF poly4a[] = { // CCW
-        PointF(670 - 600 - 30, 120 + 400),
-        PointF(700 - 600 - 30, 180 + 400),
-        PointF(800 - 600 - 30, 130 + 400),
-        PointF(650 - 600 - 30,  20 + 400)
-    };
-    if(ip2) ip2->drawPolyline( poly4a, sizeof(poly4a) / sizeof(poly4a[0]), false );
-    else painter.drawPolyline( poly4a, sizeof(poly4a) / sizeof(poly4a[0]) );
-    if(true) {
-        painter.setPen(penRef);
-        if(ip2) ip2->drawPolyline( poly4a, sizeof(poly4a) / sizeof(poly4a[0]), false );
-        else painter.drawPolyline( poly4a, sizeof(poly4a) / sizeof(poly4a[0]) );
-    }
+    if(ip2) { // This hoin type is not supported by the old painter
+        ip2->setPen(penOCapNJoin);
+        const PointF poly4a[] = { // CCW
+            PointF(670 - 600 - 30, 120 + 400),
+            PointF(700 - 600 - 30, 180 + 400),
+            PointF(800 - 600 - 30, 130 + 400),
+            PointF(650 - 600 - 30,  20 + 400)
+        };
+        ip2->drawPolyline( poly4a, sizeof(poly4a) / sizeof(poly4a[0]), false );
+        if(true) {
+            painter.setPen(penRef);
+            ip2->drawPolyline( poly4a, sizeof(poly4a) / sizeof(poly4a[0]), false );
+        }
 
-    painter.setPen(penOCapNJoin);
-    const PointF poly4b[] = { // CCW
-        PointF(670 - 430 - 40, 120 + 400),
-        PointF(700 - 430 - 40, 180 + 400),
-        PointF(800 - 430 - 40, 130 + 400),
-        PointF(650 - 430 - 40,  20 + 400)
-    };
-    if(ip2) ip2->drawPolyline( poly4b, sizeof(poly4b) / sizeof(poly4b[0]), true );
-    else painter.drawPolyline( poly4b, sizeof(poly4b) / sizeof(poly4b[0]) );
-    if(true) {
-        painter.setPen(penRef);
-        if(ip2) ip2->drawPolyline( poly4b, sizeof(poly4b) / sizeof(poly4b[0]), true );
-        else painter.drawPolyline( poly4b, sizeof(poly4b) / sizeof(poly4b[0]) );
-    }
+        ip2->setPen(penOCapNJoin);
+        const PointF poly4b[] = { // CCW
+            PointF(670 - 430 - 40, 120 + 400),
+            PointF(700 - 430 - 40, 180 + 400),
+            PointF(800 - 430 - 40, 130 + 400),
+            PointF(650 - 430 - 40,  20 + 400)
+        };
+        ip2->drawPolyline( poly4b, sizeof(poly4b) / sizeof(poly4b[0]), true );
+        if(true) {
+            ip2->setPen(penRef);
+            ip2->drawPolyline( poly4b, sizeof(poly4b) / sizeof(poly4b[0]), true );
+        }
 
-    painter.setPen(penText); painter.drawText( PointF(650 - 600 - 20, 100 + 400), "None" );
+        ip2->setPen(penText); painter.drawText( PointF(650 - 600 - 20, 100 + 400), "None" );
+    }
 
     // Test bezier
     if(ip2) {
