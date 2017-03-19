@@ -123,6 +123,7 @@ static void testDrawThickLine_impl(
 
 //#define MINI_TEST
 
+    fprintf(stderr, "\n\n##################\n\n");
     if(!true) {
         ip2->setPen(penBCapBJoin);
         const PointF poly1a[] = { // CCW

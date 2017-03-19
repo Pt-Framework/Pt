@@ -134,7 +134,7 @@ class PT_GFX_API ImagePainter2 : public Painter
 
     private:
         // State for spread-and-gather operations on polygon points
-        //struct SAGOpState;
+        struct SAGOpState;
 
     private:
         inline void convertPointTrunc(std::vector<Point>& dst, const PointF* src, const size_t pointCount);
@@ -150,8 +150,8 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         void generatePatternedLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, Pt::int32_t& piCtrInOut);
         bool thickenPatternedPolygon(std::vector<PointF>& pointsF, const PointF* src, size_t pointCount);
-        //bool sagPolygonPoints(SAGOpState& state, bool draw);
-        //void sagGenerateSimpleLineSegment(SAGOpState& state, float x1, float y1, float x2, float y2);
+        bool sagPolygonPoints(SAGOpState& state, bool draw);
+        void sagGenerateSimpleLineSegment(SAGOpState& state, float x1, float y1, float x2, float y2);
 
     private:
         RectF           _clip;
