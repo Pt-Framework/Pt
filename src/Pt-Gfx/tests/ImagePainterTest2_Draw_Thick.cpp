@@ -121,8 +121,7 @@ static void testDrawThickLine_impl(
     }
     painter.setPen(penText); painter.drawText( PointF(420, 370 - 30), "Tri-In" );
 
-//#define MINI_TEST
-
+    /*
     fprintf(stderr, "\n\n##################\n\n");
     if(true) {
         ip2->setPen(penBCapBJoin);
@@ -171,12 +170,10 @@ static void testDrawThickLine_impl(
     painter.setFont( Pt::Gfx::Font(FONT_SPEC_N) );
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
     return;
+    //*/
 
     // Test joins
     painter.setPen(penOCapBJoin);
-#ifdef MINI_TEST
-    painter.setPen(penBCapBJoin);
-#endif
     const PointF poly1a[] = { // CCW
         PointF(670 + 10, 120),
         PointF(700 + 10, 180),
@@ -191,11 +188,6 @@ static void testDrawThickLine_impl(
         if(ip2) ip2->drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]), false );
         else painter.drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]) );
     }
-#ifdef MINI_TEST
-    painter.setFont( Pt::Gfx::Font(FONT_SPEC_N) );
-    sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
-    return;
-#endif
 
     painter.setPen(penOCapBJoin);
     const PointF poly1b[] = { // CCW
