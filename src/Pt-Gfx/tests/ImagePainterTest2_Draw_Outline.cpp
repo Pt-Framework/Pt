@@ -301,14 +301,14 @@ static void testDrawRoundRect(const char* title, Image& image, Painter& painter)
     ip2->drawRoundRect( RectF(PointF(480, 290), SizeF(200, 100)), 25 );
 
     // Outline - thin - patterned
-    ip2->setPen  ( Pen(Color::fromRgb8(0, 255, 0, 175), 1, Pen::DotDash ) );
+    ip2->setPen  ( Pen(Color::fromRgb8(0, 255, 0, 175), 1, Pen::Dot, Pen::RoundCap, Pen::MiterJoin ) );
     ip2->drawRoundRect( RectF(PointF(712,  20), SizeF(200, 100)), 10 );
 
     // Outline - thick - patterned
-    ip2->setPen  ( Pen(Color::fromRgb8(0, 255, 0, 175), 12, Pen::DotDash ));
+    ip2->setPen  ( Pen(Color::fromRgb8(0, 255, 0, 175), 12, Pen::Dot, Pen::RoundCap, Pen::MiterJoin ));
     ip2->drawRoundRect( RectF(PointF(712, 160), SizeF(200, 100)), 10 );
 
-    ip2->setPen  ( Pen(Color::fromRgb8(0, 255, 0, 175), 12, Pen::DotDash ));
+    ip2->setPen  ( Pen(Color::fromRgb8(0, 255, 0, 175), 12, Pen::Dot, Pen::RoundCap, Pen::MiterJoin ));
     ip2->drawRoundRect( RectF(PointF(712, 290), SizeF(200, 100)), 25 );
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));

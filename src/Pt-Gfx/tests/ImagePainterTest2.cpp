@@ -72,7 +72,7 @@ using namespace Pt::Gfx;
 
 // Detailed-test enable settings for Pt-Gfx
 #define TEST_SOURCECOPY                         1
-#define TEST_SOURCEOVER                         0
+#define TEST_SOURCEOVER                         1
 
 // ### TODO: Check with Valgrind again after all thick-line implementations are done ###
 
