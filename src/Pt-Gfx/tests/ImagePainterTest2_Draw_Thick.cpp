@@ -141,7 +141,7 @@ static void testDrawThickLine_impl(
             else painter.drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]) );
         }
     }
-    if(!true && ip2) {
+    if(true && ip2) {
         ip2->setPen(penBCapBJoin);
         const PointF bezier1a[] = { // CCW
             PointF(150 + 310, 150 + 330),
@@ -154,7 +154,7 @@ static void testDrawThickLine_impl(
             ip2->drawQuadraticPolybezier( bezier1a, sizeof(bezier1a) / sizeof(bezier1a[0]), false );
         }
     }
-    if(!true && ip2) {
+    if(true && ip2) {
         const PointF bezier2a[] = { // CCW
             PointF(100 + 390, 100 + 330),
             PointF(100 + 390, 150 + 330),

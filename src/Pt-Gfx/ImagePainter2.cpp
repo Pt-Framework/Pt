@@ -1574,7 +1574,7 @@ bool ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const 
     */
 
     // Calculate the cell size
-    const float cellSize = _rasterizer->pen().size() * 0.5f;
+    const float cellSize = _rasterizer->pen().size() * 0.25f;
 
     // Initialize the operational state
     SAGOpState state(pointsF, src, pointCount, cellSize);
@@ -1649,8 +1649,8 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
             state.ey     = y2;
             state.uvx    = vx / vz;
             state.uvy    = vy / vz;
-            state.cvx    = vx / round(vz / state.cellSize) * 2;
-            state.cvy    = vy / round(vz / state.cellSize) * 2;
+            state.cvx    = vx / round(vz / state.cellSize) * 4;
+            state.cvy    = vy / round(vz / state.cellSize) * 4;
             state.cvl    = Gfx::Math::fastSqrt(state.cvx * state.cvx + state.cvy * state.cvy);
             state.remLen = vz;
             lprintf("    Initialize: px = %5.1f ; py = %5.1f ; ex = %5.1f ; ey = %5.1f ; cvx = %5.1f; cvy = %5.1f; cvl = %5.1f; remLen = %5.1f ; patSegLen = %5.1f ; from index [%2zd, %2zd]\n",
