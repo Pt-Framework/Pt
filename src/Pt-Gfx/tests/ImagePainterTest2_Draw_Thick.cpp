@@ -123,23 +123,53 @@ static void testDrawThickLine_impl(
 
 //#define MINI_TEST
 
-    if(ip2) {
-        // Test caps
+    if(!true) {
+        ip2->setPen(penBCapBJoin);
+        const PointF poly1a[] = { // CCW
+            PointF(670 + 10, 120),
+            PointF(700 + 10, 180),
+            PointF(800 + 10, 130),
+            PointF(650 + 10,  20)
+        };
+        if(ip2) ip2->drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]), false );
+        else painter.drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]) );
+        if(true) {
+            //penRef.setStyle(painter.pen().style());
+            painter.setPen(penRef);
+            if(ip2) ip2->drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]), false );
+            else painter.drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]) );
+        }
+    }
+    if(!true && ip2) {
+        ip2->setPen(penBCapBJoin);
         const PointF bezier1a[] = { // CCW
             PointF(150 + 310, 150 + 330),
             PointF(150 + 310, 100 + 330),
             PointF(100 + 310, 100 + 330)
         };
-        ip2->setPen(penBCapBJoin);
         ip2->drawQuadraticPolybezier( bezier1a, sizeof(bezier1a) / sizeof(bezier1a[0]), false );
         if(true) {
             ip2->setPen(penRef);
             ip2->drawQuadraticPolybezier( bezier1a, sizeof(bezier1a) / sizeof(bezier1a[0]), false );
         }
-        painter.setFont( Pt::Gfx::Font(FONT_SPEC_N) );
-        sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
-        return;
     }
+    if(true && ip2) {
+        const PointF bezier2a[] = { // CCW
+            PointF(100 + 390, 100 + 330),
+            PointF(100 + 390, 150 + 330),
+            PointF(150 + 390, 150 + 330),
+            PointF(150 + 390, 100 + 330)
+        };
+        ip2->setPen(penOCapBJoin);
+        ip2->drawQuadraticPolybezier( bezier2a, sizeof(bezier2a) / sizeof(bezier2a[0]), true );
+        if(true) {
+            ip2->setPen(penRef);
+            ip2->drawQuadraticPolybezier( bezier2a, sizeof(bezier2a) / sizeof(bezier2a[0]), true );
+        }
+    }
+    painter.setFont( Pt::Gfx::Font(FONT_SPEC_N) );
+    sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
+    return;
 
     // Test joins
     painter.setPen(penOCapBJoin);
