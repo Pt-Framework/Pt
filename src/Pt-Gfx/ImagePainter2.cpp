@@ -105,7 +105,7 @@ static inline bool intersectLine(bool& inLine, PointF& intersect, const PointF& 
         }
         if(x11 == x12 && x11 == x21 && x11 == x22 && y12 == y21) {
             intersect.set(x11, y12);
-            inLine = false;
+            inLine = true;
             return true;
         }
         // No intersection
@@ -114,8 +114,14 @@ static inline bool intersectLine(bool& inLine, PointF& intersect, const PointF& 
 
     // Calculate the intersection point
     const float idenom = 1.0f / denom;
-    const float ipX    = (b1 * c2 - b2 * c1) * idenom;
-    const float ipY    = (a2 * c1 - a1 * c2) * idenom;
+          float ipX    = (b1 * c2 - b2 * c1) * idenom;
+          float ipY    = (a2 * c1 - a1 * c2) * idenom;
+
+         if(ipX < minX1 && ipX < minX2) ipX = (minX1 + minX2) * 0.5f;
+    else if(ipX > maxX1 && ipX > maxX2) ipX = (maxX1 + maxX2) * 0.5f;
+
+         if(ipY < minY1 && ipY < minY2) ipY = (minY1 + minY2) * 0.5f;
+    else if(ipY > maxY1 && ipY > maxY2) ipY = (maxY1 + maxY2) * 0.5f;
 
     intersect.set(ipX, ipY);
 
@@ -155,8 +161,6 @@ static inline void satDPIProjection(float& min, float& max, const PointF* points
 //           Public domain code by Wojciech Muła, 2013-2017
 static inline bool satDPIProcess(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
 {
-    // ### TODO: NOT WORKING PROPERLY !!! ###
-
     #define FIX_INDEX(I, M)  ( ( (I) < 0 ) ? ( (I) + (M) ) : ( ( (I) >= (M) ) ? ( (I) - (M) ) : (I) ) )
 
     for(size_t i = 0; i < poly1Count; ++i) {
@@ -239,8 +243,6 @@ static inline Pt::int32_t naiveDPIGetSide(float la, float lb, float lc, const Po
 //           Public domain code by Wojciech Muła, 2013-2017
 static inline bool naiveDetectPolygonIntersection(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
 {
-    // ### TODO: NOT WORKING PROPERLY !!! ###
-
     #define FIX_INDEX(I, M)  ( ( (I) < 0 ) ? ( (I) + (M) ) : ( ( (I) >= (M) ) ? ( (I) - (M) ) : (I) ) )
 
     for(size_t i = 0; i < poly1Count; ++i) {
@@ -308,8 +310,8 @@ static inline bool bboxDetectPolygonIntersection(const PointF* poly1, size_t pol
 
 static inline bool detectPolygonIntersection(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
 {
-    return bboxDetectPolygonIntersection (poly1, poly1Count, poly2, poly2Count);
-    //return satDetectPolygonIntersection  (poly1, poly1Count, poly2, poly2Count);
+    //return bboxDetectPolygonIntersection (poly1, poly1Count, poly2, poly2Count);
+      return satDetectPolygonIntersection  (poly1, poly1Count, poly2, poly2Count);
     //return naiveDetectPolygonIntersection(poly1, poly1Count, poly2, poly2Count);
 }
 
@@ -1524,7 +1526,7 @@ bool ImagePainter2::combineLineSegmentForSolidClosedPolygon(std::vector<PointF>&
     */
 
     // Store the "outside" line's points
-    const Pen::JoinStyle js1 = (inSameSegment || inLine) ? Pen::MiterJoin : _rasterizer->pen().joinStyle();
+    const Pen::JoinStyle js1 = Pen::MiterJoin;//(inSameSegment || inLine) ? Pen::MiterJoin : _rasterizer->pen().joinStyle();
     outer.pop_back();
     if(isFirst) outer.pop_back();
     switch(js1) {
