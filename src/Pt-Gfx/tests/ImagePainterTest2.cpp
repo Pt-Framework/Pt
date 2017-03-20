@@ -68,22 +68,22 @@ using namespace Pt::Gfx;
 
 // General settings for Pt-Gfx
 #define DO_TEST_DRAW    1
-#define DO_BENCHMARKING 0
+#define DO_BENCHMARKING 1
 
 // Detailed-test enable settings for Pt-Gfx
-#define TEST_SOURCECOPY                         0
-#define TEST_SOURCEOVER                         1
+#define TEST_SOURCECOPY                         1
+#define TEST_SOURCEOVER                         0
 
 #define TEST_DRAW_SOLID_LINE_AND_TEXT           0 // (including bezier)
 #define TEST_DRAW_PATTERNED_LINE                0 // (including bezier)
 #define TEST_DRAW_SOLID_THICK_LINE              0 // (including bezier)
-#define TEST_DRAW_PATTERNED_THICK_LINE          1 // (including bezier)
+#define TEST_DRAW_PATTERNED_THICK_LINE          0 // (including bezier)
 
 #define TEST_DRAW_OMPF_RECTANGLES               0 // (including thick and filled)
-#define TEST_DRAW_ROUND_OMPF_RECTANGLES         0 // (including thick and filled) // ### TODO: Missing pattern !!! ###
+#define TEST_DRAW_ROUND_OMPF_RECTANGLES         1 // (including thick and filled) // ### TODO: Missing pattern !!! ###
 #define TEST_DRAW_ELLIPSES_ARCS                 0
 #define TEST_DRAW_SOLID_THICK_ELLIPSES_ARCS     0
-#define TEST_DRAW_PATTERNED_THICK_ELLIPSES_ARCS 0                                 // ### TODO: Extra lines !!! ###
+#define TEST_DRAW_PATTERNED_THICK_ELLIPSES_ARCS 1                                 // ### TODO: Extra lines !!! ###
 
 #define TEST_DRAW_SOLID_FILLED_POLYGONS         0
 #define TEST_DRAW_GRADIENT_FILLED_POLYGONS      0
@@ -112,15 +112,15 @@ using namespace Pt::Gfx;
 #define BENCHMARK_SOLID_THICK_LINE          1
 #define BENCHMARK_PATTERNED_THICK_LINE      1
 
+#define BENCHMARK_RECTANGLE                 0
 #define BENCHMARK_ELLIPSE                   0
 #define BENCHMARK_ARC                       0
 
 #define BENCHMARK_SOLID_BEZIER              0
 #define BENCHMARK_PATTERNED_BEZIER          0
-#define BENCHMARK_SOLID_THICK_BEZIER        0
-#define BENCHMARK_PATTERNED_THICK_BEZIER    0
+#define BENCHMARK_SOLID_THICK_BEZIER        1
+#define BENCHMARK_PATTERNED_THICK_BEZIER    1
 
-#define BENCHMARK_RECTANGLE                 0
 #define BENCHMARK_SOLID_FILLED_RECTANGLE    0
 #define BENCHMARK_GRADIENT_FILLED_RECTANGLE 0
 #define BENCHMARK_TEXTURE_FILLED_RECTANGLE  0

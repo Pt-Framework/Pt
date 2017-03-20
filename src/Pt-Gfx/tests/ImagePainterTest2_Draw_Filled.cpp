@@ -181,7 +181,6 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
 
 #if 0
     // Test big shape
-    // ### TODO: Produce extra pixels !!! ###
     painter.setBrush( brush1 );
     ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
     ip2->fillArc( PointF ( 20,  20), SizeF(800, 800), -225 + 30, 45 + 30, ArcMode::Pie );
