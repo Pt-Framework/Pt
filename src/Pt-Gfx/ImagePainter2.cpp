@@ -117,12 +117,14 @@ static inline bool intersectLine(bool& inLine, PointF& intersect, const PointF& 
           float ipX    = (b1 * c2 - b2 * c1) * idenom;
           float ipY    = (a2 * c1 - a1 * c2) * idenom;
 
+    // Check and fix the coordinate of the intersection point
+    // (for very steep lines, the coordinate of the intersection point can be incorrectly calculated)
          if(ipX < minX1 && ipX < minX2) ipX = (minX1 + minX2) * 0.5f;
     else if(ipX > maxX1 && ipX > maxX2) ipX = (maxX1 + maxX2) * 0.5f;
-
          if(ipY < minY1 && ipY < minY2) ipY = (minY1 + minY2) * 0.5f;
     else if(ipY > maxY1 && ipY > maxY2) ipY = (maxY1 + maxY2) * 0.5f;
 
+    // Store the intersection point
     intersect.set(ipX, ipY);
 
     // Determine if the intersection point is inside the line
@@ -142,13 +144,13 @@ static inline bool intersectLine(bool& inLine, PointF& intersect, const PointF& 
 //           http://wm.ite.pl/articles/convex-polygon-intersection/demo/demo.xhtml
 //           http://wm.ite.pl/articles/convex-polygon-intersection/demo/SAT.js
 //           Public domain code by Wojciech Muła, 2013-2017
-static inline void satDPIProjection(float& min, float& max, const PointF* points, size_t pointCount, const PointF& p)
+static inline void satDPIProjection(double& min, double& max, const PointF* points, size_t pointCount, double px, double py)
 {
-    min = points[0].x() * p.x() + points[0].y() * p.y();
+    min = points[0].x() * px + points[0].y() * py;
     max = min;
 
     for(size_t i = 1; i < pointCount; ++i) {
-        const float val = points[i].x() * p.x() + points[i].y() * p.y();
+        const double val = points[i].x() * px + points[i].y() * py;
         if(val > max) max = val;
         if(val < min) min = val;
     }
@@ -165,19 +167,25 @@ static inline bool satDPIProcess(const PointF* poly1, size_t poly1Count, const P
 
     for(size_t i = 0; i < poly1Count; ++i) {
         // Get the line
+#if 0
         const float x1 = poly1[FIX_INDEX(i    , poly1Count)].x();
         const float y1 = poly1[FIX_INDEX(i    , poly1Count)].y();
         const float x2 = poly1[FIX_INDEX(i + 1, poly1Count)].x();
         const float y2 = poly1[FIX_INDEX(i + 1, poly1Count)].y();
+#else
+        const double x1 = poly1[FIX_INDEX(poly1Count - 1 - i    , poly1Count)].x();
+        const double y1 = poly1[FIX_INDEX(poly1Count - 1 - i    , poly1Count)].y();
+        const double x2 = poly1[FIX_INDEX(poly1Count - 1 - i - 1, poly1Count)].x();
+        const double y2 = poly1[FIX_INDEX(poly1Count - 1 - i - 1, poly1Count)].y();
+
+#endif
         // Calculate the deltas
-        const float dx = x2 - x1;
-        const float dy = y2 - y1;
+        const double dx = x2 - x1;
+        const double dy = y2 - y1;
         // Calculate projection
-        const PointF p(-dy, dx);
-              float min1, max1;
-              float min2, max2;
-        satDPIProjection(min1, max1, poly1, poly1Count, p);
-        satDPIProjection(min2, max2, poly2, poly2Count, p);
+        double min1, max1, min2, max2;
+        satDPIProjection(min1, max1, poly1, poly1Count, -dy, dx);
+        satDPIProjection(min2, max2, poly2, poly2Count, -dy, dx);
         // Check for interection
         if(max1 <= min2 || min1 >= max2) return true;
     }
@@ -272,46 +280,10 @@ static inline bool naiveDetectPolygonIntersection(const PointF* poly1, size_t po
     return false;
 }
 
-static inline bool bboxDetectPolygonIntersection(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
-{
-    float minX1 = poly1[0].x();
-    float minY1 = poly1[0].y();
-    float maxX1 = minX1;
-    float maxY1 = minY1;
-    for(size_t i = 1; i < poly1Count; ++i) {
-        if(poly1[i].x() < minX1) minX1 = poly1[i].x();
-        if(poly1[i].y() < minY1) minY1 = poly1[i].y();
-        if(poly1[i].x() > maxX1) maxX1 = poly1[i].x();
-        if(poly1[i].y() > maxY1) maxY1 = poly1[i].y();
-    }
-
-    float minX2 = poly2[0].x();
-    float minY2 = poly2[0].y();
-    float maxX2 = minX2;
-    float maxY2 = minY2;
-    for(size_t i = 1; i < poly2Count; ++i) {
-        if(poly2[i].x() < minX2) minX2 = poly2[i].x();
-        if(poly2[i].y() < minY2) minY2 = poly2[i].y();
-        if(poly2[i].x() > maxX2) maxX2 = poly2[i].x();
-        if(poly2[i].y() > maxY2) maxY2 = poly2[i].y();
-    }
-
-#define CHECK_IF_INSIDE_BOUNDING_BOX(X, Y, X1, Y1, X2, Y2) if( (X) >= (X1) && (X) <= (X2) && (Y) >= (Y1) && Y <= (Y2) ) return true
-
-    CHECK_IF_INSIDE_BOUNDING_BOX(minX2, minY2, minX1, minY1, maxX1, maxY1);
-    CHECK_IF_INSIDE_BOUNDING_BOX(minX2, maxY2, minX1, minY1, maxX1, maxY1);
-    CHECK_IF_INSIDE_BOUNDING_BOX(maxX2, minY2, minX1, minY1, maxX1, maxY1);
-    CHECK_IF_INSIDE_BOUNDING_BOX(maxX2, maxY2, minX1, minY1, maxX1, maxY1);
-
-#undef CHECK_INSIDE_BOUNDING_BOX
-
-    return false;
-}
-
 static inline bool detectPolygonIntersection(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
 {
-    //return bboxDetectPolygonIntersection (poly1, poly1Count, poly2, poly2Count);
-      return satDetectPolygonIntersection  (poly1, poly1Count, poly2, poly2Count);
+    //return false;
+    return satDetectPolygonIntersection  (poly1, poly1Count, poly2, poly2Count);
     //return naiveDetectPolygonIntersection(poly1, poly1Count, poly2, poly2Count);
 }
 
