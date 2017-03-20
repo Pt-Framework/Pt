@@ -34,6 +34,7 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Math.h>
 
+#include <Pt/Gfx/AffineMatrix2D.h>
 #include <Pt/Gfx/AntiAliasingMode.h>
 #include <Pt/Gfx/ArcMode.h>
 #include <Pt/Gfx/Painter.h>
@@ -45,7 +46,6 @@ namespace Pt {
 namespace Gfx {
 
 
-class AffineMatrix2D;
 class Rasterizer2;
 
 class PT_GFX_API ImagePainter2 : public Painter
@@ -132,6 +132,43 @@ class PT_GFX_API ImagePainter2 : public Painter
         static std::vector<std::string> fontNames();
         static FontMetrics fontMetrics(const Font& font, const Pt::String& text);
 
+    public:
+        // Path API - transformation and matrix
+        virtual void clearMatrixBuffer();
+
+        virtual void pushMatrix(); // Useful for hierarchical rendering (scene graph)
+        virtual void popMatrix();  // ---
+
+        virtual void getRawMatrix(float m[3][3]) const;
+        virtual void updateMatrixUsingRaw(const float m[3][3], AffineMatrix2D::MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
+
+        virtual void loadIdentityMatrix();
+
+        virtual void translate(float x, float y, AffineMatrix2D::MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
+        virtual void scaleAboutOrigin(float x, float y, AffineMatrix2D::MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
+        virtual void rotateAboutOrigin(float deg, AffineMatrix2D::MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
+        virtual void shearXDirection(float deg, AffineMatrix2D::MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
+        virtual void shearYDirection(float deg, AffineMatrix2D::MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
+        virtual void reflectAboutOrigin(AffineMatrix2D::MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
+        virtual void reflectAboutXAxis(AffineMatrix2D::MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
+        virtual void reflectAboutYAxis(AffineMatrix2D::MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
+
+        // Path API - path generation
+        virtual void beginPath();
+        virtual void moveTo(float x, float y); // Can be caleld multiple time before endPath() to create stacked polygons
+        virtual void lineTo(float x, float y);
+        virtual void arcTo(float x, float y);
+        virtual void quadraticBezierTo(float cx, float cy, float x, float y);
+        virtual void endPath(bool autoClose);
+
+        // Path API - path manipulation
+        virtual void pushPath();
+        virtual void popPath();
+
+        virtual void transformPath();
+
+
+
     private:
         // State for spread-and-gather operations on polygon points (used to thicken patterned polygon)
         struct SAGOpState;
@@ -154,9 +191,9 @@ class PT_GFX_API ImagePainter2 : public Painter
         void sagGenerateSimpleLineSegment(SAGOpState& state, float x1, float y1, float x2, float y2);
 
     private:
-        RectF           _clip;
-        AffineMatrix2D* _affineMatrix2D;
-        Rasterizer2*    _rasterizer;
+        RectF          _clip;
+        AffineMatrix2D _affineMatrix2D;
+        Rasterizer2*   _rasterizer;
 };
 
 

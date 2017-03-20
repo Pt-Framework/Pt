@@ -30,7 +30,6 @@
 
 #include <Pt/Gfx/ImagePainter2.h>
 
-#include "AffineMatrix2D.h"
 #include "FreeType2.h"
 #include "Rasterizer2.h"
 
@@ -38,7 +37,6 @@
 namespace Pt {
 namespace Gfx {
 
-// ### TODO !!! ADD SUPPORT FOR PATH !!! TODO ###
 
 // ======================================================================================
 // ===== Internal Helper Functions - Implementation of Geometric Equations ==============
@@ -523,15 +521,11 @@ FontMetrics ImagePainter2::fontMetrics( const Font& font, const Pt::String& text
 // ======================================================================================
 
 ImagePainter2::ImagePainter2(Image& image)
-: _affineMatrix2D( new AffineMatrix2D() )
-, _rasterizer    ( new Rasterizer2(image) )
+: _rasterizer( new Rasterizer2(image) )
 { setAntiAliasingMode(); /* Call the setter to enable the default anti-aliasing mode */ }
 
 ImagePainter2::~ImagePainter2()
-{
-    delete _affineMatrix2D;
-    delete _rasterizer;
-}
+{ delete _rasterizer; }
 
 void ImagePainter2::setAntiAliasingMode(AntiAliasingMode mode)
 { _rasterizer->setAntiAliasingMode(mode); }

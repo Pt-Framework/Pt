@@ -30,6 +30,7 @@
 #ifndef PT_GFX_AFFINEMATRIX2D_H
 #define PT_GFX_AFFINEMATRIX2D_H
 
+#include <cstring>
 #include <vector>
 
 #include <Pt/Gfx/Math.h>
