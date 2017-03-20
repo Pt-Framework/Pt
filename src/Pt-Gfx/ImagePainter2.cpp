@@ -227,11 +227,11 @@ static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, float
     nSegs |= 1;
     if(nSegs < 5) nSegs = 5;
 
-    const float nSegs1 = 1.0f / (nSegs - 1);
+    const float nSegs1i = 1.0f / (nSegs - 1);
 
     for(Pt::int32_t i = 0; i < nSegs; ++i) {
         // Calculate the coordinates
-        const float t  = i * nSegs1;
+        const float t  = i * nSegs1i;
         const float it = 1.0f - t;
         const float a  = it * it;
         const float b  = 2.0f * t  * it;
@@ -245,15 +245,20 @@ static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, float
     }
 }
 
-static inline void generateEllipsePoints(std::vector<Point>& dst, Pt::int32_t radiusX, Pt::int32_t radiusY, Pt::int32_t centerX, Pt::int32_t centerY)
+static inline void generateEllipsePoints(std::vector<Point>& dst, Pt::int32_t radiusX, Pt::int32_t radiusY, Pt::int32_t centerX, Pt::int32_t centerY, size_t penSize)
 {
     // Calculate the ellipse's parameters
-    const Pt::int32_t radiusM = std::max(radiusX, radiusY);
-    const Pt::int32_t numSegs = (radiusM * 2 / 3 / 20) * 20;
+    const Pt::int32_t circFac = round(
+                                    Gfx::Math::fastSqrt( 0.5f * (radiusX * radiusX + radiusY * radiusY) ) /
+                                    ( (penSize > 4) ? (penSize * 0.25f) : 1.0f )
+                                );
+    const Pt::int32_t circSeg = (circFac / 16) * 20 + 1;
+    const Pt::int32_t nSegs   = (circSeg <  9) ?  9 : circSeg;
+    const float       nSegs1i = 1.0f / (nSegs - 1);
 
     // Generate a polygon that approximates the ellipse
-    for(Pt::int32_t i = 0; i <= numSegs; ++i) {
-        const float angle = Gfx::Math::PiMul2 * i / numSegs;
+    for(Pt::int32_t i = 0; i < nSegs; ++i) {
+        const float angle = Gfx::Math::PiMul2 * i * nSegs1i;
         // Calculate the coordinate
         const Pt::int32_t x = round( centerX + radiusX * Gfx::Math::fastCos(angle) );
         const Pt::int32_t y = round( centerY - radiusY * Gfx::Math::fastSin(angle) ); // Sign inversion due to differences between cartesian and computer coordinate systems
@@ -266,18 +271,25 @@ static inline void generateEllipsePoints(std::vector<Point>& dst, Pt::int32_t ra
     if(dst.back() == dst[0]) dst.pop_back();
 }
 
-static inline void generateArcPoints(std::vector<Point>& dst, Pt::int32_t radiusX, Pt::int32_t radiusY, Pt::int32_t centerX, Pt::int32_t centerY, float degBegin, float degEnd)
+static inline void generateArcPoints(std::vector<Point>& dst, Pt::int32_t radiusX, Pt::int32_t radiusY, Pt::int32_t centerX, Pt::int32_t centerY, float degBegin, float degEnd, size_t penSize)
 {
     // Calculate the ellipse's parameters
-    const Pt::int32_t radiusM = std::max(radiusX, radiusY);
-    const Pt::int32_t deltaDg = degEnd - degBegin;
-    const Pt::int32_t numSegs = (radiusM * 2 * deltaDg / 180 / 3 / 20) * 20;
-    const float       fdegInc = (deltaDg * Gfx::Math::PiDiv180) / numSegs;
+    const float       degDlt  = degEnd - degBegin;
+    const float       degFac  = degDlt / 360.0f;
+    const Pt::int32_t circFac = round(
+                                    degFac *
+                                    Gfx::Math::fastSqrt( 0.5f * (radiusX * radiusX + radiusY * radiusY) ) /
+                                    ( (penSize > 4) ? (penSize * 0.25f) : 1.0f )
+                                );
+    const Pt::int32_t circSeg = (circFac / 16) * 20 + 1;
+    const Pt::int32_t nSegs   = (circSeg <  9) ?  9 : circSeg;
+    const float       nSegs1i = 1.0f / (nSegs - 1);
 
     // Generate a polygon that approximates the arc
-    float angle = degBegin * Gfx::Math::PiDiv180;
+    const float fdegInc = (degDlt   * Gfx::Math::PiDiv180) * nSegs1i;
+          float angle   =  degBegin * Gfx::Math::PiDiv180;
 
-    for(Pt::int32_t i = 0; i <= numSegs; ++i) {
+    for(Pt::int32_t i = 0; i < nSegs; ++i) {
         // Calculate the coordinate
         const Pt::int32_t x = round( centerX + radiusX * Gfx::Math::fastCos(angle) );
         const Pt::int32_t y = round( centerY - radiusY * Gfx::Math::fastSin(angle) ); // Sign inversion due to differences between cartesian and computer coordinate systems
@@ -861,9 +873,9 @@ void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
         const Pt::int32_t radiusYi = ( size.height() - penSize ) / 2;
         // Generate a polygon that approximates the ellipse
         std::vector<Point> points;
-        generateEllipsePoints(points, radiusXo, radiusYo, centerX, centerY);
+        generateEllipsePoints(points, radiusXo, radiusYo, centerX, centerY, 0);
         points.push_back(Painter::PolygonSeparatorPoint);
-        generateEllipsePoints(points, radiusXi, radiusYi, centerX, centerY);
+        generateEllipsePoints(points, radiusXi, radiusYi, centerX, centerY, 0);
         // Rasterize the polygon
         _rasterizer->setPen(newPen);
         _rasterizer->strokePolygon(points.data(), points.size());
@@ -874,7 +886,7 @@ void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
     else {
         // Generate a polygon that approximates the ellipse
         std::vector<Point> points;
-        generateEllipsePoints(points, radiusX, radiusY, centerX, centerY);
+        generateEllipsePoints(points, radiusX, radiusY, centerX, centerY, newPen.size());
         // Convert the points
         std::vector<PointF> pointsF(points.size());
         for(size_t i = 0; i < points.size(); ++i) {
@@ -966,25 +978,25 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
         // Generate a polygon that approximates the arc
         if(arcMode == ArcMode::Chord) {
             // The arc's "outside" lines
-            generateArcPoints(points, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd);
+            generateArcPoints(points, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd, 0);
             // The arc's "inside" lines
             points.push_back(Painter::PolygonSeparatorPoint);
-            generateArcPoints(points, radiusXi, radiusYi, centerX + shiftX, centerY + shiftY, degBegin, degEnd);
+            generateArcPoints(points, radiusXi, radiusYi, centerX + shiftX, centerY + shiftY, degBegin, degEnd, 0);
         }
         else if(arcMode == ArcMode::Pie) {
             // The arc's "outside" lines
-            generateArcPoints(points, radiusXo, radiusYo, centerX, centerY, odegBegin, odegEnd);
+            generateArcPoints(points, radiusXo, radiusYo, centerX, centerY, odegBegin, odegEnd, 0);
             points.push_back(Point(centerXsub, centerYsub));
             // The arc's "inside" lines
             points.push_back(Painter::PolygonSeparatorPoint);
-            generateArcPoints(points, radiusXi, radiusYi, centerX, centerY, idegBegin, idegEnd);
+            generateArcPoints(points, radiusXi, radiusYi, centerX, centerY, idegBegin, idegEnd, 0);
             points.push_back(Point(centerXadd, centerYadd));
         }
         else { // ArcMode::Open
             // The arc's "inside" and "outside" lines
             std::vector<Point> inner, outer;
-            generateArcPoints(inner, radiusXi, radiusYi, centerX, centerY, degBegin, degEnd);
-            generateArcPoints(outer, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd);
+            generateArcPoints(inner, radiusXi, radiusYi, centerX, centerY, degBegin, degEnd, 0);
+            generateArcPoints(outer, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd, 0);
             // Combine the arc's lines and add caps
             combineLinePointsAndAddCaps(points, inner, outer, _rasterizer->pen().capStyle(), _rasterizer->pen().capStyle(), penSize);
         }
@@ -999,16 +1011,16 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
         // Generate a polygon that approximates the arc
         std::vector<Point> points;
         if(arcMode == ArcMode::Chord) {
-            generateArcPoints(points, radiusX, radiusY, centerX, centerY, degBegin, degEnd);
+            generateArcPoints(points, radiusX, radiusY, centerX, centerY, degBegin, degEnd, newPen.size());
             points.push_back( points[0] );
         }
         else if(arcMode == ArcMode::Pie) {
             points.push_back( Point(centerX, centerY) );
-            generateArcPoints(points, radiusX, radiusY, centerX, centerY, degBegin, degEnd);
+            generateArcPoints(points, radiusX, radiusY, centerX, centerY, degBegin, degEnd, newPen.size());
             points.push_back( Point(centerX, centerY) );
         }
         else { // ArcMode::Open
-            generateArcPoints(points, radiusX, radiusY, centerX, centerY, degBegin, degEnd);
+            generateArcPoints(points, radiusX, radiusY, centerX, centerY, degBegin, degEnd, newPen.size());
         }
         // Convert the points
         std::vector<PointF> pointsF(points.size());
