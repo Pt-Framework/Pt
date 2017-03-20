@@ -50,6 +50,7 @@
 #define FIXED_POINT_CONSTANT_HALF    32768      // The value 0.5       in fixed-point ( 2 ^ FIXED_POINT_SHIFT_FACTOR / 2       )
 #define FIXED_POINT_CONSTANT_QUARTER 16384      // The value 0.25      in fixed-point ( 2 ^ FIXED_POINT_SHIFT_FACTOR / 4       )
 #define FIXED_POINT_CONSTANT_ISQRT2  46341      // The value 1/sqrt(2) in fixed-point ( 2 ^ FIXED_POINT_SHIFT_FACTOR / sqrt(2) )
+#define FIXED_POINT_CONSTANT_SQRT2   92682      // The value sqrt(2)   in fixed-point ( 2 ^ FIXED_POINT_SHIFT_FACTOR * sqrt(2) )
 
 // Fixed-Point 16.16 Helper Macros
 #define FIXED_POINT_IPART(V)        ( (V) & ~FIXED_POINT_FRACT_BITMASK )

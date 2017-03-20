@@ -66,7 +66,7 @@ static inline void calculateLineParams(float& wh, float& dx, float& dy, float& n
     ny =  b * il * wh;
 }
 
-static inline bool intersectLine(bool& inLine, PointF& intersect, const PointF& line1a, const PointF& line1b, const PointF& line2a, const PointF& line2b)
+static inline bool intersectLine(bool& inLine, PointF& intersect, const PointF& line1a, const PointF& line1b, const PointF& line2a, const PointF& line2b, size_t penSize)
 {
     // The first line
     const float x11   = line1a.x();
@@ -119,10 +119,11 @@ static inline bool intersectLine(bool& inLine, PointF& intersect, const PointF& 
 
     // Check and fix the coordinate of the intersection point
     // (for very steep lines, the coordinate of the intersection point can be incorrectly calculated)
-         if(ipX < minX1 && ipX < minX2) ipX = (minX1 + minX2) * 0.5f;
-    else if(ipX > maxX1 && ipX > maxX2) ipX = (maxX1 + maxX2) * 0.5f;
-         if(ipY < minY1 && ipY < minY2) ipY = (minY1 + minY2) * 0.5f;
-    else if(ipY > maxY1 && ipY > maxY2) ipY = (maxY1 + maxY2) * 0.5f;
+    const size_t pzf = FIXED_POINT_TO_INT(penSize * FIXED_POINT_CONSTANT_SQRT2);
+         if(ipX < minX1 - pzf && ipX < minX2 - pzf) ipX = (minX1 + minX2) * 0.5f;
+    else if(ipX > maxX1 + pzf && ipX > maxX2 + pzf) ipX = (maxX1 + maxX2) * 0.5f;
+         if(ipY < minY1 - pzf && ipY < minY2 - pzf) ipY = (minY1 + minY2) * 0.5f;
+    else if(ipY > maxY1 + pzf && ipY > maxY2 + pzf) ipY = (maxY1 + maxY2) * 0.5f;
 
     // Store the intersection point
     intersect.set(ipX, ipY);
@@ -196,16 +197,6 @@ static inline bool satDetectPolygonIntersection(const PointF* poly1, size_t poly
     return !( satDPIProcess(poly1, poly1Count, poly2, poly2Count) ||
               satDPIProcess(poly2, poly2Count, poly1, poly1Count)
             );
-}
-
-static inline bool detectPolygonIntersection(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
-{
-    PointF p1[poly1Count], p2[poly2Count];
-    for(size_t i = 0; i < poly1Count; ++i) p1[poly1Count - 1 - i] = poly1[i];
-    for(size_t i = 0; i < poly2Count; ++i) p2[poly2Count - 1 - i] = poly2[i];
-
-    //return false;
-    return satDetectPolygonIntersection  (p1, poly1Count, p2, poly2Count);
 }
 
 
@@ -1284,7 +1275,7 @@ bool ImagePainter2::combineLineSegmentForSolidOpenPolygon(std::vector<PointF>& p
     // Intersect the "outside" lines
     bool   inLine;
     PointF intersect;
-    if(!intersectLine(inLine, intersect, oline1a, oline1b, oline2a, oline2b)) return false;
+    if(!intersectLine(inLine, intersect, oline1a, oline1b, oline2a, oline2b, penSize)) return false;
 
     /*
     const PointF& ochk1 = oline1b - intersect;
@@ -1338,7 +1329,7 @@ bool ImagePainter2::combineLineSegmentForSolidOpenPolygon(std::vector<PointF>& p
     const PointF& iline2b =                 segment[N2];
 
     // Intersect the "inside" lines
-    if(!intersectLine(inLine, intersect, iline1a, iline1b, iline2a, iline2b)) return false;
+    if(!intersectLine(inLine, intersect, iline1a, iline1b, iline2a, iline2b, penSize)) return false;
 
     /*
     const PointF& ichk1 = iline1b - intersect;
@@ -1408,7 +1399,7 @@ bool ImagePainter2::combineLineSegmentForSolidClosedPolygon(std::vector<PointF>&
     // Intersect the "outside" lines
     bool   inLine;
     PointF intersect;
-    if(!intersectLine(inLine, intersect, oline1a, oline1b, oline2a, oline2b)) return false;
+    if(!intersectLine(inLine, intersect, oline1a, oline1b, oline2a, oline2b, penSize)) return false;
 
     /*
     const PointF& ochk1 = oline1b - intersect;
@@ -1461,7 +1452,7 @@ bool ImagePainter2::combineLineSegmentForSolidClosedPolygon(std::vector<PointF>&
     const PointF& iline2b = segment[3];
 
     // Intersect the "inside" lines
-    if(!intersectLine(inLine, intersect, iline1a, iline1b, iline2a, iline2b)) return false;
+    if(!intersectLine(inLine, intersect, iline1a, iline1b, iline2a, iline2b, penSize)) return false;
 
     /*
     const PointF& ichk1 = iline1b - intersect;
@@ -1698,14 +1689,14 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
                 // Check for intersection with the first polygons in the final destination buffer
                 bool intersect = false;
                 if(state.dstPCount0) {
-                  //  intersect = detectPolygonIntersection(&state.dstPoints[0], state.dstPCount0, dstPoints.data(), dstPoints.size());
+                  //  intersect = satDetectPolygonIntersection(&state.dstPoints[0], state.dstPCount0, dstPoints.data(), dstPoints.size());
                 }
                 else {
                     state.dstPCount0 = dstPoints.size();
                 }
                 // Check for intersection with the previous polygons in the final destination buffer
                 if(!intersect && state.dstPCount && state.dstPStart) {
-                    //intersect = detectPolygonIntersection(&state.dstPoints[state.dstPStart], state.dstPCount,  dstPoints.data(), dstPoints.size());
+                    //intersect = satDetectPolygonIntersection(&state.dstPoints[state.dstPStart], state.dstPCount,  dstPoints.data(), dstPoints.size());
                 }
                 if(!intersect) {
                     state.dstPStart = state.dstPoints.size();
@@ -1833,7 +1824,7 @@ void ImagePainter2::sagGenerateSimpleLineSegment(SAGOpState& state, float x1, fl
     //*
     // Check for intersection with the first polygons in the final destination buffer
     if(state.dstPCount0) {
-        if( detectPolygonIntersection(
+        if( satDetectPolygonIntersection(
             &state.dstPoints[0], state.dstPCount0, dstPoints.data(), dstPoints.size()
         ) ) return;
     }
@@ -1843,7 +1834,7 @@ void ImagePainter2::sagGenerateSimpleLineSegment(SAGOpState& state, float x1, fl
 
     // Check for intersection with the previous polygons in the final destination buffer
     if(state.dstPCount && state.dstPStart) {
-        if( detectPolygonIntersection(
+        if( satDetectPolygonIntersection(
                 &state.dstPoints[state.dstPStart], state.dstPCount, dstPoints.data(), dstPoints.size()
           ) ) return;
     }

@@ -71,19 +71,20 @@ using namespace Pt::Gfx;
 #define DO_BENCHMARKING 0
 
 // Detailed-test enable settings for Pt-Gfx
-#define TEST_SOURCECOPY                         0
+#define TEST_SOURCECOPY                         1
 #define TEST_SOURCEOVER                         1
 
 #define TEST_DRAW_SOLID_LINE_AND_TEXT           0 // (including bezier)
 #define TEST_DRAW_PATTERNED_LINE                0 // (including bezier)
-#define TEST_DRAW_SOLID_THICK_LINE              0 // (including bezier)
-#define TEST_DRAW_PATTERNED_THICK_LINE          0 // (including bezier)
+#define TEST_DRAW_SOLID_THICK_LINE              1 // (including bezier)
+#define TEST_DRAW_PATTERNED_THICK_LINE          1 // (including bezier)
 
 #define TEST_DRAW_OMPF_RECTANGLES               0 // (including thick and filled)
-#define TEST_DRAW_ROUND_OMPF_RECTANGLES         0 // (including thick and filled)
+#define TEST_DRAW_ROUND_OMPF_RECTANGLES         1 // (including thick and filled) // ### !!! bad inner AA & low segment resolution !!! ###
+
 #define TEST_DRAW_ELLIPSES_ARCS                 0
 #define TEST_DRAW_SOLID_THICK_ELLIPSES_ARCS     0
-#define TEST_DRAW_PATTERNED_THICK_ELLIPSES_ARCS 1 // ### TODO: ERROR: inavlid & extra lines !!! ###
+#define TEST_DRAW_PATTERNED_THICK_ELLIPSES_ARCS 1 // ### !!! missing/invalid polygons & invalid lines !!! ###
 
 #define TEST_DRAW_SOLID_FILLED_POLYGONS         0
 #define TEST_DRAW_GRADIENT_FILLED_POLYGONS      0

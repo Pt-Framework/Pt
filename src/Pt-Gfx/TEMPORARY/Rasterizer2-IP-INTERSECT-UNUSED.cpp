@@ -111,3 +111,17 @@ static inline bool naiveDetectPolygonIntersection(const PointF* poly1, size_t po
 
     return false;
 }
+
+
+
+
+
+static inline bool detectPolygonIntersection(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
+{
+    PointF p1[poly1Count], p2[poly2Count];
+    for(size_t i = 0; i < poly1Count; ++i) p1[poly1Count - 1 - i] = poly1[i];
+    for(size_t i = 0; i < poly2Count; ++i) p2[poly2Count - 1 - i] = poly2[i];
+
+    //return false;
+    return satDetectPolygonIntersection  (p1, poly1Count, p2, poly2Count);
+}
