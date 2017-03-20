@@ -294,9 +294,9 @@ static inline bool bboxDetectPolygonIntersection(const PointF* poly1, size_t pol
 
 static inline bool detectPolygonIntersection(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
 {
-      return false;
+    //  return false;
     //return bboxDetectPolygonIntersection (poly1, poly1Count, poly2, poly2Count);
-    //return satDetectPolygonIntersection  (poly1, poly1Count, poly2, poly2Count);
+    return satDetectPolygonIntersection  (poly1, poly1Count, poly2, poly2Count);
     //return naiveDetectPolygonIntersection(poly1, poly1Count, poly2, poly2Count);
 }
 
@@ -1803,7 +1803,10 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
                 // Discard the new polygon if there is any intersection
                 if(!intersect) {
                     // Add polygon separator point as needed
-                    if(!state.dstPoints.empty()) state.dstPoints.push_back(Painter::PolygonSeparatorPointF);
+                    if(!state.dstPoints.empty()) {
+                        state.dstPoints.push_back(Painter::PolygonSeparatorPointF);
+                        ++state.dstPStart;
+                    }
                     // Copy the points
                     state.dstPoints.insert(state.dstPoints.end(), dstPoints.begin(), dstPoints.end());
                 }
@@ -1917,21 +1920,29 @@ void ImagePainter2::sagGenerateSimpleLineSegment(SAGOpState& state, float x1, fl
 
     // Check for intersection with the first polygons in the final destination buffer
     if(state.dstPCount0) {
-        if( detectPolygonIntersection(&state.dstPoints[0], state.dstPCount0, dstPoints.data(), dstPoints.size()) ) return;
+        if( detectPolygonIntersection(
+            &state.dstPoints[0], state.dstPCount0, dstPoints.data(), dstPoints.size()
+        ) ) return;
     }
     else {
         state.dstPCount0 = dstPoints.size();
     }
 
+
     // Check for intersection with the previous polygons in the final destination buffer
     if(state.dstPCount && state.dstPStart) {
-        if( detectPolygonIntersection(&state.dstPoints[state.dstPStart], state.dstPCount,  dstPoints.data(), dstPoints.size()) ) return;
+        if( detectPolygonIntersection(
+                &state.dstPoints[state.dstPStart], state.dstPCount, dstPoints.data(), dstPoints.size()
+          ) ) return;
     }
     state.dstPStart = state.dstPoints.size();
     state.dstPCount = dstPoints.size();
 
     // Add polygon separator point as needed
-    if(!state.dstPoints.empty()) state.dstPoints.push_back(Painter::PolygonSeparatorPointF);
+    if(!state.dstPoints.empty()) {
+        state.dstPoints.push_back(Painter::PolygonSeparatorPointF);
+        ++state.dstPStart;
+    }
 
     // Copy the points
     state.dstPoints.insert(state.dstPoints.end(), dstPoints.begin(), dstPoints.end());
