@@ -141,12 +141,15 @@ static inline void satProjection(float& min, float& max, const PointF* points, s
 //           Public domain code by Wojciech Muła, 2013-2017
 static inline bool satProcess(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
 {
-    for(size_t i = 0; i < poly1Count - 1; ++i) {
+    #define FIX_INDEX(I, M)  ( ( (I) < 0 ) ? ( (I) + (M) ) : ( ( (I) >= (M) ) ? ( (I) - (M) ) : (I) ) )
+
+    for(size_t i = 0; i < poly1Count; ++i) {
         // Get the line
-        const float x1 = poly1[i    ].x();
-        const float y1 = poly1[i    ].y();
-        const float x2 = poly1[i + 1].x();
-        const float y2 = poly1[i + 1].y();
+        const float x1 = poly1[FIX_INDEX(i    , poly1Count)].x();
+        const float y1 = poly1[FIX_INDEX(i    , poly1Count)].y();
+        const float x2 = poly1[FIX_INDEX(i + 1, poly1Count)].x();
+        const float y2 = poly1[FIX_INDEX(i + 1, poly1Count)].y();
+        // Calculate the deltas
         const float dx = x2 - x1;
         const float dy = y2 - y1;
         // Calculate projection
@@ -158,6 +161,8 @@ static inline bool satProcess(const PointF* poly1, size_t poly1Count, const Poin
         // Check for interection
         if(max1 <= min2 || min1 >= max2) return true;
     }
+
+    #undef FIX_INDEX
 
     // No intersection
     return false;
@@ -218,33 +223,39 @@ static inline Pt::int32_t naiveGetSide(float la, float lb, float lc, const Point
 //           Public domain code by Wojciech Muła, 2013-2017
 static inline bool naiveDetectIntersection(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
 {
-    for(size_t i = 1; i < poly1Count - 1; ++i) {
-        const PointF& a1 = poly1[i - 1];
-        const PointF& a2 = poly1[i    ];
-        const PointF& a3 = poly1[i + 1];
+    #define FIX_INDEX(I, M)  ( ( (I) < 0 ) ? ( (I) + (M) ) : ( ( (I) >= (M) ) ? ( (I) - (M) ) : (I) ) )
 
-        for(size_t j = 1; j < poly2Count - 1; ++j) {
-            const PointF& b1 = poly2[j - 1];
-            const PointF& b2 = poly2[j    ];
-            const PointF& b3 = poly2[j + 1];
-
-            const float   la =  ( b2.y() - a2.y() );
-            const float   lb = -( b2.x() - a2.x() );
-            const float   lc = -( la * a2.x() + lb * a2.y() );
-
+    for(size_t i = 0; i < poly1Count; ++i) {
+        // Get the points
+        const PointF& a1 = poly1[FIX_INDEX(i - 1, poly1Count)];
+        const PointF& a2 = poly1[FIX_INDEX(i    , poly1Count)];
+        const PointF& a3 = poly1[FIX_INDEX(i + 1, poly1Count)];
+        for(size_t j = 0; j < poly2Count; ++j) {
+            // Get the points
+            const PointF& b1 = poly2[FIX_INDEX(j - 1, poly2Count)];
+            const PointF& b2 = poly2[FIX_INDEX(j    , poly2Count)];
+            const PointF& b3 = poly2[FIX_INDEX(j + 1, poly2Count)];
+            // Calculate the line's parameter
+            const float la =  ( b2.y() - a2.y() );
+            const float lb = -( b2.x() - a2.x() );
+            const float lc = -( la * a2.x() + lb * a2.y() );
+            // Get the sides
             const Pt::int32_t sideA = naiveGetSide(la, lb, lc, a1, a3);
             const Pt::int32_t sideB = naiveGetSide(la, lb, lc, b1, b3);
             if(sideA == 0xFF || sideB == 0xFF) continue;
-
             if(sideA * sideB < 0) return true;
         }
     }
+
+    #undef FIX_INDEX
 
     return false;
 }
 
 static inline bool polyDetectIntersection(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
 {
+    // ### TODO: NOT WORKING !!! ###
+    return false;
     return satDetectIntersection  (poly1, poly1Count, poly2, poly2Count);
     return naiveDetectIntersection(poly1, poly1Count, poly2, poly2Count);
 }
