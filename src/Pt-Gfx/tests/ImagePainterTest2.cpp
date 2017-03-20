@@ -68,7 +68,7 @@ using namespace Pt::Gfx;
 
 // General settings for Pt-Gfx
 #define DO_TEST_DRAW    1
-#define DO_BENCHMARKING 1
+#define DO_BENCHMARKING 0
 
 // Detailed-test enable settings for Pt-Gfx
 #define TEST_SOURCECOPY                         1
@@ -83,7 +83,7 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_ROUND_OMPF_RECTANGLES         1 // (including thick and filled) // ### TODO: Missing pattern !!! ###
 #define TEST_DRAW_ELLIPSES_ARCS                 0
 #define TEST_DRAW_SOLID_THICK_ELLIPSES_ARCS     0
-#define TEST_DRAW_PATTERNED_THICK_ELLIPSES_ARCS 1                                 // ### TODO: Extra lines !!! ###
+#define TEST_DRAW_PATTERNED_THICK_ELLIPSES_ARCS 0                                 // ### TODO: Extra lines !!! ###
 
 #define TEST_DRAW_SOLID_FILLED_POLYGONS         0
 #define TEST_DRAW_GRADIENT_FILLED_POLYGONS      0

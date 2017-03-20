@@ -94,9 +94,23 @@ static inline bool intersectLine(bool& inLine, PointF& intersect, const PointF& 
     const float b2    = x21 - x22;
     const float c2    = -(x21 * y22 - x22 * y21);
 
-    // Check if there is intersection
+    // Check if the line is parallel
     const float denom = a1 * b2 - a2 * b1;
-    if(denom == 0.0f) return false;
+    if(denom == 0.0f) {
+        // Check for special cases
+        if(y11 == y12 && y11 == y21 && y11 == y22 && x12 == x21) {
+            intersect.set(x12, y11);
+            inLine = true;
+            return true;
+        }
+        if(x11 == x12 && x11 == x21 && x11 == x22 && y12 == y21) {
+            intersect.set(x11, y12);
+            inLine = false;
+            return true;
+        }
+        // No intersection
+        return false;
+    }
 
     // Calculate the intersection point
     const float idenom = 1.0f / denom;
@@ -294,9 +308,8 @@ static inline bool bboxDetectPolygonIntersection(const PointF* poly1, size_t pol
 
 static inline bool detectPolygonIntersection(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
 {
-    //  return false;
-    //return bboxDetectPolygonIntersection (poly1, poly1Count, poly2, poly2Count);
-    return satDetectPolygonIntersection  (poly1, poly1Count, poly2, poly2Count);
+    return bboxDetectPolygonIntersection (poly1, poly1Count, poly2, poly2Count);
+    //return satDetectPolygonIntersection  (poly1, poly1Count, poly2, poly2Count);
     //return naiveDetectPolygonIntersection(poly1, poly1Count, poly2, poly2Count);
 }
 
@@ -330,6 +343,7 @@ static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, float
     const float nSegs1 = 1.0f / (nSegs - 1);
 
     for(Pt::int32_t i = 0; i < nSegs; ++i) {
+        // Calculate the coordinates
         const float t  = i * nSegs1;
         const float it = 1.0f - t;
         const float a  = it * it;
@@ -337,7 +351,10 @@ static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, float
         const float c  = t * t;
         const float x  = a * x1 + b * x2 + c * x3;
         const float y  = a * y1 + b * y2 + c * y3;
-        if( dst.empty() || dst.back().x() != x || dst.back().y() != y ) dst.push_back( PointF(x, y) );
+        // Check if the coordinate is the same with the previous one
+        if( !dst.empty() && ( dst.back().x() == x && dst.back().y() == y ) ) continue;
+        // Store the coordinate
+        dst.push_back( PointF(x, y) );
     }
 }
 
@@ -796,8 +813,6 @@ void ImagePainter2::drawRoundRect( const RectF& rect, float radius )
     const float x2 = rect.bottomRight().x();
     const float y2 = rect.bottomRight().y();
 
-    // ### TODO: Missing pattern !!! ###
-
     // Generate a polygon that represents the rounded-rectangle
     std::vector<PointF> pointsF;
     generateRoundRectPoints(pointsF, x1, y1, x2, y2, radius, _rasterizer->pen().size());
@@ -810,7 +825,7 @@ void ImagePainter2::drawRoundRect( const RectF& rect, float radius )
 
     // Draw the polygon
     _rasterizer->setPen(newPen);
-    drawThickPolyline_impl(pointsF.data(), pointsF.size(), false, 0);
+    drawThickPolyline_impl(pointsF.data(), pointsF.size(), true, 0);
     _rasterizer->setPen(orgPen);
 }
 
@@ -1784,17 +1799,18 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
                 thickenSolidOpenPolygon(dstPoints, state.gather.data(), state.gather.size(), 0);
                 //lprintf("    Poly Draw : patSegLen = %5.1f ; remLen = %5.1f ; point count = %zd\n", state.patSegLen, state.remLen, state.gather.size());
 
+                if(dstPoints.size() >= 2) {
                 // Check for intersection with the first polygons in the final destination buffer
                 bool intersect = false;
                 if(state.dstPCount0) {
-                    intersect = detectPolygonIntersection(&state.dstPoints[0], state.dstPCount0, dstPoints.data(), dstPoints.size());
+                  //  intersect = detectPolygonIntersection(&state.dstPoints[0], state.dstPCount0, dstPoints.data(), dstPoints.size());
                 }
                 else {
                     state.dstPCount0 = dstPoints.size();
                 }
                 // Check for intersection with the previous polygons in the final destination buffer
                 if(!intersect && state.dstPCount && state.dstPStart) {
-                    intersect = detectPolygonIntersection(&state.dstPoints[state.dstPStart], state.dstPCount,  dstPoints.data(), dstPoints.size());
+                    //intersect = detectPolygonIntersection(&state.dstPoints[state.dstPStart], state.dstPCount,  dstPoints.data(), dstPoints.size());
                 }
                 if(!intersect) {
                     state.dstPStart = state.dstPoints.size();
@@ -1809,6 +1825,7 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
                     }
                     // Copy the points
                     state.dstPoints.insert(state.dstPoints.end(), dstPoints.begin(), dstPoints.end());
+                }
                 }
             }
             //else {
@@ -1918,6 +1935,7 @@ void ImagePainter2::sagGenerateSimpleLineSegment(SAGOpState& state, float x1, fl
         default                    : generateLineButtCap         (dstPoints, x2, y2,               -nx, -ny); break;
     }
 
+    //*
     // Check for intersection with the first polygons in the final destination buffer
     if(state.dstPCount0) {
         if( detectPolygonIntersection(
@@ -1928,7 +1946,6 @@ void ImagePainter2::sagGenerateSimpleLineSegment(SAGOpState& state, float x1, fl
         state.dstPCount0 = dstPoints.size();
     }
 
-
     // Check for intersection with the previous polygons in the final destination buffer
     if(state.dstPCount && state.dstPStart) {
         if( detectPolygonIntersection(
@@ -1937,6 +1954,7 @@ void ImagePainter2::sagGenerateSimpleLineSegment(SAGOpState& state, float x1, fl
     }
     state.dstPStart = state.dstPoints.size();
     state.dstPCount = dstPoints.size();
+//*/
 
     // Add polygon separator point as needed
     if(!state.dstPoints.empty()) {
