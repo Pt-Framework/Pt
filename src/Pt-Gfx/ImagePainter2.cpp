@@ -40,7 +40,223 @@ namespace Gfx {
 
 
 // ======================================================================================
-// ===== Internal Helper Functions ======================================================
+// ===== Internal Helper Functions - Implementation of Geometric Equations ==============
+// ======================================================================================
+
+static inline void calculateLineParams(float& wh, float& dx, float& dy, float& nx, float& ny, float x1, float y1, float x2, float y2, size_t w)
+{
+    // Line equation : 0 = aX + By + c
+    // Normal        : n = ai + bj
+    const float a = y2 - y1;
+    const float b = x1 - x2;
+  //const float c = -(x1 * y2 - x2 * y1);
+
+    // Inverse line length
+    const float il = 1.0f / Gfx::Math::fastSqrt(a * a + b * b);
+
+    // Half line width
+    wh = (float) w * 0.5f;
+
+    // Direction vector
+    dx = -b * il * wh;
+    dy =  a * il * wh;
+
+    // Normal vector vector
+    nx =  a * il * wh;
+    ny =  b * il * wh;
+}
+
+static inline bool intersectLine(bool& inLine, PointF& intersect, const PointF& line1a, const PointF& line1b, const PointF& line2a, const PointF& line2b)
+{
+    // The first line
+    const float x11   = line1a.x();
+    const float y11   = line1a.y();
+    const float x12   = line1b.x();
+    const float y12   = line1b.y();
+    const float minX1 = std::min(x11, x12);
+    const float minY1 = std::min(y11, y12);
+    const float maxX1 = std::max(x11, x12);
+    const float maxY1 = std::max(y11, y12);
+    const float a1    = y12 - y11;
+    const float b1    = x11 - x12;
+    const float c1    = -(x11 * y12 - x12 * y11);
+
+    // The second line
+    const float x21   = line2a.x();
+    const float y21   = line2a.y();
+    const float x22   = line2b.x();
+    const float y22   = line2b.y();
+    const float minX2 = std::min(x21, x22);
+    const float minY2 = std::min(y21, y22);
+    const float maxX2 = std::max(x21, x22);
+    const float maxY2 = std::max(y21, y22);
+    const float a2    = y22 - y21;
+    const float b2    = x21 - x22;
+    const float c2    = -(x21 * y22 - x22 * y21);
+
+    // Check if there is intersection
+    const float denom = a1 * b2 - a2 * b1;
+    if(denom == 0.0f) return false;
+
+    // Calculate the intersection point
+    const float idenom = 1.0f / denom;
+    const float ipX    = (b1 * c2 - b2 * c1) * idenom;
+    const float ipY    = (a2 * c1 - a1 * c2) * idenom;
+
+    intersect.set(ipX, ipY);
+
+    // Determine if the intersection point is inside the line
+    inLine = (ipX >= minX1 && ipX <= maxX1 && ipY >= minY1 && ipY <= maxY1)
+           | (ipX >= minX2 && ipX <= maxX2 && ipY >= minY2 && ipY <= maxY2);
+
+    // Done
+    //lprintf("Line 1       : (%7.3f, %7.3f) - (%7.3f, %7.3f)\n", x11, y11, x12, y12);
+    //lprintf("Line 2       : (%7.3f, %7.3f) - (%7.3f, %7.3f)\n", x21, y21, x22, y22);
+    //lprintf("Intersection : (%7.3f, %7.3f) - %s \n", ipX, ipY, inLine ? "inline" : "outline");
+    //lprintf("\n");
+    return true;
+}
+
+// Based on: Separated Axis Theorm (SAT) in Detecting intersection of convex polygons in 2D
+//           http://wm.ite.pl/articles/convex-polygon-intersection/article.html
+//           http://wm.ite.pl/articles/convex-polygon-intersection/demo/demo.xhtml
+//           http://wm.ite.pl/articles/convex-polygon-intersection/demo/SAT.js
+//           Public domain code by Wojciech Muła, 2013-2017
+static inline void satProjection(float& min, float& max, const PointF* points, size_t pointCount, const PointF& p)
+{
+    min = points[0].x() * p.x() + points[0].y() * p.y();
+    max = min;
+
+    for(size_t i = 1; i < pointCount; ++i) {
+        const float val = points[i].x() * p.x() + points[i].y() * p.y();
+        if(val > max) max = val;
+        if(val < min) min = val;
+    }
+}
+
+// Based on: Separated Axis Theorm (SAT) in Detecting intersection of convex polygons in 2D
+//           http://wm.ite.pl/articles/convex-polygon-intersection/article.html
+//           http://wm.ite.pl/articles/convex-polygon-intersection/demo/demo.xhtml
+//           http://wm.ite.pl/articles/convex-polygon-intersection/demo/SAT.js
+//           Public domain code by Wojciech Muła, 2013-2017
+static inline bool satProcess(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
+{
+    for(size_t i = 0; i < poly1Count - 1; ++i) {
+        // Get the line
+        const float x1 = poly1[i    ].x();
+        const float y1 = poly1[i    ].y();
+        const float x2 = poly1[i + 1].x();
+        const float y2 = poly1[i + 1].y();
+        const float dx = x2 - x1;
+        const float dy = y2 - y1;
+        // Calculate projection
+        const PointF p(-dy, dx);
+              float min1, max1;
+              float min2, max2;
+        satProjection(min1, max1, poly1, poly1Count, p);
+        satProjection(min2, max2, poly2, poly2Count, p);
+        // Check for interection
+        if(max1 <= min2 || min1 >= max2) return true;
+    }
+
+    // No intersection
+    return false;
+}
+
+static inline bool satDetectIntersection(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
+{
+    return false;
+    
+    const bool i1 = satProcess(poly1, poly1Count, poly2, poly2Count);
+    const bool i2 = satProcess(poly2, poly2Count, poly1, poly1Count);
+
+    return !(i1 || i2);
+}
+
+/*
+// Based on: Naive Algorithm in Detecting intersection of convex polygons in 2D
+//           http://wm.ite.pl/articles/convex-polygon-intersection/article.html
+//           http://wm.ite.pl/articles/convex-polygon-intersection/demo/demo.xhtml
+//           http://wm.ite.pl/articles/convex-polygon-intersection/demo/naive.js
+//           Public domain code by Wojciech Muła, 2013-2017
+
+function naive(polygon1, polygon2) {
+
+    var mul = 0;
+    var add = 0;
+    var cmp = 0;
+
+    function print_stats() {
+        //console.log("naive: mul - " + mul + ", add = " + add + ", cmp = " + cmp);
+    }
+
+    function get_side(point1, point2) {
+        mul += 2*2 + 1;
+        add += 2*2;
+        var s1 = line.side(point1);
+        var s2 = line.side(point2);
+        var side = s1 * s2;
+
+        if (side < 0.0) {
+            cmp += 1;
+            return null;
+        } else if (side > 0.0) {
+            cmp += 1;
+            return s1;
+        }
+
+        if (s1 == 0.0) {
+            cmp += 1;
+            return s2;
+        }
+
+        if (s2 == 0.0) {
+            cmp += 1;
+            return s1;
+        }
+    }
+
+    var line;
+    var i, n = polygon1.points.length;
+    var j, k = polygon2.points.length;
+
+    for (i=0; i < n; i++) {
+        var A1 = polygon1.get(i - 1),
+            A2 = polygon1.get(i),
+            A3 = polygon1.get(i + 1);
+
+        for (j=0; j < k; j++) {
+            var B1 = polygon2.get(j - 1),
+                B2 = polygon2.get(j),
+                B3 = polygon2.get(j + 1);
+
+            mul += 2;
+            add += 2;
+
+            line = new Line(A2, B2);
+
+            var sideA = get_side(A1, A3);
+            if (sideA === null) continue;
+            var sideB = get_side(B1, B3);
+            if (sideB === null) continue;
+
+            mul += 1;
+            cmp += 1;
+
+            if (sideA * sideB < 0.0) {
+                print_stats();
+                return [A2, B2];
+            }
+        }
+    }
+
+    print_stats();
+    return null;
+}
+*/
+
+// ======================================================================================
+// ===== Internal Helper Functions - Drawing Functions ==================================
 // ======================================================================================
 
 // Based on: Bitmap/Bézier curves/Quadratic
@@ -214,80 +430,6 @@ static inline void generateLineTriangularInCap(std::vector<PointF>& dst, float x
     dst.push_back( PointF(x + nx - dx, y + ny - dy) );
     dst.push_back( PointF(x,           y          ) );
     dst.push_back( PointF(x - nx - dx, y - ny - dy) );
-}
-
-static inline void calculateLineParams(float& wh, float& dx, float& dy, float& nx, float& ny, float x1, float y1, float x2, float y2, size_t w)
-{
-    // Line equation : 0 = aX + By + c
-    // Normal        : n = ai + bj
-    const float a = y2 - y1;
-    const float b = x1 - x2;
-  //const float c = -(x1 * y2 - x2 * y1);
-
-    // Inverse line length
-    const float il = 1.0f / Gfx::Math::fastSqrt(a * a + b * b);
-
-    // Half line width
-    wh = (float) w * 0.5f;
-
-    // Direction vector
-    dx = -b * il * wh;
-    dy =  a * il * wh;
-
-    // Normal vector vector
-    nx =  a * il * wh;
-    ny =  b * il * wh;
-}
-
-static inline bool intersectLine(bool& inLine, PointF& intersect, const PointF& line1a, const PointF& line1b, const PointF& line2a, const PointF& line2b)
-{
-    // The first line
-    const float x11   = line1a.x();
-    const float y11   = line1a.y();
-    const float x12   = line1b.x();
-    const float y12   = line1b.y();
-    const float minX1 = std::min(x11, x12);
-    const float minY1 = std::min(y11, y12);
-    const float maxX1 = std::max(x11, x12);
-    const float maxY1 = std::max(y11, y12);
-    const float a1    = y12 - y11;
-    const float b1    = x11 - x12;
-    const float c1    = -(x11 * y12 - x12 * y11);
-
-    // The second line
-    const float x21   = line2a.x();
-    const float y21   = line2a.y();
-    const float x22   = line2b.x();
-    const float y22   = line2b.y();
-    const float minX2 = std::min(x21, x22);
-    const float minY2 = std::min(y21, y22);
-    const float maxX2 = std::max(x21, x22);
-    const float maxY2 = std::max(y21, y22);
-    const float a2    = y22 - y21;
-    const float b2    = x21 - x22;
-    const float c2    = -(x21 * y22 - x22 * y21);
-
-    // Check if there is intersection
-    const float denom = a1 * b2 - a2 * b1;
-    if(denom == 0.0f) return false;
-
-    // Calculate the intersection point
-    const float idenom = 1.0f / denom;
-    const float ipX    = (b1 * c2 - b2 * c1) * idenom;
-    const float ipY    = (a2 * c1 - a1 * c2) * idenom;
-
-    intersect.set(ipX, ipY);
-
-    // Determine if the intersection point is inside the line
-    inLine = (ipX >= minX1 && ipX <= maxX1 && ipY >= minY1 && ipY <= maxY1)
-           | (ipX >= minX2 && ipX <= maxX2 && ipY >= minY2 && ipY <= maxY2);
-
-    // Done
-    //lprintf("Line 1       : (%7.3f, %7.3f) - (%7.3f, %7.3f)\n", x11, y11, x12, y12);
-    //lprintf("Line 2       : (%7.3f, %7.3f) - (%7.3f, %7.3f)\n", x21, y21, x22, y22);
-    //lprintf("Intersection : (%7.3f, %7.3f) - %s \n", ipX, ipY, inLine ? "inline" : "outline");
-    //lprintf("\n");
-    return true;
 }
 
 static inline void combineLinePointsAndAddCaps(std::vector<Point>& dst, const std::vector<Point>& inner, const std::vector<Point>& outer, Pen::CapStyle begCap, Pen::CapStyle endCap, size_t penSize)
@@ -1375,27 +1517,30 @@ bool ImagePainter2::combineLineSegmentForSolidClosedPolygon(std::vector<PointF>&
 // --- Patterned Line Thickener ---
 
 struct ImagePainter2::SAGOpState {
-    std::vector<PointF>& dstPoints; // Destination vector
+    std::vector<PointF>& dstPoints;  // Destination vector
+    size_t               dstPStart;  // Start index of the previous polygon in the above vector
+    size_t               dstPCount;  // The number of points of the previous polygon in the above vector
+    size_t               dstPCount0; // The number of points of the first polygon in the above vector
 
-    const PointF*        srcPoints; // Source points
-    size_t               srcCount;  // The number of source points
+    const PointF*        srcPoints;  // Source points
+    size_t               srcCount;   // The number of source points
 
-    float                cellSize;  // Cell size
-    float                patSegLen; // Length of the currently processed "pattern" segment
+    float                cellSize;   // Cell size
+    float                patSegLen;  // Length of the currently processed "pattern" segment
 
-    size_t               idx1;      // Index to the first point which is currently being processed;
-                                    // the index to the second point is always (idx1 + 1)
+    size_t               idx1;       // Index to the first point which is currently being processed;
+                                     // the index to the second point is always (idx1 + 1)
 
-    float                px, py;    // Current interpolation coordinate (in-between the two points)
-    float                ex, ey;    // Current end coordinate (coordinate of the the second point)
-    float                uvx, uvy;  // Unit vector from the first point to the second point
-    float                remLen;    // Remaining length between the two points that has not been "consumed" by the "pattern" segment(s)
+    float                px, py;     // Current interpolation coordinate (in-between the two points)
+    float                ex, ey;     // Current end coordinate (coordinate of the the second point)
+    float                uvx, uvy;   // Unit vector from the first point to the second point
+    float                remLen;     // Remaining length between the two points that has not been "consumed" by the "pattern" segment(s)
 
-    std::vector<PointF>  gather;    // Gathered polygon points
-    float                gatherLen; // Length of the gathered points
+    std::vector<PointF>  gather;     // Gathered polygon points
+    float                gatherLen;  // Length of the gathered points
 
     inline SAGOpState(std::vector<PointF>& pointsF, const PointF* src, size_t pointCount, size_t penSize)
-    : dstPoints(pointsF), srcPoints(src), srcCount(pointCount), cellSize(penSize * 0.25f), idx1(0), remLen(-1.0f), gatherLen(0.0f)
+    : dstPoints(pointsF), dstPStart(0), dstPCount(0), srcPoints(src), srcCount(pointCount), cellSize(penSize * 0.25f), idx1(0), remLen(-1.0f), gatherLen(0.0f)
     {}
 };
 
@@ -1508,7 +1653,8 @@ void ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const 
 
 bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
 {
-    // ### TODO: Handle intersecting polygons !!! ###
+    // Temporary buffer for the generated points
+    std::vector<PointF> dstPoints;
 
     // Loop until the current "pattern" segment is completely processed
     while(state.patSegLen > 0.0f) {
@@ -1546,11 +1692,20 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
         if(state.gatherLen >= state.patSegLen) {
             // Generate one solid polygon segment as needed
             if(draw) {
+                // Generate a new thick polygon
+                dstPoints.clear();
+                thickenSolidOpenPolygon(dstPoints, state.gather.data(), state.gather.size(), 0);
+                //lprintf("    Poly Draw : patSegLen = %5.1f ; remLen = %5.1f ; point count = %zd\n", state.patSegLen, state.remLen, state.gather.size());
+
+                // Check for intersection with the previous polygon in the final destination buffer
+                if(state.dstPCount) {
+                    // ### TODO ###
+                }
+
                 // Add polygon separator point as needed
                 if(!state.dstPoints.empty()) state.dstPoints.push_back(Painter::PolygonSeparatorPointF);
-                // Generate the polygon
-                thickenSolidOpenPolygon(state.dstPoints, state.gather.data(), state.gather.size(), 0);
-                //lprintf("    Poly Draw : patSegLen = %5.1f ; remLen = %5.1f ; point count = %zd\n", state.patSegLen, state.remLen, state.gather.size());
+                // Copy the points
+                state.dstPoints.insert(state.dstPoints.end(), dstPoints.begin(), dstPoints.end());
             }
             //else {
             //    lprintf("    Poly Skip : patSegLen = %5.1f ; remLen = %5.1f ; point count = %zd\n", state.patSegLen, state.remLen, state.gather.size());
@@ -1632,31 +1787,53 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
 
 void ImagePainter2::sagGenerateSimpleLineSegment(SAGOpState& state, float x1, float y1, float x2, float y2)
 {
+    // Temporary buffer for the generated points
+    std::vector<PointF> dstPoints;
+
     // Calculate the line's parameters
     float wh, dx, dy, nx, ny;
 
     calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, _rasterizer->pen().size());
 
-    // Add polygon separator point as needed
-    if(!state.dstPoints.empty()) state.dstPoints.push_back(Painter::PolygonSeparatorPointF);
 
     // Generate points (CCW)
     // --- Begin point ---
     switch(_rasterizer->pen().capStyle()) {
-        case Pen::SquareCap        : generateLineSquareCap       (state.dstPoints, x1, y1,     dx, dy, nx, ny); break;
-        case Pen::RoundCap         : generateLineRoundCap        (state.dstPoints, x1, y1, wh, dx, dy, nx, ny); break;
-        case Pen::TriangularOutCap : generateLineTriangularOutCap(state.dstPoints, x1, y1,     dx, dy, nx, ny); break;
-        case Pen::TriangularInCap  : generateLineTriangularInCap (state.dstPoints, x1, y1,     dx, dy, nx, ny); break;
-        default                    : generateLineButtCap         (state.dstPoints, x1, y1,             nx, ny); break;
+        case Pen::SquareCap        : generateLineSquareCap       (dstPoints, x1, y1,     dx, dy, nx, ny); break;
+        case Pen::RoundCap         : generateLineRoundCap        (dstPoints, x1, y1, wh, dx, dy, nx, ny); break;
+        case Pen::TriangularOutCap : generateLineTriangularOutCap(dstPoints, x1, y1,     dx, dy, nx, ny); break;
+        case Pen::TriangularInCap  : generateLineTriangularInCap (dstPoints, x1, y1,     dx, dy, nx, ny); break;
+        default                    : generateLineButtCap         (dstPoints, x1, y1,             nx, ny); break;
     }
     // --- End point ---
     switch(_rasterizer->pen().capStyle()) {
-        case Pen::SquareCap        : generateLineSquareCap       (state.dstPoints, x2, y2,     -dx, -dy, -nx, -ny); break;
-        case Pen::RoundCap         : generateLineRoundCap        (state.dstPoints, x2, y2, wh, -dx, -dy, -nx, -ny); break;
-        case Pen::TriangularOutCap : generateLineTriangularOutCap(state.dstPoints, x2, y2,     -dx, -dy, -nx, -ny); break;
-        case Pen::TriangularInCap  : generateLineTriangularInCap (state.dstPoints, x2, y2,     -dx, -dy, -nx, -ny); break;
-        default                    : generateLineButtCap         (state.dstPoints, x2, y2,               -nx, -ny); break;
+        case Pen::SquareCap        : generateLineSquareCap       (dstPoints, x2, y2,     -dx, -dy, -nx, -ny); break;
+        case Pen::RoundCap         : generateLineRoundCap        (dstPoints, x2, y2, wh, -dx, -dy, -nx, -ny); break;
+        case Pen::TriangularOutCap : generateLineTriangularOutCap(dstPoints, x2, y2,     -dx, -dy, -nx, -ny); break;
+        case Pen::TriangularInCap  : generateLineTriangularInCap (dstPoints, x2, y2,     -dx, -dy, -nx, -ny); break;
+        default                    : generateLineButtCap         (dstPoints, x2, y2,               -nx, -ny); break;
     }
+
+    // Check for intersection with the first polygons in the final destination buffer
+    if(state.dstPCount0) {
+       // if( satDetect(&state.dstPoints[0], state.dstPCount0, dstPoints.data(), dstPoints.size()) ) return;
+    }
+    else {
+        state.dstPCount0 = dstPoints.size();
+    }
+
+    // Check for intersection with the previous polygons in the final destination buffer
+    if(state.dstPCount && state.dstPStart) {
+        if( satDetectIntersection(&state.dstPoints[state.dstPStart], state.dstPCount,  dstPoints.data(), dstPoints.size()) ) return;
+    }
+    state.dstPStart = state.dstPoints.size();
+    state.dstPCount = dstPoints.size();
+
+    // Add polygon separator point as needed
+    if(!state.dstPoints.empty()) state.dstPoints.push_back(Painter::PolygonSeparatorPointF);
+
+    // Copy the points
+    state.dstPoints.insert(state.dstPoints.end(), dstPoints.begin(), dstPoints.end());
 }
 
 
