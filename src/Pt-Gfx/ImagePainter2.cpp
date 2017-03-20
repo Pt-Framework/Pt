@@ -144,13 +144,13 @@ static inline bool intersectLine(bool& inLine, PointF& intersect, const PointF& 
 //           http://wm.ite.pl/articles/convex-polygon-intersection/demo/demo.xhtml
 //           http://wm.ite.pl/articles/convex-polygon-intersection/demo/SAT.js
 //           Public domain code by Wojciech Muła, 2013-2017
-static inline void satDPIProjection(double& min, double& max, const PointF* points, size_t pointCount, double px, double py)
+static inline void satDPIProjection(float& min, float& max, const PointF* points, size_t pointCount, float px, float py)
 {
     min = points[0].x() * px + points[0].y() * py;
     max = min;
 
     for(size_t i = 1; i < pointCount; ++i) {
-        const double val = points[i].x() * px + points[i].y() * py;
+        const float val = points[i].x() * px + points[i].y() * py;
         if(val > max) max = val;
         if(val < min) min = val;
     }
@@ -163,128 +163,49 @@ static inline void satDPIProjection(double& min, double& max, const PointF* poin
 //           Public domain code by Wojciech Muła, 2013-2017
 static inline bool satDPIProcess(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
 {
+    // A helper macro to fix the index
     #define FIX_INDEX(I, M)  ( ( (I) < 0 ) ? ( (I) + (M) ) : ( ( (I) >= (M) ) ? ( (I) - (M) ) : (I) ) )
 
-    for(size_t i = 0; i < poly1Count; ++i) {
+    // Walk through the points
+    for(size_t i = 0; i < poly1Count-1; ++i) {
         // Get the line
-#if 0
         const float x1 = poly1[FIX_INDEX(i    , poly1Count)].x();
         const float y1 = poly1[FIX_INDEX(i    , poly1Count)].y();
         const float x2 = poly1[FIX_INDEX(i + 1, poly1Count)].x();
         const float y2 = poly1[FIX_INDEX(i + 1, poly1Count)].y();
-#else
-        const double x1 = poly1[FIX_INDEX(poly1Count - 1 - i    , poly1Count)].x();
-        const double y1 = poly1[FIX_INDEX(poly1Count - 1 - i    , poly1Count)].y();
-        const double x2 = poly1[FIX_INDEX(poly1Count - 1 - i - 1, poly1Count)].x();
-        const double y2 = poly1[FIX_INDEX(poly1Count - 1 - i - 1, poly1Count)].y();
-
-#endif
         // Calculate the deltas
-        const double dx = x2 - x1;
-        const double dy = y2 - y1;
+        const float dx = x2 - x1;
+        const float dy = y2 - y1;
         // Calculate projection
-        double min1, max1, min2, max2;
+        float min1, max1, min2, max2;
         satDPIProjection(min1, max1, poly1, poly1Count, -dy, dx);
         satDPIProjection(min2, max2, poly2, poly2Count, -dy, dx);
         // Check for interection
         if(max1 <= min2 || min1 >= max2) return true;
     }
 
-    #undef FIX_INDEX
-
     // No intersection
     return false;
+
+    // Undefine the macro
+    #undef FIX_INDEX
 }
 
 static inline bool satDetectPolygonIntersection(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
 {
-    const bool i1 = satDPIProcess(poly1, poly1Count, poly2, poly2Count);
-    if(i1) return false;
-
-    const bool i2 = satDPIProcess(poly2, poly2Count, poly1, poly1Count);
-    if(i2) return false;
-
-    return true;
-}
-
-// Based on: Naive Algorithm in Detecting intersection of convex polygons in 2D
-//           http://wm.ite.pl/articles/convex-polygon-intersection/article.html
-//           http://wm.ite.pl/articles/convex-polygon-intersection/demo/demo.xhtml
-//           http://wm.ite.pl/articles/convex-polygon-intersection/demo/line.js
-//           Public domain code by Wojciech Muła, 2013-2017
-static inline Pt::int32_t naiveDPILineSide(float la, float lb, float lc, const PointF& p)
-{
-    const Pt::int32_t val = la * p.x() + lb * p.y() + lc;
-
-    if(val < 0.0f) return -1;
-    if(val > 0.0f) return  1;
-
-    return 0;
-}
-
-// Based on: Naive Algorithm in Detecting intersection of convex polygons in 2D
-//           http://wm.ite.pl/articles/convex-polygon-intersection/article.html
-//           http://wm.ite.pl/articles/convex-polygon-intersection/demo/demo.xhtml
-//           http://wm.ite.pl/articles/convex-polygon-intersection/demo/naive.js
-//           Public domain code by Wojciech Muła, 2013-2017
-static inline Pt::int32_t naiveDPIGetSide(float la, float lb, float lc, const PointF& p1, const PointF& p2)
-{
-    const Pt::int32_t s1 = naiveDPILineSide(la, lb, lc, p1);
-    const Pt::int32_t s2 = naiveDPILineSide(la, lb, lc, p2);
-
-    const Pt::int32_t s  = s1 * s2;
-
-         if(s < 0) return 0xFF;
-    else if(s > 0) return s1;
-
-
-    if(!s1) return s2;
-    if(!s2) return s1;
-
-    return 0;
-}
-
-// Based on: Naive Algorithm in Detecting intersection of convex polygons in 2D
-//           http://wm.ite.pl/articles/convex-polygon-intersection/article.html
-//           http://wm.ite.pl/articles/convex-polygon-intersection/demo/demo.xhtml
-//           http://wm.ite.pl/articles/convex-polygon-intersection/demo/naive.js
-//           Public domain code by Wojciech Muła, 2013-2017
-static inline bool naiveDetectPolygonIntersection(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
-{
-    #define FIX_INDEX(I, M)  ( ( (I) < 0 ) ? ( (I) + (M) ) : ( ( (I) >= (M) ) ? ( (I) - (M) ) : (I) ) )
-
-    for(size_t i = 0; i < poly1Count; ++i) {
-        // Get the points
-        const PointF& a1 = poly1[FIX_INDEX(i - 1, poly1Count)];
-        const PointF& a2 = poly1[FIX_INDEX(i    , poly1Count)];
-        const PointF& a3 = poly1[FIX_INDEX(i + 1, poly1Count)];
-        for(size_t j = 0; j < poly2Count; ++j) {
-            // Get the points
-            const PointF& b1 = poly2[FIX_INDEX(j - 1, poly2Count)];
-            const PointF& b2 = poly2[FIX_INDEX(j    , poly2Count)];
-            const PointF& b3 = poly2[FIX_INDEX(j + 1, poly2Count)];
-            // Calculate the line's parameter
-            const float la =  ( b2.y() - a2.y() );
-            const float lb = -( b2.x() - a2.x() );
-            const float lc = -( la * a2.x() + lb * a2.y() );
-            // Get the sides
-            const Pt::int32_t sideA = naiveDPIGetSide(la, lb, lc, a1, a3);
-            const Pt::int32_t sideB = naiveDPIGetSide(la, lb, lc, b1, b3);
-            if(sideA == 0xFF || sideB == 0xFF) continue;
-            if(sideA * sideB < 0) return true;
-        }
-    }
-
-    #undef FIX_INDEX
-
-    return false;
+    return !( satDPIProcess(poly1, poly1Count, poly2, poly2Count) ||
+              satDPIProcess(poly2, poly2Count, poly1, poly1Count)
+            );
 }
 
 static inline bool detectPolygonIntersection(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
 {
+    PointF p1[poly1Count], p2[poly2Count];
+    for(size_t i = 0; i < poly1Count; ++i) p1[poly1Count - 1 - i] = poly1[i];
+    for(size_t i = 0; i < poly2Count; ++i) p2[poly2Count - 1 - i] = poly2[i];
+
     //return false;
-    return satDetectPolygonIntersection  (poly1, poly1Count, poly2, poly2Count);
-    //return naiveDetectPolygonIntersection(poly1, poly1Count, poly2, poly2Count);
+    return satDetectPolygonIntersection  (p1, poly1Count, p2, poly2Count);
 }
 
 
