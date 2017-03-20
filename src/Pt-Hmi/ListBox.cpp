@@ -218,21 +218,10 @@ Gfx::SizeF ListBoxItem::onAutoSize(const SizePolicy& policy) const
 }
 
 
-Gfx::SizeF ListBoxItem::onMeasure(const SizePolicy& p)
-{
-    Gfx::FontMetrics fm = Painter::fontMetrics( _font, _text );
-
-    double spacing = _picture.empty() || _text.empty() ? 0 : fm.height() * 0.5;
-    
-    double pictureWidth = _iconSize.isNull() ? _picture.width() : _iconSize.width();
-    double pictureHeight = _iconSize.isNull() ? _picture.height() : _iconSize.height();
-    
-    double itemsWidth = p.size().width();
-    double itemsHeight = std::max<double>(fm.height(), pictureHeight);
-
-    return Gfx::SizeF( itemsWidth,
-                       itemsHeight + padding().topBottom() );
-}
+//Gfx::SizeF ListBoxItem::onMeasure(const SizePolicy& p)
+//{
+//    return preferredSize();
+//}
 
 
 void ListBoxItem::onInvalidate()
@@ -368,7 +357,7 @@ void ListBox::addItem(ListBoxItem& item)
 {   
     _layout.add(item);
     item.selected() += Pt::slot(*this, &ListBox::onItemSelected);
-    item.layoutChanged() += Pt::slot(*this, &ListBox::layout);
+    item.layoutChanged() += Pt::slot(*this, &ListBox::relayout);
 }
 
 
@@ -376,9 +365,9 @@ void ListBox::removeItem(ListBoxItem& item)
 {
     _layout.remove(item);
     item.selected() -= Pt::slot(*this, &ListBox::onItemSelected);
-    item.layoutChanged() -= Pt::slot(*this, &ListBox::layout);
+    item.layoutChanged() -= Pt::slot(*this, &ListBox::relayout);
 
-    layout();
+    relayout();
 }
 
 
@@ -500,6 +489,9 @@ Gfx::SizeF ListBox::onMeasure(const SizePolicy& p)
         SizePolicy policy(SizePolicy::Fixed, SizePolicy::Preferred);
         policy.setWidth(itemsWidth);
         
+        Gfx::SizeF itemSize = item->preferredSize(policy);
+        policy.setSize(itemSize);
+
         item->measure(policy);
 
         itemsHeight += item->measuredSize().height();

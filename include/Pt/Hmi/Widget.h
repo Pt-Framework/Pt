@@ -249,7 +249,7 @@ class PT_HMI_API Widget : public Visual
 
         void invalidate();
 
-        void layout();
+        void relayout();
 
         void update();
 
@@ -279,7 +279,7 @@ class PT_HMI_API Widget : public Visual
 
         const Gfx::SizeF& size() const;
 
-        virtual void resize(const Gfx::SizeF& s);
+        void resize(const Gfx::SizeF& s);
 
         void resize(double width, double height);
 
@@ -308,9 +308,20 @@ class PT_HMI_API Widget : public Visual
 
         Gfx::SizeF preferredSize(const SizePolicy& policy) const;
 
+
         const Gfx::SizeF& measuredSize() const;
 
-        virtual void onLayout();
+        void measure(const SizePolicy& policy);
+
+
+        void layout(const Gfx::RectF& rect);
+
+        void layout(const Pt::Gfx::PointF& p, const Pt::Gfx::SizeF& s);
+
+        void layout(double x, double y, double width, double height);
+
+
+        
 
         // outer spacing
         const Spacing& margin() const;
@@ -351,12 +362,6 @@ class PT_HMI_API Widget : public Visual
 
         virtual Gfx::PointF fromScreen(const Gfx::PointF& pos) const;
 
-        void measure(const SizePolicy& policy);
-
-        void moveRequest(const Pt::Gfx::PointF& p);
-
-        virtual void resizeRequest(const Pt::Gfx::SizeF& s);
-
     protected:
          virtual void onAddWidget(Widget& w);
 
@@ -366,11 +371,12 @@ class PT_HMI_API Widget : public Visual
 
         virtual void onRaise(Widget& w);
 
+        
         virtual void onInvalidate();
         
-
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
+        virtual void onLayout();
         
 
         virtual Pt::Gfx::SizeF onAutoSize(const SizePolicy& policy) const;

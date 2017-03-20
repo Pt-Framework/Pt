@@ -40,6 +40,8 @@ namespace Hmi {
 
 class PT_HMI_API DockingLayout : public Layout
 {
+    typedef Layout Base;
+
     public:
         enum DockMode
         {
@@ -64,6 +66,8 @@ class PT_HMI_API DockingLayout : public Layout
         virtual void onAddWidget(Widget& w);
 
         virtual void onRemoveWidget(Widget& w);
+
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
         virtual void onLayout();
 

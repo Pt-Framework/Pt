@@ -643,7 +643,7 @@ void Window::onInvalidateEvent(const InvalidateEvent& ev)
 }
 
 
-void Window::layout()
+void Window::relayout()
 {   
     _layouts++;
 
@@ -666,9 +666,7 @@ void Window::onLayoutEvent(const LayoutEvent& ev)
     policy.setSize(_size);
     _mainWidget->measure(policy);
 
-
-    _mainWidget->resizeRequest(_size);
-    _mainWidget->onLayout();
+    _mainWidget->layout(Gfx::PointF(0,0), _size);
 }
 
 

@@ -121,7 +121,7 @@ class PT_HMI_API Window : public WindowBase
 
     Gfx::PointF fromParent(const Gfx::PointF& pos) const;
 
-    void layout();
+    void relayout();
 
     void repaint();
 

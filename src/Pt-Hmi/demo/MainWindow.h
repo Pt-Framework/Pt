@@ -56,28 +56,30 @@ class MainWindow : public Pt::Hmi::Window
 
         virtual void onCloseEvent(const CloseEvent& ev);
 
-      private:
-            Menu     _menu;
-            MenuItem _item1;
-            MenuItem _item2;
-            MenuItem _item3;
+        void onButton();
 
-            Menu     _subMenu;
-            MenuItem _subItem1;
-            MenuItem _subItem2;
-            MenuItem _subItem3;
+    private:
+        Menu     _menu;
+        MenuItem _item1;
+        MenuItem _item2;
+        MenuItem _item3;
+
+        Menu     _subMenu;
+        MenuItem _subItem1;
+        MenuItem _subItem2;
+        MenuItem _subItem3;
             
-            //ChildW _child1;
-            Window _child2;
+        //ChildW _child1;
+        Window _child2;
 
-            Gfx::Image _icon;
-            Picture   _picture;
+        Gfx::Image _icon;
+        Picture   _picture;
 
-            FlowLayout _scrollContainer;
-            ScrollView _scrollView;
-            PushButton _btns[20];
-            PushButton _bt2;
-            Pt::Gfx::Image _image;
+        FlowLayout _scrollContainer;
+        ScrollView _scrollView;
+        PushButton _btns[20];
+        PushButton _bt2;
+        Pt::Gfx::Image _image;
 };
 
 } // namespace

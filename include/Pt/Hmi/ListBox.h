@@ -100,7 +100,7 @@ class PT_HMI_API ListBoxItem : public Button
     protected:
         virtual Gfx::SizeF onAutoSize(const SizePolicy& policy) const;
 
-        virtual Gfx::SizeF onMeasure(const SizePolicy& p);
+        //virtual Gfx::SizeF onMeasure(const SizePolicy& p);
 
         virtual void onInvalidate();
     

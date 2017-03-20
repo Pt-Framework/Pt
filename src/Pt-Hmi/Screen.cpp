@@ -236,10 +236,6 @@ void Screen::onUpdate(const Gfx::RectF& updateRect)
     _updateRect.unify(updateRect);
     ++_updates;
 
-#ifdef LOG_EVENTS
-    std::clog << "onUpdate SCREEN " << _updates << std::endl;
-#endif
-
     UpdateEvent uev(vid(), _updateRect);
     Application::instance().loop().commitEvent(uev);
 }
@@ -273,16 +269,12 @@ void Screen::onUpdateEvent(const UpdateEvent& ev)
 {
     --_updates;
 
-#ifdef LOG_EVENTS
-    std::clog << "onUpdateEvent SCREEN " << _updates << std::endl;
-#endif
-
     // skip all updates except the last one
     if(_updates > 0)
       return ;
     
-    //std::clog << std::endl;
-    //_clock.start();
+    std::clog << std::endl;
+    _clock.start();
 
     const Gfx::RectF& screenRect = ev.rect();
 
@@ -303,9 +295,10 @@ void Screen::onPaintEvent(const PaintEvent& ev)
 {
     _impl->paint( ev.rect() );
 
-    //std::clog << "screen update: " << _clock.stop().toUSecs() << " usecs." << std::endl;
-    //std::clog << "               " << ev.rect().topLeft().x() << ',' << ev.rect().topLeft().y()
-    //          << ' ' << ev.rect().width() << 'x' << ev.rect().height() << std::endl;
+    static int nnn = 0;
+    std::clog << "screen update: " << _clock.stop().toUSecs() << " usecs. " << ++nnn << std::endl;
+    std::clog << "               " << ev.rect().topLeft().x() << ',' << ev.rect().topLeft().y()
+              << ' ' << ev.rect().width() << 'x' << ev.rect().height() << std::endl;
 }
 
 } // namespace

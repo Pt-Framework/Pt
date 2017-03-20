@@ -49,7 +49,7 @@ void StackLeft(Widget& parent, bool center)
           itemsWidth += item->margin().leftRight();
         }
 
-        posX = (parent.size().width() - itemsWidth) / 2;
+        posX = (parent.measuredSize().width() - itemsWidth) / 2;
     }
 
     std::vector<Widget*>::const_iterator it = parent.widgets().begin();
@@ -65,10 +65,11 @@ void StackLeft(Widget& parent, bool center)
         double x = posX + item->margin().left();
         double y = parent.padding().top() + item->margin().top(); 
                  
-        Gfx::PointF pos(x, y);
-        item->moveRequest(pos);
+        posX += item->preferredSize().width() + 
+                item->margin().leftRight();
 
-        posX += item->preferredSize().width() + item->margin().leftRight();
+        Gfx::PointF pos(x, y);
+        item->layout( pos, item->measuredSize() );
     }
 }
 
@@ -78,7 +79,7 @@ void StackRight(Widget& parent, bool center)
     std::vector<Widget*>::const_iterator it = parent.widgets().begin();
     std::vector<Widget*>::const_iterator end = parent.widgets().end();
 
-    double posRight  = parent.size().width() - parent.padding().right();
+    double posRight  = parent.measuredSize().width() - parent.padding().right();
 
     for( ; it != end; ++it)
     {
@@ -96,7 +97,7 @@ void StackRight(Widget& parent, bool center)
         posRight -= item->margin().left();
                    
         Gfx::PointF pos(x, y);                   
-        item->moveRequest(pos);
+        item->layout( pos, item->measuredSize() );
     }
 }
 
@@ -119,11 +120,10 @@ void StackTop(Widget& parent, bool center)
         double y = posTop + item->margin().top();
                 
         posTop += item->preferredSize().height() + 
-                  item->margin().top() + item->margin().bottom();
+                  item->margin().topBottom();
 
         Gfx::PointF pos(x, y);                   
-        item->moveRequest(pos);
-        item->resizeRequest( item->measuredSize() );
+        item->layout( pos, item->measuredSize() );
     }
 }
 
@@ -133,7 +133,7 @@ void StackBottom(Widget& parent, bool center)
     std::vector<Widget*>::const_iterator it = parent.widgets().begin();
     std::vector<Widget*>::const_iterator end = parent.widgets().end();
 
-    double posBottom = parent.size().height() - parent.padding().bottom();
+    double posBottom = parent.measuredSize().height() - parent.padding().bottom();
 
     for( ; it != end; ++it)
     {
@@ -151,7 +151,7 @@ void StackBottom(Widget& parent, bool center)
         posBottom -= item->margin().top();
                                          
         Gfx::PointF pos(x, y);                   
-        item->moveRequest(pos);
+        item->layout( pos, item->measuredSize() );
     }
 }
 

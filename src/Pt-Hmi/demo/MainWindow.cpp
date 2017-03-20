@@ -86,8 +86,8 @@ void loadIcon(Gfx::Image& icon)
 
 
 MainWindow::MainWindow()
-: //_child1("Child 1")
-  _scrollContainer(Hmi::FlowLayout::Top)
+: /*_child1("Child 1")
+,*/  _scrollContainer(Hmi::FlowLayout::Top)
 {
     loadIcon(_icon);
     _picture.set(_icon);
@@ -111,6 +111,7 @@ MainWindow::MainWindow()
         _btns[n].setMargin(5);
 
         _btns[n].setText("Hallo");
+        _btns[n].clicked() += Pt::slot(*this, &MainWindow::onButton);
         
         _scrollContainer.add(_btns[n] );
     }
@@ -119,9 +120,8 @@ MainWindow::MainWindow()
     _bt2.setText("Ende");
     _bt2.setPadding(5);
     _bt2.setMargin(5);
-
     _scrollContainer.add(_bt2);
-
+    
     _scrollContainer.setPadding(5);
     _scrollContainer.setMargin(5);
     _scrollContainer.resize( Gfx::SizeF(500, 1100) );
@@ -132,11 +132,11 @@ MainWindow::MainWindow()
     _child2.show(true);
 
     //add( _child1 );
-    
-    //_child1.setTopMost(true);
+    //
+    ////_child1.setTopMost(true);
     //_child1.move( Gfx::PointF(30,30));
     //_child1.resize( Gfx::SizeF(300, 600) );
-//    _child1.show(true);
+    //_child1.show(true);
     
     // context menu   
     _menu.setName("All Music");
@@ -255,6 +255,12 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 
     //painter.drawImage(Gfx::PointF(0, 0), image);
     ////painter.drawPicture(Gfx::PointF(0,0), _picture);
+}
+
+
+void MainWindow::onButton()
+{
+    _btns[0].setMargin(10);
 }
 
 

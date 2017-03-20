@@ -295,23 +295,6 @@ void PushButton::onLayout()
 }
 
 
-Pt::Gfx::SizeF PushButton::onMeasure(const SizePolicy& policy)
-{
-  return Base::onMeasure(policy);
-}
-
-
-
-void PushButton::resize(const Gfx::SizeF& s)
-{
-  Base::resize(s);
-}
-
-void PushButton::resizeRequest(const Pt::Gfx::SizeF& s)
-{
-  Base::resizeRequest(s);
-}
-
 void PushButton::layoutContent()
 {
     Gfx::FontMetrics fm = Painter::fontMetrics( _font, text() );
@@ -394,7 +377,7 @@ void PushButton::onInvalidate()
 
     _renderer->prepare(*this, options, _brush, _pen, _font, _textPen);
 
-    layout();
+    layoutContent();
 
     Base::onInvalidate();
 }
