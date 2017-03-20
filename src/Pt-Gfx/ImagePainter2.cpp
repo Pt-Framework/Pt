@@ -122,7 +122,7 @@ static inline bool intersectLine(bool& inLine, PointF& intersect, const PointF& 
 //           http://wm.ite.pl/articles/convex-polygon-intersection/demo/demo.xhtml
 //           http://wm.ite.pl/articles/convex-polygon-intersection/demo/SAT.js
 //           Public domain code by Wojciech Muła, 2013-2017
-static inline void satProjection(float& min, float& max, const PointF* points, size_t pointCount, const PointF& p)
+static inline void satDPIProjection(float& min, float& max, const PointF* points, size_t pointCount, const PointF& p)
 {
     min = points[0].x() * p.x() + points[0].y() * p.y();
     max = min;
@@ -139,8 +139,10 @@ static inline void satProjection(float& min, float& max, const PointF* points, s
 //           http://wm.ite.pl/articles/convex-polygon-intersection/demo/demo.xhtml
 //           http://wm.ite.pl/articles/convex-polygon-intersection/demo/SAT.js
 //           Public domain code by Wojciech Muła, 2013-2017
-static inline bool satProcess(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
+static inline bool satDPIProcess(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
 {
+    // ### TODO: NOT WORKING PROPERLY !!! ###
+
     #define FIX_INDEX(I, M)  ( ( (I) < 0 ) ? ( (I) + (M) ) : ( ( (I) >= (M) ) ? ( (I) - (M) ) : (I) ) )
 
     for(size_t i = 0; i < poly1Count; ++i) {
@@ -156,8 +158,8 @@ static inline bool satProcess(const PointF* poly1, size_t poly1Count, const Poin
         const PointF p(-dy, dx);
               float min1, max1;
               float min2, max2;
-        satProjection(min1, max1, poly1, poly1Count, p);
-        satProjection(min2, max2, poly2, poly2Count, p);
+        satDPIProjection(min1, max1, poly1, poly1Count, p);
+        satDPIProjection(min2, max2, poly2, poly2Count, p);
         // Check for interection
         if(max1 <= min2 || min1 >= max2) return true;
     }
@@ -168,12 +170,12 @@ static inline bool satProcess(const PointF* poly1, size_t poly1Count, const Poin
     return false;
 }
 
-static inline bool satDetectIntersection(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
+static inline bool satDetectPolygonIntersection(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
 {
-    const bool i1 = satProcess(poly1, poly1Count, poly2, poly2Count);
+    const bool i1 = satDPIProcess(poly1, poly1Count, poly2, poly2Count);
     if(i1) return false;
 
-    const bool i2 = satProcess(poly2, poly2Count, poly1, poly1Count);
+    const bool i2 = satDPIProcess(poly2, poly2Count, poly1, poly1Count);
     if(i2) return false;
 
     return true;
@@ -184,7 +186,7 @@ static inline bool satDetectIntersection(const PointF* poly1, size_t poly1Count,
 //           http://wm.ite.pl/articles/convex-polygon-intersection/demo/demo.xhtml
 //           http://wm.ite.pl/articles/convex-polygon-intersection/demo/line.js
 //           Public domain code by Wojciech Muła, 2013-2017
-static inline Pt::int32_t naiveLineSide(float la, float lb, float lc, const PointF& p)
+static inline Pt::int32_t naiveDPILineSide(float la, float lb, float lc, const PointF& p)
 {
     const Pt::int32_t val = la * p.x() + lb * p.y() + lc;
 
@@ -199,10 +201,10 @@ static inline Pt::int32_t naiveLineSide(float la, float lb, float lc, const Poin
 //           http://wm.ite.pl/articles/convex-polygon-intersection/demo/demo.xhtml
 //           http://wm.ite.pl/articles/convex-polygon-intersection/demo/naive.js
 //           Public domain code by Wojciech Muła, 2013-2017
-static inline Pt::int32_t naiveGetSide(float la, float lb, float lc, const PointF& p1, const PointF& p2)
+static inline Pt::int32_t naiveDPIGetSide(float la, float lb, float lc, const PointF& p1, const PointF& p2)
 {
-    const Pt::int32_t s1 = naiveLineSide(la, lb, lc, p1);
-    const Pt::int32_t s2 = naiveLineSide(la, lb, lc, p2);
+    const Pt::int32_t s1 = naiveDPILineSide(la, lb, lc, p1);
+    const Pt::int32_t s2 = naiveDPILineSide(la, lb, lc, p2);
 
     const Pt::int32_t s  = s1 * s2;
 
@@ -221,8 +223,10 @@ static inline Pt::int32_t naiveGetSide(float la, float lb, float lc, const Point
 //           http://wm.ite.pl/articles/convex-polygon-intersection/demo/demo.xhtml
 //           http://wm.ite.pl/articles/convex-polygon-intersection/demo/naive.js
 //           Public domain code by Wojciech Muła, 2013-2017
-static inline bool naiveDetectIntersection(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
+static inline bool naiveDetectPolygonIntersection(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
 {
+    // ### TODO: NOT WORKING PROPERLY !!! ###
+
     #define FIX_INDEX(I, M)  ( ( (I) < 0 ) ? ( (I) + (M) ) : ( ( (I) >= (M) ) ? ( (I) - (M) ) : (I) ) )
 
     for(size_t i = 0; i < poly1Count; ++i) {
@@ -240,8 +244,8 @@ static inline bool naiveDetectIntersection(const PointF* poly1, size_t poly1Coun
             const float lb = -( b2.x() - a2.x() );
             const float lc = -( la * a2.x() + lb * a2.y() );
             // Get the sides
-            const Pt::int32_t sideA = naiveGetSide(la, lb, lc, a1, a3);
-            const Pt::int32_t sideB = naiveGetSide(la, lb, lc, b1, b3);
+            const Pt::int32_t sideA = naiveDPIGetSide(la, lb, lc, a1, a3);
+            const Pt::int32_t sideB = naiveDPIGetSide(la, lb, lc, b1, b3);
             if(sideA == 0xFF || sideB == 0xFF) continue;
             if(sideA * sideB < 0) return true;
         }
@@ -252,12 +256,48 @@ static inline bool naiveDetectIntersection(const PointF* poly1, size_t poly1Coun
     return false;
 }
 
-static inline bool polyDetectIntersection(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
+static inline bool bboxDetectPolygonIntersection(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
 {
-    // ### TODO: NOT WORKING !!! ###
+    float minX1 = poly1[0].x();
+    float minY1 = poly1[0].y();
+    float maxX1 = minX1;
+    float maxY1 = minY1;
+    for(size_t i = 1; i < poly1Count; ++i) {
+        if(poly1[i].x() < minX1) minX1 = poly1[i].x();
+        if(poly1[i].y() < minY1) minY1 = poly1[i].y();
+        if(poly1[i].x() > maxX1) maxX1 = poly1[i].x();
+        if(poly1[i].y() > maxY1) maxY1 = poly1[i].y();
+    }
+
+    float minX2 = poly2[0].x();
+    float minY2 = poly2[0].y();
+    float maxX2 = minX2;
+    float maxY2 = minY2;
+    for(size_t i = 1; i < poly2Count; ++i) {
+        if(poly2[i].x() < minX2) minX2 = poly2[i].x();
+        if(poly2[i].y() < minY2) minY2 = poly2[i].y();
+        if(poly2[i].x() > maxX2) maxX2 = poly2[i].x();
+        if(poly2[i].y() > maxY2) maxY2 = poly2[i].y();
+    }
+
+#define CHECK_IF_INSIDE_BOUNDING_BOX(X, Y, X1, Y1, X2, Y2) if( (X) >= (X1) && (X) <= (X2) && (Y) >= (Y1) && Y <= (Y2) ) return true
+
+    CHECK_IF_INSIDE_BOUNDING_BOX(minX2, minY2, minX1, minY1, maxX1, maxY1);
+    CHECK_IF_INSIDE_BOUNDING_BOX(minX2, maxY2, minX1, minY1, maxX1, maxY1);
+    CHECK_IF_INSIDE_BOUNDING_BOX(maxX2, minY2, minX1, minY1, maxX1, maxY1);
+    CHECK_IF_INSIDE_BOUNDING_BOX(maxX2, maxY2, minX1, minY1, maxX1, maxY1);
+
+#undef CHECK_INSIDE_BOUNDING_BOX
+
     return false;
-    return satDetectIntersection  (poly1, poly1Count, poly2, poly2Count);
-    return naiveDetectIntersection(poly1, poly1Count, poly2, poly2Count);
+}
+
+static inline bool detectPolygonIntersection(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
+{
+      return false;
+    //return bboxDetectPolygonIntersection (poly1, poly1Count, poly2, poly2Count);
+    //return satDetectPolygonIntersection  (poly1, poly1Count, poly2, poly2Count);
+    //return naiveDetectPolygonIntersection(poly1, poly1Count, poly2, poly2Count);
 }
 
 
@@ -897,6 +937,13 @@ void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
         return;
     }
 
+    // Calculate the ellipse's parameters
+    const size_t      penSize  = _rasterizer->pen().size();
+    const Pt::int32_t radiusX  = size.width () / 2;
+    const Pt::int32_t radiusY  = size.height() / 2;
+    const Pt::int32_t centerX  = topLeft.x() + radiusX;
+    const Pt::int32_t centerY  = topLeft.y() + radiusY;
+
     // Save the original pen and create a new pen with miter join
     const Pen orgPen = _rasterizer->pen();
 
@@ -905,14 +952,11 @@ void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
 
     // Solid
     if(_rasterizer->pen().style() == Pen::Solid) {
-        // Calculate the ellipse's parameters
-        const size_t      penSize  = _rasterizer->pen().size();
+        // Calculate the additional ellipse's parameters
         const Pt::int32_t radiusXo = ( size.width () + penSize ) / 2;
         const Pt::int32_t radiusYo = ( size.height() + penSize ) / 2;
         const Pt::int32_t radiusXi = ( size.width () - penSize ) / 2;
         const Pt::int32_t radiusYi = ( size.height() - penSize ) / 2;
-        const Pt::int32_t centerX  = topLeft.x() + size.width () / 2;
-        const Pt::int32_t centerY  = topLeft.y() + size.height() / 2;
         // Generate a polygon that approximates the ellipse
         std::vector<Point> points;
         generateEllipsePoints(points, radiusXo, radiusYo, centerX, centerY);
@@ -926,7 +970,18 @@ void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
 
     // Patterned
     else {
-        // ### TODO ###
+        // Generate a polygon that approximates the ellipse
+        std::vector<Point> points;
+        generateEllipsePoints(points, radiusX, radiusY, centerX, centerY);
+        // Convert the points
+        std::vector<PointF> pointsF(points.size());
+        for(size_t i = 0; i < points.size(); ++i) {
+            pointsF[i].set( points[i].x(), points[i].y() );
+        }
+        // Rasterize the polygon
+        _rasterizer->setPen(newPen);
+        drawThickPolyline_impl(pointsF.data(), pointsF.size(), false, 0);
+        _rasterizer->setPen(orgPen);
     }
 }
 
@@ -951,12 +1006,6 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
         _rasterizer->strokeOnePixelEllipseArc(tl, sz, degBegin, degEnd, arcMode);
         return;
     }
-
-    // Save the original pen and create a new pen with miter join
-    const Pen orgPen = _rasterizer->pen();
-
-    Pen newPen = orgPen;
-    newPen.setJoinStyle(Pen::MiterJoin);
 
     // Ensure that the begin angle is within the acceptable range
     while(degBegin < -360.0f) degBegin += 360.0f;
@@ -987,15 +1036,25 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
     const float idegBegin = (degBegin < 0) ? (degBegin + aafd) : (degBegin - aafd);
     const float idegEnd   = (degEnd   < 0) ? (degEnd   + aafd) : (degEnd   - aafd);
 
+    // Calculate the arc's parameters
+    const Pt::int32_t radiusX = size.width () / 2;
+    const Pt::int32_t radiusY = size.height() / 2;
+    const Pt::int32_t centerX = topLeft.x() + radiusX;
+    const Pt::int32_t centerY = topLeft.y() + radiusY;
+
+    // Save the original pen and create a new pen with miter join
+    const Pen orgPen = _rasterizer->pen();
+
+    Pen newPen = orgPen;
+    newPen.setJoinStyle(Pen::MiterJoin);
+
     // Solid
     if(_rasterizer->pen().style() == Pen::Solid) {
-        // Calculate the arc's parameters
+        // Calculate the additional arc's parameters
         const Pt::int32_t radiusXo   = ( size.width () + penSize ) / 2;
         const Pt::int32_t radiusYo   = ( size.height() + penSize ) / 2;
         const Pt::int32_t radiusXi   = ( size.width () - penSize ) / 2;
         const Pt::int32_t radiusYi   = ( size.height() - penSize ) / 2;
-        const Pt::int32_t centerX    = topLeft.x() + size.width () / 2;
-        const Pt::int32_t centerY    = topLeft.y() + size.height() / 2;
         const Pt::int32_t centerXsub = round(centerX - shiftXps);
         const Pt::int32_t centerYsub = round(centerY - shiftYps);
         const Pt::int32_t centerXadd = round(centerX + shiftXps);
@@ -1035,7 +1094,29 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
 
     // Patterned
     else {
-        // ### TODO ###
+        // Generate a polygon that approximates the arc
+        std::vector<Point> points;
+        if(arcMode == ArcMode::Chord) {
+            generateArcPoints(points, radiusX, radiusY, centerX, centerY, degBegin, degEnd);
+            points.push_back( points[0] );
+        }
+        else if(arcMode == ArcMode::Pie) {
+            points.push_back( Point(centerX, centerY) );
+            generateArcPoints(points, radiusX, radiusY, centerX, centerY, degBegin, degEnd);
+            points.push_back( Point(centerX, centerY) );
+        }
+        else { // ArcMode::Open
+            generateArcPoints(points, radiusX, radiusY, centerX, centerY, degBegin, degEnd);
+        }
+        // Convert the points
+        std::vector<PointF> pointsF(points.size());
+        for(size_t i = 0; i < points.size(); ++i) {
+            pointsF[i].set( points[i].x(), points[i].y() );
+        }
+        // Rasterize the polygon
+        _rasterizer->setPen(newPen);
+        drawThickPolyline_impl(pointsF.data(), pointsF.size(), false, 0);
+        _rasterizer->setPen(orgPen);
     }
 }
 
@@ -1706,14 +1787,14 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
                 // Check for intersection with the first polygons in the final destination buffer
                 bool intersect = false;
                 if(state.dstPCount0) {
-                    intersect = polyDetectIntersection(&state.dstPoints[0], state.dstPCount0, dstPoints.data(), dstPoints.size());
+                    intersect = detectPolygonIntersection(&state.dstPoints[0], state.dstPCount0, dstPoints.data(), dstPoints.size());
                 }
                 else {
                     state.dstPCount0 = dstPoints.size();
                 }
                 // Check for intersection with the previous polygons in the final destination buffer
                 if(!intersect && state.dstPCount && state.dstPStart) {
-                    intersect = polyDetectIntersection(&state.dstPoints[state.dstPStart], state.dstPCount,  dstPoints.data(), dstPoints.size());
+                    intersect = detectPolygonIntersection(&state.dstPoints[state.dstPStart], state.dstPCount,  dstPoints.data(), dstPoints.size());
                 }
                 if(!intersect) {
                     state.dstPStart = state.dstPoints.size();
@@ -1836,7 +1917,7 @@ void ImagePainter2::sagGenerateSimpleLineSegment(SAGOpState& state, float x1, fl
 
     // Check for intersection with the first polygons in the final destination buffer
     if(state.dstPCount0) {
-        if( polyDetectIntersection(&state.dstPoints[0], state.dstPCount0, dstPoints.data(), dstPoints.size()) ) return;
+        if( detectPolygonIntersection(&state.dstPoints[0], state.dstPCount0, dstPoints.data(), dstPoints.size()) ) return;
     }
     else {
         state.dstPCount0 = dstPoints.size();
@@ -1844,7 +1925,7 @@ void ImagePainter2::sagGenerateSimpleLineSegment(SAGOpState& state, float x1, fl
 
     // Check for intersection with the previous polygons in the final destination buffer
     if(state.dstPCount && state.dstPStart) {
-        if( polyDetectIntersection(&state.dstPoints[state.dstPStart], state.dstPCount,  dstPoints.data(), dstPoints.size()) ) return;
+        if( detectPolygonIntersection(&state.dstPoints[state.dstPStart], state.dstPCount,  dstPoints.data(), dstPoints.size()) ) return;
     }
     state.dstPStart = state.dstPoints.size();
     state.dstPCount = dstPoints.size();
