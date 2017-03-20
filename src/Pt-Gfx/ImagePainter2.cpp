@@ -165,8 +165,6 @@ static inline bool satProcess(const PointF* poly1, size_t poly1Count, const Poin
 
 static inline bool satDetectIntersection(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
 {
-    return false;
-    
     const bool i1 = satProcess(poly1, poly1Count, poly2, poly2Count);
     const bool i2 = satProcess(poly2, poly2Count, poly1, poly1Count);
 
@@ -254,6 +252,12 @@ function naive(polygon1, polygon2) {
     return null;
 }
 */
+
+static inline bool polyDetectIntersection(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
+{
+    return satDetectIntersection(poly1, poly1Count, poly2, poly2Count);
+}
+
 
 // ======================================================================================
 // ===== Internal Helper Functions - Drawing Functions ==================================
@@ -1540,7 +1544,7 @@ struct ImagePainter2::SAGOpState {
     float                gatherLen;  // Length of the gathered points
 
     inline SAGOpState(std::vector<PointF>& pointsF, const PointF* src, size_t pointCount, size_t penSize)
-    : dstPoints(pointsF), dstPStart(0), dstPCount(0), srcPoints(src), srcCount(pointCount), cellSize(penSize * 0.25f), idx1(0), remLen(-1.0f), gatherLen(0.0f)
+    : dstPoints(pointsF), dstPStart(0), dstPCount(0), dstPCount0(0), srcPoints(src), srcCount(pointCount), cellSize(penSize * 0.25f), idx1(0), remLen(-1.0f), gatherLen(0.0f)
     {}
 };
 
@@ -1697,15 +1701,29 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
                 thickenSolidOpenPolygon(dstPoints, state.gather.data(), state.gather.size(), 0);
                 //lprintf("    Poly Draw : patSegLen = %5.1f ; remLen = %5.1f ; point count = %zd\n", state.patSegLen, state.remLen, state.gather.size());
 
-                // Check for intersection with the previous polygon in the final destination buffer
-                if(state.dstPCount) {
-                    // ### TODO ###
+                // Check for intersection with the first polygons in the final destination buffer
+                bool intersect = false;
+                if(state.dstPCount0) {
+                    intersect = polyDetectIntersection(&state.dstPoints[0], state.dstPCount0, dstPoints.data(), dstPoints.size());
                 }
-
-                // Add polygon separator point as needed
-                if(!state.dstPoints.empty()) state.dstPoints.push_back(Painter::PolygonSeparatorPointF);
-                // Copy the points
-                state.dstPoints.insert(state.dstPoints.end(), dstPoints.begin(), dstPoints.end());
+                else {
+                    state.dstPCount0 = dstPoints.size();
+                }
+                // Check for intersection with the previous polygons in the final destination buffer
+                if(!intersect && state.dstPCount && state.dstPStart) {
+                    intersect = polyDetectIntersection(&state.dstPoints[state.dstPStart], state.dstPCount,  dstPoints.data(), dstPoints.size());
+                }
+                if(!intersect) {
+                    state.dstPStart = state.dstPoints.size();
+                    state.dstPCount = dstPoints.size();
+                }
+                // Discard the new polygon if there is any intersection
+                if(!intersect) {
+                    // Add polygon separator point as needed
+                    if(!state.dstPoints.empty()) state.dstPoints.push_back(Painter::PolygonSeparatorPointF);
+                    // Copy the points
+                    state.dstPoints.insert(state.dstPoints.end(), dstPoints.begin(), dstPoints.end());
+                }
             }
             //else {
             //    lprintf("    Poly Skip : patSegLen = %5.1f ; remLen = %5.1f ; point count = %zd\n", state.patSegLen, state.remLen, state.gather.size());
@@ -1816,7 +1834,7 @@ void ImagePainter2::sagGenerateSimpleLineSegment(SAGOpState& state, float x1, fl
 
     // Check for intersection with the first polygons in the final destination buffer
     if(state.dstPCount0) {
-       // if( satDetect(&state.dstPoints[0], state.dstPCount0, dstPoints.data(), dstPoints.size()) ) return;
+        if( polyDetectIntersection(&state.dstPoints[0], state.dstPCount0, dstPoints.data(), dstPoints.size()) ) return;
     }
     else {
         state.dstPCount0 = dstPoints.size();
@@ -1824,7 +1842,7 @@ void ImagePainter2::sagGenerateSimpleLineSegment(SAGOpState& state, float x1, fl
 
     // Check for intersection with the previous polygons in the final destination buffer
     if(state.dstPCount && state.dstPStart) {
-        if( satDetectIntersection(&state.dstPoints[state.dstPStart], state.dstPCount,  dstPoints.data(), dstPoints.size()) ) return;
+        if( polyDetectIntersection(&state.dstPoints[state.dstPStart], state.dstPCount,  dstPoints.data(), dstPoints.size()) ) return;
     }
     state.dstPStart = state.dstPoints.size();
     state.dstPCount = dstPoints.size();
