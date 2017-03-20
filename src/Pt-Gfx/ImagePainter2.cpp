@@ -166,96 +166,87 @@ static inline bool satProcess(const PointF* poly1, size_t poly1Count, const Poin
 static inline bool satDetectIntersection(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
 {
     const bool i1 = satProcess(poly1, poly1Count, poly2, poly2Count);
-    const bool i2 = satProcess(poly2, poly2Count, poly1, poly1Count);
+    if(i1) return false;
 
-    return !(i1 || i2);
+    const bool i2 = satProcess(poly2, poly2Count, poly1, poly1Count);
+    if(i2) return false;
+
+    return true;
 }
 
-/*
+// Based on: Naive Algorithm in Detecting intersection of convex polygons in 2D
+//           http://wm.ite.pl/articles/convex-polygon-intersection/article.html
+//           http://wm.ite.pl/articles/convex-polygon-intersection/demo/demo.xhtml
+//           http://wm.ite.pl/articles/convex-polygon-intersection/demo/line.js
+//           Public domain code by Wojciech Muła, 2013-2017
+static inline Pt::int32_t naiveLineSide(float la, float lb, float lc, const PointF& p)
+{
+    const Pt::int32_t val = la * p.x() + lb * p.y() + lc;
+
+    if(val < 0.0f) return -1;
+    if(val > 0.0f) return  1;
+
+    return 0;
+}
+
 // Based on: Naive Algorithm in Detecting intersection of convex polygons in 2D
 //           http://wm.ite.pl/articles/convex-polygon-intersection/article.html
 //           http://wm.ite.pl/articles/convex-polygon-intersection/demo/demo.xhtml
 //           http://wm.ite.pl/articles/convex-polygon-intersection/demo/naive.js
 //           Public domain code by Wojciech Muła, 2013-2017
+static inline Pt::int32_t naiveGetSide(float la, float lb, float lc, const PointF& p1, const PointF& p2)
+{
+    const Pt::int32_t s1 = naiveLineSide(la, lb, lc, p1);
+    const Pt::int32_t s2 = naiveLineSide(la, lb, lc, p2);
 
-function naive(polygon1, polygon2) {
+    const Pt::int32_t s  = s1 * s2;
 
-    var mul = 0;
-    var add = 0;
-    var cmp = 0;
+         if(s < 0) return 0xFF;
+    else if(s > 0) return s1;
 
-    function print_stats() {
-        //console.log("naive: mul - " + mul + ", add = " + add + ", cmp = " + cmp);
-    }
 
-    function get_side(point1, point2) {
-        mul += 2*2 + 1;
-        add += 2*2;
-        var s1 = line.side(point1);
-        var s2 = line.side(point2);
-        var side = s1 * s2;
+    if(!s1) return s2;
+    if(!s2) return s1;
 
-        if (side < 0.0) {
-            cmp += 1;
-            return null;
-        } else if (side > 0.0) {
-            cmp += 1;
-            return s1;
-        }
-
-        if (s1 == 0.0) {
-            cmp += 1;
-            return s2;
-        }
-
-        if (s2 == 0.0) {
-            cmp += 1;
-            return s1;
-        }
-    }
-
-    var line;
-    var i, n = polygon1.points.length;
-    var j, k = polygon2.points.length;
-
-    for (i=0; i < n; i++) {
-        var A1 = polygon1.get(i - 1),
-            A2 = polygon1.get(i),
-            A3 = polygon1.get(i + 1);
-
-        for (j=0; j < k; j++) {
-            var B1 = polygon2.get(j - 1),
-                B2 = polygon2.get(j),
-                B3 = polygon2.get(j + 1);
-
-            mul += 2;
-            add += 2;
-
-            line = new Line(A2, B2);
-
-            var sideA = get_side(A1, A3);
-            if (sideA === null) continue;
-            var sideB = get_side(B1, B3);
-            if (sideB === null) continue;
-
-            mul += 1;
-            cmp += 1;
-
-            if (sideA * sideB < 0.0) {
-                print_stats();
-                return [A2, B2];
-            }
-        }
-    }
-
-    print_stats();
-    return null;
+    return 0;
 }
-*/
+
+// Based on: Naive Algorithm in Detecting intersection of convex polygons in 2D
+//           http://wm.ite.pl/articles/convex-polygon-intersection/article.html
+//           http://wm.ite.pl/articles/convex-polygon-intersection/demo/demo.xhtml
+//           http://wm.ite.pl/articles/convex-polygon-intersection/demo/naive.js
+//           Public domain code by Wojciech Muła, 2013-2017
+static inline bool naiveDetectIntersection(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
+{
+    for(size_t i = 1; i < poly1Count - 1; ++i) {
+        const PointF& a1 = poly1[i - 1];
+        const PointF& a2 = poly1[i    ];
+        const PointF& a3 = poly1[i + 1];
+
+        for(size_t j = 1; j < poly2Count - 1; ++j) {
+            const PointF& b1 = poly2[j - 1];
+            const PointF& b2 = poly2[j    ];
+            const PointF& b3 = poly2[j + 1];
+
+            const float   la =  ( b2.y() - a2.y() );
+            const float   lb = -( b2.x() - a2.x() );
+            const float   lc = -( la * a2.x() + lb * a2.y() );
+
+            const Pt::int32_t sideA = naiveGetSide(la, lb, lc, a1, a3);
+            const Pt::int32_t sideB = naiveGetSide(la, lb, lc, b1, b3);
+            if(sideA == 0xFF || sideB == 0xFF) continue;
+
+            if(sideA * sideB < 0) return true;
+        }
+    }
+
+    return false;
+}
 
 static inline bool polyDetectIntersection(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
 {
-    return satDetectIntersection(poly1, poly1Count, poly2, poly2Count);
+    return satDetectIntersection  (poly1, poly1Count, poly2, poly2Count);
+    return naiveDetectIntersection(poly1, poly1Count, poly2, poly2Count);
 }
 
 
