@@ -74,17 +74,16 @@ using namespace Pt::Gfx;
 #define TEST_SOURCECOPY                         1
 #define TEST_SOURCEOVER                         1
 
-// ### TODO: Check with Valgrind again after all thick-line implementations are done ###
-
 #define TEST_DRAW_SOLID_LINE_AND_TEXT           0 // (including bezier)
 #define TEST_DRAW_PATTERNED_LINE                0 // (including bezier)
-#define TEST_DRAW_SOLID_THICK_LINE              1 // (including bezier)
-#define TEST_DRAW_PATTERNED_THICK_LINE          1 // (including bezier)
+#define TEST_DRAW_SOLID_THICK_LINE              1 // (including bezier) // ### TODO: VALGRIND THIS ###
+#define TEST_DRAW_PATTERNED_THICK_LINE          1 // (including bezier) // ### TODO: VALGRIND THIS ###
 
 #define TEST_DRAW_OMPF_RECTANGLES               0 // (including thick and filled)
-#define TEST_DRAW_ROUND_OMPF_RECTANGLES         1 // (including thick and filled)
+#define TEST_DRAW_ROUND_OMPF_RECTANGLES         1 // (including thick and filled) // ### TODO: VALGRIND THIS ###
 #define TEST_DRAW_ELLIPSES_ARCS                 0
-#define TEST_DRAW_THICK_ELLIPSES_ARCS           0
+#define TEST_DRAW_SOLID_THICK_ELLIPSES_ARCS     1
+#define TEST_DRAW_PATTERNED_THICK_ELLIPSES_ARCS 1 // ### TODO: VALGRIND THIS ###
 
 #define TEST_DRAW_SOLID_FILLED_POLYGONS         0
 #define TEST_DRAW_GRADIENT_FILLED_POLYGONS      0
@@ -332,22 +331,41 @@ int main(int argc, char* args[])
         }
     }
 
-    // Thick ellipses and arcs
-    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_THICK_ELLIPSES_ARCS) {
+    // Solid thick ellipses and arcs
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_SOLID_THICK_ELLIPSES_ARCS) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
-        testDrawThickEllipseArc("Thick Ellipse & Arcs - ImagePainter2 [SourceCopy]", image, *painter2);
+        testDrawSolidThickEllipseArc("Solid Thick Ellipse & Arcs - ImagePainter2 [SourceCopy]", image, *painter2);
         if(TEST_COMPARE_WITH_OLD_PAINTER) {
             painter1->setCompositionMode(CompositionMode::SourceCopy);
-            testDrawThickEllipseArc("Thick Ellipse & Arcs - ImagePainter [SourceCopy]", image, *painter1);
+            testDrawSolidThickEllipseArc("Solid Thick Ellipse & Arcs - ImagePainter [SourceCopy]", image, *painter1);
         }
     }
 
-    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_THICK_ELLIPSES_ARCS) {
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_SOLID_THICK_ELLIPSES_ARCS) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
-        testDrawThickEllipseArc("Thick Ellipse & Arcs - ImagePainter2 [SourceOver]", image, *painter2);
+        testDrawSolidThickEllipseArc("Solid Thick Ellipse & Arcs - ImagePainter2 [SourceOver]", image, *painter2);
         if(TEST_COMPARE_WITH_OLD_PAINTER) {
             painter1->setCompositionMode(CompositionMode::SourceOver);
-            testDrawThickEllipseArc("Thick Ellipse & Arcs - ImagePainter [SourceOver]", image, *painter1);
+            testDrawSolidThickEllipseArc("Solid Thick Ellipse & Arcs - ImagePainter [SourceOver]", image, *painter1);
+        }
+    }
+
+    // Patterned thick ellipses and arcs
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_PATTERNED_THICK_ELLIPSES_ARCS) {
+        painter2->setCompositionMode(CompositionMode::SourceCopy);
+        testDrawPatternedThickEllipseArc("Patterned Thick Ellipse & Arcs - ImagePainter2 [SourceCopy]", image, *painter2);
+        if(TEST_COMPARE_WITH_OLD_PAINTER) {
+            painter1->setCompositionMode(CompositionMode::SourceCopy);
+            testDrawPatternedThickEllipseArc("Patterned Thick Ellipse & Arcs - ImagePainter [SourceCopy]", image, *painter1);
+        }
+    }
+
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_PATTERNED_THICK_ELLIPSES_ARCS) {
+        painter2->setCompositionMode(CompositionMode::SourceOver);
+        testDrawPatternedThickEllipseArc("Patterned Thick Ellipse & Arcs - ImagePainter2 [SourceOver]", image, *painter2);
+        if(TEST_COMPARE_WITH_OLD_PAINTER) {
+            painter1->setCompositionMode(CompositionMode::SourceOver);
+            testDrawPatternedThickEllipseArc("Patterned Thick Ellipse & Arcs - ImagePainter [SourceOver]", image, *painter1);
         }
     }
 
