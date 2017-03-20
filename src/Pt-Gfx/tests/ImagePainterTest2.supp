@@ -83,7 +83,16 @@
 }
 
 {
-   application: write_png
+   application: write_png_1
+   Memcheck:Leak
+   match-leak-kinds: all
+   fun:malloc
+   fun:png_create_info_struct
+   fun:*
+}
+
+{
+   application: write_png_2
    Memcheck:Leak
    match-leak-kinds: all
    fun:malloc
