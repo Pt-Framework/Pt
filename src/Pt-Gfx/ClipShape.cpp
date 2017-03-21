@@ -29,7 +29,6 @@
  */
 
 #include "ClipShape.h"
-#include <stdio.h>
 
 
 namespace Pt{
@@ -169,8 +168,6 @@ void ClipShape::clipEdge(std::vector<Point>& out, const std::vector<Point>& in, 
             out.push_back(p);
         }
     }
-
-    fprintf(stderr, "\n");
 }
 
 bool ClipShape::inside(const Point& p, const Point& corner, ClipMode cm)
@@ -187,89 +184,42 @@ bool ClipShape::inside(const Point& p, const Point& corner, ClipMode cm)
 
 const Point ClipShape::intersect(const Point& from, const Point& to, const Point& edge0, const Point& edge1)
 {
-
-#if 1
-    // The first line
-    const Pt::int32_t x11   = from.x();
-    const Pt::int32_t y11   = from.y();
-    const Pt::int32_t x12   = to  .x();
-    const Pt::int32_t y12   = to  .y();
-    const Pt::int32_t minX1 = std::min(x11, x12);
-    const Pt::int32_t minY1 = std::min(y11, y12);
-    const Pt::int32_t maxX1 = std::max(x11, x12);
-    const Pt::int32_t maxY1 = std::max(y11, y12);
-    const Pt::int32_t a1    = y12 - y11;
-    const Pt::int32_t b1    = x11 - x12;
-    const Pt::int32_t c1    = -(x11 * y12 - x12 * y11);
-
-    // The second line
-    const Pt::int32_t x21   = edge0.x();
-    const Pt::int32_t y21   = edge0.y();
-    const Pt::int32_t x22   = edge1.x();
-    const Pt::int32_t y22   = edge1.y();
-    const Pt::int32_t minX2 = std::min(x21, x22);
-    const Pt::int32_t minY2 = std::min(y21, y22);
-    const Pt::int32_t maxX2 = std::max(x21, x22);
-    const Pt::int32_t maxY2 = std::max(y21, y22);
-    const Pt::int32_t a2    = y22 - y21;
-    const Pt::int32_t b2    = x21 - x22;
-    const Pt::int32_t c2    = -(x21 * y22 - x22 * y21);
-
-    // Check if the line is parallel
-    const Pt::int32_t denom = a1 * b2 - a2 * b1;
-    if(!denom) return Point(0, 0);
-
-    // Calculate the intersection point
-    Pt::int32_t ipX = (b1 * c2 - b2 * c1) / denom;
-    Pt::int32_t ipY = (a2 * c1 - a1 * c2) / denom;
-
-    // Check and fix the coordinate of the intersection point
-    // (for very steep lines, the coordinate of the intersection point can be incorrectly calculated)
-         if(ipX < minX1 && ipX < minX2) ipX = (minX1 + minX2) / 2;
-    else if(ipX > maxX1 && ipX > maxX2) ipX = (maxX1 + maxX2) / 2;
-         if(ipY < minY1 && ipY < minY2) ipY = (minY1 + minY2) / 2;
-    else if(ipY > maxY1 && ipY > maxY2) ipY = (maxY1 + maxY2) / 2;
-
-    // Return the intersection point
-    return Point(ipX, ipY);
-#else
-
-
-
     Point p;
 
+    // Horizontal clip edge
     if(edge0.y() == edge1.y()) {
+        // Abnormal case - the polygon edge is parallel with the clip edge
         if(to.y() == from.y()) {
-            if(edge0.y() == to.y()) {
-                p.setX(   to.x());
-                p.setY(edge0.y());
-            }
+                 if(edge0.y() == to  .y()) p.set( to  .x(),   to.y() );
+            else if(edge0.y() == from.y()) p.set( from.x(), from.y() );
         }
+        // Normal case
         else {
-            p.setX(from.x() + (to.x() - from.x()) * (edge0.y() - from.y()) / (to.y() - from.y()));
-            p.setY(edge0.y());
+            const Pt::int32_t dx = to   .x() - from.x();
+            const Pt::int32_t dy = to   .y() - from.y();
+            const Pt::int32_t de = edge0.y() - from.y();
+            p.set( from.x() + dx * de / dy, edge0.y() );
         }
     }
 
+    // Vertical clip edge
     if(edge0.x() == edge1.x()) {
+        // Abnormal case - the polygon edge is parallel with the clip edge
         if(to.x() == from.x()) {
-            if(to.x() == edge0.x()) {
-                p.setY(   to.y());
-                p.setX(edge0.x());
-            }
+                 if(to  .x() == edge0.x())  p.set( to  .x(),  to  .y() );
+            else if(from.x() == edge0.x())  p.set( from.x(),  from.y() );
         }
+        // Normal case
         else {
-            p.setY(from.y() + (to.y() - from.y()) * (edge0.x() - from.x()) / (to.x() - from.x()));
-            p.setX(edge0.x());
+            const Pt::int32_t dx = to   .x() - from.x();
+            const Pt::int32_t dy = to   .y() - from.y();
+            const Pt::int32_t de = edge0.x() - from.x();
+            p.set( edge0.x(), from.y() + dy * de / dx );
         }
     }
 
     return p;
-
-#endif
 }
-
-
 
 
 } // namespace

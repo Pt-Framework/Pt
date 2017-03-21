@@ -14,29 +14,6 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
     return;
 #endif
 
-
-    // Diamond-like polygons
-    painter.setPen( Color::fromRgb8(255, 0, 0) );
-    painter.setBrush( brush2 );
-    const PointF qqq[] = { // CCW
-        PointF(-110, 310),    // L
-        PointF(160, 1340),    // B
-        PointF(1210, 310),    // R
-        PointF(140, -260)     // T
-
-        //PointF(110, 310),
-        //PointF(160, 340),
-        //PointF(210, 310),
-        //PointF(140, 260)
-    };
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
-    painter.fillPolygon( qqq, sizeof(qqq) / sizeof(qqq[0]) );
-    sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
-    return;
-
-
-
-
     painter.setPen( Color::fromRgb8(255, 0, 0) );
 
     painter.setBrush( Color::fromRgb8(63, 63, 255) );

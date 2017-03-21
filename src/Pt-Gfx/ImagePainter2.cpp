@@ -1424,7 +1424,7 @@ bool ImagePainter2::combineLineSegmentForSolidClosedPolygon(std::vector<PointF>&
     */
 
     // Store the "outside" line's points
-    const Pen::JoinStyle js1 = Pen::MiterJoin;//(inSameSegment || inLine) ? Pen::MiterJoin : _rasterizer->pen().joinStyle();
+    const Pen::JoinStyle js1 = (inSameSegment || inLine) ? Pen::MiterJoin : _rasterizer->pen().joinStyle();
     outer.pop_back();
     if(isFirst) outer.pop_back();
     switch(js1) {
