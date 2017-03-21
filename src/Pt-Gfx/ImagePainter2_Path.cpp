@@ -36,9 +36,126 @@ namespace Gfx {
 
 
 // ======================================================================================
+// ===== PathData Class Implementation ==================================================
+// ======================================================================================
+
+struct ImagePainter2::PathData::Data {
+};
+
+ImagePainter2::PathData::PathData()
+: _data(0)
+{
+}
+
+ImagePainter2::PathData::PathData(const PathData& pd)
+{
+}
+
+ImagePainter2::PathData::~PathData()
+{
+}
+
+const ImagePainter2::PathData& ImagePainter2::PathData::operator=(const ImagePainter2::PathData& pd)
+{
+    return *this;
+}
+
+
+// ======================================================================================
 // ===== Public Member Functions ========================================================
 // ======================================================================================
-// ### TODO  ###
+
+void ImagePainter2::clearMatrixBuffer()
+{
+}
+
+void ImagePainter2::pushMatrix()
+{
+}
+
+void ImagePainter2::popMatrix()
+{
+}
+
+void ImagePainter2::getRawMatrix(float m[3][3]) const
+{
+}
+
+void ImagePainter2::updateMatrixUsingRaw(const float m[3][3], AffineMatrix2D::MatrixUpdateMode mode)
+{
+}
+
+void ImagePainter2::loadIdentityMatrix()
+{
+}
+
+void ImagePainter2::translate(float x, float y, AffineMatrix2D::MatrixUpdateMode mode)
+{
+}
+
+void ImagePainter2::scaleAboutOrigin(float x, float y, AffineMatrix2D::MatrixUpdateMode mode)
+{
+}
+
+void ImagePainter2::rotateAboutOrigin(float deg, AffineMatrix2D::MatrixUpdateMode mode)
+{
+}
+
+void ImagePainter2::shearXDirection(float deg, AffineMatrix2D::MatrixUpdateMode mode)
+{
+}
+
+void ImagePainter2::shearYDirection(float deg, AffineMatrix2D::MatrixUpdateMode mode)
+{
+}
+
+void ImagePainter2::reflectAboutOrigin(AffineMatrix2D::MatrixUpdateMode mode)
+{
+}
+
+void ImagePainter2::reflectAboutXAxis(AffineMatrix2D::MatrixUpdateMode mode)
+{
+}
+
+void ImagePainter2::reflectAboutYAxis(AffineMatrix2D::MatrixUpdateMode mode)
+{
+}
+
+void ImagePainter2::beginPath()
+{
+}
+
+void ImagePainter2::moveTo(float x, float y)
+{
+}
+
+void ImagePainter2::lineTo(float x, float y)
+{
+}
+
+void ImagePainter2::arcTo(float x, float y)
+{
+}
+
+void ImagePainter2::quadraticBezierTo(float cx, float cy, float x, float y)
+{
+}
+
+void ImagePainter2::endPath(bool autoClose)
+{
+}
+
+void ImagePainter2::pushPath()
+{
+}
+
+void ImagePainter2::popPath()
+{
+}
+
+void ImagePainter2::transformPath()
+{
+}
 
 
 } // namespace

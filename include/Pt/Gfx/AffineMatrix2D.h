@@ -69,6 +69,8 @@ class AffineMatrix2D {
 
     public:
         inline AffineMatrix2D();
+        inline AffineMatrix2D(const AffineMatrix2D& m);
+
         inline ~AffineMatrix2D();
 
         inline void clear();
@@ -91,7 +93,8 @@ class AffineMatrix2D {
         inline void getRaw(float m[3][3]) const;
         inline void updateUsingRaw(const float m[3][3], MatrixUpdateMode mode = MultiplyOnLeft);
 
-        inline void operator=(const AffineMatrix2D& m);
+        inline const AffineMatrix2D& operator=(const AffineMatrix2D& m);
+
         inline bool operator==(const AffineMatrix2D& m) const;
         inline bool operator!=(const AffineMatrix2D& m) const;
 
@@ -148,6 +151,12 @@ AffineMatrix2D::AffineMatrix2D()
     _mdata.v[0][3] = 0; _mdata.v[1][3] = 0; _mdata.v[2][3] = 0;
     _mdata.v[3][0] = 0; _mdata.v[3][1] = 0; _mdata.v[3][2] = 0; _mdata.v[3][3] = 0;
 #endif
+}
+
+AffineMatrix2D::AffineMatrix2D(const AffineMatrix2D& m)
+{
+    this->_mdata  = m._mdata;
+    this->_mstack = m._mstack;
 }
 
 AffineMatrix2D::~AffineMatrix2D()
@@ -282,12 +291,12 @@ void AffineMatrix2D::updateUsingRaw(const float m[3][3], MatrixUpdateMode mode)
     multiplyWith(n, mode);
 }
 
-void AffineMatrix2D::operator=(const AffineMatrix2D& m)
+const AffineMatrix2D& AffineMatrix2D::operator=(const AffineMatrix2D& m)
 {
-    float r[3][3];
-    m.getRaw(r);
+    this->_mdata  = m._mdata;
+    this->_mstack = m._mstack;
 
-    updateUsingRaw(r, Replace);
+    return *this;
 }
 
 bool AffineMatrix2D::operator==(const AffineMatrix2D& m) const

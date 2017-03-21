@@ -133,6 +133,29 @@ class PT_GFX_API ImagePainter2 : public Painter
         static FontMetrics fontMetrics(const Font& font, const Pt::String& text);
 
     public:
+        // Path API - path data class
+        class PathData {
+            public:
+                struct Data;
+
+            public:
+                PathData();
+                PathData(const PathData& pd);
+
+                ~PathData();
+
+                inline Data* data()
+                { return _data; }
+
+                inline const Data* data() const
+                { return _data; }
+
+                const PathData& operator=(const PathData& pd);
+
+            private:
+                Data* _data;
+        };
+
         // Path API - transformation and matrix
         virtual void clearMatrixBuffer();
 

@@ -30,6 +30,7 @@
 #include <unistd.h>
 
 #include <Pt/Math.h>
+#include <Pt/Gfx/AffineMatrix2D.h>
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/ImagePainter2.h>
 #include <Pt/Gfx/PngReader.h>
@@ -46,8 +47,6 @@
 #else
     #include <png.h>
 #endif
-
-#include "../AffineMatrix2D.h"
 
 // Grmph ..., macro from X11 is interfering with us ;)
 #ifdef None
