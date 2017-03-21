@@ -133,6 +133,8 @@ class PT_GFX_API ImagePainter2 : public Painter
         static FontMetrics fontMetrics(const Font& font, const Pt::String& text);
 
     public:
+        typedef AffineMatrix2D::MatrixUpdateMode MatrixUpdateMode;
+
         // Path API - path data class
         class PathData {
             public:
@@ -157,24 +159,24 @@ class PT_GFX_API ImagePainter2 : public Painter
         };
 
         // Path API - transformation and matrix
-        virtual void clearMatrixBuffer();
+        virtual void clearMatrixBuffer(); // Clear matrix and its stack
 
         virtual void pushMatrix(); // Useful for hierarchical rendering (scene graph)
         virtual void popMatrix();  // ---
 
         virtual void getRawMatrix(float m[3][3]) const;
-        virtual void updateMatrixUsingRaw(const float m[3][3], AffineMatrix2D::MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
+        virtual void updateMatrixUsingRaw(const float m[3][3], MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
 
         virtual void loadIdentityMatrix();
 
-        virtual void translate(float x, float y, AffineMatrix2D::MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
-        virtual void scaleAboutOrigin(float x, float y, AffineMatrix2D::MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
-        virtual void rotateAboutOrigin(float deg, AffineMatrix2D::MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
-        virtual void shearXDirection(float deg, AffineMatrix2D::MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
-        virtual void shearYDirection(float deg, AffineMatrix2D::MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
-        virtual void reflectAboutOrigin(AffineMatrix2D::MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
-        virtual void reflectAboutXAxis(AffineMatrix2D::MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
-        virtual void reflectAboutYAxis(AffineMatrix2D::MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
+        virtual void translate(float x, float y, MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
+        virtual void scaleAboutOrigin(float x, float y, MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
+        virtual void rotateAboutOrigin(float deg, MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
+        virtual void shearXDirection(float deg, MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
+        virtual void shearYDirection(float deg, MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
+        virtual void reflectAboutOrigin(MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
+        virtual void reflectAboutXAxis(MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
+        virtual void reflectAboutYAxis(MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
 
         // Path API - path generation
         virtual void beginPath();
@@ -185,12 +187,15 @@ class PT_GFX_API ImagePainter2 : public Painter
         virtual void endPath(bool autoClose);
 
         // Path API - path manipulation
-        virtual void pushPath();
-        virtual void popPath();
-
         virtual void transformPath();
 
+        virtual void pushPath(); // Useful for hierarchical rendering (scene graph)
+        virtual void popPath();  // ---
 
+        virtual void setPathData(const PathData& pd); // Useful if the user wants to save/cache the path
+        virtual const PathData getPathData() const;   // ---
+
+        virtual void clearPathDataBuffer(); // Clear path data and its stack
 
     private:
         // State for spread-and-gather operations on polygon points (used to thicken patterned polygon)
@@ -214,9 +219,12 @@ class PT_GFX_API ImagePainter2 : public Painter
         void sagGenerateSimpleLineSegment(SAGOpState& state, float x1, float y1, float x2, float y2);
 
     private:
-        RectF          _clip;
-        AffineMatrix2D _affineMatrix2D;
-        Rasterizer2*   _rasterizer;
+        RectF                 _clip;
+        Rasterizer2*          _rasterizer;
+        AffineMatrix2D        _affineMatrix2D;
+
+        PathData              _pathData;
+        std::vector<PathData> _pathDataStack;
 };
 
 

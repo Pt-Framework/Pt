@@ -81,7 +81,7 @@ void ImagePainter2::getRawMatrix(float m[3][3]) const
 {
 }
 
-void ImagePainter2::updateMatrixUsingRaw(const float m[3][3], AffineMatrix2D::MatrixUpdateMode mode)
+void ImagePainter2::updateMatrixUsingRaw(const float m[3][3], MatrixUpdateMode mode)
 {
 }
 
@@ -89,35 +89,35 @@ void ImagePainter2::loadIdentityMatrix()
 {
 }
 
-void ImagePainter2::translate(float x, float y, AffineMatrix2D::MatrixUpdateMode mode)
+void ImagePainter2::translate(float x, float y, MatrixUpdateMode mode)
 {
 }
 
-void ImagePainter2::scaleAboutOrigin(float x, float y, AffineMatrix2D::MatrixUpdateMode mode)
+void ImagePainter2::scaleAboutOrigin(float x, float y, MatrixUpdateMode mode)
 {
 }
 
-void ImagePainter2::rotateAboutOrigin(float deg, AffineMatrix2D::MatrixUpdateMode mode)
+void ImagePainter2::rotateAboutOrigin(float deg, MatrixUpdateMode mode)
 {
 }
 
-void ImagePainter2::shearXDirection(float deg, AffineMatrix2D::MatrixUpdateMode mode)
+void ImagePainter2::shearXDirection(float deg, MatrixUpdateMode mode)
 {
 }
 
-void ImagePainter2::shearYDirection(float deg, AffineMatrix2D::MatrixUpdateMode mode)
+void ImagePainter2::shearYDirection(float deg, MatrixUpdateMode mode)
 {
 }
 
-void ImagePainter2::reflectAboutOrigin(AffineMatrix2D::MatrixUpdateMode mode)
+void ImagePainter2::reflectAboutOrigin(MatrixUpdateMode mode)
 {
 }
 
-void ImagePainter2::reflectAboutXAxis(AffineMatrix2D::MatrixUpdateMode mode)
+void ImagePainter2::reflectAboutXAxis(MatrixUpdateMode mode)
 {
 }
 
-void ImagePainter2::reflectAboutYAxis(AffineMatrix2D::MatrixUpdateMode mode)
+void ImagePainter2::reflectAboutYAxis(MatrixUpdateMode mode)
 {
 }
 
@@ -145,6 +145,10 @@ void ImagePainter2::endPath(bool autoClose)
 {
 }
 
+void ImagePainter2::transformPath()
+{
+}
+
 void ImagePainter2::pushPath()
 {
 }
@@ -153,7 +157,13 @@ void ImagePainter2::popPath()
 {
 }
 
-void ImagePainter2::transformPath()
+void ImagePainter2::setPathData(const PathData& pd)
+{ _pathData = pd; }
+
+const ImagePainter2::PathData ImagePainter2::getPathData() const
+{ return _pathData; }
+
+void ImagePainter2::clearPathDataBuffer()
 {
 }
 
