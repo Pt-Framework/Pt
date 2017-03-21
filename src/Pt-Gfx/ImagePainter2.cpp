@@ -816,7 +816,7 @@ void ImagePainter2::drawQuadraticPolybezier(const PointF* ps, const size_t point
         const float l21  = Gfx::Math::fastSqrt(dx21 * dx21 + dy21 * dy21);
         const float l31  = l32 + l21;
         // Determine the number of segments
-        const Pt::int32_t nSegs = (ceil(l31 / 16.0f) + 1);
+        const Pt::int32_t nSegs = round(l31 / 10.0f) - 1;
         // Generate points for one quadratic bezier curve
         pointsFTmp.clear();
         generateQuadraticBezierPoints(pointsFTmp, x1, y1, x2, y2, x3, y3, nSegs);
@@ -1324,7 +1324,7 @@ bool ImagePainter2::combineLineSegmentForSolidOpenPolygon(std::vector<PointF>& p
                 round(oline1b  .x()), round(oline1b  .y()),
                 round(intersect.x()), round(intersect.y()),
                 round(oline2a  .x()), round(oline2a  .y()),
-                ceil(penSize * 0.5f) - 1
+                penSize / 4 + 1
             );
             break;
         // Invalid join type
@@ -1378,7 +1378,7 @@ bool ImagePainter2::combineLineSegmentForSolidOpenPolygon(std::vector<PointF>& p
                 round(iline1b  .x()), round(iline1b  .y()),
                 round(intersect.x()), round(intersect.y()),
                 round(iline2a  .x()), round(iline2a  .y()),
-                ceil(penSize * 0.5f) - 1
+                penSize / 4 + 1
             );
             break;
         // Invalid join type
@@ -1450,7 +1450,7 @@ bool ImagePainter2::combineLineSegmentForSolidClosedPolygon(std::vector<PointF>&
                 round(oline1b  .x()), round(oline1b  .y()),
                 round(intersect.x()), round(intersect.y()),
                 round(oline2a  .x()), round(oline2a  .y()),
-                ceil(penSize * 0.5f) - 1
+                penSize / 4 + 1
             );
             break;
         // Invalid join type
@@ -1503,7 +1503,7 @@ bool ImagePainter2::combineLineSegmentForSolidClosedPolygon(std::vector<PointF>&
                 round(iline1b  .x()), round(iline1b  .y()),
                 round(intersect.x()), round(intersect.y()),
                 round(iline2a  .x()), round(iline2a  .y()),
-                ceil(penSize * 0.5f) - 1
+                penSize / 4 + 1
             );
             break;
         // Invalid join type

@@ -75,14 +75,14 @@ using namespace Pt::Gfx;
 
 #define TEST_DRAW_SOLID_LINE_AND_TEXT           0 // (including bezier)
 #define TEST_DRAW_PATTERNED_LINE                0 // (including bezier)
-#define TEST_DRAW_SOLID_THICK_LINE              1 // (including bezier)
-#define TEST_DRAW_PATTERNED_THICK_LINE          1 // (including bezier)
+#define TEST_DRAW_SOLID_THICK_LINE              0 // (including bezier)
+#define TEST_DRAW_PATTERNED_THICK_LINE          0 // (including bezier)
 
 #define TEST_DRAW_OMPF_RECTANGLES               0 // (including thick and filled)
-#define TEST_DRAW_ROUND_OMPF_RECTANGLES         1 // (including thick and filled)
+#define TEST_DRAW_ROUND_OMPF_RECTANGLES         0 // (including thick and filled)
 
 #define TEST_DRAW_ELLIPSES_ARCS                 0
-#define TEST_DRAW_SOLID_THICK_ELLIPSES_ARCS     1
+#define TEST_DRAW_SOLID_THICK_ELLIPSES_ARCS     0
 #define TEST_DRAW_PATTERNED_THICK_ELLIPSES_ARCS 1 // ### !!! the circles' segments are to slim !!! ###
 
 #define TEST_DRAW_SOLID_FILLED_POLYGONS         0
