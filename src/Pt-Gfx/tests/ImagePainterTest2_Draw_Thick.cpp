@@ -433,7 +433,7 @@ static void testDrawThickEllipseArc_impl(
     painter.fillRect( RectF( PointF(0, 80 + 185), SizeF(image.width(), 30) ) );
     painter.fillRect( RectF( PointF(0, 80 + 400), SizeF(image.width(), 60) ) );
 
-    //*
+    /*
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
     painter.setPen(drawI); painter.drawEllipse( PointF (30, 50 + 400), SizeF(67, 135) );
     painter.setCompositionMode(CompositionMode::SourceOver);

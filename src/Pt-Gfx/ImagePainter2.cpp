@@ -51,7 +51,7 @@ static inline void calculateLineParams(float& wh, float& dx, float& dy, float& n
   //const float c = -(x1 * y2 - x2 * y1);
 
     // Inverse line length
-    const float il = 1.0f / Gfx::Math::fastSqrt(a * a + b * b);
+    const float il = Gfx::Math::fastInvSqrt(a * a + b * b); //1.0f / Gfx::Math::fastSqrt(a * a + b * b);
 
     // Half line width
     wh = (float) w * 0.5f;
@@ -162,40 +162,40 @@ static inline void satDPIProjMinMax(float& min, float& max, const PointF* points
 static inline bool satDetectPolygonCollision(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
 {
     // Evaluate using the first polygon's normals
-    for(size_t i = 0; i < poly1Count; ++i) {
+    for(size_t i = poly1Count; i >= 1; --i) {
         // Calculate the indexes
-        const size_t idx1 = i;
-        const size_t idx2 = (i == poly1Count - 1) ? 0 : (i + 1);
+        const size_t idx1 =                               (i - 1);
+        const size_t idx2 = (i == 1) ? (poly1Count - 1) : (i - 2);
         // Calculate the normals
         const float dx = poly1[idx2].x() - poly1[idx1].x();
         const float dy = poly1[idx2].y() - poly1[idx1].y();
-        const float iz = 1.0f;// / Gfx::Math::fastSqrt(dx * dx + dy * dy);
-        const float nx =  dy * iz;
-        const float ny = -dx * iz;
+        const float nx =  dy;
+        const float ny = -dx;
         // Get the minimum and maximum projection values
         float min1, max1, min2, max2;
         satDPIProjMinMax(min1, max1, poly1, poly1Count, nx, ny);
         satDPIProjMinMax(min2, max2, poly2, poly2Count, nx, ny);
         // Check if the polygon is separated
+        lprintf("A: %+7.1f , %+7.1f --- %+7.1f , %+7.1f ### %d ### %+7.1f , %+7.1f\n", max1, min2, max2, min1, (max1 < min2 || max2 < min1), nx, ny);
         if(max1 < min2 || max2 < min1) return false;
     }
 
     // Calculate the second polygon's normals
-    for(size_t i = 0; i < poly2Count - 1; ++i) {
+    for(size_t i = poly2Count; i >= 1; --i) {
         // Calculate the indexes
-        const size_t idx1 = i;
-        const size_t idx2 = (i == poly2Count - 1) ? 0 : (i + 1);
+        const size_t idx1 =                               (i - 1);
+        const size_t idx2 = (i == 1) ? (poly2Count - 1) : (i - 2);
         // Calculate the normals
         const float dx = poly2[idx2].x() - poly2[idx1].x();
         const float dy = poly2[idx2].y() - poly2[idx1].y();
-        const float iz = 1.0f;// / Gfx::Math::fastSqrt(dx * dx + dy * dy);
-        const float nx =  dy * iz;
-        const float ny = -dx * iz;
+        const float nx =  dy;
+        const float ny = -dx;
         // Get the minimum and maximum projection values
         float min1, max1, min2, max2;
         satDPIProjMinMax(min1, max1, poly1, poly1Count, nx, ny);
         satDPIProjMinMax(min2, max2, poly2, poly2Count, nx, ny);
         // Check if the polygon is separated
+        lprintf("B: %+7.1f , %+7.1f --- %+7.1f , %+7.1f ### %d ### %+7.1f , %+7.1f\n", max1, min2, max2, min1, (max1 < min2 || max2 < min1), nx, ny);
         if(max1 < min2 || max2 < min1) return false;
     }
 
@@ -527,17 +527,17 @@ FontMetrics ImagePainter2::fontMetrics( const Font& font, const Pt::String& text
 
 ImagePainter2::ImagePainter2(Image& image)
 : _rasterizer( new Rasterizer2(image) )
-//{ setAntiAliasingMode(); /* Call the setter to enable the default anti-aliasing mode */ }
-//*
+{ setAntiAliasingMode(); /* Call the setter to enable the default anti-aliasing mode */ }
+/*
 {
 
     const PointF poly1[] = {
-        PointF( 90.6, 523.5),
-        PointF( 96.0, 517.0),
-        PointF(102.5, 522.4),
-        PointF(101.1, 507.5),
-        PointF( 95.7, 514.0),
-        PointF( 89.2, 508.6)
+        PointF( 90.6, 523.5+0.0),
+        PointF( 96.0, 517.0+0.0),
+        PointF(102.5, 522.4+0.0),
+        PointF(101.1, 507.5+0.0),
+        PointF( 95.7, 514.0+0.0),
+        PointF( 89.2, 508.6+0.0)
     };
     const PointF poly2[] = {
         PointF( 88.8, 500.3),
