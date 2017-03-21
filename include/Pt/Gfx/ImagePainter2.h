@@ -133,30 +133,8 @@ class PT_GFX_API ImagePainter2 : public Painter
         static FontMetrics fontMetrics(const Font& font, const Pt::String& text);
 
     public:
+        // For convenience
         typedef AffineMatrix2D::MatrixUpdateMode MatrixUpdateMode;
-
-        // Path API - path data class
-        class PathData : public BasicPathData {
-            public:
-                struct Data;
-
-            public:
-                PathData();
-                PathData(const PathData& pd);
-
-                virtual ~PathData();
-
-                inline Data& data()
-                { return *_data; }
-
-                inline const Data& data() const
-                { return *_data; }
-
-                virtual const PathData& operator=(const PathData& pd);
-
-            private:
-                Data* _data;
-        };
 
         // Path API - transformation and matrix
         virtual void clearMatrixBuffer(); // Clear matrix and its stack
@@ -190,10 +168,10 @@ class PT_GFX_API ImagePainter2 : public Painter
         virtual void transformPath();
 
         virtual void pushPath(); // Useful for hierarchical rendering (scene graph)
-        virtual void popPath();  // ---
+        virtual bool popPath();  // ---
 
-        virtual void setPathData(const BasicPathData& pd); // Useful if the user wants to save/cache the path
-        virtual const BasicPathData getPathData() const;   // ---
+        virtual void setPathData(const SmartPtr<BasicPathData>& pd); // Useful if the user wants to save/cache the path
+        virtual SmartPtr<BasicPathData> getPathData() const;         // ---
 
         virtual void clearPathDataBuffer(); // Clear path data and its stack
 
@@ -217,6 +195,32 @@ class PT_GFX_API ImagePainter2 : public Painter
         void thickenPatternedPolygon(std::vector<PointF>& pointsF, const PointF* src, size_t pointCount);
         bool sagPolygonPoints(SAGOpState& state, bool draw);
         void sagGenerateSimpleLineSegment(SAGOpState& state, float x1, float y1, float x2, float y2);
+
+    protected:
+        // Path API - path data class
+        class PathData : public BasicPathData {
+            public:
+                struct Data;
+
+            public:
+                PathData();
+                PathData(const PathData& pd);
+
+                virtual ~PathData();
+
+                void clear();
+
+                inline Data& data()
+                { return *_data; }
+
+                inline const Data& data() const
+                { return *_data; }
+
+                const PathData& operator=(const PathData& pd);
+
+            private:
+                Data* _data;
+        };
 
     private:
         RectF                 _clip;
