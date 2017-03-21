@@ -51,7 +51,7 @@ static inline void calculateLineParams(float& wh, float& dx, float& dy, float& n
   //const float c = -(x1 * y2 - x2 * y1);
 
     // Inverse line length
-    const float il = Gfx::Math::fastInvSqrt(a * a + b * b); //1.0f / Gfx::Math::fastSqrt(a * a + b * b);
+    const float il = Gfx::Math::fastInvSqrt(a * a + b * b);
 
     // Half line width
     wh = (float) w * 0.5f;
@@ -176,8 +176,9 @@ static inline bool satDetectPolygonCollision(const PointF* poly1, size_t poly1Co
         satDPIProjMinMax(min1, max1, poly1, poly1Count, nx, ny);
         satDPIProjMinMax(min2, max2, poly2, poly2Count, nx, ny);
         // Check if the polygon is separated
-        lprintf("A: %+7.1f , %+7.1f --- %+7.1f , %+7.1f ### %d ### %+7.1f , %+7.1f\n", max1, min2, max2, min1, (max1 < min2 || max2 < min1), nx, ny);
+        //lprintf("A: %+7.1f , %+7.1f --- %+7.1f , %+7.1f ### %d ### %+7.1f , %+7.1f\n", max1, min2, max2, min1, (max1 < min2 || max2 < min1), nx, ny);
         if(max1 < min2 || max2 < min1) return false;
+        if(fabs( (min2 - max1) / max1 ) <= 0.003f || fabs( (min1 - max2) / max2 ) <= 0.003f) return false;
     }
 
     // Calculate the second polygon's normals
@@ -195,8 +196,9 @@ static inline bool satDetectPolygonCollision(const PointF* poly1, size_t poly1Co
         satDPIProjMinMax(min1, max1, poly1, poly1Count, nx, ny);
         satDPIProjMinMax(min2, max2, poly2, poly2Count, nx, ny);
         // Check if the polygon is separated
-        lprintf("B: %+7.1f , %+7.1f --- %+7.1f , %+7.1f ### %d ### %+7.1f , %+7.1f\n", max1, min2, max2, min1, (max1 < min2 || max2 < min1), nx, ny);
+        //lprintf("B: %+7.1f , %+7.1f --- %+7.1f , %+7.1f ### %d ### %+7.1f , %+7.1f\n", max1, min2, max2, min1, (max1 < min2 || max2 < min1), nx, ny);
         if(max1 < min2 || max2 < min1) return false;
+        if(fabs( (min2 - max1) / max1 ) <= 0.003f || fabs( (min1 - max2) / max2 ) <= 0.003f) return false;
     }
 
     // There is a collision
@@ -528,29 +530,6 @@ FontMetrics ImagePainter2::fontMetrics( const Font& font, const Pt::String& text
 ImagePainter2::ImagePainter2(Image& image)
 : _rasterizer( new Rasterizer2(image) )
 { setAntiAliasingMode(); /* Call the setter to enable the default anti-aliasing mode */ }
-/*
-{
-
-    const PointF poly1[] = {
-        PointF( 90.6, 523.5+0.0),
-        PointF( 96.0, 517.0+0.0),
-        PointF(102.5, 522.4+0.0),
-        PointF(101.1, 507.5+0.0),
-        PointF( 95.7, 514.0+0.0),
-        PointF( 89.2, 508.6+0.0)
-    };
-    const PointF poly2[] = {
-        PointF( 88.8, 500.3),
-        PointF( 93.4, 493.2),
-        PointF(100.5, 497.7),
-        PointF( 97.3, 483.1),
-        PointF( 92.7, 490.2),
-        PointF( 85.6, 485.7)
-    };
-    lprintf("%d\n", satDetectPolygonCollision(poly1, 6, poly2, 6));
-    exit(-1);
-}
-//*/
 
 ImagePainter2::~ImagePainter2()
 { delete _rasterizer; }
@@ -1725,7 +1704,7 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
                     bool intersect = false;
                     if(state.dstPCount0) {
                         intersect = satDetectPolygonCollision(&state.dstPoints[0], state.dstPCount0, pointsF.data(), pointsF.size());
-                        lprintf("PCI-0 @ %3zd : S[%3zd, %3zd] with N[%3zd, %3zd] => %d\n", state.dstPoints.size(), (size_t) 0, state.dstPCount0, (size_t) 0, pointsF.size(), intersect);
+                        //lprintf("PCI-0 @ %3zd : S[%3zd, %3zd] with N[%3zd, %3zd] => %d\n", state.dstPoints.size(), (size_t) 0, state.dstPCount0, (size_t) 0, pointsF.size(), intersect);
                     }
                     else {
                         state.dstPCount0 = pointsF.size();
@@ -1733,7 +1712,7 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
                     // Check for intersection with the previous polygons in the final destination buffer
                     if(!intersect && state.dstPCount && state.dstPStart) {
                         intersect = satDetectPolygonCollision(&state.dstPoints[state.dstPStart], state.dstPCount, pointsF.data(), pointsF.size());
-                        lprintf("PCI-N @ %3zd : S[%3zd, %3zd] with N[%3zd, %3zd] => %d\n", state.dstPoints.size(), state.dstPStart, state.dstPCount, (size_t) 0, pointsF.size(), intersect);
+                        //lprintf("PCI-N @ %3zd : S[%3zd, %3zd] with N[%3zd, %3zd] => %d\n", state.dstPoints.size(), state.dstPStart, state.dstPCount, (size_t) 0, pointsF.size(), intersect);
                     }
                     if(!intersect) {
                         state.dstPStart = state.dstPoints.size();
@@ -1863,6 +1842,7 @@ void ImagePainter2::sagGenerateSimpleLineSegment(SAGOpState& state, float x1, fl
         const bool r = satDetectPolygonCollision(
             &state.dstPoints[0], state.dstPCount0, pointsF.data(), pointsF.size()
         );
+        /*
         lprintf("LCI-0 @ %3zd : S[%3zd, %3zd] with N[%3zd, %3zd] => %d\n", state.dstPoints.size(), (size_t) 0, state.dstPCount0, (size_t) 0, pointsF.size(), r);
         if(r) {
             for(size_t i = 0; i < state.dstPCount0; ++i) {
@@ -1875,6 +1855,7 @@ void ImagePainter2::sagGenerateSimpleLineSegment(SAGOpState& state, float x1, fl
             lprintf("\n");
             //exit(0);
         }
+        */
         if(r) return;
     }
     else {
@@ -1886,7 +1867,7 @@ void ImagePainter2::sagGenerateSimpleLineSegment(SAGOpState& state, float x1, fl
         const bool r = satDetectPolygonCollision(
             &state.dstPoints[state.dstPStart], state.dstPCount, pointsF.data(), pointsF.size()
         );
-        lprintf("LCI-N @ %3zd : S[%3zd, %3zd] with N[%3zd, %3zd] => %d\n", state.dstPoints.size(), state.dstPStart, state.dstPCount, (size_t) 0, pointsF.size(), r);
+        //lprintf("LCI-N @ %3zd : S[%3zd, %3zd] with N[%3zd, %3zd] => %d\n", state.dstPoints.size(), state.dstPStart, state.dstPCount, (size_t) 0, pointsF.size(), r);
         if(r) return;
     }
     state.dstPStart = state.dstPoints.size();
