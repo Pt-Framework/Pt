@@ -45,15 +45,55 @@ namespace Gfx {
 // ===== ImagePainter2::PathData Class Implementation ===================================
 // ======================================================================================
 
-struct ImagePainter2::PathData::Data {
-    // ### TODO ###
+class ImagePainter2::PathData::Data {
+    public:
+        // Instruction type
+        enum InsType {
+            IT_MoveTo, IT_LineTo, IT_ArcTo, IT_QuadBezierTo
+        };
 
-    inline void clear()
-    {
-        // ### TODO ###
-    }
+        // Instruction structure
+        struct Instruction {
+            InsType type;
+            float   param1, param2;
+
+            inline Instruction(InsType type_, float param1_)
+            : type(type_), param1(param1_)
+            {}
+
+            inline Instruction(InsType type_, float param1_, float param2_)
+            : type(type_), param1(param1_), param2(param2_)
+            {}
+        };
+
+        // Instruction list
+        typedef std::vector<Instruction> Instructions;
+
+    public:
+        inline Data()
+        {}
+
+        inline ~Data()
+        { clear(); }
+
+        inline void clear()
+        { _ins.clear(); }
+
+        inline void add(InsType type, float param1)
+        { _ins.push_back(Instruction(type, param1)); }
+
+        inline void add(InsType type, float param1, float param2)
+        { _ins.push_back(Instruction(type, param1, param2)); }
+
+        inline std::vector<Instruction>& get()
+        { return _ins; }
+
+        inline const std::vector<Instruction>& get() const
+        { return _ins; }
+
+    private:
+        Instructions _ins;
 };
-
 
 ImagePainter2::PathData::PathData()
 : _data(new Data())
@@ -158,34 +198,51 @@ void ImagePainter2::transformPath()
 }
 
 void ImagePainter2::pushPath()
-{ _pathDataStack.push_back(_pathData); }
+{
+    PathData* pathData = new PathData(*_pathData);
+
+    _pathDataStack.push_back(pathData);
+}
 
 bool ImagePainter2::popPath()
 {
     if(_pathDataStack.empty()) return false;
 
+    delete _pathData;
     _pathData = _pathDataStack.back();
+
     _pathDataStack.pop_back();
 
     return true;
 }
 
-void ImagePainter2::setPathData(const SmartPtr<ImagePainter2::BasicPathData>& pd)
-{ _pathData = dynamic_cast<const PathData&>(*pd.get()); }
-
-SmartPtr<Painter::BasicPathData> ImagePainter2::getPathData() const
+void ImagePainter2::setPathData(AutoPtr<Painter::BasicPathData> pd)
 {
-    Painter::BasicPathData* pd = dynamic_cast<Painter::BasicPathData*>(
-                                     new ImagePainter2::PathData(_pathData)
-                                 );
+    BasicPathData* basicPathData = pd.get();
+    PathData*      pathData      = dynamic_cast<PathData*>(basicPathData);
 
-    return SmartPtr<Painter::BasicPathData>(pd);
+    if(!pathData) return;
+
+    delete _pathData;
+    _pathData = pathData;
+
+    pd.release();
+}
+
+AutoPtr<Painter::BasicPathData> ImagePainter2::getPathData() const
+{
+    PathData*      pathData      = new PathData(*_pathData);
+    BasicPathData* basicPathData = dynamic_cast<BasicPathData*>(pathData);
+
+    return AutoPtr<BasicPathData>(basicPathData);
 }
 
 void ImagePainter2::clearPathDataBuffer()
 {
-    _pathData.clear();
+    for(size_t i = 0; i < _pathDataStack.size(); ++i) delete _pathDataStack[i];
     _pathDataStack.clear();
+
+    _pathData->clear();
 }
 
 void ImagePainter2::strokePath()

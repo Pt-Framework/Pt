@@ -186,8 +186,8 @@ class PT_GFX_API ImagePainter2 : public Painter
         virtual void pushPath(); // Useful for hierarchical rendering (scene graph)
         virtual bool popPath();  // ---
 
-        virtual void setPathData(const SmartPtr<BasicPathData>& pd); // Useful if the user wants to save/cache the path
-        virtual SmartPtr<BasicPathData> getPathData() const;         // ---
+        virtual void setPathData(AutoPtr<BasicPathData> pd); // Useful if the user wants to save/cache the path
+        virtual AutoPtr<BasicPathData> getPathData() const;         // ---
 
         virtual void clearPathDataBuffer(); // Clear path data and its stack
 
@@ -220,7 +220,7 @@ class PT_GFX_API ImagePainter2 : public Painter
         // Path API - path data class
         class PathData : public BasicPathData {
             public:
-                struct Data;
+                class Data;
 
             public:
                 PathData();
@@ -243,12 +243,12 @@ class PT_GFX_API ImagePainter2 : public Painter
         };
 
     private:
-        RectF                 _clip;
-        Rasterizer2*          _rasterizer;
-        AffineMatrix2D        _affineMatrix2D;
+        RectF                  _clip;
+        Rasterizer2*           _rasterizer;
+        AffineMatrix2D         _affineMatrix2D;
 
-        PathData              _pathData;
-        std::vector<PathData> _pathDataStack;
+        PathData*              _pathData;
+        std::vector<PathData*> _pathDataStack;
 };
 
 

@@ -529,10 +529,19 @@ FontMetrics ImagePainter2::fontMetrics( const Font& font, const Pt::String& text
 
 ImagePainter2::ImagePainter2(Image& image)
 : _rasterizer( new Rasterizer2(image) )
-{ setAntiAliasingMode(); /* Call the setter to enable the default anti-aliasing mode */ }
+, _pathData  ( new PathData() )
+{
+    /* Call the setter to enable the default anti-aliasing mode */
+    setAntiAliasingMode();
+}
 
 ImagePainter2::~ImagePainter2()
-{ delete _rasterizer; }
+{
+    for(size_t i = 0; i < _pathDataStack.size(); ++i) delete _pathDataStack[i];
+    delete _pathData;
+
+    delete _rasterizer;
+}
 
 void ImagePainter2::setAntiAliasingMode(AntiAliasingMode mode)
 { _rasterizer->setAntiAliasingMode(mode); }
