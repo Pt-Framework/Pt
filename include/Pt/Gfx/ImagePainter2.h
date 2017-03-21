@@ -136,7 +136,7 @@ class PT_GFX_API ImagePainter2 : public Painter
         typedef AffineMatrix2D::MatrixUpdateMode MatrixUpdateMode;
 
         // Path API - path data class
-        class PathData {
+        class PathData : public BasicPathData {
             public:
                 struct Data;
 
@@ -144,15 +144,15 @@ class PT_GFX_API ImagePainter2 : public Painter
                 PathData();
                 PathData(const PathData& pd);
 
-                ~PathData();
+                virtual ~PathData();
 
-                inline Data* data()
-                { return _data; }
+                inline Data& data()
+                { return *_data; }
 
-                inline const Data* data() const
-                { return _data; }
+                inline const Data& data() const
+                { return *_data; }
 
-                const PathData& operator=(const PathData& pd);
+                virtual const PathData& operator=(const PathData& pd);
 
             private:
                 Data* _data;
@@ -192,8 +192,8 @@ class PT_GFX_API ImagePainter2 : public Painter
         virtual void pushPath(); // Useful for hierarchical rendering (scene graph)
         virtual void popPath();  // ---
 
-        virtual void setPathData(const PathData& pd); // Useful if the user wants to save/cache the path
-        virtual const PathData getPathData() const;   // ---
+        virtual void setPathData(const BasicPathData& pd); // Useful if the user wants to save/cache the path
+        virtual const BasicPathData getPathData() const;   // ---
 
         virtual void clearPathDataBuffer(); // Clear path data and its stack
 

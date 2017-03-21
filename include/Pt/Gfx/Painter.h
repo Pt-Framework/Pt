@@ -58,6 +58,18 @@ class PT_GFX_API Painter
          static const Pt::int32_t MaximumCoordinate;
 
     public:
+        // An empty and non-functional basic path data
+        class BasicPathData {
+            public:
+                BasicPathData() {}
+                BasicPathData(const BasicPathData&) {}
+                
+                virtual ~BasicPathData() {}
+
+                virtual const BasicPathData operator=(const BasicPathData&) { return *this; }
+        };
+
+    public:
         //! @brief Destructor.
         virtual ~Painter()
         {}

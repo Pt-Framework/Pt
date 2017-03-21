@@ -40,23 +40,23 @@ namespace Gfx {
 // ======================================================================================
 
 struct ImagePainter2::PathData::Data {
+    // ### TODO ###
 };
 
 ImagePainter2::PathData::PathData()
-: _data(0)
-{
-}
+: _data(new Data())
+{}
 
 ImagePainter2::PathData::PathData(const PathData& pd)
-{
-}
+: _data(new Data())
+{ *_data = *pd._data; }
 
 ImagePainter2::PathData::~PathData()
-{
-}
+{ delete _data; }
 
 const ImagePainter2::PathData& ImagePainter2::PathData::operator=(const ImagePainter2::PathData& pd)
 {
+    *_data = *pd._data;
     return *this;
 }
 
@@ -157,11 +157,11 @@ void ImagePainter2::popPath()
 {
 }
 
-void ImagePainter2::setPathData(const PathData& pd)
-{ _pathData = pd; }
+void ImagePainter2::setPathData(const BasicPathData& pd)
+{ _pathData = dynamic_cast<const PathData&>(pd); }
 
-const ImagePainter2::PathData ImagePainter2::getPathData() const
-{ return _pathData; }
+const ImagePainter2::BasicPathData ImagePainter2::getPathData() const
+{ return dynamic_cast<const BasicPathData&>(_pathData); }
 
 void ImagePainter2::clearPathDataBuffer()
 {
