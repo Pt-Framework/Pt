@@ -425,7 +425,6 @@ static void testDrawThickEllipseArc_impl(
 
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(&painter);
 
-
     Pen text ( Color::fromRgb8(255,   0,   0, 255) );
     Pen vref ( Color::fromRgb8(255, 127, 127, 127) );
 
@@ -433,6 +432,16 @@ static void testDrawThickEllipseArc_impl(
     painter.fillRect( RectF( PointF(0, 80), SizeF(image.width(), 60) ) );
     painter.fillRect( RectF( PointF(0, 80 + 185), SizeF(image.width(), 30) ) );
     painter.fillRect( RectF( PointF(0, 80 + 400), SizeF(image.width(), 60) ) );
+
+    //*
+    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
+    painter.setPen(drawI); painter.drawEllipse( PointF (30, 50 + 400), SizeF(67, 135) );
+    painter.setCompositionMode(CompositionMode::SourceOver);
+    painter.setPen(vref ); painter.drawEllipse( PointF (30, 50 + 400), SizeF(67, 135) );
+    painter.setCompositionMode(cm);
+    sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), false);
+    return;
+    //*/
 
     // First row
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);

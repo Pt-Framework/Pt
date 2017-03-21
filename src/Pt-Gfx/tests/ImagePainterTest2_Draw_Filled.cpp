@@ -10,7 +10,7 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
     const PointF polyx[] = { PointF(10 * sx, 10 * sx), PointF(40 * sx, 40 * sx), PointF(30 * sx, 60 * sx) };
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
     painter.fillPolygon( polyx, sizeof(polyx) / sizeof(polyx[0]) );
-    sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
+    sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), false);
     return;
 #endif
 
@@ -186,7 +186,7 @@ static void testDrawFillEllipse(const char* title, Image& image, Painter& painte
     ip2->fillArc( PointF ( 20,  20), SizeF(800, 800), -225 + 30, 45 + 30, ArcMode::Pie );
     ip2->fillArc( PointF (100, 100), SizeF(105, 105), -225 + 30, 45 + 30, ArcMode::Pie );
     ip2->fillArc( PointF (300, 100), SizeF(105, 105), 0 + 3, 135 + 3, ArcMode::Pie );
-    sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
+    sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), false);
     return;
 #endif
 
