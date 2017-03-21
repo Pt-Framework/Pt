@@ -39,33 +39,32 @@ namespace Gfx{
 
 class ClipShape {
     public:
-        ClipShape();
+        inline ClipShape()
+        {}
 
-        static bool clipLine(Pt::int32_t& x0, Pt::int32_t& y0, Pt::int32_t& x1, Pt::int32_t& y1, const Rect& clip);
-        static void clipPolygon(std::vector<Point>& in, const Rect& clippingArea);
-
-        static bool insideXRange(Pt::int32_t v, const Rect& clippingArea)
+        static inline bool insideXRange(Pt::int32_t v, const Rect& clippingArea)
         { return ( v >= clippingArea.left() && v <= clippingArea.right() ); }
 
-        static bool insideYRange(Pt::int32_t v, const Rect& clippingArea)
+        static inline bool insideYRange(Pt::int32_t v, const Rect& clippingArea)
         { return ( v >= clippingArea.top() && v <= clippingArea.bottom() ); }
 
-    private:
-        static int csComputeOutcode(Pt::int32_t x, Pt::int32_t y, const Rect& clip);
+        static bool clipLine(Pt::int32_t& x0, Pt::int32_t& y0, Pt::int32_t& x1, Pt::int32_t& y1, const Rect& clip);
+        static void clipPolygon(std::vector<Point>& pio, const Rect& clippingArea);
 
     private:
-        enum Orientation{ Left, Right, Top, Bottom };
+        // Clip polygon
+        enum ClipMode {
+            CM_Left, CM_Right, CM_Top, CM_Bottom
+        };
 
-        static void clipEdge(const std::vector<Point>& in,
-                             std::vector<Point>& out,
-                             Point edgePoint0, Point edgePoint1);
+    private:
+        // Clip line
+        static Pt::int32_t csComputeOutcode(Pt::int32_t x, Pt::int32_t y, const Rect& clip);
 
-        static Point intersect(const Point& from,
-                               const Point& to,
-                               const Point& edge0,
-                               Point& edge1);
-
-        static bool inside(const Point& p, const Point& edge0, Point& edge1);
+        // Clip polygon
+        static void clipEdge(std::vector<Point>& out, const std::vector<Point>& in, const Point& edge0, const Point& edge1, ClipMode cm);
+        static bool inside(const Point& p, const Point& corner, ClipMode cm);
+        static const Point intersect(const Point& from, const Point& to, const Point& edge0, const Point& edge1);
 };
 
 

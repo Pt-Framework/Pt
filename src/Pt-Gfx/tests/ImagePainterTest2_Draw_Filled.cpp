@@ -14,6 +14,29 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
     return;
 #endif
 
+
+    // Diamond-like polygons
+    painter.setPen( Color::fromRgb8(255, 0, 0) );
+    painter.setBrush( brush2 );
+    const PointF qqq[] = { // CCW
+        PointF(-110, 310),    // L
+        PointF(160, 1340),    // B
+        PointF(1210, 310),    // R
+        PointF(140, -260)     // T
+
+        //PointF(110, 310),
+        //PointF(160, 340),
+        //PointF(210, 310),
+        //PointF(140, 260)
+    };
+    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
+    painter.fillPolygon( qqq, sizeof(qqq) / sizeof(qqq[0]) );
+    sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
+    return;
+
+
+
+
     painter.setPen( Color::fromRgb8(255, 0, 0) );
 
     painter.setBrush( Color::fromRgb8(63, 63, 255) );
@@ -21,7 +44,7 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
     painter.fillRect( RectF( PointF(170, 250), SizeF(800, 200) ) );
     painter.fillRect( RectF( PointF(170, 450), SizeF(100, 100) ) );
 
-
+    // Pointy polygons
     painter.setBrush( brush1 );
 
     const PointF poly1a[] = { // CCW
@@ -57,7 +80,7 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
     painter.fillPolygon( poly1c, sizeof(poly1b) / sizeof(poly1b[0]) );
     painter.drawText( PointF(30 + 391, 50), "FSAA2x2" );
 
-
+    // Diamond-like polygons
     painter.setBrush( brush2 );
 
     const PointF poly2a[] = { // CCW
@@ -90,7 +113,7 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
     painter.fillPolygon( poly2c, sizeof(poly2c) / sizeof(poly2c[0]) );
     painter.drawText( PointF(10, 250 + 300), "FSAA2x2" );
 
-
+    // Complex U-like polygons
     painter.setBrush( brush1 );
 
     const PointF poly3a[] = { // CCW
@@ -141,7 +164,7 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
     painter.fillPolygon( poly3c, sizeof(poly3c) / sizeof(poly3c[0]) );
     painter.drawText( PointF(330 + 460, 530), "FSAA 2x2" );
 
-
+    // A polygon with holes
     painter.setBrush( brush2 );
 
     const PointF poly4[] = { // CCW

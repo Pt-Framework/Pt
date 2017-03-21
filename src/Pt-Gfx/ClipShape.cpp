@@ -29,14 +29,11 @@
  */
 
 #include "ClipShape.h"
+#include <stdio.h>
 
 
 namespace Pt{
 namespace Gfx{
-
-
-ClipShape::ClipShape()
-{}
 
 
 // ======================================================================================
@@ -117,7 +114,7 @@ bool ClipShape::clipLine(Pt::int32_t& x0, Pt::int32_t& y0, Pt::int32_t& x1, Pt::
 }
 
 // Compute the bit code for a point (x, y) using the clip rectangle
-int ClipShape::csComputeOutcode(Pt::int32_t x, Pt::int32_t y, const Rect& clip)
+Pt::int32_t ClipShape::csComputeOutcode(Pt::int32_t x, Pt::int32_t y, const Rect& clip)
 {
     int code = CS_Inside; // Initialised as being inside of the clip region
 
@@ -134,56 +131,111 @@ int ClipShape::csComputeOutcode(Pt::int32_t x, Pt::int32_t y, const Rect& clip)
 // ===== Clip Polygon ===================================================================
 // ======================================================================================
 
-// ### TODO: The polygon clipper may not work on some cases !!! ###
-
-void ClipShape::clipPolygon(std::vector<Point>& in, const Rect& clippingArea)
+void ClipShape::clipPolygon(std::vector<Point>& pio, const Rect& clippingArea)
 {
     if(clippingArea.isNull()) {
-        in.clear();
+        pio.clear();
         return;
     }
 
-    std::vector<Point> buf;
+    std::vector<Point> tmp;
 
-    clipEdge( in,  buf, clippingArea.topLeft    (), clippingArea.bottomLeft () ); in .clear();
-    clipEdge( buf, in,  clippingArea.bottomLeft (), clippingArea.bottomRight() ); buf.clear();
-    clipEdge( in,  buf, clippingArea.bottomRight(), clippingArea.topRight   () ); in .clear();
-    clipEdge( buf, in,  clippingArea.topRight   (), clippingArea.topLeft    () );
+    clipEdge(tmp, pio, clippingArea.topLeft   (), clippingArea.bottomLeft  (), CM_Left  );
+    clipEdge(pio, tmp, clippingArea.topRight  (), clippingArea.bottomRight (), CM_Right );
+    clipEdge(tmp, pio, clippingArea.topLeft   (), clippingArea.topRight    (), CM_Top   );
+    clipEdge(pio, tmp, clippingArea.bottomLeft(), clippingArea.bottomRight (), CM_Bottom);
 }
 
-void ClipShape::clipEdge(const std::vector<Point>& in, std::vector<Point>& out,
-                            Point edgePoint0, Point edgePoint1)
+void ClipShape::clipEdge(std::vector<Point>& out, const std::vector<Point>& in, const Point& edge0, const Point& edge1, ClipMode cm)
 {
+    out.clear();
     if(in.empty()) return;
 
-    Point p;
-    Point i;
-    Point s = in[in.size() - 1];
+    const size_t size1 = in.size() - 1;
 
-    for(size_t j = 0; j < in.size(); ++j) {
-        p = in[j];
-        if(inside(p, edgePoint0, edgePoint1)) {
-            if(inside( s, edgePoint0, edgePoint1)) {
-                out.push_back(p);
-            }
-            else {
-                i = intersect(p, s, edgePoint0, edgePoint1);
-                out.push_back(i);
-                out.push_back(p);
-            }
+    for(size_t i = 0; i <= size1; ++i) {
+        const Point& s       = in[i];
+        const Point& p       = in[(i == size1) ? 0 : (i + 1)];
+        const bool   sInside = inside(s, edge0, cm);
+        const bool   pInside = inside(p, edge0, cm);
+        if(sInside && pInside) {
+            out.push_back(p);
         }
-        else {
-            if(inside(s, edgePoint0, edgePoint1)) {
-                i = intersect(s, p, edgePoint0, edgePoint1);
-                out.push_back(i);
-            }
+        else if(sInside && !pInside) {
+            out.push_back(intersect(s, p, edge0, edge1));
         }
-        s = p;
+        else if(!sInside && pInside) {
+            out.push_back(intersect(s, p, edge0, edge1));
+            out.push_back(p);
+        }
     }
+
+    fprintf(stderr, "\n");
 }
 
-Point ClipShape::intersect( const Point& from, const Point& to, const Point& edge0, Point& edge1)
+bool ClipShape::inside(const Point& p, const Point& corner, ClipMode cm)
 {
+    switch(cm) {
+        case CM_Left   : return p.x() >= corner.x();
+        case CM_Right  : return p.x() <= corner.x();
+        case CM_Top    : return p.y() >= corner.y();
+        case CM_Bottom : return p.y() <= corner.y();
+    }
+
+    return false;
+}
+
+const Point ClipShape::intersect(const Point& from, const Point& to, const Point& edge0, const Point& edge1)
+{
+
+#if 1
+    // The first line
+    const Pt::int32_t x11   = from.x();
+    const Pt::int32_t y11   = from.y();
+    const Pt::int32_t x12   = to  .x();
+    const Pt::int32_t y12   = to  .y();
+    const Pt::int32_t minX1 = std::min(x11, x12);
+    const Pt::int32_t minY1 = std::min(y11, y12);
+    const Pt::int32_t maxX1 = std::max(x11, x12);
+    const Pt::int32_t maxY1 = std::max(y11, y12);
+    const Pt::int32_t a1    = y12 - y11;
+    const Pt::int32_t b1    = x11 - x12;
+    const Pt::int32_t c1    = -(x11 * y12 - x12 * y11);
+
+    // The second line
+    const Pt::int32_t x21   = edge0.x();
+    const Pt::int32_t y21   = edge0.y();
+    const Pt::int32_t x22   = edge1.x();
+    const Pt::int32_t y22   = edge1.y();
+    const Pt::int32_t minX2 = std::min(x21, x22);
+    const Pt::int32_t minY2 = std::min(y21, y22);
+    const Pt::int32_t maxX2 = std::max(x21, x22);
+    const Pt::int32_t maxY2 = std::max(y21, y22);
+    const Pt::int32_t a2    = y22 - y21;
+    const Pt::int32_t b2    = x21 - x22;
+    const Pt::int32_t c2    = -(x21 * y22 - x22 * y21);
+
+    // Check if the line is parallel
+    const Pt::int32_t denom = a1 * b2 - a2 * b1;
+    if(!denom) return Point(0, 0);
+
+    // Calculate the intersection point
+    Pt::int32_t ipX = (b1 * c2 - b2 * c1) / denom;
+    Pt::int32_t ipY = (a2 * c1 - a1 * c2) / denom;
+
+    // Check and fix the coordinate of the intersection point
+    // (for very steep lines, the coordinate of the intersection point can be incorrectly calculated)
+         if(ipX < minX1 && ipX < minX2) ipX = (minX1 + minX2) / 2;
+    else if(ipX > maxX1 && ipX > maxX2) ipX = (maxX1 + maxX2) / 2;
+         if(ipY < minY1 && ipY < minY2) ipY = (minY1 + minY2) / 2;
+    else if(ipY > maxY1 && ipY > maxY2) ipY = (maxY1 + maxY2) / 2;
+
+    // Return the intersection point
+    return Point(ipX, ipY);
+#else
+
+
+
     Point p;
 
     if(edge0.y() == edge1.y()) {
@@ -213,24 +265,11 @@ Point ClipShape::intersect( const Point& from, const Point& to, const Point& edg
     }
 
     return p;
+
+#endif
 }
 
-bool ClipShape::inside(const Point& p, const Point& edge0, Point& edge1)
-{
-    // Vertical
-    if(edge0.x() == edge1.x()) {
-        if(edge0.y() < edge1.y()) return p.x() >= edge0.x(); // Right is inside
-        else                      return p.x() <= edge1.x(); // Left is inside
-    }
 
-    // Horizontal
-    if(edge0.y() == edge1.y()) {
-        if(edge0.x() < edge1.x()) return p.y() <= edge0.y(); // Top is inside
-        else                      return p.y() >= edge0.y(); // Left is inside
-    }
-
-    return false;
-}
 
 
 } // namespace

@@ -263,7 +263,7 @@ void Rasterizer2::separateAndClipPolygons(Pt::int32_t& minX, Pt::int32_t& maxX, 
             // Store the clipped points
             clippedPoints.insert(clippedPoints.end(), clipped.begin(), clipped.end());
             // Store the number of points
-            clippedCounts.push_back(curPC);
+            clippedCounts.push_back(clipped.size());
         }
     }
 }

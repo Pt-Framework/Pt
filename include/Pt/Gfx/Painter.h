@@ -61,8 +61,8 @@ class PT_GFX_API Painter
         // An empty and non-functional basic path data
         class BasicPathData {
             protected:
-                BasicPathData() {}
-                BasicPathData(const BasicPathData&) {}
+                inline BasicPathData() {}
+                inline BasicPathData(const BasicPathData&) {}
 
             public:
                 virtual ~BasicPathData() {}
