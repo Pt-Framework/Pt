@@ -175,6 +175,10 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual void clearPathDataBuffer(); // Clear path data and its stack
 
+        // Path API - path rendering
+        virtual void strokePath();
+        virtual void fillPath();
+
     private:
         // State for spread-and-gather operations on polygon points (used to thicken patterned polygon)
         struct SAGOpState;

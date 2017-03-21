@@ -1,6 +1,6 @@
 /* Copyright (C) 2017-2017 Aloysius Indrayanto
    Copyright (C) 2006-2015 Marc Boris Duerner
-   
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
@@ -32,6 +32,13 @@
 
 namespace Pt {
 namespace Gfx {
+
+
+// ======================================================================================
+// ===== Internal Helper Functions - Drawing Functions ==================================
+// ======================================================================================
+
+// ### TODO ###
 
 
 // ======================================================================================
@@ -179,6 +186,16 @@ void ImagePainter2::clearPathDataBuffer()
 {
     _pathData.clear();
     _pathDataStack.clear();
+}
+
+void ImagePainter2::strokePath()
+{
+    // ### TODO ###
+}
+
+void ImagePainter2::fillPath()
+{
+    // ### TODO ###
 }
 
 
