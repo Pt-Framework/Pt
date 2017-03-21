@@ -641,7 +641,8 @@ void Widget::measure(const SizePolicy& policy)
 
     if(doMeasure)
     {
-        std::clog << "MEASURE: " << typeid(*this).name() << std::endl;
+        static int nnn = 0;
+        std::clog << "MEASURE: " << typeid(*this).name() << " " << ++nnn << std::endl;
         _measuredSize = onMeasure(policy);
     }
 }
@@ -716,7 +717,8 @@ void Widget::layout(const Gfx::RectF& rect)
 
     if(isChanged)
     {
-        std::clog << "LAYOUT: " << typeid(*this).name() << std::endl;
+        static int nnn = 0;
+        std::clog << "LAYOUT: " << typeid(*this).name() << " " << ++nnn << std::endl;
         onLayout();
     }
 }

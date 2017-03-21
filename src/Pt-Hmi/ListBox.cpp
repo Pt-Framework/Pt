@@ -507,12 +507,16 @@ Gfx::SizeF ListBox::onMeasure(const SizePolicy& p)
 
     _layout.measure(policy);
 
+    
     return baseSize;
 }
 
 
 void ListBox::onLayout()
 {
+    //_layout.layout( Gfx::RectF(_layout.position(), 
+    //                           _layout.measuredSize()) );
+
     Base::onLayout();
 }
 
