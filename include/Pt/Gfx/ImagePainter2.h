@@ -136,6 +136,22 @@ class PT_GFX_API ImagePainter2 : public Painter
         // For convenience
         typedef AffineMatrix2D::MatrixUpdateMode MatrixUpdateMode;
 
+        /*******************************************************************************
+         * ### QUESTION ###
+         * 1. Shall we use plain function names like the ones already defined below?
+         * 2. Or, do we use something like:
+         *        pfClearMatrixBuffer()
+         *        pfTranslate()
+         *        pfStrokePath()
+         *    so the user can differentiate between direct drawing functions and path
+         *    functions?
+         *
+         *    In this case pf == path-function
+         *    Perhaps another prefix such as: pp (painter-path)?
+         *                                    pb (path-building)?
+         *                                    etc...?
+         *******************************************************************************/
+
         // Path API - transformation and matrix
         virtual void clearMatrixBuffer(); // Clear matrix and its stack
 
