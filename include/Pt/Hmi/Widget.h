@@ -444,6 +444,7 @@ class PT_HMI_API Widget : public Visual
         Widget*                      _content;
 
         int                          _invalidates;
+        bool                         _isLayouting;
 
         bool                         _visible;
         bool                         _enabled;

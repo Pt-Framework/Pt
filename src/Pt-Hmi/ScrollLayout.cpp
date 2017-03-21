@@ -152,7 +152,7 @@ void ScrollLayout::onAddWidget(Widget& w)
 {
     Base::onAddWidget(w);
 
-     double maxWidth = 0;
+    double maxWidth = 0;
     double maxHeight = 0;
     
     for(std::size_t i = 0; i < widgets().size(); ++i)
@@ -189,24 +189,6 @@ Gfx::SizeF ScrollLayout::onMeasure(const SizePolicy& policy)
 {
     Gfx::SizeF s = Base::onMeasure(policy);
 
-    std::vector<Widget*>::const_iterator it;
-    for(it = widgets().begin() ; it != widgets().end(); ++it)
-    {
-        Widget* w = *it;
-
-        SizePolicy  itemPolicy;
-        itemPolicy.setSize(w->size());
-        w->measure(itemPolicy);
-   }
-
-   return s;
-}
-
-
-void ScrollLayout::onLayout()
-{
-    Base::onLayout();
-
     double maxWidth = 0;
     double maxHeight = 0;
     
@@ -228,6 +210,24 @@ void ScrollLayout::onLayout()
 
     _maxX = static_cast<int>(maxWidth);
     _maxY = static_cast<int>(maxHeight);
+
+    std::vector<Widget*>::const_iterator it;
+    for(it = widgets().begin() ; it != widgets().end(); ++it)
+    {
+        Widget* w = *it;
+
+        SizePolicy itemPolicy;
+        itemPolicy.setSize( w->size() );
+        w->measure(itemPolicy);
+   }
+
+   return s;
+}
+
+
+void ScrollLayout::onLayout()
+{
+    Base::onLayout();
 
     //if( _maxX < size().width() && _scrollPos.x() != 0 )
     //{

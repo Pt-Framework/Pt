@@ -44,6 +44,7 @@ Widget::Widget()
 , _window(0)
 , _content(0)
 , _invalidates(0)
+, _isLayouting(true)
 , _visible(true)
 , _enabled(true)
 , _enabledState(true)
@@ -623,13 +624,26 @@ Gfx::SizeF Widget::preferredSize(const SizePolicy& policy) const
 void Widget::relayout()
 {
   if( window() )
-      window()->relayout();   
+  {
+      _isLayouting = true;
+      
+      if( parent() )
+          parent()->relayout();
+      else
+          window()->relayout(); 
+  }  
 } 
 
 
 void Widget::measure(const SizePolicy& policy)
 {
-    _measuredSize = onMeasure(policy);
+    bool doMeasure = policy.size() != _measuredSize || _isLayouting;
+
+    if(doMeasure)
+    {
+        std::clog << "MEASURE: " << typeid(*this).name() << std::endl;
+        _measuredSize = onMeasure(policy);
+    }
 }
 
 
@@ -660,6 +674,11 @@ Gfx::SizeF Widget::onMeasure(const SizePolicy& policy)
 void Widget::layout(const Gfx::RectF& rect)
 {
     bool moved = rect.topLeft() != _position;
+    bool resized = rect.size() != _size;
+    bool isChanged = moved || resized || _isLayouting;
+
+    _isLayouting = false;
+
     if(moved)
     {
         Gfx::PointF p = rect.topLeft();
@@ -678,7 +697,6 @@ void Widget::layout(const Gfx::RectF& rect)
         _position = p;
     }
 
-    bool resized = rect.size() != _size;
     if(resized)
     {
         const Gfx::SizeF& s = rect.size();
@@ -696,7 +714,11 @@ void Widget::layout(const Gfx::RectF& rect)
         update(updateRect);
     }
 
-    onLayout();
+    if(isChanged)
+    {
+        std::clog << "LAYOUT: " << typeid(*this).name() << std::endl;
+        onLayout();
+    }
 }
 
 

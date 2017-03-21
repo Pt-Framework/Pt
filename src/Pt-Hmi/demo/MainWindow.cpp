@@ -86,24 +86,24 @@ void loadIcon(Gfx::Image& icon)
 
 
 MainWindow::MainWindow()
-: /*_child1("Child 1")
-,*/  _scrollContainer(Hmi::FlowLayout::Top)
+: _child1("Child 1")
+, _scrollContainer(Hmi::FlowLayout::Top)
 {
     loadIcon(_icon);
     _picture.set(_icon);
     
     setTitle("Main 1");
     move( Gfx::PointF(60, 60) );
-    resize( Gfx::SizeF(720, 900) ); 
+    resize( Gfx::SizeF(700, 900) ); 
     
     //_child2.setTopMost(true);
-    _child2.resize( Gfx::SizeF(600, 850) );
+    _child2.resize( Gfx::SizeF(550, 550) );
     add( _child2 );
     
     _child2.setTitle("Child 2");
     _child2.move( Gfx::PointF(10, 10) );
     
-    for(int n = 0; n < 20; ++n)
+    for(int n = 0; n < 10; ++n)
     {
         _btns[n].resize(Pt::Gfx::SizeF(100, 40));
 
@@ -131,12 +131,12 @@ MainWindow::MainWindow()
     _child2.setMainWidget(&_scrollView);
     _child2.show(true);
 
-    //add( _child1 );
-    //
-    ////_child1.setTopMost(true);
-    //_child1.move( Gfx::PointF(30,30));
-    //_child1.resize( Gfx::SizeF(300, 600) );
-    //_child1.show(true);
+    add( _child1 );
+    
+    //_child1.setTopMost(true);
+    _child1.move( Gfx::PointF(30,30));
+    _child1.resize( Gfx::SizeF(300, 600) );
+    _child1.show(true);
     
     // context menu   
     _menu.setName("All Music");
@@ -260,7 +260,7 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 
 void MainWindow::onButton()
 {
-    _btns[0].setMargin(10);
+    _btns[2].setMargin(10);
 }
 
 
