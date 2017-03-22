@@ -77,4 +77,35 @@
 #endif
 
 
+
+#if defined(PT_GFX_USE_NEON)
+
+// NEON helper functions
+static inline int16x8_t NEON_SET_INT16X8(int16_t h, int16_t g, int16_t f, int16_t e, int16_t d, int16_t c, int16_t b, int16_t a)
+{
+    const int16x8_t vec = {
+        h, g, f, e, d, c, b, a
+    };
+    return vec;
+}
+
+static inline int32x4_t NEON_SET_INT32X4(int32_t d, int32_t c, int32_t b, int32_t a)
+{
+    const int32x4_t vec = {
+        d, c, b, a
+    };
+    return vec;
+}
+
+static inline int32x4_t NEON_SET_FLT32X4(float d, float c, float b, float a)
+{
+    const int32x4_t vec = {
+        d, c, b, a
+    };
+    return vec;
+}
+
+#endif
+
+
 #endif

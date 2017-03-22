@@ -50,11 +50,10 @@ static const __m256 avxOneZero = _mm256_set_ps(0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0
 
 #endif
 
-
 #if defined(PT_GFX_USE_NEON)
 
 // NEON constants
-static const float32x4_t neonOneZero = { 0.0f, 1.0f, 0.0f, 1.0f };
+static const float32x4_t neonOneZero = NEON_SET_FLT32X4(0.0f, 1.0f, 0.0f, 1.0f);
 
 #endif
 

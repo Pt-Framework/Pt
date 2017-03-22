@@ -63,27 +63,10 @@ static const __m128i sseMask0B0R = _mm_set_epi32(0x00FF00FF, 0x00FF00FF, 0x00FF0
 
 #if defined(PT_GFX_USE_NEON)
 
-// NEON helper functions
-static inline int16x8_t SET_16X8(int32_t a, int32_t b, int32_t c, int32_t d, int32_t e, int32_t f, int32_t g,  int32_t h)
-{
-    const int16x8_t vec = {
-        (int16_t) h, (int16_t) g, (int16_t) f, (int16_t) e, (int16_t) d, (int16_t) c, (int16_t) b, (int16_t) a
-    };
-    return vec;
-}
-
-static inline int32x4_t SET_32X4(int32_t a, int32_t b, int32_t c, int32_t d)
-{
-    const int32x4_t vec = {
-        (int32_t) d, (int32_t) c, (int32_t) b, (int32_t) a
-    };
-    return vec;
-}
-
 // NEON masks
-static const int32x4_t neonMaskA000 = SET_32X4(0xFF000000, 0xFF000000, 0xFF000000, 0xFF000000);
-static const int32x4_t neonMaskA0G0 = SET_32X4(0xFF00FF00, 0xFF00FF00, 0xFF00FF00, 0xFF00FF00);
-static const int32x4_t neonMask0B0R = SET_32X4(0x00FF00FF, 0x00FF00FF, 0x00FF00FF, 0x00FF00FF);
+static const int32x4_t neonMaskA000 = NEON_SET_INT32X4(0xFF000000, 0xFF000000, 0xFF000000, 0xFF000000);
+static const int32x4_t neonMaskA0G0 = NEON_SET_INT32X4(0xFF00FF00, 0xFF00FF00, 0xFF00FF00, 0xFF00FF00);
+static const int32x4_t neonMask0B0R = NEON_SET_INT32X4(0x00FF00FF, 0x00FF00FF, 0x00FF00FF, 0x00FF00FF);
 
 #endif
 
