@@ -91,14 +91,26 @@ struct Path2D::PathData {
     : curX(0.f), curY(0.0)
     {}
 
-    inline void addInstruction(const Instruction& ins)
-    { inss.push_back(ins); }
-
     inline bool empty() const
     { return inss.empty(); }
 
     inline bool lastInstructionMatch(InsType type) const
     { return inss.back().type == type; }
+
+    inline void add(InsType type)
+    { inss.push_back( Instruction(type) ); }
+
+    inline void add(InsType type, float p1)
+    { inss.push_back( Instruction(type, p1) ); }
+
+    inline void add(InsType type, float p1, float p2)
+    { inss.push_back( Instruction(type, p1, p2) ); }
+
+    inline void add(InsType type, float p1, float p2, float p3)
+    { inss.push_back( Instruction(type, p1, p2, p3) ); }
+
+    inline void add(InsType type, float p1, float p2, float p3, float p4)
+    { inss.push_back( Instruction(type, p1, p2, p3, p4) ); }
 };
 
 
@@ -117,53 +129,104 @@ void Path2D::beginPath()
 {
     if( !_pathData->empty() && !_pathData->lastInstructionMatch(PathData::IT_End) )
         throw Path2DInvalidContext(PT_SOURCEINFO_STR);
+
+    _pathData->add(PathData::IT_Begin);
 }
 
 void Path2D::endPath()
 {
     if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_Begin) || _pathData->lastInstructionMatch(PathData::IT_End) )
         throw Path2DInvalidContext(PT_SOURCEINFO_STR);
+
+    _pathData->add(PathData::IT_End);
 }
 
 void Path2D::moveTo(double x, double y)
 {
     if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
         throw Path2DInvalidContext(PT_SOURCEINFO_STR);
+
+    _pathData->add(PathData::IT_MoveTo, x, y);
+
+    _pathData->curX = x;
+    _pathData->curY = y;
 }
 
 void Path2D::lineTo(double x, double y)
 {
-    // ### TODO ###
+    if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
+        throw Path2DInvalidContext(PT_SOURCEINFO_STR);
+
+    _pathData->add(PathData::IT_LineTo, x, y);
+
+    _pathData->curX = x;
+    _pathData->curY = y;
 }
 
 void Path2D::arcTo(double x, double y, double r)
 {
-    // ### TODO ###
+    if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
+        throw Path2DInvalidContext(PT_SOURCEINFO_STR);
+
+    _pathData->add(PathData::IT_ArcTo, x, y, r);
+
+    _pathData->curX = x;
+    _pathData->curY = y;
 }
 
 void Path2D::quadraticBezierTo(double cx, double cy, double x, double y)
 {
-    // ### TODO ###
+    if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
+        throw Path2DInvalidContext(PT_SOURCEINFO_STR);
+
+    _pathData->add(PathData::IT_QuadBezierTo, cx, cy, x, y);
+
+    _pathData->curX = x;
+    _pathData->curY = y;
 }
 
 void Path2D::relMoveTo(double x, double y)
 {
-    // ### TODO ###
+    if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
+        throw Path2DInvalidContext(PT_SOURCEINFO_STR);
+
+    _pathData->add(PathData::IT_MoveTo, _pathData->curX + x, _pathData->curY + y);
+
+    _pathData->curX += x;
+    _pathData->curY += y;
 }
 
 void Path2D::relLineTo(double x, double y)
 {
-    // ### TODO ###
+    if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
+        throw Path2DInvalidContext(PT_SOURCEINFO_STR);
+
+    _pathData->add(PathData::IT_LineTo, _pathData->curX + x, _pathData->curY + y);
+
+    _pathData->curX += x;
+    _pathData->curY += y;
 }
 
 void Path2D::relArcTo(double x, double y, double r)
 {
-    // ### TODO ###
+    if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
+        throw Path2DInvalidContext(PT_SOURCEINFO_STR);
+
+    _pathData->add(PathData::IT_ArcTo, _pathData->curX + x, _pathData->curY + y, r);
+
+    _pathData->curX += x;
+    _pathData->curY += y;
 }
 
 void Path2D::relQuadraticBezierTo(double cx, double cy, double x, double y)
 {
-    // ### TODO ###
+    if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
+        throw Path2DInvalidContext(PT_SOURCEINFO_STR);
+
+    _pathData->add(PathData::IT_QuadBezierTo, _pathData->curX + cx, _pathData->curY + cy, _pathData->curX + x, _pathData->curY + y);
+
+    _pathData->curX = x;
+    _pathData->curY = y;
 }
 
 void  Path2D::generatePoints(std::vector<PointF> dst, Pt::uint8_t smoothness)
