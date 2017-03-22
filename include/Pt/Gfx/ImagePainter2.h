@@ -132,73 +132,6 @@ class PT_GFX_API ImagePainter2 : public Painter
         static std::vector<std::string> fontNames();
         static FontMetrics fontMetrics(const Font& font, const Pt::String& text);
 
-    public:
-        // For convenience
-        typedef AffineMatrix2D::MatrixUpdateMode MatrixUpdateMode;
-
-        /*******************************************************************************
-         * ### QUESTION ###
-         * 1. Shall we use plain function names like the ones already defined below?
-         * 2. Or, do we use something like:
-         *        pfClearMatrixBuffer()
-         *        pfTranslate()
-         *        pfStrokePath()
-         *    so the user can differentiate between direct drawing functions and path
-         *    functions?
-         *
-         *    In this case pf == path-function
-         *    Perhaps another prefix such as: pp (painter-path)?
-         *                                    pb (path-building)?
-         *                                    etc...?
-         *******************************************************************************/
-
-        // Path API - transformation and matrix
-        virtual void clearMatrixBuffer(); // Clear matrix and its stack
-
-        virtual void pushMatrix(); // Useful for hierarchical rendering (scene graph)
-        virtual void popMatrix();  // ---
-
-        virtual void getRawMatrix(float m[3][3]) const;
-        virtual void updateMatrixUsingRaw(const float m[3][3], MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
-
-        virtual void loadIdentityMatrix();
-
-        virtual void translate(float x, float y, MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
-        virtual void scaleAboutOrigin(float x, float y, MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
-        virtual void rotateAboutOrigin(float deg, MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
-        virtual void shearXDirection(float deg, MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
-        virtual void shearYDirection(float deg, MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
-        virtual void reflectAboutOrigin(MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
-        virtual void reflectAboutXAxis(MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
-        virtual void reflectAboutYAxis(MatrixUpdateMode mode = AffineMatrix2D::MultiplyOnLeft);
-
-        // Path API - path generation
-        virtual void beginPath();
-        virtual void moveTo(float x, float y); // Can be caleld multiple time before endPath() to create stacked polygons
-        virtual void lineTo(float x, float y);
-        virtual void arcTo(float x, float y);
-        virtual void quadraticBezierTo(float cx, float cy, float x, float y);
-        virtual void endPath(bool autoClose);
-
-        // Path API - path manipulation
-        virtual void transformPath();
-
-        virtual void pushPath(); // Useful for hierarchical rendering (scene graph)
-        virtual bool popPath();  // ---
-
-        virtual void setPathData(AutoPtr<BasicPathData> pd); // Useful if the user wants to save/cache the path
-        virtual AutoPtr<BasicPathData> getPathData() const;         // ---
-
-        virtual void clearPathDataBuffer(); // Clear path data and its stack
-
-        // Path API - path rendering
-        virtual void strokePath();
-        virtual void fillPath();
-
-    private:
-        // Path API - path rendering
-        void generatePointsFromPath();
-
     private:
         // State for spread-and-gather operations on polygon points (used to thicken patterned polygon)
         struct SAGOpState;
@@ -221,39 +154,9 @@ class PT_GFX_API ImagePainter2 : public Painter
         void sagGenerateSimpleLineSegment(SAGOpState& state, float x1, float y1, float x2, float y2);
         void sagGeneratePolyLineSegment(SAGOpState& state);
 
-    protected:
-        // Path API - path data class
-        class PathData : public BasicPathData {
-            public:
-                class Data;
-
-            public:
-                PathData();
-                PathData(const PathData& pd);
-
-                virtual ~PathData();
-
-                void clear();
-
-                inline Data& data()
-                { return *_data; }
-
-                inline const Data& data() const
-                { return *_data; }
-
-                const PathData& operator=(const PathData& pd);
-
-            private:
-                Data* _data;
-        };
-
     private:
-        RectF                  _clip;
-        Rasterizer2*           _rasterizer;
-        AffineMatrix2D         _affineMatrix2D;
-
-        PathData*              _pathData;
-        std::vector<PathData*> _pathDataStack;
+        RectF        _clip;
+        Rasterizer2* _rasterizer;
 };
 
 

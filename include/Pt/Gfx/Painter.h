@@ -58,17 +58,6 @@ class PT_GFX_API Painter
          static const Pt::int32_t MaximumCoordinate;
 
     public:
-        // An empty and non-functional basic path data
-        class BasicPathData {
-            protected:
-                inline BasicPathData() {}
-                inline BasicPathData(const BasicPathData&) {}
-
-            public:
-                virtual ~BasicPathData() {}
-        };
-
-    public:
         /* ### TODO ###
          *
          * Add/update the pure virtual functions for these APIs:
@@ -76,7 +65,7 @@ class PT_GFX_API Painter
          *     2. drawRoundRect() and fillRoundRect()
          *     3. drawArc() and fillArc()
          *     4. drawQuadraticPolybezier()
-         *     5. all path-related APIs
+         *     5. drawPath() and fillPath()
          */
 
     public:
