@@ -102,17 +102,17 @@ class PT_GFX_API AffineMatrix2D {
         inline void push();
         inline bool pop();
 
-        inline void transformPoint(float& dx, float& dy, float sx, float sy);
-        inline void transformPoint(float& x, float &y);
+        inline void transformPoint(float& dx, float& dy, float sx, float sy) const;
+        inline void transformPoint(float& x, float &y) const;
 
-        inline void transformPoint(PointF& dp, const PointF& sp);
-        inline void transformPoint(PointF& p);
+        inline void transformPoint(PointF& dp, const PointF& sp) const;
+        inline void transformPoint(PointF& p) const;
 
-        inline void transformPoints(float* dxy, const float* sxy, size_t pointCount);
-        inline void transformPoints(float* xy, size_t pointCount);
+        inline void transformPoints(float* dxy, const float* sxy, size_t pointCount) const;
+        inline void transformPoints(float* xy, size_t pointCount) const;
 
-        inline void transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount);
-        inline void transformPoints(PointF* xy, size_t pointCount);
+        inline void transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount) const;
+        inline void transformPoints(PointF* xy, size_t pointCount) const;
 
     private:
 #if defined(PT_GFX_USE_AVX1)
@@ -319,13 +319,13 @@ bool AffineMatrix2D::pop()
     return true;
 }
 
-void AffineMatrix2D::transformPoint(float& dx, float& dy, float sx, float sy)
+void AffineMatrix2D::transformPoint(float& dx, float& dy, float sx, float sy) const
 {
     dx = _mdata.v[0][0] * sx + _mdata.v[0][1] * sy + _mdata.v[0][2];
     dy = _mdata.v[1][0] * sx + _mdata.v[1][1] * sy + _mdata.v[1][2];
 }
 
-void AffineMatrix2D::transformPoint(float& x, float &y)
+void AffineMatrix2D::transformPoint(float& x, float &y) const
 {
     const float tx = _mdata.v[0][0] * x + _mdata.v[0][1] * y + _mdata.v[0][2];
     const float ty = _mdata.v[1][0] * x + _mdata.v[1][1] * y + _mdata.v[1][2];
@@ -334,7 +334,7 @@ void AffineMatrix2D::transformPoint(float& x, float &y)
     y = ty;
 }
 
-void AffineMatrix2D::transformPoint(PointF& dp, const PointF& sp)
+void AffineMatrix2D::transformPoint(PointF& dp, const PointF& sp) const
 {
     float x = sp.x();
     float y = sp.y();
@@ -343,10 +343,10 @@ void AffineMatrix2D::transformPoint(PointF& dp, const PointF& sp)
     dp.set(x, y);
 }
 
-void AffineMatrix2D::transformPoint(PointF& p)
+void AffineMatrix2D::transformPoint(PointF& p) const
 { transformPoint(p, p); }
 
-void AffineMatrix2D::transformPoints(float* dxy, const float* sxy, size_t pointCount)
+void AffineMatrix2D::transformPoints(float* dxy, const float* sxy, size_t pointCount) const
 {
 
 #if defined(PT_GFX_USE_AVX1)
@@ -428,10 +428,10 @@ void AffineMatrix2D::transformPoints(float* dxy, const float* sxy, size_t pointC
     for(size_t i = 0; i < pointCount; i += 2) transformPoint(dxy[i], dxy[i + 1], sxy[i], sxy[i + 1]);
 }
 
-void AffineMatrix2D::transformPoints(float* xy, size_t pointCount)
+void AffineMatrix2D::transformPoints(float* xy, size_t pointCount) const
 { transformPoints(xy, xy, pointCount); }
 
-void AffineMatrix2D::transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount)
+void AffineMatrix2D::transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount) const
 {
 #if defined(PT_GFX_USE_AVX1)
 
@@ -458,7 +458,7 @@ void AffineMatrix2D::transformPoints(PointF* dxy, const PointF* sxy, size_t poin
 #endif
 }
 
-void AffineMatrix2D::transformPoints(PointF* xy, size_t pointCount)
+void AffineMatrix2D::transformPoints(PointF* xy, size_t pointCount) const
 { transformPoints(xy, xy, pointCount); }
 
 

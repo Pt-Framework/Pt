@@ -42,7 +42,6 @@ if $(WITH_RASTERIZER2)
                                DrawText2.cpp
                                Path2D.cpp
                                ImagePainter2.cpp
-                               ImagePainter2_Path.cpp
                                Rasterizer2.cpp
                                Rasterizer2_PixelScanline.cpp
                                Rasterizer2_Line.cpp

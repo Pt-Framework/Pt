@@ -229,7 +229,7 @@ void Path2D::relQuadraticBezierTo(double cx, double cy, double x, double y)
     _pathData->curY = y;
 }
 
-void  Path2D::generatePoints(std::vector<PointF> dst, Pt::uint8_t smoothness)
+void  Path2D::generatePoints(std::vector<PointF> dst, Pt::uint8_t smoothness) const
 {
     // ### TODO ###
 }
