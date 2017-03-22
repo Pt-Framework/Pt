@@ -93,7 +93,7 @@ void Path2D::lineTo(double x, double y)
     // ### TODO ###
 }
 
-void Path2D::arcTo(double x, double y)
+void Path2D::arcTo(double x, double y, double r)
 {
     // ### TODO ###
 }
@@ -113,7 +113,7 @@ void Path2D::relLineTo(double x, double y)
     // ### TODO ###
 }
 
-void Path2D::relArcTo(double x, double y)
+void Path2D::relArcTo(double x, double y, double r)
 {
     // ### TODO ###
 }

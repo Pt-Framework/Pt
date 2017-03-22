@@ -56,26 +56,26 @@ class Path2D {
 
 
         //
-        // Absolute addressing
+        // Absolute coordinate
         //
 
         void moveTo(double x, double y);
 
         void lineTo(double x, double y);
 
-        void arcTo(double x, double y);
+        void arcTo(double x, double y, double r);
 
         void quadraticBezierTo(double cx, double cy, double x, double y);
 
         //
-        // Relative addressing
+        // Relative coordinate
         //
 
         void relMoveTo(double x, double y);
 
         void relLineTo(double x, double y);
 
-        void relArcTo(double x, double y);
+        void relArcTo(double x, double y, double r);
 
         void relQuadraticBezierTo(double cx, double cy, double x, double y);
 
