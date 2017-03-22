@@ -1,5 +1,5 @@
 template <typename PainterT>
-static size_t benchDrawFillRect(int loopCount, const Brush& brushH, const Brush& brushV, CompositionMode cm)
+static size_t benchDrawFillRect(int loopCount, const Brush& brush1, const Brush& brush2, CompositionMode cm)
 {
     size_t sum = 0;
 
@@ -12,11 +12,11 @@ static size_t benchDrawFillRect(int loopCount, const Brush& brushH, const Brush&
         Pt::System::Clock clock;
         clock.start();
 
-        painter.setBrush(brushH);
+        painter.setBrush(brush1);
         painter.fillRect( RectF(PointF(100, 100), SizeF(200, 100)) );
         painter.fillRect( RectF(PointF(400, 100), SizeF(200, 100)) );
 
-        painter.setBrush(brushV);
+        painter.setBrush(brush2);
         painter.fillRect( RectF(PointF(150, 150), SizeF(200, 100)) );
         painter.fillRect( RectF(PointF(450, 150), SizeF(200, 100)) );
 
@@ -30,7 +30,7 @@ static size_t benchDrawFillRect(int loopCount, const Brush& brushH, const Brush&
 }
 
 template <typename PainterT, bool USE_RANDOM>
-static size_t benchDrawFillPolygon(int loopCount, const Brush& brushH, const Brush& brushV, CompositionMode cm, AntiAliasingMode antiAliasingMode)
+static size_t benchDrawFillPolygon(int loopCount, const Brush& brush1, const Brush& brush2, CompositionMode cm, AntiAliasingMode antiAliasingMode)
 {
     size_t sum = 0;
 
@@ -51,7 +51,7 @@ static size_t benchDrawFillPolygon(int loopCount, const Brush& brushH, const Bru
 
 #define RV (USE_RANDOM ? (rand() % 21 - 10) : 0)
 
-        painter.setBrush(brushH);
+        painter.setBrush(brush1);
         const PointF poly1a[] = { // CCW
             PointF(150 + RV, 100 + RV),
             PointF(350 + RV, 350 + RV),
@@ -62,7 +62,7 @@ static size_t benchDrawFillPolygon(int loopCount, const Brush& brushH, const Bru
         if(ip2) ip2->setAntiAliasingMode(antiAliasingMode);
         painter.fillPolygon(poly1a, sizeof(poly1a) / sizeof(poly1a[0]));
 
-        painter.setBrush(brushV);
+        painter.setBrush(brush2);
         const PointF poly1b[] = { // CCW
             PointF(350 + RV, 100 + RV),
             PointF(550 + RV, 350 + RV),
@@ -101,7 +101,7 @@ static size_t benchDrawFillPolygon(int loopCount, const Brush& brushH, const Bru
 }
 
 template <typename PainterT>
-static size_t benchDrawFillEllipse(int loopCount, const Brush& brushH, const Brush& brushV, CompositionMode cm, AntiAliasingMode antiAliasingMode)
+static size_t benchDrawFillEllipse(int loopCount, const Brush& brush1, const Brush& brush2, CompositionMode cm, AntiAliasingMode antiAliasingMode)
 {
     size_t sum = 0;
 
@@ -116,11 +116,11 @@ static size_t benchDrawFillEllipse(int loopCount, const Brush& brushH, const Bru
         Pt::System::Clock clock;
         clock.start();
 
-        painter.setBrush(brushH);
+        painter.setBrush(brush1);
         if(ip2) ip2->setAntiAliasingMode(antiAliasingMode);
         painter.fillEllipse( PointF (30, 60), SizeF(120, 60) );
 
-        painter.setBrush(brushV);
+        painter.setBrush(brush2);
         if(ip2) ip2->setAntiAliasingMode(antiAliasingMode);
         painter.fillEllipse( PointF (230, 60), SizeF(60, 120) );
 
@@ -134,7 +134,7 @@ static size_t benchDrawFillEllipse(int loopCount, const Brush& brushH, const Bru
 }
 
 template <typename PainterT>
-static size_t benchDrawFillArc(int loopCount, const Brush& brushH, const Brush& brushV, CompositionMode cm, AntiAliasingMode antiAliasingMode)
+static size_t benchDrawFillArc(int loopCount, const Brush& brush1, const Brush& brush2, CompositionMode cm, AntiAliasingMode antiAliasingMode)
 {
     size_t sum = 0;
 
@@ -150,12 +150,12 @@ static size_t benchDrawFillArc(int loopCount, const Brush& brushH, const Brush& 
         Pt::System::Clock clock;
         clock.start();
 
-        painter.setBrush(brushH);
+        painter.setBrush(brush1);
         ip2->setAntiAliasingMode(antiAliasingMode);
         ip2->fillArc( PointF (30, 60), SizeF(120, 120), 30, 330, ArcMode::Chord );
         ip2->fillArc( PointF (30, 60 + 200), SizeF(120, 120), 30, 330, ArcMode::Pie );
 
-        painter.setBrush(brushV);
+        painter.setBrush(brush2);
         ip2->setAntiAliasingMode(antiAliasingMode);
         ip2->fillArc( PointF (30 + 200, 60), SizeF(120, 120), 30, 330, ArcMode::Chord );
         ip2->fillArc( PointF (30 + 200, 60 + 200), SizeF(120, 120), 30, 330, ArcMode::Pie );

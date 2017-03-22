@@ -93,6 +93,8 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS 0
 #define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  0
 
+#define TEST_DRAW_PATH                          0 // (including thick and filled)
+
 #define TEST_COMPARE_WITH_OLD_PAINTER           0 // (for some shapes only)
 
 // Detailed-test benchmark settings for Pt-Gfx and some for Cairo
@@ -137,6 +139,8 @@ using namespace Pt::Gfx;
 #define BENCHMARK_GRADIENT_FILLED_ARC       0
 #define BENCHMARK_TEXTURE_FILLED_ARC        0
 
+#define BENCHMARK_PATH                      0
+
 // Configurations and objects
 #define FONT_DIR    "../src/Pt-Gfx/fonts"
 #define FONT_SPEC_S "DejaVu Serif", 12, Pt::Gfx::Font::BoldItalic, 0
@@ -157,6 +161,7 @@ static Brush bmBrushTextureW;
 #include "ImagePainterTest2_Draw_Outline.cpp"
 #include "ImagePainterTest2_Draw_Filled.cpp"
 #include "ImagePainterTest2_Draw_Thick.cpp"
+#include "ImagePainterTest2_Draw_Path.cpp"
 #include "ImagePainterTest2_Benchmark.cpp"
 #include "ImagePainterTest2_Cairo.cpp"
 
@@ -457,6 +462,17 @@ int main(int argc, char* args[])
     if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
         testDrawFillEllipse("Texture-Filled Ellipse & Arcs - ImagePainter2 [SourceOver]", image, *painter2, brushTexture1, brushTexture2);
+    }
+
+    // Path
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_PATH) {
+        painter2->setCompositionMode(CompositionMode::SourceCopy);
+        testDrawPath("Path - ImagePainter2 [SourceCopy]", image, *painter2, brushGradient2, brushTexture1);
+    }
+
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_PATH) {
+        painter2->setCompositionMode(CompositionMode::SourceOver);
+        testDrawPath("Path - ImagePainter2 [SourceOver]", image, *painter2, brushGradient2, brushTexture1);
     }
 
     // Create the brushes used for benchmarking
