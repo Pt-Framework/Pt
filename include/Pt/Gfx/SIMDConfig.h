@@ -73,8 +73,8 @@
 #endif
 
 
-//#undef PT_GFX_USE_AVX2
-//#undef PT_GFX_USE_AVX1
+#undef PT_GFX_USE_AVX2
+#undef PT_GFX_USE_AVX1
 
 //#undef PT_GFX_USE_SSE2
 //#undef PT_GFX_USE_SSE1

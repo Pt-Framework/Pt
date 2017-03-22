@@ -48,11 +48,11 @@ static const __m256i avxArithMaskA000 = _mm256_set_epi32(0xFF000000, 0xFF000000,
 static const __m256i avxArithMaskA0G0 = _mm256_set_epi32(0xFF00FF00, 0xFF00FF00, 0xFF00FF00, 0xFF00FF00, 0xFF00FF00, 0xFF00FF00, 0xFF00FF00, 0xFF00FF00);
 static const __m256i avxArithMask0B0R = _mm256_set_epi32(0x00FF00FF, 0x00FF00FF, 0x00FF00FF, 0x00FF00FF, 0x00FF00FF, 0x00FF00FF, 0x00FF00FF, 0x00FF00FF);
 
-// --- Hi 128 Bits ---   --- Lo 128 Bits ---
-// FEDC BA98 7654 3210   FEDC BA98 7654 3210
-// A000 A000 A000 A000   A000 A000 A000 A000
-// 0A0A 0A0A 0A0A 0A0A   0A0A 0A0A 0A0A 0A0A
-// .F.F .B.B .7.7 .3.3   .F.F .B.B .7.7 .3.3   for mask .V.V is written as 0x800V800V
+//        --- Hi 128 Bits ---   --- Lo 128 Bits ---
+// Bit# : FEDC BA98 7654 3210   FEDC BA98 7654 3210
+// From : A000 A000 A000 A000   A000 A000 A000 A000
+// To   : 0A0A 0A0A 0A0A 0A0A   0A0A 0A0A 0A0A 0A0A
+// Mask : .F.F .B.B .7.7 .3.3   .F.F .B.B .7.7 .3.3   (for mask .V.V is written as 0x800V800V)
 static const __m256i avxShuflMask0A0A = _mm256_set_epi32(0x800F800F, 0x800B800B, 0x80078007, 0x80038003, 0x800F800F, 0x800B800B, 0x80078007, 0x80038003);
 
 // avxArithMaskA000to0A0A
@@ -65,6 +65,8 @@ static const __m256i avxShuflMask0A0A = _mm256_set_epi32(0x800F800F, 0x800B800B,
 static const __m128i sseArithMaskA000 = _mm_set_epi32(0xFF000000, 0xFF000000, 0xFF000000, 0xFF000000);
 static const __m128i sseArithMaskA0G0 = _mm_set_epi32(0xFF00FF00, 0xFF00FF00, 0xFF00FF00, 0xFF00FF00);
 static const __m128i sseArithMask0B0R = _mm_set_epi32(0x00FF00FF, 0x00FF00FF, 0x00FF00FF, 0x00FF00FF);
+
+static const __m128i sseShuflMask0A0A = _mm_set_epi32(0x800F800F, 0x800B800B, 0x80078007, 0x80038003);
 
 #endif
 
@@ -426,6 +428,10 @@ inline void pixelOps_SourceOver(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBu
         // Get the source alpha
         srcv0A0A = _mm_and_si128   (srcv4PIX, sseArithMaskA000); // [ A000 A000 A000 A000 ]
         srci0A0A = _mm_sub_epi32   (sseArithMaskA000, srcv0A0A); // [ I000 I000 I000 I000 ]
+#if 1
+        srcv0A0A = _mm_shuffle_epi8(srcv0A0A, sseShuflMask0A0A); // [ 0A0A 0A0A 0A0A 0A0A ]
+        srci0A0A = _mm_shuffle_epi8(srci0A0A, sseShuflMask0A0A); // [ 0I0I 0I0I 0I0I 0I0I ]
+#else
         srcv0A0A = _mm_or_si128    (                             // [ 0A0A 0A0A 0A0A 0A0A ]
                        _mm_srli_epi32(srcv0A0A,  8),
                        _mm_srli_epi32(srcv0A0A, 24)
@@ -434,6 +440,7 @@ inline void pixelOps_SourceOver(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBu
                        _mm_srli_epi32(srci0A0A,  8),
                        _mm_srli_epi32(srci0A0A, 24)
                    );
+#endif
         // Process A and G
         srcvAGAG = _mm_and_si128   (srcv4PIX, sseArithMaskA0G0); // [ A0G0 A0G0 A0G0 A0G0 ]
         srcvAGAG = _mm_srli_epi16  (srcvAGAG, 8               ); // [ A0G0 A0G0 A0G0 A0G0 ]
