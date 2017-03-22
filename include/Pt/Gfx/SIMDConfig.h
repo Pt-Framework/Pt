@@ -31,14 +31,22 @@
 #define PT_GFX_SIMDCONFIG_H
 
 
+//
+// SIMD headers and macros
+//
+
+// For now only enable SIMD when working with Rasterizer2
+// ### TODO: Autodetect teh SIMD support! ###
 #ifdef RASTERIZER2
 
+// Include the appropriate SIMD header for common ARM compilers and define the needed macros
 #if defined(__arm__) || defined(__thumb__) || defined(_M_ARM) || defined(_M_ARMT) || defined(__TARGET_ARCH_ARM) || defined(__TARGET_ARCH_THUMB) || defined(_ARM) || defined(__arm)
 
     #include <arm_neon.h>
 
     #define PT_GFX_USE_NEON
 
+// Include the appropriate SIMD header for GCC and its derivative compilers and define the needed macros
 #elif defined(i386) || defined(__i386) || defined(__i386__) || defined(_X86_) || defined(__x86_64) || defined(__x86_64__) || defined(__amd64) || defined(__amd64__)
 
     #include <x86intrin.h>
@@ -49,6 +57,7 @@
     #define PT_GFX_USE_SSE2
     #define PT_GFX_USE_SSE1
 
+// Include the appropriate SIMD header for MSVC compiler and define the needed macros
 #elif defined(_M_IX86) || defined(_M_AMD64) || defined(_M_X64)
 
     #include <intrin.h>
@@ -64,6 +73,10 @@
 #endif
 
 
+//
+// When the higher SIMD level is supported, the lower level SIMD(s) should be also supported by the CPU
+//
+
 #if defined(PT_GFX_USE_AVX2) && !defined(PT_GFX_USE_AVX1)
 #define PT_GFX_USE_AVX1
 #endif
@@ -77,13 +90,25 @@
 #endif
 
 
+//
+// SIMD Helper functions
+//
+
 #if defined(PT_GFX_USE_NEON)
 
-// NEON helper functions
+// NOTE: Unlike x86_64's SSE and AVX, ARM's NEON does not have convenience-set functions such as:
+//           _mm_set_epi32
+//           _mm_set_ps
+//           ... etc.
+//       Therefore, they are implemented using C code. This will cause endianness issue.
+//
+//       The code below will only work if the ARM is running in little endian mode.
+//       The code below is designed so that the behavior of those functions are the same with the SSE/AVX ones.
+
 static inline int16x8_t NEON_SET_INT16X8(int16_t h, int16_t g, int16_t f, int16_t e, int16_t d, int16_t c, int16_t b, int16_t a)
 {
     const int16x8_t vec = {
-        h, g, f, e, d, c, b, a
+        a, b, c, d, e, f, g, h
     };
 
     return vec;
@@ -92,7 +117,7 @@ static inline int16x8_t NEON_SET_INT16X8(int16_t h, int16_t g, int16_t f, int16_
 static inline int32x4_t NEON_SET_INT32X4(int32_t d, int32_t c, int32_t b, int32_t a)
 {
     const int32x4_t vec = {
-        d, c, b, a
+        a, b, c, d
     };
 
     return vec;
@@ -101,9 +126,9 @@ static inline int32x4_t NEON_SET_INT32X4(int32_t d, int32_t c, int32_t b, int32_
 static inline float32x4_t NEON_SET_FLT32X4(float d, float c, float b, float a)
 {
     const float32x4_t vec = {
-        d, c, b, a
+        a, b, c, d
     };
-    
+
     return vec;
 }
 
