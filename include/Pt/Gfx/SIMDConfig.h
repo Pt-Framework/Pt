@@ -36,7 +36,7 @@
 //
 
 // For now only enable SIMD when working with Rasterizer2
-// ### TODO: Autodetect teh SIMD support! ###
+// ### TODO: Autodetect the SIMD support! ###
 #ifdef RASTERIZER2
 
 // Include the appropriate SIMD header for common ARM compilers and define the needed macros
@@ -71,6 +71,15 @@
 #endif
 
 #endif
+
+
+//#undef PT_GFX_USE_AVX2
+//#undef PT_GFX_USE_AVX1
+
+//#undef PT_GFX_USE_SSE2
+//#undef PT_GFX_USE_SSE1
+
+//#undef PT_GFX_USE_NEON
 
 
 //
