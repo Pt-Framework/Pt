@@ -47,7 +47,7 @@ namespace Pt {
 
 namespace Gfx {
 
-/** @brief 2D Painter interface.
+/** @brief 2D painter interface.
   */
 class PT_GFX_API Painter
 {

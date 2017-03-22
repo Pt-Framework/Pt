@@ -36,12 +36,14 @@ namespace Pt {
 namespace Gfx {
 
 
+/** @brief Anti-aliasing mode used when rendering.
+  */
 class AntiAliasingMode {
     public:
          enum Mode {
-             None      = 0, // No         anti-aliasing (speed: very fast ; memory : very low    ; visual quality : low   )
-             Standard  = 1, // Standard   anti-aliasing (speed: fast      ; memory : medium-high ; visual quality : high  )
-             LowMemory = 2  // Low-memory anti-aliasing (speed: fast      ; memory : low         ; visual quality : medium)
+             None      = 0, //! @brief No         anti-aliasing (speed: very fast ; memory : very low    ; visual quality : low   )
+             Standard  = 1, //! @brief Standard   anti-aliasing (speed: fast      ; memory : medium-high ; visual quality : high  )
+             LowMemory = 2  //! @brief Low-memory anti-aliasing (speed: fast      ; memory : low         ; visual quality : medium)
          };
 
         AntiAliasingMode(Mode m = Standard)

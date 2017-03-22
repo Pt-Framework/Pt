@@ -27,6 +27,8 @@
   02110-1301 USA
 */
 
+#include <Pt/SourceInfo.h>
+
 #include <Pt/Gfx/Path2D.h>
 
 
@@ -52,13 +54,51 @@ struct Path2D::PathData {
         IT_MoveTo, IT_LineTo, IT_ArcTo, IT_QuadBezierTo
     };
 
+    // Instruction structure
+    struct Instruction {
+        InsType type;
+        float   p1, p2, p3, p4;
+
+        inline Instruction(InsType type_)
+        : type(type_)
+        {}
+
+        inline Instruction(InsType type_, float p1_)
+        : type(type_), p1(p1_)
+        {}
+
+        inline Instruction(InsType type_, float p1_, float p2_)
+        : type(type_), p1(p1_), p2(p2_)
+        {}
+
+        inline Instruction(InsType type_, float p1_, float p2_, float p3_)
+        : type(type_), p1(p1_), p2(p2_), p3(p3_)
+        {}
+
+        inline Instruction(InsType type_, float p1_, float p2_, float p3_, float p4_)
+        : type(type_), p1(p1_), p2(p2_), p3(p3_), p4(p4_)
+        {}
+    };
+
+    typedef std::vector<Instruction> Instructions;
+
+    // Data
+    double       curX, curY;
+    Instructions inss;
+
     // Member functions
-    PathData()
+    inline PathData()
     : curX(0.f), curY(0.0)
     {}
 
-    // Data
-    double curX, curY;
+    inline void addInstruction(const Instruction& ins)
+    { inss.push_back(ins); }
+
+    inline bool empty() const
+    { return inss.empty(); }
+
+    inline bool lastInstructionMatch(InsType type) const
+    { return inss.back().type == type; }
 };
 
 
@@ -75,17 +115,20 @@ Path2D::~Path2D()
 
 void Path2D::beginPath()
 {
-    // ### TODO ###
+    if( !_pathData->empty() && !_pathData->lastInstructionMatch(PathData::IT_End) )
+        throw Path2DInvalidContext(PT_SOURCEINFO_STR);
 }
 
 void Path2D::endPath()
 {
-    // ### TODO ###
+    if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_Begin) || _pathData->lastInstructionMatch(PathData::IT_End) )
+        throw Path2DInvalidContext(PT_SOURCEINFO_STR);
 }
 
 void Path2D::moveTo(double x, double y)
 {
-    // ### TODO ###
+    if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
+        throw Path2DInvalidContext(PT_SOURCEINFO_STR);
 }
 
 void Path2D::lineTo(double x, double y)

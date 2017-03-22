@@ -58,12 +58,14 @@ static const float32x4_t neonOneZero = NEON_SET_FLT32X4(0.0f, 1.0f, 0.0f, 1.0f);
 #endif
 
 
-class AffineMatrix2D {
+/** @brief 2D affine matrix for 2D path transformation.
+  */
+class PT_GFX_API AffineMatrix2D {
     public:
         enum MatrixUpdateMode {
-            Replace,         // M' = N
-            MultiplyOnLeft,  // M' = N * M
-            MultiplyOnRight  // M' = M * N
+            Replace,         //! @brief M' = N
+            MultiplyOnLeft,  //! @brief M' = N * M
+            MultiplyOnRight  //! @brief M' = M * N
         };
 
     public:

@@ -36,12 +36,14 @@ namespace Pt {
 namespace Gfx {
 
 
+/** @brief Mode when drawing arcs.
+  */
 class ArcMode {
     public:
          enum Mode {
-             Open  = 0, // Open; not valid for fillArc()
-             Chord = 1, // Chord
-             Pie   = 2  // Pie
+             Open  = 0, //! @brief Open; not valid for fillArc()
+             Chord = 1, //! @brief Chord
+             Pie   = 2  //! @brief Pie
          };
 
         ArcMode(Mode m)
