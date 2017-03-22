@@ -52,20 +52,27 @@ namespace Gfx {
 class PT_GFX_API Painter
 {
     public:
-         static const PointF      PolygonSeparatorPointF;
-         static const Point       PolygonSeparatorPoint;
-         static const Point       MaximumPointCoordinate;
-         static const Pt::int32_t MaximumCoordinate;
+         static const Pt::ssize_t MaximumCoordinate;       //! @brief The maximum coordinate value                  (signed integer)
+         static const Point       MaximumPointCoordinate;  //! @brief A point set with the maximum coordinate value (signed integer)
+         static const Point       PolygonSeparatorPoint;   //! @brief A separator point for defining multi-path     (signed integer)
+
+         static const float       MaximumCoordinateF;      //! @brief The maximum coordinate value                  (floating-point)
+         static const PointF      MaximumPointCoordinateF; //! @brief A point set with the maximum coordinate value (floating-point)
+         static const PointF      PolygonSeparatorPointF;  //! @brief A separator point for defining multi-path     (floating-point)
 
     public:
         /* ### TODO ###
          *
          * Add/update the pure virtual functions for these APIs:
-         *     1. autoClose flag for drawPolyline()
-         *     2. drawRoundRect() and fillRoundRect()
-         *     3. drawArc() and fillArc()
-         *     4. drawQuadraticPolybezier()
-         *     5. drawPath() and fillPath()
+         *     1. Add the autoClose flag in drawPolyline()
+         *     2. Add the pure virtual functions for:
+         *            drawRoundRect()
+         *            drawQuadraticPolybezier()
+         *            drawPath()
+         *            drawArc()
+         *            fillRoundRect()
+         *            fillArc()
+         *            fillPath()
          */
 
     public:

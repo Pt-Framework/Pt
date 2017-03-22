@@ -33,7 +33,6 @@
 
 #include <Pt/Gfx/AntiAliasingMode.h>
 #include <Pt/Gfx/ArcMode.h>
-#include <Pt/Gfx/AffineMatrix2D.h>
 #include <Pt/Gfx/Path2D.h>
 #include <Pt/Gfx/Painter.h>
 

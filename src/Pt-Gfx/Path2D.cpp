@@ -34,5 +34,100 @@ namespace Pt {
 namespace Gfx {
 
 
+// ======================================================================================
+// ===== Internal Helper Functions - Generator (Drawing) Functions ======================
+// ======================================================================================
+
+// ### TODO ###
+
+
+// ======================================================================================
+// ===== Path2D::PathData Implementation ================================================
+// ======================================================================================
+
+struct Path2D::PathData {
+    // Instruction type
+    enum InsType {
+        IT_Begin, IT_End,
+        IT_MoveTo, IT_LineTo, IT_ArcTo, IT_QuadBezierTo
+    };
+
+    // Member functions
+    PathData()
+    : curX(0.f), curY(0.0)
+    {}
+
+    // Data
+    double curX, curY;
+};
+
+
+// ======================================================================================
+// ===== Public Member Functions ========================================================
+// ======================================================================================
+
+Path2D::Path2D()
+: _pathData( new PathData() )
+{}
+
+Path2D::~Path2D()
+{ delete _pathData; }
+
+void Path2D::beginPath()
+{
+    // ### TODO ###
+}
+
+void Path2D::endPath()
+{
+    // ### TODO ###
+}
+
+void Path2D::moveTo(double x, double y)
+{
+    // ### TODO ###
+}
+
+void Path2D::lineTo(double x, double y)
+{
+    // ### TODO ###
+}
+
+void Path2D::arcTo(double x, double y)
+{
+    // ### TODO ###
+}
+
+void Path2D::quadraticBezierTo(double cx, double cy, double x, double y)
+{
+    // ### TODO ###
+}
+
+void Path2D::relMoveTo(double x, double y)
+{
+    // ### TODO ###
+}
+
+void Path2D::relLineTo(double x, double y)
+{
+    // ### TODO ###
+}
+
+void Path2D::relArcTo(double x, double y)
+{
+    // ### TODO ###
+}
+
+void Path2D::relQuadraticBezierTo(double cx, double cy, double x, double y)
+{
+    // ### TODO ###
+}
+
+void  Path2D::generatePoints(std::vector<PointF> dst, Pt::uint8_t smoothness)
+{
+    // ### TODO ###
+}
+
+
 } // namespace
 } // namespace

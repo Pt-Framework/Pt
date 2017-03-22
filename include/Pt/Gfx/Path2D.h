@@ -32,7 +32,7 @@
 
 #include <vector>
 
-#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/AffineMatrix2D.h>
 
 
 namespace Pt{
@@ -41,6 +41,54 @@ namespace Gfx{
 
 class Path2D {
 
+    public:
+        Path2D();
+
+        ~Path2D();
+
+        //
+        // Path management - call them multiple times to create multi-path (e.g. path with holes)
+        //
+
+        void beginPath();
+
+        void endPath();
+
+
+        //
+        // Absolute addressing
+        //
+
+        void moveTo(double x, double y);
+
+        void lineTo(double x, double y);
+
+        void arcTo(double x, double y);
+
+        void quadraticBezierTo(double cx, double cy, double x, double y);
+
+        //
+        // Relative addressing
+        //
+
+        void relMoveTo(double x, double y);
+
+        void relLineTo(double x, double y);
+
+        void relArcTo(double x, double y);
+
+        void relQuadraticBezierTo(double cx, double cy, double x, double y);
+
+        //
+        // Generators
+        //
+        void generatePoints(std::vector<PointF> dst, Pt::uint8_t smoothness = 0);
+
+    private:
+        struct PathData;
+
+    private:
+        PathData* _pathData;
 };
 
 

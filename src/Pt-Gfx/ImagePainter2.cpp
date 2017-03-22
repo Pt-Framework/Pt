@@ -207,7 +207,7 @@ static inline bool satDetectPolygonCollision(const PointF* poly1, size_t poly1Co
 
 
 // ======================================================================================
-// ===== Internal Helper Functions - Drawing Functions ==================================
+// ===== Internal Helper Functions - Generator (Drawing) Functions ======================
 // ======================================================================================
 
 // Based on: Bitmap/Bézier curves/Quadratic

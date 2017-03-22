@@ -35,10 +35,13 @@ namespace Pt {
 namespace Gfx {
 
 
-const PointF      Painter::PolygonSeparatorPointF(99999, 99999);
-const Point       Painter::PolygonSeparatorPoint (99999, 99999);
-const Point       Painter::MaximumPointCoordinate(32767, 32767);
-const Pt::int32_t Painter::MaximumCoordinate     (32767);
+const Pt::ssize_t Painter::MaximumCoordinate      (32767);
+const Point       Painter::MaximumPointCoordinate (32767, 32767);
+const Point       Painter::PolygonSeparatorPoint  (99999, 99999);
+
+const float       Painter::MaximumCoordinateF     (32767);
+const PointF      Painter::MaximumPointCoordinateF(32767, 32767);
+const PointF      Painter::PolygonSeparatorPointF (99999, 99999);
 
 
 } // namespace
