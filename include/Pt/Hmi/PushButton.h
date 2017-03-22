@@ -114,7 +114,7 @@ class PT_HMI_API PushButton : public Button
 
         virtual Pt::Gfx::SizeF onAutoSize(const SizePolicy& policy) const;
 
-        virtual void onLayout();
+        virtual void onLayout(const Gfx::RectF& rect);
 
         virtual void onInvalidate();
 

@@ -117,10 +117,17 @@ class BasicSize {
             _h += s._h;
         }
 
-        const BasicSize& operator=(const BasicSize& other)
+        BasicSize& operator=(const BasicSize& other)
         {
             _w = other._w; _h = other._h;
             return *this;
+        }
+
+        BasicSize& operator+=(const BasicSize& s)
+        { 
+            _w += s._w;
+            _h += s._h;
+            return *this; 
         }
 
         bool operator==(const BasicSize& other) const

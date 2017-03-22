@@ -218,10 +218,19 @@ Gfx::SizeF ListBoxItem::onAutoSize(const SizePolicy& policy) const
 }
 
 
-//Gfx::SizeF ListBoxItem::onMeasure(const SizePolicy& p)
-//{
-//    return preferredSize();
-//}
+Gfx::SizeF ListBoxItem::onMeasure(const SizePolicy& p)
+{
+    Gfx::FontMetrics fm = Painter::fontMetrics( _font, _text );
+
+    double spacing = _picture.empty() || _text.empty() ? 0 : fm.height() * 0.5;
+    double pictureWidth = _iconSize.isNull() ? _picture.width() : _iconSize.width();
+    double pictureHeight = _iconSize.isNull() ? _picture.height() : _iconSize.height();
+    double itemsWidth = fm.width() + spacing + pictureWidth;
+    double itemsHeight = std::max<double>(fm.height(), pictureHeight);
+
+    return Gfx::SizeF( itemsWidth + padding().leftRight(),
+                       itemsHeight + padding().topBottom() );
+}
 
 
 void ListBoxItem::onInvalidate()
@@ -334,8 +343,11 @@ ListBox::ListBox()
 {
     setAcceptInput(false);
 
+    _layout.setAutoSize(true);
+
     //TODO: get margin from renderer
     _scrollView.setMargin(1);
+    _scrollView.setAutoSize(true);
     _scrollView.setWidget(_layout);
 
     setContent(_scrollView);
@@ -475,49 +487,13 @@ Gfx::SizeF ListBox::onAutoSize(const SizePolicy& policy) const
 
 Gfx::SizeF ListBox::onMeasure(const SizePolicy& p)
 {
-    Gfx::SizeF baseSize = Base::onMeasure(p);
-
-    double itemsHeight = 0;
-    double itemsWidth = p.size().width() - _scrollView.margin().leftRight()
-                                         - padding().leftRight();
-    
-    std::vector<Pt::Hmi::Widget*>::const_iterator it;
-    for(it = _layout.widgets().begin(); it != _layout.widgets().end(); ++it)
-    {
-        Widget* item = *it;
-
-        SizePolicy policy(SizePolicy::Fixed, SizePolicy::Preferred);
-        policy.setWidth(itemsWidth);
-        
-        Gfx::SizeF itemSize = item->preferredSize(policy);
-        policy.setSize(itemSize);
-
-        item->measure(policy);
-
-        itemsHeight += item->measuredSize().height();
-        itemsHeight += item->margin().topBottom();
-    }
-
-    Gfx::SizeF s;
-    s.setWidth(itemsWidth);
-    s.setHeight(itemsHeight);
-
-    SizePolicy policy(SizePolicy::Fixed, SizePolicy::Fixed);
-    policy.setSize(s);
-
-    _layout.measure(policy);
-
-    
-    return baseSize;
+    return Base::onMeasure(p);
 }
 
 
-void ListBox::onLayout()
+void ListBox::onLayout(const Gfx::RectF& rect)
 {
-    //_layout.layout( Gfx::RectF(_layout.position(), 
-    //                           _layout.measuredSize()) );
-
-    Base::onLayout();
+    Base::onLayout(rect);
 }
 
 

@@ -81,12 +81,6 @@ Pt::Signal<ListBoxItem&>& ComboBoxPopup::selected()
     return _items.selected();
 }
 
-
-Gfx::SizeF ComboBoxPopup::preferredSize(const SizePolicy& policy) const
-{
-    return _items.preferredSize(policy);
-}
-
 /////////////////////////////////////////////////////////////////////////////
 // ComboBox
 /////////////////////////////////////////////////////////////////////////////
@@ -180,8 +174,8 @@ void ComboBox::showPopup()
 {
     SizePolicy policy(SizePolicy::Fixed, SizePolicy::Preferred);
     policy.setSize( size() );
-
-    Gfx::SizeF popupSize = _popup.preferredSize(policy);
+    
+    Gfx::SizeF popupSize = _popup.measure(policy);
     popupSize.setHeight( std::min(popupSize.height(), _maxHeight) );
     _popup.resize(popupSize);
     

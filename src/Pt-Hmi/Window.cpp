@@ -659,14 +659,33 @@ void Window::onLayoutEvent(const LayoutEvent& ev)
     if(_layouts > 0)
         return;
 
-    if( ! _mainWidget )
-        return;
-
-    SizePolicy policy(SizePolicy::Preferred, SizePolicy::Preferred);
+    SizePolicy policy(SizePolicy::Fixed, SizePolicy::Fixed);
     policy.setSize(_size);
-    _mainWidget->measure(policy);
+    measure(policy);
 
-    _mainWidget->layout(Gfx::PointF(0,0), _size);
+    Gfx::RectF layoutRect(_size);
+    layout(layoutRect);
+}
+
+
+Gfx::SizeF Window::measure(const SizePolicy& policy)
+{
+    if( _mainWidget )
+    {
+        _mainWidget->measure(policy);
+        return _mainWidget->preferredSize();
+    }
+
+    return policy.size();
+}
+
+
+void Window::layout(const Gfx::RectF& rect)
+{
+    if( _mainWidget )
+    {
+        _mainWidget->layout(rect);
+    }
 }
 
 

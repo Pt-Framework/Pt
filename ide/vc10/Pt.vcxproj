@@ -110,6 +110,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\ScrollLayout.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ScrollView.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ShowEvent.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\SizePolicy.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Slider.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Spacing.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Style.h" />

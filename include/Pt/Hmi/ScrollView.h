@@ -68,7 +68,7 @@ class PT_HMI_API ScrollView : public Widget
     protected:
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
-        virtual void onLayout();
+        virtual void onLayout(const Gfx::RectF& rect);
     
     private:
         void updateScrollBar(ScrollBar& scroll, double maxRange);

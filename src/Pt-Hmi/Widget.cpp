@@ -535,15 +535,15 @@ void Widget::onInvalidateEvent(const InvalidateEvent& ev)
 
     onInvalidate();
 
-    if(_autoSize)
-        _preferredSize = onAutoSize(_sizePolicy);
+    //if(_autoSize)
+    //    _preferredSize = onAutoSize(_sizePolicy);
 
-    if( size != preferredSize() )
+    //if( size != preferredSize() )
     {
         if( parent() )
            parent()->relayout();
 
-        _layoutChanged.send();
+        //_layoutChanged.send();
     }
 }
 
@@ -553,32 +553,32 @@ void Widget::onInvalidate()
 }
 
 
-const SizePolicy& Widget::sizePolicy() const
-{
-    return _sizePolicy;
-}
-
-
-void Widget::setSizePolicy(const SizePolicy& policy)
-{
-    if(policy == _sizePolicy)
-        return;
-
-    Gfx::SizeF size = preferredSize();
-
-    _sizePolicy = policy;
-
-    if(_autoSize)
-        _preferredSize = onAutoSize(_sizePolicy);
-
-    if( size != preferredSize() )
-    {
-        if( parent() )
-            parent()->relayout();
-
-        _layoutChanged.send();
-    }
-}
+//const SizePolicy& Widget::sizePolicy() const
+//{
+//    return _sizePolicy;
+//}
+//
+//
+//void Widget::setSizePolicy(const SizePolicy& policy)
+//{
+//    if(policy == _sizePolicy)
+//        return;
+//
+//    Gfx::SizeF size = preferredSize();
+//
+//    _sizePolicy = policy;
+//
+//    if(_autoSize)
+//        _preferredSize = onAutoSize(_sizePolicy);
+//
+//    if( size != preferredSize() )
+//    {
+//        if( parent() )
+//            parent()->relayout();
+//
+//        _layoutChanged.send();
+//    }
+//}
 
 
 bool Widget::isAutoSize() const
@@ -621,6 +621,12 @@ Gfx::SizeF Widget::preferredSize(const SizePolicy& policy) const
 }
 
 
+const Gfx::SizeF& Widget::measuredSize() const
+{
+    return _measuredSize;
+}
+
+
 void Widget::relayout()
 {
   if( window() )
@@ -637,20 +643,38 @@ void Widget::relayout()
 
 void Widget::measure(const SizePolicy& policy)
 {
-    bool doMeasure = policy.size() != _measuredSize || _isLayouting;
+    bool doMeasure = policy != _sizePolicy || _isLayouting;
 
     if(doMeasure)
     {
         static int nnn = 0;
         std::clog << "MEASURE: " << typeid(*this).name() << " " << ++nnn << std::endl;
-        _measuredSize = onMeasure(policy);
+        
+        _sizePolicy = policy;
+
+        if(_autoSize)
+        {
+            _preferredSize = onMeasure(policy);
+        }
+        else
+        {
+            if( ! widgets().empty() )
+            {
+                SizePolicy contentPolicy;
+                contentPolicy.setSize(_size);
+                
+                onMeasure(contentPolicy);
+            }
+
+            _preferredSize = _size;
+        }
+        
+        if(policy.vertical() == SizePolicy::Fixed)
+            _preferredSize.setHeight( policy.height() );
+        
+        if(policy.horizontal() == SizePolicy::Fixed)
+            _preferredSize.setWidth( policy.width() );  
     }
-}
-
-
-const Gfx::SizeF& Widget::measuredSize() const
-{
-    return _measuredSize;
 }
 
 
@@ -661,14 +685,15 @@ Gfx::SizeF Widget::onMeasure(const SizePolicy& policy)
         double hspace = _padding.leftRight() + _content->margin().leftRight();
         double vspace = _padding.topBottom() + _content->margin().topBottom();
 
-        SizePolicy pol;
-        pol.setWidth( _size.width() - hspace );
-        pol.setHeight( _size.height() - vspace );
+        SizePolicy contentPolicy;
+        contentPolicy.setWidth( policy.size().width() - hspace );
+        contentPolicy.setHeight( policy.size().height() - vspace );
         
-        _content->measure(policy);
+        _content->measure(contentPolicy);
+        return _content->preferredSize();
     }
 
-    return policy.size();
+    return Gfx::SizeF(0, 0);
 }
 
 
@@ -719,7 +744,7 @@ void Widget::layout(const Gfx::RectF& rect)
     {
         static int nnn = 0;
         std::clog << "LAYOUT: " << typeid(*this).name() << " " << ++nnn << std::endl;
-        onLayout();
+        onLayout(rect);
     }
 }
 
@@ -736,14 +761,21 @@ void Widget::layout(double x, double y, double width, double height)
 }
 
 
-void Widget::onLayout()
+void Widget::onLayout(const Gfx::RectF& rect)
 {
     if(_content)
     {
         Gfx::PointF pos(_padding.left() + _content->margin().left(), 
                         _padding.top()  + _content->margin().top());
         
-        _content->layout( pos, _content->measuredSize() );
+        double hspace = _padding.leftRight() + _content->margin().leftRight();
+        double vspace = _padding.topBottom() + _content->margin().topBottom();
+
+        Gfx::SizeF size;
+        size.setWidth( _size.width() - hspace );
+        size.setHeight( _size.height() - vspace );
+
+        _content->layout( pos, size );
     }
 }
 

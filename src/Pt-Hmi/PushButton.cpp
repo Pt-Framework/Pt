@@ -287,7 +287,7 @@ Pt::Gfx::SizeF PushButton::onAutoSize(const SizePolicy& policy) const
 }
 
 
-void PushButton::onLayout()
+void PushButton::onLayout(const Gfx::RectF& rect)
 {
     Base::onLayout();
 

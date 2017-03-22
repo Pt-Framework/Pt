@@ -187,17 +187,50 @@ void ScrollLayout::onRemoveWidget(Widget& w)
 
 Gfx::SizeF ScrollLayout::onMeasure(const SizePolicy& policy)
 {
-    Gfx::SizeF s = Base::onMeasure(policy);
+    Gfx::SizeF contentSize;
+
+    std::vector<Widget*>::const_iterator it;
+    for(it = widgets().begin() ; it != widgets().end(); ++it)
+    {
+        Widget* item = *it;
+
+        SizePolicy itemPolicy = policy;
+        itemPolicy.setSize( policy.size() );
+        item->measure(itemPolicy);
+
+        Gfx::SizeF prefSize = item->preferredSize();
+        contentSize.setWidth( std::max(contentSize.width(), prefSize.width() ) );
+        contentSize.setHeight( std::max(contentSize.height(), prefSize.height() ) );
+   }
+
+   return contentSize;
+}
+
+
+void ScrollLayout::onLayout(const Gfx::RectF& rect)
+{
+    Base::onLayout(rect);
+
+    //if( _maxX < size().width() && _scrollPos.x() != 0 )
+    //{
+    //    scrollX(0);
+    //}
+    //
+    //if( _maxY < size().height() && _scrollPos.y() != 0 )
+    //{
+    //    scrollY(0);
+    //}    
+
 
     double maxWidth = 0;
     double maxHeight = 0;
     
     for(std::size_t i = 0; i < widgets().size(); ++i)
     {
-        Widget* w =  widgets()[i];
+        Widget* w = widgets().at(i);
 
         const Gfx::PointF& wpos = w->position();
-        const Gfx::SizeF& wsize = w->size();
+        const Gfx::SizeF& wsize = w->preferredSize();
 
         maxWidth = std::max( maxWidth, wpos.x() +
                                        wsize.width() +
@@ -213,37 +246,9 @@ Gfx::SizeF ScrollLayout::onMeasure(const SizePolicy& policy)
 
     std::vector<Widget*>::const_iterator it;
     for(it = widgets().begin() ; it != widgets().end(); ++it)
-    {
-        Widget* w = *it;
-
-        SizePolicy itemPolicy;
-        itemPolicy.setSize( w->size() );
-        w->measure(itemPolicy);
-   }
-
-   return s;
-}
-
-
-void ScrollLayout::onLayout()
-{
-    Base::onLayout();
-
-    //if( _maxX < size().width() && _scrollPos.x() != 0 )
-    //{
-    //    scrollX(0);
-    //}
-    //
-    //if( _maxY < size().height() && _scrollPos.y() != 0 )
-    //{
-    //    scrollY(0);
-    //}    
-
-    std::vector<Widget*>::const_iterator it;
-    for(it = widgets().begin() ; it != widgets().end(); ++it)
     {        
         Widget* w = *it;
-        w->layout( w->position(), w->measuredSize() );            
+        w->layout( w->position(), w->preferredSize() );            
     }
 }
 

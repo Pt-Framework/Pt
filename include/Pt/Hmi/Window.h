@@ -48,6 +48,7 @@
 #include <Pt/Hmi/InvalidateEvent.h>
 #include <Pt/Hmi/PixmapSurface.h>
 #include <Pt/Hmi/Application.h>
+#include <Pt/Hmi/SizePolicy.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Signal.h>
 #include <map>
@@ -124,6 +125,10 @@ class PT_HMI_API Window : public WindowBase
     void relayout();
 
     void repaint();
+
+    Gfx::SizeF measure(const SizePolicy& policy);
+
+    void layout(const Gfx::RectF& rect);
 
     bool isActive() const;
 

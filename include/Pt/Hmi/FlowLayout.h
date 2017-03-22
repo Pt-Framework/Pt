@@ -67,12 +67,12 @@ class PT_HMI_API FlowLayout : public Layout
     protected:
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
-        virtual void onLayout();
+        virtual void onLayout(const Gfx::RectF& rect);
 
     private:
-        void measureWidth(const SizePolicy& policy, bool center);
+        Gfx::SizeF onMeasureHorizontal(const SizePolicy& policy);
 
-        void measureHeight(const SizePolicy& policy, bool center);
+        Gfx::SizeF onMeasureVertical(const SizePolicy& policy);
 
     private:
         Direction _direction;

@@ -45,6 +45,7 @@
 #include <Pt/Hmi/ShowEvent.h>
 #include <Pt/Hmi/FocusEvent.h>
 #include <Pt/Hmi/Cursor.h>
+#include <Pt/Hmi/SizePolicy.h>
 #include <Pt/Hmi/Spacing.h>
 #include <Pt/Hmi/Visual.h>
 #include <Pt/Connectable.h>
@@ -59,95 +60,6 @@ namespace Pt {
 namespace Hmi {
 
 class Window;
-
-class SizePolicy
-{
-    public:
-        enum Mode
-        {
-            Fixed,
-            Preferred
-            // Fill
-            // Maximum
-            // Minimum
-        };
-
-    public:
-        SizePolicy()
-        : _h(Preferred)
-        , _v(Preferred)
-        { }
-
-        SizePolicy(Mode horizontal, Mode vertical)
-        : _h(horizontal)
-        , _v(vertical)
-        { }
-
-        Mode horizontal() const
-        {
-            return _h;
-        }
-
-        void setHorizontal(Mode m)
-        {
-            _h = m;
-        }
-        
-        Mode vertical() const
-        {
-            return _v;
-        }
-        
-        void setVertical(Mode m)
-        {
-            _v = m;
-        }
-        
-        const Gfx::SizeF& size() const
-        {
-            return _sizeHint;
-        }
-
-        void setSize(const Gfx::SizeF& hint)
-        {
-            _sizeHint = hint;
-        }
-
-        void setSize(double w, double h)
-        {
-            _sizeHint.set(w, h);
-        }
-
-        double width() const
-        { 
-            return _sizeHint.width(); 
-        }
-
-        void setWidth(double w)
-        {
-            _sizeHint.setWidth(w);
-        }
-
-        double height() const
-        { 
-            return _sizeHint.height(); 
-        }
-
-        void setHeight(double h)
-        {
-            _sizeHint.setHeight(h);
-        }
-
-        bool operator== (const SizePolicy& s) const
-        {
-            return _h == s._h && _v == s._v && _sizeHint == s._sizeHint;
-        }
-
-    private:
-        Mode       _h;
-        Mode       _v;
-        Gfx::SizeF _sizeHint;
-};
 
 class PT_HMI_API Widget : public Visual
 {
@@ -296,9 +208,9 @@ class PT_HMI_API Widget : public Visual
         // layouting
         //
  
-        const SizePolicy& sizePolicy() const;
+        //const SizePolicy& sizePolicy() const;
 
-        void setSizePolicy(const SizePolicy& policy);
+        //void setSizePolicy(const SizePolicy& policy);
 
         bool isAutoSize() const;
 
@@ -376,8 +288,10 @@ class PT_HMI_API Widget : public Visual
         
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
-        virtual void onLayout();
+        virtual void onLayout(const Gfx::RectF& rect);
         
+        virtual void onLayout()
+        {}
 
         virtual Pt::Gfx::SizeF onAutoSize(const SizePolicy& policy) const;
 
@@ -451,6 +365,7 @@ class PT_HMI_API Widget : public Visual
         bool                         _enabledState;
         Gfx::PointF                  _position;
         Gfx::SizeF                   _size;
+        
         SizePolicy                   _sizePolicy;
         Gfx::SizeF                   _preferredSize;
         bool                         _autoSize;

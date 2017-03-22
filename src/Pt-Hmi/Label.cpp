@@ -373,7 +373,7 @@ void Label::layoutImage()
 }
 
 
-void Label::onLayout()
+void Label::onLayout(const Gfx::RectF& rect)
 {
     Base::onLayout();
 

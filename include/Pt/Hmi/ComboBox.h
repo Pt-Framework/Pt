@@ -57,8 +57,6 @@ class PT_HMI_API ComboBoxPopup : public Popup
 
         Pt::Signal<ListBoxItem&>& selected();
 
-        Gfx::SizeF preferredSize(const SizePolicy& policy) const;
-
     private:
         void onItemSelected(ListBoxItem& item);
 
