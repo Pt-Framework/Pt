@@ -85,6 +85,7 @@ static inline int16x8_t NEON_SET_INT16X8(int16_t h, int16_t g, int16_t f, int16_
     const int16x8_t vec = {
         h, g, f, e, d, c, b, a
     };
+
     return vec;
 }
 
@@ -93,14 +94,16 @@ static inline int32x4_t NEON_SET_INT32X4(int32_t d, int32_t c, int32_t b, int32_
     const int32x4_t vec = {
         d, c, b, a
     };
+
     return vec;
 }
 
-static inline int32x4_t NEON_SET_FLT32X4(float d, float c, float b, float a)
+static inline float32x4_t NEON_SET_FLT32X4(float d, float c, float b, float a)
 {
-    const int32x4_t vec = {
+    const float32x4_t vec = {
         d, c, b, a
     };
+    
     return vec;
 }
 

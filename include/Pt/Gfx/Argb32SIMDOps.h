@@ -214,9 +214,9 @@ inline void pixelOps_SourceOver(Pt::uint8_t* toBuffer, Pt::uint32_t srcA, Pt::ui
 #elif defined(PT_GFX_USE_NEON)
 
     const size_t     len4     = length / 4;
-    const int16x8_t  srcvAGAG = SET_16X8(srcA, srcG, srcA, srcG, srcA, srcG, srcA, srcG); // [ AAGG AAGG AAGG AAGG ]
-    const int16x8_t  srcvRBRB = SET_16X8(srcR, srcB, srcR, srcB, srcR, srcB, srcR, srcB); // [ RRBB RRBB RRBB RRBB ]
-    const int16x8_t  srci0A0A = SET_16X8(bfcI, bfcI, bfcI, bfcI, bfcI, bfcI, bfcI, bfcI); // [ 0I0I 0I0I 0I0I 0I0I ]
+    const int16x8_t  srcvAGAG = NEON_SET_INT16X8(srcG, srcA, srcG, srcA, srcG, srcA, srcG, srcA); // [ AAGG AAGG AAGG AAGG ]
+    const int16x8_t  srcvRBRB = NEON_SET_INT16X8(srcB, srcR, srcB, srcR, srcB, srcR, srcB, srcR); // [ RRBB RRBB RRBB RRBB ]
+    const int16x8_t  srci0A0A = NEON_SET_INT16X8(bfcI, bfcI, bfcI, bfcI, bfcI, bfcI, bfcI, bfcI); // [ 0I0I 0I0I 0I0I 0I0I ]
           int32x4_t* dstvARGB = reinterpret_cast<int32x4_t*>(toBuffer);
           int32x4_t  dstv4PIX;
           int32x4_t  dstvAGAG;
