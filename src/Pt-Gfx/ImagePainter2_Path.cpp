@@ -49,20 +49,26 @@ class ImagePainter2::PathData::Data {
     public:
         // Instruction type
         enum InsType {
+            IT_Begin, IT_End,
             IT_MoveTo, IT_LineTo, IT_ArcTo, IT_QuadBezierTo
         };
 
         // Instruction structure
         struct Instruction {
             InsType type;
-            float   param1, param2;
+            float   x1, y1;
+            float   x2, y2;
 
-            inline Instruction(InsType type_, float param1_)
-            : type(type_), param1(param1_)
+            inline Instruction(InsType type_)
+            : type(type_)
             {}
 
-            inline Instruction(InsType type_, float param1_, float param2_)
-            : type(type_), param1(param1_), param2(param2_)
+            inline Instruction(InsType type_, float x1_, float y1_)
+            : type(type_), x1(x1_), y1(y1_)
+            {}
+
+            inline Instruction(InsType type_, float x1_, float y1_, float x2_, float y2_)
+            : type(type_), x1(x1_), y1(y1_), x2(x2_), y2(y2_)
             {}
         };
 
@@ -77,22 +83,43 @@ class ImagePainter2::PathData::Data {
         { clear(); }
 
         inline void clear()
-        { _ins.clear(); }
+        {
+            _instructions.clear();
+            _transformedPoints.clear();
+        }
 
-        inline void add(InsType type, float param1)
-        { _ins.push_back(Instruction(type, param1)); }
+        inline void setAutoClose(bool autoClose)
+        { _autoClose = _autoClose; }
 
-        inline void add(InsType type, float param1, float param2)
-        { _ins.push_back(Instruction(type, param1, param2)); }
+        inline bool autoClose() const
+        { return _autoClose; }
 
-        inline std::vector<Instruction>& get()
-        { return _ins; }
+        inline void add(InsType type)
+        { _instructions.push_back(Instruction(type)); }
 
-        inline const std::vector<Instruction>& get() const
-        { return _ins; }
+        inline void add(InsType type, float x1, float y1)
+        { _instructions.push_back(Instruction(type, x1, y1)); }
+
+        inline void add(InsType type, float x1, float y1, float x2, float y2)
+        { _instructions.push_back(Instruction(type, x1, y1, x2, y2)); }
+
+        inline std::vector<Instruction>& instructions()
+        { return _instructions; }
+
+        inline const std::vector<Instruction>& instructions() const
+        { return _instructions; }
+
+        inline std::vector<PointF>& transformedPoints()
+        { return _transformedPoints; }
+
+        inline const std::vector<PointF>& transformedPoints() const
+        { return _transformedPoints; }
 
     private:
-        Instructions _ins;
+        bool                _autoClose;
+        Instructions        _instructions;
+
+        std::vector<PointF> _transformedPoints;
 };
 
 ImagePainter2::PathData::PathData()
@@ -164,36 +191,33 @@ void ImagePainter2::reflectAboutYAxis(MatrixUpdateMode mode)
 
 void ImagePainter2::beginPath()
 {
-    // ### TODO ###
+    _pathData->clear();
+    _pathData->data().add(PathData::Data::IT_Begin);
 }
 
 void ImagePainter2::moveTo(float x, float y)
-{
-    // ### TODO ###
-}
+{ _pathData->data().add(PathData::Data::IT_MoveTo, x, y); }
 
 void ImagePainter2::lineTo(float x, float y)
-{
-    // ### TODO ###
-}
+{ _pathData->data().add(PathData::Data::IT_LineTo, x, y); }
 
 void ImagePainter2::arcTo(float x, float y)
-{
-    // ### TODO ###
-}
+{ _pathData->data().add(PathData::Data::IT_ArcTo, x, y); }
 
 void ImagePainter2::quadraticBezierTo(float cx, float cy, float x, float y)
-{
-    // ### TODO ###
-}
+{ _pathData->data().add(PathData::Data::IT_QuadBezierTo, cx, cy, x, y); }
 
 void ImagePainter2::endPath(bool autoClose)
 {
-    // ### TODO ###
+    _pathData->data().add(PathData::Data::IT_End);
+    _pathData->data().setAutoClose(autoClose);
 }
 
 void ImagePainter2::transformPath()
 {
+    const std::vector<PathData::Data::Instruction>& insts   = _pathData->data().instructions     ();
+          std::vector<PointF>&                      pointsF = _pathData->data().transformedPoints();
+
     // ### TODO ###
 }
 
@@ -247,11 +271,37 @@ void ImagePainter2::clearPathDataBuffer()
 
 void ImagePainter2::strokePath()
 {
-    // ### TODO ###
+    const std::vector<PointF>& pointsF = _pathData->data().transformedPoints();
+
+    if(pointsF.empty()) {
+        generatePointsFromPath();
+        if(pointsF.empty()) return;
+    }
+
+    drawPolyline(pointsF.data(), pointsF.size(), _pathData->data().autoClose());
 }
 
 void ImagePainter2::fillPath()
 {
+    const std::vector<PointF>& pointsF = _pathData->data().transformedPoints();
+
+    if(pointsF.empty()) {
+        generatePointsFromPath();
+        if(pointsF.empty()) return;
+    }
+
+    fillPolygon(pointsF.data(), pointsF.size());
+}
+
+// ======================================================================================
+// ===== Private Member Functions =======================================================
+// ======================================================================================
+
+void ImagePainter2::generatePointsFromPath()
+{
+    const std::vector<PathData::Data::Instruction>& insts   = _pathData->data().instructions     ();
+          std::vector<PointF>&                      pointsF = _pathData->data().transformedPoints();
+
     // ### TODO ###
 }
 

@@ -196,6 +196,10 @@ class PT_GFX_API ImagePainter2 : public Painter
         virtual void fillPath();
 
     private:
+        // Path API - path rendering
+        void generatePointsFromPath();
+
+    private:
         // State for spread-and-gather operations on polygon points (used to thicken patterned polygon)
         struct SAGOpState;
 
