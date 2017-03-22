@@ -1,5 +1,5 @@
-/* Copyright (C) 2017-2017 Aloysius Indrayanto
-   Copyright (C) 2006-2015 Marc Boris Duerner
+/* Copyright (C) 2006-2015 Marc Boris Duerner
+   Copyright (C) 2017-2017 Aloysius Indrayanto
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -27,40 +27,11 @@
   02110-1301 USA
 */
 
-#include <Pt/Gfx/ImagePainter2.h>
+#include <Pt/Gfx/Path2D.h>
 
 
 namespace Pt {
 namespace Gfx {
-
-
-// ======================================================================================
-// ===== Internal Helper Functions - Drawing Functions ==================================
-// ======================================================================================
-
-// ### TODO ###
-
-
-// ======================================================================================
-// ===== Public Member Functions ========================================================
-// ======================================================================================
-
-void ImagePainter2::drawPath(const Path2D& path, const AffineMatrix2D& transform, bool autoClose)
-{
-    // ### TODO ###
-}
-
-void ImagePainter2::fillPath(const Path2D& path, const AffineMatrix2D& transform)
-{
-    // ### TODO ###
-}
-
-
-// ======================================================================================
-// ===== Private Member Functions =======================================================
-// ======================================================================================
-
-// ### TODO ###
 
 
 } // namespace

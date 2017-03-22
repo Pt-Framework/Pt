@@ -31,12 +31,10 @@
 #ifndef PT_GFX_IMAGEPAINTER_2_H
 #define PT_GFX_IMAGEPAINTER_2_H
 
-#include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/Math.h>
-
-#include <Pt/Gfx/AffineMatrix2D.h>
 #include <Pt/Gfx/AntiAliasingMode.h>
 #include <Pt/Gfx/ArcMode.h>
+#include <Pt/Gfx/AffineMatrix2D.h>
+#include <Pt/Gfx/Path2D.h>
 #include <Pt/Gfx/Painter.h>
 
 #include <Pt/System/Path.h>
@@ -105,6 +103,8 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual void drawEllipse(const PointF& topLeft, const SizeF& size);
 
+        virtual void drawPath(const Path2D& path, const AffineMatrix2D& transform, bool autoClose);
+
         // NOTE: The begin and end angle must move in counter-clockwise (CCW) direction or something wrong will be drawn!
         virtual void drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
@@ -119,6 +119,8 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         // NOTE: The begin and end angle must move in counter-clockwise (CCW) direction or something wrong will be drawn!
         virtual void fillArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode);
+
+        virtual void fillPath(const Path2D& path, const AffineMatrix2D& transform);
 
     public:
         // Just to make the API match the interface defined by the Pt::GfxPainter class
