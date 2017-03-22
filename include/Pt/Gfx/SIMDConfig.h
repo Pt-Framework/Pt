@@ -77,7 +77,6 @@
 #endif
 
 
-
 #if defined(PT_GFX_USE_NEON)
 
 // NEON helper functions
