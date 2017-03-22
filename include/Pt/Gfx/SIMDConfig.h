@@ -105,14 +105,15 @@
 
 #if defined(PT_GFX_USE_NEON)
 
-// NOTE: Unlike x86_64's SSE and AVX, ARM's NEON does not have convenience-set functions such as:
-//           _mm_set_epi32
-//           _mm_set_ps
-//           ... etc.
-//       Therefore, they are implemented using C code. This will cause endianness issue.
+// NOTE: * Unlike x86_64's SSE and AVX, ARM's NEON does not have convenience-set functions such as:
+//             _mm_set_epi32
+//             _mm_set_ps
+//             ... etc.
+//         Therefore, they are implemented using C code. This will cause endianness issue.
 //
-//       The code below will only work if the ARM is running in little endian mode.
-//       The code below is designed so that the behavior of those functions are the same with the SSE/AVX ones.
+//       * The code below will only work if the ARM CPU is running in little endian mode.
+//       * The code below is designed so that the behavior of those functions are the same
+//         with the SSE/AVX counterparts.
 
 static inline int16x8_t NEON_SET_INT16X8(int16_t h, int16_t g, int16_t f, int16_t e, int16_t d, int16_t c, int16_t b, int16_t a)
 {
