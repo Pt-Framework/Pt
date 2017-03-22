@@ -69,7 +69,15 @@ class PT_GFX_API Painter
         };
 
     public:
-        // ### TODO: Add the pure virtual functions for the path API ###
+        /* ### TODO ###
+         *
+         * Add/update the pure virtual functions for these APIs:
+         *     1. autoClose flag for drawPolyline()
+         *     2. drawRoundRect() and fillRoundRect()
+         *     3. drawArc() and fillArc()
+         *     4. drawQuadraticPolybezier()
+         *     5. all path-related APIs
+         */
 
     public:
         //! @brief Destructor.
