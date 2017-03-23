@@ -174,19 +174,24 @@ inline float fastAtan2_impl(float y, float x) // X86_64 => FASTER | ARM => FASTE
 // NOTE: Defined using the benchmark result of the above functions versus the native library implementations
 
 inline float fastSqrt(float x)
-{ return ::sqrtf(x); }
-
-#if defined(PT_GFX_ARM_CPU)
-
-inline float fastInvSqrt(float x)
-{ return Gfx::Math::fastInvSqrt_impl(x); }
-
+{
+#if defined(PT_GFX_USE_NEON)
+    return fastSqrt_impl_SIMD(x);
 #else
+    return ::sqrtf(x);
+#endif
+}
 
 inline float fastInvSqrt(float x)
-{ return 1.0f / ::sqrtf(x); }
-
+{
+#if defined(PT_GFX_USE_SSE1) || defined(PT_GFX_USE_NEON)
+    return fastInvSqrt_impl_SIMD(x);
+#elif defined(PT_GFX_ARM_CPU)
+    return fastInvSqrt_impl(x);
+#else
+    return 1.0f / ::sqrtf(x);
 #endif
+}
 
 inline float fastSin(float x)
 { return ::sinf(x); }
