@@ -41,9 +41,11 @@ class SizePolicy
     public:
         enum Mode
         {
-            Fixed,
-            Preferred
+            Any = 0,
+            Preferred = 1,
             // Fill
+            Fixed = 2,
+            
             // Maximum
             // Minimum
         };

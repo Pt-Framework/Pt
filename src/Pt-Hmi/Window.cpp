@@ -983,8 +983,11 @@ void Window::onResizeEvent(const ResizeEvent& ev)
     _size = ev.size();
     _surface.resize(ev.size());
 
+    //if(_mainWidget)
+    //    _mainWidget->resize( ev.size() );
+
     if(_mainWidget)
-        _mainWidget->resize( ev.size() );
+        _mainWidget->relayout();
 }
 
 

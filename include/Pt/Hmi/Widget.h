@@ -212,7 +212,7 @@ class PT_HMI_API Widget : public Visual
 
         void setSizePolicy(const SizePolicy& policy);
 
-        bool isAutoSize() const;
+        //bool isAutoSize() const;
 
         void setAutoSize(bool a);
 

@@ -545,18 +545,19 @@ void Widget::onInvalidate()
 }
 
 
-bool Widget::isAutoSize() const
-{
-    return _autoSize;
-}
+//bool Widget::isAutoSize() const
+//{
+//    return _sizePolicy.vertical() == SizePolicy::Preferred ||
+//           _sizePolicy.horizontal() == SizePolicy::Preferred;
+//}
 
 
 void Widget::setAutoSize(bool a)
 {
-    _autoSize = a;
+    //_autoSize = a;
 
-    if( parent() )
-        parent()->relayout();
+    //if( parent() )
+    //    parent()->relayout();
 }
 
 
@@ -577,10 +578,12 @@ void Widget::setSizePolicy(const SizePolicy& policy)
 
 Gfx::SizeF Widget::preferredSize() const
 {
-    if( _autoSize )
-        return _preferredSize;
+    //if( _autoSize )
+    //    return _preferredSize;
 
-    return _size;
+    //return _size;
+
+    return _preferredSize;
 }
 
 
@@ -600,37 +603,41 @@ void Widget::relayout()
 
 void Widget::measure(const SizePolicy& policy)
 {
-    bool doMeasure = policy != _lastPolicy || _isLayouting;
+    SizePolicy contentPolicy = _sizePolicy;
+
+    if( policy.horizontal() >= _sizePolicy.horizontal() )
+    {
+        contentPolicy.setHorizontal( policy.horizontal() );
+        contentPolicy.setWidth( policy.width() );
+    }
+
+    if( policy.vertical() >= _sizePolicy.vertical() )
+    {
+        contentPolicy.setVertical( policy.vertical() );
+        contentPolicy.setHeight( policy.height() );
+    }
+    
+    bool doMeasure = contentPolicy != _lastPolicy || _isLayouting;
 
     if(doMeasure)
     {
         static int nnn = 0;
         std::clog << "MEASURE: " << typeid(*this).name() << " " << ++nnn << std::endl;
         
-        _lastPolicy = policy;
+        _lastPolicy = contentPolicy;
 
-        if( isAutoSize() )
+        if( contentPolicy.vertical() == SizePolicy::Preferred ||
+            contentPolicy.horizontal() == SizePolicy::Preferred || 
+            ! widgets().empty() )
         {
-            _preferredSize = onMeasure(policy);
-        }
-        else
-        {
-            if( ! widgets().empty() )
-            {
-                SizePolicy contentPolicy;
-                contentPolicy.setSize(_size);
-                
-                onMeasure(contentPolicy);
-            }
-
-            _preferredSize = _size;
+            _preferredSize = onMeasure(contentPolicy);
         }
         
-        if(policy.vertical() == SizePolicy::Fixed)
-            _preferredSize.setHeight( policy.height() );
+        if(contentPolicy.vertical() == SizePolicy::Fixed)
+            _preferredSize.setHeight( contentPolicy.height() );
         
-        if(policy.horizontal() == SizePolicy::Fixed)
-            _preferredSize.setWidth( policy.width() );  
+        if(contentPolicy.horizontal() == SizePolicy::Fixed)
+            _preferredSize.setWidth( contentPolicy.width() );
     }
 }
 
@@ -642,7 +649,7 @@ Gfx::SizeF Widget::onMeasure(const SizePolicy& policy)
         double hspace = _padding.leftRight() + _content->margin().leftRight();
         double vspace = _padding.topBottom() + _content->margin().topBottom();
 
-        SizePolicy contentPolicy;
+        SizePolicy contentPolicy = policy;
         contentPolicy.setWidth( policy.size().width() - hspace );
         contentPolicy.setHeight( policy.size().height() - vspace );
         
@@ -940,16 +947,16 @@ void Widget::resize(const Gfx::SizeF& s)
     std::clog << "resize: " << typeid(*this).name() << " " << s.width()
                                                     << " " << s.height() << std::endl;
 
-    if(_size == s)
-        return;
+    //if(_size == s)
+    //    return;
 
-    _size = s;
+    //_size = s;
 
-    // relayout will not send a resize event
-    ResizeEvent rev(vid(), s);
-    Application::instance().loop().commitEvent(rev);
+    //// relayout will not send a resize event
+    //ResizeEvent rev(vid(), s);
+    //Application::instance().loop().commitEvent(rev);
 
-    relayout();
+    //relayout();
 }
 
 
