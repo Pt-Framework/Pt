@@ -2,6 +2,7 @@
 // Based on https://gist.github.com/hi2p-perim/7855506
 //          https://software.intel.com/en-us/blogs/2011/04/14/is-avx-enabled
 //          https://software.intel.com/en-us/articles/how-to-detect-new-instruction-support-in-the-4th-generation-intel-core-processor-family
+//          https://en.wikipedia.org/wiki/CPUID
 
 // g++ -O2 sseavx.cpp -o sseavx && ./sseavx && rm -f sseavx
 
@@ -82,15 +83,18 @@ int main()
     if(numExtendedIDs >= 0x80000001) __cpuidex(cpuinfo, 0x80000001, 0);
 
     const bool sse4aSupportted = ( numExtendedIDs >= 0x80000001 ) && ( cpuinfo[2] & (1 <<  6) );
-    const bool  sse5Supportted = ( numExtendedIDs >= 0x80000001 ) && ( cpuinfo[2] & (1 << 11) );
+    const bool   xopSupportted = ( numExtendedIDs >= 0x80000001 ) && ( cpuinfo[2] & (1 << 11) );
 
     __cpuidex(cpuinfo, 1, 0);
-    const bool osxsaveSupported  = ( cpuinfo[2] & (1 << 27) );
-    const bool xcrFeatureEnabled = osxsaveSupported && ( ( _xgetbv(0) & 0x06 ) == 0x06 );
-    const bool avx1Supportted    = xcrFeatureEnabled && ( cpuinfo[2] & (1 << 28) );
+    const bool avxBitInCPU    = ( cpuinfo[2] & (1 << 28) );
+    const bool xsaveBitInCPU  = ( cpuinfo[2] & (1 << 27) );
+    const bool avx1Supportted = ( avxBitInCPU && xsaveBitInCPU && ( ( _xgetbv(0) & 0x06 ) == 0x06 ) );
 
     __cpuidex(cpuinfo, 7, 0);
     const bool avx2Supportted = avx1Supportted && ( cpuinfo[1] & (1 << 5) );
+
+    __cpuidex(cpuinfo, 1, 0);
+    const bool fma3Supportted = avx1Supportted && ( cpuinfo[2] & (1 << 12) );
 
     std::cout << "SSE1   : " <<  sse1Supportted << std::endl;
     std::cout << "SSE2   : " <<  sse2Supportted << std::endl;
@@ -98,9 +102,10 @@ int main()
     std::cout << "SSE4.1 : " << sse41Supportted << std::endl;
     std::cout << "SSE4.2 : " << sse42Supportted << std::endl;
     std::cout << "SSE4a  : " << sse4aSupportted << std::endl;
-    std::cout << "SSE5   : " <<  sse5Supportted << std::endl;
+    std::cout << "XOP    : " <<   xopSupportted << std::endl;
     std::cout << "AVX1   : " <<  avx1Supportted << std::endl;
     std::cout << "AVX2   : " <<  avx2Supportted << std::endl;
+    std::cout << "FMA3   : " <<  fma3Supportted << std::endl;
 
     return 0;
 }
