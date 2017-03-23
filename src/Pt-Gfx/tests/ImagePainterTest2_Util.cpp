@@ -3,6 +3,14 @@
 
 static int writePNG(const char* filename, int width, int height, const uint8_t* argb8888Buff)
 {
+#if defined(PT_GFX_ARM_CPU)
+    (void) filename;
+    (void) width;
+    (void) height;
+    (void) argb8888Buff;
+    return 0;
+#endif
+
     int         code     = 0;
     FILE*       fp       = 0;
     png_structp png_ptr  = 0;
@@ -116,7 +124,6 @@ static const std::string formatCaption(const Painter& painter, CompositionMode c
 
 static void sdlPreviewRGB888Buffer(const std::string& title, const uint8_t* argb8888Buff, int sizeX, int sizeY, bool saveImageAsPNG)
 {
-#ifndef PT_GFX_ARM_CPU
     // Save the image as a PNG file
     if(saveImageAsPNG) {
         std::string eraseStr = " - ImagePainter2";
@@ -124,7 +131,6 @@ static void sdlPreviewRGB888Buffer(const std::string& title, const uint8_t* argb
         fileName.erase(fileName.find(eraseStr), eraseStr.length());
         if(writePNG(fileName.c_str(), sizeX, sizeY, argb8888Buff) < 0) return;
     }
-#endif
 
     // Initialise SDL
     if(SDL_Init(SDL_INIT_VIDEO) < 0) return;
