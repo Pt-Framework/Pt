@@ -95,6 +95,7 @@ class PT_GFX_API AffineMatrix2D {
         inline void updateUsingRaw(const float m[3][3], MatrixUpdateMode mode = MultiplyOnLeft);
 
         inline const AffineMatrix2D& operator=(const AffineMatrix2D& m);
+        inline const AffineMatrix2D& operator*(const AffineMatrix2D& m);
 
         inline bool operator==(const AffineMatrix2D& m) const;
         inline bool operator!=(const AffineMatrix2D& m) const;
@@ -143,7 +144,7 @@ class PT_GFX_API AffineMatrix2D {
         };
 
     private:
-        inline void multiplyWith(const MatrixData& n, MatrixUpdateMode mode);
+        inline void updateMatrix(const MatrixData& n, MatrixUpdateMode mode);
 
     private:
         MatrixData             _mdata;
@@ -199,7 +200,7 @@ void AffineMatrix2D::translate(float x, float y, MatrixUpdateMode mode)
     n.v[1][0] = 0.0f; n.v[1][1] = 1.0f; n.v[1][2] = y   ;
     n.v[2][0] = 0.0f; n.v[2][1] = 0.0f; n.v[2][2] = 1.0f;
 
-    multiplyWith(n, mode);
+    updateMatrix(n, mode);
     _isIdentity = false;
 }
 
@@ -213,7 +214,7 @@ void AffineMatrix2D::scaleAboutOrigin(float x, float y, MatrixUpdateMode mode)
     n.v[1][0] = 0.0f; n.v[1][1] = y   ; n.v[1][2] = 0.0f;
     n.v[2][0] = 0.0f; n.v[2][1] = 0.0f; n.v[2][2] = 1.0f;
 
-    multiplyWith(n, mode);
+    updateMatrix(n, mode);
     _isIdentity = false;
 }
 
@@ -231,7 +232,7 @@ void AffineMatrix2D::rotateAboutOrigin(float deg, MatrixUpdateMode mode)
     n.v[1][0] = -s   ; n.v[1][1] = c   ;  n.v[1][2] = 0.0f;
     n.v[2][0] =  0.0f; n.v[2][1] = 0.0f;  n.v[2][2] = 1.0f;
 
-    multiplyWith(n, mode);
+    updateMatrix(n, mode);
     _isIdentity = false;
 }
 
@@ -248,7 +249,7 @@ void AffineMatrix2D::shearXDirection(float deg, MatrixUpdateMode mode)
     n.v[1][0] = 0.0f; n.v[1][1] = 1.0f;  n.v[1][2] = 0.0f;
     n.v[2][0] = 0.0f; n.v[2][1] = 0.0f;  n.v[2][2] = 1.0f;
 
-    multiplyWith(n, mode);
+    updateMatrix(n, mode);
     _isIdentity = false;
 }
 
@@ -265,7 +266,7 @@ void AffineMatrix2D::shearYDirection(float deg, MatrixUpdateMode mode)
     n.v[1][0] = t   ; n.v[1][1] = 1.0f;  n.v[1][2] = 0.0f;
     n.v[2][0] = 0.0f; n.v[2][1] = 0.0f;  n.v[2][2] = 1.0f;
 
-    multiplyWith(n, mode);
+    updateMatrix(n, mode);
     _isIdentity = false;
 }
 
@@ -277,7 +278,7 @@ void AffineMatrix2D::reflectAboutOrigin(MatrixUpdateMode mode)
     n.v[1][0] =  0.0f; n.v[1][1] = -1.0f;  n.v[1][2] = 0.0f;
     n.v[2][0] =  0.0f; n.v[2][1] =  0.0f;  n.v[2][2] = 1.0f;
 
-    multiplyWith(n, mode);
+    updateMatrix(n, mode);
     _isIdentity = false;
 }
 
@@ -289,7 +290,7 @@ void AffineMatrix2D::reflectAboutXAxis(MatrixUpdateMode mode)
     n.v[1][0] = 0.0f; n.v[1][1] = -1.0f;  n.v[1][2] = 0.0f;
     n.v[2][0] = 0.0f; n.v[2][1] =  0.0f;  n.v[2][2] = 1.0f;
 
-    multiplyWith(n, mode);
+    updateMatrix(n, mode);
     _isIdentity = false;
 }
 
@@ -301,7 +302,7 @@ void AffineMatrix2D::reflectAboutYAxis(MatrixUpdateMode mode)
     n.v[1][0] =  0.0f; n.v[1][1] = 1.0f;  n.v[1][2] = 0.0f;
     n.v[2][0] =  0.0f; n.v[2][1] = 0.0f;  n.v[2][2] = 1.0f;
 
-    multiplyWith(n, mode);
+    updateMatrix(n, mode);
     _isIdentity = false;
 }
 
@@ -314,17 +315,23 @@ void AffineMatrix2D::getRaw(float m[3][3]) const
 
 void AffineMatrix2D::updateUsingRaw(const float m[3][3], MatrixUpdateMode mode)
 {
+    // Check if the given raw matrix is an identity matrix
     if( m[0][0] == 1.0f && m[0][1] == 0.0f && m[0][2] == 0.0f &&
         m[1][0] == 0.0f && m[1][1] == 1.0f && m[1][2] == 0.0f &&
-        m[2][0] == 0.0f && m[2][1] == 0.0f && m[2][2] == 1.0f ) return;
+        m[2][0] == 0.0f && m[2][1] == 0.0f && m[2][2] == 1.0f
+    ) {
+        if(mode == Replace) this->identity();
+        return;
+    }
 
+    // Normal operation
     MatrixData n;
 
     n.v[0][0] = m[0][0]; n.v[0][1] = m[0][1]; n.v[0][2] = m[0][2];
     n.v[1][0] = m[1][0]; n.v[1][1] = m[1][1]; n.v[1][2] = m[1][2];
     n.v[2][0] = m[2][0]; n.v[2][1] = m[2][1]; n.v[2][2] = m[2][2];
 
-    multiplyWith(n, mode);
+    updateMatrix(n, mode);
     _isIdentity = false;
 }
 
@@ -334,6 +341,18 @@ const AffineMatrix2D& AffineMatrix2D::operator=(const AffineMatrix2D& m)
     this->_isIdentity = m._isIdentity;
 
     this->_stack      = m._stack;
+
+    return *this;
+}
+
+const AffineMatrix2D& AffineMatrix2D::operator*(const AffineMatrix2D& m)
+{
+    // Check if the given matrix is an identity matrix
+    if(m._isIdentity) return *this;
+
+    // Normal operation
+    updateMatrix(m._mdata, MultiplyOnRight);
+    _isIdentity = false;
 
     return *this;
 }
@@ -542,14 +561,11 @@ void AffineMatrix2D::transformPoints(PointF* xy, size_t pointCount) const
 // ===== Inlined Private Member Functions ===============================================
 // ======================================================================================
 
-void AffineMatrix2D::multiplyWith(const MatrixData& n, MatrixUpdateMode mode)
+void AffineMatrix2D::updateMatrix(const MatrixData& n, MatrixUpdateMode mode)
 {
     // Check if the current matrix is an identity matrix or the mode is "Replace"
     if(_isIdentity || mode == Replace) {
-        _mdata       = n;
-        _isIdentity = ( n.v[0][0] == 1.0f && n.v[0][1] == 0.0f && n.v[0][2] == 0.0f &&
-                        n.v[1][0] == 0.0f && n.v[1][1] == 1.0f && n.v[1][2] == 0.0f &&
-                        n.v[2][0] == 0.0f && n.v[2][1] == 0.0f && n.v[2][2] == 1.0f );
+        _mdata = n;
         return;
     }
 
