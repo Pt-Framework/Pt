@@ -6,8 +6,8 @@
 
 #include <iostream>
 
-#include <asm/hwcap.h>
 #include <sys/auxv.h>
+#include <asm/hwcap.h>
 
 
 int main()

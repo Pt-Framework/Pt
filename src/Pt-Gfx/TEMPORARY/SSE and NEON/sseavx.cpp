@@ -94,7 +94,7 @@ int main()
     const bool avx2Supportted = avx1Supportted && ( cpuinfo[1] & (1 << 5) );
 
     __cpuidex(cpuinfo, 1, 0);
-    const bool fma3Supportted = avx1Supportted && ( cpuinfo[2] & (1 << 12) );
+    const bool fma3Supportted = avx2Supportted && ( cpuinfo[2] & (1 << 12) );
 
     std::cout << "SSE1   : " <<  sse1Supportted << std::endl;
     std::cout << "SSE2   : " <<  sse2Supportted << std::endl;
