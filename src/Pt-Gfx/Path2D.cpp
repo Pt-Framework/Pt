@@ -88,8 +88,15 @@ struct Path2D::PathData {
 
     // Member functions
     inline PathData()
-    : curX(0.f), curY(0.0)
+    : curX(0.0), curY(0.0)
     {}
+
+    inline void clear()
+    {
+        curX = 0.0;
+        curY = 0.0;
+        inss.clear();
+    }
 
     inline bool empty() const
     { return inss.empty(); }
@@ -124,6 +131,9 @@ Path2D::Path2D()
 
 Path2D::~Path2D()
 { delete _pathData; }
+
+void Path2D::clear()
+{ _pathData->clear(); }
 
 void Path2D::beginPath()
 {
@@ -231,6 +241,9 @@ void Path2D::relQuadraticBezierTo(double cx, double cy, double x, double y)
 
 void  Path2D::generatePoints(std::vector<PointF> dst, Pt::uint8_t smoothness) const
 {
+    if( _pathData->empty() || !_pathData->lastInstructionMatch(PathData::IT_End) )
+        throw Path2DInvalidContext(PT_SOURCEINFO_STR);
+
     // ### TODO ###
 }
 

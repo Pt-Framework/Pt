@@ -523,9 +523,9 @@ static void benchMatrixOps()
     Result on x86_64 (i5-4460; 64-Bit Mode)
     ---------------------------------------
 
-    -------------
-    Normal x86_64
-    -------------
+    ------------
+    Plain x86_64
+    ------------
     Initial value
         |   1.000   0.000   0.000 |
         |   0.000   1.000   0.000 |
@@ -591,9 +591,9 @@ static void benchMatrixOps()
     Result on v7l (A53; BCM2709; RaspberryPi 3; 32-bit Mode)
     --------------------------------------------------------
 
-    ----------
-    Normal Arm
-    ----------
+    ---------
+    Plain Arm
+    ---------
     Initial value
         |   1.000   0.000   0.000 |
         |   0.000   1.000   0.000 |

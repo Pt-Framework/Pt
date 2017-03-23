@@ -105,7 +105,7 @@ class PT_GFX_API ImagePainter2 : public Painter
         // NOTE: The begin and end angle must move in counter-clockwise (CCW) direction or something wrong will be drawn!
         virtual void drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
-        virtual void drawPath(const Path2D& path, const AffineMatrix2D& matrix, bool autoClose);
+        virtual void drawPath(const Path2D& path2d, const AffineMatrix2D& matrix2d, bool autoClose);
 
         virtual void fillRect(const RectF& rect);
 
@@ -119,7 +119,7 @@ class PT_GFX_API ImagePainter2 : public Painter
         // NOTE: The begin and end angle must move in counter-clockwise (CCW) direction or something wrong will be drawn!
         virtual void fillArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
-        virtual void fillPath(const Path2D& path, const AffineMatrix2D& matrix);
+        virtual void fillPath(const Path2D& path2d, const AffineMatrix2D& matrix2d);
 
     public:
         // Just to make the API match the interface defined by the Pt::GfxPainter class

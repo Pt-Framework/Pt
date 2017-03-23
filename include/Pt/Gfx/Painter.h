@@ -68,8 +68,8 @@ class PT_GFX_API Painter
          *     2. Add the pure virtual functions for:
          *            drawRoundRect()
          *            drawQuadraticPolybezier()
-         *            drawPath()
          *            drawArc()
+         *            drawPath()
          *            fillRoundRect()
          *            fillArc()
          *            fillPath()

@@ -97,10 +97,11 @@ class PT_GFX_API Path2D {
         // Path management - call them multiple times to create multi-path (e.g. path with holes)
         //
 
+        void clear();
+
         void beginPath();
 
         void endPath();
-
 
         //
         // Absolute coordinate
