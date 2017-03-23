@@ -43,7 +43,10 @@ namespace Gfx {
 namespace Math {
 
 
+//
 // The constant Pi and its variations in 32-bit floating-point
+//
+
 static const float Pi       = 3.14159265f;
 static const float PiMul2   = 6.28318531f;
 static const float PiDiv2   = 1.57079633f;
@@ -52,9 +55,11 @@ static const float PiDiv180 = 0.01745329f;
 static const float PiSqr    = 9.86960440f;
 
 
+//
 // The real implementation
-// NOTE: They are separated from the real public API so that we can benchmark them easily
+//
 
+// NOTE: They are separated from the real public API so that we can benchmark them easily
 
 inline float fastSqrt_impl(float x) // X86_64 => MUCH SLOWER | ARM => SLOWER
 {
@@ -170,7 +175,10 @@ inline float fastAtan2_impl(float y, float x) // X86_64 => FASTER | ARM => FASTE
 }
 
 
+//
 // The public API
+//
+
 // NOTE: Defined using the benchmark result of the above functions versus the native library implementations
 
 inline float fastSqrt(float x)
