@@ -256,7 +256,7 @@ void PushButton::onSetStyleOptions(const StyleOptions& o)
 }
 
 
-Pt::Gfx::SizeF PushButton::onAutoSize(const SizePolicy& policy) const
+Gfx::SizeF PushButton::onMeasure(const SizePolicy& policy)
 {
     Gfx::FontMetrics fm = Painter::fontMetrics( _font, text() );
 

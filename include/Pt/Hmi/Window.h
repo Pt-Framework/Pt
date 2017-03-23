@@ -124,11 +124,11 @@ class PT_HMI_API Window : public WindowBase
 
     void relayout();
 
-    void repaint();
-
     Gfx::SizeF measure(const SizePolicy& policy);
 
     void layout(const Gfx::RectF& rect);
+
+    void repaint();
 
     bool isActive() const;
 
@@ -207,6 +207,10 @@ class PT_HMI_API Window : public WindowBase
     virtual void onAddWidget(Widget& w);
 
     virtual void onRemoveWidget(Widget& w);
+
+    virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+
+    virtual void onLayout(const Gfx::RectF& rect);
 
   public:
     virtual Gfx::PointF toScreen(const Gfx::PointF& pos) const;

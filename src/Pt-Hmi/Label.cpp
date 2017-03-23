@@ -205,7 +205,7 @@ Adjustment Label::adjustment() const
 }
 
 
-Gfx::SizeF Label::onAutoSize(const SizePolicy& policy) const
+Gfx::SizeF Label::onMeasure(const SizePolicy& policy)
 {
     double w = 0;
     double h = 0;

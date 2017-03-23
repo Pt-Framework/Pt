@@ -645,6 +645,9 @@ void Window::relayout()
 {   
     _layouts++;
 
+    // TODO: if window is set to autoSize then measure the content
+    //       first and then resize the window
+
     LayoutEvent ev( vid() );
     Application::instance().loop().commitEvent(ev); 
 }
@@ -659,16 +662,28 @@ void Window::onLayoutEvent(const LayoutEvent& ev)
 
     std::clog << "--- LAYOUT ---" << std::endl;
 
-    SizePolicy policy(SizePolicy::Fixed, SizePolicy::Fixed);
+    SizePolicy policy;
     policy.setSize(_size);
-    measure(policy);
+    onMeasure(policy);
 
     Gfx::RectF layoutRect(_size);
-    layout(layoutRect);
+    onLayout(layoutRect);
 }
 
 
 Gfx::SizeF Window::measure(const SizePolicy& policy)
+{
+    return onMeasure(policy);
+}
+
+
+void Window::layout(const Gfx::RectF& rect)
+{
+    onLayout(rect);
+}
+
+
+Gfx::SizeF Window::onMeasure(const SizePolicy& policy)
 {
     if( _mainWidget )
     {
@@ -680,7 +695,7 @@ Gfx::SizeF Window::measure(const SizePolicy& policy)
 }
 
 
-void Window::layout(const Gfx::RectF& rect)
+void Window::onLayout(const Gfx::RectF& rect)
 {
     if( _mainWidget )
     {

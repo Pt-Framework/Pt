@@ -112,7 +112,7 @@ class PT_HMI_API PushButton : public Button
     protected:
         virtual void onSetStyleOptions(const StyleOptions& options);
 
-        virtual Pt::Gfx::SizeF onAutoSize(const SizePolicy& policy) const;
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
         virtual void onLayout(const Gfx::RectF& rect);
 

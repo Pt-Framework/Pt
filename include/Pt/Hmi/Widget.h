@@ -208,6 +208,9 @@ class PT_HMI_API Widget : public Visual
         // layouting
         //
 
+        const SizePolicy& sizePolicy() const;
+
+        void setSizePolicy(const SizePolicy& policy);
 
         bool isAutoSize() const;
 
@@ -222,6 +225,8 @@ class PT_HMI_API Widget : public Visual
         void layout(const Pt::Gfx::PointF& p, const Pt::Gfx::SizeF& s);
 
         void layout(double x, double y, double width, double height);
+
+        bool isLayouting() const;
 
 
         // outer spacing
@@ -330,9 +335,6 @@ class PT_HMI_API Widget : public Visual
 
         Widget* findWidget( const Gfx::PointF& pos, bool input );
 
-        
-
-
     private:
         Pt::Signal<const Pt::Event&> _eventReady;
         Pt::Signal<>                 _layoutChanged;
@@ -352,10 +354,10 @@ class PT_HMI_API Widget : public Visual
         Gfx::SizeF                   _size;
         
         SizePolicy                   _sizePolicy;
-        Gfx::SizeF                   _preferredSize;
         bool                         _autoSize;
 
-        Gfx::SizeF                   _measuredSize;
+        SizePolicy                   _lastPolicy;
+        Gfx::SizeF                   _preferredSize;
 
         bool                         _hasFocus;
         FocusPolicy                  _focusPolicy;

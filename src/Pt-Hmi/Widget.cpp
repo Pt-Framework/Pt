@@ -560,9 +560,24 @@ void Widget::setAutoSize(bool a)
 }
 
 
+const SizePolicy& Widget::sizePolicy() const
+{
+    return _sizePolicy;
+}
+
+
+void Widget::setSizePolicy(const SizePolicy& policy)
+{
+    _sizePolicy = policy;
+
+    if( parent() )
+        parent()->relayout();
+}
+
+
 Gfx::SizeF Widget::preferredSize() const
 {
-    if(_autoSize)
+    if( _autoSize )
         return _preferredSize;
 
     return _size;
@@ -585,16 +600,16 @@ void Widget::relayout()
 
 void Widget::measure(const SizePolicy& policy)
 {
-    bool doMeasure = policy != _sizePolicy || _isLayouting;
+    bool doMeasure = policy != _lastPolicy || _isLayouting;
 
     if(doMeasure)
     {
         static int nnn = 0;
         std::clog << "MEASURE: " << typeid(*this).name() << " " << ++nnn << std::endl;
         
-        _sizePolicy = policy;
+        _lastPolicy = policy;
 
-        if(_autoSize)
+        if( isAutoSize() )
         {
             _preferredSize = onMeasure(policy);
         }
@@ -700,6 +715,12 @@ void Widget::layout(const Pt::Gfx::PointF& p, const Pt::Gfx::SizeF& s)
 void Widget::layout(double x, double y, double width, double height)
 {
     layout( Gfx::PointF(x, y), Pt::Gfx::SizeF(width,height) );
+}
+
+
+bool Widget::isLayouting() const
+{
+    return _isLayouting;
 }
 
 
