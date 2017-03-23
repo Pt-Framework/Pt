@@ -51,7 +51,8 @@ static inline void calculateLineParams(float& wh, float& dx, float& dy, float& n
   //const float c = -(x1 * y2 - x2 * y1);
 
     // Inverse line length
-    const float il = 1.0f / ::sqrtf(a * a + b * b); // Gfx::Math::fastInvSqrt(a * a + b * b);
+    // NOTE: Gfx::Math::fastInvSqrt() will produce artifacts!
+    const float il = 1.0f / ::sqrtf(a * a + b * b);
 
     // Half line width
     wh = (float) w * 0.5f;

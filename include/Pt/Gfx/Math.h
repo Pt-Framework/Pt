@@ -194,12 +194,10 @@ inline float fastInvSqrt(float x)
 }
 
 inline float fastSin(float x)
-{ return ::sinf(x); }
-//{ return Gfx::Math::fastSin_impl(x); } // Causes artifacts when used for drawing large shapes
+{ return Gfx::Math::fastSin_impl(x); }
 
 inline float fastCos(float x)
-{ return ::cosf(x); }
-//{ return Gfx::Math::fastCos_impl(x); } // Causes artifacts when used for drawing large shapes
+{ return Gfx::Math::fastCos_impl(x); }
 
 inline float fastAtan2(float y, float x)
 { return Gfx::Math::fastAtan2_impl(y, x); }
