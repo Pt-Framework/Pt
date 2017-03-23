@@ -1,0 +1,20 @@
+// Check for NEON support
+// Based on http://stackoverflow.com/questions/26701262/how-to-check-the-existence-of-neon-on-arm
+
+// g++ -mfpu=neon -O2 neon.cpp -o neon && ./neon && rm -f neon
+
+
+#include <iostream>
+
+#include <asm/hwcap.h>
+#include <sys/auxv.h>
+
+
+int main()
+{
+    const bool neonSupportted = getauxval(AT_HWCAP) & HWCAP_NEON;
+
+    std::cout << "NEON : " <<  neonSupportted << std::endl;
+
+    return 0;
+}
