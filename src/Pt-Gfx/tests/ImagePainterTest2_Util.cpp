@@ -372,7 +372,7 @@ static void dumpMatrix(const AffineMatrix2D& mat)
 
 static void benchMatrixOps()
 {
-#if defined(__arm__) || defined(__thumb__) || defined(_M_ARM) || defined(_M_ARMT) || defined(__TARGET_ARCH_ARM) || defined(__TARGET_ARCH_THUMB) || defined(_ARM) || defined(__arm)
+#if defined(PT_GFX_ARM_CPU)
     const int loopCount = 2048;
 #else
     const int loopCount = 8192;

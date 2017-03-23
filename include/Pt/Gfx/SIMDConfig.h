@@ -44,12 +44,16 @@
 
     #include <arm_neon.h>
 
+    #define PT_GFX_ARM_CPU
+
     #define PT_GFX_USE_NEON
 
 // Include the appropriate SIMD header for GCC and its derivative compilers and define the needed macros
 #elif defined(i386) || defined(__i386) || defined(__i386__) || defined(_X86_) || defined(__x86_64) || defined(__x86_64__) || defined(__amd64) || defined(__amd64__)
 
     #include <x86intrin.h>
+
+    #define PT_GFX_X86_CPU
 
     #define PT_GFX_USE_AVX2
     #define PT_GFX_USE_AVX1
@@ -61,6 +65,8 @@
 #elif defined(_M_IX86) || defined(_M_AMD64) || defined(_M_X64)
 
     #include <intrin.h>
+
+    #define PT_GFX_X86_CPU
 
     #define PT_GFX_USE_AVX2
     #define PT_GFX_USE_AVX1

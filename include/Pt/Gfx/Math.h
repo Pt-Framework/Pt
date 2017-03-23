@@ -176,7 +176,7 @@ inline float fastAtan2_impl(float y, float x) // X86_64 => FASTER | ARM => FASTE
 inline float fastSqrt(float x)
 { return ::sqrtf(x); }
 
-#if defined(__arm__) || defined(__thumb__) || defined(_M_ARM) || defined(_M_ARMT) || defined(__TARGET_ARCH_ARM) || defined(__TARGET_ARCH_THUMB) || defined(_ARM) || defined(__arm)
+#if defined(PT_GFX_ARM_CPU)
 
 inline float fastInvSqrt(float x)
 { return Gfx::Math::fastInvSqrt_impl(x); }
