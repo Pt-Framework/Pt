@@ -52,22 +52,19 @@ static const float PiDiv180 = 0.01745329f;
 static const float PiSqr    = 9.86960440f;
 
 
+    // NOTE: This function is only SLIGHTLY faster on an ARM CPU
+    // NOTE: This function is NOT actually faster on any CPU
+
+
+// SLOWER ON X86_64 ; FASTER ON ARM
+
+// SLIGHTLY FASTER ON X86_64 ; FASTER ON ARM
+
 // The real implementation
 // NOTE: They are separated from the real public API so that we can benchmark them easily
 
-inline float fastSqrt_impl_SIMD(float x)
+inline float fastSqrt_impl(float x) // X86_64 => XXX | ARM => XXX
 {
-#ifdef PT_GFX_USE_SSE1
-    return _mm_cvtss_f32( _mm_rcp_ss( _mm_rsqrt_ss( _mm_load_ss( &x ) ) ) );
-#endif
-
-    return ::sqrtf(x);
-}
-
-inline float fastSqrt_impl(float x)
-{
-    // NOTE: This function is NOT actually faster on any CPU
-
     // Using algorithm from: Methods of Computing Square Roots
     //                       https://en.wikipedia.org/wiki/Methods_of_computing_square_roots
     //                       Last modified on February 25, 2017
@@ -84,19 +81,20 @@ inline float fastSqrt_impl(float x)
     return u.f;
 }
 
-inline float fastInvSqrt_impl_SIMD(float x)
+inline float fastSqrt_impl_SIMD(float x) // X86_64 => XXX | ARM => XXX
 {
-#ifdef PT_GFX_USE_SSE1
-    return _mm_cvtss_f32( _mm_rsqrt_ss( _mm_load_ss( &x ) ) );
+#if defined(PT_GFX_USE_SSE1)
+    return _mm_cvtss_f32( _mm_rcp_ss( _mm_rsqrt_ss( _mm_load_ss( &x ) ) ) );
+#elif defined(PT_GFX_USE_NEON)
+    return vgetq_lane_f32( vrecpeq_f32( vrsqrteq_f32( vld1q_dup_f32( &x ) ) ), 0 );
+#else
+    return ::sqrtf(x);
 #endif
 
-    return 1.0f / ::sqrtf(x);
 }
 
-inline float fastInvSqrt_impl(float x)
+inline float fastInvSqrt_impl(float x) // X86_64 => XXX | ARM => XXX
 {
-    // NOTE: This function is only SLIGHTLY faster on an ARM CPU
-
     // Using algorithm from: Fast Inverse Square Root
     //                       https://en.wikipedia.org/wiki/Fast_inverse_square_root
     //                       Last modified on February 17, 2017
@@ -115,7 +113,18 @@ inline float fastInvSqrt_impl(float x)
     return u.f;
 }
 
-inline float fastSin_impl(float x)
+inline float fastInvSqrt_impl_SIMD(float x) // X86_64 => XXX | ARM => XXX
+{
+#if defined(PT_GFX_USE_SSE1)
+    return _mm_cvtss_f32( _mm_rsqrt_ss( _mm_load_ss( &x ) ) );
+#elif defined(PT_GFX_USE_NEON)
+    return vgetq_lane_f32( vrsqrteq_f32( vld1q_dup_f32( &x ) ), 0 );
+#else
+    return 1.0f / ::sqrtf(x);
+#endif
+}
+
+inline float fastSin_impl(float x) // X86_64 => XXX | ARM => XXX
 {
     if (x > Gfx::Math::Pi) x -= Gfx::Math::PiMul2;
 
@@ -127,7 +136,7 @@ inline float fastSin_impl(float x)
     return p * (y * ::fabs(y) - y) + y;
 }
 
-inline float fastCos_impl(float x)
+inline float fastCos_impl(float x) // X86_64 => XXX | ARM => XXX
 {
     x += Gfx::Math::PiDiv2;
     if(x > Gfx::Math::PiMul2) x -= Gfx::Math::PiMul2;
@@ -135,7 +144,7 @@ inline float fastCos_impl(float x)
     return Gfx::Math::fastSin_impl(x);
 }
 
-inline float fastAtan2_impl(float y, float x)
+inline float fastAtan2_impl(float y, float x) // X86_64 => XXX | ARM => XXX
 {
 
     // Based on: atan2_approximation.c

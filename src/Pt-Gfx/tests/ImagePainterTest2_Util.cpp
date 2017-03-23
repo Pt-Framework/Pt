@@ -272,8 +272,8 @@ static void benchMathFunctions()
 {
     double time1, time2, time3;
 
-    std::clog << "                Time    Factor " << std::endl;
-    std::clog << "               ------- --------" << std::endl << std::endl;
+    std::clog << "                    Time    Factor " << std::endl;
+    std::clog << "                   ------- --------" << std::endl << std::endl;
 
     time1 = benchMathFunction<100000, 0, 100, 0>(F_sqrtf        ());
     time2 = benchMathFunction<100000, 0, 100, 0>(F_fastSqrt     ());
@@ -311,23 +311,7 @@ static void benchMathFunctions()
     Result on x86_64 (i5-4460; 64-Bit Mode)
     ---------------------------------------
 
-                    Time    Factor
-                   ------- --------
 
-    sqrtf        = 0.00389
-    fastSqrt     = 0.01103 ( 2.837)
-
-    1.0f / sqrtf = 0.00864
-    fastInvSqrt  = 0.01009 ( 1.168)
-
-    sinf         = 0.02746
-    fastSin      = 0.01495 ( 0.544)
-
-    cosf         = 0.02766
-    fastCos      = 0.01967 ( 0.711)
-
-    atan2f       = 0.03156
-    fastAtan2    = 0.00818 ( 0.259)
 
     --------------------------------------------------------
     Result on v7l (A53; BCM2709; RaspberryPi 3; 32-bit Mode)
@@ -336,20 +320,22 @@ static void benchMathFunctions()
                     Time    Factor
                    ------- --------
 
-    sqrtf        = 0.01780
-    fastSqrt     = 0.02708 ( 1.522)
+    sqrtf            = 0.01774
+    fastSqrt         = 0.02690 ( 1.516)
+    fastSqrt SIMD    = 0.01517 ( 0.855)
 
-    1.0f / sqrtf = 0.02789
-    fastInvSqrt  = 0.02522 ( 0.904)
+    1.0f / sqrtf     = 0.02775
+    fastInvSqrt      = 0.02532 ( 0.913)
+    fastInvSqrt SIMD = 0.01183 ( 0.426)
 
-    sinf         = 1.72843
-    fastSin      = 0.06808 ( 0.039)
+    sinf             = 1.72777
+    fastSin          = 0.06160 ( 0.036)
 
-    cosf         = 1.72667
-    fastCos      = 0.08795 ( 0.051)
+    cosf             = 1.72768
+    fastCos          = 0.06870 ( 0.040)
 
-    atan2f       = 0.14623
-    fastAtan2    = 0.05048 ( 0.345)
+    atan2f           = 0.14729
+    fastAtan2        = 0.04413 ( 0.300)
     */
 }
 
