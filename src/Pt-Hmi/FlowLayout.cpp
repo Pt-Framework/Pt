@@ -49,7 +49,7 @@ void StackLeft(Widget& parent, const Gfx::RectF& rect, bool center)
           itemsWidth += item->margin().leftRight();
         }
 
-        posX = (parent.measuredSize().width() - itemsWidth) / 2;
+        posX = (parent.preferredSize().width() - itemsWidth) / 2;
     }
 
     std::vector<Widget*>::const_iterator it = parent.widgets().begin();
@@ -86,7 +86,7 @@ void StackRight(Widget& parent, const Gfx::RectF& rect, bool center)
     std::vector<Widget*>::const_iterator it = parent.widgets().begin();
     std::vector<Widget*>::const_iterator end = parent.widgets().end();
 
-    double posRight  = parent.measuredSize().width() - parent.padding().right();
+    double posRight  = parent.preferredSize().width() - parent.padding().right();
 
     for( ; it != end; ++it)
     {
@@ -154,7 +154,7 @@ void StackBottom(Widget& parent, const Gfx::RectF& rect, bool center)
     std::vector<Widget*>::const_iterator it = parent.widgets().begin();
     std::vector<Widget*>::const_iterator end = parent.widgets().end();
 
-    double posBottom = parent.measuredSize().height() - parent.padding().bottom();
+    double posBottom = parent.preferredSize().height() - parent.padding().bottom();
 
     for( ; it != end; ++it)
     {
@@ -241,8 +241,6 @@ Gfx::SizeF FlowLayout::onMeasure(const SizePolicy& policy)
 
 void FlowLayout::onLayout(const Gfx::RectF& rect)
 {
-    Base::onLayout();
-
     switch(_direction)
     {
         default:

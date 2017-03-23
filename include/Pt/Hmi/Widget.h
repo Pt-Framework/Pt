@@ -207,10 +207,7 @@ class PT_HMI_API Widget : public Visual
         //
         // layouting
         //
- 
-        //const SizePolicy& sizePolicy() const;
 
-        //void setSizePolicy(const SizePolicy& policy);
 
         bool isAutoSize() const;
 
@@ -218,13 +215,7 @@ class PT_HMI_API Widget : public Visual
 
         Gfx::SizeF preferredSize() const;
 
-        Gfx::SizeF preferredSize(const SizePolicy& policy) const;
-
-
-        const Gfx::SizeF& measuredSize() const;
-
         void measure(const SizePolicy& policy);
-
 
         void layout(const Gfx::RectF& rect);
 
@@ -232,8 +223,6 @@ class PT_HMI_API Widget : public Visual
 
         void layout(double x, double y, double width, double height);
 
-
-        
 
         // outer spacing
         const Spacing& margin() const;
@@ -289,11 +278,7 @@ class PT_HMI_API Widget : public Visual
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
         virtual void onLayout(const Gfx::RectF& rect);
-        
-        virtual void onLayout()
-        {}
-
-        virtual Pt::Gfx::SizeF onAutoSize(const SizePolicy& policy) const;
+ 
 
         virtual void onSetActionKey(const Key& ak);
 

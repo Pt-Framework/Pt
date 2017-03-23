@@ -519,7 +519,7 @@ void Widget::invalidate()
 {
     ++_invalidates;
 
-    InvalidateEvent ev(vid());
+    InvalidateEvent ev( vid() );
     Application::instance().loop().commitEvent(ev);
 } 
 
@@ -535,50 +535,14 @@ void Widget::onInvalidateEvent(const InvalidateEvent& ev)
 
     onInvalidate();
 
-    //if(_autoSize)
-    //    _preferredSize = onAutoSize(_sizePolicy);
-
-    //if( size != preferredSize() )
-    {
-        if( parent() )
-           parent()->relayout();
-
-        //_layoutChanged.send();
-    }
+    if( parent() )
+        parent()->relayout();
 }
 
 
 void Widget::onInvalidate()
 {
 }
-
-
-//const SizePolicy& Widget::sizePolicy() const
-//{
-//    return _sizePolicy;
-//}
-//
-//
-//void Widget::setSizePolicy(const SizePolicy& policy)
-//{
-//    if(policy == _sizePolicy)
-//        return;
-//
-//    Gfx::SizeF size = preferredSize();
-//
-//    _sizePolicy = policy;
-//
-//    if(_autoSize)
-//        _preferredSize = onAutoSize(_sizePolicy);
-//
-//    if( size != preferredSize() )
-//    {
-//        if( parent() )
-//            parent()->relayout();
-//
-//        _layoutChanged.send();
-//    }
-//}
 
 
 bool Widget::isAutoSize() const
@@ -591,15 +555,8 @@ void Widget::setAutoSize(bool a)
 {
     _autoSize = a;
 
-    // it is cheaper to invalidate than to just update the auto size, because
-    // setAutoSize is usually called with other invalidating operations
-    invalidate();
-}
-
-
-Gfx::SizeF Widget::onAutoSize(const SizePolicy&) const
-{
-    return _size;
+    if( parent() )
+        parent()->relayout();
 }
 
 
@@ -609,21 +566,6 @@ Gfx::SizeF Widget::preferredSize() const
         return _preferredSize;
 
     return _size;
-}
-
-
-Gfx::SizeF Widget::preferredSize(const SizePolicy& policy) const
-{
-    if(_autoSize)
-        return onAutoSize(policy);
-
-    return _size;
-}
-
-
-const Gfx::SizeF& Widget::measuredSize() const
-{
-    return _measuredSize;
 }
 
 
@@ -763,6 +705,11 @@ void Widget::layout(double x, double y, double width, double height)
 
 void Widget::onLayout(const Gfx::RectF& rect)
 {
+    // TODO: content widget must be managed by derived class because only
+    //       there is the size policy known
+    //       -> move content widget to container which can really have one
+    //          i.e. Panel
+
     if(_content)
     {
         Gfx::PointF pos(_padding.left() + _content->margin().left(), 
@@ -969,6 +916,9 @@ const Gfx::SizeF& Widget::size() const
 
 void Widget::resize(const Gfx::SizeF& s)
 {
+    std::clog << "resize: " << typeid(*this).name() << " " << s.width()
+                                                    << " " << s.height() << std::endl;
+
     if(_size == s)
         return;
 

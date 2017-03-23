@@ -340,8 +340,6 @@ void Window::setMainWidget(Widget* widget)
         _mainWidget->parent()->remove(*_mainWidget);
 
     _mainWidget->setWindow(this);
-    _mainWidget->move( Gfx::PointF(0,0) );
-    _mainWidget->resize( size() );
 }
 
 
@@ -658,6 +656,8 @@ void Window::onLayoutEvent(const LayoutEvent& ev)
 
     if(_layouts > 0)
         return;
+
+    std::clog << "--- LAYOUT ---" << std::endl;
 
     SizePolicy policy(SizePolicy::Fixed, SizePolicy::Fixed);
     policy.setSize(_size);

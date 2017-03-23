@@ -207,12 +207,6 @@ void Slider::setRenderer(SliderRenderer* renderer)
 }
 
 
-Gfx::SizeF Slider::onAutoSize(const SizePolicy& policy) const
-{
-    return Base::onAutoSize(policy);
-}
-
-
 void Slider::onInvalidate()
 {
     Base::onInvalidate();

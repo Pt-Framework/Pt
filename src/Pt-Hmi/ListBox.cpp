@@ -203,21 +203,6 @@ void ListBoxItem::setRenderer(ListBoxRenderer* renderer)
 }
 
 
-Gfx::SizeF ListBoxItem::onAutoSize(const SizePolicy& policy) const
-{   
-    Gfx::FontMetrics fm = Painter::fontMetrics( _font, _text );
-
-    double spacing = _picture.empty() || _text.empty() ? 0 : fm.height() * 0.5;
-    double pictureWidth = _iconSize.isNull() ? _picture.width() : _iconSize.width();
-    double pictureHeight = _iconSize.isNull() ? _picture.height() : _iconSize.height();
-    double itemsWidth = fm.width() + spacing + pictureWidth;
-    double itemsHeight = std::max<double>(fm.height(), pictureHeight);
-
-    return Gfx::SizeF( itemsWidth + padding().leftRight(),
-                       itemsHeight + padding().topBottom() );
-}
-
-
 Gfx::SizeF ListBoxItem::onMeasure(const SizePolicy& p)
 {
     Gfx::FontMetrics fm = Painter::fontMetrics( _font, _text );
@@ -453,35 +438,6 @@ void ListBox::setRenderer(ListBoxRenderer* renderer)
     _hasRenderer = renderer != 0;
 
     invalidate();
-}
-
-
-Gfx::SizeF ListBox::onAutoSize(const SizePolicy& policy) const
-{
-    SizePolicy itemPolicy(policy);
-
-    double width = policy.size().width() - _scrollView.margin().leftRight();
-    itemPolicy.setWidth(width);
-
-    double height = policy.size().height() / _layout.widgets().size();
-    itemPolicy.setHeight(height);
-
-    double itemsHeight = 0;
-
-    std::vector<Pt::Hmi::Widget*>::const_iterator it;
-    for(it = _layout.widgets().begin(); it != _layout.widgets().end(); ++it)
-    {
-        Widget* item = *it;
-        Gfx::SizeF preferredSize = item->preferredSize(itemPolicy);
-
-        itemsHeight += preferredSize.height();
-        itemsHeight += item->margin().topBottom();
-    }
-
-    Gfx::SizeF s = _layout.size();
-    s.setWidth( policy.size().width() );
-    s.setHeight(itemsHeight + _scrollView.margin().topBottom());
-    return s;
 }
 
 

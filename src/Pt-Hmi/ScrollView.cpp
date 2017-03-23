@@ -138,15 +138,12 @@ Gfx::SizeF ScrollView::onMeasure(const SizePolicy& p)
         _scrollBarY.measure(barPolicy);
     }
 
-    //return p.size();
     return _scrollLayout.preferredSize();
 }
 
 
 void ScrollView::onLayout(const Gfx::RectF& rect)
 {
-    Widget::onLayout();
-
     _scrollLayout.layout( Gfx::PointF(0, 0), rect.size() );
 
     double width = rect.size().width();

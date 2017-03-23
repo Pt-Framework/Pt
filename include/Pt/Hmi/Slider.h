@@ -92,8 +92,6 @@ class PT_HMI_API Slider : public Control
         void setRenderer(SliderRenderer* renderer);
 
     protected:
-        virtual Gfx::SizeF onAutoSize(const SizePolicy& policy) const;
-
         virtual void onInvalidate();
 
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);

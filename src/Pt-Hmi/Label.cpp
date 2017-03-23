@@ -375,8 +375,6 @@ void Label::layoutImage()
 
 void Label::onLayout(const Gfx::RectF& rect)
 {
-    Base::onLayout();
-
     if(_hasImage)
         layoutImage();
     else
