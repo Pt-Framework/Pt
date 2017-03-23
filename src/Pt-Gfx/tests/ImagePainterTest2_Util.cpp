@@ -311,6 +311,25 @@ static void benchMathFunctions()
     Result on x86_64 (i5-4460; 64-Bit Mode)
     ---------------------------------------
 
+                        Time    Factor
+                       ------- --------
+
+    sqrtf            = 0.00402
+    fastSqrt         = 0.00888 ( 2.207)
+    fastSqrt SIMD    = 0.00413 ( 1.027)
+
+    1.0f / sqrtf     = 0.00774
+    fastInvSqrt      = 0.00868 ( 1.122)
+    fastInvSqrt SIMD = 0.00266 ( 0.344)
+
+    sinf             = 0.02739
+    fastSin          = 0.02052 ( 0.749)
+
+    cosf             = 0.02719
+    fastCos          = 0.02126 ( 0.782)
+
+    atan2f           = 0.03134
+    fastAtan2        = 0.00823 ( 0.263)
 
 
     --------------------------------------------------------

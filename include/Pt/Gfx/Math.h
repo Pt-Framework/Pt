@@ -52,18 +52,11 @@ static const float PiDiv180 = 0.01745329f;
 static const float PiSqr    = 9.86960440f;
 
 
-    // NOTE: This function is only SLIGHTLY faster on an ARM CPU
-    // NOTE: This function is NOT actually faster on any CPU
-
-
-// SLOWER ON X86_64 ; FASTER ON ARM
-
-// SLIGHTLY FASTER ON X86_64 ; FASTER ON ARM
-
 // The real implementation
 // NOTE: They are separated from the real public API so that we can benchmark them easily
 
-inline float fastSqrt_impl(float x) // X86_64 => XXX | ARM => XXX
+
+inline float fastSqrt_impl(float x) // X86_64 => MUCH SLOWER | ARM => SLOWER
 {
     // Using algorithm from: Methods of Computing Square Roots
     //                       https://en.wikipedia.org/wiki/Methods_of_computing_square_roots
@@ -81,7 +74,7 @@ inline float fastSqrt_impl(float x) // X86_64 => XXX | ARM => XXX
     return u.f;
 }
 
-inline float fastSqrt_impl_SIMD(float x) // X86_64 => XXX | ARM => XXX
+inline float fastSqrt_impl_SIMD(float x) // X86_64 => SLIGHTLY SLOWER | ARM => SLIGHTLY FASTER
 {
 #if defined(PT_GFX_USE_SSE1)
     return _mm_cvtss_f32( _mm_rcp_ss( _mm_rsqrt_ss( _mm_load_ss( &x ) ) ) );
@@ -93,7 +86,7 @@ inline float fastSqrt_impl_SIMD(float x) // X86_64 => XXX | ARM => XXX
 
 }
 
-inline float fastInvSqrt_impl(float x) // X86_64 => XXX | ARM => XXX
+inline float fastInvSqrt_impl(float x) // X86_64 => SLOWER | ARM => SLIGHTLY FASTER
 {
     // Using algorithm from: Fast Inverse Square Root
     //                       https://en.wikipedia.org/wiki/Fast_inverse_square_root
@@ -113,7 +106,7 @@ inline float fastInvSqrt_impl(float x) // X86_64 => XXX | ARM => XXX
     return u.f;
 }
 
-inline float fastInvSqrt_impl_SIMD(float x) // X86_64 => XXX | ARM => XXX
+inline float fastInvSqrt_impl_SIMD(float x) // X86_64 => FASTER | ARM => FASTER
 {
 #if defined(PT_GFX_USE_SSE1)
     return _mm_cvtss_f32( _mm_rsqrt_ss( _mm_load_ss( &x ) ) );
@@ -124,7 +117,7 @@ inline float fastInvSqrt_impl_SIMD(float x) // X86_64 => XXX | ARM => XXX
 #endif
 }
 
-inline float fastSin_impl(float x) // X86_64 => XXX | ARM => XXX
+inline float fastSin_impl(float x) // X86_64 => FASTER | ARM => MUCH FASTER
 {
     if (x > Gfx::Math::Pi) x -= Gfx::Math::PiMul2;
 
@@ -136,7 +129,7 @@ inline float fastSin_impl(float x) // X86_64 => XXX | ARM => XXX
     return p * (y * ::fabs(y) - y) + y;
 }
 
-inline float fastCos_impl(float x) // X86_64 => XXX | ARM => XXX
+inline float fastCos_impl(float x) // X86_64 => FASTER | ARM => MUCH FASTER
 {
     x += Gfx::Math::PiDiv2;
     if(x > Gfx::Math::PiMul2) x -= Gfx::Math::PiMul2;
@@ -144,7 +137,7 @@ inline float fastCos_impl(float x) // X86_64 => XXX | ARM => XXX
     return Gfx::Math::fastSin_impl(x);
 }
 
-inline float fastAtan2_impl(float y, float x) // X86_64 => XXX | ARM => XXX
+inline float fastAtan2_impl(float y, float x) // X86_64 => FASTER | ARM => FASTER
 {
 
     // Based on: atan2_approximation.c
