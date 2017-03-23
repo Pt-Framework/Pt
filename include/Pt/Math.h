@@ -45,7 +45,7 @@ static const double Pi180  = 0.01745329251994329576;
 static const double PiSqr  = 9.86960440108935861883449099987615114f;
 
 /** @brief Fast, but less precise sine calculation.
- 
+
     The @a theta is required in rad [0, 2*Pi]. In the range [0, 2*Pi], the
     max. abs error in fast accurate mode is 0.0015. In the range [0, 2*Pi],
     the max. abs error in fast mode is 0.06.
@@ -79,7 +79,7 @@ T fastSin(const T& theta)
 }
 
 /** @brief Fast, less precise cosine calculation.
-    
+
     The @a theta is required in rad [0, 2*Pi]. In the range [0, 2*Pi], the
     max. abs error in fast accurate mode is 0.0015. In the range [0, 2*Pi],
     the max. abs error in fast mode is 0.06.
@@ -104,11 +104,11 @@ T fastCos(const T& theta)
 */
 inline double hypot(double x, double y)
 {
-    #if defined(_MSC_VER) || defined(_WIN32_WCE) || defined(_WIN32)
-        return _hypot(x, y);
-    #else
-        return ::hypot(x, y);
-    #endif
+#if defined(_MSC_VER) || defined(_WIN32_WCE) || defined(_WIN32)
+    return _hypot(x, y);
+#else
+    return ::hypot(x, y);
+#endif
 }
 
 } // namespace Pt

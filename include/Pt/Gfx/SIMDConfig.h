@@ -44,7 +44,7 @@
 
     #include <arm_neon.h>
 
-    #define PT_GFX_ARM_CPU
+    #define PT_GFX_USE_ARM_CPU
 
     #define PT_GFX_USE_NEON
 
@@ -53,11 +53,13 @@
 
     #include <x86intrin.h>
 
-    #define PT_GFX_X86_CPU
+    #define PT_GFX_USE_X86_CPU
 
     #define PT_GFX_USE_AVX2
     #define PT_GFX_USE_AVX1
 
+    #define PT_GFX_USE_SSSE3
+    #define PT_GFX_USE_SSE3
     #define PT_GFX_USE_SSE2
     #define PT_GFX_USE_SSE1
 
@@ -66,11 +68,13 @@
 
     #include <intrin.h>
 
-    #define PT_GFX_X86_CPU
+    #define PT_GFX_USE_X86_CPU
 
     #define PT_GFX_USE_AVX2
     #define PT_GFX_USE_AVX1
 
+    #define PT_GFX_USE_SSSE3
+    #define PT_GFX_USE_SSE3
     #define PT_GFX_USE_SSE2
     #define PT_GFX_USE_SSE1
 
@@ -82,6 +86,8 @@
 //#undef PT_GFX_USE_AVX2
 //#undef PT_GFX_USE_AVX1
 
+//#undef PT_GFX_USE_SSSE3
+//#undef PT_GFX_USE_SSE3
 //#undef PT_GFX_USE_SSE2
 //#undef PT_GFX_USE_SSE1
 
@@ -96,7 +102,15 @@
 #define PT_GFX_USE_AVX1
 #endif
 
-#if defined(PT_GFX_USE_AVX1) && !defined(PT_GFX_USE_SSE2)
+#if defined(PT_GFX_USE_AVX1) && !defined(PT_GFX_USE_SSSE3)
+#define PT_GFX_USE_SSSE3
+#endif
+
+#if defined(PT_GFX_USE_SSSE3) && !defined(PT_GFX_USE_SSE3)
+#define PT_GFX_USE_SSE3
+#endif
+
+#if defined(PT_GFX_USE_SSE3) && !defined(PT_GFX_USE_SSE2)
 #define PT_GFX_USE_SSE2
 #endif
 

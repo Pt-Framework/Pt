@@ -3,7 +3,7 @@
 
 static int writePNG(const char* filename, int width, int height, const uint8_t* argb8888Buff)
 {
-#if defined(PT_GFX_ARM_CPU)
+#if defined(PT_GFX_USE_ARM_CPU)
     (void) filename;
     (void) width;
     (void) height;
@@ -380,7 +380,7 @@ static void dumpMatrix(const AffineMatrix2D& mat)
 
 static void benchMatrixOps()
 {
-#if defined(PT_GFX_ARM_CPU)
+#if defined(PT_GFX_USE_ARM_CPU)
     const int loopCount = 2048;
 #else
     const int loopCount = 8192;

@@ -194,7 +194,7 @@ inline float fastInvSqrt(float x)
 {
 #if defined(PT_GFX_USE_SSE1) || defined(PT_GFX_USE_NEON)
     return fastInvSqrt_impl_SIMD(x);
-#elif defined(PT_GFX_ARM_CPU)
+#elif defined(PT_GFX_USE_ARM_CPU)
     return fastInvSqrt_impl(x);
 #else
     return 1.0f / ::sqrtf(x);
