@@ -35,6 +35,9 @@
 
 #include <Pt/Gfx/Api.h>
 
+#include <Pt/Gfx/SIMDConfig.h>
+
+
 namespace Pt {
 namespace Gfx {
 namespace Math {
@@ -51,6 +54,15 @@ static const float PiSqr    = 9.86960440f;
 
 // The real implementation
 // NOTE: They are separated from the real public API so that we can benchmark them easily
+
+inline float fastSqrt_impl_SIMD(float x)
+{
+#ifdef PT_GFX_USE_SSE1
+    return _mm_cvtss_f32( _mm_rcp_ss( _mm_rsqrt_ss( _mm_load_ss( &x ) ) ) );
+#endif
+
+    return ::sqrtf(x);
+}
 
 inline float fastSqrt_impl(float x)
 {
@@ -72,9 +84,18 @@ inline float fastSqrt_impl(float x)
     return u.f;
 }
 
+inline float fastInvSqrt_impl_SIMD(float x)
+{
+#ifdef PT_GFX_USE_SSE1
+    return _mm_cvtss_f32( _mm_rsqrt_ss( _mm_load_ss( &x ) ) );
+#endif
+
+    return 1.0f / ::sqrtf(x);
+}
+
 inline float fastInvSqrt_impl(float x)
 {
-    // NOTE: This function is only slightly faster on an ARM CPU
+    // NOTE: This function is only SLIGHTLY faster on an ARM CPU
 
     // Using algorithm from: Fast Inverse Square Root
     //                       https://en.wikipedia.org/wiki/Fast_inverse_square_root

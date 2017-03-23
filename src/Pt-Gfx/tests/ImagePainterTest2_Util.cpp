@@ -251,52 +251,58 @@ static double benchMathFunction(F f)
     return (double) clock.stop().toUSecs() / ( loopCount * (MAX - MIN + 1) );
 }
 
-struct F_sqrtf       { float operator() (float x) { return ::sqrtf (x);                              } };
-struct F_fastSqrt    { float operator() (float x) { return Pt::Gfx::Math::fastSqrt_impl(x);          } };
+struct F_sqrtf           { float operator() (float x) { return ::sqrtf (x);                               } };
+struct F_fastSqrt        { float operator() (float x) { return Pt::Gfx::Math::fastSqrt_impl(x);           } };
+struct F_fastSqrt_SIMD   { float operator() (float x) { return Pt::Gfx::Math::fastSqrt_impl_SIMD(x);      } };
 
-struct F_isqrtf      { float operator() (float x) { return 1.0f / ::sqrtf(x);                        } };
-struct F_fastInvSqrt { float operator() (float x) { return Pt::Gfx::Math::fastInvSqrt_impl(x);       } };
+struct F_isqrtf          { float operator() (float x) { return 1.0f / ::sqrtf(x);                         } };
+struct F_fastInvSqrt     { float operator() (float x) { return Pt::Gfx::Math::fastInvSqrt_impl(x);        } };
+struct F_fastInvSqrt_SIMD{ float operator() (float x) { return Pt::Gfx::Math::fastInvSqrt_impl_SIMD(x);   } };
 
-struct F_sinf        { float operator() (float x) { return ::sinf (x);                               } };
-struct F_fastSin     { float operator() (float x) { return Pt::Gfx::Math::fastSin_impl(x);           } };
+struct F_sinf            { float operator() (float x) { return ::sinf (x);                                } };
+struct F_fastSin         { float operator() (float x) { return Pt::Gfx::Math::fastSin_impl(x);            } };
 
-struct F_cosf        { float operator() (float x) { return ::cosf (x);                               } };
-struct F_fastCos     { float operator() (float x) { return Pt::Gfx::Math::fastCos_impl(x);           } };
+struct F_cosf            { float operator() (float x) { return ::cosf (x);                                } };
+struct F_fastCos         { float operator() (float x) { return Pt::Gfx::Math::fastCos_impl(x);            } };
 
-struct F_atan2f      { float operator() (float x) { return ::atan2f (100.0f, x);                     } };
-struct F_fastAtan2   { float operator() (float x) { return Pt::Gfx::Math::fastAtan2_impl(100.0f, x); } };
+struct F_atan2f          { float operator() (float x) { return ::atan2f (100.0f, x);                      } };
+struct F_fastAtan2       { float operator() (float x) { return Pt::Gfx::Math::fastAtan2_impl(100.0f, x);  } };
 
 static void benchMathFunctions()
 {
-    double time1, time2;
+    double time1, time2, time3;
 
     std::clog << "                Time    Factor " << std::endl;
     std::clog << "               ------- --------" << std::endl << std::endl;
 
-    time1 = benchMathFunction<100000, 0, 100, 0>(F_sqrtf   ());
-    time2 = benchMathFunction<100000, 0, 100, 0>(F_fastSqrt());
-    printf("sqrtf        = %6.5f\n", time1);
-    printf("fastSqrt     = %6.5f (%6.3f)\n\n", time2, time2 / time1);
+    time1 = benchMathFunction<100000, 0, 100, 0>(F_sqrtf        ());
+    time2 = benchMathFunction<100000, 0, 100, 0>(F_fastSqrt     ());
+    time3 = benchMathFunction<100000, 0, 100, 0>(F_fastSqrt_SIMD());
+    printf("sqrtf            = %6.5f\n",           time1               );
+    printf("fastSqrt         = %6.5f (%6.3f)\n",   time2, time2 / time1);
+    printf("fastSqrt SIMD    = %6.5f (%6.3f)\n\n", time3, time3 / time1);
 
-    time1 = benchMathFunction<100000, 0, 100, 0>(F_isqrtf   ());
-    time2 = benchMathFunction<100000, 0, 100, 0>(F_fastInvSqrt());
-    printf("1.0f / sqrtf = %6.5f\n", time1);
-    printf("fastInvSqrt  = %6.5f (%6.3f)\n\n", time2, time2 / time1);
+    time1 = benchMathFunction<100000, 0, 100, 0>(F_isqrtf          ());
+    time2 = benchMathFunction<100000, 0, 100, 0>(F_fastInvSqrt     ());
+    time3 = benchMathFunction<100000, 0, 100, 0>(F_fastInvSqrt_SIMD());
+    printf("1.0f / sqrtf     = %6.5f\n",           time1               );
+    printf("fastInvSqrt      = %6.5f (%6.3f)\n",   time2, time2 / time1);
+    printf("fastInvSqrt SIMD = %6.5f (%6.3f)\n\n", time3, time3 / time1);
 
     time1 = benchMathFunction<10000, -360, 360, 1745>(F_sinf   ());
     time2 = benchMathFunction<10000, -360, 360, 1745>(F_fastSin());
-    printf("sinf         = %6.5f\n", time1);
-    printf("fastSin      = %6.5f (%6.3f)\n\n", time2, time2 / time1);
+    printf("sinf             = %6.5f\n",           time1               );
+    printf("fastSin          = %6.5f (%6.3f)\n\n", time2, time2 / time1);
 
     time1 = benchMathFunction<10000, -360, 360, 1745>(F_cosf   ());
     time2 = benchMathFunction<10000, -360, 360, 1745>(F_fastCos());
-    printf("cosf         = %6.5f\n", time1);
-    printf("fastCos      = %6.5f (%6.3f)\n\n", time2, time2 / time1);
+    printf("cosf             = %6.5f\n",           time1               );
+    printf("fastCos          = %6.5f (%6.3f)\n\n", time2, time2 / time1);
 
     time1 = benchMathFunction<10000, 0, 100, 0>(F_atan2f   ());
     time2 = benchMathFunction<10000, 0, 100, 0>(F_fastAtan2());
-    printf("atan2f       = %6.5f\n", time1);
-    printf("fastAtan2    = %6.5f (%6.3f)\n\n", time2, time2 / time1);
+    printf("atan2f           = %6.5f\n",           time1               );
+    printf("fastAtan2        = %6.5f (%6.3f)\n\n", time2, time2 / time1);
 
     std::clog << std::endl;
 

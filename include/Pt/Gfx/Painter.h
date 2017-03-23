@@ -52,7 +52,7 @@ namespace Gfx {
 class PT_GFX_API Painter
 {
     public:
-         static const Pt::ssize_t MaximumCoordinate;       //! @brief The maximum coordinate value                  (signed integer)
+         static const Pt::int32_t MaximumCoordinate;       //! @brief The maximum coordinate value                  (signed integer)
          static const Point       MaximumPointCoordinate;  //! @brief A point set with the maximum coordinate value (signed integer)
          static const Point       PolygonSeparatorPoint;   //! @brief A separator point for defining multi-path     (signed integer)
 
