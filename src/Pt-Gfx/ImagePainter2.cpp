@@ -1055,6 +1055,10 @@ void ImagePainter2::drawPath(const Path2D& path2d, const AffineMatrix2D& matrix2
     path2d.generatePoints(pointsF, 0);
     matrix2d.transformPoints(pointsF.data(), pointsF.size());
 
+    //for(size_t i = 0; i < pointsF.size(); ++i)
+    //    lprintf("%5.1f, %5.1f\n", pointsF[i].x(), pointsF[i].y());
+    //lprintf("\n");
+
     drawPolyline(pointsF.data(), pointsF.size(), autoClose);
 }
 
@@ -1064,6 +1068,10 @@ void ImagePainter2::fillPath(const Path2D& path2d, const AffineMatrix2D& matrix2
 
     path2d.generatePoints(pointsF, 0);
     matrix2d.transformPoints(pointsF.data(), pointsF.size());
+
+    //for(size_t i = 0; i < pointsF.size(); ++i)
+    //    lprintf("%5.1f, %5.1f\n", pointsF[i].x(), pointsF[i].y());
+    //lprintf("\n");
 
     fillPolygon(pointsF.data(), pointsF.size());
 }

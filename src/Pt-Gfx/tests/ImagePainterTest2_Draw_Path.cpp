@@ -20,7 +20,7 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     ip2->setBrush(brush1);
     ip2->fillPath(path2d, matrix2d);
 
-    matrix2d.translate(50, 50);
+    matrix2d.translate(100, 0);
     ip2->setBrush(brush2);
     ip2->fillPath(path2d, matrix2d);
 

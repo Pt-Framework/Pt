@@ -130,7 +130,7 @@ class PT_GFX_API Path2D {
         //
         // Generators
         //
-        void generatePoints(std::vector<PointF> dst, Pt::uint8_t smoothness = 0) const;
+        void generatePoints(std::vector<PointF>& dst, Pt::uint8_t smoothness = 0) const;
 
     private:
         struct PathData;

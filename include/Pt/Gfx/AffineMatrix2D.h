@@ -534,7 +534,7 @@ void AffineMatrix2D::transformPoints(PointF* dxy, const PointF* sxy, size_t poin
         *pxy++ = sxy[i].y();
     }
 
-    transformPoints(xy, xy, pointCount);
+    transformPoints(xy, xy, pointCount * 2);
 
     pxy = xy;
     for(size_t i = 0; i < pointCount; ++i) {
