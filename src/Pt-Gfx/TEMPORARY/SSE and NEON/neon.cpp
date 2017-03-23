@@ -1,7 +1,7 @@
 // Check for NEON support
 // Based on http://stackoverflow.com/questions/26701262/how-to-check-the-existence-of-neon-on-arm
 
-// g++ -mfpu=neon -O2 neon.cpp -o neon && ./neon && rm -f neon
+// g++ -O2 neon.cpp -o neon && ./neon && rm -f neon
 
 
 #include <iostream>
