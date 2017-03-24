@@ -41,6 +41,17 @@ namespace Gfx {
 // ===== Internal Helper Functions - Generator (Drawing) Functions ======================
 // ======================================================================================
 
+/*
+int r = (int)Math.sqrt((x1-x0)*(x1-x0) + (y1-y0)*(y1-y0));
+int x = x0-r;
+int y = y0-r;
+int width = 2*r;
+int height = 2*r;
+int startAngle = (int) (180/Math.PI*atan2(y1-y0, x1-x0));
+int endAngle = (int) (180/Math.PI*atan2(y2-y0, x2-x0));
+canvas.drawArc(x, y, width, height, startAngle, endAngle);
+*/
+
 // ### TODO ###
 
 
