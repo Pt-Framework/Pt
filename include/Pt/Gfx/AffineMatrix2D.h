@@ -34,7 +34,7 @@
 #include <vector>
 
 #include <Pt/Gfx/Math.h>
-#include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Painter.h>
 
 #include <Pt/Gfx/SIMDConfig.h>
 
@@ -47,6 +47,7 @@ namespace Gfx{
 
 // AVX constants
 static const __m256 avxOneZero = _mm256_set_ps(0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f);
+static const __m256 avxMaxCord = _mm256_set1_ps(Painter::MaximumCoordinateF);
 
 #endif
 
@@ -54,6 +55,7 @@ static const __m256 avxOneZero = _mm256_set_ps(0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0
 
 // NEON constants
 static const float32x4_t neonOneZero = NEON_SET_FLT32X4(0.0f, 1.0f, 0.0f, 1.0f);
+static const float32x4_t neonMaxCord = vdupq_n_f32(Painter::MaximumCoordinateF);
 
 #endif
 
@@ -380,7 +382,7 @@ bool AffineMatrix2D::pop()
 
 void AffineMatrix2D::transformPoint(float& dx, float& dy, float sx, float sy) const
 {
-    if(_isIdentity) {
+    if( _isIdentity || (sx > Painter::MaximumCoordinateF && sy > Painter::MaximumCoordinateF) ) {
         dx = sx;
         dy = sy;
         return;
@@ -392,7 +394,7 @@ void AffineMatrix2D::transformPoint(float& dx, float& dy, float sx, float sy) co
 
 void AffineMatrix2D::transformPoint(float& x, float &y) const
 {
-    if(_isIdentity) return;
+    if( _isIdentity || (x > Painter::MaximumCoordinateF && y > Painter::MaximumCoordinateF) ) return;
 
     const float tx = _mdata.v[0][0] * x + _mdata.v[0][1] * y + _mdata.v[0][2];
     const float ty = _mdata.v[1][0] * x + _mdata.v[1][1] * y + _mdata.v[1][2];
@@ -403,7 +405,7 @@ void AffineMatrix2D::transformPoint(float& x, float &y) const
 
 void AffineMatrix2D::transformPoint(PointF& dp, const PointF& sp) const
 {
-    if(_isIdentity) {
+    if( _isIdentity || (sp.x() > Painter::MaximumCoordinateF && sp.y() > Painter::MaximumCoordinateF) ) {
         dp = sp;
         return;
     }
@@ -416,7 +418,7 @@ void AffineMatrix2D::transformPoint(PointF& dp, const PointF& sp) const
 
 void AffineMatrix2D::transformPoint(PointF& p) const
 {
-    if(_isIdentity) return;
+    if( _isIdentity || (p.x() > Painter::MaximumCoordinateF && p.y() > Painter::MaximumCoordinateF) ) return;
 
     p.set(
         _mdata.v[0][0] * p.x() + _mdata.v[0][1] * p.y() + _mdata.v[0][2],
@@ -461,7 +463,14 @@ void AffineMatrix2D::transformPoints(float* dxy, const float* sxy, size_t pointC
         const __m256 r10   = _mm256_hadd_ps(r10_0, r10_1);
         const __m256 r3210 = _mm256_hadd_ps(r10  , r32  );
         // Store 8 floats to the destination vector
-        _mm256_storeu_ps(dxy, r3210);
+        _mm256_storeu_ps(
+            dxy,
+            _mm256_or_ps(
+                _mm256_and_ps(s3210, _mm256_cmp_ps(s3210, avxMaxCord, _CMP_GT_OQ)), // Retain source values >  maximum coordinate
+                _mm256_and_ps(r3210, _mm256_cmp_ps(s3210, avxMaxCord, _CMP_LE_OQ))  // Retain result values <= maximum coordinate
+            )
+        );
+        //_mm256_storeu_ps(dxy, r3210);
         // Increment the pointers
         sxy += 8;
         dxy += 8;
@@ -496,7 +505,14 @@ void AffineMatrix2D::transformPoints(float* dxy, const float* sxy, size_t pointC
         const float32x4_t r10   = vcombine_f32( vpadd_f32( vget_low_f32(r10_0), vget_high_f32(r10_0) ), vpadd_f32( vget_low_f32(r10_1), vget_high_f32(r10_1) ) );
         const float32x4_t r3210 = vcombine_f32( vpadd_f32( vget_low_f32(r10  ), vget_high_f32(r10  ) ), vpadd_f32( vget_low_f32(r32  ), vget_high_f32(r32  ) ) );
         // Store 4 floats to the destination vector
-        vst1q_f32(dxy, r3210);
+        vst1q_f32(
+            dxy,
+            vorrq_s32(
+                vandq_s32(s3210, vcgtq_f32(s3210, neonMaxCord)), // Retain source values >  maximum coordinate
+                vandq_s32(r3210, vcleq_f32(s3210, neonMaxCord))  // Retain result values <= maximum coordinate
+            )
+        );
+        //vst1q_f32(dxy, r3210);
         // Increment the pointers
         sxy += 4;
         dxy += 4;

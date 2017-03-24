@@ -28,6 +28,7 @@
   02110-1301 USA
 */
 
+#include <Pt/Gfx/AffineMatrix2D.h>
 #include <Pt/Gfx/ImagePainter2.h>
 
 #include "FreeType2.h"

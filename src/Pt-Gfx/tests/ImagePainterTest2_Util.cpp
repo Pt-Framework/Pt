@@ -397,8 +397,8 @@ static void benchMatrixOps()
     float b[3][3];
     for(int i = 0; i < 3; ++i) {
         for(int j = 0; j < 3; ++j) {
-            a[i][j] = (rand() - 16384.0f) / 1024.0f;
-            b[i][j] = (rand() - 16384.0f) / 1024.0f;
+            a[i][j] = 2.0f * rand() / RAND_MAX - 1.0f;
+            b[i][j] = 2.0f * rand() / RAND_MAX - 1.0f;
         }
     }
 
@@ -473,8 +473,8 @@ static void benchMatrixOps()
         else      mat.updateUsingRaw(b, AffineMatrix2D::Replace);
         // Reset the source vectors
         for(int j = 0; j < loopCount * 2; j += 2) {
-            sxya[j    ] = (rand() - 16384.0f) / 1024.0f;
-            sxya[j + 1] = (rand() - 16384.0f) / 1024.0f;
+            sxya[j    ] = 2.0f * rand() / RAND_MAX - 1.0f;
+            sxya[j + 1] = 2.0f * rand() / RAND_MAX - 1.0f;
         }
         // Perform benchmark
         clock.start();
@@ -496,8 +496,8 @@ static void benchMatrixOps()
         else      mat.updateUsingRaw(b, AffineMatrix2D::Replace);
         // Reset the source vectors
         for(int j = 0; j < loopCount * 2; j += 2) {
-            sxya[j    ] = (rand() - 16384.0f) / 1024.0f;
-            sxya[j + 1] = (rand() - 16384.0f) / 1024.0f;
+            sxya[j    ] = 2.0f * rand() / RAND_MAX - 1.0f;
+            sxya[j + 1] = 2.0f * rand() / RAND_MAX - 1.0f;
         }
         // Perform benchmark
         clock.start();
@@ -521,7 +521,7 @@ static void benchMatrixOps()
         else      mat.updateUsingRaw(b, AffineMatrix2D::Replace);
         // Reset the source vectors
         for(int j = 0; j < loopCount; ++j) {
-            pointsF[j].set( (rand() - 16384.0f) / 1024.0f, (rand() - 16384.0f) / 1024.0f );
+            pointsF[j].set( 2.0f * rand() / RAND_MAX - 1.0f, 2.0f * rand() / RAND_MAX - 1.0f );
         }
         // Perform benchmark
         clock.start();
@@ -571,10 +571,10 @@ static void benchMatrixOps()
     D: Point                  -> (17.500, 72.000)
     D: Point                  -> (18.500, 96.000)
     D: Point                  -> ( 7.500, 50.000)
-    Time M    = M * M    :  6.835938 nS
-    Time VD[] = M * VS[] :  0.610352 nS
-    Time VS[] = M * VS[] :  0.610352 nS
-    Time VS[] = M * VS[] :  0.610352 nS
+    Time M    = M * M    :  7.934570 nS
+    Time VD[] = M * VS[] :  0.732422 nS
+    Time VS[] = M * VS[] :  0.732422 nS
+    Time VS[] = M * VS[] :  0.732422 nS
 
     --------
     With AVX
@@ -603,10 +603,11 @@ static void benchMatrixOps()
     D: Point                  -> (17.500, 72.000)
     D: Point                  -> (18.500, 96.000)
     D: Point                  -> ( 7.500, 50.000)
-    Time M    = M * M    :  5.493164 nS
-    Time VD[] = M * VS[] :  0.244141 nS
-    Time VS[] = M * VS[] :  0.244141 nS
-    Time VS[] = M * VS[] :  0.244141 nS
+    Time M    = M * M    :  5.615234 nS
+    Time VD[] = M * VS[] :  0.366211 nS
+    Time VS[] = M * VS[] :  0.366211 nS
+    Time VS[] = M * VS[] :  0.366211 nS
+
 
     --------------------------------------------------------
     Result on v7l (A53; BCM2709; RaspberryPi 3; 32-bit Mode)

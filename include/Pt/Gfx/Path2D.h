@@ -34,7 +34,7 @@
 #include <string>
 #include <vector>
 
-#include <Pt/Gfx/AffineMatrix2D.h>
+#include <Pt/Gfx/Point.h>
 
 
 namespace Pt{
