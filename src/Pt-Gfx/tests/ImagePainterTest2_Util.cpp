@@ -4,6 +4,8 @@
 static int writePNG(const char* filename, int width, int height, const uint8_t* argb8888Buff)
 {
 #if defined(PT_GFX_USE_ARM_CPU)
+    // To minimize SVN pollution, do not save the resulting image when
+    // running on secondary development/testing system
     (void) filename;
     (void) width;
     (void) height;
