@@ -95,7 +95,7 @@ Window::Window(Window* parent, Window::Type type)
 
 Window::~Window()
 {
-    setMainWidget(0);
+    setContent(0);
 
     while( ! _windows.empty() )
        remove( *_windows.back() );
@@ -320,13 +320,13 @@ Widget* Window::mainWidget()
 }
 
 
-const Widget* Window::mainWidget()  const 
+const Widget* Window::content()  const 
 {
     return _mainWidget;
 }
 
 
-void Window::setMainWidget(Widget* widget)
+void Window::setContent(Widget* widget)
 {
     if(_mainWidget)
         _mainWidget->setWindow(0);

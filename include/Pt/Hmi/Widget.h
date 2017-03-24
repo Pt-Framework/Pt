@@ -82,15 +82,10 @@ class PT_HMI_API Widget : public Visual
 
         const Widget* parent() const;
 
-        void add(Widget& w);
-
-        void remove(Widget& w);
-        
+       
         const std::vector<Widget*>& widgets() const;
 
         Widget* findWidget( const Gfx::PointF& pos );
-
-        void setContent(Widget& widget);
 
         bool acceptsInput() const;
 
@@ -248,10 +243,16 @@ class PT_HMI_API Widget : public Visual
 
         Pt::Signal<const Pt::Event&>& eventReady();
 
+    
     public:
         virtual Gfx::PointF toScreen(const Gfx::PointF& pos) const;
 
         virtual Gfx::PointF fromScreen(const Gfx::PointF& pos) const;
+
+    protected:
+        void add(Widget& w);
+
+        void remove(Widget& w);
 
     protected:
          virtual void onAddWidget(Widget& w);
@@ -327,7 +328,6 @@ class PT_HMI_API Widget : public Visual
         std::vector<Widget*>         _children;
         Widget*                      _parent; 
         Window*                      _window; 
-        Widget*                      _content;
 
         int                          _invalidates;
         bool                         _isLayouting;

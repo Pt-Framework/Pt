@@ -196,6 +196,16 @@ FlowLayout::~FlowLayout()
 }
 
 
+void FlowLayout::addItem(Widget& w)
+{
+  add(w);
+}
+
+void FlowLayout::removeItem(Widget& w)
+{
+  remove(w);
+}
+
 void FlowLayout::setDirection(Direction d)
 { 
     _direction = d;

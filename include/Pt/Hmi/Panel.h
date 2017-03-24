@@ -124,15 +124,25 @@ class PT_HMI_API Panel : public Control
         void setFrame(bool b);
 
         void setRenderer(PanelRenderer* renderer);
+        
+        void setContent(Widget& widget);
 
     protected:
         void onInvalidate();
 	
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
+        
+        virtual void onLayout(const Gfx::RectF& rect);
+
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+
+        virtual void onRemoveWidget(Widget& w);
+
     protected:
         virtual void onResizeEvent(const ResizeEvent& ev);
 
+        
     private:
         Gfx::Image  _image;
         ImageLayout _layout;
@@ -147,6 +157,8 @@ class PT_HMI_API Panel : public Control
         bool                    _hasFrame;
 
         Picture                 _picture;
+
+    Widget*                      _content;
 };
 
 } // namespace

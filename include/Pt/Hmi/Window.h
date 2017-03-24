@@ -106,9 +106,9 @@ class PT_HMI_API Window : public WindowBase
 
     Widget* mainWidget();
 
-    const Widget* mainWidget()  const;
+    const Widget* content()  const;
 
-    void setMainWidget(Widget* widget);
+    void setContent(Widget* widget);
 
     Widget* findWidget(const Gfx::PointF& pos);
 

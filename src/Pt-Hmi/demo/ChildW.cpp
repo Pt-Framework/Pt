@@ -55,9 +55,9 @@ ChildW::ChildW(const std::string& title)
     _menuBar.addMenu(_editMenu, "Edit");
 
     _mainLayout.setDirection(FlowLayout::Top);
-    _mainLayout.add(_menuBar);
+    _mainLayout.addItem(_menuBar);
 
-    setMainWidget(&_mainLayout);
+    setContent(&_mainLayout);
     
     setTitle(title);
     
@@ -161,26 +161,26 @@ ChildW::ChildW(const std::string& title)
     _buttonBar.setName("ButtonBar");
 
     _buttonBar.setPadding(5);
-    _buttonBar.dock(_comboBox, DockingLayout::Bottom);
-    _buttonBar.dock(_lineEdit, DockingLayout::Bottom);
-    _buttonBar.dock(_checkBox, DockingLayout::Bottom);
-    _buttonBar.dock(_closeButton, DockingLayout::Bottom);
-    _buttonBar.dock(_dialogButton, DockingLayout::Bottom); 
-    _buttonBar.dock(_toggleButton, DockingLayout::Bottom);
-    _buttonBar.dock(_progressBar, DockingLayout::Bottom);
-    _buttonBar.dock(_slider, DockingLayout::Bottom);
+    _buttonBar.addItem(_comboBox, DockingLayout::Bottom);
+    _buttonBar.addItem(_lineEdit, DockingLayout::Bottom);
+    _buttonBar.addItem(_checkBox, DockingLayout::Bottom);
+    _buttonBar.addItem(_closeButton, DockingLayout::Bottom);
+    _buttonBar.addItem(_dialogButton, DockingLayout::Bottom); 
+    _buttonBar.addItem(_toggleButton, DockingLayout::Bottom);
+    _buttonBar.addItem(_progressBar, DockingLayout::Bottom);
+    _buttonBar.addItem(_slider, DockingLayout::Bottom);
  
     _childView.move( Gfx::PointF(1,1) );
     _childView.setName("MainPanel");
     _childView.setPadding(20); 
-    _childView.dock(_textLabel, DockingLayout::Fill);
-    _childView.dock(_buttonBar, DockingLayout::Bottom);
+    _childView.addItem(_textLabel, DockingLayout::Fill);
+    _childView.addItem(_buttonBar, DockingLayout::Bottom);
      
     //_childWindow2.setMainWidget(&_closeButton);    
     _childWindow2.move(Gfx::PointF(5, 40));
     _childWindow2.resize( Gfx::SizeF(250, 500) );
     _childWindow2.setTitle("Child of " + title);
-    _childWindow2.setMainWidget(&_childView);
+    _childWindow2.setContent(&_childView);
     add( _childWindow2 );
 
     _childWindow2.show(true); // Child A/B
@@ -216,8 +216,8 @@ void ChildW::onShowDialog()
     
     //enable(false);
 
-    _buttonBar.remove(_closeButton);
-    _buttonBar.dock(_closeButton, DockingLayout::Bottom);
+    _buttonBar.removeItem(_closeButton);
+    _buttonBar.addItem(_closeButton, DockingLayout::Bottom);
 
     _dialogButton.setText("Hallo");
 }

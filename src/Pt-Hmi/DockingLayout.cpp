@@ -44,10 +44,16 @@ DockingLayout::~DockingLayout()
 }
 
 
-void DockingLayout::dock(Widget& w, DockMode d)
+void DockingLayout::addItem(Widget& w, DockMode d)
 {
     _docking[&w] = d;
     add(w);
+}
+
+
+void DockingLayout::removeItem(Widget& w)
+{
+  remove(w);
 }
 
 

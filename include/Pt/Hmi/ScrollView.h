@@ -51,7 +51,7 @@ class PT_HMI_API ScrollView : public Widget
         // TODO: Widget::setContent could work for the ScrollView if the
         //       content widget is stacked behind all other children
 
-        void setWidget(Widget& w);
+        void setContent(Widget& w);
 
     protected:
         virtual void onResizeEvent(const ResizeEvent& ev);

@@ -330,9 +330,9 @@ ListBox::ListBox()
 
     //TODO: get margin from renderer
     _scrollView.setMargin(1);
-    _scrollView.setWidget(_layout);
+    _scrollView.setContent(_layout);
 
-    setContent(_scrollView);
+    add(_scrollView);
 }
 
 
@@ -349,14 +349,14 @@ void ListBox::setScrollBars(bool hasScrollBars)
 
 void ListBox::addItem(ListBoxItem& item)
 {   
-    _layout.add(item);
+    _layout.addItem(item);
     item.selected() += Pt::slot(*this, &ListBox::onItemSelected);
 }
 
 
 void ListBox::removeItem(ListBoxItem& item)
 {
-    _layout.remove(item);
+    _layout.removeItem(item);
     item.selected() -= Pt::slot(*this, &ListBox::onItemSelected);
 }
 
@@ -484,6 +484,38 @@ void ListBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
                                painter, rect, _pen);
     }
 }
+
+
+void ListBox::onLayout(const Gfx::RectF& rect)
+{
+      Gfx::PointF pos(padding().left() + _scrollView.margin().left(), 
+                      padding().top()  + _scrollView.margin().top());
+        
+      double hspace = padding().leftRight() + _scrollView.margin().leftRight();
+      double vspace = padding().topBottom() + _scrollView.margin().topBottom();
+
+      Gfx::SizeF size;
+      size.setWidth( rect.width() - hspace );
+      size.setHeight( rect.height() - vspace );
+
+      _scrollView.layout( pos, size );
+}
+
+
+
+Gfx::SizeF ListBox::onMeasure(const SizePolicy& policy)
+{
+      double hspace = padding().leftRight() + _scrollView.margin().leftRight();
+      double vspace = padding().topBottom() + _scrollView.margin().topBottom();
+
+      SizePolicy contentPolicy = policy;
+      contentPolicy.setWidth( policy.size().width() - hspace );
+      contentPolicy.setHeight( policy.size().height() - vspace );
+        
+      _scrollView.measure(contentPolicy);
+      return _scrollView.preferredSize();
+}
+
 
 } // namespace
 

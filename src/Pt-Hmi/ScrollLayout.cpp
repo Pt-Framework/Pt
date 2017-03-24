@@ -49,6 +49,17 @@ ScrollLayout::~ScrollLayout()
 }
 
 
+void ScrollLayout::addItem(Widget& w)
+{
+  add(w);
+}
+
+void ScrollLayout::removeItem(Widget& w)
+{
+  remove(w);
+}
+
+
 void ScrollLayout::enableScrolling(bool scrollX, bool scrollY)
 {
     _enableX = scrollX;

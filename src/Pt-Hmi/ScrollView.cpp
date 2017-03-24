@@ -76,12 +76,12 @@ void ScrollView::setScrollBars(bool hasScrollBars)
 }
 
 
-void ScrollView::setWidget(Widget& widget)
+void ScrollView::setContent(Widget& widget)
 {
     if(_widget)
-        _scrollLayout.remove(*_widget);
+        _scrollLayout.removeItem(*_widget);
 
-    _scrollLayout.add(widget);
+    _scrollLayout.addItem(widget);
     _widget = &widget;
 }
 

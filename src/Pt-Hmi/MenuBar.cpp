@@ -387,7 +387,7 @@ void MenuBar::onAddMenu(Menu& menu, const Pt::String& text)
 //TODO:    item->resize( Gfx::SizeF(50, 0) );
 
     _menus.push_back(item);
-    _layout.add(*item);
+    _layout.addItem(*item);
 
     update();
 }

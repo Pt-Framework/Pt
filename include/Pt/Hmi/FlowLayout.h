@@ -64,6 +64,10 @@ class PT_HMI_API FlowLayout : public Layout
 
         void setCenter(bool b);
 
+        void addItem(Widget& w);
+
+        void removeItem(Widget& w);
+
     protected:
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 

@@ -167,6 +167,10 @@ class PT_HMI_API ListBox : public Control
     
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
+        virtual void onLayout(const Gfx::RectF& rect);
+
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+
     private:
         void onItemSelected(ListBoxItem& item);
     

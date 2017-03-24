@@ -115,13 +115,13 @@ MainWindow::MainWindow()
         _btns[n].setText("Hallo");
         _btns[n].clicked() += Pt::slot(*this, &MainWindow::onButton);
         
-        _scrollContainer.add(_btns[n] );
+        _scrollContainer.addItem(_btns[n] );
     }
     
     _bt2.setText("Ende");
     _bt2.setPadding(5);
     _bt2.setMargin(5);
-    _scrollContainer.add(_bt2);
+    _scrollContainer.addItem(_bt2);
     
     _scrollContainer.setPadding(5);
     _scrollContainer.setMargin(5);
@@ -131,9 +131,9 @@ MainWindow::MainWindow()
     policy.setSize( Gfx::SizeF(500, 1100) );
     _scrollContainer.setSizePolicy(policy);
 
-    _scrollView.setWidget(_scrollContainer);
+    _scrollView.setContent(_scrollContainer);
     
-    _child2.setMainWidget(&_scrollView);
+    _child2.setContent(&_scrollView);
     _child2.show(true);
 
     add( _child1 );

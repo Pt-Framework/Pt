@@ -42,7 +42,6 @@ namespace Hmi {
 Widget::Widget()
 : _parent(0)
 , _window(0)
-, _content(0)
 , _invalidates(0)
 , _isLayouting(true)
 , _visible(true)
@@ -147,10 +146,7 @@ void Widget::remove(Widget& widget)
         return;   
      
     _children.erase(it);
-
-    if(&widget == _content)
-        _content = 0;
-    
+   
     // enable when indirectly disabled
     if( ! widget._enabledState && widget._enabled)
         widget.enable(true);
@@ -253,15 +249,6 @@ Widget* Widget::findWidget(const Gfx::PointF& pos)
 }
 
 
-void Widget::setContent(Widget& widget)
-{
-    if(_content)
-        remove(*_content);
-
-    _content = &widget;
-    
-    add(widget); 
-}
 
 
 Gfx::PointF Widget::toParent(const Gfx::PointF& pos) const
@@ -620,20 +607,7 @@ void Widget::measure(const SizePolicy& policy)
 
 Gfx::SizeF Widget::onMeasure(const SizePolicy& policy)
 {
-    if(_content)
-    { 
-        double hspace = _padding.leftRight() + _content->margin().leftRight();
-        double vspace = _padding.topBottom() + _content->margin().topBottom();
-
-        SizePolicy contentPolicy = policy;
-        contentPolicy.setWidth( policy.size().width() - hspace );
-        contentPolicy.setHeight( policy.size().height() - vspace );
-        
-        _content->measure(contentPolicy);
-        return _content->preferredSize();
-    }
-
-    return Gfx::SizeF(0, 0);
+   return Gfx::SizeF(0, 0);
 }
 
 
@@ -714,20 +688,6 @@ void Widget::onLayout(const Gfx::RectF& rect)
     //       -> move content widget to container which can really have one
     //          i.e. Panel
 
-    if(_content)
-    {
-        Gfx::PointF pos(_padding.left() + _content->margin().left(), 
-                        _padding.top()  + _content->margin().top());
-        
-        double hspace = _padding.leftRight() + _content->margin().leftRight();
-        double vspace = _padding.topBottom() + _content->margin().topBottom();
-
-        Gfx::SizeF size;
-        size.setWidth( _size.width() - hspace );
-        size.setHeight( _size.height() - vspace );
-
-        _content->layout( pos, size );
-    }
 }
 
 

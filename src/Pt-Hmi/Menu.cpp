@@ -45,7 +45,7 @@ Menu::Menu()
 , _iconWidth(0)
 , _hasRenderer(false)
 {
-    setMainWidget(&_layout);    
+    setContent(&_layout);    
 }
 
 
@@ -96,7 +96,7 @@ void Menu::addItem(MenuItem& item)
     if(item._menu == this)
         return;
 
-    _layout.add(item);
+   _layout.addItem(item);
     
     item._menu = this;
     item.triggered() += Pt::slot(*this, &Menu::onItemTriggered);
@@ -113,7 +113,7 @@ void Menu::removeItem(MenuItem& item)
     item._menu = 0;
     item.triggered() -= Pt::slot(*this, &Menu::onItemTriggered);
 
-    _layout.remove(item);
+    _layout.removeItem(item);
 
     invalidate();
 }
@@ -131,7 +131,7 @@ void Menu::onAddMenu(Menu& menu, const Pt::String& text)
     item->setText(text);
     item->setSubMenu(menu);
 
-    _layout.add(*item);
+    _layout.addItem(*item);
 
     item->_menu = this;
     item->triggered() += Pt::slot(*this, &Menu::onMenuTriggered);

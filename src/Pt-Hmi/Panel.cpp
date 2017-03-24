@@ -43,6 +43,7 @@ Panel::Panel()
 , _hasBackground(false)
 , _hasFrame(false)
 , _hasRenderer(false)
+, _content(0)
 {
 }
 
@@ -235,6 +236,74 @@ void Panel::onResizeEvent(const ResizeEvent& ev)
         break;
     }  
 }
+
+
+void Panel::setContent(Widget& widget)
+{
+    if(_content)
+        remove(*_content);
+
+    _content = &widget;
+    
+    add(widget); 
+
+}
+
+
+void Panel::onLayout(const Gfx::RectF& rect)
+{
+    // TODO: content widget must be managed by derived class because only
+    //       there is the size policy known
+    //       -> move content widget to container which can really have one
+    //          i.e. Panel
+
+    if(_content)
+    {
+        Gfx::PointF pos(padding().left() + _content->margin().left(), 
+                        padding().top()  + _content->margin().top());
+        
+        double hspace = padding().leftRight() + _content->margin().leftRight();
+        double vspace = padding().topBottom() + _content->margin().topBottom();
+
+        Gfx::SizeF size;
+        size.setWidth( rect.width() - hspace );
+        size.setHeight( rect.height() - vspace );
+
+        _content->layout( pos, size );
+    }
+}
+
+
+
+Gfx::SizeF Panel::onMeasure(const SizePolicy& policy)
+{
+    if(_content)
+    { 
+        double hspace = padding().leftRight() + _content->margin().leftRight();
+        double vspace = padding().topBottom() + _content->margin().topBottom();
+
+        SizePolicy contentPolicy = policy;
+        contentPolicy.setWidth( policy.size().width() - hspace );
+        contentPolicy.setHeight( policy.size().height() - vspace );
+        
+        _content->measure(contentPolicy);
+        return _content->preferredSize();
+    }
+
+    return Gfx::SizeF(0, 0);
+}
+
+
+
+void Panel::onRemoveWidget(Widget& w)
+{
+    Widget::onRemoveWidget(w);
+
+    if(&w == _content)
+        _content = 0;
+
+}
+
 
 } // namespace
 

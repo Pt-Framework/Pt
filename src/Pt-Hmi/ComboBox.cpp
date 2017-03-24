@@ -40,7 +40,7 @@ namespace Hmi {
 ComboBoxPopup::ComboBoxPopup()
 : Popup()
 {
-    setMainWidget(&_items);
+    setContent(&_items);
 
     _items.selected() += Pt::slot(*this, &ComboBoxPopup::onItemSelected);
 }
