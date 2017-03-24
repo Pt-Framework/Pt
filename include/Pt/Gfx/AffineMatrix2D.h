@@ -213,6 +213,8 @@ void BasicAffineMatrix2D<T>::updateMatrix(const MatrixData& n, MatrixUpdateMode 
 // ===== Inlined Private Member Functions (Specialization for float) ====================
 // ======================================================================================
 
+#if defined(PT_GFX_USE_AVX1)
+
 template <>
 void BasicAffineMatrix2D<float>::updateMatrix(const MatrixData& n, MatrixUpdateMode mode)
 {
@@ -235,8 +237,6 @@ void BasicAffineMatrix2D<float>::updateMatrix(const MatrixData& n, MatrixUpdateM
         r = &n;
     }
 
-#if defined(PT_GFX_USE_AVX1)
-
      _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
 
     __m128 out0x =                    _mm_mul_ps(_mm_broadcast_ss(&l->v[0][0]), r->r[0])  ;
@@ -256,11 +256,33 @@ void BasicAffineMatrix2D<float>::updateMatrix(const MatrixData& n, MatrixUpdateM
     _mm_storeu_ps(_mdata.v[2], out2x);
 
      _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
+}
 
-/*
 #elif defined(PT_GFX_USE_NEON)
 
-    // ### The NEON version is actually slower than the plain Arm version ###
+// ### The NEON version is actually slower than the plain Arm version ###
+
+template <>
+void BasicAffineMatrix2D<float>::updateMatrix(const MatrixData& n, MatrixUpdateMode mode)
+{
+    // Check if the current matrix is an identity matrix or the mode is "Replace"
+    if(_isIdentity || mode == Replace) {
+        _mdata = n;
+        return;
+    }
+
+    // Multiply based on the mode
+    const MatrixData* l;
+    const MatrixData* r;
+
+    if(mode == MultiplyOnLeft) {
+        l = &n;
+        r = &_mdata;
+    }
+    else { // MultiplyOnRight
+        l = &_mdata;
+        r = &n;
+    }
 
     float32x4_t out0x =                   vmulq_f32(vld1q_dup_f32(&l->v[0][0]), r->r[0])  ;
                 out0x = vaddq_f32( out0x, vmulq_f32(vld1q_dup_f32(&l->v[0][1]), r->r[1]) );
@@ -278,28 +300,9 @@ void BasicAffineMatrix2D<float>::updateMatrix(const MatrixData& n, MatrixUpdateM
     vst1q_f32(_mdata.v[0], out0x);
     vst1q_f32(_mdata.v[1], out1x);
     vst1q_f32(_mdata.v[2], out2x);
-*/
-
-#else
-
-    MatrixData o;
-
-    o.v[0][0] = l->v[0][0] * r->v[0][0] + l->v[0][1] * r->v[1][0] + l->v[0][2] * r->v[2][0];
-    o.v[0][1] = l->v[0][0] * r->v[0][1] + l->v[0][1] * r->v[1][1] + l->v[0][2] * r->v[2][1];
-    o.v[0][2] = l->v[0][0] * r->v[0][2] + l->v[0][1] * r->v[1][2] + l->v[0][2] * r->v[2][2];
-
-    o.v[1][0] = l->v[1][0] * r->v[0][0] + l->v[1][1] * r->v[1][0] + l->v[1][2] * r->v[2][0];
-    o.v[1][1] = l->v[1][0] * r->v[0][1] + l->v[1][1] * r->v[1][1] + l->v[1][2] * r->v[2][1];
-    o.v[1][2] = l->v[1][0] * r->v[0][2] + l->v[1][1] * r->v[1][2] + l->v[1][2] * r->v[2][2];
-
-    o.v[2][0] = l->v[2][0] * r->v[0][0] + l->v[2][1] * r->v[1][0] + l->v[2][2] * r->v[2][0];
-    o.v[2][1] = l->v[2][0] * r->v[0][1] + l->v[2][1] * r->v[1][1] + l->v[2][2] * r->v[2][1];
-    o.v[2][2] = l->v[2][0] * r->v[0][2] + l->v[2][1] * r->v[1][2] + l->v[2][2] * r->v[2][2];
-
-    _mdata = o;
+}
 
 #endif
-}
 
 
 // ======================================================================================
