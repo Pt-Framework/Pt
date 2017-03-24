@@ -38,6 +38,16 @@
 
 #include <Pt/Gfx/SIMDConfig.h>
 
+//#undef PT_GFX_USE_AVX2
+//#undef PT_GFX_USE_AVX1
+
+//#undef PT_GFX_USE_SSSE3
+//#undef PT_GFX_USE_SSE3
+//#undef PT_GFX_USE_SSE2
+//#undef PT_GFX_USE_SSE1
+
+//#undef PT_GFX_USE_NEON
+
 
 namespace Pt{
 namespace Gfx{
@@ -62,7 +72,8 @@ static const float32x4_t neonMaxCord = vdupq_n_f32(Painter::MaximumCoordinateF);
 
 /** @brief 2D affine matrix for 2D path transformation.
   */
-class PT_GFX_API AffineMatrix2D {
+template <typename T>
+class PT_GFX_API BasicAffineMatrix2D {
     public:
         enum MatrixUpdateMode {
             Replace,         //! @brief M' = N
@@ -71,48 +82,48 @@ class PT_GFX_API AffineMatrix2D {
         };
 
     public:
-        inline AffineMatrix2D();
-        inline AffineMatrix2D(const AffineMatrix2D& m);
+        inline BasicAffineMatrix2D();
+        inline BasicAffineMatrix2D(const BasicAffineMatrix2D& m);
 
-        inline ~AffineMatrix2D();
+        inline ~BasicAffineMatrix2D();
 
         inline void clear();
 
         inline void identity();
 
-        inline void translate(float x, float y, MatrixUpdateMode mode = MultiplyOnLeft);
+        inline void translate(T x, T y, MatrixUpdateMode mode = MultiplyOnLeft);
 
-        inline void scaleAboutOrigin(float x, float y, MatrixUpdateMode mode = MultiplyOnLeft);
+        inline void scaleAboutOrigin(T x, T y, MatrixUpdateMode mode = MultiplyOnLeft);
 
-        inline void rotateAboutOrigin(float deg, MatrixUpdateMode mode = MultiplyOnLeft);
+        inline void rotateAboutOrigin(T deg, MatrixUpdateMode mode = MultiplyOnLeft);
 
-        inline void shearXDirection(float deg, MatrixUpdateMode mode = MultiplyOnLeft);
-        inline void shearYDirection(float deg, MatrixUpdateMode mode = MultiplyOnLeft);
+        inline void shearXDirection(T deg, MatrixUpdateMode mode = MultiplyOnLeft);
+        inline void shearYDirection(T deg, MatrixUpdateMode mode = MultiplyOnLeft);
 
         inline void reflectAboutOrigin(MatrixUpdateMode mode = MultiplyOnLeft);
         inline void reflectAboutXAxis(MatrixUpdateMode mode = MultiplyOnLeft);
         inline void reflectAboutYAxis(MatrixUpdateMode mode = MultiplyOnLeft);
 
-        inline void getRaw(float m[3][3]) const;
-        inline void updateUsingRaw(const float m[3][3], MatrixUpdateMode mode = MultiplyOnLeft);
+        inline void getRaw(T m[3][3]) const;
+        inline void updateUsingRaw(const T m[3][3], MatrixUpdateMode mode = MultiplyOnLeft);
 
-        inline const AffineMatrix2D& operator=(const AffineMatrix2D& m);
-        inline const AffineMatrix2D& operator*(const AffineMatrix2D& m);
+        inline const BasicAffineMatrix2D& operator=(const BasicAffineMatrix2D& m);
+        inline const BasicAffineMatrix2D& operator*(const BasicAffineMatrix2D& m);
 
-        inline bool operator==(const AffineMatrix2D& m) const;
-        inline bool operator!=(const AffineMatrix2D& m) const;
+        inline bool operator==(const BasicAffineMatrix2D& m) const;
+        inline bool operator!=(const BasicAffineMatrix2D& m) const;
 
         inline void push();
         inline bool pop();
 
-        inline void transformPoint(float& dx, float& dy, float sx, float sy) const;
-        inline void transformPoint(float& x, float &y) const;
+        inline void transformPoint(T& dx, T& dy, T sx, T sy) const;
+        inline void transformPoint(T& x, T &y) const;
 
         inline void transformPoint(PointF& dp, const PointF& sp) const;
         inline void transformPoint(PointF& p) const;
 
-        inline void transformPoints(float* dxy, const float* sxy, size_t pointCount) const;
-        inline void transformPoints(float* xy, size_t pointCount) const;
+        inline void transformPoints(T* dxy, const T* sxy, size_t pointCount) const;
+        inline void transformPoints(T* xy, size_t pointCount) const;
 
         inline void transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount) const;
         inline void transformPoints(PointF* xy, size_t pointCount) const;
@@ -121,17 +132,17 @@ class PT_GFX_API AffineMatrix2D {
         // Matrix stack
 #if defined(PT_GFX_USE_AVX1)
         union MatrixData {
-            float  v[4][4];
+            T      v[4][4];
             __m128 r[4];
         };
 #elif defined(PT_GFX_USE_NEON)
         union MatrixData {
-            float       v[4][4];
+            T           v[4][4];
             float32x4_t r[4];
         };
 #else
         struct MatrixData {
-            float v[3][3];
+            T v[3][3];
         };
 #endif
 
@@ -157,170 +168,320 @@ class PT_GFX_API AffineMatrix2D {
 
 
 // ======================================================================================
+// ===== Inlined Private Member Functions ===============================================
+// ======================================================================================
+
+template <typename T>
+void BasicAffineMatrix2D<T>::updateMatrix(const MatrixData& n, MatrixUpdateMode mode)
+{
+    // Check if the current matrix is an identity matrix or the mode is "Replace"
+    if(_isIdentity || mode == BasicAffineMatrix2D<T>::Replace) {
+        _mdata = n;
+        return;
+    }
+
+    // Multiply based on the mode
+    const MatrixData* l;
+    const MatrixData* r;
+          MatrixData  o;
+
+    if(mode == BasicAffineMatrix2D<T>::MultiplyOnLeft) {
+        l = &n;
+        r = &_mdata;
+    }
+    else { // MultiplyOnRight
+        l = &_mdata;
+        r = &n;
+    }
+
+    o.v[0][0] = l->v[0][0] * r->v[0][0] + l->v[0][1] * r->v[1][0] + l->v[0][2] * r->v[2][0];
+    o.v[0][1] = l->v[0][0] * r->v[0][1] + l->v[0][1] * r->v[1][1] + l->v[0][2] * r->v[2][1];
+    o.v[0][2] = l->v[0][0] * r->v[0][2] + l->v[0][1] * r->v[1][2] + l->v[0][2] * r->v[2][2];
+
+    o.v[1][0] = l->v[1][0] * r->v[0][0] + l->v[1][1] * r->v[1][0] + l->v[1][2] * r->v[2][0];
+    o.v[1][1] = l->v[1][0] * r->v[0][1] + l->v[1][1] * r->v[1][1] + l->v[1][2] * r->v[2][1];
+    o.v[1][2] = l->v[1][0] * r->v[0][2] + l->v[1][1] * r->v[1][2] + l->v[1][2] * r->v[2][2];
+
+    o.v[2][0] = l->v[2][0] * r->v[0][0] + l->v[2][1] * r->v[1][0] + l->v[2][2] * r->v[2][0];
+    o.v[2][1] = l->v[2][0] * r->v[0][1] + l->v[2][1] * r->v[1][1] + l->v[2][2] * r->v[2][1];
+    o.v[2][2] = l->v[2][0] * r->v[0][2] + l->v[2][1] * r->v[1][2] + l->v[2][2] * r->v[2][2];
+
+    _mdata = o;
+}
+
+// ======================================================================================
+// ===== Inlined Private Member Functions (Specialization for float) ====================
+// ======================================================================================
+
+template <>
+void BasicAffineMatrix2D<float>::updateMatrix(const MatrixData& n, MatrixUpdateMode mode)
+{
+    // Check if the current matrix is an identity matrix or the mode is "Replace"
+    if(_isIdentity || mode == Replace) {
+        _mdata = n;
+        return;
+    }
+
+    // Multiply based on the mode
+    const MatrixData* l;
+    const MatrixData* r;
+
+    if(mode == MultiplyOnLeft) {
+        l = &n;
+        r = &_mdata;
+    }
+    else { // MultiplyOnRight
+        l = &_mdata;
+        r = &n;
+    }
+
+#if defined(PT_GFX_USE_AVX1)
+
+     _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
+
+    __m128 out0x =                    _mm_mul_ps(_mm_broadcast_ss(&l->v[0][0]), r->r[0])  ;
+           out0x = _mm_add_ps( out0x, _mm_mul_ps(_mm_broadcast_ss(&l->v[0][1]), r->r[1]) );
+           out0x = _mm_add_ps( out0x, _mm_mul_ps(_mm_broadcast_ss(&l->v[0][2]), r->r[2]) );
+
+    __m128 out1x =                    _mm_mul_ps(_mm_broadcast_ss(&l->v[1][0]), r->r[0])  ;
+           out1x = _mm_add_ps( out1x, _mm_mul_ps(_mm_broadcast_ss(&l->v[1][1]), r->r[1]) );
+           out1x = _mm_add_ps( out1x, _mm_mul_ps(_mm_broadcast_ss(&l->v[1][2]), r->r[2]) );
+
+    __m128 out2x =                    _mm_mul_ps(_mm_broadcast_ss(&l->v[2][0]), r->r[0])  ;
+           out2x = _mm_add_ps( out2x, _mm_mul_ps(_mm_broadcast_ss(&l->v[2][1]), r->r[1]) );
+           out2x = _mm_add_ps( out2x, _mm_mul_ps(_mm_broadcast_ss(&l->v[2][2]), r->r[2]) );
+
+    _mm_storeu_ps(_mdata.v[0], out0x);
+    _mm_storeu_ps(_mdata.v[1], out1x);
+    _mm_storeu_ps(_mdata.v[2], out2x);
+
+     _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
+
+/*
+#elif defined(PT_GFX_USE_NEON)
+
+    // ### The NEON version is actually slower than the plain Arm version ###
+
+    float32x4_t out0x =                   vmulq_f32(vld1q_dup_f32(&l->v[0][0]), r->r[0])  ;
+                out0x = vaddq_f32( out0x, vmulq_f32(vld1q_dup_f32(&l->v[0][1]), r->r[1]) );
+                out0x = vaddq_f32( out0x, vmulq_f32(vld1q_dup_f32(&l->v[0][2]), r->r[2]) );
+
+
+    float32x4_t out1x =                   vmulq_f32(vld1q_dup_f32(&l->v[1][0]), r->r[0])  ;
+                out1x = vaddq_f32( out1x, vmulq_f32(vld1q_dup_f32(&l->v[1][1]), r->r[1]) );
+                out1x = vaddq_f32( out1x, vmulq_f32(vld1q_dup_f32(&l->v[1][2]), r->r[2]) );
+
+    float32x4_t out2x =                   vmulq_f32(vld1q_dup_f32(&l->v[2][0]), r->r[0])  ;
+                out2x = vaddq_f32( out2x, vmulq_f32(vld1q_dup_f32(&l->v[2][1]), r->r[1]) );
+                out2x = vaddq_f32( out2x, vmulq_f32(vld1q_dup_f32(&l->v[2][2]), r->r[2]) );
+
+    vst1q_f32(_mdata.v[0], out0x);
+    vst1q_f32(_mdata.v[1], out1x);
+    vst1q_f32(_mdata.v[2], out2x);
+*/
+
+#else
+
+    MatrixData o;
+
+    o.v[0][0] = l->v[0][0] * r->v[0][0] + l->v[0][1] * r->v[1][0] + l->v[0][2] * r->v[2][0];
+    o.v[0][1] = l->v[0][0] * r->v[0][1] + l->v[0][1] * r->v[1][1] + l->v[0][2] * r->v[2][1];
+    o.v[0][2] = l->v[0][0] * r->v[0][2] + l->v[0][1] * r->v[1][2] + l->v[0][2] * r->v[2][2];
+
+    o.v[1][0] = l->v[1][0] * r->v[0][0] + l->v[1][1] * r->v[1][0] + l->v[1][2] * r->v[2][0];
+    o.v[1][1] = l->v[1][0] * r->v[0][1] + l->v[1][1] * r->v[1][1] + l->v[1][2] * r->v[2][1];
+    o.v[1][2] = l->v[1][0] * r->v[0][2] + l->v[1][1] * r->v[1][2] + l->v[1][2] * r->v[2][2];
+
+    o.v[2][0] = l->v[2][0] * r->v[0][0] + l->v[2][1] * r->v[1][0] + l->v[2][2] * r->v[2][0];
+    o.v[2][1] = l->v[2][0] * r->v[0][1] + l->v[2][1] * r->v[1][1] + l->v[2][2] * r->v[2][1];
+    o.v[2][2] = l->v[2][0] * r->v[0][2] + l->v[2][1] * r->v[1][2] + l->v[2][2] * r->v[2][2];
+
+    _mdata = o;
+
+#endif
+}
+
+
+// ======================================================================================
 // ===== Inlined Public Member Functions ================================================
 // ======================================================================================
 
-AffineMatrix2D::AffineMatrix2D()
+template <typename T>
+BasicAffineMatrix2D<T>::BasicAffineMatrix2D()
 {
     identity();
 
 #if defined(PT_GFX_USE_AVX1) || defined(PT_GFX_USE_NEON)
-    _mdata.v[0][3] = 0.0f; _mdata.v[1][3] = 0.0f; _mdata.v[2][3] = 0.0f;
-    _mdata.v[3][0] = 0.0f; _mdata.v[3][1] = 0.0f; _mdata.v[3][2] = 0.0f; _mdata.v[3][3] = 0.0f;
+    _mdata.v[0][3] = 0; _mdata.v[1][3] = 0; _mdata.v[2][3] = 0;
+    _mdata.v[3][0] = 0; _mdata.v[3][1] = 0; _mdata.v[3][2] = 0; _mdata.v[3][3] = 0;
 #endif
 }
 
-AffineMatrix2D::AffineMatrix2D(const AffineMatrix2D& m)
+template <typename T>
+BasicAffineMatrix2D<T>::BasicAffineMatrix2D(const BasicAffineMatrix2D<T>& m)
 { *this = m; }
 
-AffineMatrix2D::~AffineMatrix2D()
+template <typename T>
+BasicAffineMatrix2D<T>::~BasicAffineMatrix2D()
 {}
 
-void AffineMatrix2D::clear()
+template <typename T>
+void BasicAffineMatrix2D<T>::clear()
 {
     identity();
 
     _stack.clear();
 }
 
-void AffineMatrix2D::identity()
+template <typename T>
+void BasicAffineMatrix2D<T>::identity()
 {
-    _mdata.v[0][0] = 1.0f; _mdata.v[0][1] = 0.0f; _mdata.v[0][2] = 0.0f;
-    _mdata.v[1][0] = 0.0f; _mdata.v[1][1] = 1.0f; _mdata.v[1][2] = 0.0f;
-    _mdata.v[2][0] = 0.0f; _mdata.v[2][1] = 0.0f; _mdata.v[2][2] = 1.0f;
+    _mdata.v[0][0] = 1; _mdata.v[0][1] = 0; _mdata.v[0][2] = 0;
+    _mdata.v[1][0] = 0; _mdata.v[1][1] = 1; _mdata.v[1][2] = 0;
+    _mdata.v[2][0] = 0; _mdata.v[2][1] = 0; _mdata.v[2][2] = 1;
 
     _isIdentity = true;
 }
 
-void AffineMatrix2D::translate(float x, float y, MatrixUpdateMode mode)
+template <typename T>
+void BasicAffineMatrix2D<T>::translate(T x, T y, MatrixUpdateMode mode)
 {
-    if(x == 0.0f && y == 0.0f) return;
+    if(x == 0 && y == 0) return;
 
     MatrixData n;
 
-    n.v[0][0] = 1.0f; n.v[0][1] = 0.0f; n.v[0][2] = x   ;
-    n.v[1][0] = 0.0f; n.v[1][1] = 1.0f; n.v[1][2] = y   ;
-    n.v[2][0] = 0.0f; n.v[2][1] = 0.0f; n.v[2][2] = 1.0f;
+    n.v[0][0] = 1; n.v[0][1] = 0; n.v[0][2] = x;
+    n.v[1][0] = 0; n.v[1][1] = 1; n.v[1][2] = y;
+    n.v[2][0] = 0; n.v[2][1] = 0; n.v[2][2] = 1;
 
     updateMatrix(n, mode);
     _isIdentity = false;
 }
 
-void AffineMatrix2D::scaleAboutOrigin(float x, float y, MatrixUpdateMode mode)
+template <typename T>
+void BasicAffineMatrix2D<T>::scaleAboutOrigin(T x, T y, MatrixUpdateMode mode)
 {
-    if(x == 1.0f && y == 1.0f) return;
+    if(x == 1 && y == 1) return;
 
     MatrixData n;
 
-    n.v[0][0] = x   ; n.v[0][1] = 0.0f; n.v[0][2] = 0.0f;
-    n.v[1][0] = 0.0f; n.v[1][1] = y   ; n.v[1][2] = 0.0f;
-    n.v[2][0] = 0.0f; n.v[2][1] = 0.0f; n.v[2][2] = 1.0f;
+    n.v[0][0] = x; n.v[0][1] = 0; n.v[0][2] = 0;
+    n.v[1][0] = 0; n.v[1][1] = y; n.v[1][2] = 0;
+    n.v[2][0] = 0; n.v[2][1] = 0; n.v[2][2] = 1;
 
     updateMatrix(n, mode);
     _isIdentity = false;
 }
 
-void AffineMatrix2D::rotateAboutOrigin(float deg, MatrixUpdateMode mode)
+template <typename T>
+void BasicAffineMatrix2D<T>::rotateAboutOrigin(T deg, MatrixUpdateMode mode)
 {
-    if(deg == 0.0f) return;
+    if(deg == 0) return;
 
     MatrixData n;
 
-    const float r = deg * Gfx::Math::PiDiv180;
-    const float s = Gfx::Math::fastSin(r);
-    const float c = Gfx::Math::fastCos(r);
+    const T r = deg * (M_PI / 180);
+    const T s = ::sin(r);
+    const T c = ::cos(r);
 
-    n.v[0][0] =  c   ; n.v[0][1] = s   ;  n.v[0][2] = 0.0f;
-    n.v[1][0] = -s   ; n.v[1][1] = c   ;  n.v[1][2] = 0.0f;
-    n.v[2][0] =  0.0f; n.v[2][1] = 0.0f;  n.v[2][2] = 1.0f;
+    n.v[0][0] =  c; n.v[0][1] = s; n.v[0][2] = 0;
+    n.v[1][0] = -s; n.v[1][1] = c; n.v[1][2] = 0;
+    n.v[2][0] =  0; n.v[2][1] = 0; n.v[2][2] = 1;
 
     updateMatrix(n, mode);
     _isIdentity = false;
 }
 
-void AffineMatrix2D::shearXDirection(float deg, MatrixUpdateMode mode)
+template <typename T>
+void BasicAffineMatrix2D<T>::shearXDirection(T deg, MatrixUpdateMode mode)
 {
-    if(deg == 0.0f) return;
+    if(deg == 0) return;
 
     MatrixData n;
 
-    const float r = deg * Gfx::Math::PiDiv180;
-    const float t = Gfx::Math::fastSin(r) / Gfx::Math::fastCos(r);
+    const T r = deg * (M_PI / 180);
+    const T t = ::sin(r) / ::cos(r);
 
-    n.v[0][0] = 1.0f; n.v[0][1] = t   ;  n.v[0][2] = 0.0f;
-    n.v[1][0] = 0.0f; n.v[1][1] = 1.0f;  n.v[1][2] = 0.0f;
-    n.v[2][0] = 0.0f; n.v[2][1] = 0.0f;  n.v[2][2] = 1.0f;
+    n.v[0][0] = 1; n.v[0][1] = t; n.v[0][2] = 0;
+    n.v[1][0] = 0; n.v[1][1] = 1; n.v[1][2] = 0;
+    n.v[2][0] = 0; n.v[2][1] = 0; n.v[2][2] = 1;
 
     updateMatrix(n, mode);
     _isIdentity = false;
 }
 
-void AffineMatrix2D::shearYDirection(float deg, MatrixUpdateMode mode)
+template <typename T>
+void BasicAffineMatrix2D<T>::shearYDirection(T deg, MatrixUpdateMode mode)
 {
-    if(deg == 0.0f) return;
+    if(deg == 0) return;
 
     MatrixData n;
 
-    const float r = deg * Gfx::Math::PiDiv180;
-    const float t = Gfx::Math::fastSin(r) / Gfx::Math::fastCos(r);
+    const T r = deg * (M_PI / 180);
+    const T t = ::sin(r) / ::cos(r);
 
-    n.v[0][0] = 1.0f; n.v[0][1] = 0.0f;  n.v[0][2] = 0.0f;
-    n.v[1][0] = t   ; n.v[1][1] = 1.0f;  n.v[1][2] = 0.0f;
-    n.v[2][0] = 0.0f; n.v[2][1] = 0.0f;  n.v[2][2] = 1.0f;
+    n.v[0][0] = 1; n.v[0][1] = 0; n.v[0][2] = 0;
+    n.v[1][0] = t; n.v[1][1] = 1; n.v[1][2] = 0;
+    n.v[2][0] = 0; n.v[2][1] = 0; n.v[2][2] = 1;
 
     updateMatrix(n, mode);
     _isIdentity = false;
 }
 
-void AffineMatrix2D::reflectAboutOrigin(MatrixUpdateMode mode)
+template <typename T>
+void BasicAffineMatrix2D<T>::reflectAboutOrigin(MatrixUpdateMode mode)
 {
     MatrixData n;
 
-    n.v[0][0] = -1.0f; n.v[0][1] =  0.0f;  n.v[0][2] = 0.0f;
-    n.v[1][0] =  0.0f; n.v[1][1] = -1.0f;  n.v[1][2] = 0.0f;
-    n.v[2][0] =  0.0f; n.v[2][1] =  0.0f;  n.v[2][2] = 1.0f;
+    n.v[0][0] = -1; n.v[0][1] =  0; n.v[0][2] = 0;
+    n.v[1][0] =  0; n.v[1][1] = -1; n.v[1][2] = 0;
+    n.v[2][0] =  0; n.v[2][1] =  0; n.v[2][2] = 1;
 
     updateMatrix(n, mode);
     _isIdentity = false;
 }
 
-void AffineMatrix2D::reflectAboutXAxis(MatrixUpdateMode mode)
+template <typename T>
+void BasicAffineMatrix2D<T>::reflectAboutXAxis(MatrixUpdateMode mode)
 {
     MatrixData n;
 
-    n.v[0][0] = 1.0f; n.v[0][1] =  0.0f;  n.v[0][2] = 0.0f;
-    n.v[1][0] = 0.0f; n.v[1][1] = -1.0f;  n.v[1][2] = 0.0f;
-    n.v[2][0] = 0.0f; n.v[2][1] =  0.0f;  n.v[2][2] = 1.0f;
+    n.v[0][0] = 1; n.v[0][1] =  0; n.v[0][2] = 0;
+    n.v[1][0] = 0; n.v[1][1] = -1; n.v[1][2] = 0;
+    n.v[2][0] = 0; n.v[2][1] =  0; n.v[2][2] = 1;
 
     updateMatrix(n, mode);
     _isIdentity = false;
 }
 
-void AffineMatrix2D::reflectAboutYAxis(MatrixUpdateMode mode)
+template <typename T>
+void BasicAffineMatrix2D<T>::reflectAboutYAxis(MatrixUpdateMode mode)
 {
     MatrixData n;
 
-    n.v[0][0] = -1.0f; n.v[0][1] = 0.0f;  n.v[0][2] = 0.0f;
-    n.v[1][0] =  0.0f; n.v[1][1] = 1.0f;  n.v[1][2] = 0.0f;
-    n.v[2][0] =  0.0f; n.v[2][1] = 0.0f;  n.v[2][2] = 1.0f;
+    n.v[0][0] = -1; n.v[0][1] = 0; n.v[0][2] = 0;
+    n.v[1][0] =  0; n.v[1][1] = 1; n.v[1][2] = 0;
+    n.v[2][0] =  0; n.v[2][1] = 0; n.v[2][2] = 1;
 
     updateMatrix(n, mode);
     _isIdentity = false;
 }
 
-void AffineMatrix2D::getRaw(float m[3][3]) const
+template <typename T>
+void BasicAffineMatrix2D<T>::getRaw(T m[3][3]) const
 {
     m[0][0] = _mdata.v[0][0]; m[0][1] = _mdata.v[0][1]; m[0][2] = _mdata.v[0][2];
     m[1][0] = _mdata.v[1][0]; m[1][1] = _mdata.v[1][1]; m[1][2] = _mdata.v[1][2];
     m[2][0] = _mdata.v[2][0]; m[2][1] = _mdata.v[2][1]; m[2][2] = _mdata.v[2][2];
 }
 
-void AffineMatrix2D::updateUsingRaw(const float m[3][3], MatrixUpdateMode mode)
+template <typename T>
+void BasicAffineMatrix2D<T>::updateUsingRaw(const T m[3][3], MatrixUpdateMode mode)
 {
     // Check if the given raw matrix is an identity matrix
-    if( m[0][0] == 1.0f && m[0][1] == 0.0f && m[0][2] == 0.0f &&
-        m[1][0] == 0.0f && m[1][1] == 1.0f && m[1][2] == 0.0f &&
-        m[2][0] == 0.0f && m[2][1] == 0.0f && m[2][2] == 1.0f
+    if( m[0][0] == 1 && m[0][1] == 0 && m[0][2] == 0 &&
+        m[1][0] == 0 && m[1][1] == 1 && m[1][2] == 0 &&
+        m[2][0] == 0 && m[2][1] == 0 && m[2][2] == 1
     ) {
         if(mode == Replace) this->identity();
         return;
@@ -337,7 +498,8 @@ void AffineMatrix2D::updateUsingRaw(const float m[3][3], MatrixUpdateMode mode)
     _isIdentity = false;
 }
 
-const AffineMatrix2D& AffineMatrix2D::operator=(const AffineMatrix2D& m)
+template <typename T>
+const BasicAffineMatrix2D<T>& BasicAffineMatrix2D<T>::operator=(const BasicAffineMatrix2D<T>& m)
 {
     this->_mdata      = m._mdata;
     this->_isIdentity = m._isIdentity;
@@ -347,7 +509,8 @@ const AffineMatrix2D& AffineMatrix2D::operator=(const AffineMatrix2D& m)
     return *this;
 }
 
-const AffineMatrix2D& AffineMatrix2D::operator*(const AffineMatrix2D& m)
+template <typename T>
+const BasicAffineMatrix2D<T>& BasicAffineMatrix2D<T>::operator*(const BasicAffineMatrix2D<T>& m)
 {
     // Check if the given matrix is an identity matrix
     if(m._isIdentity) return *this;
@@ -359,16 +522,20 @@ const AffineMatrix2D& AffineMatrix2D::operator*(const AffineMatrix2D& m)
     return *this;
 }
 
-bool AffineMatrix2D::operator==(const AffineMatrix2D& m) const
+template <typename T>
+bool BasicAffineMatrix2D<T>::operator==(const BasicAffineMatrix2D<T>& m) const
 { return memcmp(&_mdata, &m._mdata, sizeof(_mdata)) == 0; }
 
-bool AffineMatrix2D::operator!=(const AffineMatrix2D& m) const
+template <typename T>
+bool BasicAffineMatrix2D<T>::operator!=(const BasicAffineMatrix2D<T>& m) const
 { return memcmp(&_mdata, &m._mdata, sizeof(_mdata)) != 0; }
 
-void AffineMatrix2D::push()
+template <typename T>
+void BasicAffineMatrix2D<T>::push()
 { _stack.push_back( StackData(_mdata, _isIdentity) ); }
 
-bool AffineMatrix2D::pop()
+template <typename T>
+bool BasicAffineMatrix2D<T>::pop()
 {
     if(_stack.empty()) return false;
 
@@ -380,7 +547,8 @@ bool AffineMatrix2D::pop()
     return true;
 }
 
-void AffineMatrix2D::transformPoint(float& dx, float& dy, float sx, float sy) const
+template <typename T>
+void BasicAffineMatrix2D<T>::transformPoint(T& dx, T& dy, T sx, T sy) const
 {
     if( _isIdentity || (sx > Painter::MaximumCoordinateF && sy > Painter::MaximumCoordinateF) ) {
         dx = sx;
@@ -392,18 +560,20 @@ void AffineMatrix2D::transformPoint(float& dx, float& dy, float sx, float sy) co
     dy = _mdata.v[1][0] * sx + _mdata.v[1][1] * sy + _mdata.v[1][2];
 }
 
-void AffineMatrix2D::transformPoint(float& x, float &y) const
+template <typename T>
+void BasicAffineMatrix2D<T>::transformPoint(T& x, T &y) const
 {
     if( _isIdentity || (x > Painter::MaximumCoordinateF && y > Painter::MaximumCoordinateF) ) return;
 
-    const float tx = _mdata.v[0][0] * x + _mdata.v[0][1] * y + _mdata.v[0][2];
-    const float ty = _mdata.v[1][0] * x + _mdata.v[1][1] * y + _mdata.v[1][2];
+    const T tx = _mdata.v[0][0] * x + _mdata.v[0][1] * y + _mdata.v[0][2];
+    const T ty = _mdata.v[1][0] * x + _mdata.v[1][1] * y + _mdata.v[1][2];
 
     x = tx;
     y = ty;
 }
 
-void AffineMatrix2D::transformPoint(PointF& dp, const PointF& sp) const
+template <typename T>
+void BasicAffineMatrix2D<T>::transformPoint(PointF& dp, const PointF& sp) const
 {
     if( _isIdentity || (sp.x() > Painter::MaximumCoordinateF && sp.y() > Painter::MaximumCoordinateF) ) {
         dp = sp;
@@ -416,7 +586,8 @@ void AffineMatrix2D::transformPoint(PointF& dp, const PointF& sp) const
     );
 }
 
-void AffineMatrix2D::transformPoint(PointF& p) const
+template <typename T>
+void BasicAffineMatrix2D<T>::transformPoint(PointF& p) const
 {
     if( _isIdentity || (p.x() > Painter::MaximumCoordinateF && p.y() > Painter::MaximumCoordinateF) ) return;
 
@@ -426,7 +597,105 @@ void AffineMatrix2D::transformPoint(PointF& p) const
     );
 }
 
-void AffineMatrix2D::transformPoints(float* dxy, const float* sxy, size_t pointCount) const
+template <typename T>
+void BasicAffineMatrix2D<T>::transformPoints(T* dxy, const T* sxy, size_t pointCount) const
+{
+    if(_isIdentity) {
+        memcpy(dxy, sxy, pointCount * sizeof(T));
+        return;
+    }
+
+    for(size_t i = 0; i < pointCount; i += 2) transformPoint(dxy[i], dxy[i + 1], sxy[i], sxy[i + 1]);
+}
+
+template <typename T>
+void BasicAffineMatrix2D<T>::transformPoints(T* xy, size_t pointCount) const
+{
+    if(_isIdentity) return;
+
+    transformPoints(xy, xy, pointCount);
+}
+
+template <typename T>
+void BasicAffineMatrix2D<T>::transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount) const
+{
+    if(_isIdentity) {
+        for(size_t i = 0; i < pointCount; ++i) dxy[i] = sxy[i];
+        return;
+    }
+
+    for(size_t i = 0; i < pointCount; ++i) transformPoint(dxy[i], sxy[i]);
+}
+
+template <typename T>
+void BasicAffineMatrix2D<T>::transformPoints(PointF* xy, size_t pointCount) const
+{
+    if(_isIdentity) return;
+
+    transformPoints(xy, xy, pointCount);
+}
+
+// ======================================================================================
+// ===== Inlined Public Member Functions (Specialization for float) =====================
+// ======================================================================================
+
+template <>
+void BasicAffineMatrix2D<float>::rotateAboutOrigin(float deg, MatrixUpdateMode mode)
+{
+    if(deg == 0) return;
+
+    MatrixData n;
+
+    const float r = deg * Gfx::Math::PiDiv180;
+    const float s = Gfx::Math::fastSin(r);
+    const float c = Gfx::Math::fastCos(r);
+
+    n.v[0][0] =  c; n.v[0][1] = s; n.v[0][2] = 0;
+    n.v[1][0] = -s; n.v[1][1] = c; n.v[1][2] = 0;
+    n.v[2][0] =  0; n.v[2][1] = 0; n.v[2][2] = 1;
+
+    updateMatrix(n, mode);
+    _isIdentity = false;
+}
+
+template <>
+void BasicAffineMatrix2D<float>::shearXDirection(float deg, MatrixUpdateMode mode)
+{
+    if(deg == 0) return;
+
+    MatrixData n;
+
+    const float r = deg * Gfx::Math::PiDiv180;
+    const float t = Gfx::Math::fastSin(r) / Gfx::Math::fastCos(r);
+
+    n.v[0][0] = 1; n.v[0][1] = t; n.v[0][2] = 0;
+    n.v[1][0] = 0; n.v[1][1] = 1; n.v[1][2] = 0;
+    n.v[2][0] = 0; n.v[2][1] = 0; n.v[2][2] = 1;
+
+    updateMatrix(n, mode);
+    _isIdentity = false;
+}
+
+template <>
+void BasicAffineMatrix2D<float>::shearYDirection(float deg, MatrixUpdateMode mode)
+{
+    if(deg == 0) return;
+
+    MatrixData n;
+
+    const float r = deg * Gfx::Math::PiDiv180;
+    const float t = Gfx::Math::fastSin(r) / Gfx::Math::fastCos(r);
+
+    n.v[0][0] = 1; n.v[0][1] = 0; n.v[0][2] = 0;
+    n.v[1][0] = t; n.v[1][1] = 1; n.v[1][2] = 0;
+    n.v[2][0] = 0; n.v[2][1] = 0; n.v[2][2] = 1;
+
+    updateMatrix(n, mode);
+    _isIdentity = false;
+}
+
+template <>
+void BasicAffineMatrix2D<float>::transformPoints(float* dxy, const float* sxy, size_t pointCount) const
 {
     if(_isIdentity) {
         memcpy(dxy, sxy, pointCount * sizeof(float));
@@ -524,14 +793,8 @@ void AffineMatrix2D::transformPoints(float* dxy, const float* sxy, size_t pointC
     for(size_t i = 0; i < pointCount; i += 2) transformPoint(dxy[i], dxy[i + 1], sxy[i], sxy[i + 1]);
 }
 
-void AffineMatrix2D::transformPoints(float* xy, size_t pointCount) const
-{
-    if(_isIdentity) return;
-
-    transformPoints(xy, xy, pointCount);
-}
-
-void AffineMatrix2D::transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount) const
+template <>
+void BasicAffineMatrix2D<float>::transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount) const
 {
     if(_isIdentity) {
         for(size_t i = 0; i < pointCount; ++i) dxy[i] = sxy[i];
@@ -563,104 +826,11 @@ void AffineMatrix2D::transformPoints(PointF* dxy, const PointF* sxy, size_t poin
 #endif
 }
 
-void AffineMatrix2D::transformPoints(PointF* xy, size_t pointCount) const
-{
-    if(_isIdentity) return;
 
-    transformPoints(xy, xy, pointCount);
-}
-
-
-// ======================================================================================
-// ===== Inlined Private Member Functions ===============================================
-// ======================================================================================
-
-void AffineMatrix2D::updateMatrix(const MatrixData& n, MatrixUpdateMode mode)
-{
-    // Check if the current matrix is an identity matrix or the mode is "Replace"
-    if(_isIdentity || mode == Replace) {
-        _mdata = n;
-        return;
-    }
-
-    // Multiply mode
-    const MatrixData* l;
-    const MatrixData* r;
-
-    if(mode == MultiplyOnLeft) {
-        l = &n;
-        r = &_mdata;
-    }
-    else { // MultiplyOnRight
-        l = &_mdata;
-        r = &n;
-    }
-
-#if defined(PT_GFX_USE_AVX1)
-
-     _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
-
-    __m128 out0x =                    _mm_mul_ps(_mm_broadcast_ss(&l->v[0][0]), r->r[0])  ;
-           out0x = _mm_add_ps( out0x, _mm_mul_ps(_mm_broadcast_ss(&l->v[0][1]), r->r[1]) );
-           out0x = _mm_add_ps( out0x, _mm_mul_ps(_mm_broadcast_ss(&l->v[0][2]), r->r[2]) );
-
-    __m128 out1x =                    _mm_mul_ps(_mm_broadcast_ss(&l->v[1][0]), r->r[0])  ;
-           out1x = _mm_add_ps( out1x, _mm_mul_ps(_mm_broadcast_ss(&l->v[1][1]), r->r[1]) );
-           out1x = _mm_add_ps( out1x, _mm_mul_ps(_mm_broadcast_ss(&l->v[1][2]), r->r[2]) );
-
-    __m128 out2x =                    _mm_mul_ps(_mm_broadcast_ss(&l->v[2][0]), r->r[0])  ;
-           out2x = _mm_add_ps( out2x, _mm_mul_ps(_mm_broadcast_ss(&l->v[2][1]), r->r[1]) );
-           out2x = _mm_add_ps( out2x, _mm_mul_ps(_mm_broadcast_ss(&l->v[2][2]), r->r[2]) );
-
-    _mm_storeu_ps(_mdata.v[0], out0x);
-    _mm_storeu_ps(_mdata.v[1], out1x);
-    _mm_storeu_ps(_mdata.v[2], out2x);
-
-     _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
-
-/*
-#elif defined(PT_GFX_USE_NEON)
-
-    // ### The NEON version is actually slower than the plain Arm version ###
-
-    float32x4_t out0x =                   vmulq_f32(vld1q_dup_f32(&l->v[0][0]), r->r[0])  ;
-                out0x = vaddq_f32( out0x, vmulq_f32(vld1q_dup_f32(&l->v[0][1]), r->r[1]) );
-                out0x = vaddq_f32( out0x, vmulq_f32(vld1q_dup_f32(&l->v[0][2]), r->r[2]) );
-
-
-    float32x4_t out1x =                   vmulq_f32(vld1q_dup_f32(&l->v[1][0]), r->r[0])  ;
-                out1x = vaddq_f32( out1x, vmulq_f32(vld1q_dup_f32(&l->v[1][1]), r->r[1]) );
-                out1x = vaddq_f32( out1x, vmulq_f32(vld1q_dup_f32(&l->v[1][2]), r->r[2]) );
-
-    float32x4_t out2x =                   vmulq_f32(vld1q_dup_f32(&l->v[2][0]), r->r[0])  ;
-                out2x = vaddq_f32( out2x, vmulq_f32(vld1q_dup_f32(&l->v[2][1]), r->r[1]) );
-                out2x = vaddq_f32( out2x, vmulq_f32(vld1q_dup_f32(&l->v[2][2]), r->r[2]) );
-
-    vst1q_f32(_mdata.v[0], out0x);
-    vst1q_f32(_mdata.v[1], out1x);
-    vst1q_f32(_mdata.v[2], out2x);
-*/
-
-#else
-
-    MatrixData  o;
-
-    o.v[0][0] = l->v[0][0] * r->v[0][0] + l->v[0][1] * r->v[1][0] + l->v[0][2] * r->v[2][0];
-    o.v[0][1] = l->v[0][0] * r->v[0][1] + l->v[0][1] * r->v[1][1] + l->v[0][2] * r->v[2][1];
-    o.v[0][2] = l->v[0][0] * r->v[0][2] + l->v[0][1] * r->v[1][2] + l->v[0][2] * r->v[2][2];
-
-    o.v[1][0] = l->v[1][0] * r->v[0][0] + l->v[1][1] * r->v[1][0] + l->v[1][2] * r->v[2][0];
-    o.v[1][1] = l->v[1][0] * r->v[0][1] + l->v[1][1] * r->v[1][1] + l->v[1][2] * r->v[2][1];
-    o.v[1][2] = l->v[1][0] * r->v[0][2] + l->v[1][1] * r->v[1][2] + l->v[1][2] * r->v[2][2];
-
-    o.v[2][0] = l->v[2][0] * r->v[0][0] + l->v[2][1] * r->v[1][0] + l->v[2][2] * r->v[2][0];
-    o.v[2][1] = l->v[2][0] * r->v[0][1] + l->v[2][1] * r->v[1][1] + l->v[2][2] * r->v[2][1];
-    o.v[2][2] = l->v[2][0] * r->v[0][2] + l->v[2][1] * r->v[1][2] + l->v[2][2] * r->v[2][2];
-
-    _mdata = o;
-
-#endif
-}
+//
+// For convenience
+//
+typedef BasicAffineMatrix2D<float> AffineMatrix2D;
 
 
 } // namespace

@@ -377,6 +377,22 @@ static inline void generateLineSquareCap(std::vector<PointF>& dst, float x, floa
 
 static inline void generateLineRoundCap(std::vector<PointF>& dst, float x, float y, float wh, float dx, float dy, float nx, float ny)
 {
+#if 0
+    generateQuadraticBezierPoints(
+        dst,
+        round(x + nx     ), round(y + ny     ),
+        round(x + nx - dx), round(y + ny - dy),
+        round(x      - dx), round(y      - dy),
+        floor(wh)
+    );
+    generateQuadraticBezierPoints(
+        dst,
+        round(x -      dx), round(y -      dy),
+        round(x - nx - dx), round(y - ny - dy),
+        round(x - nx     ), round(y - ny     ),
+        floor(wh)
+    );
+#else
     generateQuadraticBezierPoints(
         dst,
         round(x + nx       ), round(y + ny       ),
@@ -384,6 +400,7 @@ static inline void generateLineRoundCap(std::vector<PointF>& dst, float x, float
         round(x - nx       ), round(y - ny       ),
         ceil(wh) - 1
     );
+#endif
 }
 
 static inline void generateLineTriangularOutCap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)

@@ -571,7 +571,7 @@ static void benchMatrixOps()
     D: Point                  -> (17.500, 72.000)
     D: Point                  -> (18.500, 96.000)
     D: Point                  -> ( 7.500, 50.000)
-    Time M    = M * M    :  7.934570 nS
+    Time M    = M * M    : 10.742188 nS
     Time VD[] = M * VS[] :  0.732422 nS
     Time VS[] = M * VS[] :  0.732422 nS
     Time VS[] = M * VS[] :  0.732422 nS
@@ -603,7 +603,7 @@ static void benchMatrixOps()
     D: Point                  -> (17.500, 72.000)
     D: Point                  -> (18.500, 96.000)
     D: Point                  -> ( 7.500, 50.000)
-    Time M    = M * M    :  5.615234 nS
+    Time M    = M * M    :  6.469727 nS
     Time VD[] = M * VS[] :  0.366211 nS
     Time VS[] = M * VS[] :  0.366211 nS
     Time VS[] = M * VS[] :  0.366211 nS
