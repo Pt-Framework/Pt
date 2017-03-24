@@ -128,6 +128,7 @@ inline float fastInvSqrt_impl_SIMD(float x) // X86_64 => FASTER | ARM => FASTER
 #endif
 
 #elif defined(PT_GFX_USE_NEON)
+    
 #if 0
     // It produces a more precise result but runs ~2.5X slower (becomes SLOWER than plain ARM version)
     static const float32x4_t half  = NEON_SET_FLT32X4( 0.5f, 0.5f, 0.5f, 0.5f );
