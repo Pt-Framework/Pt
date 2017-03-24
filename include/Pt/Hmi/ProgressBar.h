@@ -96,6 +96,8 @@ class PT_HMI_API ProgressBar : public Control
         void setRenderer(ProgressBarRenderer* renderer);
 
     protected:
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+
         virtual void onInvalidate();
 
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);

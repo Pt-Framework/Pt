@@ -63,7 +63,7 @@ ChildW::ChildW(const std::string& title)
     setTitle(title);
     
     //Text    
-    _textLabel.setAutoSize(true);
+    //_textLabel.setAutoSize(true);
     _textLabel.resize( Gfx::SizeF(100,40) );
     _textLabel.setName("TextLabel");
     _textLabel.setText("Platinum C++     Framework");
@@ -181,8 +181,7 @@ ChildW::ChildW(const std::string& title)
     _buttonBar.dock(_toggleButton, DockingLayout::Bottom);
     _buttonBar.dock(_progressBar, DockingLayout::Bottom);
     _buttonBar.dock(_slider, DockingLayout::Bottom);
-
-    //Panel  
+ 
     _childView.resize( Gfx::SizeF(300, 620) );
     _childView.move( Gfx::PointF(1,1) );
     _childView.setName("MainPanel");

@@ -222,7 +222,10 @@ Gfx::SizeF Label::onMeasure(const SizePolicy& policy)
         TextBlock block;
         block.setAdjustment(a);
         
-        if(policy.horizontal() == Pt::Hmi::SizePolicy::Fixed)
+        // TODO: set max width if text wrap is enabled
+        // NOTE: abbreviate text if text wrap is off and width is too small
+
+        if(policy.horizontal() != Pt::Hmi::SizePolicy::Any)
             block.setMaxWidth( policy.size().width() );
 
         block.layout(_text, _font);

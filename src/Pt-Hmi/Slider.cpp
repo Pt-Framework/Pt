@@ -207,6 +207,18 @@ void Slider::setRenderer(SliderRenderer* renderer)
 }
 
 
+Gfx::SizeF Slider::onMeasure(const SizePolicy& policy)
+{
+    double itemsWidth = policy.width();
+
+    // TODO: get requred height from renderer
+    double itemsHeight = 15;
+
+    return Gfx::SizeF(policy.width(), 
+                      itemsHeight + padding().topBottom() );
+}
+
+
 void Slider::onInvalidate()
 {
     Base::onInvalidate();

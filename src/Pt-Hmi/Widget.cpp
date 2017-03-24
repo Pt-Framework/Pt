@@ -616,7 +616,7 @@ void Widget::measure(const SizePolicy& policy)
         contentPolicy.setVertical( policy.vertical() );
         contentPolicy.setHeight( policy.height() );
     }
-    
+
     bool doMeasure = contentPolicy != _lastPolicy || _isLayouting;
 
     if(doMeasure)

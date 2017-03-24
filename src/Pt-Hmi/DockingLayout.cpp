@@ -80,6 +80,8 @@ Gfx::SizeF DockingLayout::onMeasure(const SizePolicy& policy)
     std::vector<Widget*>::const_iterator it = widgets().begin();
     std::vector<Widget*>::const_iterator end = widgets().end();
 
+    // TODO: add margin of items to contentSize
+
     for( ; it != end; ++it)
     {
         if( ! (*it)->isVisible() )
@@ -106,7 +108,10 @@ Gfx::SizeF DockingLayout::onMeasure(const SizePolicy& policy)
                 
                 Gfx::SizeF prefSize = (*it)->preferredSize();
                 contentSize.setWidth( std::max(contentSize.width(), prefSize.width() ) );
-                contentSize.setHeight( std::max(contentSize.height(), prefSize.height() ) );          
+                contentSize.setHeight( std::max(contentSize.height(), prefSize.height() ) );
+                
+                contentSize.addWidth( (*it)->margin().leftRight() );
+                contentSize.addHeight( (*it)->margin().topBottom() );          
                 break;  
             }
 
@@ -121,6 +126,7 @@ Gfx::SizeF DockingLayout::onMeasure(const SizePolicy& policy)
                 
                 Gfx::SizeF prefSize = (*it)->preferredSize();
                 contentSize.addWidth( prefSize.width() );
+                contentSize.addWidth( (*it)->margin().leftRight() );
                 contentSize.setHeight( std::max(contentSize.height(), prefSize.height() ) );
                 break;  
             }
@@ -137,6 +143,7 @@ Gfx::SizeF DockingLayout::onMeasure(const SizePolicy& policy)
                 Gfx::SizeF prefSize = (*it)->preferredSize();
                 contentSize.setWidth( std::max(contentSize.width(), prefSize.width() ) );
                 contentSize.addHeight( prefSize.height() ); 
+                contentSize.addHeight( (*it)->margin().topBottom() );
                 break;  
             }
         }

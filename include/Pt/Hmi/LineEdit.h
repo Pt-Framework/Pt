@@ -123,6 +123,13 @@ class PT_HMI_API LineEdit : public Control
         void setRenderer(LineEditRenderer* renderer);
 
     protected:
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+
+        virtual void onInvalidate();
+
+        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& rect);
+
+    protected:
         virtual void onKeyEvent(const KeyEvent& ev);
 
         virtual bool onMouseEvent(const MouseEvent& ev);
@@ -132,10 +139,6 @@ class PT_HMI_API LineEdit : public Control
         virtual void onResizeEvent(const ResizeEvent& ev);
 
         virtual void onFocusEvent(const FocusEvent& ev);
-
-        virtual void onInvalidate();
-
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& rect);
 
     private:
         Pt::Signal<const Pt::String&> _textEdited;

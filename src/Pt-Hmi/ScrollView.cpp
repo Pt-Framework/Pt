@@ -40,8 +40,15 @@ ScrollView::ScrollView()
 , _scrollBarX(ScrollBar::Horizontal)
 , _scrollBarY(ScrollBar::Vertical)
 {
-    _scrollBarX.resize( Gfx::SizeF(100, 32) );
-    _scrollBarY.resize( Gfx::SizeF(32, 100) );
+    //_scrollBarX.resize( Gfx::SizeF(100, 32) );
+    SizePolicy barPolicyX(SizePolicy::Preferred, SizePolicy::Fixed);
+    barPolicyX.setHeight(32);
+    _scrollBarX.setSizePolicy(barPolicyX);
+
+    //_scrollBarY.resize( Gfx::SizeF(32, 100) );
+    SizePolicy barPolicyY(SizePolicy::Fixed, SizePolicy::Preferred);
+    barPolicyY.setWidth(32);
+    _scrollBarY.setSizePolicy(barPolicyY);
 
     _scrollBarX.changed() += Pt::slot(*this, &ScrollView::onScrollBarX);
     _scrollBarY.changed() += Pt::slot(*this, &ScrollView::onScrollBarY);
@@ -106,15 +113,15 @@ void ScrollView::onScrolledY(int n)
 }
 
 
-Gfx::SizeF ScrollView::onMeasure(const SizePolicy& p)
+Gfx::SizeF ScrollView::onMeasure(const SizePolicy& policy)
 {   
-    double width = p.size().width();
-    double height = p.size().height();
+    double width = policy.size().width();
+    double height = policy.size().height();
     
-    SizePolicy policy;
-    policy.setSize(width, height);
+    SizePolicy contentPolicy;
+    contentPolicy.setSize(width, height);
 
-    _scrollLayout.measure(policy);
+    _scrollLayout.measure(contentPolicy);
 
     if( _hasScrollBars && width < _scrollLayout.maximumX() )
         height -= _scrollBarX.size().height();
@@ -124,7 +131,7 @@ Gfx::SizeF ScrollView::onMeasure(const SizePolicy& p)
 
     if( _scrollBarX.isVisible() )
     {
-        SizePolicy barPolicy(SizePolicy::Fixed, SizePolicy::Preferred);
+        SizePolicy barPolicy(SizePolicy::Preferred, SizePolicy::Preferred);
         barPolicy.setSize(width, height);
 
         _scrollBarX.measure(barPolicy);
@@ -132,7 +139,7 @@ Gfx::SizeF ScrollView::onMeasure(const SizePolicy& p)
 
     if( _scrollBarY.isVisible() )
     {
-        SizePolicy barPolicy(SizePolicy::Preferred, SizePolicy::Fixed);
+        SizePolicy barPolicy(SizePolicy::Preferred, SizePolicy::Preferred);
         barPolicy.setSize(width, height);
 
         _scrollBarY.measure(barPolicy);
@@ -161,23 +168,23 @@ void ScrollView::onLayout(const Gfx::RectF& rect)
     }
 
     if( _scrollBarX.isVisible() )
-        height -= _scrollBarX.size().height();
+        height -= _scrollBarX.preferredSize().height();
 
     if( _scrollBarY.isVisible() )
-        width -= _scrollBarY.size().width();
+        width -= _scrollBarY.preferredSize().width();
 
     // TODO: shrink _scrollLayout
 
     if( _scrollBarX.isVisible() )
     {
         _scrollBarX.layout( Gfx::PointF(0, height),
-                            Gfx::SizeF(width, _scrollBarX.size().height()) );
+                            Gfx::SizeF(width, _scrollBarX.preferredSize().height()) );
     }
 
     if( _scrollBarY.isVisible() )
     {
         _scrollBarY.layout( Gfx::PointF(width, 0),
-                            Gfx::SizeF(_scrollBarY.size().width(), height) );
+                            Gfx::SizeF(_scrollBarY.preferredSize().width(), height) );
     }
 
     double hrange = _scrollLayout.maximumX() - _scrollLayout.size().width();

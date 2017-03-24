@@ -187,6 +187,22 @@ void CheckBox::onCanceled()
 }
 
 
+Gfx::SizeF CheckBox::onMeasure(const SizePolicy& policy)
+{
+    Gfx::FontMetrics fm = Painter::fontMetrics( _font, text() );
+
+    double space = std::min<double>(_boxSize.width() / 2, _font.size() / 2);
+    double boxWidth = _boxSize.width();
+    double boxHeight = _boxSize.height();
+
+    double itemsWidth = space + boxWidth + space + fm.width();
+    double itemsHeight = std::max<double>(fm.height(), boxHeight);
+
+    return Gfx::SizeF( itemsWidth + padding().leftRight(), 
+                       itemsHeight + padding().topBottom() );
+}
+
+
 void CheckBox::onInvalidate()
 {
     Base::onInvalidate();

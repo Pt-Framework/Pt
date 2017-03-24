@@ -328,11 +328,11 @@ ListBox::ListBox()
 {
     setAcceptInput(false);
 
-    _layout.setAutoSize(true);
+    //SizePolicy contentPolicy(SizePolicy::Any, SizePolicy::Any);
+    //_layout.setSizePolicy(contentPolicy);
 
     //TODO: get margin from renderer
     _scrollView.setMargin(1);
-    _scrollView.setAutoSize(true);
     _scrollView.setWidget(_layout);
 
     setContent(_scrollView);
