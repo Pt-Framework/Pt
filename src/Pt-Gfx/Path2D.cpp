@@ -41,18 +41,26 @@ namespace Gfx {
 // ===== Internal Helper Functions - Generator (Drawing) Functions ======================
 // ======================================================================================
 
-/*
-int r = (int)Math.sqrt((x1-x0)*(x1-x0) + (y1-y0)*(y1-y0));
-int x = x0-r;
-int y = y0-r;
-int width = 2*r;
-int height = 2*r;
-int startAngle = (int) (180/Math.PI*atan2(y1-y0, x1-x0));
-int endAngle = (int) (180/Math.PI*atan2(y2-y0, x2-x0));
-canvas.drawArc(x, y, width, height, startAngle, endAngle);
-*/
+static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, float x3, float y3, Pt::uint8_t smoothness)
+{
+    // ### TODO ###
+}
 
-// ### TODO ###
+static inline void generateArcPoints(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, float r, Pt::uint8_t smoothness)
+{
+    // ### TODO ###
+
+    /*
+    int r = (int)Math.sqrt((x1-x0)*(x1-x0) + (y1-y0)*(y1-y0));
+    int x = x0-r;
+    int y = y0-r;
+    int width = 2*r;
+    int height = 2*r;
+    int startAngle = (int) (180/Math.PI*atan2(y1-y0, x1-x0));
+    int endAngle = (int) (180/Math.PI*atan2(y2-y0, x2-x0));
+    canvas.drawArc(x, y, width, height, startAngle, endAngle);
+    */
+}
 
 
 // ======================================================================================
@@ -309,23 +317,25 @@ void Path2D::generatePoints(std::vector<PointF>& dst, Pt::uint8_t smoothness) co
             case PathData::IT_MoveTo:
                 curX = ins.p1;
                 curY = ins.p2;
-                //printf("MoveTo: %5.1f, %5.1f\n", curX, curY);
                 break;
 
             case PathData::IT_LineTo:
                 if(dst.empty()) dst.push_back( PointF(curX, curY) );
                 curX = ins.p1;
                 curY = ins.p2;
-                //printf("LineTo: %5.1f, %5.1f\n", curX, curY);
                 dst.push_back( PointF(curX, curY) );
                 break;
 
             case PathData::IT_ArcTo:
-                // ### TODO ###
+                generateArcPoints(dst, curX, curY, ins.p1, ins.p2, ins.p3, smoothness);
+                curX = ins.p1;
+                curY = ins.p2;
                 break;
 
             case PathData::IT_QuadBezierTo:
-                // ### TODO ###
+                generateQuadraticBezierPoints(dst, curX, curY, ins.p1, ins.p2, ins.p3, ins.p4, smoothness);
+                curX = ins.p3;
+                curY = ins.p4;
                 break;
 
             default:
