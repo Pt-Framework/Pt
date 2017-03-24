@@ -495,14 +495,28 @@ inline void pixelOps_SourceOver(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBu
         // Get the source alpha
         srcv0A0A =             vandq_s32  (             srcv4PIX,             neonArithMaskA000); // [ A000 A000 A000 A000 ]
         srci0A0A =             vsubq_s32  (             neonArithMaskA000,    srcv0A0A         ); // [ I000 I000 I000 I000 ]
+#if 0
+        // This version is actually slightly slower than the original one
+        srcv0A0A = (int32x4_t) vrev16q_s8 ((int8x16_t ) srcv0A0A                               ); // [ 0A00 0A00 0A00 0A00 ]
+        srci0A0A = (int32x4_t) vrev16q_s8 ((int8x16_t ) srci0A0A                               ); // [ 0I00 0I00 0I00 0I00 ]
         srcv0A0A =             vorrq_s32  (                                                       // [ 0A0A 0A0A 0A0A 0A0A ]
-                                   (int32x4_t) vshrq_n_u32((uint32x4_t) srcv0A0A,  8),
-                                   (int32x4_t) vshrq_n_u32((uint32x4_t) srcv0A0A, 24)
+                                                                       srcv0A0A,                  // [ 0A00 0A00 0A00 0A00 ]
+                                   (int32x4_t) vrev32q_s16((int16x8_t) srcv0A0A)                  // [ 000A 000A 000A 000A ]
                                );
         srci0A0A =             vorrq_s32  (                                                       // [ 0I0I 0I0I 0I0I 0I0I ]
-                                   (int32x4_t) vshrq_n_u32((uint32x4_t) srci0A0A,  8),
-                                   (int32x4_t) vshrq_n_u32((uint32x4_t) srci0A0A, 24)
+                                                                       srci0A0A,                  // [ 0I00 0I00 0I00 0I00 ]
+                                   (int32x4_t) vrev32q_s16((int16x8_t) srci0A0A)                  // [ 000I 000I 000I 000I ]
                                );
+#else
+        srcv0A0A =             vorrq_s32  (                                                       // [ 0A0A 0A0A 0A0A 0A0A ]
+                                   (int32x4_t) vshrq_n_u32((uint32x4_t) srcv0A0A,  8),            // [ 0A00 0A00 0A00 0A00 ]
+                                   (int32x4_t) vshrq_n_u32((uint32x4_t) srcv0A0A, 24)             // [ 000A 000A 000A 000A ]
+                               );
+        srci0A0A =             vorrq_s32  (                                                       // [ 0I0I 0I0I 0I0I 0I0I ]
+                                   (int32x4_t) vshrq_n_u32((uint32x4_t) srci0A0A,  8),            // [ 0I00 0I00 0I00 0I00 ]
+                                   (int32x4_t) vshrq_n_u32((uint32x4_t) srci0A0A, 24)             // [ 000I 000I 000I 000I ]
+                               );
+#endif
         // Process A and G
         srcvAGAG =             vandq_s32  (             srcv4PIX,             neonArithMaskA0G0); // [ A0G0 A0G0 A0G0 A0G0 ]
         srcvAGAG = (int32x4_t) vshrq_n_u32((uint32x4_t) srcvAGAG, 8                            ); // [ A0G0 A0G0 A0G0 A0G0 ]

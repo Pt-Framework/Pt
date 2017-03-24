@@ -79,6 +79,10 @@ inline float fastSqrt_impl(float x) // X86_64 => MUCH SLOWER | ARM => SLOWER
     return u.f;
 }
 
+//__m128 nr = _mm_rsqrt_ps( x );
+//__m128 muls = _mm_mul_ps( _mm_mul_ps( x, nr ), nr );
+//result = _mm_mul_ps( _mm_mul_ps( half, nr ), _mm_sub_ps( three, muls ) );
+
 inline float fastSqrt_impl_SIMD(float x) // X86_64 => SLIGHTLY SLOWER | ARM => SLIGHTLY FASTER
 {
 #if defined(PT_GFX_USE_SSE1)
