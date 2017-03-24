@@ -41,12 +41,12 @@ namespace Gfx {
 // ===== Internal Helper Functions - Generator (Drawing) Functions ======================
 // ======================================================================================
 
-static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, float x3, float y3, Pt::uint8_t smoothness)
+static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double x3, double y3, Pt::uint8_t smoothness)
 {
     // ### TODO ###
 }
 
-static inline void generateArcPoints(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, float r, Pt::uint8_t smoothness)
+static inline void generateArcPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double r, Pt::uint8_t smoothness)
 {
     // ### TODO ###
 
@@ -77,25 +77,25 @@ struct Path2D::PathData {
     // Instruction structure
     struct Instruction {
         InsType type;
-        float   p1, p2, p3, p4;
+        double   p1, p2, p3, p4;
 
         inline Instruction(InsType type_)
         : type(type_)
         {}
 
-        inline Instruction(InsType type_, float p1_)
+        inline Instruction(InsType type_, double p1_)
         : type(type_), p1(p1_)
         {}
 
-        inline Instruction(InsType type_, float p1_, float p2_)
+        inline Instruction(InsType type_, double p1_, double p2_)
         : type(type_), p1(p1_), p2(p2_)
         {}
 
-        inline Instruction(InsType type_, float p1_, float p2_, float p3_)
+        inline Instruction(InsType type_, double p1_, double p2_, double p3_)
         : type(type_), p1(p1_), p2(p2_), p3(p3_)
         {}
 
-        inline Instruction(InsType type_, float p1_, float p2_, float p3_, float p4_)
+        inline Instruction(InsType type_, double p1_, double p2_, double p3_, double p4_)
         : type(type_), p1(p1_), p2(p2_), p3(p3_), p4(p4_)
         {}
     };
@@ -127,16 +127,16 @@ struct Path2D::PathData {
     inline void add(InsType type)
     { inss.push_back( Instruction(type) ); }
 
-    inline void add(InsType type, float p1)
+    inline void add(InsType type, double p1)
     { inss.push_back( Instruction(type, p1) ); }
 
-    inline void add(InsType type, float p1, float p2)
+    inline void add(InsType type, double p1, double p2)
     { inss.push_back( Instruction(type, p1, p2) ); }
 
-    inline void add(InsType type, float p1, float p2, float p3)
+    inline void add(InsType type, double p1, double p2, double p3)
     { inss.push_back( Instruction(type, p1, p2, p3) ); }
 
-    inline void add(InsType type, float p1, float p2, float p3, float p4)
+    inline void add(InsType type, double p1, double p2, double p3, double p4)
     { inss.push_back( Instruction(type, p1, p2, p3, p4) ); }
 };
 
