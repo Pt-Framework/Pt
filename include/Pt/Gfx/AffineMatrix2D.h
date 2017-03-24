@@ -38,15 +38,15 @@
 
 #include <Pt/Gfx/SIMDConfig.h>
 
-//#undef PT_GFX_USE_AVX2
-//#undef PT_GFX_USE_AVX1
+#undef PT_GFX_USE_AVX2
+#undef PT_GFX_USE_AVX1
 
-//#undef PT_GFX_USE_SSSE3
-//#undef PT_GFX_USE_SSE3
-//#undef PT_GFX_USE_SSE2
-//#undef PT_GFX_USE_SSE1
+#undef PT_GFX_USE_SSSE3
+#undef PT_GFX_USE_SSE3
+#undef PT_GFX_USE_SSE2
+#undef PT_GFX_USE_SSE1
 
-//#undef PT_GFX_USE_NEON
+#undef PT_GFX_USE_NEON
 
 
 namespace Pt{
@@ -175,7 +175,7 @@ template <typename T>
 void BasicAffineMatrix2D<T>::updateMatrix(const MatrixData& n, MatrixUpdateMode mode)
 {
     // Check if the current matrix is an identity matrix or the mode is "Replace"
-    if(_isIdentity || mode == BasicAffineMatrix2D<T>::Replace) {
+    if(_isIdentity || mode == Replace) {
         _mdata = n;
         return;
     }
@@ -185,7 +185,7 @@ void BasicAffineMatrix2D<T>::updateMatrix(const MatrixData& n, MatrixUpdateMode 
     const MatrixData* r;
           MatrixData  o;
 
-    if(mode == BasicAffineMatrix2D<T>::MultiplyOnLeft) {
+    if(mode == MultiplyOnLeft) {
         l = &n;
         r = &_mdata;
     }

@@ -370,9 +370,10 @@ static void benchMathFunctions()
 
 ////////////////////////////////////////////////////////////////////////////////
 
-static void dumpMatrix(const AffineMatrix2D& mat)
+template <typename T>
+static void dumpMatrix(const BasicAffineMatrix2D<T>& mat)
 {
-    float r[3][3];
+    T r[3][3];
     mat.getRaw(r);
 
     printf("    | %7.3f %7.3f %7.3f |\n", r[0][0], r[0][1], r[0][2]);
@@ -380,6 +381,7 @@ static void dumpMatrix(const AffineMatrix2D& mat)
     printf("    | %7.3f %7.3f %7.3f |\n", r[2][0], r[2][1], r[2][2]);
 }
 
+template <typename T>
 static void benchMatrixOps()
 {
 #if defined(PT_GFX_USE_ARM_CPU)
@@ -393,8 +395,8 @@ static void benchMatrixOps()
     srand(13579);
 
     // Do not use constants or repeating values to avoid loop unroll optimizations
-    float a[3][3];
-    float b[3][3];
+    T a[3][3];
+    T b[3][3];
     for(int i = 0; i < 3; ++i) {
         for(int j = 0; j < 3; ++j) {
             a[i][j] = 2.0f * rand() / RAND_MAX - 1.0f;
@@ -403,23 +405,23 @@ static void benchMatrixOps()
     }
 
     // Correctness check
-    AffineMatrix2D mat;
+    BasicAffineMatrix2D<T> mat;
 
     printf("Initial value\n");
-    dumpMatrix(const_cast<const AffineMatrix2D&>(mat));
+    dumpMatrix<T>(const_cast<const BasicAffineMatrix2D<T>&>(mat));
 
     printf("After operations\n");
-    mat.translate       (10.0f, 20.0f, AffineMatrix2D::MultiplyOnLeft);
-    mat.scaleAboutOrigin( 0.5f,  2.0f, AffineMatrix2D::MultiplyOnLeft);
-    dumpMatrix(const_cast<const AffineMatrix2D&>(mat));
+    mat.translate       (10.0f, 20.0f, BasicAffineMatrix2D<T>::MultiplyOnLeft);
+    mat.scaleAboutOrigin( 0.5f,  2.0f, BasicAffineMatrix2D<T>::MultiplyOnLeft);
+    dumpMatrix<T>(const_cast<const BasicAffineMatrix2D<T>&>(mat));
 
-    volatile float x = 8.0f, y = 8.0f;
-             float xx, yy;
+    volatile T x = 8.0f, y = 8.0f;
+             T xx, yy;
     mat.transformPoint(xx, yy, x, y);
     printf("A: Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", x, y, xx, yy);
 
-    float xya  [10] = { 11.0f, 12.0f, 13.0f, 24.0f, 25.0f, 16.0f, 27.0f, 28.0f, 5.0f, 5.0f };
-    float xxyya[10];
+    T xya  [10] = { 11.0f, 12.0f, 13.0f, 24.0f, 25.0f, 16.0f, 27.0f, 28.0f, 5.0f, 5.0f };
+    T xxyya[10];
     mat.transformPoints(xxyya, xya, 10);
     printf("B: Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", xya[0], xya[1], xxyya[0], xxyya[1]);
     printf("B: Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", xya[2], xya[3], xxyya[2], xxyya[3]);
@@ -449,12 +451,12 @@ static void benchMatrixOps()
 
     for(int i = 0; i < loopCount ; ++i) {
         // Reset the matrix
-        if(i % 1) mat.updateUsingRaw(a, AffineMatrix2D::Replace);
-        else      mat.updateUsingRaw(b, AffineMatrix2D::Replace);
+        if(i % 1) mat.updateUsingRaw(a, BasicAffineMatrix2D<T>::Replace);
+        else      mat.updateUsingRaw(b, BasicAffineMatrix2D<T>::Replace);
         // Perform benchmark
         clock.start();
         for(int j = 0; j < loopCount ; ++j) {
-            mat.updateUsingRaw(b, AffineMatrix2D::MultiplyOnLeft);
+            mat.updateUsingRaw(b, BasicAffineMatrix2D<T>::MultiplyOnLeft);
         }
         const Pt::uint64_t curTime = clock.stop().toUSecs();
         if(curTime < bestTime) bestTime = curTime;
@@ -464,13 +466,13 @@ static void benchMatrixOps()
 
     bestTime = ~0ULL;
 
-    float dxya[loopCount * 2], sxya[loopCount * 2];
-    volatile float dmyx, dmyy;
+    T dxya[loopCount * 2], sxya[loopCount * 2];
+    volatile T dmyx, dmyy;
 
     for(int i = 0; i < loopCount ; ++i) {
         // Reset the matrix
-        if(i % 1) mat.updateUsingRaw(a, AffineMatrix2D::Replace);
-        else      mat.updateUsingRaw(b, AffineMatrix2D::Replace);
+        if(i % 1) mat.updateUsingRaw(a, BasicAffineMatrix2D<T>::Replace);
+        else      mat.updateUsingRaw(b, BasicAffineMatrix2D<T>::Replace);
         // Reset the source vectors
         for(int j = 0; j < loopCount * 2; j += 2) {
             sxya[j    ] = 2.0f * rand() / RAND_MAX - 1.0f;
@@ -492,8 +494,8 @@ static void benchMatrixOps()
 
     for(int i = 0; i < loopCount ; ++i) {
         // Reset the matrix
-        if(i % 1) mat.updateUsingRaw(a, AffineMatrix2D::Replace);
-        else      mat.updateUsingRaw(b, AffineMatrix2D::Replace);
+        if(i % 1) mat.updateUsingRaw(a, BasicAffineMatrix2D<T>::Replace);
+        else      mat.updateUsingRaw(b, BasicAffineMatrix2D<T>::Replace);
         // Reset the source vectors
         for(int j = 0; j < loopCount * 2; j += 2) {
             sxya[j    ] = 2.0f * rand() / RAND_MAX - 1.0f;
@@ -517,8 +519,8 @@ static void benchMatrixOps()
 
     for(int i = 0; i < loopCount ; ++i) {
         // Reset the matrix
-        if(i % 1) mat.updateUsingRaw(a, AffineMatrix2D::Replace);
-        else      mat.updateUsingRaw(b, AffineMatrix2D::Replace);
+        if(i % 1) mat.updateUsingRaw(a, BasicAffineMatrix2D<T>::Replace);
+        else      mat.updateUsingRaw(b, BasicAffineMatrix2D<T>::Replace);
         // Reset the source vectors
         for(int j = 0; j < loopCount; ++j) {
             pointsF[j].set( 2.0f * rand() / RAND_MAX - 1.0f, 2.0f * rand() / RAND_MAX - 1.0f );
