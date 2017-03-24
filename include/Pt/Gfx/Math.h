@@ -116,6 +116,7 @@ inline float fastInvSqrt_impl_SIMD(float x) // X86_64 => FASTER | ARM => FASTER
 #if defined(PT_GFX_USE_SSE1)
 
 #if 0
+    // It produces a more precise result but runs ~2.5X slower (still SLIGHTLY FASTER than plain x86_64 version)
     static const __m128 half  = _mm_set_ss(0.5f);
     static const __m128 three = _mm_set_ss(3.0f);
            const __m128 vx    = _mm_load_ss ( &x );
@@ -127,8 +128,17 @@ inline float fastInvSqrt_impl_SIMD(float x) // X86_64 => FASTER | ARM => FASTER
 #endif
 
 #elif defined(PT_GFX_USE_NEON)
-
+#if 0
+    // It produces a more precise result but runs ~2.5X slower (becomes SLOWER than plain ARM version)
+    static const float32x4_t half  = NEON_SET_FLT32X4( 0.5f, 0.5f, 0.5f, 0.5f );
+    static const float32x4_t three = NEON_SET_FLT32X4( 3.0f, 3.0f, 3.0f, 3.0f );
+           const float32x4_t vx    = vld1q_dup_f32( &x );
+           const float32x4_t rs    = vrsqrteq_f32 ( vx );
+           const float32x4_t ml    = vmulq_f32    ( vmulq_f32( vx, rs ), rs );
+    return vgetq_lane_f32( vmulq_f32( vmulq_f32( half, rs ), vsubq_f32( three, ml ) ), 0 );
+#else
     return vgetq_lane_f32( vrsqrteq_f32( vld1q_dup_f32( &x ) ), 0 );
+#endif
 
 #else
 
