@@ -40,12 +40,10 @@ ScrollView::ScrollView()
 , _scrollBarX(ScrollBar::Horizontal)
 , _scrollBarY(ScrollBar::Vertical)
 {
-    //_scrollBarX.resize( Gfx::SizeF(100, 32) );
     SizePolicy barPolicyX(SizePolicy::Preferred, SizePolicy::Fixed);
     barPolicyX.setHeight(32);
     _scrollBarX.setSizePolicy(barPolicyX);
 
-    //_scrollBarY.resize( Gfx::SizeF(32, 100) );
     SizePolicy barPolicyY(SizePolicy::Fixed, SizePolicy::Preferred);
     barPolicyY.setWidth(32);
     _scrollBarY.setSizePolicy(barPolicyY);
@@ -118,7 +116,7 @@ Gfx::SizeF ScrollView::onMeasure(const SizePolicy& policy)
     double width = policy.size().width();
     double height = policy.size().height();
     
-    SizePolicy contentPolicy;
+    SizePolicy contentPolicy(SizePolicy::Fixed, SizePolicy::Fixed);
     contentPolicy.setSize(width, height);
 
     _scrollLayout.measure(contentPolicy);

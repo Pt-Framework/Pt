@@ -70,7 +70,7 @@ class MainWindow : public Pt::Hmi::Window
         MenuItem _subItem3;
             
         ChildW _child1;
-        //Window _child2;
+        Window _child2;
 
         Gfx::Image _icon;
         Picture   _picture;

@@ -164,8 +164,6 @@ void ScrollLayout::onRemoveWidget(Widget& w)
 
 Gfx::SizeF ScrollLayout::onMeasure(const SizePolicy& policy)
 {
-    Gfx::SizeF contentSize;
-
     std::vector<Widget*>::const_iterator it;
     for(it = widgets().begin() ; it != widgets().end(); ++it)
     {
@@ -174,10 +172,6 @@ Gfx::SizeF ScrollLayout::onMeasure(const SizePolicy& policy)
         SizePolicy itemPolicy(SizePolicy::Any, SizePolicy::Any);
         itemPolicy.setSize( policy.size() );
         item->measure(itemPolicy);
-
-        Gfx::SizeF prefSize = item->preferredSize();
-        contentSize.setWidth( std::max(contentSize.width(), prefSize.width() ) );
-        contentSize.setHeight( std::max(contentSize.height(), prefSize.height() ) );
    }
 
     double maxWidth = 0;
@@ -202,7 +196,7 @@ Gfx::SizeF ScrollLayout::onMeasure(const SizePolicy& policy)
     _maxX = static_cast<int>(maxWidth);
     _maxY = static_cast<int>(maxHeight);
 
-   return contentSize;
+   return policy.size();
 }
 
 

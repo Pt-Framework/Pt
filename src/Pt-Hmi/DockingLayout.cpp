@@ -100,7 +100,7 @@ Gfx::SizeF DockingLayout::onMeasure(const SizePolicy& policy)
             default:
             case DockingLayout::Fill:
             {
-                SizePolicy itemPolicy;
+                SizePolicy itemPolicy(SizePolicy::Preferred, SizePolicy::Preferred);
                 itemPolicy.setWidth( policy.size().width() - hspace );
                 itemPolicy.setHeight( policy.size().height() - vspace );
                 

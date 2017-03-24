@@ -163,10 +163,6 @@ class PT_HMI_API ListBox : public Control
         void setRenderer(ListBoxRenderer* renderer);
 
     protected:
-        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
-
-        virtual void onLayout(const Gfx::RectF& rect);
-
         virtual void onInvalidate();
     
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);

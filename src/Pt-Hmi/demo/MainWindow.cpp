@@ -96,50 +96,50 @@ MainWindow::MainWindow()
     move( Gfx::PointF(60, 60) );
     resize( Gfx::SizeF(700, 900) ); 
     
-    ////_child2.setTopMost(true);
-    //_child2.resize( Gfx::SizeF(550, 600) );
-    //add( _child2 );
-    //
-    //_child2.setTitle("Child 2");
-    //_child2.move( Gfx::PointF(10, 10) );
-    //
-    //for(int n = 0; n < 10; ++n)
-    //{
-    //    //_btns[n].resize(Pt::Gfx::SizeF(100, 40));
+    //_child2.setTopMost(true);
+    _child2.resize( Gfx::SizeF(550, 600) );
+    add( _child2 );
+    
+    _child2.setTitle("Child 2");
+    _child2.move( Gfx::PointF(10, 10) );
+    
+    for(int n = 0; n < 10; ++n)
+    {
+        //_btns[n].resize(Pt::Gfx::SizeF(100, 40));
 
-    //    SizePolicy policy(SizePolicy::Preferred, SizePolicy::Fixed);
-    //    policy.setHeight(40);
-    //    _btns[n].setSizePolicy(policy);
+        SizePolicy policy(SizePolicy::Preferred, SizePolicy::Fixed);
+        policy.setHeight(40);
+        _btns[n].setSizePolicy(policy);
 
-    //    _btns[n].setPadding(5);
-    //    _btns[n].setMargin(5);
+        _btns[n].setPadding(5);
+        _btns[n].setMargin(5);
 
-    //    _btns[n].setText("Hallo");
-    //    _btns[n].clicked() += Pt::slot(*this, &MainWindow::onButton);
-    //    
-    //    _scrollContainer.add(_btns[n] );
-    //}
-    //
-    //_bt2.resize(Pt::Gfx::SizeF(100, 40));
-    //_bt2.setText("Ende");
-    //_bt2.setPadding(5);
-    //_bt2.setMargin(5);
-    //_scrollContainer.add(_bt2);
-    //
-    //_scrollContainer.setPadding(5);
-    //_scrollContainer.setMargin(5);
+        _btns[n].setText("Hallo");
+        _btns[n].clicked() += Pt::slot(*this, &MainWindow::onButton);
+        
+        _scrollContainer.add(_btns[n] );
+    }
+    
+    _bt2.resize(Pt::Gfx::SizeF(100, 40));
+    _bt2.setText("Ende");
+    _bt2.setPadding(5);
+    _bt2.setMargin(5);
+    _scrollContainer.add(_bt2);
+    
+    _scrollContainer.setPadding(5);
+    _scrollContainer.setMargin(5);
 
 
-    ////_scrollContainer.resize( Gfx::SizeF(500, 1100) );
-    //
-    //SizePolicy policy(SizePolicy::Fixed, SizePolicy::Fixed);
-    //policy.setSize( Gfx::SizeF(500, 1100) );
-    //_scrollContainer.setSizePolicy(policy);
+    //_scrollContainer.resize( Gfx::SizeF(500, 1100) );
+    
+    SizePolicy policy(SizePolicy::Fixed, SizePolicy::Fixed);
+    policy.setSize( Gfx::SizeF(500, 1100) );
+    _scrollContainer.setSizePolicy(policy);
 
-    //_scrollView.setWidget(_scrollContainer);
-    //
-    //_child2.setMainWidget(&_scrollView);
-    //_child2.show(true);
+    _scrollView.setWidget(_scrollContainer);
+    
+    _child2.setMainWidget(&_scrollView);
+    _child2.show(true);
 
     add( _child1 );
     

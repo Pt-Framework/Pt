@@ -52,8 +52,8 @@ class SizePolicy
 
     public:
         SizePolicy()
-        : _h(Preferred)
-        , _v(Preferred)
+        : _h(Any)
+        , _v(Any)
         { }
 
         SizePolicy(Mode horizontal, Mode vertical)

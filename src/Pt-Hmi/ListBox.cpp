@@ -328,9 +328,6 @@ ListBox::ListBox()
 {
     setAcceptInput(false);
 
-    //SizePolicy contentPolicy(SizePolicy::Any, SizePolicy::Any);
-    //_layout.setSizePolicy(contentPolicy);
-
     //TODO: get margin from renderer
     _scrollView.setMargin(1);
     _scrollView.setWidget(_layout);
@@ -438,18 +435,6 @@ void ListBox::setRenderer(ListBoxRenderer* renderer)
     _hasRenderer = renderer != 0;
 
     invalidate();
-}
-
-
-Gfx::SizeF ListBox::onMeasure(const SizePolicy& p)
-{
-    return Base::onMeasure(p);
-}
-
-
-void ListBox::onLayout(const Gfx::RectF& rect)
-{
-    Base::onLayout(rect);
 }
 
 
