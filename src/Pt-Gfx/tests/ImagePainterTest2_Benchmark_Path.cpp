@@ -8,18 +8,22 @@ static size_t benchDrawPath(int loopCount, const Brush& brush1, const Brush& bru
     PainterT painter(image);
     painter.setCompositionMode(cm);
 
-    Pen pen( Color::fromRgb8(255, 255, 255, 175) );
-    painter.setPen(pen);
+    Pen penThinSolid ( Pen(Color::fromRgb8(255, 255, 255, 175), 1, Pen::Solid, Pen::RoundCap, Pen::BevelJoin ) );
+    Pen penThinDot   ( Pen(Color::fromRgb8(255, 255, 255, 175), 1, Pen::Dot,   Pen::RoundCap, Pen::BevelJoin ) );
+    Pen penThickSolid( Pen(Color::fromRgb8(255, 255, 255, 175), 6, Pen::Solid, Pen::RoundCap, Pen::BevelJoin ) );
+    Pen penThickDot  ( Pen(Color::fromRgb8(255, 255, 255, 175), 6, Pen::Dot,   Pen::RoundCap, Pen::BevelJoin ) );
 
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
     if(!ip2) return 0;
 
-    AffineMatrix2D      matrix2d;
-    Path2D              path2d;
-    std::vector<PointF> pointsF;
-
     asm volatile("nop\n\tnop\n\tnop");
     for(int i = 0; i < loopCount; ++i) {
+        AffineMatrix2D      matrix2d;
+        Path2D              path2d;
+        std::vector<PointF> pointsF;
+
+        Pt::int32_t row = 0, col = 0;
+
         Pt::System::Clock clock;
         clock.start();
 
@@ -31,6 +35,69 @@ static size_t benchDrawPath(int loopCount, const Brush& brush1, const Brush& bru
         path2d.lineTo   ( 30,  0);
         path2d.endPath  ();
 
+        matrix2d.translate(-50, -40);
+
+        // First row
+        matrix2d.rotateAboutOrigin(15);
+        matrix2d.push();
+        matrix2d.translate(80 + 120 * col, 80 + 120 * row);
+        pointsF.clear();
+        path2d.generatePoints(pointsF, 0);
+        matrix2d.transformPoints(pointsF.data(), pointsF.size());
+        if(WITH_RASTERISATION) {
+            ip2->setAntiAliasingMode(antiAliasingMode);
+            ip2->setPen(penThinSolid);
+            ip2->drawPolyline(pointsF.data(), pointsF.size(), false);
+        }
+        matrix2d.pop();
+        ++col;
+
+        matrix2d.rotateAboutOrigin(15);
+        matrix2d.push();
+        matrix2d.translate(80 + 120 * col, 80 + 120 * row);
+        pointsF.clear();
+        path2d.generatePoints(pointsF, 0);
+        matrix2d.transformPoints(pointsF.data(), pointsF.size());
+        if(WITH_RASTERISATION) {
+            ip2->setAntiAliasingMode(antiAliasingMode);
+            ip2->setPen(penThinDot);
+            ip2->drawPolyline(pointsF.data(), pointsF.size(), false);
+        }
+        matrix2d.pop();
+        ++col;
+
+        matrix2d.rotateAboutOrigin(15);
+        matrix2d.push();
+        matrix2d.translate(80 + 120 * col, 80 + 120 * row);
+        pointsF.clear();
+        path2d.generatePoints(pointsF, 0);
+        matrix2d.transformPoints(pointsF.data(), pointsF.size());
+        if(WITH_RASTERISATION) {
+            ip2->setAntiAliasingMode(antiAliasingMode);
+            ip2->setPen(penThickSolid);
+            ip2->drawPolyline(pointsF.data(), pointsF.size(), false);
+        }
+        matrix2d.pop();
+        ++col;
+
+        matrix2d.rotateAboutOrigin(15);
+        matrix2d.push();
+        matrix2d.translate(80 + 120 * col, 80 + 120 * row);
+        pointsF.clear();
+        path2d.generatePoints(pointsF, 0);
+        matrix2d.transformPoints(pointsF.data(), pointsF.size());
+        if(WITH_RASTERISATION) {
+            ip2->setAntiAliasingMode(antiAliasingMode);
+            ip2->setPen(penThickDot);
+            ip2->drawPolyline(pointsF.data(), pointsF.size(), false);
+        }
+        matrix2d.pop();
+        ++col;
+
+        matrix2d.rotateAboutOrigin(15);
+        matrix2d.push();
+        matrix2d.translate(80 + 120 * col, 80 + 120 * row);
+        pointsF.clear();
         path2d.generatePoints(pointsF, 0);
         matrix2d.transformPoints(pointsF.data(), pointsF.size());
         if(WITH_RASTERISATION) {
@@ -38,19 +105,109 @@ static size_t benchDrawPath(int loopCount, const Brush& brush1, const Brush& bru
             ip2->setBrush(brush1);
             ip2->fillPolygon(pointsF.data(), pointsF.size());
         }
-        pointsF.clear();
-
-        path2d.generatePoints(pointsF, 0);
-        matrix2d.push();
-        matrix2d.translate(100, 100);
-        matrix2d.transformPoints(pointsF.data(), pointsF.size());
         matrix2d.pop();
+        ++col;
+
+        matrix2d.rotateAboutOrigin(15);
+        matrix2d.push();
+        matrix2d.translate(80 + 120 * col, 80 + 120 * row);
+        pointsF.clear();
+        path2d.generatePoints(pointsF, 0);
+        matrix2d.transformPoints(pointsF.data(), pointsF.size());
         if(WITH_RASTERISATION) {
             ip2->setAntiAliasingMode(antiAliasingMode);
             ip2->setBrush(brush2);
             ip2->fillPolygon(pointsF.data(), pointsF.size());
         }
+        matrix2d.pop();
+        col = 0;
+        ++row;
+
+        // Second row
+        matrix2d.rotateAboutOrigin(15);
+        matrix2d.push();
+        matrix2d.translate(80 + 120 * col, 80 + 120 * row);
         pointsF.clear();
+        path2d.generatePoints(pointsF, 0);
+        matrix2d.transformPoints(pointsF.data(), pointsF.size());
+        if(WITH_RASTERISATION) {
+            ip2->setAntiAliasingMode(antiAliasingMode);
+            ip2->setPen(penThinSolid);
+            ip2->drawPolyline(pointsF.data(), pointsF.size(), true);
+        }
+        matrix2d.pop();
+        ++col;
+
+        matrix2d.rotateAboutOrigin(15);
+        matrix2d.push();
+        matrix2d.translate(80 + 120 * col, 80 + 120 * row);
+        pointsF.clear();
+        path2d.generatePoints(pointsF, 0);
+        matrix2d.transformPoints(pointsF.data(), pointsF.size());
+        if(WITH_RASTERISATION) {
+            ip2->setAntiAliasingMode(antiAliasingMode);
+            ip2->setPen(penThinDot);
+            ip2->drawPolyline(pointsF.data(), pointsF.size(), true);
+        }
+        matrix2d.pop();
+        ++col;
+
+        matrix2d.rotateAboutOrigin(15);
+        matrix2d.push();
+        matrix2d.translate(80 + 120 * col, 80 + 120 * row);
+        pointsF.clear();
+        path2d.generatePoints(pointsF, 0);
+        matrix2d.transformPoints(pointsF.data(), pointsF.size());
+        if(WITH_RASTERISATION) {
+            ip2->setAntiAliasingMode(antiAliasingMode);
+            ip2->setPen(penThickSolid);
+            ip2->drawPolyline(pointsF.data(), pointsF.size(), true);
+        }
+        matrix2d.pop();
+        ++col;
+
+        matrix2d.rotateAboutOrigin(15);
+        matrix2d.push();
+        matrix2d.translate(80 + 120 * col, 80 + 120 * row);
+        pointsF.clear();
+        path2d.generatePoints(pointsF, 0);
+        matrix2d.transformPoints(pointsF.data(), pointsF.size());
+        if(WITH_RASTERISATION) {
+            ip2->setAntiAliasingMode(antiAliasingMode);
+            ip2->setPen(penThickDot);
+            ip2->drawPolyline(pointsF.data(), pointsF.size(), true);
+        }
+        matrix2d.pop();
+        ++col;
+
+        matrix2d.rotateAboutOrigin(15);
+        matrix2d.push();
+        matrix2d.translate(80 + 120 * col, 80 + 120 * row);
+        pointsF.clear();
+        path2d.generatePoints(pointsF, 0);
+        matrix2d.transformPoints(pointsF.data(), pointsF.size());
+        if(WITH_RASTERISATION) {
+            ip2->setAntiAliasingMode(antiAliasingMode);
+            ip2->setBrush(brush1);
+            ip2->fillPolygon(pointsF.data(), pointsF.size());
+        }
+        matrix2d.pop();
+        ++col;
+
+        matrix2d.rotateAboutOrigin(15);
+        matrix2d.push();
+        matrix2d.translate(80 + 120 * col, 80 + 120 * row);
+        pointsF.clear();
+        path2d.generatePoints(pointsF, 0);
+        matrix2d.transformPoints(pointsF.data(), pointsF.size());
+        if(WITH_RASTERISATION) {
+            ip2->setAntiAliasingMode(antiAliasingMode);
+            ip2->setBrush(brush2);
+            ip2->fillPolygon(pointsF.data(), pointsF.size());
+        }
+        matrix2d.pop();
+        col = 0;
+        ++row;
 
         sum += clock.stop().toUSecs();
 

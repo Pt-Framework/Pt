@@ -2,15 +2,17 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
 {
     resetImage(image);
 
-    Pen penThinSolid ( Pen(Color::fromRgb8(127, 255, 191, 175), 1, Pen::Solid, Pen::RoundCap) );
-    Pen penThinDot   ( Pen(Color::fromRgb8(127, 255, 191, 175), 1, Pen::Dot,   Pen::RoundCap) );
-    Pen penThickSolid( Pen(Color::fromRgb8(127, 255, 191, 175), 6, Pen::Solid, Pen::RoundCap) );
-    Pen penThickDot  ( Pen(Color::fromRgb8(127, 255, 191, 175), 6, Pen::Dot,   Pen::RoundCap) );
+    Pen penThinSolid ( Pen(Color::fromRgb8(255, 191, 127, 175), 1, Pen::Solid, Pen::RoundCap, Pen::BevelJoin ) );
+    Pen penThinDot   ( Pen(Color::fromRgb8(255, 191, 127, 175), 1, Pen::Dot,   Pen::RoundCap, Pen::BevelJoin ) );
+    Pen penThickSolid( Pen(Color::fromRgb8(255, 191, 127, 175), 6, Pen::Solid, Pen::RoundCap, Pen::BevelJoin ) );
+    Pen penThickDot  ( Pen(Color::fromRgb8(255, 191, 127, 175), 6, Pen::Dot,   Pen::RoundCap, Pen::BevelJoin ) );
 
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
     if(!ip2) return;
 
     ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
+
+    Pt::int32_t row = 0, col = 0;
 
     AffineMatrix2D matrix2d;
     Path2D         path2d;
@@ -24,8 +26,6 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     path2d.endPath  ();
 
     matrix2d.translate(-50, -40);
-
-    Pt::int32_t row = 0, col = 0;
 
     // First row
     matrix2d.rotateAboutOrigin(15);
