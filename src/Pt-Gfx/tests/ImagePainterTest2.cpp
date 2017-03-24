@@ -519,7 +519,11 @@ int main(int argc, char* args[])
 
     if(DO_BENCHMARKING) {
         std::clog << std::fixed << std::setprecision(0);
-        if(!BENCHMARK_RESULT_HTML) std::clog << std::endl;
+        if(!BENCHMARK_RESULT_HTML) {
+            std::clog << std::endl;
+            std::clog << "Time   : average time needed to run one pass of the benchmark unit (in microseconds)" << std::endl;
+            std::clog << "Factor : slowdown factor compared to the reference benchmark unit" << std::endl << std::endl;
+        }
 
         if(!BENCHMARK_RESULT_HTML || !BENCHMARK_RESULT_HTML_SIDE_BY_SIDE) std::clog << "Pt::Gfx - CompositionMode::SourceCopy" << std::endl;
         doBenchmark(CompositionMode::SourceCopy);
