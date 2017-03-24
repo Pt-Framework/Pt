@@ -79,10 +79,6 @@ inline float fastSqrt_impl(float x) // X86_64 => MUCH SLOWER | ARM => SLOWER
     return u.f;
 }
 
-//__m128 nr = _mm_rsqrt_ps( x );
-//__m128 muls = _mm_mul_ps( _mm_mul_ps( x, nr ), nr );
-//result = _mm_mul_ps( _mm_mul_ps( half, nr ), _mm_sub_ps( three, muls ) );
-
 inline float fastSqrt_impl_SIMD(float x) // X86_64 => SLIGHTLY SLOWER | ARM => SLIGHTLY FASTER
 {
 #if defined(PT_GFX_USE_SSE1)
@@ -118,11 +114,26 @@ inline float fastInvSqrt_impl(float x) // X86_64 => SLOWER | ARM => SLIGHTLY FAS
 inline float fastInvSqrt_impl_SIMD(float x) // X86_64 => FASTER | ARM => FASTER
 {
 #if defined(PT_GFX_USE_SSE1)
-    return _mm_cvtss_f32( _mm_rsqrt_ss( _mm_load_ss( &x ) ) );
-#elif defined(PT_GFX_USE_NEON)
-    return vgetq_lane_f32( vrsqrteq_f32( vld1q_dup_f32( &x ) ), 0 );
+
+#if 0
+    static const __m128 half  = _mm_set_ss(0.5f);
+    static const __m128 three = _mm_set_ss(3.0f);
+           const __m128 vx    = _mm_load_ss ( &x );
+           const __m128 rs    = _mm_rsqrt_ss( vx );
+           const __m128 ml    = _mm_mul_ss  ( _mm_mul_ss( vx, rs ), rs );
+    return _mm_cvtss_f32( _mm_mul_ss( _mm_mul_ss( half, rs ), _mm_sub_ss( three, ml ) ) );
 #else
+    return _mm_cvtss_f32( _mm_rsqrt_ss( _mm_load_ss( &x ) ) );
+#endif
+
+#elif defined(PT_GFX_USE_NEON)
+
+    return vgetq_lane_f32( vrsqrteq_f32( vld1q_dup_f32( &x ) ), 0 );
+
+#else
+
     return 1.0f / ::sqrtf(x);
+
 #endif
 }
 

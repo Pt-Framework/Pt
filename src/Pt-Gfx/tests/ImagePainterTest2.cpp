@@ -56,7 +56,7 @@
 using namespace Pt::Gfx;
 
 // Benchmark mathematical functions only
-#define DO_MATH_BENCHMARKING_ONLY 0
+#define DO_MATH_BENCHMARKING_ONLY 1
 
 // Benchmark matrix operations only
 #define DO_MATRIX_BENCHMARKING_ONLY 0
