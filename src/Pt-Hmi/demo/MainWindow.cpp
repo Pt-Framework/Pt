@@ -105,8 +105,6 @@ MainWindow::MainWindow()
     
     for(int n = 0; n < 10; ++n)
     {
-        //_btns[n].resize(Pt::Gfx::SizeF(100, 40));
-
         SizePolicy policy(SizePolicy::Preferred, SizePolicy::Fixed);
         policy.setHeight(40);
         _btns[n].setSizePolicy(policy);
@@ -120,7 +118,6 @@ MainWindow::MainWindow()
         _scrollContainer.add(_btns[n] );
     }
     
-    _bt2.resize(Pt::Gfx::SizeF(100, 40));
     _bt2.setText("Ende");
     _bt2.setPadding(5);
     _bt2.setMargin(5);
@@ -129,9 +126,7 @@ MainWindow::MainWindow()
     _scrollContainer.setPadding(5);
     _scrollContainer.setMargin(5);
 
-
-    //_scrollContainer.resize( Gfx::SizeF(500, 1100) );
-    
+  
     SizePolicy policy(SizePolicy::Fixed, SizePolicy::Fixed);
     policy.setSize( Gfx::SizeF(500, 1100) );
     _scrollContainer.setSizePolicy(policy);

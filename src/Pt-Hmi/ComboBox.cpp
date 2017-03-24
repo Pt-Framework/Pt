@@ -42,7 +42,6 @@ ComboBoxPopup::ComboBoxPopup()
 {
     setMainWidget(&_items);
 
-    _items.setAutoSize(true);
     _items.selected() += Pt::slot(*this, &ComboBoxPopup::onItemSelected);
 }
 

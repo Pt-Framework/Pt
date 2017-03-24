@@ -48,7 +48,6 @@ Widget::Widget()
 , _visible(true)
 , _enabled(true)
 , _enabledState(true)
-, _autoSize(false)
 , _hasFocus(false)
 , _focusPolicy(NoFocus) 
 , _focusIndex(0)
@@ -531,8 +530,6 @@ void Widget::onInvalidateEvent(const InvalidateEvent& ev)
     if(_invalidates > 0)
       return;
 
-    Gfx::SizeF size = preferredSize();
-
     onInvalidate();
 
     if( parent() )
@@ -542,22 +539,6 @@ void Widget::onInvalidateEvent(const InvalidateEvent& ev)
 
 void Widget::onInvalidate()
 {
-}
-
-
-//bool Widget::isAutoSize() const
-//{
-//    return _sizePolicy.vertical() == SizePolicy::Preferred ||
-//           _sizePolicy.horizontal() == SizePolicy::Preferred;
-//}
-
-
-void Widget::setAutoSize(bool a)
-{
-    //_autoSize = a;
-
-    //if( parent() )
-    //    parent()->relayout();
 }
 
 
@@ -578,11 +559,6 @@ void Widget::setSizePolicy(const SizePolicy& policy)
 
 Gfx::SizeF Widget::preferredSize() const
 {
-    //if( _autoSize )
-    //    return _preferredSize;
-
-    //return _size;
-
     return _preferredSize;
 }
 
@@ -817,6 +793,10 @@ void Widget::show(bool s)
 
     _visible = s;
 
+    if( parent() )
+        parent()->relayout();
+
+
     ShowEvent ev(vid(), s);
     Application::instance().loop().commitEvent(ev);
 
@@ -826,8 +806,7 @@ void Widget::show(bool s)
 
 void Widget::onShowEvent(const ShowEvent& ev )
 {
-    if( parent() )
-        parent()->relayout();
+
 }
 
 
@@ -942,29 +921,6 @@ const Gfx::SizeF& Widget::size() const
 }
 
 
-void Widget::resize(const Gfx::SizeF& s)
-{
-    std::clog << "resize: " << typeid(*this).name() << " " << s.width()
-                                                    << " " << s.height() << std::endl;
-
-    //if(_size == s)
-    //    return;
-
-    //_size = s;
-
-    //// relayout will not send a resize event
-    //ResizeEvent rev(vid(), s);
-    //Application::instance().loop().commitEvent(rev);
-
-    //relayout();
-}
-
-
-void Widget::resize(double width, double height)
-{
-    resize( Gfx::SizeF(width, height) );
-}
-
 
 void Widget::onResizeEvent(const ResizeEvent& ev)
 {   
@@ -974,14 +930,6 @@ void Widget::onResizeEvent(const ResizeEvent& ev)
 const Gfx::RectF Widget::geometry() const
 {
     return Gfx::RectF( position(), size() );
-}
-
-
-void Widget::setGeometry(const Gfx::PointF& pos, 
-                         const Gfx::SizeF& size)
-{
-    move(pos);
-    resize(size);
 }
 
 
@@ -1057,12 +1005,6 @@ void Widget::setPadding(double horiz, double vertical)
 {
     _padding.set(horiz, vertical);
     relayout();
-}
-
-
-Pt::Signal<>& Widget::layoutChanged()
-{ 
-    return _layoutChanged; 
 }
 
 

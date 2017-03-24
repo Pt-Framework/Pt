@@ -227,7 +227,7 @@ void TableLayout::onLayout()
 
                 Gfx::SizeF size( width - item->margin().leftRight(), 
                                  height - item->margin().topBottom() );
-                item->resize(size);
+//TODO:                item->resize(size);
             }
             
             x += columnSize;

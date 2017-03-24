@@ -425,7 +425,7 @@ void Menu::onResizeEvent(const ResizeEvent& ev)
         item->setIconPadding(_iconWidth);
 
         Gfx::SizeF itemSize = item->preferredSize();
-        item->resize(itemSize);
+//TODO:        item->resize(itemSize);
     }
 
     // _layout positions the items now in onResizeEvent

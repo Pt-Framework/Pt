@@ -51,7 +51,6 @@ ChildW::ChildW(const std::string& title)
     _edit3.setText("Paste");
     _editMenu.addItem(_edit3);
 
-    _menuBar.resize( Pt::Gfx::SizeF(100, 20) );
     _menuBar.addMenu(_fileMenu, "File");
     _menuBar.addMenu(_editMenu, "Edit");
 
@@ -63,8 +62,6 @@ ChildW::ChildW(const std::string& title)
     setTitle(title);
     
     //Text    
-    //_textLabel.setAutoSize(true);
-    _textLabel.resize( Gfx::SizeF(100,40) );
     _textLabel.setName("TextLabel");
     _textLabel.setText("Platinum C++     Framework");
     _textLabel.setAlignment(Alignment::Bottom);
@@ -85,7 +82,6 @@ ChildW::ChildW(const std::string& title)
     _toggleButton.setToggle(true);  
     _toggleButton.setShortcut( &key );
     _toggleButton.move( Gfx::PointF(20,30) );
-    _toggleButton.resize( Gfx::SizeF(130,30) ); 
     _toggleButton.setMargin(5);
     _toggleButton.setPadding(5);    
     _toggleButton.setIcon(toggleImage);
@@ -97,7 +93,6 @@ ChildW::ChildW(const std::string& title)
     _dialogButton.setText("&&Dia&log [CTRL+D]&");
     _dialogButton.setShortcut( &dKey );
     _dialogButton.move( Gfx::PointF(20,100));
-    _dialogButton.resize( Gfx::SizeF(130,30) );
     _dialogButton.setMargin(5);
     _dialogButton.setPadding(5);
     _dialogButton.clicked() += Pt::slot(*this, &ChildW::onShowDialog);
@@ -111,7 +106,6 @@ ChildW::ChildW(const std::string& title)
     _closeButton.setText("Close App [CTRL+X]");
     _closeButton.setShortcut(&xKey);
     _closeButton.move( Gfx::PointF(20,200) );
-    _closeButton.resize( Gfx::SizeF(130, 30) );
     _closeButton.setMargin(5);
     _closeButton.setPadding(5);
     _closeButton.clicked() += Pt::slot(*this, &ChildW::onCloseApp);
@@ -120,7 +114,7 @@ ChildW::ChildW(const std::string& title)
     _checkBox.setName("CheckBox"); 
     _checkBox.setText("Ch&eck Me");
     _checkBox.move( Gfx::PointF(0, 0) );
-    _checkBox.resize( Gfx::SizeF(130, 30) );
+
     _checkBox.setMargin(5);
     _checkBox.setPadding(5);
     _checkBox.clicked() += Pt::slot(*this, &ChildW::onCheckBox);
@@ -129,7 +123,6 @@ ChildW::ChildW(const std::string& title)
     _lineEdit.setAccepted(true); 
     //_lineEdit.setText("Hello World!");
     _lineEdit.setPlaceholderText("placeholder text");
-    _lineEdit.resize( Gfx::SizeF(130, 26) );
     _lineEdit.setMargin(5);
     _lineEdit.setTextAdjustment(Adjustment::Center);
     //_lineEdit.setEchoMode(Pt::Hmi::LineEdit::Masked);
@@ -138,15 +131,12 @@ ChildW::ChildW(const std::string& title)
 
     _comboBox.setName("ComboBox");
     _comboBox.setMargin(5);
-    _comboBox.resize( Gfx::SizeF(66, 26) );
     _comboBox.setMaxHeight(150);
     _comboBox.selected() += Pt::slot(*this, &ChildW::onComboSelected);
 
     for(unsigned n = 0; n < 9; ++n)
     {
         ListBoxItem* item = new ListBoxItem;
-        //item->resize( Gfx::SizeF(20, 30) );
-        item->setAutoSize(true);
         
         std::ostringstream oss;
         oss << "Item " << n;
@@ -158,20 +148,18 @@ ChildW::ChildW(const std::string& title)
 
     _progressBar.setName("ProgressBar"); 
     _progressBar.move( Gfx::PointF(0, 0) );
-    _progressBar.resize( Gfx::SizeF(130, 30) );
     _progressBar.setMargin(5);
     _progressBar.setPadding(5);
 
     _slider.setName("Slider"); 
     _slider.move( Gfx::PointF(0, 0) );
-    _slider.resize( Gfx::SizeF(100, 30) );
     _slider.setMargin(5);
     _slider.setPadding(5);
     _slider.setRange(0, 100);
     _slider.setPosition(100);
 
     _buttonBar.setName("ButtonBar");
-    _buttonBar.resize( Gfx::SizeF(700, 290) );
+
     _buttonBar.setPadding(5);
     _buttonBar.dock(_comboBox, DockingLayout::Bottom);
     _buttonBar.dock(_lineEdit, DockingLayout::Bottom);
@@ -182,14 +170,13 @@ ChildW::ChildW(const std::string& title)
     _buttonBar.dock(_progressBar, DockingLayout::Bottom);
     _buttonBar.dock(_slider, DockingLayout::Bottom);
  
-    _childView.resize( Gfx::SizeF(300, 620) );
     _childView.move( Gfx::PointF(1,1) );
     _childView.setName("MainPanel");
     _childView.setPadding(20); 
     _childView.dock(_textLabel, DockingLayout::Fill);
     _childView.dock(_buttonBar, DockingLayout::Bottom);
      
-    //_childWindow2.setMainWidget(&_closeButton);
+    //_childWindow2.setMainWidget(&_closeButton);    
     _childWindow2.move(Gfx::PointF(5, 40));
     _childWindow2.resize( Gfx::SizeF(250, 500) );
     _childWindow2.setTitle("Child of " + title);

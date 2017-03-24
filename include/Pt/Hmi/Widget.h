@@ -191,14 +191,7 @@ class PT_HMI_API Widget : public Visual
 
         const Gfx::SizeF& size() const;
 
-        void resize(const Gfx::SizeF& s);
-
-        void resize(double width, double height);
-
         const Gfx::RectF geometry() const;
-
-        void setGeometry(const Gfx::PointF& pos, 
-                         const Gfx::SizeF& size);
 
         const Cursor& cursor() const;
 
@@ -211,10 +204,6 @@ class PT_HMI_API Widget : public Visual
         const SizePolicy& sizePolicy() const;
 
         void setSizePolicy(const SizePolicy& policy);
-
-        //bool isAutoSize() const;
-
-        void setAutoSize(bool a);
 
         Gfx::SizeF preferredSize() const;
 
@@ -252,10 +241,6 @@ class PT_HMI_API Widget : public Visual
 
         // inner spacing
         void setPadding(double horiz, double vertical);
-
-        /** @brief Position, size or preferred size has changed.
-        */
-        Pt::Signal<>& layoutChanged();
 
         //
         // event processing
@@ -354,8 +339,6 @@ class PT_HMI_API Widget : public Visual
         Gfx::SizeF                   _size;
         
         SizePolicy                   _sizePolicy;
-        bool                         _autoSize;
-
         SizePolicy                   _lastPolicy;
         Gfx::SizeF                   _preferredSize;
 

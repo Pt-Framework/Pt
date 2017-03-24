@@ -53,7 +53,6 @@ ScrollView::ScrollView()
 
     _scrollLayout.scrolledX() += Pt::slot(*this, &ScrollView::onScrolledX);
     _scrollLayout.scrolledY() += Pt::slot(*this, &ScrollView::onScrolledY);
-    _scrollLayout.setAutoSize(true);
 
     add(_scrollLayout);
     add(_scrollBarX);

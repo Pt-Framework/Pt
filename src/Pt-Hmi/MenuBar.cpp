@@ -47,7 +47,6 @@ MenuBarItem::MenuBarItem(MenuBar& mb, Menu& menu, const Pt::String& text)
 , _menu(menu)
 , _hasRenderer(false)
 {
-    setAutoSize(true);
     setFocusPolicy(Widget::NormalFocus);
     setText(text);
 
@@ -385,7 +384,7 @@ MenuBarItem* MenuBar::findItem(const Gfx::PointF& pos)
 void MenuBar::onAddMenu(Menu& menu, const Pt::String& text)
 {
     MenuBarItem* item = new MenuBarItem(*this, menu, text);
-    item->resize( Gfx::SizeF(50, 0) );
+//TODO:    item->resize( Gfx::SizeF(50, 0) );
 
     _menus.push_back(item);
     _layout.add(*item);
@@ -558,10 +557,10 @@ void MenuBar::onResizeEvent(const ResizeEvent& ev)
     {
         Widget* item = _layout.widgets().at(i);
         Gfx::SizeF itemSize = item->preferredSize();
-        item->resize(itemSize);
+ //TODO:       item->resize(itemSize);
     }
 
-    _layout.resize( ev.size() );
+ //TODO:   _layout.resize( ev.size() );
 
     // _layout positions the items now in OnResizeEvent
     // TODO: our overall design should make this clearer

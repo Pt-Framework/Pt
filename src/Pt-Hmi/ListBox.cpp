@@ -351,7 +351,6 @@ void ListBox::addItem(ListBoxItem& item)
 {   
     _layout.add(item);
     item.selected() += Pt::slot(*this, &ListBox::onItemSelected);
-    item.layoutChanged() += Pt::slot(*this, &ListBox::relayout);
 }
 
 
@@ -359,9 +358,6 @@ void ListBox::removeItem(ListBoxItem& item)
 {
     _layout.remove(item);
     item.selected() -= Pt::slot(*this, &ListBox::onItemSelected);
-    item.layoutChanged() -= Pt::slot(*this, &ListBox::relayout);
-
-    relayout();
 }
 
 
