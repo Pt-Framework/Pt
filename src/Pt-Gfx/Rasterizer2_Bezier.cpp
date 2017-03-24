@@ -40,8 +40,8 @@ namespace Gfx {
 
 void Rasterizer2::strokeOnePixelQuadraticPolybezier(const Point* points, size_t pointCount)
 {
-    // Check if there is no actual point
-    if(!pointCount) return;
+    // Check if there are too few points
+    if(pointCount < 3) return;
 
     // Mask
     DrawLineMask mask_zero = Rasterizer2::NullLineMask;

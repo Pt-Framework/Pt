@@ -41,8 +41,8 @@ namespace Gfx {
 
 void Rasterizer2::strokeOnePixelPolygon(const Point* points, size_t pointCount, bool autoClose)
 {
-    // Check if there is no actual point
-    if(!pointCount) return;
+    // Check if there are too few points
+    if(pointCount < 2) return;
 
     // Separate the polygons, clip their coordinates, and raster them
     size_t startIndex = 0;
@@ -65,8 +65,8 @@ void Rasterizer2::strokeOnePixelPolygon(const Point* points, size_t pointCount, 
 
 void Rasterizer2::strokePolygon(const Point* points, size_t pointCount)
 {
-    // Check if there is no actual point
-    if(!pointCount) return;
+    // Check if there are too few points
+    if(pointCount < 2) return;
 
     // Disable texture/gradient
     const bool isTexture  = _isTexture;
@@ -116,8 +116,8 @@ void Rasterizer2::strokePolygon(const Point* points, size_t pointCount)
 
 void Rasterizer2::strokePolygonSeparate(const Point* points, size_t pointCount)
 {
-    // Check if there is no actual point
-    if(!pointCount) return;
+    // Check if there are too few points
+    if(pointCount < 2) return;
 
     // Disable texture/gradient
     const bool isTexture  = _isTexture;
@@ -161,8 +161,8 @@ void Rasterizer2::strokePolygonSeparate(const Point* points, size_t pointCount)
 
 void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
 {
-    // Check if there is no actual point
-    if(!pointCount) return;
+    // Check if there are too few points
+    if(pointCount < 2) return;
 
     // Separate the polygons and clip their coordinates
     Pt::int32_t         minX;

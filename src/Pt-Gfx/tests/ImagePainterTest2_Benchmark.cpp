@@ -308,9 +308,14 @@ static void doBenchmark(CompositionMode cm)
 
     // Path
     if(BENCHMARK_RESULT_HTML || BENCHMARK_PATH) {
-        time1 = benchDrawPath<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushTextureT, cm, AntiAliasingMode::None);
+        time1 = benchDrawPath<ImagePainter2, false>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushTextureT, cm, AntiAliasingMode::None);
+        std::clog << "    Path NOAA (NO RASTERISATION)     @ ImagePainter2 = " << std::setw(6) << time1 << std::endl;
+        time2 = benchDrawPath<ImagePainter2, false>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushTextureT, cm, AntiAliasingMode::Standard);
+        std::clog << "    Path XWAA (NO RASTERISATION)     @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time1 = benchDrawPath<ImagePainter2, true >(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushTextureT, cm, AntiAliasingMode::None);
         std::clog << "    Path NOAA                        @ ImagePainter2 = " << std::setw(6) << time1 << std::endl;
-        time2 = benchDrawPath<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushTextureT, cm, AntiAliasingMode::Standard);
+        time2 = benchDrawPath<ImagePainter2, true >(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushTextureT, cm, AntiAliasingMode::Standard);
         std::clog << "    Path XWAA                        @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         if(!BENCHMARK_RESULT_HTML) std::clog << std::endl;
