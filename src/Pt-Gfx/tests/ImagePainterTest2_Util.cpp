@@ -640,10 +640,10 @@ static void benchMatrixOps()
     D: Point                  -> (17.500, 72.000)
     D: Point                  -> (18.500, 96.000)
     D: Point                  -> ( 7.500, 50.000)
-    Time M    = M * M    : 26.855469 nS
-    Time VD[] = M * VS[] :  8.300781 nS
-    Time VS[] = M * VS[] :  8.300781 nS
-    Time VS[] = M * VS[] :  8.300781 nS
+    Time M    = M * M    : 32.226562 nS
+    Time VD[] = M * VS[] :  9.277344 nS
+    Time VS[] = M * VS[] :  9.277344 nS
+    Time VS[] = M * VS[] :  9.277344 nS
 
     ---------
     With NEON
@@ -672,9 +672,9 @@ static void benchMatrixOps()
     D: Point                  -> (17.500, 72.000)
     D: Point                  -> (18.500, 96.000)
     D: Point                  -> ( 7.500, 50.000)
-    Time M    = M * M    : 27.343750 nS
-    Time VD[] = M * VS[] :  6.347656 nS
-    Time VS[] = M * VS[] :  6.347656 nS
-    Time VS[] = M * VS[] :  6.347656 nS
+    Time M    = M * M    : 45.898438 nS
+    Time VD[] = M * VS[] :  6.835938 nS
+    Time VS[] = M * VS[] :  6.835938 nS
+    Time VS[] = M * VS[] :  6.835938 nS
     */
 }

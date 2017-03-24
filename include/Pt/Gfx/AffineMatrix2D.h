@@ -470,7 +470,6 @@ void AffineMatrix2D::transformPoints(float* dxy, const float* sxy, size_t pointC
                 _mm256_and_ps(r3210, _mm256_cmp_ps(s3210, avxMaxCord, _CMP_LE_OQ))  // Retain result values <= maximum coordinate
             )
         );
-        //_mm256_storeu_ps(dxy, r3210);
         // Increment the pointers
         sxy += 8;
         dxy += 8;
@@ -507,12 +506,11 @@ void AffineMatrix2D::transformPoints(float* dxy, const float* sxy, size_t pointC
         // Store 4 floats to the destination vector
         vst1q_f32(
             dxy,
-            vorrq_s32(
-                vandq_s32(s3210, vcgtq_f32(s3210, neonMaxCord)), // Retain source values >  maximum coordinate
-                vandq_s32(r3210, vcleq_f32(s3210, neonMaxCord))  // Retain result values <= maximum coordinate
+            (float32x4_t) vorrq_s32(
+                vandq_s32((int32x4_t) s3210, (int32x4_t) vcgtq_f32(s3210, neonMaxCord)), // Retain source values >  maximum coordinate
+                vandq_s32((int32x4_t) r3210, (int32x4_t) vcleq_f32(s3210, neonMaxCord))  // Retain result values <= maximum coordinate
             )
         );
-        //vst1q_f32(dxy, r3210);
         // Increment the pointers
         sxy += 4;
         dxy += 4;
@@ -540,7 +538,7 @@ void AffineMatrix2D::transformPoints(PointF* dxy, const PointF* sxy, size_t poin
         return;
     }
 
-#if defined(PT_GFX_USE_AVX1)
+#if defined(PT_GFX_USE_AVX1) || defined(PT_GFX_USE_NEON)
 
     float xy[pointCount * 2];
 
