@@ -49,9 +49,6 @@ namespace Gfx{
 static const __m256 avxOneZeroF = _mm256_set_ps(0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f);
 static const __m256 avxMaxCordF = _mm256_set1_ps(Painter::MaximumCoordinateF);
 
-static const __m256d avxOneZeroD = _mm256_set_pd(0.0f, 1.0f, 0.0f, 1.0f);
-static const __m256d avxMaxCordD = _mm256_set1_pd(Painter::MaximumCoordinateF);
-
 #endif
 
 #if defined(PT_GFX_USE_NEON)

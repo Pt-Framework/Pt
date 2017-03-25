@@ -17,9 +17,10 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     AffineMatrix2D matrix2d;
     Path2D         path2d;
 
+    // Create a new path
     path2d.clear    ();
     path2d.beginPath();
-    path2d.moveTo   (  0, 50);
+    path2d.moveTo   (  0, 50); // CCW
     path2d.lineTo   ( 50, 80);
     path2d.lineTo   (100, 50);
     path2d.lineTo   ( 30,  0);
@@ -126,6 +127,32 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     matrix2d.pop();
     col = 0;
     ++row;
+
+    // Create a new path
+    path2d.clear            ();
+    path2d.beginPath        ();
+
+    path2d.moveTo(     100, 50); // CCW
+
+    path2d.quadraticBezierTo(75, 0,  50, 50);
+
+  //  path2d.moveTo           (         0, 50);
+//    path2d.lineTo           (        50, 50);
+//    path2d.moveTo           (        50, 50);
+    //path2d.quadraticBezierTo(75, 0, 100, 50);
+    path2d.endPath          ();
+
+    matrix2d.identity();
+    matrix2d.translate(-25, -25);
+
+    // Third row
+    //matrix2d.rotateAboutOrigin(15);
+    matrix2d.push();
+    matrix2d.translate(80 + 120 * col, 80 + 120 * row);
+    ip2->setPen(penThinSolid);
+    ip2->drawPath(path2d, matrix2d, false);
+    matrix2d.pop();
+    ++col;
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }

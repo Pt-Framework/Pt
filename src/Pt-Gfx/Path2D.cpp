@@ -27,10 +27,13 @@
   02110-1301 USA
 */
 
+#include <stdio.h>
+
 #include <Pt/SourceInfo.h>
 
 #include <Pt/Gfx/Path2D.h>
 #include <Pt/Gfx/Painter.h>
+#include <Pt/Gfx/Math.h>
 
 
 namespace Pt {
@@ -43,7 +46,46 @@ namespace Gfx {
 
 static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double x3, double y3, Pt::uint8_t smoothness)
 {
-    // ### TODO ###
+    // Check if the points actually specify a straight line
+    const double sx = x3 - x2;
+    const double sy = y3 - y2;
+    const double xx = x1 - x2;
+    const double yy = y1 - y2;
+
+    // Curvature
+    if( !(xx * sy - yy * sx) ) {
+        if(dst.empty()) dst.push_back( PointF(x1, y1) );
+        dst.push_back( PointF(x3, y3) );
+        return;
+    }
+
+    printf("%5.1f, %5.1f    %5.1f, %5.1f    %5.1f, %5.1f\n", x1, y1, x2, y2, x3, y3);
+
+    // Calculate the length
+    const double l1 = ::sqrt(sx * sx + sy * sy);
+    const double l2 = ::sqrt(xx * xx + yy * yy);
+    const double l3 = l1 + l2;
+
+    // Determine the number of segments
+    if(!smoothness) smoothness = 1;
+
+    Pt::int32_t nSegs = round(l3 * smoothness / 16) + 2;
+    if(nSegs < 5) nSegs = 5;
+
+    const double nSegs1i = 1.0f / (nSegs - 1);
+
+    for(Pt::int32_t i = 0; i < nSegs; ++i) {
+        // Calculate the coordinates
+        const double t  = i * nSegs1i;
+        const double it = 1.0f - t;
+        const double a  = it * it;
+        const double b  = 2.0f * t  * it;
+        const double c  = t * t;
+        const double x  = a * x1 + b * x2 + c * x3;
+        const double y  = a * y1 + b * y2 + c * y3;
+        // Store the coordinate as needed
+        if(i || dst.empty()) dst.push_back( PointF(x, y) );
+    }
 }
 
 static inline void generateArcPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double r, Pt::uint8_t smoothness)

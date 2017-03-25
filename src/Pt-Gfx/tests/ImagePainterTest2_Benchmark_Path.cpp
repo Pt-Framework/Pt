@@ -27,9 +27,10 @@ static size_t benchDrawPath(int loopCount, const Brush& brush1, const Brush& bru
         Pt::System::Clock clock;
         clock.start();
 
+        // Create a new path
         path2d.clear    ();
         path2d.beginPath();
-        path2d.moveTo   (  0, 50);
+        path2d.moveTo   (  0, 50); // CCW
         path2d.lineTo   ( 50, 80);
         path2d.lineTo   (100, 50);
         path2d.lineTo   ( 30,  0);
