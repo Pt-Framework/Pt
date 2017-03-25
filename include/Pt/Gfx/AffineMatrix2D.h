@@ -56,16 +56,19 @@ namespace Gfx{
 #if defined(PT_GFX_USE_AVX1)
 
 // AVX constants
-static const __m256 avxOneZero = _mm256_set_ps(0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f);
-static const __m256 avxMaxCord = _mm256_set1_ps(Painter::MaximumCoordinateF);
+static const __m256 avxOneZeroF = _mm256_set_ps(0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f);
+static const __m256 avxMaxCordF = _mm256_set1_ps(Painter::MaximumCoordinateF);
+
+static const __m256d avxOneZeroD = _mm256_set_pd(0.0f, 1.0f, 0.0f, 1.0f);
+static const __m256d avxMaxCordD = _mm256_set1_pd(Painter::MaximumCoordinateF);
 
 #endif
 
 #if defined(PT_GFX_USE_NEON)
 
 // NEON constants
-static const float32x4_t neonOneZero = NEON_SET_FLT32X4(0.0f, 1.0f, 0.0f, 1.0f);
-static const float32x4_t neonMaxCord = vdupq_n_f32(Painter::MaximumCoordinateF);
+static const float32x4_t neonOneZeroF = NEON_SET_FLT32X4(0.0f, 1.0f, 0.0f, 1.0f);
+static const float32x4_t neonMaxCordF = vdupq_n_f32(Painter::MaximumCoordinateF);
 
 #endif
 
@@ -722,9 +725,9 @@ void BasicAffineMatrix2D<float>::transformPoints(float* dxy, const float* sxy, s
 
     for(size_t i = 0; i < pointCount8; ++i) {
         // Load 8 floats from the source vector
-        const __m256 s3210 = _mm256_loadu_ps  (sxy                                       ); // [ X0 Y0 X1 Y1 X2 Y2 X3 Y3 ]
-        const __m256 s32   = _mm256_shuffle_ps(s3210, avxOneZero, _MM_SHUFFLE(3, 2, 3, 2)); // [ X0 Y0 1  0  X2 Y2 1  0  ]
-        const __m256 s10   = _mm256_shuffle_ps(s3210, avxOneZero, _MM_SHUFFLE(1, 0, 1, 0)); // [ X1 Y1 1  0  X3 Y3 1  0  ]
+        const __m256 s3210 = _mm256_loadu_ps  (sxy                                        ); // [ X0 Y0 X1 Y1 X2 Y2 X3 Y3 ]
+        const __m256 s32   = _mm256_shuffle_ps(s3210, avxOneZeroF, _MM_SHUFFLE(3, 2, 3, 2)); // [ X0 Y0 1  0  X2 Y2 1  0  ]
+        const __m256 s10   = _mm256_shuffle_ps(s3210, avxOneZeroF, _MM_SHUFFLE(1, 0, 1, 0)); // [ X1 Y1 1  0  X3 Y3 1  0  ]
         // Multiply them to the matrix's rows
         const __m256 r32_0 = _mm256_mul_ps(m00, s32);
         const __m256 r32_1 = _mm256_mul_ps(m11, s32);
@@ -738,8 +741,8 @@ void BasicAffineMatrix2D<float>::transformPoints(float* dxy, const float* sxy, s
         _mm256_storeu_ps(
             dxy,
             _mm256_or_ps(
-                _mm256_and_ps(s3210, _mm256_cmp_ps(s3210, avxMaxCord, _CMP_GT_OQ)), // Retain source values >  maximum coordinate
-                _mm256_and_ps(r3210, _mm256_cmp_ps(s3210, avxMaxCord, _CMP_LE_OQ))  // Retain result values <= maximum coordinate
+                _mm256_and_ps(s3210, _mm256_cmp_ps(s3210, avxMaxCordF, _CMP_GT_OQ)), // Retain source values >  maximum coordinate
+                _mm256_and_ps(r3210, _mm256_cmp_ps(s3210, avxMaxCordF, _CMP_LE_OQ))  // Retain result values <= maximum coordinate
             )
         );
         // Increment the pointers
@@ -774,9 +777,9 @@ void BasicAffineMatrix2D<float>::transformPoints(float* dxy, const float* sxy, s
 
     for(size_t i = 0; i < pointCount4; ++i) {
         // Load 4 floats from the source vector
-        const float32x4_t s3210 = vld1q_f32   (sxy                                             ); // [ X0 Y0 X1 Y1 ]
-        const float32x4_t s32   = vcombine_f32(vget_high_f32(s3210), vget_high_f32(neonOneZero)); // [ X0 Y0 1  0  ]
-        const float32x4_t s10   = vcombine_f32(vget_low_f32 (s3210), vget_low_f32 (neonOneZero)); // [ X1 Y1 1  0  ]
+        const float32x4_t s3210 = vld1q_f32   (sxy                                              ); // [ X0 Y0 X1 Y1 ]
+        const float32x4_t s32   = vcombine_f32(vget_high_f32(s3210), vget_high_f32(neonOneZeroF)); // [ X0 Y0 1  0  ]
+        const float32x4_t s10   = vcombine_f32(vget_low_f32 (s3210), vget_low_f32 (neonOneZeroF)); // [ X1 Y1 1  0  ]
         // Multiply them to the matrix's rows
         const float32x4_t r32_0 = vmulq_f32(m0, s32);
         const float32x4_t r32_1 = vmulq_f32(m1, s32);
@@ -790,8 +793,8 @@ void BasicAffineMatrix2D<float>::transformPoints(float* dxy, const float* sxy, s
         vst1q_f32(
             dxy,
             (float32x4_t) vorrq_s32(
-                vandq_s32((int32x4_t) s3210, (int32x4_t) vcgtq_f32(s3210, neonMaxCord)), // Retain source values >  maximum coordinate
-                vandq_s32((int32x4_t) r3210, (int32x4_t) vcleq_f32(s3210, neonMaxCord))  // Retain result values <= maximum coordinate
+                vandq_s32((int32x4_t) s3210, (int32x4_t) vcgtq_f32(s3210, neonMaxCordF)), // Retain source values >  maximum coordinate
+                vandq_s32((int32x4_t) r3210, (int32x4_t) vcleq_f32(s3210, neonMaxCordF))  // Retain result values <= maximum coordinate
             )
         );
         // Increment the pointers
