@@ -131,8 +131,12 @@ static void benchDrawPath_drawCol(
 }
 
 // WEIRD BUG: with "-O2" this function will cause "Floating point exception"
+//            when compiled using GCC version 4.8.5
+#if defined(PT_GFX_USE_X86_CPU)
 #pragma GCC push_options
 #pragma GCC optimize ("-O3")
+#endif
+
 template <typename PainterT, bool WITH_RASTERISATION>
 static size_t benchDrawPath(int loopCount, const Brush& brush1, const Brush& brush2, CompositionMode cm, AntiAliasingMode antiAliasingMode)
 {
@@ -255,4 +259,7 @@ static size_t benchDrawPath(int loopCount, const Brush& brush1, const Brush& bru
     sum /= loopCount;
     return sum;
 }
+
+#if defined(PT_GFX_USE_X86_CPU)
 #pragma GCC pop_options
+#endif
