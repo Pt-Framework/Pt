@@ -54,6 +54,28 @@ static void testDrawPath_drawRow(
     ++row;
 }
 
+static void testDrawPath_drawCol(
+    ImagePainter2* ip2, AffineMatrix2D& matrix2d, const Path2D& path2d, Pt::int32_t& row, Pt::int32_t& col,
+    const Pen& penThinSolid, const Pen& penThickSolid
+)
+{
+    matrix2d.rotateAboutOrigin(15);
+    matrix2d.push();
+    matrix2d.translate(150 + 120 * col, 60 + 120 * row);
+    ip2->setPen(penThinSolid);
+    ip2->drawPath(path2d, matrix2d, false);
+    matrix2d.pop();
+    ++row;
+
+    matrix2d.rotateAboutOrigin(15);
+    matrix2d.push();
+    matrix2d.translate(150 + 120 * col, 60 + 120 * row);
+    ip2->setPen(penThickSolid);
+    ip2->drawPath(path2d, matrix2d, false);
+    matrix2d.pop();
+    ++row;
+}
+
 static void testDrawPath(const char* title, Image& image, Painter& painter, const Brush& brush1, const Brush& brush2)
 {
     resetImage(image);
@@ -93,12 +115,12 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     // Create a new path
     path2d.clear            ();
     path2d.beginPath        ();
-    path2d.moveTo           (          120, 70); // CCW
-    path2d.lineTo           (          100, 50);
-    path2d.lineTo           (           75, 50);
-    path2d.quadraticBezierTo( 50,   0,  25, 50);
-    path2d.lineTo           (            0, 50);
-    path2d.lineTo           (          -20, 70);
+    path2d.moveTo           (       120, 70); // CCW
+    path2d.lineTo           (       100, 50);
+    path2d.lineTo           (        75, 50);
+    path2d.quadraticBezierTo(50, 0,  25, 50);
+    path2d.lineTo           (         0, 50);
+    path2d.lineTo           (       -20, 70);
     path2d.endPath          ();
 
     matrix2d.identity();
@@ -111,16 +133,54 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     // Create a new path
     path2d.clear            ();
     path2d.beginPath        ();
-    path2d.moveTo           (          120,  0); // CCW
-    path2d.lineTo           (          100, 20);
-    path2d.lineTo           (           75, 20);
-    path2d.quadraticBezierTo( 50,  50,  25, 20);
-    path2d.lineTo           (            0, 20);
-    path2d.lineTo           (          -20,  0);
+    path2d.moveTo           (        120,  0); // CCW
+    path2d.lineTo           (        100, 20);
+    path2d.lineTo           (         75, 20);
+    path2d.quadraticBezierTo(50, 50,  25, 20);
+    path2d.lineTo           (          0, 20);
+    path2d.lineTo           (        -20,  0);
     path2d.endPath          ();
 
     // Fourth row
     testDrawPath_drawRow(ip2, matrix2d, path2d, row, col, penThinSolid, penThinDot, penThickSolid, penThickDot, brush1, brush2);
+
+    // Rightmost part of the image
+    row = 0;
+    col = 6;
+
+    // Create a new path
+    path2d.clear    ();
+    path2d.beginPath();
+    path2d.moveTo   (120, 70    ); // CCW
+    path2d.lineTo   (100, 50    );
+    path2d.lineTo   ( 75, 50    );
+    path2d.arcTo    ( 25, 50, 50);
+    path2d.lineTo   ( 0,  50    );
+    path2d.lineTo   (-20, 70    );
+    path2d.endPath  ();
+
+    matrix2d.identity();
+    matrix2d.translate(-50, -25);
+    matrix2d.scaleAboutOrigin(0.75f, 1.0f);
+
+    testDrawPath_drawCol(ip2, matrix2d, path2d, row, col, penThinSolid, penThickSolid);
+
+    // Create a new path
+    path2d.clear    ();
+    path2d.beginPath();
+    path2d.moveTo   (120,  0     ); // CCW
+    path2d.lineTo   (100, 20     );
+    path2d.lineTo   ( 75, 20     );
+    path2d.arcTo    ( 25, 20, -50);
+    path2d.lineTo   ( 0,  20     );
+    path2d.lineTo   (-20,  0     );
+    path2d.endPath  ();
+
+    matrix2d.identity();
+    matrix2d.translate(-50, -25);
+    matrix2d.scaleAboutOrigin(0.75f, 1.0f);
+
+    testDrawPath_drawCol(ip2, matrix2d, path2d, row, col, penThinSolid, penThickSolid);
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }

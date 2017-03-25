@@ -62,7 +62,7 @@ static inline void calculateLineParams(float& wh, float& dx, float& dy, float& n
     dx = -b * il * wh;
     dy =  a * il * wh;
 
-    // Normal vector vector
+    // Normal vector
     nx =  a * il * wh;
     ny =  b * il * wh;
 }

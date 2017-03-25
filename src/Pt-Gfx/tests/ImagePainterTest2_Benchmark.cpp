@@ -317,7 +317,7 @@ static void doBenchmark(CompositionMode cm)
         std::clog << "    Path NOAA                        @ ImagePainter2 = " << std::setw(6) << time1 << std::endl;
         time2 = benchDrawPath<ImagePainter2, true >(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushTextureT, cm, AntiAliasingMode::Standard);
         std::clog << "    Path XWAA                        @ ImagePainter2 = " << std::setw(6) << time2
-                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+                 << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         if(!BENCHMARK_RESULT_HTML) std::clog << std::endl;
     }
 }

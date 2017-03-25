@@ -32,7 +32,7 @@
 #include <Pt/Gfx/Path2D.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Math.h>
-
+#include <stdio.h>
 
 namespace Pt {
 namespace Gfx {
@@ -85,18 +85,26 @@ static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, doubl
 
 static inline void generateArcPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double r, Pt::uint8_t smoothness)
 {
-    // ### TODO ###
+    // Line equation : 0 = aX + By + c
+    // Normal        : n = ai + bj
+    const double a = y2 - y1;
+    const double b = x1 - x2;
+  //const double c = -(x1 * y2 - x2 * y1);
 
-    /*
-    int r = (int)Math.sqrt((x1-x0)*(x1-x0) + (y1-y0)*(y1-y0));
-    int x = x0-r;
-    int y = y0-r;
-    int width = 2*r;
-    int height = 2*r;
-    int startAngle = (int) (180/Math.PI*atan2(y1-y0, x1-x0));
-    int endAngle = (int) (180/Math.PI*atan2(y2-y0, x2-x0));
-    canvas.drawArc(x, y, width, height, startAngle, endAngle);
-    */
+    // Negated inverse line length
+    const float il = -Gfx::Math::fastInvSqrt(a * a + b * b);
+
+    // Circumference vector
+    const double cx =  a * il * r;
+    const double cy =  b * il * r;
+
+    // Middle point
+    const double xm = (x1 + x2) * 0.5;
+    const double ym = (y1 + y2) * 0.5;
+
+    // Use quadratic bezier curve to generate the arc
+    generateQuadraticBezierPoints(dst, x1, y1, x1 + cx, y1 + cy, xm + cx, ym + cy, smoothness);
+    generateQuadraticBezierPoints(dst, xm + cx, ym + cy, x2 + cx, y2 + cy, x2, y2, smoothness);
 }
 
 
