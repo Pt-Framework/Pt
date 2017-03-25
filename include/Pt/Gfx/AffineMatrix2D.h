@@ -699,24 +699,25 @@ void BasicAffineMatrix2D<float>::transformPoints(float* dxy, const float* sxy, s
         return;
     }
 
-    // Load the matrix's rows
-    const __m128 m0 = _mm_loadu_ps(_mdata.v[0]); // [ 00 01 02 03 ]
-    const __m128 m1 = _mm_loadu_ps(_mdata.v[1]); // [ 10 11 12 13 ]
+    // Load the matrix's rows                    //   RC RC RC RC
+    const __m128 m0 = _mm_loadu_ps(_mdata.v[0]); // [ 03 02 01 00 ]
+    const __m128 m1 = _mm_loadu_ps(_mdata.v[1]); // [ 13 12 11 10 ]
 
     _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
 
     // Extend the matrix's rows
     const __m256 m00 = _mm256_insertf128_ps(_mm256_castps128_ps256(m0), m0, 1); // [ 00 01 02 03 00 01 02 03 ]
-    const __m256 m11 = _mm256_insertf128_ps(_mm256_castps128_ps256(m1), m1, 1); // [ 10 11 12 13 10 11 12 13 ]
+    const __m256 m11 = _mm256_insertf128_ps(_mm256_castps128_ps256(m1), m1, 1); // [ 13 12 11 10 13 12 11 10 ]
 
     // Loop through 8 floats at a time
     const size_t  pointCount8 = pointCount / 8;
 
     for(size_t i = 0; i < pointCount8; ++i) {
-        // Load 8 floats from the source vector
-        const __m256 s3210 = _mm256_loadu_ps  (sxy                                        ); // [ X0 Y0 X1 Y1 X2 Y2 X3 Y3 ]
-        const __m256 s32   = _mm256_shuffle_ps(s3210, avxOneZeroF, _MM_SHUFFLE(3, 2, 3, 2)); // [ X0 Y0 1  0  X2 Y2 1  0  ]
-        const __m256 s10   = _mm256_shuffle_ps(s3210, avxOneZeroF, _MM_SHUFFLE(1, 0, 1, 0)); // [ X1 Y1 1  0  X3 Y3 1  0  ]
+        // Load 8 floats from the source vector                                              //   3  2  1  0  3  2  1  0
+        const __m256 s3210 = _mm256_loadu_ps  (sxy                                        ); // [ Y3 X3 Y2 X2 Y1 X1 Y0 X0 ]
+        const __m256 s32   = _mm256_shuffle_ps(s3210, avxOneZeroF, _MM_SHUFFLE(3, 2, 3, 2)); // [ 0  1  Y3 X3 0  1  X1 Y1 ]
+        const __m256 s10   = _mm256_shuffle_ps(s3210, avxOneZeroF, _MM_SHUFFLE(1, 0, 1, 0)); // [ 0  1  Y2 X2 0  1  Y0 X0 ]
+
         // Multiply them to the matrix's rows
         const __m256 r32_0 = _mm256_mul_ps(m00, s32);
         const __m256 r32_1 = _mm256_mul_ps(m11, s32);
@@ -757,18 +758,18 @@ void BasicAffineMatrix2D<float>::transformPoints(float* dxy, const float* sxy, s
         return;
     }
 
-    // Load the matrix's rows
-    const float32x4_t m0 = vld1q_f32(_mdata.v[0]); // [ 00 01 02 03 ]
-    const float32x4_t m1 = vld1q_f32(_mdata.v[1]); // [ 10 11 12 13 ]
+    // Load the matrix's rows                      //   RC RC RC RC
+    const float32x4_t m0 = vld1q_f32(_mdata.v[0]); // [ 03 02 01 00 ]
+    const float32x4_t m1 = vld1q_f32(_mdata.v[1]); // [ 13 12 11 10 ]
 
     // Loop through 4 floats at a time
     const size_t  pointCount4 = pointCount / 4;
 
     for(size_t i = 0; i < pointCount4; ++i) {
-        // Load 4 floats from the source vector
-        const float32x4_t s3210 = vld1q_f32   (sxy                                              ); // [ X0 Y0 X1 Y1 ]
-        const float32x4_t s32   = vcombine_f32(vget_high_f32(s3210), vget_high_f32(neonOneZeroF)); // [ X0 Y0 1  0  ]
-        const float32x4_t s10   = vcombine_f32(vget_low_f32 (s3210), vget_low_f32 (neonOneZeroF)); // [ X1 Y1 1  0  ]
+        // Load 4 floats from the source vector                                                    //   H     L
+        const float32x4_t s3210 = vld1q_f32   (sxy                                              ); // [ Y1 X1 Y0 X0 ]
+        const float32x4_t s32   = vcombine_f32(vget_high_f32(s3210), vget_high_f32(neonOneZeroF)); // [ 0  1  Y1 X1 ]
+        const float32x4_t s10   = vcombine_f32(vget_low_f32 (s3210), vget_low_f32 (neonOneZeroF)); // [ 0  1  Y0 X0 ]
         // Multiply them to the matrix's rows
         const float32x4_t r32_0 = vmulq_f32(m0, s32);
         const float32x4_t r32_1 = vmulq_f32(m1, s32);

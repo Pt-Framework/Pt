@@ -133,8 +133,8 @@ Pt::int32_t ClipShape::csComputeOutcode(Pt::int32_t x, Pt::int32_t y, const Rect
 
 void ClipShape::clipPolygon(std::vector<Point>& pio, const Rect& clippingArea)
 {
-    // If the clipping area is null, simply clear the vector
-    if(clippingArea.isNull()) {
+    // If the clipping area is null or there is too few elements, simply clear the vector
+    if(clippingArea.isNull() || pio.size() < 2) {
         pio.clear();
         return;
     }

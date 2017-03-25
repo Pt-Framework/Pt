@@ -5,7 +5,7 @@
 //     ./jam.sh configure --with-rasterizer2 --with-hmi -sGUI=linux-fb -sOPTIM=-g --with-freetype --with-libpng
 //
 //      valgrind --leak-check=full --show-leak-kinds=all --gen-suppressions=yes --demangle=no --suppressions=../src/Pt-Gfx/tests/ImagePainterTest2.supp ./ImagePainterTest2
-//      valgrind --leak-check=full --show-leak-kinds=definite,possible --suppressions=../src/Pt-Gfx/tests/ImagePainterTest2.supp ./ImagePainterTest2
+//      valgrind --leak-check=full --show-leak-kinds=definite,possible --track-origins=yes --suppressions=../src/Pt-Gfx/tests/ImagePainterTest2.supp ./ImagePainterTest2
 //
 //
 // perf record -d -g -T -e cycles,instructions,cache-references,cache-misses,bus-cycles ./ImagePainterTest2
@@ -67,7 +67,7 @@ using namespace Pt::Gfx;
 
 // General settings for Pt-Gfx
 #define DO_TEST_DRAW    1
-#define DO_BENCHMARKING 1
+#define DO_BENCHMARKING 0
 
 // Detailed-test enable settings for Pt-Gfx
 #define TEST_SOURCECOPY                         1
