@@ -313,6 +313,8 @@ Gfx::SizeF FlowLayout::onMeasureVertical(const SizePolicy& policy)
 
     Gfx::SizeF contentSize;
 
+    // TODO: handle Any case for width
+
     for( ; it != end; ++it)
     {
         Widget* item = *it; 

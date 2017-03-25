@@ -162,13 +162,11 @@ Pt::Signal<int>& ScrollLayout::scrolledY()
 void ScrollLayout::onAddWidget(Widget& w)
 {
     Base::onAddWidget(w);
-    //w.layoutChanged() += Pt::slot(*this, &ScrollLayout::layout);
 }
 
 
 void ScrollLayout::onRemoveWidget(Widget& w)
 {
-    //w.layoutChanged() -= Pt::slot(*this, &ScrollLayout::layout);
     Base::onRemoveWidget(w);
 }
 
