@@ -61,7 +61,7 @@ static void testDrawPath_drawCol(
 {
     matrix2d.rotateAboutOrigin(15);
     matrix2d.push();
-    matrix2d.translate(150 + 120 * col, 60 + 120 * row);
+    matrix2d.translate(150 + 120 * col, 70 + 120 * row);
     ip2->setPen(penThinSolid);
     ip2->drawPath(path2d, matrix2d, false);
     matrix2d.pop();
@@ -69,7 +69,7 @@ static void testDrawPath_drawCol(
 
     matrix2d.rotateAboutOrigin(15);
     matrix2d.push();
-    matrix2d.translate(150 + 120 * col, 60 + 120 * row);
+    matrix2d.translate(150 + 120 * col, 70 + 120 * row);
     ip2->setPen(penThickSolid);
     ip2->drawPath(path2d, matrix2d, false);
     matrix2d.pop();

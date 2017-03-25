@@ -15,7 +15,7 @@
   resulting executable to be covered by the GNU General Public
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
-  General Public License.
+  General Public License. 
 
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -44,6 +44,7 @@ namespace Gfx {
 
 
 class Rasterizer2;
+
 
 class PT_GFX_API ImagePainter2 : public Painter
 {

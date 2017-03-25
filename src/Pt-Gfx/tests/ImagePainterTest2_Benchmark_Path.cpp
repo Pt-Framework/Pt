@@ -103,7 +103,7 @@ static void benchDrawPath_drawCol(
 
     matrix2d.rotateAboutOrigin(15);
     matrix2d.push();
-    matrix2d.translate(150 + 120 * col, 60 + 120 * row);
+    matrix2d.translate(150 + 120 * col, 70 + 120 * row);
     pointsF.clear();
     path2d.generatePoints(pointsF, 0);
     matrix2d.transformPoints(pointsF.data(), pointsF.size());
@@ -117,7 +117,7 @@ static void benchDrawPath_drawCol(
 
     matrix2d.rotateAboutOrigin(15);
     matrix2d.push();
-    matrix2d.translate(150 + 120 * col, 60 + 120 * row);
+    matrix2d.translate(150 + 120 * col, 70 + 120 * row);
     pointsF.clear();
     path2d.generatePoints(pointsF, 0);
     matrix2d.transformPoints(pointsF.data(), pointsF.size());
@@ -130,6 +130,9 @@ static void benchDrawPath_drawCol(
     ++row;
 }
 
+// WEIRD BUG: with "-O2" this function will cause "Floating point exception"
+#pragma GCC push_options
+#pragma GCC optimize ("-O3")
 template <typename PainterT, bool WITH_RASTERISATION>
 static size_t benchDrawPath(int loopCount, const Brush& brush1, const Brush& brush2, CompositionMode cm, AntiAliasingMode antiAliasingMode)
 {
@@ -252,3 +255,4 @@ static size_t benchDrawPath(int loopCount, const Brush& brush1, const Brush& bru
     sum /= loopCount;
     return sum;
 }
+#pragma GCC pop_options

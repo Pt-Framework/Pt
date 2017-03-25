@@ -87,6 +87,7 @@ namespace Gfx {
 class DrawText2;
 class Image;
 
+
 class Rasterizer2
 {
     public:
@@ -95,7 +96,7 @@ class Rasterizer2
         typedef Point DrawLineMask[4];
 
         static const DrawLineMask NullLineMask;
-
+ 
         // Weighting filter for Xiaolin Wu's anti-aliasing algorithm
         static const Pt::uint8_t XWAA_WFILTER[256];
 
