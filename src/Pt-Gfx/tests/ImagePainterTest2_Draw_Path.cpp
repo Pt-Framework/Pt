@@ -1,3 +1,59 @@
+static void testDrawPath_drawRow(
+    ImagePainter2* ip2, AffineMatrix2D& matrix2d, const Path2D& path2d, Pt::int32_t& row, Pt::int32_t& col,
+    const Pen& penThinSolid, const Pen& penThinDot, const Pen& penThickSolid, const Pen& penThickDot,
+    const Brush& brush1, const Brush& brush2
+)
+{
+    matrix2d.rotateAboutOrigin(15);
+    matrix2d.push();
+    matrix2d.translate(80 + 120 * col, 80 + 120 * row);
+    ip2->setPen(penThinSolid);
+    ip2->drawPath(path2d, matrix2d, false);
+    matrix2d.pop();
+    ++col;
+
+    matrix2d.rotateAboutOrigin(15);
+    matrix2d.push();
+    matrix2d.translate(80 + 120 * col, 80 + 120 * row);
+    ip2->setPen(penThinDot);
+    ip2->drawPath(path2d, matrix2d, false);
+    matrix2d.pop();
+    ++col;
+
+    matrix2d.rotateAboutOrigin(15);
+    matrix2d.push();
+    matrix2d.translate(80 + 120 * col, 80 + 120 * row);
+    ip2->setPen(penThickSolid);
+    ip2->drawPath(path2d, matrix2d, false);
+    matrix2d.pop();
+    ++col;
+
+    matrix2d.rotateAboutOrigin(15);
+    matrix2d.push();
+    matrix2d.translate(80 + 120 * col, 80 + 120 * row);
+    ip2->setPen(penThickDot);
+    ip2->drawPath(path2d, matrix2d, false);
+    matrix2d.pop();
+    ++col;
+
+    matrix2d.rotateAboutOrigin(15);
+    matrix2d.push();
+    matrix2d.translate(80 + 120 * col, 80 + 120 * row);
+    ip2->setBrush(brush1);
+    ip2->fillPath(path2d, matrix2d);
+    matrix2d.pop();
+    ++col;
+
+    matrix2d.rotateAboutOrigin(15);
+    matrix2d.push();
+    matrix2d.translate(80 + 120 * col, 80 + 120 * row);
+    ip2->setBrush(brush2);
+    ip2->fillPath(path2d, matrix2d);
+    matrix2d.pop();
+    col = 0;
+    ++row;
+}
+
 static void testDrawPath(const char* title, Image& image, Painter& painter, const Brush& brush1, const Brush& brush2)
 {
     resetImage(image);
@@ -29,104 +85,10 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     matrix2d.translate(-50, -40);
 
     // First row
-    matrix2d.rotateAboutOrigin(15);
-    matrix2d.push();
-    matrix2d.translate(80 + 120 * col, 80 + 120 * row);
-    ip2->setPen(penThinSolid);
-    ip2->drawPath(path2d, matrix2d, false);
-    matrix2d.pop();
-    ++col;
-
-    matrix2d.rotateAboutOrigin(15);
-    matrix2d.push();
-    matrix2d.translate(80 + 120 * col, 80 + 120 * row);
-    ip2->setPen(penThinDot);
-    ip2->drawPath(path2d, matrix2d, false);
-    matrix2d.pop();
-    ++col;
-
-    matrix2d.rotateAboutOrigin(15);
-    matrix2d.push();
-    matrix2d.translate(80 + 120 * col, 80 + 120 * row);
-    ip2->setPen(penThickSolid);
-    ip2->drawPath(path2d, matrix2d, false);
-    matrix2d.pop();
-    ++col;
-
-    matrix2d.rotateAboutOrigin(15);
-    matrix2d.push();
-    matrix2d.translate(80 + 120 * col, 80 + 120 * row);
-    ip2->setPen(penThickDot);
-    ip2->drawPath(path2d, matrix2d, false);
-    matrix2d.pop();
-    ++col;
-
-    matrix2d.rotateAboutOrigin(15);
-    matrix2d.push();
-    matrix2d.translate(80 + 120 * col, 80 + 120 * row);
-    ip2->setBrush(brush1);
-    ip2->fillPath(path2d, matrix2d);
-    matrix2d.pop();
-    ++col;
-
-    matrix2d.rotateAboutOrigin(15);
-    matrix2d.push();
-    matrix2d.translate(80 + 120 * col, 80 + 120 * row);
-    ip2->setBrush(brush2);
-    ip2->fillPath(path2d, matrix2d);
-    matrix2d.pop();
-    col = 0;
-    ++row;
+    testDrawPath_drawRow(ip2, matrix2d, path2d, row, col, penThinSolid, penThinDot, penThickSolid, penThickDot, brush1, brush2);
 
     // Second row
-    matrix2d.rotateAboutOrigin(15);
-    matrix2d.push();
-    matrix2d.translate(80 + 120 * col, 80 + 120 * row);
-    ip2->setPen(penThinSolid);
-    ip2->drawPath(path2d, matrix2d, true);
-    matrix2d.pop();
-    ++col;
-
-    matrix2d.rotateAboutOrigin(15);
-    matrix2d.push();
-    matrix2d.translate(80 + 120 * col, 80 + 120 * row);
-    ip2->setPen(penThinDot);
-    ip2->drawPath(path2d, matrix2d, true);
-    matrix2d.pop();
-    ++col;
-
-    matrix2d.rotateAboutOrigin(15);
-    matrix2d.push();
-    matrix2d.translate(80 + 120 * col, 80 + 120 * row);
-    ip2->setPen(penThickSolid);
-    ip2->drawPath(path2d, matrix2d, true);
-    matrix2d.pop();
-    ++col;
-
-    matrix2d.rotateAboutOrigin(15);
-    matrix2d.push();
-    matrix2d.translate(80 + 120 * col, 80 + 120 * row);
-    ip2->setPen(penThickDot);
-    ip2->drawPath(path2d, matrix2d, true);
-    matrix2d.pop();
-    ++col;
-
-    matrix2d.rotateAboutOrigin(15);
-    matrix2d.push();
-    matrix2d.translate(80 + 120 * col, 80 + 120 * row);
-    ip2->setBrush(brush1);
-    ip2->fillPath(path2d, matrix2d);
-    matrix2d.pop();
-    ++col;
-
-    matrix2d.rotateAboutOrigin(15);
-    matrix2d.push();
-    matrix2d.translate(80 + 120 * col, 80 + 120 * row);
-    ip2->setBrush(brush2);
-    ip2->fillPath(path2d, matrix2d);
-    matrix2d.pop();
-    col = 0;
-    ++row;
+    testDrawPath_drawRow(ip2, matrix2d, path2d, row, col, penThinSolid, penThinDot, penThickSolid, penThickDot, brush1, brush2);
 
     // Create a new path
     path2d.clear            ();
@@ -144,54 +106,7 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     matrix2d.scaleAboutOrigin(0.75f, 1.0f);
 
     // Third row
-    matrix2d.rotateAboutOrigin(15);
-    matrix2d.push();
-    matrix2d.translate(80 + 120 * col, 80 + 120 * row);
-    ip2->setPen(penThinSolid);
-    ip2->drawPath(path2d, matrix2d, false);
-    matrix2d.pop();
-    ++col;
-
-    matrix2d.rotateAboutOrigin(15);
-    matrix2d.push();
-    matrix2d.translate(80 + 120 * col, 80 + 120 * row);
-    ip2->setPen(penThinDot);
-    ip2->drawPath(path2d, matrix2d, false);
-    matrix2d.pop();
-    ++col;
-
-    matrix2d.rotateAboutOrigin(15);
-    matrix2d.push();
-    matrix2d.translate(80 + 120 * col, 80 + 120 * row);
-    ip2->setPen(penThickSolid);
-    ip2->drawPath(path2d, matrix2d, false);
-    matrix2d.pop();
-    ++col;
-
-    matrix2d.rotateAboutOrigin(15);
-    matrix2d.push();
-    matrix2d.translate(80 + 120 * col, 80 + 120 * row);
-    ip2->setPen(penThickDot);
-    ip2->drawPath(path2d, matrix2d, false);
-    matrix2d.pop();
-    ++col;
-
-    matrix2d.rotateAboutOrigin(15);
-    matrix2d.push();
-    matrix2d.translate(80 + 120 * col, 80 + 120 * row);
-    ip2->setBrush(brush1);
-    ip2->fillPath(path2d, matrix2d);
-    matrix2d.pop();
-    ++col;
-
-    matrix2d.rotateAboutOrigin(15);
-    matrix2d.push();
-    matrix2d.translate(80 + 120 * col, 80 + 120 * row);
-    ip2->setBrush(brush2);
-    ip2->fillPath(path2d, matrix2d);
-    matrix2d.pop();
-    col = 0;
-    ++row;
+    testDrawPath_drawRow(ip2, matrix2d, path2d, row, col, penThinSolid, penThinDot, penThickSolid, penThickDot, brush1, brush2);
 
     // Create a new path
     path2d.clear            ();
@@ -205,54 +120,7 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     path2d.endPath          ();
 
     // Fourth row
-    matrix2d.rotateAboutOrigin(15);
-    matrix2d.push();
-    matrix2d.translate(80 + 120 * col, 80 + 120 * row);
-    ip2->setPen(penThinSolid);
-    ip2->drawPath(path2d, matrix2d, false);
-    matrix2d.pop();
-    ++col;
-
-    matrix2d.rotateAboutOrigin(15);
-    matrix2d.push();
-    matrix2d.translate(80 + 120 * col, 80 + 120 * row);
-    ip2->setPen(penThinDot);
-    ip2->drawPath(path2d, matrix2d, false);
-    matrix2d.pop();
-    ++col;
-
-    matrix2d.rotateAboutOrigin(15);
-    matrix2d.push();
-    matrix2d.translate(80 + 120 * col, 80 + 120 * row);
-    ip2->setPen(penThickSolid);
-    ip2->drawPath(path2d, matrix2d, false);
-    matrix2d.pop();
-    ++col;
-
-    matrix2d.rotateAboutOrigin(15);
-    matrix2d.push();
-    matrix2d.translate(80 + 120 * col, 80 + 120 * row);
-    ip2->setPen(penThickDot);
-    ip2->drawPath(path2d, matrix2d, false);
-    matrix2d.pop();
-    ++col;
-
-    matrix2d.rotateAboutOrigin(15);
-    matrix2d.push();
-    matrix2d.translate(80 + 120 * col, 80 + 120 * row);
-    ip2->setBrush(brush1);
-    ip2->fillPath(path2d, matrix2d);
-    matrix2d.pop();
-    ++col;
-
-    matrix2d.rotateAboutOrigin(15);
-    matrix2d.push();
-    matrix2d.translate(80 + 120 * col, 80 + 120 * row);
-    ip2->setBrush(brush2);
-    ip2->fillPath(path2d, matrix2d);
-    matrix2d.pop();
-    col = 0;
-    ++row;
+    testDrawPath_drawRow(ip2, matrix2d, path2d, row, col, penThinSolid, penThinDot, penThickSolid, penThickDot, brush1, brush2);
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }
