@@ -251,6 +251,7 @@ void BasicAffineMatrix2D<float>::updateMatrix(const MatrixData& n, MatrixUpdateM
      _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
 }
 
+/*
 #elif defined(PT_GFX_USE_NEON)
 
 // ### The NEON version is actually slower than the plain Arm version ###
@@ -294,6 +295,7 @@ void BasicAffineMatrix2D<float>::updateMatrix(const MatrixData& n, MatrixUpdateM
     vst1q_f32(_mdata.v[1], out1x);
     vst1q_f32(_mdata.v[2], out2x);
 }
+*/
 
 #endif
 
