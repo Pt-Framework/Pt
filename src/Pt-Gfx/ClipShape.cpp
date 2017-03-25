@@ -132,17 +132,33 @@ Pt::int32_t ClipShape::csComputeOutcode(Pt::int32_t x, Pt::int32_t y, const Rect
 
 void ClipShape::clipPolygon(std::vector<Point>& pio, const Rect& clippingArea)
 {
+    // If the clipping area is null, simply clear the vector
     if(clippingArea.isNull()) {
         pio.clear();
         return;
     }
 
+    // Perform clipping
     std::vector<Point> tmp;
 
     clipEdge(tmp, pio, clippingArea.topLeft   (), clippingArea.bottomLeft  (), CM_Left  );
     clipEdge(pio, tmp, clippingArea.topRight  (), clippingArea.bottomRight (), CM_Right );
     clipEdge(tmp, pio, clippingArea.topLeft   (), clippingArea.topRight    (), CM_Top   );
     clipEdge(pio, tmp, clippingArea.bottomLeft(), clippingArea.bottomRight (), CM_Bottom);
+
+    // Shift around the elements
+    if(pio.size() == 3) {
+        tmp.clear();
+        tmp.push_back(pio.back());
+        for(size_t i = 0; i < pio.size() - 1; ++i) tmp.push_back(pio[i]);
+    }
+    else if(pio.size() > 4) {
+        tmp.clear();
+        for(size_t i = pio.size() - 4; i < pio.size(); ++i) tmp.push_back(pio[i]);
+        for(size_t i = 0; i < pio.size() - 4; ++i) tmp.push_back(pio[i]);
+    }
+
+    pio = tmp;
 }
 
 void ClipShape::clipEdge(std::vector<Point>& out, const std::vector<Point>& in, const Point& edge0, const Point& edge1, ClipMode cm)

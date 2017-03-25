@@ -223,8 +223,7 @@ static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, float
     const float xx = x1 - x2;
     const float yy = y1 - y2;
 
-    // Curvature
-    if( !(xx * sy - yy * sx) ) {
+    if( !(xx * sy - yy * sx) ) { // Curvature
         if( dst.empty() || dst.back().x() != x1 || dst.back().y() != y1 ) dst.push_back( PointF(x1, y1) );
         if( dst.empty() || dst.back().x() != x3 || dst.back().y() != y3 ) dst.push_back( PointF(x3, y3) );
         return;

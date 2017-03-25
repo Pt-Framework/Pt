@@ -52,14 +52,11 @@ static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, doubl
     const double xx = x1 - x2;
     const double yy = y1 - y2;
 
-    // Curvature
-    if( !(xx * sy - yy * sx) ) {
+    if( !(xx * sy - yy * sx) ) { // Curvature
         if(dst.empty()) dst.push_back( PointF(x1, y1) );
         dst.push_back( PointF(x3, y3) );
         return;
     }
-
-    printf("%5.1f, %5.1f    %5.1f, %5.1f    %5.1f, %5.1f\n", x1, y1, x2, y2, x3, y3);
 
     // Calculate the length
     const double l1 = ::sqrt(sx * sx + sy * sy);
@@ -72,14 +69,14 @@ static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, doubl
     Pt::int32_t nSegs = round(l3 * smoothness / 16) + 2;
     if(nSegs < 5) nSegs = 5;
 
-    const double nSegs1i = 1.0f / (nSegs - 1);
+    const double nSegs1i = 1.0 / (nSegs - 1);
 
     for(Pt::int32_t i = 0; i < nSegs; ++i) {
         // Calculate the coordinates
         const double t  = i * nSegs1i;
-        const double it = 1.0f - t;
+        const double it = 1.0 - t;
         const double a  = it * it;
-        const double b  = 2.0f * t  * it;
+        const double b  = 2.0 * t  * it;
         const double c  = t * t;
         const double x  = a * x1 + b * x2 + c * x3;
         const double y  = a * y1 + b * y2 + c * y3;
