@@ -33,6 +33,25 @@ static void testDrawThickLine_impl(
     return;
     //*/
 
+    /*
+    painter.setPen(penOCapBJoin);
+    const PointF polyX[] = { // CCW
+        PointF(670 + 10, 120),
+        PointF(700 + 10, 180),
+        PointF(800 + 10, 130),
+        PointF(650 + 10,  20)
+    };
+    if(ip2) ip2->drawPolyline( polyX, sizeof(polyX) / sizeof(polyX[0]), false );
+    else painter.drawPolyline( polyX, sizeof(polyX) / sizeof(polyX[0]) );
+    if(true) {
+        painter.setPen(penRef);
+        if(ip2) ip2->drawPolyline( polyX, sizeof(polyX) / sizeof(polyX[0]), false );
+        else painter.drawPolyline( polyX, sizeof(polyX) / sizeof(polyX[0]) );
+    }
+    sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
+    return;
+    //*/
+
     // Test anti-aliasing
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
     painter.setPen(penBCapBJoin);
@@ -219,7 +238,7 @@ static void testDrawThickLine_impl(
 
     painter.setPen(penText); painter.drawText( PointF(650 + 20, 100 + 400), "Round" );
 
-    if(ip2) { // This hoin type is not supported by the old painter
+    if(ip2) { // This join type is not supported by the old painter
         ip2->setPen(penOCapNJoin);
         const PointF poly4a[] = { // CCW
             PointF(670 - 600 - 30, 120 + 400),

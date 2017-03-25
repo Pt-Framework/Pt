@@ -27,8 +27,6 @@
   02110-1301 USA
 */
 
-#include <stdio.h>
-
 #include <Pt/SourceInfo.h>
 
 #include <Pt/Gfx/Path2D.h>

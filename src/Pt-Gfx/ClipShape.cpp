@@ -28,6 +28,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
+#include <stdio.h>
 #include "ClipShape.h"
 
 
@@ -146,19 +147,19 @@ void ClipShape::clipPolygon(std::vector<Point>& pio, const Rect& clippingArea)
     clipEdge(tmp, pio, clippingArea.topLeft   (), clippingArea.topRight    (), CM_Top   );
     clipEdge(pio, tmp, clippingArea.bottomLeft(), clippingArea.bottomRight (), CM_Bottom);
 
-    // Shift around the elements
+    // Shift around the elements so that their original order are restored
     if(pio.size() == 3) {
         tmp.clear();
         tmp.push_back(pio.back());
         for(size_t i = 0; i < pio.size() - 1; ++i) tmp.push_back(pio[i]);
+        pio = tmp;
     }
     else if(pio.size() > 4) {
         tmp.clear();
         for(size_t i = pio.size() - 4; i < pio.size(); ++i) tmp.push_back(pio[i]);
         for(size_t i = 0; i < pio.size() - 4; ++i) tmp.push_back(pio[i]);
+        pio = tmp;
     }
-
-    pio = tmp;
 }
 
 void ClipShape::clipEdge(std::vector<Point>& out, const std::vector<Point>& in, const Point& edge0, const Point& edge1, ClipMode cm)
