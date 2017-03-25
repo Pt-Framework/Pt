@@ -59,14 +59,14 @@ using namespace Pt::Gfx;
 #define DO_MATH_BENCHMARKING_ONLY 0
 
 // Benchmark matrix operations only
-#define DO_MATRIX_BENCHMARKING_ONLY 0
+#define DO_MATRIX_BENCHMARKING_ONLY 1
 
 // Comparison with Cairo (solid-filled polygons and ellipses only)
 #define DO_BENCHMARKING_CAIRO                 0
 #define BENCHMARK_CAIRO_CHECK_RESULTING_IMAGE 0
 
 // General settings for Pt-Gfx
-#define DO_TEST_DRAW    0
+#define DO_TEST_DRAW    1
 #define DO_BENCHMARKING 1
 
 // Detailed-test enable settings for Pt-Gfx

@@ -32,7 +32,7 @@
 #include <Pt/Gfx/Path2D.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Math.h>
-#include <stdio.h>
+
 
 namespace Pt {
 namespace Gfx {

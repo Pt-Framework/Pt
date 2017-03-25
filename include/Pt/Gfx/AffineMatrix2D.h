@@ -39,15 +39,15 @@
 #include <Pt/Gfx/SIMDConfig.h>
 
 
-#undef PT_GFX_USE_AVX2
-#undef PT_GFX_USE_AVX1
+//#undef PT_GFX_USE_AVX2
+//#undef PT_GFX_USE_AVX1
 
-#undef PT_GFX_USE_SSSE3
-#undef PT_GFX_USE_SSE3
-#undef PT_GFX_USE_SSE2
-#undef PT_GFX_USE_SSE1
+//#undef PT_GFX_USE_SSSE3
+//#undef PT_GFX_USE_SSE3
+//#undef PT_GFX_USE_SSE2
+//#undef PT_GFX_USE_SSE1
 
-#undef PT_GFX_USE_NEON
+//#undef PT_GFX_USE_NEON
 
 
 namespace Pt{
@@ -214,7 +214,7 @@ void BasicAffineMatrix2D<T>::updateMatrix(const MatrixData& n, MatrixUpdateMode 
 // ===== Inlined Private Member Functions (Specialization for float) ====================
 // ======================================================================================
 
-#if defined(PT_GFX_USE_AVX1)
+#if defined(PT_GFX_USE_AVX1_X)
 
 template <>
 void BasicAffineMatrix2D<float>::updateMatrix(const MatrixData& n, MatrixUpdateMode mode)

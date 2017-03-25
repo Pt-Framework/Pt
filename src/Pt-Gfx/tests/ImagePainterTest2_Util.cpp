@@ -444,6 +444,9 @@ static void benchMatrixOps()
     printf("D: Point                  -> (%6.3f, %6.3f)\n", pf[3].x(), pf[3].y());
     printf("D: Point                  -> (%6.3f, %6.3f)\n", pf[4].x(), pf[4].y());
 
+#warning 123
+return;
+
     // Performance check
     Pt::System::Clock clock;
 
