@@ -39,17 +39,6 @@
 #include <Pt/Gfx/SIMDConfig.h>
 
 
-//#undef PT_GFX_USE_AVX2
-//#undef PT_GFX_USE_AVX1
-
-//#undef PT_GFX_USE_SSSE3
-//#undef PT_GFX_USE_SSE3
-//#undef PT_GFX_USE_SSE2
-//#undef PT_GFX_USE_SSE1
-
-//#undef PT_GFX_USE_NEON
-
-
 namespace Pt{
 namespace Gfx{
 
@@ -214,7 +203,7 @@ void BasicAffineMatrix2D<T>::updateMatrix(const MatrixData& n, MatrixUpdateMode 
 // ===== Inlined Private Member Functions (Specialization for float) ====================
 // ======================================================================================
 
-#if defined(PT_GFX_USE_AVX1_X)
+#if defined(PT_GFX_USE_AVX1)
 
 template <>
 void BasicAffineMatrix2D<float>::updateMatrix(const MatrixData& n, MatrixUpdateMode mode)
@@ -721,14 +710,13 @@ void BasicAffineMatrix2D<float>::transformPoints(float* dxy, const float* sxy, s
     const __m256 m11 = _mm256_insertf128_ps(_mm256_castps128_ps256(m1), m1, 1); // [ 13 12 11 10 13 12 11 10 ]
 
     // Loop through 8 floats at a time
-    const size_t  pointCount8 = pointCount / 8;
+    const size_t pointCount8 = pointCount / 8;
 
     for(size_t i = 0; i < pointCount8; ++i) {
         // Load 8 floats from the source vector                                              //   3  2  1  0  3  2  1  0
         const __m256 s3210 = _mm256_loadu_ps  (sxy                                        ); // [ Y3 X3 Y2 X2 Y1 X1 Y0 X0 ]
         const __m256 s32   = _mm256_shuffle_ps(s3210, avxOneZeroF, _MM_SHUFFLE(3, 2, 3, 2)); // [ 0  1  Y3 X3 0  1  X1 Y1 ]
         const __m256 s10   = _mm256_shuffle_ps(s3210, avxOneZeroF, _MM_SHUFFLE(1, 0, 1, 0)); // [ 0  1  Y2 X2 0  1  Y0 X0 ]
-
         // Multiply them to the matrix's rows
         const __m256 r32_0 = _mm256_mul_ps(m00, s32);
         const __m256 r32_1 = _mm256_mul_ps(m11, s32);
@@ -774,7 +762,7 @@ void BasicAffineMatrix2D<float>::transformPoints(float* dxy, const float* sxy, s
     const float32x4_t m1 = vld1q_f32(_mdata.v[1]); // [ 13 12 11 10 ]
 
     // Loop through 4 floats at a time
-    const size_t  pointCount4 = pointCount / 4;
+    const size_t pointCount4 = pointCount / 4;
 
     for(size_t i = 0; i < pointCount4; ++i) {
         // Load 4 floats from the source vector                                                    //   H     L
