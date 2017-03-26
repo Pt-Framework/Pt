@@ -38,6 +38,8 @@
 
 #include <Pt/Gfx/SIMDConfig.h>
 
+#undef PT_GFX_USE_NEON
+
 
 namespace Pt{
 namespace Gfx{
@@ -932,29 +934,13 @@ void BasicAffineMatrix2D<double>::transformPoints(double* dxy, const double* sxy
         const __m256d r0_0 = _mm256_mul_pd(_mdata.r[0], s0); // [ 03 02 01 00 ]
         const __m256d r0_1 = _mm256_mul_pd(_mdata.r[1], s0); // [ 13 12 11 10 ]
         // Horizontal add the multiplication results
-/*
-        const __m256d r1  = _mm256_hadd_pd(r1_0, r1_1);
-        const __m256d r0  = _mm256_hadd_pd(r0_0, r0_1);
-        double _r1[4], _r0[4];
-        _mm256_storeu_pd(_r1, r1);
-        _mm256_storeu_pd(_r0, r0);
-        dxy[0] = _r0[2] + _r0[0];
-        dxy[1] = _r0[3] + _r0[1];
-        dxy[2] = _r1[2] + _r1[0];
-        dxy[3] = _r1[3] + _r1[1];
-*/
-        const __m256d r1  = _mm256_hadd_pd(r1_1, r0_1);
-        const __m256d r0  = _mm256_hadd_pd(r1_0, r0_0);
-        double _r1[4], _r0[4];
-        _mm256_storeu_pd(_r1, r1);
-        _mm256_storeu_pd(_r0, r0);
-        dxy[0] = _r0[3] + _r0[1];
-        dxy[1] = _r1[3] + _r1[1];
-        dxy[2] = _r0[2] + _r0[0];
-        dxy[3] = _r1[2] + _r1[0];
-
+        const __m256d r1x = _mm256_hadd_pd(r1_0, r1_1);
+        const __m256d r0x = _mm256_hadd_pd(r0_0, r0_1);
+        // Permute and further add the multiplication results
+        const __m256d r1  = _mm256_permute2f128_pd(r1x, r0x, 0x31);
+        const __m256d r0  = _mm256_permute2f128_pd(r1x, r0x, 0x02);
+        const __m256d r10 = _mm256_add_pd(r1, r0);
         // Store 4 doubles to the destination vector
-        /*
         _mm256_storeu_pd(
             dxy,
             _mm256_or_pd(
@@ -962,8 +948,7 @@ void BasicAffineMatrix2D<double>::transformPoints(double* dxy, const double* sxy
                 _mm256_and_pd(r10, _mm256_cmp_pd(s10, avxMaxCordD, _CMP_LE_OQ))  // Retain result values <= maximum coordinate
             )
         );
-        */
-        //_mm256_storeu_pd(dxy, r10);
+        _mm256_storeu_pd(dxy, r10);
         // Increment the pointers
         sxy += 4;
         dxy += 4;

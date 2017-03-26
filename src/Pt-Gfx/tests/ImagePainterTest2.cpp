@@ -175,7 +175,7 @@ int main(int argc, char* args[])
 
     // Benchmark matrix operations only
     if(DO_MATRIX_BENCHMARKING_ONLY) {
-        //printf("<float>\n" ); benchMatrixOps<float >();
+        printf("<float>\n" ); benchMatrixOps<float >();
         printf("<double>\n"); benchMatrixOps<double>();
         return 0;
     }
