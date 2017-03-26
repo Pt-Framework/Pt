@@ -309,12 +309,6 @@ void Rasterizer2::updatePenPattern()
 
 void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
 {
-    // Start colors
-    Pt::uint8_t rs, gs, bs, as;
-
-    // End colors
-    Pt::uint8_t re, ge, be, ae;
-
     // Resize the brush buffer and the start-end colors
     switch(_brush.fillStyle()) {
         case Pt::Gfx::Brush::HorizontalGradient:
@@ -342,15 +336,16 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
             return;
     }
 
-    // Determine the colors
-    rs = _brush.color        ().red  () / 257;
-    gs = _brush.color        ().green() / 257;
-    bs = _brush.color        ().blue () / 257;
-    as = _brush.color        ().alpha() / 257;
-    re = _brush.gradientColor().red  () / 257;
-    ge = _brush.gradientColor().green() / 257;
-    be = _brush.gradientColor().blue () / 257;
-    ae = _brush.gradientColor().alpha() / 257;
+    // Determine the start and end colors
+    const Pt::uint8_t rs = _brush.color        ().red  () / 257;
+    const Pt::uint8_t gs = _brush.color        ().green() / 257;
+    const Pt::uint8_t bs = _brush.color        ().blue () / 257;
+    const Pt::uint8_t as = _brush.color        ().alpha() / 257;
+
+    const Pt::uint8_t re = _brush.gradientColor().red  () / 257;
+    const Pt::uint8_t ge = _brush.gradientColor().green() / 257;
+    const Pt::uint8_t be = _brush.gradientColor().blue () / 257;
+    const Pt::uint8_t ae = _brush.gradientColor().alpha() / 257;
 
     // Create one-dimensional gradient
     if(width == 1 || height == 1) {
