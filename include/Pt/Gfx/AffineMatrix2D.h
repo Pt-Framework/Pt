@@ -905,8 +905,10 @@ void BasicAffineMatrix2D<float>::transformPoints(PointF* dxy, const PointF* sxy,
 // ======================================================================================
 // ===== Inlined Public Member Functions (Specialization for double) ====================
 // ======================================================================================
-
+/*
 #if defined(PT_GFX_USE_AVX1)
+
+// ### The AVX version is actually slower than the plain x86_64 version ###
 
 template <>
 void BasicAffineMatrix2D<double>::transformPoints(double* dxy, const double* sxy, size_t pointCount) const
@@ -946,7 +948,6 @@ void BasicAffineMatrix2D<double>::transformPoints(double* dxy, const double* sxy
                 _mm256_and_pd(r10, _mm256_cmp_pd(s10, avxMaxCordD, _CMP_LE_OQ))  // Retain result values <= maximum coordinate
             )
         );
-        _mm256_storeu_pd(dxy, r10);
         // Increment the pointers
         sxy += 4;
         dxy += 4;
@@ -987,6 +988,7 @@ void BasicAffineMatrix2D<double>::transformPoints(PointF* dxy, const PointF* sxy
 }
 
 #endif
+*/
 
 
 //

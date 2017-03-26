@@ -633,10 +633,10 @@ static void benchMatrixOps()
     D: Point                  -> (17.500, 72.000)
     D: Point                  -> (18.500, 96.000)
     D: Point                  -> ( 7.500, 50.000)
-    Time M    = M * M    :  6.713867 nS
-    Time VD[] = M * VS[] :  0.366211 nS
-    Time VS[] = M * VS[] :  0.366211 nS
-    Time VS[] = M * VS[] :  0.366211 nS
+    Time M    = M * M    :  6.713867 nS   [WITH AVX]
+    Time VD[] = M * VS[] :  0.366211 nS   [WITH AVX]
+    Time VS[] = M * VS[] :  0.366211 nS   [WITH AVX]
+    Time VS[] = M * VS[] :  0.366211 nS   [WITH AVX]
 
     <double>
     Initial value
@@ -663,10 +663,10 @@ static void benchMatrixOps()
     D: Point                  -> (17.500, 72.000)
     D: Point                  -> (18.500, 96.000)
     D: Point                  -> ( 7.500, 50.000)
-    Time M    = M * M    :  6.469727 nS
-    Time VD[] = M * VS[] :  0.732422 nS
-    Time VS[] = M * VS[] :  0.732422 nS
-    Time VS[] = M * VS[] :  0.732422 nS
+    Time M    = M * M    :  6.469727 nS   [WITH AVX]
+    Time VD[] = M * VS[] :  0.732422 nS   [NO   AVX]
+    Time VS[] = M * VS[] :  0.732422 nS   [NO   AVX]
+    Time VS[] = M * VS[] :  0.732422 nS   [NO   AVX]
     */
 
     /*
@@ -761,12 +761,12 @@ static void benchMatrixOps()
     D: Point                  -> (17.500, 72.000)
     D: Point                  -> (18.500, 96.000)
     D: Point                  -> ( 7.500, 50.000)
-    Time M    = M * M    : 45.898438 nS
-    Time VD[] = M * VS[] :  7.324219 nS
-    Time VS[] = M * VS[] :  7.324219 nS
-    Time VS[] = M * VS[] :  7.324219 nS
+    Time M    = M * M    : 45.898438 nS   [NO   NEON]
+    Time VD[] = M * VS[] :  7.812500 nS   [WITH NEON]
+    Time VS[] = M * VS[] :  7.812500 nS   [WITH NEON]
+    Time VS[] = M * VS[] :  7.812500 nS   [WITH NEON]
 
-    <double> [DOES NOT USE NEON]
+    <double>
     Initial value
         |   1.000   0.000   0.000 |
         |   0.000   1.000   0.000 |
@@ -791,9 +791,9 @@ static void benchMatrixOps()
     D: Point                  -> (17.500, 72.000)
     D: Point                  -> (18.500, 96.000)
     D: Point                  -> ( 7.500, 50.000)
-    Time M    = M * M    : 43.945312 nS
-    Time VD[] = M * VS[] :  9.277344 nS
-    Time VS[] = M * VS[] :  9.277344 nS
-    Time VS[] = M * VS[] :  9.277344 nS
+    Time M    = M * M    : 43.945312 nS   [NO NEON]
+    Time VD[] = M * VS[] :  9.277344 nS   [NO NEON]
+    Time VS[] = M * VS[] :  9.277344 nS   [NO NEON]
+    Time VS[] = M * VS[] :  9.277344 nS   [NO NEON]
     */
 }
