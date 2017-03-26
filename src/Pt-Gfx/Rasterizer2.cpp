@@ -404,8 +404,8 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
                 for(Pt::int32_t x = 0; x < width; ++x) {
                     const float dx  = x - cx;
                     const float deg = Gfx::Math::convertCartesianToPolarCoordinate(dy, dx);
-                          float mf=0;
-                          float imf=0;
+                          float mf  = 0.0f;
+                          float imf = 0.0f;
                     if(deg >= 0.0f && deg < 90.0f) {
                         mf  = deg / 90.0f;
                         imf = 1.0f - mf;
@@ -428,6 +428,11 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
                     *pixel++ = (as * mf + ae * imf);
                 }
             }
+             pixel   = _brushBuffer.data() + ( (height / 2) * width + (width / 2) ) * 4;
+            *pixel++ = (bs * 0.5f + be * 0.5f);
+            *pixel++ = (gs * 0.5f + ge * 0.5f);
+            *pixel++ = (rs * 0.5f + re * 0.5f);
+            *pixel++ = (as * 0.5f + ae * 0.5f);
             break;
         }
 
