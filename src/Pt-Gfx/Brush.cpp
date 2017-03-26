@@ -112,12 +112,18 @@ BrushData::BrushData(const Image& texture)
 
 
 BrushData::BrushData(const Color& from, const Color& to, Brush::GradientDirection g)
-: _fillStyle( g == Brush::Horizontal ? Brush::HorizontalGradient
-                                     : Brush::VerticalGradient)
-, _color(from)
+: _color(from)
 , _gradientColor(to)
 , _isNull(false)
 {
+    switch(g) {
+        case Brush::Horizontal  : _fillStyle = Brush::HorizontalGradient;  break;
+        case Brush::Vertical    : _fillStyle = Brush::VerticalGradient;    break;
+        case Brush::Rectangular : _fillStyle = Brush::RectangularGradient; break;
+        case Brush::Radial      : _fillStyle = Brush::RadialGradient;      break;
+        case Brush::Conical     : _fillStyle = Brush::ConicalGradient;     break;
+        default                 : _fillStyle = Brush::Solid;               break;
+    }
 }
 
 

@@ -427,13 +427,22 @@ static inline void generateLineRoundHoleCap(std::vector<PointF>& dst, float x, f
     );
 }
 
-static inline void generateLineArrowCap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
+static inline void generateLineArrow1Cap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
 {
     dst.push_back( PointF(x + nx,        y + ny       ) );
     dst.push_back( PointF(x + nx * 2.0f, y + ny * 2.0f) );
     dst.push_back( PointF(x - dx,        y - dy       ) );
     dst.push_back( PointF(x - nx * 2.0f, y - ny * 2.0f) );
     dst.push_back( PointF(x - nx,        y - ny       ) );
+}
+
+static inline void generateLineArrow2Cap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
+{
+    dst.push_back( PointF(x + dx * 0.5f + nx,        y + dy * 0.5f + ny       ) );
+    dst.push_back( PointF(x + dx        + nx * 2.0f, y + dy        + ny * 2.0f) );
+    dst.push_back( PointF(x - dx,                    y - dy                   ) );
+    dst.push_back( PointF(x + dx        - nx * 2.0f, y + dy        - ny * 2.0f) );
+    dst.push_back( PointF(x + dx * 0.5f - nx,        y + dy * 0.5f - ny       ) );
 }
 
 static inline void combineLinePointsAndAddCaps(std::vector<Point>& dst, const std::vector<Point>& inner, const std::vector<Point>& outer, Pen::CapStyle begCap, Pen::CapStyle endCap, size_t penSize)
@@ -452,7 +461,7 @@ static inline void combineLinePointsAndAddCaps(std::vector<Point>& dst, const st
     const float       x2b  = (float) (ox2b + ix2b) * 0.5f;
     const float       y2b  = (float) (oy2b + iy2b) * 0.5f;
 
-    // Intersect the end lines
+    // Calculate the line parameters
     float wh2, dx2, dy2, nx2, ny2;
     calculateLineParams(wh2, dx2, dy2, nx2, ny2, x2a, y2a, x2b, y2b, penSize);
 
@@ -482,6 +491,14 @@ static inline void combineLinePointsAndAddCaps(std::vector<Point>& dst, const st
             break;
 
         case Pen::RoundHoleCap: {
+            /*
+            // Calculate additional line parameters
+            float wh2i, dx2i, dy2i, nx2i, ny2i;
+            float wh2o, dx2o, dy2o, nx2o, ny2o;
+            calculateLineParams(wh2i, dx2i, dy2i, nx2i, ny2i, ix2a, iy2a, ix2b, iy2b, penSize);
+            calculateLineParams(wh2o, dx2o, dy2o, nx2o, ny2o, ox2a, oy2a, ox2b, oy2b, penSize);
+            // Generate the points
+            */
             std::vector<PointF> tmp;
             generateQuadraticBezierPoints(tmp, ix2a - dx2, iy2a - dy2, x2a + dx2, y2a + dy2, ox2a - dx2, oy2a - dy2, penSize);
             if(tmp.size() <= 2) break;
@@ -491,10 +508,18 @@ static inline void combineLinePointsAndAddCaps(std::vector<Point>& dst, const st
             break;
         }
 
-        case Pen::ArrowCap:
+        case Pen::Arrow1Cap:
             dst.push_back( Point( round(x2a - nx2 * 2.0f), round(y2a - ny2 * 2.0f) ) );
             dst.push_back( Point( round(x2a - dx2       ), round(y2a - dy2       ) ) );
             dst.push_back( Point( round(x2a + nx2 * 2.0f), round(y2a + ny2 * 2.0f) ) );
+            break;
+
+        case Pen::Arrow2Cap:
+            dst.push_back( Point( round(x2a - dx2 * 0.5f - nx2       ), round(y2a - dy2 * 0.5f - ny2       ) ) );
+            dst.push_back( Point( round(x2a              - nx2 * 2.0f), round(y2a              - ny2 * 2.0f) ) );
+            dst.push_back( Point( round(x2a - dx2 * 2.0f             ), round(y2a - dy2 * 2.0f             ) ) );
+            dst.push_back( Point( round(x2a              + nx2 * 2.0f), round(y2a              + ny2 * 2.0f) ) );
+            dst.push_back( Point( round(x2a - dx2 * 0.5f + nx2       ), round(y2a - dy2 * 0.5f + ny2       ) ) );
             break;
 
         default:
@@ -548,20 +573,35 @@ static inline void combineLinePointsAndAddCaps(std::vector<Point>& dst, const st
             break;
 
         case Pen::RoundHoleCap: {
+            /*
+            // Calculate additional line parameters
+            float wh1i, dx1i, dy1i, nx1i, ny1i;
+            float wh1o, dx1o, dy1o, nx1o, ny1o;
+            calculateLineParams(wh1i, dx1i, dy1i, nx1i, ny1i, ix1a, iy1a, ix1b, iy1b, penSize);
+            calculateLineParams(wh1o, dx1o, dy1o, nx1o, ny1o, ox1a, oy1a, ox1b, oy1b, penSize);
+            // Generate the points
+            */
             std::vector<PointF> tmp;
             generateQuadraticBezierPoints(tmp, ox1a + dx1, oy1a + dy1, x1a - dx1, y1a - dy1, ix1a + dx1, iy1a + dy1, penSize);
             if(tmp.size() <= 2) break;
             for(size_t i = 1; i < tmp.size() - 1; ++i) {
                 dst.push_back( Point( round(tmp[i].x()), round(tmp[i].y()) ) );
             }
-
             break;
         }
 
-        case Pen::ArrowCap:
+        case Pen::Arrow1Cap:
             dst.push_back( Point( round(x1a + nx1 * 2.0f), round(y1a + ny1 * 2.0f) ) );
             dst.push_back( Point( round(x1a + dx1       ), round(y1a + dy1       ) ) );
             dst.push_back( Point( round(x1a - nx1 * 2.0f), round(y1a - ny1 * 2.0f) ) );
+            break;
+
+        case Pen::Arrow2Cap:
+            dst.push_back( Point( round(x1a + dx1 * 0.5f + nx1       ), round(y1a + dy1 * 0.5f + ny1       ) ) );
+            dst.push_back( Point( round(x1a              + nx1 * 2.0f), round(y1a              + ny1 * 2.0f) ) );
+            dst.push_back( Point( round(x1a + dx1 * 2.0f             ), round(y1a + dy1 * 2.0f             ) ) );
+            dst.push_back( Point( round(x1a              - nx1 * 2.0f), round(y1a              - ny1 * 2.0f) ) );
+            dst.push_back( Point( round(x1a + dx1 * 0.5f - nx1       ), round(y1a + dy1 * 0.5f - ny1       ) ) );
             break;
 
         default:
@@ -1018,12 +1058,6 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
     const float aafc = Gfx::Math::PiMul2 * Gfx::Math::fastSqrt( (aafa * aafa + aafb * aafb) / 2.0f );
     const float aafd = 360.0f * penSize2 / aafc;
 
-    // Calculate the adjusted angle
-    const float odegBegin = (degBegin < 0) ? (degBegin - aafd) : (degBegin + aafd);
-    const float odegEnd   = (degEnd   < 0) ? (degEnd   - aafd) : (degEnd   + aafd);
-    const float idegBegin = (degBegin < 0) ? (degBegin + aafd) : (degBegin - aafd);
-    const float idegEnd   = (degEnd   < 0) ? (degEnd   + aafd) : (degEnd   - aafd);
-
     // Calculate the arc's parameters
     const Pt::int32_t radiusX = size.width () / 2;
     const Pt::int32_t radiusY = size.height() / 2;
@@ -1037,7 +1071,7 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
     newPen.setJoinStyle(Pen::MiterJoin);
 
     // Solid
-    if(_rasterizer->pen().style() == Pen::Solid) {
+    if(newPen.style() == Pen::Solid) {
         // Calculate the additional arc's parameters
         const Pt::int32_t radiusXo   = ( size.width () + penSize ) / 2;
         const Pt::int32_t radiusYo   = ( size.height() + penSize ) / 2;
@@ -1058,6 +1092,11 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
             generateArcPoints(points, radiusXi, radiusYi, centerX + shiftX, centerY + shiftY, degBegin, degEnd, 0);
         }
         else if(arcMode == ArcMode::Pie) {
+            // Calculate the adjusted angle
+            const float odegBegin = (degBegin < 0) ? (degBegin - aafd) : (degBegin + aafd);
+            const float odegEnd   = (degEnd   < 0) ? (degEnd   - aafd) : (degEnd   + aafd);
+            const float idegBegin = (degBegin < 0) ? (degBegin + aafd) : (degBegin - aafd);
+            const float idegEnd   = (degEnd   < 0) ? (degEnd   + aafd) : (degEnd   - aafd);
             // The arc's "outside" lines
             generateArcPoints(points, radiusXo, radiusYo, centerX, centerY, odegBegin, odegEnd, 0);
             points.push_back(Point(centerXsub, centerYsub));
@@ -1069,10 +1108,20 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
         else { // ArcMode::Open
             // The arc's "inside" and "outside" lines
             std::vector<Point> inner, outer;
-            generateArcPoints(inner, radiusXi, radiusYi, centerX, centerY, degBegin, degEnd, 0);
-            generateArcPoints(outer, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd, 0);
+            if(newPen.capStyle() == Pen::Arrow2Cap) {
+                // Calculate the adjusted angle
+                const float adegBegin = (degBegin < 0) ? (degBegin - aafd) : (degBegin + aafd);
+                const float adegEnd   = (degEnd   < 0) ? (degEnd   + aafd) : (degEnd   - aafd);
+                // Generate the points
+                generateArcPoints(inner, radiusXi, radiusYi, centerX, centerY, adegBegin, adegEnd, 0);
+                generateArcPoints(outer, radiusXo, radiusYo, centerX, centerY, adegBegin, adegEnd, 0);
+            }
+            else {
+                generateArcPoints(inner, radiusXi, radiusYi, centerX, centerY, degBegin, degEnd, 0);
+                generateArcPoints(outer, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd, 0);
+            }
             // Combine the arc's lines and add caps
-            combineLinePointsAndAddCaps(points, inner, outer, _rasterizer->pen().capStyle(), _rasterizer->pen().capStyle(), penSize);
+            combineLinePointsAndAddCaps(points, inner, outer, newPen.capStyle(), newPen.capStyle(), penSize);
         }
         // Rasterize the polygon
         _rasterizer->setPen(newPen);
@@ -1094,7 +1143,16 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
             points.push_back( Point(centerX, centerY) );
         }
         else { // ArcMode::Open
-            generateArcPoints(points, radiusX, radiusY, centerX, centerY, degBegin, degEnd, newPen.size());
+            if(newPen.capStyle() == Pen::Arrow2Cap) {
+                // Calculate the adjusted angle
+                const float adegBegin = (degBegin < 0) ? (degBegin - aafd) : (degBegin + aafd);
+                const float adegEnd   = (degEnd   < 0) ? (degEnd   + aafd) : (degEnd   - aafd);
+                // Generate the points
+                generateArcPoints(points, radiusX, radiusY, centerX, centerY, adegBegin, adegEnd, newPen.size());
+            }
+            else {
+                generateArcPoints(points, radiusX, radiusY, centerX, centerY, degBegin, degEnd, newPen.size());
+            }
         }
         // Convert the points
         std::vector<PointF> pointsF(points.size());
@@ -1223,7 +1281,8 @@ void ImagePainter2::generateSolidLineSegment(std::vector<PointF>& dst, float x1,
             case Pen::TriangularOutCap : generateLineTriangularOutCap(dst, x1, y1,     dx, dy, nx, ny); break;
             case Pen::TriangularInCap  : generateLineTriangularInCap (dst, x1, y1,     dx, dy, nx, ny); break;
             case Pen::RoundHoleCap     : generateLineRoundHoleCap    (dst, x1, y1, wh, dx, dy, nx, ny); break;
-            case Pen::ArrowCap         : generateLineArrowCap        (dst, x1, y1,     dx, dy, nx, ny); break;
+            case Pen::Arrow1Cap        : generateLineArrow1Cap       (dst, x1, y1,     dx, dy, nx, ny); break;
+            case Pen::Arrow2Cap        : generateLineArrow2Cap       (dst, x1, y1,     dx, dy, nx, ny); break;
             default                    : openingCap = false;
         }
     }
@@ -1236,7 +1295,8 @@ void ImagePainter2::generateSolidLineSegment(std::vector<PointF>& dst, float x1,
             case Pen::TriangularOutCap : generateLineTriangularOutCap(dst, x2, y2,     -dx, -dy, -nx, -ny); break;
             case Pen::TriangularInCap  : generateLineTriangularInCap (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
             case Pen::RoundHoleCap     : generateLineRoundHoleCap    (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
-            case Pen::ArrowCap         : generateLineArrowCap        (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
+            case Pen::Arrow1Cap        : generateLineArrow1Cap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
+            case Pen::Arrow2Cap        : generateLineArrow2Cap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
             default                    : closingCap = false;
         }
     }
@@ -1702,7 +1762,8 @@ void ImagePainter2::generatePatternedSingleLineSegment(std::vector<PointF>& dst,
             case Pen::TriangularOutCap : generateLineTriangularOutCap(dst, x1, y1,     dx, dy, nx, ny); break;
             case Pen::TriangularInCap  : generateLineTriangularInCap (dst, x1, y1,     dx, dy, nx, ny); break;
             case Pen::RoundHoleCap     : generateLineRoundHoleCap    (dst, x1, y1, wh, dx, dy, nx, ny); break;
-            case Pen::ArrowCap         : generateLineArrowCap        (dst, x1, y1,     dx, dy, nx, ny); break;
+            case Pen::Arrow1Cap        : generateLineArrow1Cap       (dst, x1, y1,     dx, dy, nx, ny); break;
+            case Pen::Arrow2Cap        : generateLineArrow2Cap       (dst, x1, y1,     dx, dy, nx, ny); break;
             default                    : generateLineButtCap         (dst, x1, y1,             nx, ny); break;
         }
         // --- End point ---
@@ -1712,7 +1773,8 @@ void ImagePainter2::generatePatternedSingleLineSegment(std::vector<PointF>& dst,
             case Pen::TriangularOutCap : generateLineTriangularOutCap(dst, x2, y2,     -dx, -dy, -nx, -ny); break;
             case Pen::TriangularInCap  : generateLineTriangularInCap (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
             case Pen::RoundHoleCap     : generateLineRoundHoleCap    (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
-            case Pen::ArrowCap         : generateLineArrowCap        (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
+            case Pen::Arrow1Cap        : generateLineArrow1Cap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
+            case Pen::Arrow2Cap        : generateLineArrow2Cap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
             default                    : generateLineButtCap         (dst, x2, y2,               -nx, -ny); break;
         }
         //lprintf("    Segment #%2zd : (%5.1f, %5.1f) - (%5.1f, %5.1f)\n", i, x1, y1, x2, y2);
@@ -1934,7 +1996,8 @@ void ImagePainter2::sagGenerateSimpleLineSegment(SAGOpState& state, float x1, fl
         case Pen::TriangularOutCap : generateLineTriangularOutCap(pointsF, x1, y1,     dx, dy, nx, ny); break;
         case Pen::TriangularInCap  : generateLineTriangularInCap (pointsF, x1, y1,     dx, dy, nx, ny); break;
         case Pen::RoundHoleCap     : generateLineRoundHoleCap    (pointsF, x1, y1, wh, dx, dy, nx, ny); break;
-        case Pen::ArrowCap         : generateLineArrowCap        (pointsF, x1, y1,     dx, dy, nx, ny); break;
+        case Pen::Arrow1Cap        : generateLineArrow1Cap       (pointsF, x1, y1,     dx, dy, nx, ny); break;
+        case Pen::Arrow2Cap        : generateLineArrow2Cap       (pointsF, x1, y1,     dx, dy, nx, ny); break;
         default                    : generateLineButtCap         (pointsF, x1, y1,             nx, ny); break;
     }
     // --- End point ---
@@ -1944,7 +2007,8 @@ void ImagePainter2::sagGenerateSimpleLineSegment(SAGOpState& state, float x1, fl
         case Pen::TriangularOutCap : generateLineTriangularOutCap(pointsF, x2, y2,     -dx, -dy, -nx, -ny); break;
         case Pen::TriangularInCap  : generateLineTriangularInCap (pointsF, x2, y2,     -dx, -dy, -nx, -ny); break;
         case Pen::RoundHoleCap     : generateLineRoundHoleCap    (pointsF, x2, y2, wh, -dx, -dy, -nx, -ny); break;
-        case Pen::ArrowCap         : generateLineArrowCap        (pointsF, x2, y2,     -dx, -dy, -nx, -ny); break;
+        case Pen::Arrow1Cap        : generateLineArrow1Cap       (pointsF, x2, y2,     -dx, -dy, -nx, -ny); break;
+        case Pen::Arrow2Cap        : generateLineArrow2Cap       (pointsF, x2, y2,     -dx, -dy, -nx, -ny); break;
         default                    : generateLineButtCap         (pointsF, x2, y2,               -nx, -ny); break;
     }
 

@@ -1,11 +1,11 @@
 /* Copyright (C) 2006-2016 Marc Boris Duerner
    Copyright (C) 2010 Aloysius Indrayanto
- 
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
- 
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -15,15 +15,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
- 
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
- 
-  You should have received a copy of the GNU Lesser General Public 
+
+  You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
 
@@ -44,16 +44,22 @@ class PT_GFX_API Brush
     public:
         enum FillStyle
         {
-            Solid = 0,
-            Texture = 1,
-            HorizontalGradient = 2,
-            VerticalGradient = 3
+            Solid               = 0,
+            Texture             = 1,
+            HorizontalGradient  = 2,
+            VerticalGradient    = 3,
+            RectangularGradient = 4,
+            RadialGradient      = 5,
+            ConicalGradient     = 6
         };
 
         enum GradientDirection
         {
-            Horizontal = 0,
-            Vertical = 1
+            Horizontal  =  0,
+            Vertical    =  1,
+            Rectangular =  2,
+            Radial      =  3,
+            Conical     =  4
         };
 
     public:

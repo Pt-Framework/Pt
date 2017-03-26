@@ -130,6 +130,7 @@ class PT_GFX_API Path2D {
         //
         // Generators
         //
+        // NOTE: If you enlarge (scale-up) the shape, you may need to increase the "smoothness" factor as needed
         void generatePoints(std::vector<PointF>& dst, Pt::uint8_t smoothness = 0) const;
 
     private:

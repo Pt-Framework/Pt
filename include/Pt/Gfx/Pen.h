@@ -71,7 +71,8 @@ class PT_GFX_API Pen
                         TriangularOutCap = 3,
                         TriangularInCap  = 4,
                         RoundHoleCap     = 5,
-                        ArrowCap         = 6,
+                        Arrow1Cap        = 6,
+                        Arrow2Cap        = 7,
                         FlatCap          = 0, // FlatCap       and ButtCap          are the same
                         ProjectingCap    = 1, // ProjectingCap and SquareCap        are the same
                         TriangularCap    = 3, // TriangularCap and TriangularOutCap are the same
