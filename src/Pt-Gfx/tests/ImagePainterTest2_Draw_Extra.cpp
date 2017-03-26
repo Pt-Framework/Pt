@@ -2,7 +2,7 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
 {
     resetImage(image);
 
-    Pen penHCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 16, Pen::Solid, Pen::RoundHoleCap, Pen::BevelJoin);
+    Pen penHCapBJoin(Color::fromRgb8(  0, 255, 0, 175), 20, Pen::Solid, Pen::RoundHoleCap, Pen::BevelJoin);
     Pen penACapBJoin(Color::fromRgb8(  0, 255, 0, 175), 20, Pen::Solid, Pen::ArrowCap,     Pen::BevelJoin);
 
     Pen penText( Color::fromRgb8(255,   0,   0, 175) );
