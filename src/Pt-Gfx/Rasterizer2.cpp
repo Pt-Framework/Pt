@@ -372,23 +372,23 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
     }
 
     // Create two-dimensional gradient
-    const float        cx   = width  * 0.5f;
-    const float        cy   = height * 0.5f;
-    const float        ilen = 1.0f / Gfx::Math::fastSqrt(cx * cx + cy * cy);
-          Pt::uint8_t* pixel = _brushBuffer.data();
+    const float  cx    = width  * 0.5f;
+    const float  cy    = height * 0.5f;
+    Pt::uint8_t* pixel = _brushBuffer.data();
     switch(_brush.fillStyle()) {
         case Pt::Gfx::Brush::RectangularGradient: {
             break;
         }
 
         case Pt::Gfx::Brush::RadialGradient: {
+            const float ilen = 1.0f / Gfx::Math::fastSqrt(cx * cx + cy * cy);
             for(Pt::int32_t y = 0; y < height; ++y) {
                 const float dy2 = (y - cy) * (y - cy);
                 for(Pt::int32_t x = 0; x < width; ++x) {
-                    const float dx2 = (x - cx) * (x - cx);
-                    const float len = Gfx::Math::fastSqrt(dx2 + dy2) * ilen;
-                    const float mf  = (len >= 1.0f) ? 1.0f : len;
-                    const float imf = 1.0f - mf;
+                    const float dx2  = (x - cx) * (x - cx);
+                    const float dist = Gfx::Math::fastSqrt(dx2 + dy2) * ilen;
+                    const float mf   = (dist >= 1.0f) ? 1.0f : dist;
+                    const float imf  = 1.0f - mf;
                     *pixel++ = (bs * mf + be * imf);
                     *pixel++ = (gs * mf + ge * imf);
                     *pixel++ = (rs * mf + re * imf);
@@ -399,6 +399,35 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
         }
 
         case Pt::Gfx::Brush::ConicalGradient: {
+            for(Pt::int32_t y = 0; y < height; ++y) {
+                const float dy = y - cy;
+                for(Pt::int32_t x = 0; x < width; ++x) {
+                    const float dx  = x - cx;
+                    const float deg = Gfx::Math::convertCartesianToPolarCoordinate(dy, dx);
+                          float mf=0;
+                          float imf=0;
+                    if(deg >= 0.0f && deg < 90.0f) {
+                        mf  = deg / 90.0f;
+                        imf = 1.0f - mf;
+                    }
+                    else if(deg >= 90.0f && deg < 180.0f) {
+                        imf = (deg - 90.0f) / 90.0f;
+                        mf  = 1.0f - imf;
+                    }
+                    else if(deg >= 180.0f && deg < 270.0f) {
+                        mf  = (deg - 180.0f) / 90.0f;
+                        imf = 1.0f - mf;
+                    }
+                    else {
+                        imf = (deg - 270.0f) / 90.0f;
+                        mf  = 1.0f - imf;
+                    }
+                    *pixel++ = (bs * mf + be * imf);
+                    *pixel++ = (gs * mf + ge * imf);
+                    *pixel++ = (rs * mf + re * imf);
+                    *pixel++ = (as * mf + ae * imf);
+                }
+            }
             break;
         }
 
