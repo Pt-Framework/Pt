@@ -76,7 +76,15 @@ class PT_HMI_API FlowLayout : public Layout
     private:
         Gfx::SizeF onMeasureHorizontal(const SizePolicy& policy);
 
+        void onLayoutLeft(const Gfx::RectF& rect, bool center);
+
+        void onLayoutRight(const Gfx::RectF& rect, bool center);
+
         Gfx::SizeF onMeasureVertical(const SizePolicy& policy);
+
+        void onLayoutTop(const Gfx::RectF& rect, bool center);
+
+        void onLayoutBottom(const Gfx::RectF& rect, bool center);
 
     private:
         Direction _direction;

@@ -166,8 +166,6 @@ class PT_HMI_API ListBox : public Control
         virtual void onInvalidate();
     
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
-        
-        virtual void onSizePolicy(const SizePolicy& policy);
 
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 

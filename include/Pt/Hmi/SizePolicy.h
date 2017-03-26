@@ -52,33 +52,33 @@ class SizePolicy
 
     public:
         SizePolicy()
-        : _h(Any)
-        , _v(Any)
+        : _horizontalMode(Any)
+        , _verticalMode(Any)
         { }
 
         SizePolicy(Mode horizontal, Mode vertical)
-        : _h(horizontal)
-        , _v(vertical)
+        : _horizontalMode(horizontal)
+        , _verticalMode(vertical)
         { }
 
         Mode horizontal() const
         {
-            return _h;
+            return _horizontalMode;
         }
 
         void setHorizontal(Mode m)
         {
-            _h = m;
+            _horizontalMode = m;
         }
         
         Mode vertical() const
         {
-            return _v;
+            return _verticalMode;
         }
         
         void setVertical(Mode m)
         {
-            _v = m;
+            _verticalMode = m;
         }
         
         const Gfx::SizeF& size() const
@@ -118,17 +118,21 @@ class SizePolicy
 
         bool operator== (const SizePolicy& s) const
         {
-            return _h == s._h && _v == s._v && _sizeHint == s._sizeHint;
+            return _horizontalMode == s._horizontalMode && 
+                   _verticalMode == s._verticalMode && 
+                   _sizeHint == s._sizeHint;
         }
         
         bool operator!= (const SizePolicy& s) const
         {
-            return _h != s._h || _v != s._v || _sizeHint != s._sizeHint;
+            return _horizontalMode != s._horizontalMode || 
+                   _verticalMode != s._verticalMode || 
+                   _sizeHint != s._sizeHint;
         }
 
     private:
-        Mode       _h;
-        Mode       _v;
+        Mode       _horizontalMode;
+        Mode       _verticalMode;
         Gfx::SizeF _sizeHint;
 };
 

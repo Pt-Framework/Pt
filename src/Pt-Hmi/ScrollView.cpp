@@ -68,11 +68,8 @@ ScrollView::~ScrollView()
 void ScrollView::setScrollBars(bool hasScrollBars)
 {
     _hasScrollBars = hasScrollBars;
-    
-    //onLayout();
 
-    // TODO: relayout ?
-    assert(false);
+    relayout();
 }
 
 
@@ -83,6 +80,13 @@ void ScrollView::setContent(Widget& widget)
 
     _scrollLayout.addItem(widget);
     _widget = &widget;
+}
+
+
+void ScrollView::setContentMode(SizePolicy::Mode horizontal, 
+                                SizePolicy::Mode vertical)
+{
+    _scrollLayout.setContentMode(horizontal, vertical);
 }
 
 
@@ -115,10 +119,14 @@ Gfx::SizeF ScrollView::onMeasure(const SizePolicy& policy)
     double width = policy.size().width();
     double height = policy.size().height();
     
-    SizePolicy contentPolicy(SizePolicy::Fixed, SizePolicy::Fixed);
+    // TODO: pass content mode here instead of scroll layout member?
+    SizePolicy contentPolicy(SizePolicy::Any, SizePolicy::Any);
     contentPolicy.setSize(width, height);
 
     _scrollLayout.measure(contentPolicy);
+
+    // TODO: extend the scroll range for the width/height of the visible
+    //       scrollbars instead of shrinking the scroll layout
 
     if( _hasScrollBars && width < _scrollLayout.maximumX() )
         height -= _scrollBarX.size().height();
@@ -193,11 +201,6 @@ void ScrollView::onLayout(const Gfx::RectF& rect)
         updateScrollBar(_scrollBarY, vrange);
 }
 
-
-void ScrollView::onResizeEvent(const ResizeEvent& ev)
-{
-    Widget::onResizeEvent(ev);
-}
 
 
 void ScrollView::updateScrollBar(ScrollBar& sb, double maxRange)

@@ -69,12 +69,9 @@ class PT_HMI_API ScrollLayout : public Layout
 
         void removeItem(Widget& w);
 
+        void setContentMode(SizePolicy::Mode hmode, SizePolicy::Mode vmode);
 
     protected:
-        virtual void onAddWidget(Widget& w);
-        
-        virtual void onRemoveWidget(Widget& w);
-
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
         virtual void onLayout(const Gfx::RectF& rect);
@@ -89,7 +86,8 @@ class PT_HMI_API ScrollLayout : public Layout
     private:
         Pt::Signal<int> _scrolledX;
         Pt::Signal<int> _scrolledY;
-        Pt::Signal<> _layoutChanged;
+        SizePolicy::Mode _hmode;
+        SizePolicy::Mode _vmode;
         Gfx::PointF _scrollPos;
         Gfx::PointF _lastPos;
         bool _enableX;

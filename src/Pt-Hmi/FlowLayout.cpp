@@ -18,7 +18,7 @@
   
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
   Lesser General Public License for more details.
   
   You should have received a copy of the GNU Lesser General Public
@@ -32,157 +32,6 @@
 namespace Pt {
 
 namespace Hmi {
-
-void StackLeft(Widget& parent, const Gfx::RectF& rect, bool center)
-{
-    double posX = parent.padding().left();
-    
-    if(center)
-    {
-        double itemsWidth = 0;
-
-        std::vector<Pt::Hmi::Widget*>::const_iterator it;
-        for(it = parent.widgets().begin(); it != parent.widgets().end(); ++it)
-        {
-          Widget* item = *it;
-          itemsWidth += item->preferredSize().width();
-          itemsWidth += item->margin().leftRight();
-        }
-
-        posX = (parent.preferredSize().width() - itemsWidth) / 2;
-    }
-
-    std::vector<Widget*>::const_iterator it = parent.widgets().begin();
-    std::vector<Widget*>::const_iterator end = parent.widgets().end();
-
-    for( ; it != end; ++it)
-    {
-        Widget* item = *it;
-        
-        if( ! item->isVisible() )
-            continue;  
-
-        double x = posX + item->margin().left();
-        double y = parent.padding().top() + item->margin().top(); 
-                 
-        posX += item->preferredSize().width() + 
-                item->margin().leftRight();
-
-        Gfx::SizeF itemSize( item->preferredSize().width(), 
-                             rect.size().height() - 
-                             parent.padding().top() - 
-                             parent.padding().bottom() -
-                             item->margin().top() - 
-                             item->margin().bottom() );
-
-        Gfx::PointF pos(x, y);
-        item->layout( pos, itemSize );
-    }
-}
-
-
-void StackRight(Widget& parent, const Gfx::RectF& rect, bool center)
-{
-    std::vector<Widget*>::const_iterator it = parent.widgets().begin();
-    std::vector<Widget*>::const_iterator end = parent.widgets().end();
-
-    double posRight  = parent.preferredSize().width() - parent.padding().right();
-
-    for( ; it != end; ++it)
-    {
-        Widget* item = *it; 
-
-        if( ! item->isVisible() )
-            continue; 
-
-        posRight -= item->preferredSize().width();
-        posRight -= item->margin().right();
-                
-        double x = posRight;              
-        double y = parent.padding().top() + item->margin().top(); 
-                
-        posRight -= item->margin().left();
-                   
-        Gfx::SizeF itemSize( item->preferredSize().width(), 
-                             rect.size().height() - 
-                             parent.padding().top() - 
-                             parent.padding().bottom() -
-                             item->margin().top() - 
-                             item->margin().bottom() );
-
-        Gfx::PointF pos(x, y);                   
-        item->layout( pos, itemSize );
-    }
-}
-
-
-void StackTop(Widget& parent, const Gfx::RectF& rect, bool center)
-{
-    std::vector<Widget*>::const_iterator it = parent.widgets().begin();
-    std::vector<Widget*>::const_iterator end = parent.widgets().end();
-
-    double posTop = parent.padding().top();
-
-    for( ; it != end; ++it)
-    {
-        Widget* item = *it; 
-
-        if( ! item->isVisible() )
-            continue; 
-
-        double x = parent.padding().left() + item->margin().left();
-        double y = posTop + item->margin().top();
-                
-        posTop += item->preferredSize().height() + 
-                  item->margin().topBottom();
-
-        Gfx::SizeF itemSize( rect.size().width() - 
-                             parent.padding().left() -
-                             parent.padding().right() -
-                             item->margin().left() - 
-                             item->margin().right(), 
-                             item->preferredSize().height());
-
-        Gfx::PointF pos(x, y);                   
-        item->layout( pos, itemSize );
-    }
-}
-
-
-void StackBottom(Widget& parent, const Gfx::RectF& rect, bool center)
-{
-    std::vector<Widget*>::const_iterator it = parent.widgets().begin();
-    std::vector<Widget*>::const_iterator end = parent.widgets().end();
-
-    double posBottom = parent.preferredSize().height() - parent.padding().bottom();
-
-    for( ; it != end; ++it)
-    {
-        Widget* item = *it; 
-
-        if( ! item->isVisible() )
-            continue; 
-        
-        posBottom -= item->preferredSize().height();
-        posBottom -= item->margin().bottom();
-                
-        double x = parent.padding().left() + item->margin().left();
-        double y = posBottom;
-                
-        posBottom -= item->margin().top();
-                       
-        Gfx::SizeF itemSize( rect.size().width() - 
-                             parent.padding().left() -
-                             parent.padding().right() -
-                             item->margin().left() - 
-                             item->margin().right(), 
-                             item->preferredSize().height());
-                                         
-        Gfx::PointF pos(x, y);                   
-        item->layout( pos, itemSize );
-    }
-}
-
 
 FlowLayout::FlowLayout(Direction d)
 : _direction(d)
@@ -198,22 +47,21 @@ FlowLayout::~FlowLayout()
 
 void FlowLayout::addItem(Widget& w)
 {
-  add(w);
+    add(w);
 }
+
 
 void FlowLayout::removeItem(Widget& w)
 {
-  remove(w);
+    remove(w);
 }
+
 
 void FlowLayout::setDirection(Direction d)
 { 
     _direction = d;
     
-    //onLayout();
-
-    // TODO: relayout ?
-    //relayout();
+    relayout();
 }
 
 
@@ -255,22 +103,23 @@ void FlowLayout::onLayout(const Gfx::RectF& rect)
     {
         default:
         case Left:
-            StackLeft(*this, rect, _center);
+            onLayoutLeft(rect, _center);
             break;
 
         case Right:
-            StackRight(*this, rect, _center);
+            onLayoutRight(rect, _center);
             break;
 
         case Top:
-            StackTop(*this, rect, _center);
+            onLayoutTop(rect, _center);
             break;
 
         case Bottom:
-            StackBottom(*this, rect, _center);
+            onLayoutBottom(rect, _center);
             break;
     }
 }
+
 
 
 Gfx::SizeF FlowLayout::onMeasureHorizontal(const SizePolicy& policy)
@@ -306,6 +155,89 @@ Gfx::SizeF FlowLayout::onMeasureHorizontal(const SizePolicy& policy)
 }
 
 
+void FlowLayout::onLayoutLeft(const Gfx::RectF& rect, bool center)
+{
+    double posX = padding().left();
+    
+    if(center)
+    {
+        double itemsWidth = 0;
+
+        std::vector<Pt::Hmi::Widget*>::const_iterator it;
+        for(it = widgets().begin(); it != widgets().end(); ++it)
+        {
+          Widget* item = *it;
+          itemsWidth += item->preferredSize().width();
+          itemsWidth += item->margin().leftRight();
+        }
+
+        posX = (preferredSize().width() - itemsWidth) / 2;
+    }
+
+    std::vector<Widget*>::const_iterator it = widgets().begin();
+    std::vector<Widget*>::const_iterator end = widgets().end();
+
+    for( ; it != end; ++it)
+    {
+        Widget* item = *it;
+        
+        if( ! item->isVisible() )
+            continue;  
+
+        double x = posX + item->margin().left();
+        double y = padding().top() + item->margin().top(); 
+                 
+        posX += item->preferredSize().width() + 
+                item->margin().leftRight();
+
+        Gfx::SizeF itemSize( item->preferredSize().width(), 
+                             rect.size().height() - 
+                             padding().top() - 
+                             padding().bottom() -
+                             item->margin().top() - 
+                             item->margin().bottom() );
+
+        Gfx::PointF pos(x, y);
+        item->layout( pos, itemSize );
+    }
+}
+
+
+void FlowLayout::onLayoutRight(const Gfx::RectF& rect, bool center)
+{
+    std::vector<Widget*>::const_iterator it = widgets().begin();
+    std::vector<Widget*>::const_iterator end = widgets().end();
+
+    double posRight  = preferredSize().width() - padding().right();
+
+    for( ; it != end; ++it)
+    {
+        Widget* item = *it; 
+
+        if( ! item->isVisible() )
+            continue; 
+
+        posRight -= item->preferredSize().width();
+        posRight -= item->margin().right();
+                
+        double x = posRight;              
+        double y = padding().top() + item->margin().top(); 
+                
+        posRight -= item->margin().left();
+                   
+        Gfx::SizeF itemSize( item->preferredSize().width(), 
+                             rect.size().height() - 
+                             padding().top() - 
+                             padding().bottom() -
+                             item->margin().top() - 
+                             item->margin().bottom() );
+
+        Gfx::PointF pos(x, y);                   
+        item->layout( pos, itemSize );
+    }
+}
+
+
 Gfx::SizeF FlowLayout::onMeasureVertical(const SizePolicy& policy)
 {
     std::vector<Widget*>::const_iterator it = widgets().begin();
@@ -338,6 +270,75 @@ Gfx::SizeF FlowLayout::onMeasureVertical(const SizePolicy& policy)
     }
 
     return contentSize;
+}
+
+
+
+void FlowLayout::onLayoutTop(const Gfx::RectF& rect, bool center)
+{
+    std::vector<Widget*>::const_iterator it = widgets().begin();
+    std::vector<Widget*>::const_iterator end = widgets().end();
+
+    double posTop = padding().top();
+
+    for( ; it != end; ++it)
+    {
+        Widget* item = *it; 
+
+        if( ! item->isVisible() )
+            continue; 
+
+        double x = padding().left() + item->margin().left();
+        double y = posTop + item->margin().top();
+                
+        posTop += item->preferredSize().height() + 
+                  item->margin().topBottom();
+
+        Gfx::SizeF itemSize( rect.size().width() - 
+                             padding().left() -
+                             padding().right() -
+                             item->margin().left() - 
+                             item->margin().right(), 
+                             item->preferredSize().height());
+
+        Gfx::PointF pos(x, y);                   
+        item->layout( pos, itemSize );
+    }
+}
+
+
+void FlowLayout::onLayoutBottom(const Gfx::RectF& rect, bool center)
+{
+    std::vector<Widget*>::const_iterator it = widgets().begin();
+    std::vector<Widget*>::const_iterator end = widgets().end();
+
+    double posBottom = preferredSize().height() - padding().bottom();
+
+    for( ; it != end; ++it)
+    {
+        Widget* item = *it; 
+
+        if( ! item->isVisible() )
+            continue; 
+        
+        posBottom -= item->preferredSize().height();
+        posBottom -= item->margin().bottom();
+                
+        double x = padding().left() + item->margin().left();
+        double y = posBottom;
+                
+        posBottom -= item->margin().top();
+                       
+        Gfx::SizeF itemSize( rect.size().width() - 
+                             padding().left() -
+                             padding().right() -
+                             item->margin().left() - 
+                             item->margin().right(), 
+                             item->preferredSize().height());
+                                         
+        Gfx::PointF pos(x, y);                   
+        item->layout( pos, itemSize );
+    }
 }
 
 } // namespace

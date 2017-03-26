@@ -541,8 +541,6 @@ void Widget::setSizePolicy(const SizePolicy& policy)
 
     if( parent() )
         parent()->relayout();
-
-    onSizePolicy(policy);
 }
 
 
@@ -604,11 +602,6 @@ void Widget::measure(const SizePolicy& policy)
         if(contentPolicy.horizontal() == SizePolicy::Fixed)
             _preferredSize.setWidth( contentPolicy.width() );
     }
-}
-
-
-void Widget::onSizePolicy(const SizePolicy&)
-{
 }
 
 
@@ -922,8 +915,6 @@ void Widget::setMargin(const Spacing& s)
 
     if( parent() )
        parent()->relayout();
-
-     onSizePolicy(_sizePolicy);
 }
 
 
@@ -949,7 +940,6 @@ void Widget::setPadding( const Spacing& p )
 {
     _padding = p;
     relayout();
-    onSizePolicy(_sizePolicy);
 }
 
 

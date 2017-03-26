@@ -34,11 +34,12 @@ namespace Pt {
 namespace Hmi {
 
 ScrollLayout::ScrollLayout()
-: _scrollPos(0,0)
+: _hmode(SizePolicy::Any)
+, _vmode(SizePolicy::Any)
 , _enableX(true)
 , _enableY(true)
-, _maxX(100)
-, _maxY(100)
+, _maxX(0)
+, _maxY(0)
 {
     setAcceptInput(true);
 }
@@ -51,12 +52,13 @@ ScrollLayout::~ScrollLayout()
 
 void ScrollLayout::addItem(Widget& w)
 {
-  add(w);
+    add(w);
 }
+
 
 void ScrollLayout::removeItem(Widget& w)
 {
-  remove(w);
+    remove(w);
 }
 
 
@@ -159,28 +161,30 @@ Pt::Signal<int>& ScrollLayout::scrolledY()
 }
 
 
-void ScrollLayout::onAddWidget(Widget& w)
+void ScrollLayout::setContentMode(SizePolicy::Mode horizontal, 
+                                  SizePolicy::Mode vertical)
 {
-    Base::onAddWidget(w);
-}
+    _hmode = horizontal;
+    _vmode = vertical;
 
-
-void ScrollLayout::onRemoveWidget(Widget& w)
-{
-    Base::onRemoveWidget(w);
+    relayout();
 }
 
 
 Gfx::SizeF ScrollLayout::onMeasure(const SizePolicy& policy)
 {
+    Gfx::SizeF contentSize;
+
     std::vector<Widget*>::const_iterator it;
     for(it = widgets().begin() ; it != widgets().end(); ++it)
     {
         Widget* item = *it;
 
-        SizePolicy itemPolicy(SizePolicy::Any, SizePolicy::Any);
-        //itemPolicy.setSize( policy.size() );
+        SizePolicy itemPolicy(_hmode, _vmode);
+        itemPolicy.setSize( policy.size() );
         item->measure(itemPolicy);
+
+        contentSize = item->preferredSize();
    }
 
     double maxWidth = 0;
@@ -205,7 +209,7 @@ Gfx::SizeF ScrollLayout::onMeasure(const SizePolicy& policy)
     _maxX = static_cast<int>(maxWidth);
     _maxY = static_cast<int>(maxHeight);
 
-   return policy.size();
+   return contentSize;
 }
 
 

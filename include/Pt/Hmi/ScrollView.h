@@ -50,8 +50,8 @@ class PT_HMI_API ScrollView : public Widget
 
         void setContent(Widget& w);
 
-    protected:
-        virtual void onResizeEvent(const ResizeEvent& ev);
+        void setContentMode(SizePolicy::Mode horizontal, 
+                            SizePolicy::Mode vertical);
         
     protected:
         void onScrollBarX(int pos);

@@ -329,7 +329,7 @@ ListBox::ListBox()
     setAcceptInput(false);
 
     _scrollView.setContent(_layout);
-
+    _scrollView.setContentMode(SizePolicy::Fixed, SizePolicy::Preferred);
     add(_scrollView);
 }
 
@@ -432,23 +432,6 @@ void ListBox::setRenderer(ListBoxRenderer* renderer)
 }
 
 
-void ListBox::onSizePolicy(const SizePolicy& policy)
-{
-    // TODO: add a content mode to ScrollLayout/ScrollView to make it handle
-    //       its content according to its size, then ListBox::onMeasure 
-    //       would work without setting the size policy on its item layout
-
-    double hspace = padding().leftRight() + _scrollView.margin().leftRight();
-    double vspace = padding().topBottom() + _scrollView.margin().topBottom();
-
-    SizePolicy contentPolicy = policy;
-    contentPolicy.setWidth(policy.width() - hspace);
-    contentPolicy.setHeight(policy.height() - vspace);
-
-    _layout.setSizePolicy(contentPolicy);
-}
-
-
 Gfx::SizeF ListBox::onMeasure(const SizePolicy& policy)
 {
     double hspace = padding().leftRight() + _scrollView.margin().leftRight();
@@ -502,8 +485,6 @@ void ListBox::onInvalidate()
 
     _renderer->prepareLayout(_frameSize);
     _scrollView.setMargin(_frameSize);
-
-    onSizePolicy( sizePolicy() );
 }
 
 

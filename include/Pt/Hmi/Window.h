@@ -218,7 +218,7 @@ class PT_HMI_API Window : public WindowBase
     virtual Gfx::PointF fromScreen(const Gfx::PointF& pos) const; 
 
   protected:
-    Gfx::SizeF onSize() const;
+    virtual Gfx::SizeF onSize() const;
 
     virtual void onUpdate(const Gfx::RectF& rect);
 
