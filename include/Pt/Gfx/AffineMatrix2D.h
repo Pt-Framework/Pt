@@ -46,8 +46,11 @@ namespace Gfx{
 #if defined(PT_GFX_USE_AVX1)
 
 // AVX constants
-static const __m256 avxOneZeroF = _mm256_set_ps(0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f);
-static const __m256 avxMaxCordF = _mm256_set1_ps(Painter::MaximumCoordinateF);
+static const __m256  avxOneZeroF = _mm256_set_ps(0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f);
+static const __m256  avxMaxCordF = _mm256_set1_ps(Painter::MaximumCoordinateF);
+
+static const __m256d avxOneZeroD = _mm256_set_pd(0.0, 1.0, 0.0, 1.0);
+static const __m256d avxMaxCordD = _mm256_set1_pd(Painter::MaximumCoordinateF);
 
 #endif
 
@@ -56,6 +59,46 @@ static const __m256 avxMaxCordF = _mm256_set1_ps(Painter::MaximumCoordinateF);
 // NEON constants
 static const float32x4_t neonOneZeroF = NEON_SET_FLT32X4(0.0f, 1.0f, 0.0f, 1.0f);
 static const float32x4_t neonMaxCordF = vdupq_n_f32(Painter::MaximumCoordinateF);
+
+#endif
+
+
+// ======================================================================================
+// ===== MatrixData Implementation ======================================================
+// ======================================================================================
+#if defined(PT_GFX_USE_AVX1)
+
+template <typename T>
+union BasicMatrixData {
+    T v[4][4];
+};
+
+template <>
+union BasicMatrixData<float> {
+    float  v[4][4];
+    __m128 r[4];
+};
+
+template <>
+union BasicMatrixData<double> {
+    double  v[4][4];
+    __m256d r[4];
+};
+
+#elif defined(PT_GFX_USE_NEON)
+
+template <typename T>
+union BasicMatrixData {
+    T           v[4][4];
+    float32x4_t r[4];
+};
+
+#else
+
+template <typename T>
+struct BasicMatrixData {
+    T v[3][3];
+};
 
 #endif
 
@@ -119,22 +162,8 @@ class PT_GFX_API BasicAffineMatrix2D {
         inline void transformPoints(PointF* xy, size_t pointCount) const;
 
     private:
-        // Matrix stack
-#if defined(PT_GFX_USE_AVX1)
-        union MatrixData {
-            T      v[4][4];
-            __m128 r[4];
-        };
-#elif defined(PT_GFX_USE_NEON)
-        union MatrixData {
-            T           v[4][4];
-            float32x4_t r[4];
-        };
-#else
-        struct MatrixData {
-            T v[3][3];
-        };
-#endif
+        // Matrix data
+        typedef BasicMatrixData<T> MatrixData;
 
         // Matrix stack data
         struct StackData {
@@ -227,7 +256,7 @@ void BasicAffineMatrix2D<float>::updateMatrix(const MatrixData& n, MatrixUpdateM
         r = &n;
     }
 
-     _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
+    _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
 
     __m128 out0x =                    _mm_mul_ps(_mm_broadcast_ss(&l->v[0][0]), r->r[0])  ;
            out0x = _mm_add_ps( out0x, _mm_mul_ps(_mm_broadcast_ss(&l->v[0][1]), r->r[1]) );
@@ -245,7 +274,7 @@ void BasicAffineMatrix2D<float>::updateMatrix(const MatrixData& n, MatrixUpdateM
     _mm_storeu_ps(_mdata.v[1], out1x);
     _mm_storeu_ps(_mdata.v[2], out2x);
 
-     _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
+    _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
 }
 
 /*
@@ -293,6 +322,57 @@ void BasicAffineMatrix2D<float>::updateMatrix(const MatrixData& n, MatrixUpdateM
     vst1q_f32(_mdata.v[2], out2x);
 }
 */
+
+#endif
+
+// ======================================================================================
+// ===== Inlined Private Member Functions (Specialization for double) ===================
+// ======================================================================================
+
+#if defined(PT_GFX_USE_AVX1)
+
+template <>
+void BasicAffineMatrix2D<double>::updateMatrix(const MatrixData& n, MatrixUpdateMode mode)
+{
+    // Check if the current matrix is an identity matrix or the mode is "Replace"
+    if(_isIdentity || mode == Replace) {
+        _mdata = n;
+        return;
+    }
+
+    // Multiply based on the mode
+    const MatrixData* l;
+    const MatrixData* r;
+
+    if(mode == MultiplyOnLeft) {
+        l = &n;
+        r = &_mdata;
+    }
+    else { // MultiplyOnRight
+        l = &_mdata;
+        r = &n;
+    }
+
+    _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
+
+    __m256d out0x =                       _mm256_mul_pd(_mm256_broadcast_sd(&l->v[0][0]), r->r[0])  ;
+            out0x = _mm256_add_pd( out0x, _mm256_mul_pd(_mm256_broadcast_sd(&l->v[0][1]), r->r[1]) );
+            out0x = _mm256_add_pd( out0x, _mm256_mul_pd(_mm256_broadcast_sd(&l->v[0][2]), r->r[2]) );
+
+    __m256d out1x =                       _mm256_mul_pd(_mm256_broadcast_sd(&l->v[1][0]), r->r[0])  ;
+            out1x = _mm256_add_pd( out1x, _mm256_mul_pd(_mm256_broadcast_sd(&l->v[1][1]), r->r[1]) );
+            out1x = _mm256_add_pd( out1x, _mm256_mul_pd(_mm256_broadcast_sd(&l->v[1][2]), r->r[2]) );
+
+    __m256d out2x =                       _mm256_mul_pd(_mm256_broadcast_sd(&l->v[2][0]), r->r[0])  ;
+            out2x = _mm256_add_pd( out2x, _mm256_mul_pd(_mm256_broadcast_sd(&l->v[2][1]), r->r[1]) );
+            out2x = _mm256_add_pd( out2x, _mm256_mul_pd(_mm256_broadcast_sd(&l->v[2][2]), r->r[2]) );
+
+    _mm256_storeu_pd(_mdata.v[0], out0x);
+    _mm256_storeu_pd(_mdata.v[1], out1x);
+    _mm256_storeu_pd(_mdata.v[2], out2x);
+
+    _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
+}
 
 #endif
 
@@ -699,15 +779,11 @@ void BasicAffineMatrix2D<float>::transformPoints(float* dxy, const float* sxy, s
         return;
     }
 
-    // Load the matrix's rows                    //   RC RC RC RC
-    const __m128 m0 = _mm_loadu_ps(_mdata.v[0]); // [ 03 02 01 00 ]
-    const __m128 m1 = _mm_loadu_ps(_mdata.v[1]); // [ 13 12 11 10 ]
-
     _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
 
-    // Extend the matrix's rows
-    const __m256 m00 = _mm256_insertf128_ps(_mm256_castps128_ps256(m0), m0, 1); // [ 00 01 02 03 00 01 02 03 ]
-    const __m256 m11 = _mm256_insertf128_ps(_mm256_castps128_ps256(m1), m1, 1); // [ 13 12 11 10 13 12 11 10 ]
+    // Load and extend the matrix's rows
+    const __m256 m00 = _mm256_insertf128_ps(_mm256_castps128_ps256(_mdata.r[0]), _mdata.r[0], 1); // [ 00 01 02 03 00 01 02 03 ]
+    const __m256 m11 = _mm256_insertf128_ps(_mm256_castps128_ps256(_mdata.r[1]), _mdata.r[1], 1); // [ 13 12 11 10 13 12 11 10 ]
 
     // Loop through 8 floats at a time
     const size_t pointCount8 = pointCount / 8;
@@ -715,7 +791,7 @@ void BasicAffineMatrix2D<float>::transformPoints(float* dxy, const float* sxy, s
     for(size_t i = 0; i < pointCount8; ++i) {
         // Load 8 floats from the source vector                                              //   3  2  1  0  3  2  1  0
         const __m256 s3210 = _mm256_loadu_ps  (sxy                                        ); // [ Y3 X3 Y2 X2 Y1 X1 Y0 X0 ]
-        const __m256 s32   = _mm256_shuffle_ps(s3210, avxOneZeroF, _MM_SHUFFLE(3, 2, 3, 2)); // [ 0  1  Y3 X3 0  1  X1 Y1 ]
+        const __m256 s32   = _mm256_shuffle_ps(s3210, avxOneZeroF, _MM_SHUFFLE(3, 2, 3, 2)); // [ 0  1  Y3 X3 0  1  Y1 X1 ]
         const __m256 s10   = _mm256_shuffle_ps(s3210, avxOneZeroF, _MM_SHUFFLE(1, 0, 1, 0)); // [ 0  1  Y2 X2 0  1  Y0 X0 ]
         // Multiply them to the matrix's rows
         const __m256 r32_0 = _mm256_mul_ps(m00, s32);
@@ -758,8 +834,8 @@ void BasicAffineMatrix2D<float>::transformPoints(float* dxy, const float* sxy, s
     }
 
     // Load the matrix's rows                      //   RC RC RC RC
-    const float32x4_t m0 = vld1q_f32(_mdata.v[0]); // [ 03 02 01 00 ]
-    const float32x4_t m1 = vld1q_f32(_mdata.v[1]); // [ 13 12 11 10 ]
+    //const float32x4_t m0 = vld1q_f32(_mdata.v[0]); // [ 03 02 01 00 ]
+    //const float32x4_t m1 = vld1q_f32(_mdata.v[1]); // [ 13 12 11 10 ]
 
     // Loop through 4 floats at a time
     const size_t pointCount4 = pointCount / 4;
@@ -769,11 +845,11 @@ void BasicAffineMatrix2D<float>::transformPoints(float* dxy, const float* sxy, s
         const float32x4_t s3210 = vld1q_f32   (sxy                                              ); // [ Y1 X1 Y0 X0 ]
         const float32x4_t s32   = vcombine_f32(vget_high_f32(s3210), vget_high_f32(neonOneZeroF)); // [ 0  1  Y1 X1 ]
         const float32x4_t s10   = vcombine_f32(vget_low_f32 (s3210), vget_low_f32 (neonOneZeroF)); // [ 0  1  Y0 X0 ]
-        // Multiply them to the matrix's rows
-        const float32x4_t r32_0 = vmulq_f32(m0, s32);
-        const float32x4_t r32_1 = vmulq_f32(m1, s32);
-        const float32x4_t r10_0 = vmulq_f32(m0, s10);
-        const float32x4_t r10_1 = vmulq_f32(m1, s10);
+        // Multiply them to the matrix's rows         //   RC RC RC RC
+        const float32x4_t r32_0 = vmulq_f32(_mdata.r[0], s32); // [ 03 02 01 00 ]
+        const float32x4_t r32_1 = vmulq_f32(_mdata.r[1], s32); // [ 13 12 11 10 ]
+        const float32x4_t r10_0 = vmulq_f32(_mdata.r[0], s10); // [ 03 02 01 00 ]
+        const float32x4_t r10_1 = vmulq_f32(_mdata.r[1], s10); // [ 13 12 11 10 ]
         // Horizontal add the multiplication results
         const float32x4_t r32   = vcombine_f32( vpadd_f32( vget_low_f32(r32_0), vget_high_f32(r32_0) ), vpadd_f32( vget_low_f32(r32_1), vget_high_f32(r32_1) ) );
         const float32x4_t r10   = vcombine_f32( vpadd_f32( vget_low_f32(r10_0), vget_high_f32(r10_0) ), vpadd_f32( vget_low_f32(r10_1), vget_high_f32(r10_1) ) );
@@ -827,6 +903,104 @@ void BasicAffineMatrix2D<float>::transformPoints(PointF* dxy, const PointF* sxy,
         dxy[i].setY( *pxy++ );
     }
 }
+
+#endif
+
+// ======================================================================================
+// ===== Inlined Public Member Functions (Specialization for double) ====================
+// ======================================================================================
+
+#if defined(PT_GFX_USE_AVX1)
+
+template <>
+void BasicAffineMatrix2D<double>::transformPoints(double* dxy, const double* sxy, size_t pointCount) const
+{
+    if(_isIdentity) {
+        memcpy(dxy, sxy, pointCount * sizeof(double));
+        return;
+    }
+
+    _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
+
+    // Loop through 4 doubles at a time
+    const size_t pointCount4 = pointCount / 4;
+
+    for(size_t i = 0; i < pointCount4; ++i) {
+        // Load 4 doubles from the source vector                            //   1     0
+        const __m256d s10 = _mm256_loadu_pd       (sxy                   ); // [ Y1 X1 Y0 X0 ]
+        const __m256d s1  = _mm256_permute2f128_pd(s10, avxOneZeroD, 0x31); // [ 0  1  Y1 X1 ]
+        const __m256d s0  = _mm256_permute2f128_pd(s10, avxOneZeroD, 0x20); // [ 0  1  Y0 X0 ]
+        // Multiply them to the matrix's rows                //   RC RC RC RC
+        const __m256d r1_0 = _mm256_mul_pd(_mdata.r[0], s1); // [ 03 02 01 00 ]
+        const __m256d r1_1 = _mm256_mul_pd(_mdata.r[1], s1); // [ 13 12 11 10 ]
+        const __m256d r0_0 = _mm256_mul_pd(_mdata.r[0], s0); // [ 03 02 01 00 ]
+        const __m256d r0_1 = _mm256_mul_pd(_mdata.r[1], s0); // [ 13 12 11 10 ]
+        // Horizontal add the multiplication results
+        const __m256d r1  = _mm256_hadd_pd(r1_0, r1_1);
+        const __m256d r0  = _mm256_hadd_pd(r0_0, r0_1);
+        const __m256d r10 = _mm256_hadd_pd(r0  , r1  );
+
+        double _r1[4], _r0[4];
+        _mm256_storeu_pd(_r1, r1);
+        _mm256_storeu_pd(_r0, r0);
+
+        dxy[0] = _r0[2] + _r0[0];
+        dxy[1] = _r0[3] + _r0[1];
+
+        dxy[2] = _r1[2] + _r1[0];
+        dxy[3] = _r1[3] + _r1[1];
+
+
+        // Store 4 doubles to the destination vector
+        /*
+        _mm256_storeu_pd(
+            dxy,
+            _mm256_or_pd(
+                _mm256_and_pd(s10, _mm256_cmp_pd(s10, avxMaxCordD, _CMP_GT_OQ)), // Retain source values >  maximum coordinate
+                _mm256_and_pd(r10, _mm256_cmp_pd(s10, avxMaxCordD, _CMP_LE_OQ))  // Retain result values <= maximum coordinate
+            )
+        );
+        */
+        //_mm256_storeu_pd(dxy, r10);
+        // Increment the pointers
+        sxy += 4;
+        dxy += 4;
+    }
+
+    _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
+
+    // Process the remaining doubles using normal code
+    pointCount %= 4;
+
+    for(size_t i = 0; i < pointCount; i += 2) transformPoint(dxy[i], dxy[i + 1], sxy[i], sxy[i + 1]);
+}
+
+template <>
+void BasicAffineMatrix2D<double>::transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount) const
+{
+    if(_isIdentity) {
+        for(size_t i = 0; i < pointCount; ++i) dxy[i] = sxy[i];
+        return;
+    }
+
+
+    double  xy[pointCount * 2];
+    double* pxy = xy;
+    for(size_t i = 0; i < pointCount; ++i) {
+        *pxy++ = sxy[i].x();
+        *pxy++ = sxy[i].y();
+    }
+
+    transformPoints(xy, xy, pointCount * 2);
+
+    pxy = xy;
+
+    for(size_t i = 0; i < pointCount; ++i) {
+        dxy[i].setX( *pxy++ );
+        dxy[i].setY( *pxy++ );
+    }
+}
+
 #endif
 
 
