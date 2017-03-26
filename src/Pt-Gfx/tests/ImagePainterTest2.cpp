@@ -67,7 +67,7 @@ using namespace Pt::Gfx;
 
 // General settings for Pt-Gfx
 #define DO_TEST_DRAW    1
-#define DO_BENCHMARKING 1
+#define DO_BENCHMARKING 0
 
 // Detailed-test enable settings for Pt-Gfx
 #define TEST_SOURCECOPY                         1
@@ -93,7 +93,8 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS 0
 #define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  0
 
-#define TEST_DRAW_PATH                          1 // (including thick and filled)
+#define TEST_DRAW_PATH                          0 // (including thick and filled)
+#define TEST_DRAW_EXTRA                         1 // (including thick and filled)
 
 #define TEST_COMPARE_WITH_OLD_PAINTER           0 // (for some shapes only)
 
@@ -162,6 +163,7 @@ static Brush bmBrushTextureW;
 #include "ImagePainterTest2_Draw_Filled.cpp"
 #include "ImagePainterTest2_Draw_Thick.cpp"
 #include "ImagePainterTest2_Draw_Path.cpp"
+#include "ImagePainterTest2_Draw_Extra.cpp"
 #include "ImagePainterTest2_Benchmark.cpp"
 #include "ImagePainterTest2_Cairo.cpp"
 
@@ -465,7 +467,7 @@ int main(int argc, char* args[])
         testDrawFillEllipse("Texture-Filled Ellipse & Arcs - ImagePainter2 [SourceOver]", image, *painter2, brushTexture1, brushTexture2);
     }
 
-    // Path
+    // Path (including thick and filled)
     if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_PATH) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
         testDrawPath("Path - ImagePainter2 [SourceCopy]", image, *painter2, brushGradient2, brushTexture1);
@@ -474,6 +476,17 @@ int main(int argc, char* args[])
     if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_PATH) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
         testDrawPath("Path - ImagePainter2 [SourceOver]", image, *painter2, brushGradient2, brushTexture1);
+    }
+
+    // Extra features
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_EXTRA) {
+        painter2->setCompositionMode(CompositionMode::SourceCopy);
+        testDrawExtra("Extra Features - ImagePainter2 [SourceCopy]", image, *painter2);
+    }
+
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_EXTRA) {
+        painter2->setCompositionMode(CompositionMode::SourceOver);
+        testDrawExtra("Extra Features - ImagePainter2 [SourceOver]", image, *painter2);
     }
 
     // Create the brushes used for benchmarking
