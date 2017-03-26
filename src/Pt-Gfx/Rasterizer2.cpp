@@ -348,11 +348,11 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
     be = _brush.gradientColor().blue () / 257;
     ae = _brush.gradientColor().alpha() / 257;
 
-        // Create one-dimensional gradient
+    // Create one-dimensional gradient
     if(width == 1 || height == 1) {
         const Pt::int32_t  length = width + height - 1 - 1;
               Pt::uint8_t* pixel  = _brushBuffer.data();
-        for(int n = 0; n <= length; ++n) {
+        for(Pt::int32_t n = 0; n <= length; ++n) {
             const Pt::int32_t f2 = FIXED_POINT_FROM_INT(n) / length;
             const Pt::int32_t f1 = FIXED_POINT_CONSTANT_ONE - f2;
             const Pt::uint8_t r1 = FIXED_POINT_TO_INT(rs * f1);
@@ -372,6 +372,39 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
     }
 
     // Create two-dimensional gradient
+    const float        cx   = width  * 0.5f;
+    const float        cy   = height * 0.5f;
+    const float        mlen = 0.5f / Gfx::Math::fastSqrt(width * width + height * height);
+          Pt::uint8_t* pixel = _brushBuffer.data();
+    switch(_brush.fillStyle()) {
+        case Pt::Gfx::Brush::RectangularGradient: {
+            break;
+        }
+
+        case Pt::Gfx::Brush::RadialGradient: {
+            for(Pt::int32_t y = 0; y < height; ++y) {
+                const float dy2 = (y - cy) * (y - cy);
+                for(Pt::int32_t x = 0; x < width; ++x) {
+                    const float dx2 = (x - cx) * (x - cx);
+                    const float len = round(Gfx::Math::fastSqrt(dx2 + dy2) * mlen);
+                    const float mf  = (len >= 1.0f) ? 1.0f : len;
+                    const float imf = 1.0f - mf;
+                    *pixel++ = (bs * mf + be * imf);
+                    *pixel++ = (gs * mf + ge * imf);
+                    *pixel++ = (rs * mf + re * imf);
+                    *pixel++ = (as * mf + ae * imf);
+                }
+            }
+            break;
+        }
+
+        case Pt::Gfx::Brush::ConicalGradient: {
+            break;
+        }
+
+        default:
+            return;
+    }
 }
 
 void Rasterizer2::updateClip()
