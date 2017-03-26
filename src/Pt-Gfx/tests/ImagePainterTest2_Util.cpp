@@ -385,9 +385,9 @@ template <typename T>
 static void benchMatrixOps()
 {
 #if defined(PT_GFX_USE_ARM_CPU)
-    const int loopCount = 1024;
+    const int loopCount = 2048;
 #else
-    const int loopCount = 4096;
+    const int loopCount = 8192;
 #endif
 
     // Reinitialize the random number generator here, so it will produce
@@ -539,65 +539,6 @@ static void benchMatrixOps()
     -----------------------------------
     Plain x86_64 (i5-4460; 64-Bit Mode)
     -----------------------------------
-    <float>
-    Initial value
-        |   1.000   0.000   0.000 |
-        |   0.000   1.000   0.000 |
-        |   0.000   0.000   1.000 |
-    After operations
-        |   0.500   0.000   5.000 |
-        |   0.000   2.000  40.000 |
-        |   0.000   0.000   1.000 |
-    A: Point ( 8.000,  8.000) -> ( 9.000, 56.000)
-    B: Point (11.000, 12.000) -> (10.500, 64.000)
-    B: Point (13.000, 24.000) -> (11.500, 88.000)
-    B: Point (25.000, 16.000) -> (17.500, 72.000)
-    B: Point (27.000, 28.000) -> (18.500, 96.000)
-    B: Point ( 5.000,  5.000) -> ( 7.500, 50.000)
-    C: Point                  -> (10.500, 64.000)
-    C: Point                  -> (11.500, 88.000)
-    C: Point                  -> (17.500, 72.000)
-    C: Point                  -> (18.500, 96.000)
-    C: Point                  -> ( 7.500, 50.000)
-    D: Point                  -> (10.500, 64.000)
-    D: Point                  -> (11.500, 88.000)
-    D: Point                  -> (17.500, 72.000)
-    D: Point                  -> (18.500, 96.000)
-    D: Point                  -> ( 7.500, 50.000)
-    Time M    = M * M    :  8.510768 nS
-    Time VD[] = M * VS[] :  0.752330 nS
-    Time VS[] = M * VS[] :  0.784039 nS
-    Time VS[] = M * VS[] :  2.318203 nS
-
-    <double>
-    Initial value
-        |   1.000   0.000   0.000 |
-        |   0.000   1.000   0.000 |
-        |   0.000   0.000   1.000 |
-    After operations
-        |   0.500   0.000   5.000 |
-        |   0.000   2.000  40.000 |
-        |   0.000   0.000   1.000 |
-    A: Point ( 8.000,  8.000) -> ( 9.000, 56.000)
-    B: Point (11.000, 12.000) -> (10.500, 64.000)
-    B: Point (13.000, 24.000) -> (11.500, 88.000)
-    B: Point (25.000, 16.000) -> (17.500, 72.000)
-    B: Point (27.000, 28.000) -> (18.500, 96.000)
-    B: Point ( 5.000,  5.000) -> ( 7.500, 50.000)
-    C: Point                  -> (10.500, 64.000)
-    C: Point                  -> (11.500, 88.000)
-    C: Point                  -> (17.500, 72.000)
-    C: Point                  -> (18.500, 96.000)
-    C: Point                  -> ( 7.500, 50.000)
-    D: Point                  -> (10.500, 64.000)
-    D: Point                  -> (11.500, 88.000)
-    D: Point                  -> (17.500, 72.000)
-    D: Point                  -> (18.500, 96.000)
-    D: Point                  -> ( 7.500, 50.000)
-    Time M    = M * M    : 10.623038 nS
-    Time VD[] = M * VS[] :  1.269042 nS
-    Time VS[] = M * VS[] :  1.287639 nS
-    Time VS[] = M * VS[] :  2.083957 nS
 
     -------------------------------
     With AVX (i5-4460; 64-Bit Mode)

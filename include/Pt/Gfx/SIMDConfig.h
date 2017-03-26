@@ -42,7 +42,7 @@
 // Include the appropriate SIMD header for common ARM compilers and define the needed macros
 #if defined(__arm__) || defined(__thumb__) || defined(_M_ARM) || defined(_M_ARMT) || defined(__TARGET_ARCH_ARM) || defined(__TARGET_ARCH_THUMB) || defined(_ARM) || defined(__arm)
 
-    #include <arm_neon.h>
+    //#include <arm_neon.h>
 
     #define PT_GFX_USE_ARM_CPU
 
