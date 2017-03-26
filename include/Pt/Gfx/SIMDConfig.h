@@ -55,6 +55,8 @@
 
     #define PT_GFX_USE_X86_CPU
 
+    #define PT_GFX_USE_FMA3
+
     #define PT_GFX_USE_AVX2
     #define PT_GFX_USE_AVX1
 
@@ -70,6 +72,8 @@
 
     #define PT_GFX_USE_X86_CPU
 
+    #define PT_GFX_USE_FMA3
+
     #define PT_GFX_USE_AVX2
     #define PT_GFX_USE_AVX1
 
@@ -83,20 +87,26 @@
 #endif
 
 
-//#undef PT_GFX_USE_AVX2
-//#undef PT_GFX_USE_AVX1
+#undef PT_GFX_USE_FMA3
 
-//#undef PT_GFX_USE_SSSE3
-//#undef PT_GFX_USE_SSE3
-//#undef PT_GFX_USE_SSE2
-//#undef PT_GFX_USE_SSE1
+#undef PT_GFX_USE_AVX2
+#undef PT_GFX_USE_AVX1
 
-//#undef PT_GFX_USE_NEON
+#undef PT_GFX_USE_SSSE3
+#undef PT_GFX_USE_SSE3
+#undef PT_GFX_USE_SSE2
+#undef PT_GFX_USE_SSE1
+
+#undef PT_GFX_USE_NEON
 
 
 //
 // When the higher SIMD level is supported, the lower level SIMD(s) should be also supported by the CPU
 //
+
+#if defined(PT_GFX_USE_FMA3) && !defined(PT_GFX_USE_AVX2)
+#define PT_GFX_USE_AVX2
+#endif
 
 #if defined(PT_GFX_USE_AVX2) && !defined(PT_GFX_USE_AVX1)
 #define PT_GFX_USE_AVX1
