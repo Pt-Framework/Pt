@@ -62,9 +62,9 @@ static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, doubl
     const double l3 = l1 + l2;
 
     // Determine the number of segments
-    if(!smoothness) smoothness = 1;
+    const Pt::int32_t mf = (Pt::int32_t) smoothness + 1;
 
-    Pt::int32_t nSegs = round(l3 * smoothness / 16) + 2;
+    Pt::int32_t nSegs = round(l3 * mf / 16) + 2;
     if(nSegs < 5) nSegs = 5;
 
     const double nSegs1i = 1.0 / (nSegs - 1);
