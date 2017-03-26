@@ -258,20 +258,19 @@ void BasicAffineMatrix2D<float>::updateMatrix(const MatrixData& n, MatrixUpdateM
 
     _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
 
-#if 0
+#if defined(PT_GFX_USE_FMA3)
 
-    __m128 out0x =                    _mm_mul_ps(_mm_broadcast_ss(&l->v[0][0]), r->r[0])  ;
+    __m128 out0x = _mm_mul_ps  (_mm_broadcast_ss(&l->v[0][0]), r->r[0]       );
+           out0x = _mm_fmadd_ps(_mm_broadcast_ss(&l->v[0][1]), r->r[1], out0x);
+           out0x = _mm_fmadd_ps(_mm_broadcast_ss(&l->v[0][2]), r->r[2], out0x);
 
-    out0x = _mm_fmadd_ps(_mm_broadcast_ss(&l->v[0][1]), r->r[1], out0x);
-    out0x = _mm_fmadd_ps(_mm_broadcast_ss(&l->v[0][2]), r->r[2], out0x);
+    __m128 out1x = _mm_mul_ps  (_mm_broadcast_ss(&l->v[1][0]), r->r[0]       );
+           out1x = _mm_fmadd_ps(_mm_broadcast_ss(&l->v[1][1]), r->r[1], out1x);
+           out1x = _mm_fmadd_ps(_mm_broadcast_ss(&l->v[1][2]), r->r[2], out1x);
 
-    __m128 out1x =                    _mm_mul_ps(_mm_broadcast_ss(&l->v[1][0]), r->r[0])  ;
-           out1x = _mm_add_ps( out1x, _mm_mul_ps(_mm_broadcast_ss(&l->v[1][1]), r->r[1]) );
-           out1x = _mm_add_ps( out1x, _mm_mul_ps(_mm_broadcast_ss(&l->v[1][2]), r->r[2]) );
-
-    __m128 out2x =                    _mm_mul_ps(_mm_broadcast_ss(&l->v[2][0]), r->r[0])  ;
-           out2x = _mm_add_ps( out2x, _mm_mul_ps(_mm_broadcast_ss(&l->v[2][1]), r->r[1]) );
-           out2x = _mm_add_ps( out2x, _mm_mul_ps(_mm_broadcast_ss(&l->v[2][2]), r->r[2]) );
+    __m128 out2x = _mm_mul_ps  (_mm_broadcast_ss(&l->v[2][0]), r->r[0]       );
+           out2x = _mm_fmadd_ps(_mm_broadcast_ss(&l->v[2][1]), r->r[1], out2x);
+           out2x = _mm_fmadd_ps(_mm_broadcast_ss(&l->v[2][2]), r->r[2], out2x);
 
 #else
 
@@ -373,6 +372,22 @@ void BasicAffineMatrix2D<double>::updateMatrix(const MatrixData& n, MatrixUpdate
 
     _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
 
+#if defined(PT_GFX_USE_FMA3)
+
+    __m256d out0x = _mm256_mul_pd  (_mm256_broadcast_sd(&l->v[0][0]), r->r[0]       );
+            out0x = _mm256_fmadd_pd(_mm256_broadcast_sd(&l->v[0][1]), r->r[1], out0x);
+            out0x = _mm256_fmadd_pd(_mm256_broadcast_sd(&l->v[0][2]), r->r[2], out0x);
+
+    __m256d out1x = _mm256_mul_pd  (_mm256_broadcast_sd(&l->v[1][0]), r->r[0]       );
+            out1x = _mm256_fmadd_pd(_mm256_broadcast_sd(&l->v[1][1]), r->r[1], out1x);
+            out1x = _mm256_fmadd_pd(_mm256_broadcast_sd(&l->v[1][2]), r->r[2], out1x);
+
+    __m256d out2x = _mm256_mul_pd  (_mm256_broadcast_sd(&l->v[2][0]), r->r[0]       );
+            out2x = _mm256_fmadd_pd(_mm256_broadcast_sd(&l->v[2][1]), r->r[1], out2x);
+            out2x = _mm256_fmadd_pd(_mm256_broadcast_sd(&l->v[2][2]), r->r[2], out2x);
+
+#else
+
     __m256d out0x =                       _mm256_mul_pd(_mm256_broadcast_sd(&l->v[0][0]), r->r[0])  ;
             out0x = _mm256_add_pd( out0x, _mm256_mul_pd(_mm256_broadcast_sd(&l->v[0][1]), r->r[1]) );
             out0x = _mm256_add_pd( out0x, _mm256_mul_pd(_mm256_broadcast_sd(&l->v[0][2]), r->r[2]) );
@@ -384,6 +399,8 @@ void BasicAffineMatrix2D<double>::updateMatrix(const MatrixData& n, MatrixUpdate
     __m256d out2x =                       _mm256_mul_pd(_mm256_broadcast_sd(&l->v[2][0]), r->r[0])  ;
             out2x = _mm256_add_pd( out2x, _mm256_mul_pd(_mm256_broadcast_sd(&l->v[2][1]), r->r[1]) );
             out2x = _mm256_add_pd( out2x, _mm256_mul_pd(_mm256_broadcast_sd(&l->v[2][2]), r->r[2]) );
+
+#endif
 
     _mm256_storeu_pd(_mdata.v[0], out0x);
     _mm256_storeu_pd(_mdata.v[1], out1x);
@@ -899,7 +916,9 @@ void BasicAffineMatrix2D<float>::transformPoints(PointF* dxy, const PointF* sxy,
         return;
     }
 
+    transformPoints((float*) dxy, (const float*) dxy, pointCount * 2);
 
+    /*
     float  xy[pointCount * 2];
     float* pxy = xy;
 
@@ -916,6 +935,7 @@ void BasicAffineMatrix2D<float>::transformPoints(PointF* dxy, const PointF* sxy,
         dxy[i].setX( *pxy++ );
         dxy[i].setY( *pxy++ );
     }
+    */
 }
 
 #endif
