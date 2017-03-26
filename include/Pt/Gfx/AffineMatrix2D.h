@@ -39,6 +39,17 @@
 #include <Pt/Gfx/SIMDConfig.h>
 
 
+#undef PT_GFX_USE_AVX2
+#undef PT_GFX_USE_AVX1
+
+#undef PT_GFX_USE_SSSE3
+#undef PT_GFX_USE_SSE3
+#undef PT_GFX_USE_SSE2
+#undef PT_GFX_USE_SSE1
+
+#undef PT_GFX_USE_NEON
+
+
 namespace Pt{
 namespace Gfx{
 
@@ -258,6 +269,23 @@ void BasicAffineMatrix2D<float>::updateMatrix(const MatrixData& n, MatrixUpdateM
 
     _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
 
+#if 0
+
+    __m128 out0x =                    _mm_mul_ps(_mm_broadcast_ss(&l->v[0][0]), r->r[0])  ;
+
+    out0x = _mm_fmadd_ps(_mm_broadcast_ss(&l->v[0][1]), r->r[1], out0x);
+    out0x = _mm_fmadd_ps(_mm_broadcast_ss(&l->v[0][2]), r->r[2], out0x);
+
+    __m128 out1x =                    _mm_mul_ps(_mm_broadcast_ss(&l->v[1][0]), r->r[0])  ;
+           out1x = _mm_add_ps( out1x, _mm_mul_ps(_mm_broadcast_ss(&l->v[1][1]), r->r[1]) );
+           out1x = _mm_add_ps( out1x, _mm_mul_ps(_mm_broadcast_ss(&l->v[1][2]), r->r[2]) );
+
+    __m128 out2x =                    _mm_mul_ps(_mm_broadcast_ss(&l->v[2][0]), r->r[0])  ;
+           out2x = _mm_add_ps( out2x, _mm_mul_ps(_mm_broadcast_ss(&l->v[2][1]), r->r[1]) );
+           out2x = _mm_add_ps( out2x, _mm_mul_ps(_mm_broadcast_ss(&l->v[2][2]), r->r[2]) );
+
+#else
+
     __m128 out0x =                    _mm_mul_ps(_mm_broadcast_ss(&l->v[0][0]), r->r[0])  ;
            out0x = _mm_add_ps( out0x, _mm_mul_ps(_mm_broadcast_ss(&l->v[0][1]), r->r[1]) );
            out0x = _mm_add_ps( out0x, _mm_mul_ps(_mm_broadcast_ss(&l->v[0][2]), r->r[2]) );
@@ -269,6 +297,7 @@ void BasicAffineMatrix2D<float>::updateMatrix(const MatrixData& n, MatrixUpdateM
     __m128 out2x =                    _mm_mul_ps(_mm_broadcast_ss(&l->v[2][0]), r->r[0])  ;
            out2x = _mm_add_ps( out2x, _mm_mul_ps(_mm_broadcast_ss(&l->v[2][1]), r->r[1]) );
            out2x = _mm_add_ps( out2x, _mm_mul_ps(_mm_broadcast_ss(&l->v[2][2]), r->r[2]) );
+#endif
 
     _mm_storeu_ps(_mdata.v[0], out0x);
     _mm_storeu_ps(_mdata.v[1], out1x);
