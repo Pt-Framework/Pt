@@ -179,7 +179,7 @@ Gfx::SizeF ScrollLayout::onMeasure(const SizePolicy& policy)
         Widget* item = *it;
 
         SizePolicy itemPolicy(SizePolicy::Any, SizePolicy::Any);
-        itemPolicy.setSize( policy.size() );
+        //itemPolicy.setSize( policy.size() );
         item->measure(itemPolicy);
    }
 
@@ -212,16 +212,6 @@ Gfx::SizeF ScrollLayout::onMeasure(const SizePolicy& policy)
 void ScrollLayout::onLayout(const Gfx::RectF& rect)
 {
     Base::onLayout(rect);
-
-    //if( _maxX < size().width() && _scrollPos.x() != 0 )
-    //{
-    //    scrollX(0);
-    //}
-    //
-    //if( _maxY < size().height() && _scrollPos.y() != 0 )
-    //{
-    //    scrollY(0);
-    //}    
 
     std::vector<Widget*>::const_iterator it;
     for(it = widgets().begin() ; it != widgets().end(); ++it)

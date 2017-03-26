@@ -40,31 +40,6 @@ namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API ComboBoxPopup : public Popup
-{
-    typedef Window Base;
-
-    public:
-        ComboBoxPopup();
-		
-        virtual ~ComboBoxPopup();
-
-        void addItem(ListBoxItem& item);
-
-        void removeItem(ListBoxItem& item);
-
-        void setScrollBars(bool hasScrollBars);
-
-        Pt::Signal<ListBoxItem&>& selected();
-
-    private:
-        void onItemSelected(ListBoxItem& item);
-
-    private:
-        ListBox _items;
-};
-
-
 class PT_HMI_API ComboBox : public Control
 {
     typedef Control Base;
@@ -167,7 +142,8 @@ class PT_HMI_API ComboBox : public Control
 
         LineEditor    _editor;
         TextLine      _line;
-        ComboBoxPopup _popup;
+        Popup         _popup;
+        ListBox       _items;
         Gfx::SizeF    _buttonSize;
         double        _maxHeight;
         double        _spacing;

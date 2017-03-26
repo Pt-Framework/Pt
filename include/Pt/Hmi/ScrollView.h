@@ -48,9 +48,6 @@ class PT_HMI_API ScrollView : public Widget
 
         void setScrollBars(bool hasScrollBars);
 
-        // TODO: Widget::setContent could work for the ScrollView if the
-        //       content widget is stacked behind all other children
-
         void setContent(Widget& w);
 
     protected:

@@ -166,10 +166,12 @@ class PT_HMI_API ListBox : public Control
         virtual void onInvalidate();
     
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
-
-        virtual void onLayout(const Gfx::RectF& rect);
+        
+        virtual void onSizePolicy(const SizePolicy& policy);
 
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+
+        virtual void onLayout(const Gfx::RectF& rect);
 
     private:
         void onItemSelected(ListBoxItem& item);
@@ -185,7 +187,8 @@ class PT_HMI_API ListBox : public Control
         bool                      _hasBackground;       
         AutoPtr<Gfx::Pen>         _contour;
         bool                      _hasFrame;
-                                  
+                        
+        Spacing    _frameSize;          
         Gfx::Brush _brush;
         Gfx::Pen   _pen;
 };

@@ -266,10 +266,13 @@ class PT_HMI_API Widget : public Visual
         
         virtual void onInvalidate();
         
+
+        virtual void onSizePolicy(const SizePolicy& policy);
+
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
         virtual void onLayout(const Gfx::RectF& rect);
- 
+
 
         virtual void onSetActionKey(const Key& ak);
 

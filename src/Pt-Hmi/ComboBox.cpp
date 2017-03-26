@@ -33,57 +33,6 @@ namespace Pt {
 
 namespace Hmi {
 
-/////////////////////////////////////////////////////////////////////////////
-// ComboBoxPopup
-/////////////////////////////////////////////////////////////////////////////
-
-ComboBoxPopup::ComboBoxPopup()
-: Popup()
-{
-    setContent(&_items);
-
-    _items.selected() += Pt::slot(*this, &ComboBoxPopup::onItemSelected);
-}
-
-		
-ComboBoxPopup::~ComboBoxPopup()
-{
-}
-
-
-void ComboBoxPopup::addItem(ListBoxItem& item)
-{   
-    _items.addItem(item);
-}
-
-
-void ComboBoxPopup::removeItem(ListBoxItem& item)
-{   
-    _items.removeItem(item);
-}
-
-
-void ComboBoxPopup::onItemSelected(ListBoxItem&)
-{
-    show(false);
-}
-
-
-void ComboBoxPopup::setScrollBars(bool hasScrollBars)
-{
-    _items.setScrollBars(hasScrollBars);
-}
-
-
-Pt::Signal<ListBoxItem&>& ComboBoxPopup::selected()
-{
-    return _items.selected();
-}
-
-/////////////////////////////////////////////////////////////////////////////
-// ComboBox
-/////////////////////////////////////////////////////////////////////////////
-
 ComboBox::ComboBox()
 : _maxHeight(500)
 , _spacing(2)
@@ -93,8 +42,10 @@ ComboBox::ComboBox()
     setTextInput(_isEditable);
     setFocusPolicy(Widget::NormalFocus);
 
+    _popup.setContent(&_items);
     _popup.eventReady() += Pt::slot(*this, &ComboBox::processKeyEvent);
-    _popup.selected() += Pt::slot(*this, &ComboBox::onItemSelected);
+    
+    _items.selected() += Pt::slot(*this, &ComboBox::onItemSelected);
 }
 
 
@@ -105,7 +56,7 @@ ComboBox::~ComboBox()
 
 void ComboBox::addItem(ListBoxItem& item)
 {   
-    _popup.addItem(item);
+    _items.addItem(item);
 
     //item.setTextInput(true);
 }
@@ -113,7 +64,7 @@ void ComboBox::addItem(ListBoxItem& item)
 
 void ComboBox::removeItem(ListBoxItem& item)
 {
-    _popup.addItem(item);
+    _items.removeItem(item);
 }
 
 
@@ -159,7 +110,7 @@ void ComboBox::setTextAdjustment(Adjustment a)
 
 void ComboBox::setScrollBars(bool hasScrollBars)
 {
-    _popup.setScrollBars(hasScrollBars);
+    _items.setScrollBars(hasScrollBars);
 }
 
 
@@ -174,6 +125,8 @@ void ComboBox::showPopup()
     SizePolicy policy(SizePolicy::Fixed, SizePolicy::Preferred);
     policy.setWidth( size().width() );
     policy.setHeight( _maxHeight );
+
+    _items.setSizePolicy(policy);
 
     Gfx::SizeF popupSize = _popup.measure(policy);
     popupSize.setHeight( std::min(popupSize.height(), _maxHeight) );
@@ -214,8 +167,9 @@ Pt::Signal<const Pt::String&>& ComboBox::editingFinished()
 
 Pt::Signal<ListBoxItem&>& ComboBox::selected()
 {
-    return _popup.selected();
+    return _items.selected();
 }
+
 
 const Gfx::Brush& ComboBox::background() const
 {
@@ -329,6 +283,9 @@ void ComboBox::onItemSelected(ListBoxItem& item)
 {
     Application::instance().inputMethod().finish();
     _editor.setText( item.text() );
+
+    _popup.show(false);
+    
     invalidate();
 }
 

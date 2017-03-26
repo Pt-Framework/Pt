@@ -541,6 +541,8 @@ void Widget::setSizePolicy(const SizePolicy& policy)
 
     if( parent() )
         parent()->relayout();
+
+    onSizePolicy(policy);
 }
 
 
@@ -602,6 +604,11 @@ void Widget::measure(const SizePolicy& policy)
         if(contentPolicy.horizontal() == SizePolicy::Fixed)
             _preferredSize.setWidth( contentPolicy.width() );
     }
+}
+
+
+void Widget::onSizePolicy(const SizePolicy&)
+{
 }
 
 
@@ -683,11 +690,6 @@ bool Widget::isLayouting() const
 
 void Widget::onLayout(const Gfx::RectF& rect)
 {
-    // TODO: content widget must be managed by derived class because only
-    //       there is the size policy known
-    //       -> move content widget to container which can really have one
-    //          i.e. Panel
-
 }
 
 
@@ -920,24 +922,20 @@ void Widget::setMargin(const Spacing& s)
 
     if( parent() )
        parent()->relayout();
+
+     onSizePolicy(_sizePolicy);
 }
 
 
 void Widget::setMargin(double n)
 {
-    _margin.set(n);
-
-    if( parent() )
-       parent()->relayout();
+    setMargin( Spacing(n) );
 }
 
 
 void Widget::setMargin(double horiz, double vertical)
 {
-    _margin.set(horiz, vertical);
-
-    if( parent() )
-       parent()->relayout();
+    setMargin( Spacing(horiz, vertical) );
 }
 
 
@@ -951,20 +949,19 @@ void Widget::setPadding( const Spacing& p )
 {
     _padding = p;
     relayout();
+    onSizePolicy(_sizePolicy);
 }
 
 
 void Widget::setPadding(double n)
 {
-    _padding.set(n);
-    relayout();
+    setPadding( Spacing(n) );
 }
 
 
 void Widget::setPadding(double horiz, double vertical)
 {
-    _padding.set(horiz, vertical);
-    relayout();
+    setPadding( Spacing(horiz, vertical) );
 }
 
 
