@@ -374,7 +374,7 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
     // Create two-dimensional gradient
     const float        cx   = width  * 0.5f;
     const float        cy   = height * 0.5f;
-    const float        mlen = 0.5f / Gfx::Math::fastSqrt(width * width + height * height);
+    const float        ilen = 1.0f / Gfx::Math::fastSqrt(cx * cx + cy * cy);
           Pt::uint8_t* pixel = _brushBuffer.data();
     switch(_brush.fillStyle()) {
         case Pt::Gfx::Brush::RectangularGradient: {
@@ -386,7 +386,7 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
                 const float dy2 = (y - cy) * (y - cy);
                 for(Pt::int32_t x = 0; x < width; ++x) {
                     const float dx2 = (x - cx) * (x - cx);
-                    const float len = round(Gfx::Math::fastSqrt(dx2 + dy2) * mlen);
+                    const float len = Gfx::Math::fastSqrt(dx2 + dy2) * ilen;
                     const float mf  = (len >= 1.0f) ? 1.0f : len;
                     const float imf = 1.0f - mf;
                     *pixel++ = (bs * mf + be * imf);

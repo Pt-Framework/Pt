@@ -73,7 +73,7 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
 
     // Rectangular gradient
     painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Rectangular) );
-    painter.fillRect( RectF(PointF(20, 250), SizeF(250, 150)) );
+    //painter.fillRect( RectF(PointF(20, 250), SizeF(250, 150)) );
 
     // Radial gradient
     painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Radial) );
@@ -81,7 +81,7 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
 
     // Conical gradient
     painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Conical) );
-    painter.fillRect( RectF(PointF(20 + 600, 250), SizeF(250, 150)) );
+    //painter.fillRect( RectF(PointF(20 + 600, 250), SizeF(250, 150)) );
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }
