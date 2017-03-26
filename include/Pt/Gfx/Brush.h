@@ -48,18 +48,22 @@ class PT_GFX_API Brush
             Texture             = 1,
             HorizontalGradient  = 2,
             VerticalGradient    = 3,
-            RectangularGradient = 4,
-            RadialGradient      = 5,
-            ConicalGradient     = 6
+            DiamondGradient     = 4,
+            RectangularGradient = 5,
+            CrossGradient       = 6,
+            RadialGradient      = 7,
+            ConicalGradient     = 8
         };
 
         enum GradientDirection
         {
             Horizontal  =  0,
             Vertical    =  1,
-            Rectangular =  2,
-            Radial      =  3,
-            Conical     =  4
+            Diamond     =  2,
+            Rectangular =  3,
+            Cross       =  4,
+            Radial      =  5,
+            Conical     =  6
         };
 
     public:

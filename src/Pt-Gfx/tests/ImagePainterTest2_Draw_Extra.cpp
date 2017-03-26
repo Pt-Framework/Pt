@@ -26,9 +26,9 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
     ip2->drawLine( PointF( 20, 170), PointF(100, 120) );
 
     ip2->setPen(penHRCapBJoin);
-    ip2->drawArc( PointF (150, 20), SizeF(150, 150), 60, 300, ArcMode::Open );
+    ip2->drawArc( PointF (150, 20), SizeF(100, 100), 60, 300, ArcMode::Open );
     ip2->setPen(penRef);
-    ip2->drawArc( PointF (150, 20), SizeF(150, 150), 60, 300, ArcMode::Open );
+    ip2->drawArc( PointF (150, 20), SizeF(100, 100), 60, 300, ArcMode::Open );
 
     ip2->setPen(penText);
     ip2->drawText( PointF(70, 180), "Round-Hole" );
@@ -45,9 +45,9 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
     ip2->drawLine( PointF( 20 + 350, 170), PointF(100 + 350, 120) );
 
     ip2->setPen(penA1CapBJoin);
-    ip2->drawArc( PointF (150 + 350, 20), SizeF(150, 150), 60, 300, ArcMode::Open );
+    ip2->drawArc( PointF (150 + 350, 20), SizeF(100, 100), 60, 300, ArcMode::Open );
     ip2->setPen(penRef);
-    ip2->drawArc( PointF (150 + 350, 20), SizeF(150, 150), 60, 300, ArcMode::Open );
+    ip2->drawArc( PointF (150 + 350, 20), SizeF(100, 100), 60, 300, ArcMode::Open );
 
     ip2->setPen(penText);
     ip2->drawText( PointF(70 + 350, 180), "Arrow-1" );
@@ -64,56 +64,78 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
     ip2->drawLine( PointF( 20 + 700, 170), PointF(100 + 700, 120) );
 
     ip2->setPen(penA2CapBJoin);
-    ip2->drawArc( PointF (150 + 700, 20), SizeF(150, 150), 60, 300, ArcMode::Open );
+    ip2->drawArc( PointF (150 + 700, 20), SizeF(100, 100), 60, 300, ArcMode::Open );
     ip2->setPen(penRef);
-    ip2->drawArc( PointF (150 + 700, 20), SizeF(150, 150), 60, 300, ArcMode::Open );
+    ip2->drawArc( PointF (150 + 700, 20), SizeF(100, 100), 60, 300, ArcMode::Open );
 
     ip2->setPen(penText);
     ip2->drawText( PointF(70 + 700, 180), "Arrow-2" );
 
     // --- Part 1 ---
 
+    // Diamond gradient
+    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Diamond) );
+    painter.fillRect( RectF(PointF(20, 250), SizeF(100, 100)) );
+
     // Rectangular gradient
     painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Rectangular) );
-    painter.fillRect( RectF(PointF(20, 250), SizeF(150, 150)) );
+    painter.fillRect( RectF(PointF(20 + 180, 250), SizeF(100, 100)) );
+
+    // Cross gradient
+    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Cross) );
+    painter.fillRect( RectF(PointF(20 + 360, 250), SizeF(100, 100)) );
 
     // Radial gradient
     painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Radial) );
-    painter.fillRect( RectF(PointF(20 + 180, 250), SizeF(150, 150)) );
+    painter.fillRect( RectF(PointF(20 + 540, 250), SizeF(100, 100)) );
 
     // Conical gradient
     painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Conical) );
-    painter.fillRect( RectF(PointF(20 + 360, 250), SizeF(150, 150)) );
-
-    // Horizontal gradient
-    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Horizontal) );
-    painter.fillRect( RectF(PointF(20 + 540, 250), SizeF(150, 150)) );
-
-    // Vertical gradient
-    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Vertical) );
-    painter.fillRect( RectF(PointF(20 + 720, 250), SizeF(150, 150)) );
+    painter.fillRect( RectF(PointF(20 + 720, 250), SizeF(100, 100)) );
 
     // --- Part 2 ---
 
+    // Diamond gradient
+    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Diamond) );
+    painter.fillRect( RectF(PointF(20, 250 + 135), SizeF(50, 100)) );
+
     // Rectangular gradient
-    painter.setBrush( Brush(Color::fromRgb8(0, 255, 0, 175), Color::fromRgb8(255, 0, 0, 175), Brush::Rectangular) );
-    painter.fillRect( RectF(PointF(20, 250 + 180), SizeF(150, 150)) );
+    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Rectangular) );
+    painter.fillRect( RectF(PointF(20 + 180, 250 + 135), SizeF(50, 100)) );
+
+    // Cross gradient
+    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Cross) );
+    painter.fillRect( RectF(PointF(20 + 360, 250 + 135), SizeF(50, 100)) );
 
     // Radial gradient
-    painter.setBrush( Brush(Color::fromRgb8(0, 255, 0, 175), Color::fromRgb8(255, 0, 0, 175), Brush::Radial) );
-    painter.fillRect( RectF(PointF(20 + 180, 250 + 180), SizeF(150, 150)) );
+    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Radial) );
+    painter.fillRect( RectF(PointF(20 + 540, 250 + 135), SizeF(50, 100)) );
 
     // Conical gradient
-    painter.setBrush( Brush(Color::fromRgb8(0, 255, 0, 175), Color::fromRgb8(255, 0, 0, 175), Brush::Conical) );
-    painter.fillRect( RectF(PointF(20 + 360, 250 + 180), SizeF(150, 150)) );
+    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Conical) );
+    painter.fillRect( RectF(PointF(20 + 720, 250 + 135), SizeF(50, 100)) );
 
-    // Horizontal gradient
-    painter.setBrush( Brush(Color::fromRgb8(0, 255, 0, 175), Color::fromRgb8(255, 0, 0, 175), Brush::Horizontal) );
-    painter.fillRect( RectF(PointF(20 + 540, 250 + 180), SizeF(150, 150)) );
+    // --- Part 3 ---
 
-    // Vertical gradient
-    painter.setBrush( Brush(Color::fromRgb8(0, 255, 0, 175), Color::fromRgb8(255, 0, 0, 175), Brush::Vertical) );
-    painter.fillRect( RectF(PointF(20 + 720, 250 + 180), SizeF(150, 150)) );
+    // Diamond gradient
+    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Diamond) );
+    painter.fillRect( RectF(PointF(20, 250 + 270), SizeF(100, 50)) );
+
+    // Rectangular gradient
+    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Rectangular) );
+    painter.fillRect( RectF(PointF(20 + 180, 250 + 270), SizeF(100, 50)) );
+
+    // Cross gradient
+    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Cross) );
+    painter.fillRect( RectF(PointF(20 + 360, 250 + 270), SizeF(100, 50)) );
+
+    // Radial gradient
+    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Radial) );
+    painter.fillRect( RectF(PointF(20 + 540, 250 + 270), SizeF(100, 50)) );
+
+    // Conical gradient
+    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Conical) );
+    painter.fillRect( RectF(PointF(20 + 720, 250 + 270), SizeF(100, 50)) );
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }
