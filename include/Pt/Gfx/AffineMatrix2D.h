@@ -38,8 +38,6 @@
 
 #include <Pt/Gfx/SIMDConfig.h>
 
-#undef PT_GFX_USE_NEON
-
 
 namespace Pt{
 namespace Gfx{

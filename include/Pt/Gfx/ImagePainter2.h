@@ -15,7 +15,7 @@
   resulting executable to be covered by the GNU General Public
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
-  General Public License. 
+  General Public License.
 
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -106,7 +106,7 @@ class PT_GFX_API ImagePainter2 : public Painter
         // NOTE: The begin and end angle must move in counter-clockwise (CCW) direction or something wrong will be drawn!
         virtual void drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
-        virtual void drawPath(const Path2D& path2d, const AffineMatrix2D& matrix2d, bool autoClose);
+        virtual void drawPath(const Path2D& path2d, const AffineMatrix2D& matrix2d, bool autoClose, Pt::uint8_t smoothness = 0);
 
         virtual void fillRect(const RectF& rect);
 
@@ -120,7 +120,7 @@ class PT_GFX_API ImagePainter2 : public Painter
         // NOTE: The begin and end angle must move in counter-clockwise (CCW) direction or something wrong will be drawn!
         virtual void fillArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
-        virtual void fillPath(const Path2D& path2d, const AffineMatrix2D& matrix2d);
+        virtual void fillPath(const Path2D& path2d, const AffineMatrix2D& matrix2d, Pt::uint8_t smoothness = 0);
 
     public:
         // Just to make the API match the interface defined by the Pt::GfxPainter class

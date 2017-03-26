@@ -1065,30 +1065,22 @@ void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float deg
     _rasterizer->fillArc(tl, sz, degBegin, degEnd, arcMode);
 }
 
-void ImagePainter2::drawPath(const Path2D& path2d, const AffineMatrix2D& matrix2d, bool autoClose)
+void ImagePainter2::drawPath(const Path2D& path2d, const AffineMatrix2D& matrix2d, bool autoClose, Pt::uint8_t smoothness)
 {
     std::vector<PointF> pointsF;
 
-    path2d.generatePoints(pointsF, 0);
+    path2d.generatePoints(pointsF, smoothness);
     matrix2d.transformPoints(pointsF.data(), pointsF.size());
-
-    //for(size_t i = 0; i < pointsF.size(); ++i)
-    //    lprintf("%5.1f, %5.1f\n", pointsF[i].x(), pointsF[i].y());
-    //lprintf("\n");
 
     drawPolyline(pointsF.data(), pointsF.size(), autoClose);
 }
 
-void ImagePainter2::fillPath(const Path2D& path2d, const AffineMatrix2D& matrix2d)
+void ImagePainter2::fillPath(const Path2D& path2d, const AffineMatrix2D& matrix2d, Pt::uint8_t smoothness)
 {
     std::vector<PointF> pointsF;
 
-    path2d.generatePoints(pointsF, 0);
+    path2d.generatePoints(pointsF, smoothness);
     matrix2d.transformPoints(pointsF.data(), pointsF.size());
-
-    //for(size_t i = 0; i < pointsF.size(); ++i)
-    //    lprintf("%5.1f, %5.1f\n", pointsF[i].x(), pointsF[i].y());
-    //lprintf("\n");
 
     fillPolygon(pointsF.data(), pointsF.size());
 }
