@@ -96,7 +96,7 @@ class Rasterizer2
         typedef Point DrawLineMask[4];
 
         static const DrawLineMask NullLineMask;
- 
+
         // Weighting filter for Xiaolin Wu's anti-aliasing algorithm
         static const Pt::uint8_t XWAA_WFILTER[256];
 
@@ -314,6 +314,7 @@ class Rasterizer2
         ConstPixel       _brushPixel;
         const Image*     _brushImage;
         bool             _isGradient;
+        bool             _isGradientTexture;
         bool             _isTexture;
 
         Rect             _clip;
@@ -571,8 +572,8 @@ void Rasterizer2::rasterScanline(
     //
     if(iterR < iterL) return;
 
-    // Draw the span using texture
-    if(_isTexture) {
+    // Draw the span using texture or gradient texture
+    if(_isTexture || _isGradientTexture) {
         Pt::int32_t iterX     = iterL;
         Pt::int32_t spanWidth = iterR - iterL + 1;
         while(spanWidth > 0) {

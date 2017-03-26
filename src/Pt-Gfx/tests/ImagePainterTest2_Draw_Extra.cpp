@@ -71,5 +71,17 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
     ip2->setPen(penText);
     ip2->drawText( PointF(70 + 700, 180), "Arrow-2" );
 
+    // Rectangular gradient
+    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Rectangular) );
+    painter.fillRect( RectF(PointF(20, 250), SizeF(250, 150)) );
+
+    // Radial gradient
+    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Radial) );
+    painter.fillRect( RectF(PointF(20 + 300, 250), SizeF(250, 150)) );
+
+    // Conical gradient
+    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Conical) );
+    painter.fillRect( RectF(PointF(20 + 600, 250), SizeF(250, 150)) );
+
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }

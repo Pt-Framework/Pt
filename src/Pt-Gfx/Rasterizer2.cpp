@@ -128,9 +128,10 @@ void Rasterizer2::setPen( const Pen& pen )
 
 void Rasterizer2::setBrush( const Brush& brush )
 {
-    _brush      = brush;
-    _isGradient = false;
-    _isTexture  = false;
+    _brush             = brush;
+    _isGradient        = false;
+    _isGradientTexture = false;
+    _isTexture         = false;
 
     switch( brush.fillStyle() ) {
         case Brush::Solid:
@@ -155,6 +156,14 @@ void Rasterizer2::setBrush( const Brush& brush )
         case Brush::VerticalGradient:
             _isGradient = true;
             _brushImage = &_brushBuffer;
+            break;
+
+        case Brush::RectangularGradient:
+        case Brush::RadialGradient:
+        case Brush::ConicalGradient:
+            _isGradient        = true;
+            _isGradientTexture = true;
+            _brushImage        = &_brushBuffer;
             break;
     }
 
@@ -310,55 +319,59 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
             // Resize the brush buffer
             height = 1;
             _brushBuffer.reset(_image->format(), Size(width, 1));
-            // Determine the colors
-            rs = _brush.color        ().red  () / 257;
-            gs = _brush.color        ().green() / 257;
-            bs = _brush.color        ().blue () / 257;
-            as = _brush.color        ().alpha() / 257;
-            re = _brush.gradientColor().red  () / 257;
-            ge = _brush.gradientColor().green() / 257;
-            be = _brush.gradientColor().blue () / 257;
-            ae = _brush.gradientColor().alpha() / 257;
             break;
 
         case Pt::Gfx::Brush::VerticalGradient:
             // Resize the brush buffer
             width = 1;
             _brushBuffer.reset(_image->format(), Size(1, height));
-            // Determine the colors
-            rs = _brush.gradientColor().red  () / 257;
-            gs = _brush.gradientColor().green() / 257;
-            bs = _brush.gradientColor().blue () / 257;
-            as = _brush.gradientColor().alpha() / 257;
-            re = _brush.color        ().red  () / 257;
-            ge = _brush.color        ().green() / 257;
-            be = _brush.color        ().blue () / 257;
-            ae = _brush.color        ().alpha() / 257;
+            break;
+
+        case Pt::Gfx::Brush::RectangularGradient : /* Fallthrough */
+        case Pt::Gfx::Brush::RadialGradient      : /* Fallthrough */
+        case Pt::Gfx::Brush::ConicalGradient     :
+            // Resize the brush buffer
+            _brushBuffer.reset(_image->format(), Size(width, height));
             break;
 
         default:
             return;
     }
 
-    // Create the gradient
-    const Pt::int32_t  length = width + height - 1 - 1;
-          Pt::uint8_t* pixel  = _brushBuffer.data();
-    for(int n = 0; n <= length; ++n) {
-        const Pt::int32_t f2 = FIXED_POINT_FROM_INT(n) / length;
-        const Pt::int32_t f1 = FIXED_POINT_CONSTANT_ONE - f2;
-        const Pt::uint8_t r1 = FIXED_POINT_TO_INT(rs * f1);
-        const Pt::uint8_t r2 = FIXED_POINT_TO_INT(re * f2);
-        const Pt::uint8_t g1 = FIXED_POINT_TO_INT(gs * f1);
-        const Pt::uint8_t g2 = FIXED_POINT_TO_INT(ge * f2);
-        const Pt::uint8_t b1 = FIXED_POINT_TO_INT(bs * f1);
-        const Pt::uint8_t b2 = FIXED_POINT_TO_INT(be * f2);
-        const Pt::uint8_t a1 = FIXED_POINT_TO_INT(as * f1);
-        const Pt::uint8_t a2 = FIXED_POINT_TO_INT(ae * f2);
-        *pixel++ = b1 + b2;
-        *pixel++ = g1 + g2;
-        *pixel++ = r1 + r2;
-        *pixel++ = a1 + a2;
+    // Determine the colors
+    rs = _brush.color        ().red  () / 257;
+    gs = _brush.color        ().green() / 257;
+    bs = _brush.color        ().blue () / 257;
+    as = _brush.color        ().alpha() / 257;
+    re = _brush.gradientColor().red  () / 257;
+    ge = _brush.gradientColor().green() / 257;
+    be = _brush.gradientColor().blue () / 257;
+    ae = _brush.gradientColor().alpha() / 257;
+
+        // Create one-dimensional gradient
+    if(width == 1 || height == 1) {
+        const Pt::int32_t  length = width + height - 1 - 1;
+              Pt::uint8_t* pixel  = _brushBuffer.data();
+        for(int n = 0; n <= length; ++n) {
+            const Pt::int32_t f2 = FIXED_POINT_FROM_INT(n) / length;
+            const Pt::int32_t f1 = FIXED_POINT_CONSTANT_ONE - f2;
+            const Pt::uint8_t r1 = FIXED_POINT_TO_INT(rs * f1);
+            const Pt::uint8_t r2 = FIXED_POINT_TO_INT(re * f2);
+            const Pt::uint8_t g1 = FIXED_POINT_TO_INT(gs * f1);
+            const Pt::uint8_t g2 = FIXED_POINT_TO_INT(ge * f2);
+            const Pt::uint8_t b1 = FIXED_POINT_TO_INT(bs * f1);
+            const Pt::uint8_t b2 = FIXED_POINT_TO_INT(be * f2);
+            const Pt::uint8_t a1 = FIXED_POINT_TO_INT(as * f1);
+            const Pt::uint8_t a2 = FIXED_POINT_TO_INT(ae * f2);
+            *pixel++ = b1 + b2;
+            *pixel++ = g1 + g2;
+            *pixel++ = r1 + r2;
+            *pixel++ = a1 + a2;
+        }
+        return;
     }
+
+    // Create two-dimensional gradient
 }
 
 void Rasterizer2::updateClip()

@@ -106,8 +106,8 @@ void Rasterizer2::rasterRectArea(const Point& tl, const Point& br)
     // Calculate the width of the rectangle
     const Pt::int32_t sizeX = maxX - minX + 1;
 
-    // Draw the rectangle using texture
-    if(_isTexture) {
+    // Draw the rectangle using texture or gradient texture
+    if(_isTexture || _isGradientTexture) {
         for(Pt::int32_t iterY = minY; iterY <= maxY; ++iterY) {
             Pt::int32_t iterX     = minX;
             Pt::int32_t spanWidth = sizeX;

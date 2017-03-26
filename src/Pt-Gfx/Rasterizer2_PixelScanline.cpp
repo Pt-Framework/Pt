@@ -432,8 +432,8 @@ void Rasterizer2::rasterScanline(
     const Color& color
 )
 {
-    // Draw the span using texture
-    if(_isTexture) {
+    // Draw the span using texture or gradient texture
+    if(_isTexture || _isGradientTexture) {
         Pt::int32_t iterX     = iterL;
         Pt::int32_t spanWidth = iterR - iterL + 1;
         while(spanWidth > 0) {

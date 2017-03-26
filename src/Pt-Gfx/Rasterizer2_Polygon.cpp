@@ -69,11 +69,13 @@ void Rasterizer2::strokePolygon(const Point* points, size_t pointCount)
     if(pointCount < 2) return;
 
     // Disable texture/gradient
-    const bool isTexture  = _isTexture;
-    const bool isGradient = _isGradient;
+    const bool isTexture         = _isTexture;
+    const bool isGradientTexture = _isGradientTexture;
+    const bool isGradient        = _isGradient;
 
-    _isTexture  = false;
-    _isGradient = false;
+    _isTexture         = false;
+    _isGradientTexture = false;
+    _isGradient        = false;
 
     // Separate the polygons and clip their coordinates
     Pt::int32_t         minX;
@@ -110,8 +112,9 @@ void Rasterizer2::strokePolygon(const Point* points, size_t pointCount)
     }
 
     // Restore texture/gradient
-    _isTexture  = isTexture;
-    _isGradient = isGradient;
+    _isTexture         = isTexture;
+    _isGradientTexture = isGradientTexture;
+    _isGradient        = isGradient;
 }
 
 void Rasterizer2::strokePolygonSeparate(const Point* points, size_t pointCount)
@@ -120,11 +123,13 @@ void Rasterizer2::strokePolygonSeparate(const Point* points, size_t pointCount)
     if(pointCount < 2) return;
 
     // Disable texture/gradient
-    const bool isTexture  = _isTexture;
-    const bool isGradient = _isGradient;
+    const bool isTexture         = _isTexture;
+    const bool isGradientTexture = _isGradientTexture;
+    const bool isGradient        = _isGradient;
 
-    _isTexture  = false;
-    _isGradient = false;
+    _isTexture         = false;
+    _isGradientTexture = false;
+    _isGradient        = false;
 
     // Separate the polygons, clip their coordinates, and raster them
     size_t startIndex = 0;
@@ -155,8 +160,9 @@ void Rasterizer2::strokePolygonSeparate(const Point* points, size_t pointCount)
     }
 
     // Restore texture/gradient
-    _isTexture  = isTexture;
-    _isGradient = isGradient;
+    _isTexture         = isTexture;
+    _isGradientTexture = isGradientTexture;
+    _isGradient        = isGradient;
 }
 
 void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
