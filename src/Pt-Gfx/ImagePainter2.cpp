@@ -416,6 +416,17 @@ static inline void generateLineTriangularInCap(std::vector<PointF>& dst, float x
     dst.push_back( PointF(x - nx - dx, y - ny - dy) );
 }
 
+static inline void generateLineRoundHoleCap(std::vector<PointF>& dst, float x, float y, float wh, float dx, float dy, float nx, float ny)
+{
+    generateQuadraticBezierPoints(
+        dst,
+        round(x - nx - dx), round(y - ny - dy),
+        round(x      + dx), round(y      + dy),
+        round(x + nx -dx ), round(y + ny - dy),
+        ceil(wh) - 1
+    );
+}
+
 static inline void generateLineArrowCap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
 {
     dst.push_back( PointF(x + nx,        y + ny       ) );
@@ -470,11 +481,20 @@ static inline void combineLinePointsAndAddCaps(std::vector<Point>& dst, const st
             dst.push_back( Point( round(x2a + dx2), round(y2a + dy2) ) );
             break;
 
-        case Pen::ArrowCap:
-            dst.push_back( Point( round(x2a + nx2 * 2.0f), round(y2a + ny2 * 2.0f) ) );
-            dst.push_back( Point( round(x2a - dx2       ), round(y2a - dy2       ) ) );
-            dst.push_back( Point( round(x2a - nx2 * 2.0f), round(y2a - ny2 * 2.0f) ) );
+        case Pen::RoundHoleCap: {
+            std::vector<PointF> tmp;
+            generateQuadraticBezierPoints(tmp, ix2a - dx2, iy2a - dy2, x2a + dx2, y2a + dy2, ox2a - dx2, oy2a - dy2, penSize);
+            if(tmp.size() <= 2) break;
+            for(size_t i = 1; i < tmp.size() - 1; ++i) {
+                dst.push_back( Point( round(tmp[i].x()), round(tmp[i].y()) ) );
+            }
+            break;
+        }
 
+        case Pen::ArrowCap:
+            dst.push_back( Point( round(x2a - nx2 * 2.0f), round(y2a - ny2 * 2.0f) ) );
+            dst.push_back( Point( round(x2a - dx2       ), round(y2a - dy2       ) ) );
+            dst.push_back( Point( round(x2a + nx2 * 2.0f), round(y2a + ny2 * 2.0f) ) );
             break;
 
         default:
@@ -527,10 +547,21 @@ static inline void combineLinePointsAndAddCaps(std::vector<Point>& dst, const st
             dst.push_back( Point( round(x1a - dx1), round(y1a - dy1) ) );
             break;
 
+        case Pen::RoundHoleCap: {
+            std::vector<PointF> tmp;
+            generateQuadraticBezierPoints(tmp, ox1a + dx1, oy1a + dy1, x1a - dx1, y1a - dy1, ix1a + dx1, iy1a + dy1, penSize);
+            if(tmp.size() <= 2) break;
+            for(size_t i = 1; i < tmp.size() - 1; ++i) {
+                dst.push_back( Point( round(tmp[i].x()), round(tmp[i].y()) ) );
+            }
+
+            break;
+        }
+
         case Pen::ArrowCap:
-            dst.push_back( Point( round(x1a - nx1 * 2.0f), round(y1a - ny1 * 2.0f) ) );
-            dst.push_back( Point( round(x1a + dx1       ), round(y1a + dy1       ) ) );
             dst.push_back( Point( round(x1a + nx1 * 2.0f), round(y1a + ny1 * 2.0f) ) );
+            dst.push_back( Point( round(x1a + dx1       ), round(y1a + dy1       ) ) );
+            dst.push_back( Point( round(x1a - nx1 * 2.0f), round(y1a - ny1 * 2.0f) ) );
             break;
 
         default:
@@ -1191,6 +1222,7 @@ void ImagePainter2::generateSolidLineSegment(std::vector<PointF>& dst, float x1,
             case Pen::RoundCap         : generateLineRoundCap        (dst, x1, y1, wh, dx, dy, nx, ny); break;
             case Pen::TriangularOutCap : generateLineTriangularOutCap(dst, x1, y1,     dx, dy, nx, ny); break;
             case Pen::TriangularInCap  : generateLineTriangularInCap (dst, x1, y1,     dx, dy, nx, ny); break;
+            case Pen::RoundHoleCap     : generateLineRoundHoleCap    (dst, x1, y1, wh, dx, dy, nx, ny); break;
             case Pen::ArrowCap         : generateLineArrowCap        (dst, x1, y1,     dx, dy, nx, ny); break;
             default                    : openingCap = false;
         }
@@ -1203,6 +1235,7 @@ void ImagePainter2::generateSolidLineSegment(std::vector<PointF>& dst, float x1,
             case Pen::RoundCap         : generateLineRoundCap        (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
             case Pen::TriangularOutCap : generateLineTriangularOutCap(dst, x2, y2,     -dx, -dy, -nx, -ny); break;
             case Pen::TriangularInCap  : generateLineTriangularInCap (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
+            case Pen::RoundHoleCap     : generateLineRoundHoleCap    (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
             case Pen::ArrowCap         : generateLineArrowCap        (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
             default                    : closingCap = false;
         }
@@ -1668,6 +1701,7 @@ void ImagePainter2::generatePatternedSingleLineSegment(std::vector<PointF>& dst,
             case Pen::RoundCap         : generateLineRoundCap        (dst, x1, y1, wh, dx, dy, nx, ny); break;
             case Pen::TriangularOutCap : generateLineTriangularOutCap(dst, x1, y1,     dx, dy, nx, ny); break;
             case Pen::TriangularInCap  : generateLineTriangularInCap (dst, x1, y1,     dx, dy, nx, ny); break;
+            case Pen::RoundHoleCap     : generateLineRoundHoleCap    (dst, x1, y1, wh, dx, dy, nx, ny); break;
             case Pen::ArrowCap         : generateLineArrowCap        (dst, x1, y1,     dx, dy, nx, ny); break;
             default                    : generateLineButtCap         (dst, x1, y1,             nx, ny); break;
         }
@@ -1676,6 +1710,8 @@ void ImagePainter2::generatePatternedSingleLineSegment(std::vector<PointF>& dst,
             case Pen::SquareCap        : generateLineSquareCap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
             case Pen::RoundCap         : generateLineRoundCap        (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
             case Pen::TriangularOutCap : generateLineTriangularOutCap(dst, x2, y2,     -dx, -dy, -nx, -ny); break;
+            case Pen::TriangularInCap  : generateLineTriangularInCap (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
+            case Pen::RoundHoleCap     : generateLineRoundHoleCap    (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
             case Pen::ArrowCap         : generateLineArrowCap        (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
             default                    : generateLineButtCap         (dst, x2, y2,               -nx, -ny); break;
         }
@@ -1897,6 +1933,7 @@ void ImagePainter2::sagGenerateSimpleLineSegment(SAGOpState& state, float x1, fl
         case Pen::RoundCap         : generateLineRoundCap        (pointsF, x1, y1, wh, dx, dy, nx, ny); break;
         case Pen::TriangularOutCap : generateLineTriangularOutCap(pointsF, x1, y1,     dx, dy, nx, ny); break;
         case Pen::TriangularInCap  : generateLineTriangularInCap (pointsF, x1, y1,     dx, dy, nx, ny); break;
+        case Pen::RoundHoleCap     : generateLineRoundHoleCap    (pointsF, x1, y1, wh, dx, dy, nx, ny); break;
         case Pen::ArrowCap         : generateLineArrowCap        (pointsF, x1, y1,     dx, dy, nx, ny); break;
         default                    : generateLineButtCap         (pointsF, x1, y1,             nx, ny); break;
     }
@@ -1906,6 +1943,7 @@ void ImagePainter2::sagGenerateSimpleLineSegment(SAGOpState& state, float x1, fl
         case Pen::RoundCap         : generateLineRoundCap        (pointsF, x2, y2, wh, -dx, -dy, -nx, -ny); break;
         case Pen::TriangularOutCap : generateLineTriangularOutCap(pointsF, x2, y2,     -dx, -dy, -nx, -ny); break;
         case Pen::TriangularInCap  : generateLineTriangularInCap (pointsF, x2, y2,     -dx, -dy, -nx, -ny); break;
+        case Pen::RoundHoleCap     : generateLineRoundHoleCap    (pointsF, x2, y2, wh, -dx, -dy, -nx, -ny); break;
         case Pen::ArrowCap         : generateLineArrowCap        (pointsF, x2, y2,     -dx, -dy, -nx, -ny); break;
         default                    : generateLineButtCap         (pointsF, x2, y2,               -nx, -ny); break;
     }
