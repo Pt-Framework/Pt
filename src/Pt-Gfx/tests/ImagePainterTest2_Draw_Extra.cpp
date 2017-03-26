@@ -73,46 +73,46 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
 
     // --- Part 1 ---
 
-    // Horizontal gradient
-    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Horizontal) );
-    painter.fillRect( RectF(PointF(20, 250), SizeF(150, 150)) );
-
-    // Vertical gradient
-    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Vertical) );
-    painter.fillRect( RectF(PointF(20 + 180, 250), SizeF(150, 150)) );
-
     // Rectangular gradient
-    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Vertical) );
-    painter.fillRect( RectF(PointF(20 + 360, 250), SizeF(150, 150)) );
+    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Rectangular) );
+    painter.fillRect( RectF(PointF(20, 250), SizeF(150, 150)) );
 
     // Radial gradient
     painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Radial) );
-    painter.fillRect( RectF(PointF(20 + 540, 250), SizeF(150, 150)) );
+    painter.fillRect( RectF(PointF(20 + 180, 250), SizeF(150, 150)) );
 
     // Conical gradient
     painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Conical) );
+    painter.fillRect( RectF(PointF(20 + 360, 250), SizeF(150, 150)) );
+
+    // Horizontal gradient
+    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Horizontal) );
+    painter.fillRect( RectF(PointF(20 + 540, 250), SizeF(150, 150)) );
+
+    // Vertical gradient
+    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Vertical) );
     painter.fillRect( RectF(PointF(20 + 720, 250), SizeF(150, 150)) );
 
     // --- Part 2 ---
 
-    // Horizontal gradient
-    painter.setBrush( Brush(Color::fromRgb8(0, 255, 0, 175), Color::fromRgb8(255, 0, 0, 175), Brush::Horizontal) );
-    painter.fillRect( RectF(PointF(20, 250 + 180), SizeF(150, 150)) );
-
-    // Vertical gradient
-    painter.setBrush( Brush(Color::fromRgb8(0, 255, 0, 175), Color::fromRgb8(255, 0, 0, 175), Brush::Vertical) );
-    painter.fillRect( RectF(PointF(20 + 180, 250 + 180), SizeF(150, 150)) );
-
     // Rectangular gradient
-    painter.setBrush( Brush(Color::fromRgb8(0, 255, 0, 175), Color::fromRgb8(255, 0, 0, 175), Brush::Vertical) );
-    painter.fillRect( RectF(PointF(20 + 360, 250 + 180), SizeF(150, 150)) );
+    painter.setBrush( Brush(Color::fromRgb8(0, 255, 0, 175), Color::fromRgb8(255, 0, 0, 175), Brush::Rectangular) );
+    painter.fillRect( RectF(PointF(20, 250 + 180), SizeF(150, 150)) );
 
     // Radial gradient
     painter.setBrush( Brush(Color::fromRgb8(0, 255, 0, 175), Color::fromRgb8(255, 0, 0, 175), Brush::Radial) );
-    painter.fillRect( RectF(PointF(20 + 540, 250 + 180), SizeF(150, 150)) );
+    painter.fillRect( RectF(PointF(20 + 180, 250 + 180), SizeF(150, 150)) );
 
     // Conical gradient
     painter.setBrush( Brush(Color::fromRgb8(0, 255, 0, 175), Color::fromRgb8(255, 0, 0, 175), Brush::Conical) );
+    painter.fillRect( RectF(PointF(20 + 360, 250 + 180), SizeF(150, 150)) );
+
+    // Horizontal gradient
+    painter.setBrush( Brush(Color::fromRgb8(0, 255, 0, 175), Color::fromRgb8(255, 0, 0, 175), Brush::Horizontal) );
+    painter.fillRect( RectF(PointF(20 + 540, 250 + 180), SizeF(150, 150)) );
+
+    // Vertical gradient
+    painter.setBrush( Brush(Color::fromRgb8(0, 255, 0, 175), Color::fromRgb8(255, 0, 0, 175), Brush::Vertical) );
     painter.fillRect( RectF(PointF(20 + 720, 250 + 180), SizeF(150, 150)) );
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);

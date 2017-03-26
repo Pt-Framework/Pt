@@ -372,21 +372,42 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
     }
 
     // Create two-dimensional gradient
-    const float  cx    = width  * 0.5f;
-    const float  cy    = height * 0.5f;
+    const float cx = width  * 0.5f;
+    const float cy = height * 0.5f;
+
     Pt::uint8_t* pixel = _brushBuffer.data();
+
     switch(_brush.fillStyle()) {
         case Pt::Gfx::Brush::RectangularGradient: {
+            const float rad  = 45.0f * Gfx::Math::PiDiv180;
+            const float sval = Gfx::Math::fastSin(rad);
+            const float cval = Gfx::Math::fastCos(rad);
+            const float ilen = ::sqrtf(2.0f) / (cx + cy);
+            for(Pt::int32_t y = 0; y < height; ++y) {
+                const float dy  = y - cy;
+                for(Pt::int32_t x = 0; x < width; ++x) {
+                    const float dx = x - cx;
+                    const float ry = fabs(-sval * dx + cval * dy);
+                    const float rx = fabs( cval * dx + sval * dy);
+                    const float dist = (rx + ry) * ilen;
+                    const float mf   = (dist >= 1.0f) ? 1.0f : dist;
+                    const float imf  = 1.0f - mf;
+                    *pixel++ = (bs * mf + be * imf);
+                    *pixel++ = (gs * mf + ge * imf);
+                    *pixel++ = (rs * mf + re * imf);
+                    *pixel++ = (as * mf + ae * imf);
+                }
+            }
             break;
         }
 
         case Pt::Gfx::Brush::RadialGradient: {
             const float ilen = 1.0f / Gfx::Math::fastSqrt(cx * cx + cy * cy);
             for(Pt::int32_t y = 0; y < height; ++y) {
-                const float dy2 = (y - cy) * (y - cy);
+                const float dy  = y - cy;
                 for(Pt::int32_t x = 0; x < width; ++x) {
-                    const float dx2  = (x - cx) * (x - cx);
-                    const float dist = Gfx::Math::fastSqrt(dx2 + dy2) * ilen;
+                    const float dx = x - cx;
+                    const float dist = Gfx::Math::fastSqrt(dx * dx + dy * dy) * ilen;
                     const float mf   = (dist >= 1.0f) ? 1.0f : dist;
                     const float imf  = 1.0f - mf;
                     *pixel++ = (bs * mf + be * imf);
