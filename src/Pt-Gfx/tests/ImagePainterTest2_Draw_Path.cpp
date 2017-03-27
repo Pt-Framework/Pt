@@ -226,29 +226,31 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
 
     path2d.clear        ();
     path2d.beginPath    ();
-    path2d.moveTo       (60, 60                ); // CCW
-    path2d.cubicBezierTo(40, 30, 10, 70, 0, 100);
+    path2d.moveTo       (30, 50                ); // CCW
+    path2d.cubicBezierTo(20, 35,  5, 55,  0, 70);
+    path2d.endPath      ();
+    path2d.beginPath    ();
+    path2d.moveTo       (28, 28                );
+    path2d.cubicBezierTo( 7, 40, 44, 52, 44,  8);
     path2d.endPath      ();
 
     matrix2d.identity();
-    matrix2d.translate(-30, -20);
-    matrix2d.scaleAboutOrigin(1.5, 1.5);
+    matrix2d.rotateAboutOrigin(-25);
+    matrix2d.scaleAboutOrigin(2.5, 2.5);
 
 #define DRAW_CB(PEN)                                   \
     do {                                               \
         matrix2d.push();                               \
-        matrix2d.translate(60 + 130 * col, 150 * row); \
+        matrix2d.translate(90 + 160 * col, 140 * row); \
         ip2->setPen(PEN);                              \
         ip2->drawPath(path2d, matrix2d, false, 1);     \
         matrix2d.pop();                                \
         ++col;                                         \
     } while(false)
-
     DRAW_CB(penThinSolid );
     DRAW_CB(penThinDot   );
     DRAW_CB(penThickSolid);
     DRAW_CB(penThickDot  );
-
 #undef DRAW_CB
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
