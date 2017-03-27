@@ -83,7 +83,6 @@ class PT_GFX_API Path2DInvalidContext : public Path2DError {
 };
 
 
-
 /** @brief 2D path builder.
   */
 class PT_GFX_API Path2D {
