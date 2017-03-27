@@ -287,14 +287,13 @@ void BasicAffineMatrix2D<float>::updateMatrix(const MatrixData& n, MatrixUpdateM
            out2x = _mm_add_ps( out2x, _mm_mul_ps(_mm_broadcast_ss(&l->v[2][2]), r->r[2]) );
 #endif
 
+    _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
+
     _mm_storeu_ps(_mdata.v[0], out0x);
     _mm_storeu_ps(_mdata.v[1], out1x);
     _mm_storeu_ps(_mdata.v[2], out2x);
-
-    _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
 }
 
-/*
 #elif defined(PT_GFX_USE_NEON)
 
 // ### The NEON version is actually slower than the plain Arm version ###
@@ -338,7 +337,6 @@ void BasicAffineMatrix2D<float>::updateMatrix(const MatrixData& n, MatrixUpdateM
     vst1q_f32(_mdata.v[1], out1x);
     vst1q_f32(_mdata.v[2], out2x);
 }
-*/
 
 #endif
 
@@ -948,25 +946,21 @@ template <>
 void BasicAffineMatrix2D<float>::transformPoints(PointF* xy, size_t pointCount) const
 { if(!_isIdentity) transformPoints(xy, xy, pointCount); }
 
-
-
-
-
-
-
-
+#if 0
 
 // ======================================================================================
 // ===== Inlined Public Member Functions (Specialization for double) ====================
 // ======================================================================================
-/*
-#if defined(PT_GFX_USE_AVX1)
 
-// ### The AVX version is actually slower than the plain x86_64 version ###
+// ### This version is actually slower than GCC's auto-vectorization version  ###
+
+#if defined(PT_GFX_USE_AVX1)
 
 template <>
 void BasicAffineMatrix2D<double>::transformPoints(double* dxy, const double* sxy, size_t pointCount) const
 {
+    pointCount *= 2;
+
     if(_isIdentity) {
         memcpy(dxy, sxy, pointCount * sizeof(double));
         return;
@@ -1016,33 +1010,20 @@ void BasicAffineMatrix2D<double>::transformPoints(double* dxy, const double* sxy
 }
 
 template <>
+void BasicAffineMatrix2D<double>::transformPoints(double* xy, size_t pointCount) const
+{ if(!_isIdentity) transformPoints(xy, xy, pointCount); }
+
+template <>
 void BasicAffineMatrix2D<double>::transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount) const
-{
-    if(_isIdentity) {
-        for(size_t i = 0; i < pointCount; ++i) dxy[i] = sxy[i];
-        return;
-    }
+{ transformPoints(reinterpret_cast<double*>(dxy), reinterpret_cast<const double*>(sxy), pointCount); }
 
-
-    double  xy[pointCount * 2];
-    double* pxy = xy;
-    for(size_t i = 0; i < pointCount; ++i) {
-        *pxy++ = sxy[i].x();
-        *pxy++ = sxy[i].y();
-    }
-
-    transformPoints(xy, xy, pointCount * 2);
-
-    pxy = xy;
-
-    for(size_t i = 0; i < pointCount; ++i) {
-        dxy[i].setX( *pxy++ );
-        dxy[i].setY( *pxy++ );
-    }
-}
+template <>
+void BasicAffineMatrix2D<double>::transformPoints(PointF* xy, size_t pointCount) const
+{ transformPoints(reinterpret_cast<double*>(xy), reinterpret_cast<const double*>(xy), pointCount); }
 
 #endif
-*/
+
+#endif
 
 
 //
