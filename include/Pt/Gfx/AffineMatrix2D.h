@@ -294,9 +294,10 @@ void BasicAffineMatrix2D<float>::updateMatrix(const MatrixData& n, MatrixUpdateM
     _mm_storeu_ps(_mdata.v[2], out2x);
 }
 
+/*
 #elif defined(PT_GFX_USE_NEON)
 
-// ### The NEON version is actually slower than the plain Arm version ###
+// ### This NEON code is actually slower than the plain Arm code  ###
 
 template <>
 void BasicAffineMatrix2D<float>::updateMatrix(const MatrixData& n, MatrixUpdateMode mode)
@@ -337,6 +338,7 @@ void BasicAffineMatrix2D<float>::updateMatrix(const MatrixData& n, MatrixUpdateM
     vst1q_f32(_mdata.v[1], out1x);
     vst1q_f32(_mdata.v[2], out2x);
 }
+*/
 
 #endif
 
@@ -946,13 +948,12 @@ template <>
 void BasicAffineMatrix2D<float>::transformPoints(PointF* xy, size_t pointCount) const
 { if(!_isIdentity) transformPoints(xy, xy, pointCount); }
 
-#if 0
-
 // ======================================================================================
 // ===== Inlined Public Member Functions (Specialization for double) ====================
 // ======================================================================================
+#if 0
 
-// ### This version is actually slower than GCC's auto-vectorization version  ###
+// ### This AVX code is actually slower than the GCC's auto-vectorization code  ###
 
 #if defined(PT_GFX_USE_AVX1)
 
