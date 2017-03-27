@@ -422,22 +422,22 @@ static void benchMatrixOps()
 
     T xya  [10] = { 11.0f, 12.0f, 13.0f, 24.0f, 25.0f, 16.0f, 27.0f, 28.0f, 5.0f, 5.0f };
     T xxyya[10];
-    mat.transformPoints(xxyya, xya, 10);
+    mat.transformPoints(xxyya, xya, 5);
     printf("B: Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", xya[0], xya[1], xxyya[0], xxyya[1]);
     printf("B: Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", xya[2], xya[3], xxyya[2], xxyya[3]);
     printf("B: Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", xya[4], xya[5], xxyya[4], xxyya[5]);
     printf("B: Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", xya[6], xya[7], xxyya[6], xxyya[7]);
     printf("B: Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", xya[8], xya[9], xxyya[8], xxyya[9]);
 
-    mat.transformPoints(xya, 10);
+    mat.transformPoints(xya, 5);
     printf("C: Point                  -> (%6.3f, %6.3f)\n", xya[0], xya[1]);
     printf("C: Point                  -> (%6.3f, %6.3f)\n", xya[2], xya[3]);
     printf("C: Point                  -> (%6.3f, %6.3f)\n", xya[4], xya[5]);
     printf("C: Point                  -> (%6.3f, %6.3f)\n", xya[6], xya[7]);
     printf("C: Point                  -> (%6.3f, %6.3f)\n", xya[8], xya[9]);
 
-    PointF pf[10] = { PointF(11.0f, 12.0f), PointF(13.0f, 24.0f), PointF(25.0f, 16.0f), PointF(27.0f, 28.0f), PointF(5.0f, 5.0f) };
-    mat.transformPoints(pf, 10);
+    PointF pf[5] = { PointF(11.0f, 12.0f), PointF(13.0f, 24.0f), PointF(25.0f, 16.0f), PointF(27.0f, 28.0f), PointF(5.0f, 5.0f) };
+    mat.transformPoints(pf, 5);
     printf("D: Point                  -> (%6.3f, %6.3f)\n", pf[0].x(), pf[0].y());
     printf("D: Point                  -> (%6.3f, %6.3f)\n", pf[1].x(), pf[1].y());
     printf("D: Point                  -> (%6.3f, %6.3f)\n", pf[2].x(), pf[2].y());

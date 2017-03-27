@@ -152,11 +152,11 @@ class PT_GFX_API BasicAffineMatrix2D {
         inline void transformPoint(T& dx, T& dy, T sx, T sy) const;
         inline void transformPoint(T& x, T &y) const;
 
-        inline void transformPoint(PointF& dp, const PointF& sp) const;
-        inline void transformPoint(PointF& p) const;
-
         inline void transformPoints(T* dxy, const T* sxy, size_t pointCount) const;
         inline void transformPoints(T* xy, size_t pointCount) const;
+
+        inline void transformPoint(PointF& dp, const PointF& sp) const;
+        inline void transformPoint(PointF& p) const;
 
         inline void transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount) const;
         inline void transformPoints(PointF* xy, size_t pointCount) const;
@@ -683,6 +683,29 @@ void BasicAffineMatrix2D<T>::transformPoint(T& x, T &y) const
 }
 
 template <typename T>
+void BasicAffineMatrix2D<T>::transformPoints(T* dxy, const T* sxy, size_t pointCount) const
+{
+    pointCount *= 2;
+
+    if(_isIdentity) {
+        memcpy(dxy, sxy, pointCount * sizeof(T));
+        return;
+    }
+
+    for(size_t i = 0; i < pointCount; i += 2) transformPoint(dxy[i], dxy[i + 1], sxy[i], sxy[i + 1]);
+}
+
+template <typename T>
+void BasicAffineMatrix2D<T>::transformPoints(T* xy, size_t pointCount) const
+{
+    if(_isIdentity) return;
+
+    pointCount *= 2;
+
+    for(size_t i = 0; i < pointCount; i += 2) transformPoint(xy[i], xy[i + 1]);
+}
+
+template <typename T>
 void BasicAffineMatrix2D<T>::transformPoint(PointF& dp, const PointF& sp) const
 {
     if( _isIdentity || (sp.x() > Painter::MaximumCoordinateF && sp.y() > Painter::MaximumCoordinateF) ) {
@@ -708,25 +731,6 @@ void BasicAffineMatrix2D<T>::transformPoint(PointF& p) const
 }
 
 template <typename T>
-void BasicAffineMatrix2D<T>::transformPoints(T* dxy, const T* sxy, size_t pointCount) const
-{
-    if(_isIdentity) {
-        memcpy(dxy, sxy, pointCount * sizeof(T));
-        return;
-    }
-
-    for(size_t i = 0; i < pointCount; i += 2) transformPoint(dxy[i], dxy[i + 1], sxy[i], sxy[i + 1]);
-}
-
-template <typename T>
-void BasicAffineMatrix2D<T>::transformPoints(T* xy, size_t pointCount) const
-{
-    if(_isIdentity) return;
-
-    transformPoints(xy, xy, pointCount);
-}
-
-template <typename T>
 void BasicAffineMatrix2D<T>::transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount) const
 {
     if(_isIdentity) {
@@ -742,7 +746,7 @@ void BasicAffineMatrix2D<T>::transformPoints(PointF* xy, size_t pointCount) cons
 {
     if(_isIdentity) return;
 
-    transformPoints(xy, xy, pointCount);
+    for(size_t i = 0; i < pointCount; ++i) transformPoint(xy[i]);
 }
 
 // ======================================================================================
@@ -809,6 +813,8 @@ void BasicAffineMatrix2D<float>::shearYDirection(float deg, MatrixUpdateMode mod
 template <>
 void BasicAffineMatrix2D<float>::transformPoints(float* dxy, const float* sxy, size_t pointCount) const
 {
+    pointCount *= 2;
+
     if(_isIdentity) {
         memcpy(dxy, sxy, pointCount * sizeof(float));
         return;
@@ -863,6 +869,8 @@ void BasicAffineMatrix2D<float>::transformPoints(float* dxy, const float* sxy, s
 template <>
 void BasicAffineMatrix2D<float>::transformPoints(float* dxy, const float* sxy, size_t pointCount) const
 {
+    pointCount *= 2;
+
     if(_isIdentity) {
         memcpy(dxy, sxy, pointCount * sizeof(float));
         return;
@@ -906,7 +914,9 @@ void BasicAffineMatrix2D<float>::transformPoints(float* dxy, const float* sxy, s
 
 #endif
 
-#if defined(PT_GFX_USE_AVX1) || defined(PT_GFX_USE_NEON)
+template <>
+void BasicAffineMatrix2D<float>::transformPoints(float* xy, size_t pointCount) const
+{ if(!_isIdentity) transformPoints(xy, xy, pointCount); }
 
 template <>
 void BasicAffineMatrix2D<float>::transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount) const
@@ -916,9 +926,6 @@ void BasicAffineMatrix2D<float>::transformPoints(PointF* dxy, const PointF* sxy,
         return;
     }
 
-    transformPoints((float*) dxy, (const float*) dxy, pointCount * 2);
-
-    /*
     float  xy[pointCount * 2];
     float* pxy = xy;
 
@@ -927,7 +934,7 @@ void BasicAffineMatrix2D<float>::transformPoints(PointF* dxy, const PointF* sxy,
         *pxy++ = sxy[i].y();
     }
 
-    transformPoints(xy, xy, pointCount * 2);
+    transformPoints(xy, xy, pointCount);
 
     pxy = xy;
 
@@ -935,10 +942,19 @@ void BasicAffineMatrix2D<float>::transformPoints(PointF* dxy, const PointF* sxy,
         dxy[i].setX( *pxy++ );
         dxy[i].setY( *pxy++ );
     }
-    */
 }
 
-#endif
+template <>
+void BasicAffineMatrix2D<float>::transformPoints(PointF* xy, size_t pointCount) const
+{ if(!_isIdentity) transformPoints(xy, xy, pointCount); }
+
+
+
+
+
+
+
+
 
 // ======================================================================================
 // ===== Inlined Public Member Functions (Specialization for double) ====================
