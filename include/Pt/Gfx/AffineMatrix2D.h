@@ -666,21 +666,16 @@ void BasicAffineMatrix2D<T>::transformPoint(T& dx, T& dy, T sx, T sy) const
         return;
     }
 
-    dx = _mdata.v[0][0] * sx + _mdata.v[0][1] * sy + _mdata.v[0][2];
-    dy = _mdata.v[1][0] * sx + _mdata.v[1][1] * sy + _mdata.v[1][2];
+    const T tx = _mdata.v[0][0] * sx + _mdata.v[0][1] * sy + _mdata.v[0][2];
+    const T ty = _mdata.v[1][0] * sx + _mdata.v[1][1] * sy + _mdata.v[1][2];
+
+    dx = tx;
+    dy = ty;
 }
 
 template <typename T>
 void BasicAffineMatrix2D<T>::transformPoint(T& x, T &y) const
-{
-    if( _isIdentity || (x > Painter::MaximumCoordinateF && y > Painter::MaximumCoordinateF) ) return;
-
-    const T tx = _mdata.v[0][0] * x + _mdata.v[0][1] * y + _mdata.v[0][2];
-    const T ty = _mdata.v[1][0] * x + _mdata.v[1][1] * y + _mdata.v[1][2];
-
-    x = tx;
-    y = ty;
-}
+{ transformPoint(x, y, x, y); }
 
 template <typename T>
 void BasicAffineMatrix2D<T>::transformPoints(T* dxy, const T* sxy, size_t pointCount) const
@@ -713,22 +708,17 @@ void BasicAffineMatrix2D<T>::transformPoint(PointF& dp, const PointF& sp) const
         return;
     }
 
-    dp.set(
-        _mdata.v[0][0] * sp.x() + _mdata.v[0][1] * sp.y() + _mdata.v[0][2],
-        _mdata.v[1][0] * sp.x() + _mdata.v[1][1] * sp.y() + _mdata.v[1][2]
-    );
+    T x = sp.x();
+    T y = sp.y();
+
+    transformPoint(x, y);
+
+    dp.set(x, y);
 }
 
 template <typename T>
 void BasicAffineMatrix2D<T>::transformPoint(PointF& p) const
-{
-    if( _isIdentity || (p.x() > Painter::MaximumCoordinateF && p.y() > Painter::MaximumCoordinateF) ) return;
-
-    p.set(
-        _mdata.v[0][0] * p.x() + _mdata.v[0][1] * p.y() + _mdata.v[0][2],
-        _mdata.v[1][0] * p.x() + _mdata.v[1][1] * p.y() + _mdata.v[1][2]
-    );
-}
+{ transformPoint(p, p); }
 
 template <typename T>
 void BasicAffineMatrix2D<T>::transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount) const
