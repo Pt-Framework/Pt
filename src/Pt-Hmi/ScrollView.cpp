@@ -119,7 +119,6 @@ Gfx::SizeF ScrollView::onMeasure(const SizePolicy& policy)
     double width = policy.size().width();
     double height = policy.size().height();
     
-    // TODO: pass content mode here instead of scroll layout member?
     SizePolicy contentPolicy(SizePolicy::Any, SizePolicy::Any);
     contentPolicy.setSize(width, height);
 

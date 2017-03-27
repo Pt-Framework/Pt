@@ -62,9 +62,9 @@ class PT_HMI_API GridLayout : public Layout
 
         Gfx::SizeF onMeasureHorizontal(const SizePolicy& policy);
 
-        void layoutVertical(const Gfx::SizeF& itemSize);
+        void onLayoutVertical(const Gfx::SizeF& itemSize, const Gfx::RectF& rect);
 
-        void layoutHorizontal(const Gfx::SizeF& itemSize);
+        void onLayoutHorizontal(const Gfx::SizeF& itemSize, const Gfx::RectF& rect);
 
     private:
         Orientation _orientation;
