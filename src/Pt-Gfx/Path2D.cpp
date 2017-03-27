@@ -56,7 +56,7 @@ static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, doubl
         return;
     }
 
-    // Calculate the approximate length
+    // Calculate the approximate length of the curve
     const double l32 = ::sqrt(dx32 * dx32 + dy32 * dy32);
     const double l12 = ::sqrt(dx12 * dx12 + dy12 * dy12);
     const double lb  = l32 + l12;
@@ -88,25 +88,17 @@ static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, doubl
 
 static inline void generateCubicBezierPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, Pt::uint8_t smoothness)
 {
-    // Check if the points actually specify a straight line
+    // Calculate the approximate length of the curve
     const double dx43 = x4 - x3;
     const double dy43 = y4 - y3;
     const double dx32 = x3 - x2;
     const double dy32 = y3 - y2;
     const double dx12 = x1 - x2;
     const double dy12 = y1 - y2;
-
-    //if( !(dx12 * dy32 - dy12 * dx32) ) { // Curvature
-    //    if(dst.empty()) dst.push_back( PointF(x1, y1) );
-    //    dst.push_back( PointF(x3, y3) );
-    //    return;
-    //}
-
-    // Calculate the approximate length
-    const double l43 = ::sqrt(dx43 * dx43 + dy43 * dy43);
-    const double l32 = ::sqrt(dx32 * dx32 + dy32 * dy32);
-    const double l12 = ::sqrt(dx12 * dx12 + dy12 * dy12);
-    const double lb  = l43 + l32 + l12;
+    const double l43  = ::sqrt(dx43 * dx43 + dy43 * dy43);
+    const double l32  = ::sqrt(dx32 * dx32 + dy32 * dy32);
+    const double l12  = ::sqrt(dx12 * dx12 + dy12 * dy12);
+    const double lb   = l43 + l32 + l12;
 
     // Determine the number of segments
     const Pt::int32_t mf = (Pt::int32_t) smoothness + 1;

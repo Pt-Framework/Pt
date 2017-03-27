@@ -94,6 +94,10 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     AffineMatrix2D matrix2d;
     Path2D         path2d;
 
+    //
+    // Various shapes (top left part of the image)
+    //
+
     // Create a new path
     path2d.clear    ();
     path2d.beginPath();
@@ -144,7 +148,7 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     testDrawPath_drawRow(ip2, matrix2d, path2d, row, col, penThinSolid, penThinDot, penThickSolid, penThickDot, brush1, brush2);
 
     //
-    // Rightmost part of the image
+    // Arcs (top right part of the image)
     //
 
     // Create a new path
@@ -188,42 +192,12 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     testDrawPath_drawCol(ip2, matrix2d, path2d, row, col, penThinSolid, penThickSolid);
 
     //
-    // The effect of smoothness
-    //
-    row = 2;
-    col = 6;
-
-    path2d.clear    ();
-    path2d.beginPath();
-    path2d.moveTo   (10.0, 2.0      ); // CCW
-    path2d.lineTo   ( 7.5, 2.0      );
-    path2d.arcTo    ( 2.5, 2.0, -5.0);
-    path2d.lineTo   ( 0.0, 2.0      );
-    path2d.endPath  ();
-
-    matrix2d.identity();
-    matrix2d.translate(-5.0, -2.5);
-    matrix2d.scaleAboutOrigin(25, 25);
-
-    matrix2d.push();
-    matrix2d.translate(60 + 130 * col, 150 * row);
-    ip2->setPen( Color::fromRgb8(255, 255, 255, 175) );
-    ip2->drawPath(path2d, matrix2d, false, 0);
-    matrix2d.pop();
-    ++row;
-
-    matrix2d.push();
-    matrix2d.translate(60 + 130 * col, 150 * row);
-    ip2->setPen( Color::fromRgb8(255, 255, 255, 175) );
-    ip2->drawPath(path2d, matrix2d, false, 20);
-    matrix2d.pop();
-
-    //
-    // Cubic bezier
+    // Cubic bezier curves (bottom left part of the image)
     //
     row = 3;
     col = 0;
 
+    // Create a new path
     path2d.clear        ();
     path2d.beginPath    ();
     path2d.moveTo       (30, 50                ); // CCW
@@ -252,6 +226,38 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     DRAW_CB(penThickSolid);
     DRAW_CB(penThickDot  );
 #undef DRAW_CB
+
+    //
+    // Demonstrating the effect of smoothness (bottom right part of the image)
+    //
+    row = 2;
+    col = 6;
+
+    // Create a new path
+    path2d.clear    ();
+    path2d.beginPath();
+    path2d.moveTo   (10.0, 2.0      ); // CCW
+    path2d.lineTo   ( 7.5, 2.0      );
+    path2d.arcTo    ( 2.5, 2.0, -5.0);
+    path2d.lineTo   ( 0.0, 2.0      );
+    path2d.endPath  ();
+
+    matrix2d.identity();
+    matrix2d.translate(-5.0, -2.5);
+    matrix2d.scaleAboutOrigin(25, 25);
+
+    matrix2d.push();
+    matrix2d.translate(60 + 130 * col, 150 * row);
+    ip2->setPen( Color::fromRgb8(255, 255, 255, 175) );
+    ip2->drawPath(path2d, matrix2d, false, 0);
+    matrix2d.pop();
+    ++row;
+
+    matrix2d.push();
+    matrix2d.translate(60 + 130 * col, 150 * row);
+    ip2->setPen( Color::fromRgb8(255, 255, 255, 175) );
+    ip2->drawPath(path2d, matrix2d, false, 20);
+    matrix2d.pop();
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }
