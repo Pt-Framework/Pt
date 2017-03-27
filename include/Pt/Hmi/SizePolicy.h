@@ -80,6 +80,12 @@ class SizePolicy
         {
             _verticalMode = m;
         }
+
+        void setMode(Mode horizontal, Mode vertical)
+        {
+            _horizontalMode = horizontal;
+            _verticalMode = vertical;
+        }
         
         const Gfx::SizeF& size() const
         {

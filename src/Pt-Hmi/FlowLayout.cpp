@@ -141,7 +141,7 @@ Gfx::SizeF FlowLayout::onMeasureHorizontal(const SizePolicy& policy)
                              padding().topBottom() - 
                              item->margin().topBottom() );
 
-        SizePolicy itemPolicy(SizePolicy::Preferred, SizePolicy::Fixed);
+        SizePolicy itemPolicy(SizePolicy::Any, SizePolicy::Fixed);
         itemPolicy.setSize(itemSize);
 
         item->measure(itemPolicy);
@@ -259,7 +259,7 @@ Gfx::SizeF FlowLayout::onMeasureVertical(const SizePolicy& policy)
                              item->margin().leftRight(), 
                              policy.height() );
 
-        SizePolicy itemPolicy(SizePolicy::Fixed, SizePolicy::Preferred);
+        SizePolicy itemPolicy(SizePolicy::Fixed, SizePolicy::Any);
         itemPolicy.setSize(itemSize);                  
         
         item->measure(itemPolicy);

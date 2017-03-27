@@ -589,8 +589,8 @@ void Widget::measure(const SizePolicy& policy)
         
         _lastPolicy = contentPolicy;
 
-        if( contentPolicy.vertical() == SizePolicy::Preferred ||
-            contentPolicy.horizontal() == SizePolicy::Preferred || 
+        if( contentPolicy.vertical() != SizePolicy::Fixed ||
+            contentPolicy.horizontal() != SizePolicy::Fixed || 
             ! widgets().empty() )
         {
             _preferredSize = onMeasure(contentPolicy);
