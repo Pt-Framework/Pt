@@ -59,7 +59,7 @@ using namespace Pt::Gfx;
 #define DO_MATH_BENCHMARKING_ONLY 0
 
 // Benchmark matrix operations only
-#define DO_MATRIX_BENCHMARKING_ONLY 1
+#define DO_MATRIX_BENCHMARKING_ONLY 0
 
 // Comparison with Cairo (solid-filled polygons and ellipses only)
 #define DO_BENCHMARKING_CAIRO                 0
@@ -94,7 +94,7 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  0
 
 #define TEST_DRAW_PATH                          1 // (including thick and filled)
-#define TEST_DRAW_EXTRA                         1 // (including thick and filled)
+#define TEST_DRAW_EXTRA                         0
 
 #define TEST_COMPARE_WITH_OLD_PAINTER           0 // (for some shapes only)
 

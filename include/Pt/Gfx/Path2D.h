@@ -115,6 +115,8 @@ class PT_GFX_API Path2D {
 
         void quadraticBezierTo(double cx, double cy, double x, double y);
 
+        void cubicBezierTo(double cx1, double cy1, double cx2, double cy2, double x, double y);
+
         //
         // Relative coordinate
         //
@@ -127,10 +129,13 @@ class PT_GFX_API Path2D {
 
         void relQuadraticBezierTo(double cx, double cy, double x, double y);
 
+        void relCubicBezierTo(double cx1, double cy1, double cx2, double cy2, double x, double y);
+
         //
         // Generators
         //
-        // NOTE: If you enlarge (scale-up) the shape, you may need to increase the "smoothness" factor as needed
+        // NOTE: * If you enlarge (scale-up) the shape, you may need to increase the "smoothness" factor as needed
+        //       * If the "smoothness" factor is too large, the anti-aliasing will become less effective
         void generatePoints(std::vector<PointF>& dst, Pt::uint8_t smoothness = 0) const;
 
     private:

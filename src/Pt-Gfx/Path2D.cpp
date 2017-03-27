@@ -45,39 +45,90 @@ namespace Gfx {
 static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double x3, double y3, Pt::uint8_t smoothness)
 {
     // Check if the points actually specify a straight line
-    const double sx = x3 - x2;
-    const double sy = y3 - y2;
-    const double xx = x1 - x2;
-    const double yy = y1 - y2;
+    const double dx32 = x3 - x2;
+    const double dy32 = y3 - y2;
+    const double dx12 = x1 - x2;
+    const double dy12 = y1 - y2;
 
-    if( !(xx * sy - yy * sx) ) { // Curvature
+    if( !(dx12 * dy32 - dy12 * dx32) ) { // Curvature
         if(dst.empty()) dst.push_back( PointF(x1, y1) );
         dst.push_back( PointF(x3, y3) );
         return;
     }
 
-    // Calculate the length
-    const double l1 = ::sqrt(sx * sx + sy * sy);
-    const double l2 = ::sqrt(xx * xx + yy * yy);
-    const double l3 = l1 + l2;
+    // Calculate the approximate length
+    const double l32 = ::sqrt(dx32 * dx32 + dy32 * dy32);
+    const double l12 = ::sqrt(dx12 * dx12 + dy12 * dy12);
+    const double lb  = l32 + l12;
 
     // Determine the number of segments
     const Pt::int32_t mf = (Pt::int32_t) smoothness + 1;
 
-    Pt::int32_t nSegs = round(l3 * mf / 16) + 2;
+    Pt::int32_t nSegs = round(lb * mf / 16) + 2;
     if(nSegs < 5) nSegs = 5;
 
     const double nSegs1i = 1.0 / (nSegs - 1);
 
+    // PB = (1 - t) * (1 - t) * P1 + 2 * t * (1 - t) * P2 + t * t * P3
+    //      -----------------        ---------------        -----
+    //      a                        b                      c
     for(Pt::int32_t i = 0; i < nSegs; ++i) {
         // Calculate the coordinates
         const double t  = i * nSegs1i;
         const double it = 1.0 - t;
         const double a  = it * it;
-        const double b  = 2.0 * t  * it;
+        const double b  = 2.0 * t * it;
         const double c  = t * t;
         const double x  = a * x1 + b * x2 + c * x3;
         const double y  = a * y1 + b * y2 + c * y3;
+        // Store the coordinate as needed
+        if(i || dst.empty()) dst.push_back( PointF(x, y) );
+    }
+}
+
+static inline void generateCubicBezierPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, Pt::uint8_t smoothness)
+{
+    // Check if the points actually specify a straight line
+    const double dx43 = x4 - x3;
+    const double dy43 = y4 - y3;
+    const double dx32 = x3 - x2;
+    const double dy32 = y3 - y2;
+    const double dx12 = x1 - x2;
+    const double dy12 = y1 - y2;
+
+    //if( !(dx12 * dy32 - dy12 * dx32) ) { // Curvature
+    //    if(dst.empty()) dst.push_back( PointF(x1, y1) );
+    //    dst.push_back( PointF(x3, y3) );
+    //    return;
+    //}
+
+    // Calculate the approximate length
+    const double l43 = ::sqrt(dx43 * dx43 + dy43 * dy43);
+    const double l32 = ::sqrt(dx32 * dx32 + dy32 * dy32);
+    const double l12 = ::sqrt(dx12 * dx12 + dy12 * dy12);
+    const double lb  = l43 + l32 + l12;
+
+    // Determine the number of segments
+    const Pt::int32_t mf = (Pt::int32_t) smoothness + 1;
+
+    Pt::int32_t nSegs = round(lb * mf / 16) + 4;
+    if(nSegs < 9) nSegs = 9;
+
+    const double nSegs1i = 1.0 / (nSegs - 1);
+
+    // PB = (1 - t) * (1 - t) * (1 - t) * P1 + 3 * t * (1 - t) * (1 - t) * P2 + 3 * t * t * (1 - t) * P3 + t * t * t * P4
+    //      ---------------------------        -------------------------        -------------------        ---------
+    //      a                                  b                                c                          d
+    for(Pt::int32_t i = 0; i < nSegs; ++i) {
+        // Calculate the coordinates
+        const double t  = i * nSegs1i;
+        const double it = 1.0 - t;
+        const double a  = it * it * it;
+        const double b  = 3.0 * t * it * it;
+        const double c  = 3.0 * t * t * it;
+        const double d  = t * t * t;
+        const double x  = a * x1 + b * x2 + c * x3 + d * x4;
+        const double y  = a * y1 + b * y2 + c * y3 + d * y4;
         // Store the coordinate as needed
         if(i || dst.empty()) dst.push_back( PointF(x, y) );
     }
@@ -116,13 +167,13 @@ struct Path2D::PathData {
     // Instruction type
     enum InsType {
         IT_Begin, IT_End,
-        IT_MoveTo, IT_LineTo, IT_ArcTo, IT_QuadBezierTo
+        IT_MoveTo, IT_LineTo, IT_ArcTo, IT_QuadBezierTo, IT_CubicBezierTo
     };
 
     // Instruction structure
     struct Instruction {
         InsType type;
-        double   p1, p2, p3, p4;
+        double   p1, p2, p3, p4, p5, p6;
 
         inline Instruction(InsType type_)
         : type(type_)
@@ -142,6 +193,14 @@ struct Path2D::PathData {
 
         inline Instruction(InsType type_, double p1_, double p2_, double p3_, double p4_)
         : type(type_), p1(p1_), p2(p2_), p3(p3_), p4(p4_)
+        {}
+
+        inline Instruction(InsType type_, double p1_, double p2_, double p3_, double p4_, double p5_)
+        : type(type_), p1(p1_), p2(p2_), p3(p3_), p4(p4_), p5(p5_)
+        {}
+
+        inline Instruction(InsType type_, double p1_, double p2_, double p3_, double p4_, double p5_, double p6_)
+        : type(type_), p1(p1_), p2(p2_), p3(p3_), p4(p4_), p5(p5_), p6(p6_)
         {}
     };
 
@@ -183,6 +242,12 @@ struct Path2D::PathData {
 
     inline void add(InsType type, double p1, double p2, double p3, double p4)
     { inss.push_back( Instruction(type, p1, p2, p3, p4) ); }
+
+    inline void add(InsType type, double p1, double p2, double p3, double p4, double p5)
+    { inss.push_back( Instruction(type, p1, p2, p3, p4, p5) ); }
+
+    inline void add(InsType type, double p1, double p2, double p3, double p4, double p5, double p6)
+    { inss.push_back( Instruction(type, p1, p2, p3, p4, p5, p6) ); }
 };
 
 
@@ -276,6 +341,20 @@ void Path2D::quadraticBezierTo(double cx, double cy, double x, double y)
     _pathData->curY = y;
 }
 
+void Path2D::cubicBezierTo(double cx1, double cy1, double cx2, double cy2, double x, double y)
+{
+    // Check if this function call is valid in the current context
+    if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
+        throw Path2DInvalidContext(PT_SOURCEINFO_STR);
+
+    // Store the instruction
+    _pathData->add(PathData::IT_CubicBezierTo, cx1, cy1, cx2, cy2, x, y);
+
+    // Update the current coordinate
+    _pathData->curX = x;
+    _pathData->curY = y;
+}
+
 void Path2D::relMoveTo(double x, double y)
 {
     // Check if this function call is valid in the current context
@@ -332,6 +411,20 @@ void Path2D::relQuadraticBezierTo(double cx, double cy, double x, double y)
     _pathData->curY = y;
 }
 
+void Path2D::relCubicBezierTo(double cx1, double cy1, double cx2, double cy2, double x, double y)
+{
+    // Check if this function call is valid in the current context
+    if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
+        throw Path2DInvalidContext(PT_SOURCEINFO_STR);
+
+    // Store the instruction
+    _pathData->add(PathData::IT_CubicBezierTo, _pathData->curX + cx1, _pathData->curY + cy1, _pathData->curX + cx2, _pathData->curY + cy2, _pathData->curX + x, _pathData->curY + y);
+
+    // Update the current coordinate
+    _pathData->curX = x;
+    _pathData->curY = y;
+}
+
 void Path2D::generatePoints(std::vector<PointF>& dst, Pt::uint8_t smoothness) const
 {
     // Check if this function call is valid in the current context
@@ -381,6 +474,12 @@ void Path2D::generatePoints(std::vector<PointF>& dst, Pt::uint8_t smoothness) co
                 generateQuadraticBezierPoints(dst, curX, curY, ins.p1, ins.p2, ins.p3, ins.p4, smoothness);
                 curX = ins.p3;
                 curY = ins.p4;
+                break;
+
+            case PathData::IT_CubicBezierTo:
+                generateCubicBezierPoints(dst, curX, curY, ins.p1, ins.p2, ins.p3, ins.p4, ins.p5, ins.p6, smoothness);
+                curX = ins.p5;
+                curY = ins.p6;
                 break;
 
             default:
