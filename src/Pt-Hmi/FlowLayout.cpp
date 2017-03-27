@@ -145,8 +145,8 @@ Gfx::SizeF FlowLayout::onMeasureHorizontal(const SizePolicy& policy)
         itemPolicy.setSize(itemSize);
 
         item->measure(itemPolicy);
-        
         Gfx::SizeF prefSize = item->preferredSize();
+        
         contentSize.addWidth( prefSize.width() );
         contentSize.setHeight( policy.height() );
     }
@@ -263,8 +263,8 @@ Gfx::SizeF FlowLayout::onMeasureVertical(const SizePolicy& policy)
         itemPolicy.setSize(itemSize);                  
         
         item->measure(itemPolicy);
-
         Gfx::SizeF prefSize = item->preferredSize();
+        
         contentSize.setWidth( policy.width() );
         contentSize.addHeight( prefSize.height() );
     }

@@ -78,6 +78,7 @@ Gfx::SizeF GridLayout::onMeasureVertical(const SizePolicy& policy)
     double itemsHeight = policy.size().height() - padding().topBottom(); 
 
     // TODO: handle Any case for width
+    //       grid layout should return smallest possible size
 
     Gfx::SizeF itemSize;
 
