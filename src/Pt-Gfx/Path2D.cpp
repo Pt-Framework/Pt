@@ -164,35 +164,39 @@ struct Path2D::PathData {
 
     // Instruction structure
     struct Instruction {
-        InsType type;
-        double   p1, p2, p3, p4, p5, p6;
+        InsType             type;
+        std::vector<double> p;
 
         inline Instruction(InsType type_)
         : type(type_)
         {}
 
-        inline Instruction(InsType type_, double p1_)
-        : type(type_), p1(p1_)
-        {}
+        inline Instruction(InsType type_, double p0)
+        : type(type_), p(1)
+        { p[0] = p0; }
 
-        inline Instruction(InsType type_, double p1_, double p2_)
-        : type(type_), p1(p1_), p2(p2_)
-        {}
+        inline Instruction(InsType type_, double p0, double p1)
+        : type(type_), p(2)
+        { p[0] = p0; p[1] = p1; }
 
-        inline Instruction(InsType type_, double p1_, double p2_, double p3_)
-        : type(type_), p1(p1_), p2(p2_), p3(p3_)
-        {}
+        inline Instruction(InsType type_, double p0, double p1, double p2)
+        : type(type_), p(3)
+        { p[0] = p0; p[1] = p1; p[2] = p2; }
 
-        inline Instruction(InsType type_, double p1_, double p2_, double p3_, double p4_)
-        : type(type_), p1(p1_), p2(p2_), p3(p3_), p4(p4_)
-        {}
+        inline Instruction(InsType type_, double p0, double p1, double p2, double p3)
+        : type(type_), p(4)
+        { p[0] = p0; p[1] = p1; p[2] = p2; p[3] = p3; }
 
-        inline Instruction(InsType type_, double p1_, double p2_, double p3_, double p4_, double p5_)
-        : type(type_), p1(p1_), p2(p2_), p3(p3_), p4(p4_), p5(p5_)
-        {}
+        inline Instruction(InsType type_, double p0, double p1, double p2, double p3, double p4)
+        : type(type_), p(5)
+        { p[0] = p0; p[1] = p1; p[2] = p2; p[3] = p3; p[4] = p4; }
 
-        inline Instruction(InsType type_, double p1_, double p2_, double p3_, double p4_, double p5_, double p6_)
-        : type(type_), p1(p1_), p2(p2_), p3(p3_), p4(p4_), p5(p5_), p6(p6_)
+        inline Instruction(InsType type_, double p0, double p1, double p2, double p3, double p4, double p5)
+        : type(type_), p(6)
+        { p[0] = p0; p[1] = p1; p[2] = p2; p[3] = p3; p[4] = p4; p[5] = p5; }
+
+        inline Instruction(InsType type_, const std::vector<double>& p_)
+        : type(type_), p(p_)
         {}
     };
 
@@ -223,23 +227,26 @@ struct Path2D::PathData {
     inline void add(InsType type)
     { inss.push_back( Instruction(type) ); }
 
-    inline void add(InsType type, double p1)
-    { inss.push_back( Instruction(type, p1) ); }
+    inline void add(InsType type, double p0)
+    { inss.push_back( Instruction(type, p0) ); }
 
-    inline void add(InsType type, double p1, double p2)
-    { inss.push_back( Instruction(type, p1, p2) ); }
+    inline void add(InsType type, double p0, double p1)
+    { inss.push_back( Instruction(type, p0, p1) ); }
 
-    inline void add(InsType type, double p1, double p2, double p3)
-    { inss.push_back( Instruction(type, p1, p2, p3) ); }
+    inline void add(InsType type, double p0, double p1, double p2)
+    { inss.push_back( Instruction(type, p0, p1, p2) ); }
 
-    inline void add(InsType type, double p1, double p2, double p3, double p4)
-    { inss.push_back( Instruction(type, p1, p2, p3, p4) ); }
+    inline void add(InsType type, double p0, double p1, double p2, double p3)
+    { inss.push_back( Instruction(type, p0, p1, p2, p3) ); }
 
-    inline void add(InsType type, double p1, double p2, double p3, double p4, double p5)
-    { inss.push_back( Instruction(type, p1, p2, p3, p4, p5) ); }
+    inline void add(InsType type, double p0, double p1, double p2, double p3, double p4)
+    { inss.push_back( Instruction(type, p0, p1, p2, p3, p4) ); }
 
-    inline void add(InsType type, double p1, double p2, double p3, double p4, double p5, double p6)
-    { inss.push_back( Instruction(type, p1, p2, p3, p4, p5, p6) ); }
+    inline void add(InsType type, double p0, double p1, double p2, double p3, double p4, double p5)
+    { inss.push_back( Instruction(type, p0, p1, p2, p3, p4, p5) ); }
+
+    inline void add(InsType type, const std::vector<double>& p)
+    { inss.push_back( Instruction(type, p) ); }
 };
 
 
@@ -445,33 +452,33 @@ void Path2D::generatePoints(std::vector<PointF>& dst, Pt::uint8_t smoothness) co
                 break;
 
             case PathData::IT_MoveTo:
-                curX = ins.p1;
-                curY = ins.p2;
+                curX = ins.p[0];
+                curY = ins.p[1];
                 break;
 
             case PathData::IT_LineTo:
                 if(dst.empty()) dst.push_back( PointF(curX, curY) );
-                curX = ins.p1;
-                curY = ins.p2;
+                curX = ins.p[0];
+                curY = ins.p[1];
                 dst.push_back( PointF(curX, curY) );
                 break;
 
             case PathData::IT_ArcTo:
-                generateArcPoints(dst, curX, curY, ins.p1, ins.p2, ins.p3, smoothness);
-                curX = ins.p1;
-                curY = ins.p2;
+                generateArcPoints(dst, curX, curY, ins.p[0], ins.p[1], ins.p[2], smoothness);
+                curX = ins.p[0];
+                curY = ins.p[1];
                 break;
 
             case PathData::IT_QuadBezierTo:
-                generateQuadraticBezierPoints(dst, curX, curY, ins.p1, ins.p2, ins.p3, ins.p4, smoothness);
-                curX = ins.p3;
-                curY = ins.p4;
+                generateQuadraticBezierPoints(dst, curX, curY, ins.p[0], ins.p[1], ins.p[2], ins.p[3], smoothness);
+                curX = ins.p[2];
+                curY = ins.p[3];
                 break;
 
             case PathData::IT_CubicBezierTo:
-                generateCubicBezierPoints(dst, curX, curY, ins.p1, ins.p2, ins.p3, ins.p4, ins.p5, ins.p6, smoothness);
-                curX = ins.p5;
-                curY = ins.p6;
+                generateCubicBezierPoints(dst, curX, curY, ins.p[0], ins.p[1], ins.p[2], ins.p[3], ins.p[4], ins.p[5], smoothness);
+                curX = ins.p[4];
+                curY = ins.p[5];
                 break;
 
             default:
