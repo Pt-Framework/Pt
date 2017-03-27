@@ -432,6 +432,18 @@ void ListBox::setRenderer(ListBoxRenderer* renderer)
 }
 
 
+int ListBox::maximumX() const
+{
+    return _scrollView.maximumX() + _scrollView.margin().leftRight();
+}
+
+
+int ListBox::maximumY() const
+{
+    return _scrollView.maximumY() + _scrollView.margin().topBottom();
+}
+
+
 Gfx::SizeF ListBox::onMeasure(const SizePolicy& policy)
 {
     double hspace = padding().leftRight() + _scrollView.margin().leftRight();

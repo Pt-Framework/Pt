@@ -90,6 +90,18 @@ void ScrollView::setContentMode(SizePolicy::Mode horizontal,
 }
 
 
+int ScrollView::maximumX() const
+{
+    return _scrollLayout.maximumX();
+}
+
+
+int ScrollView::maximumY() const
+{
+    return _scrollLayout.maximumY();
+}
+
+
 void ScrollView::onScrollBarX(int pos)
 {
     _scrollLayout.scrollX(pos);
@@ -119,7 +131,7 @@ Gfx::SizeF ScrollView::onMeasure(const SizePolicy& policy)
     double width = policy.size().width();
     double height = policy.size().height();
     
-    SizePolicy contentPolicy(SizePolicy::Any, SizePolicy::Any);
+    SizePolicy contentPolicy(SizePolicy::Fixed, SizePolicy::Fixed);
     contentPolicy.setSize(width, height);
 
     _scrollLayout.measure(contentPolicy);
@@ -149,7 +161,9 @@ Gfx::SizeF ScrollView::onMeasure(const SizePolicy& policy)
         _scrollBarY.measure(barPolicy);
     }
 
-    return _scrollLayout.preferredSize();
+    return policy.size();
+
+    //return _scrollLayout.preferredSize();
 }
 
 

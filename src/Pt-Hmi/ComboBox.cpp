@@ -127,7 +127,10 @@ void ComboBox::showPopup()
     policy.setHeight( _maxHeight );
 
     Gfx::SizeF popupSize = _popup.measure(policy);
-    popupSize.setHeight( std::min(popupSize.height(), _maxHeight) );
+
+    int maxY = _items.maximumY();
+
+    popupSize.setHeight( std::min<double>(maxY, _maxHeight) );
     _popup.resize(popupSize);
     
     Gfx::PointF popupPos(0, size().height() );

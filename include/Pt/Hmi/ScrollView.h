@@ -52,6 +52,10 @@ class PT_HMI_API ScrollView : public Widget
 
         void setContentMode(SizePolicy::Mode horizontal, 
                             SizePolicy::Mode vertical);
+
+        int maximumX() const;
+
+        int maximumY() const;
         
     protected:
         void onScrollBarX(int pos);

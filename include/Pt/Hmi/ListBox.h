@@ -147,6 +147,10 @@ class PT_HMI_API ListBox : public Control
 
         Pt::Signal<ListBoxItem&>& selected();
 
+        int maximumX() const;
+
+        int maximumY() const;
+
     public:
         const Gfx::Brush* background() const;
 
