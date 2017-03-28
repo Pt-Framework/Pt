@@ -81,8 +81,6 @@ void DockingLayout::onRemoveWidget(Widget& w)
 
 Gfx::SizeF DockingLayout::onMeasure(const SizePolicy& policy)
 {
-    // TODO: handle Any case for width and height
-
     Gfx::SizeF fillSize = policy.size();
     fillSize.subWidth( padding().leftRight() );
     fillSize.subHeight( padding().topBottom() );
@@ -149,7 +147,7 @@ Gfx::SizeF DockingLayout::onMeasure(const SizePolicy& policy)
 
     if(fillWidget)
     {
-        SizePolicy itemPolicy(SizePolicy::Preferred, SizePolicy::Preferred);
+        SizePolicy itemPolicy(policy.horizontal(), policy.vertical());
         itemPolicy.setWidth( fillSize.width() - fillWidget->margin().leftRight() );
         itemPolicy.setHeight( fillSize.height() - fillWidget->margin().topBottom() );
 

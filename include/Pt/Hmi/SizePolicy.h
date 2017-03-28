@@ -42,12 +42,13 @@ class SizePolicy
         enum Mode
         {
             Any = 0,
+
             Preferred = 1,
-            // Fill
-            Fixed = 2,
+
+            // Is Maximum required?
+            Maximum = 2,
             
-            // Maximum
-            // Minimum
+            Fixed = 3,
         };
 
     public:

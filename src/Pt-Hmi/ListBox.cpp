@@ -449,12 +449,13 @@ Gfx::SizeF ListBox::onMeasure(const SizePolicy& policy)
     double hspace = padding().leftRight() + _scrollView.margin().leftRight();
     double vspace = padding().topBottom() + _scrollView.margin().topBottom();
 
-    SizePolicy contentPolicy = policy;
+    SizePolicy contentPolicy(SizePolicy::Fixed, SizePolicy::Fixed);
     contentPolicy.setWidth( policy.size().width() - hspace );
     contentPolicy.setHeight( policy.size().height() - vspace );
 
     _scrollView.measure(contentPolicy);
-    return _scrollView.preferredSize();
+    
+    return policy.size();
 }
 
 

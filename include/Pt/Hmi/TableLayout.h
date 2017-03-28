@@ -42,55 +42,12 @@ class PT_HMI_API TableLayout : public Layout
     typedef Layout Base;
 
     public:
-        // TODO: could be the same as Pt::Hmi::SicePolicy::Mode
+        // TODO: could be the same as Pt::Hmi::SizePolicy::Mode
         enum SizeMode
         {
-            Fixed,
+            Fill, // -> Any
             Preferred,
-            Fill
-        };
-
-        class SizePolicy
-        {
-            public:
-                SizePolicy()
-                : _mode(Preferred)
-                , _size(0)
-                { }
-
-                SizePolicy(SizeMode m)
-                : _mode(m)
-                , _size(0)
-                { }
-
-                SizePolicy(SizeMode m, double size)
-                : _mode(m)
-                , _size(size)
-                { }
-
-                SizeMode mode() const
-                {
-                    return _mode;
-                }
-
-                void setMode(SizeMode m)
-                {
-                    _mode = m;
-                }
-
-                double size() const
-                {
-                    return _size;
-                }
-
-                void setSize(double s)
-                {
-                    _size = s;
-                }
-            
-            private:
-                SizeMode _mode;
-                double   _size;
+            Fixed
         };
 
     public:
@@ -100,6 +57,8 @@ class PT_HMI_API TableLayout : public Layout
 
         void addItem(Widget& w, std::size_t row, std::size_t column);
 
+        void removeItem(Widget& w);
+
         void setColumn(std::size_t col, SizeMode mode, double size = 0);
 
         void setRow(std::size_t row, SizeMode mode, double size = 0);
@@ -107,11 +66,40 @@ class PT_HMI_API TableLayout : public Layout
     protected:
         virtual void onRemoveWidget(Widget& w);
 
-        virtual void onLayout();
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+
+        virtual void onLayout(const Gfx::RectF& rect);
 
     private:
-        std::vector<SizePolicy> _columnSizes;
-        std::vector<SizePolicy> _rowSizes;
+        class SizeInfo
+        {
+            public:
+                SizeInfo()
+                : _mode(Preferred)
+                , _size(0)
+                { }
+
+                SizeInfo(SizeMode m, double size)
+                : _mode(m)
+                , _size(size)
+                { }
+
+                SizeMode mode() const
+                { return _mode; }
+
+                double size() const
+                { return _size; }
+
+                void setSize(double s)
+                { _size = s; }
+            
+            private:
+                SizeMode _mode;
+                double   _size;
+        };
+
+        std::vector<SizeInfo> _columnSizes;
+        std::vector<SizeInfo> _rowSizes;
 
         typedef std::vector<Widget*> Row;
         std::vector<Row> _rows;

@@ -134,7 +134,7 @@ ChildW::ChildW(const std::string& title)
     _comboBox.setMaxHeight(150);
     _comboBox.selected() += Pt::slot(*this, &ChildW::onComboSelected);
 
-    for(unsigned n = 0; n < 2; ++n)
+    for(unsigned n = 0; n < 9; ++n)
     {
         ListBoxItem* item = new ListBoxItem;
         
@@ -148,6 +148,7 @@ ChildW::ChildW(const std::string& title)
 
     _progressBar.setName("ProgressBar"); 
     _progressBar.move( Gfx::PointF(0, 0) );
+    _progressBar.setRange(0, 100);
     _progressBar.setMargin(5);
     _progressBar.setPadding(5);
 
@@ -157,9 +158,9 @@ ChildW::ChildW(const std::string& title)
     _slider.setPadding(5);
     _slider.setRange(0, 100);
     _slider.setPosition(100);
+    _slider.positionChanged() += Pt::slot(_progressBar, &ProgressBar::setValue);
 
     _buttonBar.setName("ButtonBar");
-
     _buttonBar.setPadding(5);
     _buttonBar.addItem(_comboBox, DockingLayout::Bottom);
     _buttonBar.addItem(_lineEdit, DockingLayout::Bottom);

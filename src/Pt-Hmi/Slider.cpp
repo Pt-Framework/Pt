@@ -67,8 +67,9 @@ void Slider::setPosition(int pos)
     }
 
     _position = pos;
-
     invalidate();
+
+    _positionChanged.send(_position);
 }
 
 

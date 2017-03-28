@@ -28,6 +28,7 @@
 
 #include <Pt/Hmi/GridLayout.h>
 #include <algorithm>
+#include <cmath>
 
 namespace Pt {
 
@@ -77,9 +78,6 @@ Gfx::SizeF GridLayout::onMeasureVertical(const SizePolicy& policy)
     double itemsWidth = policy.size().width() - padding().leftRight(); 
     double itemsHeight = policy.size().height() - padding().topBottom(); 
 
-    // TODO: handle Any case for width
-    //       grid layout should return smallest possible size
-
     Gfx::SizeF itemSize;
 
     std::vector<Widget*>::const_iterator it;
@@ -92,7 +90,7 @@ Gfx::SizeF GridLayout::onMeasureVertical(const SizePolicy& policy)
         if( ! item->isVisible() )
             continue;
 
-        SizePolicy itemPolicy(SizePolicy::Any, SizePolicy::Any);
+        SizePolicy itemPolicy(SizePolicy::Preferred, SizePolicy::Preferred);
         itemPolicy.setWidth( itemsWidth - item->margin().leftRight() );
         itemPolicy.setHeight( itemsHeight - item->margin().topBottom() );
 
@@ -110,14 +108,45 @@ Gfx::SizeF GridLayout::onMeasureVertical(const SizePolicy& policy)
     std::size_t cols = _span;
 
     if(_span == 0 && itemSize.width() > 0)
-        cols = static_cast<std::size_t>( itemsWidth / itemSize.width() );
+    {
+        std::size_t maxCols = static_cast<std::size_t>( itemsWidth / itemSize.width() );
+
+        if(policy.horizontal() == SizePolicy::Fixed)
+        {
+            cols = maxCols;
+        }
+        else if(policy.horizontal() == SizePolicy::Maximum)
+        {
+            cols = std::min(cols, maxCols);
+        }
+        else
+        {
+            cols = static_cast<std::size_t>( 
+                      std::sqrt( static_cast<double>(widgets().size()) ) + 0.5 );
+        }
+    }
 
     if(cols == 0)
-        cols = 1;
+        return Gfx::SizeF(0, 0);
 
     std::size_t rows = widgets().size() / cols;
     if(widgets().size() % cols > 0)
         ++rows;
+
+    if( (policy.horizontal() == SizePolicy::Preferred ||
+         policy.horizontal() == SizePolicy::Any)  &&
+        (policy.vertical() == SizePolicy::Fixed ||
+         policy.vertical() == SizePolicy::Maximum) )
+    {
+        std::size_t maxRows = static_cast<std::size_t>( itemsHeight / itemSize.height() );
+        if(rows > maxRows)
+        {
+            rows = maxRows;
+            cols = widgets().size() / rows;
+            if(widgets().size() % rows > 0)
+                ++cols;
+        }
+    }
 
     return Gfx::SizeF(cols * itemSize.width(), 
                       rows * itemSize.height());
@@ -128,8 +157,6 @@ Gfx::SizeF GridLayout::onMeasureHorizontal(const SizePolicy& policy)
 {
     double itemsWidth = policy.size().width() - padding().leftRight(); 
     double itemsHeight = policy.size().height() - padding().topBottom(); 
-
-    // TODO: handle Any case for height
 
     Gfx::SizeF itemSize;
 
@@ -143,7 +170,7 @@ Gfx::SizeF GridLayout::onMeasureHorizontal(const SizePolicy& policy)
         if( ! item->isVisible() )
             continue;
 
-        SizePolicy itemPolicy(SizePolicy::Any, SizePolicy::Any);
+        SizePolicy itemPolicy(SizePolicy::Preferred, SizePolicy::Preferred);
         itemPolicy.setWidth( itemsWidth - item->margin().leftRight() );
         itemPolicy.setHeight( itemsHeight - item->margin().topBottom() );
 
@@ -161,14 +188,45 @@ Gfx::SizeF GridLayout::onMeasureHorizontal(const SizePolicy& policy)
     std::size_t rows = _span;
 
     if(_span == 0 && itemSize.height() > 0)
-        rows = static_cast<std::size_t>( itemsHeight / itemSize.height() );
+    {
+        std::size_t maxRows = static_cast<std::size_t>( itemsHeight / itemSize.height() );
+        
+        if(policy.vertical() == SizePolicy::Fixed)
+        {
+            rows = maxRows;
+        }
+        else if(policy.vertical() == SizePolicy::Maximum)
+        {
+            rows = std::min(rows, maxRows);
+        }
+        else
+        {
+            rows = static_cast<std::size_t>( 
+                      std::sqrt( static_cast<double>(widgets().size()) ) + 0.5 );
+        }
+    }
 
     if(rows == 0)
-        rows = 1;
+        return Gfx::SizeF(0, 0);
 
     std::size_t cols = widgets().size() / rows;
     if(widgets().size() % rows > 0)
         ++cols;
+
+    if( (policy.vertical() == SizePolicy::Preferred ||
+         policy.vertical() == SizePolicy::Any)  &&
+        (policy.horizontal() == SizePolicy::Fixed ||
+         policy.horizontal() == SizePolicy::Maximum) )
+    {
+        std::size_t maxCols = static_cast<std::size_t>( itemsWidth / itemSize.width() );
+        if(cols > maxCols)
+        {
+            cols = maxCols;
+            rows = widgets().size() / cols;
+            if(widgets().size() % cols > 0)
+                ++rows;
+        }
+    }
 
     return Gfx::SizeF(cols * itemSize.width(), 
                       rows * itemSize.height());

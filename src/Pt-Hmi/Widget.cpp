@@ -568,13 +568,15 @@ void Widget::measure(const SizePolicy& policy)
 {
     SizePolicy contentPolicy = _sizePolicy;
 
-    if( policy.horizontal() >= _sizePolicy.horizontal() )
+    if( policy.horizontal() > _sizePolicy.horizontal() ||
+        policy.horizontal() == SizePolicy::Fixed )
     {
         contentPolicy.setHorizontal( policy.horizontal() );
         contentPolicy.setWidth( policy.width() );
     }
 
-    if( policy.vertical() >= _sizePolicy.vertical() )
+    if( policy.vertical() > _sizePolicy.vertical() ||
+        policy.vertical() == SizePolicy::Fixed )
     {
         contentPolicy.setVertical( policy.vertical() );
         contentPolicy.setHeight( policy.height() );
@@ -599,8 +601,16 @@ void Widget::measure(const SizePolicy& policy)
         if(contentPolicy.vertical() == SizePolicy::Fixed)
             _preferredSize.setHeight( contentPolicy.height() );
         
+        if(contentPolicy.vertical() == SizePolicy::Maximum)
+            _preferredSize.setHeight( std::min( _preferredSize.height(),
+                                                contentPolicy.height() ) );
+
         if(contentPolicy.horizontal() == SizePolicy::Fixed)
             _preferredSize.setWidth( contentPolicy.width() );
+
+        if(contentPolicy.horizontal() == SizePolicy::Maximum)
+            _preferredSize.setWidth( std::min( _preferredSize.width(),
+                                                contentPolicy.width() ) );
     }
 }
 

@@ -105,7 +105,7 @@ MainWindow::MainWindow()
     
     for(int n = 0; n < 10; ++n)
     {
-        SizePolicy policy(SizePolicy::Preferred, SizePolicy::Fixed);
+        SizePolicy policy(SizePolicy::Any, SizePolicy::Fixed);
         policy.setHeight(40);
         _btns[n].setSizePolicy(policy);
 

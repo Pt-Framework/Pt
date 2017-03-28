@@ -141,7 +141,7 @@ Gfx::SizeF FlowLayout::onMeasureHorizontal(const SizePolicy& policy)
                              padding().topBottom() - 
                              item->margin().topBottom() );
 
-        SizePolicy itemPolicy(SizePolicy::Any, SizePolicy::Fixed);
+        SizePolicy itemPolicy(SizePolicy::Preferred, policy.vertical());
         itemPolicy.setSize(itemSize);
 
         item->measure(itemPolicy);
@@ -245,8 +245,6 @@ Gfx::SizeF FlowLayout::onMeasureVertical(const SizePolicy& policy)
 
     Gfx::SizeF contentSize;
 
-    // TODO: handle Any case for width
-
     for( ; it != end; ++it)
     {
         Widget* item = *it; 
@@ -259,7 +257,7 @@ Gfx::SizeF FlowLayout::onMeasureVertical(const SizePolicy& policy)
                              item->margin().leftRight(), 
                              policy.height() );
 
-        SizePolicy itemPolicy(SizePolicy::Fixed, SizePolicy::Any);
+        SizePolicy itemPolicy(policy.horizontal(), SizePolicy::Preferred);
         itemPolicy.setSize(itemSize);                  
         
         item->measure(itemPolicy);
@@ -271,7 +269,6 @@ Gfx::SizeF FlowLayout::onMeasureVertical(const SizePolicy& policy)
 
     return contentSize;
 }
-
 
 
 void FlowLayout::onLayoutTop(const Gfx::RectF& rect, bool center)

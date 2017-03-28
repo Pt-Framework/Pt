@@ -147,7 +147,7 @@ Gfx::SizeF ScrollView::onMeasure(const SizePolicy& policy)
 
     if( _scrollBarX.isVisible() )
     {
-        SizePolicy barPolicy(SizePolicy::Preferred, SizePolicy::Preferred);
+        SizePolicy barPolicy(SizePolicy::Fixed, SizePolicy::Preferred);
         barPolicy.setSize(width, height);
 
         _scrollBarX.measure(barPolicy);
@@ -155,15 +155,13 @@ Gfx::SizeF ScrollView::onMeasure(const SizePolicy& policy)
 
     if( _scrollBarY.isVisible() )
     {
-        SizePolicy barPolicy(SizePolicy::Preferred, SizePolicy::Preferred);
+        SizePolicy barPolicy(SizePolicy::Preferred, SizePolicy::Fixed);
         barPolicy.setSize(width, height);
 
         _scrollBarY.measure(barPolicy);
     }
 
     return policy.size();
-
-    //return _scrollLayout.preferredSize();
 }
 
 

@@ -173,8 +173,6 @@ void ScrollLayout::setContentMode(SizePolicy::Mode horizontal,
 
 Gfx::SizeF ScrollLayout::onMeasure(const SizePolicy& policy)
 {
-    Gfx::SizeF contentSize;
-
     std::vector<Widget*>::const_iterator it;
     for(it = widgets().begin() ; it != widgets().end(); ++it)
     {
@@ -183,8 +181,6 @@ Gfx::SizeF ScrollLayout::onMeasure(const SizePolicy& policy)
         SizePolicy itemPolicy(_hmode, _vmode);
         itemPolicy.setSize( policy.size() );
         item->measure(itemPolicy);
-
-        contentSize = item->preferredSize();
    }
 
     double maxWidth = 0;
@@ -209,7 +205,7 @@ Gfx::SizeF ScrollLayout::onMeasure(const SizePolicy& policy)
     _maxX = static_cast<int>(maxWidth);
     _maxY = static_cast<int>(maxHeight);
 
-   return contentSize;
+    return policy.size();
 }
 
 
