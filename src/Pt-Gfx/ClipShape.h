@@ -48,6 +48,21 @@ class ClipShape {
         static inline bool insideYRange(Pt::int32_t v, const Rect& clippingArea)
         { return ( v >= clippingArea.top() && v <= clippingArea.bottom() ); }
 
+        static inline bool insideXYRange(Pt::int32_t x, Pt::int32_t y, const Rect& clippingArea)
+        { return insideXRange(x, clippingArea) && insideYRange(y, clippingArea); }
+
+        static inline Pt::int32_t clipLeft(Pt::int32_t x, const Rect& clippingArea)
+        { return (clippingArea.left() > x) ? clippingArea.left() : x; }
+
+        static inline Pt::int32_t clipRight(Pt::int32_t x, const Rect& clippingArea)
+        { return (clippingArea.right() < x) ? clippingArea.right() : x; }
+
+        static inline Pt::int32_t clipTop(Pt::int32_t y, const Rect& clippingArea)
+        { return (clippingArea.top() > y) ? clippingArea.top() : y; }
+
+        static inline Pt::int32_t clipBottom(Pt::int32_t y, const Rect& clippingArea)
+        { return (clippingArea.bottom() < y) ? clippingArea.bottom() : y; }
+
         static bool clipLine(Pt::int32_t& x0, Pt::int32_t& y0, Pt::int32_t& x1, Pt::int32_t& y1, const Rect& clip);
         static void clipPolyline(std::vector<Point>& pio, const Rect& clippingArea);
         static void clipPolygon(std::vector<Point>& pio, const Rect& clippingArea);

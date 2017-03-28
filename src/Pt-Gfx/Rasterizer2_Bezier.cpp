@@ -99,29 +99,28 @@ void Rasterizer2::rasterOnePixelQuadraticBezierCurve(Pt::int32_t x1, Pt::int32_t
     }
 
     // A helper macro to set pixel
-    #define XW_SET_PIXEL(X, Y, A, PA)                                             \
-        do {                                                                      \
-            /* Clip the point */                                                  \
-            if( (X) < _currentClip.left() || (X) > _currentClip.right () ||       \
-                (Y) < _currentClip.top () || (Y) > _currentClip.bottom() ) break; \
-            /* Check if we should skip drawing the pixel */                       \
-            bool skipDrawing = false;                                             \
-            for(Pt::int32_t j = 0; j < 4; ++j) {                                  \
-                if( (X) != mx[j] || (Y) != my[j] ) continue;                      \
-                skipDrawing = true;                                               \
-                break;                                                            \
-            }                                                                     \
-            if(skipDrawing) break;                                                \
-            /* Set a fully-opaque pixel? */                                       \
-            Pixel PIX(_image->view(), X, Y);                                      \
-            if((A) == 0 && (PA) == 255) {                                         \
-                _image->format().setPixel(PIX, color, _compositionMode);          \
-                break;                                                            \
-            }                                                                     \
-            /* Combine the alpha and set the pixel */                             \
-            const Pt::uint8_t falpha = Rasterizer2::XWAA_WFILTER[A];              \
-            const Pt::uint8_t calpha = (Pt::uint32_t) falpha * (PA) / 255;        \
-            _image->format().setPixel(PIX, color, _compositionMode, calpha);      \
+    #define XW_SET_PIXEL(X, Y, A, PA)                                        \
+        do {                                                                 \
+            /* Clip the point */                                             \
+            if( !ClipShape::insideXYRange(X, Y, _currentClip) ) break;       \
+            /* Check if we should skip drawing the pixel */                  \
+            bool skipDrawing = false;                                        \
+            for(Pt::int32_t j = 0; j < 4; ++j) {                             \
+                if( (X) != mx[j] || (Y) != my[j] ) continue;                 \
+                skipDrawing = true;                                          \
+                break;                                                       \
+            }                                                                \
+            if(skipDrawing) break;                                           \
+            /* Set a fully-opaque pixel? */                                  \
+            Pixel PIX(_image->view(), X, Y);                                 \
+            if((A) == 0 && (PA) == 255) {                                    \
+                _image->format().setPixel(PIX, color, _compositionMode);     \
+                break;                                                       \
+            }                                                                \
+            /* Combine the alpha and set the pixel */                        \
+            const Pt::uint8_t falpha = Rasterizer2::XWAA_WFILTER[A];         \
+            const Pt::uint8_t calpha = (Pt::uint32_t) falpha * (PA) / 255;   \
+            _image->format().setPixel(PIX, color, _compositionMode, calpha); \
         } while(false)
 
     // Use anti-aliasing?

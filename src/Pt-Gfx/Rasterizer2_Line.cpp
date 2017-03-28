@@ -362,8 +362,7 @@ void Rasterizer2::rasterOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_
     #define XW_SET_PIXEL(X, Y, A)                                                 \
         do {                                                                      \
             /* Clip the point */                                                  \
-            if( (X) < _currentClip.left() || (X) > _currentClip.right () ||       \
-                (Y) < _currentClip.top () || (Y) > _currentClip.bottom() ) break; \
+            if( !ClipShape::insideXYRange(X, Y, _currentClip) ) break;            \
             /* Check if we should skip drawing the pixel */                       \
             bool skipDrawing = false;                                             \
             for(Pt::int32_t j = 0; j < 4; ++j) {                                  \
@@ -498,8 +497,7 @@ void Rasterizer2::rasterOnePixelAreaGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t
     #define XW_FILL_PIXEL(X, Y, A)                                                          \
         do {                                                                                \
             /* Clip the point */                                                            \
-            if( (X) < _currentClip.left() || (X) > _currentClip.right () ||                 \
-                (Y) < _currentClip.top () || (Y) > _currentClip.bottom() ) break;           \
+            if( !ClipShape::insideXYRange(X, Y, _currentClip) ) break;                      \
             /* Check if we should skip drawing the pixel */                                 \
             bool skipDrawing = false;                                                       \
             for(Pt::int32_t j = 0; j < 4; ++j) {                                            \

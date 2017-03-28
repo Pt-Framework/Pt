@@ -98,10 +98,10 @@ void Rasterizer2::rasterRectArea(const Point& tl, const Point& br)
     Pt::int32_t maxY = br.y();
 
     // Clip the coordinates
-    if(minX < _currentClip.left  ()) minX = _currentClip.left  ();
-    if(minY < _currentClip.top   ()) minY = _currentClip.top   ();
-    if(maxX > _currentClip.right ()) maxX = _currentClip.right ();
-    if(maxY > _currentClip.bottom()) maxY = _currentClip.bottom();
+    minX = ClipShape::clipLeft  (minX, _currentClip);
+    minY = ClipShape::clipTop   (minY, _currentClip);
+    maxX = ClipShape::clipRight (maxX, _currentClip);
+    maxY = ClipShape::clipBottom(maxY, _currentClip);
 
     // Calculate the width of the rectangle
     const Pt::int32_t sizeX = maxX - minX + 1;

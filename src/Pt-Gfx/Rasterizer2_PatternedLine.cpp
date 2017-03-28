@@ -215,25 +215,24 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentXWAA(Pt::int32_t x1, Pt::in
     }
 
     // A helper macro to set pixel
-    #define XW_SET_PIXEL(X, Y, A, PA)                                             \
-        do {                                                                      \
-            /* Clip the point */                                                  \
-            if( (X) < _currentClip.left() || (X) > _currentClip.right () ||       \
-                (Y) < _currentClip.top () || (Y) > _currentClip.bottom() ) break; \
-            /* Check if we should skip drawing the pixel */                       \
-            bool skipDrawing = false;                                             \
-            for(Pt::int32_t j = 0; j < 4; ++j) {                                  \
-                if( (X) != mx[j] || (Y) != my[j] ) continue;                      \
-                skipDrawing = true;                                               \
-                break;                                                            \
-            }                                                                     \
-            if(skipDrawing) break;                                                \
-            /* Combine and check the alpha */                                     \
-            Pt::uint8_t calpha = (Pt::uint32_t) (A) * (PA) / 255;                 \
-            if(!calpha) break;                                                    \
-            /* Set the pixel */                                                   \
-            Pixel PIX(_image->view(), X, Y);                                      \
-            _image->format().setPixel(PIX, color, _compositionMode, calpha);      \
+    #define XW_SET_PIXEL(X, Y, A, PA)                                        \
+        do {                                                                 \
+            /* Clip the point */                                             \
+            if( !ClipShape::insideXYRange(X, Y, _currentClip) ) break;       \
+            /* Check if we should skip drawing the pixel */                  \
+            bool skipDrawing = false;                                        \
+            for(Pt::int32_t j = 0; j < 4; ++j) {                             \
+                if( (X) != mx[j] || (Y) != my[j] ) continue;                 \
+                skipDrawing = true;                                          \
+                break;                                                       \
+            }                                                                \
+            if(skipDrawing) break;                                           \
+            /* Combine and check the alpha */                                \
+            Pt::uint8_t calpha = (Pt::uint32_t) (A) * (PA) / 255;            \
+            if(!calpha) break;                                               \
+            /* Set the pixel */                                              \
+            Pixel PIX(_image->view(), X, Y);                                 \
+            _image->format().setPixel(PIX, color, _compositionMode, calpha); \
         } while(false)
 
     // Check if the start and end coordinates are the same

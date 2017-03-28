@@ -499,11 +499,11 @@ void Rasterizer2::rasterScanline(
 void Rasterizer2::rasterScanlineWithClipping(Pt::int32_t from, Pt::int32_t to, Pt::int32_t pixelY, Pt::int32_t minX, Pt::int32_t minY)
 {
     // Check if the Y coordinate is outside the clipping region
-    if(pixelY < _currentClip.top() || pixelY > _currentClip.bottom()) return;
+    if( !ClipShape::insideYRange(pixelY, _currentClip) ) return;
 
     // Check and limit the X coordinates
-    if(from < _currentClip.left ()) from = _currentClip.left ();
-    if(to   > _currentClip.right()) to   = _currentClip.right();
+    from = ClipShape::clipLeft  (from, _currentClip);
+    to   = ClipShape::clipRight (to,   _currentClip);
 
     if(to < from) return;
 
