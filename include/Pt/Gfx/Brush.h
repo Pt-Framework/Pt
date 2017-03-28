@@ -44,26 +44,22 @@ class PT_GFX_API Brush
     public:
         enum FillStyle
         {
-            Solid               = 0,
-            Texture             = 1,
-            HorizontalGradient  = 2,
-            VerticalGradient    = 3,
-            DiamondGradient     = 4,
-            RectangularGradient = 5,
-            CrossGradient       = 6,
-            RadialGradient      = 7,
-            ConicalGradient     = 8
+            Solid              = 0,
+            Texture            = 1,
+            HorizontalGradient = 2,
+            VerticalGradient   = 3,
+            DiamondGradient    = 4,
+            RadialGradient     = 5,
+            ConicalGradient    = 6
         };
 
         enum GradientDirection
         {
-            Horizontal  =  0,
-            Vertical    =  1,
-            Diamond     =  2,
-            Rectangular =  3,
-            Cross       =  4,
-            Radial      =  5,
-            Conical     =  6
+            Horizontal = 0,
+            Vertical   = 1,
+            Diamond    = 2,
+            Radial     = 3,
+            Conical    = 4
         };
 
     public:
@@ -76,7 +72,7 @@ class PT_GFX_API Brush
         // TODO: texture offset
         Brush(const Image& texture);
 
-        Brush(const Color& from, const Color& to, GradientDirection g);
+        Brush(const Color& from, const Color& to, GradientDirection g, float angle = 0.0f);
 
         FillStyle fillStyle() const;
 
@@ -85,6 +81,8 @@ class PT_GFX_API Brush
         const Color& gradientColor() const;
 
         const Image& texture() const;
+
+        float angle() const;
 
         bool isNull() const;
 
@@ -102,7 +100,7 @@ class BrushData
 
         BrushData(const Image& texture);
 
-        BrushData(const Color& from, const Color& to, Brush::GradientDirection g);
+        BrushData(const Color& from, const Color& to, Brush::GradientDirection g, float angle);
 
         ~BrushData();
 
@@ -114,6 +112,8 @@ class BrushData
 
         const Image& texture() const;
 
+        float angle() const;
+
         bool isNull() const;
 
     private:
@@ -121,6 +121,7 @@ class BrushData
         Color            _color;
         Image            _texture;
         Color            _gradientColor;
+        float            _angle;
         bool             _isNull;
 };
 

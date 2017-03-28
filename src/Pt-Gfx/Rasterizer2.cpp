@@ -128,10 +128,9 @@ void Rasterizer2::setPen( const Pen& pen )
 
 void Rasterizer2::setBrush( const Brush& brush )
 {
-    _brush             = brush;
-    _isGradient        = false;
-    _isGradientTexture = false;
-    _isTexture         = false;
+    _brush      = brush;
+    _isGradient = false;
+    _isTexture  = false;
 
     switch( brush.fillStyle() ) {
         case Brush::Solid:
@@ -159,13 +158,11 @@ void Rasterizer2::setBrush( const Brush& brush )
             break;
 
         case Brush::DiamondGradient     : /* Fallthrough */
-        case Brush::RectangularGradient : /* Fallthrough */
-        case Brush::CrossGradient       : /* Fallthrough */
         case Brush::RadialGradient      : /* Fallthrough */
         case Brush::ConicalGradient     :
-            _isGradient        = true;
-            _isGradientTexture = true;
-            _brushImage        = &_brushBuffer;
+            _isGradient = true;
+            _isTexture  = true;
+            _brushImage = &_brushBuffer;
             break;
     }
 
@@ -323,11 +320,9 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
             _brushBuffer.reset(_image->format(), Size(1, height));
             break;
 
-        case Pt::Gfx::Brush::DiamondGradient     : /* Fallthrough */
-        case Pt::Gfx::Brush::RectangularGradient : /* Fallthrough */
-        case Pt::Gfx::Brush::CrossGradient       : /* Fallthrough */
-        case Pt::Gfx::Brush::RadialGradient      : /* Fallthrough */
-        case Pt::Gfx::Brush::ConicalGradient     :
+        case Pt::Gfx::Brush::DiamondGradient : /* Fallthrough */
+        case Pt::Gfx::Brush::RadialGradient  : /* Fallthrough */
+        case Pt::Gfx::Brush::ConicalGradient :
             // Resize the brush buffer
             _brushBuffer.reset(_image->format(), Size(width, height));
             break;
@@ -371,42 +366,27 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
     }
 
     // Create two-dimensional gradient
-    const float cx  = width  * 0.5f;
-    const float cy  = height * 0.5f;
+    const float ctrX   = width  * 0.5f;
+    const float ctrY   = height * 0.5f;
 
-    const float rxy = (cx > cy) ? (cx / cy) : 1.0f;
-    const float ryx = (cy > cx) ? (cy / cx) : 1.0f;
+    const float xyRat  = (ctrX > ctrY) ? (ctrX / ctrY) : 1.0f;
+    const float yxRat  = (ctrY > ctrX) ? (ctrY / ctrX) : 1.0f;
+
+    const float mfFac  = 2.0f / Gfx::Math::fastSqrt(xyRat * xyRat + yxRat * yxRat);
+
+    const float rad    = _brush.angle() * Gfx::Math::PiDiv180 - Gfx::Math::PiDiv2;
+    const float sval   = Gfx::Math::fastSin(rad);
+    const float cval   = Gfx::Math::fastCos(rad);
 
     Pt::uint8_t* pixel = _brushBuffer.data();
 
     switch(_brush.fillStyle()) {
         case Pt::Gfx::Brush::DiamondGradient: {
-            const float ilen = 1.0f / (cx + cy);
+            const float ilen = mfFac / (ctrX + ctrY);
             for(Pt::int32_t y = 0; y < height; ++y) {
-                const float dy = fabs(y - cy) * rxy;
+                const float dy = (y - ctrY) * xyRat;
                 for(Pt::int32_t x = 0; x < width; ++x) {
-                    const float dx   = fabs(x - cx) * ryx;
-                    const float dist = (dx + dy) * ilen;
-                    const float mf   = (dist >= 1.0f) ? 1.0f : dist;
-                    const float imf  = 1.0f - mf;
-                    *pixel++ = (bs * mf + be * imf);
-                    *pixel++ = (gs * mf + ge * imf);
-                    *pixel++ = (rs * mf + re * imf);
-                    *pixel++ = (as * mf + ae * imf);
-                }
-            }
-            break;
-        }
-
-        case Pt::Gfx::Brush::RectangularGradient: {
-            const float rad  = 45.0f * Gfx::Math::PiDiv180;
-            const float sval = Gfx::Math::fastSin(rad);
-            const float cval = Gfx::Math::fastCos(rad);
-            const float ilen = 1.0f / (cx + cy);
-            for(Pt::int32_t y = 0; y < height; ++y) {
-                const float dy = (y - cy) * rxy;
-                for(Pt::int32_t x = 0; x < width; ++x) {
-                    const float dx   = (x - cx) * ryx;
+                    const float dx   = (x - ctrX) * yxRat;
                     const float ry   = fabs(-sval * dx + cval * dy);
                     const float rx   = fabs( cval * dx + sval * dy);
                     const float dist = (rx + ry) * ilen;
@@ -421,35 +401,12 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
             break;
         }
 
-        case Pt::Gfx::Brush::CrossGradient: {
-            const float rad  = 45.0f * Gfx::Math::PiDiv180;
-            const float sval = Gfx::Math::fastSin(rad);
-            const float cval = Gfx::Math::fastCos(rad);
-            const float ilen = 0.1f / (cx + cy);
-            for(Pt::int32_t y = 0; y < height; ++y) {
-                const float dy = (y - cy) * rxy;
-                for(Pt::int32_t x = 0; x < width; ++x) {
-                    const float dx   = (x - cx) * ryx;
-                    const float ry   = fabs(-sval * dx + cval * dy);
-                    const float rx   = fabs( cval * dx + sval * dy);
-                    const float dist = (rx * ry) * ilen;
-                    const float mf   = (dist >= 1.0f) ? 1.0f : dist;
-                    const float imf  = 1.0f - mf;
-                    *pixel++ = (bs * mf + be * imf);
-                    *pixel++ = (gs * mf + ge * imf);
-                    *pixel++ = (rs * mf + re * imf);
-                    *pixel++ = (as * mf + ae * imf);
-                }
-            }
-            break;
-        }
-
         case Pt::Gfx::Brush::RadialGradient: {
-            const float ilen = 1.0f / Gfx::Math::fastSqrt(cx * cx + cy * cy);
+            const float ilen = mfFac / Gfx::Math::fastSqrt(ctrX * ctrX + ctrY * ctrY);
             for(Pt::int32_t y = 0; y < height; ++y) {
-                const float dy  = (y - cy) * rxy;
+                const float dy  = (y - ctrY) * xyRat;
                 for(Pt::int32_t x = 0; x < width; ++x) {
-                    const float dx = (x - cx) * ryx;
+                    const float dx = (x - ctrX) * yxRat;
                     const float dist = Gfx::Math::fastSqrt(dx * dx + dy * dy) * ilen;
                     const float mf   = (dist >= 1.0f) ? 1.0f : dist;
                     const float imf  = 1.0f - mf;
@@ -464,41 +421,20 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
 
         case Pt::Gfx::Brush::ConicalGradient: {
             for(Pt::int32_t y = 0; y < height; ++y) {
-                const float dy = (y - cy) * rxy;
+                const float dy = -(y - ctrY) * xyRat; // Sign inversion due to differences between cartesian and computer coordinate systems
                 for(Pt::int32_t x = 0; x < width; ++x) {
-                    const float dx  = (x - cx) * ryx;
-                    const float deg = Gfx::Math::convertCartesianToPolarCoordinate(dy, dx);
-                          float mf  = 0.0f;
-                          float imf = 0.0f;
-                    if(deg >= 0.0f && deg < 90.0f) {
-                        mf  = deg / 90.0f;
-                        imf = 1.0f - mf;
-                    }
-                    else if(deg >= 90.0f && deg < 180.0f) {
-                        imf = (deg - 90.0f) / 90.0f;
-                        mf  = 1.0f - imf;
-                    }
-                    else if(deg >= 180.0f && deg < 270.0f) {
-                        mf  = (deg - 180.0f) / 90.0f;
-                        imf = 1.0f - mf;
-                    }
-                    else {
-                        imf = (deg - 270.0f) / 90.0f;
-                        mf  = 1.0f - imf;
-                    }
+                    const float dx   = (x - ctrX) * yxRat;
+                    const float ry   = (-sval * dx + cval * dy);
+                    const float rx   = ( cval * dx + sval * dy);
+                    const float dist = (Gfx::Math::fastAtan2(ry, rx) + Gfx::Math::Pi) / Gfx::Math::PiMul2;
+                          float mf   = (dist <= 0.0f) ? 0.0f : ( (dist >= 1.0f) ? 1.0f : dist );
+                          float imf  = 1.0f - mf;
                     *pixel++ = (bs * mf + be * imf);
                     *pixel++ = (gs * mf + ge * imf);
                     *pixel++ = (rs * mf + re * imf);
                     *pixel++ = (as * mf + ae * imf);
                 }
             }
-            const Pt::int32_t yy = round(height / 2 * rxy);
-            const Pt::int32_t xx = round(width  / 2 * ryx);
-             pixel   = _brushBuffer.data() + ( yy * width + xx ) * 4;
-            *pixel++ = (bs * 0.5f + be * 0.5f);
-            *pixel++ = (gs * 0.5f + ge * 0.5f);
-            *pixel++ = (rs * 0.5f + re * 0.5f);
-            *pixel++ = (as * 0.5f + ae * 0.5f);
             break;
         }
 

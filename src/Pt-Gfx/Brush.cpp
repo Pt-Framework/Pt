@@ -50,8 +50,8 @@ Brush::Brush(const Image& texture)
 }
 
 
-Brush::Brush(const Color& from, const Color& to, GradientDirection g)
-: _brushData( new BrushData(from, to, g) )
+Brush::Brush(const Color& from, const Color& to, GradientDirection g, float angle)
+: _brushData( new BrushData(from, to, g, angle) )
 {
 }
 
@@ -77,6 +77,12 @@ const Color& Brush::gradientColor() const
 const Image& Brush::texture() const
 {
     return _brushData->texture();
+}
+
+
+float Brush::angle() const
+{
+    return _brushData->angle();
 }
 
 
@@ -111,20 +117,19 @@ BrushData::BrushData(const Image& texture)
 }
 
 
-BrushData::BrushData(const Color& from, const Color& to, Brush::GradientDirection g)
+BrushData::BrushData(const Color& from, const Color& to, Brush::GradientDirection g, float angle)
 : _color(from)
 , _gradientColor(to)
+, _angle(angle)
 , _isNull(false)
 {
     switch(g) {
-        case Brush::Horizontal  : _fillStyle = Brush::HorizontalGradient;  break;
-        case Brush::Vertical    : _fillStyle = Brush::VerticalGradient;    break;
-        case Brush::Diamond     : _fillStyle = Brush::DiamondGradient;     break;
-        case Brush::Rectangular : _fillStyle = Brush::RectangularGradient; break;
-        case Brush::Cross       : _fillStyle = Brush::CrossGradient;       break;
-        case Brush::Radial      : _fillStyle = Brush::RadialGradient;      break;
-        case Brush::Conical     : _fillStyle = Brush::ConicalGradient;     break;
-        default                 : _fillStyle = Brush::Solid;               break;
+        case Brush::Horizontal : _fillStyle = Brush::HorizontalGradient; break;
+        case Brush::Vertical   : _fillStyle = Brush::VerticalGradient;   break;
+        case Brush::Diamond    : _fillStyle = Brush::DiamondGradient;    break;
+        case Brush::Radial     : _fillStyle = Brush::RadialGradient;     break;
+        case Brush::Conical    : _fillStyle = Brush::ConicalGradient;    break;
+        default                : _fillStyle = Brush::Solid;              break;
     }
 }
 
@@ -155,6 +160,12 @@ const Color& BrushData::gradientColor() const
 const Image& BrushData::texture() const
 {
     return _texture;
+}
+
+
+float BrushData::angle() const
+{
+    return _angle;
 }
 
 

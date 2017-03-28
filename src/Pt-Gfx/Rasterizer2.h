@@ -314,7 +314,6 @@ class Rasterizer2
         ConstPixel       _brushPixel;
         const Image*     _brushImage;
         bool             _isGradient;
-        bool             _isGradientTexture;
         bool             _isTexture;
 
         Rect             _clip;
@@ -572,8 +571,8 @@ void Rasterizer2::rasterScanline(
     //
     if(iterR < iterL) return;
 
-    // Draw the span using texture or gradient texture
-    if(_isTexture || _isGradientTexture) {
+    // Draw the span using texture (or gradient texture)
+    if(_isTexture) {
         Pt::int32_t iterX     = iterL;
         Pt::int32_t spanWidth = iterR - iterL + 1;
         while(spanWidth > 0) {
