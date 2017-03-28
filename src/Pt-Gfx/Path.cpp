@@ -27,8 +27,6 @@
   02110-1301 USA
 */
 
-#include <cstdarg>
-
 #include <Pt/SourceInfo.h>
 
 #include <Pt/Gfx/Path.h>
@@ -431,7 +429,7 @@ void Path::cubicBezierTo(double cx1, double cy1, double cx2, double cy2, double 
     _pathData->curY = y;
 }
 
-void Path::genericNBezierTo(double x, double y, Pt::int32_t controlPointCount ...)
+void Path::genericNBezierTo(Pt::int32_t controlPointCount, double* cxy, double x, double y)
 {
     // Check if this function call is valid in the current context
     if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
@@ -441,15 +439,11 @@ void Path::genericNBezierTo(double x, double y, Pt::int32_t controlPointCount ..
     std::vector<double> points;
 
     // Extract and store the control coordinates
-    va_list args;
-    va_start(args, controlPointCount);
-    for(Pt::int32_t i = 0; i < controlPointCount; ++i) {
-        const double val = va_arg(args, double);
-        points.push_back(val);
-    }
-    va_end(args);
+    if(controlPointCount < 3) throw PathError("A generic N-bezier must have at least 3 control points");
 
-    if(points.size() % 2) throw PathError("A generic N-bezier must have an even number of control points");
+    for(Pt::int32_t i = 0; i < controlPointCount * 2; ++i) {
+        points.push_back(cxy[i]);
+    }
 
     // Store the end coordinate
     points.push_back(x);
@@ -533,7 +527,7 @@ void Path::relCubicBezierTo(double cx1, double cy1, double cx2, double cy2, doub
     _pathData->curY += y;
 }
 
-void Path::relGenericNBezierTo(double x, double y, Pt::int32_t controlPointCount ...)
+void Path::relGenericNBezierTo(Pt::int32_t controlPointCount, double* cxy, double x, double y)
 {
     // Check if this function call is valid in the current context
     if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
@@ -543,16 +537,12 @@ void Path::relGenericNBezierTo(double x, double y, Pt::int32_t controlPointCount
     std::vector<double> points;
 
     // Extract and store the control coordinates
-    va_list args;
-    va_start(args, controlPointCount);
-    for(Pt::int32_t i = 0; i < controlPointCount; ++i) {
-        const double val = va_arg(args, double);
-        if(i % 2) points.push_back(val + _pathData->curY); // Odd  -> Y
-        else      points.push_back(val + _pathData->curX); // Even -> X
-    }
-    va_end(args);
+    if(controlPointCount < 3) throw PathError("A generic N-bezier must have at least 3 control points");
 
-    if(points.size() % 2) throw PathError("A generic N-bezier must have an even number of control points");
+    for(Pt::int32_t i = 0; i < controlPointCount * 2; ++i) {
+        if(i % 2) points.push_back(cxy[i] + _pathData->curY); // Odd  -> Y
+        else      points.push_back(cxy[i] + _pathData->curX); // Even -> X
+    }
 
     // Store the end coordinate
     points.push_back(_pathData->curX + x);

@@ -116,7 +116,7 @@ class PT_GFX_API Path {
 
         void cubicBezierTo(double cx1, double cy1, double cx2, double cy2, double x, double y);
 
-        void genericNBezierTo(double x, double y, Pt::int32_t controlPointCount ...);
+        void genericNBezierTo(Pt::int32_t controlPointCount, double* cxy, double x, double y);
 
         //
         // Relative coordinate
@@ -132,7 +132,7 @@ class PT_GFX_API Path {
 
         void relCubicBezierTo(double cx1, double cy1, double cx2, double cy2, double x, double y);
 
-        void relGenericNBezierTo(double x, double y, Pt::int32_t controlPointCount ...);
+        void relGenericNBezierTo(Pt::int32_t controlPointCount, double* cxy, double x, double y);
 
         //
         // Generators
