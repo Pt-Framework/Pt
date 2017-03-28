@@ -286,7 +286,7 @@ void Rasterizer2::rasterOnePixelPolygonOutline(const Point* points, size_t point
     if(pointCount < 2) return;
 
     // Mask
-    DrawLineMask mask_zero = Rasterizer2::NullLineMask;
+  //DrawLineMask mask_zero = Rasterizer2::NullLineMask;
     DrawLineMask mask_nnp1 = Rasterizer2::NullLineMask;
 
     // Pattern indexing counter
@@ -299,7 +299,7 @@ void Rasterizer2::rasterOnePixelPolygonOutline(const Point* points, size_t point
     for(size_t i = 0; i < pc1; ++i) {
         if(solid) rasterOnePixelSolidLine    (points[i].x(), points[i].y(), points[i + 1].x(), points[i + 1].y(), color,              &mask_nnp1);
         else      rasterOnePixelPatternedLine(points[i].x(), points[i].y(), points[i + 1].x(), points[i + 1].y(), color, fpiCtrInOut, &mask_nnp1);
-        if(!i) memcpy(&mask_zero, &mask_nnp1, sizeof(mask_zero));
+        //if(!i) memcpy(&mask_zero, &mask_nnp1, sizeof(mask_zero));
     }
 
     /*

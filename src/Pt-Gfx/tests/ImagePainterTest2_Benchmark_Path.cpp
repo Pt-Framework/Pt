@@ -260,6 +260,49 @@ static size_t benchDrawPath(int loopCount, const Brush& brush1, const Brush& bru
     return sum;
 }
 
+static size_t benchDrawPathSimple(int loopCount, CompositionMode cm, AntiAliasingMode antiAliasingMode)
+{
+    size_t sum = 0;
+
+    Image image( ImageFormat::argb32(), BENCHMARK_IMAGE_SIZE );
+
+    ImagePainter2 painter(image);
+    painter.setCompositionMode(cm);
+
+    ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
+    if(!ip2) return 0;
+
+    for(int i = 0; i < loopCount; ++i) {
+        Pt::System::Clock clock;
+        clock.start();
+
+        AffineMatrix matrix;
+        Path         path;
+        std::vector<PointF> pointsF;
+
+        path.clear        ();
+        path.beginPath    ();
+        path.moveTo       (                    400, 200); // CCW
+        path.cubicBezierTo(300, 150, 150, 350, 100, 500);
+        path.endPath      ();
+
+        pointsF.clear();
+        path.generatePoints(pointsF, 0);
+        matrix.transformPoints(pointsF.data(), pointsF.size());
+
+        ip2->setAntiAliasingMode(antiAliasingMode);
+        ip2->setPen(Color::fromRgb8(255, 255, 255, 175));
+        ip2->drawPolyline(pointsF.data(), pointsF.size(), false);
+
+        sum += clock.stop().toUSecs();
+
+        BENCHMARK_DISPLAY_RESULTING_IMAGE;
+    }
+
+    sum /= loopCount;
+    return sum;
+}
+
 #if defined(PT_GFX_USE_X86_CPU)
 #pragma GCC pop_options
 #endif

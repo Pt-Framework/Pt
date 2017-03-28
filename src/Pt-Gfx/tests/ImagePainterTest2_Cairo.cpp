@@ -258,6 +258,49 @@ static size_t cairoBenchFillEllipse(int loopCount, CompositionMode cm, bool useA
     return sum;
 }
 
+static size_t cairoBenchPath(int loopCount, CompositionMode cm, bool useAntiAliasing)
+{
+    size_t sum = 0;
+
+    const Size& imgSize = BENCHMARK_IMAGE_SIZE;
+
+    std::vector<Pt::uint8_t> buffer(imgSize.width() * imgSize.height() * 4, 0);
+
+    cairo_surface_t* cairoSurface = cairo_image_surface_create_for_data ( &buffer[0], CAIRO_FORMAT_ARGB32, imgSize.width(), imgSize.height(), imgSize.width() * 4);
+    cairo_t*         cairo        = cairo_create(cairoSurface);
+
+    cairo_set_antialias(cairo, useAntiAliasing ? CAIRO_ANTIALIAS_DEFAULT : CAIRO_ANTIALIAS_NONE);
+
+    for(int i = 0; i < loopCount; ++i) {
+        Pt::System::Clock clock;
+        clock.start();
+
+        if(cm == CompositionMode::SourceOver) {
+            cairo_set_operator(cairo, CAIRO_OPERATOR_OVER);
+            cairo_set_source_rgba(cairo, 1.0f, 1.0f, 1.0f, 175.0f / 255.0f);
+        }
+        else {
+            cairo_set_operator(cairo, CAIRO_OPERATOR_SOURCE);
+            cairo_set_source_rgba(cairo, 1.0f, 1.0f, 1.0f, 1.0f);
+        }
+
+        cairo_new_path(cairo);
+        cairo_move_to (cairo, 400, 200); // CCW
+        cairo_curve_to(cairo, 300, 150, 150, 350, 100, 500);
+        cairo_stroke  (cairo);
+
+        sum += clock.stop().toUSecs();
+
+        BENCHMARK_CAIRO_DISPLAY_RESULTING_IMAGE;
+    }
+
+    cairo_destroy (cairo);
+    cairo_surface_destroy (cairoSurface);
+
+    sum /= loopCount;
+    return sum;
+}
+
 static void cairoBenchmark(CompositionMode cm)
 {
     double time1, time2;
@@ -324,6 +367,22 @@ static void cairoBenchmark(CompositionMode cm)
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::Standard);
         std::clog << "    Solid-filled    ellipse XWAA     @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        std::clog << std::endl;
+    }
+
+    // Path
+    if(BENCHMARK_RESULT_HTML || BENCHMARK_PATH) {
+        time1 = cairoBenchPath(BENCHMARK_LOOP_COUNT, cm, true );
+        std::clog << "    Path                             @ Cairo         = " << std::setw(6) << time1 << std::endl;
+        time2 = cairoBenchPath(BENCHMARK_LOOP_COUNT, cm, false);
+        std::clog << "    Path                             @ Cairo - No AA = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time2 = benchDrawPathSimple(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
+        std::clog << "    Path NOAA                        @ ImagePainter2 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time2 = benchDrawPathSimple(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::Standard);
+        std::clog << "    Path XWAA                        @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
