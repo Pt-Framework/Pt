@@ -61,9 +61,6 @@ namespace Gfx{
 static const __m256  avxOneZeroF = _mm256_set_ps(0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f);
 static const __m256  avxMaxCordF = _mm256_set1_ps(Painter::MaximumCoordinateF);
 
-static const __m256d avxOneZeroD = _mm256_set_pd(0.0, 1.0, 0.0, 1.0);
-static const __m256d avxMaxCordD = _mm256_set1_pd(Painter::MaximumCoordinateF);
-
 #endif
 
 #if defined(PT_GFX_USE_NEON)
@@ -280,43 +277,6 @@ void BasicAffineMatrix2D<float>::updateMatrix(const MatrixData& n, bool replaceI
     _mm_storeu_ps(_mdata.v[1], out1x);
     _mm_storeu_ps(_mdata.v[2], out2x);
 }
-
-/*
-#elif defined(PT_GFX_USE_NEON)
-
-// ### This NEON code is actually slower than the plain Arm code  ###
-
-template <>
-void BasicAffineMatrix2D<float>::updateMatrix(const MatrixData& n, bool replaceInsteadOfCombine)
-{
-    // Check if we need to simply replace the matrix
-    if(_isIdentity || replaceInsteadOfCombine) {
-        _mdata = n;
-        return;
-    }
-
-    // Multiply using the mode M' = M * N
-    const MatrixData* l = &n;
-    const MatrixData* r = &_mdata;
-
-    float32x4_t out0x =                   vmulq_f32(vld1q_dup_f32(&l->v[0][0]), r->r[0])  ;
-                out0x = vaddq_f32( out0x, vmulq_f32(vld1q_dup_f32(&l->v[0][1]), r->r[1]) );
-                out0x = vaddq_f32( out0x, vmulq_f32(vld1q_dup_f32(&l->v[0][2]), r->r[2]) );
-
-
-    float32x4_t out1x =                   vmulq_f32(vld1q_dup_f32(&l->v[1][0]), r->r[0])  ;
-                out1x = vaddq_f32( out1x, vmulq_f32(vld1q_dup_f32(&l->v[1][1]), r->r[1]) );
-                out1x = vaddq_f32( out1x, vmulq_f32(vld1q_dup_f32(&l->v[1][2]), r->r[2]) );
-
-    float32x4_t out2x =                   vmulq_f32(vld1q_dup_f32(&l->v[2][0]), r->r[0])  ;
-                out2x = vaddq_f32( out2x, vmulq_f32(vld1q_dup_f32(&l->v[2][1]), r->r[1]) );
-                out2x = vaddq_f32( out2x, vmulq_f32(vld1q_dup_f32(&l->v[2][2]), r->r[2]) );
-
-    vst1q_f32(_mdata.v[0], out0x);
-    vst1q_f32(_mdata.v[1], out1x);
-    vst1q_f32(_mdata.v[2], out2x);
-}
-*/
 
 #endif
 
@@ -901,84 +861,6 @@ void BasicAffineMatrix2D<float>::transformPoints(PointF* dxy, const PointF* sxy,
 template <>
 void BasicAffineMatrix2D<float>::transformPoints(PointF* xy, size_t pointCount) const
 { if(!_isIdentity) transformPoints(xy, xy, pointCount); }
-
-// ======================================================================================
-// ===== Inlined Public Member Functions (Specialization for double) ====================
-// ======================================================================================
-#if 0
-
-// ### This AVX code is actually slower than the GCC's auto-vectorization code  ###
-
-#if defined(PT_GFX_USE_AVX1)
-
-template <>
-void BasicAffineMatrix2D<double>::transformPoints(double* dxy, const double* sxy, size_t pointCount) const
-{
-    pointCount *= 2;
-
-    if(_isIdentity) {
-        memcpy(dxy, sxy, pointCount * sizeof(double));
-        return;
-    }
-
-    _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
-
-    // Loop through 4 doubles at a time
-    const size_t pointCount4 = pointCount / 4;
-
-    for(size_t i = 0; i < pointCount4; ++i) {
-        // Load 4 doubles from the source vector                            // [ --1-- --0-- ]
-        const __m256d s10 = _mm256_loadu_pd       (sxy                   ); // [ Y1 X1 Y0 X0 ]
-        const __m256d s1  = _mm256_permute2f128_pd(s10, avxOneZeroD, 0x31); // [ 0  1  Y1 X1 ]
-        const __m256d s0  = _mm256_permute2f128_pd(s10, avxOneZeroD, 0x20); // [ 0  1  Y0 X0 ]
-        // Multiply them to the matrix's rows                // [ RC RC RC RC ]
-        const __m256d r1_0 = _mm256_mul_pd(_mdata.r[0], s1); // [ 03 02 01 00 ]
-        const __m256d r1_1 = _mm256_mul_pd(_mdata.r[1], s1); // [ 13 12 11 10 ]
-        const __m256d r0_0 = _mm256_mul_pd(_mdata.r[0], s0); // [ 03 02 01 00 ]
-        const __m256d r0_1 = _mm256_mul_pd(_mdata.r[1], s0); // [ 13 12 11 10 ]
-        // Horizontal add the multiplication results
-        const __m256d r1x = _mm256_hadd_pd(r1_0, r1_1);
-        const __m256d r0x = _mm256_hadd_pd(r0_0, r0_1);
-        // Permute and further add the multiplication results
-        const __m256d r1  = _mm256_permute2f128_pd(r1x, r0x, 0x31);
-        const __m256d r0  = _mm256_permute2f128_pd(r1x, r0x, 0x02);
-        const __m256d r10 = _mm256_add_pd(r1, r0);
-        // Store 4 doubles to the destination vector
-        _mm256_storeu_pd(
-            dxy,
-            _mm256_or_pd(
-                _mm256_and_pd(s10, _mm256_cmp_pd(s10, avxMaxCordD, _CMP_GT_OQ)), // Retain source values >  maximum coordinate
-                _mm256_and_pd(r10, _mm256_cmp_pd(s10, avxMaxCordD, _CMP_LE_OQ))  // Retain result values <= maximum coordinate
-            )
-        );
-        // Increment the pointers
-        sxy += 4;
-        dxy += 4;
-    }
-
-    _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
-
-    // Process the remaining doubles using normal code
-    pointCount %= 4;
-
-    for(size_t i = 0; i < pointCount; i += 2) transformPoint(dxy[i], dxy[i + 1], sxy[i], sxy[i + 1]);
-}
-
-template <>
-void BasicAffineMatrix2D<double>::transformPoints(double* xy, size_t pointCount) const
-{ if(!_isIdentity) transformPoints(xy, xy, pointCount); }
-
-template <>
-void BasicAffineMatrix2D<double>::transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount) const
-{ transformPoints(reinterpret_cast<double*>(dxy), reinterpret_cast<const double*>(sxy), pointCount); }
-
-template <>
-void BasicAffineMatrix2D<double>::transformPoints(PointF* xy, size_t pointCount) const
-{ transformPoints(reinterpret_cast<double*>(xy), reinterpret_cast<const double*>(xy), pointCount); }
-
-#endif
-
-#endif
 
 
 //
