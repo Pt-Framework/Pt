@@ -66,7 +66,7 @@ void Rasterizer2::strokeOnePixelPolygonOutline(const Point* points, size_t point
 void Rasterizer2::strokePolygon(const Point* points, size_t pointCount)
 {
     // Check if there are too few points
-    if(pointCount < 2) return;
+    if(pointCount < 3) return;
 
     // Disable texture/gradient
     const bool isTexture         = _isTexture;
@@ -87,6 +87,7 @@ void Rasterizer2::strokePolygon(const Point* points, size_t pointCount)
     std::vector<size_t> clippedCounts;
 
     separateAndClipPolygons(minX, maxX, minY, maxY, clippedPoints, clippedCounts, points, pointCount);
+    if(clippedPoints.empty()) return;
 
     // Draw the polygon
     if(_aaMode == AntiAliasingMode::None) {
@@ -120,7 +121,7 @@ void Rasterizer2::strokePolygon(const Point* points, size_t pointCount)
 void Rasterizer2::strokePolygonSeparate(const Point* points, size_t pointCount)
 {
     // Check if there are too few points
-    if(pointCount < 2) return;
+    if(pointCount < 3) return;
 
     // Disable texture/gradient
     const bool isTexture         = _isTexture;
@@ -168,7 +169,7 @@ void Rasterizer2::strokePolygonSeparate(const Point* points, size_t pointCount)
 void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
 {
     // Check if there are too few points
-    if(pointCount < 2) return;
+    if(pointCount < 3) return;
 
     // Separate the polygons and clip their coordinates
     Pt::int32_t         minX;
@@ -180,6 +181,7 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
     std::vector<size_t> clippedCounts;
 
     separateAndClipPolygons(minX, maxX, minY, maxY, clippedPoints, clippedCounts, points, pointCount);
+    if(clippedPoints.empty()) return;
 
     // Update the gradient as needed
     if(_isGradient)
@@ -260,6 +262,7 @@ void Rasterizer2::separateAndClipPolygons(Pt::int32_t& minX, Pt::int32_t& maxX, 
             // Clip the coordinates
             std::vector<Point> clipped;
             genClippedPolygonPoints(clipped, points + startIndex, curPC, false);
+            if(clipped.empty()) continue;
             // Increment the start index
             startIndex += curPC + 1;
             // Calculate the minimum and maximum coordinate values
@@ -279,6 +282,9 @@ void Rasterizer2::separateAndClipPolygons(Pt::int32_t& minX, Pt::int32_t& maxX, 
 
 void Rasterizer2::rasterOnePixelPolygonOutline(const Point* points, size_t pointCount, const Color& color)
 {
+    // Check if there are too few points
+    if(pointCount < 2) return;
+
     // Mask
     DrawLineMask mask_zero = Rasterizer2::NullLineMask;
     DrawLineMask mask_nnp1 = Rasterizer2::NullLineMask;

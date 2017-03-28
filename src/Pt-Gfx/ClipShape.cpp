@@ -127,14 +127,10 @@ Pt::int32_t ClipShape::csComputeOutcode(Pt::int32_t x, Pt::int32_t y, const Rect
 
 
 // ======================================================================================
-// ===== Clip Polygon ===================================================================
+// ===== Clip Polyline ==================================================================
 // ======================================================================================
 
 void ClipShape::clipPolyline(std::vector<Point>& pio, const Rect& clippingArea)
-{
-}
-
-void ClipShape::clipPolygon(std::vector<Point>& pio, const Rect& clippingArea)
 {
     // If the clipping area is null or there is too few elements, simply clear the vector
     if(clippingArea.isNull() || pio.size() < 2) {
@@ -145,10 +141,68 @@ void ClipShape::clipPolygon(std::vector<Point>& pio, const Rect& clippingArea)
     // Perform clipping
     std::vector<Point> tmp;
 
-    clipEdge(tmp, pio, clippingArea.topLeft   (), clippingArea.bottomLeft  (), CM_Left  );
-    clipEdge(pio, tmp, clippingArea.topRight  (), clippingArea.bottomRight (), CM_Right );
-    clipEdge(tmp, pio, clippingArea.topLeft   (), clippingArea.topRight    (), CM_Top   );
-    clipEdge(pio, tmp, clippingArea.bottomLeft(), clippingArea.bottomRight (), CM_Bottom);
+    clipPolylineToEdge(tmp, pio, clippingArea.topLeft   (), clippingArea.bottomLeft  (), CM_Left  );
+    clipPolylineToEdge(pio, tmp, clippingArea.topRight  (), clippingArea.bottomRight (), CM_Right );
+    clipPolylineToEdge(tmp, pio, clippingArea.topLeft   (), clippingArea.topRight    (), CM_Top   );
+    clipPolylineToEdge(pio, tmp, clippingArea.bottomLeft(), clippingArea.bottomRight (), CM_Bottom);
+}
+
+void ClipShape::clipPolylineToEdge(std::vector<Point>& out, const std::vector<Point>& in, const Point& edge0, const Point& edge1, ClipMode cm)
+{
+    out.clear();
+    if(in.empty()) return;
+
+    const size_t size1 = in.size() - 1;
+
+    for(size_t i = 0; i < size1; ++i) {
+        const Point& s       = in[i    ];
+        const Point& p       = in[i + 1];
+        const bool   sInside = inside(s, edge0, cm);
+        const bool   pInside = inside(p, edge0, cm);
+        if(sInside && pInside) {
+            out.push_back(s);
+        }
+        else if(!sInside && pInside) {
+           out.push_back(intersect(s, p, edge0, edge1));
+        }
+        else if(sInside && !pInside) {
+            out.push_back(s);
+        }
+        else if(!sInside && !pInside && i) {
+            const Point& a = in[i - 1];
+            const Point& b = in[i    ];
+            if(inside(a, edge0, cm)) out.push_back(intersect(a, b, edge0, edge1));
+        }
+    }
+
+    const Point& s       = in[size1    ];
+    const Point& p       = in[size1 - 1];
+    const bool   sInside = inside(s, edge0, cm);
+    const bool   pInside = inside(p, edge0, cm);
+         if(sInside) out.push_back(s);
+    else if(pInside) out.push_back(intersect(s, p, edge0, edge1));
+}
+
+
+// ======================================================================================
+// ===== Clip Polygon ===================================================================
+// ======================================================================================
+
+void ClipShape::clipPolygon(std::vector<Point>& pio, const Rect& clippingArea)
+{
+    // If the clipping area is null or there is too few elements, simply clear the vector
+    if(clippingArea.isNull() || pio.size() < 3) {
+        pio.clear();
+        return;
+    }
+
+    // Perform clipping
+    std::vector<Point> tmp;
+
+    clipPolygonToEdge(tmp, pio, clippingArea.topLeft   (), clippingArea.bottomLeft  (), CM_Left  );
+    clipPolygonToEdge(pio, tmp, clippingArea.topRight  (), clippingArea.bottomRight (), CM_Right );
+    clipPolygonToEdge(tmp, pio, clippingArea.topLeft   (), clippingArea.topRight    (), CM_Top   );
+    clipPolygonToEdge(pio, tmp, clippingArea.bottomLeft(), clippingArea.bottomRight (), CM_Bottom);
 
     // Shift around the elements so that their original order are restored
     if(pio.size() == 3) {
@@ -165,7 +219,7 @@ void ClipShape::clipPolygon(std::vector<Point>& pio, const Rect& clippingArea)
     }
 }
 
-void ClipShape::clipEdge(std::vector<Point>& out, const std::vector<Point>& in, const Point& edge0, const Point& edge1, ClipMode cm)
+void ClipShape::clipPolygonToEdge(std::vector<Point>& out, const std::vector<Point>& in, const Point& edge0, const Point& edge1, ClipMode cm)
 {
     out.clear();
     if(in.empty()) return;
@@ -189,6 +243,11 @@ void ClipShape::clipEdge(std::vector<Point>& out, const std::vector<Point>& in, 
         }
     }
 }
+
+
+// ======================================================================================
+// ===== Clip Polyline and Polygon ======================================================
+// ======================================================================================
 
 bool ClipShape::inside(const Point& p, const Point& corner, ClipMode cm)
 {

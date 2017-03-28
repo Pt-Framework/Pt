@@ -53,7 +53,7 @@ class ClipShape {
         static void clipPolygon(std::vector<Point>& pio, const Rect& clippingArea);
 
     private:
-        // Clip polygon
+        // Clip polyline and polygon
         enum ClipMode {
             CM_Left, CM_Right, CM_Top, CM_Bottom
         };
@@ -62,8 +62,10 @@ class ClipShape {
         // Clip line
         static Pt::int32_t csComputeOutcode(Pt::int32_t x, Pt::int32_t y, const Rect& clip);
 
-        // Clip polygon
-        static void clipEdge(std::vector<Point>& out, const std::vector<Point>& in, const Point& edge0, const Point& edge1, ClipMode cm);
+        // Clip polyline and polygon
+        static void clipPolylineToEdge(std::vector<Point>& out, const std::vector<Point>& in, const Point& edge0, const Point& edge1, ClipMode cm);
+        static void clipPolygonToEdge(std::vector<Point>& out, const std::vector<Point>& in, const Point& edge0, const Point& edge1, ClipMode cm);
+
         static bool inside(const Point& p, const Point& corner, ClipMode cm);
         static const Point intersect(const Point& from, const Point& to, const Point& edge0, const Point& edge1);
 };
