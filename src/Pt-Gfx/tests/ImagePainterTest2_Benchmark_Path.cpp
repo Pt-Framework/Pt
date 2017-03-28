@@ -7,7 +7,7 @@ static void benchDrawPath_drawRow(
 {
     std::vector<PointF> pointsF;
 
-    matrix2d.rotateAboutOrigin(15);
+    matrix2d.rotate(15);
     matrix2d.push();
     matrix2d.translate(80 + 120 * col, 80 + 120 * row);
     pointsF.clear();
@@ -21,7 +21,7 @@ static void benchDrawPath_drawRow(
     matrix2d.pop();
     ++col;
 
-    matrix2d.rotateAboutOrigin(15);
+    matrix2d.rotate(15);
     matrix2d.push();
     matrix2d.translate(80 + 120 * col, 80 + 120 * row);
     pointsF.clear();
@@ -35,7 +35,7 @@ static void benchDrawPath_drawRow(
     matrix2d.pop();
     ++col;
 
-    matrix2d.rotateAboutOrigin(15);
+    matrix2d.rotate(15);
     matrix2d.push();
     matrix2d.translate(80 + 120 * col, 80 + 120 * row);
     pointsF.clear();
@@ -49,7 +49,7 @@ static void benchDrawPath_drawRow(
     matrix2d.pop();
     ++col;
 
-    matrix2d.rotateAboutOrigin(15);
+    matrix2d.rotate(15);
     matrix2d.push();
     matrix2d.translate(80 + 120 * col, 80 + 120 * row);
     pointsF.clear();
@@ -63,7 +63,7 @@ static void benchDrawPath_drawRow(
     matrix2d.pop();
     ++col;
 
-    matrix2d.rotateAboutOrigin(15);
+    matrix2d.rotate(15);
     matrix2d.push();
     matrix2d.translate(80 + 120 * col, 80 + 120 * row);
     pointsF.clear();
@@ -77,7 +77,7 @@ static void benchDrawPath_drawRow(
     matrix2d.pop();
     ++col;
 
-    matrix2d.rotateAboutOrigin(15);
+    matrix2d.rotate(15);
     matrix2d.push();
     matrix2d.translate(80 + 120 * col, 80 + 120 * row);
     pointsF.clear();
@@ -101,7 +101,7 @@ static void benchDrawPath_drawCol(
 {
     std::vector<PointF> pointsF;
 
-    matrix2d.rotateAboutOrigin(15);
+    matrix2d.rotate(15);
     matrix2d.push();
     matrix2d.translate(150 + 120 * col, 70 + 120 * row);
     pointsF.clear();
@@ -115,7 +115,7 @@ static void benchDrawPath_drawCol(
     matrix2d.pop();
     ++row;
 
-    matrix2d.rotateAboutOrigin(15);
+    matrix2d.rotate(15);
     matrix2d.push();
     matrix2d.translate(150 + 120 * col, 70 + 120 * row);
     pointsF.clear();
@@ -194,7 +194,7 @@ static size_t benchDrawPath(int loopCount, const Brush& brush1, const Brush& bru
 
         matrix2d.identity();
         matrix2d.translate(-50, -35);
-        matrix2d.scaleAboutOrigin(0.75f, 1.0f);
+        matrix2d.scale(0.75f, 1.0f);
 
         // Third row
         benchDrawPath_drawRow<WITH_RASTERISATION>(ip2, matrix2d, path2d, row, col, penThinSolid, penThinDot, penThickSolid, penThickDot, brush1, brush2, antiAliasingMode);
@@ -230,7 +230,7 @@ static size_t benchDrawPath(int loopCount, const Brush& brush1, const Brush& bru
 
         matrix2d.identity();
         matrix2d.translate(-50, -25);
-        matrix2d.scaleAboutOrigin(0.75f, 1.0f);
+        matrix2d.scale(0.75f, 1.0f);
 
         benchDrawPath_drawCol<WITH_RASTERISATION>(ip2, matrix2d, path2d, row, col, penThinSolid, penThickSolid, antiAliasingMode);
 
@@ -247,7 +247,7 @@ static size_t benchDrawPath(int loopCount, const Brush& brush1, const Brush& bru
 
         matrix2d.identity();
         matrix2d.translate(-50, -25);
-        matrix2d.scaleAboutOrigin(0.75f, 1.0f);
+        matrix2d.scale(0.75f, 1.0f);
 
         benchDrawPath_drawCol<WITH_RASTERISATION>(ip2, matrix2d, path2d, row, col, penThinSolid, penThickSolid, antiAliasingMode);
 

@@ -411,8 +411,8 @@ static void benchMatrixOps()
     dumpMatrix<T>(const_cast<const BasicAffineMatrix2D<T>&>(mat));
 
     printf("After operations\n");
-    mat.translate       (10.0f, 20.0f, BasicAffineMatrix2D<T>::MultiplyOnLeft);
-    mat.scaleAboutOrigin( 0.5f,  2.0f, BasicAffineMatrix2D<T>::MultiplyOnLeft);
+    mat.translate(10.0f, 20.0f);
+    mat.scale    ( 0.5f,  2.0f);
     dumpMatrix<T>(const_cast<const BasicAffineMatrix2D<T>&>(mat));
 
     volatile T x = 8.0f, y = 8.0f;
@@ -450,12 +450,12 @@ static void benchMatrixOps()
     double totalTime = 0;
     for(int i = 0; i < loopCount ; ++i) {
         // Reset the matrix
-        if(i % 1) mat.updateUsingRaw(a, BasicAffineMatrix2D<T>::Replace);
-        else      mat.updateUsingRaw(b, BasicAffineMatrix2D<T>::Replace);
+        if(i % 1) mat.setRaw(a);
+        else      mat.setRaw(b);
         // Perform benchmark
         clock.start();
         for(int j = 0; j < loopCount ; ++j) {
-            mat.updateUsingRaw(b, BasicAffineMatrix2D<T>::MultiplyOnLeft);
+            mat.setRaw(b);
         }
         totalTime += clock.stop().toUSecs();
     }
@@ -467,8 +467,8 @@ static void benchMatrixOps()
     volatile T dmyx, dmyy;
     for(int i = 0; i < loopCount ; ++i) {
         // Reset the matrix
-        if(i % 1) mat.updateUsingRaw(a, BasicAffineMatrix2D<T>::Replace);
-        else      mat.updateUsingRaw(b, BasicAffineMatrix2D<T>::Replace);
+        if(i % 1) mat.setRaw(a);
+        else      mat.setRaw(b);
         // Reset the source vectors
         for(int j = 0; j < loopCount * 2; j += 2) {
             sxya[j    ] = 2.0f * rand() / RAND_MAX - 1.0f;
@@ -490,8 +490,8 @@ static void benchMatrixOps()
     totalTime = 0;
     for(int i = 0; i < loopCount ; ++i) {
         // Reset the matrix
-        if(i % 1) mat.updateUsingRaw(a, BasicAffineMatrix2D<T>::Replace);
-        else      mat.updateUsingRaw(b, BasicAffineMatrix2D<T>::Replace);
+        if(i % 1) mat.setRaw(a);
+        else      mat.setRaw(b);
         // Reset the source vectors
         for(int j = 0; j < loopCount * 2; j += 2) {
             sxya[j    ] = 2.0f * rand() / RAND_MAX - 1.0f;
@@ -514,8 +514,8 @@ static void benchMatrixOps()
     PointF pointsF[loopCount];
     for(int i = 0; i < loopCount ; ++i) {
         // Reset the matrix
-        if(i % 1) mat.updateUsingRaw(a, BasicAffineMatrix2D<T>::Replace);
-        else      mat.updateUsingRaw(b, BasicAffineMatrix2D<T>::Replace);
+        if(i % 1) mat.setRaw(a);
+        else      mat.setRaw(b);
         // Reset the source vectors
         for(int j = 0; j < loopCount; ++j) {
             pointsF[j].set( 2.0f * rand() / RAND_MAX - 1.0f, 2.0f * rand() / RAND_MAX - 1.0f );
@@ -539,255 +539,19 @@ static void benchMatrixOps()
     -----------------------------------
     Plain x86_64 (i5-4460; 64-Bit Mode)
     -----------------------------------
-    <float>
-    Initial value
-        |   1.000   0.000   0.000 |
-        |   0.000   1.000   0.000 |
-        |   0.000   0.000   1.000 |
-    After operations
-        |   0.500   0.000   5.000 |
-        |   0.000   2.000  40.000 |
-        |   0.000   0.000   1.000 |
-    A: Point ( 8.000,  8.000) -> ( 9.000, 56.000)
-    B: Point (11.000, 12.000) -> (10.500, 64.000)
-    B: Point (13.000, 24.000) -> (11.500, 88.000)
-    B: Point (25.000, 16.000) -> (17.500, 72.000)
-    B: Point (27.000, 28.000) -> (18.500, 96.000)
-    B: Point ( 5.000,  5.000) -> ( 7.500, 50.000)
-    C: Point                  -> (10.500, 64.000)
-    C: Point                  -> (11.500, 88.000)
-    C: Point                  -> (17.500, 72.000)
-    C: Point                  -> (18.500, 96.000)
-    C: Point                  -> ( 7.500, 50.000)
-    D: Point                  -> (10.500, 64.000)
-    D: Point                  -> (11.500, 88.000)
-    D: Point                  -> (17.500, 72.000)
-    D: Point                  -> (18.500, 96.000)
-    D: Point                  -> ( 7.500, 50.000)
-    Time M    = M * M    :  8.067742 nS
-    Time VD[] = M * VS[] :  1.485109 nS
-    Time VS[] = M * VS[] :  1.606882 nS
-    Time VS[] = M * VS[] :  3.190681 nS
-
-    <double>
-    Initial value
-        |   1.000   0.000   0.000 |
-        |   0.000   1.000   0.000 |
-        |   0.000   0.000   1.000 |
-    After operations
-        |   0.500   0.000   5.000 |
-        |   0.000   2.000  40.000 |
-        |   0.000   0.000   1.000 |
-    A: Point ( 8.000,  8.000) -> ( 9.000, 56.000)
-    B: Point (11.000, 12.000) -> (10.500, 64.000)
-    B: Point (13.000, 24.000) -> (11.500, 88.000)
-    B: Point (25.000, 16.000) -> (17.500, 72.000)
-    B: Point (27.000, 28.000) -> (18.500, 96.000)
-    B: Point ( 5.000,  5.000) -> ( 7.500, 50.000)
-    C: Point                  -> (10.500, 64.000)
-    C: Point                  -> (11.500, 88.000)
-    C: Point                  -> (17.500, 72.000)
-    C: Point                  -> (18.500, 96.000)
-    C: Point                  -> ( 7.500, 50.000)
-    D: Point                  -> (10.500, 64.000)
-    D: Point                  -> (11.500, 88.000)
-    D: Point                  -> (17.500, 72.000)
-    D: Point                  -> (18.500, 96.000)
-    D: Point                  -> ( 7.500, 50.000)
-    Time M    = M * M    : 10.604620 nS
-    Time VD[] = M * VS[] :  2.531901 nS
-    Time VS[] = M * VS[] :  2.352700 nS
-    Time VS[] = M * VS[] :  2.195403 nS
 
     -----------------------------------------------
     With Partial AVX and FMA (i5-4460; 64-Bit Mode)
     -----------------------------------------------
-    <float>
-    Initial value
-        |   1.000   0.000   0.000 |
-        |   0.000   1.000   0.000 |
-        |   0.000   0.000   1.000 |
-    After operations
-        |   0.500   0.000   5.000 |
-        |   0.000   2.000  40.000 |
-        |   0.000   0.000   1.000 |
-    A: Point ( 8.000,  8.000) -> ( 9.000, 56.000)
-    B: Point (11.000, 12.000) -> (10.500, 64.000)
-    B: Point (13.000, 24.000) -> (11.500, 88.000)
-    B: Point (25.000, 16.000) -> (17.500, 72.000)
-    B: Point (27.000, 28.000) -> (18.500, 96.000)
-    B: Point ( 5.000,  5.000) -> ( 7.500, 50.000)
-    C: Point                  -> (10.500, 64.000)
-    C: Point                  -> (11.500, 88.000)
-    C: Point                  -> (17.500, 72.000)
-    C: Point                  -> (18.500, 96.000)
-    C: Point                  -> ( 7.500, 50.000)
-    D: Point                  -> (10.500, 64.000)
-    D: Point                  -> (11.500, 88.000)
-    D: Point                  -> (17.500, 72.000)
-    D: Point                  -> (18.500, 96.000)
-    D: Point                  -> ( 7.500, 50.000)
-    Time M    = M * M    :  6.213501 nS
-    Time VD[] = M * VS[] :  0.855759 nS
-    Time VS[] = M * VS[] :  0.845954 nS
-    Time VS[] = M * VS[] :  2.729684 nS
-
-    <double>
-    Initial value
-        |   1.000   0.000   0.000 |
-        |   0.000   1.000   0.000 |
-        |   0.000   0.000   1.000 |
-    After operations
-        |   0.500   0.000   5.000 |
-        |   0.000   2.000  40.000 |
-        |   0.000   0.000   1.000 |
-    A: Point ( 8.000,  8.000) -> ( 9.000, 56.000)
-    B: Point (11.000, 12.000) -> (10.500, 64.000)
-    B: Point (13.000, 24.000) -> (11.500, 88.000)
-    B: Point (25.000, 16.000) -> (17.500, 72.000)
-    B: Point (27.000, 28.000) -> (18.500, 96.000)
-    B: Point ( 5.000,  5.000) -> ( 7.500, 50.000)
-    C: Point                  -> (10.500, 64.000)
-    C: Point                  -> (11.500, 88.000)
-    C: Point                  -> (17.500, 72.000)
-    C: Point                  -> (18.500, 96.000)
-    C: Point                  -> ( 7.500, 50.000)
-    D: Point                  -> (10.500, 64.000)
-    D: Point                  -> (11.500, 88.000)
-    D: Point                  -> (17.500, 72.000)
-    D: Point                  -> (18.500, 96.000)
-    D: Point                  -> ( 7.500, 50.000)
-    Time M    = M * M    :  6.506652 nS
-    Time VD[] = M * VS[] :  1.273900 nS
-    Time VS[] = M * VS[] :  1.294717 nS
-    Time VS[] = M * VS[] :  1.249239 nS
     */
 
     /*
     ---------------------------------------------------------
     Plain Arm (v7l; A53; BCM2709; RaspberryPi 3; 32-bit Mode)
     ---------------------------------------------------------
-    <float>
-    Initial value
-        |   1.000   0.000   0.000 |
-        |   0.000   1.000   0.000 |
-        |   0.000   0.000   1.000 |
-    After operations
-        |   0.500   0.000   5.000 |
-        |   0.000   2.000  40.000 |
-        |   0.000   0.000   1.000 |
-    A: Point ( 8.000,  8.000) -> ( 9.000, 56.000)
-    B: Point (11.000, 12.000) -> (10.500, 64.000)
-    B: Point (13.000, 24.000) -> (11.500, 88.000)
-    B: Point (25.000, 16.000) -> (17.500, 72.000)
-    B: Point (27.000, 28.000) -> (18.500, 96.000)
-    B: Point ( 5.000,  5.000) -> ( 7.500, 50.000)
-    C: Point                  -> (10.500, 64.000)
-    C: Point                  -> (11.500, 88.000)
-    C: Point                  -> (17.500, 72.000)
-    C: Point                  -> (18.500, 96.000)
-    C: Point                  -> ( 7.500, 50.000)
-    D: Point                  -> (10.500, 64.000)
-    D: Point                  -> (11.500, 88.000)
-    D: Point                  -> (17.500, 72.000)
-    D: Point                  -> (18.500, 96.000)
-    D: Point                  -> ( 7.500, 50.000)
-    Time M    = M * M    : 38.228989 nS
-    Time VD[] = M * VS[] : 18.807411 nS
-    Time VS[] = M * VS[] : 35.268545 nS
-    Time VS[] = M * VS[] : 40.596724 nS
-
-    <double>
-    Initial value
-        |   1.000   0.000   0.000 |
-        |   0.000   1.000   0.000 |
-        |   0.000   0.000   1.000 |
-    After operations
-        |   0.500   0.000   5.000 |
-        |   0.000   2.000  40.000 |
-        |   0.000   0.000   1.000 |
-    A: Point ( 8.000,  8.000) -> ( 9.000, 56.000)
-    B: Point (11.000, 12.000) -> (10.500, 64.000)
-    B: Point (13.000, 24.000) -> (11.500, 88.000)
-    B: Point (25.000, 16.000) -> (17.500, 72.000)
-    B: Point (27.000, 28.000) -> (18.500, 96.000)
-    B: Point ( 5.000,  5.000) -> ( 7.500, 50.000)
-    C: Point                  -> (10.500, 64.000)
-    C: Point                  -> (11.500, 88.000)
-    C: Point                  -> (17.500, 72.000)
-    C: Point                  -> (18.500, 96.000)
-    C: Point                  -> ( 7.500, 50.000)
-    D: Point                  -> (10.500, 64.000)
-    D: Point                  -> (11.500, 88.000)
-    D: Point                  -> (17.500, 72.000)
-    D: Point                  -> (18.500, 96.000)
-    D: Point                  -> ( 7.500, 50.000)
-    Time M    = M * M    : 53.617001 nS
-    Time VD[] = M * VS[] : 19.263744 nS
-    Time VS[] = M * VS[] : 17.228127 nS
-    Time VS[] = M * VS[] : 17.165661 nS
 
     -----------------------------------------------------------------
     With Partial NEON (v7l; A53; BCM2709; RaspberryPi 3; 32-bit Mode)
     -----------------------------------------------------------------
-    <float>
-    Initial value
-        |   1.000   0.000   0.000 |
-        |   0.000   1.000   0.000 |
-        |   0.000   0.000   1.000 |
-    After operations
-        |   0.500   0.000   5.000 |
-        |   0.000   2.000  40.000 |
-        |   0.000   0.000   1.000 |
-    A: Point ( 8.000,  8.000) -> ( 9.000, 56.000)
-    B: Point (11.000, 12.000) -> (10.500, 64.000)
-    B: Point (13.000, 24.000) -> (11.500, 88.000)
-    B: Point (25.000, 16.000) -> (17.500, 72.000)
-    B: Point (27.000, 28.000) -> (18.500, 96.000)
-    B: Point ( 5.000,  5.000) -> ( 7.500, 50.000)
-    C: Point                  -> (10.500, 64.000)
-    C: Point                  -> (11.500, 88.000)
-    C: Point                  -> (17.500, 72.000)
-    C: Point                  -> (18.500, 96.000)
-    C: Point                  -> ( 7.500, 50.000)
-    D: Point                  -> (10.500, 64.000)
-    D: Point                  -> (11.500, 88.000)
-    D: Point                  -> (17.500, 72.000)
-    D: Point                  -> (18.500, 96.000)
-    D: Point                  -> ( 7.500, 50.000)
-    Time M    = M * M    : 43.767929 nS
-    Time VD[] = M * VS[] : 17.159700 nS
-    Time VS[] = M * VS[] : 16.253233 nS
-    Time VS[] = M * VS[] : 31.932831 nS
-
-    <double>
-    Initial value
-        |   1.000   0.000   0.000 |
-        |   0.000   1.000   0.000 |
-        |   0.000   0.000   1.000 |
-    After operations
-        |   0.500   0.000   5.000 |
-        |   0.000   2.000  40.000 |
-        |   0.000   0.000   1.000 |
-    A: Point ( 8.000,  8.000) -> ( 9.000, 56.000)
-    B: Point (11.000, 12.000) -> (10.500, 64.000)
-    B: Point (13.000, 24.000) -> (11.500, 88.000)
-    B: Point (25.000, 16.000) -> (17.500, 72.000)
-    B: Point (27.000, 28.000) -> (18.500, 96.000)
-    B: Point ( 5.000,  5.000) -> ( 7.500, 50.000)
-    C: Point                  -> (10.500, 64.000)
-    C: Point                  -> (11.500, 88.000)
-    C: Point                  -> (17.500, 72.000)
-    C: Point                  -> (18.500, 96.000)
-    C: Point                  -> ( 7.500, 50.000)
-    D: Point                  -> (10.500, 64.000)
-    D: Point                  -> (11.500, 88.000)
-    D: Point                  -> (17.500, 72.000)
-    D: Point                  -> (18.500, 96.000)
-    D: Point                  -> ( 7.500, 50.000)
-    Time M    = M * M    : 43.594122 nS
-    Time VD[] = M * VS[] : 19.179821 nS
-    Time VS[] = M * VS[] : 17.204523 nS
-    Time VS[] = M * VS[] : 17.125607 nS
     */
 }

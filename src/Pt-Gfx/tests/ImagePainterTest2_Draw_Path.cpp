@@ -4,7 +4,7 @@ static void testDrawPath_drawRow(
     const Brush& brush1, const Brush& brush2
 )
 {
-    matrix2d.rotateAboutOrigin(15);
+    matrix2d.rotate(15);
     matrix2d.push();
     matrix2d.translate(60 + 110 * col, 60 + 110 * row);
     ip2->setPen(penThinSolid);
@@ -12,7 +12,7 @@ static void testDrawPath_drawRow(
     matrix2d.pop();
     ++col;
 
-    matrix2d.rotateAboutOrigin(15);
+    matrix2d.rotate(15);
     matrix2d.push();
     matrix2d.translate(60 + 110 * col, 60 + 110 * row);
     ip2->setPen(penThinDot);
@@ -20,7 +20,7 @@ static void testDrawPath_drawRow(
     matrix2d.pop();
     ++col;
 
-    matrix2d.rotateAboutOrigin(15);
+    matrix2d.rotate(15);
     matrix2d.push();
     matrix2d.translate(60 + 110 * col, 60 + 110 * row);
     ip2->setPen(penThickSolid);
@@ -28,7 +28,7 @@ static void testDrawPath_drawRow(
     matrix2d.pop();
     ++col;
 
-    matrix2d.rotateAboutOrigin(15);
+    matrix2d.rotate(15);
     matrix2d.push();
     matrix2d.translate(60 + 110 * col, 60 + 110 * row);
     ip2->setPen(penThickDot);
@@ -36,7 +36,7 @@ static void testDrawPath_drawRow(
     matrix2d.pop();
     ++col;
 
-    matrix2d.rotateAboutOrigin(15);
+    matrix2d.rotate(15);
     matrix2d.push();
     matrix2d.translate(60 + 110 * col, 60 + 110 * row);
     ip2->setBrush(brush1);
@@ -44,7 +44,7 @@ static void testDrawPath_drawRow(
     matrix2d.pop();
     ++col;
 
-    matrix2d.rotateAboutOrigin(15);
+    matrix2d.rotate(15);
     matrix2d.push();
     matrix2d.translate(60 + 110 * col, 60 + 110 * row);
     ip2->setBrush(brush2);
@@ -59,7 +59,7 @@ static void testDrawPath_drawCol(
     const Pen& penThinSolid, const Pen& penThickSolid
 )
 {
-    matrix2d.rotateAboutOrigin(15);
+    matrix2d.rotate(15);
     matrix2d.push();
     matrix2d.translate(60 + 120 * col, 60 + 120 * row);
     ip2->setPen(penThinSolid);
@@ -67,7 +67,7 @@ static void testDrawPath_drawCol(
     matrix2d.pop();
     ++col;
 
-    matrix2d.rotateAboutOrigin(15);
+    matrix2d.rotate(15);
     matrix2d.push();
     matrix2d.translate(60 + 120 * col, 60 + 120 * row);
     ip2->setPen(penThickSolid);
@@ -128,7 +128,7 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
 
     matrix2d.identity();
     matrix2d.translate(-50, -35);
-    matrix2d.scaleAboutOrigin(0.75f, 1.0f);
+    matrix2d.scale(0.75f, 1.0f);
 
     // Third row
     testDrawPath_drawRow(ip2, matrix2d, path2d, row, col, penThinSolid, penThinDot, penThickSolid, penThickDot, brush1, brush2);
@@ -164,7 +164,7 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
 
     matrix2d.identity();
     matrix2d.translate(-50, -25);
-    matrix2d.scaleAboutOrigin(0.75f, 1.0f);
+    matrix2d.scale(0.75f, 1.0f);
 
     row = 0;
     col = 6;
@@ -184,7 +184,7 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
 
     matrix2d.identity();
     matrix2d.translate(-50, -25);
-    matrix2d.scaleAboutOrigin(0.75f, 1.0f);
+    matrix2d.scale(0.75f, 1.0f);
 
     row = 1;
     col = 6;
@@ -209,8 +209,8 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     path2d.endPath      ();
 
     matrix2d.identity();
-    matrix2d.rotateAboutOrigin(-25);
-    matrix2d.scaleAboutOrigin(2.5, 2.5);
+    matrix2d.rotate(-25);
+    matrix2d.scale(2.5, 2.5);
 
 #define DRAW_CB(PEN)                                   \
     do {                                               \
@@ -244,7 +244,7 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
 
     matrix2d.identity();
     matrix2d.translate(-5.0, -2.5);
-    matrix2d.scaleAboutOrigin(25, 25);
+    matrix2d.scale(25, 25);
 
     matrix2d.push();
     matrix2d.translate(60 + 130 * col, 150 * row);
