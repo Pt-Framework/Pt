@@ -30,7 +30,7 @@
 #include <unistd.h>
 
 #include <Pt/Math.h>
-#include <Pt/Gfx/AffineMatrix2D.h>
+#include <Pt/Gfx/AffineMatrix.h>
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/ImagePainter2.h>
 #include <Pt/Gfx/PngReader.h>

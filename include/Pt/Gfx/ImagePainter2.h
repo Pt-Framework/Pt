@@ -33,7 +33,7 @@
 
 #include <Pt/Gfx/AntiAliasingMode.h>
 #include <Pt/Gfx/ArcMode.h>
-#include <Pt/Gfx/Path2D.h>
+#include <Pt/Gfx/Path.h>
 #include <Pt/Gfx/Painter.h>
 
 #include <Pt/System/Path.h>
@@ -108,7 +108,7 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         // NOTE: * If you enlarge (scale-up) the shape, you may need to increase the "smoothness" factor as needed
         //       * If the "smoothness" factor is too large, the anti-aliasing will become less effective
-        virtual void drawPath(const Path2D& path2d, const AffineMatrix2D& matrix2d, bool autoClose, Pt::uint8_t smoothness = 0);
+        virtual void drawPath(const Path& path2d, const AffineMatrix& matrix2d, bool autoClose, Pt::uint8_t smoothness = 0);
 
         virtual void fillRect(const RectF& rect);
 
@@ -124,7 +124,7 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         // NOTE: * If you enlarge (scale-up) the shape, you may need to increase the "smoothness" factor as needed
         //       * If the "smoothness" factor is too large, the anti-aliasing will become less effective
-        virtual void fillPath(const Path2D& path2d, const AffineMatrix2D& matrix2d, Pt::uint8_t smoothness = 0);
+        virtual void fillPath(const Path& path2d, const AffineMatrix& matrix2d, Pt::uint8_t smoothness = 0);
 
     public:
         // Just to make the API match the interface defined by the Pt::GfxPainter class

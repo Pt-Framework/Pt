@@ -371,7 +371,7 @@ static void benchMathFunctions()
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-static void dumpMatrix(const BasicAffineMatrix2D<T>& mat)
+static void dumpMatrix(const BasicAffineMatrix<T>& mat)
 {
     T r[3][3];
     mat.getRaw(r);
@@ -405,15 +405,15 @@ static void benchMatrixOps()
     }
 
     // Correctness check
-    BasicAffineMatrix2D<T> mat;
+    BasicAffineMatrix<T> mat;
 
     printf("Initial value\n");
-    dumpMatrix<T>(const_cast<const BasicAffineMatrix2D<T>&>(mat));
+    dumpMatrix<T>(const_cast<const BasicAffineMatrix<T>&>(mat));
 
     printf("After operations\n");
     mat.translate(10.0f, 20.0f);
     mat.scale    ( 0.5f,  2.0f);
-    dumpMatrix<T>(const_cast<const BasicAffineMatrix2D<T>&>(mat));
+    dumpMatrix<T>(const_cast<const BasicAffineMatrix<T>&>(mat));
 
     volatile T x = 8.0f, y = 8.0f;
              T xx, yy;

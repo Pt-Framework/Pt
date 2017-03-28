@@ -27,8 +27,8 @@
   MA 02110-1301 USA
 */
 
-#ifndef PT_GFX_PATH2D_H
-#define PT_GFX_PATH2D_H
+#ifndef PT_GFX_PATH_H
+#define PT_GFX_PATH_H
 
 #include <stdexcept>
 #include <string>
@@ -41,58 +41,58 @@ namespace Pt{
 namespace Gfx{
 
 
-/** @brief Indicates invalid/erroneous usage of the Path2D API.
+/** @brief Indicates invalid/erroneous usage of the Path API.
   * @ingroup Utilities
   */
-class PT_GFX_API Path2DError : public std::runtime_error {
+class PT_GFX_API PathError : public std::runtime_error {
     public:
         //! @brief Construct with error message.
-        explicit Path2DError(const std::string& msg)
+        explicit PathError(const std::string& msg)
         : std::runtime_error(msg)
         {}
 
         //! @brief Construct with error message.
-        explicit Path2DError(const char* msg)
+        explicit PathError(const char* msg)
         : std::runtime_error(msg)
         {}
 
         //! @brief Destructor.
-        inline ~Path2DError() throw()
+        inline ~PathError() throw()
         {}
 };
 
 
-/** @brief Indicates that the Path2D API has been used in an invalid context.
+/** @brief Indicates that the Path API has been used in an invalid context.
   * @ingroup Utilities
   */
-class PT_GFX_API Path2DInvalidContext : public Path2DError {
+class PT_GFX_API PathInvalidContext : public PathError {
     public:
         //! @brief Construct with error message prefix.
-        explicit Path2DInvalidContext(const std::string& msg)
-        : Path2DError(msg + ": cannot call this function in the current context")
+        explicit PathInvalidContext(const std::string& msg)
+        : PathError(msg + ": cannot call this function in the current context")
         {}
 
         //! @brief Construct with error message prefix.
-        explicit Path2DInvalidContext(const char* msg)
-        : Path2DError(std::string(msg) + ": cannot call this function in the current context")
+        explicit PathInvalidContext(const char* msg)
+        : PathError(std::string(msg) + ": cannot call this function in the current context")
         {}
 
         //! @brief Destructor.
-        inline ~Path2DInvalidContext() throw()
+        inline ~PathInvalidContext() throw()
         {}
 };
 
 
 /** @brief 2D path builder.
   */
-class PT_GFX_API Path2D {
+class PT_GFX_API Path {
 
     // ### TODO: Add support for N-th degree spline curve! ###
 
     public:
-        Path2D();
+        Path();
 
-        ~Path2D();
+        ~Path();
 
         //
         // Path management - call them multiple times to create multi-path (e.g. path with holes)

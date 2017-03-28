@@ -27,8 +27,8 @@
   MA 02110-1301 USA
 */
 
-#ifndef PT_GFX_AFFINEMATRIX2D_H
-#define PT_GFX_AFFINEMATRIX2D_H
+#ifndef PT_GFX_AFFINEMATRIX_H
+#define PT_GFX_AFFINEMATRIX_H
 
 #include <cstring>
 #include <vector>
@@ -100,15 +100,15 @@ struct BasicMatrixData {
 #endif
 
 
-/** @brief 2D affine matrix for 2D path transformation.
+/** @brief Affine matrix for 2D path transformation.
   */
 template <typename T>
-class PT_GFX_API BasicAffineMatrix2D {
+class PT_GFX_API BasicAffineMatrix {
     public:
-        inline BasicAffineMatrix2D();
-        inline BasicAffineMatrix2D(const BasicAffineMatrix2D& m);
+        inline BasicAffineMatrix();
+        inline BasicAffineMatrix(const BasicAffineMatrix& m);
 
-        inline ~BasicAffineMatrix2D();
+        inline ~BasicAffineMatrix();
 
         inline void clear();
 
@@ -130,11 +130,11 @@ class PT_GFX_API BasicAffineMatrix2D {
         inline void getRaw(T m[3][3]) const;
         inline void setRaw(const T m[3][3]);
 
-        inline const BasicAffineMatrix2D& operator=(const BasicAffineMatrix2D& m);
-        inline const BasicAffineMatrix2D& operator*(const BasicAffineMatrix2D& m);
+        inline const BasicAffineMatrix& operator=(const BasicAffineMatrix& m);
+        inline const BasicAffineMatrix& operator*(const BasicAffineMatrix& m);
 
-        inline bool operator==(const BasicAffineMatrix2D& m) const;
-        inline bool operator!=(const BasicAffineMatrix2D& m) const;
+        inline bool operator==(const BasicAffineMatrix& m) const;
+        inline bool operator!=(const BasicAffineMatrix& m) const;
 
         inline void push();
         inline bool pop();
@@ -181,7 +181,7 @@ class PT_GFX_API BasicAffineMatrix2D {
 // ======================================================================================
 
 template <typename T>
-void BasicAffineMatrix2D<T>::updateMatrix(const MatrixData& n, bool replaceInsteadOfCombine)
+void BasicAffineMatrix<T>::updateMatrix(const MatrixData& n, bool replaceInsteadOfCombine)
 {
     // Check if we need to simply replace the matrix
     if(_isIdentity || replaceInsteadOfCombine) {
@@ -216,7 +216,7 @@ void BasicAffineMatrix2D<T>::updateMatrix(const MatrixData& n, bool replaceInste
 #if defined(PT_GFX_USE_AVX1)
 
 template <>
-void BasicAffineMatrix2D<float>::updateMatrix(const MatrixData& n, bool replaceInsteadOfCombine)
+void BasicAffineMatrix<float>::updateMatrix(const MatrixData& n, bool replaceInsteadOfCombine)
 {
     // Check if we need to simply replace the matrix
     if(_isIdentity || replaceInsteadOfCombine) {
@@ -275,7 +275,7 @@ void BasicAffineMatrix2D<float>::updateMatrix(const MatrixData& n, bool replaceI
 #if defined(PT_GFX_USE_AVX1)
 
 template <>
-void BasicAffineMatrix2D<double>::updateMatrix(const MatrixData& n, bool replaceInsteadOfCombine)
+void BasicAffineMatrix<double>::updateMatrix(const MatrixData& n, bool replaceInsteadOfCombine)
 {
     // Check if we need to simply replace the matrix
     if(_isIdentity || replaceInsteadOfCombine) {
@@ -334,7 +334,7 @@ void BasicAffineMatrix2D<double>::updateMatrix(const MatrixData& n, bool replace
 // ======================================================================================
 
 template <typename T>
-BasicAffineMatrix2D<T>::BasicAffineMatrix2D()
+BasicAffineMatrix<T>::BasicAffineMatrix()
 {
     identity();
 
@@ -345,15 +345,15 @@ BasicAffineMatrix2D<T>::BasicAffineMatrix2D()
 }
 
 template <typename T>
-BasicAffineMatrix2D<T>::BasicAffineMatrix2D(const BasicAffineMatrix2D<T>& m)
+BasicAffineMatrix<T>::BasicAffineMatrix(const BasicAffineMatrix<T>& m)
 { *this = m; }
 
 template <typename T>
-BasicAffineMatrix2D<T>::~BasicAffineMatrix2D()
+BasicAffineMatrix<T>::~BasicAffineMatrix()
 {}
 
 template <typename T>
-void BasicAffineMatrix2D<T>::clear()
+void BasicAffineMatrix<T>::clear()
 {
     identity();
 
@@ -361,7 +361,7 @@ void BasicAffineMatrix2D<T>::clear()
 }
 
 template <typename T>
-void BasicAffineMatrix2D<T>::identity()
+void BasicAffineMatrix<T>::identity()
 {
     _mdata.v[0][0] = 1; _mdata.v[0][1] = 0; _mdata.v[0][2] = 0;
     _mdata.v[1][0] = 0; _mdata.v[1][1] = 1; _mdata.v[1][2] = 0;
@@ -371,7 +371,7 @@ void BasicAffineMatrix2D<T>::identity()
 }
 
 template <typename T>
-void BasicAffineMatrix2D<T>::translate(T x, T y, bool replaceInsteadOfCombine)
+void BasicAffineMatrix<T>::translate(T x, T y, bool replaceInsteadOfCombine)
 {
     if(x == 0 && y == 0) return;
 
@@ -386,7 +386,7 @@ void BasicAffineMatrix2D<T>::translate(T x, T y, bool replaceInsteadOfCombine)
 }
 
 template <typename T>
-void BasicAffineMatrix2D<T>::scale(T x, T y, bool replaceInsteadOfCombine)
+void BasicAffineMatrix<T>::scale(T x, T y, bool replaceInsteadOfCombine)
 {
     if(x == 1 && y == 1) return;
 
@@ -401,7 +401,7 @@ void BasicAffineMatrix2D<T>::scale(T x, T y, bool replaceInsteadOfCombine)
 }
 
 template <typename T>
-void BasicAffineMatrix2D<T>::rotate(T deg, bool replaceInsteadOfCombine)
+void BasicAffineMatrix<T>::rotate(T deg, bool replaceInsteadOfCombine)
 {
     if(deg == 0) return;
 
@@ -420,7 +420,7 @@ void BasicAffineMatrix2D<T>::rotate(T deg, bool replaceInsteadOfCombine)
 }
 
 template <typename T>
-void BasicAffineMatrix2D<T>::shearX(T deg, bool replaceInsteadOfCombine)
+void BasicAffineMatrix<T>::shearX(T deg, bool replaceInsteadOfCombine)
 {
     if(deg == 0) return;
 
@@ -438,7 +438,7 @@ void BasicAffineMatrix2D<T>::shearX(T deg, bool replaceInsteadOfCombine)
 }
 
 template <typename T>
-void BasicAffineMatrix2D<T>::shearY(T deg, bool replaceInsteadOfCombine)
+void BasicAffineMatrix<T>::shearY(T deg, bool replaceInsteadOfCombine)
 {
     if(deg == 0) return;
 
@@ -456,7 +456,7 @@ void BasicAffineMatrix2D<T>::shearY(T deg, bool replaceInsteadOfCombine)
 }
 
 template <typename T>
-void BasicAffineMatrix2D<T>::reflectXY(bool replaceInsteadOfCombine)
+void BasicAffineMatrix<T>::reflectXY(bool replaceInsteadOfCombine)
 {
     MatrixData n;
 
@@ -469,7 +469,7 @@ void BasicAffineMatrix2D<T>::reflectXY(bool replaceInsteadOfCombine)
 }
 
 template <typename T>
-void BasicAffineMatrix2D<T>::reflectX(bool replaceInsteadOfCombine)
+void BasicAffineMatrix<T>::reflectX(bool replaceInsteadOfCombine)
 {
     MatrixData n;
 
@@ -482,7 +482,7 @@ void BasicAffineMatrix2D<T>::reflectX(bool replaceInsteadOfCombine)
 }
 
 template <typename T>
-void BasicAffineMatrix2D<T>::reflectY(bool replaceInsteadOfCombine)
+void BasicAffineMatrix<T>::reflectY(bool replaceInsteadOfCombine)
 {
     MatrixData n;
 
@@ -495,7 +495,7 @@ void BasicAffineMatrix2D<T>::reflectY(bool replaceInsteadOfCombine)
 }
 
 template <typename T>
-void BasicAffineMatrix2D<T>::getRaw(T m[3][3]) const
+void BasicAffineMatrix<T>::getRaw(T m[3][3]) const
 {
     m[0][0] = _mdata.v[0][0]; m[0][1] = _mdata.v[0][1]; m[0][2] = _mdata.v[0][2];
     m[1][0] = _mdata.v[1][0]; m[1][1] = _mdata.v[1][1]; m[1][2] = _mdata.v[1][2];
@@ -503,7 +503,7 @@ void BasicAffineMatrix2D<T>::getRaw(T m[3][3]) const
 }
 
 template <typename T>
-void BasicAffineMatrix2D<T>::setRaw(const T m[3][3])
+void BasicAffineMatrix<T>::setRaw(const T m[3][3])
 {
     // Check if the given raw matrix is an identity matrix
     if( m[0][0] == 1 && m[0][1] == 0 && m[0][2] == 0 &&
@@ -521,7 +521,7 @@ void BasicAffineMatrix2D<T>::setRaw(const T m[3][3])
 }
 
 template <typename T>
-const BasicAffineMatrix2D<T>& BasicAffineMatrix2D<T>::operator=(const BasicAffineMatrix2D<T>& m)
+const BasicAffineMatrix<T>& BasicAffineMatrix<T>::operator=(const BasicAffineMatrix<T>& m)
 {
     this->_mdata      = m._mdata;
     this->_isIdentity = m._isIdentity;
@@ -532,7 +532,7 @@ const BasicAffineMatrix2D<T>& BasicAffineMatrix2D<T>::operator=(const BasicAffin
 }
 
 template <typename T>
-const BasicAffineMatrix2D<T>& BasicAffineMatrix2D<T>::operator*(const BasicAffineMatrix2D<T>& m)
+const BasicAffineMatrix<T>& BasicAffineMatrix<T>::operator*(const BasicAffineMatrix<T>& m)
 {
     // Check if the given matrix is an identity matrix
     if(m._isIdentity) return *this;
@@ -545,19 +545,19 @@ const BasicAffineMatrix2D<T>& BasicAffineMatrix2D<T>::operator*(const BasicAffin
 }
 
 template <typename T>
-bool BasicAffineMatrix2D<T>::operator==(const BasicAffineMatrix2D<T>& m) const
+bool BasicAffineMatrix<T>::operator==(const BasicAffineMatrix<T>& m) const
 { return memcmp(&_mdata, &m._mdata, sizeof(_mdata)) == 0; }
 
 template <typename T>
-bool BasicAffineMatrix2D<T>::operator!=(const BasicAffineMatrix2D<T>& m) const
+bool BasicAffineMatrix<T>::operator!=(const BasicAffineMatrix<T>& m) const
 { return memcmp(&_mdata, &m._mdata, sizeof(_mdata)) != 0; }
 
 template <typename T>
-void BasicAffineMatrix2D<T>::push()
+void BasicAffineMatrix<T>::push()
 { _stack.push_back( StackData(_mdata, _isIdentity) ); }
 
 template <typename T>
-bool BasicAffineMatrix2D<T>::pop()
+bool BasicAffineMatrix<T>::pop()
 {
     if(_stack.empty()) return false;
 
@@ -570,7 +570,7 @@ bool BasicAffineMatrix2D<T>::pop()
 }
 
 template <typename T>
-void BasicAffineMatrix2D<T>::transformPoint(T& dx, T& dy, T sx, T sy) const
+void BasicAffineMatrix<T>::transformPoint(T& dx, T& dy, T sx, T sy) const
 {
     if( _isIdentity || (sx > Painter::MaximumCoordinateF && sy > Painter::MaximumCoordinateF) ) {
         dx = sx;
@@ -586,11 +586,11 @@ void BasicAffineMatrix2D<T>::transformPoint(T& dx, T& dy, T sx, T sy) const
 }
 
 template <typename T>
-void BasicAffineMatrix2D<T>::transformPoint(T& x, T &y) const
+void BasicAffineMatrix<T>::transformPoint(T& x, T &y) const
 { transformPoint(x, y, x, y); }
 
 template <typename T>
-void BasicAffineMatrix2D<T>::transformPoints(T* dxy, const T* sxy, size_t pointCount) const
+void BasicAffineMatrix<T>::transformPoints(T* dxy, const T* sxy, size_t pointCount) const
 {
     pointCount *= 2;
 
@@ -603,7 +603,7 @@ void BasicAffineMatrix2D<T>::transformPoints(T* dxy, const T* sxy, size_t pointC
 }
 
 template <typename T>
-void BasicAffineMatrix2D<T>::transformPoints(T* xy, size_t pointCount) const
+void BasicAffineMatrix<T>::transformPoints(T* xy, size_t pointCount) const
 {
     if(_isIdentity) return;
 
@@ -613,7 +613,7 @@ void BasicAffineMatrix2D<T>::transformPoints(T* xy, size_t pointCount) const
 }
 
 template <typename T>
-void BasicAffineMatrix2D<T>::transformPoint(PointF& dp, const PointF& sp) const
+void BasicAffineMatrix<T>::transformPoint(PointF& dp, const PointF& sp) const
 {
     if( _isIdentity || (sp.x() > Painter::MaximumCoordinateF && sp.y() > Painter::MaximumCoordinateF) ) {
         dp = sp;
@@ -629,11 +629,11 @@ void BasicAffineMatrix2D<T>::transformPoint(PointF& dp, const PointF& sp) const
 }
 
 template <typename T>
-void BasicAffineMatrix2D<T>::transformPoint(PointF& p) const
+void BasicAffineMatrix<T>::transformPoint(PointF& p) const
 { transformPoint(p, p); }
 
 template <typename T>
-void BasicAffineMatrix2D<T>::transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount) const
+void BasicAffineMatrix<T>::transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount) const
 {
     if(_isIdentity) {
         for(size_t i = 0; i < pointCount; ++i) dxy[i] = sxy[i];
@@ -644,7 +644,7 @@ void BasicAffineMatrix2D<T>::transformPoints(PointF* dxy, const PointF* sxy, siz
 }
 
 template <typename T>
-void BasicAffineMatrix2D<T>::transformPoints(PointF* xy, size_t pointCount) const
+void BasicAffineMatrix<T>::transformPoints(PointF* xy, size_t pointCount) const
 {
     if(_isIdentity) return;
 
@@ -656,7 +656,7 @@ void BasicAffineMatrix2D<T>::transformPoints(PointF* xy, size_t pointCount) cons
 // ======================================================================================
 
 template <>
-void BasicAffineMatrix2D<float>::rotate(float deg, bool replaceInsteadOfCombine)
+void BasicAffineMatrix<float>::rotate(float deg, bool replaceInsteadOfCombine)
 {
     if(deg == 0) return;
 
@@ -675,7 +675,7 @@ void BasicAffineMatrix2D<float>::rotate(float deg, bool replaceInsteadOfCombine)
 }
 
 template <>
-void BasicAffineMatrix2D<float>::shearX(float deg, bool replaceInsteadOfCombine)
+void BasicAffineMatrix<float>::shearX(float deg, bool replaceInsteadOfCombine)
 {
     if(deg == 0) return;
 
@@ -693,7 +693,7 @@ void BasicAffineMatrix2D<float>::shearX(float deg, bool replaceInsteadOfCombine)
 }
 
 template <>
-void BasicAffineMatrix2D<float>::shearY(float deg, bool replaceInsteadOfCombine)
+void BasicAffineMatrix<float>::shearY(float deg, bool replaceInsteadOfCombine)
 {
     if(deg == 0) return;
 
@@ -713,7 +713,7 @@ void BasicAffineMatrix2D<float>::shearY(float deg, bool replaceInsteadOfCombine)
 #if defined(PT_GFX_USE_AVX1)
 
 template <>
-void BasicAffineMatrix2D<float>::transformPoints(float* dxy, const float* sxy, size_t pointCount) const
+void BasicAffineMatrix<float>::transformPoints(float* dxy, const float* sxy, size_t pointCount) const
 {
     pointCount *= 2;
 
@@ -769,7 +769,7 @@ void BasicAffineMatrix2D<float>::transformPoints(float* dxy, const float* sxy, s
 #elif defined(PT_GFX_USE_NEON)
 
 template <>
-void BasicAffineMatrix2D<float>::transformPoints(float* dxy, const float* sxy, size_t pointCount) const
+void BasicAffineMatrix<float>::transformPoints(float* dxy, const float* sxy, size_t pointCount) const
 {
     pointCount *= 2;
 
@@ -817,11 +817,11 @@ void BasicAffineMatrix2D<float>::transformPoints(float* dxy, const float* sxy, s
 #endif
 
 template <>
-void BasicAffineMatrix2D<float>::transformPoints(float* xy, size_t pointCount) const
+void BasicAffineMatrix<float>::transformPoints(float* xy, size_t pointCount) const
 { if(!_isIdentity) transformPoints(xy, xy, pointCount); }
 
 template <>
-void BasicAffineMatrix2D<float>::transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount) const
+void BasicAffineMatrix<float>::transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount) const
 {
     if(_isIdentity) {
         for(size_t i = 0; i < pointCount; ++i) dxy[i] = sxy[i];
@@ -847,14 +847,14 @@ void BasicAffineMatrix2D<float>::transformPoints(PointF* dxy, const PointF* sxy,
 }
 
 template <>
-void BasicAffineMatrix2D<float>::transformPoints(PointF* xy, size_t pointCount) const
+void BasicAffineMatrix<float>::transformPoints(PointF* xy, size_t pointCount) const
 { if(!_isIdentity) transformPoints(xy, xy, pointCount); }
 
 
 //
 // For convenience
 //
-typedef BasicAffineMatrix2D<float> AffineMatrix2D;
+typedef BasicAffineMatrix<float> AffineMatrix;
 
 
 } // namespace

@@ -29,7 +29,7 @@
 
 #include <Pt/SourceInfo.h>
 
-#include <Pt/Gfx/Path2D.h>
+#include <Pt/Gfx/Path.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Math.h>
 
@@ -152,10 +152,10 @@ static inline void generateArcPoints(std::vector<PointF>& dst, double x1, double
 
 
 // ======================================================================================
-// ===== Path2D::PathData Implementation ================================================
+// ===== Path::PathData Implementation ================================================
 // ======================================================================================
 
-struct Path2D::PathData {
+struct Path::PathData {
     // Instruction type
     enum InsType {
         IT_Begin, IT_End,
@@ -254,41 +254,41 @@ struct Path2D::PathData {
 // ===== Public Member Functions ========================================================
 // ======================================================================================
 
-Path2D::Path2D()
+Path::Path()
 : _pathData( new PathData() )
 {}
 
-Path2D::~Path2D()
+Path::~Path()
 { delete _pathData; }
 
-void Path2D::clear()
+void Path::clear()
 { _pathData->clear(); }
 
-void Path2D::beginPath()
+void Path::beginPath()
 {
     // Check if this function call is valid in the current context
     if( !_pathData->empty() && !_pathData->lastInstructionMatch(PathData::IT_End) )
-        throw Path2DInvalidContext(PT_SOURCEINFO_STR);
+        throw PathInvalidContext(PT_SOURCEINFO_STR);
 
     // Store the instruction
     _pathData->add(PathData::IT_Begin);
 }
 
-void Path2D::endPath()
+void Path::endPath()
 {
     // Check if this function call is valid in the current context
     if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_Begin) || _pathData->lastInstructionMatch(PathData::IT_End) )
-        throw Path2DInvalidContext(PT_SOURCEINFO_STR);
+        throw PathInvalidContext(PT_SOURCEINFO_STR);
 
     // Store the instruction
     _pathData->add(PathData::IT_End);
 }
 
-void Path2D::moveTo(double x, double y)
+void Path::moveTo(double x, double y)
 {
     // Check if this function call is valid in the current context
     if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) || _pathData->lastInstructionMatch(PathData::IT_MoveTo) )
-        throw Path2DInvalidContext(PT_SOURCEINFO_STR);
+        throw PathInvalidContext(PT_SOURCEINFO_STR);
 
     // Store the instruction
     _pathData->add(PathData::IT_MoveTo, x, y);
@@ -298,11 +298,11 @@ void Path2D::moveTo(double x, double y)
     _pathData->curY = y;
 }
 
-void Path2D::lineTo(double x, double y)
+void Path::lineTo(double x, double y)
 {
     // Check if this function call is valid in the current context
     if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
-        throw Path2DInvalidContext(PT_SOURCEINFO_STR);
+        throw PathInvalidContext(PT_SOURCEINFO_STR);
 
     // Store the instruction
     _pathData->add(PathData::IT_LineTo, x, y);
@@ -312,11 +312,11 @@ void Path2D::lineTo(double x, double y)
     _pathData->curY = y;
 }
 
-void Path2D::arcTo(double x, double y, double r)
+void Path::arcTo(double x, double y, double r)
 {
     // Check if this function call is valid in the current context
     if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
-        throw Path2DInvalidContext(PT_SOURCEINFO_STR);
+        throw PathInvalidContext(PT_SOURCEINFO_STR);
 
     // Store the instruction
     _pathData->add(PathData::IT_ArcTo, x, y, r);
@@ -326,11 +326,11 @@ void Path2D::arcTo(double x, double y, double r)
     _pathData->curY = y;
 }
 
-void Path2D::quadraticBezierTo(double cx, double cy, double x, double y)
+void Path::quadraticBezierTo(double cx, double cy, double x, double y)
 {
     // Check if this function call is valid in the current context
     if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
-        throw Path2DInvalidContext(PT_SOURCEINFO_STR);
+        throw PathInvalidContext(PT_SOURCEINFO_STR);
 
     // Store the instruction
     _pathData->add(PathData::IT_QuadBezierTo, cx, cy, x, y);
@@ -340,11 +340,11 @@ void Path2D::quadraticBezierTo(double cx, double cy, double x, double y)
     _pathData->curY = y;
 }
 
-void Path2D::cubicBezierTo(double cx1, double cy1, double cx2, double cy2, double x, double y)
+void Path::cubicBezierTo(double cx1, double cy1, double cx2, double cy2, double x, double y)
 {
     // Check if this function call is valid in the current context
     if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
-        throw Path2DInvalidContext(PT_SOURCEINFO_STR);
+        throw PathInvalidContext(PT_SOURCEINFO_STR);
 
     // Store the instruction
     _pathData->add(PathData::IT_CubicBezierTo, cx1, cy1, cx2, cy2, x, y);
@@ -354,11 +354,11 @@ void Path2D::cubicBezierTo(double cx1, double cy1, double cx2, double cy2, doubl
     _pathData->curY = y;
 }
 
-void Path2D::relMoveTo(double x, double y)
+void Path::relMoveTo(double x, double y)
 {
     // Check if this function call is valid in the current context
     if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) || _pathData->lastInstructionMatch(PathData::IT_MoveTo) )
-        throw Path2DInvalidContext(PT_SOURCEINFO_STR);
+        throw PathInvalidContext(PT_SOURCEINFO_STR);
 
     // Store the instruction
     _pathData->add(PathData::IT_MoveTo, _pathData->curX + x, _pathData->curY + y);
@@ -368,11 +368,11 @@ void Path2D::relMoveTo(double x, double y)
     _pathData->curY += y;
 }
 
-void Path2D::relLineTo(double x, double y)
+void Path::relLineTo(double x, double y)
 {
     // Check if this function call is valid in the current context
     if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
-        throw Path2DInvalidContext(PT_SOURCEINFO_STR);
+        throw PathInvalidContext(PT_SOURCEINFO_STR);
 
     // Store the instruction
     _pathData->add(PathData::IT_LineTo, _pathData->curX + x, _pathData->curY + y);
@@ -382,11 +382,11 @@ void Path2D::relLineTo(double x, double y)
     _pathData->curY += y;
 }
 
-void Path2D::relArcTo(double x, double y, double r)
+void Path::relArcTo(double x, double y, double r)
 {
     // Check if this function call is valid in the current context
     if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
-        throw Path2DInvalidContext(PT_SOURCEINFO_STR);
+        throw PathInvalidContext(PT_SOURCEINFO_STR);
 
     // Store the instruction
     _pathData->add(PathData::IT_ArcTo, _pathData->curX + x, _pathData->curY + y, r);
@@ -396,11 +396,11 @@ void Path2D::relArcTo(double x, double y, double r)
     _pathData->curY += y;
 }
 
-void Path2D::relQuadraticBezierTo(double cx, double cy, double x, double y)
+void Path::relQuadraticBezierTo(double cx, double cy, double x, double y)
 {
     // Check if this function call is valid in the current context
     if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
-        throw Path2DInvalidContext(PT_SOURCEINFO_STR);
+        throw PathInvalidContext(PT_SOURCEINFO_STR);
 
     // Store the instruction
     _pathData->add(PathData::IT_QuadBezierTo, _pathData->curX + cx, _pathData->curY + cy, _pathData->curX + x, _pathData->curY + y);
@@ -410,11 +410,11 @@ void Path2D::relQuadraticBezierTo(double cx, double cy, double x, double y)
     _pathData->curY = y;
 }
 
-void Path2D::relCubicBezierTo(double cx1, double cy1, double cx2, double cy2, double x, double y)
+void Path::relCubicBezierTo(double cx1, double cy1, double cx2, double cy2, double x, double y)
 {
     // Check if this function call is valid in the current context
     if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
-        throw Path2DInvalidContext(PT_SOURCEINFO_STR);
+        throw PathInvalidContext(PT_SOURCEINFO_STR);
 
     // Store the instruction
     _pathData->add(PathData::IT_CubicBezierTo, _pathData->curX + cx1, _pathData->curY + cy1, _pathData->curX + cx2, _pathData->curY + cy2, _pathData->curX + x, _pathData->curY + y);
@@ -424,11 +424,11 @@ void Path2D::relCubicBezierTo(double cx1, double cy1, double cx2, double cy2, do
     _pathData->curY = y;
 }
 
-void Path2D::generatePoints(std::vector<PointF>& dst, Pt::uint8_t smoothness) const
+void Path::generatePoints(std::vector<PointF>& dst, Pt::uint8_t smoothness) const
 {
     // Check if this function call is valid in the current context
     if( _pathData->empty() || !_pathData->lastInstructionMatch(PathData::IT_End) )
-        throw Path2DInvalidContext(PT_SOURCEINFO_STR);
+        throw PathInvalidContext(PT_SOURCEINFO_STR);
 
     // For convenience
     typedef std::vector<PathData::Instruction>::const_iterator PDIIterator;
@@ -482,7 +482,7 @@ void Path2D::generatePoints(std::vector<PointF>& dst, Pt::uint8_t smoothness) co
                 break;
 
             default:
-                throw Path2DError("Invalid Path2D instruction type");
+                throw PathError("Invalid Path instruction type");
                 break;
         }
     }
