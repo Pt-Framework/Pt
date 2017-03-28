@@ -154,8 +154,8 @@ class Rasterizer2
         void strokeText(const Point& to, const Pt::String& text);
         void strokeOnePixelLine(const Point& a, const Point& b, DrawLineMask* maskInOut);
         void strokeOnePixelRect(const Point& tl, const Point& br);
-        void strokeOnePixelPolygon(const Point* points, size_t pointCount, bool autoClose);
-        void strokeOnePixelQuadraticPolybezier(const Point* points, size_t pointCount);
+        void strokeOnePixelPolygonOutline(const Point* points, size_t pointCount);
+        void strokeOnePixelQuadraticPolybezierOutline(const Point* points, size_t pointCount);
         void strokeOnePixelEllipseArc(const Point& topLeft, const Size& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
         void strokePolygon(const Point* points, size_t pointCount);
@@ -210,7 +210,7 @@ class Rasterizer2
 
         void rasterRectArea(const Point& tl, const Point& br);
 
-        void rasterOnePixelPolygonOutline(const Point* points, size_t pointCount, const Color& color, bool autoClose);
+        void rasterOnePixelPolygonOutline(const Point* points, size_t pointCount, const Color& color);
 
         void rasterPolygonAreaNoAA(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
         void rasterPolygonAreaFSAA2x2(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
@@ -276,7 +276,7 @@ class Rasterizer2
 
         // --- Polygon-related helper functions ---
         void getPolygonRectMinMax(const Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY) const;
-        void genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount) const;
+        void genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount, bool forPolygonOutline) const;
         void separateAndClipPolygons(Pt::int32_t& minX, Pt::int32_t& maxX, Pt::int32_t& minY, Pt::int32_t& maxY, std::vector<Point>& clippedPoints, std::vector<size_t>& clippedCounts, const Point* points, size_t pointCount) const;
 
         // Arc-related helper functions

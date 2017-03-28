@@ -49,6 +49,7 @@ class ClipShape {
         { return ( v >= clippingArea.top() && v <= clippingArea.bottom() ); }
 
         static bool clipLine(Pt::int32_t& x0, Pt::int32_t& y0, Pt::int32_t& x1, Pt::int32_t& y1, const Rect& clip);
+        static void clipPolyline(std::vector<Point>& pio, const Rect& clippingArea);
         static void clipPolygon(std::vector<Point>& pio, const Rect& clippingArea);
 
     private:

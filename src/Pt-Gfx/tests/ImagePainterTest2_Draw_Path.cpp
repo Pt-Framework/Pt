@@ -236,10 +236,10 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     // Create a new path
     path2d.clear    ();
     path2d.beginPath();
-    path2d.moveTo   (10.0, 2.0      ); // CCW
-    path2d.lineTo   ( 7.5, 2.0      );
-    path2d.arcTo    ( 2.5, 2.0, -5.0);
-    path2d.lineTo   ( 0.0, 2.0      );
+    path2d.moveTo   ( 0.0, 2.0     ); // CCW
+    path2d.lineTo   ( 2.5, 2.0     );
+    path2d.arcTo    ( 7.5, 2.0, 5.0);
+    path2d.lineTo   (10.0, 2.0     );
     path2d.endPath  ();
 
     matrix2d.identity();
@@ -249,6 +249,7 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     matrix2d.push();
     matrix2d.translate(60 + 130 * col, 150 * row);
     ip2->setPen( Color::fromRgb8(255, 255, 255, 175) );
+    //ip2->fillPath(path2d, matrix2d, 20);
     ip2->drawPath(path2d, matrix2d, false, 0);
     matrix2d.pop();
     ++row;
@@ -256,6 +257,7 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     matrix2d.push();
     matrix2d.translate(60 + 130 * col, 150 * row);
     ip2->setPen( Color::fromRgb8(255, 255, 255, 175) );
+    //ip2->fillPath(path2d, matrix2d, 20);
     ip2->drawPath(path2d, matrix2d, false, 20);
     matrix2d.pop();
 

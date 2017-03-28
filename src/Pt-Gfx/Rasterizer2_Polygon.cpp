@@ -39,7 +39,7 @@ namespace Gfx {
 // ===== Public Member Functions ========================================================
 // ======================================================================================
 
-void Rasterizer2::strokeOnePixelPolygon(const Point* points, size_t pointCount, bool autoClose)
+void Rasterizer2::strokeOnePixelPolygonOutline(const Point* points, size_t pointCount)
 {
     // Check if there are too few points
     if(pointCount < 2) return;
@@ -54,11 +54,11 @@ void Rasterizer2::strokeOnePixelPolygon(const Point* points, size_t pointCount, 
             const size_t curPC = i - startIndex;
             // Clip the coordinates
             std::vector<Point> clipped;
-            genClippedPolygonPoints(clipped, points + startIndex, curPC);
+            genClippedPolygonPoints(clipped, points + startIndex, curPC, true);
             // Increment the start index
             startIndex += curPC + 1;
             // Draw the polygon
-            rasterOnePixelPolygonOutline(clipped.data(), clipped.size(), _pen.color(), autoClose);
+            rasterOnePixelPolygonOutline(clipped.data(), clipped.size(), _pen.color());
         }
     }
 }
@@ -141,7 +141,7 @@ void Rasterizer2::strokePolygonSeparate(const Point* points, size_t pointCount)
             const size_t curPC = i - startIndex;
             // Clip the coordinates
             std::vector<Point> clipped;
-            genClippedPolygonPoints(clipped, points + startIndex, curPC);
+            genClippedPolygonPoints(clipped, points + startIndex, curPC, false);
             // Increment the start index
             startIndex += curPC + 1;
             // Calculate the minimum and maximum coordinate values
@@ -231,12 +231,15 @@ void Rasterizer2::getPolygonRectMinMax(const Point* points, size_t pointCount, P
     }
 }
 
-void Rasterizer2::genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount) const
+void Rasterizer2::genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount, bool forPolygonOutline) const
 {
     for(size_t i = 0; i < pointCount; ++i)
         dst.push_back( Point( src[i].x(), src[i].y() ) );
 
-    ClipShape::clipPolygon(dst, _currentClip);
+    if(forPolygonOutline)
+        ClipShape::clipPolyline(dst, _currentClip);
+    else
+        ClipShape::clipPolygon(dst, _currentClip);
 }
 
 void Rasterizer2::separateAndClipPolygons(Pt::int32_t& minX, Pt::int32_t& maxX, Pt::int32_t& minY, Pt::int32_t& maxY, std::vector<Point>& clippedPoints, std::vector<size_t>& clippedCounts, const Point* points, size_t pointCount) const
@@ -256,7 +259,7 @@ void Rasterizer2::separateAndClipPolygons(Pt::int32_t& minX, Pt::int32_t& maxX, 
             const size_t curPC = i - startIndex;
             // Clip the coordinates
             std::vector<Point> clipped;
-            genClippedPolygonPoints(clipped, points + startIndex, curPC);
+            genClippedPolygonPoints(clipped, points + startIndex, curPC, false);
             // Increment the start index
             startIndex += curPC + 1;
             // Calculate the minimum and maximum coordinate values
@@ -274,7 +277,7 @@ void Rasterizer2::separateAndClipPolygons(Pt::int32_t& minX, Pt::int32_t& maxX, 
     }
 }
 
-void Rasterizer2::rasterOnePixelPolygonOutline(const Point* points, size_t pointCount, const Color& color, bool autoClose)
+void Rasterizer2::rasterOnePixelPolygonOutline(const Point* points, size_t pointCount, const Color& color)
 {
     // Mask
     DrawLineMask mask_zero = Rasterizer2::NullLineMask;
@@ -293,6 +296,7 @@ void Rasterizer2::rasterOnePixelPolygonOutline(const Point* points, size_t point
         if(!i) memcpy(&mask_zero, &mask_nnp1, sizeof(mask_zero));
     }
 
+    /*
     // From the last point to the first point
     if(!autoClose) return;
 
@@ -303,6 +307,7 @@ void Rasterizer2::rasterOnePixelPolygonOutline(const Point* points, size_t point
 
     if(solid) rasterOnePixelSolidLine    (points[pc1].x(), points[pc1].y(), points[0].x(), points[0].y(), color,              &mask_zero);
     else      rasterOnePixelPatternedLine(points[pc1].x(), points[pc1].y(), points[0].x(), points[0].y(), color, fpiCtrInOut, &mask_zero);
+    */
 }
 
 // Inspired by: Efficient Polygon Fill Algorithm With C Code Sample

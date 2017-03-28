@@ -38,7 +38,7 @@ namespace Gfx {
 // ===== Public Member Functions ========================================================
 // ======================================================================================
 
-void Rasterizer2::strokeOnePixelQuadraticPolybezier(const Point* points, size_t pointCount)
+void Rasterizer2::strokeOnePixelQuadraticPolybezierOutline(const Point* points, size_t pointCount)
 {
     // Check if there are too few points
     if(pointCount < 3) return;

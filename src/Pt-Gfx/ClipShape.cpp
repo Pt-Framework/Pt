@@ -130,6 +130,10 @@ Pt::int32_t ClipShape::csComputeOutcode(Pt::int32_t x, Pt::int32_t y, const Rect
 // ===== Clip Polygon ===================================================================
 // ======================================================================================
 
+void ClipShape::clipPolyline(std::vector<Point>& pio, const Rect& clippingArea)
+{
+}
+
 void ClipShape::clipPolygon(std::vector<Point>& pio, const Rect& clippingArea)
 {
     // If the clipping area is null or there is too few elements, simply clear the vector
@@ -169,7 +173,7 @@ void ClipShape::clipEdge(std::vector<Point>& out, const std::vector<Point>& in, 
     const size_t size1 = in.size() - 1;
 
     for(size_t i = 0; i <= size1; ++i) {
-        const Point& s       = in[i];
+        const Point& s       = in[i                         ];
         const Point& p       = in[(i == size1) ? 0 : (i + 1)];
         const bool   sInside = inside(s, edge0, cm);
         const bool   pInside = inside(p, edge0, cm);

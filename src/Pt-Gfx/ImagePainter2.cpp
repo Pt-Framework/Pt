@@ -865,8 +865,9 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount, boo
         // Copy the points
         std::vector<Point> points;
         convertPointTrunc(points, ps, pointCount);
+        if(autoClose) points.push_back( Point(ps[0].x(), ps[0].y()) );
         // Rasterize the polygon
-        _rasterizer->strokeOnePixelPolygon(points.data(), pointCount, autoClose);
+        _rasterizer->strokeOnePixelPolygonOutline(points.data(), points.size());
         return;
     }
 
@@ -900,7 +901,7 @@ void ImagePainter2::drawQuadraticPolybezier(const PointF* ps, const size_t point
         convertPointTrunc(points, ps, pointCount);
         if(autoClose) points.push_back( Point( (Pt::int32_t) ps[0].x(), (Pt::int32_t) ps[0].y() ) );
         // Rasterize the bezier
-        _rasterizer->strokeOnePixelQuadraticPolybezier(points.data(), points.size());
+        _rasterizer->strokeOnePixelQuadraticPolybezierOutline(points.data(), points.size());
         return;
     }
 
