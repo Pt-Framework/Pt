@@ -209,5 +209,5 @@ static size_t benchDrawPatternedThickLine(int loopCount, CompositionMode cm, Ant
 }
 
 template <typename PainterT>
-static size_t benchDrawThickBezier(int loopCount, Pen::Style style, CompositionMode cm, AntiAliasingMode antiAliasingMode)
-{ return benchDrawBezier<PainterT>(loopCount, style, cm, antiAliasingMode, 12); }
+static size_t benchDrawThickQuadBezier(int loopCount, Pen::Style style, CompositionMode cm, AntiAliasingMode antiAliasingMode)
+{ return benchDrawQuadBezier<PainterT>(loopCount, style, cm, antiAliasingMode, 12); }

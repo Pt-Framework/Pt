@@ -374,15 +374,15 @@ static void cairoBenchmark(CompositionMode cm)
     // Path
     if(BENCHMARK_RESULT_HTML || BENCHMARK_PATH) {
         time1 = cairoBenchPath(BENCHMARK_LOOP_COUNT, cm, true );
-        std::clog << "    Path                             @ Cairo         = " << std::setw(6) << time1 << std::endl;
+        std::clog << "    Path (cubic bezier)              @ Cairo         = " << std::setw(6) << time1 << std::endl;
         time2 = cairoBenchPath(BENCHMARK_LOOP_COUNT, cm, false);
-        std::clog << "    Path                             @ Cairo - No AA = " << std::setw(6) << time2
+        std::clog << "    Path (cubic bezier)              @ Cairo - No AA = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         time2 = benchDrawPathSimple(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
-        std::clog << "    Path NOAA                        @ ImagePainter2 = " << std::setw(6) << time2
+        std::clog << "    Path (cubic bezier) NOAA         @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         time2 = benchDrawPathSimple(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::Standard);
-        std::clog << "    Path XWAA                        @ ImagePainter2 = " << std::setw(6) << time2
+        std::clog << "    Path (cubic bezier) XWAA         @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }

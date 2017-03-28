@@ -128,42 +128,42 @@ static void doBenchmark(CompositionMode cm)
         std::clog << std::endl;
     }
 
-    // Solid bezier curve
+    // Solid quadratic bezier curve
     if(BENCHMARK_RESULT_HTML || BENCHMARK_SOLID_BEZIER) {
-        time1 = benchDrawBezier<ImagePainter2>(BENCHMARK_LOOP_COUNT, Pen::Solid, cm, AntiAliasingMode::None);
-        std::clog << "    Solid     bezier NOAA            @ ImagePainter2 = " << std::setw(6) << time1 << std::endl;
-        time2 = benchDrawBezier<ImagePainter2>(BENCHMARK_LOOP_COUNT, Pen::Solid, cm, AntiAliasingMode::Standard);
-        std::clog << "    Solid     bezier XWAA            @ ImagePainter2 = " << std::setw(6) << time2
+        time1 = benchDrawQuadBezier<ImagePainter2>(BENCHMARK_LOOP_COUNT, Pen::Solid, cm, AntiAliasingMode::None);
+        std::clog << "    Solid     q-bezier NOAA          @ ImagePainter2 = " << std::setw(6) << time1 << std::endl;
+        time2 = benchDrawQuadBezier<ImagePainter2>(BENCHMARK_LOOP_COUNT, Pen::Solid, cm, AntiAliasingMode::Standard);
+        std::clog << "    Solid     q-bezier XWAA          @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
 
-    // Patterned bezier curve
+    // Patterned quadratic bezier curve
     if(BENCHMARK_RESULT_HTML || BENCHMARK_PATTERNED_BEZIER) {
-        time1 = benchDrawBezier<ImagePainter2>(BENCHMARK_LOOP_COUNT, Pen::Dash, cm, AntiAliasingMode::None);
-        std::clog << "    Patterned bezier NOAA            @ ImagePainter2 = " << std::setw(6) << time1 << std::endl;
-        time2 = benchDrawBezier<ImagePainter2>(BENCHMARK_LOOP_COUNT, Pen::Dash, cm, AntiAliasingMode::Standard);
-        std::clog << "    Patterned bezier XWAA            @ ImagePainter2 = " << std::setw(6) << time2
+        time1 = benchDrawQuadBezier<ImagePainter2>(BENCHMARK_LOOP_COUNT, Pen::Dash, cm, AntiAliasingMode::None);
+        std::clog << "    Patterned q-bezier NOAA          @ ImagePainter2 = " << std::setw(6) << time1 << std::endl;
+        time2 = benchDrawQuadBezier<ImagePainter2>(BENCHMARK_LOOP_COUNT, Pen::Dash, cm, AntiAliasingMode::Standard);
+        std::clog << "    Patterned q-bezier XWAA          @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
 
-    // Solid thick bezier curve
+    // Solid thick quadratic bezier curve
     if(BENCHMARK_RESULT_HTML || BENCHMARK_SOLID_THICK_BEZIER) {
-        time1 = benchDrawThickBezier<ImagePainter2>(BENCHMARK_LOOP_COUNT, Pen::Solid, cm, AntiAliasingMode::None);
-        std::clog << "    Solid     thick bezier NOAA      @ ImagePainter2 = " << std::setw(6) << time1 << std::endl;
-        time2 = benchDrawThickBezier<ImagePainter2>(BENCHMARK_LOOP_COUNT, Pen::Solid, cm, AntiAliasingMode::Standard);
-        std::clog << "    Solid     thick bezier XWAA      @ ImagePainter2 = " << std::setw(6) << time2
+        time1 = benchDrawThickQuadBezier<ImagePainter2>(BENCHMARK_LOOP_COUNT, Pen::Solid, cm, AntiAliasingMode::None);
+        std::clog << "    Solid     thick q-bezier NOAA    @ ImagePainter2 = " << std::setw(6) << time1 << std::endl;
+        time2 = benchDrawThickQuadBezier<ImagePainter2>(BENCHMARK_LOOP_COUNT, Pen::Solid, cm, AntiAliasingMode::Standard);
+        std::clog << "    Solid     thick q-bezier XWAA    @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
 
-    // Patterned thick bezier curve
+    // Patterned thick quadratic bezier curve
     if(BENCHMARK_RESULT_HTML || BENCHMARK_PATTERNED_THICK_BEZIER) {
-        time1 = benchDrawThickBezier<ImagePainter2>(BENCHMARK_LOOP_COUNT, Pen::Dash, cm, AntiAliasingMode::None);
-        std::clog << "    Patterned thick bezier NOAA      @ ImagePainter2 = " << std::setw(6) << time1 << std::endl;
-        time2 = benchDrawThickBezier<ImagePainter2>(BENCHMARK_LOOP_COUNT, Pen::Dash, cm, AntiAliasingMode::Standard);
-        std::clog << "    Patterned thick bezier XWAA      @ ImagePainter2 = " << std::setw(6) << time2
+        time1 = benchDrawThickQuadBezier<ImagePainter2>(BENCHMARK_LOOP_COUNT, Pen::Dash, cm, AntiAliasingMode::None);
+        std::clog << "    Patterned thick q-bezier NOAA    @ ImagePainter2 = " << std::setw(6) << time1 << std::endl;
+        time2 = benchDrawThickQuadBezier<ImagePainter2>(BENCHMARK_LOOP_COUNT, Pen::Dash, cm, AntiAliasingMode::Standard);
+        std::clog << "    Patterned thick q-bezier XWAA    @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }

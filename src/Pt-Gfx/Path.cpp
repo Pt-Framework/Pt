@@ -44,6 +44,8 @@ namespace Gfx {
 
 static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double x3, double y3, Pt::uint8_t smoothness)
 {
+    // ### TODO: Make the curve smoother, if possible. ###
+
     // Check if the points actually specify a straight line
     const double dx32 = x3 - x2;
     const double dy32 = y3 - y2;
@@ -88,6 +90,8 @@ static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, doubl
 
 static inline void generateCubicBezierPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, Pt::uint8_t smoothness)
 {
+    // ### TODO: Make the curve smoother, if possible. ###
+
     // Calculate the approximate length of the curve
     const double dx43 = x4 - x3;
     const double dy43 = y4 - y3;

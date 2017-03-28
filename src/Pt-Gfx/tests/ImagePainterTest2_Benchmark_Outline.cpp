@@ -204,7 +204,7 @@ static size_t benchDrawArc(int loopCount, CompositionMode cm, AntiAliasingMode a
 }
 
 template <typename PainterT>
-static size_t benchDrawBezier(int loopCount, Pen::Style style, CompositionMode cm, AntiAliasingMode antiAliasingMode, size_t penSize = 1)
+static size_t benchDrawQuadBezier(int loopCount, Pen::Style style, CompositionMode cm, AntiAliasingMode antiAliasingMode, size_t penSize = 1)
 {
     size_t sum = 0;
 
