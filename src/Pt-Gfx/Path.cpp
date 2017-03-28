@@ -27,6 +27,8 @@
   02110-1301 USA
 */
 
+#include <cstdarg>
+
 #include <Pt/SourceInfo.h>
 
 #include <Pt/Gfx/Path.h>
@@ -42,47 +44,72 @@ namespace Gfx {
 // ===== Internal Helper Functions - Generator (Drawing) Functions ======================
 // ======================================================================================
 
-static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double x3, double y3, Pt::uint8_t smoothness)
+// Based on: http://stackoverflow.com/a/21642962
+//           Answer by iforce2d, 2014
+static inline void getGenericNBezierPoint(double& x, double& y, const std::vector<double>& points, double t)
+{
+    std::vector<double> tmp = points;
+
+    size_t i = points.size() / 2 - 1;
+
+    while(i > 0) {
+        for(size_t k = 0; k < i; ++k) {
+            const size_t cidx =  k      * 2;
+            const size_t nidx = (k + 1) * 2;
+            tmp[cidx + 0] = tmp[cidx + 0] + t * ( tmp[nidx + 0] - tmp[cidx + 0] ); // X
+            tmp[cidx + 1] = tmp[cidx + 1] + t * ( tmp[nidx + 1] - tmp[cidx + 1] ); // Y
+        }
+        --i;
+    }
+
+    x = tmp[0];
+    y = tmp[1];
+}
+
+static inline void generateGenericNBezierPoints(std::vector<PointF>& dst, double x1, double y1, const std::vector<double>& points, Pt::uint8_t smoothness)
 {
     // ### TODO: Make the curve smoother, if possible. ###
 
-    // Check if the points actually specify a straight line
+    // Add the start coordinate to the point
+    std::vector<double> pts;
+    pts.reserve(points.size() + 2);
+
+    pts.push_back(x1);
+    pts.push_back(y1);
+
+    pts.insert(pts.end(), points.begin(), points.end());
+
+    /*
+    // ### TODO: Complete the support for N-th degree spline curve !!! ###
+
+    // Calculate the approximate length of the curve
+    const double dx43 = x4 - x3;
+    const double dy43 = y4 - y3;
     const double dx32 = x3 - x2;
     const double dy32 = y3 - y2;
     const double dx12 = x1 - x2;
     const double dy12 = y1 - y2;
-
-    if( !(dx12 * dy32 - dy12 * dx32) ) { // Curvature
-        if(dst.empty()) dst.push_back( PointF(x1, y1) );
-        dst.push_back( PointF(x3, y3) );
-        return;
-    }
-
-    // Calculate the approximate length of the curve
-    const double l32 = ::sqrt(dx32 * dx32 + dy32 * dy32);
-    const double l12 = ::sqrt(dx12 * dx12 + dy12 * dy12);
-    const double lb  = l32 + l12;
+    const double l43  = ::sqrt(dx43 * dx43 + dy43 * dy43);
+    const double l32  = ::sqrt(dx32 * dx32 + dy32 * dy32);
+    const double l12  = ::sqrt(dx12 * dx12 + dy12 * dy12);
+    const double lb   = l43 + l32 + l12;
 
     // Determine the number of segments
     const Pt::int32_t mf = (Pt::int32_t) smoothness + 1;
 
-    Pt::int32_t nSegs = round(lb * mf / 16) + 2;
-    if(nSegs < 5) nSegs = 5;
+    Pt::int32_t nSegs = round(lb * mf / 8);
+    if(nSegs < (pts.size() + 1)) nSegs = (pts.size() + 1);
+    */
+    Pt::int32_t nSegs = 25;
 
     const double nSegs1i = 1.0 / (nSegs - 1);
 
-    // PB = (1 - t) * (1 - t) * P1 + 2 * t * (1 - t) * P2 + t * t * P3
-    //      -----------------        ---------------        -----
-    //      a                        b                      c
     for(Pt::int32_t i = 0; i < nSegs; ++i) {
         // Calculate the coordinates
         const double t  = i * nSegs1i;
-        const double it = 1.0 - t;
-        const double a  = it * it;
-        const double b  = 2.0 * t * it;
-        const double c  = t * t;
-        const double x  = a * x1 + b * x2 + c * x3;
-        const double y  = a * y1 + b * y2 + c * y3;
+              double x;
+              double y;
+        getGenericNBezierPoint(x, y, pts, t);
         // Store the coordinate as needed
         if(i || dst.empty()) dst.push_back( PointF(x, y) );
     }
@@ -130,6 +157,52 @@ static inline void generateCubicBezierPoints(std::vector<PointF>& dst, double x1
     }
 }
 
+static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double x3, double y3, Pt::uint8_t smoothness)
+{
+    // ### TODO: Make the curve smoother, if possible. ###
+
+    // Check if the points actually specify a straight line
+    const double dx32 = x3 - x2;
+    const double dy32 = y3 - y2;
+    const double dx12 = x1 - x2;
+    const double dy12 = y1 - y2;
+
+    if( !(dx12 * dy32 - dy12 * dx32) ) { // Curvature
+        if(dst.empty()) dst.push_back( PointF(x1, y1) );
+        dst.push_back( PointF(x3, y3) );
+        return;
+    }
+
+    // Calculate the approximate length of the curve
+    const double l32 = ::sqrt(dx32 * dx32 + dy32 * dy32);
+    const double l12 = ::sqrt(dx12 * dx12 + dy12 * dy12);
+    const double lb  = l32 + l12;
+
+    // Determine the number of segments
+    const Pt::int32_t mf = (Pt::int32_t) smoothness + 1;
+
+    Pt::int32_t nSegs = round(lb * mf / 16) + 2;
+    if(nSegs < 5) nSegs = 5;
+
+    const double nSegs1i = 1.0 / (nSegs - 1);
+
+    // PB = (1 - t) * (1 - t) * P1 + 2 * t * (1 - t) * P2 + t * t * P3
+    //      -----------------        ---------------        -----
+    //      a                        b                      c
+    for(Pt::int32_t i = 0; i < nSegs; ++i) {
+        // Calculate the coordinates
+        const double t  = i * nSegs1i;
+        const double it = 1.0 - t;
+        const double a  = it * it;
+        const double b  = 2.0 * t * it;
+        const double c  = t * t;
+        const double x  = a * x1 + b * x2 + c * x3;
+        const double y  = a * y1 + b * y2 + c * y3;
+        // Store the coordinate as needed
+        if(i || dst.empty()) dst.push_back( PointF(x, y) );
+    }
+}
+
 static inline void generateArcPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double r, Pt::uint8_t smoothness)
 {
     // Line equation : 0 = aX + By + c
@@ -163,7 +236,7 @@ struct Path::PathData {
     // Instruction type
     enum InsType {
         IT_Begin, IT_End,
-        IT_MoveTo, IT_LineTo, IT_ArcTo, IT_QuadBezierTo, IT_CubicBezierTo
+        IT_MoveTo, IT_LineTo, IT_ArcTo, IT_QuadBezierTo, IT_CubicBezierTo, IT_GenNBezierTo
     };
 
     // Instruction structure
@@ -358,6 +431,38 @@ void Path::cubicBezierTo(double cx1, double cy1, double cx2, double cy2, double 
     _pathData->curY = y;
 }
 
+void Path::genericNBezierTo(double x, double y, Pt::int32_t controlPointCount ...)
+{
+    // Check if this function call is valid in the current context
+    if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
+        throw PathInvalidContext(PT_SOURCEINFO_STR);
+
+    // Points buffer
+    std::vector<double> points;
+
+    // Extract and store the control coordinates
+    va_list args;
+    va_start(args, controlPointCount);
+    for(Pt::int32_t i = 0; i < controlPointCount; ++i) {
+        const double val = va_arg(args, double);
+        points.push_back(val);
+    }
+    va_end(args);
+
+    if(points.size() % 2) throw PathError("A generic N-bezier must have an even number of control points");
+
+    // Store the end coordinate
+    points.push_back(x);
+    points.push_back(y);
+
+    // Store the instruction
+    _pathData->add(PathData::IT_GenNBezierTo, points);
+
+    // Update the current coordinate
+    _pathData->curX = x;
+    _pathData->curY = y;
+}
+
 void Path::relMoveTo(double x, double y)
 {
     // Check if this function call is valid in the current context
@@ -410,8 +515,8 @@ void Path::relQuadraticBezierTo(double cx, double cy, double x, double y)
     _pathData->add(PathData::IT_QuadBezierTo, _pathData->curX + cx, _pathData->curY + cy, _pathData->curX + x, _pathData->curY + y);
 
     // Update the current coordinate
-    _pathData->curX = x;
-    _pathData->curY = y;
+    _pathData->curX += x;
+    _pathData->curY += y;
 }
 
 void Path::relCubicBezierTo(double cx1, double cy1, double cx2, double cy2, double x, double y)
@@ -424,8 +529,41 @@ void Path::relCubicBezierTo(double cx1, double cy1, double cx2, double cy2, doub
     _pathData->add(PathData::IT_CubicBezierTo, _pathData->curX + cx1, _pathData->curY + cy1, _pathData->curX + cx2, _pathData->curY + cy2, _pathData->curX + x, _pathData->curY + y);
 
     // Update the current coordinate
-    _pathData->curX = x;
-    _pathData->curY = y;
+    _pathData->curX += x;
+    _pathData->curY += y;
+}
+
+void Path::relGenericNBezierTo(double x, double y, Pt::int32_t controlPointCount ...)
+{
+    // Check if this function call is valid in the current context
+    if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
+        throw PathInvalidContext(PT_SOURCEINFO_STR);
+
+    // Points buffer
+    std::vector<double> points;
+
+    // Extract and store the control coordinates
+    va_list args;
+    va_start(args, controlPointCount);
+    for(Pt::int32_t i = 0; i < controlPointCount; ++i) {
+        const double val = va_arg(args, double);
+        if(i % 2) points.push_back(val + _pathData->curY); // Odd  -> Y
+        else      points.push_back(val + _pathData->curX); // Even -> X
+    }
+    va_end(args);
+
+    if(points.size() % 2) throw PathError("A generic N-bezier must have an even number of control points");
+
+    // Store the end coordinate
+    points.push_back(_pathData->curX + x);
+    points.push_back(_pathData->curY + y);
+
+    // Store the instruction
+    _pathData->add(PathData::IT_GenNBezierTo, points);
+
+    // Update the current coordinate
+    _pathData->curX += x;
+    _pathData->curY += y;
 }
 
 void Path::generatePoints(std::vector<PointF>& dst, Pt::uint8_t smoothness) const
@@ -483,6 +621,12 @@ void Path::generatePoints(std::vector<PointF>& dst, Pt::uint8_t smoothness) cons
                 generateCubicBezierPoints(dst, curX, curY, ins.p[0], ins.p[1], ins.p[2], ins.p[3], ins.p[4], ins.p[5], smoothness);
                 curX = ins.p[4];
                 curY = ins.p[5];
+                break;
+
+            case PathData::IT_GenNBezierTo:
+                generateGenericNBezierPoints(dst, curX, curY, ins.p, smoothness);
+                curX = ins.p[ins.p.size() - 2];
+                curY = ins.p[ins.p.size() - 1];
                 break;
 
             default:

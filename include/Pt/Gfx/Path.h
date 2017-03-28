@@ -87,8 +87,6 @@ class PT_GFX_API PathInvalidContext : public PathError {
   */
 class PT_GFX_API Path {
 
-    // ### TODO: Add support for N-th degree spline curve! ###
-
     public:
         Path();
 
@@ -118,6 +116,8 @@ class PT_GFX_API Path {
 
         void cubicBezierTo(double cx1, double cy1, double cx2, double cy2, double x, double y);
 
+        void genericNBezierTo(double x, double y, Pt::int32_t controlPointCount ...);
+
         //
         // Relative coordinate
         //
@@ -131,6 +131,8 @@ class PT_GFX_API Path {
         void relQuadraticBezierTo(double cx, double cy, double x, double y);
 
         void relCubicBezierTo(double cx1, double cy1, double cx2, double cy2, double x, double y);
+
+        void relGenericNBezierTo(double x, double y, Pt::int32_t controlPointCount ...);
 
         //
         // Generators
