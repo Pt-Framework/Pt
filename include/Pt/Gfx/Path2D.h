@@ -87,6 +87,8 @@ class PT_GFX_API Path2DInvalidContext : public Path2DError {
   */
 class PT_GFX_API Path2D {
 
+    // ### TODO: Add support for N-th degree spline curve! ###
+
     public:
         Path2D();
 
