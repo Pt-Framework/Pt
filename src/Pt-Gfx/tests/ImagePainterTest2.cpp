@@ -67,7 +67,7 @@ using namespace Pt::Gfx;
 
 // General settings for Pt-Gfx
 #define DO_TEST_DRAW    1
-#define DO_BENCHMARKING 0
+#define DO_BENCHMARKING 1
 
 // Detailed-test enable settings for Pt-Gfx
 #define TEST_SOURCECOPY                         1
