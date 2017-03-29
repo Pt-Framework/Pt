@@ -379,36 +379,41 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
     Pt::uint8_t* pixel = _brushBuffer.data();
 
     switch(_brush.fillStyle()) {
+        // Linear gradient
         case Pt::Gfx::Brush::LinearGradient: {
             // Calculate the rotation
-            const float rad  = _brush.angle() * Gfx::Math::PiDiv180 - Gfx::Math::PiDiv4;
+            const float angl = _brush.angle() + 0.001f;
+            const float rad  = angl * Gfx::Math::PiDiv180 - Gfx::Math::PiDiv4;
             const float sval = Gfx::Math::fastSin(rad);
             const float cval = Gfx::Math::fastCos(rad);
-            // Determine the reference line
-            const float wq  = Gfx::Math::fastSqrt(width * width + height * height) * 0.25f;
-            const float x1  = -wq;
-            const float y1  =  wq;
-            const float x2  =  wq;
-            const float y2  = -wq;
-            // Calculate the rotated reference line
+            // Define the reference line
+            const float wq = Gfx::Math::fastSqrt(width * width + height * height) * 0.25f;
+            const float x1 = -wq;
+            const float y1 =  wq;
+            const float x2 =  wq;
+            const float y2 = -wq;
+            // Determine the rotated reference line
             const float rx1 = ( sval * x1 + cval * y1) + ctrX;
             const float ry1 = ( cval * x1 - sval * y1) + ctrY;
             const float rx2 = ( sval * x2 + cval * y2) + ctrX;
             const float ry2 = ( cval * x2 - sval * y2) + ctrY;
             // Calculate the gradient of the rotated reference line
-            const float rm  = (ry2 - ry1) / (rx1 - rx2);
-            // Create the gradient
+            const float rm = (ry2 - ry1) / (rx1 - rx2);
+            // Generate the gradient
             //static int qqq = -180; qqq += 180;
             //setPen(Color::fromRgb8(255,255,255,255));
             //strokeOnePixelLine(Point(20 + 90 + qqq + rx1, 250 + 135 + ry1), Point(20 + 90 + qqq + rx2, 250 + 135 + ry2), 0);
             for(Pt::int32_t y = 0; y < height; ++y) {
+                // Calculate the scaling factor
                 float const p0 = rm * (y - ry1) + rx1;
                 float const p1 = rm * (y - ry2) + rx2;
                 float const d  = 1.0f / (p1 - p0);
                 for(Pt::int32_t x = 0; x < width; ++x) {
+                    // Calculate the distance and blending factor
                     const float dist = d * (x - p0);
                     const float mf   = (dist <= 0.0f) ? 0.0f : ( (dist >= 1.0f) ? 1.0f : dist );
                     const float imf  = 1.0f - mf;
+                    // Put the pixel
                     *pixel++ = (bs * mf + be * imf);
                     *pixel++ = (gs * mf + ge * imf);
                     *pixel++ = (rs * mf + re * imf);
@@ -418,6 +423,7 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
             break;
         }
 
+        // Rectangular gradient
         case Pt::Gfx::Brush::RectangularGradient: {
             // Calculate the rotation
             const float rad  = -_brush.angle() * Gfx::Math::PiDiv180;
@@ -425,16 +431,21 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
             const float cval = Gfx::Math::fastCos(rad);
             // Calculate the inverse length
             const float ilen = mfFac / (ctrX + ctrY);
-            // Create the gradient
+            // Generate the gradient
             for(Pt::int32_t y = 0; y < height; ++y) {
+                // Calculate the delta Y
                 const float dy = (y - ctrY) * xyRat;
                 for(Pt::int32_t x = 0; x < width; ++x) {
-                    const float dx   = (x - ctrX) * yxRat;
-                    const float ry   = fabs(-sval * dx + cval * dy);
-                    const float rx   = fabs( cval * dx + sval * dy);
+                    // Calculate the delta X
+                    const float dx = (x - ctrX) * yxRat;
+                    // Calculate the rotated deltas
+                    const float ry = fabs(-sval * dx + cval * dy);
+                    const float rx = fabs( cval * dx + sval * dy);
+                    // Calculate the distance and blending factor
                     const float dist = (rx + ry) * ilen;
                     const float mf   = (dist >= 1.0f) ? 1.0f : dist;
                     const float imf  = 1.0f - mf;
+                    // Put the pixel
                     *pixel++ = (bs * mf + be * imf);
                     *pixel++ = (gs * mf + ge * imf);
                     *pixel++ = (rs * mf + re * imf);
@@ -444,17 +455,22 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
             break;
         }
 
+        // Radial gradient
         case Pt::Gfx::Brush::RadialGradient: {
             // Calculate the inverse length
             const float ilen = mfFac / Gfx::Math::fastSqrt(ctrX * ctrX + ctrY * ctrY);
-            // Create the gradient
+            // Generate the gradient
             for(Pt::int32_t y = 0; y < height; ++y) {
-                const float dy  = (y - ctrY) * xyRat;
+                // Calculate the delta Y
+                const float dy = (y - ctrY) * xyRat;
                 for(Pt::int32_t x = 0; x < width; ++x) {
+                    // Calculate the delta X
                     const float dx = (x - ctrX) * yxRat;
+                    // Calculate the distance and blending factor
                     const float dist = Gfx::Math::fastSqrt(dx * dx + dy * dy) * ilen;
                     const float mf   = (dist >= 1.0f) ? 1.0f : dist;
                     const float imf  = 1.0f - mf;
+                    // Put the pixel
                     *pixel++ = (bs * mf + be * imf);
                     *pixel++ = (gs * mf + ge * imf);
                     *pixel++ = (rs * mf + re * imf);
@@ -464,21 +480,45 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
             break;
         }
 
+        // Conical gradient
         case Pt::Gfx::Brush::ConicalGradient: {
             // Calculate the rotation
             const float rad  = _brush.angle() * Gfx::Math::PiDiv180 - Gfx::Math::PiDiv2;
             const float sval = Gfx::Math::fastSin(rad);
             const float cval = Gfx::Math::fastCos(rad);
-            // Create the gradient
+            // Generate the gradient
             for(Pt::int32_t y = 0; y < height; ++y) {
+                // Calculate the delta Y
                 const float dy = -(y - ctrY) * xyRat; // Sign inversion due to differences between cartesian and computer coordinate systems
                 for(Pt::int32_t x = 0; x < width; ++x) {
-                    const float dx   = (x - ctrX) * yxRat;
-                    const float ry   = (-sval * dx + cval * dy);
-                    const float rx   = ( cval * dx + sval * dy);
-                    const float dist = (Gfx::Math::fastAtan2(ry, rx) + Gfx::Math::Pi) / Gfx::Math::PiMul2;
+                    // Calculate the delta X
+                    const float dx = (x - ctrX) * yxRat;
+                    // Calculate the rotated deltas
+                    const float ry = (-sval * dx + cval * dy);
+                    const float rx = ( cval * dx + sval * dy);
+                    // Calculate the distance and anti-alias it as needed
+                    float dist = (Gfx::Math::fastAtan2(ry, rx) + Gfx::Math::Pi) / Gfx::Math::PiMul2;
+#if 1
+                    if(dist < 0.01f || dist > 0.99f) {
+                        const Pt::int32_t ijm  = 2;
+                        const float       ijm2 = (ijm - 1) * 0.5f;
+                        dist = 0.0f;
+                        for(Pt::int32_t i = 0; i < ijm; ++i) {
+                            for(Pt::int32_t j = 0; j < ijm; ++j) {
+                                const float dxs =  (x + i - ijm2 - ctrX) * yxRat;
+                                const float dys = -(y + j - ijm2 - ctrY) * xyRat; // Sign inversion due to differences between cartesian and computer coordinate systems
+                                const float rxs = ( cval * dxs + sval * dys);
+                                const float rys = (-sval * dxs + cval * dys);
+                                dist += (Gfx::Math::fastAtan2(rys, rxs) + Gfx::Math::Pi) / Gfx::Math::PiMul2;
+                            }
+                        }
+                        dist /= (ijm * ijm);
+                    }
+#endif
+                    // Calculate the blending factor
                     const float mf   = (dist <= 0.0f) ? 0.0f : ( (dist >= 1.0f) ? 1.0f : dist );
                     const float imf  = 1.0f - mf;
+                    // Put the pixel
                     *pixel++ = (bs * mf + be * imf);
                     *pixel++ = (gs * mf + ge * imf);
                     *pixel++ = (rs * mf + re * imf);
@@ -488,6 +528,7 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
             break;
         }
 
+        // Invalid gradient
         default:
             return;
     }
