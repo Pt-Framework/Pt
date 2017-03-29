@@ -1177,7 +1177,7 @@ void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float deg
     _rasterizer->fillArc(tl, sz, degBegin, degEnd, arcMode);
 }
 
-void ImagePainter2::drawPath(const Path& path2d, const AffineMatrix& matrix2d, bool autoClose, Pt::uint8_t smoothness)
+void ImagePainter2::drawPath(const Path& path2d, const AffineMatrix& matrix2d, bool autoClose, float smoothness)
 {
     std::vector<PointF> pointsF;
 
@@ -1187,7 +1187,7 @@ void ImagePainter2::drawPath(const Path& path2d, const AffineMatrix& matrix2d, b
     drawPolyline(pointsF.data(), pointsF.size(), autoClose);
 }
 
-void ImagePainter2::fillPath(const Path& path2d, const AffineMatrix& matrix2d, Pt::uint8_t smoothness)
+void ImagePainter2::fillPath(const Path& path2d, const AffineMatrix& matrix2d, float smoothness)
 {
     std::vector<PointF> pointsF;
 

@@ -64,7 +64,7 @@ static inline void getGenericNBezierPoint(double& x, double& y, const std::vecto
     y = tmp[1];
 }
 
-static inline void generateGenericNBezierPoints(std::vector<PointF>& dst, double x1, double y1, const std::vector<double>& points, Pt::uint8_t smoothness)
+static inline void generateGenericNBezierPoints(std::vector<PointF>& dst, double x1, double y1, const std::vector<double>& points, float smoothness)
 {
     // ### TODO: Make the curve smoother, if possible. ###
 
@@ -93,9 +93,7 @@ static inline void generateGenericNBezierPoints(std::vector<PointF>& dst, double
     const double lb   = l43 + l32 + l12;
 
     // Determine the number of segments
-    const Pt::int32_t mf = (Pt::int32_t) smoothness + 1;
-
-    Pt::int32_t nSegs = round(lb * mf / 8);
+    Pt::int32_t nSegs = round(lb * smoothness / 8);
     if(nSegs < (pts.size() + 1)) nSegs = (pts.size() + 1);
     */
     Pt::int32_t nSegs = 25;
@@ -113,7 +111,7 @@ static inline void generateGenericNBezierPoints(std::vector<PointF>& dst, double
     }
 }
 
-static inline void generateCubicBezierPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, Pt::uint8_t smoothness)
+static inline void generateCubicBezierPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, float smoothness)
 {
     // ### TODO: Make the curve smoother, if possible. ###
 
@@ -130,9 +128,7 @@ static inline void generateCubicBezierPoints(std::vector<PointF>& dst, double x1
     const double lb   = l43 + l32 + l12;
 
     // Determine the number of segments
-    const Pt::int32_t mf = (Pt::int32_t) smoothness + 1;
-
-    Pt::int32_t nSegs = round(lb * mf / 16) + 4;
+    Pt::int32_t nSegs = round(lb * smoothness / 16) + 4;
     if(nSegs < 9) nSegs = 9;
 
     const double nSegs1i = 1.0 / (nSegs - 1);
@@ -155,7 +151,7 @@ static inline void generateCubicBezierPoints(std::vector<PointF>& dst, double x1
     }
 }
 
-static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double x3, double y3, Pt::uint8_t smoothness)
+static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double x3, double y3, float smoothness)
 {
     // ### TODO: Make the curve smoother, if possible. ###
 
@@ -177,9 +173,7 @@ static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, doubl
     const double lb  = l32 + l12;
 
     // Determine the number of segments
-    const Pt::int32_t mf = (Pt::int32_t) smoothness + 1;
-
-    Pt::int32_t nSegs = round(lb * mf / 16) + 2;
+    Pt::int32_t nSegs = round(lb * smoothness / 16) + 2;
     if(nSegs < 5) nSegs = 5;
 
     const double nSegs1i = 1.0 / (nSegs - 1);
@@ -201,7 +195,7 @@ static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, doubl
     }
 }
 
-static inline void generateArcPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double r, Pt::uint8_t smoothness)
+static inline void generateArcPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double r, float smoothness)
 {
     // Line equation : 0 = aX + By + c
     // Normal        : n = ai + bj
@@ -556,7 +550,7 @@ void Path::relGenericNBezierTo(Pt::int32_t controlPointCount, double* cxy, doubl
     _pathData->curY += y;
 }
 
-void Path::generatePoints(std::vector<PointF>& dst, Pt::uint8_t smoothness) const
+void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
 {
     // Check if this function call is valid in the current context
     if( _pathData->empty() || !_pathData->lastInstructionMatch(PathData::IT_End) )

@@ -108,7 +108,7 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         // NOTE: * If you enlarge (scale-up) the shape, you may need to increase the "smoothness" factor as needed
         //       * If the "smoothness" factor is too large, the anti-aliasing will become less effective
-        virtual void drawPath(const Path& path2d, const AffineMatrix& matrix2d, bool autoClose, Pt::uint8_t smoothness = 0);
+        virtual void drawPath(const Path& path2d, const AffineMatrix& matrix2d, bool autoClose, float smoothness = 1.0f);
 
         virtual void fillRect(const RectF& rect);
 
@@ -124,7 +124,7 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         // NOTE: * If you enlarge (scale-up) the shape, you may need to increase the "smoothness" factor as needed
         //       * If the "smoothness" factor is too large, the anti-aliasing will become less effective
-        virtual void fillPath(const Path& path2d, const AffineMatrix& matrix2d, Pt::uint8_t smoothness = 0);
+        virtual void fillPath(const Path& path2d, const AffineMatrix& matrix2d, float smoothness = 1.0f);
 
     public:
         // Just to make the API match the interface defined by the Pt::GfxPainter class

@@ -11,7 +11,7 @@ static void benchDrawPath_drawRow(
     matrix.push();
     matrix.translate(80 + 120 * col, 80 + 120 * row);
     pointsF.clear();
-    path.generatePoints(pointsF, 0);
+    path.generatePoints(pointsF, 1);
     matrix.transformPoints(pointsF.data(), pointsF.size());
     if(WITH_RASTERISATION) {
         ip2->setAntiAliasingMode(antiAliasingMode);
@@ -25,7 +25,7 @@ static void benchDrawPath_drawRow(
     matrix.push();
     matrix.translate(80 + 120 * col, 80 + 120 * row);
     pointsF.clear();
-    path.generatePoints(pointsF, 0);
+    path.generatePoints(pointsF, 1);
     matrix.transformPoints(pointsF.data(), pointsF.size());
     if(WITH_RASTERISATION) {
         ip2->setAntiAliasingMode(antiAliasingMode);
@@ -39,7 +39,7 @@ static void benchDrawPath_drawRow(
     matrix.push();
     matrix.translate(80 + 120 * col, 80 + 120 * row);
     pointsF.clear();
-    path.generatePoints(pointsF, 0);
+    path.generatePoints(pointsF, 1);
     matrix.transformPoints(pointsF.data(), pointsF.size());
     if(WITH_RASTERISATION) {
         ip2->setAntiAliasingMode(antiAliasingMode);
@@ -53,7 +53,7 @@ static void benchDrawPath_drawRow(
     matrix.push();
     matrix.translate(80 + 120 * col, 80 + 120 * row);
     pointsF.clear();
-    path.generatePoints(pointsF, 0);
+    path.generatePoints(pointsF, 1);
     matrix.transformPoints(pointsF.data(), pointsF.size());
     if(WITH_RASTERISATION) {
         ip2->setAntiAliasingMode(antiAliasingMode);
@@ -67,7 +67,7 @@ static void benchDrawPath_drawRow(
     matrix.push();
     matrix.translate(80 + 120 * col, 80 + 120 * row);
     pointsF.clear();
-    path.generatePoints(pointsF, 0);
+    path.generatePoints(pointsF, 1);
     matrix.transformPoints(pointsF.data(), pointsF.size());
     if(WITH_RASTERISATION) {
         ip2->setAntiAliasingMode(antiAliasingMode);
@@ -81,7 +81,7 @@ static void benchDrawPath_drawRow(
     matrix.push();
     matrix.translate(80 + 120 * col, 80 + 120 * row);
     pointsF.clear();
-    path.generatePoints(pointsF, 0);
+    path.generatePoints(pointsF, 1);
     matrix.transformPoints(pointsF.data(), pointsF.size());
     if(WITH_RASTERISATION) {
         ip2->setAntiAliasingMode(antiAliasingMode);
@@ -105,7 +105,7 @@ static void benchDrawPath_drawCol(
     matrix.push();
     matrix.translate(150 + 120 * col, 70 + 120 * row);
     pointsF.clear();
-    path.generatePoints(pointsF, 0);
+    path.generatePoints(pointsF, 1);
     matrix.transformPoints(pointsF.data(), pointsF.size());
     if(WITH_RASTERISATION) {
         ip2->setAntiAliasingMode(antiAliasingMode);
@@ -119,7 +119,7 @@ static void benchDrawPath_drawCol(
     matrix.push();
     matrix.translate(150 + 120 * col, 70 + 120 * row);
     pointsF.clear();
-    path.generatePoints(pointsF, 0);
+    path.generatePoints(pointsF, 1);
     matrix.transformPoints(pointsF.data(), pointsF.size());
     if(WITH_RASTERISATION) {
         ip2->setAntiAliasingMode(antiAliasingMode);
@@ -287,7 +287,7 @@ static size_t benchDrawPathSimple(int loopCount, CompositionMode cm, AntiAliasin
         path.endPath      ();
 
         pointsF.clear();
-        path.generatePoints(pointsF, 0);
+        path.generatePoints(pointsF, 1);
         matrix.transformPoints(pointsF.data(), pointsF.size());
 
         ip2->setAntiAliasingMode(antiAliasingMode);

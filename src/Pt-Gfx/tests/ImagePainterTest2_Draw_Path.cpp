@@ -212,14 +212,14 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     matrix.rotate(-25);
     matrix.scale(2.5, 2.5);
 
-#define DRAW_CB(PEN)                                   \
-    do {                                               \
+#define DRAW_CB(PEN)                                 \
+    do {                                             \
         matrix.push();                               \
         matrix.translate(90 + 160 * col, 140 * row); \
-        ip2->setPen(PEN);                              \
-        ip2->drawPath(path, matrix, false, 1);     \
+        ip2->setPen(PEN);                            \
+        ip2->drawPath(path, matrix, false, 2);       \
         matrix.pop();                                \
-        ++col;                                         \
+        ++col;                                       \
     } while(false)
     DRAW_CB(penThinSolid );
     DRAW_CB(penThinDot   );
@@ -249,8 +249,8 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     matrix.push();
     matrix.translate(60 + 130 * col, 150 * row);
     ip2->setPen( Color::fromRgb8(255, 255, 255, 175) );
-    //ip2->fillPath(path, matrix, 20);
-    ip2->drawPath(path, matrix, false, 0);
+    //ip2->fillPath(path, matrix, 1);
+    ip2->drawPath(path, matrix, false, 1);
     matrix.pop();
     ++row;
 
