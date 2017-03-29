@@ -16,7 +16,6 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
 
     // Round-Hole caps
     ip2->setFont( Pt::Gfx::Font(FONT_SPEC_S) );
-    ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
 
     ip2->setPen(penHRCapBJoin);
     ip2->drawLine( PointF( 20,  20), PointF(100,  70) );
@@ -35,7 +34,6 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
 
     // Arrow-1 caps
     ip2->setFont( Pt::Gfx::Font(FONT_SPEC_S) );
-    ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
 
     ip2->setPen(penA1CapBJoin);
     ip2->drawLine( PointF( 20 + 350,  20), PointF(100 + 350,  70) );
@@ -54,7 +52,6 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
 
     // Arrow-2 caps
     ip2->setFont( Pt::Gfx::Font(FONT_SPEC_S) );
-    ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
 
     ip2->setPen(penA2CapBJoin);
     ip2->drawLine( PointF( 20 + 700,  20), PointF(100 + 700,  70) );

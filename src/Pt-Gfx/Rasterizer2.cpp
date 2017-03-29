@@ -379,6 +379,11 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
 
     const float rrFac  = 2.0f / scale / Gfx::Math::fastSqrt(xyRat * xyRat + yxRat * yxRat); // For rectangular and radial gradients
 
+    const float ang45  =  angle - floor(angle / 45.0f) * 45.0f;
+    const float ang90  =  angle - floor(angle / 90.0f) * 90.0f;
+    const bool  asym   = (xyRat != yxRat);
+    const bool  useAA  = (_aaMode != AntiAliasingMode::None) && (ang90 >= 0.1f) && (asym || ang45 >= 0.1f);
+
     Pt::uint8_t* pixel = _brushBuffer.data();
 
     switch(_brush.fillStyle()) {
@@ -501,9 +506,9 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
                     const float rx = ( cval * dx + sval * dy);
                     // Calculate the distance and anti-alias it as needed
                     float dist = (Gfx::Math::fastAtan2(ry, rx) + Gfx::Math::Pi) / Gfx::Math::PiMul2 / scale;
-#if 1
-                    if(dist < 0.01f || dist > 0.99f) {
-                        const Pt::int32_t ijm  = 2;
+                    if(useAA && (dist < 0.01f || dist > 0.99f)) {
+                        const float       dd   = 4.0f - ceil( ( (dist < 0.5f) ? dist : (1.0f - dist) ) * 400 );
+                        const Pt::int32_t ijm  = (dd <= 2.0f) ? 2 : dd;
                         const float       ijm2 = (ijm - 1) * 0.5f;
                         dist = 0.0f;
                         for(Pt::int32_t i = 0; i < ijm; ++i) {
@@ -517,7 +522,6 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
                         }
                         dist /= (ijm * ijm);
                     }
-#endif
                     // Calculate the blending factor
                     const float mf   = (dist <= 0.0f) ? 0.0f : ( (dist >= 1.0f) ? 1.0f : dist );
                     const float imf  = 1.0f - mf;
