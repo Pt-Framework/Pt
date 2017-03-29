@@ -27,6 +27,9 @@
   02110-1301 USA
 */
 
+#warning 123
+#include <stdio.h>
+
 #include <Pt/SourceInfo.h>
 
 #include <Pt/Gfx/Path.h>
@@ -423,7 +426,7 @@ void Path::cubicBezierTo(double cx1, double cy1, double cx2, double cy2, double 
     _pathData->curY = y;
 }
 
-void Path::genericNBezierTo(Pt::int32_t controlPointCount, double* cxy, double x, double y)
+void Path::genericNBezierTo(Pt::int32_t controlPointCount, const double* cxy, double x, double y)
 {
     // Check if this function call is valid in the current context
     if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
@@ -521,7 +524,7 @@ void Path::relCubicBezierTo(double cx1, double cy1, double cx2, double cy2, doub
     _pathData->curY += y;
 }
 
-void Path::relGenericNBezierTo(Pt::int32_t controlPointCount, double* cxy, double x, double y)
+void Path::relGenericNBezierTo(Pt::int32_t controlPointCount, const double* cxy, double x, double y)
 {
     // Check if this function call is valid in the current context
     if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )

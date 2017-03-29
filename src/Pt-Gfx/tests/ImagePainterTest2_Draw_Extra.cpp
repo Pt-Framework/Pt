@@ -14,6 +14,39 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
 
     ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
 
+    // Generic N-bezier
+    AffineMatrix matrix;
+    Path         path;
+
+    matrix.scale(-1, 1);
+    matrix.translate(970, 280);
+
+    path.clear              ();
+    path.beginPath          ();
+    path.moveTo             (  0,    0); // CW
+    path.lineTo             ( 55, -180);
+    path.lineTo             (115,  -45);
+    path.lineTo             (170, -135);
+    path.lineTo             (230,  -90);
+    path.lineTo             (170,  -45);
+    path.endPath            ();
+    ip2->setPen( Pen(Color::fromRgb8(255, 0, 255, 175), 6, Pen::Solid, Pen::ButtCap, Pen::MiterJoin) );
+    ip2->drawPath(path, matrix, false);
+
+    const double cxy[] = { // CW
+          55, -180,
+         115,   45,
+         170, -135,
+         230,  -90
+    };
+    path.clear              ();
+    path.beginPath          ();
+    path.moveTo             (0, 0);
+    path.relGenericNBezierTo(sizeof(cxy) / sizeof(cxy[0]) / 2, cxy, 170, -45);
+    path.endPath            ();
+    ip2->setPen( Pen(Color::fromRgb8(127, 255, 255, 175), 6, Pen::Solid, Pen::ButtCap, Pen::MiterJoin) );
+    ip2->drawPath(path, matrix, false);
+
     // Round-Hole caps
     ip2->setFont( Pt::Gfx::Font(FONT_SPEC_S) );
 
@@ -36,37 +69,37 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
     ip2->setFont( Pt::Gfx::Font(FONT_SPEC_S) );
 
     ip2->setPen(penA1CapBJoin);
-    ip2->drawLine( PointF( 20 + 350,  20), PointF(100 + 350,  70) );
-    ip2->drawLine( PointF( 20 + 350, 170), PointF(100 + 350, 120) );
+    ip2->drawLine( PointF( 20 + 300,  20), PointF(100 + 300,  70) );
+    ip2->drawLine( PointF( 20 + 300, 170), PointF(100 + 300, 120) );
     ip2->setPen(penRef);
-    ip2->drawLine( PointF( 20 + 350,  20), PointF(100 + 350,  70) );
-    ip2->drawLine( PointF( 20 + 350, 170), PointF(100 + 350, 120) );
+    ip2->drawLine( PointF( 20 + 300,  20), PointF(100 + 300,  70) );
+    ip2->drawLine( PointF( 20 + 300, 170), PointF(100 + 300, 120) );
 
     ip2->setPen(penA1CapBJoin);
-    ip2->drawArc( PointF (150 + 350, 20), SizeF(100, 100), 60, 300, ArcMode::Open );
+    ip2->drawArc( PointF (150 + 300, 20), SizeF(100, 100), 60, 300, ArcMode::Open );
     ip2->setPen(penRef);
-    ip2->drawArc( PointF (150 + 350, 20), SizeF(100, 100), 60, 300, ArcMode::Open );
+    ip2->drawArc( PointF (150 + 300, 20), SizeF(100, 100), 60, 300, ArcMode::Open );
 
     ip2->setPen(penText);
-    ip2->drawText( PointF(70 + 350, 180), "Arrow-1" );
+    ip2->drawText( PointF(70 + 300, 180), "Arrow-1" );
 
     // Arrow-2 caps
     ip2->setFont( Pt::Gfx::Font(FONT_SPEC_S) );
 
     ip2->setPen(penA2CapBJoin);
-    ip2->drawLine( PointF( 20 + 700,  20), PointF(100 + 700,  70) );
-    ip2->drawLine( PointF( 20 + 700, 170), PointF(100 + 700, 120) );
+    ip2->drawLine( PointF( 20 + 600,  20), PointF(100 + 600,  70) );
+    ip2->drawLine( PointF( 20 + 600, 170), PointF(100 + 600, 120) );
     ip2->setPen(penRef);
-    ip2->drawLine( PointF( 20 + 700,  20), PointF(100 + 700,  70) );
-    ip2->drawLine( PointF( 20 + 700, 170), PointF(100 + 700, 120) );
+    ip2->drawLine( PointF( 20 + 600,  20), PointF(100 + 600,  70) );
+    ip2->drawLine( PointF( 20 + 600, 170), PointF(100 + 600, 120) );
 
     ip2->setPen(penA2CapBJoin);
-    ip2->drawArc( PointF (150 + 700, 20), SizeF(100, 100), 60, 300, ArcMode::Open );
+    ip2->drawArc( PointF (150 + 600, 20), SizeF(100, 100), 60, 300, ArcMode::Open );
     ip2->setPen(penRef);
-    ip2->drawArc( PointF (150 + 700, 20), SizeF(100, 100), 60, 300, ArcMode::Open );
+    ip2->drawArc( PointF (150 + 600, 20), SizeF(100, 100), 60, 300, ArcMode::Open );
 
     ip2->setPen(penText);
-    ip2->drawText( PointF(70 + 700, 180), "Arrow-2" );
+    ip2->drawText( PointF(70 + 600, 180), "Arrow-2" );
 
     // --- Part 1 ---
 

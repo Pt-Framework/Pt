@@ -1184,6 +1184,10 @@ void ImagePainter2::drawPath(const Path& path2d, const AffineMatrix& matrix2d, b
     path2d.generatePoints(pointsF, smoothness);
     matrix2d.transformPoints(pointsF.data(), pointsF.size());
 
+    //for(size_t i = 0; i < pointsF.size(); ++i)
+    //    printf("TrnPts: %5.1f, %5.1f\n", pointsF[i].x(), pointsF[i].y());
+    //printf("\n");
+
     drawPolyline(pointsF.data(), pointsF.size(), autoClose);
 }
 
