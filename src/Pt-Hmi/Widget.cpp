@@ -1,11 +1,11 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
+/* Copyright (C) 2015 Marc Boris Duerner
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -15,17 +15,20 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
+
+#include <cmath>
+#include <cassert>
 
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/Window.h>
@@ -33,7 +36,7 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/String.h>
-#include <cassert>
+
 
 namespace Pt {
 
@@ -48,14 +51,14 @@ Widget::Widget()
 , _enabled(true)
 , _enabledState(true)
 , _hasFocus(false)
-, _focusPolicy(NoFocus) 
+, _focusPolicy(NoFocus)
 , _focusIndex(0)
 , _acceptsInput(true)
 , _textInput(false)
 , _cursor( Hmi::Cursor::defaultCursor() )
 , _actionKey(Key::Space)
 , _mnemonic(0)
-{      
+{
     _eventReady += Pt::slot(*this, &Widget::onKeyEvent );
     _eventReady += Pt::slot(*this, &Widget::scrollEvent );
     _eventReady += Pt::slot(*this, &Widget::onMoveEvent );
@@ -100,7 +103,7 @@ const Window* Widget::window() const
 
 
 Widget* Widget::parent()
-{         
+{
     return _parent;
 }
 
@@ -130,7 +133,7 @@ void Widget::add(Widget& widget)
 
     widget.setParent(this);
     widget.setWindow(_window);
-    
+
     relayout();
     widget.update();
 
@@ -143,20 +146,20 @@ void Widget::remove(Widget& widget)
     std::vector<Widget*>::iterator it;
     it = std::find(_children.begin(), _children.end(), &widget);
     if( it == _children.end() )
-        return;   
-     
+        return;
+
     _children.erase(it);
-   
+
     // enable when indirectly disabled
     if( ! widget._enabledState && widget._enabled)
         widget.enable(true);
-    
+
     widget.setParent(0);
     widget.setWindow(0);
 
     relayout();
-    update();    
-    
+    update();
+
     onRemoveWidget(widget);
 }
 
@@ -189,7 +192,7 @@ void Widget::setWindow(Window* window)
         _window->removeWidget(*this);
 
     _window = window;
-      
+
     std::vector<Widget*>::iterator it;
     for(it = _children.begin(); it != _children.end(); ++it)
         (*it)->setWindow(window);
@@ -220,7 +223,7 @@ Widget* Widget::findWidget(const Gfx::PointF& pos, bool input)
 
         if( ! child->isVisible() || ! child->isEnabled() )
             continue;
-        
+
         if( ! child->geometry().contains(pos) )
             continue;
 
@@ -245,7 +248,7 @@ Widget* Widget::findWidget(const Gfx::PointF& pos, bool input)
 
 Widget* Widget::findWidget(const Gfx::PointF& pos)
 {
-    return findWidget(pos, false); 
+    return findWidget(pos, false);
 }
 
 
@@ -278,7 +281,7 @@ Gfx::PointF Widget::toWindow(const Gfx::PointF& p) const
     Gfx::PointF pos = p + this->position();
 
     const Widget* w = this;
-    
+
     for(w = w->parent(); w != 0; w = w->parent())
     {
         pos += w->position();
@@ -291,13 +294,13 @@ Gfx::PointF Widget::toWindow(const Gfx::PointF& p) const
 Gfx::PointF Widget::toScreen(const Gfx::PointF& pos) const
 {
     Gfx::PointF screenPos = toWindow(pos);
-    
+
     if( window() )
         return window()->toScreen(screenPos);
 
     return screenPos;
 }
-    
+
 
 Gfx::PointF Widget::fromScreen(const Gfx::PointF& pos) const
 {
@@ -361,7 +364,7 @@ bool Widget::hasFocus() const
 void Widget::focus()
 {
     if(_window)
-        _window->setFocusWidget(this);          
+        _window->setFocusWidget(this);
 }
 
 
@@ -375,7 +378,7 @@ void Widget::setFocusIndex(size_t index)
 
 
 void Widget::onFocusEvent(const FocusEvent& ev)
-{    
+{
     _hasFocus = ev.isFocused();
 }
 
@@ -407,7 +410,7 @@ const Key* Widget::shortcut() const
 {
     if(_shortcutKey.code() == Key::NoKey)
         return 0;
-           
+
     return &_shortcutKey;
 }
 
@@ -429,7 +432,7 @@ void Widget::setShortcut(const Key* k)
 void Widget::onSetShortcut(const Key*)
 {
 }
-  
+
 
 void Widget::onShortcut(const KeyEvent& kev)
 {
@@ -443,7 +446,7 @@ const Pt::Char* Widget::mnemonic() const
 
 
 void Widget::setMnemonic(const Char& ch)
-{  
+{
     _mnemonic = ch;
 
     const Char* m = ch != 0 ? &ch : 0;
@@ -453,7 +456,7 @@ void Widget::setMnemonic(const Char& ch)
 
 
 String Widget::setMnemonic(const String& text)
-{  
+{
     String str;
     Char mnemonic = 0;
 
@@ -507,7 +510,7 @@ void Widget::invalidate()
 
     InvalidateEvent ev( vid() );
     Application::instance().loop().commitEvent(ev);
-} 
+}
 
 
 void Widget::onInvalidateEvent(const InvalidateEvent& ev)
@@ -555,13 +558,13 @@ void Widget::relayout()
   if( window() )
   {
       _isLayouting = true;
-      
+
       if( parent() )
           parent()->relayout();
       else
-          window()->relayout(); 
-  }  
-} 
+          window()->relayout();
+  }
+}
 
 
 void Widget::measure(const SizePolicy& policy)
@@ -588,19 +591,19 @@ void Widget::measure(const SizePolicy& policy)
     {
         //static int nnn = 0;
         //std::clog << "MEASURE: " << typeid(*this).name() << " " << ++nnn << std::endl;
-        
+
         _lastPolicy = contentPolicy;
 
         if( contentPolicy.vertical() != SizePolicy::Fixed ||
-            contentPolicy.horizontal() != SizePolicy::Fixed || 
+            contentPolicy.horizontal() != SizePolicy::Fixed ||
             ! widgets().empty() )
         {
             _preferredSize = onMeasure(contentPolicy);
         }
-        
+
         if(contentPolicy.vertical() == SizePolicy::Fixed)
             _preferredSize.setHeight( contentPolicy.height() );
-        
+
         if(contentPolicy.vertical() == SizePolicy::Maximum)
             _preferredSize.setHeight( std::min( _preferredSize.height(),
                                                 contentPolicy.height() ) );
@@ -632,12 +635,12 @@ void Widget::layout(const Gfx::RectF& rect)
     if(moved)
     {
         Gfx::PointF p = rect.topLeft();
-        
+
         Gfx::RectF updateRect(Gfx::PointF(0, 0), _size);
 
         Gfx::PointF to = p - _position;
-        updateRect.unify( Gfx::RectF(to, _size) ); 
-    
+        updateRect.unify( Gfx::RectF(to, _size) );
+
         MoveEvent mev(vid(), p);
         Application::instance().loop().commitEvent(mev);
 
@@ -651,7 +654,7 @@ void Widget::layout(const Gfx::RectF& rect)
     {
         const Gfx::SizeF& s = rect.size();
 
-        Gfx::SizeF updateSize( std::max( _size.width(), s.width()), 
+        Gfx::SizeF updateSize( std::max( _size.width(), s.width()),
                                std::max( _size.height(), s.height()) );
 
         Gfx::RectF updateRect(Gfx::PointF(0,0), updateSize);
@@ -660,7 +663,7 @@ void Widget::layout(const Gfx::RectF& rect)
 
         ResizeEvent rev(vid(), s);
         Application::instance().loop().commitEvent(rev);
-    
+
         update(updateRect);
     }
 
@@ -704,11 +707,11 @@ void Widget::update()
 
 
 void Widget::update(const Gfx::RectF& rect)
-{   
+{
     Window* w = window();
     if( ! w )
         return;
-    
+
     Gfx::PointF updatePos = toWindow( rect.topLeft() );
     Gfx::RectF updateRect( updatePos, rect.size() );
 
@@ -731,10 +734,10 @@ void Widget::repaint(const Gfx::RectF& rect)
     Application::instance().loop().commitEvent(pev);
 
     const std::vector<Widget*>& widgets = this->widgets();
-    
+
     std::vector<Widget*>::const_iterator it;
     for(it = widgets.begin() ; it != widgets.end(); ++it)
-    {        
+    {
         Widget* w = (*it);
 
         Gfx::RectF updateRect = w->geometry().intersect(rect);
@@ -744,7 +747,7 @@ void Widget::repaint(const Gfx::RectF& rect)
         Gfx::PointF updatePos = w->fromParent( updateRect.topLeft() );
         updateRect.setOrigin(updatePos);
 
-        w->repaint(updateRect);            
+        w->repaint(updateRect);
     }
 }
 
@@ -786,7 +789,7 @@ bool Widget::isEnabled() const
 
 
 void Widget::enable(bool e)
-{    
+{
     _enabled = e;
     _enabledState = e;
 
@@ -798,7 +801,7 @@ void Widget::enable(bool e)
 
 
 void Widget::onEnableEvent(const EnableEvent& ev)
-{        
+{
     _enabledState = ev.enabled();
 
     for( size_t i = 0; i < _children.size(); ++i)
@@ -812,7 +815,7 @@ void Widget::onEnableEvent(const EnableEvent& ev)
 
         EnableEvent eev( w->vid(), ev.enabled());
         Application::instance().loop().commitEvent(eev);
-    }  
+    }
 }
 
 
@@ -821,7 +824,7 @@ void Widget::raise()
     if( ! _parent )
         return;
 
-    _parent->onRaise(*this);     
+    _parent->onRaise(*this);
 }
 
 
@@ -834,8 +837,8 @@ void Widget::onRaise(Widget& w)
 
     _children.erase(it);
     _children.push_back(&w);
-    
-    w.update();   
+
+    w.update();
 }
 
 
@@ -861,9 +864,9 @@ void Widget::move(const Gfx::PointF& pos)
 {
     if(pos == _position)
         return;
-    
+
     _position = pos;
-    
+
     // relayout will not send a move event
     MoveEvent mev(vid(), pos);
     Application::instance().loop().commitEvent(mev);
@@ -880,7 +883,7 @@ void Widget::move(double x, double y)
 
 
 void Widget::onMoveEvent(const MoveEvent& ev)
-{        
+{
 }
 
 
@@ -892,7 +895,7 @@ const Gfx::SizeF& Widget::size() const
 
 
 void Widget::onResizeEvent(const ResizeEvent& ev)
-{   
+{
 }
 
 
@@ -908,7 +911,7 @@ const Cursor& Widget::cursor() const
 }
 
 
-void Widget::setCursor(const Cursor& c) 
+void Widget::setCursor(const Cursor& c)
 {
     _cursor = c;
 
@@ -977,7 +980,7 @@ Pt::Signal<const Pt::Event&>& Widget::eventReady()
 
 void Widget::onEvent(const Pt::Event& ev)
 {
-    _eventReady.send(ev ); 
+    _eventReady.send(ev );
 }
 
 
@@ -1072,7 +1075,7 @@ void Widget::onKeyEvent(const KeyEvent& ev)
 
 void Widget::onEnterEvent( const EnterEvent& ev)
 {
-    Application::instance().setCursor( &cursor() ); 
+    Application::instance().setCursor( &cursor() );
 }
 
 

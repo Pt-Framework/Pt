@@ -379,10 +379,14 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
 
     const float rrFac  = 2.0f / scale / Gfx::Math::fastSqrt(xyRat * xyRat + yxRat * yxRat); // For rectangular and radial gradients
 
+#define CONICAL_GRADIENT_USE_SMOOTH_TRANSITION
+
+#ifndef CONICAL_GRADIENT_USE_SMOOTH_TRANSITION
     const float ang45  =  angle - floor(angle / 45.0f) * 45.0f;
     const float ang90  =  angle - floor(angle / 90.0f) * 90.0f;
     const bool  asym   = (xyRat != yxRat);
     const bool  useAA  = (_aaMode != AntiAliasingMode::None) && (ang90 >= 0.1f) && (asym || ang45 >= 0.1f);
+#endif
 
     Pt::uint8_t* pixel = _brushBuffer.data();
 
@@ -490,6 +494,16 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
 
         // Conical gradient
         case Pt::Gfx::Brush::ConicalGradient: {
+#ifdef CONICAL_GRADIENT_USE_SMOOTH_TRANSITION
+            // Calculate the middle color from the start and end colors
+            const Pt::uint8_t rm = ((Pt::uint32_t) rs + (Pt::uint32_t) re) / 2;
+            const Pt::uint8_t gm = ((Pt::uint32_t) gs + (Pt::uint32_t) ge) / 2;
+            const Pt::uint8_t bm = ((Pt::uint32_t) bs + (Pt::uint32_t) be) / 2;
+            const Pt::uint8_t am = ((Pt::uint32_t) as + (Pt::uint32_t) ae) / 2;
+            // Low and high limit for mixing color
+            const float loLim = 0.25f;
+            const float hiLim = 0.75f;
+#endif
             // Calculate the rotation
             const float rad  = angle * Gfx::Math::PiDiv180 - Gfx::Math::PiDiv2;
             const float sval = Gfx::Math::fastSin(rad);
@@ -504,8 +518,46 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
                     // Calculate the rotated deltas
                     const float ry = (-sval * dx + cval * dy);
                     const float rx = ( cval * dx + sval * dy);
-                    // Calculate the distance and anti-alias it as needed
+                    // Calculate the distance
                     float dist = (Gfx::Math::fastAtan2(ry, rx) + Gfx::Math::Pi) / Gfx::Math::PiMul2 / scale;
+                         if(dist < 0.0f) dist = 0.0f;
+                    else if(dist > 1.0f) dist = 1.0f;
+#ifdef CONICAL_GRADIENT_USE_SMOOTH_TRANSITION
+                    // Distance: 0.00f <= dist <= loLim --- blend from end color to middle color
+                    if(dist <= loLim) {
+                        // Calculate the blending factor
+                        const float mf   = dist / loLim;
+                        const float imf  = 1.0f - mf;
+                        // Put the pixel
+                        *pixel++ = (be * mf + bm * imf);
+                        *pixel++ = (ge * mf + gm * imf);
+                        *pixel++ = (re * mf + rm * imf);
+                        *pixel++ = (ae * mf + am * imf);
+                    }
+                    // Distance: hiLim <= dist <= 1.00f --- blend from middle color to start color
+                    else if(dist >= hiLim) { //
+                        // Calculate the blending factor
+                        const float mf   = (dist - hiLim) / loLim;
+                        const float imf  = 1.0f - mf;
+                        // Put the pixel
+                        *pixel++ = (bm * mf + bs * imf);
+                        *pixel++ = (gm * mf + gs * imf);
+                        *pixel++ = (rm * mf + rs * imf);
+                        *pixel++ = (am * mf + as * imf);
+                    }
+                    // Distance: loLim < dist < hiLim --- blend from start color to end color
+                    else {
+                        // Calculate the blending factor
+                        const float mf   = (dist - loLim) / (hiLim - loLim);
+                        const float imf  = 1.0f - mf;
+                        // Put the pixel
+                        *pixel++ = (bs * mf + be * imf);
+                        *pixel++ = (gs * mf + ge * imf);
+                        *pixel++ = (rs * mf + re * imf);
+                        *pixel++ = (as * mf + ae * imf);
+                    }
+#else
+                    // Anti-alias the distance
                     if(useAA && (dist < 0.01f || dist > 0.99f)) {
                         const float       dd   = 4.0f - ceil( ( (dist < 0.5f) ? dist : (1.0f - dist) ) * 400 );
                         const Pt::int32_t ijm  = (dd <= 2.0f) ? 2 : dd;
@@ -530,6 +582,7 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
                     *pixel++ = (gs * mf + ge * imf);
                     *pixel++ = (rs * mf + re * imf);
                     *pixel++ = (as * mf + ae * imf);
+#endif
                 }
             }
             break;
