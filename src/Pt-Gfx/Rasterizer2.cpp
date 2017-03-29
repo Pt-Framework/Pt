@@ -469,7 +469,7 @@ void Rasterizer2::updateGradientBrush_gen2DRectangularGradient(Pt::int32_t width
     float ctrX, ctrY, xyRat, yxRat;
     updateGradientBrush_getCtrRatXY(ctrX, ctrY, xyRat, yxRat, width, height);
 
-    const float rrFac = 2.0f / scale / Gfx::Math::fastSqrt(xyRat * xyRat + yxRat * yxRat);
+    const float rrFac = 2.4f / scale / Gfx::Math::fastSqrt(xyRat * xyRat + yxRat * yxRat);
 
     // Calculate the rotation
     const float rad  = -angle * Gfx::Math::PiDiv180;
