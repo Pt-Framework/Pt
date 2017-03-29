@@ -73,11 +73,11 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
 
     // --- Part 1 ---
 
-    // Diamond gradient
-    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Diamond) );
+    // Rectangular gradient
+    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Rectangular) );
     painter.fillRect( RectF(PointF(20, 250), SizeF(100, 100)) );
 
-    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Diamond, 30.0f) );
+    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Rectangular, 30.0f) );
     painter.fillRect( RectF(PointF(20 + 180, 250), SizeF(100, 100)) );
 
     // Radial gradient
@@ -93,11 +93,11 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
 
     // --- Part 2 ---
 
-    // Diamond gradient
-    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Diamond ) );
+    // Rectangular gradient
+    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Rectangular ) );
     painter.fillRect( RectF(PointF(20, 250 + 135), SizeF(50, 100)) );
 
-    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Diamond, 30.0f) );
+    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Rectangular, 30.0f) );
     painter.fillRect( RectF(PointF(20 + 180, 250 + 135), SizeF(50, 100)) );
 
     // Radial gradient
@@ -111,13 +111,29 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
     painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Conical, 30.0f) );
     painter.fillRect( RectF(PointF(20 + 720, 250 + 135), SizeF(50, 100)) );
 
+    // Linear gradient
+    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Linear, 0.01f) );
+    painter.fillRect( RectF(PointF(20 + 90, 250 + 135), SizeF(50, 50)) );
+
+    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Linear, 15.0f) );
+    painter.fillRect( RectF(PointF(20 + 90 + 180, 250 + 135), SizeF(50, 50)) );
+
+    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Linear, -15.0f) );
+    painter.fillRect( RectF(PointF(20 + 90 + 360, 250 + 135), SizeF(50, 50)) );
+
+    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Linear, 0.01f) );
+    painter.fillRect( RectF(PointF(20 + 90 + 540, 250 + 135), SizeF(50, 100)) );
+
+    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Linear, 0.01f) );
+    painter.fillRect( RectF(PointF(20 + 90 + 720, 250 + 135), SizeF(100, 50)) );
+
     // --- Part 3 ---
 
-    // Diamond gradient
-    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Diamond) );
+    // Rectangular gradient
+    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Rectangular) );
     painter.fillRect( RectF(PointF(20, 250 + 270), SizeF(100, 50)) );
 
-    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Diamond, 30.0f) );
+    painter.setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Rectangular, 30.0f) );
     painter.fillRect( RectF(PointF(20 + 180, 250 + 270), SizeF(100, 50)) );
 
     // Radial gradient

@@ -124,12 +124,13 @@ BrushData::BrushData(const Color& from, const Color& to, Brush::GradientDirectio
 , _isNull(false)
 {
     switch(g) {
-        case Brush::Horizontal : _fillStyle = Brush::HorizontalGradient; break;
-        case Brush::Vertical   : _fillStyle = Brush::VerticalGradient;   break;
-        case Brush::Diamond    : _fillStyle = Brush::DiamondGradient;    break;
-        case Brush::Radial     : _fillStyle = Brush::RadialGradient;     break;
-        case Brush::Conical    : _fillStyle = Brush::ConicalGradient;    break;
-        default                : _fillStyle = Brush::Solid;              break;
+        case Brush::Horizontal  : _fillStyle = Brush::HorizontalGradient;  break;
+        case Brush::Vertical    : _fillStyle = Brush::VerticalGradient;    break;
+        case Brush::Linear      : _fillStyle = Brush::LinearGradient;      break;
+        case Brush::Rectangular : _fillStyle = Brush::RectangularGradient; break;
+        case Brush::Radial      : _fillStyle = Brush::RadialGradient;      break;
+        case Brush::Conical     : _fillStyle = Brush::ConicalGradient;     break;
+        default                 : _fillStyle = Brush::Solid;               break;
     }
 }
 

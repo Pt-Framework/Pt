@@ -44,22 +44,24 @@ class PT_GFX_API Brush
     public:
         enum FillStyle
         {
-            Solid              = 0,
-            Texture            = 1,
-            HorizontalGradient = 2,
-            VerticalGradient   = 3,
-            DiamondGradient    = 4,
-            RadialGradient     = 5,
-            ConicalGradient    = 6
+            Solid               = 0,
+            Texture             = 1,
+            HorizontalGradient  = 2,
+            VerticalGradient    = 3,
+            LinearGradient      = 4,
+            RectangularGradient = 5,
+            RadialGradient      = 6,
+            ConicalGradient     = 7
         };
 
         enum GradientDirection
         {
-            Horizontal = 0,
-            Vertical   = 1,
-            Diamond    = 2,
-            Radial     = 3,
-            Conical    = 4
+            Horizontal  = 0,
+            Vertical    = 1,
+            Linear      = 2,
+            Rectangular = 3,
+            Radial      = 4,
+            Conical     = 5
         };
 
     public:
