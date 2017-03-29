@@ -225,6 +225,14 @@ void Rasterizer2::strokeText( const Point& to, const Pt::String& text )
 // ===== Private Member Functions =======================================================
 // ======================================================================================
 
+void Rasterizer2::updateClip()
+{
+    const Rect imageRect( Point(0,0) , _image->size() );
+    _currentClip = _clip.isNull() ? imageRect : _clip.intersect( imageRect );
+
+    _text->setClip(_currentClip);
+}
+
 void Rasterizer2::updatePenPattern()
 {
     // Predefined patterns
@@ -333,273 +341,334 @@ void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
             return;
     }
 
-    // Determine the start and end colors
-    const Pt::uint8_t rs = _brush.color        ().red  () / 257;
-    const Pt::uint8_t gs = _brush.color        ().green() / 257;
-    const Pt::uint8_t bs = _brush.color        ().blue () / 257;
-    const Pt::uint8_t as = _brush.color        ().alpha() / 257;
-
-    const Pt::uint8_t re = _brush.gradientColor().red  () / 257;
-    const Pt::uint8_t ge = _brush.gradientColor().green() / 257;
-    const Pt::uint8_t be = _brush.gradientColor().blue () / 257;
-    const Pt::uint8_t ae = _brush.gradientColor().alpha() / 257;
-
-    // Create one-dimensional gradient
+    // Generate one-dimensional gradient
     if(width == 1 || height == 1) {
-        const Pt::int32_t  length = width + height - 1 - 1;
-              Pt::uint8_t* pixel  = _brushBuffer.data();
-        for(Pt::int32_t n = 0; n <= length; ++n) {
-            const Pt::int32_t f2 = FIXED_POINT_FROM_INT(n) / length;
-            const Pt::int32_t f1 = FIXED_POINT_CONSTANT_ONE - f2;
-            const Pt::uint8_t r1 = FIXED_POINT_TO_INT(rs * f1);
-            const Pt::uint8_t r2 = FIXED_POINT_TO_INT(re * f2);
-            const Pt::uint8_t g1 = FIXED_POINT_TO_INT(gs * f1);
-            const Pt::uint8_t g2 = FIXED_POINT_TO_INT(ge * f2);
-            const Pt::uint8_t b1 = FIXED_POINT_TO_INT(bs * f1);
-            const Pt::uint8_t b2 = FIXED_POINT_TO_INT(be * f2);
-            const Pt::uint8_t a1 = FIXED_POINT_TO_INT(as * f1);
-            const Pt::uint8_t a2 = FIXED_POINT_TO_INT(ae * f2);
-            *pixel++ = b1 + b2;
-            *pixel++ = g1 + g2;
-            *pixel++ = r1 + r2;
-            *pixel++ = a1 + a2;
-        }
+        updateGradientBrush_gen1DHorVerGradient(width, height);
         return;
     }
 
     // Create two-dimensional gradient
-    const float ctrX   = width  * 0.5f;
-    const float ctrY   = height * 0.5f;
-
-    const float xyRat  = (ctrX > ctrY) ? (ctrX / ctrY) : 1.0f;
-    const float yxRat  = (ctrY > ctrX) ? (ctrY / ctrX) : 1.0f;
-
-    const float angle  = _brush.angle();
-    const float scale  = _brush.scale();
-
-    const float rrFac  = 2.0f / scale / Gfx::Math::fastSqrt(xyRat * xyRat + yxRat * yxRat); // For rectangular and radial gradients
-
-#define CONICAL_GRADIENT_USE_SMOOTH_TRANSITION
-
-#ifndef CONICAL_GRADIENT_USE_SMOOTH_TRANSITION
-    const float ang45  =  angle - floor(angle / 45.0f) * 45.0f;
-    const float ang90  =  angle - floor(angle / 90.0f) * 90.0f;
-    const bool  asym   = (xyRat != yxRat);
-    const bool  useAA  = (_aaMode != AntiAliasingMode::None) && (ang90 >= 0.1f) && (asym || ang45 >= 0.1f);
-#endif
-
-    Pt::uint8_t* pixel = _brushBuffer.data();
-
     switch(_brush.fillStyle()) {
-        // Linear gradient
-        case Pt::Gfx::Brush::LinearGradient: {
-            // Calculate the rotation
-            const float angl = angle + 0.001f;
-            const float rad  = angl * Gfx::Math::PiDiv180 - Gfx::Math::PiDiv4;
-            const float sval = Gfx::Math::fastSin(rad);
-            const float cval = Gfx::Math::fastCos(rad);
-            // Define the reference line
-            const float wq = Gfx::Math::fastSqrt(width * width + height * height) * 0.25f * scale;
-            const float x1 = -wq;
-            const float y1 =  wq;
-            const float x2 =  wq;
-            const float y2 = -wq;
-            // Determine the rotated reference line
-            const float rx1 = ( sval * x1 + cval * y1) + ctrX;
-            const float ry1 = ( cval * x1 - sval * y1) + ctrY;
-            const float rx2 = ( sval * x2 + cval * y2) + ctrX;
-            const float ry2 = ( cval * x2 - sval * y2) + ctrY;
-            // Calculate the gradient of the rotated reference line
-            const float rm = (ry2 - ry1) / (rx1 - rx2);
-            // Generate the gradient
-            //static int qqq = -180; qqq += 180;
-            //setPen(Color::fromRgb8(255,255,255,255));
-            //strokeOnePixelLine(Point(20 + 90 + qqq + rx1, 250 + 135 + ry1), Point(20 + 90 + qqq + rx2, 250 + 135 + ry2), 0);
-            for(Pt::int32_t y = 0; y < height; ++y) {
-                // Calculate the scaling factor
-                float const p0 = rm * (y - ry1) + rx1;
-                float const p1 = rm * (y - ry2) + rx2;
-                float const d  = 1.0f / (p1 - p0);
-                for(Pt::int32_t x = 0; x < width; ++x) {
-                    // Calculate the distance and blending factor
-                    const float dist = d * (x - p0);
-                    const float mf   = (dist <= 0.0f) ? 0.0f : ( (dist >= 1.0f) ? 1.0f : dist );
-                    const float imf  = 1.0f - mf;
-                    // Put the pixel
-                    *pixel++ = (bs * mf + be * imf);
-                    *pixel++ = (gs * mf + ge * imf);
-                    *pixel++ = (rs * mf + re * imf);
-                    *pixel++ = (as * mf + ae * imf);
-                }
-            }
-            break;
-        }
-
-        // Rectangular gradient
-        case Pt::Gfx::Brush::RectangularGradient: {
-            // Calculate the rotation
-            const float rad  = -angle * Gfx::Math::PiDiv180;
-            const float sval = Gfx::Math::fastSin(rad);
-            const float cval = Gfx::Math::fastCos(rad);
-            // Calculate the inverse scaling factor
-            const float ilen = rrFac / (ctrX + ctrY);
-            // Generate the gradient
-            for(Pt::int32_t y = 0; y < height; ++y) {
-                // Calculate the delta Y
-                const float dy = (y - ctrY) * xyRat;
-                for(Pt::int32_t x = 0; x < width; ++x) {
-                    // Calculate the delta X
-                    const float dx = (x - ctrX) * yxRat;
-                    // Calculate the rotated deltas
-                    const float ry = fabs(-sval * dx + cval * dy);
-                    const float rx = fabs( cval * dx + sval * dy);
-                    // Calculate the distance and blending factor
-                    const float dist = (rx + ry) * ilen;
-                    const float mf   = (dist >= 1.0f) ? 1.0f : dist;
-                    const float imf  = 1.0f - mf;
-                    // Put the pixel
-                    *pixel++ = (bs * mf + be * imf);
-                    *pixel++ = (gs * mf + ge * imf);
-                    *pixel++ = (rs * mf + re * imf);
-                    *pixel++ = (as * mf + ae * imf);
-                }
-            }
-            break;
-        }
-
-        // Radial gradient
-        case Pt::Gfx::Brush::RadialGradient: {
-            // Calculate the inverse scaling factor
-            const float ilen = rrFac / Gfx::Math::fastSqrt(ctrX * ctrX + ctrY * ctrY);
-            // Generate the gradient
-            for(Pt::int32_t y = 0; y < height; ++y) {
-                // Calculate the delta Y
-                const float dy = (y - ctrY) * xyRat;
-                for(Pt::int32_t x = 0; x < width; ++x) {
-                    // Calculate the delta X
-                    const float dx = (x - ctrX) * yxRat;
-                    // Calculate the distance and blending factor
-                    const float dist = Gfx::Math::fastSqrt(dx * dx + dy * dy) * ilen;
-                    const float mf   = (dist >= 1.0f) ? 1.0f : dist;
-                    const float imf  = 1.0f - mf;
-                    // Put the pixel
-                    *pixel++ = (bs * mf + be * imf);
-                    *pixel++ = (gs * mf + ge * imf);
-                    *pixel++ = (rs * mf + re * imf);
-                    *pixel++ = (as * mf + ae * imf);
-                }
-            }
-            break;
-        }
-
-        // Conical gradient
-        case Pt::Gfx::Brush::ConicalGradient: {
-#ifdef CONICAL_GRADIENT_USE_SMOOTH_TRANSITION
-            // Calculate the middle color from the start and end colors
-            const Pt::uint8_t rm = ((Pt::uint32_t) rs + (Pt::uint32_t) re) / 2;
-            const Pt::uint8_t gm = ((Pt::uint32_t) gs + (Pt::uint32_t) ge) / 2;
-            const Pt::uint8_t bm = ((Pt::uint32_t) bs + (Pt::uint32_t) be) / 2;
-            const Pt::uint8_t am = ((Pt::uint32_t) as + (Pt::uint32_t) ae) / 2;
-            // Low and high limit for mixing color
-            const float loLim = 0.25f;
-            const float hiLim = 0.75f;
-#endif
-            // Calculate the rotation
-            const float rad  = angle * Gfx::Math::PiDiv180 - Gfx::Math::PiDiv2;
-            const float sval = Gfx::Math::fastSin(rad);
-            const float cval = Gfx::Math::fastCos(rad);
-            // Generate the gradient
-            for(Pt::int32_t y = 0; y < height; ++y) {
-                // Calculate the delta Y
-                const float dy = -(y - ctrY) * xyRat; // Sign inversion due to differences between cartesian and computer coordinate systems
-                for(Pt::int32_t x = 0; x < width; ++x) {
-                    // Calculate the delta X
-                    const float dx = (x - ctrX) * yxRat;
-                    // Calculate the rotated deltas
-                    const float ry = (-sval * dx + cval * dy);
-                    const float rx = ( cval * dx + sval * dy);
-                    // Calculate the distance
-                    float dist = (Gfx::Math::fastAtan2(ry, rx) + Gfx::Math::Pi) / Gfx::Math::PiMul2 / scale;
-                         if(dist < 0.0f) dist = 0.0f;
-                    else if(dist > 1.0f) dist = 1.0f;
-#ifdef CONICAL_GRADIENT_USE_SMOOTH_TRANSITION
-                    // Distance: 0.00f <= dist <= loLim --- blend from end color to middle color
-                    if(dist <= loLim) {
-                        // Calculate the blending factor
-                        const float mf   = dist / loLim;
-                        const float imf  = 1.0f - mf;
-                        // Put the pixel
-                        *pixel++ = (be * mf + bm * imf);
-                        *pixel++ = (ge * mf + gm * imf);
-                        *pixel++ = (re * mf + rm * imf);
-                        *pixel++ = (ae * mf + am * imf);
-                    }
-                    // Distance: hiLim <= dist <= 1.00f --- blend from middle color to start color
-                    else if(dist >= hiLim) { //
-                        // Calculate the blending factor
-                        const float mf   = (dist - hiLim) / loLim;
-                        const float imf  = 1.0f - mf;
-                        // Put the pixel
-                        *pixel++ = (bm * mf + bs * imf);
-                        *pixel++ = (gm * mf + gs * imf);
-                        *pixel++ = (rm * mf + rs * imf);
-                        *pixel++ = (am * mf + as * imf);
-                    }
-                    // Distance: loLim < dist < hiLim --- blend from start color to end color
-                    else {
-                        // Calculate the blending factor
-                        const float mf   = (dist - loLim) / (hiLim - loLim);
-                        const float imf  = 1.0f - mf;
-                        // Put the pixel
-                        *pixel++ = (bs * mf + be * imf);
-                        *pixel++ = (gs * mf + ge * imf);
-                        *pixel++ = (rs * mf + re * imf);
-                        *pixel++ = (as * mf + ae * imf);
-                    }
-#else
-                    // Anti-alias the distance
-                    if(useAA && (dist < 0.01f || dist > 0.99f)) {
-                        const float       dd   = 4.0f - ceil( ( (dist < 0.5f) ? dist : (1.0f - dist) ) * 400 );
-                        const Pt::int32_t ijm  = (dd <= 2.0f) ? 2 : dd;
-                        const float       ijm2 = (ijm - 1) * 0.5f;
-                        dist = 0.0f;
-                        for(Pt::int32_t i = 0; i < ijm; ++i) {
-                            for(Pt::int32_t j = 0; j < ijm; ++j) {
-                                const float dxs =  (x + i - ijm2 - ctrX) * yxRat;
-                                const float dys = -(y + j - ijm2 - ctrY) * xyRat; // Sign inversion due to differences between cartesian and computer coordinate systems
-                                const float rxs = ( cval * dxs + sval * dys);
-                                const float rys = (-sval * dxs + cval * dys);
-                                dist += (Gfx::Math::fastAtan2(rys, rxs) + Gfx::Math::Pi) / Gfx::Math::PiMul2;
-                            }
-                        }
-                        dist /= (ijm * ijm);
-                    }
-                    // Calculate the blending factor
-                    const float mf   = (dist <= 0.0f) ? 0.0f : ( (dist >= 1.0f) ? 1.0f : dist );
-                    const float imf  = 1.0f - mf;
-                    // Put the pixel
-                    *pixel++ = (bs * mf + be * imf);
-                    *pixel++ = (gs * mf + ge * imf);
-                    *pixel++ = (rs * mf + re * imf);
-                    *pixel++ = (as * mf + ae * imf);
-#endif
-                }
-            }
-            break;
-        }
-
-        // Invalid gradient
-        default:
-            return;
+        case Pt::Gfx::Brush::LinearGradient      : updateGradientBrush_gen2DLinearGradient     (width, height); break;
+        case Pt::Gfx::Brush::RectangularGradient : updateGradientBrush_gen2DRectangularGradient(width, height); break;
+        case Pt::Gfx::Brush::RadialGradient      : updateGradientBrush_gen2DRadialGradient     (width, height); break;
+        case Pt::Gfx::Brush::ConicalGradient     : updateGradientBrush_gen2DConicalGradient    (width, height); break;
+        default                                  : return;
     }
 }
 
-void Rasterizer2::updateClip()
+void Rasterizer2::updateGradientBrush_gen1DHorVerGradient(Pt::int32_t width, Pt::int32_t height)
 {
-    const Rect imageRect( Point(0,0) , _image->size() );
-    _currentClip = _clip.isNull() ? imageRect : _clip.intersect( imageRect );
+    // Determine the start and end colors
+    Pt::uint8_t sc[4], ec[4];
+    updateGradientBrush_getStartEndColors(sc, ec);
 
-    _text->setClip(_currentClip);
+    const Pt::uint8_t rs = sc[0], gs = sc[1], bs = sc[2], as = sc[2];
+    const Pt::uint8_t re = ec[0], ge = ec[1], be = ec[2], ae = ec[2];
+
+    // Generate the gradient
+    const Pt::int32_t length = width + height - 1 - 1;
+
+    Pt::uint8_t* pixel = _brushBuffer.data();
+
+    for(Pt::int32_t n = 0; n <= length; ++n) {
+        const Pt::int32_t f2 = FIXED_POINT_FROM_INT(n) / length;
+        const Pt::int32_t f1 = FIXED_POINT_CONSTANT_ONE - f2;
+        const Pt::uint8_t r1 = FIXED_POINT_TO_INT(rs * f1);
+        const Pt::uint8_t r2 = FIXED_POINT_TO_INT(re * f2);
+        const Pt::uint8_t g1 = FIXED_POINT_TO_INT(gs * f1);
+        const Pt::uint8_t g2 = FIXED_POINT_TO_INT(ge * f2);
+        const Pt::uint8_t b1 = FIXED_POINT_TO_INT(bs * f1);
+        const Pt::uint8_t b2 = FIXED_POINT_TO_INT(be * f2);
+        const Pt::uint8_t a1 = FIXED_POINT_TO_INT(as * f1);
+        const Pt::uint8_t a2 = FIXED_POINT_TO_INT(ae * f2);
+        *pixel++ = b1 + b2;
+        *pixel++ = g1 + g2;
+        *pixel++ = r1 + r2;
+        *pixel++ = a1 + a2;
+    }
+}
+
+void Rasterizer2::updateGradientBrush_gen2DLinearGradient(Pt::int32_t width, Pt::int32_t height)
+{
+    // Determine the start and end colors
+    Pt::uint8_t sc[4], ec[4];
+    updateGradientBrush_getStartEndColors(sc, ec);
+
+    const Pt::uint8_t rs = sc[0], gs = sc[1], bs = sc[2], as = sc[2];
+    const Pt::uint8_t re = ec[0], ge = ec[1], be = ec[2], ae = ec[2];
+
+    // Extract and calculate the parameters
+    const float angle = _brush.angle();
+    const float scale = _brush.scale();
+
+    float ctrX, ctrY, xyRat, yxRat;
+    updateGradientBrush_getCtrRatXY(ctrX, ctrY, xyRat, yxRat, width, height);
+
+    // Calculate the rotation
+    const float angl = angle + 0.001f;
+    const float rad  = angl * Gfx::Math::PiDiv180 - Gfx::Math::PiDiv4;
+    const float sval = Gfx::Math::fastSin(rad);
+    const float cval = Gfx::Math::fastCos(rad);
+
+    // Define the reference line
+    const float wq = Gfx::Math::fastSqrt(width * width + height * height) * 0.25f * scale;
+    const float x1 = -wq;
+    const float y1 =  wq;
+    const float x2 =  wq;
+    const float y2 = -wq;
+
+    // Determine the rotated reference line
+    const float rx1 = ( sval * x1 + cval * y1) + ctrX;
+    const float ry1 = ( cval * x1 - sval * y1) + ctrY;
+    const float rx2 = ( sval * x2 + cval * y2) + ctrX;
+    const float ry2 = ( cval * x2 - sval * y2) + ctrY;
+
+    // Calculate the gradient of the rotated reference line
+    const float rm = (ry2 - ry1) / (rx1 - rx2);
+
+    //static int qqq = -180; qqq += 180;
+    //setPen(Color::fromRgb8(255,255,255,255));
+    //strokeOnePixelLine(Point(20 + 90 + qqq + rx1, 250 + 135 + ry1), Point(20 + 90 + qqq + rx2, 250 + 135 + ry2), 0);
+
+    // Generate the gradient
+    Pt::uint8_t* pixel = _brushBuffer.data();
+
+    for(Pt::int32_t y = 0; y < height; ++y) {
+        // Calculate the scaling factor
+        float const p0 = rm * (y - ry1) + rx1;
+        float const p1 = rm * (y - ry2) + rx2;
+        float const d  = 1.0f / (p1 - p0);
+        for(Pt::int32_t x = 0; x < width; ++x) {
+            // Calculate the distance and blending factor
+            const float dist = d * (x - p0);
+            const float mf   = (dist <= 0.0f) ? 0.0f : ( (dist >= 1.0f) ? 1.0f : dist );
+            const float imf  = 1.0f - mf;
+            // Put the pixel
+            *pixel++ = (bs * mf + be * imf);
+            *pixel++ = (gs * mf + ge * imf);
+            *pixel++ = (rs * mf + re * imf);
+            *pixel++ = (as * mf + ae * imf);
+        }
+    }
+}
+
+void Rasterizer2::updateGradientBrush_gen2DRectangularGradient(Pt::int32_t width, Pt::int32_t height)
+{
+    // Determine the start and end colors
+    Pt::uint8_t sc[4], ec[4];
+    updateGradientBrush_getStartEndColors(sc, ec);
+
+    const Pt::uint8_t rs = sc[0], gs = sc[1], bs = sc[2], as = sc[2];
+    const Pt::uint8_t re = ec[0], ge = ec[1], be = ec[2], ae = ec[2];
+
+    // Extract and calculate the parameters
+    const float angle = _brush.angle();
+    const float scale = _brush.scale();
+
+    float ctrX, ctrY, xyRat, yxRat;
+    updateGradientBrush_getCtrRatXY(ctrX, ctrY, xyRat, yxRat, width, height);
+
+    const float rrFac = 2.0f / scale / Gfx::Math::fastSqrt(xyRat * xyRat + yxRat * yxRat);
+
+    // Calculate the rotation
+    const float rad  = -angle * Gfx::Math::PiDiv180;
+    const float sval = Gfx::Math::fastSin(rad);
+    const float cval = Gfx::Math::fastCos(rad);
+
+    // Calculate the inverse scaling factor
+    const float ilen = rrFac / (ctrX + ctrY);
+
+    // Generate the gradient
+    Pt::uint8_t* pixel = _brushBuffer.data();
+
+    for(Pt::int32_t y = 0; y < height; ++y) {
+        // Calculate the delta Y
+        const float dy = (y - ctrY) * xyRat;
+        for(Pt::int32_t x = 0; x < width; ++x) {
+            // Calculate the delta X
+            const float dx = (x - ctrX) * yxRat;
+            // Calculate the rotated deltas
+            const float ry = fabs(-sval * dx + cval * dy);
+            const float rx = fabs( cval * dx + sval * dy);
+            // Calculate the distance and blending factor
+            const float dist = (rx + ry) * ilen;
+            const float mf   = (dist >= 1.0f) ? 1.0f : dist;
+            const float imf  = 1.0f - mf;
+            // Put the pixel
+            *pixel++ = (bs * mf + be * imf);
+            *pixel++ = (gs * mf + ge * imf);
+            *pixel++ = (rs * mf + re * imf);
+            *pixel++ = (as * mf + ae * imf);
+        }
+    }
+}
+
+void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width, Pt::int32_t height)
+{
+    // Determine the start and end colors
+    Pt::uint8_t sc[4], ec[4];
+    updateGradientBrush_getStartEndColors(sc, ec);
+
+    const Pt::uint8_t rs = sc[0], gs = sc[1], bs = sc[2], as = sc[2];
+    const Pt::uint8_t re = ec[0], ge = ec[1], be = ec[2], ae = ec[2];
+
+    // Extract and calculate the parameters
+    const float scale = _brush.scale();
+
+    float ctrX, ctrY, xyRat, yxRat;
+    updateGradientBrush_getCtrRatXY(ctrX, ctrY, xyRat, yxRat, width, height);
+
+    const float rrFac = 2.0f / scale / Gfx::Math::fastSqrt(xyRat * xyRat + yxRat * yxRat);
+
+    // Calculate the inverse scaling factor
+    const float ilen = rrFac / Gfx::Math::fastSqrt(ctrX * ctrX + ctrY * ctrY);
+
+    // Generate the gradient
+    Pt::uint8_t* pixel = _brushBuffer.data();
+
+    for(Pt::int32_t y = 0; y < height; ++y) {
+        // Calculate the delta Y
+        const float dy = (y - ctrY) * xyRat;
+        for(Pt::int32_t x = 0; x < width; ++x) {
+            // Calculate the delta X
+            const float dx = (x - ctrX) * yxRat;
+            // Calculate the distance and blending factor
+            const float dist = Gfx::Math::fastSqrt(dx * dx + dy * dy) * ilen;
+            const float mf   = (dist >= 1.0f) ? 1.0f : dist;
+            const float imf  = 1.0f - mf;
+            // Put the pixel
+            *pixel++ = (bs * mf + be * imf);
+            *pixel++ = (gs * mf + ge * imf);
+            *pixel++ = (rs * mf + re * imf);
+            *pixel++ = (as * mf + ae * imf);
+        }
+    }
+}
+
+void Rasterizer2::updateGradientBrush_gen2DConicalGradient(Pt::int32_t width, Pt::int32_t height)
+{
+#define CONICAL_GRADIENT_USE_SMOOTH_TRANSITION
+
+    // Determine the start and end colors
+    Pt::uint8_t sc[4], ec[4];
+    updateGradientBrush_getStartEndColors(sc, ec);
+
+    const Pt::uint8_t rs = sc[0], gs = sc[1], bs = sc[2], as = sc[2];
+    const Pt::uint8_t re = ec[0], ge = ec[1], be = ec[2], ae = ec[2];
+
+#ifdef CONICAL_GRADIENT_USE_SMOOTH_TRANSITION
+    // Calculate the middle color from the start and end colors
+    const Pt::uint8_t rm = ((Pt::uint32_t) rs + (Pt::uint32_t) re) / 2;
+    const Pt::uint8_t gm = ((Pt::uint32_t) gs + (Pt::uint32_t) ge) / 2;
+    const Pt::uint8_t bm = ((Pt::uint32_t) bs + (Pt::uint32_t) be) / 2;
+    const Pt::uint8_t am = ((Pt::uint32_t) as + (Pt::uint32_t) ae) / 2;
+
+    // Low and high limit for mixing color
+    const float loLim = 0.25f;
+    const float hiLim = 0.75f;
+#endif
+
+    // Extract and calculate the parameters
+    const float angle = _brush.angle();
+    const float scale = _brush.scale();
+
+    float ctrX, ctrY, xyRat, yxRat;
+    updateGradientBrush_getCtrRatXY(ctrX, ctrY, xyRat, yxRat, width, height);
+
+#ifndef CONICAL_GRADIENT_USE_SMOOTH_TRANSITION
+    const float ang45 =  angle - floor(angle / 45.0f) * 45.0f;
+    const float ang90 =  angle - floor(angle / 90.0f) * 90.0f;
+    const bool  asym  = (xyRat != yxRat);
+    const bool  useAA = (_aaMode != AntiAliasingMode::None) && (ang90 >= 0.1f) && (asym || ang45 >= 0.1f);
+#endif
+
+    // Calculate the rotation
+    const float rad  = angle * Gfx::Math::PiDiv180 - Gfx::Math::PiDiv2;
+    const float sval = Gfx::Math::fastSin(rad);
+    const float cval = Gfx::Math::fastCos(rad);
+
+    // Generate the gradient
+    Pt::uint8_t* pixel = _brushBuffer.data();
+
+    for(Pt::int32_t y = 0; y < height; ++y) {
+        // Calculate the delta Y
+        const float dy = -(y - ctrY) * xyRat; // Sign inversion due to differences between cartesian and computer coordinate systems
+        for(Pt::int32_t x = 0; x < width; ++x) {
+            // Calculate the delta X
+            const float dx = (x - ctrX) * yxRat;
+            // Calculate the rotated deltas
+            const float ry = (-sval * dx + cval * dy);
+            const float rx = ( cval * dx + sval * dy);
+            // Calculate the distance
+            float dist = (Gfx::Math::fastAtan2(ry, rx) + Gfx::Math::Pi) / Gfx::Math::PiMul2 / scale;
+                 if(dist < 0.0f) dist = 0.0f;
+            else if(dist > 1.0f) dist = 1.0f;
+#ifdef CONICAL_GRADIENT_USE_SMOOTH_TRANSITION
+            // Distance: 0.00f <= dist <= loLim --- blend from end color to middle color
+            if(dist <= loLim) {
+                // Calculate the blending factor
+                const float mf   = dist / loLim;
+                const float imf  = 1.0f - mf;
+                // Put the pixel
+                *pixel++ = (be * mf + bm * imf);
+                *pixel++ = (ge * mf + gm * imf);
+                *pixel++ = (re * mf + rm * imf);
+                *pixel++ = (ae * mf + am * imf);
+            }
+            // Distance: hiLim <= dist <= 1.00f --- blend from middle color to start color
+            else if(dist >= hiLim) { //
+                // Calculate the blending factor
+                const float mf   = (dist - hiLim) / loLim;
+                const float imf  = 1.0f - mf;
+                // Put the pixel
+                *pixel++ = (bm * mf + bs * imf);
+                *pixel++ = (gm * mf + gs * imf);
+                *pixel++ = (rm * mf + rs * imf);
+                *pixel++ = (am * mf + as * imf);
+            }
+            // Distance: loLim < dist < hiLim --- blend from start color to end color
+            else {
+                // Calculate the blending factor
+                const float mf   = (dist - loLim) / (hiLim - loLim);
+                const float imf  = 1.0f - mf;
+                // Put the pixel
+                *pixel++ = (bs * mf + be * imf);
+                *pixel++ = (gs * mf + ge * imf);
+                *pixel++ = (rs * mf + re * imf);
+                *pixel++ = (as * mf + ae * imf);
+            }
+#else
+            // Anti-alias the distance
+            if(useAA && (dist < 0.01f || dist > 0.99f)) {
+                const float       dd   = 4.0f - ceil( ( (dist < 0.5f) ? dist : (1.0f - dist) ) * 400 );
+                const Pt::int32_t ijm  = (dd <= 2.0f) ? 2 : dd;
+                const float       ijm2 = (ijm - 1) * 0.5f;
+                dist = 0.0f;
+                for(Pt::int32_t i = 0; i < ijm; ++i) {
+                    for(Pt::int32_t j = 0; j < ijm; ++j) {
+                        const float dxs =  (x + i - ijm2 - ctrX) * yxRat;
+                        const float dys = -(y + j - ijm2 - ctrY) * xyRat; // Sign inversion due to differences between cartesian and computer coordinate systems
+                        const float rxs = ( cval * dxs + sval * dys);
+                        const float rys = (-sval * dxs + cval * dys);
+                        dist += (Gfx::Math::fastAtan2(rys, rxs) + Gfx::Math::Pi) / Gfx::Math::PiMul2;
+                    }
+                }
+                dist /= (ijm * ijm);
+            }
+            // Calculate the blending factor
+            const float mf   = (dist <= 0.0f) ? 0.0f : ( (dist >= 1.0f) ? 1.0f : dist );
+            const float imf  = 1.0f - mf;
+            // Put the pixel
+            *pixel++ = (bs * mf + be * imf);
+            *pixel++ = (gs * mf + ge * imf);
+            *pixel++ = (rs * mf + re * imf);
+            *pixel++ = (as * mf + ae * imf);
+#endif
+        }
+    }
+
+#undef CONICAL_GRADIENT_USE_SMOOTH_TRANSITION
 }
 
 

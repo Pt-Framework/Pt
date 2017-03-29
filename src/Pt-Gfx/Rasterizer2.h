@@ -224,9 +224,19 @@ class Rasterizer2
 
     private:
         // --- Generic helper functions ---
-        void updatePenPattern();
-        void updateGradientBrush(Pt::int32_t width, Pt::int32_t height);
         void updateClip();
+
+        void updatePenPattern();
+
+        void updateGradientBrush(Pt::int32_t width, Pt::int32_t height);
+        void updateGradientBrush_gen1DHorVerGradient(Pt::int32_t width, Pt::int32_t height);
+        void updateGradientBrush_gen2DLinearGradient(Pt::int32_t width, Pt::int32_t height);
+        void updateGradientBrush_gen2DRectangularGradient(Pt::int32_t width, Pt::int32_t height);
+        void updateGradientBrush_gen2DRadialGradient(Pt::int32_t width, Pt::int32_t height);
+        void updateGradientBrush_gen2DConicalGradient(Pt::int32_t width, Pt::int32_t height);
+
+        inline void updateGradientBrush_getStartEndColors(Pt::uint8_t rgbaStart[4], Pt::uint8_t rgbaEnd[4]);
+        inline void updateGradientBrush_getCtrRatXY(float& ctrX, float& ctrY, float &xyRat, float& yxRat, Pt::int32_t width, Pt::int32_t height);
 
         inline Pt::uint8_t patternBuffer1PAlpha(Pt::int32_t idx) const;
         inline Pt::uint8_t patternBuffer1PAlphaPolar(Pt::int32_t x, Pt::int32_t y, float scale) const;
@@ -407,6 +417,28 @@ const Pt::uint8_t* Rasterizer2::patternBufferMP64() const
 // ======================================================================================
 // ===== Inlined and/or Templated Private Member Functions ==============================
 // ======================================================================================
+
+void Rasterizer2::updateGradientBrush_getStartEndColors(Pt::uint8_t rgbaStart[4], Pt::uint8_t rgbaEnd[4])
+{
+    rgbaStart[0] = _brush.color        ().red  () / 257;
+    rgbaStart[1] = _brush.color        ().green() / 257;
+    rgbaStart[2] = _brush.color        ().blue () / 257;
+    rgbaStart[3] = _brush.color        ().alpha() / 257;
+
+    rgbaEnd  [0] = _brush.gradientColor().red  () / 257;
+    rgbaEnd  [1] = _brush.gradientColor().green() / 257;
+    rgbaEnd  [2] = _brush.gradientColor().blue () / 257;
+    rgbaEnd  [3] = _brush.gradientColor().alpha() / 257;
+}
+
+void Rasterizer2::updateGradientBrush_getCtrRatXY(float& ctrX, float& ctrY, float &xyRat, float& yxRat, Pt::int32_t width, Pt::int32_t height)
+{
+    ctrX  = width  * 0.5f;
+    ctrY  = height * 0.5f;
+
+    xyRat = (ctrX > ctrY) ? (ctrX / ctrY) : 1.0f;
+    yxRat = (ctrY > ctrX) ? (ctrY / ctrX) : 1.0f;
+}
 
 Pt::uint8_t Rasterizer2::patternBuffer1PAlpha(Pt::int32_t idx) const
 { return _patternBuffer1P[ idx % FIXED_POINT_TO_INT(PATTERN_BUFFER_COUNTER_MAX1P) ]; }
