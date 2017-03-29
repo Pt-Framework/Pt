@@ -74,7 +74,7 @@ class PT_GFX_API Brush
         // TODO: texture offset
         Brush(const Image& texture);
 
-        Brush(const Color& from, const Color& to, GradientDirection g, float angle = 0.0f);
+        Brush(const Color& from, const Color& to, GradientDirection g, float angleDeg = 0.0f, float scale = 1.0f);
 
         FillStyle fillStyle() const;
 
@@ -85,6 +85,8 @@ class PT_GFX_API Brush
         const Image& texture() const;
 
         float angle() const;
+
+        float scale() const;
 
         bool isNull() const;
 
@@ -102,7 +104,7 @@ class BrushData
 
         BrushData(const Image& texture);
 
-        BrushData(const Color& from, const Color& to, Brush::GradientDirection g, float angle);
+        BrushData(const Color& from, const Color& to, Brush::GradientDirection g, float angleDeg, float scale);
 
         ~BrushData();
 
@@ -116,6 +118,8 @@ class BrushData
 
         float angle() const;
 
+        float scale() const;
+
         bool isNull() const;
 
     private:
@@ -124,6 +128,7 @@ class BrushData
         Image            _texture;
         Color            _gradientColor;
         float            _angle;
+        float            _scale;
         bool             _isNull;
 };
 

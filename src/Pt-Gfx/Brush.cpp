@@ -50,8 +50,8 @@ Brush::Brush(const Image& texture)
 }
 
 
-Brush::Brush(const Color& from, const Color& to, GradientDirection g, float angle)
-: _brushData( new BrushData(from, to, g, angle) )
+Brush::Brush(const Color& from, const Color& to, GradientDirection g, float angleDeg, float scale)
+: _brushData( new BrushData(from, to, g, angleDeg, scale) )
 {
 }
 
@@ -86,6 +86,12 @@ float Brush::angle() const
 }
 
 
+float Brush::scale() const
+{
+    return _brushData->scale();
+}
+
+
 bool Brush::isNull() const
 {
     return _brushData->isNull();
@@ -117,10 +123,11 @@ BrushData::BrushData(const Image& texture)
 }
 
 
-BrushData::BrushData(const Color& from, const Color& to, Brush::GradientDirection g, float angle)
+BrushData::BrushData(const Color& from, const Color& to, Brush::GradientDirection g, float angleDeg, float scale)
 : _color(from)
 , _gradientColor(to)
-, _angle(angle)
+, _angle(angleDeg)
+, _scale(scale)
 , _isNull(false)
 {
     switch(g) {
@@ -167,6 +174,12 @@ const Image& BrushData::texture() const
 float BrushData::angle() const
 {
     return _angle;
+}
+
+
+float BrushData::scale() const
+{
+    return _scale;
 }
 
 
