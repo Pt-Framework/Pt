@@ -146,9 +146,11 @@ Gfx::SizeF FlowLayout::onMeasureHorizontal(const SizePolicy& policy)
 
         item->measure(itemPolicy);
         Gfx::SizeF prefSize = item->preferredSize();
-        
+        prefSize.addHeight( padding().topBottom() + item->margin().topBottom() );
+
         contentSize.addWidth( prefSize.width() );
-        contentSize.setHeight( policy.height() );
+        contentSize.setHeight( std::max(contentSize.height(), 
+                                        prefSize.height()) );
     }
 
     return contentSize;
@@ -171,7 +173,7 @@ void FlowLayout::onLayoutLeft(const Gfx::RectF& rect, bool center)
           itemsWidth += item->margin().leftRight();
         }
 
-        posX = (preferredSize().width() - itemsWidth) / 2;
+        posX = (rect.width() - itemsWidth) / 2;
     }
 
     std::vector<Widget*>::const_iterator it = widgets().begin();
@@ -262,8 +264,10 @@ Gfx::SizeF FlowLayout::onMeasureVertical(const SizePolicy& policy)
         
         item->measure(itemPolicy);
         Gfx::SizeF prefSize = item->preferredSize();
-        
-        contentSize.setWidth( policy.width() );
+        prefSize.addWidth( padding().leftRight() + item->margin().leftRight() );
+
+        contentSize.setWidth( std::max(contentSize.width(), 
+                                       prefSize.width())  );
         contentSize.addHeight( prefSize.height() );
     }
 

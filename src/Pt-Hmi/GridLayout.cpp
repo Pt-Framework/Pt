@@ -53,6 +53,18 @@ void GridLayout::setOrientation(Orientation o, std::size_t span)
 }
 
 
+void GridLayout::addItem(Widget& w)
+{
+    add(w);
+}
+
+
+void GridLayout::removeItem(Widget& w)
+{
+    remove(w);
+}
+
+
 Gfx::SizeF GridLayout::onMeasure(const SizePolicy& policy)
 {
     Gfx::SizeF contentSize;

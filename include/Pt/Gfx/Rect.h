@@ -113,6 +113,16 @@ class BasicRect
             _s = s;
         }
 
+        void setWidth(T w)
+        {
+            _s.setWidth(w);
+        }
+
+        void setHeight(T h)
+        {
+            _s.setHeight(h);
+        }
+
         T x() const
         {
             return _p.x();

@@ -723,6 +723,10 @@ void Widget::repaint(const Gfx::RectF& rect)
 
     Gfx::RectF widgetRect = rect.intersect( Gfx::RectF(Gfx::PointF(0,0),
                                                        this->size() ) );
+
+    // TODO: remove this hack when Size is integer based
+    widgetRect.setHeight( std::floor(widgetRect.height() + 0.5) );
+
     PaintEvent pev( vid(), widgetRect);
     Application::instance().loop().commitEvent(pev);
 
