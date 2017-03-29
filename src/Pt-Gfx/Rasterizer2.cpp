@@ -363,8 +363,8 @@ void Rasterizer2::updateGradientBrush_gen1DHorVerGradient(Pt::int32_t width, Pt:
     Pt::uint8_t sc[4], ec[4];
     updateGradientBrush_getStartEndColors(sc, ec);
 
-    const Pt::uint8_t rs = sc[0], gs = sc[1], bs = sc[2], as = sc[2];
-    const Pt::uint8_t re = ec[0], ge = ec[1], be = ec[2], ae = ec[2];
+    const Pt::uint8_t rs = sc[0], gs = sc[1], bs = sc[2], as = sc[3];
+    const Pt::uint8_t re = ec[0], ge = ec[1], be = ec[2], ae = ec[3];
 
     // Generate the gradient
     const Pt::int32_t length = width + height - 1 - 1;
@@ -395,8 +395,8 @@ void Rasterizer2::updateGradientBrush_gen2DLinearGradient(Pt::int32_t width, Pt:
     Pt::uint8_t sc[4], ec[4];
     updateGradientBrush_getStartEndColors(sc, ec);
 
-    const Pt::uint8_t rs = sc[0], gs = sc[1], bs = sc[2], as = sc[2];
-    const Pt::uint8_t re = ec[0], ge = ec[1], be = ec[2], ae = ec[2];
+    const Pt::uint8_t rs = sc[0], gs = sc[1], bs = sc[2], as = sc[3];
+    const Pt::uint8_t re = ec[0], ge = ec[1], be = ec[2], ae = ec[3];
 
     // Extract and calculate the parameters
     const float angle = _brush.angle();
@@ -459,8 +459,8 @@ void Rasterizer2::updateGradientBrush_gen2DRectangularGradient(Pt::int32_t width
     Pt::uint8_t sc[4], ec[4];
     updateGradientBrush_getStartEndColors(sc, ec);
 
-    const Pt::uint8_t rs = sc[0], gs = sc[1], bs = sc[2], as = sc[2];
-    const Pt::uint8_t re = ec[0], ge = ec[1], be = ec[2], ae = ec[2];
+    const Pt::uint8_t rs = sc[0], gs = sc[1], bs = sc[2], as = sc[3];
+    const Pt::uint8_t re = ec[0], ge = ec[1], be = ec[2], ae = ec[3];
 
     // Extract and calculate the parameters
     const float angle = _brush.angle();
@@ -510,8 +510,8 @@ void Rasterizer2::updateGradientBrush_gen2DRadialGradient(Pt::int32_t width, Pt:
     Pt::uint8_t sc[4], ec[4];
     updateGradientBrush_getStartEndColors(sc, ec);
 
-    const Pt::uint8_t rs = sc[0], gs = sc[1], bs = sc[2], as = sc[2];
-    const Pt::uint8_t re = ec[0], ge = ec[1], be = ec[2], ae = ec[2];
+    const Pt::uint8_t rs = sc[0], gs = sc[1], bs = sc[2], as = sc[3];
+    const Pt::uint8_t re = ec[0], ge = ec[1], be = ec[2], ae = ec[3];
 
     // Extract and calculate the parameters
     const float scale = _brush.scale();
@@ -554,8 +554,8 @@ void Rasterizer2::updateGradientBrush_gen2DConicalGradient(Pt::int32_t width, Pt
     Pt::uint8_t sc[4], ec[4];
     updateGradientBrush_getStartEndColors(sc, ec);
 
-    const Pt::uint8_t rs = sc[0], gs = sc[1], bs = sc[2], as = sc[2];
-    const Pt::uint8_t re = ec[0], ge = ec[1], be = ec[2], ae = ec[2];
+    const Pt::uint8_t rs = sc[0], gs = sc[1], bs = sc[2], as = sc[3];
+    const Pt::uint8_t re = ec[0], ge = ec[1], be = ec[2], ae = ec[3];
 
 #ifdef CONICAL_GRADIENT_USE_SMOOTH_TRANSITION
     // Calculate the middle color from the start and end colors

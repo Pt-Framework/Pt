@@ -78,7 +78,7 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_SOLID_THICK_LINE              0 // (including bezier)
 #define TEST_DRAW_PATTERNED_THICK_LINE          0 // (including bezier)
 
-#define TEST_DRAW_OMPF_RECTANGLES               1 // (including thick and filled)
+#define TEST_DRAW_OMPF_RECTANGLES               0 // (including thick and filled)
 #define TEST_DRAW_ROUND_OMPF_RECTANGLES         0 // (including thick and filled)
 
 #define TEST_DRAW_ELLIPSES_ARCS                 0
@@ -93,7 +93,7 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS 0
 #define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  0
 
-#define TEST_DRAW_PATH                          0 // (including thick and filled)
+#define TEST_DRAW_PATH                          1 // (including thick and filled)
 #define TEST_DRAW_EXTRA                         1
 
 #define TEST_COMPARE_WITH_OLD_PAINTER           0 // (for some shapes only)
