@@ -30,7 +30,7 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
     path.lineTo             (230,  -90);
     path.lineTo             (170,  -45);
     path.endPath            ();
-    ip2->setPen( Pen(Color::fromRgb8(255, 0, 255, 175), 6, Pen::Solid, Pen::ButtCap, Pen::MiterJoin) );
+    ip2->setPen( Pen(Color::fromRgb8(255, 0, 255, 175), 3, Pen::Solid, Pen::ButtCap, Pen::MiterJoin) );
     ip2->drawPath(path, matrix, false);
 
     const double cxy[] = { // CW
@@ -44,7 +44,7 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
     path.moveTo             (0, 0);
     path.relGenericNBezierTo(sizeof(cxy) / sizeof(cxy[0]) / 2, cxy, 170, -45);
     path.endPath            ();
-    ip2->setPen( Pen(Color::fromRgb8(127, 255, 255, 175), 6, Pen::Solid, Pen::ButtCap, Pen::MiterJoin) );
+    ip2->setPen( Pen(Color::fromRgb8(127, 255, 255, 175), 3, Pen::Solid, Pen::ButtCap, Pen::MiterJoin) );
     ip2->drawPath(path, matrix, false);
 
     // Round-Hole caps

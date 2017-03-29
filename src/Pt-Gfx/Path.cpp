@@ -27,9 +27,6 @@
   02110-1301 USA
 */
 
-#warning 123
-#include <stdio.h>
-
 #include <Pt/SourceInfo.h>
 
 #include <Pt/Gfx/Path.h>
@@ -80,29 +77,29 @@ static inline void generateGenericNBezierPoints(std::vector<PointF>& dst, double
 
     pts.insert(pts.end(), points.begin(), points.end());
 
-    /*
-    // ### TODO: Complete the support for N-th degree spline curve !!! ###
-
     // Calculate the approximate length of the curve
-    const double dx43 = x4 - x3;
-    const double dy43 = y4 - y3;
-    const double dx32 = x3 - x2;
-    const double dy32 = y3 - y2;
-    const double dx12 = x1 - x2;
-    const double dy12 = y1 - y2;
-    const double l43  = ::sqrt(dx43 * dx43 + dy43 * dy43);
-    const double l32  = ::sqrt(dx32 * dx32 + dy32 * dy32);
-    const double l12  = ::sqrt(dx12 * dx12 + dy12 * dy12);
-    const double lb   = l43 + l32 + l12;
+    double clen = 0.0;
+    for(size_t i = 0; i < (points.size() / 2 - 1); ++i) {
+        const size_t cidx =  i      * 2;
+        const size_t nidx = (i + 1) * 2;
+        const double x1   = pts[cidx + 0];
+        const double y1   = pts[cidx + 1];
+        const double x2   = pts[nidx + 0];
+        const double y2   = pts[nidx + 1];
+        const double dx   = x2 - x1;
+        const double dy   = y2 - y1;
+        clen += ::sqrt(dx * dx + dy * dy);
+    }
 
     // Determine the number of segments
-    Pt::int32_t nSegs = round(lb * smoothness / 8);
-    if(nSegs < (pts.size() + 1)) nSegs = (pts.size() + 1);
-    */
-    Pt::int32_t nSegs = 25;
+    const Pt::int32_t minNS = pts.size() / 2 + 1;
+          Pt::int32_t nSegs = round(clen * smoothness / 24);
+    if(nSegs < minNS) nSegs = minNS;
 
+    // Calculate the inverse multiplication factor
     const double nSegs1i = 1.0 / (nSegs - 1);
 
+    // Generate the points
     for(Pt::int32_t i = 0; i < nSegs; ++i) {
         // Calculate the coordinates
         const double t  = i * nSegs1i;
@@ -134,8 +131,10 @@ static inline void generateCubicBezierPoints(std::vector<PointF>& dst, double x1
     Pt::int32_t nSegs = round(lb * smoothness / 16) + 4;
     if(nSegs < 9) nSegs = 9;
 
+    // Calculate the inverse multiplication factor
     const double nSegs1i = 1.0 / (nSegs - 1);
 
+    // Generate the points
     // PB = (1 - t) * (1 - t) * (1 - t) * P1 + 3 * t * (1 - t) * (1 - t) * P2 + 3 * t * t * (1 - t) * P3 + t * t * t * P4
     //      ---------------------------        -------------------------        -------------------        ---------
     //      a                                  b                                c                          d
@@ -179,8 +178,10 @@ static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, doubl
     Pt::int32_t nSegs = round(lb * smoothness / 16) + 2;
     if(nSegs < 5) nSegs = 5;
 
+    // Calculate the inverse multiplication factor
     const double nSegs1i = 1.0 / (nSegs - 1);
 
+    // Generate the points
     // PB = (1 - t) * (1 - t) * P1 + 2 * t * (1 - t) * P2 + t * t * P3
     //      -----------------        ---------------        -----
     //      a                        b                      c
