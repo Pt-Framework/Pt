@@ -660,7 +660,7 @@ void Window::onLayoutEvent(const LayoutEvent& ev)
     if(_layouts > 0)
         return;
 
-    std::clog << "--- LAYOUT ---" << std::endl;
+    //std::clog << "--- LAYOUT ---" << std::endl;
 
     SizePolicy policy(SizePolicy::Fixed, SizePolicy::Fixed);
     policy.setSize(_size);

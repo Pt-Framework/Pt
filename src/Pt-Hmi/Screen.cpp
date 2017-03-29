@@ -273,8 +273,8 @@ void Screen::onUpdateEvent(const UpdateEvent& ev)
     if(_updates > 0)
       return ;
     
-    std::clog << std::endl;
-    _clock.start();
+    //std::clog << std::endl;
+    //_clock.start();
 
     const Gfx::RectF& screenRect = ev.rect();
 
@@ -295,10 +295,10 @@ void Screen::onPaintEvent(const PaintEvent& ev)
 {
     _impl->paint( ev.rect() );
 
-    static int nnn = 0;
-    std::clog << "screen update: " << _clock.stop().toUSecs() << " usecs. " << ++nnn << std::endl;
-    std::clog << "               " << ev.rect().topLeft().x() << ',' << ev.rect().topLeft().y()
-              << ' ' << ev.rect().width() << 'x' << ev.rect().height() << std::endl;
+    //static int nnn = 0;
+    //std::clog << "screen update: " << _clock.stop().toUSecs() << " usecs. " << ++nnn << std::endl;
+    //std::clog << "               " << ev.rect().topLeft().x() << ',' << ev.rect().topLeft().y()
+    //          << ' ' << ev.rect().width() << 'x' << ev.rect().height() << std::endl;
 }
 
 } // namespace
