@@ -28,7 +28,7 @@
   02110-1301 USA
 */
 
-#include <Pt/Gfx/AffineMatrix.h>
+#include <Pt/Gfx/AffineTransform.h>
 #include <Pt/Gfx/ImagePainter2.h>
 
 #include "FreeType2.h"
@@ -1177,12 +1177,12 @@ void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float deg
     _rasterizer->fillArc(tl, sz, degBegin, degEnd, arcMode);
 }
 
-void ImagePainter2::drawPath(const Path& path2d, const AffineMatrix& matrix2d, bool autoClose, float smoothness)
+void ImagePainter2::drawPath(const Path& path2d, const AffineTransform& atrans, bool autoClose, float smoothness)
 {
     std::vector<PointF> pointsF;
 
     path2d.generatePoints(pointsF, smoothness);
-    matrix2d.transformPoints(pointsF.data(), pointsF.size());
+    atrans.transformPoints(pointsF.data(), pointsF.size());
 
     //for(size_t i = 0; i < pointsF.size(); ++i)
     //    printf("TrnPts: %5.1f, %5.1f\n", pointsF[i].x(), pointsF[i].y());
@@ -1191,12 +1191,16 @@ void ImagePainter2::drawPath(const Path& path2d, const AffineMatrix& matrix2d, b
     drawPolyline(pointsF.data(), pointsF.size(), autoClose);
 }
 
-void ImagePainter2::fillPath(const Path& path2d, const AffineMatrix& matrix2d, float smoothness)
+void ImagePainter2::fillPath(const Path& path2d, const AffineTransform& atrans, float smoothness)
 {
     std::vector<PointF> pointsF;
 
     path2d.generatePoints(pointsF, smoothness);
-    matrix2d.transformPoints(pointsF.data(), pointsF.size());
+    atrans.transformPoints(pointsF.data(), pointsF.size());
+
+    //for(size_t i = 0; i < pointsF.size(); ++i)
+    //    printf("TrnPts: %5.1f, %5.1f\n", pointsF[i].x(), pointsF[i].y());
+    //printf("\n");
 
     fillPolygon(pointsF.data(), pointsF.size());
 }
