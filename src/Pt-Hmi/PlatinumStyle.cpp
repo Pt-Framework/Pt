@@ -899,7 +899,7 @@ void PlatinumSliderRenderer::onRender( const Slider& s,
                                        const Gfx::Font& font) const
 {
     double handleWidth = 7.0;
-    double handleHeight = 15.0;
+    double handleHeight = 17.0;
     double sliderHeight = 5.0;
 
     double sliderX = handleWidth / 2;
