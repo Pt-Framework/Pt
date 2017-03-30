@@ -726,9 +726,13 @@ void ImagePainter2::drawLine( const PointF& from, const PointF& to )
 {
     // Rasterize one-pixel line
     if(_rasterizer->pen().size() == 1) {
-        // Copy the points
+        // Convert the points
+        const Point a( round(from.x()), round(from.y()) );
+        const Point b( round(to  .x()), round(to  .y()) );
+        /*
         const Point a( (Pt::int32_t) from.x(), (Pt::int32_t) from.y() );
         const Point b( (Pt::int32_t) to  .x(), (Pt::int32_t) to  .y() );
+        */
         // Rasterize the line
         _rasterizer->strokeOnePixelLine(a, b, 0);
         return;
@@ -756,9 +760,13 @@ void ImagePainter2::drawRect( const RectF& rect )
 {
     // Rasterize one-pixel rectangle
     if(_rasterizer->pen().size() == 1) {
-        // Copy the points
+        // Convert the points
+        const Point tl( round(rect.topLeft    ().x()), round(rect.topLeft    ().y()) );
+        const Point br( round(rect.bottomRight().x()), round(rect.bottomRight().y()) );
+        /*
         const Point tl( (Pt::int32_t) rect.topLeft    ().x(), (Pt::int32_t) rect.topLeft    ().y() );
         const Point br( (Pt::int32_t) rect.bottomRight().x(), (Pt::int32_t) rect.bottomRight().y() );
+        */
         // Rasterize the rectangle
         _rasterizer->strokeOnePixelRect(tl, br);
         return;
@@ -830,11 +838,11 @@ void ImagePainter2::drawRoundRect( const RectF& rect, float radius )
     std::vector<PointF> pointsF;
     generateRoundRectPoints(pointsF, x1, y1, x2, y2, radius, ceil(_rasterizer->pen().size() * 0.5f));
 
-    // Save the original pen and create a new pen with miter join
+    // Save the original pen and create a new pen with bevel join
     const Pen orgPen = _rasterizer->pen();
 
     Pen newPen = orgPen;
-    newPen.setJoinStyle(Pen::MiterJoin);
+    newPen.setJoinStyle(Pen::BevelJoin);
 
     // Draw the polygon
     _rasterizer->setPen(newPen);
@@ -862,10 +870,14 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount, boo
 {
     // Rasterize one-pixel polyline
     if(_rasterizer->pen().size() == 1) {
-        // Copy the points
+        // Convert the points
         std::vector<Point> points;
+        convertPointRound(points, ps, pointCount);
+        if(autoClose) points.push_back( Point( round(ps[0].x()), round(ps[0].y())) );
+        /*
         convertPointTrunc(points, ps, pointCount);
-        if(autoClose) points.push_back( Point(ps[0].x(), ps[0].y()) );
+        if(autoClose) points.push_back( Point( (Pt::int32_t) ps[0].x(), (Pt::int32_t) ps[0].y()) );
+        */
         // Rasterize the polygon
         _rasterizer->strokeOnePixelPolygonOutline(points.data(), points.size());
         return;
@@ -877,10 +889,12 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount, boo
 
 void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
 {
-    // Copy the points
+    // Convert the points
     std::vector<Point> points;
-
+    convertPointRound(points, ps, pointCount);
+    /*
     convertPointTrunc(points, ps, pointCount);
+    */
 
     // Rasterize the polygon
     _rasterizer->fillPolygon(points.data(), pointCount);
@@ -897,9 +911,13 @@ void ImagePainter2::drawQuadraticPolybezier(const PointF* ps, const size_t point
         // Prepare the buffer
         std::vector<Point> points;
         points.reserve(autoClose ? (pointCount + 1) : pointCount);
-        // Copy the points
+        // Convert the points
+        convertPointRound(points, ps, pointCount);
+        if(autoClose) points.push_back( Point( round(ps[0].x()), round(ps[0].y())) );
+        /*
         convertPointTrunc(points, ps, pointCount);
         if(autoClose) points.push_back( Point( (Pt::int32_t) ps[0].x(), (Pt::int32_t) ps[0].y() ) );
+        */
         // Rasterize the bezier
         _rasterizer->strokeOnePixelQuadraticPolybezierOutline(points.data(), points.size());
         return;
@@ -958,9 +976,13 @@ void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
 {
     // Rasterize one-pixel ellipse
     if(_rasterizer->pen().size() == 1) {
-        // Copy the points
+        // Convert the points
+        const Point tl( round(topLeft.x    ()), round(topLeft.y     ()) );
+        const Size  sz( round(size   .width()), round(size   .height()) );
+        /*
         const Point tl( (Pt::int32_t) topLeft.x    (), (Pt::int32_t) topLeft.y     () );
         const Size  sz( (Pt::int32_t) size   .width(), (Pt::int32_t) size   .height() );
+        */
         // Rasterize the ellipse
         _rasterizer->strokeOnePixelEllipseArc(tl, sz, 0, 0, ArcMode::Open);
         return;
@@ -973,11 +995,11 @@ void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
     const Pt::int32_t centerX  = topLeft.x() + radiusX;
     const Pt::int32_t centerY  = topLeft.y() + radiusY;
 
-    // Save the original pen and create a new pen with miter join
+    // Save the original pen and create a new pen with bevel join
     const Pen orgPen = _rasterizer->pen();
 
     Pen newPen = orgPen;
-    newPen.setJoinStyle(Pen::MiterJoin);
+    newPen.setJoinStyle(Pen::BevelJoin);
 
     // Solid
     if(_rasterizer->pen().style() == Pen::Solid) {
@@ -1016,9 +1038,13 @@ void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
 
 void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
 {
-    // Copy the points
+    // Convert the points
+    const Point tl( round(topLeft.x    ()), round(topLeft.y     ()) );
+    const Size  sz( round(size   .width()), round(size   .height()) );
+    /*
     const Point tl( (Pt::int32_t) topLeft.x    (), (Pt::int32_t) topLeft.y     () );
     const Size  sz( (Pt::int32_t) size   .width(), (Pt::int32_t) size   .height() );
+    */
 
     // Rasterize the ellipse
     _rasterizer->fillEllipse(tl, sz);
@@ -1028,9 +1054,13 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
 {
     // Rasterize one-pixel arc
     if(_rasterizer->pen().size() == 1) {
-        // Copy the points
+        // Convert the points
+        const Point tl( round(topLeft.x    ()), round(topLeft.y     ()) );
+        const Size  sz( round(size   .width()), round(size   .height()) );
+        /*
         const Point tl( (Pt::int32_t) topLeft.x    (), (Pt::int32_t) topLeft.y     () );
         const Size  sz( (Pt::int32_t) size   .width(), (Pt::int32_t) size   .height() );
+        */
         // Rasterize the arc
         _rasterizer->strokeOnePixelEllipseArc(tl, sz, degBegin, degEnd, arcMode);
         return;
@@ -1065,11 +1095,11 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
     const Pt::int32_t centerX = topLeft.x() + radiusX;
     const Pt::int32_t centerY = topLeft.y() + radiusY;
 
-    // Save the original pen and create a new pen with miter join
+    // Save the original pen and create a new pen with bevel join
     const Pen orgPen = _rasterizer->pen();
 
     Pen newPen = orgPen;
-    newPen.setJoinStyle(Pen::MiterJoin);
+    newPen.setJoinStyle(Pen::BevelJoin);
 
     // Solid
     if(newPen.style() == Pen::Solid) {
@@ -1169,9 +1199,13 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
 
 void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode )
 {
-    // Copy the points
+    // Convert the points
+    const Point tl( round(topLeft.x    ()), round(topLeft.y     ()) );
+    const Size  sz( round(size   .width()), round(size   .height()) );
+    /*
     const Point tl( (Pt::int32_t) topLeft.x    (), (Pt::int32_t) topLeft.y     () );
     const Size  sz( (Pt::int32_t) size   .width(), (Pt::int32_t) size   .height() );
+    */
 
     // Rasterize the arc
     _rasterizer->fillArc(tl, sz, degBegin, degEnd, arcMode);

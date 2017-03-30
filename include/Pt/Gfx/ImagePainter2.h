@@ -143,7 +143,9 @@ class PT_GFX_API ImagePainter2 : public Painter
         struct SAGOpState;
 
     private:
+        /*
         inline void convertPointTrunc(std::vector<Point>& dst, const PointF* src, const size_t pointCount);
+        */
         inline void convertPointRound(std::vector<Point>& dst, const PointF* src, const size_t pointCount);
 
         void drawThickPolyline_impl(const PointF* ps, const size_t pointCount, bool autoClose, const int32_t* segmentIndexMarker);
@@ -170,6 +172,7 @@ class PT_GFX_API ImagePainter2 : public Painter
 // ===== Inlined Private Member Functions ===============================================
 // ======================================================================================
 
+/*
 void ImagePainter2::convertPointTrunc(std::vector<Point>& dst, const PointF* src, const size_t pointCount)
 {
     // Check if there is no actual point
@@ -198,6 +201,7 @@ void ImagePainter2::convertPointTrunc(std::vector<Point>& dst, const PointF* src
     // Resize the buffer to discard unused elements
     dst.resize(ofs + putCnt);
 }
+*/
 
 void ImagePainter2::convertPointRound(std::vector<Point>& dst, const PointF* src, const size_t pointCount)
 {

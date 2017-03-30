@@ -809,7 +809,8 @@ void BasicAffineTransform<float>::transformPoints(PointF* xy, size_t pointCount)
 //
 // For convenience
 //
-typedef BasicAffineTransform<float> AffineTransform;
+typedef BasicAffineTransform<float > AffineTransform;  // We cannot use ssize_t
+typedef BasicAffineTransform<double> AffineTransformF;
 
 
 } // namespace
