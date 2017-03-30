@@ -129,12 +129,15 @@ Gfx::SizeF TableLayout::onMeasure(const SizePolicy& policy)
     double itemsWidth = policy.width() - padding().leftRight(); 
     double itemsHeight = policy.height() - padding().topBottom();
 
-    Gfx::SizeF itemSize;
+    Gfx::SizeF contentSize;
 
     for(std::size_t row = 0; row < _rows.size(); ++row)
     {
         SizeInfo& rowPolicy = _rowSizes.at(row);
         std::size_t columns = _rows.at(row).size();
+
+        double rowWidth = 0;
+        double rowHeight = 0;
         
         for(std::size_t col = 0; col != columns; ++col)
         {
@@ -169,12 +172,17 @@ Gfx::SizeF TableLayout::onMeasure(const SizePolicy& policy)
             double itemWidth = prefSize.width() + item->margin().leftRight();
             double itemHeight = prefSize.height() + item->margin().topBottom();
         
-            itemSize.addWidth(itemWidth);
-            itemSize.addHeight(itemHeight);
+            rowWidth += itemWidth;
+            rowHeight = std::max(rowHeight, itemHeight);
         }
+
+        contentSize.addWidth( std::max(contentSize.width(), rowWidth) );
+        contentSize.addHeight(rowHeight);
     }
 
-    return itemSize;
+    contentSize.addWidth( padding().leftRight() );
+    contentSize.addHeight( padding().topBottom() );
+    return contentSize;
 }
 
 

@@ -27,9 +27,6 @@
   MA 02110-1301 USA
 */
 
-#include <cmath>
-#include <cassert>
-
 #include <Pt/Hmi/Widget.h>
 #include <Pt/Hmi/Window.h>
 #include <Pt/Hmi/Layout.h>
@@ -37,6 +34,8 @@
 #include <Pt/Gfx/Brush.h>
 #include <Pt/String.h>
 
+#include <cmath>
+#include <cassert>
 
 namespace Pt {
 
