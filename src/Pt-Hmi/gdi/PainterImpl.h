@@ -190,9 +190,8 @@ class PainterImpl
             return _gradientBrush;
         }
 
-        void setClip(const Gfx::RectF& rectF)
+        void setClip(const Gfx::Rect& rect)
         {
-            Gfx::Rect rect = Application::instance().screen().fromUnit(rectF);
 
             if(_clipRect)
             {
@@ -251,9 +250,6 @@ class PainterImpl
     
             GetTextExtentPoint32W(dc, wtext.c_str(), wtext.size(), &textSize);
     
-            Gfx::Size size(textSize.cx, textSize.cy);
-            Gfx::SizeF sizeF = Application::instance().screen().toUnit(size);
-
             SelectObject(dc, oldFont);
             DeleteObject(newFont);
 
@@ -261,8 +257,8 @@ class PainterImpl
 
             return Gfx::FontMetrics(tm.tmAscent, 
                                     tm.tmDescent, 
-                                    (int)sizeF.width(), 
-                                    (int)sizeF.height());
+                                    textSize.cx, 
+                                     textSize.cy);
         }
         
         static std::string defaultFont()

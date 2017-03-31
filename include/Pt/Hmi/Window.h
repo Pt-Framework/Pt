@@ -110,7 +110,7 @@ class PT_HMI_API Window : public WindowBase
 
     void setContent(Widget* widget);
 
-    Widget* findWidget(const Gfx::PointF& pos);
+    Widget* findWidget(const Gfx::Point& pos);
 
     Widget* focusWidget();
 
@@ -118,15 +118,15 @@ class PT_HMI_API Window : public WindowBase
 
     void focusPrev();
 
-    Gfx::PointF toParent(const Gfx::PointF& pos) const;
+    Gfx::Point toParent(const Gfx::Point& pos) const;
 
-    Gfx::PointF fromParent(const Gfx::PointF& pos) const;
+    Gfx::Point fromParent(const Gfx::Point& pos) const;
 
     void relayout();
 
-    Gfx::SizeF measure(const SizePolicy& policy);
+    Gfx::Size measure(const SizePolicy& policy);
 
-    void layout(const Gfx::RectF& rect);
+    void layout(const Gfx::Rect& rect);
 
     void repaint();
 
@@ -148,11 +148,11 @@ class PT_HMI_API Window : public WindowBase
 
     void releasePointer();
 
-    const Gfx::PointF& position() const;
+    const Gfx::Point& position() const;
 
-    void move(const Gfx::PointF& p);
+    void move(const Gfx::Point& p);
 
-    void resize( const Gfx::SizeF& s );
+    void resize( const Gfx::Size& s );
 
     bool isClosed() const;
 
@@ -170,13 +170,13 @@ class PT_HMI_API Window : public WindowBase
 
     void setTitle( const std::string& t );
 
-    const Gfx::SizeF& minimumSize() const;
+    const Gfx::Size& minimumSize() const;
 
-    void setMinimumSize(const Gfx::SizeF& s);
+    void setMinimumSize(const Gfx::Size& s);
 
-    const Gfx::SizeF& maximumSize() const;
+    const Gfx::Size& maximumSize() const;
 
-    void setMaximumSize(const Gfx::SizeF& s);
+    void setMaximumSize(const Gfx::Size& s);
 
     bool isTopMost() const;
 
@@ -208,36 +208,36 @@ class PT_HMI_API Window : public WindowBase
 
     virtual void onRemoveWidget(Widget& w);
 
-    virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+    virtual Gfx::Size onMeasure(const SizePolicy& policy);
 
-    virtual void onLayout(const Gfx::RectF& rect);
+    virtual void onLayout(const Gfx::Rect& rect);
 
   public:
-    virtual Gfx::PointF toScreen(const Gfx::PointF& pos) const;
+    virtual Gfx::Point toScreen(const Gfx::Point& pos) const;
     
-    virtual Gfx::PointF fromScreen(const Gfx::PointF& pos) const; 
+    virtual Gfx::Point fromScreen(const Gfx::Point& pos) const; 
 
   protected:
-    virtual Gfx::SizeF onSize() const;
+    virtual Gfx::Size onSize() const;
 
-    virtual void onUpdate(const Gfx::RectF& rect);
+    virtual void onUpdate(const Gfx::Rect& rect);
 
     virtual void onInvalidate();
 
-    virtual void onPaintBackground(const Gfx::RectF& rect);
+    virtual void onPaintBackground(const Gfx::Rect& rect);
 
-    virtual void onPaintContent(const Gfx::RectF& rect);
+    virtual void onPaintContent(const Gfx::Rect& rect);
 
   protected:
     virtual void onInit(Window& w);
     
     virtual void onDeinit(Window& w);
 
-    virtual Gfx::PointF onToParent(const Window& w, const Gfx::PointF& pos) const;
+    virtual Gfx::Point onToParent(const Window& w, const Gfx::Point& pos) const;
 
-    virtual Gfx::PointF onFromParent(const Window& w, const Gfx::PointF& pos) const;
+    virtual Gfx::Point onFromParent(const Window& w, const Gfx::Point& pos) const;
 
-    virtual void onUpdate(Window& w, const Gfx::RectF& rect);
+    virtual void onUpdate(Window& w, const Gfx::Rect& rect);
 
     virtual void onShow(Window& w, bool visible);
 
@@ -245,9 +245,9 @@ class PT_HMI_API Window : public WindowBase
 
     virtual void onEnable(Window& w, bool enable);
 
-    virtual void onMove(Window& w, const Gfx::PointF& to);
+    virtual void onMove(Window& w, const Gfx::Point& to);
 
-    virtual void onResize(Window& w, const Gfx::SizeF& to);
+    virtual void onResize(Window& w, const Gfx::Size& to);
 
     virtual void onFrameChanged(Window& w);
 
@@ -320,13 +320,13 @@ class PT_HMI_API Window : public WindowBase
 
     void setMnemonic(Widget& w, const Char* ch);
 
-    Widget* findWidget(const Gfx::PointF& pos, bool input);
+    Widget* findWidget(const Gfx::Point& pos, bool input);
 
   private:
     MainWindowImpl*              _impl;
     WindowManager                _windowManager;
     PixmapSurface                _surface;
-    Gfx::RectF                   _damageRect;
+    Gfx::Rect                    _damageRect;
     Pt::Signal<const Pt::Event&> _eventReady;
     int                          _layouts;
 
@@ -345,13 +345,13 @@ class PT_HMI_API Window : public WindowBase
     bool                         _enabled; 
     bool                         _enabledState;
     bool                         _isClosed; 
-    Gfx::PointF                  _position;
-    Gfx::SizeF                   _size;
+    Gfx::Point                  _position;
+    Gfx::Size                    _size;
     Type                         _type;
     std::string                  _title;
     Gfx::Image                   _icon;
-    Gfx::SizeF                   _minimumSize;
-    Gfx::SizeF                   _maximumSize;
+    Gfx::Size                   _minimumSize;
+    Gfx::Size                   _maximumSize;
     State                        _state;
     bool                         _topMost;
    

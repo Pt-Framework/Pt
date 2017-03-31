@@ -84,7 +84,7 @@ MenuShell& Menu::rootShell()
 }
 
 
-void Menu::show(const Gfx::PointF& pos)
+void Menu::show(const Gfx::Point& pos)
 {
     Window::move(pos);
     Window::show();
@@ -174,9 +174,9 @@ void Menu::onMenuTriggered(MenuItem& item)
     
     if( ! menu->isVisible() )
     {
-        Gfx::PointF topRight(item.size().width(), 0);
-        Gfx::PointF wpos = item.toWindow(topRight);
-        Gfx::PointF menuPos = item.window()->toScreen(wpos);
+        Gfx::Point topRight(item.size().width(), 0);
+        Gfx::Point wpos = item.toWindow(topRight);
+        Gfx::Point menuPos = item.window()->toScreen(wpos);
 
         menu->show(menuPos);
     }
@@ -187,12 +187,12 @@ void Menu::onMenuTriggered(MenuItem& item)
 }
 
 
-MenuShell* Menu::onFindMenu(const Gfx::PointF& screenPos)
+MenuShell* Menu::onFindMenu(const Gfx::Point& screenPos)
 { 
     if( ! isVisible() )
         return 0;
 
-    Gfx::RectF rect( position(), size() );
+    Gfx::Rect rect( position(), size() );
     if( rect.contains(screenPos) )
         return this;
 
@@ -293,8 +293,8 @@ void Menu::onInvalidate()
 
     _iconWidth = 0;
 
-    double menuWidth = 0;
-    double menuHeight = 0;
+    Pt::ssize_t menuWidth = 0;
+    Pt::ssize_t menuHeight = 0;
 
     // determine menu size
     for(std::size_t i = 0; i < _layout.widgets().size(); ++i)
@@ -302,7 +302,7 @@ void Menu::onInvalidate()
         MenuItem* item = static_cast<MenuItem*>(_layout.widgets().at(i));
 
         // item size with margin
-        Gfx::SizeF itemSize = item->preferredSize();
+        Gfx::Size itemSize = item->preferredSize();
         itemSize.addWidth( item->margin().leftRight() );
         itemSize.addHeight( item->margin().topBottom() );
 
@@ -326,7 +326,7 @@ void Menu::onInvalidate()
 
     _layout.setPadding(menuPadding);
     
-    Gfx::SizeF size(menuWidth, menuHeight);
+    Gfx::Size size(menuWidth, menuHeight);
     size.addWidth( _layout.padding().leftRight() );
     size.addHeight( _layout.padding().topBottom() );
 
@@ -348,7 +348,7 @@ void Menu::onInvalidate()
 }
 
 
-void Menu::onPaintBackground(const Gfx::RectF& rect)
+void Menu::onPaintBackground(const Gfx::Rect& rect)
 {
     Base::onPaintBackground(rect);
 
@@ -375,12 +375,12 @@ bool Menu::onMouseEvent(const MouseEvent& ev)
 {
     Base::onMouseEvent(ev);
 
-    Gfx::RectF rect( Gfx::PointF(0,0), size() );
+    Gfx::Rect rect( Gfx::Point(0,0), size() );
 
     if( rect.contains( ev.position() ) )
         return true;
 
-    Gfx::PointF screenPos = toScreen( ev.position() );
+    Gfx::Point screenPos = toScreen( ev.position() );
     MenuShell* menu = rootShell().findMenu(screenPos);
 
     if(menu && menu != this)
@@ -424,7 +424,7 @@ void Menu::onResizeEvent(const ResizeEvent& ev)
 
         item->setIconPadding(_iconWidth);
 
-        Gfx::SizeF itemSize = item->preferredSize();
+        Gfx::Size itemSize = item->preferredSize();
 //TODO:        item->resize(itemSize);
     }
 

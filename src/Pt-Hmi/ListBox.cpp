@@ -71,16 +71,16 @@ void ListBoxItem::setIcon(const Gfx::Image& image)
 }
 
 
-void ListBoxItem::setIconSize(const Gfx::SizeF& size)
+void ListBoxItem::setIconSize(const Gfx::Size& size)
 {
     _iconSize = size;
     update();
 }
 
 
-void ListBoxItem::setIconSize(double width, double height)
+void ListBoxItem::setIconSize(Pt::ssize_t width, Pt::ssize_t height)
 {
-    setIconSize( Gfx::SizeF(width, height) );
+    setIconSize( Gfx::Size(width, height) );
 }
 
 
@@ -203,17 +203,17 @@ void ListBoxItem::setRenderer(ListBoxRenderer* renderer)
 }
 
 
-Gfx::SizeF ListBoxItem::onMeasure(const SizePolicy& p)
+Gfx::Size ListBoxItem::onMeasure(const SizePolicy& p)
 {
     Gfx::FontMetrics fm = Painter::fontMetrics( _font, _text );
 
-    double spacing = _picture.empty() || _text.empty() ? 0 : fm.height() * 0.5;
-    double pictureWidth = _iconSize.isNull() ? _picture.width() : _iconSize.width();
-    double pictureHeight = _iconSize.isNull() ? _picture.height() : _iconSize.height();
-    double itemsWidth = fm.width() + spacing + pictureWidth;
-    double itemsHeight = std::max<double>(fm.height(), pictureHeight);
+    Pt::ssize_t spacing = _picture.empty() || _text.empty() ? 0 : fm.height() /2;
+    Pt::ssize_t pictureWidth = _iconSize.isNull() ? _picture.width() : _iconSize.width();
+    Pt::ssize_t pictureHeight = _iconSize.isNull() ? _picture.height() : _iconSize.height();
+    Pt::ssize_t itemsWidth = fm.width() + spacing + pictureWidth;
+    Pt::ssize_t itemsHeight = std::max<Pt::ssize_t>(fm.height(), pictureHeight);
 
-    return Gfx::SizeF( itemsWidth + padding().leftRight(),
+    return Gfx::Size( itemsWidth + padding().leftRight(),
                        itemsHeight + padding().topBottom() );
 }
 
@@ -242,7 +242,7 @@ void ListBoxItem::onInvalidate()
 }
 
 
-void ListBoxItem::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void ListBoxItem::onPaint(PaintSurface& surface, const Gfx::Rect& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
@@ -272,15 +272,15 @@ void ListBoxItem::onPaintContent(Painter& painter)
 
     Gfx::FontMetrics fm = painter.fontMetrics( _text );
 
-    double pictureX = 0;
-    double pictureY = 0;
-    double textX = 0;
-    double textY = 0;
+    Pt::ssize_t pictureX = 0;
+    Pt::ssize_t pictureY = 0;
+    Pt::ssize_t textX = 0;
+    Pt::ssize_t textY = 0;
 
-    double spacing = _picture.empty() || _text.empty() ? 0 : fm.height() * 0.5;
-    double pictureWidth = _iconSize.isNull() ? _picture.width() : _iconSize.width();
-    double pictureHeight = _iconSize.isNull() ? _picture.height() : _iconSize.height();
-    double itemsWidth = fm.width() + spacing + pictureWidth;
+    Pt::ssize_t spacing = _picture.empty() || _text.empty() ? 0 : fm.height() / 2;
+    Pt::ssize_t pictureWidth = _iconSize.isNull() ? _picture.width() : _iconSize.width();
+    Pt::ssize_t pictureHeight = _iconSize.isNull() ? _picture.height() : _iconSize.height();
+    Pt::ssize_t itemsWidth = fm.width() + spacing + pictureWidth;
 
     pictureX = padding().left();
     pictureY = (size().height() - pictureHeight) / 2;
@@ -296,10 +296,10 @@ void ListBoxItem::onPaintContent(Painter& painter)
     {
         painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceOver);
         
-        double pictureXOff = (pictureWidth - _picture.width()) / 2;
-        double pictureYOff = (pictureHeight - _picture.height()) / 2;
+        Pt::ssize_t pictureXOff = (pictureWidth - _picture.width()) / 2;
+        Pt::ssize_t pictureYOff = (pictureHeight - _picture.height()) / 2;
 
-        Gfx::PointF picturePos(pictureX + pictureXOff, 
+        Gfx::Point picturePos(pictureX + pictureXOff, 
                                pictureY + pictureYOff);
         painter.drawPicture(picturePos, _picture);
         
@@ -310,8 +310,8 @@ void ListBoxItem::onPaintContent(Painter& painter)
     // text
     //
 
-    Gfx::RectF mnemonicRect;
-    Gfx::PointF textPos(textX, textY);
+    Gfx::Rect mnemonicRect;
+    Gfx::Point textPos(textX, textY);
     
     painter.drawText(textPos, _text);
 }
@@ -444,10 +444,10 @@ int ListBox::maximumY() const
 }
 
 
-Gfx::SizeF ListBox::onMeasure(const SizePolicy& policy)
+Gfx::Size ListBox::onMeasure(const SizePolicy& policy)
 {
-    double hspace = padding().leftRight() + _scrollView.margin().leftRight();
-    double vspace = padding().topBottom() + _scrollView.margin().topBottom();
+    Pt::ssize_t hspace = padding().leftRight() + _scrollView.margin().leftRight();
+    Pt::ssize_t vspace = padding().topBottom() + _scrollView.margin().topBottom();
 
     SizePolicy contentPolicy(SizePolicy::Fixed, SizePolicy::Fixed);
     contentPolicy.setWidth( policy.size().width() - hspace );
@@ -459,15 +459,15 @@ Gfx::SizeF ListBox::onMeasure(const SizePolicy& policy)
 }
 
 
-void ListBox::onLayout(const Gfx::RectF& rect)
+void ListBox::onLayout(const Gfx::Rect& rect)
 {
-    Gfx::PointF pos(padding().left() + _scrollView.margin().left(), 
+    Gfx::Point pos(padding().left() + _scrollView.margin().left(), 
                     padding().top()  + _scrollView.margin().top());
         
-    double hspace = padding().leftRight() + _scrollView.margin().leftRight();
-    double vspace = padding().topBottom() + _scrollView.margin().topBottom();
+    Pt::ssize_t hspace = padding().leftRight() + _scrollView.margin().leftRight();
+    Pt::ssize_t vspace = padding().topBottom() + _scrollView.margin().topBottom();
 
-    Gfx::SizeF size;
+    Gfx::Size size;
     size.setWidth( rect.width() - hspace );
     size.setHeight( rect.height() - vspace );
 
@@ -501,7 +501,7 @@ void ListBox::onInvalidate()
 }
 
 
-void ListBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void ListBox::onPaint(PaintSurface& surface, const Gfx::Rect& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 

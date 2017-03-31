@@ -208,14 +208,14 @@ void Slider::setRenderer(SliderRenderer* renderer)
 }
 
 
-Gfx::SizeF Slider::onMeasure(const SizePolicy& policy)
+Gfx::Size Slider::onMeasure(const SizePolicy& policy)
 {
-    double itemsWidth = policy.width();
+    Pt::ssize_t itemsWidth = policy.width();
 
     // TODO: get requred height from renderer
-    double itemsHeight = 15;
+    Pt::ssize_t itemsHeight = 15;
 
-    return Gfx::SizeF(policy.width(), 
+    return Gfx::Size(policy.width(), 
                       itemsHeight + padding().topBottom() );
 }
 
@@ -244,7 +244,7 @@ void Slider::onInvalidate()
 }
 
 
-void Slider::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void Slider::onPaint(PaintSurface& surface, const Gfx::Rect& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
@@ -271,10 +271,10 @@ bool Slider::onMouseEvent(const MouseEvent& ev)
 
     if( ev.isPressed() )
     {
-        double x = ev.position().x();
-        double width = size().width();
+        Pt::ssize_t x = ev.position().x();
+        Pt::ssize_t width = size().width();
 
-        double offset = x * (_max - _min) / width;
+        Pt::ssize_t offset = x * (_max - _min) / width;
         setPosition(_min + offset);
     }
 
@@ -294,10 +294,10 @@ void Slider::onTouchEvent(const TouchEvent& ev)
 
     if( ev.isPressed() )
     {
-        double x = ev.position().x();
-        double width = size().width();
+        Pt::ssize_t x = ev.position().x();
+        Pt::ssize_t width = size().width();
 
-        double offset = x * (_max - _min) / width;
+        Pt::ssize_t offset = x * (_max - _min) / width;
         setPosition(_min + offset);
     }
 }

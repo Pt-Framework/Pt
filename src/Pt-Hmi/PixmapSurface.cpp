@@ -50,7 +50,7 @@ PixmapSurface::~PixmapSurface()
 }
 
 
-void PixmapSurface::resize(const Gfx::SizeF& size)
+void PixmapSurface::resize(const Gfx::Size& size)
 {
     _impl->resize(size);
 }
@@ -62,7 +62,7 @@ void PixmapSurface::clear(const Gfx::Color& c)
 }
 
 
-const Gfx::SizeF& PixmapSurface::onSize() const
+const Gfx::Size& PixmapSurface::onSize() const
 {
     return _impl->size();
 }
@@ -104,7 +104,7 @@ void PixmapSurface::setFont(const Gfx::Font& font)
 }
 
 
-void PixmapSurface::setClip( const Gfx::RectF& clip)
+void PixmapSurface::setClip( const Gfx::Rect& clip)
 {
     _impl->setClip(clip);
 }
@@ -122,80 +122,80 @@ Gfx::FontMetrics PixmapSurface::fontMetrics(const Pt::String& text) const
 }
 
 
-void PixmapSurface::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
+void PixmapSurface::drawLine(const Gfx::Point& from, const Gfx::Point& to)
 {
     _impl->drawLine(from, to);
 }
 
 
-void PixmapSurface::drawText(const Gfx::PointF& to, const Pt::String& text)
+void PixmapSurface::drawText(const Gfx::Point& to, const Pt::String& text)
 {
     _impl->drawText(to, text);
 }
 
 
-void PixmapSurface::drawRect(const Gfx::RectF& r)
+void PixmapSurface::drawRect(const Gfx::Rect& r)
 {
     _impl->drawRect(r);
 }
 
 
-void PixmapSurface::fillRect(const Gfx::RectF& r)
+void PixmapSurface::fillRect(const Gfx::Rect& r)
 {
     _impl->fillRect(r);
 }
 
 
-void PixmapSurface::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
+void PixmapSurface::drawEllipse(const Gfx::Point& topLeft, const Gfx::Size& size)
 {
     _impl->drawEllipse(topLeft, size);
 }
 
 
-void PixmapSurface::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
+void PixmapSurface::fillEllipse(const Gfx::Point& topLeft, const Gfx::Size& size)
 {
     _impl->fillEllipse(topLeft, size);
 }
 
 
-void PixmapSurface::drawPolyline(const Gfx::PointF* points, size_t pointCount)
+void PixmapSurface::drawPolyline(const Gfx::Point* points, size_t pointCount)
 {
     _impl->drawPolyline(points, pointCount);
 }
 
 
-void PixmapSurface::fillPolygon(const Gfx::PointF* points, size_t pointCount)
+void PixmapSurface::fillPolygon(const Gfx::Point* points, size_t pointCount)
 {
     _impl->fillPolygon(points, pointCount);
 }
 
 
-void PixmapSurface::drawSurface(const Gfx::PointF& to, const PixmapSurface& surface)
+void PixmapSurface::drawSurface(const Gfx::Point& to, const PixmapSurface& surface)
 {
     _impl->drawSurface(to, surface);
 }
 
 
-void PixmapSurface::drawSurface(const Gfx::PointF& to, 
+void PixmapSurface::drawSurface(const Gfx::Point& to, 
                                   const PixmapSurface& pm,
-                                  const Gfx::RectF& pmRect)
+                                  const Gfx::Rect& pmRect)
 {
     _impl->drawSurface(to, pm, pmRect);
 }
 
 
-void PixmapSurface::drawImage(const Gfx::PointF& to, const Gfx::Image& image)
+void PixmapSurface::drawImage(const Gfx::Point& to, const Gfx::Image& image)
 {
     _impl->drawImage(to, image);
 }
 
-void PixmapSurface::drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& r)
+void PixmapSurface::drawImage(const Gfx::Point& to, const Gfx::Image& image, const Gfx::Rect& r)
 {
     _impl->drawImage(to, image, r);
 }
 
 
-void PixmapSurface::drawPicture(const Gfx::PointF& to, const Picture& pic)
+void PixmapSurface::drawPicture(const Gfx::Point& to, const Picture& pic)
 {
     _impl->drawPicture(to , pic);
 }

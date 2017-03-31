@@ -49,7 +49,7 @@ class MainWindowImpl
 
         virtual ~MainWindowImpl();
 
-        void paint(const Gfx::RectF& rect);
+        void paint(const Gfx::Rect& rect);
 
         void show(bool b);
 
@@ -57,9 +57,9 @@ class MainWindowImpl
 
         void enable(bool b);
 
-        void move(const Gfx::PointF& pos);
+        void move(const Gfx::Point& pos);
 
-        void resize(const Gfx::SizeF& size);
+        void resize(const Gfx::Size& size);
 
         void close();
 
@@ -69,9 +69,9 @@ class MainWindowImpl
 
         void setIcon(const Gfx::Image& p);
 
-        void setMinimumSize(const Gfx::SizeF& s);
+        void setMinimumSize(const Gfx::Size& s);
     
-        void setMaximumSize(const Gfx::SizeF& s); 
+        void setMaximumSize(const Gfx::Size& s); 
 
         void setTitle(const std::string& title);
 

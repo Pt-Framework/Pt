@@ -83,7 +83,7 @@ int ScrollLayout::maximumY() const
 
 void ScrollLayout::scrollX(int xpos)
 {
-    double maxPosX = _maxX - size().width();
+    Pt::ssize_t maxPosX = _maxX - size().width();
     
     if( xpos > maxPosX  )
         xpos = maxPosX;
@@ -91,13 +91,13 @@ void ScrollLayout::scrollX(int xpos)
     if(xpos < 0)
         xpos = 0;
 
-    double delta = xpos - _scrollPos.x();
+    Pt::ssize_t delta = xpos - _scrollPos.x();
 
     for( size_t i = 0; i < widgets().size();  ++i)
     {
         Widget* w =  widgets().at(i);
             
-        Gfx::PointF pos = w->position();
+        Gfx::Point pos = w->position();
         pos.subX(delta);
         w->move(pos);
     }
@@ -111,7 +111,7 @@ void ScrollLayout::scrollX(int xpos)
 
 void ScrollLayout::scrollY(int ypos)
 {    
-    double maxPosY = _maxY - size().height();
+    Pt::ssize_t maxPosY = _maxY - size().height();
     
     if( ypos > maxPosY  )
         ypos = maxPosY;
@@ -119,13 +119,13 @@ void ScrollLayout::scrollY(int ypos)
     if(ypos < 0)
         ypos = 0;
 
-    double delta = ypos - _scrollPos.y();
+    Pt::ssize_t delta = ypos - _scrollPos.y();
 
     for( size_t i = 0; i < widgets().size();  ++ i)
     {
         Widget* w =  widgets().at(i);
             
-        Gfx::PointF pos = w->position();
+        Gfx::Point pos = w->position();
         pos.subY(delta);
         w->move(pos);
     }
@@ -171,7 +171,7 @@ void ScrollLayout::setContentMode(SizePolicy::Mode horizontal,
 }
 
 
-Gfx::SizeF ScrollLayout::onMeasure(const SizePolicy& policy)
+Gfx::Size ScrollLayout::onMeasure(const SizePolicy& policy)
 {
     std::vector<Widget*>::const_iterator it;
     for(it = widgets().begin() ; it != widgets().end(); ++it)
@@ -183,15 +183,15 @@ Gfx::SizeF ScrollLayout::onMeasure(const SizePolicy& policy)
         item->measure(itemPolicy);
    }
 
-    double maxWidth = 0;
-    double maxHeight = 0;
+    Pt::ssize_t maxWidth = 0;
+    Pt::ssize_t maxHeight = 0;
     
     for(std::size_t i = 0; i < widgets().size(); ++i)
     {
         Widget* w = widgets().at(i);
 
-        const Gfx::PointF& wpos = w->position();
-        const Gfx::SizeF& wsize = w->preferredSize();
+        const Gfx::Point& wpos = w->position();
+        const Gfx::Size& wsize = w->preferredSize();
 
         maxWidth = std::max( maxWidth, wpos.x() +
                                        wsize.width() +
@@ -209,7 +209,7 @@ Gfx::SizeF ScrollLayout::onMeasure(const SizePolicy& policy)
 }
 
 
-void ScrollLayout::onLayout(const Gfx::RectF& rect)
+void ScrollLayout::onLayout(const Gfx::Rect& rect)
 {
     Base::onLayout(rect);
 
@@ -243,7 +243,7 @@ bool ScrollLayout::onScrollEvent(const ScrollEvent& ev)
     {
         if(_enableX)
         {
-            double deltaX = _scrollPos.x() - ev.delta();
+            Pt::ssize_t deltaX = _scrollPos.x() - ev.delta();
             scrollX(deltaX);
         }
     }
@@ -252,7 +252,7 @@ bool ScrollLayout::onScrollEvent(const ScrollEvent& ev)
     {
         if(_enableY)
         {
-            double deltaY = _scrollPos.y() - ev.delta();
+            Pt::ssize_t deltaY = _scrollPos.y() - ev.delta();
             scrollY(deltaY);
         }
     }

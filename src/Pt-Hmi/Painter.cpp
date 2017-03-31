@@ -112,7 +112,7 @@ const Gfx::CompositionMode& Painter::compositionMode() const
 }
 
 
-void Painter::setClip(const Gfx::RectF& clip)
+void Painter::setClip(const Gfx::Rect& clip)
 {
     _clip = clip;
 
@@ -123,7 +123,7 @@ void Painter::setClip(const Gfx::RectF& clip)
 }
 
 
-const Gfx::RectF& Painter::clip() const
+const Gfx::Rect& Painter::clip() const
 {
     return _clip;
 }
@@ -200,7 +200,7 @@ std::vector<std::string> Painter::fontNames()
 }
 
 
-void Painter::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
+void Painter::drawLine(const Gfx::Point& from, const Gfx::Point& to)
 {
     if( _pen.size() == 0 )
         return;
@@ -209,37 +209,37 @@ void Painter::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 }
 
 
-void Painter::drawText(const Gfx::PointF& to, const Pt::String& text)
+void Painter::drawText(const Gfx::Point& to, const Pt::String& text)
 {
     _surface->drawText(to, text);
 }
 
 
-void Painter::drawRect(const Gfx::RectF& rect)
+void Painter::drawRect(const Gfx::Rect& rect)
 {
     _surface->drawRect(rect);
 }
 
 
-void Painter::fillRect(const Gfx::RectF& rect)
+void Painter::fillRect(const Gfx::Rect& rect)
 {
     _surface->fillRect(rect);
 }
 
 
-void Painter::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
+void Painter::drawEllipse(const Gfx::Point& topLeft, const Gfx::Size& size)
 {
     _surface->drawEllipse(topLeft, size);
 }
 
 
-void Painter::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
+void Painter::fillEllipse(const Gfx::Point& topLeft, const Gfx::Size& size)
 {
     _surface->fillEllipse(topLeft, size);
 }
 
 
-void Painter::drawPolyline(const Gfx::PointF* points, const size_t pointCount)
+void Painter::drawPolyline(const Gfx::Point* points, const size_t pointCount)
 {
     if( _pen.size() == 0 )
        return;
@@ -248,39 +248,39 @@ void Painter::drawPolyline(const Gfx::PointF* points, const size_t pointCount)
 }
 
 
-void Painter::fillPolygon(const Gfx::PointF* points, const size_t pointCount)
+void Painter::fillPolygon(const Gfx::Point* points, const size_t pointCount)
 {
     _surface->fillPolygon(points, pointCount);
 }
 
 
-void Painter::drawImage(const Gfx::PointF& to, const Gfx::Image& image)
+void Painter::drawImage(const Gfx::Point& to, const Gfx::Image& image)
 {
     _surface->drawImage(to, image);
 }
 
 
-void Painter::drawPicture(const Gfx::PointF& to, const Picture& pic)
+void Painter::drawPicture(const Gfx::Point& to, const Picture& pic)
 {
     _surface->drawPicture( to, pic );
 }
 
 
-void Painter::drawSurface(const Gfx::PointF& to, const PixmapSurface& surface)
+void Painter::drawSurface(const Gfx::Point& to, const PixmapSurface& surface)
 {
     _surface->drawSurface(to, surface);
 }
 
 
-void Painter::drawSurface(const Gfx::PointF& to, 
-                          const PixmapSurface& pm, const Gfx::RectF& pmRect)
+void Painter::drawSurface(const Gfx::Point& to, 
+                          const PixmapSurface& pm, const Gfx::Rect& pmRect)
 {
     _surface->drawSurface(to, pm, pmRect);
 }
 
 
-void Painter::drawImage(const Gfx::PointF& to, 
-                        const Gfx::Image& image, const Gfx::RectF& imageRect)
+void Painter::drawImage(const Gfx::Point& to, 
+                        const Gfx::Image& image, const Gfx::Rect& imageRect)
 {
     _surface->drawImage(to, image, imageRect);
 }

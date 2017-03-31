@@ -138,7 +138,7 @@ void WindowButton::touchEvent(const TouchEvent& tev)
 }
 
 
-void WindowButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
+void WindowButton::paint(PaintSurface& surface, const Gfx::Rect& rect)
 {
     Painter painter(surface);
     painter.setClip(rect);
@@ -167,13 +167,13 @@ void WindowButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
     // bottom right border
     //
     painter.setPen( Gfx::Pen(borderBottomRightColor, 1) );
-    painter.drawLine(Gfx::PointF(_geometry.topRight().x(),
+    painter.drawLine(Gfx::Point(_geometry.topRight().x(),
                                  _geometry.topRight().y() +1), 
-                     Gfx::PointF(_geometry.bottomRight().x(),
+                     Gfx::Point(_geometry.bottomRight().x(),
                                  _geometry.bottomRight().y() + 1) );
-    painter.drawLine(Gfx::PointF(_geometry.bottomLeft().x() + 1,
+    painter.drawLine(Gfx::Point(_geometry.bottomLeft().x() + 1,
                                  _geometry.bottomLeft().y() ),
-                     Gfx::PointF(_geometry.bottomRight().x() + 1,
+                     Gfx::Point(_geometry.bottomRight().x() + 1,
                                  _geometry.bottomRight().y() ) );
 
     //
@@ -199,7 +199,7 @@ MinimizeButton::~MinimizeButton()
 }
 
 
-void MinimizeButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
+void MinimizeButton::paint(PaintSurface& surface, const Gfx::Rect& rect)
 {
     WindowButton::paint(surface, rect);
 
@@ -213,10 +213,10 @@ void MinimizeButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
                  Gfx::Pen::Solid, Gfx::Pen::FlatCap);
     painter.setPen(pen);
 
-    Gfx::PointF tl = geometry().topLeft() + Gfx::PointF(5, 5);
-    Gfx::PointF tr = geometry().topRight() + Gfx::PointF(-4, 4);
-    Gfx::PointF br = geometry().bottomRight() - Gfx::PointF(4, 4);
-    Gfx::PointF bl = geometry().bottomLeft() - Gfx::PointF(-4, 4);
+    Gfx::Point tl = geometry().topLeft() + Gfx::Point(5, 5);
+    Gfx::Point tr = geometry().topRight() + Gfx::Point(-4, 4);
+    Gfx::Point br = geometry().bottomRight() - Gfx::Point(4, 4);
+    Gfx::Point bl = geometry().bottomLeft() - Gfx::Point(-4, 4);
     painter.drawLine(bl, br);
     painter.drawLine(tl, bl);
     painter.drawLine(tr, bl);
@@ -237,7 +237,7 @@ MaximizeButton::~MaximizeButton()
 }
 
 
-void MaximizeButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
+void MaximizeButton::paint(PaintSurface& surface, const Gfx::Rect& rect)
 {
     WindowButton::paint(surface, rect);
 
@@ -251,10 +251,10 @@ void MaximizeButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
                      Gfx::Pen::Solid, Gfx::Pen::FlatCap);
     painter.setPen(pen);
 
-    Gfx::PointF tl = geometry().topLeft() + Gfx::PointF(5, 5);
-    Gfx::PointF tr = geometry().topRight() + Gfx::PointF(-4, 4);
-    Gfx::PointF br = geometry().bottomRight() - Gfx::PointF(4, 4);
-    Gfx::PointF bl = geometry().bottomLeft() - Gfx::PointF(-4, 4);
+    Gfx::Point tl = geometry().topLeft() + Gfx::Point(5, 5);
+    Gfx::Point tr = geometry().topRight() + Gfx::Point(-4, 4);
+    Gfx::Point br = geometry().bottomRight() - Gfx::Point(4, 4);
+    Gfx::Point bl = geometry().bottomLeft() - Gfx::Point(-4, 4);
     painter.drawLine(tl, tr);
     painter.drawLine(bl, tr);
     painter.drawLine(br, tr);
@@ -275,7 +275,7 @@ CloseButton::~CloseButton()
 }
 
 
-void CloseButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
+void CloseButton::paint(PaintSurface& surface, const Gfx::Rect& rect)
 {
     WindowButton::paint(surface, rect);
 
@@ -288,10 +288,10 @@ void CloseButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
                      Gfx::Pen::Solid, Gfx::Pen::RoundCap);
     painter.setPen(pen);
 
-    Gfx::PointF tl = geometry().topLeft() + Gfx::PointF(4, 4);
-    Gfx::PointF br = geometry().bottomRight() - Gfx::PointF(4, 4);
-    Gfx::PointF tr = geometry().topRight() + Gfx::PointF(-4, 4);
-    Gfx::PointF bl = geometry().bottomLeft() - Gfx::PointF(-4, 4);
+    Gfx::Point tl = geometry().topLeft() + Gfx::Point(4, 4);
+    Gfx::Point br = geometry().bottomRight() - Gfx::Point(4, 4);
+    Gfx::Point tr = geometry().topRight() + Gfx::Point(-4, 4);
+    Gfx::Point bl = geometry().bottomLeft() - Gfx::Point(-4, 4);
     painter.drawLine(tl, br);
     painter.drawLine(tr, bl);
 }
@@ -310,7 +310,7 @@ MenuButton::~MenuButton()
 }
 
 
-void MenuButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
+void MenuButton::paint(PaintSurface& surface, const Gfx::Rect& rect)
 {
     Painter painter(surface);
     painter.setClip(rect);
@@ -318,10 +318,10 @@ void MenuButton::paint(PaintSurface& surface, const Gfx::RectF& rect)
     //
     // draw symbol
     //
-    Gfx::PointF triangle[3];
-    triangle[0] = geometry().topLeft() + Gfx::PointF(4, 4);
-    triangle[1] = geometry().topRight() + Gfx::PointF(-2, 4);
-    Gfx::PointF mid(geometry().width() / 2, geometry().height() / 2);
+    Gfx::Point triangle[3];
+    triangle[0] = geometry().topLeft() + Gfx::Point(4, 4);
+    triangle[1] = geometry().topRight() + Gfx::Point(-2, 4);
+    Gfx::Point mid(geometry().width() / 2, geometry().height() / 2);
     mid.addY(1); 
     triangle[2] = geometry().topLeft() + mid;
 
@@ -394,68 +394,68 @@ void WindowFrame::setState(Window::State state)
 }
 
 
-const Gfx::PointF& WindowFrame::restorePosition() const
+const Gfx::Point& WindowFrame::restorePosition() const
 {
     return _restorePos;
 }
 
 
-const Gfx::SizeF& WindowFrame::restoreSize() const
+const Gfx::Size& WindowFrame::restoreSize() const
 {
     return _restoreSize;
 }
 
       
-void WindowFrame::setRestore(const Gfx::PointF& pos, const Gfx::SizeF& size)
+void WindowFrame::setRestore(const Gfx::Point& pos, const Gfx::Size& size)
 {
     _restorePos = _window->position();
     _restoreSize = _window->size();
 }
 
 
-const Gfx::RectF& WindowFrame::clientRect() const
+const Gfx::Rect& WindowFrame::clientRect() const
 {
     return _clientRect;
 }
 
 
-const Gfx::RectF& WindowFrame::frameRect() const
+const Gfx::Rect& WindowFrame::frameRect() const
 {
     return _frameRect;
 }
 
 
-void WindowFrame::setFrame(double bw, double th)
+void WindowFrame::setFrame(Pt::ssize_t bw, Pt::ssize_t th)
 { 
     _borderWidth = bw;
     _titleHeight = th;
 }
 
 
-Gfx::PointF WindowFrame::toFrame(const Gfx::PointF& pos) const
+Gfx::Point WindowFrame::toFrame(const Gfx::Point& pos) const
 {
-    double offY = _borderWidth + _titleHeight;
-    double offX = _borderWidth;
+    Pt::ssize_t offY = _borderWidth + _titleHeight;
+    Pt::ssize_t offX = _borderWidth;
 
-    return pos + Gfx::PointF(offX, offY);
+    return pos + Gfx::Point(offX, offY);
 }
 
 
-Gfx::PointF WindowFrame::fromFrame(const Gfx::PointF& pos) const
+Gfx::Point WindowFrame::fromFrame(const Gfx::Point& pos) const
 {
-    double offY = _borderWidth + _titleHeight;
-    double offX = _borderWidth;
+    Pt::ssize_t offY = _borderWidth + _titleHeight;
+    Pt::ssize_t offX = _borderWidth;
 
-    return pos - Gfx::PointF(offX, offY);
+    return pos - Gfx::Point(offX, offY);
 }
 
 
-Gfx::SizeF WindowFrame::fromFrame(const Gfx::SizeF& size) const
+Gfx::Size WindowFrame::fromFrame(const Gfx::Size& size) const
 {
-    double offY = (2*_borderWidth) + _titleHeight;
-    double offX = 2*_borderWidth;
+    Pt::ssize_t offY = (2*_borderWidth) + _titleHeight;
+    Pt::ssize_t offX = 2*_borderWidth;
 
-    return Gfx::SizeF(size.width() - offX, size.height() - offY);
+    return Gfx::Size(size.width() - offX, size.height() - offY);
 }
 
 
@@ -494,10 +494,10 @@ void WindowFrame::update()
 }
 
 
-void WindowFrame::update(const Gfx::RectF& rect)
+void WindowFrame::update(const Gfx::Rect& rect)
 {
-    Gfx::PointF updatePos = _window->fromParent( rect.topLeft() );
-    Gfx::RectF updateRect(updatePos, rect.size());
+    Gfx::Point updatePos = _window->fromParent( rect.topLeft() );
+    Gfx::Rect updateRect(updatePos, rect.size());
     
     _window->update(updateRect);
 }
@@ -507,7 +507,7 @@ void WindowFrame::moveEvent(const MoveEvent& mev)
 {
     _frameRect.setOrigin( mev.position() );
 
-    Gfx::PointF clientPos = mev.position();
+    Gfx::Point clientPos = mev.position();
     clientPos.addX(_borderWidth);
     clientPos.addY(_borderWidth + _titleHeight);
     _clientRect.setOrigin(clientPos);
@@ -520,7 +520,7 @@ void WindowFrame::resizeEvent(const ResizeEvent& rev)
 {
     _clientRect.setSize( rev.size() );
     
-    Gfx::SizeF frameSize = rev.size();
+    Gfx::Size frameSize = rev.size();
     frameSize.addWidth(2 * _borderWidth);
     frameSize.addHeight(2 * _borderWidth);
     frameSize.addHeight(_titleHeight);
@@ -532,25 +532,25 @@ void WindowFrame::resizeEvent(const ResizeEvent& rev)
 
 void WindowFrame::onLayout()
 {
-    double buttonWidth = _titleHeight - _borderWidth;
+    Pt::ssize_t buttonWidth = _titleHeight - _borderWidth;
 
-    Gfx::PointF menuPos(_frameRect.x() + _borderWidth, _frameRect.y() + _borderWidth);
+    Gfx::Point menuPos(_frameRect.x() + _borderWidth, _frameRect.y() + _borderWidth);
     _menuButton.moveEvent( MoveEvent(0, menuPos ) );
-    _menuButton.resizeEvent( ResizeEvent(0, Gfx::SizeF(buttonWidth, buttonWidth) ) );
+    _menuButton.resizeEvent( ResizeEvent(0, Gfx::Size(buttonWidth, buttonWidth) ) );
 
-    double buttonX = _frameRect.x() + _frameRect.width() - (_borderWidth + buttonWidth);
-    double buttonY = _frameRect.y() + _borderWidth;
+    Pt::ssize_t buttonX = _frameRect.x() + _frameRect.width() - (_borderWidth + buttonWidth);
+    Pt::ssize_t buttonY = _frameRect.y() + _borderWidth;
 
-    _closeButton.moveEvent( MoveEvent(0, Gfx::PointF(buttonX, buttonY) ) );
-    _closeButton.resizeEvent( ResizeEvent(0, Gfx::SizeF(buttonWidth, buttonWidth) ) );
-
-    buttonX -= _borderWidth + buttonWidth;
-    _maximizeButton.moveEvent( MoveEvent(0, Gfx::PointF(buttonX, buttonY) ) );
-    _maximizeButton.resizeEvent( ResizeEvent(0, Gfx::SizeF(buttonWidth, buttonWidth) ) );
+    _closeButton.moveEvent( MoveEvent(0, Gfx::Point(buttonX, buttonY) ) );
+    _closeButton.resizeEvent( ResizeEvent(0, Gfx::Size(buttonWidth, buttonWidth) ) );
 
     buttonX -= _borderWidth + buttonWidth;
-    _minimizeButton.moveEvent( MoveEvent(0, Gfx::PointF(buttonX, buttonY) ) );
-    _minimizeButton.resizeEvent( ResizeEvent(0, Gfx::SizeF(buttonWidth, buttonWidth) ) );
+    _maximizeButton.moveEvent( MoveEvent(0, Gfx::Point(buttonX, buttonY) ) );
+    _maximizeButton.resizeEvent( ResizeEvent(0, Gfx::Size(buttonWidth, buttonWidth) ) );
+
+    buttonX -= _borderWidth + buttonWidth;
+    _minimizeButton.moveEvent( MoveEvent(0, Gfx::Point(buttonX, buttonY) ) );
+    _minimizeButton.resizeEvent( ResizeEvent(0, Gfx::Size(buttonWidth, buttonWidth) ) );
 }
 
 
@@ -602,7 +602,7 @@ bool WindowFrame::onMouseEvent(const MouseEvent& mev)
     {
         if( window->isEnabled() )
         {
-            Gfx::PointF pos = mev.position() - _clientRect.topLeft();
+            Gfx::Point pos = mev.position() - _clientRect.topLeft();
             MouseEvent mev2 = mev;
             mev2.setPosition(pos);
             window->processEvent(mev2);
@@ -656,7 +656,7 @@ bool WindowFrame::onTouchEvent(const TouchEvent& tev)
     {
         if( window->isEnabled() )
         {
-            Gfx::PointF pos = tev.position() - _clientRect.topLeft();
+            Gfx::Point pos = tev.position() - _clientRect.topLeft();
             TouchEvent tev2 = tev;
             tev2.setPosition(pos);
             window->processEvent(tev2);
@@ -685,13 +685,13 @@ bool WindowFrame::onTouchEvent(const TouchEvent& tev)
 }
 
 
-bool WindowFrame::isTitle(const Gfx::PointF& p) const
+bool WindowFrame::isTitle(const Gfx::Point& p) const
 {            
     bool isResizing = _isLeftResizing || _isRightResizing || 
                       _isTopResizing || _isBottomResizing;
 
 
-    Gfx::PointF localPos = p - _frameRect.topLeft();
+    Gfx::Point localPos = p - _frameRect.topLeft();
 
     bool overTitle = localPos.x() >= _borderWidth && 
                      localPos.x() < _borderWidth + _clientRect.width() &&
@@ -702,9 +702,9 @@ bool WindowFrame::isTitle(const Gfx::PointF& p) const
 }
 
 
-bool WindowFrame::isLeftBorder(const Pt::Gfx::PointF& p) const
+bool WindowFrame::isLeftBorder(const Pt::Gfx::Point& p) const
 {        
-    Gfx::PointF localPos = p - _frameRect.topLeft();
+    Gfx::Point localPos = p - _frameRect.topLeft();
 
     bool r =  localPos.x() >= 0 &&
               localPos.x() < _borderWidth &&
@@ -715,9 +715,9 @@ bool WindowFrame::isLeftBorder(const Pt::Gfx::PointF& p) const
 }
 
 
-bool WindowFrame::isRightBorder(const Pt::Gfx::PointF& p) const
+bool WindowFrame::isRightBorder(const Pt::Gfx::Point& p) const
 {        
-    Gfx::PointF localPos = p - _frameRect.topLeft();
+    Gfx::Point localPos = p - _frameRect.topLeft();
 
     bool r =   localPos.x() >= _borderWidth + _clientRect.width() &&
                localPos.x() < 2 * _borderWidth + _clientRect.width() &&
@@ -728,9 +728,9 @@ bool WindowFrame::isRightBorder(const Pt::Gfx::PointF& p) const
 }
 
 
-bool WindowFrame::isTopBorder(const Pt::Gfx::PointF& p) const
+bool WindowFrame::isTopBorder(const Pt::Gfx::Point& p) const
 {        
-    Gfx::PointF localPos = p - _frameRect.topLeft();
+    Gfx::Point localPos = p - _frameRect.topLeft();
 
     bool r =   localPos.x() >= 0 &&
                localPos.x() < _frameRect.width() &&
@@ -741,11 +741,11 @@ bool WindowFrame::isTopBorder(const Pt::Gfx::PointF& p) const
 }
 
 
-bool WindowFrame::isBottomBorder(const Pt::Gfx::PointF& p) const
+bool WindowFrame::isBottomBorder(const Pt::Gfx::Point& p) const
 {        
-    Gfx::PointF localPos = p - _frameRect.topLeft();
+    Gfx::Point localPos = p - _frameRect.topLeft();
 
-    double minY = _clientRect.height() + _borderWidth + _titleHeight;
+    Pt::ssize_t minY = _clientRect.height() + _borderWidth + _titleHeight;
 
     bool r =   localPos.x() >= 0 &&
                localPos.x() < _frameRect.width() &&
@@ -756,7 +756,7 @@ bool WindowFrame::isBottomBorder(const Pt::Gfx::PointF& p) const
 }
 
 
-Window* WindowFrame::checkWindow(const Gfx::PointF& pos)
+Window* WindowFrame::checkWindow(const Gfx::Point& pos)
 {
     bool isResizing = _isLeftResizing || _isRightResizing || 
                       _isTopResizing || _isBottomResizing;
@@ -787,7 +787,7 @@ Window* WindowFrame::checkWindow(const Gfx::PointF& pos)
 }
 
 
-WindowButton* WindowFrame::checkButton(const Gfx::PointF& pos)
+WindowButton* WindowFrame::checkButton(const Gfx::Point& pos)
 {
     bool isResizing = _isLeftResizing || _isRightResizing || 
                       _isTopResizing || _isBottomResizing;
@@ -814,7 +814,7 @@ WindowButton* WindowFrame::checkButton(const Gfx::PointF& pos)
 }
 
 
-bool WindowFrame::checkMove(const Gfx::PointF& pos, bool isDrag, bool isPress)
+bool WindowFrame::checkMove(const Gfx::Point& pos, bool isDrag, bool isPress)
 {
     if( isTitle(pos) )
     {       
@@ -822,7 +822,7 @@ bool WindowFrame::checkMove(const Gfx::PointF& pos, bool isDrag, bool isPress)
 
         if(_isMoving && ! isPress)
         {
-            Gfx::PointF to = _window->position() + pos - _lastPointer;
+            Gfx::Point to = _window->position() + pos - _lastPointer;
             _window->move(to);
         }
         
@@ -833,7 +833,7 @@ bool WindowFrame::checkMove(const Gfx::PointF& pos, bool isDrag, bool isPress)
 }
  
 
-bool WindowFrame::checkResize(const Gfx::PointF& pos, bool isDrag, bool isPress)
+bool WindowFrame::checkResize(const Gfx::Point& pos, bool isDrag, bool isPress)
 {
     bool onLeftBorder = isLeftBorder(pos);
     bool onRightBorder = isRightBorder(pos);
@@ -852,9 +852,9 @@ bool WindowFrame::checkResize(const Gfx::PointF& pos, bool isDrag, bool isPress)
 
         if(isResizing && ! isPress)
         {
-            Gfx::SizeF size = _window->size();
-            Gfx::PointF winpos = _window->position();
-            Gfx::PointF delta = pos - _lastPointer;
+            Gfx::Size size = _window->size();
+            Gfx::Point winpos = _window->position();
+            Gfx::Point delta = pos - _lastPointer;
 
             if( _isLeftResizing )
             {
@@ -888,7 +888,7 @@ bool WindowFrame::checkResize(const Gfx::PointF& pos, bool isDrag, bool isPress)
 }
 
 
-void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
+void WindowFrame::paint(PaintSurface& surface, const Gfx::Rect& rect)
 {
     if( _borderWidth < 0.1 && _titleHeight < 0.1  )
         return;
@@ -906,33 +906,33 @@ void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
     Gfx::Brush brush(color);
     painter.setBrush(brush);
 
-    Gfx::PointF pos = _window->position();
+    Gfx::Point pos = _window->position();
 
-    Gfx::RectF leftBorder( pos.x(), 
+    Gfx::Rect leftBorder( pos.x(), 
                            pos.x() + _borderWidth - 1,
                            pos.y() + _borderWidth, 
                            pos.y() + _frameRect.height() - _borderWidth - 1 );
     painter.fillRect(leftBorder);
 
-    Gfx::RectF topBorder(pos.x(),
+    Gfx::Rect topBorder(pos.x(),
                          pos.x() + _frameRect.width() - 1,
                          pos.y(),
                          pos.y() + _borderWidth - 1);
     painter.fillRect(topBorder);
 
-    Gfx::RectF rightBorder(pos.x() + _frameRect.width() - _borderWidth,
+    Gfx::Rect rightBorder(pos.x() + _frameRect.width() - _borderWidth,
                            pos.x() + _frameRect.width() - 1,
                            pos.y() + _borderWidth,
                            pos.y() + _frameRect.height() - _borderWidth - 1 );
     painter.fillRect(rightBorder);
 
-    Gfx::RectF bottomBorder(pos.x(),
+    Gfx::Rect bottomBorder(pos.x(),
                             pos.x() + _frameRect.width() - 1,
                             pos.y() + _frameRect.height() - _borderWidth,
                             pos.y() + _frameRect.height() - 1);
     painter.fillRect(bottomBorder);
 
-    Gfx::RectF titleArea( pos.x() + _borderWidth,
+    Gfx::Rect titleArea( pos.x() + _borderWidth,
                           pos.x() + _frameRect.width() - _borderWidth - 1,
                           pos.y() + _borderWidth,
                           pos.y() + _borderWidth + _titleHeight - 1);
@@ -946,21 +946,21 @@ void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
 
     painter.setPen(borderPenLight);
     painter.drawLine(_frameRect.topLeft(), 
-                     Gfx::PointF(_frameRect.topRight().x() + 1,
+                     Gfx::Point(_frameRect.topRight().x() + 1,
                                  _frameRect.topRight().y()) );
     
     painter.drawLine(_frameRect.topLeft(), 
-                     Gfx::PointF(_frameRect.bottomLeft().x(),
+                     Gfx::Point(_frameRect.bottomLeft().x(),
                                  _frameRect.bottomLeft().y() + 1) );
 
-    painter.drawLine( Gfx::PointF(_frameRect.topRight().x() - (_borderWidth -1),
+    painter.drawLine( Gfx::Point(_frameRect.topRight().x() - (_borderWidth -1),
                                   _frameRect.topRight().y() + (_borderWidth) + _titleHeight),
-                      Gfx::PointF(_frameRect.bottomRight().x() - (_borderWidth -1),
+                      Gfx::Point(_frameRect.bottomRight().x() - (_borderWidth -1),
                                   _frameRect.bottomRight().y() - (_borderWidth-1)) );
     
-    painter.drawLine( Gfx::PointF(_frameRect.bottomLeft().x() + (_borderWidth),
+    painter.drawLine( Gfx::Point(_frameRect.bottomLeft().x() + (_borderWidth),
                                   _frameRect.bottomLeft().y() - (_borderWidth - 1)),
-                      Gfx::PointF(_frameRect.bottomRight().x() - (_borderWidth -2),
+                      Gfx::Point(_frameRect.bottomRight().x() - (_borderWidth -2),
                                   _frameRect.bottomRight().y() - (_borderWidth - 1)) );
 
     //
@@ -970,23 +970,23 @@ void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
     Gfx::Pen borderPenDark(borderDark, 1);
 
     painter.setPen(borderPenDark);
-    painter.drawLine( Gfx::PointF(_frameRect.bottomLeft().x() + 1,
+    painter.drawLine( Gfx::Point(_frameRect.bottomLeft().x() + 1,
                                   _frameRect.bottomLeft().y()), 
                       _frameRect.bottomRight() );
 
-    painter.drawLine(Gfx::PointF( _frameRect.topRight().x(),
+    painter.drawLine(Gfx::Point( _frameRect.topRight().x(),
                                   _frameRect.topRight().y() + 1 ), 
-                     Gfx::PointF(_frameRect.bottomRight().x(),
+                     Gfx::Point(_frameRect.bottomRight().x(),
                                  _frameRect.bottomRight().y() + 1) );
 
-    painter.drawLine( Gfx::PointF(_frameRect.topLeft().x() + (_borderWidth-1),
+    painter.drawLine( Gfx::Point(_frameRect.topLeft().x() + (_borderWidth-1),
                                   _frameRect.topLeft().y() + (_borderWidth) + _titleHeight),
-                      Gfx::PointF(_frameRect.bottomLeft().x() + (_borderWidth-1),
+                      Gfx::Point(_frameRect.bottomLeft().x() + (_borderWidth-1),
                                   _frameRect.bottomLeft().y() - (_borderWidth - 2)) );
 
-    painter.drawLine( Gfx::PointF(_frameRect.topLeft().x() + (_borderWidth-1),
+    painter.drawLine( Gfx::Point(_frameRect.topLeft().x() + (_borderWidth-1),
                                   _frameRect.topLeft().y() + (_borderWidth-1) + _titleHeight),
-                      Gfx::PointF(_frameRect.topRight().x() - (_borderWidth-2),
+                      Gfx::Point(_frameRect.topRight().x() - (_borderWidth-2),
                                  _frameRect.topRight().y() + (_borderWidth-1) + _titleHeight) );
 
     //
@@ -998,7 +998,7 @@ void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
     painter.setFont(font);
     Gfx::FontMetrics fm = painter.fontMetrics(title);
 
-    Gfx::PointF textPos(pos.x() + _borderWidth + _titleHeight, 
+    Gfx::Point textPos(pos.x() + _borderWidth + _titleHeight, 
                         pos.y() + _titleHeight - _borderWidth);
 
     Gfx::Color textColor = _window->isActive() ? _wm->textColor() 
@@ -1021,9 +1021,9 @@ void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
     Gfx::Pen gripPenDark(gripColorDark, 1);
 
 
-    Gfx::PointF gripStart( textPos.x() + fm.width() + _borderWidth, 
+    Gfx::Point gripStart( textPos.x() + fm.width() + _borderWidth, 
                            pos.y() + _borderWidth - 2); // approx.
-    Gfx::PointF gripEnd(pos.x() + _frameRect.width() - _borderWidth - 3*_titleHeight,
+    Gfx::Point gripEnd(pos.x() + _frameRect.width() - _borderWidth - 3*_titleHeight,
                         pos.y() + _borderWidth - 2); // approx.
     
     for(int n = 0; n < 4; ++n)
@@ -1046,7 +1046,7 @@ void WindowFrame::paint(PaintSurface& surface, const Gfx::RectF& rect)
     {
         WindowButton* button = *it;
 
-        Gfx::RectF buttonUpdateRect = button->geometry().intersect(rect);
+        Gfx::Rect buttonUpdateRect = button->geometry().intersect(rect);
         if( buttonUpdateRect.isNull() )
             continue;
 

@@ -70,9 +70,9 @@ class PT_HMI_API DockingLayout : public Layout
 
         virtual void onRemoveWidget(Widget& w);
 
-        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+        virtual Gfx::Size onMeasure(const SizePolicy& policy);
 
-        virtual void onLayout(const Gfx::RectF& rect);
+        virtual void onLayout(const Gfx::Rect& rect);
 
     private:
         std::map<Widget*, DockMode> _docking;

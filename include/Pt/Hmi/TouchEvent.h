@@ -77,32 +77,32 @@ class TouchEvent : public Pt::BasicEvent<TouchEvent>
             return _vid;
         }
 
-        const Gfx::PointF& position() const
+        const Gfx::Point& position() const
         {
             return _pos;
         }
 
-        void setPosition(const Gfx::PointF& pos)
+        void setPosition(const Gfx::Point& pos)
         {
             _pos = pos;
         }
 
-        double x() const
+        Pt::ssize_t x() const
         {
             return _pos.x();
         }
         
-        void setX(double x)
+        void setX(Pt::ssize_t x)
         {
             _pos.setX(x);
         }
         
-        double y() const
+        Pt::ssize_t y() const
         {
             return _pos.y();
         }
 
-        void setY(double y)
+        void setY(Pt::ssize_t y)
         {
             _pos.setY(y);
         }
@@ -170,7 +170,7 @@ class TouchEvent : public Pt::BasicEvent<TouchEvent>
 
     private:
         Pt::uint64_t _vid;
-        Gfx::PointF  _pos;
+        Gfx::Point   _pos;
         Action       _action;
         Pt::uint32_t _trackingId;
         double       _pressure;

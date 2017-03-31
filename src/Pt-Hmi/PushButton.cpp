@@ -80,7 +80,7 @@ void PushButton::setIcon(const Gfx::Image& image)
 }
 
 
-void PushButton::setIconSize(const Gfx::SizeF& size)
+void PushButton::setIconSize(const Gfx::Size& size)
 {
     _iconSize = size;
     update();
@@ -256,15 +256,15 @@ void PushButton::onSetStyleOptions(const StyleOptions& o)
 }
 
 
-Gfx::SizeF PushButton::onMeasure(const SizePolicy& policy)
+Gfx::Size PushButton::onMeasure(const SizePolicy& policy)
 {
     Gfx::FontMetrics fm = Painter::fontMetrics( _font, text() );
 
-    double spacing = _picture.empty() || text().empty() ? 0 : fm.height() * 0.5;
-    double pictureWidth = _iconSize.isNull() ? _picture.width() : _iconSize.width();
-    double pictureHeight = _iconSize.isNull() ? _picture.height() : _iconSize.height();
-    double itemsWidth = 0;
-    double itemsHeight = 0;
+    Pt::ssize_t spacing = _picture.empty() || text().empty() ? 0 : fm.height() * 0.5;
+    Pt::ssize_t pictureWidth = _iconSize.isNull() ? _picture.width() : _iconSize.width();
+    Pt::ssize_t pictureHeight = _iconSize.isNull() ? _picture.height() : _iconSize.height();
+    Pt::ssize_t itemsWidth = 0;
+    Pt::ssize_t itemsHeight = 0;
 
     switch(_direction)
     {
@@ -272,22 +272,22 @@ Gfx::SizeF PushButton::onMeasure(const SizePolicy& policy)
         case Left:
         case Right:
             itemsWidth = fm.width() + spacing + pictureWidth;
-            itemsHeight = std::max<double>(fm.height(), pictureHeight);
+            itemsHeight = std::max<Pt::ssize_t>(fm.height(), pictureHeight);
             break;
 
         case Top:
         case Bottom:
-            itemsWidth = std::max<double>(fm.width(), pictureWidth);
+            itemsWidth = std::max<Pt::ssize_t>(fm.width(), pictureWidth);
             itemsHeight = fm.height() + spacing + pictureHeight;
             break;  
     }
 
-    return Gfx::SizeF( itemsWidth + padding().leftRight(), 
+    return Gfx::Size( itemsWidth + padding().leftRight(), 
                        itemsHeight + padding().topBottom() );
 }
 
 
-void PushButton::onLayout(const Gfx::RectF& rect)
+void PushButton::onLayout(const Gfx::Rect& rect)
 {
     layoutContent();
 }
@@ -297,16 +297,16 @@ void PushButton::layoutContent()
 {
     Gfx::FontMetrics fm = Painter::fontMetrics( _font, text() );
 
-    double spacing = _picture.empty() || text().empty() ? 0 : fm.height() * 0.5;
-    double pictureWidth = _iconSize.isNull() ? _picture.width() : _iconSize.width();
-    double pictureHeight = _iconSize.isNull() ? _picture.height() : _iconSize.height();
-    double itemsWidth = fm.width() + spacing + pictureWidth;
-    double itemsHeight = fm.height() + spacing + pictureHeight;
+    Pt::ssize_t spacing = _picture.empty() || text().empty() ? 0 : fm.height() * 0.5;
+    Pt::ssize_t pictureWidth = _iconSize.isNull() ? _picture.width() : _iconSize.width();
+    Pt::ssize_t pictureHeight = _iconSize.isNull() ? _picture.height() : _iconSize.height();
+    Pt::ssize_t itemsWidth = fm.width() + spacing + pictureWidth;
+    Pt::ssize_t itemsHeight = fm.height() + spacing + pictureHeight;
 
-    double pictureX = 0;
-    double pictureY = 0;
-    double textX = 0;
-    double textY = 0;
+    Pt::ssize_t pictureX = 0;
+    Pt::ssize_t pictureY = 0;
+    Pt::ssize_t textX = 0;
+    Pt::ssize_t textY = 0;
 
     switch(_direction)
     {
@@ -346,8 +346,8 @@ void PushButton::layoutContent()
 
     if( ! _picture.empty() )
     {
-        double pictureXOff = (pictureWidth - _picture.width()) / 2;
-        double pictureYOff = (pictureHeight - _picture.height()) / 2;
+        Pt::ssize_t pictureXOff = (pictureWidth - _picture.width()) / 2;
+        Pt::ssize_t pictureYOff = (pictureHeight - _picture.height()) / 2;
 
         _iconPos.set(pictureX + pictureXOff, 
                      pictureY + pictureYOff);
@@ -381,7 +381,7 @@ void PushButton::onInvalidate()
 }
 
 
-void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void PushButton::onPaint(PaintSurface& surface, const Gfx::Rect& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
@@ -419,7 +419,7 @@ void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     // button text including menomnic
     //
 
-    Gfx::RectF mnemonicRect;   
+    Gfx::Rect mnemonicRect;   
     const Char* m = mnemonic();
     if(m)
     {
@@ -432,9 +432,9 @@ void PushButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
             mnemonicText = *m;
             Gfx::FontMetrics fmChar = painter.fontMetrics(mnemonicText);
 
-            mnemonicRect.set( Gfx::PointF(_textPos.x() + fmLeft.width(), 
+            mnemonicRect.set( Gfx::Point(_textPos.x() + fmLeft.width(), 
                                           _textPos.y() - fmChar.ascent()),
-                              Gfx::SizeF(fmChar.width(), 
+                              Gfx::Size(fmChar.width(), 
                                          fmChar.height()) );
         }
     }

@@ -47,25 +47,25 @@ LineEditor::~LineEditor()
 }
 
 
-const Gfx::PointF& LineEditor::position() const
+const Gfx::Point& LineEditor::position() const
 {
     return _position;
 }
 
 
-void LineEditor::setPosition(const Gfx::PointF& p)
+void LineEditor::setPosition(const Gfx::Point& p)
 {
     _position = p;
 }
 
 
-const Gfx::SizeF& LineEditor::size() const
+const Gfx::Size& LineEditor::size() const
 {
     return _size;
 }
 
 
-void LineEditor::setSize(const Gfx::SizeF& s)
+void LineEditor::setSize(const Gfx::Size& s)
 {
     _size = s;
 }
@@ -226,8 +226,8 @@ void LineEditor::layout(const Pt::String& text, TextLine& line)
 {
     line.setText(text, _font);
 
-    double lineX = 0;
-    double lineY = (_size.height() - line.maxHeight()) / 2;
+    Pt::ssize_t lineX = 0;
+    Pt::ssize_t lineY = (_size.height() - line.maxHeight()) / 2;
 
     switch(_adjustment)
     {
@@ -247,17 +247,17 @@ void LineEditor::layout(const Pt::String& text, TextLine& line)
     
     if( line.width() >= _size.width() )
     {
-        double cursorX = line.cursorToX(_cursorPosition);
-        double maxX = _size.width() + _scrollOffset;
+        Pt::ssize_t cursorX = line.cursorToX(_cursorPosition);
+        Pt::ssize_t maxX = _size.width() + _scrollOffset;
 
         if( cursorX > maxX )
         {
-            double delta = cursorX - maxX;
+            Pt::ssize_t delta = cursorX - maxX;
             _scrollOffset += delta;
         }
         else if( cursorX < _scrollOffset )
         {
-            double delta = _scrollOffset - cursorX;
+            Pt::ssize_t delta = _scrollOffset - cursorX;
             _scrollOffset -= delta;
         }
 

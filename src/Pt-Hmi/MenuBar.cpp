@@ -90,7 +90,7 @@ void MenuBarItem::toggle()
 
 void MenuBarItem::open()
 {
-    Gfx::PointF menuPos(0, size().height());
+    Gfx::Point menuPos(0, size().height());
     menuPos = toWindow(menuPos);
 
     if( window() )
@@ -106,11 +106,11 @@ void MenuBarItem::close()
 }
 
 
-Gfx::SizeF MenuBarItem::onAutoSize(const SizePolicy& policy) const
+Gfx::Size MenuBarItem::onAutoSize(const SizePolicy& policy) const
 {
     Gfx::FontMetrics fm = Painter::fontMetrics(_font, _text);
 
-    return Gfx::SizeF( fm.width() + padding().leftRight(), 
+    return Gfx::Size( fm.width() + padding().leftRight(), 
                        fm.height() + padding().topBottom() );
 }
 
@@ -119,7 +119,7 @@ bool MenuBarItem::onMouseEvent(const MouseEvent& ev)
 { 
     Base::onMouseEvent(ev);
 
-    bool inside = Gfx::RectF( size() ).contains( ev.position() );
+    bool inside = Gfx::Rect( size() ).contains( ev.position() );
 
     if( inside && ev.isRelease() )
     {
@@ -133,7 +133,7 @@ bool MenuBarItem::onMouseEvent(const MouseEvent& ev)
     // navigate to sibling item if a sub menu is open
     if( _menuBar.selectedMenu() )
     {
-        Gfx::PointF pos = toParent( ev.position() );
+        Gfx::Point pos = toParent( ev.position() );
         MenuBarItem* item = _menuBar.findItem(pos);
         if(item)
         {
@@ -145,7 +145,7 @@ bool MenuBarItem::onMouseEvent(const MouseEvent& ev)
     }
 
     // navigate to open sub menu
-    Gfx::PointF screenPos = toScreen( ev.position() );
+    Gfx::Point screenPos = toScreen( ev.position() );
     MenuShell* menu = _menu.findMenu(screenPos);   
     if(menu)
     {   
@@ -281,7 +281,7 @@ void MenuBarItem::onInvalidate()
 }
 
 
-void MenuBarItem::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void MenuBarItem::onPaint(PaintSurface& surface, const Gfx::Rect& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
     
@@ -301,12 +301,12 @@ void MenuBarItem::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     // item text
     //
     Gfx::FontMetrics fm = painter.fontMetrics(_text);
-    double textX = padding().left();
-    double textY = (size().height() - fm.height()) / 2;
+    Pt::ssize_t textX = padding().left();
+    Pt::ssize_t textY = (size().height() - fm.height()) / 2;
     textY += fm.ascent();
-    Gfx::PointF textPos(textX, textY);
+    Gfx::Point textPos(textX, textY);
 
-    Gfx::RectF mnemonicRect; // TODO
+    Gfx::Rect mnemonicRect; // TODO
     
     _renderer->renderItemText(*this, options, painter, rect,
                               _text, textPos, _font, _textPen, mnemonicRect);
@@ -340,7 +340,7 @@ MenuBar::MenuBar()
     //this->setBorderColor( Gfx::Color(32767, 32767, 32767)  );
     //this->setBorderStyle(Panel::NoBorder);
 
-    _layout.move( Gfx::PointF(0,0) );
+    _layout.move( Gfx::Point(0,0) );
     _layout.setPadding(1);
 
     add(_layout);
@@ -363,7 +363,7 @@ Menu* MenuBar::selectedMenu()
 }
 
 
-MenuBarItem* MenuBar::findItem(const Gfx::PointF& pos)
+MenuBarItem* MenuBar::findItem(const Gfx::Point& pos)
 {
     MenuBarItem* item = 0;
 
@@ -384,7 +384,7 @@ MenuBarItem* MenuBar::findItem(const Gfx::PointF& pos)
 void MenuBar::onAddMenu(Menu& menu, const Pt::String& text)
 {
     MenuBarItem* item = new MenuBarItem(*this, menu, text);
-//TODO:    item->resize( Gfx::SizeF(50, 0) );
+//TODO:    item->resize( Gfx::Size(50, 0) );
 
     _menus.push_back(item);
     _layout.addItem(*item);
@@ -454,15 +454,15 @@ void MenuBar::onEnter()
 }
 
 
-MenuShell* MenuBar::onFindMenu(const Gfx::PointF& screenPos)
+MenuShell* MenuBar::onFindMenu(const Gfx::Point& screenPos)
 { 
     if( ! isVisible() )
         return 0;
 
-    Gfx::PointF pos = this->window()->fromScreen(screenPos);
+    Gfx::Point pos = this->window()->fromScreen(screenPos);
     pos = this->fromWindow(pos);
 
-    Gfx::RectF rect( Gfx::PointF(0,0), size() );
+    Gfx::Rect rect( Gfx::Point(0,0), size() );
     if( rect.contains( pos ) )
         return this;
 
@@ -530,7 +530,7 @@ void MenuBar::onInvalidate()
 }
 
 
-void MenuBar::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void MenuBar::onPaint(PaintSurface& surface, const Gfx::Rect& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
@@ -556,7 +556,7 @@ void MenuBar::onResizeEvent(const ResizeEvent& ev)
     for(std::size_t i = 0; i < _layout.widgets().size(); ++i)
     {
         Widget* item = _layout.widgets().at(i);
-        Gfx::SizeF itemSize = item->preferredSize();
+        Gfx::Size itemSize = item->preferredSize();
  //TODO:       item->resize(itemSize);
     }
 

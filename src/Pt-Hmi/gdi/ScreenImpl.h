@@ -55,23 +55,7 @@ class ScreenImpl
 
         void init(WindowBase& w);
 
-        Gfx::SizeF size() const;
-
-        Gfx::PointF toUnit(const Gfx::Point& value);
-
-        Gfx::SizeF toUnit(const Gfx::Size& value);
-
-        Gfx::Point fromUnit(const Gfx::PointF& value);
-
-        Gfx::Size fromUnit(const Gfx::SizeF& value);
-
-        Gfx::Rect fromUnit(const Gfx::RectF& value);        
-
-        double unitSizeInch() const;
-
-        double unitSizeMm() const;
-
-        double resolutionDPI() const;
+        Gfx::Size size() const;
 
         void registerWindow(Window& w)
         {
@@ -87,15 +71,15 @@ class ScreenImpl
 
         void dispatchScrollEvent(const ScrollEvent& ev);
 
-        Gfx::PointF toParent(const Window& w, const Gfx::PointF& pos) const;
+        Gfx::Point toParent(const Window& w, const Gfx::Point& pos) const;
 
-        Gfx::PointF fromParent(const Window& w, const Gfx::PointF& pos) const;
+        Gfx::Point fromParent(const Window& w, const Gfx::Point& pos) const;
 
-        void paint(const Gfx::RectF& rect);
+        void paint(const Gfx::Rect& rect);
 
-        void onResize(Window& w, const Gfx::SizeF& s);
+        void onResize(Window& w, const Gfx::Size& s);
 
-        void onMove(Window& w, const Gfx::PointF& p);
+        void onMove(Window& w, const Gfx::Point& p);
 
         void onFrameChanged(Window& w);
 
@@ -110,19 +94,6 @@ class ScreenImpl
         void onActivate(Window& w);
 
         void onEnable(Window& w, bool enable);
-
-    private:
-        Gfx::Size screenResolution();
-
-    private:
-        Gfx::Size _size;
-        double _factorX;
-        double _offsetX;
-        double _factorY;
-        double _offsetY;
-        double _width;
-        double _height;
-        double _dpi;
 };
 
 } // namespace

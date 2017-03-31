@@ -44,7 +44,7 @@ class MoveEvent : public Pt::BasicEvent<MoveEvent>
 {
     public:    
         MoveEvent(Pt::uint64_t vid, 
-                  const Gfx::PointF& pos)
+                  const Gfx::Point& pos)
         : _vid(vid)
         , _position(pos)
         {
@@ -64,19 +64,19 @@ class MoveEvent : public Pt::BasicEvent<MoveEvent>
             _vid = vid;
         }
 
-        const Gfx::PointF& position() const
+        const Gfx::Point& position() const
         {
             return _position;
         }    
 
-        void setPosition(const Gfx::PointF& p)
+        void setPosition(const Gfx::Point& p)
         {
             _position = p;
         }
 
     private:
         Pt::uint64_t _vid;
-        Gfx::PointF _position;
+        Gfx::Point _position;
 };
 
 } // namespace

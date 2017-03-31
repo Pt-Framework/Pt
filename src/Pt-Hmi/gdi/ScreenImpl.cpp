@@ -38,18 +38,7 @@ namespace Pt {
 namespace Hmi {
 
 ScreenImpl::ScreenImpl(ApplicationImpl&)
-: _dpi(96.0)
 {
-    _size = screenResolution();
-
-    _width  = _size.width() * unitSizeInch()*_dpi;
-    _height = _size.height() * unitSizeInch()*_dpi;
-    
-    _factorX = _width / _size.width();
-    _factorY = _height / _size.height();
-
-    _offsetX = 0;
-    _offsetY = 0;
 }
 
 
@@ -64,13 +53,13 @@ void ScreenImpl::init(WindowBase& w)
 }
 
 
-Gfx::PointF ScreenImpl::toParent(const Window& w, const Gfx::PointF& pos) const
+Gfx::Point ScreenImpl::toParent(const Window& w, const Gfx::Point& pos) const
 {
     return w.impl()->toScreen(pos);
 }
 
 
-Gfx::PointF ScreenImpl::fromParent(const Window& w, const Gfx::PointF& pos) const
+Gfx::Point ScreenImpl::fromParent(const Window& w, const Gfx::Point& pos) const
 {
     return w.impl()->fromScreen(pos);
 }
@@ -94,17 +83,17 @@ void ScreenImpl::dispatchScrollEvent(const ScrollEvent& ev)
 }
 
 
-void ScreenImpl::paint(const Gfx::RectF& updateRect)
+void ScreenImpl::paint(const Gfx::Rect& updateRect)
 {
 }
 
 
-void ScreenImpl::onResize(Window& w, const Gfx::SizeF& s)
+void ScreenImpl::onResize(Window& w, const Gfx::Size& s)
 {
 }
 
 
-void ScreenImpl::onMove(Window& w, const Gfx::PointF& p)
+void ScreenImpl::onMove(Window& w, const Gfx::Point& p)
 {
 }
 
@@ -163,90 +152,17 @@ void ScreenImpl::onEnable(Window& w, bool enable)
 }
 
 
-Gfx::SizeF ScreenImpl::size() const
+Gfx::Size ScreenImpl::size() const
 {
   HWND hDesktop = GetDesktopWindow();
   
   RECT r;   
   GetWindowRect(hDesktop, &r);
   
-  return Gfx::SizeF(r.right, r.bottom);
+  return Gfx::Size(r.right, r.bottom);
 }
 
 
-double ScreenImpl::resolutionDPI() const
-{
-    return _dpi;
-}
-
-Gfx::PointF ScreenImpl::toUnit(const Gfx::Point& value)
-{
-    const double x = value.x() * _factorX  + _offsetX;
-    const double y = value.y() * _factorY  + _offsetY;
-
-    return Gfx::PointF(std::ceil(x),std::ceil(y));
-}
-
-
-Gfx::SizeF ScreenImpl::toUnit(const Gfx::Size& value)
-{
-    const double width = value.width() * _factorX  + _offsetX;
-    const double height = value.height() * _factorY  + _offsetY;
-
-    return Gfx::SizeF(std::ceil(width), std::ceil(height));
-}
-
-
-Gfx::Point ScreenImpl::fromUnit(const Gfx::PointF& value)
-{
-    double factorX = _size.width() / _width;
-    double factorY = _size.height() / _height;
-    int x = (int) ( value.x() * factorX); 
-    int y = (int) ( value.y() * factorY);
-
-    return Gfx::Point(x,y);
-}
-
-
-Gfx::Size ScreenImpl::fromUnit(const Gfx::SizeF& value)
-{
-    double factorX = _size.width() / _width;
-    double factorY = _size.height() / _height;
-    int width = (int) ( value.width() * factorX); 
-    int height = (int) ( value.height() * factorY);
-    return Gfx::Size(width,height);
-}
-
-
-Gfx::Rect ScreenImpl::fromUnit(const Gfx::RectF& value)
-{
-    Gfx::Rect rect( Gfx::Point( static_cast<int>(value.x()), 
-                                static_cast<int>(value.y()) ),
-                    Gfx::Size( static_cast<int>(value.width()), 
-                               static_cast<int>(value.height()) ) );
-    return rect;
-}
-
-
-double ScreenImpl::unitSizeInch() const
-{
-    return 1.0/96.0;
-}
-
-
-double ScreenImpl::unitSizeMm() const
-{
-    return 25.4 * unitSizeInch();
-}
-
-
-Gfx::Size ScreenImpl::screenResolution()
-{
-  RECT desktop;    
-  GetWindowRect(GetDesktopWindow(), &desktop);
-
-  return Gfx::Size( desktop.right, desktop.bottom );
-}
 
 } // namespace
 

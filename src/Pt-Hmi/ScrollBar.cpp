@@ -111,15 +111,16 @@ void ScrollBar::setPosition(int pos)
 
     _position = pos;
 
-    double buttonLength = _orientation == Vertical ? size().width()
+    Pt::ssize_t buttonLength = _orientation == Vertical ? size().width()
                                                    : size().height();
-    double pixpos = positionToPixel(_position);
+    Pt::ssize_t pixpos = positionToPixel(_position);
 
-    Gfx::PointF pt = _orientation == Vertical ? Gfx::PointF(0, pixpos)
-                                               : Gfx::PointF(pixpos, 0);
+    Gfx::Point pt = _orientation == Vertical ? Gfx::Point(0, pixpos)
+                                               : Gfx::Point(pixpos, 0);
     
-    Gfx::SizeF size(buttonLength, buttonLength);
+    Gfx::Size size(buttonLength, buttonLength);
     
+
     _handleRect.set(pt, size);
 
     update();
@@ -206,7 +207,7 @@ void ScrollBar::onInvalidate()
 }
 
 
-void ScrollBar::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void ScrollBar::onPaint(PaintSurface& surface, const Gfx::Rect& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
@@ -242,7 +243,7 @@ bool ScrollBar::onMouseEvent(const MouseEvent& ev)
 
     if(_dragging)
     {
-        double pixPos = _orientation == Vertical ? ev.position().y() 
+        Pt::ssize_t pixPos = _orientation == Vertical ? ev.position().y() 
                                                  : ev.position().x();
         int pos = pixelToPosition(pixPos);
 
@@ -278,7 +279,7 @@ void ScrollBar::onTouchEvent(const TouchEvent& tev)
 
     if(_dragging)
     {
-        double pixPos = _orientation == Vertical ? tev.position().y() 
+        Pt::ssize_t pixPos = _orientation == Vertical ? tev.position().y() 
                                                  : tev.position().x();
         int pos = pixelToPosition(pixPos);
 
@@ -296,51 +297,55 @@ void ScrollBar::onResizeEvent(const ResizeEvent& ev)
 }
 
 
-int ScrollBar::pixelToPosition(double pix)
+int ScrollBar::pixelToPosition(Pt::ssize_t pix)
 {
-    double pos = pix * _factorPosition + _offsetPosition;
+    Pt::ssize_t pos = pix * _factorPosition + _offsetPosition;
     return static_cast<int>(pos);
 }
 
 
-double ScrollBar::positionToPixel(int pos)
+Pt::ssize_t ScrollBar::positionToPixel(int pos)
 {
     return pos * _factorPixel + _offsetPixel;
 }
 
 
-Gfx::SizeF ScrollBar::onMeasure(const SizePolicy& policy)
+Gfx::Size ScrollBar::onMeasure(const SizePolicy& policy)
 {
     if( _orientation == Vertical)
-      return Gfx::SizeF( sizePolicy().width(), policy.size().height() );
+      return Gfx::Size( sizePolicy().width(), policy.size().height() );
 
-    return Gfx::SizeF( policy.size().width(), sizePolicy().height() );
+    return Gfx::Size( policy.size().width(), sizePolicy().height() );
 }
 
 
 void ScrollBar::updateScroll()
 {
-    double buttonLength = _orientation == Vertical ? size().width()
+    if(_maxPos == _minPos )
+      return;
+
+    Pt::ssize_t buttonLength = _orientation == Vertical ? size().width()
                                                    : size().height();
 
-    double length = _orientation == Vertical ? size().height()
+    Pt::ssize_t length = _orientation == Vertical ? size().height()
                                              : size().width(); 
 
-    const double pixMin = buttonLength;
-    const double pixMax = length - buttonLength * 2;
+    const Pt::ssize_t pixMin = buttonLength;
+    const Pt::ssize_t pixMax = length - buttonLength * 2;
 
-    _factorPixel = (pixMax  - pixMin) / (_maxPos -_minPos );
-    _offsetPixel = (pixMin * _maxPos - pixMax *_minPos) / (_maxPos - _minPos );
+     _factorPixel = (pixMax  - pixMin) / (double) (_maxPos -_minPos );
+
+    _offsetPixel = (pixMin * _maxPos - pixMax *_minPos) / (double) (_maxPos - _minPos );
        
-    _factorPosition = (_maxPos -_minPos) / (pixMax - pixMin );
-    _offsetPosition = (_minPos * pixMax - _maxPos *pixMin) / (pixMax - pixMin );  
+    _factorPosition = (_maxPos -_minPos) / (double)  (pixMax - pixMin );
+    _offsetPosition = (_minPos * pixMax - _maxPos *pixMin) / (double) (pixMax - pixMin );  
 
-    double pixpos = positionToPixel(_position);
+    Pt::ssize_t pixpos = positionToPixel(_position);
 
-    Gfx::PointF pos = _orientation == Vertical ? Gfx::PointF(0, pixpos)
-                                               : Gfx::PointF(pixpos, 0);
+    Gfx::Point pos = _orientation == Vertical ? Gfx::Point(0, pixpos)
+                                               : Gfx::Point(pixpos, 0);
     
-     Gfx::SizeF size(buttonLength, buttonLength);
+     Gfx::Size size(buttonLength, buttonLength);
     
     _handleRect.set( pos, size );
 }

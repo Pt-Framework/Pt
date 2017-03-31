@@ -88,67 +88,20 @@ const std::vector<Window*>& Screen::windows() const
 }
 
 
-Gfx::SizeF Screen::onSize() const
+Gfx::Size Screen::onSize() const
 {
     return _impl->size();
 }
 
 
-Gfx::PointF Screen::toUnit(const Gfx::Point& value)
-{
-    return _impl->toUnit(value);
-}
 
-
-Gfx::SizeF Screen::toUnit(const Gfx::Size& value)
-{
-    return _impl->toUnit(value);
-}
-
-
-Gfx::Point Screen::fromUnit(const Gfx::PointF& value)
-{
-    return _impl->fromUnit(value);
-}
-
-
-Gfx::Size Screen::fromUnit(const Gfx::SizeF& value)
-{
-    return _impl->fromUnit(value);
-}
-
-
-Gfx::Rect Screen::fromUnit(const Gfx::RectF& value)
-{
-    return _impl->fromUnit(value);
-}
-
-
-double Screen::unitSizeInch() const
-{
-    return _impl->unitSizeInch();
-}
-
-
-double Screen::unitSizeMm() const
-{
-    return _impl->unitSizeMm();
-}
-
-
-double Screen::resolutionDPI() const
-{
-    return _impl->resolutionDPI();
-}
-
-
-Pt::Gfx::PointF Screen::toScreen(const Pt::Gfx::PointF& p) const
+Pt::Gfx::Point Screen::toScreen(const Pt::Gfx::Point& p) const
 {
     return p;
 }
 
 
-Pt::Gfx::PointF Screen::fromScreen(const Pt::Gfx::PointF& p) const
+Pt::Gfx::Point Screen::fromScreen(const Pt::Gfx::Point& p) const
 {
     return p;
 }
@@ -160,26 +113,26 @@ ScreenImpl* Screen::impl()
 }
 
 
-Gfx::PointF Screen::onToParent(const Window& w, const Gfx::PointF& pos) const
+Gfx::Point Screen::onToParent(const Window& w, const Gfx::Point& pos) const
 {
     return _impl->toParent(w, pos);
 }
 
 
-Gfx::PointF Screen::onFromParent(const Window& w, const Gfx::PointF& pos) const
+Gfx::Point Screen::onFromParent(const Window& w, const Gfx::Point& pos) const
 {
     return _impl->fromParent(w, pos);
 }
 
 
-void Screen::onResize(Window& w, const Gfx::SizeF& s)
+void Screen::onResize(Window& w, const Gfx::Size& s)
 {
     w.impl()->resize(s);
     _impl->onResize(w, s);
 }
 
 
-void Screen::onMove(Window& w, const Gfx::PointF& p)
+void Screen::onMove(Window& w, const Gfx::Point& p)
 {   
     w.impl()->move(p);
     _impl->onMove(w, p);
@@ -231,7 +184,7 @@ void Screen::onEnable(Window& w, bool enable)
 }
 
 
-void Screen::onUpdate(const Gfx::RectF& updateRect)
+void Screen::onUpdate(const Gfx::Rect& updateRect)
 {
     _updateRect.unify(updateRect);
     ++_updates;
@@ -241,10 +194,10 @@ void Screen::onUpdate(const Gfx::RectF& updateRect)
 }
 
 
-void Screen::onUpdate(Window& w, const Gfx::RectF& updateRect)
+void Screen::onUpdate(Window& w, const Gfx::Rect& updateRect)
 {	
-    Gfx::PointF pos = w.toScreen( updateRect.topLeft() );
-    Gfx::RectF rect( pos, updateRect.size() );
+    Gfx::Point pos = w.toScreen( updateRect.topLeft() );
+    Gfx::Rect rect( pos, updateRect.size() );
     update(rect);
 }
 
@@ -276,7 +229,7 @@ void Screen::onUpdateEvent(const UpdateEvent& ev)
     //std::clog << std::endl;
     //_clock.start();
 
-    const Gfx::RectF& screenRect = ev.rect();
+    const Gfx::Rect& screenRect = ev.rect();
 
     std::vector<Window*>::iterator it;
     for(it = _windows.begin(); it != _windows.end(); ++it)

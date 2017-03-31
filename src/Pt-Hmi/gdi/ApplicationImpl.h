@@ -149,7 +149,7 @@ class ApplicationImpl : public Pt::System::EventLoop
         const Cursor*                    _currentCursor;
 
         bool                             _onScroll;
-        Gfx::PointF                      _scrollFrom;
+        Gfx::Point                       _scrollFrom;
 };
 
 } // namespace

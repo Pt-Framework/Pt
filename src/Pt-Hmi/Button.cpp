@@ -157,7 +157,7 @@ bool Button::onMouseEvent(const MouseEvent& ev)
     }
     else if( ev.isRelease() )
     {
-        const Gfx::PointF& pos = ev.position();
+        const Gfx::Point& pos = ev.position();
 
         bool inside = pos.x() > 0 && pos.x() <= size().width() &&
                       pos.y() > 0 && pos.y() <= size().height();
@@ -196,7 +196,7 @@ void Button::onTouchEvent(const TouchEvent& ev)
     }
     else if( ev.isRelease() )
     {
-        const Gfx::PointF& pos = ev.position();
+        const Gfx::Point& pos = ev.position();
 
         bool inside = pos.x() > 0 && pos.x() <= size().width() &&
                       pos.y() > 0 && pos.y() <= size().height();

@@ -222,14 +222,14 @@ void ProgressBar::setRenderer(ProgressBarRenderer* renderer)
 }
 
 
-Gfx::SizeF ProgressBar::onMeasure(const SizePolicy& policy)
+Gfx::Size ProgressBar::onMeasure(const SizePolicy& policy)
 {
-    double itemsWidth = policy.width();
+    Pt::ssize_t itemsWidth = policy.width();
 
     // TODO: get requred height from renderer
-    double itemsHeight = 15;
+    Pt::ssize_t itemsHeight = 15;
 
-    return Gfx::SizeF(policy.width(), 
+    return Gfx::Size(policy.width(), 
                       itemsHeight + padding().topBottom() );
 }
 
@@ -258,7 +258,7 @@ void ProgressBar::onInvalidate()
 }
 
 
-void ProgressBar::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void ProgressBar::onPaint(PaintSurface& surface, const Gfx::Rect& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 

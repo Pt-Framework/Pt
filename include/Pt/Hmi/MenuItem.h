@@ -63,9 +63,9 @@ class PT_HMI_API MenuItem : public Control
         
         void setIcon(const Gfx::Image& img);
 
-        double iconPadding() const;
+        Pt::ssize_t iconPadding() const;
 
-        void setIconPadding(double left);
+        void setIconPadding(Pt::ssize_t left);
 
         Menu* subMenu() const;
 
@@ -109,12 +109,12 @@ class PT_HMI_API MenuItem : public Control
         
         virtual void onShortcut(const KeyEvent& kev);
 
-        virtual Gfx::SizeF onAutoSize(const SizePolicy& policy) const;
+        virtual Gfx::Size onAutoSize(const SizePolicy& policy) const;
 
     protected:
         virtual void onInvalidate();
         
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+        virtual void onPaint(PaintSurface& surface, const Gfx::Rect& updateRect);
   
     protected:
         virtual bool onMouseEvent(const MouseEvent& ev);
@@ -130,7 +130,7 @@ class PT_HMI_API MenuItem : public Control
     private:
         Menu*             _menu;
         Signal<MenuItem&> _triggered;
-        double            _iconWidth;
+        Pt::ssize_t            _iconWidth;
         Gfx::Image        _icon;
         Pt::String        _text;
         Menu*             _subMenu;

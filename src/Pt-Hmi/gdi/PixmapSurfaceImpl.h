@@ -49,9 +49,9 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         
         void clear(const Gfx::Color& c);  
     
-        void resize(const Gfx::SizeF& size);
+        void resize(const Gfx::Size& size);
         
-        const Gfx::SizeF& size() const;
+        const Gfx::Size& size() const;
 
         void begin(Painter& painter);  
         
@@ -59,7 +59,7 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
         
         const Gfx::ImageFormat& format() const;
 
-        void setClip( const Gfx::RectF& clip);
+        void setClip( const Gfx::Rect& clip);
          
         void setCompositionMode(const Gfx::CompositionMode& mode);
 
@@ -71,41 +71,41 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
 
         Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
 
-        void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
+        void drawLine(const Gfx::Point& from, const Gfx::Point& to);
 
-        void drawText(const Gfx::PointF& to, const Pt::String& Text);
+        void drawText(const Gfx::Point& to, const Pt::String& Text);
 
-        void drawRect(const Gfx::RectF& rectangle);
+        void drawRect(const Gfx::Rect& rectangle);
 
-        void fillRect(const Gfx::RectF& rectangle);
+        void fillRect(const Gfx::Rect& rectangle);
 
-        void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
+        void drawEllipse(const Gfx::Point& topLeft, const Gfx::Size& size);
 
-        void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
+        void fillEllipse(const Gfx::Point& topLeft, const Gfx::Size& size);
 
-        void drawPolyline(const Gfx::PointF* points, size_t pointCount);
+        void drawPolyline(const Gfx::Point* points, size_t pointCount);
 
-        void fillPolygon(const Gfx::PointF* points, size_t pointCount);
+        void fillPolygon(const Gfx::Point* points, size_t pointCount);
 
-        void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
+        void drawSurface(const Gfx::Point& toF, const PixmapSurface& surface);
 
-        void drawSurface(const Gfx::PointF& toF, 
+        void drawSurface(const Gfx::Point& toF, 
                                  const PixmapSurface& pm,
-                                 const Gfx::RectF& pmRect);
+                                 const Gfx::Rect& pmRect);
 
-        void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
+        void drawImage(const Gfx::Point& to, const Gfx::Image& image);
 
-        void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imgRect);
+        void drawImage(const Gfx::Point& to, const Gfx::Image& image, const Gfx::Rect& imgRect);
 
-        void drawPicture(const Gfx::PointF& to, const Picture& pic);
+        void drawPicture(const Gfx::Point& to, const Picture& pic);
 
         HDC deviceContext() const;
 
     private: 
-        void bitBlit( const Gfx::PointF& pos, size_t width, size_t height, HBITMAP bitmap, DWORD op );
+        void bitBlit( const Gfx::Point& pos, size_t width, size_t height, HBITMAP bitmap, DWORD op );
 
     private:
-        Gfx::SizeF     _size;
+        Gfx::Size     _size;
         Painter*       _painter;
         HDC            _dc;
         HBITMAP        _bitmap;

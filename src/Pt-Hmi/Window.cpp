@@ -343,7 +343,7 @@ void Window::setContent(Widget* widget)
 }
 
 
-Widget* Window::findWidget(const Gfx::PointF& pos, bool input)
+Widget* Window::findWidget(const Gfx::Point& pos, bool input)
 {
     if( ! isVisible() || ! isEnabled() )
         return 0;
@@ -368,7 +368,7 @@ Widget* Window::findWidget(const Gfx::PointF& pos, bool input)
     return 0;
 }
 
-Widget* Window::findWidget(const Gfx::PointF& pos)
+Widget* Window::findWidget(const Gfx::Point& pos)
 {
   return findWidget(pos, false);
 }
@@ -526,42 +526,42 @@ void Window::setFocusIndex(Widget& , size_t)
 }
 
 
-Gfx::PointF Window::toParent(const Gfx::PointF& pos) const
+Gfx::Point Window::toParent(const Gfx::Point& pos) const
 {
     if( ! _init )
-        return Gfx::PointF(0, 0);
+        return Gfx::Point(0, 0);
 
     return _parent->onToParent(*this, pos);
 }
 
 
-Gfx::PointF Window::onToParent(const Window& w, const Gfx::PointF& pos) const
+Gfx::Point Window::onToParent(const Window& w, const Gfx::Point& pos) const
 {
     return _windowManager.toParent(w, pos);
 }
 
 
-Gfx::PointF Window::fromParent(const Gfx::PointF& pos) const
+Gfx::Point Window::fromParent(const Gfx::Point& pos) const
 {
     if( ! _init )
-        return Gfx::PointF(0, 0);
+        return Gfx::Point(0, 0);
 
     return _parent->onFromParent(*this, pos);
 }
 
 
-Gfx::PointF Window::onFromParent(const Window& w, const Gfx::PointF& pos) const
+Gfx::Point Window::onFromParent(const Window& w, const Gfx::Point& pos) const
 {
     return _windowManager.fromParent(w, pos);
 }
 
 
-Gfx::PointF Window::toScreen(const Gfx::PointF& pos) const
+Gfx::Point Window::toScreen(const Gfx::Point& pos) const
 {
     if( ! _init )
-        return Gfx::PointF(0, 0);
+        return Gfx::Point(0, 0);
 
-    Gfx::PointF p = toParent(pos);
+    Gfx::Point p = toParent(pos);
 
     if(_parentWindow)
         return _parentWindow->toScreen(p);
@@ -570,12 +570,12 @@ Gfx::PointF Window::toScreen(const Gfx::PointF& pos) const
 }
 
 
-Gfx::PointF Window::fromScreen(const Gfx::PointF& pos) const
+Gfx::Point Window::fromScreen(const Gfx::Point& pos) const
 {
     if( ! _init )
-        return Gfx::PointF(0, 0);
+        return Gfx::Point(0, 0);
 
-    Gfx::PointF p = fromParent(pos);
+    Gfx::Point p = fromParent(pos);
     
     if(_parentWindow)
         return _parentWindow->fromScreen(p);
@@ -604,13 +604,13 @@ Pt::Signal<const Pt::Event&>& Window::eventReady()
 }
 
 
-Gfx::SizeF Window::onSize() const
+Gfx::Size Window::onSize() const
 {
     return _size;
 }
 
 
-void Window::onUpdate(const Gfx::RectF& rect)
+void Window::onUpdate(const Gfx::Rect& rect)
 {
     if( ! _init )
         return;
@@ -621,7 +621,7 @@ void Window::onUpdate(const Gfx::RectF& rect)
 }
 
 
-void Window::onUpdate(Window& child, const Gfx::RectF& rect)
+void Window::onUpdate(Window& child, const Gfx::Rect& rect)
 {
      _windowManager.onUpdate(child, rect);
 }
@@ -666,24 +666,24 @@ void Window::onLayoutEvent(const LayoutEvent& ev)
     policy.setSize(_size);
     onMeasure(policy);
 
-    Gfx::RectF layoutRect(_size);
+    Gfx::Rect layoutRect(_size);
     onLayout(layoutRect);
 }
 
 
-Gfx::SizeF Window::measure(const SizePolicy& policy)
+Gfx::Size Window::measure(const SizePolicy& policy)
 {
     return onMeasure(policy);
 }
 
 
-void Window::layout(const Gfx::RectF& rect)
+void Window::layout(const Gfx::Rect& rect)
 {
     onLayout(rect);
 }
 
 
-Gfx::SizeF Window::onMeasure(const SizePolicy& policy)
+Gfx::Size Window::onMeasure(const SizePolicy& policy)
 {
     if( _mainWidget )
     {
@@ -695,7 +695,7 @@ Gfx::SizeF Window::onMeasure(const SizePolicy& policy)
 }
 
 
-void Window::onLayout(const Gfx::RectF& rect)
+void Window::onLayout(const Gfx::Rect& rect)
 {
     if( _mainWidget )
     {
@@ -716,7 +716,7 @@ void Window::repaint()
 
     if( mainWidget() )
     {
-        Gfx::RectF updateRect = mainWidget()->geometry().intersect(_damageRect);
+        Gfx::Rect updateRect = mainWidget()->geometry().intersect(_damageRect);
 
         if( ! updateRect.isNull() )
             mainWidget()->repaint(_damageRect);
@@ -747,7 +747,7 @@ void Window::onPaintEvent(const PaintEvent& ev)
 }
 
 
-void Window::onPaintBackground(const Gfx::RectF& rect)
+void Window::onPaintBackground(const Gfx::Rect& rect)
 {
     Painter painter(_surface);
     painter.setBrush(_backgroundBrush);
@@ -755,7 +755,7 @@ void Window::onPaintBackground(const Gfx::RectF& rect)
 }
 
 
-void Window::onPaintContent(const Gfx::RectF& rect)
+void Window::onPaintContent(const Gfx::Rect& rect)
 {
     _windowManager.paint(_surface, rect);
 }
@@ -932,13 +932,13 @@ void Window::releasePointer()
 }
 
 
-const Gfx::PointF& Window::position() const
+const Gfx::Point& Window::position() const
 {
     return _position;
 }
 
 
-void Window::move(const Gfx::PointF& p)
+void Window::move(const Gfx::Point& p)
 {
    _position = p;
 
@@ -949,7 +949,7 @@ void Window::move(const Gfx::PointF& p)
 }
 
 
-void Window::onMove(Window& w, const Gfx::PointF& to)
+void Window::onMove(Window& w, const Gfx::Point& to)
 {   
     _windowManager.onMove(w, to);
 }
@@ -961,7 +961,7 @@ void Window::onMoveEvent(const MoveEvent& ev)
 }
 
 
-void Window::resize(const Gfx::SizeF& s)
+void Window::resize(const Gfx::Size& s)
 {
     _size = s;
 
@@ -972,7 +972,7 @@ void Window::resize(const Gfx::SizeF& s)
 }
 
 
-void Window::onResize(Window& w, const Gfx::SizeF& to)
+void Window::onResize(Window& w, const Gfx::Size& to)
 {   
     _windowManager.onResize(w, to);
 }
@@ -1094,13 +1094,13 @@ void Window::onFrameChanged(Window& w)
 }
 
 
-const Gfx::SizeF& Window::minimumSize() const
+const Gfx::Size& Window::minimumSize() const
 {
     return _minimumSize;
 }
 
 
-void Window::setMinimumSize(const Gfx::SizeF& s)
+void Window::setMinimumSize(const Gfx::Size& s)
 {
     if( _impl ) 
         _impl->setMinimumSize(s);
@@ -1129,13 +1129,13 @@ void Window::setTopMost(bool top)
 }
 
 
-const Gfx::SizeF& Window::maximumSize() const
+const Gfx::Size& Window::maximumSize() const
 {
     return _maximumSize;
 }
 
 
-void Window::setMaximumSize(const Gfx::SizeF& s)
+void Window::setMaximumSize(const Gfx::Size& s)
 {
     if( _impl )
         _impl->setMaximumSize(s);

@@ -69,22 +69,22 @@ class PT_HMI_API FlowLayout : public Layout
         void removeItem(Widget& w);
 
     protected:
-        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+        virtual Gfx::Size onMeasure(const SizePolicy& policy);
 
-        virtual void onLayout(const Gfx::RectF& rect);
+        virtual void onLayout(const Gfx::Rect& rect);
 
     private:
-        Gfx::SizeF onMeasureHorizontal(const SizePolicy& policy);
+        Gfx::Size onMeasureHorizontal(const SizePolicy& policy);
 
-        void onLayoutLeft(const Gfx::RectF& rect, bool center);
+        void onLayoutLeft(const Gfx::Rect& rect, bool center);
 
-        void onLayoutRight(const Gfx::RectF& rect, bool center);
+        void onLayoutRight(const Gfx::Rect& rect, bool center);
 
-        Gfx::SizeF onMeasureVertical(const SizePolicy& policy);
+        Gfx::Size onMeasureVertical(const SizePolicy& policy);
 
-        void onLayoutTop(const Gfx::RectF& rect, bool center);
+        void onLayoutTop(const Gfx::Rect& rect, bool center);
 
-        void onLayoutBottom(const Gfx::RectF& rect, bool center);
+        void onLayoutBottom(const Gfx::Rect& rect, bool center);
 
     private:
         Direction _direction;

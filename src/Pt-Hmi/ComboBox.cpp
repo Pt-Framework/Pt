@@ -114,7 +114,7 @@ void ComboBox::setScrollBars(bool hasScrollBars)
 }
 
 
-void ComboBox::setMaxHeight(double height)
+void ComboBox::setMaxHeight(Pt::ssize_t height)
 {
     _maxHeight = height;
 }
@@ -126,14 +126,14 @@ void ComboBox::showPopup()
     policy.setWidth( size().width() );
     policy.setHeight( _maxHeight );
 
-    Gfx::SizeF popupSize = _popup.measure(policy);
+    Gfx::Size popupSize = _popup.measure(policy);
 
-    int maxY = _items.maximumY();
-    popupSize.setHeight( std::min<double>(maxY, _maxHeight) );
+    Pt::ssize_t maxY = _items.maximumY();
+    popupSize.setHeight( std::min<Pt::ssize_t>(maxY, _maxHeight) );
     
     _popup.resize(popupSize);
     
-    Gfx::PointF popupPos(0, size().height() );
+    Gfx::Point popupPos(0, size().height() );
     popupPos = this->toScreen(popupPos);
     _popup.move(popupPos);
 
@@ -291,13 +291,13 @@ void ComboBox::onItemSelected(ListBoxItem& item)
 }
 
 
-Gfx::SizeF ComboBox::onMeasure(const SizePolicy& policy)
+Gfx::Size ComboBox::onMeasure(const SizePolicy& policy)
 {
     // TODO: width of widest item?
-    double itemsWidth = policy.width();
-    double itemsHeight = _font.size() * 2;
+    Pt::ssize_t itemsWidth = policy.width();
+    Pt::ssize_t itemsHeight = _font.size() * 2;
 
-    return Gfx::SizeF( itemsWidth + padding().leftRight(), 
+    return Gfx::Size( itemsWidth + padding().leftRight(), 
                        itemsHeight + padding().topBottom() );
 }
 
@@ -329,7 +329,7 @@ void ComboBox::onInvalidate()
 }
 
 
-void ComboBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void ComboBox::onPaint(PaintSurface& surface, const Gfx::Rect& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
@@ -353,27 +353,27 @@ void ComboBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     // text with cursor
     //
     
-    Gfx::RectF cursorRect;
+    Gfx::Rect cursorRect;
 
-    Gfx::PointF clipPos = _editor.position();
-    Gfx::SizeF clipSize = _editor.size();
+    Gfx::Point clipPos = _editor.position();
+    Gfx::Size clipSize = _editor.size();
     clipSize.addWidth(_spacing); // cursor
 
     if( _isEditable && hasFocus() )
     {
-        double cursorX = _line.cursorToX( _editor.cursorPosition() );
+        Pt::ssize_t cursorX = _line.cursorToX( _editor.cursorPosition() );
         cursorX += _line.position().x();
         
-        double cursorWidth = 1;
+        Pt::ssize_t cursorWidth = 1;
 
-        cursorRect.set(Gfx::PointF( cursorX, _line.position().y() ),
-                       Gfx::SizeF( cursorWidth, _line.maxHeight() ) );           
+        cursorRect.set(Gfx::Point( cursorX, _line.position().y() ),
+                       Gfx::Size( cursorWidth, _line.maxHeight() ) );           
     }
 
-    Gfx::RectF clipRect(clipPos, clipSize);
-    painter.setClip( Gfx::RectF(clipPos, clipSize) );
+    Gfx::Rect clipRect(clipPos, clipSize);
+    painter.setClip( clipRect );
 
-    Gfx::PointF textPos = _line.position();
+    Gfx::Point textPos = _line.position();
     textPos.addY( _line.ascent() );
 
     _renderer->renderText(*this, options, painter, rect, 
@@ -400,10 +400,10 @@ void ComboBox::onResizeEvent(const ResizeEvent& ev)
     if(_spacing < 2)
         _spacing = 2;
 
-    Gfx::PointF editPosition(_spacing, 0);
+    Gfx::Point editPosition(_spacing, 0);
     _editor.setPosition(editPosition);
 
-    Gfx::SizeF editSize = ev.size();
+    Gfx::Size editSize = ev.size();
     editSize.addWidth( - _buttonSize.width() );
     editSize.addWidth(-3 * _spacing); // left, right, cursor
     _editor.setSize(editSize);
@@ -475,7 +475,7 @@ bool ComboBox::onMouseEvent(const MouseEvent& ev)
     if( ! ev.isPress() )
         return true;
 
-    double buttonX = size().width() - _buttonSize.width();
+    Pt::ssize_t buttonX = size().width() - _buttonSize.width();
         
     if( ev.position().x() > buttonX )
     {
@@ -501,7 +501,7 @@ void ComboBox::onTouchEvent(const TouchEvent& ev)
     if( ! ev.isPress() )
         return;
 
-    double buttonX = size().width() - _buttonSize.width();
+    Pt::ssize_t buttonX = size().width() - _buttonSize.width();
 
     if( ev.position().x() > buttonX )
     {

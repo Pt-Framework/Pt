@@ -76,7 +76,7 @@ void MenuShell::removeMenu(Menu& menu)
 }
 
 
-MenuShell* MenuShell::findMenu(const Gfx::PointF& screenPos)
+MenuShell* MenuShell::findMenu(const Gfx::Point& screenPos)
 {
     return onFindMenu(screenPos);
 }

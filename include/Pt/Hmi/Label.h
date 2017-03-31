@@ -90,13 +90,13 @@ class PT_HMI_API Label : public Control
         void setRenderer(LabelRenderer* renderer);
 
     protected:
-        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+        virtual Gfx::Size onMeasure(const SizePolicy& policy);
 
-        virtual void onLayout(const Gfx::RectF& rect);
+        virtual void onLayout(const Gfx::Rect& rect);
 
         virtual void onInvalidate();
 
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+        virtual void onPaint(PaintSurface& surface, const Gfx::Rect& updateRect);
         
     private:
         Adjustment adjustment() const;
@@ -114,7 +114,7 @@ class PT_HMI_API Label : public Control
         TextBlock   _textBlock;
 
         Gfx::Image  _image;
-        Gfx::PointF _imagePos;
+        Gfx::Point _imagePos;
         
         AutoPtr<Gfx::Brush>       _background;
         AutoPtr<Gfx::Pen>         _contour;

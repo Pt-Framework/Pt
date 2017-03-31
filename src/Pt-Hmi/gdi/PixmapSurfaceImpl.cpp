@@ -164,11 +164,11 @@ PixmapSurfaceImpl::PixmapSurfaceImpl()
 , _dc(0)
 , _gradientBrush(false)
 {
-    _size = Gfx::SizeF(10 ,10);
+    _size = Gfx::Size(10 ,10);
 
     HDC screenDC = GetDC(NULL);
     _dc = CreateCompatibleDC(screenDC);
-    _bitmap = CreateCompatibleBitmap(screenDC, (int)_size.width(), (int)_size.height());
+    _bitmap = CreateCompatibleBitmap(screenDC, _size.width(), _size.height());
     ReleaseDC(NULL, screenDC);
 
     _oldPen    = (HPEN) GetCurrentObject(_dc, OBJ_PEN);
@@ -226,16 +226,15 @@ void PixmapSurfaceImpl::clear(const Gfx::Color& c)
 }
 
 
-void PixmapSurfaceImpl::resize(const Gfx::SizeF& size)
+void PixmapSurfaceImpl::resize(const Gfx::Size& size)
 {
     if( _size == size )
         return;
 
     _size = size;
-    Gfx::Size nsize = Application::instance().screen().fromUnit(_size);
     
     HDC screenDC = GetDC(NULL);
-    HBITMAP bitmap = CreateCompatibleBitmap(screenDC, nsize.width(), nsize.height());
+    HBITMAP bitmap = CreateCompatibleBitmap(screenDC, _size.width(), _size.height());
     ReleaseDC(NULL, screenDC);
 
     SelectObject(_dc, bitmap);
@@ -245,13 +244,13 @@ void PixmapSurfaceImpl::resize(const Gfx::SizeF& size)
 }
 
 
-const Gfx::SizeF& PixmapSurfaceImpl::size() const
+const Gfx::Size& PixmapSurfaceImpl::size() const
 {
     return _size;
 }
 
 
-//void PixmapSurfaceImpl::setClip(const Gfx::RectF& clipRect)
+//void PixmapSurfaceImpl::setClip(const Gfx::Rect& clipRect)
 //{
 //    if( clipRect.isNull() )
 //    {
@@ -274,7 +273,7 @@ const Gfx::SizeF& PixmapSurfaceImpl::size() const
 //}
 
 
-void PixmapSurfaceImpl::setClip(const Gfx::RectF& clipRect)
+void PixmapSurfaceImpl::setClip(const Gfx::Rect& clipRect)
 {
     _painter->impl()->setClip(clipRect);
 
@@ -457,21 +456,16 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
     GetTextExtentPoint32W(_dc, 
                           wtext.c_str(), wtext.size(), &textSize);
     
-    Gfx::Size size(textSize.cx, textSize.cy);
-    Gfx::SizeF sizeF = Application::instance().screen().toUnit(size);
 
     return Gfx::FontMetrics(tm.tmAscent, 
                             tm.tmDescent, 
-                            (int)sizeF.width(), 
-                            (int)sizeF.height());
+                            textSize.cx, 
+                            textSize.cy);
 }
 
 
-void PixmapSurfaceImpl::drawLine(const Gfx::PointF& fromF, const Gfx::PointF& toF)
+void PixmapSurfaceImpl::drawLine(const Gfx::Point& from, const Gfx::Point& to)
 {
-    Gfx::Point from = Application::instance().screen().fromUnit(fromF);
-    Gfx::Point to = Application::instance().screen().fromUnit(toF);
-
     POINT points[2];
     points[0].x = from.x();
     points[0].y = from.y();
@@ -482,9 +476,8 @@ void PixmapSurfaceImpl::drawLine(const Gfx::PointF& fromF, const Gfx::PointF& to
 }
 
 
-void PixmapSurfaceImpl::drawText(const Gfx::PointF& toF, const Pt::String& text)
+void PixmapSurfaceImpl::drawText(const Gfx::Point& to, const Pt::String& text)
 {
-    Gfx::Point to = Application::instance().screen().fromUnit(toF);
   
     RECT rectangle;
     SetRect(&rectangle, to.x(), to.y(), to.x(), to.y());
@@ -497,15 +490,13 @@ void PixmapSurfaceImpl::drawText(const Gfx::PointF& toF, const Pt::String& text)
 }
 
 
-void PixmapSurfaceImpl::drawRect(const Gfx::RectF& rectF)
+void PixmapSurfaceImpl::drawRect(const Gfx::Rect& rect)
 {
-    Gfx::Rect rect = Application::instance().screen().fromUnit(rectF);
-
     if (rect.size().width() == 1 && rect.size().height() == 1) 
     {
         // windows does not paint rectangles with a size of 1x1
         // we draw a pixel (1|1) instead
-        drawLine(rectF.topLeft(), rectF.topLeft());
+        drawLine(rect.topLeft(), rect.topLeft());
         return;
     }
 
@@ -517,10 +508,9 @@ void PixmapSurfaceImpl::drawRect(const Gfx::RectF& rectF)
 }
 
 
-void PixmapSurfaceImpl::fillRect(const Gfx::RectF& rectF)
+void PixmapSurfaceImpl::fillRect(const Gfx::Rect& rect)
 {
-    Gfx::Rect rect = Application::instance().screen().fromUnit(rectF);
-  
+ 
     RECT rectangle;
     rectangle.left  = rect.left();
     rectangle.top   = rect.top();
@@ -547,11 +537,8 @@ void PixmapSurfaceImpl::fillRect(const Gfx::RectF& rectF)
 }
 
 
-void PixmapSurfaceImpl::drawEllipse(const Gfx::PointF& topLeftF, const Gfx::SizeF& sizeF)
+void PixmapSurfaceImpl::drawEllipse(const Gfx::Point& topLeft, const Gfx::Size& size)
 {
-    Gfx::Point topLeft = Application::instance().screen().fromUnit(topLeftF);
-    Gfx::Size size = Application::instance().screen().fromUnit(sizeF);
-
     HBRUSH originalBrush = (HBRUSH)SelectObject(_dc, GetStockObject(NULL_BRUSH));
 
     Ellipse(_dc, 
@@ -563,11 +550,9 @@ void PixmapSurfaceImpl::drawEllipse(const Gfx::PointF& topLeftF, const Gfx::Size
 }
 
 
-void PixmapSurfaceImpl::fillEllipse(const Gfx::PointF& topLeftF, const Gfx::SizeF& sizeF)
+void PixmapSurfaceImpl::fillEllipse(const Gfx::Point& topLeft, const Gfx::Size& size)
 {
     POINT brushOrigin = {0};
-    Gfx::Point topLeft = Application::instance().screen().fromUnit(topLeftF);
-    Gfx::Size size = Application::instance().screen().fromUnit(sizeF);
 
     HGDIOBJ oldBrush = 0;
 
@@ -601,13 +586,13 @@ void PixmapSurfaceImpl::fillEllipse(const Gfx::PointF& topLeftF, const Gfx::Size
 }
 
 
-void PixmapSurfaceImpl::drawPolyline(const Gfx::PointF* points, const size_t pointCount)
+void PixmapSurfaceImpl::drawPolyline(const Gfx::Point* points, const size_t pointCount)
 {
     std::vector<POINT> winPoints(pointCount);
 
     for (size_t i = 0; i < pointCount; i++)
     {
-        Gfx::Point p = Application::instance().screen().fromUnit(points[i]);
+        const Gfx::Point& p = points[i];
         winPoints[i].x = p.x();
         winPoints[i].y = p.y();
     }
@@ -616,7 +601,7 @@ void PixmapSurfaceImpl::drawPolyline(const Gfx::PointF* points, const size_t poi
 }
 
 
-void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* points, const size_t pointCount)
+void PixmapSurfaceImpl::fillPolygon(const Gfx::Point* points, const size_t pointCount)
 {
     if( ! pointCount ) 
         return;
@@ -632,7 +617,7 @@ void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* points, const size_t poin
 
     for(size_t i = 0; i < pointCount; i++)
     {
-        Gfx::Point p = Application::instance().screen().fromUnit(points[i]);
+        const Gfx::Point& p = points[i];
         winPoints[i].x = p.x();
         winPoints[i].y = p.y();
 
@@ -675,10 +660,9 @@ void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* points, const size_t poin
 }
 
 
-void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface)
+void PixmapSurfaceImpl::drawSurface(const Gfx::Point& to, const PixmapSurface& surface)
 {
-    Gfx::Point to = Application::instance().screen().fromUnit(toF);
-    Gfx::Size size = Application::instance().screen().fromUnit( surface.size() );
+    const Gfx::Size& size = surface.size();
 
     BitBlt( _dc, 
             to.x(), to.y(), size.width(), size.height(), 
@@ -686,13 +670,12 @@ void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& toF, const PixmapSurface&
 }
 
 
-void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& toF, 
+void PixmapSurfaceImpl::drawSurface(const Gfx::Point& to, 
                                     const PixmapSurface& pm, 
-                                    const Gfx::RectF& pmRect)
+                                    const Gfx::Rect& pmRect)
 {
-    Gfx::Point to = Application::instance().screen().fromUnit(toF);
-    Gfx::Size size = Application::instance().screen().fromUnit( pmRect.size() );
-    Gfx::Point from = Application::instance().screen().fromUnit(pmRect.topLeft());
+    const Gfx::Size& size = pmRect.size();
+    const Gfx::Point& from = pmRect.topLeft();
 
     BitBlt( _dc, 
             to.x(), to.y(), size.width(), size.height(), 
@@ -700,7 +683,7 @@ void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& toF,
 }
 
 
-void PixmapSurfaceImpl::drawPicture(const Gfx::PointF& toF, const Picture& pic)
+void PixmapSurfaceImpl::drawPicture(const Gfx::Point& to, const Picture& pic)
 {
     const PictureImpl* picImpl = pic.impl();
 
@@ -709,15 +692,14 @@ void PixmapSurfaceImpl::drawPicture(const Gfx::PointF& toF, const Picture& pic)
 
     if( picImpl->mask() )
     {
-        bitBlit(toF, picImpl->width(), picImpl->height(), pic.impl()->mask(), SRCAND);
-        bitBlit(toF, picImpl->width(), picImpl->height(), pic.impl()->bitmap(), SRCPAINT);
+        bitBlit(to, picImpl->width(), picImpl->height(), pic.impl()->mask(), SRCAND);
+        bitBlit(to, picImpl->width(), picImpl->height(), pic.impl()->bitmap(), SRCPAINT);
         return;
     }
 
     // NOTE: it is impossible to use SourceCopy since picture is
     //       already premultiplied...
 
-    Gfx::Point to = Application::instance().screen().fromUnit(toF);
     HDC bitmapDC = CreateCompatibleDC(NULL);
 
     SelectObject( bitmapDC, picImpl->bitmap() );
@@ -735,10 +717,8 @@ void PixmapSurfaceImpl::drawPicture(const Gfx::PointF& toF, const Picture& pic)
 }
 
 
-void PixmapSurfaceImpl::bitBlit( const Gfx::PointF& pos, size_t width, size_t height, HBITMAP bitmap, DWORD op )
+void PixmapSurfaceImpl::bitBlit( const Gfx::Point& to, size_t width, size_t height, HBITMAP bitmap, DWORD op )
 {
-    Gfx::Point to = Application::instance().screen().fromUnit(pos);
-
     HDC bitmapDC = CreateCompatibleDC(NULL);
     SelectObject(bitmapDC, bitmap);
 
@@ -748,7 +728,7 @@ void PixmapSurfaceImpl::bitBlit( const Gfx::PointF& pos, size_t width, size_t he
 }
 
 
-void PixmapSurfaceImpl::drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imgRect)
+void PixmapSurfaceImpl::drawImage(const Gfx::Point& to, const Gfx::Image& image, const Gfx::Rect& imgRect)
 {
   //Todo:
     throw std::runtime_error("not implemented");
@@ -756,10 +736,8 @@ void PixmapSurfaceImpl::drawImage(const Gfx::PointF& to, const Gfx::Image& image
 
 
 
-void PixmapSurfaceImpl::drawImage(const Gfx::PointF& toF, const Gfx::Image& image)
+void PixmapSurfaceImpl::drawImage(const Gfx::Point& to, const Gfx::Image& image)
 {
-    Gfx::Point to = Application::instance().screen().fromUnit(toF);
-
     const size_t depth = image.view().pixelStride() * 8; 
     const Pt::uint8_t* data = image.data();
 

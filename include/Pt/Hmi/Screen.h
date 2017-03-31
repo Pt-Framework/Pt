@@ -62,46 +62,30 @@ class PT_HMI_API Screen : public WindowBase
 
         const std::vector<Window*>& windows() const;
    
-        Gfx::PointF toUnit(const Gfx::Point& value);
-      
-        Gfx::SizeF toUnit(const Gfx::Size& value);
-      
-        Gfx::Point fromUnit(const Gfx::PointF& value);
-      
-        Gfx::Size fromUnit(const Gfx::SizeF& value);
-      
-        Gfx::Rect fromUnit(const Gfx::RectF& value);
-
-        double unitSizeInch() const;
-      
-        double unitSizeMm() const;
-      
-        double resolutionDPI() const;
-
         ScreenImpl* impl();
 
     public:
-        virtual Pt::Gfx::PointF toScreen(const Pt::Gfx::PointF& p) const;
+        virtual Pt::Gfx::Point toScreen(const Pt::Gfx::Point& p) const;
 
-        virtual Pt::Gfx::PointF fromScreen(const Pt::Gfx::PointF& p) const;
+        virtual Pt::Gfx::Point fromScreen(const Pt::Gfx::Point& p) const;
 
     protected:
-        virtual Gfx::SizeF onSize() const;
+        virtual Gfx::Size onSize() const;
         
-        virtual void onUpdate(const Gfx::RectF& updateRect);
+        virtual void onUpdate(const Gfx::Rect& updateRect);
 
     protected:
         virtual void onInit(Window& w);
     
         virtual void onDeinit(Window& w);
 
-        virtual Gfx::PointF onToParent(const Window& w, const Gfx::PointF& pos) const;
+        virtual Gfx::Point onToParent(const Window& w, const Gfx::Point& pos) const;
 
-        virtual Gfx::PointF onFromParent(const Window& w, const Gfx::PointF& pos) const;
+        virtual Gfx::Point onFromParent(const Window& w, const Gfx::Point& pos) const;
 
-        virtual void onResize(Window& w, const Gfx::SizeF& s);
+        virtual void onResize(Window& w, const Gfx::Size& s);
 
-        virtual void onMove(Window& w, const Gfx::PointF& p);
+        virtual void onMove(Window& w, const Gfx::Point& p);
 
         virtual void onFrameChanged(Window& w);
 
@@ -117,7 +101,7 @@ class PT_HMI_API Screen : public WindowBase
 
         virtual void onEnable(Window& w, bool enable);
 
-        virtual void onUpdate(Window& w, const Gfx::RectF& rect);
+        virtual void onUpdate(Window& w, const Gfx::Rect& rect);
 
     protected:
         virtual void onEvent( const Event& ev );
@@ -128,7 +112,7 @@ class PT_HMI_API Screen : public WindowBase
     
     private:
         ScreenImpl*          _impl;
-        Gfx::RectF           _updateRect;
+        Gfx::Rect           _updateRect;
         int                  _updates;
         std::vector<Window*> _windows;
         Pt::System::Clock    _clock;

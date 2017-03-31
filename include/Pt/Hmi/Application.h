@@ -194,7 +194,7 @@ class PT_HMI_API Application : public Pt::System::Application
         DefaultInputMethod _defaultInputMethod;
         InputMethod*       _inputMethod;
 
-        Gfx::PointF        _scrollFrom;
+        Gfx::Point        _scrollFrom;
         bool               _onScroll;
 };
 

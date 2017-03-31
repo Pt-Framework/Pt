@@ -303,7 +303,7 @@ void Application::processTouchEvent(const TouchEvent& ev)
     }
     else if( ev.isMove() )
     {
-        Gfx::PointF scrollTo = vit->second->toScreen( ev.position() );
+        Gfx::Point scrollTo = vit->second->toScreen( ev.position() );
         
         double delta = scrollTo.y() - _scrollFrom.y();
 
@@ -345,9 +345,9 @@ void Application::processTouchEvent(const TouchEvent& ev)
     Window* ime = inputMethod().activeWindow();
     if(ime)
     {
-        Gfx::PointF screenPos = vit->second->toScreen( ev.position() );
-        Gfx::PointF p = ime->fromScreen(screenPos);
-        Gfx::RectF rect( ime->size() );
+        Gfx::Point screenPos = vit->second->toScreen( ev.position() );
+        Gfx::Point p = ime->fromScreen(screenPos);
+        Gfx::Rect rect( ime->size() );
         if( rect.contains(p) )
         {
             tev.setPosition(p);
@@ -360,7 +360,7 @@ void Application::processTouchEvent(const TouchEvent& ev)
     Visual* grabber = Application::instance().pointerGrabber();
     if(grabber)
     {
-        Gfx::PointF screenPos = vit->second->toScreen( ev.position() );
+        Gfx::Point screenPos = vit->second->toScreen( ev.position() );
         tev.setPosition( grabber->fromScreen(screenPos) ); 
         tev.setId( grabber->vid() );
         loop().commitEvent(tev);
@@ -388,7 +388,7 @@ void Application::processMouseEvent(const MouseEvent& ev)
     }
     else if( ev.isPressed() )
     {
-        Gfx::PointF scrollTo = vit->second->toScreen( ev.position() );
+        Gfx::Point scrollTo = vit->second->toScreen( ev.position() );
         
         double delta = scrollTo.y() - _scrollFrom.y();
         
@@ -430,9 +430,9 @@ void Application::processMouseEvent(const MouseEvent& ev)
     Window* ime = inputMethod().activeWindow();
     if(ime)
     {
-        Gfx::PointF screenPos = vit->second->toScreen( ev.position() );
-        Gfx::PointF p = ime->fromScreen(screenPos);
-        Gfx::RectF rect( ime->size() );
+        Gfx::Point screenPos = vit->second->toScreen( ev.position() );
+        Gfx::Point p = ime->fromScreen(screenPos);
+        Gfx::Rect rect( ime->size() );
         if( rect.contains(p) )
         {
             mev.setPosition(p);
@@ -445,7 +445,7 @@ void Application::processMouseEvent(const MouseEvent& ev)
     Visual* grabber = pointerGrabber();
     if(grabber)
     {
-        Gfx::PointF screenPos = vit->second->toScreen( ev.position() );
+        Gfx::Point screenPos = vit->second->toScreen( ev.position() );
         mev.setPosition( grabber->fromScreen(screenPos) );
         mev.setId( grabber->vid() );
         loop().commitEvent(mev);

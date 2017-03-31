@@ -279,12 +279,12 @@ void LineEdit::setRenderer(LineEditRenderer* renderer)
 }
 
 
-Gfx::SizeF LineEdit::onMeasure(const SizePolicy& policy)
+Gfx::Size LineEdit::onMeasure(const SizePolicy& policy)
 {
-    double itemsWidth = policy.width();
-    double itemsHeight = _font.size() * 2;
+    Pt::ssize_t itemsWidth = policy.width();
+    Pt::ssize_t itemsHeight = _font.size() * 2;
 
-    return Gfx::SizeF( itemsWidth + padding().leftRight(), 
+    return Gfx::Size( itemsWidth + padding().leftRight(), 
                        itemsHeight + padding().topBottom() );
 }
 
@@ -318,7 +318,7 @@ void LineEdit::onInvalidate()
 }
 
 
-void LineEdit::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void LineEdit::onPaint(PaintSurface& surface, const Gfx::Rect& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
@@ -339,27 +339,27 @@ void LineEdit::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     // text with cursor
     //
     
-    Gfx::RectF cursorRect;
+    Gfx::Rect cursorRect;
 
-    Gfx::PointF clipPos = _editor.position();
-    Gfx::SizeF clipSize = _editor.size();
+    Gfx::Point clipPos = _editor.position();
+    Gfx::Size clipSize = _editor.size();
     clipSize.addWidth(_spacing); // cursor
 
     if( _isEditable && hasFocus() )
     {
-        double cursorX = _line.cursorToX( _editor.cursorPosition() );
+        Pt::ssize_t cursorX = _line.cursorToX( _editor.cursorPosition() );
         cursorX += _line.position().x();
         
-        double cursorWidth = 1;
+        Pt::ssize_t cursorWidth = 1;
 
-        cursorRect.set(Gfx::PointF( cursorX, _line.position().y() ),
-                       Gfx::SizeF( cursorWidth, _line.maxHeight() ) );           
+        cursorRect.set(Gfx::Point( cursorX, _line.position().y() ),
+                       Gfx::Size( cursorWidth, _line.maxHeight() ) );           
     }
 
-    Gfx::RectF clipRect(clipPos, clipSize);
-    painter.setClip( Gfx::RectF(clipPos, clipSize) );
+    Gfx::Rect clipRect(clipPos, clipSize);
+    painter.setClip( Gfx::Rect(clipPos, clipSize) );
 
-    Gfx::PointF textPos = _line.position();
+    Gfx::Point textPos = _line.position();
     textPos.addY( _line.ascent() );
 
     // TODO: renderer prepare can set placeholder color
@@ -387,10 +387,10 @@ void LineEdit::onResizeEvent(const ResizeEvent& ev)
     if(_spacing < 2)
         _spacing = 2;
 
-    Gfx::PointF editPosition(_spacing, 0);
+    Gfx::Point editPosition(_spacing, 0);
     _editor.setPosition(editPosition);
 
-    Gfx::SizeF editSize = ev.size();
+    Gfx::Size editSize = ev.size();
     editSize.addWidth(-3 * _spacing);
     _editor.setSize(editSize);
 

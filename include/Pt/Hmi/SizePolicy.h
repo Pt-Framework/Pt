@@ -88,37 +88,37 @@ class SizePolicy
             _verticalMode = vertical;
         }
         
-        const Gfx::SizeF& size() const
+        const Gfx::Size& size() const
         {
             return _sizeHint;
         }
 
-        void setSize(const Gfx::SizeF& hint)
+        void setSize(const Gfx::Size& hint)
         {
             _sizeHint = hint;
         }
 
-        void setSize(double w, double h)
+        void setSize(Pt::ssize_t w, Pt::ssize_t h)
         {
             _sizeHint.set(w, h);
         }
 
-        double width() const
+        Pt::ssize_t width() const
         { 
             return _sizeHint.width(); 
         }
 
-        void setWidth(double w)
+        void setWidth(Pt::ssize_t w)
         {
             _sizeHint.setWidth(w);
         }
 
-        double height() const
+        Pt::ssize_t height() const
         { 
             return _sizeHint.height(); 
         }
 
-        void setHeight(double h)
+        void setHeight(Pt::ssize_t h)
         {
             _sizeHint.setHeight(h);
         }
@@ -140,7 +140,7 @@ class SizePolicy
     private:
         Mode       _horizontalMode;
         Mode       _verticalMode;
-        Gfx::SizeF _sizeHint;
+        Gfx::Size _sizeHint;
 };
 
 } // namespace

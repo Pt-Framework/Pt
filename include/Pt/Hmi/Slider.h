@@ -92,18 +92,18 @@ class PT_HMI_API Slider : public Control
         void setRenderer(SliderRenderer* renderer);
 
     protected:
-        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+        virtual Gfx::Size onMeasure(const SizePolicy& policy);
 
         virtual void onInvalidate();
 
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+        virtual void onPaint(PaintSurface& surface, const Gfx::Rect& updateRect);
 
 				virtual bool onMouseEvent(const MouseEvent& ev);
 
         virtual void onTouchEvent(const TouchEvent& ev);
         
     private:
-        Gfx::PointF textPosition() const;
+        Gfx::Point textPosition() const;
 
     private:
 				Signal<int>	_positionChanged;

@@ -64,12 +64,12 @@ class WindowManager : public Pt::Connectable
 
         void remove(Window& window);
 
-        double borderWidth() const
+        Pt::ssize_t borderWidth() const
         {
             return _borderWidth;
         }
 
-        double titleHeight()  const
+        Pt::ssize_t titleHeight()  const
         {
             return _titleHeight;
         }
@@ -107,14 +107,14 @@ class WindowManager : public Pt::Connectable
 
         bool scrollEvent(const ScrollEvent& ev);
 
-        void paint(PaintSurface& surface, const Gfx::RectF& rect);
+        void paint(PaintSurface& surface, const Gfx::Rect& rect);
 
     public:
-        void onUpdate(Window& child, const Gfx::RectF& rect);
+        void onUpdate(Window& child, const Gfx::Rect& rect);
 
-        void onResize(Window& w, const Gfx::SizeF& to);
+        void onResize(Window& w, const Gfx::Size& to);
 
-        void onMove(Window& w, const Gfx::PointF& to);
+        void onMove(Window& w, const Gfx::Point& to);
 
         void onShow( Window& w, bool visible );
 
@@ -130,12 +130,12 @@ class WindowManager : public Pt::Connectable
 
         void onClose(Window& w);
 
-        Gfx::PointF toParent(const Window& w, const Gfx::PointF& pos) const;
+        Gfx::Point toParent(const Window& w, const Gfx::Point& pos) const;
 
-        Gfx::PointF fromParent(const Window& w, const Gfx::PointF& pos) const;
+        Gfx::Point fromParent(const Window& w, const Gfx::Point& pos) const;
 
     private:
-        WindowFrame* findWindow(const Gfx::PointF& p);
+        WindowFrame* findWindow(const Gfx::Point& p);
 
         WindowFrame* findWindow(const Window& w) const;
 
@@ -148,8 +148,8 @@ class WindowManager : public Pt::Connectable
         WindowFrame*              _grabbedWindow;
         WindowFrame*              _topMostWindow;
 
-        double                    _borderWidth;
-        double                    _titleHeight;
+        Pt::ssize_t              _borderWidth;
+        Pt::ssize_t                _titleHeight;
         Gfx::Color                _inactiveColor;
         Gfx::Color                _activeColor;
         Gfx::Color                _textColor;

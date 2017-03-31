@@ -58,7 +58,7 @@ ScreenImpl::ScreenImpl(ApplicationImpl& app)
 
     Painter painter(_surface);
 
-    Gfx::RectF rect( Gfx::PointF(0, 0), _surface.size() );
+    Gfx::Rect rect( Gfx::Point(0, 0), _surface.size() );
     Pt::Gfx::Color bgColor(65535 * 0.4f, 65535 * 0.3f, 65535 * 0.4f);
     painter.setBrush( Gfx::Brush(bgColor) );
     painter.fillRect(rect);
@@ -102,7 +102,7 @@ Gfx::Image& ScreenImpl::image()
 }
 
 
-void ScreenImpl::paint(const Gfx::RectF& updateRect)
+void ScreenImpl::paint(const Gfx::Rect& updateRect)
 {                
     if( ! _cursorBackground.empty() )
     {
@@ -124,17 +124,17 @@ void ScreenImpl::paint(const Gfx::RectF& updateRect)
   //  std::clog << "update area2 " << updateRect.topLeft().x() << ',' << updateRect.topLeft().y()
   //            << ' ' << updateRect.width() << 'x' << updateRect.height() << std::endl;
                   
-    updateScreen( Application::instance().screen().fromUnit( updateRect)  );
+    updateScreen( updateRect );
 }
 
 
-Gfx::PointF ScreenImpl::screenPosition(const Gfx::PointF& posRaw)
+Gfx::Point ScreenImpl::screenPosition(const Gfx::Point& posRaw)
 {     
-    const Gfx::SizeF& screenSize = size();
+    const Gfx::Size& screenSize = size();
     const double touchWidth  = 800;
     const double touchHeight = 480;
 
-    Gfx::PointF pos = posRaw;
+    Gfx::Point pos = posRaw;
 
     switch( _frameBuffer.rotation() )
     {
@@ -213,27 +213,27 @@ void ScreenImpl::onKeyEvent(const Pt::Hmi::KeyEvent& ev)
 }
 
 
-Gfx::PointF ScreenImpl::toParent(const Window& w, const Gfx::PointF& pos) const
+Gfx::Point ScreenImpl::toParent(const Window& w, const Gfx::Point& pos) const
 {
     //return w.impl()->toScreen(pos);
     return _windowManager.toParent(w, pos);
 }
 
 
-Gfx::PointF ScreenImpl::fromParent(const Window& w, const Gfx::PointF& pos) const
+Gfx::Point ScreenImpl::fromParent(const Window& w, const Gfx::Point& pos) const
 {
     //return w.impl()->fromScreen(pos);
     return _windowManager.fromParent(w, pos);
 }
 
 
-void ScreenImpl::onResize(Window& w, const Gfx::SizeF& s)
+void ScreenImpl::onResize(Window& w, const Gfx::Size& s)
 {
     _windowManager.onResize(w, s);
 }
 
 
-void ScreenImpl::onMove(Window& w, const Gfx::PointF& pos)
+void ScreenImpl::onMove(Window& w, const Gfx::Point& pos)
 {
     _windowManager.onMove(w, pos);
 }
@@ -281,7 +281,7 @@ void ScreenImpl::onEnable(Window& w, bool enable)
 }
 
 
-void ScreenImpl::grabImage( const Pt::uint8_t* buffer, const Gfx::Point& pos,Gfx::Image& image)
+void ScreenImpl::grabImage( const Pt::uint8_t* buffer, const Gfx::Point& pos, Gfx::Image& image)
 {    
     const size_t pixelSizeInByte = _frameBuffer.pixelSize();
     const Gfx::Size& imageSize = image.size();

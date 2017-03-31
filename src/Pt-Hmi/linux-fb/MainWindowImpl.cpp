@@ -44,7 +44,7 @@ MainWindowImpl::~MainWindowImpl()
 }
 
 
-void MainWindowImpl::paint(const Gfx::RectF& rect)
+void MainWindowImpl::paint(const Gfx::Rect& rect)
 {
 }
 
@@ -64,12 +64,12 @@ void MainWindowImpl::enable(bool b)
 }
 
 
-void MainWindowImpl::resize(const Gfx::SizeF& size)
+void MainWindowImpl::resize(const Gfx::Size& size)
 {
 }
 
 
-void MainWindowImpl::move(const Gfx::PointF& pos)
+void MainWindowImpl::move(const Gfx::Point& pos)
 {
 }
 
@@ -94,12 +94,12 @@ void MainWindowImpl::setIcon(const Gfx::Image& icon)
 }
 
 
-void MainWindowImpl::setMinimumSize(const Gfx::SizeF& s)
+void MainWindowImpl::setMinimumSize(const Gfx::Size& s)
 {
 }
 
 
-void MainWindowImpl::setMaximumSize(const Gfx::SizeF& s)
+void MainWindowImpl::setMaximumSize(const Gfx::Size& s)
 {
 }
 

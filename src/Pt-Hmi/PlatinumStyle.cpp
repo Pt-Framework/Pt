@@ -83,17 +83,17 @@ PlatinumRendererBase::~PlatinumRendererBase()
 
 
 void PlatinumRendererBase::renderFrame(Painter& painter,
-                                       const Gfx::RectF& frameRect,
+                                       const Gfx::Rect& frameRect,
                                        const Gfx::Pen& pen,
-                                       double corner) const
+                                       Pt::ssize_t corner) const
 {
-    Gfx::RectF borderRect = frameRect;
+    Gfx::Rect borderRect = frameRect;
 
-    borderRect.setOrigin( Gfx::PointF(corner, corner) );
-    borderRect.setSize( Gfx::SizeF(frameRect.size().width() - corner, 
+    borderRect.setOrigin( Gfx::Point(corner, corner) );
+    borderRect.setSize( Gfx::Size(frameRect.size().width() - corner, 
                                    frameRect.size().height() - corner) );
 
-    Gfx::PointF outline[9] = {};
+    Gfx::Point outline[9] = {};
 
     // top left
     outline[0].setX(0);
@@ -131,15 +131,15 @@ void PlatinumRendererBase::renderFrame(Painter& painter,
 
 
 void PlatinumRendererBase::renderPlane(Painter& painter,
-                                       const Gfx::RectF& rect,
+                                       const Gfx::Rect& rect,
                                        const Gfx::Brush& brush,
-                                       double corner) const
+                                       Pt::ssize_t corner) const
 {
-    Gfx::RectF borderRect( Gfx::PointF(corner, corner),
-                           Gfx::SizeF(rect.size().width() - corner, 
+    Gfx::Rect borderRect( Gfx::Point(corner, corner),
+                           Gfx::Size(rect.size().width() - corner, 
                                       rect.size().height() - corner) );
 
-    Gfx::PointF outline[9] = {};
+    Gfx::Point outline[9] = {};
 
     // top left
     outline[0].setX(0);
@@ -229,23 +229,23 @@ void PlatinumButtonRenderer::onPrepareIcon(const PushButton& button,
 void PlatinumButtonRenderer::onRenderBackground(const PushButton& button,
                                                 const StyleOptions& options,
                                                 Painter& painter, 
-                                                const Gfx::RectF& rect,
+                                                const Gfx::Rect& rect,
                                                 const Gfx::Brush& brush,
                                                 const Gfx::Pen& pen) const 
 {
-    Gfx::RectF borderRect( button.size() );
+    Gfx::Rect borderRect( button.size() );
     _baseRenderer.renderPlane(painter, borderRect, brush);
 
     if( button.hasFocus() )
     {
-        Gfx::SizeF focusSize = button.size();
+        Gfx::Size focusSize = button.size();
         focusSize.addHeight(-4);
         focusSize.addWidth(-4);
 
         Gfx::Pen focusPen(pen.color(), 1, Gfx::Pen::Dash);
         painter.setPen(focusPen);
         
-        Gfx::RectF rect(Gfx::PointF(2,2), focusSize);
+        Gfx::Rect rect(Gfx::Point(2,2), focusSize);
         painter.drawRect(rect);
     }
 
@@ -256,12 +256,12 @@ void PlatinumButtonRenderer::onRenderBackground(const PushButton& button,
 void PlatinumButtonRenderer::onRenderText(const PushButton& button,
                                           const StyleOptions& options,
                                           Painter& painter, 
-                                          const Gfx::RectF& rect,
+                                          const Gfx::Rect& rect,
                                           const String& text,
-                                          const Gfx::PointF& textPos,
+                                          const Gfx::Point& textPos,
                                           const Gfx::Font& font, 
                                           const Gfx::Pen& textPen,
-                                          const Gfx::RectF& mnemonic) const 
+                                          const Gfx::Rect& mnemonic) const 
 {
     painter.setFont(font);
     painter.setPen(textPen);
@@ -269,9 +269,9 @@ void PlatinumButtonRenderer::onRenderText(const PushButton& button,
 
     if( ! mnemonic.isNull() )
     {
-        double menmonicY = textPos.y() + 1;
-        painter.drawLine( Gfx::PointF(mnemonic.left(), menmonicY), 
-                          Gfx::PointF(mnemonic.right(), menmonicY) );
+        Pt::ssize_t menmonicY = textPos.y() + 1;
+        painter.drawLine( Gfx::Point(mnemonic.left(), menmonicY), 
+                          Gfx::Point(mnemonic.right(), menmonicY) );
     }
 }
 
@@ -296,7 +296,7 @@ void PlatinumCheckBoxRenderer::onPrepare(const CheckBox& cb,
                                          Gfx::Pen& contour,
                                          Gfx::Font& font,
                                          Gfx::Pen& textPen,
-                                         Gfx::SizeF& boxSize) const 
+                                         Gfx::Size& boxSize) const 
 {
     boxSize.set( font.size(), font.size() );
 }
@@ -305,8 +305,8 @@ void PlatinumCheckBoxRenderer::onPrepare(const CheckBox& cb,
 void PlatinumCheckBoxRenderer::onRenderBox(const CheckBox& cb,
                                            const StyleOptions& options,
                                            Painter& painter, 
-                                           const Gfx::RectF& rect,
-                                           const Gfx::RectF& boxRect,
+                                           const Gfx::Rect& rect,
+                                           const Gfx::Rect& boxRect,
                                            const Gfx::Brush& brush,
                                            const Gfx::Pen& pen) const
 {
@@ -320,10 +320,10 @@ void PlatinumCheckBoxRenderer::onRenderBox(const CheckBox& cb,
 
     if( cb.isChecked() )
     {
-        Gfx::PointF tl = boxRect.topLeft() + Gfx::PointF(2, 2);
-        Gfx::PointF br = boxRect.bottomRight() - Gfx::PointF(2, 2);
-        Gfx::PointF tr = boxRect.topRight() + Gfx::PointF(-2, 2);
-        Gfx::PointF bl = boxRect.bottomLeft() - Gfx::PointF(-2, 2);
+        Gfx::Point tl = boxRect.topLeft() + Gfx::Point(2, 2);
+        Gfx::Point br = boxRect.bottomRight() - Gfx::Point(2, 2);
+        Gfx::Point tr = boxRect.topRight() + Gfx::Point(-2, 2);
+        Gfx::Point bl = boxRect.bottomLeft() - Gfx::Point(-2, 2);
 
         Pt::Gfx::Pen pen(checkColor, 2, Gfx::Pen::Solid, Gfx::Pen::RoundCap);
         painter.setPen(pen);
@@ -336,13 +336,13 @@ void PlatinumCheckBoxRenderer::onRenderBox(const CheckBox& cb,
 void PlatinumCheckBoxRenderer::onRenderText(const CheckBox& cb,
                                             const StyleOptions& options,
                                             Painter& painter, 
-                                            const Gfx::RectF& rect,
+                                            const Gfx::Rect& rect,
                                             const String& text,
-                                            const Gfx::PointF& textPos,
+                                            const Gfx::Point& textPos,
                                             const Gfx::FontMetrics& textMetric,
                                             const Gfx::Font& font, 
                                             const Gfx::Pen& textPen,
-                                            const Gfx::RectF& mnemonic) const 
+                                            const Gfx::Rect& mnemonic) const 
 {
     painter.setFont(font);
     painter.setPen(textPen);
@@ -350,16 +350,16 @@ void PlatinumCheckBoxRenderer::onRenderText(const CheckBox& cb,
 
     if( ! mnemonic.isNull() )
     {
-        double menmonicY = textPos.y() + 1;
-        painter.drawLine( Gfx::PointF(mnemonic.left(), menmonicY), 
-                          Gfx::PointF(mnemonic.right(), menmonicY) );
+        Pt::ssize_t menmonicY = textPos.y() + 1;
+        painter.drawLine( Gfx::Point(mnemonic.left(), menmonicY), 
+                          Gfx::Point(mnemonic.right(), menmonicY) );
     }
 
     if( cb.hasFocus() )
     {       
-        Gfx::RectF focusRect( Gfx::PointF(textPos.x() - 2, 
+        Gfx::Rect focusRect( Gfx::Point(textPos.x() - 2, 
                                           textPos.y() - textMetric.ascent()), 
-                              Gfx::SizeF(textMetric.width() + 4, 
+                              Gfx::Size(textMetric.width() + 4, 
                                          textMetric.height() ) );
         
         Gfx::Pen pen(textPen.color(), 1, Gfx::Pen::Dash);
@@ -386,10 +386,10 @@ PlatinumPanelRenderer::~PlatinumPanelRenderer()
 void PlatinumPanelRenderer::onRenderBackground(const Panel& p,
                                                const StyleOptions& options,
                                                Painter& painter, 
-                                               const Gfx::RectF& rect,
+                                               const Gfx::Rect& rect,
                                                const Gfx::Brush& brush) const 
 {
-    Gfx::RectF borderRect( Gfx::PointF(0,0), p.size() );
+    Gfx::Rect borderRect( Gfx::Point(0,0), p.size() );
     
     _baseRenderer.renderPlane(painter, borderRect, brush);
 }
@@ -398,10 +398,10 @@ void PlatinumPanelRenderer::onRenderBackground(const Panel& p,
 void PlatinumPanelRenderer::onRenderFrame(const Panel& p,
                                           const StyleOptions& options,
                                           Painter& painter, 
-                                          const Gfx::RectF& rect,
+                                          const Gfx::Rect& rect,
                                           const Gfx::Pen& pen) const 
 {
-    Gfx::RectF borderRect( Gfx::PointF(0,0), p.size() );
+    Gfx::Rect borderRect( Gfx::Point(0,0), p.size() );
     
     _baseRenderer.renderFrame(painter, borderRect, pen);
 }
@@ -433,10 +433,10 @@ void PlatinumLabelRenderer::onPrepare(const Label& l,
 void PlatinumLabelRenderer::onRenderBackground(const Label& l,
                                                const StyleOptions& options,
                                                Painter& painter, 
-                                               const Gfx::RectF& rect,
+                                               const Gfx::Rect& rect,
                                                const Gfx::Brush& brush) const 
 {
-    Gfx::RectF borderRect( Gfx::PointF(0,0), l.size() );
+    Gfx::Rect borderRect( Gfx::Point(0,0), l.size() );
     
     _baseRenderer.renderPlane(painter, borderRect, brush);
 }
@@ -445,10 +445,10 @@ void PlatinumLabelRenderer::onRenderBackground(const Label& l,
 void PlatinumLabelRenderer::onRenderFrame(const Label& l,
                                           const StyleOptions& options,
                                           Painter& painter, 
-                                          const Gfx::RectF& rect,
+                                          const Gfx::Rect& rect,
                                           const Gfx::Pen& contour) const 
 {
-    Gfx::RectF borderRect( Gfx::PointF(0,0), l.size() );
+    Gfx::Rect borderRect( Gfx::Point(0,0), l.size() );
     
     _baseRenderer.renderFrame(painter, borderRect, contour);
 }
@@ -457,9 +457,9 @@ void PlatinumLabelRenderer::onRenderFrame(const Label& l,
 void PlatinumLabelRenderer::onRenderText(const Label& l,
                                          const StyleOptions& options,
                                          Painter& painter, 
-                                         const Gfx::RectF& rect,
+                                         const Gfx::Rect& rect,
                                          const String& text,
-                                         const Gfx::PointF& textPos,
+                                         const Gfx::Point& textPos,
                                          const Gfx::Font& font, 
                                          const Gfx::Pen& textPen) const 
 {
@@ -513,11 +513,11 @@ void PlatinumLineEditRenderer::onPrepare(const LineEdit& le,
 void PlatinumLineEditRenderer::onRenderBackground(const LineEdit& le, 
                                                   const StyleOptions& options,
                                                   Painter& painter, 
-                                                  const Gfx::RectF& rect,
+                                                  const Gfx::Rect& rect,
                                                   const Gfx::Pen& contour,
                                                   const Gfx::Brush& brush) const
 {
-    Gfx::RectF borderRect( le.size() );
+    Gfx::Rect borderRect( le.size() );
 
     painter.setBrush(brush);
     painter.fillRect(borderRect);
@@ -530,9 +530,9 @@ void PlatinumLineEditRenderer::onRenderBackground(const LineEdit& le,
 void PlatinumLineEditRenderer::onRenderText(const LineEdit& le, 
                                             const StyleOptions& options,
                                             Painter& painter, 
-                                            const Gfx::RectF& rect,
+                                            const Gfx::Rect& rect,
                                             const String& text,
-                                            const Gfx::PointF& textPos,
+                                            const Gfx::Point& textPos,
                                             const Gfx::Font& font,
                                             const Gfx::Pen& textPen) const
 {
@@ -545,8 +545,8 @@ void PlatinumLineEditRenderer::onRenderText(const LineEdit& le,
 void PlatinumLineEditRenderer::onRenderCursor(const LineEdit& le, 
                                               const StyleOptions& options,
                                               Painter& painter, 
-                                              const Gfx::RectF& rect,
-                                              const Gfx::RectF& cursorRect ) const
+                                              const Gfx::Rect& rect,
+                                              const Gfx::Rect& cursorRect ) const
 {
     painter.setPen( options.textColor() );
     
@@ -580,11 +580,11 @@ void PlatinumMenuRenderer::onPrepare(const Menu& m,
 void PlatinumMenuRenderer::onRenderBackground(const Menu& m, 
                                               const StyleOptions& options,
                                               Painter& painter, 
-                                              const Gfx::RectF& rect,
+                                              const Gfx::Rect& rect,
                                               const Gfx::Brush& brush,
                                               const Gfx::Pen& contour) const
 {
-    const Gfx::SizeF& size = m.size();
+    const Gfx::Size& size = m.size();
 
     //
     // icon strip on the left side
@@ -596,8 +596,8 @@ void PlatinumMenuRenderer::onRenderBackground(const Menu& m,
 
     if(iconWidth > 0)
     {
-        Gfx::RectF iconStrip( Gfx::PointF(0, 0),
-                              Gfx::SizeF(iconWidth, size.height()) );
+        Gfx::Rect iconStrip( Gfx::Point(0, 0),
+                              Gfx::Size(iconWidth, size.height()) );
                 
          Gfx::Brush brush(brush.color(),
                           Gfx::Color(65000, 65000, 65000), 
@@ -610,7 +610,7 @@ void PlatinumMenuRenderer::onRenderBackground(const Menu& m,
     //
     // menu border
     //
-    Gfx::RectF borderRect(size);
+    Gfx::Rect borderRect(size);
 
     painter.setPen(contour);
     painter.drawRect(borderRect);
@@ -636,7 +636,7 @@ void PlatinumMenuRenderer::onPrepareItem(const MenuItem& m,
 void PlatinumMenuRenderer::onRenderItem(const MenuItem& m, 
                                         const StyleOptions& options,
                                         Painter& painter, 
-                                        const Gfx::RectF& rect,
+                                        const Gfx::Rect& rect,
                                         Gfx::Brush& brush,
                                         Gfx::Pen& contour) const
 {
@@ -652,16 +652,16 @@ void PlatinumMenuRenderer::onRenderItem(const MenuItem& m,
 void PlatinumMenuRenderer::onRenderIndicator(const MenuItem& m, 
                                              const StyleOptions& options,
                                              Painter& painter, 
-                                             const Gfx::RectF& rect) const
+                                             const Gfx::Rect& rect) const
 {
-    static const double indicatorWidth = 5.0;
+    static const Pt::ssize_t indicatorWidth = 5;
 
-    double x = m.size().width() - indicatorWidth - m.padding().right();
-    double y = m.size().height() / 2;
+    Pt::ssize_t x = m.size().width() - indicatorWidth - m.padding().right();
+    Pt::ssize_t y = m.size().height() / 2;
 
-    Gfx::PointF indicator[3] = { Gfx::PointF(x - 3, y - 4),
-                                 Gfx::PointF(x + 1, y),
-                                 Gfx::PointF(x - 3, y + 4) };
+    Gfx::Point indicator[3] = { Gfx::Point(x - 3, y - 4),
+                                 Gfx::Point(x + 1, y),
+                                 Gfx::Point(x - 3, y + 4) };
   
     Gfx::Brush brush( m.textColor() );
     painter.setBrush(brush);
@@ -694,7 +694,7 @@ void PlatinumMenuBarRenderer::onPrepare(const MenuBar& m,
 void PlatinumMenuBarRenderer::onRenderBackground(const MenuBar& m, 
                                                  const StyleOptions& options,
                                                  Painter& painter, 
-                                                 const Gfx::RectF& rect,
+                                                 const Gfx::Rect& rect,
                                                  const Gfx::Brush& brush,
                                                  const Gfx::Pen& contour) const
 {
@@ -718,14 +718,14 @@ void PlatinumMenuBarRenderer::onPrepareItem(const MenuBarItem& m,
 void PlatinumMenuBarRenderer::onRenderItem(const MenuBarItem& m, 
                                            const StyleOptions& options,
                                            Painter& painter, 
-                                           const Gfx::RectF& rect,
+                                           const Gfx::Rect& rect,
                                            const Gfx::Brush& brush,
                                            const Gfx::Pen& contour) const
 {
     if( m.isHighlighted() )
     {
         painter.setBrush(brush);
-        painter.fillRect( Gfx::RectF(Gfx::PointF(0,0), m.size()) );
+        painter.fillRect( Gfx::Rect(Gfx::Point(0,0), m.size()) );
     }
 }
 
@@ -733,12 +733,12 @@ void PlatinumMenuBarRenderer::onRenderItem(const MenuBarItem& m,
 void PlatinumMenuBarRenderer::onRenderItemText(const MenuBarItem& m,
                                                const StyleOptions& options,
                                                Painter& painter, 
-                                               const Gfx::RectF& rect,
+                                               const Gfx::Rect& rect,
                                                const String& text,
-                                               const Gfx::PointF& textPos,
+                                               const Gfx::Point& textPos,
                                                const Gfx::Font& font, 
                                                const Gfx::Pen& textPen,
-                                               const Gfx::RectF& mnemonic) const 
+                                               const Gfx::Rect& mnemonic) const 
 {
     painter.setFont(font);
     painter.setPen(textPen);
@@ -746,9 +746,9 @@ void PlatinumMenuBarRenderer::onRenderItemText(const MenuBarItem& m,
 
     if( ! mnemonic.isNull() )
     {
-        double menmonicY = textPos.y() + 1;
-        painter.drawLine( Gfx::PointF(mnemonic.left(), menmonicY), 
-                          Gfx::PointF(mnemonic.right(), menmonicY) );
+        Pt::ssize_t menmonicY = textPos.y() + 1;
+        painter.drawLine( Gfx::Point(mnemonic.left(), menmonicY), 
+                          Gfx::Point(mnemonic.right(), menmonicY) );
     }
 }
 
@@ -779,8 +779,8 @@ void PlatinumScrollBarRenderer::onPrepare(const ScrollBar& s,
 void PlatinumScrollBarRenderer::onRender(const ScrollBar& s,
                                          const StyleOptions& options,
                                          Painter& painter,
-                                         const Gfx::RectF& rect,
-                                         const Gfx::RectF& handleRect,
+                                         const Gfx::Rect& rect,
+                                         const Gfx::Rect& handleRect,
                                          const Gfx::Brush& background,
                                          const Gfx::Brush& foreground,
                                          const Gfx::Pen& contour) const
@@ -789,7 +789,7 @@ void PlatinumScrollBarRenderer::onRender(const ScrollBar& s,
     painter.fillRect(rect);
 
     painter.setPen(contour);
-    painter.drawRect( Gfx::RectF( s.size() ) );
+    painter.drawRect( Gfx::Rect( s.size() ) );
 
     painter.setBrush(foreground);
     painter.fillRect(handleRect);
@@ -827,7 +827,7 @@ void PlatinumProgressBarRenderer::onPrepare(const ProgressBar&    p,
 void PlatinumProgressBarRenderer::onRender( const ProgressBar& p,
                                             const StyleOptions& options,
                                             Painter& painter,
-                                            const Gfx::RectF& rect,
+                                            const Gfx::Rect& rect,
                                             const Gfx::Brush& background,
                                             const Gfx::Brush& foreground,
                                             const Gfx::Pen& contour,
@@ -836,15 +836,15 @@ void PlatinumProgressBarRenderer::onRender( const ProgressBar& p,
                                          ) const
 {
     
-    const double barHeight = 3.0;
-    const double progressWidth = p.size().width() * p.progress();
-    const double boxY = p.size().height()/2 - barHeight/2;
+    const Pt::ssize_t barHeight = 3;
+    const Pt::ssize_t progressWidth = p.size().width() * p.progress();
+    const Pt::ssize_t boxY = p.size().height()/2 - barHeight/2;
 
-    Gfx::RectF boxRect( Gfx::PointF(0.0, boxY),
-                        Gfx::SizeF(p.size().width(), barHeight) );
+    Gfx::Rect boxRect( Gfx::Point(0.0, boxY),
+                        Gfx::Size(p.size().width(), barHeight) );
 
-    Gfx::RectF progressRect( Gfx::PointF(0.0, boxY),
-                             Gfx::SizeF(progressWidth,barHeight) );
+    Gfx::Rect progressRect( Gfx::Point(0.0, boxY),
+                             Gfx::Size(progressWidth,barHeight) );
 
     painter.setBrush(background);
     painter.fillRect(boxRect);
@@ -853,7 +853,7 @@ void PlatinumProgressBarRenderer::onRender( const ProgressBar& p,
     painter.fillRect(progressRect);
 
     painter.setBrush(foreground);
-    painter.fillCircle(Gfx::PointF(progressWidth - barHeight/2, 
+    painter.fillCircle(Gfx::Point(progressWidth - barHeight/2, 
                                    boxY), barHeight);
 }
 
@@ -891,36 +891,36 @@ void PlatinumSliderRenderer::onPrepare( const Slider& s,
 void PlatinumSliderRenderer::onRender( const Slider& s,
                                        const StyleOptions& options,
                                        Painter& painter,
-                                       const Gfx::RectF& rect,
+                                       const Gfx::Rect& rect,
                                        const Gfx::Brush& background,
                                        const Gfx::Brush& foreground,
                                        const Gfx::Pen& contour,
                                        const Gfx::Pen& textPen,
                                        const Gfx::Font& font) const
 {
-    double handleWidth = 7.0;
-    double handleHeight = 17.0;
-    double sliderHeight = 5.0;
+    Pt::ssize_t handleWidth = 7;
+    Pt::ssize_t handleHeight = 17;
+    Pt::ssize_t sliderHeight = 5;
 
-    double sliderX = handleWidth / 2;
-    double sliderY = s.size().height() / 2 - sliderHeight / 2;
-    double sliderWidth = s.size().width() - handleWidth;
+    Pt::ssize_t sliderX = handleWidth / 2;
+    Pt::ssize_t sliderY = s.size().height() / 2 - sliderHeight / 2;
+    Pt::ssize_t sliderWidth = s.size().width() - handleWidth;
 
-    Gfx::RectF boxRect( Gfx::PointF(sliderX, sliderY),
-                        Gfx::SizeF(sliderWidth, sliderHeight) );
+    Gfx::Rect boxRect( Gfx::Point(sliderX, sliderY),
+                        Gfx::Size(sliderWidth, sliderHeight) );
 
     painter.setBrush(background);
     painter.fillRect(boxRect);
 
     int range = s.maximum() - s.minimum();
     int offset = s.position() - s.minimum();
-    double handleOffset = sliderWidth * offset / range;
+    Pt::ssize_t handleOffset = sliderWidth * offset / range;
 
-    double handleX = handleOffset;
-    double handleY = s.size().height() / 2 - handleHeight / 2;
+    Pt::ssize_t handleX = handleOffset;
+    Pt::ssize_t handleY = s.size().height() / 2 - handleHeight / 2;
 
-    Gfx::RectF handleRect( Gfx::PointF(handleX, handleY),
-                           Gfx::SizeF(handleWidth, handleHeight) );
+    Gfx::Rect handleRect( Gfx::Point(handleX, handleY),
+                           Gfx::Size(handleWidth, handleHeight) );
 
     painter.setBrush(foreground);
     painter.fillRect(handleRect);
@@ -950,7 +950,7 @@ void PlatinumListBoxRenderer::onPrepareLayout(Spacing& frameSize)
 void PlatinumListBoxRenderer::onRenderBackground(const ListBox& lb,
                                                  const StyleOptions& options,
                                                  Painter& painter, 
-                                                 const Gfx::RectF& rect,
+                                                 const Gfx::Rect& rect,
                                                  const Gfx::Brush& brush) const 
 {   
     painter.setBrush(brush);
@@ -961,10 +961,10 @@ void PlatinumListBoxRenderer::onRenderBackground(const ListBox& lb,
 void PlatinumListBoxRenderer::onRenderFrame(const ListBox& lb,
                                             const StyleOptions& options,
                                             Painter& painter, 
-                                            const Gfx::RectF& rect,
+                                            const Gfx::Rect& rect,
                                             const Gfx::Pen& pen) const 
 {
-    Gfx::RectF borderRect( lb.size() );
+    Gfx::Rect borderRect( lb.size() );
     
     painter.setPen(pen);
     painter.drawRect(borderRect);
@@ -989,7 +989,7 @@ void PlatinumListBoxRenderer::onPrepareItem(const ListBoxItem& item,
 void PlatinumListBoxRenderer::onRenderItem(const ListBoxItem& item, 
                                            const StyleOptions& options,
                                            Painter& painter, 
-                                           const Gfx::RectF& rect,
+                                           const Gfx::Rect& rect,
                                            Gfx::Brush& brush,
                                            Gfx::Pen& contour) const
 {
@@ -1043,11 +1043,11 @@ void PlatinumComboBoxRenderer::onPrepare(const ComboBox& cb,
 void PlatinumComboBoxRenderer::onRenderBackground(const ComboBox& cb, 
                                                   const StyleOptions& options,
                                                   Painter& painter, 
-                                                  const Gfx::RectF& rect,
+                                                  const Gfx::Rect& rect,
                                                   const Gfx::Pen& contour,
                                                   const Gfx::Brush& background) const
 {
-    Gfx::RectF borderRect( cb.size() );
+    Gfx::Rect borderRect( cb.size() );
 
     painter.setBrush(background);
     painter.fillRect(borderRect);
@@ -1058,22 +1058,22 @@ void PlatinumComboBoxRenderer::onRenderBackground(const ComboBox& cb,
 
 
 void PlatinumComboBoxRenderer::onPrepareLayout(const ComboBox& cb,
-                                               Gfx::SizeF& buttonSize) const
+                                               Gfx::Size& buttonSize) const
 {
     int indicatorWidth = static_cast<int>(cb.size().height()) / 3;
     if(indicatorWidth % 2 == 0)
         ++indicatorWidth;
     
-    double width = indicatorWidth * 2.5;
-    double height = cb.size().height();
-    buttonSize = Gfx::SizeF(width, height);
+    Pt::ssize_t width = (indicatorWidth * 2.5);
+    Pt::ssize_t height = cb.size().height();
+    buttonSize = Gfx::Size(width, height);
 }
 
 
 void PlatinumComboBoxRenderer::onRenderButton(const ComboBox& cb, 
                                               const StyleOptions& options,
                                               Painter& painter, 
-                                              const Gfx::RectF& rect,
+                                              const Gfx::Rect& rect,
                                               const Gfx::Pen& contour,
                                               const Gfx::Brush& foreground) const
 {
@@ -1083,21 +1083,21 @@ void PlatinumComboBoxRenderer::onRenderButton(const ComboBox& cb,
     
     int indicatorHeight = indicatorWidth / 2 + 1;
 
-    double lineX = cb.size().width() - indicatorWidth * 2.5;
+    Pt::ssize_t lineX = cb.size().width() - indicatorWidth * 2.5;
 
     painter.setPen(contour);
-    painter.drawLine( Gfx::PointF(lineX, 
+    painter.drawLine( Gfx::Point(lineX, 
                                   indicatorHeight - 1),
-                      Gfx::PointF(lineX, 
+                      Gfx::Point(lineX, 
                                   cb.size().height() - indicatorHeight) );
 
 
-    double x = cb.size().width() - indicatorWidth * 1.75;
-    double y = (cb.size().height() - indicatorHeight) / 2 + 1;
+    Pt::ssize_t x = cb.size().width() - indicatorWidth * 1.75;
+    Pt::ssize_t y = (cb.size().height() - indicatorHeight) / 2 + 1;
 
-    Gfx::PointF indicator[3] = { Gfx::PointF(x, y),
-                                 Gfx::PointF(x + indicatorWidth, y),
-                                 Gfx::PointF(x + indicatorHeight - 1, y + indicatorHeight) };
+    Gfx::Point indicator[3] = { Gfx::Point(x, y),
+                                 Gfx::Point(x + indicatorWidth, y),
+                                 Gfx::Point(x + indicatorHeight - 1, y + indicatorHeight) };
 
     painter.setBrush(foreground);
     painter.fillPolygon(indicator, 3);
@@ -1107,12 +1107,12 @@ void PlatinumComboBoxRenderer::onRenderButton(const ComboBox& cb,
 void PlatinumComboBoxRenderer::onRenderText(const ComboBox& cb,
                                             const StyleOptions& options,
                                             Painter& painter, 
-                                            const Gfx::RectF& rect,
+                                            const Gfx::Rect& rect,
                                             const String& text,
-                                            const Gfx::PointF& textPos,
+                                            const Gfx::Point& textPos,
                                             const Gfx::Font& font, 
                                             const Gfx::Pen& textPen,
-                                            const Gfx::RectF& cursor) const
+                                            const Gfx::Rect& cursor) const
 {
     //
     // text

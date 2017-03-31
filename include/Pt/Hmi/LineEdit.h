@@ -123,11 +123,11 @@ class PT_HMI_API LineEdit : public Control
         void setRenderer(LineEditRenderer* renderer);
 
     protected:
-        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+        virtual Gfx::Size onMeasure(const SizePolicy& policy);
 
         virtual void onInvalidate();
 
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& rect);
+        virtual void onPaint(PaintSurface& surface, const Gfx::Rect& rect);
 
     protected:
         virtual void onKeyEvent(const KeyEvent& ev);
@@ -152,7 +152,7 @@ class PT_HMI_API LineEdit : public Control
         bool                          _isAccepted;
         bool                          _isTextChanged;
         EchoMode                      _echoMode;
-        double                        _spacing;
+        Pt::ssize_t                   _spacing;
 
         FacetPtr<LineEditRenderer>     _renderer;
         bool                           _hasRenderer;

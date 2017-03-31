@@ -71,27 +71,24 @@ MainWindowImpl::~MainWindowImpl()
 }
 
 
-Gfx::PointF MainWindowImpl::toScreen(const Gfx::PointF& windowPos) const
+Gfx::Point MainWindowImpl::toScreen(const Gfx::Point& windowPos) const
 {
-    POINT p = { static_cast<LONG>(windowPos.x()), 
-                static_cast<LONG>(windowPos.y()) };
+    POINT p = { windowPos.x(), 
+                windowPos.y() };
 
     ClientToScreen(_hwnd, &p);
 
-    return Gfx::PointF( static_cast<double>(p.x), 
-                        static_cast<double>(p.y) );
+    return Gfx::Point( p.x, p.y );
 }
 
 
-Gfx::PointF MainWindowImpl::fromScreen(const Gfx::PointF& screenPos) const
+Gfx::Point MainWindowImpl::fromScreen(const Gfx::Point& screenPos) const
 {
-    POINT p = { static_cast<LONG>(screenPos.x()), 
-                static_cast<LONG>(screenPos.y()) };
+    POINT p = { screenPos.x(), screenPos.y() };
 
     ScreenToClient(_hwnd, &p);
 
-    return Gfx::PointF( static_cast<double>(p.x), 
-                        static_cast<double>(p.y) );
+    return Gfx::Point( p.x, p.y );
 }
 
 
@@ -104,7 +101,7 @@ void MainWindowImpl::close()
 }
 
 
-void MainWindowImpl::paint(const Gfx::RectF& rect)
+void MainWindowImpl::paint(const Gfx::Rect& rect)
 {
     InvalidateRect(_hwnd, NULL, FALSE);
 }
@@ -147,18 +144,15 @@ void MainWindowImpl::setTopMost(bool e)
 }
 
 
-void MainWindowImpl::move(const Gfx::PointF& pos)
+void MainWindowImpl::move(const Gfx::Point& p)
 {
-    Gfx::Point p = _screen.fromUnit(pos);
     SetWindowPos(_hwnd, 0, p.x(), p.y(), 0, 0, 
                  SWP_DRAWFRAME|SWP_NOSIZE|SWP_NOACTIVATE|SWP_NOZORDER);
 }
 
 
-void MainWindowImpl::resize(const Gfx::SizeF& s)
+void MainWindowImpl::resize(const Gfx::Size& size)
 {
-    Gfx::Size size = _screen.fromUnit(s);
-
     RECT clientRect;
     SetRect(&clientRect, 0, 0, size.width() - 1, size.height() - 1);
 
@@ -254,12 +248,12 @@ void MainWindowImpl::setTitle(const std::string& text)
 }
 
 
-void MainWindowImpl::setMinimumSize(const Gfx::SizeF& s)
+void MainWindowImpl::setMinimumSize(const Gfx::Size& s)
 {
 }
 
 
-void MainWindowImpl::setMaximumSize(const Gfx::SizeF& s)
+void MainWindowImpl::setMaximumSize(const Gfx::Size& s)
 {
 }
 

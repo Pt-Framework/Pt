@@ -61,7 +61,7 @@ class PT_HMI_API Menu : public MenuShell
 
         void removeItem(MenuItem& item);
 
-        void show(const Gfx::PointF& pos);
+        void show(const Gfx::Point& pos);
 
         Pt::ssize_t iconWidth() const;
 
@@ -88,12 +88,12 @@ class PT_HMI_API Menu : public MenuShell
 
         virtual void onEnter();
 
-        virtual MenuShell* onFindMenu(const Gfx::PointF& screenPos);
+        virtual MenuShell* onFindMenu(const Gfx::Point& screenPos);
 
     protected:
         virtual void onInvalidate();
 
-        virtual void onPaintBackground(const Gfx::RectF& rect);
+        virtual void onPaintBackground(const Gfx::Rect& rect);
 
     protected:
         virtual void onPaintEvent(const PaintEvent& ev);

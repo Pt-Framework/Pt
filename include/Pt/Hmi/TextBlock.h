@@ -48,21 +48,21 @@ class PT_HMI_API TextLine
 
         ~TextLine();
 
-        const Gfx::PointF& position() const;
+        const Gfx::Point& position() const;
         
-        void setPosition(const Gfx::PointF& p);
+        void setPosition(const Gfx::Point& p);
 
-        void setPosition(double x, double y);
+        void setPosition(Pt::ssize_t x, Pt::ssize_t y);
 
-        double width() const;
+        Pt::ssize_t width() const;
 
-        double height() const;
+        Pt::ssize_t height() const;
 
-        double maxHeight() const;
+        Pt::ssize_t maxHeight() const;
 
-        double ascent() const;
+        Pt::ssize_t ascent() const;
 
-        double descent() const;
+        Pt::ssize_t descent() const;
 
         const Pt::String& text() const;
 
@@ -71,12 +71,12 @@ class PT_HMI_API TextLine
         void setText(const Pt::String& text, const Gfx::Font& font,
                      const Gfx::FontMetrics& tm);
 
-        double cursorToX(std::size_t n) const;
+        Pt::ssize_t cursorToX(std::size_t n) const;
 
-        std::size_t xToCursor(double x) const;
+        std::size_t xToCursor(Pt::ssize_t x) const;
 
     private:
-        Gfx::PointF      _position;
+        Gfx::Point      _position;
         Pt::String       _text;
         Gfx::Font        _font;
         Gfx::FontMetrics _textMetrics;
@@ -93,19 +93,19 @@ class PT_HMI_API TextBlock
 
         ~TextBlock();
 
-        const Gfx::PointF& position() const;
+        const Gfx::Point& position() const;
         
-        void setPosition(const Gfx::PointF& p);
+        void setPosition(const Gfx::Point& p);
 
-        const Gfx::SizeF& size() const;
+        const Gfx::Size& size() const;
 
-        double width() const;
+        Pt::ssize_t width() const;
 
-        double height() const;
+        Pt::ssize_t height() const;
 
-        double maxWidth() const;
+        Pt::ssize_t maxWidth() const;
 
-        void setMaxWidth(double w);
+        void setMaxWidth(Pt::ssize_t w);
 
         void setAdjustment(Adjustment a);
 
@@ -127,9 +127,9 @@ class PT_HMI_API TextBlock
                      const Gfx::FontMetrics& tm);
 
     private:
-        Gfx::PointF           _position;
-        Gfx::SizeF            _size;
-        double                _maxWidth;
+        Gfx::Point           _position;
+        Gfx::Size            _size;
+        Pt::ssize_t                _maxWidth;
         Adjustment            _adjustment;
         std::vector<TextLine> _lines;
 };

@@ -53,7 +53,7 @@ class PT_HMI_API ScrollBar : public Control
 
         ~ScrollBar();
 
-        const Pt::Gfx::RectF& handleRect() const
+        const Pt::Gfx::Rect& handleRect() const
         {
           return _handleRect;
         }
@@ -97,11 +97,11 @@ class PT_HMI_API ScrollBar : public Control
     protected:
         virtual void onInvalidate();
 
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& rect);
+        virtual void onPaint(PaintSurface& surface, const Gfx::Rect& rect);
 
     protected:
 
-        Gfx::SizeF onMeasure(const SizePolicy& s);;
+        Gfx::Size onMeasure(const SizePolicy& s);;
 
         virtual bool onMouseEvent(const MouseEvent& ev);
 
@@ -110,9 +110,9 @@ class PT_HMI_API ScrollBar : public Control
         virtual void onResizeEvent(const ResizeEvent& ev);
 
     private:
-        int pixelToPosition(double pix);
+        int pixelToPosition(Pt::ssize_t pix);
         
-        double positionToPixel(int pos);
+        Pt::ssize_t positionToPixel(int pos);
 
         void updateScroll();
 
@@ -128,7 +128,7 @@ class PT_HMI_API ScrollBar : public Control
         double      _offsetPixel;
         double      _factorPosition;
         double      _offsetPosition;
-        Gfx::RectF  _handleRect;
+        Gfx::Rect  _handleRect;
         Signal<int> _changed;
 
         FacetPtr<ScrollBarRenderer>  _renderer;
