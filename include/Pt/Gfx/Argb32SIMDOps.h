@@ -159,7 +159,8 @@ inline void pixelOps_SourceOver(Pt::uint8_t* toBuffer, Pt::uint32_t srcA, Pt::ui
 
     for(size_t i = 0; i < len8; ++i) {
         // Load 8 pixels
-        dstv8PIX = _mm256_loadu_si256 (dstvARGB                  ); // [ ARGB ARGB ARGB ARGB ARGB ARGB ARGB ARGB ]
+        dstv8PIX = _mm256_lddqu_si256 (dstvARGB                  ); // [ ARGB ARGB ARGB ARGB ARGB ARGB ARGB ARGB ]
+      //dstv8PIX = _mm256_loadu_si256 (dstvARGB                  ); // [ ARGB ARGB ARGB ARGB ARGB ARGB ARGB ARGB ]
         // Process A and G
         dstvAGAG = _mm256_and_si256   (dstv8PIX, avxArithMaskA0G0); // [ A0G0 A0G0 A0G0 A0G0 A0G0 A0G0 A0G0 A0G0 ]
         dstvAGAG = _mm256_srli_epi16  (dstvAGAG, 8               ); // [ 0A0G 0A0G 0A0G 0A0G 0A0G 0A0G 0A0G 0A0G ]
@@ -197,7 +198,11 @@ inline void pixelOps_SourceOver(Pt::uint8_t* toBuffer, Pt::uint32_t srcA, Pt::ui
 
     for(size_t i = 0; i < len4; ++i) {
         // Load 4 pixels
+#if defined(PT_GFX_USE_SSE3)
+        dstv4PIX = _mm_lddqu_si128 (dstvARGB                  ); // [ ARGB ARGB ARGB ARGB ]
+#else
         dstv4PIX = _mm_loadu_si128 (dstvARGB                  ); // [ ARGB ARGB ARGB ARGB ]
+#endif
         // Process A and G
         dstvAGAG = _mm_and_si128   (dstv4PIX, sseArithMaskA0G0); // [ A0G0 A0G0 A0G0 A0G0 ]
         dstvAGAG = _mm_srli_epi16  (dstvAGAG, 8               ); // [ 0A0G 0A0G 0A0G 0A0G ]
@@ -285,7 +290,8 @@ inline void pixelOps_SourceCopy(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBu
           __m256i* dstvARGB = reinterpret_cast<      __m256i*>(toBuffer  );
 
     for(size_t i = 0; i < len8; ++i) {
-        _mm256_storeu_si256(dstvARGB, _mm256_loadu_si256(srcvARGB));
+        _mm256_storeu_si256(dstvARGB, _mm256_lddqu_si256(srcvARGB));
+      //_mm256_storeu_si256(dstvARGB, _mm256_loadu_si256(srcvARGB));
         ++srcvARGB;
         ++dstvARGB;
     }
@@ -304,7 +310,11 @@ inline void pixelOps_SourceCopy(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBu
           __m128i* dstvARGB = reinterpret_cast<      __m128i*>(toBuffer  );
 
     for(size_t i = 0; i < len4; ++i) {
+#if defined(PT_GFX_USE_SSE3)
+        _mm_storeu_si128(dstvARGB, _mm_lddqu_si128(srcvARGB));
+#else
         _mm_storeu_si128(dstvARGB, _mm_loadu_si128(srcvARGB));
+#endif
         ++srcvARGB;
         ++dstvARGB;
     }
@@ -359,8 +369,12 @@ inline void pixelOps_SourceOver(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBu
 
     for(size_t i = 0; i < len8; ++i) {
         // Load 8 pixels
+        srcv8PIX = _mm256_lddqu_si256 (srcvARGB                  ); // [ ARGB ARGB ARGB ARGB ARGB ARGB ARGB ARGB ]
+        dstv8PIX = _mm256_lddqu_si256 (dstvARGB                  ); // [ ARGB ARGB ARGB ARGB ARGB ARGB ARGB ARGB ]
+        /*
         srcv8PIX = _mm256_loadu_si256 (srcvARGB                  ); // [ ARGB ARGB ARGB ARGB ARGB ARGB ARGB ARGB ]
         dstv8PIX = _mm256_loadu_si256 (dstvARGB                  ); // [ ARGB ARGB ARGB ARGB ARGB ARGB ARGB ARGB ]
+        */
         // Get the source alpha
         srcv0A0A = _mm256_and_si256   (srcv8PIX, avxArithMaskA000); // [ A000 A000 A000 A000 A000 A000 A000 A000 ]
         srci0A0A = _mm256_sub_epi32   (avxArithMaskA000, srcv0A0A); // [ I000 I000 I000 I000 I000 I000 I000 I000 ]
@@ -424,8 +438,13 @@ inline void pixelOps_SourceOver(Pt::uint8_t* toBuffer, const Pt::uint8_t* fromBu
 
     for(size_t i = 0; i < len4; ++i) {
         // Load 4 pixels
+#if defined(PT_GFX_USE_SSE3)
+        srcv4PIX = _mm_lddqu_si128 (srcvARGB                  ); // [ ARGB ARGB ARGB ARGB ]
+        dstv4PIX = _mm_lddqu_si128 (dstvARGB                  ); // [ ARGB ARGB ARGB ARGB ]
+#else
         srcv4PIX = _mm_loadu_si128 (srcvARGB                  ); // [ ARGB ARGB ARGB ARGB ]
         dstv4PIX = _mm_loadu_si128 (dstvARGB                  ); // [ ARGB ARGB ARGB ARGB ]
+#endif
         // Get the source alpha
         srcv0A0A = _mm_and_si128   (srcv4PIX, sseArithMaskA000); // [ A000 A000 A000 A000 ]
         srci0A0A = _mm_sub_epi32   (sseArithMaskA000, srcv0A0A); // [ I000 I000 I000 I000 ]
