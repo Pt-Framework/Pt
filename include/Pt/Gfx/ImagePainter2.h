@@ -143,9 +143,6 @@ class PT_GFX_API ImagePainter2 : public Painter
         struct SAGOpState;
 
     private:
-        /*
-        inline void convertPointTrunc(std::vector<Point>& dst, const PointF* src, const size_t pointCount);
-        */
         inline void convertPointRound(std::vector<Point>& dst, const PointF* src, const size_t pointCount);
 
         void drawThickPolyline_impl(const PointF* ps, const size_t pointCount, bool autoClose, const int32_t* segmentIndexMarker);
@@ -171,37 +168,6 @@ class PT_GFX_API ImagePainter2 : public Painter
 // ======================================================================================
 // ===== Inlined Private Member Functions ===============================================
 // ======================================================================================
-
-/*
-void ImagePainter2::convertPointTrunc(std::vector<Point>& dst, const PointF* src, const size_t pointCount)
-{
-    // Check if there is no actual point
-    if(!pointCount) return;
-
-    // Prepare the buffer
-    const size_t ofs = dst.size();
-    dst.resize(ofs + pointCount);
-
-    // Process the coordinates
-    size_t putCnt = 0;
-    for(size_t i = 0; i < pointCount; ++i) {
-        // Truncate the coordinates
-        const Pt::int32_t x = src[i].x();
-        const Pt::int32_t y = src[i].y();
-        // Skip duplicated coordinates
-        if( ofs + putCnt >= 1 && dst[ofs + putCnt - 1].x() == x && dst[ofs + putCnt - 1].y() == y ) continue;
-        // Store the coordinate and increment the "put" counter
-        dst[ofs + putCnt].set(x, y);
-        ++putCnt;
-    }
-
-    // Discard the last point if it has the same coordinate with the first point
-    if(dst[ofs + putCnt - 1] == dst[ofs]) --putCnt;
-
-    // Resize the buffer to discard unused elements
-    dst.resize(ofs + putCnt);
-}
-*/
 
 void ImagePainter2::convertPointRound(std::vector<Point>& dst, const PointF* src, const size_t pointCount)
 {
