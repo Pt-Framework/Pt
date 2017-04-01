@@ -253,7 +253,7 @@ static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, float
     }
 }
 
-static inline void generateEllipsePoints(std::vector<Point>& dst, Pt::int32_t radiusX, Pt::int32_t radiusY, Pt::int32_t centerX, Pt::int32_t centerY, size_t penSize)
+static inline void generateEllipsePoints(std::vector<PointF>& dst, Pt::int32_t radiusX, Pt::int32_t radiusY, Pt::int32_t centerX, Pt::int32_t centerY, size_t penSize)
 {
     // Calculate the ellipse's parameters
     const Pt::int32_t circFac = round(
@@ -268,18 +268,18 @@ static inline void generateEllipsePoints(std::vector<Point>& dst, Pt::int32_t ra
     for(Pt::int32_t i = 0; i < nSegs; ++i) {
         const float angle = Gfx::Math::PiMul2 * i * nSegs1i;
         // Calculate the coordinate
-        const Pt::int32_t x = round( centerX + radiusX * Gfx::Math::fastCos(angle) );
-        const Pt::int32_t y = round( centerY - radiusY * Gfx::Math::fastSin(angle) ); // Sign inversion due to differences between cartesian and computer coordinate systems
+        const float x = centerX + radiusX * Gfx::Math::fastCos(angle);
+        const float y = centerY - radiusY * Gfx::Math::fastSin(angle); // Sign inversion due to differences between cartesian and computer coordinate systems
         // Store the coordinate only if it is different with the previous one
         if( !dst.empty() && dst.back().x() == x && dst.back().y() == y ) continue;
-        dst.push_back( Point(x, y) );
+        dst.push_back( PointF(x, y) );
     }
 
     // Discard the last point if it has the same coordinate with the first one
     if(dst.back() == dst[0]) dst.pop_back();
 }
 
-static inline void generateArcPoints(std::vector<Point>& dst, Pt::int32_t radiusX, Pt::int32_t radiusY, Pt::int32_t centerX, Pt::int32_t centerY, float degBegin, float degEnd, size_t penSize)
+static inline void generateArcPoints(std::vector<PointF>& dst, Pt::int32_t radiusX, Pt::int32_t radiusY, Pt::int32_t centerX, Pt::int32_t centerY, float degBegin, float degEnd, size_t penSize)
 {
     // Calculate the ellipse's parameters
     const float       degDlt  = degEnd - degBegin;
@@ -299,13 +299,13 @@ static inline void generateArcPoints(std::vector<Point>& dst, Pt::int32_t radius
 
     for(Pt::int32_t i = 0; i < nSegs; ++i) {
         // Calculate the coordinate
-        const Pt::int32_t x = round( centerX + radiusX * Gfx::Math::fastCos(angle) );
-        const Pt::int32_t y = round( centerY - radiusY * Gfx::Math::fastSin(angle) ); // Sign inversion due to differences between cartesian and computer coordinate systems
+        const float x = centerX + radiusX * Gfx::Math::fastCos(angle);
+        const float y = centerY - radiusY * Gfx::Math::fastSin(angle); // Sign inversion due to differences between cartesian and computer coordinate systems
         // Update the angle
         angle += fdegInc;
         // Store the coordinate only if it is different with the previous one
         if( !dst.empty() && dst.back().x() == x && dst.back().y() == y ) continue;
-        dst.push_back( Point(x, y) );
+        dst.push_back( PointF(x, y) );
     }
 
     // Discard the last point if it has the same coordinate with the first one
@@ -448,7 +448,7 @@ static inline void generateLineArrow2Cap(std::vector<PointF>& dst, float x, floa
     dst.push_back( PointF(x + dx * 0.5f - nx,        y + dy * 0.5f - ny       ) );
 }
 
-static inline void combineLinePointsAndAddCaps(std::vector<Point>& dst, const std::vector<Point>& inner, const std::vector<Point>& outer, Pen::CapStyle begCap, Pen::CapStyle endCap, size_t penSize)
+static inline void combineLinePointsAndAddCaps(std::vector<PointF>& dst, const std::vector<PointF>& inner, const std::vector<PointF>& outer, Pen::CapStyle begCap, Pen::CapStyle endCap, size_t penSize)
 {
     // Calculate the end lines' parameters
     const Pt::int32_t ox2a = outer[outer.size() - 1].x();
@@ -471,8 +471,8 @@ static inline void combineLinePointsAndAddCaps(std::vector<Point>& dst, const st
     // Generate the end cap
     switch(endCap) {
         case Pen::SquareCap:
-            dst.push_back( Point( round(ix2a - dx2), round(iy2a - dy2) ) );
-            dst.push_back( Point( round(ox2a - dx2), round(oy2a - dy2) ) );
+            dst.push_back( PointF( ix2a - dx2, iy2a - dy2 ) );
+            dst.push_back( PointF( ox2a - dx2, oy2a - dy2 ) );
             break;
 
         case Pen::RoundCap: {
@@ -480,17 +480,17 @@ static inline void combineLinePointsAndAddCaps(std::vector<Point>& dst, const st
             generateQuadraticBezierPoints(tmp, ix2a, iy2a, x2a - dx2 * 2.0f, y2a - dy2 * 2.0f, ox2a, oy2a, ceil(penSize * 0.5f) - 1);
             if(tmp.size() <= 2) break;
             for(size_t i = 1; i < tmp.size() - 1; ++i) {
-                dst.push_back( Point( round(tmp[i].x()), round(tmp[i].y()) ) );
+                dst.push_back( PointF( tmp[i].x(), tmp[i].y() ) );
             }
             break;
         }
 
         case Pen::TriangularOutCap:
-            dst.push_back( Point( round(x2a - dx2), round(y2a - dy2) ) );
+            dst.push_back( PointF( x2a - dx2, y2a - dy2 ) );
             break;
 
         case Pen::TriangularInCap:
-            dst.push_back( Point( round(x2a + dx2), round(y2a + dy2) ) );
+            dst.push_back( PointF( x2a + dx2, y2a + dy2 ) );
             break;
 
         case Pen::RoundHoleCap: {
@@ -506,23 +506,23 @@ static inline void combineLinePointsAndAddCaps(std::vector<Point>& dst, const st
             generateQuadraticBezierPoints(tmp, ix2a - dx2, iy2a - dy2, x2a + dx2, y2a + dy2, ox2a - dx2, oy2a - dy2, penSize);
             if(tmp.size() <= 2) break;
             for(size_t i = 1; i < tmp.size() - 1; ++i) {
-                dst.push_back( Point( round(tmp[i].x()), round(tmp[i].y()) ) );
+                dst.push_back( PointF( tmp[i].x(), tmp[i].y() ) );
             }
             break;
         }
 
         case Pen::Arrow1Cap:
-            dst.push_back( Point( round(x2a - nx2 * 2.0f), round(y2a - ny2 * 2.0f) ) );
-            dst.push_back( Point( round(x2a - dx2       ), round(y2a - dy2       ) ) );
-            dst.push_back( Point( round(x2a + nx2 * 2.0f), round(y2a + ny2 * 2.0f) ) );
+            dst.push_back( PointF( x2a - nx2 * 2.0f, y2a - ny2 * 2.0f ) );
+            dst.push_back( PointF( x2a - dx2       , y2a - dy2        ) );
+            dst.push_back( PointF( x2a + nx2 * 2.0f, y2a + ny2 * 2.0f ) );
             break;
 
         case Pen::Arrow2Cap:
-            dst.push_back( Point( round(x2a - dx2 * 0.5f - nx2       ), round(y2a - dy2 * 0.5f - ny2       ) ) );
-            dst.push_back( Point( round(x2a              - nx2 * 2.0f), round(y2a              - ny2 * 2.0f) ) );
-            dst.push_back( Point( round(x2a - dx2 * 2.0f             ), round(y2a - dy2 * 2.0f             ) ) );
-            dst.push_back( Point( round(x2a              + nx2 * 2.0f), round(y2a              + ny2 * 2.0f) ) );
-            dst.push_back( Point( round(x2a - dx2 * 0.5f + nx2       ), round(y2a - dy2 * 0.5f + ny2       ) ) );
+            dst.push_back( PointF( x2a - dx2 * 0.5f - nx2       , y2a - dy2 * 0.5f - ny2        ) );
+            dst.push_back( PointF( x2a              - nx2 * 2.0f, y2a              - ny2 * 2.0f ) );
+            dst.push_back( PointF( x2a - dx2 * 2.0f             , y2a - dy2 * 2.0f              ) );
+            dst.push_back( PointF( x2a              + nx2 * 2.0f, y2a              + ny2 * 2.0f ) );
+            dst.push_back( PointF( x2a - dx2 * 0.5f + nx2       , y2a - dy2 * 0.5f + ny2        ) );
             break;
 
         default:
@@ -553,8 +553,8 @@ static inline void combineLinePointsAndAddCaps(std::vector<Point>& dst, const st
     // Generate the begin cap
     switch(begCap) {
         case Pen::SquareCap:
-            dst.push_back( Point( round(ox1a + dx1), round(oy1a + dy1) ) );
-            dst.push_back( Point( round(ix1a + dx1), round(iy1a + dy1) ) );
+            dst.push_back( PointF( ox1a + dx1, oy1a + dy1 ) );
+            dst.push_back( PointF( ix1a + dx1, iy1a + dy1 ) );
             break;
 
         case Pen::RoundCap: {
@@ -562,17 +562,17 @@ static inline void combineLinePointsAndAddCaps(std::vector<Point>& dst, const st
             generateQuadraticBezierPoints(tmp, ox1a, oy1a, x1a + dx1 * 2.0f, y1a + dy1 * 2.0f, ix1a, iy1a, ceil(penSize * 0.5f) - 1);
             if(tmp.size() <= 2) break;
             for(size_t i = 1; i < tmp.size() - 1; ++i) {
-                dst.push_back( Point( round(tmp[i].x()), round(tmp[i].y()) ) );
+                dst.push_back( PointF( tmp[i].x(), tmp[i].y() ) );
             }
             break;
         }
 
         case Pen::TriangularOutCap:
-            dst.push_back( Point( round(x1a + dx1), round(y1a + dy1) ) );
+            dst.push_back( PointF( x1a + dx1, y1a + dy1 ) );
             break;
 
         case Pen::TriangularInCap:
-            dst.push_back( Point( round(x1a - dx1), round(y1a - dy1) ) );
+            dst.push_back( PointF( x1a - dx1, y1a - dy1 ) );
             break;
 
         case Pen::RoundHoleCap: {
@@ -588,23 +588,23 @@ static inline void combineLinePointsAndAddCaps(std::vector<Point>& dst, const st
             generateQuadraticBezierPoints(tmp, ox1a + dx1, oy1a + dy1, x1a - dx1, y1a - dy1, ix1a + dx1, iy1a + dy1, penSize);
             if(tmp.size() <= 2) break;
             for(size_t i = 1; i < tmp.size() - 1; ++i) {
-                dst.push_back( Point( round(tmp[i].x()), round(tmp[i].y()) ) );
+                dst.push_back( PointF( tmp[i].x(), tmp[i].y() ) );
             }
             break;
         }
 
         case Pen::Arrow1Cap:
-            dst.push_back( Point( round(x1a + nx1 * 2.0f), round(y1a + ny1 * 2.0f) ) );
-            dst.push_back( Point( round(x1a + dx1       ), round(y1a + dy1       ) ) );
-            dst.push_back( Point( round(x1a - nx1 * 2.0f), round(y1a - ny1 * 2.0f) ) );
+            dst.push_back( PointF( x1a + nx1 * 2.0f, y1a + ny1 * 2.0f ) );
+            dst.push_back( PointF( x1a + dx1       , y1a + dy1        ) );
+            dst.push_back( PointF( x1a - nx1 * 2.0f, y1a - ny1 * 2.0f ) );
             break;
 
         case Pen::Arrow2Cap:
-            dst.push_back( Point( round(x1a + dx1 * 0.5f + nx1       ), round(y1a + dy1 * 0.5f + ny1       ) ) );
-            dst.push_back( Point( round(x1a              + nx1 * 2.0f), round(y1a              + ny1 * 2.0f) ) );
-            dst.push_back( Point( round(x1a + dx1 * 2.0f             ), round(y1a + dy1 * 2.0f             ) ) );
-            dst.push_back( Point( round(x1a              - nx1 * 2.0f), round(y1a              - ny1 * 2.0f) ) );
-            dst.push_back( Point( round(x1a + dx1 * 0.5f - nx1       ), round(y1a + dy1 * 0.5f - ny1       ) ) );
+            dst.push_back( PointF( x1a + dx1 * 0.5f + nx1       , y1a + dy1 * 0.5f + ny1        ) );
+            dst.push_back( PointF( x1a              + nx1 * 2.0f, y1a              + ny1 * 2.0f ) );
+            dst.push_back( PointF( x1a + dx1 * 2.0f             , y1a + dy1 * 2.0f              ) );
+            dst.push_back( PointF( x1a              - nx1 * 2.0f, y1a              - ny1 * 2.0f ) );
+            dst.push_back( PointF( x1a + dx1 * 0.5f - nx1       , y1a + dy1 * 0.5f - ny1        ) );
             break;
 
         default:
@@ -978,11 +978,17 @@ void ImagePainter2::drawEllipse( const Point& topLeft, const Size& size )
         const Pt::int32_t radiusYo = ( size.height() + penSize ) / 2;
         const Pt::int32_t radiusXi = ( size.width () - penSize ) / 2;
         const Pt::int32_t radiusYi = ( size.height() - penSize ) / 2;
+
         // Generate a polygon that approximates the ellipse
+        std::vector<PointF> pointsF;
+        generateEllipsePoints(pointsF, radiusXo, radiusYo, centerX, centerY, 0);
+        pointsF.push_back(POLYGON_SEPARATOR_POINT_F);
+        generateEllipsePoints(pointsF, radiusXi, radiusYi, centerX, centerY, 0);
+
+        // Round the points and remove duplicates
         std::vector<Point> points;
-        generateEllipsePoints(points, radiusXo, radiusYo, centerX, centerY, 0);
-        points.push_back(Painter::PolygonSeparatorPoint);
-        generateEllipsePoints(points, radiusXi, radiusYi, centerX, centerY, 0);
+        deduplicateRoundedPointsF(points, pointsF.data(), pointsF.size());
+
         // Rasterize the polygon
         _rasterizer->setPen(newPen);
         _rasterizer->strokePolygon(points.data(), points.size());
@@ -992,11 +998,13 @@ void ImagePainter2::drawEllipse( const Point& topLeft, const Size& size )
     // Patterned
     else {
         // Generate a polygon that approximates the ellipse
-        std::vector<Point> points;
-        generateEllipsePoints(points, radiusX, radiusY, centerX, centerY, newPen.size());
-        // Convert the points type
         std::vector<PointF> pointsF;
-        convertPointsToPointsF(pointsF, points.data(), points.size());
+        generateEllipsePoints(pointsF, radiusX, radiusY, centerX, centerY, newPen.size());
+
+        // Convert the points type
+        //std::vector<PointF> pointsF;
+        //convertPointsToPointsF(pointsF, points.data(), points.size());
+
         // Rasterize the polygon
         _rasterizer->setPen(newPen);
         drawThickPolyline_impl(pointsF.data(), pointsF.size(), false, 0);
@@ -1073,14 +1081,14 @@ void ImagePainter2::drawArc( const Point& topLeft, const Size& size, float degBe
         const Pt::int32_t centerXadd = round(centerX + shiftXps);
         const Pt::int32_t centerYadd = round(centerY + shiftYps);
         // The arc's points
-        std::vector<Point> points;
+        std::vector<PointF> pointsF;
         // Generate a polygon that approximates the arc
         if(arcMode == ArcMode::Chord) {
             // The arc's "outside" lines
-            generateArcPoints(points, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd, 0);
+            generateArcPoints(pointsF, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd, 0);
             // The arc's "inside" lines
-            points.push_back(Painter::PolygonSeparatorPoint);
-            generateArcPoints(points, radiusXi, radiusYi, centerX + shiftX, centerY + shiftY, degBegin, degEnd, 0);
+            pointsF.push_back(POLYGON_SEPARATOR_POINT_F);
+            generateArcPoints(pointsF, radiusXi, radiusYi, centerX + shiftX, centerY + shiftY, degBegin, degEnd, 0);
         }
         else if(arcMode == ArcMode::Pie) {
             // Calculate the adjusted angle
@@ -1089,16 +1097,16 @@ void ImagePainter2::drawArc( const Point& topLeft, const Size& size, float degBe
             const float idegBegin = (degBegin < 0) ? (degBegin + aafd) : (degBegin - aafd);
             const float idegEnd   = (degEnd   < 0) ? (degEnd   + aafd) : (degEnd   - aafd);
             // The arc's "outside" lines
-            generateArcPoints(points, radiusXo, radiusYo, centerX, centerY, odegBegin, odegEnd, 0);
-            points.push_back(Point(centerXsub, centerYsub));
+            generateArcPoints(pointsF, radiusXo, radiusYo, centerX, centerY, odegBegin, odegEnd, 0);
+            pointsF.push_back(PointF(centerXsub, centerYsub));
             // The arc's "inside" lines
-            points.push_back(Painter::PolygonSeparatorPoint);
-            generateArcPoints(points, radiusXi, radiusYi, centerX, centerY, idegBegin, idegEnd, 0);
-            points.push_back(Point(centerXadd, centerYadd));
+            pointsF.push_back(POLYGON_SEPARATOR_POINT_F);
+            generateArcPoints(pointsF, radiusXi, radiusYi, centerX, centerY, idegBegin, idegEnd, 0);
+            pointsF.push_back(PointF(centerXadd, centerYadd));
         }
         else { // ArcMode::Open
             // The arc's "inside" and "outside" lines
-            std::vector<Point> inner, outer;
+            std::vector<PointF> inner, outer;
             if(newPen.capStyle() == Pen::Arrow2Cap) {
                 // Calculate the adjusted angle
                 const float adegBegin = (degBegin < 0) ? (degBegin - aafd) : (degBegin + aafd);
@@ -1112,8 +1120,13 @@ void ImagePainter2::drawArc( const Point& topLeft, const Size& size, float degBe
                 generateArcPoints(outer, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd, 0);
             }
             // Combine the arc's lines and add caps
-            combineLinePointsAndAddCaps(points, inner, outer, newPen.capStyle(), newPen.capStyle(), penSize);
+            combineLinePointsAndAddCaps(pointsF, inner, outer, newPen.capStyle(), newPen.capStyle(), penSize);
         }
+
+        // Round the points and remove duplicates
+        std::vector<Point> points;
+        deduplicateRoundedPointsF(points, pointsF.data(), pointsF.size());
+
         // Rasterize the polygon
         _rasterizer->setPen(newPen);
         _rasterizer->strokePolygon(points.data(), points.size());
@@ -1123,15 +1136,15 @@ void ImagePainter2::drawArc( const Point& topLeft, const Size& size, float degBe
     // Patterned
     else {
         // Generate a polygon that approximates the arc
-        std::vector<Point> points;
+        std::vector<PointF> pointsF;
         if(arcMode == ArcMode::Chord) {
-            generateArcPoints(points, radiusX, radiusY, centerX, centerY, degBegin, degEnd, newPen.size());
-            points.push_back( points[0] );
+            generateArcPoints(pointsF, radiusX, radiusY, centerX, centerY, degBegin, degEnd, newPen.size());
+            pointsF.push_back( pointsF[0] );
         }
         else if(arcMode == ArcMode::Pie) {
-            points.push_back( Point(centerX, centerY) );
-            generateArcPoints(points, radiusX, radiusY, centerX, centerY, degBegin, degEnd, newPen.size());
-            points.push_back( Point(centerX, centerY) );
+            pointsF.push_back( PointF(centerX, centerY) );
+            generateArcPoints(pointsF, radiusX, radiusY, centerX, centerY, degBegin, degEnd, newPen.size());
+            pointsF.push_back( PointF(centerX, centerY) );
         }
         else { // ArcMode::Open
             if(newPen.capStyle() == Pen::Arrow2Cap) {
@@ -1139,15 +1152,15 @@ void ImagePainter2::drawArc( const Point& topLeft, const Size& size, float degBe
                 const float adegBegin = (degBegin < 0) ? (degBegin - aafd) : (degBegin + aafd);
                 const float adegEnd   = (degEnd   < 0) ? (degEnd   + aafd) : (degEnd   - aafd);
                 // Generate the points
-                generateArcPoints(points, radiusX, radiusY, centerX, centerY, adegBegin, adegEnd, newPen.size());
+                generateArcPoints(pointsF, radiusX, radiusY, centerX, centerY, adegBegin, adegEnd, newPen.size());
             }
             else {
-                generateArcPoints(points, radiusX, radiusY, centerX, centerY, degBegin, degEnd, newPen.size());
+                generateArcPoints(pointsF, radiusX, radiusY, centerX, centerY, degBegin, degEnd, newPen.size());
             }
         }
         // Convert the points type
-        std::vector<PointF> pointsF;
-        convertPointsToPointsF(pointsF, points.data(), points.size());
+        //std::vector<PointF> pointsF;
+        //convertPointsToPointsF(pointsF, points.data(), points.size());
         // Rasterize the polygon
         _rasterizer->setPen(newPen);
         drawThickPolyline_impl(pointsF.data(), pointsF.size(), false, 0);
