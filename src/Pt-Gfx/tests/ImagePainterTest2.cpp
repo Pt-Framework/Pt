@@ -206,12 +206,12 @@ int main(int argc, char* args[])
     Painter* painter2 = dynamic_cast<Painter*>(&painter2obj);
 
     // Create the brushes used for drawing
-    const Brush brushSolid1   (Color::fromRgb8(  0, 255, 0, 175));
-    const Brush brushGradient1(Color::fromRgb8(  0, 255, 0, 175), Color::fromRgb8(0, 0, 0, 175), Brush::Vertical);
+    const Brush brushSolid1   (Color::fromRgb8(0, 255, 0, 175));
+    const Brush brushGradient1(Color::fromRgb8(0, 255, 0, 175), Color::fromRgb8(0, 0, 0, 175), Brush::Vertical);
     const Brush brushTexture1 (textureWithTransBackground);
 
-    const Brush brushSolid2   (Color::fromRgb8(  0, 255, 255, 175));
-    const Brush brushGradient2(Color::fromRgb8(  0, 255, 255, 175), Color::fromRgb8(0, 0, 0, 175), Brush::Horizontal);
+    const Brush brushSolid2   (Color::fromRgb8(0, 255, 255, 175));
+    const Brush brushGradient2(Color::fromRgb8(0, 255, 255, 175), Color::fromRgb8(0, 0, 0, 175), Brush::Horizontal);
     const Brush brushTexture2 (textureWithWhiteBackground);
 
     // Solid lines
