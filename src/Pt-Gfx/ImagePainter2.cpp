@@ -724,9 +724,9 @@ void ImagePainter2::drawLine( const Point& from, const Point& to )
         generatePatternedSingleLineSegment(pointsF, from.x(), from.y(), to.x(), to.y(), piCtrInOut);
     }
 
-    // Convert and round the points
+    // Round the points and remove duplicates
     std::vector<Point> points;
-    convertPointRound(points, pointsF.data(), pointsF.size());
+    roundAndDeduplicatePoints(points, pointsF.data(), pointsF.size());
 
     // Rasterize the polygon
     _rasterizer->strokePolygonSeparate(points.data(), points.size());
@@ -827,9 +827,9 @@ void ImagePainter2::fillRoundRect( const Rect& rect, float radius )
     std::vector<PointF> pointsF;
     generateRoundRectPoints(pointsF, x1, y1, x2, y2, radius, ceil(_rasterizer->pen().size() * 0.5f));
 
-    // Convert the points
+    // Round the points and remove duplicates
     std::vector<Point> points;
-    convertPointRound(points, pointsF.data(), pointsF.size());
+    roundAndDeduplicatePoints(points, pointsF.data(), pointsF.size());
 
     // Draw the polygon
     _rasterizer->fillPolygon(points.data(), points.size());
@@ -841,22 +841,17 @@ void ImagePainter2::drawPolyline( const Point* ps, const size_t pointCount, bool
     if(_rasterizer->pen().size() == 1) {
         // Copy the points while removing duplicates
         std::vector<Point> points;
-        deduplicatePoint(points, ps, pointCount);
+        deduplicatePoints(points, ps, pointCount);
         if(autoClose) points.push_back( Point( ps[0].x(), ps[0].y() ) );
         // Rasterize the polygon
         _rasterizer->strokeOnePixelPolygonOutline(points.data(), points.size());
         return;
     }
 
-
-    // Copy the points while removing duplicates
-    std::vector<Point> points;
-    deduplicatePoint(points, ps, pointCount);
-
     // Convert the points
-    std::vector<PointF> pointsF(points.size());
-    for(size_t i = 0; i < points.size(); ++i) {
-        pointsF[i].set( points[i].x(), points[i].y() );
+    std::vector<PointF> pointsF(pointCount);
+    for(size_t i = 0; i < pointCount; ++i) {
+        pointsF[i].set( ps[i].x(), ps[i].y() );
     }
 
     // Rasterize thick polyline
@@ -876,7 +871,7 @@ void ImagePainter2::drawQuadraticPolybezier(const Point* ps, const size_t pointC
     if(_rasterizer->pen().size() == 1) {
         // Copy the points while removing duplicates
         std::vector<Point> points;
-        deduplicatePoint(points, ps, pointCount);
+        deduplicatePoints(points, ps, pointCount);
         if(autoClose) points.push_back( Point( ps[0].x(), ps[0].y() ) );
         // Rasterize the bezier
         _rasterizer->strokeOnePixelQuadraticPolybezierOutline(points.data(), points.size());
@@ -1157,6 +1152,7 @@ void ImagePainter2::fillArc( const Point& topLeft, const Size& size, float degBe
 
 void ImagePainter2::drawPath(const Path& path2d, const AffineTransform& atrans, bool autoClose, float smoothness)
 {
+    // Convert the path to points and perform transformation
     std::vector<PointF> pointsF;
 
     path2d.generatePoints(pointsF, smoothness);
@@ -1166,14 +1162,22 @@ void ImagePainter2::drawPath(const Path& path2d, const AffineTransform& atrans, 
     //    printf("TrnPts: %5.1f, %5.1f\n", pointsF[i].x(), pointsF[i].y());
     //printf("\n");
 
-    std::vector<Point> points;
-    convertPointRound(points, pointsF.data(), pointsF.size());
-
-    drawPolyline(points.data(), points.size(), autoClose);
+    // Draw the points as polyline
+    if(_rasterizer->pen().size() == 1) {
+        // Round the points and remove duplicates
+        std::vector<Point> points;
+        roundAndDeduplicatePoints(points, pointsF.data(), pointsF.size());
+        // Draw the path
+        drawPolyline(points.data(), points.size(), autoClose);
+    }
+    else {
+        drawThickPolyline_impl(pointsF.data(), pointsF.size(), autoClose, 0);
+    }
 }
 
 void ImagePainter2::fillPath(const Path& path2d, const AffineTransform& atrans, float smoothness)
 {
+    // Convert the path to points and perform transformation
     std::vector<PointF> pointsF;
 
     path2d.generatePoints(pointsF, smoothness);
@@ -1183,9 +1187,11 @@ void ImagePainter2::fillPath(const Path& path2d, const AffineTransform& atrans, 
     //    printf("TrnPts: %5.1f, %5.1f\n", pointsF[i].x(), pointsF[i].y());
     //printf("\n");
 
+    // Round the points and remove duplicates
     std::vector<Point> points;
-    convertPointRound(points, pointsF.data(), pointsF.size());
+    roundAndDeduplicatePoints(points, pointsF.data(), pointsF.size());
 
+    // Draw the points as polygon
     _rasterizer->fillPolygon(points.data(), points.size());
 }
 
@@ -1246,9 +1252,9 @@ void ImagePainter2::drawThickPolyline_impl(const PointF* ps, const size_t pointC
                     thickenPatternedPolygon(pointsF, basePtr, curPCnt);
                 }
             }
-            // Convert the points
+            // Round the points and remove duplicates
             std::vector<Point> points;
-            convertPointRound(points, pointsF.data(), pointsF.size());
+            roundAndDeduplicatePoints(points, pointsF.data(), pointsF.size());
             // Rasterize the polygon
             if(solidPen && closedPolygon) _rasterizer->strokePolygon        (points.data(), points.size());
             else                          _rasterizer->strokePolygonSeparate(points.data(), points.size());

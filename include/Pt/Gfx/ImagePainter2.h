@@ -143,8 +143,8 @@ class PT_GFX_API ImagePainter2 : public Painter
         struct SAGOpState;
 
     private:
-        inline void deduplicatePoint(std::vector<Point>& dst, const Point* src, const size_t pointCount);
-        inline void convertPointRound(std::vector<Point>& dst, const PointF* src, const size_t pointCount);
+        inline void deduplicatePoints(std::vector<Point>& dst, const Point* src, const size_t pointCount);
+        inline void roundAndDeduplicatePoints(std::vector<Point>& dst, const PointF* src, const size_t pointCount);
 
         void drawThickPolyline_impl(const PointF* ps, const size_t pointCount, bool autoClose, const int32_t* segmentIndexMarker);
 
@@ -170,7 +170,7 @@ class PT_GFX_API ImagePainter2 : public Painter
 // ===== Inlined Private Member Functions ===============================================
 // ======================================================================================
 
-void ImagePainter2::deduplicatePoint(std::vector<Point>& dst, const Point* src, const size_t pointCount)
+void ImagePainter2::deduplicatePoints(std::vector<Point>& dst, const Point* src, const size_t pointCount)
 {
     // Check if there is no actual point
     if(!pointCount) return;
@@ -199,7 +199,7 @@ void ImagePainter2::deduplicatePoint(std::vector<Point>& dst, const Point* src, 
     dst.resize(ofs + putCnt);
 }
 
-void ImagePainter2::convertPointRound(std::vector<Point>& dst, const PointF* src, const size_t pointCount)
+void ImagePainter2::roundAndDeduplicatePoints(std::vector<Point>& dst, const PointF* src, const size_t pointCount)
 {
     // Check if there is no actual point
     if(!pointCount) return;
