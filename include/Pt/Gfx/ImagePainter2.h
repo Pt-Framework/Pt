@@ -63,9 +63,9 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual const CompositionMode& compositionMode() const;
 
-        virtual void setClip( const RectF& clip );
+        virtual void setClip( const Rect& clip );
 
-        virtual const Gfx::RectF& clip() const;
+        virtual const Gfx::Rect& clip() const;
 
         virtual void setPen(const Pen& pen);
 
@@ -81,46 +81,46 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual FontMetrics fontMetrics(const Pt::String& text) const;
 
-        virtual void drawImage(const PointF& to, const Image& image);
+        virtual void drawImage(const Point& to, const Image& image);
 
-        virtual void drawImage(const PointF& to, const Image& image, const RectF& imageRect);
+        virtual void drawImage(const Point& to, const Image& image, const Rect& imageRect);
 
-        virtual void drawText(const PointF& to, const Pt::String& text);
+        virtual void drawText(const Point& to, const Pt::String& text);
 
-        virtual void drawLine(const PointF& from, const PointF& to);
+        virtual void drawLine(const Point& from, const Point& to);
 
-        virtual void drawRect(const RectF& rect);
+        virtual void drawRect(const Rect& rect);
 
-        virtual void drawRoundRect(const RectF& rect, float radius);
+        virtual void drawRoundRect(const Rect& rect, float radius);
 
         // NOTE: The points must move in counter-clockwise (CCW) direction or something wrong will be drawn!
-        virtual void drawPolyline(const PointF* points, const size_t pointCount, bool autoClose);
+        virtual void drawPolyline(const Point* points, const size_t pointCount, bool autoClose);
 
         // NOTE: The points must move in counter-clockwise (CCW) direction or something wrong will be drawn!
         //       When autoClose == false : the number of points must be >= 3 and odd
         //       When autoClose == true  : the number of points must be >= 4 and even
-        virtual void drawQuadraticPolybezier(const PointF* points, const size_t pointCount, bool autoClose);
+        virtual void drawQuadraticPolybezier(const Point* points, const size_t pointCount, bool autoClose);
 
-        virtual void drawEllipse(const PointF& topLeft, const SizeF& size);
+        virtual void drawEllipse(const Point& topLeft, const Size& size);
 
         // NOTE: The begin and end angle must move in counter-clockwise (CCW) direction or something wrong will be drawn!
-        virtual void drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode);
+        virtual void drawArc(const Point& topLeft, const Size& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
         // NOTE: * If you enlarge (scale-up) the shape, you may need to increase the "smoothness" factor as needed
         //       * If the "smoothness" factor is too large, the anti-aliasing will become less effective
         virtual void drawPath(const Path& path2d, const AffineTransform& atrans, bool autoClose, float smoothness = 1.0f);
 
-        virtual void fillRect(const RectF& rect);
+        virtual void fillRect(const Rect& rect);
 
-        virtual void fillRoundRect(const RectF& rect, float radius);
+        virtual void fillRoundRect(const Rect& rect, float radius);
 
         // NOTE: The points must move in counter-clockwise (CCW) direction or something wrong will be drawn!
-        virtual void fillPolygon(const PointF* points, const size_t pointCount);
+        virtual void fillPolygon(const Point* points, const size_t pointCount);
 
-        virtual void fillEllipse(const PointF& topLeft, const SizeF& size);
+        virtual void fillEllipse(const Point& topLeft, const Size& size);
 
         // NOTE: The begin and end angle must move in counter-clockwise (CCW) direction or something wrong will be drawn!
-        virtual void fillArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode);
+        virtual void fillArc(const Point& topLeft, const Size& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
         // NOTE: * If you enlarge (scale-up) the shape, you may need to increase the "smoothness" factor as needed
         //       * If the "smoothness" factor is too large, the anti-aliasing will become less effective
@@ -128,7 +128,7 @@ class PT_GFX_API ImagePainter2 : public Painter
 
     public:
         // Just to make the API match the interface defined by the Pt::GfxPainter class
-        virtual void drawPolyline(const PointF* points, const size_t pointCount)
+        virtual void drawPolyline(const Point* points, const size_t pointCount)
         { drawPolyline(points, pointCount, false); }
 
     public:
@@ -143,6 +143,7 @@ class PT_GFX_API ImagePainter2 : public Painter
         struct SAGOpState;
 
     private:
+        inline void deduplicatePoint(std::vector<Point>& dst, const Point* src, const size_t pointCount);
         inline void convertPointRound(std::vector<Point>& dst, const PointF* src, const size_t pointCount);
 
         void drawThickPolyline_impl(const PointF* ps, const size_t pointCount, bool autoClose, const int32_t* segmentIndexMarker);
@@ -160,7 +161,7 @@ class PT_GFX_API ImagePainter2 : public Painter
         void sagGeneratePolyLineSegment(SAGOpState& state);
 
     private:
-        RectF        _clip;
+        Rect         _clip;
         Rasterizer2* _rasterizer;
 };
 
@@ -168,6 +169,35 @@ class PT_GFX_API ImagePainter2 : public Painter
 // ======================================================================================
 // ===== Inlined Private Member Functions ===============================================
 // ======================================================================================
+
+void ImagePainter2::deduplicatePoint(std::vector<Point>& dst, const Point* src, const size_t pointCount)
+{
+    // Check if there is no actual point
+    if(!pointCount) return;
+
+    // Prepare the buffer
+    const size_t ofs = dst.size();
+    dst.resize(ofs + pointCount);
+
+    // Process the coordinates
+    size_t putCnt = 0;
+    for(size_t i = 0; i < pointCount; ++i) {
+        // Round the coordinates
+        const Pt::int32_t x = src[i].x();
+        const Pt::int32_t y = src[i].y();
+        // Skip duplicated coordinates
+        if( ofs + putCnt >= 1 && dst[ofs + putCnt - 1].x() == x && dst[ofs + putCnt - 1].y() == y ) continue;
+        // Store the coordinate and increment the "put" counter
+        dst[ofs + putCnt].set(x, y);
+        ++putCnt;
+    }
+
+    // Discard the last point if it has the same coordinate with the first point
+    if(dst[ofs] == dst[ofs + putCnt - 1]) --putCnt;
+
+    // Resize the buffer to discard unused elements
+    dst.resize(ofs + putCnt);
+}
 
 void ImagePainter2::convertPointRound(std::vector<Point>& dst, const PointF* src, const size_t pointCount)
 {

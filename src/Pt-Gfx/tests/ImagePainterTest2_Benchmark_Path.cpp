@@ -1,3 +1,15 @@
+static inline void convertPointsFToPoints(std::vector<Point>& points, const std::vector<PointF>& pointsF)
+{
+   points.resize(pointsF.size());
+
+    for(size_t i = 0; i < pointsF.size(); ++i) {
+        points[i].set(
+            round(pointsF[i].x()),
+            round(pointsF[i].y())
+        );
+    }
+}
+
 template <bool WITH_RASTERISATION>
 static void benchDrawPath_drawRow(
     ImagePainter2* ip2, AffineTransform& atrans, const Path& path, Pt::int32_t& row, Pt::int32_t& col,
@@ -6,6 +18,7 @@ static void benchDrawPath_drawRow(
 )
 {
     std::vector<PointF> pointsF;
+    std::vector<Point > points;
 
     atrans.rotate(15);
     atrans.push();
@@ -13,10 +26,11 @@ static void benchDrawPath_drawRow(
     pointsF.clear();
     path.generatePoints(pointsF, 1);
     atrans.transformPoints(pointsF.data(), pointsF.size());
+    convertPointsFToPoints(points, pointsF);
     if(WITH_RASTERISATION) {
         ip2->setAntiAliasingMode(antiAliasingMode);
         ip2->setPen(penThinSolid);
-        ip2->drawPolyline(pointsF.data(), pointsF.size(), false);
+        ip2->drawPolyline(points.data(), points.size(), false);
     }
     atrans.pop();
     ++col;
@@ -27,10 +41,11 @@ static void benchDrawPath_drawRow(
     pointsF.clear();
     path.generatePoints(pointsF, 1);
     atrans.transformPoints(pointsF.data(), pointsF.size());
+    convertPointsFToPoints(points, pointsF);
     if(WITH_RASTERISATION) {
         ip2->setAntiAliasingMode(antiAliasingMode);
         ip2->setPen(penThinDot);
-        ip2->drawPolyline(pointsF.data(), pointsF.size(), false);
+        ip2->drawPolyline(points.data(), points.size(), false);
     }
     atrans.pop();
     ++col;
@@ -41,10 +56,11 @@ static void benchDrawPath_drawRow(
     pointsF.clear();
     path.generatePoints(pointsF, 1);
     atrans.transformPoints(pointsF.data(), pointsF.size());
+    convertPointsFToPoints(points, pointsF);
     if(WITH_RASTERISATION) {
         ip2->setAntiAliasingMode(antiAliasingMode);
         ip2->setPen(penThickSolid);
-        ip2->drawPolyline(pointsF.data(), pointsF.size(), false);
+        ip2->drawPolyline(points.data(), points.size(), false);
     }
     atrans.pop();
     ++col;
@@ -55,10 +71,11 @@ static void benchDrawPath_drawRow(
     pointsF.clear();
     path.generatePoints(pointsF, 1);
     atrans.transformPoints(pointsF.data(), pointsF.size());
+    convertPointsFToPoints(points, pointsF);
     if(WITH_RASTERISATION) {
         ip2->setAntiAliasingMode(antiAliasingMode);
         ip2->setPen(penThickDot);
-        ip2->drawPolyline(pointsF.data(), pointsF.size(), false);
+        ip2->drawPolyline(points.data(), points.size(), false);
     }
     atrans.pop();
     ++col;
@@ -69,10 +86,11 @@ static void benchDrawPath_drawRow(
     pointsF.clear();
     path.generatePoints(pointsF, 1);
     atrans.transformPoints(pointsF.data(), pointsF.size());
+    convertPointsFToPoints(points, pointsF);
     if(WITH_RASTERISATION) {
         ip2->setAntiAliasingMode(antiAliasingMode);
         ip2->setBrush(brush1);
-        ip2->fillPolygon(pointsF.data(), pointsF.size());
+        ip2->fillPolygon(points.data(), points.size());
     }
     atrans.pop();
     ++col;
@@ -83,10 +101,11 @@ static void benchDrawPath_drawRow(
     pointsF.clear();
     path.generatePoints(pointsF, 1);
     atrans.transformPoints(pointsF.data(), pointsF.size());
+    convertPointsFToPoints(points, pointsF);
     if(WITH_RASTERISATION) {
         ip2->setAntiAliasingMode(antiAliasingMode);
         ip2->setBrush(brush2);
-        ip2->fillPolygon(pointsF.data(), pointsF.size());
+        ip2->fillPolygon(points.data(), points.size());
     }
     atrans.pop();
     col = 0;
@@ -100,6 +119,7 @@ static void benchDrawPath_drawCol(
 )
 {
     std::vector<PointF> pointsF;
+    std::vector<Point > points;
 
     atrans.rotate(15);
     atrans.push();
@@ -107,10 +127,11 @@ static void benchDrawPath_drawCol(
     pointsF.clear();
     path.generatePoints(pointsF, 1);
     atrans.transformPoints(pointsF.data(), pointsF.size());
+    convertPointsFToPoints(points, pointsF);
     if(WITH_RASTERISATION) {
         ip2->setAntiAliasingMode(antiAliasingMode);
         ip2->setPen(penThinSolid);
-        ip2->drawPolyline(pointsF.data(), pointsF.size(), false);
+        ip2->drawPolyline(points.data(), points.size(), false);
     }
     atrans.pop();
     ++row;
@@ -121,10 +142,11 @@ static void benchDrawPath_drawCol(
     pointsF.clear();
     path.generatePoints(pointsF, 1);
     atrans.transformPoints(pointsF.data(), pointsF.size());
+    convertPointsFToPoints(points, pointsF);
     if(WITH_RASTERISATION) {
         ip2->setAntiAliasingMode(antiAliasingMode);
         ip2->setPen(penThickSolid);
-        ip2->drawPolyline(pointsF.data(), pointsF.size(), false);
+        ip2->drawPolyline(points.data(), points.size(), false);
     }
     atrans.pop();
     ++row;
@@ -278,7 +300,9 @@ static size_t benchDrawPathSimple(int loopCount, CompositionMode cm, AntiAliasin
 
         AffineTransform atrans;
         Path            path;
+
         std::vector<PointF> pointsF;
+        std::vector<Point > points;
 
         path.clear        ();
         path.beginPath    ();
@@ -289,10 +313,11 @@ static size_t benchDrawPathSimple(int loopCount, CompositionMode cm, AntiAliasin
         pointsF.clear();
         path.generatePoints(pointsF, 1);
         atrans.transformPoints(pointsF.data(), pointsF.size());
+        convertPointsFToPoints(points, pointsF);
 
         ip2->setAntiAliasingMode(antiAliasingMode);
         ip2->setPen(Color::fromRgb8(255, 255, 255, 175));
-        ip2->drawPolyline(pointsF.data(), pointsF.size(), false);
+        ip2->drawPolyline(points.data(), points.size(), false);
 
         sum += clock.stop().toUSecs();
 

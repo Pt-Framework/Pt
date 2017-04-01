@@ -662,18 +662,13 @@ void ImagePainter2::setCompositionMode(const CompositionMode& mode)
 const CompositionMode& ImagePainter2::compositionMode() const
 { return _rasterizer->compositionMode(); }
 
-void ImagePainter2::setClip( const RectF& clipIn )
+void ImagePainter2::setClip( const Rect& clip )
 {
-    const Rect clip(
-        Point( (Pt::int32_t) clipIn.x    (), (Pt::int32_t) clipIn.y     () ),
-        Size ( (Pt::int32_t) clipIn.width(), (Pt::int32_t) clipIn.height() )
-    );
-
     _rasterizer->setClip(clip);
-    _clip = clipIn;
+    _clip = clip;
 }
 
-const Gfx::RectF& ImagePainter2::clip() const
+const Gfx::Rect& ImagePainter2::clip() const
 { return _clip; }
 
 void ImagePainter2::setPen( const Pen& pen )
@@ -697,43 +692,23 @@ const Font& ImagePainter2::font() const
 FontMetrics ImagePainter2::fontMetrics(const String& text) const
 { return _rasterizer->fontMetrics( text ); }
 
-void ImagePainter2::drawImage( const PointF& toIn, const Image& image )
+void ImagePainter2::drawImage( const Point& to, const Image& image )
 {
-    const Point to( (Pt::int32_t) toIn.x(), (Pt::int32_t) toIn.y() );
-
     _rasterizer->blitImage(to, image);
 }
 
-void ImagePainter2::drawImage( const PointF& toIn, const Image& image, const RectF& imageRect )
-{
-    const Point to( (Pt::int32_t) toIn.x(), (Pt::int32_t) toIn.y() );
-    const Rect  ir(
-        Point( (Pt::int32_t) imageRect.    x(), (Pt::int32_t) imageRect.     y() ),
-        Size ( (Pt::int32_t) imageRect.width(), (Pt::int32_t) imageRect.height() )
-    );
+void ImagePainter2::drawImage( const Point& to, const Image& image, const Rect& imageRect )
+{ _rasterizer->blitImage(to, image, imageRect); }
 
-    _rasterizer->blitImage(to, image, ir);
-}
+void ImagePainter2::drawText( const Point& to, const String& text )
+{ _rasterizer->strokeText(to, text); }
 
-void ImagePainter2::drawText( const PointF& toIn, const String& text )
-{
-    const Point to( (Pt::int32_t) toIn.x(), (Pt::int32_t) toIn.y() );
-
-    _rasterizer->strokeText( to, text );
-}
-
-void ImagePainter2::drawLine( const PointF& from, const PointF& to )
+void ImagePainter2::drawLine( const Point& from, const Point& to )
 {
     // Rasterize one-pixel line
     if(_rasterizer->pen().size() == 1) {
-        // Convert the points
-        const Point a( round(from.x()), round(from.y()) );
-        const Point b( round(to  .x()), round(to  .y()) );
-        /*
-        const Point a( (Pt::int32_t) from.x(), (Pt::int32_t) from.y() );
-        const Point b( (Pt::int32_t) to  .x(), (Pt::int32_t) to  .y() );
-        */
-        // Rasterize the line
+        const Point a( from.x(), from.y() );
+        const Point b( to  .x(), to  .y() );
         _rasterizer->strokeOnePixelLine(a, b, 0);
         return;
     }
@@ -749,90 +724,80 @@ void ImagePainter2::drawLine( const PointF& from, const PointF& to )
         generatePatternedSingleLineSegment(pointsF, from.x(), from.y(), to.x(), to.y(), piCtrInOut);
     }
 
-    // Rasterize the polygon
+    // Convert and round the points
     std::vector<Point> points;
-
     convertPointRound(points, pointsF.data(), pointsF.size());
+
+    // Rasterize the polygon
     _rasterizer->strokePolygonSeparate(points.data(), points.size());
 }
 
-void ImagePainter2::drawRect( const RectF& rect )
+void ImagePainter2::drawRect( const Rect& rect )
 {
     // Rasterize one-pixel rectangle
     if(_rasterizer->pen().size() == 1) {
-        // Convert the points
-        const Point tl( round(rect.topLeft    ().x()), round(rect.topLeft    ().y()) );
-        const Point br( round(rect.bottomRight().x()), round(rect.bottomRight().y()) );
-        /*
-        const Point tl( (Pt::int32_t) rect.topLeft    ().x(), (Pt::int32_t) rect.topLeft    ().y() );
-        const Point br( (Pt::int32_t) rect.bottomRight().x(), (Pt::int32_t) rect.bottomRight().y() );
-        */
-        // Rasterize the rectangle
+        const Point tl( rect.topLeft    ().x(), rect.topLeft    ().y() );
+        const Point br( rect.bottomRight().x(), rect.bottomRight().y() );
         _rasterizer->strokeOnePixelRect(tl, br);
         return;
     }
 
     // Generate a polygon that represents the rectangle
-    const PointF pointsF[4] = {
+    const Point points[4] = {
         rect.bottomLeft(), rect.bottomRight(), rect.topRight(), rect.topLeft()
     };
-    drawPolyline(pointsF, 4, true);
+    drawPolyline(points, 4, true);
 }
 
-void ImagePainter2::fillRect( const RectF& rect )
+void ImagePainter2::fillRect( const Rect& rect )
 {
-    const Point tl( (Pt::int32_t) rect.topLeft    ().x(), (Pt::int32_t) rect.topLeft    ().y() );
-    const Point br( (Pt::int32_t) rect.bottomRight().x(), (Pt::int32_t) rect.bottomRight().y() );
+    const Point tl( rect.topLeft    ().x(), rect.topLeft    ().y() );
+    const Point br( rect.bottomRight().x(), rect.bottomRight().y() );
 
     _rasterizer->fillRect(tl, br);
 }
 
-void ImagePainter2::drawRoundRect( const RectF& rect, float radius )
+void ImagePainter2::drawRoundRect( const Rect& rect, float radius )
 {
+    // Extract the coordinates
+    const Pt::int32_t x1 = rect.topLeft    ().x();
+    const Pt::int32_t y1 = rect.topLeft    ().y();
+    const Pt::int32_t x2 = rect.bottomRight().x();
+    const Pt::int32_t y2 = rect.bottomRight().y();
+
     // Rasterize one-pixel round rectangle
     if(_rasterizer->pen().size() == 1) {
-        // Extract the coordinates
-        const float x1 = rect.topLeft    ().x();
-        const float y1 = rect.topLeft    ().y();
-        const float x2 = rect.bottomRight().x();
-        const float y2 = rect.bottomRight().y();
         // Generate a quadratic polybezier that represents the rounded-rectangle
-        const PointF pbz[] = { // CCW
+        const Point pbz[] = { // CCW
             // Bottom left
-            PointF(x1         , y2 - radius),
-            PointF(x1         , y2         ),
-            PointF(x1 + radius, y2         ),
+            Point(x1         , y2 - radius),
+            Point(x1         , y2         ),
+            Point(x1 + radius, y2         ),
             // Bottom middle
-            PointF((x1 + x2) * 0.5f, y2),
+            Point((x1 + x2) / 2, y2),
             // Bottom right
-            PointF(x2 - radius, y2         ),
-            PointF(x2         , y2         ),
-            PointF(x2         , y2 - radius),
+            Point(x2 - radius, y2         ),
+            Point(x2         , y2         ),
+            Point(x2         , y2 - radius),
             // Center right
-            PointF(x2, (y1 + y2) * 0.5f),
+            Point(x2, (y1 + y2) / 2),
             // Top right
-            PointF(x2         , y1 + radius),
-            PointF(x2         , y1         ),
-            PointF(x2 - radius, y1         ),
+            Point(x2         , y1 + radius),
+            Point(x2         , y1         ),
+            Point(x2 - radius, y1         ),
             // Top middle
-            PointF((x1 + x2) * 0.5f, y1),
+            Point((x1 + x2) / 2, y1),
             // Top left
-            PointF(x1 + radius, y1         ),
-            PointF(x1         , y1         ),
-            PointF(x1         , y1 + radius),
+            Point(x1 + radius, y1         ),
+            Point(x1         , y1         ),
+            Point(x1         , y1 + radius),
             // Center left
-            PointF(x1, (y1 + y2) * 0.5f)
+            Point(x1, (y1 + y2) / 2)
         };
         // Draw the quadratic polybezier
         drawQuadraticPolybezier(pbz, sizeof(pbz) / sizeof(pbz[0]), true);
         return;
     }
-
-    // Extract the coordinates
-    const float x1 = rect.topLeft    ().x();
-    const float y1 = rect.topLeft    ().y();
-    const float x2 = rect.bottomRight().x();
-    const float y2 = rect.bottomRight().y();
 
     // Generate a polygon that represents the rounded-rectangle
     std::vector<PointF> pointsF;
@@ -850,57 +815,58 @@ void ImagePainter2::drawRoundRect( const RectF& rect, float radius )
     _rasterizer->setPen(orgPen);
 }
 
-void ImagePainter2::fillRoundRect( const RectF& rect, float radius )
+void ImagePainter2::fillRoundRect( const Rect& rect, float radius )
 {
     // Extract the coordinates
-    const float x1 = rect.topLeft    ().x();
-    const float y1 = rect.topLeft    ().y();
-    const float x2 = rect.bottomRight().x();
-    const float y2 = rect.bottomRight().y();
+    const Pt::int32_t x1 = rect.topLeft    ().x();
+    const Pt::int32_t y1 = rect.topLeft    ().y();
+    const Pt::int32_t x2 = rect.bottomRight().x();
+    const Pt::int32_t y2 = rect.bottomRight().y();
 
     // Generate a polygon that represents the rounded-rectangle
     std::vector<PointF> pointsF;
     generateRoundRectPoints(pointsF, x1, y1, x2, y2, radius, ceil(_rasterizer->pen().size() * 0.5f));
 
+    // Convert the points
+    std::vector<Point> points;
+    convertPointRound(points, pointsF.data(), pointsF.size());
+
     // Draw the polygon
-    fillPolygon(pointsF.data(), pointsF.size());
+    _rasterizer->fillPolygon(points.data(), points.size());
 }
 
-void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount, bool autoClose )
+void ImagePainter2::drawPolyline( const Point* ps, const size_t pointCount, bool autoClose )
 {
     // Rasterize one-pixel polyline
     if(_rasterizer->pen().size() == 1) {
-        // Convert the points
+        // Copy the points while removing duplicates
         std::vector<Point> points;
-        convertPointRound(points, ps, pointCount);
-        if(autoClose) points.push_back( Point( round(ps[0].x()), round(ps[0].y())) );
-        /*
-        convertPointTrunc(points, ps, pointCount);
-        if(autoClose) points.push_back( Point( (Pt::int32_t) ps[0].x(), (Pt::int32_t) ps[0].y()) );
-        */
+        deduplicatePoint(points, ps, pointCount);
+        if(autoClose) points.push_back( Point( ps[0].x(), ps[0].y() ) );
         // Rasterize the polygon
         _rasterizer->strokeOnePixelPolygonOutline(points.data(), points.size());
         return;
     }
 
-    // Rasterize thick polyline
-    drawThickPolyline_impl(ps, pointCount, autoClose, 0);
-}
 
-void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
-{
-    // Convert the points
+    // Copy the points while removing duplicates
     std::vector<Point> points;
-    convertPointRound(points, ps, pointCount);
-    /*
-    convertPointTrunc(points, ps, pointCount);
-    */
+    deduplicatePoint(points, ps, pointCount);
 
-    // Rasterize the polygon
-    _rasterizer->fillPolygon(points.data(), pointCount);
+    // Convert the points
+    std::vector<PointF> pointsF(points.size());
+    for(size_t i = 0; i < points.size(); ++i) {
+        pointsF[i].set( points[i].x(), points[i].y() );
+    }
+
+    // Rasterize thick polyline
+    drawThickPolyline_impl(pointsF.data(), pointsF.size(), autoClose, 0);
 }
 
-void ImagePainter2::drawQuadraticPolybezier(const PointF* ps, const size_t pointCount, bool autoClose)
+void ImagePainter2::fillPolygon( const Point* ps, const size_t pointCount )
+{ _rasterizer->fillPolygon(ps, pointCount); }
+
+void ImagePainter2::drawQuadraticPolybezier(const Point* ps, const size_t pointCount, bool autoClose)
 {
     // Check the number of points
     if(  autoClose && (pointCount < 4 ||  (pointCount & 1)) ) return; // The number of points must be >= 4 and even
@@ -908,16 +874,10 @@ void ImagePainter2::drawQuadraticPolybezier(const PointF* ps, const size_t point
 
     // Rasterize one-pixel polybezier
     if(_rasterizer->pen().size() == 1) {
-        // Prepare the buffer
+        // Copy the points while removing duplicates
         std::vector<Point> points;
-        points.reserve(autoClose ? (pointCount + 1) : pointCount);
-        // Convert the points
-        convertPointRound(points, ps, pointCount);
-        if(autoClose) points.push_back( Point( round(ps[0].x()), round(ps[0].y())) );
-        /*
-        convertPointTrunc(points, ps, pointCount);
-        if(autoClose) points.push_back( Point( (Pt::int32_t) ps[0].x(), (Pt::int32_t) ps[0].y() ) );
-        */
+        deduplicatePoint(points, ps, pointCount);
+        if(autoClose) points.push_back( Point( ps[0].x(), ps[0].y() ) );
         // Rasterize the bezier
         _rasterizer->strokeOnePixelQuadraticPolybezierOutline(points.data(), points.size());
         return;
@@ -972,17 +932,13 @@ void ImagePainter2::drawQuadraticPolybezier(const PointF* ps, const size_t point
     drawThickPolyline_impl(pointsF.data(), pointsF.size(), false, segmentIndexMarker.data());
 }
 
-void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
+void ImagePainter2::drawEllipse( const Point& topLeft, const Size& size )
 {
     // Rasterize one-pixel ellipse
     if(_rasterizer->pen().size() == 1) {
         // Convert the points
-        const Point tl( round(topLeft.x    ()), round(topLeft.y     ()) );
-        const Size  sz( round(size   .width()), round(size   .height()) );
-        /*
-        const Point tl( (Pt::int32_t) topLeft.x    (), (Pt::int32_t) topLeft.y     () );
-        const Size  sz( (Pt::int32_t) size   .width(), (Pt::int32_t) size   .height() );
-        */
+        const Point tl( topLeft.x    (), topLeft.y     () );
+        const Size  sz( size   .width(), size   .height() );
         // Rasterize the ellipse
         _rasterizer->strokeOnePixelEllipseArc(tl, sz, 0, 0, ArcMode::Open);
         return;
@@ -1036,31 +992,23 @@ void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
     }
 }
 
-void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
+void ImagePainter2::fillEllipse( const Point& topLeft, const Size& size )
 {
     // Convert the points
-    const Point tl( round(topLeft.x    ()), round(topLeft.y     ()) );
-    const Size  sz( round(size   .width()), round(size   .height()) );
-    /*
-    const Point tl( (Pt::int32_t) topLeft.x    (), (Pt::int32_t) topLeft.y     () );
-    const Size  sz( (Pt::int32_t) size   .width(), (Pt::int32_t) size   .height() );
-    */
+    const Point tl( topLeft.x    (), topLeft.y     () );
+    const Size  sz( size   .width(), size   .height() );
 
     // Rasterize the ellipse
     _rasterizer->fillEllipse(tl, sz);
 }
 
-void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode )
+void ImagePainter2::drawArc( const Point& topLeft, const Size& size, float degBegin, float degEnd, const ArcMode& arcMode )
 {
     // Rasterize one-pixel arc
     if(_rasterizer->pen().size() == 1) {
         // Convert the points
-        const Point tl( round(topLeft.x    ()), round(topLeft.y     ()) );
-        const Size  sz( round(size   .width()), round(size   .height()) );
-        /*
-        const Point tl( (Pt::int32_t) topLeft.x    (), (Pt::int32_t) topLeft.y     () );
-        const Size  sz( (Pt::int32_t) size   .width(), (Pt::int32_t) size   .height() );
-        */
+        const Point tl( topLeft.x    (), topLeft.y     () );
+        const Size  sz( size   .width(), size   .height() );
         // Rasterize the arc
         _rasterizer->strokeOnePixelEllipseArc(tl, sz, degBegin, degEnd, arcMode);
         return;
@@ -1197,15 +1145,11 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
     }
 }
 
-void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode )
+void ImagePainter2::fillArc( const Point& topLeft, const Size& size, float degBegin, float degEnd, const ArcMode& arcMode )
 {
     // Convert the points
-    const Point tl( round(topLeft.x    ()), round(topLeft.y     ()) );
-    const Size  sz( round(size   .width()), round(size   .height()) );
-    /*
-    const Point tl( (Pt::int32_t) topLeft.x    (), (Pt::int32_t) topLeft.y     () );
-    const Size  sz( (Pt::int32_t) size   .width(), (Pt::int32_t) size   .height() );
-    */
+    const Point tl( topLeft.x    (), topLeft.y     () );
+    const Size  sz( size   .width(), size   .height() );
 
     // Rasterize the arc
     _rasterizer->fillArc(tl, sz, degBegin, degEnd, arcMode);
@@ -1222,7 +1166,10 @@ void ImagePainter2::drawPath(const Path& path2d, const AffineTransform& atrans, 
     //    printf("TrnPts: %5.1f, %5.1f\n", pointsF[i].x(), pointsF[i].y());
     //printf("\n");
 
-    drawPolyline(pointsF.data(), pointsF.size(), autoClose);
+    std::vector<Point> points;
+    convertPointRound(points, pointsF.data(), pointsF.size());
+
+    drawPolyline(points.data(), points.size(), autoClose);
 }
 
 void ImagePainter2::fillPath(const Path& path2d, const AffineTransform& atrans, float smoothness)
@@ -1236,7 +1183,10 @@ void ImagePainter2::fillPath(const Path& path2d, const AffineTransform& atrans, 
     //    printf("TrnPts: %5.1f, %5.1f\n", pointsF[i].x(), pointsF[i].y());
     //printf("\n");
 
-    fillPolygon(pointsF.data(), pointsF.size());
+    std::vector<Point> points;
+    convertPointRound(points, pointsF.data(), pointsF.size());
+
+    _rasterizer->fillPolygon(points.data(), points.size());
 }
 
 

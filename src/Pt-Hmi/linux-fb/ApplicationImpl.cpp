@@ -1,11 +1,11 @@
- /* Copyright (C) 2015 Marc Boris Duerner 
+ /* Copyright (C) 2015 Marc Boris Duerner
     Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -15,15 +15,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
     MA 02110-1301    USA
 */
 
@@ -37,7 +37,7 @@
 #include <fstream>
 #include <cmath>
 #include <fcntl.h>
-#include <sys/ioctl.h> 
+#include <sys/ioctl.h>
 #include <sys/mman.h>
 #include <sys/kd.h>
 
@@ -47,9 +47,9 @@ namespace Hmi {
 
 ApplicationImpl::ApplicationImpl()
 : _lastMouse(0)
-{           
+{
     showConsole(false);
-    
+
     _inputDevices.reserve(10);
 
     for(size_t i = 0; i < 10; ++i)
@@ -59,7 +59,7 @@ ApplicationImpl::ApplicationImpl()
         std::ostringstream oss;
         oss << i;
         deviceName += oss.str().c_str();
-            
+
         if( Pt::System::FileInfo::exists(deviceName) )
         {
             InputDevice* device = new InputDevice( deviceName.toLocal().c_str() );
@@ -85,7 +85,7 @@ ApplicationImpl::~ApplicationImpl()
     }
 
     showConsole(true);
-} 
+}
 
 
 void ApplicationImpl::setCursor(const Cursor* cursor)
@@ -112,8 +112,8 @@ void ApplicationImpl::onMouseEvent(const MouseEvent& ev)
     mev.setId( Application::instance().screen().vid() );
 
     ScreenImpl* screen = Application::instance().screen().impl();
-    
-    Gfx::PointF pos = screen->screenPosition( ev.position() );
+
+    Gfx::Point pos = screen->screenPosition( ev.position() );
     mev.setPosition(pos);
 
     screen->drawCursor(mev);
@@ -131,7 +131,7 @@ void ApplicationImpl::onTouchEvent(const TouchEvent& ev)
 
     ScreenImpl* screen = Application::instance().screen().impl();
 
-    Gfx::PointF pos = screen->screenPosition( ev.position() );
+    Gfx::Point pos = screen->screenPosition( ev.position() );
     tev.setPosition(pos);
 
     Application::instance().processTouchEvent(tev);
@@ -149,8 +149,8 @@ void ApplicationImpl::releasePointer(Window& grabber)
     // Application::instance().setPointerWidget(0)
 
     // send mouse move event with current button state
-    // so widget under the cursor gets an enter event 
-    _lastMouse.setMove(); 
+    // so widget under the cursor gets an enter event
+    _lastMouse.setMove();
 
     Application::instance().processMouseEvent(_lastMouse);
 }
@@ -167,9 +167,9 @@ void ApplicationImpl::releasePointer(Widget& grabber)
     // Application::instance().setPointerWidget(0)
 
     // send mouse move event with current button state
-    // so widget under the cursor gets an enter event 
-    _lastMouse.setMove(); 
-    
+    // so widget under the cursor gets an enter event
+    _lastMouse.setMove();
+
     Application::instance().processMouseEvent(_lastMouse);
 }
 
@@ -188,7 +188,7 @@ void ApplicationImpl::showConsole(bool s)
     terminal = "/dev/" + terminal;
 
     int fd = open(terminal.c_str(), O_RDWR);
-    
+
     if( ! s )
           ioctl( fd, KDSETMODE, KD_GRAPHICS );
     else

@@ -1,5 +1,5 @@
- /* 
-  Copyright (C) 2015 Marc Boris Duerner 
+ /*
+  Copyright (C) 2015 Marc Boris Duerner
   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
 
   This library is free software; you can redistribute it and/or
@@ -24,7 +24,7 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, 
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA  02110-1301  USA
 */
 
@@ -77,7 +77,7 @@ class ScreenImpl : public Pt::Connectable
         const Gfx::Image& image() const;
 
         Gfx::Image& image();
-        
+
         void paint(const Gfx::Rect& updateRect);
 
         WindowManager& windowManager()
@@ -92,9 +92,9 @@ class ScreenImpl : public Pt::Connectable
 
         void dispatchScrollEvent(const ScrollEvent& ev);
 
-        Gfx::PointF toParent(const Window& w, const Gfx::PointF& pos) const;
+        Gfx::Point toParent(const Window& w, const Gfx::Point& pos) const;
 
-        Gfx::PointF fromParent(const Window& w, const Gfx::PointF& pos) const;
+        Gfx::Point fromParent(const Window& w, const Gfx::Point& pos) const;
 
         void onResize(Window& w, const Gfx::Size& s);
 
@@ -126,7 +126,7 @@ class ScreenImpl : public Pt::Connectable
         };
 
         void grabImage( const Pt::uint8_t* buffer, const Gfx::Point& pos,Gfx::Image& image);
- 
+
         void bitBlit( const Pt::uint8_t* , size_t width, size_t height, const Gfx::Point& pos, Pt::uint8_t* buffer, BlitOp op );
 
         void drawCursor( Pt::uint8_t* buffer );
