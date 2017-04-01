@@ -696,9 +696,7 @@ FontMetrics ImagePainter2::fontMetrics(const String& text) const
 { return _rasterizer->fontMetrics( text ); }
 
 void ImagePainter2::drawImage( const Point& to, const Image& image )
-{
-    _rasterizer->blitImage(to, image);
-}
+{ _rasterizer->blitImage(to, image); }
 
 void ImagePainter2::drawImage( const Point& to, const Image& image, const Rect& imageRect )
 { _rasterizer->blitImage(to, image, imageRect); }
@@ -729,7 +727,7 @@ void ImagePainter2::drawLine( const Point& from, const Point& to )
 
     // Round the points and remove duplicates
     std::vector<Point> points;
-    roundAndDeduplicatePoints(points, pointsF.data(), pointsF.size());
+    deduplicateRoundedPointsF(points, pointsF.data(), pointsF.size());
 
     // Rasterize the polygon
     _rasterizer->strokePolygonSeparate(points.data(), points.size());
@@ -745,18 +743,21 @@ void ImagePainter2::drawRect( const Rect& rect )
         return;
     }
 
-    // Generate a polygon that represents the rectangle
+    // Generate and draw a polyline that represents the rectangle
     const Point points[4] = {
         rect.bottomLeft(), rect.bottomRight(), rect.topRight(), rect.topLeft()
     };
+
     drawPolyline(points, 4, true);
 }
 
 void ImagePainter2::fillRect( const Rect& rect )
 {
+    // Convert the points
     const Point tl( rect.topLeft    ().x(), rect.topLeft    ().y() );
     const Point br( rect.bottomRight().x(), rect.bottomRight().y() );
 
+    // Rasterize the rectangle
     _rasterizer->fillRect(tl, br);
 }
 
@@ -832,7 +833,7 @@ void ImagePainter2::fillRoundRect( const Rect& rect, float radius )
 
     // Round the points and remove duplicates
     std::vector<Point> points;
-    roundAndDeduplicatePoints(points, pointsF.data(), pointsF.size());
+    deduplicateRoundedPointsF(points, pointsF.data(), pointsF.size());
 
     // Draw the polygon
     _rasterizer->fillPolygon(points.data(), points.size());
@@ -851,11 +852,9 @@ void ImagePainter2::drawPolyline( const Point* ps, const size_t pointCount, bool
         return;
     }
 
-    // Convert the points
-    std::vector<PointF> pointsF(pointCount);
-    for(size_t i = 0; i < pointCount; ++i) {
-        pointsF[i].set( ps[i].x(), ps[i].y() );
-    }
+    // Convert the points type
+    std::vector<PointF> pointsF;
+    convertPointsToPointsF(pointsF, ps, pointCount);
 
     // Rasterize thick polyline
     drawThickPolyline_impl(pointsF.data(), pointsF.size(), autoClose, 0);
@@ -867,7 +866,7 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount, boo
     if(_rasterizer->pen().size() == 1) {
         // Round the points and remove duplicates
         std::vector<Point> points;
-        roundAndDeduplicatePoints(points, ps, pointCount);
+        deduplicateRoundedPointsF(points, ps, pointCount);
         if(autoClose) points.push_back( Point( round(ps[0].x()), round(ps[0].y()) ) );
         // Rasterize the polygon
         _rasterizer->strokeOnePixelPolygonOutline(points.data(), points.size());
@@ -995,11 +994,9 @@ void ImagePainter2::drawEllipse( const Point& topLeft, const Size& size )
         // Generate a polygon that approximates the ellipse
         std::vector<Point> points;
         generateEllipsePoints(points, radiusX, radiusY, centerX, centerY, newPen.size());
-        // Convert the points
-        std::vector<PointF> pointsF(points.size());
-        for(size_t i = 0; i < points.size(); ++i) {
-            pointsF[i].set( points[i].x(), points[i].y() );
-        }
+        // Convert the points type
+        std::vector<PointF> pointsF;
+        convertPointsToPointsF(pointsF, points.data(), points.size());
         // Rasterize the polygon
         _rasterizer->setPen(newPen);
         drawThickPolyline_impl(pointsF.data(), pointsF.size(), false, 0);
@@ -1148,11 +1145,9 @@ void ImagePainter2::drawArc( const Point& topLeft, const Size& size, float degBe
                 generateArcPoints(points, radiusX, radiusY, centerX, centerY, degBegin, degEnd, newPen.size());
             }
         }
-        // Convert the points
-        std::vector<PointF> pointsF(points.size());
-        for(size_t i = 0; i < points.size(); ++i) {
-            pointsF[i].set( points[i].x(), points[i].y() );
-        }
+        // Convert the points type
+        std::vector<PointF> pointsF;
+        convertPointsToPointsF(pointsF, points.data(), points.size());
         // Rasterize the polygon
         _rasterizer->setPen(newPen);
         drawThickPolyline_impl(pointsF.data(), pointsF.size(), false, 0);
@@ -1200,7 +1195,7 @@ void ImagePainter2::fillPath(const Path& path2d, const AffineTransform& atrans, 
 
     // Round the points and remove duplicates
     std::vector<Point> points;
-    roundAndDeduplicatePoints(points, pointsF.data(), pointsF.size());
+    deduplicateRoundedPointsF(points, pointsF.data(), pointsF.size());
 
     // Draw the points as polygon
     _rasterizer->fillPolygon(points.data(), points.size());
@@ -1265,7 +1260,7 @@ void ImagePainter2::drawThickPolyline_impl(const PointF* ps, const size_t pointC
             }
             // Round the points and remove duplicates
             std::vector<Point> points;
-            roundAndDeduplicatePoints(points, pointsF.data(), pointsF.size());
+            deduplicateRoundedPointsF(points, pointsF.data(), pointsF.size());
             // Rasterize the polygon
             if(solidPen && closedPolygon) _rasterizer->strokePolygon        (points.data(), points.size());
             else                          _rasterizer->strokePolygonSeparate(points.data(), points.size());
@@ -1732,8 +1727,6 @@ void ImagePainter2::generatePatternedSingleLineSegment(std::vector<PointF>& dst,
     const float        xInc  = (x2 - x1) / nSegs;
     const float        yInc  = (y2 - y1) / nSegs;
 
-    //lprintf("(%5.1f, %5.1f) - (%5.1f, %5.1f) : %zd\n", x1, y1, x2, y2, nSegs);
-
     // Generate the segments
     Pt::uint8_t prvPat = 0;
     float       xs     = x1;
@@ -1787,9 +1780,7 @@ void ImagePainter2::generatePatternedSingleLineSegment(std::vector<PointF>& dst,
             case Pen::Arrow2Cap        : generateLineArrow2Cap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
             default                    : generateLineButtCap         (dst, x2, y2,               -nx, -ny); break;
         }
-        //lprintf("    Segment #%2zd : (%5.1f, %5.1f) - (%5.1f, %5.1f)\n", i, x1, y1, x2, y2);
     }
-    //lprintf("\n");
 }
 
 void ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const PointF* src, size_t pointCount)
@@ -1805,7 +1796,6 @@ void ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const 
     bool done = false;
     while(!done) {
         // Calculate the "pattern" segment length
-        //const Pt::int32_t oldPi = piCtrInOut;
         const Pt::uint8_t refPat = pBuff[piCtrInOut];
         state.patSegLen = 0.0f;
         for(;;) {
@@ -1824,7 +1814,6 @@ void ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const 
         // Bail out if the "pattern" segment is shorter than the cell size
         if(state.patSegLen < state.cellSize) return;
         // Process the "pattern" segment
-        //lprintf("### Processing a pattern segment with size %5.1f (from PI %2d to %2d):\n", state.patSegLen, oldPi, piCtrInOut - 1);
         done = sagPolygonPoints(state, !!refPat);
     }
 }
@@ -1841,7 +1830,6 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
         if(state.remLen <= 0.0f) {
             // Check if all polygon's points have been processed
             if(state.idx1 + 1 >= state.srcCount) {
-                //lprintf("### All points are processed!\n");
                 state.gather.clear();
                 state.gatherLen = 0.0f;
                 return true;
@@ -1864,8 +1852,6 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
             state.cvx    = state.uvx * state.cellSize;
             state.cvy    = state.uvy * state.cellSize;
             state.remLen = vz;
-            //lprintf("    Initialize: px = %5.1f ; py = %5.1f ; ex = %5.1f ; ey = %5.1f ; remLen = %5.1f ; patSegLen = %5.1f ; from index [%2zd, %2zd]\n",
-            //        state.px, state.py, state.ex, state.ey, state.remLen, state.patSegLen, state.idx1, state.idx1 + 1);
         }
 
         // If we have the complete length from the gathered points, process them into a thick polygon
@@ -1880,8 +1866,6 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
                 }
                 sagGeneratePolyLineSegment(state);
             }
-            //if(draw) lprintf("    Poly Draw : patSegLen = %5.1f ; remLen = %5.1f ; point count = %zd\n", state.patSegLen, state.remLen, state.gather.size());
-            //else     lprintf("    Poly Skip : patSegLen = %5.1f ; remLen = %5.1f ; point count = %zd\n", state.patSegLen, state.remLen, state.gather.size());
             // Reset the "pattern" segment length
             state.patSegLen = 0.0f;
             // Reset the gather buffer
@@ -1914,8 +1898,6 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
                     );
                 }
             }
-            //if(draw) lprintf("    Line Draw : patSegLen = %5.1f ; remLen = %5.1f ; line (%5.1f, %5.1f) - (%5.1f, %5.1f)\n", state.patSegLen, state.remLen, state.px, state.py, state.px + state.uvx * state.patSegLen, state.py + state.uvy * state.patSegLen);
-            //else     lprintf("    Line Skip : patSegLen = %5.1f ; remLen = %5.1f ; line (%5.1f, %5.1f) - (%5.1f, %5.1f)\n", state.patSegLen, state.remLen, state.px, state.py, state.px + state.uvx * state.patSegLen, state.py + state.uvy * state.patSegLen);
             // Substract the remainder length
             state.remLen -= state.patSegLen;
             // Reset the "pattern" segment length
@@ -1925,12 +1907,10 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
                 // Update the interpolation coordinate
                 state.px = state.ex - state.uvx * state.remLen;
                 state.py = state.ey - state.uvy * state.remLen;
-                //lprintf("    Excess    : px = %5.1f ; py = %5.1f ; remLen = %5.1f\n", state.px, state.py, state.remLen);
             }
             else {
                 // Reset the remainder length and increment the point index so that the next time
                 // this loop is running, the next point within the polygon will be processed
-                //lprintf("    Consumed  : remLen = %5.1f\n", state.remLen);
                 state.remLen = -1.0f;
                 ++state.idx1;
             }
@@ -1946,14 +1926,12 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
         // Store the current interpolation coordinate to the "gather" buffer as needed
         if(state.gather.empty() || state.gather.back().x() != state.px || state.gather.back().y() != state.py) {
             state.gather.push_back(PointF(state.px, state.py));
-            //lprintf("    Gather P  : patSegLen = %5.1f ; remLen = %5.1f ; gatherLen = %5.1f ; segment (%5.1f, %5.1f) - (%5.1f, %5.1f) from index [%2zd, %2zd]; new gather.size() = %zd\n", state.patSegLen, state.remLen, state.gatherLen, state.px, state.py, state.ex, state.ey, state.idx1, state.idx1 + 1, state.gather.size());
         }
         // If the combined length is less than or equal to the "pattern" segment length, simply store the end coordinate
         if(state.gatherLen + state.remLen <= state.patSegLen) {
             // Store the end coordinate
             state.gather.push_back(PointF(state.ex, state.ey));
             state.gatherLen += state.remLen;
-            //printf("    Gather E  : patSegLen = %5.1f ; remLen = %5.1f ; gatherLen = %5.1f ; segment (%5.1f, %5.1f) - (%5.1f, %5.1f) from index [%2zd, %2zd]; new gather.size() = %zd\n", state.patSegLen, state.remLen, state.gatherLen, state.px, state.py, state.ex, state.ey, state.idx1, state.idx1 + 1, state.gather.size());
             // Reset the remainder length and increment the point index so that the next time
             // this loop is running, the next point within the polygon will be processed
             state.remLen = -1.0f;
@@ -1974,11 +1952,9 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
             if(state.remLen <= 0.0f) {
                 // Reset the remainder length and increment the point index so that the next time
                 // this loop is running, the next point within the polygon will be processed
-                //lprintf("    Consumed  : remLen = %5.1f\n", state.remLen);
                 state.remLen = -1.0f;
                 ++state.idx1;
             }
-            //lprintf("    Gather I  : patSegLen = %5.1f ; remLen = %5.1f ; gatherLen = %5.1f ; segment (%5.1f, %5.1f) - (%5.1f, %5.1f) from index [%2zd, %2zd]; new gather.size() = %zd\n", state.patSegLen, state.remLen, state.gatherLen, state.px, state.py, state.ex, state.ey, state.idx1, state.idx1 + 1, state.gather.size());
         }
 
     } // while()
@@ -2027,20 +2003,6 @@ void ImagePainter2::sagGenerateSimpleLineSegment(SAGOpState& state, float x1, fl
         const bool r = satDetectPolygonCollision(
             &state.dstPoints[0], state.dstPCount0, pointsF.data(), pointsF.size()
         );
-        //lprintf("LCI-0 @ %3zd : S[%3zd, %3zd] with N[%3zd, %3zd] => %d\n", state.dstPoints.size(), (size_t) 0, state.dstPCount0, (size_t) 0, pointsF.size(), r);
-        /*
-        if(r) {
-            for(size_t i = 0; i < state.dstPCount0; ++i) {
-                lprintf("%5.1f, %5.1f\n", state.dstPoints[i].x(), state.dstPoints[i].y());
-            }
-            lprintf("---\n");
-            for(size_t i = 0; i < pointsF.size(); ++i) {
-                lprintf("%5.1f, %5.1f\n", pointsF[i].x(), pointsF[i].y());
-            }
-            lprintf("\n");
-            //exit(0);
-        }
-        */
         if(r) return;
     }
     else {
@@ -2052,7 +2014,6 @@ void ImagePainter2::sagGenerateSimpleLineSegment(SAGOpState& state, float x1, fl
         const bool r = satDetectPolygonCollision(
             &state.dstPoints[state.dstPStart], state.dstPCount, pointsF.data(), pointsF.size()
         );
-        //lprintf("LCI-N @ %3zd : S[%3zd, %3zd] with N[%3zd, %3zd] => %d\n", state.dstPoints.size(), state.dstPStart, state.dstPCount, (size_t) 0, pointsF.size(), r);
         if(r) return;
     }
     state.dstPStart = state.dstPoints.size();
@@ -2084,7 +2045,6 @@ void ImagePainter2::sagGeneratePolyLineSegment(SAGOpState& state)
         const bool r = satDetectPolygonCollision(
             &state.dstPoints[0], state.dstPCount0, pointsF.data(), pointsF.size()
         );
-        //lprintf("PCI-0 @ %3zd : S[%3zd, %3zd] with N[%3zd, %3zd] => %d\n", state.dstPoints.size(), (size_t) 0, state.dstPCount0, (size_t) 0, pointsF.size(), intersect);
         if(r) return;
     }
     else {
@@ -2096,7 +2056,6 @@ void ImagePainter2::sagGeneratePolyLineSegment(SAGOpState& state)
         const bool r = satDetectPolygonCollision(
             &state.dstPoints[state.dstPStart], state.dstPCount, pointsF.data(), pointsF.size()
         );
-        //lprintf("PCI-N @ %3zd : S[%3zd, %3zd] with N[%3zd, %3zd] => %d\n", state.dstPoints.size(), state.dstPStart, state.dstPCount, (size_t) 0, pointsF.size(), intersect);
         if(r) return;
     }
     state.dstPStart = state.dstPoints.size();
