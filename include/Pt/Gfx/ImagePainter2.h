@@ -97,6 +97,10 @@ class PT_GFX_API ImagePainter2 : public Painter
         virtual void drawPolyline(const Point* points, const size_t pointCount, bool autoClose);
 
         // NOTE: The points must move in counter-clockwise (CCW) direction or something wrong will be drawn!
+        //       This version of the function is needed to properly draw some path
+        virtual void drawPolyline(const PointF* points, const size_t pointCount, bool autoClose);
+
+        // NOTE: The points must move in counter-clockwise (CCW) direction or something wrong will be drawn!
         //       When autoClose == false : the number of points must be >= 3 and odd
         //       When autoClose == true  : the number of points must be >= 4 and even
         virtual void drawQuadraticPolybezier(const Point* points, const size_t pointCount, bool autoClose);

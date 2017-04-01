@@ -45,7 +45,7 @@ namespace Gfx{
 
 // AVX constants
 static const __m256  avxOneZeroF = _mm256_set_ps(0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f);
-static const __m256  avxMaxCordF = _mm256_set1_ps(Painter::MaximumCoordinateF);
+static const __m256  avxMaxCordF = _mm256_set1_ps(Painter::MaximumCoordinate);
 
 #endif
 
@@ -53,7 +53,7 @@ static const __m256  avxMaxCordF = _mm256_set1_ps(Painter::MaximumCoordinateF);
 
 // NEON constants
 static const float32x4_t neonOneZeroF = NEON_SET_FLT32X4(0.0f, 1.0f, 0.0f, 1.0f);
-static const float32x4_t neonMaxCordF = vdupq_n_f32(Painter::MaximumCoordinateF);
+static const float32x4_t neonMaxCordF = vdupq_n_f32(Painter::MaximumCoordinate);
 
 #endif
 
@@ -527,7 +527,7 @@ bool BasicAffineTransform<T>::pop()
 template <typename T>
 void BasicAffineTransform<T>::transformPoint(T& dx, T& dy, T sx, T sy) const
 {
-    if( _isIdentity || (sx > Painter::MaximumCoordinateF && sy > Painter::MaximumCoordinateF) ) {
+    if( _isIdentity || (sx > Painter::MaximumCoordinate && sy > Painter::MaximumCoordinate) ) {
         dx = sx;
         dy = sy;
         return;
@@ -570,7 +570,7 @@ void BasicAffineTransform<T>::transformPoints(T* xy, size_t pointCount) const
 template <typename T>
 void BasicAffineTransform<T>::transformPoint(PointF& dp, const PointF& sp) const
 {
-    if( _isIdentity || (sp.x() > Painter::MaximumCoordinateF && sp.y() > Painter::MaximumCoordinateF) ) {
+    if( _isIdentity || (sp.x() > Painter::MaximumCoordinate && sp.y() > Painter::MaximumCoordinate) ) {
         dp = sp;
         return;
     }

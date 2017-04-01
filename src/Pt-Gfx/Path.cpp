@@ -34,6 +34,9 @@
 #include <Pt/Gfx/Math.h>
 
 
+#define POLYGON_SEPARATOR_POINT_F PointF(Painter::PolygonSeparatorPoint.x(), Painter::PolygonSeparatorPoint.y())
+
+
 namespace Pt {
 namespace Gfx {
 
@@ -574,7 +577,7 @@ void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
         // Act based on the type of the instruction
         switch(ins.type) {
             case PathData::IT_Begin:
-                if(!dst.empty()) dst.push_back( Painter::PolygonSeparatorPointF );
+                if(!dst.empty()) dst.push_back(POLYGON_SEPARATOR_POINT_F);
                 break;
 
             case PathData::IT_End:

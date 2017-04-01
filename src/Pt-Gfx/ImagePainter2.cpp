@@ -35,6 +35,9 @@
 #include "Rasterizer2.h"
 
 
+#define POLYGON_SEPARATOR_POINT_F PointF(Painter::PolygonSeparatorPoint.x(), Painter::PolygonSeparatorPoint.y())
+
+
 namespace Pt {
 namespace Gfx {
 
@@ -858,6 +861,23 @@ void ImagePainter2::drawPolyline( const Point* ps, const size_t pointCount, bool
     drawThickPolyline_impl(pointsF.data(), pointsF.size(), autoClose, 0);
 }
 
+void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount, bool autoClose )
+{
+    // Rasterize one-pixel polyline
+    if(_rasterizer->pen().size() == 1) {
+        // Round the points and remove duplicates
+        std::vector<Point> points;
+        roundAndDeduplicatePoints(points, ps, pointCount);
+        if(autoClose) points.push_back( Point( round(ps[0].x()), round(ps[0].y()) ) );
+        // Rasterize the polygon
+        _rasterizer->strokeOnePixelPolygonOutline(points.data(), points.size());
+        return;
+    }
+
+    // Rasterize thick polyline
+    drawThickPolyline_impl(ps, pointCount, autoClose, 0);
+}
+
 void ImagePainter2::fillPolygon( const Point* ps, const size_t pointCount )
 { _rasterizer->fillPolygon(ps, pointCount); }
 
@@ -1162,17 +1182,8 @@ void ImagePainter2::drawPath(const Path& path2d, const AffineTransform& atrans, 
     //    printf("TrnPts: %5.1f, %5.1f\n", pointsF[i].x(), pointsF[i].y());
     //printf("\n");
 
-    // Draw the points as polyline
-    if(_rasterizer->pen().size() == 1) {
-        // Round the points and remove duplicates
-        std::vector<Point> points;
-        roundAndDeduplicatePoints(points, pointsF.data(), pointsF.size());
-        // Draw the path
-        drawPolyline(points.data(), points.size(), autoClose);
-    }
-    else {
-        drawThickPolyline_impl(pointsF.data(), pointsF.size(), autoClose, 0);
-    }
+    // Draw the path
+    drawPolyline(pointsF.data(), pointsF.size(), autoClose);
 }
 
 void ImagePainter2::fillPath(const Path& path2d, const AffineTransform& atrans, float smoothness)
@@ -1343,7 +1354,7 @@ bool ImagePainter2::thickenSolidOpenPolygon(std::vector<PointF>& pointsF, const 
     pointsFPolygon.insert(pointsFPolygon.end(), pointsFInner.rbegin(), pointsFInner.rend());
 
     // Combine the polygon data
-    if(!pointsF.empty()) pointsF.push_back(Painter::PolygonSeparatorPointF);
+    if(!pointsF.empty()) pointsF.push_back(POLYGON_SEPARATOR_POINT_F);
     pointsF.insert(pointsF.end(), pointsFPolygon.begin(), pointsFPolygon.end());
 
     // Done
@@ -1405,10 +1416,10 @@ bool ImagePainter2::thickenSolidClosedPolygon(std::vector<PointF>& pointsF, cons
     // Combine the polygon data
     if(pointsFOuter.empty() || pointsFInner.empty()) return false;
 
-    if(!pointsF.empty()) pointsF.push_back(Painter::PolygonSeparatorPointF);
+    if(!pointsF.empty()) pointsF.push_back(POLYGON_SEPARATOR_POINT_F);
     pointsF.insert(pointsF.end(), pointsFOuter.begin(), pointsFOuter.end());
 
-    pointsF.push_back(Painter::PolygonSeparatorPointF);
+    if(!pointsF.empty()) pointsF.push_back(POLYGON_SEPARATOR_POINT_F);
     pointsF.insert(pointsF.end(), pointsFInner.begin(), pointsFInner.end());
 
     // Done
@@ -1752,7 +1763,7 @@ void ImagePainter2::generatePatternedSingleLineSegment(std::vector<PointF>& dst,
         // Skip if we are not going to draw this segment
         if(!draw) continue;
         // Add polygon separator point as needed
-        if(!dst.empty()) dst.push_back(Painter::PolygonSeparatorPointF);
+        if(!dst.empty()) dst.push_back(POLYGON_SEPARATOR_POINT_F);
         // Generate points (CCW)
         // --- Begin point ---
         switch(_rasterizer->pen().capStyle()) {
@@ -2049,7 +2060,7 @@ void ImagePainter2::sagGenerateSimpleLineSegment(SAGOpState& state, float x1, fl
 
     // Add polygon separator point as needed
     if(!state.dstPoints.empty()) {
-        state.dstPoints.push_back(Painter::PolygonSeparatorPointF);
+        state.dstPoints.push_back(POLYGON_SEPARATOR_POINT_F);
         ++state.dstPStart;
     }
 
@@ -2093,7 +2104,7 @@ void ImagePainter2::sagGeneratePolyLineSegment(SAGOpState& state)
 
     // Add polygon separator point as needed
     if(!state.dstPoints.empty()) {
-        state.dstPoints.push_back(Painter::PolygonSeparatorPointF);
+        state.dstPoints.push_back(POLYGON_SEPARATOR_POINT_F);
         ++state.dstPStart;
     }
 

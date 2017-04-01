@@ -56,15 +56,12 @@ class PT_GFX_API Painter
          static const Point       MaximumPointCoordinate;  //! @brief A point set with the maximum coordinate value (signed integer)
          static const Point       PolygonSeparatorPoint;   //! @brief A separator point for defining multi-path     (signed integer)
 
-         static const float       MaximumCoordinateF;      //! @brief The maximum coordinate value                  (floating-point)
-         static const PointF      MaximumPointCoordinateF; //! @brief A point set with the maximum coordinate value (floating-point)
-         static const PointF      PolygonSeparatorPointF;  //! @brief A separator point for defining multi-path     (floating-point)
-
     public:
         /* ### TODO ###
          *
          * Add/update the pure virtual functions for these APIs:
          *     1. Add the autoClose flag in drawPolyline()
+         *        and drawPolyline() with PointF
          *     2. Add the pure virtual functions for:
          *            drawRoundRect()
          *            drawQuadraticPolybezier()
