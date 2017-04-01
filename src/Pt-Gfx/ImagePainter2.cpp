@@ -494,16 +494,14 @@ static inline void combineLinePointsAndAddCaps(std::vector<PointF>& dst, const s
             break;
 
         case Pen::RoundHoleCap: {
-            /*
             // Calculate additional line parameters
             float wh2i, dx2i, dy2i, nx2i, ny2i;
             float wh2o, dx2o, dy2o, nx2o, ny2o;
             calculateLineParams(wh2i, dx2i, dy2i, nx2i, ny2i, ix2a, iy2a, ix2b, iy2b, penSize);
             calculateLineParams(wh2o, dx2o, dy2o, nx2o, ny2o, ox2a, oy2a, ox2b, oy2b, penSize);
             // Generate the points
-            */
             std::vector<PointF> tmp;
-            generateQuadraticBezierPoints(tmp, ix2a - dx2, iy2a - dy2, x2a + dx2, y2a + dy2, ox2a - dx2, oy2a - dy2, penSize);
+            generateQuadraticBezierPoints(tmp, ix2a - dx2i, iy2a - dy2i, x2a + dx2, y2a + dy2, ox2a - dx2o, oy2a - dy2o, penSize);
             if(tmp.size() <= 2) break;
             for(size_t i = 1; i < tmp.size() - 1; ++i) {
                 dst.push_back( PointF( tmp[i].x(), tmp[i].y() ) );
@@ -984,11 +982,9 @@ void ImagePainter2::drawEllipse( const Point& topLeft, const Size& size )
         generateEllipsePoints(pointsF, radiusXo, radiusYo, centerX, centerY, 0);
         pointsF.push_back(POLYGON_SEPARATOR_POINT_F);
         generateEllipsePoints(pointsF, radiusXi, radiusYi, centerX, centerY, 0);
-
         // Round the points and remove duplicates
         std::vector<Point> points;
         deduplicateRoundedPointsF(points, pointsF.data(), pointsF.size());
-
         // Rasterize the polygon
         _rasterizer->setPen(newPen);
         _rasterizer->strokePolygon(points.data(), points.size());
@@ -1000,11 +996,6 @@ void ImagePainter2::drawEllipse( const Point& topLeft, const Size& size )
         // Generate a polygon that approximates the ellipse
         std::vector<PointF> pointsF;
         generateEllipsePoints(pointsF, radiusX, radiusY, centerX, centerY, newPen.size());
-
-        // Convert the points type
-        //std::vector<PointF> pointsF;
-        //convertPointsToPointsF(pointsF, points.data(), points.size());
-
         // Rasterize the polygon
         _rasterizer->setPen(newPen);
         drawThickPolyline_impl(pointsF.data(), pointsF.size(), false, 0);
@@ -1122,11 +1113,9 @@ void ImagePainter2::drawArc( const Point& topLeft, const Size& size, float degBe
             // Combine the arc's lines and add caps
             combineLinePointsAndAddCaps(pointsF, inner, outer, newPen.capStyle(), newPen.capStyle(), penSize);
         }
-
         // Round the points and remove duplicates
         std::vector<Point> points;
         deduplicateRoundedPointsF(points, pointsF.data(), pointsF.size());
-
         // Rasterize the polygon
         _rasterizer->setPen(newPen);
         _rasterizer->strokePolygon(points.data(), points.size());
@@ -1158,9 +1147,6 @@ void ImagePainter2::drawArc( const Point& topLeft, const Size& size, float degBe
                 generateArcPoints(pointsF, radiusX, radiusY, centerX, centerY, degBegin, degEnd, newPen.size());
             }
         }
-        // Convert the points type
-        //std::vector<PointF> pointsF;
-        //convertPointsToPointsF(pointsF, points.data(), points.size());
         // Rasterize the polygon
         _rasterizer->setPen(newPen);
         drawThickPolyline_impl(pointsF.data(), pointsF.size(), false, 0);
