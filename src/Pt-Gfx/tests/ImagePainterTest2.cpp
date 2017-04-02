@@ -148,6 +148,9 @@ using namespace Pt::Gfx;
 #define FONT_SPEC_N "DejaVu Serif", 24, Pt::Gfx::Font::BoldItalic, 0
 #define FONT_SPEC_R "DejaVu Serif", 24, Pt::Gfx::Font::BoldItalic, -150
 
+#define TEX_FILE_TRANS_BGR "../etc/images/bleech-200x200-tbgr.png"
+#define TEX_FILE_WHITE_BGR "../etc/images/bleech-200x200-wbgr.png"
+
 static Image textureWithTransBackground;
 static Image textureWithWhiteBackground;
 
@@ -156,6 +159,8 @@ static Brush bmBrushGradientH;
 static Brush bmBrushGradientV;
 static Brush bmBrushTextureT;
 static Brush bmBrushTextureW;
+
+static const char* sfileDirXTarget = "";
 
 // Include the other source files
 #include "ImagePainterTest2_Util.cpp"
@@ -182,24 +187,52 @@ int main(int argc, char* args[])
         return 0;
     }
 
+    // Determine the exact locations of the support files and directories
+    const char* texFileTransBgr;
+    const char* texFileWhiteBgr;
+    const char* ffilesDirectory;
+
+    std::ifstream checkIfs(TEX_FILE_TRANS_BGR);
+
+    if(checkIfs.is_open()) {
+        checkIfs.close();
+        texFileTransBgr = TEX_FILE_TRANS_BGR;
+        texFileWhiteBgr = TEX_FILE_WHITE_BGR;
+        ffilesDirectory = FONT_DIR;
+    }
+    else {
+        checkIfs.open("../" TEX_FILE_TRANS_BGR);
+        if(!checkIfs.is_open()) {
+            std::clog << std::endl << "Cannot determine the exact locations of the support files and directories!" << std::endl << std::endl;
+            exit(-1);
+        }
+        checkIfs.close();
+        texFileTransBgr = "../" TEX_FILE_TRANS_BGR;
+        texFileWhiteBgr = "../" TEX_FILE_WHITE_BGR;
+        ffilesDirectory = "../" FONT_DIR;
+        sfileDirXTarget = "../";
+    }
+
     // Load the textures
-    std::ifstream tbgrIfs("../etc/images/bleech-200x200-tbgr.png");
+    std::ifstream tbgrIfs(texFileTransBgr);
     PngReader     tbgrPng(tbgrIfs, textureWithTransBackground);
     tbgrPng.get();
+    tbgrIfs.close();
 
-    std::ifstream wbgrIfs("../etc/images/bleech-200x200-wbgr.png");
+    std::ifstream wbgrIfs(texFileWhiteBgr);
     PngReader     wbgrPng(wbgrIfs, textureWithWhiteBackground);
     wbgrPng.get();
+    wbgrIfs.close();
 
     // Prepare the images and painters
     Image         image( ImageFormat::argb32(), Size(1000, 600) );
     ImagePainter  painter1obj(image);
     ImagePainter2 painter2obj(image);
 
-    painter1obj.setFontDir( Pt::System::Path(FONT_DIR) );
+    painter1obj.setFontDir( Pt::System::Path(ffilesDirectory) );
     painter1obj.setFont( Pt::Gfx::Font(FONT_SPEC_N) );
 
-    painter2obj.setFontDir( Pt::System::Path(FONT_DIR) );
+    painter2obj.setFontDir( Pt::System::Path(ffilesDirectory) );
     painter2obj.setFont( Pt::Gfx::Font(FONT_SPEC_N) );
 
     Painter* painter1 = dynamic_cast<Painter*>(&painter1obj);

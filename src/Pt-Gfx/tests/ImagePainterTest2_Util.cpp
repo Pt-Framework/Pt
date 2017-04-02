@@ -129,7 +129,7 @@ static void sdlPreviewRGB888Buffer(const std::string& title, const uint8_t* argb
     // Save the image as a PNG file
     if(saveImageAsPNG) {
         std::string eraseStr = " - ImagePainter2";
-        std::string fileName = std::string("../src/Pt-Gfx/TEMPORARY/IPT2 - ") + title + ".png";
+        std::string fileName = std::string(sfileDirXTarget) + "../src/Pt-Gfx/TEMPORARY/IPT2 - " + title + ".png";
         fileName.erase(fileName.find(eraseStr), eraseStr.length());
         if(writePNG(fileName.c_str(), sizeX, sizeY, argb8888Buff) < 0) return;
     }
