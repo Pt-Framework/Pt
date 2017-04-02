@@ -599,9 +599,9 @@ static void benchATransOps()
     Time VS[] = M * VS[] :  2.576992 nS
     Time VS[] = M * VS[] :  2.753466 nS
 
-    --------------------------------------------------------------------
-    With Partial AVX, FMA, and Auto-Vectorization (i5-4460; 64-Bit Mode)
-    --------------------------------------------------------------------
+    --------------------------------------------------------------
+    With Partial AVX and Auto-Vectorization (i5-4460; 64-Bit Mode)
+    --------------------------------------------------------------
     <float>
     Initial value
         |   1.000   0.000   0.000 |
@@ -627,10 +627,10 @@ static void benchATransOps()
     D: Point                  -> (17.500, 72.000)
     D: Point                  -> (18.500, 96.000)
     D: Point                  -> ( 7.500, 50.000)
-    Time M    = M * M    :  1.517728 nS
-    Time VD[] = M * VS[] :  0.825852 nS
-    Time VS[] = M * VS[] :  0.820816 nS
-    Time VS[] = M * VS[] :  2.720132 nS
+    Time M    = M * M    :  1.526594 nS
+    Time VD[] = M * VS[] :  0.853822 nS
+    Time VS[] = M * VS[] :  0.845984 nS
+    Time VS[] = M * VS[] :  2.728611 nS
 
     <double>
     Initial value
@@ -657,10 +657,10 @@ static void benchATransOps()
     D: Point                  -> (17.500, 72.000)
     D: Point                  -> (18.500, 96.000)
     D: Point                  -> ( 7.500, 50.000)
-    Time M    = M * M    :  1.486436 nS
-    Time VD[] = M * VS[] :  1.283213 nS
-    Time VS[] = M * VS[] :  1.250699 nS
-    Time VS[] = M * VS[] :  1.323894 nS
+    Time M    = M * M    :  1.486346 nS
+    Time VD[] = M * VS[] :  1.292378 nS
+    Time VS[] = M * VS[] :  1.247808 nS
+    Time VS[] = M * VS[] :  1.323849 nS
     */
 
     /*
@@ -755,10 +755,10 @@ static void benchATransOps()
     D: Point                  -> (17.500, 72.000)
     D: Point                  -> (18.500, 96.000)
     D: Point                  -> ( 7.500, 50.000)
-    Time M    = M * M    :  8.890390 nS
-    Time VD[] = M * VS[] : 16.655207 nS
-    Time VS[] = M * VS[] : 16.111135 nS
-    Time VS[] = M * VS[] : 31.778812 nS
+    Time M    = M * M    :  8.816481 nS
+    Time VD[] = M * VS[] : 16.415834 nS
+    Time VS[] = M * VS[] : 16.183615 nS
+    Time VS[] = M * VS[] : 32.117128 nS
 
     <double>
     Initial value
@@ -785,9 +785,9 @@ static void benchATransOps()
     D: Point                  -> (17.500, 72.000)
     D: Point                  -> (18.500, 96.000)
     D: Point                  -> ( 7.500, 50.000)
-    Time M    = M * M    :  8.564234 nS
-    Time VD[] = M * VS[] : 19.114733 nS
-    Time VS[] = M * VS[] : 19.637823 nS
-    Time VS[] = M * VS[] : 21.391630 nS
+    Time M    = M * M    :  8.693695 nS
+    Time VD[] = M * VS[] : 19.355297 nS
+    Time VS[] = M * VS[] : 19.686460 nS
+    Time VS[] = M * VS[] : 21.716356 nS
     */
 }

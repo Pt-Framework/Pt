@@ -59,7 +59,7 @@ using namespace Pt::Gfx;
 #define DO_MATH_BENCHMARKING_ONLY 0
 
 // Benchmark affine transform operations only
-#define DO_ATRANS_BENCHMARKING_ONLY 1
+#define DO_ATRANS_BENCHMARKING_ONLY 0
 
 // Comparison with Cairo (solid-filled polygons and ellipses only)
 #define DO_BENCHMARKING_CAIRO                 0
