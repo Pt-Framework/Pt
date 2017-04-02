@@ -30,10 +30,13 @@
 #include <unistd.h>
 
 #include <Pt/Math.h>
+
 #include <Pt/Gfx/AffineTransform.h>
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/ImagePainter2.h>
 #include <Pt/Gfx/PngReader.h>
+#include <Pt/Gfx/SvgReader.h>
+
 #include <Pt/System/Logger.h>
 #include <Pt/System/Clock.h>
 
@@ -67,7 +70,7 @@ using namespace Pt::Gfx;
 
 // General settings for Pt-Gfx
 #define DO_TEST_DRAW    1
-#define DO_BENCHMARKING 1
+#define DO_BENCHMARKING 0
 
 // Detailed-test enable settings for Pt-Gfx
 #define TEST_SOURCECOPY                         1
@@ -93,8 +96,10 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS 0
 #define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  0
 
-#define TEST_DRAW_PATH                          1 // (including thick and filled)
-#define TEST_DRAW_EXTRA                         1
+#define TEST_DRAW_PATH                          0 // (including thick and filled)
+#define TEST_DRAW_EXTRA                         0
+
+#define TEST_SVG_READER                         1
 
 #define TEST_COMPARE_WITH_OLD_PAINTER           0 // (for some shapes only)
 
@@ -160,7 +165,7 @@ static Brush bmBrushGradientV;
 static Brush bmBrushTextureT;
 static Brush bmBrushTextureW;
 
-static const char* sfileDirXTarget = "";
+static const char* sfileDirXPrefix = "";
 
 // Include the other source files
 #include "ImagePainterTest2_Util.cpp"
@@ -169,6 +174,7 @@ static const char* sfileDirXTarget = "";
 #include "ImagePainterTest2_Draw_Thick.cpp"
 #include "ImagePainterTest2_Draw_Path.cpp"
 #include "ImagePainterTest2_Draw_Extra.cpp"
+#include "ImagePainterTest2_SvgReader.cpp"
 #include "ImagePainterTest2_Benchmark.cpp"
 #include "ImagePainterTest2_Cairo.cpp"
 
@@ -210,7 +216,7 @@ int main(int argc, char* args[])
         texFileTransBgr = "../" TEX_FILE_TRANS_BGR;
         texFileWhiteBgr = "../" TEX_FILE_WHITE_BGR;
         ffilesDirectory = "../" FONT_DIR;
-        sfileDirXTarget = "../";
+        sfileDirXPrefix = "../";
     }
 
     // Load the textures
@@ -520,6 +526,12 @@ int main(int argc, char* args[])
     if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_EXTRA) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
         testDrawExtra("Extra Features - ImagePainter2 [SourceOver]", image, *painter2);
+    }
+
+    // Svg reader
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SVG_READER) {
+        painter2->setCompositionMode(CompositionMode::SourceOver);
+        testSvgReader("SVG Reader - ImagePainter2", image, *painter2);
     }
 
     // Create the brushes used for benchmarking

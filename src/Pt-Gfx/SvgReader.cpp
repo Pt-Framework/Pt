@@ -27,16 +27,8 @@
  * MA  02110-1301  USA
  */
 
-#include <iostream>
-
-#include <Pt/IOError.h>
-
 #include <Pt/Gfx/SvgReader.h>
-#include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/Size.h>
-
-#include <Pt/Xml/InputSource.h>
-#include <Pt/Xml/XmlReader.h>
+#include "SvgRasterizer.h"
 
 
 namespace Pt {
@@ -50,10 +42,12 @@ class SvgReaderImpl {
     public:
         inline SvgReaderImpl();
         inline SvgReaderImpl(std::istream& is, Image& image);
+        inline SvgReaderImpl(std::istream& is, Image& image, const AffineTransform& worldTransform);
 
         inline ~SvgReaderImpl();
 
         inline void attach(std::istream& is, Image& image);
+        inline void attach(std::istream& is, Image& image, const AffineTransform& worldTransform);
         inline void detach();
 
         inline void reset();
@@ -62,70 +56,58 @@ class SvgReaderImpl {
         inline Image& get();
 
     private:
-        enum State {
-            NotStarted
-        };
-
-    private:
-        State   _state;
-        Image*  _image;
-
-        Xml::BinaryInputSource _bis;
-        Xml::XmlReader         _xmlReader;
+        SvgRasterizer* _svgRasterizer;
 };
 
 SvgReaderImpl::SvgReaderImpl()
-: _state(NotStarted)
-, _image(0)
+: _svgRasterizer(0)
 {}
 
 SvgReaderImpl::SvgReaderImpl(std::istream& is, Image& image)
-: _state(NotStarted)
-, _image(0)
+: _svgRasterizer(0)
 { attach(is, image); }
+
+SvgReaderImpl::SvgReaderImpl(std::istream& is, Image& image, const AffineTransform& worldTransform)
+: _svgRasterizer(0)
+{ attach(is, image, worldTransform); }
 
 SvgReaderImpl::~SvgReaderImpl()
 { reset(); }
 
 void SvgReaderImpl::attach(std::istream& is, Image& image)
-{
-    _bis.reset(is);
-    _xmlReader.reset(_bis);
+{ attach(is, image, AffineTransform()); }
 
-    _image = &image;
+void SvgReaderImpl::attach(std::istream& is, Image& image, const AffineTransform& worldTransform)
+{
+    delete _svgRasterizer;
+
+    _svgRasterizer = new SvgRasterizer(is, image, worldTransform);
 }
 
 void SvgReaderImpl::SvgReaderImpl::detach()
 {
-    _bis.reset();
-    _xmlReader.reset();
+    delete _svgRasterizer;
 
-    _image = 0;
+    _svgRasterizer = 0;
 }
 
 void SvgReaderImpl::reset()
-{
-    detach();
-
-    _state = NotStarted;
-}
+{ detach(); }
 
 Image* SvgReaderImpl::advance()
 {
-    if(!_image) return 0;
+    if(!_svgRasterizer) return 0;
 
-    if(_state == NotStarted) {
-    }
-
-    return _image;
+    return _svgRasterizer->process() ? &_svgRasterizer->image() : 0;
 }
 
 Image& SvgReaderImpl::get()
 {
-    if(!_image) throw IOError("svg error");
+    if(!_svgRasterizer) throw IOError("svg error");
 
     while(!advance());
-    return *_image;
+
+    return _svgRasterizer->image();
 }
 
 // ================================================================================
@@ -138,11 +120,18 @@ SvgReader::SvgReader(std::istream& is, Image& image)
 : _impl( new SvgReaderImpl(is, image) )
 {}
 
+SvgReader::SvgReader(std::istream& is, Image& image, const AffineTransform& worldTransform)
+: _impl( new SvgReaderImpl(is, image, worldTransform) )
+{}
+
 SvgReader::~SvgReader()
 { delete _impl; }
 
 void SvgReader::attach(std::istream& is, Image& image)
 { _impl->attach(is, image); }
+
+void SvgReader::attach(std::istream& is, Image& image, const AffineTransform& worldTransform)
+{ _impl->attach(is, image, worldTransform); };
 
 void SvgReader::detach()
 { _impl->detach(); }
@@ -152,6 +141,9 @@ void SvgReader::reset()
 
 Image* SvgReader::advance()
 { return _impl->advance(); }
+
+Image& SvgReader::get()
+{ return _impl->get(); }
 
 
 } // namespace

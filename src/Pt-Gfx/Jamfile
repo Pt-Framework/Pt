@@ -52,6 +52,7 @@ if $(WITH_RASTERIZER2)
                                Rasterizer2_Arc.cpp
                                Rasterizer2_Ellipse.cpp
                                SvgReader.cpp
+                               SvgRasterizer.cpp
                                ;
 }
 
