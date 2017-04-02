@@ -43,6 +43,9 @@ namespace Pt {
 namespace Gfx {
 
 
+// svn propset svn:mime-type text/plain etc/images/*.svg
+
+
 class SvgReaderImpl {
     public:
         inline SvgReaderImpl();
