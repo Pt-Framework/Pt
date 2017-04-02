@@ -51,6 +51,7 @@ if $(WITH_RASTERIZER2)
                                Rasterizer2_Bezier.cpp
                                Rasterizer2_Arc.cpp
                                Rasterizer2_Ellipse.cpp
+                               SvgReader.cpp
                                ;
 }
 
@@ -117,6 +118,11 @@ else
 {
     LinkFlags Pt-Gfx : $(FREETYPE_LINKFLAGS) ;
     LinkLibs Pt-Gfx : $(FREETYPE_LINKLIBS) ;
+}
+
+if $(WITH_RASTERIZER2)
+{
+    LinkSharedLibraries Pt-Gfx : Pt-Xml ;
 }
 
 SubInclude PT_TOP src Pt-Gfx tests ;
