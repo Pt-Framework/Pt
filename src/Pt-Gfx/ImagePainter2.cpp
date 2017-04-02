@@ -385,14 +385,14 @@ static inline void generateLineRoundCap(std::vector<PointF>& dst, float x, float
         round(x + nx     ), round(y + ny     ),
         round(x + nx - dx), round(y + ny - dy),
         round(x      - dx), round(y      - dy),
-        floor(wh)
+        ceil(wh * 0.5f)
     );
     generateQuadraticBezierPoints(
         dst,
-        round(x -      dx), round(y -      dy),
+        round(x      - dx), round(y      - dy),
         round(x - nx - dx), round(y - ny - dy),
         round(x - nx     ), round(y - ny     ),
-        floor(wh)
+        ceil(wh * 0.5f)
     );
 #else
     generateQuadraticBezierPoints(
@@ -421,13 +421,30 @@ static inline void generateLineTriangularInCap(std::vector<PointF>& dst, float x
 
 static inline void generateLineRoundHoleCap(std::vector<PointF>& dst, float x, float y, float wh, float dx, float dy, float nx, float ny)
 {
+#if 0
     generateQuadraticBezierPoints(
         dst,
+        round(x + nx - dx), round(y + ny - dy),
+        round(x + nx     ), round(y + ny     ),
+        round(x          ), round(y          ),
+        ceil(wh * 0.5f)
+    );
+    generateQuadraticBezierPoints(
+        dst,
+        round(x          ), round(y          ),
+        round(x - nx     ), round(y - ny     ),
         round(x - nx - dx), round(y - ny - dy),
+        ceil(wh * 0.5f)
+    );
+#else
+    generateQuadraticBezierPoints(
+        dst,
+        round(x + nx - dx), round(y + ny - dy),
         round(x      + dx), round(y      + dy),
-        round(x + nx -dx ), round(y + ny - dy),
+        round(x - nx - dx), round(y - ny - dy),
         ceil(wh) - 1
     );
+#endif
 }
 
 static inline void generateLineArrow1Cap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
@@ -1172,10 +1189,6 @@ void ImagePainter2::drawPath(const Path& path2d, const AffineTransform& atrans, 
     path2d.generatePoints(pointsF, smoothness);
     atrans.transformPoints(pointsF.data(), pointsF.size());
 
-    //for(size_t i = 0; i < pointsF.size(); ++i)
-    //    printf("TrnPts: %5.1f, %5.1f\n", pointsF[i].x(), pointsF[i].y());
-    //printf("\n");
-
     // Draw the path
     drawPolyline(pointsF.data(), pointsF.size(), autoClose);
 }
@@ -1187,10 +1200,6 @@ void ImagePainter2::fillPath(const Path& path2d, const AffineTransform& atrans, 
 
     path2d.generatePoints(pointsF, smoothness);
     atrans.transformPoints(pointsF.data(), pointsF.size());
-
-    //for(size_t i = 0; i < pointsF.size(); ++i)
-    //    printf("TrnPts: %5.1f, %5.1f\n", pointsF[i].x(), pointsF[i].y());
-    //printf("\n");
 
     // Round the points and remove duplicates
     std::vector<Point> points;
