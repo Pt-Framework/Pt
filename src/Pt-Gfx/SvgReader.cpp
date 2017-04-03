@@ -35,9 +35,6 @@ namespace Pt {
 namespace Gfx {
 
 
-// svn propset svn:mime-type text/plain etc/images/*.svg
-
-
 class SvgReaderImpl {
     public:
         inline SvgReaderImpl();
@@ -75,7 +72,11 @@ SvgReaderImpl::~SvgReaderImpl()
 { reset(); }
 
 void SvgReaderImpl::attach(std::istream& is, Image& image)
-{ attach(is, image, AffineTransform()); }
+{
+    static const AffineTransform identityTransform;
+
+    attach(is, image, identityTransform);
+}
 
 void SvgReaderImpl::attach(std::istream& is, Image& image, const AffineTransform& worldTransform)
 {
@@ -98,7 +99,7 @@ Image* SvgReaderImpl::advance()
 {
     if(!_svgRasterizer) return 0;
 
-    return _svgRasterizer->process() ? &_svgRasterizer->image() : 0;
+    return _svgRasterizer->advance() ? &_svgRasterizer->image() : 0;
 }
 
 Image& SvgReaderImpl::get()

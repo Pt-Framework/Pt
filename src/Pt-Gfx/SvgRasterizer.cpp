@@ -27,6 +27,9 @@
   02110-1301 USA
 */
 
+// Just for debugging ;)
+#include <stdio.h>
+
 #include "SvgRasterizer.h"
 
 
@@ -49,9 +52,13 @@ SvgRasterizer::~SvgRasterizer()
 {
 }
 
-bool SvgRasterizer::process()
+bool SvgRasterizer::advance()
 {
-    return true;
+    Xml::Node* node = _xmlReader.advance();
+
+    lprintf("%d\n", node ? node->type() : 0);
+
+    return !node;
 }
 
 

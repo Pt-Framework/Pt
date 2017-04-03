@@ -75,9 +75,9 @@
 #define PATTERN_BUFFER_COUNTER_MAX1P FIXED_POINT_FROM_INT(PATTERN_BUFFER_NUM_OF_CELLS * PATTERN_BUFFER_SCALE_FACTOR)
 #define PATTERN_BUFFER_COUNTER_MAXMP PATTERN_BUFFER_NUM_OF_CELLS
 
-// Just for easy and faster debugging ;)
+// Just for debugging ;)
 #include <stdio.h>
-#define lprintf(...) fprintf (stderr, __VA_ARGS__)
+//#define lprintf(...) fprintf (stderr, __VA_ARGS__)
 
 
 namespace Pt {

@@ -53,7 +53,7 @@ class SvgRasterizer
 
         ~SvgRasterizer();
 
-        bool process();
+        bool advance();
 
         inline Image& image()
         { return _image; }

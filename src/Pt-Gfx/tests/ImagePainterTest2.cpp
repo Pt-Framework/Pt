@@ -18,6 +18,10 @@
 //
 // while true; do ps -aF | grep "[I]magePainterTest2"; done
 //
+//
+// svn propset svn:mime-type text/plain etc/images/*.svg
+//
+
 
 #ifdef __GNUC__
 #include <cxxabi.h>
