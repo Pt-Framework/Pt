@@ -21,6 +21,7 @@ if $(WITH_RASTERIZER2)
     { return $(<) ; }
 
     SubDirC++Flags [ FDefines RASTERIZER2 ] ;
+    SubDirC++Flags [ FDefines 'lprintf(...)'='fprintf(stderr,__VA_ARGS__)' ] ;
 
     if $(TARGET_OSPLAT:L) = arm
     {

@@ -30,6 +30,14 @@
 // Just for debugging ;)
 #include <stdio.h>
 
+#include <Pt/Xml/StartDocument.h>
+#include <Pt/Xml/DocType.h>
+#include <Pt/Xml/StartElement.h>
+#include <Pt/Xml/EndElement.h>
+#include <Pt/Xml/Characters.h>
+
+#include <Pt/Gfx/Path.h>
+
 #include "SvgRasterizer.h"
 
 
@@ -38,27 +46,143 @@ namespace Gfx {
 
 
 // ======================================================================================
+// ===== Internal Helper Functions ======================================================
+// ======================================================================================
+
+inline const std::string cnvLowerCase(const std::string & str_)
+{
+    std::string  str = str_;
+    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+
+    return str;
+}
+
+inline const std::string cnvLowerCase(const Pt::String& str_)
+{
+    Pt::String str = str_;
+    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+
+    return str.narrow();
+}
+
+
+// ======================================================================================
+// ===== Internal and Private Member Structure Definitions ==============================
+// ======================================================================================
+
+struct PenSetting {
+    Color          color;
+    Pen::Style     style;
+    Pt::uint64_t   styleUserPattern;
+    Pen::CapStyle  capStyle;
+    Pen::JoinStyle joinStyle;
+};
+
+struct BrushSetting {
+    Color            color1;
+    Color            color2;
+    Brush::FillStyle fillStyle;
+    float            angleDeg;
+    float            scale;
+};
+
+struct SvgRasterizer::RasterState {
+    Image&                    image;
+    ImagePainter2             painter;
+
+    AffineTransform           atrans;
+    Path                      path;
+
+    std::vector<PenSetting  > psStack;
+    std::vector<BrushSetting> bsStack;
+
+    inline RasterState(Image& image_, const AffineTransform& initialTransform)
+    : image  (image_)
+    , painter(image_)
+    , atrans (initialTransform)
+    {}
+};
+
+
+// ======================================================================================
 // ===== Public Member Functions ========================================================
 // ======================================================================================
 
 SvgRasterizer::SvgRasterizer(std::istream& is, Image& image, const AffineTransform& worldTransform)
-: _worldTransform   (worldTransform)
-, _image            (image)
+: _rstate           (new RasterState(image, worldTransform))
 , _binaryInputSource(is)
 , _xmlReader        (_binaryInputSource)
-{}
+{
+    _xmlReader.reportStartDocument(true);
+    _xmlReader.reportDocType(true);
+}
 
 SvgRasterizer::~SvgRasterizer()
-{
-}
+{ delete _rstate; }
+
+Image& SvgRasterizer::image()
+{ return _rstate->image; }
 
 bool SvgRasterizer::advance()
 {
+    // Get the next node
     Xml::Node* node = _xmlReader.advance();
+    if(!node) return true;
 
-    lprintf("%d\n", node ? node->type() : 0);
+    // Process the node
+    switch(node->type()) {
+        case Xml::Node::StartDocument: {
+            const Xml::XmlDeclaration* nc = _xmlReader.input()->declaration();
+            if(nc && !nc->version().empty()) {
+                lprintf("StartDocument : %s\n", cnvLowerCase(nc->version()).c_str());
+                lprintf("                %s\n", cnvLowerCase(nc->encoding()).c_str());
+            }
+            break;
+        }
 
-    return !node;
+        case Xml::Node::DocType: {
+            const Xml::DocType& nc = Xml::nodeCast<Xml::DocType>(*node);
+            lprintf("DocType       : %s\n", cnvLowerCase(nc.rootName().local()).c_str());
+            lprintf("                %s\n", cnvLowerCase(nc.publicId()        ).c_str());
+            lprintf("                %s\n", cnvLowerCase(nc.systemId()        ).c_str());
+            break;
+        }
+
+        case Xml::Node::StartElement: {
+            const Xml::StartElement& nc = Xml::nodeCast<Xml::StartElement>(*node);
+            if(cnvLowerCase(nc.name().local()) == "svg") {
+                lprintf("StartElement  : %s\n", cnvLowerCase(nc.name().local()).c_str());
+                lprintf("                %s\n", cnvLowerCase(nc.namespaceUri()).c_str());
+            }
+            else {
+                lprintf("StartElement  : %s\n", cnvLowerCase(nc.name().local()).c_str());
+            }
+            const Xml::AttributeList& alist = nc.attributes();
+            for(Xml::AttributeList::ConstIterator it = alist.begin(); it != alist.end(); ++it) {
+                const Xml::Attribute& a = *it;
+                lprintf("    Attribute : %s = %s\n", cnvLowerCase(a.name().local()).c_str(), a.value().narrow().c_str());
+            }
+            break;
+        }
+
+        case Xml::Node::EndElement: {
+            const Xml::EndElement& nc = Xml::nodeCast<Xml::EndElement>(*node);
+            lprintf("EndElement    : %s\n", cnvLowerCase(nc.name().local()).c_str());
+            break;
+        }
+
+        case Xml::Node::Characters: {
+            //const Xml::Characters& nc = Xml::nodeCast<Xml::Characters>(*node);
+            //lprintf("Characters    : %s\n", nc.content().narrow().c_str());
+            break;
+        }
+
+        default:
+            break;
+    }
+
+    // Not done yet
+    return false;
 }
 
 

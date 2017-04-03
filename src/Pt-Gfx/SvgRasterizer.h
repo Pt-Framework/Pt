@@ -38,8 +38,7 @@
 #include <Pt/Xml/XmlReader.h>
 
 #include <Pt/Gfx/AffineTransform.h>
-#include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/Size.h>
+#include <Pt/Gfx/ImagePainter2.h>
 
 
 namespace Pt {
@@ -53,14 +52,15 @@ class SvgRasterizer
 
         ~SvgRasterizer();
 
+        Image& image();
+
         bool advance();
 
-        inline Image& image()
-        { return _image; }
+    private:
+        struct RasterState;
 
     private:
-        const AffineTransform& _worldTransform;
-        Image&                 _image;
+        RasterState*           _rstate;
 
         Xml::BinaryInputSource _binaryInputSource;
         Xml::XmlReader         _xmlReader;
