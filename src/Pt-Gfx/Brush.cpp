@@ -38,6 +38,19 @@ Brush::Brush()
 }
 
 
+void Brush::setSolidColor(const Color& color)
+{
+    // COW
+
+    SmartPtr<BrushData> brushData(new BrushData);
+
+    *brushData = *_brushData;
+    brushData->setSolidColor(color);
+
+    _brushData = brushData;
+}
+
+
 Brush::Brush(const Color& color)
 : _brushData( new BrushData(color) )
 {
@@ -68,9 +81,35 @@ const Color& Brush::color() const
 }
 
 
+void Brush::setGradient(const Color& from, const Color& to, GradientDirection g, float angleDeg, float scale)
+{
+    // COW
+
+    SmartPtr<BrushData> brushData(new BrushData);
+
+    *brushData = *_brushData;
+    brushData->setGradient(from, to, g, angleDeg, scale);
+
+    _brushData = brushData;
+}
+
+
 const Color& Brush::gradientColor() const
 {
     return _brushData->gradientColor();
+}
+
+
+void Brush::setTexture(const Image& texture)
+{
+    // COW
+
+    SmartPtr<BrushData> brushData(new BrushData);
+
+    *brushData = *_brushData;
+    brushData->setTexture(texture);
+
+    _brushData = brushData;
 }
 
 
@@ -153,15 +192,33 @@ Brush::FillStyle BrushData::fillStyle() const
 }
 
 
+void BrushData::setSolidColor(const Color& color)
+{
+    _fillStyle = Brush::Solid;
+    _color     = color;
+    _isNull    = false;
+}
+
+
 const Color& BrushData::color() const
 {
     return _color;
 }
 
 
+void BrushData::setGradient(const Color& from, const Color& to, Brush::GradientDirection g, float angleDeg, float scale)
+{
+}
+
+
 const Color& BrushData::gradientColor() const
 {
     return _gradientColor;
+}
+
+
+void BrushData::setTexture(const Image& texture)
+{
 }
 
 

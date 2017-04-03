@@ -58,7 +58,7 @@ void Pen::setColor(const Color& color)
 {
     // COW
 
-    SmartPtr<PenData> penData(new PenData(Color(0, 0, 0), 0, Solid, 0, RoundCap, RoundJoin));
+    SmartPtr<PenData> penData(new PenData);
 
     *penData = *_penData;
     penData->setColor(color);
@@ -77,7 +77,7 @@ void Pen::setSize(std::size_t size)
 {
     // COW
 
-    SmartPtr<PenData> penData(new PenData(Color(0, 0, 0), 0, Solid, 0, RoundCap, RoundJoin));
+    SmartPtr<PenData> penData(new PenData);
 
     *penData = *_penData;
     penData->setSize(size);
@@ -96,7 +96,7 @@ void Pen::setStyle(Style style)
 {
     // COW
 
-    SmartPtr<PenData> penData(new PenData(Color(0, 0, 0), 0, Solid, 0, RoundCap, RoundJoin));
+    SmartPtr<PenData> penData(new PenData);
 
     *penData = *_penData;
     penData->setStyle( (style != UserDefined) ? style : Solid, 0 );
@@ -109,7 +109,7 @@ void Pen::setStyle(Pt::uint64_t stylePattern)
 {
     // COW
 
-    SmartPtr<PenData> penData(new PenData(Color(0, 0, 0), 0, Solid, 0, RoundCap, RoundJoin));
+    SmartPtr<PenData> penData(new PenData);
 
     *penData = *_penData;
     penData->setStyle(UserDefined, stylePattern);
@@ -134,7 +134,7 @@ void Pen::setCapStyle(CapStyle cap)
 {
     // COW
 
-    SmartPtr<PenData> penData(new PenData(Color(0, 0, 0), 0, Solid, 0, RoundCap, RoundJoin));
+    SmartPtr<PenData> penData(new PenData);
 
     *penData = *_penData;
     penData->setCapStyle(cap);
@@ -153,7 +153,7 @@ void Pen::setJoinStyle(JoinStyle join)
 {
     // COW
 
-    SmartPtr<PenData> penData(new PenData(Color(0, 0, 0), 0, Solid, 0, RoundCap, RoundJoin));
+    SmartPtr<PenData> penData(new PenData);
 
     *penData = *_penData;
     penData->setJoinStyle(join);

@@ -218,6 +218,10 @@ class PT_GFX_API PenData
       { return _joinStyle; }
 
   private:
+      inline PenData() {} // Does nothing
+      friend class Pen;
+
+  private:
       Color          _color;
       std::size_t    _size;
       Pen::Style     _style;

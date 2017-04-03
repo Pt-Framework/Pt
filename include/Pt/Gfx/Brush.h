@@ -78,9 +78,15 @@ class PT_GFX_API Brush
 
         FillStyle fillStyle() const;
 
+        void setSolidColor(const Color& color);
+
         const Color& color() const;
 
+        void setGradient(const Color& from, const Color& to, GradientDirection g, float angleDeg = 0.0f, float scale = 1.0f);
+
         const Color& gradientColor() const;
+
+        void setTexture(const Image& texture);
 
         const Image& texture() const;
 
@@ -110,9 +116,15 @@ class BrushData
 
         Brush::FillStyle fillStyle() const;
 
+        void setSolidColor(const Color& color);
+
         const Color& color() const;
 
+        void setGradient(const Color& from, const Color& to, Brush::GradientDirection g, float angleDeg, float scale);
+
         const Color& gradientColor() const;
+
+        void setTexture(const Image& texture);
 
         const Image& texture() const;
 
