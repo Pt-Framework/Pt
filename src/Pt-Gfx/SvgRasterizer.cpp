@@ -67,34 +67,18 @@ inline const std::string cnvLowerCase(const Pt::String& str_)
 
 
 // ======================================================================================
-// ===== Internal and Private Member Structure Definitions ==============================
+// ===== Private Member Structure Definitions ===========================================
 // ======================================================================================
 
-struct PenSetting {
-    Color          color;
-    Pen::Style     style;
-    Pt::uint64_t   styleUserPattern;
-    Pen::CapStyle  capStyle;
-    Pen::JoinStyle joinStyle;
-};
-
-struct BrushSetting {
-    Color            color1;
-    Color            color2;
-    Brush::FillStyle fillStyle;
-    float            angleDeg;
-    float            scale;
-};
-
 struct SvgRasterizer::RasterState {
-    Image&                    image;
-    ImagePainter2             painter;
+    Image&             image;
+    ImagePainter2      painter;
 
-    AffineTransform           atrans;
-    Path                      path;
+    AffineTransform    atrans;
+    Path               path;
 
-    std::vector<PenSetting  > psStack;
-    std::vector<BrushSetting> bsStack;
+    std::vector<Pen  > psStack;
+    std::vector<Brush> bsStack;
 
     inline RasterState(Image& image_, const AffineTransform& initialTransform)
     : image  (image_)

@@ -246,6 +246,10 @@ inline float convertCartesianToPolarCoordinate(float x, float y)
 }
 
 
+//
+// lrint() overloaded functions for float and double
+//
+
 inline Pt::int32_t lrint(double val)
 {
 #if defined(PT_GFX_USE_SSE2)

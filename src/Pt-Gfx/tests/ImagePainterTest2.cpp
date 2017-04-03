@@ -185,14 +185,6 @@ static const char* sfileDirXPrefix = "";
 
 int main(int argc, char* args[])
 {
-    double a = 10000009.0;
-    float  b = 10000009.0f;
-
-    std::clog << ((Pt::int64_t) a) << "    "  << Pt::Gfx::Math::lrint(a) << std::endl;
-    std::clog << ((Pt::int32_t) b) << "    "  << Pt::Gfx::Math::lrint(b) << std::endl;
-    return 0;
-
-
     // Benchmark some mathematical functions only
     if(DO_MATH_BENCHMARKING_ONLY) {
         benchMathFunctions();
