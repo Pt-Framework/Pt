@@ -231,7 +231,7 @@ inline Pt::int32_t qlrint(double val)
         Pt::int32_t tmp;
         __asm__ __volatile__ (
             "fldl   %1\n\t"
-            "fistpq %0    "
+            "fistpl %0    "
             : "=m"(tmp)
             :  "m"(val)
             : "memory"
@@ -265,7 +265,7 @@ inline Pt::int64_t qllrint(float val)
         Pt::int64_t tmp;
         __asm__ __volatile__ (
             "flds   %1\n\t"
-            "fistpl %0    "
+            "fistpq %0    "
             : "=m"(tmp)
             :  "m"(val)
             : "memory"
