@@ -197,6 +197,8 @@ void BrushData::setSolidColor(const Color& color)
     _fillStyle = Brush::Solid;
     _color     = color;
     _isNull    = false;
+
+    _texture   = Image();
 }
 
 
@@ -208,6 +210,23 @@ const Color& BrushData::color() const
 
 void BrushData::setGradient(const Color& from, const Color& to, Brush::GradientDirection g, float angleDeg, float scale)
 {
+    switch(g) {
+        case Brush::Horizontal  : _fillStyle = Brush::HorizontalGradient;  break;
+        case Brush::Vertical    : _fillStyle = Brush::VerticalGradient;    break;
+        case Brush::Linear      : _fillStyle = Brush::LinearGradient;      break;
+        case Brush::Rectangular : _fillStyle = Brush::RectangularGradient; break;
+        case Brush::Radial      : _fillStyle = Brush::RadialGradient;      break;
+        case Brush::Conical     : _fillStyle = Brush::ConicalGradient;     break;
+        default                 : _fillStyle = Brush::Solid;               break;
+    }
+
+    _color         = from;
+    _gradientColor = to;
+    _angle         = angleDeg;
+    _scale         = scale;
+    _isNull        = false;
+
+    _texture       = Image();
 }
 
 
@@ -219,6 +238,9 @@ const Color& BrushData::gradientColor() const
 
 void BrushData::setTexture(const Image& texture)
 {
+    _fillStyle = Brush::Texture;
+    _texture   = texture;
+    _isNull    = false;
 }
 
 
