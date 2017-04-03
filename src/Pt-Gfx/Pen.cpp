@@ -56,7 +56,14 @@ Pen::Pen(const Color& color, std::size_t size, Pt::uint64_t stylePattern, CapSty
 
 void Pen::setColor(const Color& color)
 {
-    _penData->setColor(color);
+    // COW
+
+    SmartPtr<PenData> penData(new PenData(Color(0, 0, 0), 0, Solid, 0, RoundCap, RoundJoin));
+
+    *penData = *_penData;
+    penData->setColor(color);
+
+    _penData = penData;
 }
 
 
@@ -68,7 +75,14 @@ const Color& Pen::color() const
 
 void Pen::setSize(std::size_t size)
 {
-    _penData->setSize(size);
+    // COW
+
+    SmartPtr<PenData> penData(new PenData(Color(0, 0, 0), 0, Solid, 0, RoundCap, RoundJoin));
+
+    *penData = *_penData;
+    penData->setSize(size);
+
+    _penData = penData;
 }
 
 
@@ -80,13 +94,27 @@ std::size_t Pen::size() const
 
 void Pen::setStyle(Style style)
 {
-    _penData->setStyle( (style != UserDefined) ? style : Solid, 0 );
+    // COW
+
+    SmartPtr<PenData> penData(new PenData(Color(0, 0, 0), 0, Solid, 0, RoundCap, RoundJoin));
+
+    *penData = *_penData;
+    penData->setStyle( (style != UserDefined) ? style : Solid, 0 );
+
+    _penData = penData;
 }
 
 
 void Pen::setStyle(Pt::uint64_t stylePattern)
 {
-    _penData->setStyle(UserDefined, stylePattern);
+    // COW
+
+    SmartPtr<PenData> penData(new PenData(Color(0, 0, 0), 0, Solid, 0, RoundCap, RoundJoin));
+
+    *penData = *_penData;
+    penData->setStyle(UserDefined, stylePattern);
+
+    _penData = penData;
 }
 
 
@@ -104,7 +132,14 @@ Pt::uint64_t Pen::styleUserPattern() const
 
 void Pen::setCapStyle(CapStyle cap)
 {
-    _penData->setCapStyle(cap);
+    // COW
+
+    SmartPtr<PenData> penData(new PenData(Color(0, 0, 0), 0, Solid, 0, RoundCap, RoundJoin));
+
+    *penData = *_penData;
+    penData->setCapStyle(cap);
+
+    _penData = penData;
 }
 
 
@@ -116,7 +151,14 @@ Pen::CapStyle Pen::capStyle() const
 
 void Pen::setJoinStyle(JoinStyle join)
 {
-    _penData->setJoinStyle(join);
+    // COW
+
+    SmartPtr<PenData> penData(new PenData(Color(0, 0, 0), 0, Solid, 0, RoundCap, RoundJoin));
+
+    *penData = *_penData;
+    penData->setJoinStyle(join);
+
+    _penData = penData;
 }
 
 
