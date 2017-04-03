@@ -130,12 +130,12 @@ class PT_HMI_API Panel : public Control
     protected:
         void onInvalidate();
 	
-        virtual void onPaint(PaintSurface& surface, const Gfx::Rect& updateRect);
+        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
         
-        virtual void onLayout(const Gfx::Rect& rect);
+        virtual void onLayout(const Gfx::RectF& rect);
 
-        virtual Gfx::Size onMeasure(const SizePolicy& policy);
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
         virtual void onRemoveWidget(Widget& w);
 

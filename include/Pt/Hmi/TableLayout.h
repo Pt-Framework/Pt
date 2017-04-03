@@ -59,16 +59,16 @@ class PT_HMI_API TableLayout : public Layout
 
         void removeItem(Widget& w);
 
-        void setColumn(std::size_t col, SizeMode mode, Pt::ssize_t size = 0);
+        void setColumn(std::size_t col, SizeMode mode, double size = 0);
 
-        void setRow(std::size_t row, SizeMode mode, Pt::ssize_t size = 0);
+        void setRow(std::size_t row, SizeMode mode, double size = 0);
 
     protected:
         virtual void onRemoveWidget(Widget& w);
 
-        virtual Gfx::Size onMeasure(const SizePolicy& policy);
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
-        virtual void onLayout(const Gfx::Rect& rect);
+        virtual void onLayout(const Gfx::RectF& rect);
 
     private:
         class SizeInfo
@@ -79,7 +79,7 @@ class PT_HMI_API TableLayout : public Layout
                 , _size(0)
                 { }
 
-                SizeInfo(SizeMode m, Pt::ssize_t size)
+                SizeInfo(SizeMode m, double size)
                 : _mode(m)
                 , _size(size)
                 { }
@@ -87,15 +87,15 @@ class PT_HMI_API TableLayout : public Layout
                 SizeMode mode() const
                 { return _mode; }
 
-                Pt::ssize_t size() const
+                double size() const
                 { return _size; }
 
-                void setSize(Pt::ssize_t s)
+                void setSize(double s)
                 { _size = s; }
             
             private:
                 SizeMode _mode;
-                Pt::ssize_t   _size;
+                double   _size;
         };
 
         std::vector<SizeInfo> _columnSizes;

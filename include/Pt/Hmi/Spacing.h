@@ -27,7 +27,6 @@
 #ifndef Pt_Hmi_Spacing_H
 #define Pt_Hmi_Spacing_H
 
-#include <Pt/Types.h>
 #include <Pt/Hmi/Api.h>
 
 namespace Pt{
@@ -36,17 +35,17 @@ namespace Hmi{
 class Spacing
 {
   public:
-    Spacing(Pt::ssize_t all)
+    Spacing(double all)
     {
       set(all);
     }
 
-    Spacing(Pt::ssize_t horizontal, Pt::ssize_t vertical)
+    Spacing(double horizontal, double vertical)
     {
       set(horizontal, vertical);
     }
 
-    Spacing(Pt::ssize_t left, Pt::ssize_t top, Pt::ssize_t right, Pt::ssize_t bottom)
+    Spacing(double left, double top, double right, double bottom)
     {
       set(left, top, right, bottom);
     }
@@ -56,12 +55,12 @@ class Spacing
       set( 0, 0, 0, 0);
     }
 
-    void set(Pt::ssize_t value)
+    void set(double value)
     {
       set(value, value);
     }
 
-    void set(Pt::ssize_t horizontal, Pt::ssize_t vertical)
+    void set(double horizontal, double vertical)
     {
       _left = horizontal;
       _top = vertical;
@@ -69,7 +68,7 @@ class Spacing
       _bottom = vertical;
     }
 
-    void set(Pt::ssize_t left, Pt::ssize_t top, Pt::ssize_t right, Pt::ssize_t bottom)
+    void set(double left, double top, double right, double bottom)
     {
       _left = left;
       _top = top;
@@ -77,61 +76,61 @@ class Spacing
       _bottom = bottom;
     }
 
-    Pt::ssize_t left() const
+    double left() const
     {
       return _left;
     }
     
-    void setLeft(Pt::ssize_t left)
+    void setLeft(double left)
     {
       _left = left;
     }
 
-    Pt::ssize_t topBottom() const
+    double topBottom() const
     {
       return _top + _bottom;
     }
 
-    Pt::ssize_t leftRight() const
+    double leftRight() const
     {
       return _left + _right;
     }
 
-    Pt::ssize_t top() const
+    double top() const
     {
       return _top;
     }
     
-    void setTop(Pt::ssize_t top)
+    void setTop(double top)
     {
       _top = top;
     } 
 
-    Pt::ssize_t right() const
+    double right() const
     {
       return _right;
     }
     
-    void setRight(Pt::ssize_t right)
+    void setRight(double right)
     {
       _right = right;
     } 
 
-    Pt::ssize_t bottom() const
+    double bottom() const
     {
       return _bottom;
     }
     
-    void setBottom(Pt::ssize_t bottom)
+    void setBottom(double bottom)
     {
       _bottom = bottom;
     } 
 
   private:
-    Pt::ssize_t _left;
-    Pt::ssize_t _top;
-    Pt::ssize_t _right;
-    Pt::ssize_t _bottom;        
+    double _left;
+    double _top;
+    double _right;
+    double _bottom;        
 };
 
 }}

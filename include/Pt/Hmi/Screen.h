@@ -61,31 +61,31 @@ class PT_HMI_API Screen : public WindowBase
         Window* findWindow(const std::string& name);
 
         const std::vector<Window*>& windows() const;
-   
+  
         ScreenImpl* impl();
 
     public:
-        virtual Pt::Gfx::Point toScreen(const Pt::Gfx::Point& p) const;
+        virtual Pt::Gfx::PointF toScreen(const Pt::Gfx::PointF& p) const;
 
-        virtual Pt::Gfx::Point fromScreen(const Pt::Gfx::Point& p) const;
+        virtual Pt::Gfx::PointF fromScreen(const Pt::Gfx::PointF& p) const;
 
     protected:
-        virtual Gfx::Size onSize() const;
+        virtual Gfx::SizeF onSize() const;
         
-        virtual void onUpdate(const Gfx::Rect& updateRect);
+        virtual void onUpdate(const Gfx::RectF& updateRect);
 
     protected:
         virtual void onInit(Window& w);
     
         virtual void onDeinit(Window& w);
 
-        virtual Gfx::Point onToParent(const Window& w, const Gfx::Point& pos) const;
+        virtual Gfx::PointF onToParent(const Window& w, const Gfx::PointF& pos) const;
 
-        virtual Gfx::Point onFromParent(const Window& w, const Gfx::Point& pos) const;
+        virtual Gfx::PointF onFromParent(const Window& w, const Gfx::PointF& pos) const;
 
-        virtual void onResize(Window& w, const Gfx::Size& s);
+        virtual void onResize(Window& w, const Gfx::SizeF& s);
 
-        virtual void onMove(Window& w, const Gfx::Point& p);
+        virtual void onMove(Window& w, const Gfx::PointF& p);
 
         virtual void onFrameChanged(Window& w);
 
@@ -101,7 +101,7 @@ class PT_HMI_API Screen : public WindowBase
 
         virtual void onEnable(Window& w, bool enable);
 
-        virtual void onUpdate(Window& w, const Gfx::Rect& rect);
+        virtual void onUpdate(Window& w, const Gfx::RectF& rect);
 
     protected:
         virtual void onEvent( const Event& ev );
@@ -112,7 +112,7 @@ class PT_HMI_API Screen : public WindowBase
     
     private:
         ScreenImpl*          _impl;
-        Gfx::Rect           _updateRect;
+        Gfx::RectF           _updateRect;
         int                  _updates;
         std::vector<Window*> _windows;
         Pt::System::Clock    _clock;

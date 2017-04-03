@@ -54,7 +54,7 @@ class PT_HMI_API MenuShell
 
         void removeMenu(Menu& menu);
 
-        MenuShell* findMenu(const Gfx::Point& screenPos);
+        MenuShell* findMenu(const Gfx::PointF& screenPos);
 
         /** @brief Quits the menu chain.
         */
@@ -73,7 +73,7 @@ class PT_HMI_API MenuShell
 
         virtual void onEnter() = 0;
 
-        virtual MenuShell* onFindMenu(const Gfx::Point& screenPos) = 0;
+        virtual MenuShell* onFindMenu(const Gfx::PointF& screenPos) = 0;
 
     private:
         std::vector<Menu*> _menus;

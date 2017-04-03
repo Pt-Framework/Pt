@@ -43,6 +43,7 @@
 namespace Pt {
 namespace Gfx {
 
+
 ImagePainter::ImagePainter(Image& image)
 : _rasterizer( new Rasterizer(image))
 {
@@ -79,20 +80,15 @@ void ImagePainter::setCompositionMode(const CompositionMode& mode)
 }
 
 
-const Gfx::Rect& ImagePainter::clip() const
+const Gfx::RectF& ImagePainter::clip() const
 {
   return _clip;
 }
 
 
-void ImagePainter::setClip( const Rect& clipIn )
+void ImagePainter::setClip( const RectF& clipIn )
 {
-   Rect  clip( Point( (int) (clipIn.x()), 
-                      (int) (clipIn.y()) ), 
-               Size( (int) (clipIn.width()),
-                     (int) (clipIn.height()) ));
-
-  _rasterizer->setClip( clip );
+  _rasterizer->setClip( round(clipIn) );
   _clip = clipIn;
 }
 
@@ -139,71 +135,81 @@ FontMetrics ImagePainter::fontMetrics(const String& text) const
 }
 
 
-void ImagePainter::drawLine(const Point& from, const  Point& to)
+void ImagePainter::drawLine(const PointF& from, const  PointF& to)
 {
-	Point points[] = { from , to  };
+	Point points[] = { round(from) , round(to)  };
 	_rasterizer->stroke( points, 2);
 }
 
 
-void ImagePainter::drawText( const Point& to, const String& text )
+void ImagePainter::drawText( const PointF& to, const String& text )
 { 
-  _rasterizer->strokeText( to, text );
+  _rasterizer->strokeText( round(to), text );
 }
 
 
-void ImagePainter::drawRect( const  Rect& rect )
+void ImagePainter::drawRect( const  RectF& rect )
 {
-	Point points[5] = { Point(rect.topLeft().x(),rect.topLeft().y()) ,
-                        Point(rect.topRight().x(),rect.topRight().y()) ,
-                        Point(rect.bottomRight().x(),rect.bottomRight().y()) ,
-                        Point(rect.bottomLeft().x(),rect.bottomLeft().y()) ,
-                        Point(rect.topLeft().x(),rect.topLeft().y()),
-                        };
+	Point points[5] = {   round(rect.topLeft()) ,
+                        round(rect.topRight()) ,
+                        round(rect.bottomRight()),
+                        round(rect.bottomLeft()),
+                        round(rect.topLeft()),
+                   };
 
 	_rasterizer->stroke( points, 5);
 }
 
 
-void ImagePainter::fillRect( const  Rect& r )
+void ImagePainter::fillRect( const  RectF& r )
 {  
-    _rasterizer->fillRect(r);
+    _rasterizer->fillRect(round(r));
 }
 
 
-void ImagePainter::drawEllipse( const Point& topLeft, const  Size& size )
+void ImagePainter::drawEllipse( const PointF& topLeft, const  SizeF& size )
 {
-  _rasterizer->strokeEllipse( topLeft, size );
+  _rasterizer->strokeEllipse( round( topLeft ),  round(size) );
 }
 
 
-void ImagePainter::fillEllipse( const Point& topLeft, const  Size& size )
+void ImagePainter::fillEllipse( const PointF& topLeft, const  SizeF& size )
 {
-   _rasterizer->fillEllipse( topLeft, size );
+   _rasterizer->fillEllipse(  round(topLeft),  round(size) );
 }
 
 
-void ImagePainter::drawPolyline( const Point* ps, const size_t pointCount )
+void ImagePainter::drawPolyline( const PointF* ps, const size_t pointCount )
 {
-  _rasterizer->stroke(ps, pointCount);
+  std::vector<Point> points(pointCount);
+
+  for( size_t i = 0; i < pointCount; ++i)
+    points[i] = round(ps[i]);
+
+  _rasterizer->stroke(&points[0], points.size());
 }
 
 
-void ImagePainter::fillPolygon( const Point* ps, const size_t pointCount )
+void ImagePainter::fillPolygon( const PointF* ps, const size_t pointCount )
 {    
-  _rasterizer->fill( ps, pointCount);
+  std::vector<Point> points(pointCount);
+
+  for( size_t i = 0; i < pointCount; ++i)
+    points[i] = round(ps[i]);
+
+  _rasterizer->fill(&points[0], points.size());
 }
 
 
-void ImagePainter::drawImage( const Point& to, const Image& image)
+void ImagePainter::drawImage( const PointF& to, const Image& image)
 {
-  _rasterizer->image( to, image);
+  _rasterizer->image( round(to), image);
 }
 
 
-void ImagePainter::drawImage(const Point& to, const Image& image, const Rect& imageRect)
+void ImagePainter::drawImage(const PointF& to, const Image& image, const RectF& imageRect)
 {
-  _rasterizer->image( to, image, imageRect );
+  _rasterizer->image( round(to), image, round(imageRect) );
 }
 
 

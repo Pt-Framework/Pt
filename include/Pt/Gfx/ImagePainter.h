@@ -32,6 +32,7 @@
 
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Painter.h>
+#include <Pt/Gfx/Rect.h>
 #include <Pt/System/Path.h>
 
 namespace Pt {
@@ -55,9 +56,9 @@ class PT_GFX_API ImagePainter : public Painter
 
     virtual const CompositionMode& compositionMode() const;
 
-    virtual void setClip( const Rect& clip );
+    virtual void setClip( const RectF& clip );
 
-    virtual const Gfx::Rect& clip() const;
+    virtual const Gfx::RectF& clip() const;
 
     virtual void setPen(const Pen& pen);
 
@@ -73,25 +74,25 @@ class PT_GFX_API ImagePainter : public Painter
 
     virtual FontMetrics fontMetrics(const Pt::String& text) const;
 
-    virtual void drawLine(const  Point& from, const  Point& to);
+    virtual void drawLine(const  PointF& from, const  PointF& to);
 
-    virtual void drawText(const  Point& to, const Pt::String& text );
+    virtual void drawText(const  PointF& to, const Pt::String& text );
 
-    virtual void drawRect(const  Rect& rect);
+    virtual void drawRect(const  RectF& rect);
 
-    virtual void fillRect(const  Rect& rect);
+    virtual void fillRect(const  RectF& rect);
 
-    virtual void drawEllipse(const Point& topLeft, const  Size& size);
+    virtual void drawEllipse(const PointF& topLeft, const  SizeF& size);
 
-    virtual void fillEllipse(const Point& topLeft, const  Size& size);
+    virtual void fillEllipse(const PointF& topLeft, const  SizeF& size);
 
-    virtual void drawPolyline(const Point* points, const size_t pointCount);
+    virtual void drawPolyline(const PointF* points, const size_t pointCount);
 
-    virtual void fillPolygon(const Point* points, const size_t pointCount);
+    virtual void fillPolygon(const PointF* points, const size_t pointCount);
 
-    virtual void drawImage(const  Point& to, const Image& image);
+    virtual void drawImage(const  PointF& to, const Image& image);
 
-    virtual void drawImage(const Point& to, const Image& image, const Rect& imageRect);
+    virtual void drawImage(const PointF& to, const Image& image, const RectF& imageRect);
 
   public:
     static void setFontDir(const System::Path& path);
@@ -106,7 +107,7 @@ class PT_GFX_API ImagePainter : public Painter
 
   private:
     Rasterizer* _rasterizer;
-    Rect _clip;
+    RectF _clip;
 };
 
 }}

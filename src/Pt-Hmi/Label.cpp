@@ -205,15 +205,15 @@ Adjustment Label::adjustment() const
 }
 
 
-Gfx::Size Label::onMeasure(const SizePolicy& policy)
+Gfx::SizeF Label::onMeasure(const SizePolicy& policy)
 {
-    Pt::ssize_t w = 0;
-    Pt::ssize_t h = 0;
+    double w = 0;
+    double h = 0;
 
     if(_hasImage)
     {
-        w =_picture.width() ;
-        h = _picture.height() ;
+        w = static_cast<double>( _picture.width() );
+        h = static_cast<double>( _picture.height() );
     }
     else
     {
@@ -228,11 +228,11 @@ Gfx::Size Label::onMeasure(const SizePolicy& policy)
         block.setMaxWidth( policy.size().width() );
         block.layout(_text, _font);
 
-        w = block.size().width(); 
-        h = block.size().height();
+        w = static_cast<double>( block.size().width() ); 
+        h = static_cast<double>( block.size().height() );
     }
 
-    return Gfx::Size( w + padding().leftRight(), 
+    return Gfx::SizeF( w + padding().leftRight(), 
                        h + padding().topBottom() );
 }
 
@@ -245,7 +245,7 @@ void Label::layoutText()
     _textBlock.setAdjustment(a);
     _textBlock.layout(_text, _font);
 
-    Gfx::Point pos;
+    Gfx::PointF pos;
 
     switch( _alignment )
     {
@@ -262,8 +262,8 @@ void Label::layoutText()
         case Alignment::Center:
         case Alignment::Right:
         {
-            Pt::ssize_t height = size().height() - padding().topBottom();
-            Pt::ssize_t y = (height - _textBlock.height()) / 2;
+            double height = size().height() - padding().topBottom();
+            double y = (height - _textBlock.height()) / 2;
             pos.set(padding().left(), y + padding().top());
             break;
         }
@@ -272,8 +272,8 @@ void Label::layoutText()
         case Alignment::Bottom:
         case Alignment::BottomRight:
         {
-            Pt::ssize_t height = size().height() - padding().topBottom();
-            Pt::ssize_t y = height - _textBlock.height();
+            double height = size().height() - padding().topBottom();
+            double y = height - _textBlock.height();
 
             pos.set( padding().left(), padding().top() + y);
             break;
@@ -296,76 +296,76 @@ void Label::layoutImage()
         }
         case Alignment::Top:
         {
-            Pt::ssize_t width = size().width() - padding().leftRight();
-            Pt::ssize_t x = (width - _picture.width()) / 2;
+            double width = size().width() - padding().leftRight();
+            double x = (width - _picture.width()) / 2;
 
             _imagePos.set( padding().left() + x, padding().top() );
             break;
         }
         case Alignment::TopRight:
         {
-            Pt::ssize_t width = size().width() - padding().leftRight();
-            Pt::ssize_t x = width - _picture.width();
+            double width = size().width() - padding().leftRight();
+            double x = width - _picture.width();
 
             _imagePos.set( padding().left() + x, padding().top() );
             break;
         }
         case Alignment::Left:
         {
-            Pt::ssize_t height = size().height() - padding().topBottom();
-            Pt::ssize_t y = (height - _picture.height()) / 2;
+            double height = size().height() - padding().topBottom();
+            double y = (height - _picture.height()) / 2;
 
             _imagePos.set( padding().left(), padding().top() + y);
             break;
         }
         case Alignment::Center:
         {
-            Pt::ssize_t width = size().width() - padding().leftRight();
-            Pt::ssize_t x = (width - _picture.width()) / 2;
+            double width = size().width() - padding().leftRight();
+            double x = (width - _picture.width()) / 2;
             
-            Pt::ssize_t height = size().height() - padding().topBottom();
-            Pt::ssize_t y = (height - _picture.height()) / 2;
+            double height = size().height() - padding().topBottom();
+            double y = (height - _picture.height()) / 2;
 
             _imagePos.set( padding().left() + x, padding().top() + y);
             break;
         }
         case Alignment::Right:
         {
-            Pt::ssize_t width = size().width() - padding().leftRight();
-            Pt::ssize_t x = width - _picture.width();
+            double width = size().width() - padding().leftRight();
+            double x = width - _picture.width();
 
-            Pt::ssize_t height = size().height() - padding().topBottom();
-            Pt::ssize_t y = (height - _picture.height()) / 2;
+            double height = size().height() - padding().topBottom();
+            double y = (height - _picture.height()) / 2;
 
             _imagePos.set( padding().left() + x, padding().top() + y);
             break;
         }
         case Alignment::BottomLeft:
         {
-            Pt::ssize_t height = size().height() - padding().topBottom();
-            Pt::ssize_t y = height - _picture.height();
+            double height = size().height() - padding().topBottom();
+            double y = height - _picture.height();
 
             _imagePos.set(padding().left(), padding().top() + y);
             break;
         }
         case Alignment::Bottom:
         {
-            Pt::ssize_t width = size().width() - padding().leftRight();
-            Pt::ssize_t x = (width - _picture.width()) / 2;
+            double width = size().width() - padding().leftRight();
+            double x = (width - _picture.width()) / 2;
 
-            Pt::ssize_t height = size().height() - padding().topBottom();
-            Pt::ssize_t y = height - _picture.height();
+            double height = size().height() - padding().topBottom();
+            double y = height - _picture.height();
 
             _imagePos.set( padding().left() + x, padding().top() + y);
             break;
         }
         case Alignment::BottomRight:
         {
-            Pt::ssize_t width = size().width() - padding().leftRight();
-            Pt::ssize_t x = width - _picture.width();
+            double width = size().width() - padding().leftRight();
+            double x = width - _picture.width();
 
-            Pt::ssize_t height = size().height() - padding().topBottom();
-            Pt::ssize_t y = height - _picture.height();
+            double height = size().height() - padding().topBottom();
+            double y = height - _picture.height();
 
             _imagePos.set( padding().left() + x, padding().top() + y);
             break;
@@ -374,7 +374,7 @@ void Label::layoutImage()
 }
 
 
-void Label::onLayout(const Gfx::Rect& rect)
+void Label::onLayout(const Gfx::RectF& rect)
 {
     if(_hasImage)
         layoutImage();
@@ -408,7 +408,7 @@ void Label::onInvalidate()
 }
 
 
-void Label::onPaint(PaintSurface& surface, const Gfx::Rect& rect)
+void Label::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
@@ -445,7 +445,7 @@ void Label::onPaint(PaintSurface& surface, const Gfx::Rect& rect)
         {
             const Pt::String& lineText = it->text();
 
-            Gfx::Point pos = _textBlock.position() + it->position();
+            Gfx::PointF pos = _textBlock.position() + it->position();
             pos.addY( it->ascent() );
 
             _renderer->renderText(*this, options,  painter, rect,

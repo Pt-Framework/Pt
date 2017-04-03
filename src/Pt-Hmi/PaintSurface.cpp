@@ -50,7 +50,7 @@ PaintSurface::~PaintSurface()
 }
 
 
-const Gfx::Size& PaintSurface::size() const
+const Gfx::SizeF& PaintSurface::size() const
 {
     return onSize();
 }

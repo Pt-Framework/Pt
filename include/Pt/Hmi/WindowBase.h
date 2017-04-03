@@ -51,29 +51,29 @@ class PT_HMI_API WindowBase : public Visual
 
         virtual ~WindowBase();
 
-        Gfx::Size size() const;
+        Gfx::SizeF size() const;
 
         void invalidate();
 
         void update();
 
-        void update(const Gfx::Rect& rect);
+        void update(const Gfx::RectF& rect);
 
     protected:
-        virtual Gfx::Size onSize() const = 0;
+        virtual Gfx::SizeF onSize() const = 0;
         
-        virtual void onUpdate(const Gfx::Rect& rect) = 0;
+        virtual void onUpdate(const Gfx::RectF& rect) = 0;
 
     protected:
         virtual void onInit(Window& w) = 0;
 
         virtual void onDeinit(Window& w) = 0;
 
-        virtual Gfx::Point onToParent(const Window& w, const Gfx::Point& pos) const = 0;
+        virtual Gfx::PointF onToParent(const Window& w, const Gfx::PointF& pos) const = 0;
     
-        virtual Gfx::Point onFromParent(const Window& w, const Gfx::Point& pos) const = 0;
+        virtual Gfx::PointF onFromParent(const Window& w, const Gfx::PointF& pos) const = 0;
     
-        virtual void onUpdate(Window& child, const Gfx::Rect& rect) = 0;
+        virtual void onUpdate(Window& child, const Gfx::RectF& rect) = 0;
 
         virtual void onShow(Window& w, bool visible) = 0;   
     
@@ -81,9 +81,9 @@ class PT_HMI_API WindowBase : public Visual
 
         virtual void onEnable(Window& w, bool enable) = 0;
 
-        virtual void onMove(Window& w, const Gfx::Point& to) = 0;
+        virtual void onMove(Window& w, const Gfx::PointF& to) = 0;
 
-        virtual void onResize(Window& w, const Gfx::Size& to) = 0;
+        virtual void onResize(Window& w, const Gfx::SizeF& to) = 0;
 
         virtual void onFrameChanged(Window& w) = 0;
 

@@ -40,7 +40,8 @@ namespace Hmi {
 
 PixmapSurfaceImpl::PixmapSurfaceImpl()
 : _size(10,10)
-, _image( Application::instance().impl()->frameBuffer().format(), _size)
+, _image( Application::instance().impl()->frameBuffer().format(),
+          Gfx::Size(_size.width(), _size.height()) )
 , _painter(_image)
 {
 }
@@ -74,28 +75,28 @@ void PixmapSurfaceImpl::finish()
 
 void PixmapSurfaceImpl::resize(const Gfx::Size& size, size_t padding)
 {
-    _size = size;
-    _image.reset(_image.format(), _size, padding);
+    _size.set(size.width(), size.height());
+    _image.reset(_image.format(), size, padding);
     _painter.setImage(_image);
 }
 
 
-void PixmapSurfaceImpl::resize(const Gfx::Size& size)
+void PixmapSurfaceImpl::resize(const Gfx::SizeF& size)
 {
     _size = size;
-    _image.reset(_image.format(), _size );
+    _image.reset(_image.format(), Gfx::Size(_size.width(), _size.height() ) );
 
     _painter.setImage(_image);
 }
 
 
-const Gfx::Size& PixmapSurfaceImpl::size() const
+const Gfx::SizeF& PixmapSurfaceImpl::size() const
 {
     return _size;
 }
 
 
-void PixmapSurfaceImpl::setClip(const Gfx::Rect& clip)
+void PixmapSurfaceImpl::setClip(const Gfx::RectF& clip)
 {
     _painter.setClip(clip);
 }
@@ -131,83 +132,83 @@ Gfx::FontMetrics PixmapSurfaceImpl::fontMetrics(const Pt::String& text) const
 }
 
 
-void PixmapSurfaceImpl::drawLine(const Gfx::Point& from, const Gfx::Point& to)
+void PixmapSurfaceImpl::drawLine(const Gfx::PointF& from, const Gfx::PointF& to)
 {    
     _painter.drawLine(from, to);
 }
 
 
-void PixmapSurfaceImpl::drawText(const Gfx::Point& to, const Pt::String& text)
+void PixmapSurfaceImpl::drawText(const Gfx::PointF& to, const Pt::String& text)
 {
     _painter.drawText(to, text);
 }
 
 
-void PixmapSurfaceImpl::drawRect(const Gfx::Rect& rect)
+void PixmapSurfaceImpl::drawRect(const Gfx::RectF& rect)
 {  
     _painter.drawRect(rect); 
 }
 
 
-void PixmapSurfaceImpl::fillRect(const Gfx::Rect& rect)
+void PixmapSurfaceImpl::fillRect(const Gfx::RectF& rect)
 {
     _painter.fillRect(rect);
 }
 
 
-void PixmapSurfaceImpl::drawEllipse(const Gfx::Point& topLeft, const Gfx::Size& size)
+void PixmapSurfaceImpl::drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
     _painter.drawEllipse(topLeft, size);
 }
 
 
-void PixmapSurfaceImpl::fillEllipse(const Gfx::Point& topLeft, const Gfx::Size& size)
+void PixmapSurfaceImpl::fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size)
 {
     _painter.fillEllipse(topLeft, size);
 }
 
 
-void PixmapSurfaceImpl::drawPolyline(const Gfx::Point* points, const size_t pointCount)
+void PixmapSurfaceImpl::drawPolyline(const Gfx::PointF* points, const size_t pointCount)
 {
     _painter.drawPolyline(points, pointCount);
 }
 
 
-void PixmapSurfaceImpl::fillPolygon(const Gfx::Point* points, const size_t pointCount)
+void PixmapSurfaceImpl::fillPolygon(const Gfx::PointF* points, const size_t pointCount)
 {
     _painter.fillPolygon(points, pointCount);
 }
 
 
-void PixmapSurfaceImpl::drawSurface(const Gfx::Point& to, const PixmapSurface& surface)
+void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to, const PixmapSurface& surface)
 {
     const Gfx::Image& image = surface.pixmapImpl()->image();
     _painter.drawImage(to, image);
 }
 
 
-void PixmapSurfaceImpl::drawSurface(const Gfx::Point& to, 
+void PixmapSurfaceImpl::drawSurface(const Gfx::PointF& to, 
                                   const PixmapSurface& pm,
-                                  const Gfx::Rect& pmRect)
+                                  const Gfx::RectF& pmRect)
 {
     const Gfx::Image& image = pm.pixmapImpl()->image();
     _painter.drawImage(to, image, pmRect);
 }
 
 
-void PixmapSurfaceImpl::drawImage(const Gfx::Point& to, const Gfx::Image& image)
+void PixmapSurfaceImpl::drawImage(const Gfx::PointF& to, const Gfx::Image& image)
 {
     _painter.drawImage(to, image);
 }
 
 
-void PixmapSurfaceImpl::drawImage(const Gfx::Point& to, const Gfx::Image& image, const Gfx::Rect& r)
+void PixmapSurfaceImpl::drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& r)
 {
     _painter.drawImage( to, image, r);
 }
 
 
-void PixmapSurfaceImpl::drawPicture(const Gfx::Point& to, const Picture& pic)
+void PixmapSurfaceImpl::drawPicture(const Gfx::PointF& to, const Picture& pic)
 {
     const PictureImpl* picImpl = pic.impl();
     const Gfx::Image& image = picImpl->image();

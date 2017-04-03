@@ -32,16 +32,16 @@ void Paint()
 
             for(int n = 0; n < 10; ++n)
             {
-                painter.fillRect(Rect(Point(0,0), Size(1280,800)));
+                painter.fillRect(RectF(PointF(0,0), SizeF(1280,800)));
 
                for(int i = 0; i < 10; i++)
-                    painter.fillRect( Rect(Point(0,0), Size(100,100)));
+                    painter.fillRect( RectF(PointF(0,0), SizeF(100,100)));
 
                 for(int x = 0; x < 50; x++)
-                    painter.drawLine( Point(x, 0), Point(x, 200) );
+                    painter.drawLine( PointF(x, 0), PointF(x, 200) );
 
                 for(int y = 0; y < 20; y++)
-                    painter.drawLine( Point(0, y), Point(200, y) );
+                    painter.drawLine( PointF(0, y), PointF(200, y) );
             }
 
             std::clog << "drawing: " << clock.stop().toUSecs() << std::endl;

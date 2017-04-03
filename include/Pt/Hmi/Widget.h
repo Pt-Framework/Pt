@@ -85,7 +85,7 @@ class PT_HMI_API Widget : public Visual
        
         const std::vector<Widget*>& widgets() const;
 
-        Widget* findWidget( const Gfx::Point& pos );
+        Widget* findWidget( const Gfx::PointF& pos );
 
         bool acceptsInput() const;
 
@@ -99,13 +99,13 @@ class PT_HMI_API Widget : public Visual
         // coordinate transformations
         //
 
-        Gfx::Point toParent(const Gfx::Point& pos) const;
+        Gfx::PointF toParent(const Gfx::PointF& pos) const;
 
-        Gfx::Point fromParent(const Gfx::Point& pos) const;
+        Gfx::PointF fromParent(const Gfx::PointF& pos) const;
 
-        Gfx::Point toWindow(const Gfx::Point& p) const;
+        Gfx::PointF toWindow(const Gfx::PointF& p) const;
 
-        Gfx::Point fromWindow(const Gfx::Point& pos) const;
+        Gfx::PointF fromWindow(const Gfx::PointF& pos) const;
 
         //
         // focus handling
@@ -160,9 +160,9 @@ class PT_HMI_API Widget : public Visual
 
         void update();
 
-        void update(const Gfx::Rect& rect);
+        void update(const Gfx::RectF& rect);
 
-        void repaint(const Gfx::Rect& updateRect);
+        void repaint(const Gfx::RectF& updateRect);
 
         bool isVisible() const;
 
@@ -178,15 +178,15 @@ class PT_HMI_API Widget : public Visual
 
         void releasePointer();
 
-        const Gfx::Point& position() const;
+        const Gfx::PointF& position() const;
 
-        void move(const Gfx::Point& p);
+        void move(const Gfx::PointF& p);
 
-        void move(Pt::ssize_t x, Pt::ssize_t y);
+        void move(double x, double y);
 
-        const Gfx::Size& size() const;
+        const Gfx::SizeF& size() const;
 
-        const Gfx::Rect geometry() const;
+        const Gfx::RectF geometry() const;
 
         const Cursor& cursor() const;
 
@@ -200,15 +200,15 @@ class PT_HMI_API Widget : public Visual
 
         void setSizePolicy(const SizePolicy& policy);
 
-        Gfx::Size preferredSize() const;
+        Gfx::SizeF preferredSize() const;
 
         void measure(const SizePolicy& policy);
 
-        void layout(const Gfx::Rect& rect);
+        void layout(const Gfx::RectF& rect);
 
-        void layout(const Pt::Gfx::Point& p, const Pt::Gfx::Size& s);
+        void layout(const Pt::Gfx::PointF& p, const Pt::Gfx::SizeF& s);
 
-        void layout(Pt::ssize_t x, Pt::ssize_t y, Pt::ssize_t width, Pt::ssize_t height);
+        void layout(double x, double y, double width, double height);
 
         bool isLayouting() const;
 
@@ -220,10 +220,10 @@ class PT_HMI_API Widget : public Visual
         void setMargin(const Spacing& s);
 
         // outer spacing
-        void setMargin(Pt::ssize_t n);
+        void setMargin(double n);
 
         // inner spacing
-        void setMargin(Pt::ssize_t horiz, Pt::ssize_t vertical);
+        void setMargin(double horiz, double vertical);
 
         // inner spacing
         const Spacing& padding() const;
@@ -232,10 +232,10 @@ class PT_HMI_API Widget : public Visual
         void setPadding(const Spacing& p);
 
         // inner spacing
-        void setPadding(Pt::ssize_t n);
+        void setPadding(double n);
 
         // inner spacing
-        void setPadding(Pt::ssize_t horiz, Pt::ssize_t vertical);
+        void setPadding(double horiz, double vertical);
 
         //
         // event processing
@@ -245,9 +245,9 @@ class PT_HMI_API Widget : public Visual
 
     
     public:
-        virtual Gfx::Point toScreen(const Gfx::Point& pos) const;
+        virtual Gfx::PointF toScreen(const Gfx::PointF& pos) const;
 
-        virtual Gfx::Point fromScreen(const Gfx::Point& pos) const;
+        virtual Gfx::PointF fromScreen(const Gfx::PointF& pos) const;
 
     protected:
         void add(Widget& w);
@@ -267,9 +267,9 @@ class PT_HMI_API Widget : public Visual
         virtual void onInvalidate();
 
 
-        virtual Gfx::Size onMeasure(const SizePolicy& policy);
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
-        virtual void onLayout(const Gfx::Rect& rect);
+        virtual void onLayout(const Gfx::RectF& rect);
 
 
         virtual void onSetActionKey(const Key& ak);
@@ -320,7 +320,7 @@ class PT_HMI_API Widget : public Visual
 
         void setWindow(Window* window);
 
-        Widget* findWidget( const Gfx::Point& pos, bool input );
+        Widget* findWidget( const Gfx::PointF& pos, bool input );
 
     private:
         Pt::Signal<const Pt::Event&> _eventReady;
@@ -336,12 +336,12 @@ class PT_HMI_API Widget : public Visual
         bool                         _visible;
         bool                         _enabled;
         bool                         _enabledState;
-        Gfx::Point                  _position;
-        Gfx::Size                   _size;
+        Gfx::PointF                  _position;
+        Gfx::SizeF                   _size;
         
         SizePolicy                   _sizePolicy;
         SizePolicy                   _lastPolicy;
-        Gfx::Size                   _preferredSize;
+        Gfx::SizeF                   _preferredSize;
 
         bool                         _hasFocus;
         FocusPolicy                  _focusPolicy;

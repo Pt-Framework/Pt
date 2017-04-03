@@ -187,18 +187,18 @@ void CheckBox::onCanceled()
 }
 
 
-Gfx::Size CheckBox::onMeasure(const SizePolicy& policy)
+Gfx::SizeF CheckBox::onMeasure(const SizePolicy& policy)
 {
     Gfx::FontMetrics fm = Painter::fontMetrics( _font, text() );
 
-    Pt::ssize_t space = std::min<Pt::ssize_t>(_boxSize.width() / 2, _font.size() / 2);
-    Pt::ssize_t boxWidth = _boxSize.width();
-    Pt::ssize_t boxHeight = _boxSize.height();
+    double space = std::min<double>(_boxSize.width() / 2, _font.size() / 2);
+    double boxWidth = _boxSize.width();
+    double boxHeight = _boxSize.height();
 
-    Pt::ssize_t itemsWidth = space + boxWidth + space + fm.width();
-    Pt::ssize_t itemsHeight = std::max<Pt::ssize_t>(fm.height(), boxHeight);
+    double itemsWidth = space + boxWidth + space + fm.width();
+    double itemsHeight = std::max<double>(fm.height(), boxHeight);
 
-    return Gfx::Size( itemsWidth + padding().leftRight(), 
+    return Gfx::SizeF( itemsWidth + padding().leftRight(), 
                        itemsHeight + padding().topBottom() );
 }
 
@@ -225,7 +225,7 @@ void CheckBox::onInvalidate()
 }
 
 
-void CheckBox::onPaint(PaintSurface& surface, const Gfx::Rect& rect)
+void CheckBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
@@ -235,12 +235,12 @@ void CheckBox::onPaint(PaintSurface& surface, const Gfx::Rect& rect)
     Painter painter(surface);
     painter.setClip(rect);
 
-    Pt::ssize_t space = std::min<Pt::ssize_t>(_boxSize.width() / 2, _font.size() / 2);
+    double space = std::min<double>(_boxSize.width() / 2, _font.size() / 2);
 
-    Pt::ssize_t boxX = space;
-    Pt::ssize_t boxY = (size().height() - _boxSize.height()) / 2;
+    double boxX = space;
+    double boxY = (size().height() - _boxSize.height()) / 2;
     
-    Gfx::Rect boxRect(Gfx::Point(boxX, boxY), _boxSize);
+    Gfx::RectF boxRect(Gfx::PointF(boxX, boxY), _boxSize);
 
     _renderer->renderBox(*this, options, painter, rect, 
                           boxRect, _brush, _pen);
@@ -248,11 +248,11 @@ void CheckBox::onPaint(PaintSurface& surface, const Gfx::Rect& rect)
     painter.setFont(_font);
     Gfx::FontMetrics tm = painter.fontMetrics( text() );
 
-    Pt::ssize_t textX = space + _boxSize.width() + space;
-    Pt::ssize_t textY = (size().height() / 2) - (tm.height() / 2) + tm.ascent();
-    Gfx::Point textPos(textX, textY);
+    double textX = space + _boxSize.width() + space;
+    double textY = (size().height() / 2) - (tm.height() / 2) + tm.ascent();
+    Gfx::PointF textPos(textX, textY);
 
-    Gfx::Rect mnemonicRect;
+    Gfx::RectF mnemonicRect;
 
     const Char* m = mnemonic();
     if(m)
@@ -266,9 +266,9 @@ void CheckBox::onPaint(PaintSurface& surface, const Gfx::Rect& rect)
             mnemonicText = *m;
             Gfx::FontMetrics fmChar = painter.fontMetrics(mnemonicText);
 
-            mnemonicRect.set( Gfx::Point(textPos.x() + fmLeft.width(), 
+            mnemonicRect.set( Gfx::PointF(textPos.x() + fmLeft.width(), 
                                           textPos.y() - fmChar.ascent()),
-                              Gfx::Size(fmChar.width(), 
+                              Gfx::SizeF(fmChar.width(), 
                                          fmChar.height()) );
         }
     }

@@ -47,13 +47,13 @@ class LineEditor
         
         ~LineEditor();
 
-        const Gfx::Point& position() const;
+        const Gfx::PointF& position() const;
         
-        void setPosition(const Gfx::Point& p);
+        void setPosition(const Gfx::PointF& p);
 
-        const Gfx::Size& size() const;
+        const Gfx::SizeF& size() const;
 
-        void setSize(const Gfx::Size& s);
+        void setSize(const Gfx::SizeF& s);
 
         Adjustment adjustment() const;
 
@@ -96,15 +96,15 @@ class LineEditor
         void layout(const Pt::String& text, TextLine& line);
 
     private:
-        Gfx::Point _position;
-        Gfx::Size  _size;
+        Gfx::PointF _position;
+        Gfx::SizeF  _size;
         Adjustment  _adjustment;
         bool        _isMasked;
         Pt::String  _text;
         Pt::String  _displayText;
         Gfx::Font   _font;
         std::size_t _cursorPosition;
-        Pt::ssize_t _scrollOffset;
+        double      _scrollOffset;
 };
 
 } // namespace

@@ -136,15 +136,15 @@ void MenuItem::setIcon(const Gfx::Image& img)
 }
 
 
-Pt::ssize_t MenuItem::iconPadding() const
+double MenuItem::iconPadding() const
 {
     return _iconWidth;
 }
 
 
-void MenuItem::setIconPadding(Pt::ssize_t w)
+void MenuItem::setIconPadding(double w)
 {
-    _iconWidth = std::max(w, _icon.width());
+    _iconWidth = std::max<double>(w, _icon.width());
 }
 
 
@@ -281,12 +281,12 @@ void MenuItem::onShortcut(const KeyEvent& kev)
 }
 
 
-Gfx::Size MenuItem::onAutoSize(const SizePolicy& policy) const
+Gfx::SizeF MenuItem::onAutoSize(const SizePolicy& policy) const
 {
     Gfx::FontMetrics fm = Painter::fontMetrics(_font, _text);
 
-    Pt::ssize_t contentHeight = std::max<Pt::ssize_t>( fm.height(), _icon.height() );
-    Pt::ssize_t contentWidth = fm.width() + _picture.width();
+    double contentHeight = std::max<Pt::ssize_t>( fm.height(), _icon.height() );
+    double contentWidth = fm.width() + _picture.width();
 
     const Key* sk = shortcut();
     if(sk)
@@ -299,7 +299,7 @@ Gfx::Size MenuItem::onAutoSize(const SizePolicy& policy) const
     if(_subMenu)
         contentWidth += fm.height() * 4;
 
-    return Gfx::Size( contentWidth + padding().leftRight(),
+    return Gfx::SizeF( contentWidth + padding().leftRight(),
                        contentHeight + padding().topBottom() );
 }
 
@@ -329,7 +329,7 @@ void MenuItem::onInvalidate()
 }
 
 
-void MenuItem::onPaint(PaintSurface& surface, const Gfx::Rect& rect)
+void MenuItem::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
@@ -347,10 +347,10 @@ void MenuItem::onPaint(PaintSurface& surface, const Gfx::Rect& rect)
     //
     // icon
     //
-    Pt::ssize_t iconX = (iconPadding() - icon().width()) / 2;
-    Pt::ssize_t iconY = (size().height() - icon().height()) / 2;
+    double iconX = (iconPadding() - icon().width()) / 2;
+    double iconY = (size().height() - icon().height()) / 2;
 
-    Gfx::Point iconPos(iconX, iconY);
+    Gfx::PointF iconPos(iconX, iconY);
     painter.setCompositionMode(Gfx::CompositionMode::SourceOver);
     painter.drawPicture(iconPos, _picture);
     painter.setCompositionMode(Gfx::CompositionMode::SourceCopy);
@@ -362,10 +362,10 @@ void MenuItem::onPaint(PaintSurface& surface, const Gfx::Rect& rect)
     painter.setPen(_textPen);
 
     Gfx::FontMetrics fm = Painter::fontMetrics(_font, _text);
-    Pt::ssize_t textX = padding().left() + _iconWidth;
-    Pt::ssize_t textY = (size().height() - fm.height()) / 2;
+    double textX = padding().left() + _iconWidth;
+    double textY = (size().height() - fm.height()) / 2;
     textY += fm.ascent();
-    Gfx::Point textPos(textX, textY);
+    Gfx::PointF textPos(textX, textY);
 
     painter.drawText(textPos, _text);
 
@@ -378,10 +378,10 @@ void MenuItem::onPaint(PaintSurface& surface, const Gfx::Rect& rect)
         Pt::String skText = shortcutText(*sk);
         Gfx::FontMetrics skm = Painter::fontMetrics(_font, skText);
 
-        Pt::ssize_t skX = size().width() - skm.width() - padding().right();
-        Pt::ssize_t skY = (size().height() - skm.height()) / 2;
+        double skX = size().width() - skm.width() - padding().right();
+        double skY = (size().height() - skm.height()) / 2;
         skY += skm.ascent();
-        Gfx::Point skPos(skX, skY);
+        Gfx::PointF skPos(skX, skY);
 
         painter.drawText(skPos, skText);
     }
@@ -398,7 +398,7 @@ bool MenuItem::onMouseEvent(const MouseEvent& ev)
 {
     Base::onMouseEvent(ev);
 
-    bool inside = Gfx::Rect( size() ).contains( ev.position() );
+    bool inside = Gfx::RectF( size() ).contains( ev.position() );
 
     if( inside && ev.isRelease() )
     {
@@ -413,7 +413,7 @@ void MenuItem::onTouchEvent(const TouchEvent& ev)
 {    
     Base::onTouchEvent(ev);
 
-    bool inside = Gfx::Rect( size() ).contains( ev.position() );
+    bool inside = Gfx::RectF( size() ).contains( ev.position() );
    
     if( inside && ev.isRelease() )
     {

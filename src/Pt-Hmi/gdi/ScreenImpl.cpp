@@ -53,13 +53,13 @@ void ScreenImpl::init(WindowBase& w)
 }
 
 
-Gfx::Point ScreenImpl::toParent(const Window& w, const Gfx::Point& pos) const
+Gfx::PointF ScreenImpl::toParent(const Window& w, const Gfx::PointF& pos) const
 {
     return w.impl()->toScreen(pos);
 }
 
 
-Gfx::Point ScreenImpl::fromParent(const Window& w, const Gfx::Point& pos) const
+Gfx::PointF ScreenImpl::fromParent(const Window& w, const Gfx::PointF& pos) const
 {
     return w.impl()->fromScreen(pos);
 }
@@ -83,17 +83,17 @@ void ScreenImpl::dispatchScrollEvent(const ScrollEvent& ev)
 }
 
 
-void ScreenImpl::paint(const Gfx::Rect& updateRect)
+void ScreenImpl::paint(const Gfx::RectF& updateRect)
 {
 }
 
 
-void ScreenImpl::onResize(Window& w, const Gfx::Size& s)
+void ScreenImpl::onResize(Window& w, const Gfx::SizeF& s)
 {
 }
 
 
-void ScreenImpl::onMove(Window& w, const Gfx::Point& p)
+void ScreenImpl::onMove(Window& w, const Gfx::PointF& p)
 {
 }
 
@@ -152,14 +152,14 @@ void ScreenImpl::onEnable(Window& w, bool enable)
 }
 
 
-Gfx::Size ScreenImpl::size() const
+Gfx::SizeF ScreenImpl::size() const
 {
   HWND hDesktop = GetDesktopWindow();
   
   RECT r;   
   GetWindowRect(hDesktop, &r);
   
-  return Gfx::Size(r.right, r.bottom);
+  return Gfx::SizeF(r.right, r.bottom);
 }
 
 

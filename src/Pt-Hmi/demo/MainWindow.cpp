@@ -93,15 +93,15 @@ MainWindow::MainWindow()
     _picture.set(_icon);
     
     setTitle("Main 1");
-    move( Gfx::Point(60, 60) );
-    resize( Gfx::Size(700, 900) ); 
+    move( Gfx::PointF(60, 60) );
+    resize( Gfx::SizeF(700, 900) ); 
     
     //_child2.setTopMost(true);
-    _child2.resize( Gfx::Size(550, 600) );
+    _child2.resize( Gfx::SizeF(550, 600) );
     add( _child2 );
     
     _child2.setTitle("Child 2");
-    _child2.move( Gfx::Point(10, 10) );
+    _child2.move( Gfx::PointF(10, 10) );
     
     for(int n = 0; n < 10; ++n)
     {
@@ -128,7 +128,7 @@ MainWindow::MainWindow()
 
   
     SizePolicy policy(SizePolicy::Fixed, SizePolicy::Fixed);
-    policy.setSize( Gfx::Size(500, 1100) );
+    policy.setSize( Gfx::SizeF(500, 1100) );
     _scrollContainer.setSizePolicy(policy);
 
     _scrollView.setContent(_scrollContainer);
@@ -139,8 +139,8 @@ MainWindow::MainWindow()
     add( _child1 );
     
     //_child1.setTopMost(true);
-    _child1.move( Gfx::Point(30,30));
-    _child1.resize( Gfx::Size(300, 600) );
+    _child1.move( Gfx::PointF(30,30));
+    _child1.resize( Gfx::SizeF(300, 600) );
     _child1.show(true);
     
     // context menu   
@@ -183,7 +183,7 @@ MainWindow::~MainWindow()
 }
 
 
-void MainWindow::onPaintBackground(const Gfx::Rect& rect)
+void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 {
     Window::onPaintBackground(rect);
 
@@ -195,13 +195,13 @@ void MainWindow::onPaintBackground(const Gfx::Rect& rect)
     //Gfx::ImagePainter::setDefaultFont("DejaVu Sans");
     //imagePainter.setBrush( Gfx::Brush( Gfx::Color::fromRgb8(200, 200, 200)));
 
-    //Pt::Gfx::Rect borderRect(Pt::Gfx::Point(0,0), 
-    //                          Pt::Gfx::Size(image.size().width() - 10, 
+    //Pt::Gfx::RectF borderRect(Pt::Gfx::PointF(0,0), 
+    //                          Pt::Gfx::SizeF(image.size().width() - 10, 
     //                                         image.size().height() -10));
 
     ////const double corner = 7;
 
-    ////Pt::Gfx::Point outline[9] = {};
+    ////Pt::Gfx::PointF outline[9] = {};
 
     ////// top left
     ////outline[0].setX(0);
@@ -234,32 +234,32 @@ void MainWindow::onPaintBackground(const Gfx::Rect& rect)
     ////outline[8] = outline[0];
     ////imagePainter.fillPolygon(&outline[0],9);
 
-    ////std::vector<Pt::Gfx::Point> concave;
-    ////concave.push_back(Pt::Gfx::Point(5,0));
-    ////concave.push_back(Pt::Gfx::Point(10,5));
-    ////concave.push_back(Pt::Gfx::Point(5,10));
-    ////concave.push_back(Pt::Gfx::Point(0,5));
-    ////concave.push_back(Pt::Gfx::Point(5,0));
+    ////std::vector<Pt::Gfx::PointF> concave;
+    ////concave.push_back(Pt::Gfx::PointF(5,0));
+    ////concave.push_back(Pt::Gfx::PointF(10,5));
+    ////concave.push_back(Pt::Gfx::PointF(5,10));
+    ////concave.push_back(Pt::Gfx::PointF(0,5));
+    ////concave.push_back(Pt::Gfx::PointF(5,0));
     ////imagePainter.fillPolygon(&concave[0],concave.size());
 
-    ////std::vector<Pt::Gfx::Point> concave2;
-    ////concave2.push_back(Pt::Gfx::Point(0,5));
-    ////concave2.push_back(Pt::Gfx::Point(5,0));
-    ////concave2.push_back(Pt::Gfx::Point(10,18));
-    ////concave2.push_back(Pt::Gfx::Point(15,0));
-    ////concave2.push_back(Pt::Gfx::Point(20,5));
-    ////concave2.push_back(Pt::Gfx::Point(20,20));
-    ////concave2.push_back(Pt::Gfx::Point(0,20));
-    ////concave2.push_back(Pt::Gfx::Point(0,5));
+    ////std::vector<Pt::Gfx::PointF> concave2;
+    ////concave2.push_back(Pt::Gfx::PointF(0,5));
+    ////concave2.push_back(Pt::Gfx::PointF(5,0));
+    ////concave2.push_back(Pt::Gfx::PointF(10,18));
+    ////concave2.push_back(Pt::Gfx::PointF(15,0));
+    ////concave2.push_back(Pt::Gfx::PointF(20,5));
+    ////concave2.push_back(Pt::Gfx::PointF(20,20));
+    ////concave2.push_back(Pt::Gfx::PointF(0,20));
+    ////concave2.push_back(Pt::Gfx::PointF(0,5));
     ////imagePainter.fillPolygon(&concave2[0],concave2.size());
 
     //imagePainter.setFont(Pt::Gfx::Font("", 24));
     //imagePainter.setPen( Gfx::Pen( Gfx::Color::fromRgb8(255,0,0) ) );
-    //imagePainter.drawText( Gfx::Point(30, 25), "Hello World!");
-    ////imagePainter.drawImage(Gfx::Point(0, 0), _icon);
+    //imagePainter.drawText( Gfx::PointF(30, 25), "Hello World!");
+    ////imagePainter.drawImage(Gfx::PointF(0, 0), _icon);
 
-    //painter.drawImage(Gfx::Point(0, 0), image);
-    ////painter.drawPicture(Gfx::Point(0,0), _picture);
+    //painter.drawImage(Gfx::PointF(0, 0), image);
+    ////painter.drawPicture(Gfx::PointF(0,0), _picture);
 }
 
 
@@ -275,7 +275,7 @@ bool MainWindow::onMouseEvent(const MouseEvent& ev)
 
     if( ev.isRelease(MouseEvent::Right) )
     {
-        Gfx::Point menuPos = this->toScreen( ev.position() );
+        Gfx::PointF menuPos = this->toScreen( ev.position() );
 
         _menu.show(menuPos);
     }

@@ -94,11 +94,11 @@ class MenuBarItem : public Control
         void setRenderer(MenuBarRenderer* renderer);
 
     protected:
-        virtual Gfx::Size onAutoSize(const SizePolicy& policy) const;
+        virtual Gfx::SizeF onAutoSize(const SizePolicy& policy) const;
 
         virtual void onInvalidate();
 
-        virtual void onPaint(PaintSurface& surface, const Gfx::Rect& updateRect);
+        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
     protected:
         virtual bool onMouseEvent(const MouseEvent& ev);
@@ -141,7 +141,7 @@ class PT_HMI_API MenuBar : public MenuShell
 
         Menu* selectedMenu();
 
-        MenuBarItem* findItem(const Gfx::Point& pos);
+        MenuBarItem* findItem(const Gfx::PointF& pos);
 
     public:
         const Gfx::Brush& background() const;
@@ -167,12 +167,12 @@ class PT_HMI_API MenuBar : public MenuShell
 
         virtual void onEnter();
 
-        virtual MenuShell* onFindMenu(const Gfx::Point& screenPos);
+        virtual MenuShell* onFindMenu(const Gfx::PointF& screenPos);
 
     protected:
         virtual void onInvalidate();
 
-        virtual void onPaint(PaintSurface& surface, const Gfx::Rect& rect);
+        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& rect);
 
     protected:
         virtual bool onMouseEvent(const MouseEvent& ev);

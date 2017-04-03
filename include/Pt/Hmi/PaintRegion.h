@@ -52,14 +52,14 @@ class Picture;
 class PT_HMI_API PaintRegion : public PaintSurface
 {
     public:
-        PaintRegion(PaintSurface& surface, const Gfx::Rect& rect);
+        PaintRegion(PaintSurface& surface, const Gfx::RectF& rect);
 
         virtual ~PaintRegion();
 
     protected:
         virtual const Gfx::ImageFormat& format() const;
 
-        virtual void setClip( const Gfx::Rect& clip);
+        virtual void setClip( const Gfx::RectF& clip);
 
         virtual void setCompositionMode(const Gfx::CompositionMode& mode);
 
@@ -71,36 +71,36 @@ class PT_HMI_API PaintRegion : public PaintSurface
 
         virtual Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
 
-        virtual void drawLine(const Gfx::Point& from, const Gfx::Point& to);
+        virtual void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
 
-        virtual void drawText(const Gfx::Point& to, const Pt::String& Text);
+        virtual void drawText(const Gfx::PointF& to, const Pt::String& Text);
 
-        virtual void drawRect(const Gfx::Rect& rectangle);
+        virtual void drawRect(const Gfx::RectF& rectangle);
 
-        virtual void fillRect(const Gfx::Rect& rectangle);
+        virtual void fillRect(const Gfx::RectF& rectangle);
 
-        virtual void drawEllipse(const Gfx::Point& topLeft, const Gfx::Size& size);
+        virtual void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
 
-        virtual void fillEllipse(const Gfx::Point& topLeft, const Gfx::Size& size);
+        virtual void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
 
-        virtual void drawPolyline(const Gfx::Point* points, size_t pointCount);
+        virtual void drawPolyline(const Gfx::PointF* points, size_t pointCount);
 
-        virtual void fillPolygon(const Gfx::Point* points, size_t pointCount);
+        virtual void fillPolygon(const Gfx::PointF* points, size_t pointCount);
 
-        virtual void drawSurface(const Gfx::Point& toF, const PixmapSurface& surface);
+        virtual void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
 
-        virtual void drawSurface(const Gfx::Point& toF, 
+        virtual void drawSurface(const Gfx::PointF& toF, 
                                  const PixmapSurface& pm,
-                                 const Gfx::Rect& pmRect);
+                                 const Gfx::RectF& pmRect);
 
-        virtual void drawImage(const Gfx::Point& to, const Gfx::Image& image);
+        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
 
-        virtual void drawImage(const Gfx::Point& to, const Gfx::Image& image, const Gfx::Rect& imgRect);
+        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imgRect);
 
-        virtual void drawPicture(const Gfx::Point& to, const Picture& pic);
+        virtual void drawPicture(const Gfx::PointF& to, const Picture& pic);
 
     protected:
-        virtual const Gfx::Size& onSize() const;
+        virtual const Gfx::SizeF& onSize() const;
 
         virtual void onBegin(Painter& painter);
 
@@ -108,7 +108,7 @@ class PT_HMI_API PaintRegion : public PaintSurface
 
     private:
         PaintSurface* _surface;
-        Gfx::Rect _area;
+        Gfx::RectF _area;
 };
 
 } // namespace

@@ -210,7 +210,7 @@ const std::vector<Widget*>& Widget::widgets() const
 }
 
 
-Widget* Widget::findWidget(const Gfx::Point& pos, bool input)
+Widget* Widget::findWidget(const Gfx::PointF& pos, bool input)
 {
     if( ! isVisible() || ! isEnabled() )
         return 0;
@@ -226,7 +226,7 @@ Widget* Widget::findWidget(const Gfx::Point& pos, bool input)
         if( ! child->geometry().contains(pos) )
             continue;
 
-        Gfx::Point p = child->fromParent(pos);
+        Gfx::PointF p = child->fromParent(pos);
         Widget* found = child->findWidget(p, input);
 
         if( ! input)
@@ -245,7 +245,7 @@ Widget* Widget::findWidget(const Gfx::Point& pos, bool input)
 }
 
 
-Widget* Widget::findWidget(const Gfx::Point& pos)
+Widget* Widget::findWidget(const Gfx::PointF& pos)
 {
     return findWidget(pos, false);
 }
@@ -253,31 +253,31 @@ Widget* Widget::findWidget(const Gfx::Point& pos)
 
 
 
-Gfx::Point Widget::toParent(const Gfx::Point& pos) const
+Gfx::PointF Widget::toParent(const Gfx::PointF& pos) const
 {
     return  pos + _position;
 }
 
 
-Gfx::Point Widget::fromParent(const Gfx::Point& pos) const
+Gfx::PointF Widget::fromParent(const Gfx::PointF& pos) const
 {
     return pos - _position;
 }
 
 
-Gfx::Point Widget::fromWindow(const Gfx::Point& pos) const
+Gfx::PointF Widget::fromWindow(const Gfx::PointF& pos) const
 {
     if( ! _parent )
         return pos;
 
-    Gfx::Point p = _parent->fromWindow(pos);
+    Gfx::PointF p = _parent->fromWindow(pos);
     return p - _position;
 }
 
 
-Gfx::Point Widget::toWindow(const Gfx::Point& p) const
+Gfx::PointF Widget::toWindow(const Gfx::PointF& p) const
 {
-    Gfx::Point pos = p + this->position();
+    Gfx::PointF pos = p + this->position();
 
     const Widget* w = this;
 
@@ -290,9 +290,9 @@ Gfx::Point Widget::toWindow(const Gfx::Point& p) const
 }
 
 
-Gfx::Point Widget::toScreen(const Gfx::Point& pos) const
+Gfx::PointF Widget::toScreen(const Gfx::PointF& pos) const
 {
-    Gfx::Point screenPos = toWindow(pos);
+    Gfx::PointF screenPos = toWindow(pos);
 
     if( window() )
         return window()->toScreen(screenPos);
@@ -301,9 +301,9 @@ Gfx::Point Widget::toScreen(const Gfx::Point& pos) const
 }
 
 
-Gfx::Point Widget::fromScreen(const Gfx::Point& pos) const
+Gfx::PointF Widget::fromScreen(const Gfx::PointF& pos) const
 {
-    Gfx::Point widgetPos;
+    Gfx::PointF widgetPos;
 
     if( window() )
         widgetPos = window()->fromScreen(pos);
@@ -546,7 +546,7 @@ void Widget::setSizePolicy(const SizePolicy& policy)
 }
 
 
-Gfx::Size Widget::preferredSize() const
+Gfx::SizeF Widget::preferredSize() const
 {
     return _preferredSize;
 }
@@ -617,13 +617,13 @@ void Widget::measure(const SizePolicy& policy)
 }
 
 
-Gfx::Size Widget::onMeasure(const SizePolicy& policy)
+Gfx::SizeF Widget::onMeasure(const SizePolicy& policy)
 {
-   return Gfx::Size(0, 0);
+   return Gfx::SizeF(0, 0);
 }
 
 
-void Widget::layout(const Gfx::Rect& rect)
+void Widget::layout(const Gfx::RectF& rect)
 {
     bool moved = rect.topLeft() != _position;
     bool resized = rect.size() != _size;
@@ -633,12 +633,12 @@ void Widget::layout(const Gfx::Rect& rect)
 
     if(moved)
     {
-        Gfx::Point p = rect.topLeft();
+        Gfx::PointF p = rect.topLeft();
 
-        Gfx::Rect updateRect(Gfx::Point(0, 0), _size);
+        Gfx::RectF updateRect(Gfx::PointF(0, 0), _size);
 
-        Gfx::Point to = p - _position;
-        updateRect.unify( Gfx::Rect(to, _size) );
+        Gfx::PointF to = p - _position;
+        updateRect.unify( Gfx::RectF(to, _size) );
 
         MoveEvent mev(vid(), p);
         Application::instance().loop().commitEvent(mev);
@@ -651,12 +651,12 @@ void Widget::layout(const Gfx::Rect& rect)
 
     if(resized)
     {
-        const Gfx::Size& s = rect.size();
+        const Gfx::SizeF& s = rect.size();
 
-        Gfx::Size updateSize( std::max( _size.width(), s.width()),
+        Gfx::SizeF updateSize( std::max( _size.width(), s.width()),
                                std::max( _size.height(), s.height()) );
 
-        Gfx::Rect updateRect(Gfx::Point(0,0), updateSize);
+        Gfx::RectF updateRect(Gfx::PointF(0,0), updateSize);
 
         _size = s;
 
@@ -675,15 +675,15 @@ void Widget::layout(const Gfx::Rect& rect)
 }
 
 
-void Widget::layout(const Pt::Gfx::Point& p, const Pt::Gfx::Size& s)
+void Widget::layout(const Pt::Gfx::PointF& p, const Pt::Gfx::SizeF& s)
 {
-    layout( Gfx::Rect(p, s) );
+    layout( Gfx::RectF(p, s) );
 }
 
 
-void Widget::layout(Pt::ssize_t x, Pt::ssize_t y, Pt::ssize_t width, Pt::ssize_t height)
+void Widget::layout(double x, double y, double width, double height)
 {
-    layout( Gfx::Point(x, y), Pt::Gfx::Size(width,height) );
+    layout( Gfx::PointF(x, y), Pt::Gfx::SizeF(width,height) );
 }
 
 
@@ -693,39 +693,42 @@ bool Widget::isLayouting() const
 }
 
 
-void Widget::onLayout(const Gfx::Rect& rect)
+void Widget::onLayout(const Gfx::RectF& rect)
 {
 }
 
 
 void Widget::update()
 {
-    Gfx::Rect rect( Gfx::Point(0,0), size() );
+    Gfx::RectF rect( Gfx::PointF(0,0), size() );
     update(rect);
 }
 
 
-void Widget::update(const Gfx::Rect& rect)
+void Widget::update(const Gfx::RectF& rect)
 {
     Window* w = window();
     if( ! w )
         return;
 
-    Gfx::Point updatePos = toWindow( rect.topLeft() );
-    Gfx::Rect updateRect( updatePos, rect.size() );
+    Gfx::PointF updatePos = toWindow( rect.topLeft() );
+    Gfx::RectF updateRect( updatePos, rect.size() );
 
     w->update(updateRect);
 }
 
 
-void Widget::repaint(const Gfx::Rect& rect)
+void Widget::repaint(const Gfx::RectF& rect)
 {
     if( ! isVisible() )
         return;
 
-    Gfx::Rect widgetRect = rect.intersect( Gfx::Rect(Gfx::Point(0,0), this->size() ) );
-    
-    
+    Gfx::RectF widgetRect = rect.intersect( Gfx::RectF(Gfx::PointF(0,0),
+                                                       this->size() ) );
+
+    // TODO: remove this hack when Size is integer based
+    widgetRect.setHeight( std::floor(widgetRect.height() + 0.5) );
+
     PaintEvent pev( vid(), widgetRect);
     Application::instance().loop().commitEvent(pev);
 
@@ -736,11 +739,11 @@ void Widget::repaint(const Gfx::Rect& rect)
     {
         Widget* w = (*it);
 
-        Gfx::Rect updateRect = w->geometry().intersect(rect);
+        Gfx::RectF updateRect = w->geometry().intersect(rect);
         if( updateRect.isNull() )
             continue;
 
-        Gfx::Point updatePos = w->fromParent( updateRect.topLeft() );
+        Gfx::PointF updatePos = w->fromParent( updateRect.topLeft() );
         updateRect.setOrigin(updatePos);
 
         w->repaint(updateRect);
@@ -850,13 +853,13 @@ void Widget::releasePointer()
 }
 
 
-const Gfx::Point& Widget::position() const
+const Gfx::PointF& Widget::position() const
 {
     return _position;
 }
 
 
-void Widget::move(const Gfx::Point& pos)
+void Widget::move(const Gfx::PointF& pos)
 {
     if(pos == _position)
         return;
@@ -872,9 +875,9 @@ void Widget::move(const Gfx::Point& pos)
 }
 
 
-void Widget::move(Pt::ssize_t x, Pt::ssize_t y)
+void Widget::move(double x, double y)
 {
-    move( Gfx::Point(x, y) );
+    move( Gfx::PointF(x, y) );
 }
 
 
@@ -883,7 +886,7 @@ void Widget::onMoveEvent(const MoveEvent& ev)
 }
 
 
-const Gfx::Size& Widget::size() const
+const Gfx::SizeF& Widget::size() const
 {
     return _size;
 }
@@ -895,9 +898,9 @@ void Widget::onResizeEvent(const ResizeEvent& ev)
 }
 
 
-const Gfx::Rect Widget::geometry() const
+const Gfx::RectF Widget::geometry() const
 {
-    return Gfx::Rect( position(), size() );
+    return Gfx::RectF( position(), size() );
 }
 
 
@@ -931,13 +934,13 @@ void Widget::setMargin(const Spacing& s)
 }
 
 
-void Widget::setMargin(Pt::ssize_t n)
+void Widget::setMargin(double n)
 {
     setMargin( Spacing(n) );
 }
 
 
-void Widget::setMargin(Pt::ssize_t horiz, Pt::ssize_t vertical)
+void Widget::setMargin(double horiz, double vertical)
 {
     setMargin( Spacing(horiz, vertical) );
 }
@@ -956,13 +959,13 @@ void Widget::setPadding( const Spacing& p )
 }
 
 
-void Widget::setPadding(Pt::ssize_t n)
+void Widget::setPadding(double n)
 {
     setPadding( Spacing(n) );
 }
 
 
-void Widget::setPadding(Pt::ssize_t horiz, Pt::ssize_t vertical)
+void Widget::setPadding(double horiz, double vertical)
 {
     setPadding( Spacing(horiz, vertical) );
 }

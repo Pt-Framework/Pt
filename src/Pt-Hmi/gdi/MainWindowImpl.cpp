@@ -71,24 +71,24 @@ MainWindowImpl::~MainWindowImpl()
 }
 
 
-Gfx::Point MainWindowImpl::toScreen(const Gfx::Point& windowPos) const
+Gfx::PointF MainWindowImpl::toScreen(const Gfx::PointF& windowPos) const
 {
-    POINT p = { windowPos.x(), 
-                windowPos.y() };
+    POINT p = { Gfx::round(windowPos.x()), 
+                Gfx::round(windowPos.y()) };
 
     ClientToScreen(_hwnd, &p);
 
-    return Gfx::Point( p.x, p.y );
+    return Gfx::PointF( p.x, p.y );
 }
 
 
-Gfx::Point MainWindowImpl::fromScreen(const Gfx::Point& screenPos) const
+Gfx::PointF MainWindowImpl::fromScreen(const Gfx::PointF& screenPos) const
 {
-    POINT p = { screenPos.x(), screenPos.y() };
+    POINT p = { Gfx::round(screenPos.x()), Gfx::round(screenPos.y()) };
 
     ScreenToClient(_hwnd, &p);
 
-    return Gfx::Point( p.x, p.y );
+    return Gfx::PointF( p.x, p.y );
 }
 
 
@@ -101,7 +101,7 @@ void MainWindowImpl::close()
 }
 
 
-void MainWindowImpl::paint(const Gfx::Rect& rect)
+void MainWindowImpl::paint(const Gfx::RectF& rect)
 {
     InvalidateRect(_hwnd, NULL, FALSE);
 }
@@ -144,14 +144,14 @@ void MainWindowImpl::setTopMost(bool e)
 }
 
 
-void MainWindowImpl::move(const Gfx::Point& p)
+void MainWindowImpl::move(const Gfx::PointF& p)
 {
     SetWindowPos(_hwnd, 0, p.x(), p.y(), 0, 0, 
                  SWP_DRAWFRAME|SWP_NOSIZE|SWP_NOACTIVATE|SWP_NOZORDER);
 }
 
 
-void MainWindowImpl::resize(const Gfx::Size& size)
+void MainWindowImpl::resize(const Gfx::SizeF& size)
 {
     RECT clientRect;
     SetRect(&clientRect, 0, 0, size.width() - 1, size.height() - 1);
@@ -248,12 +248,12 @@ void MainWindowImpl::setTitle(const std::string& text)
 }
 
 
-void MainWindowImpl::setMinimumSize(const Gfx::Size& s)
+void MainWindowImpl::setMinimumSize(const Gfx::SizeF& s)
 {
 }
 
 
-void MainWindowImpl::setMaximumSize(const Gfx::Size& s)
+void MainWindowImpl::setMaximumSize(const Gfx::SizeF& s)
 {
 }
 

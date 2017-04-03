@@ -62,7 +62,7 @@ bool Popup::onMouseEvent(const MouseEvent& ev)
 {
     bool r = Base::onMouseEvent(ev);
 
-    Gfx::Rect rect( size() );
+    Gfx::RectF rect( size() );
     if( rect.contains( ev.position() ) )
         return r;
 
@@ -79,7 +79,7 @@ void Popup::onTouchEvent(const TouchEvent& ev)
 {
     Base::onTouchEvent(ev);
 
-    Gfx::Rect rect( size() );
+    Gfx::RectF rect( size() );
     if( rect.contains( ev.position() ) )
         return;
 

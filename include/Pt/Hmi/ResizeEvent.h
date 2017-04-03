@@ -43,7 +43,7 @@ class ResizeEvent : public Pt::BasicEvent<ResizeEvent>
 {
     public:
         ResizeEvent(Pt::uint64_t vid, 
-                    const Gfx::Size& size)
+                    const Gfx::SizeF& size)
         : _vid(vid)
         , _size(size)
         {
@@ -63,19 +63,19 @@ class ResizeEvent : public Pt::BasicEvent<ResizeEvent>
             _vid = vid;
         }
 
-        const Gfx::Size& size() const
+        const Gfx::SizeF& size() const
         {
             return _size;
         }
 
-        void setSize(const Gfx::Size& size)
+        void setSize(const Gfx::SizeF& size)
         {
             _size = size;
         }
 
     private:
         Pt::uint64_t _vid;
-        Gfx::Size   _size;
+        Gfx::SizeF   _size;
 };
 
 } // namespace

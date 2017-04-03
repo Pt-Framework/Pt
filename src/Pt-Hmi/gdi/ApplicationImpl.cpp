@@ -666,7 +666,7 @@ void ApplicationImpl::onMouse(Window& w, unsigned int msg, WPARAM wparam, LPARAM
         break;
     }
   
-    Gfx::Point pos(xPos, yPos);
+    Gfx::PointF pos(xPos, yPos);
 
     _mouseEvent.setPosition(pos);
     _mouseEvent.setId( w.vid() );
@@ -688,7 +688,7 @@ void ApplicationImpl::onMove(Window& w, HWND hwnd, LPARAM lParam)
     int xPos = info.left;
     int yPos = info.top;
 
-    MoveEvent ev(w.vid(), Gfx::Point(xPos, yPos) );
+    MoveEvent ev(w.vid(), Gfx::PointF(xPos, yPos) );
     commitEvent( ev );          
 }
 
@@ -728,12 +728,12 @@ void ApplicationImpl::onResize(Window& w, WPARAM wParam, LPARAM lParam)
     int width  = LOWORD(lParam);
     int height = HIWORD(lParam);
 
-    Gfx::Size to(width, height);
+    Gfx::SizeF to(width, height);
           
     ResizeEvent rev(w.vid(), to);
     commitEvent(rev);
            
-    Gfx::Rect updateRect(Gfx::Point(0,0), to);
+    Gfx::RectF updateRect(Gfx::PointF(0,0), to);
     w.update(updateRect);
             
     // windows starts a nested message loop during resizing, so the events
@@ -751,7 +751,7 @@ void ApplicationImpl::onPaint(Window& w, HWND hwnd)
     HDC windowContext = BeginPaint(hwnd, &ps);
 
     // TODO: rect optimization
-    Gfx::Rect updateRect(Gfx::Point(0,0), w.size());
+    //Gfx::Rect updateRect(Gfx::Point(0,0), w.size());
 
     HDC bitmapContext = w.surface().pixmapImpl()->deviceContext();
     BitBlt(windowContext, 0, 0, info.right, info.bottom, bitmapContext, 0, 0, SRCCOPY);    

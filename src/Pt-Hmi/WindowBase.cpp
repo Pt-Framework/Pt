@@ -45,7 +45,7 @@ WindowBase::~WindowBase()
 }
 
 
-Gfx::Size WindowBase::size() const
+Gfx::SizeF WindowBase::size() const
 {
     return onSize();
 }
@@ -60,14 +60,14 @@ void WindowBase::invalidate()
 
 void WindowBase::update()
 {
-    Gfx::Rect updateRect( Gfx::Point(0,0),
+    Gfx::RectF updateRect( Gfx::PointF(0,0),
                            size() );
 
     onUpdate(updateRect);
 }
 
 
-void WindowBase::update(const Gfx::Rect& rect)
+void WindowBase::update(const Gfx::RectF& rect)
 {
     onUpdate(rect);
 }

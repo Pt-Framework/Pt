@@ -35,6 +35,7 @@
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/Font.h>
+#include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Gfx/Rect.h>
@@ -190,8 +191,9 @@ class PainterImpl
             return _gradientBrush;
         }
 
-        void setClip(const Gfx::Rect& rect)
+        void setClip(const Gfx::RectF& rectF)
         {
+            Gfx::Rect rect = round(rectF);
 
             if(_clipRect)
             {

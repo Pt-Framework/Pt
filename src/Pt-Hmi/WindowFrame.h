@@ -69,7 +69,7 @@ class WindowButton
         void setParent(WindowFrame& frame)
         { _frame  = &frame; }
 
-        const Gfx::Rect&  geometry() const
+        const Gfx::RectF&  geometry() const
         { return _geometry; }
 
         void setColor(const Gfx::Color& c)
@@ -95,12 +95,12 @@ class WindowButton
 
         virtual void touchEvent(const TouchEvent& tev);
 
-        virtual void paint(PaintSurface& surface, const Gfx::Rect& rect);
+        virtual void paint(PaintSurface& surface, const Gfx::RectF& rect);
 
     private:
         Signal<>       _clicked;
         WindowFrame*   _frame;
-        Gfx::Rect     _geometry;
+        Gfx::RectF     _geometry;
         Gfx::Color     _color;
         bool           _isPressed;
 };
@@ -112,7 +112,7 @@ class MinimizeButton : public WindowButton
 
         ~MinimizeButton();
 
-        void paint(PaintSurface& surface, const Gfx::Rect& rect);
+        void paint(PaintSurface& surface, const Gfx::RectF& rect);
 };
 
 
@@ -123,7 +123,7 @@ class MaximizeButton : public WindowButton
 
         ~MaximizeButton();
 
-        void paint(PaintSurface& surface, const Gfx::Rect& rect);
+        void paint(PaintSurface& surface, const Gfx::RectF& rect);
 };
 
 
@@ -134,7 +134,7 @@ class CloseButton : public WindowButton
 
         ~CloseButton();
 
-        void paint(PaintSurface& surface, const Gfx::Rect& rect);
+        void paint(PaintSurface& surface, const Gfx::RectF& rect);
 };
 
 
@@ -145,7 +145,7 @@ class MenuButton : public WindowButton
 
         ~MenuButton();
 
-        void paint(PaintSurface& surface, const Gfx::Rect& rect);
+        void paint(PaintSurface& surface, const Gfx::RectF& rect);
 };
 
 
@@ -164,27 +164,27 @@ class WindowFrame : public Pt::Connectable
 
         void setState(Window::State state);
 
-        const Gfx::Point& restorePosition() const;
+        const Gfx::PointF& restorePosition() const;
 
-        const Gfx::Size& restoreSize() const;
+        const Gfx::SizeF& restoreSize() const;
         
-        void setRestore(const Gfx::Point& pos, const Gfx::Size& size);
+        void setRestore(const Gfx::PointF& pos, const Gfx::SizeF& size);
 
-        const Gfx::Rect& clientRect() const;
+        const Gfx::RectF& clientRect() const;
 
-        const Gfx::Rect& frameRect() const;
+        const Gfx::RectF& frameRect() const;
 
-        void setFrame(Pt::ssize_t bw, Pt::ssize_t th);
+        void setFrame(double bw, double th);
 
-        Gfx::Point toFrame(const Gfx::Point& pos) const;
+        Gfx::PointF toFrame(const Gfx::PointF& pos) const;
 
-        Gfx::Point fromFrame(const Gfx::Point& pos) const;
+        Gfx::PointF fromFrame(const Gfx::PointF& pos) const;
 
-        Gfx::Size fromFrame(const Gfx::Size& size) const;
+        Gfx::SizeF fromFrame(const Gfx::SizeF& size) const;
 
         void update();
 
-        void update(const Gfx::Rect& rect);
+        void update(const Gfx::RectF& rect);
 
         void moveEvent(const MoveEvent& mev);
 
@@ -200,7 +200,7 @@ class WindowFrame : public Pt::Connectable
         //! @brief Returns true if window was grabbed for moving or resizing.
         bool touchEvent(const TouchEvent& tev);
 
-        void paint(PaintSurface& surface, const Gfx::Rect& rect);
+        void paint(PaintSurface& surface, const Gfx::RectF& rect);
 
     protected:
         bool onMouseEvent(const MouseEvent& mev);
@@ -218,38 +218,38 @@ class WindowFrame : public Pt::Connectable
         void onClose();
 
     private:
-        bool isTitle(const Gfx::Point& p) const;
+        bool isTitle(const Gfx::PointF& p) const;
 
-        bool isLeftBorder(const Pt::Gfx::Point& p) const;
+        bool isLeftBorder(const Pt::Gfx::PointF& p) const;
         
-        bool isRightBorder(const Pt::Gfx::Point& p) const;
+        bool isRightBorder(const Pt::Gfx::PointF& p) const;
         
-        bool isTopBorder(const Pt::Gfx::Point& p) const;
+        bool isTopBorder(const Pt::Gfx::PointF& p) const;
         
-        bool isBottomBorder(const Pt::Gfx::Point& p) const;
+        bool isBottomBorder(const Pt::Gfx::PointF& p) const;
 
-        Window* checkWindow(const Gfx::Point& pos);
+        Window* checkWindow(const Gfx::PointF& pos);
 
-        WindowButton* checkButton(const Gfx::Point& pos);
+        WindowButton* checkButton(const Gfx::PointF& pos);
 
         //! @brief Returns true if window was grabbed for moving or resizing.
-        bool checkMove(const Gfx::Point& pos, bool isDrag, bool isPress);
+        bool checkMove(const Gfx::PointF& pos, bool isDrag, bool isPress);
 
         //! @brief Returns true if window was grabbed for moving or resizing.
-        bool checkResize(const Gfx::Point& pos, bool isDrag, bool isPress);
+        bool checkResize(const Gfx::PointF& pos, bool isDrag, bool isPress);
 
     private:
         WindowManager* _wm;
         Window*        _window;
-        Pt::ssize_t   _borderWidth;
-        Pt::ssize_t   _titleHeight;
-        Gfx::Rect     _frameRect;
-        Gfx::Rect     _clientRect;
-        Gfx::Point    _restorePos;
-        Gfx::Size     _restoreSize;
+        double         _borderWidth;
+        double         _titleHeight;
+        Gfx::RectF     _frameRect;
+        Gfx::RectF     _clientRect;
+        Gfx::PointF    _restorePos;
+        Gfx::SizeF     _restoreSize;
         Window::State  _state;
 
-        Gfx::Point    _lastPointer;
+        Gfx::PointF    _lastPointer;
         bool           _isClient;
         bool           _isMoving;
         bool           _isLeftResizing;

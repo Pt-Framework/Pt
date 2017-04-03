@@ -159,12 +159,12 @@ void Panel::onInvalidate()
 }
 
 
-Gfx::Size Panel::onMeasure(const SizePolicy& policy)
+Gfx::SizeF Panel::onMeasure(const SizePolicy& policy)
 {
     if(_content)
     { 
-        Pt::ssize_t hspace = padding().leftRight() + _content->margin().leftRight();
-        Pt::ssize_t vspace = padding().topBottom() + _content->margin().topBottom();
+        double hspace = padding().leftRight() + _content->margin().leftRight();
+        double vspace = padding().topBottom() + _content->margin().topBottom();
 
         SizePolicy contentPolicy = policy;
         contentPolicy.setWidth( policy.size().width() - hspace );
@@ -174,21 +174,21 @@ Gfx::Size Panel::onMeasure(const SizePolicy& policy)
         return _content->preferredSize();
     }
 
-    return Gfx::Size(0, 0);
+    return Gfx::SizeF(0, 0);
 }
 
 
-void Panel::onLayout(const Gfx::Rect& rect)
+void Panel::onLayout(const Gfx::RectF& rect)
 {
     if(_content)
     {
-        Gfx::Point pos(padding().left() + _content->margin().left(), 
+        Gfx::PointF pos(padding().left() + _content->margin().left(), 
                         padding().top()  + _content->margin().top());
         
-        Pt::ssize_t hspace = padding().leftRight() + _content->margin().leftRight();
-        Pt::ssize_t vspace = padding().topBottom() + _content->margin().topBottom();
+        double hspace = padding().leftRight() + _content->margin().leftRight();
+        double vspace = padding().topBottom() + _content->margin().topBottom();
 
-        Gfx::Size size;
+        Gfx::SizeF size;
         size.setWidth( rect.width() - hspace );
         size.setHeight( rect.height() - vspace );
 
@@ -197,7 +197,7 @@ void Panel::onLayout(const Gfx::Rect& rect)
 }
 
 
-void Panel::onPaint(PaintSurface& surface, const Gfx::Rect& rect)
+void Panel::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
@@ -216,31 +216,31 @@ void Panel::onPaint(PaintSurface& surface, const Gfx::Rect& rect)
 
     if( ! _picture.empty() )
     {
-        const Gfx::Size& size = this->size();
+        const Gfx::SizeF& size = this->size();
 
         painter.setCompositionMode(Pt::Gfx::CompositionMode::SourceOver);
 
         switch( _layout.type() )
         {
             default:
-                painter.drawPicture( Pt::Gfx::Point(0,0), _picture );
+                painter.drawPicture( Pt::Gfx::PointF(0,0), _picture );
                 break;
 
             case ImageLayout::Tile:
             {
-                for( Pt::ssize_t x = 0; x < size.width();  x += _picture.width() )
+                for( double x = 0; x < size.width();  x += _picture.width() )
                 {
-                    for( Pt::ssize_t y = 0; y < size.height();  y += _picture.height() )
-                        painter.drawPicture(Gfx::Point(x,y), _picture);
+                    for( double y = 0; y < size.height();  y += _picture.height() )
+                        painter.drawPicture(Gfx::PointF(x,y), _picture);
                 }
                 break;
             }
             
             case ImageLayout::Center:
             {
-                const Pt::ssize_t x = size.width()/2  - _picture.width()/2;
-                const Pt::ssize_t y = size.height()/2  - _picture.height()/2;
-                painter.drawPicture(Gfx::Point(x, y), _picture);
+                const double x = size.width()/2  - _picture.width()/2;
+                const double y = size.height()/2  - _picture.height()/2;
+                painter.drawPicture(Gfx::PointF(x, y), _picture);
                 break;
             }
         }
@@ -268,7 +268,8 @@ void Panel::onResizeEvent(const ResizeEvent& ev)
     {
         case ImageLayout::Strech:
         {
-            Gfx::Size newSize(  ev.size().width(), ev.size().height() );
+            Gfx::Size newSize( (int) ev.size().width(), 
+                               (int)ev.size().height() );
 
             Gfx::Image streched(_image.format(), newSize);
             
@@ -281,7 +282,7 @@ void Panel::onResizeEvent(const ResizeEvent& ev)
 
         case ImageLayout::Zoom:
         {
-            const Pt::ssize_t factor = ev.size().width() / _image.width();
+            const double factor = ev.size().width() / _image.width();
             
             Pt::Gfx::Size newSize( ( size_t)(_image.width() * factor), 
                                    (size_t)(_image.height() * factor) );

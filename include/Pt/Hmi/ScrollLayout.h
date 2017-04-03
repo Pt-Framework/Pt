@@ -72,9 +72,9 @@ class PT_HMI_API ScrollLayout : public Layout
         void setContentMode(SizePolicy::Mode hmode, SizePolicy::Mode vmode);
 
     protected:
-        virtual Gfx::Size onMeasure(const SizePolicy& policy);
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
-        virtual void onLayout(const Gfx::Rect& rect);
+        virtual void onLayout(const Gfx::RectF& rect);
 
     protected:
         virtual bool onMouseEvent(const MouseEvent& ev);
@@ -88,8 +88,8 @@ class PT_HMI_API ScrollLayout : public Layout
         Pt::Signal<int> _scrolledY;
         SizePolicy::Mode _hmode;
         SizePolicy::Mode _vmode;
-        Gfx::Point _scrollPos;
-        Gfx::Point _lastPos;
+        Gfx::PointF _scrollPos;
+        Gfx::PointF _lastPos;
         bool _enableX;
         bool _enableY;
         int _maxX;

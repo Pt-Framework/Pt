@@ -126,10 +126,10 @@ void ScrollView::onScrolledY(int n)
 }
 
 
-Gfx::Size ScrollView::onMeasure(const SizePolicy& policy)
+Gfx::SizeF ScrollView::onMeasure(const SizePolicy& policy)
 {   
-    Pt::ssize_t width = policy.size().width();
-    Pt::ssize_t height = policy.size().height();
+    double width = policy.size().width();
+    double height = policy.size().height();
     
     SizePolicy contentPolicy(SizePolicy::Fixed, SizePolicy::Fixed);
     contentPolicy.setSize(width, height);
@@ -165,12 +165,12 @@ Gfx::Size ScrollView::onMeasure(const SizePolicy& policy)
 }
 
 
-void ScrollView::onLayout(const Gfx::Rect& rect)
+void ScrollView::onLayout(const Gfx::RectF& rect)
 {
-    _scrollLayout.layout( Gfx::Point(0, 0), rect.size() );
+    _scrollLayout.layout( Gfx::PointF(0, 0), rect.size() );
 
-    Pt::ssize_t width = rect.size().width();
-    Pt::ssize_t height = rect.size().height();
+    double width = rect.size().width();
+    double height = rect.size().height();
 
     if(_hasScrollBars)
     {
@@ -193,28 +193,28 @@ void ScrollView::onLayout(const Gfx::Rect& rect)
 
     if( _scrollBarX.isVisible() )
     {
-        _scrollBarX.layout( Gfx::Point(0, height),
-                            Gfx::Size(width, _scrollBarX.preferredSize().height()) );
+        _scrollBarX.layout( Gfx::PointF(0, height),
+                            Gfx::SizeF(width, _scrollBarX.preferredSize().height()) );
     }
 
     if( _scrollBarY.isVisible() )
     {
-        _scrollBarY.layout( Gfx::Point(width, 0),
-                            Gfx::Size(_scrollBarY.preferredSize().width(), height) );
+        _scrollBarY.layout( Gfx::PointF(width, 0),
+                            Gfx::SizeF(_scrollBarY.preferredSize().width(), height) );
     }
 
-    Pt::ssize_t hrange = _scrollLayout.maximumX() - _scrollLayout.size().width();
+    double hrange = _scrollLayout.maximumX() - _scrollLayout.size().width();
     if(hrange >= 0)
         updateScrollBar(_scrollBarX, hrange);
 
-    Pt::ssize_t vrange = _scrollLayout.maximumY() -_scrollLayout.size().height();
+    double vrange = _scrollLayout.maximumY() -_scrollLayout.size().height();
     if(vrange >= 0)
         updateScrollBar(_scrollBarY, vrange);
 }
 
 
 
-void ScrollView::updateScrollBar(ScrollBar& sb, Pt::ssize_t maxRange)
+void ScrollView::updateScrollBar(ScrollBar& sb, double maxRange)
 {
     int oldPos = sb.position();
     int oldMax = sb.maximumPosition();
@@ -224,7 +224,7 @@ void ScrollView::updateScrollBar(ScrollBar& sb, Pt::ssize_t maxRange)
     
     if(sb.maximumPosition() > 0)
     {      
-        double relPos = Pt::ssize_t(oldPos) / (double)oldMax;
+        double relPos = double(oldPos) / oldMax;
         double newPos = maxRange * relPos + 0.5;
 
         sb.setPosition( static_cast<int>(newPos) );

@@ -63,9 +63,9 @@ class PT_HMI_API Visual : public virtual Pt::Connectable
             return _name;
         }
 
-        virtual Gfx::Point toScreen(const Gfx::Point& l) const = 0;
+        virtual Gfx::PointF toScreen(const Gfx::PointF& l) const = 0;
 
-        virtual Gfx::Point fromScreen(const Gfx::Point& g) const = 0;
+        virtual Gfx::PointF fromScreen(const Gfx::PointF& g) const = 0;
 
     protected:
         Visual();

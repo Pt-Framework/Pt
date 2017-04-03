@@ -88,20 +88,19 @@ const std::vector<Window*>& Screen::windows() const
 }
 
 
-Gfx::Size Screen::onSize() const
+Gfx::SizeF Screen::onSize() const
 {
     return _impl->size();
 }
 
 
-
-Pt::Gfx::Point Screen::toScreen(const Pt::Gfx::Point& p) const
+Pt::Gfx::PointF Screen::toScreen(const Pt::Gfx::PointF& p) const
 {
     return p;
 }
 
 
-Pt::Gfx::Point Screen::fromScreen(const Pt::Gfx::Point& p) const
+Pt::Gfx::PointF Screen::fromScreen(const Pt::Gfx::PointF& p) const
 {
     return p;
 }
@@ -113,26 +112,26 @@ ScreenImpl* Screen::impl()
 }
 
 
-Gfx::Point Screen::onToParent(const Window& w, const Gfx::Point& pos) const
+Gfx::PointF Screen::onToParent(const Window& w, const Gfx::PointF& pos) const
 {
     return _impl->toParent(w, pos);
 }
 
 
-Gfx::Point Screen::onFromParent(const Window& w, const Gfx::Point& pos) const
+Gfx::PointF Screen::onFromParent(const Window& w, const Gfx::PointF& pos) const
 {
     return _impl->fromParent(w, pos);
 }
 
 
-void Screen::onResize(Window& w, const Gfx::Size& s)
+void Screen::onResize(Window& w, const Gfx::SizeF& s)
 {
     w.impl()->resize(s);
     _impl->onResize(w, s);
 }
 
 
-void Screen::onMove(Window& w, const Gfx::Point& p)
+void Screen::onMove(Window& w, const Gfx::PointF& p)
 {   
     w.impl()->move(p);
     _impl->onMove(w, p);
@@ -184,7 +183,7 @@ void Screen::onEnable(Window& w, bool enable)
 }
 
 
-void Screen::onUpdate(const Gfx::Rect& updateRect)
+void Screen::onUpdate(const Gfx::RectF& updateRect)
 {
     _updateRect.unify(updateRect);
     ++_updates;
@@ -194,10 +193,10 @@ void Screen::onUpdate(const Gfx::Rect& updateRect)
 }
 
 
-void Screen::onUpdate(Window& w, const Gfx::Rect& updateRect)
+void Screen::onUpdate(Window& w, const Gfx::RectF& updateRect)
 {	
-    Gfx::Point pos = w.toScreen( updateRect.topLeft() );
-    Gfx::Rect rect( pos, updateRect.size() );
+    Gfx::PointF pos = w.toScreen( updateRect.topLeft() );
+    Gfx::RectF rect( pos, updateRect.size() );
     update(rect);
 }
 
@@ -229,7 +228,7 @@ void Screen::onUpdateEvent(const UpdateEvent& ev)
     //std::clog << std::endl;
     //_clock.start();
 
-    const Gfx::Rect& screenRect = ev.rect();
+    const Gfx::RectF& screenRect = ev.rect();
 
     std::vector<Window*>::iterator it;
     for(it = _windows.begin(); it != _windows.end(); ++it)

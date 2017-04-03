@@ -52,9 +52,9 @@ class MainWindowImpl
 
         void setType(Window::Type type);
 
-        Gfx::Point toScreen(const Gfx::Point& pos) const;
+        Gfx::PointF toScreen(const Gfx::PointF& pos) const;
 
-        Gfx::Point fromScreen(const Gfx::Point& pos) const;
+        Gfx::PointF fromScreen(const Gfx::PointF& pos) const;
     
         void show(bool v);
     
@@ -62,21 +62,21 @@ class MainWindowImpl
 
         void enable(bool e);  
        
-        void move(const Gfx::Point& pos);
+        void move(const Gfx::PointF& pos);
 
-        void resize(const Gfx::Size& size);
+        void resize(const Gfx::SizeF& size);
 
         void close();
 
-        void paint(const Gfx::Rect& rect);
+        void paint(const Gfx::RectF& rect);
     
         void setState(Window::State s);
        
         void setIcon(const Gfx::Image& p);
     
-        void setMinimumSize(const Gfx::Size& s);
+        void setMinimumSize(const Gfx::SizeF& s);
     
-        void setMaximumSize(const Gfx::Size& s);
+        void setMaximumSize(const Gfx::SizeF& s);
 
         void setTitle( const std::string& t );
 

@@ -57,18 +57,18 @@ class PT_HMI_API GridLayout : public Layout
         void removeItem(Widget& w);
 
     protected:
-        virtual Gfx::Size onMeasure(const SizePolicy& policy);
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
         
-        virtual void onLayout(const Gfx::Rect& rect);
+        virtual void onLayout(const Gfx::RectF& rect);
 
     private:
-        Gfx::Size onMeasureVertical(const SizePolicy& policy);
+        Gfx::SizeF onMeasureVertical(const SizePolicy& policy);
 
-        Gfx::Size onMeasureHorizontal(const SizePolicy& policy);
+        Gfx::SizeF onMeasureHorizontal(const SizePolicy& policy);
 
-        void onLayoutVertical(const Gfx::Size& itemSize, const Gfx::Rect& rect);
+        void onLayoutVertical(const Gfx::SizeF& itemSize, const Gfx::RectF& rect);
 
-        void onLayoutHorizontal(const Gfx::Size& itemSize, const Gfx::Rect& rect);
+        void onLayoutHorizontal(const Gfx::SizeF& itemSize, const Gfx::RectF& rect);
 
     private:
         Orientation _orientation;

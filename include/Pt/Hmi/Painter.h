@@ -59,9 +59,9 @@ class PT_HMI_API Painter : public Gfx::Painter
 
         virtual const Gfx::CompositionMode& compositionMode() const; 
 
-        virtual void setClip(const Gfx::Rect& clip);
+        virtual void setClip(const Gfx::RectF& clip);
 
-        virtual const Gfx::Rect& clip() const;
+        virtual const Gfx::RectF& clip() const;
 
         virtual void setPen(const Gfx::Pen& pen);
 
@@ -79,32 +79,32 @@ class PT_HMI_API Painter : public Gfx::Painter
         
         static Gfx::FontMetrics fontMetrics(const Gfx::Font& font, const Pt::String& text);   
 
-        virtual void drawLine(const Gfx::Point& from, const Gfx::Point& to);
+        virtual void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
 
-        virtual void drawText(const Gfx::Point& to, const Pt::String& Text);
+        virtual void drawText(const Gfx::PointF& to, const Pt::String& Text);
 
-        virtual void drawRect(const Gfx::Rect& rectangle);        
+        virtual void drawRect(const Gfx::RectF& rectangle);        
 
-        virtual void fillRect(const Gfx::Rect& rectangle);
+        virtual void fillRect(const Gfx::RectF& rectangle);
 
-        virtual void drawEllipse(const Gfx::Point& topLeft, const Gfx::Size& size);
+        virtual void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
 
-        virtual void fillEllipse(const Gfx::Point& topLeft, const Gfx::Size& size);
+        virtual void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
 
-        virtual void drawPolyline(const Gfx::Point* points, const size_t pointCount);
+        virtual void drawPolyline(const Gfx::PointF* points, const size_t pointCount);
 
-        virtual void fillPolygon(const Gfx::Point* points, const size_t pointCount);
+        virtual void fillPolygon(const Gfx::PointF* points, const size_t pointCount);
         
-        virtual void drawImage(const Gfx::Point& to, const Gfx::Image& image);
+        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
 
-        virtual void drawPicture(const Gfx::Point& to, const Picture& pic);
+        virtual void drawPicture(const Gfx::PointF& to, const Picture& pic);
     
-        virtual void drawImage(const Gfx::Point& to, const Gfx::Image& image, const Gfx::Rect& imageRect);
+        virtual void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imageRect);
 
     public:
-        void drawSurface(const Gfx::Point& to, const PixmapSurface& pm);
+        void drawSurface(const Gfx::PointF& to, const PixmapSurface& pm);
 
-        void drawSurface(const Gfx::Point& to, const PixmapSurface& pm, const Gfx::Rect& pmRect);
+        void drawSurface(const Gfx::PointF& to, const PixmapSurface& pm, const Gfx::RectF& pmRect);
     
         PainterImpl* impl()
         { return _impl;}
@@ -125,7 +125,7 @@ class PT_HMI_API Painter : public Gfx::Painter
         Gfx::Brush           _brush;
         Gfx::Font            _font;
         Gfx::CompositionMode _compositionMode;
-        Gfx::Rect           _clip;
+        Gfx::RectF           _clip;
 };
 
 } // namespace

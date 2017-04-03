@@ -63,7 +63,7 @@ class PainterImpl
         {
         }
 
-        void setClip(const Gfx::Rect& rect)
+        void setClip(const Gfx::RectF& rectF)
         {
         }
 

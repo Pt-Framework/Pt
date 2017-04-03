@@ -47,6 +47,29 @@ namespace Pt {
 
 namespace Gfx {
 
+inline int round(double r) 
+{
+  int tmp = static_cast<int> (r);
+  tmp += (r-tmp>=.5) - (r-tmp<=-.5);
+  return tmp;
+}
+
+
+inline Point round(PointF r) 
+{
+  return Point(round(r.x()), round(r.y()));
+}
+
+inline Size round(SizeF r) 
+{
+  return Size(round(r.width()), round(r.height()));
+}
+
+inline Rect round (RectF r) 
+{
+  return Rect( round(r.topLeft() ),  round( r.size() ));
+}
+
 /** @brief 2D painter interface.
   */
 class PT_GFX_API Painter
@@ -91,11 +114,11 @@ class PT_GFX_API Painter
 
         /** @brief Sets the clipping rect.
         */
-        virtual void setClip(const Rect& clip) = 0;
+        virtual void setClip(const RectF& clip) = 0;
 
         /** @brief Returns the current clipping rect.
         */
-        virtual const Rect& clip() const = 0;
+        virtual const RectF& clip() const = 0;
 
         /** @brief Sets the pen used to stroke lines.
         */
@@ -127,57 +150,57 @@ class PT_GFX_API Painter
 
         /** @brief Draws a line between two points.
         */
-        virtual void drawLine(const Point& from, const Point& to) = 0;
+        virtual void drawLine(const PointF& from, const PointF& to) = 0;
 
         /** @brief Draws a polyline.
         */
-        virtual void drawPolyline(const Point* points, const size_t pointCount) = 0;
+        virtual void drawPolyline(const PointF* points, const size_t pointCount) = 0;
 
         /** @brief Fills a polygon.
         */
-        virtual void fillPolygon(const Point* points, const size_t pointCount) = 0;
+        virtual void fillPolygon(const PointF* points, const size_t pointCount) = 0;
 
         /** @brief Draws a text block.
         */
-        virtual void drawText(const Point& to, const Pt::String& text) = 0;
+        virtual void drawText(const PointF& to, const Pt::String& text) = 0;
 
         /** @brief Draws the outline of a rectangle.
         */
-        virtual void drawRect(const Rect& rect) = 0;
+        virtual void drawRect(const RectF& rect) = 0;
 
         /** @brief Fills a rectangular area.
         */
-        virtual void fillRect(const Rect& rect) = 0;
+        virtual void fillRect(const RectF& rect) = 0;
 
         /** @brief Draws the outline of a circle.
           */
-        void drawCircle(const Point& topLeft, std::size_t diameter)
+        void drawCircle(const PointF& topLeft, std::size_t diameter)
         {
-            drawEllipse(topLeft, Size(diameter, diameter));
+            drawEllipse(topLeft, SizeF(diameter, diameter));
         }
 
         /** @brief Fills a circular area.
         */
-        inline void fillCircle(const Point& topLeft, std::size_t diameter)
+        inline void fillCircle(const PointF& topLeft, std::size_t diameter)
         {
-            fillEllipse(topLeft, Size(diameter, diameter));
+            fillEllipse(topLeft, SizeF(diameter, diameter));
         }
 
         /** @brief Draws the outline of an ellipse.
         */
-        virtual void drawEllipse(const Point& topLeft, const Size& size) = 0;
+        virtual void drawEllipse(const PointF& topLeft, const SizeF& size) = 0;
 
         /** @brief Fills an elliptical area.
         */
-        virtual void fillEllipse(const Point& topLeft, const Size& size) = 0;
+        virtual void fillEllipse(const PointF& topLeft, const SizeF& size) = 0;
 
         /** @brief Draws an image.
         */
-        virtual void drawImage(const Point& to, const Image& im) = 0;
+        virtual void drawImage(const PointF& to, const Image& im) = 0;
 
         /** @brief Draws a part of an image.
         */
-        virtual void drawImage(const Point& to, const Image& im, const Rect& rect) = 0;
+        virtual void drawImage(const PointF& to, const Image& im, const RectF& rect) = 0;
 };
 
 } // namespace

@@ -174,7 +174,7 @@ void ButtonRenderer::prepareIcon(const PushButton& button,
 void ButtonRenderer::renderBackground(const PushButton& button,
                                       const StyleOptions& options,
                                       Painter& painter, 
-                                      const Gfx::Rect& rect,
+                                      const Gfx::RectF& rect,
                                       const Gfx::Brush& brush,
                                       const Gfx::Pen& pen) const
 { 
@@ -185,12 +185,12 @@ void ButtonRenderer::renderBackground(const PushButton& button,
 void ButtonRenderer::renderText(const PushButton& button,
                                 const StyleOptions& options,
                                 Painter& painter, 
-                                const Gfx::Rect& rect,
+                                const Gfx::RectF& rect,
                                 const String& text,
-                                const Gfx::Point& textPos,
+                                const Gfx::PointF& textPos,
                                 const Gfx::Font& font, 
                                 const Gfx::Pen& textPen,
-                                const Gfx::Rect& mnemonic) const
+                                const Gfx::RectF& mnemonic) const
 { 
     onRenderText(button, options, painter, rect, 
                  text, textPos, font, textPen, mnemonic); 
@@ -217,7 +217,7 @@ void CheckBoxRenderer::prepare(const CheckBox& cb,
                                Gfx::Pen& contour,
                                Gfx::Font& font,
                                Gfx::Pen& textPen,
-                               Gfx::Size& boxSize) const
+                               Gfx::SizeF& boxSize) const
 {
     onPrepare(cb, options, brush, contour, font, textPen, boxSize); 
 }
@@ -226,8 +226,8 @@ void CheckBoxRenderer::prepare(const CheckBox& cb,
 void CheckBoxRenderer::renderBox(const CheckBox& cb,
                                  const StyleOptions& options,
                                  Painter& painter, 
-                                 const Gfx::Rect& rect,
-                                 const Gfx::Rect& boxRect,
+                                 const Gfx::RectF& rect,
+                                 const Gfx::RectF& boxRect,
                                  const Gfx::Brush& brush,
                                  const Gfx::Pen& pen) const
 { 
@@ -239,13 +239,13 @@ void CheckBoxRenderer::renderBox(const CheckBox& cb,
 void CheckBoxRenderer::renderText(const CheckBox& cb,
                                   const StyleOptions& options,
                                   Painter& painter, 
-                                  const Gfx::Rect& rect,
+                                  const Gfx::RectF& rect,
                                   const String& text,
-                                  const Gfx::Point& textPos,
+                                  const Gfx::PointF& textPos,
                                   const Gfx::FontMetrics& textMetric,
                                   const Gfx::Font& font, 
                                   const Gfx::Pen& textPen,
-                                  const Gfx::Rect& mnemonic) const
+                                  const Gfx::RectF& mnemonic) const
 { 
     onRenderText(cb, options, painter, rect, 
                  text, textPos, textMetric, font, textPen, mnemonic); 
@@ -270,7 +270,7 @@ PanelRenderer::~PanelRenderer()
 void PanelRenderer::renderBackground(const Panel& p,
                                      const StyleOptions& options,
                                      Painter& painter, 
-                                     const Gfx::Rect& rect,
+                                     const Gfx::RectF& rect,
                                      const Gfx::Brush& brush) const
 {
     onRenderBackground(p, options, painter, rect, brush);
@@ -280,7 +280,7 @@ void PanelRenderer::renderBackground(const Panel& p,
 void PanelRenderer::renderFrame(const Panel& p,
                                 const StyleOptions& options,
                                 Painter& painter, 
-                                const Gfx::Rect& rect, 
+                                const Gfx::RectF& rect, 
                                 const Gfx::Pen& pen) const
 {
     onRenderFrame(p, options, painter, rect, pen);
@@ -313,7 +313,7 @@ void LabelRenderer::prepare(const Label& l,
 void LabelRenderer::renderBackground(const Label& l,
                                      const StyleOptions& options,
                                      Painter& p, 
-                                     const Gfx::Rect& rect,
+                                     const Gfx::RectF& rect,
                                      const Gfx::Brush& brush) const
 {
     onRenderBackground(l, options, p, rect, brush);
@@ -323,7 +323,7 @@ void LabelRenderer::renderBackground(const Label& l,
 void LabelRenderer::renderFrame(const Label& l,
                                 const StyleOptions& options,
                                 Painter& p, 
-                                const Gfx::Rect& rect, 
+                                const Gfx::RectF& rect, 
                                 const Gfx::Pen& contour) const
 {
     onRenderFrame(l, options, p, rect, contour);
@@ -333,9 +333,9 @@ void LabelRenderer::renderFrame(const Label& l,
 void LabelRenderer::renderText(const Label& l,
                                const StyleOptions& options,
                                Painter& p, 
-                               const Gfx::Rect& rect,
+                               const Gfx::RectF& rect,
                                const String& text,
-                               const Gfx::Point& textPos,
+                               const Gfx::PointF& textPos,
                                const Gfx::Font& font, 
                                const Gfx::Pen& textPen) const
 {
@@ -371,7 +371,7 @@ void LineEditRenderer::prepare(const LineEdit& le,
 void LineEditRenderer::renderBackground(const LineEdit& le, 
                                         const StyleOptions& options,
                                         Painter& painter, 
-                                        const Gfx::Rect& rect,
+                                        const Gfx::RectF& rect,
                                         const Gfx::Pen& contour,
                                         const Gfx::Brush& brush) const
 {
@@ -382,9 +382,9 @@ void LineEditRenderer::renderBackground(const LineEdit& le,
 void LineEditRenderer::renderText(const LineEdit& le, 
                                   const StyleOptions& options,
                                   Painter& painter, 
-                                  const Gfx::Rect& rect,
+                                  const Gfx::RectF& rect,
                                   const String& text,
-                                  const Gfx::Point& textPos,
+                                  const Gfx::PointF& textPos,
                                   const Gfx::Font& font,
                                   const Gfx::Pen& textPen) const
 {
@@ -395,8 +395,8 @@ void LineEditRenderer::renderText(const LineEdit& le,
 void LineEditRenderer::renderCursor(const LineEdit& le, 
                                     const StyleOptions& options,
                                     Painter& painter, 
-                                    const Gfx::Rect& rect,
-                                    const Gfx::Rect& cursorRect) const
+                                    const Gfx::RectF& rect,
+                                    const Gfx::RectF& cursorRect) const
 {
     onRenderCursor(le, options, painter, rect, cursorRect);
 }
@@ -441,7 +441,7 @@ void MenuRenderer::prepareItem(const MenuItem& m,
 void MenuRenderer::renderBackground(const Menu& m, 
                                     const StyleOptions& options,
                                     Painter& painter, 
-                                    const Gfx::Rect& rect,
+                                    const Gfx::RectF& rect,
                                     const Gfx::Brush& brush,
                                     const Gfx::Pen& contour) const
 { 
@@ -452,7 +452,7 @@ void MenuRenderer::renderBackground(const Menu& m,
 void MenuRenderer::renderItem(const MenuItem& m, 
                               const StyleOptions& options,
                               Painter& painter, 
-                              const Gfx::Rect& rect,
+                              const Gfx::RectF& rect,
                               Gfx::Brush& brush,
                               Gfx::Pen& contour) const
 { 
@@ -463,7 +463,7 @@ void MenuRenderer::renderItem(const MenuItem& m,
 void MenuRenderer::renderIndicator(const MenuItem& m, 
                                    const StyleOptions& options,
                                    Painter& painter, 
-                                   const Gfx::Rect& rect) const
+                                   const Gfx::RectF& rect) const
 { 
     onRenderIndicator(m, options, painter, rect); 
 }
@@ -495,7 +495,7 @@ void MenuBarRenderer::prepare(const MenuBar& m,
 void MenuBarRenderer::renderBackground(const MenuBar& m, 
                                        const StyleOptions& options,
                                        Painter& painter, 
-                                       const Gfx::Rect& rect,
+                                       const Gfx::RectF& rect,
                                        const Gfx::Brush& brush,
                                        const Gfx::Pen& contour) const
 { 
@@ -517,7 +517,7 @@ void MenuBarRenderer::prepareItem(const MenuBarItem& m,
 void MenuBarRenderer::renderItem(const MenuBarItem& m, 
                                  const StyleOptions& options,
                                  Painter& painter, 
-                                 const Gfx::Rect& rect,
+                                 const Gfx::RectF& rect,
                                  const Gfx::Brush& brush,
                                  const Gfx::Pen& contour) const
 { 
@@ -528,12 +528,12 @@ void MenuBarRenderer::renderItem(const MenuBarItem& m,
 void MenuBarRenderer::renderItemText(const MenuBarItem& m, 
                                  const StyleOptions& options,
                                  Painter& painter, 
-                                 const Gfx::Rect& rect,
+                                 const Gfx::RectF& rect,
                                  const String& text,
-                                 const Gfx::Point& textPos,
+                                 const Gfx::PointF& textPos,
                                  const Gfx::Font& font, 
                                  const Gfx::Pen& textPen,
-                                 const Gfx::Rect& mnemonic) const
+                                 const Gfx::RectF& mnemonic) const
 { 
     onRenderItemText(m, options, painter, rect, 
                      text, textPos, font, textPen, mnemonic); 
@@ -568,8 +568,8 @@ void ScrollBarRenderer::prepare(const ScrollBar& s,
 void ScrollBarRenderer::render(const ScrollBar& s,
                                const StyleOptions& options,
                                Painter& painter,
-                               const Gfx::Rect& rect,
-                               const Gfx::Rect& handleRect,
+                               const Gfx::RectF& rect,
+                               const Gfx::RectF& handleRect,
                                const Gfx::Brush& background,
                                const Gfx::Brush& foreground,
                                const Gfx::Pen& contour) const
@@ -608,7 +608,7 @@ void ProgressBarRenderer::prepare(const ProgressBar&  p,
 void ProgressBarRenderer::render( const ProgressBar& p,
                                            const StyleOptions& options,
                                           Painter& painter,
-                                          const Gfx::Rect& rect,
+                                          const Gfx::RectF& rect,
                                           const Gfx::Brush& background,
                                           const Gfx::Brush& foreground,
                                           const Gfx::Pen& contour,
@@ -649,7 +649,7 @@ void SliderRenderer::prepare( const Slider&        s,
 void SliderRenderer::render( const Slider&        s,
                              const StyleOptions&  options,
                              Painter&              painter,
-                             const Gfx::Rect&    rect,
+                             const Gfx::RectF&    rect,
                              const Gfx::Brush&    background,
                              const Gfx::Brush&    foreground,
                              const Gfx::Pen&      contour,
@@ -684,7 +684,7 @@ void ListBoxRenderer::prepareLayout(Spacing& frameSize)
 void ListBoxRenderer::renderBackground(const ListBox& lb,
                                        const StyleOptions& options,
                                        Painter& painter, 
-                                       const Gfx::Rect& rect,
+                                       const Gfx::RectF& rect,
                                        const Gfx::Brush& brush) const
 {
     onRenderBackground(lb, options, painter, rect, brush);
@@ -694,7 +694,7 @@ void ListBoxRenderer::renderBackground(const ListBox& lb,
 void ListBoxRenderer::renderFrame(const ListBox& lb,
                                   const StyleOptions& options,
                                   Painter& painter, 
-                                  const Gfx::Rect& rect, 
+                                  const Gfx::RectF& rect, 
                                   const Gfx::Pen& pen) const
 {
     onRenderFrame(lb, options, painter, rect, pen);
@@ -715,7 +715,7 @@ void ListBoxRenderer::prepareItem(const ListBoxItem& item,
 void ListBoxRenderer::renderItem(const ListBoxItem& item, 
                                  const StyleOptions& options,
                                  Painter& painter, 
-                                 const Gfx::Rect& rect,
+                                 const Gfx::RectF& rect,
                                  Gfx::Brush& brush,
                                  Gfx::Pen& contour) const
 { 
@@ -750,7 +750,7 @@ void ComboBoxRenderer::prepare(const ComboBox& cb,
 
 
 void ComboBoxRenderer::prepareLayout(const ComboBox& cb,
-                                     Gfx::Size& buttonSize) const
+                                     Gfx::SizeF& buttonSize) const
 {
     return onPrepareLayout(cb, buttonSize);
 }
@@ -759,7 +759,7 @@ void ComboBoxRenderer::prepareLayout(const ComboBox& cb,
 void ComboBoxRenderer::renderBackground(const ComboBox& cb, 
                                         const StyleOptions& options,
                                         Painter& painter, 
-                                        const Gfx::Rect& rect,
+                                        const Gfx::RectF& rect,
                                         const Gfx::Pen& contour,
                                         const Gfx::Brush& brush) const
 {
@@ -770,7 +770,7 @@ void ComboBoxRenderer::renderBackground(const ComboBox& cb,
 void ComboBoxRenderer::renderButton(const ComboBox& cb, 
                                     const StyleOptions& options,
                                     Painter& painter, 
-                                    const Gfx::Rect& rect,
+                                    const Gfx::RectF& rect,
                                     const Gfx::Pen& contour,
                                     const Gfx::Brush& foreground) const
 {
@@ -781,12 +781,12 @@ void ComboBoxRenderer::renderButton(const ComboBox& cb,
 void ComboBoxRenderer::renderText(const ComboBox& cb,
                                   const StyleOptions& options,
                                   Painter& painter, 
-                                  const Gfx::Rect& rect,
+                                  const Gfx::RectF& rect,
                                   const String& text,
-                                  const Gfx::Point& textPos,
+                                  const Gfx::PointF& textPos,
                                   const Gfx::Font& font, 
                                   const Gfx::Pen& textPen,
-                                  const Gfx::Rect& cursor) const
+                                  const Gfx::RectF& cursor) const
 {
     onRenderText(cb, options, painter, rect, text, textPos, font, textPen, cursor);
 }

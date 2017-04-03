@@ -90,7 +90,7 @@ class PT_HMI_API CheckBox : public Button
         void setRenderer(CheckBoxRenderer* renderer);
     
     protected:
-        virtual Gfx::Size onMeasure(const SizePolicy& policy);
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
         virtual void onInvalidate();
 
@@ -101,7 +101,7 @@ class PT_HMI_API CheckBox : public Button
         virtual void onCanceled();
     
     protected:       
-        virtual void onPaint(PaintSurface& surface, const Gfx::Rect& updateRect);
+        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
     private:
         State                    _state;
@@ -120,7 +120,7 @@ class PT_HMI_API CheckBox : public Button
         Gfx::Pen                 _pen;
         Gfx::Pen                 _textPen;
         Gfx::Font                _font;
-        Gfx::Size                _boxSize;
+        Gfx::SizeF               _boxSize;
 };
 
 } // namespace

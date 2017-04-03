@@ -67,7 +67,7 @@ class PT_HMI_API PushButton : public Button
 
         void setIcon(const Gfx::Image& image);
 
-        void setIconSize(const Gfx::Size& size);
+        void setIconSize(const Gfx::SizeF& size);
 
         bool isFlat() const;
 
@@ -112,13 +112,13 @@ class PT_HMI_API PushButton : public Button
     protected:
         virtual void onSetStyleOptions(const StyleOptions& options);
 
-        virtual Gfx::Size onMeasure(const SizePolicy& policy);
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
-        virtual void onLayout(const Gfx::Rect& rect);
+        virtual void onLayout(const Gfx::RectF& rect);
 
         virtual void onInvalidate();
 
-        virtual void onPaint(PaintSurface& surface, const Gfx::Rect& updateRect);
+        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
     protected:
         virtual void onEnableEvent(const EnableEvent& ev);
@@ -132,9 +132,9 @@ class PT_HMI_API PushButton : public Button
         bool                      _isFlat;
         Direction                 _direction;
         Gfx::Image                _icon;
-        Gfx::Size                _iconSize;
-        Gfx::Point               _iconPos;
-        Gfx::Point               _textPos;
+        Gfx::SizeF                _iconSize;
+        Gfx::PointF               _iconPos;
+        Gfx::PointF               _textPos;
                                   
         FacetPtr<ButtonRenderer>  _renderer;
         bool                      _hasRenderer;

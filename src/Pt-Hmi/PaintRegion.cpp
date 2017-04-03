@@ -37,7 +37,7 @@ namespace Pt {
 
 namespace Hmi {
 
-PaintRegion::PaintRegion(PaintSurface& surface, const Gfx::Rect& rect)
+PaintRegion::PaintRegion(PaintSurface& surface, const Gfx::RectF& rect)
 : _surface(0)
 {           
     _surface = &surface;
@@ -51,7 +51,7 @@ PaintRegion::~PaintRegion()
 }
 
 
-const Gfx::Size& PaintRegion::onSize() const
+const Gfx::SizeF& PaintRegion::onSize() const
 {
     return _area.size();
 }
@@ -75,9 +75,9 @@ const Gfx::ImageFormat& PaintRegion::format() const
 }
 
 
-void PaintRegion::setClip(const Gfx::Rect& clip)
+void PaintRegion::setClip(const Gfx::RectF& clip)
 {
-    _surface->setClip( Gfx::Rect( clip.topLeft() +  _area.topLeft(), clip.size()));
+    _surface->setClip( Gfx::RectF( clip.topLeft() +  _area.topLeft(), clip.size()));
 }
 
 
@@ -111,106 +111,98 @@ Gfx::FontMetrics PaintRegion::fontMetrics(const Pt::String& text) const
 }
 
 
-void PaintRegion::drawLine(const Gfx::Point& fromF, const Gfx::Point& toF)
+void PaintRegion::drawLine(const Gfx::PointF& fromF, const Gfx::PointF& toF)
 {
     _surface->drawLine(fromF + _area.topLeft(),
                        toF + _area.topLeft() );
 }
 
 
-void PaintRegion::drawText(const Gfx::Point& toF, const Pt::String& text)
+void PaintRegion::drawText(const Gfx::PointF& toF, const Pt::String& text)
 {
     _surface->drawText(toF + _area.topLeft(), text);
 }
 
 
-void PaintRegion::drawRect(const Gfx::Rect& r)
+void PaintRegion::drawRect(const Gfx::RectF& r)
 {
-    Gfx::Rect rect(r);
+    Gfx::RectF rect(r);
     rect.setOrigin(r.topLeft() + _area.topLeft());
 
     _surface->drawRect(rect);
 }
 
 
-void PaintRegion::fillRect(const Gfx::Rect& r)
+void PaintRegion::fillRect(const Gfx::RectF& r)
 {
-    Gfx::Rect rect(r);
+    Gfx::RectF rect(r);
     rect.setOrigin(r.topLeft() + _area.topLeft());
 
     _surface->fillRect(rect);
 }
 
 
-void PaintRegion::drawEllipse(const Gfx::Point& topLeftF, const Gfx::Size& size)
+void PaintRegion::drawEllipse(const Gfx::PointF& topLeftF, const Gfx::SizeF& sizeF)
 {
-    _surface->drawEllipse(topLeftF + _area.topLeft(), size);
+    _surface->drawEllipse(topLeftF + _area.topLeft(), sizeF);
 }
 
 
-void PaintRegion::fillEllipse(const Gfx::Point& topLeft, const Gfx::Size& size)
+void PaintRegion::fillEllipse(const Gfx::PointF& topLeftF, const Gfx::SizeF& sizeF)
 {
-    _surface->fillEllipse(topLeft + _area.topLeft(), size);
+    _surface->fillEllipse(topLeftF + _area.topLeft(), sizeF);
 }
 
 
-void PaintRegion::drawPolyline(const Gfx::Point* points, size_t pointCount)
+void PaintRegion::drawPolyline(const Gfx::PointF* points, size_t pointCount)
 {
-    std::vector<Gfx::Point> translated(pointCount);
+    std::vector<Gfx::PointF> translated(pointCount);
 
     for (size_t i = 0; i < pointCount; i++)
-    {
-        Gfx::Point pt = points[i] + _area.topLeft();
-        translated[i].setX( pt.x() );
-        translated[i].setY( pt.y() );
-    }
+        translated[i] = points[i] + _area.topLeft();
 
     _surface->drawPolyline(&translated[0], pointCount);
 }
 
 
-void PaintRegion::fillPolygon(const Gfx::Point* points, size_t pointCount)
+void PaintRegion::fillPolygon(const Gfx::PointF* points, size_t pointCount)
 {
-    std::vector<Gfx::Point> translated(pointCount);
+    std::vector<Gfx::PointF> translated(pointCount);
 
     for (size_t i = 0; i < pointCount; i++)
-    {
-        Gfx::Point pt = points[i] + _area.topLeft();
-        translated[i].setX( pt.x() );
-        translated[i].setY( pt.y() );
-    }
+      translated[i] = points[i] + _area.topLeft();
 
     _surface->fillPolygon(&translated[0], pointCount);
 }
 
 
-void PaintRegion::drawSurface(const Gfx::Point& toF, const PixmapSurface& surface)
+void PaintRegion::drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface)
 {
     _surface->drawSurface(toF + _area.topLeft(), surface);
 }
 
 
-void PaintRegion::drawSurface(const Gfx::Point& toF, 
+void PaintRegion::drawSurface(const Gfx::PointF& toF, 
                                   const PixmapSurface& pm,
-                                  const Gfx::Rect& pmRect)
+                                  const Gfx::RectF& pmRect)
 {
     _surface->drawSurface(toF + _area.topLeft(), pm, pmRect);
 }
 
 
-void PaintRegion::drawImage(const Gfx::Point& toF, const Gfx::Image& image)
+void PaintRegion::drawImage(const Gfx::PointF& toF, const Gfx::Image& image)
 {
     _surface->drawImage(toF + _area.topLeft(), image);
 }
 
 
-void PaintRegion::drawImage(const Gfx::Point& to, const Gfx::Image& image, const Gfx::Rect& imgRect)
+void PaintRegion::drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& imgRect)
 {
     _surface->drawImage(to + _area.topLeft(), image, imgRect);
 }
 
 
-void PaintRegion::drawPicture(const Gfx::Point& to, const Picture& pic)
+void PaintRegion::drawPicture(const Gfx::PointF& to, const Picture& pic)
 {
     _surface->drawPicture(to + _area.topLeft(), pic);
 }

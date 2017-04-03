@@ -82,32 +82,32 @@ class MouseEvent : public Pt::BasicEvent<MouseEvent>
             return _vid;
         }
         
-        const Gfx::Point& position() const
+        const Gfx::PointF& position() const
         {
             return _pos;
         }
 
-        void setPosition(const Gfx::Point& pos)
+        void setPosition(const Gfx::PointF& pos)
         {
             _pos = pos;
         }
 
-        Pt::ssize_t x() const
+        double x() const
         {
             return _pos.x();
         }
 
-        void setX(Pt::ssize_t x)
+        void setX(double x)
         {
             _pos.setX(x);
         }
 
-        Pt::ssize_t y() const
+        double y() const
         {
             return _pos.y();
         }
     
-        void setY(Pt::ssize_t y)
+        void setY(double y)
         {
             _pos.setY(y);
         }
@@ -175,7 +175,7 @@ class MouseEvent : public Pt::BasicEvent<MouseEvent>
 
     private:
         Pt::uint64_t _vid;
-        Gfx::Point   _pos;
+        Gfx::PointF  _pos;
         Action       _action;
         Pt::uint32_t _buttonState;
         Pt::uint32_t _button;

@@ -41,7 +41,7 @@ namespace Hmi{
 class PT_HMI_API PaintEvent : public Pt::BasicEvent<PaintEvent>
 {
     public:    
-        PaintEvent( Pt::uint64_t vid, const Gfx::Rect& rect )
+        PaintEvent( Pt::uint64_t vid, const Gfx::RectF& rect )
         : _rect( rect )
         , _vid( vid )
         {
@@ -51,7 +51,7 @@ class PT_HMI_API PaintEvent : public Pt::BasicEvent<PaintEvent>
         {
         }
 
-        const Gfx::Rect&  rect( ) const
+        const Gfx::RectF&  rect( ) const
         {
             return _rect;
         }
@@ -62,7 +62,7 @@ class PT_HMI_API PaintEvent : public Pt::BasicEvent<PaintEvent>
         }
 
     private:
-        Gfx::Rect  _rect;
+        Gfx::RectF  _rect;
         Pt::uint64_t _vid;
 };
 
@@ -70,7 +70,7 @@ class PT_HMI_API PaintEvent : public Pt::BasicEvent<PaintEvent>
 class PT_HMI_API UpdateEvent : public Pt::BasicEvent<UpdateEvent>
 {
     public:    
-        UpdateEvent( Pt::uint64_t vid, const Gfx::Rect& rect )
+        UpdateEvent( Pt::uint64_t vid, const Gfx::RectF& rect )
         : _rect( rect )
         , _vid( vid )
         {
@@ -80,7 +80,7 @@ class PT_HMI_API UpdateEvent : public Pt::BasicEvent<UpdateEvent>
         {
         }
 
-        const Gfx::Rect&  rect( ) const
+        const Gfx::RectF&  rect( ) const
         {
             return _rect;
         }
@@ -91,7 +91,7 @@ class PT_HMI_API UpdateEvent : public Pt::BasicEvent<UpdateEvent>
         }
 
     private:
-        Gfx::Rect  _rect;
+        Gfx::RectF  _rect;
         Pt::uint64_t _vid;
 };
 

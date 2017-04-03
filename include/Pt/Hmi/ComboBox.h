@@ -67,7 +67,7 @@ class PT_HMI_API ComboBox : public Control
 
         void setScrollBars(bool hasScrollBars);
 
-        void setMaxHeight(Pt::ssize_t height);
+        void setMaxHeight(double height);
 
         void showPopup();
 
@@ -113,11 +113,11 @@ class PT_HMI_API ComboBox : public Control
         void setRenderer(ComboBoxRenderer* renderer);
 
     protected:
-        virtual Gfx::Size onMeasure(const SizePolicy& policy);
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
         virtual void onInvalidate();
 	
-        virtual void onPaint(PaintSurface& surface, const Gfx::Rect& updateRect);
+        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
     protected:
         virtual void onResizeEvent(const ResizeEvent& ev);
@@ -144,9 +144,9 @@ class PT_HMI_API ComboBox : public Control
         TextLine      _line;
         Popup         _popup;
         ListBox       _items;
-        Gfx::Size    _buttonSize;
-        Pt::ssize_t        _maxHeight;
-        Pt::ssize_t        _spacing;
+        Gfx::SizeF    _buttonSize;
+        double        _maxHeight;
+        double        _spacing;
         bool          _isEditable;
         
         AutoPtr<Gfx::Brush>       _background;

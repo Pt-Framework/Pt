@@ -79,9 +79,9 @@ void DockingLayout::onRemoveWidget(Widget& w)
 }
 
 
-Gfx::Size DockingLayout::onMeasure(const SizePolicy& policy)
+Gfx::SizeF DockingLayout::onMeasure(const SizePolicy& policy)
 {
-    Gfx::Size fillSize = policy.size();
+    Gfx::SizeF fillSize = policy.size();
     fillSize.subWidth( padding().leftRight() );
     fillSize.subHeight( padding().topBottom() );
 
@@ -101,8 +101,8 @@ Gfx::Size DockingLayout::onMeasure(const SizePolicy& policy)
         if( docking == _docking.end() )
             continue;
 
-        Pt::ssize_t hspace = padding().leftRight() + (*it)->margin().leftRight();
-        Pt::ssize_t vspace = padding().topBottom() + (*it)->margin().topBottom();
+        double hspace = padding().leftRight() + (*it)->margin().leftRight();
+        double vspace = padding().topBottom() + (*it)->margin().topBottom();
 
         DockMode d = docking->second;
         switch(d)
@@ -119,9 +119,9 @@ Gfx::Size DockingLayout::onMeasure(const SizePolicy& policy)
                 itemPolicy.setHeight( fillSize.height() - (*it)->margin().topBottom() );
                 
                 (*it)->measure(itemPolicy); 
-                Gfx::Size itemSize = (*it)->preferredSize();
+                Gfx::SizeF itemSize = (*it)->preferredSize();
                 
-                Pt::ssize_t itemWidth = itemSize.width() + (*it)->margin().leftRight();
+                double itemWidth = itemSize.width() + (*it)->margin().leftRight();
                 fillSize.subWidth(itemWidth);
                 break;  
             }
@@ -134,16 +134,16 @@ Gfx::Size DockingLayout::onMeasure(const SizePolicy& policy)
                 itemPolicy.setHeight( policy.size().height() - vspace );
                 
                 (*it)->measure(itemPolicy);  
-                Gfx::Size itemSize = (*it)->preferredSize();
+                Gfx::SizeF itemSize = (*it)->preferredSize();
 
-                Pt::ssize_t itemHeight = itemSize.height() + (*it)->margin().topBottom();
+                double itemHeight = itemSize.height() + (*it)->margin().topBottom();
                 fillSize.subHeight(itemHeight);
                 break;  
             }
         }
     }
 
-    Gfx::Size contentSize;
+    Gfx::SizeF contentSize;
 
     if(fillWidget)
     {
@@ -152,10 +152,10 @@ Gfx::Size DockingLayout::onMeasure(const SizePolicy& policy)
         itemPolicy.setHeight( fillSize.height() - fillWidget->margin().topBottom() );
 
         fillWidget->measure(itemPolicy);
-        Gfx::Size itemSize = fillWidget->preferredSize();
+        Gfx::SizeF itemSize = fillWidget->preferredSize();
         
-        Pt::ssize_t itemWidth = itemSize.width() + fillWidget->margin().leftRight();
-        Pt::ssize_t itemHeight = itemSize.height() + fillWidget->margin().topBottom();
+        double itemWidth = itemSize.width() + fillWidget->margin().leftRight();
+        double itemHeight = itemSize.height() + fillWidget->margin().topBottom();
                 
         contentSize.addWidth(itemWidth);
         contentSize.addHeight(itemHeight);
@@ -180,9 +180,9 @@ Gfx::Size DockingLayout::onMeasure(const SizePolicy& policy)
             case DockingLayout::Left:
             case DockingLayout::Right:
             {
-                Gfx::Size itemSize = (*rit)->preferredSize();
-                Pt::ssize_t itemWidth = itemSize.width() + (*rit)->margin().leftRight();
-                Pt::ssize_t itemHeight = itemSize.height() + (*rit)->margin().topBottom();
+                Gfx::SizeF itemSize = (*rit)->preferredSize();
+                double itemWidth = itemSize.width() + (*rit)->margin().leftRight();
+                double itemHeight = itemSize.height() + (*rit)->margin().topBottom();
                 
                 contentSize.addWidth(itemWidth);
                 contentSize.setHeight( std::max(contentSize.height(), itemHeight) );
@@ -192,9 +192,9 @@ Gfx::Size DockingLayout::onMeasure(const SizePolicy& policy)
             case DockingLayout::Top:
             case DockingLayout::Bottom:
             {
-                Gfx::Size itemSize = (*rit)->preferredSize();
-                Pt::ssize_t itemWidth = itemSize.width() + (*rit)->margin().leftRight();
-                Pt::ssize_t itemHeight = itemSize.height() + (*rit)->margin().topBottom();
+                Gfx::SizeF itemSize = (*rit)->preferredSize();
+                double itemWidth = itemSize.width() + (*rit)->margin().leftRight();
+                double itemHeight = itemSize.height() + (*rit)->margin().topBottom();
                 
                 contentSize.setWidth( std::max(contentSize.width(), itemWidth) );
                 contentSize.addHeight(itemHeight);
@@ -209,17 +209,17 @@ Gfx::Size DockingLayout::onMeasure(const SizePolicy& policy)
 }
 
 
-void DockingLayout::onLayout(const Gfx::Rect& rect)
+void DockingLayout::onLayout(const Gfx::RectF& rect)
 {
     Base::onLayout(rect);
 
     std::vector<Widget*>::const_iterator it = this->widgets().begin();
     std::vector<Widget*>::const_iterator end = this->widgets().end();
 
-    Pt::ssize_t posLeft   = padding().left();
-    Pt::ssize_t posTop    = padding().top();
-    Pt::ssize_t posRight  = rect.width() - padding().right();
-    Pt::ssize_t posBottom = rect.height() - padding().bottom();
+    double posLeft   = padding().left();
+    double posTop    = padding().top();
+    double posRight  = rect.width() - padding().right();
+    double posBottom = rect.height() - padding().bottom();
     bool hasFilled   = false;
 
     for( ; it != end; ++it)
@@ -242,31 +242,31 @@ void DockingLayout::onLayout(const Gfx::Rect& rect)
 
             case DockingLayout::Left:
             {
-                Pt::ssize_t x = posLeft + (*it)->margin().left();
-                Pt::ssize_t y = posTop  + (*it)->margin().top();            
+                double x = posLeft + (*it)->margin().left();
+                double y = posTop  + (*it)->margin().top();            
 
                 posLeft += (*it)->preferredSize().width() + (*it)->margin().leftRight(); 
                             
-                Gfx::Size itemSize( (*it)->preferredSize().width(), 
+                Gfx::SizeF itemSize( (*it)->preferredSize().width(), 
                                      (posBottom - posTop) - 
                                      (*it)->margin().topBottom() );
 
-                Gfx::Point pos(x, y);                   
+                Gfx::PointF pos(x, y);                   
                 (*it)->layout( pos, itemSize );             
                 break;  
             }
 
             case DockingLayout::Top:
             {
-                Pt::ssize_t x = posLeft + (*it)->margin().left();
-                Pt::ssize_t y = posTop  + (*it)->margin().top();         
+                double x = posLeft + (*it)->margin().left();
+                double y = posTop  + (*it)->margin().top();         
 
                 posTop += (*it)->preferredSize().height() + (*it)->margin().topBottom();      
         
-                Gfx::Size itemSize( (posRight - posLeft) - (*it)->margin().leftRight(), 
+                Gfx::SizeF itemSize( (posRight - posLeft) - (*it)->margin().leftRight(), 
                                      (*it)->preferredSize().height() );
 
-                Gfx::Point pos(x, y);                   
+                Gfx::PointF pos(x, y);                   
                 (*it)->layout( pos, itemSize );              
                 break;
             }
@@ -275,16 +275,16 @@ void DockingLayout::onLayout(const Gfx::Rect& rect)
             {
                 posRight -= (*it)->preferredSize().width()  + (*it)->margin().right();  
                      
-                Pt::ssize_t x = posRight;
-                Pt::ssize_t y = posTop + (*it)->margin().top();                             
+                double x = posRight;
+                double y = posTop + (*it)->margin().top();                             
                     
                 posRight -=  (*it)->margin().left();
 
-                Gfx::Size itemSize( (*it)->preferredSize().width(), 
+                Gfx::SizeF itemSize( (*it)->preferredSize().width(), 
                                      (posBottom - posTop) - 
                                      (*it)->margin().topBottom() );
 
-                Gfx::Point pos(x, y);                   
+                Gfx::PointF pos(x, y);                   
                 (*it)->layout( pos, itemSize );              
                 break;
             }
@@ -293,15 +293,15 @@ void DockingLayout::onLayout(const Gfx::Rect& rect)
             {
                 posBottom -= (*it)->preferredSize().height() + (*it)->margin().bottom();   
                    
-                Pt::ssize_t x = posLeft + (*it)->margin().left();
-                Pt::ssize_t y = posBottom;       
+                double x = posLeft + (*it)->margin().left();
+                double y = posBottom;       
                   
                 posBottom -= (*it)->margin().top();                      
 
-                Gfx::Size itemSize( (posRight - posLeft) - (*it)->margin().leftRight(), 
+                Gfx::SizeF itemSize( (posRight - posLeft) - (*it)->margin().leftRight(), 
                                      (*it)->preferredSize().height() );
 
-                Gfx::Point pos(x, y);                   
+                Gfx::PointF pos(x, y);                   
                 (*it)->layout( pos, itemSize );              
                 break;
             }
@@ -311,7 +311,7 @@ void DockingLayout::onLayout(const Gfx::Rect& rect)
     if( ! hasFilled )
         return;
 
-    Gfx::Size fillSize(posRight - posLeft, 
+    Gfx::SizeF fillSize(posRight - posLeft, 
                         posBottom - posTop);
 
     for(it = widgets().begin(); it != end; ++it)
@@ -329,10 +329,10 @@ void DockingLayout::onLayout(const Gfx::Rect& rect)
 
             const Spacing& margin = (*it)->margin();
 
-            Gfx::Point pos(posLeft + margin.left(), 
+            Gfx::PointF pos(posLeft + margin.left(), 
                             posTop + margin.top());
 
-            Gfx::Size itemSize( fillSize.width() - margin.leftRight(), 
+            Gfx::SizeF itemSize( fillSize.width() - margin.leftRight(), 
                                  fillSize.height() - margin.topBottom()  );
 
             (*it)->layout( pos, itemSize );            

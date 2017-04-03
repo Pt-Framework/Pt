@@ -65,11 +65,11 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
 
         void resize(const Gfx::Size& size, size_t stride);
 
-        void resize(const Gfx::Size& size);    
+        void resize(const Gfx::SizeF& size);    
 
-        const Gfx::Size& size() const;
+        const Gfx::SizeF& size() const;
 
-        void setClip( const Gfx::Rect& clip);
+        void setClip( const Gfx::RectF& clip);
 
         void setCompositionMode(const Gfx::CompositionMode& mode);
 
@@ -81,36 +81,36 @@ class PixmapSurfaceImpl : public PaintSurfaceImpl
 
         Gfx::FontMetrics fontMetrics(const Pt::String& text) const;
 
-        void drawLine(const Gfx::Point& from, const Gfx::Point& to);
+        void drawLine(const Gfx::PointF& from, const Gfx::PointF& to);
 
-        void drawText(const Gfx::Point& to, const Pt::String& Text);
+        void drawText(const Gfx::PointF& to, const Pt::String& Text);
 
-        void drawRect(const Gfx::Rect& rectangle);
+        void drawRect(const Gfx::RectF& rectangle);
 
-        void fillRect(const Gfx::Rect& rectangle);
+        void fillRect(const Gfx::RectF& rectangle);
 
-        void drawEllipse(const Gfx::Point& topLeft, const Gfx::Size& size);
+        void drawEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
 
-        void fillEllipse(const Gfx::Point& topLeft, const Gfx::Size& size);
+        void fillEllipse(const Gfx::PointF& topLeft, const Gfx::SizeF& size);
 
-        void drawPolyline(const Gfx::Point* points, size_t pointCount);
+        void drawPolyline(const Gfx::PointF* points, size_t pointCount);
 
-        void fillPolygon(const Gfx::Point* points, size_t pointCount);
+        void fillPolygon(const Gfx::PointF* points, size_t pointCount);
 
-        void drawSurface(const Gfx::Point& toF, const PixmapSurface& surface);
+        void drawSurface(const Gfx::PointF& toF, const PixmapSurface& surface);
 
-        void drawSurface(const Gfx::Point& to, 
+        void drawSurface(const Gfx::PointF& toF, 
                          const PixmapSurface& pm,
-                         const Gfx::Rect& pmRect);
+                         const Gfx::RectF& pmRect);
 
-        void drawImage(const Gfx::Point& to, const Gfx::Image& image);
+        void drawImage(const Gfx::PointF& to, const Gfx::Image& image);
 
-        void drawImage(const Gfx::Point& to, const Gfx::Image& image, const Gfx::Rect& r);
+        void drawImage(const Gfx::PointF& to, const Gfx::Image& image, const Gfx::RectF& r);
 
-        void drawPicture(const Gfx::Point& to, const Picture& pic);
+        void drawPicture(const Gfx::PointF& to, const Picture& pic);
         
     private:
-        Gfx::Size            _size;
+        Gfx::SizeF            _size;
         Gfx::Image            _image;
         Gfx::ImagePainter     _painter;
 };

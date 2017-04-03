@@ -104,7 +104,7 @@ void TableLayout::onRemoveWidget(Widget& w)
 }
 
 
-void TableLayout::setColumn(std::size_t col, SizeMode mode, Pt::ssize_t size)
+void TableLayout::setColumn(std::size_t col, SizeMode mode, double size)
 {
     std::size_t cols = col + 1;
     if( cols > _columnSizes.size() )
@@ -114,7 +114,7 @@ void TableLayout::setColumn(std::size_t col, SizeMode mode, Pt::ssize_t size)
 }
 
 
-void TableLayout::setRow(std::size_t row, SizeMode mode, Pt::ssize_t size)
+void TableLayout::setRow(std::size_t row, SizeMode mode, double size)
 {
     std::size_t rows = row + 1;
     if( rows > _rowSizes.size() )
@@ -124,20 +124,20 @@ void TableLayout::setRow(std::size_t row, SizeMode mode, Pt::ssize_t size)
 }
 
 
-Gfx::Size TableLayout::onMeasure(const SizePolicy& policy)
+Gfx::SizeF TableLayout::onMeasure(const SizePolicy& policy)
 {
-    Pt::ssize_t itemsWidth = policy.width() - padding().leftRight(); 
-    Pt::ssize_t itemsHeight = policy.height() - padding().topBottom();
+    double itemsWidth = policy.width() - padding().leftRight(); 
+    double itemsHeight = policy.height() - padding().topBottom();
 
-    Gfx::Size contentSize;
+    Gfx::SizeF contentSize;
 
     for(std::size_t row = 0; row < _rows.size(); ++row)
     {
         SizeInfo& rowPolicy = _rowSizes.at(row);
         std::size_t columns = _rows.at(row).size();
 
-        Pt::ssize_t rowWidth = 0;
-        Pt::ssize_t rowHeight = 0;
+        double rowWidth = 0;
+        double rowHeight = 0;
         
         for(std::size_t col = 0; col != columns; ++col)
         {
@@ -167,10 +167,10 @@ Gfx::Size TableLayout::onMeasure(const SizePolicy& policy)
             }
 
             item->measure(itemPolicy);
-            Gfx::Size prefSize = item->preferredSize();
+            Gfx::SizeF prefSize = item->preferredSize();
 
-            Pt::ssize_t itemWidth = prefSize.width() + item->margin().leftRight();
-            Pt::ssize_t itemHeight = prefSize.height() + item->margin().topBottom();
+            double itemWidth = prefSize.width() + item->margin().leftRight();
+            double itemHeight = prefSize.height() + item->margin().topBottom();
         
             rowWidth += itemWidth;
             rowHeight = std::max(rowHeight, itemHeight);
@@ -186,13 +186,13 @@ Gfx::Size TableLayout::onMeasure(const SizePolicy& policy)
 }
 
 
-void TableLayout::onLayout(const Gfx::Rect& rect)
+void TableLayout::onLayout(const Gfx::RectF& rect)
 {
     //
     // calculate row sizes
     //
 
-    Pt::ssize_t rowAvail = rect.height() - padding().topBottom();
+    double rowAvail = rect.height() - padding().topBottom();
     std::size_t rowFills = 0;
 
     for(std::size_t row = 0; row < _rows.size(); ++row)
@@ -208,7 +208,7 @@ void TableLayout::onLayout(const Gfx::Rect& rect)
             
             if(rowPolicy.mode() == TableLayout::Preferred)
             {
-                Pt::ssize_t height = item->preferredSize().height() +
+                double height = item->preferredSize().height() +
                                 item->margin().topBottom();
 
                 height = std::max(rowPolicy.size(), height);
@@ -228,7 +228,7 @@ void TableLayout::onLayout(const Gfx::Rect& rect)
     // calculate column sizes
     //
 
-    Pt::ssize_t columnAvail = rect.width() - padding().leftRight();
+    double columnAvail = rect.width() - padding().leftRight();
     std::size_t columnFills = 0;
     std::size_t columns = _rows.empty() ? 0 : _rows.front().size();
 
@@ -244,7 +244,7 @@ void TableLayout::onLayout(const Gfx::Rect& rect)
 
             if(columnPolicy.mode() == TableLayout::Preferred)
             {
-                Pt::ssize_t width = item->preferredSize().width() + 
+                double width = item->preferredSize().width() + 
                                item->margin().leftRight();
                 width = std::max(columnPolicy.size(), width);
                 
@@ -263,33 +263,33 @@ void TableLayout::onLayout(const Gfx::Rect& rect)
     // cell layouting
     //
 
-    Pt::ssize_t rowFillSize = rowFills > 0 ? rowAvail / rowFills : 0;
-    Pt::ssize_t columnFillSize = columnFills > 0 ? columnAvail / columnFills : 0;
-    Pt::ssize_t y = padding().top();
+    double rowFillSize = rowFills > 0 ? rowAvail / rowFills : 0;
+    double columnFillSize = columnFills > 0 ? columnAvail / columnFills : 0;
+    double y = padding().top();
 
     for(std::size_t row = 0; row < _rows.size(); ++row)
     {
         SizeInfo& rowPolicy = _rowSizes.at(row);
-        Pt::ssize_t rowSize = rowPolicy.mode() == TableLayout::Fill ? rowFillSize
+        double rowSize = rowPolicy.mode() == TableLayout::Fill ? rowFillSize
                                                                : rowPolicy.size();
 
-        Pt::ssize_t x = padding().left();
+        double x = padding().left();
         std::size_t columns = _rows.at(row).size();
         
         for(std::size_t col = 0; col < columns; ++col)
         {
             SizeInfo& columnPolicy = _columnSizes.at(col);
-            Pt::ssize_t columnSize = columnPolicy.mode() == TableLayout::Fill ? columnFillSize
+            double columnSize = columnPolicy.mode() == TableLayout::Fill ? columnFillSize
                                                                          : columnPolicy.size();
 
             Widget* item = _rows.at(row).at(col);
 
             if( item && item->isVisible() )
             {
-                Gfx::Point pos( x + item->margin().left(), 
+                Gfx::PointF pos( x + item->margin().left(), 
                                  y + item->margin().top() );
 
-                Gfx::Size size( columnSize - item->margin().leftRight(), 
+                Gfx::SizeF size( columnSize - item->margin().leftRight(), 
                                  rowSize - item->margin().topBottom() );
 
                 item->layout(pos, size);

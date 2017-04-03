@@ -57,9 +57,9 @@ class PT_HMI_API ListBoxItem : public Button
         
         void setIcon(const Gfx::Image& image);
 
-        void setIconSize(const Gfx::Size& size);
+        void setIconSize(const Gfx::SizeF& size);
 
-        void setIconSize(Pt::ssize_t width, Pt::ssize_t height);
+        void setIconSize(double width, double height);
 
         Pt::Signal<ListBoxItem&>& selected();
 
@@ -98,11 +98,11 @@ class PT_HMI_API ListBoxItem : public Button
         virtual void onCanceled();
 
     protected:
-        virtual Gfx::Size onMeasure(const SizePolicy& p);
+        virtual Gfx::SizeF onMeasure(const SizePolicy& p);
 
         virtual void onInvalidate();
     
-        virtual void onPaint(PaintSurface& surface, const Gfx::Rect& updateRect);
+        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
         virtual void onPaintContent(Painter& painter);
 
@@ -110,7 +110,7 @@ class PT_HMI_API ListBoxItem : public Button
         Pt::Signal<ListBoxItem&> _selected;
         String                   _text;
         Gfx::Image               _image;
-        Gfx::Size               _iconSize;
+        Gfx::SizeF               _iconSize;
 
         FacetPtr<ListBoxRenderer> _renderer;
         bool                      _hasRenderer;
@@ -169,11 +169,11 @@ class PT_HMI_API ListBox : public Control
     protected:
         virtual void onInvalidate();
     
-        virtual void onPaint(PaintSurface& surface, const Gfx::Rect& updateRect);
+        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
-        virtual Gfx::Size onMeasure(const SizePolicy& policy);
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
-        virtual void onLayout(const Gfx::Rect& rect);
+        virtual void onLayout(const Gfx::RectF& rect);
 
     private:
         void onItemSelected(ListBoxItem& item);

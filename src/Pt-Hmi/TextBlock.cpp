@@ -48,49 +48,49 @@ TextLine::~TextLine()
 }
 
 
-const Gfx::Point& TextLine::position() const
+const Gfx::PointF& TextLine::position() const
 {
     return _position;
 }
 
         
-void TextLine::setPosition(const Gfx::Point& p)
+void TextLine::setPosition(const Gfx::PointF& p)
 {
     _position = p;
 }
 
 
-void TextLine::setPosition(Pt::ssize_t x, Pt::ssize_t y)
+void TextLine::setPosition(double x, double y)
 {
     _position.set(x, y);
 }
    
 
-Pt::ssize_t TextLine::width() const
+double TextLine::width() const
 {
     return _textMetrics.width();
 }
 
 
-Pt::ssize_t TextLine::height() const
+double TextLine::height() const
 {
     return _textMetrics.height();
 }
 
 
-Pt::ssize_t TextLine::maxHeight() const
+double TextLine::maxHeight() const
 {
     return _textMetrics.ascent() + _textMetrics.descent();
 }
 
 
-Pt::ssize_t TextLine::ascent() const
+double TextLine::ascent() const
 {
     return _textMetrics.ascent();
 }
 
 
-Pt::ssize_t TextLine::descent() const
+double TextLine::descent() const
 {
     return _textMetrics.descent();
 }
@@ -120,7 +120,7 @@ void TextLine::setText(const Pt::String& text, const Gfx::Font& font,
 }
 
 
-Pt::ssize_t TextLine::cursorToX(std::size_t cursorPosition) const
+double TextLine::cursorToX(std::size_t cursorPosition) const
 {
     Pt::String left;
     if( cursorPosition <= _text.size() && ! _text.empty() ) 
@@ -132,7 +132,7 @@ Pt::ssize_t TextLine::cursorToX(std::size_t cursorPosition) const
 }
 
 
-std::size_t TextLine::xToCursor(Pt::ssize_t x) const
+std::size_t TextLine::xToCursor(double x) const
 {
     const Pt::String& str = _text;
 
@@ -198,43 +198,43 @@ TextBlock::~TextBlock()
 }
 
 
-const Gfx::Point& TextBlock::position() const
+const Gfx::PointF& TextBlock::position() const
 {
     return _position;
 }
 
       
-void TextBlock::setPosition(const Gfx::Point& p)
+void TextBlock::setPosition(const Gfx::PointF& p)
 {
     _position = p;
 }
 
 
-const Gfx::Size& TextBlock::size() const
+const Gfx::SizeF& TextBlock::size() const
 {
     return _size;
 }
 
 
-Pt::ssize_t TextBlock::width() const
+double TextBlock::width() const
 {
     return _size.width();
 }
 
 
-Pt::ssize_t TextBlock::height() const
+double TextBlock::height() const
 {
     return _size.height();
 }
 
 
-Pt::ssize_t TextBlock::maxWidth() const
+double TextBlock::maxWidth() const
 {
     return _maxWidth;
 }
 
 
-void TextBlock::setMaxWidth(Pt::ssize_t w)
+void TextBlock::setMaxWidth(double w)
 {
     _maxWidth = w;
 }
@@ -372,12 +372,12 @@ void TextBlock::addLine(const Pt::String& line,
                         const Gfx::Font& font, 
                         const Gfx::FontMetrics& tm)
 {
-    Pt::ssize_t lineHeight = font.size() * 1.2;
-    Pt::ssize_t lineOffset = (lineHeight - font.size()) / 2;
-    Pt::ssize_t lineWidth = static_cast<Pt::ssize_t>( tm.width() );
+    double lineHeight = font.size() * 1.2;
+    double lineOffset = (lineHeight - font.size()) / 2;
+    double lineWidth = static_cast<double>( tm.width() );
 
-    Pt::ssize_t lineX = 0;
-    Pt::ssize_t lineY = _size.height();
+    double lineX = 0;
+    double lineY = _size.height();
 
     if( ! _lines.empty() )
         lineY += lineOffset;

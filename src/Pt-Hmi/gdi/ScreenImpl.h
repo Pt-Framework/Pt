@@ -55,7 +55,7 @@ class ScreenImpl
 
         void init(WindowBase& w);
 
-        Gfx::Size size() const;
+        Gfx::SizeF size() const;
 
         void registerWindow(Window& w)
         {
@@ -71,15 +71,15 @@ class ScreenImpl
 
         void dispatchScrollEvent(const ScrollEvent& ev);
 
-        Gfx::Point toParent(const Window& w, const Gfx::Point& pos) const;
+        Gfx::PointF toParent(const Window& w, const Gfx::PointF& pos) const;
 
-        Gfx::Point fromParent(const Window& w, const Gfx::Point& pos) const;
+        Gfx::PointF fromParent(const Window& w, const Gfx::PointF& pos) const;
 
-        void paint(const Gfx::Rect& rect);
+        void paint(const Gfx::RectF& rect);
 
-        void onResize(Window& w, const Gfx::Size& s);
+        void onResize(Window& w, const Gfx::SizeF& s);
 
-        void onMove(Window& w, const Gfx::Point& p);
+        void onMove(Window& w, const Gfx::PointF& p);
 
         void onFrameChanged(Window& w);
 
