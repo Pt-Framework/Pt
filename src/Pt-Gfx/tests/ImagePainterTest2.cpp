@@ -182,8 +182,94 @@ static const char* sfileDirXPrefix = "";
 #include "ImagePainterTest2_Benchmark.cpp"
 #include "ImagePainterTest2_Cairo.cpp"
 
+
+inline Pt::int64_t pt_lrintd(double val)
+{
+#if defined(PT_GFX_USE_SSE2)
+
+    return _mm_cvtsd_si64(_mm_load_sd(&val));
+
+#elif defined(PT_GFX_USE_X86_CPU)
+
+#if defined(__unix__) || defined(__GNUC__)
+    Pt::int64_t tmp;
+    __asm__ __volatile__ (
+        "fldl   %1\n\t"
+        "fistpq %0    "
+        : "=m"(tmp)
+        :  "m"(val)
+        : "memory"
+    );
+    return tmp;
+#else
+    Pt::int64_t tmp;
+    __asm {
+        fld   val
+        fistp tmp
+    }
+    return tmp;
+#endif
+
+#elif defined(PT_GFX_USE_ARM_CPU)
+
+    float       tmp;
+    Pt::int64_t res;
+    __asm__ __volatile__ ( "ftosid %0, %P1" : "=w" (tmp) : "w" (val) );
+    __asm__ __volatile__ ( "fmrs   %0, %1"  : "=r" (res) : "w" (tmp) );
+    return res;
+
+#endif
+}
+
+inline Pt::int32_t pt_lrintf(float val)
+{
+#if defined(PT_GFX_USE_SSE2)
+    return _mm_cvtss_si32(_mm_load_ss(&val));
+#elif defined(PT_GFX_USE_X86_CPU)
+
+#if defined(__unix__) || defined(__GNUC__)
+    Pt::int32_t tmp;
+    __asm__ __volatile__ (
+        "flds   %1\n\t"
+        "fistpl %0    "
+        : "=m"(tmp)
+        :  "m"(val)
+        : "memory"
+    );
+    return tmp;
+#else
+    Pt::int32_t tmp;
+    __asm {
+        fld   val
+        fistp tmp
+    }
+    return tmp;
+#endif
+
+#elif defined(PT_GFX_USE_ARM_CPU)
+
+    float       tmp;
+    Pt::int32_t res;
+    __asm__ __volatile__ ( "ftosis %0, %1" : "=w" (tmp) : "w" (val) );
+    __asm__ __volatile__ ( "fmrs   %0, %1" : "=r" (res) : "w" (tmp) );
+    return res;
+
+#endif
+}
+
+
+
+
 int main(int argc, char* args[])
 {
+    double a = 1000000000000009.0;
+    float  b = 10000009.0f;
+
+    std::clog << ((Pt::int64_t) a) << "    "  << pt_lrintd(a) << std::endl;
+    std::clog << "        " << ((Pt::int32_t) b) << "        " << "    "  << pt_lrintf(b) << std::endl;
+    return 0;
+
+
     // Benchmark some mathematical functions only
     if(DO_MATH_BENCHMARKING_ONLY) {
         benchMathFunctions();
