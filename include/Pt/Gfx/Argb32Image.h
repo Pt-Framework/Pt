@@ -104,14 +104,14 @@ class Argb32Model
 
         static void sourceOver(Pt::uint8_t* to, const Pt::Gfx::Color& from)
         {
-            const Pt::uint32_t alpha    = from.alpha() / 257;
+            const Pt::uint32_t alpha    = from.alpha() >> 8;
             const Pt::uint32_t alphaSrc = alpha;
             const Pt::uint32_t alphaInv = 255 - alpha;
 
-            to[0] = (Pt::uint8_t) ( (alphaSrc * from.blue () / 257 + alphaInv * to[0]) >> 8 );
-            to[1] = (Pt::uint8_t) ( (alphaSrc * from.green() / 257 + alphaInv * to[1]) >> 8 );
-            to[2] = (Pt::uint8_t) ( (alphaSrc * from.red  () / 257 + alphaInv * to[2]) >> 8 );
-            to[3] = (Pt::uint8_t) ( (alphaSrc * alpha              + alphaInv * to[3]) >> 8 );
+            to[0] = (Pt::uint8_t) ( (alphaSrc * (from.blue () >> 8) + alphaInv * to[0]) >> 8 );
+            to[1] = (Pt::uint8_t) ( (alphaSrc * (from.green() >> 8) + alphaInv * to[1]) >> 8 );
+            to[2] = (Pt::uint8_t) ( (alphaSrc * (from.red  () >> 8) + alphaInv * to[2]) >> 8 );
+            to[3] = (Pt::uint8_t) ( (alphaSrc *  alpha              + alphaInv * to[3]) >> 8 );
         }
 
         static void assign(Pt::uint8_t* to, const Color& c,
@@ -152,22 +152,22 @@ class Argb32Model
                 case CompositionMode::SourceCopy: {
                     const Pt::uint32_t blendAlphaSrc = blendingAlpha;
                     const Pt::uint32_t blendAlphaInv = 255 - blendingAlpha;
-                    to[0] = (blendAlphaSrc * c.blue () / 257 + blendAlphaInv * to[0]) >> 8;
-                    to[1] = (blendAlphaSrc * c.green() / 257 + blendAlphaInv * to[1]) >> 8;
-                    to[2] = (blendAlphaSrc * c.red  () / 257 + blendAlphaInv * to[2]) >> 8;
-                    to[3] = (blendAlphaSrc * c.alpha() / 257 + blendAlphaInv * to[3]) >> 8;
+                    to[0] = (blendAlphaSrc * (c.blue () >> 8) + blendAlphaInv * to[0]) >> 8;
+                    to[1] = (blendAlphaSrc * (c.green() >> 8) + blendAlphaInv * to[1]) >> 8;
+                    to[2] = (blendAlphaSrc * (c.red  () >> 8) + blendAlphaInv * to[2]) >> 8;
+                    to[3] = (blendAlphaSrc * (c.alpha() >> 8) + blendAlphaInv * to[3]) >> 8;
                     break;
                 }
 
                 case CompositionMode::SourceOver:
                 {
-                    const Pt::uint32_t colorAlpha    = c.alpha() / 257;
+                    const Pt::uint32_t colorAlpha    = c.alpha() >> 8;
                     const Pt::uint32_t blendAlphaSrc = colorAlpha * blendingAlpha / 255;
                     const Pt::uint32_t blendAlphaInv = 255 - blendAlphaSrc;
-                    to[0] = (blendAlphaSrc * c.blue () / 257 + blendAlphaInv * to[0]) >> 8;
-                    to[1] = (blendAlphaSrc * c.green() / 257 + blendAlphaInv * to[1]) >> 8;
-                    to[2] = (blendAlphaSrc * c.red  () / 257 + blendAlphaInv * to[2]) >> 8;
-                    to[3] = (blendAlphaSrc * colorAlpha      + blendAlphaInv * to[3]) >> 8;
+                    to[0] = (blendAlphaSrc * (c.blue () >> 8) + blendAlphaInv * to[0]) >> 8;
+                    to[1] = (blendAlphaSrc * (c.green() >> 8) + blendAlphaInv * to[1]) >> 8;
+                    to[2] = (blendAlphaSrc * (c.red  () >> 8) + blendAlphaInv * to[2]) >> 8;
+                    to[3] = (blendAlphaSrc *  colorAlpha      + blendAlphaInv * to[3]) >> 8;
                     break;
                 }
             }
@@ -217,11 +217,11 @@ class Argb32Model
                 }
 
                 case CompositionMode::SourceOver: {
-                    const Pt::uint32_t blend    = c.alpha() / 257;
+                    const Pt::uint32_t blend    = c.alpha() >> 8;
                     const Pt::uint32_t blendInv = 255 - blend;
-                    const Pt::uint32_t srcR     = (Pt::uint32_t) c.red  () * blend / 257;
-                    const Pt::uint32_t srcG     = (Pt::uint32_t) c.green() * blend / 257;
-                    const Pt::uint32_t srcB     = (Pt::uint32_t) c.blue () * blend / 257;
+                    const Pt::uint32_t srcR     = (Pt::uint32_t) (c.red  () >> 8) * blend;
+                    const Pt::uint32_t srcG     = (Pt::uint32_t) (c.green() >> 8) * blend;
+                    const Pt::uint32_t srcB     = (Pt::uint32_t) (c.blue () >> 8) * blend;
                     const Pt::uint32_t srcA     = blend * blend;
                     Argb32::pixelOps_SourceOver(to, srcA, srcR, srcG, srcB, blendInv, length);
                     break;
