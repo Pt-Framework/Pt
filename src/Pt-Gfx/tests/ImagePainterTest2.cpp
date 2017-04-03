@@ -183,8 +183,150 @@ static const char* sfileDirXPrefix = "";
 #include "ImagePainterTest2_Cairo.cpp"
 
 
+
+//
+// lrint() and llrint() overloaded functions for float and double
+//
+
+inline Pt::int32_t qlrint(float val)
+{
+#if defined(PT_GFX_USE_SSE2)
+    return _mm_cvtss_si32(_mm_load_ss(&val));
+#elif defined(PT_GFX_USE_X86_CPU)
+    #if defined(__unix__) || defined(__GNUC__)
+        Pt::int32_t tmp;
+        __asm__ __volatile__ (
+            "flds   %1\n\t"
+            "fistpl %0    "
+            : "=m"(tmp)
+            :  "m"(val)
+            : "memory"
+        );
+        return tmp;
+    #else
+        Pt::int32_t tmp;
+        __asm {
+            fld   val
+            fistp tmp
+        }
+        return tmp;
+    #endif
+#elif defined(PT_GFX_USE_ARM_CPU)
+    float       tmp;
+    Pt::int32_t res;
+    __asm__ __volatile__ ( "ftosis %0, %1" : "=w" (tmp) : "w" (val) );
+    __asm__ __volatile__ ( "fmrs   %0, %1" : "=r" (res) : "w" (tmp) );
+    return res;
+#else
+    return (val >= 0.0f) ? floorf(val + 0.5f) : ceilf(val - 0.5f);
+#endif
+}
+
+inline Pt::int32_t qlrint(double val)
+{
+#if defined(PT_GFX_USE_SSE2)
+    return _mm_cvtsd_si32(_mm_load_sd(&val));
+#elif defined(PT_GFX_USE_X86_CPU)
+    #if defined(__unix__) || defined(__GNUC__)
+        Pt::int32_t tmp;
+        __asm__ __volatile__ (
+            "fldl   %1\n\t"
+            "fistpq %0    "
+            : "=m"(tmp)
+            :  "m"(val)
+            : "memory"
+        );
+        return tmp;
+    #else
+        Pt::int32_t tmp;
+        __asm {
+            fld   val
+            fistp tmp
+        }
+        return tmp;
+    #endif
+#elif defined(PT_GFX_USE_ARM_CPU)
+    float       tmp;
+    Pt::int32_t res;
+    __asm__ __volatile__ ( "ftosid %0, %P1" : "=w" (tmp) : "w" (val) );
+    __asm__ __volatile__ ( "fmrs   %0, %1"  : "=r" (res) : "w" (tmp) );
+    return res;
+#else
+    return (val >= 0.0) ? floor(val + 0.5) : ceil(val - 0.5);
+#endif
+}
+
+inline Pt::int64_t qllrint(float val)
+{
+#if defined(PT_GFX_USE_SSE2)
+    return _mm_cvtss_si64(_mm_load_ss(&val));
+#elif defined(PT_GFX_USE_X86_CPU)
+    #if defined(__unix__) || defined(__GNUC__)
+        Pt::int64_t tmp;
+        __asm__ __volatile__ (
+            "flds   %1\n\t"
+            "fistpl %0    "
+            : "=m"(tmp)
+            :  "m"(val)
+            : "memory"
+        );
+        return tmp;
+    #else
+        Pt::int64_t tmp;
+        __asm {
+            fld   val
+            fistp tmp
+        }
+        return tmp;
+    #endif
+#else
+    return (val >= 0.0f) ? floorf(val + 0.5f) : ceilf(val - 0.5f);
+#endif
+}
+
+inline Pt::int64_t qllrint(double val)
+{
+#if defined(PT_GFX_USE_SSE2)
+    return _mm_cvtsd_si64(_mm_load_sd(&val));
+#elif defined(PT_GFX_USE_X86_CPU)
+    #if defined(__unix__) || defined(__GNUC__)
+        Pt::int64_t tmp;
+        __asm__ __volatile__ (
+            "fldl   %1\n\t"
+            "fistpq %0    "
+            : "=m"(tmp)
+            :  "m"(val)
+            : "memory"
+        );
+        return tmp;
+    #else
+        Pt::int64_t tmp;
+        __asm {
+            fld   val
+            fistp tmp
+        }
+        return tmp;
+    #endif
+#else
+    return (val >= 0.0) ? floor(val + 0.5) : ceil(val - 0.5);
+#endif
+}
+
+
+
+
 int main(int argc, char* args[])
 {
+    float  a = 10000009.0;
+    double b = 1000000000009.0;
+
+    std::clog << (Pt::int64_t) a << "    " << qlrint(a) << std::endl;
+    std::clog << (Pt::int64_t) (double) a << "    " << qlrint((double) a) << std::endl;
+
+    std::clog << "     " << (Pt::int64_t) a << "     " << "    " << qllrint(a) << std::endl;
+    std::clog << (Pt::int64_t) b << "    " << qllrint(b) << std::endl;
+    return 0;
+
     // Benchmark some mathematical functions only
     if(DO_MATH_BENCHMARKING_ONLY) {
         benchMathFunctions();
