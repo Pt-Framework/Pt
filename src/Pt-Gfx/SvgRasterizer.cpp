@@ -8,7 +8,7 @@
 
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
-  instantiate templates or use macros or inline functions from this
+  instantiate templates or use macros or inline fuelemtions from this
   file, or you compile this file and link it with other files to
   produce an executable, this file does not by itself cause the
   resulting executable to be covered by the GNU General Public
@@ -23,7 +23,7 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+  Foundation, Ielem., 51 Franklin Street, Fifth Floor, Boston, MA
   02110-1301 USA
 */
 
@@ -46,10 +46,10 @@ namespace Gfx {
 
 
 // ======================================================================================
-// ===== Internal Helper Functions ======================================================
+// ===== Internal Helper Fuelemtions ======================================================
 // ======================================================================================
 
-inline const std::string cnvLowerCase(const std::string & str_)
+inline const std::string lcaseStdStr(const std::string & str_)
 {
     std::string  str = str_;
     std::transform(str.begin(), str.end(), str.begin(), ::tolower);
@@ -57,12 +57,20 @@ inline const std::string cnvLowerCase(const std::string & str_)
     return str;
 }
 
-inline const std::string cnvLowerCase(const Pt::String& str_)
+inline const std::string lcaseStdStr(const Pt::String& str_)
 {
     Pt::String str = str_;
     std::transform(str.begin(), str.end(), str.begin(), ::tolower);
 
     return str.narrow();
+}
+
+inline const Pt::String lcasePtStr(const Pt::String& str_)
+{
+    Pt::String str = str_;
+    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+
+    return str;
 }
 
 
@@ -71,6 +79,9 @@ inline const std::string cnvLowerCase(const Pt::String& str_)
 // ======================================================================================
 
 struct SvgRasterizer::RasterState {
+    bool               gotStart;
+    bool               gotEnd;
+
     Image&             image;
     ImagePainter2      painter;
 
@@ -81,15 +92,17 @@ struct SvgRasterizer::RasterState {
     std::vector<Brush> bsStack;
 
     inline RasterState(Image& image_, const AffineTransform& initialTransform)
-    : image  (image_)
-    , painter(image_)
-    , atrans (initialTransform)
+    : gotStart(false)
+    , gotEnd  (false)
+    , image   (image_)
+    , painter (image_)
+    , atrans  (initialTransform)
     {}
 };
 
 
 // ======================================================================================
-// ===== Public Member Functions ========================================================
+// ===== Public Member Fuelemtions ========================================================
 // ======================================================================================
 
 SvgRasterizer::SvgRasterizer(std::istream& is, Image& image, const AffineTransform& worldTransform)
@@ -111,57 +124,87 @@ bool SvgRasterizer::advance()
 {
     // Get the next node
     Xml::Node* node = _xmlReader.advance();
-    if(!node) return true;
+    if(!node) {
+        // Check if we have got a complete SVG body
+        if(!_rstate->gotStart || !_rstate->gotEnd) throw IOError("svg error");
+        // All done!
+        lprintf("DONE!\n");
+        return true;
+    }
 
     // Process the node
     switch(node->type()) {
         case Xml::Node::StartDocument: {
-            const Xml::XmlDeclaration* nc = _xmlReader.input()->declaration();
-            if(nc && !nc->version().empty()) {
-                lprintf("StartDocument : %s\n", cnvLowerCase(nc->version()).c_str());
-                lprintf("                %s\n", cnvLowerCase(nc->encoding()).c_str());
+            // Get the XML declaration
+            const Xml::XmlDeclaration* elem = _xmlReader.input()->declaration();
+            // Dump the XML declaration
+            if(elem && !elem->version().empty()) {
+                lprintf("StartDocument : %s\n", lcaseStdStr(elem->version ()).c_str());
+                lprintf("                %s\n", lcaseStdStr(elem->encoding()).c_str());
             }
+            break;
+        }
+
+        case Xml::Node::EndDocument: {
+            // Check if we have got a complete SVG body
+            if(!_rstate->gotStart || !_rstate->gotEnd) throw IOError("svg error");
+            // Dump the element
+            lprintf("EndDocument   :\n");
             break;
         }
 
         case Xml::Node::DocType: {
-            const Xml::DocType& nc = Xml::nodeCast<Xml::DocType>(*node);
-            lprintf("DocType       : %s\n", cnvLowerCase(nc.rootName().local()).c_str());
-            lprintf("                %s\n", cnvLowerCase(nc.publicId()        ).c_str());
-            lprintf("                %s\n", cnvLowerCase(nc.systemId()        ).c_str());
+            // Convert the element
+            const Xml::DocType& elem = Xml::nodeCast<Xml::DocType>(*node);
+            // Dump the element
+            lprintf("DocType       : %s\n", lcaseStdStr(elem.rootName().local()).c_str());
+            lprintf("                %s\n", lcaseStdStr(elem.publicId()        ).c_str());
+            lprintf("                %s\n", lcaseStdStr(elem.systemId()        ).c_str());
             break;
         }
 
         case Xml::Node::StartElement: {
-            const Xml::StartElement& nc = Xml::nodeCast<Xml::StartElement>(*node);
-            if(cnvLowerCase(nc.name().local()) == "svg") {
-                lprintf("StartElement  : %s\n", cnvLowerCase(nc.name().local()).c_str());
-                lprintf("                %s\n", cnvLowerCase(nc.namespaceUri()).c_str());
+            // Convert the element
+            const Xml::StartElement& elem = Xml::nodeCast<Xml::StartElement>(*node);
+            // Check for the SVG opening element
+            if(lcasePtStr(elem.name().local()) == L"svg") _rstate->gotStart = true;
+            // Dump the element
+            if(lcaseStdStr(elem.name().local()) == "svg") {
+                lprintf("StartElement  : %s\n", lcaseStdStr(elem.name().local()).c_str());
+                lprintf("                %s\n", lcaseStdStr(elem.namespaceUri()).c_str());
             }
             else {
-                lprintf("StartElement  : %s\n", cnvLowerCase(nc.name().local()).c_str());
+                lprintf("StartElement  : %s\n", lcaseStdStr(elem.name().local()).c_str());
             }
-            const Xml::AttributeList& alist = nc.attributes();
+            const Xml::AttributeList& alist = elem.attributes();
             for(Xml::AttributeList::ConstIterator it = alist.begin(); it != alist.end(); ++it) {
                 const Xml::Attribute& a = *it;
-                lprintf("    Attribute : %s = %s\n", cnvLowerCase(a.name().local()).c_str(), a.value().narrow().c_str());
+                lprintf("    Attribute : %s = %s\n", lcaseStdStr(a.name().local()).c_str(), a.value().narrow().c_str());
             }
             break;
         }
 
         case Xml::Node::EndElement: {
-            const Xml::EndElement& nc = Xml::nodeCast<Xml::EndElement>(*node);
-            lprintf("EndElement    : %s\n", cnvLowerCase(nc.name().local()).c_str());
+            // Convert the element
+            const Xml::EndElement& elem = Xml::nodeCast<Xml::EndElement>(*node);
+            // Check for the SVG closing element
+            if(lcasePtStr(elem.name().local()) == L"svg") _rstate->gotEnd = true;
+            // Dump the element
+            lprintf("EndElement    : %s\n", lcaseStdStr(elem.name().local()).c_str());
             break;
         }
 
         case Xml::Node::Characters: {
-            //const Xml::Characters& nc = Xml::nodeCast<Xml::Characters>(*node);
-            //lprintf("Characters    : %s\n", nc.content().narrow().c_str());
+            // Convert the element
+            //const Xml::Characters& elem = Xml::nodeCast<Xml::Characters>(*node);
+            // Dump the element
+            //lprintf("Characters    : %s\n", elem.content().narrow().c_str());
             break;
         }
 
         default:
+            // Dump the element
+            lprintf("node->type()  : %d\n", node->type());
             break;
     }
 
