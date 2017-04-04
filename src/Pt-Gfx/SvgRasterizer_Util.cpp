@@ -38,29 +38,45 @@ namespace Gfx {
 
 
 // ======================================================================================
-// ===== Private Member Functions =======================================================
+// ===== Internal Helper Functions ======================================================
 // ======================================================================================
 
-/*
-cat html_color.txt | awk --non-decimal-data '
-BEGIN {OFS = FS}
+inline const Color fromCssHsl(int h, int s, int l)
 {
-    $3 = sprintf("%d", "0x" substr($2, 2, 2))
-    $4 = sprintf("%d", "0x" substr($2, 4, 2))
-    $5 = sprintf("%d", "0x" substr($2, 6, 2))
-    printf "    static const Color& c_%-20s = Color::fromRgb8(%3d, %3d, %3d, 255);\n", $1, $3, $4, $5
-}'
+    return Color::fromRgb8(0, 0, 0, 255);
+}
 
-cat html_color.txt | awk '
-BEGIN {OFS = FS}
+inline const Color fromCssHwb(int h, int s, int l)
 {
-    $2 = sprintf("\"%s\"", $1)
-    printf "    if(colStr == %-22s) return c_%s;\n", $2, $1
-}'
-*/
-const Color SvgRasterizer::fromHtmlColor(const std::string& colStr_)
+    return Color::fromRgb8(0, 0, 0, 255);
+}
+
+inline const Color fromCssCmyk(int c, int m, int y, int k)
 {
-    // Named colors
+    return Color::fromRgb8(0, 0, 0, 255);
+}
+
+inline const Color& fromCssNamedColor(const std::string& colStr)
+{
+    /*
+    cat html_color.txt | awk --non-decimal-data '
+    BEGIN {OFS = FS}
+    {
+        $3 = sprintf("%d", "0x" substr($2, 2, 2))
+        $4 = sprintf("%d", "0x" substr($2, 4, 2))
+        $5 = sprintf("%d", "0x" substr($2, 6, 2))
+        printf "    static const Color& c_%-20s = Color::fromRgb8(%3d, %3d, %3d, 255);\n", $1, $3, $4, $5
+    }'
+
+    cat html_color.txt | awk '
+    BEGIN {OFS = FS}
+    {
+        $2 = sprintf("\"%s\"", $1)
+        printf "    if(colStr == %-22s) return c_%s;\n", $2, $1
+    }'
+    */
+
+    // Color constants
     static const Color& c_black                = Color::fromRgb8(  0,   0,   0, 255);
     static const Color& c_silver               = Color::fromRgb8(192, 192, 192, 255);
     static const Color& c_gray                 = Color::fromRgb8(128, 128, 128, 255);
@@ -209,51 +225,7 @@ const Color SvgRasterizer::fromHtmlColor(const std::string& colStr_)
     static const Color& c_yellowgreen          = Color::fromRgb8(154, 205,  50, 255);
     static const Color& c_rebeccapurple        = Color::fromRgb8(102,  51, 153, 255);
 
-    // Remove spaces
-    std::string colStr = colStr_;
-    colStr.erase(remove_if(colStr.begin(), colStr.end(), ::isspace), colStr.end());
-
-    // Get the length and C-string
-    const size_t clen = colStr.length();
-    const char*  cstr = colStr.c_str();
-
-    // Hex RGB/RGBA color?
-    if(cstr[0] == '#') {
-        int r = 0;
-        int g = 0;
-        int b = 0;
-        int a = 255;
-             if(clen == 3 + 1) sscanf(cstr + 1, "%1x%1x%1x",        &r, &g, &b    );
-        else if(clen == 4 + 1) sscanf(cstr + 1, "%1x%1x%1x%1x",     &r, &g, &b, &a);
-        else if(clen == 6 + 1) sscanf(cstr + 1, "%02x%02x%02x",     &r, &g, &b    );
-        else if(clen == 8 + 1) sscanf(cstr + 1, "%02x%02x%02x%02x", &r, &g, &b, &a);
-        return Color::fromRgb8(r, g, b, 255);
-    }
-
-    // RGBA color?
-    if(clen >= 13 && cstr[0] == 'r' && cstr[1] == 'g' && cstr[2] == 'b' && cstr[3] == 'a' && cstr[4] == '(' &&  cstr[clen - 1] == ')') {
-        char  c1, c2, c3;
-        int   r = 0;
-        int   g = 0;
-        int   b = 0;
-        float a = 1.0f;
-        sscanf(cstr + 5, "%3d%1c%3d%1c%3d%1c%f", &r, &c1, &g, &c2, &b, &c3, &a);
-        if(c1 != ',' || c2 != ',' || c3 != ',') return c_black;
-        return Color::fromRgb8(r, g, b, a * 255.0f);
-    }
-
-    // RGB color?
-    if(clen >= 10 && cstr[0] == 'r' && cstr[1] == 'g' && cstr[2] == 'b' && cstr[3] == '(' &&  cstr[clen - 1] == ')') {
-        char  c1, c2;
-        int   r = 0;
-        int   g = 0;
-        int   b = 0;
-        sscanf(cstr + 5, "%3d%1c%3d%1c%3d", &r, &c1, &g, &c2, &b);
-        if(c1 != ',' || c2 != ',') return c_black;
-        return Color::fromRgb8(r, g, b, 255);
-    }
-
-    // Named colors
+    // Compare the names
     if(colStr == "black"               ) return c_black;
     if(colStr == "silver"              ) return c_silver;
     if(colStr == "gray"                ) return c_gray;
@@ -404,6 +376,109 @@ const Color SvgRasterizer::fromHtmlColor(const std::string& colStr_)
 
     // Unknown/unsupported color
     return c_black;
+}
+
+
+// ======================================================================================
+// ===== Private Member Functions =======================================================
+// ======================================================================================
+
+const Color SvgRasterizer::fromHtmlColor(const std::string& colStr_)
+{
+
+    // Remove spaces
+    std::string colStr = colStr_;
+    colStr.erase(remove_if(colStr.begin(), colStr.end(), ::isspace), colStr.end());
+
+    // Get the length and C-string
+    const size_t clen = colStr.length();
+    const char*  cstr = colStr.c_str();
+
+    // Hex RGB/RGBA color?
+    if(cstr[0] == '#') {
+        int r = 0;
+        int g = 0;
+        int b = 0;
+        int a = 255;
+             if(clen == 3 + 1) sscanf(cstr + 1, "%1x%1x%1x",        &r, &g, &b    );
+        else if(clen == 4 + 1) sscanf(cstr + 1, "%1x%1x%1x%1x",     &r, &g, &b, &a);
+        else if(clen == 6 + 1) sscanf(cstr + 1, "%02x%02x%02x",     &r, &g, &b    );
+        else if(clen == 8 + 1) sscanf(cstr + 1, "%02x%02x%02x%02x", &r, &g, &b, &a);
+        return Color::fromRgb8(r, g, b, a);
+    }
+
+    // RGBA color?
+    if(clen >= 13 && cstr[0] == 'r' && cstr[1] == 'g' && cstr[2] == 'b' && cstr[3] == 'a' && cstr[4] == '(' &&  cstr[clen - 1] == ')') {
+        char  c1, c2, c3;
+        int   r = 0;
+        int   g = 0;
+        int   b = 0;
+        float a = 1.0f;
+        sscanf(cstr + 5, "%3d%1c%3d%1c%3d%1c%f", &r, &c1, &g, &c2, &b, &c3, &a);
+        if(c1 != ',' || c2 != ',' || c3 != ',') {
+            r = g = b = 0;
+            a = 1.0f;
+        }
+        return Color::fromRgb8(r, g, b, a * 255.0f);
+    }
+
+    // RGB color?
+    if(clen >= 10 && cstr[0] == 'r' && cstr[1] == 'g' && cstr[2] == 'b' && cstr[3] == '(' &&  cstr[clen - 1] == ')') {
+        char c1, c2;
+        int  r = 0;
+        int  g = 0;
+        int  b = 0;
+        sscanf(cstr + 4, "%3d%1c%3d%1c%3d", &r, &c1, &g, &c2, &b);
+        if(c1 != ',' || c2 != ',') {
+            r = g = b = 0;
+        }
+        return Color::fromRgb8(r, g, b, 255);
+    }
+
+    // HSL color?
+    if(clen >= 12 && cstr[0] == 'h' && cstr[1] == 's' && cstr[2] == 'l' && cstr[3] == '(' &&  cstr[clen - 1] == ')') {
+        char c1, c2, p1, p2;
+        int  h = 0;
+        int  s = 0;
+        int  l = 0;
+        sscanf(cstr + 4, "%3d%c%3d%c%c%3d%c", &h, &c1, &s, &p1, &c2, &l, &p2);
+        if(c1 != ',' || c2 != ',' || p1 != '%' || p2 != '%') {
+            h = s = l = 0;
+        }
+        return fromCssHsl(h, s, l);
+    }
+
+    // HWB color?
+    if(clen >= 12 && cstr[0] == 'h' && cstr[1] == 'w' && cstr[2] == 'b' && cstr[3] == '(' &&  cstr[clen - 1] == ')') {
+        char c1, c2, p1, p2;
+        int  h = 0;
+        int  w = 0;
+        int  b = 100;
+        sscanf(cstr + 4, "%3d%c%3d%c%c%3d%c", &h, &c1, &w, &p1, &c2, &b, &p2);
+        if(c1 != ',' || c2 != ',' || p1 != '%' || p2 != '%') {
+            h = w = 0;
+            b = 100;
+        }
+        return fromCssHwb(h, w, b);
+    }
+
+    // CMYK color?
+    if(clen >= 17 && cstr[0] == 'c' && cstr[1] == 'm' && cstr[2] == 'y' && cstr[3] == 'k' && cstr[4] == '(' &&  cstr[clen - 1] == ')') {
+        char c1, c2, c3, p1, p2, p3, p4;
+        int  c = 0;
+        int  m = 0;
+        int  y = 0;
+        int  k = 100;
+        sscanf(cstr + 5, "%3d%c%c%3d%c%c%3d%c%c%3d%c", &c, &p1, &c1, &m, &p2, &c2, &y, &p3, &c3, &k, &p4);
+        if(c1 != ',' || c2 != ',' || c3 != ','  || p1 != '%' || p2 != '%' || p3 != '%' || p4 != '%') {
+            c = m = y = 0;
+            k = 100;
+        }
+        return fromCssCmyk(c, m, y, k);
+    }
+
+    // Check against named colors
+    return fromCssNamedColor(colStr);
 }
 
 
