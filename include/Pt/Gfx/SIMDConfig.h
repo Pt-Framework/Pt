@@ -39,48 +39,56 @@
 // ### TODO: Autodetect the SIMD support! ###
 #ifdef RASTERIZER2
 
-// Include the appropriate SIMD header for common ARM compilers and define the needed macros
-#if defined(__arm__) || defined(__thumb__) || defined(_M_ARM) || defined(_M_ARMT) || defined(__TARGET_ARCH_ARM) || defined(__TARGET_ARCH_THUMB) || defined(_ARM) || defined(__arm)
+// GNU-style compiler
+#if defined(__unix__) || defined(__GNUC__)
 
-    #include <arm_neon.h>
+    // Define the compiler identification macro
+    #define PT_GFX_USE_GNU_STYLE_COMPILER
+    // Include the appropriate SIMD header x86 and define the appropriate macros
+    #if defined(i386) || defined(__i386) || defined(__i386__) || defined(_X86_) || defined(__x86_64) || defined(__x86_64__) || defined(__amd64) || defined(__amd64__)
+        #include <x86intrin.h>
+        #define PT_GFX_USE_X86_CPU
+        #define PT_GFX_USE_GNU_STYLE_COMPILER
+        #define PT_GFX_USE_FMA3
+        #define PT_GFX_USE_AVX2
+        #define PT_GFX_USE_AVX1
+        #define PT_GFX_USE_SSSE4P2
+        #define PT_GFX_USE_SSSE4P1
+        #define PT_GFX_USE_SSSE3
+        #define PT_GFX_USE_SSE3
+        #define PT_GFX_USE_SSE2
+        #define PT_GFX_USE_SSE1
+    // Include the appropriate SIMD header Arm and define the appropriate macros
+    #elif defined(__arm__) || defined(__thumb__) || defined(_M_ARM) || defined(_M_ARMT) || defined(__TARGET_ARCH_ARM) || defined(__TARGET_ARCH_THUMB) || defined(_ARM) || defined(__arm)
+        #include <arm_neon.h>
+        #define PT_GFX_USE_ARM_CPU
+        #define PT_GFX_USE_NEON
+    #endif
 
-    #define PT_GFX_USE_ARM_CPU
+// MSVC-style compiler
+#elif defined(_MSC_VER )
 
-    #define PT_GFX_USE_NEON
-
-// Include the appropriate SIMD header for GCC and its derivative compilers and define the needed macros
-#elif defined(i386) || defined(__i386) || defined(__i386__) || defined(_X86_) || defined(__x86_64) || defined(__x86_64__) || defined(__amd64) || defined(__amd64__)
-
-    #include <x86intrin.h>
-
-    #define PT_GFX_USE_X86_CPU
-
-    #define PT_GFX_USE_FMA3
-
-    #define PT_GFX_USE_AVX2
-    #define PT_GFX_USE_AVX1
-
-    #define PT_GFX_USE_SSSE3
-    #define PT_GFX_USE_SSE3
-    #define PT_GFX_USE_SSE2
-    #define PT_GFX_USE_SSE1
-
-// Include the appropriate SIMD header for MSVC compiler and define the needed macros
-#elif defined(_M_IX86) || defined(_M_AMD64) || defined(_M_X64)
-
-    #include <intrin.h>
-
-    #define PT_GFX_USE_X86_CPU
-
-    #define PT_GFX_USE_FMA3
-
-    #define PT_GFX_USE_AVX2
-    #define PT_GFX_USE_AVX1
-
-    #define PT_GFX_USE_SSSE3
-    #define PT_GFX_USE_SSE3
-    #define PT_GFX_USE_SSE2
-    #define PT_GFX_USE_SSE1
+    // Define the compiler identification macro
+    #define PT_GFX_USE_MSVC_STYLE_COMPILER
+    // Include the appropriate SIMD header x86 and define the appropriate macros
+    #if defined(_M_IX86) || defined(_M_AMD64) || defined(_M_X64)
+        #include <intrin.h>
+        #define PT_GFX_USE_X86_CPU
+        #define PT_GFX_USE_FMA3
+        #define PT_GFX_USE_AVX2
+        #define PT_GFX_USE_AVX1
+        #define PT_GFX_USE_SSSE4P2
+        #define PT_GFX_USE_SSSE4P1
+        #define PT_GFX_USE_SSSE3
+        #define PT_GFX_USE_SSE3
+        #define PT_GFX_USE_SSE2
+        #define PT_GFX_USE_SSE1
+    // Include the appropriate SIMD header Arm and define the appropriate macros
+    #elif defined(_M_ARM) || defined(_M_ARM64)
+        #include <arm_neon.h>
+        #define PT_GFX_USE_ARM_CPU
+        #define PT_GFX_USE_NEON
+    #endif
 
 #endif
 
@@ -92,6 +100,8 @@
 //#undef PT_GFX_USE_AVX2
 //#undef PT_GFX_USE_AVX1
 
+//#undef PT_GFX_USE_SSSE4P2
+//#undef PT_GFX_USE_SSSE4P1
 //#undef PT_GFX_USE_SSSE3
 //#undef PT_GFX_USE_SSE3
 //#undef PT_GFX_USE_SSE2
@@ -112,7 +122,15 @@
 #define PT_GFX_USE_AVX1
 #endif
 
-#if defined(PT_GFX_USE_AVX1) && !defined(PT_GFX_USE_SSSE3)
+#if defined(PT_GFX_USE_AVX1) && !defined(PT_GFX_USE_SSSE4P2)
+#define PT_GFX_USE_SSSE4P2
+#endif
+
+#if defined(PT_GFX_USE_SSSE4P2) && !defined(PT_GFX_USE_SSSE4P1)
+#define PT_GFX_USE_SSSE4P1
+#endif
+
+#if defined(PT_GFX_USE_SSSE4P1) && !defined(PT_GFX_USE_SSSE3)
 #define PT_GFX_USE_SSSE3
 #endif
 

@@ -64,7 +64,7 @@ static inline void getGenericNBezierPoint(double& x, double& y, const std::vecto
     y = tmp[1];
 }
 
-static inline void generateGenericNBezierPoints(std::vector<PointF>& dst, double x1, double y1, const std::vector<double>& points, float smoothness)
+static inline void generateGenericNBezierPoints(std::vector<PointF>& dst, double x1, double y1, const std::vector<double>& points, double smoothness)
 {
     // ### TODO: Make the curve smoother, if possible. ###
 
@@ -93,7 +93,7 @@ static inline void generateGenericNBezierPoints(std::vector<PointF>& dst, double
 
     // Determine the number of segments
     const Pt::int32_t minNS = pts.size() / 2 + 1;
-          Pt::int32_t nSegs = round(clen * smoothness / 24);
+          Pt::int32_t nSegs = Gfx::Math::llrint(clen * smoothness / 24);
     if(nSegs < minNS) nSegs = minNS;
 
     // Calculate the inverse multiplication factor
@@ -111,7 +111,7 @@ static inline void generateGenericNBezierPoints(std::vector<PointF>& dst, double
     }
 }
 
-static inline void generateCubicBezierPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, float smoothness)
+static inline void generateCubicBezierPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double smoothness)
 {
     // ### TODO: Make the curve smoother, if possible. ###
 
@@ -128,7 +128,7 @@ static inline void generateCubicBezierPoints(std::vector<PointF>& dst, double x1
     const double lb   = l43 + l32 + l12;
 
     // Determine the number of segments
-    Pt::int32_t nSegs = round(lb * smoothness / 16) + 4;
+    Pt::int32_t nSegs = Gfx::Math::llrint(lb * smoothness / 16) + 4;
     if(nSegs < 9) nSegs = 9;
 
     // Calculate the inverse multiplication factor
@@ -153,7 +153,7 @@ static inline void generateCubicBezierPoints(std::vector<PointF>& dst, double x1
     }
 }
 
-static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double x3, double y3, float smoothness)
+static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double x3, double y3, double smoothness)
 {
     // ### TODO: Make the curve smoother, if possible. ###
 
@@ -175,7 +175,7 @@ static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, doubl
     const double lb  = l32 + l12;
 
     // Determine the number of segments
-    Pt::int32_t nSegs = round(lb * smoothness / 16) + 2;
+    Pt::int32_t nSegs = Gfx::Math::llrint(lb * smoothness / 16) + 2;
     if(nSegs < 5) nSegs = 5;
 
     // Calculate the inverse multiplication factor
@@ -199,7 +199,7 @@ static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, doubl
     }
 }
 
-static inline void generateArcPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double r, float smoothness)
+static inline void generateArcPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double r, double smoothness)
 {
     // Line equation : 0 = aX + By + c
     // Normal        : n = ai + bj
@@ -208,7 +208,7 @@ static inline void generateArcPoints(std::vector<PointF>& dst, double x1, double
   //const double c = -(x1 * y2 - x2 * y1);
 
     // Negated inverse line length
-    const float il = -Gfx::Math::fastInvSqrt(a * a + b * b);
+    const double il = -Gfx::Math::fastInvSqrt(a * a + b * b);
 
     // Circumference vector
     const double cx =  a * il * r;

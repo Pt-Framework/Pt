@@ -255,7 +255,7 @@ inline Pt::int32_t lrint(float val)
 #if defined(PT_GFX_USE_SSE2)
     return _mm_cvtss_si32(_mm_load_ss(&val));
 #elif defined(PT_GFX_USE_X86_CPU)
-    #if defined(__unix__) || defined(__GNUC__)
+    #if defined(PT_GFX_USE_GNU_STYLE_COMPILER)
         Pt::int32_t tmp;
         __asm__ __volatile__ (
             "flds   %1\n\t"
@@ -289,7 +289,7 @@ inline Pt::int32_t lrint(double val)
 #if defined(PT_GFX_USE_SSE2)
     return _mm_cvtsd_si32(_mm_load_sd(&val));
 #elif defined(PT_GFX_USE_X86_CPU)
-    #if defined(__unix__) || defined(__GNUC__)
+    #if defined(PT_GFX_USE_GNU_STYLE_COMPILER)
         Pt::int32_t tmp;
         __asm__ __volatile__ (
             "fldl   %1\n\t"
@@ -323,7 +323,7 @@ inline Pt::int64_t llrint(float val)
 #if defined(PT_GFX_USE_SSE2)
     return _mm_cvtss_si64(_mm_load_ss(&val));
 #elif defined(PT_GFX_USE_X86_CPU)
-    #if defined(__unix__) || defined(__GNUC__)
+    #if defined(PT_GFX_USE_GNU_STYLE_COMPILER)
         Pt::int64_t tmp;
         __asm__ __volatile__ (
             "flds   %1\n\t"
@@ -351,7 +351,7 @@ inline Pt::int64_t llrint(double val)
 #if defined(PT_GFX_USE_SSE2)
     return _mm_cvtsd_si64(_mm_load_sd(&val));
 #elif defined(PT_GFX_USE_X86_CPU)
-    #if defined(__unix__) || defined(__GNUC__)
+    #if defined(PT_GFX_USE_GNU_STYLE_COMPILER)
         Pt::int64_t tmp;
         __asm__ __volatile__ (
             "fldl   %1\n\t"

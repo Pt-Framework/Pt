@@ -113,7 +113,7 @@ static const std::string formatCaption(const Painter& painter, CompositionMode c
 {
     // Get the class name string
     std::string className = typeid(painter).name();
-#ifdef __GNUC__
+#if defined(PT_GFX_USE_GNU_STYLE_COMPILER)
     int s;
     char* demangled = abi::__cxa_demangle(className.c_str(), 0, 0, &s);
     className = demangled;

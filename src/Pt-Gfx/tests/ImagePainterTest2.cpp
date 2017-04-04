@@ -23,10 +23,6 @@
 //
 
 
-#ifdef __GNUC__
-#include <cxxabi.h>
-#endif
-
 #include <ctime>
 #include <fstream>
 #include <iomanip>
@@ -43,6 +39,10 @@
 
 #include <Pt/System/Logger.h>
 #include <Pt/System/Clock.h>
+
+#if defined(PT_GFX_USE_GNU_STYLE_COMPILER)
+#include <cxxabi.h>
+#endif
 
 #include <cairo.h>
 
