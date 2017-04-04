@@ -119,6 +119,28 @@ inline const Color fromCssCmyk(int c_, int m_, int y_, int k_)
     return Color::fromRgb8(r, g, b, 255);
 }
 
+inline const Color fromCssNCol(char n, int h, int w, int b)
+{
+    float percent = (float) h / 90.0f;
+    if(percent > 100.0f) percent = 100.0f;
+
+    switch(::toupper(n)) {
+        case 'R': h = Gfx::Math::lrint(  0 + (percent * 0.6f)); break;
+        case 'Y': h = Gfx::Math::lrint( 60 + (percent * 0.6f)); break;
+        case 'G': h = Gfx::Math::lrint(120 + (percent * 0.6f)); break;
+        case 'C': h = Gfx::Math::lrint(180 + (percent * 0.6f)); break;
+        case 'B': h = Gfx::Math::lrint(240 + (percent * 0.6f)); break;
+        case 'M': h = Gfx::Math::lrint(300 + (percent * 0.6f)); break;
+        case 'W': h = 0;
+                  b = Gfx::Math::lrint(percent);
+                  w = 100 - b;
+                  break;
+        default : return Color::fromRgb8(0, 0, 0, 255);
+    }
+
+    return fromCssHwb(h, w, b);
+}
+
 inline const Color& fromCssNamedColor(const std::string& colStr)
 {
     /*
@@ -538,6 +560,28 @@ const Color SvgRasterizer::fromHtmlColor(const std::string& colStr_)
             k = 100;
         }
         return fromCssCmyk(c, m, y, k);
+    }
+
+    // Natural color?
+    if(clen >= 8 && cstr[clen - 1] == '%') {
+        char c1, c2, p1, p2;
+        char n = 'W';
+        int  h = 0;
+        int  w = 0;
+        int  b = 100;
+        // N..,..%,..%
+        sscanf(cstr, "%c%2d%c%3d%c%c%3d%c", &n, &h, &c1, &w, &p1, &c2, &b, &p2);
+        if(c1 != ',' || c2 != ',' || p1 != '%' || p2 != '%') {
+            // N,..%,..%
+            h = 0;
+            sscanf(cstr, "%c%c%3d%c%c%3d%c", &n, &c1, &w, &p1, &c2, &b, &p2);
+            if(c1 != ',' || c2 != ',' || p1 != '%' || p2 != '%') {
+                n = 'W';
+                h = w = 0;
+                b = 100;
+            }
+        }
+        return fromCssNCol(n, h, w, b);
     }
 
     // Check against named colors
