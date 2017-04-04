@@ -64,6 +64,9 @@ class SvgRasterizer
 
         Xml::BinaryInputSource _binaryInputSource;
         Xml::XmlReader         _xmlReader;
+
+    private:
+        const Color fromHtmlColor(const std::string& colStr);
 };
 
 

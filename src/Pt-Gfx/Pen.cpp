@@ -35,7 +35,7 @@ namespace Gfx {
 
 
 Pen::Pen()
-: _penData(new PenData(Color(0,0,0), 0, Solid, 0, RoundCap, RoundJoin))
+: _penData(new PenData(Color(0, 0, 0), 0, Solid, 0, RoundCap, RoundJoin))
 { }
 
 

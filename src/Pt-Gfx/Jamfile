@@ -54,6 +54,7 @@ if $(WITH_RASTERIZER2)
                                Rasterizer2_Ellipse.cpp
                                SvgReader.cpp
                                SvgRasterizer.cpp
+                               SvgRasterizer_Util.cpp
                                ;
 }
 

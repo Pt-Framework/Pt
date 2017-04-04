@@ -46,7 +46,7 @@ namespace Gfx {
 
 
 // ======================================================================================
-// ===== Internal Helper Fuelemtions ======================================================
+// ===== Internal Helper Functions ======================================================
 // ======================================================================================
 
 inline const std::string lcaseStdStr(const std::string & str_)
@@ -79,30 +79,34 @@ inline const Pt::String lcasePtStr(const Pt::String& str_)
 // ======================================================================================
 
 struct SvgRasterizer::RasterState {
-    bool               gotStart;
-    bool               gotEnd;
+    bool               gotStart; // State flags
+    bool               gotEnd;   // ---
 
-    Image&             image;
-    ImagePainter2      painter;
+    Image&             image;    // Target image
+    ImagePainter2      painter;  // Target painter
 
-    AffineTransform    atrans;
-    Path               path;
+    Pen                pen;      // Active pen
+    Brush              brush;    // Active brush
+    AffineTransform    atrans;   // Active affine transform
+    Path               path;     // Working path
 
-    std::vector<Pen  > psStack;
-    std::vector<Brush> bsStack;
+    std::vector<Pen  > psStack;  // Pen stack
+    std::vector<Brush> bsStack;  // Brush stack
 
     inline RasterState(Image& image_, const AffineTransform& initialTransform)
     : gotStart(false)
     , gotEnd  (false)
     , image   (image_)
     , painter (image_)
+    , pen     (Color::fromRgb8(0, 0, 0, 255), 1, Pen::Solid, Pen::ButtCap, Pen::MiterJoin)
+    , brush   (Color::fromRgb8(0, 0, 0, 255))
     , atrans  (initialTransform)
     {}
 };
 
 
 // ======================================================================================
-// ===== Public Member Fuelemtions ========================================================
+// ===== Public Member Functions ========================================================
 // ======================================================================================
 
 SvgRasterizer::SvgRasterizer(std::istream& is, Image& image, const AffineTransform& worldTransform)
