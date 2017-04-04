@@ -41,19 +41,82 @@ namespace Gfx {
 // ===== Internal Helper Functions ======================================================
 // ======================================================================================
 
+inline int cssHueToRgb(float t1, float t2, float hue)
+{
+  if(hue <  0.0f) hue += 6.0f;
+  if(hue >= 6.0f) hue -= 6.0f;
+
+  if(hue <  1.0f) return (t2 - t1) * hue + t1;
+  if(hue <  3.0f) return t2;
+  if(hue <  4.0f) return (t2 - t1) * (4.0f - hue) + t1;
+
+  return t1;
+}
+
+inline void cssHslToRgb(int& r, int& g, int& b, int h_, int s_, int l_)
+{
+    const float h = (float) h_ /  60.0f;
+    const float s = (float) s_ / 100.0f;
+    const float l = (float) l_ / 100.0f;
+
+    // Achromatic color?
+    if(s == 0.0f) {
+        r = g = b = Gfx::Math::lrint(l * 255.0f);
+        return;
+    }
+
+    // Normal color
+    const float t2 = (l <= 0.5f) ? ( l * (s + 1.0f) ) : ( l + s - (l * s) );
+    const float t1 = l * 2.0f - t2;
+
+    r = Gfx::Math::lrint( cssHueToRgb(t1, t2, h + 2.0f) * 255.0f );
+    g = Gfx::Math::lrint( cssHueToRgb(t1, t2, h       ) * 255.0f );
+    b = Gfx::Math::lrint( cssHueToRgb(t1, t2, h - 2.0f) * 255.0f );
+}
+
 inline const Color fromCssHsl(int h, int s, int l)
 {
-    return Color::fromRgb8(0, 0, 0, 255);
+    int r, g, b;
+    cssHslToRgb(r, g, b, h, s, l);
+
+    return Color::fromRgb8(r, g, b, 255);
 }
 
-inline const Color fromCssHwb(int h, int s, int l)
+inline const Color fromCssHwb(int h, int w_, int b_)
 {
-    return Color::fromRgb8(0, 0, 0, 255);
+    int r, g, b;
+    cssHslToRgb(r, g, b, h, 100, 50);
+
+    const float wh = (float) w_ / 100.0f;
+    const float bl = (float) b_ / 100.0f;
+
+    float fr = (float) r / 255.0f;
+    float fg = (float) g / 255.0f;
+    float fb = (float) b / 255.0f;
+
+    fr *= (1.0f - wh - bl); fr += wh;
+    fg *= (1.0f - wh - bl); fg += wh;
+    fb *= (1.0f - wh - bl); fb += wh;
+
+    r = Gfx::Math::lrint(fr * 255.0f);
+    g = Gfx::Math::lrint(fg * 255.0f);
+    b = Gfx::Math::lrint(fb * 255.0f);
+
+    return Color::fromRgb8(r, g, b, 255);
 }
 
-inline const Color fromCssCmyk(int c, int m, int y, int k)
+inline const Color fromCssCmyk(int c_, int m_, int y_, int k_)
 {
-    return Color::fromRgb8(0, 0, 0, 255);
+    const float c = (float) c_ / 100.0f;
+    const float m = (float) m_ / 100.0f;
+    const float y = (float) y_ / 100.0f;
+    const float k = (float) k_ / 100.0f;
+
+    const int r = 255 - Gfx::Math::lrint( ( std::min( 1.0f, c * (1.0f - k) + k ) ) * 255.0f );
+    const int g = 255 - Gfx::Math::lrint( ( std::min( 1.0f, m * (1.0f - k) + k ) ) * 255.0f );
+    const int b = 255 - Gfx::Math::lrint( ( std::min( 1.0f, y * (1.0f - k) + k ) ) * 255.0f );
+
+    return Color::fromRgb8(r, g, b, 255);
 }
 
 inline const Color& fromCssNamedColor(const std::string& colStr)
