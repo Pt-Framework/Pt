@@ -642,6 +642,15 @@ inline void BasicAffineTransform<float>::transformPoints(float* dxy, const float
         const float32x4_t r10   = vcombine_f32( vpadd_f32( vget_low_f32(r10_0), vget_high_f32(r10_0) ), vpadd_f32( vget_low_f32(r10_1), vget_high_f32(r10_1) ) );
         const float32x4_t r3210 = vcombine_f32( vpadd_f32( vget_low_f32(r10  ), vget_high_f32(r10  ) ), vpadd_f32( vget_low_f32(r32  ), vget_high_f32(r32  ) ) );
         // Store 4 floats to the destination vector
+        const uint32x4_t  mask  = vcgtq_f32(s3210, neonMaxCordF);
+        vst1q_f32(
+            dxy,
+            (float32x4_t) vorrq_s32(
+                vandq_s32((int32x4_t) s3210, (int32x4_t) mask), // Retain source values >  maximum coordinate
+                vbicq_s32((int32x4_t) r3210, (int32x4_t) mask)  // Retain result values <= maximum coordinate
+            )
+        );
+        /*
         vst1q_f32(
             dxy,
             (float32x4_t) vorrq_s32(
@@ -649,6 +658,7 @@ inline void BasicAffineTransform<float>::transformPoints(float* dxy, const float
                 vandq_s32((int32x4_t) r3210, (int32x4_t) vcleq_f32(s3210, neonMaxCordF))  // Retain result values <= maximum coordinate
             )
         );
+        */
         // Increment the pointers
         sxy += 4;
         dxy += 4;
