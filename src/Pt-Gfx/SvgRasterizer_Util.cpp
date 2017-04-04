@@ -41,6 +41,8 @@ namespace Gfx {
 // ===== Internal Helper Functions ======================================================
 // ======================================================================================
 
+// ### TODO: CHECK ALL COLOR FUNCTIONS !!! ###
+
 inline int cssHueToRgb(float t1, float t2, float hue)
 {
   if(hue <  0.0f) hue += 6.0f;
