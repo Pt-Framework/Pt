@@ -247,7 +247,7 @@ inline float convertCartesianToPolarCoordinate(float x, float y)
 
 
 //
-// lrint() and llrint() and zrint() overloaded functions for float and double
+// lrint(), llrint(), and zrint() overloaded functions for float and double
 //
 
 inline Pt::int32_t lrint(float val)
@@ -385,6 +385,34 @@ inline Pt::ssize_t zrint(float  val) { return  lrint(val); }
 inline Pt::ssize_t zrint(double val) { return  lrint(val); }
 
 #endif
+
+
+//
+// lfint(), llfint(), and zfint() overloaded functions for float and double
+//
+
+inline Pt::int32_t lfint (float  val) { return lrint (floor(val)); }
+inline Pt::int32_t lfint (double val) { return lrint (floor(val)); }
+
+inline Pt::int32_t llfint(float  val) { return llrint(floor(val)); }
+inline Pt::int32_t llfint(double val) { return llrint(floor(val)); }
+
+inline Pt::ssize_t zfint (float  val) { return zrint (floor(val)); }
+inline Pt::ssize_t zfint (double val) { return zrint (floor(val)); }
+
+
+//
+// lcint(), llcint(), and zcint() overloaded functions for float and double
+//
+
+inline Pt::int32_t lcint (float  val) { return lrint (ceil(val)); }
+inline Pt::int32_t lcint (double val) { return lrint (ceil(val)); }
+
+inline Pt::int32_t llcint(float  val) { return llrint(ceil(val)); }
+inline Pt::int32_t llcint(double val) { return llrint(ceil(val)); }
+
+inline Pt::ssize_t zcint (float  val) { return zrint (ceil(val)); }
+inline Pt::ssize_t zcint (double val) { return zrint (ceil(val)); }
 
 
 } // namespace

@@ -78,30 +78,30 @@ using namespace Pt::Gfx;
 
 // Detailed-test enable settings for Pt-Gfx
 #define TEST_SOURCECOPY                         1
-#define TEST_SOURCEOVER                         1
+#define TEST_SOURCEOVER                         0
 
-#define TEST_DRAW_SOLID_LINE_AND_TEXT           1 // (including bezier)
-#define TEST_DRAW_PATTERNED_LINE                1 // (including bezier)
-#define TEST_DRAW_SOLID_THICK_LINE              1 // (including bezier)
-#define TEST_DRAW_PATTERNED_THICK_LINE          1 // (including bezier)
+#define TEST_DRAW_SOLID_LINE_AND_TEXT           0 // (including bezier)
+#define TEST_DRAW_PATTERNED_LINE                0 // (including bezier)
+#define TEST_DRAW_SOLID_THICK_LINE              0 // (including bezier)
+#define TEST_DRAW_PATTERNED_THICK_LINE          0 // (including bezier)
 
-#define TEST_DRAW_OMPF_RECTANGLES               1 // (including thick and filled)
-#define TEST_DRAW_ROUND_OMPF_RECTANGLES         1 // (including thick and filled)
+#define TEST_DRAW_OMPF_RECTANGLES               0 // (including thick and filled)
+#define TEST_DRAW_ROUND_OMPF_RECTANGLES         0 // (including thick and filled)
 
-#define TEST_DRAW_ELLIPSES_ARCS                 1
-#define TEST_DRAW_SOLID_THICK_ELLIPSES_ARCS     1
-#define TEST_DRAW_PATTERNED_THICK_ELLIPSES_ARCS 1
+#define TEST_DRAW_ELLIPSES_ARCS                 0
+#define TEST_DRAW_SOLID_THICK_ELLIPSES_ARCS     0
+#define TEST_DRAW_PATTERNED_THICK_ELLIPSES_ARCS 0
 
-#define TEST_DRAW_SOLID_FILLED_POLYGONS         1
-#define TEST_DRAW_GRADIENT_FILLED_POLYGONS      1
-#define TEST_DRAW_TEXTURE_FILLED_POLYGONS       1
+#define TEST_DRAW_SOLID_FILLED_POLYGONS         0
+#define TEST_DRAW_GRADIENT_FILLED_POLYGONS      0
+#define TEST_DRAW_TEXTURE_FILLED_POLYGONS       0
 
-#define TEST_DRAW_SOLID_FILLED_ELLIPSES_ARCS    1
-#define TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS 1
-#define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  1
+#define TEST_DRAW_SOLID_FILLED_ELLIPSES_ARCS    0
+#define TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS 0
+#define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  0
 
-#define TEST_DRAW_PATH                          1 // (including thick and filled)
-#define TEST_DRAW_EXTRA                         1
+#define TEST_DRAW_PATH                          0 // (including thick and filled)
+#define TEST_DRAW_EXTRA                         0
 
 #define TEST_SVG_READER                         1
 
@@ -534,7 +534,7 @@ int main(int argc, char* args[])
     }
 
     // Svg reader
-    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SVG_READER) {
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && (TEST_SOURCECOPY || TEST_SOURCEOVER) && TEST_SVG_READER) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
         testSvgReader("SVG Reader - ImagePainter2", image, *painter2);
     }
