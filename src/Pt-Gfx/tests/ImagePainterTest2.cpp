@@ -194,7 +194,7 @@ int main(int argc, char* args[])
     // Benchmark affine transform operations only
     if(DO_ATRANS_BENCHMARKING_ONLY) {
         printf("<float>\n" ); benchATransOps<float >();
-        //printf("<double>\n"); benchATransOps<double>();
+        printf("<double>\n"); benchATransOps<double>();
         return 0;
     }
 

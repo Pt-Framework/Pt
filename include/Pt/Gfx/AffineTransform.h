@@ -44,8 +44,8 @@ namespace Gfx{
 #if defined(PT_GFX_USE_AVX1)
 
 // AVX constants
-static const __m256  avxOneZeroF = _mm256_set_ps(0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f);
-static const __m256  avxMaxCordF = _mm256_set1_ps(Painter::MaximumCoordinate);
+static const __m256 avxOneZeroF = _mm256_set_ps(0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f);
+static const __m256 avxMaxCordF = _mm256_set1_ps(Painter::MaximumCoordinate);
 
 #endif
 
@@ -585,8 +585,8 @@ inline void BasicAffineTransform<float>::transformPoints(float* dxy, const float
         const __m256 mask  = _mm256_cmp_ps(s3210, avxMaxCordF, _CMP_GT_OQ);
 #if 1
         _mm256_storeu_ps(dxy, _mm256_blendv_ps(
-                                  r3210, // Retain source values >  maximum coordinate
-                                  s3210, // Retain result values <= maximum coordinate
+                                  r3210, // Retain result values <= maximum coordinate
+                                  s3210, // Retain source values >  maximum coordinate
                                   mask
                               )
                         );

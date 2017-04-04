@@ -47,6 +47,9 @@ namespace Gfx{
 static const __m256  avxOneZeroF = _mm256_set_ps(0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f);
 static const __m256  avxMaxCordF = _mm256_set1_ps(Painter::MaximumCoordinate);
 
+static const __m256d avxOneZeroD = _mm256_set_pd(0.0f, 1.0f, 0.0f, 1.0f);
+static const __m256d avxMaxCordD = _mm256_set1_pd(Painter::MaximumCoordinate);
+
 #endif
 
 #if defined(PT_GFX_USE_NEON)
@@ -607,11 +610,294 @@ void BasicAffineTransform<T>::transformPoints(PointF* xy, size_t pointCount) con
 }
 
 // ======================================================================================
+// ===== Inlined Public Member Functions ================================================
+// ======================================================================================
+
+template <typename T>
+inline BasicAffineTransform<T>::BasicAffineTransform()
+{
+    identity();
+
+#if defined(PT_GFX_USE_AVX1) || defined(PT_GFX_USE_NEON)
+    _mdata.v[0][3] = 0; _mdata.v[1][3] = 0; _mdata.v[2][3] = 0;
+    _mdata.v[3][0] = 0; _mdata.v[3][1] = 0; _mdata.v[3][2] = 0; _mdata.v[3][3] = 0;
+#endif
+}
+
+template <typename T>
+inline BasicAffineTransform<T>::BasicAffineTransform(const BasicAffineTransform<T>& m)
+{ *this = m; }
+
+template <typename T>
+inline BasicAffineTransform<T>::~BasicAffineTransform()
+{}
+
+template <typename T>
+inline void BasicAffineTransform<T>::clear()
+{
+    identity();
+
+    _stack.clear();
+}
+
+template <typename T>
+inline void BasicAffineTransform<T>::identity()
+{
+    _mdata.v[0][0] = 1; _mdata.v[0][1] = 0; _mdata.v[0][2] = 0;
+    _mdata.v[1][0] = 0; _mdata.v[1][1] = 1; _mdata.v[1][2] = 0;
+    _mdata.v[2][0] = 0; _mdata.v[2][1] = 0; _mdata.v[2][2] = 1;
+
+    _isIdentity = true;
+}
+
+template <typename T>
+inline void BasicAffineTransform<T>::translate(T x, T y, bool replaceInsteadOfCombine)
+{
+    if(x == 0 && y == 0) return;
+
+    MatrixData n;
+
+    n.v[0][0] = 1; n.v[0][1] = 0; n.v[0][2] = x;
+    n.v[1][0] = 0; n.v[1][1] = 1; n.v[1][2] = y;
+    n.v[2][0] = 0; n.v[2][1] = 0; n.v[2][2] = 1;
+
+    updateMatrix(n, replaceInsteadOfCombine);
+    _isIdentity = false;
+}
+
+template <typename T>
+inline void BasicAffineTransform<T>::scale(T x, T y, bool replaceInsteadOfCombine)
+{
+    if(x == 1 && y == 1) return;
+
+    MatrixData n;
+
+    n.v[0][0] = x; n.v[0][1] = 0; n.v[0][2] = 0;
+    n.v[1][0] = 0; n.v[1][1] = y; n.v[1][2] = 0;
+    n.v[2][0] = 0; n.v[2][1] = 0; n.v[2][2] = 1;
+
+    updateMatrix(n, replaceInsteadOfCombine);
+    _isIdentity = false;
+}
+
+template <typename T>
+inline void BasicAffineTransform<T>::rotate(T deg, bool replaceInsteadOfCombine)
+{
+    if(deg == 0) return;
+
+    MatrixData n;
+
+    const T r = deg * (M_PI / 180);
+    const T s = ::sin(r);
+    const T c = ::cos(r);
+
+    n.v[0][0] =  c; n.v[0][1] = s; n.v[0][2] = 0;
+    n.v[1][0] = -s; n.v[1][1] = c; n.v[1][2] = 0;
+    n.v[2][0] =  0; n.v[2][1] = 0; n.v[2][2] = 1;
+
+    updateMatrix(n, replaceInsteadOfCombine);
+    _isIdentity = false;
+}
+
+template <typename T>
+inline void BasicAffineTransform<T>::shearX(T deg, bool replaceInsteadOfCombine)
+{
+    if(deg == 0) return;
+
+    MatrixData n;
+
+    const T r = deg * (M_PI / 180);
+    const T t = ::sin(r) / ::cos(r);
+
+    n.v[0][0] = 1; n.v[0][1] = t; n.v[0][2] = 0;
+    n.v[1][0] = 0; n.v[1][1] = 1; n.v[1][2] = 0;
+    n.v[2][0] = 0; n.v[2][1] = 0; n.v[2][2] = 1;
+
+    updateMatrix(n, replaceInsteadOfCombine);
+    _isIdentity = false;
+}
+
+template <typename T>
+inline void BasicAffineTransform<T>::shearY(T deg, bool replaceInsteadOfCombine)
+{
+    if(deg == 0) return;
+
+    MatrixData n;
+
+    const T r = deg * (M_PI / 180);
+    const T t = ::sin(r) / ::cos(r);
+
+    n.v[0][0] = 1; n.v[0][1] = 0; n.v[0][2] = 0;
+    n.v[1][0] = t; n.v[1][1] = 1; n.v[1][2] = 0;
+    n.v[2][0] = 0; n.v[2][1] = 0; n.v[2][2] = 1;
+
+    updateMatrix(n, replaceInsteadOfCombine);
+    _isIdentity = false;
+}
+
+template <typename T>
+inline void BasicAffineTransform<T>::getRaw(T m[3][3]) const
+{
+    m[0][0] = _mdata.v[0][0]; m[0][1] = _mdata.v[0][1]; m[0][2] = _mdata.v[0][2];
+    m[1][0] = _mdata.v[1][0]; m[1][1] = _mdata.v[1][1]; m[1][2] = _mdata.v[1][2];
+    m[2][0] = _mdata.v[2][0]; m[2][1] = _mdata.v[2][1]; m[2][2] = _mdata.v[2][2];
+}
+
+template <typename T>
+inline void BasicAffineTransform<T>::setRaw(const T m[3][3])
+{
+    // Check if the given raw matrix is an identity matrix
+    if( m[0][0] == 1 && m[0][1] == 0 && m[0][2] == 0 &&
+        m[1][0] == 0 && m[1][1] == 1 && m[1][2] == 0 &&
+        m[2][0] == 0 && m[2][1] == 0 && m[2][2] == 1
+    ) {
+        this->identity();
+        return;
+    }
+
+    _mdata.v[0][0] = m[0][0]; _mdata.v[0][1] = m[0][1]; _mdata.v[0][2] = m[0][2];
+    _mdata.v[1][0] = m[1][0]; _mdata.v[1][1] = m[1][1]; _mdata.v[1][2] = m[1][2];
+    _mdata.v[2][0] = m[2][0]; _mdata.v[2][1] = m[2][1]; _mdata.v[2][2] = m[2][2];
+    _isIdentity = false;
+}
+
+template <typename T>
+inline const BasicAffineTransform<T>& BasicAffineTransform<T>::operator=(const BasicAffineTransform<T>& m)
+{
+    this->_mdata      = m._mdata;
+    this->_isIdentity = m._isIdentity;
+
+    this->_stack      = m._stack;
+
+    return *this;
+}
+
+template <typename T>
+inline const BasicAffineTransform<T>& BasicAffineTransform<T>::operator*(const BasicAffineTransform<T>& m)
+{
+    // Check if the given matrix is an identity matrix
+    if(m._isIdentity) return *this;
+
+    // Normal operation
+    updateMatrix(m._mdata, false);
+    _isIdentity = false;
+
+    return *this;
+}
+
+template <typename T>
+inline bool BasicAffineTransform<T>::operator==(const BasicAffineTransform<T>& m) const
+{ return memcmp(&_mdata, &m._mdata, sizeof(_mdata)) == 0; }
+
+template <typename T>
+inline bool BasicAffineTransform<T>::operator!=(const BasicAffineTransform<T>& m) const
+{ return memcmp(&_mdata, &m._mdata, sizeof(_mdata)) != 0; }
+
+template <typename T>
+inline void BasicAffineTransform<T>::push()
+{ _stack.push_back( StackData(_mdata, _isIdentity) ); }
+
+template <typename T>
+inline bool BasicAffineTransform<T>::pop()
+{
+    if(_stack.empty()) return false;
+
+    _mdata      = _stack.back().mdata;
+    _isIdentity = _stack.back().isIdentity;
+
+    _stack.pop_back();
+
+    return true;
+}
+
+template <typename T>
+inline void BasicAffineTransform<T>::transformPoint(T& dx, T& dy, T sx, T sy) const
+{
+    if( _isIdentity || (sx > Painter::MaximumCoordinate && sy > Painter::MaximumCoordinate) ) {
+        dx = sx;
+        dy = sy;
+        return;
+    }
+
+    const T tx = _mdata.v[0][0] * sx + _mdata.v[0][1] * sy + _mdata.v[0][2];
+    const T ty = _mdata.v[1][0] * sx + _mdata.v[1][1] * sy + _mdata.v[1][2];
+
+    dx = tx;
+    dy = ty;
+}
+
+template <typename T>
+inline void BasicAffineTransform<T>::transformPoint(T& x, T &y) const
+{ transformPoint(x, y, x, y); }
+
+template <typename T>
+inline void BasicAffineTransform<T>::transformPoints(T* dxy, const T* sxy, size_t pointCount) const
+{
+    pointCount *= 2;
+
+    if(_isIdentity) {
+        memcpy(dxy, sxy, pointCount * sizeof(T));
+        return;
+    }
+
+    for(size_t i = 0; i < pointCount; i += 2) transformPoint(dxy[i], dxy[i + 1], sxy[i], sxy[i + 1]);
+}
+
+template <typename T>
+inline void BasicAffineTransform<T>::transformPoints(T* xy, size_t pointCount) const
+{
+    if(_isIdentity) return;
+
+    pointCount *= 2;
+
+    for(size_t i = 0; i < pointCount; i += 2) transformPoint(xy[i], xy[i + 1]);
+}
+
+template <typename T>
+inline void BasicAffineTransform<T>::transformPoint(PointF& dp, const PointF& sp) const
+{
+    if( _isIdentity || (sp.x() > Painter::MaximumCoordinate && sp.y() > Painter::MaximumCoordinate) ) {
+        dp = sp;
+        return;
+    }
+
+    T x = sp.x();
+    T y = sp.y();
+
+    transformPoint(x, y);
+
+    dp.set(x, y);
+}
+
+template <typename T>
+inline void BasicAffineTransform<T>::transformPoint(PointF& p) const
+{ transformPoint(p, p); }
+
+template <typename T>
+inline void BasicAffineTransform<T>::transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount) const
+{
+    if(_isIdentity) {
+        for(size_t i = 0; i < pointCount; ++i) dxy[i] = sxy[i];
+        return;
+    }
+
+    for(size_t i = 0; i < pointCount; ++i) transformPoint(dxy[i], sxy[i]);
+}
+
+template <typename T>
+inline void BasicAffineTransform<T>::transformPoints(PointF* xy, size_t pointCount) const
+{
+    if(_isIdentity) return;
+
+    for(size_t i = 0; i < pointCount; ++i) transformPoint(xy[i]);
+}
+
+// ======================================================================================
 // ===== Inlined Public Member Functions (Specialization for float) =====================
 // ======================================================================================
 
 template <>
-void BasicAffineTransform<float>::rotate(float deg, bool replaceInsteadOfCombine)
+inline void BasicAffineTransform<float>::rotate(float deg, bool replaceInsteadOfCombine)
 {
     if(deg == 0) return;
 
@@ -630,7 +916,7 @@ void BasicAffineTransform<float>::rotate(float deg, bool replaceInsteadOfCombine
 }
 
 template <>
-void BasicAffineTransform<float>::shearX(float deg, bool replaceInsteadOfCombine)
+inline void BasicAffineTransform<float>::shearX(float deg, bool replaceInsteadOfCombine)
 {
     if(deg == 0) return;
 
@@ -648,7 +934,7 @@ void BasicAffineTransform<float>::shearX(float deg, bool replaceInsteadOfCombine
 }
 
 template <>
-void BasicAffineTransform<float>::shearY(float deg, bool replaceInsteadOfCombine)
+inline void BasicAffineTransform<float>::shearY(float deg, bool replaceInsteadOfCombine)
 {
     if(deg == 0) return;
 
@@ -668,7 +954,7 @@ void BasicAffineTransform<float>::shearY(float deg, bool replaceInsteadOfCombine
 #if defined(PT_GFX_USE_AVX1)
 
 template <>
-void BasicAffineTransform<float>::transformPoints(float* dxy, const float* sxy, size_t pointCount) const
+inline void BasicAffineTransform<float>::transformPoints(float* dxy, const float* sxy, size_t pointCount) const
 {
     pointCount *= 2;
 
@@ -701,13 +987,23 @@ void BasicAffineTransform<float>::transformPoints(float* dxy, const float* sxy, 
         const __m256 r10   = _mm256_hadd_ps(r10_0, r10_1);
         const __m256 r3210 = _mm256_hadd_ps(r10  , r32  );
         // Store 8 floats to the destination vector
+        const __m256 mask  = _mm256_cmp_ps(s3210, avxMaxCordF, _CMP_GT_OQ);
+#if 1
+        _mm256_storeu_ps(dxy, _mm256_blendv_ps(
+                                  r3210, // Retain result values <= maximum coordinate
+                                  s3210, // Retain source values >  maximum coordinate
+                                  mask
+                              )
+                        );
+#else
         _mm256_storeu_ps(
             dxy,
             _mm256_or_ps(
-                _mm256_and_ps(s3210, _mm256_cmp_ps(s3210, avxMaxCordF, _CMP_GT_OQ)), // Retain source values >  maximum coordinate
-                _mm256_and_ps(r3210, _mm256_cmp_ps(s3210, avxMaxCordF, _CMP_LE_OQ))  // Retain result values <= maximum coordinate
+                _mm256_and_ps   (mask, s3210), // Retain source values >  maximum coordinate
+                _mm256_andnot_ps(mask, r3210)  // Retain result values <= maximum coordinate
             )
         );
+#endif
         // Increment the pointers
         sxy += 8;
         dxy += 8;
@@ -724,7 +1020,7 @@ void BasicAffineTransform<float>::transformPoints(float* dxy, const float* sxy, 
 #elif defined(PT_GFX_USE_NEON)
 
 template <>
-void BasicAffineTransform<float>::transformPoints(float* dxy, const float* sxy, size_t pointCount) const
+inline void BasicAffineTransform<float>::transformPoints(float* dxy, const float* sxy, size_t pointCount) const
 {
     pointCount *= 2;
 
@@ -772,11 +1068,11 @@ void BasicAffineTransform<float>::transformPoints(float* dxy, const float* sxy, 
 #endif
 
 template <>
-void BasicAffineTransform<float>::transformPoints(float* xy, size_t pointCount) const
+inline void BasicAffineTransform<float>::transformPoints(float* xy, size_t pointCount) const
 { if(!_isIdentity) transformPoints(xy, xy, pointCount); }
 
 template <>
-void BasicAffineTransform<float>::transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount) const
+inline void BasicAffineTransform<float>::transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount) const
 {
     if(_isIdentity) {
         for(size_t i = 0; i < pointCount; ++i) dxy[i] = sxy[i];
@@ -802,8 +1098,93 @@ void BasicAffineTransform<float>::transformPoints(PointF* dxy, const PointF* sxy
 }
 
 template <>
-void BasicAffineTransform<float>::transformPoints(PointF* xy, size_t pointCount) const
+inline void BasicAffineTransform<float>::transformPoints(PointF* xy, size_t pointCount) const
 { if(!_isIdentity) transformPoints(xy, xy, pointCount); }
+
+// ======================================================================================
+// ===== Inlined Public Member Functions (Specialization for double) ====================
+// ======================================================================================
+
+#if defined(PT_GFX_USE_AVX1)
+
+// ### This AVX code is actually slower than the GCC's auto-vectorization code  ###
+
+template <>
+inline void BasicAffineTransform<double>::transformPoints(double* dxy, const double* sxy, size_t pointCount) const
+{
+    pointCount *= 2;
+
+    if(_isIdentity) {
+        memcpy(dxy, sxy, pointCount * sizeof(double));
+        return;
+    }
+
+    _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
+
+    // Loop through 4 doubles at a time
+    const size_t pointCount4 = pointCount / 4;
+
+    for(size_t i = 0; i < pointCount4; ++i) {
+        // Load 4 doubles from the source vector                             // [ --1-- --0-- ]
+        const __m256d s10  = _mm256_loadu_pd       (sxy                   ); // [ Y1 X1 Y0 X0 ]
+        const __m256d s1   = _mm256_permute2f128_pd(s10, avxOneZeroD, 0x31); // [ 0  1  Y1 X1 ]
+        const __m256d s0   = _mm256_permute2f128_pd(s10, avxOneZeroD, 0x20); // [ 0  1  Y0 X0 ]
+        // Multiply them to the matrix's rows                // [ RC RC RC RC ]
+        const __m256d r1_0 = _mm256_mul_pd(_mdata.r[0], s1); // [ 03 02 01 00 ]
+        const __m256d r1_1 = _mm256_mul_pd(_mdata.r[1], s1); // [ 13 12 11 10 ]
+        const __m256d r0_0 = _mm256_mul_pd(_mdata.r[0], s0); // [ 03 02 01 00 ]
+        const __m256d r0_1 = _mm256_mul_pd(_mdata.r[1], s0); // [ 13 12 11 10 ]
+        // Horizontal add the multiplication results
+        const __m256d r1x  = _mm256_hadd_pd(r1_0, r1_1);
+        const __m256d r0x  = _mm256_hadd_pd(r0_0, r0_1);
+        // Permute and further add the multiplication results
+        const __m256d r1   = _mm256_permute2f128_pd(r1x, r0x, 0x31);
+        const __m256d r0   = _mm256_permute2f128_pd(r1x, r0x, 0x02);
+        const __m256d r10  = _mm256_add_pd(r1, r0);
+        // Store 4 doubles to the destination vector
+        const __m256d mask = _mm256_cmp_pd(s10, avxMaxCordD, _CMP_GT_OQ);
+#if 1
+        _mm256_storeu_pd(dxy, _mm256_blendv_pd(
+                                  r10, // Retain result values <= maximum coordinate
+                                  s10, // Retain source values >  maximum coordinate
+                                  mask
+                              )
+                        );
+#else
+        _mm256_storeu_pd(
+            dxy,
+            _mm256_or_pd(
+                _mm256_and_pd   (mask, s10), // Retain source values >  maximum coordinate
+                _mm256_andnot_pd(mask, r10)  // Retain result values <= maximum coordinate
+            )
+        );
+#endif
+        // Increment the pointers
+        sxy += 4;
+        dxy += 4;
+    }
+
+    _mm256_zeroupper(); // Prevent transition penalty from AVX <-> SSE because SSE might be used in other part of the code
+
+    // Process the remaining doubles using normal code
+    pointCount %= 4;
+
+    for(size_t i = 0; i < pointCount; i += 2) transformPoint(dxy[i], dxy[i + 1], sxy[i], sxy[i + 1]);
+}
+
+template <>
+inline void BasicAffineTransform<double>::transformPoints(double* xy, size_t pointCount) const
+{ if(!_isIdentity) transformPoints(xy, xy, pointCount); }
+
+template <>
+inline void BasicAffineTransform<double>::transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount) const
+{ transformPoints(reinterpret_cast<double*>(dxy), reinterpret_cast<const double*>(sxy), pointCount); }
+
+template <>
+inline void BasicAffineTransform<double>::transformPoints(PointF* xy, size_t pointCount) const
+{ transformPoints(reinterpret_cast<double*>(xy), reinterpret_cast<const double*>(xy), pointCount); }
+
+#endif
 
 
 //

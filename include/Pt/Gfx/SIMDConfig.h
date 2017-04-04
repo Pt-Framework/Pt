@@ -95,19 +95,19 @@
 #endif
 
 
-//#undef PT_GFX_USE_FMA3
+#undef PT_GFX_USE_FMA3
 
-//#undef PT_GFX_USE_AVX2
-//#undef PT_GFX_USE_AVX1
+#undef PT_GFX_USE_AVX2
+#undef PT_GFX_USE_AVX1
 
-//#undef PT_GFX_USE_SSSE4P2
-//#undef PT_GFX_USE_SSSE4P1
-//#undef PT_GFX_USE_SSSE3
-//#undef PT_GFX_USE_SSE3
-//#undef PT_GFX_USE_SSE2
-//#undef PT_GFX_USE_SSE1
+#undef PT_GFX_USE_SSSE4P2
+#undef PT_GFX_USE_SSSE4P1
+#undef PT_GFX_USE_SSSE3
+#undef PT_GFX_USE_SSE3
+#undef PT_GFX_USE_SSE2
+#undef PT_GFX_USE_SSE1
 
-//#undef PT_GFX_USE_NEON
+#undef PT_GFX_USE_NEON
 
 
 //
