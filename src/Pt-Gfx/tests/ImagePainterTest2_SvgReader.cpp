@@ -23,7 +23,7 @@ static void testSvgReader(const char* title, Image& image, Painter& painter)
     svgReader.attach(ifsReader, imgReader, atrans);
     svgReader.get();
     ifsReader.close();
-    painter.drawImage(Point(0, 0), imgReader);
+    painter.drawImage(PointF(0, 0), imgReader);
     lprintf("\n");
     //*/
 
@@ -36,7 +36,7 @@ static void testSvgReader(const char* title, Image& image, Painter& painter)
     svgReader.attach(ifsReader, imgReader, atrans);
     svgReader.get();
     ifsReader.close();
-    painter.drawImage(Point(0, 0), imgReader);
+    painter.drawImage(PointF(0, 0), imgReader);
     lprintf("\n");
     //*/
 

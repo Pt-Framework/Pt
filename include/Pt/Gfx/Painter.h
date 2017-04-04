@@ -47,7 +47,7 @@ namespace Pt {
 
 namespace Gfx {
 
-inline int round(double r) 
+inline int round(double r)
 {
   int tmp = static_cast<int> (r);
   tmp += (r-tmp>=.5) - (r-tmp<=-.5);
@@ -55,17 +55,17 @@ inline int round(double r)
 }
 
 
-inline Point round(PointF r) 
+inline Point round(PointF r)
 {
   return Point(round(r.x()), round(r.y()));
 }
 
-inline Size round(SizeF r) 
+inline Size round(SizeF r)
 {
   return Size(round(r.width()), round(r.height()));
 }
 
-inline Rect round (RectF r) 
+inline Rect round (RectF r)
 {
   return Rect( round(r.topLeft() ),  round( r.size() ));
 }
@@ -78,6 +78,10 @@ class PT_GFX_API Painter
          static const Pt::int32_t MaximumCoordinate;       //! @brief The maximum coordinate value                  (signed integer)
          static const Point       MaximumPointCoordinate;  //! @brief A point set with the maximum coordinate value (signed integer)
          static const Point       PolygonSeparatorPoint;   //! @brief A separator point for defining multi-path     (signed integer)
+
+         static const double      MaximumCoordinateF;      //! @brief The maximum coordinate value                  (floating-point)
+         static const PointF      MaximumPointCoordinateF; //! @brief A point set with the maximum coordinate value (floating-point)
+         static const PointF      PolygonSeparatorPointF;  //! @brief A separator point for defining multi-path     (floating-point)
 
     public:
         /* ### TODO ###

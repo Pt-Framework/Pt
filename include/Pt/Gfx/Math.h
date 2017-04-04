@@ -247,7 +247,7 @@ inline float convertCartesianToPolarCoordinate(float x, float y)
 
 
 //
-// lrint() and llrint() overloaded functions for float and double
+// lrint() and llrint() and zrint() overloaded functions for float and double
 //
 
 inline Pt::int32_t lrint(float val)
@@ -280,7 +280,7 @@ inline Pt::int32_t lrint(float val)
     __asm__ __volatile__ ( "fmrs   %0, %1" : "=r" (res) : "w" (tmp) );
     return res;
 #else
-    return (val >= 0.0f) ? floorf(val + 0.5f) : ceilf(val - 0.5f);
+    return (Pt::int32_t) ( (val >= 0.0f) ? (val + 0.5f) : (val - 0.5f) );
 #endif
 }
 
@@ -314,7 +314,7 @@ inline Pt::int32_t lrint(double val)
     __asm__ __volatile__ ( "fmrs   %0, %1"  : "=r" (res) : "w" (tmp) );
     return res;
 #else
-    return (val >= 0.0) ? floor(val + 0.5) : ceil(val - 0.5);
+    return (Pt::int32_t) ( (val >= 0.0) ? (val + 0.5) : (val - 0.5) );
 #endif
 }
 
@@ -342,7 +342,7 @@ inline Pt::int64_t llrint(float val)
         return tmp;
     #endif
 #else
-    return (val >= 0.0f) ? floorf(val + 0.5f) : ceilf(val - 0.5f);
+    return (Pt::int64_t) ( (val >= 0.0f) ? (val + 0.5f) : (val - 0.5f) );
 #endif
 }
 
@@ -370,9 +370,21 @@ inline Pt::int64_t llrint(double val)
         return tmp;
     #endif
 #else
-    return (val >= 0.0) ? floor(val + 0.5) : ceil(val - 0.5);
+    return (Pt::int64_t) ( (val >= 0.0) ? (val + 0.5) : (val - 0.5) );
 #endif
 }
+
+#if ULONG_MAX == 18446744073709551615ULL
+
+inline Pt::ssize_t zrint(float  val) { return llrint(val); }
+inline Pt::ssize_t zrint(double val) { return llrint(val); }
+
+#else
+
+inline Pt::ssize_t zrint(float  val) { return  lrint(val); }
+inline Pt::ssize_t zrint(double val) { return  lrint(val); }
+
+#endif
 
 
 } // namespace
