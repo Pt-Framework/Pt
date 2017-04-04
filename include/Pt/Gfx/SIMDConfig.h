@@ -48,7 +48,6 @@
     #if defined(i386) || defined(__i386) || defined(__i386__) || defined(_X86_) || defined(__x86_64) || defined(__x86_64__) || defined(__amd64) || defined(__amd64__)
         #include <x86intrin.h>
         #define PT_GFX_USE_X86_CPU
-        #define PT_GFX_USE_GNU_STYLE_COMPILER
         #define PT_GFX_USE_FMA3
         #define PT_GFX_USE_AVX2
         #define PT_GFX_USE_AVX1
@@ -95,19 +94,19 @@
 #endif
 
 
-#undef PT_GFX_USE_FMA3
+//#undef PT_GFX_USE_FMA3
 
-#undef PT_GFX_USE_AVX2
-#undef PT_GFX_USE_AVX1
+//#undef PT_GFX_USE_AVX2
+//#undef PT_GFX_USE_AVX1
 
-#undef PT_GFX_USE_SSSE4P2
-#undef PT_GFX_USE_SSSE4P1
-#undef PT_GFX_USE_SSSE3
-#undef PT_GFX_USE_SSE3
-#undef PT_GFX_USE_SSE2
-#undef PT_GFX_USE_SSE1
+//#undef PT_GFX_USE_SSSE4P2
+//#undef PT_GFX_USE_SSSE4P1
+//#undef PT_GFX_USE_SSSE3
+//#undef PT_GFX_USE_SSE3
+//#undef PT_GFX_USE_SSE2
+//#undef PT_GFX_USE_SSE1
 
-#undef PT_GFX_USE_NEON
+//#undef PT_GFX_USE_NEON
 
 
 //
