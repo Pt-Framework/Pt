@@ -47,29 +47,6 @@ namespace Pt {
 
 namespace Gfx {
 
-inline int round(double r)
-{
-  int tmp = static_cast<int> (r);
-  tmp += (r-tmp>=.5) - (r-tmp<=-.5);
-  return tmp;
-}
-
-
-inline Point round(PointF r)
-{
-  return Point(round(r.x()), round(r.y()));
-}
-
-inline Size round(SizeF r)
-{
-  return Size(round(r.width()), round(r.height()));
-}
-
-inline Rect round (RectF r)
-{
-  return Rect( round(r.topLeft() ),  round( r.size() ));
-}
-
 /** @brief 2D painter interface.
   */
 class PT_GFX_API Painter

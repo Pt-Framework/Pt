@@ -32,6 +32,7 @@
 #define PT_GFX_POINT_H
 
 #include <Pt/Gfx/Api.h>
+#include <Pt/Math.h>
 #include <Pt/Types.h>
 
 namespace Pt {
@@ -191,9 +192,14 @@ class BasicPoint
         T _y;
 };
 
-typedef BasicPoint<Pt::ssize_t>  Point;
+typedef BasicPoint<Pt::ssize_t> Point;
+typedef BasicPoint<double> PointF;
 
-typedef BasicPoint<double>       PointF;
+inline Point round(const PointF& r)
+{
+  return Point( lround(r.x()), 
+                lround(r.y()) );
+}
 
 } // namespace
 

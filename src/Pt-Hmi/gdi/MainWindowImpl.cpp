@@ -73,8 +73,8 @@ MainWindowImpl::~MainWindowImpl()
 
 Gfx::PointF MainWindowImpl::toScreen(const Gfx::PointF& windowPos) const
 {
-    POINT p = { Gfx::round(windowPos.x()), 
-                Gfx::round(windowPos.y()) };
+    POINT p = { lround(windowPos.x()), 
+                lround(windowPos.y()) };
 
     ClientToScreen(_hwnd, &p);
 
@@ -84,7 +84,8 @@ Gfx::PointF MainWindowImpl::toScreen(const Gfx::PointF& windowPos) const
 
 Gfx::PointF MainWindowImpl::fromScreen(const Gfx::PointF& screenPos) const
 {
-    POINT p = { Gfx::round(screenPos.x()), Gfx::round(screenPos.y()) };
+    POINT p = { lround(screenPos.x()), 
+                lround(screenPos.y()) };
 
     ScreenToClient(_hwnd, &p);
 

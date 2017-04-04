@@ -31,8 +31,9 @@
 #ifndef PT_GFX_SIZE_H
 #define PT_GFX_SIZE_H
 
-#include <Pt/Types.h>
 #include <Pt/Gfx/Api.h>
+#include <Pt/Types.h>
+#include <Pt/Math.h>
 
 namespace Pt {
 
@@ -158,8 +159,13 @@ class BasicSize {
 };
 
 typedef BasicSize<Pt::ssize_t> Size;
+typedef BasicSize<double> SizeF;
 
-typedef BasicSize<double>      SizeF;
+inline Size round(const SizeF& r)
+{
+  return Size( lround(r.width()), 
+               lround(r.height()) );
+}
 
 } //namespace
 

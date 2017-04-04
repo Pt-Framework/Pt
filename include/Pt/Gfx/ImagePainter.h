@@ -74,17 +74,17 @@ class PT_GFX_API ImagePainter : public Painter
 
     virtual FontMetrics fontMetrics(const Pt::String& text) const;
 
-    virtual void drawLine(const  PointF& from, const  PointF& to);
+    virtual void drawLine(const PointF& from, const  PointF& to);
 
-    virtual void drawText(const  PointF& to, const Pt::String& text );
+    virtual void drawText(const PointF& to, const Pt::String& text );
 
-    virtual void drawRect(const  RectF& rect);
+    virtual void drawRect(const RectF& rect);
 
-    virtual void fillRect(const  RectF& rect);
+    virtual void fillRect(const RectF& rect);
 
-    virtual void drawEllipse(const PointF& topLeft, const  SizeF& size);
+    virtual void drawEllipse(const PointF& topLeft, const SizeF& size);
 
-    virtual void fillEllipse(const PointF& topLeft, const  SizeF& size);
+    virtual void fillEllipse(const PointF& topLeft, const SizeF& size);
 
     virtual void drawPolyline(const PointF* points, const size_t pointCount);
 

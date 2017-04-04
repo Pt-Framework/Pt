@@ -32,8 +32,9 @@
 
 #include <Pt/Types.h>
 #include <Pt/Api.h>
-#include <math.h> // hypot is not in cmath
+#include <cmath>
 #include <cassert>
+#include <math.h> // hypot is not in cmath
 
 namespace Pt {
 
@@ -100,14 +101,29 @@ T fastCos(const T& theta)
     return fastSin<T, accurate>(sinTheta);
 }
 
-/** @brief Return the euclidean distance of the given values
+/** @brief Return the euclidean distance of the given values.
 */
 inline double hypot(double x, double y)
 {
-#if defined(_MSC_VER) || defined(_WIN32_WCE) || defined(_WIN32)
+#if __cplusplus == 201103L
+  return std::hypot(x, y);
+#elif defined(_MSC_VER) || defined(_WIN32_WCE) || defined(_WIN32)
     return _hypot(x, y);
 #else
     return ::hypot(x, y);
+#endif
+}
+
+/** @brief Rounds to nearest integer value.
+*/
+inline long int lround(double x)
+{
+#if __cplusplus == 201103L
+  return std::lround(x);
+#else
+  int tmp = static_cast<int>(x);
+  tmp += (x - tmp >= 0.5) - (x - tmp <= -0.5);
+  return tmp;
 #endif
 }
 
