@@ -18,6 +18,308 @@
 
 
 <h1><pre>
+<b>AFTER CONVERTING THE PUBLIC API BACK TO USE POINTF</b>
+</pre>
+
+<pre>
+<b>2017/04/04 - 07:28</b><br/>
+<div id='wrapperTop5ce52f8e'>
+    <table id='contentTop5ce52f8e'></table>
+</div>
+<div id='wrapperBot5ce52f8e'>
+<table id='contentBot5ce52f8e'>
+<tr>
+    <td><i><b>Pt::Gfx - CompositionMode::SourceCopy</b></i></td><td>&nbsp;&nbsp;&nbsp;</td>
+    <td><i><b>Pt::Gfx - CompositionMode::SourceOver</b></i></td><td>&nbsp;&nbsp;&nbsp;</td>
+    <td><i><b>Comparison with Cairo</b></i></td>
+</tr>
+<tr>
+    <!-- Pt::Gfx - CompositionMode::SourceCopy -->
+    <td>
+                                                       (Time) (Factor)
+                                                       ------ --------
+    Text                             @ ImagePainter  =     46
+    Text NOAA                        @ ImagePainter2 =     19 ( 0.413)
+    Text FTAA                        @ ImagePainter2 =     21 ( 0.457)
+
+    Rotated text (FAILED)            @ ImagePainter  =     38
+    Rotated text NOAA                @ ImagePainter2 =    142 ( 3.737)
+    Rotated text FTAA                @ ImagePainter2 =    154 ( 4.053)
+
+    Solid     line                   @ ImagePainter  =      7
+    Solid     line NOAA              @ ImagePainter2 =     11 ( 1.571)
+    Solid     line XWAA              @ ImagePainter2 =     29 ( 4.143)
+
+    Patterned line                   @ ImagePainter  =     15
+    Patterned line NOAA              @ ImagePainter2 =     11 ( 0.733)
+    Patterned line XWAA              @ ImagePainter2 =     25 ( 1.667)
+
+    Solid     thick line             @ ImagePainter  =     40
+    Solid     thick line NOAA        @ ImagePainter2 =    103 ( 2.575)
+    Solid     thick line XWAA        @ ImagePainter2 =    238 ( 5.950)
+
+    Patterned thick line             @ ImagePainter  =     38
+    Patterned thick line NOAA        @ ImagePainter2 =    103 ( 2.711)
+    Patterned thick line XWAA        @ ImagePainter2 =    224 ( 5.895)
+
+    Rectangle                        @ ImagePainter  =      5
+    Rectangle                        @ ImagePainter2 =      5 ( 1.000)
+
+    Ellipse                          @ ImagePainter  =      3
+    Ellipse NOAA                     @ ImagePainter2 =      5 ( 1.667)
+    Ellipse XWAA                     @ ImagePainter2 =     12 ( 4.000)
+
+    Arc     NOAA                     @ ImagePainter2 =      9
+    Arc     XWAA                     @ ImagePainter2 =     20 ( 2.222)
+
+    Solid     q-bezier NOAA          @ ImagePainter2 =      3
+    Solid     q-bezier XWAA          @ ImagePainter2 =      9 ( 3.000)
+
+    Patterned q-bezier NOAA          @ ImagePainter2 =      4
+    Patterned q-bezier XWAA          @ ImagePainter2 =     11 ( 2.750)
+
+    Solid     thick q-bezier NOAA    @ ImagePainter2 =     22
+    Solid     thick q-bezier XWAA    @ ImagePainter2 =     42 ( 1.909)
+
+    Patterned thick q-bezier NOAA    @ ImagePainter2 =     22
+    Patterned thick q-bezier XWAA    @ ImagePainter2 =     39 ( 1.773)
+
+    Solid-filled    rectangle        @ ImagePainter  =     20
+    Solid-filled    rectangle        @ ImagePainter2 =     19 ( 0.950)
+
+    Gradient-filled rectangle        @ ImagePainter  =    980
+    Gradient-filled rectangle        @ ImagePainter2 =     17 ( 0.017)
+
+    Texture-filled  rectangle        @ ImagePainter  =     21
+    Texture-filled  rectangle        @ ImagePainter2 =     20 ( 0.952)
+
+    Solid-filled    polygon          @ ImagePainter  =     46
+    Solid-filled    polygon NOAA     @ ImagePainter2 =     30 ( 0.652)
+    Solid-filled    polygon XWAA     @ ImagePainter2 =     78 ( 1.696)
+    Solid-filled    polygon FSAA 2x2 @ ImagePainter2 =    101 ( 2.196)
+
+    Gradient-filled polygon          @ ImagePainter  =   1036
+    Gradient-filled polygon NOAA     @ ImagePainter2 =     49 ( 0.047)
+    Gradient-filled polygon XWAA     @ ImagePainter2 =    118 ( 0.114)
+    Gradient-filled polygon FSAA 2x2 @ ImagePainter2 =    173 ( 0.167)
+
+    Texture-filled  polygon          @ ImagePainter  =     65
+    Texture-filled  polygon NOAA     @ ImagePainter2 =     54 ( 0.831)
+    Texture-filled  polygon XWAA     @ ImagePainter2 =    122 ( 1.877)
+    Texture-filled  polygon FSAA 2x2 @ ImagePainter2 =    177 ( 2.723)
+
+    Solid-filled    ellipse          @ ImagePainter  =      4
+    Solid-filled    ellipse NOAA     @ ImagePainter2 =      4 ( 1.000)
+    Solid-filled    ellipse XWAA     @ ImagePainter2 =     13 ( 3.250)
+
+    Gradient-filled ellipse          @ ImagePainter  =    149
+    Gradient-filled ellipse NOAA     @ ImagePainter2 =      8 ( 0.054)
+    Gradient-filled ellipse XWAA     @ ImagePainter2 =     20 ( 0.134)
+
+    Texture-filled  ellipse          @ ImagePainter  =      8
+    Texture-filled  ellipse NOAA     @ ImagePainter2 =      8 ( 1.000)
+    Texture-filled  ellipse XWAA     @ ImagePainter2 =     20 ( 2.500)
+
+    Solid-filled    arc     NOAA     @ ImagePainter2 =     40
+    Solid-filled    arc     XWAA     @ ImagePainter2 =     76 ( 1.900)
+
+    Gradient-filled arc     NOAA     @ ImagePainter2 =     51
+    Gradient-filled arc     XWAA     @ ImagePainter2 =     92 ( 1.804)
+
+    Texture-filled  arc     NOAA     @ ImagePainter2 =     50
+    Texture-filled  arc     XWAA     @ ImagePainter2 =     92 ( 1.840)
+
+    Path NOAA (28 SHAPES, NO RASTER) @ ImagePainter2 =      7
+    Path XWAA (28 SHAPES, NO RASTER) @ ImagePainter2 =      7 ( 1.000)
+    Path NOAA (28 SHAPES, /W RASTER) @ ImagePainter2 =    325
+    Path XWAA (28 SHAPES, /W RASTER) @ ImagePainter2 =    563 ( 1.732)
+    </td><td>&nbsp;&nbsp;&nbsp;</td>
+    <!-- Pt::Gfx - CompositionMode::SourceOver -->
+    <td>
+                                                       (Time) (Factor)
+                                                       ------ --------
+    Text                             @ ImagePainter  =     39
+    Text NOAA                        @ ImagePainter2 =     23 ( 0.590)
+    Text FTAA                        @ ImagePainter2 =     30 ( 0.769)
+
+    Rotated text (FAILED)            @ ImagePainter  =     41
+    Rotated text NOAA                @ ImagePainter2 =    142 ( 3.463)
+    Rotated text FTAA                @ ImagePainter2 =    157 ( 3.829)
+
+    Solid     line                   @ ImagePainter  =      8
+    Solid     line NOAA              @ ImagePainter2 =     13 ( 1.625)
+    Solid     line XWAA              @ ImagePainter2 =     30 ( 3.750)
+
+    Patterned line                   @ ImagePainter  =     18
+    Patterned line NOAA              @ ImagePainter2 =     11 ( 0.611)
+    Patterned line XWAA              @ ImagePainter2 =     25 ( 1.389)
+
+    Solid     thick line             @ ImagePainter  =     80
+    Solid     thick line NOAA        @ ImagePainter2 =    143 ( 1.788)
+    Solid     thick line XWAA        @ ImagePainter2 =    342 ( 4.275)
+
+    Patterned thick line             @ ImagePainter  =     61
+    Patterned thick line NOAA        @ ImagePainter2 =    133 ( 2.180)
+    Patterned thick line XWAA        @ ImagePainter2 =    292 ( 4.787)
+
+    Rectangle                        @ ImagePainter  =      8
+    Rectangle                        @ ImagePainter2 =      6 ( 0.750)
+
+    Ellipse                          @ ImagePainter  =      5
+    Ellipse NOAA                     @ ImagePainter2 =      6 ( 1.200)
+    Ellipse XWAA                     @ ImagePainter2 =     12 ( 2.400)
+
+    Arc     NOAA                     @ ImagePainter2 =     11
+    Arc     XWAA                     @ ImagePainter2 =     20 ( 1.818)
+
+    Solid     q-bezier NOAA          @ ImagePainter2 =      4
+    Solid     q-bezier XWAA          @ ImagePainter2 =     10 ( 2.500)
+
+    Patterned q-bezier NOAA          @ ImagePainter2 =      5
+    Patterned q-bezier XWAA          @ ImagePainter2 =     12 ( 2.400)
+
+    Solid     thick q-bezier NOAA    @ ImagePainter2 =     26
+    Solid     thick q-bezier XWAA    @ ImagePainter2 =     50 ( 1.923)
+
+    Patterned thick q-bezier NOAA    @ ImagePainter2 =     23
+    Patterned thick q-bezier XWAA    @ ImagePainter2 =     44 ( 1.913)
+
+    Solid-filled    rectangle        @ ImagePainter  =     42
+    Solid-filled    rectangle        @ ImagePainter2 =     40 ( 0.952)
+
+    Gradient-filled rectangle        @ ImagePainter  =   1044
+    Gradient-filled rectangle        @ ImagePainter2 =     39 ( 0.037)
+
+    Texture-filled  rectangle        @ ImagePainter  =     45
+    Texture-filled  rectangle        @ ImagePainter2 =     43 ( 0.956)
+
+    Solid-filled    polygon          @ ImagePainter  =     77
+    Solid-filled    polygon NOAA     @ ImagePainter2 =     59 ( 0.766)
+    Solid-filled    polygon XWAA     @ ImagePainter2 =    132 ( 1.714)
+    Solid-filled    polygon FSAA 2x2 @ ImagePainter2 =    115 ( 1.494)
+
+    Gradient-filled polygon          @ ImagePainter  =   1100
+    Gradient-filled polygon NOAA     @ ImagePainter2 =     83 ( 0.075)
+    Gradient-filled polygon XWAA     @ ImagePainter2 =    168 ( 0.153)
+    Gradient-filled polygon FSAA 2x2 @ ImagePainter2 =    205 ( 0.186)
+
+    Texture-filled  polygon          @ ImagePainter  =     98
+    Texture-filled  polygon NOAA     @ ImagePainter2 =     89 ( 0.908)
+    Texture-filled  polygon XWAA     @ ImagePainter2 =    177 ( 1.806)
+    Texture-filled  polygon FSAA 2x2 @ ImagePainter2 =    209 ( 2.133)
+
+    Solid-filled    ellipse          @ ImagePainter  =      9
+    Solid-filled    ellipse NOAA     @ ImagePainter2 =      8 ( 0.889)
+    Solid-filled    ellipse XWAA     @ ImagePainter2 =     18 ( 2.000)
+
+    Gradient-filled ellipse          @ ImagePainter  =    159
+    Gradient-filled ellipse NOAA     @ ImagePainter2 =     13 ( 0.082)
+    Gradient-filled ellipse XWAA     @ ImagePainter2 =     26 ( 0.164)
+
+    Texture-filled  ellipse          @ ImagePainter  =     14
+    Texture-filled  ellipse NOAA     @ ImagePainter2 =     15 ( 1.071)
+    Texture-filled  ellipse XWAA     @ ImagePainter2 =     27 ( 1.929)
+
+    Solid-filled    arc     NOAA     @ ImagePainter2 =     56
+    Solid-filled    arc     XWAA     @ ImagePainter2 =     92 ( 1.643)
+
+    Gradient-filled arc     NOAA     @ ImagePainter2 =     69
+    Gradient-filled arc     XWAA     @ ImagePainter2 =    112 ( 1.623)
+
+    Texture-filled  arc     NOAA     @ ImagePainter2 =     71
+    Texture-filled  arc     XWAA     @ ImagePainter2 =    113 ( 1.592)
+
+    Path NOAA (28 SHAPES, NO RASTER) @ ImagePainter2 =      7
+    Path XWAA (28 SHAPES, NO RASTER) @ ImagePainter2 =      7 ( 1.000)
+    Path NOAA (28 SHAPES, /W RASTER) @ ImagePainter2 =    362
+    Path XWAA (28 SHAPES, /W RASTER) @ ImagePainter2 =    665 ( 1.837)
+    </td><td>&nbsp;&nbsp;&nbsp;</td>
+    <!-- Comparison with Cairo -->
+    <td>
+Cairo - CompositionMode::SourceCopy
+                                                       (Time) (Factor)
+                                                       ------ --------
+    Solid thick line                 @ Cairo         =    219
+    Solid thick line                 @ Cairo - No AA =     56 ( 0.256)
+    Solid thick line                 @ ImagePainter  =     21 ( 0.096)
+    Solid thick line NOAA            @ ImagePainter2 =     47 ( 0.215)
+    Solid thick line XWAA            @ ImagePainter2 =    113 ( 0.516)
+    Solid thick line FSAA2x2         @ ImagePainter2 =    113 ( 0.516)
+
+    Solid-filled    polygon          @ Cairo         =    128
+    Solid-filled    polygon          @ Cairo - No AA =     39 ( 0.305)
+    Solid-filled    polygon          @ ImagePainter  =     46 ( 0.359)
+    Solid-filled    polygon NOAA     @ ImagePainter2 =     30 ( 0.234)
+    Solid-filled    polygon XWAA     @ ImagePainter2 =     78 ( 0.609)
+    Solid-filled    polygon FSAA 2x2 @ ImagePainter2 =    100 ( 0.781)
+
+    Solid-filled    ellipse          @ Cairo         =     88
+    Solid-filled    ellipse          @ Cairo - No AA =     48 ( 0.545)
+    Solid-filled    ellipse          @ ImagePainter  =      4 ( 0.045)
+    Solid-filled    ellipse NOAA     @ ImagePainter2 =      4 ( 0.045)
+    Solid-filled    ellipse XWAA     @ ImagePainter2 =     15 ( 0.170)
+
+    Path (cubic bezier)              @ Cairo         =     69
+    Path (cubic bezier)              @ Cairo - No AA =     15 ( 0.217)
+    Path (cubic bezier) NOAA         @ ImagePainter2 =      7 ( 0.101)
+    Path (cubic bezier) XWAA         @ ImagePainter2 =     13 ( 0.188)
+
+    >>> +Random: Factor => Relative to Self Non-Random (Time) (Factor)
+                                                       ------ --------
+    Overhead for calling the rand() function in libc =  0.008
+    Solid-filled  R-polygon          @ Cairo         =    163 ( 1.273)
+    Solid-filled  R-polygon          @ Cairo - No AA =     50 ( 1.282)
+    Solid-filled  R-polygon          @ ImagePainter  =     51 ( 1.085)
+    Solid-filled  R-polygon NOAA     @ ImagePainter2 =     36 ( 1.200)
+    Solid-filled  R-polygon XWAA     @ ImagePainter2 =     89 ( 1.141)
+    Solid-filled  R-polygon FSAA 2x2 @ ImagePainter2 =    107 ( 1.070)
+
+Cairo - CompositionMode::SourceOver
+                                                       (Time) (Factor)
+                                                       ------ --------
+    Solid thick line                 @ Cairo         =    496
+    Solid thick line                 @ Cairo - No AA =    144 ( 0.290)
+    Solid thick line                 @ ImagePainter  =     39 ( 0.079)
+    Solid thick line NOAA            @ ImagePainter2 =     62 ( 0.125)
+    Solid thick line XWAA            @ ImagePainter2 =    155 ( 0.312)
+    Solid thick line FSAA2x2         @ ImagePainter2 =    122 ( 0.246)
+
+    Solid-filled    polygon          @ Cairo         =    361
+    Solid-filled    polygon          @ Cairo - No AA =    127 ( 0.352)
+    Solid-filled    polygon          @ ImagePainter  =     76 ( 0.211)
+    Solid-filled    polygon NOAA     @ ImagePainter2 =     59 ( 0.163)
+    Solid-filled    polygon XWAA     @ ImagePainter2 =    132 ( 0.366)
+    Solid-filled    polygon FSAA 2x2 @ ImagePainter2 =    123 ( 0.341)
+
+    Solid-filled    ellipse          @ Cairo         =    145
+    Solid-filled    ellipse          @ Cairo - No AA =     69 ( 0.476)
+    Solid-filled    ellipse          @ ImagePainter  =      9 ( 0.062)
+    Solid-filled    ellipse NOAA     @ ImagePainter2 =      8 ( 0.055)
+    Solid-filled    ellipse XWAA     @ ImagePainter2 =     18 ( 0.124)
+
+    Path (cubic bezier)              @ Cairo         =    104
+    Path (cubic bezier)              @ Cairo - No AA =     44 ( 0.423)
+    Path (cubic bezier) NOAA         @ ImagePainter2 =      8 ( 0.077)
+    Path (cubic bezier) XWAA         @ ImagePainter2 =     13 ( 0.125)
+
+    >>> +Random: Factor => Relative to Self Non-Random (Time) (Factor)
+                                                       ------ --------
+    Overhead for calling the rand() function in libc =  0.008
+    Solid-filled  R-polygon          @ Cairo         =    391 ( 1.083)
+    Solid-filled  R-polygon          @ Cairo - No AA =    133 ( 1.047)
+    Solid-filled  R-polygon          @ ImagePainter  =     83 ( 1.092)
+    Solid-filled  R-polygon NOAA     @ ImagePainter2 =     66 ( 1.119)
+    Solid-filled  R-polygon XWAA     @ ImagePainter2 =    140 ( 1.061)
+    Solid-filled  R-polygon FSAA 2x2 @ ImagePainter2 =    133 ( 1.090)
+    </td>
+</tr>
+</table>
+</div></pre><br/>
+<script>$(document).ready(function() { pairHScroll('5ce52f8e', 'wrapperTop', 'wrapperBot', 'contentTop', 'contentBot'); });</script>
+
+
+
+<h1><pre>
 <b>AFTER CONVERTING THE PUBLIC API TO USE POINT INSTEAD OF POINTF</b>
 </pre>
 
