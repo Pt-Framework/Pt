@@ -66,7 +66,7 @@ using namespace Pt::Gfx;
 #define DO_MATH_BENCHMARKING_ONLY 0
 
 // Benchmark affine transform operations only
-#define DO_ATRANS_BENCHMARKING_ONLY 0
+#define DO_ATRANS_BENCHMARKING_ONLY 1
 
 // Comparison with Cairo (solid-filled polygons and ellipses only)
 #define DO_BENCHMARKING_CAIRO                 0
@@ -194,7 +194,7 @@ int main(int argc, char* args[])
     // Benchmark affine transform operations only
     if(DO_ATRANS_BENCHMARKING_ONLY) {
         printf("<float>\n" ); benchATransOps<float >();
-        printf("<double>\n"); benchATransOps<double>();
+        //printf("<double>\n"); benchATransOps<double>();
         return 0;
     }
 

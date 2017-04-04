@@ -582,13 +582,23 @@ inline void BasicAffineTransform<float>::transformPoints(float* dxy, const float
         const __m256 r10   = _mm256_hadd_ps(r10_0, r10_1);
         const __m256 r3210 = _mm256_hadd_ps(r10  , r32  );
         // Store 8 floats to the destination vector
+        const __m256 mask  = _mm256_cmp_ps(s3210, avxMaxCordF, _CMP_GT_OQ);
+#if 1
+        _mm256_storeu_ps(dxy, _mm256_blendv_ps(
+                                  r3210, // Retain source values >  maximum coordinate
+                                  s3210, // Retain result values <= maximum coordinate
+                                  mask
+                              )
+                        );
+#else
         _mm256_storeu_ps(
             dxy,
             _mm256_or_ps(
-                _mm256_and_ps(s3210, _mm256_cmp_ps(s3210, avxMaxCordF, _CMP_GT_OQ)), // Retain source values >  maximum coordinate
-                _mm256_and_ps(r3210, _mm256_cmp_ps(s3210, avxMaxCordF, _CMP_LE_OQ))  // Retain result values <= maximum coordinate
+                _mm256_and_ps   (mask, s3210), // Retain source values >  maximum coordinate
+                _mm256_andnot_ps(mask, r3210)  // Retain result values <= maximum coordinate
             )
         );
+#endif
         // Increment the pointers
         sxy += 8;
         dxy += 8;
