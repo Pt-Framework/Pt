@@ -116,6 +116,19 @@ SvgRasterizer::SvgRasterizer(std::istream& is, Image& image, const AffineTransfo
 {
     _xmlReader.reportStartDocument(true);
     _xmlReader.reportDocType(true);
+
+    std::vector<std::string> tokens;
+
+    //const std::string str = "M0,0 L10,10l10 10zl200,200z";
+    //lexPathData(tokens, str);
+
+    const std::string str = "";
+    lexStyleData(tokens, str);
+
+    for(size_t i = 0; i < tokens.size(); ++i) {
+        lprintf("%s\n", tokens[i].c_str());
+    }
+    throw 0;
 }
 
 SvgRasterizer::~SvgRasterizer()
@@ -130,7 +143,7 @@ bool SvgRasterizer::advance()
     Xml::Node* node = _xmlReader.advance();
     if(!node) {
         // Check if we have got a complete SVG body
-        if(!_rstate->gotStart || !_rstate->gotEnd) throw IOError("svg error");
+        if(!_rstate->gotStart || !_rstate->gotEnd) throw IOError("svg error: premature end of document");
         // All done!
         lprintf("DONE!\n");
         return true;
@@ -151,7 +164,7 @@ bool SvgRasterizer::advance()
 
         case Xml::Node::EndDocument: {
             // Check if we have got a complete SVG body
-            if(!_rstate->gotStart || !_rstate->gotEnd) throw IOError("svg error");
+            if(!_rstate->gotStart || !_rstate->gotEnd) throw IOError("svg error: premature end of document");
             // Dump the element
             lprintf("EndDocument   :\n");
             break;
@@ -171,7 +184,12 @@ bool SvgRasterizer::advance()
             // Convert the element
             const Xml::StartElement& elem = Xml::nodeCast<Xml::StartElement>(*node);
             // Check for the SVG opening element
-            if(lcasePtStr(elem.name().local()) == L"svg") _rstate->gotStart = true;
+            if(lcasePtStr(elem.name().local()) == L"svg") {
+                // Check if we have got the opening element
+                if(_rstate->gotStart) throw IOError("svg error: multiple main body");
+                // Set flag
+                _rstate->gotStart = true;
+            }
             // Dump the element
             if(lcaseStdStr(elem.name().local()) == "svg") {
                 lprintf("StartElement  : %s\n", lcaseStdStr(elem.name().local()).c_str());

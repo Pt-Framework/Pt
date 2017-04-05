@@ -57,6 +57,7 @@ if $(WITH_RASTERIZER2)
                                SvgReader.cpp
                                SvgRasterizer.cpp
                                SvgRasterizer_Color.cpp
+                               SvgRasterizer_Lexer.cpp
                                ;
 }
 
