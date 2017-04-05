@@ -27,9 +27,6 @@
   02110-1301 USA
 */
 
-#warning 123
-#include <stdio.h>
-
 #include "SvgRasterizer.h"
 
 
@@ -246,9 +243,26 @@ void SvgRasterizer::lexTransformData(std::vector<std::string>& tokens, const std
             else if(curCmd == "r") {
                 if(numPar != 1 && numPar != 3)
                     throw IOError("svg error: transform definition: invalid number of parameters for rotate");
-                if(numPar != 3) {
-                    tokens.push_back("0");
-                    tokens.push_back("0");
+                if(numPar == 3) {
+                    // Extract back the command
+                    const std::string pary = tokens.back(); tokens.pop_back();
+                    const std::string parx = tokens.back(); tokens.pop_back();
+                    const std::string parr = tokens.back(); tokens.pop_back();
+                    const std::string cmd  = tokens.back(); tokens.pop_back();
+                    assert(cmd == "r");
+                    // Put a translation
+                    tokens.push_back("t");
+                    tokens.push_back(parx);
+                    tokens.push_back(pary);
+                    // Put back the rotation
+                    tokens.push_back("r");
+                    tokens.push_back(parr);
+                    // Put a reverse translation
+                    tokens.push_back("t");
+                    if(parx[0] == '-') tokens.push_back(parx.substr(1));
+                    else               tokens.push_back("-" + parx    );
+                    if(pary[0] == '-') tokens.push_back(pary.substr(1));
+                    else               tokens.push_back("-" + pary    );
                 }
             }
             else if(curCmd == "s") {
