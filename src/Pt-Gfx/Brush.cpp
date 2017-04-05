@@ -25,12 +25,15 @@
  * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+
+#include <stdexcept>
+
 #include <Pt/Gfx/Brush.h>
-#include <algorithm>
+
 
 namespace Pt {
-
 namespace Gfx {
+
 
 Brush::Brush()
 : _brushData( new BrushData() )
@@ -63,8 +66,8 @@ Brush::Brush(const Image& texture)
 }
 
 
-Brush::Brush(const Color& from, const Color& to, GradientDirection g, float angleDeg, float scale)
-: _brushData( new BrushData(from, to, g, angleDeg, scale) )
+Brush::Brush(const Color& from, const Color& to, GradientDirection g, float rotDeg, float scale, Pt::int32_t ofsX, Pt::int32_t ofsY)
+: _brushData( new BrushData(from, to, g, rotDeg, scale, ofsX, ofsY) )
 {
 }
 
@@ -81,14 +84,59 @@ const Color& Brush::color() const
 }
 
 
-void Brush::setGradient(const Color& from, const Color& to, GradientDirection g, float angleDeg, float scale)
+void Brush::setGradient(const Color& from, const Color& to, GradientDirection g, float rotDeg, float scale, Pt::int32_t ofsX, Pt::int32_t ofsY)
 {
     // COW
 
     SmartPtr<BrushData> brushData(new BrushData);
 
     *brushData = *_brushData;
-    brushData->setGradient(from, to, g, angleDeg, scale);
+    brushData->setGradient(from, to, g, rotDeg, scale, ofsX, ofsY);
+
+    _brushData = brushData;
+}
+
+
+void Brush::setGradientRotation(float rotDeg)
+{
+    if(!_brushData->isGradient()) throw std::logic_error("brush error: not a gradient");
+
+    // COW
+
+    SmartPtr<BrushData> brushData(new BrushData);
+
+    *brushData = *_brushData;
+    brushData->setGradientRotation(rotDeg);
+
+    _brushData = brushData;
+}
+
+
+void Brush::setGradientScale(float scale)
+{
+    if(!_brushData->isGradient()) throw std::logic_error("brush error: not a gradient");
+
+    // COW
+
+    SmartPtr<BrushData> brushData(new BrushData);
+
+    *brushData = *_brushData;
+    brushData->setGradientScale(scale);
+
+    _brushData = brushData;
+}
+
+
+void Brush::setGradientOffset(Pt::int32_t ofsX, Pt::int32_t ofsY)
+{
+    if(!_brushData->isGradient()) throw std::logic_error("brush error: not a gradient");
+
+    // COW
+
+    SmartPtr<BrushData> brushData(new BrushData);
+
+    *brushData = *_brushData;
+    brushData->setGradientOffset(ofsX, ofsY);
 
     _brushData = brushData;
 }
@@ -119,15 +167,33 @@ const Image& Brush::texture() const
 }
 
 
-float Brush::angle() const
+float Brush::rotation() const
 {
-    return _brushData->angle();
+    return _brushData->rotation();
 }
 
 
 float Brush::scale() const
 {
     return _brushData->scale();
+}
+
+
+Pt::int32_t Brush::offsetX() const
+{
+    return _brushData->offsetX();
+}
+
+
+Pt::int32_t Brush::offsetY() const
+{
+    return _brushData->offsetY();
+}
+
+
+bool Brush::isGradient() const
+{
+    return _brushData->isGradient();
 }
 
 
@@ -139,35 +205,37 @@ bool Brush::isNull() const
 
 BrushData::BrushData()
 : _fillStyle(Brush::Solid)
-, _color(0, 0, 0)
-, _isNull(true)
+, _color    (0, 0, 0)
+, _isNull   (true)
 {
 }
 
 
 BrushData::BrushData(const Color& color)
 : _fillStyle(Brush::Solid)
-, _color(color)
-, _texture()
-, _isNull(false)
+, _color    (color)
+, _texture  ()
+, _isNull   (false)
 {
 }
 
 
 BrushData::BrushData(const Image& texture)
 : _fillStyle(Brush::Texture)
-, _texture(texture)
-, _isNull(false)
+, _texture  (texture)
+, _isNull   (false)
 {
 }
 
 
-BrushData::BrushData(const Color& from, const Color& to, Brush::GradientDirection g, float angleDeg, float scale)
-: _color(from)
+BrushData::BrushData(const Color& from, const Color& to, Brush::GradientDirection g, float rotDeg, float scale, Pt::int32_t ofsX, Pt::int32_t ofsY)
+: _color        (from)
 , _gradientColor(to)
-, _angle(angleDeg)
-, _scale(scale)
-, _isNull(false)
+, _rotDeg       (rotDeg)
+, _scale        (scale)
+, _ofsX         (ofsX)
+, _ofsY         (ofsY)
+, _isNull       (false)
 {
     switch(g) {
         case Brush::Horizontal  : _fillStyle = Brush::HorizontalGradient;  break;
@@ -208,7 +276,7 @@ const Color& BrushData::color() const
 }
 
 
-void BrushData::setGradient(const Color& from, const Color& to, Brush::GradientDirection g, float angleDeg, float scale)
+void BrushData::setGradient(const Color& from, const Color& to, Brush::GradientDirection g, float rotDeg, float scale, Pt::int32_t ofsX, Pt::int32_t ofsY)
 {
     switch(g) {
         case Brush::Horizontal  : _fillStyle = Brush::HorizontalGradient;  break;
@@ -222,11 +290,32 @@ void BrushData::setGradient(const Color& from, const Color& to, Brush::GradientD
 
     _color         = from;
     _gradientColor = to;
-    _angle         = angleDeg;
+    _rotDeg        = rotDeg;
     _scale         = scale;
+    _ofsX          = ofsX;
+    _ofsY          = ofsY;
     _isNull        = false;
 
     _texture       = Image();
+}
+
+
+void BrushData::setGradientRotation(float rotDeg)
+{
+    _rotDeg = rotDeg;
+}
+
+
+void BrushData::setGradientScale(float scale)
+{
+    _scale = scale;
+}
+
+
+void BrushData::setGradientOffset(Pt::int32_t ofsX, Pt::int32_t ofsY)
+{
+    _ofsX = ofsX;
+    _ofsY = ofsY;
 }
 
 
@@ -250,9 +339,9 @@ const Image& BrushData::texture() const
 }
 
 
-float BrushData::angle() const
+float BrushData::rotation() const
 {
-    return _angle;
+    return _rotDeg;
 }
 
 
@@ -262,11 +351,29 @@ float BrushData::scale() const
 }
 
 
+Pt::int32_t BrushData::offsetX() const
+{
+    return _ofsX;
+}
+
+
+Pt::int32_t BrushData::offsetY() const
+{
+    return _ofsY;
+}
+
+
+bool BrushData::isGradient() const
+{
+    return (_fillStyle != Brush::Solid) && (_fillStyle != Brush::Texture);
+}
+
+
 bool BrushData::isNull() const
 {
     return _isNull;
 }
 
-} // namespace
 
+} // namespace
 } // namespace

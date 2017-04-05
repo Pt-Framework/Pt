@@ -36,11 +36,13 @@
 #include <Pt/SmartPtr.h>
 #include <cstddef>
 
-namespace Pt {
 
+namespace Pt {
 namespace Gfx {
 
+
 class PenData;
+
 
 /** @brief Attributs for the drawing of outlines.
 
@@ -230,8 +232,8 @@ class PT_GFX_API PenData
       Pen::JoinStyle _joinStyle;
 };
 
-} // namespace
 
+} // namespace
 } // namespace
 
 #endif

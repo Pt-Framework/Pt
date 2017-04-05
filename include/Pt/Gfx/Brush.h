@@ -33,11 +33,13 @@
 #include <Pt/Gfx/Image.h>
 #include <Pt/SmartPtr.h>
 
-namespace Pt {
 
+namespace Pt {
 namespace Gfx {
 
+
 class BrushData;
+
 
 class PT_GFX_API Brush
 {
@@ -74,7 +76,7 @@ class PT_GFX_API Brush
         // TODO: texture offset
         Brush(const Image& texture);
 
-        Brush(const Color& from, const Color& to, GradientDirection g, float angleDeg = 0.0f, float scale = 1.0f);
+        Brush(const Color& from, const Color& to, GradientDirection g, float rotDeg = 0.0f, float scale = 1.0f, Pt::int32_t ofsX = 0, Pt::int32_t ofsY = 0);
 
         FillStyle fillStyle() const;
 
@@ -82,7 +84,13 @@ class PT_GFX_API Brush
 
         const Color& color() const;
 
-        void setGradient(const Color& from, const Color& to, GradientDirection g, float angleDeg = 0.0f, float scale = 1.0f);
+        void setGradient(const Color& from, const Color& to, GradientDirection g, float rotDeg = 0.0f, float scale = 1.0f, Pt::int32_t ofsX = 0, Pt::int32_t ofsY = 0);
+
+        void setGradientRotation(float rotDeg = 0.0f);
+
+        void setGradientScale(float scale = 1.0f);
+
+        void setGradientOffset(Pt::int32_t ofsX = 0, Pt::int32_t ofsY = 0);
 
         const Color& gradientColor() const;
 
@@ -90,9 +98,15 @@ class PT_GFX_API Brush
 
         const Image& texture() const;
 
-        float angle() const;
+        float rotation() const;
 
         float scale() const;
+
+        Pt::int32_t offsetX() const;
+
+        Pt::int32_t offsetY() const;
+
+        bool isGradient() const;
 
         bool isNull() const;
 
@@ -110,7 +124,7 @@ class BrushData
 
         BrushData(const Image& texture);
 
-        BrushData(const Color& from, const Color& to, Brush::GradientDirection g, float angleDeg, float scale);
+        BrushData(const Color& from, const Color& to, Brush::GradientDirection g, float rotDeg, float scale, Pt::int32_t ofsX, Pt::int32_t ofsY);
 
         ~BrushData();
 
@@ -120,7 +134,13 @@ class BrushData
 
         const Color& color() const;
 
-        void setGradient(const Color& from, const Color& to, Brush::GradientDirection g, float angleDeg, float scale);
+        void setGradient(const Color& from, const Color& to, Brush::GradientDirection g, float rotDeg, float scale, Pt::int32_t ofsX, Pt::int32_t ofsY);
+
+        void setGradientRotation(float rotDeg);
+
+        void setGradientScale(float scale);
+
+        void setGradientOffset(Pt::int32_t ofsX, Pt::int32_t ofsY);
 
         const Color& gradientColor() const;
 
@@ -128,9 +148,15 @@ class BrushData
 
         const Image& texture() const;
 
-        float angle() const;
+        float rotation() const;
 
         float scale() const;
+
+        Pt::int32_t offsetX() const;
+
+        Pt::int32_t offsetY() const;
+
+        bool isGradient() const;
 
         bool isNull() const;
 
@@ -139,13 +165,15 @@ class BrushData
         Color            _color;
         Image            _texture;
         Color            _gradientColor;
-        float            _angle;
+        float            _rotDeg;
         float            _scale;
+        Pt::int32_t      _ofsX;
+        Pt::int32_t      _ofsY;
         bool             _isNull;
 };
 
-} // namespace
 
+} // namespace
 } // namespace
 
 #endif

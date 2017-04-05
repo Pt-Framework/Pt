@@ -434,8 +434,8 @@ void Rasterizer2::updateGradientBrush_getStartEndColors(Pt::uint8_t rgbaStart[4]
 
 void Rasterizer2::updateGradientBrush_getCtrRatXY(float& ctrX, float& ctrY, float &xyRat, float& yxRat, Pt::int32_t width, Pt::int32_t height)
 {
-    ctrX  = width  * 0.5f;
-    ctrY  = height * 0.5f;
+    ctrX  = width  * 0.5f + _brush.offsetX();
+    ctrY  = height * 0.5f + _brush.offsetY();
 
     xyRat = (ctrX > ctrY) ? (ctrX / ctrY) : 1.0f;
     yxRat = (ctrY > ctrX) ? (ctrY / ctrX) : 1.0f;

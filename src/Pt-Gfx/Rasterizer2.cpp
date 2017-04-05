@@ -367,12 +367,15 @@ void Rasterizer2::updateGradientBrush_gen1DHorVerGradient(Pt::int32_t width, Pt:
     const Pt::uint8_t re = ec[0], ge = ec[1], be = ec[2], ae = ec[3];
 
     // Generate the gradient
+    const Pt::int32_t ofs    = (width == 1) ? _brush.offsetY() : _brush.offsetX();
     const Pt::int32_t length = width + height - 1 - 1;
 
     Pt::uint8_t* pixel = _brushBuffer.data();
 
     for(Pt::int32_t n = 0; n <= length; ++n) {
-        const Pt::int32_t f2 = FIXED_POINT_FROM_INT(n) / length;
+        const Pt::int32_t fo = n + ofs;
+        const Pt::int32_t fi = (fo <= 0) ? 0 : ( (fo >= length) ? length : fo );
+        const Pt::int32_t f2 = FIXED_POINT_FROM_INT(fi) / length;
         const Pt::int32_t f1 = FIXED_POINT_CONSTANT_ONE - f2;
         const Pt::uint8_t r1 = FIXED_POINT_TO_INT(rs * f1);
         const Pt::uint8_t r2 = FIXED_POINT_TO_INT(re * f2);
@@ -399,7 +402,7 @@ void Rasterizer2::updateGradientBrush_gen2DLinearGradient(Pt::int32_t width, Pt:
     const Pt::uint8_t re = ec[0], ge = ec[1], be = ec[2], ae = ec[3];
 
     // Extract and calculate the parameters
-    const float angle = _brush.angle();
+    const float angle = _brush.rotation();
     const float scale = _brush.scale();
 
     float ctrX, ctrY, xyRat, yxRat;
@@ -463,7 +466,7 @@ void Rasterizer2::updateGradientBrush_gen2DRectangularGradient(Pt::int32_t width
     const Pt::uint8_t re = ec[0], ge = ec[1], be = ec[2], ae = ec[3];
 
     // Extract and calculate the parameters
-    const float angle = _brush.angle();
+    const float angle = _brush.rotation();
     const float scale = _brush.scale();
 
     float ctrX, ctrY, xyRat, yxRat;
@@ -570,7 +573,7 @@ void Rasterizer2::updateGradientBrush_gen2DConicalGradient(Pt::int32_t width, Pt
 #endif
 
     // Extract and calculate the parameters
-    const float angle = _brush.angle();
+    const float angle = _brush.rotation();
     const float scale = _brush.scale();
 
     float ctrX, ctrY, xyRat, yxRat;
