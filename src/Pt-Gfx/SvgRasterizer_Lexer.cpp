@@ -108,7 +108,7 @@ void SvgRasterizer::lexPathData(std::vector<std::string>& tokens, const std::str
         // Other characters
         if(true) {
             // Store the parameter
-            tokens.push_back(token);
+            tokens.push_back(passValidNumber(token, "path data"));
             token.clear();
             // Decrement the number of parameter
             --curCmdNPar;
@@ -232,7 +232,7 @@ void SvgRasterizer::lexTransformData(std::vector<std::string>& tokens, const std
             if(curCmd.empty() || curPar.empty())
                 throw IOError("svg error: transform definition: unexpected location for character ')'");
             // Store the parameter token
-            tokens.push_back(lrtrimStdStr(curPar));
+            tokens.push_back(passValidNumber(lrtrimStdStr(curPar), "transform definition"));
             ++numPar;
             // Check the number of mandatory parameters and store the optional parameters
             if(curCmd == "t") {
@@ -298,7 +298,7 @@ void SvgRasterizer::lexTransformData(std::vector<std::string>& tokens, const std
             if(curCmd.empty() || curPar.empty())
                 throw IOError("svg error: transform definition: unexpected location for character ','");
             // Store the parameter token
-            tokens.push_back(lrtrimStdStr(curPar));
+            tokens.push_back(passValidNumber(lrtrimStdStr(curPar), "transform definition"));
             ++numPar;
             // Clear the parameter token
             curPar.clear();
@@ -313,7 +313,7 @@ void SvgRasterizer::lexTransformData(std::vector<std::string>& tokens, const std
             // A ' ' or ';' acts as a separator only if there is already a parameter defined
             if(!curPar.empty()) {
                 // Store the parameter token
-                tokens.push_back(lrtrimStdStr(curPar));
+                tokens.push_back(passValidNumber(lrtrimStdStr(curPar), "transform definition"));
                 ++numPar;
                 // Clear the parameter token
                 curPar.clear();

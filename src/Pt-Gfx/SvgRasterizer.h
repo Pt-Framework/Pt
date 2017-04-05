@@ -76,6 +76,7 @@ class SvgRasterizer
         static inline const std::string lrtrimStdStr(const std::string & str);
         static inline const std::string removeAllSpacesStdStr(const std::string & str);
 
+        static inline const std::string& passValidNumber(const std::string& s, const std::string& sectionInfo);
 
     private:
         static const Color fromHtmlColor(const std::string& colStr);
@@ -141,6 +142,16 @@ const std::string SvgRasterizer::removeAllSpacesStdStr(const std::string & str_)
     return str;
 }
 
+const std::string& SvgRasterizer::passValidNumber(const std::string& s, const std::string& sectionInfo)
+{
+    char*  end = 0;
+    double val = strtod(s.c_str(), &end);
+
+    if(*end || val == HUGE_VAL)
+        throw IOError("svg error: " + sectionInfo + ": invalid number '" + s + "'");
+
+    return s;
+}
 
 } // namespace
 } // namespace

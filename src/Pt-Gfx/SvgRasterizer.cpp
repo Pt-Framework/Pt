@@ -88,21 +88,23 @@ SvgRasterizer::SvgRasterizer(std::istream& is, Image& image, const AffineTransfo
     _xmlReader.reportStartDocument(true);
     _xmlReader.reportDocType(true);
 
+#if 0
     std::vector<std::string> tokens;
 
-    //const std::string str = "M0,0 L10,10l10 10zl200,200z";
-    //lexPathData(tokens, str);
+    const std::string str = "M1,0 L10,10l10 10zl200,200z";
+    lexPathData(tokens, str);
 
     //const std::string str = "stroke:green; stroke-width:8";
     //lexStyleData(tokens, str);
 
-    const std::string str = "translate(10 12) translate (10) ; translate(10,10) rotate(20) rotate(20,10,-11) scale(10) scale(10,2) skewX(1) skewY(1) matrix(0,1,2,3,4,5)";
-    lexTransformData(tokens, str);
+    //const std::string str = "translate(10 12) translate (10) ; translate(10,10) rotate(20) rotate(20,10,-11) scale(10) scale(10,2) skewX(1) skewY(1) matrix(0,1,2,3,4,5)";
+    //lexTransformData(tokens, str);
 
     for(size_t i = 0; i < tokens.size(); ++i) {
         lprintf("%s\n", tokens[i].c_str());
     }
     throw 0;
+#endif
 }
 
 SvgRasterizer::~SvgRasterizer()
