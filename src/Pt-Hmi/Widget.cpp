@@ -584,6 +584,18 @@ void Widget::measure(const SizePolicy& policy)
         contentPolicy.setHeight( policy.height() );
     }
 
+    if( contentPolicy.vertical() != SizePolicy::Fixed &&
+        contentPolicy.height() < _minimumSize.height() )
+    {
+        contentPolicy.setHeight( _minimumSize.height() );
+    }
+
+    if( contentPolicy.horizontal() != SizePolicy::Fixed &&
+        contentPolicy.width() < _minimumSize.width() )
+    {
+        contentPolicy.setWidth( _minimumSize.width() );
+    }
+
     bool doMeasure = contentPolicy != _lastPolicy || _isLayouting;
 
     if(doMeasure)
@@ -602,6 +614,8 @@ void Widget::measure(const SizePolicy& policy)
 
         if(contentPolicy.vertical() == SizePolicy::Fixed)
             _preferredSize.setHeight( contentPolicy.height() );
+        else if( _preferredSize.height() < _minimumSize.height() )
+            _preferredSize.setHeight( _minimumSize.height() );
 
         if(contentPolicy.vertical() == SizePolicy::Maximum)
             _preferredSize.setHeight( std::min( _preferredSize.height(),
@@ -609,6 +623,8 @@ void Widget::measure(const SizePolicy& policy)
 
         if(contentPolicy.horizontal() == SizePolicy::Fixed)
             _preferredSize.setWidth( contentPolicy.width() );
+        else if( _preferredSize.width() < _minimumSize.width() )
+            _preferredSize.setWidth( _minimumSize.width() );
 
         if(contentPolicy.horizontal() == SizePolicy::Maximum)
             _preferredSize.setWidth( std::min( _preferredSize.width(),
@@ -968,6 +984,50 @@ void Widget::setPadding(double n)
 void Widget::setPadding(double horiz, double vertical)
 {
     setPadding( Spacing(horiz, vertical) );
+}
+
+
+const Gfx::SizeF& Widget::minimumSize() const
+{
+    return _minimumSize;
+}
+
+
+void Widget::setMinimumSize(const Gfx::SizeF& s)
+{
+    _minimumSize = s;
+}
+
+
+void Widget::setMinimumSize(double w, double h)
+{
+    _minimumSize.set(w, h);
+}
+
+
+double Widget::minimumWidth() const
+{
+    return _minimumSize.width();
+}
+
+
+void Widget::setMinimumWidth(double h)
+{
+    _minimumSize.setWidth(h);
+    relayout();
+}
+
+
+double Widget::minimumHeight() const
+{
+    return _minimumSize.height();
+}
+
+
+void Widget::setMinimumHeight(double h)
+{
+    _minimumSize.setHeight(h);
+    relayout();
 }
 
 

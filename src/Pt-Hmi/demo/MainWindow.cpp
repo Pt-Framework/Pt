@@ -119,6 +119,7 @@ MainWindow::MainWindow()
     }
     
     _bt2.setText("Ende");
+    _bt2.setMinimumHeight(50);
     _bt2.setPadding(5);
     _bt2.setMargin(5);
     _scrollContainer.addItem(_bt2);
