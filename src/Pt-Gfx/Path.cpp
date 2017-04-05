@@ -93,7 +93,7 @@ static inline void generateGenericNBezierPoints(std::vector<PointF>& dst, double
 
     // Determine the number of segments
     const Pt::int32_t minNS = pts.size() / 2 + 1;
-          Pt::int32_t nSegs = Gfx::Math::llrint(clen * smoothness / 24);
+          Pt::int32_t nSegs = Gfx::Math::zrint(clen * smoothness / 24);
     if(nSegs < minNS) nSegs = minNS;
 
     // Calculate the inverse multiplication factor
@@ -128,7 +128,7 @@ static inline void generateCubicBezierPoints(std::vector<PointF>& dst, double x1
     const double lb   = l43 + l32 + l12;
 
     // Determine the number of segments
-    Pt::int32_t nSegs = Gfx::Math::llrint(lb * smoothness / 16) + 4;
+    Pt::int32_t nSegs = Gfx::Math::zrint(lb * smoothness / 16) + 4;
     if(nSegs < 9) nSegs = 9;
 
     // Calculate the inverse multiplication factor
@@ -175,7 +175,7 @@ static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, doubl
     const double lb  = l32 + l12;
 
     // Determine the number of segments
-    Pt::int32_t nSegs = Gfx::Math::llrint(lb * smoothness / 16) + 2;
+    Pt::int32_t nSegs = Gfx::Math::zrint(lb * smoothness / 16) + 2;
     if(nSegs < 5) nSegs = 5;
 
     // Calculate the inverse multiplication factor

@@ -60,7 +60,7 @@ inline void cssHslToRgb(int& r, int& g, int& b, int h_, int s_, int l_)
 
     // Achromatic color?
     if(s == 0.0f) {
-        r = g = b = Gfx::Math::lrint(l * 255.0f);
+        r = g = b = Gfx::Math::zrint(l * 255.0f);
         return;
     }
 
@@ -68,9 +68,9 @@ inline void cssHslToRgb(int& r, int& g, int& b, int h_, int s_, int l_)
     const float t2 = (l <= 0.5f) ? ( l * (s + 1.0f) ) : ( l + s - (l * s) );
     const float t1 = l * 2.0f - t2;
 
-    r = Gfx::Math::lrint( cssHueToRgb(t1, t2, h + 2.0f) * 255.0f );
-    g = Gfx::Math::lrint( cssHueToRgb(t1, t2, h       ) * 255.0f );
-    b = Gfx::Math::lrint( cssHueToRgb(t1, t2, h - 2.0f) * 255.0f );
+    r = Gfx::Math::zrint( cssHueToRgb(t1, t2, h + 2.0f) * 255.0f );
+    g = Gfx::Math::zrint( cssHueToRgb(t1, t2, h       ) * 255.0f );
+    b = Gfx::Math::zrint( cssHueToRgb(t1, t2, h - 2.0f) * 255.0f );
 }
 
 inline const Color fromCssHsl(int h, int s, int l)
@@ -97,9 +97,9 @@ inline const Color fromCssHwb(int h, int w_, int b_)
     fg *= (1.0f - wh - bl); fg += wh;
     fb *= (1.0f - wh - bl); fb += wh;
 
-    r = Gfx::Math::lrint(fr * 255.0f);
-    g = Gfx::Math::lrint(fg * 255.0f);
-    b = Gfx::Math::lrint(fb * 255.0f);
+    r = Gfx::Math::zrint(fr * 255.0f);
+    g = Gfx::Math::zrint(fg * 255.0f);
+    b = Gfx::Math::zrint(fb * 255.0f);
 
     return Color::fromRgb8(r, g, b, 255);
 }
@@ -111,9 +111,9 @@ inline const Color fromCssCmyk(int c_, int m_, int y_, int k_)
     const float y = (float) y_ / 100.0f;
     const float k = (float) k_ / 100.0f;
 
-    const int r = 255 - Gfx::Math::lrint( ( std::min( 1.0f, c * (1.0f - k) + k ) ) * 255.0f );
-    const int g = 255 - Gfx::Math::lrint( ( std::min( 1.0f, m * (1.0f - k) + k ) ) * 255.0f );
-    const int b = 255 - Gfx::Math::lrint( ( std::min( 1.0f, y * (1.0f - k) + k ) ) * 255.0f );
+    const int r = 255 - Gfx::Math::zrint( ( std::min( 1.0f, c * (1.0f - k) + k ) ) * 255.0f );
+    const int g = 255 - Gfx::Math::zrint( ( std::min( 1.0f, m * (1.0f - k) + k ) ) * 255.0f );
+    const int b = 255 - Gfx::Math::zrint( ( std::min( 1.0f, y * (1.0f - k) + k ) ) * 255.0f );
 
     return Color::fromRgb8(r, g, b, 255);
 }
@@ -123,14 +123,14 @@ inline const Color fromCssNCol(char n, int h, int w, int b)
     const float percent = (h / 10) * 10;
 
     switch(::toupper(n)) {
-        case 'R': h = Gfx::Math::lrint(  0 + (percent * 0.6f)); break;
-        case 'Y': h = Gfx::Math::lrint( 60 + (percent * 0.6f)); break;
-        case 'G': h = Gfx::Math::lrint(120 + (percent * 0.6f)); break;
-        case 'C': h = Gfx::Math::lrint(180 + (percent * 0.6f)); break;
-        case 'B': h = Gfx::Math::lrint(240 + (percent * 0.6f)); break;
-        case 'M': h = Gfx::Math::lrint(300 + (percent * 0.6f)); break;
+        case 'R': h = Gfx::Math::zrint(  0 + (percent * 0.6f)); break;
+        case 'Y': h = Gfx::Math::zrint( 60 + (percent * 0.6f)); break;
+        case 'G': h = Gfx::Math::zrint(120 + (percent * 0.6f)); break;
+        case 'C': h = Gfx::Math::zrint(180 + (percent * 0.6f)); break;
+        case 'B': h = Gfx::Math::zrint(240 + (percent * 0.6f)); break;
+        case 'M': h = Gfx::Math::zrint(300 + (percent * 0.6f)); break;
         case 'W': h = 0;
-                  b = Gfx::Math::lrint(percent);
+                  b = Gfx::Math::zrint(percent);
                   w = 100 - b;
                   break;
         default : return Color::fromRgb8(0, 0, 0, 255);

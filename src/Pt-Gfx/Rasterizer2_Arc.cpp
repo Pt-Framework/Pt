@@ -71,8 +71,8 @@ void Rasterizer2::fillArc(const Point& topLeft, const Size& size, float degBegin
     fai.ctrY      = fai.minY + fai.radY;
     fai.xyRat     = (float) fai.radX / (float) fai.radY;
 
-    fai.quartersX = Gfx::Math::lrint( fai.radX2 * Gfx::Math::fastInvSqrt(fai.radX2 + fai.radY2) );
-    fai.quartersY = Gfx::Math::lrint( fai.radY2 * Gfx::Math::fastInvSqrt(fai.radX2 + fai.radY2) );
+    fai.quartersX = Gfx::Math::zrint( fai.radX2 * Gfx::Math::fastInvSqrt(fai.radX2 + fai.radY2) );
+    fai.quartersY = Gfx::Math::zrint( fai.radY2 * Gfx::Math::fastInvSqrt(fai.radX2 + fai.radY2) );
 
     // Find the exact coordinate of the begin and end point
     arcUtil_findExactBegEndPointsCoordinate(fai);
@@ -189,13 +189,13 @@ void Rasterizer2::arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai)
 
     // Calculate the approximate coordinate of the point which is located at the begin angle
     const float rBeg = fai.degBegin * Gfx::Math::PiDiv180;
-    const Pt::int32_t bx = Gfx::Math::lrint(fai.ctrX + fai.radX * ::cosf(rBeg));
-    const Pt::int32_t by = Gfx::Math::lrint(fai.ctrY - fai.radY * ::sinf(rBeg)); // Sign inversion due to differences between cartesian and computer coordinate systems
+    const Pt::int32_t bx = Gfx::Math::zrint(fai.ctrX + fai.radX * ::cosf(rBeg));
+    const Pt::int32_t by = Gfx::Math::zrint(fai.ctrY - fai.radY * ::sinf(rBeg)); // Sign inversion due to differences between cartesian and computer coordinate systems
 
     // Calculate the approximate coordinate of the point which is located at the end angle
     const float rEnd = fai.degEnd * Gfx::Math::PiDiv180;
-    const Pt::int32_t ex = Gfx::Math::lrint(fai.ctrX + fai.radX * ::cosf(rEnd));
-    const Pt::int32_t ey = Gfx::Math::lrint(fai.ctrY - fai.radY * ::sinf(rEnd)); // Sign inversion due to differences between cartesian and computer coordinate systems
+    const Pt::int32_t ex = Gfx::Math::zrint(fai.ctrX + fai.radX * ::cosf(rEnd));
+    const Pt::int32_t ey = Gfx::Math::zrint(fai.ctrY - fai.radY * ::sinf(rEnd)); // Sign inversion due to differences between cartesian and computer coordinate systems
 
     // Used for finding the exact coordinate of the points which are located at the begin and end angle
     Pt::int32_t x1d = MAXIMUM_COORD; // Begin point
@@ -209,8 +209,8 @@ void Rasterizer2::arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai)
         const float       y  = fai.radY * Gfx::Math::fastSqrt(1 - (float) x * x / fai.radX2);
         const Pt::int32_t xl = fai.ctrX - x;
         const Pt::int32_t xr = fai.ctrX + x;
-        const Pt::int32_t yt = fai.ctrY - ( fai.antiAlias ? Gfx::Math::lfint(y) : Gfx::Math::lrint(y) );
-        const Pt::int32_t yb = fai.ctrY + ( fai.antiAlias ? Gfx::Math::lfint(y) : Gfx::Math::lrint(y) );
+        const Pt::int32_t yt = fai.ctrY - ( fai.antiAlias ? Gfx::Math::zfint(y) : Gfx::Math::zrint(y) );
+        const Pt::int32_t yb = fai.ctrY + ( fai.antiAlias ? Gfx::Math::zfint(y) : Gfx::Math::zrint(y) );
         // Determine the exact coordinates of the closing lines
         if(abs(xl - bx) < x1d) { x1d = abs(xl - bx); fai.x1 = xl; }
         if(abs(xl - ex) < x2d) { x2d = abs(xl - ex); fai.x2 = xl; }
@@ -226,8 +226,8 @@ void Rasterizer2::arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai)
     for(Pt::int32_t y = 0; y <= fai.quartersY; ++y) {
         // Calculate the coordinate
         const float       x  = fai.radX * Gfx::Math::fastSqrt(1 - (float) y * y / fai.radY2);
-        const Pt::int32_t xl = fai.ctrX - ( fai.antiAlias ? Gfx::Math::lfint(x) : Gfx::Math::lrint(x) );
-        const Pt::int32_t xr = fai.ctrX + ( fai.antiAlias ? Gfx::Math::lfint(x) : Gfx::Math::lrint(x) );
+        const Pt::int32_t xl = fai.ctrX - ( fai.antiAlias ? Gfx::Math::zfint(x) : Gfx::Math::zrint(x) );
+        const Pt::int32_t xr = fai.ctrX + ( fai.antiAlias ? Gfx::Math::zfint(x) : Gfx::Math::zrint(x) );
         const Pt::int32_t yt = fai.ctrY - y;
         const Pt::int32_t yb = fai.ctrY + y;
         // Determine the exact coordinates of the closing lines
@@ -369,8 +369,8 @@ void Rasterizer2::arcUtil_genScanlinesForChord(EAScanlines& scanlines, const Fil
     for(Pt::int32_t x = 0; x <= fai.quartersX; ++x) {
         // Calculate the coordinate
         const float       y  = fai.radY * Gfx::Math::fastSqrt(1 - (float) x * x / fai.radX2);
-        const Pt::int32_t yt = fai.ctrY - ( fai.antiAlias ? Gfx::Math::lfint(y) : Gfx::Math::lrint(y) );
-        const Pt::int32_t yb = fai.ctrY + ( fai.antiAlias ? Gfx::Math::lfint(y) : Gfx::Math::lrint(y) );
+        const Pt::int32_t yt = fai.ctrY - ( fai.antiAlias ? Gfx::Math::zfint(y) : Gfx::Math::zrint(y) );
+        const Pt::int32_t yb = fai.ctrY + ( fai.antiAlias ? Gfx::Math::zfint(y) : Gfx::Math::zrint(y) );
         const Pt::int32_t xl = fai.ctrX - x;
         const Pt::int32_t xr = fai.ctrX + x;
         // Skip if the scanline will be completely outside the shape
@@ -387,8 +387,8 @@ void Rasterizer2::arcUtil_genScanlinesForChord(EAScanlines& scanlines, const Fil
         const float       x  = fai.radX * Gfx::Math::fastSqrt(1 - (float) y * y / fai.radY2);
         const Pt::int32_t yt = fai.ctrY - y;
         const Pt::int32_t yb = fai.ctrY + y;
-        const Pt::int32_t xl = fai.ctrX - ( fai.antiAlias ? Gfx::Math::lfint(x) : Gfx::Math::lrint(x) );
-        const Pt::int32_t xr = fai.ctrX + ( fai.antiAlias ? Gfx::Math::lfint(x) : Gfx::Math::lrint(x) );
+        const Pt::int32_t xl = fai.ctrX - ( fai.antiAlias ? Gfx::Math::zfint(x) : Gfx::Math::zrint(x) );
+        const Pt::int32_t xr = fai.ctrX + ( fai.antiAlias ? Gfx::Math::zfint(x) : Gfx::Math::zrint(x) );
         // Skip if the scanline will be completely outside the shape
         if(xwLine.faceL && xr < xlMin) continue;
         if(xwLine.faceR && xl > xlMax) continue;
@@ -504,8 +504,8 @@ void Rasterizer2::arcUtil_genScanlinesForPie(EAScanlines& scanlines1, EAScanline
     for(Pt::int32_t x = 0; x <= fai.quartersX; ++x) {
         // Calculate the coordinate
         const float       y  = fai.radY * Gfx::Math::fastSqrt(1 - (float) x * x / fai.radX2);
-        const Pt::int32_t yt = fai.ctrY - ( fai.antiAlias ? Gfx::Math::lfint(y) : Gfx::Math::lrint(y) );
-        const Pt::int32_t yb = fai.ctrY + ( fai.antiAlias ? Gfx::Math::lfint(y) : Gfx::Math::lrint(y) );
+        const Pt::int32_t yt = fai.ctrY - ( fai.antiAlias ? Gfx::Math::zfint(y) : Gfx::Math::zrint(y) );
+        const Pt::int32_t yb = fai.ctrY + ( fai.antiAlias ? Gfx::Math::zfint(y) : Gfx::Math::zrint(y) );
         const Pt::int32_t xl = fai.ctrX - x;
         const Pt::int32_t xr = fai.ctrX + x;
         // Store/update the scanline coordinates
@@ -519,8 +519,8 @@ void Rasterizer2::arcUtil_genScanlinesForPie(EAScanlines& scanlines1, EAScanline
         const float       x  = fai.radX * Gfx::Math::fastSqrt(1 - (float) y * y / fai.radY2);
         const Pt::int32_t yt = fai.ctrY - y;
         const Pt::int32_t yb = fai.ctrY + y;
-        const Pt::int32_t xl = fai.ctrX - ( fai.antiAlias ? Gfx::Math::lfint(x) : Gfx::Math::lrint(x) );
-        const Pt::int32_t xr = fai.ctrX + ( fai.antiAlias ? Gfx::Math::lfint(x) : Gfx::Math::lrint(x) );
+        const Pt::int32_t xl = fai.ctrX - ( fai.antiAlias ? Gfx::Math::zfint(x) : Gfx::Math::zrint(x) );
+        const Pt::int32_t xr = fai.ctrX + ( fai.antiAlias ? Gfx::Math::zfint(x) : Gfx::Math::zrint(x) );
         // Store/update the scanline coordinates
         arcUtil_cropAndStoreScanlineForPie(scanlines1, scanlines2, fai, xwLine1, xwLine2, lineMinY, lineMaxY, xl, xr, yt);
         arcUtil_cropAndStoreScanlineForPie(scanlines1, scanlines2, fai, xwLine1, xwLine2, lineMinY, lineMaxY, xl, xr, yb);
@@ -694,9 +694,9 @@ void Rasterizer2::arcUtil_rasterCircumferencePixels(FilledArcInfo& fai)
     for(Pt::int32_t x = 0; x <= fai.quartersX; ++x) {
         // Calculate the Y coordinate and alpha
         const float       y     = fai.radY * Gfx::Math::fastSqrt(1 - (float) x * x / fai.radX2);
-        const Pt::int32_t fly   = Gfx::Math::lfint(y);
+        const Pt::int32_t fly   = Gfx::Math::zfint(y);
         const float       error = y - fly;
-        const Pt::uint8_t alpha = Gfx::Math::lrint(error * 255);
+        const Pt::uint8_t alpha = Gfx::Math::zrint(error * 255);
         // Draw the pixels
         const Pt::int32_t x1 = fai.ctrX - x;
         const Pt::int32_t x2 = fai.ctrX + x;
@@ -715,9 +715,9 @@ void Rasterizer2::arcUtil_rasterCircumferencePixels(FilledArcInfo& fai)
     for(Pt::int32_t y = 0; y <= fai.quartersY; ++y) {
         // Calculate the X coordinate and alpha
         const float       x     = fai.radX * Gfx::Math::fastSqrt(1 - (float) y * y / fai.radY2);
-        const Pt::int32_t flx   = Gfx::Math::lfint(x);
+        const Pt::int32_t flx   = Gfx::Math::zfint(x);
         const float       error = x - flx;
-        const Pt::uint8_t alpha = Gfx::Math::lrint(error * 255);
+        const Pt::uint8_t alpha = Gfx::Math::zrint(error * 255);
         // Draw the pixels
         const Pt::int32_t x1 = fai.ctrX - flx - 1;
         const Pt::int32_t x2 = fai.ctrX + flx + 1;

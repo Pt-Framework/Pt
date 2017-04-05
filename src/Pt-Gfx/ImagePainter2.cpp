@@ -382,14 +382,14 @@ static inline void generateLineRoundCap(std::vector<PointF>& dst, float x, float
         Gfx::Math::zrint(x + nx     ), Gfx::Math::zrint(y + ny     ),
         Gfx::Math::zrint(x + nx - dx), Gfx::Math::zrint(y + ny - dy),
         Gfx::Math::zrint(x      - dx), Gfx::Math::zrint(y      - dy),
-        ceil(wh * 0.5f)
+        Gfx::Math::zcint(wh * 0.5f)
     );
     generateQuadraticBezierPoints(
         dst,
         Gfx::Math::zrint(x      - dx), Gfx::Math::zrint(y      - dy),
         Gfx::Math::zrint(x - nx - dx), Gfx::Math::zrint(y - ny - dy),
         Gfx::Math::zrint(x - nx     ), Gfx::Math::zrint(y - ny     ),
-        ceil(wh * 0.5f)
+        Gfx::Math::zcint(wh * 0.5f)
     );
 #else
     generateQuadraticBezierPoints(
@@ -397,7 +397,7 @@ static inline void generateLineRoundCap(std::vector<PointF>& dst, float x, float
         Gfx::Math::zrint(x + nx       ), Gfx::Math::zrint(y + ny       ),
         Gfx::Math::zrint(x - dx * 2.0f), Gfx::Math::zrint(y - dy * 2.0f),
         Gfx::Math::zrint(x - nx       ), Gfx::Math::zrint(y - ny       ),
-        ceil(wh) - 1
+        Gfx::Math::zcint(wh) - 1
     );
 #endif
 }
@@ -424,14 +424,14 @@ static inline void generateLineRoundHoleCap(std::vector<PointF>& dst, float x, f
         Gfx::Math::zrint(x + nx - dx), Gfx::Math::zrint(y + ny - dy),
         Gfx::Math::zrint(x + nx     ), Gfx::Math::zrint(y + ny     ),
         Gfx::Math::zrint(x          ), Gfx::Math::zrint(y          ),
-        ceil(wh * 0.5f)
+        Gfx::Math::zcint(wh * 0.5f)
     );
     generateQuadraticBezierPoints(
         dst,
         Gfx::Math::zrint(x          ), Gfx::Math::zrint(y          ),
         Gfx::Math::zrint(x - nx     ), Gfx::Math::zrint(y - ny     ),
         Gfx::Math::zrint(x - nx - dx), Gfx::Math::zrint(y - ny - dy),
-        ceil(wh * 0.5f)
+        Gfx::Math::zcint(wh * 0.5f)
     );
 #else
     generateQuadraticBezierPoints(
@@ -439,7 +439,7 @@ static inline void generateLineRoundHoleCap(std::vector<PointF>& dst, float x, f
         Gfx::Math::zrint(x + nx - dx), Gfx::Math::zrint(y + ny - dy),
         Gfx::Math::zrint(x      + dx), Gfx::Math::zrint(y      + dy),
         Gfx::Math::zrint(x - nx - dx), Gfx::Math::zrint(y - ny - dy),
-        ceil(wh) - 1
+        Gfx::Math::zcint(wh) - 1
     );
 #endif
 }
@@ -491,7 +491,7 @@ static inline void combineLinePointsAndAddCaps(std::vector<PointF>& dst, const s
 
         case Pen::RoundCap: {
             std::vector<PointF> tmp;
-            generateQuadraticBezierPoints(tmp, ix2a, iy2a, x2a - dx2 * 2.0f, y2a - dy2 * 2.0f, ox2a, oy2a, ceil(penSize * 0.5f) - 1);
+            generateQuadraticBezierPoints(tmp, ix2a, iy2a, x2a - dx2 * 2.0f, y2a - dy2 * 2.0f, ox2a, oy2a, Gfx::Math::zcint(penSize * 0.5f) - 1);
             if(tmp.size() <= 2) break;
             for(size_t i = 1; i < tmp.size() - 1; ++i) {
                 dst.push_back( PointF( tmp[i].x(), tmp[i].y() ) );
@@ -571,7 +571,7 @@ static inline void combineLinePointsAndAddCaps(std::vector<PointF>& dst, const s
 
         case Pen::RoundCap: {
             std::vector<PointF> tmp;
-            generateQuadraticBezierPoints(tmp, ox1a, oy1a, x1a + dx1 * 2.0f, y1a + dy1 * 2.0f, ix1a, iy1a, ceil(penSize * 0.5f) - 1);
+            generateQuadraticBezierPoints(tmp, ox1a, oy1a, x1a + dx1 * 2.0f, y1a + dy1 * 2.0f, ix1a, iy1a, Gfx::Math::zcint(penSize * 0.5f) - 1);
             if(tmp.size() <= 2) break;
             for(size_t i = 1; i < tmp.size() - 1; ++i) {
                 dst.push_back( PointF( tmp[i].x(), tmp[i].y() ) );
@@ -844,7 +844,7 @@ void ImagePainter2::drawRoundRect( const RectF& rect, float radius )
 
     // Generate a polygon that represents the rounded-rectangle
     std::vector<PointF> pointsF;
-    generateRoundRectPoints(pointsF, x1, y1, x2, y2, radius, ceil(_rasterizer->pen().size() * 0.5f));
+    generateRoundRectPoints(pointsF, x1, y1, x2, y2, radius, Gfx::Math::zcint(_rasterizer->pen().size() * 0.5f));
 
     // Save the original pen and create a new pen with bevel join
     const Pen orgPen = _rasterizer->pen();
@@ -868,7 +868,7 @@ void ImagePainter2::fillRoundRect( const RectF& rect, float radius )
 
     // Generate a polygon that represents the rounded-rectangle
     std::vector<PointF> pointsF;
-    generateRoundRectPoints(pointsF, x1, y1, x2, y2, radius, ceil(_rasterizer->pen().size() * 0.5f));
+    generateRoundRectPoints(pointsF, x1, y1, x2, y2, radius, Gfx::Math::zcint(_rasterizer->pen().size() * 0.5f));
 
     // Round the points and remove duplicates
     std::vector<Point> points;

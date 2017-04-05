@@ -56,7 +56,7 @@ static const float PiSqr    = 9.86960440f;
 
 
 //
-// The real implementation
+// The real implementation for fast_*() functions
 //
 
 // NOTE: They are separated from the real public API so that we can benchmark them easily
@@ -201,7 +201,7 @@ inline float fastAtan2_impl(float y, float x) // X86_64 => FASTER | ARM => FASTE
 
 
 //
-// The public API
+// The public API for fast_*() functions
 //
 
 // NOTE: Defined using the benchmark result of the above functions versus the native library implementations
@@ -247,10 +247,70 @@ inline float convertCartesianToPolarCoordinate(float x, float y)
 
 
 //
-// lrint(), llrint(), and zrint() overloaded functions for float and double
+// zrint(), zfint(), and zcint() overloaded functions for float and double
 //
 
-inline Pt::int32_t lrint(float val)
+#if ULONG_MAX == 18446744073709551615ULL
+
+inline Pt::ssize_t zrint(float val)
+{
+#if defined(PT_GFX_USE_SSE2)
+    return _mm_cvtss_si64(_mm_load_ss(&val));
+#elif defined(PT_GFX_USE_X86_CPU)
+    #if defined(PT_GFX_USE_GNU_STYLE_COMPILER)
+        Pt::int64_t tmp;
+        __asm__ __volatile__ (
+            "flds   %1\n\t"
+            "fistpq %0    "
+            : "=m"(tmp)
+            :  "m"(val)
+            : "memory"
+        );
+        return tmp;
+    #else
+        Pt::int64_t tmp;
+        __asm {
+            fld   val
+            fistp tmp
+        }
+        return tmp;
+    #endif
+#else
+    return (Pt::int64_t) ( (val >= 0.0f) ? (val + 0.5f) : (val - 0.5f) );
+#endif
+}
+
+inline Pt::ssize_t zrint(double val)
+{
+#if defined(PT_GFX_USE_SSE2)
+    return _mm_cvtsd_si64(_mm_load_sd(&val));
+#elif defined(PT_GFX_USE_X86_CPU)
+    #if defined(PT_GFX_USE_GNU_STYLE_COMPILER)
+        Pt::int64_t tmp;
+        __asm__ __volatile__ (
+            "fldl   %1\n\t"
+            "fistpq %0    "
+            : "=m"(tmp)
+            :  "m"(val)
+            : "memory"
+        );
+        return tmp;
+    #else
+        Pt::int64_t tmp;
+        __asm {
+            fld   val
+            fistp tmp
+        }
+        return tmp;
+    #endif
+#else
+    return (Pt::int64_t) ( (val >= 0.0) ? (val + 0.5) : (val - 0.5) );
+#endif
+}
+
+#else
+
+inline Pt::ssize_t zrint(float val)
 {
 #if defined(PT_GFX_USE_SSE2)
     return _mm_cvtss_si32(_mm_load_ss(&val));
@@ -284,7 +344,7 @@ inline Pt::int32_t lrint(float val)
 #endif
 }
 
-inline Pt::int32_t lrint(double val)
+inline Pt::ssize_t zrint(double val)
 {
 #if defined(PT_GFX_USE_SSE2)
     return _mm_cvtsd_si32(_mm_load_sd(&val));
@@ -318,101 +378,13 @@ inline Pt::int32_t lrint(double val)
 #endif
 }
 
-inline Pt::int64_t llrint(float val)
-{
-#if defined(PT_GFX_USE_SSE2)
-    return _mm_cvtss_si64(_mm_load_ss(&val));
-#elif defined(PT_GFX_USE_X86_CPU)
-    #if defined(PT_GFX_USE_GNU_STYLE_COMPILER)
-        Pt::int64_t tmp;
-        __asm__ __volatile__ (
-            "flds   %1\n\t"
-            "fistpq %0    "
-            : "=m"(tmp)
-            :  "m"(val)
-            : "memory"
-        );
-        return tmp;
-    #else
-        Pt::int64_t tmp;
-        __asm {
-            fld   val
-            fistp tmp
-        }
-        return tmp;
-    #endif
-#else
-    return (Pt::int64_t) ( (val >= 0.0f) ? (val + 0.5f) : (val - 0.5f) );
-#endif
-}
-
-inline Pt::int64_t llrint(double val)
-{
-#if defined(PT_GFX_USE_SSE2)
-    return _mm_cvtsd_si64(_mm_load_sd(&val));
-#elif defined(PT_GFX_USE_X86_CPU)
-    #if defined(PT_GFX_USE_GNU_STYLE_COMPILER)
-        Pt::int64_t tmp;
-        __asm__ __volatile__ (
-            "fldl   %1\n\t"
-            "fistpq %0    "
-            : "=m"(tmp)
-            :  "m"(val)
-            : "memory"
-        );
-        return tmp;
-    #else
-        Pt::int64_t tmp;
-        __asm {
-            fld   val
-            fistp tmp
-        }
-        return tmp;
-    #endif
-#else
-    return (Pt::int64_t) ( (val >= 0.0) ? (val + 0.5) : (val - 0.5) );
-#endif
-}
-
-#if ULONG_MAX == 18446744073709551615ULL
-
-inline Pt::ssize_t zrint(float  val) { return llrint(val); }
-inline Pt::ssize_t zrint(double val) { return llrint(val); }
-
-#else
-
-inline Pt::ssize_t zrint(float  val) { return  lrint(val); }
-inline Pt::ssize_t zrint(double val) { return  lrint(val); }
-
 #endif
 
+inline Pt::int32_t zfint(float val) { return zrint((float) floor(val)); }
+inline Pt::int32_t zcint(float val) { return zrint((float) ceil (val)); }
 
-//
-// lfint(), llfint(), and zfint() overloaded functions for float and double
-//
-
-inline Pt::int32_t lfint (float  val) { return lrint (floor(val)); }
-inline Pt::int32_t lfint (double val) { return lrint (floor(val)); }
-
-inline Pt::int32_t llfint(float  val) { return llrint(floor(val)); }
-inline Pt::int32_t llfint(double val) { return llrint(floor(val)); }
-
-inline Pt::ssize_t zfint (float  val) { return zrint (floor(val)); }
-inline Pt::ssize_t zfint (double val) { return zrint (floor(val)); }
-
-
-//
-// lcint(), llcint(), and zcint() overloaded functions for float and double
-//
-
-inline Pt::int32_t lcint (float  val) { return lrint (ceil(val)); }
-inline Pt::int32_t lcint (double val) { return lrint (ceil(val)); }
-
-inline Pt::int32_t llcint(float  val) { return llrint(ceil(val)); }
-inline Pt::int32_t llcint(double val) { return llrint(ceil(val)); }
-
-inline Pt::ssize_t zcint (float  val) { return zrint (ceil(val)); }
-inline Pt::ssize_t zcint (double val) { return zrint (ceil(val)); }
+inline Pt::int32_t zfint(double val) { return zrint(floor(val)); }
+inline Pt::int32_t zcint(double val) { return zrint(ceil (val)); }
 
 
 } // namespace
