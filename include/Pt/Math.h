@@ -121,7 +121,7 @@ inline long int lround(double x)
 #if __cplusplus == 201103L
   return std::lround(x);
 #else
-  int tmp = static_cast<int>(x);
+  long int tmp = static_cast<long int>(x);
   tmp += (x - tmp >= 0.5) - (x - tmp <= -0.5);
   return tmp;
 #endif
