@@ -27,7 +27,7 @@
   02110-1301 USA
 */
 
-#include <stdio.h>
+#include <stdio.h> // For sscanf
 
 #include "SvgRasterizer.h"
 

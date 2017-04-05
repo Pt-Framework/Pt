@@ -76,7 +76,8 @@
 #define PATTERN_BUFFER_COUNTER_MAXMP PATTERN_BUFFER_NUM_OF_CELLS
 
 // Just for debugging ;)
-#include <stdio.h>
+//#warning "Just for debugging ;)"
+//#include <stdio.h>
 //#define lprintf(...) fprintf (stderr, __VA_ARGS__)
 
 
