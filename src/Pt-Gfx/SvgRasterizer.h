@@ -30,6 +30,7 @@
 #ifndef PT_GFX_SVGRASTERIZER_H
 #define PT_GFX_SVGRASTERIZER_H
 
+#include <algorithm>
 #include <iostream>
 
 #include <Pt/IOError.h>
@@ -66,10 +67,77 @@ class SvgRasterizer
         Xml::XmlReader         _xmlReader;
 
     private:
+        static inline const std::string lcaseStdStr(const std::string & str);
+        static inline const std::string lcaseStdStr(const Pt::String& str);
+        static inline const Pt::String lcasePtStr(const Pt::String& str);
+
+        static inline const std::string ltrimStdStr(const std::string & str);
+        static inline const std::string rtrimStdStr(const std::string & str);
+        static inline const std::string lrtrimStdStr(const std::string & str);
+        static inline const std::string removeAllSpacesStdStr(const std::string & str);
+
+
+    private:
         static const Color fromHtmlColor(const std::string& colStr);
         static void lexPathData(std::vector<std::string>& tokens, const std::string& str);
         static void lexStyleData(std::vector<std::string>& tokens, const std::string& str);
 };
+
+
+// ======================================================================================
+// ===== Inlined Private Member Functions ===============================================
+// ======================================================================================
+
+const std::string SvgRasterizer::lcaseStdStr(const std::string & str_)
+{
+    std::string  str = str_;
+    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+
+    return str;
+}
+
+const std::string SvgRasterizer::lcaseStdStr(const Pt::String& str_)
+{
+    Pt::String str = str_;
+    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+
+    return str.narrow();
+}
+
+const Pt::String SvgRasterizer::lcasePtStr(const Pt::String& str_)
+{
+    Pt::String str = str_;
+    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
+
+    return str;
+}
+
+const std::string SvgRasterizer::ltrimStdStr(const std::string & str)
+{
+    const size_t idx = str.find_first_not_of(" \t\v\n\r\f");
+
+    if(idx != std::string::npos) return str.substr(idx);
+    return str;
+}
+
+const std::string SvgRasterizer::rtrimStdStr(const std::string & str)
+{
+    const size_t idx = str.find_last_not_of(" \t\v\n\r\f");
+
+    if(idx != std::string::npos) return str.substr(0, idx + 1);
+    return str;
+}
+
+const std::string SvgRasterizer::lrtrimStdStr(const std::string & str)
+{ return rtrimStdStr(ltrimStdStr(str)); }
+
+const std::string SvgRasterizer::removeAllSpacesStdStr(const std::string & str_)
+{
+    std::string str = str_;
+    str.erase(remove_if(str.begin(), str.end(), ::isspace), str.end());
+
+    return str;
+}
 
 
 } // namespace

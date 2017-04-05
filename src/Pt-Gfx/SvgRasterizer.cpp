@@ -27,7 +27,7 @@
   02110-1301 USA
 */
 
-// Just for debugging ;)
+#warning "Just for debugging ;)"
 #include <stdio.h>
 
 #include <Pt/Xml/StartDocument.h>
@@ -43,35 +43,6 @@
 
 namespace Pt {
 namespace Gfx {
-
-
-// ======================================================================================
-// ===== Internal Helper Functions ======================================================
-// ======================================================================================
-
-inline const std::string lcaseStdStr(const std::string & str_)
-{
-    std::string  str = str_;
-    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
-
-    return str;
-}
-
-inline const std::string lcaseStdStr(const Pt::String& str_)
-{
-    Pt::String str = str_;
-    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
-
-    return str.narrow();
-}
-
-inline const Pt::String lcasePtStr(const Pt::String& str_)
-{
-    Pt::String str = str_;
-    std::transform(str.begin(), str.end(), str.begin(), ::tolower);
-
-    return str;
-}
 
 
 // ======================================================================================
@@ -122,7 +93,7 @@ SvgRasterizer::SvgRasterizer(std::istream& is, Image& image, const AffineTransfo
     //const std::string str = "M0,0 L10,10l10 10zl200,200z";
     //lexPathData(tokens, str);
 
-    const std::string str = "";
+    const std::string str = "stroke:green; stroke-width:8";
     lexStyleData(tokens, str);
 
     for(size_t i = 0; i < tokens.size(); ++i) {

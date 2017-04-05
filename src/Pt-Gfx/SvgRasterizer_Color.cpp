@@ -27,7 +27,6 @@
   02110-1301 USA
 */
 
-#include <algorithm>
 #include <stdio.h>
 
 #include "SvgRasterizer.h"
@@ -470,9 +469,7 @@ inline const Color& fromCssNamedColor(const std::string& colStr)
 const Color SvgRasterizer::fromHtmlColor(const std::string& colStr_)
 {
     // Remove spaces and convert to lower case
-    std::string colStr = colStr_;
-    colStr.erase(remove_if(colStr.begin(), colStr.end(), ::isspace), colStr.end());
-    std::transform(colStr.begin(), colStr.end(), colStr.begin(), ::tolower);
+    const std::string& colStr = lcaseStdStr( removeAllSpacesStdStr( colStr_ ) );
 
     // Get the length and C-string
     const size_t clen = colStr.length();

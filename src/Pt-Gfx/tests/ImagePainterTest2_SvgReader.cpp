@@ -26,11 +26,23 @@ static void testSvgReader(const char* title, Image& image, Painter& painter)
 
     AffineTransform atrans;
 
-    atrans.translate(0, 0, true);
+    atrans.translate(125 * 0, 0, true);
     renderSVG(*ip2, PointF(0, 0), image.size(), atrans, "../etc/images/line1-dtd-direct.svg");
 
-    atrans.translate(125, 0, true);
+    atrans.translate(125 * 1, 0, true);
     renderSVG(*ip2, PointF(0, 0), image.size(), atrans, "../etc/images/line1-plain-direct.svg");
+
+    atrans.translate(125 * 2, 0, true);
+    renderSVG(*ip2, PointF(0, 0), image.size(), atrans, "../etc/images/line1-plain-with-style.svg");
+
+    atrans.translate(125 * 3, 0, true);
+    renderSVG(*ip2, PointF(0, 0), image.size(), atrans, "../etc/images/line1-plain-with-group.svg");
+
+    atrans.translate(125 * 4, 0, true);
+    renderSVG(*ip2, PointF(0, 0), image.size(), atrans, "../etc/images/line1-plain-with-style.svg");
+
+    atrans.translate(125 * 5, 0, true);
+    renderSVG(*ip2, PointF(0, 0), image.size(), atrans, "../etc/images/line1-plain-with-view-direct.svg");
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }

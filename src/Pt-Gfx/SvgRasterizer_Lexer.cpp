@@ -27,8 +27,8 @@
   02110-1301 USA
 */
 
+#warning 123
 #include <stdio.h>
-#include <algorithm>
 
 #include "SvgRasterizer.h"
 
@@ -122,7 +122,7 @@ void SvgRasterizer::lexPathData(std::vector<std::string>& tokens, const std::str
         }
     }
 
-    // Process the last token (parameter)
+    // Process the last token (parameter), if any
     if(!token.empty()) {
         // Store the parameter
         tokens.push_back(token);
@@ -137,6 +137,53 @@ void SvgRasterizer::lexPathData(std::vector<std::string>& tokens, const std::str
 
 void SvgRasterizer::lexStyleData(std::vector<std::string>& tokens, const std::string& str)
 {
+    // State variables
+    bool        getKey = true;
+    std::string curKey;
+    std::string curVal;
+
+    // Clear first
+    tokens.clear();
+
+    // Walk thorugh the characters
+    for(std::string::const_iterator it = str.begin(); it != str.end(); ++it) {
+        // Get the character
+        const char c = *it;
+        // Is the character is a ';'?
+        if(c == ';') {
+            // Store the tokens
+            if(!curKey.empty()) {
+                tokens.push_back(lrtrimStdStr(curKey));
+                tokens.push_back(lrtrimStdStr(curVal));
+            }
+            curKey.clear();
+            curVal.clear();
+            getKey = true;
+            // Process the next character
+            continue;
+        }
+        // Is the character is a ':'?
+        if(c == ':') {
+            // Check for invalid location the character ':'
+            if(curKey.empty())
+                throw IOError("svg error: path data: a value without a key in style definition");
+            if(!curVal.empty())
+                throw IOError("svg error: path data: multiple value definition in style definition");
+            // Change flag
+            getKey = false;
+            // Process the next character
+            continue;
+        }
+        // Store the character as a key or value
+        if(getKey) curKey += c;
+        else       curVal += c;
+    }
+
+    // Store the last tokens (key-value pair), if any
+    if(!curKey.empty()) {
+        tokens.push_back(lrtrimStdStr(curKey));
+        tokens.push_back(lrtrimStdStr(curVal));
+    }
 }
 
 
