@@ -41,9 +41,7 @@ namespace Gfx {
 // ===== Internal Helper Functions ======================================================
 // ======================================================================================
 
-// ### TODO: CHECK ALL COLOR FUNCTIONS !!! ###
-
-inline int cssHueToRgb(float t1, float t2, float hue)
+inline float cssHueToRgb(float t1, float t2, float hue)
 {
   if(hue <  0.0f) hue += 6.0f;
   if(hue >= 6.0f) hue -= 6.0f;
@@ -123,8 +121,7 @@ inline const Color fromCssCmyk(int c_, int m_, int y_, int k_)
 
 inline const Color fromCssNCol(char n, int h, int w, int b)
 {
-    float percent = (float) h / 90.0f;
-    if(percent > 100.0f) percent = 100.0f;
+    const float percent = (h / 10) * 10;
 
     switch(::toupper(n)) {
         case 'R': h = Gfx::Math::lrint(  0 + (percent * 0.6f)); break;
@@ -164,7 +161,7 @@ inline const Color& fromCssNamedColor(const std::string& colStr)
     */
 
     // Color constants
-    static const Color& c_black                = Color::fromRgb8(  0,   0,   0, 255);
+    static const Color& c_black                = Color::fromRgb8(  0,   0,   0, 255); // CSS Level 1
     static const Color& c_silver               = Color::fromRgb8(192, 192, 192, 255);
     static const Color& c_gray                 = Color::fromRgb8(128, 128, 128, 255);
     static const Color& c_white                = Color::fromRgb8(255, 255, 255, 255);
@@ -180,8 +177,8 @@ inline const Color& fromCssNamedColor(const std::string& colStr)
     static const Color& c_blue                 = Color::fromRgb8(  0,   0, 255, 255);
     static const Color& c_teal                 = Color::fromRgb8(  0, 128, 128, 255);
     static const Color& c_aqua                 = Color::fromRgb8(  0, 255, 255, 255);
-    static const Color& c_orange               = Color::fromRgb8(255, 165,   0, 255);
-    static const Color& c_aliceblue            = Color::fromRgb8(240, 248, 255, 255);
+    static const Color& c_orange               = Color::fromRgb8(255, 165,   0, 255); // CSS Level 2 Revision 1
+    static const Color& c_aliceblue            = Color::fromRgb8(240, 248, 255, 255); // CSS Color Module Level 3
     static const Color& c_antiquewhite         = Color::fromRgb8(250, 235, 215, 255);
     static const Color& c_aquamarine           = Color::fromRgb8(127, 255, 212, 255);
     static const Color& c_azure                = Color::fromRgb8(240, 255, 255, 255);
@@ -310,7 +307,7 @@ inline const Color& fromCssNamedColor(const std::string& colStr)
     static const Color& c_wheat                = Color::fromRgb8(245, 222, 179, 255);
     static const Color& c_whitesmoke           = Color::fromRgb8(245, 245, 245, 255);
     static const Color& c_yellowgreen          = Color::fromRgb8(154, 205,  50, 255);
-    static const Color& c_rebeccapurple        = Color::fromRgb8(102,  51, 153, 255);
+    static const Color& c_rebeccapurple        = Color::fromRgb8(102,  51, 153, 255); // CSS Color Module Level 4
 
     // Compare the names
     if(colStr == "black"               ) return c_black;
@@ -472,16 +469,18 @@ inline const Color& fromCssNamedColor(const std::string& colStr)
 
 const Color SvgRasterizer::fromHtmlColor(const std::string& colStr_)
 {
-
-    // Remove spaces
+    // Remove spaces and convert to lower case
     std::string colStr = colStr_;
     colStr.erase(remove_if(colStr.begin(), colStr.end(), ::isspace), colStr.end());
+    std::transform(colStr.begin(), colStr.end(), colStr.begin(), ::tolower);
 
     // Get the length and C-string
     const size_t clen = colStr.length();
     const char*  cstr = colStr.c_str();
 
     // Hex RGB/RGBA color?
+    // #RGB    / #RGBA     : R/G/B/A =  0 -  F
+    // #RRGGBB / #RRGGBBAA : R/G/B/A = 00 - FF
     if(cstr[0] == '#') {
         int r = 0;
         int g = 0;
@@ -495,6 +494,8 @@ const Color SvgRasterizer::fromHtmlColor(const std::string& colStr_)
     }
 
     // RGBA color?
+    // rgba(RRR, GGG, BBB, A.A) : RRR/GGG/BBB = 0   - 255
+    //                            A.A         = 0.0 - 1.0
     if(clen >= 13 && cstr[0] == 'r' && cstr[1] == 'g' && cstr[2] == 'b' && cstr[3] == 'a' && cstr[4] == '(' &&  cstr[clen - 1] == ')') {
         char  c1, c2, c3;
         int   r = 0;
@@ -510,6 +511,7 @@ const Color SvgRasterizer::fromHtmlColor(const std::string& colStr_)
     }
 
     // RGB color?
+    // rgb(RRR, GGG, BBB) : RRR/GGG/BBB = 0 - 255
     if(clen >= 10 && cstr[0] == 'r' && cstr[1] == 'g' && cstr[2] == 'b' && cstr[3] == '(' &&  cstr[clen - 1] == ')') {
         char c1, c2;
         int  r = 0;
@@ -523,6 +525,8 @@ const Color SvgRasterizer::fromHtmlColor(const std::string& colStr_)
     }
 
     // HSL color?
+    // hsl(HHH, SSS%, LLL%) : HHH     = 0  - 360
+    //                        SSS/LLL = 0% - 100%
     if(clen >= 12 && cstr[0] == 'h' && cstr[1] == 's' && cstr[2] == 'l' && cstr[3] == '(' &&  cstr[clen - 1] == ')') {
         char c1, c2, p1, p2;
         int  h = 0;
@@ -536,6 +540,8 @@ const Color SvgRasterizer::fromHtmlColor(const std::string& colStr_)
     }
 
     // HWB color?
+    // hsl(HHH, WWW%, BBB%) : HHH     = 0  - 360
+    //                        WWW/HHH = 0% - 100%
     if(clen >= 12 && cstr[0] == 'h' && cstr[1] == 'w' && cstr[2] == 'b' && cstr[3] == '(' &&  cstr[clen - 1] == ')') {
         char c1, c2, p1, p2;
         int  h = 0;
@@ -550,6 +556,7 @@ const Color SvgRasterizer::fromHtmlColor(const std::string& colStr_)
     }
 
     // CMYK color?
+    // cmyk(CCC%, YYY%, MMM%, KKK%) : CCC/YYY/MMM/KKK = 0 - 100%
     if(clen >= 17 && cstr[0] == 'c' && cstr[1] == 'm' && cstr[2] == 'y' && cstr[3] == 'k' && cstr[4] == '(' &&  cstr[clen - 1] == ')') {
         char c1, c2, c3, p1, p2, p3, p4;
         int  c = 0;
@@ -565,6 +572,9 @@ const Color SvgRasterizer::fromHtmlColor(const std::string& colStr_)
     }
 
     // Natural color?
+    // N[VV], WWW%, HHH% :  N       = R, Y, G, C, B, M, W
+    //                      VV      = 10, 20, 30, 40, 50, 60, 90
+    //                      WWW/HHH = 0 - 100%
     if(clen >= 8 && cstr[clen - 1] == '%') {
         char c1, c2, p1, p2;
         char n = 'W';
@@ -587,6 +597,8 @@ const Color SvgRasterizer::fromHtmlColor(const std::string& colStr_)
     }
 
     // Check against named colors
+    // Please refer to: https://www.w3schools.com/colors/colors_names.asp
+    //                  https://developer.mozilla.org/en-US/docs/Web/CSS/color_value
     return fromCssNamedColor(colStr);
 }
 
