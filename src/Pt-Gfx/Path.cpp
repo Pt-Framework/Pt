@@ -33,6 +33,8 @@
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Math.h>
 
+#include "clipper/clipper.hpp"
+
 
 namespace Pt {
 namespace Gfx {
@@ -626,6 +628,10 @@ void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
     //for(size_t i = 0; i < dst.size(); ++i)
     //    printf("GenPts: %5.1f, %5.1f\n", dst[i].x(), dst[i].y());
     //printf("\n");
+}
+
+void Path::clipPolygon(std::vector<PointF>& subject, const std::vector<PointF>& clipper)
+{
 }
 
 
