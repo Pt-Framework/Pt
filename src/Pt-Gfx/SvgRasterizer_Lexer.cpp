@@ -135,12 +135,15 @@ void SvgRasterizer::lexPathData(std::vector<std::string>& tokens, const std::str
         throw IOError("svg error: path data: not enough parameters specified for the last command");
 }
 
-void SvgRasterizer::lexStyleData(std::vector<std::string>& tokens, const std::string& str)
+void SvgRasterizer::lexStyleData(std::vector<std::string>& tokens, const std::string& str_)
 {
+    // Convert to lower case
+    const std::string& str = lcaseStdStr(str_);
+
     // State variables
-    bool        getKey = true;
     std::string curKey;
     std::string curVal;
+    bool        getKey = true;
 
     // Clear first
     tokens.clear();
@@ -166,9 +169,9 @@ void SvgRasterizer::lexStyleData(std::vector<std::string>& tokens, const std::st
         if(c == ':') {
             // Check for invalid location the character ':'
             if(curKey.empty())
-                throw IOError("svg error: path data: a value without a key in style definition");
+                throw IOError("svg error: style definition: a value without a key");
             if(!curVal.empty())
-                throw IOError("svg error: path data: multiple value definition in style definition");
+                throw IOError("svg error: style definition: multiple value specified");
             // Change flag
             getKey = false;
             // Process the next character
@@ -184,6 +187,138 @@ void SvgRasterizer::lexStyleData(std::vector<std::string>& tokens, const std::st
         tokens.push_back(lrtrimStdStr(curKey));
         tokens.push_back(lrtrimStdStr(curVal));
     }
+}
+
+void SvgRasterizer::lexTransformData(std::vector<std::string>& tokens, const std::string& str_)
+{
+    // Convert to lower case
+    const std::string& str = lcaseStdStr(str_);
+
+    // State variables
+    std::string curCmd;
+    std::string curPar;
+    Pt::uint8_t numPar = 0;
+    bool        getCmd = true;
+    bool        gotAmp = false;
+
+    // Clear first
+    tokens.clear();
+
+    // Walk thorugh the characters
+    for(std::string::const_iterator it = str.begin(); it != str.end(); ++it) {
+        // Get the character
+        const char c = *it;
+        // Is the character is a '('?
+        if(c == '(') {
+            // Check for invalid location the character '('
+            if(curCmd.empty() || !curPar.empty())
+                throw IOError("svg error: transform definition: unexpected location for character '('");
+            // Check and shorten the command token
+                 if(curCmd == "translate") curCmd = "t" ;
+            else if(curCmd == "rotate"   ) curCmd = "r";
+            else if(curCmd == "scale"    ) curCmd = "s";
+            else if(curCmd == "skewx"    ) curCmd = "wx";
+            else if(curCmd == "skewy"    ) curCmd = "wy";
+            else if(curCmd == "matrix"   ) curCmd = "m";
+            else throw IOError("svg error: transform definition: invalid command '" + curCmd + "'");
+            // Store the command token
+            tokens.push_back(lrtrimStdStr(curCmd));
+            // Change flags
+            getCmd = false;
+            gotAmp = true;
+            // Process the next character
+            continue;
+        }
+        // Is the character is a ')'?
+        if(c == ')') {
+            // Check for invalid location the character ')'
+            if(curCmd.empty() || curPar.empty())
+                throw IOError("svg error: transform definition: unexpected location for character ')'");
+            // Store the parameter token
+            tokens.push_back(lrtrimStdStr(curPar));
+            ++numPar;
+            // Check the number of mandatory parameters and store the optional parameters
+            if(curCmd == "t") {
+                if(numPar != 1 && numPar != 2)
+                    throw IOError("svg error: transform definition: invalid number of parameters for translate");
+                if(numPar != 2) tokens.push_back("0");
+            }
+            else if(curCmd == "r") {
+                if(numPar != 1 && numPar != 3)
+                    throw IOError("svg error: transform definition: invalid number of parameters for rotate");
+                if(numPar != 3) {
+                    tokens.push_back("0");
+                    tokens.push_back("0");
+                }
+            }
+            else if(curCmd == "s") {
+                if(numPar != 1 && numPar != 2)
+                    throw IOError("svg error: transform definition: invalid number of parameters for scale");
+                if(numPar != 2) tokens.push_back(tokens.back());
+            }
+            else if(curCmd == "wx") {
+                if(numPar != 1)
+                    throw IOError("svg error: transform definition: invalid number of parameters for skewX");
+            }
+            else if(curCmd == "wy") {
+                if(numPar != 1)
+                    throw IOError("svg error: transform definition: invalid number of parameters for skewY");
+            }
+            else if(curCmd == "m") {
+                if(numPar != 6)
+                    throw IOError("svg error: transform definition: invalid number of parameters for matrix");
+            }
+            // Clear the command and parameter tokens
+            curCmd.clear();
+            curPar.clear();
+            // Change flags and reset the parameter count
+            getCmd = true;
+            gotAmp = false;
+            numPar = 0;
+            // Process the next character
+            continue;
+        }
+        // Is the character is a ','?
+        if(c == ',') {
+            // Check for invalid location the character ','
+            if(curCmd.empty() || curPar.empty())
+                throw IOError("svg error: transform definition: unexpected location for character ','");
+            // Store the parameter token
+            tokens.push_back(lrtrimStdStr(curPar));
+            ++numPar;
+            // Clear the parameter token
+            curPar.clear();
+            // Process the next character
+            continue;
+        }
+        // Is the character is a white-space or ';'?
+        if(::isspace(c) || c == ';') {
+            // Check for invalid location the character ';'
+            if(gotAmp && c == ';')
+                throw IOError("svg error: transform definition: unexpected location for character ';'");
+            // A ' ' or ';' acts as a separator only if there is already a parameter defined
+            if(!curPar.empty()) {
+                // Store the parameter token
+                tokens.push_back(lrtrimStdStr(curPar));
+                ++numPar;
+                // Clear the parameter token
+                curPar.clear();
+                // Consume the following white-space characters (if any)
+                while(::isspace(*it)) ++it;
+                // Consume the following ',' character (if any)
+                if(*it == ',') ++it;
+            }
+            // Process the next character
+            continue;
+        }
+        // Store the character as a command or parameter
+        if(getCmd) curCmd += c;
+        else       curPar += c;
+    }
+
+    // Check for an incomplete transform definition
+    if(!curPar.empty() || !curPar.empty())
+        throw IOError("svg error: transform definition: invalid/incomplete definition string");
 }
 
 

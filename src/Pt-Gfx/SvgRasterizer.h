@@ -79,8 +79,10 @@ class SvgRasterizer
 
     private:
         static const Color fromHtmlColor(const std::string& colStr);
+
         static void lexPathData(std::vector<std::string>& tokens, const std::string& str);
         static void lexStyleData(std::vector<std::string>& tokens, const std::string& str);
+        static void lexTransformData(std::vector<std::string>& tokens, const std::string& str);
 };
 
 
