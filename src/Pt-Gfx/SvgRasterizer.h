@@ -153,6 +153,7 @@ const std::string& SvgRasterizer::passValidNumber(const std::string& s, const st
     return s;
 }
 
+
 } // namespace
 } // namespace
 
