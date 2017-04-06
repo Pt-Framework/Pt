@@ -314,9 +314,6 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
     atrans.transformPoints(subjPointsF.data(), subjPointsF.size());
     atrans.pop();
 
-    // Perform clipping
-    Path::clipPolygon(clipPointsF, subjPointsF, cregPointsF);
-
     // Draw the clip-region and subject polygons
     atrans.push();
     atrans.translate(10 + 250 * col, 10 + 250 * row);
@@ -329,7 +326,8 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
     ip2->fillPolygon(cregPointsF.data(), cregPointsF.size());
     ++col;
 
-    // Draw the clipped polygon
+    // Perform clipping and draw the clipped polygon
+    Path::clipPolygon(clipPointsF, subjPointsF, cregPointsF, Path::Intersection);
     atrans.push();
     atrans.translate(10 + 250 * col, 10 + 250 * row);
     atrans.transformPoints(clipPointsF.data(), clipPointsF.size());
@@ -337,6 +335,33 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
     ip2->setBrush(brush1);
     ip2->fillPolygon(clipPointsF.data(), clipPointsF.size());
     ++col;
+
+    Path::clipPolygon(clipPointsF, subjPointsF, cregPointsF, Path::Union);
+    atrans.push();
+    atrans.translate(10 + 250 * col, 10 + 250 * row);
+    atrans.transformPoints(clipPointsF.data(), clipPointsF.size());
+    atrans.pop();
+    ip2->setBrush(brush1);
+    ip2->fillPolygon(clipPointsF.data(), clipPointsF.size());
+    ++row;
+    col = 1;
+
+    Path::clipPolygon(clipPointsF, subjPointsF, cregPointsF, Path::Difference);
+    atrans.push();
+    atrans.translate(10 + 250 * col, 10 + 250 * row);
+    atrans.transformPoints(clipPointsF.data(), clipPointsF.size());
+    atrans.pop();
+    ip2->setBrush(brush1);
+    ip2->fillPolygon(clipPointsF.data(), clipPointsF.size());
+    ++col;
+
+    Path::clipPolygon(clipPointsF, subjPointsF, cregPointsF, Path::Xor);
+    atrans.push();
+    atrans.translate(10 + 250 * col, 10 + 250 * row);
+    atrans.transformPoints(clipPointsF.data(), clipPointsF.size());
+    atrans.pop();
+    ip2->setBrush(brush1);
+    ip2->fillPolygon(clipPointsF.data(), clipPointsF.size());
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }

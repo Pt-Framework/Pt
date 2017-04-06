@@ -141,10 +141,16 @@ class PT_GFX_API Path {
         //       * If the "smoothness" factor is too large, the anti-aliasing will become less effective
         void generatePoints(std::vector<PointF>& dst, float smoothness = 1.0f) const;
 
+    public:
         //
         // Polygon clipper
         //
-        static void clipPolygon(std::vector<PointF>& result, const std::vector<PointF>& subject, const std::vector<PointF>& clipRegion);
+
+        enum ClipMode {
+            Intersection, Union, Difference, Xor
+        };
+
+        static void clipPolygon(std::vector<PointF>& result, const std::vector<PointF>& subject, const std::vector<PointF>& clipRegion, ClipMode cm);
 
     private:
         struct PathData;

@@ -630,7 +630,7 @@ void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
     //printf("\n");
 }
 
-void Path::clipPolygon(std::vector<PointF>& result, const std::vector<PointF>& subject, const std::vector<PointF>& clipRegion)
+void Path::clipPolygon(std::vector<PointF>& result, const std::vector<PointF>& subject, const std::vector<PointF>& clipRegion, ClipMode cm)
 {
     // Scaling factors
     const double mmFac = 16.0;
@@ -682,10 +682,30 @@ void Path::clipPolygon(std::vector<PointF>& result, const std::vector<PointF>& s
     }
 
     // Perform clipping
-    clipper.Execute(ClipperLib::ctIntersection, cpresult, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
+    result.clear();
+
+    switch(cm) {
+        case Intersection:
+            clipper.Execute(ClipperLib::ctIntersection, cpresult, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
+            break;
+
+        case Union:
+            clipper.Execute(ClipperLib::ctUnion,        cpresult, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
+            break;
+
+        case Difference:
+            clipper.Execute(ClipperLib::ctDifference,   cpresult, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
+            break;
+
+        case Xor:
+            clipper.Execute(ClipperLib::ctXor,          cpresult, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
+            break;
+
+        default:
+            return;
+    }
 
     // Combine back the result polygons
-    result.clear();
     for(size_t i = 0; i < cpresult.size(); ++i) {
         const ClipperLib::Path& curPath = cpresult[i];
         if(!result.empty()) result.push_back(Painter::PolygonSeparatorPointF);
