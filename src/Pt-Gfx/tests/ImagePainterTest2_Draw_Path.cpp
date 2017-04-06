@@ -367,7 +367,6 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
     row = 0;
     col = 2;
 
-    path.setFont( Pt::Gfx::Font(FONT_SPEC_H) );
     path.clear    ();
     path.beginPath();
     path.moveTo   (100, 100);
@@ -375,6 +374,7 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
     path.endPath  ();
 
     subjPointsF.clear();
+    path.setFont( Pt::Gfx::Font(FONT_SPEC_H) );
     path.generatePoints(subjPointsF, 1);
     atrans.push();
     atrans.transformPoints(subjPointsF.data(), subjPointsF.size());

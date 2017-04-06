@@ -78,12 +78,15 @@ class FreeType2 : public Pt::Singleton<FreeType2> {
 
         FontMetrics fontMetrics(const String& text, FTC_FaceID faceId, FTC_ImageType imageType);
 
+        void pathFromChar(
+            std::vector<PointF>& points, std::vector<Pt::int32_t>& contours, const Char& chr,
+            FTC_FaceID faceId, FTC_ImageType imageType
+        );
+
         void draw(
             Image& image, const Rect& clip, const Point& pos, const Color& color, Pt::ssize_t fontAngle, const CompositionMode& mode,
             const String& text, FT_Matrix& matrix, FTC_FaceID faceId, FTC_ImageType imageType, bool mono
         );
-
-        void genPointsFromChar(std::vector<PointF>& dst, const Char& chr, FTC_FaceID faceId);
 
         static FT_Error fontRequest(FTC_FaceID face_id, FT_Library library, FT_Pointer request_data, FT_Face* face);
 

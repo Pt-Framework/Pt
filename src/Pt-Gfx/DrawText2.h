@@ -54,7 +54,7 @@ class DrawText2 {
         void draw(Image& image, const Color& color, const Point& pos, const String& text, const CompositionMode& mode);
         void drawMono(Image& image, const Color& color, const Point& pos, const String& text, const CompositionMode& mode);
 
-        void genPointsFromChar(std::vector<PointF>& dst, const Char& chr);
+        void pathFromChar(std::vector<PointF>& points, std::vector<Pt::int32_t>& contours, const Char& chr);
 
     private:
         void drawGlyph(Image& image, const Color& color, int xpos, int ypos, int bmPitch, int height, int width, const unsigned char* buffer);

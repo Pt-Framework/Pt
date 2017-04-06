@@ -259,9 +259,10 @@ FT_Error FreeType2::onFontRequest(FTC_FaceID faceId, FT_Face* face)
     return FT_New_Face(_ft, path->toLocal().c_str(), 0, face);
 }
 
-void FreeType2::genPointsFromChar(std::vector<PointF>& dst, const Char& chr, FTC_FaceID faceId)
+void FreeType2::pathFromChar(std::vector<PointF>& points, std::vector<Pt::int32_t>& contours, const Char& chr, FTC_FaceID faceId, FTC_ImageType imageType)
 {
-    dst.clear();
+    points.clear();
+    contours.clear();
 
     System::MutexLock lock(_mutex);
 
@@ -276,31 +277,28 @@ void FreeType2::genPointsFromChar(std::vector<PointF>& dst, const Char& chr, FTC
             break;
         }
     }
-   // std::cout << "A id=" << faceId << "\n";
 
-    FT_UInt glyph_index = FT_Get_Char_Index(face, chr);
+    FT_UInt glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, chr);
     if(!glyph_index) return;
 
-    //std::cout << "B gi=" << glyph_index << "\n";
+    imageType->flags = FT_LOAD_TARGET_NORMAL | FT_LOAD_IGNORE_TRANSFORM;
 
-    ferr = FT_Load_Glyph(face, glyph_index, FT_LOAD_DEFAULT);
-    if(ferr) return;
+    FTC_SBit smalGlyphBitmap;
+    FTC_Node node;
+    if(FTC_SBitCache_Lookup(_bitmapCache, imageType, glyph_index, &smalGlyphBitmap, &node))
+        return;
 
-
-    //*
-//    FT_UInt glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, chr);
-  //  if(!glyph_index) return;
-    //*/
-
-    std::cout << "N = " << face->glyph->outline.n_points << std::endl;
-
-    dst.resize(face->glyph->outline.n_points);
-
+    points.resize(face->glyph->outline.n_points);
     for(int i = 0; i < face->glyph->outline.n_points; ++i) {
-        dst[i].set(
-            face->glyph->outline.points[i].x * 0.25f,
-            face->glyph->outline.points[i].y * 0.25f
+        points[i].set(
+            face->glyph->outline.points[i].x,
+            face->glyph->outline.points[i].y
         );
+    }
+
+    contours.resize(face->glyph->outline.n_contours);
+    for(int i = 0; i < face->glyph->outline.n_contours; ++i) {
+        contours[i] = face->glyph->outline.contours[i];
     }
 }
 
@@ -410,7 +408,7 @@ void FreeType2::draw(
 
         glyphPos.x += incX;
         glyphPos.y -= incY;
-        previous   = glyph_index;
+        previous    = glyph_index;
 
         if(glyphCopy) {
             FT_Done_Glyph(glyphCopy);

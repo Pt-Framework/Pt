@@ -347,8 +347,8 @@ Path::Path()
 
 Path::~Path()
 {
-    delete _pathData;
     delete _text;
+    delete _pathData;
 }
 
 void Path::clear()
@@ -654,16 +654,23 @@ void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
                 break;
 
             case PathData::IT_Char: {
-                std::vector<PointF> tmp;
-                _text->genPointsFromChar(tmp, ins.chr);
+                std::vector<PointF     > p;
+                std::vector<Pt::int32_t> c;
+
+                _text->pathFromChar(p, c, ins.chr);
+
+                std::clog << "points = " << p.size() << " ; contours = " << c.size() << std::endl;
+
+                //*
                 if(!dst.empty()) dst.push_back(Painter::PolygonSeparatorPointF);
-                for(size_t i = 0; i < tmp.size(); ++i) {
+                for(size_t i = 0; i < p.size(); ++i) {
                     dst.push_back(PointF(
-                        tmp[i].x() + curX,
-                        tmp[i].y() + curY
+                        p[i].x() + curX,
+                        p[i].y() + curY
                     ));
                 }
                 dst.push_back(Painter::PolygonSeparatorPointF);
+                //*/
                 break;
             }
 
@@ -673,7 +680,8 @@ void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
         }
     }
 
-    if(dst.back().x() > Painter::MaximumCoordinateF && dst.back().y() > Painter::MaximumCoordinateF) dst.pop_back();
+    if(!dst.empty() && dst.back().x() > Painter::MaximumCoordinateF && dst.back().y() > Painter::MaximumCoordinateF)
+        dst.pop_back();
 
     //for(size_t i = 0; i < dst.size(); ++i)
     //    printf("GenPts: %5.1f, %5.1f\n", dst[i].x(), dst[i].y());
