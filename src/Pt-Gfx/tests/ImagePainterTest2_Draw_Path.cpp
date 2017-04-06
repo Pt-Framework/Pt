@@ -363,7 +363,7 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
     ip2->setBrush(brush1);
     ip2->fillPolygon(clipPointsF.data(), clipPointsF.size());
 
-    // Character outline
+    // Character in path
     row = 4;
     col = 0;
 
@@ -380,14 +380,12 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
     atrans.translate(50 + 100 * col, 50 + 100 * row);
     atrans.transformPoints(subjPointsF.data(), subjPointsF.size());
     atrans.pop();
-
-    ip2->setPen(Color::fromRgb8(255,0,0));
     ip2->setBrush(brush2);
-    ip2->drawPolyline(subjPointsF.data(), subjPointsF.size(), true);
+    ip2->fillPolygon(subjPointsF.data(), subjPointsF.size());
 
-    //ip2->setFont( Pt::Gfx::Font(FONT_SPEC_H) );
-    //ip2->setPen( Color::fromRgb8(0, 255, 255, 255) );
-    //ip2->drawText( PointF(10 + 250 * col, 10 + 250 * row), "P" );
+    ip2->setFont( Pt::Gfx::Font(FONT_SPEC_H) );
+    ip2->setPen( Color::fromRgb8(255, 255, 255, 255) );
+    ip2->drawText( PointF(50 + 100 * col + 100, 50 + 100 * row), "P" );
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }

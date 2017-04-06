@@ -527,12 +527,12 @@ int main(int argc, char* args[])
     // Path clipping
     if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_PATH_CLIPPING) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
-        testDrawPathClipping("Path Clipping - ImagePainter2 [SourceCopy]", image, *painter2, brushSolid1, brushSolid2);
+        testDrawPathClipping("Path Clipping - ImagePainter2 [SourceCopy]", image, *painter2, brushGradient1, brushGradient2);
     }
 
     if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_PATH_CLIPPING) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
-        testDrawPathClipping("Path Clipping - ImagePainter2 [SourceOver]", image, *painter2, brushSolid1, brushSolid2);
+        testDrawPathClipping("Path Clipping - ImagePainter2 [SourceOver]", image, *painter2, brushGradient1, brushGradient2);
     }
 
     // Extra features
