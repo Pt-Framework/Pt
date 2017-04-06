@@ -372,6 +372,8 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
     path.moveTo   (100, 100);
     path.putChar  ('P');
     path.endPath  ();
+    //path.getCharKerning(Pt::int32_t& x, Pt::int32_t& y, const Char& chr1, const Char& chr2)
+
 
     subjPointsF.clear();
     path.setFont( Pt::Gfx::Font(FONT_SPEC_H) );
@@ -385,7 +387,12 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
 
     ip2->setFont( Pt::Gfx::Font(FONT_SPEC_H) );
     ip2->setPen( Color::fromRgb8(255, 255, 255, 255) );
-    ip2->drawText( PointF(50 + 100 * col + 100, 50 + 100 * row), "P" );
+    ip2->drawText( PointF(50 + 100 * col, 50 + 100 * row + 120), "Pt" );
+
+    ip2->setPen( Color::fromRgb8(255, 0, 0, 255) );
+    ip2->drawLine( PointF(50 + 100 * col, 50 + 100 * row - 120), PointF(50 + 100 * col,       50 + 100 * row + 120) );
+    ip2->drawLine( PointF(50 + 100 * col, 50 + 100 * row      ), PointF(50 + 100 * col + 200, 50 + 100 * row      ) );
+    ip2->drawLine( PointF(50 + 100 * col, 50 + 100 * row + 120), PointF(50 + 100 * col + 200, 50 + 100 * row + 120) );
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }

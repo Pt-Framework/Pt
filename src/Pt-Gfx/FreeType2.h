@@ -78,6 +78,11 @@ class FreeType2 : public Pt::Singleton<FreeType2> {
 
         FontMetrics fontMetrics(const String& text, FTC_FaceID faceId, FTC_ImageType imageType);
 
+        void getCharKerning(
+            Pt::int32_t& x, Pt::int32_t& y,
+            const Char& chr1, const Char& chr2, FTC_FaceID faceId, FTC_ImageType imageType
+        );
+
         void pathFromChar(
             std::vector<Point>& points, std::vector<Pt::uint8_t>& tags, std::vector<Pt::int32_t>& contours,
             const Char& chr, FTC_FaceID faceId, FTC_ImageType imageType

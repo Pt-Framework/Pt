@@ -100,6 +100,11 @@ void DrawText2::drawMono(Image& image, const Color& color, const Point& pos, con
     return FreeType2::instance().draw(image, _clip, pos, color, _fontAngle, mode, text, _matrix, _faceId, &_imageType, true);
 }
 
+void DrawText2::getCharKerning(Pt::int32_t& x, Pt::int32_t& y, const Char& chr1, const Char& chr2)
+{
+    FreeType2::instance().getCharKerning(x, y, chr1, chr2, _faceId, &_imageType);
+}
+
 void DrawText2::pathFromChar(std::vector<Point>& points, std::vector<Pt::uint8_t>& tags, std::vector<Pt::int32_t>& contours, const Char& chr)
 {
     FreeType2::instance().pathFromChar(points, tags, contours, chr, _faceId, &_imageType);

@@ -54,6 +54,7 @@ class DrawText2 {
         void draw(Image& image, const Color& color, const Point& pos, const String& text, const CompositionMode& mode);
         void drawMono(Image& image, const Color& color, const Point& pos, const String& text, const CompositionMode& mode);
 
+        void getCharKerning(Pt::int32_t& x, Pt::int32_t& y, const Char& chr1, const Char& chr2);
         void pathFromChar(std::vector<Point>& points, std::vector<Pt::uint8_t>& tags, std::vector<Pt::int32_t>& contours, const Char& chr);
 
     private:

@@ -259,7 +259,17 @@ FT_Error FreeType2::onFontRequest(FTC_FaceID faceId, FT_Face* face)
     return FT_New_Face(_ft, path->toLocal().c_str(), 0, face);
 }
 
-void FreeType2::pathFromChar(std::vector<Point>& points, std::vector<Pt::uint8_t>& tags, std::vector<Pt::int32_t>& contours, const Char& chr, FTC_FaceID faceId, FTC_ImageType imageType)
+void FreeType2::getCharKerning(
+    Pt::int32_t& x, Pt::int32_t& y,
+    const Char& chr1, const Char& chr2, FTC_FaceID faceId, FTC_ImageType imageType
+)
+{
+}
+
+void FreeType2::pathFromChar(
+    std::vector<Point>& points, std::vector<Pt::uint8_t>& tags, std::vector<Pt::int32_t>& contours,
+    const Char& chr, FTC_FaceID faceId, FTC_ImageType imageType
+)
 {
     points.clear();
     contours.clear();

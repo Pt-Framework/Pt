@@ -236,68 +236,72 @@ static inline void generateChrPoints(std::vector<PointF>& dst, double x, double 
 
     for(size_t i = 0; i < points.size(); ++i) {
         pointsF[i].set(
-            points[i].x() * 0.015625, // (1 / 64)
-            points[i].y() * 0.015625  // ...
+            points[i].x() * 0.015625, // (1.0 / 64.0)
+            points[i].y() * 0.015625  // (1.0 / 64.0)
         );
     }
 
     // Walk through the contours
-    Pt::int32_t contourStart = 0;
-    Pt::int32_t contourEnd   = 0;
+    Pt::int32_t cSIdx = 0;
+    Pt::int32_t cEIdx = 0;
     for(size_t i = 0; i < contours.size(); ++i) {
         // Get the end index of the contour
-        contourEnd = contours[i];
+        cEIdx = contours[i];
         // Calculate the number of points within the contour
-        const size_t numPoints = contourEnd - contourStart + 1;
-        // Start a new contour
+        const size_t numPoints = cEIdx - cSIdx + 1;
+        // Generate a new path that starts from the first point of the contour
         if(!dst.empty()) dst.push_back(Painter::PolygonSeparatorPointF);
-        dst.push_back(pointsF[contourStart]);
+        dst.push_back(pointsF[cSIdx]);
         // Walk through the points in this contour
         for(size_t j = 0; j < numPoints; ++j) {
-            // Get the data
-            const Pt::int32_t idx0    = (j + 0) % numPoints + contourStart;
-            const Pt::int32_t idx1    = (j + 1) % numPoints + contourStart;
-            const Pt::int32_t idx2    = (j + 2) % numPoints + contourStart;
-            const double      x0      = pointsF[idx0].x();
-            const double      y0      = pointsF[idx0].y();
-            const double      x1      = pointsF[idx1].x();
-            const double      y1      = pointsF[idx1].y();
-            const double      x2      = pointsF[idx2].x();
-            const double      y2      = pointsF[idx2].y();
-            const bool        tagBit0 = (tags[idx0] & 0x01);
-            const bool        tagBit1 = (tags[idx1] & 0x01);
-            const bool        tagBit2 = (tags[idx2] & 0x01);
-                  bool        isCtl0  = !tagBit0;
-            const bool        isCtl1  = !tagBit1;
-            const bool        isCtl2  = !tagBit2;
-            // If we got adjacent control points, add a halfway point between the two control points
+            // Get the indexes and coordinates
+            const Pt::int32_t idx0 = (j + 0) % numPoints + cSIdx;
+            const Pt::int32_t idx1 = (j + 1) % numPoints + cSIdx;
+            const Pt::int32_t idx2 = (j + 2) % numPoints + cSIdx;
+            const double      x0   = pointsF[idx0].x();
+            const double      y0   = pointsF[idx0].y();
+            const double      x1   = pointsF[idx1].x();
+            const double      y1   = pointsF[idx1].y();
+            const double      x2   = pointsF[idx2].x();
+            const double      y2   = pointsF[idx2].y();
+            // Get the tags
+            // Bit #0 -> 0 = control point         ; 1 = non-control point
+            // Bit #1 -> 0 = qudratic bezier (TTF) ; 1 = cubic bezier (OTF)
+            // Bit #2 -> 0 = bit #5-#7 is unused   ; 1 = bit #5-#7 contain the OTF drop-out mode
+                  bool        isCtl0 = !(tags[idx0] & 0x01);
+            const bool        isCtl1 = !(tags[idx1] & 0x01);
+            const bool        isCtl2 = !(tags[idx2] & 0x01);
+            // Does point #0 and point #1 are both control points?
             if(isCtl0 && isCtl1) {
-                const double xm = (x0 + x1) * 0.5;
-                const double ym = (y0 + y1) * 0.5;
-                isCtl0 = false;
+                // If this is the first iteration, generate a new path that starts from
+                // the halfway point between the two control points
                 if(!j) {
+                    const double xm = (x0 + x1) * 0.5;
+                    const double ym = (y0 + y1) * 0.5;
                     if(!dst.empty()) dst.push_back(Painter::PolygonSeparatorPointF);
                     dst.push_back(PointF(xm, ym));
                 }
+                // Mark point #0 as a non-control point
+                isCtl0 = false;
             }
-            // Generate a bezier curve
-            if(!isCtl0 && isCtl1 && !isCtl2) {
-                generateQuadraticBezierPoints(dst, dst.back().x(), dst.back().y(), x1, y1, x2, y2, smoothness);
+            // If both point #0 and point #1 are not control points, generate a line
+            if(!isCtl0 && !isCtl1) {
+                dst.push_back(PointF(x1, y1));
             }
-            // Generate a bezier curve using the halfway point between the two control points
+            // If point #1 is the only control point, generate a bezier curve
+            else if(!isCtl0 && isCtl1 && !isCtl2) {
+                generateQuadraticBezierPoints(dst, x0, y0, x1, y1, x2, y2, smoothness);
+            }
+            // If point #1 and point #2 are both control points, generate a bezier curve
+            // using the halfway point between the two control points
             else if(!isCtl0 && isCtl1 && isCtl2) {
                 const double xm = (x1 + x2) * 0.5;
                 const double ym = (y1 + y2) * 0.5;
-                generateQuadraticBezierPoints(dst, dst.back().x(), dst.back().y(), x1, y1, xm, ym, smoothness);
-
-            }
-            // Generate line
-            else if(!isCtl0 && !isCtl1) {
-                dst.push_back(PointF(x1, y1));
+                generateQuadraticBezierPoints(dst, x0, y0, x1, y1, xm, ym, smoothness);
             }
         }
         // Update the start index of the contour
-        contourStart = contourEnd + 1;
+        cSIdx = cEIdx + 1;
     }
 
     // Add a separator point
@@ -667,6 +671,9 @@ void Path::putChar(const Char& chr)
     _pathData->add(chr);
 }
 
+void Path::getCharKerning(Pt::int32_t& x, Pt::int32_t& y, const Char& chr1, const Char& chr2)
+{ _text->getCharKerning(x, y, chr1, chr2); }
+
 void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
 {
     // Check if this function call is valid in the current context
@@ -757,8 +764,8 @@ void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
 void Path::clipPolygon(std::vector<PointF>& result, const std::vector<PointF>& subject, const std::vector<PointF>& clipRegion, ClipMode cm)
 {
     // Scaling factors
-    const double mmFac = 16.0;
-    const double imFac =  0.0625;
+    const double mmFac = 64.0;
+    const double imFac =  0.015625; // (1.0 / 64.0)
 
     // Working variables
     ClipperLib::Clipper clipper;
@@ -779,7 +786,6 @@ void Path::clipPolygon(std::vector<PointF>& result, const std::vector<PointF>& s
                 cpath[j].X = Gfx::Math::zrint( clipRegion[startIndex + j].x() * mmFac );
                 cpath[j].Y = Gfx::Math::zrint( clipRegion[startIndex + j].y() * mmFac );
             }
-            if(cpath[0] != cpath.back()) cpath.push_back(cpath[0]);
             clipper.AddPath(cpath, ClipperLib::ptClip, true);
             // Increment the start index
             startIndex += curPC + 1;
