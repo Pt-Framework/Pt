@@ -155,7 +155,7 @@ class Rasterizer2
         void strokeText(const Point& to, const Pt::String& text);
         void strokeOnePixelLine(const Point& a, const Point& b, DrawLineMask* maskInOut);
         void strokeOnePixelRect(const Point& tl, const Point& br);
-        void strokeOnePixelPolygonOutline(const Point* points, size_t pointCount);
+        void strokeOnePixelPolygonOutline(const Point* points, size_t pointCount, bool autoClose);
         void strokeOnePixelQuadraticPolybezierOutline(const Point* points, size_t pointCount);
         void strokeOnePixelEllipseArc(const Point& topLeft, const Size& size, float degBegin, float degEnd, const ArcMode& arcMode);
 

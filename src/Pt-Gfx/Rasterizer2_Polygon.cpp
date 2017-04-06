@@ -39,7 +39,7 @@ namespace Gfx {
 // ===== Public Member Functions ========================================================
 // ======================================================================================
 
-void Rasterizer2::strokeOnePixelPolygonOutline(const Point* points, size_t pointCount)
+void Rasterizer2::strokeOnePixelPolygonOutline(const Point* points, size_t pointCount, bool autoClose)
 {
     // Check if there are too few points
     if(pointCount < 2) return;
@@ -55,6 +55,7 @@ void Rasterizer2::strokeOnePixelPolygonOutline(const Point* points, size_t point
             // Clip the coordinates
             std::vector<Point> clipped;
             genClippedPolygonPoints(clipped, points + startIndex, curPC, true);
+            if(autoClose && clipped.back() != clipped[0]) clipped.push_back(points[0]);
             // Increment the start index
             startIndex += curPC + 1;
             // Draw the polygon

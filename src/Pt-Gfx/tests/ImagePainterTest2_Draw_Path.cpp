@@ -383,7 +383,7 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
 
     ip2->setPen(Color::fromRgb8(255,0,0));
     ip2->setBrush(brush2);
-    ip2->drawPolyline(subjPointsF.data(), subjPointsF.size(), false);
+    ip2->drawPolyline(subjPointsF.data(), subjPointsF.size(), true);
 
     //ip2->setFont( Pt::Gfx::Font(FONT_SPEC_H) );
     //ip2->setPen( Color::fromRgb8(0, 255, 255, 255) );

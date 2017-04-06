@@ -885,9 +885,8 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount, boo
         // Round the points and remove duplicates
         std::vector<Point> points;
         cnvPointsFToPointsDeduplicate(points, ps, pointCount);
-        if(autoClose && points.back() != points[0]) points.push_back(points[0]);
         // Rasterize the polygon
-        _rasterizer->strokeOnePixelPolygonOutline(points.data(), points.size());
+        _rasterizer->strokeOnePixelPolygonOutline(points.data(), points.size(), autoClose);
         return;
     }
 
