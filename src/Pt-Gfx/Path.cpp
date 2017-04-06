@@ -673,13 +673,7 @@ void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
         }
     }
 
-    double q = dst[0].x();
-    /*
-    if(
-        dst[0].x() > Painter::MaximumPointCoordinateF &&
-        dst[0].y() > Painter::MaximumPointCoordinateF
-    );// dst.pop_back();
-    */
+    if(dst.back().x() > Painter::MaximumCoordinateF && dst.back().y() > Painter::MaximumCoordinateF) dst.pop_back();
 
     //for(size_t i = 0; i < dst.size(); ++i)
     //    printf("GenPts: %5.1f, %5.1f\n", dst[i].x(), dst[i].y());

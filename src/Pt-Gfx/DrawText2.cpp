@@ -95,7 +95,6 @@ void DrawText2::draw(Image& image, const Color& color, const Point& pos, const S
     return FreeType2::instance().draw(image, _clip, pos, color, _fontAngle, mode, text, _matrix, _faceId, &_imageType, false);
 }
 
-
 void DrawText2::drawMono(Image& image, const Color& color, const Point& pos, const String& text, const CompositionMode& mode)
 {
     return FreeType2::instance().draw(image, _clip, pos, color, _fontAngle, mode, text, _matrix, _faceId, &_imageType, true);

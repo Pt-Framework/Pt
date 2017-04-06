@@ -276,14 +276,31 @@ void FreeType2::genPointsFromChar(std::vector<PointF>& dst, const Char& chr, FTC
             break;
         }
     }
+   // std::cout << "A id=" << faceId << "\n";
 
-    FT_UInt glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, chr);
+    FT_UInt glyph_index = FT_Get_Char_Index(face, chr);
     if(!glyph_index) return;
+
+    //std::cout << "B gi=" << glyph_index << "\n";
+
+    ferr = FT_Load_Glyph(face, glyph_index, FT_LOAD_DEFAULT);
+    if(ferr) return;
+
+
+    //*
+//    FT_UInt glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, chr);
+  //  if(!glyph_index) return;
+    //*/
+
+    std::cout << "N = " << face->glyph->outline.n_points << std::endl;
 
     dst.resize(face->glyph->outline.n_points);
 
     for(int i = 0; i < face->glyph->outline.n_points; ++i) {
-        dst[i].set( face->glyph->outline.points[i].x, face->glyph->outline.points[i].y );
+        dst[i].set(
+            face->glyph->outline.points[i].x * 0.25f,
+            face->glyph->outline.points[i].y * 0.25f
+        );
     }
 }
 

@@ -380,8 +380,9 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
     atrans.transformPoints(subjPointsF.data(), subjPointsF.size());
     atrans.pop();
 
+    ip2->setPen(Color::fromRgb8(255,0,0));
     ip2->setBrush(brush2);
-    ip2->fillPolygon(subjPointsF.data(), subjPointsF.size());
+    ip2->drawPolyline(subjPointsF.data(), subjPointsF.size(), true);
     ++col;
 
 
