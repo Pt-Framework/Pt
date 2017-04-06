@@ -33,7 +33,7 @@
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Math.h>
 
-#include "clipper/clipper.hpp"
+#include "clipper_aj/clipper.hpp"
 
 
 namespace Pt {
@@ -630,8 +630,12 @@ void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
     //printf("\n");
 }
 
-void Path::clipPolygon(std::vector<PointF>& result, const std::vector<PointF>& subject, const std::vector<PointF>& clipRegion, bool autoCloseSubject)
+void Path::clipPolygon(std::vector<PointF>& result, const std::vector<PointF>& subject, const std::vector<PointF>& clipRegion)
 {
+    // Scaling factors
+    const double mmFac = 16.0;
+    const double imFac =  0.0625;
+
     // Working variables
     ClipperLib::Clipper clipper;
     ClipperLib::Path    cpath;
@@ -648,8 +652,8 @@ void Path::clipPolygon(std::vector<PointF>& result, const std::vector<PointF>& s
             // Append the polygon to the clipper
             cpath.resize(curPC);
             for(size_t j = 0; j < curPC; ++j) {
-                cpath[j].X = Gfx::Math::zrint(clipRegion[startIndex + j].x());
-                cpath[j].Y = Gfx::Math::zrint(clipRegion[startIndex + j].y());
+                cpath[j].X = Gfx::Math::zrint( clipRegion[startIndex + j].x() * mmFac );
+                cpath[j].Y = Gfx::Math::zrint( clipRegion[startIndex + j].y() * mmFac );
             }
             if(cpath[0] != cpath.back()) cpath.push_back(cpath[0]);
             clipper.AddPath(cpath, ClipperLib::ptClip, true);
@@ -668,10 +672,9 @@ void Path::clipPolygon(std::vector<PointF>& result, const std::vector<PointF>& s
             // Append the polygon to the clipper
             cpath.resize(curPC);
             for(size_t j = 0; j < curPC; ++j) {
-                cpath[j].X = Gfx::Math::zrint(subject[startIndex + j].x());
-                cpath[j].Y = Gfx::Math::zrint(subject[startIndex + j].y());
+                cpath[j].X = Gfx::Math::zrint( subject[startIndex + j].x() * mmFac );
+                cpath[j].Y = Gfx::Math::zrint( subject[startIndex + j].y() * mmFac );
             }
-            if(autoCloseSubject && cpath[0] != cpath.back()) cpath.push_back(cpath[0]);
             clipper.AddPath(cpath, ClipperLib::ptSubject, cpath[0] == cpath.back());
             // Increment the start index
             startIndex += curPC + 1;
@@ -687,7 +690,7 @@ void Path::clipPolygon(std::vector<PointF>& result, const std::vector<PointF>& s
         const ClipperLib::Path& curPath = cpresult[i];
         if(!result.empty()) result.push_back(Painter::PolygonSeparatorPointF);
         for(size_t j = 0; j < curPath.size(); ++j) {
-            result.push_back( PointF(curPath[j].X, curPath[j].Y) );
+            result.push_back( PointF( curPath[j].X * imFac, curPath[j].Y * imFac ) );
         }
     }
 }

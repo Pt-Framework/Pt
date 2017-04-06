@@ -58,7 +58,7 @@ if $(WITH_RASTERIZER2)
                                SvgRasterizer.cpp
                                SvgRasterizer_Color.cpp
                                SvgRasterizer_Lexer.cpp
-                               clipper$(SLASH)clipper.cpp
+                               clipper_aj$(SLASH)clipper.cpp
                                ;
 }
 

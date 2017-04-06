@@ -278,11 +278,11 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
     AffineTransform atrans;
     Path            path;
 
-    std::vector<PointF> clipRegion;
-    std::vector<PointF> subject;
-    std::vector<PointF> result;
+    std::vector<PointF> cregPointsF;
+    std::vector<PointF> subjPointsF;
+    std::vector<PointF> clipPointsF;
 
-    // Create a new clipper path
+    // Create a new clip-region path
     path.clear    ();
     path.beginPath();
     path.moveTo   (  0, 50); // CCW
@@ -291,12 +291,12 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
     path.lineTo   ( 30,  0);
     path.endPath  ();
 
-    clipRegion.clear();
-    path.generatePoints(clipRegion, 2);
+    cregPointsF.clear();
+    path.generatePoints(cregPointsF, 1);
     atrans.push();
     atrans.scale(2, 2);
     atrans.translate(50, 70);
-    atrans.transformPoints(clipRegion.data(), clipRegion.size());
+    atrans.transformPoints(cregPointsF.data(), cregPointsF.size());
     atrans.pop();
 
     // Create a subject path
@@ -307,35 +307,35 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
     path.arcTo    (  0, 50, 50);
     path.endPath  ();
 
-    subject.clear();
-    path.generatePoints(subject, 2);
+    subjPointsF.clear();
+    path.generatePoints(subjPointsF, 3);
     atrans.push();
     atrans.scale(2, 2);
-    atrans.transformPoints(subject.data(), subject.size());
+    atrans.transformPoints(subjPointsF.data(), subjPointsF.size());
     atrans.pop();
 
     // Perform clipping
-    Path::clipPolygon(result, subject, clipRegion, true);
+    Path::clipPolygon(clipPointsF, subjPointsF, cregPointsF);
 
-    // Draw the clipper and subject
+    // Draw the clip-region and subject polygons
     atrans.push();
     atrans.translate(10 + 250 * col, 10 + 250 * row);
-    atrans.transformPoints(clipRegion.data(), clipRegion.size());
-    atrans.transformPoints(subject.data(), subject.size());
+    atrans.transformPoints(cregPointsF.data(), cregPointsF.size());
+    atrans.transformPoints(subjPointsF.data(), subjPointsF.size());
     atrans.pop();
     ip2->setBrush(brush1);
-    ip2->fillPolygon(subject.data(), subject.size());
+    ip2->fillPolygon(subjPointsF.data(), subjPointsF.size());
     ip2->setBrush(brush2);
-    ip2->fillPolygon(clipRegion.data(), clipRegion.size());
+    ip2->fillPolygon(cregPointsF.data(), cregPointsF.size());
     ++col;
 
-    // Draw the result
+    // Draw the clipped polygon
     atrans.push();
     atrans.translate(10 + 250 * col, 10 + 250 * row);
-    atrans.transformPoints(result.data(), result.size());
+    atrans.transformPoints(clipPointsF.data(), clipPointsF.size());
     atrans.pop();
     ip2->setBrush(brush1);
-    ip2->fillPolygon(result.data(), result.size());
+    ip2->fillPolygon(clipPointsF.data(), clipPointsF.size());
     ++col;
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
