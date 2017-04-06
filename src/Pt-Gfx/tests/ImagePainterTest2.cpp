@@ -154,10 +154,10 @@ using namespace Pt::Gfx;
 
 // Configurations and objects
 #define FONT_DIR    "../src/Pt-Gfx/fonts"
-#define FONT_SPEC_S "DejaVu Serif", 12, Pt::Gfx::Font::BoldItalic, 0
-#define FONT_SPEC_N "DejaVu Serif", 24, Pt::Gfx::Font::BoldItalic, 0
-#define FONT_SPEC_R "DejaVu Serif", 24, Pt::Gfx::Font::BoldItalic, -150
-#define FONT_SPEC_H "DejaVu Serif", 24, Pt::Gfx::Font::BoldItalic, 0
+#define FONT_SPEC_S "DejaVu Serif",  12, Pt::Gfx::Font::BoldItalic, 0
+#define FONT_SPEC_N "DejaVu Serif",  24, Pt::Gfx::Font::BoldItalic, 0
+#define FONT_SPEC_R "DejaVu Serif",  24, Pt::Gfx::Font::BoldItalic, -150
+#define FONT_SPEC_H "DejaVu Serif", 128, Pt::Gfx::Font::BoldItalic, 0
 
 #define TEX_FILE_TRANS_BGR "../etc/images/bleech-200x200-tbgr.png"
 #define TEX_FILE_WHITE_BGR "../etc/images/bleech-200x200-wbgr.png"

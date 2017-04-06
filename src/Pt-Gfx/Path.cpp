@@ -231,6 +231,15 @@ static inline void generateChrPoints(std::vector<PointF>& dst, double x, double 
 {
     std::clog << "points/tags = " << points.size() << " ; contours = " << contours.size() << std::endl;
 
+    std::vector<PointF> pointsF(points.size());
+
+    for(size_t i = 0; i < points.size(); ++i) {
+        pointsF[i].set(
+            points[i].x() * 0.015625, // 1/64
+            points[i].y() * 0.015625
+        );
+    }
+
     int contour_starti = 0;
     int contour_endi = 0;
     for ( int i = 0 ; i < (int) contours.size() ; i++ ) {
@@ -240,8 +249,8 @@ static inline void generateChrPoints(std::vector<PointF>& dst, double x, double 
 
         if(!dst.empty()) dst.push_back(Painter::PolygonSeparatorPointF);
         dst.push_back(PointF(
-            points[contour_starti].x(),
-            points[contour_starti].y()
+            pointsF[contour_starti].x(),
+            pointsF[contour_starti].y()
         ));
 
 
@@ -249,12 +258,12 @@ static inline void generateChrPoints(std::vector<PointF>& dst, double x, double 
             int thisi = j%npts + offset;
             int nexti = (j+1)%npts + offset;
             int nextnexti = (j+2)%npts + offset;
-            int x = points[thisi].x();
-            int y = points[thisi].y();
-            int nx = points[nexti].x();
-            int ny = points[nexti].y();
-            int nnx = points[nextnexti].x();
-            int nny = points[nextnexti].y();
+            int x = pointsF[thisi].x();
+            int y = pointsF[thisi].y();
+            int nx = pointsF[nexti].x();
+            int ny = pointsF[nexti].y();
+            int nnx = pointsF[nextnexti].x();
+            int nny = pointsF[nextnexti].y();
             bool this_tagbit1 = (tags[ thisi ] & 1);
             bool next_tagbit1 = (tags[ nexti ] & 1);
             bool nextnext_tagbit1 = (tags[ nextnexti ] & 1);

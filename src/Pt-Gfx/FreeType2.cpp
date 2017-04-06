@@ -291,8 +291,8 @@ void FreeType2::pathFromChar(std::vector<Point>& points, std::vector<Pt::uint8_t
     points.resize(face->glyph->outline.n_points);
     for(int i = 0; i < face->glyph->outline.n_points; ++i) {
         points[i].set(
-            face->glyph->outline.points[i].x,
-            face->glyph->outline.points[i].y
+             face->glyph->outline.points[i].x,
+            -face->glyph->outline.points[i].y
         );
     }
 
