@@ -29,6 +29,7 @@
 
 #include "MainWindowImpl.h"
 #include <Pt/Hmi/Application.h>
+#include <Pt/Math.h>
 #include <cassert>
 
 namespace Pt {
@@ -155,7 +156,8 @@ void MainWindowImpl::move(const Gfx::PointF& p)
 void MainWindowImpl::resize(const Gfx::SizeF& size)
 {
     RECT clientRect;
-    SetRect(&clientRect, 0, 0, size.width() - 1, size.height() - 1);
+    SetRect(&clientRect, 0, 0, lround(size.width()) - 1, 
+                               lround(size.height()) - 1);
 
     LONG style = GetWindowLong(_hwnd, GWL_STYLE);
     LONG exStyle = GetWindowLong(_hwnd, GWL_EXSTYLE);
