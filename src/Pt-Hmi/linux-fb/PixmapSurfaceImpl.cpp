@@ -84,8 +84,7 @@ void PixmapSurfaceImpl::resize(const Gfx::Size& size, size_t padding)
 void PixmapSurfaceImpl::resize(const Gfx::SizeF& size)
 {
     _size = size;
-    _image.reset(_image.format(), Gfx::Size(_size.width(), _size.height() ) );
-
+    _image.reset(_image.format(), round(size));
     _painter.setImage(_image);
 }
 
