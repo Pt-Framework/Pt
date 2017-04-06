@@ -101,6 +101,11 @@ void DrawText2::drawMono(Image& image, const Color& color, const Point& pos, con
     return FreeType2::instance().draw(image, _clip, pos, color, _fontAngle, mode, text, _matrix, _faceId, &_imageType, true);
 }
 
+void DrawText2::genPointsFromChar(std::vector<PointF>& dst, const Char& chr)
+{
+    FreeType2::instance().genPointsFromChar(dst, chr, _faceId);
+}
+
 
 } //namespace
 } //namespace

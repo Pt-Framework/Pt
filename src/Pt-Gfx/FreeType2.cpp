@@ -259,6 +259,34 @@ FT_Error FreeType2::onFontRequest(FTC_FaceID faceId, FT_Face* face)
     return FT_New_Face(_ft, path->toLocal().c_str(), 0, face);
 }
 
+void FreeType2::genPointsFromChar(std::vector<PointF>& dst, const Char& chr, FTC_FaceID faceId)
+{
+    dst.clear();
+
+    System::MutexLock lock(_mutex);
+
+    FT_Face  face = 0;
+    FT_Error ferr = FTC_Manager_LookupFace(_manager, faceId, &face);
+    if(ferr && ferr != FT_Err_Out_Of_Memory) return;
+
+    FT_Int charMapIndex = 0;
+    for(int n = 0; n < face->num_charmaps; ++n) {
+        if(face->charmap[n].encoding == FT_ENCODING_UNICODE) {
+            charMapIndex = n;
+            break;
+        }
+    }
+
+    FT_UInt glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, chr);
+    if(!glyph_index) return;
+
+    dst.resize(face->glyph->outline.n_points);
+
+    for(int i = 0; i < face->glyph->outline.n_points; ++i) {
+        dst[i].set( face->glyph->outline.points[i].x, face->glyph->outline.points[i].y );
+    }
+}
+
 void FreeType2::draw(
     Image& image, const Rect& clip, const Point& pos, const Color& color, Pt::ssize_t fontAngle, const CompositionMode& mode,
     const String& text, FT_Matrix& matrix, FTC_FaceID faceId, FTC_ImageType imageType, bool mono

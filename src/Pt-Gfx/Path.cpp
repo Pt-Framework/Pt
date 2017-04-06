@@ -33,6 +33,8 @@
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Math.h>
 
+#include "DrawText2.h"
+
 #include "clipper_aj/clipper.hpp"
 
 
@@ -227,19 +229,21 @@ static inline void generateArcPoints(std::vector<PointF>& dst, double x1, double
 
 
 // ======================================================================================
-// ===== Path::PathData Implementation ================================================
+// ===== Path::PathData Implementation ==================================================
 // ======================================================================================
 
 struct Path::PathData {
     // Instruction type
     enum InsType {
         IT_Begin, IT_End,
-        IT_MoveTo, IT_LineTo, IT_ArcTo, IT_QuadBezierTo, IT_CubicBezierTo, IT_GenNBezierTo
+        IT_MoveTo, IT_LineTo, IT_ArcTo, IT_QuadBezierTo, IT_CubicBezierTo, IT_GenNBezierTo,
+        IT_Char
     };
 
     // Instruction structure
     struct Instruction {
         InsType             type;
+        Char                chr;
         std::vector<double> p;
 
         inline Instruction(InsType type_)
@@ -272,6 +276,10 @@ struct Path::PathData {
 
         inline Instruction(InsType type_, const std::vector<double>& p_)
         : type(type_), p(p_)
+        {}
+
+        inline Instruction(const Char& chr_)
+        : type(IT_Char), chr(chr_)
         {}
     };
 
@@ -322,6 +330,9 @@ struct Path::PathData {
 
     inline void add(InsType type, const std::vector<double>& p)
     { inss.push_back( Instruction(type, p) ); }
+
+    inline void add(const Char& chr)
+    { inss.push_back( Instruction(chr) ); }
 };
 
 
@@ -331,10 +342,14 @@ struct Path::PathData {
 
 Path::Path()
 : _pathData( new PathData() )
+, _text    ( new DrawText2() )
 {}
 
 Path::~Path()
-{ delete _pathData; }
+{
+    delete _pathData;
+    delete _text;
+}
 
 void Path::clear()
 { _pathData->clear(); }
@@ -556,6 +571,25 @@ void Path::relGenericNBezierTo(Pt::int32_t controlPointCount, const double* cxy,
     _pathData->curY += y;
 }
 
+void Path::setFont(const Font& font)
+{
+    _font = font;
+    _text->setFont(_font);
+}
+
+const Font& Path::font() const
+{ return _font; }
+
+void Path::putChar(const Char& chr)
+{
+    // Check if this function call is valid in the current context
+    if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
+        throw PathInvalidContext(PT_SOURCEINFO_STR);
+
+    // Store the instruction
+    _pathData->add(chr);
+}
+
 void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
 {
     // Check if this function call is valid in the current context
@@ -619,11 +653,33 @@ void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
                 curY = ins.p[ins.p.size() - 1];
                 break;
 
+            case PathData::IT_Char: {
+                std::vector<PointF> tmp;
+                _text->genPointsFromChar(tmp, ins.chr);
+                if(!dst.empty()) dst.push_back(Painter::PolygonSeparatorPointF);
+                for(size_t i = 0; i < tmp.size(); ++i) {
+                    dst.push_back(PointF(
+                        tmp[i].x() + curX,
+                        tmp[i].y() + curY
+                    ));
+                }
+                dst.push_back(Painter::PolygonSeparatorPointF);
+                break;
+            }
+
             default:
                 throw PathError("Invalid Path instruction type");
                 break;
         }
     }
+
+    double q = dst[0].x();
+    /*
+    if(
+        dst[0].x() > Painter::MaximumPointCoordinateF &&
+        dst[0].y() > Painter::MaximumPointCoordinateF
+    );// dst.pop_back();
+    */
 
     //for(size_t i = 0; i < dst.size(); ++i)
     //    printf("GenPts: %5.1f, %5.1f\n", dst[i].x(), dst[i].y());

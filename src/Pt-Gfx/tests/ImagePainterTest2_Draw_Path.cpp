@@ -363,5 +363,27 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
     ip2->setBrush(brush1);
     ip2->fillPolygon(clipPointsF.data(), clipPointsF.size());
 
+    //
+    row = 0;
+    col = 2;
+
+    path.setFont( Pt::Gfx::Font(FONT_SPEC_H) );
+    path.clear    ();
+    path.beginPath();
+    path.moveTo   (100, 100);
+    path.putChar  ('P');
+    path.endPath  ();
+
+    subjPointsF.clear();
+    path.generatePoints(subjPointsF, 1);
+    atrans.push();
+    atrans.transformPoints(subjPointsF.data(), subjPointsF.size());
+    atrans.pop();
+
+    ip2->setBrush(brush2);
+    ip2->fillPolygon(subjPointsF.data(), subjPointsF.size());
+    ++col;
+
+
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }

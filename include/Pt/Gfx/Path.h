@@ -34,11 +34,15 @@
 #include <string>
 #include <vector>
 
+#include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Point.h>
 
 
 namespace Pt{
 namespace Gfx{
+
+
+class DrawText2;
 
 
 /** @brief Indicates invalid/erroneous usage of the Path API.
@@ -135,13 +139,21 @@ class PT_GFX_API Path {
         void relGenericNBezierTo(Pt::int32_t controlPointCount, const double* cxy, double x, double y);
 
         //
+        // Text related
+        //
+        void setFont(const Font& font);
+
+        const Font& font() const;
+
+        void putChar(const Char& chr);
+
+        //
         // Generators
         //
         // NOTE: * If you enlarge (scale-up) the shape, you may need to increase the "smoothness" factor as needed
         //       * If the "smoothness" factor is too large, the anti-aliasing will become less effective
         void generatePoints(std::vector<PointF>& dst, float smoothness = 1.0f) const;
 
-    public:
         //
         // Polygon clipper
         //
@@ -157,6 +169,9 @@ class PT_GFX_API Path {
 
     private:
         PathData* _pathData;
+
+        DrawText2* _text;
+        Font       _font;
 };
 
 

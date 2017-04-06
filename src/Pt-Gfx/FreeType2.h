@@ -83,6 +83,8 @@ class FreeType2 : public Pt::Singleton<FreeType2> {
             const String& text, FT_Matrix& matrix, FTC_FaceID faceId, FTC_ImageType imageType, bool mono
         );
 
+        void genPointsFromChar(std::vector<PointF>& dst, const Char& chr, FTC_FaceID faceId);
+
         static FT_Error fontRequest(FTC_FaceID face_id, FT_Library library, FT_Pointer request_data, FT_Face* face);
 
     protected:
