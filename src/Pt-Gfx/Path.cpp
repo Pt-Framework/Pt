@@ -229,89 +229,78 @@ static inline void generateArcPoints(std::vector<PointF>& dst, double x1, double
 
 static inline void generateChrPoints(std::vector<PointF>& dst, double x, double y, const std::vector<Point>& points, const std::vector<Pt::uint8_t>& tags, const std::vector<Pt::int32_t>& contours, double smoothness)
 {
-    std::clog << "points/tags = " << points.size() << " ; contours = " << contours.size() << std::endl;
+    //std::clog << "points/tags = " << points.size() << " ; contours = " << contours.size() << std::endl;
 
+    // Scale the points
     std::vector<PointF> pointsF(points.size());
 
     for(size_t i = 0; i < points.size(); ++i) {
         pointsF[i].set(
-            points[i].x() * 0.015625, // 1/64
-            points[i].y() * 0.015625
+            points[i].x() * 0.015625, // (1 / 64)
+            points[i].y() * 0.015625  // ...
         );
     }
 
-    int contour_starti = 0;
-    int contour_endi = 0;
-    for ( int i = 0 ; i < (int) contours.size() ; i++ ) {
-        contour_endi = contours.at(i);
-        int offset = contour_starti;
-        int npts = contour_endi - contour_starti + 1;
-
+    // Walk through the contours
+    Pt::int32_t contourStart = 0;
+    Pt::int32_t contourEnd   = 0;
+    for(size_t i = 0; i < contours.size(); ++i) {
+        // Get the end index of the contour
+        contourEnd = contours[i];
+        // Calculate the number of points within the contour
+        const size_t numPoints = contourEnd - contourStart + 1;
+        // Start a new contour
         if(!dst.empty()) dst.push_back(Painter::PolygonSeparatorPointF);
-        dst.push_back(PointF(
-            pointsF[contour_starti].x(),
-            pointsF[contour_starti].y()
-        ));
-
-
-        for ( int j = 0; j < npts; j++ ) {
-            int thisi = j%npts + offset;
-            int nexti = (j+1)%npts + offset;
-            int nextnexti = (j+2)%npts + offset;
-            int x = pointsF[thisi].x();
-            int y = pointsF[thisi].y();
-            int nx = pointsF[nexti].x();
-            int ny = pointsF[nexti].y();
-            int nnx = pointsF[nextnexti].x();
-            int nny = pointsF[nextnexti].y();
-            bool this_tagbit1 = (tags[ thisi ] & 1);
-            bool next_tagbit1 = (tags[ nexti ] & 1);
-            bool nextnext_tagbit1 = (tags[ nextnexti ] & 1);
-            bool this_isctl = !this_tagbit1;
-            bool next_isctl = !next_tagbit1;
-            bool nextnext_isctl = !nextnext_tagbit1;
-
-            if (this_isctl && next_isctl) {
-                x = (x + nx) / 2;
-                y = (y + ny) / 2;
-                this_isctl = false;
-
-                if (j==0) {
+        dst.push_back(pointsF[contourStart]);
+        // Walk through the points in this contour
+        for(size_t j = 0; j < numPoints; ++j) {
+            // Get the data
+            const Pt::int32_t idx0    = (j + 0) % numPoints + contourStart;
+            const Pt::int32_t idx1    = (j + 1) % numPoints + contourStart;
+            const Pt::int32_t idx2    = (j + 2) % numPoints + contourStart;
+            const double      x0      = pointsF[idx0].x();
+            const double      y0      = pointsF[idx0].y();
+            const double      x1      = pointsF[idx1].x();
+            const double      y1      = pointsF[idx1].y();
+            const double      x2      = pointsF[idx2].x();
+            const double      y2      = pointsF[idx2].y();
+            const bool        tagBit0 = (tags[idx0] & 0x01);
+            const bool        tagBit1 = (tags[idx1] & 0x01);
+            const bool        tagBit2 = (tags[idx2] & 0x01);
+                  bool        isCtl0  = !tagBit0;
+            const bool        isCtl1  = !tagBit1;
+            const bool        isCtl2  = !tagBit2;
+            // If we got adjacent control points, add a halfway point between the two control points
+            if(isCtl0 && isCtl1) {
+                const double xm = (x0 + x1) * 0.5;
+                const double ym = (y0 + y1) * 0.5;
+                isCtl0 = false;
+                if(!j) {
                     if(!dst.empty()) dst.push_back(Painter::PolygonSeparatorPointF);
-                    dst.push_back(PointF(
-                        x,
-                        y
-                    ));
+                    dst.push_back(PointF(xm, ym));
                 }
             }
+            // Generate a bezier curve
+            if(!isCtl0 && isCtl1 && !isCtl2) {
+                generateQuadraticBezierPoints(dst, dst.back().x(), dst.back().y(), x1, y1, x2, y2, smoothness);
+            }
+            // Generate a bezier curve using the halfway point between the two control points
+            else if(!isCtl0 && isCtl1 && isCtl2) {
+                const double xm = (x1 + x2) * 0.5;
+                const double ym = (y1 + y2) * 0.5;
+                generateQuadraticBezierPoints(dst, dst.back().x(), dst.back().y(), x1, y1, xm, ym, smoothness);
 
-            if (!this_isctl && next_isctl && !nextnext_isctl) {
-
-                generateQuadraticBezierPoints(dst, dst.back().x(), dst.back().y(), nx, ny, nnx, nny, smoothness);
-
-
-            } else if (!this_isctl && next_isctl && nextnext_isctl) {
-                nnx = (nx + nnx) / 2;
-                nny = (ny + nny) / 2;
-
-                generateQuadraticBezierPoints(dst, dst.back().x(), dst.back().y(), nx, ny, nnx, nny, smoothness);
-
-            } else if (!this_isctl && !next_isctl) {
-
-                    dst.push_back(PointF(
-                        nx,
-                        ny
-                    ));
-
-
-            } else if (this_isctl && !next_isctl) {
+            }
+            // Generate line
+            else if(!isCtl0 && !isCtl1) {
+                dst.push_back(PointF(x1, y1));
             }
         }
-        contour_starti = contour_endi+1;
+        // Update the start index of the contour
+        contourStart = contourEnd + 1;
     }
 
-
-
+    // Add a separator point
     dst.push_back(Painter::PolygonSeparatorPointF);
 }
 
@@ -756,6 +745,7 @@ void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
         }
     }
 
+    // Remove dangling separator point as needed
     if(!dst.empty() && dst.back().x() > Painter::MaximumCoordinateF && dst.back().y() > Painter::MaximumCoordinateF)
         dst.pop_back();
 
