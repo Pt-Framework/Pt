@@ -101,8 +101,8 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  0
 
 #define TEST_DRAW_PATH                          0 // (including thick and filled)
-#define TEST_DRAW_PATH_CLIPPING                 0
-#define TEST_DRAW_EXTRA                         0
+#define TEST_DRAW_PATH_CLIPPING                 1
+#define TEST_DRAW_EXTRA                         1
 
 #define TEST_SVG_READER                         1
 

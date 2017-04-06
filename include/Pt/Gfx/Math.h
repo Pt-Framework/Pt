@@ -250,7 +250,7 @@ inline float convertCartesianToPolarCoordinate(float x, float y)
 // zrint(), zfint(), and zcint() overloaded functions for float and double
 //
 
-#if ULONG_MAX == 18446744073709551615ULL
+#if SIZE_MAX == 18446744073709551615ULL
 
 inline Pt::ssize_t zrint(float val)
 {
@@ -258,7 +258,7 @@ inline Pt::ssize_t zrint(float val)
     return _mm_cvtss_si64(_mm_load_ss(&val));
 #elif defined(PT_GFX_USE_X86_CPU)
     #if defined(PT_GFX_USE_GNU_STYLE_COMPILER)
-        Pt::int64_t tmp;
+        Pt::ssize_t tmp;
         __asm__ __volatile__ (
             "flds   %1\n\t"
             "fistpq %0    "
@@ -268,15 +268,17 @@ inline Pt::ssize_t zrint(float val)
         );
         return tmp;
     #else
-        Pt::int64_t tmp;
+        Pt::ssize_t tmp;
         __asm {
             fld   val
             fistp tmp
         }
         return tmp;
     #endif
+#elif __cplusplus == 201103L
+    return lroundf(val);
 #else
-    return (Pt::int64_t) ( (val >= 0.0f) ? (val + 0.5f) : (val - 0.5f) );
+    return (Pt::ssize_t) ( (val >= 0.0f) ? (val + 0.5f) : (val - 0.5f) );
 #endif
 }
 
@@ -286,7 +288,7 @@ inline Pt::ssize_t zrint(double val)
     return _mm_cvtsd_si64(_mm_load_sd(&val));
 #elif defined(PT_GFX_USE_X86_CPU)
     #if defined(PT_GFX_USE_GNU_STYLE_COMPILER)
-        Pt::int64_t tmp;
+        Pt::ssize_t tmp;
         __asm__ __volatile__ (
             "fldl   %1\n\t"
             "fistpq %0    "
@@ -296,15 +298,17 @@ inline Pt::ssize_t zrint(double val)
         );
         return tmp;
     #else
-        Pt::int64_t tmp;
+        Pt::ssize_t tmp;
         __asm {
             fld   val
             fistp tmp
         }
         return tmp;
     #endif
+#elif __cplusplus == 201103L
+    return lround(val);
 #else
-    return (Pt::int64_t) ( (val >= 0.0) ? (val + 0.5) : (val - 0.5) );
+    return (Pt::ssize_t) ( (val >= 0.0) ? (val + 0.5) : (val - 0.5) );
 #endif
 }
 
@@ -316,7 +320,7 @@ inline Pt::ssize_t zrint(float val)
     return _mm_cvtss_si32(_mm_load_ss(&val));
 #elif defined(PT_GFX_USE_X86_CPU)
     #if defined(PT_GFX_USE_GNU_STYLE_COMPILER)
-        Pt::int32_t tmp;
+        Pt::ssize_t tmp;
         __asm__ __volatile__ (
             "flds   %1\n\t"
             "fistpl %0    "
@@ -326,7 +330,7 @@ inline Pt::ssize_t zrint(float val)
         );
         return tmp;
     #else
-        Pt::int32_t tmp;
+        Pt::ssize_t tmp;
         __asm {
             fld   val
             fistp tmp
@@ -335,12 +339,14 @@ inline Pt::ssize_t zrint(float val)
     #endif
 #elif defined(PT_GFX_USE_ARM_CPU)
     float       tmp;
-    Pt::int32_t res;
+    Pt::ssize_t res;
     __asm__ __volatile__ ( "ftosis %0, %1" : "=w" (tmp) : "w" (val) );
     __asm__ __volatile__ ( "fmrs   %0, %1" : "=r" (res) : "w" (tmp) );
     return res;
+#elif __cplusplus == 201103L
+    return lroundf(val);
 #else
-    return (Pt::int32_t) ( (val >= 0.0f) ? (val + 0.5f) : (val - 0.5f) );
+    return (Pt::ssize_t) ( (val >= 0.0f) ? (val + 0.5f) : (val - 0.5f) );
 #endif
 }
 
@@ -350,7 +356,7 @@ inline Pt::ssize_t zrint(double val)
     return _mm_cvtsd_si32(_mm_load_sd(&val));
 #elif defined(PT_GFX_USE_X86_CPU)
     #if defined(PT_GFX_USE_GNU_STYLE_COMPILER)
-        Pt::int32_t tmp;
+        Pt::ssize_t tmp;
         __asm__ __volatile__ (
             "fldl   %1\n\t"
             "fistpl %0    "
@@ -360,7 +366,7 @@ inline Pt::ssize_t zrint(double val)
         );
         return tmp;
     #else
-        Pt::int32_t tmp;
+        Pt::ssize_t tmp;
         __asm {
             fld   val
             fistp tmp
@@ -369,22 +375,24 @@ inline Pt::ssize_t zrint(double val)
     #endif
 #elif defined(PT_GFX_USE_ARM_CPU)
     float       tmp;
-    Pt::int32_t res;
+    Pt::ssize_t res;
     __asm__ __volatile__ ( "ftosid %0, %P1" : "=w" (tmp) : "w" (val) );
     __asm__ __volatile__ ( "fmrs   %0, %1"  : "=r" (res) : "w" (tmp) );
     return res;
+#elif __cplusplus == 201103L
+    return lround(val);
 #else
-    return (Pt::int32_t) ( (val >= 0.0) ? (val + 0.5) : (val - 0.5) );
+    return (Pt::ssize_t) ( (val >= 0.0) ? (val + 0.5) : (val - 0.5) );
 #endif
 }
 
 #endif
 
-inline Pt::int32_t zfint(float val) { return zrint((float) floor(val)); }
-inline Pt::int32_t zcint(float val) { return zrint((float) ceil (val)); }
+inline Pt::ssize_t zfint(float val) { return zrint((float) floor(val)); }
+inline Pt::ssize_t zcint(float val) { return zrint((float) ceil (val)); }
 
-inline Pt::int32_t zfint(double val) { return zrint(floor(val)); }
-inline Pt::int32_t zcint(double val) { return zrint(ceil (val)); }
+inline Pt::ssize_t zfint(double val) { return zrint(floor(val)); }
+inline Pt::ssize_t zcint(double val) { return zrint(ceil (val)); }
 
 
 } // namespace
