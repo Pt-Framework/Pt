@@ -263,3 +263,80 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }
+
+static void testDrawPathClipping(const char* title, Image& image, Painter& painter, const Brush& brush1, const Brush& brush2)
+{
+    resetImage(image);
+
+    ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
+    if(!ip2) return;
+
+    ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
+
+    Pt::int32_t row = 0, col = 0;
+
+    AffineTransform atrans;
+    Path            path;
+
+    std::vector<PointF> clipRegion;
+    std::vector<PointF> subject;
+    std::vector<PointF> result;
+
+    // Create a new clipper path
+    path.clear    ();
+    path.beginPath();
+    path.moveTo   (  0, 50); // CCW
+    path.lineTo   ( 50, 80);
+    path.lineTo   (100, 50);
+    path.lineTo   ( 30,  0);
+    path.endPath  ();
+
+    clipRegion.clear();
+    path.generatePoints(clipRegion, 2);
+    atrans.push();
+    atrans.scale(2, 2);
+    atrans.translate(50, 70);
+    atrans.transformPoints(clipRegion.data(), clipRegion.size());
+    atrans.pop();
+
+    // Create a subject path
+    path.clear    ();
+    path.beginPath();
+    path.moveTo   (0,  50     ); // CCW
+    path.arcTo    (100, 50, 50);
+    path.arcTo    (  0, 50, 50);
+    path.endPath  ();
+
+    subject.clear();
+    path.generatePoints(subject, 2);
+    atrans.push();
+    atrans.scale(2, 2);
+    atrans.transformPoints(subject.data(), subject.size());
+    atrans.pop();
+
+    // Perform clipping
+    Path::clipPolygon(result, subject, clipRegion, true);
+
+    // Draw the clipper and subject
+    atrans.push();
+    atrans.translate(10 + 250 * col, 10 + 250 * row);
+    atrans.transformPoints(clipRegion.data(), clipRegion.size());
+    atrans.transformPoints(subject.data(), subject.size());
+    atrans.pop();
+    ip2->setBrush(brush1);
+    ip2->fillPolygon(subject.data(), subject.size());
+    ip2->setBrush(brush2);
+    ip2->fillPolygon(clipRegion.data(), clipRegion.size());
+    ++col;
+
+    // Draw the result
+    atrans.push();
+    atrans.translate(10 + 250 * col, 10 + 250 * row);
+    atrans.transformPoints(result.data(), result.size());
+    atrans.pop();
+    ip2->setBrush(brush1);
+    ip2->fillPolygon(result.data(), result.size());
+    ++col;
+
+    sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
+}

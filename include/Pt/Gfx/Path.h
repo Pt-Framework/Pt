@@ -144,7 +144,7 @@ class PT_GFX_API Path {
         //
         // Polygon clipper
         //
-        static void clipPolygon(std::vector<PointF>& subject, const std::vector<PointF>& clipRegion, bool autoCloseSubject);
+        static void clipPolygon(std::vector<PointF>& result, const std::vector<PointF>& subject, const std::vector<PointF>& clipRegion, bool autoCloseSubject);
 
     private:
         struct PathData;

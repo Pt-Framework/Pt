@@ -78,7 +78,7 @@ using namespace Pt::Gfx;
 
 // Detailed-test enable settings for Pt-Gfx
 #define TEST_SOURCECOPY                         1
-#define TEST_SOURCEOVER                         0
+#define TEST_SOURCEOVER                         1
 
 #define TEST_DRAW_SOLID_LINE_AND_TEXT           0 // (including bezier)
 #define TEST_DRAW_PATTERNED_LINE                0 // (including bezier)
@@ -101,6 +101,7 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  0
 
 #define TEST_DRAW_PATH                          0 // (including thick and filled)
+#define TEST_DRAW_PATH_CLIPPING                 0
 #define TEST_DRAW_EXTRA                         0
 
 #define TEST_SVG_READER                         1
@@ -520,6 +521,17 @@ int main(int argc, char* args[])
     if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_PATH) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
         testDrawPath("Path - ImagePainter2 [SourceOver]", image, *painter2, brushGradient2, brushTexture1);
+    }
+
+    // Path clipping
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_PATH_CLIPPING) {
+        painter2->setCompositionMode(CompositionMode::SourceCopy);
+        testDrawPathClipping("Path Clipping - ImagePainter2 [SourceCopy]", image, *painter2, brushSolid1, brushSolid2);
+    }
+
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_PATH_CLIPPING) {
+        painter2->setCompositionMode(CompositionMode::SourceOver);
+        testDrawPathClipping("Path Clipping - ImagePainter2 [SourceOver]", image, *painter2, brushSolid1, brushSolid2);
     }
 
     // Extra features
