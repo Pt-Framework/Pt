@@ -630,8 +630,66 @@ void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
     //printf("\n");
 }
 
-void Path::clipPolygon(std::vector<PointF>& subject, const std::vector<PointF>& clipper)
+void Path::clipPolygon(std::vector<PointF>& subject, const std::vector<PointF>& clipRegion, bool autoCloseSubject)
 {
+    // Working variables
+    ClipperLib::Clipper clipper;
+    ClipperLib::Path    cpath;
+    ClipperLib::Paths   result;
+    size_t              startIndex;
+
+    // Separate and append the clipper polygons
+    startIndex = 0;
+    for(size_t i = 0; i <= clipRegion.size(); ++i) {
+        // Search for the end and/or separator points
+        if( i == clipRegion.size() || (clipRegion[i].x() > Painter::MaximumCoordinateF && clipRegion[i].y() > Painter::MaximumCoordinateF) ) {
+            // Calculate the number of points for this polygon
+            const size_t curPC = i - startIndex;
+            // Append the polygon to the clipper
+            cpath.resize(curPC);
+            for(size_t j = 0; j < 0; ++j) {
+                cpath[i].X = Gfx::Math::zrint(clipRegion[startIndex + j].x());
+                cpath[i].Y = Gfx::Math::zrint(clipRegion[startIndex + j].y());
+            }
+            if(cpath[0] != cpath.back()) cpath.push_back(cpath[0]);
+            clipper.AddPath(cpath, ClipperLib::ptClip, true);
+            // Increment the start index
+            startIndex += curPC + 1;
+        }
+    }
+
+    // Separate and append the subject polygons
+    startIndex = 0;
+    for(size_t i = 0; i <= subject.size(); ++i) {
+        // Search for the end and/or separator points
+        if( i == subject.size() || (subject[i].x() > Painter::MaximumCoordinateF && subject[i].y() > Painter::MaximumCoordinateF) ) {
+            // Calculate the number of points for this polygon
+            const size_t curPC = i - startIndex;
+            // Append the polygon to the clipper
+            cpath.resize(curPC);
+            for(size_t j = 0; j < 0; ++j) {
+                cpath[i].X = Gfx::Math::zrint(subject[startIndex + j].x());
+                cpath[i].Y = Gfx::Math::zrint(subject[startIndex + j].y());
+            }
+            if(autoCloseSubject && cpath[0] != cpath.back()) cpath.push_back(cpath[0]);
+            clipper.AddPath(cpath, ClipperLib::ptSubject, cpath[0] == cpath.back());
+            // Increment the start index
+            startIndex += curPC + 1;
+        }
+    }
+
+    // Perform clipping
+    clipper.Execute(ClipperLib::ctIntersection, result, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
+
+    // Combine back the result polygons
+    subject.clear();
+    for(size_t i = 0; i < result.size(); ++i) {
+        const ClipperLib::Path& curPath = result[i];
+        if(!subject.empty()) subject.push_back(Painter::PolygonSeparatorPointF);
+        for(size_t j = 0; j < curPath.size(); ++j) {
+            subject.push_back( PointF(curPath[j].X, curPath[j].Y) );
+        }
+    }
 }
 
 
