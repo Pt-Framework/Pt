@@ -100,9 +100,9 @@ void DrawText2::drawMono(Image& image, const Color& color, const Point& pos, con
     return FreeType2::instance().draw(image, _clip, pos, color, _fontAngle, mode, text, _matrix, _faceId, &_imageType, true);
 }
 
-void DrawText2::pathFromChar(std::vector<PointF>& points, std::vector<Pt::int32_t>& contours, const Char& chr)
+void DrawText2::pathFromChar(std::vector<Point>& points, std::vector<Pt::uint8_t>& tags, std::vector<Pt::int32_t>& contours, const Char& chr)
 {
-    FreeType2::instance().pathFromChar(points, contours, chr, _faceId, &_imageType);
+    FreeType2::instance().pathFromChar(points, tags, contours, chr, _faceId, &_imageType);
 }
 
 

@@ -227,6 +227,85 @@ static inline void generateArcPoints(std::vector<PointF>& dst, double x1, double
     generateQuadraticBezierPoints(dst, xm + cx, ym + cy, x2 + cx, y2 + cy, x2, y2, smoothness);
 }
 
+static inline void generateChrPoints(std::vector<PointF>& dst, double x, double y, const std::vector<Point>& points, const std::vector<Pt::uint8_t>& tags, const std::vector<Pt::int32_t>& contours, double smoothness)
+{
+    std::clog << "points/tags = " << points.size() << " ; contours = " << contours.size() << std::endl;
+
+    int contour_starti = 0;
+    int contour_endi = 0;
+    for ( int i = 0 ; i < (int) contours.size() ; i++ ) {
+        contour_endi = contours.at(i);
+        int offset = contour_starti;
+        int npts = contour_endi - contour_starti + 1;
+
+        if(!dst.empty()) dst.push_back(Painter::PolygonSeparatorPointF);
+        dst.push_back(PointF(
+            points[contour_starti].x(),
+            points[contour_starti].y()
+        ));
+
+
+        for ( int j = 0; j < npts; j++ ) {
+            int thisi = j%npts + offset;
+            int nexti = (j+1)%npts + offset;
+            int nextnexti = (j+2)%npts + offset;
+            int x = points[thisi].x();
+            int y = points[thisi].y();
+            int nx = points[nexti].x();
+            int ny = points[nexti].y();
+            int nnx = points[nextnexti].x();
+            int nny = points[nextnexti].y();
+            bool this_tagbit1 = (tags[ thisi ] & 1);
+            bool next_tagbit1 = (tags[ nexti ] & 1);
+            bool nextnext_tagbit1 = (tags[ nextnexti ] & 1);
+            bool this_isctl = !this_tagbit1;
+            bool next_isctl = !next_tagbit1;
+            bool nextnext_isctl = !nextnext_tagbit1;
+
+            if (this_isctl && next_isctl) {
+                x = (x + nx) / 2;
+                y = (y + ny) / 2;
+                this_isctl = false;
+
+                if (j==0) {
+                    if(!dst.empty()) dst.push_back(Painter::PolygonSeparatorPointF);
+                    dst.push_back(PointF(
+                        x,
+                        y
+                    ));
+                }
+            }
+
+            if (!this_isctl && next_isctl && !nextnext_isctl) {
+
+                generateQuadraticBezierPoints(dst, dst.back().x(), dst.back().y(), nx, ny, nnx, nny, smoothness);
+
+
+            } else if (!this_isctl && next_isctl && nextnext_isctl) {
+                nnx = (nx + nnx) / 2;
+                nny = (ny + nny) / 2;
+
+                generateQuadraticBezierPoints(dst, dst.back().x(), dst.back().y(), nx, ny, nnx, nny, smoothness);
+
+            } else if (!this_isctl && !next_isctl) {
+
+                    dst.push_back(PointF(
+                        nx,
+                        ny
+                    ));
+
+
+            } else if (this_isctl && !next_isctl) {
+            }
+        }
+        contour_starti = contour_endi+1;
+    }
+
+
+
+    dst.push_back(Painter::PolygonSeparatorPointF);
+}
+
 
 // ======================================================================================
 // ===== Path::PathData Implementation ==================================================
@@ -654,23 +733,11 @@ void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
                 break;
 
             case PathData::IT_Char: {
-                std::vector<PointF     > p;
-                std::vector<Pt::int32_t> c;
-
-                _text->pathFromChar(p, c, ins.chr);
-
-                std::clog << "points = " << p.size() << " ; contours = " << c.size() << std::endl;
-
-                //*
-                if(!dst.empty()) dst.push_back(Painter::PolygonSeparatorPointF);
-                for(size_t i = 0; i < p.size(); ++i) {
-                    dst.push_back(PointF(
-                        p[i].x() + curX,
-                        p[i].y() + curY
-                    ));
-                }
-                dst.push_back(Painter::PolygonSeparatorPointF);
-                //*/
+                std::vector<Point      > points;
+                std::vector<Pt::uint8_t> tags;
+                std::vector<Pt::int32_t> contours;
+                _text->pathFromChar(points, tags, contours, ins.chr);
+                generateChrPoints(dst, curX, curY, points, tags, contours, smoothness);
                 break;
             }
 

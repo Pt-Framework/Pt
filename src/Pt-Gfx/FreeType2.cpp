@@ -259,7 +259,7 @@ FT_Error FreeType2::onFontRequest(FTC_FaceID faceId, FT_Face* face)
     return FT_New_Face(_ft, path->toLocal().c_str(), 0, face);
 }
 
-void FreeType2::pathFromChar(std::vector<PointF>& points, std::vector<Pt::int32_t>& contours, const Char& chr, FTC_FaceID faceId, FTC_ImageType imageType)
+void FreeType2::pathFromChar(std::vector<Point>& points, std::vector<Pt::uint8_t>& tags, std::vector<Pt::int32_t>& contours, const Char& chr, FTC_FaceID faceId, FTC_ImageType imageType)
 {
     points.clear();
     contours.clear();
@@ -294,6 +294,11 @@ void FreeType2::pathFromChar(std::vector<PointF>& points, std::vector<Pt::int32_
             face->glyph->outline.points[i].x,
             face->glyph->outline.points[i].y
         );
+    }
+
+    tags.resize(face->glyph->outline.n_points);
+    for(int i = 0; i < face->glyph->outline.n_points; ++i) {
+        tags[i] = face->glyph->outline.tags[i];
     }
 
     contours.resize(face->glyph->outline.n_contours);
