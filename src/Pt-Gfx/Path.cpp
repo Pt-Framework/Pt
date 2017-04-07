@@ -255,12 +255,10 @@ static inline void generateChrPoints(std::vector<PointF>& dst, double x, double 
     //    Bit #1 -> 0 = quadratic bezier (TTF) ; 1 = cubic bezier (OTF)
     //    Bit #2 -> 0 = bit #5-#7 is unused    ; 1 = bit #5-#7 contain the OTF drop-out mode (currently ignored)
 
-#define CURVE_TAG(T) ((T) & 0x03)
-#define CURVE_TAG_ON    0x01
-#define CURVE_TAG_CONIC 0x00
-#define CURVE_TAG_CUBIC 0x02
 
-//#define CURVE_TAG_CUBIC(T) ((T) & 0x03 == 0x02)
+#define CURVE_TAG_C_POINT(T) ( ( (T) & 0x03 ) == 0x01 )
+#define CURVE_TAG_Q_B_CTL(T) ( ( (T) & 0x03 ) == 0x00 )
+#define CURVE_TAG_C_B_CTL(T) ( ( (T) & 0x03 ) == 0x02 )
 
     // Index of the first point in the contour
     Pt::int32_t begIdx = 0;
@@ -277,14 +275,13 @@ static inline void generateChrPoints(std::vector<PointF>& dst, double x, double 
         PointF      pBeg = pointsF[begIdx];
         PointF      pEnd = pointsF[endIdx];
         PointF      pCtl = pBeg;
-        Pt::uint8_t pTag = CURVE_TAG(tItr[0]);
-        // A contour cannot start with a cubic control point
-        if(pTag == CURVE_TAG_CUBIC) return;
+        Pt::uint8_t pTag = tItr[0];
+        // A contour cannot start with a cubic bezier control point
+        if(CURVE_TAG_C_B_CTL(pTag)) return;
 
         // check begIdx point to determine origin
-        if(pTag == CURVE_TAG_CONIC) {
-            // begIdx point is conic control.  Yes, this happens.
-            if(CURVE_TAG(tags[endIdx]) == CURVE_TAG_ON) {
+        if(CURVE_TAG_Q_B_CTL(pTag)) {
+            if(CURVE_TAG_C_POINT(tags[endIdx])) {
                 // start at endIdx point if it is on the curve
                 pBeg = pEnd;
                 --pMax;
@@ -311,15 +308,15 @@ static inline void generateChrPoints(std::vector<PointF>& dst, double x, double 
             ++pItr;
             ++tItr;
 
-            pTag = CURVE_TAG(tItr[0]);
+            pTag = tItr[0];
 
             // Generate a line
-            if(pTag == CURVE_TAG_ON) {
+            if(CURVE_TAG_C_POINT(pTag)) {
                 dst.push_back(PointF(pItr->x(), pItr->y()));
                 continue;
             }
 
-            else if(pTag == CURVE_TAG_CONIC) {
+            else if(CURVE_TAG_Q_B_CTL(pTag)) {
                 pCtl = *pItr;
 
                 bool done = false;
@@ -327,9 +324,9 @@ static inline void generateChrPoints(std::vector<PointF>& dst, double x, double 
                     ++pItr;
                     ++tItr;
 
-                    pTag = CURVE_TAG(tItr[0]);
+                    pTag = tItr[0];
 
-                    if(pTag == CURVE_TAG_ON) {
+                    if(CURVE_TAG_C_POINT(pTag)) {
                         generateQuadraticBezierPoints(
                             dst,
                             dst.back().x(), dst.back().y(),
@@ -342,7 +339,7 @@ static inline void generateChrPoints(std::vector<PointF>& dst, double x, double 
                     }
                     if(done) break;
 
-                    if(pTag != CURVE_TAG_CONIC) return;
+                    if(!CURVE_TAG_Q_B_CTL(pTag)) return;
 
                     generateQuadraticBezierPoints(
                         dst, dst.back().x(), dst.back().y(),
@@ -365,8 +362,8 @@ static inline void generateChrPoints(std::vector<PointF>& dst, double x, double 
                 pItr = pMax;
             }
 
-            else {
-                if(pItr + 1 > pMax || CURVE_TAG(tItr[1]) != CURVE_TAG_CUBIC) return;
+            else { // CURVE_TAG_C_B_CTL
+                if(pItr + 1 > pMax || !CURVE_TAG_C_B_CTL(tItr[1])) return;
 
                 PointF vec1 = pItr[0];
                 PointF vec2 = pItr[1];
