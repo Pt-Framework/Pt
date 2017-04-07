@@ -305,7 +305,7 @@ void FreeType2::getCharSpacing(
 
 void FreeType2::pathFromChar(
     std::vector<PointF>& points, std::vector<Pt::uint8_t>& tags, std::vector<Pt::int32_t>& contours,
-    const Char& chr, FTC_FaceID faceId, FTC_ImageType imageType
+    const Char& chr, FTC_FaceID faceId
 )
 {
     points.clear();
@@ -328,35 +328,31 @@ void FreeType2::pathFromChar(
     FT_UInt glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, chr);
     if(!glyph_index) return;
 
-    imageType->flags = FT_LOAD_TARGET_NORMAL | FT_LOAD_IGNORE_TRANSFORM;
+    FT_Load_Glyph(face, glyph_index, FT_LOAD_TARGET_NORMAL | FT_LOAD_IGNORE_TRANSFORM);
+    FT_GlyphSlot glyph = face->glyph;
 
-    FTC_SBit smalGlyphBitmap;
-    FTC_Node node;
-    if(FTC_SBitCache_Lookup(_bitmapCache, imageType, glyph_index, &smalGlyphBitmap, &node))
-        return;
-
-    points.resize(face->glyph->outline.n_points);
-    for(int i = 0; i < face->glyph->outline.n_points; ++i) {
+    points.resize(glyph->outline.n_points);
+    for(int i = 0; i < glyph->outline.n_points; ++i) {
         points[i].set(
-             face->glyph->outline.points[i].x * 0.015625, // (1.0 / 64.0)
-            -face->glyph->outline.points[i].y * 0.015625
+             glyph->outline.points[i].x * 0.015625, // (1.0 / 64.0)
+            -glyph->outline.points[i].y * 0.015625
         );
     }
 
-    tags.resize(face->glyph->outline.n_points);
-    for(int i = 0; i < face->glyph->outline.n_points; ++i) {
-        tags[i] = face->glyph->outline.tags[i];
+    tags.resize(glyph->outline.n_points);
+    for(int i = 0; i < glyph->outline.n_points; ++i) {
+        tags[i] = glyph->outline.tags[i];
     }
 
-    contours.resize(face->glyph->outline.n_contours);
-    for(int i = 0; i < face->glyph->outline.n_contours; ++i) {
-        contours[i] = face->glyph->outline.contours[i];
+    contours.resize(glyph->outline.n_contours);
+    for(int i = 0; i < glyph->outline.n_contours; ++i) {
+        contours[i] = glyph->outline.contours[i];
     }
 }
 
 void FreeType2::pathFromCharExt(
     std::vector<PointF>& points, std::vector<Pt::uint8_t>& tags, std::vector<Pt::int32_t>& contours,
-    const Char& chr, Pt::int32_t& x, Pt::int32_t& y, const Char& chrNext, FTC_FaceID faceId, FTC_ImageType imageType
+    const Char& chr, Pt::int32_t& x, Pt::int32_t& y, const Char& chrNext, FTC_FaceID faceId
 )
 {
     points.clear();
@@ -381,37 +377,33 @@ void FreeType2::pathFromCharExt(
     FT_UInt glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, chr);
     if(!glyph_index) return;
 
-    imageType->flags = FT_LOAD_TARGET_NORMAL | FT_LOAD_IGNORE_TRANSFORM;
+    FT_Load_Glyph(face, glyph_index, FT_LOAD_TARGET_NORMAL | FT_LOAD_IGNORE_TRANSFORM);
+    FT_GlyphSlot glyph = face->glyph;
 
-    FTC_SBit smalGlyphBitmap;
-    FTC_Node node;
-    if(FTC_SBitCache_Lookup(_bitmapCache, imageType, glyph_index, &smalGlyphBitmap, &node))
-        return;
-
-    points.resize(face->glyph->outline.n_points);
-    for(int i = 0; i < face->glyph->outline.n_points; ++i) {
+    points.resize(glyph->outline.n_points);
+    for(int i = 0; i < glyph->outline.n_points; ++i) {
         points[i].set(
-             face->glyph->outline.points[i].x * 0.015625, // (1.0 / 64.0)
-            -face->glyph->outline.points[i].y * 0.015625
+             glyph->outline.points[i].x * 0.015625, // (1.0 / 64.0)
+            -glyph->outline.points[i].y * 0.015625
         );
     }
 
-    tags.resize(face->glyph->outline.n_points);
-    for(int i = 0; i < face->glyph->outline.n_points; ++i) {
-        tags[i] = face->glyph->outline.tags[i];
+    tags.resize(glyph->outline.n_points);
+    for(int i = 0; i < glyph->outline.n_points; ++i) {
+        tags[i] = glyph->outline.tags[i];
     }
 
-    contours.resize(face->glyph->outline.n_contours);
-    for(int i = 0; i < face->glyph->outline.n_contours; ++i) {
-        contours[i] = face->glyph->outline.contours[i];
+    contours.resize(glyph->outline.n_contours);
+    for(int i = 0; i < glyph->outline.n_contours; ++i) {
+        contours[i] = glyph->outline.contours[i];
     }
 
     // Calculate the spacing to the next character
     FT_UInt glyph_index_next = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, chrNext);
     if(!glyph_index_next) return;
 
-    x = smalGlyphBitmap->xadvance;
-    y = smalGlyphBitmap->yadvance;
+    x = glyph->advance.x / 64;
+    y = glyph->advance.y / 64;
 
     if(FT_HAS_KERNING(face)) {
         FT_Vector delta;
