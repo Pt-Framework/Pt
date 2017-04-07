@@ -210,6 +210,9 @@ void PlatinumButtonRenderer::onPrepare(const PushButton& button,
         if( button.isPressed() )
         {
             buttonColor = brighten(buttonColor, 0.9f);
+
+            if( button.isFlat() )
+                textPen = options.accentColor();
         }
 
         foreground = buttonColor;
@@ -222,7 +225,29 @@ void PlatinumButtonRenderer::onPrepareIcon(const PushButton& button,
                                            const Gfx::Image& icon,
                                            Picture& picture) const
 {
-    picture.set(icon);
+    if( button.isPressed() && button.isFlat() )
+    {
+        Gfx::Color hightlightColor = options.accentColor();
+
+        Gfx::Image highlightIcon = icon;
+
+        for(Gfx::Image::PixelIterator it = highlightIcon.begin(); it != highlightIcon.end(); ++it)
+        {
+            Gfx::Color color = it->toColor();
+
+            color.setRed( hightlightColor.red() );
+            color.setGreen( hightlightColor.green() ); 
+            color.setBlue( hightlightColor.blue() ); 
+
+            (*it) = color;
+        }
+
+        picture.set(highlightIcon);
+    }
+    else
+    {
+        picture.set(icon);
+    }
 }
 
 

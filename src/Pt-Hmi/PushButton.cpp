@@ -212,6 +212,11 @@ void PushButton::onPressed()
     }
     else
         setPressed(true);
+
+    const StyleOptions& options = Application::instance().styleOptions();
+
+    if(_renderer)
+        _renderer->prepareIcon(*this, options, _icon, _picture);
 }
 
 
@@ -223,6 +228,11 @@ void PushButton::onReleased()
 
     if( ! isToggle() )
         setPressed(false);
+
+    const StyleOptions& options = Application::instance().styleOptions();
+
+    if(_renderer)
+        _renderer->prepareIcon(*this, options, _icon, _picture);
 
     clicked().send();
 }
@@ -242,6 +252,11 @@ void PushButton::onCanceled()
     }
     else
         setPressed(false);
+
+    const StyleOptions& options = Application::instance().styleOptions();
+
+    if(_renderer)
+        _renderer->prepareIcon(*this, options, _icon, _picture);
 }
 
 
