@@ -41,7 +41,7 @@ namespace Pt{
 namespace Gfx{
 
 
-#if defined(PT_GFX_USE_AVX1_Q)
+#if defined(PT_GFX_USE_AVX1)
 
 // AVX constants
 static const __m256 avxOneZeroF = _mm256_set_ps(0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, 1.0f);
@@ -49,7 +49,7 @@ static const __m256 avxMaxCordF = _mm256_set1_ps(Painter::MaximumCoordinate);
 
 #endif
 
-#if defined(PT_GFX_USE_NEON_Q)
+#if defined(PT_GFX_USE_NEON)
 
 // NEON constants
 static const float32x4_t neonOneZeroF = NEON_SET_FLT32X4(0.0f, 1.0f, 0.0f, 1.0f);
@@ -61,7 +61,7 @@ static const float32x4_t neonMaxCordF = vdupq_n_f32(Painter::MaximumCoordinate);
 // ======================================================================================
 // ===== MatrixData Implementation ======================================================
 // ======================================================================================
-#if defined(PT_GFX_USE_AVX1_Q)
+#if defined(PT_GFX_USE_AVX1)
 
 template <typename T>
 union BasicMatrixData {
@@ -80,7 +80,7 @@ union BasicMatrixData<double> {
     __m256d r[4];
 };
 
-#elif defined(PT_GFX_USE_NEON_Q)
+#elif defined(PT_GFX_USE_NEON)
 
 template <typename T>
 union BasicMatrixData {
@@ -213,7 +213,7 @@ inline BasicAffineTransform<T>::BasicAffineTransform()
 {
     identity();
 
-#if defined(PT_GFX_USE_AVX1_Q) || defined(PT_GFX_USE_NEON_Q)
+#if defined(PT_GFX_USE_AVX1) || defined(PT_GFX_USE_NEON)
     _mdata.v[0][3] = 0; _mdata.v[1][3] = 0; _mdata.v[2][3] = 0;
     _mdata.v[3][0] = 0; _mdata.v[3][1] = 0; _mdata.v[3][2] = 0; _mdata.v[3][3] = 0;
 #endif
@@ -546,7 +546,7 @@ inline void BasicAffineTransform<float>::shearY(float deg, bool replaceInsteadOf
     _isIdentity = false;
 }
 
-#if defined(PT_GFX_USE_AVX1_Q)
+#if defined(PT_GFX_USE_AVX1)
 
 template <>
 inline void BasicAffineTransform<float>::transformPoints(float* dxy, const float* sxy, size_t pointCount) const
@@ -612,7 +612,7 @@ inline void BasicAffineTransform<float>::transformPoints(float* dxy, const float
     for(size_t i = 0; i < pointCount; i += 2) transformPoint(dxy[i], dxy[i + 1], sxy[i], sxy[i + 1]);
 }
 
-#elif defined(PT_GFX_USE_NEON_Q)
+#elif defined(PT_GFX_USE_NEON)
 
 template <>
 inline void BasicAffineTransform<float>::transformPoints(float* dxy, const float* sxy, size_t pointCount) const

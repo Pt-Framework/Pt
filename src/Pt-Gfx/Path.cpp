@@ -70,8 +70,6 @@ static inline void getGenericNBezierPoint(double& x, double& y, const std::vecto
 
 static inline void generateGenericNBezierPoints(std::vector<PointF>& dst, double x1, double y1, const std::vector<double>& points, double smoothness)
 {
-    // ### TODO: Make the curve smoother, if possible. ###
-
     // Add the start coordinate to the point
     std::vector<double> pts;
     pts.reserve(points.size() + 2);
@@ -96,9 +94,7 @@ static inline void generateGenericNBezierPoints(std::vector<PointF>& dst, double
     }
 
     // Determine the number of segments
-    const Pt::int32_t minNS = pts.size() / 2 + 1;
-          Pt::int32_t nSegs = Gfx::Math::zrint(clen * smoothness / 24);
-    if(nSegs < minNS) nSegs = minNS;
+    const Pt::int32_t nSegs = Gfx::Math::zrint(clen * abs(smoothness) / 20) + (pts.size() / 2 + 1);
 
     // Calculate the inverse multiplication factor
     const double nSegs1i = 1.0 / (nSegs - 1);
@@ -117,8 +113,6 @@ static inline void generateGenericNBezierPoints(std::vector<PointF>& dst, double
 
 static inline void generateCubicBezierPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double smoothness)
 {
-    // ### TODO: Make the curve smoother, if possible. ###
-
     // Calculate the approximate length of the curve
     const double dx43 = x4 - x3;
     const double dy43 = y4 - y3;
@@ -132,8 +126,7 @@ static inline void generateCubicBezierPoints(std::vector<PointF>& dst, double x1
     const double lb   = l43 + l32 + l12;
 
     // Determine the number of segments
-    Pt::int32_t nSegs = Gfx::Math::zrint(lb * smoothness / 16) + 4;
-    if(nSegs < 9) nSegs = 9;
+    const Pt::int32_t nSegs = Gfx::Math::zrint(lb * abs(smoothness) / 20) + 5;
 
     // Calculate the inverse multiplication factor
     const double nSegs1i = 1.0 / (nSegs - 1);
@@ -159,8 +152,6 @@ static inline void generateCubicBezierPoints(std::vector<PointF>& dst, double x1
 
 static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double x3, double y3, double smoothness)
 {
-    // ### TODO: Make the curve smoother, if possible. ###
-
     // Check if the points actually specify a straight line
     const double dx32 = x3 - x2;
     const double dy32 = y3 - y2;
@@ -179,8 +170,7 @@ static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, doubl
     const double lb  = l32 + l12;
 
     // Determine the number of segments
-    Pt::int32_t nSegs = Gfx::Math::zrint(lb * smoothness / 16) + 2;
-    if(nSegs < 5) nSegs = 5;
+    const Pt::int32_t nSegs = Gfx::Math::zrint(lb * abs(smoothness) / 20) + 4;
 
     // Calculate the inverse multiplication factor
     const double nSegs1i = 1.0 / (nSegs - 1);

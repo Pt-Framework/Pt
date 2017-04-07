@@ -229,9 +229,10 @@ static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, float
         return;
     }
 
-    // Process as a quadratic bezier curve
-    if(nSegs < 5) nSegs = 5;
+    // Ensure that the number of segments are not too few
+    if(nSegs < 4) nSegs = 4;
 
+    // Calculate the inverse multiplication factor
     const float nSegs1i = 1.0f / (nSegs - 1);
 
     for(Pt::int32_t i = 0; i < nSegs; ++i) {
