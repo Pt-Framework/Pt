@@ -88,6 +88,11 @@ class FreeType2 : public Pt::Singleton<FreeType2> {
             const Char& chr, FTC_FaceID faceId, FTC_ImageType imageType
         );
 
+        void pathFromCharExt(
+            std::vector<PointF>& points, std::vector<Pt::uint8_t>& tags, std::vector<Pt::int32_t>& contours,
+            const Char& chr, Pt::int32_t& x, Pt::int32_t& y, const Char& chrNext, FTC_FaceID faceId, FTC_ImageType imageType
+        );
+
         void draw(
             Image& image, const Rect& clip, const Point& pos, const Color& color, Pt::ssize_t fontAngle, const CompositionMode& mode,
             const String& text, FT_Matrix& matrix, FTC_FaceID faceId, FTC_ImageType imageType, bool mono

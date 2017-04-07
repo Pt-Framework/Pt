@@ -264,6 +264,8 @@ void FreeType2::getCharSpacing(
     const Char& from, const Char& to, FTC_FaceID faceId, FTC_ImageType imageType
 )
 {
+    x = y = 0;
+
     System::MutexLock lock(_mutex);
 
     FT_Face  face = 0;
@@ -340,7 +342,7 @@ void FreeType2::pathFromChar(
             -face->glyph->outline.points[i].y * 0.015625
         );
     }
- 
+
     tags.resize(face->glyph->outline.n_points);
     for(int i = 0; i < face->glyph->outline.n_points; ++i) {
         tags[i] = face->glyph->outline.tags[i];
@@ -349,6 +351,73 @@ void FreeType2::pathFromChar(
     contours.resize(face->glyph->outline.n_contours);
     for(int i = 0; i < face->glyph->outline.n_contours; ++i) {
         contours[i] = face->glyph->outline.contours[i];
+    }
+}
+
+void FreeType2::pathFromCharExt(
+    std::vector<PointF>& points, std::vector<Pt::uint8_t>& tags, std::vector<Pt::int32_t>& contours,
+    const Char& chr, Pt::int32_t& x, Pt::int32_t& y, const Char& chrNext, FTC_FaceID faceId, FTC_ImageType imageType
+)
+{
+    points.clear();
+    contours.clear();
+
+    x = y = 0;
+
+    System::MutexLock lock(_mutex);
+
+    FT_Face  face = 0;
+    FT_Error ferr = FTC_Manager_LookupFace(_manager, faceId, &face);
+    if(ferr && ferr != FT_Err_Out_Of_Memory) return;
+
+    FT_Int charMapIndex = 0;
+    for(int n = 0; n < face->num_charmaps; ++n) {
+        if(face->charmap[n].encoding == FT_ENCODING_UNICODE) {
+            charMapIndex = n;
+            break;
+        }
+    }
+
+    FT_UInt glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, chr);
+    if(!glyph_index) return;
+
+    imageType->flags = FT_LOAD_TARGET_NORMAL | FT_LOAD_IGNORE_TRANSFORM;
+
+    FTC_SBit smalGlyphBitmap;
+    FTC_Node node;
+    if(FTC_SBitCache_Lookup(_bitmapCache, imageType, glyph_index, &smalGlyphBitmap, &node))
+        return;
+
+    points.resize(face->glyph->outline.n_points);
+    for(int i = 0; i < face->glyph->outline.n_points; ++i) {
+        points[i].set(
+             face->glyph->outline.points[i].x * 0.015625, // (1.0 / 64.0)
+            -face->glyph->outline.points[i].y * 0.015625
+        );
+    }
+
+    tags.resize(face->glyph->outline.n_points);
+    for(int i = 0; i < face->glyph->outline.n_points; ++i) {
+        tags[i] = face->glyph->outline.tags[i];
+    }
+
+    contours.resize(face->glyph->outline.n_contours);
+    for(int i = 0; i < face->glyph->outline.n_contours; ++i) {
+        contours[i] = face->glyph->outline.contours[i];
+    }
+
+    // Calculate the spacing to the next character
+    FT_UInt glyph_index_next = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, chrNext);
+    if(!glyph_index_next) return;
+
+    x = smalGlyphBitmap->xadvance;
+    y = smalGlyphBitmap->yadvance;
+
+    if(FT_HAS_KERNING(face)) {
+        FT_Vector delta;
+        FT_Get_Kerning(face, glyph_index, glyph_index_next, FT_KERNING_DEFAULT, &delta);
+        x += delta.x;
+        y += delta.y;
     }
 }
 

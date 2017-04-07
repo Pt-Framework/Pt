@@ -110,6 +110,11 @@ void DrawText2::pathFromChar(std::vector<PointF>& points, std::vector<Pt::uint8_
     FreeType2::instance().pathFromChar(points, tags, contours, chr, _faceId, &_imageType);
 }
 
+void DrawText2::pathFromCharExt(std::vector<PointF>& points, std::vector<Pt::uint8_t>& tags, std::vector<Pt::int32_t>& contours, const Char& chr, Pt::int32_t& x, Pt::int32_t& y, const Char& chrNext)
+{
+    FreeType2::instance().pathFromCharExt(points, tags, contours, chr, x, y, chrNext, _faceId, &_imageType);
+}
+
 
 } //namespace
 } //namespace
