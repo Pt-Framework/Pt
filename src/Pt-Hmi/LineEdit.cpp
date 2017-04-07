@@ -77,6 +77,8 @@ void LineEdit::setText(const Pt::String& str)
 {
     _editor.setText(str);
     invalidate();
+
+    _textEdited.send( _editor.text() );
 }
 
 
