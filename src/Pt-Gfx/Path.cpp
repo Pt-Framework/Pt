@@ -332,36 +332,39 @@ Do_Conic:
 
                         tag = CURVE_TAG(tags[0]);
 
-                        PointF vec = *point;
-
                         if(tag == CURVE_TAG_ON) {
-                            x1 = v_control.x();
-                            y1 = v_control.y();
-                            double x2 = vec.x();
-                            double y2 = vec.y();
-                            generateQuadraticBezierPoints(dst, dst.back().x(), dst.back().y(), x1, y1, x2, y2, smoothness);
+                            generateQuadraticBezierPoints(
+                                dst,
+                                dst.back().x(), dst.back().y(),
+                                v_control.x(), v_control.y(),
+                                point->x(), point->y(),
+                                smoothness
+                            );
                             continue;
                         }
 
                         if(tag != CURVE_TAG_CONIC) return;
 
-                        x1 = v_control.x();
-                        y1 = v_control.y();
-                        double x2 = (v_control.x() + vec.x()) * 0.5;;
-                        double y2 = (v_control.y() + vec.y()) * 0.5;
-
-                        generateQuadraticBezierPoints(dst, dst.back().x(), dst.back().y(), x1, y1, x2, y2, smoothness);
-                        v_control = vec;
+                        generateQuadraticBezierPoints(
+                            dst, dst.back().x(), dst.back().y(),
+                            v_control.x(), v_control.y(),
+                            (v_control.x() + point->x()) * 0.5, (v_control.y() + point->y()) * 0.5,
+                            smoothness
+                        );
+                        v_control = *point;
                         goto Do_Conic;
                     }
 
-                    x1 = v_control.x();
-                    y1 = v_control.y();
-                    double x2 = v_start.x();
-                    double y2 = v_start.y();
-                    generateQuadraticBezierPoints(dst, dst.back().x(), dst.back().y(), x1, y1, x2, y2, smoothness);
+                    generateQuadraticBezierPoints(
+                        dst,
+                        dst.back().x(), dst.back().y(),
+                        v_control.x(), v_control.y(),
+                        v_start.x(), v_start.y(),
+                        smoothness
+                    );
 
-                    goto Close;
+                    point = limit;
+                    break;
                 }
 
                 default : { // CURVE_TAG_CUBIC
@@ -377,31 +380,34 @@ Do_Conic:
                     if(point <= limit) {
                         PointF vec = *point;
 
-                        x1 = vec1.x();
-                        y1 = vec1.y();
-                        double x2 = vec2.x();
-                        double y2 = vec2.y();
-                        double x3 = vec.x();
-                        double y3 = vec.y();
-                        generateCubicBezierPoints(dst, dst.back().x(), dst.back().y(), x1, y1, x2, y2, x3, y3, smoothness);
+                        generateCubicBezierPoints(
+                            dst,
+                            dst.back().x(), dst.back().y(),
+                            vec1.x(), vec1.y(),
+                            vec2.x(), vec2.y(),
+                            vec.x(), vec.y(),
+                            smoothness
+                        );
                         continue;
                     }
 
-                    x1 = vec1.x();
-                    y1 = vec1.y();
-                    double x2 = vec2.x();
-                    double y2 = vec2.y();
-                    double x3 = v_start.x();
-                    double y3 = v_start.y();
+                    generateCubicBezierPoints(
+                        dst,
+                        dst.back().x(), dst.back().y(),
+                        vec1.x(), vec1.y(),
+                        vec2.x(), vec2.y(),
+                        v_start.x(), v_start.y(),
+                        smoothness
+                    );
 
-                    generateCubicBezierPoints(dst, dst.back().x(), dst.back().y(), x1, y1, x2, y2, x3, y3, smoothness);
-                    goto Close;
+                    point = limit;
+                    break;
                 }
 
             } // switch
         } // while
 
-Close:
+
         first = last + 1;
     }
 
