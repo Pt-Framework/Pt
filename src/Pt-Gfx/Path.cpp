@@ -250,38 +250,39 @@ static inline void generateChrPoints(std::vector<PointF>& dst, double x, double 
         );
     }
 
-    // Bit #0 -> 0 = control point          ; 1 = non-control point
-    // Bit #1 -> 0 = quadratic bezier (TTF) ; 1 = cubic bezier (OTF)
-    // Bit #2 -> 0 = bit #5-#7 is unused    ; 1 = bit #5-#7 contain the OTF drop-out mode (we ignored this)
+    // About the point tags:
+    //    Bit #0 -> 0 = control point          ; 1 = non-control point
+    //    Bit #1 -> 0 = quadratic bezier (TTF) ; 1 = cubic bezier (OTF)
+    //    Bit #2 -> 0 = bit #5-#7 is unused    ; 1 = bit #5-#7 contain the OTF drop-out mode (currently ignored)
 
 #define CURVE_TAG(T) ((T) & 0x03)
 #define CURVE_TAG_ON    0x01
 #define CURVE_TAG_CONIC 0x00
 #define CURVE_TAG_CUBIC 0x02
 
-    // Walk through the contours
+//#define CURVE_TAG_CUBIC(T) ((T) & 0x03 == 0x02)
+
+    // Index of the first point in the contour
     Pt::int32_t begIdx = 0;
+
+    // Walk through the contours
     for(size_t i = 0; i < contours.size(); ++i) {
-        // Get the index of the endIdx point in the contour
+       // Index of the last point in the contour
         Pt::int32_t endIdx = contours[i];
-
-        const PointF* pMax = pointsF.data() + endIdx;
-
-        PointF pBeg = pointsF[begIdx];
-        PointF pEnd  = pointsF[endIdx];
-
-        //
-        PointF pCtl = pBeg;
-        const PointF* pItr = pointsF.data() + begIdx;
-        const Pt::uint8_t* tItr = tags.data() + begIdx;
-
-        Pt::uint8_t tag = CURVE_TAG(tItr[0]);
-
+        // Prepare the iterators
+        const PointF*      pMax = &pointsF[endIdx];
+        const PointF*      pItr = &pointsF[begIdx];
+        const Pt::uint8_t* tItr = &tags   [begIdx];
+        // Get the initial begin, end, and control points as well as the tag
+        PointF      pBeg = pointsF[begIdx];
+        PointF      pEnd = pointsF[endIdx];
+        PointF      pCtl = pBeg;
+        Pt::uint8_t pTag = CURVE_TAG(tItr[0]);
         // A contour cannot start with a cubic control point
-        if(tag == CURVE_TAG_CUBIC) return;
+        if(pTag == CURVE_TAG_CUBIC) return;
 
         // check begIdx point to determine origin
-        if(tag == CURVE_TAG_CONIC) {
+        if(pTag == CURVE_TAG_CONIC) {
             // begIdx point is conic control.  Yes, this happens.
             if(CURVE_TAG(tags[endIdx]) == CURVE_TAG_ON) {
                 // start at endIdx point if it is on the curve
@@ -310,100 +311,97 @@ static inline void generateChrPoints(std::vector<PointF>& dst, double x, double 
             ++pItr;
             ++tItr;
 
-            tag = CURVE_TAG(tItr[0]);
+            pTag = CURVE_TAG(tItr[0]);
 
-            switch(tag) {
-                // Generate a line
-                case CURVE_TAG_ON: {
-                    dst.push_back(PointF(pItr->x(), pItr->y()));
-                    continue;
-                }
+            // Generate a line
+            if(pTag == CURVE_TAG_ON) {
+                dst.push_back(PointF(pItr->x(), pItr->y()));
+                continue;
+            }
 
-                case CURVE_TAG_CONIC: {
-                    pCtl = *pItr;
+            else if(pTag == CURVE_TAG_CONIC) {
+                pCtl = *pItr;
 
-                    bool done = false;
-                    while(!done && pItr < pMax) {
-                        ++pItr;
-                        ++tItr;
+                bool done = false;
+                while(!done && pItr < pMax) {
+                    ++pItr;
+                    ++tItr;
 
-                        tag = CURVE_TAG(tItr[0]);
+                    pTag = CURVE_TAG(tItr[0]);
 
-                        if(tag == CURVE_TAG_ON) {
-                            generateQuadraticBezierPoints(
-                                dst,
-                                dst.back().x(), dst.back().y(),
-                                pCtl.x(), pCtl.y(),
-                                pItr->x(), pItr->y(),
-                                smoothness
-                            );
-                            done = true;
-                            break;
-                        }
-                        if(done) break;
-
-                        if(tag != CURVE_TAG_CONIC) return;
-
+                    if(pTag == CURVE_TAG_ON) {
                         generateQuadraticBezierPoints(
-                            dst, dst.back().x(), dst.back().y(),
-                            pCtl.x(), pCtl.y(),
-                            (pCtl.x() + pItr->x()) * 0.5, (pCtl.y() + pItr->y()) * 0.5,
-                            smoothness
-                        );
-                        pCtl = *pItr;
-                    }
-                    if(done) continue;
-
-                    generateQuadraticBezierPoints(
-                        dst,
-                        dst.back().x(), dst.back().y(),
-                        pCtl.x(), pCtl.y(),
-                        pBeg.x(), pBeg.y(),
-                        smoothness
-                    );
-
-                    pItr = pMax;
-                    break;
-                }
-
-                default : { // CURVE_TAG_CUBIC
-
-                    if(pItr + 1 > pMax || CURVE_TAG(tItr[1]) != CURVE_TAG_CUBIC) return;
-
-                    PointF vec1 = pItr[0];
-                    PointF vec2 = pItr[1];
-
-                    pItr += 2;
-                    tItr  += 2;
-
-                    if(pItr <= pMax) {
-                        PointF vec = *pItr;
-
-                        generateCubicBezierPoints(
                             dst,
                             dst.back().x(), dst.back().y(),
-                            vec1.x(), vec1.y(),
-                            vec2.x(), vec2.y(),
-                            vec.x(), vec.y(),
+                            pCtl.x(), pCtl.y(),
+                            pItr->x(), pItr->y(),
                             smoothness
                         );
-                        continue;
+                        done = true;
+                        break;
                     }
+                    if(done) break;
+
+                    if(pTag != CURVE_TAG_CONIC) return;
+
+                    generateQuadraticBezierPoints(
+                        dst, dst.back().x(), dst.back().y(),
+                        pCtl.x(), pCtl.y(),
+                        (pCtl.x() + pItr->x()) * 0.5, (pCtl.y() + pItr->y()) * 0.5,
+                        smoothness
+                    );
+                    pCtl = *pItr;
+                }
+                if(done) continue;
+
+                generateQuadraticBezierPoints(
+                    dst,
+                    dst.back().x(), dst.back().y(),
+                    pCtl.x(), pCtl.y(),
+                    pBeg.x(), pBeg.y(),
+                    smoothness
+                );
+
+                pItr = pMax;
+            }
+
+            else {
+                if(pItr + 1 > pMax || CURVE_TAG(tItr[1]) != CURVE_TAG_CUBIC) return;
+
+                PointF vec1 = pItr[0];
+                PointF vec2 = pItr[1];
+
+                pItr += 2;
+                tItr  += 2;
+
+                if(pItr <= pMax) {
+                    PointF vec = *pItr;
 
                     generateCubicBezierPoints(
                         dst,
                         dst.back().x(), dst.back().y(),
                         vec1.x(), vec1.y(),
                         vec2.x(), vec2.y(),
-                        pBeg.x(), pBeg.y(),
+                        vec.x(), vec.y(),
                         smoothness
                     );
-
-                    pItr = pMax;
-                    break;
+                    continue;
                 }
 
-            } // switch
+                generateCubicBezierPoints(
+                    dst,
+                    dst.back().x(), dst.back().y(),
+                    vec1.x(), vec1.y(),
+                    vec2.x(), vec2.y(),
+                    pBeg.x(), pBeg.y(),
+                    smoothness
+                );
+
+                pItr = pMax;
+
+            }
+
+
 
         } // while
 
