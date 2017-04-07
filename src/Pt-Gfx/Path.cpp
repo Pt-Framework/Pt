@@ -236,7 +236,7 @@ static inline void generateArcPoints(std::vector<PointF>& dst, double x1, double
 #endif
 }
 
-static inline void generateChrPoints(std::vector<PointF>& dst, double x, double y, const std::vector<PointF>& pointsF_, const std::vector<Pt::uint8_t>& tags, const std::vector<Pt::int32_t>& contours, double smoothness)
+static inline void generateChrPoints(std::vector<PointF>& dst, double x, double y, const std::vector<PointF>& pointsF_, const std::vector<Pt::uint8_t>& tags_, const std::vector<Pt::int32_t>& contours, double smoothness)
 {
     //std::clog << "points/tags = " << points.size() << " ; contours = " << contours.size() << std::endl;
 
@@ -250,6 +250,162 @@ static inline void generateChrPoints(std::vector<PointF>& dst, double x, double 
         );
     }
 
+    // Bit #0 -> 0 = control point          ; 1 = non-control point
+    // Bit #1 -> 0 = quadratic bezier (TTF) ; 1 = cubic bezier (OTF)
+    // Bit #2 -> 0 = bit #5-#7 is unused    ; 1 = bit #5-#7 contain the OTF drop-out mode (we ignored this)
+
+#define CURVE_TAG(T) ((T) & 0x03)
+#define CURVE_TAG_ON    0x01
+#define CURVE_TAG_CONIC 0x00
+#define CURVE_TAG_CUBIC 0x02
+
+    // Walk through the contours
+    Pt::int32_t first = 0;
+    for(size_t i = 0; i < contours.size(); ++i) {
+        // Get the index of the last point in the contour
+        Pt::int32_t last = contours[i];
+
+        const PointF* limit = pointsF.data() + last;
+
+        PointF v_start = pointsF[first];
+        PointF v_last  = pointsF[last];
+
+        //
+        PointF v_control = v_start;
+        const PointF* point = pointsF.data() + first;
+        const Pt::uint8_t* tags = tags_.data() + first;
+
+        Pt::uint8_t tag = CURVE_TAG(tags[0]);
+
+        // A contour cannot start with a cubic control point
+        if(tag == CURVE_TAG_CUBIC) return;
+
+        // check first point to determine origin
+        if(tag == CURVE_TAG_CONIC) {
+            // first point is conic control.  Yes, this happens.
+            if(CURVE_TAG(tags_[last]) == CURVE_TAG_ON) {
+                // start at last point if it is on the curve
+                v_start = v_last;
+                --limit;
+            }
+            else {
+              // if both first and last points are conic,
+              // start at their middle and record its position
+              // for closure
+              v_start.setX( (v_start.x() + v_last.x()) / 2 );
+              v_start.setY( (v_start.y() + v_last.y()) / 2 );
+
+              v_last    = v_start;
+            }
+            --point;
+            --tags;
+        }
+
+        double x1 = v_start.x();
+        double y1 = v_start.y();
+
+        // Start a new ...
+        if(!dst.empty()) dst.push_back(Painter::PolygonSeparatorPointF);
+        dst.push_back(PointF(x1, y1));
+
+        while(point < limit) {
+            ++point;
+            ++tags;
+
+            tag = CURVE_TAG(tags[0]);
+
+            switch(tag) {
+                // Generate a line
+                case CURVE_TAG_ON: {
+                    x1 = point->x();
+                    y1 = point->y();
+                    dst.push_back(PointF(x1, y1));
+                    continue;
+                }
+
+                case CURVE_TAG_CONIC: {
+                    v_control = *point;
+Do_Conic:
+                    if(point < limit) {
+                        ++point;
+                        ++tags;
+
+                        tag = CURVE_TAG(tags[0]);
+
+                        PointF vec = *point;
+
+                        if(tag == CURVE_TAG_ON) {
+                            x1 = v_control.x();
+                            y1 = v_control.y();
+                            double x2 = vec.x();
+                            double y2 = vec.y();
+                            generateQuadraticBezierPoints(dst, dst.back().x(), dst.back().y(), x1, y1, x2, y2, smoothness);
+                            continue;
+                        }
+
+                        if(tag != CURVE_TAG_CONIC) return;
+
+                        x1 = v_control.x();
+                        y1 = v_control.y();
+                        double x2 = (v_control.x() + vec.x()) * 0.5;;
+                        double y2 = (v_control.y() + vec.y()) * 0.5;
+
+                        generateQuadraticBezierPoints(dst, dst.back().x(), dst.back().y(), x1, y1, x2, y2, smoothness);
+                        v_control = vec;
+                        goto Do_Conic;
+                    }
+
+                    x1 = v_control.x();
+                    y1 = v_control.y();
+                    double x2 = v_start.x();
+                    double y2 = v_start.y();
+                    generateQuadraticBezierPoints(dst, dst.back().x(), dst.back().y(), x1, y1, x2, y2, smoothness);
+
+                    goto Close;
+                }
+
+                default : { // CURVE_TAG_CUBIC
+
+                    if(point + 1 > limit || CURVE_TAG(tags[1]) != CURVE_TAG_CUBIC) return;
+
+                    PointF vec1 = point[0];
+                    PointF vec2 = point[1];
+
+                    point += 2;
+                    tags  += 2;
+
+                    if(point <= limit) {
+                        PointF vec = *point;
+
+                        x1 = vec1.x();
+                        y1 = vec1.y();
+                        double x2 = vec2.x();
+                        double y2 = vec2.y();
+                        double x3 = vec.x();
+                        double y3 = vec.y();
+                        generateCubicBezierPoints(dst, dst.back().x(), dst.back().y(), x1, y1, x2, y2, x3, y3, smoothness);
+                        continue;
+                    }
+
+                    x1 = vec1.x();
+                    y1 = vec1.y();
+                    double x2 = vec2.x();
+                    double y2 = vec2.y();
+                    double x3 = v_start.x();
+                    double y3 = v_start.y();
+
+                    generateCubicBezierPoints(dst, dst.back().x(), dst.back().y(), x1, y1, x2, y2, x3, y3, smoothness);
+                    goto Close;
+                }
+
+            } // switch
+        } // while
+
+Close:
+        first = last + 1;
+    }
+
+/*
     // Walk through the contours
     Pt::int32_t cSIdx = 0;
     Pt::int32_t cEIdx = 0;
@@ -338,6 +494,7 @@ static inline void generateChrPoints(std::vector<PointF>& dst, double x, double 
         // Update the start index of the contour
         cSIdx = cEIdx + 1;
     }
+*/
 
     // Add a separator point
     dst.push_back(Painter::PolygonSeparatorPointF);
