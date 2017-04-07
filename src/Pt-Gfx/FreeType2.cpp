@@ -259,9 +259,9 @@ FT_Error FreeType2::onFontRequest(FTC_FaceID faceId, FT_Face* face)
     return FT_New_Face(_ft, path->toLocal().c_str(), 0, face);
 }
 
-void FreeType2::getCharKerning(
+void FreeType2::getCharSpacing(
     Pt::int32_t& x, Pt::int32_t& y,
-    const Char& chr1, const Char& chr2, FTC_FaceID faceId, FTC_ImageType imageType
+    const Char& from, const Char& to, FTC_FaceID faceId, FTC_ImageType imageType
 )
 {
     System::MutexLock lock(_mutex);
@@ -278,24 +278,24 @@ void FreeType2::getCharKerning(
         }
     }
 
-    FT_UInt glyph_index1 = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, chr1);
-    if(!glyph_index1) return;
+    FT_UInt glyph_index0 = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, from);
+    if(!glyph_index0) return;
 
-    FT_UInt glyph_index2 = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, chr2);
-    if(!glyph_index2) return;
+    FT_UInt glyph_index1 = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, to);
+    if(!glyph_index1) return;
 
     imageType->flags = FT_LOAD_TARGET_NORMAL | FT_LOAD_IGNORE_TRANSFORM;
 
     FT_Glyph glyph;
     FTC_Node node;
-    FTC_ImageCache_Lookup(_imageCache, imageType, glyph_index1, &glyph, &node);
+    FTC_ImageCache_Lookup(_imageCache, imageType, glyph_index0, &glyph, &node);
 
     x = glyph->advance.x >> 16;
     y = glyph->advance.y >> 16;
 
     if(FT_HAS_KERNING(face)) {
         FT_Vector delta;
-        FT_Get_Kerning(face, glyph_index1, glyph_index2, FT_KERNING_DEFAULT, &delta);
+        FT_Get_Kerning(face, glyph_index0, glyph_index1, FT_KERNING_DEFAULT, &delta);
         x += delta.x;
         y += delta.y;
     }

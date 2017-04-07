@@ -375,7 +375,7 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
     path.moveTo   (100, 100);
     path.putChar  ('P');
     path.endPath  ();
-    path.getCharKerning(dx, dy, 'P', 'T');
+    path.getCharSpacing(dx, dy, 'P', 'T');
 
     subjPointsF.clear();
     path.generatePoints(subjPointsF, 1);

@@ -78,9 +78,9 @@ class FreeType2 : public Pt::Singleton<FreeType2> {
 
         FontMetrics fontMetrics(const String& text, FTC_FaceID faceId, FTC_ImageType imageType);
 
-        void getCharKerning(
+        void getCharSpacing(
             Pt::int32_t& x, Pt::int32_t& y,
-            const Char& chr1, const Char& chr2, FTC_FaceID faceId, FTC_ImageType imageType
+            const Char& from, const Char& to, FTC_FaceID faceId, FTC_ImageType imageType
         );
 
         void pathFromChar(

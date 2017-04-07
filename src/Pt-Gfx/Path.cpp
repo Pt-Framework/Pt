@@ -671,8 +671,8 @@ void Path::putChar(const Char& chr)
     _pathData->add(chr);
 }
 
-void Path::getCharKerning(Pt::int32_t& x, Pt::int32_t& y, const Char& chr1, const Char& chr2)
-{ _text->getCharKerning(x, y, chr1, chr2); }
+void Path::getCharSpacing(Pt::int32_t& x, Pt::int32_t& y, const Char& chr1, const Char& chr2)
+{ _text->getCharSpacing(x, y, chr1, chr2); }
 
 void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
 {
