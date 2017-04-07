@@ -287,6 +287,12 @@ static inline void generateChrPoints(std::vector<PointF>& dst, double x, double 
                 // If this is the first iteration, generate a new path that starts from
                 // the halfway point between the two control points
                 if(!j) {
+                    // A contour cannot start with a cubic bezier control point
+                    if(isCub0) {
+                        j = numPoints;
+                        continue;
+                    }
+                    // Generate a new path
                     const double xm = (x0 + x1) * 0.5;
                     const double ym = (y0 + y1) * 0.5;
                     if(!dst.empty()) dst.push_back(Painter::PolygonSeparatorPointF);
@@ -300,6 +306,7 @@ static inline void generateChrPoints(std::vector<PointF>& dst, double x, double 
                 dst.push_back(PointF(x1, y1));
             }
             // Is it a cubic bezier?
+            // ### TODO: Something is not fully correct here! ###
             else if(isCub0 && isCub1) {
                 // If Point #2 is not a control point, directly generate a cubic bezier curve
                 if(!isCtl2) {
