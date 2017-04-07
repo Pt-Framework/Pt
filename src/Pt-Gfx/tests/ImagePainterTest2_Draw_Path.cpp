@@ -281,6 +281,12 @@ static void testDrawPathClipping_drawCars(
     path.getCharSpacing(dx, dy, 'P', 't');
     path.relMoveTo     (dx, dy);
     path.putChar       ('t');
+    path.getCharSpacing(dx, dy, 't', '-');
+    path.relMoveTo     (dx, dy);
+    path.putChar       ('-');
+    path.getCharSpacing(dx, dy, '-', 'Q');
+    path.relMoveTo     (dx, dy);
+    path.putChar       ('Q');
     path.endPath       ();
 
     path.generatePoints(pointsF, 1);
@@ -293,7 +299,7 @@ static void testDrawPathClipping_drawCars(
 
     ip2->setFont( path.font() );
     ip2->setPen( Color::fromRgb8(255, 255, 255, 255) );
-    ip2->drawText( PointF(50 + 50 * col, 50 + 50 * row + 120), "Pt" );
+    ip2->drawText( PointF(50 + 50 * col, 50 + 50 * row + 120), "Pt-Q" );
 
     ip2->setPen( Color::fromRgb8(255, 0, 0, 255) );
     ip2->drawLine( PointF(50 + 50 * col, 50 + 50 * row - 120), PointF(50 + 50 * col,       50 + 50 * row + 120) );
@@ -406,9 +412,14 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
     path.setFont( Pt::Gfx::Font(FONT_SPEC_H) );
     testDrawPathClipping_drawCars(ip2, path, atrans, row, col, brush2);
 
-    row = 5;
+    row = 1;
     col = 15;
     path.setFont( Pt::Gfx::Font(FONT_SPEC_Q) );
+    testDrawPathClipping_drawCars(ip2, path, atrans, row, col, brush2);
+
+    row = 7;
+    col = 15;
+    path.setFont( Pt::Gfx::Font(FONT_SPEC_C) );
     testDrawPathClipping_drawCars(ip2, path, atrans, row, col, brush2);
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);

@@ -270,18 +270,17 @@ static inline void generateChrPoints(std::vector<PointF>& dst, double x, double 
         const PointF*      pMax = &pointsF[endIdx];
         const PointF*      pItr = &pointsF[begIdx];
         const Pt::uint8_t* tItr = &tags   [begIdx];
-        // Get the initial begin, end, and control points as well as the tag
-        PointF      pBeg = pointsF[begIdx];
-        PointF      pEnd = pointsF[endIdx];
-        PointF      pCtl = pBeg;
-        Pt::uint8_t pTag = tItr[0];
+        // Get the initial end, begin, and control points
+        const PointF& pEnd = pointsF[endIdx];
+              PointF  pBeg = pointsF[begIdx];
+              PointF  pCtl = pBeg;
         // A contour cannot begin with a cubic bezier control point
-        if(CURVE_TAG_C_B_CTL(pTag)) {
+        if(CURVE_TAG_C_B_CTL(tItr[0])) {
             dst.clear();
             return;
         }
         // Check the tag of the begin point to determine the origin
-        if(CURVE_TAG_Q_B_CTL(pTag)) {
+        if(CURVE_TAG_Q_B_CTL(tItr[0])) {
             // Start from the end point if it is on the curve
             if(CURVE_TAG_C_POINT(tags[endIdx])) {
                 pBeg = pEnd;
@@ -290,11 +289,10 @@ static inline void generateChrPoints(std::vector<PointF>& dst, double x, double 
             // Both begin and points are quadratic bezier control points, hence,
             // start at the middle
             else {
-              pBeg.set(
-                  ( pBeg.x() + pEnd.x() ) * 0.5,
-                  ( pBeg.y() + pEnd.y() ) * 0.5
-              );
-              pEnd = pBeg;
+                pBeg.set(
+                    ( pBeg.x() + pEnd.x() ) * 0.5,
+                    ( pBeg.y() + pEnd.y() ) * 0.5
+                );
             }
             // Adjust the iterators
             --pItr;
@@ -309,7 +307,7 @@ static inline void generateChrPoints(std::vector<PointF>& dst, double x, double 
             ++pItr;
             ++tItr;
             // Get the new tag
-            pTag = tItr[0];
+            Pt::uint8_t pTag = tItr[0];
             // If the point is on the curve, generate a line
             if(CURVE_TAG_C_POINT(pTag)) {
                 dst.push_back(PointF(pItr->x(), pItr->y()));

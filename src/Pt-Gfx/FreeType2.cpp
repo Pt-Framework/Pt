@@ -468,7 +468,6 @@ void FreeType2::draw(
         if(!fontAngle) {
             if(mono) imageType->flags = FT_LOAD_RENDER | FT_LOAD_TARGET_MONO;
             else     imageType->flags = FT_LOAD_RENDER | FT_LOAD_TARGET_NORMAL;
-
             if(FTC_SBitCache_Lookup(_bitmapCache, imageType, glyph_index, &smalGlyphBitmap, &node))
                 continue;
 
