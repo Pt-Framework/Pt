@@ -300,7 +300,6 @@ static inline void generateChrPoints(std::vector<PointF>& dst, double x, double 
                 dst.push_back(PointF(x1, y1));
             }
             // Is it a cubic bezier?
-            // ### TODO: Check the cubic bezier code (OTF fonts) !!! ###
             else if(isCub0 && isCub1) {
                 // If Point #2 is not a control point, directly generate a cubic bezier curve
                 if(!isCtl2) {

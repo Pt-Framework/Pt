@@ -264,6 +264,43 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }
 
+// ======================================================================================
+
+static void testDrawPathClipping_drawCars(
+    ImagePainter2* ip2, Path& path, AffineTransform& atrans,
+    Pt::int32_t& row, Pt::int32_t& col, const Brush& brush
+)
+{
+    std::vector<PointF> pointsF;
+    Pt::int32_t         dx, dy;
+
+    path.clear         ();
+    path.beginPath     ();
+    path.moveTo        (0, 0);
+    path.putChar       ('P');
+    path.getCharSpacing(dx, dy, 'P', 't');
+    path.relMoveTo     (dx, dy);
+    path.putChar       ('t');
+    path.endPath       ();
+
+    path.generatePoints(pointsF, 1);
+    atrans.push();
+    atrans.translate(50 + 50 * col, 50 + 50 * row);
+    atrans.transformPoints(pointsF.data(), pointsF.size());
+    atrans.pop();
+    ip2->setBrush(brush);
+    ip2->fillPolygon(pointsF.data(), pointsF.size());
+
+    ip2->setFont( path.font() );
+    ip2->setPen( Color::fromRgb8(255, 255, 255, 255) );
+    ip2->drawText( PointF(50 + 50 * col, 50 + 50 * row + 120), "Pt" );
+
+    ip2->setPen( Color::fromRgb8(255, 0, 0, 255) );
+    ip2->drawLine( PointF(50 + 50 * col, 50 + 50 * row - 120), PointF(50 + 50 * col,       50 + 50 * row + 120) );
+    ip2->drawLine( PointF(50 + 50 * col, 50 + 50 * row      ), PointF(50 + 50 * col + 180, 50 + 50 * row      ) );
+    ip2->drawLine( PointF(50 + 50 * col, 50 + 50 * row + 120), PointF(50 + 50 * col + 180, 50 + 50 * row + 120) );
+}
+
 static void testDrawPathClipping(const char* title, Image& image, Painter& painter, const Brush& brush1, const Brush& brush2)
 {
     resetImage(image);
@@ -363,39 +400,16 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
     ip2->setBrush(brush1);
     ip2->fillPolygon(clipPointsF.data(), clipPointsF.size());
 
-    // Character in path
-    row = 4;
+    // Characters with path
+    row = 7;
     col = 0;
+    path.setFont( Pt::Gfx::Font(FONT_SPEC_H) );
+    testDrawPathClipping_drawCars(ip2, path, atrans, row, col, brush2);
 
-    Pt::int32_t dx, dy;
-
-    path.setFont       ( Pt::Gfx::Font(FONT_SPEC_H) );
-    path.clear         ();
-    path.beginPath     ();
-    path.moveTo        (0, 0);
-    path.putChar       ('P');
-    path.getCharSpacing(dx, dy, 'P', 't');
-    path.relMoveTo     (dx, dy);
-    path.putChar       ('t');
-    path.endPath       ();
-
-    subjPointsF.clear();
-    path.generatePoints(subjPointsF, 1);
-    atrans.push();
-    atrans.translate(50 + 100 * col, 50 + 100 * row);
-    atrans.transformPoints(subjPointsF.data(), subjPointsF.size());
-    atrans.pop();
-    ip2->setBrush(brush2);
-    ip2->fillPolygon(subjPointsF.data(), subjPointsF.size());
-
-    ip2->setFont( Pt::Gfx::Font(FONT_SPEC_H) );
-    ip2->setPen( Color::fromRgb8(255, 255, 255, 255) );
-    ip2->drawText( PointF(50 + 100 * col, 50 + 100 * row + 120), "Pt" );
-
-    ip2->setPen( Color::fromRgb8(255, 0, 0, 255) );
-    ip2->drawLine( PointF(50 + 100 * col, 50 + 100 * row - 120), PointF(50 + 100 * col,       50 + 100 * row + 120) );
-    ip2->drawLine( PointF(50 + 100 * col, 50 + 100 * row      ), PointF(50 + 100 * col + 200, 50 + 100 * row      ) );
-    ip2->drawLine( PointF(50 + 100 * col, 50 + 100 * row + 120), PointF(50 + 100 * col + 200, 50 + 100 * row + 120) );
+    row = 5;
+    col = 15;
+    path.setFont( Pt::Gfx::Font(FONT_SPEC_Q) );
+    testDrawPathClipping_drawCars(ip2, path, atrans, row, col, brush2);
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }
