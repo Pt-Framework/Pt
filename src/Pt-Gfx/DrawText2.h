@@ -55,7 +55,7 @@ class DrawText2 {
         void drawMono(Image& image, const Color& color, const Point& pos, const String& text, const CompositionMode& mode);
 
         void getCharSpacing(Pt::int32_t& x, Pt::int32_t& y, const Char& from, const Char& to);
-        void pathFromChar(std::vector<Point>& points, std::vector<Pt::uint8_t>& tags, std::vector<Pt::int32_t>& contours, const Char& chr);
+        void pathFromChar(std::vector<PointF>& points, std::vector<Pt::uint8_t>& tags, std::vector<Pt::int32_t>& contours, const Char& chr);
 
     private:
         void drawGlyph(Image& image, const Color& color, int xpos, int ypos, int bmPitch, int height, int width, const unsigned char* buffer);

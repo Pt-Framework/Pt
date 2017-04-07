@@ -105,7 +105,7 @@ void DrawText2::getCharSpacing(Pt::int32_t& x, Pt::int32_t& y, const Char& from,
     FreeType2::instance().getCharSpacing(x, y, from, to, _faceId, &_imageType);
 }
 
-void DrawText2::pathFromChar(std::vector<Point>& points, std::vector<Pt::uint8_t>& tags, std::vector<Pt::int32_t>& contours, const Char& chr)
+void DrawText2::pathFromChar(std::vector<PointF>& points, std::vector<Pt::uint8_t>& tags, std::vector<Pt::int32_t>& contours, const Char& chr)
 {
     FreeType2::instance().pathFromChar(points, tags, contours, chr, _faceId, &_imageType);
 }

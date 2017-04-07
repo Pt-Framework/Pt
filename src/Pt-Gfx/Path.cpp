@@ -227,17 +227,17 @@ static inline void generateArcPoints(std::vector<PointF>& dst, double x1, double
     generateQuadraticBezierPoints(dst, xm + cx, ym + cy, x2 + cx, y2 + cy, x2, y2, smoothness);
 }
 
-static inline void generateChrPoints(std::vector<PointF>& dst, double x, double y, const std::vector<Point>& points, const std::vector<Pt::uint8_t>& tags, const std::vector<Pt::int32_t>& contours, double smoothness)
+static inline void generateChrPoints(std::vector<PointF>& dst, double x, double y, const std::vector<PointF>& pointsF_, const std::vector<Pt::uint8_t>& tags, const std::vector<Pt::int32_t>& contours, double smoothness)
 {
     //std::clog << "points/tags = " << points.size() << " ; contours = " << contours.size() << std::endl;
 
-    // Scale the points
-    std::vector<PointF> pointsF(points.size());
+    // Translate the points
+    std::vector<PointF> pointsF(pointsF_.size());
 
-    for(size_t i = 0; i < points.size(); ++i) {
+    for(size_t i = 0; i < pointsF_.size(); ++i) {
         pointsF[i].set(
-            points[i].x() * 0.015625, // (1.0 / 64.0)
-            points[i].y() * 0.015625  // (1.0 / 64.0)
+            x + pointsF_[i].x(),
+            y + pointsF_[i].y()
         );
     }
 
@@ -290,14 +290,14 @@ static inline void generateChrPoints(std::vector<PointF>& dst, double x, double 
             }
             // If point #1 is the only control point, generate a bezier curve
             else if(!isCtl0 && isCtl1 && !isCtl2) {
-                generateQuadraticBezierPoints(dst, x0, y0, x1, y1, x2, y2, smoothness);
+                generateQuadraticBezierPoints(dst, dst.back().x(), dst.back().y(), x1, y1, x2, y2, smoothness);
             }
             // If point #1 and point #2 are both control points, generate a bezier curve
             // using the halfway point between the two control points
             else if(!isCtl0 && isCtl1 && isCtl2) {
                 const double xm = (x1 + x2) * 0.5;
                 const double ym = (y1 + y2) * 0.5;
-                generateQuadraticBezierPoints(dst, x0, y0, x1, y1, xm, ym, smoothness);
+                generateQuadraticBezierPoints(dst, dst.back().x(), dst.back().y(), x1, y1, xm, ym, smoothness);
             }
         }
         // Update the start index of the contour
@@ -738,11 +738,11 @@ void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
                 break;
 
             case PathData::IT_Char: {
-                std::vector<Point      > points;
+                std::vector<PointF     > pointsF;
                 std::vector<Pt::uint8_t> tags;
                 std::vector<Pt::int32_t> contours;
-                _text->pathFromChar(points, tags, contours, ins.chr);
-                generateChrPoints(dst, curX, curY, points, tags, contours, smoothness);
+                _text->pathFromChar(pointsF, tags, contours, ins.chr);
+                generateChrPoints(dst, curX, curY, pointsF, tags, contours, smoothness);
                 break;
             }
 

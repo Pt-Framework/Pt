@@ -369,13 +369,15 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
 
     Pt::int32_t dx, dy;
 
-    path.setFont  ( Pt::Gfx::Font(FONT_SPEC_H) );
-    path.clear    ();
-    path.beginPath();
-    path.moveTo   (100, 100);
-    path.putChar  ('P');
-    path.endPath  ();
-    path.getCharSpacing(dx, dy, 'P', 'T');
+    path.setFont       ( Pt::Gfx::Font(FONT_SPEC_H) );
+    path.clear         ();
+    path.beginPath     ();
+    path.moveTo        (0, 0);
+    path.putChar       ('P');
+    path.getCharSpacing(dx, dy, 'P', 't');
+    path.relMoveTo     (dx, dy);
+    path.putChar       ('t');
+    path.endPath       ();
 
     subjPointsF.clear();
     path.generatePoints(subjPointsF, 1);
