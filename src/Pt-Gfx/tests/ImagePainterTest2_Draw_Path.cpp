@@ -302,7 +302,7 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
     // Create a subject path
     path.clear    ();
     path.beginPath();
-    path.moveTo   (0,  50     ); // CCW
+    path.moveTo   (  0,  50   ); // CCW
     path.arcTo    (100, 50, 50);
     path.arcTo    (  0, 50, 50);
     path.endPath  ();

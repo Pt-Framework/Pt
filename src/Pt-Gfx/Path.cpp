@@ -214,6 +214,14 @@ static inline void generateArcPoints(std::vector<PointF>& dst, double x1, double
     // Negated inverse line length
     const double il = -Gfx::Math::fastInvSqrt(a * a + b * b);
 
+#if 1
+    // Circumference vector
+    const double cx = (1.0 + 1.0 / 3.0) * a * il * r;
+    const double cy = (1.0 + 1.0 / 3.0) * b * il * r;
+
+    // Use cubic bezier curve to generate the arc
+    generateCubicBezierPoints(dst, x1, y1, x1 + cx, y1 + cy, x2 + cx, y2 + cy, x2, y2, smoothness);
+#else
     // Circumference vector
     const double cx = a * il * r;
     const double cy = b * il * r;
@@ -225,6 +233,7 @@ static inline void generateArcPoints(std::vector<PointF>& dst, double x1, double
     // Use quadratic bezier curve to generate the arc
     generateQuadraticBezierPoints(dst, x1, y1, x1 + cx, y1 + cy, xm + cx, ym + cy, smoothness);
     generateQuadraticBezierPoints(dst, xm + cx, ym + cy, x2 + cx, y2 + cy, x2, y2, smoothness);
+#endif
 }
 
 static inline void generateChrPoints(std::vector<PointF>& dst, double x, double y, const std::vector<PointF>& pointsF_, const std::vector<Pt::uint8_t>& tags, const std::vector<Pt::int32_t>& contours, double smoothness)
