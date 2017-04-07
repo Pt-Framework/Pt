@@ -286,6 +286,7 @@ void FreeType2::getCharSpacing(
     FT_UInt glyph_index1 = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, to);
     if(!glyph_index1) return;
 
+#if 1
     imageType->flags = FT_LOAD_TARGET_NORMAL | FT_LOAD_IGNORE_TRANSFORM;
 
     FT_Glyph glyph;
@@ -294,15 +295,22 @@ void FreeType2::getCharSpacing(
 
     x = glyph->advance.x >> 16;
     y = glyph->advance.y >> 16;
+#else
+    FT_Load_Glyph(face, glyph_index0, FT_LOAD_TARGET_NORMAL | FT_LOAD_IGNORE_TRANSFORM);
+    FT_GlyphSlot glyph = face->glyph;
 
-    //*
+    x = glyph->advance.x / 64;
+    y = glyph->advance.y / 64;
+#endif
+
+    /*
     if(FT_HAS_KERNING(face)) {
         FT_Vector delta;
         FT_Get_Kerning(face, glyph_index0, glyph_index1, FT_KERNING_DEFAULT, &delta);
         x += delta.x;
         y += delta.y;
     }
-    //*/
+    */
 }
 
 void FreeType2::pathFromChar(
@@ -352,6 +360,71 @@ void FreeType2::pathFromChar(
     }
 }
 
+void FreeType2::pathFromCharExt(
+    std::vector<PointF>& points, std::vector<Pt::uint8_t>& tags, std::vector<Pt::int32_t>& contours,
+    const Char& chr, Pt::int32_t& x, Pt::int32_t& y, const Char& chrNext, FTC_FaceID faceId
+)
+{
+    points.clear();
+    contours.clear();
+
+    x = y = 0;
+
+    System::MutexLock lock(_mutex);
+
+    FT_Face  face = 0;
+    FT_Error ferr = FTC_Manager_LookupFace(_manager, faceId, &face);
+    if(ferr && ferr != FT_Err_Out_Of_Memory) return;
+
+    FT_Int charMapIndex = 0;
+    for(int n = 0; n < face->num_charmaps; ++n) {
+        if(face->charmap[n].encoding == FT_ENCODING_UNICODE) {
+            charMapIndex = n;
+            break;
+        }
+    }
+
+    FT_UInt glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, chr);
+    if(!glyph_index) return;
+
+    FT_Load_Glyph(face, glyph_index, FT_LOAD_TARGET_NORMAL | FT_LOAD_IGNORE_TRANSFORM);
+    FT_GlyphSlot glyph = face->glyph;
+
+    points.resize(glyph->outline.n_points);
+    for(int i = 0; i < glyph->outline.n_points; ++i) {
+        points[i].set(
+             glyph->outline.points[i].x * 0.015625, // (1.0 / 64.0)
+            -glyph->outline.points[i].y * 0.015625
+        );
+    }
+
+    tags.resize(glyph->outline.n_points);
+    for(int i = 0; i < glyph->outline.n_points; ++i) {
+        tags[i] = glyph->outline.tags[i];
+    }
+
+    contours.resize(glyph->outline.n_contours);
+    for(int i = 0; i < glyph->outline.n_contours; ++i) {
+        contours[i] = glyph->outline.contours[i];
+    }
+
+    // Calculate the spacing to the next character
+    FT_UInt glyph_index_next = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, chrNext);
+    if(!glyph_index_next) return;
+
+    x = glyph->advance.x / 64;
+    y = glyph->advance.y / 64;
+
+    /*
+    if(FT_HAS_KERNING(face)) {
+        FT_Vector delta;
+        FT_Get_Kerning(face, glyph_index, glyph_index_next, FT_KERNING_DEFAULT, &delta);
+        x += delta.x;
+        y += delta.y;
+    }
+    */
+}
+
 void FreeType2::draw(
     Image& image, const Rect& clip, const Point& pos, const Color& color, Pt::ssize_t fontAngle, const CompositionMode& mode,
     const String& text, FT_Matrix& matrix, FTC_FaceID faceId, FTC_ImageType imageType, bool mono
@@ -398,13 +471,13 @@ void FreeType2::draw(
         FT_UInt glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, it->value());
         if(!glyph_index) continue;
 
-        //*
+        /*
         if(FT_HAS_KERNING(face) && previous) {
             FT_Get_Kerning(face, previous, glyph_index, FT_KERNING_DEFAULT, &delta);
             glyphPos.x += delta.x;
             glyphPos.y -= delta.y;
         }
-        //*/
+        */
 
         if(!fontAngle) {
             if(mono) imageType->flags = FT_LOAD_RENDER | FT_LOAD_TARGET_MONO;

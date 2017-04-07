@@ -161,6 +161,7 @@ using namespace Pt::Gfx;
 #define FONT_SPEC_H "DejaVu Serif" ,  92, Pt::Gfx::Font::Normal    ,    0
 #define FONT_SPEC_Q "QumpellkaNo12",  64, Pt::Gfx::Font::Normal    ,    0
 #define FONT_SPEC_C "Charakterny"  , 116, Pt::Gfx::Font::Italic    ,    0
+#define FONT_SPEC_O FONT_SPEC_C
 
 #define TEX_FILE_TRANS_BGR "../etc/images/bleech-200x200-tbgr.png"
 #define TEX_FILE_WHITE_BGR "../etc/images/bleech-200x200-wbgr.png"

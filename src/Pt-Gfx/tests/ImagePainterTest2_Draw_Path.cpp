@@ -369,7 +369,7 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
     ip2->fillPolygon(cregPointsF.data(), cregPointsF.size());
     ++col;
 
-    // Perform clipping and draw the clipped polygon
+    // Perform clipping and draw the resulting polygon
     Path::clipPolygon(clipPointsF, subjPointsF, cregPointsF, Path::Intersection);
     atrans.push();
     atrans.translate(10 + 250 * col, 10 + 250 * row);
@@ -414,13 +414,14 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
 
     row = 1;
     col = 15;
-    path.setFont( Pt::Gfx::Font(FONT_SPEC_Q) );
+    path.setFont( Pt::Gfx::Font(FONT_SPEC_O) );
     testDrawPathClipping_drawCars(ip2, path, atrans, row, col, brush2);
 
     row = 7;
     col = 15;
-    path.setFont( Pt::Gfx::Font(FONT_SPEC_C) );
+    path.setFont( Pt::Gfx::Font(FONT_SPEC_O) );
     testDrawPathClipping_drawCars(ip2, path, atrans, row, col, brush2);
+
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }

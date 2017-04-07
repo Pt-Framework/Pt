@@ -238,7 +238,9 @@ static inline void generateArcPoints(std::vector<PointF>& dst, double x1, double
 
 static inline void generateChrPoints(std::vector<PointF>& dst, double x, double y, const std::vector<PointF>& pointsF_, const std::vector<Pt::uint8_t>& tags, const std::vector<Pt::int32_t>& contours, double smoothness)
 {
-    //std::clog << "points/tags = " << points.size() << " ; contours = " << contours.size() << std::endl;
+    // ### TODO: Make the character smoother, if possible. ###
+
+    //std::clog << "points/tags = " << pointsF_.size() << " ; contours = " << contours.size() << std::endl;
 
     // Translate the points
     std::vector<PointF> pointsF(pointsF_.size());
