@@ -236,7 +236,7 @@ static inline void generateArcPoints(std::vector<PointF>& dst, double x1, double
 #endif
 }
 
-static inline void generateChrPoints(std::vector<PointF>& dst, double x, double y, const std::vector<PointF>& pointsF_, const std::vector<Pt::uint8_t>& tags_, const std::vector<Pt::int32_t>& contours, double smoothness)
+static inline void generateChrPoints(std::vector<PointF>& dst, double x, double y, const std::vector<PointF>& pointsF_, const std::vector<Pt::uint8_t>& tags, const std::vector<Pt::int32_t>& contours, double smoothness)
 {
     //std::clog << "points/tags = " << points.size() << " ; contours = " << contours.size() << std::endl;
 
@@ -260,125 +260,124 @@ static inline void generateChrPoints(std::vector<PointF>& dst, double x, double 
 #define CURVE_TAG_CUBIC 0x02
 
     // Walk through the contours
-    Pt::int32_t first = 0;
+    Pt::int32_t begIdx = 0;
     for(size_t i = 0; i < contours.size(); ++i) {
-        // Get the index of the last point in the contour
-        Pt::int32_t last = contours[i];
+        // Get the index of the endIdx point in the contour
+        Pt::int32_t endIdx = contours[i];
 
-        const PointF* limit = pointsF.data() + last;
+        const PointF* pMax = pointsF.data() + endIdx;
 
-        PointF v_start = pointsF[first];
-        PointF v_last  = pointsF[last];
+        PointF pBeg = pointsF[begIdx];
+        PointF pEnd  = pointsF[endIdx];
 
         //
-        PointF v_control = v_start;
-        const PointF* point = pointsF.data() + first;
-        const Pt::uint8_t* tags = tags_.data() + first;
+        PointF pCtl = pBeg;
+        const PointF* pItr = pointsF.data() + begIdx;
+        const Pt::uint8_t* tItr = tags.data() + begIdx;
 
-        Pt::uint8_t tag = CURVE_TAG(tags[0]);
+        Pt::uint8_t tag = CURVE_TAG(tItr[0]);
 
         // A contour cannot start with a cubic control point
         if(tag == CURVE_TAG_CUBIC) return;
 
-        // check first point to determine origin
+        // check begIdx point to determine origin
         if(tag == CURVE_TAG_CONIC) {
-            // first point is conic control.  Yes, this happens.
-            if(CURVE_TAG(tags_[last]) == CURVE_TAG_ON) {
-                // start at last point if it is on the curve
-                v_start = v_last;
-                --limit;
+            // begIdx point is conic control.  Yes, this happens.
+            if(CURVE_TAG(tags[endIdx]) == CURVE_TAG_ON) {
+                // start at endIdx point if it is on the curve
+                pBeg = pEnd;
+                --pMax;
             }
             else {
-              // if both first and last points are conic,
+              // if both begIdx and endIdx points are conic,
               // start at their middle and record its position
               // for closure
-              v_start.setX( (v_start.x() + v_last.x()) / 2 );
-              v_start.setY( (v_start.y() + v_last.y()) / 2 );
+              pBeg.setX( (pBeg.x() + pEnd.x()) / 2 );
+              pBeg.setY( (pBeg.y() + pEnd.y()) / 2 );
 
-              v_last    = v_start;
+              pEnd    = pBeg;
             }
-            --point;
-            --tags;
+            --pItr;
+            --tItr;
         }
 
-        double x1 = v_start.x();
-        double y1 = v_start.y();
 
         // Start a new ...
         if(!dst.empty()) dst.push_back(Painter::PolygonSeparatorPointF);
-        dst.push_back(PointF(x1, y1));
+        dst.push_back(PointF(pBeg.x(), pBeg.y()));
 
-        while(point < limit) {
-            ++point;
-            ++tags;
+        while(pItr < pMax) {
+            ++pItr;
+            ++tItr;
 
-            tag = CURVE_TAG(tags[0]);
+            tag = CURVE_TAG(tItr[0]);
 
             switch(tag) {
                 // Generate a line
                 case CURVE_TAG_ON: {
-                    x1 = point->x();
-                    y1 = point->y();
-                    dst.push_back(PointF(x1, y1));
+                    dst.push_back(PointF(pItr->x(), pItr->y()));
                     continue;
                 }
 
                 case CURVE_TAG_CONIC: {
-                    v_control = *point;
-Do_Conic:
-                    if(point < limit) {
-                        ++point;
-                        ++tags;
+                    pCtl = *pItr;
 
-                        tag = CURVE_TAG(tags[0]);
+                    bool done = false;
+                    while(!done && pItr < pMax) {
+                        ++pItr;
+                        ++tItr;
+
+                        tag = CURVE_TAG(tItr[0]);
 
                         if(tag == CURVE_TAG_ON) {
                             generateQuadraticBezierPoints(
                                 dst,
                                 dst.back().x(), dst.back().y(),
-                                v_control.x(), v_control.y(),
-                                point->x(), point->y(),
+                                pCtl.x(), pCtl.y(),
+                                pItr->x(), pItr->y(),
                                 smoothness
                             );
-                            continue;
+                            done = true;
+                            break;
                         }
+                        if(done) break;
 
                         if(tag != CURVE_TAG_CONIC) return;
 
                         generateQuadraticBezierPoints(
                             dst, dst.back().x(), dst.back().y(),
-                            v_control.x(), v_control.y(),
-                            (v_control.x() + point->x()) * 0.5, (v_control.y() + point->y()) * 0.5,
+                            pCtl.x(), pCtl.y(),
+                            (pCtl.x() + pItr->x()) * 0.5, (pCtl.y() + pItr->y()) * 0.5,
                             smoothness
                         );
-                        v_control = *point;
-                        goto Do_Conic;
+                        pCtl = *pItr;
                     }
+                    if(done) continue;
 
                     generateQuadraticBezierPoints(
                         dst,
                         dst.back().x(), dst.back().y(),
-                        v_control.x(), v_control.y(),
-                        v_start.x(), v_start.y(),
+                        pCtl.x(), pCtl.y(),
+                        pBeg.x(), pBeg.y(),
                         smoothness
                     );
 
-                    point = limit;
+                    pItr = pMax;
                     break;
                 }
 
                 default : { // CURVE_TAG_CUBIC
 
-                    if(point + 1 > limit || CURVE_TAG(tags[1]) != CURVE_TAG_CUBIC) return;
+                    if(pItr + 1 > pMax || CURVE_TAG(tItr[1]) != CURVE_TAG_CUBIC) return;
 
-                    PointF vec1 = point[0];
-                    PointF vec2 = point[1];
+                    PointF vec1 = pItr[0];
+                    PointF vec2 = pItr[1];
 
-                    point += 2;
-                    tags  += 2;
+                    pItr += 2;
+                    tItr  += 2;
 
-                    if(point <= limit) {
-                        PointF vec = *point;
+                    if(pItr <= pMax) {
+                        PointF vec = *pItr;
 
                         generateCubicBezierPoints(
                             dst,
@@ -396,20 +395,23 @@ Do_Conic:
                         dst.back().x(), dst.back().y(),
                         vec1.x(), vec1.y(),
                         vec2.x(), vec2.y(),
-                        v_start.x(), v_start.y(),
+                        pBeg.x(), pBeg.y(),
                         smoothness
                     );
 
-                    point = limit;
+                    pItr = pMax;
                     break;
                 }
 
             } // switch
+
         } // while
 
 
-        first = last + 1;
+        // Update the start index of the contour
+        begIdx = endIdx + 1;
     }
+
 
 /*
     // Walk through the contours
