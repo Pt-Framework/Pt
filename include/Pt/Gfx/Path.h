@@ -147,7 +147,7 @@ class PT_GFX_API Path {
 
         void putChar(const Char& chr);
 
-        void getCharSpacing(Pt::int32_t& x, Pt::int32_t& y, const Char& chr1, const Char& chr2);
+        void getCharSpacing(Pt::int32_t& x, Pt::int32_t& y, const Char& from, const Char& to);
 
         //
         // Generators

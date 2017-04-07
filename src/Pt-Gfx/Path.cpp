@@ -215,8 +215,8 @@ static inline void generateArcPoints(std::vector<PointF>& dst, double x1, double
     const double il = -Gfx::Math::fastInvSqrt(a * a + b * b);
 
     // Circumference vector
-    const double cx =  a * il * r;
-    const double cy =  b * il * r;
+    const double cx = a * il * r;
+    const double cy = b * il * r;
 
     // Middle point
     const double xm = (x1 + x2) * 0.5;
@@ -691,8 +691,8 @@ void Path::putChar(const Char& chr)
     _pathData->add(chr);
 }
 
-void Path::getCharSpacing(Pt::int32_t& x, Pt::int32_t& y, const Char& chr1, const Char& chr2)
-{ _text->getCharSpacing(x, y, chr1, chr2); }
+void Path::getCharSpacing(Pt::int32_t& x, Pt::int32_t& y, const Char& from, const Char& to)
+{ _text->getCharSpacing(x, y, from, to); }
 
 void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
 {
