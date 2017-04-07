@@ -367,16 +367,17 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
     row = 4;
     col = 0;
 
+    Pt::int32_t dx, dy;
+
+    path.setFont  ( Pt::Gfx::Font(FONT_SPEC_H) );
     path.clear    ();
     path.beginPath();
     path.moveTo   (100, 100);
     path.putChar  ('P');
     path.endPath  ();
-    //path.getCharKerning(Pt::int32_t& x, Pt::int32_t& y, const Char& chr1, const Char& chr2)
-
+    path.getCharKerning(dx, dy, 'P', 'T');
 
     subjPointsF.clear();
-    path.setFont( Pt::Gfx::Font(FONT_SPEC_H) );
     path.generatePoints(subjPointsF, 1);
     atrans.push();
     atrans.translate(50 + 100 * col, 50 + 100 * row);

@@ -196,7 +196,7 @@ FontMetrics FreeType2::fontMetrics(const String& text, FTC_FaceID faceId, FTC_Im
     FT_UInt   previous = 0;
     FT_Vector delta;
     FT_Glyph  glyph;
-    FT_BBox   gbbox = { 0 , 0, 0, 0 };
+    FT_BBox   gbbox = { 0, 0, 0, 0 };
     FT_BBox   tbbox = { std::numeric_limits<FT_Pos>::max(),
                         std::numeric_limits<FT_Pos>::max(),
                         std::numeric_limits<FT_Pos>::min(),
@@ -264,6 +264,41 @@ void FreeType2::getCharKerning(
     const Char& chr1, const Char& chr2, FTC_FaceID faceId, FTC_ImageType imageType
 )
 {
+    System::MutexLock lock(_mutex);
+
+    FT_Face  face = 0;
+    FT_Error ferr = FTC_Manager_LookupFace(_manager, faceId, &face);
+    if(ferr && ferr != FT_Err_Out_Of_Memory) return;
+
+    FT_Int charMapIndex = 0;
+    for(int n = 0; n < face->num_charmaps; ++n) {
+        if(face->charmap[n].encoding == FT_ENCODING_UNICODE) {
+            charMapIndex = n;
+            break;
+        }
+    }
+
+    FT_UInt glyph_index1 = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, chr1);
+    if(!glyph_index1) return;
+
+    FT_UInt glyph_index2 = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, chr2);
+    if(!glyph_index2) return;
+
+    imageType->flags = FT_LOAD_TARGET_NORMAL | FT_LOAD_IGNORE_TRANSFORM;
+
+    FT_Glyph glyph;
+    FTC_Node node;
+    FTC_ImageCache_Lookup(_imageCache, imageType, glyph_index1, &glyph, &node);
+
+    x = glyph->advance.x >> 16;
+    y = glyph->advance.y >> 16;
+
+    if(FT_HAS_KERNING(face)) {
+        FT_Vector delta;
+        FT_Get_Kerning(face, glyph_index1, glyph_index2, FT_KERNING_DEFAULT, &delta);
+        x += delta.x;
+        y += delta.y;
+    }
 }
 
 void FreeType2::pathFromChar(
