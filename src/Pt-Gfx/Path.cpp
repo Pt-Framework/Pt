@@ -226,27 +226,16 @@ static inline void generateArcPoints(std::vector<PointF>& dst, double x1, double
 #endif
 }
 
-static inline void generateChrPoints(std::vector<PointF>& dst, double x, double y, const std::vector<PointF>& pointsF_, const std::vector<Pt::uint8_t>& tags, const std::vector<Pt::int32_t>& contours, double smoothness)
+static inline void generateChrPoints(std::vector<PointF>& dst, double x, double y, const std::vector<PointF>& pointsF, const std::vector<Pt::uint8_t>& tags, const std::vector<Pt::int32_t>& contours, double smoothness)
 {
-    // ### TODO: Make the character smoother, if possible. ###
-
     //std::clog << "points/tags = " << pointsF_.size() << " ; contours = " << contours.size() << std::endl;
 
-    // Translate the points
-    std::vector<PointF> pointsF(pointsF_.size());
+    // The origin point
+    const PointF xyOrg(x, y);
 
-    for(size_t i = 0; i < pointsF_.size(); ++i) {
-        pointsF[i].set(
-            x + pointsF_[i].x(),
-            y + pointsF_[i].y()
-        );
-    }
-
-    // Helper macros
-    //    The point tags:
-    //        Bit #0 -> 0 = control point          ; 1 = non-control point
-    //        Bit #1 -> 0 = quadratic bezier (TTF) ; 1 = cubic bezier (OTF)
-    //        Bit #2 -> 0 = bit #5-#7 is unused    ; 1 = bit #5-#7 contain the OTF drop-out mode (currently ignored)
+    // Helper macros to process point tags
+    //     Bit #0 -> 0 = control point          ; 1 = non-control point
+    //     Bit #1 -> 0 = quadratic bezier (TTF) ; 1 = cubic bezier (OTF)
     #define CURVE_TAG_C_POINT(T) ( ( (T) & 0x03 ) == 0x01 )
     #define CURVE_TAG_Q_B_CTL(T) ( ( (T) & 0x03 ) == 0x00 )
     #define CURVE_TAG_C_B_CTL(T) ( ( (T) & 0x03 ) == 0x02 )
@@ -257,29 +246,28 @@ static inline void generateChrPoints(std::vector<PointF>& dst, double x, double 
     // Walk through the contours
     for(size_t i = 0; i < contours.size(); ++i) {
        // Index of the last point in the contour
-        Pt::int32_t endIdx = contours[i];
+        const Pt::int32_t endIdx = contours[i];
         // Prepare the iterators
         const PointF*      pMax = &pointsF[endIdx];
         const PointF*      pItr = &pointsF[begIdx];
         const Pt::uint8_t* tItr = &tags   [begIdx];
         // Get the initial end, begin, and control points
-        const PointF& pEnd = pointsF[endIdx];
-              PointF  pBeg = pointsF[begIdx];
+        const PointF& pEnd = xyOrg + pointsF[endIdx];
+              PointF  pBeg = xyOrg + pointsF[begIdx];
               PointF  pCtl = pBeg;
         // A contour cannot begin with a cubic bezier control point
-        if(CURVE_TAG_C_B_CTL(tItr[0])) {
-            dst.clear();
-            return;
-        }
+        if( CURVE_TAG_C_B_CTL(tItr[0]) ) return;
         // Check the tag of the begin point to determine the origin
-        if(CURVE_TAG_Q_B_CTL(tItr[0])) {
-            // Start from the end point if it is on the curve
-            if(CURVE_TAG_C_POINT(tags[endIdx])) {
+        if( CURVE_TAG_Q_B_CTL(tItr[0]) ) {
+            // Start from the end point if the end point is part of the curve
+            if( CURVE_TAG_C_POINT(tags[endIdx]) ) {
+                // Copy end point to begin point
                 pBeg = pEnd;
+                // Adjust the maximum limit
                 --pMax;
             }
-            // Both begin and points are quadratic bezier control points, hence,
-            // start at the middle
+            // If both the begin and end points are quadratic bezier control points,
+            // start at the halfway point between them
             else {
                 pBeg.set(
                     ( pBeg.x() + pEnd.x() ) * 0.5,
@@ -298,57 +286,57 @@ static inline void generateChrPoints(std::vector<PointF>& dst, double x, double 
             // Adjust the iterators
             ++pItr;
             ++tItr;
-            // Get the new tag
-            Pt::uint8_t pTag = tItr[0];
-            // If the point is on the curve, generate a line
-            if(CURVE_TAG_C_POINT(pTag)) {
-                dst.push_back(PointF(pItr->x(), pItr->y()));
+            // If the point is part of the curve, simply generate a line
+            if( CURVE_TAG_C_POINT(tItr[0]) ) {
+                dst.push_back(xyOrg + *pItr);
                 continue;
             }
-            // If the point is a quadratic bezier control point, generate quadratic bezier curve(s)
-            else if(CURVE_TAG_Q_B_CTL(pTag)) {
+            // If the point is a quadratic bezier control point, generate
+            // one or more quadratic bezier curve(s)
+            else if( CURVE_TAG_Q_B_CTL(tItr[0]) ) {
                 // Update the control point
-                pCtl = *pItr;
+                pCtl = xyOrg + *pItr;
                 // There can be multiple quadratic bezier curves, process them all
-                bool done = false;
-                while(!done && pItr < pMax) {
+                bool qbcSeriesDone = false;
+                while( !qbcSeriesDone && (pItr < pMax) ) {
                     // Adjust the iterators
                     ++pItr;
                     ++tItr;
-                    // Get the new tag
-                    pTag = tItr[0];
-                    // A non-control point marks the end of the curves
-                    if(CURVE_TAG_C_POINT(pTag)) {
+                    // A non-control point marks the end of the series of curves
+                    if( CURVE_TAG_C_POINT(tItr[0]) ) {
+                        const PointF& pCur = xyOrg + *pItr;
                         generateQuadraticBezierPoints(
                             dst,
                             dst.back().x(), dst.back().y(),
                             pCtl      .x(), pCtl      .y(),
-                            pItr     ->x(), pItr     ->y(),
+                            pCur      .x(), pCur      .y(),
                             smoothness
                         );
-                        done = true;
+                        qbcSeriesDone = true;
                         break;
                     }
-                    if(done) break;
+                    if(qbcSeriesDone) break;
                     // If the point turns out to be not a quadratic bezier control point,
-                    // abort the whole process
-                    if(!CURVE_TAG_Q_B_CTL(pTag)) {
-                        dst.clear();
-                        return;
-                    }
-                    // Generate one quadratic bezier curve to the middle point
+                    // abort the whole process (it is an error condition)
+                    if( !CURVE_TAG_Q_B_CTL(tItr[0]) ) return;
+                    // Generate one quadratic bezier curve with the middle point
+                    // as the final point
+                    const PointF& pCur = xyOrg + *pItr;
                     generateQuadraticBezierPoints(
                         dst,
-                        dst.back().x(),                 dst.back().y(),
-                        pCtl      .x(),                 pCtl      .y(),
-                      ( pCtl.x() + pItr->x() ) * 0.5, ( pCtl.y() + pItr->y() ) * 0.5,
+                        dst.back().x(),                dst.back().y(),
+                        pCtl      .x(),                pCtl      .y(),
+                      ( pCtl.x() + pCur.x() ) * 0.5, ( pCtl.y() + pCur.y() ) * 0.5,
                         smoothness
                     );
                     // Update the control point
-                    pCtl = *pItr;
+                    pCtl = xyOrg + *pItr;
                 }
-                if(done) continue;
-                // Generate one quadratic bezier curve to the begin point
+                // Continue processing the next point if we have just processed
+                // a series of quadratic bezier curves
+                if(qbcSeriesDone) continue;
+                // Generate one quadratic bezier curve with the begin point
+                // as the final point
                 generateQuadraticBezierPoints(
                     dst,
                     dst.back().x(), dst.back().y(),
@@ -356,36 +344,36 @@ static inline void generateChrPoints(std::vector<PointF>& dst, double x, double 
                     pBeg      .x(), pBeg      .y(),
                     smoothness
                 );
-                // Update the control point
+                // Set the point iterator to maximum to end the iteration
                 pItr = pMax;
             }
             // Generate a cubic bezier curve
             else {
-                // If the next point turns out to be not a cubic bezier control point,
-                // abort the whole process
-                if( pItr + 1 > pMax || !CURVE_TAG_C_B_CTL(tItr[1]) ) {
-                    dst.clear();
-                    return;
-                }
+                // If the next point turns out to be non-existent or it is not a cubic bezier control point,
+                // abort the whole process (it is an error condition)
+                if( pItr >= pMax || !CURVE_TAG_C_B_CTL(tItr[1]) ) return;
                 // Capture the control points
-                const PointF& pCtl1 = pItr[0];
-                const PointF& pCtl2 = pItr[1];
+                const PointF& pCtl1 = xyOrg + pItr[0];
+                const PointF& pCtl2 = xyOrg + pItr[1];
                 // Adjust the iterators
                 pItr += 2;
                 tItr += 2;
-                // Generate one cubic bezier curve to the current point
+                // Generate one cubic bezier curve with the current point
+                // as the final point
                 if(pItr < pMax) {
+                    const PointF& pCur = xyOrg + *pItr;
                     generateCubicBezierPoints(
                         dst,
                         dst.back().x(), dst.back().y(),
                         pCtl1     .x(), pCtl1     .y(),
                         pCtl2     .x(), pCtl2     .y(),
-                        pItr     ->x(), pItr     ->y(),
+                        pCur      .x(), pCur      .y(),
                         smoothness
                     );
                     continue;
                 }
-                // Generate one cubic bezier curve to the begin point
+                // Generate one cubic bezier curve with the begin point
+                // as the final point
                 generateCubicBezierPoints(
                     dst,
                     dst.back().x(), dst.back().y(),
