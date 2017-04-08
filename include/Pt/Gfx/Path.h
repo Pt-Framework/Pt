@@ -145,9 +145,11 @@ class PT_GFX_API Path {
 
         const Font& font() const;
 
-        void putChar(const Char& chr);
-
         void getCharSpacing(Pt::int32_t& x, Pt::int32_t& y, const Char& from, const Char& to);
+
+        void putChar(const Char& chr, const Char& autoAddSpaceFor = 0);
+
+        void putText(const String& str);
 
         //
         // Generators

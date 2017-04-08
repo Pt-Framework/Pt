@@ -752,7 +752,10 @@ void Path::setFont(const Font& font)
 const Font& Path::font() const
 { return _font; }
 
-void Path::putChar(const Char& chr)
+void Path::getCharSpacing(Pt::int32_t& x, Pt::int32_t& y, const Char& from, const Char& to)
+{ _text->getCharSpacing(x, y, from, to); }
+
+void Path::putChar(const Char& chr, const Char& autoAddSpaceFor)
 {
     // Check if this function call is valid in the current context
     if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
@@ -760,10 +763,23 @@ void Path::putChar(const Char& chr)
 
     // Store the instruction
     _pathData->add(chr);
+
+    // Automatically add space as needed
+    if(!autoAddSpaceFor) return;
+
+    Pt::int32_t dx, dy;
+
+    getCharSpacing(dx, dy, chr, autoAddSpaceFor);
+    relMoveTo     (dx, dy);
 }
 
-void Path::getCharSpacing(Pt::int32_t& x, Pt::int32_t& y, const Char& from, const Char& to)
-{ _text->getCharSpacing(x, y, from, to); }
+void Path::putText(const String& str)
+{
+    const Pt::int32_t len1 = ( (Pt::int32_t) str.length() ) - 1;
+
+    for(Pt::int32_t i = 0; i < len1; ++i) putChar(str[i], str[i + 1]);
+    putChar(str[len1]);
+}
 
 void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
 {

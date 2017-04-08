@@ -272,8 +272,15 @@ static void testDrawPathClipping_drawCars(
 )
 {
     std::vector<PointF> pointsF;
-    Pt::int32_t         dx, dy;
 
+#if 1
+    path.clear    ();
+    path.beginPath();
+    path.moveTo   (0, 0);
+    path.putText  ("Pt-Q");
+    path.endPath  ();
+#else
+    Pt::int32_t dx, dy;
     path.clear         ();
     path.beginPath     ();
     path.moveTo        (0, 0);
@@ -288,6 +295,7 @@ static void testDrawPathClipping_drawCars(
     path.relMoveTo     (dx, dy);
     path.putChar       ('Q');
     path.endPath       ();
+#endif
 
     path.generatePoints(pointsF, 1);
     atrans.push();
