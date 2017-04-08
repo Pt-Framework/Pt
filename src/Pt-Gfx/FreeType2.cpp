@@ -27,6 +27,8 @@
   02110-1301 USA
 */
 
+#include <iomanip>
+
 #include <limits>
 #include <utility>
 
@@ -184,17 +186,6 @@ void FreeType2::getCharSpacing(
 
     imageType->flags = FT_LOAD_RENDER | FT_LOAD_TARGET_NORMAL | FT_LOAD_IGNORE_TRANSFORM;
 
-    /*
-    FTC_ScalerRec scaler;
-    scaler.face_id = imageType->face_id;
-    scaler.width   = imageType->width;
-    scaler.height  = imageType->height;
-    scaler.pixel   = 1; // Set to 1 to ignore "scaler.x_res" and "scaler.y_res"
-
-    FT_Size size;
-    FTC_Manager_LookupSize(_manager, &scaler, &size);
-    //*/
-
     FT_Glyph glyph = 0;
     FTC_Node node  = 0;
     if(FTC_ImageCache_Lookup(_imageCache, imageType, glyph_index0, &glyph, &node))
@@ -213,17 +204,17 @@ void FreeType2::getCharSpacing(
     y = smalGlyphBitmap->yadvance;
     //*/
 
-    //std::clog << "G: " << (char) from << " " << (char) to << " " << glyph_index0 << " " << glyph_index1 << std::endl;
+    //std::clog << "getCharSpacing : from '" << (char) from << "' to '" << (char) to << "' : G[ " << std::setw(5) << glyph_index0 << " | " << std::setw(5) << glyph_index1 << " ]" << std::endl;
 
     if(FT_HAS_KERNING(face)) {
         FT_Vector delta;
         FT_Get_Kerning(face, glyph_index0, glyph_index1, FT_KERNING_DEFAULT, &delta);
         x += delta.x;
         y += delta.y;
-        //std::clog << "K: " << (char) from << " " << (char) to << " " << delta.x << " " << delta.y << std::endl;
+        //std::clog << "getCharSpacing : from '" << (char) from << "' to '" << (char) to << "' : K( " << std::setw(5) << delta.x << " , " << std::setw(5) << delta.y << " )" << std::endl;
     }
 
-    //std::clog << "S: " << (char) from << " " << (char) to << " " << x << " " << y << std::endl;
+    //std::clog << "getCharSpacing : from '" << (char) from << "' to '" << (char) to << "' : S( " << std::setw(5) << x << " , " << std::setw(5) << y << " )" << std::endl;
 }
 
 void FreeType2::pathFromChar(
@@ -538,7 +529,7 @@ void FreeType2::reserveInstance_impl(FTC_FaceID faceID)
     FreeType2::Instances::iterator it = FreeType2::_instances.find(faceID);
     if(it != FreeType2::_instances.end()) {
         ++it->second->_refCount;
-        std::clog << "reserveInstance(" << faceID << ") : INC : refCount = " << it->second->_refCount << "\n";
+        //std::clog << "reserveInstance_impl(" << std::hex << std::setw(10) << faceID << std::dec << ") : INC : refCount = " << it->second->_refCount << std::endl;
         return;
     }
 
@@ -546,7 +537,7 @@ void FreeType2::reserveInstance_impl(FTC_FaceID faceID)
     FreeType2* inst = new FreeType2;
     FreeType2::_instances.insert(std::make_pair(faceID, inst));
 
-    std::clog << "reserveInstance(" << faceID << ") : NEW : refCount = " << inst->_refCount << "\n";
+    //std::clog << "reserveInstance_impl(" << std::hex << std::setw(10) << faceID << std::dec << ") : NEW : refCount = " << inst->_refCount << std::endl;
 }
 
 void FreeType2::releaseInstance(FTC_FaceID faceID)
@@ -571,20 +562,20 @@ void FreeType2::releaseInstance_impl(FTC_FaceID faceID)
     // Check the reference counter
     if(it->second->_refCount > 1) {
         --it->second->_refCount;
-        std::clog << "releaseInstance(" << faceID << ") : DEC : refCount = " << it->second->_refCount << "\n";
+        //std::clog << "releaseInstance_impl(" << std::hex << std::setw(10) << faceID << std::dec << ") : DEC : refCount = " << it->second->_refCount << std::endl;
         return;
     }
 
     // The instance can be deleted now
     delete it->second;
     FreeType2::_instances.erase(it);
-    std::clog << "releaseInstance(" << faceID << ") : DEL : refCount = 0\n";
+    //std::clog << "releaseInstance_impl(" << std::hex << std::setw(10) << faceID << std::dec << ") : DEL : refCount = 0\n";
 
     // If there are no more instances, delete the library too
     if(FreeType2::_instances.empty()) {
         FT_Done_FreeType(FreeType2::_ft);
         FreeType2::_ft = 0;
-        std::clog << "closing FreeType\n";
+        //std::clog << "reserveInstance_impl(" << std::hex << std::setw(10) << faceID << std::dec << ") : END : closing FreeType\n";
     }
 }
 
@@ -596,6 +587,8 @@ FreeType2& FreeType2::instance(FTC_FaceID faceID)
     FreeType2::Instances::iterator it = FreeType2::_instances.find(faceID);
     if(it == FreeType2::_instances.end())
         throw std::logic_error( "FreeType2::instance()" );
+
+    //std::clog << "            instance(" << std::hex << std::setw(10) << faceID << std::dec << ") : GET : refCount = " << it->second->_refCount << std::endl;
 
     // Return the instance
     return *it->second;
