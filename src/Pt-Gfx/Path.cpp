@@ -228,7 +228,7 @@ static inline void generateArcPoints(std::vector<PointF>& dst, double x1, double
 
 static inline void generateChrPoints(std::vector<PointF>& dst, double x, double y, const std::vector<PointF>& pointsF, const std::vector<Pt::uint8_t>& tags, const std::vector<Pt::int32_t>& contours, double smoothness)
 {
-    //std::clog << "points/tags = " << pointsF_.size() << " ; contours = " << contours.size() << std::endl;
+    std::clog << "points/tags = " << pointsF.size() << " ; contours = " << contours.size() << std::endl;
 
     // The origin point
     const PointF xyOrg(x, y);
@@ -771,10 +771,17 @@ void Path::putChar(const Char& chr, const Char& autoAddSpaceFor)
 
     getCharSpacing(dx, dy, chr, autoAddSpaceFor);
     relMoveTo     (dx, dy);
+
+    std::clog << dx << " " << dy << std::endl;
 }
 
 void Path::putText(const String& str)
 {
+    // Check if this function call is valid in the current context
+    if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
+        throw PathInvalidContext(PT_SOURCEINFO_STR);
+
+    // Put the characters from the string
     const Pt::int32_t len1 = ( (Pt::int32_t) str.length() ) - 1;
 
     for(Pt::int32_t i = 0; i < len1; ++i) putChar(str[i], str[i + 1]);
