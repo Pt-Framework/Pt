@@ -134,8 +134,6 @@ class FreeType2 {
         static std::string    _defaultFont;
 
     private:
-        static void atExitHandler();
-
         static void setFontDir_impl_noLock(const System::Path& path);
 
     public:
