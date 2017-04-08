@@ -92,7 +92,7 @@ const FontMetrics FreeType2::fontMetrics(const String& text, FTC_FaceID faceId, 
     if(ferr && ferr != FT_Err_Out_Of_Memory) return FontMetrics(0, 0, 0, 0);
 
     FT_Int charMapIndex = 0;
-    for(int n = 0; n < face->num_charmaps; ++n) {
+    for(Pt::int32_t n = 0; n < face->num_charmaps; ++n) {
         if(face->charmap[n].encoding != FT_ENCODING_UNICODE) continue;
         charMapIndex = n;
         break;
@@ -102,22 +102,22 @@ const FontMetrics FreeType2::fontMetrics(const String& text, FTC_FaceID faceId, 
     scaler.face_id = imageType->face_id;
     scaler.width   = imageType->width;
     scaler.height  = imageType->height;
-    scaler.pixel   = 1; // Set to 1 to ignore scaler.x_res and scaler.y_res
+    scaler.pixel   = 1; // Set to 1 to ignore "scaler.x_res" and "scaler.y_res"
 
     FT_Size size;
     FTC_Manager_LookupSize(_manager, &scaler, &size);
 
-    int       pen_x    = 0;
-    int       pen_y    = 0;
-    FT_UInt   previous = 0;
-    FT_Vector delta;
-    FT_Glyph  glyph;
-    FT_BBox   gbbox = { 0, 0, 0, 0 };
-    FT_BBox   tbbox = { std::numeric_limits<FT_Pos>::max(),
-                        std::numeric_limits<FT_Pos>::max(),
-                        std::numeric_limits<FT_Pos>::min(),
-                        std::numeric_limits<FT_Pos>::min()
-                      };
+    Pt::int32_t penX     = 0;
+    Pt::int32_t penY     = 0;
+    FT_UInt     previous = 0;
+    FT_Vector   delta;
+    FT_Glyph    glyph;
+    FT_BBox     gbbox = { 0, 0, 0, 0 };
+    FT_BBox     tbbox = { std::numeric_limits<FT_Pos>::max(),
+                          std::numeric_limits<FT_Pos>::max(),
+                          std::numeric_limits<FT_Pos>::min(),
+                          std::numeric_limits<FT_Pos>::min()
+                        };
 
     for(String::const_iterator it = text.begin(); it != text.end(); ++it) {
         FT_UInt glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, it->value());
@@ -125,8 +125,8 @@ const FontMetrics FreeType2::fontMetrics(const String& text, FTC_FaceID faceId, 
 
         if(FT_HAS_KERNING(face) && previous) {
             FT_Get_Kerning( face, previous, glyph_index, FT_KERNING_DEFAULT, &delta);
-            pen_x += delta.x;
-            pen_y -= delta.y;
+            penX += delta.x;
+            penY -= delta.y;
         }
 
         FTC_Node node;
@@ -135,14 +135,14 @@ const FontMetrics FreeType2::fontMetrics(const String& text, FTC_FaceID faceId, 
 
         FT_Glyph_Get_CBox(glyph, FT_GLYPH_BBOX_PIXELS, &gbbox);
 
-        gbbox.xMin += ( pen_x >> 16 );
-        gbbox.xMax += ( pen_x >> 16 );
+        gbbox.xMin += ( penX >> 16 );
+        gbbox.xMax += ( penX >> 16 );
 
         tbbox.xMin = std::min(gbbox.xMin, tbbox.xMin);
         tbbox.xMax = std::max(gbbox.xMax, tbbox.xMax);
 
-        pen_x += glyph->advance.x;
-        pen_y -= glyph->advance.y;
+        penX += glyph->advance.x;
+        penY -= glyph->advance.y;
 
         previous = glyph_index;
     }
@@ -169,7 +169,7 @@ void FreeType2::getCharSpacing(
     if(ferr && ferr != FT_Err_Out_Of_Memory) return;
 
     FT_Int charMapIndex = 0;
-    for(int n = 0; n < face->num_charmaps; ++n) {
+    for(Pt::int32_t n = 0; n < face->num_charmaps; ++n) {
         if(face->charmap[n].encoding == FT_ENCODING_UNICODE) {
             charMapIndex = n;
             break;
@@ -182,26 +182,19 @@ void FreeType2::getCharSpacing(
     FT_UInt glyph_index1 = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, to);
     if(!glyph_index1) return;
 
-    imageType->flags = FT_LOAD_TARGET_NORMAL;// | FT_LOAD_IGNORE_TRANSFORM;
+    imageType->flags = FT_LOAD_RENDER | FT_LOAD_TARGET_NORMAL | FT_LOAD_IGNORE_TRANSFORM;
 
+    /*
     FTC_ScalerRec scaler;
     scaler.face_id = imageType->face_id;
     scaler.width   = imageType->width;
     scaler.height  = imageType->height;
-    scaler.pixel   = 1; // Set to 1 to ignore scaler.x_res and scaler.y_res
+    scaler.pixel   = 1; // Set to 1 to ignore "scaler.x_res" and "scaler.y_res"
 
     FT_Size size;
     FTC_Manager_LookupSize(_manager, &scaler, &size);
+    //*/
 
-#if 0
-    FTC_SBit smalGlyphBitmap;
-    FTC_Node node  = 0;
-    if(FTC_SBitCache_Lookup(_bitmapCache, imageType, glyph_index0, &smalGlyphBitmap, &node))
-        return;
-
-    x = smalGlyphBitmap->xadvance;
-    y = smalGlyphBitmap->yadvance;
-#else
     FT_Glyph glyph = 0;
     FTC_Node node  = 0;
     if(FTC_ImageCache_Lookup(_imageCache, imageType, glyph_index0, &glyph, &node))
@@ -209,7 +202,16 @@ void FreeType2::getCharSpacing(
 
     x = glyph->advance.x >> 16;
     y = glyph->advance.y >> 16;
-#endif
+
+    /*
+    FTC_SBit smalGlyphBitmap;
+    FTC_Node node  = 0;
+    if(FTC_SBitCache_Lookup(_bitmapCache, imageType, glyph_index0, &smalGlyphBitmap, &node))
+        return;
+
+    x = smalGlyphBitmap->xadvance;
+    y = smalGlyphBitmap->yadvance;
+    //*/
 
     //std::clog << "G: " << (char) from << " " << (char) to << " " << glyph_index0 << " " << glyph_index1 << std::endl;
 
@@ -239,7 +241,7 @@ void FreeType2::pathFromChar(
     if(ferr && ferr != FT_Err_Out_Of_Memory) return;
 
     FT_Int charMapIndex = 0;
-    for(int n = 0; n < face->num_charmaps; ++n) {
+    for(Pt::int32_t n = 0; n < face->num_charmaps; ++n) {
         if(face->charmap[n].encoding == FT_ENCODING_UNICODE) {
             charMapIndex = n;
             break;
@@ -249,11 +251,11 @@ void FreeType2::pathFromChar(
     FT_UInt glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, chr);
     if(!glyph_index) return;
 
-    FT_Load_Glyph(face, glyph_index, FT_LOAD_TARGET_NORMAL/* | FT_LOAD_IGNORE_TRANSFORM*/);
+    FT_Load_Glyph(face, glyph_index, FT_LOAD_RENDER | FT_LOAD_TARGET_NORMAL | FT_LOAD_IGNORE_TRANSFORM);
     FT_GlyphSlot glyph = face->glyph;
 
     points.resize(glyph->outline.n_points);
-    for(int i = 0; i < glyph->outline.n_points; ++i) {
+    for(Pt::int32_t i = 0; i < glyph->outline.n_points; ++i) {
         points[i].set(
              glyph->outline.points[i].x * 0.015625, // (1.0 / 64.0)
             -glyph->outline.points[i].y * 0.015625
@@ -261,12 +263,12 @@ void FreeType2::pathFromChar(
     }
 
     tags.resize(glyph->outline.n_points);
-    for(int i = 0; i < glyph->outline.n_points; ++i) {
+    for(Pt::int32_t i = 0; i < glyph->outline.n_points; ++i) {
         tags[i] = glyph->outline.tags[i];
     }
 
     contours.resize(glyph->outline.n_contours);
-    for(int i = 0; i < glyph->outline.n_contours; ++i) {
+    for(Pt::int32_t i = 0; i < glyph->outline.n_contours; ++i) {
         contours[i] = glyph->outline.contours[i];
     }
 }
@@ -288,13 +290,13 @@ void FreeType2::draw(
     FT_BitmapGlyph glyphBitmap;
 
     // Glyph bitmap description
-    int            incX;
-    int            incY;
-    int            left;
-    int            top;
-    int            pitch;
-    int            height;
-    int            width;
+    Pt::int32_t    incX;
+    Pt::int32_t    incY;
+    Pt::int32_t    left;
+    Pt::int32_t    top;
+    Pt::int32_t    pitch;
+    Pt::int32_t    height;
+    Pt::int32_t    width;
     unsigned char* buffer;
 
     FT_Face  face = 0;
@@ -302,15 +304,15 @@ void FreeType2::draw(
     if(ferr && ferr != FT_Err_Out_Of_Memory) return;
 
     FT_Int charMapIndex = 0;
-    for(int n = 0; n < face->num_charmaps; ++n) {
+    for(Pt::int32_t n = 0; n < face->num_charmaps; ++n) {
         if(face->charmap[n].encoding == FT_ENCODING_UNICODE) {
             charMapIndex = n;
             break;
         }
     }
 
-    glyphPos.x = (int) pos.x() << 16;
-    glyphPos.y = (int) pos.y() << 16;
+    glyphPos.x = (Pt::int32_t) pos.x() << 16;
+    glyphPos.y = (Pt::int32_t) pos.y() << 16;
 
     for(String::const_iterator it = text.begin(); it != text.end(); ++it) {
 
@@ -391,8 +393,8 @@ void FreeType2::draw(
 }
 
 void FreeType2::drawGlyph(
-    Image& image, const Rect& clip, int xpos, int ypos, const Color& color, const CompositionMode& mode,
-    int pitch, int width, int height, const unsigned char* buffer, bool mono
+    Image& image, const Rect& clip, Pt::int32_t xpos, Pt::int32_t ypos, const Color& color, const CompositionMode& mode,
+    Pt::int32_t pitch, Pt::int32_t width, Pt::int32_t height, const unsigned char* buffer, bool mono
 )
 {
     // No need to lock the mutex here because this function is called by the
@@ -403,13 +405,13 @@ void FreeType2::drawGlyph(
     const Pt::ssize_t x2 = x1 + clip.width () - 1;
     const Pt::ssize_t y2 = y1 + clip.height() - 1;
 
-    int ofsx = 0;
+    Pt::int32_t ofsx = 0;
     if(xpos < x1) {
         ofsx = x1 - xpos;
         xpos = x1;
     }
 
-    int ofsy = 0;
+    Pt::int32_t ofsy = 0;
     if(ypos < y1) {
         ofsy = y1 - ypos;
         ypos = y1;

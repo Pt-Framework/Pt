@@ -109,8 +109,8 @@ class FreeType2 {
         FreeType2();
 
         void drawGlyph(
-            Image& image, const Rect& clip, int xpos, int ypos, const Color& color, const CompositionMode& mode,
-            int pitch, int width, int height, const unsigned char* buffer, bool mono
+            Image& image, const Rect& clip, Pt::int32_t xpos, Pt::int32_t ypos, const Color& color, const CompositionMode& mode,
+            Pt::int32_t pitch, Pt::int32_t width, Pt::int32_t height, const unsigned char* buffer, bool mono
         );
 
         FT_Error onFontRequest(FTC_FaceID face_id, FT_Face* face);
