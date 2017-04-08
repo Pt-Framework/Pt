@@ -191,15 +191,17 @@ void FreeType2::getCharSpacing(
     x = glyph->advance.x >> 16;
     y = glyph->advance.y >> 16;
 
+    std::clog << "G: " << (char) from << " " << (char) to << " " << glyph_index0 << " " << glyph_index1 << std::endl;
+
     if(FT_HAS_KERNING(face)) {
         FT_Vector delta;
         FT_Get_Kerning(face, glyph_index0, glyph_index1, FT_KERNING_DEFAULT, &delta);
         x += delta.x;
         y += delta.y;
-        std::clog << "K: " << (char) from << " " << (char) to << " " << x << " " << y << std::endl;
+        //std::clog << "K: " << (char) from << " " << (char) to << " " << delta.x << " " << delta.y << std::endl;
     }
 
-    std::clog << "S: " << (char) from << " " << (char) to << " " << x << " " << y << std::endl;
+    //std::clog << "S: " << (char) from << " " << (char) to << " " << x << " " << y << std::endl;
 }
 
 void FreeType2::pathFromChar(
