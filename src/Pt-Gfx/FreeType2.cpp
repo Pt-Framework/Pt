@@ -184,14 +184,29 @@ void FreeType2::getCharSpacing(
 
     imageType->flags = FT_LOAD_TARGET_NORMAL | FT_LOAD_IGNORE_TRANSFORM;
 
-    FT_Glyph glyph;
-    FTC_Node node;
+#if 1
+    FTC_SBit smalGlyphBitmap;
+    FTC_Node node  = 0;
+
+    if(mono) imageType->flags = FT_LOAD_RENDER | FT_LOAD_TARGET_MONO;
+    else     imageType->flags = FT_LOAD_RENDER | FT_LOAD_TARGET_NORMAL;
+
+    if(FTC_SBitCache_Lookup(_bitmapCache, imageType, glyph_index, &smalGlyphBitmap, &node))
+        continue;
+
+
+    incX   = smalGlyphBitmap->xadvance << 16;
+    incY   = smalGlyphBitmap->yadvance << 16;
+#else
+    FT_Glyph glyph = 0;
+    FTC_Node node  = 0;
     FTC_ImageCache_Lookup(_imageCache, imageType, glyph_index0, &glyph, &node);
+#endif
 
     x = glyph->advance.x >> 16;
     y = glyph->advance.y >> 16;
 
-    std::clog << "G: " << (char) from << " " << (char) to << " " << glyph_index0 << " " << glyph_index1 << std::endl;
+    //std::clog << "G: " << (char) from << " " << (char) to << " " << glyph_index0 << " " << glyph_index1 << std::endl;
 
     if(FT_HAS_KERNING(face)) {
         FT_Vector delta;
@@ -323,7 +338,9 @@ void FreeType2::draw(
             if(mono) {
                 imageType->flags = FT_LOAD_TARGET_MONO;
 
-                FTC_ImageCache_Lookup(_imageCache, imageType, glyph_index, &glyph, &node);
+                if(FTC_ImageCache_Lookup(_imageCache, imageType, glyph_index, &glyph, &node))
+                    continue;
+
                 FT_Glyph_Copy( glyph, &glyphCopy );
                 FT_Glyph_Transform( glyphCopy, &matrix, 0);
                 FT_Glyph_To_Bitmap( &glyphCopy, FT_RENDER_MODE_MONO, 0, 1 );
@@ -331,7 +348,9 @@ void FreeType2::draw(
             else {
                 imageType->flags = FT_LOAD_TARGET_NORMAL;
 
-                FTC_ImageCache_Lookup(_imageCache, imageType, glyph_index, &glyph, &node);
+                if(FTC_ImageCache_Lookup(_imageCache, imageType, glyph_index, &glyph, &node))
+                    continue;
+
                 FT_Glyph_Copy( glyph, &glyphCopy );
                 FT_Glyph_Transform( glyphCopy, &matrix, 0);
                 FT_Glyph_To_Bitmap( &glyphCopy, FT_RENDER_MODE_NORMAL, 0, 1 );
