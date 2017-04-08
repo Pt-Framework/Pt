@@ -414,12 +414,12 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
 
     row = 1;
     col = 15;
-    path.setFont( Pt::Gfx::Font(FONT_SPEC_O) );
+    path.setFont( Pt::Gfx::Font(FONT_SPEC_Q) );
     testDrawPathClipping_drawCars(ip2, path, atrans, row, col, brush2);
 
     row = 7;
     col = 15;
-    path.setFont( Pt::Gfx::Font(FONT_SPEC_O) );
+    path.setFont( Pt::Gfx::Font(FONT_SPEC_C) );
     testDrawPathClipping_drawCars(ip2, path, atrans, row, col, brush2);
 
 

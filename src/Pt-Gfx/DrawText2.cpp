@@ -45,10 +45,15 @@ namespace Gfx {
 DrawText2::DrawText2()
 : _faceId(0), _fontAngle(0)
 {
+    // Setup the rotation matrix
     _matrix.xx = 0;
     _matrix.xy = 0;
     _matrix.yx = 0;
     _matrix.yy = 0;
+
+    // Set the default and initial font
+    FreeType2::instance().setDefaultFont("");
+    setFont( Font( FreeType2::instance().defaultFont(), 12 ) );
 }
 
 DrawText2::~DrawText2()
@@ -56,6 +61,10 @@ DrawText2::~DrawText2()
 
 void DrawText2::setFont(const Font& font)
 {
+    // Reset the caches
+    FreeType2::instance().resetCaches();
+
+    // Get the face ID
     if( font.name().empty() ) {
         Font defaultFont(FreeType2::instance().defaultFont(), font);
         _faceId = FreeType2::instance().findFaceId(defaultFont);

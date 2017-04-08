@@ -66,6 +66,8 @@ class FreeType2 : public Pt::Singleton<FreeType2> {
 
         ~FreeType2();
 
+        void resetCaches();
+
         void setFontDir(const System::Path& path);
 
         std::vector<std::string> fontNames() const;

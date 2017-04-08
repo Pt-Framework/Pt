@@ -57,6 +57,23 @@ FreeType2::FreeType2()
     if( FT_Init_FreeType( &_ft ) )
         throw std::runtime_error("FT_Init_FreeType2");
 
+    setFontDir(System::Path( System::Path::curdir()) / "fonts");
+    
+    resetCaches();
+}
+
+FreeType2::~FreeType2()
+{
+    FTC_Manager_Done( _manager );
+    FT_Done_FreeType( _ft );
+}
+
+void FreeType2::resetCaches()
+{
+    System::MutexLock lock(_mutex);
+
+    FTC_Manager_Done( _manager );
+
     if( FTC_Manager_New( _ft, 0, 0, 0, &FreeType2::fontRequest, this, &_manager ) )
         throw std::runtime_error( "FTC_Manager_New" );
 
@@ -68,16 +85,6 @@ FreeType2::FreeType2()
 
     if( FTC_ImageCache_New( _manager, &_imageCache ) )
         throw std::runtime_error( "FTC_ImageCache_New" );
-
-    const System::Path path = System::Path( System::Path::curdir()) / "fonts";
-    const std::string  lp   = path.toLocal();
-    setFontDir(path);
-}
-
-FreeType2::~FreeType2()
-{
-    FTC_Manager_Done( _manager );
-    FT_Done_FreeType( _ft );
 }
 
 void FreeType2::setFontDir(const System::Path& path)
@@ -144,7 +151,7 @@ void FreeType2::setDefaultFont( const std::string& font )
 {
     System::MutexLock lock(_mutex);
 
-    _defaultFont = font;
+    _defaultFont = font.empty() ? "DejaVu Sans" : font;
 }
 
 std::string FreeType2::defaultFont() const
