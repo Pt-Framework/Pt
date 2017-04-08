@@ -184,7 +184,16 @@ void FreeType2::getCharSpacing(
 
     imageType->flags = FT_LOAD_TARGET_NORMAL;// | FT_LOAD_IGNORE_TRANSFORM;
 
-#if 1
+    FTC_ScalerRec scaler;
+    scaler.face_id = imageType->face_id;
+    scaler.width   = imageType->width;
+    scaler.height  = imageType->height;
+    scaler.pixel   = 1; // Set to 1 to ignore scaler.x_res and scaler.y_res
+
+    FT_Size size;
+    FTC_Manager_LookupSize(_manager, &scaler, &size);
+
+#if 0
     FTC_SBit smalGlyphBitmap;
     FTC_Node node  = 0;
     if(FTC_SBitCache_Lookup(_bitmapCache, imageType, glyph_index0, &smalGlyphBitmap, &node))
