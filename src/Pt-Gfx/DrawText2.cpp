@@ -60,24 +60,24 @@ DrawText2::DrawText2()
 }
 
 DrawText2::~DrawText2()
-{ FreeType2::releaseInstance(_faceId); }
+{ if(_faceId) FreeType2::releaseInstance(_faceId); }
 
 void DrawText2::setFont(const Font& font)
 {
     // Release the previous instance as needed
-    FreeType2::releaseInstance(_faceId);
+    if(_faceId) FreeType2::releaseInstance(_faceId);
 
     // Get the face ID
     if( font.name().empty() ) {
         Font defaultFont(FreeType2::defaultFont(), font);
-        _faceId = FreeType2::getInstance(0)->findFaceId(defaultFont);
+        _faceId = FreeType2::instance().findFaceId(defaultFont);
     }
     else {
-        _faceId = FreeType2::getInstance(0)->findFaceId(font);
+        _faceId = FreeType2::instance().findFaceId(font);
     }
 
-    // Create the instance as needed
-    if(!FreeType2::getInstance(_faceId)) FreeType2::getInstance(_faceId, true);
+    // Reserve the instance as needed
+    if(_faceId) FreeType2::reserveInstance(_faceId);
 
     // Setup the image type
     _imageType.face_id = _faceId;
@@ -100,29 +100,39 @@ void DrawText2::setFont(const Font& font)
     _matrix.yy = (FT_Fixed) ( cosinus);
 }
 
-FontMetrics DrawText2::fontMetrics(const String& text)
+const FontMetrics DrawText2::fontMetrics(const String& text)
 {
-    return FreeType2::getInstance(_faceId)->fontMetrics(text, _faceId, &_imageType);
+    return FreeType2::instance(_faceId).fontMetrics(
+        text, _faceId, &_imageType
+    );
 }
 
 void DrawText2::getCharSpacing(Pt::int32_t& x, Pt::int32_t& y, const Char& from, const Char& to)
 {
-    FreeType2::getInstance(_faceId)->getCharSpacing(x, y, from, to, _faceId, &_imageType);
+    FreeType2::instance(_faceId).getCharSpacing(
+        x, y, from, to, _faceId, &_imageType
+    );
 }
 
 void DrawText2::pathFromChar(std::vector<PointF>& points, std::vector<Pt::uint8_t>& tags, std::vector<Pt::int32_t>& contours, const Char& chr)
 {
-    FreeType2::getInstance(_faceId)->pathFromChar(points, tags, contours, chr, _faceId);
+    FreeType2::instance(_faceId).pathFromChar(
+        points, tags, contours, chr, _faceId
+    );
 }
 
 void DrawText2::draw(Image& image, const Color& color, const Point& pos, const String& text, const CompositionMode& mode)
 {
-    return FreeType2::getInstance(_faceId)->draw(image, _clip, pos, color, _fontAngle, mode, text, _matrix, _faceId, &_imageType, false);
+    return FreeType2::instance(_faceId).draw(
+        image, _clip, pos, color, _fontAngle, mode, text, _matrix, _faceId, &_imageType, false
+    );
 }
 
 void DrawText2::drawMono(Image& image, const Color& color, const Point& pos, const String& text, const CompositionMode& mode)
 {
-    return FreeType2::getInstance(_faceId)->draw(image, _clip, pos, color, _fontAngle, mode, text, _matrix, _faceId, &_imageType, true);
+    return FreeType2::instance(_faceId).draw(
+        image, _clip, pos, color, _fontAngle, mode, text, _matrix, _faceId, &_imageType, true
+    );
 }
 
 

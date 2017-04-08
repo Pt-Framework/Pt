@@ -81,28 +81,23 @@ class FreeType2 {
             const String& text, FT_Matrix& matrix, FTC_FaceID faceId, FTC_ImageType imageType, bool mono
         );
 
-        // Note:
-        //     * Instance with face ID of zero is the management instance, it will be created
-        //       on the first need and will never be deleted until the end of the program.
-        //     * Each call to getInstance() with "createIfNotExists" sets to "false" will
-        //       return zero if an instance associated with the face ID does not exists.
-        //     * Each call to getInstance() with "createIfNotExists" sets to "true" will either:
-        //           + create a new instance if there is no associated instance; or
-        //           + increment the reference counter return the existing associated instance.
-        //       Therefore releaseInstance() must later be called as many as the number of times
-        //       this function is called with "createIfNotExists" sets to "true".
-        static FreeType2* getInstance(FTC_FaceID faceID, bool createIfNotExists = false);
-
+        static void reserveInstance(FTC_FaceID faceID);
         static void releaseInstance(FTC_FaceID faceID);
 
+        static FreeType2& instance(FTC_FaceID faceID = 0);
+
     private:
-        struct ExitFunc {
-            inline ~ExitFunc()
+        struct InitFT2 {
+            inline InitFT2()
+            { FreeType2::reserveInstance_impl(0); }
+
+            inline ~InitFT2()
             { FreeType2::releaseInstance_impl(0); }
         };
 
-        static ExitFunc _exitFunc;
+        static InitFT2 _initFT2;
 
+        static void reserveInstance_impl(FTC_FaceID faceID);
         static void releaseInstance_impl(FTC_FaceID faceID);
 
     private:

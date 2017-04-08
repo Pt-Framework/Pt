@@ -634,16 +634,16 @@ static inline void combineLinePointsAndAddCaps(std::vector<PointF>& dst, const s
 // ======================================================================================
 
 void ImagePainter2::setFontDir(const Pt::System::Path& path)
-{ FreeType2::getInstance(0)->setFontDir(path); }
+{ FreeType2::instance().setFontDir(path); }
 
 void ImagePainter2::setDefaultFont(const std::string& f)
-{ FreeType2::getInstance(0)->setDefaultFont(f); }
+{ FreeType2::instance().setDefaultFont(f); }
 
 std::string ImagePainter2::defaultFont()
-{ return FreeType2::getInstance(0)->defaultFont(); }
+{ return FreeType2::instance().defaultFont(); }
 
 std::vector<std::string> ImagePainter2::fontNames()
-{ return FreeType2::getInstance(0)->fontNames(); }
+{ return FreeType2::instance().fontNames(); }
 
 FontMetrics ImagePainter2::fontMetrics( const Font& font, const Pt::String& text )
 { return Rasterizer2::fontMetrics(font, text); }

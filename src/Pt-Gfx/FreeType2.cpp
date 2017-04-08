@@ -512,41 +512,48 @@ FreeType2::Files     FreeType2::_files;
 
 std::string          FreeType2::_defaultFont;
 
-FreeType2::ExitFunc  FreeType2::_exitFunc;
+FreeType2::InitFT2   FreeType2::_initFT2;
 
 
 // ======================================================================================
 // ===== Static Member Functions ========================================================
 // ======================================================================================
 
-FreeType2* FreeType2::getInstance(FTC_FaceID faceID, bool createIfNotExists)
+void FreeType2::reserveInstance(FTC_FaceID faceID)
+{
+    // Ensure that the specified face ID is not zero
+    if(!faceID)
+        throw std::logic_error( "FreeType2::reserveInstance()" );
+
+    // Reserve the instance
+    reserveInstance_impl(faceID);
+}
+
+void FreeType2::reserveInstance_impl(FTC_FaceID faceID)
 {
     System::MutexLock lock(FreeType2::_mutex);
 
-    // Check if the instance for the specified face ID already exists
+    // If the instance for the specified face ID already exists,
+    // simply increment the reference counter
     FreeType2::Instances::iterator it = FreeType2::_instances.find(faceID);
     if(it != FreeType2::_instances.end()) {
-        if(createIfNotExists) ++it->second->_refCount;
-        //std::clog << "getInstance(" << faceID << ") : INC refCount = " << it->second->_refCount << "\n";
-        return it->second;
+        ++it->second->_refCount;
+        std::clog << "reserveInstance(" << faceID << ") : INC : refCount = " << it->second->_refCount << "\n";
+        return;
     }
 
-    // Do not create a new instance if not asked, unless for instance with face ID of zero
-    if(!createIfNotExists && !faceID) return 0;
-
-    // Create a new instance, store it, and return it
+    // Create a new instance and store it to the map
     FreeType2* inst = new FreeType2;
     FreeType2::_instances.insert(std::make_pair(faceID, inst));
 
-    //std::clog << "getInstance(" << faceID << ") : NEW refCount = " << inst->_refCount << "\n";
-
-    return inst;
+    std::clog << "reserveInstance(" << faceID << ") : NEW : refCount = " << inst->_refCount << "\n";
 }
 
 void FreeType2::releaseInstance(FTC_FaceID faceID)
 {
     // Ensure that the specified face ID is not zero
-    if(!faceID) return;
+    if(!faceID)
+        throw std::logic_error( "FreeType2::releaseInstance()" );
 
     // Release the instance
     releaseInstance_impl(faceID);
@@ -556,31 +563,42 @@ void FreeType2::releaseInstance_impl(FTC_FaceID faceID)
 {
     System::MutexLock lock(FreeType2::_mutex);
 
-    // Check if the instance for the specified face ID does actually exist
+    // Check if the instance for the specified face ID does actually exists
     FreeType2::Instances::iterator it = FreeType2::_instances.find(faceID);
-    if(it == FreeType2::_instances.end()) return;
+    if(it == FreeType2::_instances.end())
+        throw std::logic_error( "FreeType2::releaseInstance_impl()" );
 
     // Check the reference counter
     if(it->second->_refCount > 1) {
         --it->second->_refCount;
-        //std::clog << "releaseInstance(" << faceID << ") : DEC refCount = " << it->second->_refCount << "\n";
+        std::clog << "releaseInstance(" << faceID << ") : DEC : refCount = " << it->second->_refCount << "\n";
         return;
     }
 
-    it->second->_refCount = 0;
-    //std::clog << "releaseInstance(" << faceID << ") : DEC refCount = " << it->second->_refCount << "\n";
-
+    // The instance can be deleted now
     delete it->second;
     FreeType2::_instances.erase(it);
-
-    //std::clog << "releaseInstance(" << faceID << ") : NUM = " << FreeType2::_instances.size() << "\n";
+    std::clog << "releaseInstance(" << faceID << ") : DEL : refCount = 0\n";
 
     // If there are no more instances, delete the library too
     if(FreeType2::_instances.empty()) {
         FT_Done_FreeType(FreeType2::_ft);
         FreeType2::_ft = 0;
-        //std::clog << "closing FreeType\n";
+        std::clog << "closing FreeType\n";
     }
+}
+
+FreeType2& FreeType2::instance(FTC_FaceID faceID)
+{
+    System::MutexLock lock(FreeType2::_mutex);
+
+    // Check if the instance for the specified face ID does actually exists
+    FreeType2::Instances::iterator it = FreeType2::_instances.find(faceID);
+    if(it == FreeType2::_instances.end())
+        throw std::logic_error( "FreeType2::instance()" );
+
+    // Return the instance
+    return *it->second;
 }
 
 void FreeType2::setFontDir_impl_noLock(const System::Path& path)

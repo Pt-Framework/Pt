@@ -49,7 +49,7 @@ class DrawText2 {
 
         void setFont(const Font& font);
 
-        FontMetrics fontMetrics(const String& text);
+        const FontMetrics fontMetrics(const String& text);
 
         void getCharSpacing(Pt::int32_t& x, Pt::int32_t& y, const Char& from, const Char& to);
         void pathFromChar(std::vector<PointF>& points, std::vector<Pt::uint8_t>& tags, std::vector<Pt::int32_t>& contours, const Char& chr);
