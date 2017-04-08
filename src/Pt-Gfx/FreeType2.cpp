@@ -182,7 +182,7 @@ void FreeType2::getCharSpacing(
     FT_UInt glyph_index1 = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, to);
     if(!glyph_index1) return;
 
-    imageType->flags = FT_LOAD_TARGET_NORMAL | FT_LOAD_IGNORE_TRANSFORM;
+    imageType->flags = FT_LOAD_TARGET_NORMAL;// | FT_LOAD_IGNORE_TRANSFORM;
 
 #if 1
     FTC_SBit smalGlyphBitmap;
@@ -240,7 +240,7 @@ void FreeType2::pathFromChar(
     FT_UInt glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, chr);
     if(!glyph_index) return;
 
-    FT_Load_Glyph(face, glyph_index, FT_LOAD_TARGET_NORMAL | FT_LOAD_IGNORE_TRANSFORM);
+    FT_Load_Glyph(face, glyph_index, FT_LOAD_TARGET_NORMAL/* | FT_LOAD_IGNORE_TRANSFORM*/);
     FT_GlyphSlot glyph = face->glyph;
 
     points.resize(glyph->outline.n_points);
