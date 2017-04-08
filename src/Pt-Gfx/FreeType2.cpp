@@ -187,24 +187,20 @@ void FreeType2::getCharSpacing(
 #if 1
     FTC_SBit smalGlyphBitmap;
     FTC_Node node  = 0;
+    if(FTC_SBitCache_Lookup(_bitmapCache, imageType, glyph_index0, &smalGlyphBitmap, &node))
+        return;
 
-    if(mono) imageType->flags = FT_LOAD_RENDER | FT_LOAD_TARGET_MONO;
-    else     imageType->flags = FT_LOAD_RENDER | FT_LOAD_TARGET_NORMAL;
-
-    if(FTC_SBitCache_Lookup(_bitmapCache, imageType, glyph_index, &smalGlyphBitmap, &node))
-        continue;
-
-
-    incX   = smalGlyphBitmap->xadvance << 16;
-    incY   = smalGlyphBitmap->yadvance << 16;
+    x = smalGlyphBitmap->xadvance;
+    y = smalGlyphBitmap->yadvance;
 #else
     FT_Glyph glyph = 0;
     FTC_Node node  = 0;
-    FTC_ImageCache_Lookup(_imageCache, imageType, glyph_index0, &glyph, &node);
-#endif
+    if(FTC_ImageCache_Lookup(_imageCache, imageType, glyph_index0, &glyph, &node))
+        return;
 
     x = glyph->advance.x >> 16;
     y = glyph->advance.y >> 16;
+#endif
 
     //std::clog << "G: " << (char) from << " " << (char) to << " " << glyph_index0 << " " << glyph_index1 << std::endl;
 
