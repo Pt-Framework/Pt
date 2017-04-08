@@ -60,25 +60,11 @@ class Image;
 class CompositionMode;
 
 
-class FreeType2 : public Pt::Singleton<FreeType2> {
+class FreeType2 {
     public:
-        friend class Pt::Singleton<FreeType2>;
-
         ~FreeType2();
 
-        void resetCaches();
-
-        void setFontDir(const System::Path& path);
-
-        std::vector<std::string> fontNames() const;
-
-        void setDefaultFont(const std::string& font);
-
-        std::string defaultFont() const;
-
-        FTC_FaceID findFaceId(const Font& font);
-
-        FontMetrics fontMetrics(const String& text, FTC_FaceID faceId, FTC_ImageType imageType);
+        const FontMetrics fontMetrics(const String& text, FTC_FaceID faceId, FTC_ImageType imageType);
 
         void getCharSpacing(
             Pt::int32_t& x, Pt::int32_t& y,
@@ -95,34 +81,55 @@ class FreeType2 : public Pt::Singleton<FreeType2> {
             const String& text, FT_Matrix& matrix, FTC_FaceID faceId, FTC_ImageType imageType, bool mono
         );
 
-        static FT_Error fontRequest(FTC_FaceID face_id, FT_Library library, FT_Pointer request_data, FT_Face* face);
+        static FreeType2* getInstance(FTC_FaceID faceID);
 
-    protected:
+        static void releaseInstance(FTC_FaceID faceID);
+
+    private:
         FreeType2();
-
-        FT_Error onFontRequest(FTC_FaceID face_id, FT_Face* face);
 
         void drawGlyph(
             Image& image, const Rect& clip, int xpos, int ypos, const Color& color, const CompositionMode& mode,
             int pitch, int width, int height, const unsigned char* buffer, bool mono
         );
 
-    private:
-        typedef std::set<System::Path*> Files;
-        typedef std::map<Font, System::Path> Fonts;
+        FT_Error onFontRequest(FTC_FaceID face_id, FT_Face* face);
 
-        mutable System::Mutex _mutex;
+        Pt::int32_t    _refCount;
 
-        FT_Library     _ft;
         FTC_Manager    _manager;
         FTC_CMapCache  _charMapCache;
         FTC_SBitCache  _bitmapCache;
         FTC_ImageCache _imageCache;
 
-        System::Path   _fontDir;
-        std::string    _defaultFont;
-        Fonts          _fonts;
-        Files          _files;
+    private:
+        typedef std::set<System::Path*           > Files;
+        typedef std::map<Font,       System::Path> Fonts;
+        typedef std::map<FTC_FaceID, FreeType2*  > Instances;
+
+        static System::Mutex  _mutex;
+
+        static FT_Library     _ft;
+        static Instances      _instances;
+
+        static System::Path   _fontDir;
+        static Fonts          _fonts;
+        static Files          _files;
+
+        static std::string    _defaultFont;
+
+    public:
+        static FT_Error fontRequest(FTC_FaceID face_id, FT_Library library, FT_Pointer request_data, FT_Face* face);
+
+        static void setFontDir(const System::Path& path);
+
+        static const std::vector<std::string> fontNames();
+
+        static void setDefaultFont(const std::string& font);
+
+        static const std::string defaultFont();
+
+        static FTC_FaceID findFaceId(const Font& font);
 };
 
 

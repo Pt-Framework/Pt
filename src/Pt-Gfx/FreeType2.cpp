@@ -28,6 +28,7 @@
 */
 
 #include <limits>
+#include <utility>
 
 #include <Pt/System/Directory.h>
 #include <Pt/System/FileInfo.h>
@@ -46,35 +47,21 @@ namespace Pt {
 namespace Gfx {
 
 
-static struct Init {
-    Init()
-    { FreeType2::instance(); }
-} initFreeType2;
-
+// ======================================================================================
+// ===== Normal Member Functions ========================================================
+// ======================================================================================
 
 FreeType2::FreeType2()
+: _refCount(1)
 {
-    if( FT_Init_FreeType( &_ft ) )
-        throw std::runtime_error("FT_Init_FreeType2");
+    System::MutexLock lock(FreeType2::_mutex);
 
-    setFontDir(System::Path( System::Path::curdir()) / "fonts");
-    
-    resetCaches();
-}
+    const bool initLib = !FreeType2::_ft;
 
-FreeType2::~FreeType2()
-{
-    FTC_Manager_Done( _manager );
-    FT_Done_FreeType( _ft );
-}
+    if( initLib && ( FT_Init_FreeType( &FreeType2::_ft ) || !FreeType2::_ft ) )
+        throw std::runtime_error("FT_Init_FreeType");
 
-void FreeType2::resetCaches()
-{
-    System::MutexLock lock(_mutex);
-
-    FTC_Manager_Done( _manager );
-
-    if( FTC_Manager_New( _ft, 0, 0, 0, &FreeType2::fontRequest, this, &_manager ) )
+    if( FTC_Manager_New( FreeType2::_ft, 0, 0, 0, &FreeType2::fontRequest, this, &_manager ) )
         throw std::runtime_error( "FTC_Manager_New" );
 
     if( FTC_CMapCache_New( _manager, &_charMapCache ) )
@@ -85,98 +72,22 @@ void FreeType2::resetCaches()
 
     if( FTC_ImageCache_New( _manager, &_imageCache ) )
         throw std::runtime_error( "FTC_ImageCache_New" );
+
+    if(!initLib) return;
+
+    setFontDir(
+        FreeType2::_fontDir.empty()
+        ? System::Path( System::Path::curdir()) / "fonts"
+        : FreeType2::_fontDir
+    );
 }
 
-void FreeType2::setFontDir(const System::Path& path)
+FreeType2::~FreeType2()
+{ FTC_Manager_Done(_manager); }
+
+const FontMetrics FreeType2::fontMetrics(const String& text, FTC_FaceID faceId, FTC_ImageType imageType)
 {
-    System::MutexLock lock(_mutex);
-
-    _fontDir = path;
-
-    _fonts.clear();
-    _files.clear();
-
-    if( !System::FileInfo::exists(_fontDir) ) return;
-
-    System::DirectoryIterator it(_fontDir);
-    System::DirectoryIterator end;
-
-    for(; it != end; ++it) {
-        const System::Path fp = _fontDir / it->path();
-        const std::string  gg = fp.toLocal();
-
-        FT_Face  face;
-        FT_Error err = FT_New_Face(_ft, fp.toLocal().c_str(), 0, &face);
-        if(err != 0) continue;
-
-        Font::Style style = Font::Normal;
-
-        if( (face->style_flags & FT_STYLE_FLAG_BOLD) == FT_STYLE_FLAG_BOLD )
-            style = Font::Bold;
-
-        if( (face->style_flags & FT_STYLE_FLAG_ITALIC) == FT_STYLE_FLAG_ITALIC )
-            style = Font::Italic;
-
-        if( (face->style_flags & FT_STYLE_FLAG_BOLD) == FT_STYLE_FLAG_BOLD && (face->style_flags & FT_STYLE_FLAG_ITALIC) == FT_STYLE_FLAG_ITALIC )
-            style = Font::BoldItalic;
-
-        Font font(face->family_name, 12, style);
-
-        System::Path& fontPath = _fonts[font];
-        fontPath = fp;
-
-        _files.insert(&fontPath);
-
-        FT_Done_Face(face);
-    }
-}
-
-std::vector<std::string> FreeType2::fontNames() const
-{
-    std::vector<std::string> names;
-    names.push_back("DejaVu Sans");
-
-    System::MutexLock lock(_mutex);
-
-    Fonts::const_iterator it;
-    for(it = _fonts.begin(); it != _fonts.end(); ++it) {
-        if(std::find(names.begin(), names.end(), it->first.name()) == names.end())
-            names.push_back( it->first.name() );
-    }
-
-    return names;
-}
-
-void FreeType2::setDefaultFont( const std::string& font )
-{
-    System::MutexLock lock(_mutex);
-
-    _defaultFont = font.empty() ? "DejaVu Sans" : font;
-}
-
-std::string FreeType2::defaultFont() const
-{
-    System::MutexLock lock(_mutex);
-
-    const std::string df = _defaultFont;
-
-    return df;
-}
-
-FTC_FaceID FreeType2::findFaceId(const Font& font)
-{
-    System::MutexLock lock(_mutex);
-
-    Fonts::iterator it = _fonts.find(font);
-    if(it == _fonts.end()) return 0;
-
-    System::Path* path = &it->second;
-    return reinterpret_cast<FTC_FaceID>(path);
-}
-
-FontMetrics FreeType2::fontMetrics(const String& text, FTC_FaceID faceId, FTC_ImageType imageType)
-{
-    System::MutexLock lock(_mutex);
+    System::MutexLock lock(FreeType2::_mutex);
 
     FT_Face  face = 0;
     FT_Error ferr = FTC_Manager_LookupFace(_manager, faceId, &face);
@@ -246,26 +157,6 @@ FontMetrics FreeType2::fontMetrics(const String& text, FTC_FaceID faceId, FTC_Im
     );
 }
 
-FT_Error FreeType2::fontRequest(FTC_FaceID faceId, FT_Library library, FT_Pointer data, FT_Face* face)
-{
-    FreeType2* ft = static_cast<FreeType2*>(data);
-    return ft->onFontRequest(faceId, face);
-}
-
-FT_Error FreeType2::onFontRequest(FTC_FaceID faceId, FT_Face* face)
-{
-    System::Path* path = reinterpret_cast<System::Path*>(faceId);
-
-    if(faceId == 0)
-        return FT_New_Memory_Face(_ft, DejaVuSans, DejaVuSansSize, 0, face);
-
-    // Check if path is still valid
-    if(_files.find(path) == _files.end())
-        return FT_New_Memory_Face(_ft, DejaVuSans, DejaVuSansSize, 0, face);
-
-    return FT_New_Face(_ft, path->toLocal().c_str(), 0, face);
-}
-
 void FreeType2::getCharSpacing(
     Pt::int32_t& x, Pt::int32_t& y,
     const Char& from, const Char& to, FTC_FaceID faceId, FTC_ImageType imageType
@@ -273,7 +164,7 @@ void FreeType2::getCharSpacing(
 {
     x = y = 0;
 
-    System::MutexLock lock(_mutex);
+    System::MutexLock lock(FreeType2::_mutex);
 
     FT_Face  face = 0;
     FT_Error ferr = FTC_Manager_LookupFace(_manager, faceId, &face);
@@ -302,14 +193,12 @@ void FreeType2::getCharSpacing(
     x = glyph->advance.x >> 16;
     y = glyph->advance.y >> 16;
 
-    //*
     if(FT_HAS_KERNING(face)) {
         FT_Vector delta;
         FT_Get_Kerning(face, glyph_index0, glyph_index1, FT_KERNING_DEFAULT, &delta);
         x += delta.x;
         y += delta.y;
     }
-    //*/
 }
 
 void FreeType2::pathFromChar(
@@ -320,7 +209,7 @@ void FreeType2::pathFromChar(
     points.clear();
     contours.clear();
 
-    System::MutexLock lock(_mutex);
+    System::MutexLock lock(FreeType2::_mutex);
 
     FT_Face  face = 0;
     FT_Error ferr = FTC_Manager_LookupFace(_manager, faceId, &face);
@@ -364,7 +253,7 @@ void FreeType2::draw(
     const String& text, FT_Matrix& matrix, FTC_FaceID faceId, FTC_ImageType imageType, bool mono
 )
 {
-    System::MutexLock lock(_mutex);
+    System::MutexLock lock(FreeType2::_mutex);
 
     FT_Vector      glyphPos;
     FT_Vector      delta;
@@ -405,13 +294,11 @@ void FreeType2::draw(
         FT_UInt glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, it->value());
         if(!glyph_index) continue;
 
-        //*
         if(FT_HAS_KERNING(face) && previous) {
             FT_Get_Kerning(face, previous, glyph_index, FT_KERNING_DEFAULT, &delta);
             glyphPos.x += delta.x;
             glyphPos.y -= delta.y;
         }
-        //*/
 
         if(!fontAngle) {
             if(mono) imageType->flags = FT_LOAD_RENDER | FT_LOAD_TARGET_MONO;
@@ -481,6 +368,9 @@ void FreeType2::drawGlyph(
     int pitch, int width, int height, const unsigned char* buffer, bool mono
 )
 {
+    // No need to lock the mutex here because this function is called by the
+    // draw() function that already locked the mutex
+
     const Pt::ssize_t x1 = clip.x();
     const Pt::ssize_t y1 = clip.y();
     const Pt::ssize_t x2 = x1 + clip.width () - 1;
@@ -557,6 +447,180 @@ void FreeType2::drawGlyph(
         }
 
     } // for
+}
+
+FT_Error FreeType2::onFontRequest(FTC_FaceID faceId, FT_Face* face)
+{
+    System::Path* path = reinterpret_cast<System::Path*>(faceId);
+
+    // No need to lock the mutex here because this function is called by the
+    // fontRequest() function, which is called by the FTC_Manager instance, which
+    // in turn is being used by other functions that already locked the mutex
+
+    if(faceId == 0)
+        return FT_New_Memory_Face(FreeType2::_ft, DejaVuSans, DejaVuSansSize, 0, face);
+
+    // Check if path is still valid
+    if(FreeType2::_files.find(path) == FreeType2::_files.end())
+        return FT_New_Memory_Face(FreeType2::_ft, DejaVuSans, DejaVuSansSize, 0, face);
+
+    return FT_New_Face(FreeType2::_ft, path->toLocal().c_str(), 0, face);
+}
+
+
+// ======================================================================================
+// ===== Static Member Variables/Functions ==============================================
+// ======================================================================================
+
+System::Mutex        FreeType2::_mutex;
+
+FT_Library           FreeType2::_ft = 0;
+FreeType2::Instances FreeType2::_instances;
+
+System::Path         FreeType2::_fontDir;
+FreeType2::Fonts     FreeType2::_fonts;
+FreeType2::Files     FreeType2::_files;
+
+std::string          FreeType2::_defaultFont;
+
+
+FreeType2* FreeType2::getInstance(FTC_FaceID faceID)
+{
+    // Check if the instance for the specified face ID already exists
+    FreeType2::Instances::iterator it = FreeType2::_instances.find(faceID);
+    if(it != FreeType2::_instances.end()) {
+        ++it->second->_refCount;
+        return it->second;
+    }
+
+    // Create a new instance, store it, and return it
+
+    // No need to lock the mutex here because the constructor will lock the mutex
+
+    FreeType2* inst = new FreeType2;
+    FreeType2::_instances.insert(std::make_pair(faceID, inst));
+
+    return inst;
+}
+
+void FreeType2::releaseInstance(FTC_FaceID faceID)
+{
+    // Ensure that the specified face ID is not zero
+    if(!faceID) return;
+
+    // Check if the instance for the specified face ID does actually exist
+    FreeType2::Instances::iterator it = FreeType2::_instances.find(faceID);
+    if(it == FreeType2::_instances.end()) return;
+
+    // Check if there are other(s) that still use the instance
+    if(it->second->_refCount > 1) {
+        --it->second->_refCount;
+        return;
+    }
+
+    // No one is using the instance, delete it
+    System::MutexLock lock(FreeType2::_mutex);
+
+    delete it->second;
+    FreeType2::_instances.erase(it);
+
+    // If there are no more instances, delete the library too
+    if(FreeType2::_instances.empty()) {
+        FT_Done_FreeType(FreeType2::_ft);
+        FreeType2::_ft = 0;
+    }
+}
+
+FT_Error FreeType2::fontRequest(FTC_FaceID faceId, FT_Library library, FT_Pointer data, FT_Face* face)
+{
+    FreeType2* ft = static_cast<FreeType2*>(data);
+
+    return ft->onFontRequest(faceId, face);
+}
+
+void FreeType2::setFontDir(const System::Path& path)
+{
+    FreeType2::_fontDir = path;
+
+    FreeType2::_fonts.clear();
+    FreeType2::_files.clear();
+
+    if( !System::FileInfo::exists(FreeType2::_fontDir) ) return;
+
+    System::MutexLock lock(FreeType2::_mutex);
+
+    System::DirectoryIterator it(FreeType2::_fontDir);
+    System::DirectoryIterator end;
+
+    for(; it != end; ++it) {
+        const System::Path& fp = FreeType2::_fontDir / it->path();
+
+        FT_Face  face;
+        FT_Error err = FT_New_Face(FreeType2::_ft, fp.toLocal().c_str(), 0, &face);
+        if(err != 0) continue;
+
+        Font::Style style = Font::Normal;
+
+        if( (face->style_flags & FT_STYLE_FLAG_BOLD) == FT_STYLE_FLAG_BOLD )
+            style = Font::Bold;
+
+        if( (face->style_flags & FT_STYLE_FLAG_ITALIC) == FT_STYLE_FLAG_ITALIC )
+            style = Font::Italic;
+
+        if( (face->style_flags & FT_STYLE_FLAG_BOLD) == FT_STYLE_FLAG_BOLD && (face->style_flags & FT_STYLE_FLAG_ITALIC) == FT_STYLE_FLAG_ITALIC )
+            style = Font::BoldItalic;
+
+        Font font(face->family_name, 12, style);
+
+        System::Path& fontPath = FreeType2::_fonts[font];
+        fontPath = fp;
+
+        FreeType2::_files.insert(&fontPath);
+
+        FT_Done_Face(face);
+    }
+}
+
+const std::vector<std::string> FreeType2::fontNames()
+{
+    std::vector<std::string> names;
+    names.push_back("DejaVu Sans");
+
+    System::MutexLock lock(FreeType2::_mutex);
+
+    Fonts::const_iterator it;
+    for(it = FreeType2::_fonts.begin(); it != FreeType2::_fonts.end(); ++it) {
+        if(std::find(names.begin(), names.end(), it->first.name()) == names.end())
+            names.push_back( it->first.name() );
+    }
+
+    return names;
+}
+
+void FreeType2::setDefaultFont( const std::string& font )
+{
+    System::MutexLock lock(FreeType2::_mutex);
+
+    FreeType2::_defaultFont = font.empty() ? "DejaVu Sans" : font;
+}
+
+const std::string FreeType2::defaultFont()
+{
+    System::MutexLock lock(FreeType2::_mutex);
+
+    const std::string df = FreeType2::_defaultFont;
+
+    return df;
+}
+
+FTC_FaceID FreeType2::findFaceId(const Font& font)
+{
+    System::MutexLock lock(FreeType2::_mutex);
+
+    Fonts::iterator it = FreeType2::_fonts.find(font);
+    if(it == FreeType2::_fonts.end()) return 0;
+
+    return reinterpret_cast<FTC_FaceID>(&it->second);
 }
 
 

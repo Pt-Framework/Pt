@@ -96,7 +96,6 @@ Rasterizer2::Rasterizer2(Image& image)
 , _penPixel       ( _image->view(), 0, 0 )
 , _brushPixel     ( _image->view(), 0, 0 )
 {
-    _text->setFont(_font);
     updateClip();
 }
 
