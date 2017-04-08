@@ -81,9 +81,29 @@ class FreeType2 {
             const String& text, FT_Matrix& matrix, FTC_FaceID faceId, FTC_ImageType imageType, bool mono
         );
 
-        static FreeType2* getInstance(FTC_FaceID faceID);
+        // Note:
+        //     * Instance with face ID of zero is the management instance, it will be created
+        //       on the first need and will never be deleted until the end of the program.
+        //     * Each call to getInstance() with "createIfNotExists" sets to "false" will
+        //       return zero if an instance associated with the face ID does not exists.
+        //     * Each call to getInstance() with "createIfNotExists" sets to "true" will either:
+        //           + create a new instance if there is no associated instance; or
+        //           + increment the reference counter return the existing associated instance.
+        //       Therefore releaseInstance() must later be called as many as the number of times
+        //       this function is called with "createIfNotExists" sets to "true".
+        static FreeType2* getInstance(FTC_FaceID faceID, bool createIfNotExists = false);
 
         static void releaseInstance(FTC_FaceID faceID);
+
+    private:
+        struct ExitFunc {
+            inline ~ExitFunc()
+            { FreeType2::releaseInstance_impl(0); }
+        };
+
+        static ExitFunc _exitFunc;
+
+        static void releaseInstance_impl(FTC_FaceID faceID);
 
     private:
         FreeType2();
@@ -118,9 +138,12 @@ class FreeType2 {
 
         static std::string    _defaultFont;
 
-    public:
-        static FT_Error fontRequest(FTC_FaceID face_id, FT_Library library, FT_Pointer request_data, FT_Face* face);
+    private:
+        static void atExitHandler();
 
+        static void setFontDir_impl_noLock(const System::Path& path);
+
+    public:
         static void setFontDir(const System::Path& path);
 
         static const std::vector<std::string> fontNames();
@@ -130,6 +153,8 @@ class FreeType2 {
         static const std::string defaultFont();
 
         static FTC_FaceID findFaceId(const Font& font);
+
+        static FT_Error fontRequest(FTC_FaceID face_id, FT_Library library, FT_Pointer request_data, FT_Face* face);
 };
 
 

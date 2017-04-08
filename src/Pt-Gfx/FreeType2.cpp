@@ -54,8 +54,6 @@ namespace Gfx {
 FreeType2::FreeType2()
 : _refCount(1)
 {
-    System::MutexLock lock(FreeType2::_mutex);
-
     const bool initLib = !FreeType2::_ft;
 
     if( initLib && ( FT_Init_FreeType( &FreeType2::_ft ) || !FreeType2::_ft ) )
@@ -75,7 +73,7 @@ FreeType2::FreeType2()
 
     if(!initLib) return;
 
-    setFontDir(
+    setFontDir_impl_noLock(
         FreeType2::_fontDir.empty()
         ? System::Path( System::Path::curdir()) / "fonts"
         : FreeType2::_fontDir
@@ -469,7 +467,7 @@ FT_Error FreeType2::onFontRequest(FTC_FaceID faceId, FT_Face* face)
 
 
 // ======================================================================================
-// ===== Static Member Variables/Functions ==============================================
+// ===== Static Member Variables ========================================================
 // ======================================================================================
 
 System::Mutex        FreeType2::_mutex;
@@ -483,22 +481,33 @@ FreeType2::Files     FreeType2::_files;
 
 std::string          FreeType2::_defaultFont;
 
+FreeType2::ExitFunc  FreeType2::_exitFunc;
 
-FreeType2* FreeType2::getInstance(FTC_FaceID faceID)
+
+// ======================================================================================
+// ===== Static Member Functions ========================================================
+// ======================================================================================
+
+FreeType2* FreeType2::getInstance(FTC_FaceID faceID, bool createIfNotExists)
 {
+    System::MutexLock lock(FreeType2::_mutex);
+
     // Check if the instance for the specified face ID already exists
     FreeType2::Instances::iterator it = FreeType2::_instances.find(faceID);
     if(it != FreeType2::_instances.end()) {
-        ++it->second->_refCount;
+        if(createIfNotExists) ++it->second->_refCount;
+        //std::clog << "getInstance(" << faceID << ") : INC refCount = " << it->second->_refCount << "\n";
         return it->second;
     }
 
+    // Do not create a new instance if not asked, unless for instance with face ID of zero
+    if(!createIfNotExists && !faceID) return 0;
+
     // Create a new instance, store it, and return it
-
-    // No need to lock the mutex here because the constructor will lock the mutex
-
     FreeType2* inst = new FreeType2;
     FreeType2::_instances.insert(std::make_pair(faceID, inst));
+
+    //std::clog << "getInstance(" << faceID << ") : NEW refCount = " << inst->_refCount << "\n";
 
     return inst;
 }
@@ -508,37 +517,42 @@ void FreeType2::releaseInstance(FTC_FaceID faceID)
     // Ensure that the specified face ID is not zero
     if(!faceID) return;
 
+    // Release the instance
+    releaseInstance_impl(faceID);
+}
+
+void FreeType2::releaseInstance_impl(FTC_FaceID faceID)
+{
+    System::MutexLock lock(FreeType2::_mutex);
+
     // Check if the instance for the specified face ID does actually exist
     FreeType2::Instances::iterator it = FreeType2::_instances.find(faceID);
     if(it == FreeType2::_instances.end()) return;
 
-    // Check if there are other(s) that still use the instance
+    // Check the reference counter
     if(it->second->_refCount > 1) {
         --it->second->_refCount;
+        //std::clog << "releaseInstance(" << faceID << ") : DEC refCount = " << it->second->_refCount << "\n";
         return;
     }
 
-    // No one is using the instance, delete it
-    System::MutexLock lock(FreeType2::_mutex);
+    it->second->_refCount = 0;
+    //std::clog << "releaseInstance(" << faceID << ") : DEC refCount = " << it->second->_refCount << "\n";
 
     delete it->second;
     FreeType2::_instances.erase(it);
+
+    //std::clog << "releaseInstance(" << faceID << ") : NUM = " << FreeType2::_instances.size() << "\n";
 
     // If there are no more instances, delete the library too
     if(FreeType2::_instances.empty()) {
         FT_Done_FreeType(FreeType2::_ft);
         FreeType2::_ft = 0;
+        //std::clog << "closing FreeType\n";
     }
 }
 
-FT_Error FreeType2::fontRequest(FTC_FaceID faceId, FT_Library library, FT_Pointer data, FT_Face* face)
-{
-    FreeType2* ft = static_cast<FreeType2*>(data);
-
-    return ft->onFontRequest(faceId, face);
-}
-
-void FreeType2::setFontDir(const System::Path& path)
+void FreeType2::setFontDir_impl_noLock(const System::Path& path)
 {
     FreeType2::_fontDir = path;
 
@@ -546,8 +560,6 @@ void FreeType2::setFontDir(const System::Path& path)
     FreeType2::_files.clear();
 
     if( !System::FileInfo::exists(FreeType2::_fontDir) ) return;
-
-    System::MutexLock lock(FreeType2::_mutex);
 
     System::DirectoryIterator it(FreeType2::_fontDir);
     System::DirectoryIterator end;
@@ -579,6 +591,13 @@ void FreeType2::setFontDir(const System::Path& path)
 
         FT_Done_Face(face);
     }
+}
+
+void FreeType2::setFontDir(const System::Path& path)
+{
+    System::MutexLock lock(FreeType2::_mutex);
+
+    setFontDir_impl_noLock(path);
 }
 
 const std::vector<std::string> FreeType2::fontNames()
@@ -621,6 +640,13 @@ FTC_FaceID FreeType2::findFaceId(const Font& font)
     if(it == FreeType2::_fonts.end()) return 0;
 
     return reinterpret_cast<FTC_FaceID>(&it->second);
+}
+
+FT_Error FreeType2::fontRequest(FTC_FaceID faceId, FT_Library library, FT_Pointer data, FT_Face* face)
+{
+    FreeType2* ft = static_cast<FreeType2*>(data);
+
+    return ft->onFontRequest(faceId, face);
 }
 
 

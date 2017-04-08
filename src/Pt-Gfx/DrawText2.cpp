@@ -64,6 +64,9 @@ DrawText2::~DrawText2()
 
 void DrawText2::setFont(const Font& font)
 {
+    // Release the previous instance as needed
+    FreeType2::releaseInstance(_faceId);
+
     // Get the face ID
     if( font.name().empty() ) {
         Font defaultFont(FreeType2::defaultFont(), font);
@@ -72,6 +75,9 @@ void DrawText2::setFont(const Font& font)
     else {
         _faceId = FreeType2::getInstance(0)->findFaceId(font);
     }
+
+    // Create the instance as needed
+    if(!FreeType2::getInstance(_faceId)) FreeType2::getInstance(_faceId, true);
 
     // Setup the image type
     _imageType.face_id = _faceId;
