@@ -228,7 +228,7 @@ static inline void generateArcPoints(std::vector<PointF>& dst, double x1, double
 
 static inline void generateChrPoints(std::vector<PointF>& dst, double x, double y, const std::vector<PointF>& pointsF, const std::vector<Pt::uint8_t>& tags, const std::vector<Pt::int32_t>& contours, double smoothness)
 {
-    std::clog << "points/tags = " << pointsF.size() << " ; contours = " << contours.size() << std::endl;
+    //std::clog << "points/tags = " << pointsF.size() << " ; contours = " << contours.size() << std::endl;
 
     // The origin point
     const PointF xyOrg(x, y);
@@ -772,7 +772,7 @@ void Path::putChar(const Char& chr, const Char& autoAddSpaceFor)
     getCharSpacing(dx, dy, chr, autoAddSpaceFor);
     relMoveTo     (dx, dy);
 
-    std::clog << dx << " " << dy << std::endl;
+    //std::clog << dx << " " << dy << std::endl;
 }
 
 void Path::putText(const String& str)
