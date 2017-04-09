@@ -45,15 +45,47 @@ SGNode::~SGNode()
 
 void SGNode::clear()
 {
+    // Delete the children
     for(Children::iterator it = _children.begin(); it != _children.end(); ++it) {
         delete *it;
     }
 
+    // Null the pen and brush
     _pen   = Pen  ();
     _brush = Brush();
 
+    // Clear the transformation and children list
     _transform.identity();
     _children.clear();
+}
+
+const Transform SGNode::begDrawSeq(ImagePainter2& painter, const Transform* transform)
+{
+    // Combine the transformations
+    const Transform& thisTransform = transform ? ( _transform * (*transform) ) : _transform;
+
+    // Save the original pen and brush as needed
+    if(!_pen  .isNull()) _savePen   = painter.pen  ();
+    if(!_brush.isNull()) _saveBrush = painter.brush();
+
+    // Set the current pen and/or brush as needed
+    if(!_pen  .isNull()) painter.setPen  (_pen  );
+    if(!_brush.isNull()) painter.setBrush(_brush);
+
+    // Draw the children
+    for(Children::iterator it = _children.begin(); it != _children.end(); ++it) {
+        (*it)->draw(painter, &thisTransform);
+    }
+
+    // Combine the combined transformations
+    return thisTransform;
+}
+
+const void SGNode::endDrawSeq(ImagePainter2& painter)
+{
+    // Restore the original pen and/or brush as needed
+    if(!_pen  .isNull()) painter.setPen  (_savePen  );
+    if(!_brush.isNull()) painter.setBrush(_saveBrush);
 }
 
 
@@ -66,8 +98,10 @@ SGNodePath::~SGNodePath()
 
 void SGNodePath::clear()
 {
+    // Clear the path
     _path.clear();
 
+    // Clear the base class' data
     SGNode::clear();
 }
 
@@ -76,21 +110,8 @@ void SGNodePath::draw(ImagePainter2& painter, const Transform* transform)
     // Check if this node and all its children must not be drawn
     if(_rm == RenderNone) return;
 
-    // Combine the transformations
-    const Transform& thisTransform = transform ? ( _transform * (*transform) ) : _transform;
-
-    // Save the original pen and brush
-    const Pen   pen   = painter.pen  ();
-    const Brush brush = painter.brush();
-
-    // Set the current pen and/or brush as needed
-    if(!_pen  .isNull()) painter.setPen  (_pen  );
-    if(!_brush.isNull()) painter.setBrush(_brush);
-
-    // Draw the children
-    for(Children::iterator it = _children.begin(); it != _children.end(); ++it) {
-        (*it)->draw(painter, &thisTransform);
-    }
+    // Begin the drawing sequence
+    const Transform& thisTransform = begDrawSeq(painter, transform);
 
     // Draw the path only if it is not null
     if(!_path.isNull()) {
@@ -109,9 +130,8 @@ void SGNodePath::draw(ImagePainter2& painter, const Transform* transform)
         }
     }
 
-    // Restore the original pen and/or brush as needed
-    if(!_pen  .isNull()) painter.setPen  (pen  );
-    if(!_brush.isNull()) painter.setBrush(brush);
+    // End the drawing sequence
+    endDrawSeq(painter);
 }
 
 

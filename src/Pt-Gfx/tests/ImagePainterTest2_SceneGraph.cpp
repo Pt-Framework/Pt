@@ -38,7 +38,7 @@ static void testSceneGraph(const char* title, Image& image, Painter& painter)
 
     // 2nd-child's 3rd child
     SGNodePath* csgn2_3 = &csgn2->addChild(new SGNodePath(SGNode::RenderStroke, pathPoly4));
-                csgn2_3->setPen(Pen(Color::fromRgb8(255, 255, 127), 6));
+                csgn2_3->setPen(Pen(Color::fromRgb8(255, 255, 127), 6, Pen::Solid, Pen::RoundCap, Pen::MiterJoin));
                 csgn2_3->transform().translate(150, 150);
 
     // Draw it

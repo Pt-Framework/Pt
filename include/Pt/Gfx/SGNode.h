@@ -143,6 +143,10 @@ class PT_GFX_API SGNode {
         { return _children.end(); }
 
     protected:
+        const Transform begDrawSeq(ImagePainter2& painter, const Transform* transform);
+        const void endDrawSeq(ImagePainter2& painter);
+
+    protected:
         SGNode*    _parent;
 
         RenderMode _rm;
@@ -152,6 +156,10 @@ class PT_GFX_API SGNode {
         Transform  _transform;
 
         Children   _children;
+
+    private:
+        Pen   _savePen;
+        Brush _saveBrush;
 };
 
 
@@ -209,13 +217,13 @@ class PT_GFX_API SGNodePath : public SGNode {
         inline const Path& path() const
         { return _path; }
 
-    public:
-        friend class SGNode;
-
     protected:
         Path  _path;
         float _smoothness;
 };
+
+
+// ### TODO: !!! MORE NODE TYPES !!! ###
 
 
 } // namespace
