@@ -118,8 +118,8 @@ class FreeType2 {
         FTC_ImageCache _imageCache;
 
     private:
-        struct FontComparator {
-            inline int cmpstr(const char* a, const char* b) const
+        struct FCmp {
+            inline int strcmp(const char* a, const char* b) const
             {
                 while(*a && *b && *a == *b) { ++a; ++b; }
                 return static_cast<int>(*a) - static_cast<int>(*b);
@@ -127,16 +127,16 @@ class FreeType2 {
 
             inline bool operator()(const Font& a, const Font& b) const
             {
-
-                if(cmpstr(a.name().c_str(), b.name().c_str()) < 0) return true;
-                //if(a.name () < b.name ()) return true;
+                if(this->strcmp(a.name().c_str(), b.name().c_str()) < 0) return true;
                 if(a.style() < b.style()) return true;
                 return false;
             }
         };
 
+
         typedef std::map<FTC_FaceID, FreeType2*  > Instances;
-        typedef std::map<Font,       System::Path, FontComparator> Fonts;
+        typedef std::map<Font,       System::Path> Fonts;
+      //typedef std::map<Font, System::Path, FCmp> Fonts;
         typedef std::set<Pt::String              > Files;
 
         static System::Mutex  _mutex;
