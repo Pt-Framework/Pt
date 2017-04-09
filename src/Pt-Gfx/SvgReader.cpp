@@ -39,12 +39,12 @@ class SvgReaderImpl {
     public:
         inline SvgReaderImpl();
         inline SvgReaderImpl(std::istream& is, Image& image);
-        inline SvgReaderImpl(std::istream& is, Image& image, const AffineTransform& worldTransform);
+        inline SvgReaderImpl(std::istream& is, Image& image, const Transform& worldTransform);
 
         inline ~SvgReaderImpl();
 
         inline void attach(std::istream& is, Image& image);
-        inline void attach(std::istream& is, Image& image, const AffineTransform& worldTransform);
+        inline void attach(std::istream& is, Image& image, const Transform& worldTransform);
         inline void detach();
 
         inline void reset();
@@ -64,7 +64,7 @@ SvgReaderImpl::SvgReaderImpl(std::istream& is, Image& image)
 : _svgRasterizer(0)
 { attach(is, image); }
 
-SvgReaderImpl::SvgReaderImpl(std::istream& is, Image& image, const AffineTransform& worldTransform)
+SvgReaderImpl::SvgReaderImpl(std::istream& is, Image& image, const Transform& worldTransform)
 : _svgRasterizer(0)
 { attach(is, image, worldTransform); }
 
@@ -73,12 +73,12 @@ SvgReaderImpl::~SvgReaderImpl()
 
 void SvgReaderImpl::attach(std::istream& is, Image& image)
 {
-    static const AffineTransform identityTransform;
+    static const Transform identityTransform;
 
     attach(is, image, identityTransform);
 }
 
-void SvgReaderImpl::attach(std::istream& is, Image& image, const AffineTransform& worldTransform)
+void SvgReaderImpl::attach(std::istream& is, Image& image, const Transform& worldTransform)
 {
     delete _svgRasterizer;
 
@@ -121,7 +121,7 @@ SvgReader::SvgReader(std::istream& is, Image& image)
 : _impl( new SvgReaderImpl(is, image) )
 {}
 
-SvgReader::SvgReader(std::istream& is, Image& image, const AffineTransform& worldTransform)
+SvgReader::SvgReader(std::istream& is, Image& image, const Transform& worldTransform)
 : _impl( new SvgReaderImpl(is, image, worldTransform) )
 {}
 
@@ -131,7 +131,7 @@ SvgReader::~SvgReader()
 void SvgReader::attach(std::istream& is, Image& image)
 { _impl->attach(is, image); }
 
-void SvgReader::attach(std::istream& is, Image& image, const AffineTransform& worldTransform)
+void SvgReader::attach(std::istream& is, Image& image, const Transform& worldTransform)
 { _impl->attach(is, image, worldTransform); };
 
 void SvgReader::detach()

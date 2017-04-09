@@ -38,7 +38,7 @@
 #include <Pt/Xml/InputSource.h>
 #include <Pt/Xml/XmlReader.h>
 
-#include <Pt/Gfx/AffineTransform.h>
+#include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/ImagePainter2.h>
 
 
@@ -49,7 +49,7 @@ namespace Gfx {
 class SvgRasterizer
 {
     public:
-        SvgRasterizer(std::istream& is, Image& image, const AffineTransform& worldTransform);
+        SvgRasterizer(std::istream& is, Image& image, const Transform& worldTransform);
 
         ~SvgRasterizer();
 

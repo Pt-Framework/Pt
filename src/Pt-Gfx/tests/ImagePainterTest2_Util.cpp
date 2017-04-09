@@ -371,10 +371,10 @@ static void benchMathFunctions()
 ////////////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-static void dumpATransMatrix(const BasicAffineTransform<T>& atrans)
+static void dumpTransformMatrix(const BasicTransform<T>& transform)
 {
     T r[3][3];
-    atrans.getRaw(r);
+    transform.getRaw(r);
 
     printf("    | %7.3f %7.3f %7.3f |\n", r[0][0], r[0][1], r[0][2]);
     printf("    | %7.3f %7.3f %7.3f |\n", r[1][0], r[1][1], r[1][2]);
@@ -382,7 +382,7 @@ static void dumpATransMatrix(const BasicAffineTransform<T>& atrans)
 }
 
 template <typename T>
-static void benchATransOps()
+static void bench2DTransOps()
 {
 #if defined(PT_GFX_USE_ARM_CPU)
     const int loopCount = 2048;
@@ -405,31 +405,31 @@ static void benchATransOps()
     }
 
     // Correctness check
-    BasicAffineTransform<T> atrans;
+    BasicTransform<T> transform;
 
     printf("Initial value\n");
-    dumpATransMatrix<T>(const_cast<const BasicAffineTransform<T>&>(atrans));
+    dumpTransformMatrix<T>(const_cast<const BasicTransform<T>&>(transform));
 
     printf("After operations\n");
-    atrans.translate(10.0f, 20.0f);
-    atrans.scale    ( 0.5f,  2.0f);
-    dumpATransMatrix<T>(const_cast<const BasicAffineTransform<T>&>(atrans));
+    transform.translate(10.0f, 20.0f);
+    transform.scale    ( 0.5f,  2.0f);
+    dumpTransformMatrix<T>(const_cast<const BasicTransform<T>&>(transform));
 
     volatile T x = 8.0f, y = 8.0f;
              T xx, yy;
-    atrans.transformPoint(xx, yy, x, y);
+    transform.transformPoint(xx, yy, x, y);
     printf("A: Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", x, y, xx, yy);
 
     T xya  [10] = { 11.0f, 12.0f, 13.0f, 24.0f, 25.0f, 16.0f, 27.0f, 28.0f, 5.0f, 5.0f };
     T xxyya[10];
-    atrans.transformPoints(xxyya, xya, 5);
+    transform.transformPoints(xxyya, xya, 5);
     printf("B: Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", xya[0], xya[1], xxyya[0], xxyya[1]);
     printf("B: Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", xya[2], xya[3], xxyya[2], xxyya[3]);
     printf("B: Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", xya[4], xya[5], xxyya[4], xxyya[5]);
     printf("B: Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", xya[6], xya[7], xxyya[6], xxyya[7]);
     printf("B: Point (%6.3f, %6.3f) -> (%6.3f, %6.3f)\n", xya[8], xya[9], xxyya[8], xxyya[9]);
 
-    atrans.transformPoints(xya, 5);
+    transform.transformPoints(xya, 5);
     printf("C: Point                  -> (%6.3f, %6.3f)\n", xya[0], xya[1]);
     printf("C: Point                  -> (%6.3f, %6.3f)\n", xya[2], xya[3]);
     printf("C: Point                  -> (%6.3f, %6.3f)\n", xya[4], xya[5]);
@@ -437,7 +437,7 @@ static void benchATransOps()
     printf("C: Point                  -> (%6.3f, %6.3f)\n", xya[8], xya[9]);
 
     PointF pf[5] = { PointF(11.0f, 12.0f), PointF(13.0f, 24.0f), PointF(25.0f, 16.0f), PointF(27.0f, 28.0f), PointF(5.0f, 5.0f) };
-    atrans.transformPoints(pf, 5);
+    transform.transformPoints(pf, 5);
     printf("D: Point                  -> (%6.3f, %6.3f)\n", pf[0].x(), pf[0].y());
     printf("D: Point                  -> (%6.3f, %6.3f)\n", pf[1].x(), pf[1].y());
     printf("D: Point                  -> (%6.3f, %6.3f)\n", pf[2].x(), pf[2].y());
@@ -450,12 +450,12 @@ static void benchATransOps()
     double totalTime = 0;
     for(int i = 0; i < loopCount ; ++i) {
         // Reset the transformation
-        if(i % 1) atrans.setRaw(a);
-        else      atrans.setRaw(b);
+        if(i % 1) transform.setRaw(a);
+        else      transform.setRaw(b);
         // Perform benchmark
         clock.start();
         for(int j = 0; j < loopCount ; ++j) {
-            atrans.setRaw(b);
+            transform.setRaw(b);
         }
         totalTime += clock.stop().toUSecs();
     }
@@ -467,8 +467,8 @@ static void benchATransOps()
     volatile T dmyx, dmyy;
     for(int i = 0; i < loopCount ; ++i) {
         // Reset the transformation
-        if(i % 1) atrans.setRaw(a);
-        else      atrans.setRaw(b);
+        if(i % 1) transform.setRaw(a);
+        else      transform.setRaw(b);
         // Reset the source vectors
         for(int j = 0; j < loopCount * 2; j += 2) {
             sxya[j    ] = 2.0f * rand() / RAND_MAX - 1.0f;
@@ -476,7 +476,7 @@ static void benchATransOps()
         }
         // Perform benchmark
         clock.start();
-        atrans.transformPoints(dxya, sxya, loopCount);
+        transform.transformPoints(dxya, sxya, loopCount);
         totalTime += clock.stop().toUSecs();
         // Copy the destination vectors to a volatile memory location
         for(int j = 0; j < loopCount * 2; j += 2) {
@@ -490,8 +490,8 @@ static void benchATransOps()
     totalTime = 0;
     for(int i = 0; i < loopCount ; ++i) {
         // Reset the transformation
-        if(i % 1) atrans.setRaw(a);
-        else      atrans.setRaw(b);
+        if(i % 1) transform.setRaw(a);
+        else      transform.setRaw(b);
         // Reset the source vectors
         for(int j = 0; j < loopCount * 2; j += 2) {
             sxya[j    ] = 2.0f * rand() / RAND_MAX - 1.0f;
@@ -499,7 +499,7 @@ static void benchATransOps()
         }
         // Perform benchmark
         clock.start();
-        atrans.transformPoints(sxya, loopCount);
+        transform.transformPoints(sxya, loopCount);
         totalTime += clock.stop().toUSecs();
         // Copy the result vectors to a volatile memory location
         for(int j = 0; j < loopCount * 2; j += 2) {
@@ -514,15 +514,15 @@ static void benchATransOps()
     PointF pointsF[loopCount];
     for(int i = 0; i < loopCount ; ++i) {
         // Reset the transformation
-        if(i % 1) atrans.setRaw(a);
-        else      atrans.setRaw(b);
+        if(i % 1) transform.setRaw(a);
+        else      transform.setRaw(b);
         // Reset the source vectors
         for(int j = 0; j < loopCount; ++j) {
             pointsF[j].set( 2.0f * rand() / RAND_MAX - 1.0f, 2.0f * rand() / RAND_MAX - 1.0f );
         }
         // Perform benchmark
         clock.start();
-        atrans.transformPoints(pointsF, loopCount);
+        transform.transformPoints(pointsF, loopCount);
         totalTime += clock.stop().toUSecs();
         // Copy the result vectors to a volatile memory location
         for(int j = 0; j < loopCount; ++j) {

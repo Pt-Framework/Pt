@@ -37,7 +37,7 @@
 
 #include <Pt/Math.h>
 
-#include <Pt/Gfx/AffineTransform.h>
+#include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/ImagePainter2.h>
 #include <Pt/Gfx/PngReader.h>
@@ -71,8 +71,8 @@ using namespace Pt::Gfx;
 // Benchmark mathematical functions only
 #define DO_MATH_BENCHMARKING_ONLY 0
 
-// Benchmark affine transform operations only
-#define DO_ATRANS_BENCHMARKING_ONLY 0
+// Benchmark 2D transform operations only
+#define DO_TRANSFORM_BENCHMARKING_ONLY 0
 
 // Comparison with Cairo (solid-filled polygons and ellipses only)
 #define DO_BENCHMARKING_CAIRO                 0
@@ -202,10 +202,10 @@ int main(int argc, char* args[])
         return 0;
     }
 
-    // Benchmark affine transform operations only
-    if(DO_ATRANS_BENCHMARKING_ONLY) {
-        printf("<float>\n" ); benchATransOps<float >();
-        printf("<double>\n"); benchATransOps<double>();
+    // Benchmark 2D transform operations only
+    if(DO_TRANSFORM_BENCHMARKING_ONLY) {
+        printf("<float>\n" ); bench2DTransOps<float >();
+        printf("<double>\n"); bench2DTransOps<double>();
         return 0;
     }
 

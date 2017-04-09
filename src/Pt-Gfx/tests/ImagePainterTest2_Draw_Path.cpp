@@ -1,78 +1,78 @@
 static void testDrawPath_drawRow(
-    ImagePainter2* ip2, AffineTransform& atrans, const Path& path, Pt::int32_t& row, Pt::int32_t& col,
+    ImagePainter2* ip2, Transform& transform, const Path& path, Pt::int32_t& row, Pt::int32_t& col,
     const Pen& penThinSolid, const Pen& penThinDot, const Pen& penThickSolid, const Pen& penThickDot,
     const Brush& brush1, const Brush& brush2
 )
 {
-    atrans.rotate(15);
-    atrans.push();
-    atrans.translate(60 + 110 * col, 60 + 110 * row);
+    transform.rotate(15);
+    transform.push();
+    transform.translate(60 + 110 * col, 60 + 110 * row);
     ip2->setPen(penThinSolid);
-    ip2->drawPath(path, atrans, false);
-    atrans.pop();
+    ip2->drawPath(path, transform, false);
+    transform.pop();
     ++col;
 
-    atrans.rotate(15);
-    atrans.push();
-    atrans.translate(60 + 110 * col, 60 + 110 * row);
+    transform.rotate(15);
+    transform.push();
+    transform.translate(60 + 110 * col, 60 + 110 * row);
     ip2->setPen(penThinDot);
-    ip2->drawPath(path, atrans, false);
-    atrans.pop();
+    ip2->drawPath(path, transform, false);
+    transform.pop();
     ++col;
 
-    atrans.rotate(15);
-    atrans.push();
-    atrans.translate(60 + 110 * col, 60 + 110 * row);
+    transform.rotate(15);
+    transform.push();
+    transform.translate(60 + 110 * col, 60 + 110 * row);
     ip2->setPen(penThickSolid);
-    ip2->drawPath(path, atrans, false);
-    atrans.pop();
+    ip2->drawPath(path, transform, false);
+    transform.pop();
     ++col;
 
-    atrans.rotate(15);
-    atrans.push();
-    atrans.translate(60 + 110 * col, 60 + 110 * row);
+    transform.rotate(15);
+    transform.push();
+    transform.translate(60 + 110 * col, 60 + 110 * row);
     ip2->setPen(penThickDot);
-    ip2->drawPath(path, atrans, false);
-    atrans.pop();
+    ip2->drawPath(path, transform, false);
+    transform.pop();
     ++col;
 
-    atrans.rotate(15);
-    atrans.push();
-    atrans.translate(60 + 110 * col, 60 + 110 * row);
+    transform.rotate(15);
+    transform.push();
+    transform.translate(60 + 110 * col, 60 + 110 * row);
     ip2->setBrush(brush1);
-    ip2->fillPath(path, atrans);
-    atrans.pop();
+    ip2->fillPath(path, transform);
+    transform.pop();
     ++col;
 
-    atrans.rotate(15);
-    atrans.push();
-    atrans.translate(60 + 110 * col, 60 + 110 * row);
+    transform.rotate(15);
+    transform.push();
+    transform.translate(60 + 110 * col, 60 + 110 * row);
     ip2->setBrush(brush2);
-    ip2->fillPath(path, atrans);
-    atrans.pop();
+    ip2->fillPath(path, transform);
+    transform.pop();
     col = 0;
     ++row;
 }
 
 static void testDrawPath_drawCol(
-    ImagePainter2* ip2, AffineTransform& atrans, const Path& path, Pt::int32_t& row, Pt::int32_t& col,
+    ImagePainter2* ip2, Transform& transform, const Path& path, Pt::int32_t& row, Pt::int32_t& col,
     const Pen& penThinSolid, const Pen& penThickSolid
 )
 {
-    atrans.rotate(15);
-    atrans.push();
-    atrans.translate(60 + 120 * col, 60 + 120 * row);
+    transform.rotate(15);
+    transform.push();
+    transform.translate(60 + 120 * col, 60 + 120 * row);
     ip2->setPen(penThinSolid);
-    ip2->drawPath(path, atrans, false);
-    atrans.pop();
+    ip2->drawPath(path, transform, false);
+    transform.pop();
     ++col;
 
-    atrans.rotate(15);
-    atrans.push();
-    atrans.translate(60 + 120 * col, 60 + 120 * row);
+    transform.rotate(15);
+    transform.push();
+    transform.translate(60 + 120 * col, 60 + 120 * row);
     ip2->setPen(penThickSolid);
-    ip2->drawPath(path, atrans, false);
-    atrans.pop();
+    ip2->drawPath(path, transform, false);
+    transform.pop();
 }
 
 static void testDrawPath(const char* title, Image& image, Painter& painter, const Brush& brush1, const Brush& brush2)
@@ -91,8 +91,8 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
 
     Pt::int32_t row = 0, col = 0;
 
-    AffineTransform atrans;
-    Path            path;
+    Transform transform;
+    Path      path;
 
     //
     // Various shapes (top left part of the image)
@@ -107,13 +107,13 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     path.lineTo   ( 30,  0);
     path.endPath  ();
 
-    atrans.translate(-50, -40);
+    transform.translate(-50, -40);
 
     // First row
-    testDrawPath_drawRow(ip2, atrans, path, row, col, penThinSolid, penThinDot, penThickSolid, penThickDot, brush1, brush2);
+    testDrawPath_drawRow(ip2, transform, path, row, col, penThinSolid, penThinDot, penThickSolid, penThickDot, brush1, brush2);
 
     // Second row
-    testDrawPath_drawRow(ip2, atrans, path, row, col, penThinSolid, penThinDot, penThickSolid, penThickDot, brush1, brush2);
+    testDrawPath_drawRow(ip2, transform, path, row, col, penThinSolid, penThinDot, penThickSolid, penThickDot, brush1, brush2);
 
     // Create a new path
     path.clear            ();
@@ -126,12 +126,12 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     path.lineTo           (       -20, 70);
     path.endPath          ();
 
-    atrans.identity();
-    atrans.translate(-50, -35);
-    atrans.scale(0.75f, 1.0f);
+    transform.identity();
+    transform.translate(-50, -35);
+    transform.scale(0.75f, 1.0f);
 
     // Third row
-    testDrawPath_drawRow(ip2, atrans, path, row, col, penThinSolid, penThinDot, penThickSolid, penThickDot, brush1, brush2);
+    testDrawPath_drawRow(ip2, transform, path, row, col, penThinSolid, penThinDot, penThickSolid, penThickDot, brush1, brush2);
 
     // Create a new path
     path.clear            ();
@@ -145,7 +145,7 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     path.endPath          ();
 
     // Fourth row
-    testDrawPath_drawRow(ip2, atrans, path, row, col, penThinSolid, penThinDot, penThickSolid, penThickDot, brush1, brush2);
+    testDrawPath_drawRow(ip2, transform, path, row, col, penThinSolid, penThinDot, penThickSolid, penThickDot, brush1, brush2);
 
     //
     // Arcs (top right part of the image)
@@ -162,14 +162,14 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     path.lineTo   (-20, 70    );
     path.endPath  ();
 
-    atrans.identity();
-    atrans.translate(-50, -25);
-    atrans.scale(0.75f, 1.0f);
+    transform.identity();
+    transform.translate(-50, -25);
+    transform.scale(0.75f, 1.0f);
 
     row = 0;
     col = 6;
 
-    testDrawPath_drawCol(ip2, atrans, path, row, col, penThinSolid, penThickSolid);
+    testDrawPath_drawCol(ip2, transform, path, row, col, penThinSolid, penThickSolid);
 
     // Create a new path
     path.clear    ();
@@ -182,14 +182,14 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     path.lineTo   (-20,  0     );
     path.endPath  ();
 
-    atrans.identity();
-    atrans.translate(-50, -25);
-    atrans.scale(0.75f, 1.0f);
+    transform.identity();
+    transform.translate(-50, -25);
+    transform.scale(0.75f, 1.0f);
 
     row = 1;
     col = 6;
 
-    testDrawPath_drawCol(ip2, atrans, path, row, col, penThinSolid, penThickSolid);
+    testDrawPath_drawCol(ip2, transform, path, row, col, penThinSolid, penThickSolid);
 
     //
     // Cubic bezier curves (bottom left part of the image)
@@ -208,17 +208,17 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     path.cubicBezierTo( 7, 40, 44, 52, 44,  8);
     path.endPath      ();
 
-    atrans.identity();
-    atrans.rotate(-25);
-    atrans.scale(2.5, 2.5);
+    transform.identity();
+    transform.rotate(-25);
+    transform.scale(2.5, 2.5);
 
 #define DRAW_CB(PEN)                                 \
     do {                                             \
-        atrans.push();                               \
-        atrans.translate(90 + 160 * col, 140 * row); \
+        transform.push();                               \
+        transform.translate(90 + 160 * col, 140 * row); \
         ip2->setPen(PEN);                            \
-        ip2->drawPath(path, atrans, false, 2);       \
-        atrans.pop();                                \
+        ip2->drawPath(path, transform, false, 2);       \
+        transform.pop();                                \
         ++col;                                       \
     } while(false)
     DRAW_CB(penThinSolid );
@@ -242,24 +242,24 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     path.lineTo   (10.0, 2.0     );
     path.endPath  ();
 
-    atrans.identity();
-    atrans.translate(-5.0, -2.5);
-    atrans.scale(25, 25);
+    transform.identity();
+    transform.translate(-5.0, -2.5);
+    transform.scale(25, 25);
 
-    atrans.push();
-    atrans.translate(60 + 130 * col, 150 * row);
+    transform.push();
+    transform.translate(60 + 130 * col, 150 * row);
     ip2->setPen( Color::fromRgb8(255, 255, 255, 175) );
-    //ip2->fillPath(path, atrans, 1);
-    ip2->drawPath(path, atrans, false, 1);
-    atrans.pop();
+    //ip2->fillPath(path, transform, 1);
+    ip2->drawPath(path, transform, false, 1);
+    transform.pop();
     ++row;
 
-    atrans.push();
-    atrans.translate(60 + 130 * col, 150 * row);
+    transform.push();
+    transform.translate(60 + 130 * col, 150 * row);
     ip2->setPen( Color::fromRgb8(255, 255, 255, 175) );
-    //ip2->fillPath(path, atrans, 20);
-    ip2->drawPath(path, atrans, false, 20);
-    atrans.pop();
+    //ip2->fillPath(path, transform, 20);
+    ip2->drawPath(path, transform, false, 20);
+    transform.pop();
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }
@@ -267,7 +267,7 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
 // ======================================================================================
 
 static void testDrawPathClipping_drawCars(
-    ImagePainter2* ip2, Path& path, AffineTransform& atrans,
+    ImagePainter2* ip2, Path& path, Transform& transform,
     Pt::int32_t& row, Pt::int32_t& col, const Brush& brush
 )
 {
@@ -298,10 +298,10 @@ static void testDrawPathClipping_drawCars(
 #endif
 
     path.generatePoints(pointsF, 1);
-    atrans.push();
-    atrans.translate(50 + 50 * col, 50 + 50 * row);
-    atrans.transformPoints(pointsF.data(), pointsF.size());
-    atrans.pop();
+    transform.push();
+    transform.translate(50 + 50 * col, 50 + 50 * row);
+    transform.transformPoints(pointsF.data(), pointsF.size());
+    transform.pop();
     ip2->setBrush(brush);
     ip2->fillPolygon(pointsF.data(), pointsF.size());
 
@@ -326,8 +326,8 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
 
     Pt::int32_t row = 0, col = 0;
 
-    AffineTransform atrans;
-    Path            path;
+    Transform transform;
+    Path      path;
 
     std::vector<PointF> cregPointsF;
     std::vector<PointF> subjPointsF;
@@ -344,11 +344,11 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
 
     cregPointsF.clear();
     path.generatePoints(cregPointsF, 1);
-    atrans.push();
-    atrans.scale(2, 2);
-    atrans.translate(50, 70);
-    atrans.transformPoints(cregPointsF.data(), cregPointsF.size());
-    atrans.pop();
+    transform.push();
+    transform.scale(2, 2);
+    transform.translate(50, 70);
+    transform.transformPoints(cregPointsF.data(), cregPointsF.size());
+    transform.pop();
 
     // Create a subject path
     path.clear    ();
@@ -360,17 +360,17 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
 
     subjPointsF.clear();
     path.generatePoints(subjPointsF, 3);
-    atrans.push();
-    atrans.scale(2, 2);
-    atrans.transformPoints(subjPointsF.data(), subjPointsF.size());
-    atrans.pop();
+    transform.push();
+    transform.scale(2, 2);
+    transform.transformPoints(subjPointsF.data(), subjPointsF.size());
+    transform.pop();
 
     // Draw the clip-region and subject polygons
-    atrans.push();
-    atrans.translate(10 + 250 * col, 10 + 250 * row);
-    atrans.transformPoints(cregPointsF.data(), cregPointsF.size());
-    atrans.transformPoints(subjPointsF.data(), subjPointsF.size());
-    atrans.pop();
+    transform.push();
+    transform.translate(10 + 250 * col, 10 + 250 * row);
+    transform.transformPoints(cregPointsF.data(), cregPointsF.size());
+    transform.transformPoints(subjPointsF.data(), subjPointsF.size());
+    transform.pop();
     ip2->setBrush(brush1);
     ip2->fillPolygon(subjPointsF.data(), subjPointsF.size());
     ip2->setBrush(brush2);
@@ -379,38 +379,38 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
 
     // Perform clipping and draw the resulting polygon
     Path::clipPolygon(clipPointsF, subjPointsF, cregPointsF, Path::Intersection);
-    atrans.push();
-    atrans.translate(10 + 250 * col, 10 + 250 * row);
-    atrans.transformPoints(clipPointsF.data(), clipPointsF.size());
-    atrans.pop();
+    transform.push();
+    transform.translate(10 + 250 * col, 10 + 250 * row);
+    transform.transformPoints(clipPointsF.data(), clipPointsF.size());
+    transform.pop();
     ip2->setBrush(brush1);
     ip2->fillPolygon(clipPointsF.data(), clipPointsF.size());
     ++col;
 
     Path::clipPolygon(clipPointsF, subjPointsF, cregPointsF, Path::Union);
-    atrans.push();
-    atrans.translate(10 + 250 * col, 10 + 250 * row);
-    atrans.transformPoints(clipPointsF.data(), clipPointsF.size());
-    atrans.pop();
+    transform.push();
+    transform.translate(10 + 250 * col, 10 + 250 * row);
+    transform.transformPoints(clipPointsF.data(), clipPointsF.size());
+    transform.pop();
     ip2->setBrush(brush1);
     ip2->fillPolygon(clipPointsF.data(), clipPointsF.size());
     ++row;
     col = 1;
 
     Path::clipPolygon(clipPointsF, subjPointsF, cregPointsF, Path::Difference);
-    atrans.push();
-    atrans.translate(10 + 250 * col, 10 + 250 * row);
-    atrans.transformPoints(clipPointsF.data(), clipPointsF.size());
-    atrans.pop();
+    transform.push();
+    transform.translate(10 + 250 * col, 10 + 250 * row);
+    transform.transformPoints(clipPointsF.data(), clipPointsF.size());
+    transform.pop();
     ip2->setBrush(brush1);
     ip2->fillPolygon(clipPointsF.data(), clipPointsF.size());
     ++col;
 
     Path::clipPolygon(clipPointsF, subjPointsF, cregPointsF, Path::Xor);
-    atrans.push();
-    atrans.translate(10 + 250 * col, 10 + 250 * row);
-    atrans.transformPoints(clipPointsF.data(), clipPointsF.size());
-    atrans.pop();
+    transform.push();
+    transform.translate(10 + 250 * col, 10 + 250 * row);
+    transform.transformPoints(clipPointsF.data(), clipPointsF.size());
+    transform.pop();
     ip2->setBrush(brush1);
     ip2->fillPolygon(clipPointsF.data(), clipPointsF.size());
 
@@ -418,17 +418,17 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
     row = 7;
     col = 0;
     path.setFont( Pt::Gfx::Font(FONT_SPEC_H) );
-    testDrawPathClipping_drawCars(ip2, path, atrans, row, col, brush2);
+    testDrawPathClipping_drawCars(ip2, path, transform, row, col, brush2);
 
     row = 1;
     col = 15;
     path.setFont( Pt::Gfx::Font(FONT_SPEC_Q) );
-    testDrawPathClipping_drawCars(ip2, path, atrans, row, col, brush2);
+    testDrawPathClipping_drawCars(ip2, path, transform, row, col, brush2);
 
     row = 7;
     col = 15;
     path.setFont( Pt::Gfx::Font(FONT_SPEC_C) );
-    testDrawPathClipping_drawCars(ip2, path, atrans, row, col, brush2);
+    testDrawPathClipping_drawCars(ip2, path, transform, row, col, brush2);
 
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);

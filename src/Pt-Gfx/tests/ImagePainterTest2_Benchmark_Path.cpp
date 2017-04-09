@@ -1,132 +1,132 @@
 template <bool WITH_RASTERISATION>
 static void benchDrawPath_drawRow(
-    ImagePainter2* ip2, AffineTransform& atrans, const Path& path, Pt::int32_t& row, Pt::int32_t& col,
+    ImagePainter2* ip2, Transform& transform, const Path& path, Pt::int32_t& row, Pt::int32_t& col,
     const Pen& penThinSolid, const Pen& penThinDot, const Pen& penThickSolid, const Pen& penThickDot,
     const Brush& brush1, const Brush& brush2, AntiAliasingMode antiAliasingMode
 )
 {
     std::vector<PointF> pointsF;
 
-    atrans.rotate(15);
-    atrans.push();
-    atrans.translate(80 + 120 * col, 80 + 120 * row);
+    transform.rotate(15);
+    transform.push();
+    transform.translate(80 + 120 * col, 80 + 120 * row);
     pointsF.clear();
     path.generatePoints(pointsF, 1);
-    atrans.transformPoints(pointsF.data(), pointsF.size());
+    transform.transformPoints(pointsF.data(), pointsF.size());
     if(WITH_RASTERISATION) {
         ip2->setAntiAliasingMode(antiAliasingMode);
         ip2->setPen(penThinSolid);
         ip2->drawPolyline(pointsF.data(), pointsF.size(), false);
     }
-    atrans.pop();
+    transform.pop();
     ++col;
 
-    atrans.rotate(15);
-    atrans.push();
-    atrans.translate(80 + 120 * col, 80 + 120 * row);
+    transform.rotate(15);
+    transform.push();
+    transform.translate(80 + 120 * col, 80 + 120 * row);
     pointsF.clear();
     path.generatePoints(pointsF, 1);
-    atrans.transformPoints(pointsF.data(), pointsF.size());
+    transform.transformPoints(pointsF.data(), pointsF.size());
     if(WITH_RASTERISATION) {
         ip2->setAntiAliasingMode(antiAliasingMode);
         ip2->setPen(penThinDot);
         ip2->drawPolyline(pointsF.data(), pointsF.size(), false);
     }
-    atrans.pop();
+    transform.pop();
     ++col;
 
-    atrans.rotate(15);
-    atrans.push();
-    atrans.translate(80 + 120 * col, 80 + 120 * row);
+    transform.rotate(15);
+    transform.push();
+    transform.translate(80 + 120 * col, 80 + 120 * row);
     pointsF.clear();
     path.generatePoints(pointsF, 1);
-    atrans.transformPoints(pointsF.data(), pointsF.size());
+    transform.transformPoints(pointsF.data(), pointsF.size());
     if(WITH_RASTERISATION) {
         ip2->setAntiAliasingMode(antiAliasingMode);
         ip2->setPen(penThickSolid);
         ip2->drawPolyline(pointsF.data(), pointsF.size(), false);
     }
-    atrans.pop();
+    transform.pop();
     ++col;
 
-    atrans.rotate(15);
-    atrans.push();
-    atrans.translate(80 + 120 * col, 80 + 120 * row);
+    transform.rotate(15);
+    transform.push();
+    transform.translate(80 + 120 * col, 80 + 120 * row);
     pointsF.clear();
     path.generatePoints(pointsF, 1);
-    atrans.transformPoints(pointsF.data(), pointsF.size());
+    transform.transformPoints(pointsF.data(), pointsF.size());
     if(WITH_RASTERISATION) {
         ip2->setAntiAliasingMode(antiAliasingMode);
         ip2->setPen(penThickDot);
         ip2->drawPolyline(pointsF.data(), pointsF.size(), false);
     }
-    atrans.pop();
+    transform.pop();
     ++col;
 
-    atrans.rotate(15);
-    atrans.push();
-    atrans.translate(80 + 120 * col, 80 + 120 * row);
+    transform.rotate(15);
+    transform.push();
+    transform.translate(80 + 120 * col, 80 + 120 * row);
     pointsF.clear();
     path.generatePoints(pointsF, 1);
-    atrans.transformPoints(pointsF.data(), pointsF.size());
+    transform.transformPoints(pointsF.data(), pointsF.size());
     if(WITH_RASTERISATION) {
         ip2->setAntiAliasingMode(antiAliasingMode);
         ip2->setBrush(brush1);
         ip2->fillPolygon(pointsF.data(), pointsF.size());
     }
-    atrans.pop();
+    transform.pop();
     ++col;
 
-    atrans.rotate(15);
-    atrans.push();
-    atrans.translate(80 + 120 * col, 80 + 120 * row);
+    transform.rotate(15);
+    transform.push();
+    transform.translate(80 + 120 * col, 80 + 120 * row);
     pointsF.clear();
     path.generatePoints(pointsF, 1);
-    atrans.transformPoints(pointsF.data(), pointsF.size());
+    transform.transformPoints(pointsF.data(), pointsF.size());
     if(WITH_RASTERISATION) {
         ip2->setAntiAliasingMode(antiAliasingMode);
         ip2->setBrush(brush2);
         ip2->fillPolygon(pointsF.data(), pointsF.size());
     }
-    atrans.pop();
+    transform.pop();
     col = 0;
     ++row;
 }
 
 template <bool WITH_RASTERISATION>
 static void benchDrawPath_drawCol(
-    ImagePainter2* ip2, AffineTransform& atrans, const Path& path, Pt::int32_t& row, Pt::int32_t& col,
+    ImagePainter2* ip2, Transform& transform, const Path& path, Pt::int32_t& row, Pt::int32_t& col,
     const Pen& penThinSolid, const Pen& penThickSolid, AntiAliasingMode antiAliasingMode
 )
 {
     std::vector<PointF> pointsF;
 
-    atrans.rotate(15);
-    atrans.push();
-    atrans.translate(150 + 120 * col, 70 + 120 * row);
+    transform.rotate(15);
+    transform.push();
+    transform.translate(150 + 120 * col, 70 + 120 * row);
     pointsF.clear();
     path.generatePoints(pointsF, 1);
-    atrans.transformPoints(pointsF.data(), pointsF.size());
+    transform.transformPoints(pointsF.data(), pointsF.size());
     if(WITH_RASTERISATION) {
         ip2->setAntiAliasingMode(antiAliasingMode);
         ip2->setPen(penThinSolid);
         ip2->drawPolyline(pointsF.data(), pointsF.size(), false);
     }
-    atrans.pop();
+    transform.pop();
     ++row;
 
-    atrans.rotate(15);
-    atrans.push();
-    atrans.translate(150 + 120 * col, 70 + 120 * row);
+    transform.rotate(15);
+    transform.push();
+    transform.translate(150 + 120 * col, 70 + 120 * row);
     pointsF.clear();
     path.generatePoints(pointsF, 1);
-    atrans.transformPoints(pointsF.data(), pointsF.size());
+    transform.transformPoints(pointsF.data(), pointsF.size());
     if(WITH_RASTERISATION) {
         ip2->setAntiAliasingMode(antiAliasingMode);
         ip2->setPen(penThickSolid);
         ip2->drawPolyline(pointsF.data(), pointsF.size(), false);
     }
-    atrans.pop();
+    transform.pop();
     ++row;
 }
 
@@ -156,7 +156,7 @@ static size_t benchDrawPath(int loopCount, const Brush& brush1, const Brush& bru
     if(!ip2) return 0;
 
     for(int i = 0; i < loopCount; ++i) {
-        AffineTransform atrans;
+        Transform transform;
         Path            path;
 
         Pt::int32_t row = 0, col = 0;
@@ -173,13 +173,13 @@ static size_t benchDrawPath(int loopCount, const Brush& brush1, const Brush& bru
         path.lineTo   ( 30,  0);
         path.endPath  ();
 
-        atrans.translate(-50, -40);
+        transform.translate(-50, -40);
 
         // First row
-        benchDrawPath_drawRow<WITH_RASTERISATION>(ip2, atrans, path, row, col, penThinSolid, penThinDot, penThickSolid, penThickDot, brush1, brush2, antiAliasingMode);
+        benchDrawPath_drawRow<WITH_RASTERISATION>(ip2, transform, path, row, col, penThinSolid, penThinDot, penThickSolid, penThickDot, brush1, brush2, antiAliasingMode);
 
         // Second row
-        benchDrawPath_drawRow<WITH_RASTERISATION>(ip2, atrans, path, row, col, penThinSolid, penThinDot, penThickSolid, penThickDot, brush1, brush2, antiAliasingMode);
+        benchDrawPath_drawRow<WITH_RASTERISATION>(ip2, transform, path, row, col, penThinSolid, penThinDot, penThickSolid, penThickDot, brush1, brush2, antiAliasingMode);
 
         // Create a new path
         path.clear            ();
@@ -192,12 +192,12 @@ static size_t benchDrawPath(int loopCount, const Brush& brush1, const Brush& bru
         path.lineTo           (       -20, 70);
         path.endPath          ();
 
-        atrans.identity();
-        atrans.translate(-50, -35);
-        atrans.scale(0.75f, 1.0f);
+        transform.identity();
+        transform.translate(-50, -35);
+        transform.scale(0.75f, 1.0f);
 
         // Third row
-        benchDrawPath_drawRow<WITH_RASTERISATION>(ip2, atrans, path, row, col, penThinSolid, penThinDot, penThickSolid, penThickDot, brush1, brush2, antiAliasingMode);
+        benchDrawPath_drawRow<WITH_RASTERISATION>(ip2, transform, path, row, col, penThinSolid, penThinDot, penThickSolid, penThickDot, brush1, brush2, antiAliasingMode);
 
         // Create a new path
         path.clear            ();
@@ -211,7 +211,7 @@ static size_t benchDrawPath(int loopCount, const Brush& brush1, const Brush& bru
         path.endPath          ();
 
         // Fourth row
-        benchDrawPath_drawRow<WITH_RASTERISATION>(ip2, atrans, path, row, col, penThinSolid, penThinDot, penThickSolid, penThickDot, brush1, brush2, antiAliasingMode);
+        benchDrawPath_drawRow<WITH_RASTERISATION>(ip2, transform, path, row, col, penThinSolid, penThinDot, penThickSolid, penThickDot, brush1, brush2, antiAliasingMode);
 
         // Rightmost part of the image
         row = 0;
@@ -228,11 +228,11 @@ static size_t benchDrawPath(int loopCount, const Brush& brush1, const Brush& bru
         path.lineTo   (-20, 70    );
         path.endPath  ();
 
-        atrans.identity();
-        atrans.translate(-50, -25);
-        atrans.scale(0.75f, 1.0f);
+        transform.identity();
+        transform.translate(-50, -25);
+        transform.scale(0.75f, 1.0f);
 
-        benchDrawPath_drawCol<WITH_RASTERISATION>(ip2, atrans, path, row, col, penThinSolid, penThickSolid, antiAliasingMode);
+        benchDrawPath_drawCol<WITH_RASTERISATION>(ip2, transform, path, row, col, penThinSolid, penThickSolid, antiAliasingMode);
 
         // Create a new path
         path.clear    ();
@@ -245,11 +245,11 @@ static size_t benchDrawPath(int loopCount, const Brush& brush1, const Brush& bru
         path.lineTo   (-20,  0     );
         path.endPath  ();
 
-        atrans.identity();
-        atrans.translate(-50, -25);
-        atrans.scale(0.75f, 1.0f);
+        transform.identity();
+        transform.translate(-50, -25);
+        transform.scale(0.75f, 1.0f);
 
-        benchDrawPath_drawCol<WITH_RASTERISATION>(ip2, atrans, path, row, col, penThinSolid, penThickSolid, antiAliasingMode);
+        benchDrawPath_drawCol<WITH_RASTERISATION>(ip2, transform, path, row, col, penThinSolid, penThickSolid, antiAliasingMode);
 
         sum += clock.stop().toUSecs();
 
@@ -276,8 +276,8 @@ static size_t benchDrawPathSimple(int loopCount, CompositionMode cm, AntiAliasin
         Pt::System::Clock clock;
         clock.start();
 
-        AffineTransform atrans;
-        Path            path;
+        Transform transform;
+        Path      path;
 
         std::vector<PointF> pointsF;
 
@@ -289,7 +289,7 @@ static size_t benchDrawPathSimple(int loopCount, CompositionMode cm, AntiAliasin
 
         pointsF.clear();
         path.generatePoints(pointsF, 1);
-        atrans.transformPoints(pointsF.data(), pointsF.size());
+        transform.transformPoints(pointsF.data(), pointsF.size());
 
         ip2->setAntiAliasingMode(antiAliasingMode);
         ip2->setPen(Color::fromRgb8(255, 255, 255, 175));

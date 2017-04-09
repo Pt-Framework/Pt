@@ -31,7 +31,7 @@
 #define PT_GFX_SVGREADER_H
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/AffineTransform.h>
+#include <Pt/Gfx/Transform.h>
 
 #include <iosfwd>
 
@@ -60,7 +60,7 @@ class PT_GFX_API SvgReader
 
         /** @brief Construct with target stream, image, and world transform.
         */
-        SvgReader(std::istream& is, Image& image, const AffineTransform& worldTransform);
+        SvgReader(std::istream& is, Image& image, const Transform& worldTransform);
 
         /** @brief Destructor.
         */
@@ -72,7 +72,7 @@ class PT_GFX_API SvgReader
 
         /** @brief Attach to target stream, image, and world transform.
         */
-        void attach(std::istream& is, Image& image, const AffineTransform& worldTransform);
+        void attach(std::istream& is, Image& image, const Transform& worldTransform);
 
         /** @brief Detach from target stream.
         */

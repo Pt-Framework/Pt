@@ -51,28 +51,28 @@ namespace Gfx {
 // ======================================================================================
 
 struct SvgRasterizer::RasterState {
-    bool               gotStart; // State flags
-    bool               gotEnd;   // ---
+    bool               gotStart;  // State flags
+    bool               gotEnd;    // ---
 
-    Image&             image;    // Target image
-    ImagePainter2      painter;  // Target painter
+    Image&             image;     // Target image
+    ImagePainter2      painter;   // Target painter
 
-    Pen                pen;      // Active pen
-    Brush              brush;    // Active brush
-    AffineTransform    atrans;   // Active affine transform
-    Path               path;     // Working path
+    Pen                pen;       // Active pen
+    Brush              brush;     // Active brush
+    Transform          transform; // Active 2D transformation
+    Path               path;      // Working path
 
-    std::vector<Pen  > psStack;  // Pen stack
-    std::vector<Brush> bsStack;  // Brush stack
+    std::vector<Pen  > psStack;   // Pen stack
+    std::vector<Brush> bsStack;   // Brush stack
 
-    inline RasterState(Image& image_, const AffineTransform& initialTransform)
+    inline RasterState(Image& image_, const Transform& initialTransform)
     : gotStart(false)
     , gotEnd  (false)
     , image   (image_)
     , painter (image_)
     , pen     (Color::fromRgb8(0, 0, 0, 255), 1, Pen::Solid, Pen::ButtCap, Pen::MiterJoin)
     , brush   (Color::fromRgb8(0, 0, 0, 255))
-    , atrans  (initialTransform)
+    , transform  (initialTransform)
     {}
 };
 
@@ -81,7 +81,7 @@ struct SvgRasterizer::RasterState {
 // ===== Public Member Functions ========================================================
 // ======================================================================================
 
-SvgRasterizer::SvgRasterizer(std::istream& is, Image& image, const AffineTransform& worldTransform)
+SvgRasterizer::SvgRasterizer(std::istream& is, Image& image, const Transform& worldTransform)
 : _rstate           (new RasterState(image, worldTransform))
 , _binaryInputSource(is)
 , _xmlReader        (_binaryInputSource)

@@ -28,7 +28,7 @@
   02110-1301 USA
 */
 
-#include <Pt/Gfx/AffineTransform.h>
+#include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/ImagePainter2.h>
 
 #include "FreeType2.h"
@@ -1190,25 +1190,25 @@ void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float deg
     _rasterizer->fillArc(tl, sz, degBegin, degEnd, arcMode);
 }
 
-void ImagePainter2::drawPath(const Path& path2d, const AffineTransform& atrans, bool autoClose, float smoothness)
+void ImagePainter2::drawPath(const Path& path2d, const Transform& transform, bool autoClose, float smoothness)
 {
     // Convert the path to points and perform transformation
     std::vector<PointF> pointsF;
 
     path2d.generatePoints(pointsF, smoothness);
-    atrans.transformPoints(pointsF.data(), pointsF.size());
+    transform.transformPoints(pointsF.data(), pointsF.size());
 
     // Draw the path
     drawPolyline(pointsF.data(), pointsF.size(), autoClose);
 }
 
-void ImagePainter2::fillPath(const Path& path2d, const AffineTransform& atrans, float smoothness)
+void ImagePainter2::fillPath(const Path& path2d, const Transform& transform, float smoothness)
 {
     // Convert the path to points and perform transformation
     std::vector<PointF> pointsF;
 
     path2d.generatePoints(pointsF, smoothness);
-    atrans.transformPoints(pointsF.data(), pointsF.size());
+    transform.transformPoints(pointsF.data(), pointsF.size());
 
     // Round the points and remove duplicates
     std::vector<Point> points;
