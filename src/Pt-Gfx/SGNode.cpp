@@ -28,8 +28,8 @@
 */
 
 // Just for debugging ;)
-#warning "Just for debugging ;)"
-#include <stdio.h>
+//#warning "Just for debugging ;)"
+//#include <stdio.h>
 
 #include <stdexcept>
 
@@ -39,6 +39,21 @@
 
 namespace Pt {
 namespace Gfx {
+
+
+/*
+template <typename T>
+static void sgDumpTransformMatrix(const BasicTransform<T>& transform)
+{
+    T r[3][3];
+    transform.getRaw(r);
+
+    printf("    | %7.3f %7.3f %7.3f |\n", r[0][0], r[0][1], r[0][2]);
+    printf("    | %7.3f %7.3f %7.3f |\n", r[1][0], r[1][1], r[1][2]);
+    printf("    | %7.3f %7.3f %7.3f |\n", r[2][0], r[2][1], r[2][2]);
+    printf("\n");
+}
+//*/
 
 
 // ======================================================================================
@@ -146,18 +161,6 @@ void SGNodePath::draw(ImagePainter2& painter, const Transform* transform)
 SGNodeLine::~SGNodeLine()
 {}
 
-template <typename T>
-static void sgDumpTransformMatrix(const BasicTransform<T>& transform)
-{
-    T r[3][3];
-    transform.getRaw(r);
-
-    printf("    | %7.3f %7.3f %7.3f |\n", r[0][0], r[0][1], r[0][2]);
-    printf("    | %7.3f %7.3f %7.3f |\n", r[1][0], r[1][1], r[1][2]);
-    printf("    | %7.3f %7.3f %7.3f |\n", r[2][0], r[2][1], r[2][2]);
-    printf("\n");
-}
-
 void SGNodeLine::draw(ImagePainter2& painter, const Transform* transform)
 {
     // Check if this node and all its children must not be drawn
@@ -172,8 +175,14 @@ void SGNodeLine::draw(ImagePainter2& painter, const Transform* transform)
     thisTransform.transformPoint(f, _from);
     thisTransform.transformPoint(t, _to  );
 
-    sgDumpTransformMatrix(thisTransform);
+    Pen npen = _pen;
 
+    float w = _pen.size() * 0.5f;
+    float z = 0.0f;
+
+    thisTransform.transformPoint(w, z);
+
+    std::clog << w << std::endl;
 
     // TODO: Transform the pen width too!
 

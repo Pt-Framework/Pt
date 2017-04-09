@@ -124,7 +124,7 @@ class PT_GFX_API BasicTransform {
         inline void setRaw(const T m[3][3]);
 
         inline const BasicTransform& operator=(const BasicTransform& m);
-        inline const BasicTransform& operator*(const BasicTransform& m);
+        inline const BasicTransform operator*(const BasicTransform& m);
 
         inline bool operator==(const BasicTransform& m) const;
         inline bool operator!=(const BasicTransform& m) const;
@@ -167,7 +167,7 @@ inline void BasicTransform<T>::updateMatrix(const MatrixData& n, bool replaceIns
         return;
     }
 
-    // Multiply using the mode M' = M * N
+    // Multiply using the mode M' = N * M
     const MatrixData* l = &n;
     const MatrixData* r = &_mdata;
           MatrixData  o;
@@ -346,16 +346,19 @@ inline const BasicTransform<T>& BasicTransform<T>::operator=(const BasicTransfor
 }
 
 template <typename T>
-inline const BasicTransform<T>& BasicTransform<T>::operator*(const BasicTransform<T>& m)
+inline const BasicTransform<T> BasicTransform<T>::operator*(const BasicTransform<T>& m)
 {
+    // Copy this matrix
+    BasicTransform r = *this;
+
     // Check if the given matrix is an identity matrix
-    if(m._isIdentity) return *this;
+    if(m._isIdentity) return r;
 
     // Normal operation
-    updateMatrix(m._mdata, false);
-    _isIdentity = false;
+    r.updateMatrix(m._mdata, false);
+    r._isIdentity = false;
 
-    return *this;
+    return r;
 }
 
 template <typename T>
