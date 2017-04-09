@@ -118,9 +118,9 @@ class FreeType2 {
         FTC_ImageCache _imageCache;
 
     private:
-        typedef std::set<System::Path*           > Files;
-        typedef std::map<Font,       System::Path> Fonts;
         typedef std::map<FTC_FaceID, FreeType2*  > Instances;
+        typedef std::map<Font,       System::Path> Fonts;
+        typedef std::set<Pt::String              > Files;
 
         static System::Mutex  _mutex;
 

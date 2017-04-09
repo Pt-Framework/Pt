@@ -1,27 +1,33 @@
 // Use the buillt-in FreeType engine and libpng included with Pt:
 //     ./jam.sh configure --with-rasterizer2 --with-hmi -sGUI=linux-fb -sOPTIM=-O2 --with-freetype --with-libpng
 //
+//
 // Enable debugging information for use with Valgrind:
 //     ./jam.sh configure --with-rasterizer2 --with-hmi -sGUI=linux-fb -sOPTIM=-g --with-freetype --with-libpng
 //
-//      valgrind --leak-check=full --show-leak-kinds=all --gen-suppressions=yes --demangle=no --suppressions=../src/Pt-Gfx/tests/ImagePainterTest2.supp ./ImagePainterTest2
-//      valgrind --leak-check=full --show-leak-kinds=definite,possible --track-origins=yes --suppressions=../src/Pt-Gfx/tests/ImagePainterTest2.supp ./ImagePainterTest2
+// Generate Valgrind suppression list:
+//     valgrind --leak-check=full --show-leak-kinds=all --gen-suppressions=yes --demangle=no --suppressions=../src/Pt-Gfx/tests/ImagePainterTest2.supp ./ImagePainterTest2
+//
+// Use Valgrind to check memory leak:
+//     valgrind --leak-check=full --show-leak-kinds=definite,possible --track-origins=yes --suppressions=../src/Pt-Gfx/tests/ImagePainterTest2.supp ./ImagePainterTest2
+//
+//     Note: * Optimization level other than -O0 can cause false positive detection!
+//           * Some SIMD operations can also cause false positive detection!
 //
 //
-// perf record -d -g -T -e cycles,instructions,cache-references,cache-misses,bus-cycles ./ImagePainterTest2
-// perf report
+// Use performance analysis tools for Linux:
+//     perf record -d -g -T -e cycles,instructions,cache-references,cache-misses,bus-cycles ./ImagePainterTest2
+//     perf report
 //
-// perf archive
-//     Now please run: 'tar xvf perf.data.tar.bz2 -C ~/.debug'
-//     wherever you need to run 'perf report' on.
+//     perf archive
+//         Now please run: 'tar xvf perf.data.tar.bz2 -C ~/.debug'
+//         wherever you need to run 'perf report' on.
 //
-//
-// while true; do ps -aF | grep "[I]magePainterTest2"; done
+//     while true; do ps -aF | grep "[I]magePainterTest2"; done
 //
 //
 // svn propset svn:mime-type text/plain etc/images/*.svg
 //
-
 
 #include <ctime>
 #include <fstream>
@@ -154,9 +160,9 @@ using namespace Pt::Gfx;
 
 // Configurations and objects
 #define FONT_DIR    "../src/Pt-Gfx/fonts"
-#define FONT_SPEC_S "DejaVu Serif" ,  12, Pt::Gfx::Font::BoldItalic,    0
-#define FONT_SPEC_N "DejaVu Serif" ,  24, Pt::Gfx::Font::BoldItalic,    0
-#define FONT_SPEC_R "DejaVu Serif" ,  24, Pt::Gfx::Font::BoldItalic, -150
+#define FONT_SPEC_S "DejaVu Sans"  ,  12, Pt::Gfx::Font::BoldItalic,    0
+#define FONT_SPEC_N "DejaVu Sans"  ,  24, Pt::Gfx::Font::BoldItalic,    0
+#define FONT_SPEC_R "DejaVu Sans"  ,  24, Pt::Gfx::Font::BoldItalic, -150
 
 #define FONT_SPEC_H "DejaVu Serif" ,  92, Pt::Gfx::Font::Normal    ,    0
 #define FONT_SPEC_Q "QumpellkaNo12",  64, Pt::Gfx::Font::Normal    ,    0 /* OTF */

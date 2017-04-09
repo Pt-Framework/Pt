@@ -125,12 +125,6 @@ const FontMetrics FreeType2::fontMetrics(const String& text, FTC_FaceID faceId, 
         FT_UInt glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, it->value());
         if(!glyph_index) continue;
 
-        if(FT_HAS_KERNING(face) && previous) {
-            FT_Get_Kerning( face, previous, glyph_index, FT_KERNING_DEFAULT, &delta);
-            penX += delta.x;
-            penY -= delta.y;
-        }
-
         FTC_Node node;
         if(FTC_ImageCache_Lookup(_imageCache, imageType, glyph_index, &glyph, &node))
             continue;
@@ -145,6 +139,14 @@ const FontMetrics FreeType2::fontMetrics(const String& text, FTC_FaceID faceId, 
 
         penX += glyph->advance.x;
         penY -= glyph->advance.y;
+
+        if(FT_HAS_KERNING(face) && previous) {
+            FT_Get_Kerning( face, previous, glyph_index, FT_KERNING_DEFAULT, &delta);
+            if(delta.x < glyph->advance.x && delta.y < glyph->advance.y) {
+                penX += delta.x;
+                penY -= delta.y;
+            }
+        }
 
         previous = glyph_index;
     }
@@ -194,27 +196,21 @@ void FreeType2::getCharSpacing(
     x = glyph->advance.x >> 16;
     y = glyph->advance.y >> 16;
 
-    /*
-    FTC_SBit smalGlyphBitmap;
-    FTC_Node node  = 0;
-    if(FTC_SBitCache_Lookup(_bitmapCache, imageType, glyph_index0, &smalGlyphBitmap, &node))
-        return;
-
-    x = smalGlyphBitmap->xadvance;
-    y = smalGlyphBitmap->yadvance;
-    //*/
-
-    //std::clog << "getCharSpacing : from '" << (char) from << "' to '" << (char) to << "' : G[ " << std::setw(5) << glyph_index0 << " | " << std::setw(5) << glyph_index1 << " ]" << std::endl;
+    //std::clog << "getCharSpacing() : from '" << (char) from << "' to '" << (char) to << "' : G[ " << std::setw(5) << glyph_index0 << " | " << std::setw(5) << glyph_index1 << " ]" << std::endl;
+    //std::clog << "getCharSpacing() : from '" << (char) from << "' to '" << (char) to << "' : S( " << std::setw(5) << x << " , " << std::setw(5) << y << " )" << std::endl;
 
     if(FT_HAS_KERNING(face)) {
         FT_Vector delta;
         FT_Get_Kerning(face, glyph_index0, glyph_index1, FT_KERNING_DEFAULT, &delta);
-        x += delta.x;
-        y += delta.y;
-        //std::clog << "getCharSpacing : from '" << (char) from << "' to '" << (char) to << "' : K( " << std::setw(5) << delta.x << " , " << std::setw(5) << delta.y << " )" << std::endl;
+        if(delta.x < x && delta.y < y) {
+            x += delta.x;
+            y -= delta.y;
+        }
+        //std::clog << "getCharSpacing() : from '" << (char) from << "' to '" << (char) to << "' : K( " << std::setw(5) << delta.x << " , " << std::setw(5) << delta.y << " )" << std::endl;
     }
 
-    //std::clog << "getCharSpacing : from '" << (char) from << "' to '" << (char) to << "' : S( " << std::setw(5) << x << " , " << std::setw(5) << y << " )" << std::endl;
+    //std::clog << "getCharSpacing() : from '" << (char) from << "' to '" << (char) to << "' : S( " << std::setw(5) << x << " , " << std::setw(5) << y << " )" << std::endl;
+    //std::clog << std::endl;
 }
 
 void FreeType2::pathFromChar(
@@ -310,20 +306,22 @@ void FreeType2::draw(
         FT_UInt glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, it->value());
         if(!glyph_index) continue;
 
-        if(FT_HAS_KERNING(face) && previous) {
-            FT_Get_Kerning(face, previous, glyph_index, FT_KERNING_DEFAULT, &delta);
-            glyphPos.x += delta.x;
-            glyphPos.y -= delta.y;
-        }
-
         if(!fontAngle) {
             if(mono) imageType->flags = FT_LOAD_RENDER | FT_LOAD_TARGET_MONO;
             else     imageType->flags = FT_LOAD_RENDER | FT_LOAD_TARGET_NORMAL;
             if(FTC_SBitCache_Lookup(_bitmapCache, imageType, glyph_index, &smalGlyphBitmap, &node))
                 continue;
 
-            incX   = smalGlyphBitmap->xadvance << 16;
-            incY   = smalGlyphBitmap->yadvance << 16;
+            incX = smalGlyphBitmap->xadvance << 16;
+            incY = smalGlyphBitmap->yadvance << 16;
+
+            if(FT_HAS_KERNING(face) && previous) {
+                FT_Get_Kerning(face, previous, glyph_index, FT_KERNING_DEFAULT, &delta);
+                if(delta.x < incX && delta.y < incY) {
+                     glyphPos.x += delta.x;
+                     glyphPos.y -= delta.y;
+                }
+            }
 
             left   = (glyphPos.x >> 16) + smalGlyphBitmap->left;
             top    = (glyphPos.y >> 16) - smalGlyphBitmap->top;
@@ -356,8 +354,16 @@ void FreeType2::draw(
 
             glyphBitmap = (FT_BitmapGlyph) glyphCopy;
 
-            incX   = glyphCopy->advance.x;
-            incY   = glyphCopy->advance.y;
+            incX = glyphCopy->advance.x;
+            incY = glyphCopy->advance.y;
+
+            if(FT_HAS_KERNING(face) && previous) {
+                FT_Get_Kerning(face, previous, glyph_index, FT_KERNING_DEFAULT, &delta);
+                if(delta.x < incX && delta.y < incY) {
+                     glyphPos.x += delta.x;
+                     glyphPos.y -= delta.y;
+                }
+            }
 
             left   = (glyphPos.x >> 16) + glyphBitmap->left;
             top    = (glyphPos.y >> 16) - glyphBitmap->top;
@@ -471,7 +477,7 @@ void FreeType2::drawGlyph(
 
 FT_Error FreeType2::onFontRequest(FTC_FaceID faceId, FT_Face* face)
 {
-    System::Path* path = reinterpret_cast<System::Path*>(faceId);
+    const System::Path* path = reinterpret_cast<const System::Path*>(faceId);
 
     // No need to lock the mutex here because this function is called by the
     // fontRequest() function, which is called by the FTC_Manager instance, which
@@ -481,7 +487,7 @@ FT_Error FreeType2::onFontRequest(FTC_FaceID faceId, FT_Face* face)
         return FT_New_Memory_Face(FreeType2::_ft, DejaVuSans, DejaVuSansSize, 0, face);
 
     // Check if path is still valid
-    if(FreeType2::_files.find(path) == FreeType2::_files.end())
+    if(FreeType2::_files.find(path->toString()) == FreeType2::_files.end())
         return FT_New_Memory_Face(FreeType2::_ft, DejaVuSans, DejaVuSansSize, 0, face);
 
     return FT_New_Face(FreeType2::_ft, path->toLocal().c_str(), 0, face);
@@ -603,16 +609,18 @@ void FreeType2::setFontDir_impl_noLock(const System::Path& path)
 
     if( !System::FileInfo::exists(FreeType2::_fontDir) ) return;
 
+    // Iterate through the files in the given path
     System::DirectoryIterator it(FreeType2::_fontDir);
     System::DirectoryIterator end;
 
     for(; it != end; ++it) {
-        const System::Path& fp = FreeType2::_fontDir / it->path();
+        // Try to load the font file
+        const System::Path& fontPath = FreeType2::_fontDir / it->path();
 
-        FT_Face  face;
-        FT_Error err = FT_New_Face(FreeType2::_ft, fp.toLocal().c_str(), 0, &face);
-        if(err != 0) continue;
+        FT_Face face;
+        if(FT_New_Face(FreeType2::_ft, fontPath.toLocal().c_str(), 0, &face)) continue;
 
+        // Determine the font's style
         Font::Style style = Font::Normal;
 
         if( (face->style_flags & FT_STYLE_FLAG_BOLD) == FT_STYLE_FLAG_BOLD )
@@ -621,17 +629,20 @@ void FreeType2::setFontDir_impl_noLock(const System::Path& path)
         if( (face->style_flags & FT_STYLE_FLAG_ITALIC) == FT_STYLE_FLAG_ITALIC )
             style = Font::Italic;
 
-        if( (face->style_flags & FT_STYLE_FLAG_BOLD) == FT_STYLE_FLAG_BOLD && (face->style_flags & FT_STYLE_FLAG_ITALIC) == FT_STYLE_FLAG_ITALIC )
+        if( (face->style_flags & FT_STYLE_FLAG_BOLD  ) == FT_STYLE_FLAG_BOLD && (face->style_flags & FT_STYLE_FLAG_ITALIC) == FT_STYLE_FLAG_ITALIC )
             style = Font::BoldItalic;
 
-        Font font(face->family_name, 12, style);
-
-        System::Path& fontPath = FreeType2::_fonts[font];
-        fontPath = fp;
-
-        FreeType2::_files.insert(&fontPath);
-
+        // Generate a font object so that font information can be stored
+        Font font(face->family_name, 0, style);
         FT_Done_Face(face);
+
+        //std::clog << "setFontDir_impl_noLock() : " << std::left << std::setw(80) << fontPath.toLocal() << std::right << " : " << style << " : " << font.name() << std::endl;
+
+        // Store the font information
+        FreeType2::_fonts[font] = fontPath;
+
+        // Store the font file name
+        FreeType2::_files.insert(fontPath.toString());
     }
 }
 
@@ -651,8 +662,8 @@ const std::vector<std::string> FreeType2::fontNames()
 
     Fonts::const_iterator it;
     for(it = FreeType2::_fonts.begin(); it != FreeType2::_fonts.end(); ++it) {
-        if(std::find(names.begin(), names.end(), it->first.name()) == names.end())
-            names.push_back( it->first.name() );
+        if(std::find(names.begin(), names.end(), it->first.name()) != names.end()) continue;
+        names.push_back(it->first.name());
     }
 
     return names;
