@@ -107,6 +107,8 @@ class PT_GFX_API BasicTransform {
 
         inline ~BasicTransform();
 
+        inline bool isIdentity() const;
+
         inline void identity();
 
         inline void translate(T x, T y, bool replaceInsteadOfCombine = false);
@@ -208,6 +210,10 @@ inline BasicTransform<T>::BasicTransform(const BasicTransform<T>& m)
 template <typename T>
 inline BasicTransform<T>::~BasicTransform()
 {}
+
+template <typename T>
+inline bool BasicTransform<T>::isIdentity() const
+{ return _isIdentity; }
 
 template <typename T>
 inline void BasicTransform<T>::identity()

@@ -121,7 +121,7 @@ void SGNodePath::draw(ImagePainter2& painter, const Transform* transform)
         // Transform points
         thisTransform.transformPoints(pointsF.data(), pointsF.size());
         // Draw based on the mode
-        const RenderMode rm = (_rm == RenderInherit) ? _parent->renderMode() : _rm;
+        const RenderMode rm = renderMode();
         switch(rm) {
             case RenderFill            : painter.fillPolygon (pointsF.data(), pointsF.size()       ); break;
             case RenderStroke          : painter.drawPolyline(pointsF.data(), pointsF.size(), false); break;

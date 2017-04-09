@@ -99,7 +99,17 @@ class PT_GFX_API SGNode {
         }
 
         inline RenderMode renderMode() const
-        { return _rm; }
+        {
+            if(_rm != RenderInherit) return _rm;
+
+            const SGNode* p = _parent;
+            while(p) {
+                if(p->_rm != RenderInherit) return p->_rm;
+                p = p->_parent;
+            }
+
+            return _rm;
+        }
 
         //
         // Drawing
