@@ -120,16 +120,34 @@ class PT_GFX_API SGNode {
         inline void setPen(const Pen& pen)
         { _pen = pen; }
 
-        inline const Pen& pen() const
-        { return _pen; }
-
         inline void setBrush(const Brush& brush)
         { _brush = brush; }
 
-        inline const Brush& brush() const
-        { return _brush; }
+        void drawNR(ImagePainter2& painter, const TransformT* transform = 0);
+
+        virtual void drawImpl(ImagePainter2& painter, const TransformT& transform) const = 0;
 
         virtual void draw(ImagePainter2& painter, const TransformT* transform = 0) = 0;
+
+        //
+        // Access to the pen object
+        //
+
+        inline Pen& pen()
+        { return _pen; }
+
+        inline const Pen& pen() const
+        { return _pen; }
+
+        //
+        // Access to the brush object
+        //
+
+        inline Brush& brush()
+        { return _brush; }
+
+        inline const Brush& brush() const
+        { return _brush; }
 
         //
         // Access to the transform object
@@ -217,6 +235,8 @@ class PT_GFX_API SGNodePath : public SGNode {
         inline void setSmoothness(float smoothness = 1.0f)
         { _smoothness = smoothness; }
 
+        virtual void drawImpl(ImagePainter2& painter, const TransformT& transform) const;
+
         virtual void draw(ImagePainter2& painter, const TransformT* transform = 0);
 
         //
@@ -266,6 +286,8 @@ class PT_GFX_API SGNodeLine : public SGNode {
         //
         // Drawing functions
         //
+
+        virtual void drawImpl(ImagePainter2& painter, const TransformT& transform) const;
 
         virtual void draw(ImagePainter2& painter, const TransformT* transform = 0);
 

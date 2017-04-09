@@ -32,6 +32,7 @@
 //#include <stdio.h>
 
 #include <stdexcept>
+#include <stack>
 
 #include <Pt/Gfx/SGNode.h>
 #include <Pt/Gfx/ImagePainter2.h>
@@ -77,6 +78,73 @@ void SGNode::clear()
     // Clear the transformation and children list
     _transform.identity();
     _children.clear();
+}
+
+//
+struct TraversalStack {
+    const SGNode*    node;
+    const Pen        pen;
+    const Brush      brush;
+    const SGNode::TransformT transform;
+    bool             leave;
+
+    inline TraversalStack(const SGNode* node_, const Pen& pen_, const Brush& brush_, const SGNode::TransformT& transform_)
+    : node(node_), pen(pen_), brush(brush_), transform(transform_), leave(false)
+    {}
+};
+
+void SGNode::drawNR(ImagePainter2& painter, const TransformT* transform_)
+{
+    //
+    TransformT transform = transform_ ? *transform_ : TransformT();
+
+    //
+    Pen   pen   = painter.pen  ();
+    Brush brush = painter.brush();
+
+    //
+    std::stack<TraversalStack> nStack;
+    nStack.push(TraversalStack(this, pen, brush, transform));
+
+    while(!nStack.empty()) {
+        //
+        TraversalStack& cur = nStack.top();
+
+        //
+        if(!cur.leave) {
+            // Combine the transformations
+            transform = cur.node->_transform * transform;
+            // Set the current pen and/or brush as needed
+            if(!cur.node->_pen  .isNull()) painter.setPen  (cur.node->_pen  );
+            if(!cur.node->_brush.isNull()) painter.setBrush(cur.node->_brush);
+
+            cur.node->drawImpl(painter, transform);
+
+            // Process the children
+            for(Children::const_reverse_iterator it = cur.node->_children.rbegin(); it != cur.node->_children.rend(); ++it) {
+                if( (*it)->_rm == RenderNone ) continue;
+                nStack.push(TraversalStack(*it, pen, brush, transform));
+            }
+
+            //
+            cur.leave = true;
+
+        }
+
+        //
+        else {
+            //
+            transform = cur.transform;
+            // Restore the original pen and/or brush as needed
+            if(!cur.node->_pen  .isNull()) painter.setPen  (cur.pen  );
+            if(!cur.node->_brush.isNull()) painter.setBrush(cur.brush);
+
+            //
+            nStack.pop();
+        }
+    }
+
+
 }
 
 const SGNode::TransformT SGNode::begDrawSeq(ImagePainter2& painter, const TransformT* transform)
@@ -125,6 +193,28 @@ void SGNodePath::clear()
     SGNode::clear();
 }
 
+void SGNodePath::drawImpl(ImagePainter2& painter, const TransformT& transform) const
+{
+    // Return if the path is null
+    if(_path.isNull()) return;
+
+    // Generate points
+    std::vector<PointF> pointsF;
+    _path.generatePoints(pointsF, _smoothness);
+
+    // TransformT points
+    transform.transformPoints(pointsF.data(), pointsF.size());
+
+    // Draw based on the mode
+    const RenderMode rm = renderMode();
+    switch(rm) {
+        case RenderFill            : painter.fillPolygon (pointsF.data(), pointsF.size()       ); break;
+        case RenderStroke          : painter.drawPolyline(pointsF.data(), pointsF.size(), false); break;
+        case RenderStrokeAutoClose : painter.drawPolyline(pointsF.data(), pointsF.size(), true ); break;
+        default                    :                                                              break;
+    }
+}
+
 void SGNodePath::draw(ImagePainter2& painter, const TransformT* transform)
 {
     // Check if this node and all its children must not be drawn
@@ -141,8 +231,7 @@ void SGNodePath::draw(ImagePainter2& painter, const TransformT* transform)
         // TransformT points
         thisTransformT.transformPoints(pointsF.data(), pointsF.size());
         // Draw based on the mode
-        const RenderMode rm = renderMode();
-        switch(rm) {
+        switch(renderMode()) {
             case RenderFill            : painter.fillPolygon (pointsF.data(), pointsF.size()       ); break;
             case RenderStroke          : painter.drawPolyline(pointsF.data(), pointsF.size(), false); break;
             case RenderStrokeAutoClose : painter.drawPolyline(pointsF.data(), pointsF.size(), true ); break;
@@ -161,6 +250,23 @@ void SGNodePath::draw(ImagePainter2& painter, const TransformT* transform)
 SGNodeLine::~SGNodeLine()
 {}
 
+void SGNodeLine::drawImpl(ImagePainter2& painter, const TransformT& transform) const
+{
+    // TransformT the coordinates
+    PointF f, t;
+
+    transform.transformPoint(f, _from);
+    transform.transformPoint(t, _to  );
+
+    // Draw the line based on the mode
+    switch(renderMode()) {
+        case RenderFill            : /* Fallthrough */
+        case RenderStroke          : /* Fallthrough */
+        case RenderStrokeAutoClose : painter.drawLine(f, t); break;
+        default                    :                         break;
+    }
+}
+
 void SGNodeLine::draw(ImagePainter2& painter, const TransformT* transform)
 {
     // Check if this node and all its children must not be drawn
@@ -176,8 +282,7 @@ void SGNodeLine::draw(ImagePainter2& painter, const TransformT* transform)
     thisTransformT.transformPoint(t, _to  );
 
     // Draw the line based on the mode
-    const RenderMode rm = renderMode();
-    switch(rm) {
+    switch(renderMode()) {
         case RenderFill            : /* Fallthrough */
         case RenderStroke          : /* Fallthrough */
         case RenderStrokeAutoClose : painter.drawLine(f, t); break;
