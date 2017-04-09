@@ -69,18 +69,18 @@ void DrawText2::setFont(const Font& font)
 
     // Get the face ID
     if( font.name().empty() ) {
-        std::clog << "setFont() EMP : " << font.name() << " [" << font.style() << "]" << std::endl;
+        //std::clog << "setFont() EMP : " << font.name() << " [" << font.style() << "]" << std::endl;
         Font defaultFont(FreeType2::defaultFont(), font);
         _faceId = FreeType2::instance().findFaceId(defaultFont);
     }
     else {
-        std::clog << "setFont() ASK : " << font.name() << " [" << font.style() << "]" << std::endl;
+        //std::clog << "setFont() ASK : " << font.name() << " [" << font.style() << "]" << std::endl;
         _faceId = FreeType2::instance().findFaceId(font);
     }
 
-    const System::Path* path = reinterpret_cast<const System::Path*>(_faceId);
-    if(path) std::clog << "setFont() GOT : " << path->toLocal() << std::endl;
-    else     std::clog << "setFont() GOT : " << 0               << std::endl;
+    //const System::Path* path = reinterpret_cast<const System::Path*>(_faceId);
+    //if(path) std::clog << "setFont() GOT : " << path->toLocal() << std::endl;
+    //else     std::clog << "setFont() GOT : " << 0               << std::endl;
 
     // Reserve the instance as needed
     if(_faceId) FreeType2::reserveInstance(_faceId);
@@ -122,9 +122,9 @@ void DrawText2::getCharSpacing(Pt::int32_t& x, Pt::int32_t& y, const Char& from,
 
 void DrawText2::pathFromChar(std::vector<PointF>& points, std::vector<Pt::uint8_t>& tags, std::vector<Pt::int32_t>& contours, const Char& chr)
 {
-    const System::Path* path = reinterpret_cast<const System::Path*>(_faceId);
-    if(path) std::clog << "pathFromChar() : " << path->toLocal() << std::endl;
-    else     std::clog << "pathFromChar() : " << 0 << std::endl;
+    //const System::Path* path = reinterpret_cast<const System::Path*>(_faceId);
+    //if(path) std::clog << "pathFromChar() : " << path->toLocal() << std::endl;
+    //else     std::clog << "pathFromChar() : " << 0 << std::endl;
 
     FreeType2::instance(_faceId).pathFromChar(
         points, tags, contours, chr, _faceId

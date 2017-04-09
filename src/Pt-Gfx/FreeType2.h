@@ -119,9 +119,16 @@ class FreeType2 {
 
     private:
         struct FontComparator {
+            inline int cmpstr(const char* a, const char* b) const
+            {
+                while(*a && *b && *a == *b) { ++a; ++b; }
+                return static_cast<int>(*a) - static_cast<int>(*b);
+            }
+
             inline bool operator()(const Font& a, const Font& b) const
             {
-                if(strcmp(a.name().c_str(), b.name().c_str()) < 0) return true;
+
+                if(cmpstr(a.name().c_str(), b.name().c_str()) < 0) return true;
                 //if(a.name () < b.name ()) return true;
                 if(a.style() < b.style()) return true;
                 return false;

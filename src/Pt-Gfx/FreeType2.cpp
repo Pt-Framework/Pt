@@ -625,7 +625,7 @@ void FreeType2::setFontDir_impl_noLock(const System::Path& path)
         // Try to load the font file
         const System::Path& fontPath = FreeType2::_fontDir / it->path();
 
-        std::clog << "setFontDir_impl_noLock() : FOUND : " << fontPath.toLocal() << std::endl;
+        //std::clog << "setFontDir_impl_noLock() : FOUND : " << fontPath.toLocal() << std::endl;
 
         FT_Face face;
         if(FT_New_Face(FreeType2::_ft, fontPath.toLocal().c_str(), 0, &face)) continue;
@@ -647,7 +647,7 @@ void FreeType2::setFontDir_impl_noLock(const System::Path& path)
             style = Font::Italic;
         }
 
-        std::clog << "setFontDir_impl_noLock() : VALID : [" << style << "] " << std::endl;
+        //std::clog << "setFontDir_impl_noLock() : VALID : [" << style << "] " << std::endl;
 
         // Generate a font object so that font information can be stored
         Font font(face->family_name, 0, style);
@@ -702,19 +702,19 @@ FTC_FaceID FreeType2::findFaceId(const Font& font)
 {
     System::MutexLock lock(FreeType2::_mutex);
 
-    //Fonts::iterator it = FreeType2::_fonts.find(font);
-    //if(it == FreeType2::_fonts.end()) return 0;
+    Fonts::iterator it = FreeType2::_fonts.find(font);
+    if(it == FreeType2::_fonts.end()) return 0;
 
-    //return reinterpret_cast<FTC_FaceID>(&it->second);
+    return reinterpret_cast<FTC_FaceID>(&it->second);
 
-    for(Fonts::iterator it = FreeType2::_fonts.begin(); it != FreeType2::_fonts.end(); ++it) {
-        if(it->first.name () != font.name ()) continue;
-        if(it->first.style() != font.style()) continue;
-        std::clog << "findFaceId() : " << it->second.toLocal() << std::endl;
-        return reinterpret_cast<FTC_FaceID>(&it->second);
-    }
+    //for(Fonts::iterator it = FreeType2::_fonts.begin(); it != FreeType2::_fonts.end(); ++it) {
+    //    if(it->first.name () != font.name ()) continue;
+    //    if(it->first.style() != font.style()) continue;
+    //    std::clog << "findFaceId() : " << it->second.toLocal() << std::endl;
+    //    return reinterpret_cast<FTC_FaceID>(&it->second);
+    //}
 
-    std::clog << "findFaceId() : " << 0 << std::endl;
+    //std::clog << "findFaceId() : " << 0 << std::endl;
     return 0;
 }
 
@@ -722,9 +722,9 @@ FT_Error FreeType2::fontRequest(FTC_FaceID faceId, FT_Library library, FT_Pointe
 {
     FreeType2* ft = static_cast<FreeType2*>(data);
 
-    const System::Path* path = reinterpret_cast<const System::Path*>(faceId);
-    if(path) std::clog << "fontRequest() : " << path->toLocal() << std::endl;
-    else     std::clog << "fontRequest() : " << 0 << std::endl;
+    //const System::Path* path = reinterpret_cast<const System::Path*>(faceId);
+    //if(path) std::clog << "fontRequest() : " << path->toLocal() << std::endl;
+    //else     std::clog << "fontRequest() : " << 0 << std::endl;
 
     return ft->onFontRequest(faceId, face);
 }
