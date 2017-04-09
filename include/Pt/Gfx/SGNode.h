@@ -93,7 +93,7 @@ class PT_GFX_API SGNode {
         inline const Pen& pen() const
         { return _pen; }
 
-        inline void setPen(const Brush& brush)
+        inline void setBrush(const Brush& brush)
         { _brush = brush; }
 
         inline const Brush& brush() const

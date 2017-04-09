@@ -76,6 +76,16 @@ void SGNodePath::draw(ImagePainter2& painter, TransformStack& tstack, const Tran
     //
     Transform t = transform;
 
+    t = _transform * t;
+
+    //
+    const Pen   pen   = painter.pen  ();
+    const Brush brush = painter.brush();
+
+    //
+    if(!_pen  .isNull()) painter.setPen  (_pen  );
+    if(!_brush.isNull()) painter.setBrush(_brush);
+
     //
     for(Children::iterator it = _children.begin(); it != _children.end(); ++it) {
         tstack.push(t);
@@ -90,12 +100,15 @@ void SGNodePath::draw(ImagePainter2& painter, TransformStack& tstack, const Tran
     std::vector<PointF> pointsF;
     _path.generatePoints(pointsF, 1);
 
+    //
     t.transformPoints(pointsF.data(), pointsF.size());
 
-    painter.setPen(_pen);
-    painter.setBrush(_brush);
-
+    //
     painter.fillPolygon(pointsF.data(), pointsF.size());
+
+    //
+    painter.setPen  (pen  );
+    painter.setBrush(brush);
 }
 
 
