@@ -5,10 +5,11 @@ static void benchDrawPath_drawRow(
     const Brush& brush1, const Brush& brush2, AntiAliasingMode antiAliasingMode
 )
 {
+    TransformStack      tstack;
     std::vector<PointF> pointsF;
 
     transform.rotate(15);
-    transform.push();
+    tstack.push(transform);
     transform.translate(80 + 120 * col, 80 + 120 * row);
     pointsF.clear();
     path.generatePoints(pointsF, 1);
@@ -18,11 +19,11 @@ static void benchDrawPath_drawRow(
         ip2->setPen(penThinSolid);
         ip2->drawPolyline(pointsF.data(), pointsF.size(), false);
     }
-    transform.pop();
+    transform = tstack.pop();
     ++col;
 
     transform.rotate(15);
-    transform.push();
+    tstack.push(transform);
     transform.translate(80 + 120 * col, 80 + 120 * row);
     pointsF.clear();
     path.generatePoints(pointsF, 1);
@@ -32,11 +33,11 @@ static void benchDrawPath_drawRow(
         ip2->setPen(penThinDot);
         ip2->drawPolyline(pointsF.data(), pointsF.size(), false);
     }
-    transform.pop();
+    transform = tstack.pop();
     ++col;
 
     transform.rotate(15);
-    transform.push();
+    tstack.push(transform);
     transform.translate(80 + 120 * col, 80 + 120 * row);
     pointsF.clear();
     path.generatePoints(pointsF, 1);
@@ -46,11 +47,11 @@ static void benchDrawPath_drawRow(
         ip2->setPen(penThickSolid);
         ip2->drawPolyline(pointsF.data(), pointsF.size(), false);
     }
-    transform.pop();
+    transform = tstack.pop();
     ++col;
 
     transform.rotate(15);
-    transform.push();
+    tstack.push(transform);
     transform.translate(80 + 120 * col, 80 + 120 * row);
     pointsF.clear();
     path.generatePoints(pointsF, 1);
@@ -60,11 +61,11 @@ static void benchDrawPath_drawRow(
         ip2->setPen(penThickDot);
         ip2->drawPolyline(pointsF.data(), pointsF.size(), false);
     }
-    transform.pop();
+    transform = tstack.pop();
     ++col;
 
     transform.rotate(15);
-    transform.push();
+    tstack.push(transform);
     transform.translate(80 + 120 * col, 80 + 120 * row);
     pointsF.clear();
     path.generatePoints(pointsF, 1);
@@ -74,11 +75,11 @@ static void benchDrawPath_drawRow(
         ip2->setBrush(brush1);
         ip2->fillPolygon(pointsF.data(), pointsF.size());
     }
-    transform.pop();
+    transform = tstack.pop();
     ++col;
 
     transform.rotate(15);
-    transform.push();
+    tstack.push(transform);
     transform.translate(80 + 120 * col, 80 + 120 * row);
     pointsF.clear();
     path.generatePoints(pointsF, 1);
@@ -88,7 +89,7 @@ static void benchDrawPath_drawRow(
         ip2->setBrush(brush2);
         ip2->fillPolygon(pointsF.data(), pointsF.size());
     }
-    transform.pop();
+    transform = tstack.pop();
     col = 0;
     ++row;
 }
@@ -99,10 +100,11 @@ static void benchDrawPath_drawCol(
     const Pen& penThinSolid, const Pen& penThickSolid, AntiAliasingMode antiAliasingMode
 )
 {
+    TransformStack      tstack;
     std::vector<PointF> pointsF;
 
     transform.rotate(15);
-    transform.push();
+    tstack.push(transform);
     transform.translate(150 + 120 * col, 70 + 120 * row);
     pointsF.clear();
     path.generatePoints(pointsF, 1);
@@ -112,11 +114,11 @@ static void benchDrawPath_drawCol(
         ip2->setPen(penThinSolid);
         ip2->drawPolyline(pointsF.data(), pointsF.size(), false);
     }
-    transform.pop();
+    transform = tstack.pop();
     ++row;
 
     transform.rotate(15);
-    transform.push();
+    tstack.push(transform);
     transform.translate(150 + 120 * col, 70 + 120 * row);
     pointsF.clear();
     path.generatePoints(pointsF, 1);
@@ -126,7 +128,7 @@ static void benchDrawPath_drawCol(
         ip2->setPen(penThickSolid);
         ip2->drawPolyline(pointsF.data(), pointsF.size(), false);
     }
-    transform.pop();
+    transform = tstack.pop();
     ++row;
 }
 

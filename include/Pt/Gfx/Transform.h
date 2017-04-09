@@ -31,7 +31,6 @@
 #define PT_GFX_TRANSFORM_H
 
 #include <cstring>
-#include <vector>
 
 #include <Pt/Gfx/Math.h>
 #include <Pt/Gfx/Painter.h>
@@ -130,9 +129,6 @@ class PT_GFX_API BasicTransform {
         inline bool operator==(const BasicTransform& m) const;
         inline bool operator!=(const BasicTransform& m) const;
 
-        inline void push();
-        inline bool pop();
-
         inline void transformPoint(T& dx, T& dy, T sx, T sy) const;
         inline void transformPoint(T& x, T &y) const;
 
@@ -149,24 +145,12 @@ class PT_GFX_API BasicTransform {
         // Matrix data
         typedef BasicMatrixData<T> MatrixData;
 
-        // Matrix stack data
-        struct StackData {
-            MatrixData mdata;
-            bool       isIdentity;
-
-            inline StackData(const MatrixData& mdata_, bool isIdentity_)
-            : mdata(mdata_), isIdentity(isIdentity_)
-            {}
-        };
-
     private:
         inline void updateMatrix(const MatrixData& n, bool replaceInsteadOfCombine);
 
     private:
-        MatrixData             _mdata;
-        bool                   _isIdentity;
-
-        std::vector<StackData> _stack;
+        MatrixData _mdata;
+        bool       _isIdentity;
 };
 
 
@@ -229,11 +213,7 @@ inline BasicTransform<T>::~BasicTransform()
 
 template <typename T>
 inline void BasicTransform<T>::clear()
-{
-    identity();
-
-    _stack.clear();
-}
+{ identity(); }
 
 template <typename T>
 inline void BasicTransform<T>::identity()
@@ -362,8 +342,6 @@ inline const BasicTransform<T>& BasicTransform<T>::operator=(const BasicTransfor
     this->_mdata      = m._mdata;
     this->_isIdentity = m._isIdentity;
 
-    this->_stack      = m._stack;
-
     return *this;
 }
 
@@ -387,23 +365,6 @@ inline bool BasicTransform<T>::operator==(const BasicTransform<T>& m) const
 template <typename T>
 inline bool BasicTransform<T>::operator!=(const BasicTransform<T>& m) const
 { return memcmp(&_mdata, &m._mdata, sizeof(_mdata)) != 0; }
-
-template <typename T>
-inline void BasicTransform<T>::push()
-{ _stack.push_back( StackData(_mdata, _isIdentity) ); }
-
-template <typename T>
-inline bool BasicTransform<T>::pop()
-{
-    if(_stack.empty()) return false;
-
-    _mdata      = _stack.back().mdata;
-    _isIdentity = _stack.back().isIdentity;
-
-    _stack.pop_back();
-
-    return true;
-}
 
 template <typename T>
 inline void BasicTransform<T>::transformPoint(T& dx, T& dy, T sx, T sy) const

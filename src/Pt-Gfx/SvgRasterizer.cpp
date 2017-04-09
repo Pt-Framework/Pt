@@ -62,6 +62,7 @@ struct SvgRasterizer::RasterState {
     Transform          transform; // Active 2D transformation
     Path               path;      // Working path
 
+    TransformStack     tsStack;   // Transform stack
     std::vector<Pen  > psStack;   // Pen stack
     std::vector<Brush> bsStack;   // Brush stack
 

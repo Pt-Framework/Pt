@@ -38,7 +38,7 @@
 #include <Pt/Xml/InputSource.h>
 #include <Pt/Xml/XmlReader.h>
 
-#include <Pt/Gfx/Transform.h>
+#include <Pt/Gfx/TransformStack.h>
 #include <Pt/Gfx/ImagePainter2.h>
 
 
