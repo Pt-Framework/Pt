@@ -58,13 +58,13 @@ Pen::Pen(const Color& color, std::size_t size, Pt::uint64_t stylePattern, CapSty
 void Pen::setColor(const Color& color)
 {
     // COW
+    if(_penData.refs() > 1) {
+        SmartPtr<PenData> penData(new PenData);
+        *penData = *_penData;
+        _penData = penData;
+    }
 
-    SmartPtr<PenData> penData(new PenData);
-
-    *penData = *_penData;
-    penData->setColor(color);
-
-    _penData = penData;
+    _penData->setColor(color);
 }
 
 
@@ -77,13 +77,13 @@ const Color& Pen::color() const
 void Pen::setSize(std::size_t size)
 {
     // COW
+    if(_penData.refs() > 1) {
+        SmartPtr<PenData> penData(new PenData);
+        *penData = *_penData;
+        _penData = penData;
+    }
 
-    SmartPtr<PenData> penData(new PenData);
-
-    *penData = *_penData;
-    penData->setSize(size);
-
-    _penData = penData;
+    _penData->setSize(size);
 }
 
 
@@ -96,26 +96,26 @@ std::size_t Pen::size() const
 void Pen::setStyle(Style style)
 {
     // COW
+    if(_penData.refs() > 1) {
+        SmartPtr<PenData> penData(new PenData);
+        *penData = *_penData;
+        _penData = penData;
+    }
 
-    SmartPtr<PenData> penData(new PenData);
-
-    *penData = *_penData;
-    penData->setStyle( (style != UserDefined) ? style : Solid, 0 );
-
-    _penData = penData;
+    _penData->setStyle( (style != UserDefined) ? style : Solid, 0 );
 }
 
 
 void Pen::setStyle(Pt::uint64_t stylePattern)
 {
     // COW
+    if(_penData.refs() > 1) {
+        SmartPtr<PenData> penData(new PenData);
+        *penData = *_penData;
+        _penData = penData;
+    }
 
-    SmartPtr<PenData> penData(new PenData);
-
-    *penData = *_penData;
-    penData->setStyle(UserDefined, stylePattern);
-
-    _penData = penData;
+    _penData->setStyle(UserDefined, stylePattern);
 }
 
 
@@ -134,13 +134,13 @@ Pt::uint64_t Pen::styleUserPattern() const
 void Pen::setCapStyle(CapStyle cap)
 {
     // COW
+    if(_penData.refs() > 1) {
+        SmartPtr<PenData> penData(new PenData);
+        *penData = *_penData;
+        _penData = penData;
+    }
 
-    SmartPtr<PenData> penData(new PenData);
-
-    *penData = *_penData;
-    penData->setCapStyle(cap);
-
-    _penData = penData;
+    _penData->setCapStyle(cap);
 }
 
 
@@ -153,13 +153,13 @@ Pen::CapStyle Pen::capStyle() const
 void Pen::setJoinStyle(JoinStyle join)
 {
     // COW
+    if(_penData.refs() > 1) {
+        SmartPtr<PenData> penData(new PenData);
+        *penData = *_penData;
+        _penData = penData;
+    }
 
-    SmartPtr<PenData> penData(new PenData);
-
-    *penData = *_penData;
-    penData->setJoinStyle(join);
-
-    _penData = penData;
+    _penData->setJoinStyle(join);
 }
 
 

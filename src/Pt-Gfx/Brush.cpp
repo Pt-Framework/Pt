@@ -44,13 +44,13 @@ Brush::Brush()
 void Brush::setSolidColor(const Color& color)
 {
     // COW
+    if(_brushData.refs() > 1) {
+        SmartPtr<BrushData> brushData(new BrushData);
+        *brushData = *_brushData;
+        _brushData = brushData;
+    }
 
-    SmartPtr<BrushData> brushData(new BrushData);
-
-    *brushData = *_brushData;
-    brushData->setSolidColor(color);
-
-    _brushData = brushData;
+    _brushData->setSolidColor(color);
 }
 
 
@@ -87,13 +87,13 @@ const Color& Brush::color() const
 void Brush::setGradient(const Color& from, const Color& to, GradientDirection g, float rotDeg, float scale, Pt::int32_t ofsX, Pt::int32_t ofsY)
 {
     // COW
+    if(_brushData.refs() > 1) {
+        SmartPtr<BrushData> brushData(new BrushData);
+        *brushData = *_brushData;
+        _brushData = brushData;
+    }
 
-    SmartPtr<BrushData> brushData(new BrushData);
-
-    *brushData = *_brushData;
-    brushData->setGradient(from, to, g, rotDeg, scale, ofsX, ofsY);
-
-    _brushData = brushData;
+    _brushData->setGradient(from, to, g, rotDeg, scale, ofsX, ofsY);
 }
 
 
@@ -102,13 +102,13 @@ void Brush::setGradientRotation(float rotDeg)
     if(!_brushData->isGradient()) throw std::logic_error("brush error: not a gradient");
 
     // COW
+    if(_brushData.refs() > 1) {
+        SmartPtr<BrushData> brushData(new BrushData);
+        *brushData = *_brushData;
+        _brushData = brushData;
+    }
 
-    SmartPtr<BrushData> brushData(new BrushData);
-
-    *brushData = *_brushData;
-    brushData->setGradientRotation(rotDeg);
-
-    _brushData = brushData;
+    _brushData->setGradientRotation(rotDeg);
 }
 
 
@@ -117,13 +117,13 @@ void Brush::setGradientScale(float scale)
     if(!_brushData->isGradient()) throw std::logic_error("brush error: not a gradient");
 
     // COW
+    if(_brushData.refs() > 1) {
+        SmartPtr<BrushData> brushData(new BrushData);
+        *brushData = *_brushData;
+        _brushData = brushData;
+    }
 
-    SmartPtr<BrushData> brushData(new BrushData);
-
-    *brushData = *_brushData;
-    brushData->setGradientScale(scale);
-
-    _brushData = brushData;
+    _brushData->setGradientScale(scale);
 }
 
 
@@ -132,13 +132,13 @@ void Brush::setGradientOffset(Pt::int32_t ofsX, Pt::int32_t ofsY)
     if(!_brushData->isGradient()) throw std::logic_error("brush error: not a gradient");
 
     // COW
+    if(_brushData.refs() > 1) {
+        SmartPtr<BrushData> brushData(new BrushData);
+        *brushData = *_brushData;
+        _brushData = brushData;
+    }
 
-    SmartPtr<BrushData> brushData(new BrushData);
-
-    *brushData = *_brushData;
-    brushData->setGradientOffset(ofsX, ofsY);
-
-    _brushData = brushData;
+    _brushData->setGradientOffset(ofsX, ofsY);
 }
 
 
@@ -151,13 +151,13 @@ const Color& Brush::gradientColor() const
 void Brush::setTexture(const Image& texture)
 {
     // COW
+    if(_brushData.refs() > 1) {
+        SmartPtr<BrushData> brushData(new BrushData);
+        *brushData = *_brushData;
+        _brushData = brushData;
+    }
 
-    SmartPtr<BrushData> brushData(new BrushData);
-
-    *brushData = *_brushData;
-    brushData->setTexture(texture);
-
-    _brushData = brushData;
+    _brushData->setTexture(texture);
 }
 
 
