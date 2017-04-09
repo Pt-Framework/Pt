@@ -1,30 +1,35 @@
-/* Copyright (C) 2006-2015 Laurentiu-Gheorghe Crisan
- * Copyright (C) 2006-2015 Marc Boris Duerner
- * Copyright (C) 2010 Aloysius Indrayanto
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * As a special exception, you may use this file as part of a free
- * software library without restriction. Specifically, if other files
- * instantiate templates or use macros or inline functions from this
- * file, or you compile this file and link it with other files to
- * produce an executable, this file does not by itself cause the
- * resulting executable to be covered by the GNU General Public
- * License. This exception does not however invalidate any other
- * reasons why the executable file might be covered by the GNU Library
- * General Public License.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+/* Copyright (C) 2006-2015 Marc Boris Duerner
+   Copyright (C) 2017-2017 Aloysius Indrayanto
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+  MA 02110-1301 USA
+*/
+
+// Just for debugging ;)
+#warning "Just for debugging ;)"
+#include <stdio.h>
 
 #include <stdexcept>
 
@@ -128,6 +133,57 @@ void SGNodePath::draw(ImagePainter2& painter, const Transform* transform)
             case RenderStrokeAutoClose : painter.drawPolyline(pointsF.data(), pointsF.size(), true ); break;
             default                    :                                                              break;
         }
+    }
+
+    // End the drawing sequence
+    endDrawSeq(painter);
+}
+
+
+// ======================================================================================
+// ===== SGNodeLine Class ===============================================================
+// ======================================================================================
+SGNodeLine::~SGNodeLine()
+{}
+
+template <typename T>
+static void sgDumpTransformMatrix(const BasicTransform<T>& transform)
+{
+    T r[3][3];
+    transform.getRaw(r);
+
+    printf("    | %7.3f %7.3f %7.3f |\n", r[0][0], r[0][1], r[0][2]);
+    printf("    | %7.3f %7.3f %7.3f |\n", r[1][0], r[1][1], r[1][2]);
+    printf("    | %7.3f %7.3f %7.3f |\n", r[2][0], r[2][1], r[2][2]);
+    printf("\n");
+}
+
+void SGNodeLine::draw(ImagePainter2& painter, const Transform* transform)
+{
+    // Check if this node and all its children must not be drawn
+    if(_rm == RenderNone) return;
+
+    // Begin the drawing sequence
+    const Transform& thisTransform = begDrawSeq(painter, transform);
+
+    // Transform the coordinates
+    PointF f, t;
+
+    thisTransform.transformPoint(f, _from);
+    thisTransform.transformPoint(t, _to  );
+
+    sgDumpTransformMatrix(thisTransform);
+
+
+    // TODO: Transform the pen width too!
+
+    // Draw the line based on the mode
+    const RenderMode rm = renderMode();
+    switch(rm) {
+        case RenderFill            : /* Fallthrough */
+        case RenderStroke          : /* Fallthrough */
+        case RenderStrokeAutoClose : painter.drawLine(f, t); break;
+        default                    :                         break;
     }
 
     // End the drawing sequence

@@ -51,11 +51,11 @@ class ImagePainter2;
 class PT_GFX_API SGNode {
     public:
         enum RenderMode {
-            RenderInherit,
-            RenderNone,
-            RenderFill,
-            RenderStroke,
-            RenderStrokeAutoClose
+            RenderInherit,         //! @brief Inherit from parent
+            RenderNone,            //! @brief Do not draw this node
+            RenderStroke,          //! @brief Draw this node as an stroked shape
+            RenderStrokeAutoClose, //! @brief Draw this node as an stroked shape with auto-close (only meaningful for some node types)
+            RenderFill             //! @brief Draw this node as a filled shape                   (only meaningful for some node types)
         };
 
         typedef std::vector<SGNode*> Children;
@@ -82,7 +82,7 @@ class PT_GFX_API SGNode {
         virtual ~SGNode() = 0;
 
         //
-        // Management
+        // Management functions
         //
 
         virtual void clear();
@@ -112,7 +112,7 @@ class PT_GFX_API SGNode {
         }
 
         //
-        // Drawing
+        // Drawing functions
         //
 
         inline void setPen(const Pen& pen)
@@ -130,7 +130,7 @@ class PT_GFX_API SGNode {
         virtual void draw(ImagePainter2& painter, const Transform* transform = 0) = 0;
 
         //
-        // Transform
+        // Access to the transform object
         //
 
         inline Transform& transform()
@@ -140,7 +140,7 @@ class PT_GFX_API SGNode {
         { return _transform; }
 
         //
-        // Children access
+        // Access to the child nodes
         //
 
         inline const Children& children() const
@@ -173,7 +173,7 @@ class PT_GFX_API SGNode {
 };
 
 
-/** @brief A scene-graph node class with an embedded Path.
+/** @brief A scene-graph node class that specifies a path.
   */
 class PT_GFX_API SGNodePath : public SGNode {
     public:
@@ -203,13 +203,13 @@ class PT_GFX_API SGNodePath : public SGNode {
         virtual ~SGNodePath();
 
         //
-        // Management
+        // Management functions
         //
 
         virtual void clear();
 
         //
-        // Drawing
+        // Drawing functions
         //
 
         inline void setSmoothness(float smoothness = 1.0f)
@@ -218,7 +218,7 @@ class PT_GFX_API SGNodePath : public SGNode {
         virtual void draw(ImagePainter2& painter, const Transform* transform = 0);
 
         //
-        // Path
+        // Access to the path object
         //
 
         inline Path& path()
@@ -230,6 +230,62 @@ class PT_GFX_API SGNodePath : public SGNode {
     protected:
         Path  _path;
         float _smoothness;
+};
+
+
+/** @brief A scene-graph node class that specifies a line.
+  */
+class PT_GFX_API SGNodeLine : public SGNode {
+    public:
+        inline SGNodeLine(RenderMode rm = RenderInherit)
+        : SGNode( rm )
+        {}
+
+        inline SGNodeLine(RenderMode rm, const PointF& from, const PointF& to)
+        : SGNode( rm )
+        , _from ( from )
+        , _to   ( to )
+        {}
+
+        inline SGNodeLine(RenderMode rm, const PointF& from, const PointF& to, const Transform& transform)
+        : SGNode( rm, transform )
+        , _from ( from )
+        , _to   ( to )
+        {}
+
+        inline SGNodeLine(RenderMode rm, const PointF& from, const PointF& to, const Transform& transform, const Children& children)
+        : SGNode( rm, transform, children )
+        , _from ( from )
+        , _to   ( to )
+        {}
+
+        virtual ~SGNodeLine();
+
+        //
+        // Drawing functions
+        //
+
+        virtual void draw(ImagePainter2& painter, const Transform* transform = 0);
+
+        //
+        // Access to the line object
+        //
+
+        inline void set(const PointF& from, const PointF& to)
+        {
+            _from = from;
+            _to   = to;
+        }
+
+        inline const PointF& from() const
+        { return _from; }
+
+        inline const PointF& to() const
+        { return _to; }
+
+    protected:
+        PointF _from;
+        PointF _to;
 };
 
 

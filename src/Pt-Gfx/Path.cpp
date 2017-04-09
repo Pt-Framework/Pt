@@ -1024,6 +1024,11 @@ void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
     //printf("\n");
 }
 
+
+// ======================================================================================
+// ===== Static Public Member Functions =================================================
+// ======================================================================================
+
 void Path::clipPolygon(std::vector<PointF>& result, const std::vector<PointF>& subject, const std::vector<PointF>& clipRegion, ClipMode cm)
 {
     // Scaling factors
