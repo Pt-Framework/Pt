@@ -644,13 +644,15 @@ void FreeType2::setFontDir_impl_noLock(const System::Path& path)
         Font font(face->family_name, 0, style);
         FT_Done_Face(face);
 
-        //std::clog << "setFontDir_impl_noLock() : " << std::left << std::setw(80) << fontPath.toLocal() << std::right << " : " << style << " : " << font.name() << std::endl;
-
         // Store the font information
         FreeType2::_fonts[font] = fontPath;
 
         // Store the font file name
         FreeType2::_files.insert(fontPath.toString());
+    }
+
+    for(FreeType2::Fonts::const_iterator it = FreeType2::_fonts.begin(); it != FreeType2::_fonts.end(); ++it) {
+        std::clog << "setFontDir_impl_noLock() : " << std::left << std::setw(80) << it->second.toLocal() << std::right << " : " << it->first.style() << " : " << it->first.name() << std::endl;
     }
 }
 
