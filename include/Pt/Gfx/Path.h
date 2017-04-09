@@ -34,6 +34,8 @@
 #include <string>
 #include <vector>
 
+#include <Pt/SmartPtr.h>
+
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Point.h>
 
@@ -178,10 +180,10 @@ class PT_GFX_API Path {
         struct PathData;
 
     private:
-        PathData* _pathData;
+        SmartPtr<PathData>  _pathData;
 
-        DrawText2* _text;
-        Font       _font;
+        SmartPtr<DrawText2> _text;
+        SmartPtr<Font>      _font;
 };
 
 

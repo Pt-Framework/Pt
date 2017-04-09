@@ -30,8 +30,9 @@
 #ifndef PT_GFX_BRUSH_H
 #define PT_GFX_BRUSH_H
 
-#include <Pt/Gfx/Image.h>
 #include <Pt/SmartPtr.h>
+
+#include <Pt/Gfx/Image.h>
 
 
 namespace Pt {

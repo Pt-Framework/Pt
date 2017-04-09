@@ -515,37 +515,55 @@ struct Path::PathData {
 Path::Path()
 : _pathData( new PathData() )
 , _text    ( new DrawText2() )
+, _font    ( new Font() )
 {}
 
 Path::Path(const Path& p)
-: _pathData( new PathData() )
-, _text    ( new DrawText2() )
+: _pathData( 0 )
+, _text    ( 0 )
+, _font    ( 0 )
 { this->operator=(p); }
 
 Path::~Path()
-{
-    delete _text;
-    delete _pathData;
-}
+{}
 
 const Path& Path::operator=(const Path& p)
 {
-    *_pathData = *p._pathData;
+    _pathData = p._pathData;
+    _text     = p._text;
+    _font     = p._font;
+
     return *this;
 }
 
 bool Path::isNull() const
 { return _pathData->empty(); }
 
-
 void Path::clear()
-{ _pathData->clear(); }
+{
+    // COW
+    if(_pathData.refs() > 1) {
+        SmartPtr<PathData> pathData(new PathData);
+        *pathData = *_pathData;
+        _pathData = pathData;
+    }
+
+    // Clear the path data
+    _pathData->clear();
+}
 
 void Path::beginPath()
 {
     // Check if this function call is valid in the current context
     if( !_pathData->empty() && !_pathData->lastInstructionMatch(PathData::IT_End) )
         throw PathInvalidContext(PT_SOURCEINFO_STR);
+
+    // COW
+    if(_pathData.refs() > 1) {
+        SmartPtr<PathData> pathData(new PathData);
+        *pathData = *_pathData;
+        _pathData = pathData;
+    }
 
     // Store the instruction
     _pathData->add(PathData::IT_Begin);
@@ -557,6 +575,13 @@ void Path::endPath()
     if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_Begin) || _pathData->lastInstructionMatch(PathData::IT_End) )
         throw PathInvalidContext(PT_SOURCEINFO_STR);
 
+    // COW
+    if(_pathData.refs() > 1) {
+        SmartPtr<PathData> pathData(new PathData);
+        *pathData = *_pathData;
+        _pathData = pathData;
+    }
+
     // Store the instruction
     _pathData->add(PathData::IT_End);
 }
@@ -566,6 +591,13 @@ void Path::moveTo(double x, double y)
     // Check if this function call is valid in the current context
     if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) || _pathData->lastInstructionMatch(PathData::IT_MoveTo) )
         throw PathInvalidContext(PT_SOURCEINFO_STR);
+
+    // COW
+    if(_pathData.refs() > 1) {
+        SmartPtr<PathData> pathData(new PathData);
+        *pathData = *_pathData;
+        _pathData = pathData;
+    }
 
     // Store the instruction
     _pathData->add(PathData::IT_MoveTo, x, y);
@@ -581,6 +613,13 @@ void Path::lineTo(double x, double y)
     if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
         throw PathInvalidContext(PT_SOURCEINFO_STR);
 
+    // COW
+    if(_pathData.refs() > 1) {
+        SmartPtr<PathData> pathData(new PathData);
+        *pathData = *_pathData;
+        _pathData = pathData;
+    }
+
     // Store the instruction
     _pathData->add(PathData::IT_LineTo, x, y);
 
@@ -594,6 +633,13 @@ void Path::arcTo(double x, double y, double r)
     // Check if this function call is valid in the current context
     if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
         throw PathInvalidContext(PT_SOURCEINFO_STR);
+
+    // COW
+    if(_pathData.refs() > 1) {
+        SmartPtr<PathData> pathData(new PathData);
+        *pathData = *_pathData;
+        _pathData = pathData;
+    }
 
     // Store the instruction
     _pathData->add(PathData::IT_ArcTo, x, y, r);
@@ -609,6 +655,13 @@ void Path::quadraticBezierTo(double cx, double cy, double x, double y)
     if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
         throw PathInvalidContext(PT_SOURCEINFO_STR);
 
+    // COW
+    if(_pathData.refs() > 1) {
+        SmartPtr<PathData> pathData(new PathData);
+        *pathData = *_pathData;
+        _pathData = pathData;
+    }
+
     // Store the instruction
     _pathData->add(PathData::IT_QuadBezierTo, cx, cy, x, y);
 
@@ -622,6 +675,13 @@ void Path::cubicBezierTo(double cx1, double cy1, double cx2, double cy2, double 
     // Check if this function call is valid in the current context
     if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
         throw PathInvalidContext(PT_SOURCEINFO_STR);
+
+    // COW
+    if(_pathData.refs() > 1) {
+        SmartPtr<PathData> pathData(new PathData);
+        *pathData = *_pathData;
+        _pathData = pathData;
+    }
 
     // Store the instruction
     _pathData->add(PathData::IT_CubicBezierTo, cx1, cy1, cx2, cy2, x, y);
@@ -651,6 +711,13 @@ void Path::genericNBezierTo(Pt::int32_t controlPointCount, const double* cxy, do
     points.push_back(x);
     points.push_back(y);
 
+    // COW
+    if(_pathData.refs() > 1) {
+        SmartPtr<PathData> pathData(new PathData);
+        *pathData = *_pathData;
+        _pathData = pathData;
+    }
+
     // Store the instruction
     _pathData->add(PathData::IT_GenNBezierTo, points);
 
@@ -664,6 +731,13 @@ void Path::relMoveTo(double x, double y)
     // Check if this function call is valid in the current context
     if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) || _pathData->lastInstructionMatch(PathData::IT_MoveTo) )
         throw PathInvalidContext(PT_SOURCEINFO_STR);
+
+    // COW
+    if(_pathData.refs() > 1) {
+        SmartPtr<PathData> pathData(new PathData);
+        *pathData = *_pathData;
+        _pathData = pathData;
+    }
 
     // Store the instruction
     _pathData->add(PathData::IT_MoveTo, _pathData->curX + x, _pathData->curY + y);
@@ -679,6 +753,13 @@ void Path::relLineTo(double x, double y)
     if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
         throw PathInvalidContext(PT_SOURCEINFO_STR);
 
+    // COW
+    if(_pathData.refs() > 1) {
+        SmartPtr<PathData> pathData(new PathData);
+        *pathData = *_pathData;
+        _pathData = pathData;
+    }
+
     // Store the instruction
     _pathData->add(PathData::IT_LineTo, _pathData->curX + x, _pathData->curY + y);
 
@@ -692,6 +773,13 @@ void Path::relArcTo(double x, double y, double r)
     // Check if this function call is valid in the current context
     if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
         throw PathInvalidContext(PT_SOURCEINFO_STR);
+
+    // COW
+    if(_pathData.refs() > 1) {
+        SmartPtr<PathData> pathData(new PathData);
+        *pathData = *_pathData;
+        _pathData = pathData;
+    }
 
     // Store the instruction
     _pathData->add(PathData::IT_ArcTo, _pathData->curX + x, _pathData->curY + y, r);
@@ -707,6 +795,13 @@ void Path::relQuadraticBezierTo(double cx, double cy, double x, double y)
     if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
         throw PathInvalidContext(PT_SOURCEINFO_STR);
 
+    // COW
+    if(_pathData.refs() > 1) {
+        SmartPtr<PathData> pathData(new PathData);
+        *pathData = *_pathData;
+        _pathData = pathData;
+    }
+
     // Store the instruction
     _pathData->add(PathData::IT_QuadBezierTo, _pathData->curX + cx, _pathData->curY + cy, _pathData->curX + x, _pathData->curY + y);
 
@@ -720,6 +815,13 @@ void Path::relCubicBezierTo(double cx1, double cy1, double cx2, double cy2, doub
     // Check if this function call is valid in the current context
     if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
         throw PathInvalidContext(PT_SOURCEINFO_STR);
+
+    // COW
+    if(_pathData.refs() > 1) {
+        SmartPtr<PathData> pathData(new PathData);
+        *pathData = *_pathData;
+        _pathData = pathData;
+    }
 
     // Store the instruction
     _pathData->add(PathData::IT_CubicBezierTo, _pathData->curX + cx1, _pathData->curY + cy1, _pathData->curX + cx2, _pathData->curY + cy2, _pathData->curX + x, _pathData->curY + y);
@@ -750,6 +852,13 @@ void Path::relGenericNBezierTo(Pt::int32_t controlPointCount, const double* cxy,
     points.push_back(_pathData->curX + x);
     points.push_back(_pathData->curY + y);
 
+    // COW
+    if(_pathData.refs() > 1) {
+        SmartPtr<PathData> pathData(new PathData);
+        *pathData = *_pathData;
+        _pathData = pathData;
+    }
+
     // Store the instruction
     _pathData->add(PathData::IT_GenNBezierTo, points);
 
@@ -758,14 +867,24 @@ void Path::relGenericNBezierTo(Pt::int32_t controlPointCount, const double* cxy,
     _pathData->curY += y;
 }
 
-void Path::setFont(const Font& font)
+void Path::setFont(const Font& fontSpec)
 {
-    _font = font;
-    _text->setFont(_font);
+    // COW
+    if(_font.refs() > 1 || _text.refs() > 1) {
+        SmartPtr<Font> font(new Font);
+        *font = *_font;
+        _font = font;
+        SmartPtr<DrawText2> text(new DrawText2);
+        *text = *_text;
+        _text = text;
+    }
+
+    *_font = fontSpec;
+    _text->setFont(*_font);
 }
 
 const Font& Path::font() const
-{ return _font; }
+{ return *_font; }
 
 void Path::getCharSpacing(Pt::int32_t& x, Pt::int32_t& y, const Char& from, const Char& to)
 { _text->getCharSpacing(x, y, from, to); }
@@ -776,18 +895,31 @@ void Path::putChar(const Char& chr, const Char& autoAddSpaceFor)
     if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
         throw PathInvalidContext(PT_SOURCEINFO_STR);
 
-    // Store the instruction
+    // COW
+    if(_pathData.refs() > 1) {
+        SmartPtr<PathData> pathData(new PathData);
+        *pathData = *_pathData;
+        _pathData = pathData;
+    }
+
+    // Store the instruction to draw a character
     _pathData->add(chr);
 
-    // Automatically add space as needed
+    // Return here if we do not need to automatically add character spacing
     if(!autoAddSpaceFor) return;
 
+    // Get the character spacing
     Pt::int32_t dx, dy;
-
     getCharSpacing(dx, dy, chr, autoAddSpaceFor);
-    relMoveTo     (dx, dy);
-
     //std::clog << dx << " " << dy << std::endl;
+
+    // Store the instruction to move the drawing coordinate
+    _pathData->add(PathData::IT_MoveTo, _pathData->curX + dx, _pathData->curY + dy);
+
+    // Update the current coordinate
+    _pathData->curX += dx;
+    _pathData->curY += dy;
+
 }
 
 void Path::putText(const String& str)
@@ -795,6 +927,8 @@ void Path::putText(const String& str)
     // Check if this function call is valid in the current context
     if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
         throw PathInvalidContext(PT_SOURCEINFO_STR);
+
+    // The COW mechanism is done by the putChar() function
 
     // Put the characters from the string
     const Pt::int32_t len1 = ( (Pt::int32_t) str.length() ) - 1;

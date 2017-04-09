@@ -31,10 +31,12 @@
 #ifndef PT_GFX_PEN_H
 #define PT_GFX_PEN_H
 
+#include <cstddef>
+
+#include <Pt/SmartPtr.h>
+
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Color.h>
-#include <Pt/SmartPtr.h>
-#include <cstddef>
 
 
 namespace Pt {
