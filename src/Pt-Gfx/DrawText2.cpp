@@ -116,6 +116,10 @@ void DrawText2::getCharSpacing(Pt::int32_t& x, Pt::int32_t& y, const Char& from,
 
 void DrawText2::pathFromChar(std::vector<PointF>& points, std::vector<Pt::uint8_t>& tags, std::vector<Pt::int32_t>& contours, const Char& chr)
 {
+    const System::Path* path = reinterpret_cast<const System::Path*>(_faceId);
+    if(path) std::clog << "pathFromChar() : " << path->toLocal() << std::endl;
+    else     std::clog << "pathFromChar() : " << 0 << std::endl;
+
     FreeType2::instance(_faceId).pathFromChar(
         points, tags, contours, chr, _faceId
     );

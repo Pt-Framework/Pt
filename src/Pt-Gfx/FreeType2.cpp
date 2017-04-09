@@ -487,8 +487,9 @@ FT_Error FreeType2::onFontRequest(FTC_FaceID faceId, FT_Face* face)
         return FT_New_Memory_Face(FreeType2::_ft, DejaVuSans, DejaVuSansSize, 0, face);
 
     // Check if path is still valid
-    if(FreeType2::_files.find(path->toString()) == FreeType2::_files.end())
+    if(FreeType2::_files.find(path->toString()) == FreeType2::_files.end()) {
         return FT_New_Memory_Face(FreeType2::_ft, DejaVuSans, DejaVuSansSize, 0, face);
+    }
 
     return FT_New_Face(FreeType2::_ft, path->toLocal().c_str(), 0, face);
 }
@@ -600,6 +601,13 @@ FreeType2& FreeType2::instance(FTC_FaceID faceID)
     return *it->second;
 }
 
+void FreeType2::setFontDir(const System::Path& path)
+{
+    System::MutexLock lock(FreeType2::_mutex);
+
+    setFontDir_impl_noLock(path);
+}
+
 void FreeType2::setFontDir_impl_noLock(const System::Path& path)
 {
     FreeType2::_fontDir = path;
@@ -646,13 +654,6 @@ void FreeType2::setFontDir_impl_noLock(const System::Path& path)
     }
 }
 
-void FreeType2::setFontDir(const System::Path& path)
-{
-    System::MutexLock lock(FreeType2::_mutex);
-
-    setFontDir_impl_noLock(path);
-}
-
 const std::vector<std::string> FreeType2::fontNames()
 {
     std::vector<std::string> names;
@@ -692,12 +693,18 @@ FTC_FaceID FreeType2::findFaceId(const Font& font)
     Fonts::iterator it = FreeType2::_fonts.find(font);
     if(it == FreeType2::_fonts.end()) return 0;
 
+    std::clog << "findFaceId() : " << it->second.toLocal() << std::endl;
+
     return reinterpret_cast<FTC_FaceID>(&it->second);
 }
 
 FT_Error FreeType2::fontRequest(FTC_FaceID faceId, FT_Library library, FT_Pointer data, FT_Face* face)
 {
     FreeType2* ft = static_cast<FreeType2*>(data);
+
+    const System::Path* path = reinterpret_cast<const System::Path*>(faceId);
+    if(path) std::clog << "fontRequest() : " << path->toLocal() << std::endl;
+    else     std::clog << "fontRequest() : " << 0 << std::endl;
 
     return ft->onFontRequest(faceId, face);
 }
