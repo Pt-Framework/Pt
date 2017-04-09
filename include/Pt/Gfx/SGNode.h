@@ -141,6 +141,10 @@ class PT_GFX_API SGNodePath : public SGNode {
         inline SGNodePath()
         {}
 
+        inline SGNodePath(const Path& path)
+        : _path ( path )
+        {}
+
         inline SGNodePath(const Path& path, const Transform& transform)
         : SGNode( transform )
         , _path ( path )

@@ -10,7 +10,6 @@ static void testSceneGraph(const char* title, Image& image, Painter& painter)
     SGNodePath     sgn;
 
     SGNodePath*    csgn;
-    Path*          path;
 
     // Generate a new path
     Path pathPoly4;
@@ -23,27 +22,19 @@ static void testSceneGraph(const char* title, Image& image, Painter& painter)
     pathPoly4.endPath  ();
 
     // Parent's 1st child
-    csgn = &sgn.addChild(new SGNodePath);
-    path = &csgn->path();
-    *path = pathPoly4;
+    csgn = &sgn.addChild(new SGNodePath(pathPoly4));
 
     // Parent's 2nd child
-    csgn = &sgn.addChild(new SGNodePath);
-    path = &csgn->path();
-    *path = pathPoly4;
+    csgn = &sgn.addChild(new SGNodePath(pathPoly4));
     csgn->transform().translate(150, 0);
 
-    /*
     // 2nd-child's 1st child
-    csgn = &csgn->addChild(new SGNodePath);
-    path = &csgn->path();
-    *path = pathPoly4;
+    csgn = &csgn->addChild(new SGNodePath(pathPoly4));
     csgn->transform().translate(150, 0);
-    */
 
     // Draw it
-    //sgn.transform().rotate(-15);
-    //sgn.transform().translate(100, 100);
+    sgn.transform().rotate(-15);
+    sgn.transform().translate(100, 100);
 
     sgn.setPen  (Color::fromRgb8(255, 255, 255));
     sgn.setBrush(Color::fromRgb8(255, 255, 255));

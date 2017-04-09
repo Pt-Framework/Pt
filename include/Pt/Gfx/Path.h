@@ -94,7 +94,11 @@ class PT_GFX_API Path {
     public:
         Path();
 
+        Path(const Path& p);
+
         ~Path();
+
+        const Path& operator=(const Path& p);
 
         bool isNull() const;
 

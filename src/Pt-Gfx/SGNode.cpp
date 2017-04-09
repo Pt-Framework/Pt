@@ -74,9 +74,7 @@ void SGNodePath::clear()
 void SGNodePath::draw(ImagePainter2& painter, TransformStack& tstack, const Transform& transform)
 {
     //
-    Transform t = transform;
-
-    t = _transform * t;
+    Transform thisTransform = _transform * transform;
 
     //
     const Pen   pen   = painter.pen  ();
@@ -88,9 +86,9 @@ void SGNodePath::draw(ImagePainter2& painter, TransformStack& tstack, const Tran
 
     //
     for(Children::iterator it = _children.begin(); it != _children.end(); ++it) {
-        tstack.push(t);
-        (*it)->draw(painter, tstack, t);
-        t = tstack.pop();
+        tstack.push(thisTransform);
+        (*it)->draw(painter, tstack, thisTransform);
+        thisTransform = tstack.pop();
     }
 
     //
@@ -101,7 +99,7 @@ void SGNodePath::draw(ImagePainter2& painter, TransformStack& tstack, const Tran
     _path.generatePoints(pointsF, 1);
 
     //
-    t.transformPoints(pointsF.data(), pointsF.size());
+    thisTransform.transformPoints(pointsF.data(), pointsF.size());
 
     //
     painter.fillPolygon(pointsF.data(), pointsF.size());

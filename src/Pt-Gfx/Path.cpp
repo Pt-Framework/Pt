@@ -517,14 +517,26 @@ Path::Path()
 , _text    ( new DrawText2() )
 {}
 
+Path::Path(const Path& p)
+: _pathData( new PathData() )
+, _text    ( new DrawText2() )
+{ this->operator=(p); }
+
 Path::~Path()
 {
     delete _text;
     delete _pathData;
 }
 
+const Path& Path::operator=(const Path& p)
+{
+    *_pathData = *p._pathData;
+    return *this;
+}
+
 bool Path::isNull() const
 { return _pathData->empty(); }
+
 
 void Path::clear()
 { _pathData->clear(); }
