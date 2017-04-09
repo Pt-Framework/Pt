@@ -267,25 +267,6 @@ void FreeType2::draw(
 {
     System::MutexLock lock(FreeType2::_mutex);
 
-    FT_Vector      glyphPos;
-    FT_Vector      delta;
-    FT_UInt        previous = 0;
-    FT_Glyph       glyph;
-    FT_Glyph       glyphCopy = 0;
-    FTC_Node       node;
-    FTC_SBit       smalGlyphBitmap;
-    FT_BitmapGlyph glyphBitmap;
-
-    // Glyph bitmap description
-    Pt::int32_t    incX;
-    Pt::int32_t    incY;
-    Pt::int32_t    left;
-    Pt::int32_t    top;
-    Pt::int32_t    pitch;
-    Pt::int32_t    height;
-    Pt::int32_t    width;
-    unsigned char* buffer;
-
     FT_Face  face = 0;
     FT_Error ferr = FTC_Manager_LookupFace(_manager, faceId, &face);
     if(ferr && ferr != FT_Err_Out_Of_Memory) return;
@@ -298,8 +279,27 @@ void FreeType2::draw(
         }
     }
 
+    FT_Vector glyphPos;
     glyphPos.x = (Pt::int32_t) pos.x() << 16;
     glyphPos.y = (Pt::int32_t) pos.y() << 16;
+
+    // Glyph data
+    FTC_Node       node;
+    FT_Glyph       glyph;
+    FT_Glyph       glyphCopy = 0;
+    FT_UInt        previous = 0;
+    FTC_SBit       smalGlyphBitmap;
+    FT_BitmapGlyph glyphBitmap;
+
+    // Glyph bitmap data
+    Pt::int32_t    incX;
+    Pt::int32_t    incY;
+    Pt::int32_t    left;
+    Pt::int32_t    top;
+    Pt::int32_t    pitch;
+    Pt::int32_t    height;
+    Pt::int32_t    width;
+    unsigned char* buffer;
 
     for(String::const_iterator it = text.begin(); it != text.end(); ++it) {
 
@@ -316,6 +316,7 @@ void FreeType2::draw(
             incY = smalGlyphBitmap->yadvance << 16;
 
             if(FT_HAS_KERNING(face) && previous) {
+                FT_Vector delta;
                 FT_Get_Kerning(face, previous, glyph_index, FT_KERNING_DEFAULT, &delta);
                 if(delta.x < incX && delta.y < incY) {
                      glyphPos.x += delta.x;
@@ -358,6 +359,7 @@ void FreeType2::draw(
             incY = glyphCopy->advance.y;
 
             if(FT_HAS_KERNING(face) && previous) {
+                FT_Vector delta;
                 FT_Get_Kerning(face, previous, glyph_index, FT_KERNING_DEFAULT, &delta);
                 if(delta.x < incX && delta.y < incY) {
                      glyphPos.x += delta.x;
