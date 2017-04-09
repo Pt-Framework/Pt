@@ -22,15 +22,17 @@ static void testSceneGraph(const char* title, Image& image, Painter& painter)
     pathPoly4.endPath  ();
 
     // Parent's 1st child
-    csgn = &sgn.addChild(new SGNodePath(pathPoly4));
+    csgn = &sgn.addChild(new SGNodePath(SGNode::RenderFill, pathPoly4));
 
     // Parent's 2nd child
-    csgn = &sgn.addChild(new SGNodePath(pathPoly4));
+    csgn = &sgn.addChild(new SGNodePath(SGNode::RenderFill, pathPoly4));
     csgn->transform().translate(150, 0);
+    csgn->setBrush(Color::fromRgb8(255, 0, 0));
 
     // 2nd-child's 1st child
-    csgn = &csgn->addChild(new SGNodePath(pathPoly4));
+    csgn = &csgn->addChild(new SGNodePath(SGNode::RenderStrokeAutoClose, pathPoly4));
     csgn->transform().translate(150, 0);
+    csgn->setPen(Color::fromRgb8(0, 255, 0));
 
     // Draw it
     sgn.transform().rotate(-15);

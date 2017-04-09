@@ -50,18 +50,29 @@ class ImagePainter2;
   */
 class PT_GFX_API SGNode {
     public:
+        enum RenderMode {
+            RenderNone,
+            RenderFill,
+            RenderStroke,
+            RenderStrokeAutoClose
+        };
+
+    public:
         typedef std::vector<SGNode*> Children;
 
     public:
-        inline SGNode()
+        inline SGNode(RenderMode rm)
+        : _rm(rm)
         {}
 
-        inline SGNode(const Transform& transform)
-        : _transform( transform )
+        inline SGNode(RenderMode rm, const Transform& transform)
+        : _rm(rm)
+        , _transform( transform )
         {}
 
-        inline SGNode(const Transform& transform, const Children& children)
-        : _transform( transform )
+        inline SGNode(RenderMode rm, const Transform& transform, const Children& children)
+        : _rm(rm)
+        , _transform( transform )
         , _children ( children )
         {}
 
@@ -125,12 +136,13 @@ class PT_GFX_API SGNode {
         { return _children.end(); }
 
     protected:
-        Pen       _pen;
-        Brush     _brush;
+        RenderMode _rm;
+        Pen        _pen;
+        Brush      _brush;
 
-        Transform _transform;
+        Transform  _transform;
 
-        Children  _children;
+        Children   _children;
 };
 
 
@@ -138,21 +150,27 @@ class PT_GFX_API SGNode {
   */
 class PT_GFX_API SGNodePath : public SGNode {
     public:
-        inline SGNodePath()
+        inline SGNodePath(RenderMode rm = RenderNone)
+        : SGNode     ( rm )
+        , _smoothness( 1.0f )
         {}
 
-        inline SGNodePath(const Path& path)
-        : _path ( path )
+        inline SGNodePath(RenderMode rm, const Path& path)
+        : SGNode     ( rm )
+        , _path      ( path )
+        , _smoothness( 1.0f )
         {}
 
-        inline SGNodePath(const Path& path, const Transform& transform)
-        : SGNode( transform )
-        , _path ( path )
+        inline SGNodePath(RenderMode rm, const Path& path, const Transform& transform)
+        : SGNode     ( rm, transform )
+        , _path      ( path )
+        , _smoothness( 1.0f )
         {}
 
-        inline SGNodePath(const Path& path, const Transform& transform, const Children& children)
-        : SGNode( transform, children )
-        , _path ( path )
+        inline SGNodePath(RenderMode rm, const Path& path, const Transform& transform, const Children& children)
+        : SGNode     ( rm, transform, children )
+        , _path      ( path )
+        , _smoothness( 1.0f )
         {}
 
         virtual ~SGNodePath();
@@ -167,6 +185,9 @@ class PT_GFX_API SGNodePath : public SGNode {
         // Drawing
         //
 
+        inline void setSmoothness(float smoothness)
+        { _smoothness = smoothness; }
+
         virtual void draw(ImagePainter2& painter, TransformStack& tstack, const Transform& transform);
 
         //
@@ -180,7 +201,8 @@ class PT_GFX_API SGNodePath : public SGNode {
         { return _path; }
 
     protected:
-        Path _path;
+        Path  _path;
+        float _smoothness;
 };
 
 

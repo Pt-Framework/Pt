@@ -96,13 +96,31 @@ void SGNodePath::draw(ImagePainter2& painter, TransformStack& tstack, const Tran
 
     //
     std::vector<PointF> pointsF;
-    _path.generatePoints(pointsF, 1);
+    _path.generatePoints(pointsF, _smoothness);
 
     //
     thisTransform.transformPoints(pointsF.data(), pointsF.size());
 
     //
-    painter.fillPolygon(pointsF.data(), pointsF.size());
+    switch(_rm) {
+        case RenderNone:
+            break;
+
+        case RenderFill:
+            painter.fillPolygon(pointsF.data(), pointsF.size());
+            break;
+
+        case RenderStroke:
+            painter.drawPolyline(pointsF.data(), pointsF.size(), false);
+            break;
+
+        case RenderStrokeAutoClose:
+            painter.drawPolyline(pointsF.data(), pointsF.size(), true);
+            break;
+
+        default:
+            break;
+    }
 
     //
     painter.setPen  (pen  );
