@@ -164,7 +164,7 @@ using namespace Pt::Gfx;
 #define FONT_SPEC_N "DejaVu Sans"  ,  24, Pt::Gfx::Font::BoldItalic,    0
 #define FONT_SPEC_R "DejaVu Sans"  ,  24, Pt::Gfx::Font::BoldItalic, -150
 
-#define FONT_SPEC_H "DejaVu Serif" ,  92, Pt::Gfx::Font::Normal    ,    0
+#define FONT_SPEC_H "DejaVu Serif" ,  80, Pt::Gfx::Font::Italic    ,    0
 #define FONT_SPEC_Q "QumpellkaNo12",  64, Pt::Gfx::Font::Normal    ,    0 /* OTF */
 #define FONT_SPEC_C "Charakterny"  , 116, Pt::Gfx::Font::Italic    ,    0 /* OTF */
 

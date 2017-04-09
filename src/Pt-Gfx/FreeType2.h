@@ -118,6 +118,7 @@ class FreeType2 {
         FTC_ImageCache _imageCache;
 
     private:
+        /*
         struct FCmp {
             inline int strcmp(const char* a, const char* b) const
             {
@@ -132,7 +133,7 @@ class FreeType2 {
                 return false;
             }
         };
-
+        */
 
         typedef std::map<FTC_FaceID, FreeType2*  > Instances;
         typedef std::map<Font,       System::Path> Fonts;

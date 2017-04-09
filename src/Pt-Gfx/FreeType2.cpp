@@ -660,10 +660,10 @@ void FreeType2::setFontDir_impl_noLock(const System::Path& path)
         FreeType2::_files.insert(fontPath.toString());
     }
 
-    for(FreeType2::Fonts::const_iterator it = FreeType2::_fonts.begin(); it != FreeType2::_fonts.end(); ++it) {
-        std::clog << "setFontDir_impl_noLock() : " << std::left << std::setw(80) << it->second.toLocal() << std::right << " : [" << it->first.style() << "] " << it->first.name() << std::endl;
-    }
-    std::clog << std::endl;
+    //for(FreeType2::Fonts::const_iterator it = FreeType2::_fonts.begin(); it != FreeType2::_fonts.end(); ++it) {
+    //    std::clog << "setFontDir_impl_noLock() : " << std::left << std::setw(80) << it->second.toLocal() << std::right << " : [" << it->first.style() << "] " << it->first.name() << std::endl;
+    //}
+    //std::clog << std::endl;
 }
 
 const std::vector<std::string> FreeType2::fontNames()
@@ -702,20 +702,26 @@ FTC_FaceID FreeType2::findFaceId(const Font& font)
 {
     System::MutexLock lock(FreeType2::_mutex);
 
+#if 0
+    
     Fonts::iterator it = FreeType2::_fonts.find(font);
     if(it == FreeType2::_fonts.end()) return 0;
 
     return reinterpret_cast<FTC_FaceID>(&it->second);
 
-    //for(Fonts::iterator it = FreeType2::_fonts.begin(); it != FreeType2::_fonts.end(); ++it) {
-    //    if(it->first.name () != font.name ()) continue;
-    //    if(it->first.style() != font.style()) continue;
-    //    std::clog << "findFaceId() : " << it->second.toLocal() << std::endl;
-    //    return reinterpret_cast<FTC_FaceID>(&it->second);
-    //}
+#else
+
+    for(Fonts::iterator it = FreeType2::_fonts.begin(); it != FreeType2::_fonts.end(); ++it) {
+        if(it->first.name () != font.name ()) continue;
+        if(it->first.style() != font.style()) continue;
+        //std::clog << "findFaceId() : " << it->second.toLocal() << std::endl;
+        return reinterpret_cast<FTC_FaceID>(&it->second);
+    }
 
     //std::clog << "findFaceId() : " << 0 << std::endl;
     return 0;
+
+#endif
 }
 
 FT_Error FreeType2::fontRequest(FTC_FaceID faceId, FT_Library library, FT_Pointer data, FT_Face* face)
