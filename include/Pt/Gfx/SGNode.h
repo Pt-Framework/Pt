@@ -60,19 +60,21 @@ class PT_GFX_API SGNode {
 
         typedef std::vector<SGNode*> Children;
 
+        typedef BasicTransform<double> TransformT;
+
     public:
         inline SGNode(RenderMode rm)
         : _parent(0)
         , _rm    (rm)
         {}
 
-        inline SGNode(RenderMode rm, const Transform& transform)
+        inline SGNode(RenderMode rm, const TransformT& transform)
         : _parent   (0)
         , _rm       (rm)
         , _transform( transform )
         {}
 
-        inline SGNode(RenderMode rm, const Transform& transform, const Children& children)
+        inline SGNode(RenderMode rm, const TransformT& transform, const Children& children)
         : _parent   (0)
         , _rm       (rm)
         , _transform( transform )
@@ -127,16 +129,16 @@ class PT_GFX_API SGNode {
         inline const Brush& brush() const
         { return _brush; }
 
-        virtual void draw(ImagePainter2& painter, const Transform* transform = 0) = 0;
+        virtual void draw(ImagePainter2& painter, const TransformT* transform = 0) = 0;
 
         //
         // Access to the transform object
         //
 
-        inline Transform& transform()
+        inline TransformT& transform()
         { return _transform; }
 
-        inline const Transform& transform() const
+        inline const TransformT& transform() const
         { return _transform; }
 
         //
@@ -153,7 +155,7 @@ class PT_GFX_API SGNode {
         { return _children.end(); }
 
     protected:
-        const Transform begDrawSeq(ImagePainter2& painter, const Transform* transform);
+        const TransformT begDrawSeq(ImagePainter2& painter, const TransformT* transform);
         const void endDrawSeq(ImagePainter2& painter);
 
     protected:
@@ -163,7 +165,7 @@ class PT_GFX_API SGNode {
         Pen        _pen;
         Brush      _brush;
 
-        Transform  _transform;
+        TransformT  _transform;
 
         Children   _children;
 
@@ -188,13 +190,13 @@ class PT_GFX_API SGNodePath : public SGNode {
         , _smoothness( 1.0f )
         {}
 
-        inline SGNodePath(RenderMode rm, const Path& path, const Transform& transform)
+        inline SGNodePath(RenderMode rm, const Path& path, const TransformT& transform)
         : SGNode     ( rm, transform )
         , _path      ( path )
         , _smoothness( 1.0f )
         {}
 
-        inline SGNodePath(RenderMode rm, const Path& path, const Transform& transform, const Children& children)
+        inline SGNodePath(RenderMode rm, const Path& path, const TransformT& transform, const Children& children)
         : SGNode     ( rm, transform, children )
         , _path      ( path )
         , _smoothness( 1.0f )
@@ -215,7 +217,7 @@ class PT_GFX_API SGNodePath : public SGNode {
         inline void setSmoothness(float smoothness = 1.0f)
         { _smoothness = smoothness; }
 
-        virtual void draw(ImagePainter2& painter, const Transform* transform = 0);
+        virtual void draw(ImagePainter2& painter, const TransformT* transform = 0);
 
         //
         // Access to the path object
@@ -247,13 +249,13 @@ class PT_GFX_API SGNodeLine : public SGNode {
         , _to   ( to )
         {}
 
-        inline SGNodeLine(RenderMode rm, const PointF& from, const PointF& to, const Transform& transform)
+        inline SGNodeLine(RenderMode rm, const PointF& from, const PointF& to, const TransformT& transform)
         : SGNode( rm, transform )
         , _from ( from )
         , _to   ( to )
         {}
 
-        inline SGNodeLine(RenderMode rm, const PointF& from, const PointF& to, const Transform& transform, const Children& children)
+        inline SGNodeLine(RenderMode rm, const PointF& from, const PointF& to, const TransformT& transform, const Children& children)
         : SGNode( rm, transform, children )
         , _from ( from )
         , _to   ( to )
@@ -265,7 +267,7 @@ class PT_GFX_API SGNodeLine : public SGNode {
         // Drawing functions
         //
 
-        virtual void draw(ImagePainter2& painter, const Transform* transform = 0);
+        virtual void draw(ImagePainter2& painter, const TransformT* transform = 0);
 
         //
         // Access to the line object

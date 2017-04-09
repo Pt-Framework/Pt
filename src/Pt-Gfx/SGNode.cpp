@@ -43,7 +43,7 @@ namespace Gfx {
 
 /*
 template <typename T>
-static void sgDumpTransformMatrix(const BasicTransform<T>& transform)
+static void sgDumpTransformTMatrix(const BasicTransformT<T>& transform)
 {
     T r[3][3];
     transform.getRaw(r);
@@ -79,10 +79,10 @@ void SGNode::clear()
     _children.clear();
 }
 
-const Transform SGNode::begDrawSeq(ImagePainter2& painter, const Transform* transform)
+const SGNode::TransformT SGNode::begDrawSeq(ImagePainter2& painter, const TransformT* transform)
 {
     // Combine the transformations
-    const Transform& thisTransform = transform ? ( _transform * (*transform) ) : _transform;
+    const TransformT& thisTransformT = transform ? ( _transform * (*transform) ) : _transform;
 
     // Save the original pen and brush as needed
     if(!_pen  .isNull()) _savePen   = painter.pen  ();
@@ -94,11 +94,11 @@ const Transform SGNode::begDrawSeq(ImagePainter2& painter, const Transform* tran
 
     // Draw the children
     for(Children::iterator it = _children.begin(); it != _children.end(); ++it) {
-        (*it)->draw(painter, &thisTransform);
+        (*it)->draw(painter, &thisTransformT);
     }
 
     // Combine the combined transformations
-    return thisTransform;
+    return thisTransformT;
 }
 
 const void SGNode::endDrawSeq(ImagePainter2& painter)
@@ -125,21 +125,21 @@ void SGNodePath::clear()
     SGNode::clear();
 }
 
-void SGNodePath::draw(ImagePainter2& painter, const Transform* transform)
+void SGNodePath::draw(ImagePainter2& painter, const TransformT* transform)
 {
     // Check if this node and all its children must not be drawn
     if(_rm == RenderNone) return;
 
     // Begin the drawing sequence
-    const Transform& thisTransform = begDrawSeq(painter, transform);
+    const TransformT& thisTransformT = begDrawSeq(painter, transform);
 
     // Draw the path only if it is not null
     if(!_path.isNull()) {
         // Generate points
         std::vector<PointF> pointsF;
         _path.generatePoints(pointsF, _smoothness);
-        // Transform points
-        thisTransform.transformPoints(pointsF.data(), pointsF.size());
+        // TransformT points
+        thisTransformT.transformPoints(pointsF.data(), pointsF.size());
         // Draw based on the mode
         const RenderMode rm = renderMode();
         switch(rm) {
@@ -161,30 +161,19 @@ void SGNodePath::draw(ImagePainter2& painter, const Transform* transform)
 SGNodeLine::~SGNodeLine()
 {}
 
-void SGNodeLine::draw(ImagePainter2& painter, const Transform* transform)
+void SGNodeLine::draw(ImagePainter2& painter, const TransformT* transform)
 {
     // Check if this node and all its children must not be drawn
     if(_rm == RenderNone) return;
 
     // Begin the drawing sequence
-    const Transform& thisTransform = begDrawSeq(painter, transform);
+    const TransformT& thisTransformT = begDrawSeq(painter, transform);
 
-    // Transform the coordinates
+    // TransformT the coordinates
     PointF f, t;
 
-    thisTransform.transformPoint(f, _from);
-    thisTransform.transformPoint(t, _to  );
-
-    Pen npen = _pen;
-
-    float w = _pen.size() * 0.5f;
-    float z = 0.0f;
-
-    thisTransform.transformPoint(w, z);
-
-    std::clog << w << std::endl;
-
-    // TODO: Transform the pen width too!
+    thisTransformT.transformPoint(f, _from);
+    thisTransformT.transformPoint(t, _to  );
 
     // Draw the line based on the mode
     const RenderMode rm = renderMode();

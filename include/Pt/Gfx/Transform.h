@@ -102,6 +102,9 @@ struct BasicMatrixData {
 template <typename T>
 class PT_GFX_API BasicTransform {
     public:
+        typedef T ValueT;
+
+    public:
         inline BasicTransform();
         inline BasicTransform(const BasicTransform& m);
 
@@ -676,6 +679,22 @@ inline void BasicTransform<float>::transformPoints(PointF* xy, size_t pointCount
 //
 typedef BasicTransform<float > Transform;  // We cannot use ssize_t
 typedef BasicTransform<double> TransformF;
+
+
+/*
+// ### TODO: Extract the translation factor
+const TransformT::ValueT tx = v[0][2];
+const TransformT::ValueT ty = v[1][2];
+
+// ### TODO: Extract the scaling factor
+const TransformT::ValueT sx = ::sqrt(v[0][0] * v[0][0] + v[0][1] * v[0][1]);
+const TransformT::ValueT sy = ::sqrt(v[1][0] * v[1][0] + v[1][1] * v[1][1]);
+
+// ### TODO: Extract the rotation factor
+const TransformT::ValueT r1 = ::atan2(-v[0][1], v[0][0]);
+const TransformT::ValueT r2 = ::atan2( v[1][0], v[1][1]);
+const TransformT::ValueT r  = (r1 + r2) * 0.5f;
+*/
 
 
 } // namespace
