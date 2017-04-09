@@ -44,6 +44,7 @@ if $(WITH_RASTERIZER2)
                                FreeType2.cpp
                                DrawText2.cpp
                                Path.cpp
+                               SGNode.cpp
                                ImagePainter2.cpp
                                Rasterizer2.cpp
                                Rasterizer2_PixelScanline.cpp

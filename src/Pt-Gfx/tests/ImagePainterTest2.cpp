@@ -38,7 +38,6 @@
 #include <Pt/Math.h>
 
 #include <Pt/Gfx/SGNode.h>
-#include <Pt/Gfx/TransformStack.h>
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/ImagePainter2.h>
 #include <Pt/Gfx/PngReader.h>
@@ -108,9 +107,10 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  0
 
 #define TEST_DRAW_PATH                          0 // (including thick and filled)
-#define TEST_DRAW_PATH_CLIPPING                 1
+#define TEST_DRAW_PATH_CLIPPING                 0
 #define TEST_DRAW_EXTRA                         0
 
+#define TEST_SCENE_GRAPH                        1
 #define TEST_SVG_READER                         0
 
 #define TEST_COMPARE_WITH_OLD_PAINTER           0 // (for some shapes only)
@@ -190,11 +190,15 @@ static const char* sfileDirXPrefix = "";
 #include "ImagePainterTest2_Draw_Thick.cpp"
 #include "ImagePainterTest2_Draw_Path.cpp"
 #include "ImagePainterTest2_Draw_Extra.cpp"
+#include "ImagePainterTest2_SceneGraph.cpp"
 #include "ImagePainterTest2_SvgReader.cpp"
 #include "ImagePainterTest2_Benchmark.cpp"
 #include "ImagePainterTest2_Cairo.cpp"
 
 
+//
+// Main program
+//
 int main(int argc, char* args[])
 {
     // Benchmark some mathematical functions only
@@ -554,6 +558,12 @@ int main(int argc, char* args[])
     if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_EXTRA) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
         testDrawExtra("Extra Features - ImagePainter2 [SourceOver]", image, *painter2);
+    }
+
+    // Scene-graph
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && (TEST_SOURCECOPY || TEST_SOURCEOVER) && TEST_SCENE_GRAPH) {
+        painter2->setCompositionMode(CompositionMode::SourceOver);
+        testSceneGraph("Scene Graph - ImagePainter2", image, *painter2);
     }
 
     // Svg reader

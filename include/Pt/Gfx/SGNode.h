@@ -36,18 +36,21 @@
 #include <Pt/Gfx/Brush.h>
 
 #include <Pt/Gfx/Path.h>
-#include <Pt/Gfx/Transform.h>
+#include <Pt/Gfx/TransformStack.h>
 
 
 namespace Pt{
 namespace Gfx{
 
 
+class ImagePainter2;
+
+
 /** @brief A scene-graph node class.
   */
 class PT_GFX_API SGNode {
     public:
-        typedef std::vector<SGNode> Children;
+        typedef std::vector<SGNode*> Children;
 
     public:
         inline SGNode()
@@ -55,36 +58,32 @@ class PT_GFX_API SGNode {
         , _brush ( Color::fromRgb8(0, 0, 0, 255) )
         {}
 
-        inline SGNode(const Path& path, const Transform& transform)
+        inline SGNode(const Transform& transform)
         : _pen      ( Color::fromRgb8(0, 0, 0, 255) )
         , _brush    ( Color::fromRgb8(0, 0, 0, 255) )
-        , _path     ( path )
         , _transform( transform )
         {}
 
-        inline SGNode(const Path& path, const Transform& transform, const Children& children)
+        inline SGNode(const Transform& transform, const Children& children)
         : _pen      ( Color::fromRgb8(0, 0, 0, 255) )
         , _brush    ( Color::fromRgb8(0, 0, 0, 255) )
-        , _path     ( path )
         , _transform( transform )
         , _children ( children )
         {}
 
-        inline ~SGNode()
-        {}
-
-        inline void clear()
-        {
-            _pen   = Pen  ( Color::fromRgb8(0, 0, 0, 255) );
-            _brush = Brush( Color::fromRgb8(0, 0, 0, 255) );
-
-            _path.clear();
-            _transform.identity();
-            _children.clear();
-        }
+        virtual ~SGNode() = 0;
 
         //
-        // Drawing pen and path
+        // Management
+        //
+
+        virtual void clear();
+
+        inline void addChild(SGNode* child)
+        { _children.push_back(child); }
+
+        //
+        // Drawing
         //
 
         inline void setPen(const Pen& pen)
@@ -99,15 +98,7 @@ class PT_GFX_API SGNode {
         inline const Brush& brush() const
         { return _brush; }
 
-        //
-        // Path
-        //
-
-        inline Path& path()
-        { return _path; }
-
-        inline const Path& path() const
-        { return _path; }
+        virtual void draw(ImagePainter2& painter, TransformStack& tstack, const Transform& transform) = 0;
 
         //
         // Transform
@@ -132,14 +123,59 @@ class PT_GFX_API SGNode {
         Children::const_iterator end() const
         { return _children.end(); }
 
-    private:
+    protected:
         Pen       _pen;
         Brush     _brush;
 
-        Path      _path;
         Transform _transform;
 
         Children  _children;
+};
+
+
+/** @brief A scene-graph node class with an embedded Path.
+  */
+class PT_GFX_API SGNodePath : public SGNode {
+    public:
+        inline SGNodePath()
+        {}
+
+        inline SGNodePath(const Path& path, const Transform& transform)
+        : SGNode( transform )
+        , _path ( path )
+        {}
+
+        inline SGNodePath(const Path& path, const Transform& transform, const Children& children)
+        : SGNode( transform, children )
+        , _path ( path )
+        {}
+
+        virtual ~SGNodePath();
+
+        //
+        // Management
+        //
+
+        virtual void clear();
+
+        //
+        // Drawing
+        //
+
+        virtual void draw(ImagePainter2& painter, TransformStack& tstack, const Transform& transform);
+
+        //
+        // Path
+        //
+
+        inline Path& path()
+        { return _path; }
+
+        inline const Path& path() const
+        { return _path; }
+
+    protected:
+        Path _path;
 };
 
 
