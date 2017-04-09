@@ -37,6 +37,7 @@
 
 #include <Pt/Math.h>
 
+#include <Pt/Gfx/SGNode.h>
 #include <Pt/Gfx/TransformStack.h>
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/ImagePainter2.h>

@@ -67,13 +67,13 @@ struct SvgRasterizer::RasterState {
     std::vector<Brush> bsStack;   // Brush stack
 
     inline RasterState(Image& image_, const Transform& initialTransform)
-    : gotStart(false)
-    , gotEnd  (false)
-    , image   (image_)
-    , painter (image_)
-    , pen     (Color::fromRgb8(0, 0, 0, 255), 1, Pen::Solid, Pen::ButtCap, Pen::MiterJoin)
-    , brush   (Color::fromRgb8(0, 0, 0, 255))
-    , transform  (initialTransform)
+    : gotStart (false)
+    , gotEnd   (false)
+    , image    (image_)
+    , painter  (image_)
+    , pen      (Color::fromRgb8(0, 0, 0, 255), 1, Pen::Solid, Pen::ButtCap, Pen::MiterJoin)
+    , brush    (Color::fromRgb8(0, 0, 0, 255))
+    , transform(initialTransform)
     {}
 };
 
