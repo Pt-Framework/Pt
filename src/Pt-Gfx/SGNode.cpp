@@ -29,6 +29,7 @@
 #include <stdexcept>
 
 #include <Pt/Gfx/SGNode.h>
+#include <Pt/Gfx/ImagePainter2.h>
 
 
 namespace Pt {
@@ -48,8 +49,8 @@ void SGNode::clear()
         delete *it;
     }
 
-    _pen   = Pen  ( Color::fromRgb8(0, 0, 0, 255) );
-    _brush = Brush( Color::fromRgb8(0, 0, 0, 255) );
+    _pen   = Pen  ();
+    _brush = Brush();
 
     _transform.identity();
     _children.clear();
@@ -72,6 +73,29 @@ void SGNodePath::clear()
 
 void SGNodePath::draw(ImagePainter2& painter, TransformStack& tstack, const Transform& transform)
 {
+    //
+    Transform t = transform;
+
+    //
+    for(Children::iterator it = _children.begin(); it != _children.end(); ++it) {
+        tstack.push(t);
+        (*it)->draw(painter, tstack, t);
+        t = tstack.pop();
+    }
+
+    //
+    if(_path.isNull()) return;
+
+    //
+    std::vector<PointF> pointsF;
+    _path.generatePoints(pointsF, 1);
+
+    t.transformPoints(pointsF.data(), pointsF.size());
+
+    painter.setPen(_pen);
+    painter.setBrush(_brush);
+
+    painter.fillPolygon(pointsF.data(), pointsF.size());
 }
 
 

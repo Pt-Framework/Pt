@@ -96,6 +96,8 @@ class PT_GFX_API Path {
 
         ~Path();
 
+        bool isNull() const;
+
         //
         // Path management - call them multiple times to create multi-path (e.g. path with holes)
         //

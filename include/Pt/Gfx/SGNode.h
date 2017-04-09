@@ -54,20 +54,14 @@ class PT_GFX_API SGNode {
 
     public:
         inline SGNode()
-        : _pen   ( Color::fromRgb8(0, 0, 0, 255) )
-        , _brush ( Color::fromRgb8(0, 0, 0, 255) )
         {}
 
         inline SGNode(const Transform& transform)
-        : _pen      ( Color::fromRgb8(0, 0, 0, 255) )
-        , _brush    ( Color::fromRgb8(0, 0, 0, 255) )
-        , _transform( transform )
+        : _transform( transform )
         {}
 
         inline SGNode(const Transform& transform, const Children& children)
-        : _pen      ( Color::fromRgb8(0, 0, 0, 255) )
-        , _brush    ( Color::fromRgb8(0, 0, 0, 255) )
-        , _transform( transform )
+        : _transform( transform )
         , _children ( children )
         {}
 
@@ -79,8 +73,15 @@ class PT_GFX_API SGNode {
 
         virtual void clear();
 
-        inline void addChild(SGNode* child)
-        { _children.push_back(child); }
+
+        template <typename T>
+        inline T& addChild(T* child_)
+        {
+            SGNode* child = child_;
+            _children.push_back(child);
+
+            return *child_;
+        }
 
         //
         // Drawing

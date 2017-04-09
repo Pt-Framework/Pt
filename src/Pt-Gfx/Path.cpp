@@ -523,6 +523,9 @@ Path::~Path()
     delete _pathData;
 }
 
+bool Path::isNull() const
+{ return _pathData->empty(); }
+
 void Path::clear()
 { _pathData->clear(); }
 
