@@ -71,60 +71,47 @@ void SGNodePath::clear()
     SGNode::clear();
 }
 
-void SGNodePath::draw(ImagePainter2& painter, TransformStack& tstack, const Transform& transform)
+void SGNodePath::draw(ImagePainter2& painter, const Transform* transform)
 {
-    //
-    Transform thisTransform = _transform * transform;
+    // Check if this node and all its children must not be drawn
+    if(_rm == RenderNone) return;
 
-    //
+    // Combine the transformations
+    const Transform& thisTransform = transform ? ( _transform * (*transform) ) : _transform;
+
+    // Save the original pen and brush
     const Pen   pen   = painter.pen  ();
     const Brush brush = painter.brush();
 
-    //
+    // Set the current pen and/or brush as needed
     if(!_pen  .isNull()) painter.setPen  (_pen  );
     if(!_brush.isNull()) painter.setBrush(_brush);
 
-    //
+    // Draw the children
     for(Children::iterator it = _children.begin(); it != _children.end(); ++it) {
-        tstack.push(thisTransform);
-        (*it)->draw(painter, tstack, thisTransform);
-        thisTransform = tstack.pop();
+        (*it)->draw(painter, &thisTransform);
     }
 
-    //
-    if(_path.isNull()) return;
-
-    //
-    std::vector<PointF> pointsF;
-    _path.generatePoints(pointsF, _smoothness);
-
-    //
-    thisTransform.transformPoints(pointsF.data(), pointsF.size());
-
-    //
-    switch(_rm) {
-        case RenderNone:
-            break;
-
-        case RenderFill:
-            painter.fillPolygon(pointsF.data(), pointsF.size());
-            break;
-
-        case RenderStroke:
-            painter.drawPolyline(pointsF.data(), pointsF.size(), false);
-            break;
-
-        case RenderStrokeAutoClose:
-            painter.drawPolyline(pointsF.data(), pointsF.size(), true);
-            break;
-
-        default:
-            break;
+    // Draw the path only if it is not null
+    if(!_path.isNull()) {
+        // Generate points
+        std::vector<PointF> pointsF;
+        _path.generatePoints(pointsF, _smoothness);
+        // Transform points
+        thisTransform.transformPoints(pointsF.data(), pointsF.size());
+        // Draw based on the mode
+        const RenderMode rm = (_rm == RenderInherit) ? _parent->renderMode() : _rm;
+        switch(rm) {
+            case RenderFill            : painter.fillPolygon (pointsF.data(), pointsF.size()       ); break;
+            case RenderStroke          : painter.drawPolyline(pointsF.data(), pointsF.size(), false); break;
+            case RenderStrokeAutoClose : painter.drawPolyline(pointsF.data(), pointsF.size(), true ); break;
+            default                    :                                                              break;
+        }
     }
 
-    //
-    painter.setPen  (pen  );
-    painter.setBrush(brush);
+    // Restore the original pen and/or brush as needed
+    if(!_pen  .isNull()) painter.setPen  (pen  );
+    if(!_brush.isNull()) painter.setBrush(brush);
 }
 
 

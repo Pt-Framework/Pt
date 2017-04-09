@@ -5,11 +5,7 @@ static void testSceneGraph(const char* title, Image& image, Painter& painter)
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
     if(!ip2) return;
 
-    TransformStack tstack;
-    Transform      transform;
-    SGNodePath     sgn;
-
-    SGNodePath*    csgn;
+    SGNodePath sgn;
 
     // Generate a new path
     Path pathPoly4;
@@ -22,17 +18,28 @@ static void testSceneGraph(const char* title, Image& image, Painter& painter)
     pathPoly4.endPath  ();
 
     // Parent's 1st child
-    csgn = &sgn.addChild(new SGNodePath(SGNode::RenderFill, pathPoly4));
+    SGNodePath* csgn1 = &sgn.addChild(new SGNodePath(SGNode::RenderFill, pathPoly4));
+                csgn1 = csgn1;
 
     // Parent's 2nd child
-    csgn = &sgn.addChild(new SGNodePath(SGNode::RenderFill, pathPoly4));
-    csgn->transform().translate(150, 0);
-    csgn->setBrush(Color::fromRgb8(255, 0, 0));
+    SGNodePath* csgn2 = &sgn.addChild(new SGNodePath(SGNode::RenderFill, pathPoly4));
+                csgn2->transform().translate(150, 0);
+                csgn2->setBrush(Color::fromRgb8(255, 0, 0));
 
     // 2nd-child's 1st child
-    csgn = &csgn->addChild(new SGNodePath(SGNode::RenderStrokeAutoClose, pathPoly4));
-    csgn->transform().translate(150, 0);
-    csgn->setPen(Color::fromRgb8(0, 255, 0));
+    SGNodePath* csgn2_1 = &csgn2->addChild(new SGNodePath(SGNode::RenderStrokeAutoClose, pathPoly4));
+                csgn2_1->transform().translate(150, 0);
+                csgn2_1->setPen(Color::fromRgb8(0, 255, 0));
+
+    // 2nd-child's 2nd child
+    SGNodePath* csgn2_2 = &csgn2->addChild(new SGNodePath(SGNode::RenderInherit, pathPoly4));
+                csgn2_2->setBrush(Color::fromRgb8(0, 0, 255));
+                csgn2_2->transform().translate(0, 150);
+
+    // 2nd-child's 3rd child
+    SGNodePath* csgn2_3 = &csgn2->addChild(new SGNodePath(SGNode::RenderStroke, pathPoly4));
+                csgn2_3->setPen(Pen(Color::fromRgb8(255, 255, 127), 6));
+                csgn2_3->transform().translate(150, 150);
 
     // Draw it
     sgn.transform().rotate(-15);
@@ -40,7 +47,7 @@ static void testSceneGraph(const char* title, Image& image, Painter& painter)
 
     sgn.setPen  (Color::fromRgb8(255, 255, 255));
     sgn.setBrush(Color::fromRgb8(255, 255, 255));
-    sgn.draw(*ip2, tstack, transform);
+    sgn.draw(*ip2);
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }

@@ -56,10 +56,10 @@ class PT_GFX_API BasicTransformStack {
         inline void clear()
         { _stack.clear(); }
 
-        inline void push(TransformT& transform)
+        inline void push(const TransformT& transform)
         { _stack.push_back(transform); }
 
-        inline TransformT pop()
+        inline const TransformT pop()
         {
             if(_stack.empty())
                 throw std::out_of_range("stack underflow");
