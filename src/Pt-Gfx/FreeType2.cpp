@@ -702,6 +702,7 @@ FTC_FaceID FreeType2::findFaceId(const Font& font)
 {
     System::MutexLock lock(FreeType2::_mutex);
 
+    // Temporary workaround for this configuration
 #if ( defined(__arm__) || defined(__thumb__) || defined(__aarch64__) ) && ( __GNUC__ == 4 && __GNUC_MINOR__ == 9 )
 
     for(Fonts::iterator it = FreeType2::_fonts.begin(); it != FreeType2::_fonts.end(); ++it) {
