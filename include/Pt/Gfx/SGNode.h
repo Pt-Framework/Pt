@@ -32,6 +32,9 @@
 
 #include <vector>
 
+#include <Pt/Gfx/Pen.h>
+#include <Pt/Gfx/Brush.h>
+
 #include <Pt/Gfx/Path.h>
 #include <Pt/Gfx/Transform.h>
 
@@ -48,6 +51,23 @@ class PT_GFX_API SGNode {
 
     public:
         inline SGNode()
+        : _pen   ( Color::fromRgb8(0, 0, 0, 255) )
+        , _brush ( Color::fromRgb8(0, 0, 0, 255) )
+        {}
+
+        inline SGNode(const Path& path, const Transform& transform)
+        : _pen      ( Color::fromRgb8(0, 0, 0, 255) )
+        , _brush    ( Color::fromRgb8(0, 0, 0, 255) )
+        , _path     ( path )
+        , _transform( transform )
+        {}
+
+        inline SGNode(const Path& path, const Transform& transform, const Children& children)
+        : _pen      ( Color::fromRgb8(0, 0, 0, 255) )
+        , _brush    ( Color::fromRgb8(0, 0, 0, 255) )
+        , _path     ( path )
+        , _transform( transform )
+        , _children ( children )
         {}
 
         inline ~SGNode()
@@ -55,10 +75,33 @@ class PT_GFX_API SGNode {
 
         inline void clear()
         {
+            _pen   = Pen  ( Color::fromRgb8(0, 0, 0, 255) );
+            _brush = Brush( Color::fromRgb8(0, 0, 0, 255) );
+
             _path.clear();
             _transform.identity();
             _children.clear();
         }
+
+        //
+        // Drawing pen and path
+        //
+
+        inline void setPen(const Pen& pen)
+        { _pen = pen; }
+
+        inline const Pen& pen() const
+        { return _pen; }
+
+        inline void setPen(const Brush& brush)
+        { _brush = brush; }
+
+        inline const Brush& brush() const
+        { return _brush; }
+
+        //
+        // Path
+        //
 
         inline Path& path()
         { return _path; }
@@ -66,16 +109,33 @@ class PT_GFX_API SGNode {
         inline const Path& path() const
         { return _path; }
 
+        //
+        // Transform
+        //
+
         inline Transform& transform()
         { return _transform; }
 
         inline const Transform& transform() const
         { return _transform; }
 
+        //
+        // Children access
+        //
+
         inline const Children& children() const
         { return _children; }
 
+        Children::const_iterator begin() const
+        { return _children.begin(); }
+
+        Children::const_iterator end() const
+        { return _children.end(); }
+
     private:
+        Pen       _pen;
+        Brush     _brush;
+
         Path      _path;
         Transform _transform;
 
