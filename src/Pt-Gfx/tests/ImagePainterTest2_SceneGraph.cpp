@@ -45,6 +45,7 @@ static void testSceneGraph(const char* title, Image& image, Painter& painter)
     SGNodeLine* csgn2_1_1 = &csgn2_1->addChild(new SGNodeLine(SGNode::RenderStroke, PointF(50, 50), PointF(200, 100)));
                 csgn2_1_1->setPen(Pen(Color::fromRgb8(127, 255, 255, 127), 20, Pen::Solid, Pen::TriangularInCap));
 
+
     // Draw it
     sgn.setPen  (Color::fromRgb8(255, 255, 255));
     sgn.setBrush(Color::fromRgb8(255, 255, 255));

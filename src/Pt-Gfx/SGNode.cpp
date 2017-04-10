@@ -31,7 +31,6 @@
 //#warning "Just for debugging ;)"
 //#include <stdio.h>
 
-#include <stdexcept>
 #include <stack>
 
 #include <Pt/Gfx/SGNode.h>

@@ -30,11 +30,6 @@
 #ifndef PT_GFX_SGNODE_H
 #define PT_GFX_SGNODE_H
 
-#include <vector>
-
-#include <Pt/Gfx/Pen.h>
-#include <Pt/Gfx/Brush.h>
-
 #include <Pt/Gfx/Path.h>
 #include <Pt/Gfx/Transform.h>
 
@@ -51,15 +46,14 @@ class ImagePainter2;
 class PT_GFX_API SGNode {
     public:
         enum RenderMode {
-            RenderInherit,         //! @brief Inherit from parent
+            RenderInherit,         //! @brief Inherit the mode from this node's parent
             RenderNone,            //! @brief Do not draw this node
-            RenderStroke,          //! @brief Draw this node as an stroked shape
-            RenderStrokeAutoClose, //! @brief Draw this node as an stroked shape with auto-close (only meaningful for some node types)
-            RenderFill             //! @brief Draw this node as a filled shape                   (only meaningful for some node types)
+            RenderStroke,          //! @brief Draw as a stroked shape
+            RenderStrokeAutoClose, //! @brief Draw as a stroked shape with auto-close (if not supported by, it will be drawn using the closest mode)
+            RenderFill             //! @brief Draw as a filled shape (if not supported by, it will be drawn using the closest mode)
         };
 
-        typedef double ValueT;
-
+        typedef double                 ValueT;
         typedef BasicTransform<ValueT> TransformT;
 
         typedef std::vector<SGNode*>             Children;
@@ -116,6 +110,14 @@ class PT_GFX_API SGNode {
             child->_parent = this;
 
             return *child_;
+        }
+
+        inline void removeChild(const SGNode* child)
+        {
+            Children::iterator it = std::find(_children.begin(), _children.end(), child);
+            if(it == _children.end()) return;
+
+            _children.erase(it);
         }
 
         //
