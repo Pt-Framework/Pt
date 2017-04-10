@@ -58,9 +58,13 @@ class PT_GFX_API SGNode {
             RenderFill             //! @brief Draw this node as a filled shape                   (only meaningful for some node types)
         };
 
-        typedef std::vector<SGNode*> Children;
+        typedef double ValueT;
 
-        typedef BasicTransform<double> TransformT;
+        typedef BasicTransform<ValueT> TransformT;
+
+        typedef std::vector<SGNode*>             Children;
+        typedef Children::const_iterator         ConstIterator;
+        typedef Children::const_reverse_iterator ConstReverseIterator;
 
     private:
         // A stack-element used for processing (traversing) the nodes
@@ -95,7 +99,7 @@ class PT_GFX_API SGNode {
         , _children ( children )
         {}
 
-        virtual ~SGNode() = 0;
+        virtual ~SGNode();
 
         //
         // Management functions
@@ -114,7 +118,17 @@ class PT_GFX_API SGNode {
             return *child_;
         }
 
+        //
+        // Drawing functions
+        //
+
+        inline void setRenderMode(RenderMode rm)
+        { _rm = rm; }
+
         inline RenderMode renderMode() const
+        { return _rm; }
+
+        inline RenderMode effectiveRenderMode() const
         {
             if(_rm != RenderInherit) return _rm;
 
@@ -127,10 +141,6 @@ class PT_GFX_API SGNode {
             return _rm;
         }
 
-        //
-        // Drawing functions
-        //
-
         inline void setPen(const Pen& pen)
         { _pen = pen; }
 
@@ -139,10 +149,8 @@ class PT_GFX_API SGNode {
 
         void draw(ImagePainter2& painter, const TransformT* transform = 0);
 
-        virtual void drawImpl(ImagePainter2& painter, const TransformT& transform) const = 0;
-
         //
-        // Access to the pen object
+        // Direct access to the pen object
         //
 
         inline Pen& pen()
@@ -152,7 +160,7 @@ class PT_GFX_API SGNode {
         { return _pen; }
 
         //
-        // Access to the brush object
+        // Direct access to the brush object
         //
 
         inline Brush& brush()
@@ -162,7 +170,7 @@ class PT_GFX_API SGNode {
         { return _brush; }
 
         //
-        // Access to the transform object
+        // Direct access to the transform object
         //
 
         inline TransformT& transform()
@@ -172,7 +180,7 @@ class PT_GFX_API SGNode {
         { return _transform; }
 
         //
-        // Access to the child nodes
+        // Direct access to the child nodes
         //
 
         inline const Children& children() const
@@ -183,6 +191,15 @@ class PT_GFX_API SGNode {
 
         Children::const_iterator end() const
         { return _children.end(); }
+
+        Children::const_reverse_iterator rbegin() const
+        { return _children.rbegin(); }
+
+        Children::const_reverse_iterator rend() const
+        { return _children.rend(); }
+
+    protected:
+        virtual void drawImpl(ImagePainter2& painter, const TransformT& transform) const = 0;
 
     protected:
         SGNode*    _parent;
@@ -236,10 +253,11 @@ class PT_GFX_API SGNodePath : public SGNode {
         inline void setSmoothness(float smoothness = 1.0f)
         { _smoothness = smoothness; }
 
-        virtual void drawImpl(ImagePainter2& painter, const TransformT& transform) const;
+        inline float smoothness() const
+        { return _smoothness; }
 
         //
-        // Access to the path object
+        // Direct access to the path object
         //
 
         inline Path& path()
@@ -247,6 +265,9 @@ class PT_GFX_API SGNodePath : public SGNode {
 
         inline const Path& path() const
         { return _path; }
+
+    protected:
+        virtual void drawImpl(ImagePainter2& painter, const TransformT& transform) const;
 
     protected:
         Path  _path;
@@ -283,13 +304,13 @@ class PT_GFX_API SGNodeLine : public SGNode {
         virtual ~SGNodeLine();
 
         //
-        // Drawing functions
+        // Management functions
         //
 
-        virtual void drawImpl(ImagePainter2& painter, const TransformT& transform) const;
+        virtual void clear();
 
         //
-        // Access to the line object
+        // Direct access to the line object
         //
 
         inline void set(const PointF& from, const PointF& to)
@@ -303,6 +324,9 @@ class PT_GFX_API SGNodeLine : public SGNode {
 
         inline const PointF& to() const
         { return _to; }
+
+    protected:
+        virtual void drawImpl(ImagePainter2& painter, const TransformT& transform) const;
 
     protected:
         PointF _from;

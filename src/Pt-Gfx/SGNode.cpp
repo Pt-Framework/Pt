@@ -74,12 +74,12 @@ void SGNode::clear()
 
 void SGNode::draw(ImagePainter2& painter, const TransformT* transform_)
 {
-    // Prepare the transformation object
+    // Prepare the transformation
     TransformT transform = transform_ ? *transform_ : TransformT();
 
     // Prepare the stack
     std::stack<TraversalStack> nStack;
-    nStack.push(TraversalStack(this, painter.pen(), painter.brush(), transform));
+    nStack.push( TraversalStack(this, painter.pen(), painter.brush(), transform) );
 
     // Loop while the stack is not empty
     while(!nStack.empty()) {
@@ -95,11 +95,11 @@ void SGNode::draw(ImagePainter2& painter, const TransformT* transform_)
             // Draw this node
             eCur.node->drawImpl(painter, transform);
             // Process the children of this node
-            for(Children::const_reverse_iterator it = eCur.node->_children.rbegin(); it != eCur.node->_children.rend(); ++it) {
+            for(ConstReverseIterator it = eCur.node->rbegin(); it != eCur.node->rend(); ++it) {
                 // Only store to stack if it is not hidden
                 const SGNode* child = *it;
                 if(child->_rm == RenderNone) continue;
-                nStack.push(TraversalStack(child, painter.pen(), painter.brush(), transform));
+                nStack.push( TraversalStack(child, painter.pen(), painter.brush(), transform) );
             }
             // Set the flag so that the next time this element is visited again,
             // the "after" phase will be processed instead
@@ -124,12 +124,13 @@ void SGNode::draw(ImagePainter2& painter, const TransformT* transform_)
 // ======================================================================================
 
 SGNodePath::~SGNodePath()
-{ clear(); }
+{}
 
 void SGNodePath::clear()
 {
-    // Clear the path
+    // Clear the path and reset the smoothness
     _path.clear();
+    _smoothness = 1.0f;
 
     // Clear the base class' data
     SGNode::clear();
@@ -147,9 +148,8 @@ void SGNodePath::drawImpl(ImagePainter2& painter, const TransformT& transform) c
     // TransformT points
     transform.transformPoints(pointsF.data(), pointsF.size());
 
-    // Draw based on the mode
-    const RenderMode rm = renderMode();
-    switch(rm) {
+    // Draw based on the effective mode
+    switch(effectiveRenderMode()) {
         case RenderFill            : painter.fillPolygon (pointsF.data(), pointsF.size()       ); break;
         case RenderStroke          : painter.drawPolyline(pointsF.data(), pointsF.size(), false); break;
         case RenderStrokeAutoClose : painter.drawPolyline(pointsF.data(), pointsF.size(), true ); break;
@@ -164,20 +164,30 @@ void SGNodePath::drawImpl(ImagePainter2& painter, const TransformT& transform) c
 SGNodeLine::~SGNodeLine()
 {}
 
+void SGNodeLine::clear()
+{
+    // Clear the line
+    _from.set(0, 0);
+    _to  .set(0, 0);
+
+    // Clear the base class' data
+    SGNode::clear();
+}
+
 void SGNodeLine::drawImpl(ImagePainter2& painter, const TransformT& transform) const
 {
     // TransformT the coordinates
-    PointF f, t;
+    PointF from, to;
 
-    transform.transformPoint(f, _from);
-    transform.transformPoint(t, _to  );
+    transform.transformPoint(from, _from);
+    transform.transformPoint(to  , _to  );
 
-    // Draw the line based on the mode
-    switch(renderMode()) {
+    // Draw based on the effective mode
+    switch(effectiveRenderMode()) {
         case RenderFill            : /* Fallthrough */
         case RenderStroke          : /* Fallthrough */
-        case RenderStrokeAutoClose : painter.drawLine(f, t); break;
-        default                    :                         break;
+        case RenderStrokeAutoClose : painter.drawLine(from, to); break;
+        default                    :                             break;
     }
 }
 
