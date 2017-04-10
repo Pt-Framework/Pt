@@ -409,7 +409,7 @@ void Rasterizer2::updateGradientBrush_gen2DLinearGradient(Pt::int32_t width, Pt:
 
     // Calculate the rotation
     const float angl = angle + 0.001f;
-    const float rad  = angl * Gfx::Math::PiDiv180 - Gfx::Math::PiDiv4;
+    const float rad  = angl * Gfx::Math::DegToRad - Gfx::Math::PiDiv4;
     const float sval = Gfx::Math::fastSin(rad);
     const float cval = Gfx::Math::fastCos(rad);
 
@@ -474,7 +474,7 @@ void Rasterizer2::updateGradientBrush_gen2DRectangularGradient(Pt::int32_t width
     const float rrFac = 2.4f / scale / Gfx::Math::fastSqrt(xyRat * xyRat + yxRat * yxRat);
 
     // Calculate the rotation
-    const float rad  = -angle * Gfx::Math::PiDiv180;
+    const float rad  = -angle * Gfx::Math::DegToRad;
     const float sval = Gfx::Math::fastSin(rad);
     const float cval = Gfx::Math::fastCos(rad);
 
@@ -586,7 +586,7 @@ void Rasterizer2::updateGradientBrush_gen2DConicalGradient(Pt::int32_t width, Pt
 #endif
 
     // Calculate the rotation
-    const float rad  = angle * Gfx::Math::PiDiv180 - Gfx::Math::PiDiv2;
+    const float rad  = angle * Gfx::Math::DegToRad - Gfx::Math::PiDiv2;
     const float sval = Gfx::Math::fastSin(rad);
     const float cval = Gfx::Math::fastCos(rad);
 

@@ -292,8 +292,8 @@ static inline void generateArcPoints(std::vector<PointF>& dst, Pt::int32_t radiu
     const float       nSegs1i = 1.0f / (nSegs - 1);
 
     // Generate a polygon that approximates the arc
-    const float fdegInc = (degDlt   * Gfx::Math::PiDiv180) * nSegs1i;
-          float angle   =  degBegin * Gfx::Math::PiDiv180;
+    const float fdegInc = (degDlt   * Gfx::Math::DegToRad) * nSegs1i;
+          float angle   =  degBegin * Gfx::Math::DegToRad;
 
     for(Pt::int32_t i = 0; i < nSegs; ++i) {
         // Calculate the coordinate
@@ -1062,7 +1062,7 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
     // Calculate the coordinate shift
     const size_t penSize  = _rasterizer->pen().size();
     const size_t penSize2 = penSize / 2;
-    const float  degMid   = (degBegin + degEnd) / 2.0f * Gfx::Math::PiDiv180;
+    const float  degMid   = (degBegin + degEnd) / 2.0f * Gfx::Math::DegToRad;
     const float  shiftX   = Gfx::Math::fastCos(degMid);
     const float  shiftY   = Gfx::Math::fastSin(degMid);
     const float  shiftXps = shiftX * penSize2;

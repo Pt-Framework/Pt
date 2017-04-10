@@ -188,12 +188,12 @@ void Rasterizer2::arcUtil_findExactBegEndPointsCoordinate(FilledArcInfo& fai)
     // NOTE: Gfx::Math::fastCos() and Gfx::Math::fastSin() will produce artifacts!
 
     // Calculate the approximate coordinate of the point which is located at the begin angle
-    const float rBeg = fai.degBegin * Gfx::Math::PiDiv180;
+    const float rBeg = fai.degBegin * Gfx::Math::DegToRad;
     const Pt::int32_t bx = Gfx::Math::zrint(fai.ctrX + fai.radX * ::cosf(rBeg));
     const Pt::int32_t by = Gfx::Math::zrint(fai.ctrY - fai.radY * ::sinf(rBeg)); // Sign inversion due to differences between cartesian and computer coordinate systems
 
     // Calculate the approximate coordinate of the point which is located at the end angle
-    const float rEnd = fai.degEnd * Gfx::Math::PiDiv180;
+    const float rEnd = fai.degEnd * Gfx::Math::DegToRad;
     const Pt::int32_t ex = Gfx::Math::zrint(fai.ctrX + fai.radX * ::cosf(rEnd));
     const Pt::int32_t ey = Gfx::Math::zrint(fai.ctrY - fai.radY * ::sinf(rEnd)); // Sign inversion due to differences between cartesian and computer coordinate systems
 

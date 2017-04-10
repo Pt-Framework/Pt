@@ -111,15 +111,11 @@ class PT_GFX_API BasicTransform {
         inline ~BasicTransform();
 
         inline bool isIdentity() const;
-
         inline void identity();
 
         inline void translate(T x, T y, bool replaceInsteadOfCombine = false);
-
         inline void scale(T x, T y, bool replaceInsteadOfCombine = false);
-
         inline void rotate(T deg, bool replaceInsteadOfCombine = false);
-
         inline void shearX(T deg, bool replaceInsteadOfCombine = false);
         inline void shearY(T deg, bool replaceInsteadOfCombine = false);
 
@@ -143,6 +139,13 @@ class PT_GFX_API BasicTransform {
 
         inline void transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount) const;
         inline void transformPoints(PointF* xy, size_t pointCount) const;
+
+        inline void extractTranslation(T& x, T& y) const;
+        inline void extractScaling(T& x, T& y) const;
+        inline void extractRotation(T& deg) const;
+        inline void extractShearing(T& deg) const;
+        inline void extractShearingX(T& deg) const;
+        inline void extractShearingY(T& deg) const;
 
     private:
         // Matrix data
@@ -454,6 +457,56 @@ inline void BasicTransform<T>::transformPoints(PointF* xy, size_t pointCount) co
     for(size_t i = 0; i < pointCount; ++i) transformPoint(xy[i]);
 }
 
+template <typename T>
+inline void BasicTransform<T>::extractTranslation(T& x, T& y) const
+{
+    x = _mdata.v[0][2];
+    y = _mdata.v[1][2];
+}
+
+template <typename T>
+inline void BasicTransform<T>::extractScaling(T& x, T& y) const
+{
+    x = ::sqrt(_mdata.v[0][0] * _mdata.v[0][0] + _mdata.v[0][1] * _mdata.v[0][1]);
+    y = (_mdata.v[0][0] * _mdata.v[1][1] - _mdata.v[0][1] * _mdata.v[1][0]) / x;
+}
+
+template <typename T>
+inline void BasicTransform<T>::extractRotation(T& deg) const
+{
+    const T x1 = _mdata.v[0][0];
+    const T y1 = _mdata.v[0][1];
+    const T r1 = (y1 >= 0)
+               ? ::atan2(y1, x1)             // Quadrant   I and II
+               : ::atan2(y1, x1) + M_PI * 2; // Quadrant III and IV
+
+    const T x2 =  _mdata.v[1][1];
+    const T y2 = -_mdata.v[1][0];
+    const T r2 = (y2 >= 0)
+               ? ::atan2(y2, x2)             // Quadrant   I and II
+               : ::atan2(y2, x2) + M_PI * 2; // Quadrant III and IV
+
+    deg = (r1 + r2) * 90 / M_PI;
+}
+
+template <typename T>
+inline void BasicTransform<T>::extractShearing(T& deg) const
+{
+    deg = ::atan(
+              (_mdata.v[0][0] * _mdata.v[1][0] + _mdata.v[0][1] * _mdata.v[1][1]) /
+              (_mdata.v[0][0] * _mdata.v[1][1] - _mdata.v[0][1] * _mdata.v[1][0])
+          ) * (180 / M_PI);
+}
+
+template <typename T>
+inline void BasicTransform<T>::extractShearingX(T& deg) const
+{ deg = ::atan(_mdata.v[0][1]) * (180 / M_PI); }
+
+template <typename T>
+inline void BasicTransform<T>::extractShearingY(T& deg) const
+{ deg = ::atan(_mdata.v[1][0]) * (180 / M_PI); }
+
+
 // ======================================================================================
 // ===== Inlined Public Member Functions (Specialization for float) =====================
 // ======================================================================================
@@ -465,7 +518,7 @@ inline void BasicTransform<float>::rotate(float deg, bool replaceInsteadOfCombin
 
     MatrixData n;
 
-    const float r = deg * Gfx::Math::PiDiv180;
+    const float r = deg * Gfx::Math::DegToRad;
     const float s = Gfx::Math::fastSin(r);
     const float c = Gfx::Math::fastCos(r);
 
@@ -484,7 +537,7 @@ inline void BasicTransform<float>::shearX(float deg, bool replaceInsteadOfCombin
 
     MatrixData n;
 
-    const float r = deg * Gfx::Math::PiDiv180;
+    const float r = deg * Gfx::Math::DegToRad;
     const float t = Gfx::Math::fastSin(r) / Gfx::Math::fastCos(r);
 
     n.v[0][0] = 1; n.v[0][1] = t; n.v[0][2] = 0;
@@ -502,7 +555,7 @@ inline void BasicTransform<float>::shearY(float deg, bool replaceInsteadOfCombin
 
     MatrixData n;
 
-    const float r = deg * Gfx::Math::PiDiv180;
+    const float r = deg * Gfx::Math::DegToRad;
     const float t = Gfx::Math::fastSin(r) / Gfx::Math::fastCos(r);
 
     n.v[0][0] = 1; n.v[0][1] = 0; n.v[0][2] = 0;
@@ -673,28 +726,37 @@ template <>
 inline void BasicTransform<float>::transformPoints(PointF* xy, size_t pointCount) const
 { if(!_isIdentity) transformPoints(xy, xy, pointCount); }
 
+template <>
+inline void BasicTransform<float>::extractScaling(float& x, float& y) const
+{
+    x = Gfx::Math::fastSqrt(_mdata.v[0][0] * _mdata.v[0][0] + _mdata.v[0][1] * _mdata.v[0][1]);
+    y = (_mdata.v[0][0] * _mdata.v[1][1] - _mdata.v[0][1] * _mdata.v[1][0]) / x;
+}
+
+template <>
+inline void BasicTransform<float>::extractRotation(float& deg) const
+{
+    const float x1 = _mdata.v[0][0];
+    const float y1 = _mdata.v[0][1];
+    const float r1 = (y1 >= 0)
+                   ? Gfx::Math::fastAtan2(y1, x1)             // Quadrant   I and II
+                   : Gfx::Math::fastAtan2(y1, x1) + M_PI * 2; // Quadrant III and IV
+
+    const float x2 =  _mdata.v[1][1];
+    const float y2 = -_mdata.v[1][0];
+    const float r2 = (y2 >= 0)
+                   ? Gfx::Math::fastAtan2(y2, x2)             // Quadrant   I and II
+                   : Gfx::Math::fastAtan2(y2, x2) + M_PI * 2; // Quadrant III and IV
+
+    deg = (r1 + r2) * 90.0f / Gfx::Math::Pi;
+}
+
 
 //
 // For convenience
 //
 typedef BasicTransform<float > Transform;  // We cannot use ssize_t
 typedef BasicTransform<double> TransformF;
-
-
-/*
-// ### TODO: Extract the translation factor
-const TransformT::ValueT tx = v[0][2];
-const TransformT::ValueT ty = v[1][2];
-
-// ### TODO: Extract the scaling factor
-const TransformT::ValueT sx = ::sqrt(v[0][0] * v[0][0] + v[0][1] * v[0][1]);
-const TransformT::ValueT sy = ::sqrt(v[1][0] * v[1][0] + v[1][1] * v[1][1]);
-
-// ### TODO: Extract the rotation factor
-const TransformT::ValueT r1 = ::atan2(-v[0][1], v[0][0]);
-const TransformT::ValueT r2 = ::atan2( v[1][0], v[1][1]);
-const TransformT::ValueT r  = (r1 + r2) * 0.5f;
-*/
 
 
 } // namespace

@@ -96,7 +96,7 @@ void DrawText2::setFont(const Font& font)
 
     if(_fontAngle < 0) _fontAngle += 3600;
 
-    const float angle   = (_fontAngle / 10.0f * Gfx::Math::Pi) / 180.0f;
+    const float angle   = _fontAngle / 10.0f * Gfx::Math::DegToRad;
     const float cosinus = Gfx::Math::fastCos( angle ) * 0x10000L;
     const float sinus   = Gfx::Math::fastSin( angle ) * 0x10000L;
 
