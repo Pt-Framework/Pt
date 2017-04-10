@@ -74,8 +74,7 @@ class PT_GFX_API Brush
 
         Brush(const Color& color);
 
-        // TODO: texture offset
-        Brush(const Image& texture);
+        Brush(const Image& texture, Pt::int32_t offsetX = 0, Pt::int32_t offsetY = 0);
 
         Brush(const Color& from, const Color& to, GradientDirection g, float rotDeg = 0.0f, float scale = 1.0f, Pt::int32_t ofsX = 0, Pt::int32_t ofsY = 0);
 
@@ -95,7 +94,7 @@ class PT_GFX_API Brush
 
         const Color& gradientColor() const;
 
-        void setTexture(const Image& texture);
+        void setTexture(const Image& texture, Pt::int32_t offsetX = 0, Pt::int32_t offsetY = 0);
 
         const Image& texture() const;
 
@@ -123,7 +122,7 @@ class BrushData
 
         BrushData(const Color& color);
 
-        BrushData(const Image& texture);
+        BrushData(const Image& texture, Pt::int32_t offsetX, Pt::int32_t offsetY);
 
         BrushData(const Color& from, const Color& to, Brush::GradientDirection g, float rotDeg, float scale, Pt::int32_t ofsX, Pt::int32_t ofsY);
 
@@ -145,7 +144,7 @@ class BrushData
 
         const Color& gradientColor() const;
 
-        void setTexture(const Image& texture);
+        void setTexture(const Image& texture, Pt::int32_t offsetX, Pt::int32_t offsetY);
 
         const Image& texture() const;
 

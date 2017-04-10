@@ -468,7 +468,7 @@ template <typename T>
 inline void BasicTransform<T>::extractScaling(T& x, T& y) const
 {
     x = ::sqrt(_mdata.v[0][0] * _mdata.v[0][0] + _mdata.v[0][1] * _mdata.v[0][1]);
-    y = (_mdata.v[0][0] * _mdata.v[1][1] - _mdata.v[0][1] * _mdata.v[1][0]) / x;
+    y =       (_mdata.v[0][0] * _mdata.v[1][1] - _mdata.v[0][1] * _mdata.v[1][0]) / x;
 }
 
 template <typename T>
@@ -730,7 +730,7 @@ template <>
 inline void BasicTransform<float>::extractScaling(float& x, float& y) const
 {
     x = Gfx::Math::fastSqrt(_mdata.v[0][0] * _mdata.v[0][0] + _mdata.v[0][1] * _mdata.v[0][1]);
-    y = (_mdata.v[0][0] * _mdata.v[1][1] - _mdata.v[0][1] * _mdata.v[1][0]) / x;
+    y =                    (_mdata.v[0][0] * _mdata.v[1][1] - _mdata.v[0][1] * _mdata.v[1][0]) / x;
 }
 
 template <>

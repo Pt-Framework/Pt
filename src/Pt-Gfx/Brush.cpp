@@ -60,8 +60,8 @@ Brush::Brush(const Color& color)
 }
 
 
-Brush::Brush(const Image& texture)
-: _brushData( new BrushData(texture) )
+Brush::Brush(const Image& texture, Pt::int32_t offsetX, Pt::int32_t offsetY)
+: _brushData( new BrushData(texture, offsetX, offsetY) )
 {
 }
 
@@ -148,7 +148,7 @@ const Color& Brush::gradientColor() const
 }
 
 
-void Brush::setTexture(const Image& texture)
+void Brush::setTexture(const Image& texture, Pt::int32_t offsetX, Pt::int32_t offsetY)
 {
     // COW
     if(_brushData.refs() > 1) {
@@ -157,7 +157,7 @@ void Brush::setTexture(const Image& texture)
         _brushData = brushData;
     }
 
-    _brushData->setTexture(texture);
+    _brushData->setTexture(texture, offsetX, offsetY);
 }
 
 
@@ -220,12 +220,8 @@ BrushData::BrushData(const Color& color)
 }
 
 
-BrushData::BrushData(const Image& texture)
-: _fillStyle(Brush::Texture)
-, _texture  (texture)
-, _isNull   (false)
-{
-}
+BrushData::BrushData(const Image& texture, Pt::int32_t offsetX, Pt::int32_t offsetY)
+{ setTexture(texture, offsetX, offsetY); }
 
 
 BrushData::BrushData(const Color& from, const Color& to, Brush::GradientDirection g, float rotDeg, float scale, Pt::int32_t ofsX, Pt::int32_t ofsY)
@@ -325,10 +321,14 @@ const Color& BrushData::gradientColor() const
 }
 
 
-void BrushData::setTexture(const Image& texture)
+void BrushData::setTexture(const Image& texture, Pt::int32_t offsetX, Pt::int32_t offsetY)
 {
+    // TODO: offsetX, offsetY
+
     _fillStyle = Brush::Texture;
     _texture   = texture;
+    _ofsX      = offsetX;
+    _ofsY      = offsetY;
     _isNull    = false;
 }
 
