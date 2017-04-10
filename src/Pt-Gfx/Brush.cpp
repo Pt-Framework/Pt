@@ -348,15 +348,17 @@ void BrushData::setTexture(const Image& texture, Pt::int32_t offsetX, Pt::int32_
             sy = 0;
             dy = (-offsetY) % texture.height();
         }
-        // Draw on the top and/or left hole area
+        // Draw on the right hole
         if(!dx       ) ip.drawImage(
-                           PointF(texture.width() - sx, 0), texture,
-                           RectF(PointF(0, sy), SizeF(sx, sy ? (texture.height() - sy) : texture.height()))
+                           PointF(texture.width() - sx, dy), texture,
+                           RectF(PointF(0, sy), SizeF(texture.width() - sx, texture.height() - sy))
                        );
+        // Draw on the bottom hole
         if(       !dy) ip.drawImage(
-                           PointF(0, texture.height() - sy), texture,
-                           RectF(PointF(sx, 0), SizeF(sx ? (texture.width() - sx) : texture.width(), sy))
+                           PointF(dx, texture.height() - sy), texture,
+                           RectF(PointF(sx, 0), SizeF(texture.width() - sx, texture.height() - sy))
                        );
+        // Draw on the right-bottom hole
         if(!dx && !dy) ip.drawImage(
                            PointF(texture.width() - sx, texture.height() - sy), texture,
                            RectF(PointF(0, 0), SizeF(texture.width() - sx, texture.height() - sy))
@@ -366,8 +368,21 @@ void BrushData::setTexture(const Image& texture, Pt::int32_t offsetX, Pt::int32_
             PointF(dx, dy), texture,
             RectF(PointF(sx, sy), SizeF(texture.width() - sx, texture.height() - sy))
         );
-        // Draw on the bottom and/or right hole area
-
+        // Draw on the left hole
+        if(!sx       ) ip.drawImage(
+                           PointF(0, sy), texture,
+                           RectF(PointF(texture.width() - dx, 0), SizeF(dx, texture.height() - dy))
+                       );
+        // Draw on the top hole
+        if(       !sy) ip.drawImage(
+                           PointF(sx, 0), texture,
+                           RectF(PointF(0, texture.height() - dy), SizeF(texture.width() - dx, dy))
+                       );
+        // Draw on the left-top hole
+        if(!sx && !sy) ip.drawImage(
+                           PointF(0, 0), texture,
+                           RectF(PointF(texture.width() - dx, texture.height() - dy), SizeF(dx, dy))
+                       );
     }
     else {
         _texture = texture;
