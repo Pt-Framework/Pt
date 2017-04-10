@@ -81,6 +81,7 @@ class PT_GFX_API Font
 
         friend bool operator!=(const Font& a, const Font& b);
 
+        // ### TODO: Remove it later! ###
         friend bool operator<(const Font& a, const Font& b);
 
     private:
@@ -108,7 +109,7 @@ inline bool operator!=(const Font& a, const Font& b)
            a._angle != b._angle;
 }
 
-
+// ### TODO: Remove it later! ###
 inline bool operator<(const Font& a, const Font& b)
 {
     if(a._name < b._name)

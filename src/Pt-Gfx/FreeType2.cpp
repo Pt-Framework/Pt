@@ -704,21 +704,6 @@ FTC_FaceID FreeType2::findFaceId(const Font& font)
 {
     System::MutexLock lock(FreeType2::_mutex);
 
-    // Temporary workaround for this configuration
-#if ( defined(__arm__) || defined(__thumb__) || defined(__aarch64__) ) && ( __GNUC__ == 4 && __GNUC_MINOR__ == 9 )
-
-    for(Fonts::iterator it = FreeType2::_fonts.begin(); it != FreeType2::_fonts.end(); ++it) {
-        if(it->first.name () != font.name ()) continue;
-        if(it->first.style() != font.style()) continue;
-        //std::clog << "findFaceId() : " << it->second.toLocal() << std::endl;
-        return reinterpret_cast<FTC_FaceID>(&it->second);
-    }
-
-    //std::clog << "findFaceId() : " << 0 << std::endl;
-    return 0;
-
-#else
-
     Fonts::iterator it = FreeType2::_fonts.find(font);
     if(it == FreeType2::_fonts.end()) {
         //std::clog << "findFaceId() : " << 0 << std::endl;
@@ -727,8 +712,6 @@ FTC_FaceID FreeType2::findFaceId(const Font& font)
 
     //std::clog << "findFaceId() : " << it->second.toLocal() << std::endl;
     return reinterpret_cast<FTC_FaceID>(&it->second);
-
-#endif
 }
 
 FT_Error FreeType2::fontRequest(FTC_FaceID faceId, FT_Library library, FT_Pointer data, FT_Face* face)

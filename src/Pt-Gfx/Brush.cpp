@@ -323,11 +323,17 @@ const Color& BrushData::gradientColor() const
 
 void BrushData::setTexture(const Image& texture, Pt::int32_t offsetX, Pt::int32_t offsetY)
 {
+    // The texture has no offset
+    if(!offsetX && !offsetY) {
+        _texture = texture;
+    }
+
     // The texture has offset
-    if(offsetX || offsetY) {
+    else {
         // Prepare the destination texture
         _texture.reset(texture.format(), texture.size());
         // Prepare the image painter
+        // ### TODO: Use the new painter later! ###
         ImagePainter ip(_texture);
         ip.setCompositionMode(CompositionMode::SourceCopy);
         // Calculate the source and destination coordinate
@@ -426,10 +432,6 @@ void BrushData::setTexture(const Image& texture, Pt::int32_t offsetX, Pt::int32_
                 RectF(PointF(0, 0), SizeF(dx, sy))
             );
         }
-    }
-    // The texture has no offset
-    else {
-        _texture = texture;
     }
 
     _fillStyle = Brush::Texture;

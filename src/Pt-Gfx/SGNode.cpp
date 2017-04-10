@@ -27,10 +27,6 @@
   MA 02110-1301 USA
 */
 
-// Just for debugging ;)
-//#warning "Just for debugging ;)"
-//#include <stdio.h>
-
 #include <stack>
 
 #include <Pt/Gfx/SGNode.h>
@@ -40,10 +36,6 @@
 namespace Pt {
 namespace Gfx {
 
-
-// ======================================================================================
-// ===== SGNode Class ===================================================================
-// ======================================================================================
 
 SGNode::~SGNode()
 {
@@ -114,139 +106,6 @@ void SGNode::draw(ImagePainter2& painter, const TransformT* transform_)
             // Pop the stack element
             nStack.pop();
         }
-    }
-}
-
-
-// ======================================================================================
-// ===== SGNodePath Class ===============================================================
-// ======================================================================================
-
-SGNodePath::~SGNodePath()
-{}
-
-void SGNodePath::clear()
-{
-    // Clear the path and reset the smoothness
-    _path.clear();
-    _smoothness = 1.0f;
-
-    // Clear the base class' data
-    SGNode::clear();
-}
-
-void SGNodePath::drawImpl(ImagePainter2& painter, const TransformT& transform) const
-{
-    // Return if the path is null
-    if(_path.isNull()) return;
-
-    // Generate points
-    std::vector<PointT> points;
-    _path.generatePoints(points, _smoothness);
-
-    // TransformT points
-    transform.transformPoints(points.data(), points.size());
-
-    // Draw based on the effective mode
-    switch(effectiveRenderMode()) {
-        case RenderFill            : painter.fillPolygon (points.data(), points.size()       ); break;
-        case RenderStroke          : painter.drawPolyline(points.data(), points.size(), false); break;
-        case RenderStrokeAutoClose : painter.drawPolyline(points.data(), points.size(), true ); break;
-        default                    :                                                            break;
-    }
-}
-
-
-// ======================================================================================
-// ===== SGNodeLine Class ===============================================================
-// ======================================================================================
-SGNodeLine::~SGNodeLine()
-{}
-
-void SGNodeLine::clear()
-{
-    // Clear the line
-    _from.set(0, 0);
-    _to  .set(0, 0);
-
-    // Clear the base class' data
-    SGNode::clear();
-}
-
-void SGNodeLine::drawImpl(ImagePainter2& painter, const TransformT& transform) const
-{
-    // TransformT the coordinates
-    PointT from, to;
-
-    transform.transformPoint(from, _from);
-    transform.transformPoint(to  , _to  );
-
-    // Draw based on the effective mode
-    switch(effectiveRenderMode()) {
-        case RenderFill            : /* Fallthrough */
-        case RenderStroke          : /* Fallthrough */
-        case RenderStrokeAutoClose : painter.drawLine(from, to); break;
-        default                    :                             break;
-    }
-}
-
-
-// ======================================================================================
-// ===== SGNodeRect Class ===============================================================
-// ======================================================================================
-SGNodeRect::~SGNodeRect()
-{}
-
-void SGNodeRect::clear()
-{
-    // Clear the rectangle
-    _rect.set( PointT(0, 0), SizeT(0, 0) );
-    _radius = 0.0f;
-
-    // Clear the base class' data
-    SGNodePath::clear();
-}
-
-void SGNodeRect::set(const RectT& rect, float radius)
-{
-    // Save the parameter
-    _rect   = rect;
-    _radius = ::abs(radius);
-
-    // Clear the base class' data
-    SGNodePath::clear();
-
-    // Determine the coordinates
-    const ValueT x1 = _rect.topLeft    ().x();
-    const ValueT y1 = _rect.topLeft    ().y();
-    const ValueT x2 = _rect.bottomRight().x();
-    const ValueT y2 = _rect.bottomRight().y();
-
-    // Create a rounded rectangle
-    if(_radius > 0.0f) {
-        const ValueT r = _radius;
-        path().beginPath();
-        path().moveTo           (        x1,     y2 - r); // CCW
-        path().quadraticBezierTo(x1, y2, x1 + r, y2    );
-        path().lineTo           (        x2 - r, y2    );
-        path().quadraticBezierTo(x2, y2, x2    , y2 - r);
-        path().lineTo           (        x2    , y1 + r);
-        path().quadraticBezierTo(x2, y1, x2 - r, y1    );
-        path().lineTo           (        x1 + r, y1    );
-        path().quadraticBezierTo(x1, y1, x1    , y1 + r);
-        path().lineTo           (        x1    , y2 - r);
-        path().endPath  ();
-    }
-
-    // Create a normal rectangle
-    else {
-        path().beginPath();
-        path().moveTo   (x1, y2); // CCW
-        path().lineTo   (x2, y2);
-        path().lineTo   (x2, y1);
-        path().lineTo   (x1, y1);
-        path().lineTo   (x1, y2);
-        path().endPath  ();
     }
 }
 

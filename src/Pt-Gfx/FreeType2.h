@@ -118,26 +118,17 @@ class FreeType2 {
         FTC_ImageCache _imageCache;
 
     private:
-        /*
         struct FCmp {
-            inline int strcmp(const char* a, const char* b) const
-            {
-                while(*a && *b && *a == *b) { ++a; ++b; }
-                return static_cast<int>(*a) - static_cast<int>(*b);
-            }
-
             inline bool operator()(const Font& a, const Font& b) const
             {
-                if(this->strcmp(a.name().c_str(), b.name().c_str()) < 0) return true;
-                if(a.style() < b.style()) return true;
-                return false;
+                if(a.name() < b.name()) return true;
+                if(a.name() > b.name()) return false;
+                return a.style() < b.style();
             }
         };
-        */
 
         typedef std::map<FTC_FaceID, FreeType2*  > Instances;
-        typedef std::map<Font,       System::Path> Fonts;
-      //typedef std::map<Font, System::Path, FCmp> Fonts;
+        typedef std::map<Font, System::Path, FCmp> Fonts;
         typedef std::set<Pt::String              > Files;
 
         static System::Mutex  _mutex;
