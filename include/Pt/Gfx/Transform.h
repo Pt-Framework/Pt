@@ -140,11 +140,10 @@ class PT_GFX_API BasicTransform {
         inline void transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount) const;
         inline void transformPoints(PointF* xy, size_t pointCount) const;
 
-        inline void transformSize(T& dz, const T& sz) const;
-        inline void transformSize(T& z) const;
+        inline const T transformSize(const T& sz) const;
 
-        inline void transformSizePair(T& dza, T& dzb, const T& sza, const T& szb) const;
-        inline void transformSizePair(T& za, T& zb) const;
+        inline void transformSize(T& dza, T& dzb, const T& sza, const T& szb) const;
+        inline void transformSize(T& za, T& zb) const;
 
         inline void transformSize(SizeF& dz, const SizeF& sz) const;
         inline void transformSize(SizeF& z) const;
@@ -483,7 +482,7 @@ inline void BasicTransform<T>::transformPoints(PointF* xy, size_t pointCount) co
 //
 
 template <typename T>
-inline void BasicTransform<T>::transformSize(T& dz, const T& sz) const
+inline const T BasicTransform<T>::transformSize(const T& sz) const
 {
     T zx = sz, rx = 0;
     T zy =  0, ry = 0;
@@ -494,15 +493,11 @@ inline void BasicTransform<T>::transformSize(T& dz, const T& sz) const
     const T dx = zx - rx;
     const T dy = zy - ry;
 
-    dz = ::sqrt(dx * dx + dy * dy);
+    return ::sqrt(dx * dx + dy * dy);
 }
 
 template <typename T>
-inline void BasicTransform<T>::transformSize(T& z) const
-{ transformSize(z, z); }
-
-template <typename T>
-inline void BasicTransform<T>::transformSizePair(T& dza, T& dzb, const T& sza, const T& szb) const
+inline void BasicTransform<T>::transformSize(T& dza, T& dzb, const T& sza, const T& szb) const
 {
     T zxa = sza, zxb = szb, rx = 0;
     T zya =   0, zyb =   0, ry = 0;
@@ -521,8 +516,8 @@ inline void BasicTransform<T>::transformSizePair(T& dza, T& dzb, const T& sza, c
 }
 
 template <typename T>
-inline void BasicTransform<T>::transformSizePair(T& za, T& zb) const
-{ transformSizePair(za, zb, za, zb); }
+inline void BasicTransform<T>::transformSize(T& za, T& zb) const
+{ transformSize(za, zb, za, zb); }
 
 template <typename T>
 inline void BasicTransform<T>::transformSize(SizeF& dz, const SizeF& sz) const
@@ -530,7 +525,7 @@ inline void BasicTransform<T>::transformSize(SizeF& dz, const SizeF& sz) const
     T za = sz.width ();
     T zb = sz.height();
 
-    transformSizePair(za, zb, za, zb);
+    transformSize(za, zb, za, zb);
 
     dz.set(za, zb);
 }
@@ -825,7 +820,7 @@ inline void BasicTransform<float>::transformPoints(PointF* xy, size_t pointCount
 //
 
 template <>
-inline void BasicTransform<float>::transformSize(float& dz, const float& sz) const
+inline const float BasicTransform<float>::transformSize(const float& sz) const
 {
     float zx = sz, rx = 0;
     float zy =  0, ry = 0;
@@ -836,15 +831,11 @@ inline void BasicTransform<float>::transformSize(float& dz, const float& sz) con
     const float dx = zx - rx;
     const float dy = zy - ry;
 
-    dz = Gfx::Math::fastSqrt(dx * dx + dy * dy);
+    return Gfx::Math::fastSqrt(dx * dx + dy * dy);
 }
 
 template <>
-inline void BasicTransform<float>::transformSize(float& z) const
-{ transformSize(z, z); }
-
-template <>
-inline void BasicTransform<float>::transformSizePair(float& dza, float& dzb, const float& sza, const float& szb) const
+inline void BasicTransform<float>::transformSize(float& dza, float& dzb, const float& sza, const float& szb) const
 {
     float zxa = sza, zxb = szb, rx = 0;
     float zya =   0, zyb =   0, ry = 0;
@@ -863,8 +854,8 @@ inline void BasicTransform<float>::transformSizePair(float& dza, float& dzb, con
 }
 
 template <>
-inline void BasicTransform<float>::transformSizePair(float& za, float& zb) const
-{ transformSizePair(za, zb, za, zb); }
+inline void BasicTransform<float>::transformSize(float& za, float& zb) const
+{ transformSize(za, zb, za, zb); }
 
 template <>
 inline void BasicTransform<float>::transformSize(SizeF& dz, const SizeF& sz) const
@@ -872,7 +863,7 @@ inline void BasicTransform<float>::transformSize(SizeF& dz, const SizeF& sz) con
     float za = sz.width ();
     float zb = sz.height();
 
-    transformSizePair(za, zb, za, zb);
+    transformSize(za, zb, za, zb);
 
     dz.set(za, zb);
 }

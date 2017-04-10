@@ -80,9 +80,23 @@ void SGNode::draw(ImagePainter2& painter, const TransformT* transform_)
         if(!eCur.after) {
             // Update the active transform object
             transform = eCur.node->_transform * transform;
-            // Set this node's pen and/or brush to the painter as needed
-            if(!eCur.node->_pen  .isNull()) painter.setPen  (eCur.node->_pen  );
-            if(!eCur.node->_brush.isNull()) painter.setBrush(eCur.node->_brush);
+            // Set this node's pen to the painter as needed
+            if(!eCur.node->_pen  .isNull()) {
+            // Scale the pen width
+                const size_t orgPenSize = eCur.node->_pen.size();
+                const size_t newPenSize = Gfx::Math::zrint( transform.transformSize((float) orgPenSize) );
+                if(orgPenSize == newPenSize) {
+                    painter.setPen(eCur.node->_pen);
+                }
+                else {
+                    Pen newPen = eCur.node->_pen;
+                    newPen.setSize(newPenSize);
+                    painter.setPen(newPen);
+                }
+            }
+            // Set this node's brush to the painter as needed
+            if(!eCur.node->_brush.isNull())
+                painter.setBrush(eCur.node->_brush);
             // Draw this node
             eCur.node->drawImpl(painter, transform);
             // Process the children of this node
