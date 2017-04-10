@@ -323,6 +323,7 @@ const Color& BrushData::gradientColor() const
 
 void BrushData::setTexture(const Image& texture, Pt::int32_t offsetX, Pt::int32_t offsetY)
 {
+    // The texture has offset
     if(offsetX || offsetY) {
         // Prepare the destination texture
         _texture.reset(texture.format(), texture.size());
@@ -353,10 +354,7 @@ void BrushData::setTexture(const Image& texture, Pt::int32_t offsetX, Pt::int32_
             PointF(dx, dy), texture,
             RectF(PointF(sx, sy), SizeF(texture.width() - sx, texture.height() - sy))
         );
-
-        ip.setCompositionMode(CompositionMode::SourceOver);
-
-        // Positive offsets
+        // Positive offset
         if(!dx && !dy) {
             // Draw on the right/top-right hole
             ip.drawImage(
@@ -374,7 +372,7 @@ void BrushData::setTexture(const Image& texture, Pt::int32_t offsetX, Pt::int32_
                 RectF(PointF(0, 0), SizeF(texture.width() - sx, texture.height() - sy))
             );
         }
-        // Negative offsets
+        // Negative offset
         else if(!sx && !sy) {
             // Draw on the left/bottom-left hole
             ip.drawImage(
@@ -392,10 +390,25 @@ void BrushData::setTexture(const Image& texture, Pt::int32_t offsetX, Pt::int32_
                 RectF(PointF(texture.width() - dx, texture.height() - dy), SizeF(dx, dy))
             );
         }
-        // Mixed offsets
+        // Mixed offset
         else if(!dx && !sy) {
+            // Draw on the top-left hole
+            ip.drawImage(
+                PointF(0, 0), texture,
+                RectF(PointF(sx, texture.height() - dy), SizeF(texture.width() - sx, dy))
+            );
+            // Draw on the top-right hole
+            ip.drawImage(
+                PointF(sx, 0), texture,
+                RectF(PointF(0, texture.height() - dy), SizeF(sx, dy))
+            );
+            // Draw on the bottom-right hole
+            ip.drawImage(
+                PointF(sx, dy), texture,
+                RectF(PointF(0, 0), SizeF(sx, dy))
+            );
         }
-        // Mixed offsets
+        // Mixed offset
         else if(!sx && !dy) {
             // Draw on the top-left hole
             ip.drawImage(
@@ -414,6 +427,7 @@ void BrushData::setTexture(const Image& texture, Pt::int32_t offsetX, Pt::int32_
             );
         }
     }
+    // The texture has no offset
     else {
         _texture = texture;
     }

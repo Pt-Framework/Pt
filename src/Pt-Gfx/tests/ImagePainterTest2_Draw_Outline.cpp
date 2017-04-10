@@ -208,7 +208,7 @@ static void testDrawRect(const char* title, Image& image, Painter& painter)
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
 
-#if 0
+#if 1
 
     // Solid
     painter.setPen  ( Color::fromRgb8(255, 255,   0, 175) );
