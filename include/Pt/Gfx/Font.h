@@ -114,10 +114,10 @@ inline bool operator<(const Font& a, const Font& b)
     if(a._name < b._name)
         return true;
 
-    if(a._style < b._style)
-        return true;
+    if(a._name > b._name)
+        return false;
 
-    return false;
+    return a._style < b._style;
 }
 
 

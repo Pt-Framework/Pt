@@ -85,7 +85,7 @@ using namespace Pt::Gfx;
 
 // Detailed-test enable settings for Pt-Gfx
 #define TEST_SOURCECOPY                         1
-#define TEST_SOURCEOVER                         0
+#define TEST_SOURCEOVER                         1
 
 #define TEST_DRAW_SOLID_LINE_AND_TEXT           0 // (including bezier)
 #define TEST_DRAW_PATTERNED_LINE                0 // (including bezier)
@@ -108,7 +108,7 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  0
 
 #define TEST_DRAW_PATH                          0 // (including thick and filled)
-#define TEST_DRAW_PATH_CLIPPING                 0
+#define TEST_DRAW_PATH_CLIPPING                 1
 #define TEST_DRAW_EXTRA                         0
 
 #define TEST_SCENE_GRAPH                        1
@@ -166,7 +166,7 @@ using namespace Pt::Gfx;
 #define FONT_SPEC_N "DejaVu Sans"  ,  24, Pt::Gfx::Font::BoldItalic,    0
 #define FONT_SPEC_R "DejaVu Sans"  ,  24, Pt::Gfx::Font::BoldItalic, -150
 
-#define FONT_SPEC_H "DejaVu Sans"  ,  92, Pt::Gfx::Font::Normal    ,    0
+#define FONT_SPEC_H "DejaVu Serif" ,  92, Pt::Gfx::Font::Normal    ,    0
 #define FONT_SPEC_Q "QumpellkaNo12",  64, Pt::Gfx::Font::Normal    ,    0 /* OTF */
 #define FONT_SPEC_C "Charakterny"  , 116, Pt::Gfx::Font::Italic    ,    0 /* OTF */
 
