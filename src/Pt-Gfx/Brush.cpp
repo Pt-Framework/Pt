@@ -28,7 +28,7 @@
 
 #include <stdexcept>
 
-#include <Pt/Gfx/Brush.h>
+#include <Pt/Gfx/ImagePainter.h>
 
 
 namespace Pt {
@@ -323,10 +323,57 @@ const Color& BrushData::gradientColor() const
 
 void BrushData::setTexture(const Image& texture, Pt::int32_t offsetX, Pt::int32_t offsetY)
 {
-    // TODO: offsetX, offsetY
+    if(offsetX || offsetY) {
+        // Prepare the destination texture
+        _texture.reset(texture.format(), texture.size());
+        // Prepare the image painter
+        ImagePainter ip(_texture);
+        ip.setCompositionMode(CompositionMode::SourceCopy);
+        // Calculate the source and destination coordinate
+        Pt::int32_t sx, dx;
+        if(offsetX >= 0) {
+            sx = offsetX % texture.width();
+            dx = 0;
+        }
+        else {
+            sx = 0;
+            dx = (-offsetX) % texture.width();
+        }
+        Pt::int32_t sy, dy;
+        if(offsetY >= 0) {
+            sy = offsetY % texture.height();
+            dy = 0;
+        }
+        else {
+            sy = 0;
+            dy = (-offsetY) % texture.height();
+        }
+        // Draw on the top and/or left hole area
+        if(!dx       ) ip.drawImage(
+                           PointF(texture.width() - sx, 0), texture,
+                           RectF(PointF(0, sy), SizeF(sx, sy ? (texture.height() - sy) : texture.height()))
+                       );
+        if(       !dy) ip.drawImage(
+                           PointF(0, texture.height() - sy), texture,
+                           RectF(PointF(sx, 0), SizeF(sx ? (texture.width() - sx) : texture.width(), sy))
+                       );
+        if(!dx && !dy) ip.drawImage(
+                           PointF(texture.width() - sx, texture.height() - sy), texture,
+                           RectF(PointF(0, 0), SizeF(texture.width() - sx, texture.height() - sy))
+                       );
+        // Draw on the middle area
+        ip.drawImage(
+            PointF(dx, dy), texture,
+            RectF(PointF(sx, sy), SizeF(texture.width() - sx, texture.height() - sy))
+        );
+        // Draw on the bottom and/or right hole area
+
+    }
+    else {
+        _texture = texture;
+    }
 
     _fillStyle = Brush::Texture;
-    _texture   = texture;
     _ofsX      = offsetX;
     _ofsY      = offsetY;
     _isNull    = false;

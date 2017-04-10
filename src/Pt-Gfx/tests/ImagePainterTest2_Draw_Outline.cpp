@@ -236,7 +236,21 @@ static void testDrawRect(const char* title, Image& image, Painter& painter)
     painter.fillRect( RectF(PointF(400, 390), SizeF(200, 100)) );
 
     painter.setBrush( Brush(textureWithWhiteBackground) );
+
+    //painter.setBrush( Brush(textureWithWhiteBackground, 0, 0) );
+    //painter.setBrush( Brush(textureWithWhiteBackground, 100, 0) );
+    //painter.setBrush( Brush(textureWithWhiteBackground, 0, 150) );
+    //painter.setBrush( Brush(textureWithWhiteBackground, 100, 150) );
+
+    painter.setBrush( Brush(textureWithWhiteBackground, -100, 0) );
+    //painter.setBrush( Brush(textureWithWhiteBackground, 0, -150) );
+    //painter.setBrush( Brush(textureWithWhiteBackground, -100, -150) );
+
     painter.fillRect( RectF(PointF(150, 440), SizeF(200, 100)) );
+
+    painter.setPen  ( Color::fromRgb8(255, 0,   0, 255) );
+    painter.drawRect( RectF(PointF(150-1, 440-1), SizeF(200+1, 100+1)) );
+
 
     painter.setBrush( Brush(textureWithTransBackground) );
     painter.fillRect( RectF(PointF(450, 440), SizeF(200, 100)) );
