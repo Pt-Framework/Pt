@@ -230,7 +230,7 @@ static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, float
     }
 
     // Ensure that the number of segments are not too few
-    if(nSegs < 4) nSegs = 4;
+    if(nSegs < 3) nSegs = 3;
 
     // Calculate the inverse multiplication factor
     const float nSegs1i = 1.0f / (nSegs - 1);
@@ -887,6 +887,7 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount, boo
         std::vector<Point> points;
         cnvPointsFToPointsDeduplicate(points, ps, pointCount);
         // Rasterize the polygon
+        if(ps[0] == ps[pointCount - 1]) autoClose = true;
         _rasterizer->strokeOnePixelPolygonOutline(points.data(), points.size(), autoClose);
         return;
     }

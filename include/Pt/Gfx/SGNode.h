@@ -41,7 +41,7 @@ namespace Gfx{
 class ImagePainter2;
 
 
-/** @brief A scene-graph node class.
+/** @brief The base class for all scene-graph node classes.
   */
 class PT_GFX_API SGNode {
     public:
@@ -54,6 +54,9 @@ class PT_GFX_API SGNode {
         };
 
         typedef double                 ValueT;
+        typedef BasicPoint    <ValueT> PointT;
+        typedef BasicSize     <ValueT> SizeT;
+        typedef BasicRect     <ValueT> RectT;
         typedef BasicTransform<ValueT> TransformT;
 
         typedef std::vector<SGNode*>             Children;
@@ -285,19 +288,19 @@ class PT_GFX_API SGNodeLine : public SGNode {
         : SGNode( rm )
         {}
 
-        inline SGNodeLine(RenderMode rm, const PointF& from, const PointF& to)
+        inline SGNodeLine(RenderMode rm, const PointT& from, const PointT& to)
         : SGNode( rm )
         , _from ( from )
         , _to   ( to )
         {}
 
-        inline SGNodeLine(RenderMode rm, const PointF& from, const PointF& to, const TransformT& transform)
+        inline SGNodeLine(RenderMode rm, const PointT& from, const PointT& to, const TransformT& transform)
         : SGNode( rm, transform )
         , _from ( from )
         , _to   ( to )
         {}
 
-        inline SGNodeLine(RenderMode rm, const PointF& from, const PointF& to, const TransformT& transform, const Children& children)
+        inline SGNodeLine(RenderMode rm, const PointT& from, const PointT& to, const TransformT& transform, const Children& children)
         : SGNode( rm, transform, children )
         , _from ( from )
         , _to   ( to )
@@ -315,24 +318,71 @@ class PT_GFX_API SGNodeLine : public SGNode {
         // Direct access to the line object
         //
 
-        inline void set(const PointF& from, const PointF& to)
+        inline void set(const PointT& from, const PointT& to)
         {
             _from = from;
             _to   = to;
         }
 
-        inline const PointF& from() const
+        inline const PointT& from() const
         { return _from; }
 
-        inline const PointF& to() const
+        inline const PointT& to() const
         { return _to; }
 
     protected:
         virtual void drawImpl(ImagePainter2& painter, const TransformT& transform) const;
 
     protected:
-        PointF _from;
-        PointF _to;
+        PointT _from;
+        PointT _to;
+};
+
+
+/** @brief A scene-graph node class that specifies a rectangle or a rounded rectangle.
+  */
+class PT_GFX_API SGNodeRect : public SGNodePath {
+    public:
+        inline SGNodeRect(RenderMode rm = RenderInherit)
+        : SGNodePath( rm )
+        {}
+
+        inline SGNodeRect(RenderMode rm, const RectT& rect, float radius = 0.0f)
+        : SGNodePath( rm )
+        { set(rect, radius); }
+
+        inline SGNodeRect(RenderMode rm, const RectT& rect, float radius, const TransformT& transform)
+        : SGNodePath( rm, Path(), transform )
+        { set(rect, radius); }
+
+        inline SGNodeRect(RenderMode rm, const RectT& rect, float radius, const TransformT& transform, const Children& children)
+        : SGNodePath( rm, Path(), transform, children )
+        { set(rect, radius); }
+
+        virtual ~SGNodeRect();
+
+        //
+        // Management functions
+        //
+
+        virtual void clear();
+
+        //
+        // Direct access to the rectangle object
+        //
+
+        void set(const RectT& rect, float radius = 0.0f);
+
+        inline const RectT& rect() const
+        { return _rect; }
+
+        inline float radius() const
+        { return _radius; }
+
+
+    protected:
+        RectT _rect;
+        float _radius;
 };
 
 
