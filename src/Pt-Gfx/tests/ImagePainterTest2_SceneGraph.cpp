@@ -51,12 +51,12 @@ static void testSceneGraph(const char* title, Image& image, Painter& painter)
 
     sgn.transform().rotate(-15);
     sgn.transform().translate(50, 50);
-    sgn.drawNR(*ip2);
+    sgn.draw(*ip2);
 
     sgn.transform().identity();
     sgn.transform().scale(0.5f, 0.5f); // Note: the pen width is not scaled!
     sgn.transform().translate(500, 50);
-    sgn.drawNR(*ip2);
+    sgn.draw(*ip2);
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }

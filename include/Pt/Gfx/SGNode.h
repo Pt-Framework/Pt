@@ -62,6 +62,20 @@ class PT_GFX_API SGNode {
 
         typedef BasicTransform<double> TransformT;
 
+    private:
+        // A stack-element used for processing (traversing) the nodes
+        struct TraversalStack {
+            const SGNode*    node;      // Scene-graph node to be rendered
+            const Pen        pen;       // For saving the pen
+            const Brush      brush;     // For saving the brush
+            const TransformT transform; // For saving the transformation
+            bool             after;     // Flag that indicates the active processing phase
+
+            inline TraversalStack(const SGNode* node_, const Pen& pen_, const Brush& brush_, const SGNode::TransformT& transform_)
+            : node(node_), pen(pen_), brush(brush_), transform(transform_), after(false)
+            {}
+        };
+
     public:
         inline SGNode(RenderMode rm)
         : _parent(0)
@@ -123,11 +137,9 @@ class PT_GFX_API SGNode {
         inline void setBrush(const Brush& brush)
         { _brush = brush; }
 
-        void drawNR(ImagePainter2& painter, const TransformT* transform = 0);
+        void draw(ImagePainter2& painter, const TransformT* transform = 0);
 
         virtual void drawImpl(ImagePainter2& painter, const TransformT& transform) const = 0;
-
-        virtual void draw(ImagePainter2& painter, const TransformT* transform = 0) = 0;
 
         //
         // Access to the pen object
@@ -173,23 +185,12 @@ class PT_GFX_API SGNode {
         { return _children.end(); }
 
     protected:
-        const TransformT begDrawSeq(ImagePainter2& painter, const TransformT* transform);
-        const void endDrawSeq(ImagePainter2& painter);
-
-    protected:
         SGNode*    _parent;
-
         RenderMode _rm;
         Pen        _pen;
         Brush      _brush;
-
-        TransformT  _transform;
-
+        TransformT _transform;
         Children   _children;
-
-    private:
-        Pen   _savePen;
-        Brush _saveBrush;
 };
 
 
@@ -236,8 +237,6 @@ class PT_GFX_API SGNodePath : public SGNode {
         { _smoothness = smoothness; }
 
         virtual void drawImpl(ImagePainter2& painter, const TransformT& transform) const;
-
-        virtual void draw(ImagePainter2& painter, const TransformT* transform = 0);
 
         //
         // Access to the path object
@@ -288,8 +287,6 @@ class PT_GFX_API SGNodeLine : public SGNode {
         //
 
         virtual void drawImpl(ImagePainter2& painter, const TransformT& transform) const;
-
-        virtual void draw(ImagePainter2& painter, const TransformT* transform = 0);
 
         //
         // Access to the line object

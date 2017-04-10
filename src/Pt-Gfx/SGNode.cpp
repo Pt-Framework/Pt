@@ -42,138 +42,80 @@ namespace Pt {
 namespace Gfx {
 
 
-/*
-template <typename T>
-static void sgDumpTransformTMatrix(const BasicTransformT<T>& transform)
-{
-    T r[3][3];
-    transform.getRaw(r);
-
-    printf("    | %7.3f %7.3f %7.3f |\n", r[0][0], r[0][1], r[0][2]);
-    printf("    | %7.3f %7.3f %7.3f |\n", r[1][0], r[1][1], r[1][2]);
-    printf("    | %7.3f %7.3f %7.3f |\n", r[2][0], r[2][1], r[2][2]);
-    printf("\n");
-}
-//*/
-
-
 // ======================================================================================
 // ===== SGNode Class ===================================================================
 // ======================================================================================
 
 SGNode::~SGNode()
-{}
+{
+    // Delete all the child objects
+    for(Children::iterator it = _children.begin(); it != _children.end(); ++it) {
+        delete *it;
+    }
+}
 
 void SGNode::clear()
 {
-    // Delete the children
+    // Delete all the child objects
     for(Children::iterator it = _children.begin(); it != _children.end(); ++it) {
         delete *it;
     }
 
+    // Clear the children list
+    _children.clear();
+
+    // Make the transformation into an identity transformation
+    _transform.identity();
+
     // Null the pen and brush
     _pen   = Pen  ();
     _brush = Brush();
-
-    // Clear the transformation and children list
-    _transform.identity();
-    _children.clear();
 }
 
-//
-struct TraversalStack {
-    const SGNode*    node;
-    const Pen        pen;
-    const Brush      brush;
-    const SGNode::TransformT transform;
-    bool             leave;
-
-    inline TraversalStack(const SGNode* node_, const Pen& pen_, const Brush& brush_, const SGNode::TransformT& transform_)
-    : node(node_), pen(pen_), brush(brush_), transform(transform_), leave(false)
-    {}
-};
-
-void SGNode::drawNR(ImagePainter2& painter, const TransformT* transform_)
+void SGNode::draw(ImagePainter2& painter, const TransformT* transform_)
 {
-    //
+    // Prepare the transformation object
     TransformT transform = transform_ ? *transform_ : TransformT();
 
-    //
-    Pen   pen   = painter.pen  ();
-    Brush brush = painter.brush();
-
-    //
+    // Prepare the stack
     std::stack<TraversalStack> nStack;
-    nStack.push(TraversalStack(this, pen, brush, transform));
+    nStack.push(TraversalStack(this, painter.pen(), painter.brush(), transform));
 
+    // Loop while the stack is not empty
     while(!nStack.empty()) {
-        //
-        TraversalStack& cur = nStack.top();
-
-        //
-        if(!cur.leave) {
-            // Combine the transformations
-            transform = cur.node->_transform * transform;
-            // Set the current pen and/or brush as needed
-            if(!cur.node->_pen  .isNull()) painter.setPen  (cur.node->_pen  );
-            if(!cur.node->_brush.isNull()) painter.setBrush(cur.node->_brush);
-
-            cur.node->drawImpl(painter, transform);
-
-            // Process the children
-            for(Children::const_reverse_iterator it = cur.node->_children.rbegin(); it != cur.node->_children.rend(); ++it) {
-                if( (*it)->_rm == RenderNone ) continue;
-                nStack.push(TraversalStack(*it, pen, brush, transform));
+        // Get the current stack element
+        TraversalStack& eCur = nStack.top();
+        // If the flag is not set, then this is the "before" phase
+        if(!eCur.after) {
+            // Update the active transform object
+            transform = eCur.node->_transform * transform;
+            // Set this node's pen and/or brush to the painter as needed
+            if(!eCur.node->_pen  .isNull()) painter.setPen  (eCur.node->_pen  );
+            if(!eCur.node->_brush.isNull()) painter.setBrush(eCur.node->_brush);
+            // Draw this node
+            eCur.node->drawImpl(painter, transform);
+            // Process the children of this node
+            for(Children::const_reverse_iterator it = eCur.node->_children.rbegin(); it != eCur.node->_children.rend(); ++it) {
+                // Only store to stack if it is not hidden
+                const SGNode* child = *it;
+                if(child->_rm == RenderNone) continue;
+                nStack.push(TraversalStack(child, painter.pen(), painter.brush(), transform));
             }
-
-            //
-            cur.leave = true;
-
+            // Set the flag so that the next time this element is visited again,
+            // the "after" phase will be processed instead
+            eCur.after = true;
         }
-
-        //
+        // If the flag is set, then this is the "after" phase
         else {
-            //
-            transform = cur.transform;
-            // Restore the original pen and/or brush as needed
-            if(!cur.node->_pen  .isNull()) painter.setPen  (cur.pen  );
-            if(!cur.node->_brush.isNull()) painter.setBrush(cur.brush);
-
-            //
+            // Restore the painter's original pen and/or brush as needed
+            if(!eCur.node->_pen  .isNull()) painter.setPen  (eCur.pen  );
+            if(!eCur.node->_brush.isNull()) painter.setBrush(eCur.brush);
+            // Restore the transform object
+            transform = eCur.transform;
+            // Pop the stack element
             nStack.pop();
         }
     }
-
-
-}
-
-const SGNode::TransformT SGNode::begDrawSeq(ImagePainter2& painter, const TransformT* transform)
-{
-    // Combine the transformations
-    const TransformT& thisTransformT = transform ? ( _transform * (*transform) ) : _transform;
-
-    // Save the original pen and brush as needed
-    if(!_pen  .isNull()) _savePen   = painter.pen  ();
-    if(!_brush.isNull()) _saveBrush = painter.brush();
-
-    // Set the current pen and/or brush as needed
-    if(!_pen  .isNull()) painter.setPen  (_pen  );
-    if(!_brush.isNull()) painter.setBrush(_brush);
-
-    // Draw the children
-    for(Children::iterator it = _children.begin(); it != _children.end(); ++it) {
-        (*it)->draw(painter, &thisTransformT);
-    }
-
-    // Combine the combined transformations
-    return thisTransformT;
-}
-
-const void SGNode::endDrawSeq(ImagePainter2& painter)
-{
-    // Restore the original pen and/or brush as needed
-    if(!_pen  .isNull()) painter.setPen  (_savePen  );
-    if(!_brush.isNull()) painter.setBrush(_saveBrush);
 }
 
 
@@ -215,34 +157,6 @@ void SGNodePath::drawImpl(ImagePainter2& painter, const TransformT& transform) c
     }
 }
 
-void SGNodePath::draw(ImagePainter2& painter, const TransformT* transform)
-{
-    // Check if this node and all its children must not be drawn
-    if(_rm == RenderNone) return;
-
-    // Begin the drawing sequence
-    const TransformT& thisTransformT = begDrawSeq(painter, transform);
-
-    // Draw the path only if it is not null
-    if(!_path.isNull()) {
-        // Generate points
-        std::vector<PointF> pointsF;
-        _path.generatePoints(pointsF, _smoothness);
-        // TransformT points
-        thisTransformT.transformPoints(pointsF.data(), pointsF.size());
-        // Draw based on the mode
-        switch(renderMode()) {
-            case RenderFill            : painter.fillPolygon (pointsF.data(), pointsF.size()       ); break;
-            case RenderStroke          : painter.drawPolyline(pointsF.data(), pointsF.size(), false); break;
-            case RenderStrokeAutoClose : painter.drawPolyline(pointsF.data(), pointsF.size(), true ); break;
-            default                    :                                                              break;
-        }
-    }
-
-    // End the drawing sequence
-    endDrawSeq(painter);
-}
-
 
 // ======================================================================================
 // ===== SGNodeLine Class ===============================================================
@@ -265,32 +179,6 @@ void SGNodeLine::drawImpl(ImagePainter2& painter, const TransformT& transform) c
         case RenderStrokeAutoClose : painter.drawLine(f, t); break;
         default                    :                         break;
     }
-}
-
-void SGNodeLine::draw(ImagePainter2& painter, const TransformT* transform)
-{
-    // Check if this node and all its children must not be drawn
-    if(_rm == RenderNone) return;
-
-    // Begin the drawing sequence
-    const TransformT& thisTransformT = begDrawSeq(painter, transform);
-
-    // TransformT the coordinates
-    PointF f, t;
-
-    thisTransformT.transformPoint(f, _from);
-    thisTransformT.transformPoint(t, _to  );
-
-    // Draw the line based on the mode
-    switch(renderMode()) {
-        case RenderFill            : /* Fallthrough */
-        case RenderStroke          : /* Fallthrough */
-        case RenderStrokeAutoClose : painter.drawLine(f, t); break;
-        default                    :                         break;
-    }
-
-    // End the drawing sequence
-    endDrawSeq(painter);
 }
 
 
