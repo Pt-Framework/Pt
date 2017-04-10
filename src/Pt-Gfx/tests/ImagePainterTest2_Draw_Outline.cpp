@@ -207,7 +207,9 @@ static void testDrawRect(const char* title, Image& image, Painter& painter)
 
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
-/*
+
+#if 0
+
     // Solid
     painter.setPen  ( Color::fromRgb8(255, 255,   0, 175) );
     painter.setBrush( Color::fromRgb8(255,   0, 255, 175) );
@@ -255,43 +257,53 @@ static void testDrawRect(const char* title, Image& image, Painter& painter)
     painter.drawRect( RectF(PointF(750, 100), SizeF(200, 100)) );
     painter.drawRect( RectF(PointF(750, 270), SizeF(200, 100)) );
     painter.drawRect( RectF(PointF(750, 440), SizeF(200, 100)) );
-**/
 
+#else
 
     painter.setPen( Color::fromRgb8(255, 0, 0) );
+    painter.setFont( Pt::Gfx::Font(FONT_SPEC_N) );
 
     painter.setBrush( Brush(textureWithWhiteBackground, 100, 0) );
     painter.fillRect( RectF(PointF(0+1, 0+1), SizeF(200, 200)) );
     painter.drawRect( RectF(PointF(0+0, 0+0), SizeF(200+2, 200+2)) );
+    painter.drawText( PointF(0, 0+30), "100, 0" );
 
     painter.setBrush( Brush(textureWithWhiteBackground, 0, 100) );
     painter.fillRect( RectF(PointF(250+1, 0+1), SizeF(200, 200)) );
     painter.drawRect( RectF(PointF(250+0, 0+0), SizeF(200+2, 200+2)) );
+    painter.drawText( PointF(250, 0+30), "0, 100" );
 
     painter.setBrush( Brush(textureWithWhiteBackground, 100, 100) );
     painter.fillRect( RectF(PointF(500+1, 0+1), SizeF(200, 200)) );
     painter.drawRect( RectF(PointF(500+0, 0+0), SizeF(200+2, 200+2)) );
+    painter.drawText( PointF(500, 0+30), "100, 100" );
 
     painter.setBrush( Brush(textureWithWhiteBackground, -100, 0) );
     painter.fillRect( RectF(PointF(0+1, 250+1), SizeF(200, 200)) );
     painter.drawRect( RectF(PointF(0+0, 250+0), SizeF(200+2, 200+2)) );
+    painter.drawText( PointF(0, 250+30), "-100, 0" );
 
     painter.setBrush( Brush(textureWithWhiteBackground, 0, -100) );
     painter.fillRect( RectF(PointF(250+1, 250+1), SizeF(200, 200)) );
     painter.drawRect( RectF(PointF(250+0, 250+0), SizeF(200+2, 200+2)) );
+    painter.drawText( PointF(250, 250+30), "0, -100" );
 
     painter.setBrush( Brush(textureWithWhiteBackground, -100, -100) );
     painter.fillRect( RectF(PointF(500+1, 250+1), SizeF(200, 200)) );
     painter.drawRect( RectF(PointF(500+0, 250+0), SizeF(200+2, 200+2)) );
-
+    painter.drawText( PointF(500, 250+30), "-100, -100" );
 
     painter.setBrush( Brush(textureWithWhiteBackground, 100, -100) );
     painter.fillRect( RectF(PointF(750+1, 0+1), SizeF(200, 200)) );
     painter.drawRect( RectF(PointF(750+0, 0+0), SizeF(200+2, 200+2)) );
+    painter.drawText( PointF(750, 30), "100, -100" );
 
     painter.setBrush( Brush(textureWithWhiteBackground, -100, 100) );
     painter.fillRect( RectF(PointF(750+1, 250+1), SizeF(200, 200)) );
     painter.drawRect( RectF(PointF(750+0, 250+0), SizeF(200+2, 200+2)) );
+    painter.drawText( PointF(750, 250+30), "-100, 100" );
+
+#endif
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
 }
