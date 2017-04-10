@@ -140,6 +140,15 @@ class PT_GFX_API BasicTransform {
         inline void transformPoints(PointF* dxy, const PointF* sxy, size_t pointCount) const;
         inline void transformPoints(PointF* xy, size_t pointCount) const;
 
+        inline void transformSize(T& dz, const T& sz) const;
+        inline void transformSize(T& z) const;
+
+        inline void transformSizePair(T& dza, T& dzb, const T& sza, const T& szb) const;
+        inline void transformSizePair(T& za, T& zb) const;
+
+        inline void transformSize(SizeF& dz, const SizeF& sz) const;
+        inline void transformSize(SizeF& z) const;
+
         inline void extractTranslation(T& x, T& y) const;
         inline void extractScaling(T& x, T& y) const;
         inline void extractRotation(T& deg) const;
@@ -216,6 +225,10 @@ inline BasicTransform<T>::BasicTransform(const BasicTransform<T>& m)
 template <typename T>
 inline BasicTransform<T>::~BasicTransform()
 {}
+
+//
+// Management functions
+//
 
 template <typename T>
 inline bool BasicTransform<T>::isIdentity() const
@@ -342,6 +355,10 @@ inline void BasicTransform<T>::setRaw(const T m[3][3])
     _isIdentity = false;
 }
 
+//
+// Overloaded operators
+//
+
 template <typename T>
 inline const BasicTransform<T>& BasicTransform<T>::operator=(const BasicTransform<T>& m)
 {
@@ -374,6 +391,10 @@ inline bool BasicTransform<T>::operator==(const BasicTransform<T>& m) const
 template <typename T>
 inline bool BasicTransform<T>::operator!=(const BasicTransform<T>& m) const
 { return memcmp(&_mdata, &m._mdata, sizeof(_mdata)) != 0; }
+
+//
+// Transform-point functions
+//
 
 template <typename T>
 inline void BasicTransform<T>::transformPoint(T& dx, T& dy, T sx, T sy) const
@@ -457,6 +478,71 @@ inline void BasicTransform<T>::transformPoints(PointF* xy, size_t pointCount) co
     for(size_t i = 0; i < pointCount; ++i) transformPoint(xy[i]);
 }
 
+//
+// Transform-size functions
+//
+
+template <typename T>
+inline void BasicTransform<T>::transformSize(T& dz, const T& sz) const
+{
+    T zx = sz, rx = 0;
+    T zy =  0, ry = 0;
+
+    transformPoint(zx, zy);
+    transformPoint(rx, ry);
+
+    const T dx = zx - rx;
+    const T dy = zy - ry;
+
+    dz = ::sqrt(dx * dx + dy * dy);
+}
+
+template <typename T>
+inline void BasicTransform<T>::transformSize(T& z) const
+{ transformSize(z, z); }
+
+template <typename T>
+inline void BasicTransform<T>::transformSizePair(T& dza, T& dzb, const T& sza, const T& szb) const
+{
+    T zxa = sza, zxb = szb, rx = 0;
+    T zya =   0, zyb =   0, ry = 0;
+
+    transformPoint(zxa, zya);
+    transformPoint(zxb, zyb);
+    transformPoint(rx,  ry );
+
+    const T dxa = zxa - rx;
+    const T dya = zya - ry;
+    const T dxb = zxb - rx;
+    const T dyb = zyb - ry;
+
+    dza = ::sqrt(dxa * dxa + dya * dya);
+    dzb = ::sqrt(dxb * dxb + dyb * dyb);
+}
+
+template <typename T>
+inline void BasicTransform<T>::transformSizePair(T& za, T& zb) const
+{ transformSizePair(za, zb, za, zb); }
+
+template <typename T>
+inline void BasicTransform<T>::transformSize(SizeF& dz, const SizeF& sz) const
+{
+    T za = sz.width ();
+    T zb = sz.height();
+
+    transformSizePair(za, zb, za, zb);
+
+    dz.set(za, zb);
+}
+
+template <typename T>
+inline void BasicTransform<T>::transformSize(SizeF& z) const
+{ transformSize(z, z); }
+
+//
+// Extraction functions
+//
+
 template <typename T>
 inline void BasicTransform<T>::extractTranslation(T& x, T& y) const
 {
@@ -510,6 +596,10 @@ inline void BasicTransform<T>::extractShearingY(T& deg) const
 // ======================================================================================
 // ===== Inlined Public Member Functions (Specialization for float) =====================
 // ======================================================================================
+
+//
+// Management functions
+//
 
 template <>
 inline void BasicTransform<float>::rotate(float deg, bool replaceInsteadOfCombine)
@@ -565,6 +655,10 @@ inline void BasicTransform<float>::shearY(float deg, bool replaceInsteadOfCombin
     updateMatrix(n, replaceInsteadOfCombine);
     _isIdentity = false;
 }
+
+//
+// Transform-point functions
+//
 
 #if defined(PT_GFX_USE_AVX1)
 
@@ -725,6 +819,71 @@ inline void BasicTransform<float>::transformPoints(PointF* dxy, const PointF* sx
 template <>
 inline void BasicTransform<float>::transformPoints(PointF* xy, size_t pointCount) const
 { if(!_isIdentity) transformPoints(xy, xy, pointCount); }
+
+//
+// Transform-size functions
+//
+
+template <>
+inline void BasicTransform<float>::transformSize(float& dz, const float& sz) const
+{
+    float zx = sz, rx = 0;
+    float zy =  0, ry = 0;
+
+    transformPoint(zx, zy);
+    transformPoint(rx, ry);
+
+    const float dx = zx - rx;
+    const float dy = zy - ry;
+
+    dz = Gfx::Math::fastSqrt(dx * dx + dy * dy);
+}
+
+template <>
+inline void BasicTransform<float>::transformSize(float& z) const
+{ transformSize(z, z); }
+
+template <>
+inline void BasicTransform<float>::transformSizePair(float& dza, float& dzb, const float& sza, const float& szb) const
+{
+    float zxa = sza, zxb = szb, rx = 0;
+    float zya =   0, zyb =   0, ry = 0;
+
+    transformPoint(zxa, zya);
+    transformPoint(zxb, zyb);
+    transformPoint(rx,  ry );
+
+    const float dxa = zxa - rx;
+    const float dya = zya - ry;
+    const float dxb = zxb - rx;
+    const float dyb = zyb - ry;
+
+    dza = Gfx::Math::fastSqrt(dxa * dxa + dya * dya);
+    dzb = Gfx::Math::fastSqrt(dxb * dxb + dyb * dyb);
+}
+
+template <>
+inline void BasicTransform<float>::transformSizePair(float& za, float& zb) const
+{ transformSizePair(za, zb, za, zb); }
+
+template <>
+inline void BasicTransform<float>::transformSize(SizeF& dz, const SizeF& sz) const
+{
+    float za = sz.width ();
+    float zb = sz.height();
+
+    transformSizePair(za, zb, za, zb);
+
+    dz.set(za, zb);
+}
+
+template <>
+inline void BasicTransform<float>::transformSize(SizeF& z) const
+{ transformSize(z, z); }
+
+//
+// Extraction functions
+//
 
 template <>
 inline void BasicTransform<float>::extractScaling(float& x, float& y) const
