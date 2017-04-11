@@ -964,7 +964,7 @@ void Rasterizer2::rasterPolygonAreaXWAA(const PointF* points, const size_t* poin
             if(to < from) continue;
             // Store the scanline coordinate as needed
             if(_compositionMode != CompositionMode::SourceCopy) {
-                scanlines[pixelY - minY].push_back(ScanlineElement16(from, to));
+                scanlines[pixelY - minY + 1].push_back(ScanlineElement16(from, to));
             }
             // Draw the scanline
             rasterScanline(from - minX, to - minX, pixelY - minY, minX, minY, color);
@@ -983,7 +983,7 @@ void Rasterizer2::rasterPolygonAreaXWAA(const PointF* points, const size_t* poin
             rasterOnePixelAreaGLineSegmentXWAA_F(
                 curPointBase[i    ].x(), curPointBase[i    ].y(),
                 curPointBase[i + 1].x(), curPointBase[i + 1].y(),
-                color, minX, minY_, scanlines, mask_nnp1
+                color, minX, minY_ - 1, scanlines, mask_nnp1
             );
             if(!i) memcpy(&mask_zero, &mask_nnp1, sizeof(mask_zero));
         }
@@ -995,7 +995,7 @@ void Rasterizer2::rasterPolygonAreaXWAA(const PointF* points, const size_t* poin
         rasterOnePixelAreaGLineSegmentXWAA_F(
              curPointBase[pc1].x(), curPointBase[pc1].y(),
              curPointBase[0  ].x(), curPointBase[0  ].y(),
-             color, minX, minY_, scanlines, mask_zero
+             color, minX, minY_ - 1, scanlines, mask_zero
         );
         // Increment the base pointer
         curPointBase += pointCount[p];

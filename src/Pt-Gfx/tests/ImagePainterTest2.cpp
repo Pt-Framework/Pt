@@ -81,8 +81,8 @@ using namespace Pt::Gfx;
 #define BENCHMARK_CAIRO_CHECK_RESULTING_IMAGE 0
 
 // General settings for Pt-Gfx
-#define DO_TEST_DRAW    0
-#define DO_BENCHMARKING 1
+#define DO_TEST_DRAW    1
+#define DO_BENCHMARKING 0
 
 // Detailed-test enable settings for Pt-Gfx
 #define TEST_SOURCECOPY                         1
@@ -131,7 +131,7 @@ using namespace Pt::Gfx;
 
 #define BENCHMARK_SOLID_LINE                0
 #define BENCHMARK_PATTERNED_LINE            0
-#define BENCHMARK_SOLID_THICK_LINE          1
+#define BENCHMARK_SOLID_THICK_LINE          0
 #define BENCHMARK_PATTERNED_THICK_LINE      0
 
 #define BENCHMARK_RECTANGLE                 0
@@ -159,7 +159,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_GRADIENT_FILLED_ARC       0
 #define BENCHMARK_TEXTURE_FILLED_ARC        0
 
-#define BENCHMARK_PATH                      0
+#define BENCHMARK_PATH                      1
 
 // Configurations and objects
 #define FONT_DIR    "../src/Pt-Gfx/fonts"
