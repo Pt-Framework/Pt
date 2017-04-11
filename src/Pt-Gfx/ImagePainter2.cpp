@@ -28,6 +28,8 @@
   02110-1301 USA
 */
 
+#include "ImagePainter2_TestConfig.h"
+
 #include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/ImagePainter2.h>
 
@@ -37,9 +39,6 @@
 
 namespace Pt {
 namespace Gfx {
-
-
-//#define USE_HIRES_WITH_STANDARD_AA
 
 
 // ======================================================================================
@@ -771,7 +770,7 @@ void ImagePainter2::drawLine( const PointF& from, const PointF& to )
     cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
 
     // Rasterize the polygon
-    _rasterizer->strokePolygonSeparate(points.data(), points.size());
+    _rasterizer->penFillPolygonSeparate(points.data(), points.size());
 }
 
 void ImagePainter2::drawRect( const RectF& rect )
@@ -1053,7 +1052,7 @@ void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
         cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
         // Rasterize the polygon
         _rasterizer->setPen(newPen);
-        _rasterizer->strokePolygon(points.data(), points.size());
+        _rasterizer->penFillPolygon(points.data(), points.size());
         _rasterizer->setPen(orgPen);
     }
 
@@ -1184,7 +1183,7 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
         cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
         // Rasterize the polygon
         _rasterizer->setPen(newPen);
-        _rasterizer->strokePolygon(points.data(), points.size());
+        _rasterizer->penFillPolygon(points.data(), points.size());
         _rasterizer->setPen(orgPen);
     }
 
@@ -1315,18 +1314,30 @@ void ImagePainter2::drawThickPolyline_impl(const PointF* ps, const size_t pointC
                     thickenPatternedPolygon(pointsF, basePtr, curPCnt);
                 }
             }
-#if 0 && defined(USE_HIRES_WITH_STANDARD_AA)
-            // Remove duplicates
-            std::vector<PointF> points;
-            deduplicatePointsF(points, pointsF.data(), pointsF.size());
+            // Determine whether to use the higher resolution function
+#if defined(USE_HIRES_WITH_STANDARD_AA)
+            const bool useFloatFuncs = _rasterizer->antiAliasingMode() == AntiAliasingMode::Standard;
 #else
-            // Round the points and remove duplicates
-            std::vector<Point> points;
-            cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
+            const bool useFloatFuncs = false;
 #endif
-            // Rasterize the polygon
-            if(solidPen && closedPolygon) _rasterizer->strokePolygon        (points.data(), points.size());
-            else                          _rasterizer->strokePolygonSeparate(points.data(), points.size());
+            // Use higher precision rasterization when using AntiAliasingMode::Standard
+            if(useFloatFuncs) {
+                // Remove duplicates
+                std::vector<PointF> points;
+                deduplicatePointsF(points, pointsF.data(), pointsF.size());
+                // Rasterize the polygon
+                if(solidPen && closedPolygon) _rasterizer->penFillPolygon        (points.data(), points.size());
+                else                          _rasterizer->penFillPolygonSeparate(points.data(), points.size());
+            }
+            // Use lower precision rasterization when using other modes
+            else {
+                // Round the points and remove duplicates
+                std::vector<Point> points;
+                cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
+                // Rasterize the polygon
+                if(solidPen && closedPolygon) _rasterizer->penFillPolygon        (points.data(), points.size());
+                else                          _rasterizer->penFillPolygonSeparate(points.data(), points.size());
+            }
         }
     }
 }

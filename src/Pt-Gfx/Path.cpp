@@ -27,6 +27,8 @@
   02110-1301 USA
 */
 
+#include "ImagePainter2_TestConfig.h"
+
 #include <Pt/SourceInfo.h>
 
 #include <Pt/Gfx/Path.h>
@@ -42,8 +44,14 @@ namespace Pt {
 namespace Gfx {
 
 
-// ### TEST: If USE_HIRES_WITH_STANDARD_AA is defined in ImagePainter2.cpp, then this value must be set to 1 ###
-#define ADD_FAC 0
+//
+// Increase the curve resolution as needed
+//
+#if defined(USE_HIRES_WITH_STANDARD_AA)
+    #define ADD_FAC 1
+#else
+    #define ADD_FAC 0
+#endif
 
 
 // ======================================================================================

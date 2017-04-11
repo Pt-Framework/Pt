@@ -100,7 +100,7 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_SOLID_THICK_ELLIPSES_ARCS     0
 #define TEST_DRAW_PATTERNED_THICK_ELLIPSES_ARCS 0
 
-#define TEST_DRAW_SOLID_FILLED_POLYGONS         0
+#define TEST_DRAW_SOLID_FILLED_POLYGONS         1
 #define TEST_DRAW_GRADIENT_FILLED_POLYGONS      0
 #define TEST_DRAW_TEXTURE_FILLED_POLYGONS       0
 
@@ -109,8 +109,8 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  0
 
 #define TEST_DRAW_PATH                          0 // (including thick and filled)
-#define TEST_DRAW_PATH_CLIPPING                 1
-#define TEST_DRAW_EXTRA                         0
+#define TEST_DRAW_PATH_CLIPPING                 0
+#define TEST_DRAW_EXTRA                         0 // (including n-bezier)
 
 #define TEST_SCENE_GRAPH                        0
 #define TEST_SVG_READER                         0
@@ -131,7 +131,7 @@ using namespace Pt::Gfx;
 
 #define BENCHMARK_SOLID_LINE                0
 #define BENCHMARK_PATTERNED_LINE            0
-#define BENCHMARK_SOLID_THICK_LINE          0
+#define BENCHMARK_SOLID_THICK_LINE          1
 #define BENCHMARK_PATTERNED_THICK_LINE      0
 
 #define BENCHMARK_RECTANGLE                 0
@@ -159,7 +159,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_GRADIENT_FILLED_ARC       0
 #define BENCHMARK_TEXTURE_FILLED_ARC        0
 
-#define BENCHMARK_PATH                      1
+#define BENCHMARK_PATH                      0
 
 // Configurations and objects
 #define FONT_DIR    "../src/Pt-Gfx/fonts"

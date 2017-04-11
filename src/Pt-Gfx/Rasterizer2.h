@@ -162,10 +162,10 @@ class Rasterizer2
         void strokeOnePixelQuadraticPolybezierOutline(const Point* points, size_t pointCount);
         void strokeOnePixelEllipseArc(const Point& topLeft, const Size& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
-        void strokePolygon(const Point* points, size_t pointCount);
-        void strokePolygon(const PointF* points, size_t pointCount);
-        void strokePolygonSeparate(const Point* points, size_t pointCount);
-        void strokePolygonSeparate(const PointF* points, size_t pointCount);
+        void penFillPolygon(const Point* points, size_t pointCount);
+        void penFillPolygon(const PointF* points, size_t pointCount);
+        void penFillPolygonSeparate(const Point* points, size_t pointCount);
+        void penFillPolygonSeparate(const PointF* points, size_t pointCount);
 
         void fillRect(const Point& tl, const Point& br);
         void fillPolygon(const Point* points, size_t pointCount);
