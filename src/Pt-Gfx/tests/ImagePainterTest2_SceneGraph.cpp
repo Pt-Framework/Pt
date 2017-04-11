@@ -53,7 +53,7 @@ static void testSceneGraph(const char* title, Image& image, Painter& painter)
     psgn.setPen  (Color::fromRgb8(255, 255, 255));
     psgn.setBrush(Color::fromRgb8(255, 255, 255));
 
-    psgn.transform().rotate(-15);
+    //psgn.transform().rotate(-15);
     psgn.transform().translate(100, 50);
     psgn.draw(*ip2);
 

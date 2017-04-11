@@ -230,7 +230,7 @@ static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, float
     }
 
     // Ensure that the number of segments are not too few
-    if(nSegs < 3) nSegs = 3;
+    if(nSegs < 4) nSegs = 4;
 
     // Calculate the inverse multiplication factor
     const float nSegs1i = 1.0f / (nSegs - 1);
