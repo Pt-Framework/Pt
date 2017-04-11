@@ -765,12 +765,30 @@ void ImagePainter2::drawLine( const PointF& from, const PointF& to )
         generatePatternedSingleLineSegment(pointsF, from.x(), from.y(), to.x(), to.y(), piCtrInOut);
     }
 
-    // Round the points and remove duplicates
-    std::vector<Point> points;
-    cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
+    // Determine whether to use the higher resolution function
+#if defined(USE_HIRES_WITH_STANDARD_AA)
+    const bool useFloatFuncs = _rasterizer->antiAliasingMode() == AntiAliasingMode::Standard;
+#else
+    const bool useFloatFuncs = false;
+#endif
 
-    // Rasterize the polygon
-    _rasterizer->penFillPolygonSeparate(points.data(), points.size());
+    // Use higher precision rasterization when using AntiAliasingMode::Standard
+    if(useFloatFuncs) {
+        // Remove duplicates
+        std::vector<PointF> points;
+        deduplicatePointsF(points, pointsF.data(), pointsF.size());
+        // Rasterize the polygon
+        _rasterizer->penFillPolygonSeparate(points.data(), points.size());
+    }
+
+    // Use lower precision rasterization when using other modes
+    else {
+        // Round the points and remove duplicates
+        std::vector<Point> points;
+        cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
+        // Rasterize the polygon
+        _rasterizer->penFillPolygonSeparate(points.data(), points.size());
+    }
 }
 
 void ImagePainter2::drawRect( const RectF& rect )
@@ -873,12 +891,30 @@ void ImagePainter2::fillRoundRect( const RectF& rect, float radius )
     std::vector<PointF> pointsF;
     generateRoundRectPoints(pointsF, x1, y1, x2, y2, radius, Gfx::Math::zcint(_rasterizer->pen().size() * 0.5f));
 
-    // Round the points and remove duplicates
-    std::vector<Point> points;
-    cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
+    // Determine whether to use the higher resolution function
+#if defined(USE_HIRES_WITH_STANDARD_AA)
+    const bool useFloatFuncs = _rasterizer->antiAliasingMode() == AntiAliasingMode::Standard;
+#else
+    const bool useFloatFuncs = false;
+#endif
 
-    // Draw the polygon
-    _rasterizer->fillPolygon(points.data(), points.size());
+    // Use higher precision rasterization when using AntiAliasingMode::Standard
+    if(useFloatFuncs) {
+        // Remove duplicates
+        std::vector<PointF> points;
+        deduplicatePointsF(points, pointsF.data(), pointsF.size());
+        // Draw the polygon
+        _rasterizer->fillPolygon(points.data(), points.size());
+    }
+
+    // Use lower precision rasterization when using other modes
+    else {
+        // Round the points and remove duplicates
+        std::vector<Point> points;
+        cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
+        // Draw the polygon
+        _rasterizer->fillPolygon(points.data(), points.size());
+    }
 }
 
 void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount, bool autoClose )
@@ -1047,13 +1083,32 @@ void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
         generateEllipsePoints(pointsF, radiusXo, radiusYo, centerX, centerY, 0);
         pointsF.push_back(Painter::PolygonSeparatorPointF);
         generateEllipsePoints(pointsF, radiusXi, radiusYi, centerX, centerY, 0);
-        // Round the points and remove duplicates
-        std::vector<Point> points;
-        cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
-        // Rasterize the polygon
-        _rasterizer->setPen(newPen);
-        _rasterizer->penFillPolygon(points.data(), points.size());
-        _rasterizer->setPen(orgPen);
+        // Determine whether to use the higher resolution function
+#if defined(USE_HIRES_WITH_STANDARD_AA)
+        const bool useFloatFuncs = _rasterizer->antiAliasingMode() == AntiAliasingMode::Standard;
+#else
+        const bool useFloatFuncs = false;
+#endif
+        // Use higher precision rasterization when using AntiAliasingMode::Standard
+        if(useFloatFuncs) {
+            // Remove duplicates
+            std::vector<PointF> points;
+            deduplicatePointsF(points, pointsF.data(), pointsF.size());
+            // Rasterize the polygon
+            _rasterizer->setPen(newPen);
+            _rasterizer->penFillPolygon(points.data(), points.size());
+            _rasterizer->setPen(orgPen);
+        }
+        // Use lower precision rasterization when using other modes
+        else {
+            // Round the points and remove duplicates
+            std::vector<Point> points;
+            cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
+            // Rasterize the polygon
+            _rasterizer->setPen(newPen);
+            _rasterizer->penFillPolygon(points.data(), points.size());
+            _rasterizer->setPen(orgPen);
+        }
     }
 
     // Patterned
@@ -1178,13 +1233,32 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
             // Combine the arc's lines and add caps
             combineLinePointsAndAddCaps(pointsF, inner, outer, newPen.capStyle(), newPen.capStyle(), penSize);
         }
-        // Round the points and remove duplicates
-        std::vector<Point> points;
-        cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
-        // Rasterize the polygon
-        _rasterizer->setPen(newPen);
-        _rasterizer->penFillPolygon(points.data(), points.size());
-        _rasterizer->setPen(orgPen);
+        // Determine whether to use the higher resolution function
+#if defined(USE_HIRES_WITH_STANDARD_AA)
+        const bool useFloatFuncs = _rasterizer->antiAliasingMode() == AntiAliasingMode::Standard;
+#else
+        const bool useFloatFuncs = false;
+#endif
+        // Use higher precision rasterization when using AntiAliasingMode::Standard
+        if(useFloatFuncs) {
+            // Remove duplicates
+            std::vector<PointF> points;
+            deduplicatePointsF(points, pointsF.data(), pointsF.size());
+            // Rasterize the polygon
+            _rasterizer->setPen(newPen);
+            _rasterizer->penFillPolygon(points.data(), points.size());
+            _rasterizer->setPen(orgPen);
+        }
+        // Use lower precision rasterization when using other modes
+        else {
+            // Round the points and remove duplicates
+            std::vector<Point> points;
+            cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
+            // Rasterize the polygon
+            _rasterizer->setPen(newPen);
+            _rasterizer->penFillPolygon(points.data(), points.size());
+            _rasterizer->setPen(orgPen);
+        }
     }
 
     // Patterned
@@ -1249,12 +1323,30 @@ void ImagePainter2::fillPath(const Path& path2d, const Transform& transform, flo
     path2d.generatePoints(pointsF, smoothness);
     transform.transformPoints(pointsF.data(), pointsF.size());
 
-    // Round the points and remove duplicates
-    std::vector<Point> points;
-    cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
+    // Determine whether to use the higher resolution function
+#if defined(USE_HIRES_WITH_STANDARD_AA)
+    const bool useFloatFuncs = _rasterizer->antiAliasingMode() == AntiAliasingMode::Standard;
+#else
+    const bool useFloatFuncs = false;
+#endif
 
-    // Draw the points as polygon
-    _rasterizer->fillPolygon(points.data(), points.size());
+    // Use higher precision rasterization when using AntiAliasingMode::Standard
+    if(useFloatFuncs) {
+        // Remove duplicates
+        std::vector<PointF> points;
+        deduplicatePointsF(points, pointsF.data(), pointsF.size());
+        // Draw the path as a filled polygon
+        _rasterizer->fillPolygon(points.data(), points.size());
+    }
+
+    // Use lower precision rasterization when using other modes
+    else {
+        // Round the points and remove duplicates
+        std::vector<Point> points;
+        cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
+        // Draw the path as a filled polygon
+        _rasterizer->fillPolygon(points.data(), points.size());
+    }
 }
 
 
