@@ -39,25 +39,25 @@ namespace Gfx{
 
 /** @brief A scene-graph node class that specifies a rectangle or a rounded rectangle.
   */
-class PT_GFX_API SGNodeRect : public SGNodePath {
+class PT_GFX_API SGNodeRectangle : public SGNodePath {
     public:
-        inline SGNodeRect(RenderMode rm = RenderInherit)
+        inline SGNodeRectangle(RenderMode rm = RenderInherit)
         : SGNodePath( rm )
         {}
 
-        inline SGNodeRect(RenderMode rm, const RectT& rect, float radius = 0.0f)
+        inline SGNodeRectangle(RenderMode rm, const RectT& rect, float radius = 0.0f)
         : SGNodePath( rm )
         { set(rect, radius); }
 
-        inline SGNodeRect(RenderMode rm, const RectT& rect, float radius, const TransformT& transform)
+        inline SGNodeRectangle(RenderMode rm, const RectT& rect, float radius, const TransformT& transform)
         : SGNodePath( rm, Path(), transform )
         { set(rect, radius); }
 
-        inline SGNodeRect(RenderMode rm, const RectT& rect, float radius, const TransformT& transform, const Children& children)
+        inline SGNodeRectangle(RenderMode rm, const RectT& rect, float radius, const TransformT& transform, const Children& children)
         : SGNodePath( rm, Path(), transform, children )
         { set(rect, radius); }
 
-        virtual ~SGNodeRect();
+        virtual ~SGNodeRectangle();
 
         //
         // Management functions

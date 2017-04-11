@@ -27,8 +27,9 @@ static void testSceneGraph(const char* title, Image& image, Painter& painter)
                 csgn2->setBrush( Color::fromRgb8(255, 0, 0) );
 
     // Parent's 3rd child
-  //SGNodeRect* csgn3 = &psgn.addChild( new SGNodeRect( SGNode::RenderFill, RectF(PointF(0, 0), SizeF(50, 50)), 10 ) );
-    SGNodeRect* csgn3 = &psgn.addChild( new SGNodeRect( SGNode::RenderStroke, RectF(PointF(0, 0), SizeF(50, 50)), 10 ) );
+  //SGNodeRectangle* csgn3 = &psgn.addChild( new SGNodeRectangle( SGNode::RenderFill, RectF(PointF(0, 0), SizeF(50, 50)), 10 ) );
+  //SGNodeRectangle* csgn3 = &psgn.addChild( new SGNodeRectangle( SGNode::RenderStroke, RectF(PointF(0, 0), SizeF(50, 50)), 10 ) );
+    SGNodeEllipse* csgn3 = &psgn.addChild( new SGNodeEllipse( SGNode::RenderStroke, PointF(0, 0), SizeF(100, 75) ) );
                 csgn3->transform().translate(0, 150);
 
     // 2nd-child's 1st child

@@ -27,7 +27,7 @@
   MA 02110-1301 USA
 */
 
-#include <Pt/Gfx/SGNodeRect.h>
+#include <Pt/Gfx/SGNodeEllipse.h>
 #include <Pt/Gfx/ImagePainter2.h>
 
 
@@ -35,60 +35,41 @@ namespace Pt {
 namespace Gfx {
 
 
-SGNodeRect::~SGNodeRect()
+SGNodeEllipse::~SGNodeEllipse()
 {}
 
-void SGNodeRect::clear()
+void SGNodeEllipse::clear()
 {
     // Clear the rectangle
-    _rect.set( PointT(0, 0), SizeT(0, 0) );
-    _radius = 0.0f;
+    _topLeft.set(0, 0);
+    _size   .set(0, 0);
 
     // Clear the base class' data
     SGNodePath::clear();
 }
 
-void SGNodeRect::set(const RectT& rect, float radius)
+void SGNodeEllipse::set(const PointT& topLeft, const SizeT& size)
 {
-    // Save the parameter
-    _rect   = rect;
-    _radius = ::abs(radius);
+    // Save the parameters
+    _topLeft = topLeft;
+    _size    = size;
 
     // Clear the base class' data
     SGNodePath::clear();
 
-    // Determine the coordinates
-    const ValueT x1 = _rect.topLeft    ().x();
-    const ValueT y1 = _rect.topLeft    ().y();
-    const ValueT x2 = _rect.bottomRight().x();
-    const ValueT y2 = _rect.bottomRight().y();
+    // Determine the coordinates and radius
+    const ValueT xl = _topLeft.x();
+    const ValueT xr = xl + _size.width ();
 
-    // Create a rounded rectangle
-    if(_radius > 0.0f) {
-        const ValueT r = _radius;
-        path().beginPath();
-        path().moveTo           (        x1,     y2 - r); // CCW
-        path().quadraticBezierTo(x1, y2, x1 + r, y2    );
-        path().lineTo           (        x2 - r, y2    );
-        path().quadraticBezierTo(x2, y2, x2    , y2 - r);
-        path().lineTo           (        x2    , y1 + r);
-        path().quadraticBezierTo(x2, y1, x2 - r, y1    );
-        path().lineTo           (        x1 + r, y1    );
-        path().quadraticBezierTo(x1, y1, x1    , y1 + r);
-        path().lineTo           (        x1    , y2 - r);
-        path().endPath  ();
-    }
+    const ValueT yr = _size.height() * 0.5f;
+    const ValueT ym = _topLeft.y() + yr;
 
-    // Create a normal rectangle
-    else {
-        path().beginPath();
-        path().moveTo   (x1, y2); // CCW
-        path().lineTo   (x2, y2);
-        path().lineTo   (x2, y1);
-        path().lineTo   (x1, y1);
-        path().lineTo   (x1, y2);
-        path().endPath  ();
-    }
+    // Create an ellipse
+    path().beginPath();
+    path().moveTo   (xl, ym    ); // CCW
+    path().arcTo    (xr, ym, yr);
+    path().arcTo    (xl, ym, yr);
+    path().endPath  ();
 }
 
 
