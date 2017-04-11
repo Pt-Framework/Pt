@@ -60,7 +60,7 @@ static void testSceneGraph(const char* title, Image& image, Painter& painter)
 
     psgn.transform().identity();
     psgn.transform().scale(0.5f, 0.5f); // Note: the pen width is not scaled!
-    psgn.transform().translate(500, 50);
+    psgn.transform().translate(600, 50);
     psgn.draw(*ip2);
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
