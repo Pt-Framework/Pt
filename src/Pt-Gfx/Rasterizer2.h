@@ -62,14 +62,12 @@
 #define FIXED_POINT_MUL_TO_A8(A, B) ( ( ( (Pt::uint32_t)(A) * (Pt::uint32_t)(B) + FIXED_POINT_FRACT_BITMASK ) >> FIXED_POINT_SHIFT_FACTOR ) )
 #define FIXED_POINT_FROM_INT(V)     ( (V) << FIXED_POINT_SHIFT_FACTOR )
 #define FIXED_POINT_TO_INT(V)       ( (V) >> FIXED_POINT_SHIFT_FACTOR )
-#define FIXED_POINT_FROM_FLT(V)     ( (Pt::int32_t) ( (V) * FIXED_POINT_CONSTANT_ONE ) )
 
 // Coordinate limit
-#define MAXIMUM_COORD   Painter::MaximumCoordinate
-#define MAXIMUM_POINT   Painter::MaximumPointCoordinate
+#define MAXIMUM_COORD Painter::MaximumCoordinate
+#define MAXIMUM_POINT Painter::MaximumPointCoordinate
 
-#define MAXIMUM_COORD_F Painter::MaximumCoordinateF
-#define MAXIMUM_POINT_F Painter::MaximumPointCoordinateF
+#define MAXIMUM_COORD_F (float) Painter::MaximumCoordinate
 
 // Scaling factor and starting value for the pattern buffer
 #define PATTERN_BUFFER_NUM_OF_CELLS  64
@@ -206,7 +204,7 @@ class Rasterizer2
         void rasterOnePixelSolidXLineSegment(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut);
         void rasterOnePixelSolidGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut);
         void rasterOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut);
-        void rasterOnePixelSolidGLineSegmentXWAA_F(double x1, double y1, double x2, double y2, const Color& color, DrawLineMask* maskInOut);
+        void rasterOnePixelSolidGLineSegmentXWAA_F(float x1, float y1, float x2, float y2, const Color& color, DrawLineMask* maskInOut);
 
         void rasterOnePixelAreaGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t minX, Pt::int32_t minY, const PolygonScanlines& exclusionZone, DrawLineMask& maskInOut);
 
@@ -214,10 +212,10 @@ class Rasterizer2
         void rasterOnePixelPatternedXLineSegment(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t fpiCtrInc, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut);
         void rasterOnePixelPatternedGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t fpiCtrInc, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut);
         void rasterOnePixelPatternedGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t fpiCtrInc, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut);
-        void rasterOnePixelPatternedGLineSegmentXWAA_F(double x1, double y1, double x2, double y2, const Color& color, Pt::int32_t fpiCtrInc, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut);
+        void rasterOnePixelPatternedGLineSegmentXWAA_F(float x1, float y1, float x2, float y2, const Color& color, Pt::int32_t fpiCtrInc, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut);
 
-        inline void rasterOnePixelSolidLine_F(double x1, double y1, double x2, double y2, const Color& color, DrawLineMask* maskInOut);
-        inline void rasterOnePixelPatternedLine_F(double x1, double y1, double x2, double y2, const Color& color, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut);
+        inline void rasterOnePixelSolidLine_F(float x1, float y1, float x2, float y2, const Color& color, DrawLineMask* maskInOut);
+        inline void rasterOnePixelPatternedLine_F(float x1, float y1, float x2, float y2, const Color& color, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut);
 
         void rasterRectArea(const Point& tl, const Point& br);
 
@@ -431,10 +429,10 @@ const Pt::uint8_t* Rasterizer2::patternBufferMP64() const
 // ===== Inlined and/or Templated Private Member Functions ==============================
 // ======================================================================================
 
-void Rasterizer2::rasterOnePixelSolidLine_F(double x1, double y1, double x2, double y2, const Color& color, DrawLineMask* maskInOut)
+void Rasterizer2::rasterOnePixelSolidLine_F(float x1, float y1, float x2, float y2, const Color& color, DrawLineMask* maskInOut)
 { rasterOnePixelSolidGLineSegmentXWAA_F(x1, y1, x2, y2, color, maskInOut); }
 
-void Rasterizer2::rasterOnePixelPatternedLine_F(double x1, double y1, double x2, double y2, const Color& color, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut)
+void Rasterizer2::rasterOnePixelPatternedLine_F(float x1, float y1, float x2, float y2, const Color& color, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut)
 {
     // Check the size of the line
     const Pt::int32_t sizeX = abs(x2 - x1);
