@@ -39,7 +39,7 @@ namespace Pt {
 namespace Gfx {
 
 
-#define USE_HIRES_WITH_STANDARD_AA
+//#define USE_HIRES_WITH_STANDARD_AA
 
 
 // ======================================================================================

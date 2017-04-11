@@ -42,6 +42,10 @@ namespace Pt {
 namespace Gfx {
 
 
+// ### TEST: If USE_HIRES_WITH_STANDARD_AA is defined in ImagePainter2.cpp, then this value must be set to 1 ###
+#define ADD_FAC 0
+
+
 // ======================================================================================
 // ===== Internal Helper Functions - Generator (Drawing) Functions ======================
 // ======================================================================================
@@ -94,7 +98,7 @@ static inline void generateGenericNBezierPoints(std::vector<PointF>& dst, double
     }
 
     // Determine the number of segments
-    const Pt::int32_t nSegs = Gfx::Math::zrint(clen * abs(smoothness) / 20) + (pts.size() / 2 + 1 + 1);
+    const Pt::int32_t nSegs = Gfx::Math::zrint(clen * abs(smoothness) / 20) + (pts.size() / 2 + 1 + ADD_FAC);
 
     // Calculate the inverse multiplication factor
     const double nSegs1i = 1.0 / (nSegs - 1);
@@ -126,7 +130,7 @@ static inline void generateCubicBezierPoints(std::vector<PointF>& dst, double x1
     const double lb   = l43 + l32 + l12;
 
     // Determine the number of segments
-    const Pt::int32_t nSegs = Gfx::Math::zrint(lb * abs(smoothness) / 20) + 4 + 1;
+    const Pt::int32_t nSegs = Gfx::Math::zrint(lb * abs(smoothness) / 20) + 4 + ADD_FAC;
 
     // Calculate the inverse multiplication factor
     const double nSegs1i = 1.0 / (nSegs - 1);
@@ -173,7 +177,7 @@ static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, doubl
     const double lb  = l32 + l12;
 
     // Determine the number of segments
-    const Pt::int32_t nSegs = Gfx::Math::zrint(lb * abs(smoothness) / 20) + 3 + 1;
+    const Pt::int32_t nSegs = Gfx::Math::zrint(lb * abs(smoothness) / 20) + 3 + ADD_FAC;
 
     // Calculate the inverse multiplication factor
     const double nSegs1i = 1.0 / (nSegs - 1);

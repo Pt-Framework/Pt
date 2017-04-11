@@ -907,23 +907,25 @@ void Rasterizer2::rasterPolygonAreaXWAA(const Point* points, const size_t* point
 // Inspired by: Efficient Polygon Fill Algorithm With C Code Sample
 //              http://alienryderflex.com/polygon_fill
 //              Public-domain code by Darel Rex Finley, 2007
-void Rasterizer2::rasterPolygonAreaXWAA(const PointF* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, float minX, float minY_, float maxX, float maxY_)
+void Rasterizer2::rasterPolygonAreaXWAA(const PointF* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, float minX_, float minY_, float maxX_, float maxY_)
 {
     // List of nodes that define the horizontal spans
     std::vector<float> nodeX(totalPointCount * 2, 0);
 
     // Calculate the scaled Y coordinates
-    const ssize_t minY = Pt::Gfx::Math::zrint(minY_ * Gfx::Math::sPSF);
-    const ssize_t maxY = Pt::Gfx::Math::zrint(maxY_ * Gfx::Math::sPSF);
+    const Pt::int32_t minX = Pt::Gfx::Math::zfint(minX_);
+  //const Pt::int32_t maxX = Pt::Gfx::Math::zcint(maxX_);
+    const Pt::int32_t minY = Pt::Gfx::Math::zfint(minY_);
+    const Pt::int32_t maxY = Pt::Gfx::Math::zcint(maxY_);
 
     // List of polygon scanlines
     PolygonScanlines scanlines;
 
     if(_compositionMode != CompositionMode::SourceCopy)
-        scanlines.resize( (maxY_ - minY_) + 1 + 4 );
+        scanlines.resize( (maxY - minY) + 1 + 4 );
 
     // Loop through the rows of the image
-    for(Pt::int32_t pixelY = minY; pixelY <= maxY; pixelY += Gfx::Math::iPSF) {
+    for(Pt::int32_t pixelY = minY; pixelY <= maxY; ++pixelY) {
         // Base pointer for the polygons
         const PointF* curPointBase = points;
         // Build a list of nodes using all the polygons
@@ -940,15 +942,14 @@ void Rasterizer2::rasterPolygonAreaXWAA(const PointF* points, const size_t* poin
                 const float curXj = (curPointBase + j)->x();
                 const float curYj = (curPointBase + j)->y();
                 // Calculate the node's coordinate
-                const float iterY = pixelY * Gfx::Math::sPSFi;
-                if( ( iterY >= curYi && iterY < curYj ) || ( iterY >= curYj && iterY < curYi ) ) {
+                if( ( pixelY >= curYi && pixelY < curYj ) || ( pixelY >= curYj && pixelY < curYi ) ) {
                     // Bail out if we have produced too many nodes
                     if((size_t) nodes >= nodeX.size()) return;
                     // Calculate the node's coordinate
-                    const float deltaYp = iterY - curYi;
-                    const float deltaYj = curYj - curYi;
-                    const float deltaXj = curXj - curXi;
-                    const float interXf = curXi + (deltaYp) / deltaYj * deltaXj;
+                    const float deltaYp = pixelY - curYi;
+                    const float deltaYj = curYj  - curYi;
+                    const float deltaXj = curXj  - curXi;
+                    const float interXf = curXi  + (deltaYp) / deltaYj * deltaXj;
                     nodeX[nodes++] = interXf;
                 }
                 // Update the searching index
@@ -964,20 +965,15 @@ void Rasterizer2::rasterPolygonAreaXWAA(const PointF* points, const size_t* poin
         // Fill the pixels between the node pairs
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
             // Calculate the coordinate
-            const Pt::int32_t from = Gfx::Math::zrint(nodeX[i    ] + 0.5f);
-            const Pt::int32_t to   = Gfx::Math::zrint(nodeX[i + 1]       );
+            const Pt::int32_t from = Gfx::Math::zrint(nodeX[i    ]) + 1;
+            const Pt::int32_t to   = Gfx::Math::zrint(nodeX[i + 1]);
             if(to < from) continue;
             // Store the scanline coordinate as needed
-            const Pt::int32_t iterY = Pt::Gfx::Math::zrint( (float) (pixelY - minY) * Gfx::Math::sPSFi );
             if(_compositionMode != CompositionMode::SourceCopy) {
-                scanlines[iterY + 1].push_back(ScanlineElement16(from, to));
+                scanlines[pixelY - minY].push_back(ScanlineElement16(from, to));
             }
             // Draw the scanline
-            rasterScanline(
-                Pt::Gfx::Math::zrint( (float) (from - minX) ),
-                Pt::Gfx::Math::zrint( (float) (to   - minX) ),
-                iterY, minX, minY_, color
-            );
+            rasterScanline(from - minX, to - minX, pixelY - minY, minX, minY, color);
         }
     }
 
@@ -993,7 +989,7 @@ void Rasterizer2::rasterPolygonAreaXWAA(const PointF* points, const size_t* poin
             rasterOnePixelAreaGLineSegmentXWAA_F(
                 curPointBase[i    ].x(), curPointBase[i    ].y(),
                 curPointBase[i + 1].x(), curPointBase[i + 1].y(),
-                color, minX, minY_ - 1, scanlines, mask_nnp1
+                color, minX, minY_, scanlines, mask_nnp1
             );
             if(!i) memcpy(&mask_zero, &mask_nnp1, sizeof(mask_zero));
         }
@@ -1005,7 +1001,7 @@ void Rasterizer2::rasterPolygonAreaXWAA(const PointF* points, const size_t* poin
         rasterOnePixelAreaGLineSegmentXWAA_F(
              curPointBase[pc1].x(), curPointBase[pc1].y(),
              curPointBase[0  ].x(), curPointBase[0  ].y(),
-             color, minX, minY_ - 1, scanlines, mask_zero
+             color, minX, minY_, scanlines, mask_zero
         );
         // Increment the base pointer
         curPointBase += pointCount[p];
