@@ -360,8 +360,7 @@ void Rasterizer2::rasterOnePixelPolygonOutline(const PointF* points, size_t poin
 
     for(size_t i = 0; i < pc1; ++i) {
         if(solid) rasterOnePixelSolidLine_F    (points[i].x(), points[i].y(), points[i + 1].x(), points[i + 1].y(), color,              &mask_nnp1);
-        else      rasterOnePixelPatternedLine(points[i].x(), points[i].y(), points[i + 1].x(), points[i + 1].y(), color, fpiCtrInOut, &mask_nnp1);
-#warning 123
+        else      rasterOnePixelPatternedLine_F(points[i].x(), points[i].y(), points[i + 1].x(), points[i + 1].y(), color, fpiCtrInOut, &mask_nnp1);
     }
 }
 

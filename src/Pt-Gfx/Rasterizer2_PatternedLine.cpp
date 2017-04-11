@@ -346,6 +346,160 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentXWAA(Pt::int32_t x1, Pt::in
     #undef XW_SET_PIXEL
 }
 
+// Using algorithm from: Xiaolin Wu's Line Algorithm
+//                       https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
+//                       Last modified on January 19, 2017
+void Rasterizer2::rasterOnePixelPatternedGLineSegmentXWAA_F(float x1, float y1, float x2, float y2, const Color& color, Pt::int32_t fpiCtrInc, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut)
+{
+    // Get the mask's coordinates as needed
+    float mx[4] = { MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F };
+    float my[4] = { MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F };
+
+    if(maskInOut) {
+        for(Pt::int32_t i = 0; i < 4; ++i) {
+            mx[i] = (*maskInOut)[i].x();
+            my[i] = (*maskInOut)[i].y();
+        }
+    }
+
+    // A helper macro to set pixel
+    #define XW_SET_PIXEL(X, Y, A, PA)                                        \
+        do {                                                                 \
+            /* Clip the point */                                             \
+            if( !ClipShapeI::insideXYRange(X, Y, _currentClip) ) break;      \
+            /* Check if we should skip drawing the pixel */                  \
+            bool skipDrawing = false;                                        \
+            for(Pt::int32_t j = 0; j < 4; ++j) {                             \
+                if( (X) != mx[j] || (Y) != my[j] ) continue;                 \
+                skipDrawing = true;                                          \
+                break;                                                       \
+            }                                                                \
+            if(skipDrawing) break;                                           \
+            /* Combine and check the alpha */                                \
+            Pt::uint8_t calpha = (Pt::uint32_t) (A) * (PA) / 255;            \
+            if(!calpha) break;                                               \
+            /* Set the pixel */                                              \
+            Pixel PIX(_image->view(), X, Y);                                 \
+            _image->format().setPixel(PIX, color, _compositionMode, calpha); \
+        } while(false)
+
+    // Check if the start and end coordinates are the same
+    if(x1 == x2 && y1 == y2) return;
+
+    // Copy the coordinates
+    float fx1 = x1;
+    float fy1 = y1;
+    float fx2 = x2;
+    float fy2 = y2;
+
+    // Swap the values as needed
+    const float deltaX = (fx2 >= fx1) ? (fx2 - fx1) : (fx1 - fx2);
+    const float deltaY = (fy2 >= fy1) ? (fy2 - fy1) : (fy1 - fy2);
+    const bool  steep  = deltaY > deltaX;
+
+    if(steep) {
+        std::swap(fx1, fy1);
+        std::swap(fx2, fy2);
+    }
+
+    const bool swapDir = (fx1 > fx2);
+
+    if(swapDir) {
+        std::swap(fx1, fx2);
+        std::swap(fy1, fy2);
+    }
+
+    // Handle the gradient, starting point, and ending point
+    const float   grad  = (fy2 - fy1) / (fx2 - fx1);
+    const ssize_t xpxl1 = Gfx::Math::zrint(fx1);
+    const ssize_t xpxl2 = Gfx::Math::zrint(fx2);
+    const float   ypxl  = fy1 + grad * (xpxl1 - fx1);
+
+    // Draw the pixels
+    ssize_t from  = Gfx::Math::zrint(fx1);
+    ssize_t to    = xpxl2;
+    float   ypxli = ypxl;
+
+    // If the line direction is swapped, determine the ending and starting value of the pattern indexing counter
+    Pt::int32_t fpiCtrNextOut = 0;
+    if(swapDir) {
+        const Pt::int32_t lineLen = to - from + 1;
+        fpiCtrNextOut = (fpiCtrInOut + fpiCtrInc * lineLen) % PATTERN_BUFFER_COUNTER_MAX1P;
+        fpiCtrInOut   = fpiCtrNextOut - fpiCtrInc;
+        if(fpiCtrInOut < 0) fpiCtrInOut += PATTERN_BUFFER_COUNTER_MAX1P;
+    }
+
+    // Draw the pixels
+    if(steep) {
+        // Draw the pixels
+        for(ssize_t i = from; i <= to; ++i) {
+            // Get alpha from the pattern
+            Pt::uint8_t pa = _patternBuffer1P[FIXED_POINT_TO_INT(fpiCtrInOut)];
+            if(swapDir) {
+                fpiCtrInOut -= fpiCtrInc;
+                if(fpiCtrInOut < 0) fpiCtrInOut += PATTERN_BUFFER_COUNTER_MAX1P;
+            }
+            else {
+                fpiCtrInOut += fpiCtrInc;
+                if(fpiCtrInOut >= PATTERN_BUFFER_COUNTER_MAX1P) fpiCtrInOut -= PATTERN_BUFFER_COUNTER_MAX1P;
+            }
+            // Draw the pixels
+            const ssize_t     fypxli = Pt::Gfx::Math::zfint(ypxli);
+            const ssize_t     fpart  = Pt::Gfx::Math::zrint( (ypxli - fypxli) * 255.0f );
+            const ssize_t     rfpart = 255 - fpart;
+            const Pt::uint8_t a1     = Rasterizer2::XWAA_WFILTER[ fpart];
+            const Pt::uint8_t a2     = Rasterizer2::XWAA_WFILTER[rfpart];
+            XW_SET_PIXEL(fypxli    , i, a1, pa);
+            XW_SET_PIXEL(fypxli + 1, i, a2, pa);
+            ypxli += grad;
+        }
+        // Store back the start and end coordinates to the mask as needed
+        if(maskInOut) {
+            (*maskInOut)[swapDir ? 2 : 0].set(Pt::Gfx::Math::zfint(ypxl )    , from);
+            (*maskInOut)[swapDir ? 3 : 1].set(Pt::Gfx::Math::zfint(ypxl ) + 1, from);
+            (*maskInOut)[swapDir ? 0 : 2].set(Pt::Gfx::Math::zfint(ypxli)    , to  );
+            (*maskInOut)[swapDir ? 1 : 3].set(Pt::Gfx::Math::zfint(ypxli) + 1, to  );
+        }
+    }
+    else {
+        // Draw the pixels
+        for(ssize_t i = from; i <= to; ++i) {
+            // Get alpha from the pattern
+            Pt::uint8_t pa = _patternBuffer1P[FIXED_POINT_TO_INT(fpiCtrInOut)];
+            if(swapDir) {
+                fpiCtrInOut -= fpiCtrInc;
+                if(fpiCtrInOut < 0) fpiCtrInOut += PATTERN_BUFFER_COUNTER_MAX1P;
+            }
+            else {
+                fpiCtrInOut += fpiCtrInc;
+                if(fpiCtrInOut >= PATTERN_BUFFER_COUNTER_MAX1P) fpiCtrInOut -= PATTERN_BUFFER_COUNTER_MAX1P;
+            }
+            // Draw the pixels
+            const ssize_t     fypxli = Pt::Gfx::Math::zfint(ypxli);
+            const ssize_t     fpart  = Pt::Gfx::Math::zrint( (ypxli - fypxli) * 255.0f );
+            const ssize_t     rfpart = 255 - fpart;
+            const Pt::uint8_t a1     = Rasterizer2::XWAA_WFILTER[ fpart];
+            const Pt::uint8_t a2     = Rasterizer2::XWAA_WFILTER[rfpart];
+            XW_SET_PIXEL(i, fypxli    , a1, pa);
+            XW_SET_PIXEL(i, fypxli + 1, a2, pa);
+            ypxli += grad;
+        }
+        // Store back the start and end coordinates to the mask as needed
+        if(maskInOut) {
+            (*maskInOut)[swapDir ? 2 : 0].set(from, Pt::Gfx::Math::zfint(ypxl )    );
+            (*maskInOut)[swapDir ? 3 : 1].set(from, Pt::Gfx::Math::zfint(ypxl ) + 1);
+            (*maskInOut)[swapDir ? 0 : 2].set(to,   Pt::Gfx::Math::zfint(ypxli)    );
+            (*maskInOut)[swapDir ? 1 : 3].set(to,   Pt::Gfx::Math::zfint(ypxli) + 1);
+        }
+    }
+
+    // If the line direction is swapped, send out the ending value of the pattern indexing counter which was previously calculated
+    if(swapDir) fpiCtrInOut = fpiCtrNextOut;
+
+    // Undefine the helper macro
+    #undef XW_SET_PIXEL
+}
+
 
 } // namespace
 } // namespace

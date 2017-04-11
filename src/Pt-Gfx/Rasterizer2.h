@@ -435,13 +435,13 @@ void Rasterizer2::rasterOnePixelSolidLine_F(float x1, float y1, float x2, float 
 void Rasterizer2::rasterOnePixelPatternedLine_F(float x1, float y1, float x2, float y2, const Color& color, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut)
 {
     // Check the size of the line
-    const Pt::int32_t sizeX = abs(x2 - x1);
-    const Pt::int32_t sizeY = abs(y2 - y1);
-    const Pt::int32_t sizeS = sizeX + sizeY;
-    const Pt::int32_t sizeL = Gfx::Math::fastSqrt(sizeX * sizeX + sizeY * sizeY);
+    const float sizeX = ::fabs(x2 - x1);
+    const float sizeY = ::fabs(y2 - y1);
+    const float sizeS = sizeX + sizeY;
+    const float sizeL = Gfx::Math::fastSqrt(sizeX * sizeX + sizeY * sizeY);
 
     // Calculate the incremental factor of the pattern indexing counter
-    const Pt::int32_t fpiCtrInc = FIXED_POINT_CONSTANT_ISQRT2 * PATTERN_BUFFER_SCALE_FACTOR * sizeS / sizeL;
+    const Pt::int32_t fpiCtrInc = Pt::Gfx::Math::zrint(FIXED_POINT_CONSTANT_ISQRT2 * PATTERN_BUFFER_SCALE_FACTOR * sizeS / sizeL);
 
     // Rasterize line
     rasterOnePixelPatternedGLineSegmentXWAA_F(x1, y1, x2, y2, color, fpiCtrInc, fpiCtrInOut, maskInOut);
