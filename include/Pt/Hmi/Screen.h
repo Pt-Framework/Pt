@@ -48,6 +48,7 @@ namespace Hmi {
 
 class ScreenImpl;
 class ApplicationImpl;
+class Widget;
 
 class PT_HMI_API Screen : public WindowBase
 {
@@ -59,6 +60,8 @@ class PT_HMI_API Screen : public WindowBase
         virtual ~Screen();
 
         Window* findWindow(const std::string& name);
+
+        Widget* findWidget(const std::string& name);
 
         const std::vector<Window*>& windows() const;
   

@@ -374,6 +374,18 @@ Widget* Window::findWidget(const Gfx::PointF& pos)
 }
 
 
+Widget* Window::findWidget(const std::string& name)
+{
+    if( ! _mainWidget )
+        return 0;
+
+    if( _mainWidget->name() == name )
+        return _mainWidget;
+
+    return _mainWidget->findWidget(name);
+}
+
+
 void Window::addWidget(Widget& w)
 {
     addFocusWidget(w);

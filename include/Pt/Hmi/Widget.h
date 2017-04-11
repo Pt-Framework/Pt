@@ -87,6 +87,8 @@ class PT_HMI_API Widget : public Visual
 
         Widget* findWidget( const Gfx::PointF& pos );
 
+        Widget* findWidget( const std::string& name );
+
         bool acceptsInput() const;
 
         void setAcceptInput( bool a );

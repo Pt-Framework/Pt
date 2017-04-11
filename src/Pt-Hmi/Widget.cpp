@@ -251,6 +251,23 @@ Widget* Widget::findWidget(const Gfx::PointF& pos)
 }
 
 
+Widget* Widget::findWidget( const std::string& name )
+{
+    std::vector<Widget*>::const_iterator it;
+    for(it = _children.begin(); it != _children.end(); ++it)
+    {
+        Widget* child = *it;
+
+        if( child->name() == name )
+            return child;
+
+        Widget* widget = child->findWidget(name);
+        if( widget )
+            return widget;
+    }
+
+    return 0;
+}
 
 
 Gfx::PointF Widget::toParent(const Gfx::PointF& pos) const

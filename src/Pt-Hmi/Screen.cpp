@@ -82,6 +82,21 @@ Window* Screen::findWindow(const std::string& name)
 }
 
 
+Widget* Screen::findWidget(const std::string& name)
+{
+    std::vector<Window*>::iterator it;
+    for(it = _windows.begin(); it != _windows.end(); ++it)
+    {
+        Window* w = *it;
+        Widget* widget = w->findWidget(name);
+        if( ! widget )
+            return widget;
+    }
+    
+    return 0;
+}
+
+
 const std::vector<Window*>& Screen::windows() const
 {
   return _windows;
