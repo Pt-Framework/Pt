@@ -28,34 +28,22 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  */
 
-#include "ClipShape.h"
-
-
-namespace Pt{
-namespace Gfx{
-
-
 // ======================================================================================
 // ===== Clip Line ======================================================================
 // ======================================================================================
 
-static const int CS_Inside = 0; // 0000
-static const int CS_Left   = 1; // 0001
-static const int CS_Right  = 2; // 0010
-static const int CS_Bottom = 4; // 0100
-static const int CS_Top    = 8; // 1000
-
 // Cohen–Sutherland clipping algorithm clips a line from (x0, y0) to (x1, y1)
 // against a clip rectangle (https://en.wikipedia.org/wiki/Cohen–Sutherland_algorithm)
-bool ClipShape::clipLine(Pt::int32_t& x0, Pt::int32_t& y0, Pt::int32_t& x1, Pt::int32_t& y1, const Rect& clip)
+template <typename T>
+inline bool BasicClipShape<T>::clipLine(T& x0, T& y0, T& x1, T& y1, const Rect& clip)
 {
     // Compute the initial outcodes for the endpoints
-    int outcode0 = csComputeOutcode(x0, y0, clip);
-    int outcode1 = csComputeOutcode(x1, y1, clip);
+    Pt::int32_t outcode0 = csComputeOutcode(x0, y0, clip);
+    Pt::int32_t outcode1 = csComputeOutcode(x1, y1, clip);
 
-    bool        accept = false;
-    Pt::int32_t x      = 0;
-    Pt::int32_t y      = 0;
+    bool accept = false;
+    T    x      = 0;
+    T    y      = 0;
 
     while(true) {
         // Both endpoints are inside the clip region
@@ -73,7 +61,7 @@ bool ClipShape::clipLine(Pt::int32_t& x0, Pt::int32_t& y0, Pt::int32_t& x1, Pt::
             // and find the intersection point using:
             //     y = y0 + (x - x0) * slope
             //     x = x0 + (y - y0) * slope
-            int outcodeOut = outcode0 ? outcode0 : outcode1;
+            Pt::int32_t outcodeOut = outcode0 ? outcode0 : outcode1;
             // Endpoint is above the clip rectangle
             if(outcodeOut & CS_Top) {
                 x = x0 + (x1 - x0) * (clip.top   () - y0) / (y1 - y0);
@@ -113,9 +101,10 @@ bool ClipShape::clipLine(Pt::int32_t& x0, Pt::int32_t& y0, Pt::int32_t& x1, Pt::
 }
 
 // Compute the bit code for a point (x, y) using the clip rectangle
-Pt::int32_t ClipShape::csComputeOutcode(Pt::int32_t x, Pt::int32_t y, const Rect& clip)
+template <typename T>
+inline Pt::int32_t BasicClipShape<T>::csComputeOutcode(T x, T y, const Rect& clip)
 {
-    int code = CS_Inside; // Initialised as being inside of the clip region
+    Pt::int32_t code = CS_Inside; // Initialised as being inside of the clip region
 
          if(x < clip.left  ()) code |= CS_Left;   // to the left of clip region
     else if(x > clip.right ()) code |= CS_Right;  // to the right of clip region
@@ -130,7 +119,8 @@ Pt::int32_t ClipShape::csComputeOutcode(Pt::int32_t x, Pt::int32_t y, const Rect
 // ===== Clip Polyline ==================================================================
 // ======================================================================================
 
-void ClipShape::clipPolyline(std::vector<Point>& pio, const Rect& clippingArea)
+template <typename T>
+inline void BasicClipShape<T>::clipPolyline(std::vector<PointT>& pio, const Rect& clippingArea)
 {
     // If the clipping area is null or there is too few elements, simply clear the vector
     if(clippingArea.isNull() || pio.size() < 2) {
@@ -139,7 +129,7 @@ void ClipShape::clipPolyline(std::vector<Point>& pio, const Rect& clippingArea)
     }
 
     // Perform clipping
-    std::vector<Point> tmp;
+    std::vector<PointT> tmp;
 
     clipPolylineToEdge(tmp, pio, clippingArea.topLeft   (), clippingArea.bottomLeft  (), CM_Left  );
     clipPolylineToEdge(pio, tmp, clippingArea.topRight  (), clippingArea.bottomRight (), CM_Right );
@@ -147,7 +137,8 @@ void ClipShape::clipPolyline(std::vector<Point>& pio, const Rect& clippingArea)
     clipPolylineToEdge(pio, tmp, clippingArea.bottomLeft(), clippingArea.bottomRight (), CM_Bottom);
 }
 
-void ClipShape::clipPolylineToEdge(std::vector<Point>& out, const std::vector<Point>& in, const Point& edge0, const Point& edge1, ClipMode cm)
+template <typename T>
+inline void BasicClipShape<T>::clipPolylineToEdge(std::vector<PointT>& out, const std::vector<PointT>& in, const Point& edge0, const Point& edge1, ClipMode cm)
 {
     out.clear();
     if(in.empty()) return;
@@ -155,10 +146,10 @@ void ClipShape::clipPolylineToEdge(std::vector<Point>& out, const std::vector<Po
     const size_t size1 = in.size() - 1;
 
     for(size_t i = 0; i < size1; ++i) {
-        const Point& s       = in[i    ];
-        const Point& p       = in[i + 1];
-        const bool   sInside = inside(s, edge0, cm);
-        const bool   pInside = inside(p, edge0, cm);
+        const PointT& s       = in[i    ];
+        const PointT& p       = in[i + 1];
+        const bool    sInside = inside(s, edge0, cm);
+        const bool    pInside = inside(p, edge0, cm);
         if(sInside && pInside) {
             out.push_back(s);
         }
@@ -169,16 +160,16 @@ void ClipShape::clipPolylineToEdge(std::vector<Point>& out, const std::vector<Po
             out.push_back(s);
         }
         else if(!sInside && !pInside && i) {
-            const Point& a = in[i - 1];
-            const Point& b = in[i    ];
+            const PointT& a = in[i - 1];
+            const PointT& b = in[i    ];
             if(inside(a, edge0, cm)) out.push_back(intersect(a, b, edge0, edge1));
         }
     }
 
-    const Point& s       = in[size1    ];
-    const Point& p       = in[size1 - 1];
-    const bool   sInside = inside(s, edge0, cm);
-    const bool   pInside = inside(p, edge0, cm);
+    const PointT& s       = in[size1    ];
+    const PointT& p       = in[size1 - 1];
+    const bool    sInside = inside(s, edge0, cm);
+    const bool    pInside = inside(p, edge0, cm);
          if(sInside) out.push_back(s);
     else if(pInside) out.push_back(intersect(s, p, edge0, edge1));
 }
@@ -188,7 +179,8 @@ void ClipShape::clipPolylineToEdge(std::vector<Point>& out, const std::vector<Po
 // ===== Clip Polygon ===================================================================
 // ======================================================================================
 
-void ClipShape::clipPolygon(std::vector<Point>& pio, const Rect& clippingArea)
+template <typename T>
+inline void BasicClipShape<T>::clipPolygon(std::vector<PointT>& pio, const Rect& clippingArea)
 {
     // If the clipping area is null or there is too few elements, simply clear the vector
     if(clippingArea.isNull() || pio.size() < 3) {
@@ -197,7 +189,7 @@ void ClipShape::clipPolygon(std::vector<Point>& pio, const Rect& clippingArea)
     }
 
     // Perform clipping
-    std::vector<Point> tmp;
+    std::vector<PointT> tmp;
 
     clipPolygonToEdge(tmp, pio, clippingArea.topLeft   (), clippingArea.bottomLeft  (), CM_Left  );
     clipPolygonToEdge(pio, tmp, clippingArea.topRight  (), clippingArea.bottomRight (), CM_Right );
@@ -219,7 +211,8 @@ void ClipShape::clipPolygon(std::vector<Point>& pio, const Rect& clippingArea)
     }
 }
 
-void ClipShape::clipPolygonToEdge(std::vector<Point>& out, const std::vector<Point>& in, const Point& edge0, const Point& edge1, ClipMode cm)
+template <typename T>
+inline void BasicClipShape<T>::clipPolygonToEdge(std::vector<PointT>& out, const std::vector<PointT>& in, const Point& edge0, const Point& edge1, ClipMode cm)
 {
     out.clear();
     if(in.empty()) return;
@@ -227,10 +220,10 @@ void ClipShape::clipPolygonToEdge(std::vector<Point>& out, const std::vector<Poi
     const size_t size1 = in.size() - 1;
 
     for(size_t i = 0; i <= size1; ++i) {
-        const Point& s       = in[i                         ];
-        const Point& p       = in[(i == size1) ? 0 : (i + 1)];
-        const bool   sInside = inside(s, edge0, cm);
-        const bool   pInside = inside(p, edge0, cm);
+        const PointT& s       = in[i                         ];
+        const PointT& p       = in[(i == size1) ? 0 : (i + 1)];
+        const bool    sInside = inside(s, edge0, cm);
+        const bool    pInside = inside(p, edge0, cm);
         if(sInside && pInside) {
             out.push_back(p);
         }
@@ -249,21 +242,23 @@ void ClipShape::clipPolygonToEdge(std::vector<Point>& out, const std::vector<Poi
 // ===== Clip Polyline and Polygon ======================================================
 // ======================================================================================
 
-bool ClipShape::inside(const Point& p, const Point& corner, ClipMode cm)
+template <typename T>
+inline bool BasicClipShape<T>::inside(const PointT& p, const Point& corner, ClipMode cm)
 {
     switch(cm) {
-        case CM_Left   : return p.x() >= corner.x();
-        case CM_Right  : return p.x() <= corner.x();
-        case CM_Top    : return p.y() >= corner.y();
-        case CM_Bottom : return p.y() <= corner.y();
+        case CM_Left   : return p.x() >= (T) corner.x();
+        case CM_Right  : return p.x() <= (T) corner.x();
+        case CM_Top    : return p.y() >= (T) corner.y();
+        case CM_Bottom : return p.y() <= (T) corner.y();
     }
 
     return false;
 }
 
-const Point ClipShape::intersect(const Point& from, const Point& to, const Point& edge0, const Point& edge1)
+template <typename T>
+inline const typename BasicClipShape<T>::PointT BasicClipShape<T>::intersect(const PointT& from, const PointT& to, const Point& edge0, const Point& edge1)
 {
-    Point p;
+    PointT p;
 
     // Horizontal clip edge
     if(edge0.y() == edge1.y()) {
@@ -274,9 +269,9 @@ const Point ClipShape::intersect(const Point& from, const Point& to, const Point
         }
         // Normal case
         else {
-            const Pt::int32_t dx = to   .x() - from.x();
-            const Pt::int32_t dy = to   .y() - from.y();
-            const Pt::int32_t de = edge0.y() - from.y();
+            const T dx =     to   .x() - from.x();
+            const T dy =     to   .y() - from.y();
+            const T de = (T) edge0.y() - from.y();
             p.set( from.x() + dx * de / dy, edge0.y() );
         }
     }
@@ -290,16 +285,12 @@ const Point ClipShape::intersect(const Point& from, const Point& to, const Point
         }
         // Normal case
         else {
-            const Pt::int32_t dx = to   .x() - from.x();
-            const Pt::int32_t dy = to   .y() - from.y();
-            const Pt::int32_t de = edge0.x() - from.x();
+            const T dx =     to   .x() - from.x();
+            const T dy =     to   .y() - from.y();
+            const T de = (T) edge0.x() - from.x();
             p.set( edge0.x(), from.y() + dy * de / dx );
         }
     }
 
     return p;
 }
-
-
-} // namespace
-} // namespace

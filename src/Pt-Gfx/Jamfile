@@ -40,8 +40,7 @@ if $(WITH_RASTERIZER2)
         #SubDirC++Flags [ FGeneric -msse -mno-sse2 -mno-sse3 -mno-ssse3 -mno-sse4.1 -mno-sse4.2 -mno-avx -mno-avx2 -mno-fma ] ;
     }
 
-    PT_GFX_RASTERIZER2_FILES = ClipShape.cpp
-                               FreeType2.cpp
+    PT_GFX_RASTERIZER2_FILES = FreeType2.cpp
                                DrawText2.cpp
                                Path.cpp
                                SGNode.cpp

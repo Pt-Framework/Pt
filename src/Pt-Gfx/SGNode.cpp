@@ -84,7 +84,8 @@ void SGNode::draw(ImagePainter2& painter, const TransformT* transform_)
             if(!eCur.node->_pen  .isNull()) {
             // Scale the pen width
                 const size_t orgPenSize = eCur.node->_pen.size();
-                const size_t newPenSize = Gfx::Math::zrint( transform.transformSize((float) orgPenSize) );
+                const size_t sclPenSize = Gfx::Math::zrint( transform.transformSize((float) orgPenSize) );
+                const size_t newPenSize = (sclPenSize >= 1) ? sclPenSize : 1;
                 if(orgPenSize == newPenSize) {
                     painter.setPen(eCur.node->_pen);
                 }

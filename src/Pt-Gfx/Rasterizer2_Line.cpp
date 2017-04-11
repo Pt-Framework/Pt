@@ -47,7 +47,7 @@ void Rasterizer2::strokeOnePixelLine(const Point& a, const Point& b, DrawLineMas
     Pt::int32_t x2 = b.x();
     Pt::int32_t y2 = b.y();
 
-    if(!ClipShape::clipLine(x1, y1, x2, y2, _currentClip)) return;
+    if(!ClipShapeI::clipLine(x1, y1, x2, y2, _currentClip)) return;
 
     // Find the minimum and maximum coordinates
     Pt::int32_t minX, minY, maxX, maxY;
@@ -362,7 +362,7 @@ void Rasterizer2::rasterOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_
     #define XW_SET_PIXEL(X, Y, A)                                                 \
         do {                                                                      \
             /* Clip the point */                                                  \
-            if( !ClipShape::insideXYRange(X, Y, _currentClip) ) break;            \
+            if( !ClipShapeI::insideXYRange(X, Y, _currentClip) ) break;           \
             /* Check if we should skip drawing the pixel */                       \
             bool skipDrawing = false;                                             \
             for(Pt::int32_t j = 0; j < 4; ++j) {                                  \
@@ -477,6 +477,149 @@ void Rasterizer2::rasterOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_
 // Using algorithm from: Xiaolin Wu's Line Algorithm
 //                       https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
 //                       Last modified on January 19, 2017
+void Rasterizer2::rasterOnePixelSolidGLineSegmentXWAA_F(double x1, double y1, double x2, double y2, const Color& color, DrawLineMask* maskInOut)
+{
+    // Get the mask's coordinates as needed
+    double mx[4] = { MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F };
+    double my[4] = { MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F };
+
+    if(maskInOut) {
+        for(Pt::int32_t i = 0; i < 4; ++i) {
+            mx[i] = (*maskInOut)[i].x();
+            my[i] = (*maskInOut)[i].y();
+        }
+    }
+
+    // Used for storing back the mask's coordinates
+    Pt::int32_t pCnt  = 0;
+    double      lx[4] = { MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F };
+    double      ly[4] = { MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F, MAXIMUM_COORD_F };
+
+    // A helper macro to set pixel
+    #define XW_SET_PIXEL(X, Y, A)                                                 \
+        do {                                                                      \
+            /* Clip the point */                                                  \
+            if( !ClipShapeI::insideXYRange(X, Y, _currentClip) ) break;           \
+            /* Check if we should skip drawing the pixel */                       \
+            bool skipDrawing = false;                                             \
+            for(Pt::int32_t j = 0; j < 4; ++j) {                                  \
+                if( (X) != mx[j] || (Y) != my[j] ) continue;                      \
+                skipDrawing = true;                                               \
+                break;                                                            \
+            }                                                                     \
+            if(skipDrawing || !(A)) break;                                        \
+            /* Store back the mask's coordinates */                               \
+            lx[2] = lx[3]; lx[3] = X;                                             \
+            ly[2] = ly[3]; ly[3] = Y;                                             \
+            if(pCnt < 2) {                                                        \
+                lx[pCnt] = X;                                                     \
+                ly[pCnt] = Y;                                                     \
+                ++pCnt;                                                           \
+            }                                                                     \
+            /* Set the pixel */                                                   \
+            Pixel PIX(_image->view(), X, Y);                                      \
+            _image->format().setPixel(PIX, color, _compositionMode, A);           \
+        } while(false)
+
+    // Check if the start and end coordinates are the same
+    if(x1 == x2 && y1 == y2) {
+        // Draw the pixel
+        XW_SET_PIXEL( Gfx::Math::zrint(x1), Gfx::Math::zrint(y1), 255 );
+        // Store back the start and end coordinates to the mask as needed
+        if(maskInOut) {
+            (*maskInOut)[0].set( Gfx::Math::zrint(lx[0]), Gfx::Math::zrint(ly[0]) );
+            (*maskInOut)[1].set( Gfx::Math::zrint(lx[0]), Gfx::Math::zrint(ly[0]) );
+            (*maskInOut)[2].set( Gfx::Math::zrint(lx[0]), Gfx::Math::zrint(ly[0]) );
+            (*maskInOut)[3].set( Gfx::Math::zrint(lx[0]), Gfx::Math::zrint(ly[0]) );
+        }
+        // Exit here
+        return;
+    }
+
+    // Copy the coordinates
+    double fx1 = x1;
+    double fy1 = y1;
+    double fx2 = x2;
+    double fy2 = y2;
+
+    // Swap the values as needed
+    const double deltaX = (fx2 >= fx1) ? (fx2 - fx1) : (fx1 - fx2);
+    const double deltaY = (fy2 >= fy1) ? (fy2 - fy1) : (fy1 - fy2);
+    const bool   steep  = deltaY > deltaX;
+
+    if(steep) {
+        std::swap(fx1, fy1);
+        std::swap(fx2, fy2);
+    }
+
+    const bool swapDir = (fx1 > fx2);
+
+    if(swapDir) {
+        std::swap(fx1, fx2);
+        std::swap(fy1, fy2);
+    }
+
+    // Handle the gradient, starting point, and ending point
+    const double  grad  = (fy2 - fy1) / (fx2 - fx1);
+    const ssize_t xpxl1 = Gfx::Math::zrint(fx1);
+    const ssize_t xpxl2 = Gfx::Math::zrint(fx2);
+    const double  ypxl  = fy1 + grad * (xpxl1 - fx1);
+
+    // Draw the pixels
+    ssize_t from  = Gfx::Math::zrint(fx1);
+    ssize_t to    = xpxl2;
+    double  ypxli = ypxl;
+
+    if(steep) {
+        // Draw the pixels
+        for(ssize_t i = from; i <= to; ++i) {
+            const ssize_t     fypxli = Pt::Gfx::Math::zfint(ypxli);
+            const ssize_t     fpart  = Pt::Gfx::Math::zrint( (ypxli - fypxli) * 255.0 );
+            const ssize_t     rfpart = 255 - fpart;
+            const Pt::uint8_t a1     = Rasterizer2::XWAA_WFILTER[ fpart];
+            const Pt::uint8_t a2     = Rasterizer2::XWAA_WFILTER[rfpart];
+            XW_SET_PIXEL(fypxli    , i, a1);
+            XW_SET_PIXEL(fypxli + 1, i, a2);
+            ypxli += grad;
+        }
+    }
+    else {
+        // Draw the pixels
+        for(ssize_t i = from; i <= to; ++i) {
+            const ssize_t     fypxli = Pt::Gfx::Math::zfint(ypxli);
+            const ssize_t     fpart  = Pt::Gfx::Math::zrint( (ypxli - fypxli) * 255.0 );
+            const ssize_t     rfpart = 255 - fpart;
+            const Pt::uint8_t a1     = Rasterizer2::XWAA_WFILTER[ fpart];
+            const Pt::uint8_t a2     = Rasterizer2::XWAA_WFILTER[rfpart];
+            XW_SET_PIXEL(i, fypxli    , a1);
+            XW_SET_PIXEL(i, fypxli + 1, a2);
+            ypxli += grad;
+        }
+    }
+
+    // Store back the start and end coordinates to the mask as needed
+    if(maskInOut) {
+        if(swapDir) {
+            (*maskInOut)[2].set( Gfx::Math::zrint(lx[0]), Gfx::Math::zrint(ly[0]) );
+            (*maskInOut)[3].set( Gfx::Math::zrint(lx[1]), Gfx::Math::zrint(ly[1]) );
+            (*maskInOut)[0].set( Gfx::Math::zrint(lx[2]), Gfx::Math::zrint(ly[2]) );
+            (*maskInOut)[1].set( Gfx::Math::zrint(lx[3]), Gfx::Math::zrint(ly[3]) );
+        }
+        else {
+            (*maskInOut)[0].set( Gfx::Math::zrint(lx[0]), Gfx::Math::zrint(ly[0]) );
+            (*maskInOut)[1].set( Gfx::Math::zrint(lx[1]), Gfx::Math::zrint(ly[1]) );
+            (*maskInOut)[2].set( Gfx::Math::zrint(lx[2]), Gfx::Math::zrint(ly[2]) );
+            (*maskInOut)[3].set( Gfx::Math::zrint(lx[3]), Gfx::Math::zrint(ly[3]) );
+        }
+    }
+
+    // Undefine the helper macro
+    #undef XW_SET_PIXEL
+}
+
+// Using algorithm from: Xiaolin Wu's Line Algorithm
+//                       https://en.wikipedia.org/wiki/Xiaolin_Wu's_line_algorithm
+//                       Last modified on January 19, 2017
 void Rasterizer2::rasterOnePixelAreaGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t minX, Pt::int32_t minY, const PolygonScanlines& exclusionZone, DrawLineMask& maskInOut)
 {
     // Get the mask's coordinate
@@ -497,7 +640,7 @@ void Rasterizer2::rasterOnePixelAreaGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t
     #define XW_FILL_PIXEL(X, Y, A)                                                          \
         do {                                                                                \
             /* Clip the point */                                                            \
-            if( !ClipShape::insideXYRange(X, Y, _currentClip) ) break;                      \
+            if( !ClipShapeI::insideXYRange(X, Y, _currentClip) ) break;                     \
             /* Check if we should skip drawing the pixel */                                 \
             bool skipDrawing = false;                                                       \
             for(Pt::int32_t j = 0; j < 4; ++j) {                                            \

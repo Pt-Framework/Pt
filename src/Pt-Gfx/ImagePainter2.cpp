@@ -883,12 +883,22 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount, boo
 {
     // Rasterize one-pixel polyline
     if(_rasterizer->pen().size() == 1) {
-        // Round the points and remove duplicates
-        std::vector<Point> points;
-        cnvPointsFToPointsDeduplicate(points, ps, pointCount);
-        // Rasterize the polygon
-        if(ps[0] == ps[pointCount - 1]) autoClose = true;
-        _rasterizer->strokeOnePixelPolygonOutline(points.data(), points.size(), autoClose);
+        if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Standard) {
+            // Remove duplicates
+            std::vector<PointF> pointsF;
+            deduplicatePointsF(pointsF, ps, pointCount);
+            // Rasterize the polygon
+            if(ps[0] == ps[pointCount - 1]) autoClose = true;
+            _rasterizer->strokeOnePixelPolygonOutline(pointsF.data(), pointsF.size(), autoClose);
+        }
+        else {
+            // Round the points and remove duplicates
+            std::vector<Point> points;
+            cnvPointsFToPointsDeduplicate(points, ps, pointCount);
+            // Rasterize the polygon
+            if(ps[0] == ps[pointCount - 1]) autoClose = true;
+            _rasterizer->strokeOnePixelPolygonOutline(points.data(), points.size(), autoClose);
+        }
         return;
     }
 

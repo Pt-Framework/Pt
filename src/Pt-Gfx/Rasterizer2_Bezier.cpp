@@ -102,7 +102,7 @@ void Rasterizer2::rasterOnePixelQuadraticBezierCurve(Pt::int32_t x1, Pt::int32_t
     #define XW_SET_PIXEL(X, Y, A, PA)                                        \
         do {                                                                 \
             /* Clip the point */                                             \
-            if( !ClipShape::insideXYRange(X, Y, _currentClip) ) break;       \
+            if( !ClipShapeI::insideXYRange(X, Y, _currentClip) ) break;      \
             /* Check if we should skip drawing the pixel */                  \
             bool skipDrawing = false;                                        \
             for(Pt::int32_t j = 0; j < 4; ++j) {                             \

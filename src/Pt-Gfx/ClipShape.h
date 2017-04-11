@@ -37,56 +37,89 @@ namespace Pt{
 namespace Gfx{
 
 
-class ClipShape {
+template <typename T>
+class BasicClipShape {
     public:
-        inline ClipShape()
+        typedef T             ValueT;
+        typedef BasicPoint<T> PointT;
+
+    public:
+        inline BasicClipShape()
         {}
 
-        static inline bool insideXRange(Pt::int32_t v, const Rect& clippingArea)
+        static inline bool insideXRange(T v, const Rect& clippingArea)
         { return ( v >= clippingArea.left() && v <= clippingArea.right() ); }
 
-        static inline bool insideYRange(Pt::int32_t v, const Rect& clippingArea)
+        static inline bool insideYRange(T v, const Rect& clippingArea)
         { return ( v >= clippingArea.top() && v <= clippingArea.bottom() ); }
 
-        static inline bool insideXYRange(Pt::int32_t x, Pt::int32_t y, const Rect& clippingArea)
+        static inline bool insideXYRange(T x, T y, const Rect& clippingArea)
         { return insideXRange(x, clippingArea) && insideYRange(y, clippingArea); }
 
-        static inline Pt::int32_t clipLeft(Pt::int32_t x, const Rect& clippingArea)
+        static inline T clipLeft(T x, const Rect& clippingArea)
         { return (clippingArea.left() > x) ? clippingArea.left() : x; }
 
-        static inline Pt::int32_t clipRight(Pt::int32_t x, const Rect& clippingArea)
+        static inline T clipRight(T x, const Rect& clippingArea)
         { return (clippingArea.right() < x) ? clippingArea.right() : x; }
 
-        static inline Pt::int32_t clipTop(Pt::int32_t y, const Rect& clippingArea)
+        static inline T clipTop(T y, const Rect& clippingArea)
         { return (clippingArea.top() > y) ? clippingArea.top() : y; }
 
-        static inline Pt::int32_t clipBottom(Pt::int32_t y, const Rect& clippingArea)
+        static inline T clipBottom(T y, const Rect& clippingArea)
         { return (clippingArea.bottom() < y) ? clippingArea.bottom() : y; }
 
-        static bool clipLine(Pt::int32_t& x0, Pt::int32_t& y0, Pt::int32_t& x1, Pt::int32_t& y1, const Rect& clip);
-        static void clipPolyline(std::vector<Point>& pio, const Rect& clippingArea);
-        static void clipPolygon(std::vector<Point>& pio, const Rect& clippingArea);
+        static inline bool clipLine(T& x0, T& y0, T& x1, T& y1, const Rect& clip);
+        static inline void clipPolyline(std::vector<PointT>& pio, const Rect& clippingArea);
+        static inline void clipPolygon(std::vector<PointT>& pio, const Rect& clippingArea);
 
     private:
-        // Clip polyline and polygon
+        // Used by clip line
+        enum Outcode {
+            CS_Inside = 0, // 0000
+            CS_Left   = 1, // 0001
+            CS_Right  = 2, // 0010
+            CS_Bottom = 4, // 0100
+            CS_Top    = 8  // 1000
+        };
+
+        // Used by clip polyline and polygon
         enum ClipMode {
             CM_Left, CM_Right, CM_Top, CM_Bottom
         };
 
     private:
         // Clip line
-        static Pt::int32_t csComputeOutcode(Pt::int32_t x, Pt::int32_t y, const Rect& clip);
+        static inline Pt::int32_t csComputeOutcode(T x, T y, const Rect& clip);
 
         // Clip polyline and polygon
-        static void clipPolylineToEdge(std::vector<Point>& out, const std::vector<Point>& in, const Point& edge0, const Point& edge1, ClipMode cm);
-        static void clipPolygonToEdge(std::vector<Point>& out, const std::vector<Point>& in, const Point& edge0, const Point& edge1, ClipMode cm);
+        static inline void clipPolylineToEdge(std::vector<PointT>& out, const std::vector<PointT>& in, const Point& edge0, const Point& edge1, ClipMode cm);
+        static inline void clipPolygonToEdge(std::vector<PointT>& out, const std::vector<PointT>& in, const Point& edge0, const Point& edge1, ClipMode cm);
 
-        static bool inside(const Point& p, const Point& corner, ClipMode cm);
-        static const Point intersect(const Point& from, const Point& to, const Point& edge0, const Point& edge1);
+        static inline bool inside(const PointT& p, const Point& corner, ClipMode cm);
+        static inline const PointT intersect(const PointT& from, const PointT& to, const Point& edge0, const Point& edge1);
 };
 
 
+//
+// Include the template implementation
+//
+#include "ClipShape.tpp"
+
+
+//
+// For convenience
+//
+typedef BasicClipShape<Pt::int32_t> ClipShapeI;
+typedef BasicClipShape<Pt::ssize_t> ClipShapeZ;
+typedef BasicClipShape<double>      ClipShapeF;
+
+
+
 } // namespace
 } // namespace
+
+
+
+
 
 #endif

@@ -41,10 +41,10 @@ namespace Gfx {
 
 void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2)
 {
-    const bool x1Valid = ClipShape::insideXRange(x1, _currentClip);
-    const bool y1Valid = ClipShape::insideYRange(y1, _currentClip);
-    const bool x2Valid = ClipShape::insideXRange(x2, _currentClip) && (x2 != x1);
-    const bool y2Valid = ClipShape::insideYRange(y2, _currentClip) && (y2 != y1);
+    const bool x1Valid = ClipShapeI::insideXRange(x1, _currentClip);
+    const bool y1Valid = ClipShapeI::insideYRange(y1, _currentClip);
+    const bool x2Valid = ClipShapeI::insideXRange(x2, _currentClip) && (x2 != x1);
+    const bool y2Valid = ClipShapeI::insideYRange(y2, _currentClip) && (y2 != y1);
 
     if( x1Valid && y1Valid ) {
         Pixel pixel(_image->view(), x1, y1);
@@ -69,10 +69,10 @@ void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, 
 
 void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const bool mask[4])
 {
-    const bool x1Valid = ClipShape::insideXRange(x1, _currentClip);
-    const bool y1Valid = ClipShape::insideYRange(y1, _currentClip);
-    const bool x2Valid = ClipShape::insideXRange(x2, _currentClip) && (x2 != x1);
-    const bool y2Valid = ClipShape::insideYRange(y2, _currentClip) && (y2 != y1);
+    const bool x1Valid = ClipShapeI::insideXRange(x1, _currentClip);
+    const bool y1Valid = ClipShapeI::insideYRange(y1, _currentClip);
+    const bool x2Valid = ClipShapeI::insideXRange(x2, _currentClip) && (x2 != x1);
+    const bool y2Valid = ClipShapeI::insideYRange(y2, _currentClip) && (y2 != y1);
 
     if( x1Valid && y1Valid && mask[0] ) {
         Pixel pixel(_image->view(), x1, y1);
@@ -97,10 +97,10 @@ void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, 
 
 void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::uint8_t alpha)
 {
-    const bool x1Valid = ClipShape::insideXRange(x1, _currentClip);
-    const bool y1Valid = ClipShape::insideYRange(y1, _currentClip);
-    const bool x2Valid = ClipShape::insideXRange(x2, _currentClip) && (x2 != x1);
-    const bool y2Valid = ClipShape::insideYRange(y2, _currentClip) && (y2 != y1);
+    const bool x1Valid = ClipShapeI::insideXRange(x1, _currentClip);
+    const bool y1Valid = ClipShapeI::insideYRange(y1, _currentClip);
+    const bool x2Valid = ClipShapeI::insideXRange(x2, _currentClip) && (x2 != x1);
+    const bool y2Valid = ClipShapeI::insideYRange(y2, _currentClip) && (y2 != y1);
 
     if (x1Valid && y1Valid ) {
         Pixel pixel(_image->view(), x1, y1);
@@ -125,10 +125,10 @@ void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, 
 
 void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::uint8_t alpha, const bool mask[4])
 {
-    const bool x1Valid = ClipShape::insideXRange(x1, _currentClip);
-    const bool y1Valid = ClipShape::insideYRange(y1, _currentClip);
-    const bool x2Valid = ClipShape::insideXRange(x2, _currentClip) && (x2 != x1);
-    const bool y2Valid = ClipShape::insideYRange(y2, _currentClip) && (y2 != y1);
+    const bool x1Valid = ClipShapeI::insideXRange(x1, _currentClip);
+    const bool y1Valid = ClipShapeI::insideYRange(y1, _currentClip);
+    const bool x2Valid = ClipShapeI::insideXRange(x2, _currentClip) && (x2 != x1);
+    const bool y2Valid = ClipShapeI::insideYRange(y2, _currentClip) && (y2 != y1);
 
     if( x1Valid && y1Valid && mask[0] ) {
         Pixel pixel(_image->view(), x1, y1);
@@ -154,10 +154,10 @@ void Rasterizer2::stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, 
 void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY)
 {
     // Check the clipping
-    const bool x1Valid = ClipShape::insideXRange(x1, _currentClip);
-    const bool y1Valid = ClipShape::insideYRange(y1, _currentClip);
-    const bool x2Valid = ClipShape::insideXRange(x2, _currentClip) && (x2 != x1);
-    const bool y2Valid = ClipShape::insideYRange(y2, _currentClip) && (y2 != y1);
+    const bool x1Valid = ClipShapeI::insideXRange(x1, _currentClip);
+    const bool y1Valid = ClipShapeI::insideYRange(y1, _currentClip);
+    const bool x2Valid = ClipShapeI::insideXRange(x2, _currentClip) && (x2 != x1);
+    const bool y2Valid = ClipShapeI::insideYRange(y2, _currentClip) && (y2 != y1);
 
     // Draw the pixels using texture or gradient
     if(_isTexture || _isGradient) {
@@ -209,10 +209,10 @@ void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt
 void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const bool mask[4])
 {
     // Check the clipping
-    const bool x1Valid = ClipShape::insideXRange(x1, _currentClip);
-    const bool y1Valid = ClipShape::insideYRange(y1, _currentClip);
-    const bool x2Valid = ClipShape::insideXRange(x2, _currentClip) && (x2 != x1);
-    const bool y2Valid = ClipShape::insideYRange(y2, _currentClip) && (y2 != y1);
+    const bool x1Valid = ClipShapeI::insideXRange(x1, _currentClip);
+    const bool y1Valid = ClipShapeI::insideYRange(y1, _currentClip);
+    const bool x2Valid = ClipShapeI::insideXRange(x2, _currentClip) && (x2 != x1);
+    const bool y2Valid = ClipShapeI::insideYRange(y2, _currentClip) && (y2 != y1);
 
     // Draw the pixels using texture or gradient
     if(_isTexture || _isGradient) {
@@ -264,10 +264,10 @@ void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt
 void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, Pt::uint8_t alpha)
 {
     // Check the clipping
-    const bool x1Valid = ClipShape::insideXRange(x1, _currentClip);
-    const bool y1Valid = ClipShape::insideYRange(y1, _currentClip);
-    const bool x2Valid = ClipShape::insideXRange(x2, _currentClip) && (x2 != x1);
-    const bool y2Valid = ClipShape::insideYRange(y2, _currentClip) && (y2 != y1);
+    const bool x1Valid = ClipShapeI::insideXRange(x1, _currentClip);
+    const bool y1Valid = ClipShapeI::insideYRange(y1, _currentClip);
+    const bool x2Valid = ClipShapeI::insideXRange(x2, _currentClip) && (x2 != x1);
+    const bool y2Valid = ClipShapeI::insideYRange(y2, _currentClip) && (y2 != y1);
 
     // Draw the pixels using texture or gradient
     if(_isTexture || _isGradient) {
@@ -319,10 +319,10 @@ void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt
 void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, Pt::uint8_t alpha, const bool mask[4])
 {
     // Check the clipping
-    const bool x1Valid = ClipShape::insideXRange(x1, _currentClip);
-    const bool y1Valid = ClipShape::insideYRange(y1, _currentClip);
-    const bool x2Valid = ClipShape::insideXRange(x2, _currentClip) && (x2 != x1);
-    const bool y2Valid = ClipShape::insideYRange(y2, _currentClip) && (y2 != y1);
+    const bool x1Valid = ClipShapeI::insideXRange(x1, _currentClip);
+    const bool y1Valid = ClipShapeI::insideYRange(y1, _currentClip);
+    const bool x2Valid = ClipShapeI::insideXRange(x2, _currentClip) && (x2 != x1);
+    const bool y2Valid = ClipShapeI::insideYRange(y2, _currentClip) && (y2 != y1);
 
     // Draw the pixels using texture or gradient
     if(_isTexture || _isGradient) {
@@ -374,10 +374,10 @@ void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt
 void Rasterizer2::fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const Pt::uint8_t alphaMask[4])
 {
     // Check the clipping
-    const bool x1Valid = ClipShape::insideXRange(x1, _currentClip);
-    const bool y1Valid = ClipShape::insideYRange(y1, _currentClip);
-    const bool x2Valid = ClipShape::insideXRange(x2, _currentClip) && (x2 != x1);
-    const bool y2Valid = ClipShape::insideYRange(y2, _currentClip) && (y2 != y1);
+    const bool x1Valid = ClipShapeI::insideXRange(x1, _currentClip);
+    const bool y1Valid = ClipShapeI::insideYRange(y1, _currentClip);
+    const bool x2Valid = ClipShapeI::insideXRange(x2, _currentClip) && (x2 != x1);
+    const bool y2Valid = ClipShapeI::insideYRange(y2, _currentClip) && (y2 != y1);
 
     // Draw the pixels using texture or gradient
     if(_isTexture || _isGradient) {
@@ -499,11 +499,11 @@ void Rasterizer2::rasterScanline(
 void Rasterizer2::rasterScanlineWithClipping(Pt::int32_t from, Pt::int32_t to, Pt::int32_t pixelY, Pt::int32_t minX, Pt::int32_t minY)
 {
     // Check if the Y coordinate is outside the clipping region
-    if( !ClipShape::insideYRange(pixelY, _currentClip) ) return;
+    if( !ClipShapeI::insideYRange(pixelY, _currentClip) ) return;
 
     // Check and limit the X coordinates
-    from = ClipShape::clipLeft  (from, _currentClip);
-    to   = ClipShape::clipRight (to,   _currentClip);
+    from = ClipShapeI::clipLeft  (from, _currentClip);
+    to   = ClipShapeI::clipRight (to,   _currentClip);
 
     if(to < from) return;
 

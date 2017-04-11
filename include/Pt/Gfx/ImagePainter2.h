@@ -144,6 +144,7 @@ class PT_GFX_API ImagePainter2 : public Painter
         struct SAGOpState;
 
     private:
+        inline void deduplicatePointsF(std::vector<PointF>& dst, const PointF* src, const size_t pointCount);
         inline void cnvPointsFToPointsDeduplicate(std::vector<Point>& dst, const PointF* src, const size_t pointCount);
 
         void drawThickPolyline_impl(const PointF* ps, const size_t pointCount, bool autoClose, const int32_t* segmentIndexMarker);
@@ -169,6 +170,43 @@ class PT_GFX_API ImagePainter2 : public Painter
 // ======================================================================================
 // ===== Inlined Private Member Functions ===============================================
 // ======================================================================================
+
+void ImagePainter2::deduplicatePointsF(std::vector<PointF>& dst, const PointF* src, const size_t pointCount)
+{
+    // Check if there is no actual point
+    if(!pointCount) return;
+
+    // Prepare the buffer
+    const size_t ofs = dst.size();
+    dst.resize(ofs + pointCount);
+
+    // Process the coordinates
+    size_t putCnt = 0;
+    for(size_t i = 0; i < pointCount; ++i) {
+        // Round the coordinates
+        const double x = ::round(src[i].x() * 64.0);
+        const double y = ::round(src[i].y() * 64.0);
+        // Skip duplicated coordinates
+        if( ofs + putCnt >= 1 && dst[ofs + putCnt - 1].x() == x && dst[ofs + putCnt - 1].y() == y ) continue;
+        // Store the coordinate and increment the "put" counter
+        dst[ofs + putCnt].set(x, y);
+        ++putCnt;
+    }
+
+    // Discard the last point if it has the same coordinate with the first point
+    if(dst[ofs] == dst[ofs + putCnt - 1]) --putCnt;
+
+    // Resize the buffer to discard unused elements
+    dst.resize(ofs + putCnt);
+
+    // Scale back the coordinates
+    for(size_t i = 0; i < dst.size(); ++i) {
+        dst[i].set(
+            dst[i].x() * 0.015625, // (1.0 / 64.0)
+            dst[i].y() * 0.015625  // (1.0 / 64.0)
+        );
+    }
+}
 
 void ImagePainter2::cnvPointsFToPointsDeduplicate(std::vector<Point>& dst, const PointF* src, const size_t pointCount)
 {

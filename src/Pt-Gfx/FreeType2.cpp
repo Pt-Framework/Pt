@@ -245,7 +245,7 @@ void FreeType2::pathFromChar(
     for(Pt::int32_t i = 0; i < glyph->outline.n_points; ++i) {
         points[i].set(
              glyph->outline.points[i].x * 0.015625, // (1.0 / 64.0)
-            -glyph->outline.points[i].y * 0.015625
+            -glyph->outline.points[i].y * 0.015625  // (1.0 / 64.0)
         );
     }
 

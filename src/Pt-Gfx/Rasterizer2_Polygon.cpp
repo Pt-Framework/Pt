@@ -64,6 +64,31 @@ void Rasterizer2::strokeOnePixelPolygonOutline(const Point* points, size_t point
     }
 }
 
+void Rasterizer2::strokeOnePixelPolygonOutline(const PointF* points, size_t pointCount, bool autoClose)
+{
+    // Check if there are too few points
+    if(pointCount < 2) return;
+
+    // Separate the polygons, clip their coordinates, and raster them
+    size_t startIndex = 0;
+
+    for(size_t i = 0; i <= pointCount; ++i) {
+        // Search for the end and/or separator points
+        if( i == pointCount || (points[i].x() > MAXIMUM_COORD && points[i].y() > MAXIMUM_COORD) ) {
+            // Calculate the number of points for this polygon
+            const size_t curPC = i - startIndex;
+            // Clip the coordinates
+            std::vector<PointF> clipped;
+            genClippedPolygonPoints(clipped, points + startIndex, curPC, true);
+            if(autoClose && clipped.back() != clipped[0]) clipped.push_back(points[0]);
+            // Increment the start index
+            startIndex += curPC + 1;
+            // Draw the polygon
+            rasterOnePixelPolygonOutline(clipped.data(), clipped.size(), _pen.color());
+        }
+    }
+}
+
 void Rasterizer2::strokePolygon(const Point* points, size_t pointCount)
 {
     // Check if there are too few points
@@ -233,10 +258,17 @@ void Rasterizer2::genClippedPolygonPoints(std::vector<Point>& dst, const Point* 
     for(size_t i = 0; i < pointCount; ++i)
         dst.push_back( Point( src[i].x(), src[i].y() ) );
 
-    if(forPolygonOutline)
-        ClipShape::clipPolyline(dst, _currentClip);
-    else
-        ClipShape::clipPolygon(dst, _currentClip);
+    if(forPolygonOutline) ClipShapeZ::clipPolyline(dst, _currentClip);
+    else                  ClipShapeZ::clipPolygon (dst, _currentClip);
+}
+
+void Rasterizer2::genClippedPolygonPoints(std::vector<PointF>& dst, const PointF* src, const size_t pointCount, bool forPolygonOutline) const
+{
+    for(size_t i = 0; i < pointCount; ++i)
+        dst.push_back( PointF( src[i].x(), src[i].y() ) );
+
+    if(forPolygonOutline) ClipShapeF::clipPolyline(dst, _currentClip);
+    else                  ClipShapeF::clipPolygon (dst, _currentClip);
 }
 
 void Rasterizer2::separateAndClipPolygons(Pt::int32_t& minX, Pt::int32_t& maxX, Pt::int32_t& minY, Pt::int32_t& maxY, std::vector<Point>& clippedPoints, std::vector<size_t>& clippedCounts, const Point* points, size_t pointCount) const
@@ -309,6 +341,28 @@ void Rasterizer2::rasterOnePixelPolygonOutline(const Point* points, size_t point
     if(solid) rasterOnePixelSolidLine    (points[pc1].x(), points[pc1].y(), points[0].x(), points[0].y(), color,              &mask_zero);
     else      rasterOnePixelPatternedLine(points[pc1].x(), points[pc1].y(), points[0].x(), points[0].y(), color, fpiCtrInOut, &mask_zero);
     */
+}
+
+void Rasterizer2::rasterOnePixelPolygonOutline(const PointF* points, size_t pointCount, const Color& color)
+{
+    // Check if there are too few points
+    if(pointCount < 2) return;
+
+    // Mask
+    DrawLineMask mask_nnp1 = Rasterizer2::NullLineMask;
+
+    // Pattern indexing counter
+    const bool        solid       = (_pen.style() == Pen::Solid);
+          Pt::int32_t fpiCtrInOut = PATTERN_BUFFER_COUNTER_START;
+
+    // From point N to point (N + 1), successively
+    const size_t pc1 = pointCount - 1;
+
+    for(size_t i = 0; i < pc1; ++i) {
+        if(solid) rasterOnePixelSolidLine_F    (points[i].x(), points[i].y(), points[i + 1].x(), points[i + 1].y(), color,              &mask_nnp1);
+        else      rasterOnePixelPatternedLine(points[i].x(), points[i].y(), points[i + 1].x(), points[i + 1].y(), color, fpiCtrInOut, &mask_nnp1);
+#warning 123
+    }
 }
 
 // Inspired by: Efficient Polygon Fill Algorithm With C Code Sample
