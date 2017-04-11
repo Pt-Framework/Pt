@@ -492,8 +492,8 @@ void Rasterizer2::rasterOnePixelSolidGLineSegmentXWAA_F(float x1, float y1, floa
 
     // Used for storing back the mask's coordinates
     Pt::int32_t pCnt  = 0;
-    ssize_t     lx[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
-    ssize_t     ly[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
+    Pt::int32_t lx[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
+    Pt::int32_t ly[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
 
     // A helper macro to set pixel
     #define XW_SET_PIXEL(X, Y, A)                                                 \
@@ -560,22 +560,22 @@ void Rasterizer2::rasterOnePixelSolidGLineSegmentXWAA_F(float x1, float y1, floa
     }
 
     // Handle the gradient, starting point, and ending point
-    const float   grad  = (fy2 - fy1) / (fx2 - fx1);
-    const ssize_t xpxl1 = Gfx::Math::zrint(fx1);
-    const ssize_t xpxl2 = Gfx::Math::zrint(fx2);
-    const float   ypxl  = fy1 + grad * (xpxl1 - fx1);
+    const float       grad  = (fy2 - fy1) / (fx2 - fx1);
+    const Pt::int32_t xpxl1 = Gfx::Math::zrint(fx1);
+    const Pt::int32_t xpxl2 = Gfx::Math::zrint(fx2);
+    const float       ypxl  = fy1 + grad * (xpxl1 - fx1);
 
     // Draw the pixels
-    ssize_t from  = Gfx::Math::zrint(fx1);
-    ssize_t to    = xpxl2;
-    float   ypxli = ypxl;
+    Pt::int32_t from  = Gfx::Math::zrint(fx1);
+    Pt::int32_t to    = xpxl2;
+    float       ypxli = ypxl;
 
     if(steep) {
         // Draw the pixels
-        for(ssize_t i = from; i <= to; ++i) {
-            const ssize_t     fypxli = Pt::Gfx::Math::zfint(ypxli);
-            const ssize_t     fpart  = Pt::Gfx::Math::zrint( (ypxli - fypxli) * 255.0f );
-            const ssize_t     rfpart = 255 - fpart;
+        for(Pt::int32_t i = from; i <= to; ++i) {
+            const Pt::int32_t fypxli = Pt::Gfx::Math::zfint(ypxli);
+            const Pt::int32_t fpart  = Pt::Gfx::Math::zrint( (ypxli - fypxli) * 255.0f );
+            const Pt::int32_t rfpart = 255 - fpart;
             const Pt::uint8_t a1     = Rasterizer2::XWAA_WFILTER[ fpart];
             const Pt::uint8_t a2     = Rasterizer2::XWAA_WFILTER[rfpart];
             XW_SET_PIXEL(fypxli    , i, a1);
@@ -585,10 +585,10 @@ void Rasterizer2::rasterOnePixelSolidGLineSegmentXWAA_F(float x1, float y1, floa
     }
     else {
         // Draw the pixels
-        for(ssize_t i = from; i <= to; ++i) {
-            const ssize_t     fypxli = Pt::Gfx::Math::zfint(ypxli);
-            const ssize_t     fpart  = Pt::Gfx::Math::zrint( (ypxli - fypxli) * 255.0f );
-            const ssize_t     rfpart = 255 - fpart;
+        for(Pt::int32_t i = from; i <= to; ++i) {
+            const Pt::int32_t fypxli = Pt::Gfx::Math::zfint(ypxli);
+            const Pt::int32_t fpart  = Pt::Gfx::Math::zrint( (ypxli - fypxli) * 255.0f );
+            const Pt::int32_t rfpart = 255 - fpart;
             const Pt::uint8_t a1     = Rasterizer2::XWAA_WFILTER[ fpart];
             const Pt::uint8_t a2     = Rasterizer2::XWAA_WFILTER[rfpart];
             XW_SET_PIXEL(i, fypxli    , a1);
@@ -807,8 +807,8 @@ void Rasterizer2::rasterOnePixelAreaGLineSegmentXWAA_F(float x1, float y1, float
 
     // Used for storing back the mask's coordinates
     Pt::int32_t pCnt  = 0;
-    ssize_t     lx[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
-    ssize_t     ly[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
+    Pt::int32_t lx[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
+    Pt::int32_t ly[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
 
     // A helper macro to fill pixel
     #define XW_FILL_PIXEL(X, Y, A)                                                          \
@@ -886,23 +886,23 @@ void Rasterizer2::rasterOnePixelAreaGLineSegmentXWAA_F(float x1, float y1, float
     }
 
     // Handle the gradient, starting point, and ending point
-    const float   grad  = (fy2 - fy1) / (fx2 - fx1);
-    const ssize_t xpxl1 = Gfx::Math::zrint(fx1);
-    const ssize_t xpxl2 = Gfx::Math::zrint(fx2);
-    const float   ypxl  = fy1 + grad * (xpxl1 - fx1);
+    const float       grad  = (fy2 - fy1) / (fx2 - fx1);
+    const Pt::int32_t xpxl1 = Gfx::Math::zrint(fx1);
+    const Pt::int32_t xpxl2 = Gfx::Math::zrint(fx2);
+    const float       ypxl  = fy1 + grad * (xpxl1 - fx1);
 
     // Draw the pixels
-    ssize_t from  = Gfx::Math::zrint(fx1);
-    ssize_t to    = xpxl2;
-    float   ypxli = ypxl;
+    Pt::int32_t from  = Gfx::Math::zrint(fx1);
+    Pt::int32_t to    = xpxl2;
+    float       ypxli = ypxl;
 
     if(steep) {
         // Draw the pixels
         for(Pt::int32_t i = from; i <= to; ++i) {
             // Calculate the alphas and coordinates
-            const ssize_t     fypxli = Pt::Gfx::Math::zfint(ypxli);
-            const ssize_t     fpart  = Pt::Gfx::Math::zrint( (ypxli - fypxli) * 255.0f );
-            const ssize_t     rfpart = 255 - fpart;
+            const Pt::int32_t fypxli = Pt::Gfx::Math::zfint(ypxli);
+            const Pt::int32_t fpart  = Pt::Gfx::Math::zrint( (ypxli - fypxli) * 255.0f );
+            const Pt::int32_t rfpart = 255 - fpart;
             const Pt::uint8_t a1     = Rasterizer2::XWAA_WFILTER[ fpart];
             const Pt::uint8_t a2     = Rasterizer2::XWAA_WFILTER[rfpart];
             const Pt::int32_t x1 = fypxli;
@@ -927,9 +927,9 @@ void Rasterizer2::rasterOnePixelAreaGLineSegmentXWAA_F(float x1, float y1, float
         // Draw the pixels
         for(Pt::int32_t i = from; i <= to; ++i) {
             // Calculate the alphas and coordinates
-            const ssize_t     fypxli = Pt::Gfx::Math::zfint(ypxli);
-            const ssize_t     fpart  = Pt::Gfx::Math::zrint( (ypxli - fypxli) * 255.0f );
-            const ssize_t     rfpart = 255 - fpart;
+            const Pt::int32_t fypxli = Pt::Gfx::Math::zfint(ypxli);
+            const Pt::int32_t fpart  = Pt::Gfx::Math::zrint( (ypxli - fypxli) * 255.0f );
+            const Pt::int32_t rfpart = 255 - fpart;
             const Pt::uint8_t a1     = Rasterizer2::XWAA_WFILTER[ fpart];
             const Pt::uint8_t a2     = Rasterizer2::XWAA_WFILTER[rfpart];
             const Pt::int32_t x  = i;

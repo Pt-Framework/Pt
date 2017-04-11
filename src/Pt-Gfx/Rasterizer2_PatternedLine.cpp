@@ -410,15 +410,15 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentXWAA_F(float x1, float y1, 
     }
 
     // Handle the gradient, starting point, and ending point
-    const float   grad  = (fy2 - fy1) / (fx2 - fx1);
-    const ssize_t xpxl1 = Gfx::Math::zrint(fx1);
-    const ssize_t xpxl2 = Gfx::Math::zrint(fx2);
-    const float   ypxl  = fy1 + grad * (xpxl1 - fx1);
+    const float       grad  = (fy2 - fy1) / (fx2 - fx1);
+    const Pt::int32_t xpxl1 = Gfx::Math::zrint(fx1);
+    const Pt::int32_t xpxl2 = Gfx::Math::zrint(fx2);
+    const float       ypxl  = fy1 + grad * (xpxl1 - fx1);
 
     // Draw the pixels
-    ssize_t from  = Gfx::Math::zrint(fx1);
-    ssize_t to    = xpxl2;
-    float   ypxli = ypxl;
+    Pt::int32_t from  = Gfx::Math::zrint(fx1);
+    Pt::int32_t to    = xpxl2;
+    float       ypxli = ypxl;
 
     // If the line direction is swapped, determine the ending and starting value of the pattern indexing counter
     Pt::int32_t fpiCtrNextOut = 0;
@@ -432,7 +432,7 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentXWAA_F(float x1, float y1, 
     // Draw the pixels
     if(steep) {
         // Draw the pixels
-        for(ssize_t i = from; i <= to; ++i) {
+        for(Pt::int32_t i = from; i <= to; ++i) {
             // Get alpha from the pattern
             Pt::uint8_t pa = _patternBuffer1P[FIXED_POINT_TO_INT(fpiCtrInOut)];
             if(swapDir) {
@@ -444,9 +444,9 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentXWAA_F(float x1, float y1, 
                 if(fpiCtrInOut >= PATTERN_BUFFER_COUNTER_MAX1P) fpiCtrInOut -= PATTERN_BUFFER_COUNTER_MAX1P;
             }
             // Draw the pixels
-            const ssize_t     fypxli = Pt::Gfx::Math::zfint(ypxli);
-            const ssize_t     fpart  = Pt::Gfx::Math::zrint( (ypxli - fypxli) * 255.0f );
-            const ssize_t     rfpart = 255 - fpart;
+            const Pt::int32_t fypxli = Pt::Gfx::Math::zfint(ypxli);
+            const Pt::int32_t fpart  = Pt::Gfx::Math::zrint( (ypxli - fypxli) * 255.0f );
+            const Pt::int32_t rfpart = 255 - fpart;
             const Pt::uint8_t a1     = Rasterizer2::XWAA_WFILTER[ fpart];
             const Pt::uint8_t a2     = Rasterizer2::XWAA_WFILTER[rfpart];
             XW_SET_PIXEL(fypxli    , i, a1, pa);
@@ -463,7 +463,7 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentXWAA_F(float x1, float y1, 
     }
     else {
         // Draw the pixels
-        for(ssize_t i = from; i <= to; ++i) {
+        for(Pt::int32_t i = from; i <= to; ++i) {
             // Get alpha from the pattern
             Pt::uint8_t pa = _patternBuffer1P[FIXED_POINT_TO_INT(fpiCtrInOut)];
             if(swapDir) {
@@ -475,9 +475,9 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentXWAA_F(float x1, float y1, 
                 if(fpiCtrInOut >= PATTERN_BUFFER_COUNTER_MAX1P) fpiCtrInOut -= PATTERN_BUFFER_COUNTER_MAX1P;
             }
             // Draw the pixels
-            const ssize_t     fypxli = Pt::Gfx::Math::zfint(ypxli);
-            const ssize_t     fpart  = Pt::Gfx::Math::zrint( (ypxli - fypxli) * 255.0f );
-            const ssize_t     rfpart = 255 - fpart;
+            const Pt::int32_t fypxli = Pt::Gfx::Math::zfint(ypxli);
+            const Pt::int32_t fpart  = Pt::Gfx::Math::zrint( (ypxli - fypxli) * 255.0f );
+            const Pt::int32_t rfpart = 255 - fpart;
             const Pt::uint8_t a1     = Rasterizer2::XWAA_WFILTER[ fpart];
             const Pt::uint8_t a2     = Rasterizer2::XWAA_WFILTER[rfpart];
             XW_SET_PIXEL(i, fypxli    , a1, pa);
