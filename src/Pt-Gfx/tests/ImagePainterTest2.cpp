@@ -82,43 +82,43 @@ using namespace Pt::Gfx;
 
 // General settings for Pt-Gfx
 #define DO_TEST_DRAW    1
-#define DO_BENCHMARKING 1
+#define DO_BENCHMARKING 0
 
 // Detailed-test enable settings for Pt-Gfx
 #define TEST_SOURCECOPY                         1
 #define TEST_SOURCEOVER                         1
 
-#define TEST_DRAW_SOLID_LINE_AND_TEXT           1 // (including bezier)
-#define TEST_DRAW_PATTERNED_LINE                1 // (including bezier)
-#define TEST_DRAW_SOLID_THICK_LINE              1 // (including bezier)
-#define TEST_DRAW_PATTERNED_THICK_LINE          1 // (including bezier)
+#define TEST_DRAW_SOLID_LINE_AND_TEXT           0 // (including bezier)
+#define TEST_DRAW_PATTERNED_LINE                0 // (including bezier)
+#define TEST_DRAW_SOLID_THICK_LINE              0 // (including bezier)
+#define TEST_DRAW_PATTERNED_THICK_LINE          0 // (including bezier)
 
-#define TEST_DRAW_OMPF_RECTANGLES               1 // (including thick and filled)
-#define TEST_DRAW_ROUND_OMPF_RECTANGLES         1 // (including thick and filled)
+#define TEST_DRAW_OMPF_RECTANGLES               0 // (including thick and filled)
+#define TEST_DRAW_ROUND_OMPF_RECTANGLES         0 // (including thick and filled)
 
-#define TEST_DRAW_ELLIPSES_ARCS                 1
-#define TEST_DRAW_SOLID_THICK_ELLIPSES_ARCS     1
-#define TEST_DRAW_PATTERNED_THICK_ELLIPSES_ARCS 1
+#define TEST_DRAW_ELLIPSES_ARCS                 0
+#define TEST_DRAW_SOLID_THICK_ELLIPSES_ARCS     0
+#define TEST_DRAW_PATTERNED_THICK_ELLIPSES_ARCS 0
 
-#define TEST_DRAW_SOLID_FILLED_POLYGONS         1
-#define TEST_DRAW_GRADIENT_FILLED_POLYGONS      1
-#define TEST_DRAW_TEXTURE_FILLED_POLYGONS       1
+#define TEST_DRAW_SOLID_FILLED_POLYGONS         0
+#define TEST_DRAW_GRADIENT_FILLED_POLYGONS      0
+#define TEST_DRAW_TEXTURE_FILLED_POLYGONS       0
 
-#define TEST_DRAW_SOLID_FILLED_ELLIPSES_ARCS    1
-#define TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS 1
-#define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  1
+#define TEST_DRAW_SOLID_FILLED_ELLIPSES_ARCS    0
+#define TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS 0
+#define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  0
 
-#define TEST_DRAW_PATH                          1 // (including thick and filled)
-#define TEST_DRAW_PATH_CLIPPING                 1 // (including path-based text)
-#define TEST_DRAW_EXTRA                         1 // (including path-based n-bezier)
+#define TEST_DRAW_PATH                          0 // (including thick and filled)
+#define TEST_DRAW_PATH_CLIPPING                 0 // (including path-based text)
+#define TEST_DRAW_EXTRA                         0 // (including path-based n-bezier)
 
 #define TEST_SCENE_GRAPH                        1
-#define TEST_SVG_READER                         1
+#define TEST_SVG_READER                         0
 
 #define TEST_COMPARE_WITH_OLD_PAINTER           0 // (for some shapes only)
 
 // Detailed-test benchmark settings for Pt-Gfx and some for Cairo
-#define BENCHMARK_RESULT_HTML               1 // (automatically disabling test drawing and enabling Cairo comparison)
+#define BENCHMARK_RESULT_HTML               0 // (automatically disabling test drawing and enabling Cairo comparison)
 #define BENCHMARK_RESULT_HTML_SIDE_BY_SIDE  1
 
 #define BENCHMARK_CHECK_RESULTING_IMAGE     0
