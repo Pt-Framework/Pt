@@ -78,8 +78,8 @@
 #define PATTERN_BUFFER_COUNTER_MAXMP PATTERN_BUFFER_NUM_OF_CELLS
 
 // Just for debugging ;)
-//#warning "Just for debugging ;)"
-//#include <stdio.h>
+#warning "Just for debugging ;)"
+#include <stdio.h>
 //#define lprintf(...) fprintf (stderr, __VA_ARGS__)
 
 
@@ -163,10 +163,13 @@ class Rasterizer2
         void strokeOnePixelEllipseArc(const Point& topLeft, const Size& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
         void strokePolygon(const Point* points, size_t pointCount);
+        void strokePolygon(const PointF* points, size_t pointCount);
         void strokePolygonSeparate(const Point* points, size_t pointCount);
+        void strokePolygonSeparate(const PointF* points, size_t pointCount);
 
         void fillRect(const Point& tl, const Point& br);
         void fillPolygon(const Point* points, size_t pointCount);
+        void fillPolygon(const PointF* points, size_t pointCount);
         void fillEllipse(const Point& topLeft, const Size& size);
         void fillArc(const Point& topLeft, const Size& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
@@ -207,6 +210,7 @@ class Rasterizer2
         void rasterOnePixelSolidGLineSegmentXWAA_F(float x1, float y1, float x2, float y2, const Color& color, DrawLineMask* maskInOut);
 
         void rasterOnePixelAreaGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t minX, Pt::int32_t minY, const PolygonScanlines& exclusionZone, DrawLineMask& maskInOut);
+        void rasterOnePixelAreaGLineSegmentXWAA_F(float x1, float y1, float x2, float y2, const Color& color, Pt::int32_t minX, Pt::int32_t minY, const PolygonScanlines& exclusionZone, DrawLineMask& maskInOut);
 
         void rasterOnePixelPatternedLine(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut);
         void rasterOnePixelPatternedXLineSegment(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t fpiCtrInc, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut);
@@ -225,6 +229,7 @@ class Rasterizer2
         void rasterPolygonAreaNoAA(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
         void rasterPolygonAreaFSAA2x2(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
         void rasterPolygonAreaXWAA(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
+        void rasterPolygonAreaXWAA(const PointF* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, float minX, float minY, float maxX, float maxY);
 
         void rasterOnePixelQuadraticBezierCurve(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t x3, Pt::int32_t y3, const Color& color, Pt::int32_t* fpiCtrInOut, DrawLineMask* maskInOut);
 
@@ -296,9 +301,11 @@ class Rasterizer2
 
         // --- Polygon-related helper functions ---
         void getPolygonRectMinMax(const Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY) const;
+        void getPolygonRectMinMax(const PointF* points, size_t pointCount, float& minX, float& minY, float& maxX, float& maxY) const;
         void genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount, bool forPolygonOutline) const;
         void genClippedPolygonPoints(std::vector<PointF>& dst, const PointF* src, const size_t pointCount, bool forPolygonOutline) const;
         void separateAndClipPolygons(Pt::int32_t& minX, Pt::int32_t& maxX, Pt::int32_t& minY, Pt::int32_t& maxY, std::vector<Point>& clippedPoints, std::vector<size_t>& clippedCounts, const Point* points, size_t pointCount) const;
+        void separateAndClipPolygons(float& minX, float& maxX, float& minY, float& maxY, std::vector<PointF>& clippedPoints, std::vector<size_t>& clippedCounts, const PointF* points, size_t pointCount) const;
 
         // Arc-related helper functions
         static inline void arcUtil_detXWLineDirection(ArcXWLineData& xwLineData);

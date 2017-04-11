@@ -27,6 +27,7 @@ static void testSceneGraph(const char* title, Image& image, Painter& painter)
                 csgn2->setBrush( Color::fromRgb8(255, 0, 0) );
 
     // Parent's 3rd child
+  //SGNodeRect* csgn3 = &psgn.addChild( new SGNodeRect( SGNode::RenderFill, RectF(PointF(0, 0), SizeF(50, 50)), 10 ) );
     SGNodeRect* csgn3 = &psgn.addChild( new SGNodeRect( SGNode::RenderStroke, RectF(PointF(0, 0), SizeF(50, 50)), 10 ) );
                 csgn3->transform().translate(0, 150);
 
@@ -53,7 +54,7 @@ static void testSceneGraph(const char* title, Image& image, Painter& painter)
     psgn.setPen  (Color::fromRgb8(255, 255, 255));
     psgn.setBrush(Color::fromRgb8(255, 255, 255));
 
-    //psgn.transform().rotate(-15);
+    psgn.transform().rotate(-15);
     psgn.transform().translate(100, 50);
     psgn.draw(*ip2);
 

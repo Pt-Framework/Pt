@@ -94,7 +94,7 @@ static inline void generateGenericNBezierPoints(std::vector<PointF>& dst, double
     }
 
     // Determine the number of segments
-    const Pt::int32_t nSegs = Gfx::Math::zrint(clen * abs(smoothness) / 20) + (pts.size() / 2 + 1);
+    const Pt::int32_t nSegs = Gfx::Math::zrint(clen * abs(smoothness) / 20) + (pts.size() / 2 + 1 + 1);
 
     // Calculate the inverse multiplication factor
     const double nSegs1i = 1.0 / (nSegs - 1);

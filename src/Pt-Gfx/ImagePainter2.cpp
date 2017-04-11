@@ -39,6 +39,9 @@ namespace Pt {
 namespace Gfx {
 
 
+#define USE_HIRES_WITH_STANDARD_AA
+
+
 // ======================================================================================
 // ===== Internal Helper Functions - Implementation of Geometric Equations ==============
 // ======================================================================================
@@ -883,7 +886,14 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount, boo
 {
     // Rasterize one-pixel polyline
     if(_rasterizer->pen().size() == 1) {
-        if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Standard) {
+        // Determine whether to use the higher resolution function
+#if defined(USE_HIRES_WITH_STANDARD_AA)
+        const bool useFloatFuncs = _rasterizer->antiAliasingMode() == AntiAliasingMode::Standard;
+#else
+        const bool useFloatFuncs = false;
+#endif
+        // Use higher precision rasterization when using AntiAliasingMode::Standard
+        if(useFloatFuncs) {
             // Remove duplicates
             std::vector<PointF> pointsF;
             deduplicatePointsF(pointsF, ps, pointCount);
@@ -891,6 +901,7 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount, boo
             if(ps[0] == ps[pointCount - 1]) autoClose = true;
             _rasterizer->strokeOnePixelPolygonOutline(pointsF.data(), pointsF.size(), autoClose);
         }
+        // Use lower precision rasterization when using other modes
         else {
             // Round the points and remove duplicates
             std::vector<Point> points;
@@ -908,12 +919,30 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount, boo
 
 void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
 {
-    // Round the points and remove duplicates
-    std::vector<Point> points;
-    cnvPointsFToPointsDeduplicate(points, ps, pointCount);
+    // Determine whether to use the higher resolution function
+#if defined(USE_HIRES_WITH_STANDARD_AA)
+    const bool useFloatFuncs = _rasterizer->antiAliasingMode() == AntiAliasingMode::Standard;
+#else
+    const bool useFloatFuncs = false;
+#endif
 
-    // Rasterize thick polygon
-    _rasterizer->fillPolygon(points.data(), points.size());
+    // Use higher precision rasterization when using AntiAliasingMode::Standard
+    if(useFloatFuncs) {
+        // Remove duplicates
+        std::vector<PointF> pointsF;
+        deduplicatePointsF(pointsF, ps, pointCount);
+        // Rasterize the polygon
+        _rasterizer->fillPolygon(pointsF.data(), pointsF.size());
+    }
+
+    // Use lower precision rasterization when using other modes
+    else {
+        // Round the points and remove duplicates
+        std::vector<Point> points;
+        cnvPointsFToPointsDeduplicate(points, ps, pointCount);
+        // Rasterize the polygon
+        _rasterizer->fillPolygon(points.data(), points.size());
+    }
 }
 
 void ImagePainter2::drawQuadraticPolybezier(const PointF* ps, const size_t pointCount, bool autoClose)
@@ -1286,9 +1315,15 @@ void ImagePainter2::drawThickPolyline_impl(const PointF* ps, const size_t pointC
                     thickenPatternedPolygon(pointsF, basePtr, curPCnt);
                 }
             }
+#if 0 && defined(USE_HIRES_WITH_STANDARD_AA)
+            // Remove duplicates
+            std::vector<PointF> points;
+            deduplicatePointsF(points, pointsF.data(), pointsF.size());
+#else
             // Round the points and remove duplicates
             std::vector<Point> points;
             cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
+#endif
             // Rasterize the polygon
             if(solidPen && closedPolygon) _rasterizer->strokePolygon        (points.data(), points.size());
             else                          _rasterizer->strokePolygonSeparate(points.data(), points.size());
