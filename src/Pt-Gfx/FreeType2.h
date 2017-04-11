@@ -81,27 +81,31 @@ class FreeType2 {
             const String& text, FT_Matrix& matrix, FTC_FaceID faceId, FTC_ImageType imageType, bool mono
         );
 
+        static void setFontDir(const System::Path& path);
+
+        static const std::vector<std::string> fontNames();
+
+        static void setDefaultFont(const std::string& font);
+
+        static const std::string defaultFont();
+
+        static FTC_FaceID findFaceId(const Font& font);
+
+        static FT_Error fontRequest(FTC_FaceID face_id, FT_Library library, FT_Pointer request_data, FT_Face* face);
+
         static void reserveInstance(FTC_FaceID faceID);
         static void releaseInstance(FTC_FaceID faceID);
 
         static FreeType2& instance(FTC_FaceID faceID = 0);
 
     private:
-        struct InitFT2 {
-            inline InitFT2()
-            { FreeType2::reserveInstance_impl(0); }
+        FreeType2(FTC_FaceID faceID);
 
-            inline ~InitFT2()
-            { FreeType2::releaseInstance_impl(0); }
-        };
+        FreeType2(const FreeType2&)
+        {}
 
-        static InitFT2 _initFT2;
-
-        static void reserveInstance_impl(FTC_FaceID faceID);
-        static void releaseInstance_impl(FTC_FaceID faceID);
-
-    private:
-        FreeType2();
+        const FreeType2& operator=(const FreeType2&)
+        { return *this; }
 
         void drawGlyph(
             Image& image, const Rect& clip, Pt::int32_t xpos, Pt::int32_t ypos, const Color& color, const CompositionMode& mode,
@@ -110,12 +114,19 @@ class FreeType2 {
 
         FT_Error onFontRequest(FTC_FaceID face_id, FT_Face* face);
 
+    private:
         Pt::int32_t    _refCount;
 
         FTC_Manager    _manager;
         FTC_CMapCache  _charMapCache;
         FTC_SBitCache  _bitmapCache;
         FTC_ImageCache _imageCache;
+
+    private:
+        static void reserveInstance_impl(FTC_FaceID faceID);
+        static void releaseInstance_impl(FTC_FaceID faceID);
+
+        static void setFontDir_impl_noLock(const System::Path& path);
 
     private:
         struct FCmp {
@@ -143,20 +154,17 @@ class FreeType2 {
         static std::string    _defaultFont;
 
     private:
-        static void setFontDir_impl_noLock(const System::Path& path);
+        // Initialize FreeType on program start
+        struct InitFT2 {
+            inline InitFT2()
+            { FreeType2::reserveInstance_impl(0); }
 
-    public:
-        static void setFontDir(const System::Path& path);
+            inline ~InitFT2()
+            { FreeType2::releaseInstance_impl(0); }
+        };
 
-        static const std::vector<std::string> fontNames();
-
-        static void setDefaultFont(const std::string& font);
-
-        static const std::string defaultFont();
-
-        static FTC_FaceID findFaceId(const Font& font);
-
-        static FT_Error fontRequest(FTC_FaceID face_id, FT_Library library, FT_Pointer request_data, FT_Face* face);
+        // This member function must be initialized after the other static member variables
+        static InitFT2 _initFT2;
 };
 
 

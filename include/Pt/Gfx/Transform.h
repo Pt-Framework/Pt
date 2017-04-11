@@ -484,6 +484,8 @@ inline void BasicTransform<T>::transformPoints(PointF* xy, size_t pointCount) co
 template <typename T>
 inline const T BasicTransform<T>::transformSize(const T& sz) const
 {
+    if(_isIdentity) return sz;
+
     T zx = sz, rx = 0;
     T zy =  0, ry = 0;
 
@@ -499,6 +501,12 @@ inline const T BasicTransform<T>::transformSize(const T& sz) const
 template <typename T>
 inline void BasicTransform<T>::transformSize(T& dza, T& dzb, const T& sza, const T& szb) const
 {
+    if(_isIdentity) {
+        dza = sza;
+        dzb = szb;
+        return;
+    }
+
     T zxa = sza, zxb = szb, rx = 0;
     T zya =   0, zyb =   0, ry = 0;
 
@@ -522,6 +530,11 @@ inline void BasicTransform<T>::transformSize(T& za, T& zb) const
 template <typename T>
 inline void BasicTransform<T>::transformSize(SizeF& dz, const SizeF& sz) const
 {
+    if(_isIdentity) {
+        dz = sz;
+        return;
+    }
+
     T za = sz.width ();
     T zb = sz.height();
 
@@ -822,6 +835,8 @@ inline void BasicTransform<float>::transformPoints(PointF* xy, size_t pointCount
 template <>
 inline const float BasicTransform<float>::transformSize(const float& sz) const
 {
+    if(_isIdentity) return sz;
+
     float zx = sz, rx = 0;
     float zy =  0, ry = 0;
 
@@ -837,6 +852,12 @@ inline const float BasicTransform<float>::transformSize(const float& sz) const
 template <>
 inline void BasicTransform<float>::transformSize(float& dza, float& dzb, const float& sza, const float& szb) const
 {
+    if(_isIdentity) {
+        dza = sza;
+        dzb = szb;
+        return;
+    }
+
     float zxa = sza, zxb = szb, rx = 0;
     float zya =   0, zyb =   0, ry = 0;
 
@@ -860,6 +881,11 @@ inline void BasicTransform<float>::transformSize(float& za, float& zb) const
 template <>
 inline void BasicTransform<float>::transformSize(SizeF& dz, const SizeF& sz) const
 {
+    if(_isIdentity) {
+        dz = sz;
+        return;
+    }
+
     float za = sz.width ();
     float zb = sz.height();
 
