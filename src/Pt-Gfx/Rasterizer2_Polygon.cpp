@@ -838,7 +838,11 @@ void Rasterizer2::rasterPolygonAreaXWAA(const Point* points, const size_t* point
                     const Pt::int32_t deltaXj = curXj  - curXi;
                     const Pt::int32_t interXf = FIXED_POINT_FROM_INT(curXi)
                                               + ( FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj );
+#if 1
+                    nodeX[nodes++] = interXf;
+#else
                     nodeX[nodes++] = FIXED_POINT_TO_INT(interXf);
+#endif
                 }
                 // Update the searching index
                 j = i;
@@ -853,8 +857,13 @@ void Rasterizer2::rasterPolygonAreaXWAA(const Point* points, const size_t* point
         // Fill the pixels between the node pairs
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
             // Calculate the coordinate
+#if 1
+            const Pt::int32_t from = FIXED_POINT_TO_INT(FIXED_POINT_CEIL (nodeX[i    ]));
+            const Pt::int32_t to   = FIXED_POINT_TO_INT(FIXED_POINT_FLOOR(nodeX[i + 1]));
+#else
             const Pt::int32_t from = nodeX[i    ] + 1;
             const Pt::int32_t to   = nodeX[i + 1];
+#endif
             if(to < from) continue;
             // Store the scanline coordinate as needed
             if(_compositionMode != CompositionMode::SourceCopy) {

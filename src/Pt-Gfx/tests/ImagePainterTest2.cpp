@@ -81,8 +81,8 @@ using namespace Pt::Gfx;
 #define BENCHMARK_CAIRO_CHECK_RESULTING_IMAGE 0
 
 // General settings for Pt-Gfx
-#define DO_TEST_DRAW    1
-#define DO_BENCHMARKING 0
+#define DO_TEST_DRAW    0
+#define DO_BENCHMARKING 1
 
 // Detailed-test enable settings for Pt-Gfx
 #define TEST_SOURCECOPY                         1
@@ -100,7 +100,7 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_SOLID_THICK_ELLIPSES_ARCS     0
 #define TEST_DRAW_PATTERNED_THICK_ELLIPSES_ARCS 0
 
-#define TEST_DRAW_SOLID_FILLED_POLYGONS         1
+#define TEST_DRAW_SOLID_FILLED_POLYGONS         0
 #define TEST_DRAW_GRADIENT_FILLED_POLYGONS      0
 #define TEST_DRAW_TEXTURE_FILLED_POLYGONS       0
 
@@ -109,10 +109,10 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  0
 
 #define TEST_DRAW_PATH                          0 // (including thick and filled)
-#define TEST_DRAW_PATH_CLIPPING                 0
-#define TEST_DRAW_EXTRA                         0 // (including n-bezier)
+#define TEST_DRAW_PATH_CLIPPING                 0 // (including path-based text)
+#define TEST_DRAW_EXTRA                         0 // (including path-based n-bezier)
 
-#define TEST_SCENE_GRAPH                        0
+#define TEST_SCENE_GRAPH                        1
 #define TEST_SVG_READER                         0
 
 #define TEST_COMPARE_WITH_OLD_PAINTER           0 // (for some shapes only)
