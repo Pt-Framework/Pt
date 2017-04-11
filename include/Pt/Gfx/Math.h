@@ -44,18 +44,6 @@ namespace Math {
 
 
 //
-// Precision scaling factors
-//
-
-static const double      dPSF  = 64.0;
-static const double      dPSFi =  0.015625;
-
-static const float       sPSF  = 64.0;
-static const float       sPSFi =  0.015625;
-
-static const Pt::int32_t iPSF  = 64;
-
-//
 // The constant Pi and its variations in 32-bit floating-point
 //
 

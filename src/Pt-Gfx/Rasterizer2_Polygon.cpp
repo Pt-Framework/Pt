@@ -121,7 +121,7 @@ void Rasterizer2::penFillPolygon(const Point* points, size_t pointCount)
             _pen.color(), minX, minY, maxX, maxY
         );
     }
-    else if(_aaMode == AntiAliasingMode::Standard) {
+    else if(_aaMode == AntiAliasingMode::Standard || _aaMode == AntiAliasingMode::Speed) {
         rasterPolygonAreaXWAA(
             clippedPoints.data(), clippedCounts.data(),
             clippedCounts.size(), clippedPoints.size(),
@@ -210,7 +210,7 @@ void Rasterizer2::penFillPolygonSeparate(const Point* points, size_t pointCount)
             // Draw the polygon
             if(_aaMode == AntiAliasingMode::None)
                 rasterPolygonAreaNoAA(clipped.data(), numPoint, 1, clipped.size(), _pen.color(), minX, minY, maxX, maxY);
-            else if(_aaMode == AntiAliasingMode::Standard)
+            else if(_aaMode == AntiAliasingMode::Standard || _aaMode == AntiAliasingMode::Speed)
                 rasterPolygonAreaXWAA(clipped.data(), numPoint, 1, clipped.size(), _pen.color(), minX, minY, maxX, maxY);
             else // _aaMode == AntiAliasingMode::LowMemory
                 rasterPolygonAreaFSAA2x2(clipped.data(), numPoint, 1, clipped.size(), _pen.color(), minX, minY, maxX, maxY);
@@ -291,7 +291,7 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
             _brush.color(), minX, minY, maxX, maxY
         );
     }
-    else if(_aaMode == AntiAliasingMode::Standard) {
+    else if(_aaMode == AntiAliasingMode::Standard || _aaMode == AntiAliasingMode::Speed) {
         rasterPolygonAreaXWAA(
             clippedPoints.data(), clippedCounts.data(),
             clippedCounts.size(), clippedPoints.size(),

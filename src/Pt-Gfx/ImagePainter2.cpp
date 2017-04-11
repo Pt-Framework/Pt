@@ -28,8 +28,6 @@
   02110-1301 USA
 */
 
-#include "ImagePainter2_TestConfig.h"
-
 #include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/ImagePainter2.h>
 
@@ -765,15 +763,8 @@ void ImagePainter2::drawLine( const PointF& from, const PointF& to )
         generatePatternedSingleLineSegment(pointsF, from.x(), from.y(), to.x(), to.y(), piCtrInOut);
     }
 
-    // Determine whether to use the higher resolution function
-#if defined(USE_HIRES_WITH_STANDARD_AA)
-    const bool useFloatFuncs = _rasterizer->antiAliasingMode() == AntiAliasingMode::Standard;
-#else
-    const bool useFloatFuncs = false;
-#endif
-
     // Use higher precision rasterization when using AntiAliasingMode::Standard
-    if(useFloatFuncs) {
+    if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Standard) {
         // Remove duplicates
         std::vector<PointF> points;
         deduplicatePointsF(points, pointsF.data(), pointsF.size());
@@ -891,15 +882,8 @@ void ImagePainter2::fillRoundRect( const RectF& rect, float radius )
     std::vector<PointF> pointsF;
     generateRoundRectPoints(pointsF, x1, y1, x2, y2, radius, Gfx::Math::zcint(_rasterizer->pen().size() * 0.5f));
 
-    // Determine whether to use the higher resolution function
-#if defined(USE_HIRES_WITH_STANDARD_AA)
-    const bool useFloatFuncs = _rasterizer->antiAliasingMode() == AntiAliasingMode::Standard;
-#else
-    const bool useFloatFuncs = false;
-#endif
-
     // Use higher precision rasterization when using AntiAliasingMode::Standard
-    if(useFloatFuncs) {
+    if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Standard) {
         // Remove duplicates
         std::vector<PointF> points;
         deduplicatePointsF(points, pointsF.data(), pointsF.size());
@@ -921,14 +905,8 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount, boo
 {
     // Rasterize one-pixel polyline
     if(_rasterizer->pen().size() == 1) {
-        // Determine whether to use the higher resolution function
-#if defined(USE_HIRES_WITH_STANDARD_AA)
-        const bool useFloatFuncs = _rasterizer->antiAliasingMode() == AntiAliasingMode::Standard;
-#else
-        const bool useFloatFuncs = false;
-#endif
         // Use higher precision rasterization when using AntiAliasingMode::Standard
-        if(useFloatFuncs) {
+        if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Standard) {
             // Remove duplicates
             std::vector<PointF> pointsF;
             deduplicatePointsF(pointsF, ps, pointCount);
@@ -954,15 +932,8 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount, boo
 
 void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
 {
-    // Determine whether to use the higher resolution function
-#if defined(USE_HIRES_WITH_STANDARD_AA)
-    const bool useFloatFuncs = _rasterizer->antiAliasingMode() == AntiAliasingMode::Standard;
-#else
-    const bool useFloatFuncs = false;
-#endif
-
     // Use higher precision rasterization when using AntiAliasingMode::Standard
-    if(useFloatFuncs) {
+    if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Standard) {
         // Remove duplicates
         std::vector<PointF> pointsF;
         deduplicatePointsF(pointsF, ps, pointCount);
@@ -1083,14 +1054,8 @@ void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
         generateEllipsePoints(pointsF, radiusXo, radiusYo, centerX, centerY, 0);
         pointsF.push_back(Painter::PolygonSeparatorPointF);
         generateEllipsePoints(pointsF, radiusXi, radiusYi, centerX, centerY, 0);
-        // Determine whether to use the higher resolution function
-#if defined(USE_HIRES_WITH_STANDARD_AA)
-        const bool useFloatFuncs = _rasterizer->antiAliasingMode() == AntiAliasingMode::Standard;
-#else
-        const bool useFloatFuncs = false;
-#endif
         // Use higher precision rasterization when using AntiAliasingMode::Standard
-        if(useFloatFuncs) {
+        if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Standard) {
             // Remove duplicates
             std::vector<PointF> points;
             deduplicatePointsF(points, pointsF.data(), pointsF.size());
@@ -1233,14 +1198,8 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
             // Combine the arc's lines and add caps
             combineLinePointsAndAddCaps(pointsF, inner, outer, newPen.capStyle(), newPen.capStyle(), penSize);
         }
-        // Determine whether to use the higher resolution function
-#if defined(USE_HIRES_WITH_STANDARD_AA)
-        const bool useFloatFuncs = _rasterizer->antiAliasingMode() == AntiAliasingMode::Standard;
-#else
-        const bool useFloatFuncs = false;
-#endif
         // Use higher precision rasterization when using AntiAliasingMode::Standard
-        if(useFloatFuncs) {
+        if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Standard) {
             // Remove duplicates
             std::vector<PointF> points;
             deduplicatePointsF(points, pointsF.data(), pointsF.size());
@@ -1323,15 +1282,8 @@ void ImagePainter2::fillPath(const Path& path2d, const Transform& transform, flo
     path2d.generatePoints(pointsF, smoothness);
     transform.transformPoints(pointsF.data(), pointsF.size());
 
-    // Determine whether to use the higher resolution function
-#if defined(USE_HIRES_WITH_STANDARD_AA)
-    const bool useFloatFuncs = _rasterizer->antiAliasingMode() == AntiAliasingMode::Standard;
-#else
-    const bool useFloatFuncs = false;
-#endif
-
     // Use higher precision rasterization when using AntiAliasingMode::Standard
-    if(useFloatFuncs) {
+    if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Standard) {
         // Remove duplicates
         std::vector<PointF> points;
         deduplicatePointsF(points, pointsF.data(), pointsF.size());
@@ -1406,14 +1358,8 @@ void ImagePainter2::drawThickPolyline_impl(const PointF* ps, const size_t pointC
                     thickenPatternedPolygon(pointsF, basePtr, curPCnt);
                 }
             }
-            // Determine whether to use the higher resolution function
-#if defined(USE_HIRES_WITH_STANDARD_AA)
-            const bool useFloatFuncs = _rasterizer->antiAliasingMode() == AntiAliasingMode::Standard;
-#else
-            const bool useFloatFuncs = false;
-#endif
             // Use higher precision rasterization when using AntiAliasingMode::Standard
-            if(useFloatFuncs) {
+            if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Standard) {
                 // Remove duplicates
                 std::vector<PointF> points;
                 deduplicatePointsF(points, pointsF.data(), pointsF.size());
