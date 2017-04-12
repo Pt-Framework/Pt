@@ -57,6 +57,9 @@ class PT_HMI_API ListBoxItem : public Button
         
         void setIcon(const Gfx::Image& image);
 
+        const Gfx::SizeF& iconSize() const
+        { return _iconSize; }
+
         void setIconSize(const Gfx::SizeF& size);
 
         void setIconSize(double width, double height);
@@ -89,6 +92,13 @@ class PT_HMI_API ListBoxItem : public Button
         void setFontStyle(Gfx::Font::Style style);
 
         void setRenderer(ListBoxRenderer* renderer);
+
+    protected:
+        const Picture& picture() const
+        { return _picture; }
+
+        const Gfx::Font& currentFont() const
+        { return _font; }
 
     protected:
         virtual void onPressed();
