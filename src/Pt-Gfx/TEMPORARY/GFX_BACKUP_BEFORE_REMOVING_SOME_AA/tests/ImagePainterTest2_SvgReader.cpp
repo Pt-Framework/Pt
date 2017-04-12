@@ -10,7 +10,7 @@ static void renderSVG(ImagePainter2& targetImagePainter, const PointF& targetIma
 
     ifs.close();
 
-    targetImagePainter.setAntiAliasingMode(AntiAliasingMode::Default);
+    targetImagePainter.setAntiAliasingMode(AntiAliasingMode::Standard);
     targetImagePainter.setCompositionMode(CompositionMode::SourceOver);
     targetImagePainter.drawImage(targetImageXY, imgReader);
 

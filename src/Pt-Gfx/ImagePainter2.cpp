@@ -763,8 +763,8 @@ void ImagePainter2::drawLine( const PointF& from, const PointF& to )
         generatePatternedSingleLineSegment(pointsF, from.x(), from.y(), to.x(), to.y(), piCtrInOut);
     }
 
-    // Use higher precision rasterization when using AntiAliasingMode::Standard
-    if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Standard) {
+    // Use anti-aliasing
+    if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Default) {
         // Remove duplicates
         std::vector<PointF> points;
         deduplicatePointsF(points, pointsF.data(), pointsF.size());
@@ -772,7 +772,7 @@ void ImagePainter2::drawLine( const PointF& from, const PointF& to )
         _rasterizer->penFillPolygonSeparate(points.data(), points.size());
     }
 
-    // Use lower precision rasterization when using other modes
+    // Do not use use anti-aliasing
     else {
         // Round the points and remove duplicates
         std::vector<Point> points;
@@ -882,8 +882,8 @@ void ImagePainter2::fillRoundRect( const RectF& rect, float radius )
     std::vector<PointF> pointsF;
     generateRoundRectPoints(pointsF, x1, y1, x2, y2, radius, Gfx::Math::zcint(_rasterizer->pen().size() * 0.5f));
 
-    // Use higher precision rasterization when using AntiAliasingMode::Standard
-    if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Standard) {
+    // Use anti-aliasing
+    if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Default) {
         // Remove duplicates
         std::vector<PointF> points;
         deduplicatePointsF(points, pointsF.data(), pointsF.size());
@@ -891,7 +891,7 @@ void ImagePainter2::fillRoundRect( const RectF& rect, float radius )
         _rasterizer->fillPolygon(points.data(), points.size());
     }
 
-    // Use lower precision rasterization when using other modes
+    // Do not use use anti-aliasing
     else {
         // Round the points and remove duplicates
         std::vector<Point> points;
@@ -905,8 +905,8 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount, boo
 {
     // Rasterize one-pixel polyline
     if(_rasterizer->pen().size() == 1) {
-        // Use higher precision rasterization when using AntiAliasingMode::Standard
-        if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Standard) {
+        // Use anti-aliasing
+        if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Default) {
             // Remove duplicates
             std::vector<PointF> pointsF;
             deduplicatePointsF(pointsF, ps, pointCount);
@@ -914,7 +914,7 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount, boo
             if(ps[0] == ps[pointCount - 1]) autoClose = true;
             _rasterizer->strokeOnePixelPolygonOutline(pointsF.data(), pointsF.size(), autoClose);
         }
-        // Use lower precision rasterization when using other modes
+        // Do not use use anti-aliasing
         else {
             // Round the points and remove duplicates
             std::vector<Point> points;
@@ -932,8 +932,8 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount, boo
 
 void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
 {
-    // Use higher precision rasterization when using AntiAliasingMode::Standard
-    if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Standard) {
+    // Use anti-aliasing
+    if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Default) {
         // Remove duplicates
         std::vector<PointF> pointsF;
         deduplicatePointsF(pointsF, ps, pointCount);
@@ -941,7 +941,7 @@ void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
         _rasterizer->fillPolygon(pointsF.data(), pointsF.size());
     }
 
-    // Use lower precision rasterization when using other modes
+    // Do not use use anti-aliasing
     else {
         // Round the points and remove duplicates
         std::vector<Point> points;
@@ -1054,8 +1054,8 @@ void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
         generateEllipsePoints(pointsF, radiusXo, radiusYo, centerX, centerY, 0);
         pointsF.push_back(Painter::PolygonSeparatorPointF);
         generateEllipsePoints(pointsF, radiusXi, radiusYi, centerX, centerY, 0);
-        // Use higher precision rasterization when using AntiAliasingMode::Standard
-        if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Standard) {
+        // Use anti-aliasing
+        if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Default) {
             // Remove duplicates
             std::vector<PointF> points;
             deduplicatePointsF(points, pointsF.data(), pointsF.size());
@@ -1064,7 +1064,7 @@ void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
             _rasterizer->penFillPolygon(points.data(), points.size());
             _rasterizer->setPen(orgPen);
         }
-        // Use lower precision rasterization when using other modes
+        // Do not use use anti-aliasing
         else {
             // Round the points and remove duplicates
             std::vector<Point> points;
@@ -1198,8 +1198,8 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
             // Combine the arc's lines and add caps
             combineLinePointsAndAddCaps(pointsF, inner, outer, newPen.capStyle(), newPen.capStyle(), penSize);
         }
-        // Use higher precision rasterization when using AntiAliasingMode::Standard
-        if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Standard) {
+        // Use anti-aliasing
+        if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Default) {
             // Remove duplicates
             std::vector<PointF> points;
             deduplicatePointsF(points, pointsF.data(), pointsF.size());
@@ -1208,7 +1208,7 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
             _rasterizer->penFillPolygon(points.data(), points.size());
             _rasterizer->setPen(orgPen);
         }
-        // Use lower precision rasterization when using other modes
+        // Do not use use anti-aliasing
         else {
             // Round the points and remove duplicates
             std::vector<Point> points;
@@ -1282,8 +1282,8 @@ void ImagePainter2::fillPath(const Path& path2d, const Transform& transform, flo
     path2d.generatePoints(pointsF, smoothness);
     transform.transformPoints(pointsF.data(), pointsF.size());
 
-    // Use higher precision rasterization when using AntiAliasingMode::Standard
-    if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Standard) {
+    // Use anti-aliasing
+    if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Default) {
         // Remove duplicates
         std::vector<PointF> points;
         deduplicatePointsF(points, pointsF.data(), pointsF.size());
@@ -1291,7 +1291,7 @@ void ImagePainter2::fillPath(const Path& path2d, const Transform& transform, flo
         _rasterizer->fillPolygon(points.data(), points.size());
     }
 
-    // Use lower precision rasterization when using other modes
+    // Do not use use anti-aliasing
     else {
         // Round the points and remove duplicates
         std::vector<Point> points;
@@ -1358,8 +1358,8 @@ void ImagePainter2::drawThickPolyline_impl(const PointF* ps, const size_t pointC
                     thickenPatternedPolygon(pointsF, basePtr, curPCnt);
                 }
             }
-            // Use higher precision rasterization when using AntiAliasingMode::Standard
-            if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Standard) {
+            // Use anti-aliasing
+            if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Default) {
                 // Remove duplicates
                 std::vector<PointF> points;
                 deduplicatePointsF(points, pointsF.data(), pointsF.size());
@@ -1367,7 +1367,7 @@ void ImagePainter2::drawThickPolyline_impl(const PointF* ps, const size_t pointC
                 if(solidPen && closedPolygon) _rasterizer->penFillPolygon        (points.data(), points.size());
                 else                          _rasterizer->penFillPolygonSeparate(points.data(), points.size());
             }
-            // Use lower precision rasterization when using other modes
+            // Do not use use anti-aliasing
             else {
                 // Round the points and remove duplicates
                 std::vector<Point> points;

@@ -12,7 +12,7 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
     if(!ip2) return;
 
-    ip2->setAntiAliasingMode(AntiAliasingMode::Default);
+    ip2->setAntiAliasingMode(AntiAliasingMode::Standard);
 
     // Generic N-bezier
     Transform transform;

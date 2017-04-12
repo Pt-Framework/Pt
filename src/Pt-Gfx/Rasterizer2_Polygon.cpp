@@ -114,27 +114,11 @@ void Rasterizer2::penFillPolygon(const Point* points, size_t pointCount)
     if(clippedPoints.empty()) return;
 
     // Draw the polygon
-    if(_aaMode == AntiAliasingMode::None) {
-        rasterPolygonAreaNoAA(
-            clippedPoints.data(), clippedCounts.data(),
-            clippedCounts.size(), clippedPoints.size(),
-            _pen.color(), minX, minY, maxX, maxY
-        );
-    }
-    else if(_aaMode == AntiAliasingMode::Standard || _aaMode == AntiAliasingMode::Speed) {
-        rasterPolygonAreaXWAA(
-            clippedPoints.data(), clippedCounts.data(),
-            clippedCounts.size(), clippedPoints.size(),
-            _pen.color(), minX, minY, maxX, maxY
-        );
-    }
-    else { // _aaMode == AntiAliasingMode::LowMemory
-        rasterPolygonAreaFSAA2x2(
-            clippedPoints.data(), clippedCounts.data(),
-            clippedCounts.size(), clippedPoints.size(),
-            _pen.color(), minX, minY, maxX, maxY
-        );
-    }
+    rasterPolygonAreaNoAA(
+        clippedPoints.data(), clippedCounts.data(),
+        clippedCounts.size(), clippedPoints.size(),
+        _pen.color(), minX, minY, maxX, maxY
+    );
 
     // Restore texture and gradient
     _isTexture  = isTexture;
@@ -208,12 +192,7 @@ void Rasterizer2::penFillPolygonSeparate(const Point* points, size_t pointCount)
             // Get the number of points for drawing this polygon
             const size_t numPoint[1] = { clipped.size() };
             // Draw the polygon
-            if(_aaMode == AntiAliasingMode::None)
-                rasterPolygonAreaNoAA(clipped.data(), numPoint, 1, clipped.size(), _pen.color(), minX, minY, maxX, maxY);
-            else if(_aaMode == AntiAliasingMode::Standard || _aaMode == AntiAliasingMode::Speed)
-                rasterPolygonAreaXWAA(clipped.data(), numPoint, 1, clipped.size(), _pen.color(), minX, minY, maxX, maxY);
-            else // _aaMode == AntiAliasingMode::LowMemory
-                rasterPolygonAreaFSAA2x2(clipped.data(), numPoint, 1, clipped.size(), _pen.color(), minX, minY, maxX, maxY);
+            rasterPolygonAreaNoAA(clipped.data(), numPoint, 1, clipped.size(), _pen.color(), minX, minY, maxX, maxY);
         }
     }
 
@@ -284,27 +263,11 @@ void Rasterizer2::fillPolygon(const Point* points, size_t pointCount)
         updateGradientBrush(maxX - minX + 1, maxY - minY + 1);
 
     // Draw the polygon
-    if(_aaMode == AntiAliasingMode::None) {
-        rasterPolygonAreaNoAA(
-            clippedPoints.data(), clippedCounts.data(),
-            clippedCounts.size(), clippedPoints.size(),
-            _brush.color(), minX, minY, maxX, maxY
-        );
-    }
-    else if(_aaMode == AntiAliasingMode::Standard || _aaMode == AntiAliasingMode::Speed) {
-        rasterPolygonAreaXWAA(
-            clippedPoints.data(), clippedCounts.data(),
-            clippedCounts.size(), clippedPoints.size(),
-            _brush.color(), minX, minY, maxX, maxY
-        );
-    }
-    else { // _aaMode == AntiAliasingMode::LowMemory
-        rasterPolygonAreaFSAA2x2(
-            clippedPoints.data(), clippedCounts.data(),
-            clippedCounts.size(), clippedPoints.size(),
-            _brush.color(), minX, minY, maxX, maxY
-        );
-    }
+    rasterPolygonAreaNoAA(
+        clippedPoints.data(), clippedCounts.data(),
+        clippedCounts.size(), clippedPoints.size(),
+        _brush.color(), minX, minY, maxX, maxY
+    );
 }
 
 void Rasterizer2::fillPolygon(const PointF* points, size_t pointCount)

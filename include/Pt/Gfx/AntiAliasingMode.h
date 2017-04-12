@@ -41,13 +41,11 @@ namespace Gfx {
 class AntiAliasingMode {
     public:
          enum Mode {
-             None      = 0, //! @brief No         anti-aliasing (speed: fastest ; memory : lowest ; quality : lowest )
-             Standard  = 1, //! @brief Standard   anti-aliasing (speed: fast    ; memory : higher ; quality : highest)
-             Speed     = 2, //! @brief Faster     anti-aliasing (speed: faster  ; memory : higher ; quality : high   )
-             LowMemory = 3  //! @brief Low-memory anti-aliasing (speed: slower  ; memory : low    ; quality : medium )
+             None    = 0, //! @brief Disable anti-aliasing
+             Default = 1  //! @brief Enable anti-aliasing
          };
 
-        AntiAliasingMode(Mode m = Standard)
+        AntiAliasingMode(Mode m = Default)
         : _mode(m)
         {}
 

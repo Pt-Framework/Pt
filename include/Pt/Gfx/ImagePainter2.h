@@ -53,7 +53,7 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual ~ImagePainter2();
 
-        void setAntiAliasingMode(AntiAliasingMode mode = AntiAliasingMode::Standard);
+        void setAntiAliasingMode(AntiAliasingMode mode = AntiAliasingMode::Default);
 
         void setImage(Image& image);
 

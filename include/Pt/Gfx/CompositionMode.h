@@ -42,8 +42,8 @@ class CompositionMode
     public:
         enum Mode
         {
-            SourceCopy = 0, // use source pixel
-            SourceOver = 1, // use alpha of source pixel
+            SourceCopy = 0, //! @brief Use source pixel as is
+            SourceOver = 1, //! @brief Use alpha of source pixel to control blending
         };
 
         CompositionMode(Mode m = SourceCopy)
