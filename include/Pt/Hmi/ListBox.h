@@ -49,7 +49,15 @@ class PT_HMI_API ListBoxItem : public Button
       public:
         ListBoxItem();
         
-        virtual ~ListBoxItem();    
+        virtual ~ListBoxItem();
+
+        bool isSelectable() const;
+
+        void setSelectable(bool b);
+
+        bool isSelected() const;
+
+        void setSelected(bool b);
         
         void setText(const Pt::String& t);
 
@@ -118,6 +126,8 @@ class PT_HMI_API ListBoxItem : public Button
 
     private:
         Pt::Signal<ListBoxItem&> _selected;
+        bool                     _isSelectable;
+        bool                     _isSelected;
         String                   _text;
         Gfx::Image               _image;
         Gfx::SizeF               _iconSize;
@@ -140,6 +150,31 @@ class PT_HMI_API ListBoxItem : public Button
 };
 
 
+class ListBoxLayout : public FlowLayout
+{
+    friend class ListBox;
+
+    public:
+        ListBoxLayout();
+
+        const std::vector<ListBoxItem*>& selectedItems() const;
+
+        Pt::Signal<ListBoxItem&>& selected();
+
+    protected:
+        virtual void onAddWidget(Widget& w);
+        
+        virtual void onRemoveWidget(Widget& w);
+
+    private:
+        void onItemSelected(ListBoxItem& item);
+
+    private:
+        Pt::Signal<ListBoxItem&>  _selected;
+        std::vector<ListBoxItem*> _selectedItems;
+};
+
+
 class PT_HMI_API ListBox : public Control
 {
     typedef Control Base;
@@ -154,6 +189,8 @@ class PT_HMI_API ListBox : public Control
         void addItem(ListBoxItem& item);
 
         void removeItem(ListBoxItem& item);
+
+        const std::vector<ListBoxItem*>& selectedItems() const;
 
         Pt::Signal<ListBoxItem&>& selected();
 
@@ -184,15 +221,10 @@ class PT_HMI_API ListBox : public Control
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
         virtual void onLayout(const Gfx::RectF& rect);
-
-    private:
-        void onItemSelected(ListBoxItem& item);
     
     private:
-        Pt::Signal<ListBoxItem&> _selected;
-        ScrollView               _scrollView;
-        FlowLayout               _layout;
-        
+        ScrollView                _scrollView;
+        ListBoxLayout             _layout;        
         FacetPtr<ListBoxRenderer> _renderer;
         bool                      _hasRenderer;
         AutoPtr<Gfx::Brush>       _background;

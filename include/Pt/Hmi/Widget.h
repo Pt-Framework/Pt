@@ -270,7 +270,7 @@ class PT_HMI_API Widget : public Visual
         void remove(Widget& w);
 
     protected:
-         virtual void onAddWidget(Widget& w);
+        virtual void onAddWidget(Widget& w);
 
         virtual void onRemoveWidget(Widget& w);
 

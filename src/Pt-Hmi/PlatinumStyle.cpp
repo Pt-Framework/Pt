@@ -1003,7 +1003,7 @@ void PlatinumListBoxRenderer::onPrepareItem(const ListBoxItem& item,
                                             Gfx::Font& font,
                                             Gfx::Pen& textPen) const
 {
-    if( item.isHighlighted() )
+    if( item.isHighlighted() || item.isSelected() )
     {
         brush =  options.highlightColor();
         textPen = options.highlightedTextColor();
@@ -1018,7 +1018,7 @@ void PlatinumListBoxRenderer::onRenderItem(const ListBoxItem& item,
                                            Gfx::Brush& brush,
                                            Gfx::Pen& contour) const
 {
-    if( item.isHighlighted() )
+    if( item.isHighlighted() || item.isSelected() )
     {
         painter.setBrush(brush);
         painter.fillRect(rect);

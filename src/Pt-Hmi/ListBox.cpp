@@ -39,6 +39,8 @@ namespace Hmi {
 
 ListBoxItem::ListBoxItem()
 : _hasRenderer(false)
+, _isSelectable(false)
+, _isSelected(false)
 {
     setPadding(8);
 }
@@ -46,6 +48,47 @@ ListBoxItem::ListBoxItem()
 
 ListBoxItem::~ListBoxItem()
 {
+}
+
+
+bool ListBoxItem::isSelectable() const
+{
+    return _isSelectable;
+}
+
+
+void ListBoxItem::setSelectable(bool b)
+{
+    _isSelectable = b;
+    
+    if(_isSelected && ! _isSelectable)
+      setSelected(false);
+    else
+      invalidate();
+}
+
+
+bool ListBoxItem::isSelected() const
+{
+    return _isSelected;
+}
+
+
+void ListBoxItem::setSelected(bool b)
+{
+    if(_isSelected == b)
+        return;
+
+    if( ! _isSelectable )
+    {
+        _selected.send(*this);
+        return;
+    }
+
+    _isSelected = b;
+    invalidate();
+
+    _selected.send(*this);
 }
 
 
@@ -99,7 +142,8 @@ void ListBoxItem::onPressed()
 void ListBoxItem::onReleased()
 {
     Base::onReleased();
-    _selected.send(*this);
+
+    setSelected( ! _isSelected );
 }
 
 
@@ -317,11 +361,67 @@ void ListBoxItem::onPaintContent(Painter& painter)
 }
 
 /////////////////////////////////////////////////////////////////////////////
+// ListBoxLayout
+/////////////////////////////////////////////////////////////////////////////
+
+ListBoxLayout::ListBoxLayout()
+: FlowLayout(FlowLayout::Top)
+{
+}
+
+
+const std::vector<ListBoxItem*>& ListBoxLayout::selectedItems() const
+{
+    return _selectedItems;
+}
+
+
+Pt::Signal<ListBoxItem&>& ListBoxLayout::selected()
+{
+    return _selected;
+}
+
+
+void ListBoxLayout::onAddWidget(Widget& w)
+{
+}
+
+
+void ListBoxLayout::onRemoveWidget(Widget& w)
+{
+    ListBoxItem& item = static_cast<ListBoxItem&>(w);
+
+    _selectedItems.erase( std::remove(_selectedItems.begin(), 
+                                      _selectedItems.end(), 
+                                      &item),
+                          _selectedItems.end() );
+}
+
+
+void ListBoxLayout::onItemSelected(ListBoxItem& item)
+{
+    if( ! item.isSelected() )
+    {
+        _selectedItems.erase( std::remove(_selectedItems.begin(), 
+                                          _selectedItems.end(), 
+                                          &item),
+                              _selectedItems.end() );
+    }
+    else
+    {
+        _selectedItems.push_back(&item);
+    }
+
+    _selected.send(item);
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
 // ListBox
 /////////////////////////////////////////////////////////////////////////////
 
 ListBox::ListBox()
-: _layout(FlowLayout::Top)
+: _layout()
 , _hasBackground(true)
 , _hasFrame(true)
 , _hasRenderer(false)
@@ -348,26 +448,26 @@ void ListBox::setScrollBars(bool hasScrollBars)
 void ListBox::addItem(ListBoxItem& item)
 {   
     _layout.addItem(item);
-    item.selected() += Pt::slot(*this, &ListBox::onItemSelected);
+    item.selected() += Pt::slot(_layout, &ListBoxLayout::onItemSelected);
 }
 
 
 void ListBox::removeItem(ListBoxItem& item)
 {
     _layout.removeItem(item);
-    item.selected() -= Pt::slot(*this, &ListBox::onItemSelected);
+    item.selected() -= Pt::slot(_layout, &ListBoxLayout::onItemSelected);
 }
 
 
-void ListBox::onItemSelected(ListBoxItem& item)
+const std::vector<ListBoxItem*>& ListBox::selectedItems() const
 {
-    _selected.send(item);
+    return _layout.selectedItems();
 }
 
 
 Pt::Signal<ListBoxItem&>& ListBox::selected()
 {
-    return _selected;
+    return _layout.selected();
 }
 
 
