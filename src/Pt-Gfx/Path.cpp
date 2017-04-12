@@ -198,35 +198,64 @@ static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, doubl
 
 static inline void generateArcPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double r, double smoothness)
 {
+    // Check for NEON support
+    // Based on http://stackoverflow.com/questions/1734745/how-to-create-circle-with-bézier-curves
+    //         http://stackoverflow.com/a/27863181
+
     // Line equation : 0 = aX + By + c
     // Normal        : n = ai + bj
     const double a = y2 - y1;
     const double b = x1 - x2;
   //const double c = -(x1 * y2 - x2 * y1);
 
-    // Negated inverse line length
-    const double il = -Gfx::Math::fastInvSqrt(a * a + b * b);
-
-#if 1
-    // Circumference vector
-    const double cx = (1.0 + 1.0 / 3.0) * a * il * r;
-    const double cy = (1.0 + 1.0 / 3.0) * b * il * r;
-
-    // Use cubic bezier curve to generate the arc
-    generateCubicBezierPoints(dst, x1, y1, x1 + cx, y1 + cy, x2 + cx, y2 + cy, x2, y2, smoothness);
-#else
-    // Circumference vector
-    const double cx = a * il * r;
-    const double cy = b * il * r;
-
     // Middle point
     const double xm = (x1 + x2) * 0.5;
     const double ym = (y1 + y2) * 0.5;
 
-    // Use quadratic bezier curve to generate the arc
-    generateQuadraticBezierPoints(dst, x1, y1, x1 + cx, y1 + cy, xm + cx, ym + cy, smoothness);
-    generateQuadraticBezierPoints(dst, xm + cx, ym + cy, x2 + cx, y2 + cy, x2, y2, smoothness);
-#endif
+    // Radius
+    const double ab = Gfx::Math::fastSqrt(a * a + b * b);
+    const double rx = ab * 0.5f;
+    const double ry = r;
+
+    // Normal vector
+    const double iz = -1.0 / ab;
+    const double nx = a * iz;
+    const double ny = b * iz;
+
+    // Circumference vectors
+    const double nxrx = nx * rx;
+    const double nxry = nx * ry;
+    const double nyrx = ny * rx;
+    const double nyry = ny * ry;
+
+    // Optimal distance to the control points for circle approximation
+    // using N segments of cubic bezier:
+    //    dist = (4 / 3) * tan(pi / 2 / N)
+    // If N = 4, then:
+    //    dist = (4 / 3) * tan(pi / 2 / 4) = 0.0822479912358
+    const double od = 0.552284749831;
+
+    // Curve #1
+    const double c1x1 = x1;
+    const double c1y1 = y1;
+    const double c1x4 = xm   + nxrx;
+    const double c1y4 = ym   + nyry;
+    const double c1x2 = c1x1 + nxrx * od;
+    const double c1y2 = c1y1 + nyry * od;
+    const double c1x3 = c1x4 - nyrx * od;
+    const double c1y3 = c1y4 - nxry * od;
+    generateCubicBezierPoints(dst, c1x1, c1y1, c1x2, c1y2, c1x3, c1y3, c1x4, c1y4, smoothness);
+
+    // Curve #2
+    const double c2x1 = xm   + nxrx;
+    const double c2y1 = ym   + nyry;
+    const double c2x4 = x2;
+    const double c2y4 = y2;
+    const double c2x2 = c2x1 + nyrx * od;
+    const double c2y2 = c2y1 - nxry * od;
+    const double c2x3 = c2x4 - nxrx * od;
+    const double c2y3 = c2y4 + nyry * od;
+    generateCubicBezierPoints(dst, c2x1, c2y1, c2x2, c2y2, c2x3, c2y3, c2x4, c2y4, smoothness);
 }
 
 static inline void generateChrPoints(std::vector<PointF>& dst, double x, double y, const std::vector<PointF>& pointsF, const std::vector<Pt::uint8_t>& tags, const std::vector<Pt::int32_t>& contours, double smoothness)

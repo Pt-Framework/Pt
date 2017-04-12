@@ -266,6 +266,9 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     ip2->drawPath(path, transform, false, 20);
     transform = tstack.pop();
 
+    //ip2->setPen(Color::fromRgb8(255, 0, 0, 255));
+    //ip2->drawEllipse( PointF (60 + 130 * col - 2.5 * 25, 150 * row -0.5 * 25 - 125), SizeF(5 * 25, 2 * 5 * 25) );
+
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }
 
