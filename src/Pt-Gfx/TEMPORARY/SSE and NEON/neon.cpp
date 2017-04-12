@@ -1,6 +1,8 @@
 // Check for NEON support
-// Based on http://stackoverflow.com/a/26920837
-//          http://stackoverflow.com/questions/26701262/how-to-check-the-existence-of-neon-on-arm
+//
+// Based on: How to check the existence of NEON on arm?
+//           http://stackoverflow.com/questions/26701262/how-to-check-the-existence-of-neon-on-arm
+//           Answer by Peter M, 2014 (permalink: http://stackoverflow.com/a/26920837)
 
 // g++ -O2 neon.cpp -o neon && ./neon && rm -f neon
 

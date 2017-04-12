@@ -1,8 +1,9 @@
 // Check for SSE and AVX support
-// Based on https://gist.github.com/hi2p-perim/7855506
-//          https://software.intel.com/en-us/blogs/2011/04/14/is-avx-enabled
-//          https://software.intel.com/en-us/articles/how-to-detect-new-instruction-support-in-the-4th-generation-intel-core-processor-family
-//          https://en.wikipedia.org/wiki/CPUID
+//
+// Based on: https://gist.github.com/hi2p-perim/7855506
+//           https://software.intel.com/en-us/blogs/2011/04/14/is-avx-enabled
+//           https://software.intel.com/en-us/articles/how-to-detect-new-instruction-support-in-the-4th-generation-intel-core-processor-family
+//           https://en.wikipedia.org/wiki/CPUID
 
 // g++ -O2 sseavx.cpp -o sseavx && ./sseavx && rm -f sseavx
 

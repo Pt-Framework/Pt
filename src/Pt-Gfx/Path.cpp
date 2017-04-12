@@ -46,8 +46,9 @@ namespace Gfx {
 // ===== Internal Helper Functions - Generator (Drawing) Functions ======================
 // ======================================================================================
 
-// Based on: http://stackoverflow.com/a/21642962
-//           Answer by iforce2d, 2014
+// Based on: How do I implement a Bézier curve in C++?
+//           http://stackoverflow.com/questions/785097/how-do-i-implement-a-bézier-curve-in-c
+//           Answer by iforce2d, 2014 (permalink: http://stackoverflow.com/a/21642962)
 static inline void getGenericNBezierPoint(double& x, double& y, const std::vector<double>& points, double t)
 {
     std::vector<double> tmp = points;
@@ -198,9 +199,9 @@ static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, doubl
 
 static inline void generateArcPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double r, double smoothness)
 {
-    // Check for NEON support
-    // Based on http://stackoverflow.com/questions/1734745/how-to-create-circle-with-bézier-curves
-    //         http://stackoverflow.com/a/27863181
+    // Based on How to create circle with Bézier curves?
+    //          http://stackoverflow.com/questions/1734745/how-to-create-circle-with-bézier-curves
+    //          Answer by Kpym, 2015 (permalink: http://stackoverflow.com/a/27863181)
 
     // Line equation : 0 = aX + By + c
     // Normal        : n = ai + bj
