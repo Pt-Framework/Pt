@@ -419,8 +419,8 @@ void Rasterizer2::updateGradientBrush_gen2DLinearGradient(Pt::int32_t width, Pt:
     // Calculate the rotation
     const float angl = angle + 0.001f;
     const float rad  = angl * Gfx::Math::DegToRad - Gfx::Math::PiDiv4;
-    const float sval = Gfx::Math::fastSin(rad);
-    const float cval = Gfx::Math::fastCos(rad);
+    const float sval = ::sin(rad); // Gfx::Math::fastSin(rad);
+    const float cval = ::cos(rad); // Gfx::Math::fastCos(rad);
 
     // Define the reference line
     const float wq = Gfx::Math::fastSqrt(width * width + height * height) * 0.25f * scale;
@@ -484,8 +484,8 @@ void Rasterizer2::updateGradientBrush_gen2DRectangularGradient(Pt::int32_t width
 
     // Calculate the rotation
     const float rad  = -angle * Gfx::Math::DegToRad;
-    const float sval = Gfx::Math::fastSin(rad);
-    const float cval = Gfx::Math::fastCos(rad);
+    const float sval = ::sin(rad); // Gfx::Math::fastSin(rad);
+    const float cval = ::cos(rad); // Gfx::Math::fastCos(rad);
 
     // Calculate the inverse scaling factor
     const float ilen = rrFac / (ctrX + ctrY);
@@ -596,8 +596,8 @@ void Rasterizer2::updateGradientBrush_gen2DConicalGradient(Pt::int32_t width, Pt
 
     // Calculate the rotation
     const float rad  = angle * Gfx::Math::DegToRad - Gfx::Math::PiDiv2;
-    const float sval = Gfx::Math::fastSin(rad);
-    const float cval = Gfx::Math::fastCos(rad);
+    const float sval = ::sin(rad); // Gfx::Math::fastSin(rad);
+    const float cval = ::cos(rad); // Gfx::Math::fastCos(rad);
 
     // Generate the gradient
     Pt::uint8_t* pixel = _brushBuffer.data();

@@ -150,10 +150,10 @@ class PT_GFX_API BasicTransform {
 
         inline void extractTranslation(T& x, T& y) const;
         inline void extractScaling(T& x, T& y) const;
-        inline void extractRotation(T& deg) const;
-        inline void extractShearing(T& deg) const;
-        inline void extractShearingX(T& deg) const;
-        inline void extractShearingY(T& deg) const;
+        inline const T extractRotation() const;
+        inline const T extractShearing() const;
+        inline const T extractShearingX() const;
+        inline const T extractShearingY() const;
 
     private:
         // Matrix data
@@ -566,7 +566,7 @@ inline void BasicTransform<T>::extractScaling(T& x, T& y) const
 }
 
 template <typename T>
-inline void BasicTransform<T>::extractRotation(T& deg) const
+inline const T BasicTransform<T>::extractRotation() const
 {
     const T x1 = _mdata.v[0][0];
     const T y1 = _mdata.v[0][1];
@@ -580,25 +580,25 @@ inline void BasicTransform<T>::extractRotation(T& deg) const
                ? ::atan2(y2, x2)             // Quadrant   I and II
                : ::atan2(y2, x2) + M_PI * 2; // Quadrant III and IV
 
-    deg = (r1 + r2) * 90 / M_PI;
+    return (r1 + r2) * 90 / M_PI;
 }
 
 template <typename T>
-inline void BasicTransform<T>::extractShearing(T& deg) const
+inline const T BasicTransform<T>::extractShearing() const
 {
-    deg = ::atan(
-              (_mdata.v[0][0] * _mdata.v[1][0] + _mdata.v[0][1] * _mdata.v[1][1]) /
-              (_mdata.v[0][0] * _mdata.v[1][1] - _mdata.v[0][1] * _mdata.v[1][0])
-          ) * (180 / M_PI);
+    return ::atan(
+               (_mdata.v[0][0] * _mdata.v[1][0] + _mdata.v[0][1] * _mdata.v[1][1]) /
+               (_mdata.v[0][0] * _mdata.v[1][1] - _mdata.v[0][1] * _mdata.v[1][0])
+           ) * (180 / M_PI);
 }
 
 template <typename T>
-inline void BasicTransform<T>::extractShearingX(T& deg) const
-{ deg = ::atan(_mdata.v[0][1]) * (180 / M_PI); }
+inline const T BasicTransform<T>::extractShearingX() const
+{ return ::atan(_mdata.v[0][1]) * (180 / M_PI); }
 
 template <typename T>
-inline void BasicTransform<T>::extractShearingY(T& deg) const
-{ deg = ::atan(_mdata.v[1][0]) * (180 / M_PI); }
+inline const T BasicTransform<T>::extractShearingY() const
+{ return ::atan(_mdata.v[1][0]) * (180 / M_PI); }
 
 
 // ======================================================================================
@@ -910,7 +910,7 @@ inline void BasicTransform<float>::extractScaling(float& x, float& y) const
 }
 
 template <>
-inline void BasicTransform<float>::extractRotation(float& deg) const
+inline const float BasicTransform<float>::extractRotation() const
 {
     const float x1 = _mdata.v[0][0];
     const float y1 = _mdata.v[0][1];
@@ -924,7 +924,7 @@ inline void BasicTransform<float>::extractRotation(float& deg) const
                    ? Gfx::Math::fastAtan2(y2, x2)             // Quadrant   I and II
                    : Gfx::Math::fastAtan2(y2, x2) + M_PI * 2; // Quadrant III and IV
 
-    deg = (r1 + r2) * 90.0f / Gfx::Math::Pi;
+    return (r1 + r2) * 90.0f / Gfx::Math::Pi;
 }
 
 

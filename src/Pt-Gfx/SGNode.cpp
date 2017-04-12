@@ -98,9 +98,28 @@ void SGNode::draw(ImagePainter2& painter, const TransformT* transform_)
                 }
             }
             // Set this node's brush to the painter as needed
-            // ### TODO: Rotate the brush angle ###
-            if(!eCur.node->_brush.isNull())
-                painter.setBrush(eCur.node->_brush);
+            if(!eCur.node->_brush.isNull()) {
+                // If the brush is a gradient, adjust its rotation as needed
+                if(eCur.node->_brush.isGradient()) {
+                    const ValueT orgRot = eCur.node->_brush.rotation();
+                    const ValueT newRot = orgRot + transform.extractRotation();
+                    // Assign a new brush with the original rotation
+                    if(orgRot == newRot) {
+                        painter.setBrush(eCur.node->_brush);
+                    }
+                    // Assign a new brush with the updated rotation
+                    else {
+                        Brush newBrush = eCur.node->_brush;
+                        newBrush.setGradientRotation(newRot);
+                        painter.setBrush(newBrush);
+                    }
+                }
+                // Not a gradient
+                // ### TODO: Rotate the texture???  ###
+                else {
+                    painter.setBrush(eCur.node->_brush);
+                }
+            }
             // Draw this node
             eCur.node->drawImpl(painter, transform);
             // Process the children of this node

@@ -151,11 +151,15 @@ inline float fastInvSqrt_impl_SIMD(float x) // X86_64 => FASTER | ARM => FASTER
 
 inline float fastSin_impl(float x) // X86_64 => FASTER | ARM => MUCH FASTER
 {
-    if (x > Gfx::Math::Pi) x -= Gfx::Math::PiMul2;
+    // ### TODO: May produce the wrong value when (x > Pi) !!! ###
+    //assert(x <= Gfx::Math::PiMul2);
+    //assert(x >= 0.0f);
 
-    const float b =  4 / Gfx::Math::Pi;
-    const float c = -4 / Gfx::Math::PiSqr;
-    const float p = 0.225;
+    if(x > Gfx::Math::Pi) x -= Gfx::Math::PiMul2;
+
+    const float b =  4.0f / Gfx::Math::Pi;
+    const float c = -4.0f / Gfx::Math::PiSqr;
+    const float p = 0.225f;
     const float y = b * x + c * x * ::fabs(x);
 
     return p * (y * ::fabs(y) - y) + y;
@@ -163,6 +167,10 @@ inline float fastSin_impl(float x) // X86_64 => FASTER | ARM => MUCH FASTER
 
 inline float fastCos_impl(float x) // X86_64 => FASTER | ARM => MUCH FASTER
 {
+    // ### TODO: May produce the wrong value when (x > Pi) !!! ###
+    //assert(x <= Gfx::Math::PiMul2);
+    //assert(x >= 0.0f);
+
     x += Gfx::Math::PiDiv2;
     if(x > Gfx::Math::PiMul2) x -= Gfx::Math::PiMul2;
 
