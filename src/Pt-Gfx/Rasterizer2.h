@@ -230,7 +230,6 @@ class Rasterizer2
         void rasterOnePixelPolygonOutline(const PointF* points, size_t pointCount, const Color& color);
 
         void rasterPolygonAreaNoAA(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
-        void rasterPolygonAreaFSAA2x2(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
         void rasterPolygonAreaXWAA(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
         void rasterPolygonAreaXWAA(const PointF* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, float minX, float minY, float maxX, float maxY);
 
@@ -293,20 +292,15 @@ class Rasterizer2
             const Color& color
         );
 
-        template<Pt::uint8_t SUPERSAMPLE_SIZE, Pt::uint8_t MIN_ALPHA, Pt::uint8_t MUL_ALPHA>
-        void rasterScanline(
-            Pt::int32_t  iterL, Pt::int32_t iterR, Pt::int32_t pixelY,
-            Pt::int32_t  minX,  Pt::int32_t minY,  Pt::int32_t sizeX,
-            const Color& color, const std::vector<Pt::uint8_t>& alphas
-        );
-
         void rasterScanlineWithClipping(Pt::int32_t from, Pt::int32_t to, Pt::int32_t pixelY, Pt::int32_t minX, Pt::int32_t minY);
 
         // --- Polygon-related helper functions ---
-        void getPolygonRectMinMax(const Point* points, size_t pointCount, Pt::int32_t& minX, Pt::int32_t& minY, Pt::int32_t& maxX, Pt::int32_t& maxY) const;
-        void getPolygonRectMinMax(const PointF* points, size_t pointCount, float& minX, float& minY, float& maxX, float& maxY) const;
+        template <typename PointT, typename ValueT>
+        inline void getPolygonRectMinMax(const BasicPoint<PointT>* points, size_t pointCount, ValueT& minX, ValueT& minY, ValueT& maxX, ValueT& maxY) const;
+
         void genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount, bool forPolygonOutline) const;
         void genClippedPolygonPoints(std::vector<PointF>& dst, const PointF* src, const size_t pointCount, bool forPolygonOutline) const;
+
         void separateAndClipPolygons(Pt::int32_t& minX, Pt::int32_t& maxX, Pt::int32_t& minY, Pt::int32_t& maxY, std::vector<Point>& clippedPoints, std::vector<size_t>& clippedCounts, const Point* points, size_t pointCount) const;
         void separateAndClipPolygons(float& minX, float& maxX, float& minY, float& maxY, std::vector<PointF>& clippedPoints, std::vector<size_t>& clippedCounts, const PointF* points, size_t pointCount) const;
 
@@ -554,169 +548,22 @@ void Rasterizer2::fillPixel(Pt::int32_t x, Pt::int32_t y, Pt::int32_t minX, Pt::
     }
 }
 
-template<Pt::uint8_t SUPERSAMPLE_SIZE, Pt::uint8_t MIN_ALPHA, Pt::uint8_t MUL_ALPHA>
-void Rasterizer2::rasterScanline(
-    Pt::int32_t  iterL, Pt::int32_t iterR, Pt::int32_t pixelY,
-    Pt::int32_t  minX,  Pt::int32_t minY,  Pt::int32_t sizeX,
-    const Color& color, const std::vector<Pt::uint8_t>& alphas
-)
+template <typename PointT, typename ValueT>
+void Rasterizer2::getPolygonRectMinMax(const BasicPoint<PointT>* points, size_t pointCount, ValueT& minX, ValueT& minY, ValueT& maxX, ValueT& maxY) const
 {
-    // A helper macro to scale the alpha
-    #define RSL_SCALE_ALPHA(A) ( Pt::uint16_t(A) * MUL_ALPHA / SUPERSAMPLE_SIZE / SUPERSAMPLE_SIZE )
+    minX =  MAXIMUM_COORD;
+    minY =  MAXIMUM_COORD;
+    maxX = -MAXIMUM_COORD;
+    maxY = -MAXIMUM_COORD;
 
-    // The maximum value for alpha
-    #define RSL_MAX_ALPHA (MIN_ALPHA * SUPERSAMPLE_SIZE * SUPERSAMPLE_SIZE)
-
-    //
-    // Draw pixels that belongs to the left-part of the span to the image
-    //
-    if(iterL < 0) iterL = 0;
-
-    // Skip fully-transparent pixels
-    for(; iterL < sizeX; ++iterL) {
-        if(alphas[iterL]) break;
+    for(size_t i = 0; i < pointCount; ++i) {
+        const ValueT x = points[i].x();
+        const ValueT y = points[i].y();
+        if(x < minX) minX = x;
+        if(y < minY) minY = y;
+        if(x > maxX) maxX = x;
+        if(y > maxY) maxY = y;
     }
-
-    // Texture or gradient
-    if(_isTexture || _isGradient) {
-        const Pt::int32_t bw = _brushImage->width();
-        const Pt::int32_t bh = _brushImage->height();
-        for(; iterL < sizeX; ++iterL) {
-            // Break if we have reached the non anti-aliased part of the span
-            if(alphas[iterL] >= RSL_MAX_ALPHA) break;
-            // Draw the pixel
-            const Pt::int32_t iterX = minX + iterL;
-            const Pt::int32_t iterY = minY + pixelY;
-            const Pt::int32_t tx = _isGradient ? std::min(bw - 1, iterL ) : (iterL  % bw);
-            const Pt::int32_t ty = _isGradient ? std::min(bh - 1, pixelY) : (pixelY % bh);
-            ConstPixel srcPixel(_brushImage->view(), tx, ty);
-            Pixel      dstPixel(_image->view(), iterX, iterY);
-            _image->format().setPixel(dstPixel, srcPixel, _compositionMode, RSL_SCALE_ALPHA(alphas[iterL]));
-        }
-    }
-
-    // Solid color
-    else {
-        for(; iterL < sizeX; ++iterL) {
-            // Break if we have reached the non anti-aliased part of the span
-            if(alphas[iterL] >= RSL_MAX_ALPHA) break;
-            // Draw the pixel
-            Pixel pixel(_image->view(), minX + iterL, minY + pixelY);
-            _image->format().setPixel(pixel, color, _compositionMode, RSL_SCALE_ALPHA(alphas[iterL]));
-        }
-    }
-
-    //
-    // Draw pixels that belongs to the right-part of the span to the image
-    //
-    if(iterR >= sizeX) iterR = sizeX - 1;
-
-    // Skip fully-transparent pixels
-    for(; iterR >= 0; --iterR) {
-        if(alphas[iterR]) break;
-    }
-
-    // Texture or gradient
-    if(_isTexture || _isGradient) {
-        for(; iterR >= 0; --iterR) {
-            // Break if we have reached the non anti-aliased part of the span
-            if(alphas[iterR] >= RSL_MAX_ALPHA) break;
-            // Draw the pixel
-            const Pt::int32_t iterX = minX + iterR;
-            const Pt::int32_t iterY = minY + pixelY;
-            const Pt::int32_t bw    = _brushImage->width ();
-            const Pt::int32_t bh    = _brushImage->height();
-            const Pt::int32_t tx    = _isGradient ? std::min(bw - 1, iterR ) : (iterR  % bw);
-            const Pt::int32_t ty    = _isGradient ? std::min(bh - 1, pixelY) : (pixelY % bh);
-            ConstPixel srcPixel(_brushImage->view(), tx, ty);
-            Pixel      dstPixel(_image->view(), iterX, iterY);
-            _image->format().setPixel(dstPixel, srcPixel, _compositionMode, RSL_SCALE_ALPHA(alphas[iterR]));
-        }
-    }
-
-    // Solid color
-    else {
-        for(; iterR >= 0; --iterR) {
-            // Break if we have reached the non anti-aliased part of the span
-            if(alphas[iterR] >= RSL_MAX_ALPHA) break;
-            // Draw the pixel
-            Pixel pixel(_image->view(), minX + iterR, minY + pixelY);
-            _image->format().setPixel(pixel, color, _compositionMode, RSL_SCALE_ALPHA(alphas[iterR]));
-        }
-    }
-
-    //
-    // Draw pixels that belongs to the middle-part of the span to the image
-    //
-    if(iterR < iterL) return;
-
-    // Draw the span using texture (or gradient texture)
-    if(_isTexture) {
-        const Pt::int32_t bw        = _brushImage->width();
-        const Pt::int32_t bh        = _brushImage->height();
-              Pt::int32_t iterX     = iterL;
-              Pt::int32_t spanWidth = iterR - iterL + 1;
-        while(spanWidth > 0) {
-            const Pt::int32_t tx = _isGradient ? std::min(bw - 1, iterX ) : (iterX  % bw);
-            const Pt::int32_t ty = _isGradient ? std::min(bh - 1, pixelY) : (pixelY % bh);
-            const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tx);
-            if(n) {
-                ConstPixel srcPixel(_brushImage->view(), tx, ty);
-                Pixel      dstPixel(_image->view(), minX + iterX, minY + pixelY);
-                _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
-            }
-            spanWidth -= n;
-            iterX     += n;
-        }
-    }
-
-    // Draw the span using gradient
-    else if(_isGradient) {
-        Pt::int32_t iterX     = iterL;
-        Pt::int32_t spanWidth = iterR - iterL + 1;
-        // Fill the span - vertical gradient
-        if(_brush.fillStyle() == Pt::Gfx::Brush::VerticalGradient) {
-            const Pt::int32_t textureY = std::min<Pt::int32_t>(pixelY, _brushImage->height() - 1);
-            ConstPixel        srcPixel(_brushImage->view(), 0, textureY);
-            Pixel             dstPixel(_image->view(), minX + iterX, minY + pixelY);
-            _image->format().setPixels(dstPixel, srcPixel, spanWidth, _compositionMode);
-        }
-        // Fill the span - horizontal gradient
-        else {
-            while(spanWidth > 0) {
-                const Pt::int32_t tx = std::min<Pt::int32_t>(iterX,     _brushImage->width () - 1);
-                const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tx);
-                if(n) {
-                    ConstPixel srcPixel(_brushImage->view(), tx, 0);
-                    Pixel      dstPixel(_image->view(), minX + iterX, minY + pixelY);
-                    _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
-                }
-                spanWidth -= n;
-                iterX     += n;
-            }
-        }
-    }
-
-    // Draw the span using solid color
-    else {
-        Pixel pixel(_image->view(), minX + iterL, minY + pixelY);
-        _image->format().setPixels(pixel, color, iterR - iterL + 1, _compositionMode);
-        //Pt::int32_t iterX     = minX + iterL;
-        //Pt::int32_t spanWidth = iterR - iterL + 1;
-        //while(spanWidth > 0) {
-        //    const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
-        //    if(n) {
-        //        Pixel pixel(_image->view(), iterX, minY + pixelY);
-        //        _image->format().copy(pixel, _brushPixel, n, _compositionMode);
-        //    }
-        //    spanWidth -= n;
-        //    iterX     += n;
-        //}
-    }
-
-    // Undefine the macros
-    #undef RSL_SCALE_ALPHA
-    #undef RSL_MAX_ALPHA
 }
 
 void Rasterizer2::arcUtil_detXWLineDirection(ArcXWLineData& xwLineData)
