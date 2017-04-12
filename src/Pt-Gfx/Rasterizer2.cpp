@@ -314,11 +314,14 @@ void Rasterizer2::updatePenPattern()
 
 void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
 {
-    // Adjust the width and height as needed
+    /*
+    // Adjust the width and height as needed (anti-aliasing can
+    // create additional pixels on the edges)
     if(_aaMode != AntiAliasingMode::None) {
         width  += 2;
         height += 2;
     }
+    */
 
     // Resize the brush buffer and the start-end colors
     switch(_brush.fillStyle()) {

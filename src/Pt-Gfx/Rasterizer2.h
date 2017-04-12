@@ -538,7 +538,11 @@ void Rasterizer2::fillPixel(Pt::int32_t x, Pt::int32_t y, Pt::int32_t minX, Pt::
     if(_isTexture || _isGradient) {
         const Pt::int32_t bw = _brushImage->width();
         const Pt::int32_t bh = _brushImage->height();
-        ConstPixel srcPixel(_brushImage->view(), (x - minX) % bw, (y - minY) % bh);
+        const Pt::int32_t dx = x - minX;
+        const Pt::int32_t dy = y - minY;
+        const Pt::int32_t tx = _isGradient ? std::min(bw - 1, dx) : (dx % bw);
+        const Pt::int32_t ty = _isGradient ? std::min(bh - 1, dy) : (dy % bh);
+        ConstPixel srcPixel(_brushImage->view(), tx, ty);
         Pixel      dstPixel(_image->view(), x, y);
         _image->format().setPixel(dstPixel, srcPixel, _compositionMode, alpha);
     }
@@ -575,15 +579,17 @@ void Rasterizer2::rasterScanline(
 
     // Texture or gradient
     if(_isTexture || _isGradient) {
+        const Pt::int32_t bw = _brushImage->width();
+        const Pt::int32_t bh = _brushImage->height();
         for(; iterL < sizeX; ++iterL) {
             // Break if we have reached the non anti-aliased part of the span
             if(alphas[iterL] >= RSL_MAX_ALPHA) break;
             // Draw the pixel
             const Pt::int32_t iterX = minX + iterL;
             const Pt::int32_t iterY = minY + pixelY;
-            const Pt::int32_t tX    = iterL  % _brushImage->width ();
-            const Pt::int32_t tY    = pixelY % _brushImage->height();
-            ConstPixel srcPixel(_brushImage->view(), tX, tY);
+            const Pt::int32_t tx = _isGradient ? std::min(bw - 1, iterL ) : (iterL  % bw);
+            const Pt::int32_t ty = _isGradient ? std::min(bh - 1, pixelY) : (pixelY % bh);
+            ConstPixel srcPixel(_brushImage->view(), tx, ty);
             Pixel      dstPixel(_image->view(), iterX, iterY);
             _image->format().setPixel(dstPixel, srcPixel, _compositionMode, RSL_SCALE_ALPHA(alphas[iterL]));
         }
@@ -618,9 +624,11 @@ void Rasterizer2::rasterScanline(
             // Draw the pixel
             const Pt::int32_t iterX = minX + iterR;
             const Pt::int32_t iterY = minY + pixelY;
-            const Pt::int32_t tX    = iterR  % _brushImage->width ();
-            const Pt::int32_t tY    = pixelY % _brushImage->height();
-            ConstPixel srcPixel(_brushImage->view(), tX, tY);
+            const Pt::int32_t bw    = _brushImage->width ();
+            const Pt::int32_t bh    = _brushImage->height();
+            const Pt::int32_t tx    = _isGradient ? std::min(bw - 1, iterR ) : (iterR  % bw);
+            const Pt::int32_t ty    = _isGradient ? std::min(bh - 1, pixelY) : (pixelY % bh);
+            ConstPixel srcPixel(_brushImage->view(), tx, ty);
             Pixel      dstPixel(_image->view(), iterX, iterY);
             _image->format().setPixel(dstPixel, srcPixel, _compositionMode, RSL_SCALE_ALPHA(alphas[iterR]));
         }
@@ -644,14 +652,16 @@ void Rasterizer2::rasterScanline(
 
     // Draw the span using texture (or gradient texture)
     if(_isTexture) {
-        Pt::int32_t iterX     = iterL;
-        Pt::int32_t spanWidth = iterR - iterL + 1;
+        const Pt::int32_t bw        = _brushImage->width();
+        const Pt::int32_t bh        = _brushImage->height();
+              Pt::int32_t iterX     = iterL;
+              Pt::int32_t spanWidth = iterR - iterL + 1;
         while(spanWidth > 0) {
-            const Pt::int32_t tX = iterX  % _brushImage->width ();
-            const Pt::int32_t tY = pixelY % _brushImage->height();
-            const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tX);
+            const Pt::int32_t tx = _isGradient ? std::min(bw - 1, iterX ) : (iterX  % bw);
+            const Pt::int32_t ty = _isGradient ? std::min(bh - 1, pixelY) : (pixelY % bh);
+            const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tx);
             if(n) {
-                ConstPixel srcPixel(_brushImage->view(), tX, tY);
+                ConstPixel srcPixel(_brushImage->view(), tx, ty);
                 Pixel      dstPixel(_image->view(), minX + iterX, minY + pixelY);
                 _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
             }
@@ -666,7 +676,7 @@ void Rasterizer2::rasterScanline(
         Pt::int32_t spanWidth = iterR - iterL + 1;
         // Fill the span - vertical gradient
         if(_brush.fillStyle() == Pt::Gfx::Brush::VerticalGradient) {
-            const Pt::int32_t textureY = pixelY % _brushImage->height();
+            const Pt::int32_t textureY = std::min<Pt::int32_t>(pixelY, _brushImage->height() - 1);
             ConstPixel        srcPixel(_brushImage->view(), 0, textureY);
             Pixel             dstPixel(_image->view(), minX + iterX, minY + pixelY);
             _image->format().setPixels(dstPixel, srcPixel, spanWidth, _compositionMode);
@@ -674,11 +684,10 @@ void Rasterizer2::rasterScanline(
         // Fill the span - horizontal gradient
         else {
             while(spanWidth > 0) {
-                const Pt::int32_t tX = iterX  % _brushImage->width ();
-                const Pt::int32_t tY = pixelY % _brushImage->height();
-                const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tX);
+                const Pt::int32_t tx = std::min<Pt::int32_t>(iterX,     _brushImage->width () - 1);
+                const Pt::int32_t n  = std::min<Pt::int32_t>(spanWidth, _brushImage->width() - tx);
                 if(n) {
-                    ConstPixel srcPixel(_brushImage->view(), tX, tY);
+                    ConstPixel srcPixel(_brushImage->view(), tx, 0);
                     Pixel      dstPixel(_image->view(), minX + iterX, minY + pixelY);
                     _image->format().copy(dstPixel, srcPixel,  n, _compositionMode);
                 }

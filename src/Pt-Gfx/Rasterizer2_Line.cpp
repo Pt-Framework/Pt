@@ -637,38 +637,42 @@ void Rasterizer2::rasterOnePixelAreaGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t
     Pt::int32_t ly[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
 
     // A helper macro to fill pixel
-    #define XW_FILL_PIXEL(X, Y, A)                                                          \
-        do {                                                                                \
-            /* Clip the point */                                                            \
-            if( !ClipShapeI::insideXYRange(X, Y, _currentClip) ) break;                     \
-            /* Check if we should skip drawing the pixel */                                 \
-            bool skipDrawing = false;                                                       \
-            for(Pt::int32_t j = 0; j < 4; ++j) {                                            \
-                if( (X) != mx[j] || (Y) != my[j] ) continue;                                \
-                skipDrawing = true;                                                         \
-                break;                                                                      \
-            }                                                                               \
-            if(skipDrawing || !(A)) break;                                                  \
-            /* Store back the mask's coordinates */                                         \
-            lx[2] = lx[3]; lx[3] = X;                                                       \
-            ly[2] = ly[3]; ly[3] = Y;                                                       \
-            if(pCnt < 2) {                                                                  \
-                lx[pCnt] = X;                                                               \
-                ly[pCnt] = Y;                                                               \
-                ++pCnt;                                                                     \
-            }                                                                               \
-            /* Fill the pixel */                                                            \
-            if(_isTexture || _isGradient) {                                                 \
-                const Pt::int32_t bw = _brushImage->width();                                \
-                const Pt::int32_t bh = _brushImage->height();                               \
-                ConstPixel srcPixel(_brushImage->view(), (X - minX) % bw, (Y - minY) % bh); \
-                Pixel      dstPixel(_image->view(), X, Y);                                  \
-                _image->format().setPixel(dstPixel, srcPixel, _compositionMode, A);         \
-            }                                                                               \
-            else {                                                                          \
-                Pixel pixel(_image->view(), X, Y);                                          \
-                _image->format().setPixel(pixel, color, _compositionMode, A);               \
-            }                                                                               \
+    #define XW_FILL_PIXEL(X, Y, A)                                                     \
+        do {                                                                           \
+            /* Clip the point */                                                       \
+            if( !ClipShapeI::insideXYRange(X, Y, _currentClip) ) break;                \
+            /* Check if we should skip drawing the pixel */                            \
+            bool skipDrawing = false;                                                  \
+            for(Pt::int32_t j = 0; j < 4; ++j) {                                       \
+                if( (X) != mx[j] || (Y) != my[j] ) continue;                           \
+                skipDrawing = true;                                                    \
+                break;                                                                 \
+            }                                                                          \
+            if(skipDrawing || !(A)) break;                                             \
+            /* Store back the mask's coordinates */                                    \
+            lx[2] = lx[3]; lx[3] = X;                                                  \
+            ly[2] = ly[3]; ly[3] = Y;                                                  \
+            if(pCnt < 2) {                                                             \
+                lx[pCnt] = X;                                                          \
+                ly[pCnt] = Y;                                                          \
+                ++pCnt;                                                                \
+            }                                                                          \
+            /* Fill the pixel */                                                       \
+            if(_isTexture || _isGradient) {                                            \
+                const Pt::int32_t bw = _brushImage->width();                           \
+                const Pt::int32_t bh = _brushImage->height();                          \
+                const Pt::int32_t dx = X - minX;                                       \
+                const Pt::int32_t dy = Y - minY;                                       \
+                const Pt::int32_t tx = _isGradient ? std::min(bw - 1, dx) : (dx % bw); \
+                const Pt::int32_t ty = _isGradient ? std::min(bh - 1, dy) : (dy % bh); \
+                ConstPixel srcPixel(_brushImage->view(), tx, ty);                      \
+                Pixel      dstPixel(_image->view(), X, Y);                             \
+                _image->format().setPixel(dstPixel, srcPixel, _compositionMode, A);    \
+            }                                                                          \
+            else { /* Solid */                                                         \
+                Pixel pixel(_image->view(), X, Y);                                     \
+                _image->format().setPixel(pixel, color, _compositionMode, A);          \
+            }                                                                          \
         } while(false)
 
     // Check if the start and end coordinates are the same
@@ -811,42 +815,42 @@ void Rasterizer2::rasterOnePixelAreaGLineSegmentXWAA_F(float x1, float y1, float
     Pt::int32_t ly[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
 
     // A helper macro to fill pixel
-    #define XW_FILL_PIXEL(X, Y, A)                                                          \
-        do {                                                                                \
-            /* Clip the point */                                                            \
-            if( !ClipShapeI::insideXYRange(X, Y, _currentClip) ) break;                     \
-            /* Check if we should skip drawing the pixel */                                 \
-            bool skipDrawing = false;                                                       \
-            for(Pt::int32_t j = 0; j < 4; ++j) {                                            \
-                if( (X) != mx[j] || (Y) != my[j] ) continue;                                \
-                skipDrawing = true;                                                         \
-                break;                                                                      \
-            }                                                                               \
-            if(skipDrawing || !(A)) break;                                                  \
-            /* Store back the mask's coordinates */                                         \
-            lx[2] = lx[3]; lx[3] = X;                                                       \
-            ly[2] = ly[3]; ly[3] = Y;                                                       \
-            if(pCnt < 2) {                                                                  \
-                lx[pCnt] = X;                                                               \
-                ly[pCnt] = Y;                                                               \
-                ++pCnt;                                                                     \
-            }                                                                               \
-            /* Fill the pixel */                                                            \
-            if(_isTexture || _isGradient) {                                                 \
-                const Pt::int32_t bw = _brushImage->width();                                \
-                const Pt::int32_t bh = _brushImage->height();                               \
-                ConstPixel srcPixel(_brushImage->view(), (X - minX + 1) % bw, (Y - minY) % bh); \
-                if( (X - minX + 1) % bw < 0)    throw 1;\
-                if( (X - minX + 1) % bw >= bw) throw 1.0;\
-                if( (Y - minY) % bh < 0)    throw 'a';\
-                if( (Y - minY) % bh >= bh) throw "a";\
-                Pixel      dstPixel(_image->view(), X, Y);                                  \
-                _image->format().setPixel(dstPixel, srcPixel, _compositionMode, A);         \
-            }                                                                               \
-            else {                                                                          \
-                Pixel pixel(_image->view(), X, Y);                                          \
-                _image->format().setPixel(pixel, color, _compositionMode, A);               \
-            }                                                                               \
+    #define XW_FILL_PIXEL(X, Y, A)                                                     \
+        do {                                                                           \
+            /* Clip the point */                                                       \
+            if( !ClipShapeI::insideXYRange(X, Y, _currentClip) ) break;                \
+            /* Check if we should skip drawing the pixel */                            \
+            bool skipDrawing = false;                                                  \
+            for(Pt::int32_t j = 0; j < 4; ++j) {                                       \
+                if( (X) != mx[j] || (Y) != my[j] ) continue;                           \
+                skipDrawing = true;                                                    \
+                break;                                                                 \
+            }                                                                          \
+            if(skipDrawing || !(A)) break;                                             \
+            /* Store back the mask's coordinates */                                    \
+            lx[2] = lx[3]; lx[3] = X;                                                  \
+            ly[2] = ly[3]; ly[3] = Y;                                                  \
+            if(pCnt < 2) {                                                             \
+                lx[pCnt] = X;                                                          \
+                ly[pCnt] = Y;                                                          \
+                ++pCnt;                                                                \
+            }                                                                          \
+            /* Fill the pixel */                                                       \
+            if(_isTexture || _isGradient) {                                            \
+                const Pt::int32_t bw = _brushImage->width();                           \
+                const Pt::int32_t bh = _brushImage->height();                          \
+                const Pt::int32_t dx = X - minX;                                       \
+                const Pt::int32_t dy = Y - minY;                                       \
+                const Pt::int32_t tx = _isGradient ? std::min(bw - 1, dx) : (dx % bw); \
+                const Pt::int32_t ty = _isGradient ? std::min(bh - 1, dy) : (dy % bh); \
+                ConstPixel srcPixel(_brushImage->view(), tx, ty);                      \
+                Pixel      dstPixel(_image->view(), X, Y);                             \
+                _image->format().setPixel(dstPixel, srcPixel, _compositionMode, A);    \
+            }                                                                          \
+            else { /* Solid */                                                         \
+                Pixel pixel(_image->view(), X, Y);                                     \
+                _image->format().setPixel(pixel, color, _compositionMode, A);          \
+            }                                                                          \
         } while(false)
 
     // Check if the start and end coordinates are the same

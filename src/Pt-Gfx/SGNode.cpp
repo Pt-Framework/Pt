@@ -82,13 +82,15 @@ void SGNode::draw(ImagePainter2& painter, const TransformT* transform_)
             transform = eCur.node->_transform * transform;
             // Set this node's pen to the painter as needed
             if(!eCur.node->_pen  .isNull()) {
-            // Scale the pen width
+                // Scale the pen width
                 const size_t orgPenSize = eCur.node->_pen.size();
                 const size_t sclPenSize = Gfx::Math::zrint( transform.transformSize((float) orgPenSize) );
                 const size_t newPenSize = (sclPenSize >= 1) ? sclPenSize : 1;
+                // Assign a new pen with the original width
                 if(orgPenSize == newPenSize) {
                     painter.setPen(eCur.node->_pen);
                 }
+                // Assign a new pen with the scaled width
                 else {
                     Pen newPen = eCur.node->_pen;
                     newPen.setSize(newPenSize);
@@ -96,6 +98,7 @@ void SGNode::draw(ImagePainter2& painter, const TransformT* transform_)
                 }
             }
             // Set this node's brush to the painter as needed
+            // ### TODO: Rotate the brush angle ###
             if(!eCur.node->_brush.isNull())
                 painter.setBrush(eCur.node->_brush);
             // Draw this node
