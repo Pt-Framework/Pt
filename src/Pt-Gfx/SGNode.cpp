@@ -101,13 +101,16 @@ void SGNode::draw(ImagePainter2& painter, const TransformT* transform_)
             if(!eCur.node->_brush.isNull()) {
                 // If the brush is a gradient, adjust its rotation as needed
                 if(eCur.node->_brush.isGradient()) {
+                    // Calculate the new gradient rotation and ensure that it is within the acceptable range
                     const ValueT orgRot = eCur.node->_brush.rotation();
-                    const ValueT newRot = orgRot + transform.extractRotation();
-                    // Assign a new brush with the original rotation
+                          ValueT newRot = orgRot + transform.extractRotation();
+                    while(newRot < -360) newRot += 360;
+                    while(newRot >  360) newRot -= 360;
+                    // Assign a new brush with the original gradient rotation
                     if(orgRot == newRot) {
                         painter.setBrush(eCur.node->_brush);
                     }
-                    // Assign a new brush with the updated rotation
+                    // Assign a new brush with the updated gradient rotation
                     else {
                         Brush newBrush = eCur.node->_brush;
                         newBrush.setGradientRotation(newRot);
