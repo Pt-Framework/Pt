@@ -57,17 +57,18 @@ struct GetPixel_C {
 
 
 //
-// SSE2
+// SSE constants
 //
-
-// Constant
 static const __m128 sseFour001 = _mm_set1_ps(  1);
 static const __m128 sseFour256 = _mm_set1_ps(256);
 
+
+//
+// SSE2
+//
+
 inline __m128 calcWeight_SSE2(float x, float y)
 {
-     _MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);
-
      const __m128  ssx       = _mm_set_ss     (x                                            );
      const __m128  ssy       = _mm_set_ss     (y                                            );
      const __m128  psXY      = _mm_unpacklo_ps(ssx,        ssy                              ); // 0 0 Y X
@@ -81,25 +82,6 @@ inline __m128 calcWeight_SSE2(float x, float y)
      const __m128  wx        = _mm_movelh_ps  (wxh,        wxh                              ); // X (1-X) X     (1-X)
      const __m128  wy        = _mm_shuffle_ps (psXYfrac1,  psXYfrac, _MM_SHUFFLE(1, 1, 1, 1)); // Y Y     (1-Y) (1-Y)
 
-     _MM_SET_ROUNDING_MODE(_MM_ROUND_NEAREST);
-
-     // Return the complete weight vector
-     return _mm_mul_ps(wx, wy);
-}
-
-inline __m128 calcWeight_SSE4(float x, float y)
-{
-     const __m128  ssx       = _mm_set_ss     (x                                            );
-     const __m128  ssy       = _mm_set_ss     (y                                            );
-     const __m128  psXY      = _mm_unpacklo_ps(ssx,        ssy                              ); // 0 0 Y X
-
-     const __m128  psXYfloor = _mm_floor_ps   (psXY                                         );
-     const __m128  psXYfrac  = _mm_sub_ps     (psXY,       psXYfloor                        );
-
-     const __m128  psXYfrac1 = _mm_sub_ps     (sseFour001, psXYfrac                         ); // ? ?     (1-Y) (1-X)
-     const __m128  wxh       = _mm_unpacklo_ps(psXYfrac1,  psXYfrac                         ); // ? ?     X     (1-X)
-     const __m128  wx        = _mm_movelh_ps  (wxh,        wxh                              ); // X (1-X) X     (1-X)
-     const __m128  wy        = _mm_shuffle_ps (psXYfrac1,  psXYfrac, _MM_SHUFFLE(1, 1, 1, 1)); // Y Y     (1-Y) (1-Y)
      // Return the complete weight vector
      return _mm_mul_ps(wx, wy);
 }
@@ -121,8 +103,8 @@ inline Pt::int32_t getPixel_SSE2(const Pt::int32_t* img, Pt::ssize_t imageWidth,
     const __m128i p12     = _mm_unpacklo_epi8  (p12h,    _mm_setzero_si128()    );
     const __m128i p34     = _mm_unpacklo_epi8  (p34h,    _mm_setzero_si128()    );
 
-    // Calculate weight
-    const __m128  weight  = calcWeight_SSE2(x, y);
+    // Calculate weights
+    const __m128  weight  = calcWeight_SSE2    (x,       y                      );
 
     // Convert floating point weights to 16-bit integer
     const __m128  weights = _mm_mul_ps         (weight,  sseFour256             );
@@ -156,6 +138,80 @@ inline Pt::int32_t getPixel_SSE2(const Pt::int32_t* img, Pt::ssize_t imageWidth,
 struct GetPixel_SSE2 {
     static inline Pt::int32_t getPixel(const Pt::int32_t* img, Pt::ssize_t imageWidth, float x, float y)
     { return getPixel_SSE2(img, imageWidth, x, y); }
+};
+
+
+//
+// SSE4.1
+//
+
+inline __m128 calcWeight_SSE4P1(float x, float y)
+{
+     const __m128  ssx       = _mm_set_ss     (x                                            );
+     const __m128  ssy       = _mm_set_ss     (y                                            );
+     const __m128  psXY      = _mm_unpacklo_ps(ssx,        ssy                              ); // 0 0 Y X
+
+     const __m128  psXYfloor = _mm_floor_ps   (psXY                                         );
+     const __m128  psXYfrac  = _mm_sub_ps     (psXY,       psXYfloor                        );
+
+     const __m128  psXYfrac1 = _mm_sub_ps     (sseFour001, psXYfrac                         ); // ? ?     (1-Y) (1-X)
+     const __m128  wxh       = _mm_unpacklo_ps(psXYfrac1,  psXYfrac                         ); // ? ?     X     (1-X)
+     const __m128  wx        = _mm_movelh_ps  (wxh,        wxh                              ); // X (1-X) X     (1-X)
+     const __m128  wy        = _mm_shuffle_ps (psXYfrac1,  psXYfrac, _MM_SHUFFLE(1, 1, 1, 1)); // Y Y     (1-Y) (1-Y)
+
+     // Return the complete weight vector
+     return _mm_mul_ps(wx, wy);
+}
+
+inline Pt::int32_t getPixel_SSE4P1(const Pt::int32_t* img, Pt::ssize_t imageWidth, float x, float y)
+{
+    // Floor the coordinate
+    const Pt::int32_t px = Pt::Gfx::Math::zfint(x);
+    const Pt::int32_t py = Pt::Gfx::Math::zfint(y);
+
+    // Pointer to the first pixel
+    const Pt::int32_t* p0 = img + py * imageWidth + px;
+
+    // Load the four neighboring pixels
+    const __m128i p12     = _mm_loadl_epi64    ( (const __m128i*) &p0[0 * imageWidth] );
+    const __m128i p34     = _mm_loadl_epi64    ( (const __m128i*) &p0[1 * imageWidth] );
+
+    // Convert RGBA RGBA RGBA RGAB to RRRR GGGG BBBB AAAA (AoS to SoA)
+    const __m128i p1234   = _mm_unpacklo_epi8  (p12,     p34                    );
+    const __m128i p34xx   = _mm_unpackhi_epi64 (p1234,   _mm_setzero_si128()    );
+    const __m128i p1234b  = _mm_unpacklo_epi8  (p1234,   p34xx                  );
+
+    // Extend to 16-bit
+    const __m128i pRG     = _mm_unpacklo_epi8  (p1234b,  _mm_setzero_si128()    );
+    const __m128i pBA     = _mm_unpackhi_epi8  (p1234b,  _mm_setzero_si128()    );
+
+    // Calculate weights
+    const __m128  weight  = calcWeight_SSE4P1  (x,       y                      );
+
+    // Convert floating point weights to 16-bit integer
+    const __m128  weights = _mm_mul_ps         (weight,  sseFour256             );
+    const __m128i weighti = _mm_cvtps_epi32    (weights                         ); // W4 W3 W2 W1
+    const __m128i weightd = _mm_packs_epi32    (weighti, weighti                ); // 32-bit to 2x 16-bit
+
+    // Multiply each pixel with its weight
+    const __m128i outRG   = _mm_madd_epi16     (pRG,     weightd                ); // [W1*R1 + W2*R2 | W3*R3 + W4*R4 | W1*G1 + W2*G2 | W3*G3 + W4*G4]
+    const __m128i outBA   = _mm_madd_epi16     (pBA,     weightd                ); // [W1*B1 + W2*B2 | W3*B3 + W4*B4 | W1*A1 + W2*A2 | W3*A3 + W4*A4]
+
+    // Horizontal add that will produce the output values (in 32-bit)
+    const __m128i out     = _mm_hadd_epi32     (outRG,   outBA                  );
+    const __m128i out32   = _mm_srli_epi32     (out,     8                      ); // Divide by 256
+
+    // Convert 32-bit to 8-bit
+    const __m128i out16   = _mm_packus_epi32   (out32,   _mm_setzero_si128()    );
+    const __m128i out8    = _mm_packus_epi16   (out16,   _mm_setzero_si128()    );
+
+    // Return the result
+    return _mm_cvtsi128_si32(out8);
+}
+
+struct GetPixel_SSE4P1 {
+    static inline Pt::int32_t getPixel(const Pt::int32_t* img, Pt::ssize_t imageWidth, float x, float y)
+    { return getPixel_SSE4P1(img, imageWidth, x, y); }
 };
 
 
@@ -218,7 +274,7 @@ static void testImageScaling(const char* title, Image& image, Painter& painter)
     painter.drawText( PointF(x, y + scaledImage.height() + 20), "Block - Plain C" );
     x += scaledImage.width() + 20;
 
-    // Scaled image (bilinear scale)
+    // Scaled image (bilinear scale) - 1
     bilinearScale<GetPixel_C>(
         textureWithWhiteBackground.begin(), textureWithWhiteBackground.width(), textureWithWhiteBackground.height(),
         scaledImage               .begin(), scaledImage               .width(), scaledImage               .height()
@@ -227,13 +283,24 @@ static void testImageScaling(const char* title, Image& image, Painter& painter)
     painter.drawText( PointF(x, y + scaledImage.height() + 20), "Bilinear - Plain C" );
     x += scaledImage.width() + 20;
 
-    // Scaled image (bilinear scale)
+    // Scaled image (bilinear scale) - 2
+     _MM_SET_ROUNDING_MODE(_MM_ROUND_TOWARD_ZERO);
     bilinearScale<GetPixel_SSE2>(
         textureWithWhiteBackground.begin(), textureWithWhiteBackground.width(), textureWithWhiteBackground.height(),
         scaledImage               .begin(), scaledImage               .width(), scaledImage               .height()
     );
+     _MM_SET_ROUNDING_MODE(_MM_ROUND_NEAREST);
     painter.drawImage(PointF(x, y), scaledImage);
     painter.drawText( PointF(x, y + scaledImage.height() + 20), "Bilinear - SSE2" );
+    x += scaledImage.width() + 20;
+
+    // Scaled image (bilinear scale) - 3
+    bilinearScale<GetPixel_SSE4P1>(
+        textureWithWhiteBackground.begin(), textureWithWhiteBackground.width(), textureWithWhiteBackground.height(),
+        scaledImage               .begin(), scaledImage               .width(), scaledImage               .height()
+    );
+    painter.drawImage(PointF(x, y), scaledImage);
+    painter.drawText( PointF(x, y + scaledImage.height() + 20), "Bilinear - SSE4.1" );
     x += scaledImage.width() + 20;
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
