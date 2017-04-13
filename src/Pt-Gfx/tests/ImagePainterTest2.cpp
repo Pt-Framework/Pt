@@ -74,6 +74,7 @@
 #undef None
 #endif
 
+
 using namespace Pt::Gfx;
 
 // Benchmark mathematical functions only
