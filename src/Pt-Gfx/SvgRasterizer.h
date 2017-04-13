@@ -58,6 +58,7 @@ class SvgRasterizer
         bool advance();
 
     private:
+        struct SvgInst;
         struct RasterState;
 
     private:

@@ -50,30 +50,29 @@ namespace Gfx {
 // ===== Private Member Structure Definitions ===========================================
 // ======================================================================================
 
+struct SvgRasterizer::SvgInst {
+};
+
 struct SvgRasterizer::RasterState {
-    bool               gotStart;  // State flags
-    bool               gotEnd;    // ---
+    bool                           gotStart;       // State flags
+    bool                           gotEnd;         // ---
 
-    Image&             image;     // Target image
-    ImagePainter2      painter;   // Target painter
+    Image&                         image;          // Target image
+    ImagePainter2                  painter;        // Target painter
 
-    Pen                pen;       // Active pen
-    Brush              brush;     // Active brush
-    Transform          transform; // Active 2D transformation
-    Path               path;      // Working path
+    Transform                      worldTransform; // World transformation that will be applied to all loaded SVG objects
 
-    TransformStack     tsStack;   // Transform stack
-    std::vector<Pen  > psStack;   // Pen stack
-    std::vector<Brush> bsStack;   // Brush stack
+    std::map<std::string, SvgInst> svgInst;        // A map between reference names and their corresponding SVG object instances
 
-    inline RasterState(Image& image_, const Transform& initialTransform)
-    : gotStart (false)
-    , gotEnd   (false)
-    , image    (image_)
-    , painter  (image_)
-    , pen      (Color::fromRgb8(0, 0, 0, 255), 1, Pen::Solid, Pen::ButtCap, Pen::MiterJoin)
-    , brush    (Color::fromRgb8(0, 0, 0, 255))
-    , transform(initialTransform)
+    std::set<Pen>                  penSet;         // A set of pens    (for cache look-up)
+    std::set<Brush>                brushSet;       // A set of brushes (for cache look-up)
+
+    inline RasterState(Image& image_, const Transform& worldTransform)
+    : gotStart      (false)
+    , gotEnd        (false)
+    , image         (image_)
+    , painter       (image_)
+    , worldTransform(worldTransform)
     {}
 };
 
