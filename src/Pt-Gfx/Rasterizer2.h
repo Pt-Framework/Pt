@@ -160,10 +160,11 @@ class Rasterizer2
         void strokeText(const Point& to, const Pt::String& text);
         void strokeOnePixelLine(const Point& a, const Point& b, DrawLineMask* maskInOut);
         void strokeOnePixelRect(const Point& tl, const Point& br);
-        void strokeOnePixelPolygonOutline(const Point* points, size_t pointCount, bool autoClose);
-        void strokeOnePixelPolygonOutline(const PointF* points, size_t pointCount, bool autoClose);
         void strokeOnePixelQuadraticPolybezierOutline(const Point* points, size_t pointCount);
         void strokeOnePixelEllipseArc(const Point& topLeft, const Size& size, float degBegin, float degEnd, const ArcMode& arcMode);
+
+        template <typename PointT>
+        inline void strokeOnePixelPolygonOutline(const BasicPoint<PointT>* points, size_t pointCount, bool autoClose);
 
         void penFillPolygon(const Point* points, size_t pointCount);
         void penFillPolygon(const PointF* points, size_t pointCount);
@@ -204,7 +205,9 @@ class Rasterizer2
         struct ArcXWLineData;
 
     private:
-        void rasterOnePixelSolidLine(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut);
+        inline void rasterOnePixelSolidLine(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut);
+        inline void rasterOnePixelSolidLine_F(float x1, float y1, float x2, float y2, const Color& color, DrawLineMask* maskInOut);
+
         void rasterOnePixelSolidHLineSegment(Pt::int32_t x1, Pt::int32_t x2, Pt::int32_t y, const Color& color, DrawLineMask* maskInOut);
         void rasterOnePixelSolidVLineSegment(Pt::int32_t x, Pt::int32_t y1, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut);
         void rasterOnePixelSolidXLineSegment(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut);
@@ -212,17 +215,15 @@ class Rasterizer2
         void rasterOnePixelSolidGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut);
         void rasterOnePixelSolidGLineSegmentXWAA_F(float x1, float y1, float x2, float y2, const Color& color, DrawLineMask* maskInOut);
 
-        void rasterOnePixelAreaGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t minX, Pt::int32_t minY, const PolygonScanlines& exclusionZone, DrawLineMask& maskInOut);
         void rasterOnePixelAreaGLineSegmentXWAA_F(float x1, float y1, float x2, float y2, const Color& color, Pt::int32_t minX, Pt::int32_t minY, const PolygonScanlines& exclusionZone, DrawLineMask& maskInOut);
 
-        void rasterOnePixelPatternedLine(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut);
+        inline void rasterOnePixelPatternedLine(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut);
+        inline void rasterOnePixelPatternedLine_F(float x1, float y1, float x2, float y2, const Color& color, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut);
+
         void rasterOnePixelPatternedXLineSegment(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t fpiCtrInc, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut);
         void rasterOnePixelPatternedGLineSegmentNoAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t fpiCtrInc, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut);
         void rasterOnePixelPatternedGLineSegmentXWAA(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t fpiCtrInc, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut);
         void rasterOnePixelPatternedGLineSegmentXWAA_F(float x1, float y1, float x2, float y2, const Color& color, Pt::int32_t fpiCtrInc, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut);
-
-        inline void rasterOnePixelSolidLine_F(float x1, float y1, float x2, float y2, const Color& color, DrawLineMask* maskInOut);
-        inline void rasterOnePixelPatternedLine_F(float x1, float y1, float x2, float y2, const Color& color, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut);
 
         void rasterRectArea(const Point& tl, const Point& br);
 
@@ -230,7 +231,6 @@ class Rasterizer2
         void rasterOnePixelPolygonOutline(const PointF* points, size_t pointCount, const Color& color);
 
         void rasterPolygonAreaNoAA(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
-        void rasterPolygonAreaXWAA(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
         void rasterPolygonAreaXWAA(const PointF* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, float minX, float minY, float maxX, float maxY);
 
         void rasterOnePixelQuadraticBezierCurve(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t x3, Pt::int32_t y3, const Color& color, Pt::int32_t* fpiCtrInOut, DrawLineMask* maskInOut);
@@ -242,7 +242,6 @@ class Rasterizer2
     private:
         // --- Generic helper functions ---
         void updateClip();
-
         void updatePenPattern();
 
         void updateGradientBrush(Pt::int32_t width, Pt::int32_t height);
@@ -278,13 +277,13 @@ class Rasterizer2
         void stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::uint8_t alpha);
         void stroke4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::uint8_t alpha, const bool mask[4]);
 
-        inline void fillPixel(Pt::int32_t x, Pt::int32_t y, Pt::int32_t minX, Pt::int32_t minY, Pt::uint8_t alpha);
-
         void fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY);
         void fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const bool mask[4]);
         void fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, Pt::uint8_t alpha);
         void fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, Pt::uint8_t alpha, const bool mask[4]);
         void fill4Pixels(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t minX, Pt::int32_t minY, const Pt::uint8_t alphaMask[4]);
+
+        inline void fillPixel(Pt::int32_t x, Pt::int32_t y, Pt::int32_t minX, Pt::int32_t minY, Pt::uint8_t alpha);
 
         void rasterScanline(
             Pt::int32_t  iterL, Pt::int32_t iterR, Pt::int32_t pixelY,
@@ -298,13 +297,13 @@ class Rasterizer2
         template <typename PointT, typename ValueT>
         inline void getPolygonRectMinMax(const BasicPoint<PointT>* points, size_t pointCount, ValueT& minX, ValueT& minY, ValueT& maxX, ValueT& maxY) const;
 
-        void genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount, bool forPolygonOutline) const;
-        void genClippedPolygonPoints(std::vector<PointF>& dst, const PointF* src, const size_t pointCount, bool forPolygonOutline) const;
+        template <typename PointT>
+        inline void genClippedPolygonPoints(std::vector< BasicPoint<PointT> >& dst, const BasicPoint<PointT>* src, const size_t pointCount, bool forPolygonOutline) const;
 
-        void separateAndClipPolygons(Pt::int32_t& minX, Pt::int32_t& maxX, Pt::int32_t& minY, Pt::int32_t& maxY, std::vector<Point>& clippedPoints, std::vector<size_t>& clippedCounts, const Point* points, size_t pointCount) const;
-        void separateAndClipPolygons(float& minX, float& maxX, float& minY, float& maxY, std::vector<PointF>& clippedPoints, std::vector<size_t>& clippedCounts, const PointF* points, size_t pointCount) const;
+        template <typename PointT, typename ValueT>
+        inline void separateAndClipPolygons(ValueT& minX, ValueT& maxX, ValueT& minY, ValueT& maxY, std::vector< BasicPoint<PointT> >& clippedPoints, std::vector<size_t>& clippedCounts, const BasicPoint<PointT>* points, size_t pointCount) const;
 
-        // Arc-related helper functions
+        // --- Arc-related helper functions ---
         static inline void arcUtil_detXWLineDirection(ArcXWLineData& xwLineData);
 
         static inline bool arcUtil_pointIsInsideDegRange(Pt::int32_t x, Pt::int32_t y, Pt::int32_t ctrX, Pt::int32_t ctrY, float degBegin, float degEnd, float xyRatio);
@@ -422,19 +421,104 @@ struct Rasterizer2::ArcXWLineData {
 
 
 // ======================================================================================
-// ===== Inlined Public Member Functions ================================================
+// ===== Inlined and/or Templated Public Member Functions ===============================
 // ======================================================================================
 
 const Pt::uint8_t* Rasterizer2::patternBufferMP64() const
 { return _patternBufferMP; }
 
+template <typename PointT>
+void Rasterizer2::strokeOnePixelPolygonOutline(const BasicPoint<PointT>* points, size_t pointCount, bool autoClose)
+{
+    // Check if there are too few points
+    if(pointCount < 2) return;
+
+    // Separate the polygons, clip their coordinates, and raster them
+    size_t startIndex = 0;
+
+    for(size_t i = 0; i <= pointCount; ++i) {
+        // Search for the end and/or separator points
+        if( i == pointCount || (points[i].x() > MAXIMUM_COORD && points[i].y() > MAXIMUM_COORD) ) {
+            // Calculate the number of points for this polygon
+            const size_t curPC = i - startIndex;
+            // Clip the coordinates
+            std::vector< BasicPoint<PointT> > clipped;
+            genClippedPolygonPoints(clipped, points + startIndex, curPC, true);
+            if(autoClose && clipped.back() != clipped[0]) clipped.push_back(points[0]);
+            // Increment the start index
+            startIndex += curPC + 1;
+            // Draw the polygon
+            rasterOnePixelPolygonOutline(clipped.data(), clipped.size(), _pen.color());
+        }
+    }
+}
 
 // ======================================================================================
 // ===== Inlined and/or Templated Private Member Functions ==============================
 // ======================================================================================
 
+// --- Line-rasterization functions ---
+
+void Rasterizer2::rasterOnePixelSolidLine(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, DrawLineMask* maskInOut)
+{
+    // Check for horizontal line
+    if(y1 == y2) {
+        rasterOnePixelSolidHLineSegment(x1, x2, y1, color, maskInOut);
+        return;
+    }
+
+    // Check for vertical line
+    if(x1 == x2) {
+        rasterOnePixelSolidVLineSegment(x1, y1, y2, color, maskInOut);
+        return;
+    }
+
+    // Check for 45-degree line
+    if(abs(x2 - x1) == abs(y2 - y1)) {
+        rasterOnePixelSolidXLineSegment(x1, y1, x2, y2, color, maskInOut);
+        return;
+    }
+
+    // Generic line
+    if(_aaMode == AntiAliasingMode::None) {
+        // Raster the line without using anti-aliasing
+        rasterOnePixelSolidGLineSegmentNoAA(x1, y1, x2, y2, color, maskInOut);
+    }
+    else {
+        // Raster the line using anti-aliasing
+        rasterOnePixelSolidGLineSegmentXWAA(x1, y1, x2, y2, color, maskInOut);
+    }
+}
+
 void Rasterizer2::rasterOnePixelSolidLine_F(float x1, float y1, float x2, float y2, const Color& color, DrawLineMask* maskInOut)
 { rasterOnePixelSolidGLineSegmentXWAA_F(x1, y1, x2, y2, color, maskInOut); }
+
+void Rasterizer2::rasterOnePixelPatternedLine(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut)
+{
+    // Check the size of the line
+    const Pt::int32_t sizeX = abs(x2 - x1);
+    const Pt::int32_t sizeY = abs(y2 - y1);
+    const Pt::int32_t sizeS = sizeX + sizeY;
+    const Pt::int32_t sizeL = Gfx::Math::fastSqrt(sizeX * sizeX + sizeY * sizeY);
+
+    // Calculate the incremental factor of the pattern indexing counter
+    const Pt::int32_t fpiCtrInc = FIXED_POINT_CONSTANT_ISQRT2 * PATTERN_BUFFER_SCALE_FACTOR * sizeS / sizeL;
+
+    // Check for 45-degree line
+    if(abs(x2 - x1) == abs(y2 - y1)) {
+        rasterOnePixelPatternedXLineSegment(x1, y1, x2, y2, color, fpiCtrInc, fpiCtrInOut, maskInOut);
+    }
+
+    // Generic line
+    else {
+        // Without anti-aliasing
+        if(_aaMode == AntiAliasingMode::None)
+            rasterOnePixelPatternedGLineSegmentNoAA(x1, y1, x2, y2, color, fpiCtrInc, fpiCtrInOut, maskInOut);
+        // With anti-aliasing
+        else
+            rasterOnePixelPatternedGLineSegmentXWAA(x1, y1, x2, y2, color, fpiCtrInc, fpiCtrInOut, maskInOut);
+    }
+}
 
 void Rasterizer2::rasterOnePixelPatternedLine_F(float x1, float y1, float x2, float y2, const Color& color, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut)
 {
@@ -450,6 +534,8 @@ void Rasterizer2::rasterOnePixelPatternedLine_F(float x1, float y1, float x2, fl
     // Rasterize line
     rasterOnePixelPatternedGLineSegmentXWAA_F(x1, y1, x2, y2, color, fpiCtrInc, fpiCtrInOut, maskInOut);
 }
+
+// --- Generic helper functions ---
 
 void Rasterizer2::updateGradientBrush_getStartEndColors(Pt::uint8_t rgbaStart[4], Pt::uint8_t rgbaEnd[4])
 {
@@ -522,6 +608,8 @@ void Rasterizer2::bubbleSortAscending(T& basket, Pt::int32_t size)
     }
 }
 
+// --- Rasterization-related helper functions ---
+
 void Rasterizer2::fillPixel(Pt::int32_t x, Pt::int32_t y, Pt::int32_t minX, Pt::int32_t minY, Pt::uint8_t alpha)
 {
     // Check the clipping
@@ -548,6 +636,8 @@ void Rasterizer2::fillPixel(Pt::int32_t x, Pt::int32_t y, Pt::int32_t minX, Pt::
     }
 }
 
+// --- Polygon-related helper functions ---
+
 template <typename PointT, typename ValueT>
 void Rasterizer2::getPolygonRectMinMax(const BasicPoint<PointT>* points, size_t pointCount, ValueT& minX, ValueT& minY, ValueT& maxX, ValueT& maxY) const
 {
@@ -565,6 +655,55 @@ void Rasterizer2::getPolygonRectMinMax(const BasicPoint<PointT>* points, size_t 
         if(y > maxY) maxY = y;
     }
 }
+
+template <typename PointT>
+void Rasterizer2::genClippedPolygonPoints(std::vector< BasicPoint<PointT> >& dst, const BasicPoint<PointT>* src, const size_t pointCount, bool forPolygonOutline) const
+{
+    for(size_t i = 0; i < pointCount; ++i)
+        dst.push_back( BasicPoint<PointT>( src[i].x(), src[i].y() ) );
+
+    if(forPolygonOutline) BasicClipShape<PointT>::clipPolyline(dst, _currentClip);
+    else                  BasicClipShape<PointT>::clipPolygon (dst, _currentClip);
+}
+
+template <typename PointT, typename ValueT>
+void Rasterizer2::separateAndClipPolygons(ValueT& minX, ValueT& maxX, ValueT& minY, ValueT& maxY, std::vector< BasicPoint<PointT> >& clippedPoints, std::vector<size_t>& clippedCounts, const BasicPoint<PointT>* points, size_t pointCount) const
+{
+    // Minimum and maximum coordinate values for all the polygons
+    minX =  MAXIMUM_COORD;
+    minY =  MAXIMUM_COORD;
+    maxX = -MAXIMUM_COORD;
+    maxY = -MAXIMUM_COORD;
+
+    // Separate the polygons and clip their coordinates
+    size_t startIndex = 0;
+    for(size_t i = 0; i <= pointCount; ++i) {
+        // Search for the end and/or separator points
+        if( i == pointCount || (points[i].x() > MAXIMUM_COORD && points[i].y() > MAXIMUM_COORD) ) {
+            // Calculate the number of points for this polygon
+            const size_t curPC = i - startIndex;
+            // Clip the coordinates
+            std::vector< BasicPoint<PointT> > clipped;
+            genClippedPolygonPoints(clipped, points + startIndex, curPC, false);
+            if(clipped.empty()) continue;
+            // Increment the start index
+            startIndex += curPC + 1;
+            // Calculate the minimum and maximum coordinate values
+            ValueT curMinX, curMinY, curMaxX, curMaxY;
+            getPolygonRectMinMax(clipped.data(), clipped.size(), curMinX, curMinY, curMaxX, curMaxY);
+            if(curMinX < minX) minX = curMinX;
+            if(curMinY < minY) minY = curMinY;
+            if(curMaxX > maxX) maxX = curMaxX;
+            if(curMaxY > maxY) maxY = curMaxY;
+            // Store the clipped points
+            clippedPoints.insert(clippedPoints.end(), clipped.begin(), clipped.end());
+            // Store the number of points
+            clippedCounts.push_back(clipped.size());
+        }
+    }
+}
+
+// --- Arc-related helper functions ---
 
 void Rasterizer2::arcUtil_detXWLineDirection(ArcXWLineData& xwLineData)
 {

@@ -39,56 +39,6 @@ namespace Gfx {
 // ===== Public Member Functions ========================================================
 // ======================================================================================
 
-void Rasterizer2::strokeOnePixelPolygonOutline(const Point* points, size_t pointCount, bool autoClose)
-{
-    // Check if there are too few points
-    if(pointCount < 2) return;
-
-    // Separate the polygons, clip their coordinates, and raster them
-    size_t startIndex = 0;
-
-    for(size_t i = 0; i <= pointCount; ++i) {
-        // Search for the end and/or separator points
-        if( i == pointCount || (points[i].x() > MAXIMUM_COORD && points[i].y() > MAXIMUM_COORD) ) {
-            // Calculate the number of points for this polygon
-            const size_t curPC = i - startIndex;
-            // Clip the coordinates
-            std::vector<Point> clipped;
-            genClippedPolygonPoints(clipped, points + startIndex, curPC, true);
-            if(autoClose && clipped.back() != clipped[0]) clipped.push_back(points[0]);
-            // Increment the start index
-            startIndex += curPC + 1;
-            // Draw the polygon
-            rasterOnePixelPolygonOutline(clipped.data(), clipped.size(), _pen.color());
-        }
-    }
-}
-
-void Rasterizer2::strokeOnePixelPolygonOutline(const PointF* points, size_t pointCount, bool autoClose)
-{
-    // Check if there are too few points
-    if(pointCount < 2) return;
-
-    // Separate the polygons, clip their coordinates, and raster them
-    size_t startIndex = 0;
-
-    for(size_t i = 0; i <= pointCount; ++i) {
-        // Search for the end and/or separator points
-        if( i == pointCount || (points[i].x() > MAXIMUM_COORD && points[i].y() > MAXIMUM_COORD) ) {
-            // Calculate the number of points for this polygon
-            const size_t curPC = i - startIndex;
-            // Clip the coordinates
-            std::vector<PointF> clipped;
-            genClippedPolygonPoints(clipped, points + startIndex, curPC, true);
-            if(autoClose && clipped.back() != clipped[0]) clipped.push_back(points[0]);
-            // Increment the start index
-            startIndex += curPC + 1;
-            // Draw the polygon
-            rasterOnePixelPolygonOutline(clipped.data(), clipped.size(), _pen.color());
-        }
-    }
-}
-
 void Rasterizer2::penFillPolygon(const Point* points, size_t pointCount)
 {
     // Check if there are too few points
@@ -102,10 +52,7 @@ void Rasterizer2::penFillPolygon(const Point* points, size_t pointCount)
     _isGradient = false;
 
     // Separate the polygons and clip their coordinates
-    Pt::int32_t minX;
-    Pt::int32_t minY;
-    Pt::int32_t maxX;
-    Pt::int32_t maxY;
+    Pt::int32_t minX, minY, maxX, maxY;
 
     std::vector<Point > clippedPoints;
     std::vector<size_t> clippedCounts;
@@ -138,10 +85,7 @@ void Rasterizer2::penFillPolygon(const PointF* points, size_t pointCount)
     _isGradient = false;
 
     // Separate the polygons and clip their coordinates
-    float minX;
-    float minY;
-    float maxX;
-    float maxY;
+    float minX, minY, maxX, maxY;
 
     std::vector<PointF> clippedPoints;
     std::vector<size_t> clippedCounts;
@@ -304,96 +248,6 @@ void Rasterizer2::fillPolygon(const PointF* points, size_t pointCount)
 // ===== Private Member Functions =======================================================
 // ======================================================================================
 
-void Rasterizer2::genClippedPolygonPoints(std::vector<Point>& dst, const Point* src, const size_t pointCount, bool forPolygonOutline) const
-{
-    for(size_t i = 0; i < pointCount; ++i)
-        dst.push_back( Point( src[i].x(), src[i].y() ) );
-
-    if(forPolygonOutline) ClipShapeZ::clipPolyline(dst, _currentClip);
-    else                  ClipShapeZ::clipPolygon (dst, _currentClip);
-}
-
-void Rasterizer2::genClippedPolygonPoints(std::vector<PointF>& dst, const PointF* src, const size_t pointCount, bool forPolygonOutline) const
-{
-    for(size_t i = 0; i < pointCount; ++i)
-        dst.push_back( PointF( src[i].x(), src[i].y() ) );
-
-    if(forPolygonOutline) ClipShapeF::clipPolyline(dst, _currentClip);
-    else                  ClipShapeF::clipPolygon (dst, _currentClip);
-}
-
-void Rasterizer2::separateAndClipPolygons(Pt::int32_t& minX, Pt::int32_t& maxX, Pt::int32_t& minY, Pt::int32_t& maxY, std::vector<Point>& clippedPoints, std::vector<size_t>& clippedCounts, const Point* points, size_t pointCount) const
-{
-    // Minimum and maximum coordinate values for all the polygons
-    minX =  MAXIMUM_COORD;
-    minY =  MAXIMUM_COORD;
-    maxX = -MAXIMUM_COORD;
-    maxY = -MAXIMUM_COORD;
-
-    // Separate the polygons and clip their coordinates
-    size_t startIndex = 0;
-    for(size_t i = 0; i <= pointCount; ++i) {
-        // Search for the end and/or separator points
-        if( i == pointCount || (points[i].x() > MAXIMUM_COORD && points[i].y() > MAXIMUM_COORD) ) {
-            // Calculate the number of points for this polygon
-            const size_t curPC = i - startIndex;
-            // Clip the coordinates
-            std::vector<Point> clipped;
-            genClippedPolygonPoints(clipped, points + startIndex, curPC, false);
-            if(clipped.empty()) continue;
-            // Increment the start index
-            startIndex += curPC + 1;
-            // Calculate the minimum and maximum coordinate values
-            Pt::int32_t curMinX, curMinY, curMaxX, curMaxY;
-            getPolygonRectMinMax(clipped.data(), clipped.size(), curMinX, curMinY, curMaxX, curMaxY);
-            if(curMinX < minX) minX = curMinX;
-            if(curMinY < minY) minY = curMinY;
-            if(curMaxX > maxX) maxX = curMaxX;
-            if(curMaxY > maxY) maxY = curMaxY;
-            // Store the clipped points
-            clippedPoints.insert(clippedPoints.end(), clipped.begin(), clipped.end());
-            // Store the number of points
-            clippedCounts.push_back(clipped.size());
-        }
-    }
-}
-
-void Rasterizer2::separateAndClipPolygons(float& minX, float& maxX, float& minY, float& maxY, std::vector<PointF>& clippedPoints, std::vector<size_t>& clippedCounts, const PointF* points, size_t pointCount) const
-{
-    // Minimum and maximum coordinate values for all the polygons
-    minX =  MAXIMUM_COORD_F;
-    minY =  MAXIMUM_COORD_F;
-    maxX = -MAXIMUM_COORD_F;
-    maxY = -MAXIMUM_COORD_F;
-
-    // Separate the polygons and clip their coordinates
-    size_t startIndex = 0;
-    for(size_t i = 0; i <= pointCount; ++i) {
-        // Search for the end and/or separator points
-        if( i == pointCount || (points[i].x() > MAXIMUM_COORD_F && points[i].y() > MAXIMUM_COORD_F) ) {
-            // Calculate the number of points for this polygon
-            const size_t curPC = i - startIndex;
-            // Clip the coordinates
-            std::vector<PointF> clipped;
-            genClippedPolygonPoints(clipped, points + startIndex, curPC, false);
-            if(clipped.empty()) continue;
-            // Increment the start index
-            startIndex += curPC + 1;
-            // Calculate the minimum and maximum coordinate values
-            float curMinX, curMinY, curMaxX, curMaxY;
-            getPolygonRectMinMax(clipped.data(), clipped.size(), curMinX, curMinY, curMaxX, curMaxY);
-            if(curMinX < minX) minX = curMinX;
-            if(curMinY < minY) minY = curMinY;
-            if(curMaxX > maxX) maxX = curMaxX;
-            if(curMaxY > maxY) maxY = curMaxY;
-            // Store the clipped points
-            clippedPoints.insert(clippedPoints.end(), clipped.begin(), clipped.end());
-            // Store the number of points
-            clippedCounts.push_back(clipped.size());
-        }
-    }
-}
-
 void Rasterizer2::rasterOnePixelPolygonOutline(const Point* points, size_t pointCount, const Color& color)
 {
     // Check if there are too few points
@@ -491,107 +345,6 @@ void Rasterizer2::rasterPolygonAreaNoAA(const Point* points, const size_t* point
             const Pt::int32_t to   = nodeX[i + 1];
             rasterScanline(from - minX, to - minX, pixelY - minY, minX, minY, color);
         }
-    }
-}
-
-// Inspired by: Efficient Polygon Fill Algorithm With C Code Sample
-//              http://alienryderflex.com/polygon_fill
-//              Public-domain code by Darel Rex Finley, 2007
-void Rasterizer2::rasterPolygonAreaXWAA(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY)
-{
-    // List of nodes that define the horizontal spans
-    std::vector<Pt::int32_t> nodeX(totalPointCount * 2, 0);
-
-    // List of polygon scanlines
-    PolygonScanlines scanlines;
-
-    if(_compositionMode != CompositionMode::SourceCopy)
-        scanlines.resize(maxY - minY + 1 + 2);
-
-    // Loop through the rows of the image
-    for(Pt::int32_t pixelY = minY; pixelY <= maxY; ++pixelY) {
-        // Base pointer for the polygons
-        const Point* curPointBase = points;
-        // Build a list of nodes using all the polygons
-        Pt::int32_t nodes = 0;
-        for(size_t p = 0; p < polyCount; ++p) {
-            // Get the current point count
-            const size_t curPointCount = pointCount[p];
-            // Loop through the points
-            Pt::int32_t j = curPointCount - 1;
-            for(size_t i = 0; i < curPointCount; ++i) {
-                // Get the coordinates
-                const Pt::int32_t curXi = (curPointBase + i)->x();
-                const Pt::int32_t curYi = (curPointBase + i)->y();
-                const Pt::int32_t curXj = (curPointBase + j)->x();
-                const Pt::int32_t curYj = (curPointBase + j)->y();
-                // Calculate the node's coordinate
-                if( ( pixelY >= curYi && pixelY < curYj ) || ( pixelY >= curYj && pixelY < curYi ) ) {
-                    // Bail out if we have produced too many nodes
-                    if((size_t) nodes >= nodeX.size()) return;
-                    // Calculate the node's coordinate
-                    const Pt::int32_t deltaYp = pixelY - curYi;
-                    const Pt::int32_t deltaYj = curYj  - curYi;
-                    const Pt::int32_t deltaXj = curXj  - curXi;
-                    const Pt::int32_t interXf = FIXED_POINT_FROM_INT(curXi)
-                                              + ( FIXED_POINT_FROM_INT(deltaYp) / deltaYj * deltaXj );
-#if 1
-                    nodeX[nodes++] = interXf;
-#else
-                    nodeX[nodes++] = FIXED_POINT_TO_INT(interXf);
-#endif
-                }
-                // Update the searching index
-                j = i;
-            }
-            // Increment the base pointer
-            curPointBase += curPointCount;
-        }
-        // Skip if there is no node
-        if(!nodes) continue;
-        // Sort the nodes
-        bubbleSortAscending(nodeX, nodes);
-        // Fill the pixels between the node pairs
-        for(Pt::int32_t i = 0; i < nodes; i += 2) {
-            // Calculate the coordinate
-#if 1
-            const Pt::int32_t from = FIXED_POINT_TO_INT(FIXED_POINT_CEIL (nodeX[i    ]));
-            const Pt::int32_t to   = FIXED_POINT_TO_INT(FIXED_POINT_FLOOR(nodeX[i + 1]));
-#else
-            const Pt::int32_t from = nodeX[i    ] + 1;
-            const Pt::int32_t to   = nodeX[i + 1];
-#endif
-            if(to < from) continue;
-            // Store the scanline coordinate as needed
-            if(_compositionMode != CompositionMode::SourceCopy) {
-                scanlines[pixelY - minY].push_back(ScanlineElement16(from, to));
-            }
-            // Draw the scanline
-            rasterScanline(from - minX, to - minX, pixelY - minY, minX, minY, color);
-        }
-    }
-
-    // Raster the anti-aliased outline
-    const Point* curPointBase = points;
-    for(size_t p = 0; p < polyCount; ++p) {
-        // Mask
-        DrawLineMask mask_zero = Rasterizer2::NullLineMask;
-        DrawLineMask mask_nnp1 = Rasterizer2::NullLineMask;
-        // From point N to point (N + 1), successively
-        const size_t pc1 = pointCount[p] - 1;
-        for(size_t i = 0; i < pc1; ++i) {
-            //lprintf("%3d, %3d    %3d, %3d\n", curPointBase[i].x(), curPointBase[i].y(), curPointBase[i + 1].x(), curPointBase[i + 1].y());
-            rasterOnePixelAreaGLineSegmentXWAA(curPointBase[i].x(), curPointBase[i].y(), curPointBase[i + 1].x(), curPointBase[i + 1].y(), color, minX, minY, scanlines, mask_nnp1);
-            if(!i) memcpy(&mask_zero, &mask_nnp1, sizeof(mask_zero));
-        }
-        // From the last point to the first point
-        mask_zero[2] = mask_zero[0];
-        mask_zero[3] = mask_zero[1];
-        mask_zero[0] = mask_nnp1[2];
-        mask_zero[1] = mask_nnp1[3];
-        rasterOnePixelAreaGLineSegmentXWAA(curPointBase[pc1].x(), curPointBase[pc1].y(), curPointBase[0].x(), curPointBase[0].y(), color, minX, minY, scanlines, mask_zero);
-        // Increment the base pointer
-        curPointBase += pointCount[p];
     }
 }
 

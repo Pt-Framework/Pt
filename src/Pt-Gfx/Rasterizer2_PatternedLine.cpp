@@ -39,33 +39,6 @@ namespace Gfx {
 // ===== Private Member Functions =======================================================
 // ======================================================================================
 
-void Rasterizer2::rasterOnePixelPatternedLine(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut)
-{
-    // Check the size of the line
-    const Pt::int32_t sizeX = abs(x2 - x1);
-    const Pt::int32_t sizeY = abs(y2 - y1);
-    const Pt::int32_t sizeS = sizeX + sizeY;
-    const Pt::int32_t sizeL = Gfx::Math::fastSqrt(sizeX * sizeX + sizeY * sizeY);
-
-    // Calculate the incremental factor of the pattern indexing counter
-    const Pt::int32_t fpiCtrInc = FIXED_POINT_CONSTANT_ISQRT2 * PATTERN_BUFFER_SCALE_FACTOR * sizeS / sizeL;
-
-    // Check for 45-degree line
-    if(abs(x2 - x1) == abs(y2 - y1)) {
-        rasterOnePixelPatternedXLineSegment(x1, y1, x2, y2, color, fpiCtrInc, fpiCtrInOut, maskInOut);
-    }
-
-    // Generic line
-    else {
-        // Without anti-aliasing
-        if(_aaMode == AntiAliasingMode::None)
-            rasterOnePixelPatternedGLineSegmentNoAA(x1, y1, x2, y2, color, fpiCtrInc, fpiCtrInOut, maskInOut);
-        // With anti-aliasing
-        else
-            rasterOnePixelPatternedGLineSegmentXWAA(x1, y1, x2, y2, color, fpiCtrInc, fpiCtrInOut, maskInOut);
-    }
-}
-
 void Rasterizer2::rasterOnePixelPatternedXLineSegment(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, const Color& color, Pt::int32_t fpiCtrInc, Pt::int32_t& fpiCtrInOut, DrawLineMask* maskInOut)
 {
     // Get the mask's coordinates as needed
