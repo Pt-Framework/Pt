@@ -41,9 +41,13 @@
 #include <Pt/Gfx/SGNodeRectangle.h>
 #include <Pt/Gfx/SGNodeEllipse.h>
 #include <Pt/Gfx/SGNodeArc.h>
+
+#include <Pt/Gfx/BlockScale.h>
 #include <Pt/Gfx/TransformStack.h>
+
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/ImagePainter2.h>
+
 #include <Pt/Gfx/PngReader.h>
 #include <Pt/Gfx/SvgReader.h>
 
@@ -114,7 +118,8 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_PATH_CLIPPING                 0 // (including path-based text)
 #define TEST_DRAW_EXTRA                         0 // (including path-based n-bezier)
 
-#define TEST_SCENE_GRAPH                        1
+#define TEST_SCENE_GRAPH                        0
+#define TEST_IMAGE_SCALING                      1
 #define TEST_SVG_READER                         0
 
 #define TEST_COMPARE_WITH_OLD_PAINTER           0 // (for some shapes only)
@@ -195,7 +200,9 @@ static const char* sfileDirXPrefix = "";
 #include "ImagePainterTest2_Draw_Path.cpp"
 #include "ImagePainterTest2_Draw_Extra.cpp"
 #include "ImagePainterTest2_SceneGraph.cpp"
+#include "ImagePainterTest2_ImageScaling.cpp"
 #include "ImagePainterTest2_SvgReader.cpp"
+
 #include "ImagePainterTest2_Benchmark.cpp"
 #include "ImagePainterTest2_Cairo.cpp"
 
@@ -568,6 +575,12 @@ int main(int argc, char* args[])
     if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && (TEST_SOURCECOPY || TEST_SOURCEOVER) && TEST_SCENE_GRAPH) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
         testSceneGraph("Scene Graph - ImagePainter2", image, *painter2);
+    }
+
+    // Image scaling
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && (TEST_SOURCECOPY || TEST_SOURCEOVER) && TEST_IMAGE_SCALING) {
+        painter2->setCompositionMode(CompositionMode::SourceCopy);
+        testImageScaling("Image Scaling - ImagePainter2", image, *painter2);
     }
 
     // Svg reader
