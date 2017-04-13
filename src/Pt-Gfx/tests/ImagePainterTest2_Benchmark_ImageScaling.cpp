@@ -31,10 +31,14 @@ static size_t benchImageScalingBilinear(int loopCount)
         Pt::System::Clock clock;
         clock.start();
 
+        GetPixelT::init();
+
         bilinearScale<GetPixelT>(
             textureWithWhiteBackground.begin(), textureWithWhiteBackground.width(), textureWithWhiteBackground.height(),
             scaledImage               .begin(), scaledImage               .width(), scaledImage               .height()
         );
+
+        GetPixelT::deinit();
 
         sum += clock.stop().toUSecs();
     }

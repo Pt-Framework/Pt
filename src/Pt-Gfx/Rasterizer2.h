@@ -62,7 +62,7 @@
 #define FIXED_POINT_FPART_TO_A8(V)  ( FIXED_POINT_FPART (V) >> 8 )
 #define FIXED_POINT_RFPART_TO_A8(V) ( FIXED_POINT_RFPART(V) >> 8 )
 #define FIXED_POINT_MUL_TO_A8(A, B) ( ( ( (Pt::uint32_t)(A) * (Pt::uint32_t)(B) + FIXED_POINT_FRACT_BITMASK ) >> FIXED_POINT_SHIFT_FACTOR ) )
-#define FIXED_POINT_FROM_FLT(V)     ( (V) * ( (float) FIXED_POINT_CONSTANT_ONE ) )
+#define FIXED_POINT_FROM_FLT(V)     ( Gfx::Math::zrint( ( (V) * ( (float) FIXED_POINT_CONSTANT_ONE ) ) ) )
 #define FIXED_POINT_FROM_INT(V)     ( (V) << FIXED_POINT_SHIFT_FACTOR )
 #define FIXED_POINT_TO_INT(V)       ( (V) >> FIXED_POINT_SHIFT_FACTOR )
 

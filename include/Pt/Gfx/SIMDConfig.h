@@ -51,8 +51,8 @@
         #define PT_GFX_USE_FMA3
         #define PT_GFX_USE_AVX2
         #define PT_GFX_USE_AVX1
-        #define PT_GFX_USE_SSSE4P2
-        #define PT_GFX_USE_SSSE4P1
+        #define PT_GFX_USE_SSE4P2
+        #define PT_GFX_USE_SSE4P1
         #define PT_GFX_USE_SSSE3
         #define PT_GFX_USE_SSE3
         #define PT_GFX_USE_SSE2
@@ -76,8 +76,8 @@
         #define PT_GFX_USE_FMA3
         #define PT_GFX_USE_AVX2
         #define PT_GFX_USE_AVX1
-        #define PT_GFX_USE_SSSE4P2
-        #define PT_GFX_USE_SSSE4P1
+        #define PT_GFX_USE_SSE4P2
+        #define PT_GFX_USE_SSE4P1
         #define PT_GFX_USE_SSSE3
         #define PT_GFX_USE_SSE3
         #define PT_GFX_USE_SSE2
@@ -99,8 +99,8 @@
 //#undef PT_GFX_USE_AVX2
 //#undef PT_GFX_USE_AVX1
 
-//#undef PT_GFX_USE_SSSE4P2
-//#undef PT_GFX_USE_SSSE4P1
+//#undef PT_GFX_USE_SSE4P2
+//#undef PT_GFX_USE_SSE4P1
 //#undef PT_GFX_USE_SSSE3
 //#undef PT_GFX_USE_SSE3
 //#undef PT_GFX_USE_SSE2
@@ -121,15 +121,15 @@
 #define PT_GFX_USE_AVX1
 #endif
 
-#if defined(PT_GFX_USE_AVX1) && !defined(PT_GFX_USE_SSSE4P2)
-#define PT_GFX_USE_SSSE4P2
+#if defined(PT_GFX_USE_AVX1) && !defined(PT_GFX_USE_SSE4P2)
+#define PT_GFX_USE_SSE4P2
 #endif
 
-#if defined(PT_GFX_USE_SSSE4P2) && !defined(PT_GFX_USE_SSSE4P1)
-#define PT_GFX_USE_SSSE4P1
+#if defined(PT_GFX_USE_SSE4P2) && !defined(PT_GFX_USE_SSE4P1)
+#define PT_GFX_USE_SSE4P1
 #endif
 
-#if defined(PT_GFX_USE_SSSE4P1) && !defined(PT_GFX_USE_SSSE3)
+#if defined(PT_GFX_USE_SSE4P1) && !defined(PT_GFX_USE_SSSE3)
 #define PT_GFX_USE_SSSE3
 #endif
 

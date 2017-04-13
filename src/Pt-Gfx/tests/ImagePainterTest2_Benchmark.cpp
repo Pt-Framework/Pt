@@ -328,13 +328,25 @@ static void doBenchmarkImageScaling()
         time1 = benchImageScalingBlock(BENCHMARK_LOOP_COUNT);
         std::clog << "    Image scaling (block    plain C)                 = " << std::setw(6) << time1 << std::endl;
         time1 = benchImageScalingBilinear<GetPixel_C     >(BENCHMARK_LOOP_COUNT);
-        std::clog << "    Image scaling (bilinear plain C)                 = " << std::setw(6) << time1 << std::endl;
+        std::clog << "    Image scaling (bilinear float C)                 = " << std::setw(6) << time1 << std::endl;
+        time2 = benchImageScalingBilinear<GetPixel_FP_C  >(BENCHMARK_LOOP_COUNT);
+        std::clog << "    Image scaling (bilinear fixed C)                 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+#if defined(PT_GFX_USE_SSE2)
         time2 = benchImageScalingBilinear<GetPixel_SSE2  >(BENCHMARK_LOOP_COUNT);
         std::clog << "    Image scaling (bilinear SSE 2  )                 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+#endif
+#if defined(PT_GFX_USE_SSE4P1)
         time2 = benchImageScalingBilinear<GetPixel_SSE4P1>(BENCHMARK_LOOP_COUNT);
         std::clog << "    Image scaling (bilinear SSE 4.1)                 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+#endif
+#if defined(PT_GFX_USE_NEON)
+        time2 = benchImageScalingBilinear<GetPixel_SSE2  >(BENCHMARK_LOOP_COUNT);
+        std::clog << "    Image scaling (bilinear NEON   )                 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+#endif
         if(!BENCHMARK_RESULT_HTML) std::clog << std::endl;
     }
 }
