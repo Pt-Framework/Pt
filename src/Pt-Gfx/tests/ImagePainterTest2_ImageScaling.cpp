@@ -264,7 +264,7 @@ static void testImageScaling(const char* title, Image& image, Painter& painter)
     x += textureWithWhiteBackground.width() + 20;
 
     // Scaled image (block scale)
-    Image scaledImage( image.format(), Size(120, 120) );
+    Image scaledImage( textureWithWhiteBackground.format(), Size(120, 120) );
 
     blockScale(
         textureWithWhiteBackground.begin(), textureWithWhiteBackground.width(), textureWithWhiteBackground.height(),
@@ -305,3 +305,4 @@ static void testImageScaling(const char* title, Image& image, Painter& painter)
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }
+

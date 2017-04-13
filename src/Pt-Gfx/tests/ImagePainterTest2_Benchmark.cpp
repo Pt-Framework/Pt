@@ -11,6 +11,8 @@
 #include "ImagePainterTest2_Benchmark_Thick.cpp"
 #include "ImagePainterTest2_Benchmark_Path.cpp"
 
+#include "ImagePainterTest2_Benchmark_ImageScaling.cpp"
+
 static void doBenchmark(CompositionMode cm)
 {
     double time1, time2;
@@ -308,7 +310,31 @@ static void doBenchmark(CompositionMode cm)
         std::clog << "    Path NOAA (28 SHAPES, /W RASTER) @ ImagePainter2 = " << std::setw(6) << time1 << std::endl;
         time2 = benchDrawPath<ImagePainter2, true >(BENCHMARK_LOOP_COUNT, bmBrushGradientH, bmBrushTextureT, cm, AntiAliasingMode::Default);
         std::clog << "    Path XWAA (28 SHAPES, /W RASTER) @ ImagePainter2 = " << std::setw(6) << time2
-                 << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        std::clog << std::endl;
+    }
+
+}
+
+static void doBenchmarkImageScaling()
+{
+    double time1, time2;
+
+    std::clog << "                                                       (Time) (Factor)" << std::endl;
+    std::clog << "                                                       ------ --------" << std::endl;
+
+    // Image scaling
+    if(BENCHMARK_RESULT_HTML || BENCHMARK_IMAGE_SCALING) {
+        time1 = benchImageScalingBlock(BENCHMARK_LOOP_COUNT);
+        std::clog << "    Image scaling (block    plain C)                 = " << std::setw(6) << time1 << std::endl;
+        time1 = benchImageScalingBilinear<GetPixel_C     >(BENCHMARK_LOOP_COUNT);
+        std::clog << "    Image scaling (bilinear plain C)                 = " << std::setw(6) << time1 << std::endl;
+        time2 = benchImageScalingBilinear<GetPixel_SSE2  >(BENCHMARK_LOOP_COUNT);
+        std::clog << "    Image scaling (bilinear SSE 2  )                 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time2 = benchImageScalingBilinear<GetPixel_SSE4P1>(BENCHMARK_LOOP_COUNT);
+        std::clog << "    Image scaling (bilinear SSE 4.1)                 = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         if(!BENCHMARK_RESULT_HTML) std::clog << std::endl;
     }
 }

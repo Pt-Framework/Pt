@@ -88,7 +88,7 @@ using namespace Pt::Gfx;
 
 // General settings for Pt-Gfx
 #define DO_TEST_DRAW    1
-#define DO_BENCHMARKING 0
+#define DO_BENCHMARKING 1
 
 // Detailed-test enable settings for Pt-Gfx
 #define TEST_SOURCECOPY                         1
@@ -166,7 +166,8 @@ using namespace Pt::Gfx;
 #define BENCHMARK_GRADIENT_FILLED_ARC       0
 #define BENCHMARK_TEXTURE_FILLED_ARC        0
 
-#define BENCHMARK_PATH                      1
+#define BENCHMARK_PATH                      0
+#define BENCHMARK_IMAGE_SCALING             1
 
 // Configurations and objects
 #define FONT_DIR    "../src/Pt-Gfx/fonts"
@@ -650,6 +651,9 @@ int main(int argc, char* args[])
 
         if(!BENCHMARK_RESULT_HTML || !BENCHMARK_RESULT_HTML_SIDE_BY_SIDE) std::clog << "Pt::Gfx - CompositionMode::SourceOver" << std::endl;
         doBenchmark(CompositionMode::SourceOver);
+
+        if(!BENCHMARK_RESULT_HTML || !BENCHMARK_RESULT_HTML_SIDE_BY_SIDE) std::clog << "Pt::Gfx - Image Scaling" << std::endl;
+        doBenchmarkImageScaling();
 
         if(BENCHMARK_RESULT_HTML && BENCHMARK_RESULT_HTML_SIDE_BY_SIDE) {
             std::clog << "    </td><td>&nbsp;&nbsp;&nbsp;</td>" << std::endl;
