@@ -532,6 +532,18 @@ void ListBox::setRenderer(ListBoxRenderer* renderer)
 }
 
 
+void ListBox::scrollX(int xpos)
+{
+    _scrollView.scrollX(xpos);
+}
+
+
+void ListBox::scrollY(int ypos)
+{
+    _scrollView.scrollY(ypos);
+}
+
+
 int ListBox::maximumX() const
 {
     return _scrollView.maximumX() + _scrollView.margin().leftRight();

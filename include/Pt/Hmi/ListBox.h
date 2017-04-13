@@ -194,6 +194,10 @@ class PT_HMI_API ListBox : public Control
 
         Pt::Signal<ListBoxItem&>& selected();
 
+        void scrollX(int xpos);
+
+        void scrollY(int ypos);
+
         int maximumX() const;
 
         int maximumY() const;

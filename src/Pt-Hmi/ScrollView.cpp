@@ -90,6 +90,18 @@ void ScrollView::setContentMode(SizePolicy::Mode horizontal,
 }
 
 
+void ScrollView::scrollX(int xpos)
+{
+    _scrollLayout.scrollX(xpos);
+}
+
+
+void ScrollView::scrollY(int ypos)
+{
+    _scrollLayout.scrollY(ypos);
+}
+
+
 int ScrollView::maximumX() const
 {
     return _scrollLayout.maximumX();
