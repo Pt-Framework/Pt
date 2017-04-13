@@ -165,7 +165,13 @@ class PT_GFX_API Pen
         */
         JoinStyle joinStyle() const;
 
+        /** @brief Returns true if the pen is null.
+        */
         bool isNull() const;
+
+        /** @brief Compare pens.
+        */
+        bool operator==(const Pen& pen) const;
 
     private:
       SmartPtr<PenData> _penData;
@@ -183,7 +189,7 @@ class PT_GFX_API PenData
       , _userPattern(userPattern)
       , _capStyle(cap)
       , _joinStyle(join)
-      { }
+      {}
 
       void setColor(const Color& color)
       { _color = color; }
@@ -220,6 +226,16 @@ class PT_GFX_API PenData
 
       Pen::JoinStyle joinStyle() const
       { return _joinStyle; }
+
+      bool operator==(const PenData& pd) const
+      {
+          return _color       == pd._color       &&
+                 _size        == pd._size        &&
+                 _style       == pd._style       &&
+                 _userPattern == pd._userPattern &&
+                 _capStyle    == pd._capStyle    &&
+                 _joinStyle   == pd._joinStyle;
+      }
 
   private:
       inline PenData() {} // Does nothing

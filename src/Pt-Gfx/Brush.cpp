@@ -1,6 +1,6 @@
 /* Copyright (C) 2006-2015 Laurentiu-Gheorghe Crisan
  * Copyright (C) 2006-2015 Marc Boris Duerner
- * Copyright (C) 2010 Aloysius Indrayanto
+ * Copyright (C) 2017-2017 Aloysius Indrayanto
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -37,15 +37,13 @@ namespace Gfx {
 
 Brush::Brush()
 : _brushData( new BrushData() )
-{
-}
-
+{}
 
 void Brush::setSolidColor(const Color& color)
 {
     // COW
     if(_brushData.refs() > 1) {
-        SmartPtr<BrushData> brushData(new BrushData);
+        SmartPtr<BrushData> brushData( new BrushData() );
         *brushData = *_brushData;
         _brushData = brushData;
     }
@@ -53,42 +51,29 @@ void Brush::setSolidColor(const Color& color)
     _brushData->setSolidColor(color);
 }
 
-
 Brush::Brush(const Color& color)
 : _brushData( new BrushData(color) )
-{
-}
-
+{}
 
 Brush::Brush(const Image& texture, Pt::int32_t offsetX, Pt::int32_t offsetY)
 : _brushData( new BrushData(texture, offsetX, offsetY) )
-{
-}
-
+{}
 
 Brush::Brush(const Color& from, const Color& to, GradientDirection g, float rotDeg, float scale, Pt::int32_t ofsX, Pt::int32_t ofsY)
 : _brushData( new BrushData(from, to, g, rotDeg, scale, ofsX, ofsY) )
-{
-}
-
+{}
 
 Brush::FillStyle Brush::fillStyle() const
-{
-    return _brushData->fillStyle();
-}
-
+{ return _brushData->fillStyle(); }
 
 const Color& Brush::color() const
-{
-    return _brushData->color();
-}
-
+{ return _brushData->color(); }
 
 void Brush::setGradient(const Color& from, const Color& to, GradientDirection g, float rotDeg, float scale, Pt::int32_t ofsX, Pt::int32_t ofsY)
 {
     // COW
     if(_brushData.refs() > 1) {
-        SmartPtr<BrushData> brushData(new BrushData);
+        SmartPtr<BrushData> brushData( new BrushData() );
         *brushData = *_brushData;
         _brushData = brushData;
     }
@@ -96,14 +81,13 @@ void Brush::setGradient(const Color& from, const Color& to, GradientDirection g,
     _brushData->setGradient(from, to, g, rotDeg, scale, ofsX, ofsY);
 }
 
-
 void Brush::setGradientRotation(float rotDeg)
 {
-    if(!_brushData->isGradient()) throw std::logic_error("brush error: not a gradient");
+    if(!_brushData->isGradient2D()) throw std::logic_error("brush error: not a 2D gradient");
 
     // COW
     if(_brushData.refs() > 1) {
-        SmartPtr<BrushData> brushData(new BrushData);
+        SmartPtr<BrushData> brushData( new BrushData() );
         *brushData = *_brushData;
         _brushData = brushData;
     }
@@ -111,14 +95,13 @@ void Brush::setGradientRotation(float rotDeg)
     _brushData->setGradientRotation(rotDeg);
 }
 
-
 void Brush::setGradientScale(float scale)
 {
-    if(!_brushData->isGradient()) throw std::logic_error("brush error: not a gradient");
+    if(!_brushData->isGradient2D()) throw std::logic_error("brush error: not a 2D gradient");
 
     // COW
     if(_brushData.refs() > 1) {
-        SmartPtr<BrushData> brushData(new BrushData);
+        SmartPtr<BrushData> brushData( new BrushData() );
         *brushData = *_brushData;
         _brushData = brushData;
     }
@@ -126,14 +109,13 @@ void Brush::setGradientScale(float scale)
     _brushData->setGradientScale(scale);
 }
 
-
 void Brush::setGradientOffset(Pt::int32_t ofsX, Pt::int32_t ofsY)
 {
     if(!_brushData->isGradient()) throw std::logic_error("brush error: not a gradient");
 
     // COW
     if(_brushData.refs() > 1) {
-        SmartPtr<BrushData> brushData(new BrushData);
+        SmartPtr<BrushData> brushData( new BrushData() );
         *brushData = *_brushData;
         _brushData = brushData;
     }
@@ -141,18 +123,14 @@ void Brush::setGradientOffset(Pt::int32_t ofsX, Pt::int32_t ofsY)
     _brushData->setGradientOffset(ofsX, ofsY);
 }
 
-
 const Color& Brush::gradientColor() const
-{
-    return _brushData->gradientColor();
-}
-
+{ return _brushData->gradientColor(); }
 
 void Brush::setTexture(const Image& texture, Pt::int32_t offsetX, Pt::int32_t offsetY)
 {
     // COW
     if(_brushData.refs() > 1) {
-        SmartPtr<BrushData> brushData(new BrushData);
+        SmartPtr<BrushData> brushData( new BrushData() );
         *brushData = *_brushData;
         _brushData = brushData;
     }
@@ -160,78 +138,40 @@ void Brush::setTexture(const Image& texture, Pt::int32_t offsetX, Pt::int32_t of
     _brushData->setTexture(texture, offsetX, offsetY);
 }
 
-
 const Image& Brush::texture() const
-{
-    return _brushData->texture();
-}
-
+{ return _brushData->texture(); }
 
 float Brush::rotation() const
-{
-    return _brushData->rotation();
-}
-
+{ return _brushData->rotation(); }
 
 float Brush::scale() const
-{
-    return _brushData->scale();
-}
-
+{ return _brushData->scale(); }
 
 Pt::int32_t Brush::offsetX() const
-{
-    return _brushData->offsetX();
-}
-
+{ return _brushData->offsetX(); }
 
 Pt::int32_t Brush::offsetY() const
-{
-    return _brushData->offsetY();
-}
-
+{ return _brushData->offsetY(); }
 
 bool Brush::isGradient() const
-{
-    return _brushData->isGradient();
-}
-
+{ return _brushData->isGradient(); }
 
 bool Brush::isNull() const
-{
-    return _brushData->isNull();
-}
+{ return _brushData->isNull(); }
 
+bool Brush::operator==(const Brush& brush) const
+{ return *_brushData == *brush._brushData; }
 
-BrushData::BrushData()
-: _fillStyle(Brush::Solid)
-, _color    (0, 0, 0)
-, _isNull   (true)
-{
-}
-
-
-BrushData::BrushData(const Color& color)
-: _fillStyle(Brush::Solid)
-, _color    (color)
-, _texture  ()
-, _isNull   (false)
-{
-}
-
-
-BrushData::BrushData(const Image& texture, Pt::int32_t offsetX, Pt::int32_t offsetY)
-{ setTexture(texture, offsetX, offsetY); }
 
 
 BrushData::BrushData(const Color& from, const Color& to, Brush::GradientDirection g, float rotDeg, float scale, Pt::int32_t ofsX, Pt::int32_t ofsY)
-: _color        (from)
+: _isNull       (false)
+, _color        (from)
 , _gradientColor(to)
 , _rotDeg       (rotDeg)
 , _scale        (scale)
 , _ofsX         (ofsX)
 , _ofsY         (ofsY)
-, _isNull       (false)
 {
     switch(g) {
         case Brush::Horizontal  : _fillStyle = Brush::HorizontalGradient;  break;
@@ -243,34 +183,6 @@ BrushData::BrushData(const Color& from, const Color& to, Brush::GradientDirectio
         default                 : _fillStyle = Brush::Solid;               break;
     }
 }
-
-
-BrushData::~BrushData()
-{
-}
-
-
-Brush::FillStyle BrushData::fillStyle() const
-{
-    return _fillStyle;
-}
-
-
-void BrushData::setSolidColor(const Color& color)
-{
-    _fillStyle = Brush::Solid;
-    _color     = color;
-    _isNull    = false;
-
-    _texture   = Image();
-}
-
-
-const Color& BrushData::color() const
-{
-    return _color;
-}
-
 
 void BrushData::setGradient(const Color& from, const Color& to, Brush::GradientDirection g, float rotDeg, float scale, Pt::int32_t ofsX, Pt::int32_t ofsY)
 {
@@ -294,32 +206,6 @@ void BrushData::setGradient(const Color& from, const Color& to, Brush::GradientD
 
     _texture       = Image();
 }
-
-
-void BrushData::setGradientRotation(float rotDeg)
-{
-    _rotDeg = rotDeg;
-}
-
-
-void BrushData::setGradientScale(float scale)
-{
-    _scale = scale;
-}
-
-
-void BrushData::setGradientOffset(Pt::int32_t ofsX, Pt::int32_t ofsY)
-{
-    _ofsX = ofsX;
-    _ofsY = ofsY;
-}
-
-
-const Color& BrushData::gradientColor() const
-{
-    return _gradientColor;
-}
-
 
 void BrushData::setTexture(const Image& texture, Pt::int32_t offsetX, Pt::int32_t offsetY)
 {
@@ -438,48 +324,6 @@ void BrushData::setTexture(const Image& texture, Pt::int32_t offsetX, Pt::int32_
     _ofsX      = offsetX;
     _ofsY      = offsetY;
     _isNull    = false;
-}
-
-
-const Image& BrushData::texture() const
-{
-    return _texture;
-}
-
-
-float BrushData::rotation() const
-{
-    return _rotDeg;
-}
-
-
-float BrushData::scale() const
-{
-    return _scale;
-}
-
-
-Pt::int32_t BrushData::offsetX() const
-{
-    return _ofsX;
-}
-
-
-Pt::int32_t BrushData::offsetY() const
-{
-    return _ofsY;
-}
-
-
-bool BrushData::isGradient() const
-{
-    return (_fillStyle != Brush::Solid) && (_fillStyle != Brush::Texture);
-}
-
-
-bool BrushData::isNull() const
-{
-    return _isNull;
 }
 
 

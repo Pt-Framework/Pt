@@ -34,13 +34,14 @@
 #include <Pt/Gfx/Api.h>
 #include <Pt/String.h>
 
-namespace Pt {
 
+namespace Pt {
 namespace Gfx {
+
 
 class Color
 {
-      public:
+    public:
         Color()
         : _a(65535)
         , _r(0)
@@ -62,45 +63,45 @@ class Color
         , _b(b)
         { }
 
-            Pt::uint16_t alpha() const
-            {
-                  return _a;
-            }
+        Pt::uint16_t alpha() const
+        {
+              return _a;
+        }
 
-            Pt::uint16_t red() const
-            {
-                  return _r;
-            }
+        Pt::uint16_t red() const
+        {
+              return _r;
+        }
 
-            Pt::uint16_t green() const
-            {
-                  return _g;
-            }
+        Pt::uint16_t green() const
+        {
+              return _g;
+        }
 
-            Pt::uint16_t blue() const
-            {
-                  return _b;
-            }
+        Pt::uint16_t blue() const
+        {
+              return _b;
+        }
 
-            void setAlpha( Pt::uint16_t c)
-            {
-                  _a = c;
-            }
+        void setAlpha( Pt::uint16_t c)
+        {
+              _a = c;
+        }
 
-            void setRed( Pt::uint16_t c)
-            {
-                  _r = c;
-            }
+        void setRed( Pt::uint16_t c)
+        {
+              _r = c;
+        }
 
-            void setGreen( Pt::uint16_t c)
-            {
-                  _g = c;
-            }
+        void setGreen( Pt::uint16_t c)
+        {
+              _g = c;
+        }
 
-            void setBlue( Pt::uint16_t c)
-            {
-                  _b = c;
-            }
+        void setBlue( Pt::uint16_t c)
+        {
+              _b = c;
+        }
 
         Color toGray() const
         {
@@ -123,15 +124,20 @@ class Color
             return Color(a * 257, r * 257, g * 257, b * 257);
         }
 
-      private:
-            Pt::uint16_t _a;
-            Pt::uint16_t _r;
-            Pt::uint16_t _g;
-            Pt::uint16_t _b;
+        bool operator==(const Color& c) const
+        {
+            return _a == c._a && _r == c._r && _g == c._g && _b == c._b;
+        }
+
+    private:
+        Pt::uint16_t _a;
+        Pt::uint16_t _r;
+        Pt::uint16_t _g;
+        Pt::uint16_t _b;
 };
 
-} // namespace
 
+} // namespace
 } // namespace
 
 #endif

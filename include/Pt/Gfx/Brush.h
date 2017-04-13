@@ -1,5 +1,5 @@
 /* Copyright (C) 2006-2016 Marc Boris Duerner
-   Copyright (C) 2010 Aloysius Indrayanto
+   Copyright (C) 2017-2017 Aloysius Indrayanto
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -110,6 +110,8 @@ class PT_GFX_API Brush
 
         bool isNull() const;
 
+        bool operator==(const Brush& brush) const;
+
     private:
         SmartPtr<BrushData> _brushData;
 };
@@ -118,58 +120,127 @@ class PT_GFX_API Brush
 class BrushData
 {
     public:
-        BrushData();
+        BrushData()
+        : _isNull   (true)
+        , _fillStyle(Brush::Solid)
+        , _color    (0, 0, 0)
+        {}
 
-        BrushData(const Color& color);
+        BrushData(const Color& color)
+        : _isNull   (false)
+        , _fillStyle(Brush::Solid)
+        , _color    (color)
+        , _texture  ()
+        {}
 
-        BrushData(const Image& texture, Pt::int32_t offsetX, Pt::int32_t offsetY);
+        BrushData(const Image& texture, Pt::int32_t offsetX, Pt::int32_t offsetY)
+        { setTexture(texture, offsetX, offsetY); }
 
         BrushData(const Color& from, const Color& to, Brush::GradientDirection g, float rotDeg, float scale, Pt::int32_t ofsX, Pt::int32_t ofsY);
 
-        ~BrushData();
+        ~BrushData()
+        {}
 
-        Brush::FillStyle fillStyle() const;
+        Brush::FillStyle fillStyle() const
+        { return _fillStyle; }
 
-        void setSolidColor(const Color& color);
+        void setSolidColor(const Color& color)
+        {
+            _fillStyle = Brush::Solid;
+            _color     = color;
+            _isNull    = false;
 
-        const Color& color() const;
+            _texture   = Image();
+        }
+
+        const Color& color() const
+        { return _color; }
 
         void setGradient(const Color& from, const Color& to, Brush::GradientDirection g, float rotDeg, float scale, Pt::int32_t ofsX, Pt::int32_t ofsY);
 
-        void setGradientRotation(float rotDeg);
+        void setGradientRotation(float rotDeg)
+        { _rotDeg = rotDeg; }
 
-        void setGradientScale(float scale);
+        void setGradientScale(float scale)
+        { _scale = scale; }
 
-        void setGradientOffset(Pt::int32_t ofsX, Pt::int32_t ofsY);
+        void setGradientOffset(Pt::int32_t ofsX, Pt::int32_t ofsY)
+        {
+            _ofsX = ofsX;
+            _ofsY = ofsY;
+        }
 
-        const Color& gradientColor() const;
+        const Color& gradientColor() const
+        { return _gradientColor; }
 
         void setTexture(const Image& texture, Pt::int32_t offsetX, Pt::int32_t offsetY);
 
-        const Image& texture() const;
+        const Image& texture() const
+        { return _texture; }
 
-        float rotation() const;
+        float rotation() const
+        { return _rotDeg; }
 
-        float scale() const;
+        float scale() const
+        { return _scale; }
 
-        Pt::int32_t offsetX() const;
+        Pt::int32_t offsetX() const
+        { return _ofsX; }
 
-        Pt::int32_t offsetY() const;
+        Pt::int32_t offsetY() const
+        { return _ofsY; }
 
-        bool isGradient() const;
+        bool isGradient() const
+        {
+            return (_fillStyle != Brush::Solid  ) &&
+                   (_fillStyle != Brush::Texture);
+        }
 
-        bool isNull() const;
+        bool isGradient1D() const
+        {
+            return (_fillStyle != Brush::Solid              ) &&
+                   (_fillStyle != Brush::Texture            ) &&
+                   (_fillStyle != Brush::LinearGradient     ) &&
+                   (_fillStyle != Brush::RectangularGradient) &&
+                   (_fillStyle != Brush::RadialGradient     ) &&
+                   (_fillStyle != Brush::ConicalGradient    );
+        }
+
+        bool isGradient2D() const
+        {
+            return (_fillStyle != Brush::Solid             ) &&
+                   (_fillStyle != Brush::Texture           ) &&
+                   (_fillStyle != Brush::HorizontalGradient) &&
+                   (_fillStyle != Brush::VerticalGradient  );
+        }
+
+        bool isNull() const
+        { return _isNull; }
+
+        bool operator==(const BrushData& bd) const
+        {
+          return _isNull        == bd._isNull        &&
+                 _fillStyle     == bd._fillStyle     &&
+                 _color         == bd._color         &&
+                 _gradientColor == bd._gradientColor &&
+                 _rotDeg        == bd._rotDeg        &&
+                 _scale         == bd._scale         &&
+                 _ofsX          == bd._ofsX          &&
+                 _ofsY          == bd._ofsY          &&
+                 _rotDeg        == bd._rotDeg        &&
+                 _texture       == bd._texture;
+        }
 
     private:
+        bool             _isNull;
         Brush::FillStyle _fillStyle;
         Color            _color;
-        Image            _texture;
         Color            _gradientColor;
         float            _rotDeg;
         float            _scale;
         Pt::int32_t      _ofsX;
         Pt::int32_t      _ofsY;
-        bool             _isNull;
+        Image            _texture;
 };
 
 
