@@ -343,7 +343,7 @@ static void doBenchmarkImageScaling()
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
 #endif
 #if defined(PT_GFX_USE_NEON)
-        time2 = benchImageScalingBilinear<GetPixel_SSE2  >(BENCHMARK_LOOP_COUNT);
+        time2 = benchImageScalingBilinear<GetPixel_NEON  >(BENCHMARK_LOOP_COUNT);
         std::clog << "    Image scaling (bilinear NEON   )                 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
 #endif

@@ -74,7 +74,6 @@
 #undef None
 #endif
 
-
 using namespace Pt::Gfx;
 
 // Benchmark mathematical functions only
@@ -167,7 +166,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_GRADIENT_FILLED_ARC       0
 #define BENCHMARK_TEXTURE_FILLED_ARC        0
 
-#define BENCHMARK_PATH                      1
+#define BENCHMARK_PATH                      0
 #define BENCHMARK_IMAGE_SCALING             1
 
 // Configurations and objects

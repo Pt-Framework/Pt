@@ -315,18 +315,41 @@ struct GetPixel_SSE4P1 {
 
 #if defined(PT_GFX_USE_NEON)
 
-//static const __m128 sseFour001 = _mm_set1_ps(  1);
-//static const __m128 sseFour256 = _mm_set1_ps(256);
+static const float32x4_t neonFour001 = NEON_SET_FLT32X4(  1,   1,   1,   1);
+static const float32x4_t neonFour256 = NEON_SET_FLT32X4(256, 256, 256, 256);
 
 inline float32x4_t calcWeight_NEON(float x, float y)
 {
-    return (float32x4_t) 0;
+     return (float32x4_t) { 0, 0, 0, 0 };
+
+/*
+     const float32x4_t   psXY      = NEON_SET_FLT32X4(0, 0, y, x                                  ); // 0 0 Y X
+     const int32x4_t     psXYi     = vcvtq_f32_s32   (psXY                                         );
+
+     const float32x4_t   psXYfloor = vcvtq_s32_f32   (psXYi                                        );
+     const float32x4_t   psXYfrac  = vsubq_f32       (psXY,        psXYfloor                        );
+
+     const float32x4_t   psXYfrac1 = vsubq_f32       (neonFour001, psXYfrac                         ); // ? ?     (1-Y) (1-X)
+
+
+     const float32x2x2_t wxh2     = vzip_f32(vget_low_f32(psXYfrac1), vget_low_f32(psXYfrac));
+     const float32x4_t   wxh       = vcombine_f32(wxh2.val[0], wxh2.val[1]);
+
+
+   //  const float32x4_t  wx        = _mm_movelh_ps  (wxh,        wxh                              ); // X (1-X) X     (1-X)
+    // const float32x4_t  wy        = _mm_shuffle_ps (psXYfrac1,  psXYfrac, _MM_SHUFFLE(1, 1, 1, 1)); // Y Y     (1-Y) (1-Y)
+
+     // Return the complete weight vector
+     return _mm_mul_ps(wx, wy);
+*/
+
      /*
      const __m128  ssx       = _mm_set_ss     (x                                            );
      const __m128  ssy       = _mm_set_ss     (y                                            );
      const __m128  psXY      = _mm_unpacklo_ps(ssx,        ssy                              ); // 0 0 Y X
 
-     const __m128  psXYfloor = _mm_floor_ps   (psXY                                         );
+     const __m128i psXYi     = _mm_cvtps_epi32(psXY                                         );
+     const __m128  psXYfloor = _mm_cvtepi32_ps(psXYi                                        );
      const __m128  psXYfrac  = _mm_sub_ps     (psXY,       psXYfloor                        );
 
      const __m128  psXYfrac1 = _mm_sub_ps     (sseFour001, psXYfrac                         ); // ? ?     (1-Y) (1-X)
@@ -342,6 +365,7 @@ inline float32x4_t calcWeight_NEON(float x, float y)
 inline Pt::int32_t getPixel_NEON(const Pt::int32_t* img, Pt::ssize_t imageWidth, float x, float y)
 {
     return 0;
+
     /*
     // Floor the coordinate
     const Pt::int32_t px = Pt::Gfx::Math::zfint(x);
@@ -351,40 +375,43 @@ inline Pt::int32_t getPixel_NEON(const Pt::int32_t* img, Pt::ssize_t imageWidth,
     const Pt::int32_t* p0 = img + py * imageWidth + px;
 
     // Load the four neighboring pixels
-    const __m128i p12     = _mm_loadl_epi64    ( (const __m128i*) &p0[0 * imageWidth] );
-    const __m128i p34     = _mm_loadl_epi64    ( (const __m128i*) &p0[1 * imageWidth] );
-
-    // Convert RGBA RGBA RGBA RGAB to RRRR GGGG BBBB AAAA (AoS to SoA)
-    const __m128i p1234   = _mm_unpacklo_epi8  (p12,     p34                    );
-    const __m128i p34xx   = _mm_unpackhi_epi64 (p1234,   _mm_setzero_si128()    );
-    const __m128i p1234b  = _mm_unpacklo_epi8  (p1234,   p34xx                  );
+    const __m128i p12h    = _mm_loadl_epi64    ( (const __m128i*) &p0[0 * imageWidth] );
+    const __m128i p34h    = _mm_loadl_epi64    ( (const __m128i*) &p0[1 * imageWidth] );
 
     // Extend to 16-bit
-    const __m128i pRG     = _mm_unpacklo_epi8  (p1234b,  _mm_setzero_si128()    );
-    const __m128i pBA     = _mm_unpackhi_epi8  (p1234b,  _mm_setzero_si128()    );
+    const __m128i p12     = _mm_unpacklo_epi8  (p12h,    _mm_setzero_si128()    );
+    const __m128i p34     = _mm_unpacklo_epi8  (p34h,    _mm_setzero_si128()    );
 
     // Calculate weights
-    const __m128  weight  = calcWeight_SSE4P1  (x,       y                      );
+    const __m128  weight  = calcWeight_SSE2    (x,       y                      );
 
     // Convert floating point weights to 16-bit integer
     const __m128  weights = _mm_mul_ps         (weight,  sseFour256             );
     const __m128i weighti = _mm_cvtps_epi32    (weights                         ); // W4 W3 W2 W1
-    const __m128i weightd = _mm_packs_epi32    (weighti, weighti                ); // 32-bit to 2x 16-bit
+    const __m128i weighth = _mm_packs_epi32    (weighti, _mm_setzero_si128()    ); // 32-bit to 16-bit
+
+     // Prepare the weights
+    const __m128i w12h    = _mm_shufflelo_epi16(weighth, _MM_SHUFFLE(1, 1, 0, 0));
+    const __m128i w12     = _mm_unpacklo_epi16 (w12h,    w12h                   ); // W2 W2 W2 W2 W1 W1 W1 W1
+
+    const __m128i w34h    = _mm_shufflelo_epi16(weighth, _MM_SHUFFLE(3, 3, 2, 2));
+    const __m128i w34     = _mm_unpacklo_epi16 (w34h,    w34h                   ); // W4 W4 W4 W4 W3 W3 W3 W3
 
     // Multiply each pixel with its weight
-    const __m128i outRG   = _mm_madd_epi16     (pRG,     weightd                ); // [W1*R1 + W2*R2 | W3*R3 + W4*R4 | W1*G1 + W2*G2 | W3*G3 + W4*G4]
-    const __m128i outBA   = _mm_madd_epi16     (pBA,     weightd                ); // [W1*B1 + W2*B2 | W3*B3 + W4*B4 | W1*A1 + W2*A2 | W3*A3 + W4*A4]
+    const __m128i L12     = _mm_mullo_epi16    (p12,     w12                    );
+    const __m128i L34     = _mm_mullo_epi16    (p34,     w34                    );
 
-    // Horizontal add that will produce the output values (in 32-bit)
-    const __m128i out     = _mm_hadd_epi32     (outRG,   outBA                  );
-    const __m128i out32   = _mm_srli_epi32     (out,     8                      ); // Divide by 256
+    // Add the results
+    const __m128i L1234   = _mm_add_epi16      (L12,     L34                    );
+    const __m128i Lhi     = _mm_shuffle_epi32  (L1234,   _MM_SHUFFLE(3, 2, 3, 2));
+    const __m128i L       = _mm_add_epi16      (L1234,   Lhi                    );
 
-    // Convert 32-bit to 8-bit
-    const __m128i out16   = _mm_packus_epi32   (out32,   _mm_setzero_si128()    );
-    const __m128i out8    = _mm_packus_epi16   (out16,   _mm_setzero_si128()    );
+    // Convert back to 8-bit
+    const __m128i L8h     = _mm_srli_epi16     (L,       8                      ); // Divide by 256
+    const __m128i L8      = _mm_packus_epi16   (L8h,     _mm_setzero_si128()    );
 
     // Return the result
-    return _mm_cvtsi128_si32(out8);
+    return _mm_cvtsi128_si32(L8);
     */
 }
 
@@ -507,12 +534,12 @@ static void testImageScaling(const char* title, Image& image, Painter& painter)
 
 #if defined(PT_GFX_USE_NEON)
     // Scaled image (bilinear scale) - NEON
-    GetPixel_SSE2::init();
+    GetPixel_NEON::init();
     bilinearScale<GetPixel_NEON>(
         textureWithWhiteBackground.begin(), textureWithWhiteBackground.width(), textureWithWhiteBackground.height(),
         scaledImage               .begin(), scaledImage               .width(), scaledImage               .height()
     );
-    GetPixel_SSE2::deinit();
+    GetPixel_NEON::deinit();
     painter.drawImage(PointF(x, y), scaledImage);
     painter.drawText( PointF(x, y + scaledImage.height() + 20), "Bilinear - NEON" );
     x += scaledImage.width() + 20;
