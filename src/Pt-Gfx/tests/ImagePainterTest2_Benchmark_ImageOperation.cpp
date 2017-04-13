@@ -20,7 +20,6 @@ static size_t benchImageScalingBlock(int loopCount)
     return sum;
 }
 
-template <typename GetPixelT>
 static size_t benchImageScalingBilinear(int loopCount)
 {
     size_t sum = 0;
@@ -31,14 +30,10 @@ static size_t benchImageScalingBilinear(int loopCount)
         Pt::System::Clock clock;
         clock.start();
 
-        GetPixelT::init();
-
-        bilinearScale<GetPixelT>(
+        bilinearScale(
             textureWithWhiteBackground.begin(), textureWithWhiteBackground.width(), textureWithWhiteBackground.height(),
             scaledImage               .begin(), scaledImage               .width(), scaledImage               .height()
         );
-
-        GetPixelT::deinit();
 
         sum += clock.stop().toUSecs();
     }

@@ -1135,10 +1135,6 @@ void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
 
 void Path::clipPolygon(std::vector<PointF>& result, const std::vector<PointF>& subject, const std::vector<PointF>& clipRegion, ClipMode cm)
 {
-    // Scaling factors
-    const double mmFac = 64.0;
-    const double imFac =  0.015625; // (1.0 / 64.0)
-
     // Working variables
     ClipperLib::Clipper clipper;
     ClipperLib::Path    cpath;
@@ -1155,8 +1151,8 @@ void Path::clipPolygon(std::vector<PointF>& result, const std::vector<PointF>& s
             // Append the polygon to the clipper
             cpath.resize(curPC);
             for(size_t j = 0; j < curPC; ++j) {
-                cpath[j].X = Gfx::Math::zrint( clipRegion[startIndex + j].x() * mmFac );
-                cpath[j].Y = Gfx::Math::zrint( clipRegion[startIndex + j].y() * mmFac );
+                cpath[j].X = Gfx::Math::zrint( clipRegion[startIndex + j].x() * Gfx::Math::VecResScaleUp );
+                cpath[j].Y = Gfx::Math::zrint( clipRegion[startIndex + j].y() * Gfx::Math::VecResScaleUp );
             }
             clipper.AddPath(cpath, ClipperLib::ptClip, true);
             // Increment the start index
@@ -1174,8 +1170,8 @@ void Path::clipPolygon(std::vector<PointF>& result, const std::vector<PointF>& s
             // Append the polygon to the clipper
             cpath.resize(curPC);
             for(size_t j = 0; j < curPC; ++j) {
-                cpath[j].X = Gfx::Math::zrint( subject[startIndex + j].x() * mmFac );
-                cpath[j].Y = Gfx::Math::zrint( subject[startIndex + j].y() * mmFac );
+                cpath[j].X = Gfx::Math::zrint( subject[startIndex + j].x() * Gfx::Math::VecResScaleUp );
+                cpath[j].Y = Gfx::Math::zrint( subject[startIndex + j].y() * Gfx::Math::VecResScaleUp );
             }
             clipper.AddPath(cpath, ClipperLib::ptSubject, cpath[0] == cpath.back());
             // Increment the start index
@@ -1212,7 +1208,10 @@ void Path::clipPolygon(std::vector<PointF>& result, const std::vector<PointF>& s
         const ClipperLib::Path& curPath = cpresult[i];
         if(!result.empty()) result.push_back(Painter::PolygonSeparatorPointF);
         for(size_t j = 0; j < curPath.size(); ++j) {
-            result.push_back( PointF( curPath[j].X * imFac, curPath[j].Y * imFac ) );
+            result.push_back( PointF(
+                curPath[j].X * Gfx::Math::VecResScaleDn,
+                curPath[j].Y * Gfx::Math::VecResScaleDn
+            ) );
         }
     }
 }

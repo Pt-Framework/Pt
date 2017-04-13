@@ -44,6 +44,14 @@ namespace Math {
 
 
 //
+// Scaling constants
+//
+
+static const double VecResScaleUp = 64.0;      // We use the same scaling facotr that FreeType uses
+static const double VecResScaleDn =  0.015625; // ---
+
+
+//
 // The constant Pi and its variations in 32-bit floating-point
 //
 

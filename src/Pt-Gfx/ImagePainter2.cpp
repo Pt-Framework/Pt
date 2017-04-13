@@ -1003,7 +1003,7 @@ void ImagePainter2::drawQuadraticPolybezier(const PointF* ps, const size_t point
             if(!pointsF.empty()) {
                 const float dx = ::fabs( pointsF.back().x() - pointsFTmp[j].x() );
                 const float dy = ::fabs( pointsF.back().y() - pointsFTmp[j].y() );
-                if(dx <= IMAGE_PAINTER_FP_SCALE_D && dy <= IMAGE_PAINTER_FP_SCALE_D) continue;
+                if(dx <= Gfx::Math::VecResScaleDn && dy <= Gfx::Math::VecResScaleDn) continue;
             }
             // Store the points
             pointsF.push_back(pointsFTmp[j]);

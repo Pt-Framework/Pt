@@ -54,6 +54,8 @@
 #include <Pt/System/Logger.h>
 #include <Pt/System/Clock.h>
 
+#include "BilinearScale.h"
+
 #if defined(PT_GFX_USE_GNU_STYLE_COMPILER)
 #include <cxxabi.h>
 #endif
@@ -167,7 +169,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_TEXTURE_FILLED_ARC        0
 
 #define BENCHMARK_PATH                      0
-#define BENCHMARK_IMAGE_SCALING             1
+#define BENCHMARK_IMAGE_OPERATION           1
 
 // Configurations and objects
 #define FONT_DIR    "../src/Pt-Gfx/fonts"
@@ -201,7 +203,7 @@ static const char* sfileDirXPrefix = "";
 #include "ImagePainterTest2_Draw_Path.cpp"
 #include "ImagePainterTest2_Draw_Extra.cpp"
 #include "ImagePainterTest2_SceneGraph.cpp"
-#include "ImagePainterTest2_ImageScaling.cpp"
+#include "ImagePainterTest2_ImageOperation.cpp"
 #include "ImagePainterTest2_SvgReader.cpp"
 
 #include "ImagePainterTest2_Benchmark.cpp"
@@ -578,10 +580,10 @@ int main(int argc, char* args[])
         testSceneGraph("Scene Graph - ImagePainter2", image, *painter2);
     }
 
-    // Image scaling
-    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && (TEST_SOURCECOPY || TEST_SOURCEOVER) && TEST_IMAGE_SCALING) {
+    // Image operations
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && (TEST_SOURCECOPY || TEST_SOURCEOVER) && BENCHMARK_IMAGE_OPERATION) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
-        testImageScaling("Image Scaling - ImagePainter2", image, *painter2);
+        testImageOperation("Image Operation - ImagePainter2", image, *painter2);
     }
 
     // Svg reader
@@ -644,7 +646,7 @@ int main(int argc, char* args[])
         doBenchmark(CompositionMode::SourceCopy);
 
         if(!BENCHMARK_RESULT_HTML || !BENCHMARK_RESULT_HTML_SIDE_BY_SIDE) std::clog << "Pt::Gfx - Image Scaling" << std::endl;
-        doBenchmarkImageScaling();
+        doBenchmarkImageOperation();
 
         if(BENCHMARK_RESULT_HTML && BENCHMARK_RESULT_HTML_SIDE_BY_SIDE) {
             std::clog << "    </td><td>&nbsp;&nbsp;&nbsp;</td>" << std::endl;
@@ -656,7 +658,7 @@ int main(int argc, char* args[])
         doBenchmark(CompositionMode::SourceOver);
 
         if(!BENCHMARK_RESULT_HTML || !BENCHMARK_RESULT_HTML_SIDE_BY_SIDE) std::clog << "Pt::Gfx - Image Scaling" << std::endl;
-        doBenchmarkImageScaling();
+        doBenchmarkImageOperation();
 
         if(BENCHMARK_RESULT_HTML && BENCHMARK_RESULT_HTML_SIDE_BY_SIDE) {
             std::clog << "    </td><td>&nbsp;&nbsp;&nbsp;</td>" << std::endl;

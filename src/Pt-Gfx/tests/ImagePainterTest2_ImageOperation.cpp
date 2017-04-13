@@ -3,11 +3,12 @@
 // Blog by theowl84, 2011
 // http://fastcpp.blogspot.co.id/2011/06/bilinear-pixel-interpolation-using-sse.html
 
+#if 0
 //
 // Normal C
 //
 
-inline Pt::int32_t getPixel_C(const Pt::int32_t* img, Pt::ssize_t imageWidth, float x, float y)
+inline Pt::int32_t getPixel_C(const Pt::int32_t* img, Pt::ssize_t imgW, float x, float y)
 {
     // Used for processing the pixels
     union Pixel4 {
@@ -20,13 +21,13 @@ inline Pt::int32_t getPixel_C(const Pt::int32_t* img, Pt::ssize_t imageWidth, fl
     const Pt::int32_t py = Pt::Gfx::Math::zfint(y);
 
     // Pointer to the first pixel
-    const Pixel4* p0 = (const Pixel4*) img + py * imageWidth + px;
+    const Pixel4* p0 = (const Pixel4*) img + py * imgW + px;
 
     // Load the four neighboring pixels
-    const Pixel4& p1 = p0[0 + 0 * imageWidth];
-    const Pixel4& p2 = p0[1 + 0 * imageWidth];
-    const Pixel4& p3 = p0[0 + 1 * imageWidth];
-    const Pixel4& p4 = p0[1 + 1 * imageWidth];
+    const Pixel4& p1 = p0[0 + 0 * imgW];
+    const Pixel4& p2 = p0[1 + 0 * imgW];
+    const Pixel4& p3 = p0[0 + 1 * imgW];
+    const Pixel4& p4 = p0[1 + 1 * imgW];
 
     // Calculate the weights for each pixel
     const float fx  = x    - px;
@@ -57,8 +58,8 @@ struct GetPixel_C {
     static inline void deinit()
     {}
 
-    static inline Pt::int32_t getPixel(const Pt::int32_t* img, Pt::ssize_t imageWidth, float x, float y)
-    { return getPixel_C(img, imageWidth, x, y); }
+    static inline Pt::int32_t getPixel(const Pt::int32_t* img, Pt::ssize_t imgW, float x, float y)
+    { return getPixel_C(img, imgW, x, y); }
 };
 
 
@@ -66,7 +67,7 @@ struct GetPixel_C {
 // Fixed-point C
 //
 
-inline Pt::int32_t getPixel_FP_C(const Pt::int32_t* img, Pt::ssize_t imageWidth, float x, float y)
+inline Pt::int32_t getPixel_FP_C(const Pt::int32_t* img, Pt::ssize_t imgW, float x, float y)
 {
     // Used for processing the pixels
     union Pixel4 {
@@ -83,13 +84,13 @@ inline Pt::int32_t getPixel_FP_C(const Pt::int32_t* img, Pt::ssize_t imageWidth,
     const Pt::int32_t py = Fy & 0x0000FF00;
 
     // Pointer to the first pixel
-    const Pixel4* p0 = (const Pixel4*) img + (py >> 8) * imageWidth + (px >> 8);
+    const Pixel4* p0 = (const Pixel4*) img + (py >> 8) * imgW + (px >> 8);
 
     // Load the four neighboring pixels
-    const Pixel4& p1 = p0[0 + 0 * imageWidth];
-    const Pixel4& p2 = p0[1 + 0 * imageWidth];
-    const Pixel4& p3 = p0[0 + 1 * imageWidth];
-    const Pixel4& p4 = p0[1 + 1 * imageWidth];
+    const Pixel4& p1 = p0[0 + 0 * imgW];
+    const Pixel4& p2 = p0[1 + 0 * imgW];
+    const Pixel4& p3 = p0[0 + 1 * imgW];
+    const Pixel4& p4 = p0[1 + 1 * imgW];
 
     // Calculate the weights for each pixel
     const Pt::int32_t fx  = Fx & 0x000000FF;
@@ -120,8 +121,8 @@ struct GetPixel_FP_C {
     static inline void deinit()
     {}
 
-    static inline Pt::int32_t getPixel(const Pt::int32_t* img, Pt::ssize_t imageWidth, float x, float y)
-    { return getPixel_FP_C(img, imageWidth, x, y); }
+    static inline Pt::int32_t getPixel(const Pt::int32_t* img, Pt::ssize_t imgW, float x, float y)
+    { return getPixel_FP_C(img, imgW, x, y); }
 };
 
 
@@ -162,18 +163,18 @@ inline __m128 calcWeight_SSE2(float x, float y)
      return _mm_mul_ps(wx, wy);
 }
 
-inline Pt::int32_t getPixel_SSE2(const Pt::int32_t* img, Pt::ssize_t imageWidth, float x, float y)
+inline Pt::int32_t getPixel_SSE2(const Pt::int32_t* img, Pt::ssize_t imgW, float x, float y)
 {
     // Floor the coordinate
     const Pt::int32_t px = Pt::Gfx::Math::zfint(x);
     const Pt::int32_t py = Pt::Gfx::Math::zfint(y);
 
     // Pointer to the first pixel
-    const Pt::int32_t* p0 = img + py * imageWidth + px;
+    const Pt::int32_t* p0 = img + py * imgW + px;
 
     // Load the four neighboring pixels
-    const __m128i p12h    = _mm_loadl_epi64    ( (const __m128i*) &p0[0 * imageWidth] );
-    const __m128i p34h    = _mm_loadl_epi64    ( (const __m128i*) &p0[1 * imageWidth] );
+    const __m128i p12h    = _mm_loadl_epi64    ( (const __m128i*) &p0[0 * imgW] );
+    const __m128i p34h    = _mm_loadl_epi64    ( (const __m128i*) &p0[1 * imgW] );
 
     // Extend to 16-bit
     const __m128i p12     = _mm_unpacklo_epi8  (p12h,    _mm_setzero_si128()    );
@@ -218,8 +219,8 @@ struct GetPixel_SSE2 {
     static inline void deinit()
     { _MM_SET_ROUNDING_MODE(_MM_ROUND_NEAREST); }
 
-    static inline Pt::int32_t getPixel(const Pt::int32_t* img, Pt::ssize_t imageWidth, float x, float y)
-    { return getPixel_SSE2(img, imageWidth, x, y); }
+    static inline Pt::int32_t getPixel(const Pt::int32_t* img, Pt::ssize_t imgW, float x, float y)
+    { return getPixel_SSE2(img, imgW, x, y); }
 };
 
 #endif
@@ -249,18 +250,18 @@ inline __m128 calcWeight_SSE4P1(float x, float y)
      return _mm_mul_ps(wx, wy);
 }
 
-inline Pt::int32_t getPixel_SSE4P1(const Pt::int32_t* img, Pt::ssize_t imageWidth, float x, float y)
+inline Pt::int32_t getPixel_SSE4P1(const Pt::int32_t* img, Pt::ssize_t imgW, float x, float y)
 {
     // Floor the coordinate
     const Pt::int32_t px = Pt::Gfx::Math::zfint(x);
     const Pt::int32_t py = Pt::Gfx::Math::zfint(y);
 
     // Pointer to the first pixel
-    const Pt::int32_t* p0 = img + py * imageWidth + px;
+    const Pt::int32_t* p0 = img + py * imgW + px;
 
     // Load the four neighboring pixels
-    const __m128i p12     = _mm_loadl_epi64    ( (const __m128i*) &p0[0 * imageWidth] );
-    const __m128i p34     = _mm_loadl_epi64    ( (const __m128i*) &p0[1 * imageWidth] );
+    const __m128i p12     = _mm_loadl_epi64    ( (const __m128i*) &p0[0 * imgW] );
+    const __m128i p34     = _mm_loadl_epi64    ( (const __m128i*) &p0[1 * imgW] );
 
     // Convert RGBA RGBA RGBA RGAB to RRRR GGGG BBBB AAAA (AoS to SoA)
     const __m128i p1234   = _mm_unpacklo_epi8  (p12,     p34                    );
@@ -302,8 +303,8 @@ struct GetPixel_SSE4P1 {
     static inline void deinit()
     {}
 
-    static inline Pt::int32_t getPixel(const Pt::int32_t* img, Pt::ssize_t imageWidth, float x, float y)
-    { return getPixel_SSE4P1(img, imageWidth, x, y); }
+    static inline Pt::int32_t getPixel(const Pt::int32_t* img, Pt::ssize_t imgW, float x, float y)
+    { return getPixel_SSE4P1(img, imgW, x, y); }
 };
 
 #endif
@@ -362,7 +363,7 @@ inline float32x4_t calcWeight_NEON(float x, float y)
      */
 }
 
-inline Pt::int32_t getPixel_NEON(const Pt::int32_t* img, Pt::ssize_t imageWidth, float x, float y)
+inline Pt::int32_t getPixel_NEON(const Pt::int32_t* img, Pt::ssize_t imgW, float x, float y)
 {
     return 0;
 
@@ -372,11 +373,11 @@ inline Pt::int32_t getPixel_NEON(const Pt::int32_t* img, Pt::ssize_t imageWidth,
     const Pt::int32_t py = Pt::Gfx::Math::zfint(y);
 
     // Pointer to the first pixel
-    const Pt::int32_t* p0 = img + py * imageWidth + px;
+    const Pt::int32_t* p0 = img + py * imgW + px;
 
     // Load the four neighboring pixels
-    const __m128i p12h    = _mm_loadl_epi64    ( (const __m128i*) &p0[0 * imageWidth] );
-    const __m128i p34h    = _mm_loadl_epi64    ( (const __m128i*) &p0[1 * imageWidth] );
+    const __m128i p12h    = _mm_loadl_epi64    ( (const __m128i*) &p0[0 * imgW] );
+    const __m128i p34h    = _mm_loadl_epi64    ( (const __m128i*) &p0[1 * imgW] );
 
     // Extend to 16-bit
     const __m128i p12     = _mm_unpacklo_epi8  (p12h,    _mm_setzero_si128()    );
@@ -422,8 +423,8 @@ struct GetPixel_NEON {
     static inline void deinit()
     {}
 
-    static inline Pt::int32_t getPixel(const Pt::int32_t* img, Pt::ssize_t imageWidth, float x, float y)
-    { return getPixel_NEON(img, imageWidth, x, y); }
+    static inline Pt::int32_t getPixel(const Pt::int32_t* img, Pt::ssize_t imgW, float x, float y)
+    { return getPixel_NEON(img, imgW, x, y); }
 };
 
 #endif
@@ -460,8 +461,10 @@ void bilinearScale(
 //
 // Test
 //
+#endif
 
-static void testImageScaling(const char* title, Image& image, Painter& painter)
+
+static void testImageOperation(const char* title, Image& image, Painter& painter)
 {
     resetImage(image);
 
@@ -485,65 +488,17 @@ static void testImageScaling(const char* title, Image& image, Painter& painter)
         scaledImage               .begin(), scaledImage               .width(), scaledImage               .height()
     );
     painter.drawImage(PointF(x, y), scaledImage);
-    painter.drawText( PointF(x, y + scaledImage.height() + 20), "Block - Plain C" );
+    painter.drawText( PointF(x, y + scaledImage.height() + 20), "Block Scaling" );
     x += scaledImage.width() + 20;
 
-    // Scaled image (bilinear scale) - plain C
-    bilinearScale<GetPixel_C>(
+    // Scaled image (bilinear scale)
+    bilinearScale(
         textureWithWhiteBackground.begin(), textureWithWhiteBackground.width(), textureWithWhiteBackground.height(),
         scaledImage               .begin(), scaledImage               .width(), scaledImage               .height()
     );
     painter.drawImage(PointF(x, y), scaledImage);
-    painter.drawText( PointF(x, y + scaledImage.height() + 20), "Bilinear - Plain C" );
+    painter.drawText( PointF(x, y + scaledImage.height() + 20), "Bilinear Scaling" );
     x += scaledImage.width() + 20;
-
-    // Scaled image (bilinear scale) - fixed-point C
-    bilinearScale<GetPixel_FP_C>(
-        textureWithWhiteBackground.begin(), textureWithWhiteBackground.width(), textureWithWhiteBackground.height(),
-        scaledImage               .begin(), scaledImage               .width(), scaledImage               .height()
-    );
-    painter.drawImage(PointF(x, y), scaledImage);
-    painter.drawText( PointF(x, y + scaledImage.height() + 20), "Bilinear - Fixed C" );
-    x += scaledImage.width() + 20;
-
-#if defined(PT_GFX_USE_SSE2)
-    // Scaled image (bilinear scale) - SSE 2
-    GetPixel_SSE2::init();
-    bilinearScale<GetPixel_SSE2>(
-        textureWithWhiteBackground.begin(), textureWithWhiteBackground.width(), textureWithWhiteBackground.height(),
-        scaledImage               .begin(), scaledImage               .width(), scaledImage               .height()
-    );
-    GetPixel_SSE2::deinit();
-    painter.drawImage(PointF(x, y), scaledImage);
-    painter.drawText( PointF(x, y + scaledImage.height() + 20), "Bilinear - SSE 2" );
-    x += scaledImage.width() + 20;
-#endif
-
-#if defined(PT_GFX_USE_SSE4P1)
-    // Scaled image (bilinear scale) - SSE 4.1
-    GetPixel_SSE4P1::init();
-    bilinearScale<GetPixel_SSE4P1>(
-        textureWithWhiteBackground.begin(), textureWithWhiteBackground.width(), textureWithWhiteBackground.height(),
-        scaledImage               .begin(), scaledImage               .width(), scaledImage               .height()
-    );
-    GetPixel_SSE4P1::deinit();
-    painter.drawImage(PointF(x, y), scaledImage);
-    painter.drawText( PointF(x, y + scaledImage.height() + 20), "Bilinear - SSE 4.1" );
-    x += scaledImage.width() + 20;
-#endif
-
-#if defined(PT_GFX_USE_NEON)
-    // Scaled image (bilinear scale) - NEON
-    GetPixel_NEON::init();
-    bilinearScale<GetPixel_NEON>(
-        textureWithWhiteBackground.begin(), textureWithWhiteBackground.width(), textureWithWhiteBackground.height(),
-        scaledImage               .begin(), scaledImage               .width(), scaledImage               .height()
-    );
-    GetPixel_NEON::deinit();
-    painter.drawImage(PointF(x, y), scaledImage);
-    painter.drawText( PointF(x, y + scaledImage.height() + 20), "Bilinear - NEON" );
-    x += scaledImage.width() + 20;
-#endif
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }
