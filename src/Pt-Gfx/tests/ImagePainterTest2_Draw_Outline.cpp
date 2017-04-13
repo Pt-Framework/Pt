@@ -381,7 +381,7 @@ static void testDrawEllipseArc(const char* title, Image& image, Painter& painter
     Pen text( Color::fromRgb8(255,   0,   0, 255) );
 
     painter.setBrush( Color::fromRgb8(63, 63, 255) );
-    painter.fillRect( RectF( PointF(0, 80), SizeF(image.width(), 60) ) );
+    painter.fillRect( RectF( PointF(0, 80      ), SizeF(image.width(), 60) ) );
     painter.fillRect( RectF( PointF(0, 80 + 185), SizeF(image.width(), 30) ) );
     painter.fillRect( RectF( PointF(0, 80 + 400), SizeF(image.width(), 60) ) );
 

@@ -17,6 +17,9 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
     painter.setPen( Color::fromRgb8(255, 0, 0) );
 
     painter.setBrush( Color::fromRgb8(63, 63, 255) );
+
+    painter.fillRect( RectF( PointF(500, 120), SizeF(170, 130) ) );
+
     painter.fillRect( RectF( PointF(800, 120), SizeF(170, 130) ) );
     painter.fillRect( RectF( PointF(170, 250), SizeF(800, 200) ) );
     painter.fillRect( RectF( PointF(170, 450), SizeF(100, 100) ) );
