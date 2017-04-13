@@ -433,6 +433,44 @@ static inline void generateChrPoints(std::vector<PointF>& dst, double x, double 
 }
 
 
+static inline void generateArcPoints(std::vector<PointF>& dst, double radiusX, double radiusY, double centerX, double centerY, double degBegin, double degEnd, double smoothness, const ArcMode& arcMode)
+{
+    // Calculate the arc's parameters
+    const double degDlt  = degEnd - degBegin;
+    const double degFac  = degDlt / 360.0f;
+    const double circFac = degFac * ::sqrt( 0.5 * (radiusX * radiusX + radiusY * radiusY) );
+    const size_t nSegs   = Gfx::Math::zrint(circFac * abs(smoothness));
+    const double nSegs1i = 1.0 / (double) (nSegs - 1);
+
+    // Generate a polygon that approximates the arc
+    const double fdegInc = (degDlt   * Gfx::Math::DegToRad) * nSegs1i;
+          double angle   =  degBegin * Gfx::Math::DegToRad;
+
+    for(size_t i = 0; i < nSegs; ++i) {
+        // Calculate the coordinate
+        const double x = centerX + radiusX * ::cos(angle);
+        const double y = centerY - radiusY * ::sin(angle); // Sign inversion due to differences between cartesian and computer coordinate systems
+        // Update the angle
+        angle += fdegInc;
+        // Store the coordinate only if it is different with the previous one
+        if( !dst.empty() && dst.back().x() == x && dst.back().y() == y ) continue;
+        dst.push_back( PointF(x, y) );
+    }
+
+    // Discard the last point if it has the same coordinate with the first one
+    if(dst.back() == dst[0]) dst.pop_back();
+
+    // Add the closing point as needed
+    if(arcMode == ArcMode::Chord) {
+       dst.push_back( dst[0] );
+    }
+    else if(arcMode == ArcMode::Pie) {
+        dst.push_back( PointF(centerX, centerY) );
+        dst.push_back( dst[0] );
+    }
+}
+
+
 // ======================================================================================
 // ===== Path::PathData Implementation ==================================================
 // ======================================================================================
@@ -442,7 +480,7 @@ struct Path::PathData {
     enum InsType {
         IT_Begin, IT_End,
         IT_MoveTo, IT_LineTo, IT_ArcTo, IT_QuadBezierTo, IT_CubicBezierTo, IT_GenNBezierTo,
-        IT_Char
+        IT_PutArc, IT_PutChar
     };
 
     // Instruction structure
@@ -484,7 +522,7 @@ struct Path::PathData {
         {}
 
         inline Instruction(const Char& chr_)
-        : type(IT_Char), chr(chr_)
+        : type(IT_PutChar), chr(chr_)
         {}
     };
 
@@ -585,6 +623,8 @@ void Path::clear()
     _pathData->clear();
 }
 
+// --- Path management ---
+
 void Path::beginPath()
 {
     // Check if this function call is valid in the current context
@@ -618,6 +658,8 @@ void Path::endPath()
     // Store the instruction
     _pathData->add(PathData::IT_End);
 }
+
+// --- Absolute coordinate ---
 
 void Path::moveTo(double x, double y)
 {
@@ -758,6 +800,8 @@ void Path::genericNBezierTo(Pt::int32_t controlPointCount, const double* cxy, do
     _pathData->curX = x;
     _pathData->curY = y;
 }
+
+// --- Relative coordinate ---
 
 void Path::relMoveTo(double x, double y)
 {
@@ -900,6 +944,27 @@ void Path::relGenericNBezierTo(Pt::int32_t controlPointCount, const double* cxy,
     _pathData->curY += y;
 }
 
+// --- Arc, chord, and pie placement ---
+
+void Path::putArc(double rx, double ry, double degBegin, double degEnd, const ArcMode& arcMode)
+{
+    // Check if this function call is valid in the current context
+    if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
+        throw PathInvalidContext(PT_SOURCEINFO_STR);
+
+    // COW
+    if(_pathData.refs() > 1) {
+        SmartPtr<PathData> pathData(new PathData);
+        *pathData = *_pathData;
+        _pathData = pathData;
+    }
+
+    // Store the instruction
+    _pathData->add(PathData::IT_PutArc, rx, ry, degBegin, degEnd, arcMode);
+}
+
+// --- Character and text placement ---
+
 void Path::setFont(const Font& fontSpec)
 {
     // COW
@@ -1033,7 +1098,13 @@ void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
                 curY = ins.p[ins.p.size() - 1];
                 break;
 
-            case PathData::IT_Char: {
+            case PathData::IT_PutArc: {
+                const ArcMode arcMode = static_cast<ArcMode::Mode>( Gfx::Math::zrint(ins.p[4]) );
+                generateArcPoints(dst, ins.p[0], ins.p[1], curX, curY, ins.p[2], ins.p[3], smoothness, arcMode);
+                break;
+            }
+
+            case PathData::IT_PutChar: {
                 std::vector<PointF     > pointsF;
                 std::vector<Pt::uint8_t> tags;
                 std::vector<Pt::int32_t> contours;

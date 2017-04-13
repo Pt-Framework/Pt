@@ -1,4 +1,5 @@
-/* Copyright (C) 2017-2017 Aloysius Indrayanto
+/* Copyright (C) 2006-2015 Marc Boris Duerner
+   Copyright (C) 2017-2017 Aloysius Indrayanto
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -22,51 +23,53 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
-  02110-1301 USA
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+  MA 02110-1301 USA
 */
 
-#ifndef PT_GFX_ARCMODE_H
-#define PT_GFX_ARCMODE_H
+#include <Pt/Gfx/SGNodeArc.h>
+#include <Pt/Gfx/ImagePainter2.h>
 
-#include <Pt/Gfx/Api.h>
-#include <Pt/Types.h>
 
 namespace Pt {
 namespace Gfx {
 
 
-/** @brief Mode when drawing arcs.
-  */
-class ArcMode {
-    public:
-         enum Mode {
-             Open  = 0, //! @brief Open; not valid for fillArc()
-             Chord = 1, //! @brief Chord
-             Pie   = 2  //! @brief Pie
-         };
+SGNodeArc::~SGNodeArc()
+{}
 
-        ArcMode(Mode m = Open)
-        : _mode(m)
-        {}
+void SGNodeArc::clear()
+{
+    // Clear the arc
+    _center.set(0, 0);
+    _radius.set(0, 0);
+    _degBegin = 0;
+    _degEnd   = 0;
+    _arcMode  = ArcMode::Open;
 
-        ArcMode& operator=(Mode m)
-        {
-            _mode = m;
-            return *this;
-        }
+    // Clear the base class' data
+    SGNodePath::clear();
+}
 
-        operator Pt::uint32_t() const
-        {
-            return _mode;
-        }
+void SGNodeArc::set(const PointT& center, const SizeT& radius, ValueT degBegin, ValueT degEnd, const ArcMode& arcMode)
+{
+    // Save the parameters
+    _center   = center;
+    _radius   = radius;
+    _degBegin = degBegin;
+    _degEnd   = degEnd;
+    _arcMode  = arcMode;
 
-    private:
-        Mode _mode;
-};
+    // Clear the base class' data
+    SGNodePath::clear();
+
+    // Create an arc
+    path().beginPath();
+    path().moveTo   (_center.x    (), _center.y     ()                              );
+    path().putArc   (_radius.width(), _radius.height(), _degBegin, _degEnd, _arcMode);
+    path().endPath  ();
+}
 
 
 } // namespace
 } // namespace
-
-#endif

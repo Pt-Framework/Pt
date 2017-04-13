@@ -54,23 +54,36 @@ static void testSceneGraph(const char* title, Image& image, Painter& painter)
 
         // 3rd-child's 1st child
         SGNodeRectangle* csgn3_1 = &csgn3->addChild( new SGNodeRectangle( SGNode::RenderFill, RectF(PointF(0, 0), SizeF(80, 80)), 10 ) );
-                         csgn3_1->transform().translate(0, 120);
+                         csgn3_1->transform().translate(120 * 0, 120 * 1);
                          csgn3_1->setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Rectangular) );
 
         // 3rd-child's 2nd child
         SGNodeRectangle* csgn3_2 = &csgn3->addChild( new SGNodeRectangle( SGNode::RenderStroke, RectF(PointF(0, 0), SizeF(80, 80)), 10 ) );
-                         csgn3_2->transform().translate(120, 120);
+                         csgn3_2->transform().translate(120 * 1, 120 * 1);
                          csgn3_2->setPen( Color::fromRgb8(255, 0, 0) );
 
         // 3rd-child's 3rd child
         SGNodeEllipse* csgn3_3 = &csgn3->addChild( new SGNodeEllipse( SGNode::RenderStroke, PointF(0, 0), SizeF(100, 75) ) );
-                       csgn3_3->transform().translate(120 * 2, 120);
+                       csgn3_3->transform().translate(120 * 2, 120 * 1);
                        csgn3_3->setPen( Color::fromRgb8(0, 255, 0) );
 
         // 3rd-child's 4th child
         SGNodeEllipse* csgn3_4 = &csgn3->addChild( new SGNodeEllipse( SGNode::RenderFill, PointF(0, 0), SizeF(75, 100) ) );
-                       csgn3_4->transform().translate(120 * 3, 120);
+                       csgn3_4->transform().translate(120 * 3, 120 * 1);
                        csgn3_4->setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Conical) );
+
+        // 3rd-child's 5th child
+        SGNodeArc* csgn3_5 = &csgn3->addChild( new SGNodeArc( SGNode::RenderStroke, PointF(30, 30), SizeF(30, 30), 30, 240, ArcMode::Open ) );
+                   csgn3_5->transform().translate(120 * 4 + 75 * 0, 120 * 1 + 75 * 0);
+                   csgn3_5->setPen( Pen(Color::fromRgb8(127, 255, 255, 255), 6, Pen::Dash, Pen::RoundCap) );
+
+        // 3rd-child's 6th child
+        SGNodeArc* csgn3_6 = &csgn3->addChild( new SGNodeArc( SGNode::RenderFill, PointF(30, 30), SizeF(30, 30), 30, 240, ArcMode::Chord ) );
+                   csgn3_6->transform().translate(120 * 4 + 75 * 0, 120 * 1 + 75 * 1);
+
+        // 3rd-child's 7th child
+        SGNodeArc* csgn3_7 = &csgn3->addChild( new SGNodeArc( SGNode::RenderFill, PointF(30, 30), SizeF(30, 30), 30, 240, ArcMode::Pie) );
+                   csgn3_7->transform().translate(120 * 4 + 75 * 1, 120 * 1 + 75 * 1);
 
     // Draw it
     psgn.setPen  (Color::fromRgb8(255, 255, 255));
@@ -82,7 +95,7 @@ static void testSceneGraph(const char* title, Image& image, Painter& painter)
 
     psgn.transform().identity();
     psgn.transform().scale(0.5f, 0.5f); // Note: the pen width is not scaled!
-    psgn.transform().translate(720, 30);
+    psgn.transform().translate(650, 30);
     psgn.draw(*ip2);
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);

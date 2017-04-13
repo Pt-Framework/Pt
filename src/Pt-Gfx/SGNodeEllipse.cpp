@@ -40,7 +40,7 @@ SGNodeEllipse::~SGNodeEllipse()
 
 void SGNodeEllipse::clear()
 {
-    // Clear the rectangle
+    // Clear the ellipse
     _topLeft.set(0, 0);
     _size   .set(0, 0);
 

@@ -36,6 +36,7 @@
 
 #include <Pt/SmartPtr.h>
 
+#include <Pt/Gfx/ArcMode.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Point.h>
 
@@ -104,11 +105,11 @@ class PT_GFX_API Path {
 
         bool isNull() const;
 
+        void clear();
+
         //
         // Path management - call them multiple times to create multi-path (e.g. path with holes)
         //
-
-        void clear();
 
         void beginPath();
 
@@ -147,8 +148,15 @@ class PT_GFX_API Path {
         void relGenericNBezierTo(Pt::int32_t controlPointCount, const double* cxy, double x, double y);
 
         //
-        // Text related
+        // Arc, chord, and pie placement (does not change the current drawing coordinate)
         //
+
+        void putArc(double rx, double ry, double degBegin, double degEnd, const ArcMode& arcMode);
+
+        //
+        // Character and text placement (does not change the current drawing coordinate)
+        //
+
         void setFont(const Font& font);
 
         const Font& font() const;

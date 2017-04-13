@@ -279,7 +279,7 @@ static inline void generateEllipsePoints(std::vector<PointF>& dst, Pt::int32_t r
 
 static inline void generateArcPoints(std::vector<PointF>& dst, Pt::int32_t radiusX, Pt::int32_t radiusY, Pt::int32_t centerX, Pt::int32_t centerY, float degBegin, float degEnd, size_t penSize)
 {
-    // Calculate the ellipse's parameters
+    // Calculate the arc's parameters
     const float       degDlt  = degEnd - degBegin;
     const float       degFac  = degDlt / 360.0f;
     const Pt::int32_t circFac = Gfx::Math::zrint(
