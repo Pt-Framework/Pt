@@ -993,7 +993,7 @@ void ImagePainter2::drawQuadraticPolybezier(const PointF* ps, const size_t point
         const float l21  = Gfx::Math::fastSqrt(dx21 * dx21 + dy21 * dy21);
         const float l31  = l32 + l21;
         // Determine the number of segments
-        const Pt::int32_t nSegs = Gfx::Math::zrint(l31 / 16.0f) + 2;
+        const Pt::int32_t nSegs = Gfx::Math::zrint(l31 / 20) + 3 + 1;
         // Generate points for one quadratic bezier curve
         pointsFTmp.clear();
         generateQuadraticBezierPoints(pointsFTmp, x1, y1, x2, y2, x3, y3, nSegs);
@@ -1003,7 +1003,7 @@ void ImagePainter2::drawQuadraticPolybezier(const PointF* ps, const size_t point
             if(!pointsF.empty()) {
                 const float dx = ::fabs( pointsF.back().x() - pointsFTmp[j].x() );
                 const float dy = ::fabs( pointsF.back().y() - pointsFTmp[j].y() );
-                if(dx < 0.5f && dy < 0.5f) continue;
+                if(dx <= IMAGE_PAINTER_FP_SCALE_D && dy <= IMAGE_PAINTER_FP_SCALE_D) continue;
             }
             // Store the points
             pointsF.push_back(pointsFTmp[j]);

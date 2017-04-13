@@ -630,8 +630,8 @@ void Rasterizer2::rasterOnePixelAreaGLineSegmentXWAA_F(float x1, float y1, float
             if(_isTexture || _isGradient) {                                            \
                 const Pt::int32_t bw = _brushImage->width();                           \
                 const Pt::int32_t bh = _brushImage->height();                          \
-                const Pt::int32_t dx = X - minX;                                       \
-                const Pt::int32_t dy = Y - minY;                                       \
+                const Pt::int32_t dx = std::max<Pt::int32_t>(X - minX, 0);             \
+                const Pt::int32_t dy = std::max<Pt::int32_t>(Y - minY, 0);             \
                 const Pt::int32_t tx = _isGradient ? std::min(bw - 1, dx) : (dx % bw); \
                 const Pt::int32_t ty = _isGradient ? std::min(bh - 1, dy) : (dy % bh); \
                 ConstPixel srcPixel(_brushImage->view(), tx, ty);                      \
