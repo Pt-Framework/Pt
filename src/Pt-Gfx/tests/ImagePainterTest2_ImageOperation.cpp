@@ -14,9 +14,10 @@ static void testImageOperation(const char* title, Image& image, Painter& painter
     painter.drawImage(PointF(x, y), textureWithWhiteBackground);
     x += textureWithWhiteBackground.width() + 20;
 
-    // Scaled image (block scale)
+    // Scaled and rotated image (block scale)
     Image scaledImage( textureWithWhiteBackground.format(), Size(120, 120) );
 
+    // Block scale
     blockScale4(
         textureWithWhiteBackground.begin(), textureWithWhiteBackground.width(), textureWithWhiteBackground.height(),
         scaledImage               .begin(), scaledImage               .width(), scaledImage               .height()
@@ -25,7 +26,7 @@ static void testImageOperation(const char* title, Image& image, Painter& painter
     painter.drawText( PointF(x, y + scaledImage.height() + 20), "Block Scaling" );
     x += scaledImage.width() + 20;
 
-    // Scaled image (bilinear scale)
+    // Bilinear scale
     bilinearScale4(
         textureWithWhiteBackground.begin(), textureWithWhiteBackground.width(), textureWithWhiteBackground.height(),
         scaledImage               .begin(), scaledImage               .width(), scaledImage               .height()
@@ -34,5 +35,16 @@ static void testImageOperation(const char* title, Image& image, Painter& painter
     painter.drawText( PointF(x, y + scaledImage.height() + 20), "Bilinear Scaling" );
     x += scaledImage.width() + 20;
 
+    // Block rotate
+    blockRotate4(
+        textureWithWhiteBackground.begin(), textureWithWhiteBackground.width(), textureWithWhiteBackground.height(),
+        scaledImage               .begin(), scaledImage               .width(), scaledImage               .height(),
+        30
+    );
+    painter.drawImage(PointF(x, y), scaledImage);
+    painter.drawText( PointF(x, y + scaledImage.height() + 20), "Block Rotate" );
+    x += scaledImage.width() + 20;
+
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
+
 }

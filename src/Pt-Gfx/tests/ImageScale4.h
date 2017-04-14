@@ -253,12 +253,15 @@ void blockScale4(
     OutIterT to,   Pt::ssize_t toWidth,   Pt::ssize_t toHeight
 )
 {
+    // Get the source and destination pointers
     const Pt::uint32_t* src = reinterpret_cast<const Pt::uint32_t*>( from->base() );
           Pt::uint32_t* dst = reinterpret_cast<      Pt::uint32_t*>( to  ->base() );
 
+    // Calculate the increment factors
     const Pt::uint32_t incX = 65536 * fromWidth  / toWidth;
     const Pt::uint32_t incY = 65536 * fromHeight / toHeight;
 
+    // Walk through the pixels
     Pt::uint32_t itrY = 0;
     for(Pt::ssize_t y = 0; y < toHeight; ++y) {
         const Pt::int32_t  srcY = ( (itrY + 32768) >> 16 ) * fromWidth;
@@ -277,9 +280,11 @@ void bilinearScale4(
     OutIterT to,   Pt::ssize_t toWidth,   Pt::ssize_t toHeight
 )
 {
+    // Get the source and destination pointers
     const Pt::uint32_t* src = reinterpret_cast<const Pt::uint32_t*>( from->base() );
           Pt::uint32_t* dst = reinterpret_cast<      Pt::uint32_t*>( to  ->base() );
 
+    // Calculate the increment factors
 #if defined(PT_GFX_USE_SSE4P1) || defined(PT_GFX_USE_SSE2)
     typedef float ValueT;
     const ValueT incX = (ValueT) fromWidth  / toWidth;
@@ -290,6 +295,7 @@ void bilinearScale4(
     const ValueT incY = 65536 * fromHeight / toHeight;
 #endif
 
+    // Walk through the pixels
     ValueT itrY = 0;
     for(Pt::ssize_t y = 0; y < toHeight; ++y) {
         ValueT itrX = 0;
@@ -297,6 +303,69 @@ void bilinearScale4(
             *dst++ = bsGetPixel(src, fromWidth, itrX, itrY);
             itrX += incX;
         }
+        itrY += incY;
+    }
+}
+
+
+template <typename InIterT, typename OutIterT>
+void blockRotate4(
+    InIterT      from, Pt::ssize_t fromWidth, Pt::ssize_t fromHeight,
+    OutIterT     to,   Pt::ssize_t toWidth,   Pt::ssize_t toHeight,
+    float        deg,
+    const Color& cfil = Color::fromRgb8(0, 0, 0, 255)
+)
+{
+    // Calculate the filler color
+    const Pt::uint32_t  fil = ( Pt::uint32_t(cfil.alpha() & 0xFF00) << 16 ) |
+                              ( Pt::uint32_t(cfil.red  () & 0xFF00) <<  8 ) |
+                                Pt::uint32_t(cfil.green() & 0xFF00)         |
+                              ( Pt::uint32_t(cfil.blue ()         ) >>  8 );
+
+    // Get the source and destination pointers
+    const Pt::uint32_t* src = reinterpret_cast<const Pt::uint32_t*>( from->base() );
+          Pt::uint32_t* dst = reinterpret_cast<      Pt::uint32_t*>( to  ->base() );
+
+    // Calculate the increment factors
+    const Pt::int32_t incX = 65536 * fromWidth  / toWidth;
+    const Pt::int32_t incY = 65536 * fromHeight / toHeight;
+
+    // Calculate the center positions
+    const Pt::int32_t midX = 32768 * fromWidth;
+    const Pt::int32_t midY = 32768 * fromHeight;
+
+    // Calculate the sine and cosine values
+    const double      r = -deg * (M_PI / 180);
+    const Pt::int32_t s = Pt::Gfx::Math::zrint( 256 * ::sin(r) );
+    const Pt::int32_t c = Pt::Gfx::Math::zrint( 256 * ::cos(r) );
+
+    // Walk through the row pixels
+    Pt::int32_t itrY = 0;
+    for(Pt::ssize_t y = 0; y < toHeight; ++y) {
+        // Walk through the column pixels
+        Pt::int32_t itrX = 0;
+        for(Pt::ssize_t x = 0; x < toWidth; ++x) {
+            // Get the centered source coordinates
+            const Pt::int32_t srcX = (itrX - midX) >> 8;
+            const Pt::int32_t srcY = (itrY - midY) >> 8;
+            // Rotate the coordinates and offset them back
+            const Pt::int32_t rotX =  c * srcX + s * srcY + midX;
+            const Pt::int32_t rotY = -s * srcX + c * srcY + midY;
+            // Calculate the read coordinates
+            const Pt::uint32_t getX = (rotX + 32768) >> 16;
+            const Pt::uint32_t getY = (rotY + 32768) >> 16;
+            // Check if the any of the coordinates is outside the image
+            if(getX < 0 || getY < 0 || getX >= fromWidth || getY >= fromHeight) {
+                *dst++ = fil;
+            }
+            // The coordinates are inside the image
+            else {
+                *dst++ = src[getY * fromWidth + getX];
+            }
+            // Increment the iterator
+            itrX += incX;
+        }
+        // Increment the iterator
         itrY += incY;
     }
 }
