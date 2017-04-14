@@ -119,7 +119,7 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_PATH_CLIPPING                 0 // (including path-based text)
 #define TEST_DRAW_EXTRA                         0 // (including path-based n-bezier)
 
-#define TEST_SCENE_GRAPH                        0
+#define TEST_SCENE_GRAPH                        1
 #define TEST_IMAGE_SCALING                      1
 #define TEST_SVG_READER                         0
 
@@ -167,7 +167,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_GRADIENT_FILLED_ARC       0
 #define BENCHMARK_TEXTURE_FILLED_ARC        0
 
-#define BENCHMARK_PATH                      0
+#define BENCHMARK_PATH                      1
 #define BENCHMARK_IMAGE_OPERATION           1
 
 // Configurations and objects
