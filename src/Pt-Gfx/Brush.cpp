@@ -160,7 +160,22 @@ bool Brush::isNull() const
 { return _brushData->isNull(); }
 
 bool Brush::operator==(const Brush& brush) const
-{ return *_brushData == *brush._brushData; }
+{
+    if(_brushData->isNull() != brush._brushData->isNull()) return false;
+
+    if(_brushData->fillStyle() == Brush::Texture) {
+        if(brush._brushData->fillStyle() != Brush::Texture) return false;
+        return _brushData->texture() == brush._brushData->texture();
+    }
+
+    return _brushData->fillStyle    () == brush._brushData->fillStyle    () &&
+           _brushData->color        () == brush._brushData->color        () &&
+           _brushData->gradientColor() == brush._brushData->gradientColor() &&
+           _brushData->rotation     () == brush._brushData->rotation     () &&
+           _brushData->scale        () == brush._brushData->scale        () &&
+           _brushData->offsetX      () == brush._brushData->offsetX      () &&
+           _brushData->offsetY      () == brush._brushData->offsetY      ();
+}
 
 
 
