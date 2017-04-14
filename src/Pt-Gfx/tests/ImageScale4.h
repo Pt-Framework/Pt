@@ -49,8 +49,8 @@ static const __m128 sseFour256 = _mm_set1_ps(256);
 #if defined(PT_GFX_USE_NEON)
 
 // NEON constants
-static const float32x4_t neonFour001 = NEON_SET_FLT32X4(  1,   1,   1,   1);
-static const float32x4_t neonFour256 = NEON_SET_FLT32X4(256, 256, 256, 256);
+static const float32x4_t neonFour001 = vdupq_n_f32(  1);
+static const float32x4_t neonFour256 = vdupq_n_f32(256);
 
 #endif
 
@@ -86,8 +86,8 @@ inline Pt::int32_t bsGetPixel(const Pt::int32_t* img, Pt::ssize_t imgW, float x,
     const Pt::int32_t* p0 = img + py * imgW + px;
 
     // Load the four neighboring pixels
-    const __m128i p12      = _mm_loadl_epi64   ( (const __m128i*) &p0[0 * imgW]              ); // ? ? ? ? C C C C
-    const __m128i p34      = _mm_loadl_epi64   ( (const __m128i*) &p0[1 * imgW]              ); // ? ? ? ? C C C C
+    const __m128i p12      = _mm_loadl_epi64   ( (const __m128i*) &p0[0 * imgW]              );
+    const __m128i p34      = _mm_loadl_epi64   ( (const __m128i*) &p0[1 * imgW]              );
 
     // Convert ARGB ARGB ARGB ARGB to AAAA RRRR GGGG BBBB
     const __m128i p1234aos = _mm_unpacklo_epi8 (p12,        p34                              );
@@ -145,12 +145,12 @@ inline Pt::int32_t bsGetPixel(const Pt::int32_t* img, Pt::ssize_t imgW, float x,
     const Pt::int32_t* p0 = img + py * imgW + px;
 
     // Load the four neighboring pixels
-    const __m128i p12      = _mm_loadl_epi64    ( (const __m128i*) &p0[0 * imgW]              ); // ? ? ? ? C C C C
-    const __m128i p34      = _mm_loadl_epi64    ( (const __m128i*) &p0[1 * imgW]              ); // ? ? ? ? C C C C
+    const __m128i p12      = _mm_loadl_epi64    ( (const __m128i*) &p0[0 * imgW]              );
+    const __m128i p34      = _mm_loadl_epi64    ( (const __m128i*) &p0[1 * imgW]              );
 
     // Extend to 16-bit integer
-    const __m128i p12ex    = _mm_unpacklo_epi8  (p12,        _mm_setzero_si128()              ); // 0 C 0 C 0 C 0 C
-    const __m128i p34ex    = _mm_unpacklo_epi8  (p34,        _mm_setzero_si128()              ); // 0 C 0 C 0 C 0 C
+    const __m128i p12ex    = _mm_unpacklo_epi8  (p12,        _mm_setzero_si128()              );
+    const __m128i p34ex    = _mm_unpacklo_epi8  (p34,        _mm_setzero_si128()              );
 
     // Calculate weights
     const __m128  ssx      = _mm_set_ss         (x                                            ); // 0  0      0      X
@@ -195,7 +195,7 @@ inline Pt::int32_t bsGetPixel(const Pt::int32_t* img, Pt::ssize_t imgW, float x,
     return _mm_cvtsi128_si32(rfin);
 }
 
-#elif defined(PT_GFX_USEA_NEON)
+#elif defined(PT_GFX_USE_NEON)
 
 inline Pt::int32_t bsGetPixel(const Pt::int32_t* img, Pt::ssize_t imgW, float x, float y)
 {
@@ -204,25 +204,31 @@ inline Pt::int32_t bsGetPixel(const Pt::int32_t* img, Pt::ssize_t imgW, float x,
     const Pt::int32_t py = Pt::Gfx::Math::zfint(y);
 
     // Pointer to the first pixel
-    const Pt::int32_t* p0 = img + py * imgW + px;
+    const Pt::int64_t* p0 = reinterpret_cast<const Pt::int64_t*>( img + py * imgW + px );
 
 
     // Load the four neighboring pixels
-    const uint8x8_t p12      = vld1_u8    ( (const uint8_t*) &p0[0 * imgW]              ); // ? ? ? ? C C C C
-    const uint8x8_t p34      = vld1_u8    ( (const uint8_t*) &p0[1 * imgW]              ); // ? ? ? ? C C C C
+    const int32x4_t   p12      = (int32x4_t ) vdupq_n_s64     (            p0[0 * imgW]              );
+    const int32x4_t   p34      = (int32x4_t ) vdupq_n_s32     (            p0[1 * imgW]              );
+
+    // Extend to 16-bit integer
+    const int8x8_t    p12a1    = (  int8x8_t) vget_low_s16    ((int16x8_t) p12                       );
+    const int8x8_t    p12b1    = (  int8x8_t) vget_low_s16    ((int16x8_t) vdupq_n_s32(0)            );
+    const int8x8x2_t  p12x2    =              vzip_s8         (            p12a1,        p12b1       );
+    const int16x8_t   p12ex    = ( int16x8_t) vcombine_s8     (            p12x2.val[0], p12x2.val[1]);
+    const int8x8_t    p34a1    = (  int8x8_t) vget_low_s16    ((int16x8_t) p34                       );
+    const int8x8_t    p34b1    = (  int8x8_t) vget_low_s16    ((int16x8_t) vdupq_n_s32(0)            );
+    const int8x8x2_t  p34x2    =              vzip_s8         (            p34a1,        p34b1       );
+    const int16x8_t   p34ex    = ( int16x8_t) vcombine_s8     (            p34x2.val[0], p34x2.val[1]);
+
+    // Calculate weights
+    const float32x4_t zzyx     =              NEON_SET_FLT32X4(0, 0, y, x                            ); // 0  0      Y      X
+    const int32x4_t   zzyxi    =              vcvtq_s32_f32   (zzyx                                  ); // 0  0      Yi     Xi
+    const float32x4_t zzyxflor =              vcvtq_f32_s32   (zzyxi                                 ); // 0  0      Yi     Xi
 
     /*
 
-    // Extend to 16-bit integer
-    const __m128i p12ex    = _mm_unpacklo_epi8  (p12,        _mm_setzero_si128()              ); // 0 C 0 C 0 C 0 C
-    const __m128i p34ex    = _mm_unpacklo_epi8  (p34,        _mm_setzero_si128()              ); // 0 C 0 C 0 C 0 C
 
-    // Calculate weights
-    const __m128  ssx      = _mm_set_ss         (x                                            ); // 0  0      0      X
-    const __m128  ssy      = _mm_set_ss         (y                                            ); // 0  0      0      Y
-    const __m128  zzyx     = _mm_unpacklo_ps    (ssx,        ssy                              ); // 0  0      Y      X
-    const __m128i zzyxi    = _mm_cvttps_epi32   (zzyx                                         ); // 0  0      Yi     Xi
-    const __m128  zzyxflor = _mm_cvtepi32_ps    (zzyxi                                        ); // 0  0      Yi     Xi
     const __m128  zzyxfrac = _mm_sub_ps         (zzyx,       zzyxflor                         ); // 0  0      Yr     Xr
     const __m128  ooyxfrac = _mm_sub_ps         (sseFour001, zzyxfrac                         ); // ?  ?      (1-Yr) (1-Xr)
     const __m128  wxh      = _mm_unpacklo_ps    (ooyxfrac,   zzyxfrac                         ); // ?  ?      Xr     (1-Xr)
@@ -282,7 +288,7 @@ inline Pt::int32_t bsGetPixel(const Pt::int32_t* img, Pt::ssize_t imgW, float x,
     const Pt::int32_t py = Fy & 0x0000FF00;
 
     // Pointer to the first pixel
-    const Pixel4* p0 = (const Pixel4*) img + (py >> 8) * imgW + (px >> 8);
+    const Pixel4* p0 = reinterpret_cast<const Pixel4*>( img + (py >> 8) * imgW + (px >> 8) );
 
     // Load the four neighboring pixels
     const Pixel4& p1 = p0[0 + 0 * imgW];
