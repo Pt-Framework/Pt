@@ -42,7 +42,6 @@
 #include <Pt/Gfx/SGNodeEllipse.h>
 #include <Pt/Gfx/SGNodeArc.h>
 
-#include <Pt/Gfx/BlockScale.h>
 #include <Pt/Gfx/TransformStack.h>
 
 #include <Pt/Gfx/ImagePainter.h>
@@ -54,7 +53,7 @@
 #include <Pt/System/Logger.h>
 #include <Pt/System/Clock.h>
 
-#include "BilinearScale.h"
+#include "ImageScale4.h"
 
 #if defined(PT_GFX_USE_GNU_STYLE_COMPILER)
 #include <cxxabi.h>
@@ -133,7 +132,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_CHECK_RESULTING_IMAGE     0
 
 #define BENCHMARK_IMAGE_SIZE                Size(1280, 800)
-#define BENCHMARK_LOOP_COUNT                ( 500 * (BENCHMARK_RESULT_HTML ? 10 : 1) )
+#define BENCHMARK_LOOP_COUNT                ( 5000 * (BENCHMARK_RESULT_HTML ? 10 : 1) )
 
 #define BENCHMARK_TEXT                      0
 #define BENCHMARK_ROTATED_TEXT              0

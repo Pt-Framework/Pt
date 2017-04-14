@@ -59,7 +59,69 @@ static const __m128 sseFour256 = _mm_set1_ps(256);
 //           http://fastcpp.blogspot.co.id/2011/06/bilinear-pixel-interpolation-using-sse.html
 //           Blog by theowl84, 2011
 
-#if defined(PT_GFX_USEA_SSE4P1)
+// Image scaling 4 (block    - plain C   )          =     13
+// Image scaling 4 (bilinear - fixed C   )          =    136 (10.462)
+// Image scaling 4 (bilinear - SSE 2/4.1 )          =    114 ( 8.769)
+
+#if defined(PT_GFX_USE_SSE4P1)
+
+inline Pt::int32_t bsGetPixel(const Pt::int32_t* img, Pt::ssize_t imgW, float x, float y)
+{
+
+    // Floor the coordinate
+    const Pt::int32_t px = Pt::Gfx::Math::zfint(x);
+    const Pt::int32_t py = Pt::Gfx::Math::zfint(y);
+
+    // Pointer to the first pixel
+    const Pt::int32_t* p0 = img + py * imgW + px;
+
+    // Load the four neighboring pixels
+    const __m128i p12      = _mm_loadl_epi64   ( (const __m128i*) &p0[0 * imgW]              ); // ? ? ? ? C C C C
+    const __m128i p34      = _mm_loadl_epi64   ( (const __m128i*) &p0[1 * imgW]              ); // ? ? ? ? C C C C
+
+    // Convert ARGB ARGB ARGB ARGB to AAAA RRRR GGGG BBBB
+    const __m128i p1234aos = _mm_unpacklo_epi8 (p12,        p34                              );
+    const __m128i p34xx    = _mm_unpackhi_epi64(p1234aos,   _mm_setzero_si128()              );
+    const __m128i p1234soa = _mm_unpacklo_epi8 (p1234aos,   p34xx                            );
+
+    // Extend to 16-bit integer
+    const __m128i prgex    = _mm_unpacklo_epi8 (p1234soa,   _mm_setzero_si128()              );
+    const __m128i pbaex    = _mm_unpackhi_epi8 (p1234soa,   _mm_setzero_si128()              );
+
+    // Calculate weights
+    const __m128  ssx      = _mm_set_ss        (x                                            ); // 0  0      0      X
+    const __m128  ssy      = _mm_set_ss        (y                                            ); // 0  0      0      Y
+    const __m128  zzyx     = _mm_unpacklo_ps   (ssx,        ssy                              ); // 0  0      Y      X
+    const __m128  zzyxflor = _mm_floor_ps      (zzyx                                         ); // 0  0      Yi     Xi
+    const __m128  zzyxfrac = _mm_sub_ps        (zzyx,       zzyxflor                         ); // 0  0      Yr     Xr
+    const __m128  ooyxfrac = _mm_sub_ps        (sseFour001, zzyxfrac                         ); // ?  ?      (1-Yr) (1-Xr)
+    const __m128  wxh      = _mm_unpacklo_ps   (ooyxfrac,   zzyxfrac                         ); // ?  ?      Xr     (1-Xr)
+    const __m128  wx       = _mm_movelh_ps     (wxh,        wxh                              ); // Xr (1-Xr) Xr     (1-Xr)
+    const __m128  wy       = _mm_shuffle_ps    (ooyxfrac,   zzyxfrac, _MM_SHUFFLE(1, 1, 1, 1)); // Yr Yr     (1-Yr) (1-Yr)
+    const __m128  weight   = _mm_mul_ps        (wx,         wy                               );
+
+    // Convert the weights to 16-bit integer
+    const __m128  weights = _mm_mul_ps         (weight,     sseFour256                       ); // W4  .   W3  .   W2  .   W1  .
+    const __m128i weighti = _mm_cvttps_epi32   (weights                                      ); // W4i .   W3i .   W2i .   W1i .
+    const __m128i weighth = _mm_packs_epi32    (weighti,    weighti                          ); // W4i W3i W2i W1i W4i W3i W2i W1i
+
+    // Multiply each pixel with the corresponding weight
+    const __m128i resrg   = _mm_madd_epi16     (prgex,      weighth                          ); // [W1*R1 + W2*R2 | W3*R3 + W4*R4 | W1*G1 + W2*G2 | W3*G3 + W4*G4]
+    const __m128i resba   = _mm_madd_epi16     (pbaex,      weighth                          ); // [W1*B1 + W2*B2 | W3*B3 + W4*B4 | W1*A1 + W2*A2 | W3*A3 + W4*A4]
+
+    // Horizontal add the results and produce output values in 32-bit
+    const __m128i r       = _mm_hadd_epi32     (resrg,      resba                            );
+
+    // Divide the results by 256
+    const __m128i rdiv256 = _mm_srli_epi32     (r,          8                                );
+
+    // Convert back the results to 8-bit integer and pack
+    const __m128i r16     = _mm_packus_epi32   (rdiv256,    _mm_setzero_si128()              );
+    const __m128i rfin    = _mm_packus_epi16   (r16,        _mm_setzero_si128()              );
+
+    // Return the result as a 32-bit integer
+    return _mm_cvtsi128_si32(rfin);
+}
 
 #elif defined(PT_GFX_USE_SSE2)
 
@@ -81,12 +143,12 @@ inline Pt::int32_t bsGetPixel(const Pt::int32_t* img, Pt::ssize_t imgW, float x,
     const __m128i p34ex    = _mm_unpacklo_epi8  (p34,        _mm_setzero_si128()              ); // 0 C 0 C 0 C 0 C
 
     // Calculate weights
-    const __m128  ssx      = _mm_set_ss         (x                                            ); // 0 0 0  X
-    const __m128  ssy      = _mm_set_ss         (y                                            ); // 0 0 0  Y
-    const __m128  zzyx     = _mm_unpacklo_ps    (ssx,        ssy                              ); // 0 0 Y  X
-    const __m128i zzyxi    = _mm_cvttps_epi32   (zzyx                                         ); // 0 0 Yi Xi
-    const __m128  zzyxflor = _mm_cvtepi32_ps    (zzyxi                                        ); // 0 0 Yi Xi
-    const __m128  zzyxfrac = _mm_sub_ps         (zzyx,       zzyxflor                         ); // 0 0 Yr Xr
+    const __m128  ssx      = _mm_set_ss         (x                                            ); // 0  0      0      X
+    const __m128  ssy      = _mm_set_ss         (y                                            ); // 0  0      0      Y
+    const __m128  zzyx     = _mm_unpacklo_ps    (ssx,        ssy                              ); // 0  0      Y      X
+    const __m128i zzyxi    = _mm_cvttps_epi32   (zzyx                                         ); // 0  0      Yi     Xi
+    const __m128  zzyxflor = _mm_cvtepi32_ps    (zzyxi                                        ); // 0  0      Yi     Xi
+    const __m128  zzyxfrac = _mm_sub_ps         (zzyx,       zzyxflor                         ); // 0  0      Yr     Xr
     const __m128  ooyxfrac = _mm_sub_ps         (sseFour001, zzyxfrac                         ); // ?  ?      (1-Yr) (1-Xr)
     const __m128  wxh      = _mm_unpacklo_ps    (ooyxfrac,   zzyxfrac                         ); // ?  ?      Xr     (1-Xr)
     const __m128  wx       = _mm_movelh_ps      (wxh,        wxh                              ); // Xr (1-Xr) Xr     (1-Xr)
@@ -111,11 +173,13 @@ inline Pt::int32_t bsGetPixel(const Pt::int32_t* img, Pt::ssize_t imgW, float x,
     // Add the results
     const __m128i r1234    = _mm_add_epi16      (r1r,        r34                              );
     const __m128i r1234h   = _mm_shuffle_epi32  (r1234,      _MM_SHUFFLE(3, 2, 3, 2)          );
-    const __m128i r        = _mm_add_epi16      (r1234,      r1234h                           ); // C . C . C . C .
+    const __m128i r        = _mm_add_epi16      (r1234,      r1234h                           );
 
-    // Convert back to 8-bit integer
-    const __m128i r08      = _mm_srli_epi16     (r,          8                                ); // 0 C 0 C 0 C 0 C
-    const __m128i rfin     = _mm_packus_epi16   (r08,        _mm_setzero_si128()              ); // 0 0 0 0 C C C C
+    // Divide the results by 256
+    const __m128i rdiv256  = _mm_srli_epi16     (r,          8                                );
+
+    // Convert back the results to 8-bit integer and pack
+    const __m128i rfin     = _mm_packus_epi16   (rdiv256,    _mm_setzero_si128()              );
 
     // Return the result as a 32-bit integer
     return _mm_cvtsi128_si32(rfin);
@@ -180,7 +244,31 @@ inline Pt::int32_t bsGetPixel(const Pt::int32_t* img, Pt::ssize_t imgW, float x,
 // ======================================================================================
 
 template <typename InIterT, typename OutIterT>
-void bilinearScale(
+void blockScale4(
+    InIterT  from, Pt::ssize_t fromWidth, Pt::ssize_t fromHeight,
+    OutIterT to,   Pt::ssize_t toWidth,   Pt::ssize_t toHeight
+)
+{
+    const Pt::int32_t* src = (const Pt::int32_t*) from->base();
+          Pt::int32_t* dst = (      Pt::int32_t*) to  ->base();
+
+    const float incX = (float) fromWidth  / (float) toWidth;
+    const float incY = (float) fromHeight / (float) toHeight;
+
+    float itrY = 0;
+    for(Pt::ssize_t y = 0; y < toHeight; ++y) {
+        const Pt::int32_t srcY   = Pt::Gfx::Math::zrint(itrY)  * fromWidth;
+              float       itrX = 0;
+        for(Pt::ssize_t x = 0; x < toWidth; ++x) {
+            *dst++ = src[srcY + Pt::Gfx::Math::zrint(itrX)];
+            itrX += incX;
+        }
+        itrY += incY;
+    }
+}
+
+template <typename InIterT, typename OutIterT>
+void bilinearScale4(
     InIterT  from, Pt::ssize_t fromWidth, Pt::ssize_t fromHeight,
     OutIterT to,   Pt::ssize_t toWidth,   Pt::ssize_t toHeight
 )

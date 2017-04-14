@@ -326,9 +326,9 @@ static void doBenchmarkImageOperation()
     // Image scaling
     if(BENCHMARK_RESULT_HTML || BENCHMARK_IMAGE_OPERATION) {
         time1 = benchImageScalingBlock(BENCHMARK_LOOP_COUNT);
-        std::clog << "    Image scaling (block   )                         = " << std::setw(6) << time1 << std::endl;
+        std::clog << "    Image scaling 4 (block   )                       = " << std::setw(6) << time1 << std::endl;
         time2 = benchImageScalingBilinear(BENCHMARK_LOOP_COUNT);
-        std::clog << "    Image scaling (bilinear)                         = " << std::setw(6) << time2
+        std::clog << "    Image scaling 4 (bilinear)                       = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         if(!BENCHMARK_RESULT_HTML) std::clog << std::endl;
     }

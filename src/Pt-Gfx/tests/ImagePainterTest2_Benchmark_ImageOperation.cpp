@@ -8,7 +8,7 @@ static size_t benchImageScalingBlock(int loopCount)
         Pt::System::Clock clock;
         clock.start();
 
-        blockScale(
+        blockScale4(
             textureWithWhiteBackground.begin(), textureWithWhiteBackground.width(), textureWithWhiteBackground.height(),
             scaledImage               .begin(), scaledImage               .width(), scaledImage               .height()
         );
@@ -30,7 +30,7 @@ static size_t benchImageScalingBilinear(int loopCount)
         Pt::System::Clock clock;
         clock.start();
 
-        bilinearScale(
+        bilinearScale4(
             textureWithWhiteBackground.begin(), textureWithWhiteBackground.width(), textureWithWhiteBackground.height(),
             scaledImage               .begin(), scaledImage               .width(), scaledImage               .height()
         );
