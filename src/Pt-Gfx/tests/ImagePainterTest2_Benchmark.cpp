@@ -337,6 +337,9 @@ static void doBenchmarkImageOperation()
     if(BENCHMARK_RESULT_HTML || BENCHMARK_IMAGE_OPERATION) {
         time1 = benchImageRotationBlock(BENCHMARK_LOOP_COUNT);
         std::clog << "    Image rotation 4 (block   )                      = " << std::setw(6) << time1 << std::endl;
+        time2 = benchImageRotationBilinear(BENCHMARK_LOOP_COUNT);
+        std::clog << "    Image rotation 4 (bilinear)                      = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         if(!BENCHMARK_RESULT_HTML) std::clog << std::endl;
     }
 }

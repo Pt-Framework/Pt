@@ -45,6 +45,15 @@ static void testImageOperation(const char* title, Image& image, Painter& painter
     painter.drawText( PointF(x, y + scaledImage.height() + 20), "Block Rotate" );
     x += scaledImage.width() + 20;
 
-    sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
+    // Bilinear rotate
+    bilinearRotate4(
+        textureWithWhiteBackground.begin(), textureWithWhiteBackground.width(), textureWithWhiteBackground.height(),
+        scaledImage               .begin(), scaledImage               .width(), scaledImage               .height(),
+        30
+    );
+    painter.drawImage(PointF(x, y), scaledImage);
+    painter.drawText( PointF(x, y + scaledImage.height() + 20), "Bilinear Rotate" );
+    x += scaledImage.width() + 20;
 
+    sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }
