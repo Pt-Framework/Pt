@@ -68,15 +68,6 @@ static const float32x4_t neonFour256 = vdupq_n_f32(256);
 //           http://fastcpp.blogspot.co.id/2011/06/bilinear-pixel-interpolation-using-sse.html
 //           Blog by theowl84, 2011
 
-// x86_64
-//     Image scaling 4 (block    - plain C   )          =     10
-//     Image scaling 4 (bilinear - fixed C   )          =    114 (11.400)
-//     Image scaling 4 (bilinear - SSE 2/4.1 )          =    114 (11.400)
-
-// Arm
-//     Image scaling 4 (block    - plain C   )          =    142
-//     Image scaling 4 (bilinear - fixed C   )          =   1417 ( 9.979)
-
 #if defined(PT_GFX_USE_SSE4P1)
 
 static inline Pt::uint32_t bsGetPixel(const Pt::uint32_t* img, Pt::ssize_t imgW, float x, float y)
@@ -369,7 +360,7 @@ inline void bilinearScale4(
     }
 }
 
-template <typename InIterT, typename OutIterT>
+template <bool full, typename InIterT, typename OutIterT>
 inline void blockRotate4(
     InIterT      from, Pt::ssize_t fromWidth, Pt::ssize_t fromHeight,
     OutIterT     to,   Pt::ssize_t toWidth,   Pt::ssize_t toHeight,
@@ -399,6 +390,7 @@ inline void blockRotate4(
     const double      r = -deg * (M_PI / 180);
     const Pt::int32_t s = Pt::Gfx::Math::zrint( 256 * ::sin(r) );
     const Pt::int32_t c = Pt::Gfx::Math::zrint( 256 * ::cos(r) );
+    const Pt::int32_t f = ::abs(s) + ::abs(c);
 
     // Walk through the row pixels
     Pt::int32_t itrY = 0;
@@ -407,8 +399,8 @@ inline void blockRotate4(
         Pt::int32_t itrX = 0;
         for(Pt::ssize_t x = 0; x < toWidth; ++x) {
             // Get the centered source coordinates
-            const Pt::int32_t srcX = (itrX - midX) >> 8;
-            const Pt::int32_t srcY = (itrY - midY) >> 8;
+            const Pt::int32_t srcX = full ? ( (itrX - midX) / f ) : ( (itrX - midX) >> 8 );
+            const Pt::int32_t srcY = full ? ( (itrY - midY) / f ) : ( (itrY - midY) >> 8 );
             // Rotate the coordinates and offset them back
             const Pt::int32_t rotX =  c * srcX + s * srcY + midX;
             const Pt::int32_t rotY = -s * srcX + c * srcY + midY;
@@ -431,7 +423,7 @@ inline void blockRotate4(
     }
 }
 
-template <typename InIterT, typename OutIterT>
+template <bool full, typename InIterT, typename OutIterT>
 inline void bilinearRotate4(
     InIterT      from, Pt::ssize_t fromWidth, Pt::ssize_t fromHeight,
     OutIterT     to,   Pt::ssize_t toWidth,   Pt::ssize_t toHeight,
@@ -461,6 +453,7 @@ inline void bilinearRotate4(
     const double      r = -deg * (M_PI / 180);
     const Pt::int32_t s = Pt::Gfx::Math::zrint( 256 * ::sin(r) );
     const Pt::int32_t c = Pt::Gfx::Math::zrint( 256 * ::cos(r) );
+    const Pt::int32_t f = ::abs(s) + ::abs(c);
 
     // Walk through the row pixels
     Pt::int32_t itrY = 0;
@@ -469,8 +462,8 @@ inline void bilinearRotate4(
         Pt::int32_t itrX = 0;
         for(Pt::ssize_t x = 0; x < toWidth; ++x) {
             // Get the centered source coordinates
-            const Pt::int32_t srcX = (itrX - midX) >> 8;
-            const Pt::int32_t srcY = (itrY - midY) >> 8;
+            const Pt::int32_t srcX = full ? ( (itrX - midX) / f ) : ( (itrX - midX) >> 8 );
+            const Pt::int32_t srcY = full ? ( (itrY - midY) / f ) : ( (itrY - midY) >> 8 );
             // Rotate the coordinates and offset them back
             const Pt::int32_t rotX =  c * srcX + s * srcY + midX;
             const Pt::int32_t rotY = -s * srcX + c * srcY + midY;
@@ -490,3 +483,15 @@ inline void bilinearRotate4(
 
 
 #endif
+
+/*
+-----------------------------
+x86_64 (i5-4460; 64-Bit Mode)
+-----------------------------
+*/
+
+/*
+---------------------------------------------------
+Arm (v7l; A53; BCM2709; RaspberryPi 3; 32-bit Mode)
+---------------------------------------------------
+*/

@@ -42,6 +42,7 @@ static size_t benchImageScalingBilinear(int loopCount)
     return sum;
 }
 
+template <bool full>
 static size_t benchImageRotationBlock(int loopCount)
 {
     size_t sum = 0;
@@ -52,7 +53,7 @@ static size_t benchImageRotationBlock(int loopCount)
         Pt::System::Clock clock;
         clock.start();
 
-        blockRotate4(
+        blockRotate4<full>(
             textureWithWhiteBackground.begin(), textureWithWhiteBackground.width(), textureWithWhiteBackground.height(),
             scaledImage               .begin(), scaledImage               .width(), scaledImage               .height(),
             30
@@ -65,6 +66,7 @@ static size_t benchImageRotationBlock(int loopCount)
     return sum;
 }
 
+template <bool full>
 static size_t benchImageRotationBilinear(int loopCount)
 {
     size_t sum = 0;
@@ -75,7 +77,7 @@ static size_t benchImageRotationBilinear(int loopCount)
         Pt::System::Clock clock;
         clock.start();
 
-        bilinearRotate4(
+        bilinearRotate4<full>(
             textureWithWhiteBackground.begin(), textureWithWhiteBackground.width(), textureWithWhiteBackground.height(),
             scaledImage               .begin(), scaledImage               .width(), scaledImage               .height(),
             30
