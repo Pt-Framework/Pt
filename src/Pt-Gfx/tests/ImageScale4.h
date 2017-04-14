@@ -69,13 +69,18 @@ static const float32x4_t neonFour256 = vdupq_n_f32(256);
 //     Image scaling 4 (bilinear - fixed C   )          =    136 (13.600)
 //     Image scaling 4 (bilinear - SSE 2/4.1 )          =    114 (11.400)
 
+//    Image scaling 4 (block   )                       =      9
+//    Image scaling 4 (bilinear)                       =    114 (12.667)
+
+
+
 // Arm
 //     Image scaling 4 (block    - plain C   )          =    141
 //     Image scaling 4 (bilinear - fixed C   )          =   1520 (10.780)
 
 #if defined(PT_GFX_USE_SSE4P1)
 
-inline Pt::uint32_t bsGetPixel(const Pt::uint32_t* img, Pt::ssize_t imgW, float x, float y)
+static inline Pt::uint32_t bsGetPixel(const Pt::uint32_t* img, Pt::ssize_t imgW, float x, float y)
 {
 
     // Floor the coordinate
@@ -135,7 +140,7 @@ inline Pt::uint32_t bsGetPixel(const Pt::uint32_t* img, Pt::ssize_t imgW, float 
 
 #elif defined(PT_GFX_USE_SSE2)
 
-inline Pt::uint32_t bsGetPixel(const Pt::uint32_t* img, Pt::ssize_t imgW, float x, float y)
+static inline Pt::uint32_t bsGetPixel(const Pt::uint32_t* img, Pt::ssize_t imgW, float x, float y)
 {
     // Floor the coordinate
     const Pt::int32_t px = Pt::Gfx::Math::zfint(x);
@@ -197,7 +202,7 @@ inline Pt::uint32_t bsGetPixel(const Pt::uint32_t* img, Pt::ssize_t imgW, float 
 
 #else
 
-inline Pt::uint32_t bsGetPixel(const Pt::uint32_t* img, Pt::ssize_t imgW, float x, float y)
+static inline Pt::uint32_t bsGetPixel(const Pt::uint32_t* img, Pt::ssize_t imgW, Pt::uint32_t Fx, Pt::uint32_t Fy)
 {
     // Used for processing the pixels
     union Pixel4 {
@@ -205,16 +210,12 @@ inline Pt::uint32_t bsGetPixel(const Pt::uint32_t* img, Pt::ssize_t imgW, float 
         Pt::uint32_t i;
     };
 
-    // Convert to fixed-points
-    const Pt::uint32_t Fx = Pt::Gfx::Math::zrint(x * 256);
-    const Pt::uint32_t Fy = Pt::Gfx::Math::zrint(y * 256);
-
     // Floor the coordinate
-    const Pt::uint32_t px = Fx & 0x0000FF00;
-    const Pt::uint32_t py = Fy & 0x0000FF00;
+    const Pt::uint32_t px = Fx & 0xFFFF0000;
+    const Pt::uint32_t py = Fy & 0xFFFF0000;
 
     // Pointer to the first pixel
-    const Pixel4* p0 = reinterpret_cast<const Pixel4*>( img + (py >> 8) * imgW + (px >> 8) );
+    const Pixel4* p0 = reinterpret_cast<const Pixel4*>( img + (py >> 16) * imgW + (px >> 16) );
 
     // Load the four neighboring pixels
     const Pixel4& p1 = p0[0 * imgW + 0];
@@ -223,15 +224,15 @@ inline Pt::uint32_t bsGetPixel(const Pt::uint32_t* img, Pt::ssize_t imgW, float 
     const Pixel4& p4 = p0[1 * imgW + 1];
 
     // Calculate the weights for each pixel
-    const Pt::uint32_t fx  = Fx & 0x000000FF;
-    const Pt::uint32_t fy  = Fy & 0x000000FF;
-    const Pt::uint32_t fx1 = 255 - fx;
-    const Pt::uint32_t fy1 = 255 - fy;
+    const Pt::uint32_t fx  = Fx & 0x0000FFFF;
+    const Pt::uint32_t fy  = Fy & 0x0000FFFF;
+    const Pt::uint32_t fx1 = 65535 - fx;
+    const Pt::uint32_t fy1 = 65535 - fy;
 
-    const Pt::uint32_t w1 = fx1 * fy1;
-    const Pt::uint32_t w2 = fx  * fy1;
-    const Pt::uint32_t w3 = fx1 * fy;
-    const Pt::uint32_t w4 = fx  * fy;
+    const Pt::uint32_t w1 = (fx1 * fy1) >> 16;
+    const Pt::uint32_t w2 = (fx  * fy1) >> 16;
+    const Pt::uint32_t w3 = (fx1 * fy ) >> 16;
+    const Pt::uint32_t w4 = (fx  * fy ) >> 16;
 
     // Calculate the weighted sum of pixels
     Pixel4 r;
@@ -284,12 +285,19 @@ void bilinearScale4(
     const Pt::uint32_t* src = reinterpret_cast<const Pt::uint32_t*>( from->base() );
           Pt::uint32_t* dst = reinterpret_cast<      Pt::uint32_t*>( to  ->base() );
 
-    const float incX = (float) fromWidth  / (float) toWidth;
-    const float incY = (float) fromHeight / (float) toHeight;
+#if defined(PT_GFX_USE_SSE4P1) || defined(PT_GFX_USE_SSE2)
+    typedef float ValueT;
+    const ValueT incX = (ValueT) fromWidth  / toWidth;
+    const ValueT incY = (ValueT) fromHeight / toHeight;
+#else
+    typedef Pt::uint32_t ValueT;
+    const ValueT incX = 65536 * fromWidth  / toWidth;
+    const ValueT incY = 65536 * fromHeight / toHeight;
+#endif
 
-    float itrY = 0;
+    ValueT itrY = 0;
     for(Pt::ssize_t y = 0; y < toHeight; ++y) {
-        float itrX = 0;
+        ValueT itrX = 0;
         for(Pt::ssize_t x = 0; x < toWidth; ++x) {
             *dst++ = bsGetPixel(src, fromWidth, itrX, itrY);
             itrX += incX;
