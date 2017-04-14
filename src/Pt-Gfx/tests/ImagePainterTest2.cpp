@@ -644,7 +644,7 @@ int main(int argc, char* args[])
         if(!BENCHMARK_RESULT_HTML || !BENCHMARK_RESULT_HTML_SIDE_BY_SIDE) std::clog << "Pt::Gfx - CompositionMode::SourceCopy" << std::endl;
         doBenchmark(CompositionMode::SourceCopy);
 
-        if(!BENCHMARK_RESULT_HTML || !BENCHMARK_RESULT_HTML_SIDE_BY_SIDE) std::clog << "Pt::Gfx - Image Scaling" << std::endl;
+        if(!BENCHMARK_RESULT_HTML || !BENCHMARK_RESULT_HTML_SIDE_BY_SIDE) std::clog << "Pt::Gfx - Image Operation" << std::endl;
         doBenchmarkImageOperation();
 
         if(BENCHMARK_RESULT_HTML && BENCHMARK_RESULT_HTML_SIDE_BY_SIDE) {
@@ -656,7 +656,7 @@ int main(int argc, char* args[])
         if(!BENCHMARK_RESULT_HTML || !BENCHMARK_RESULT_HTML_SIDE_BY_SIDE) std::clog << "Pt::Gfx - CompositionMode::SourceOver" << std::endl;
         doBenchmark(CompositionMode::SourceOver);
 
-        if(!BENCHMARK_RESULT_HTML || !BENCHMARK_RESULT_HTML_SIDE_BY_SIDE) std::clog << "Pt::Gfx - Image Scaling" << std::endl;
+        if(!BENCHMARK_RESULT_HTML || !BENCHMARK_RESULT_HTML_SIDE_BY_SIDE) std::clog << "Pt::Gfx - Image Operation" << std::endl;
         doBenchmarkImageOperation();
 
         if(BENCHMARK_RESULT_HTML && BENCHMARK_RESULT_HTML_SIDE_BY_SIDE) {

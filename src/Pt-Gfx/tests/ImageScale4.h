@@ -405,8 +405,8 @@ inline void blockRotate4(
             const Pt::int32_t rotX =  c * srcX + s * srcY + midX;
             const Pt::int32_t rotY = -s * srcX + c * srcY + midY;
             // Calculate the read coordinates
-            const Pt::uint32_t getX = (rotX + 32768) >> 16;
-            const Pt::uint32_t getY = (rotY + 32768) >> 16;
+            const Pt::int32_t getX = (rotX + 32768) >> 16;
+            const Pt::int32_t getY = (rotY + 32768) >> 16;
             // Check if the any of the coordinates is outside the image
             if(getX < 0 || getY < 0 || getX >= fromWidth || getY >= fromHeight) {
                 *dst++ = fil;
@@ -488,6 +488,15 @@ inline void bilinearRotate4(
 -----------------------------
 x86_64 (i5-4460; 64-Bit Mode)
 -----------------------------
+                                                   (Time) (Factor)
+                                                   ------ --------
+Image scaling  4 (block               )          =     10
+Image scaling  4 (bilinear            )          =    121 (12.100)
+
+Image rotation 4 (block    - normal   )          =     26
+Image rotation 4 (block    - fullscale)          =     56 ( 2.154)
+Image rotation 4 (bilinear - normal   )          =    200 ( 7.692)
+Image rotation 4 (bilinear - fullscale)          =    295 (11.346)
 */
 
 /*
