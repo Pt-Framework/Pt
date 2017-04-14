@@ -65,9 +65,9 @@ static const float32x4_t neonFour256 = vdupq_n_f32(256);
 //           Blog by theowl84, 2011
 
 // x86_64
-//     Image scaling 4 (block    - plain C   )          =     13
-//     Image scaling 4 (bilinear - fixed C   )          =    136 (10.462)
-//     Image scaling 4 (bilinear - SSE 2/4.1 )          =    114 ( 8.769)
+//     Image scaling 4 (block    - plain C   )          =     10
+//     Image scaling 4 (bilinear - fixed C   )          =    136 (13.600)
+//     Image scaling 4 (bilinear - SSE 2/4.1 )          =    114 (11.400)
 
 // Arm
 //     Image scaling 4 (block    - plain C   )          =    333
@@ -75,7 +75,7 @@ static const float32x4_t neonFour256 = vdupq_n_f32(256);
 
 #if defined(PT_GFX_USE_SSE4P1)
 
-inline Pt::int32_t bsGetPixel(const Pt::int32_t* img, Pt::ssize_t imgW, float x, float y)
+inline Pt::uint32_t bsGetPixel(const Pt::uint32_t* img, Pt::ssize_t imgW, float x, float y)
 {
 
     // Floor the coordinate
@@ -83,7 +83,7 @@ inline Pt::int32_t bsGetPixel(const Pt::int32_t* img, Pt::ssize_t imgW, float x,
     const Pt::int32_t py = Pt::Gfx::Math::zfint(y);
 
     // Pointer to the first pixel
-    const Pt::int32_t* p0 = img + py * imgW + px;
+    const Pt::uint32_t* p0 = img + py * imgW + px;
 
     // Load the four neighboring pixels
     const __m128i p12      = _mm_loadl_epi64   ( (const __m128i*) &p0[0 * imgW]              );
@@ -130,19 +130,19 @@ inline Pt::int32_t bsGetPixel(const Pt::int32_t* img, Pt::ssize_t imgW, float x,
     const __m128i rfin    = _mm_packus_epi16   (r16,        _mm_setzero_si128()              );
 
     // Return the result as a 32-bit integer
-    return _mm_cvtsi128_si32(rfin);
+    return static_cast<Pt::uint32_t>( _mm_cvtsi128_si32(rfin) );
 }
 
 #elif defined(PT_GFX_USE_SSE2)
 
-inline Pt::int32_t bsGetPixel(const Pt::int32_t* img, Pt::ssize_t imgW, float x, float y)
+inline Pt::uint32_t bsGetPixel(const Pt::uint32_t* img, Pt::ssize_t imgW, float x, float y)
 {
     // Floor the coordinate
     const Pt::int32_t px = Pt::Gfx::Math::zfint(x);
     const Pt::int32_t py = Pt::Gfx::Math::zfint(y);
 
     // Pointer to the first pixel
-    const Pt::int32_t* p0 = img + py * imgW + px;
+    const Pt::uint32_t* p0 = img + py * imgW + px;
 
     // Load the four neighboring pixels
     const __m128i p12      = _mm_loadl_epi64    ( (const __m128i*) &p0[0 * imgW]              );
@@ -192,7 +192,7 @@ inline Pt::int32_t bsGetPixel(const Pt::int32_t* img, Pt::ssize_t imgW, float x,
     const __m128i rfin     = _mm_packus_epi16   (rdiv256,    _mm_setzero_si128()              );
 
     // Return the result as a 32-bit integer
-    return _mm_cvtsi128_si32(rfin);
+    return static_cast<Pt::uint32_t>( _mm_cvtsi128_si32(rfin) );
 }
 
 #else
@@ -260,15 +260,15 @@ void blockScale4(
     const Pt::uint32_t* src = reinterpret_cast<const Pt::uint32_t*>( from->base() );
           Pt::uint32_t* dst = reinterpret_cast<      Pt::uint32_t*>( to  ->base() );
 
-    const float incX = (float) fromWidth  / (float) toWidth;
-    const float incY = (float) fromHeight / (float) toHeight;
+    const Pt::uint32_t incX = 65536 * fromWidth  / toWidth;
+    const Pt::uint32_t incY = 65536 * fromHeight / toHeight;
 
-    float itrY = 0;
+    Pt::uint32_t itrY = 0;
     for(Pt::ssize_t y = 0; y < toHeight; ++y) {
-        const Pt::int32_t srcY   = Pt::Gfx::Math::zrint(itrY)  * fromWidth;
-              float       itrX = 0;
+        const Pt::int32_t  srcY = ( (itrY + 32768) >> 16 ) * fromWidth;
+              Pt::uint32_t itrX = 0;
         for(Pt::ssize_t x = 0; x < toWidth; ++x) {
-            *dst++ = src[srcY + Pt::Gfx::Math::zrint(itrX)];
+            *dst++ = src[ srcY + ( (itrX + 32768) >> 16 ) ];
             itrX += incX;
         }
         itrY += incY;
