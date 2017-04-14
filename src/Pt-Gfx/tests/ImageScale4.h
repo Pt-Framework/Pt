@@ -66,17 +66,12 @@ static const float32x4_t neonFour256 = vdupq_n_f32(256);
 
 // x86_64
 //     Image scaling 4 (block    - plain C   )          =     10
-//     Image scaling 4 (bilinear - fixed C   )          =    136 (13.600)
+//     Image scaling 4 (bilinear - fixed C   )          =    114 (11.400)
 //     Image scaling 4 (bilinear - SSE 2/4.1 )          =    114 (11.400)
 
-//    Image scaling 4 (block   )                       =      9
-//    Image scaling 4 (bilinear)                       =    114 (12.667)
-
-
-
 // Arm
-//     Image scaling 4 (block    - plain C   )          =    141
-//     Image scaling 4 (bilinear - fixed C   )          =   1520 (10.780)
+//     Image scaling 4 (block    - plain C   )          =    142
+//     Image scaling 4 (bilinear - fixed C   )          =   1417 ( 9.979)
 
 #if defined(PT_GFX_USE_SSE4P1)
 
