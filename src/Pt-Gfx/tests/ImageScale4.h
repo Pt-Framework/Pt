@@ -195,117 +195,43 @@ inline Pt::int32_t bsGetPixel(const Pt::int32_t* img, Pt::ssize_t imgW, float x,
     return _mm_cvtsi128_si32(rfin);
 }
 
-#elif defined(PT_GFX_USE_NEON)
-
-inline Pt::int32_t bsGetPixel(const Pt::int32_t* img, Pt::ssize_t imgW, float x, float y)
-{
-    // Floor the coordinate
-    const Pt::int32_t px = Pt::Gfx::Math::zfint(x);
-    const Pt::int32_t py = Pt::Gfx::Math::zfint(y);
-
-    // Pointer to the first pixel
-    const Pt::int64_t* p0 = reinterpret_cast<const Pt::int64_t*>( img + py * imgW + px );
-
-
-    // Load the four neighboring pixels
-    const int32x4_t   p12      = (int32x4_t ) vdupq_n_s64     (            p0[0 * imgW]              );
-    const int32x4_t   p34      = (int32x4_t ) vdupq_n_s32     (            p0[1 * imgW]              );
-
-    // Extend to 16-bit integer
-    const int8x8_t    p12a1    = (  int8x8_t) vget_low_s16    ((int16x8_t) p12                       );
-    const int8x8_t    p12b1    = (  int8x8_t) vget_low_s16    ((int16x8_t) vdupq_n_s32(0)            );
-    const int8x8x2_t  p12x2    =              vzip_s8         (            p12a1,        p12b1       );
-    const int16x8_t   p12ex    = ( int16x8_t) vcombine_s8     (            p12x2.val[0], p12x2.val[1]);
-    const int8x8_t    p34a1    = (  int8x8_t) vget_low_s16    ((int16x8_t) p34                       );
-    const int8x8_t    p34b1    = (  int8x8_t) vget_low_s16    ((int16x8_t) vdupq_n_s32(0)            );
-    const int8x8x2_t  p34x2    =              vzip_s8         (            p34a1,        p34b1       );
-    const int16x8_t   p34ex    = ( int16x8_t) vcombine_s8     (            p34x2.val[0], p34x2.val[1]);
-
-    // Calculate weights
-    const float32x4_t zzyx     =              NEON_SET_FLT32X4(0, 0, y, x                            ); // 0  0      Y      X
-    const int32x4_t   zzyxi    =              vcvtq_s32_f32   (zzyx                                  ); // 0  0      Yi     Xi
-    const float32x4_t zzyxflor =              vcvtq_f32_s32   (zzyxi                                 ); // 0  0      Yi     Xi
-
-    /*
-
-
-    const __m128  zzyxfrac = _mm_sub_ps         (zzyx,       zzyxflor                         ); // 0  0      Yr     Xr
-    const __m128  ooyxfrac = _mm_sub_ps         (sseFour001, zzyxfrac                         ); // ?  ?      (1-Yr) (1-Xr)
-    const __m128  wxh      = _mm_unpacklo_ps    (ooyxfrac,   zzyxfrac                         ); // ?  ?      Xr     (1-Xr)
-    const __m128  wx       = _mm_movelh_ps      (wxh,        wxh                              ); // Xr (1-Xr) Xr     (1-Xr)
-    const __m128  wy       = _mm_shuffle_ps     (ooyxfrac,   zzyxfrac, _MM_SHUFFLE(1, 1, 1, 1)); // Yr Yr     (1-Yr) (1-Yr)
-    const __m128  weight   = _mm_mul_ps         (wx,         wy                               );
-
-    // Convert the weights to 16-bit integer
-    const __m128  sweight  = _mm_mul_ps         (weight,     sseFour256                       ); // W4  .   W3  .   W2  .   W1  .
-    const __m128i sweighti = _mm_cvttps_epi32   (sweight                                      ); // W4i .   W3i .   W2i .   W1i .
-    const __m128i weighth  = _mm_packs_epi32    (sweighti,   _mm_setzero_si128()              ); // 0   0   0   0   W4i W3i W2i W1i
-
-    // Shuffle the weights
-    const __m128i w12h     = _mm_shufflelo_epi16(weighth,    _MM_SHUFFLE(1, 1, 0, 0)          );
-    const __m128i w12      = _mm_unpacklo_epi16 (w12h,       w12h                             ); // W2i W2i W2i W2i W1i W1i W1i W1i
-    const __m128i w34h     = _mm_shufflelo_epi16(weighth,    _MM_SHUFFLE(3, 3, 2, 2)          );
-    const __m128i w34      = _mm_unpacklo_epi16 (w34h,       w34h                             ); // W4i W4i W4i W4i W3i W3i W3i W3i
-
-    // Multiply each pixel with the corresponding weight
-    const __m128i r1r      = _mm_mullo_epi16    (p12ex,      w12                              );
-    const __m128i r34      = _mm_mullo_epi16    (p34ex,      w34                              );
-
-    // Add the results
-    const __m128i r1234    = _mm_add_epi16      (r1r,        r34                              );
-    const __m128i r1234h   = _mm_shuffle_epi32  (r1234,      _MM_SHUFFLE(3, 2, 3, 2)          );
-    const __m128i r        = _mm_add_epi16      (r1234,      r1234h                           );
-
-    // Divide the results by 256
-    const __m128i rdiv256  = _mm_srli_epi16     (r,          8                                );
-
-    // Convert back the results to 8-bit integer and pack
-    const __m128i rfin     = _mm_packus_epi16   (rdiv256,    _mm_setzero_si128()              );
-
-    // Return the result as a 32-bit integer
-    return _mm_cvtsi128_si32(rfin);
-    */
-
-    return 0;
-}
-
 #else
 
-inline Pt::int32_t bsGetPixel(const Pt::int32_t* img, Pt::ssize_t imgW, float x, float y)
+inline Pt::uint32_t bsGetPixel(const Pt::uint32_t* img, Pt::ssize_t imgW, float x, float y)
 {
     // Used for processing the pixels
     union Pixel4 {
-        Pt::uint8_t c[4];
-        Pt::int32_t i;
+        Pt::uint8_t  c[4];
+        Pt::uint32_t i;
     };
 
     // Convert to fixed-points
-    const Pt::int32_t Fx = Pt::Gfx::Math::zrint(x * 256);
-    const Pt::int32_t Fy = Pt::Gfx::Math::zrint(y * 256);
+    const Pt::uint32_t Fx = Pt::Gfx::Math::zrint(x * 256);
+    const Pt::uint32_t Fy = Pt::Gfx::Math::zrint(y * 256);
 
     // Floor the coordinate
-    const Pt::int32_t px = Fx & 0x0000FF00;
-    const Pt::int32_t py = Fy & 0x0000FF00;
+    const Pt::uint32_t px = Fx & 0x0000FF00;
+    const Pt::uint32_t py = Fy & 0x0000FF00;
 
     // Pointer to the first pixel
     const Pixel4* p0 = reinterpret_cast<const Pixel4*>( img + (py >> 8) * imgW + (px >> 8) );
 
     // Load the four neighboring pixels
-    const Pixel4& p1 = p0[0 + 0 * imgW];
-    const Pixel4& p2 = p0[1 + 0 * imgW];
-    const Pixel4& p3 = p0[0 + 1 * imgW];
-    const Pixel4& p4 = p0[1 + 1 * imgW];
+    const Pixel4& p1 = p0[0 * imgW + 0];
+    const Pixel4& p2 = p0[0 * imgW + 1];
+    const Pixel4& p3 = p0[1 * imgW + 0];
+    const Pixel4& p4 = p0[1 * imgW + 1];
 
     // Calculate the weights for each pixel
-    const Pt::int32_t fx  = Fx & 0x000000FF;
-    const Pt::int32_t fy  = Fy & 0x000000FF;
-    const Pt::int32_t fx1 = 255 - fx;
-    const Pt::int32_t fy1 = 255 - fy;
+    const Pt::uint32_t fx  = Fx & 0x000000FF;
+    const Pt::uint32_t fy  = Fy & 0x000000FF;
+    const Pt::uint32_t fx1 = 255 - fx;
+    const Pt::uint32_t fy1 = 255 - fy;
 
-    const Pt::int32_t w1 = fx1 * fy1;
-    const Pt::int32_t w2 = fx  * fy1;
-    const Pt::int32_t w3 = fx1 * fy;
-    const Pt::int32_t w4 = fx  * fy;
+    const Pt::uint32_t w1 = fx1 * fy1;
+    const Pt::uint32_t w2 = fx  * fy1;
+    const Pt::uint32_t w3 = fx1 * fy;
+    const Pt::uint32_t w4 = fx  * fy;
 
     // Calculate the weighted sum of pixels
     Pixel4 r;
@@ -331,8 +257,8 @@ void blockScale4(
     OutIterT to,   Pt::ssize_t toWidth,   Pt::ssize_t toHeight
 )
 {
-    const Pt::int32_t* src = (const Pt::int32_t*) from->base();
-          Pt::int32_t* dst = (      Pt::int32_t*) to  ->base();
+    const Pt::uint32_t* src = reinterpret_cast<const Pt::uint32_t*>( from->base() );
+          Pt::uint32_t* dst = reinterpret_cast<      Pt::uint32_t*>( to  ->base() );
 
     const float incX = (float) fromWidth  / (float) toWidth;
     const float incY = (float) fromHeight / (float) toHeight;
@@ -355,8 +281,8 @@ void bilinearScale4(
     OutIterT to,   Pt::ssize_t toWidth,   Pt::ssize_t toHeight
 )
 {
-    const Pt::int32_t* src = (const Pt::int32_t*) from->base();
-          Pt::int32_t* dst = (      Pt::int32_t*) to  ->base();
+    const Pt::uint32_t* src = reinterpret_cast<const Pt::uint32_t*>( from->base() );
+          Pt::uint32_t* dst = reinterpret_cast<      Pt::uint32_t*>( to  ->base() );
 
     const float incX = (float) fromWidth  / (float) toWidth;
     const float incY = (float) fromHeight / (float) toHeight;
