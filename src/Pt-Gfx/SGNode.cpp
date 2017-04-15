@@ -101,6 +101,7 @@ void SGNode::draw(ImagePainter2& painter, const TransformT* transform_)
             if(!eCur.node->_brush.isNull()) {
                 // If the brush is a texture or a 2D gradient, adjust its rotation as needed
                 if(eCur.node->_brush.isTexture() || eCur.node->_brush.isGradient()) {
+                    // ### TODO: Texture scaling ??? ###
                     // Calculate the new gradient rotation and ensure that it is within the acceptable range
                     const ValueT orgRot = eCur.node->_brush.rotation();
                           ValueT newRot = orgRot + transform.extractRotation();
