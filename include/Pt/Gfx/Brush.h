@@ -67,6 +67,14 @@ class PT_GFX_API Brush
             Conical     = 5
         };
 
+        enum TextureRotationMode
+        {
+            Block,
+            BlockFullscale,
+            Bilinear,
+            BilinearFullscale
+        };
+
         typedef ImageView::ConstPixel ConstPixel;
 
     public:
@@ -76,7 +84,7 @@ class PT_GFX_API Brush
 
         Brush(const Color& color);
 
-        Brush(const Image& texture, Pt::int32_t offsetX = 0, Pt::int32_t offsetY = 0, float rotDeg = 0.0f, const Color& colorFill = Color::fromRgb8(0, 0, 0, 255), bool fullScale = true);
+        Brush(const Image& texture, Pt::int32_t offsetX = 0, Pt::int32_t offsetY = 0, float rotDeg = 0.0f, const Color& colorFill = Color::fromRgb8(0, 0, 0, 255), TextureRotationMode mode = BlockFullscale);
 
         Brush(const Color& from, const Color& to, GradientDirection g, float rotDeg = 0.0f, float scale = 1.0f, Pt::int32_t ofsX = 0, Pt::int32_t ofsY = 0);
 
@@ -96,9 +104,9 @@ class PT_GFX_API Brush
 
         const Color& gradientColor() const;
 
-        void setTexture(const Image& texture, Pt::int32_t offsetX = 0, Pt::int32_t offsetY = 0, float rotDeg = 0.0f, const Color& colorFill = Color::fromRgb8(0, 0, 0, 255), bool fullScale = true);
+        void setTexture(const Image& texture, Pt::int32_t offsetX = 0, Pt::int32_t offsetY = 0, float rotDeg = 0.0f, const Color& colorFill = Color::fromRgb8(0, 0, 0, 255), TextureRotationMode mode = BlockFullscale);
 
-        void setTextureRotation(float rotDeg = 0.0f, const Color& colorFill = Color::fromRgb8(0, 0, 0, 255), bool fullScale = true);
+        void setTextureRotation(float rotDeg = 0.0f, const Color& colorFill = Color::fromRgb8(0, 0, 0, 255), TextureRotationMode mode = BlockFullscale);
 
         const Image& texture() const;
 
@@ -143,8 +151,8 @@ class BrushData
         , _texture  ()
         {}
 
-        BrushData(const Image& texture, Pt::int32_t offsetX, Pt::int32_t offsetY, float rotDeg, const Color& colorFill, bool fullScale)
-        { setTexture(texture, offsetX, offsetY, rotDeg, colorFill, fullScale); }
+        BrushData(const Image& texture, Pt::int32_t offsetX, Pt::int32_t offsetY, float rotDeg, const Color& colorFill, Brush::TextureRotationMode mode)
+        { setTexture(texture, offsetX, offsetY, rotDeg, colorFill, mode); }
 
         BrushData(const Color& from, const Color& to, Brush::GradientDirection g, float rotDeg, float scale, Pt::int32_t ofsX, Pt::int32_t ofsY);
 
@@ -183,9 +191,9 @@ class BrushData
         const Color& gradientColor() const
         { return _gradientColor; }
 
-        void setTexture(const Image& texture, Pt::int32_t offsetX, Pt::int32_t offsetY, float rotDeg, const Color& colorFill, bool fullScale);
+        void setTexture(const Image& texture, Pt::int32_t offsetX, Pt::int32_t offsetY, float rotDeg, const Color& colorFill, Brush::TextureRotationMode mode);
 
-        void setTextureRotation(float rotDeg, const Color& colorFill, bool fullScale);
+        void setTextureRotation(float rotDeg, const Color& colorFill, Brush::TextureRotationMode mode);
 
         const Image& texture() const
         { return _texture; }

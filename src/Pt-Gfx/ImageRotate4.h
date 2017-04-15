@@ -30,6 +30,7 @@
 #ifndef PT_GFX_IMAGEROTATE4_H
 #define PT_GFX_IMAGEROTATE4_H
 
+#include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Math.h>
 #include <Pt/Gfx/SIMDConfig.h>
 
@@ -102,7 +103,7 @@ static inline Pt::uint32_t bsMixPixel(const Pt::uint32_t* img, Pt::ssize_t imgW,
 
 
 // ======================================================================================
-// ===== Rotate FUnctions ===============================================================
+// ===== Rotate Functions ===============================================================
 // ======================================================================================
 
 template <bool full, typename InIterT, typename OutIterT>

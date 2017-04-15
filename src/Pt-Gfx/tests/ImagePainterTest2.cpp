@@ -44,6 +44,7 @@
 
 #include <Pt/Gfx/TransformStack.h>
 
+#include <Pt/Gfx/ImageOperation.h>
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/ImagePainter2.h>
 
@@ -52,8 +53,6 @@
 
 #include <Pt/System/Logger.h>
 #include <Pt/System/Clock.h>
-
-#include "ImageOperation4.h"
 
 #if defined(PT_GFX_USE_GNU_STYLE_COMPILER)
 #include <cxxabi.h>
@@ -109,7 +108,7 @@ using namespace Pt::Gfx;
 
 #define TEST_DRAW_SOLID_FILLED_POLYGONS         0
 #define TEST_DRAW_GRADIENT_FILLED_POLYGONS      0
-#define TEST_DRAW_TEXTURE_FILLED_POLYGONS       1
+#define TEST_DRAW_TEXTURE_FILLED_POLYGONS       0
 
 #define TEST_DRAW_SOLID_FILLED_ELLIPSES_ARCS    0
 #define TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS 0
@@ -120,7 +119,7 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_EXTRA                         0 // (including path-based n-bezier)
 
 #define TEST_SCENE_GRAPH                        0
-#define TEST_IMAGE_SCALING                      0
+#define TEST_IMAGE_OPERATION                    1
 #define TEST_SVG_READER                         0
 
 #define TEST_COMPARE_WITH_OLD_PAINTER           0 // (for some shapes only)
@@ -167,7 +166,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_GRADIENT_FILLED_ARC       0
 #define BENCHMARK_TEXTURE_FILLED_ARC        0
 
-#define BENCHMARK_PATH                      1
+#define BENCHMARK_PATH                      0
 #define BENCHMARK_IMAGE_OPERATION           1
 
 // Configurations and objects
@@ -580,7 +579,7 @@ int main(int argc, char* args[])
     }
 
     // Image operations
-    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && (TEST_SOURCECOPY || TEST_SOURCEOVER) && BENCHMARK_IMAGE_OPERATION) {
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && (TEST_SOURCECOPY || TEST_SOURCEOVER) && TEST_IMAGE_OPERATION) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
         testImageOperation("Image Operation - ImagePainter2", image, *painter2);
     }
