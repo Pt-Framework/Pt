@@ -27,15 +27,15 @@
   02110-1301 USA
 */
 
-#ifndef PT_GFX_BILINEARSCALE_H
-#define PT_GFX_BILINEARSCALE_H
+#ifndef PT_GFX_IMAGEOPERATION4_H
+#define PT_GFX_IMAGEOPERATION4_H
 
 #include <Pt/Gfx/Math.h>
 #include <Pt/Gfx/SIMDConfig.h>
 
 
-#undef PT_GFX_USE_SSE4P1
-#undef PT_GFX_USE_SSE2
+//#undef PT_GFX_USE_SSE4P1
+//#undef PT_GFX_USE_SSE2
 
 
 namespace Pt {
@@ -47,14 +47,6 @@ namespace Gfx {
 // SSE constants
 static const __m128 sseFour001 = _mm_set1_ps(  1);
 static const __m128 sseFour256 = _mm_set1_ps(256);
-
-#endif
-
-#if defined(PT_GFX_USE_NEON)
-
-// NEON constants
-static const float32x4_t neonFour001 = vdupq_n_f32(  1);
-static const float32x4_t neonFour256 = vdupq_n_f32(256);
 
 #endif
 

@@ -30,6 +30,8 @@
 
 #include <Pt/Gfx/ImagePainter.h>
 
+#include "ImageRotate4.h"
+
 
 namespace Pt {
 namespace Gfx {
@@ -38,6 +40,21 @@ namespace Gfx {
 Brush::Brush()
 : _brushData( new BrushData() )
 {}
+
+Brush::Brush(const Color& color)
+: _brushData( new BrushData(color) )
+{}
+
+Brush::Brush(const Image& texture, Pt::int32_t offsetX, Pt::int32_t offsetY, float rotDeg, const Color& colorFill, bool fullScale)
+: _brushData( new BrushData(texture, offsetX, offsetY, rotDeg, colorFill, fullScale) )
+{}
+
+Brush::Brush(const Color& from, const Color& to, GradientDirection g, float rotDeg, float scale, Pt::int32_t ofsX, Pt::int32_t ofsY)
+: _brushData( new BrushData(from, to, g, rotDeg, scale, ofsX, ofsY) )
+{}
+
+Brush::FillStyle Brush::fillStyle() const
+{ return _brushData->fillStyle(); }
 
 void Brush::setSolidColor(const Color& color)
 {
@@ -50,21 +67,6 @@ void Brush::setSolidColor(const Color& color)
 
     _brushData->setSolidColor(color);
 }
-
-Brush::Brush(const Color& color)
-: _brushData( new BrushData(color) )
-{}
-
-Brush::Brush(const Image& texture, Pt::int32_t offsetX, Pt::int32_t offsetY)
-: _brushData( new BrushData(texture, offsetX, offsetY) )
-{}
-
-Brush::Brush(const Color& from, const Color& to, GradientDirection g, float rotDeg, float scale, Pt::int32_t ofsX, Pt::int32_t ofsY)
-: _brushData( new BrushData(from, to, g, rotDeg, scale, ofsX, ofsY) )
-{}
-
-Brush::FillStyle Brush::fillStyle() const
-{ return _brushData->fillStyle(); }
 
 const Color& Brush::color() const
 { return _brushData->color(); }
@@ -126,7 +128,7 @@ void Brush::setGradientOffset(Pt::int32_t ofsX, Pt::int32_t ofsY)
 const Color& Brush::gradientColor() const
 { return _brushData->gradientColor(); }
 
-void Brush::setTexture(const Image& texture, Pt::int32_t offsetX, Pt::int32_t offsetY)
+void Brush::setTexture(const Image& texture, Pt::int32_t offsetX, Pt::int32_t offsetY, float rotDeg, const Color& colorFill, bool fullScale)
 {
     // COW
     if(_brushData.refs() > 1) {
@@ -135,9 +137,22 @@ void Brush::setTexture(const Image& texture, Pt::int32_t offsetX, Pt::int32_t of
         _brushData = brushData;
     }
 
-    _brushData->setTexture(texture, offsetX, offsetY);
+    _brushData->setTexture(texture, offsetX, offsetY, rotDeg, colorFill, fullScale);
 }
 
+void Brush::setTextureRotation(float rotDeg, const Color& colorFill, bool fullScale)
+{
+    if(!_brushData->isTexture()) throw std::logic_error("brush error: not a texture");
+
+    // COW
+    if(_brushData.refs() > 1) {
+        SmartPtr<BrushData> brushData( new BrushData() );
+        *brushData = *_brushData;
+        _brushData = brushData;
+    }
+
+    _brushData->setTextureRotation(rotDeg, colorFill, fullScale);
+}
 const Image& Brush::texture() const
 { return _brushData->texture(); }
 
@@ -156,6 +171,15 @@ Pt::int32_t Brush::offsetY() const
 bool Brush::isGradient() const
 { return _brushData->isGradient(); }
 
+bool Brush::isGradient1D() const
+{ return _brushData->isGradient1D(); }
+
+bool Brush::isGradient2D() const
+{ return _brushData->isGradient2D(); }
+
+bool Brush::isTexture() const
+{ return _brushData->isTexture(); }
+
 bool Brush::isNull() const
 { return _brushData->isNull(); }
 
@@ -165,7 +189,10 @@ bool Brush::operator==(const Brush& brush) const
 
     if(_brushData->fillStyle() == Brush::Texture) {
         if(brush._brushData->fillStyle() != Brush::Texture) return false;
-        return _brushData->texture() == brush._brushData->texture();
+        return _brushData->rotation() == brush._brushData->rotation() &&
+               _brushData->offsetX () == brush._brushData->offsetX () &&
+               _brushData->offsetY () == brush._brushData->offsetY () &&
+               _brushData->texture () == brush._brushData->texture ();
     }
 
     return _brushData->fillStyle    () == brush._brushData->fillStyle    () &&
@@ -222,7 +249,7 @@ void BrushData::setGradient(const Color& from, const Color& to, Brush::GradientD
     _texture       = Image();
 }
 
-void BrushData::setTexture(const Image& texture, Pt::int32_t offsetX, Pt::int32_t offsetY)
+void BrushData::setTexture(const Image& texture, Pt::int32_t offsetX, Pt::int32_t offsetY, float rotDeg, const Color& colorFill, bool fullScale)
 {
     // The texture has no offset
     if(!offsetX && !offsetY) {
@@ -339,6 +366,34 @@ void BrushData::setTexture(const Image& texture, Pt::int32_t offsetX, Pt::int32_
     _ofsX      = offsetX;
     _ofsY      = offsetY;
     _isNull    = false;
+
+    setTextureRotation(rotDeg, colorFill, fullScale);
+}
+
+void BrushData::setTextureRotation(float rotDeg, const Color& colorFill, bool fullScale)
+{
+    if(_texture.format().pixelStride() != 4)
+        throw std::runtime_error("brush error: texture rotation is not supported with this image format (pixel stride != 4)");
+
+    if(_texture.padding())
+        throw std::runtime_error("brush error: texture rotation is not supported with this image format (padding != 0)");
+
+    _rotDeg        = rotDeg;
+
+/*
+        Color            _texCFill;
+
+        Pt::int32_t      _texRotS_F;
+        Pt::int32_t      _texRotC_F;
+        Pt::int32_t      _texRotF_F;
+        Pt::int32_t      _texMidX_F;
+        Pt::int32_t      _texMidY_F;
+
+        Image            _texture;
+        Image            _textureOrig;
+
+        */
+
 }
 
 
