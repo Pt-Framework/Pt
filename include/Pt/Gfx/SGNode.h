@@ -80,20 +80,20 @@ class PT_GFX_API SGNode {
         inline SGNode(RenderMode rm)
         : _parent(0)
         , _rm    (rm)
-        {}
+        { setTextureRotationParameters(); }
 
         inline SGNode(RenderMode rm, const TransformT& transform)
         : _parent   (0)
         , _rm       (rm)
         , _transform( transform )
-        {}
+        { setTextureRotationParameters(); }
 
         inline SGNode(RenderMode rm, const TransformT& transform, const Children& children)
         : _parent   (0)
         , _rm       (rm)
         , _transform( transform )
         , _children ( children )
-        {}
+        { setTextureRotationParameters(); }
 
         virtual ~SGNode();
 
@@ -150,6 +150,12 @@ class PT_GFX_API SGNode {
 
         inline void setBrush(const Brush& brush)
         { _brush = brush; }
+
+        inline void setTextureRotationParameters(const Color& colorFill = Color::fromRgb8(0, 0, 0, 255), Brush::TextureRotationMode mode = Brush::BlockFullscale)
+        {
+            _trCFil = colorFill;
+            _trMode = mode;
+        }
 
         void draw(ImagePainter2& painter, const TransformT* transform = 0);
 
@@ -212,6 +218,9 @@ class PT_GFX_API SGNode {
         Brush      _brush;
         TransformT _transform;
         Children   _children;
+
+        Color                      _trCFil;
+        Brush::TextureRotationMode _trMode;
 };
 
 

@@ -9,6 +9,13 @@ static void testSceneGraph(const char* title, Image& image, Painter& painter)
 
     SGNodePath psgn;
 
+    // Generate scaled textures
+    Image scaledTexH( textureWithWhiteBackground.format(), Size(textureWithWhiteBackground.width() / 2, textureWithWhiteBackground.height() / 2) );
+    Image scaledTexQ( textureWithWhiteBackground.format(), Size(textureWithWhiteBackground.width() / 4, textureWithWhiteBackground.height() / 4) );
+
+    bilinearScale(scaledTexH, textureWithWhiteBackground);
+    bilinearScale(scaledTexQ, scaledTexH                );
+
     // Generate a new path
     Path pathPoly4;
 
@@ -39,18 +46,19 @@ static void testSceneGraph(const char* title, Image& image, Painter& painter)
 
         // 2nd-child's 2nd child
         SGNodePath* csgn2_2 = &csgn2->addChild( new SGNodePath( SGNode::RenderInherit, pathPoly4 ) );
-                    csgn2_2->setBrush( Color::fromRgb8(0, 0, 255) );
                     csgn2_2->transform().translate(0, 150);
+                    csgn2_2->setBrush( Color::fromRgb8(0, 0, 255) );
 
         // 2nd-child's 3rd child
         SGNodePath* csgn2_3 = &csgn2->addChild( new SGNodePath( SGNode::RenderStroke, pathPoly4 ) );
-                    csgn2_3->setPen( Pen(Color::fromRgb8(255, 255, 127), 6, Pen::Solid, Pen::RoundCap, Pen::MiterJoin) );
                     csgn2_3->transform().translate(150, 150);
-
+                    csgn2_3->setPen( Pen(Color::fromRgb8(255, 255, 127), 6, Pen::Solid, Pen::RoundCap, Pen::MiterJoin) );
 
     // Parent's 3rd child
     SGNodeRectangle* csgn3 = &psgn.addChild( new SGNodeRectangle( SGNode::RenderFill, RectF(PointF(0, 0), SizeF(80, 80)) ) );
                      csgn3->transform().translate(0, 150);
+                     csgn3->setBrush( scaledTexQ );
+                     csgn3->setTextureRotationParameters( Color::fromRgb8(0, 255, 255, 255), Brush::Bilinear );
 
         // 3rd-child's 1st child
         SGNodeRectangle* csgn3_1 = &csgn3->addChild( new SGNodeRectangle( SGNode::RenderFill, RectF(PointF(0, 0), SizeF(80, 80)), 10 ) );

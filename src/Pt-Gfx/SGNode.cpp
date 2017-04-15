@@ -99,16 +99,22 @@ void SGNode::draw(ImagePainter2& painter, const TransformT* transform_)
             }
             // Set this node's brush to the painter as needed
             if(!eCur.node->_brush.isNull()) {
-                // If the brush is a gradient, adjust its rotation as needed
-                if(eCur.node->_brush.isGradient()) {
+                // If the brush is a texture or a 2D gradient, adjust its rotation as needed
+                if(eCur.node->_brush.isTexture() || eCur.node->_brush.isGradient()) {
                     // Calculate the new gradient rotation and ensure that it is within the acceptable range
                     const ValueT orgRot = eCur.node->_brush.rotation();
                           ValueT newRot = orgRot + transform.extractRotation();
                     while(newRot < -360) newRot += 360;
                     while(newRot >  360) newRot -= 360;
-                    // Assign a new brush with the original gradient rotation
+                    // Assign the original brush as the painter's brush
                     if(orgRot == newRot) {
                         painter.setBrush(eCur.node->_brush);
+                    }
+                    // Assign a new brush with the updated texture rotation
+                    else if(eCur.node->_brush.isTexture()) {
+                        Brush newBrush = eCur.node->_brush;
+                        newBrush.setTextureRotation(newRot, eCur.node->_trCFil, eCur.node->_trMode);
+                        painter.setBrush(newBrush);
                     }
                     // Assign a new brush with the updated gradient rotation
                     else {
@@ -117,8 +123,7 @@ void SGNode::draw(ImagePainter2& painter, const TransformT* transform_)
                         painter.setBrush(newBrush);
                     }
                 }
-                // Not a gradient
-                // ### TODO: Rotate the texture???  ###
+                // Other brush types
                 else {
                     painter.setBrush(eCur.node->_brush);
                 }
