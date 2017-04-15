@@ -24,7 +24,7 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
     painter.fillRect( RectF( PointF(170, 250), SizeF(800, 200) ) );
     painter.fillRect( RectF( PointF(170, 450), SizeF(100, 100) ) );
 
-    // PointFy polygons
+    // Pointy polygons
     painter.setBrush( brush1 );
 
     const PointF poly1a[] = { // CCW
@@ -108,7 +108,13 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
     painter.drawText( PointF(330 + 220, 530 + 30), "XWAA" );
 
     // A polygon with holes
-    painter.setBrush( brush2 );
+    if(!brush2.isTexture())
+        painter.setBrush( brush2 );
+    else {
+        Brush tmp = brush2;
+        tmp.setTextureRotation(30, Color::fromRgb8(255, 0, 0, 255), Brush::Bilinear);
+        painter.setBrush( tmp );
+    }
 
     const PointF poly4a[] = { // CCW
         // Outside
@@ -132,6 +138,14 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
     if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
     painter.fillPolygon( poly4a, sizeof(poly4a) / sizeof(poly4a[0]) );
     painter.drawText( PointF(730 - 200, 70), "NOAA" );
+
+    if(!brush2.isTexture())
+        painter.setBrush( brush2 );
+    else {
+        Brush tmp = brush2;
+        tmp.setTextureRotation(-30, Color::fromRgb8(255, 0, 0, 255), Brush::Bilinear);
+        painter.setBrush( tmp );
+    }
 
     const PointF poly4b[] = { // CCW
         // Outside

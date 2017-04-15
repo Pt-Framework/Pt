@@ -380,8 +380,9 @@ void BrushData::setTextureRotation(float rotDeg, const Color& colorFill, Brush::
     if(_texture.padding())
         throw std::runtime_error("brush error: texture rotation is not supported with this image format (padding != 0)");
 
-    // Copy the rotation angle
+    // Copy and check the rotation angle
     _rotDeg = rotDeg;
+    if(_rotDeg == 0.0f) return;
 
     // Save the original texture as needed
     if(_textureOrig.empty()) _textureOrig = _texture;
