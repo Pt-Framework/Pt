@@ -105,7 +105,7 @@ static inline Pt::uint32_t bsMixPixel(const Pt::uint32_t* img, Pt::ssize_t imgW,
 // ===== Rotate Functions ===============================================================
 // ======================================================================================
 
-template <bool full, typename InIterT, typename OutIterT>
+template <bool fullFit, typename InIterT, typename OutIterT>
 static inline void blockRotate4(
     InIterT      from, Pt::ssize_t  fromWidth, Pt::ssize_t fromHeight,
     OutIterT     to,   Pt::ssize_t  toWidth,   Pt::ssize_t toHeight,
@@ -143,8 +143,8 @@ static inline void blockRotate4(
         Pt::int32_t itrX = 0;
         for(Pt::ssize_t x = 0; x < toWidth; ++x) {
             // Get the centered source coordinates
-            const Pt::int32_t srcX = full ? ( (itrX - midX) / f ) : ( (itrX - midX) >> 8 );
-            const Pt::int32_t srcY = full ? ( (itrY - midY) / f ) : ( (itrY - midY) >> 8 );
+            const Pt::int32_t srcX = fullFit ? ( (itrX - midX) / f ) : ( (itrX - midX) >> 8 );
+            const Pt::int32_t srcY = fullFit ? ( (itrY - midY) / f ) : ( (itrY - midY) >> 8 );
             // Rotate the coordinates and offset them back
             const Pt::int32_t rotX =  c * srcX + s * srcY + midX;
             const Pt::int32_t rotY = -s * srcX + c * srcY + midY;
@@ -167,7 +167,7 @@ static inline void blockRotate4(
     }
 }
 
-template <bool full, typename InIterT, typename OutIterT>
+template <bool fullFit, typename InIterT, typename OutIterT>
 static inline void bilinearRotate4(
     InIterT      from, Pt::ssize_t  fromWidth, Pt::ssize_t fromHeight,
     OutIterT     to,   Pt::ssize_t  toWidth,   Pt::ssize_t toHeight,
@@ -205,8 +205,8 @@ static inline void bilinearRotate4(
         Pt::int32_t itrX = 0;
         for(Pt::ssize_t x = 0; x < toWidth; ++x) {
             // Get the centered source coordinates
-            const Pt::int32_t srcX = full ? ( (itrX - midX) / f ) : ( (itrX - midX) >> 8 );
-            const Pt::int32_t srcY = full ? ( (itrY - midY) / f ) : ( (itrY - midY) >> 8 );
+            const Pt::int32_t srcX = fullFit ? ( (itrX - midX) / f ) : ( (itrX - midX) >> 8 );
+            const Pt::int32_t srcY = fullFit ? ( (itrY - midY) / f ) : ( (itrY - midY) >> 8 );
             // Rotate the coordinates and offset them back
             const Pt::int32_t rotX =  c * srcX + s * srcY + midX;
             const Pt::int32_t rotY = -s * srcX + c * srcY + midY;

@@ -397,7 +397,7 @@ void BrushData::setTextureRotation(float rotDeg, const Color& colorFill, Brush::
             );
             break;
 
-        case Brush::BlockFullscale:
+        case Brush::BlockFullFit:
             blockRotate4<true>(
                 _textureOrig.begin(), _textureOrig.width(), _textureOrig.height(),
                 _texture    .begin(), _texture    .width(), _texture    .height(),
@@ -413,7 +413,7 @@ void BrushData::setTextureRotation(float rotDeg, const Color& colorFill, Brush::
             );
             break;
 
-        case Brush::BilinearFullscale:
+        case Brush::BilinearFullFit:
             bilinearRotate4<true>(
                 _textureOrig.begin(), _textureOrig.width(), _textureOrig.height(),
                 _texture    .begin(), _texture    .width(), _texture    .height(),

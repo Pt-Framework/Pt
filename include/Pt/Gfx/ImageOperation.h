@@ -41,9 +41,9 @@ void PT_GFX_API blockScale(Image& to, const Image& from);
 
 void PT_GFX_API bilinearScale(Image& to, const Image& from);
 
-void PT_GFX_API blockRotate(Image& to, const Image& from, float deg, const Color& colorFill, bool fullScale);
+void PT_GFX_API blockRotate(Image& to, const Image& from, float deg, const Color& colorFill, bool fullFit);
 
-void PT_GFX_API bilinearRotate(Image& to, const Image& from, float deg, const Color& colorFill, bool fullScale);
+void PT_GFX_API bilinearRotate(Image& to, const Image& from, float deg, const Color& colorFill, bool fullFit);
 
 
 } // namespace

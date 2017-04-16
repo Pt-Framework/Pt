@@ -74,7 +74,7 @@ void bilinearScale(Image& to, const Image& from)
     );
 }
 
-void blockRotate(Image& to, const Image& from, float deg, const Color& colorFill, bool fullScale)
+void blockRotate(Image& to, const Image& from, float deg, const Color& colorFill, bool fullFit)
 {
     if(from.format().pixelStride() != 4)
         throw std::runtime_error("images with pixel stride != 4 are not supported yet");
@@ -86,7 +86,7 @@ void blockRotate(Image& to, const Image& from, float deg, const Color& colorFill
     if(to.empty())
         throw std::runtime_error("destination image is empty (not initialized)");
 
-    if(fullScale) {
+    if(fullFit) {
         blockRotate4<true>(
             from.begin(), from.width(), from.height(),
             to  .begin(), to  .width(), to  .height(),
@@ -102,7 +102,7 @@ void blockRotate(Image& to, const Image& from, float deg, const Color& colorFill
     }
 }
 
-void bilinearRotate(Image& to, const Image& from, float deg, const Color& colorFill, bool fullScale)
+void bilinearRotate(Image& to, const Image& from, float deg, const Color& colorFill, bool fullFit)
 {
     if(from.format().pixelStride() != 4)
         throw std::runtime_error("images with pixel stride != 4 are not supported yet");
@@ -114,7 +114,7 @@ void bilinearRotate(Image& to, const Image& from, float deg, const Color& colorF
     if(to.empty())
         throw std::runtime_error("destination image is empty (not initialized)");
 
-    if(fullScale) {
+    if(fullFit) {
         bilinearRotate4<true>(
             from.begin(), from.width(), from.height(),
             to  .begin(), to  .width(), to  .height(),
