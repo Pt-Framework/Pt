@@ -120,8 +120,8 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_PATH_CLIPPING                 0 // (including path-based text)
 #define TEST_DRAW_EXTRA                         0 // (including path-based n-bezier)
 
-#define TEST_SCENE_GRAPH                        0
 #define TEST_IMAGE_OPERATION                    1
+#define TEST_SCENE_GRAPH                        1
 #define TEST_SVG_READER                         0
 
 #define TEST_COMPARE_WITH_OLD_PAINTER           0 // (for some shapes only)
@@ -168,7 +168,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_GRADIENT_FILLED_ARC       0
 #define BENCHMARK_TEXTURE_FILLED_ARC        0
 
-#define BENCHMARK_PATH                      0
+#define BENCHMARK_PATH                      1
 #define BENCHMARK_IMAGE_OPERATION           1
 
 // Configurations and objects
@@ -574,16 +574,16 @@ int main(int argc, char* args[])
         testDrawExtra("Extra Features - ImagePainter2 [SourceOver]", image, *painter2);
     }
 
-    // Scene-graph
-    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && (TEST_SOURCECOPY || TEST_SOURCEOVER) && TEST_SCENE_GRAPH) {
-        painter2->setCompositionMode(CompositionMode::SourceOver);
-        testSceneGraph("Scene Graph - ImagePainter2", image, *painter2);
-    }
-
     // Image operations
     if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && (TEST_SOURCECOPY || TEST_SOURCEOVER) && TEST_IMAGE_OPERATION) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
         testImageOperation("Image Operation - ImagePainter2", image, *painter2);
+    }
+
+    // Scene-graph
+    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && (TEST_SOURCECOPY || TEST_SOURCEOVER) && TEST_SCENE_GRAPH) {
+        painter2->setCompositionMode(CompositionMode::SourceOver);
+        testSceneGraph("Scene Graph - ImagePainter2", image, *painter2);
     }
 
     // Svg reader
