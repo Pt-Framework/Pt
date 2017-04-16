@@ -111,28 +111,28 @@ x86_64 (i5-4460; 64-Bit Mode)
 -----------------------------
                                                    (Time) (Factor)
                                                    ------ --------
-Image scaling    (block - generic     )          =    157
-Image scaling    (block - argb32      )          =     40 ( 0.255)
-Image scaling  4 (block               )          =      9 ( 0.057)
-Image scaling  4 (bilinear            )          =    121 ( 0.771)
+Image scaling    (block    - generic )           =    157
+Image scaling    (block    - argb32  )           =     40 ( 0.255)
+Image scaling  4 (block              )           =      9 ( 0.057)
+Image scaling  4 (bilinear           )           =    121 ( 0.771)
 
-Image rotation 4 (block    - normal   )          =     36
-Image rotation 4 (block    - fullscale)          =     75 ( 2.083)
-Image rotation 4 (bilinear - normal   )          =    197 ( 5.472)
-Image rotation 4 (bilinear - fullscale)          =    292 ( 8.111)
+Image rotation 4 (block    - normal  )           =     36
+Image rotation 4 (block    - full fit)           =     75 ( 2.083)
+Image rotation 4 (bilinear - normal  )           =    197 ( 5.472)
+Image rotation 4 (bilinear - full fit)           =    292 ( 8.111)
 */
 
 /*
 ---------------------------------------------------
 Arm (v7l; A53; BCM2709; RaspberryPi 3; 32-bit Mode)
 ---------------------------------------------------
-Image scaling    (block - generic     )          =   2431
-Image scaling    (block - argb32      )          =    522 ( 0.215)
-Image scaling  4 (block               )          =    141 ( 0.058)
-Image scaling  4 (bilinear            )          =   1639 ( 0.674)
+Image scaling    (block - generic    )           =   2457
+Image scaling    (block - argb32     )           =    521 ( 0.212)
+Image scaling  4 (block              )           =    143 ( 0.058)
+Image scaling  4 (bilinear           )           =   1658 ( 0.675)
 
-Image rotation 4 (block    - normal   )          =    625
-Image rotation 4 (block    - fullscale)          =   2121 ( 3.394)
-Image rotation 4 (bilinear - normal   )          =   2685 ( 4.296)
-Image rotation 4 (bilinear - fullscale)          =   4323 ( 6.917)
+Image rotation 4 (block    - normal  )           =    629
+Image rotation 4 (block    - full fit)           =   2136 ( 3.396)
+Image rotation 4 (bilinear - normal  )           =   2768 ( 4.401)
+Image rotation 4 (bilinear - full fit)           =   4468 ( 7.103)
 */

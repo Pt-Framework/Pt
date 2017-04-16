@@ -326,15 +326,15 @@ static void doBenchmarkImageOperation()
     // Image scaling
     if(BENCHMARK_RESULT_HTML || BENCHMARK_IMAGE_OPERATION) {
         time1 = benchImageScalingBlock<-1>(BENCHMARK_LOOP_COUNT);
-        std::clog << "    Image scaling    (block - generic     )          = " << std::setw(6) << time1 << std::endl;
+        std::clog << "    Image scaling    (block    - generic )           = " << std::setw(6) << time1 << std::endl;
         time2 = benchImageScalingBlock<-2>(BENCHMARK_LOOP_COUNT);
-        std::clog << "    Image scaling    (block - argb32      )          = " << std::setw(6) << time2
+        std::clog << "    Image scaling    (block    - argb32  )           = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         time2 = benchImageScalingBlock<0>(BENCHMARK_LOOP_COUNT);
-        std::clog << "    Image scaling  4 (block               )          = " << std::setw(6) << time2
+        std::clog << "    Image scaling  4 (block              )           = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         time2 = benchImageScalingBilinear(BENCHMARK_LOOP_COUNT);
-        std::clog << "    Image scaling  4 (bilinear            )          = " << std::setw(6) << time2
+        std::clog << "    Image scaling  4 (bilinear           )           = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         std::clog << std::endl;
     }
@@ -342,15 +342,15 @@ static void doBenchmarkImageOperation()
     // Image rotation
     if(BENCHMARK_RESULT_HTML || BENCHMARK_IMAGE_OPERATION) {
         time1 = benchImageRotationBlock<false>(BENCHMARK_LOOP_COUNT);
-        std::clog << "    Image rotation 4 (block    - normal   )          = " << std::setw(6) << time1 << std::endl;
+        std::clog << "    Image rotation 4 (block    - normal  )           = " << std::setw(6) << time1 << std::endl;
         time2 = benchImageRotationBlock<true>(BENCHMARK_LOOP_COUNT);
-        std::clog << "    Image rotation 4 (block    - fullscale)          = " << std::setw(6) << time2
+        std::clog << "    Image rotation 4 (block    - full-fit)           = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         time2 = benchImageRotationBilinear<false>(BENCHMARK_LOOP_COUNT);
-        std::clog << "    Image rotation 4 (bilinear - normal   )          = " << std::setw(6) << time2
+        std::clog << "    Image rotation 4 (bilinear - normal  )           = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         time2 = benchImageRotationBilinear<true>(BENCHMARK_LOOP_COUNT);
-        std::clog << "    Image rotation 4 (bilinear - fullscale)          = " << std::setw(6) << time2
+        std::clog << "    Image rotation 4 (bilinear - full-fit)           = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         if(!BENCHMARK_RESULT_HTML) std::clog << std::endl;
     }
