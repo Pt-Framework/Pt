@@ -57,12 +57,21 @@ static const __m128 sseFour256 = _mm_set1_ps(256);
 
 #if defined(PT_GFX_USE_SSE4P1)
 
-static inline Pt::uint32_t bsGetPixel(const Pt::uint32_t* img, Pt::ssize_t imgW, float x, float y)
+static inline Pt::uint32_t bsGetPixel(const Pt::uint32_t* img, Pt::ssize_t imgW, Pt::ssize_t imgH, float x, float y)
 {
+    // Floor and limit the coordinates
+    Pt::int32_t px = Pt::Gfx::Math::zfint(x);
+    Pt::int32_t py = Pt::Gfx::Math::zfint(y);
 
-    // Floor the coordinates
-    const Pt::int32_t px = Pt::Gfx::Math::zfint(x);
-    const Pt::int32_t py = Pt::Gfx::Math::zfint(y);
+    if(px + 1 >= imgW) {
+        px = imgW - 2;
+        x  = px;
+    }
+
+    if(py + 1 >= imgH) {
+        py = imgH - 2;
+        y  = py;
+    }
 
     // Pointer to the first pixel
     const Pt::uint32_t* p0 = img + py * imgW + px;
@@ -117,11 +126,21 @@ static inline Pt::uint32_t bsGetPixel(const Pt::uint32_t* img, Pt::ssize_t imgW,
 
 #elif defined(PT_GFX_USE_SSE2)
 
-static inline Pt::uint32_t bsGetPixel(const Pt::uint32_t* img, Pt::ssize_t imgW, float x, float y)
+static inline Pt::uint32_t bsGetPixel(const Pt::uint32_t* img, Pt::ssize_t imgW, Pt::ssize_t imgH, float x, float y)
 {
-    // Floor the coordinates
-    const Pt::int32_t px = Pt::Gfx::Math::zfint(x);
-    const Pt::int32_t py = Pt::Gfx::Math::zfint(y);
+    // Floor and limit the coordinates
+    Pt::int32_t px = Pt::Gfx::Math::zfint(x);
+    Pt::int32_t py = Pt::Gfx::Math::zfint(y);
+
+    if(px + 1 >= imgW) {
+        px = imgW - 2;
+        x  = px;
+    }
+
+    if(py + 1 >= imgH) {
+        py = imgH - 2;
+        y  = py;
+    }
 
     // Pointer to the first pixel
     const Pt::uint32_t* p0 = img + py * imgW + px;
@@ -179,7 +198,7 @@ static inline Pt::uint32_t bsGetPixel(const Pt::uint32_t* img, Pt::ssize_t imgW,
 
 #else
 
-static inline Pt::uint32_t bsGetPixel(const Pt::uint32_t* img, Pt::ssize_t imgW, Pt::uint32_t Fx, Pt::uint32_t Fy)
+static inline Pt::uint32_t bsGetPixel(const Pt::uint32_t* img, Pt::ssize_t imgW, Pt::ssize_t imgH, Pt::uint32_t Fx, Pt::uint32_t Fy)
 {
     // Used for processing the pixels
     union Pixel4 {
@@ -187,9 +206,19 @@ static inline Pt::uint32_t bsGetPixel(const Pt::uint32_t* img, Pt::ssize_t imgW,
         Pt::uint32_t i;
     };
 
-    // Floor the coordinates
-    const Pt::uint32_t px = Fx & 0xFFFF0000;
-    const Pt::uint32_t py = Fy & 0xFFFF0000;
+    // Floor and limit the coordinates
+    Pt::uint32_t px = Fx & 0xFFFF0000;
+    Pt::uint32_t py = Fy & 0xFFFF0000;
+
+    if(px + 1 >= (imgW << 16)) {
+        px = (imgW - 2) << 16;
+        Fx = 65535;
+    }
+
+    if(py + 1 >= (imgH << 16)) {
+        py = (imgH - 2) << 16;
+        Fy = 65535;
+    }
 
     // Pointer to the first pixel
     const Pixel4* p0 = reinterpret_cast<const Pixel4*>( img + (py >> 16) * imgW + (px >> 16) );
@@ -282,7 +311,7 @@ static inline void bilinearScale4(
     for(Pt::ssize_t y = 0; y < toHeight; ++y) {
         ValueT itrX = 0;
         for(Pt::ssize_t x = 0; x < toWidth; ++x) {
-            *dst++ = bsGetPixel(src, fromWidth, itrX, itrY);
+            *dst++ = bsGetPixel(src, fromWidth, fromHeight, itrX, itrY);
             itrX += incX;
         }
         itrY += incY;

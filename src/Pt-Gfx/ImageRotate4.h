@@ -32,7 +32,6 @@
 
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Math.h>
-#include <Pt/Gfx/SIMDConfig.h>
 
 
 namespace Pt {

@@ -14,7 +14,7 @@ static void testImageOperation(const char* title, Image& image, Painter& painter
     painter.drawImage(PointF(x, y), textureWithWhiteBackground);
     x += textureWithWhiteBackground.width() + 50;
 
-    // Scaled and rotated image (block scale)
+    // Scaled and rotated image
     Image scaledImage( textureWithWhiteBackground.format(), Size(120, 120) );
 
     // Block scale
