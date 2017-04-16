@@ -44,6 +44,8 @@
 
 #include <Pt/Gfx/TransformStack.h>
 
+#include <Pt/Gfx/BlockScale.h>
+#include <Pt/Gfx/Argb32Image.h>
 #include <Pt/Gfx/ImageOperation.h>
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/ImagePainter2.h>
@@ -118,7 +120,7 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_PATH_CLIPPING                 0 // (including path-based text)
 #define TEST_DRAW_EXTRA                         0 // (including path-based n-bezier)
 
-#define TEST_SCENE_GRAPH                        1
+#define TEST_SCENE_GRAPH                        0
 #define TEST_IMAGE_OPERATION                    1
 #define TEST_SVG_READER                         0
 

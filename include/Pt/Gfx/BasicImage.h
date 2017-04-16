@@ -1,11 +1,11 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
+/* Copyright (C) 2015 Marc Boris Duerner
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -15,15 +15,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
   02110-1301 USA
 */
 
@@ -53,11 +53,11 @@ class BasicView
                 PixelIterator(BasicView& view, Pt::ssize_t x, Pt::ssize_t y)
                 : _pixel(view, x, y)
                 { }
-                
+
                 PixelIterator(const PixelIterator& it)
                 : _pixel(it._pixel)
                 {}
-                
+
                 PixelIterator& operator=(const PixelIterator& it)
                 {
                     _pixel.reset(it._pixel);
@@ -66,19 +66,25 @@ class BasicView
 
                 Pixel& operator*()
                 { return _pixel; }
-                
+
                 Pixel* operator->()
                 { return &_pixel; }
-                
+
                 PixelIterator& operator++()
                 {
                     _pixel.advance();
-                    return *this; 
+                    return *this;
+                }
+
+                PixelIterator& operator+=(Pt::ssize_t n)
+                {
+                    _pixel.advance(n);
+                    return *this;
                 }
 
                 bool operator!=(const PixelIterator& it) const
                 { return _pixel != it._pixel; }
-        
+
                 bool operator==(const PixelIterator& it) const
                 { return _pixel == it._pixel; }
 
@@ -112,12 +118,18 @@ class BasicView
                 ConstPixelIterator& operator++()
                 {
                     _pixel.advance();
-                    return *this; 
+                    return *this;
+                }
+
+                ConstPixelIterator& operator+=(Pt::ssize_t n)
+                {
+                    _pixel.advance(n);
+                    return *this;
                 }
 
                 bool operator!=(const ConstPixelIterator& it) const
                 { return _pixel != it._pixel; }
-        
+
                 bool operator==(const ConstPixelIterator& it) const
                 { return _pixel == it._pixel; }
 
@@ -131,7 +143,7 @@ class BasicView
         , _size(size)
         , _padding(padding)
         , _stride(0)
-        { 
+        {
             _stride = (_size.width() * ModelT::pixelStride()) + _padding;
         }
 
@@ -144,22 +156,22 @@ class BasicView
         */
         PixelIterator begin()
         { return PixelIterator(*this, 0, 0); }
-        
+
         /** @brief Returns an iterator to the end of the pixels.
         */
         PixelIterator end()
         { return PixelIterator(*this, 0, height()); }
-        
+
         /** @brief Returns a const iterator to the pixel at the given position.
         */
         ConstPixelIterator pixel(Pt::ssize_t x, Pt::ssize_t y) const
         { return ConstPixelIterator(*this, x, y); }
-        
+
         /** @brief Returns a const iterator to the first pixel.
         */
         ConstPixelIterator begin() const
         { return PixelIterator(*this, 0, 0); }
-        
+
         /** @brief Returns a const iterator to the end of the pixels.
         */
         ConstPixelIterator end() const
@@ -206,7 +218,7 @@ class BasicImage
         typedef ModelT                              Model;
         typedef typename ModelT::Pixel              Pixel;
         typedef typename ModelT::ConstPixel         ConstPixel;
-        
+
         typedef ViewT                               View;
         typedef typename View::PixelIterator        PixelIterator;
         typedef typename View::ConstPixelIterator   ConstPixelIterator;
@@ -223,7 +235,7 @@ class BasicImage
 
         virtual ~BasicImage()
         {}
-        
+
         /** @brief Returns an iterator to the pixel at the given position.
         */
         PixelIterator pixel(Pt::ssize_t x, Pt::ssize_t y)
@@ -233,22 +245,22 @@ class BasicImage
         */
         PixelIterator begin()
         { return _view.begin(); }
-        
+
         /** @brief Returns an iterator to the end of the pixels.
         */
         PixelIterator end()
         { return _view.end(); }
-        
+
         /** @brief Returns a const iterator to the pixel at the given position.
         */
         ConstPixelIterator pixel(Pt::ssize_t x, Pt::ssize_t y) const
         { return _view.pixel(x, y); }
-        
+
         /** @brief Returns a const iterator to the first pixel.
         */
         ConstPixelIterator begin() const
         { return _view.begin(); }
-        
+
         /** @brief Returns a const iterator to the end of the pixels.
         */
         ConstPixelIterator end() const
@@ -264,7 +276,7 @@ class BasicImage
 
         Pt::ssize_t height() const
         { return _view.height(); }
-    
+
         Pt::ssize_t padding() const
         { return _view.padding(); }
 
