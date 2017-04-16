@@ -151,7 +151,7 @@ class PT_GFX_API SGNode {
         inline void setBrush(const Brush& brush)
         { _brush = brush; }
 
-        inline void setTextureRotationParameters(const Color& colorFill = Color::fromRgb8(0, 0, 0, 255), Brush::TextureRotationMode mode = Brush::BlockFullscale)
+        inline void setTextureRotationParameters(const Color& colorFill = Color::fromRgb8(0, 0, 0, 255), Brush::TextureRotationMode mode = Brush::BlockFullFit)
         {
             _trCFil = colorFill;
             _trMode = mode;
