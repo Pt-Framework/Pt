@@ -112,7 +112,7 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         painter.setBrush( brush2 );
     else {
         Brush tmp = brush2;
-        tmp.setTextureRotation(30, Color::fromRgb8(255, 0, 0, 255), Brush::Bilinear);
+        tmp.setTextureRotation(30, Color::fromRgb8(255, 0, 0, 255), Brush::Block);
         painter.setBrush( tmp );
     }
 
