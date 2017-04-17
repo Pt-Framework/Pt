@@ -39,7 +39,7 @@ namespace Gfx {
 
 
 // ======================================================================================
-// ===== Helper Functions ===============================================================
+// ===== Internal Helper Functions ======================================================
 // ======================================================================================
 
 #if defined(PT_GFX_USE_SSE4P1) || defined(PT_GFX_USE_SSE2)
@@ -57,7 +57,7 @@ static const __m128 sseFour256 = _mm_set1_ps(256);
 
 #if defined(PT_GFX_USE_SSE4P1)
 
-static inline Pt::uint32_t bsGetPixel(const Pt::uint32_t* img, Pt::ssize_t imgW, Pt::ssize_t imgH, float x, float y)
+static inline Pt::uint32_t bsGetPixel_implSIMD(const Pt::uint32_t* img, Pt::ssize_t imgW, Pt::ssize_t imgH, float x, float y)
 {
     // Floor and limit the coordinates
     Pt::int32_t px = Pt::Gfx::Math::zfint(x);
@@ -126,7 +126,7 @@ static inline Pt::uint32_t bsGetPixel(const Pt::uint32_t* img, Pt::ssize_t imgW,
 
 #elif defined(PT_GFX_USE_SSE2)
 
-static inline Pt::uint32_t bsGetPixel(const Pt::uint32_t* img, Pt::ssize_t imgW, Pt::ssize_t imgH, float x, float y)
+static inline Pt::uint32_t bsGetPixel_implSIMD(const Pt::uint32_t* img, Pt::ssize_t imgW, Pt::ssize_t imgH, float x, float y)
 {
     // Floor and limit the coordinates
     Pt::int32_t px = Pt::Gfx::Math::zfint(x);
@@ -198,7 +198,7 @@ static inline Pt::uint32_t bsGetPixel(const Pt::uint32_t* img, Pt::ssize_t imgW,
 
 #else
 
-static inline Pt::uint32_t bsGetPixel(const Pt::uint32_t* img, Pt::ssize_t imgW, Pt::ssize_t imgH, Pt::uint32_t Fx, Pt::uint32_t Fy)
+static inline Pt::uint32_t bsGetPixel_implFP(const Pt::uint32_t* img, Pt::ssize_t imgW, Pt::ssize_t imgH, Pt::uint32_t Fx, Pt::uint32_t Fy)
 {
     // Used for processing the pixels
     union Pixel4 {
@@ -206,22 +206,22 @@ static inline Pt::uint32_t bsGetPixel(const Pt::uint32_t* img, Pt::ssize_t imgW,
         Pt::uint32_t i;
     };
 
-    // Floor and limit the coordinates
-    Pt::uint32_t px = Fx & 0xFFFF0000;
-    Pt::uint32_t py = Fy & 0xFFFF0000;
+    // Floor the coordinates, convert them to normal integers, and limit them
+    Pt::uint32_t px = (Fx & 0xFFFF0000) >> 16;
+    Pt::uint32_t py = (Fy & 0xFFFF0000) >> 16;
 
-    if(px + 1 >= (imgW << 16)) {
-        px = (imgW - 2) << 16;
+    if(px + 1 >= imgW) {
+        px = imgW - 2;
         Fx = 65535;
     }
 
-    if(py + 1 >= (imgH << 16)) {
-        py = (imgH - 2) << 16;
+    if(py + 1 >= imgH) {
+        py = imgH - 2;
         Fy = 65535;
     }
 
     // Pointer to the first pixel
-    const Pixel4* p0 = reinterpret_cast<const Pixel4*>( img + (py >> 16) * imgW + (px >> 16) );
+    const Pixel4* p0 = reinterpret_cast<const Pixel4*>( img + py * imgW + px );
 
     // Load the four neighboring pixels
     const Pixel4& p1 = p0[0 * imgW + 0];
@@ -253,13 +253,8 @@ static inline Pt::uint32_t bsGetPixel(const Pt::uint32_t* img, Pt::ssize_t imgW,
 
 #endif
 
-
-// ======================================================================================
-// ===== Scale Functions ================================================================
-// ======================================================================================
-
-template <typename InIterT, typename OutIterT>
-static inline void blockScale4(
+template <bool bilinear, typename InIterT, typename OutIterT>
+static inline void bblScale4_implFP(
     InIterT  from, Pt::ssize_t fromWidth, Pt::ssize_t fromHeight,
     OutIterT to,   Pt::ssize_t toWidth,   Pt::ssize_t toHeight
 )
@@ -269,55 +264,90 @@ static inline void blockScale4(
           Pt::uint32_t* dst = reinterpret_cast<      Pt::uint32_t*>( to  ->base() );
 
     // Calculate the increment factors
-    const Pt::uint32_t incX = 65536 * fromWidth  / toWidth;
-    const Pt::uint32_t incY = 65536 * fromHeight / toHeight;
+    const Pt::uint32_t FincX = 65536 * fromWidth  / toWidth;
+    const Pt::uint32_t FincY = 65536 * fromHeight / toHeight;
 
-    // Walk through the pixels
-    Pt::uint32_t itrY = 0;
+    // Walk through the row pixels
+    Pt::uint32_t FitrY = 0;
     for(Pt::ssize_t y = 0; y < toHeight; ++y) {
-        const Pt::int32_t  srcY = ( (itrY + 32768) >> 16 ) * fromWidth;
-              Pt::uint32_t itrX = 0;
+        // Calculate the source row address
+        const Pt::int32_t FsrcY = ( (FitrY + 32768) >> 16 ) * fromWidth;
+        // Walk through the column pixels
+          Pt::uint32_t FitrX = 0;
         for(Pt::ssize_t x = 0; x < toWidth; ++x) {
-            *dst++ = src[ srcY + ( (itrX + 32768) >> 16 ) ];
-            itrX += incX;
-        }
-        itrY += incY;
-    }
-}
-
-template <typename InIterT, typename OutIterT>
-static inline void bilinearScale4(
-    InIterT  from, Pt::ssize_t fromWidth, Pt::ssize_t fromHeight,
-    OutIterT to,   Pt::ssize_t toWidth,   Pt::ssize_t toHeight
-)
-{
-    // Get the source and destination pointers
-    const Pt::uint32_t* src = reinterpret_cast<const Pt::uint32_t*>( from->base() );
-          Pt::uint32_t* dst = reinterpret_cast<      Pt::uint32_t*>( to  ->base() );
-
-    // Calculate the increment factors
-#if defined(PT_GFX_USE_SSE4P1) || defined(PT_GFX_USE_SSE2)
-    typedef float ValueT;
-    const ValueT incX = (ValueT) fromWidth  / toWidth;
-    const ValueT incY = (ValueT) fromHeight / toHeight;
-#else
-    typedef Pt::uint32_t ValueT;
-    const ValueT incX = 65536 * fromWidth  / toWidth;
-    const ValueT incY = 65536 * fromHeight / toHeight;
+#if !defined(PT_GFX_USE_SSE4P1) && !defined(PT_GFX_USE_SSE2)
+            // Bilinear scaling (non SIMD)
+            if(bilinear)
+                *dst++ = bsGetPixel_implFP(src, fromWidth, fromHeight, FitrX, FitrY);
+            // Block scaling
+            else
 #endif
-
-    // Walk through the pixels
-    ValueT itrY = 0;
-    for(Pt::ssize_t y = 0; y < toHeight; ++y) {
-        ValueT itrX = 0;
-        for(Pt::ssize_t x = 0; x < toWidth; ++x) {
-            *dst++ = bsGetPixel(src, fromWidth, fromHeight, itrX, itrY);
-            itrX += incX;
+                *dst++ = src[ FsrcY + ( (FitrX + 32768) >> 16 ) ];
+            // Increment the iterator
+            FitrX += FincX;
         }
-        itrY += incY;
+        // Increment the iterator
+        FitrY += FincY;
     }
 }
 
+
+// ======================================================================================
+// ===== Public Functions ===============================================================
+// ======================================================================================
+
+template <typename InIterT, typename OutIterT>
+inline void blockScale4(
+    InIterT  from, Pt::ssize_t fromWidth, Pt::ssize_t fromHeight,
+    OutIterT to,   Pt::ssize_t toWidth,   Pt::ssize_t toHeight
+)
+{
+    bblScale4_implFP<false, InIterT, OutIterT>(
+        from, fromWidth, fromHeight,
+        to,   toWidth,   toHeight
+    );
+}
+
+template <typename InIterT, typename OutIterT>
+inline void bilinearScale4(
+    InIterT  from, Pt::ssize_t fromWidth, Pt::ssize_t fromHeight,
+    OutIterT to,   Pt::ssize_t toWidth,   Pt::ssize_t toHeight
+)
+{
+#if defined(PT_GFX_USE_SSE4P1) || defined(PT_GFX_USE_SSE2)
+
+    // Get the source and destination pointers
+    const Pt::uint32_t* src = reinterpret_cast<const Pt::uint32_t*>( from->base() );
+          Pt::uint32_t* dst = reinterpret_cast<      Pt::uint32_t*>( to  ->base() );
+
+    // Calculate the increment factors
+    const float incX = (float) fromWidth  / toWidth;
+    const float incY = (float) fromHeight / toHeight;
+
+    // Walk through the row pixels
+    float itrY = 0;
+    for(Pt::ssize_t y = 0; y < toHeight; ++y) {
+        // Walk through the column pixels
+        float itrX = 0;
+        for(Pt::ssize_t x = 0; x < toWidth; ++x) {
+            // Get the interpolated pixel (SIMD)
+            *dst++ = bsGetPixel_implSIMD(src, fromWidth, fromHeight, itrX, itrY);
+            // Increment the iterator
+            itrX += incX;
+        }
+        // Increment the iterator
+        itrY += incY;
+    }
+
+#else
+
+    bblScale4_implFP<true, InIterT, OutIterT>(
+        from, fromWidth, fromHeight,
+        to,   toWidth,   toHeight
+    );
+
+#endif
+}
 
 
 } // namespace

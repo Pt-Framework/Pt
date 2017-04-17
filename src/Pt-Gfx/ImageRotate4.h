@@ -39,10 +39,10 @@ namespace Gfx {
 
 
 // ======================================================================================
-// ===== Helper Functions ===============================================================
+// ===== Internal Helper Functions ======================================================
 // ======================================================================================
 
-static inline Pt::uint32_t bsMixPixel(const Pt::uint32_t* img, Pt::ssize_t imgW, Pt::ssize_t imgH, Pt::int32_t Fx, Pt::int32_t Fy, Pt::uint32_t fil)
+static inline Pt::uint32_t bsMixPixel_implFP(const Pt::uint32_t* img, Pt::ssize_t imgW, Pt::ssize_t imgH, Pt::int32_t Fx, Pt::int32_t Fy, Pt::uint32_t fil)
 {
     // Used for processing the pixels
     union Pixel4 {
@@ -100,124 +100,106 @@ static inline Pt::uint32_t bsMixPixel(const Pt::uint32_t* img, Pt::ssize_t imgW,
     return r.i;
 }
 
-
-// ======================================================================================
-// ===== Rotate Functions ===============================================================
-// ======================================================================================
-
-template <bool fullFit, typename InIterT, typename OutIterT>
-static inline void blockRotate4(
+template <bool bilinear, bool fullFit, typename InIterT, typename OutIterT>
+static inline void bblRotate4_implFP(
     InIterT      from, Pt::ssize_t  fromWidth, Pt::ssize_t fromHeight,
     OutIterT     to,   Pt::ssize_t  toWidth,   Pt::ssize_t toHeight,
-    float        deg,  const Color& cfil
+    float        deg,  const Color& cfill
 )
 {
     // Calculate the filler color
-    const Pt::uint32_t fil = ( Pt::uint32_t(cfil.alpha() & 0xFF00) << 16 ) |
-                             ( Pt::uint32_t(cfil.red  () & 0xFF00) <<  8 ) |
-                               Pt::uint32_t(cfil.green() & 0xFF00)         |
-                             ( Pt::uint32_t(cfil.blue ()         ) >>  8 );
+    const Pt::uint32_t fil = ( Pt::uint32_t(cfill.alpha() & 0xFF00) << 16 ) |
+                             ( Pt::uint32_t(cfill.red  () & 0xFF00) <<  8 ) |
+                               Pt::uint32_t(cfill.green() & 0xFF00)         |
+                             ( Pt::uint32_t(cfill.blue ()         ) >>  8 );
 
     // Get the source and destination pointers
     const Pt::uint32_t* src = reinterpret_cast<const Pt::uint32_t*>( from->base() );
           Pt::uint32_t* dst = reinterpret_cast<      Pt::uint32_t*>( to  ->base() );
 
     // Calculate the increment factors
-    const Pt::int32_t incX = 65536 * fromWidth  / toWidth;
-    const Pt::int32_t incY = 65536 * fromHeight / toHeight;
+    const Pt::int32_t FincX = 65536 * fromWidth  / toWidth;
+    const Pt::int32_t FincY = 65536 * fromHeight / toHeight;
 
     // Calculate the center positions
-    const Pt::int32_t midX = 32768 * fromWidth;
-    const Pt::int32_t midY = 32768 * fromHeight;
+    const Pt::int32_t FmidX = 32768 * fromWidth;
+    const Pt::int32_t FmidY = 32768 * fromHeight;
 
     // Calculate the sine and cosine values
-    const double      r = -deg * (M_PI / 180);
-    const Pt::int32_t s = Pt::Gfx::Math::zrint( 256 * ::sin(r) );
-    const Pt::int32_t c = Pt::Gfx::Math::zrint( 256 * ::cos(r) );
-    const Pt::int32_t f = ::abs(s) + ::abs(c);
+    const double      r  = -deg * (M_PI / 180);
+    const double      s  = ::sin(r);
+    const double      c  = ::cos(r);
+    const Pt::int32_t Fs = Pt::Gfx::Math::zrint(512 * s);
+    const Pt::int32_t Fc = Pt::Gfx::Math::zrint(512 * c);
+    const Pt::int32_t Fm = 131072 / (::abs(Fs) + ::abs(Fc));
 
     // Walk through the row pixels
-    Pt::int32_t itrY = 0;
+    Pt::int32_t FitrY = 0;
     for(Pt::ssize_t y = 0; y < toHeight; ++y) {
         // Walk through the column pixels
-        Pt::int32_t itrX = 0;
+        Pt::int32_t FitrX = 0;
         for(Pt::ssize_t x = 0; x < toWidth; ++x) {
             // Get the centered source coordinates
-            const Pt::int32_t srcX = fullFit ? ( (itrX - midX) / f ) : ( (itrX - midX) >> 8 );
-            const Pt::int32_t srcY = fullFit ? ( (itrY - midY) / f ) : ( (itrY - midY) >> 8 );
+            const Pt::int32_t FsrcX = fullFit ? ( ((FitrX - FmidX) * Fm) >> 16 ) : ( (FitrX - FmidX) >> 8 );
+            const Pt::int32_t FsrcY = fullFit ? ( ((FitrY - FmidY) * Fm) >> 16 ) : ( (FitrY - FmidY) >> 8 );
             // Rotate the coordinates and offset them back
-            const Pt::int32_t rotX =  c * srcX + s * srcY + midX;
-            const Pt::int32_t rotY = -s * srcX + c * srcY + midY;
-            // Calculate the read coordinates
-            const Pt::int32_t getX = (rotX + 32768) >> 16;
-            const Pt::int32_t getY = (rotY + 32768) >> 16;
-            // Check if the any of the coordinates is outside the image
-            if(getX < 0 || getY < 0 || getX >= fromWidth || getY >= fromHeight) {
-                *dst++ = fil;
+            const Pt::int32_t FrotX = ( ( Fc * FsrcX + Fs * FsrcY) >> 1 ) + FmidX;
+            const Pt::int32_t FrotY = ( (-Fs * FsrcX + Fc * FsrcY) >> 1 ) + FmidY;
+            // Bilinear rotation
+            if(bilinear) {
+                *dst++ = bsMixPixel_implFP(src, fromWidth, fromHeight, FrotX, FrotY, fil);
             }
-            // The coordinates are inside the image
+            // Block rotation
             else {
-                *dst++ = src[getY * fromWidth + getX];
+                // Calculate the read coordinates
+                const Pt::int32_t getX = (FrotX + 32768) >> 16;
+                const Pt::int32_t getY = (FrotY + 32768) >> 16;
+                // Check if the any of the coordinates is outside the image
+                if(getX < 0 || getY < 0 || getX >= fromWidth || getY >= fromHeight)
+                    *dst++ = fil;
+                // The coordinates are inside the image
+                else
+                    *dst++ = src[getY * fromWidth + getX];
             }
             // Increment the iterator
-            itrX += incX;
+            FitrX += FincX;
         }
         // Increment the iterator
-        itrY += incY;
+        FitrY += FincY;
     }
 }
 
+
+// ======================================================================================
+// ===== Public Functions ===============================================================
+// ======================================================================================
+
 template <bool fullFit, typename InIterT, typename OutIterT>
-static inline void bilinearRotate4(
+inline void blockRotate4(
     InIterT      from, Pt::ssize_t  fromWidth, Pt::ssize_t fromHeight,
     OutIterT     to,   Pt::ssize_t  toWidth,   Pt::ssize_t toHeight,
-    float        deg,  const Color& cfil
+    float        deg,  const Color& cfill
 )
 {
-    // Get the filler color
-    const Pt::uint32_t fil = ( Pt::uint32_t(cfil.alpha() & 0xFF00) << 16 ) |
-                             ( Pt::uint32_t(cfil.red  () & 0xFF00) <<  8 ) |
-                               Pt::uint32_t(cfil.green() & 0xFF00)         |
-                             ( Pt::uint32_t(cfil.blue ()         ) >>  8 );
+    bblRotate4_implFP<false, fullFit, InIterT, OutIterT>(
+        from, fromWidth, fromHeight,
+        to,   toWidth,   toHeight,
+        deg,  cfill
+    );
+}
 
-    // Get the source and destination pointers
-    const Pt::uint32_t* src = reinterpret_cast<const Pt::uint32_t*>( from->base() );
-          Pt::uint32_t* dst = reinterpret_cast<      Pt::uint32_t*>( to  ->base() );
-
-    // Calculate the increment factors
-    const Pt::int32_t incX = 65536 * fromWidth  / toWidth;
-    const Pt::int32_t incY = 65536 * fromHeight / toHeight;
-
-    // Calculate the center positions
-    const Pt::int32_t midX = 32768 * fromWidth;
-    const Pt::int32_t midY = 32768 * fromHeight;
-
-    // Calculate the sine and cosine values
-    const double      r = -deg * (M_PI / 180);
-    const Pt::int32_t s = Pt::Gfx::Math::zrint( 256 * ::sin(r) );
-    const Pt::int32_t c = Pt::Gfx::Math::zrint( 256 * ::cos(r) );
-    const Pt::int32_t f = ::abs(s) + ::abs(c);
-
-    // Walk through the row pixels
-    Pt::int32_t itrY = 0;
-    for(Pt::ssize_t y = 0; y < toHeight; ++y) {
-        // Walk through the column pixels
-        Pt::int32_t itrX = 0;
-        for(Pt::ssize_t x = 0; x < toWidth; ++x) {
-            // Get the centered source coordinates
-            const Pt::int32_t srcX = fullFit ? ( (itrX - midX) / f ) : ( (itrX - midX) >> 8 );
-            const Pt::int32_t srcY = fullFit ? ( (itrY - midY) / f ) : ( (itrY - midY) >> 8 );
-            // Rotate the coordinates and offset them back
-            const Pt::int32_t rotX =  c * srcX + s * srcY + midX;
-            const Pt::int32_t rotY = -s * srcX + c * srcY + midY;
-            // Get and mix the pixel with the filler color as needed
-            *dst++ = bsMixPixel(src, fromWidth, fromHeight, rotX, rotY, fil);
-            // Increment the iterator
-            itrX += incX;
-        }
-        // Increment the iterator
-        itrY += incY;
-    }
+template <bool fullFit, typename InIterT, typename OutIterT>
+inline void bilinearRotate4(
+    InIterT      from, Pt::ssize_t  fromWidth, Pt::ssize_t fromHeight,
+    OutIterT     to,   Pt::ssize_t  toWidth,   Pt::ssize_t toHeight,
+    float        deg,  const Color& cfill
+)
+{
+    bblRotate4_implFP<true, fullFit, InIterT, OutIterT>(
+        from, fromWidth, fromHeight,
+        to,   toWidth,   toHeight,
+        deg,  cfill
+    );
 }
 
 

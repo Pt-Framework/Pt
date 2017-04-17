@@ -16,6 +16,10 @@ static void testSceneGraph(const char* title, Image& image, Painter& painter)
     bilinearScale(scaledTexH, textureWithWhiteBackground);
     bilinearScale(scaledTexQ, scaledTexH                );
 
+    //Image scaledTexO( textureWithWhiteBackground.format(), Size(textureWithWhiteBackground.width() / 8, textureWithWhiteBackground.height() / 8) );
+    //bilinearScale(scaledTexO, scaledTexQ                );
+    //bilinearScale(scaledTexQ, scaledTexO                );
+
     // Generate a new path
     Path pathPoly4;
 
