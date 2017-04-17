@@ -111,15 +111,15 @@ x86_64 (i5-4460; 64-Bit Mode)
 -----------------------------
                                                    (Time) (Factor)
                                                    ------ --------
-Image scaling    (block    - generic )           =    157
-Image scaling    (block    - argb32  )           =     40 ( 0.255)
-Image scaling  4 (block              )           =      9 ( 0.057)
-Image scaling  4 (bilinear           )           =    121 ( 0.771)
+Image scaling    (block    - generic )           =    155
+Image scaling    (block    - argb32  )           =     40 ( 0.258)
+Image scaling  4 (block              )           =      9 ( 0.058)
+Image scaling  4 (bilinear           )           =    128 ( 0.826)
 
-Image rotation 4 (block    - normal  )           =     36
-Image rotation 4 (block    - full fit)           =     75 ( 2.083)
-Image rotation 4 (bilinear - normal  )           =    197 ( 5.472)
-Image rotation 4 (bilinear - full fit)           =    292 ( 8.111)
+Image rotation 4 (block    - normal  )           =     37
+Image rotation 4 (block    - full-fit)           =     37 ( 1.000)
+Image rotation 4 (bilinear - normal  )           =    201 ( 5.432)
+Image rotation 4 (bilinear - full-fit)           =    204 ( 5.514)
 */
 
 /*
