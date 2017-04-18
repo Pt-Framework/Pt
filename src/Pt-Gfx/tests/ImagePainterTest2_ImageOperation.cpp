@@ -40,7 +40,7 @@ static void testImageOperation(const char* title, Image& image, Painter& painter
     // Block rotate - full
     blockRotateImage(textureWithWhiteBackground, srImage, 30, Color::fromRgb8(0, 127, 127, 255), true);
     painter.drawImage(PointF(x, y), srImage);
-    painter.drawText( PointF(x, y + srImage.height() + 20), "Block Rotate (Fullscale)" );
+    painter.drawText( PointF(x, y + srImage.height() + 20), "Block Rotate (Full-fit)" );
 
     x  = 20 + textureWithWhiteBackground.width() + 50;
     y += srImage.height() + 50;
@@ -54,7 +54,7 @@ static void testImageOperation(const char* title, Image& image, Painter& painter
     // Bilinear rotate - fullscale
     bilinearRotateImage(textureWithWhiteBackground, srImage, 30, Color::fromRgb8(0, 127, 127, 255), true);
     painter.drawImage(PointF(x, y), srImage);
-    painter.drawText( PointF(x, y + srImage.height() + 20), "Bilinear Rotate (Fullscale)" );
+    painter.drawText( PointF(x, y + srImage.height() + 20), "Bilinear Rotate (Full-fit)" );
     x += srImage.width() + 50;
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
