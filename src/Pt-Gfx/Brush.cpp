@@ -29,8 +29,7 @@
 #include <stdexcept>
 
 #include <Pt/Gfx/ImagePainter.h>
-
-#include "ImageRotate4.h"
+#include <Pt/Gfx/ImageOperation.h>
 
 
 namespace Pt {
@@ -390,34 +389,34 @@ void BrushData::setTextureRotation(float rotDeg, const Color& colorFill, Brush::
     // Perform rotation
     switch(mode) {
         case Brush::Block:
-            blockRotate4<false>(
-                _textureOrig.begin(), _textureOrig.width(), _textureOrig.height(),
+            blockRotateImage(
                 _texture    .begin(), _texture    .width(), _texture    .height(),
-                _rotDeg,              colorFill
+                _textureOrig.begin(), _textureOrig.width(), _textureOrig.height(),
+                _rotDeg,              colorFill,            false
             );
             break;
 
         case Brush::BlockFullFit:
-            blockRotate4<true>(
-                _textureOrig.begin(), _textureOrig.width(), _textureOrig.height(),
+            blockRotateImage(
                 _texture    .begin(), _texture    .width(), _texture    .height(),
-                _rotDeg,              colorFill
+                _textureOrig.begin(), _textureOrig.width(), _textureOrig.height(),
+                _rotDeg,              colorFill,            true
             );
             break;
 
         case Brush::Bilinear:
-            bilinearRotate4<false>(
-                _textureOrig.begin(), _textureOrig.width(), _textureOrig.height(),
+            bilinearRotateImage(
                 _texture    .begin(), _texture    .width(), _texture    .height(),
-                _rotDeg,              colorFill
+                _textureOrig.begin(), _textureOrig.width(), _textureOrig.height(),
+                _rotDeg,              colorFill,            false
             );
             break;
 
         case Brush::BilinearFullFit:
-            bilinearRotate4<true>(
-                _textureOrig.begin(), _textureOrig.width(), _textureOrig.height(),
+            bilinearRotateImage(
                 _texture    .begin(), _texture    .width(), _texture    .height(),
-                _rotDeg,              colorFill
+                _textureOrig.begin(), _textureOrig.width(), _textureOrig.height(),
+                _rotDeg,              colorFill,            true
             );
             break;
     }
