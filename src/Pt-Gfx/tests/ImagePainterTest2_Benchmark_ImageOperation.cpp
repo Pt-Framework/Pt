@@ -130,13 +130,13 @@ Arm (v7l; A53; BCM2709; RaspberryPi 3; 32-bit Mode)
 ---------------------------------------------------
                                                    (Time) (Factor)
                                                    ------ --------
-Image scaling    (block    - generic )           =   2441
-Image scaling    (block    - argb32  )           =    526 ( 0.215)
+Image scaling    (block    - generic )           =   2440
+Image scaling    (block    - argb32  )           =    511 ( 0.209)
 Image scaling  4 (block              )           =    142 ( 0.058)
-Image scaling  4 (bilinear           )           =   1646 ( 0.674)
+Image scaling  4 (bilinear           )           =   1621 ( 0.664)
 
-Image rotation 4 (block    - normal  )           =    650
-Image rotation 4 (block    - full-fit)           =    660 ( 1.015)
-Image rotation 4 (bilinear - normal  )           =   2764 ( 4.252)
-Image rotation 4 (bilinear - full-fit)           =   3057 ( 4.703)
+Image rotation 4 (block    - normal  )           =    651
+Image rotation 4 (block    - full-fit)           =    655 ( 1.006)
+Image rotation 4 (bilinear - normal  )           =   3004 ( 4.614)
+Image rotation 4 (bilinear - full-fit)           =   3092 ( 4.750)
 */

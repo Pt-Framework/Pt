@@ -210,12 +210,12 @@ static inline Pt::uint32_t bsGetPixel32Bpp_implFP(const Pt::uint32_t* img, Pt::s
     Pt::uint32_t px = (Fx & 0xFFFF0000) >> 16;
     Pt::uint32_t py = (Fy & 0xFFFF0000) >> 16;
 
-    if(px + 1 >= imgW) {
+    if(px + 1 >= (Pt::uint32_t) imgW) {
         px = imgW - 2;
         Fx = 65535;
     }
 
-    if(py + 1 >= imgH) {
+    if(py + 1 >= (Pt::uint32_t) imgH) {
         py = imgH - 2;
         Fy = 65535;
     }
