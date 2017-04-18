@@ -12,6 +12,7 @@ static void testImageOperation(const char* title, Image& image, Painter& painter
     Pt::int32_t y = 20;
 
     painter.drawImage(PointF(x, y), textureWithWhiteBackground);
+    painter.drawText( PointF(x, y + textureWithWhiteBackground.height() + 20), "Original (Reference) Image" );
     x += textureWithWhiteBackground.width() + 50;
 
     // Scaled and rotated image
