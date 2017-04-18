@@ -88,6 +88,9 @@ class BasicView
                 bool operator==(const PixelIterator& it) const
                 { return _pixel == it._pixel; }
 
+                std::size_t pixelStride() const
+                { return Model::pixelStride(); }
+
             private:
                 Pixel _pixel;
         };
@@ -132,6 +135,9 @@ class BasicView
 
                 bool operator==(const ConstPixelIterator& it) const
                 { return _pixel == it._pixel; }
+
+                std::size_t pixelStride() const
+                { return Model::pixelStride(); }
 
             private:
                 ConstPixel _pixel;

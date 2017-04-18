@@ -30,20 +30,189 @@
 #ifndef PT_GFX_IMAGEOPERATION_H
 #define PT_GFX_IMAGEOPERATION_H
 
-#include <Pt/Gfx/Image.h>
+#include <Pt/Gfx/BlockScale.h>
+
+#include <Pt/Gfx/ImageScale32Bpp.h>
+#include <Pt/Gfx/ImageRotate32Bpp.h>
 
 
 namespace Pt {
 namespace Gfx {
 
 
-void PT_GFX_API blockScale(Image& to, const Image& from);
+//
+// API with image iterators
+//
 
-void PT_GFX_API bilinearScale(Image& to, const Image& from);
+/** @brief Block scale for images.
+*/
+template<typename InIterT, typename OutIterT>
+inline void blockScaleImage(
+    InIterT  from, Pt::ssize_t fromWidth, Pt::ssize_t fromHeight,
+    OutIterT to,   Pt::ssize_t toWidth,   Pt::ssize_t toHeight
+)
+{
+    if(fromWidth <= 0 || fromHeight <= 0 || toWidth <= 0 || toHeight <= 0)
+        throw std::runtime_error("invalid fromWidth/fromHeight/toWidth/toHeight");
 
-void PT_GFX_API blockRotate(Image& to, const Image& from, float deg, const Color& colorFill, bool fullFit);
+    if(from.pixelStride() != 4 || to.pixelStride() != 4) {
+        // Use the generic implementation
+        blockScale(
+            from, fromWidth, fromHeight,
+            to,   toWidth,   toHeight
+        );
+        return;
+    }
 
-void PT_GFX_API bilinearRotate(Image& to, const Image& from, float deg, const Color& colorFill, bool fullFit);
+    // Use the specialized implementation
+    blockScaleImage32Bpp(
+        from, fromWidth, fromHeight,
+        to,   toWidth,   toHeight
+    );
+}
+
+/** @brief Bilinear scale for images.
+*/
+template<typename InIterT, typename OutIterT>
+inline void bilinearScaleImage(
+    InIterT  from, Pt::ssize_t fromWidth, Pt::ssize_t fromHeight,
+    OutIterT to,   Pt::ssize_t toWidth,   Pt::ssize_t toHeight
+)
+{
+    if(fromWidth <= 0 || fromHeight <= 0 || toWidth <= 0 || toHeight <= 0)
+        throw std::runtime_error("invalid fromWidth/fromHeight/toWidth/toHeight");
+
+    if(from.pixelStride() != 4 || to.pixelStride() != 4)
+        throw std::runtime_error("bilinear scale for images with pixel stride != 4 is not supported yet");
+
+    bilinearScaleImage32Bpp(
+        from, fromWidth, fromHeight,
+        to,   toWidth,   toHeight
+    );
+}
+
+/** @brief Block rotate for images.
+*/
+template<typename InIterT, typename OutIterT>
+inline void blockRotateImage(
+    InIterT  from, Pt::ssize_t fromWidth, Pt::ssize_t fromHeight,
+    OutIterT to,   Pt::ssize_t toWidth,   Pt::ssize_t toHeight,
+    float                     deg,
+    const Color&              colorFill = Color::fromRgb8(0, 0, 0, 255),
+    bool                      fullFit   = false
+)
+{
+    if(fromWidth <= 0 || fromHeight <= 0 || toWidth <= 0 || toHeight <= 0)
+        throw std::runtime_error("invalid fromWidth/fromHeight/toWidth/toHeight");
+
+    if(from.pixelStride() != 4 || to.pixelStride() != 4)
+        throw std::runtime_error("block rotate for images with pixel stride != 4 is not supported yet");
+
+    if(fullFit) {
+        blockRotateImage32Bpp<true>(
+            from, fromWidth, fromHeight,
+            to,   toWidth,   toHeight,
+            deg,  colorFill
+        );
+    }
+    else {
+        blockRotateImage32Bpp<false>(
+            from, fromWidth, fromHeight,
+            to,   toWidth,   toHeight,
+            deg,  colorFill
+        );
+    }
+}
+
+/** @brief Bilinear rotate for images.
+*/
+template<typename InIterT, typename OutIterT>
+inline void bilinearRotateImage(
+    InIterT  from, Pt::ssize_t fromWidth, Pt::ssize_t fromHeight,
+    OutIterT to,   Pt::ssize_t toWidth,   Pt::ssize_t toHeight,
+    float                     deg,
+    const Color&              colorFill = Color::fromRgb8(0, 0, 0, 255),
+    bool                      fullFit   = false
+)
+{
+    if(fromWidth <= 0 || fromHeight <= 0 || toWidth <= 0 || toHeight <= 0)
+        throw std::runtime_error("invalid fromWidth/fromHeight/toWidth/toHeight");
+
+    if(from.pixelStride() != 4 || to.pixelStride() != 4)
+        throw std::runtime_error("bilinear rotate for images with pixel stride != 4 is not supported yet");
+
+    if(fullFit) {
+        bilinearRotateImage32Bpp<true>(
+            from, fromWidth, fromHeight,
+            to,   toWidth,   toHeight,
+            deg,  colorFill
+        );
+    }
+    else {
+        bilinearRotateImage32Bpp<false>(
+            from, fromWidth, fromHeight,
+            to,   toWidth,   toHeight,
+            deg,  colorFill
+        );
+    }
+}
+
+
+//
+// API with image objects
+//
+
+/** @brief Block scale for images.
+*/
+template<typename InImageT, typename OutImageT>
+inline void blockScaleImage(const InImageT& from, OutImageT& to)
+{
+    blockScaleImage(
+        from.begin(), from.width(), from.height(),
+        to  .begin(), to  .width(), to  .height()
+    );
+}
+
+/** @brief Bilinear scale for images.
+*/
+template<typename InImageT, typename OutImageT>
+inline void bilinearScaleImage(const InImageT& from, OutImageT& to)
+{
+    bilinearScaleImage(
+        from.begin(), from.width(), from.height(),
+        to  .begin(), to  .width(), to  .height()
+    );
+}
+
+/** @brief Block rotate for images.
+*/
+template<typename InImageT, typename OutImageT>
+inline void blockRotateImage(
+    const InImageT& from, OutImageT& to, float deg,
+    const Color& colorFill = Color::fromRgb8(0, 0, 0, 255), bool fullFit = false
+)
+{
+    blockRotateImage(
+        from.begin(), from.width(), from.height(),
+        to  .begin(), to  .width(), to  .height(),
+        deg,          colorFill,    fullFit
+    );
+}
+
+/** @brief Bilinear rotate for images.
+*/
+template<typename InImageT, typename OutImageT>
+inline void bilinearRotateImage(
+    const InImageT& from, OutImageT& to, float deg,
+    const Color& colorFill = Color::fromRgb8(0, 0, 0, 255), bool fullFit = false
+)
+{
+    bilinearRotateImage(
+        from.begin(), from.width(), from.height(),
+        to  .begin(), to  .width(), to  .height(),
+        deg,          colorFill,    fullFit
+    );
+}
 
 
 } // namespace

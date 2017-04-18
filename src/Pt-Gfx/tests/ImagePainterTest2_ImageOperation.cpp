@@ -15,47 +15,47 @@ static void testImageOperation(const char* title, Image& image, Painter& painter
     x += textureWithWhiteBackground.width() + 50;
 
     // Scaled and rotated image
-    Image scaledImage( textureWithWhiteBackground.format(), Size(120, 120) );
+    Image srImage( textureWithWhiteBackground.format(), Size(120, 120) );
 
     // Block scale
-    blockScale(scaledImage, textureWithWhiteBackground);
-    painter.drawImage(PointF(x, y), scaledImage);
-    painter.drawText( PointF(x, y + scaledImage.height() + 20), "Block Scaling" );
-    x += scaledImage.width() + 50;
+    blockScaleImage(textureWithWhiteBackground, srImage);
+    painter.drawImage(PointF(x, y), srImage);
+    painter.drawText( PointF(x, y + srImage.height() + 20), "Block Scaling" );
+    x += srImage.width() + 50;
 
     // Bilinear scale
-    bilinearScale(scaledImage, textureWithWhiteBackground);
-    painter.drawImage(PointF(x, y), scaledImage);
-    painter.drawText( PointF(x, y + scaledImage.height() + 20), "Bilinear Scaling" );
+    bilinearScaleImage(textureWithWhiteBackground, srImage);
+    painter.drawImage(PointF(x, y), srImage);
+    painter.drawText( PointF(x, y + srImage.height() + 20), "Bilinear Scaling" );
 
     x  = 20 + textureWithWhiteBackground.width() + 50;
-    y += scaledImage.height() + 50;
+    y += srImage.height() + 50;
 
     // Block rotate - normal
-    blockRotate(scaledImage, textureWithWhiteBackground, 30, Color::fromRgb8(0, 127, 127, 255), false);
-    painter.drawImage(PointF(x, y), scaledImage);
-    painter.drawText( PointF(x, y + scaledImage.height() + 20), "Block Rotate" );
-    x += scaledImage.width() + 50;
+    blockRotateImage(textureWithWhiteBackground, srImage, 30, Color::fromRgb8(0, 127, 127, 255), false);
+    painter.drawImage(PointF(x, y), srImage);
+    painter.drawText( PointF(x, y + srImage.height() + 20), "Block Rotate" );
+    x += srImage.width() + 50;
 
     // Block rotate - full
-    blockRotate(scaledImage, textureWithWhiteBackground, 30, Color::fromRgb8(0, 127, 127, 255), true);
-    painter.drawImage(PointF(x, y), scaledImage);
-    painter.drawText( PointF(x, y + scaledImage.height() + 20), "Block Rotate (Fullscale)" );
+    blockRotateImage(textureWithWhiteBackground, srImage, 30, Color::fromRgb8(0, 127, 127, 255), true);
+    painter.drawImage(PointF(x, y), srImage);
+    painter.drawText( PointF(x, y + srImage.height() + 20), "Block Rotate (Fullscale)" );
 
     x  = 20 + textureWithWhiteBackground.width() + 50;
-    y += scaledImage.height() + 50;
+    y += srImage.height() + 50;
 
     // Bilinear rotate - normal
-    bilinearRotate(scaledImage, textureWithWhiteBackground, 30, Color::fromRgb8(0, 127, 127, 255), false);
-    painter.drawImage(PointF(x, y), scaledImage);
-    painter.drawText( PointF(x, y + scaledImage.height() + 20), "Bilinear Rotate" );
-    x += scaledImage.width() + 50;
+    bilinearRotateImage(textureWithWhiteBackground, srImage, 30, Color::fromRgb8(0, 127, 127, 255), false);
+    painter.drawImage(PointF(x, y), srImage);
+    painter.drawText( PointF(x, y + srImage.height() + 20), "Bilinear Rotate" );
+    x += srImage.width() + 50;
 
     // Bilinear rotate - fullscale
-    bilinearRotate(scaledImage, textureWithWhiteBackground, 30, Color::fromRgb8(0, 127, 127, 255), true);
-    painter.drawImage(PointF(x, y), scaledImage);
-    painter.drawText( PointF(x, y + scaledImage.height() + 20), "Bilinear Rotate (Fullscale)" );
-    x += scaledImage.width() + 50;
+    bilinearRotateImage(textureWithWhiteBackground, srImage, 30, Color::fromRgb8(0, 127, 127, 255), true);
+    painter.drawImage(PointF(x, y), srImage);
+    painter.drawText( PointF(x, y + srImage.height() + 20), "Bilinear Rotate (Fullscale)" );
+    x += srImage.width() + 50;
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }

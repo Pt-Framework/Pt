@@ -3,10 +3,10 @@ static size_t benchImageScalingBlock(int loopCount)
 {
     size_t sum = 0;
 
-    Image scaledImage( textureWithWhiteBackground.format(), Size(120, 120) );
+    Image srImage( textureWithWhiteBackground.format(), Size(120, 120) );
 
     Argb32Image srcArgb32(textureWithWhiteBackground.size());
-    Argb32Image dstArgb32(scaledImage               .size());
+    Argb32Image dstArgb32(srImage               .size());
     memcpy(
         srcArgb32.data(),
         textureWithWhiteBackground.data(),
@@ -20,7 +20,7 @@ static size_t benchImageScalingBlock(int loopCount)
         if(mode == -1) {
             blockScale(
                 textureWithWhiteBackground.begin(), textureWithWhiteBackground.width(), textureWithWhiteBackground.height(),
-                scaledImage               .begin(), scaledImage               .width(), scaledImage               .height()
+                srImage                   .begin(), srImage                   .width(), srImage                   .height()
             );
         }
         else if(mode == -2) {
@@ -28,14 +28,16 @@ static size_t benchImageScalingBlock(int loopCount)
                 srcArgb32.begin(), srcArgb32.width(), srcArgb32.height(),
                 dstArgb32.begin(), dstArgb32.width(), dstArgb32.height()
             );
+            /*
             memcpy(
-                scaledImage.data(),
+                srImage.data(),
                 dstArgb32.data(),
-                scaledImage.width() * scaledImage.height() * scaledImage.format().pixelStride()
+                srImage.width() * srImage.height() * srImage.format().pixelStride()
             );
+            */
         }
         else {
-            blockScale(scaledImage, textureWithWhiteBackground);
+            blockScaleImage(textureWithWhiteBackground, srImage);
         }
 
         sum += clock.stop().toUSecs();
@@ -50,13 +52,13 @@ static size_t benchImageScalingBilinear(int loopCount)
 {
     size_t sum = 0;
 
-    Image scaledImage( textureWithWhiteBackground.format(), Size(120, 120) );
+    Image srImage( textureWithWhiteBackground.format(), Size(120, 120) );
 
     for(int i = 0; i < loopCount; ++i) {
         Pt::System::Clock clock;
         clock.start();
 
-        bilinearScale(scaledImage, textureWithWhiteBackground);
+        bilinearScaleImage(textureWithWhiteBackground, srImage);
 
         sum += clock.stop().toUSecs();
     }
@@ -70,13 +72,13 @@ static size_t benchImageRotationBlock(int loopCount)
 {
     size_t sum = 0;
 
-    Image scaledImage( textureWithWhiteBackground.format(), Size(120, 120) );
+    Image srImage( textureWithWhiteBackground.format(), Size(120, 120) );
 
     for(int i = 0; i < loopCount; ++i) {
         Pt::System::Clock clock;
         clock.start();
 
-        blockRotate(scaledImage, textureWithWhiteBackground, 30, Color::fromRgb8(0, 0, 0, 255), fullscale);
+        blockRotateImage(textureWithWhiteBackground, srImage, 30, Color::fromRgb8(0, 0, 0, 255), fullscale);
 
         sum += clock.stop().toUSecs();
     }
@@ -90,13 +92,13 @@ static size_t benchImageRotationBilinear(int loopCount)
 {
     size_t sum = 0;
 
-    Image scaledImage( textureWithWhiteBackground.format(), Size(120, 120) );
+    Image srImage( textureWithWhiteBackground.format(), Size(120, 120) );
 
     for(int i = 0; i < loopCount; ++i) {
         Pt::System::Clock clock;
         clock.start();
 
-        bilinearRotate(scaledImage, textureWithWhiteBackground, 30, Color::fromRgb8(0, 0, 0, 255), fullscale);
+        bilinearRotateImage(textureWithWhiteBackground, srImage, 30, Color::fromRgb8(0, 0, 0, 255), fullscale);
 
         sum += clock.stop().toUSecs();
     }
@@ -111,15 +113,15 @@ x86_64 (i5-4460; 64-Bit Mode)
 -----------------------------
                                                    (Time) (Factor)
                                                    ------ --------
-Image scaling    (block    - generic )           =    155
-Image scaling    (block    - argb32  )           =     40 ( 0.258)
-Image scaling  4 (block              )           =      9 ( 0.058)
-Image scaling  4 (bilinear           )           =    128 ( 0.826)
+Image scaling    (block    - generic )           =    158
+Image scaling    (block    - argb32  )           =     45 ( 0.285)
+Image scaling  4 (block              )           =     12 ( 0.076)
+Image scaling  4 (bilinear           )           =    136 ( 0.861)
 
-Image rotation 4 (block    - normal  )           =     37
-Image rotation 4 (block    - full-fit)           =     37 ( 1.000)
-Image rotation 4 (bilinear - normal  )           =    201 ( 5.432)
-Image rotation 4 (bilinear - full-fit)           =    204 ( 5.514)
+Image rotation 4 (block    - normal  )           =     40
+Image rotation 4 (block    - full-fit)           =     40 ( 1.000)
+Image rotation 4 (bilinear - normal  )           =    203 ( 5.075)
+Image rotation 4 (bilinear - full-fit)           =    204 ( 5.100)
 */
 
 /*

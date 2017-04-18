@@ -27,8 +27,8 @@
   02110-1301 USA
 */
 
-#ifndef PT_GFX_IMAGEROTATE4_H
-#define PT_GFX_IMAGEROTATE4_H
+#ifndef PT_GFX_IMAGEROTATE32BPP_H
+#define PT_GFX_IMAGEROTATE32BPP_H
 
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/Math.h>
@@ -42,7 +42,7 @@ namespace Gfx {
 // ===== Internal Helper Functions ======================================================
 // ======================================================================================
 
-static inline Pt::uint32_t bsMixPixel_implFP(const Pt::uint32_t* img, Pt::ssize_t imgW, Pt::ssize_t imgH, Pt::int32_t Fx, Pt::int32_t Fy, Pt::uint32_t fil)
+static inline Pt::uint32_t bsMixPixel32Bpp_implFP(const Pt::uint32_t* img, Pt::ssize_t imgW, Pt::ssize_t imgH, Pt::int32_t Fx, Pt::int32_t Fy, Pt::uint32_t fil)
 {
     // Used for processing the pixels
     union Pixel4 {
@@ -147,7 +147,7 @@ static inline void bblRotate4_implFP(
             const Pt::int32_t FrotY = ( (-Fs * FsrcX + Fc * FsrcY) >> 1 ) + FmidY;
             // Bilinear rotation
             if(bilinear) {
-                *dst++ = bsMixPixel_implFP(src, fromWidth, fromHeight, FrotX, FrotY, fil);
+                *dst++ = bsMixPixel32Bpp_implFP(src, fromWidth, fromHeight, FrotX, FrotY, fil);
             }
             // Block rotation
             else {
@@ -174,8 +174,10 @@ static inline void bblRotate4_implFP(
 // ===== Public Functions ===============================================================
 // ======================================================================================
 
+/** @brief Block rotate implementation for 32 bits/pixel images.
+*/
 template <bool fullFit, typename InIterT, typename OutIterT>
-inline void blockRotate4(
+inline void blockRotateImage32Bpp(
     InIterT      from, Pt::ssize_t  fromWidth, Pt::ssize_t fromHeight,
     OutIterT     to,   Pt::ssize_t  toWidth,   Pt::ssize_t toHeight,
     float        deg,  const Color& cfill
@@ -188,8 +190,10 @@ inline void blockRotate4(
     );
 }
 
+/** @brief Bilinear rotate implementation for 32 bits/pixel images.
+*/
 template <bool fullFit, typename InIterT, typename OutIterT>
-inline void bilinearRotate4(
+inline void bilinearRotateImage32Bpp(
     InIterT      from, Pt::ssize_t  fromWidth, Pt::ssize_t fromHeight,
     OutIterT     to,   Pt::ssize_t  toWidth,   Pt::ssize_t toHeight,
     float        deg,  const Color& cfill

@@ -13,12 +13,12 @@ static void testSceneGraph(const char* title, Image& image, Painter& painter)
     Image scaledTexH( textureWithWhiteBackground.format(), Size(textureWithWhiteBackground.width() / 2, textureWithWhiteBackground.height() / 2) );
     Image scaledTexQ( textureWithWhiteBackground.format(), Size(textureWithWhiteBackground.width() / 4, textureWithWhiteBackground.height() / 4) );
 
-    bilinearScale(scaledTexH, textureWithWhiteBackground);
-    bilinearScale(scaledTexQ, scaledTexH                );
+    bilinearScaleImage(scaledTexH, textureWithWhiteBackground);
+    bilinearScaleImage(scaledTexQ, scaledTexH                );
 
     //Image scaledTexO( textureWithWhiteBackground.format(), Size(textureWithWhiteBackground.width() / 8, textureWithWhiteBackground.height() / 8) );
-    //bilinearScale(scaledTexO, scaledTexQ                );
-    //bilinearScale(scaledTexQ, scaledTexO                );
+    //bilinearScaleImage(scaledTexO, scaledTexQ                );
+    //bilinearScaleImage(scaledTexQ, scaledTexO                );
 
     // Generate a new path
     Path pathPoly4;

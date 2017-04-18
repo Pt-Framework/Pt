@@ -27,8 +27,8 @@
   02110-1301 USA
 */
 
-#ifndef PT_GFX_IMAGESCALE4_H
-#define PT_GFX_IMAGESCALE4_H
+#ifndef PT_GFX_IMAGESCALE32BPP_H
+#define PT_GFX_IMAGESCALE32BPP_H
 
 #include <Pt/Gfx/Math.h>
 #include <Pt/Gfx/SIMDConfig.h>
@@ -57,7 +57,7 @@ static const __m128 sseFour256 = _mm_set1_ps(256);
 
 #if defined(PT_GFX_USE_SSE4P1)
 
-static inline Pt::uint32_t bsGetPixel_implSIMD(const Pt::uint32_t* img, Pt::ssize_t imgW, Pt::ssize_t imgH, float x, float y)
+static inline Pt::uint32_t bsGetPixel32Bpp_implSIMD(const Pt::uint32_t* img, Pt::ssize_t imgW, Pt::ssize_t imgH, float x, float y)
 {
     // Floor and limit the coordinates
     Pt::int32_t px = Pt::Gfx::Math::zfint(x);
@@ -126,7 +126,7 @@ static inline Pt::uint32_t bsGetPixel_implSIMD(const Pt::uint32_t* img, Pt::ssiz
 
 #elif defined(PT_GFX_USE_SSE2)
 
-static inline Pt::uint32_t bsGetPixel_implSIMD(const Pt::uint32_t* img, Pt::ssize_t imgW, Pt::ssize_t imgH, float x, float y)
+static inline Pt::uint32_t bsGetPixel32Bpp_implSIMD(const Pt::uint32_t* img, Pt::ssize_t imgW, Pt::ssize_t imgH, float x, float y)
 {
     // Floor and limit the coordinates
     Pt::int32_t px = Pt::Gfx::Math::zfint(x);
@@ -198,7 +198,7 @@ static inline Pt::uint32_t bsGetPixel_implSIMD(const Pt::uint32_t* img, Pt::ssiz
 
 #else
 
-static inline Pt::uint32_t bsGetPixel_implFP(const Pt::uint32_t* img, Pt::ssize_t imgW, Pt::ssize_t imgH, Pt::uint32_t Fx, Pt::uint32_t Fy)
+static inline Pt::uint32_t bsGetPixel32Bpp_implFP(const Pt::uint32_t* img, Pt::ssize_t imgW, Pt::ssize_t imgH, Pt::uint32_t Fx, Pt::uint32_t Fy)
 {
     // Used for processing the pixels
     union Pixel4 {
@@ -254,7 +254,7 @@ static inline Pt::uint32_t bsGetPixel_implFP(const Pt::uint32_t* img, Pt::ssize_
 #endif
 
 template <bool bilinear, typename InIterT, typename OutIterT>
-static inline void bblScale4_implFP(
+static inline void bblScale32Bpp_implFP(
     InIterT  from, Pt::ssize_t fromWidth, Pt::ssize_t fromHeight,
     OutIterT to,   Pt::ssize_t toWidth,   Pt::ssize_t toHeight
 )
@@ -278,7 +278,7 @@ static inline void bblScale4_implFP(
 #if !defined(PT_GFX_USE_SSE4P1) && !defined(PT_GFX_USE_SSE2)
             // Bilinear scaling (non SIMD)
             if(bilinear)
-                *dst++ = bsGetPixel_implFP(src, fromWidth, fromHeight, FitrX, FitrY);
+                *dst++ = bsGetPixel32Bpp_implFP(src, fromWidth, fromHeight, FitrX, FitrY);
             // Block scaling
             else
 #endif
@@ -296,20 +296,24 @@ static inline void bblScale4_implFP(
 // ===== Public Functions ===============================================================
 // ======================================================================================
 
+/** @brief Block scale implementation for 32 bits/pixel images.
+*/
 template <typename InIterT, typename OutIterT>
-inline void blockScale4(
+inline void blockScaleImage32Bpp(
     InIterT  from, Pt::ssize_t fromWidth, Pt::ssize_t fromHeight,
     OutIterT to,   Pt::ssize_t toWidth,   Pt::ssize_t toHeight
 )
 {
-    bblScale4_implFP<false, InIterT, OutIterT>(
+    bblScale32Bpp_implFP<false, InIterT, OutIterT>(
         from, fromWidth, fromHeight,
         to,   toWidth,   toHeight
     );
 }
 
+/** @brief Bilinear scale implementation for 32 bits/pixel images.
+*/
 template <typename InIterT, typename OutIterT>
-inline void bilinearScale4(
+inline void bilinearScaleImage32Bpp(
     InIterT  from, Pt::ssize_t fromWidth, Pt::ssize_t fromHeight,
     OutIterT to,   Pt::ssize_t toWidth,   Pt::ssize_t toHeight
 )
@@ -331,7 +335,7 @@ inline void bilinearScale4(
         float itrX = 0;
         for(Pt::ssize_t x = 0; x < toWidth; ++x) {
             // Get the interpolated pixel (SIMD)
-            *dst++ = bsGetPixel_implSIMD(src, fromWidth, fromHeight, itrX, itrY);
+            *dst++ = bsGetPixel32Bpp_implSIMD(src, fromWidth, fromHeight, itrX, itrY);
             // Increment the iterator
             itrX += incX;
         }
@@ -341,7 +345,7 @@ inline void bilinearScale4(
 
 #else
 
-    bblScale4_implFP<true, InIterT, OutIterT>(
+    bblScale32Bpp_implFP<true, InIterT, OutIterT>(
         from, fromWidth, fromHeight,
         to,   toWidth,   toHeight
     );
