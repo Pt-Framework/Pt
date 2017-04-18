@@ -54,25 +54,46 @@ struct SvgRasterizer::SvgInst {
 };
 
 struct SvgRasterizer::RasterState {
-    bool                           gotStart;       // State flags
-    bool                           gotEnd;         // ---
+    // Typedefs
+    typedef std::map<std::string, SvgInst> SvgObjects;
 
-    Image&                         image;          // Target image
-    ImagePainter2                  painter;        // Target painter
+    // State flags
+    bool gotStart; // A flag that indicates that we have got the SVG opening tag
+    bool gotEnd;   // A flag that indicates that we have got the SVG closing tag
 
-    Transform                      worldTransform; // World transformation that will be applied to all loaded SVG objects
+    // Rendering target
+    Image&        image;    // Target image
+    ImagePainter2 painter;  // Target painter
+    PointF        topLeft;  // Starting (top-left) coordinate for rendering the SVG
 
-    std::map<std::string, SvgInst> svgInst;        // A map between reference names and their corresponding SVG object instances
+    // Viewport and viewbox
+    double          vpWidth;  // Width  of the viewport (negative: relative percentage; positive: absolute pixels)
+    double          vpHeight; // Height of the viewport (negative: relative percentage; positive: absolute pixels)
+    double          vbX;      // Viewbox top-left X coordinate
+    double          vbY;      // Viewbox top-left Y coordinate
+    double          vbW;      // Viewbox width
+    double          vbH;      // Viewbox height
+    AspectRatioMode arMode;   // Aspect ratio mode
 
-    std::set<Pen>                  penSet;         // A set of pens    (for cache look-up)
-    std::set<Brush>                brushSet;       // A set of brushes (for cache look-up)
+    // Caches
+    std::set<Pen>   penSet;   // A set of pens    (for cache look-up)
+    std::set<Brush> brushSet; // A set of brushes (for cache look-up)
+    SvgObjects      svgInst;  // A map between reference names and their corresponding SVG objects
 
-    inline RasterState(Image& image_, const Transform& worldTransform)
-    : gotStart      (false)
-    , gotEnd        (false)
-    , image         (image_)
-    , painter       (image_)
-    , worldTransform(worldTransform)
+    // Construct a raster state object
+    inline RasterState(Image& image_, const PointF& topLeft_)
+    : gotStart(false)
+    , gotEnd  (false)
+    , image   (image_)
+    , painter (image_)
+    , topLeft (topLeft_)
+    , vpWidth (-100) // The default viewport width  is 100% of the target image width
+    , vpHeight(-100) // The default viewport height is 100% of the target image height
+    , vbX     (0)    // The default viewbox top-left coordinate is (0, 0)
+    , vbY     (0)    // The default viewbox top-left coordinate is (0, 0)
+    , vbW     (0)    // The default viewbox width  is the the same with the viewport width
+    , vbH     (0)    // The default viewbox height is the the same with the viewport height
+    , arMode  (XMidYMidMeet)
     {}
 };
 
@@ -81,8 +102,8 @@ struct SvgRasterizer::RasterState {
 // ===== Public Member Functions ========================================================
 // ======================================================================================
 
-SvgRasterizer::SvgRasterizer(std::istream& is, Image& image, const Transform& worldTransform)
-: _rstate           (new RasterState(image, worldTransform))
+SvgRasterizer::SvgRasterizer(std::istream& is, Image& image, const PointF& topLeft)
+: _rstate           (new RasterState(image, topLeft))
 , _binaryInputSource(is)
 , _xmlReader        (_binaryInputSource)
 {

@@ -49,7 +49,7 @@ namespace Gfx {
 class SvgRasterizer
 {
     public:
-        SvgRasterizer(std::istream& is, Image& image, const Transform& worldTransform);
+        SvgRasterizer(std::istream& is, Image& image, const PointF& topLeft);
 
         ~SvgRasterizer();
 
@@ -80,6 +80,29 @@ class SvgRasterizer
         static inline const std::string& passValidNumber(const std::string& s, const std::string& sectionInfo);
 
     private:
+        enum AspectRatioMode {
+            None,
+            XMinYMinMeet,
+            XMinYMidMeet,
+            XMinYMaxMeet,
+            XMidYMinMeet,
+            XMidYMidMeet,
+            XMidYMaxMeet,
+            XMaxYMinMeet,
+            XMaxYMidMeet,
+            XMaxYMaxMeet,
+            XMinYMinSlice,
+            XMinYMidSlice,
+            XMinYMaxSlice,
+            XMidYMinSlice,
+            XMidYMidSlice,
+            XMidYMaxSlice,
+            XMaxYMinSlice,
+            XMaxYMidSlice,
+            XMaxYMaxSlice
+        };
+
+    private:
         static const Color fromHtmlColor(const std::string& colStr);
 
         static void lexPathData(std::vector<std::string>& tokens, const std::string& str);
@@ -92,7 +115,7 @@ class SvgRasterizer
 // ===== Inlined Private Member Functions ===============================================
 // ======================================================================================
 
-const std::string SvgRasterizer::lcaseStdStr(const std::string & str_)
+inline const std::string SvgRasterizer::lcaseStdStr(const std::string & str_)
 {
     std::string  str = str_;
     std::transform(str.begin(), str.end(), str.begin(), ::tolower);
@@ -100,7 +123,7 @@ const std::string SvgRasterizer::lcaseStdStr(const std::string & str_)
     return str;
 }
 
-const std::string SvgRasterizer::lcaseStdStr(const Pt::String& str_)
+inline const std::string SvgRasterizer::lcaseStdStr(const Pt::String& str_)
 {
     Pt::String str = str_;
     std::transform(str.begin(), str.end(), str.begin(), ::tolower);
@@ -108,7 +131,7 @@ const std::string SvgRasterizer::lcaseStdStr(const Pt::String& str_)
     return str.narrow();
 }
 
-const Pt::String SvgRasterizer::lcasePtStr(const Pt::String& str_)
+inline const Pt::String SvgRasterizer::lcasePtStr(const Pt::String& str_)
 {
     Pt::String str = str_;
     std::transform(str.begin(), str.end(), str.begin(), ::tolower);
@@ -116,7 +139,7 @@ const Pt::String SvgRasterizer::lcasePtStr(const Pt::String& str_)
     return str;
 }
 
-const std::string SvgRasterizer::ltrimStdStr(const std::string & str)
+inline const std::string SvgRasterizer::ltrimStdStr(const std::string & str)
 {
     const size_t idx = str.find_first_not_of(" \t\v\n\r\f");
 
@@ -124,7 +147,7 @@ const std::string SvgRasterizer::ltrimStdStr(const std::string & str)
     return str;
 }
 
-const std::string SvgRasterizer::rtrimStdStr(const std::string & str)
+inline const std::string SvgRasterizer::rtrimStdStr(const std::string & str)
 {
     const size_t idx = str.find_last_not_of(" \t\v\n\r\f");
 
@@ -132,10 +155,10 @@ const std::string SvgRasterizer::rtrimStdStr(const std::string & str)
     return str;
 }
 
-const std::string SvgRasterizer::lrtrimStdStr(const std::string & str)
+inline const std::string SvgRasterizer::lrtrimStdStr(const std::string & str)
 { return rtrimStdStr(ltrimStdStr(str)); }
 
-const std::string SvgRasterizer::removeAllSpacesStdStr(const std::string & str_)
+inline const std::string SvgRasterizer::removeAllSpacesStdStr(const std::string & str_)
 {
     std::string str = str_;
     str.erase(remove_if(str.begin(), str.end(), ::isspace), str.end());
@@ -143,7 +166,7 @@ const std::string SvgRasterizer::removeAllSpacesStdStr(const std::string & str_)
     return str;
 }
 
-const std::string& SvgRasterizer::passValidNumber(const std::string& s, const std::string& sectionInfo)
+inline const std::string& SvgRasterizer::passValidNumber(const std::string& s, const std::string& sectionInfo)
 {
     char*  end = 0;
     double val = strtod(s.c_str(), &end);

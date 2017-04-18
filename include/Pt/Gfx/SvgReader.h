@@ -54,25 +54,17 @@ class PT_GFX_API SvgReader
         */
         SvgReader();
 
-        /** @brief Construct with target stream and image.
+        /** @brief Construct with target stream, image, and starting rendering coordinate.
         */
-        SvgReader(std::istream& is, Image& image);
-
-        /** @brief Construct with target stream, image, and world transform.
-        */
-        SvgReader(std::istream& is, Image& image, const Transform& worldTransform);
+        SvgReader(std::istream& is, Image& image, const PointF& topLeft = PointF(0, 0));
 
         /** @brief Destructor.
         */
         ~SvgReader();
 
-        /** @brief Attach to target stream and image.
+        /** @brief Attach to target stream, image, and starting rendering coordinate.
         */
-        void attach(std::istream& is, Image& image);
-
-        /** @brief Attach to target stream, image, and world transform.
-        */
-        void attach(std::istream& is, Image& image, const Transform& worldTransform);
+        void attach(std::istream& is, Image& image, const PointF& topLeft = PointF(0, 0));
 
         /** @brief Detach from target stream.
         */

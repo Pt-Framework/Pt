@@ -119,8 +119,8 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_PATH_CLIPPING                 0 // (including path-based text)
 #define TEST_DRAW_EXTRA                         0 // (including path-based n-bezier)
 
-#define TEST_IMAGE_OPERATION                    1
-#define TEST_SCENE_GRAPH                        1
+#define TEST_IMAGE_OPERATION                    0
+#define TEST_SCENE_GRAPH                        0
 #define TEST_SVG_READER                         1
 
 #define TEST_COMPARE_WITH_OLD_PAINTER           0 // (for some shapes only)
