@@ -390,32 +390,32 @@ void BrushData::setTextureRotation(float rotDeg, const Color& colorFill, Brush::
     switch(mode) {
         case Brush::Block:
             blockRotateImage(
-                _texture    .begin(), _texture    .width(), _texture    .height(),
                 _textureOrig.begin(), _textureOrig.width(), _textureOrig.height(),
+                _texture    .begin(), _texture    .width(), _texture    .height(),
                 _rotDeg,              colorFill,            false
             );
             break;
 
         case Brush::BlockFullFit:
             blockRotateImage(
-                _texture    .begin(), _texture    .width(), _texture    .height(),
                 _textureOrig.begin(), _textureOrig.width(), _textureOrig.height(),
+                _texture    .begin(), _texture    .width(), _texture    .height(),
                 _rotDeg,              colorFill,            true
             );
             break;
 
         case Brush::Bilinear:
             bilinearRotateImage(
-                _texture    .begin(), _texture    .width(), _texture    .height(),
                 _textureOrig.begin(), _textureOrig.width(), _textureOrig.height(),
+                _texture    .begin(), _texture    .width(), _texture    .height(),
                 _rotDeg,              colorFill,            false
             );
             break;
 
         case Brush::BilinearFullFit:
             bilinearRotateImage(
-                _texture    .begin(), _texture    .width(), _texture    .height(),
                 _textureOrig.begin(), _textureOrig.width(), _textureOrig.height(),
+                _texture    .begin(), _texture    .width(), _texture    .height(),
                 _rotDeg,              colorFill,            true
             );
             break;
