@@ -1,0 +1,10 @@
+<!-- plain (without DTD); without size; without view-box -->
+
+<!-- the coordinates should be rendered as is and then aligned to the top-left of the screen -->
+
+<svg xmlns="http://www.w3.org/2000/svg">
+    <!-- with group -->
+    <g stroke="green" stroke-width="8">
+        <line x1="5" y1="5" x2="100" y2="100"/>
+    </g>
+</svg>

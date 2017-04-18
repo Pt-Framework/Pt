@@ -1,0 +1,8 @@
+<!-- plain (without DTD); with relative size; with view-box -->
+
+<!-- the coordinates should be scaled uniformly to the specified % of the screen size and then aligned to the middle-center of the screen -->
+
+<svg xmlns="http://www.w3.org/2000/svg" width="75%" height="25%" viewBox="0 0 319 239" preserveAspectRatio="xMidYMid">
+    <!-- direct -->
+    <line x1="5" y1="5" x2="100" y2="100" stroke="green" stroke-width="8"/>
+</svg>

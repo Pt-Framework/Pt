@@ -82,6 +82,9 @@ void SvgReaderImpl::attach(std::istream& is, Image& image, const Transform& worl
 {
     delete _svgRasterizer;
 
+    if( !is || is.rdbuf()->sgetc() == std::ios::traits_type::eof() )
+        throw IOError("invalid svg file");
+
     _svgRasterizer = new SvgRasterizer(is, image, worldTransform);
 }
 
