@@ -35,7 +35,6 @@
 #include <Pt/Xml/DocType.h>
 #include <Pt/Xml/StartElement.h>
 #include <Pt/Xml/EndElement.h>
-#include <Pt/Xml/Characters.h>
 
 #include <Pt/Gfx/Path.h>
 
@@ -47,55 +46,39 @@ namespace Gfx {
 
 
 // ======================================================================================
-// ===== Private Member Structure Definitions ===========================================
+// ===== SvgRasterizer::SvgObject =======================================================
 // ======================================================================================
 
-struct SvgRasterizer::SvgInst {
+struct SvgRasterizer::SvgObject {
 };
 
-struct SvgRasterizer::RasterState {
-    // Typedefs
-    typedef std::map<std::string, SvgInst> SvgObjects;
 
-    // State flags
-    bool gotStart; // A flag that indicates that we have got the SVG opening tag
-    bool gotEnd;   // A flag that indicates that we have got the SVG closing tag
+// ======================================================================================
+// ===== SvgRasterizer::RasterState =====================================================
+// ======================================================================================
 
-    // Rendering target
-    Image&        image;    // Target image
-    ImagePainter2 painter;  // Target painter
-    PointF        topLeft;  // Starting (top-left) coordinate for rendering the SVG
+SvgRasterizer::RasterState::RasterState(Image& image_, const PointF& topLeft_)
+: gotStart(false)
+, gotEnd  (false)
+, image   (image_)
+, painter (image_)
+, topLeft (topLeft_)
+, vpWidth (-100) // The default viewport width  is 100% of the target image width
+, vpHeight(-100) // The default viewport height is 100% of the target image height
+, vbX     (0)    // The default viewbox top-left coordinate is (0, 0)
+, vbY     (0)    // The default viewbox top-left coordinate is (0, 0)
+, vbW     (0)    // The default viewbox width  is the the same with the viewport width
+, vbH     (0)    // The default viewbox height is the the same with the viewport height
+, arMode  (XMidYMidMeet)
+{}
 
-    // Viewport and viewbox
-    double          vpWidth;  // Width  of the viewport (negative: relative percentage; positive: absolute pixels)
-    double          vpHeight; // Height of the viewport (negative: relative percentage; positive: absolute pixels)
-    double          vbX;      // Viewbox top-left X coordinate
-    double          vbY;      // Viewbox top-left Y coordinate
-    double          vbW;      // Viewbox width
-    double          vbH;      // Viewbox height
-    AspectRatioMode arMode;   // Aspect ratio mode
-
-    // Caches
-    std::set<Pen>   penSet;   // A set of pens    (for cache look-up)
-    std::set<Brush> brushSet; // A set of brushes (for cache look-up)
-    SvgObjects      svgInst;  // A map between reference names and their corresponding SVG objects
-
-    // Construct a raster state object
-    inline RasterState(Image& image_, const PointF& topLeft_)
-    : gotStart(false)
-    , gotEnd  (false)
-    , image   (image_)
-    , painter (image_)
-    , topLeft (topLeft_)
-    , vpWidth (-100) // The default viewport width  is 100% of the target image width
-    , vpHeight(-100) // The default viewport height is 100% of the target image height
-    , vbX     (0)    // The default viewbox top-left coordinate is (0, 0)
-    , vbY     (0)    // The default viewbox top-left coordinate is (0, 0)
-    , vbW     (0)    // The default viewbox width  is the the same with the viewport width
-    , vbH     (0)    // The default viewbox height is the the same with the viewport height
-    , arMode  (XMidYMidMeet)
-    {}
-};
+SvgRasterizer::RasterState::~RasterState()
+{
+    for(SvgObjects::iterator it = svgObjects.begin(); it != svgObjects.end(); ++it) {
+        delete it->second;
+    }
+    svgObjects.clear();
+}
 
 
 // ======================================================================================
@@ -142,8 +125,6 @@ bool SvgRasterizer::advance()
     if(!node) {
         // Check if we have got a complete SVG body
         if(!_rstate->gotStart || !_rstate->gotEnd) throw IOError("svg error: premature end of document");
-        // All done!
-        lprintf("DONE!\n");
         return true;
     }
 
@@ -152,29 +133,34 @@ bool SvgRasterizer::advance()
         case Xml::Node::StartDocument: {
             // Get the XML declaration
             const Xml::XmlDeclaration* elem = _xmlReader.input()->declaration();
-            // Dump the XML declaration
-            if(elem && !elem->version().empty()) {
-                lprintf("StartDocument : %s\n", lcaseStdStr(elem->version ()).c_str());
-                lprintf("                %s\n", lcaseStdStr(elem->encoding()).c_str());
-            }
+            // Check the XML declaration
+            if(!elem->version ().empty() && lcaseStdStr(elem->version ()) != "1.0"  ) throw IOError("svg error: invalid XML version" );
+            if(!elem->encoding().empty() && lcaseStdStr(elem->encoding()) != "utf-8") throw IOError("svg error: invalid XML encoding");
             break;
         }
 
         case Xml::Node::EndDocument: {
             // Check if we have got a complete SVG body
             if(!_rstate->gotStart || !_rstate->gotEnd) throw IOError("svg error: premature end of document");
-            // Dump the element
-            lprintf("EndDocument   :\n");
             break;
         }
 
         case Xml::Node::DocType: {
             // Convert the element
             const Xml::DocType& elem = Xml::nodeCast<Xml::DocType>(*node);
-            // Dump the element
-            lprintf("DocType       : %s\n", lcaseStdStr(elem.rootName().local()).c_str());
-            lprintf("                %s\n", lcaseStdStr(elem.publicId()        ).c_str());
-            lprintf("                %s\n", lcaseStdStr(elem.systemId()        ).c_str());
+            // Check the document type
+            if(lcaseStdStr(elem.rootName().local()) != "svg")
+                throw IOError("svg error: invalid SVG DTD root name");
+            const std::string& pubId = lcaseStdStr(elem.publicId());
+            if( pubId != "-//w3c//dtd svg 1.0//en" &&
+                pubId != "-//w3c//dtd svg 1.1//en"
+              )
+                throw IOError("svg error: invalid SVG DTD public ID");
+            const std::string& sysId = lcaseStdStr(elem.systemId());
+            if( sysId != "http://www.w3.org/tr/2001/rec-svg-20010904/dtd/svg10.dtd" &&
+                sysId != "http://www.w3.org/tr/2001/rec-svg-20010904/dtd/svg11.dtd"
+              )
+                throw IOError("svg error: invalid SVG DTD public ID");
             break;
         }
 
@@ -182,24 +168,13 @@ bool SvgRasterizer::advance()
             // Convert the element
             const Xml::StartElement& elem = Xml::nodeCast<Xml::StartElement>(*node);
             // Check for the SVG opening element
-            if(lcasePtStr(elem.name().local()) == L"svg") {
+            if(lcasePtStr(elem.name().local()) == "svg") {
                 // Check if we have got the opening element
                 if(_rstate->gotStart) throw IOError("svg error: multiple main body");
                 // Set flag
                 _rstate->gotStart = true;
-            }
-            // Dump the element
-            if(lcaseStdStr(elem.name().local()) == "svg") {
-                lprintf("StartElement  : %s\n", lcaseStdStr(elem.name().local()).c_str());
-                lprintf("                %s\n", lcaseStdStr(elem.namespaceUri()).c_str());
-            }
-            else {
-                lprintf("StartElement  : %s\n", lcaseStdStr(elem.name().local()).c_str());
-            }
-            const Xml::AttributeList& alist = elem.attributes();
-            for(Xml::AttributeList::ConstIterator it = alist.begin(); it != alist.end(); ++it) {
-                const Xml::Attribute& a = *it;
-                lprintf("    Attribute : %s = %s\n", lcaseStdStr(a.name().local()).c_str(), a.value().narrow().c_str());
+                // Process the parameters
+                processSvgElemParams(*_rstate, elem);
             }
             break;
         }
@@ -209,22 +184,28 @@ bool SvgRasterizer::advance()
             const Xml::EndElement& elem = Xml::nodeCast<Xml::EndElement>(*node);
             // Check for the SVG closing element
             if(lcasePtStr(elem.name().local()) == L"svg") _rstate->gotEnd = true;
+            /*
             // Dump the element
             lprintf("EndElement    : %s\n", lcaseStdStr(elem.name().local()).c_str());
+            //*/
             break;
         }
 
         case Xml::Node::Characters: {
             // Convert the element
             //const Xml::Characters& elem = Xml::nodeCast<Xml::Characters>(*node);
+            /*
             // Dump the element
             //lprintf("Characters    : %s\n", elem.content().narrow().c_str());
+            //*/
             break;
         }
 
         default:
+            /*
             // Dump the element
             lprintf("node->type()  : %d\n", node->type());
+            //*/
             break;
     }
 

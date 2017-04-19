@@ -58,7 +58,7 @@ class SvgRasterizer
         bool advance();
 
     private:
-        struct SvgInst;
+        struct SvgObject;
         struct RasterState;
 
     private:
@@ -108,6 +108,47 @@ class SvgRasterizer
         static void lexPathData(std::vector<std::string>& tokens, const std::string& str);
         static void lexStyleData(std::vector<std::string>& tokens, const std::string& str);
         static void lexTransformData(std::vector<std::string>& tokens, const std::string& str);
+
+        static void processSvgElemParams(RasterState& rs, const Xml::StartElement& elem);
+};
+
+
+// ======================================================================================
+// ===== Private Member Structure Definitions ===========================================
+// ======================================================================================
+
+struct SvgRasterizer::RasterState {
+    // Typedefs
+    typedef std::map<std::string, SvgObject*> SvgObjects;
+
+    // State flags
+    bool gotStart; // A flag that indicates that we have got the SVG opening tag
+    bool gotEnd;   // A flag that indicates that we have got the SVG closing tag
+
+    // Rendering target
+    Image&        image;    // Target image
+    ImagePainter2 painter;  // Target painter
+    PointF        topLeft;  // Starting (top-left) coordinate for rendering the SVG
+
+    // Viewport and viewbox
+    double          vpWidth;  // Width  of the viewport (negative: relative percentage; positive: absolute pixels)
+    double          vpHeight; // Height of the viewport (negative: relative percentage; positive: absolute pixels)
+    double          vbX;      // Viewbox top-left X coordinate
+    double          vbY;      // Viewbox top-left Y coordinate
+    double          vbW;      // Viewbox width
+    double          vbH;      // Viewbox height
+    AspectRatioMode arMode;   // Aspect ratio mode
+
+    // Caches
+    std::set<Pen>   penSet;     // A set of pens    (for cache look-up)
+    std::set<Brush> brushSet;   // A set of brushes (for cache look-up)
+    SvgObjects      svgObjects; // A map between reference names and their corresponding SVG objects
+
+    // Construct a raster state object
+    RasterState(Image& image, const PointF& topLeft);
+
+    // Destruct a raster state object
+    ~RasterState();
 };
 
 
