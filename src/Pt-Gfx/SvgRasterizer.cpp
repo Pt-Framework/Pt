@@ -38,6 +38,7 @@
 #include <Pt/Xml/EndElement.h>
 
 #include <Pt/Gfx/Path.h>
+#include <Pt/Gfx/SGNode.h>
 
 #include "SvgRasterizer.h"
 
@@ -72,10 +73,13 @@ SvgRasterizer::RasterState::RasterState(Image& image_, const PointF& topLeft_)
 , vbW       (0)    // The default viewbox width  is the the same with the viewport width
 , vbH       (0)    // The default viewbox height is the the same with the viewport height
 , arMode    (XMidYMidMeet)
+, sgParent  (new SGNode)
 {}
 
 SvgRasterizer::RasterState::~RasterState()
 {
+    delete sgParent;
+
     for(SvgObjects::iterator it = svgObjects.begin(); it != svgObjects.end(); ++it) {
         delete it->second;
     }
@@ -198,12 +202,14 @@ bool SvgRasterizer::advance()
                     throw IOError("svg error: invalid SVG namespace URI");
                 // Process the parameters
                 processSvgElementParameters(elem);
+                // Store the parent node to the stack
+                _rstate->sgStack.push(_rstate->sgParent);
                 // Set flag and done
                 _rstate->gotStart = true;
                 break;
             }
             // Process other elements as drawing elements
-            processDrawingElement(elem);
+            _rstate->sgStack.push(processDrawingElement(elem));
             break;
         }
 
@@ -211,7 +217,21 @@ bool SvgRasterizer::advance()
             // Convert the element
             const Xml::EndElement& elem = Xml::nodeCast<Xml::EndElement>(*node);
             // Check for the SVG closing element
-            if(lcaseStdStr(elem.name().local()) == "svg") _rstate->gotEnd = true;
+            if(lcaseStdStr(elem.name().local()) == "svg") {
+                // The only node left in the node stack must be the parent node
+                if(_rstate->sgStack.size() != 1 && _rstate->sgStack.top() != _rstate->sgParent)
+                    throw IOError("svg error: document structure error");
+                // Clear the node stack
+                _rstate->sgStack.pop();
+                // Clear the caches
+                _rstate->penSet    .clear();
+                _rstate->brushSet  .clear();
+                _rstate->svgObjects.clear();
+                // Set flag
+                _rstate->gotEnd = true;
+            }
+            // Process other elements as drawing elements
+            _rstate->sgStack.pop();
             break;
         }
 
@@ -283,6 +303,7 @@ void SvgRasterizer::renderNextFrame()
             case XMaxYMaxSlice:
                 break;
         }
+        _rstate->vpbTransform.identity();
         // Translate to the top-left coordinate
         _rstate->vpbTransform.translate(_rstate->topLeft.x(), _rstate->topLeft.y());
         // Set flag

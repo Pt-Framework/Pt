@@ -31,6 +31,7 @@
 #define PT_GFX_SVGRASTERIZER_H
 
 #include <algorithm>
+#include <stack>
 #include <iostream>
 
 #include <Pt/IOError.h>
@@ -44,6 +45,9 @@
 
 namespace Pt {
 namespace Gfx {
+
+
+class SGNode;
 
 
 class SvgRasterizer
@@ -109,7 +113,7 @@ class SvgRasterizer
 
         void processSvgElementParameters(const Xml::StartElement& elem);
 
-        void processDrawingElement(const Xml::StartElement& elem);
+        SGNode* processDrawingElement(const Xml::StartElement& elem);
 };
 
 
@@ -140,6 +144,10 @@ struct SvgRasterizer::RasterState {
     double          vbH;          // Viewbox height
     AspectRatioMode arMode;       // Aspect ratio mode
     Transform       vpbTransform; // The viewport-viewbox transform (projection-view matrix in OpenGL worlds ;)
+
+    // Scene graph objects
+    SGNode*             sgParent; // Parent node
+    std::stack<SGNode*> sgStack;  // Node stack
 
     // Caches
     std::set<Pen>   penSet;     // A set of pens

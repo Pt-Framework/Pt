@@ -33,6 +33,11 @@
 
 #include <Pt/Xml/StartElement.h>
 
+#include <Pt/Gfx/SGNodeLine.h>
+#include <Pt/Gfx/SGNodeRectangle.h>
+#include <Pt/Gfx/SGNodeEllipse.h>
+#include <Pt/Gfx/SGNodeArc.h>
+
 #include "SvgRasterizer.h"
 
 
@@ -131,9 +136,12 @@ void SvgRasterizer::processSvgElementParameters(const Xml::StartElement& elem)
     }
 }
 
-void SvgRasterizer::processDrawingElement(const Xml::StartElement& elem)
+SGNode* SvgRasterizer::processDrawingElement(const Xml::StartElement& elem)
 {
     // ### TODO ###
+    //SGNode* parent = _rstate->sgStack.top();
+
+    return new SGNode;
 }
 
 
