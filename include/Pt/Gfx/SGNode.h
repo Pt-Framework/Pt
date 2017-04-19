@@ -77,7 +77,7 @@ class PT_GFX_API SGNode {
         };
 
     public:
-        inline SGNode(RenderMode rm)
+        inline SGNode(RenderMode rm = RenderInherit)
         : _parent(0)
         , _rm    (rm)
         { setTextureRotationParameters(); }
@@ -209,7 +209,7 @@ class PT_GFX_API SGNode {
         { return _children.rend(); }
 
     protected:
-        virtual void drawImpl(ImagePainter2& painter, const TransformT& transform) const = 0;
+        virtual void drawImpl(ImagePainter2& painter, const TransformT& transform) const;
 
     protected:
         SGNode*    _parent;

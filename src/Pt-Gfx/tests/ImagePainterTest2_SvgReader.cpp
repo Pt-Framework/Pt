@@ -5,6 +5,8 @@ static void renderSVG(ImagePainter2& targetImagePainter, const PointF& svgImageT
     const std::string& fnm = std::string(sfileDirXPrefix) + "../etc/images/" + fileName;
     std::ifstream      ifs(fnm.c_str());
 
+    lprintf("%s\n", fnm.c_str());
+
     SvgReader svgr(ifs, imgReader, PointF(0, 0));
     svgr.get();
 
@@ -14,7 +16,7 @@ static void renderSVG(ImagePainter2& targetImagePainter, const PointF& svgImageT
     targetImagePainter.setCompositionMode(CompositionMode::SourceOver);
     targetImagePainter.drawImage(svgImageTopLeft, imgReader);
 
-    lprintf("\n");
+    lprintf("--- DONE ---\n\n");
 }
 
 static void testSvgReader1(const char* title, Image& image, Painter& painter)

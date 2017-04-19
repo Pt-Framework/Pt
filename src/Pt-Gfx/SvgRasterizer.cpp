@@ -197,13 +197,13 @@ bool SvgRasterizer::advance()
                 if(lcaseStdStr(elem.namespaceUri()) != "http://www.w3.org/2000/svg")
                     throw IOError("svg error: invalid SVG namespace URI");
                 // Process the parameters
-                processSvgElementParameters(*_rstate, elem);
+                processSvgElementParameters(elem);
                 // Set flag and done
                 _rstate->gotStart = true;
                 break;
             }
             // Process other elements as drawing elements
-            processDrawingElement(*_rstate, elem);
+            processDrawingElement(elem);
             break;
         }
 

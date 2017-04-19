@@ -7,8 +7,6 @@ static void testSceneGraph(const char* title, Image& image, Painter& painter)
 
     ip2->setAntiAliasingMode(AntiAliasingMode::Default);
 
-    SGNodePath psgn;
-
     // Generate scaled textures
     Image scaledTexH( textureWithWhiteBackground.format(), Size(textureWithWhiteBackground.width() / 2, textureWithWhiteBackground.height() / 2) );
     Image scaledTexQ( textureWithWhiteBackground.format(), Size(textureWithWhiteBackground.width() / 4, textureWithWhiteBackground.height() / 4) );
@@ -29,6 +27,9 @@ static void testSceneGraph(const char* title, Image& image, Painter& painter)
     pathPoly4.lineTo   (100, 50);
     pathPoly4.lineTo   ( 30,  0);
     pathPoly4.endPath  ();
+
+    // The parent
+    SGNode psgn;
 
     // Parent's 1st child
     SGNodePath* csgn1 = &psgn.addChild( new SGNodePath( SGNode::RenderFill, pathPoly4 ) );

@@ -155,6 +155,11 @@ void SGNode::draw(ImagePainter2& painter, const TransformT* transform_)
     }
 }
 
+void SGNode::drawImpl(ImagePainter2& painter, const TransformT& transform) const
+{
+    // Does nothing
+}
+
 
 } // namespace
 } // namespace

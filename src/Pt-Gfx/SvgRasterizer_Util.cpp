@@ -75,17 +75,17 @@ double SvgRasterizer::cnvUnitStrToPixels(const std::string& str_)
     throw IOError("svg error: invalid number unit specifier '" + str + "'");
 }
 
-void SvgRasterizer::processSvgElementParameters(RasterState& rs, const Xml::StartElement& elem)
+void SvgRasterizer::processSvgElementParameters(const Xml::StartElement& elem)
 {
     const Xml::AttributeList& alist = elem.attributes();
     for(Xml::AttributeList::ConstIterator it = alist.begin(); it != alist.end(); ++it) {
         const std::string& snam = lcaseStdStr(it->name ().local ());
         const std::string& sval = lcaseStdStr(it->value().narrow());
         if(snam == "width") {
-            rs.vpWidth = cnvUnitStrToPixels(sval);
+            _rstate->vpWidth = cnvUnitStrToPixels(sval);
         }
         else if(snam == "height") {
-            rs.vpHeight = cnvUnitStrToPixels(sval);
+            _rstate->vpHeight = cnvUnitStrToPixels(sval);
         }
         else if(snam == "viewbox") {
             // Tokenize
@@ -97,10 +97,10 @@ void SvgRasterizer::processSvgElementParameters(RasterState& rs, const Xml::Star
             const double y = cnvStrToDbl(tok[1], "viewBox");
             const double w = cnvStrToDbl(tok[2], "viewBox");
             const double h = cnvStrToDbl(tok[3], "viewBox");
-            rs.vbX = (x <= 0) ? 0 : x;
-            rs.vbY = (y <= 0) ? 0 : y;
-            rs.vbW = (w <= 0) ? 0 : w;
-            rs.vbH = (h <= 0) ? 0 : h;
+            _rstate->vbX = (x <= 0) ? 0 : x;
+            _rstate->vbY = (y <= 0) ? 0 : y;
+            _rstate->vbW = (w <= 0) ? 0 : w;
+            _rstate->vbH = (h <= 0) ? 0 : h;
         }
         else if(snam == "preserveaspectratio") {
             // Tokenize
@@ -116,22 +116,22 @@ void SvgRasterizer::processSvgElementParameters(RasterState& rs, const Xml::Star
                     throw IOError("svg error: invalid preserveAspectRatio specifier '" + sval + "'");
             }
             // Process the directive
-                 if(tok[0] == "none"    ) rs.arMode = None;
-            else if(tok[0] == "xminymin") rs.arMode = meet ? XMinYMinMeet : XMinYMinSlice;
-            else if(tok[0] == "xminymid") rs.arMode = meet ? XMinYMidMeet : XMinYMidSlice;
-            else if(tok[0] == "xminymax") rs.arMode = meet ? XMinYMaxMeet : XMinYMaxSlice;
-            else if(tok[0] == "xmidymin") rs.arMode = meet ? XMidYMinMeet : XMidYMinSlice;
-            else if(tok[0] == "xmidymid") rs.arMode = meet ? XMidYMidMeet : XMidYMidSlice;
-            else if(tok[0] == "xmidymax") rs.arMode = meet ? XMidYMaxMeet : XMidYMaxSlice;
-            else if(tok[0] == "xmaxymin") rs.arMode = meet ? XMaxYMinMeet : XMaxYMinSlice;
-            else if(tok[0] == "xmaxymid") rs.arMode = meet ? XMaxYMidMeet : XMaxYMidSlice;
-            else if(tok[0] == "xmaxymax") rs.arMode = meet ? XMaxYMaxMeet : XMaxYMaxSlice;
+                 if(tok[0] == "none"    ) _rstate->arMode = None;
+            else if(tok[0] == "xminymin") _rstate->arMode = meet ? XMinYMinMeet : XMinYMinSlice;
+            else if(tok[0] == "xminymid") _rstate->arMode = meet ? XMinYMidMeet : XMinYMidSlice;
+            else if(tok[0] == "xminymax") _rstate->arMode = meet ? XMinYMaxMeet : XMinYMaxSlice;
+            else if(tok[0] == "xmidymin") _rstate->arMode = meet ? XMidYMinMeet : XMidYMinSlice;
+            else if(tok[0] == "xmidymid") _rstate->arMode = meet ? XMidYMidMeet : XMidYMidSlice;
+            else if(tok[0] == "xmidymax") _rstate->arMode = meet ? XMidYMaxMeet : XMidYMaxSlice;
+            else if(tok[0] == "xmaxymin") _rstate->arMode = meet ? XMaxYMinMeet : XMaxYMinSlice;
+            else if(tok[0] == "xmaxymid") _rstate->arMode = meet ? XMaxYMidMeet : XMaxYMidSlice;
+            else if(tok[0] == "xmaxymax") _rstate->arMode = meet ? XMaxYMaxMeet : XMaxYMaxSlice;
             else                          throw IOError("svg error: invalid preserveAspectRatio specifier '" + sval + "'");
         }
     }
 }
 
-void SvgRasterizer::processDrawingElement(RasterState& rs, const Xml::StartElement& elem)
+void SvgRasterizer::processDrawingElement(const Xml::StartElement& elem)
 {
     // ### TODO ###
 }
