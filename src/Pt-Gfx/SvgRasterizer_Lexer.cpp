@@ -46,8 +46,9 @@ void SvgRasterizer::lexPathData(std::vector<std::string>& tokens, const std::str
                                               //  M  m  Z  z  L  l  H  h  V  v  C  c  S  s  Q  q  T  t  A  a
 
     // State variables
-    char        curCmd     = 0;
-    Pt::uint8_t curCmdNPar = 0;
+    char        curCmd     =  0;
+    Pt::uint8_t curCmdNPar =  0;
+    ssize_t     prvCmdIdx  = -1;
     std::string token;
 
     // Clear first
@@ -59,13 +60,33 @@ void SvgRasterizer::lexPathData(std::vector<std::string>& tokens, const std::str
         const char c = *it;
         // Start a new command?
         if(!curCmd) {
-            // Check the command
-            const size_t idx = supportedCommand.find(c);
-            if(idx == std::string::npos)
-                throw IOError(std::string("svg error: path data: invalid command '") + c + "'");
+            // If the character is a white-space then simply process the next character
+            if(::isspace(c)) {
+                ++it;
+                continue;
+            }
+            // Check for valid command
+            size_t idx = supportedCommand.find(c);
+            if(idx == std::string::npos) {
+                // Check if the character is a '-', '.', or digit
+                const bool isNumStart = ( c == '-' || c == '.' || ::isdigit(c) );
+                // Reuse the previous command?
+                if(isNumStart && prvCmdIdx >= 0) {
+                    idx = prvCmdIdx;
+                    --it;
+                }
+                // Assume invalid character/command
+                else {
+                    if(isNumStart)
+                        throw IOError(std::string("svg error: path data: unexpected location for character '") + c + "'");
+                    else
+                        throw IOError(std::string("svg error: path data: invalid command '") + c + "'");
+                }
+            }
             // Update the state variables
-            curCmd     = c;
-            curCmdNPar = numOfCmdParams[idx];
+            curCmd     = supportedCommand[idx];
+            curCmdNPar = numOfCmdParams  [idx];
+            prvCmdIdx  = (c == 'Z' || c == 'z') ? -1 : idx;
             // Store the command
             tokens.push_back(supportedCommand.substr(idx, 1));
             // Check if the command actually expect no parameter
@@ -114,7 +135,7 @@ void SvgRasterizer::lexPathData(std::vector<std::string>& tokens, const std::str
             --curCmdNPar;
             // Check if all the parameters have been obtained
             if(!curCmdNPar) curCmd = 0;
-            // If the character is a white-space or a ',' simply process the next character
+            // If the character is a white-space or a ',' then simply process the next character
             if(::isspace(c) || c == ',') ++it;
         }
     }

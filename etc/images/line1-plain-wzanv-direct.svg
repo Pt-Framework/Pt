@@ -2,7 +2,7 @@
 
 <!-- the coordinates should be rendered as is and then aligned to the top-left of the screen -->
 
-<svg xmlns="http://www.w3.org/2000/svg" width="320px" height="240px">
+<svg xmlns="http://www.w3.org/2000/svg" width="150px" height="100px">
     <!-- direct -->
     <line x1="5" y1="5" x2="100" y2="100" stroke="green" stroke-width="8"/>
 </svg>

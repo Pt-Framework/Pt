@@ -113,7 +113,7 @@ SvgRasterizer::SvgRasterizer(std::istream& is, Image& image, const PointF& topLe
 #if 0
     std::vector<std::string> tokens;
 
-    const std::string str = "M1,0 L10,10l10 10zl200,200z";
+    const std::string str = "M1,0 L10,10l10 10zl200,200z M100,100 l10,20 30,10z";
     lexPathData(tokens, str);
 
     //const std::string str = "stroke:green; stroke-width:8";

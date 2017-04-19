@@ -2,7 +2,7 @@
 
 <!-- the coordinates should be scaled to fit the specified % of the screen size and then aligned to the top-left of the screen -->
 
-<svg xmlns="http://www.w3.org/2000/svg" width="75%" height="25%" viewBox="0 0 319 239" preserveAspectRatio="none">
+<svg xmlns="http://www.w3.org/2000/svg" width="75%" height="25%" viewBox="0 0 150 100" preserveAspectRatio="none">
     <!-- direct -->
     <line x1="5" y1="5" x2="100" y2="100" stroke="green" stroke-width="8"/>
 </svg>
