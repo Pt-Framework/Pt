@@ -96,7 +96,7 @@ void SvgRasterizer::processSvgElementAttributes(const Xml::StartElement& elem)
         }
         else if(snam == "viewbox") {
             // Tokenize
-            const std::vector<std::string>& tok = tokenizeBySpace(sval);
+            const std::vector<std::string>& tok = tokenizeWS(sval);
             if(tok.size() != 4)
                 throw IOError("svg error: invalid viewBox specifier '" + sval + "'");
             // Convert to doubles
@@ -111,7 +111,7 @@ void SvgRasterizer::processSvgElementAttributes(const Xml::StartElement& elem)
         }
         else if(snam == "preserveaspectratio") {
             // Tokenize
-            const std::vector<std::string>& tok = tokenizeBySpace(sval);
+            const std::vector<std::string>& tok = tokenizeWS(sval);
             // CHeck the number of tokens
             if(tok.size() < 1 || tok.size() > 2)
                 throw IOError("svg error: invalid preserveAspectRatio specifier '" + sval + "'");

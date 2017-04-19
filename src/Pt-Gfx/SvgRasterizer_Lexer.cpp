@@ -384,6 +384,7 @@ void SvgRasterizer::extractStyleData(SvgStyleData& ssd, const SGNode& parent, co
                 ssd.penSize      = Gfx::Math::zrint(cnvStrToDbl(v, sectionInfo));
                 ssd.penSpecified = true;
             }
+            // ### TODO: The brush data! ###
         }
     }
 
@@ -404,6 +405,7 @@ void SvgRasterizer::extractStyleData(SvgStyleData& ssd, const SGNode& parent, co
         ssd.penSpecified = true;
     }
 
+    // ### TODO: The brush data! ###
 }
 
 
