@@ -59,6 +59,8 @@ class SvgRasterizer
 
         bool advance();
 
+        // ### TODO: Add support for animated SVG! ###
+
     private:
         static inline const std::string lcaseStdStr(const std::string & str);
         static inline const std::string lcaseStdStr(const Pt::String& str);
@@ -69,7 +71,10 @@ class SvgRasterizer
         static inline const std::string lrtrimStdStr(const std::string & str);
         static inline const std::string removeAllSpacesStdStr(const std::string & str);
 
+        static inline Pt::int32_t cnvStrToInt(const std::string& s, const std::string& sectionInfo);
+        static inline Pt::int32_t cnvStrToInt(const Pt::String& s, const std::string& sectionInfo);
         static inline double cnvStrToDbl(const std::string& s, const std::string& sectionInfo);
+        static inline double cnvStrToDbl(const Pt::String& s, const std::string& sectionInfo);
         static inline const std::string& passValidNumber(const std::string& s, const std::string& sectionInfo);
 
         static inline const std::vector<std::string> tokenizeBySpace(const std::string& str);
@@ -109,7 +114,7 @@ class SvgRasterizer
         // Defined in "SvgRasterizer_Util.cpp"
         static double cnvUnitStrToPixels(const std::string& str);
 
-        void processSvgElementParameters(const Xml::StartElement& elem);
+        void processSvgElementAttributes(const Xml::StartElement& elem);
 
         SGNode* processDrawingElement(const Xml::StartElement& elem);
 };
@@ -134,17 +139,17 @@ struct SvgRasterizer::RasterState {
     PointF        topLeft;  // Starting (top-left) coordinate for rendering the SVG
 
     // Viewport and viewbox
-    double          vpWidth;      // Width  of the viewport (negative: relative percentage; positive: absolute pixels)
-    double          vpHeight;     // Height of the viewport (negative: relative percentage; positive: absolute pixels)
-    double          vbX;          // Viewbox top-left X coordinate
-    double          vbY;          // Viewbox top-left Y coordinate
-    double          vbW;          // Viewbox width
-    double          vbH;          // Viewbox height
-    AspectRatioMode arMode;       // Aspect ratio mode
-    SGNode::TransformT       vpbTransform; // The viewport-viewbox transform (projection-view matrix in OpenGL worlds ;)
+    double             vpWidth;      // Width  of the viewport (negative: relative percentage; positive: absolute pixels)
+    double             vpHeight;     // Height of the viewport (negative: relative percentage; positive: absolute pixels)
+    double             vbX;          // Viewbox top-left X coordinate
+    double             vbY;          // Viewbox top-left Y coordinate
+    double             vbW;          // Viewbox width
+    double             vbH;          // Viewbox height
+    AspectRatioMode    arMode;       // Aspect ratio mode
+    SGNode::TransformT vpbTransform; // The viewport-viewbox transform (projection-view matrix in OpenGL worlds ;)
 
     // Scene graph objects
-    // ### TODO: add support for animated SVG! ###
+    // ### TODO: Add support for animated SVG! ###
     SGNode*             sgParent; // Parent node
     std::stack<SGNode*> sgStack;  // Node stack
 
@@ -219,6 +224,20 @@ inline const std::string SvgRasterizer::removeAllSpacesStdStr(const std::string 
     return str;
 }
 
+inline Pt::int32_t SvgRasterizer::cnvStrToInt(const std::string& s, const std::string& sectionInfo)
+{
+    char*       end = 0;
+    Pt::int32_t val = strtol(s.c_str(), &end, 10);
+
+    if(*end || val == LONG_MAX)
+        throw IOError("svg error: " + sectionInfo + ": invalid number '" + s + "'");
+
+    return val;
+}
+
+inline Pt::int32_t SvgRasterizer::cnvStrToInt(const Pt::String& s, const std::string& sectionInfo)
+{ return cnvStrToInt(s.narrow(), sectionInfo); }
+
 inline double SvgRasterizer::cnvStrToDbl(const std::string& s, const std::string& sectionInfo)
 {
     char*  end = 0;
@@ -229,6 +248,9 @@ inline double SvgRasterizer::cnvStrToDbl(const std::string& s, const std::string
 
     return val;
 }
+
+inline double SvgRasterizer::cnvStrToDbl(const Pt::String& s, const std::string& sectionInfo)
+{ return cnvStrToDbl(s.narrow(), sectionInfo); }
 
 inline const std::string& SvgRasterizer::passValidNumber(const std::string& s, const std::string& sectionInfo)
 {

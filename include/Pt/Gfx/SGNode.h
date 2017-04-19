@@ -123,7 +123,7 @@ class PT_GFX_API SGNode {
         }
 
         //
-        // Drawing functions
+        // Render mode
         //
 
         inline void setRenderMode(RenderMode rm)
@@ -145,11 +145,41 @@ class PT_GFX_API SGNode {
             return _rm;
         }
 
+        //
+        // Drawing functions
+        //
+
         inline void setPen(const Pen& pen)
         { _pen = pen; }
 
+        inline const Pen& effectivePen() const
+        {
+            if(!_pen.isNull()) return _pen;
+
+            const SGNode* p = _parent;
+            while(p) {
+                if(!p->_pen.isNull()) return p->_pen;
+                p = p->_parent;
+            }
+
+            return _pen;
+        }
+
         inline void setBrush(const Brush& brush)
         { _brush = brush; }
+
+        inline const Brush& effectiveBrush() const
+        {
+            if(!_brush.isNull()) return _brush;
+
+            const SGNode* p = _parent;
+            while(p) {
+                if(!p->_brush.isNull()) return p->_brush;
+                p = p->_parent;
+            }
+
+            return _brush;
+        }
 
         inline void setTextureRotationParameters(const Color& colorFill = Color::fromRgb8(0, 0, 0, 255), Brush::TextureRotationMode mode = Brush::BlockFullFit)
         {

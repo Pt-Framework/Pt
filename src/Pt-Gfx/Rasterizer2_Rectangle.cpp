@@ -164,13 +164,8 @@ void Rasterizer2::rasterRectArea(const Point& tl, const Point& br)
 
     // Draw the rectangle using solid color
     for(Pt::int32_t y = minY; y <= maxY; ++y) {
-        Pt::int32_t spanWidth = sizeX;
-        while(spanWidth > 0) {
-            const Pt::int32_t n = std::min<Pt::int32_t>(_brushBuffer.width(), spanWidth);
-            Pixel             pixel(_image->view(), minX + sizeX - spanWidth, y);
-            _image->format().copy(pixel, _brushPixel, n, _compositionMode);
-            spanWidth -= n;
-        }
+        Pixel pixel(_image->view(), minX, y);
+        _image->format().setPixels(pixel, _brush.color(), sizeX, _compositionMode);
     }
 }
 

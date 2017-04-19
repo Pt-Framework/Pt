@@ -103,6 +103,7 @@ SvgRasterizer::SvgRasterizer(std::istream& is, Image& image, const PointF& topLe
     _xmlReader.reportDocType(true);
 
 #if 0
+    // Just for testing :)
     lprintf("10   = %f\n", cnvUnitStrToPixels("10  "));
     lprintf("10px = %f\n", cnvUnitStrToPixels("10px"));
     lprintf("10pt = %f\n", cnvUnitStrToPixels("10pt"));
@@ -116,6 +117,7 @@ SvgRasterizer::SvgRasterizer(std::istream& is, Image& image, const PointF& topLe
 #endif
 
 #if 0
+    // Just for testing :)
     std::vector<std::string> tokens;
 
     const std::string str = "M1,0 L10,10l10 10zl200,200z M100,100 l10,20 30,10z";
@@ -204,7 +206,7 @@ bool SvgRasterizer::advance()
                 if(lcaseStdStr(elem.namespaceUri()) != "http://www.w3.org/2000/svg")
                     throw IOError("svg error: invalid SVG namespace URI");
                 // Process the parameters
-                processSvgElementParameters(elem);
+                processSvgElementAttributes(elem);
                 // Store the parent node to the stack
                 _rstate->sgStack.push(_rstate->sgParent);
                 // Set flag
@@ -350,7 +352,11 @@ void SvgRasterizer::renderNextFrame()
         _rstate->renderInit = true;
     }
 
-    // ### TODO: for animated SVG, update the scene graph nodes here! ###
+    // ### TODO: For animated SVG, update the scene graph nodes here! ###
+
+    // Clear the image with a fully transparent color
+    _rstate->painter.setBrush( Color::fromRgb8(0, 0, 0, 0) );
+    _rstate->painter.fillRect( RectF( PointF(0, 0), SizeF(_rstate->image.width(), _rstate->image.height()) ) );
 
     // Render the scene graph
     _rstate->sgParent->draw(_rstate->painter, &_rstate->vpbTransform);

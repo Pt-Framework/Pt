@@ -43,8 +43,6 @@ namespace Gfx {
 class Image;
 
 
-// TODO: ImageIOHandler used by ImageReader and ImageWriter
-
 /** @brief Reader for SVG images.
 */
 class PT_GFX_API SvgReader
@@ -81,6 +79,8 @@ class PT_GFX_API SvgReader
         /** @brief Reads the whole image from the stream.
         */
         Image& get();
+
+        // ### TODO: Add support for animated SVG! ###
 
     private:
         class SvgReaderImpl* _impl;

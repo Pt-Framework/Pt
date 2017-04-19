@@ -80,12 +80,15 @@ double SvgRasterizer::cnvUnitStrToPixels(const std::string& str_)
     throw IOError("svg error: invalid number unit specifier '" + str + "'");
 }
 
-void SvgRasterizer::processSvgElementParameters(const Xml::StartElement& elem)
+void SvgRasterizer::processSvgElementAttributes(const Xml::StartElement& elem)
 {
+    // Get the attributes
     const Xml::AttributeList& alist = elem.attributes();
+
+    // Walk through the attributes
     for(Xml::AttributeList::ConstIterator it = alist.begin(); it != alist.end(); ++it) {
-        const std::string& snam = lcaseStdStr(it->name ().local ());
-        const std::string& sval = lcaseStdStr(it->value().narrow());
+        const std::string& snam = lcaseStdStr( it->name ().local() );
+        const std::string& sval = lcaseStdStr( it->value()         );
         if(snam == "width") {
             _rstate->vpWidth = cnvUnitStrToPixels(sval);
         }
@@ -110,13 +113,14 @@ void SvgRasterizer::processSvgElementParameters(const Xml::StartElement& elem)
         else if(snam == "preserveaspectratio") {
             // Tokenize
             const std::vector<std::string>& tok = tokenizeBySpace(sval);
+            // CHeck the number of tokens
             if(tok.size() < 1 || tok.size() > 2)
                 throw IOError("svg error: invalid preserveAspectRatio specifier '" + sval + "'");
             // Check for "meet" or "slice"
             bool meet = true;
             if(tok.size() == 2) {
-                     if(tok[1] == "meet" ) { /* Does nothing */ }
-                else if(tok[1] == "slice") { meet = false; }
+                     if(tok.back() == "meet" ) { /* Does nothing */ }
+                else if(tok.back() == "slice") { meet = false; }
                 else
                     throw IOError("svg error: invalid preserveAspectRatio specifier '" + sval + "'");
             }
@@ -138,10 +142,52 @@ void SvgRasterizer::processSvgElementParameters(const Xml::StartElement& elem)
 
 SGNode* SvgRasterizer::processDrawingElement(const Xml::StartElement& elem)
 {
-    // ### TODO ###
+    // Get the parent
     SGNode& parent = *_rstate->sgStack.top();
 
-    return &parent.addChild(new SGNode);
+    // Get the name
+    const std::string& etype = lcaseStdStr(elem.name().local());
+
+    // Get the attributes
+    const Xml::AttributeList& alist = elem.attributes();
+
+    // Holder variable
+    SGNode* sgn = 0;
+
+    // Process base on the type
+
+    // ### TODO: Complete them and refactor them out! ###
+
+    if(etype == "g") {
+        sgn = new SGNode();
+    }
+
+    else if(etype == "line") {
+        //
+        const double x1 = alist.has("x1") ? cnvStrToDbl(alist.get("x1"), "line") : 0.0;
+        const double y1 = alist.has("y1") ? cnvStrToDbl(alist.get("y1"), "line") : 0.0;
+        const double x2 = alist.has("x2") ? cnvStrToDbl(alist.get("x2"), "line") : 0.0;
+        const double y2 = alist.has("y2") ? cnvStrToDbl(alist.get("y2"), "line") : 0.0;
+
+        // ### TODO: Do not set pen/brush if not specified in the SVG! ###
+
+        const std::string& color = alist.has("stroke") ? alist.get("stroke").narrow() : "#000";
+        const std::string& pensz = alist.has("stroke-width") ? alist.get("stroke-width").narrow() : "1";
+
+        //
+        SGNodeLine* csg = new SGNodeLine( SGNode::RenderStroke, PointF(x1, y1), PointF(x2, y2) );
+        csg->setPen( Pen( fromHtmlColor(color), cnvStrToInt(pensz, "line"), Pen::Solid, Pen::FlatCap, Pen::BevelJoin ) );
+        //
+
+        //
+        sgn = csg;
+    }
+
+    // Add the newly created node to the parent
+    parent.addChild(sgn);
+
+    // Return the newly created node
+    return sgn;
 }
 
 
