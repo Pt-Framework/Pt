@@ -42,6 +42,13 @@
 
 
 namespace Pt {
+namespace Xml {
+    class AttributeList;
+}
+}
+
+
+namespace Pt {
 namespace Gfx {
 
 
@@ -91,6 +98,8 @@ class SvgRasterizer
         };
 
         struct SvgObject;
+        struct SvgStyleData;
+
         struct RasterState;
 
     private:
@@ -105,11 +114,18 @@ class SvgRasterizer
 
         // Defined in "SvgRasterizer_Color.cpp"
         static const Color fromHtmlColor(const std::string& colStr);
+        static inline const Color fromHtmlColor(const Pt::String& colStr);
 
         // Defined in "SvgRasterizer_Lexer.cpp"
         static void lexPathData(std::vector<std::string>& tokens, const std::string& str);
         static void lexStyleData(std::vector<std::string>& tokens, const std::string& str);
         static void lexTransformData(std::vector<std::string>& tokens, const std::string& str);
+
+        static inline void lexPathData(std::vector<std::string>& tokens, const Pt::String& str);
+        static inline void lexStyleData(std::vector<std::string>& tokens, const Pt::String& str);
+        static inline void lexTransformData(std::vector<std::string>& tokens, const Pt::String& str);
+
+        static void extractStyleData(SvgStyleData& ssd, const Xml::AttributeList& alist, const std::string& sectionInfo);
 
         // Defined in "SvgRasterizer_Util.cpp"
         static double cnvUnitStrToPixels(const std::string& str);
@@ -117,12 +133,34 @@ class SvgRasterizer
         void processSvgElementAttributes(const Xml::StartElement& elem);
 
         SGNode* processDrawingElement(const Xml::StartElement& elem);
+        SGNode* processDrawingElement_g(const Xml::AttributeList& alist);
+        SGNode* processDrawingElement_line(const Xml::AttributeList& alist);
 };
 
 
 // ======================================================================================
 // ===== Private Member Structure Definitions ===========================================
 // ======================================================================================
+
+struct SvgRasterizer::SvgStyleData {
+    bool           specified;
+
+    Color          penColor;
+    Pt::size_t     penSize;
+    Pen::Style     penStyle;
+    Pen::CapStyle  penCapStyle;
+    Pen::JoinStyle penJoinStyle;
+    Pt::uint64_t   penStylePattern;
+
+    inline SvgStyleData()
+    : specified      (false)
+    , penSize        (1)
+    , penStyle       (Pen::Solid)
+    , penCapStyle    (Pen::FlatCap)
+    , penJoinStyle   (Pen::MiterJoin)
+    , penStylePattern(0)
+    {}
+};
 
 struct SvgRasterizer::RasterState {
     // Typedefs
@@ -173,6 +211,10 @@ struct SvgRasterizer::RasterState {
 // ===== Inlined Private Member Functions ===============================================
 // ======================================================================================
 
+//
+// Character case converters
+//
+
 inline const std::string SvgRasterizer::lcaseStdStr(const std::string & str_)
 {
     std::string  str = str_;
@@ -196,6 +238,11 @@ inline const Pt::String SvgRasterizer::lcasePtStr(const Pt::String& str_)
 
     return str;
 }
+
+
+//
+// White-space removers
+//
 
 inline const std::string SvgRasterizer::ltrimStdStr(const std::string & str)
 {
@@ -223,6 +270,11 @@ inline const std::string SvgRasterizer::removeAllSpacesStdStr(const std::string 
 
     return str;
 }
+
+
+//
+// Converters
+//
 
 inline Pt::int32_t SvgRasterizer::cnvStrToInt(const std::string& s, const std::string& sectionInfo)
 {
@@ -258,6 +310,14 @@ inline const std::string& SvgRasterizer::passValidNumber(const std::string& s, c
     return s;
 }
 
+inline const Color SvgRasterizer::fromHtmlColor(const Pt::String& colStr)
+{ return fromHtmlColor(colStr.narrow()); }
+
+
+//
+// Tokenizers
+//
+
 inline const std::vector<std::string> SvgRasterizer::tokenizeBySpace(const std::string& str_)
 {
     std::vector<std::string> result;
@@ -272,6 +332,20 @@ inline const std::vector<std::string> SvgRasterizer::tokenizeBySpace(const std::
 
     return result;
 }
+
+
+//
+// Lexers
+//
+
+inline void SvgRasterizer::lexPathData(std::vector<std::string>& tokens, const Pt::String& str)
+{ lexPathData(tokens, str.narrow()); }
+
+inline void SvgRasterizer::lexStyleData(std::vector<std::string>& tokens, const Pt::String& str)
+{ lexStyleData(tokens, str.narrow()); }
+
+inline void SvgRasterizer::lexTransformData(std::vector<std::string>& tokens, const Pt::String& str)
+{ lexTransformData(tokens, str.narrow()); }
 
 
 } // namespace

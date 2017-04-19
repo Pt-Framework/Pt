@@ -27,6 +27,8 @@
   02110-1301 USA
 */
 
+#include <Pt/Xml/StartElement.h>
+
 #include "SvgRasterizer.h"
 
 
@@ -354,6 +356,47 @@ void SvgRasterizer::lexTransformData(std::vector<std::string>& tokens, const std
     // Check for an incomplete transform definition
     if(!curPar.empty() || !curPar.empty())
         throw IOError("svg error: transform definition: invalid/incomplete definition string");
+}
+
+void SvgRasterizer::extractStyleData(SvgStyleData& ssd,const Xml::AttributeList& alist, const std::string& sectionInfo)
+{
+    // Extract from the style string (if specified)
+    if(alist.has("style")) {
+        // Tokenize the string
+        std::vector<std::string> tokens;
+        lexStyleData(tokens, alist.get("style"));
+        // Process the tokens
+        for(size_t i = 0; i < tokens.size(); i += 2) {
+            const std::string& n = tokens[i + 0];
+            const std::string& v = tokens[i + 1];
+            if(n == "stroke") {
+                ssd.penColor  = fromHtmlColor(v);
+                ssd.specified = true;
+            }
+            else if(n == "stroke-opacity") {
+                ssd.penColor.setAlpha(Gfx::Math::zrint(cnvStrToDbl(v, sectionInfo) * 65535));
+                ssd.specified = true;
+            }
+            else if(n == "stroke-width") {
+                ssd.penSize   = Gfx::Math::zrint(cnvStrToDbl(v, sectionInfo));
+                ssd.specified = true;
+            }
+        }
+    }
+
+    // Overwrite the style as needed
+    if(alist.has("stroke")) {
+        ssd.penColor  = fromHtmlColor(alist.get("stroke"));
+        ssd.specified = true;
+    }
+    if(alist.has("stroke-opacity")) {
+        ssd.penColor.setAlpha(Gfx::Math::zrint(cnvStrToDbl(alist.get("stroke-opacity"), sectionInfo) * 65535));
+        ssd.specified = true;
+    }
+    if(alist.has("stroke-width")) {
+        ssd.penSize   = Gfx::Math::zrint(cnvStrToDbl(alist.get("stroke-width"), sectionInfo));
+        ssd.specified = true;
+    }
 }
 
 

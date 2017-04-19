@@ -214,7 +214,10 @@ bool SvgRasterizer::advance()
             }
             // Process the element as a drawing element
             else {
-                _rstate->sgStack.push( processDrawingElement(elem) );
+                SGNode* sgn = processDrawingElement(elem);
+                if(!sgn)
+                    throw IOError("svg error: unsupported SVG element '" + enam + "'");
+                _rstate->sgStack.push(sgn);
             }
             break;
         }

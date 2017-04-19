@@ -44,7 +44,6 @@
 namespace Pt {
 namespace Gfx {
 
-
 // ======================================================================================
 // ===== Private Member Functions =======================================================
 // ======================================================================================
@@ -151,40 +150,46 @@ SGNode* SvgRasterizer::processDrawingElement(const Xml::StartElement& elem)
     // Get the attributes
     const Xml::AttributeList& alist = elem.attributes();
 
-    // Holder variable
-    SGNode* sgn = 0;
-
     // Process base on the type
+    // ### TODO: Complete them ! ###
+         if(etype == "g"   ) return &parent.addChild( processDrawingElement_g   (alist) );
+    else if(etype == "line") return &parent.addChild( processDrawingElement_line(alist) );
 
-    // ### TODO: Complete them and refactor them out! ###
 
-    if(etype == "g") {
-        sgn = new SGNode();
+    // Return the newly created node
+    return 0;
+}
+
+SGNode* SvgRasterizer::processDrawingElement_g(const Xml::AttributeList& alist)
+{
+    return new SGNode();
+}
+
+SGNode* SvgRasterizer::processDrawingElement_line(const Xml::AttributeList& alist)
+{
+    // Extract the style data
+    SvgStyleData ssd;
+    extractStyleData(ssd, alist, "line");
+
+    // Extract the coordinates
+    if( !alist.has("x1") || !alist.has("y1") || !alist.has("x2") || !alist.has("y2") )
+        throw IOError("svg error: line: missing attribute");
+
+    const double x1 = cnvStrToDbl(alist.get("x1"), "line");
+    const double y1 = cnvStrToDbl(alist.get("y1"), "line");
+    const double x2 = cnvStrToDbl(alist.get("x2"), "line");
+    const double y2 = cnvStrToDbl(alist.get("y2"), "line");
+
+    // Create a new node
+    SGNodeLine* sgn = new SGNodeLine( SGNode::RenderStroke, PointF(x1, y1), PointF(x2, y2) );
+
+    // Set the pen as needed
+    if(ssd.specified) {
+        if(ssd.penStyle != Pen::UserDefined)
+            sgn->setPen( Pen(ssd.penColor, ssd.penSize, ssd.penStyle, ssd.penCapStyle, ssd.penJoinStyle) );
+        else
+            sgn->setPen( Pen(ssd.penColor, ssd.penSize, ssd.penStylePattern, ssd.penCapStyle, ssd.penJoinStyle) );
     }
-
-    else if(etype == "line") {
-        //
-        const double x1 = alist.has("x1") ? cnvStrToDbl(alist.get("x1"), "line") : 0.0;
-        const double y1 = alist.has("y1") ? cnvStrToDbl(alist.get("y1"), "line") : 0.0;
-        const double x2 = alist.has("x2") ? cnvStrToDbl(alist.get("x2"), "line") : 0.0;
-        const double y2 = alist.has("y2") ? cnvStrToDbl(alist.get("y2"), "line") : 0.0;
-
-        // ### TODO: Do not set pen/brush if not specified in the SVG! ###
-
-        const std::string& color = alist.has("stroke") ? alist.get("stroke").narrow() : "#000";
-        const std::string& pensz = alist.has("stroke-width") ? alist.get("stroke-width").narrow() : "1";
-
-        //
-        SGNodeLine* csg = new SGNodeLine( SGNode::RenderStroke, PointF(x1, y1), PointF(x2, y2) );
-        csg->setPen( Pen( fromHtmlColor(color), cnvStrToInt(pensz, "line"), Pen::Solid, Pen::FlatCap, Pen::BevelJoin ) );
-        //
-
-        //
-        sgn = csg;
-    }
-
-    // Add the newly created node to the parent
-    parent.addChild(sgn);
 
     // Return the newly created node
     return sgn;
