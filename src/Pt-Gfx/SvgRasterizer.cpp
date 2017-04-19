@@ -188,18 +188,22 @@ bool SvgRasterizer::advance()
         case Xml::Node::StartElement: {
             // Convert the element
             const Xml::StartElement& elem = Xml::nodeCast<Xml::StartElement>(*node);
+            const std::string&       enam = lcaseStdStr(elem.name().local());
             // Check for the SVG opening element
-            if(lcasePtStr(elem.name().local()) == "svg") {
+            if(enam == "svg") {
                 // Check if we have already got the opening element
                 if(_rstate->gotStart) throw IOError("svg error: multiple SVG elements in one document");
                 // Check the namespace URI
                 if(lcaseStdStr(elem.namespaceUri()) != "http://www.w3.org/2000/svg")
                     throw IOError("svg error: invalid SVG namespace URI");
                 // Process the parameters
-                processSvgElemParams(*_rstate, elem);
-                // Set flag
+                processSvgElementParameters(*_rstate, elem);
+                // Set flag and done
                 _rstate->gotStart = true;
+                break;
             }
+            // Process other elements as drawing elements
+            processDrawingElement(*_rstate, elem);
             break;
         }
 
@@ -207,22 +211,12 @@ bool SvgRasterizer::advance()
             // Convert the element
             const Xml::EndElement& elem = Xml::nodeCast<Xml::EndElement>(*node);
             // Check for the SVG closing element
-            if(lcasePtStr(elem.name().local()) == "svg") _rstate->gotEnd = true;
-            break;
-        }
-
-        case Xml::Node::Characters: {
-            /*
-            // Convert the element
-            const Xml::Characters& elem = Xml::nodeCast<Xml::Characters>(*node);
-            // Dump the element
-            lprintf("Characters    : %s\n", elem.content().narrow().c_str());
-            //*/
+            if(lcaseStdStr(elem.name().local()) == "svg") _rstate->gotEnd = true;
             break;
         }
 
         default:
-            // Ignore unsupported elements
+            // Ignore other elements
             break;
     }
 
@@ -237,22 +231,65 @@ bool SvgRasterizer::advance()
 
 void SvgRasterizer::renderNextFrame()
 {
+    // Initialize the rendering-related data as needed
     if(!_rstate->renderInit) {
+        // Determine the viewport width and height
+             if(_rstate->vpWidth  == 0.0) _rstate->vpWidth  =                             _rstate->image.width ();
+        else if(_rstate->vpWidth  <  0  ) _rstate->vpWidth  = -_rstate->vpWidth  * 0.01 * _rstate->image.width ();
+             if(_rstate->vpHeight == 0.0) _rstate->vpHeight =                             _rstate->image.height();
+        else if(_rstate->vpHeight <  0  ) _rstate->vpHeight = -_rstate->vpHeight * 0.01 * _rstate->image.height();
+        // Determine the viewbox width and height
+        if(_rstate->vbW <= 0.0) _rstate->vbW = _rstate->vpWidth;
+        if(_rstate->vbH <= 0.0) _rstate->vbH = _rstate->vpHeight;
+        // Initialize the viewport-viewbox transform
+        // ### TODO ###
+        switch(_rstate->arMode) {
+            case None:
+                break;
+            case XMinYMinMeet:
+                break;
+            case XMinYMidMeet:
+                break;
+            case XMinYMaxMeet:
+                break;
+            case XMidYMinMeet:
+                break;
+            case XMidYMidMeet:
+                break;
+            case XMidYMaxMeet:
+                break;
+            case XMaxYMinMeet:
+                break;
+            case XMaxYMidMeet:
+                break;
+            case XMaxYMaxMeet:
+                break;
+            case XMinYMinSlice:
+                break;
+            case XMinYMidSlice:
+                break;
+            case XMinYMaxSlice:
+                break;
+            case XMidYMinSlice:
+                break;
+            case XMidYMidSlice:
+                break;
+            case XMidYMaxSlice:
+                break;
+            case XMaxYMinSlice:
+                break;
+            case XMaxYMidSlice:
+                break;
+            case XMaxYMaxSlice:
+                break;
+        }
+        // Translate to the top-left coordinate
+        _rstate->vpbTransform.translate(_rstate->topLeft.x(), _rstate->topLeft.y());
+        // Set flag
+        _rstate->renderInit = true;
     }
 
-/*
- *  Auto-determine these values as needed:
-    double          vpWidth;  // Width  of the viewport (negative: relative percentage; positive: absolute pixels)
-    double          vpHeight; // Height of the viewport (negative: relative percentage; positive: absolute pixels)
-    double          vbX;      // Viewbox top-left X coordinate
-    double          vbY;      // Viewbox top-left Y coordinate
-    double          vbW;      // Viewbox width
-    double          vbH;      // Viewbox height
- *  Create vp-vb transform
-    AspectRatioMode arMode;   // Aspect ratio mode
-    Transform       vpbTransform; // The viewport-viewbox transform (projection-view matrix in OpenGL worlds ;)
-
-*/
+    // Render the scene graph
 }
 
 

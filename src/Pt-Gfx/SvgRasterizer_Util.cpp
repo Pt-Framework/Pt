@@ -75,7 +75,7 @@ double SvgRasterizer::cnvUnitStrToPixels(const std::string& str_)
     throw IOError("svg error: invalid number unit specifier '" + str + "'");
 }
 
-void SvgRasterizer::processSvgElemParams(RasterState& rs, const Xml::StartElement& elem)
+void SvgRasterizer::processSvgElementParameters(RasterState& rs, const Xml::StartElement& elem)
 {
     const Xml::AttributeList& alist = elem.attributes();
     for(Xml::AttributeList::ConstIterator it = alist.begin(); it != alist.end(); ++it) {
@@ -129,6 +129,11 @@ void SvgRasterizer::processSvgElemParams(RasterState& rs, const Xml::StartElemen
             else                          throw IOError("svg error: invalid preserveAspectRatio specifier '" + sval + "'");
         }
     }
+}
+
+void SvgRasterizer::processDrawingElement(RasterState& rs, const Xml::StartElement& elem)
+{
+    // ### TODO ###
 }
 
 

@@ -107,7 +107,9 @@ class SvgRasterizer
         // Defined in "SvgRasterizer_Util.cpp"
         static double cnvUnitStrToPixels(const std::string& str);
 
-        static void processSvgElemParams(RasterState& rs, const Xml::StartElement& elem);
+        static void processSvgElementParameters(RasterState& rs, const Xml::StartElement& elem);
+
+        static void processDrawingElement(RasterState& rs, const Xml::StartElement& elem);
 };
 
 
