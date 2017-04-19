@@ -78,8 +78,6 @@ class SvgRasterizer
         static inline const std::string lrtrimStdStr(const std::string & str);
         static inline const std::string removeAllSpacesStdStr(const std::string & str);
 
-        static inline Pt::int32_t cnvStrToInt(const std::string& s, const std::string& sectionInfo);
-        static inline Pt::int32_t cnvStrToInt(const Pt::String& s, const std::string& sectionInfo);
         static inline double cnvStrToDbl(const std::string& s, const std::string& sectionInfo);
         static inline double cnvStrToDbl(const Pt::String& s, const std::string& sectionInfo);
         static inline const std::string& passValidNumber(const std::string& s, const std::string& sectionInfo);
@@ -99,6 +97,9 @@ class SvgRasterizer
 
         struct SvgObject;
         struct SvgStyleData;
+
+        struct ComparePen;
+        struct CompareBrush;
 
         struct RasterState;
 
@@ -125,7 +126,11 @@ class SvgRasterizer
         static inline void lexStyleData(std::vector<std::string>& tokens, const Pt::String& str);
         static inline void lexTransformData(std::vector<std::string>& tokens, const Pt::String& str);
 
-        static void extractStyleData(SvgStyleData& ssd, const Xml::AttributeList& alist, const std::string& sectionInfo);
+        static inline void copyPenData(SvgStyleData& ssd, const Pen& pen);
+        static inline void copyBrushData(SvgStyleData& ssd, const Brush& brush);
+
+        static void extractStyleData(SvgStyleData& ssd, const SGNode& parent, const Xml::AttributeList& alist, const std::string& sectionInfo);
+        inline void applyStyleData(SGNode& sgn, const SvgStyleData& ssd);
 
         // Defined in "SvgRasterizer_Util.cpp"
         static double cnvUnitStrToPixels(const std::string& str);
@@ -133,8 +138,8 @@ class SvgRasterizer
         void processSvgElementAttributes(const Xml::StartElement& elem);
 
         SGNode* processDrawingElement(const Xml::StartElement& elem);
-        SGNode* processDrawingElement_g(const Xml::AttributeList& alist);
-        SGNode* processDrawingElement_line(const Xml::AttributeList& alist);
+        SGNode* processDrawingElement_g(SGNode& parent, const Xml::AttributeList& alist);
+        SGNode* processDrawingElement_line(SGNode& parent, const Xml::AttributeList& alist);
 };
 
 
@@ -143,8 +148,7 @@ class SvgRasterizer
 // ======================================================================================
 
 struct SvgRasterizer::SvgStyleData {
-    bool           specified;
-
+    bool           penSpecified;
     Color          penColor;
     Pt::size_t     penSize;
     Pen::Style     penStyle;
@@ -153,13 +157,53 @@ struct SvgRasterizer::SvgStyleData {
     Pt::uint64_t   penStylePattern;
 
     inline SvgStyleData()
-    : specified      (false)
+    : penSpecified   (false)
     , penSize        (1)
     , penStyle       (Pen::Solid)
     , penCapStyle    (Pen::FlatCap)
     , penJoinStyle   (Pen::MiterJoin)
     , penStylePattern(0)
     {}
+};
+
+struct SvgRasterizer::ComparePen {
+    bool operator()(const Pen& a, const Pen&b) const
+    {
+        const Pt::uint64_t aCol = ( Pt::uint64_t(a.color().alpha()) << 48 ) |
+                                  ( Pt::uint64_t(a.color().red  ()) << 32 ) |
+                                  ( Pt::uint64_t(a.color().green()) << 16 ) |
+                                  ( Pt::uint64_t(a.color().blue ()) <<  0 );
+        const Pt::uint64_t bCol = ( Pt::uint64_t(a.color().alpha()) << 48 ) |
+                                  ( Pt::uint64_t(a.color().red  ()) << 32 ) |
+                                  ( Pt::uint64_t(a.color().green()) << 16 ) |
+                                  ( Pt::uint64_t(a.color().blue ()) <<  0 );
+
+/*
+     if(a._name < b._name)
+        return true;
+
+    if(a._name > b._name)
+        return false;
+
+    return a._style < b._style;*
+        const Color& color() const;
+        std::size_t size() const;
+        Style style() const;
+        Pt::uint64_t styleUserPattern() const;
+        void setCapStyle(CapStyle cap = FlatCap);
+        JoinStyle joinStyle() const;
+*/
+
+        return false;
+    }
+};
+
+struct SvgRasterizer::CompareBrush {
+    bool operator()(const Brush& a, const Brush&b) const
+    {
+        // ### TODO ###
+        return false;
+    }
 };
 
 struct SvgRasterizer::RasterState {
@@ -192,9 +236,9 @@ struct SvgRasterizer::RasterState {
     std::stack<SGNode*> sgStack;  // Node stack
 
     // Caches
-    std::set<Pen>   penSet;     // A set of pens
-    std::set<Brush> brushSet;   // A set of brushes
-    SvgObjects      svgObjects; // A map between reference names and their corresponding SVG objects
+    std::set<Pen,   ComparePen  > penSet;     // A set of pens
+    std::set<Brush, CompareBrush> brushSet;   // A set of brushes
+    SvgObjects                    svgObjects; // A map between reference names and their corresponding SVG objects
 
     // Construct a raster state object
     RasterState(Image& image, const PointF& topLeft);
@@ -273,22 +317,8 @@ inline const std::string SvgRasterizer::removeAllSpacesStdStr(const std::string 
 
 
 //
-// Converters
+// Converters and checkers
 //
-
-inline Pt::int32_t SvgRasterizer::cnvStrToInt(const std::string& s, const std::string& sectionInfo)
-{
-    char*       end = 0;
-    Pt::int32_t val = strtol(s.c_str(), &end, 10);
-
-    if(*end || val == LONG_MAX)
-        throw IOError("svg error: " + sectionInfo + ": invalid number '" + s + "'");
-
-    return val;
-}
-
-inline Pt::int32_t SvgRasterizer::cnvStrToInt(const Pt::String& s, const std::string& sectionInfo)
-{ return cnvStrToInt(s.narrow(), sectionInfo); }
 
 inline double SvgRasterizer::cnvStrToDbl(const std::string& s, const std::string& sectionInfo)
 {
@@ -315,7 +345,21 @@ inline const Color SvgRasterizer::fromHtmlColor(const Pt::String& colStr)
 
 
 //
-// Tokenizers
+// Lexers
+//
+
+inline void SvgRasterizer::lexPathData(std::vector<std::string>& tokens, const Pt::String& str)
+{ lexPathData(tokens, str.narrow()); }
+
+inline void SvgRasterizer::lexStyleData(std::vector<std::string>& tokens, const Pt::String& str)
+{ lexStyleData(tokens, str.narrow()); }
+
+inline void SvgRasterizer::lexTransformData(std::vector<std::string>& tokens, const Pt::String& str)
+{ lexTransformData(tokens, str.narrow()); }
+
+
+//
+// Other helper functions
 //
 
 inline const std::vector<std::string> SvgRasterizer::tokenizeBySpace(const std::string& str_)
@@ -333,19 +377,48 @@ inline const std::vector<std::string> SvgRasterizer::tokenizeBySpace(const std::
     return result;
 }
 
+inline void SvgRasterizer::copyPenData(SvgStyleData& ssd, const Pen& pen)
+{
+    if(pen.isNull()) return;
 
-//
-// Lexers
-//
+    ssd.penColor        = pen.color();
+    ssd.penSize         = pen.size();
+    ssd.penStyle        = pen.style();
+    ssd.penCapStyle     = pen.capStyle();
+    ssd.penJoinStyle    = pen.joinStyle();
+    ssd.penStylePattern = pen.styleUserPattern();
+}
 
-inline void SvgRasterizer::lexPathData(std::vector<std::string>& tokens, const Pt::String& str)
-{ lexPathData(tokens, str.narrow()); }
+inline void SvgRasterizer::copyBrushData(SvgStyleData& ssd, const Brush& brush)
+{
+    // ### TODO ###
+}
 
-inline void SvgRasterizer::lexStyleData(std::vector<std::string>& tokens, const Pt::String& str)
-{ lexStyleData(tokens, str.narrow()); }
+inline void SvgRasterizer::applyStyleData(SGNode& sgn, const SvgRasterizer::SvgStyleData& ssd)
+{
+    // Set the pen as needed
+    if(ssd.penSpecified) {
+        // Generate the pen
+        const Pen pen = (ssd.penStyle == Pen::UserDefined)
+                       ? Pen(ssd.penColor, ssd.penSize, ssd.penStylePattern, ssd.penCapStyle, ssd.penJoinStyle)
+                       : Pen(ssd.penColor, ssd.penSize, ssd.penStyle,        ssd.penCapStyle, ssd.penJoinStyle);
+        // If a pen with the same parameters already exists, assign it
+        std::set<Pen>::const_iterator it = _rstate->penSet.find(pen);
+        if(it != _rstate->penSet.end()) {
+            sgn.setPen(*it);
+        }
+        // Assign and store the new pen
+        else {
+            sgn.setPen(pen);
+            _rstate->penSet.insert(pen);
+        }
 
-inline void SvgRasterizer::lexTransformData(std::vector<std::string>& tokens, const Pt::String& str)
-{ lexTransformData(tokens, str.narrow()); }
+    }
+
+    // Set the brush as needed
+    // ### TODO ###
+    // _rstate->brushSet;
+}
 
 
 } // namespace

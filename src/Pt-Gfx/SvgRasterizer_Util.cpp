@@ -152,24 +152,33 @@ SGNode* SvgRasterizer::processDrawingElement(const Xml::StartElement& elem)
 
     // Process base on the type
     // ### TODO: Complete them ! ###
-         if(etype == "g"   ) return &parent.addChild( processDrawingElement_g   (alist) );
-    else if(etype == "line") return &parent.addChild( processDrawingElement_line(alist) );
-
+         if(etype == "g"   ) return processDrawingElement_g   (parent, alist);
+    else if(etype == "line") return processDrawingElement_line(parent, alist);
 
     // Return the newly created node
     return 0;
 }
 
-SGNode* SvgRasterizer::processDrawingElement_g(const Xml::AttributeList& alist)
-{
-    return new SGNode();
-}
-
-SGNode* SvgRasterizer::processDrawingElement_line(const Xml::AttributeList& alist)
+SGNode* SvgRasterizer::processDrawingElement_g(SGNode& parent, const Xml::AttributeList& alist)
 {
     // Extract the style data
     SvgStyleData ssd;
-    extractStyleData(ssd, alist, "line");
+    extractStyleData(ssd, parent, alist, "line");
+
+    // Create a new node and apply the style
+    SGNode* sgn = new SGNode();
+
+    applyStyleData(*sgn, ssd);
+
+    // Add the newly created node to the parent and return it
+    return &parent.addChild(sgn);
+}
+
+SGNode* SvgRasterizer::processDrawingElement_line(SGNode& parent, const Xml::AttributeList& alist)
+{
+    // Extract the style data
+    SvgStyleData ssd;
+    extractStyleData(ssd, parent, alist, "line");
 
     // Extract the coordinates
     if( !alist.has("x1") || !alist.has("y1") || !alist.has("x2") || !alist.has("y2") )
@@ -180,19 +189,13 @@ SGNode* SvgRasterizer::processDrawingElement_line(const Xml::AttributeList& alis
     const double x2 = cnvStrToDbl(alist.get("x2"), "line");
     const double y2 = cnvStrToDbl(alist.get("y2"), "line");
 
-    // Create a new node
+    // Create a new node and apply the style
     SGNodeLine* sgn = new SGNodeLine( SGNode::RenderStroke, PointF(x1, y1), PointF(x2, y2) );
 
-    // Set the pen as needed
-    if(ssd.specified) {
-        if(ssd.penStyle != Pen::UserDefined)
-            sgn->setPen( Pen(ssd.penColor, ssd.penSize, ssd.penStyle, ssd.penCapStyle, ssd.penJoinStyle) );
-        else
-            sgn->setPen( Pen(ssd.penColor, ssd.penSize, ssd.penStylePattern, ssd.penCapStyle, ssd.penJoinStyle) );
-    }
+    applyStyleData(*sgn, ssd);
 
-    // Return the newly created node
-    return sgn;
+    // Add the newly created node to the parent and return it
+    return &parent.addChild(sgn);
 }
 
 
