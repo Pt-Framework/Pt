@@ -46,14 +46,6 @@ namespace Gfx {
 
 void SvgRasterizer::processSvgElemParams(RasterState& rs, const Xml::StartElement& elem)
 {
-    if(lcaseStdStr(elem.name().local()) == "svg") {
-        lprintf("StartElement  : %s\n", lcaseStdStr(elem.name().local()).c_str());
-        lprintf("                %s\n", lcaseStdStr(elem.namespaceUri()).c_str());
-    }
-    else {
-        lprintf("StartElement  : %s\n", lcaseStdStr(elem.name().local()).c_str());
-    }
-
     const Xml::AttributeList& alist = elem.attributes();
     for(Xml::AttributeList::ConstIterator it = alist.begin(); it != alist.end(); ++it) {
         const Xml::Attribute& a = *it;

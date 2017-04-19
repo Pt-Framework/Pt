@@ -120,6 +120,12 @@ Image& SvgRasterizer::image()
 
 bool SvgRasterizer::advance()
 {
+    // Render the (next) frame if we have got a complete SVG body
+    if(_rstate->gotStart && _rstate->gotEnd) {
+        renderNextFrame();
+        return true;
+    }
+
     // Get the next node
     Xml::Node* node = _xmlReader.advance();
     if(!node) {
@@ -169,12 +175,15 @@ bool SvgRasterizer::advance()
             const Xml::StartElement& elem = Xml::nodeCast<Xml::StartElement>(*node);
             // Check for the SVG opening element
             if(lcasePtStr(elem.name().local()) == "svg") {
-                // Check if we have got the opening element
-                if(_rstate->gotStart) throw IOError("svg error: multiple main body");
-                // Set flag
-                _rstate->gotStart = true;
+                // Check if we have already got the opening element
+                if(_rstate->gotStart) throw IOError("svg error: multiple SVG elements in one document");
+                // Check the namespace URI
+                if(lcaseStdStr(elem.namespaceUri()) != "http://www.w3.org/2000/svg")
+                    throw IOError("svg error: invalid SVG namespace URI");
                 // Process the parameters
                 processSvgElemParams(*_rstate, elem);
+                // Set flag
+                _rstate->gotStart = true;
             }
             break;
         }
@@ -211,6 +220,15 @@ bool SvgRasterizer::advance()
 
     // Not done yet
     return false;
+}
+
+
+// ======================================================================================
+// ===== Private Member Functions =======================================================
+// ======================================================================================
+
+void SvgRasterizer::renderNextFrame()
+{
 }
 
 

@@ -58,16 +58,6 @@ class SvgRasterizer
         bool advance();
 
     private:
-        struct SvgObject;
-        struct RasterState;
-
-    private:
-        RasterState*           _rstate;
-
-        Xml::BinaryInputSource _binaryInputSource;
-        Xml::XmlReader         _xmlReader;
-
-    private:
         static inline const std::string lcaseStdStr(const std::string & str);
         static inline const std::string lcaseStdStr(const Pt::String& str);
         static inline const Pt::String lcasePtStr(const Pt::String& str);
@@ -82,27 +72,26 @@ class SvgRasterizer
     private:
         enum AspectRatioMode {
             None,
-            XMinYMinMeet,
-            XMinYMidMeet,
-            XMinYMaxMeet,
-            XMidYMinMeet,
-            XMidYMidMeet,
-            XMidYMaxMeet,
-            XMaxYMinMeet,
-            XMaxYMidMeet,
-            XMaxYMaxMeet,
-            XMinYMinSlice,
-            XMinYMidSlice,
-            XMinYMaxSlice,
-            XMidYMinSlice,
-            XMidYMidSlice,
-            XMidYMaxSlice,
-            XMaxYMinSlice,
-            XMaxYMidSlice,
-            XMaxYMaxSlice
+            XMinYMinMeet,  XMinYMidMeet,  XMinYMaxMeet,
+            XMidYMinMeet,  XMidYMidMeet,  XMidYMaxMeet,
+            XMaxYMinMeet,  XMaxYMidMeet,  XMaxYMaxMeet,
+            XMinYMinSlice, XMinYMidSlice, XMinYMaxSlice,
+            XMidYMinSlice, XMidYMidSlice, XMidYMaxSlice,
+            XMaxYMinSlice, XMaxYMidSlice, XMaxYMaxSlice
         };
 
+        struct SvgObject;
+        struct RasterState;
+
     private:
+        RasterState*           _rstate;
+
+        Xml::BinaryInputSource _binaryInputSource;
+        Xml::XmlReader         _xmlReader;
+
+    private:
+        void renderNextFrame();
+
         static const Color fromHtmlColor(const std::string& colStr);
 
         static void lexPathData(std::vector<std::string>& tokens, const std::string& str);
@@ -140,8 +129,8 @@ struct SvgRasterizer::RasterState {
     AspectRatioMode arMode;   // Aspect ratio mode
 
     // Caches
-    std::set<Pen>   penSet;     // A set of pens    (for cache look-up)
-    std::set<Brush> brushSet;   // A set of brushes (for cache look-up)
+    std::set<Pen>   penSet;     // A set of pens
+    std::set<Brush> brushSet;   // A set of brushes
     SvgObjects      svgObjects; // A map between reference names and their corresponding SVG objects
 
     // Construct a raster state object
