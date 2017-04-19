@@ -67,7 +67,10 @@ class SvgRasterizer
         static inline const std::string lrtrimStdStr(const std::string & str);
         static inline const std::string removeAllSpacesStdStr(const std::string & str);
 
+        static inline double cnvStrToDbl(const std::string& s, const std::string& sectionInfo);
         static inline const std::string& passValidNumber(const std::string& s, const std::string& sectionInfo);
+
+        static inline const std::vector<std::string> tokenizeBySpace(const std::string& str);
 
     private:
         enum AspectRatioMode {
@@ -90,13 +93,19 @@ class SvgRasterizer
         Xml::XmlReader         _xmlReader;
 
     private:
+        // Defined in "SvgRasterizer.cpp"
         void renderNextFrame();
 
+        // Defined in "SvgRasterizer_Color.cpp"
         static const Color fromHtmlColor(const std::string& colStr);
 
+        // Defined in "SvgRasterizer_Lexer.cpp"
         static void lexPathData(std::vector<std::string>& tokens, const std::string& str);
         static void lexStyleData(std::vector<std::string>& tokens, const std::string& str);
         static void lexTransformData(std::vector<std::string>& tokens, const std::string& str);
+
+        // Defined in "SvgRasterizer_Util.cpp"
+        static double cnvUnitStrToPixels(const std::string& str);
 
         static void processSvgElemParams(RasterState& rs, const Xml::StartElement& elem);
 };
@@ -111,8 +120,9 @@ struct SvgRasterizer::RasterState {
     typedef std::map<std::string, SvgObject*> SvgObjects;
 
     // State flags
-    bool gotStart; // A flag that indicates that we have got the SVG opening tag
-    bool gotEnd;   // A flag that indicates that we have got the SVG closing tag
+    bool gotStart;   // A flag that indicates that we have got the SVG opening tag
+    bool gotEnd;     // A flag that indicates that we have got the SVG closing tag
+    bool renderInit; // A flag that indicates if the rendering-related data has been initialized
 
     // Rendering target
     Image&        image;    // Target image
@@ -120,13 +130,14 @@ struct SvgRasterizer::RasterState {
     PointF        topLeft;  // Starting (top-left) coordinate for rendering the SVG
 
     // Viewport and viewbox
-    double          vpWidth;  // Width  of the viewport (negative: relative percentage; positive: absolute pixels)
-    double          vpHeight; // Height of the viewport (negative: relative percentage; positive: absolute pixels)
-    double          vbX;      // Viewbox top-left X coordinate
-    double          vbY;      // Viewbox top-left Y coordinate
-    double          vbW;      // Viewbox width
-    double          vbH;      // Viewbox height
-    AspectRatioMode arMode;   // Aspect ratio mode
+    double          vpWidth;      // Width  of the viewport (negative: relative percentage; positive: absolute pixels)
+    double          vpHeight;     // Height of the viewport (negative: relative percentage; positive: absolute pixels)
+    double          vbX;          // Viewbox top-left X coordinate
+    double          vbY;          // Viewbox top-left Y coordinate
+    double          vbW;          // Viewbox width
+    double          vbH;          // Viewbox height
+    AspectRatioMode arMode;       // Aspect ratio mode
+    Transform       vpbTransform; // The viewport-viewbox transform (projection-view matrix in OpenGL worlds ;)
 
     // Caches
     std::set<Pen>   penSet;     // A set of pens
@@ -196,7 +207,7 @@ inline const std::string SvgRasterizer::removeAllSpacesStdStr(const std::string 
     return str;
 }
 
-inline const std::string& SvgRasterizer::passValidNumber(const std::string& s, const std::string& sectionInfo)
+inline double SvgRasterizer::cnvStrToDbl(const std::string& s, const std::string& sectionInfo)
 {
     char*  end = 0;
     double val = strtod(s.c_str(), &end);
@@ -204,7 +215,28 @@ inline const std::string& SvgRasterizer::passValidNumber(const std::string& s, c
     if(*end || val == HUGE_VAL)
         throw IOError("svg error: " + sectionInfo + ": invalid number '" + s + "'");
 
+    return val;
+}
+
+inline const std::string& SvgRasterizer::passValidNumber(const std::string& s, const std::string& sectionInfo)
+{
+    cnvStrToDbl(s, sectionInfo);
     return s;
+}
+
+inline const std::vector<std::string> SvgRasterizer::tokenizeBySpace(const std::string& str_)
+{
+    std::vector<std::string> result;
+
+    const char* str = str_.c_str();
+    do {
+        const char *begin = str;
+        while(*str && !::isspace(*str)) ++str;
+        result.push_back(std::string(begin, str));
+
+    } while(*str++);
+
+    return result;
 }
 
 

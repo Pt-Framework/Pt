@@ -32,6 +32,7 @@
 #include <stdio.h>
 
 #include <Pt/Xml/StartDocument.h>
+#include <Pt/Xml/EndDocument.h>
 #include <Pt/Xml/DocType.h>
 #include <Pt/Xml/StartElement.h>
 #include <Pt/Xml/EndElement.h>
@@ -58,18 +59,19 @@ struct SvgRasterizer::SvgObject {
 // ======================================================================================
 
 SvgRasterizer::RasterState::RasterState(Image& image_, const PointF& topLeft_)
-: gotStart(false)
-, gotEnd  (false)
-, image   (image_)
-, painter (image_)
-, topLeft (topLeft_)
-, vpWidth (-100) // The default viewport width  is 100% of the target image width
-, vpHeight(-100) // The default viewport height is 100% of the target image height
-, vbX     (0)    // The default viewbox top-left coordinate is (0, 0)
-, vbY     (0)    // The default viewbox top-left coordinate is (0, 0)
-, vbW     (0)    // The default viewbox width  is the the same with the viewport width
-, vbH     (0)    // The default viewbox height is the the same with the viewport height
-, arMode  (XMidYMidMeet)
+: gotStart  (false)
+, gotEnd    (false)
+, renderInit(false)
+, image     (image_)
+, painter   (image_)
+, topLeft   (topLeft_)
+, vpWidth   (-100) // The default viewport width  is 100% of the target image width
+, vpHeight  (-100) // The default viewport height is 100% of the target image height
+, vbX       (0)    // The default viewbox top-left coordinate is (0, 0)
+, vbY       (0)    // The default viewbox top-left coordinate is (0, 0)
+, vbW       (0)    // The default viewbox width  is the the same with the viewport width
+, vbH       (0)    // The default viewbox height is the the same with the viewport height
+, arMode    (XMidYMidMeet)
 {}
 
 SvgRasterizer::RasterState::~RasterState()
@@ -92,6 +94,19 @@ SvgRasterizer::SvgRasterizer(std::istream& is, Image& image, const PointF& topLe
 {
     _xmlReader.reportStartDocument(true);
     _xmlReader.reportDocType(true);
+
+#if 0
+    lprintf("10   = %f\n", cnvUnitStrToPixels("10  "));
+    lprintf("10px = %f\n", cnvUnitStrToPixels("10px"));
+    lprintf("10pt = %f\n", cnvUnitStrToPixels("10pt"));
+    lprintf("10pc = %f\n", cnvUnitStrToPixels("10pc"));
+    lprintf("10mm = %f\n", cnvUnitStrToPixels("10mm"));
+    lprintf("10cm = %f\n", cnvUnitStrToPixels("10cm"));
+    lprintf("10in = %f\n", cnvUnitStrToPixels("10in"));
+    lprintf("10em = %f\n", cnvUnitStrToPixels("10em"));
+    lprintf("10ex = %f\n", cnvUnitStrToPixels("10ex"));
+    throw 0
+#endif
 
 #if 0
     std::vector<std::string> tokens;
@@ -192,29 +207,22 @@ bool SvgRasterizer::advance()
             // Convert the element
             const Xml::EndElement& elem = Xml::nodeCast<Xml::EndElement>(*node);
             // Check for the SVG closing element
-            if(lcasePtStr(elem.name().local()) == L"svg") _rstate->gotEnd = true;
-            /*
-            // Dump the element
-            lprintf("EndElement    : %s\n", lcaseStdStr(elem.name().local()).c_str());
-            //*/
+            if(lcasePtStr(elem.name().local()) == "svg") _rstate->gotEnd = true;
             break;
         }
 
         case Xml::Node::Characters: {
-            // Convert the element
-            //const Xml::Characters& elem = Xml::nodeCast<Xml::Characters>(*node);
             /*
+            // Convert the element
+            const Xml::Characters& elem = Xml::nodeCast<Xml::Characters>(*node);
             // Dump the element
-            //lprintf("Characters    : %s\n", elem.content().narrow().c_str());
+            lprintf("Characters    : %s\n", elem.content().narrow().c_str());
             //*/
             break;
         }
 
         default:
-            /*
-            // Dump the element
-            lprintf("node->type()  : %d\n", node->type());
-            //*/
+            // Ignore unsupported elements
             break;
     }
 
@@ -229,6 +237,22 @@ bool SvgRasterizer::advance()
 
 void SvgRasterizer::renderNextFrame()
 {
+    if(!_rstate->renderInit) {
+    }
+
+/*
+ *  Auto-determine these values as needed:
+    double          vpWidth;  // Width  of the viewport (negative: relative percentage; positive: absolute pixels)
+    double          vpHeight; // Height of the viewport (negative: relative percentage; positive: absolute pixels)
+    double          vbX;      // Viewbox top-left X coordinate
+    double          vbY;      // Viewbox top-left Y coordinate
+    double          vbW;      // Viewbox width
+    double          vbH;      // Viewbox height
+ *  Create vp-vb transform
+    AspectRatioMode arMode;   // Aspect ratio mode
+    Transform       vpbTransform; // The viewport-viewbox transform (projection-view matrix in OpenGL worlds ;)
+
+*/
 }
 
 

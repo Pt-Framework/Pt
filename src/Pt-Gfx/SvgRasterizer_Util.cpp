@@ -44,14 +44,91 @@ namespace Gfx {
 // ===== Private Member Functions =======================================================
 // ======================================================================================
 
+double SvgRasterizer::cnvUnitStrToPixels(const std::string& str_)
+{
+    // Monitor's DPI
+    const double MONITOR_DPI = 96; // https://en.wikipedia.org/wiki/Dots_per_inch#Computer_monitor_DPI_standards
+
+    // Remove all white-spaces and convert to lower case
+    const std::string& str = lcaseStdStr(removeAllSpacesStdStr(str_));
+
+    // Convert to double and check for invalid value
+    char*  end = 0;
+    double val = strtod(str.c_str(), &end);
+
+    if(val == HUGE_VAL)
+        throw IOError("svg error: invalid number unit specifier '" + str + "'");
+
+    // If there is no unit or the unit is "px", simply return the value
+    if(!*end || strcmp(end, "px") == 0) return val;
+
+    if(strcmp(end, "%" ) == 0) return -val;
+
+    if(strcmp(end, "pt") == 0) return MONITOR_DPI * val / 72.00; // (1 / 72 of an inch)
+    if(strcmp(end, "pc") == 0) return MONITOR_DPI * val /  6.00; // (1 /  6 of an inch)
+    if(strcmp(end, "mm") == 0) return MONITOR_DPI * val / 25.40;
+    if(strcmp(end, "cm") == 0) return MONITOR_DPI * val /  2.54;
+    if(strcmp(end, "in") == 0) return MONITOR_DPI * val;
+    if(strcmp(end, "em") == 0) return val * (10.0 + 1.0 / 15.0); // http://kb.mozillazine.org/Em_units_versus_ex_units
+    if(strcmp(end, "ex") == 0) return val *   6.0;               // http://kb.mozillazine.org/Em_units_versus_ex_units
+
+    throw IOError("svg error: invalid number unit specifier '" + str + "'");
+}
+
 void SvgRasterizer::processSvgElemParams(RasterState& rs, const Xml::StartElement& elem)
 {
     const Xml::AttributeList& alist = elem.attributes();
     for(Xml::AttributeList::ConstIterator it = alist.begin(); it != alist.end(); ++it) {
-        const Xml::Attribute& a = *it;
-        lprintf("    Attribute : %s = %s\n", lcaseStdStr(a.name().local()).c_str(), a.value().narrow().c_str());
+        const std::string& snam = lcaseStdStr(it->name ().local ());
+        const std::string& sval = lcaseStdStr(it->value().narrow());
+        if(snam == "width") {
+            rs.vpWidth = cnvUnitStrToPixels(sval);
+        }
+        else if(snam == "height") {
+            rs.vpHeight = cnvUnitStrToPixels(sval);
+        }
+        else if(snam == "viewbox") {
+            // Tokenize
+            const std::vector<std::string>& tok = tokenizeBySpace(sval);
+            if(tok.size() != 4)
+                throw IOError("svg error: invalid viewBox specifier '" + sval + "'");
+            // Convert to doubles
+            const double x = cnvStrToDbl(tok[0], "viewBox");
+            const double y = cnvStrToDbl(tok[1], "viewBox");
+            const double w = cnvStrToDbl(tok[2], "viewBox");
+            const double h = cnvStrToDbl(tok[3], "viewBox");
+            rs.vbX = (x <= 0) ? 0 : x;
+            rs.vbY = (y <= 0) ? 0 : y;
+            rs.vbW = (w <= 0) ? 0 : w;
+            rs.vbH = (h <= 0) ? 0 : h;
+        }
+        else if(snam == "preserveaspectratio") {
+            // Tokenize
+            const std::vector<std::string>& tok = tokenizeBySpace(sval);
+            if(tok.size() < 1 || tok.size() > 2)
+                throw IOError("svg error: invalid preserveAspectRatio specifier '" + sval + "'");
+            // Check for "meet" or "slice"
+            bool meet = true;
+            if(tok.size() == 2) {
+                     if(tok[1] == "meet" ) { /* Does nothing */ }
+                else if(tok[1] == "slice") { meet = false; }
+                else
+                    throw IOError("svg error: invalid preserveAspectRatio specifier '" + sval + "'");
+            }
+            // Process the directive
+                 if(tok[0] == "none"    ) rs.arMode = None;
+            else if(tok[0] == "xminymin") rs.arMode = meet ? XMinYMinMeet : XMinYMinSlice;
+            else if(tok[0] == "xminymid") rs.arMode = meet ? XMinYMidMeet : XMinYMidSlice;
+            else if(tok[0] == "xminymax") rs.arMode = meet ? XMinYMaxMeet : XMinYMaxSlice;
+            else if(tok[0] == "xmidymin") rs.arMode = meet ? XMidYMinMeet : XMidYMinSlice;
+            else if(tok[0] == "xmidymid") rs.arMode = meet ? XMidYMidMeet : XMidYMidSlice;
+            else if(tok[0] == "xmidymax") rs.arMode = meet ? XMidYMaxMeet : XMidYMaxSlice;
+            else if(tok[0] == "xmaxymin") rs.arMode = meet ? XMaxYMinMeet : XMaxYMinSlice;
+            else if(tok[0] == "xmaxymid") rs.arMode = meet ? XMaxYMidMeet : XMaxYMidSlice;
+            else if(tok[0] == "xmaxymax") rs.arMode = meet ? XMaxYMaxMeet : XMaxYMaxSlice;
+            else                          throw IOError("svg error: invalid preserveAspectRatio specifier '" + sval + "'");
+        }
     }
-
 }
 
 
