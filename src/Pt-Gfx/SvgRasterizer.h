@@ -30,16 +30,14 @@
 #ifndef PT_GFX_SVGRASTERIZER_H
 #define PT_GFX_SVGRASTERIZER_H
 
-#include <algorithm>
 #include <stack>
-#include <iostream>
 
 #include <Pt/IOError.h>
 
 #include <Pt/Xml/InputSource.h>
 #include <Pt/Xml/XmlReader.h>
 
-#include <Pt/Gfx/TransformStack.h>
+#include <Pt/Gfx/SGNode.h>
 #include <Pt/Gfx/ImagePainter2.h>
 
 
@@ -143,9 +141,10 @@ struct SvgRasterizer::RasterState {
     double          vbW;          // Viewbox width
     double          vbH;          // Viewbox height
     AspectRatioMode arMode;       // Aspect ratio mode
-    Transform       vpbTransform; // The viewport-viewbox transform (projection-view matrix in OpenGL worlds ;)
+    SGNode::TransformT       vpbTransform; // The viewport-viewbox transform (projection-view matrix in OpenGL worlds ;)
 
     // Scene graph objects
+    // ### TODO: add support for animated SVG! ###
     SGNode*             sgParent; // Parent node
     std::stack<SGNode*> sgStack;  // Node stack
 
@@ -159,6 +158,9 @@ struct SvgRasterizer::RasterState {
 
     // Destruct a raster state object
     ~RasterState();
+
+    // Clear all caches
+    void clearAllCaches();
 };
 
 

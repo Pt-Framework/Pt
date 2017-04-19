@@ -28,17 +28,14 @@
 */
 
 // Just for debugging ;)
-#warning "Just for debugging ;)"
-#include <stdio.h>
+//#warning "Just for debugging ;)"
+//#include <stdio.h>
 
 #include <Pt/Xml/StartDocument.h>
 #include <Pt/Xml/EndDocument.h>
 #include <Pt/Xml/DocType.h>
 #include <Pt/Xml/StartElement.h>
 #include <Pt/Xml/EndElement.h>
-
-#include <Pt/Gfx/Path.h>
-#include <Pt/Gfx/SGNode.h>
 
 #include "SvgRasterizer.h"
 
@@ -80,9 +77,15 @@ SvgRasterizer::RasterState::~RasterState()
 {
     delete sgParent;
 
+    clearAllCaches();
+}
+
+void SvgRasterizer::RasterState::clearAllCaches()
+{
     for(SvgObjects::iterator it = svgObjects.begin(); it != svgObjects.end(); ++it) {
         delete it->second;
     }
+
     svgObjects.clear();
 }
 
@@ -204,12 +207,13 @@ bool SvgRasterizer::advance()
                 processSvgElementParameters(elem);
                 // Store the parent node to the stack
                 _rstate->sgStack.push(_rstate->sgParent);
-                // Set flag and done
+                // Set flag
                 _rstate->gotStart = true;
-                break;
             }
-            // Process other elements as drawing elements
-            _rstate->sgStack.push(processDrawingElement(elem));
+            // Process the element as a drawing element
+            else {
+                _rstate->sgStack.push( processDrawingElement(elem) );
+            }
             break;
         }
 
@@ -221,17 +225,16 @@ bool SvgRasterizer::advance()
                 // The only node left in the node stack must be the parent node
                 if(_rstate->sgStack.size() != 1 && _rstate->sgStack.top() != _rstate->sgParent)
                     throw IOError("svg error: document structure error");
-                // Clear the node stack
+                // Clear the node stack and caches
                 _rstate->sgStack.pop();
-                // Clear the caches
-                _rstate->penSet    .clear();
-                _rstate->brushSet  .clear();
-                _rstate->svgObjects.clear();
+                _rstate->clearAllCaches();
                 // Set flag
                 _rstate->gotEnd = true;
             }
-            // Process other elements as drawing elements
-            _rstate->sgStack.pop();
+            // Process the element as a drawing element
+            else {
+                _rstate->sgStack.pop();
+            }
             break;
         }
 
@@ -261,56 +264,96 @@ void SvgRasterizer::renderNextFrame()
         // Determine the viewbox width and height
         if(_rstate->vbW <= 0.0) _rstate->vbW = _rstate->vpWidth;
         if(_rstate->vbH <= 0.0) _rstate->vbH = _rstate->vpHeight;
-        // Initialize the viewport-viewbox transform
-        // ### TODO ###
+        // Calculate the delta between the viewport and viewbox
+        const double pbDltW = _rstate->vpWidth  - _rstate->vbW;
+        const double pbDltH = _rstate->vpHeight - _rstate->vbH;
+        // Calculate the ratio between the viewport and viewbox
+        const double pbRatW = _rstate->vpWidth  / _rstate->vbW;
+        const double pbRatH = _rstate->vpHeight / _rstate->vbH;
+        // Determine the viewport-viewbox scaling
+        double xs = 1;
+        double ys = 1;
         switch(_rstate->arMode) {
-            case None:
+            // Non-uniform scaling
+            case None :
+                xs = pbRatW;
+                ys = pbRatH;
                 break;
-            case XMinYMinMeet:
+            // The entire viewbox is visible within the viewport
+            case XMinYMinMeet : /* Fallthrough */
+            case XMinYMidMeet : /* Fallthrough */
+            case XMinYMaxMeet : /* Fallthrough */
+            case XMidYMinMeet : /* Fallthrough */
+            case XMidYMidMeet : /* Fallthrough */
+            case XMidYMaxMeet : /* Fallthrough */
+            case XMaxYMinMeet : /* Fallthrough */
+            case XMaxYMidMeet : /* Fallthrough */
+            case XMaxYMaxMeet :
+                xs = std::min(pbRatW, pbRatH);
+                ys = xs;
                 break;
-            case XMinYMidMeet:
-                break;
-            case XMinYMaxMeet:
-                break;
-            case XMidYMinMeet:
-                break;
-            case XMidYMidMeet:
-                break;
-            case XMidYMaxMeet:
-                break;
-            case XMaxYMinMeet:
-                break;
-            case XMaxYMidMeet:
-                break;
-            case XMaxYMaxMeet:
-                break;
-            case XMinYMinSlice:
-                break;
-            case XMinYMidSlice:
-                break;
-            case XMinYMaxSlice:
-                break;
-            case XMidYMinSlice:
-                break;
-            case XMidYMidSlice:
-                break;
-            case XMidYMaxSlice:
-                break;
-            case XMaxYMinSlice:
-                break;
-            case XMaxYMidSlice:
-                break;
-            case XMaxYMaxSlice:
+            // The entire viewport is covered by the viewbox
+            case XMinYMinSlice : /* Fallthrough */
+            case XMinYMidSlice : /* Fallthrough */
+            case XMinYMaxSlice : /* Fallthrough */
+            case XMidYMinSlice : /* Fallthrough */
+            case XMidYMidSlice : /* Fallthrough */
+            case XMidYMaxSlice : /* Fallthrough */
+            case XMaxYMinSlice : /* Fallthrough */
+            case XMaxYMidSlice : /* Fallthrough */
+            case XMaxYMaxSlice :
+                xs = std::max(pbRatW, pbRatH);
+                ys = xs;
                 break;
         }
+        // Determine the viewport-viewbox translation
+        double xt = 0;
+        double yt = 0;
+        switch(_rstate->arMode) {
+            // Top-left
+            case None          : /* Fallthrough */
+            case XMinYMinMeet  : /* Fallthrough */
+            case XMinYMinSlice :                                       break;
+            // Middle-left
+            case XMinYMidMeet  : /* Fallthrough */
+            case XMinYMidSlice :                    yt = pbDltH * 0.5; break;
+            // Bottom-left
+            case XMinYMaxMeet  : /* Fallthrough */
+            case XMinYMaxSlice :                    yt = pbDltH * 1.0; break;
+            // Top-center
+            case XMidYMinMeet  : /* Fallthrough */
+            case XMidYMinSlice : xt = pbDltW * 0.5;                    break;
+            // Middle-center
+            case XMidYMidMeet  : /* Fallthrough */
+            case XMidYMidSlice : xt = pbDltW * 0.5; yt = pbDltH * 0.5; break;
+            // Bottom-center
+            case XMidYMaxMeet  : /* Fallthrough */
+            case XMidYMaxSlice : xt = pbDltW * 0.5; yt = pbDltH * 1.0; break;
+            // Top-right
+            case XMaxYMinMeet  : /* Fallthrough */
+            case XMaxYMinSlice : xt = pbDltW * 1.0;                    break;
+            // Middle-right
+            case XMaxYMidMeet  : /* Fallthrough */
+            case XMaxYMidSlice : xt = pbDltW * 1.0; yt = pbDltH * 0.5; break;
+            // Bottom-right
+            case XMaxYMaxMeet  : /* Fallthrough */
+            case XMaxYMaxSlice : xt = pbDltW * 1.0; yt = pbDltH * 1.0; break;
+        }
+        // Initialize the viewport-viewbox transform
         _rstate->vpbTransform.identity();
-        // Translate to the top-left coordinate
+        _rstate->vpbTransform.translate(-_rstate->vbX, -_rstate->vbY);
+        _rstate->vpbTransform.scale(xs, ys);
+        _rstate->vpbTransform.translate(xt, yt);
+        // Translate to the user-specified top-left coordinate
         _rstate->vpbTransform.translate(_rstate->topLeft.x(), _rstate->topLeft.y());
         // Set flag
         _rstate->renderInit = true;
     }
 
+    // ### TODO: for animated SVG, update the scene graph nodes here! ###
+
     // Render the scene graph
+    _rstate->sgParent->draw(_rstate->painter, &_rstate->vpbTransform);
 }
 
 

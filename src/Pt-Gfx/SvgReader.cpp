@@ -28,6 +28,7 @@
  */
 
 #include <Pt/Gfx/SvgReader.h>
+
 #include "SvgRasterizer.h"
 
 

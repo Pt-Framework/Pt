@@ -139,9 +139,9 @@ void SvgRasterizer::processSvgElementParameters(const Xml::StartElement& elem)
 SGNode* SvgRasterizer::processDrawingElement(const Xml::StartElement& elem)
 {
     // ### TODO ###
-    //SGNode* parent = _rstate->sgStack.top();
+    SGNode& parent = *_rstate->sgStack.top();
 
-    return new SGNode;
+    return &parent.addChild(new SGNode);
 }
 
 
