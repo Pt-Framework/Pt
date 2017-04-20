@@ -269,9 +269,6 @@ void SvgRasterizer::renderNextFrame()
         // Determine the viewbox width and height
         if(_rstate->vbW <= 0.0) _rstate->vbW = _rstate->vpWidth;
         if(_rstate->vbH <= 0.0) _rstate->vbH = _rstate->vpHeight;
-        // Calculate the delta between the viewport and viewbox
-        const double pbDltW = _rstate->vpWidth  - _rstate->vbW;
-        const double pbDltH = _rstate->vpHeight - _rstate->vbH;
         // Calculate the ratio between the viewport and viewbox
         const double pbRatW = _rstate->vpWidth  / _rstate->vbW;
         const double pbRatH = _rstate->vpHeight / _rstate->vbH;
@@ -311,6 +308,9 @@ void SvgRasterizer::renderNextFrame()
                 ys = xs;
                 break;
         }
+        // Calculate the delta between the viewport and viewbox
+        const double pbDltW = _rstate->vpWidth  - _rstate->vbW * xs;
+        const double pbDltH = _rstate->vpHeight - _rstate->vbH * ys;
         // Determine the viewport-viewbox translation
         double xt = 0;
         double yt = 0;
@@ -358,8 +358,11 @@ void SvgRasterizer::renderNextFrame()
     // ### TODO: For animated SVG, update the scene graph nodes here! ###
 
     // Clear the image with a fully transparent color
-    _rstate->painter.setBrush( Color::fromRgb8(0, 0, 0, 0) );
-    _rstate->painter.fillRect( RectF( PointF(0, 0), SizeF(_rstate->image.width(), _rstate->image.height()) ) );
+    //_rstate->painter.setBrush( Color::fromRgb8(0, 0, 0, 0) );
+    //_rstate->painter.fillRect( RectF( PointF(0, 0), SizeF(_rstate->image.width(), _rstate->image.height()) ) );
+
+    // Set the clip region
+    _rstate->painter.setClip( RectF( PointF(0, 0), SizeF(_rstate->vpWidth, _rstate->vpHeight) ) );
 
     // Render the scene graph
     _rstate->sgParent->draw(_rstate->painter, &_rstate->vpbTransform);
