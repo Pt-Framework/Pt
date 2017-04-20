@@ -209,6 +209,9 @@ class BasicView
         Pt::ssize_t padding() const
         { return _padding; }
 
+        std::size_t pixelStride() const
+        { return Model::pixelStride(); }
+
     private:
         Pt::uint8_t* _data;
         Size         _size;
@@ -294,6 +297,9 @@ class BasicImage
 
         bool empty() const
         { return _view.empty(); }
+
+        const View& view() const
+        { return _view; }
 
     private:
         std::vector<Pt::uint8_t> _buffer;

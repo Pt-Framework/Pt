@@ -50,7 +50,6 @@ if $(WITH_RASTERIZER2)
                                SGNodeEllipse.cpp
                                SGNodeArc.cpp
                                SGNodeProxy.cpp
-                               ImageOperation2.cpp
                                ImageOperation2_ScaleGeneric.cpp
                                ImageOperation2_Scale32Bpp.cpp
                                ImageOperation2_Rotate32Bpp.cpp
