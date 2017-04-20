@@ -75,6 +75,9 @@ static void testSceneGraph(const char* title, Image& image, Painter& painter)
                          csgn3_2->transform().translate(120 * 1, 120 * 1);
                          csgn3_2->setPen( Color::fromRgb8(255, 0, 0) );
 
+            // 1st child of the 3rd-child's 2nd child (a proxy node)
+            csgn3_2->addChild( new SGNodeProxy(*csgn3_1) );
+
         // 3rd-child's 3rd child
         SGNodeEllipse* csgn3_3 = &csgn3->addChild( new SGNodeEllipse( SGNode::RenderStroke, PointF(0, 0), SizeF(100, 75) ) );
                        csgn3_3->transform().translate(120 * 2, 120 * 1);

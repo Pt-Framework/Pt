@@ -63,6 +63,29 @@ class PT_GFX_API SGNode {
         typedef Children::const_reverse_iterator ConstReverseIterator;
 
     private:
+        // Node data
+        struct NodeData {
+            Pen                        pen;       // Pen   (if null, then use the parent's pen  )
+            Brush                      brush;     // Brush (if null, then use the parent's brush)
+            TransformT                 transform; // Transform
+            Children                   children;  // Children
+
+            Color                      trCFil;    // Background fill used when rotating texture
+            Brush::TextureRotationMode trMode;    // Texture rotation mode
+
+            inline NodeData()
+            {}
+
+            inline NodeData(const TransformT& transform_)
+            : transform( transform_ )
+            {}
+
+            inline NodeData(const TransformT& transform_, const Children& children_)
+            : transform( transform_ )
+            , children ( children_ )
+            {}
+        };
+
         // A stack-element used for processing (traversing) the nodes
         struct TraversalStack {
             const SGNode*    node;      // Scene-graph node to be rendered
@@ -76,23 +99,36 @@ class PT_GFX_API SGNode {
             {}
         };
 
+    private:
+        friend class SGNodeProxy;
+
+        inline SGNode(SmartPtr<NodeData> nodeData)
+        : _parent    ( 0 )
+        , _rm        ( RenderInherit )
+        , _nodeData  ( nodeData )
+        , _nodeDataRO( true )
+        {}
+
     public:
         inline SGNode(RenderMode rm = RenderInherit)
-        : _parent(0)
-        , _rm    (rm)
+        : _parent    ( 0 )
+        , _rm        ( rm )
+        , _nodeData  ( new NodeData() )
+        , _nodeDataRO( false )
         { setTextureRotationParameters(); }
 
         inline SGNode(RenderMode rm, const TransformT& transform)
-        : _parent   (0)
-        , _rm       (rm)
-        , _transform( transform )
+        : _parent    ( 0 )
+        , _rm        ( rm )
+        , _nodeData  ( new NodeData(transform) )
+        , _nodeDataRO( false )
         { setTextureRotationParameters(); }
 
         inline SGNode(RenderMode rm, const TransformT& transform, const Children& children)
-        : _parent   (0)
-        , _rm       (rm)
-        , _transform( transform )
-        , _children ( children )
+        : _parent    ( 0 )
+        , _rm        ( rm )
+        , _nodeData  ( new NodeData(transform, children) )
+        , _nodeDataRO( false )
         { setTextureRotationParameters(); }
 
         virtual ~SGNode();
@@ -106,8 +142,10 @@ class PT_GFX_API SGNode {
         template <typename T>
         inline T& addChild(T* child_)
         {
+            if(_nodeDataRO) throw std::logic_error("the node data is read-only in this instance");
+
             SGNode* child = child_;
-            _children.push_back(child);
+            _nodeData->children.push_back(child);
 
             child->_parent = this;
 
@@ -116,11 +154,16 @@ class PT_GFX_API SGNode {
 
         inline void removeChild(const SGNode* child)
         {
-            Children::iterator it = std::find(_children.begin(), _children.end(), child);
-            if(it == _children.end()) return;
+            if(_nodeDataRO) throw std::logic_error("the node data is read-only in this instance");
 
-            _children.erase(it);
+            Children::iterator it = std::find(_nodeData->children.begin(), _nodeData->children.end(), child);
+            if(it == _nodeData->children.end()) return;
+
+            _nodeData->children.erase(it);
         }
+
+        inline const SGNode* parent() const
+        { return _parent; }
 
         //
         // Render mode
@@ -150,41 +193,51 @@ class PT_GFX_API SGNode {
         //
 
         inline void setPen(const Pen& pen)
-        { _pen = pen; }
+        {
+            if(_nodeDataRO) throw std::logic_error("the node data is read-only in this instance");
+
+            _nodeData->pen = pen;
+        }
 
         inline const Pen& effectivePen() const
         {
-            if(!_pen.isNull()) return _pen;
+            if(!_nodeData->pen.isNull()) return _nodeData->pen;
 
             const SGNode* p = _parent;
             while(p) {
-                if(!p->_pen.isNull()) return p->_pen;
+                if(!p->_nodeData->pen.isNull()) return p->_nodeData->pen;
                 p = p->_parent;
             }
 
-            return _pen;
+            return _nodeData->pen;
         }
 
         inline void setBrush(const Brush& brush)
-        { _brush = brush; }
+        {
+            if(_nodeDataRO) throw std::logic_error("the node data is read-only in this instance");
+
+            _nodeData->brush = brush;
+        }
 
         inline const Brush& effectiveBrush() const
         {
-            if(!_brush.isNull()) return _brush;
+            if(!_nodeData->brush.isNull()) return _nodeData->brush;
 
             const SGNode* p = _parent;
             while(p) {
-                if(!p->_brush.isNull()) return p->_brush;
+                if(!p->_nodeData->brush.isNull()) return p->_nodeData->brush;
                 p = p->_parent;
             }
 
-            return _brush;
+            return _nodeData->brush;
         }
 
         inline void setTextureRotationParameters(const Color& colorFill = Color::fromRgb8(0, 0, 0, 255), Brush::TextureRotationMode mode = Brush::BlockFullFit)
         {
-            _trCFil = colorFill;
-            _trMode = mode;
+            if(_nodeDataRO) throw std::logic_error("the node data is read-only in this instance");
+
+            _nodeData->trCFil = colorFill;
+            _nodeData->trMode = mode;
         }
 
         void draw(ImagePainter2& painter, const TransformT* transform = 0);
@@ -194,63 +247,71 @@ class PT_GFX_API SGNode {
         //
 
         inline Pen& pen()
-        { return _pen; }
+        {
+            if(_nodeDataRO) throw std::logic_error("the node data is read-only in this instance");
+
+            return _nodeData->pen;
+        }
 
         inline const Pen& pen() const
-        { return _pen; }
+        { return _nodeData->pen; }
 
         //
         // Direct access to the brush object
         //
 
         inline Brush& brush()
-        { return _brush; }
+        {
+            if(_nodeDataRO) throw std::logic_error("the node data is read-only in this instance");
+
+            return _nodeData->brush;
+        }
 
         inline const Brush& brush() const
-        { return _brush; }
+        { return _nodeData->brush; }
 
         //
         // Direct access to the transform object
         //
 
         inline TransformT& transform()
-        { return _transform; }
+        {
+            if(_nodeDataRO) throw std::logic_error("the node data is read-only in this instance");
+
+            return _nodeData->transform;
+        }
 
         inline const TransformT& transform() const
-        { return _transform; }
+        { return _nodeData->transform; }
 
         //
         // Direct access to the child nodes
         //
 
         inline const Children& children() const
-        { return _children; }
+        { return _nodeData->children; }
 
         Children::const_iterator begin() const
-        { return _children.begin(); }
+        { return _nodeData->children.begin(); }
 
         Children::const_iterator end() const
-        { return _children.end(); }
+        { return _nodeData->children.end(); }
 
         Children::const_reverse_iterator rbegin() const
-        { return _children.rbegin(); }
+        { return _nodeData->children.rbegin(); }
 
         Children::const_reverse_iterator rend() const
-        { return _children.rend(); }
+        { return _nodeData->children.rend(); }
 
     protected:
         virtual void drawImpl(ImagePainter2& painter, const TransformT& transform) const;
 
-    protected:
-        SGNode*    _parent;
-        RenderMode _rm;
-        Pen        _pen;
-        Brush      _brush;
-        TransformT _transform;
-        Children   _children;
+    private:
+        SGNode*            _parent;     // Parent node
+        RenderMode         _rm;         // Render mode
 
-        Color                      _trCFil;
-        Brush::TextureRotationMode _trMode;
+        SmartPtr<NodeData> _nodeData;   // Node data
+        bool               _nodeDataRO; // A flag that indicates whether the node data is read-only
 };
 
 

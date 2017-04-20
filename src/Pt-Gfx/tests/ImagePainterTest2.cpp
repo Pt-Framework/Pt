@@ -41,6 +41,7 @@
 #include <Pt/Gfx/SGNodeRectangle.h>
 #include <Pt/Gfx/SGNodeEllipse.h>
 #include <Pt/Gfx/SGNodeArc.h>
+#include <Pt/Gfx/SGNodeProxy.h>
 
 #include <Pt/Gfx/TransformStack.h>
 
@@ -120,8 +121,8 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_EXTRA                         0 // (including path-based n-bezier)
 
 #define TEST_IMAGE_OPERATION                    0
-#define TEST_SCENE_GRAPH                        0
-#define TEST_SVG_READER                         1
+#define TEST_SCENE_GRAPH                        1
+#define TEST_SVG_READER                         0
 
 #define TEST_COMPARE_WITH_OLD_PAINTER           0 // (for some shapes only)
 

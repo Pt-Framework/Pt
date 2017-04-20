@@ -37,6 +37,7 @@
 #include <Pt/Gfx/SGNodeRectangle.h>
 #include <Pt/Gfx/SGNodeEllipse.h>
 #include <Pt/Gfx/SGNodeArc.h>
+#include <Pt/Gfx/SGNodeProxy.h>
 
 #include "SvgRasterizer.h"
 

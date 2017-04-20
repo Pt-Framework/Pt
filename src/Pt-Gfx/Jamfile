@@ -49,6 +49,7 @@ if $(WITH_RASTERIZER2)
                                SGNodeRectangle.cpp
                                SGNodeEllipse.cpp
                                SGNodeArc.cpp
+                               SGNodeProxy.cpp
                                ImagePainter2.cpp
                                Rasterizer2.cpp
                                Rasterizer2_PixelScanline.cpp
