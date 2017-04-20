@@ -258,6 +258,14 @@ void SvgRasterizer::renderNextFrame()
         else if(_rstate->vpWidth  <  0  ) _rstate->vpWidth  = -_rstate->vpWidth  * 0.01 * _rstate->image.width ();
              if(_rstate->vpHeight == 0.0) _rstate->vpHeight =                             _rstate->image.height();
         else if(_rstate->vpHeight <  0  ) _rstate->vpHeight = -_rstate->vpHeight * 0.01 * _rstate->image.height();
+        // Check the viewport width and height
+        if(_rstate->vpWidth == 0.0 || _rstate->vpHeight == 0.0)
+            throw std::runtime_error("svg error: the SVG viewport width/height cannot be determined");
+        // Reset the image as needed
+        if(_rstate->image.empty())
+            _rstate->image.reset(ImageFormat::argb32(), Size(_rstate->vpWidth, _rstate->vpHeight));
+        else if(_rstate->image.format() != ImageFormat::argb32())
+            _rstate->image.reset(ImageFormat::argb32(), Size(_rstate->image.width(), _rstate->image.height()));
         // Determine the viewbox width and height
         if(_rstate->vbW <= 0.0) _rstate->vbW = _rstate->vpWidth;
         if(_rstate->vbH <= 0.0) _rstate->vbH = _rstate->vpHeight;

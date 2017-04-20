@@ -153,8 +153,8 @@ inline void ImageOperation2::blockScale(const ImageT& from, ImageT& to)
         throw std::runtime_error("invalid 'from' and/or 'to' image size");
 
     if(from.view().pixelStride() != 4 || to.view().pixelStride() != 4) {
-        blockScaleGeneric(from, to);
         //throw std::runtime_error("block scale for images with pixel stride != 4 is not supported yet");
+        blockScaleGeneric(from, to);
         return;
     }
 
