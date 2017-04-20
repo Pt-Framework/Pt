@@ -33,8 +33,6 @@
 
 #include <Pt/Gfx/ImageOperation2.h>
 
-#undef PT_GFX_USE_SSE4P1
-//#undef PT_GFX_USE_SSE2
 
 namespace Pt {
 namespace Gfx {
@@ -50,23 +48,18 @@ namespace Gfx {
 static const __m128 sseFour001 = _mm_set1_ps(  1);
 static const __m128 sseFour256 = _mm_set1_ps(256);
 
-#endif
-
 // Based on: FastC++: Coding Cpp Efficiently
 //           Bilinear Pixel Interpolation using SSE
 //           http://fastcpp.blogspot.co.id/2011/06/bilinear-pixel-interpolation-using-sse.html
 //           Blog by theowl84, 2011
-
-#if defined(PT_GFX_USE_SSE4P1)
-
-static inline Pt::uint32_t bsGetPixel32Bpp_implSIMD(const Pt::uint32_t* img, Pt::ssize_t imgS, Pt::ssize_t imgW, Pt::ssize_t imgH, float x, float y)
+static inline Pt::uint32_t bsGetPixel32Bpp_implSIMD(const Pt::uint8_t* img, Pt::ssize_t imgS, Pt::ssize_t imgW, Pt::ssize_t imgH, float x, float y)
 {
     // Floor and limit the coordinates
     Pt::int32_t px = Pt::Gfx::Math::zfint(x);
     Pt::int32_t py = Pt::Gfx::Math::zfint(y);
 
-    if(px + 1 >= imgS) {
-        px = imgS - 2;
+    if(px + 1 >= imgW) {
+        px = imgW - 2;
         x  = px;
     }
 
@@ -75,12 +68,15 @@ static inline Pt::uint32_t bsGetPixel32Bpp_implSIMD(const Pt::uint32_t* img, Pt:
         y  = py;
     }
 
-    // Pointer to the first pixel
-    const Pt::uint32_t* p0 = img + py * imgS + px;
+    // Pointer to the rows
+    const Pt::uint32_t* r0 = reinterpret_cast<const Pt::uint32_t*>(img + (py + 0) * imgS + px * 4);
+    const Pt::uint32_t* r1 = reinterpret_cast<const Pt::uint32_t*>(img + (py + 1) * imgS + px * 4);
 
     // Load the four neighboring pixels
-    const __m128i p12      = _mm_loadl_epi64   ( (const __m128i*) &p0[0 * imgS]              );
-    const __m128i p34      = _mm_loadl_epi64   ( (const __m128i*) &p0[1 * imgS]              );
+    const __m128i p12      = _mm_loadl_epi64    ( (const __m128i*) r0                         );
+    const __m128i p34      = _mm_loadl_epi64    ( (const __m128i*) r1                         );
+
+#if defined(PT_GFX_USE_SSE4P1)
 
     // Convert ARGB ARGB ARGB ARGB to AAAA RRRR GGGG BBBB
     const __m128i p1234aos = _mm_unpacklo_epi8 (p12,        p34                              );
@@ -124,33 +120,8 @@ static inline Pt::uint32_t bsGetPixel32Bpp_implSIMD(const Pt::uint32_t* img, Pt:
 
     // Return the result as a 32-bit integer
     return static_cast<Pt::uint32_t>( _mm_cvtsi128_si32(rfin) );
-}
 
 #elif defined(PT_GFX_USE_SSE2)
-
-static inline Pt::uint32_t bsGetPixel32Bpp_implSIMD(const Pt::uint8_t* img, Pt::ssize_t imgS, Pt::ssize_t imgW, Pt::ssize_t imgH, float x, float y)
-{
-    // Floor and limit the coordinates
-    Pt::int32_t px = Pt::Gfx::Math::zfint(x);
-    Pt::int32_t py = Pt::Gfx::Math::zfint(y);
-
-    if(px + 1 >= imgW) {
-        px = imgW - 2;
-        x  = px;
-    }
-
-    if(py + 1 >= imgH) {
-        py = imgH - 2;
-        y  = py;
-    }
-
-    // Pointer to the rows
-    const Pt::uint32_t* r0 = reinterpret_cast<const Pt::uint32_t*>(img + (py + 0) * imgS + px * 4);
-    const Pt::uint32_t* r1 = reinterpret_cast<const Pt::uint32_t*>(img + (py + 1) * imgS + px * 4);
-
-    // Load the four neighboring pixels
-    const __m128i p12      = _mm_loadl_epi64    ( (const __m128i*) r0                         );
-    const __m128i p34      = _mm_loadl_epi64    ( (const __m128i*) r1                         );
 
     // Extend to 16-bit integer
     const __m128i p12ex    = _mm_unpacklo_epi8  (p12,        _mm_setzero_si128()              );
@@ -197,6 +168,8 @@ static inline Pt::uint32_t bsGetPixel32Bpp_implSIMD(const Pt::uint8_t* img, Pt::
 
     // Return the result as a 32-bit integer
     return static_cast<Pt::uint32_t>( _mm_cvtsi128_si32(rfin) );
+
+#endif
 }
 
 #else

@@ -37,7 +37,7 @@ static size_t benchImageScalingBlock(int loopCount)
             */
         }
         else {
-            blockScaleImage(textureWithWhiteBackground, srImage);
+            ImageOperation2::blockScale(textureWithWhiteBackground, srImage);
         }
 
         sum += clock.stop().toUSecs();
@@ -58,7 +58,7 @@ static size_t benchImageScalingBilinear(int loopCount)
         Pt::System::Clock clock;
         clock.start();
 
-        bilinearScaleImage(textureWithWhiteBackground, srImage);
+        ImageOperation2::bilinearScale(textureWithWhiteBackground, srImage);
 
         sum += clock.stop().toUSecs();
     }
