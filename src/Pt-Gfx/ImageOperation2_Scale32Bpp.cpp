@@ -34,7 +34,7 @@
 #include <Pt/Gfx/ImageOperation2.h>
 
 #undef PT_GFX_USE_SSE4P1
-#undef PT_GFX_USE_SSE2
+//#undef PT_GFX_USE_SSE2
 
 namespace Pt {
 namespace Gfx {
@@ -128,14 +128,14 @@ static inline Pt::uint32_t bsGetPixel32Bpp_implSIMD(const Pt::uint32_t* img, Pt:
 
 #elif defined(PT_GFX_USE_SSE2)
 
-static inline Pt::uint32_t bsGetPixel32Bpp_implSIMD(const Pt::uint32_t* img, Pt::ssize_t imgS, Pt::ssize_t imgW, Pt::ssize_t imgH, float x, float y)
+static inline Pt::uint32_t bsGetPixel32Bpp_implSIMD(const Pt::uint8_t* img, Pt::ssize_t imgS, Pt::ssize_t imgW, Pt::ssize_t imgH, float x, float y)
 {
     // Floor and limit the coordinates
     Pt::int32_t px = Pt::Gfx::Math::zfint(x);
     Pt::int32_t py = Pt::Gfx::Math::zfint(y);
 
-    if(px + 1 >= imgS) {
-        px = imgS - 2;
+    if(px + 1 >= imgW) {
+        px = imgW - 2;
         x  = px;
     }
 
@@ -144,12 +144,13 @@ static inline Pt::uint32_t bsGetPixel32Bpp_implSIMD(const Pt::uint32_t* img, Pt:
         y  = py;
     }
 
-    // Pointer to the first pixel
-    const Pt::uint32_t* p0 = img + py * imgS + px;
+    // Pointer to the rows
+    const Pt::uint32_t* r0 = reinterpret_cast<const Pt::uint32_t*>(img + (py + 0) * imgS + px * 4);
+    const Pt::uint32_t* r1 = reinterpret_cast<const Pt::uint32_t*>(img + (py + 1) * imgS + px * 4);
 
     // Load the four neighboring pixels
-    const __m128i p12      = _mm_loadl_epi64    ( (const __m128i*) &p0[0 * imgS]              );
-    const __m128i p34      = _mm_loadl_epi64    ( (const __m128i*) &p0[1 * imgS]              );
+    const __m128i p12      = _mm_loadl_epi64    ( (const __m128i*) r0                         );
+    const __m128i p34      = _mm_loadl_epi64    ( (const __m128i*) r1                         );
 
     // Extend to 16-bit integer
     const __m128i p12ex    = _mm_unpacklo_epi8  (p12,        _mm_setzero_si128()              );
@@ -289,7 +290,9 @@ static inline void bblScale32Bpp_implFP(
                  dst_   = reinterpret_cast<      Pt::uint32_t*>(dst);
                 *dst_++ = *src_;
                  dst    = reinterpret_cast<      Pt::uint8_t* >(dst_);
+#if !defined(PT_GFX_USE_SSE4P1) && !defined(PT_GFX_USE_SSE2)
             }
+#endif
             // Increment the iterator
             FitrX += FincX;
         }
@@ -334,7 +337,7 @@ void ImageOperation2::bilinearScale32Bpp(
         float itrX = 0;
         for(Pt::ssize_t x = 0; x < dstW; ++x) {
             // Get the interpolated pixel (SIMD)
-            *dst++ = bsGetPixel32Bpp_implSIMD(src, srcS, srcW, srcH, itrX, itrY);
+            *dst++ = bsGetPixel32Bpp_implSIMD(reinterpret_cast<const Pt::uint8_t*>(src), srcS, srcW, srcH, itrX, itrY);
             // Increment the iterator
             itrX += incX;
         }
