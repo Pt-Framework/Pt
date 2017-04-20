@@ -121,8 +121,8 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_EXTRA                         0 // (including path-based n-bezier)
 
 #define TEST_IMAGE_OPERATION                    0
-#define TEST_SCENE_GRAPH                        1
-#define TEST_SVG_READER                         0
+#define TEST_SCENE_GRAPH                        0
+#define TEST_SVG_READER                         DEFINE_CONFIG_BITS(1, 2, 255) // (multi-test)
 
 #define TEST_COMPARE_WITH_OLD_PAINTER           0 // (for some shapes only)
 
@@ -211,8 +211,41 @@ static const char* sfileDirXPrefix = "";
 
 
 //
+// Helper function to select which multi-test should be run
+//
+
+static inline Pt::uint32_t DEFINE_CONFIG_BITS(Pt::uint8_t idx,...)
+{
+    Pt::uint32_t result = 0;
+
+    if(idx) result |= ( (Pt::uint32_t) 1 << (idx - 1) );
+
+    va_list valist;
+    va_start(valist, idx);
+
+    for(;;) {
+        idx = va_arg(valist, Pt::uint32_t);
+        if(idx > 32) break;
+        if(idx) result |= ( (Pt::uint32_t) 1 << (idx - 1) );
+    }
+
+    va_end(valist);
+
+    return result;
+}
+
+static inline bool CONFIG_BIT_ENABLED(Pt::uint32_t configBits, Pt::uint32_t idx)
+{
+    if(idx < 1 || idx > 32) return false;
+
+    return !!( configBits & ( (Pt::uint32_t) 1 << (idx - 1) ) );
+}
+
+
+//
 // Main program
 //
+
 int main(int argc, char* args[])
 {
     // Benchmark some mathematical functions only
@@ -589,7 +622,8 @@ int main(int argc, char* args[])
     // Svg reader
     if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && (TEST_SOURCECOPY || TEST_SOURCEOVER) && TEST_SVG_READER) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
-        testSvgReader1("SVG Reader - ImagePainter2 - Test #1", image, *painter2);
+        if(CONFIG_BIT_ENABLED(TEST_SVG_READER, 1)) testSvgReader1("SVG Reader - ImagePainter2 - Test #1", image, *painter2);
+        if(CONFIG_BIT_ENABLED(TEST_SVG_READER, 2)) testSvgReader2("SVG Reader - ImagePainter2 - Test #2", image, *painter2);
     }
 
     // Create the brushes used for benchmarking

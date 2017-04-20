@@ -70,3 +70,19 @@ static void testSvgReader1(const char* title, Image& image, Painter& painter)
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }
+
+static void testSvgReader2(const char* title, Image& image, Painter& painter)
+{
+    resetImage(image);
+
+    ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
+    if(!ip2) return;
+
+    //PointF svgImgTopLeft;
+    //Size   svgImgSize(180, 180);
+
+    //svgImgTopLeft.set(200 * 0 + 10, 200 * 0 + 10);
+    //renderSVG(*ip2, svgImgTopLeft, svgImgSize, "line1-dtd-nznv-direct.svg");
+
+    sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
+}
