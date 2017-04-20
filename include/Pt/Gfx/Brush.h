@@ -69,10 +69,12 @@ class PT_GFX_API Brush
 
         enum TextureRotationMode
         {
-            Block,
-            BlockFullFit,
-            Bilinear,
-            BilinearFullFit
+            BlockCrop,
+            BlockNoCrop,
+            BlockFit,
+            BilinearCrop,
+            BilinearNoCrop,
+            BilinearFit
         };
 
         typedef ImageView::ConstPixel ConstPixel;
@@ -84,7 +86,7 @@ class PT_GFX_API Brush
 
         Brush(const Color& color);
 
-        Brush(const Image& texture, Pt::int32_t offsetX = 0, Pt::int32_t offsetY = 0, float rotDeg = 0.0f, const Color& colorFill = Color::fromRgb8(0, 0, 0, 255), TextureRotationMode mode = BlockFullFit);
+        Brush(const Image& texture, Pt::int32_t offsetX = 0, Pt::int32_t offsetY = 0, float rotDeg = 0.0f, const Color& colorFill = Color::fromRgb8(0, 0, 0, 255), TextureRotationMode mode = BlockFit);
 
         Brush(const Color& from, const Color& to, GradientDirection g, float rotDeg = 0.0f, float scale = 1.0f, Pt::int32_t ofsX = 0, Pt::int32_t ofsY = 0);
 
@@ -104,9 +106,9 @@ class PT_GFX_API Brush
 
         const Color& gradientColor() const;
 
-        void setTexture(const Image& texture, Pt::int32_t offsetX = 0, Pt::int32_t offsetY = 0, float rotDeg = 0.0f, const Color& colorFill = Color::fromRgb8(0, 0, 0, 255), TextureRotationMode mode = BlockFullFit);
+        void setTexture(const Image& texture, Pt::int32_t offsetX = 0, Pt::int32_t offsetY = 0, float rotDeg = 0.0f, const Color& colorFill = Color::fromRgb8(0, 0, 0, 255), TextureRotationMode mode = BlockFit);
 
-        void setTextureRotation(float rotDeg = 0.0f, const Color& colorFill = Color::fromRgb8(0, 0, 0, 255), TextureRotationMode mode = BlockFullFit);
+        void setTextureRotation(float rotDeg = 0.0f, const Color& colorFill = Color::fromRgb8(0, 0, 0, 255), TextureRotationMode mode = BlockFit);
 
         const Image& texture() const;
 

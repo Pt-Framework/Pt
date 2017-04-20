@@ -119,6 +119,8 @@ class PT_GFX_API ImageOperation2
 template <typename ImageT>
 inline void ImageOperation2::blockScale(const ImageT& from, ImageT& to)
 {
+    // ### TODO: Call the generic implementation function, if possible !!! ###
+
     if(from.width() <= 0 || from.height() <= 0 || to.width() <= 0 || to.height() <= 0)
         throw std::runtime_error("invalid 'from' and/or 'to' image size");
 
@@ -134,6 +136,8 @@ inline void ImageOperation2::blockScale(const ImageT& from, ImageT& to)
 template <typename ImageT>
 inline void ImageOperation2::bilinearScale(const ImageT& from, ImageT& to)
 {
+    // ### TODO: Call the generic implementation function, if possible !!! ###
+
     if(from.width() <= 0 || from.height() <= 0 || to.width() <= 0 || to.height() <= 0)
         throw std::runtime_error("invalid 'from' and/or 'to' image size");
 
@@ -154,6 +158,8 @@ inline void ImageOperation2::bilinearScale(const ImageT& from, ImageT& to)
 template <typename ImageT>
 inline void ImageOperation2::blockRotate(const ImageT& from, ImageT& to, float deg, const Color& cfill, ImageRotateMode irm)
 {
+    // ### TODO: Call the generic implementation function, if possible !!! ###
+
     if(from.width() <= 0 || from.height() <= 0 || to.width() <= 0 || to.height() <= 0)
         throw std::runtime_error("invalid 'from' and/or 'to' image size");
 
@@ -170,6 +176,8 @@ inline void ImageOperation2::blockRotate(const ImageT& from, ImageT& to, float d
 template <typename ImageT>
 inline void ImageOperation2::bilinearRotate(const ImageT& from, ImageT& to, float deg, const Color& cfill, ImageRotateMode irm)
 {
+    // ### TODO: Call the generic implementation function, if possible !!! ###
+
     if(from.width() <= 0 || from.height() <= 0 || to.width() <= 0 || to.height() <= 0)
         throw std::runtime_error("invalid 'from' and/or 'to' image size");
 

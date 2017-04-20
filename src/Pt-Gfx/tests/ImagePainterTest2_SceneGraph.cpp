@@ -11,12 +11,12 @@ static void testSceneGraph(const char* title, Image& image, Painter& painter)
     Image scaledTexH( textureWithWhiteBackground.format(), Size(textureWithWhiteBackground.width() / 2, textureWithWhiteBackground.height() / 2) );
     Image scaledTexQ( textureWithWhiteBackground.format(), Size(textureWithWhiteBackground.width() / 4, textureWithWhiteBackground.height() / 4) );
 
-    bilinearScaleImage(textureWithWhiteBackground, scaledTexH);
-    bilinearScaleImage(scaledTexH,                 scaledTexQ);
+    ImageOperation2::bilinearScale(textureWithWhiteBackground, scaledTexH);
+    ImageOperation2::bilinearScale(scaledTexH,                 scaledTexQ);
 
     //Image scaledTexO( textureWithWhiteBackground.format(), Size(textureWithWhiteBackground.width() / 8, textureWithWhiteBackground.height() / 8) );
-    //bilinearScaleImage(scaledTexQ, scaledTexO                );
-    //bilinearScaleImage(scaledTexO, scaledTexQ                );
+    //ImageOperation2::bilinearScale(scaledTexQ, scaledTexO);
+    //ImageOperation2::bilinearScale(scaledTexO, scaledTexQ);
 
     // Generate a new path
     Path pathPoly4;
@@ -63,7 +63,7 @@ static void testSceneGraph(const char* title, Image& image, Painter& painter)
     SGNodeRectangle* csgn3 = &psgn.addChild( new SGNodeRectangle( SGNode::RenderFill, RectF(PointF(0, 0), SizeF(80, 80)) ) );
                      csgn3->transform().translate(0, 150);
                      csgn3->setBrush( scaledTexQ );
-                     csgn3->setTextureRotationParameters( Color::fromRgb8(0, 255, 255, 255), Brush::Bilinear );
+                     csgn3->setTextureRotationParameters( Color::fromRgb8(0, 255, 255, 255), Brush::BilinearCrop );
 
         // 3rd-child's 1st child
         SGNodeRectangle* csgn3_1 = &csgn3->addChild( new SGNodeRectangle( SGNode::RenderFill, RectF(PointF(0, 0), SizeF(80, 80)), 10 ) );

@@ -223,7 +223,7 @@ class PT_GFX_API SGNode {
             return _nodeData->brush;
         }
 
-        inline void setTextureRotationParameters(const Color& colorFill = Color::fromRgb8(0, 0, 0, 255), Brush::TextureRotationMode mode = Brush::BlockFullFit)
+        inline void setTextureRotationParameters(const Color& colorFill = Color::fromRgb8(0, 0, 0, 255), Brush::TextureRotationMode mode = Brush::BlockFit)
         {
             if(_nodeDataRO) throw std::logic_error("the node data is read-only in this instance");
 

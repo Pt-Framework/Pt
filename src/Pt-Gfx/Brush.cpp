@@ -29,7 +29,7 @@
 #include <stdexcept>
 
 #include <Pt/Gfx/ImagePainter.h>
-#include <Pt/Gfx/ImageOperation.h>
+#include <Pt/Gfx/ImageOperation2.h>
 
 
 namespace Pt {
@@ -390,36 +390,28 @@ void BrushData::setTextureRotation(float rotDeg, const Color& colorFill, Brush::
 
     // Perform rotation
     switch(mode) {
-        case Brush::Block:
-            blockRotateImage(
-                _textureOrig.begin(), _textureOrig.width(), _textureOrig.height(),
-                _texture    .begin(), _texture    .width(), _texture    .height(),
-                _rotDeg,              colorFill,            false
-            );
+        case Brush::BlockCrop:
+            ImageOperation2::blockRotate(_textureOrig, _texture, _rotDeg, colorFill, ImageOperation2::RotateCrop);
             break;
 
-        case Brush::BlockFullFit:
-            blockRotateImage(
-                _textureOrig.begin(), _textureOrig.width(), _textureOrig.height(),
-                _texture    .begin(), _texture    .width(), _texture    .height(),
-                _rotDeg,              colorFill,            true
-            );
+        case Brush::BlockNoCrop:
+            ImageOperation2::blockRotate(_textureOrig, _texture, _rotDeg, colorFill, ImageOperation2::RotateNoCrop);
             break;
 
-        case Brush::Bilinear:
-            bilinearRotateImage(
-                _textureOrig.begin(), _textureOrig.width(), _textureOrig.height(),
-                _texture    .begin(), _texture    .width(), _texture    .height(),
-                _rotDeg,              colorFill,            false
-            );
+        case Brush::BlockFit:
+            ImageOperation2::blockRotate(_textureOrig, _texture, _rotDeg, colorFill, ImageOperation2::RotateFit);
             break;
 
-        case Brush::BilinearFullFit:
-            bilinearRotateImage(
-                _textureOrig.begin(), _textureOrig.width(), _textureOrig.height(),
-                _texture    .begin(), _texture    .width(), _texture    .height(),
-                _rotDeg,              colorFill,            true
-            );
+        case Brush::BilinearCrop:
+            ImageOperation2::bilinearRotate(_textureOrig, _texture, _rotDeg, colorFill, ImageOperation2::RotateCrop);
+            break;
+
+        case Brush::BilinearNoCrop:
+            ImageOperation2::bilinearRotate(_textureOrig, _texture, _rotDeg, colorFill, ImageOperation2::RotateNoCrop);
+            break;
+
+        case Brush::BilinearFit:
+            ImageOperation2::bilinearRotate(_textureOrig, _texture, _rotDeg, colorFill, ImageOperation2::RotateFit);
             break;
     }
 }
