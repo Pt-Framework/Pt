@@ -96,7 +96,7 @@ class PT_GFX_API SGNodePath : public SGNode {
     protected:
         virtual void drawImpl(ImagePainter2& painter, const TransformT& transform) const;
 
-    protected:
+    private:
         Path  _path;
         float _smoothness;
 };

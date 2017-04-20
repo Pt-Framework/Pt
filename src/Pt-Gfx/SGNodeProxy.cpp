@@ -38,15 +38,22 @@ namespace Gfx {
 SGNodeProxy::~SGNodeProxy()
 {}
 
-void SGNodeProxy::drawImpl(ImagePainter2& painter, const TransformT& transform) const
+void SGNodeProxy::checkForCircularChain(const SGNode* parent) const
 {
+    // Call the base implementation
+    SGNode::checkForCircularChain(parent);
+
     // Check for circular/recursive proxy chain
-    const SGNode* p = _parent;
+    const SGNode* p = parent;
+
     while(p) {
         if(p == &_target) throw std::logic_error("circular/recursive proxy chain detected");
         p = p->_parent;
     }
+}
 
+void SGNodeProxy::drawImpl(ImagePainter2& painter, const TransformT& transform) const
+{
     // Call the target's implementation
     _target.drawImpl(painter, transform);
 }

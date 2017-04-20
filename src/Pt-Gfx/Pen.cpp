@@ -148,7 +148,12 @@ bool Pen::isNull() const
 { return size() == 0; }
 
 bool Pen::operator==(const Pen& pen) const
-{ return *_penData == *pen._penData; }
+{
+    if(_penData.get() == pen._penData.get()) return true;
+
+    return *_penData == *pen._penData;
+
+}
 
 
 } // namespace

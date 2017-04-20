@@ -86,7 +86,7 @@ class PT_GFX_API SGNodeArc : public SGNodePath {
         inline const ArcMode& arcMode() const
         { return _arcMode; }
 
-    protected:
+    private:
         PointT  _center;
         SizeT   _radius;
         ValueT  _degBegin;

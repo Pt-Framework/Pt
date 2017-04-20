@@ -90,7 +90,7 @@ class PT_GFX_API SGNodeLine : public SGNode {
     protected:
         virtual void drawImpl(ImagePainter2& painter, const TransformT& transform) const;
 
-    protected:
+    private:
         PointT _from;
         PointT _to;
 };

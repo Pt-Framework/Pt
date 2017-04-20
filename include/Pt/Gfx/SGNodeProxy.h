@@ -52,9 +52,13 @@ class PT_GFX_API SGNodeProxy : public SGNode {
         virtual ~SGNodeProxy();
 
     protected:
+        virtual void checkForCircularChain(const SGNode* parent) const;
+
         virtual void drawImpl(ImagePainter2& painter, const TransformT& transform) const;
 
-    protected:
+    private:
+        friend class SGNode;
+
         const SGNode& _target;
 };
 

@@ -120,9 +120,9 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_PATH_CLIPPING                 0 // (including path-based text)
 #define TEST_DRAW_EXTRA                         0 // (including path-based n-bezier)
 
-#define TEST_IMAGE_OPERATION                    0
+#define TEST_IMAGE_OPERATION                    1
 #define TEST_SCENE_GRAPH                        0
-#define TEST_SVG_READER                         DEFINE_CONFIG_BITS(1, 2, 255) // (multi-test)
+#define TEST_SVG_READER                         DEFINE_CONFIG_BITS(0, 1, 2) // (multi-test)
 
 #define TEST_COMPARE_WITH_OLD_PAINTER           0 // (for some shapes only)
 
@@ -214,8 +214,11 @@ static const char* sfileDirXPrefix = "";
 // Helper function to select which multi-test should be run
 //
 
-static inline Pt::uint32_t DEFINE_CONFIG_BITS(Pt::uint8_t idx,...)
+static inline Pt::uint32_t DEFINE_CONFIG_BITS(Pt::uint8_t numIdx, Pt::uint8_t idx,...)
 {
+    if(!numIdx) return 0;
+    --numIdx;
+
     Pt::uint32_t result = 0;
 
     if(idx) result |= ( (Pt::uint32_t) 1 << (idx - 1) );
@@ -223,10 +226,10 @@ static inline Pt::uint32_t DEFINE_CONFIG_BITS(Pt::uint8_t idx,...)
     va_list valist;
     va_start(valist, idx);
 
-    for(;;) {
+    for(Pt::uint8_t i = 0; i < numIdx; ++i) {
         idx = va_arg(valist, Pt::uint32_t);
-        if(idx > 32) break;
-        if(idx) result |= ( (Pt::uint32_t) 1 << (idx - 1) );
+        if(idx < 1 || idx > 32) continue;
+        result |= ( (Pt::uint32_t) 1 << (idx - 1) );
     }
 
     va_end(valist);

@@ -77,8 +77,7 @@ class PT_GFX_API SGNodeRectangle : public SGNodePath {
         inline float radius() const
         { return _radius; }
 
-
-    protected:
+    private:
         RectT _rect;
         float _radius;
 };

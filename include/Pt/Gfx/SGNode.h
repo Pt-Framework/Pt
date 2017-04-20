@@ -144,6 +144,8 @@ class PT_GFX_API SGNode {
         {
             if(_nodeDataRO) throw std::logic_error("the node data is read-only in this instance");
 
+            child_->checkForCircularChain(this);
+
             SGNode* child = child_;
             _nodeData->children.push_back(child);
 
@@ -304,6 +306,8 @@ class PT_GFX_API SGNode {
         { return _nodeData->children.rend(); }
 
     protected:
+        virtual void checkForCircularChain(const SGNode* parent) const;
+
         virtual void drawImpl(ImagePainter2& painter, const TransformT& transform) const;
 
     private:

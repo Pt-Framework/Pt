@@ -185,6 +185,8 @@ bool Brush::isNull() const
 
 bool Brush::operator==(const Brush& brush) const
 {
+    if(_brushData.get() == brush._brushData.get()) return true;
+
     if(_brushData->isNull() != brush._brushData->isNull()) return false;
 
     if(_brushData->fillStyle() == Brush::Texture) {
