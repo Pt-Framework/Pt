@@ -113,15 +113,15 @@ x86_64 (i5-4460; 64-Bit Mode)
                                                    ------ --------
 Image scaling    (block    - generic )           =    174
 Image scaling    (block    - argb32  )           =     39 ( 0.224)
-Image scaling  4 (block              )           =     10 ( 0.057)
-Image scaling  4 (bilinear           )           =    125 ( 0.718)
+Image scaling  2 (block              )           =     10 ( 0.057)
+Image scaling  2 (bilinear           )           =    125 ( 0.718)
 
-Image rotation 4 (block    - crop    )           =     40
-Image rotation 4 (block    - no-crop )           =     41 ( 1.025)
-Image rotation 4 (block    - fit     )           =     40 ( 1.000)
-Image rotation 4 (bilinear - crop    )           =    206 ( 5.150)
-Image rotation 4 (bilinear - no-crop )           =    208 ( 5.200)
-Image rotation 4 (bilinear - fit     )           =    208 ( 5.200)
+Image rotation 2 (block    - crop    )           =     40
+Image rotation 2 (block    - no-crop )           =     41 ( 1.025)
+Image rotation 2 (block    - fit     )           =     40 ( 1.000)
+Image rotation 2 (bilinear - crop    )           =    206 ( 5.150)
+Image rotation 2 (bilinear - no-crop )           =    208 ( 5.200)
+Image rotation 2 (bilinear - fit     )           =    208 ( 5.200)
 */
 
 /*
@@ -130,13 +130,13 @@ Arm (v7l; A53; BCM2709; RaspberryPi 3; 32-bit Mode)
 ---------------------------------------------------
 Image scaling    (block    - generic )           =   2459
 Image scaling    (block    - argb32  )           =    495 ( 0.201)
-Image scaling  4 (block              )           =    166 ( 0.068)
-Image scaling  4 (bilinear           )           =   1931 ( 0.785)
+Image scaling  2 (block              )           =    166 ( 0.068)
+Image scaling  2 (bilinear           )           =   1931 ( 0.785)
 
-Image rotation 4 (block    - crop    )           =    693
-Image rotation 4 (block    - no-crop )           =    745 ( 1.075)
-Image rotation 4 (block    - fit     )           =    702 ( 1.013)
-Image rotation 4 (bilinear - crop    )           =   2971 ( 4.287)
-Image rotation 4 (bilinear - no-crop )           =   2811 ( 4.056)
-Image rotation 4 (bilinear - fit     )           =   2976 ( 4.294)
+Image rotation 2 (block    - crop    )           =    693
+Image rotation 2 (block    - no-crop )           =    745 ( 1.075)
+Image rotation 2 (block    - fit     )           =    702 ( 1.013)
+Image rotation 2 (bilinear - crop    )           =   2971 ( 4.287)
+Image rotation 2 (bilinear - no-crop )           =   2811 ( 4.056)
+Image rotation 2 (bilinear - fit     )           =   2976 ( 4.294)
 */

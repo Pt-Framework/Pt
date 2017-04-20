@@ -13,7 +13,7 @@ static void testImageOperation(const char* title, Image& image, Painter& painter
 
     painter.drawImage(PointF(x, y), textureWithWhiteBackground);
     painter.drawText( PointF(x, y + textureWithWhiteBackground.height() + 20), "Original (Reference) Image" );
-    x += textureWithWhiteBackground.width() + 50;
+    x += textureWithWhiteBackground.width() + 60;
 
     // Scaled and rotated image
     Image srImage( textureWithWhiteBackground.format(), Size(120, 120) );
@@ -22,49 +22,49 @@ static void testImageOperation(const char* title, Image& image, Painter& painter
     ImageOperation2::blockScale(textureWithWhiteBackground, srImage);
     painter.drawImage(PointF(x, y), srImage);
     painter.drawText( PointF(x, y + srImage.height() + 20), "Block Scaling" );
-    x += srImage.width() + 50;
+    x += srImage.width() + 60;
 
     // Bilinear scale
     ImageOperation2::bilinearScale(textureWithWhiteBackground, srImage);
     painter.drawImage(PointF(x, y), srImage);
     painter.drawText( PointF(x, y + srImage.height() + 20), "Bilinear Scaling" );
 
-    x  = 20 + textureWithWhiteBackground.width() + 50;
-    y += srImage.height() + 50;
+    x  = 20 + textureWithWhiteBackground.width() + 60;
+    y += srImage.height() + 60;
 
     // Block rotate - crop
     ImageOperation2::blockRotate(textureWithWhiteBackground, srImage, 30, Color::fromRgb8(0, 127, 127, 255), ImageOperation2::RotateCrop);
     painter.drawImage(PointF(x, y), srImage);
     painter.drawText( PointF(x, y + srImage.height() + 20), "Block Rotate (Crop)" );
-    x += srImage.width() + 50;
+    x += srImage.width() + 60;
 
     // Block rotate - no-crop
     ImageOperation2::blockRotate(textureWithWhiteBackground, srImage, 30, Color::fromRgb8(0, 127, 127, 255), ImageOperation2::RotateNoCrop);
     painter.drawImage(PointF(x, y), srImage);
     painter.drawText( PointF(x, y + srImage.height() + 20), "Block Rotate (No-Crop)" );
 
-    x += srImage.width() + 50;
+    x += srImage.width() + 60;
 
     // Block rotate -fit
     ImageOperation2::blockRotate(textureWithWhiteBackground, srImage, 30, Color::fromRgb8(0, 127, 127, 255), ImageOperation2::RotateFit);
     painter.drawImage(PointF(x, y), srImage);
     painter.drawText( PointF(x, y + srImage.height() + 20), "Block Rotate (Fit)" );
 
-    x  = 20 + textureWithWhiteBackground.width() + 50;
-    y += srImage.height() + 50;
+    x  = 20 + textureWithWhiteBackground.width() + 60;
+    y += srImage.height() + 60;
 
     // Bilinear rotate - crop
     ImageOperation2::bilinearRotate(textureWithWhiteBackground, srImage, 30, Color::fromRgb8(0, 127, 127, 255), ImageOperation2::RotateCrop);
     painter.drawImage(PointF(x, y), srImage);
     painter.drawText( PointF(x, y + srImage.height() + 20), "Bilinear Rotate (Crop)" );
-    x += srImage.width() + 50;
+    x += srImage.width() + 60;
 
     // Bilinear rotate - no-crop
     ImageOperation2::bilinearRotate(textureWithWhiteBackground, srImage, 30, Color::fromRgb8(0, 127, 127, 255), ImageOperation2::RotateNoCrop);
     painter.drawImage(PointF(x, y), srImage);
     painter.drawText( PointF(x, y + srImage.height() + 20), "Bilinear Rotate (No-Crop)" );
 
-    x += srImage.width() + 50;
+    x += srImage.width() + 60;
 
     // Bilinear rotate - fit
     ImageOperation2::bilinearRotate(textureWithWhiteBackground, srImage, 30, Color::fromRgb8(0, 127, 127, 255), ImageOperation2::RotateFit);
