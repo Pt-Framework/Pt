@@ -81,13 +81,13 @@ class PT_GFX_API ImageOperation2
         //
 
         static void blockScale32Bpp(
-            const Pt::uint32_t* src, Pt::ssize_t srcS, Pt::ssize_t srcW, Pt::ssize_t srcH,
-                  Pt::uint32_t* dst, Pt::ssize_t dstS, Pt::ssize_t dstW, Pt::ssize_t dstH
+            const Pt::uint8_t* src, Pt::ssize_t srcS, Pt::ssize_t srcW, Pt::ssize_t srcH,
+                  Pt::uint8_t* dst, Pt::ssize_t dstS, Pt::ssize_t dstW, Pt::ssize_t dstH
         );
 
         static void bilinearScale32Bpp(
-            const Pt::uint32_t* src, Pt::ssize_t srcS, Pt::ssize_t srcW, Pt::ssize_t srcH,
-                  Pt::uint32_t* dst, Pt::ssize_t dstS, Pt::ssize_t dstW, Pt::ssize_t dstH
+            const Pt::uint8_t* src, Pt::ssize_t srcS, Pt::ssize_t srcW, Pt::ssize_t srcH,
+                  Pt::uint8_t* dst, Pt::ssize_t dstS, Pt::ssize_t dstW, Pt::ssize_t dstH
         );
 
         //
@@ -95,16 +95,16 @@ class PT_GFX_API ImageOperation2
         //
 
         static void blockRotate32Bpp(
-            const Pt::uint32_t* src, Pt::ssize_t srcS, Pt::ssize_t srcW, Pt::ssize_t srcH,
-                  Pt::uint32_t* dst, Pt::ssize_t dstS, Pt::ssize_t dstW, Pt::ssize_t dstH,
+            const Pt::uint8_t* src, Pt::ssize_t srcS, Pt::ssize_t srcW, Pt::ssize_t srcH,
+                  Pt::uint8_t* dst, Pt::ssize_t dstS, Pt::ssize_t dstW, Pt::ssize_t dstH,
             float               deg,
             const Color&        cfill,
             ImageRotateMode     irm
         );
 
         static void bilinearRotate32Bpp(
-            const Pt::uint32_t* src, Pt::ssize_t srcS, Pt::ssize_t srcW, Pt::ssize_t srcH,
-                  Pt::uint32_t* dst, Pt::ssize_t dstS, Pt::ssize_t dstW, Pt::ssize_t dstH,
+            const Pt::uint8_t* src, Pt::ssize_t srcS, Pt::ssize_t srcW, Pt::ssize_t srcH,
+                  Pt::uint8_t* dst, Pt::ssize_t dstS, Pt::ssize_t dstW, Pt::ssize_t dstH,
             float               deg,
             const Color&        cfill,
             ImageRotateMode     irm
@@ -128,8 +128,8 @@ inline void ImageOperation2::blockScale(const ImageT& from, ImageT& to)
         throw std::runtime_error("block scale for images with pixel stride != 4 is not supported yet");
 
     blockScale32Bpp(
-        reinterpret_cast<const Pt::uint32_t*>(from.data()), from.view().stride(), from.width(), from.height(),
-        reinterpret_cast<      Pt::uint32_t*>(to  .data()), to  .view().stride(), to  .width(), to  .height()
+        from.data(), from.view().stride(), from.width(), from.height(),
+        to  .data(), to  .view().stride(), to  .width(), to  .height()
     );
 }
 
@@ -145,8 +145,8 @@ inline void ImageOperation2::bilinearScale(const ImageT& from, ImageT& to)
         throw std::runtime_error("bilinear scale for images with pixel stride != 4 is not supported yet");
 
     bilinearScale32Bpp(
-        reinterpret_cast<const Pt::uint32_t*>(from.data()), from.view().stride(), from.width(), from.height(),
-        reinterpret_cast<      Pt::uint32_t*>(to  .data()), to  .view().stride(), to  .width(), to  .height()
+        from.data(), from.view().stride(), from.width(), from.height(),
+        to  .data(), to  .view().stride(), to  .width(), to  .height()
     );
 }
 
@@ -167,8 +167,8 @@ inline void ImageOperation2::blockRotate(const ImageT& from, ImageT& to, float d
         throw std::runtime_error("block rotate for images with pixel stride != 4 is not supported yet");
 
     blockRotate32Bpp(
-        reinterpret_cast<const Pt::uint32_t*>(from.data()), from.view().stride(), from.width(), from.height(),
-        reinterpret_cast<      Pt::uint32_t*>(to  .data()), to  .view().stride(), to  .width(), to  .height(),
+        from.data(), from.view().stride(), from.width(), from.height(),
+        to  .data(), to  .view().stride(), to  .width(), to  .height(),
         deg, cfill, irm
     );
 }
@@ -185,8 +185,8 @@ inline void ImageOperation2::bilinearRotate(const ImageT& from, ImageT& to, floa
         throw std::runtime_error("bilinear rotate for images with pixel stride != 4 is not supported yet");
 
     bilinearRotate32Bpp(
-        reinterpret_cast<const Pt::uint32_t*>(from.data()), from.view().stride(), from.width(), from.height(),
-        reinterpret_cast<      Pt::uint32_t*>(to  .data()), to  .view().stride(), to  .width(), to  .height(),
+        from.data(), from.view().stride(), from.width(), from.height(),
+        to  .data(), to  .view().stride(), to  .width(), to  .height(),
         deg, cfill, irm
     );
 }

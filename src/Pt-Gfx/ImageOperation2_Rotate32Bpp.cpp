@@ -98,10 +98,10 @@ static inline Pt::uint32_t bsMixPixel32Bpp_implFP(const Pt::uint8_t* img, Pt::ss
 
 template <bool bilinear, ImageOperation2::ImageRotateMode irm>
 static inline void bblRotate4_implFP(
-    const Pt::uint32_t* src_, Pt::ssize_t srcS, Pt::ssize_t srcW, Pt::ssize_t srcH,
-          Pt::uint32_t* dst_, Pt::ssize_t dstS, Pt::ssize_t dstW, Pt::ssize_t dstH,
-          float         deg,
-          const Color&  cfill
+    const Pt::uint8_t* src, Pt::ssize_t srcS, Pt::ssize_t srcW, Pt::ssize_t srcH,
+          Pt::uint8_t* dst, Pt::ssize_t dstS, Pt::ssize_t dstW, Pt::ssize_t dstH,
+          float        deg,
+          const Color& cfill
 )
 {
     // Calculate the filler color
@@ -109,10 +109,6 @@ static inline void bblRotate4_implFP(
                              ( Pt::uint32_t(cfill.red  () & 0xFF00) <<  8 ) |
                                Pt::uint32_t(cfill.green() & 0xFF00)         |
                              ( Pt::uint32_t(cfill.blue ()         ) >>  8 );
-
-    // Convert the pointer types
-    const Pt::uint8_t* src = reinterpret_cast<const Pt::uint8_t*>(src_);
-          Pt::uint8_t* dst = reinterpret_cast<      Pt::uint8_t*>(dst_);
 
     // Calculate the increment factors
     const Pt::int32_t FincX = 65536 * srcW / dstW;
@@ -160,9 +156,8 @@ static inline void bblRotate4_implFP(
             const Pt::int32_t FrotY = ( (-Fs * FsrcX + Fc * FsrcY) >> 1 ) + FmidY;
             // Bilinear rotation
             if(bilinear) {
-                 dst_   = reinterpret_cast<Pt::uint32_t*>(dst);
-                *dst_++ = bsMixPixel32Bpp_implFP(src, srcS, srcW, srcH, FrotX, FrotY, fil);
-                 dst    = reinterpret_cast<Pt::uint8_t*>(dst_);
+                *reinterpret_cast<Pt::uint32_t*>(dst) = bsMixPixel32Bpp_implFP(src, srcS, srcW, srcH, FrotX, FrotY, fil);
+                dst += 4;
             }
             // Block rotation
             else {
@@ -171,17 +166,14 @@ static inline void bblRotate4_implFP(
                 const Pt::int32_t getY = (FrotY + 32768) >> 16;
                 // Check if the any of the coordinates is outside the image
                 if(getX < 0 || getY < 0 || getX >= srcW || getY >= srcH) {
-                     dst_   = reinterpret_cast<      Pt::uint32_t*>(dst);
-                    *dst_++ = fil;
-                     dst    = reinterpret_cast<      Pt::uint8_t* >(dst_);
+                    *reinterpret_cast<Pt::uint32_t*>(dst) = fil;
+                    dst += 4;
                 }
                 // The coordinates are inside the image
                 else {
                     const Pt::uint32_t offset = getY * srcS + getX * 4;
-                     src_   = reinterpret_cast<const Pt::uint32_t*>(src + offset);
-                     dst_   = reinterpret_cast<      Pt::uint32_t*>(dst);
-                    *dst_++ = *src_;
-                     dst    = reinterpret_cast<      Pt::uint8_t* >(dst_);
+                    *reinterpret_cast<Pt::uint32_t*>(dst) = *reinterpret_cast<const Pt::uint32_t*>(src + offset);
+                    dst += 4;
                 }
             }
             // Increment the iterator
@@ -200,11 +192,11 @@ static inline void bblRotate4_implFP(
 // ======================================================================================
 
 void ImageOperation2::blockRotate32Bpp(
-    const Pt::uint32_t* src, Pt::ssize_t srcS, Pt::ssize_t srcW, Pt::ssize_t srcH,
-          Pt::uint32_t* dst, Pt::ssize_t dstS, Pt::ssize_t dstW, Pt::ssize_t dstH,
-    float               deg,
-    const Color&        cfill,
-    ImageRotateMode     irm
+    const Pt::uint8_t* src, Pt::ssize_t srcS, Pt::ssize_t srcW, Pt::ssize_t srcH,
+          Pt::uint8_t* dst, Pt::ssize_t dstS, Pt::ssize_t dstW, Pt::ssize_t dstH,
+    float              deg,
+    const Color&       cfill,
+    ImageRotateMode    irm
 )
 {
     switch(irm) {
@@ -233,11 +225,11 @@ void ImageOperation2::blockRotate32Bpp(
 }
 
 void ImageOperation2::bilinearRotate32Bpp(
-    const Pt::uint32_t* src, Pt::ssize_t srcS, Pt::ssize_t srcW, Pt::ssize_t srcH,
-          Pt::uint32_t* dst, Pt::ssize_t dstS, Pt::ssize_t dstW, Pt::ssize_t dstH,
-    float               deg,
-    const Color&        cfill,
-    ImageRotateMode     irm
+    const Pt::uint8_t* src, Pt::ssize_t srcS, Pt::ssize_t srcW, Pt::ssize_t srcH,
+          Pt::uint8_t* dst, Pt::ssize_t dstS, Pt::ssize_t dstW, Pt::ssize_t dstH,
+    float              deg,
+    const Color&       cfill,
+    ImageRotateMode    irm
 )
 {
     switch(irm) {

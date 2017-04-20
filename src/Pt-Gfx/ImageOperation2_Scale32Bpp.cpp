@@ -69,12 +69,12 @@ static inline Pt::uint32_t bsGetPixel32Bpp_implSIMD(const Pt::uint8_t* img, Pt::
     }
 
     // Pointer to the rows
-    const Pt::uint32_t* r0 = reinterpret_cast<const Pt::uint32_t*>(img + (py + 0) * imgS + px * 4);
-    const Pt::uint32_t* r1 = reinterpret_cast<const Pt::uint32_t*>(img + (py + 1) * imgS + px * 4);
+    const __m128i* r0 = reinterpret_cast<const __m128i*>(img + (py + 0) * imgS + px * 4);
+    const __m128i* r1 = reinterpret_cast<const __m128i*>(img + (py + 1) * imgS + px * 4);
 
     // Load the four neighboring pixels
-    const __m128i p12      = _mm_loadl_epi64    ( (const __m128i*) r0                         );
-    const __m128i p34      = _mm_loadl_epi64    ( (const __m128i*) r1                         );
+    const __m128i p12      = _mm_loadl_epi64   ( r0                                          );
+    const __m128i p34      = _mm_loadl_epi64   ( r1                                          );
 
 #if defined(PT_GFX_USE_SSE4P1)
 
@@ -228,14 +228,10 @@ static inline Pt::uint32_t bsGetPixel32Bpp_implFP(const Pt::uint8_t* img, Pt::ss
 
 template <bool bilinear>
 static inline void bblScale32Bpp_implFP(
-    const Pt::uint32_t* src_, Pt::ssize_t srcS, Pt::ssize_t srcW, Pt::ssize_t srcH,
-          Pt::uint32_t* dst_, Pt::ssize_t dstS, Pt::ssize_t dstW, Pt::ssize_t dstH
+    const Pt::uint8_t* src, Pt::ssize_t srcS, Pt::ssize_t srcW, Pt::ssize_t srcH,
+          Pt::uint8_t* dst, Pt::ssize_t dstS, Pt::ssize_t dstW, Pt::ssize_t dstH
 )
 {
-    // Convert the pointer types
-    const Pt::uint8_t* src = reinterpret_cast<const Pt::uint8_t*>(src_);
-          Pt::uint8_t* dst = reinterpret_cast<      Pt::uint8_t*>(dst_);
-
     // Calculate the increment factors
     const Pt::uint32_t FincX = 65536 * srcW / dstW;
     const Pt::uint32_t FincY = 65536 * srcH / dstH;
@@ -251,18 +247,15 @@ static inline void bblScale32Bpp_implFP(
 #if !defined(PT_GFX_USE_SSE4P1) && !defined(PT_GFX_USE_SSE2)
             // Bilinear scaling (non SIMD)
             if(bilinear) {
-                 dst_   = reinterpret_cast<Pt::uint32_t*>(dst);
-                *dst_++ = bsGetPixel32Bpp_implFP(src, srcS, srcW, srcH, FitrX, FitrY);
-                 dst    = reinterpret_cast<Pt::uint8_t*>(dst_);
+                *reinterpret_cast<Pt::uint32_t*>(dst) = bsGetPixel32Bpp_implFP(src, srcS, srcW, srcH, FitrX, FitrY);
+                dst += 4;
             }
             // Block scaling
             else {
 #endif
                 const Pt::uint32_t offset = FsrcY * srcS + ( (FitrX + 32768) >> 16 ) * 4;
-                 src_   = reinterpret_cast<const Pt::uint32_t*>(src + offset);
-                 dst_   = reinterpret_cast<      Pt::uint32_t*>(dst);
-                *dst_++ = *src_;
-                 dst    = reinterpret_cast<      Pt::uint8_t* >(dst_);
+                *reinterpret_cast<Pt::uint32_t*>(dst) = *reinterpret_cast<const Pt::uint32_t*>(src + offset);
+                dst += 4;
 #if !defined(PT_GFX_USE_SSE4P1) && !defined(PT_GFX_USE_SSE2)
             }
 #endif
@@ -282,8 +275,8 @@ static inline void bblScale32Bpp_implFP(
 // ======================================================================================
 
 void ImageOperation2::blockScale32Bpp(
-    const Pt::uint32_t* src, Pt::ssize_t srcS, Pt::ssize_t srcW, Pt::ssize_t srcH,
-          Pt::uint32_t* dst, Pt::ssize_t dstS, Pt::ssize_t dstW, Pt::ssize_t dstH
+    const Pt::uint8_t* src, Pt::ssize_t srcS, Pt::ssize_t srcW, Pt::ssize_t srcH,
+          Pt::uint8_t* dst, Pt::ssize_t dstS, Pt::ssize_t dstW, Pt::ssize_t dstH
 )
 {
     bblScale32Bpp_implFP<false>(
@@ -293,8 +286,8 @@ void ImageOperation2::blockScale32Bpp(
 }
 
 void ImageOperation2::bilinearScale32Bpp(
-    const Pt::uint32_t* src, Pt::ssize_t srcS, Pt::ssize_t srcW, Pt::ssize_t srcH,
-          Pt::uint32_t* dst, Pt::ssize_t dstS, Pt::ssize_t dstW, Pt::ssize_t dstH
+    const Pt::uint8_t* src, Pt::ssize_t srcS, Pt::ssize_t srcW, Pt::ssize_t srcH,
+          Pt::uint8_t* dst, Pt::ssize_t dstS, Pt::ssize_t dstW, Pt::ssize_t dstH
 )
 {
 #if defined(PT_GFX_USE_SSE4P1) || defined(PT_GFX_USE_SSE2)
@@ -310,12 +303,15 @@ void ImageOperation2::bilinearScale32Bpp(
         float itrX = 0;
         for(Pt::ssize_t x = 0; x < dstW; ++x) {
             // Get the interpolated pixel (SIMD)
-            *dst++ = bsGetPixel32Bpp_implSIMD(reinterpret_cast<const Pt::uint8_t*>(src), srcS, srcW, srcH, itrX, itrY);
+            *reinterpret_cast<Pt::uint32_t*>(dst) = bsGetPixel32Bpp_implSIMD(src, srcS, srcW, srcH, itrX, itrY);
+            dst += 4;
             // Increment the iterator
             itrX += incX;
         }
         // Increment the iterator
         itrY += incY;
+        // Adjust the destination pointer
+        dst += (dstS - dstW * 4);
     }
 
 #else
