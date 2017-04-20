@@ -123,7 +123,7 @@ using namespace Pt::Gfx;
 
 #define TEST_IMAGE_OPERATION                    0
 #define TEST_SCENE_GRAPH                        0
-#define TEST_SVG_READER                         DEFINE_CONFIG_BITS(2, 1, 2) // (multi-test)
+#define TEST_SVG_READER                         DEFINE_CONFIG_BITS(3, 3, 2, 1) // (multi-test)
 
 #define TEST_COMPARE_WITH_OLD_PAINTER           0 // (for some shapes only)
 
@@ -626,7 +626,7 @@ int main(int argc, char* args[])
     // Svg reader
     if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && (TEST_SOURCECOPY || TEST_SOURCEOVER) && TEST_SVG_READER) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
-        if(CONFIG_BIT_ENABLED(TEST_SVG_READER, 1)) testSvgReader1("SVG Reader - ImagePainter2 - Test #1 (Basic)",              image, *painter2);
+        if(CONFIG_BIT_ENABLED(TEST_SVG_READER, 1)) testSvgReader1("SVG Reader - ImagePainter2 - Test #1 (Absolute Basic)",              image, *painter2);
         if(CONFIG_BIT_ENABLED(TEST_SVG_READER, 2)) testSvgReader2("SVG Reader - ImagePainter2 - Test #2 (VP-VB Aspect Ratio)", image, *painter2);
     }
 
