@@ -48,7 +48,7 @@ void SGNodeLine::clear()
     SGNode::clear();
 }
 
-void SGNodeLine::drawImpl(ImagePainter2& painter, const TransformT& transform) const
+void SGNodeLine::drawImpl(ImagePainter2& painter, const TransformT& transform, RenderMode overrideRM) const
 {
     // TransformT the coordinates
     PointT from, to;
@@ -57,7 +57,7 @@ void SGNodeLine::drawImpl(ImagePainter2& painter, const TransformT& transform) c
     transform.transformPoint(to  , _to  );
 
     // Draw based on the effective mode
-    switch(effectiveRenderMode()) {
+    switch(effectiveRenderMode(overrideRM)) {
         case RenderFill            : /* Fallthrough */
         case RenderStroke          : /* Fallthrough */
         case RenderStrokeAutoClose : painter.drawLine(from, to); break;

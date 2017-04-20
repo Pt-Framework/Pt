@@ -49,7 +49,9 @@ class PT_GFX_API SGNode {
             RenderNone,            //! @brief Do not draw this node
             RenderStroke,          //! @brief Draw as a stroked shape
             RenderStrokeAutoClose, //! @brief Draw as a stroked shape with auto-close (if not supported by, it will be drawn using the closest mode)
-            RenderFill             //! @brief Draw as a filled shape (if not supported by, it will be drawn using the closest mode)
+            RenderFill,            //! @brief Draw as a filled shape (if not supported by, it will be drawn using the closest mode)
+
+            _DoNotOverrideRM       //! @brief For internal use
         };
 
         typedef double                 ValueT;
@@ -102,9 +104,9 @@ class PT_GFX_API SGNode {
     private:
         friend class SGNodeProxy;
 
-        inline SGNode(SmartPtr<NodeData> nodeData)
+        inline SGNode(RenderMode rm, SmartPtr<NodeData> nodeData)
         : _parent    ( 0 )
-        , _rm        ( RenderInherit )
+        , _rm        ( rm )
         , _nodeData  ( nodeData )
         , _nodeDataRO( true )
         {}
@@ -176,19 +178,6 @@ class PT_GFX_API SGNode {
 
         inline RenderMode renderMode() const
         { return _rm; }
-
-        inline RenderMode effectiveRenderMode() const
-        {
-            if(_rm != RenderInherit) return _rm;
-
-            const SGNode* p = _parent;
-            while(p) {
-                if(p->_rm != RenderInherit) return p->_rm;
-                p = p->_parent;
-            }
-
-            return _rm;
-        }
 
         //
         // Drawing functions
@@ -306,9 +295,24 @@ class PT_GFX_API SGNode {
         { return _nodeData->children.rend(); }
 
     protected:
+        inline RenderMode effectiveRenderMode(RenderMode overrideRM) const
+        {
+            const RenderMode rm = (overrideRM != _DoNotOverrideRM) ? overrideRM : _rm;
+
+            if(rm != RenderInherit) return rm;
+
+            const SGNode* p = _parent;
+            while(p) {
+                if(p->_rm != RenderInherit) return p->_rm;
+                p = p->_parent;
+            }
+
+            return rm;
+        }
+
         virtual void checkForCircularChain(const SGNode* parent) const;
 
-        virtual void drawImpl(ImagePainter2& painter, const TransformT& transform) const;
+        virtual void drawImpl(ImagePainter2& painter, const TransformT& transform, RenderMode overrideRM) const;
 
     private:
         SGNode*            _parent;     // Parent node

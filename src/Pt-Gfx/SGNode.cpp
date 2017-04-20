@@ -130,7 +130,7 @@ void SGNode::draw(ImagePainter2& painter, const TransformT* transform_)
                 }
             }
             // Draw this node
-            eCur.node->drawImpl(painter, transform);
+            eCur.node->drawImpl(painter, transform, _DoNotOverrideRM);
             // Process the children of this node
             for(ConstReverseIterator it = eCur.node->rbegin(); it != eCur.node->rend(); ++it) {
                 // Only store to stack if it is not hidden
@@ -166,7 +166,7 @@ void SGNode::checkForCircularChain(const SGNode* parent) const
     }
 }
 
-void SGNode::drawImpl(ImagePainter2& painter, const TransformT& transform) const
+void SGNode::drawImpl(ImagePainter2& /*painter*/, const TransformT& /*transform*/, RenderMode /*overrideRM*/) const
 {
     // Does nothing
 }

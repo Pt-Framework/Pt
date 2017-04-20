@@ -49,7 +49,7 @@ void SGNodePath::clear()
     SGNode::clear();
 }
 
-void SGNodePath::drawImpl(ImagePainter2& painter, const TransformT& transform) const
+void SGNodePath::drawImpl(ImagePainter2& painter, const TransformT& transform, RenderMode overrideRM) const
 {
     // Return if the path is null
     if(_path.isNull()) return;
@@ -62,7 +62,7 @@ void SGNodePath::drawImpl(ImagePainter2& painter, const TransformT& transform) c
     transform.transformPoints(points.data(), points.size());
 
     // Draw based on the effective mode
-    switch(effectiveRenderMode()) {
+    switch(effectiveRenderMode(overrideRM)) {
         case RenderFill            : painter.fillPolygon (points.data(), points.size()       ); break;
         case RenderStroke          : painter.drawPolyline(points.data(), points.size(), false); break;
         case RenderStrokeAutoClose : painter.drawPolyline(points.data(), points.size(), true ); break;

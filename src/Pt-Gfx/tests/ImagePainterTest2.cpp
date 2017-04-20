@@ -47,6 +47,7 @@
 
 #include <Pt/Gfx/Argb32Image.h>
 #include <Pt/Gfx/ImageOperation.h>
+#include <Pt/Gfx/ImageOperation2.h>
 #include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/ImagePainter2.h>
 

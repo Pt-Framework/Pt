@@ -1,5 +1,5 @@
-/* Copyright (C) 2006-2015 Marc Boris Duerner
-   Copyright (C) 2017-2017 Aloysius Indrayanto
+/* Copyright (C) 2010-2016 Marc Boris Duerner
+   Copyright (C) 2017-2017 by Aloysius Indrayanto
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -23,47 +23,23 @@
 
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
-  MA 02110-1301 USA
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
+  02110-1301 USA
 */
 
-#ifndef PT_GFX_SGNODEPROXY_H
-#define PT_GFX_SGNODEPROXY_H
 
-#include <Pt/Gfx/SGNode.h>
+#include <Pt/Gfx/Argb32Format.h>
+#include <Pt/Gfx/Argb32Image.h>
+#include <Pt/Gfx/Image.h>
 
-
-namespace Pt{
-namespace Gfx{
+#include <Pt/Gfx/ImageOperation2.h>
 
 
-/** @brief A scene-graph node class that acts as a proxy to another node or node-branch.
-  *
-  * Its function is to reuse existing nodes in other branches of the scene graph
-  * to reduce memory usage.
-  */
-class PT_GFX_API SGNodeProxy : public SGNode {
-    public:
-        inline SGNodeProxy(const SGNode& target, RenderMode rm = RenderInherit)
-        : SGNode ( rm, target._nodeData )
-        , _target( target )
-        {}
+namespace Pt {
+namespace Gfx {
 
-        virtual ~SGNodeProxy();
-
-    protected:
-        virtual void checkForCircularChain(const SGNode* parent) const;
-
-        virtual void drawImpl(ImagePainter2& painter, const TransformT& transform, RenderMode overrideRM) const;
-
-    private:
-        friend class SGNode;
-
-        const SGNode& _target;
-};
 
 
 } // namespace
 } // namespace
 
-#endif
