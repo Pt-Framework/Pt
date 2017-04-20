@@ -13,9 +13,6 @@ static size_t benchImageScalingBlock(int loopCount)
         textureWithWhiteBackground.width() * textureWithWhiteBackground.height() * textureWithWhiteBackground.format().pixelStride()
     );
 
-    ImageOperation2::blockScale(textureWithWhiteBackground, srImage);
-    ImageOperation2::blockScale(srcArgb32, dstArgb32);
-
     for(int i = 0; i < loopCount; ++i) {
         Pt::System::Clock clock;
         clock.start();

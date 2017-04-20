@@ -19,13 +19,13 @@ static void testImageOperation(const char* title, Image& image, Painter& painter
     Image srImage( textureWithWhiteBackground.format(), Size(120, 120) );
 
     // Block scale
-    blockScaleImage(textureWithWhiteBackground, srImage);
+    ImageOperation2::blockScale(textureWithWhiteBackground, srImage);
     painter.drawImage(PointF(x, y), srImage);
     painter.drawText( PointF(x, y + srImage.height() + 20), "Block Scaling" );
     x += srImage.width() + 50;
 
     // Bilinear scale
-    bilinearScaleImage(textureWithWhiteBackground, srImage);
+    ImageOperation2::bilinearScale(textureWithWhiteBackground, srImage);
     painter.drawImage(PointF(x, y), srImage);
     painter.drawText( PointF(x, y + srImage.height() + 20), "Bilinear Scaling" );
 
@@ -33,6 +33,7 @@ static void testImageOperation(const char* title, Image& image, Painter& painter
     y += srImage.height() + 50;
 
     // Block rotate - normal
+    //ImageOperation2::blockRotate(textureWithWhiteBackground, srImage, 30, Color::fromRgb8(0, 127, 127, 255), ImageOperation2::RotateCrop);
     blockRotateImage(textureWithWhiteBackground, srImage, 30, Color::fromRgb8(0, 127, 127, 255), false);
     painter.drawImage(PointF(x, y), srImage);
     painter.drawText( PointF(x, y + srImage.height() + 20), "Block Rotate" );
