@@ -140,6 +140,8 @@ void SvgRasterizer::processSvgElementAttributes(const Xml::StartElement& elem)
     }
 }
 
+// ### TODO: Use the cache: _rstate->svgObjects ###
+
 SGNode* SvgRasterizer::processDrawingElement(const Xml::StartElement& elem)
 {
     // Get the parent

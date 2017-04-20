@@ -98,8 +98,8 @@ class SvgRasterizer
         struct ComparePen;
         struct CompareBrush;
 
-        struct SvgObject;
         struct SvgStyleData;
+        struct SvgObject;
 
         struct RasterState;
 

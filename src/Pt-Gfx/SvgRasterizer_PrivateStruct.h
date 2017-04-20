@@ -150,6 +150,15 @@ struct SvgRasterizer::SvgStyleData {
 
 
 //
+// SvgObject
+//
+
+struct SvgRasterizer::SvgObject {
+    // ### TODO ###
+};
+
+
+//
 // Raster state
 //
 
