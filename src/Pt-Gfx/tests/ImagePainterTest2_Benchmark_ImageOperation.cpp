@@ -67,8 +67,7 @@ static size_t benchImageScalingBilinear(int loopCount)
     return sum;
 }
 
-template <bool fullscale>
-static size_t benchImageRotationBlock(int loopCount)
+static size_t benchImageRotationBlock(int loopCount, ImageOperation2::ImageRotateMode irm)
 {
     size_t sum = 0;
 
@@ -78,7 +77,7 @@ static size_t benchImageRotationBlock(int loopCount)
         Pt::System::Clock clock;
         clock.start();
 
-        blockRotateImage(textureWithWhiteBackground, srImage, 30, Color::fromRgb8(0, 0, 0, 255), fullscale);
+        ImageOperation2::blockRotate(textureWithWhiteBackground, srImage, 30, Color::fromRgb8(0, 0, 0, 255), irm);
 
         sum += clock.stop().toUSecs();
     }
@@ -87,8 +86,7 @@ static size_t benchImageRotationBlock(int loopCount)
     return sum;
 }
 
-template <bool fullscale>
-static size_t benchImageRotationBilinear(int loopCount)
+static size_t benchImageRotationBilinear(int loopCount, ImageOperation2::ImageRotateMode irm)
 {
     size_t sum = 0;
 
@@ -98,7 +96,7 @@ static size_t benchImageRotationBilinear(int loopCount)
         Pt::System::Clock clock;
         clock.start();
 
-        bilinearRotateImage(textureWithWhiteBackground, srImage, 30, Color::fromRgb8(0, 0, 0, 255), fullscale);
+        ImageOperation2::bilinearRotate(textureWithWhiteBackground, srImage, 30, Color::fromRgb8(0, 0, 0, 255), irm);
 
         sum += clock.stop().toUSecs();
     }
@@ -113,30 +111,21 @@ x86_64 (i5-4460; 64-Bit Mode)
 -----------------------------
                                                    (Time) (Factor)
                                                    ------ --------
-Image scaling    (block    - generic )           =    158
-Image scaling    (block    - argb32  )           =     45 ( 0.285)
-Image scaling  4 (block              )           =     12 ( 0.076)
-Image scaling  4 (bilinear           )           =    136 ( 0.861)
+Image scaling    (block    - generic )           =    174
+Image scaling    (block    - argb32  )           =     39 ( 0.224)
+Image scaling  4 (block              )           =     10 ( 0.057)
+Image scaling  4 (bilinear           )           =    125 ( 0.718)
 
-Image rotation 4 (block    - normal  )           =     40
-Image rotation 4 (block    - full-fit)           =     40 ( 1.000)
-Image rotation 4 (bilinear - normal  )           =    203 ( 5.075)
-Image rotation 4 (bilinear - full-fit)           =    204 ( 5.100)
+Image rotation 4 (block    - crop    )           =     40
+Image rotation 4 (block    - no-crop )           =     40 ( 1.000)
+Image rotation 4 (block    - fit     )           =     40 ( 1.000)
+Image rotation 4 (bilinear - crop    )           =    206 ( 5.150)
+Image rotation 4 (bilinear - no-crop )           =    208 ( 5.200)
+Image rotation 4 (bilinear - fit     )           =    208 ( 5.200)
 */
 
 /*
 ---------------------------------------------------
 Arm (v7l; A53; BCM2709; RaspberryPi 3; 32-bit Mode)
 ---------------------------------------------------
-                                                   (Time) (Factor)
-                                                   ------ --------
-Image scaling    (block    - generic )           =   2440
-Image scaling    (block    - argb32  )           =    511 ( 0.209)
-Image scaling  4 (block              )           =    142 ( 0.058)
-Image scaling  4 (bilinear           )           =   1621 ( 0.664)
-
-Image rotation 4 (block    - normal  )           =    651
-Image rotation 4 (block    - full-fit)           =    655 ( 1.006)
-Image rotation 4 (bilinear - normal  )           =   3004 ( 4.614)
-Image rotation 4 (bilinear - full-fit)           =   3092 ( 4.750)
 */

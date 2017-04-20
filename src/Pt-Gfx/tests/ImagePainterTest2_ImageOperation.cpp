@@ -53,7 +53,6 @@ static void testImageOperation(const char* title, Image& image, Painter& painter
     x  = 20 + textureWithWhiteBackground.width() + 50;
     y += srImage.height() + 50;
 
-
     // Bilinear rotate - crop
     ImageOperation2::bilinearRotate(textureWithWhiteBackground, srImage, 30, Color::fromRgb8(0, 127, 127, 255), ImageOperation2::RotateCrop);
     painter.drawImage(PointF(x, y), srImage);

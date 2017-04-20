@@ -341,16 +341,22 @@ static void doBenchmarkImageOperation()
 
     // Image rotation
     if(BENCHMARK_RESULT_HTML || BENCHMARK_IMAGE_OPERATION) {
-        time1 = benchImageRotationBlock<false>(BENCHMARK_LOOP_COUNT);
-        std::clog << "    Image rotation 4 (block    - normal  )           = " << std::setw(6) << time1 << std::endl;
-        time2 = benchImageRotationBlock<true>(BENCHMARK_LOOP_COUNT);
-        std::clog << "    Image rotation 4 (block    - full-fit)           = " << std::setw(6) << time2
+        time1 = benchImageRotationBlock(BENCHMARK_LOOP_COUNT, ImageOperation2::RotateCrop);
+        std::clog << "    Image rotation 4 (block    - crop    )           = " << std::setw(6) << time1 << std::endl;
+        time2 = benchImageRotationBlock(BENCHMARK_LOOP_COUNT, ImageOperation2::RotateNoCrop);
+        std::clog << "    Image rotation 4 (block    - no-crop )           = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchImageRotationBilinear<false>(BENCHMARK_LOOP_COUNT);
-        std::clog << "    Image rotation 4 (bilinear - normal  )           = " << std::setw(6) << time2
+        time2 = benchImageRotationBlock(BENCHMARK_LOOP_COUNT, ImageOperation2::RotateFit);
+        std::clog << "    Image rotation 4 (block    - fit     )           = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchImageRotationBilinear<true>(BENCHMARK_LOOP_COUNT);
-        std::clog << "    Image rotation 4 (bilinear - full-fit)           = " << std::setw(6) << time2
+        time2 = benchImageRotationBilinear(BENCHMARK_LOOP_COUNT, ImageOperation2::RotateCrop);
+        std::clog << "    Image rotation 4 (bilinear - crop    )           = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time2 = benchImageRotationBilinear(BENCHMARK_LOOP_COUNT, ImageOperation2::RotateNoCrop);
+        std::clog << "    Image rotation 4 (bilinear - no-crop )           = " << std::setw(6) << time2
+                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
+        time2 = benchImageRotationBilinear(BENCHMARK_LOOP_COUNT, ImageOperation2::RotateFit);
+        std::clog << "    Image rotation 4 (bilinear - fit     )           = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         if(!BENCHMARK_RESULT_HTML) std::clog << std::endl;
     }
