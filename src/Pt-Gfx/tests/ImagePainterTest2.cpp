@@ -626,8 +626,8 @@ int main(int argc, char* args[])
     // Svg reader
     if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && (TEST_SOURCECOPY || TEST_SOURCEOVER) && TEST_SVG_READER) {
         painter2->setCompositionMode(CompositionMode::SourceOver);
-        if(CONFIG_BIT_ENABLED(TEST_SVG_READER, 1)) testSvgReader1("SVG Reader - ImagePainter2 - Test #1", image, *painter2);
-        if(CONFIG_BIT_ENABLED(TEST_SVG_READER, 2)) testSvgReader2("SVG Reader - ImagePainter2 - Test #2", image, *painter2);
+        if(CONFIG_BIT_ENABLED(TEST_SVG_READER, 1)) testSvgReader1("SVG Reader - ImagePainter2 - Test #1 (Basic)",              image, *painter2);
+        if(CONFIG_BIT_ENABLED(TEST_SVG_READER, 2)) testSvgReader2("SVG Reader - ImagePainter2 - Test #2 (VP-VB Aspect Ratio)", image, *painter2);
     }
 
     // Create the brushes used for benchmarking

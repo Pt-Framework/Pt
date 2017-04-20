@@ -102,14 +102,15 @@ class PT_GFX_API SGNode {
         };
 
     private:
-        friend class SGNodeProxy;
-
+        // Special constructor to create a proxy node
         inline SGNode(RenderMode rm, SmartPtr<NodeData> nodeData)
         : _parent    ( 0 )
         , _rm        ( rm )
         , _nodeData  ( nodeData )
         , _nodeDataRO( true )
         {}
+
+        friend class SGNodeProxy;
 
     public:
         inline SGNode(RenderMode rm = RenderInherit)
@@ -146,9 +147,9 @@ class PT_GFX_API SGNode {
         {
             if(_nodeDataRO) throw std::logic_error("the node data is read-only in this instance");
 
-            child_->checkForCircularChain(this);
-
             SGNode* child = child_;
+            child->checkForCircularChain(this);
+
             _nodeData->children.push_back(child);
 
             child->_parent = this;
