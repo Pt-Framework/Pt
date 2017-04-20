@@ -37,40 +37,40 @@ static void testSvgReader1(const char* title, Image& image, Painter& painter)
     Pt::uint8_t r = 0, c = 0;
 
     svgImgTopLeft.set(200 * c + 10, 200 * r + 10); ++c;
-    renderSVG(*ip2, svgImgTopLeft, svgImgSize, SVG_SUB_DIR "line1-dtd-nznv-direct.svg");
+    renderSVG(*ip2, svgImgTopLeft, svgImgSize, SVG_SUB_DIR "dtd-nznv-direct.svg");
 
     svgImgTopLeft.set(200 * c + 10, 200 * r + 10); ++c;
-    renderSVG(*ip2, svgImgTopLeft, svgImgSize, SVG_SUB_DIR "line1-plain-nznv-direct.svg");
+    renderSVG(*ip2, svgImgTopLeft, svgImgSize, SVG_SUB_DIR "plain-nznv-direct.svg");
 
     svgImgTopLeft.set(200 * c + 10, 200 * r + 10); ++c;
-    renderSVG(*ip2, svgImgTopLeft, svgImgSize, SVG_SUB_DIR "line1-plain-nznv-direct-with-style.svg");
+    renderSVG(*ip2, svgImgTopLeft, svgImgSize, SVG_SUB_DIR "plain-nznv-direct-with-style.svg");
 
     svgImgTopLeft.set(200 * c + 10, 200 * r + 10); ++c;
-    renderSVG(*ip2, svgImgTopLeft, svgImgSize, SVG_SUB_DIR "line1-plain-nznv-with-group.svg");
+    renderSVG(*ip2, svgImgTopLeft, svgImgSize, SVG_SUB_DIR "plain-nznv-with-group.svg");
 
     svgImgTopLeft.set(200 * c + 10, 200 * r + 10); ++r; c = 0;
-    renderSVG(*ip2, svgImgTopLeft, svgImgSize, SVG_SUB_DIR "line1-plain-nznv-with-group-style.svg");
+    renderSVG(*ip2, svgImgTopLeft, svgImgSize, SVG_SUB_DIR "plain-nznv-with-group-style.svg");
 
     svgImgTopLeft.set(200 * c + 10, 200 * r + 10); ++c;
-    renderSVG(*ip2, svgImgTopLeft, svgImgSize, SVG_SUB_DIR "line1-plain-nzwv-direct.svg");
+    renderSVG(*ip2, svgImgTopLeft, svgImgSize, SVG_SUB_DIR "plain-nzwv-direct.svg");
 
     svgImgTopLeft.set(200 * c + 10, 200 * r + 10); ++c;
-    renderSVG(*ip2, svgImgTopLeft, svgImgSize, SVG_SUB_DIR "line1-plain-nzwv-noar-direct.svg");
+    renderSVG(*ip2, svgImgTopLeft, svgImgSize, SVG_SUB_DIR "plain-nzwv-noar-direct.svg");
 
     svgImgTopLeft.set(200 * c + 10, 200 * r + 10); ++c;
-    renderSVG(*ip2, svgImgTopLeft, svgImgSize, SVG_SUB_DIR "line1-plain-wzanv-direct.svg");
+    renderSVG(*ip2, svgImgTopLeft, svgImgSize, SVG_SUB_DIR "plain-wzanv-direct.svg");
 
     svgImgTopLeft.set(200 * c + 10, 200 * r + 10); ++c;
-    renderSVG(*ip2, svgImgTopLeft, svgImgSize, SVG_SUB_DIR "line1-plain-wzawv-direct.svg");
+    renderSVG(*ip2, svgImgTopLeft, svgImgSize, SVG_SUB_DIR "plain-wzawv-direct.svg");
 
     svgImgTopLeft.set(200 * c + 10, 200 * r + 10); ++r; c = 0;
-    renderSVG(*ip2, svgImgTopLeft, svgImgSize, SVG_SUB_DIR "line1-plain-wzrnv-direct.svg");
+    renderSVG(*ip2, svgImgTopLeft, svgImgSize, SVG_SUB_DIR "plain-wzrnv-direct.svg");
 
     svgImgTopLeft.set(200 * c + 10, 200 * r + 10); ++c;
-    renderSVG(*ip2, svgImgTopLeft, svgImgSize, SVG_SUB_DIR "line1-plain-wzrwv-direct.svg");
+    renderSVG(*ip2, svgImgTopLeft, svgImgSize, SVG_SUB_DIR "plain-wzrwv-direct.svg");
 
     svgImgTopLeft.set(200 * c + 10, 200 * r + 10); ++c;
-    renderSVG(*ip2, svgImgTopLeft, svgImgSize, SVG_SUB_DIR "line1-plain-wzrwv-noar-direct.svg");
+    renderSVG(*ip2, svgImgTopLeft, svgImgSize, SVG_SUB_DIR "plain-wzrwv-noar-direct.svg");
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 
