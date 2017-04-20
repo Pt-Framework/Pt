@@ -259,7 +259,7 @@ static inline void bblScale32Bpp_implFP(
             else {
 #endif
                 const Pt::uint32_t offset = FsrcY * srcS + ( (FitrX + 32768) >> 16 ) * 4;
-                 src_   = reinterpret_cast<const Pt::uint32_t*>(src +  offset);
+                 src_   = reinterpret_cast<const Pt::uint32_t*>(src + offset);
                  dst_   = reinterpret_cast<      Pt::uint32_t*>(dst);
                 *dst_++ = *src_;
                  dst    = reinterpret_cast<      Pt::uint8_t* >(dst_);
