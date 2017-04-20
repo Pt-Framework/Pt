@@ -117,15 +117,46 @@ class PT_GFX_API ImageOperation2
 //
 
 template <typename ImageT>
+static inline void blockScaleGeneric(const ImageT& from, ImageT& to)
+{
+    typename ImageT::PixelIterator fIter = const_cast<ImageT&>(from).begin();
+    typename ImageT::PixelIterator tIter = to.begin();
+
+    Pt::ssize_t dltH = 0;
+    Pt::ssize_t yCtr = 0;
+
+    while(yCtr < to.height()) {
+        typename ImageT::PixelIterator sIter = fIter;
+        do {
+            Pt::ssize_t dltW = 0;
+            for(Pt::ssize_t x = 0; x < to.width(); ++x) {
+                *tIter = *fIter;
+                ++tIter;
+                for(dltW += from.width(); dltW >= to.width(); ++fIter, dltW -= to.width());
+            }
+            fIter = sIter;
+            ++yCtr;
+        }
+        while((dltH += from.height()) < to.height());
+
+        while(dltH >= to.height()) {
+            fIter += from.width();
+            dltH -= to.height();
+        }
+    }
+}
+
+template <typename ImageT>
 inline void ImageOperation2::blockScale(const ImageT& from, ImageT& to)
 {
-    // ### TODO: Call the generic implementation function, if possible !!! ###
-
     if(from.width() <= 0 || from.height() <= 0 || to.width() <= 0 || to.height() <= 0)
         throw std::runtime_error("invalid 'from' and/or 'to' image size");
 
-    if(from.view().pixelStride() != 4 || to.view().pixelStride() != 4)
-        throw std::runtime_error("block scale for images with pixel stride != 4 is not supported yet");
+    if(from.view().pixelStride() != 4 || to.view().pixelStride() != 4) {
+        blockScaleGeneric(from, to);
+        //throw std::runtime_error("block scale for images with pixel stride != 4 is not supported yet");
+        return;
+    }
 
     blockScale32Bpp(
         from.data(), from.view().stride(), from.width(), from.height(),
