@@ -37,7 +37,6 @@
 #include <Pt/Gfx/SGNodeRectangle.h>
 #include <Pt/Gfx/SGNodeEllipse.h>
 #include <Pt/Gfx/SGNodeArc.h>
-#include <Pt/Gfx/SGNodeProxy.h>
 
 #include "SvgRasterizer.h"
 
@@ -194,13 +193,13 @@ SGNode* SvgRasterizer::processDrawingElement_use(const SvgStyleData& ssd, const 
     SGNodeProxy* sgn = new SGNodeProxy(*sgnRef);
 
     // Check if we need to specify override(s)
-    const SvgInheritSpec* sis = sgnRef->extendedData<SvgInheritSpec>();
-
-    if(sis && sis->penColor && ssd.penSpecified) {
-        // ### TODO: Store pen in cache (_rstate->penSet) ###
-        Pen* pen = new Pen( sgnRef->pen() );
-        pen->setColor(ssd.penColor);
-        sgn->setPenOverride(pen);
+    if(ssd.penSpecified) {
+        const SvgInheritSpec* sis = sgnRef->extendedData<SvgInheritSpec>();
+        if(sis && sis->penColor) {
+            Pen* pen = new Pen( sgnRef->pen() );
+            pen->setColor(ssd.penColor);
+            applyPenOverride(sgn, pen);
+        }
     }
 
     // Apply the transform as needed

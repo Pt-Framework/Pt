@@ -175,20 +175,41 @@ inline void SvgRasterizer::applyStyleData(SGNode& sgn, const SvgRasterizer::SvgS
         const Pen pen = (ssd.penStyle == Pen::UserDefined)
                        ? Pen(ssd.penColor, ssd.penSize, ssd.penStylePattern, ssd.penCapStyle, ssd.penJoinStyle)
                        : Pen(ssd.penColor, ssd.penSize, ssd.penStyle,        ssd.penCapStyle, ssd.penJoinStyle);
-        // If a pen with the same parameters already exists, assign it
+        // If a pen with the same parameters already exists, assign it in place of the new pen
         std::set<Pen>::const_iterator it = _rstate->penSet.find(pen);
         if(it != _rstate->penSet.end()) {
             sgn.setPen(*it);
         }
-        // Assign and store the new pen
+        // Cache the new pen before assigning it
         else {
-            sgn.setPen(pen);
             _rstate->penSet.insert(pen);
+            sgn.setPen(pen);
         }
-
     }
 
     // Set the brush as needed
+    // ### TODO ###
+    // _rstate->brushSet;
+}
+
+inline void SvgRasterizer::applyPenOverride(SGNodeProxy* sgn, Pen* pen)
+{
+    // If a pen with the same parameters already exists, assign it in place of the new pen
+    std::set<Pen>::const_iterator it = _rstate->penSet.find(*pen);
+    if(it != _rstate->penSet.end()) {
+        *pen = *it;
+        sgn->setPenOverride(pen);
+    }
+
+    // Cache the new pen before assigning it
+    else {
+        _rstate->penSet.insert(*pen);
+        sgn->setPenOverride(pen);
+    }
+}
+
+inline void SvgRasterizer::applyBrushOverride(SGNodeProxy* sgn, Brush* brush)
+{
     // ### TODO ###
     // _rstate->brushSet;
 }

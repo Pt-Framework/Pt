@@ -37,7 +37,7 @@
 #include <Pt/Xml/InputSource.h>
 #include <Pt/Xml/XmlReader.h>
 
-#include <Pt/Gfx/SGNode.h>
+#include <Pt/Gfx/SGNodeProxy.h>
 #include <Pt/Gfx/ImagePainter2.h>
 
 
@@ -145,6 +145,9 @@ class SvgRasterizer
 
         static void extractStyleData(SvgStyleData& ssd, const SGNode& parent, const Xml::AttributeList& attrList, const std::string& sectionInfo);
         inline void applyStyleData(SGNode& sgn, const SvgStyleData& ssd);
+
+        inline void applyPenOverride(SGNodeProxy* sgn, Pen* pen);
+        inline void applyBrushOverride(SGNodeProxy* sgn, Brush* brush);
 
         void storeSvgObject(const Pt::String& objId, SGNode* sgn, const SvgStyleData& ssd, const std::string& sectionInfo);
         const SGNode* getSvgObject_SGNode(const Pt::String& objId, const std::string& sectionInfo);
