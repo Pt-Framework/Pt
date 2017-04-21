@@ -132,14 +132,21 @@ class SvgRasterizer
         static void extractStyleData(SvgStyleData& ssd, const SGNode& parent, const Xml::AttributeList& alist, const std::string& sectionInfo);
         inline void applyStyleData(SGNode& sgn, const SvgStyleData& ssd);
 
-        // Defined in "SvgRasterizer_Util.cpp"
-        static double cnvUnitStrToPixels(const std::string& str);
-
+        // Defined in "SvgRasterizer_Process.cpp"
         void processSvgElementAttributes(const Xml::StartElement& elem);
 
         SGNode* processDrawingElement(const Xml::StartElement& elem);
         SGNode* processDrawingElement_g(SGNode& parent, const Xml::AttributeList& alist);
+        SGNode* processDrawingElement_defs(SGNode& parent, const Xml::AttributeList& alist);
+        SGNode* processDrawingElement_use(SGNode& parent, const Xml::AttributeList& alist);
         SGNode* processDrawingElement_line(SGNode& parent, const Xml::AttributeList& alist);
+
+        // Defined in "SvgRasterizer_Util.cpp"
+        static double cnvUnitStrToPixels(const std::string& str);
+
+        static const std::string cnvUtf32ToUtf8(const Pt::String& str);
+
+        void storeSvgObject(const Pt::String& id, const SGNode* sgn, const std::string& sectionInfo);
 };
 
 

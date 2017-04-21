@@ -154,7 +154,15 @@ struct SvgRasterizer::SvgStyleData {
 //
 
 struct SvgRasterizer::SvgObject {
-    // ### TODO ###
+    const SGNode* sgn;
+
+    inline SvgObject()
+    : sgn(0)
+    {}
+
+    inline SvgObject(const SGNode* sgn_)
+    : sgn(sgn_)
+    {}
 };
 
 
@@ -164,7 +172,7 @@ struct SvgRasterizer::SvgObject {
 
 struct SvgRasterizer::RasterState {
     // Typedefs
-    typedef std::map<std::string, SvgObject*> SvgObjects;
+    typedef std::map<Pt::String, SvgObject*> SvgObjects;
 
     // State flags
     bool gotStart;   // A flag that indicates that we have got the SVG opening tag

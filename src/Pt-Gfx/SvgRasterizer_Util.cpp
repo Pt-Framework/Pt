@@ -27,23 +27,12 @@
   02110-1301 USA
 */
 
-// Just for debugging ;)
-#warning "Just for debugging ;)"
-#include <stdio.h>
-
-#include <Pt/Xml/StartElement.h>
-
-#include <Pt/Gfx/SGNodeLine.h>
-#include <Pt/Gfx/SGNodeRectangle.h>
-#include <Pt/Gfx/SGNodeEllipse.h>
-#include <Pt/Gfx/SGNodeArc.h>
-#include <Pt/Gfx/SGNodeProxy.h>
-
 #include "SvgRasterizer.h"
 
 
 namespace Pt {
 namespace Gfx {
+
 
 // ======================================================================================
 // ===== Private Member Functions =======================================================
@@ -80,125 +69,59 @@ double SvgRasterizer::cnvUnitStrToPixels(const std::string& str_)
     throw IOError("svg error: invalid number unit specifier '" + str + "'");
 }
 
-void SvgRasterizer::processSvgElementAttributes(const Xml::StartElement& elem)
+const std::string SvgRasterizer::cnvUtf32ToUtf8(const Pt::String& str)
 {
-    // Get the attributes
-    const Xml::AttributeList& alist = elem.attributes();
+    std::string utf8;
+    utf8.reserve(str.length() * 4);
 
-    // Walk through the attributes
-    for(Xml::AttributeList::ConstIterator it = alist.begin(); it != alist.end(); ++it) {
-        const std::string& snam = lcaseStdStr( it->name ().local() );
-        const std::string& sval = lcaseStdStr( it->value()         );
-        if(snam == "width") {
-            _rstate->vpWidth = cnvUnitStrToPixels(sval);
+    // UTF-32 Bytes                 UTF-8 Byte #1   UTF-8 Byte #2   UTF-8 Byte #3   UTF-8 Byte #4
+    //                   0aaaaaaa   0aaaaaaa
+    //          00000bbb baaaaaaa   110bbbba        10aaaaaa
+    //          ccccbbbb baaaaaaa   1110cccc        10bbbbba        10aaaaaa
+    // 000ddddd ccccbbbb baaaaaaa   11110ddd        10ddcccc        10bbbbba        10aaaaaa
+
+    for(Pt::String::const_iterator it = str.begin(); it != str.end(); ++it) {
+        //                             Max. UTF-32   Replacement
+        const Pt::uint32_t ch = (it->value() > 0x0010FFFF) ? 0x0000FFFD : it->value();
+        if(ch < 0x00000080) {
+            utf8 += static_cast<char>( 0x00 | ( ( ch & 0x0000007F ) >>  0 ) );
         }
-        else if(snam == "height") {
-            _rstate->vpHeight = cnvUnitStrToPixels(sval);
+        else if(ch < 0x00000800) {
+            utf8 += static_cast<char>( 0xC0 | ( ( ch & 0x000007C0 ) >>  6 ) );
+            utf8 += static_cast<char>( 0x80 | ( ( ch & 0x0000003F ) >>  0 ) );
         }
-        else if(snam == "viewbox") {
-            // Tokenize
-            const std::vector<std::string>& tok = tokenizeWS(sval);
-            if(tok.size() != 4)
-                throw IOError("svg error: invalid viewBox specifier '" + sval + "'");
-            // Convert to doubles
-            const double x = cnvStrToDbl(tok[0], "viewBox");
-            const double y = cnvStrToDbl(tok[1], "viewBox");
-            const double w = cnvStrToDbl(tok[2], "viewBox");
-            const double h = cnvStrToDbl(tok[3], "viewBox");
-            _rstate->vbX = (x <= 0) ? 0 : x;
-            _rstate->vbY = (y <= 0) ? 0 : y;
-            _rstate->vbW = (w <= 0) ? 0 : w;
-            _rstate->vbH = (h <= 0) ? 0 : h;
+        else if(ch < 0x00010000) {
+            utf8 += static_cast<char>( 0xE0 | ( ( ch & 0x0000F000 ) >> 12 ) );
+            utf8 += static_cast<char>( 0x80 | ( ( ch & 0x00000FC0 ) >>  6 ) );
+            utf8 += static_cast<char>( 0x80 | ( ( ch & 0x0000003F ) >>  0 ) );
         }
-        else if(snam == "preserveaspectratio") {
-            // Tokenize
-            const std::vector<std::string>& tok = tokenizeWS(sval);
-            // CHeck the number of tokens
-            if(tok.size() < 1 || tok.size() > 2)
-                throw IOError("svg error: invalid preserveAspectRatio specifier '" + sval + "'");
-            // Check for "meet" or "slice"
-            bool meet = true;
-            if(tok.size() == 2) {
-                     if(tok.back() == "meet" ) { /* Does nothing */ }
-                else if(tok.back() == "slice") { meet = false; }
-                else
-                    throw IOError("svg error: invalid preserveAspectRatio specifier '" + sval + "'");
-            }
-            // Process the directive
-                 if(tok[0] == "none"    ) _rstate->arMode = None;
-            else if(tok[0] == "xminymin") _rstate->arMode = meet ? XMinYMinMeet : XMinYMinSlice;
-            else if(tok[0] == "xminymid") _rstate->arMode = meet ? XMinYMidMeet : XMinYMidSlice;
-            else if(tok[0] == "xminymax") _rstate->arMode = meet ? XMinYMaxMeet : XMinYMaxSlice;
-            else if(tok[0] == "xmidymin") _rstate->arMode = meet ? XMidYMinMeet : XMidYMinSlice;
-            else if(tok[0] == "xmidymid") _rstate->arMode = meet ? XMidYMidMeet : XMidYMidSlice;
-            else if(tok[0] == "xmidymax") _rstate->arMode = meet ? XMidYMaxMeet : XMidYMaxSlice;
-            else if(tok[0] == "xmaxymin") _rstate->arMode = meet ? XMaxYMinMeet : XMaxYMinSlice;
-            else if(tok[0] == "xmaxymid") _rstate->arMode = meet ? XMaxYMidMeet : XMaxYMidSlice;
-            else if(tok[0] == "xmaxymax") _rstate->arMode = meet ? XMaxYMaxMeet : XMaxYMaxSlice;
-            else                          throw IOError("svg error: invalid preserveAspectRatio specifier '" + sval + "'");
+        else if(ch < 0x00200000) {
+            utf8 += static_cast<char>( 0xF0 | ( ( ch & 0x001C0000 ) >> 18 ) );
+            utf8 += static_cast<char>( 0x80 | ( ( ch & 0x0003F000 ) >> 12 ) );
+            utf8 += static_cast<char>( 0x80 | ( ( ch & 0x00000FC0 ) >>  6 ) );
+            utf8 += static_cast<char>( 0x80 | ( ( ch & 0x0000003F ) >>  0 ) );
         }
     }
+
+    return utf8;
 }
 
-// ### TODO: Use the cache: _rstate->svgObjects ###
-
-SGNode* SvgRasterizer::processDrawingElement(const Xml::StartElement& elem)
+void SvgRasterizer::storeSvgObject(const Pt::String& id, const SGNode* sgn, const std::string& sectionInfo)
 {
-    // Get the parent
-    SGNode& parent = *_rstate->sgStack.top();
+    // Check if an object with the same ID already exists
+    RasterState::SvgObjects::iterator it = _rstate->svgObjects.find(id);
 
-    // Get the name
-    const std::string& etype = lcaseStdStr(elem.name().local());
+    if(it != _rstate->svgObjects.end()) {
+        // Check if the object already has an associated SGNode
+        if(it->second->sgn)
+            throw IOError("svg error: " + sectionInfo + ": duplicated ID '" + cnvUtf32ToUtf8(id) + "'");
+        // Store the SGNode
+        it->second->sgn = sgn;
+        return;
+    }
 
-    // Get the attributes
-    const Xml::AttributeList& alist = elem.attributes();
-
-    // Process base on the type
-    // ### TODO: Complete them ! ###
-         if(etype == "g"   ) return processDrawingElement_g   (parent, alist);
-    else if(etype == "line") return processDrawingElement_line(parent, alist);
-
-    // Return the newly created node
-    return 0;
-}
-
-SGNode* SvgRasterizer::processDrawingElement_g(SGNode& parent, const Xml::AttributeList& alist)
-{
-    // Extract the style data
-    SvgStyleData ssd;
-    extractStyleData(ssd, parent, alist, "line");
-
-    // Create a new node and apply the style
-    SGNode* sgn = new SGNode();
-
-    applyStyleData(*sgn, ssd);
-
-    // Add the newly created node to the parent and return it
-    return &parent.addChild(sgn);
-}
-
-SGNode* SvgRasterizer::processDrawingElement_line(SGNode& parent, const Xml::AttributeList& alist)
-{
-    // Extract the style data
-    SvgStyleData ssd;
-    extractStyleData(ssd, parent, alist, "line");
-
-    // Extract the coordinates
-    if( !alist.has("x1") || !alist.has("y1") || !alist.has("x2") || !alist.has("y2") )
-        throw IOError("svg error: line: missing attribute");
-
-    const double x1 = cnvStrToDbl(alist.get("x1"), "line");
-    const double y1 = cnvStrToDbl(alist.get("y1"), "line");
-    const double x2 = cnvStrToDbl(alist.get("x2"), "line");
-    const double y2 = cnvStrToDbl(alist.get("y2"), "line");
-
-    // Create a new node and apply the style
-    SGNodeLine* sgn = new SGNodeLine( SGNode::RenderStroke, PointF(x1, y1), PointF(x2, y2) );
-
-    applyStyleData(*sgn, ssd);
-
-    // Add the newly created node to the parent and return it
-    return &parent.addChild(sgn);
+    // Create a new object and store it
+    _rstate->svgObjects[id] = new SvgObject(sgn);
 }
 
 
