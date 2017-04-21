@@ -190,11 +190,19 @@ SGNode* SvgRasterizer::processDrawingElement_use(const SvgStyleData& ssd, const 
   //const double w = attrList.has("width" ) ? cnvStrToDbl(attrList.get("width" ), "use") : 0.0;
   //const double h = attrList.has("height") ? cnvStrToDbl(attrList.get("height"), "use") : 0.0;
 
-    // ### TODO: Implement style "inherit" !!! ###
-
-    // Create a new node and apply the style
+    // Create a proxy node
     SGNodeProxy* sgn = new SGNodeProxy(*sgnRef);
-    //applyStyleData(*sgn, ssd);
+
+    // Check if we need to specify override(s)
+    const SvgInheritSpec* sis = sgnRef->extendedData<SvgInheritSpec>();
+
+    if(sis && sis->penColor && ssd.penSpecified) {
+        Pen* pen = new Pen( sgnRef->pen() );
+
+        pen->setColor(ssd.penColor);
+
+        sgn->setPenOverride(pen);
+    }
 
     // Apply the transform as needed
     if(x != 0.0 || y != 0.0) sgn->transform().translate(x, y);

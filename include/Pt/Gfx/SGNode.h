@@ -222,18 +222,7 @@ class PT_GFX_API SGNode {
             _nodeData->pen = pen;
         }
 
-        inline const Pen& effectivePen() const
-        {
-            if(!_nodeData->pen.isNull()) return _nodeData->pen;
-
-            const SGNode* p = _parent;
-            while(p) {
-                if(!p->_nodeData->pen.isNull()) return p->_nodeData->pen;
-                p = p->_parent;
-            }
-
-            return _nodeData->pen;
-        }
+        virtual const Pen& effectivePen() const;
 
         inline void setBrush(const Brush& brush)
         {
@@ -242,18 +231,7 @@ class PT_GFX_API SGNode {
             _nodeData->brush = brush;
         }
 
-        inline const Brush& effectiveBrush() const
-        {
-            if(!_nodeData->brush.isNull()) return _nodeData->brush;
-
-            const SGNode* p = _parent;
-            while(p) {
-                if(!p->_nodeData->brush.isNull()) return p->_nodeData->brush;
-                p = p->_parent;
-            }
-
-            return _nodeData->brush;
-        }
+        virtual const Brush& effectiveBrush() const;
 
         inline void setTextureRotationParameters(const Color& colorFill = Color::fromRgb8(0, 0, 0, 255), Brush::TextureRotationMode mode = Brush::BlockFit)
         {

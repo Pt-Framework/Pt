@@ -47,16 +47,32 @@ namespace Gfx{
 class PT_GFX_API SGNodeProxy : public SGNode, private NonCopyable {
     public:
         inline SGNodeProxy(const SGNode& target, RenderMode rm = RenderInherit)
-        : SGNode ( rm, target._nodeData )
-        , _target( target )
+        : SGNode        ( rm, target._nodeData )
+        , _target       ( target )
+        , _penOverride  ( 0 )
+        , _brushOverride( 0 )
         { checkForProxyInProxy(_target); }
 
         inline SGNodeProxy(const SGNode& target, RenderMode rm, const TransformT& transform)
-        : SGNode ( rm, transform, target._nodeData )
-        , _target( target )
+        : SGNode        ( rm, transform, target._nodeData )
+        , _target       ( target )
+        , _penOverride  ( 0 )
+        , _brushOverride( 0 )
         { checkForProxyInProxy(_target); }
 
         virtual ~SGNodeProxy();
+
+        //
+        // Drawing functions
+        //
+
+        void setPenOverride(Pen* pen);
+
+        void setBrushOverride(Brush* brush);
+
+        virtual const Pen& effectivePen() const;
+
+        virtual const Brush& effectiveBrush() const;
 
     protected:
         virtual void drawImpl(ImagePainter2& painter, const TransformT& transform, RenderMode overrideRM) const;
@@ -65,6 +81,9 @@ class PT_GFX_API SGNodeProxy : public SGNode, private NonCopyable {
 
     private:
         const SGNode& _target;
+
+        Pen*          _penOverride;   // Optional pen override
+        Brush*        _brushOverride; // Optional brush override
 
         static void checkForProxyInProxy(const SGNode& target);
 };

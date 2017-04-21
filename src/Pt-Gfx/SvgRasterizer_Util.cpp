@@ -179,7 +179,7 @@ void SvgRasterizer::storeSvgObject(const Pt::String& objId, SGNode* sgn, const S
 
     // Set the extended data as needed
     if(!ssd.inheritSpec.isNull()) {
-        SvgInheritSpec* sis = new SvgInheritSpec();
+        SvgInheritSpec* sis = new SvgInheritSpec(ssd.inheritSpec);
         sis->combineWith(sgn->extendedData<SvgInheritSpec>());
         sgn->setExtendedData(sis);
     }

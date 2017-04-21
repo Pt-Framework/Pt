@@ -35,7 +35,40 @@ namespace Gfx {
 
 
 SGNodeProxy::~SGNodeProxy()
-{}
+{
+    delete _penOverride;
+    delete _brushOverride;
+}
+
+void SGNodeProxy::setPenOverride(Pen* pen)
+{
+    std::clog << "SET PEN OVR: " << this << " = " << pen << std::endl;
+    delete _penOverride;
+    _penOverride = pen;
+}
+
+void SGNodeProxy::setBrushOverride(Brush* brush)
+{
+    delete _brushOverride;
+    _brushOverride = brush;
+}
+
+const Pen& SGNodeProxy::effectivePen() const
+{
+    std::clog << "GET PEN OVR: " << this << " = " << _penOverride << std::endl;
+    throw 1;
+    if(_penOverride) {
+        throw 123;
+        return *_penOverride;
+    }
+    return SGNode::effectivePen();
+}
+
+const Brush& SGNodeProxy::effectiveBrush() const
+{
+    if(_brushOverride) return *_brushOverride;
+    return SGNode::effectiveBrush();
+}
 
 void SGNodeProxy::drawImpl(ImagePainter2& painter, const TransformT& transform, RenderMode overrideRM) const
 {

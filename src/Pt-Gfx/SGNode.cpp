@@ -73,6 +73,32 @@ void SGNode::clear()
     _nodeData->brush = Brush();
 }
 
+const Pen& SGNode::effectivePen() const
+{
+    if(!_nodeData->pen.isNull()) return _nodeData->pen;
+
+    const SGNode* p = _parent;
+    while(p) {
+        if(!p->_nodeData->pen.isNull()) return p->_nodeData->pen;
+        p = p->_parent;
+    }
+
+    return _nodeData->pen;
+}
+
+const Brush& SGNode::effectiveBrush() const
+{
+    if(!_nodeData->brush.isNull()) return _nodeData->brush;
+
+    const SGNode* p = _parent;
+    while(p) {
+        if(!p->_nodeData->brush.isNull()) return p->_nodeData->brush;
+        p = p->_parent;
+    }
+
+    return _nodeData->brush;
+}
+
 void SGNode::draw(ImagePainter2& painter, const TransformT* transform_)
 {
     // Prepare the transformation
