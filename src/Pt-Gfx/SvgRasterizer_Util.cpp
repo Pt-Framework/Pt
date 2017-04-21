@@ -112,7 +112,6 @@ void SvgRasterizer::extractStyleData(SvgStyleData& ssd, const SGNode& parent, co
 {
     // Extract from the style string (if specified)
     if(attrList.has("style")) {
-        // ### TODO: Implement style "inherit" !!! ###
         // Tokenize the string
         std::vector<std::string> tokens;
         lexStyleData(tokens, attrList.get("style"));
@@ -122,7 +121,8 @@ void SvgRasterizer::extractStyleData(SvgStyleData& ssd, const SGNode& parent, co
             const std::string& v = tokens[i + 1];
             if(n == "stroke") {
                 if(!ssd.penSpecified) copyPenData(ssd, parent.effectivePen());
-                ssd.penColor     = fromHtmlColor(v);
+                if(v == "inherit") ssd.inheritSpec.penColor = true;
+                else               ssd.penColor             = fromHtmlColor(v);
                 ssd.penSpecified = true;
             }
             else if(n == "stroke-opacity") {
@@ -159,7 +159,7 @@ void SvgRasterizer::extractStyleData(SvgStyleData& ssd, const SGNode& parent, co
     // ### TODO: The brush data! ###
 }
 
-void SvgRasterizer::storeSvgObject(const Pt::String& objId, const SGNode* sgn, const std::string& sectionInfo)
+void SvgRasterizer::storeSvgObject(const Pt::String& objId, SGNode* sgn, const SvgStyleData& ssd, const std::string& sectionInfo)
 {
     // Check if an object with the same ID already exists
     RasterState::SvgObjects::iterator it = _rstate->svgObjects.find(objId);
@@ -170,11 +170,19 @@ void SvgRasterizer::storeSvgObject(const Pt::String& objId, const SGNode* sgn, c
             throw IOError("svg error: " + sectionInfo + ": duplicated ID '" + cnvUtf32ToUtf8(objId) + "'");
         // Store the SGNode
         it->second->sgn = sgn;
-        return;
     }
 
     // Create a new object and store it
-    _rstate->svgObjects[objId] = new SvgObject(sgn);
+    else {
+        _rstate->svgObjects[objId] = new SvgObject(sgn);
+    }
+
+    // Set the extended data as needed
+    if(!ssd.inheritSpec.isNull()) {
+        SvgInheritSpec* sis = new SvgInheritSpec();
+        sis->combineWith(sgn->extendedData<SvgInheritSpec>());
+        sgn->setExtendedData(sis);
+    }
 }
 
 const SGNode* SvgRasterizer::getSvgObject_SGNode(const Pt::String& objId_, const std::string& sectionInfo)

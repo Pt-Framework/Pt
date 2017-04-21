@@ -160,7 +160,7 @@ SGNode* SvgRasterizer::processDrawingElement_g(const SvgStyleData& ssd, const Xm
     applyStyleData(*sgn, ssd);
 
     // Store the node in a list of objects if it has an ID
-    if(!objId.empty()) storeSvgObject(objId, sgn, "g");
+    if(!objId.empty()) storeSvgObject(objId, sgn, ssd, "g");
 
     // Return the newly created node
     return sgn;
@@ -219,7 +219,7 @@ SGNode* SvgRasterizer::processDrawingElement_line(const SvgStyleData& ssd, const
     applyStyleData(*sgn, ssd);
 
     // Store the node in a list of objects if it has an ID
-    if(!objId.empty()) storeSvgObject(objId, sgn, "line");
+    if(!objId.empty()) storeSvgObject(objId, sgn, ssd, "line");
 
     // Return the newly created node
     return sgn;

@@ -124,11 +124,43 @@ struct SvgRasterizer::CompareBrush {
 
 
 //
-// SVG Style data
+// SVG inherit flags
+//
+
+struct SvgRasterizer::SvgInheritSpec : public SGNode::BasicExtendedData {
+    bool penColor;
+    bool brushColor;
+
+    inline SvgInheritSpec()
+    : penColor  (false)
+    , brushColor(false)
+    {}
+
+    virtual ~SvgInheritSpec()
+    {}
+
+    inline void combineWith(const SvgInheritSpec* sis)
+    {
+        if(!sis) return;
+
+        penColor   |= sis->penColor;
+        brushColor |= sis->brushColor;
+    }
+
+    inline bool isNull() const
+    { return !(penColor || brushColor); }
+};
+
+
+//
+// SVG style data
 //
 
 struct SvgRasterizer::SvgStyleData {
-    // ### TODO: Implement style "inherit" !!! ###
+    // Inherit specifiers
+    SvgInheritSpec inheritSpec;
+
+    // Pen data
     bool           penSpecified;
     Color          penColor;
     Pt::size_t     penSize;
@@ -137,10 +169,12 @@ struct SvgRasterizer::SvgStyleData {
     Pen::JoinStyle penJoinStyle;
     Pt::uint64_t   penStylePattern;
 
-    // ### TODO: The brush data! ###
+    // Brush data
+    // ### TODO ###
 
     inline SvgStyleData()
     : penSpecified   (false)
+    , penColor       (0, 0, 0, 255)
     , penSize        (1)
     , penStyle       (Pen::Solid)
     , penCapStyle    (Pen::FlatCap)
@@ -151,11 +185,10 @@ struct SvgRasterizer::SvgStyleData {
 
 
 //
-// SvgObject
+// Svg object
 //
 
 struct SvgRasterizer::SvgObject {
-    // ### TODO: Implement style "inherit" !!! ###
     const SGNode* sgn;
 
     inline SvgObject()

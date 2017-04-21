@@ -98,6 +98,7 @@ class SvgRasterizer
         struct ComparePen;
         struct CompareBrush;
 
+        struct SvgInheritSpec;
         struct SvgStyleData;
         struct SvgObject;
 
@@ -145,7 +146,7 @@ class SvgRasterizer
         static void extractStyleData(SvgStyleData& ssd, const SGNode& parent, const Xml::AttributeList& attrList, const std::string& sectionInfo);
         inline void applyStyleData(SGNode& sgn, const SvgStyleData& ssd);
 
-        void storeSvgObject(const Pt::String& objId, const SGNode* sgn, const std::string& sectionInfo);
+        void storeSvgObject(const Pt::String& objId, SGNode* sgn, const SvgStyleData& ssd, const std::string& sectionInfo);
         const SGNode* getSvgObject_SGNode(const Pt::String& objId, const std::string& sectionInfo);
 };
 

@@ -104,7 +104,7 @@ class PT_GFX_API SGNode {
         };
 
     private:
-        // Special constructor to create a proxy node
+        // A special constructor to create a proxy node
         inline SGNode(RenderMode rm, SmartPtr<NodeData> nodeData)
         : _parent    ( 0 )
         , _rm        ( rm )
@@ -113,6 +113,7 @@ class PT_GFX_API SGNode {
         , _extData   ( 0 )
         {}
 
+        // A special constructor to create a proxy node
         inline SGNode(RenderMode rm, const TransformT& transform, SmartPtr<NodeData> nodeData)
         : _parent    ( 0 )
         , _rm        ( rm )
@@ -193,8 +194,12 @@ class PT_GFX_API SGNode {
             _extData = extData;
         }
 
-        inline BasicExtendedData* eExtendedData()
+        inline const BasicExtendedData* eExtendedData() const
         { return _extData; }
+
+        template <typename T>
+        inline const T* extendedData() const
+        { return dynamic_cast<T*>(_extData); }
 
         //
         // Render mode
