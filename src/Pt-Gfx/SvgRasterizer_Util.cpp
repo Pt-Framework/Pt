@@ -27,6 +27,8 @@
   02110-1301 USA
 */
 
+#include <Pt/Xml/StartElement.h>
+
 #include "SvgRasterizer.h"
 
 
@@ -37,37 +39,6 @@ namespace Gfx {
 // ======================================================================================
 // ===== Private Member Functions =======================================================
 // ======================================================================================
-
-double SvgRasterizer::cnvUnitStrToPixels(const std::string& str_)
-{
-    // Monitor's DPI
-    const double MONITOR_DPI = 96; // https://en.wikipedia.org/wiki/Dots_per_inch#Computer_monitor_DPI_standards
-
-    // Remove all white-spaces and convert to lower case
-    const std::string& str = lcaseStdStr(removeAllSpacesStdStr(str_));
-
-    // Convert to double and check for invalid value
-    char*  end = 0;
-    double val = strtod(str.c_str(), &end);
-
-    if(val == HUGE_VAL)
-        throw IOError("svg error: invalid number unit specifier '" + str + "'");
-
-    // If there is no unit or the unit is "px", simply return the value
-    if(!*end || strcmp(end, "px") == 0) return val;
-
-    if(strcmp(end, "%" ) == 0) return -val;
-
-    if(strcmp(end, "pt") == 0) return MONITOR_DPI * val / 72.00; // (1 / 72 of an inch)
-    if(strcmp(end, "pc") == 0) return MONITOR_DPI * val /  6.00; // (1 /  6 of an inch)
-    if(strcmp(end, "mm") == 0) return MONITOR_DPI * val / 25.40;
-    if(strcmp(end, "cm") == 0) return MONITOR_DPI * val /  2.54;
-    if(strcmp(end, "in") == 0) return MONITOR_DPI * val;
-    if(strcmp(end, "em") == 0) return val * (10.0 + 1.0 / 15.0); // http://kb.mozillazine.org/Em_units_versus_ex_units
-    if(strcmp(end, "ex") == 0) return val *   6.0;               // http://kb.mozillazine.org/Em_units_versus_ex_units
-
-    throw IOError("svg error: invalid number unit specifier '" + str + "'");
-}
 
 const std::string SvgRasterizer::cnvUtf32ToUtf8(const Pt::String& str)
 {
@@ -104,6 +75,88 @@ const std::string SvgRasterizer::cnvUtf32ToUtf8(const Pt::String& str)
     }
 
     return utf8;
+}
+
+double SvgRasterizer::cnvUnitStrToPixels(const std::string& str_)
+{
+    // Monitor's DPI
+    const double MONITOR_DPI = 96; // https://en.wikipedia.org/wiki/Dots_per_inch#Computer_monitor_DPI_standards
+
+    // Remove all white-spaces and convert to lower case
+    const std::string& str = lcaseStdStr(removeAllSpacesStdStr(str_));
+
+    // Convert to double and check for invalid value
+    char*  end = 0;
+    double val = strtod(str.c_str(), &end);
+
+    if(val == HUGE_VAL)
+        throw IOError("svg error: invalid number unit specifier '" + str + "'");
+
+    // If there is no unit or the unit is "px", simply return the value
+    if(!*end || strcmp(end, "px") == 0) return val;
+
+    if(strcmp(end, "%" ) == 0) return -val;
+
+    if(strcmp(end, "pt") == 0) return MONITOR_DPI * val / 72.00; // (1 / 72 of an inch)
+    if(strcmp(end, "pc") == 0) return MONITOR_DPI * val /  6.00; // (1 /  6 of an inch)
+    if(strcmp(end, "mm") == 0) return MONITOR_DPI * val / 25.40;
+    if(strcmp(end, "cm") == 0) return MONITOR_DPI * val /  2.54;
+    if(strcmp(end, "in") == 0) return MONITOR_DPI * val;
+    if(strcmp(end, "em") == 0) return val * (10.0 + 1.0 / 15.0); // http://kb.mozillazine.org/Em_units_versus_ex_units
+    if(strcmp(end, "ex") == 0) return val *   6.0;               // http://kb.mozillazine.org/Em_units_versus_ex_units
+
+    throw IOError("svg error: invalid number unit specifier '" + str + "'");
+}
+
+void SvgRasterizer::extractStyleData(SvgStyleData& ssd, const SGNode& parent, const Xml::AttributeList& attrList, const std::string& sectionInfo)
+{
+    // Extract from the style string (if specified)
+    if(attrList.has("style")) {
+        // ### TODO: style "inherit" !!! ###
+        // Tokenize the string
+        std::vector<std::string> tokens;
+        lexStyleData(tokens, attrList.get("style"));
+        // Process the tokens
+        for(size_t i = 0; i < tokens.size(); i += 2) {
+            const std::string& n = tokens[i + 0];
+            const std::string& v = tokens[i + 1];
+            if(n == "stroke") {
+                if(!ssd.penSpecified) copyPenData(ssd, parent.effectivePen());
+                ssd.penColor     = fromHtmlColor(v);
+                ssd.penSpecified = true;
+            }
+            else if(n == "stroke-opacity") {
+                if(!ssd.penSpecified) copyPenData(ssd, parent.effectivePen());
+                ssd.penColor.setAlpha(Gfx::Math::zrint(cnvStrToDbl(v, sectionInfo) * 65535));
+                ssd.penSpecified = true;
+            }
+            else if(n == "stroke-width") {
+                if(!ssd.penSpecified) copyPenData(ssd, parent.effectivePen());
+                ssd.penSize      = Gfx::Math::zrint(cnvStrToDbl(v, sectionInfo));
+                ssd.penSpecified = true;
+            }
+            // ### TODO: The brush data! ###
+        }
+    }
+
+    // Overwrite the style as needed
+    if(attrList.has("stroke")) {
+        if(!ssd.penSpecified) copyPenData(ssd, parent.effectivePen());
+        ssd.penColor     = fromHtmlColor(attrList.get("stroke"));
+        ssd.penSpecified = true;
+    }
+    if(attrList.has("stroke-opacity")) {
+        if(!ssd.penSpecified) copyPenData(ssd, parent.effectivePen());
+        ssd.penColor.setAlpha(Gfx::Math::zrint(cnvStrToDbl(attrList.get("stroke-opacity"), sectionInfo) * 65535));
+        ssd.penSpecified = true;
+    }
+    if(attrList.has("stroke-width")) {
+        if(!ssd.penSpecified) copyPenData(ssd, parent.effectivePen());
+        ssd.penSize      = Gfx::Math::zrint(cnvStrToDbl(attrList.get("stroke-width"), sectionInfo));
+        ssd.penSpecified = true;
+    }
+
+    // ### TODO: The brush data! ###
 }
 
 void SvgRasterizer::storeSvgObject(const Pt::String& objId, const SGNode* sgn, const std::string& sectionInfo)

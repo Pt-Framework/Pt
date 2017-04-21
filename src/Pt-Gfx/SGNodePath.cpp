@@ -27,7 +27,6 @@
   MA 02110-1301 USA
 */
 
-
 #include <Pt/Gfx/SGNodePath.h>
 #include <Pt/Gfx/ImagePainter2.h>
 

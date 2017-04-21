@@ -358,56 +358,6 @@ void SvgRasterizer::lexTransformData(std::vector<std::string>& tokens, const std
         throw IOError("svg error: transform definition: invalid/incomplete definition string");
 }
 
-void SvgRasterizer::extractStyleData(SvgStyleData& ssd, const SGNode& parent, const Xml::AttributeList& attrList, const std::string& sectionInfo)
-{
-    // Extract from the style string (if specified)
-    if(attrList.has("style")) {
-        // Tokenize the string
-        std::vector<std::string> tokens;
-        lexStyleData(tokens, attrList.get("style"));
-        // Process the tokens
-        for(size_t i = 0; i < tokens.size(); i += 2) {
-            const std::string& n = tokens[i + 0];
-            const std::string& v = tokens[i + 1];
-            if(n == "stroke") {
-                if(!ssd.penSpecified) copyPenData(ssd, parent.effectivePen());
-                ssd.penColor     = fromHtmlColor(v);
-                ssd.penSpecified = true;
-            }
-            else if(n == "stroke-opacity") {
-                if(!ssd.penSpecified) copyPenData(ssd, parent.effectivePen());
-                ssd.penColor.setAlpha(Gfx::Math::zrint(cnvStrToDbl(v, sectionInfo) * 65535));
-                ssd.penSpecified = true;
-            }
-            else if(n == "stroke-width") {
-                if(!ssd.penSpecified) copyPenData(ssd, parent.effectivePen());
-                ssd.penSize      = Gfx::Math::zrint(cnvStrToDbl(v, sectionInfo));
-                ssd.penSpecified = true;
-            }
-            // ### TODO: The brush data! ###
-        }
-    }
-
-    // Overwrite the style as needed
-    if(attrList.has("stroke")) {
-        if(!ssd.penSpecified) copyPenData(ssd, parent.effectivePen());
-        ssd.penColor     = fromHtmlColor(attrList.get("stroke"));
-        ssd.penSpecified = true;
-    }
-    if(attrList.has("stroke-opacity")) {
-        if(!ssd.penSpecified) copyPenData(ssd, parent.effectivePen());
-        ssd.penColor.setAlpha(Gfx::Math::zrint(cnvStrToDbl(attrList.get("stroke-opacity"), sectionInfo) * 65535));
-        ssd.penSpecified = true;
-    }
-    if(attrList.has("stroke-width")) {
-        if(!ssd.penSpecified) copyPenData(ssd, parent.effectivePen());
-        ssd.penSize      = Gfx::Math::zrint(cnvStrToDbl(attrList.get("stroke-width"), sectionInfo));
-        ssd.penSpecified = true;
-    }
-
-    // ### TODO: The brush data! ###
-}
-
 
 } // namespace
 } // namespace

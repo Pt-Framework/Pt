@@ -27,7 +27,6 @@
   MA 02110-1301 USA
 */
 
-
 #include <Pt/Gfx/SGNodeProxy.h>
 
 
@@ -54,8 +53,16 @@ void SGNodeProxy::checkForCircularChain(const SGNode* parent) const
 
 void SGNodeProxy::drawImpl(ImagePainter2& painter, const TransformT& transform, RenderMode overrideRM) const
 {
+    // Determine the render mode
+    SGNode::RenderMode rm = _rm;
+
+    if(rm == SGNode::RenderInherit) {
+        rm = _target.renderMode();
+        if(rm == SGNode::RenderNone) rm = SGNode::RenderInherit;
+    }
+
     // Call the target's implementation usig this node's render mode
-    _target.drawImpl(painter, transform * _target._transform, _rm);
+    _target.drawImpl(painter, transform * _target._transform, rm);
 }
 
 

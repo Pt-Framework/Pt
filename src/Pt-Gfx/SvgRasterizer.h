@@ -129,9 +129,6 @@ class SvgRasterizer
         static inline void copyPenData(SvgStyleData& ssd, const Pen& pen);
         static inline void copyBrushData(SvgStyleData& ssd, const Brush& brush);
 
-        static void extractStyleData(SvgStyleData& ssd, const SGNode& parent, const Xml::AttributeList& attrList, const std::string& sectionInfo);
-        inline void applyStyleData(SGNode& sgn, const SvgStyleData& ssd);
-
         // Defined in "SvgRasterizer_Process.cpp"
         void processSvgElementAttributes(const Xml::StartElement& elem);
 
@@ -142,9 +139,11 @@ class SvgRasterizer
         SGNode* processDrawingElement_line(const SvgStyleData& ssd, const Xml::AttributeList& attrList, const Pt::String& objId);
 
         // Defined in "SvgRasterizer_Util.cpp"
+        static const std::string cnvUtf32ToUtf8(const Pt::String& str);
         static double cnvUnitStrToPixels(const std::string& str);
 
-        static const std::string cnvUtf32ToUtf8(const Pt::String& str);
+        static void extractStyleData(SvgStyleData& ssd, const SGNode& parent, const Xml::AttributeList& attrList, const std::string& sectionInfo);
+        inline void applyStyleData(SGNode& sgn, const SvgStyleData& ssd);
 
         void storeSvgObject(const Pt::String& objId, const SGNode* sgn, const std::string& sectionInfo);
         const SGNode* getSvgObject_SGNode(const Pt::String& objId, const std::string& sectionInfo);

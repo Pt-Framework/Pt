@@ -56,8 +56,6 @@ void SGNodeLine::drawImpl(ImagePainter2& painter, const TransformT& transform, R
     transform.transformPoint(from, _from);
     transform.transformPoint(to  , _to  );
 
-    //std::clog << "LINE: (" << from.x() << ", " << from.y() << ") - " << to.x() << ", " << to.y() << std::endl;
-
     // Draw based on the effective mode
     switch(effectiveRenderMode(overrideRM)) {
         case RenderFill            : /* Fallthrough */
