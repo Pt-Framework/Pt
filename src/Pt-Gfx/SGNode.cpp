@@ -52,11 +52,11 @@ void SGNode::clear()
         delete *it;
     }
 
+    // Make the transformation into an identity transformation
+    _transform.identity();
+
     // Clear the children list
     _nodeData->children.clear();
-
-    // Make the transformation into an identity transformation
-    _nodeData->transform.identity();
 
     // Null the pen and brush
     _nodeData->pen   = Pen  ();
@@ -79,7 +79,7 @@ void SGNode::draw(ImagePainter2& painter, const TransformT* transform_)
         // If the flag is not set, then this is the "before" phase
         if(!eCur.after) {
             // Update the active transform object
-            transform = eCur.node->_nodeData->transform * transform;
+            transform = transform * eCur.node->_transform;
             // Set this node's pen to the painter as needed
             if(!eCur.node->_nodeData->pen.isNull()) {
                 // Scale the pen width

@@ -69,7 +69,6 @@ class PT_GFX_API SGNode {
         struct NodeData {
             Pen                        pen;       // Pen   (if null, then use the parent's pen  )
             Brush                      brush;     // Brush (if null, then use the parent's brush)
-            TransformT                 transform; // Transform
             Children                   children;  // Children
 
             Color                      trCFil;    // Background fill used when rotating texture
@@ -78,13 +77,8 @@ class PT_GFX_API SGNode {
             inline NodeData()
             {}
 
-            inline NodeData(const TransformT& transform_)
-            : transform( transform_ )
-            {}
-
-            inline NodeData(const TransformT& transform_, const Children& children_)
-            : transform( transform_ )
-            , children ( children_ )
+            inline NodeData(const Children& children_)
+            : children ( children_ )
             {}
         };
 
@@ -110,6 +104,14 @@ class PT_GFX_API SGNode {
         , _nodeDataRO( true )
         {}
 
+        inline SGNode(RenderMode rm, const TransformT& transform, SmartPtr<NodeData> nodeData)
+        : _parent    ( 0 )
+        , _rm        ( rm )
+        , _transform ( transform )
+        , _nodeData  ( nodeData )
+        , _nodeDataRO( true )
+        {}
+
         friend class SGNodeProxy;
 
     public:
@@ -123,14 +125,16 @@ class PT_GFX_API SGNode {
         inline SGNode(RenderMode rm, const TransformT& transform)
         : _parent    ( 0 )
         , _rm        ( rm )
-        , _nodeData  ( new NodeData(transform) )
+        , _transform ( transform )
+        , _nodeData  ( new NodeData() )
         , _nodeDataRO( false )
         { setTextureRotationParameters(); }
 
         inline SGNode(RenderMode rm, const TransformT& transform, const Children& children)
         : _parent    ( 0 )
         , _rm        ( rm )
-        , _nodeData  ( new NodeData(transform, children) )
+        , _transform ( transform )
+        , _nodeData  ( new NodeData(children) )
         , _nodeDataRO( false )
         { setTextureRotationParameters(); }
 
@@ -267,14 +271,10 @@ class PT_GFX_API SGNode {
         //
 
         inline TransformT& transform()
-        {
-            if(_nodeDataRO) throw std::logic_error("the node data is read-only in this instance");
-
-            return _nodeData->transform;
-        }
+        { return _transform; }
 
         inline const TransformT& transform() const
-        { return _nodeData->transform; }
+        { return _transform; }
 
         //
         // Direct access to the child nodes
@@ -318,6 +318,8 @@ class PT_GFX_API SGNode {
     private:
         SGNode*            _parent;     // Parent node
         RenderMode         _rm;         // Render mode
+
+        TransformT         _transform;  // Transform
 
         SmartPtr<NodeData> _nodeData;   // Node data
         bool               _nodeDataRO; // A flag that indicates whether the node data is read-only

@@ -55,7 +55,7 @@ void SGNodeProxy::checkForCircularChain(const SGNode* parent) const
 void SGNodeProxy::drawImpl(ImagePainter2& painter, const TransformT& transform, RenderMode overrideRM) const
 {
     // Call the target's implementation usig this node's render mode
-    _target.drawImpl(painter, transform, _rm);
+    _target.drawImpl(painter, transform * _target._transform, _rm);
 }
 
 

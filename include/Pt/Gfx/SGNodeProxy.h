@@ -49,6 +49,11 @@ class PT_GFX_API SGNodeProxy : public SGNode {
         , _target( target )
         {}
 
+        inline SGNodeProxy(const SGNode& target, RenderMode rm, const TransformT& transform)
+        : SGNode ( rm, transform, target._nodeData )
+        , _target( target )
+        {}
+
         virtual ~SGNodeProxy();
 
     protected:
