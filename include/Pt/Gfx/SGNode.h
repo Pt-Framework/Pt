@@ -30,6 +30,8 @@
 #ifndef PT_GFX_SGNODE_H
 #define PT_GFX_SGNODE_H
 
+#include <Pt/NonCopyable.h>
+
 #include <Pt/Gfx/Transform.h>
 
 
@@ -42,7 +44,7 @@ class ImagePainter2;
 
 /** @brief The base class for all scene-graph node classes.
   */
-class PT_GFX_API SGNode {
+class PT_GFX_API SGNode : private NonCopyable {
     public:
         enum RenderMode {
             RenderInherit,         //! @brief Inherit the mode from this node's parent
