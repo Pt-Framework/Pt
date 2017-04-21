@@ -106,22 +106,37 @@ const std::string SvgRasterizer::cnvUtf32ToUtf8(const Pt::String& str)
     return utf8;
 }
 
-void SvgRasterizer::storeSvgObject(const Pt::String& id, const SGNode* sgn, const std::string& sectionInfo)
+void SvgRasterizer::storeSvgObject(const Pt::String& objId, const SGNode* sgn, const std::string& sectionInfo)
 {
     // Check if an object with the same ID already exists
-    RasterState::SvgObjects::iterator it = _rstate->svgObjects.find(id);
+    RasterState::SvgObjects::iterator it = _rstate->svgObjects.find(objId);
 
     if(it != _rstate->svgObjects.end()) {
         // Check if the object already has an associated SGNode
         if(it->second->sgn)
-            throw IOError("svg error: " + sectionInfo + ": duplicated ID '" + cnvUtf32ToUtf8(id) + "'");
+            throw IOError("svg error: " + sectionInfo + ": duplicated ID '" + cnvUtf32ToUtf8(objId) + "'");
         // Store the SGNode
         it->second->sgn = sgn;
         return;
     }
 
     // Create a new object and store it
-    _rstate->svgObjects[id] = new SvgObject(sgn);
+    _rstate->svgObjects[objId] = new SvgObject(sgn);
+}
+
+const SGNode* SvgRasterizer::getSvgObject_SGNode(const Pt::String& objId_, const std::string& sectionInfo)
+{
+    // Remove the '#' prefix
+    const Pt::String& objId = (objId_[0] == '#') ? objId_.substr(1) : objId_;
+
+    // Check if an object with the given ID does exist
+    RasterState::SvgObjects::iterator it = _rstate->svgObjects.find(objId);
+
+    if(it == _rstate->svgObjects.end() || !it->second->sgn)
+        throw IOError("svg error: " + sectionInfo + ": undefined ID '" + cnvUtf32ToUtf8(objId) + "'");
+
+    // Return the object
+    return it->second->sgn;
 }
 
 

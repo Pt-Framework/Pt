@@ -120,6 +120,14 @@ SGNode* SvgRasterizer::processDrawingElement(const Xml::StartElement& elem)
 
     // Get the attributes
     const Xml::AttributeList& attrList = elem.attributes();
+    /*
+    for(Xml::AttributeList::ConstIterator it = attrList.begin(); it != attrList.end(); ++it) {
+        std::clog <<        it->name().prefix().narrow()
+                  << " " << it->name().name  ().narrow()
+                  << " " << it->name().local ().narrow()
+                  << std::endl;
+    }
+    //*/
 
     // Extract the object ID
     const Pt::String& objId = attrList.has("id") ? attrList.get("id") : Pt::String();
@@ -144,14 +152,14 @@ SGNode* SvgRasterizer::processDrawingElement(const Xml::StartElement& elem)
     return &parent.addChild(sgn);
 }
 
-SGNode* SvgRasterizer::processDrawingElement_g(const SvgStyleData& ssd, const Xml::AttributeList& attrList, const Pt::String& id)
+SGNode* SvgRasterizer::processDrawingElement_g(const SvgStyleData& ssd, const Xml::AttributeList& attrList, const Pt::String& objId)
 {
     // Create a new node and apply the style
     SGNode* sgn = new SGNode();
     applyStyleData(*sgn, ssd);
 
-    // Store the node in a list of objects as needed
-    if(!id.empty()) storeSvgObject(id, sgn, "g");
+    // Store the node in a list of objects if it has an ID
+    if(!objId.empty()) storeSvgObject(objId, sgn, "g");
 
     // Return the newly created node
     return sgn;
@@ -166,16 +174,37 @@ SGNode* SvgRasterizer::processDrawingElement_defs(const SvgStyleData& ssd, const
 
 SGNode* SvgRasterizer::processDrawingElement_use(const SvgStyleData& ssd, const Xml::AttributeList& attrList)
 {
-    // ### TODO ###
+    // Extract the link
+    if( !attrList.has("href") )
+        throw IOError("svg error: use: missing attribute 'xlink:href'");
 
-    return new SGNode();
+    const Pt::String& objId = attrList.get("href");
+
+    // Get the object
+    const SGNode* sgnRef = getSvgObject_SGNode(objId, "use");
+
+    // Extract the coordinate and size specifier
+    const double x = attrList.has("x"     ) ? cnvStrToDbl(attrList.get("x"     ), "use") : 0.0;
+    const double y = attrList.has("y"     ) ? cnvStrToDbl(attrList.get("y"     ), "use") : 0.0;
+  //const double w = attrList.has("width" ) ? cnvStrToDbl(attrList.get("width" ), "use") : 0.0;
+  //const double h = attrList.has("height") ? cnvStrToDbl(attrList.get("height"), "use") : 0.0;
+
+    // Create a new node and apply the style
+    SGNodeProxy* sgn = new SGNodeProxy(*sgnRef);
+    applyStyleData(*sgn, ssd);
+
+    // Apply the transform as needed
+    if(x != 0.0 || y != 0.0) sgn->transform().translate(x, y);
+
+    // Return the newly created node
+    return sgn;
 }
 
-SGNode* SvgRasterizer::processDrawingElement_line(const SvgStyleData& ssd, const Xml::AttributeList& attrList, const Pt::String& id)
+SGNode* SvgRasterizer::processDrawingElement_line(const SvgStyleData& ssd, const Xml::AttributeList& attrList, const Pt::String& objId)
 {
     // Extract the coordinates
     if( !attrList.has("x1") || !attrList.has("y1") || !attrList.has("x2") || !attrList.has("y2") )
-        throw IOError("svg error: line: missing attribute");
+        throw IOError("svg error: line: missing attribute 'x1/y1/x2/y2'");
 
     const double x1 = cnvStrToDbl(attrList.get("x1"), "line");
     const double y1 = cnvStrToDbl(attrList.get("y1"), "line");
@@ -186,8 +215,8 @@ SGNode* SvgRasterizer::processDrawingElement_line(const SvgStyleData& ssd, const
     SGNodeLine* sgn = new SGNodeLine( SGNode::RenderStroke, PointF(x1, y1), PointF(x2, y2) );
     applyStyleData(*sgn, ssd);
 
-    // Store the node in a list of objects as needed
-    if(!id.empty()) storeSvgObject(id, sgn, "line");
+    // Store the node in a list of objects if it has an ID
+    if(!objId.empty()) storeSvgObject(objId, sgn, "line");
 
     // Return the newly created node
     return sgn;

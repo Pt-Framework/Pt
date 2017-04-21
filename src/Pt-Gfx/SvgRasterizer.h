@@ -136,17 +136,18 @@ class SvgRasterizer
         void processSvgElementAttributes(const Xml::StartElement& elem);
 
         SGNode* processDrawingElement(const Xml::StartElement& elem);
-        SGNode* processDrawingElement_g(const SvgStyleData& ssd, const Xml::AttributeList& attrList, const Pt::String& id);
+        SGNode* processDrawingElement_g(const SvgStyleData& ssd, const Xml::AttributeList& attrList, const Pt::String& objId);
         SGNode* processDrawingElement_defs(const SvgStyleData& ssd, const Xml::AttributeList& attrList);
         SGNode* processDrawingElement_use(const SvgStyleData& ssd, const Xml::AttributeList& attrList);
-        SGNode* processDrawingElement_line(const SvgStyleData& ssd, const Xml::AttributeList& attrList, const Pt::String& id);
+        SGNode* processDrawingElement_line(const SvgStyleData& ssd, const Xml::AttributeList& attrList, const Pt::String& objId);
 
         // Defined in "SvgRasterizer_Util.cpp"
         static double cnvUnitStrToPixels(const std::string& str);
 
         static const std::string cnvUtf32ToUtf8(const Pt::String& str);
 
-        void storeSvgObject(const Pt::String& id, const SGNode* sgn, const std::string& sectionInfo);
+        void storeSvgObject(const Pt::String& objId, const SGNode* sgn, const std::string& sectionInfo);
+        const SGNode* getSvgObject_SGNode(const Pt::String& objId, const std::string& sectionInfo);
 };
 
 
