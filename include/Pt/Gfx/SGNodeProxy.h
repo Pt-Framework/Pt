@@ -70,7 +70,11 @@ class PT_GFX_API SGNodeProxy : public SGNode, private NonCopyable {
 
         void setBrushOverride(Brush* brush);
 
+        virtual const Pen& pen() const;
+
         virtual const Pen& effectivePen() const;
+
+        virtual const Brush& brush() const;
 
         virtual const Brush& effectiveBrush() const;
 

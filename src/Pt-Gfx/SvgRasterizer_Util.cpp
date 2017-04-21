@@ -110,6 +110,9 @@ double SvgRasterizer::cnvUnitStrToPixels(const std::string& str_)
 
 void SvgRasterizer::extractStyleData(SvgStyleData& ssd, const SGNode& parent, const Xml::AttributeList& attrList, const std::string& sectionInfo)
 {
+    // Get the parent's effective pen
+    const Pen& parEffPen = parent.effectivePen();
+
     // Extract from the style string (if specified)
     if(attrList.has("style")) {
         // Tokenize the string
@@ -120,18 +123,18 @@ void SvgRasterizer::extractStyleData(SvgStyleData& ssd, const SGNode& parent, co
             const std::string& n = tokens[i + 0];
             const std::string& v = tokens[i + 1];
             if(n == "stroke") {
-                if(!ssd.penSpecified) copyPenData(ssd, parent.effectivePen());
+                if(!ssd.penSpecified) copyPenData(ssd, parEffPen);
                 if(v == "inherit") ssd.inheritSpec.penColor = true;
                 else               ssd.penColor             = fromHtmlColor(v);
                 ssd.penSpecified = true;
             }
             else if(n == "stroke-opacity") {
-                if(!ssd.penSpecified) copyPenData(ssd, parent.effectivePen());
+                if(!ssd.penSpecified) copyPenData(ssd, parEffPen);
                 ssd.penColor.setAlpha(Gfx::Math::zrint(cnvStrToDbl(v, sectionInfo) * 65535));
                 ssd.penSpecified = true;
             }
             else if(n == "stroke-width") {
-                if(!ssd.penSpecified) copyPenData(ssd, parent.effectivePen());
+                if(!ssd.penSpecified) copyPenData(ssd, parEffPen);
                 ssd.penSize      = Gfx::Math::zrint(cnvStrToDbl(v, sectionInfo));
                 ssd.penSpecified = true;
             }
@@ -141,17 +144,17 @@ void SvgRasterizer::extractStyleData(SvgStyleData& ssd, const SGNode& parent, co
 
     // Overwrite the style as needed
     if(attrList.has("stroke")) {
-        if(!ssd.penSpecified) copyPenData(ssd, parent.effectivePen());
+        if(!ssd.penSpecified) copyPenData(ssd, parEffPen);
         ssd.penColor     = fromHtmlColor(attrList.get("stroke"));
         ssd.penSpecified = true;
     }
     if(attrList.has("stroke-opacity")) {
-        if(!ssd.penSpecified) copyPenData(ssd, parent.effectivePen());
+        if(!ssd.penSpecified) copyPenData(ssd, parEffPen);
         ssd.penColor.setAlpha(Gfx::Math::zrint(cnvStrToDbl(attrList.get("stroke-opacity"), sectionInfo) * 65535));
         ssd.penSpecified = true;
     }
     if(attrList.has("stroke-width")) {
-        if(!ssd.penSpecified) copyPenData(ssd, parent.effectivePen());
+        if(!ssd.penSpecified) copyPenData(ssd, parEffPen);
         ssd.penSize      = Gfx::Math::zrint(cnvStrToDbl(attrList.get("stroke-width"), sectionInfo));
         ssd.penSpecified = true;
     }

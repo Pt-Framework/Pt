@@ -483,10 +483,10 @@ const Color SvgRasterizer::fromHtmlColor(const std::string& colStr_)
         int g = 0;
         int b = 0;
         int a = 255;
-             if(clen == 3 + 1) sscanf(cstr + 1, "%1x%1x%1x",        &r, &g, &b    );
-        else if(clen == 4 + 1) sscanf(cstr + 1, "%1x%1x%1x%1x",     &r, &g, &b, &a);
-        else if(clen == 6 + 1) sscanf(cstr + 1, "%02x%02x%02x",     &r, &g, &b    );
-        else if(clen == 8 + 1) sscanf(cstr + 1, "%02x%02x%02x%02x", &r, &g, &b, &a);
+             if(clen == 3 + 1) { sscanf(cstr + 1, "%1x%1x%1x",        &r, &g, &b    ); r *= 17; g *= 17; b *= 17; }
+        else if(clen == 4 + 1) { sscanf(cstr + 1, "%1x%1x%1x%1x",     &r, &g, &b, &a); r *= 17; g *= 17; b *= 17; }
+        else if(clen == 6 + 1)   sscanf(cstr + 1, "%02x%02x%02x",     &r, &g, &b    );
+        else if(clen == 8 + 1)   sscanf(cstr + 1, "%02x%02x%02x%02x", &r, &g, &b, &a);
         return Color::fromRgb8(r, g, b, a);
     }
 

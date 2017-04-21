@@ -96,10 +96,12 @@ static void testSceneGraph(const char* title, Image& image, Painter& painter)
         // 3rd-child's 6th child
         SGNodeArc* csgn3_6 = &csgn3->addChild( new SGNodeArc( SGNode::RenderFill, PointF(30, 30), SizeF(30, 30), 30, 240, ArcMode::Chord ) );
                    csgn3_6->transform().translate(120 * 4 + 75 * 0, 120 * 1 + 75 * 1);
+                   csgn3_6->setTextureRotationParameters( Color::fromRgb8(0, 255, 255, 255), Brush::BilinearCrop );
 
         // 3rd-child's 7th child
         SGNodeArc* csgn3_7 = &csgn3->addChild( new SGNodeArc( SGNode::RenderFill, PointF(30, 30), SizeF(30, 30), 30, 240, ArcMode::Pie) );
                    csgn3_7->transform().translate(120 * 4 + 75 * 1, 120 * 1 + 75 * 1);
+                   csgn3_7->setTextureRotationParameters( Color::fromRgb8(0, 255, 255, 255), Brush::BilinearCrop );
 
     // Draw it
     psgn.setPen  (Color::fromRgb8(255, 255, 255));

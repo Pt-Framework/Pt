@@ -197,10 +197,9 @@ SGNode* SvgRasterizer::processDrawingElement_use(const SvgStyleData& ssd, const 
     const SvgInheritSpec* sis = sgnRef->extendedData<SvgInheritSpec>();
 
     if(sis && sis->penColor && ssd.penSpecified) {
+        // ### TODO: Store pen in cache (_rstate->penSet) ###
         Pen* pen = new Pen( sgnRef->pen() );
-
         pen->setColor(ssd.penColor);
-
         sgn->setPenOverride(pen);
     }
 

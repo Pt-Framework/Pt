@@ -73,6 +73,9 @@ void SGNode::clear()
     _nodeData->brush = Brush();
 }
 
+const Pen& SGNode::pen() const
+{ return _nodeData->pen; }
+
 const Pen& SGNode::effectivePen() const
 {
     if(!_nodeData->pen.isNull()) return _nodeData->pen;
@@ -85,6 +88,9 @@ const Pen& SGNode::effectivePen() const
 
     return _nodeData->pen;
 }
+
+const Brush& SGNode::brush() const
+{ return _nodeData->brush; }
 
 const Brush& SGNode::effectiveBrush() const
 {
@@ -112,57 +118,60 @@ void SGNode::draw(ImagePainter2& painter, const TransformT* transform_)
     while(!nStack.empty()) {
         // Get the current stack element
         TraversalStack& eCur = nStack.top();
+        // Get the pen and brush
+        const Pen&   pen   = eCur.node->pen  ();
+        const Brush& brush = eCur.node->brush();
         // If the flag is not set, then this is the "before" phase
         if(!eCur.after) {
             // Update the active transform object
             transform = transform * eCur.node->_transform;
             // Set this node's pen to the painter as needed
-            if(!eCur.node->_nodeData->pen.isNull()) {
+            if(!pen.isNull()) {
                 // Scale the pen width
-                const size_t orgPenSize = eCur.node->_nodeData->pen.size();
+                const size_t orgPenSize = pen.size();
                 const size_t sclPenSize = Gfx::Math::zrint( transform.transformSize((float) orgPenSize) );
                 const size_t newPenSize = (sclPenSize >= 1) ? sclPenSize : 1;
                 // Assign a new pen with the original width
                 if(orgPenSize == newPenSize) {
-                    painter.setPen(eCur.node->_nodeData->pen);
+                    painter.setPen(pen);
                 }
                 // Assign a new pen with the scaled width
                 else {
-                    Pen newPen = eCur.node->_nodeData->pen;
+                    Pen newPen = pen;
                     newPen.setSize(newPenSize);
                     painter.setPen(newPen);
                 }
             }
             // Set this node's brush to the painter as needed
-            if(!eCur.node->_nodeData->brush.isNull()) {
+            if(!brush.isNull()) {
                 // If the brush is a texture or a 2D gradient, adjust its rotation as needed
-                if(eCur.node->_nodeData->brush.isTexture() || eCur.node->_nodeData->brush.isGradient()) {
+                if(brush.isTexture() || brush.isGradient()) {
                     // ### TODO: Texture scaling ??? ###
                     // Calculate the new gradient rotation and ensure that it is within the acceptable range
-                    const ValueT orgRot = eCur.node->_nodeData->brush.rotation();
+                    const ValueT orgRot = brush.rotation();
                           ValueT newRot = orgRot + transform.extractRotation();
                     while(newRot < -360) newRot += 360;
                     while(newRot >  360) newRot -= 360;
                     // Assign the original brush as the painter's brush
                     if(orgRot == newRot) {
-                        painter.setBrush(eCur.node->_nodeData->brush);
+                        painter.setBrush(brush);
                     }
                     // Assign a new brush with the updated texture rotation
-                    else if(eCur.node->_nodeData->brush.isTexture()) {
-                        Brush newBrush = eCur.node->_nodeData->brush;
+                    else if(brush.isTexture()) {
+                        Brush newBrush = brush;
                         newBrush.setTextureRotation(newRot, eCur.node->_nodeData->trCFil, eCur.node->_nodeData->trMode);
                         painter.setBrush(newBrush);
                     }
                     // Assign a new brush with the updated gradient rotation
                     else {
-                        Brush newBrush = eCur.node->_nodeData->brush;
+                        Brush newBrush = brush;
                         newBrush.setGradientRotation(newRot);
                         painter.setBrush(newBrush);
                     }
                 }
                 // Other brush types
                 else {
-                    painter.setBrush(eCur.node->_nodeData->brush);
+                    painter.setBrush(brush);
                 }
             }
             // Draw this node
@@ -181,8 +190,8 @@ void SGNode::draw(ImagePainter2& painter, const TransformT* transform_)
         // If the flag is set, then this is the "after" phase
         else {
             // Restore the painter's original pen and/or brush as needed
-            if(!eCur.node->_nodeData->pen  .isNull()) painter.setPen  (eCur.pen  );
-            if(!eCur.node->_nodeData->brush.isNull()) painter.setBrush(eCur.brush);
+            if(!pen  .isNull()) painter.setPen  (eCur.pen  );
+            if(!brush.isNull()) painter.setBrush(eCur.brush);
             // Restore the transform object
             transform = eCur.transform;
             // Pop the stack element

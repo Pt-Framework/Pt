@@ -42,7 +42,6 @@ SGNodeProxy::~SGNodeProxy()
 
 void SGNodeProxy::setPenOverride(Pen* pen)
 {
-    std::clog << "SET PEN OVR: " << this << " = " << pen << std::endl;
     delete _penOverride;
     _penOverride = pen;
 }
@@ -53,15 +52,22 @@ void SGNodeProxy::setBrushOverride(Brush* brush)
     _brushOverride = brush;
 }
 
+const Pen& SGNodeProxy::pen() const
+{
+    if(_penOverride) return *_penOverride;
+    return SGNode::pen();
+}
+
 const Pen& SGNodeProxy::effectivePen() const
 {
-    std::clog << "GET PEN OVR: " << this << " = " << _penOverride << std::endl;
-    throw 1;
-    if(_penOverride) {
-        throw 123;
-        return *_penOverride;
-    }
+    if(_penOverride) return *_penOverride;
     return SGNode::effectivePen();
+}
+
+const Brush& SGNodeProxy::brush() const
+{
+    if(_brushOverride) return *_brushOverride;
+    return SGNode::brush();
 }
 
 const Brush& SGNodeProxy::effectiveBrush() const

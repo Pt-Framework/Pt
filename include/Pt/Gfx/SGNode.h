@@ -222,6 +222,8 @@ class PT_GFX_API SGNode {
             _nodeData->pen = pen;
         }
 
+        virtual const Pen& pen() const;
+
         virtual const Pen& effectivePen() const;
 
         inline void setBrush(const Brush& brush)
@@ -230,6 +232,8 @@ class PT_GFX_API SGNode {
 
             _nodeData->brush = brush;
         }
+
+        virtual const Brush& brush() const;
 
         virtual const Brush& effectiveBrush() const;
 
@@ -242,34 +246,6 @@ class PT_GFX_API SGNode {
         }
 
         void draw(ImagePainter2& painter, const TransformT* transform = 0);
-
-        //
-        // Direct access to the pen object
-        //
-
-        inline Pen& pen()
-        {
-            if(_nodeDataRO) throw std::logic_error("the node data is read-only in this instance");
-
-            return _nodeData->pen;
-        }
-
-        inline const Pen& pen() const
-        { return _nodeData->pen; }
-
-        //
-        // Direct access to the brush object
-        //
-
-        inline Brush& brush()
-        {
-            if(_nodeDataRO) throw std::logic_error("the node data is read-only in this instance");
-
-            return _nodeData->brush;
-        }
-
-        inline const Brush& brush() const
-        { return _nodeData->brush; }
 
         //
         // Direct access to the transform object
