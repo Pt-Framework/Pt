@@ -53,10 +53,10 @@ namespace Gfx {
 void SvgRasterizer::processSvgElementAttributes(const Xml::StartElement& elem)
 {
     // Get the attributes
-    const Xml::AttributeList& alist = elem.attributes();
+    const Xml::AttributeList& attrList = elem.attributes();
 
     // Walk through the attributes
-    for(Xml::AttributeList::ConstIterator it = alist.begin(); it != alist.end(); ++it) {
+    for(Xml::AttributeList::ConstIterator it = attrList.begin(); it != attrList.end(); ++it) {
         const std::string& snam = lcaseStdStr( it->name ().local() );
         const std::string& sval = lcaseStdStr( it->value()         );
         if(snam == "width") {
@@ -112,81 +112,85 @@ void SvgRasterizer::processSvgElementAttributes(const Xml::StartElement& elem)
 
 SGNode* SvgRasterizer::processDrawingElement(const Xml::StartElement& elem)
 {
-    // Get the parent
+    // Get the parent node
     SGNode& parent = *_rstate->sgStack.top();
 
-    // Get the name
-    const std::string& etype = lcaseStdStr(elem.name().local());
+    // Get the element type
+    const std::string& elemType = lcaseStdStr(elem.name().local());
 
     // Get the attributes
-    const Xml::AttributeList& alist = elem.attributes();
+    const Xml::AttributeList& attrList = elem.attributes();
 
-    // Process base on the type
-    // ### TODO: Complete them ! ###
-         if(etype == "g"   ) return processDrawingElement_g   (parent, alist);
-    else if(etype == "defs") return processDrawingElement_defs(parent, alist);
-    else if(etype == "use" ) return processDrawingElement_use (parent, alist);
-    else if(etype == "line") return processDrawingElement_line(parent, alist);
+    // Extract the object ID
+    const Pt::String& objId = attrList.has("id") ? attrList.get("id") : Pt::String();
 
-    // Return the newly created node
-    return 0;
-}
-
-SGNode* SvgRasterizer::processDrawingElement_g(SGNode& parent, const Xml::AttributeList& alist)
-{
     // Extract the style data
     SvgStyleData ssd;
-    extractStyleData(ssd, parent, alist, "line");
+    extractStyleData(ssd, parent, attrList, elemType);
 
-    // Create a new node and apply the style
-    SGNode* sgn = new SGNode();
+    // Process based on the element type
+    SGNode* sgn = 0;
 
-    applyStyleData(*sgn, ssd);
+    // ### TODO: Complete them ! ###
+
+         if(elemType == "g"   ) sgn = processDrawingElement_g   (ssd, attrList, objId);
+    else if(elemType == "defs") sgn = processDrawingElement_defs(ssd, attrList       );
+    else if(elemType == "use" ) sgn = processDrawingElement_use (ssd, attrList       );
+    else if(elemType == "line") sgn = processDrawingElement_line(ssd, attrList, objId);
+
+    if(!sgn) return 0;
 
     // Add the newly created node to the parent and return it
     return &parent.addChild(sgn);
 }
 
-SGNode* SvgRasterizer::processDrawingElement_defs(SGNode& parent, const Xml::AttributeList& alist)
+SGNode* SvgRasterizer::processDrawingElement_g(const SvgStyleData& ssd, const Xml::AttributeList& attrList, const Pt::String& id)
 {
-    // ### TODO ###
-    return &parent.addChild(new SGNode());
+    // Create a new node and apply the style
+    SGNode* sgn = new SGNode();
+    applyStyleData(*sgn, ssd);
+
+    // Store the node in a list of objects as needed
+    if(!id.empty()) storeSvgObject(id, sgn, "g");
+
+    // Return the newly created node
+    return sgn;
 }
 
-SGNode* SvgRasterizer::processDrawingElement_use(SGNode& parent, const Xml::AttributeList& alist)
+SGNode* SvgRasterizer::processDrawingElement_defs(const SvgStyleData& ssd, const Xml::AttributeList& attrList)
 {
     // ### TODO ###
-    return &parent.addChild(new SGNode());
+
+    return new SGNode();
 }
 
-SGNode* SvgRasterizer::processDrawingElement_line(SGNode& parent, const Xml::AttributeList& alist)
+SGNode* SvgRasterizer::processDrawingElement_use(const SvgStyleData& ssd, const Xml::AttributeList& attrList)
 {
-    // Extract the style data
-    SvgStyleData ssd;
-    extractStyleData(ssd, parent, alist, "line");
+    // ### TODO ###
 
-    // Extract the ID
-    const Pt::String& id = alist.has("id") ? alist.get("id") : Pt::String();
+    return new SGNode();
+}
 
+SGNode* SvgRasterizer::processDrawingElement_line(const SvgStyleData& ssd, const Xml::AttributeList& attrList, const Pt::String& id)
+{
     // Extract the coordinates
-    if( !alist.has("x1") || !alist.has("y1") || !alist.has("x2") || !alist.has("y2") )
+    if( !attrList.has("x1") || !attrList.has("y1") || !attrList.has("x2") || !attrList.has("y2") )
         throw IOError("svg error: line: missing attribute");
 
-    const double x1 = cnvStrToDbl(alist.get("x1"), "line");
-    const double y1 = cnvStrToDbl(alist.get("y1"), "line");
-    const double x2 = cnvStrToDbl(alist.get("x2"), "line");
-    const double y2 = cnvStrToDbl(alist.get("y2"), "line");
+    const double x1 = cnvStrToDbl(attrList.get("x1"), "line");
+    const double y1 = cnvStrToDbl(attrList.get("y1"), "line");
+    const double x2 = cnvStrToDbl(attrList.get("x2"), "line");
+    const double y2 = cnvStrToDbl(attrList.get("y2"), "line");
 
     // Create a new node and apply the style
     SGNodeLine* sgn = new SGNodeLine( SGNode::RenderStroke, PointF(x1, y1), PointF(x2, y2) );
-
     applyStyleData(*sgn, ssd);
 
-    // Store the node in a list of objects
-    storeSvgObject(id, sgn, "line");
+    // Store the node in a list of objects as needed
+    if(!id.empty()) storeSvgObject(id, sgn, "line");
 
-    // Add the newly created node to the parent and return it
-    return &parent.addChild(sgn);
+    // Return the newly created node
+    return sgn;
 }
 
 

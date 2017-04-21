@@ -75,13 +75,13 @@ const std::string SvgRasterizer::cnvUtf32ToUtf8(const Pt::String& str)
     utf8.reserve(str.length() * 4);
 
     // UTF-32 Bytes                 UTF-8 Byte #1   UTF-8 Byte #2   UTF-8 Byte #3   UTF-8 Byte #4
-    //                   0aaaaaaa   0aaaaaaa
-    //          00000bbb baaaaaaa   110bbbba        10aaaaaa
-    //          ccccbbbb baaaaaaa   1110cccc        10bbbbba        10aaaaaa
-    // 000ddddd ccccbbbb baaaaaaa   11110ddd        10ddcccc        10bbbbba        10aaaaaa
+    //                   0AAAAAAA   0AAAAAAA
+    //          00000BBB BAAAAAAA   110BBBBA        10AAAAAA
+    //          CCCCBBBB BAAAAAAA   1110CCCC        10BBBBBA        10AAAAAA
+    // 000DDDDD CCCCBBBB BAAAAAAA   11110DDD        10DDCCCC        10BBBBBA        10AAAAAA
 
     for(Pt::String::const_iterator it = str.begin(); it != str.end(); ++it) {
-        //                             Max. UTF-32   Replacement
+        //                                     Max. UTF-32   Replacement
         const Pt::uint32_t ch = (it->value() > 0x0010FFFF) ? 0x0000FFFD : it->value();
         if(ch < 0x00000080) {
             utf8 += static_cast<char>( 0x00 | ( ( ch & 0x0000007F ) >>  0 ) );

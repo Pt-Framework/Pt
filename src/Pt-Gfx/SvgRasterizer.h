@@ -129,17 +129,17 @@ class SvgRasterizer
         static inline void copyPenData(SvgStyleData& ssd, const Pen& pen);
         static inline void copyBrushData(SvgStyleData& ssd, const Brush& brush);
 
-        static void extractStyleData(SvgStyleData& ssd, const SGNode& parent, const Xml::AttributeList& alist, const std::string& sectionInfo);
+        static void extractStyleData(SvgStyleData& ssd, const SGNode& parent, const Xml::AttributeList& attrList, const std::string& sectionInfo);
         inline void applyStyleData(SGNode& sgn, const SvgStyleData& ssd);
 
         // Defined in "SvgRasterizer_Process.cpp"
         void processSvgElementAttributes(const Xml::StartElement& elem);
 
         SGNode* processDrawingElement(const Xml::StartElement& elem);
-        SGNode* processDrawingElement_g(SGNode& parent, const Xml::AttributeList& alist);
-        SGNode* processDrawingElement_defs(SGNode& parent, const Xml::AttributeList& alist);
-        SGNode* processDrawingElement_use(SGNode& parent, const Xml::AttributeList& alist);
-        SGNode* processDrawingElement_line(SGNode& parent, const Xml::AttributeList& alist);
+        SGNode* processDrawingElement_g(const SvgStyleData& ssd, const Xml::AttributeList& attrList, const Pt::String& id);
+        SGNode* processDrawingElement_defs(const SvgStyleData& ssd, const Xml::AttributeList& attrList);
+        SGNode* processDrawingElement_use(const SvgStyleData& ssd, const Xml::AttributeList& attrList);
+        SGNode* processDrawingElement_line(const SvgStyleData& ssd, const Xml::AttributeList& attrList, const Pt::String& id);
 
         // Defined in "SvgRasterizer_Util.cpp"
         static double cnvUnitStrToPixels(const std::string& str);
