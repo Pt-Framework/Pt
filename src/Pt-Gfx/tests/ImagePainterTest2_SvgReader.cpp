@@ -164,3 +164,25 @@ static void testSvgReader2(const char* title, Image& image, Painter& painter)
 
     #undef SVG_SUB_DIR
 }
+
+static void testSvgReader3(const char* title, Image& image, Painter& painter)
+{
+    #define SVG_SUB_DIR "svg_basic_defs_use/"
+
+    resetImage(image);
+
+    ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
+    if(!ip2) return;
+
+    PointF svgImgTopLeft;
+    Size   svgImgSize(180, 180);
+
+    Pt::uint8_t r = 0, c = 0;
+
+    svgImgTopLeft.set(200 * c + 10, 200 * r + 10); ++c;
+    renderSVG(*ip2, svgImgTopLeft, svgImgSize, SVG_SUB_DIR "use-line1.svg");
+
+    sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
+
+    #undef SVG_SUB_DIR
+}
