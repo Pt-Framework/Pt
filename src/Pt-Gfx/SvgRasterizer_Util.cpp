@@ -112,7 +112,7 @@ void SvgRasterizer::extractStyleData(SvgStyleData& ssd, const SGNode& parent, co
 {
     // Extract from the style string (if specified)
     if(attrList.has("style")) {
-        // ### TODO: style "inherit" !!! ###
+        // ### TODO: Implement style "inherit" !!! ###
         // Tokenize the string
         std::vector<std::string> tokens;
         lexStyleData(tokens, attrList.get("style"));

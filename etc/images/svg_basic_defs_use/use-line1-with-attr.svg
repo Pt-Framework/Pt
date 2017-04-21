@@ -1,7 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
      width="150px" height="100px" viewBox="0 0 150 100">
 
-    <line id="line1" x1="5" y1="5" x2="10" y2="10" style="stroke:green; stroke-width:1"/>
-    <use x="20" y="20" xlink:href="#line1" style="stroke:cyan"/>
+    <line id="line1" x1="5" y1="5" x2="10" y2="10" style="stroke:inherit; stroke-width:1"/>
+    <use x="0" y="0" xlink:href="#line1" style="stroke:#F00"/>
+    <use x="20" y="20" xlink:href="#line1" style="stroke:#0F0"/>
 
 </svg>

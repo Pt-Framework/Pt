@@ -128,6 +128,7 @@ struct SvgRasterizer::CompareBrush {
 //
 
 struct SvgRasterizer::SvgStyleData {
+    // ### TODO: Implement style "inherit" !!! ###
     bool           penSpecified;
     Color          penColor;
     Pt::size_t     penSize;
@@ -154,6 +155,7 @@ struct SvgRasterizer::SvgStyleData {
 //
 
 struct SvgRasterizer::SvgObject {
+    // ### TODO: Implement style "inherit" !!! ###
     const SGNode* sgn;
 
     inline SvgObject()

@@ -140,6 +140,7 @@ SGNode* SvgRasterizer::processDrawingElement(const Xml::StartElement& elem)
     SGNode* sgn = 0;
 
     // ### TODO: Complete them ! ###
+    // ### TODO: Implement <style>, <defs>, etc. !!! ###
 
          if(elemType == "g"   ) sgn = processDrawingElement_g   (ssd, attrList, objId);
     else if(elemType == "defs") sgn = processDrawingElement_defs(ssd, attrList       );
@@ -188,6 +189,8 @@ SGNode* SvgRasterizer::processDrawingElement_use(const SvgStyleData& ssd, const 
     const double y = attrList.has("y"     ) ? cnvStrToDbl(attrList.get("y"     ), "use") : 0.0;
   //const double w = attrList.has("width" ) ? cnvStrToDbl(attrList.get("width" ), "use") : 0.0;
   //const double h = attrList.has("height") ? cnvStrToDbl(attrList.get("height"), "use") : 0.0;
+
+    // ### TODO: Implement style "inherit" !!! ###
 
     // Create a new node and apply the style
     SGNodeProxy* sgn = new SGNodeProxy(*sgnRef);
