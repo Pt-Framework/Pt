@@ -311,9 +311,9 @@ class PT_GFX_API SGNode {
             return rm;
         }
 
-        virtual void checkForCircularChain(const SGNode* parent) const;
-
         virtual void drawImpl(ImagePainter2& painter, const TransformT& transform, RenderMode overrideRM) const;
+
+        virtual void checkForCircularChain(const SGNode* parent) const;
 
     private:
         SGNode*            _parent;     // Parent node

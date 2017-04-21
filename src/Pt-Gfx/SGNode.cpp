@@ -155,6 +155,11 @@ void SGNode::draw(ImagePainter2& painter, const TransformT* transform_)
     }
 }
 
+void SGNode::drawImpl(ImagePainter2& /*painter*/, const TransformT& /*transform*/, RenderMode /*overrideRM*/) const
+{
+    // Does nothing
+}
+
 void SGNode::checkForCircularChain(const SGNode* parent) const
 {
     // Check for circular/recursive node chain
@@ -164,11 +169,6 @@ void SGNode::checkForCircularChain(const SGNode* parent) const
         if(p == this) throw std::logic_error("circular/recursive node chain detected");
         p = p->_parent;
     }
-}
-
-void SGNode::drawImpl(ImagePainter2& /*painter*/, const TransformT& /*transform*/, RenderMode /*overrideRM*/) const
-{
-    // Does nothing
 }
 
 

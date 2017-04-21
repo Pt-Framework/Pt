@@ -37,6 +37,20 @@ namespace Gfx {
 SGNodeProxy::~SGNodeProxy()
 {}
 
+void SGNodeProxy::drawImpl(ImagePainter2& painter, const TransformT& transform, RenderMode overrideRM) const
+{
+    // Determine the render mode
+    SGNode::RenderMode rm = _rm;
+
+    if(rm == SGNode::RenderInherit) {
+        rm = _target.renderMode();
+        if(rm == SGNode::RenderNone) rm = SGNode::RenderInherit;
+    }
+
+    // Call the target's implementation usig this node's render mode
+    _target.drawImpl(painter, transform * _target._transform, rm);
+}
+
 void SGNodeProxy::checkForCircularChain(const SGNode* parent) const
 {
     // Call the base implementation
@@ -51,18 +65,14 @@ void SGNodeProxy::checkForCircularChain(const SGNode* parent) const
     }
 }
 
-void SGNodeProxy::drawImpl(ImagePainter2& painter, const TransformT& transform, RenderMode overrideRM) const
+void SGNodeProxy::checkForProxyInProxy(const SGNode& target)
 {
-    // Determine the render mode
-    SGNode::RenderMode rm = _rm;
+    const SGNodeProxy* sgn = dynamic_cast<const SGNodeProxy*>(&target);
+    if(sgn) throw std::logic_error("making a proxy that contains another proxy is not supported");
 
-    if(rm == SGNode::RenderInherit) {
-        rm = _target.renderMode();
-        if(rm == SGNode::RenderNone) rm = SGNode::RenderInherit;
+    for(Children::const_iterator it = target.begin(); it != target.end(); ++it) {
+        checkForProxyInProxy(**it);
     }
-
-    // Call the target's implementation usig this node's render mode
-    _target.drawImpl(painter, transform * _target._transform, rm);
 }
 
 

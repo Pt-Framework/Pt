@@ -30,6 +30,8 @@
 #ifndef PT_GFX_SGNODEPROXY_H
 #define PT_GFX_SGNODEPROXY_H
 
+#include <Pt/NonCopyable.h>
+
 #include <Pt/Gfx/SGNode.h>
 
 
@@ -42,27 +44,29 @@ namespace Gfx{
   * Its function is to reuse existing nodes in other branches of the scene graph
   * to reduce memory usage.
   */
-class PT_GFX_API SGNodeProxy : public SGNode {
+class PT_GFX_API SGNodeProxy : public SGNode, private NonCopyable {
     public:
         inline SGNodeProxy(const SGNode& target, RenderMode rm = RenderInherit)
         : SGNode ( rm, target._nodeData )
         , _target( target )
-        {}
+        { checkForProxyInProxy(_target); }
 
         inline SGNodeProxy(const SGNode& target, RenderMode rm, const TransformT& transform)
         : SGNode ( rm, transform, target._nodeData )
         , _target( target )
-        {}
+        { checkForProxyInProxy(_target); }
 
         virtual ~SGNodeProxy();
 
     protected:
-        virtual void checkForCircularChain(const SGNode* parent) const;
-
         virtual void drawImpl(ImagePainter2& painter, const TransformT& transform, RenderMode overrideRM) const;
+
+        virtual void checkForCircularChain(const SGNode* parent) const;
 
     private:
         const SGNode& _target;
+
+        static void checkForProxyInProxy(const SGNode& target);
 };
 
 
