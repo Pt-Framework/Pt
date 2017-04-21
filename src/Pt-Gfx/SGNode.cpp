@@ -37,12 +37,22 @@ namespace Pt {
 namespace Gfx {
 
 
+SGNode::BasicExtendedData::BasicExtendedData()
+{}
+
+SGNode::BasicExtendedData::~BasicExtendedData()
+{}
+
+
 SGNode::~SGNode()
 {
     // Delete all the child objects
     for(Children::iterator it = _nodeData->children.begin(); it != _nodeData->children.end(); ++it) {
         delete *it;
     }
+
+    // Delete the extended data (if any)
+    delete _extData;
 }
 
 void SGNode::clear()

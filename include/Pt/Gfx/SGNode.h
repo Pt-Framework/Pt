@@ -64,6 +64,14 @@ class PT_GFX_API SGNode {
         typedef Children::const_iterator         ConstIterator;
         typedef Children::const_reverse_iterator ConstReverseIterator;
 
+    public:
+        //! @brief Basic class for adding extended (user) data to scene-graph nodes
+        class BasicExtendedData {
+            public:
+                BasicExtendedData();
+                virtual ~BasicExtendedData();
+        };
+
     private:
         // Node data
         struct NodeData {
@@ -102,6 +110,7 @@ class PT_GFX_API SGNode {
         , _rm        ( rm )
         , _nodeData  ( nodeData )
         , _nodeDataRO( true )
+        , _extData   ( 0 )
         {}
 
         inline SGNode(RenderMode rm, const TransformT& transform, SmartPtr<NodeData> nodeData)
@@ -110,6 +119,7 @@ class PT_GFX_API SGNode {
         , _transform ( transform )
         , _nodeData  ( nodeData )
         , _nodeDataRO( true )
+        , _extData   ( 0 )
         {}
 
         friend class SGNodeProxy;
@@ -120,6 +130,7 @@ class PT_GFX_API SGNode {
         , _rm        ( rm )
         , _nodeData  ( new NodeData() )
         , _nodeDataRO( false )
+        , _extData   ( 0 )
         { setTextureRotationParameters(); }
 
         inline SGNode(RenderMode rm, const TransformT& transform)
@@ -128,6 +139,7 @@ class PT_GFX_API SGNode {
         , _transform ( transform )
         , _nodeData  ( new NodeData() )
         , _nodeDataRO( false )
+        , _extData   ( 0 )
         { setTextureRotationParameters(); }
 
         inline SGNode(RenderMode rm, const TransformT& transform, const Children& children)
@@ -136,6 +148,7 @@ class PT_GFX_API SGNode {
         , _transform ( transform )
         , _nodeData  ( new NodeData(children) )
         , _nodeDataRO( false )
+        , _extData   ( 0 )
         { setTextureRotationParameters(); }
 
         virtual ~SGNode();
@@ -173,6 +186,15 @@ class PT_GFX_API SGNode {
 
         inline const SGNode* parent() const
         { return _parent; }
+
+        inline void setExtendedData(BasicExtendedData* extData)
+        {
+            delete _extData;
+            _extData = extData;
+        }
+
+        inline BasicExtendedData* eExtendedData()
+        { return _extData; }
 
         //
         // Render mode
@@ -323,6 +345,8 @@ class PT_GFX_API SGNode {
 
         SmartPtr<NodeData> _nodeData;   // Node data
         bool               _nodeDataRO; // A flag that indicates whether the node data is read-only
+
+        BasicExtendedData* _extData;    // Optional extended data
 };
 
 
