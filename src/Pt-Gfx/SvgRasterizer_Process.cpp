@@ -191,7 +191,7 @@ SGNode* SvgRasterizer::processDrawingElement_use(const SvgStyleData& ssd, const 
 
     // Create a new node and apply the style
     SGNodeProxy* sgn = new SGNodeProxy(*sgnRef);
-    applyStyleData(*sgn, ssd);
+    //applyStyleData(*sgn, ssd);
 
     // Apply the transform as needed
     if(x != 0.0 || y != 0.0) sgn->transform().translate(x, y);
