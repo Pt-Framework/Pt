@@ -1,11 +1,11 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
+/* Copyright (C) 2015 Marc Boris Duerner
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -15,15 +15,15 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
   02110-1301 USA
 */
 
@@ -32,8 +32,8 @@
 namespace Pt {
 
 namespace Gfx {
- 
-Image::Image()		
+
+Image::Image()
 {
 }
 
@@ -47,7 +47,7 @@ Image::Image(const ImageFormat& format, const Size& size, size_t padding)
 }
 
 
-Image::Image(const ImageFormat& format, Pt::uint8_t* buffer, 
+Image::Image(const ImageFormat& format, Pt::uint8_t* buffer,
              const Gfx::Size& size, size_t padding)
 {
 }
@@ -59,7 +59,7 @@ Image::Image(const Image& image)
 }
 
 
-Image::~Image()		
+Image::~Image()
 {
 }
 
@@ -68,41 +68,41 @@ const Image& Image::operator=(const Image& image)
 {
     Pt::ssize_t n = image.format().imageSize(image.size(), image.padding());
     _buffer.resize(n);
-    
+
     if( n != 0)
     {
       const Pt::uint8_t* imageData = image.data();
       std::memcpy(&_buffer[0], imageData, n);
-      Pt::uint8_t* data = _buffer.empty() ? 0 : &_buffer[0];    
+      Pt::uint8_t* data = _buffer.empty() ? 0 : &_buffer[0];
       _view.reset(image.format(), data, image.size(), image.view().padding());
     }
     else
     {
       _view.reset(image.format(), 0, image.size(), image.view().padding());
     }
-	  
+
     return *this;
 }
 
 
-void Image::reset(const ImageFormat& f, 
+void Image::reset(const ImageFormat& f,
                   const Gfx::Size& size, Pt::ssize_t padding)
 {
     Pt::ssize_t n = f.imageSize(size, padding);
-    _buffer.resize(n); 
-    
+    _buffer.resize(n);
+
     Pt::uint8_t* data = _buffer.empty() ? 0
                                         : &_buffer[0];
 
-    _view.reset(f, data, size, padding); 
+    _view.reset(f, data, size, padding);
 }
 
 
-void Image::reset(const ImageFormat& format, Pt::uint8_t* data, 
+void Image::reset(const ImageFormat& format, Pt::uint8_t* data,
                   const Gfx::Size& size, Pt::ssize_t padding)
 {
     _view.reset(format, data, size, padding);
-    _buffer.clear();  
+    _buffer.clear();
 }
 
 } // namespace
