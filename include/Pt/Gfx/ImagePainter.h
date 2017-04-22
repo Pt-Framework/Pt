@@ -48,5 +48,4 @@ namespace Gfx {
 
 #endif
 
-
 #endif
