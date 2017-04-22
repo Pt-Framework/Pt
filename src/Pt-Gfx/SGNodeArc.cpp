@@ -70,6 +70,8 @@ void SGNodeArc::set(const PointT& center, const SizeT& radius, ValueT degBegin, 
     path().endPath  ();
 }
 
+// ======================================================================================
+
 SGNode* SGNodeArc::cloneImpl(SGNode* newInst) const
 {
     // The new instance

@@ -164,7 +164,9 @@ class PT_GFX_API SGNode : private NonCopyable {
 
         virtual void clear();
 
-        SGNode* clone() const; // NOTE: This operation with convert all proxy nodes to normal nodes
+        // NOTE: * This operation with convert all child proxy nodes to normal nodes
+        //       * This operation will not clone the node's parent
+        SGNode* clone() const;
 
         template <typename T>
         inline T& addChild(T* child_)

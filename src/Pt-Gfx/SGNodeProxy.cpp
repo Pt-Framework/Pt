@@ -76,6 +76,8 @@ const Brush& SGNodeProxy::effectiveBrush() const
     return SGNode::effectiveBrush();
 }
 
+// ======================================================================================
+
 SGNode* SGNodeProxy::cloneImpl(SGNode* newInst) const
 {
     // Cloning a proxy node means cloning the whole target graph, removing the proxy
@@ -87,6 +89,9 @@ SGNode* SGNodeProxy::cloneImpl(SGNode* newInst) const
 
     // Have we given an instance?
     if(newInst) {
+        // Check the object type
+        if(!dynamic_cast<SGNodeProxy*>(newInst))
+            throw std::runtime_error("SGNodeProxy: invalid clone operation");
         // Call the base class implementation so that it can copy its data
         SGNode::cloneImpl(newInst);
         // Add the newly created instance as the child of the given instance

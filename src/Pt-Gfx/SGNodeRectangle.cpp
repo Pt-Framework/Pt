@@ -91,6 +91,8 @@ void SGNodeRectangle::set(const RectT& rect, float radius)
     }
 }
 
+// ======================================================================================
+
 SGNode* SGNodeRectangle::cloneImpl(SGNode* newInst) const
 {
     // The new instance

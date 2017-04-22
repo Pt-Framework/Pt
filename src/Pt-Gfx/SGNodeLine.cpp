@@ -48,6 +48,8 @@ void SGNodeLine::clear()
     SGNode::clear();
 }
 
+// ======================================================================================
+
 SGNode* SGNodeLine::cloneImpl(SGNode* newInst) const
 {
     // The new instance

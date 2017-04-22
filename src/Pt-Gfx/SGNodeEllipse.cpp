@@ -72,6 +72,8 @@ void SGNodeEllipse::set(const PointT& topLeft, const SizeT& size)
     path().endPath  ();
 }
 
+// ======================================================================================
+
 SGNode* SGNodeEllipse::cloneImpl(SGNode* newInst) const
 {
     // The new instance

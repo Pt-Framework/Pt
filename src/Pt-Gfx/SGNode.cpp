@@ -208,6 +208,8 @@ void SGNode::draw(ImagePainter2& painter, const TransformT* transform_)
     }
 }
 
+// ======================================================================================
+
 SGNode* SGNode::cloneGraph() const
 { return cloneImpl(0); }
 
