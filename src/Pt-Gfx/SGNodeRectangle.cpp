@@ -91,6 +91,32 @@ void SGNodeRectangle::set(const RectT& rect, float radius)
     }
 }
 
+SGNode* SGNodeRectangle::cloneImpl(SGNode* newInst) const
+{
+    // The new instance
+    SGNodeRectangle* sgn;
+
+    // Convert and check the object type
+    if(newInst) {
+        sgn = dynamic_cast<SGNodeRectangle*>(newInst);
+        if(!sgn) throw std::runtime_error("SGNodeRectangle: invalid clone operation");
+    }
+    // Ceate a new object
+    else {
+        sgn = new SGNodeRectangle();
+    }
+
+    // Call the base class implementation so that it can copy its data
+    SGNodePath::cloneImpl(sgn);
+
+    // Copy this class' data
+    sgn->_rect   = _rect;
+    sgn->_radius = _radius;
+
+    // Return the new instance
+    return sgn;
+}
+
 
 } // namespace
 } // namespace

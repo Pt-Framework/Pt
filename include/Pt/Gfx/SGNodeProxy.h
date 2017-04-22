@@ -77,6 +77,8 @@ class PT_GFX_API SGNodeProxy : public SGNode {
         virtual const Brush& effectiveBrush() const;
 
     protected:
+        virtual SGNode* cloneImpl(SGNode* newInst) const;
+
         virtual void drawImpl(ImagePainter2& painter, const TransformT& transform, RenderMode overrideRM) const;
 
         virtual void checkForCircularChain(const SGNode* parent) const;

@@ -72,6 +72,32 @@ void SGNodeEllipse::set(const PointT& topLeft, const SizeT& size)
     path().endPath  ();
 }
 
+SGNode* SGNodeEllipse::cloneImpl(SGNode* newInst) const
+{
+    // The new instance
+    SGNodeEllipse* sgn;
+
+    // Convert and check the object type
+    if(newInst) {
+        sgn = dynamic_cast<SGNodeEllipse*>(newInst);
+        if(!sgn) throw std::runtime_error("SGNodeEllipse: invalid clone operation");
+    }
+    // Ceate a new object
+    else {
+        sgn = new SGNodeEllipse();
+    }
+
+    // Call the base class implementation so that it can copy its data
+    SGNodePath::cloneImpl(sgn);
+
+    // Copy this class' data
+    sgn->_topLeft = _topLeft;
+    sgn->_size    = _size;
+
+    // Return the new instance
+    return sgn;
+}
+
 
 } // namespace
 } // namespace

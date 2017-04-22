@@ -139,6 +139,9 @@ struct SvgRasterizer::SvgInheritSpec : public SGNode::BasicExtendedData {
     virtual ~SvgInheritSpec()
     {}
 
+    virtual BasicExtendedData* clone() const
+    { return new SvgInheritSpec(*this); }
+
     inline void combineWith(const SvgInheritSpec* sis)
     {
         if(!sis) return;

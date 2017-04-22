@@ -88,6 +88,8 @@ class PT_GFX_API SGNodeLine : public SGNode {
         { return _to; }
 
     protected:
+        virtual SGNode* cloneImpl(SGNode* newInst) const;
+
         virtual void drawImpl(ImagePainter2& painter, const TransformT& transform, RenderMode overrideRM) const;
 
     private:

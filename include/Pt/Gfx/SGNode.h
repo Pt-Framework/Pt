@@ -72,6 +72,8 @@ class PT_GFX_API SGNode : private NonCopyable {
             public:
                 BasicExtendedData();
                 virtual ~BasicExtendedData();
+
+                virtual BasicExtendedData* clone() const = 0;
         };
 
     private:
@@ -161,6 +163,8 @@ class PT_GFX_API SGNode : private NonCopyable {
         //
 
         virtual void clear();
+
+        SGNode* clone() const; // NOTE: This operation with convert all proxy nodes to normal nodes
 
         template <typename T>
         inline T& addChild(T* child_)
@@ -293,6 +297,10 @@ class PT_GFX_API SGNode : private NonCopyable {
 
             return rm;
         }
+
+        SGNode* cloneGraph() const;
+
+        virtual SGNode* cloneImpl(SGNode* newInst) const;
 
         virtual void drawImpl(ImagePainter2& painter, const TransformT& transform, RenderMode overrideRM) const;
 

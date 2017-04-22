@@ -614,7 +614,7 @@ void Path::clear()
 {
     // COW
     if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData(new PathData);
+        SmartPtr<PathData> pathData( new PathData() );
         *pathData = *_pathData;
         _pathData = pathData;
     }
@@ -633,7 +633,7 @@ void Path::beginPath()
 
     // COW
     if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData(new PathData);
+        SmartPtr<PathData> pathData( new PathData() );
         *pathData = *_pathData;
         _pathData = pathData;
     }
@@ -650,7 +650,7 @@ void Path::endPath()
 
     // COW
     if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData(new PathData);
+        SmartPtr<PathData> pathData( new PathData() );
         *pathData = *_pathData;
         _pathData = pathData;
     }
@@ -669,7 +669,7 @@ void Path::moveTo(double x, double y)
 
     // COW
     if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData(new PathData);
+        SmartPtr<PathData> pathData( new PathData() );
         *pathData = *_pathData;
         _pathData = pathData;
     }
@@ -690,7 +690,7 @@ void Path::lineTo(double x, double y)
 
     // COW
     if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData(new PathData);
+        SmartPtr<PathData> pathData( new PathData() );
         *pathData = *_pathData;
         _pathData = pathData;
     }
@@ -711,7 +711,7 @@ void Path::arcTo(double x, double y, double r)
 
     // COW
     if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData(new PathData);
+        SmartPtr<PathData> pathData( new PathData() );
         *pathData = *_pathData;
         _pathData = pathData;
     }
@@ -732,7 +732,7 @@ void Path::quadraticBezierTo(double cx, double cy, double x, double y)
 
     // COW
     if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData(new PathData);
+        SmartPtr<PathData> pathData( new PathData() );
         *pathData = *_pathData;
         _pathData = pathData;
     }
@@ -753,7 +753,7 @@ void Path::cubicBezierTo(double cx1, double cy1, double cx2, double cy2, double 
 
     // COW
     if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData(new PathData);
+        SmartPtr<PathData> pathData( new PathData() );
         *pathData = *_pathData;
         _pathData = pathData;
     }
@@ -788,7 +788,7 @@ void Path::genericNBezierTo(Pt::int32_t controlPointCount, const double* cxy, do
 
     // COW
     if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData(new PathData);
+        SmartPtr<PathData> pathData( new PathData() );
         *pathData = *_pathData;
         _pathData = pathData;
     }
@@ -811,7 +811,7 @@ void Path::relMoveTo(double x, double y)
 
     // COW
     if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData(new PathData);
+        SmartPtr<PathData> pathData( new PathData() );
         *pathData = *_pathData;
         _pathData = pathData;
     }
@@ -832,7 +832,7 @@ void Path::relLineTo(double x, double y)
 
     // COW
     if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData(new PathData);
+        SmartPtr<PathData> pathData( new PathData() );
         *pathData = *_pathData;
         _pathData = pathData;
     }
@@ -853,7 +853,7 @@ void Path::relArcTo(double x, double y, double r)
 
     // COW
     if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData(new PathData);
+        SmartPtr<PathData> pathData( new PathData() );
         *pathData = *_pathData;
         _pathData = pathData;
     }
@@ -874,7 +874,7 @@ void Path::relQuadraticBezierTo(double cx, double cy, double x, double y)
 
     // COW
     if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData(new PathData);
+        SmartPtr<PathData> pathData( new PathData() );
         *pathData = *_pathData;
         _pathData = pathData;
     }
@@ -895,7 +895,7 @@ void Path::relCubicBezierTo(double cx1, double cy1, double cx2, double cy2, doub
 
     // COW
     if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData(new PathData);
+        SmartPtr<PathData> pathData( new PathData() );
         *pathData = *_pathData;
         _pathData = pathData;
     }
@@ -931,7 +931,7 @@ void Path::relGenericNBezierTo(Pt::int32_t controlPointCount, const double* cxy,
 
     // COW
     if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData(new PathData);
+        SmartPtr<PathData> pathData( new PathData() );
         *pathData = *_pathData;
         _pathData = pathData;
     }
@@ -954,7 +954,7 @@ void Path::putArc(double rx, double ry, double degBegin, double degEnd, const Ar
 
     // COW
     if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData(new PathData);
+        SmartPtr<PathData> pathData( new PathData() );
         *pathData = *_pathData;
         _pathData = pathData;
     }
@@ -995,7 +995,7 @@ void Path::putChar(const Char& chr, const Char& autoAddSpaceFor)
 
     // COW
     if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData(new PathData);
+        SmartPtr<PathData> pathData( new PathData() );
         *pathData = *_pathData;
         _pathData = pathData;
     }

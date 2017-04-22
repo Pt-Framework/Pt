@@ -77,6 +77,9 @@ class PT_GFX_API SGNodeRectangle : public SGNodePath {
         inline float radius() const
         { return _radius; }
 
+    protected:
+        virtual SGNode* cloneImpl(SGNode* newInst) const;
+
     private:
         RectT _rect;
         float _radius;

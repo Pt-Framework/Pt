@@ -48,6 +48,32 @@ void SGNodePath::clear()
     SGNode::clear();
 }
 
+SGNode* SGNodePath::cloneImpl(SGNode* newInst) const
+{
+    // The new instance
+    SGNodePath* sgn;
+
+    // Convert and check the object type
+    if(newInst) {
+        sgn = dynamic_cast<SGNodePath*>(newInst);
+        if(!sgn) throw std::runtime_error("SGNodePath: invalid clone operation");
+    }
+    // Ceate a new object
+    else {
+        sgn = new SGNodePath();
+    }
+
+    // Call the base class implementation so that it can copy its data
+    SGNode::cloneImpl(sgn);
+
+    // Copy this class' data
+    sgn->_path       = _path;
+    sgn->_smoothness = _smoothness;
+
+    // Return the new instance
+    return sgn;
+}
+
 void SGNodePath::drawImpl(ImagePainter2& painter, const TransformT& transform, RenderMode overrideRM) const
 {
     // Return if the path is null

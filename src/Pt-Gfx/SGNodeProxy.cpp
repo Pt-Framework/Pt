@@ -76,6 +76,29 @@ const Brush& SGNodeProxy::effectiveBrush() const
     return SGNode::effectiveBrush();
 }
 
+SGNode* SGNodeProxy::cloneImpl(SGNode* newInst) const
+{
+    // Cloning a proxy node means cloning the whole target graph, removing the proxy
+    SGNode* sgn = _target.cloneGraph();
+
+    // Assign the pen and brush as needed
+    if(_penOverride  ) sgn->setPen  (*_penOverride  );
+    if(_brushOverride) sgn->setBrush(*_brushOverride);
+
+    // Have we given an instance?
+    if(newInst) {
+        // Call the base class implementation so that it can copy its data
+        SGNode::cloneImpl(newInst);
+        // Add the newly created instance as the child of the given instance
+        newInst->addChild(sgn);
+        // Assign the given instance as the newly created instance
+        sgn = newInst;
+    }
+
+    // Return the new instance
+    return sgn;
+}
+
 void SGNodeProxy::drawImpl(ImagePainter2& painter, const TransformT& transform, RenderMode overrideRM) const
 {
     // Determine the render mode

@@ -48,6 +48,32 @@ void SGNodeLine::clear()
     SGNode::clear();
 }
 
+SGNode* SGNodeLine::cloneImpl(SGNode* newInst) const
+{
+    // The new instance
+    SGNodeLine* sgn;
+
+    // Convert and check the object type
+    if(newInst) {
+        sgn = dynamic_cast<SGNodeLine*>(newInst);
+        if(!sgn) throw std::runtime_error("SGNodeLine: invalid clone operation");
+    }
+    // Ceate a new object
+    else {
+        sgn = new SGNodeLine();
+    }
+
+    // Call the base class implementation so that it can copy its data
+    SGNode::cloneImpl(sgn);
+
+    // Copy this class' data
+    sgn->_from = _from;
+    sgn->_to   = _to;
+
+    // Return the new instance
+    return sgn;
+}
+
 void SGNodeLine::drawImpl(ImagePainter2& painter, const TransformT& transform, RenderMode overrideRM) const
 {
     // TransformT the coordinates

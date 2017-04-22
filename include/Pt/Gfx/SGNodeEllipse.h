@@ -77,6 +77,9 @@ class PT_GFX_API SGNodeEllipse : public SGNodePath {
         inline const SizeT& size() const
         { return _size; }
 
+    protected:
+        virtual SGNode* cloneImpl(SGNode* newInst) const;
+
     private:
         PointT _topLeft;
         SizeT  _size;

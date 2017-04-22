@@ -70,6 +70,35 @@ void SGNodeArc::set(const PointT& center, const SizeT& radius, ValueT degBegin, 
     path().endPath  ();
 }
 
+SGNode* SGNodeArc::cloneImpl(SGNode* newInst) const
+{
+    // The new instance
+    SGNodeArc* sgn;
+
+    // Convert and check the object type
+    if(newInst) {
+        sgn = dynamic_cast<SGNodeArc*>(newInst);
+        if(!sgn) throw std::runtime_error("SGNodeArc: invalid clone operation");
+    }
+    // Ceate a new object
+    else {
+        sgn = new SGNodeArc();
+    }
+
+    // Call the base class implementation so that it can copy its data
+    SGNodePath::cloneImpl(sgn);
+
+    // Copy this class' data
+    sgn->_center   = _center;
+    sgn->_radius   = _radius;
+    sgn->_degBegin = _degBegin;
+    sgn->_degEnd   = _degEnd;
+    sgn->_arcMode  = _arcMode;
+
+    // Return the new instance
+    return sgn;
+}
+
 
 } // namespace
 } // namespace

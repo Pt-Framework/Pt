@@ -73,6 +73,14 @@ void SGNode::clear()
     _nodeData->brush = Brush();
 }
 
+SGNode* SGNode::clone() const
+{
+    SGNode* sgn = cloneGraph();
+    sgn->_parent = 0;
+
+    return sgn;
+}
+
 const Pen& SGNode::pen() const
 { return _nodeData->pen; }
 
@@ -198,6 +206,40 @@ void SGNode::draw(ImagePainter2& painter, const TransformT* transform_)
             nStack.pop();
         }
     }
+}
+
+SGNode* SGNode::cloneGraph() const
+{ return cloneImpl(0); }
+
+SGNode* SGNode::cloneImpl(SGNode* newInst) const
+{
+    // Cloning a node means cloning the whole graph, removing any proxy
+
+    // The new instance
+    SGNode* sgn = newInst ? newInst : new SGNode();
+
+    // Set/copy this class' data
+    sgn->_parent           = _parent;
+    sgn->_rm               = _rm;
+
+    sgn->_transform        = _transform;
+
+    sgn->_nodeData         = SmartPtr<NodeData>(new NodeData());
+    sgn->_nodeDataRO       = false;
+
+    sgn->_nodeData->pen    = _nodeData->pen;
+    sgn->_nodeData->brush  = _nodeData->brush;
+    sgn->_nodeData->trCFil = _nodeData->trCFil;
+    sgn->_nodeData->trMode = _nodeData->trMode;
+
+    for(Children::const_iterator it = _nodeData->children.begin(); it != _nodeData->children.end(); ++it) {
+        sgn->_nodeData->children.push_back((*it)->cloneGraph());
+    }
+
+    if(_extData) sgn->_extData = _extData->clone();
+
+    // Return the new instance
+    return sgn;
 }
 
 void SGNode::drawImpl(ImagePainter2& /*painter*/, const TransformT& /*transform*/, RenderMode /*overrideRM*/) const

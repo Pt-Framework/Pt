@@ -112,7 +112,7 @@ static void testSceneGraph(const char* title, Image& image, Painter& painter)
     psgn.draw(*ip2);
 
     psgn.transform().identity();
-    psgn.transform().scale(0.5f, 0.5f); // Note: the pen width is not scaled!
+    psgn.transform().scale(0.5f, 0.5f);
     psgn.transform().translate(650, 30);
     psgn.draw(*ip2);
 
