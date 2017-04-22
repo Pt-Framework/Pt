@@ -1,7 +1,7 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
      width="150px" height="100px" viewBox="0 0 150 100">
 
-    <line id="line1" x1="5" y1="5" x2="10" y2="10" stroke="green" stroke-width="1"/>
+    <line id="line1" x1="5" y1="5" x2="10" y2="10" stroke="hsl(240,100%,50%)" stroke-width="1"/>
     <use x="20" y="20" xlink:href="#line1"/>
 
 </svg>

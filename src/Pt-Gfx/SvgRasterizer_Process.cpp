@@ -181,7 +181,7 @@ SGNode* SvgRasterizer::processDrawingElement_use(const SvgStyleData& ssd, const 
     const Pt::String& objId = attrList.get("href");
 
     // Get the object
-    const SGNode* sgnRef = getSvgObject_SGNode(objId, "use");
+    const SGNode* sgnTarget = getSvgObject_SGNode(objId, "use");
 
     // Extract the coordinate and size specifier
     const double x = attrList.has("x"     ) ? cnvStrToDbl(attrList.get("x"     ), "use") : 0.0;
@@ -190,16 +190,20 @@ SGNode* SvgRasterizer::processDrawingElement_use(const SvgStyleData& ssd, const 
   //const double h = attrList.has("height") ? cnvStrToDbl(attrList.get("height"), "use") : 0.0;
 
     // Create a proxy node
-    SGNodeProxy* sgn = new SGNodeProxy(*sgnRef);
+    SGNodeProxy* sgn = new SGNodeProxy(*sgnTarget);
+
+    // Get the inherit specification of the target object
+    const SvgInheritSpec* sis = sgnTarget->extendedData<SvgInheritSpec>();
 
     // Check if we need to specify override(s)
-    if(ssd.penSpecified) {
-        const SvgInheritSpec* sis = sgnRef->extendedData<SvgInheritSpec>();
-        if(sis && sis->penColor) {
-            Pen* pen = new Pen( sgnRef->pen() );
+    if(sis) {
+        // Pen color override?
+        if(sis->penColorInherit && ssd.inheritSpec.penColorFromStyle) {
+            Pen* pen = new Pen( sgnTarget->pen() );
             pen->setColor(ssd.penColor);
             applyPenOverride(sgn, pen);
         }
+        // ### TODO: Other overrides! ###
     }
 
     // Apply the transform as needed

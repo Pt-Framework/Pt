@@ -125,8 +125,13 @@ void SvgRasterizer::extractStyleData(SvgStyleData& ssd, const SGNode& parent, co
             const std::string& v = tokens[i + 1];
             if(n == "stroke") {
                 if(!ssd.penSpecified) copyPenData(ssd, parEffPen);
-                if(v == "inherit") ssd.inheritSpec.penColor = true;
-                else               ssd.penColor             = fromHtmlColor(v);
+                if(v == "inherit") {
+                    ssd.inheritSpec.penColorInherit = true;
+                }
+                else {
+                    ssd.inheritSpec.penColorFromStyle = true;
+                    ssd.penColor = fromHtmlColor(v);
+                }
                 ssd.penSpecified = true;
             }
             else if(n == "stroke-opacity") {
@@ -146,6 +151,7 @@ void SvgRasterizer::extractStyleData(SvgStyleData& ssd, const SGNode& parent, co
     // Overwrite the style as needed
     if(attrList.has("stroke")) {
         if(!ssd.penSpecified) copyPenData(ssd, parEffPen);
+        ssd.inheritSpec.penColorFromStyle = false;
         ssd.penColor     = fromHtmlColor(attrList.get("stroke"));
         ssd.penSpecified = true;
     }

@@ -128,12 +128,22 @@ struct SvgRasterizer::CompareBrush {
 //
 
 struct SvgRasterizer::SvgInheritSpec : public SGNode::BasicExtendedData {
-    bool penColor;
-    bool brushColor;
+    // This flags indicate if the specific attribute can be overridden
+    // when the object is referenced via <use/>
+    bool penColorInherit;
+    bool brushColorInherit;
 
+    // This flags indicate if the specific attribute can be used to override
+    // a corresponding object's attribute which is referenced via <use/>
+    bool penColorFromStyle;
+    bool brushColorFromStyle;
+
+    // Member functions
     inline SvgInheritSpec()
-    : penColor  (false)
-    , brushColor(false)
+    : penColorInherit    (false)
+    , brushColorInherit  (false)
+    , penColorFromStyle  (false)
+    , brushColorFromStyle(false)
     {}
 
     virtual ~SvgInheritSpec()
@@ -146,12 +156,19 @@ struct SvgRasterizer::SvgInheritSpec : public SGNode::BasicExtendedData {
     {
         if(!sis) return;
 
-        penColor   |= sis->penColor;
-        brushColor |= sis->brushColor;
+        penColorInherit     |= sis->penColorInherit;
+        brushColorInherit   |= sis->brushColorInherit;
+
+        penColorFromStyle   |= sis->penColorFromStyle;
+        brushColorFromStyle |= sis->brushColorFromStyle;
     }
 
     inline bool isNull() const
-    { return !(penColor || brushColor); }
+    {
+        return !( penColorInherit   | brushColorInherit   |
+                  penColorFromStyle | brushColorFromStyle
+                );
+    }
 };
 
 

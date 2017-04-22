@@ -368,15 +368,25 @@ void SvgRasterizer::renderNextFrame()
 
     // ### TODO: For animated SVG, update the scene graph nodes here! ###
 
-    // Clear the image with a fully transparent color
-    //_rstate->painter.setBrush( Color::fromRgb8(0, 0, 0, 0) );
-    //_rstate->painter.fillRect( RectF( PointF(0, 0), SizeF(_rstate->image.width(), _rstate->image.height()) ) );
+    // Save the painter's clip region and composition mode
+    const RectF           cr = _rstate->painter.clip();
+    const CompositionMode cm = _rstate->painter.compositionMode();
 
-    // Set the clip region
+    // Set the painter's clip region
     _rstate->painter.setClip( RectF( PointF(0, 0), SizeF(_rstate->vpWidth, _rstate->vpHeight) ) );
 
+    // Clear the image with a fully transparent color
+    _rstate->painter.setCompositionMode(CompositionMode::SourceCopy);
+    _rstate->painter.setBrush( Color::fromRgb8(0, 0, 0, 0) );
+    _rstate->painter.fillRect( RectF( PointF(0, 0), SizeF(_rstate->vpWidth, _rstate->vpHeight) ) );
+
     // Render the scene graph
+    _rstate->painter.setCompositionMode(CompositionMode::SourceOver);
     _rstate->sgParent->draw(_rstate->painter, &_rstate->vpbTransform);
+
+    // Restore the painter's clip region and composition mode
+    _rstate->painter.setClip(cr);
+    _rstate->painter.setCompositionMode(cm);
 }
 
 

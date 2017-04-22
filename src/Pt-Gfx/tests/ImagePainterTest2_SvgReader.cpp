@@ -13,7 +13,6 @@ static const Size renderSVG(ImagePainter2& target, const PointF& svgImageTopLeft
     ifs.close();
 
     target.setAntiAliasingMode(AntiAliasingMode::Default);
-    target.setCompositionMode(CompositionMode::SourceOver);
     target.drawImage(svgImageTopLeft, imgReader);
 
     target.setPen( Color::fromRgb8(255, 255, 255, 255) );
