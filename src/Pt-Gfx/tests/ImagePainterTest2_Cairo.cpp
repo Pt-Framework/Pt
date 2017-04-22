@@ -315,9 +315,6 @@ static void cairoBenchmark(CompositionMode cm)
         time2 = cairoBenchThickLine(BENCHMARK_LOOP_COUNT, cm, false);
         std::clog << "    Solid thick line                 @ Cairo - No AA = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawSolidThickLineSimple<ImagePainter >(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
-        std::clog << "    Solid thick line                 @ ImagePainter  = " << std::setw(6) << time2
-                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         time2 = benchDrawSolidThickLineSimple<ImagePainter2>(BENCHMARK_LOOP_COUNT, cm, AntiAliasingMode::None);
         std::clog << "    Solid thick line NOAA            @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
@@ -334,9 +331,6 @@ static void cairoBenchmark(CompositionMode cm)
         time2 = cairoBenchFillPolygon<false>(BENCHMARK_LOOP_COUNT, cm, false);
         std::clog << "    Solid-filled    polygon          @ Cairo - No AA = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillPolygon<ImagePainter , false>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::None);
-        std::clog << "    Solid-filled    polygon          @ ImagePainter  = " << std::setw(6) << time2
-                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         time2 = benchDrawFillPolygon<ImagePainter2, false>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::None);
         std::clog << "    Solid-filled    polygon NOAA     @ ImagePainter2 = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
@@ -352,9 +346,6 @@ static void cairoBenchmark(CompositionMode cm)
         std::clog << "    Solid-filled    ellipse          @ Cairo         = " << std::setw(6) << time1 << std::endl;
         time2 = cairoBenchFillEllipse              (BENCHMARK_LOOP_COUNT, cm, false);
         std::clog << "    Solid-filled    ellipse          @ Cairo - No AA = " << std::setw(6) << time2
-                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time2 = benchDrawFillEllipse<ImagePainter >(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::None);
-        std::clog << "    Solid-filled    ellipse          @ ImagePainter  = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         time2 = benchDrawFillEllipse<ImagePainter2>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::None);
         std::clog << "    Solid-filled    ellipse NOAA     @ ImagePainter2 = " << std::setw(6) << time2
@@ -397,10 +388,6 @@ static void cairoBenchmark(CompositionMode cm)
         time1 = cairoBenchFillPolygon<false>(BENCHMARK_LOOP_COUNT, cm, false);
         time2 = cairoBenchFillPolygon<true >(BENCHMARK_LOOP_COUNT, cm, false);
         std::clog << "    Solid-filled  R-polygon          @ Cairo - No AA = " << std::setw(6) << time2
-                  << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
-        time1 = benchDrawFillPolygon<ImagePainter , false>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::None);
-        time2 = benchDrawFillPolygon<ImagePainter , true >(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::None);
-        std::clog << "    Solid-filled  R-polygon          @ ImagePainter  = " << std::setw(6) << time2
                   << " (" << std::setw(6) << std::setprecision(3) << (time2 / time1) << ")" << std::setprecision(0) << std::endl;
         time1 = benchDrawFillPolygon<ImagePainter2, false>(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::None);
         time2 = benchDrawFillPolygon<ImagePainter2, true >(BENCHMARK_LOOP_COUNT, bmBrushSolid, bmBrushSolid, cm, AntiAliasingMode::None);
