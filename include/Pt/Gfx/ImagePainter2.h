@@ -244,4 +244,3 @@ void ImagePainter2::cnvPointsFToPointsDeduplicate(std::vector<Point>& dst, const
 } // namespace
 
 #endif
-
