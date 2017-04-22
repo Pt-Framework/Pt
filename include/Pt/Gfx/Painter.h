@@ -66,6 +66,7 @@ class PT_GFX_API Painter
          * Add/update the pure virtual functions for these APIs:
          *     1. Add the autoClose flag in drawPolyline()
          *     2. Add the pure virtual functions for:
+         *            setAntiAliasingMode()
          *            drawRoundRect()
          *            drawQuadraticPolybezier()
          *            drawArc()
