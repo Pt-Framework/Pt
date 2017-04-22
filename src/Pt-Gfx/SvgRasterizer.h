@@ -68,6 +68,15 @@ class SvgRasterizer
 
         // ### TODO: Add support for animated SVG! ###
 
+    public:
+        static void setDisplayPPI(Pt::uint32_t ppi = DefaultDisplayPPI);
+
+        // https://en.wikipedia.org/wiki/Dots_per_inch#Computer_monitor_DPI_standards
+        static const Pt::uint32_t DefaultDisplayPPI = 96;
+
+    private:
+        static Pt::uint32_t DisplayPPI;
+
     private:
         static inline const std::string lcaseStdStr(const std::string & str);
         static inline const std::string lcaseStdStr(const Pt::String& str);

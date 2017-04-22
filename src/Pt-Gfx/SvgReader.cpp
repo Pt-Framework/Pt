@@ -104,6 +104,9 @@ Image& SvgReaderImpl::get()
 
 // ================================================================================
 
+void SvgReader::setDisplayPPI(Pt::uint32_t ppi)
+{ SvgRasterizer::setDisplayPPI(ppi); }
+
 SvgReader::SvgReader()
 : _impl( new SvgReaderImpl() )
 {}

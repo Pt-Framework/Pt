@@ -28,8 +28,8 @@
 */
 
 // Just for debugging ;)
-//#warning "Just for debugging ;)"
-//#include <stdio.h>
+#warning "Just for debugging ;)"
+#include <stdio.h>
 
 #include <Pt/Xml/StartDocument.h>
 #include <Pt/Xml/EndDocument.h>
@@ -83,6 +83,17 @@ void SvgRasterizer::RasterState::clearAllCaches()
 
 
 // ======================================================================================
+// ===== Static Member Variables/Functions ==============================================
+// ======================================================================================
+const Pt::uint32_t SvgRasterizer::DefaultDisplayPPI;
+
+Pt::uint32_t SvgRasterizer::DisplayPPI = SvgRasterizer::DefaultDisplayPPI;
+
+void SvgRasterizer::setDisplayPPI(Pt::uint32_t ppi)
+{ DisplayPPI = ppi; }
+
+
+// ======================================================================================
 // ===== Public Member Functions ========================================================
 // ======================================================================================
 
@@ -105,7 +116,7 @@ SvgRasterizer::SvgRasterizer(std::istream& is, Image& image, const PointF& topLe
     lprintf("10in = %f\n", cnvUnitStrToPixels("10in"));
     lprintf("10em = %f\n", cnvUnitStrToPixels("10em"));
     lprintf("10ex = %f\n", cnvUnitStrToPixels("10ex"));
-    throw 0
+    throw 0;
 #endif
 
 #if 0

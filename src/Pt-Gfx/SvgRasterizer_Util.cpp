@@ -79,8 +79,9 @@ const std::string SvgRasterizer::cnvUtf32ToUtf8(const Pt::String& str)
 
 double SvgRasterizer::cnvUnitStrToPixels(const std::string& str_)
 {
-    // Monitor's DPI
-    const double MONITOR_DPI = 96; // https://en.wikipedia.org/wiki/Dots_per_inch#Computer_monitor_DPI_standards
+    // Monitor's PPI and scale factor
+    const double monitorPPI  = SvgRasterizer::DisplayPPI;
+    const double scaleFactor = monitorPPI / (double) SvgRasterizer::DefaultDisplayPPI;
 
     // Remove all white-spaces and convert to lower case
     const std::string& str = lcaseStdStr(removeAllSpacesStdStr(str_));
@@ -97,13 +98,13 @@ double SvgRasterizer::cnvUnitStrToPixels(const std::string& str_)
 
     if(strcmp(end, "%" ) == 0) return -val;
 
-    if(strcmp(end, "pt") == 0) return MONITOR_DPI * val / 72.00; // (1 / 72 of an inch)
-    if(strcmp(end, "pc") == 0) return MONITOR_DPI * val /  6.00; // (1 /  6 of an inch)
-    if(strcmp(end, "mm") == 0) return MONITOR_DPI * val / 25.40;
-    if(strcmp(end, "cm") == 0) return MONITOR_DPI * val /  2.54;
-    if(strcmp(end, "in") == 0) return MONITOR_DPI * val;
-    if(strcmp(end, "em") == 0) return val * (10.0 + 1.0 / 15.0); // http://kb.mozillazine.org/Em_units_versus_ex_units
-    if(strcmp(end, "ex") == 0) return val *   6.0;               // http://kb.mozillazine.org/Em_units_versus_ex_units
+    if(strcmp(end, "pt") == 0) return monitorPPI * val / 72.00; // (1 / 72 of an inch)
+    if(strcmp(end, "pc") == 0) return monitorPPI * val /  6.00; // (1 /  6 of an inch)
+    if(strcmp(end, "mm") == 0) return monitorPPI * val / 25.40;
+    if(strcmp(end, "cm") == 0) return monitorPPI * val /  2.54;
+    if(strcmp(end, "in") == 0) return monitorPPI * val;
+    if(strcmp(end, "em") == 0) return val * scaleFactor * (10.0 + 1.0 / 15.0); // http://kb.mozillazine.org/Em_units_versus_ex_units
+    if(strcmp(end, "ex") == 0) return val * scaleFactor *   6.0;               // http://kb.mozillazine.org/Em_units_versus_ex_units
 
     throw IOError("svg error: invalid number unit specifier '" + str + "'");
 }

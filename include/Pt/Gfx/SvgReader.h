@@ -48,6 +48,11 @@ class Image;
 class PT_GFX_API SvgReader
 {
     public:
+        /** @brief Set the PPI of the display/monitor (zero = use default)
+        */
+        static void setDisplayPPI(Pt::uint32_t ppi = 0);
+
+    public:
         /** @brief Default Constructor.
         */
         SvgReader();
