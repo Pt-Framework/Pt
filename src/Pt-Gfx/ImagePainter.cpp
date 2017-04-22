@@ -1,11 +1,11 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
+/* Copyright (C) 2015 Marc Boris Duerner
    Copyright (C) 2015 Laurentiu-Gheorghe Crisan
-  
+
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
   License as published by the Free Software Foundation; either
   version 2.1 of the License, or (at your option) any later version.
-  
+
   As a special exception, you may use this file as part of a free
   software library without restriction. Specifically, if other files
   instantiate templates or use macros or inline functions from this
@@ -15,20 +15,20 @@
   License. This exception does not however invalidate any other
   reasons why the executable file might be covered by the GNU Library
   General Public License.
-  
+
   This library is distributed in the hope that it will be useful,
   but WITHOUT ANY WARRANTY; without even the implied warranty of
   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
   Lesser General Public License for more details.
-  
+
   You should have received a copy of the GNU Lesser General Public
   License along with this library; if not, write to the Free Software
-  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
   02110-1301 USA
 */
 
 #include <Pt/Math.h>
-#include <Pt/Gfx/ImagePainter.h>
+#include <Pt/Gfx/ImagePainter_ORIGINAL.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Point.h>
@@ -118,7 +118,7 @@ const Brush& ImagePainter::brush() const
 
 
 void ImagePainter::setFont(const Font& font)
-{    
+{
 	_rasterizer->setFont( font );
 }
 
@@ -143,7 +143,7 @@ void ImagePainter::drawLine(const PointF& from, const  PointF& to)
 
 
 void ImagePainter::drawText( const PointF& to, const String& text )
-{ 
+{
   _rasterizer->strokeText( round(to), text );
 }
 
@@ -162,7 +162,7 @@ void ImagePainter::drawRect( const  RectF& rect )
 
 
 void ImagePainter::fillRect( const  RectF& r )
-{  
+{
     _rasterizer->fillRect(round(r));
 }
 
@@ -191,7 +191,7 @@ void ImagePainter::drawPolyline( const PointF* ps, const size_t pointCount )
 
 
 void ImagePainter::fillPolygon( const PointF* ps, const size_t pointCount )
-{    
+{
   std::vector<Point> points(pointCount);
 
   for( size_t i = 0; i < pointCount; ++i)
@@ -222,7 +222,7 @@ FontMetrics ImagePainter::fontMetrics( const Font& font, const Pt::String& text 
 void ImagePainter::setFontDir(const Pt::System::Path& path)
 {
    FreeType::instance().setFontDir(path);
-} 
+}
 
 
 std::string ImagePainter::defaultFont()

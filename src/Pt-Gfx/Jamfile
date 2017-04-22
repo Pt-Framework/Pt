@@ -18,80 +18,89 @@ if $(FREETYPE_INCLUDES)
     SubDirHdrs $(FREETYPE_INCLUDES) ;
 }
 
-if $(WITH_RASTERIZER2)
+if $(WITH_NEW_RASTERIZER)
+{
+    SubDirC++Flags [ FDefines WITH_NEW_RASTERIZER ] ;
+}
+
+if $(WITH_EXPERIMENTAL_GFX)
 {
     rule FGeneric
     { return $(<) ; }
 
-    SubDirC++Flags [ FDefines RASTERIZER2 ] ;
-    SubDirC++Flags [ FDefines 'lprintf(...)'='fprintf(stderr,__VA_ARGS__)' ] ;
-
     if $(TARGET_OSPLAT:L) = arm
     {
-        SubDirCcFlags  [ FGeneric -mfpu=neon ] ;
-        SubDirC++Flags [ FGeneric -mfpu=neon ] ;
+        CPU_FLAGS = -mfpu=neon ;
+       #CPU_FLAGS = ;
     }
 
     if $(TARGET_OSPLAT:L) = x86_64
     {
-        SubDirCcFlags  [ FGeneric -msse -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -mavx -mavx2 -mfma ] ;
-        SubDirC++Flags [ FGeneric -msse -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -mavx -mavx2 -mfma ] ;
-        #SubDirCcFlags  [ FGeneric -msse -mno-sse2 -mno-sse3 -mno-ssse3 -mno-sse4.1 -mno-sse4.2 -mno-avx -mno-avx2 -mno-fma ] ;
-        #SubDirC++Flags [ FGeneric -msse -mno-sse2 -mno-sse3 -mno-ssse3 -mno-sse4.1 -mno-sse4.2 -mno-avx -mno-avx2 -mno-fma ] ;
+        CPU_FLAGS = -msse -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -mavx -mavx2 -mfma ;
+       #CPU_FLAGS = -msse -mno-sse2 -mno-sse3 -mno-ssse3 -mno-sse4.1 -mno-sse4.2 -mno-avx -mno-avx2 -mno-fma ;
     }
 
-    PT_GFX_RASTERIZER2_FILES = FreeType2.cpp
-                               DrawText2.cpp
-                               Path.cpp
-                               SGNode.cpp
-                               SGNodeLine.cpp
-                               SGNodePath.cpp
-                               SGNodeRectangle.cpp
-                               SGNodeEllipse.cpp
-                               SGNodeArc.cpp
-                               SGNodeProxy.cpp
-                               ImagePainter2.cpp
-                               Rasterizer2.cpp
-                               Rasterizer2_PixelScanline.cpp
-                               Rasterizer2_Line.cpp
-                               Rasterizer2_PatternedLine.cpp
-                               Rasterizer2_Rectangle.cpp
-                               Rasterizer2_Polygon.cpp
-                               Rasterizer2_Bezier.cpp
-                               Rasterizer2_Arc.cpp
-                               Rasterizer2_Ellipse.cpp
-                               SvgReader.cpp
-                               SvgRasterizer.cpp
-                               SvgRasterizer_Color.cpp
-                               SvgRasterizer_Lexer.cpp
-                               SvgRasterizer_Process.cpp
-                               SvgRasterizer_Util.cpp
-                               clipper_aj$(SLASH)clipper.cpp
-                               ;
+    SubDirCcFlags  [ FGeneric $(CPU_FLAGS) ] ;
+    SubDirC++Flags [ FGeneric $(CPU_FLAGS) ] ;
+
+    SubDirC++Flags [ FDefines WITH_EXPERIMENTAL_GFX ] ;
+    SubDirC++Flags [ FDefines 'lprintf(...)'='fprintf(stderr,__VA_ARGS__)' ] ;
+
+    PT_EXPERIMENTAL_GFX_FILES = SGNode.cpp
+                                SGNodeLine.cpp
+                                SGNodePath.cpp
+                                SGNodeRectangle.cpp
+                                SGNodeEllipse.cpp
+                                SGNodeArc.cpp
+                                SGNodeProxy.cpp
+                                SvgReader.cpp
+                                SvgRasterizer.cpp
+                                SvgRasterizer_Color.cpp
+                                SvgRasterizer_Lexer.cpp
+                                SvgRasterizer_Process.cpp
+                                SvgRasterizer_Util.cpp
+                                ;
 }
 
-SharedLibrary Pt-Gfx : Argb32Format.cpp
+PT_GFX_NEW_RASTERIZER_FILES = FreeType2.cpp
+                              DrawText2.cpp
+                              ImageOperation2_Scale32Bpp.cpp
+                              ImageOperation2_Rotate32Bpp.cpp
+                              ImagePainter2.cpp
+                              Rasterizer2.cpp
+                              Rasterizer2_PixelScanline.cpp
+                              Rasterizer2_Line.cpp
+                              Rasterizer2_PatternedLine.cpp
+                              Rasterizer2_Rectangle.cpp
+                              Rasterizer2_Polygon.cpp
+                              Rasterizer2_Bezier.cpp
+                              Rasterizer2_Arc.cpp
+                              Rasterizer2_Ellipse.cpp
+                              Path.cpp
+                              clipper_aj$(SLASH)clipper.cpp
+                              ;
+
+SharedLibrary Pt-Gfx : Color.cpp
+                       Pen.cpp
                        Brush.cpp
-                       ClipPolygon.cpp
-                       Color.cpp
-                       DrawText.cpp
-                       Font.cpp
-                       FontMetrics.cpp
-                       FreeType.cpp
                        Image.cpp
                        ImageFormat.cpp
-                       ImagePainter.cpp
-                       JpegReader.cpp
-                       Pen.cpp
-                       PngReader.cpp
-                       Rasterizer.cpp
+                       Argb32Format.cpp
                        Rgb32Format.cpp
                        Rgb16Format.cpp
                        Yuv12Format.cpp
+                       Font.cpp
+                       FontMetrics.cpp
+                       PngReader.cpp
+                       JpegReader.cpp
+                       FreeType.cpp
+                       DrawText.cpp
                        Painter.cpp
-                       ImageOperation2_Scale32Bpp.cpp
-                       ImageOperation2_Rotate32Bpp.cpp
-                       $(PT_GFX_RASTERIZER2_FILES)
+                       ImagePainter.cpp
+                       Rasterizer.cpp
+                       ClipPolygon.cpp
+                       $(PT_GFX_NEW_RASTERIZER_FILES)
+                       $(PT_EXPERIMENTAL_GFX_FILES)
                        ;
 
 LinkSharedLibraries Pt-Gfx : Pt Pt-System ;
@@ -137,7 +146,7 @@ else
     LinkLibs Pt-Gfx : $(FREETYPE_LINKLIBS) ;
 }
 
-if $(WITH_RASTERIZER2)
+if $(WITH_EXPERIMENTAL_GFX)
 {
     LinkSharedLibraries Pt-Gfx : Pt-Xml ;
 }

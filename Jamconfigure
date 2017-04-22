@@ -430,11 +430,18 @@ Configure ZLIB ;
 # Build rasterizer2
 #############################################################################
 
-if --with-rasterizer2 in $(ARGV)
+if --with-new-rasterizer in $(ARGV)
 {
-    WITH_RASTERIZER2 = yes ;
-    Configure WITH_RASTERIZER2 ;
-    EchoOption WITH_RASTERIZER2 : "Rasterizer2" ;
+    WITH_NEW_RASTERIZER = yes ;
+    Configure WITH_NEW_RASTERIZER ;
+    EchoOption WITH_NEW_RASTERIZER : "NewRasterizer" ;
+}
+
+if --with-experimental-gfx in $(ARGV)
+{
+    WITH_EXPERIMENTAL_GFX = yes ;
+    Configure WITH_EXPERIMENTAL_GFX ;
+    EchoOption WITH_EXPERIMENTAL_GFX : "ExperimentalGfx" ;
 }
 
 #############################################################################

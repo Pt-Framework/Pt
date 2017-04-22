@@ -28,7 +28,8 @@
 
 #include <stdexcept>
 
-#include <Pt/Gfx/ImagePainter.h>
+#include <Pt/Gfx/ImagePainter_ORIGINAL.h>
+
 #include <Pt/Gfx/ImageOperation2.h>
 
 

@@ -2,6 +2,11 @@ SubDir PT_TOP src Pt-Gfx tests ;
 SubDirHdrs $(PT_TOP)/include ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Gfx ;
 
+if $(WITH_NEW_RASTERIZER)
+{
+    SubDirC++Flags [ FDefines WITH_NEW_RASTERIZER ] ;
+}
+
 Main Pt-Gfx-test : Pt-Gfx-test.cpp
                    BlockScaleTest.cpp
                    Argb32Test.cpp
@@ -15,26 +20,21 @@ Main ImagePainterTest : ImagePainterTest.cpp ;
 LinkSharedLibraries ImagePainterTest : Pt Pt-Gfx Pt-System ;
 MakeLocate ImagePainterTest : $(PT_OUTPUT_TARGET) ;
 
-if $(WITH_RASTERIZER2)
+if $(WITH_EXPERIMENTAL_GFX)
 {
     rule FGeneric
     { return $(<) ; }
 
-    SubDirC++Flags [ FDefines RASTERIZER2 ] ;
-    SubDirC++Flags [ FDefines 'lprintf(...)'='fprintf(stderr,__VA_ARGS__)' ] ;
-
     if $(TARGET_OSPLAT:L) = arm
     {
-        SubDirCcFlags  [ FGeneric -mfpu=neon ] ;
-        SubDirC++Flags [ FGeneric -mfpu=neon ] ;
+        CPU_FLAGS = -mfpu=neon ;
+       #CPU_FLAGS = ;
     }
 
     if $(TARGET_OSPLAT:L) = x86_64
     {
-        SubDirCcFlags  [ FGeneric -msse -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -mavx -mavx2 -mfma ] ;
-        SubDirC++Flags [ FGeneric -msse -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -mavx -mavx2 -mfma ] ;
-        #SubDirCcFlags  [ FGeneric -msse -mno-sse2 -mno-sse3 -mno-ssse3 -mno-sse4.1 -mno-sse4.2 -mno-avx -mno-avx2 -mno-fma ] ;
-        #SubDirC++Flags [ FGeneric -msse -mno-sse2 -mno-sse3 -mno-ssse3 -mno-sse4.1 -mno-sse4.2 -mno-avx -mno-avx2 -mno-fma ] ;
+        CPU_FLAGS = -msse -msse2 -msse3 -mssse3 -msse4.1 -msse4.2 -mavx -mavx2 -mfma ;
+       #CPU_FLAGS = -msse -mno-sse2 -mno-sse3 -mno-ssse3 -mno-sse4.1 -mno-sse4.2 -mno-avx -mno-avx2 -mno-fma ;
     }
 
     if $(WITH_BUILTIN_LIBPNG)
@@ -42,6 +42,12 @@ if $(WITH_RASTERIZER2)
         SubDirCcFlags  [ FDefines WITH_BUILTIN_LIBPNG ] ;
         SubDirC++Flags [ FDefines WITH_BUILTIN_LIBPNG ] ;
     }
+
+    SubDirCcFlags  [ FGeneric $(CPU_FLAGS) ] ;
+    SubDirC++Flags [ FGeneric $(CPU_FLAGS) ] ;
+
+    SubDirC++Flags [ FDefines WITH_EXPERIMENTAL_GFX ] ;
+    SubDirC++Flags [ FDefines 'lprintf(...)'='fprintf(stderr,__VA_ARGS__)' ] ;
 
     SubDirC++Flags [ FIncludes "/usr/include/cairo" ] ;
 

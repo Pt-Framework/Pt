@@ -27,90 +27,26 @@
   02110-1301 USA
 */
 
-#ifndef PT_GFX_IMAGEPAINTER_H
-#define PT_GFX_IMAGEPAINTER_H
+#ifndef PT_GFX_IMAGEPAINTER_STUB_H
+#define PT_GFX_IMAGEPAINTER_STUB_H
 
-#include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/Painter.h>
-#include <Pt/Gfx/Rect.h>
-#include <Pt/System/Path.h>
+//#define WITH_NEW_RASTERIZER
+
+#if defined(WITH_NEW_RASTERIZER)
+
+#include <Pt/Gfx/ImagePainter2.h>
 
 namespace Pt {
-
 namespace Gfx {
+    typedef ImagePainter2 ImagePainter;
+}
+}
 
-class Rasterizer;
+#else
 
-class PT_GFX_API ImagePainter : public Painter
-{
-  public:
-    ImagePainter( Image& image );
-
-    virtual ~ImagePainter();
-
-    void setImage(Image& image);
-
-    virtual const ImageFormat& format() const;
-
-    virtual void setCompositionMode(const CompositionMode& mode);
-
-    virtual const CompositionMode& compositionMode() const;
-
-    virtual void setClip( const RectF& clip );
-
-    virtual const Gfx::RectF& clip() const;
-
-    virtual void setPen(const Pen& pen);
-
-    virtual const Pen& pen() const;
-
-    virtual void setBrush(const Brush& brush);
-
-    virtual const Brush& brush() const;
-
-    virtual void setFont(const Font& font);
-
-    virtual const Font& font() const;
-
-    virtual FontMetrics fontMetrics(const Pt::String& text) const;
-
-    virtual void drawLine(const PointF& from, const  PointF& to);
-
-    virtual void drawText(const PointF& to, const Pt::String& text );
-
-    virtual void drawRect(const RectF& rect);
-
-    virtual void fillRect(const RectF& rect);
-
-    virtual void drawEllipse(const PointF& topLeft, const SizeF& size);
-
-    virtual void fillEllipse(const PointF& topLeft, const SizeF& size);
-
-    virtual void drawPolyline(const PointF* points, const size_t pointCount);
-
-    virtual void fillPolygon(const PointF* points, const size_t pointCount);
-
-    virtual void drawImage(const  PointF& to, const Image& image);
-
-    virtual void drawImage(const PointF& to, const Image& image, const RectF& imageRect);
-
-  public:
-    static void setFontDir(const System::Path& path);
-
-    static std::string defaultFont();
-
-    static void setDefaultFont(const std::string& name);
-
-    static std::vector<std::string> fontNames();
-
-    static FontMetrics fontMetrics( const Font& font, const Pt::String& text );
-
-  private:
-    Rasterizer* _rasterizer;
-    RectF _clip;
-};
-
-}}
+#include <Pt/Gfx/ImagePainter_ORIGINAL.h>
 
 #endif
 
+
+#endif
