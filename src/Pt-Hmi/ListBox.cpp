@@ -62,9 +62,9 @@ void ListBoxItem::setSelectable(bool b)
     _isSelectable = b;
     
     if(_isSelected && ! _isSelectable)
-      setSelected(false);
+        setSelected(false);
     else
-      invalidate();
+        invalidate();
 }
 
 
