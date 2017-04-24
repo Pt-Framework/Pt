@@ -34,7 +34,7 @@
 namespace Pt {
 namespace Gfx {
 
-    
+
 // ======================================================================================
 // ===== Private Member Functions =======================================================
 // ======================================================================================
@@ -219,11 +219,9 @@ void Rasterizer2::rasterPolygonAreaXWAA(const PointF* points, const size_t* poin
     for(size_t p = 0; p < polyCount; ++p) {
         // Mask
         DrawLineMask mask_zero;
-        memcpy(mask_zero, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
-
         DrawLineMask mask_nnp1;
+        memcpy(mask_zero, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
         memcpy(mask_nnp1, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
-
         // From point N to point (N + 1), successively
         const size_t pc1 = pointCount[p] - 1;
         for(size_t i = 0; i < pc1; ++i) {

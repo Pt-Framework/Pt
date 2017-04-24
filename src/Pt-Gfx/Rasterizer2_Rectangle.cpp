@@ -66,10 +66,8 @@ void Rasterizer2::strokeOnePixelRect(const Point& tl, const Point& br)
     // Patterned line
     else {
         Pt::int32_t  fpiCtrInOut = PATTERN_BUFFER_COUNTER_START;
-
         DrawLineMask mask;
         memcpy(mask, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
-
         rasterOnePixelPatternedLine(minX, minY, maxX, minY, _pen.color(), fpiCtrInOut, &mask);
         rasterOnePixelPatternedLine(maxX, minY, maxX, maxY, _pen.color(), fpiCtrInOut, &mask);
         rasterOnePixelPatternedLine(maxX, maxY, minX, maxY, _pen.color(), fpiCtrInOut, &mask);

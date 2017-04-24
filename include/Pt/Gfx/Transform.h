@@ -570,13 +570,13 @@ inline const T BasicTransform<T>::extractRotation() const
     const T x1 = _mdata.v[0][0];
     const T y1 = _mdata.v[0][1];
     const T r1 = (y1 >= 0)
-               ? ::atan2(y1, x1)             // Quadrant   I and II
+               ? ::atan2(y1, x1)           // Quadrant   I and II
                : ::atan2(y1, x1) + Pi * 2; // Quadrant III and IV
 
     const T x2 =  _mdata.v[1][1];
     const T y2 = -_mdata.v[1][0];
     const T r2 = (y2 >= 0)
-               ? ::atan2(y2, x2)             // Quadrant   I and II
+               ? ::atan2(y2, x2)           // Quadrant   I and II
                : ::atan2(y2, x2) + Pi * 2; // Quadrant III and IV
 
     return (r1 + r2) * 90 / Pi;
@@ -805,7 +805,7 @@ inline void BasicTransform<float>::transformPoints(PointF* dxy, const PointF* sx
         return;
     }
 
-    std::vector<float>  xy(pointCount * 2);
+    std::vector<float> xy(pointCount * 2);
     float* pxy = &xy[0];
 
     for(size_t i = 0; i < pointCount; ++i) {
@@ -914,13 +914,13 @@ inline const float BasicTransform<float>::extractRotation() const
     const float x1 = _mdata.v[0][0];
     const float y1 = _mdata.v[0][1];
     const float r1 = (y1 >= 0)
-                   ? Gfx::Math::fastAtan2(y1, x1)             // Quadrant   I and II
+                   ? Gfx::Math::fastAtan2(y1, x1)           // Quadrant   I and II
                    : Gfx::Math::fastAtan2(y1, x1) + Pi * 2; // Quadrant III and IV
 
     const float x2 =  _mdata.v[1][1];
     const float y2 = -_mdata.v[1][0];
     const float r2 = (y2 >= 0)
-                   ? Gfx::Math::fastAtan2(y2, x2)             // Quadrant   I and II
+                   ? Gfx::Math::fastAtan2(y2, x2)           // Quadrant   I and II
                    : Gfx::Math::fastAtan2(y2, x2) + Pi * 2; // Quadrant III and IV
 
     return (r1 + r2) * 90.0f / Gfx::Math::Pi;

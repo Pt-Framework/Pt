@@ -359,11 +359,10 @@ void Rasterizer2::strokeOnePixelEllipseArc(const Point& topLeft, const Size& siz
         }
         else if(arcMode == ArcMode::Pie) {
             Rasterizer2::DrawLineMask mask;
-            memcpy(mask, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
-
             const Point               a(bx,   by  );
             const Point               b(ex,   ey  );
             const Point               o(ctrX, ctrY);
+            memcpy(mask, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
             strokeOnePixelLine(a, o, &mask);
             strokeOnePixelLine(b, o, &mask);
         }
