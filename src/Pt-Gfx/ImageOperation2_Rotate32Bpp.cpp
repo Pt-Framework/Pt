@@ -119,7 +119,7 @@ static inline void bblRotate4_implFP(
     const Pt::int32_t FmidY = 32768 * srcH;
 
     // Calculate the sine and cosine values
-    const double      r  = -deg * (M_PI / 180);
+    const double      r  = -deg * (Pi / 180);
     const double      s  = ::sin(r);
     const double      c  = ::cos(r);
     const Pt::int32_t Fs = Pt::Gfx::Math::zrint(512 * s);

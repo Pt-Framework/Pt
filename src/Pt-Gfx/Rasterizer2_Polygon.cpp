@@ -45,7 +45,8 @@ void Rasterizer2::rasterOnePixelPolygonOutline(const Point* points, size_t point
     if(pointCount < 2) return;
 
     // Mask
-    DrawLineMask mask_nnp1 = Rasterizer2::NullLineMask;
+    DrawLineMask mask_nnp1;
+    memcpy(mask_nnp1, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
 
     // Pattern indexing counter
     const bool        solid       = (_pen.style() == Pen::Solid);
@@ -66,7 +67,8 @@ void Rasterizer2::rasterOnePixelPolygonOutline(const PointF* points, size_t poin
     if(pointCount < 2) return;
 
     // Mask
-    DrawLineMask mask_nnp1 = Rasterizer2::NullLineMask;
+    DrawLineMask mask_nnp1;
+    memcpy(mask_nnp1, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
 
     // Pattern indexing counter
     const bool        solid       = (_pen.style() == Pen::Solid);
@@ -216,8 +218,12 @@ void Rasterizer2::rasterPolygonAreaXWAA(const PointF* points, const size_t* poin
     const PointF* curPointBase = points;
     for(size_t p = 0; p < polyCount; ++p) {
         // Mask
-        DrawLineMask mask_zero = Rasterizer2::NullLineMask;
-        DrawLineMask mask_nnp1 = Rasterizer2::NullLineMask;
+        DrawLineMask mask_zero;
+        memcpy(mask_zero, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
+
+        DrawLineMask mask_nnp1;
+        memcpy(mask_nnp1, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
+
         // From point N to point (N + 1), successively
         const size_t pc1 = pointCount[p] - 1;
         for(size_t i = 0; i < pc1; ++i) {

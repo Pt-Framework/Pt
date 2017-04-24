@@ -186,8 +186,8 @@ void ImagePainter2::deduplicatePointsF(std::vector<PointF>& dst, const PointF* s
     size_t putCnt = 0;
     for(size_t i = 0; i < pointCount; ++i) {
         // Round the coordinates
-        const double x = ::round(src[i].x() * Gfx::Math::VecResScaleUp);
-        const double y = ::round(src[i].y() * Gfx::Math::VecResScaleUp);
+        const double x = std::floor(src[i].x() * Gfx::Math::VecResScaleUp + 0.5);
+        const double y = std::floor(src[i].y() * Gfx::Math::VecResScaleUp + 0.5);
         // Skip duplicated coordinates
         if( ofs + putCnt >= 1 && dst[ofs + putCnt - 1].x() == x && dst[ofs + putCnt - 1].y() == y ) continue;
         // Store the coordinate and increment the "put" counter

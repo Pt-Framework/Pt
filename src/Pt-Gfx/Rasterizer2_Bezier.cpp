@@ -44,8 +44,11 @@ void Rasterizer2::strokeOnePixelQuadraticPolybezierOutline(const Point* points, 
     if(pointCount < 3) return;
 
     // Mask
-    DrawLineMask mask_zero = Rasterizer2::NullLineMask;
-    DrawLineMask mask_nnp1 = Rasterizer2::NullLineMask;
+    DrawLineMask mask_zero;
+    memcpy(mask_zero, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
+
+    DrawLineMask mask_nnp1;
+    memcpy(mask_nnp1, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
 
     // Counter for pattern buffer
     Pt::int32_t fpiCtrInOut = PATTERN_BUFFER_COUNTER_START;

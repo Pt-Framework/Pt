@@ -280,7 +280,7 @@ inline void BasicTransform<T>::rotate(T deg, bool replaceInsteadOfCombine)
 
     MatrixData n;
 
-    const T r = deg * (M_PI / 180);
+    const T r = deg * (Pi / 180);
     const T s = ::sin(r);
     const T c = ::cos(r);
 
@@ -299,7 +299,7 @@ inline void BasicTransform<T>::shearX(T deg, bool replaceInsteadOfCombine)
 
     MatrixData n;
 
-    const T r = deg * (M_PI / 180);
+    const T r = deg * (Pi / 180);
     const T t = ::sin(r) / ::cos(r);
 
     n.v[0][0] = 1; n.v[0][1] = t; n.v[0][2] = 0;
@@ -317,7 +317,7 @@ inline void BasicTransform<T>::shearY(T deg, bool replaceInsteadOfCombine)
 
     MatrixData n;
 
-    const T r = deg * (M_PI / 180);
+    const T r = deg * (Pi / 180);
     const T t = ::sin(r) / ::cos(r);
 
     n.v[0][0] = 1; n.v[0][1] = 0; n.v[0][2] = 0;
@@ -571,15 +571,15 @@ inline const T BasicTransform<T>::extractRotation() const
     const T y1 = _mdata.v[0][1];
     const T r1 = (y1 >= 0)
                ? ::atan2(y1, x1)             // Quadrant   I and II
-               : ::atan2(y1, x1) + M_PI * 2; // Quadrant III and IV
+               : ::atan2(y1, x1) + Pi * 2; // Quadrant III and IV
 
     const T x2 =  _mdata.v[1][1];
     const T y2 = -_mdata.v[1][0];
     const T r2 = (y2 >= 0)
                ? ::atan2(y2, x2)             // Quadrant   I and II
-               : ::atan2(y2, x2) + M_PI * 2; // Quadrant III and IV
+               : ::atan2(y2, x2) + Pi * 2; // Quadrant III and IV
 
-    return (r1 + r2) * 90 / M_PI;
+    return (r1 + r2) * 90 / Pi;
 }
 
 template <typename T>
@@ -588,16 +588,16 @@ inline const T BasicTransform<T>::extractShearing() const
     return ::atan(
                (_mdata.v[0][0] * _mdata.v[1][0] + _mdata.v[0][1] * _mdata.v[1][1]) /
                (_mdata.v[0][0] * _mdata.v[1][1] - _mdata.v[0][1] * _mdata.v[1][0])
-           ) * (180 / M_PI);
+           ) * (180 / Pi);
 }
 
 template <typename T>
 inline const T BasicTransform<T>::extractShearingX() const
-{ return ::atan(_mdata.v[0][1]) * (180 / M_PI); }
+{ return ::atan(_mdata.v[0][1]) * (180 / Pi); }
 
 template <typename T>
 inline const T BasicTransform<T>::extractShearingY() const
-{ return ::atan(_mdata.v[1][0]) * (180 / M_PI); }
+{ return ::atan(_mdata.v[1][0]) * (180 / Pi); }
 
 
 // ======================================================================================
@@ -805,17 +805,17 @@ inline void BasicTransform<float>::transformPoints(PointF* dxy, const PointF* sx
         return;
     }
 
-    float  xy[pointCount * 2];
-    float* pxy = xy;
+    std::vector<float>  xy(pointCount * 2);
+    float* pxy = &xy[0];
 
     for(size_t i = 0; i < pointCount; ++i) {
         *pxy++ = sxy[i].x();
         *pxy++ = sxy[i].y();
     }
 
-    transformPoints(xy, xy, pointCount);
+    transformPoints(&xy[0], &xy[0], pointCount);
 
-    pxy = xy;
+    pxy = &xy[0];
 
     for(size_t i = 0; i < pointCount; ++i) {
         dxy[i].setX( *pxy++ );
@@ -915,13 +915,13 @@ inline const float BasicTransform<float>::extractRotation() const
     const float y1 = _mdata.v[0][1];
     const float r1 = (y1 >= 0)
                    ? Gfx::Math::fastAtan2(y1, x1)             // Quadrant   I and II
-                   : Gfx::Math::fastAtan2(y1, x1) + M_PI * 2; // Quadrant III and IV
+                   : Gfx::Math::fastAtan2(y1, x1) + Pi * 2; // Quadrant III and IV
 
     const float x2 =  _mdata.v[1][1];
     const float y2 = -_mdata.v[1][0];
     const float r2 = (y2 >= 0)
                    ? Gfx::Math::fastAtan2(y2, x2)             // Quadrant   I and II
-                   : Gfx::Math::fastAtan2(y2, x2) + M_PI * 2; // Quadrant III and IV
+                   : Gfx::Math::fastAtan2(y2, x2) + Pi * 2; // Quadrant III and IV
 
     return (r1 + r2) * 90.0f / Gfx::Math::Pi;
 }
