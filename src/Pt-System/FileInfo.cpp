@@ -73,6 +73,12 @@ uint64_t FileInfo::size(const Path& path)
 }
 
 
+DateTime FileInfo::lastModified(const Path& path)
+{
+    return FileInfoImpl::lastModified(path);
+}
+
+
 void FileInfo::createFile(const Path& path)
 {
     FileInfoImpl::createFile(path);

@@ -110,6 +110,32 @@ class FileInfoImpl
             return static_cast<Pt::uint64_t>(li.QuadPart);
         }
 
+        static DateTime lastModified(const Path& path)
+        {
+            WIN32_FILE_ATTRIBUTE_DATA info;
+            BOOL ret = GetFileAttributesExW( path.impl()->c_str(), 
+                                             GetFileExInfoStandard, 
+                                             &info );
+            if(ret == 0)
+            {
+                throw AccessFailed( path.toString().narrow() );
+            }
+
+            SYSTEMTIME systemTime;
+            FileTimeToSystemTime(&info.ftLastWriteTime, &systemTime);
+
+            SYSTEMTIME localTime;
+            SystemTimeToTzSpecificLocalTime(NULL, &systemTime, &localTime);
+
+            return DateTime(localTime.wYear,
+                            localTime.wMonth,
+                            localTime.wDay,
+                            localTime.wHour,
+                            localTime.wMinute,
+                            localTime.wSecond,
+                            localTime.wMilliseconds);
+        }
+
         static void resize(const Path& path, Pt::uint64_t newSize)
         {
             HANDLE h = ::CreateFileW( path.impl()->c_str(),

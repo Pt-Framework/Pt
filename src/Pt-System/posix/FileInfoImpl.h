@@ -99,14 +99,34 @@ class FileInfoImpl
 
         static std::size_t size(const Path& path)
         {
-            struct stat buff;
+            struct stat s;
 
-            if( 0 != stat(path.impl()->c_str(), &buff) )
+            if( 0 != stat(path.impl()->c_str(), &s) )
             {
                 throw AccessFailed(path.impl()->c_str());
             }
 
-            return buff.st_size;
+            return s.st_size;
+        }
+
+        static DateTime lastModified(const Path& path)
+        {
+            struct stat s;
+
+            if( 0 != stat(path.impl()->c_str(), &s) )
+            {
+                throw AccessFailed(path.impl()->c_str());
+            }
+
+            struct tm tim;
+            localtime_r(&s.st_mtime, &tim);
+
+            return DateTime( tim.tm_year + 1900,
+                             tim.tm_mon + 1,
+                             tim.tm_mday,
+                             tim.tm_hour,
+                             tim.tm_min,
+                             tim.tm_sec );
         }
 
         static void resize(const Path& path, std::size_t newSize)

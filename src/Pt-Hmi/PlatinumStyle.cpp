@@ -522,15 +522,12 @@ void PlatinumLineEditRenderer::onPrepare(const LineEdit& le,
 
     if( le.isEnabled() )
     {
-        Gfx::Color color = contour.color();
-
         if( le.isHighlighted() || le.hasFocus() )
         {
-            color = options.accentColor();
+            contour = Gfx::Pen( options.accentColor(), 
+                                contour.size(), contour.style(), 
+                                contour.capStyle(), contour.joinStyle() );
         }
-
-        contour = Gfx::Pen( color, contour.size(), contour.style(), 
-                            contour.capStyle(), contour.joinStyle() );
     }
 }
 
@@ -1050,15 +1047,12 @@ void PlatinumComboBoxRenderer::onPrepare(const ComboBox& cb,
 {
     if( cb.isEnabled() )
     {
-        Gfx::Color color = contour.color();
-
         if( cb.isHighlighted() || cb.hasFocus() )
         {
-            color = options.accentColor();
+            contour = Gfx::Pen( options.accentColor(), 
+                                contour.size(), contour.style(), 
+                                contour.capStyle(), contour.joinStyle() );
         }
-
-        contour = Gfx::Pen( color, contour.size(), contour.style(), 
-                            contour.capStyle(), contour.joinStyle() );
     }
 
     foreground = contour.color();

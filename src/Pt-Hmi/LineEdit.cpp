@@ -63,6 +63,7 @@ void LineEdit::setEditable(bool e)
 {
     _isEditable = e;
     setTextInput(_isEditable);
+    setFocusPolicy(_isEditable ? Widget::NormalFocus : Widget::NoFocus);
     update();
 }
 

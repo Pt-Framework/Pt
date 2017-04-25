@@ -31,6 +31,7 @@
 
 #include <Pt/System/Api.h>
 #include <Pt/System/Path.h>
+#include <Pt/DateTime.h>
 #include <Pt/String.h>
 #include <Pt/Types.h>
 #include <string>
@@ -156,6 +157,9 @@ class PT_SYSTEM_API FileInfo
 
         //! @brief Returns the size of the file in bytes.
         static Pt::uint64_t size(const Path& path);
+
+        //! @brief Returns the time when last modified.
+        static DateTime lastModified(const Path& path);
 
         //! @brief Returns true if a file or directory exists at the \a path.
         static bool exists(const Path& path)
