@@ -1251,7 +1251,7 @@ bool Window::onMouseEvent(const MouseEvent& ev)
 
 
 void Window::onTouchEvent(const TouchEvent& tev)
-{
+{ 
     if( _windowManager.touchEvent(tev) )
         return;
 
@@ -1271,7 +1271,9 @@ void Window::onTouchEvent(const TouchEvent& tev)
 
     // widget may be null to unset the pointer widget
     if( tev.isRelease() )
+    {
         Application::instance().setPointerWidget(0);
+    }
     else
         Application::instance().setPointerWidget(widget);
 
