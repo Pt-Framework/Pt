@@ -432,7 +432,6 @@ static inline void generateChrPoints(std::vector<PointF>& dst, double x, double 
     #undef CURVE_TAG_C_B_CTL
 }
 
-
 static inline void generateArcPoints(std::vector<PointF>& dst, double radiusX, double radiusY, double centerX, double centerY, double degBegin, double degEnd, double smoothness, const ArcMode& arcMode)
 {
     // Calculate the arc's parameters
