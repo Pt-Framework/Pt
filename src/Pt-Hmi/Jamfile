@@ -58,7 +58,8 @@ SharedLibrary Pt-Hmi : $(PT_HMI_IMPL)
 			           Slider.cpp
                        Style.cpp
                        StyleOptions.cpp
-                       TableLayout.cpp 
+                       TableLayout.cpp
+                       TabView.cpp
                        TextBlock.cpp
                        Visual.cpp
                        Widget.cpp

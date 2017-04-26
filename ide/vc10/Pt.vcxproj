@@ -116,6 +116,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\Style.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\StyleOptions.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\TableLayout.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\TabView.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\TextBlock.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\TouchEvent.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Visual.h" />
@@ -607,6 +608,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\Style.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\StyleOptions.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\TableLayout.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\TabView.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\TextBlock.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Visual.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Widget.cpp" />
