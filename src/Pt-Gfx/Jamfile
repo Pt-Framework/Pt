@@ -45,21 +45,6 @@ if $(WITH_EXPERIMENTAL_GFX)
 
     SubDirC++Flags [ FDefines WITH_EXPERIMENTAL_GFX ] ;
     SubDirC++Flags [ FDefines 'lprintf(...)'='fprintf(stderr,__VA_ARGS__)' ] ;
-
-    PT_EXPERIMENTAL_GFX_FILES = SGNode.cpp
-                                SGNodeLine.cpp
-                                SGNodePath.cpp
-                                SGNodeRectangle.cpp
-                                SGNodeEllipse.cpp
-                                SGNodeArc.cpp
-                                SGNodeProxy.cpp
-                                SvgReader.cpp
-                                SvgRasterizer.cpp
-                                SvgRasterizer_Color.cpp
-                                SvgRasterizer_Lexer.cpp
-                                SvgRasterizer_Process.cpp
-                                SvgRasterizer_Util.cpp
-                                ;
 }
 
 PT_GFX_NEW_RASTERIZER_FILES = FreeType2.cpp
@@ -100,7 +85,6 @@ SharedLibrary Pt-Gfx : Color.cpp
                        Rasterizer.cpp
                        ClipPolygon.cpp
                        $(PT_GFX_NEW_RASTERIZER_FILES)
-                       $(PT_EXPERIMENTAL_GFX_FILES)
                        ;
 
 LinkSharedLibraries Pt-Gfx : Pt Pt-System ;
@@ -144,11 +128,6 @@ else
 {
     LinkFlags Pt-Gfx : $(FREETYPE_LINKFLAGS) ;
     LinkLibs Pt-Gfx : $(FREETYPE_LINKLIBS) ;
-}
-
-if $(WITH_EXPERIMENTAL_GFX)
-{
-    LinkSharedLibraries Pt-Gfx : Pt-Xml ;
 }
 
 SubInclude PT_TOP src Pt-Gfx tests ;

@@ -37,12 +37,6 @@
 
 #include <Pt/Math.h>
 
-#include <Pt/Gfx/SGNodeLine.h>
-#include <Pt/Gfx/SGNodeRectangle.h>
-#include <Pt/Gfx/SGNodeEllipse.h>
-#include <Pt/Gfx/SGNodeArc.h>
-#include <Pt/Gfx/SGNodeProxy.h>
-
 #include <Pt/Gfx/TransformStack.h>
 
 #include <Pt/Gfx/Argb32Image.h>
@@ -51,7 +45,6 @@
 #include <Pt/Gfx/ImagePainter2.h>
 
 #include <Pt/Gfx/PngReader.h>
-#include <Pt/Gfx/SvgReader.h>
 
 #include <Pt/System/Logger.h>
 #include <Pt/System/Clock.h>
@@ -116,13 +109,11 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS 0
 #define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  0
 
-#define TEST_DRAW_PATH                          0 // (including thick and filled)
-#define TEST_DRAW_PATH_CLIPPING                 0 // (including path-based text)
-#define TEST_DRAW_EXTRA                         0 // (including path-based n-bezier)
+#define TEST_DRAW_PATH                          1 // (including thick and filled)
+#define TEST_DRAW_PATH_CLIPPING                 1 // (including path-based text)
+#define TEST_DRAW_EXTRA                         1 // (including path-based n-bezier)
 
 #define TEST_IMAGE_OPERATION                    1
-#define TEST_SCENE_GRAPH                        1
-#define TEST_SVG_READER                         DEFINE_CONFIG_BITS(0, 3, 2, 1) // (multi-test)
 
 // Detailed-test benchmark settings for Pt-Gfx and some for Cairo
 #define BENCHMARK_RESULT_HTML               0 // (automatically disabling test drawing and enabling Cairo comparison)
@@ -200,9 +191,7 @@ static const char* sfileDirXPrefix = "";
 #include "ImagePainterTest2_Draw_Thick.cpp"
 #include "ImagePainterTest2_Draw_Path.cpp"
 #include "ImagePainterTest2_Draw_Extra.cpp"
-#include "ImagePainterTest2_SceneGraph.cpp"
 #include "ImagePainterTest2_ImageOperation.cpp"
-#include "ImagePainterTest2_SvgReader.cpp"
 
 #include "ImagePainterTest2_Benchmark.cpp"
 #include "ImagePainterTest2_Cairo.cpp"
@@ -519,20 +508,6 @@ int main(int argc, char* args[])
     if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && (TEST_SOURCECOPY || TEST_SOURCEOVER) && TEST_IMAGE_OPERATION) {
         painter2->setCompositionMode(CompositionMode::SourceCopy);
         testImageOperation("Image Operation - ImagePainter2", image, *painter2);
-    }
-
-    // Scene-graph
-    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && (TEST_SOURCECOPY || TEST_SOURCEOVER) && TEST_SCENE_GRAPH) {
-        painter2->setCompositionMode(CompositionMode::SourceOver);
-        testSceneGraph("Scene Graph - ImagePainter2", image, *painter2);
-    }
-
-    // Svg reader
-    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && (TEST_SOURCECOPY || TEST_SOURCEOVER) && TEST_SVG_READER) {
-        painter2->setCompositionMode(CompositionMode::SourceOver);
-        if(CONFIG_BIT_ENABLED(TEST_SVG_READER, 1)) testSvgReader1("SVG Reader - ImagePainter2 - Test #1 (Absolute Basic)"    , image, *painter2);
-        if(CONFIG_BIT_ENABLED(TEST_SVG_READER, 2)) testSvgReader2("SVG Reader - ImagePainter2 - Test #2 (VPB Aspect Ratio)"  , image, *painter2);
-        if(CONFIG_BIT_ENABLED(TEST_SVG_READER, 3)) testSvgReader3("SVG Reader - ImagePainter2 - Test #3 (Basic Defs and Use)", image, *painter2);
     }
 
     // Create the brushes used for benchmarking
