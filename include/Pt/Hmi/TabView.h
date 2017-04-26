@@ -30,12 +30,109 @@
 #define Pt_Hmi_TabView_H
 
 #include <Pt/Hmi/Control.h>
+#include <Pt/Hmi/Panel.h>
+#include <Pt/Hmi/Button.h>
+#include <Pt/Hmi/FlowLayout.h>
+#include <Pt/Hmi/DockingLayout.h>
 #include <Pt/SmartPtr.h>
 #include <Pt/Signal.h>
 
 namespace Pt {
 
 namespace Hmi {
+
+class PT_HMI_API TabButton : public Button
+{
+    public:
+        typedef Button Base;
+
+    public:
+        TabButton();
+
+        virtual ~TabButton();
+
+        void click();
+
+    protected:
+        virtual void onPressed();
+
+        virtual void onReleased();
+
+        virtual void onCanceled();
+
+    protected:
+        virtual void onInvalidate();
+
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+
+        virtual void onLayout(const Gfx::RectF& rect);
+
+        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+
+    private:
+        bool _isBeingToggled;
+};
+
+
+class PT_HMI_API TabBar : public Panel
+{
+    public:
+        typedef Panel Base;
+
+    public:
+        TabBar();
+
+        virtual ~TabBar();
+
+        void addItem(const Pt::String& title);
+
+        void clear();
+
+        void setCurrent(std::size_t n);
+
+    protected:
+        virtual void onInvalidate();
+
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+
+        virtual void onLayout(const Gfx::RectF& rect);
+
+        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+
+    private:
+        FlowLayout              _layout;
+        std::vector<TabButton*> _buttons;
+};
+
+
+class PT_HMI_API TabLayout : public Layout
+{
+    public:
+        typedef Layout Base;
+
+    public:
+        TabLayout();
+
+        virtual ~TabLayout();
+
+        void addItem(Widget& w);
+
+        void removeItem(Widget& w);
+
+        void setCurrent(std::size_t n);
+
+    protected:
+        virtual void onRemoveWidget(Widget& w);
+
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+
+        virtual void onLayout(const Gfx::RectF& rect);
+
+    private:
+        std::vector<Widget*> _widgets;
+        Widget*              _current;
+};
+
 
 class PT_HMI_API TabView : public Control
 {
@@ -46,6 +143,24 @@ class PT_HMI_API TabView : public Control
         TabView();
 
         virtual ~TabView();
+
+        void addItem(const Pt::String& title, Widget& w);
+
+        void setCurrent(std::size_t n);
+
+    protected:
+        virtual void onInvalidate();
+
+        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
+
+        virtual void onLayout(const Gfx::RectF& rect);
+
+        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+
+    private:
+        DockingLayout _layout;
+        TabBar        _tabBar;
+        TabLayout     _tabLayout;
 };
 
 } // namespace

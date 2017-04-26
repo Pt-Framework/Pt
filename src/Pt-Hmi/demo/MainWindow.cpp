@@ -138,6 +138,26 @@ MainWindow::MainWindow()
     _child2.show(true);
 
     add( _child1 );
+
+    _tabLabel1.setText("Tab Label 1");
+    _tabLabel1.setAlignment(Alignment::Center);
+    _tabLabel1.setBackground( Gfx::Color::fromRgb8(200, 120, 100) );
+    _tabLabel1.setContour( Gfx::Color::fromRgb8(120, 50, 50) );
+    _tabLabel1.setMargin(5);
+    
+    _tabLabel2.setText("Tab Label 2");
+    _tabLabel2.setBackground( Gfx::Color::fromRgb8(100, 200, 120) );
+    
+    _tabLabel3.setText("Tab Label 3");
+    _tabLabel3.setBackground( Gfx::Color::fromRgb8(100, 120, 200) );
+
+    _tabView.addItem("Tab 1", _tabLabel1);
+    _tabView.addItem("Tab 2", _tabLabel2);
+    _tabView.addItem("Tab 3", _tabLabel3);
+
+    _tabView.setCurrent(0);
+
+    _child1.setContent(&_tabView);
     
     //_child1.setTopMost(true);
     _child1.move( Gfx::PointF(30,30));

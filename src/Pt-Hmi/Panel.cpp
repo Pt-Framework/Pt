@@ -38,12 +38,11 @@ namespace Pt {
 namespace Hmi {
 
 Panel::Panel()
-: _image()
+: _content(0)
 , _layout( ImageLayout::None )
 , _hasBackground(false)
 , _hasFrame(false)
 , _hasRenderer(false)
-, _content(0)
 {
 }
 

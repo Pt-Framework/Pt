@@ -34,6 +34,7 @@
 #include <Pt/Hmi/MenuItem.h>
 #include <Pt/Hmi/Picture.h>
 #include <Pt/Hmi/ScrollView.h>
+#include <Pt/Hmi/TabView.h>
 #include "ChildW.h"
 
 namespace Pt {
@@ -79,7 +80,12 @@ class MainWindow : public Pt::Hmi::Window
         ScrollView _scrollView;
         PushButton _btns[20];
         PushButton _bt2;
-        Pt::Gfx::Image _image;
+        Gfx::Image _image;
+
+        TabView _tabView;
+        Label _tabLabel1;
+        Label _tabLabel2;
+        Label _tabLabel3;
 };
 
 } // namespace

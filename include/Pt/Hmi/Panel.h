@@ -85,7 +85,7 @@ class ImageLayout
         }
 
     private:
-        Type _type;        
+        Type _type;
 };
 
 
@@ -93,10 +93,10 @@ class PT_HMI_API Panel : public Control
 {
     typedef Control Base;
 
-	  public:
+    public:
         Panel();
-		
-        virtual ~Panel();	
+
+        virtual ~Panel();
    
         //enum TileMode
         //{
@@ -128,24 +128,23 @@ class PT_HMI_API Panel : public Control
         void setContent(Widget& widget);
 
     protected:
-        void onInvalidate();
-	
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+        virtual void onRemoveWidget(Widget& w);
 
-        
-        virtual void onLayout(const Gfx::RectF& rect);
+        virtual void onInvalidate();
 
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
-        virtual void onRemoveWidget(Widget& w);
+        virtual void onLayout(const Gfx::RectF& rect);
+
+        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
     protected:
         virtual void onResizeEvent(const ResizeEvent& ev);
 
-        
     private:
-        Gfx::Image  _image;
-        ImageLayout _layout;
+        Widget*                  _content;
+        Gfx::Image               _image;
+        ImageLayout              _layout;
 
         FacetPtr<PanelRenderer> _renderer;
         bool                    _hasRenderer;
@@ -157,8 +156,6 @@ class PT_HMI_API Panel : public Control
         bool                    _hasFrame;
 
         Picture                 _picture;
-
-    Widget*                      _content;
 };
 
 } // namespace
