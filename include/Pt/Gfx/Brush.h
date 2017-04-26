@@ -130,8 +130,6 @@ class PT_GFX_API Brush
 
         bool isNull() const;
 
-        bool operator==(const Brush& brush) const;
-
     private:
         SmartPtr<BrushData> _brushData;
 };
@@ -241,20 +239,6 @@ class BrushData
 
         bool isNull() const
         { return _isNull; }
-
-        bool operator==(const BrushData& bd) const
-        {
-          return _isNull        == bd._isNull        &&
-                 _fillStyle     == bd._fillStyle     &&
-                 _color         == bd._color         &&
-                 _gradientColor == bd._gradientColor &&
-                 _rotDeg        == bd._rotDeg        &&
-                 _scale         == bd._scale         &&
-                 _ofsX          == bd._ofsX          &&
-                 _ofsY          == bd._ofsY          &&
-                 _rotDeg        == bd._rotDeg        &&
-                 _texture       == bd._texture;
-        }
 
     private:
         bool             _isNull;

@@ -175,9 +175,6 @@ class PT_GFX_API Path {
 
     private:
         SmartPtr<PathData>  _pathData;
-
-        SmartPtr<DrawText2> _text;
-        SmartPtr<Font>      _font;
 };
 
 

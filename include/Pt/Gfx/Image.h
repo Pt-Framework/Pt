@@ -145,9 +145,6 @@ class PT_GFX_API Image
             return _view.empty();
         }
 
-        bool operator==(const Image& image) const
-        { return _buffer == image._buffer; }
-
     private:
         std::vector<Pt::uint8_t> _buffer;
         ImageView                _view;

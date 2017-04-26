@@ -169,10 +169,6 @@ class PT_GFX_API Pen
         */
         bool isNull() const;
 
-        /** @brief Compare pens.
-        */
-        bool operator==(const Pen& pen) const;
-
     private:
       SmartPtr<PenData> _penData;
 };

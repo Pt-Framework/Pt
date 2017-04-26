@@ -365,14 +365,10 @@ struct Path::PathData {
 
 Path::Path()
 : _pathData( new PathData() )
-, _text    ( new DrawText2() )
-, _font    ( new Font() )
 {}
 
 Path::Path(const Path& p)
 : _pathData( 0 )
-, _text    ( 0 )
-, _font    ( 0 )
 { this->operator=(p); }
 
 Path::~Path()
@@ -381,8 +377,6 @@ Path::~Path()
 const Path& Path::operator=(const Path& p)
 {
     _pathData = p._pathData;
-    _text     = p._text;
-    _font     = p._font;
 
     return *this;
 }

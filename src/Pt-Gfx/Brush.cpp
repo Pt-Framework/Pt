@@ -184,29 +184,6 @@ bool Brush::isTexture() const
 bool Brush::isNull() const
 { return _brushData->isNull(); }
 
-bool Brush::operator==(const Brush& brush) const
-{
-    if(_brushData.get() == brush._brushData.get()) return true;
-
-    if(_brushData->isNull() != brush._brushData->isNull()) return false;
-
-    if(_brushData->fillStyle() == Brush::Texture) {
-        if(brush._brushData->fillStyle() != Brush::Texture) return false;
-        return _brushData->rotation() == brush._brushData->rotation() &&
-               _brushData->offsetX () == brush._brushData->offsetX () &&
-               _brushData->offsetY () == brush._brushData->offsetY () &&
-               _brushData->texture () == brush._brushData->texture ();
-    }
-
-    return _brushData->fillStyle    () == brush._brushData->fillStyle    () &&
-           _brushData->color        () == brush._brushData->color        () &&
-           _brushData->gradientColor() == brush._brushData->gradientColor() &&
-           _brushData->rotation     () == brush._brushData->rotation     () &&
-           _brushData->scale        () == brush._brushData->scale        () &&
-           _brushData->offsetX      () == brush._brushData->offsetX      () &&
-           _brushData->offsetY      () == brush._brushData->offsetY      ();
-}
-
 
 
 BrushData::BrushData(const Color& from, const Color& to, Brush::GradientDirection g, float rotDeg, float scale, Pt::int32_t ofsX, Pt::int32_t ofsY)
