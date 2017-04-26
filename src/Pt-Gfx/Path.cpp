@@ -259,217 +259,6 @@ static inline void generateArcPoints(std::vector<PointF>& dst, double x1, double
     generateCubicBezierPoints(dst, c2x1, c2y1, c2x2, c2y2, c2x3, c2y3, c2x4, c2y4, smoothness);
 }
 
-static inline void generateChrPoints(std::vector<PointF>& dst, double x, double y, const std::vector<PointF>& pointsF, const std::vector<Pt::uint8_t>& tags, const std::vector<Pt::int32_t>& contours, double smoothness)
-{
-    //std::clog << "points/tags = " << pointsF.size() << " ; contours = " << contours.size() << std::endl;
-
-    // The origin point
-    const PointF xyOrg(x, y);
-
-    // Helper macros to process point tags
-    //     Bit #0 -> 0 = control point          ; 1 = non-control point
-    //     Bit #1 -> 0 = quadratic bezier (TTF) ; 1 = cubic bezier (OTF)
-    #define CURVE_TAG_C_POINT(T) ( ( (T) & 0x03 ) == 0x01 )
-    #define CURVE_TAG_Q_B_CTL(T) ( ( (T) & 0x03 ) == 0x00 )
-    #define CURVE_TAG_C_B_CTL(T) ( ( (T) & 0x03 ) == 0x02 )
-
-    // Index of the first point in the contour
-    Pt::int32_t begIdx = 0;
-
-    // Walk through the contours
-    for(size_t i = 0; i < contours.size(); ++i) {
-       // Index of the last point in the contour
-        const Pt::int32_t endIdx = contours[i];
-        // Prepare the iterators
-        const PointF*      pMax = &pointsF[endIdx];
-        const PointF*      pItr = &pointsF[begIdx];
-        const Pt::uint8_t* tItr = &tags   [begIdx];
-        // Get the initial end, begin, and control points
-        const PointF& pEnd = xyOrg + pointsF[endIdx];
-              PointF  pBeg = xyOrg + pointsF[begIdx];
-              PointF  pCtl = pBeg;
-        // A contour cannot begin with a cubic bezier control point
-        if( CURVE_TAG_C_B_CTL(tItr[0]) ) return;
-        // Check the tag of the begin point to determine the origin
-        if( CURVE_TAG_Q_B_CTL(tItr[0]) ) {
-            // Start from the end point if the end point is part of the curve
-            if( CURVE_TAG_C_POINT(tags[endIdx]) ) {
-                // Copy end point to begin point
-                pBeg = pEnd;
-                // Adjust the maximum limit
-                --pMax;
-            }
-            // If both the begin and end points are quadratic bezier control points,
-            // start at the halfway point between them
-            else {
-                pBeg.set(
-                    ( pBeg.x() + pEnd.x() ) * 0.5,
-                    ( pBeg.y() + pEnd.y() ) * 0.5
-                );
-            }
-            // Adjust the iterators
-            --pItr;
-            --tItr;
-        }
-        // Start a new subpath
-        if(!dst.empty()) dst.push_back(Painter::PolygonSeparatorPointF);
-        dst.push_back(pBeg);
-        // Walk through the points
-        while(pItr < pMax) {
-            // Adjust the iterators
-            ++pItr;
-            ++tItr;
-            // If the point is part of the curve, simply generate a line
-            if( CURVE_TAG_C_POINT(tItr[0]) ) {
-                dst.push_back(xyOrg + *pItr);
-                continue;
-            }
-            // If the point is a quadratic bezier control point, generate
-            // one or more quadratic bezier curve(s)
-            else if( CURVE_TAG_Q_B_CTL(tItr[0]) ) {
-                // Update the control point
-                pCtl = xyOrg + *pItr;
-                // There can be multiple quadratic bezier curves, process them all
-                bool qbcSeriesDone = false;
-                while( !qbcSeriesDone && (pItr < pMax) ) {
-                    // Adjust the iterators
-                    ++pItr;
-                    ++tItr;
-                    // A non-control point marks the end of the series of curves
-                    if( CURVE_TAG_C_POINT(tItr[0]) ) {
-                        const PointF& pCur = xyOrg + *pItr;
-                        generateQuadraticBezierPoints(
-                            dst,
-                            dst.back().x(), dst.back().y(),
-                            pCtl      .x(), pCtl      .y(),
-                            pCur      .x(), pCur      .y(),
-                            smoothness
-                        );
-                        qbcSeriesDone = true;
-                        break;
-                    }
-                    if(qbcSeriesDone) break;
-                    // If the point turns out to be not a quadratic bezier control point,
-                    // abort the whole process (it is an error condition)
-                    if( !CURVE_TAG_Q_B_CTL(tItr[0]) ) return;
-                    // Generate one quadratic bezier curve with the middle point
-                    // as the final point
-                    const PointF& pCur = xyOrg + *pItr;
-                    generateQuadraticBezierPoints(
-                        dst,
-                        dst.back().x(),                dst.back().y(),
-                        pCtl      .x(),                pCtl      .y(),
-                      ( pCtl.x() + pCur.x() ) * 0.5, ( pCtl.y() + pCur.y() ) * 0.5,
-                        smoothness
-                    );
-                    // Update the control point
-                    pCtl = xyOrg + *pItr;
-                }
-                // Continue processing the next point if we have just processed
-                // a series of quadratic bezier curves
-                if(qbcSeriesDone) continue;
-                // Generate one quadratic bezier curve with the begin point
-                // as the final point
-                generateQuadraticBezierPoints(
-                    dst,
-                    dst.back().x(), dst.back().y(),
-                    pCtl      .x(), pCtl      .y(),
-                    pBeg      .x(), pBeg      .y(),
-                    smoothness
-                );
-                // Set the point iterator to maximum to end the iteration
-                pItr = pMax;
-            }
-            // Generate a cubic bezier curve
-            else {
-                // If the next point turns out to be non-existent or it is not a cubic bezier control point,
-                // abort the whole process (it is an error condition)
-                if( pItr >= pMax || !CURVE_TAG_C_B_CTL(tItr[1]) ) return;
-                // Capture the control points
-                const PointF& pCtl1 = xyOrg + pItr[0];
-                const PointF& pCtl2 = xyOrg + pItr[1];
-                // Adjust the iterators
-                pItr += 2;
-                tItr += 2;
-                // Generate one cubic bezier curve with the current point
-                // as the final point
-                if(pItr < pMax) {
-                    const PointF& pCur = xyOrg + *pItr;
-                    generateCubicBezierPoints(
-                        dst,
-                        dst.back().x(), dst.back().y(),
-                        pCtl1     .x(), pCtl1     .y(),
-                        pCtl2     .x(), pCtl2     .y(),
-                        pCur      .x(), pCur      .y(),
-                        smoothness
-                    );
-                    continue;
-                }
-                // Generate one cubic bezier curve with the begin point
-                // as the final point
-                generateCubicBezierPoints(
-                    dst,
-                    dst.back().x(), dst.back().y(),
-                    pCtl1     .x(), pCtl1     .y(),
-                    pCtl2     .x(), pCtl2     .y(),
-                    pBeg      .x(), pBeg      .y(),
-                    smoothness
-                );
-                // Set the point iterator to maximum to end the iteration
-                pItr = pMax;
-            }
-        }
-        // Update the start index of the contour
-        begIdx = endIdx + 1;
-    }
-
-    // Add a separator point
-    dst.push_back(Painter::PolygonSeparatorPointF);
-
-    // Undefine the helper macro
-    #undef CURVE_TAG_C_POINT
-    #undef CURVE_TAG_Q_B_CTL
-    #undef CURVE_TAG_C_B_CTL
-}
-
-
-static inline void generateArcPoints(std::vector<PointF>& dst, double radiusX, double radiusY, double centerX, double centerY, double degBegin, double degEnd, double smoothness, const ArcMode& arcMode)
-{
-    // Calculate the arc's parameters
-    const double degDlt  = degEnd - degBegin;
-    const double degFac  = degDlt / 360.0f;
-    const double circFac = degFac * ::sqrt( 0.5 * (radiusX * radiusX + radiusY * radiusY) );
-    const size_t nSegs   = Gfx::Math::zrint(circFac * abs(smoothness));
-    const double nSegs1i = 1.0 / (double) (nSegs - 1);
-
-    // Generate a polygon that approximates the arc
-    const double fdegInc = (degDlt   * Gfx::Math::DegToRad) * nSegs1i;
-          double angle   =  degBegin * Gfx::Math::DegToRad;
-
-    for(size_t i = 0; i < nSegs; ++i) {
-        // Calculate the coordinate
-        const double x = centerX + radiusX * ::cos(angle);
-        const double y = centerY - radiusY * ::sin(angle); // Sign inversion due to differences between cartesian and computer coordinate systems
-        // Update the angle
-        angle += fdegInc;
-        // Store the coordinate only if it is different with the previous one
-        if( !dst.empty() && dst.back().x() == x && dst.back().y() == y ) continue;
-        dst.push_back( PointF(x, y) );
-    }
-
-    // Discard the last point if it has the same coordinate with the first one
-    if(dst.back() == dst[0]) dst.pop_back();
-
-    // Add the closing point as needed
-    if(arcMode == ArcMode::Chord) {
-       dst.push_back( dst[0] );
-    }
-    else if(arcMode == ArcMode::Pie) {
-        dst.push_back( PointF(centerX, centerY) );
-        dst.push_back( dst[0] );
-    }
-}
-
 
 // ======================================================================================
 // ===== Path::PathData Implementation ==================================================
@@ -480,13 +269,11 @@ struct Path::PathData {
     enum InsType {
         IT_Begin, IT_End,
         IT_MoveTo, IT_LineTo, IT_ArcTo, IT_QuadBezierTo, IT_CubicBezierTo, IT_GenNBezierTo,
-        IT_PutArc, IT_PutChar
     };
 
     // Instruction structure
     struct Instruction {
         InsType             type;
-        Char                chr;
         std::vector<double> p;
 
         inline Instruction(InsType type_)
@@ -519,10 +306,6 @@ struct Path::PathData {
 
         inline Instruction(InsType type_, const std::vector<double>& p_)
         : type(type_), p(p_)
-        {}
-
-        inline Instruction(const Char& chr_)
-        : type(IT_PutChar), chr(chr_)
         {}
     };
 
@@ -573,9 +356,6 @@ struct Path::PathData {
 
     inline void add(InsType type, const std::vector<double>& p)
     { inss.push_back( Instruction(type, p) ); }
-
-    inline void add(const Char& chr)
-    { inss.push_back( Instruction(chr) ); }
 };
 
 
@@ -944,96 +724,7 @@ void Path::relGenericNBezierTo(Pt::int32_t controlPointCount, const double* cxy,
     _pathData->curY += y;
 }
 
-// --- Arc, chord, and pie placement ---
-
-void Path::putArc(double rx, double ry, double degBegin, double degEnd, const ArcMode& arcMode)
-{
-    // Check if this function call is valid in the current context
-    if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
-        throw PathInvalidContext(PT_SOURCEINFO_STR);
-
-    // COW
-    if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData( new PathData() );
-        *pathData = *_pathData;
-        _pathData = pathData;
-    }
-
-    // Store the instruction
-    _pathData->add(PathData::IT_PutArc, rx, ry, degBegin, degEnd, arcMode);
-}
-
-// --- Character and text placement ---
-
-void Path::setFont(const Font& fontSpec)
-{
-    // COW
-    if(_font.refs() > 1 || _text.refs() > 1) {
-        SmartPtr<Font> font(new Font);
-        *font = *_font;
-        _font = font;
-        SmartPtr<DrawText2> text(new DrawText2);
-        *text = *_text;
-        _text = text;
-    }
-
-    *_font = fontSpec;
-    _text->setFont(*_font);
-}
-
-const Font& Path::font() const
-{ return *_font; }
-
-void Path::getCharSpacing(Pt::int32_t& x, Pt::int32_t& y, const Char& from, const Char& to)
-{ _text->getCharSpacing(x, y, from, to); }
-
-void Path::putChar(const Char& chr, const Char& autoAddSpaceFor)
-{
-    // Check if this function call is valid in the current context
-    if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
-        throw PathInvalidContext(PT_SOURCEINFO_STR);
-
-    // COW
-    if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData( new PathData() );
-        *pathData = *_pathData;
-        _pathData = pathData;
-    }
-
-    // Store the instruction to draw a character
-    _pathData->add(chr);
-
-    // Return here if we do not need to automatically add character spacing
-    if(!autoAddSpaceFor) return;
-
-    // Get the character spacing
-    Pt::int32_t dx, dy;
-    getCharSpacing(dx, dy, chr, autoAddSpaceFor);
-    //std::clog << dx << " " << dy << std::endl;
-
-    // Store the instruction to move the drawing coordinate
-    _pathData->add(PathData::IT_MoveTo, _pathData->curX + dx, _pathData->curY + dy);
-
-    // Update the current coordinate
-    _pathData->curX += dx;
-    _pathData->curY += dy;
-
-}
-
-void Path::putText(const String& str)
-{
-    // Check if this function call is valid in the current context
-    if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
-        throw PathInvalidContext(PT_SOURCEINFO_STR);
-
-    // The COW mechanism is done by the putChar() function
-
-    // Put the characters from the string
-    const Pt::int32_t len1 = ( (Pt::int32_t) str.length() ) - 1;
-
-    for(Pt::int32_t i = 0; i < len1; ++i) putChar(str[i], str[i + 1]);
-    putChar(str[len1]);
-}
+// --- Generate points ---
 
 void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
 {
@@ -1097,21 +788,6 @@ void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
                 curX = ins.p[ins.p.size() - 2];
                 curY = ins.p[ins.p.size() - 1];
                 break;
-
-            case PathData::IT_PutArc: {
-                const ArcMode arcMode = static_cast<ArcMode::Mode>( Gfx::Math::zrint(ins.p[4]) );
-                generateArcPoints(dst, ins.p[0], ins.p[1], curX, curY, ins.p[2], ins.p[3], smoothness, arcMode);
-                break;
-            }
-
-            case PathData::IT_PutChar: {
-                std::vector<PointF     > pointsF;
-                std::vector<Pt::uint8_t> tags;
-                std::vector<Pt::int32_t> contours;
-                _text->pathFromChar(pointsF, tags, contours, ins.chr);
-                generateChrPoints(dst, curX, curY, pointsF, tags, contours, smoothness);
-                break;
-            }
 
             default:
                 throw PathError("Invalid Path instruction type");

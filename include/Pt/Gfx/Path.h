@@ -154,20 +154,6 @@ class PT_GFX_API Path {
         void putArc(double rx, double ry, double degBegin, double degEnd, const ArcMode& arcMode);
 
         //
-        // Character and text placement (does not change the current drawing coordinate)
-        //
-
-        void setFont(const Font& font);
-
-        const Font& font() const;
-
-        void getCharSpacing(Pt::int32_t& x, Pt::int32_t& y, const Char& from, const Char& to);
-
-        void putChar(const Char& chr, const Char& autoAddSpaceFor = 0);
-
-        void putText(const String& str);
-
-        //
         // Generators
         //
         // NOTE: * If you enlarge (scale-up) the shape, you may need to increase the "smoothness" factor as needed
