@@ -146,14 +146,16 @@ MainWindow::MainWindow()
     _tabLabel1.setMargin(5);
     
     _tabLabel2.setText("Tab Label 2");
+    _tabLabel2.setAlignment(Alignment::Center);
     _tabLabel2.setBackground( Gfx::Color::fromRgb8(100, 200, 120) );
     
     _tabLabel3.setText("Tab Label 3");
+    _tabLabel3.setAlignment(Alignment::Center);
     _tabLabel3.setBackground( Gfx::Color::fromRgb8(100, 120, 200) );
 
-    _tabView.addItem("Tab 1", _tabLabel1);
-    _tabView.addItem("Tab 2", _tabLabel2);
-    _tabView.addItem("Tab 3", _tabLabel3);
+    _tabView.addTab(_tabLabel1, "Tab 1");
+    _tabView.addTab(_tabLabel2, "Tab 2");
+    _tabView.addTab(_tabLabel3, "Tab 3");
 
     _tabView.setCurrent(0);
 

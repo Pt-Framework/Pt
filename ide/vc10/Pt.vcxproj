@@ -113,6 +113,7 @@
     <ClInclude Include="..\..\include\Pt\Hmi\SizePolicy.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Slider.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Spacing.h" />
+    <ClInclude Include="..\..\include\Pt\Hmi\StackLayout.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\Style.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\StyleOptions.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\TableLayout.h" />
@@ -605,6 +606,7 @@
     <ClCompile Include="..\..\src\Pt-Hmi\ScrollLayout.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\ScrollView.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Slider.cpp" />
+    <ClCompile Include="..\..\src\Pt-Hmi\StackLayout.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Style.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\StyleOptions.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\TableLayout.cpp" />

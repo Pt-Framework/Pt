@@ -38,7 +38,6 @@ namespace Hmi {
 //////////////////////////////////////////////////////////////////////////
 
 TabButton::TabButton()
-: _isBeingToggled(false)
 {
 }
 
@@ -48,40 +47,40 @@ TabButton::~TabButton()
 }
 
 
-void TabButton::click()
+void TabButton::press()
 {
-    setPressed( ! isPressed() );
+    if( isPressed() )
+        return;
+
+    setPressed(true);
     clicked().send();
+}
+
+
+void TabButton::release()
+{
+    if( ! isPressed() )
+        return;
+
+    setPressed(false);
 }
 
 
 void TabButton::onPressed()
 {
     Base::onPressed();
-    
-    setPressed( ! isPressed() );
-    _isBeingToggled = true;
+    press();
 }
 
 
 void TabButton::onReleased()
 {
     Base::onReleased();
-
-    _isBeingToggled = false;
-    clicked().send();
 }
 
 
 void TabButton::onCanceled()
 {
-    Base::onCanceled();
-
-    if(_isBeingToggled)
-    {
-        _isBeingToggled = false;
-        setPressed( ! isPressed() );
-    }
 }
 
 
@@ -143,6 +142,7 @@ void TabButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 //////////////////////////////////////////////////////////////////////////
 
 TabBar::TabBar()
+: _current( static_cast<std::size_t>(-1) )
 {
     setContent(_layout);
 }
@@ -150,30 +150,54 @@ TabBar::TabBar()
 
 TabBar::~TabBar()
 {
-    clear();
-}
-
-
-void TabBar::clear()
-{
     std::vector<TabButton*>::iterator it;
     for(it = _buttons.begin(); it != _buttons.end(); ++it)
     {
         delete *it;
     }
-
-    _buttons.clear();
 }
 
 
-void TabBar::addItem(const Pt::String& title)
+bool TabBar::empty() const
+{
+    return _buttons.empty();
+}
+
+
+std::size_t TabBar::size() const
+{
+    return _buttons.size();
+}
+
+
+void TabBar::addTab(const Pt::String& title)
 {
     TabButton* tb = new TabButton;
     _buttons.push_back(tb);
 
     tb->setText(title);
+    tb->clicked() += Pt::slot(*this, &TabBar::onClicked);
 
     _layout.addItem(*tb);
+}
+
+
+void TabBar::removeTab(std::size_t n)
+{
+    if( n >= _buttons.size() )
+        return;
+
+    if(_current == n)
+        _current = static_cast<std::size_t>(-1);
+
+    delete _buttons.at(n);
+    _buttons.erase(_buttons.begin() + n);
+}
+
+
+std::size_t TabBar::current() const
+{
+    return _current;
 }
 
 
@@ -182,19 +206,36 @@ void TabBar::setCurrent(std::size_t n)
     if( n >= _buttons.size() )
         return;
 
-    for(std::size_t i = 0; i < _buttons.size(); ++i)
-    {
-        TabButton* tb = _buttons.at(i);
+    if(_current == n)
+        return;
 
-        if( i == n )
+    if( _current < _buttons.size() )
+        _buttons.at(_current)->release();
+    
+    _buttons.at(n)->press();
+    _current = n;
+    _currentChanged.send(_current);
+}
+
+
+void TabBar::onClicked()
+{
+    if( _current < _buttons.size() )
+    {
+        _buttons.at(_current)->release();
+    }
+
+    std::vector<TabButton*>::iterator it;
+    for(it = _buttons.begin(); it != _buttons.end(); ++it)
+    {
+        TabButton* tb = *it;
+
+        if( tb->isPressed() )
         {
-            if( ! tb->isPressed() )
-                tb->click();
-        }
-        else
-        {
-            if( tb->isPressed() )
-                tb->click();
+            std::size_t n = std::distance(_buttons.begin(), it );
+            _current = n;
+            _currentChanged.send(_current);
+            return;
         }
     }
 }
@@ -234,108 +275,16 @@ void TabBar::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 }
 
 //////////////////////////////////////////////////////////////////////////
-// TabLayout
-//////////////////////////////////////////////////////////////////////////
-
-TabLayout::TabLayout()
-: _current(0)
-{
-}
-
-
-TabLayout::~TabLayout()
-{
-}
-
-
-void TabLayout::addItem(Widget& w)
-{
-    _widgets.push_back(&w);
-
-    w.show(false);
-    add(w);
-}
-
-
-void TabLayout::removeItem(Widget& w)
-{
-    remove(w);
-}
-
-
-void TabLayout::onRemoveWidget(Widget& w)
-{
-    Widget::onRemoveWidget(w);
-
-    if(_current == &w)
-        _current = 0;
-
-    _widgets.erase( std::remove(_widgets.begin(), _widgets.end(), &w),
-                    _widgets.end() );
-}
-
-
-void TabLayout::setCurrent(std::size_t n)
-{
-    if( n >= _widgets.size() )
-        return;
-
-    if(_current)
-        _current->show(false);
-
-    _current = _widgets.at(n);
-
-    _current->show(true);
-}
-
-
-Gfx::SizeF TabLayout::onMeasure(const SizePolicy& policy)
-{
-    Gfx::SizeF s;
-
-    std::vector<Widget*>::iterator it;
-    for(it = _widgets.begin(); it != _widgets.end(); ++it)
-    {
-        Widget* item = *it;
-        item->measure(policy);
-        Gfx::SizeF preferredSize = item->preferredSize();
-
-        double width = std::max( preferredSize.width(), s.width() );
-        double height = std::max( preferredSize.height(), s.height() );
-        
-        s.set(width, height);
-    }
-
-    return s;
-}
-
-
-void TabLayout::onLayout(const Gfx::RectF& rect)
-{
-    if(_current)
-    {
-        Gfx::PointF pos(padding().left() + _current->margin().left(), 
-                        padding().top()  + _current->margin().top());
-        
-        double hspace = padding().leftRight() + _current->margin().leftRight();
-        double vspace = padding().topBottom() + _current->margin().topBottom();
-
-        Gfx::SizeF size;
-        size.setWidth( rect.width() - hspace );
-        size.setHeight( rect.height() - vspace );
-
-        _current->layout( pos, size );
-    }
-}
-
-//////////////////////////////////////////////////////////////////////////
 // TabView
 //////////////////////////////////////////////////////////////////////////
 
 TabView::TabView()
 {
+    _tabBar.currentChanged() += Pt::slot(_stack, &StackLayout::setCurrent);
+    _stack.widgetRemoved() += Pt::slot(_tabBar, &TabBar::removeTab);
+
     _layout.addItem(_tabBar, DockingLayout::Top);
-    _layout.addItem(_tabLayout, DockingLayout::Fill);
+    _layout.addItem(_stack, DockingLayout::Fill);
 
     add(_layout);
 }
@@ -346,19 +295,47 @@ TabView::~TabView()
 }
 
 
-void TabView::addItem(const Pt::String& title, Widget& w)
+bool TabView::empty() const
 {
-    _tabBar.addItem(title);
-    _tabLayout.addItem(w);
+    return _tabBar.empty();
+}
 
-    // TODO: remove tab button from tab bar if widget is destructed
+
+std::size_t TabView::size() const
+{
+    return _tabBar.size();
+}
+
+
+void TabView::addTab(Widget& w, const Pt::String& title)
+{
+    _tabBar.addTab(title);
+    _stack.addItem(w);
+}
+
+
+void TabView::removeTab(std::size_t n)
+{
+    _tabBar.removeTab(n);
+
+    Widget* widget = _stack.widgetAt(n);
+    if( ! widget )
+        return;
+
+    _stack.removeItem(*widget);
+}
+
+
+std::size_t TabView::current() const
+{
+    return _tabBar.current();
 }
 
 
 void TabView::setCurrent(std::size_t n)
 {
     _tabBar.setCurrent(n);
-    _tabLayout.setCurrent(n);
+    _stack.setCurrent(n);
 }
 
 

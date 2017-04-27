@@ -33,6 +33,7 @@
 #include <Pt/Hmi/Panel.h>
 #include <Pt/Hmi/Button.h>
 #include <Pt/Hmi/FlowLayout.h>
+#include <Pt/Hmi/StackLayout.h>
 #include <Pt/Hmi/DockingLayout.h>
 #include <Pt/SmartPtr.h>
 #include <Pt/Signal.h>
@@ -51,7 +52,9 @@ class PT_HMI_API TabButton : public Button
 
         virtual ~TabButton();
 
-        void click();
+        void press();
+
+        void release();
 
     protected:
         virtual void onPressed();
@@ -68,9 +71,6 @@ class PT_HMI_API TabButton : public Button
         virtual void onLayout(const Gfx::RectF& rect);
 
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
-
-    private:
-        bool _isBeingToggled;
 };
 
 
@@ -84,11 +84,23 @@ class PT_HMI_API TabBar : public Panel
 
         virtual ~TabBar();
 
-        void addItem(const Pt::String& title);
+        bool empty() const;
 
-        void clear();
+        std::size_t size() const;
+
+        void addTab(const Pt::String& title);
+
+        void removeTab(std::size_t n);
+
+        std::size_t current() const;
 
         void setCurrent(std::size_t n);
+
+        Pt::Signal<std::size_t>& currentChanged()
+        { return _currentChanged; }
+
+    protected:
+        void onClicked();
 
     protected:
         virtual void onInvalidate();
@@ -100,39 +112,11 @@ class PT_HMI_API TabBar : public Panel
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
     private:
+        Pt::Signal<std::size_t> _currentChanged;
         FlowLayout              _layout;
         std::vector<TabButton*> _buttons;
+        std::size_t             _current;
 };
-
-
-class PT_HMI_API TabLayout : public Layout
-{
-    public:
-        typedef Layout Base;
-
-    public:
-        TabLayout();
-
-        virtual ~TabLayout();
-
-        void addItem(Widget& w);
-
-        void removeItem(Widget& w);
-
-        void setCurrent(std::size_t n);
-
-    protected:
-        virtual void onRemoveWidget(Widget& w);
-
-        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
-
-        virtual void onLayout(const Gfx::RectF& rect);
-
-    private:
-        std::vector<Widget*> _widgets;
-        Widget*              _current;
-};
-
 
 class PT_HMI_API TabView : public Control
 {
@@ -144,7 +128,15 @@ class PT_HMI_API TabView : public Control
 
         virtual ~TabView();
 
-        void addItem(const Pt::String& title, Widget& w);
+        bool empty() const;
+
+        std::size_t size() const;
+
+        void addTab(Widget& w, const Pt::String& title);
+
+        void removeTab(std::size_t n);
+
+        std::size_t current() const;
 
         void setCurrent(std::size_t n);
 
@@ -160,7 +152,7 @@ class PT_HMI_API TabView : public Control
     private:
         DockingLayout _layout;
         TabBar        _tabBar;
-        TabLayout     _tabLayout;
+        StackLayout   _stack;
 };
 
 } // namespace
