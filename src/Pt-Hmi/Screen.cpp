@@ -89,7 +89,7 @@ Widget* Screen::findWidget(const std::string& name)
     {
         Window* w = *it;
         Widget* widget = w->findWidget(name);
-        if( ! widget )
+        if( widget )
             return widget;
     }
     
