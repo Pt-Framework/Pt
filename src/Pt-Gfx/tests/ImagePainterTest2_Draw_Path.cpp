@@ -374,5 +374,46 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
     ip2->setBrush(brush1);
     ip2->fillPolygon(clipPointsF.data(), clipPointsF.size());
 
+    // Testing
+    col = 0;
+    row = 2;
+
+    //ip2->setAntiAliasingMode(AntiAliasingMode::None);
+
+    if(true) { // Maximize
+        RectF geometry( PointF(10 + 250 * col + 20 * 0, 10 + 250 * row), SizeF(16, 16) );
+        PointF tl = geometry.topLeft    () + PointF( 4, 4);
+        PointF tr = geometry.topRight   () + PointF(-4, 4);
+        PointF bl = geometry.bottomLeft () - PointF(-4, 4);
+        PointF br = geometry.bottomRight() - PointF( 4, 4);
+        ip2->setPen( Pen(Color(62258, 45874, 3276), 2, Pen::Solid, Pen::FlatCap) );
+        ip2->drawLine(tl, tr);
+        ip2->drawLine(bl, tr);
+        ip2->drawLine(br, tr);
+    }
+
+    if(true) { // Maximize
+        RectF geometry( PointF(10 + 250 * col + 20 * 1, 10 + 250 * row), SizeF(16, 16) );
+        PointF tl = geometry.topLeft    () + PointF( 4, 4);
+        PointF tr = geometry.topRight   () + PointF(-4, 4);
+        PointF bl = geometry.bottomLeft () - PointF(-4, 4);
+        PointF br = geometry.bottomRight() - PointF( 4, 4);
+        ip2->setPen( Pen(Color(22937, 42597, 16383), 2, Pen::Solid, Pen::FlatCap) );
+        ip2->drawLine(bl, br);
+        ip2->drawLine(tl, bl);
+        ip2->drawLine(tr, bl);
+    }
+
+    if(true) { // Close
+        RectF geometry( PointF(10 + 250 * col + 20 * 2, 10 + 250 * row), SizeF(16, 16) );
+        PointF tl = geometry.topLeft    () + PointF( 4, 4);
+        PointF tr = geometry.topRight   () + PointF(-4, 4);
+        PointF bl = geometry.bottomLeft () - PointF(-4, 4);
+        PointF br = geometry.bottomRight() - PointF( 4, 4);
+        ip2->setPen( Pen(Color(53738, 16383, 14417), 2, Pen::Solid, Pen::FlatCap) );
+        ip2->drawLine(tl, br);
+        ip2->drawLine(tr, bl);
+    }
+
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
 }
