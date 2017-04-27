@@ -523,6 +523,47 @@ class PT_HMI_API PlatinumComboBoxRenderer : public ComboBoxRenderer
         PlatinumRendererBase _baseRenderer;
 };
 
+
+class PT_HMI_API PlatinumTabViewRenderer : public TabViewRenderer
+{
+    public:
+        PlatinumTabViewRenderer(std::size_t refs = 0);
+
+        virtual ~PlatinumTabViewRenderer();
+        
+    protected:
+        virtual void onPrepareView(const TabView& tv,
+                                   const StyleOptions& options,
+                                   Gfx::Brush& background,
+                                   Gfx::Pen& contour) const;
+        
+        virtual void onPrepareTab(const TabButton& tb,
+                                  const StyleOptions& options,
+                                  Gfx::Brush& background,
+                                  Gfx::Brush& foreground,
+                                  Gfx::Pen& contour,
+                                  Gfx::Font& font, 
+                                  Gfx::Pen& textPen) const;
+        
+        virtual void onRenderView(const TabView& tv,
+                                  const StyleOptions& options,
+                                  Painter& painter,
+                                  const Gfx::RectF& rect,
+                                  const Gfx::Brush& background,
+                                  const Gfx::Pen& contour) const;
+        
+        virtual void onRenderTab(const TabButton& tb,
+                                 const StyleOptions& options,
+                                 Painter& painter,
+                                 const Gfx::RectF& rect,
+                                 const Gfx::Brush& background,
+                                 const Gfx::Brush& foreground,
+                                 const Gfx::Pen& contour,
+                                 const Gfx::Font& font, 
+                                 const Gfx::Pen& textPen) const;
+};
+
+
 class PT_HMI_API PlatinumStyle : public Style
 {
     public:

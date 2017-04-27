@@ -65,6 +65,9 @@ class Slider;
 class ProgressBar;
 class ListBox;
 class ListBoxItem;
+class TabView;
+class TabBar;
+class TabButton;
 
 template <typename T>
 class FacetPtr
@@ -946,6 +949,76 @@ class PT_HMI_API ComboBoxRenderer : public Style::Facet
                                   const Gfx::Font& font, 
                                   const Gfx::Pen& textPen,
                                   const Gfx::RectF& cursor) const = 0;
+};
+
+
+class PT_HMI_API TabViewRenderer : public Style::Facet
+{
+    public:
+        TabViewRenderer(std::size_t refs = 0);
+
+        virtual ~TabViewRenderer();
+
+        void prepareView(const TabView& tv,
+                         const StyleOptions& options,
+                         Gfx::Brush& background,
+                         Gfx::Pen& contour) const;
+
+        void prepareTab(const TabButton& tb,
+                        const StyleOptions& options,
+                        Gfx::Brush& background,
+                        Gfx::Brush& foreground,
+                        Gfx::Pen& contour,
+                        Gfx::Font& font, 
+                        Gfx::Pen& textPen) const;
+
+        void renderView(const TabView& tv,
+                        const StyleOptions& options,
+                        Painter& painter,
+                        const Gfx::RectF& rect,
+                        const Gfx::Brush& background,
+                        const Gfx::Pen& contour) const;
+      
+        void renderTab(const TabButton& tb,
+                       const StyleOptions& options,
+                       Painter& painter,
+                       const Gfx::RectF& rect,
+                       const Gfx::Brush& background,
+                       const Gfx::Brush& foreground,
+                       const Gfx::Pen& contour,
+                       const Gfx::Font& font, 
+                       const Gfx::Pen& textPen) const;
+        
+    protected:
+        virtual void onPrepareView(const TabView& tv,
+                                   const StyleOptions& options,
+                                   Gfx::Brush& background,
+                                   Gfx::Pen& contour) const = 0;
+        
+        virtual void onPrepareTab(const TabButton& tb,
+                                  const StyleOptions& options,
+                                  Gfx::Brush& background,
+                                  Gfx::Brush& foreground,
+                                  Gfx::Pen& contour,
+                                  Gfx::Font& font, 
+                                  Gfx::Pen& textPen) const = 0;
+
+        virtual void onRenderView(const TabView& tv,
+                                  const StyleOptions& options,
+                                  Painter& painter,
+                                  const Gfx::RectF& rect,
+                                  const Gfx::Brush& background,
+                                  const Gfx::Pen& contour) const = 0;
+
+        virtual void onRenderTab(const TabButton& tb,
+                                 const StyleOptions& options,
+                                 Painter& painter,
+                                 const Gfx::RectF& rect,
+                                 const Gfx::Brush& background,
+                                 const Gfx::Brush& foreground,
+                                 const Gfx::Pen& contour,
+                                 const Gfx::Font& font, 
+                                 const Gfx::Pen& textPen) const = 0;
 };
 
 } // namespace

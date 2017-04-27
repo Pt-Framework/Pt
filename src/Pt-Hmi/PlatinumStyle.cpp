@@ -46,6 +46,7 @@
 #include <Pt/Hmi/Slider.h>
 #include <Pt/Hmi/ListBox.h>
 #include <Pt/Hmi/ComboBox.h>
+#include <Pt/Hmi/TabView.h>
 
 namespace {
 
@@ -1150,6 +1151,81 @@ void PlatinumComboBoxRenderer::onRenderText(const ComboBox& cb,
     }
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// PlatinumComboBoxRenderer
+///////////////////////////////////////////////////////////////////////////////
+
+PlatinumTabViewRenderer::PlatinumTabViewRenderer(std::size_t refs)
+: TabViewRenderer(refs)
+{
+}
+
+    
+PlatinumTabViewRenderer::~PlatinumTabViewRenderer()
+{
+}
+
+
+void PlatinumTabViewRenderer::onPrepareView(const TabView& tv,
+                                            const StyleOptions& options,
+                                            Gfx::Brush& background,
+                                            Gfx::Pen& contour) const
+{
+}
+
+
+void PlatinumTabViewRenderer::onPrepareTab(const TabButton& tb,
+                                           const StyleOptions& options,
+                                           Gfx::Brush& background,
+                                           Gfx::Brush& foreground,
+                                           Gfx::Pen& contour,
+                                           Gfx::Font& font, 
+                                           Gfx::Pen& textPen) const
+{
+    if( tb.isPressed() )
+    {
+        contour = options.accentColor();
+        textPen = options.accentColor();
+    }
+}
+
+
+void PlatinumTabViewRenderer::onRenderView(const TabView& tv,
+                                           const StyleOptions& options,
+                                           Painter& painter,
+                                           const Gfx::RectF& rect,
+                                           const Gfx::Brush& background,
+                                           const Gfx::Pen& contou) const
+{
+}
+
+
+void PlatinumTabViewRenderer::onRenderTab(const TabButton& tb,
+                                          const StyleOptions& options,
+                                          Painter& painter,
+                                          const Gfx::RectF& rect,
+                                          const Gfx::Brush& background,
+                                          const Gfx::Brush& foreground,
+                                          const Gfx::Pen& contour,
+                                          const Gfx::Font& font, 
+                                          const Gfx::Pen& textPen) const
+{
+    painter.setPen(textPen);
+    painter.setFont(font);
+
+    Gfx::FontMetrics fm = Painter::fontMetrics( font, tb.text() );
+
+    double textX = fm.descent() * 2;
+    double textY = tb.size().height() / 2 + fm.ascent() / 2;
+    Gfx::PointF textPos(textX, textY);
+    painter.drawText( textPos, tb.text() );
+
+    painter.setPen(contour);
+
+    Gfx::PointF from(2, tb.size().height() - 1);
+    Gfx::PointF to(tb.size().width() - 2, tb.size().height() - 1);
+    painter.drawLine(from, to);
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 // PlatinumStyle
@@ -1169,6 +1245,7 @@ PlatinumStyle::PlatinumStyle()
     set(new PlatinumSliderRenderer);
     set(new PlatinumListBoxRenderer);
     set(new PlatinumComboBoxRenderer);
+    set(new PlatinumTabViewRenderer);
 }
 
 

@@ -38,6 +38,7 @@ namespace Hmi {
 //////////////////////////////////////////////////////////////////////////
 
 TabButton::TabButton()
+: _hasRenderer(false)
 {
 }
 
@@ -84,9 +85,36 @@ void TabButton::onCanceled()
 }
 
 
+void TabButton::setRenderer(TabViewRenderer* renderer)
+{
+    _renderer.reset(renderer);
+    _hasRenderer = renderer != 0;
+
+    invalidate();
+}
+
+
 void TabButton::onInvalidate()
 {
     Base::onInvalidate();
+
+    const StyleOptions& options = Application::instance().styleOptions();
+    const Style& style = Application::instance().style();
+
+    _backgroundBrush = options.background();
+    _foregroundBrush = options.foreground();
+    _contourPen = options.contour();
+    _textPen = options.textColor();
+    _font = options.font();
+
+    if( ! _hasRenderer )
+        _renderer.reset( style.get<TabViewRenderer>() );
+    
+    if( ! _renderer )
+        return;
+
+    _renderer->prepareTab(*this, options, _backgroundBrush, _foregroundBrush,
+                          _contourPen, _font, _textPen);
 }
 
 
@@ -116,25 +144,8 @@ void TabButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     Painter painter(surface);
     painter.setClip(rect);
 
-    if( isPressed() )
-    {
-        const Gfx::Brush& brush = Application::instance().styleOptions().foreground();
-        painter.setBrush(brush);
-        painter.fillRect(rect);
-    }
-
-    const Gfx::Pen& pen = Application::instance().styleOptions().textColor();
-    painter.setPen(pen);
-
-    const Gfx::Font& font = Application::instance().styleOptions().font();
-    painter.setFont(font);
-
-    Gfx::FontMetrics fm = Painter::fontMetrics( font, text() );
-
-    double textX = fm.descent() * 2;
-    double textY = size().height() / 2 + fm.ascent() / 2;
-    Gfx::PointF textPos(textX, textY);
-    painter.drawText( textPos, text() );
+    _renderer->renderTab(*this, options, painter, rect, 
+                       _backgroundBrush, _foregroundBrush, _contourPen, _font, _textPen);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -143,6 +154,7 @@ void TabButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 
 TabBar::TabBar()
 : _current( static_cast<std::size_t>(-1) )
+, _hasRenderer(false)
 {
     setContent(_layout);
 }
@@ -241,9 +253,36 @@ void TabBar::onClicked()
 }
 
 
+void TabBar::setRenderer(TabViewRenderer* renderer)
+{
+    _renderer.reset(renderer);
+    _hasRenderer = renderer != 0;
+
+    invalidate();
+}
+
+
 void TabBar::onInvalidate()
 {
     Base::onInvalidate();
+
+    const StyleOptions& options = Application::instance().styleOptions();
+    const Style& style = Application::instance().style();
+
+    //_backgroundBrush = background();
+    //_foregroundBrush = foreground();
+    //_contourPen = contour();
+    //_textPen = textColor();
+    //_font = Gfx::Font(font(), fontSize(), fontStyle());
+
+    if( ! _hasRenderer )
+        _renderer.reset( style.get<TabViewRenderer>() );
+    
+    if( ! _renderer )
+        return;
+
+    //_renderer->prepare(*this, options, _backgroundBrush, _foregroundBrush,
+    //                   _contourPen, _textPen, _font);
 }
 
 
@@ -272,6 +311,16 @@ void TabBar::onLayout(const Gfx::RectF& rect)
 
 void TabBar::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
+    const StyleOptions& options = Application::instance().styleOptions();
+
+    if( ! _renderer)
+        return;
+
+    Painter painter(surface);
+    painter.setClip(rect);
+
+    //_renderer->render(*this, options, painter, rect, 
+    //                   _backgroundBrush, _foregroundBrush, _contourPen, _textPen, _font);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -279,6 +328,7 @@ void TabBar::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 //////////////////////////////////////////////////////////////////////////
 
 TabView::TabView()
+: _hasRenderer(false)
 {
     _tabBar.currentChanged() += Pt::slot(_stack, &StackLayout::setCurrent);
     _stack.widgetRemoved() += Pt::slot(_tabBar, &TabBar::removeTab);
@@ -339,9 +389,32 @@ void TabView::setCurrent(std::size_t n)
 }
 
 
+void TabView::setRenderer(TabViewRenderer* renderer)
+{
+    _renderer.reset(renderer);
+    _hasRenderer = renderer != 0;
+
+    invalidate();
+}
+
+
 void TabView::onInvalidate()
 {
     Base::onInvalidate();
+
+    const StyleOptions& options = Application::instance().styleOptions();
+    const Style& style = Application::instance().style();
+
+    _backgroundBrush = options.background();
+    _contourPen = options.contour();
+
+    if( ! _hasRenderer )
+        _renderer.reset( style.get<TabViewRenderer>() );
+
+    if( ! _renderer )
+        return;
+
+    _renderer->prepareView(*this, options, _backgroundBrush, _contourPen);
 }
 
 
@@ -370,6 +443,16 @@ void TabView::onLayout(const Gfx::RectF& rect)
 
 void TabView::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
+    const StyleOptions& options = Application::instance().styleOptions();
+
+    if( ! _renderer)
+        return;
+
+    Painter painter(surface);
+    painter.setClip(rect);
+
+    _renderer->renderView(*this, options, painter, rect,
+                          _backgroundBrush, _contourPen);
 }
 
 } // namespace

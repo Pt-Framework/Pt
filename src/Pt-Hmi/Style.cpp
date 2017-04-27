@@ -791,6 +791,68 @@ void ComboBoxRenderer::renderText(const ComboBox& cb,
     onRenderText(cb, options, painter, rect, text, textPos, font, textPen, cursor);
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// TabViewRenderer
+///////////////////////////////////////////////////////////////////////////////
+
+TabViewRenderer::TabViewRenderer(std::size_t refs)
+: Style::Facet( typeid(TabViewRenderer), refs )
+{
+}
+
+    
+TabViewRenderer::~TabViewRenderer()
+{
+}
+
+
+void TabViewRenderer::prepareView(const TabView& tv,
+                                  const StyleOptions& options,
+                                  Gfx::Brush& background,
+                                  Gfx::Pen& contour) const
+{
+    onPrepareView(tv, options, background, contour); 
+}
+
+
+void TabViewRenderer::prepareTab(const TabButton& tb,
+                                 const StyleOptions& options,
+                                 Gfx::Brush& background,
+                                 Gfx::Brush& foreground,
+                                 Gfx::Pen& contour,
+                                 Gfx::Font& font, 
+                                 Gfx::Pen& textPen) const
+{
+    onPrepareTab(tb, options, background, foreground, 
+                 contour, font, textPen);
+}
+
+
+void TabViewRenderer::renderView(const TabView& tv,
+                                 const StyleOptions& options,
+                                 Painter& painter,
+                                 const Gfx::RectF& rect,
+                                 const Gfx::Brush& background,
+                                 const Gfx::Pen& contour) const
+{ 
+    onRenderView(tv, options, painter, rect, background, contour); 
+}  
+
+
+void TabViewRenderer::renderTab(const TabButton& tb,
+                                 const StyleOptions& options,
+                                 Painter& painter,
+                                 const Gfx::RectF& rect,
+                                 const Gfx::Brush& background,
+                                 const Gfx::Brush& foreground,
+                                 const Gfx::Pen& contour,
+                                 const Gfx::Font& font, 
+                                 const Gfx::Pen& textPen) const
+{ 
+    onRenderTab(tb, options, painter, rect, 
+                background, foreground, contour, font, textPen); 
+}  
+
 } // namespace
 
 } // namespace

@@ -56,6 +56,9 @@ class PT_HMI_API TabButton : public Button
 
         void release();
 
+    public:
+        void setRenderer(TabViewRenderer* renderer);
+
     protected:
         virtual void onPressed();
 
@@ -71,9 +74,20 @@ class PT_HMI_API TabButton : public Button
         virtual void onLayout(const Gfx::RectF& rect);
 
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+
+    private:
+        FacetPtr<TabViewRenderer> _renderer;
+        bool                      _hasRenderer;
+
+        Gfx::Brush  _backgroundBrush;
+        Gfx::Brush  _foregroundBrush;
+        Gfx::Pen    _contourPen;
+        Gfx::Pen    _textPen;
+        Gfx::Font   _font;
 };
 
-
+/** @brief Tab bar for all tabbed widgets.
+*/
 class PT_HMI_API TabBar : public Panel
 {
     public:
@@ -99,6 +113,9 @@ class PT_HMI_API TabBar : public Panel
         Pt::Signal<std::size_t>& currentChanged()
         { return _currentChanged; }
 
+    public:
+        void setRenderer(TabViewRenderer* renderer);
+
     protected:
         void onClicked();
 
@@ -116,8 +133,13 @@ class PT_HMI_API TabBar : public Panel
         FlowLayout              _layout;
         std::vector<TabButton*> _buttons;
         std::size_t             _current;
+
+        FacetPtr<TabViewRenderer> _renderer;
+        bool                      _hasRenderer;
 };
 
+/** @brief Tabbed view for widgets.
+*/
 class PT_HMI_API TabView : public Control
 {
     public:
@@ -140,6 +162,9 @@ class PT_HMI_API TabView : public Control
 
         void setCurrent(std::size_t n);
 
+    public:
+        void setRenderer(TabViewRenderer* renderer);
+
     protected:
         virtual void onInvalidate();
 
@@ -150,9 +175,15 @@ class PT_HMI_API TabView : public Control
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
     private:
-        DockingLayout _layout;
-        TabBar        _tabBar;
-        StackLayout   _stack;
+        DockingLayout             _layout;
+        TabBar                    _tabBar;
+        StackLayout               _stack;
+
+        FacetPtr<TabViewRenderer> _renderer;
+        bool                      _hasRenderer;
+
+        Gfx::Brush  _backgroundBrush;
+        Gfx::Pen    _contourPen;
 };
 
 } // namespace
