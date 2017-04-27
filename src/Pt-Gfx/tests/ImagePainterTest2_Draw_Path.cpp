@@ -374,7 +374,7 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
     ip2->setBrush(brush1);
     ip2->fillPolygon(clipPointsF.data(), clipPointsF.size());
 
-    // Testing
+    // Testing Hmi window buttons' icons
     col = 0;
     row = 2;
 

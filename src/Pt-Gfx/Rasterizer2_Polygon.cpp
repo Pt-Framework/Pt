@@ -210,7 +210,7 @@ void Rasterizer2::rasterPolygonAreaXWAA(const PointF* points, const size_t* poin
                 scanlines[pixelY - minY + 1].push_back(ScanlineElement16(from, to));
             }
             // Draw the scanline
-            //rasterScanline(from - minX, to - minX, pixelY - minY, minX, minY, color);
+            rasterScanline(from - minX, to - minX, pixelY - minY, minX, minY, color);
         }
     }
 
