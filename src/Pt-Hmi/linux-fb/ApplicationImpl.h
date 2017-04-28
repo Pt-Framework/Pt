@@ -61,6 +61,8 @@ class ApplicationImpl : public Pt::System::MainLoop
     void grabPointer(Widget& grabber);
 
     void releasePointer(Widget& grabber);
+
+    void sendKeyEvent(const KeyEvent& ev);
     
 		FrameBuffer& frameBuffer()
 		{

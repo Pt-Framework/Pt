@@ -234,6 +234,22 @@ void ApplicationImpl::releasePointer(Widget& grabber)
 }
 
 
+void ApplicationImpl::sendKeyEvent(const KeyEvent& ev)
+{
+    HWND hwnd = GetActiveWindow();
+    if( ! hwnd )
+        return;
+
+    Window* window = findWindow(hwnd);
+    if( ! window )
+        return;
+
+    KeyEvent kev = ev;
+    kev.setId( window->vid() );
+    commitEvent(kev);
+}
+
+
 void ApplicationImpl::nextEvent()
 {
     waitNext();
@@ -676,6 +692,10 @@ void ApplicationImpl::onMouse(Window& w, unsigned int msg, WPARAM wparam, LPARAM
         Application::instance().setPointerWindow(&w);
         _pointerInWindow = true;
     }
+
+    // TODO: call Application::processMouseEvent which returns true if the
+    //       event was consumed. If it returns false and the event was not
+    //       consumed call ApplicationImpl::dispatchMouseEvent
 
     Application::instance().processMouseEvent(_mouseEvent);
 }

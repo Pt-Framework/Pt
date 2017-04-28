@@ -81,6 +81,8 @@ class ApplicationImpl : public Pt::System::EventLoop
 
         void releasePointer(Widget& grabber);
 
+        void sendKeyEvent(const KeyEvent& ev);
+
     protected:
         virtual void onAttachSelectable(System::Selectable&);
 

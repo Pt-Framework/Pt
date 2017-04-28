@@ -115,6 +115,10 @@ class PT_HMI_API Application : public Pt::System::Application
 
         void removeInputMethod(InputMethod& im);
 
+        /** @brief Sends a key event to the active window.
+        */
+        void sendKeyEvent(const KeyEvent& ev);
+
         void invalidate();
 
         // TODO: this might be the same as loop().waitNext()

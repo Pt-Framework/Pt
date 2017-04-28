@@ -207,7 +207,7 @@ void ScreenImpl::dispatchScrollEvent(const ScrollEvent& ev)
 }
 
 
-void ScreenImpl::onKeyEvent(const Pt::Hmi::KeyEvent& ev)
+void ScreenImpl::dispatchKeyEvent(const Pt::Hmi::KeyEvent& ev)
 {
     _windowManager.keyEvent(ev);
 }

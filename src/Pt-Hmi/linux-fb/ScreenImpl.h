@@ -93,6 +93,8 @@ class ScreenImpl : public Pt::Connectable
 
         void dispatchScrollEvent(const ScrollEvent& ev);
 
+        void dispatchKeyEvent(const KeyEvent& ev);
+
         Gfx::PointF toParent(const Window& w, const Gfx::PointF& pos) const;
 
         Gfx::PointF fromParent(const Window& w, const Gfx::PointF& pos) const;
@@ -114,9 +116,6 @@ class ScreenImpl : public Pt::Connectable
         void onActivate(Window& w);
 
         void onEnable(Window& w, bool enable);
-
-    protected:
-        void onKeyEvent(const Pt::Hmi::KeyEvent& ev);
 
     private:
         enum BlitOp

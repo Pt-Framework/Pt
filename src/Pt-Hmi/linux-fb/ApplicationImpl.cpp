@@ -106,38 +106,6 @@ void ApplicationImpl::setCursor(const Cursor* cursor)
 }
 
 
-void ApplicationImpl::onMouseEvent(const MouseEvent& ev)
-{
-    MouseEvent mev = ev;
-    mev.setId( Application::instance().screen().vid() );
-
-    ScreenImpl* screen = Application::instance().screen().impl();
-    
-    Gfx::PointF pos = screen->screenPosition( ev.position() );
-    mev.setPosition(pos);
-
-    screen->drawCursor(mev);
-
-    _lastMouse = mev;
-
-    Application::instance().processMouseEvent(mev);
-}
-
-
-void ApplicationImpl::onTouchEvent(const TouchEvent& ev)
-{
-    TouchEvent tev = ev;
-    tev.setId( Application::instance().screen().vid() );
-
-    ScreenImpl* screen = Application::instance().screen().impl();
-
-    Gfx::PointF pos = screen->screenPosition( ev.position() );
-    tev.setPosition(pos);
-
-    Application::instance().processTouchEvent(tev);
-}
-
-
 void ApplicationImpl::grabPointer(Window& grabber)
 {
 }
@@ -173,6 +141,48 @@ void ApplicationImpl::releasePointer(Widget& grabber)
     _lastMouse.setId( Application::instance().screen().vid() );
 
     Application::instance().processMouseEvent(_lastMouse);
+}
+
+
+void ApplicationImpl::sendKeyEvent(const KeyEvent& ev)
+{
+    Application::instance().screen().impl()->dispatchKeyEvent(ev);
+}
+
+
+void ApplicationImpl::onMouseEvent(const MouseEvent& ev)
+{
+    MouseEvent mev = ev;
+    mev.setId( Application::instance().screen().vid() );
+
+    ScreenImpl* screen = Application::instance().screen().impl();
+    
+    Gfx::PointF pos = screen->screenPosition( ev.position() );
+    mev.setPosition(pos);
+
+    screen->drawCursor(mev);
+
+    _lastMouse = mev;
+
+    // TODO: call Application::processMouseEvent which returns true if the
+    //       event was consumed. If it returns false and the event was not
+    //       consumed call ApplicationImpl::dispatchMouseEvent
+
+    Application::instance().processMouseEvent(mev);
+}
+
+
+void ApplicationImpl::onTouchEvent(const TouchEvent& ev)
+{
+    TouchEvent tev = ev;
+    tev.setId( Application::instance().screen().vid() );
+
+    ScreenImpl* screen = Application::instance().screen().impl();
+
+    Gfx::PointF pos = screen->screenPosition( ev.position() );
+    tev.setPosition(pos);
+
+    Application::instance().processTouchEvent(tev);
 }
 
 
