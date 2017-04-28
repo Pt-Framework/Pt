@@ -93,7 +93,6 @@ class PT_GFX_API PathInvalidContext : public PathError {
 /** @brief 2D path builder.
   */
 class PT_GFX_API Path {
-
     public:
         Path();
 
@@ -160,6 +159,9 @@ class PT_GFX_API Path {
         //       * If the "smoothness" factor is too large, the anti-aliasing will become less effective
         void generatePoints(std::vector<PointF>& dst, float smoothness = 1.0f) const;
 
+        // ### TODO: Add generator function(s) that can also takes transformation(s)! ###
+
+    public:
         //
         // Polygon clipper
         //
@@ -175,6 +177,9 @@ class PT_GFX_API Path {
 
     private:
         SmartPtr<PathData>  _pathData;
+
+        void decomposeAndStore_arcTo(double x1, double y1, double x2, double y2, double r);
+
 };
 
 

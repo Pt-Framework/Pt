@@ -197,68 +197,6 @@ static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, doubl
     }
 }
 
-static inline void generateArcPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double r, double smoothness)
-{
-    // Based on How to create circle with Bézier curves?
-    //          http://stackoverflow.com/questions/1734745/how-to-create-circle-with-bézier-curves
-    //          Answer by Kpym, 2015 (permalink: http://stackoverflow.com/a/27863181)
-
-    // Line equation : 0 = aX + By + c
-    // Normal        : n = ai + bj
-    const double a = y2 - y1;
-    const double b = x1 - x2;
-  //const double c = -(x1 * y2 - x2 * y1);
-
-    // Middle point
-    const double xm = (x1 + x2) * 0.5;
-    const double ym = (y1 + y2) * 0.5;
-
-    // Radius
-    const double ab = Gfx::Math::fastSqrt(a * a + b * b);
-    const double rx = ab * 0.5f;
-    const double ry = r;
-
-    // Normal vector
-    const double iz = -1.0 / ab;
-    const double nx = a * iz;
-    const double ny = b * iz;
-
-    // Circumference vectors
-    const double nxrx = nx * rx;
-    const double nxry = nx * ry;
-    const double nyrx = ny * rx;
-    const double nyry = ny * ry;
-
-    // Optimal distance to the control points for circle approximation
-    // using N segments of cubic bezier:
-    //    dist = (4 / 3) * tan(pi / 2 / N)
-    // If N = 4, then:
-    //    dist = (4 / 3) * tan(pi / 2 / 4) = 0.0822479912358
-    const double od = 0.552284749831;
-
-    // Curve #1
-    const double c1x1 = x1;
-    const double c1y1 = y1;
-    const double c1x4 = xm   + nxrx;
-    const double c1y4 = ym   + nyry;
-    const double c1x2 = c1x1 + nxrx * od;
-    const double c1y2 = c1y1 + nyry * od;
-    const double c1x3 = c1x4 - nyrx * od;
-    const double c1y3 = c1y4 - nxry * od;
-    generateCubicBezierPoints(dst, c1x1, c1y1, c1x2, c1y2, c1x3, c1y3, c1x4, c1y4, smoothness);
-
-    // Curve #2
-    const double c2x1 = xm   + nxrx;
-    const double c2y1 = ym   + nyry;
-    const double c2x4 = x2;
-    const double c2y4 = y2;
-    const double c2x2 = c2x1 + nyrx * od;
-    const double c2y2 = c2y1 - nxry * od;
-    const double c2x3 = c2x4 - nxrx * od;
-    const double c2y3 = c2y4 + nyry * od;
-    generateCubicBezierPoints(dst, c2x1, c2y1, c2x2, c2y2, c2x3, c2y3, c2x4, c2y4, smoothness);
-}
-
 
 // ======================================================================================
 // ===== Path::PathData Implementation ==================================================
@@ -268,44 +206,32 @@ struct Path::PathData {
     // Instruction type
     enum InsType {
         IT_Begin, IT_End,
-        IT_MoveTo, IT_LineTo, IT_ArcTo, IT_QuadBezierTo, IT_CubicBezierTo, IT_GenNBezierTo,
+        IT_MoveTo, IT_LineTo, IT_QuadBezierTo, IT_CubicBezierTo, IT_GenNBezierTo,
     };
 
     // Instruction structure
     struct Instruction {
         InsType             type;
-        std::vector<double> p;
+        std::vector<double> pxy;
 
         inline Instruction(InsType type_)
         : type(type_)
         {}
 
-        inline Instruction(InsType type_, double p0)
-        : type(type_), p(1)
-        { p[0] = p0; }
+        inline Instruction(InsType type_, double x0, double y0)
+        : type(type_), pxy(2)
+        { pxy[0] = x0; pxy[1] = y0; }
 
-        inline Instruction(InsType type_, double p0, double p1)
-        : type(type_), p(2)
-        { p[0] = p0; p[1] = p1; }
+        inline Instruction(InsType type_, double x0, double y0, double x1, double y1)
+        : type(type_), pxy(4)
+        { pxy[0] = x0; pxy[1] = y0; pxy[2] = x1; pxy[3] = y1; }
 
-        inline Instruction(InsType type_, double p0, double p1, double p2)
-        : type(type_), p(3)
-        { p[0] = p0; p[1] = p1; p[2] = p2; }
+        inline Instruction(InsType type_, double x0, double y0, double x1, double y1, double x2, double y2)
+        : type(type_), pxy(6)
+        { pxy[0] = x0; pxy[1] = y0; pxy[2] = x1; pxy[3] = y1; pxy[4] = x2; pxy[5] = y2; }
 
-        inline Instruction(InsType type_, double p0, double p1, double p2, double p3)
-        : type(type_), p(4)
-        { p[0] = p0; p[1] = p1; p[2] = p2; p[3] = p3; }
-
-        inline Instruction(InsType type_, double p0, double p1, double p2, double p3, double p4)
-        : type(type_), p(5)
-        { p[0] = p0; p[1] = p1; p[2] = p2; p[3] = p3; p[4] = p4; }
-
-        inline Instruction(InsType type_, double p0, double p1, double p2, double p3, double p4, double p5)
-        : type(type_), p(6)
-        { p[0] = p0; p[1] = p1; p[2] = p2; p[3] = p3; p[4] = p4; p[5] = p5; }
-
-        inline Instruction(InsType type_, const std::vector<double>& p_)
-        : type(type_), p(p_)
+        inline Instruction(InsType type_, const std::vector<double>& pxy_)
+        : type(type_), pxy(pxy_)
         {}
     };
 
@@ -336,26 +262,17 @@ struct Path::PathData {
     inline void add(InsType type)
     { inss.push_back( Instruction(type) ); }
 
-    inline void add(InsType type, double p0)
-    { inss.push_back( Instruction(type, p0) ); }
+    inline void add(InsType type, double x0, double y0)
+    { inss.push_back( Instruction(type, x0, y0) ); }
 
-    inline void add(InsType type, double p0, double p1)
-    { inss.push_back( Instruction(type, p0, p1) ); }
+    inline void add(InsType type, double x0, double y0, double x1, double y1)
+    { inss.push_back( Instruction(type, x0, y0, x1, y1) ); }
 
-    inline void add(InsType type, double p0, double p1, double p2)
-    { inss.push_back( Instruction(type, p0, p1, p2) ); }
+    inline void add(InsType type, double x0, double y0, double x1, double y1, double x2, double y2)
+    { inss.push_back( Instruction(type, x0, y0, x1, y1, x2, y2 ) ); }
 
-    inline void add(InsType type, double p0, double p1, double p2, double p3)
-    { inss.push_back( Instruction(type, p0, p1, p2, p3) ); }
-
-    inline void add(InsType type, double p0, double p1, double p2, double p3, double p4)
-    { inss.push_back( Instruction(type, p0, p1, p2, p3, p4) ); }
-
-    inline void add(InsType type, double p0, double p1, double p2, double p3, double p4, double p5)
-    { inss.push_back( Instruction(type, p0, p1, p2, p3, p4, p5) ); }
-
-    inline void add(InsType type, const std::vector<double>& p)
-    { inss.push_back( Instruction(type, p) ); }
+    inline void add(InsType type, const std::vector<double>& xy)
+    { inss.push_back( Instruction(type, xy) ); }
 };
 
 
@@ -490,8 +407,8 @@ void Path::arcTo(double x, double y, double r)
         _pathData = pathData;
     }
 
-    // Store the instruction
-    _pathData->add(PathData::IT_ArcTo, x, y, r);
+    // Decompose and store the instruction
+    decomposeAndStore_arcTo(_pathData->curX, _pathData->curY, x, y, r);
 
     // Update the current coordinate
     _pathData->curX = x;
@@ -632,8 +549,8 @@ void Path::relArcTo(double x, double y, double r)
         _pathData = pathData;
     }
 
-    // Store the instruction
-    _pathData->add(PathData::IT_ArcTo, _pathData->curX + x, _pathData->curY + y, r);
+    // Decompose and store the instruction
+    decomposeAndStore_arcTo(_pathData->curX, _pathData->curY, _pathData->curX + x, _pathData->curY + y, r);
 
     // Update the current coordinate
     _pathData->curX += x;
@@ -748,39 +665,33 @@ void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
                 break;
 
             case PathData::IT_MoveTo:
-                curX = ins.p[0];
-                curY = ins.p[1];
+                curX = ins.pxy[0];
+                curY = ins.pxy[1];
                 break;
 
             case PathData::IT_LineTo:
                 if(dst.empty()) dst.push_back( PointF(curX, curY) );
-                curX = ins.p[0];
-                curY = ins.p[1];
+                curX = ins.pxy[0];
+                curY = ins.pxy[1];
                 dst.push_back( PointF(curX, curY) );
                 break;
 
-            case PathData::IT_ArcTo:
-                generateArcPoints(dst, curX, curY, ins.p[0], ins.p[1], ins.p[2], smoothness);
-                curX = ins.p[0];
-                curY = ins.p[1];
-                break;
-
             case PathData::IT_QuadBezierTo:
-                generateQuadraticBezierPoints(dst, curX, curY, ins.p[0], ins.p[1], ins.p[2], ins.p[3], smoothness);
-                curX = ins.p[2];
-                curY = ins.p[3];
+                generateQuadraticBezierPoints(dst, curX, curY, ins.pxy[0], ins.pxy[1], ins.pxy[2], ins.pxy[3], smoothness);
+                curX = ins.pxy[2];
+                curY = ins.pxy[3];
                 break;
 
             case PathData::IT_CubicBezierTo:
-                generateCubicBezierPoints(dst, curX, curY, ins.p[0], ins.p[1], ins.p[2], ins.p[3], ins.p[4], ins.p[5], smoothness);
-                curX = ins.p[4];
-                curY = ins.p[5];
+                generateCubicBezierPoints(dst, curX, curY, ins.pxy[0], ins.pxy[1], ins.pxy[2], ins.pxy[3], ins.pxy[4], ins.pxy[5], smoothness);
+                curX = ins.pxy[4];
+                curY = ins.pxy[5];
                 break;
 
             case PathData::IT_GenNBezierTo:
-                generateGenericNBezierPoints(dst, curX, curY, ins.p, smoothness);
-                curX = ins.p[ins.p.size() - 2];
-                curY = ins.p[ins.p.size() - 1];
+                generateGenericNBezierPoints(dst, curX, curY, ins.pxy, smoothness);
+                curX = ins.pxy[ins.pxy.size() - 2];
+                curY = ins.pxy[ins.pxy.size() - 1];
                 break;
 
             default:
@@ -884,6 +795,73 @@ void Path::clipPolygon(std::vector<PointF>& result, const std::vector<PointF>& s
             ) );
         }
     }
+}
+
+
+// ======================================================================================
+// ===== Private Member Functions =======================================================
+// ======================================================================================
+
+void Path::decomposeAndStore_arcTo(double x1, double y1, double x2, double y2, double r)
+{
+    // Based on How to create circle with Bézier curves?
+    //          http://stackoverflow.com/questions/1734745/how-to-create-circle-with-bézier-curves
+    //          Answer by Kpym, 2015 (permalink: http://stackoverflow.com/a/27863181)
+
+    // Line equation : 0 = aX + By + c
+    // Normal        : n = ai + bj
+    const double a = y2 - y1;
+    const double b = x1 - x2;
+  //const double c = -(x1 * y2 - x2 * y1);
+
+    // Middle point
+    const double xm = (x1 + x2) * 0.5;
+    const double ym = (y1 + y2) * 0.5;
+
+    // Radius
+    const double ab = Gfx::Math::fastSqrt(a * a + b * b);
+    const double rx = ab * 0.5f;
+    const double ry = r;
+
+    // Normal vector
+    const double iz = -1.0 / ab;
+    const double nx = a * iz;
+    const double ny = b * iz;
+
+    // Circumference vectors
+    const double nxrx = nx * rx;
+    const double nxry = nx * ry;
+    const double nyrx = ny * rx;
+    const double nyry = ny * ry;
+
+    // Optimal distance to the control points for circle approximation
+    // using N segments of cubic bezier:
+    //    dist = (4 / 3) * tan(pi / 2 / N)
+    // If N = 4, then:
+    //    dist = (4 / 3) * tan(pi / 2 / 4) = 0.0822479912358
+    const double od = 0.552284749831;
+
+    // Curve #1
+    const double c1x1 = x1;
+    const double c1y1 = y1;
+    const double c1x4 = xm   + nxrx;
+    const double c1y4 = ym   + nyry;
+    const double c1x2 = c1x1 + nxrx * od;
+    const double c1y2 = c1y1 + nyry * od;
+    const double c1x3 = c1x4 - nyrx * od;
+    const double c1y3 = c1y4 - nxry * od;
+    _pathData->add(PathData::IT_CubicBezierTo, c1x2, c1y2, c1x3, c1y3, c1x4, c1y4);
+
+    // Curve #2
+    const double c2x1 = xm   + nxrx;
+    const double c2y1 = ym   + nyry;
+    const double c2x4 = x2;
+    const double c2y4 = y2;
+    const double c2x2 = c2x1 + nyrx * od;
+    const double c2y2 = c2y1 - nxry * od;
+    const double c2x3 = c2x4 - nxrx * od;
+    const double c2y3 = c2y4 + nyry * od;
+    _pathData->add(PathData::IT_CubicBezierTo, c2x2, c2y2, c2x3, c2y3, c2x4, c2y4);
 }
 
 

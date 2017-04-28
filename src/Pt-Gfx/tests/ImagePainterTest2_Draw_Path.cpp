@@ -380,6 +380,8 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
 
     //ip2->setAntiAliasingMode(AntiAliasingMode::None);
 
+    // ### TODO: Try to use polygon! ###
+
     if(true) { // Maximize
         RectF geometry( PointF(10 + 250 * col + 20 * 0, 10 + 250 * row), SizeF(16, 16) );
         PointF tl = geometry.topLeft    () + PointF( 4, 4);
