@@ -1166,65 +1166,123 @@ PlatinumTabViewRenderer::~PlatinumTabViewRenderer()
 }
 
 
-void PlatinumTabViewRenderer::onPrepareView(const TabView& tv,
-                                            const StyleOptions& options,
-                                            Gfx::Brush& background,
-                                            Gfx::Pen& contour) const
+void PlatinumTabViewRenderer::onPrepare(const TabView& tv,
+                                        const StyleOptions& options,
+                                        Gfx::Brush& background,
+                                        Gfx::Brush& foreground,
+                                        Gfx::Pen& contour) const
 {
 }
 
 
-void PlatinumTabViewRenderer::onPrepareTab(const TabButton& tb,
-                                           const StyleOptions& options,
-                                           Gfx::Brush& background,
-                                           Gfx::Brush& foreground,
-                                           Gfx::Pen& contour,
-                                           Gfx::Font& font, 
-                                           Gfx::Pen& textPen) const
+void PlatinumTabViewRenderer::onRender(const TabView& tv,
+                                       const StyleOptions& options,
+                                       Painter& painter,
+                                       const Gfx::RectF& rect,
+                                       const Gfx::Brush& background,
+                                       const Gfx::Brush& foreground,
+                                       const Gfx::Pen& contour) const
 {
-    if( tb.isPressed() )
+}
+
+
+Gfx::SizeF PlatinumTabViewRenderer::onMeasureTabs(const std::vector<TabItem>& tabs,
+                                                  const Gfx::Font& font) const
+{
+    Spacing spacing(font.size() / 2, font.size() / 2 );
+
+    Gfx::SizeF s;
+    s.setHeight(font.size() * 2);
+
+    std::vector<TabItem>::const_iterator it;
+    for(it = tabs.begin(); it != tabs.end(); ++it)
     {
-        contour = options.accentColor();
-        textPen = options.accentColor();
+        Gfx::FontMetrics fm = Painter::fontMetrics( font, it->text() );
+        s.addWidth( fm.width() + spacing.leftRight() );
+    }
+
+    return s;
+}
+
+
+void PlatinumTabViewRenderer::onLayoutTabs(std::vector<TabItem>& tabs,
+                                           const Gfx::RectF& rect, 
+                                           const Gfx::Font& font) const
+{
+    Spacing spacing(font.size() / 2, font.size() / 2 );
+
+    Gfx::PointF tabPos;
+
+    std::vector<TabItem>::iterator it;
+    for(it = tabs.begin(); it != tabs.end(); ++it)
+    {
+        Gfx::FontMetrics fm = Painter::fontMetrics( font, it->text() );
+
+        double tabWidth = fm.width() + spacing.leftRight();
+        
+        Gfx::RectF tabRect;
+        tabRect.setOrigin(tabPos);
+        tabRect.setWidth(tabWidth);
+        tabRect.setHeight( rect.height() );
+
+        it->setGeometry(tabRect);
+
+        tabPos.addX(tabWidth);
     }
 }
 
 
-void PlatinumTabViewRenderer::onRenderView(const TabView& tv,
-                                           const StyleOptions& options,
-                                           Painter& painter,
-                                           const Gfx::RectF& rect,
-                                           const Gfx::Brush& background,
-                                           const Gfx::Pen& contou) const
+void PlatinumTabViewRenderer::onPrepareTabs(const TabBar& tabs,
+                                            const StyleOptions& options,
+                                            const Gfx::Brush& background,
+                                            const Gfx::Brush& foreground,
+                                            const Gfx::Pen& contour,
+                                            const Gfx::Font& font, 
+                                            const Gfx::Pen& textPen) const
 {
 }
 
 
-void PlatinumTabViewRenderer::onRenderTab(const TabButton& tb,
-                                          const StyleOptions& options,
-                                          Painter& painter,
-                                          const Gfx::RectF& rect,
-                                          const Gfx::Brush& background,
-                                          const Gfx::Brush& foreground,
-                                          const Gfx::Pen& contour,
-                                          const Gfx::Font& font, 
-                                          const Gfx::Pen& textPen) const
+void PlatinumTabViewRenderer::onRenderTabs(const std::vector<TabItem>& tabs,
+                                           const StyleOptions& options,
+                                           Painter& painter,
+                                           const Gfx::RectF& rect,
+                                           const Gfx::Brush& background,
+                                           const Gfx::Brush& foreground,
+                                           const Gfx::Pen& contour,
+                                           const Gfx::Font& font, 
+                                           const Gfx::Pen& textPen) const
 {
-    painter.setPen(textPen);
-    painter.setFont(font);
+    Spacing spacing(font.size() / 2, font.size() / 2 );
 
-    Gfx::FontMetrics fm = Painter::fontMetrics( font, tb.text() );
+    std::vector<TabItem>::const_iterator it;
+    for(it = tabs.begin(); it != tabs.end(); ++it)
+    {
+        if( it->isPressed() )
+            painter.setPen( options.accentColor() );
+        else
+            painter.setPen(textPen);
 
-    double textX = fm.descent() * 2;
-    double textY = tb.size().height() / 2 + fm.ascent() / 2;
-    Gfx::PointF textPos(textX, textY);
-    painter.drawText( textPos, tb.text() );
+        painter.setFont(font);
 
-    painter.setPen(contour);
+        Gfx::FontMetrics fm = Painter::fontMetrics( font, it->text() );
+        
+        double textX = it->geometry().left() + spacing.left();
+        double textY = it->geometry().height() / 2 + fm.ascent() / 2;
+        Gfx::PointF textPos(textX, textY);
+        painter.drawText( textPos, it->text() );
 
-    Gfx::PointF from(2, tb.size().height() - 1);
-    Gfx::PointF to(tb.size().width() - 2, tb.size().height() - 1);
-    painter.drawLine(from, to);
+        if( it->isPressed() )
+            painter.setPen( options.accentColor() );
+        else
+            painter.setPen(contour);
+
+        Gfx::PointF from(it->geometry().left() + spacing.left() / 2, 
+                          it->geometry().height() - 1);
+        Gfx::PointF to(it->geometry().left() + it->geometry().width() - spacing.right() / 2,
+                        it->geometry().height() - 1);
+        painter.drawLine(from, to);
+    }
 }
 
 ///////////////////////////////////////////////////////////////////////////////

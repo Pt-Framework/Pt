@@ -532,35 +532,44 @@ class PT_HMI_API PlatinumTabViewRenderer : public TabViewRenderer
         virtual ~PlatinumTabViewRenderer();
         
     protected:
-        virtual void onPrepareView(const TabView& tv,
+        virtual void onPrepare(const TabView& tv,
+                               const StyleOptions& options,
+                               Gfx::Brush& background,
+                               Gfx::Brush& foreground,
+                               Gfx::Pen& contour) const;
+
+        virtual void onRender(const TabView& tv,
+                              const StyleOptions& options,
+                              Painter& painter,
+                              const Gfx::RectF& rect,
+                              const Gfx::Brush& background,
+                              const Gfx::Brush& foreground,
+                              const Gfx::Pen& contour) const;
+
+        virtual Gfx::SizeF onMeasureTabs(const std::vector<TabItem>& tabs,
+                                         const Gfx::Font& font) const;
+
+        virtual void onLayoutTabs(std::vector<TabItem>& tabs,
+                                  const Gfx::RectF& rect, 
+                                  const Gfx::Font& font) const;
+
+        virtual void onPrepareTabs(const TabBar& tabs,
                                    const StyleOptions& options,
-                                   Gfx::Brush& background,
-                                   Gfx::Pen& contour) const;
-        
-        virtual void onPrepareTab(const TabButton& tb,
-                                  const StyleOptions& options,
-                                  Gfx::Brush& background,
-                                  Gfx::Brush& foreground,
-                                  Gfx::Pen& contour,
-                                  Gfx::Font& font, 
-                                  Gfx::Pen& textPen) const;
-        
-        virtual void onRenderView(const TabView& tv,
+                                   const Gfx::Brush& background,
+                                   const Gfx::Brush& foreground,
+                                   const Gfx::Pen& contour,
+                                   const Gfx::Font& font, 
+                                   const Gfx::Pen& textPen) const;
+
+        virtual void onRenderTabs(const std::vector<TabItem>& tabs,
                                   const StyleOptions& options,
                                   Painter& painter,
                                   const Gfx::RectF& rect,
                                   const Gfx::Brush& background,
-                                  const Gfx::Pen& contour) const;
-        
-        virtual void onRenderTab(const TabButton& tb,
-                                 const StyleOptions& options,
-                                 Painter& painter,
-                                 const Gfx::RectF& rect,
-                                 const Gfx::Brush& background,
-                                 const Gfx::Brush& foreground,
-                                 const Gfx::Pen& contour,
-                                 const Gfx::Font& font, 
-                                 const Gfx::Pen& textPen) const;
+                                  const Gfx::Brush& foreground,
+                                  const Gfx::Pen& contour,
+                                  const Gfx::Font& font, 
+                                  const Gfx::Pen& textPen) const;
 };
 
 

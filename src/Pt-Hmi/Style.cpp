@@ -806,40 +806,57 @@ TabViewRenderer::~TabViewRenderer()
 }
 
 
-void TabViewRenderer::prepareView(const TabView& tv,
-                                  const StyleOptions& options,
-                                  Gfx::Brush& background,
-                                  Gfx::Pen& contour) const
+void TabViewRenderer::prepare(const TabView& tv,
+                              const StyleOptions& options,
+                              Gfx::Brush& background,
+                              Gfx::Brush& foreground,
+                              Gfx::Pen& contour) const
 {
-    onPrepareView(tv, options, background, contour); 
+    onPrepare(tv, options, background, foreground, contour); 
 }
 
 
-void TabViewRenderer::prepareTab(const TabButton& tb,
-                                 const StyleOptions& options,
-                                 Gfx::Brush& background,
-                                 Gfx::Brush& foreground,
-                                 Gfx::Pen& contour,
-                                 Gfx::Font& font, 
-                                 Gfx::Pen& textPen) const
-{
-    onPrepareTab(tb, options, background, foreground, 
-                 contour, font, textPen);
-}
-
-
-void TabViewRenderer::renderView(const TabView& tv,
-                                 const StyleOptions& options,
-                                 Painter& painter,
-                                 const Gfx::RectF& rect,
-                                 const Gfx::Brush& background,
-                                 const Gfx::Pen& contour) const
+void TabViewRenderer::render(const TabView& tv,
+                             const StyleOptions& options,
+                             Painter& painter,
+                             const Gfx::RectF& rect,
+                             const Gfx::Brush& background,
+                             const Gfx::Brush& foreground,
+                             const Gfx::Pen& contour) const
 { 
-    onRenderView(tv, options, painter, rect, background, contour); 
+    onRender(tv, options, painter, rect, background, foreground, contour); 
 }  
 
 
-void TabViewRenderer::renderTab(const TabButton& tb,
+Gfx::SizeF TabViewRenderer::measureTabs(const std::vector<TabItem>& tabs,
+                                        const Gfx::Font& font) const
+{
+    return onMeasureTabs(tabs, font);
+}
+
+
+void TabViewRenderer::layoutTabs(std::vector<TabItem>& tabs,
+                                 const Gfx::RectF& rect, 
+                                 const Gfx::Font& font) const
+{
+    onLayoutTabs(tabs, rect, font);
+}
+
+
+void TabViewRenderer::prepareTabs(const TabBar& tabs,
+                                  const StyleOptions& options,
+                                  const Gfx::Brush& background,
+                                  const Gfx::Brush& foreground,
+                                  const Gfx::Pen& contour,
+                                  const Gfx::Font& font, 
+                                  const Gfx::Pen& textPen) const
+{
+    onPrepareTabs(tabs, options, 
+                  background, foreground, contour, font, textPen);
+}
+
+
+void TabViewRenderer::renderTabs(const std::vector<TabItem>& tabs,
                                  const StyleOptions& options,
                                  Painter& painter,
                                  const Gfx::RectF& rect,
@@ -848,10 +865,10 @@ void TabViewRenderer::renderTab(const TabButton& tb,
                                  const Gfx::Pen& contour,
                                  const Gfx::Font& font, 
                                  const Gfx::Pen& textPen) const
-{ 
-    onRenderTab(tb, options, painter, rect, 
-                background, foreground, contour, font, textPen); 
-}  
+{
+    onRenderTabs(tabs, options, painter, rect, 
+                 background, foreground, contour,font, textPen);
+}
 
 } // namespace
 

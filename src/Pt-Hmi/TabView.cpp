@@ -34,121 +34,6 @@ namespace Pt {
 namespace Hmi {
 
 //////////////////////////////////////////////////////////////////////////
-// TabButton
-//////////////////////////////////////////////////////////////////////////
-
-TabButton::TabButton()
-: _hasRenderer(false)
-{
-}
-
-
-TabButton::~TabButton()
-{
-}
-
-
-void TabButton::press()
-{
-    if( isPressed() )
-        return;
-
-    setPressed(true);
-    clicked().send();
-}
-
-
-void TabButton::release()
-{
-    if( ! isPressed() )
-        return;
-
-    setPressed(false);
-}
-
-
-void TabButton::onPressed()
-{
-    Base::onPressed();
-    press();
-}
-
-
-void TabButton::onReleased()
-{
-    Base::onReleased();
-}
-
-
-void TabButton::onCanceled()
-{
-}
-
-
-void TabButton::setRenderer(TabViewRenderer* renderer)
-{
-    _renderer.reset(renderer);
-    _hasRenderer = renderer != 0;
-
-    invalidate();
-}
-
-
-void TabButton::onInvalidate()
-{
-    Base::onInvalidate();
-
-    const StyleOptions& options = Application::instance().styleOptions();
-    const Style& style = Application::instance().style();
-
-    _backgroundBrush = options.background();
-    _foregroundBrush = options.foreground();
-    _contourPen = options.contour();
-    _textPen = options.textColor();
-    _font = options.font();
-
-    if( ! _hasRenderer )
-        _renderer.reset( style.get<TabViewRenderer>() );
-    
-    if( ! _renderer )
-        return;
-
-    _renderer->prepareTab(*this, options, _backgroundBrush, _foregroundBrush,
-                          _contourPen, _font, _textPen);
-}
-
-
-Gfx::SizeF TabButton::onMeasure(const SizePolicy& policy)
-{
-    const Gfx::Font& font = Application::instance().styleOptions().font();
-    Gfx::FontMetrics fm = Painter::fontMetrics( font, text() );
-
-    double spacing =  fm.descent() * 4;
-    double itemsWidth = itemsWidth = fm.width() + spacing;
-    double itemsHeight = itemsHeight = fm.height() + spacing;
-
-    return Gfx::SizeF( itemsWidth + padding().leftRight(), 
-                       itemsHeight + padding().topBottom() );
-}
-
-
-void TabButton::onLayout(const Gfx::RectF& rect)
-{
-}
-
-
-void TabButton::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
-{
-    const StyleOptions& options = Application::instance().styleOptions();
-
-    Painter painter(surface);
-    painter.setClip(rect);
-
-    _renderer->renderTab(*this, options, painter, rect, 
-                       _backgroundBrush, _foregroundBrush, _contourPen, _font, _textPen);
-}
-
-//////////////////////////////////////////////////////////////////////////
 // TabBar
 //////////////////////////////////////////////////////////////////////////
 
@@ -156,54 +41,47 @@ TabBar::TabBar()
 : _current( static_cast<std::size_t>(-1) )
 , _hasRenderer(false)
 {
-    setContent(_layout);
 }
 
 
 TabBar::~TabBar()
 {
-    std::vector<TabButton*>::iterator it;
-    for(it = _buttons.begin(); it != _buttons.end(); ++it)
-    {
-        delete *it;
-    }
 }
 
 
 bool TabBar::empty() const
 {
-    return _buttons.empty();
+    return _tabs.empty();
 }
 
 
 std::size_t TabBar::size() const
 {
-    return _buttons.size();
+    return _tabs.size();
 }
 
 
 void TabBar::addTab(const Pt::String& title)
 {
-    TabButton* tb = new TabButton;
-    _buttons.push_back(tb);
+    TabItem t;
+    t.setText(title);
+    _tabs.push_back(t);
 
-    tb->setText(title);
-    tb->clicked() += Pt::slot(*this, &TabBar::onClicked);
-
-    _layout.addItem(*tb);
+    relayout();
 }
 
 
 void TabBar::removeTab(std::size_t n)
 {
-    if( n >= _buttons.size() )
+    if( n >= _tabs.size() )
         return;
 
     if(_current == n)
         _current = static_cast<std::size_t>(-1);
 
-    delete _buttons.at(n);
-    _buttons.erase(_buttons.begin() + n);
+    _tabs.erase(_tabs.begin() + n);
+
+    relayout();
 }
 
 
@@ -215,41 +93,22 @@ std::size_t TabBar::current() const
 
 void TabBar::setCurrent(std::size_t n)
 {
-    if( n >= _buttons.size() )
+    if( n >= _tabs.size() )
         return;
 
     if(_current == n)
         return;
 
-    if( _current < _buttons.size() )
-        _buttons.at(_current)->release();
+    if( _current < _tabs.size() )
+    {
+        _tabs.at(_current).setPressed(false);
+    }
     
-    _buttons.at(n)->press();
+    _tabs.at(n).setPressed(true);
     _current = n;
+
+    invalidate();
     _currentChanged.send(_current);
-}
-
-
-void TabBar::onClicked()
-{
-    if( _current < _buttons.size() )
-    {
-        _buttons.at(_current)->release();
-    }
-
-    std::vector<TabButton*>::iterator it;
-    for(it = _buttons.begin(); it != _buttons.end(); ++it)
-    {
-        TabButton* tb = *it;
-
-        if( tb->isPressed() )
-        {
-            std::size_t n = std::distance(_buttons.begin(), it );
-            _current = n;
-            _currentChanged.send(_current);
-            return;
-        }
-    }
 }
 
 
@@ -269,11 +128,11 @@ void TabBar::onInvalidate()
     const StyleOptions& options = Application::instance().styleOptions();
     const Style& style = Application::instance().style();
 
-    //_backgroundBrush = background();
-    //_foregroundBrush = foreground();
-    //_contourPen = contour();
-    //_textPen = textColor();
-    //_font = Gfx::Font(font(), fontSize(), fontStyle());
+    _backgroundBrush = options.background();
+    _foregroundBrush = options.foreground();
+    _contourPen = options.contour();
+    _textPen = options.textColor();
+    _font = options.font();
 
     if( ! _hasRenderer )
         _renderer.reset( style.get<TabViewRenderer>() );
@@ -281,31 +140,27 @@ void TabBar::onInvalidate()
     if( ! _renderer )
         return;
 
-    //_renderer->prepare(*this, options, _backgroundBrush, _foregroundBrush,
-    //                   _contourPen, _textPen, _font);
+    _renderer->prepareTabs(*this, options, 
+                           _backgroundBrush, _foregroundBrush, _contourPen, 
+                           _font, _textPen);
 }
 
 
 Gfx::SizeF TabBar::onMeasure(const SizePolicy& policy)
 {
-    _layout.measure(policy);
-    return _layout.preferredSize();
+    if( ! _renderer)
+        return Gfx::SizeF();
+
+    return _renderer->measureTabs(_tabs, _font);
 }
 
 
 void TabBar::onLayout(const Gfx::RectF& rect)
 {
-    Gfx::PointF pos(padding().left() + _layout.margin().left(), 
-                    padding().top()  + _layout.margin().top());
-        
-    double hspace = padding().leftRight() + _layout.margin().leftRight();
-    double vspace = padding().topBottom() + _layout.margin().topBottom();
+    if( ! _renderer)
+        return;
 
-    Gfx::SizeF size;
-    size.setWidth( rect.width() - hspace );
-    size.setHeight( rect.height() - vspace );
-
-    _layout.layout(rect);
+    _renderer->layoutTabs(_tabs, rect, _font);
 }
 
 
@@ -319,8 +174,42 @@ void TabBar::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     Painter painter(surface);
     painter.setClip(rect);
 
-    //_renderer->render(*this, options, painter, rect, 
-    //                   _backgroundBrush, _foregroundBrush, _contourPen, _textPen, _font);
+    _renderer->renderTabs(_tabs, options, painter, rect,
+                          _backgroundBrush, _foregroundBrush, _contourPen, 
+                          _font, _textPen);
+}
+
+
+bool TabBar::onMouseEvent(const MouseEvent& ev)
+{
+    Base::onMouseEvent(ev);
+
+    if( ! ev.isPress() )
+        return true;
+
+    std::vector<TabItem>::iterator it;
+    for(std::size_t n = 0; n != _tabs.size(); ++n)
+    {
+        TabItem& t = _tabs[n];
+        
+        if( t.geometry().contains( ev.position() ) )
+        {
+            if(n != _current)
+            {
+                _tabs.at(_current).setPressed(false);
+                t.setPressed(true);
+
+                invalidate();
+
+                _current = n;
+                _currentChanged.send(_current);
+            }
+
+            break;
+        }
+    }
+
+    return true;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -406,6 +295,7 @@ void TabView::onInvalidate()
     const Style& style = Application::instance().style();
 
     _backgroundBrush = options.background();
+    _foregroundBrush = options.foreground();
     _contourPen = options.contour();
 
     if( ! _hasRenderer )
@@ -414,7 +304,8 @@ void TabView::onInvalidate()
     if( ! _renderer )
         return;
 
-    _renderer->prepareView(*this, options, _backgroundBrush, _contourPen);
+    _renderer->prepare(*this, options, 
+                       _backgroundBrush, _foregroundBrush, _contourPen);
 }
 
 
@@ -451,8 +342,8 @@ void TabView::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
     Painter painter(surface);
     painter.setClip(rect);
 
-    _renderer->renderView(*this, options, painter, rect,
-                          _backgroundBrush, _contourPen);
+    _renderer->render(*this, options, painter, rect,
+                      _backgroundBrush, _foregroundBrush, _contourPen);
 }
 
 } // namespace

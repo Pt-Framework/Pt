@@ -67,7 +67,7 @@ class ListBox;
 class ListBoxItem;
 class TabView;
 class TabBar;
-class TabButton;
+class TabItem;
 
 template <typename T>
 class FacetPtr
@@ -959,66 +959,84 @@ class PT_HMI_API TabViewRenderer : public Style::Facet
 
         virtual ~TabViewRenderer();
 
-        void prepareView(const TabView& tv,
+        void prepare(const TabView& tv,
+                     const StyleOptions& options,
+                     Gfx::Brush& background,
+                     Gfx::Brush& foreground,
+                     Gfx::Pen& contour) const;
+
+        void render(const TabView& tv,
+                    const StyleOptions& options,
+                    Painter& painter,
+                    const Gfx::RectF& rect,
+                    const Gfx::Brush& background,
+                    const Gfx::Brush& foreground,
+                    const Gfx::Pen& contour) const;
+
+        Gfx::SizeF measureTabs(const std::vector<TabItem>& tabs,
+                               const Gfx::Font& font) const;
+
+        void layoutTabs(std::vector<TabItem>& tabs,
+                        const Gfx::RectF& rect, 
+                        const Gfx::Font& font) const;
+
+        void prepareTabs(const TabBar& tabs,
                          const StyleOptions& options,
-                         Gfx::Brush& background,
-                         Gfx::Pen& contour) const;
+                         const Gfx::Brush& background,
+                         const Gfx::Brush& foreground,
+                         const Gfx::Pen& contour,
+                         const Gfx::Font& font, 
+                         const Gfx::Pen& textPen) const;
 
-        void prepareTab(const TabButton& tb,
-                        const StyleOptions& options,
-                        Gfx::Brush& background,
-                        Gfx::Brush& foreground,
-                        Gfx::Pen& contour,
-                        Gfx::Font& font, 
-                        Gfx::Pen& textPen) const;
-
-        void renderView(const TabView& tv,
+        void renderTabs(const std::vector<TabItem>& tabs,
                         const StyleOptions& options,
                         Painter& painter,
                         const Gfx::RectF& rect,
                         const Gfx::Brush& background,
-                        const Gfx::Pen& contour) const;
-      
-        void renderTab(const TabButton& tb,
-                       const StyleOptions& options,
-                       Painter& painter,
-                       const Gfx::RectF& rect,
-                       const Gfx::Brush& background,
-                       const Gfx::Brush& foreground,
-                       const Gfx::Pen& contour,
-                       const Gfx::Font& font, 
-                       const Gfx::Pen& textPen) const;
+                        const Gfx::Brush& foreground,
+                        const Gfx::Pen& contour,
+                        const Gfx::Font& font, 
+                        const Gfx::Pen& textPen) const;
         
     protected:
-        virtual void onPrepareView(const TabView& tv,
-                                   const StyleOptions& options,
-                                   Gfx::Brush& background,
-                                   Gfx::Pen& contour) const = 0;
-        
-        virtual void onPrepareTab(const TabButton& tb,
-                                  const StyleOptions& options,
-                                  Gfx::Brush& background,
-                                  Gfx::Brush& foreground,
-                                  Gfx::Pen& contour,
-                                  Gfx::Font& font, 
-                                  Gfx::Pen& textPen) const = 0;
+        virtual void onPrepare(const TabView& tv,
+                               const StyleOptions& options,
+                               Gfx::Brush& background,
+                               Gfx::Brush& foreground,
+                               Gfx::Pen& contour) const = 0;
 
-        virtual void onRenderView(const TabView& tv,
+        virtual void onRender(const TabView& tv,
+                              const StyleOptions& options,
+                              Painter& painter,
+                              const Gfx::RectF& rect,
+                              const Gfx::Brush& background,
+                              const Gfx::Brush& foreground,
+                              const Gfx::Pen& contour) const = 0;
+
+        virtual Gfx::SizeF onMeasureTabs(const std::vector<TabItem>& tabs,
+                                         const Gfx::Font& font) const = 0;
+
+        virtual void onLayoutTabs(std::vector<TabItem>& tabs,
+                                  const Gfx::RectF& rect, 
+                                  const Gfx::Font& font) const = 0;
+        
+        virtual void onPrepareTabs(const TabBar& tabs,
+                                   const StyleOptions& options,
+                                   const Gfx::Brush& background,
+                                   const Gfx::Brush& foreground,
+                                   const Gfx::Pen& contour,
+                                   const Gfx::Font& font, 
+                                   const Gfx::Pen& textPen) const = 0;
+
+        virtual void onRenderTabs(const std::vector<TabItem>& tabs,
                                   const StyleOptions& options,
                                   Painter& painter,
                                   const Gfx::RectF& rect,
                                   const Gfx::Brush& background,
-                                  const Gfx::Pen& contour) const = 0;
-
-        virtual void onRenderTab(const TabButton& tb,
-                                 const StyleOptions& options,
-                                 Painter& painter,
-                                 const Gfx::RectF& rect,
-                                 const Gfx::Brush& background,
-                                 const Gfx::Brush& foreground,
-                                 const Gfx::Pen& contour,
-                                 const Gfx::Font& font, 
-                                 const Gfx::Pen& textPen) const = 0;
+                                  const Gfx::Brush& foreground,
+                                  const Gfx::Pen& contour,
+                                  const Gfx::Font& font, 
+                                  const Gfx::Pen& textPen) const = 0;
 };
 
 } // namespace

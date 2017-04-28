@@ -30,9 +30,6 @@
 #define Pt_Hmi_TabView_H
 
 #include <Pt/Hmi/Control.h>
-#include <Pt/Hmi/Panel.h>
-#include <Pt/Hmi/Button.h>
-#include <Pt/Hmi/FlowLayout.h>
 #include <Pt/Hmi/StackLayout.h>
 #include <Pt/Hmi/DockingLayout.h>
 #include <Pt/SmartPtr.h>
@@ -42,56 +39,48 @@ namespace Pt {
 
 namespace Hmi {
 
-class PT_HMI_API TabButton : public Button
+/** @brief Item for tab bars.
+*/
+class TabItem
 {
     public:
-        typedef Button Base;
+        TabItem()
+        : _isPressed(false)
+        {}
 
-    public:
-        TabButton();
+        ~TabItem()
+        {}
 
-        virtual ~TabButton();
+        const String& text() const
+        { return _text; }
 
-        void press();
+        void setText(const String& s)
+        { _text = s; }
 
-        void release();
+        const Gfx::RectF& geometry() const
+        { return _geometry; }
 
-    public:
-        void setRenderer(TabViewRenderer* renderer);
+        void setGeometry(const Gfx::RectF& r)
+        { _geometry = r; }
 
-    protected:
-        virtual void onPressed();
+        bool isPressed() const
+        { return _isPressed; }
 
-        virtual void onReleased();
-
-        virtual void onCanceled();
-
-    protected:
-        virtual void onInvalidate();
-
-        virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
-
-        virtual void onLayout(const Gfx::RectF& rect);
-
-        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
+        void setPressed(bool b)
+        { _isPressed = b; }
 
     private:
-        FacetPtr<TabViewRenderer> _renderer;
-        bool                      _hasRenderer;
-
-        Gfx::Brush  _backgroundBrush;
-        Gfx::Brush  _foregroundBrush;
-        Gfx::Pen    _contourPen;
-        Gfx::Pen    _textPen;
-        Gfx::Font   _font;
+        String     _text;
+        Gfx::RectF _geometry;
+        bool       _isPressed;
 };
 
 /** @brief Tab bar for all tabbed widgets.
 */
-class PT_HMI_API TabBar : public Panel
+class PT_HMI_API TabBar : public Control
 {
     public:
-        typedef Panel Base;
+        typedef Control Base;
 
     public:
         TabBar();
@@ -117,9 +106,6 @@ class PT_HMI_API TabBar : public Panel
         void setRenderer(TabViewRenderer* renderer);
 
     protected:
-        void onClicked();
-
-    protected:
         virtual void onInvalidate();
 
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
@@ -128,14 +114,22 @@ class PT_HMI_API TabBar : public Panel
 
         virtual void onPaint(PaintSurface& surface, const Gfx::RectF& updateRect);
 
+    protected:
+        virtual bool onMouseEvent(const MouseEvent& ev);
+
     private:
         Pt::Signal<std::size_t> _currentChanged;
-        FlowLayout              _layout;
-        std::vector<TabButton*> _buttons;
+        std::vector<TabItem>    _tabs;
         std::size_t             _current;
 
         FacetPtr<TabViewRenderer> _renderer;
         bool                      _hasRenderer;
+
+        Gfx::Brush  _backgroundBrush;
+        Gfx::Brush  _foregroundBrush;
+        Gfx::Pen    _contourPen;
+        Gfx::Pen    _textPen;
+        Gfx::Font   _font;
 };
 
 /** @brief Tabbed view for widgets.
@@ -182,8 +176,9 @@ class PT_HMI_API TabView : public Control
         FacetPtr<TabViewRenderer> _renderer;
         bool                      _hasRenderer;
 
-        Gfx::Brush  _backgroundBrush;
-        Gfx::Pen    _contourPen;
+        Gfx::Brush                _backgroundBrush;
+        Gfx::Brush                _foregroundBrush;
+        Gfx::Pen                  _contourPen;
 };
 
 } // namespace
