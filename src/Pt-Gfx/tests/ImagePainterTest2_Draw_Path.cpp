@@ -380,8 +380,6 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
 
     //ip2->setAntiAliasingMode(AntiAliasingMode::None);
 
-    // ### TODO: Try to use polygon! ###
-
     if(true) { // Maximize
         RectF geometry( PointF(10 + 250 * col + 20 * 0, 10 + 250 * row), SizeF(16, 16) );
         PointF tl = geometry.topLeft    () + PointF( 4, 4);
@@ -394,7 +392,7 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
         ip2->drawLine(br, tr);
     }
 
-    if(true) { // Maximize
+    if(true) { // Minimize
         RectF geometry( PointF(10 + 250 * col + 20 * 1, 10 + 250 * row), SizeF(16, 16) );
         PointF tl = geometry.topLeft    () + PointF( 4, 4);
         PointF tr = geometry.topRight   () + PointF(-4, 4);
@@ -415,6 +413,83 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
         ip2->setPen( Pen(Color(53738, 16383, 14417), 2, Pen::Solid, Pen::FlatCap) );
         ip2->drawLine(tl, br);
         ip2->drawLine(tr, bl);
+    }
+
+    col = 1;
+    row = 2;
+
+    if(true) { // Maximize
+        RectF geometry( PointF(10 + 250 * col + 20 * 0, 10 + 250 * row), SizeF(10, 10) );
+        std::vector<PointF> points(9);
+        points[0] = geometry.topRight() + PointF( 0, 0);
+        points[1] = geometry.topRight() + PointF(-9, 0);
+        points[2] = geometry.topRight() + PointF(-9, 2);
+        points[3] = geometry.topRight() + PointF(-4, 2);
+        points[4] = geometry.topRight() + PointF(-9, 7);
+        points[5] = geometry.topRight() + PointF(-7, 9);
+        points[6] = geometry.topRight() + PointF(-2, 4);
+        points[7] = geometry.topRight() + PointF(-2, 9);
+        points[8] = geometry.topRight() + PointF( 0, 9);
+        ip2->setBrush( Color(62258, 45874, 3276) );
+        ip2->fillPolygon( points.data(), points.size() );
+    }
+
+    if(true) { // Minimize
+        RectF geometry( PointF(10 + 250 * col + 20 * 1, 10 + 250 * row), SizeF(10, 10) );
+        std::vector<PointF> points(9);
+        points[0] = geometry.bottomLeft() + PointF(0,  0);
+        points[1] = geometry.bottomLeft() + PointF(9,  0);
+        points[2] = geometry.bottomLeft() + PointF(9, -2);
+        points[3] = geometry.bottomLeft() + PointF(4, -2);
+        points[4] = geometry.bottomLeft() + PointF(9, -7);
+        points[5] = geometry.bottomLeft() + PointF(7, -9);
+        points[6] = geometry.bottomLeft() + PointF(2, -4);
+        points[7] = geometry.bottomLeft() + PointF(2, -9);
+        points[8] = geometry.bottomLeft() + PointF(0, -9);
+        ip2->setBrush( Color(22937, 42597, 16383) );
+        ip2->fillPolygon( points.data(), points.size() );
+    }
+
+    if(true) { // Close - 1
+        RectF geometry( PointF(10 + 250 * col + 20 * 2, 10 + 250 * row), SizeF(10, 10) );
+        std::vector<PointF> points(16);
+        points[ 0] = geometry.topRight() + PointF( -2,  0);
+        points[ 1] = geometry.topRight() + PointF( -4,  2);
+        points[ 2] = geometry.topRight() + PointF( -5,  2);
+        points[ 3] = geometry.topRight() + PointF( -7,  0);
+        points[ 4] = geometry.topRight() + PointF( -9,  2);
+        points[ 5] = geometry.topRight() + PointF( -7,  4);
+        points[ 6] = geometry.topRight() + PointF( -7,  5);
+        points[ 7] = geometry.topRight() + PointF( -9,  7);
+        points[ 8] = geometry.topRight() + PointF( -7,  9);
+        points[ 9] = geometry.topRight() + PointF( -5,  7);
+        points[10] = geometry.topRight() + PointF( -4,  7);
+        points[11] = geometry.topRight() + PointF( -2,  9);
+        points[12] = geometry.topRight() + PointF(  0,  7);
+        points[13] = geometry.topRight() + PointF( -2,  5);
+        points[14] = geometry.topRight() + PointF( -2,  4);
+        points[15] = geometry.topRight() + PointF(  0,  2);
+        ip2->setBrush( Color(53738, 16383, 14417) );
+        ip2->fillPolygon( points.data(), points.size() );
+    }
+
+    if(true) { // Close - 2
+        RectF geometry( PointF(10 + 250 * col + 20 * 3, 10 + 250 * row), SizeF(10, 10) );
+        std::vector<PointF> points(12);
+        points[ 0] = geometry.topRight() + PointF( -2  ,  0  );
+        points[ 1] = geometry.topRight() + PointF( -4.5,  3  );
+        points[ 2] = geometry.topRight() + PointF( -7  ,  0  );
+        points[ 3] = geometry.topRight() + PointF( -9  ,  2  );
+        points[ 4] = geometry.topRight() + PointF( -6  ,  4.5);
+        points[ 5] = geometry.topRight() + PointF( -9  ,  7  );
+        points[ 6] = geometry.topRight() + PointF( -7  ,  9  );
+        points[ 7] = geometry.topRight() + PointF( -4.5,  6  );
+        points[ 8] = geometry.topRight() + PointF( -2  ,  9  );
+        points[ 9] = geometry.topRight() + PointF(  0  ,  7  );
+        points[10] = geometry.topRight() + PointF( -3  ,  4.5);
+        points[11] = geometry.topRight() + PointF(  0  ,  2  );
+        ip2->setBrush( Color(53738, 16383, 14417) );
+        ip2->fillPolygon( points.data(), points.size() );
     }
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!ip2);
