@@ -1262,6 +1262,7 @@ void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float deg
     _rasterizer->fillArc(tl, sz, degBegin, degEnd, arcMode);
 }
 
+/*
 void ImagePainter2::drawPath(const Path& path2d, const Transform& transform, bool autoClose, float smoothness)
 {
     // Convert the path to points and perform transformation
@@ -1300,6 +1301,7 @@ void ImagePainter2::fillPath(const Path& path2d, const Transform& transform, flo
         _rasterizer->fillPolygon(points.data(), points.size());
     }
 }
+*/
 
 
 // ======================================================================================

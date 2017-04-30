@@ -10,7 +10,7 @@ static void testDrawPath_drawRow(
     tstack.push(transform);
     transform.translate(60 + 110 * col, 60 + 110 * row);
     ip2->setPen(penThinSolid);
-    ip2->drawPath(path, transform, false);
+    //ip2->drawPath(path, transform, false);
     transform = tstack.pop();
     ++col;
 
@@ -18,7 +18,7 @@ static void testDrawPath_drawRow(
     tstack.push(transform);
     transform.translate(60 + 110 * col, 60 + 110 * row);
     ip2->setPen(penThinDot);
-    ip2->drawPath(path, transform, false);
+    //ip2->drawPath(path, transform, false);
     transform = tstack.pop();
     ++col;
 
@@ -26,7 +26,7 @@ static void testDrawPath_drawRow(
     tstack.push(transform);
     transform.translate(60 + 110 * col, 60 + 110 * row);
     ip2->setPen(penThickSolid);
-    ip2->drawPath(path, transform, false);
+    //ip2->drawPath(path, transform, false);
     transform = tstack.pop();
     ++col;
 
@@ -34,7 +34,7 @@ static void testDrawPath_drawRow(
     tstack.push(transform);
     transform.translate(60 + 110 * col, 60 + 110 * row);
     ip2->setPen(penThickDot);
-    ip2->drawPath(path, transform, false);
+    //ip2->drawPath(path, transform, false);
     transform = tstack.pop();
     ++col;
 
@@ -42,7 +42,7 @@ static void testDrawPath_drawRow(
     tstack.push(transform);
     transform.translate(60 + 110 * col, 60 + 110 * row);
     ip2->setBrush(brush1);
-    ip2->fillPath(path, transform);
+    //ip2->fillPath(path, transform);
     transform = tstack.pop();
     ++col;
 
@@ -50,7 +50,7 @@ static void testDrawPath_drawRow(
     tstack.push(transform);
     transform.translate(60 + 110 * col, 60 + 110 * row);
     ip2->setBrush(brush2);
-    ip2->fillPath(path, transform);
+    //ip2->fillPath(path, transform);
     transform = tstack.pop();
     col = 0;
     ++row;
@@ -67,7 +67,7 @@ static void testDrawPath_drawCol(
     tstack.push(transform);
     transform.translate(60 + 120 * col, 60 + 120 * row);
     ip2->setPen(penThinSolid);
-    ip2->drawPath(path, transform, false);
+    //ip2->drawPath(path, transform, false);
     transform = tstack.pop();
     ++col;
 
@@ -75,7 +75,7 @@ static void testDrawPath_drawCol(
     tstack.push(transform);
     transform.translate(60 + 120 * col, 60 + 120 * row);
     ip2->setPen(penThickSolid);
-    ip2->drawPath(path, transform, false);
+    //ip2->drawPath(path, transform, false);
     transform = tstack.pop();
 }
 
@@ -219,11 +219,11 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
 
 #define DRAW_CB(PEN)                                    \
     do {                                                \
-        tstack.push(transform);                          \
+        tstack.push(transform);                         \
         transform.translate(90 + 160 * col, 140 * row); \
         ip2->setPen(PEN);                               \
-        ip2->drawPath(path, transform, false, 2);       \
-        transform = tstack.pop();                                \
+        /*ip2->drawPath(path, transform, false, 2);*/   \
+        transform = tstack.pop();                       \
         ++col;                                          \
     } while(false)
     DRAW_CB(penThinSolid );
@@ -255,7 +255,7 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     transform.translate(60 + 130 * col, 150 * row);
     ip2->setPen( Color::fromRgb8(255, 255, 255, 175) );
     //ip2->fillPath(path, transform, 1);
-    ip2->drawPath(path, transform, false, 1);
+    //ip2->drawPath(path, transform, false, 1);
     transform = tstack.pop();
     ++row;
 
@@ -263,7 +263,7 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     transform.translate(60 + 130 * col, 150 * row);
     ip2->setPen( Color::fromRgb8(255, 255, 255, 175) );
     //ip2->fillPath(path, transform, 20);
-    ip2->drawPath(path, transform, false, 20);
+    //ip2->drawPath(path, transform, false, 20);
     transform = tstack.pop();
 
     //ip2->setPen(Color::fromRgb8(255, 0, 0, 255));
@@ -302,6 +302,7 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
     path.lineTo   ( 30,  0);
     path.endPath  ();
 
+    /*
     cregPointsF.clear();
     path.generatePoints(cregPointsF, 1);
     tstack.push(transform);
@@ -309,6 +310,7 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
     transform.translate(50, 70);
     transform.transformPoints(cregPointsF.data(), cregPointsF.size());
     transform = tstack.pop();
+    */
 
     // Create a subject path
     path.clear    ();
@@ -318,12 +320,14 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
     path.arcTo    (  0, 50, 50);
     path.endPath  ();
 
+    /*
     subjPointsF.clear();
     path.generatePoints(subjPointsF, 3);
     tstack.push(transform);
     transform.scale(2, 2);
     transform.transformPoints(subjPointsF.data(), subjPointsF.size());
     transform = tstack.pop();
+    */
 
     // Draw the clip-region and subject polygons
     tstack.push(transform);

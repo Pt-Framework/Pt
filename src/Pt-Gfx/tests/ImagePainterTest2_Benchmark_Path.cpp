@@ -11,6 +11,7 @@ static void benchDrawPath_drawRow(
     transform.rotate(15);
     tstack.push(transform);
     transform.translate(80 + 120 * col, 80 + 120 * row);
+    /*
     pointsF.clear();
     path.generatePoints(pointsF, 1);
     transform.transformPoints(pointsF.data(), pointsF.size());
@@ -20,11 +21,13 @@ static void benchDrawPath_drawRow(
         ip2->drawPolyline(pointsF.data(), pointsF.size(), false);
     }
     transform = tstack.pop();
+    */
     ++col;
 
     transform.rotate(15);
     tstack.push(transform);
     transform.translate(80 + 120 * col, 80 + 120 * row);
+    /*
     pointsF.clear();
     path.generatePoints(pointsF, 1);
     transform.transformPoints(pointsF.data(), pointsF.size());
@@ -34,11 +37,13 @@ static void benchDrawPath_drawRow(
         ip2->drawPolyline(pointsF.data(), pointsF.size(), false);
     }
     transform = tstack.pop();
+    */
     ++col;
 
     transform.rotate(15);
     tstack.push(transform);
     transform.translate(80 + 120 * col, 80 + 120 * row);
+    /*
     pointsF.clear();
     path.generatePoints(pointsF, 1);
     transform.transformPoints(pointsF.data(), pointsF.size());
@@ -48,11 +53,13 @@ static void benchDrawPath_drawRow(
         ip2->drawPolyline(pointsF.data(), pointsF.size(), false);
     }
     transform = tstack.pop();
+    */
     ++col;
 
     transform.rotate(15);
     tstack.push(transform);
     transform.translate(80 + 120 * col, 80 + 120 * row);
+    /*
     pointsF.clear();
     path.generatePoints(pointsF, 1);
     transform.transformPoints(pointsF.data(), pointsF.size());
@@ -62,11 +69,13 @@ static void benchDrawPath_drawRow(
         ip2->drawPolyline(pointsF.data(), pointsF.size(), false);
     }
     transform = tstack.pop();
+    */
     ++col;
 
     transform.rotate(15);
     tstack.push(transform);
     transform.translate(80 + 120 * col, 80 + 120 * row);
+    /*
     pointsF.clear();
     path.generatePoints(pointsF, 1);
     transform.transformPoints(pointsF.data(), pointsF.size());
@@ -76,11 +85,13 @@ static void benchDrawPath_drawRow(
         ip2->fillPolygon(pointsF.data(), pointsF.size());
     }
     transform = tstack.pop();
+    */
     ++col;
 
     transform.rotate(15);
     tstack.push(transform);
     transform.translate(80 + 120 * col, 80 + 120 * row);
+    /*
     pointsF.clear();
     path.generatePoints(pointsF, 1);
     transform.transformPoints(pointsF.data(), pointsF.size());
@@ -90,6 +101,7 @@ static void benchDrawPath_drawRow(
         ip2->fillPolygon(pointsF.data(), pointsF.size());
     }
     transform = tstack.pop();
+    */
     col = 0;
     ++row;
 }
@@ -106,6 +118,7 @@ static void benchDrawPath_drawCol(
     transform.rotate(15);
     tstack.push(transform);
     transform.translate(150 + 120 * col, 70 + 120 * row);
+    /*
     pointsF.clear();
     path.generatePoints(pointsF, 1);
     transform.transformPoints(pointsF.data(), pointsF.size());
@@ -115,11 +128,13 @@ static void benchDrawPath_drawCol(
         ip2->drawPolyline(pointsF.data(), pointsF.size(), false);
     }
     transform = tstack.pop();
+    */
     ++row;
 
     transform.rotate(15);
     tstack.push(transform);
     transform.translate(150 + 120 * col, 70 + 120 * row);
+    /*
     pointsF.clear();
     path.generatePoints(pointsF, 1);
     transform.transformPoints(pointsF.data(), pointsF.size());
@@ -129,6 +144,7 @@ static void benchDrawPath_drawCol(
         ip2->drawPolyline(pointsF.data(), pointsF.size(), false);
     }
     transform = tstack.pop();
+    */
     ++row;
 }
 
@@ -289,9 +305,11 @@ static size_t benchDrawPathSimple(int loopCount, CompositionMode cm, AntiAliasin
         path.cubicBezierTo(300, 150, 150, 350, 100, 500);
         path.endPath      ();
 
+        /*
         pointsF.clear();
         path.generatePoints(pointsF, 1);
         transform.transformPoints(pointsF.data(), pointsF.size());
+        */
 
         ip2->setAntiAliasingMode(antiAliasingMode);
         ip2->setPen(Color::fromRgb8(255, 255, 255, 175));

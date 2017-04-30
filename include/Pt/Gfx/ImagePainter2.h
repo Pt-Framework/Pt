@@ -109,9 +109,11 @@ class PT_GFX_API ImagePainter2 : public Painter
         // NOTE: The begin and end angle must move in counter-clockwise (CCW) direction or something wrong may be drawn!
         virtual void drawArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
+        /*
         // NOTE: * If you enlarge (scale-up) the shape, you may need to increase the "smoothness" factor as needed
         //       * If the "smoothness" factor is too large, the anti-aliasing will become less effective
         virtual void drawPath(const Path& path2d, const Transform& transform, bool autoClose, float smoothness = 1.0f);
+        */
 
         virtual void fillRect(const RectF& rect);
 
@@ -125,9 +127,11 @@ class PT_GFX_API ImagePainter2 : public Painter
         // NOTE: The begin and end angle must move in counter-clockwise (CCW) direction or something wrong may be drawn!
         virtual void fillArc(const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
+        /*
         // NOTE: * If you enlarge (scale-up) the shape, you may need to increase the "smoothness" factor as needed
         //       * If the "smoothness" factor is too large, the anti-aliasing will become less effective
         virtual void fillPath(const Path& path2d, const Transform& transform, float smoothness = 1.0f);
+        */
 
     public:
         // Just to make the API match the interface defined by the Pt::GfxPainter class

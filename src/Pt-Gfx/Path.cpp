@@ -637,6 +637,7 @@ void Path::relGenericNBezierTo(Pt::int32_t controlPointCount, const double* cxy,
 
 // --- Generate points ---
 
+/*
 void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
 {
     // Check if this function call is valid in the current context
@@ -708,6 +709,7 @@ void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
     //    printf("GenPts: %5.1f, %5.1f\n", dst[i].x(), dst[i].y());
     //printf("\n");
 }
+*/
 
 
 // ======================================================================================

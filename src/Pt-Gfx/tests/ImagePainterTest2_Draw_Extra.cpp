@@ -31,7 +31,7 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
     path.lineTo             (170,  -45);
     path.endPath            ();
     ip2->setPen( Pen(Color::fromRgb8(255, 0, 255, 175), 3, Pen::Solid, Pen::ButtCap, Pen::MiterJoin) );
-    ip2->drawPath(path, transform, false);
+    //ip2->drawPath(path, transform, false);
 
     const double cxy[] = { // CW
           55, -180,
@@ -45,7 +45,7 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
     path.relGenericNBezierTo(sizeof(cxy) / sizeof(cxy[0]) / 2, cxy, 170, -45);
     path.endPath            ();
     ip2->setPen( Pen(Color::fromRgb8(127, 255, 255, 175), 3, Pen::Solid, Pen::ButtCap, Pen::MiterJoin) );
-    ip2->drawPath(path, transform, false);
+    //ip2->drawPath(path, transform, false);
 
     // Round-Hole caps
     ip2->setFont( Pt::Gfx::Font(FONT_SPEC_S) );
