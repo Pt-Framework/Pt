@@ -651,6 +651,8 @@ void Path::relGenericNBezierTo(Pt::int32_t controlPointCount, const double* cxy,
 void Path::generatePoints(std::vector<PointF>& dst, float smoothness)
 {
     // ### TODO ###
+
+    //_clipPath
 }
 
 void Path::generatePointsWithClipping(std::vector<PointF>& dst, float smoothness)
@@ -887,9 +889,14 @@ void Path::decomposeAndStore_arcTo(double x1, double y1, double x2, double y2, d
     _pathData->add(PathData::IT_CubicBezierTo, c2x2, c2y2, c2x3, c2y3, c2x4, c2y4);
 }
 
-void Path::getTransformedPathData(std::vector<double> dst)
+void Path::getTransformedPathData(PathData& dst)
 {
-    // ### TODO ###
+    dst = *_pathData;
+    if(_transform.isIdentity()) return;
+
+    for(size_t i = 0; i < dst.inss.size(); ++i) {
+        _transform.transformPoints(dst.inss[i].pxy.data(), dst.inss[i].pxy.size() / 2);
+    }
 }
 
 

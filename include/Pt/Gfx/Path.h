@@ -95,6 +95,9 @@ class PT_GFX_API PathInvalidContext : public PathError {
   */
 class PT_GFX_API Path {
     public:
+        typedef BasicTransform<double> TransformT;
+
+    public:
         //
         // Polygon clipper
         //
@@ -161,10 +164,12 @@ class PT_GFX_API Path {
         //
         // Transform and clipping
         //
-        inline void setTransform(const Transform& transform)
+        template <typename T>
+        inline void setTransform(const BasicTransform<T>& transform)
         { _transform = transform; }
 
-        inline const Transform& transform() const
+        template <typename T>
+        inline const BasicTransform<T>& transform() const
         { return _transform; }
 
         inline void setClipPath(const Path& clipPath)
@@ -191,12 +196,6 @@ class PT_GFX_API Path {
         //       * If the "smoothness" factor is too large, the anti-aliasing will become less effective
         void generatePointsWithClipping(std::vector<PointF>& dst, float smoothness = 1);
 
-        /*
-        // NOTE: * If you enlarge (scale-up) the shape, you may need to increase the "smoothness" factor as needed
-        //       * If the "smoothness" factor is too large, the anti-aliasing will become less effective
-        void generatePoints(std::vector<PointF>& dst, float smoothness = 1.0f) const;
-        */
-
     private:
         struct PathData;
 
@@ -204,12 +203,12 @@ class PT_GFX_API Path {
 
     private:
         SmartPtr<PathData> _pathData;
-        Transform          _transform;
+        TransformT         _transform;
         Path*              _clipPath;
         ClipMode           _clipMode;
 
         void decomposeAndStore_arcTo(double x1, double y1, double x2, double y2, double r);
-        void getTransformedPathData(std::vector<double> dst);
+        void getTransformedPathData(PathData& dst);
 };
 
 

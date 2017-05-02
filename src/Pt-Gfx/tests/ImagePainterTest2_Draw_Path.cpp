@@ -1,5 +1,5 @@
 static void testDrawPath_drawRow(
-    ImagePainter2* ip2, Transform& transform, const Path& path, Pt::int32_t& row, Pt::int32_t& col,
+    ImagePainter2* ip2, Transform& transform, Path& path, Pt::int32_t& row, Pt::int32_t& col,
     const Pen& penThinSolid, const Pen& penThinDot, const Pen& penThickSolid, const Pen& penThickDot,
     const Brush& brush1, const Brush& brush2
 )
@@ -10,6 +10,7 @@ static void testDrawPath_drawRow(
     tstack.push(transform);
     transform.translate(60 + 110 * col, 60 + 110 * row);
     ip2->setPen(penThinSolid);
+    path.setTransform(transform);
     //ip2->drawPath(path, transform, false);
     transform = tstack.pop();
     ++col;
@@ -57,7 +58,7 @@ static void testDrawPath_drawRow(
 }
 
 static void testDrawPath_drawCol(
-    ImagePainter2* ip2, Transform& transform, const Path& path, Pt::int32_t& row, Pt::int32_t& col,
+    ImagePainter2* ip2, Transform& transform, Path& path, Pt::int32_t& row, Pt::int32_t& col,
     const Pen& penThinSolid, const Pen& penThickSolid
 )
 {
@@ -81,7 +82,6 @@ static void testDrawPath_drawCol(
 
 static void testDrawPath(const char* title, Image& image, Painter& painter, const Brush& brush1, const Brush& brush2)
 {
-    return;
     resetImage(image);
 
     Pen penThinSolid ( Pen(Color::fromRgb8(255, 191, 127, 175), 1, Pen::Solid, Pen::RoundCap, Pen::BevelJoin ) );

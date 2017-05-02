@@ -1,6 +1,6 @@
 template <bool WITH_RASTERISATION>
 static void benchDrawPath_drawRow(
-    ImagePainter2* ip2, Transform& transform, const Path& path, Pt::int32_t& row, Pt::int32_t& col,
+    ImagePainter2* ip2, Transform& transform, Path& path, Pt::int32_t& row, Pt::int32_t& col,
     const Pen& penThinSolid, const Pen& penThinDot, const Pen& penThickSolid, const Pen& penThickDot,
     const Brush& brush1, const Brush& brush2, AntiAliasingMode antiAliasingMode
 )
@@ -108,7 +108,7 @@ static void benchDrawPath_drawRow(
 
 template <bool WITH_RASTERISATION>
 static void benchDrawPath_drawCol(
-    ImagePainter2* ip2, Transform& transform, const Path& path, Pt::int32_t& row, Pt::int32_t& col,
+    ImagePainter2* ip2, Transform& transform, Path& path, Pt::int32_t& row, Pt::int32_t& col,
     const Pen& penThinSolid, const Pen& penThickSolid, AntiAliasingMode antiAliasingMode
 )
 {

@@ -64,27 +64,16 @@ static const float32x4_t neonMaxCordF = vdupq_n_f32(Painter::MaximumCoordinate);
 
 template <typename T>
 union BasicMatrixData {
-    T v[4][4];
-};
-
-template <>
-union BasicMatrixData<float> {
-    float  v[4][4];
-    __m128 r[4];
-};
-
-template <>
-union BasicMatrixData<double> {
-    double  v[4][4];
-    __m256d r[4];
+    T      v[3][4];
+    __m128 r[3];
 };
 
 #elif defined(PT_GFX_USE_NEON)
 
 template <typename T>
 union BasicMatrixData {
-    T           v[4][4];
-    float32x4_t r[4];
+    T           v[3][4];
+    float32x4_t r[3];
 };
 
 #else
@@ -108,6 +97,9 @@ class PT_GFX_API BasicTransform {
         inline BasicTransform();
         inline BasicTransform(const BasicTransform& m);
 
+        template <typename S>
+        inline BasicTransform(const BasicTransform<S>& m);
+
         inline ~BasicTransform();
 
         inline bool isIdentity() const;
@@ -124,6 +116,9 @@ class PT_GFX_API BasicTransform {
 
         inline const BasicTransform& operator=(const BasicTransform& m);
         inline const BasicTransform operator*(const BasicTransform& rhs) const;
+
+        template <typename S>
+        inline const BasicTransform& operator=(const BasicTransform<S>& m);
 
         inline bool operator==(const BasicTransform& m) const;
         inline bool operator!=(const BasicTransform& m) const;
@@ -165,6 +160,8 @@ class PT_GFX_API BasicTransform {
     private:
         MatrixData _mdata;
         bool       _isIdentity;
+
+        template <typename S> friend class BasicTransform;
 };
 
 
@@ -213,7 +210,6 @@ inline BasicTransform<T>::BasicTransform()
 
 #if defined(PT_GFX_USE_AVX1) || defined(PT_GFX_USE_NEON)
     _mdata.v[0][3] = 0; _mdata.v[1][3] = 0; _mdata.v[2][3] = 0;
-    _mdata.v[3][0] = 0; _mdata.v[3][1] = 0; _mdata.v[3][2] = 0; _mdata.v[3][3] = 0;
 #endif
 }
 
@@ -222,8 +218,15 @@ inline BasicTransform<T>::BasicTransform(const BasicTransform<T>& m)
 { *this = m; }
 
 template <typename T>
+template <typename S>
+inline BasicTransform<T>::BasicTransform(const BasicTransform<S>& m)
+{ *this = m; }
+
+
+template <typename T>
 inline BasicTransform<T>::~BasicTransform()
 {}
+
 
 //
 // Management functions
@@ -363,6 +366,34 @@ inline const BasicTransform<T>& BasicTransform<T>::operator=(const BasicTransfor
 {
     this->_mdata      = m._mdata;
     this->_isIdentity = m._isIdentity;
+
+    return *this;
+}
+
+template <typename T>
+template <typename S>
+inline const BasicTransform<T>& BasicTransform<T>::operator=(const BasicTransform<S>& m)
+{
+    this->_mdata.v[0][0] = m._mdata.v[0][0];
+    this->_mdata.v[0][1] = m._mdata.v[0][1];
+    this->_mdata.v[0][2] = m._mdata.v[0][2];
+#if defined(PT_GFX_USE_AVX1) || defined(PT_GFX_USE_NEON)
+    this->_mdata.v[0][3] = m._mdata.v[0][3];
+#endif
+
+    this->_mdata.v[1][0] = m._mdata.v[1][0];
+    this->_mdata.v[1][1] = m._mdata.v[1][1];
+    this->_mdata.v[1][2] = m._mdata.v[1][2];
+#if defined(PT_GFX_USE_AVX1) || defined(PT_GFX_USE_NEON)
+    this->_mdata.v[1][3] = m._mdata.v[1][3];
+#endif
+
+    this->_mdata.v[2][0] = m._mdata.v[2][0];
+    this->_mdata.v[2][1] = m._mdata.v[2][1];
+    this->_mdata.v[2][2] = m._mdata.v[2][2];
+#if defined(PT_GFX_USE_AVX1) || defined(PT_GFX_USE_NEON)
+    this->_mdata.v[2][3] = m._mdata.v[2][3];
+#endif
 
     return *this;
 }

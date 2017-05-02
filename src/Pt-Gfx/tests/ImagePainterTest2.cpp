@@ -198,41 +198,6 @@ static const char* sfileDirXPrefix = "";
 
 
 //
-// Helper function to select which multi-test should be run
-//
-
-static inline Pt::uint32_t DEFINE_CONFIG_BITS(Pt::uint8_t numIdx, Pt::uint8_t idx,...)
-{
-    if(!numIdx) return 0;
-    --numIdx;
-
-    Pt::uint32_t result = 0;
-
-    if(idx) result |= ( (Pt::uint32_t) 1 << (idx - 1) );
-
-    va_list valist;
-    va_start(valist, idx);
-
-    for(Pt::uint8_t i = 0; i < numIdx; ++i) {
-        idx = va_arg(valist, Pt::uint32_t);
-        if(idx < 1 || idx > 32) continue;
-        result |= ( (Pt::uint32_t) 1 << (idx - 1) );
-    }
-
-    va_end(valist);
-
-    return result;
-}
-
-static inline bool CONFIG_BIT_ENABLED(Pt::uint32_t configBits, Pt::uint32_t idx)
-{
-    if(idx < 1 || idx > 32) return false;
-
-    return !!( configBits & ( (Pt::uint32_t) 1 << (idx - 1) ) );
-}
-
-
-//
 // Main program
 //
 
