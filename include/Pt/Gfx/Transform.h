@@ -64,23 +64,23 @@ static const float32x4_t neonMaxCordF = vdupq_n_f32(Painter::MaximumCoordinate);
 
 template <typename T>
 union BasicMatrixData {
-    T      v[3][4];
-    __m128 r[3];
+    T      v[2][4];
+    __m128 r[2];
 };
 
 #elif defined(PT_GFX_USE_NEON)
 
 template <typename T>
 union BasicMatrixData {
-    T           v[3][4];
-    float32x4_t r[3];
+    T           v[2][4];
+    float32x4_t r[2];
 };
 
 #else
 
 template <typename T>
 struct BasicMatrixData {
-    T v[3][3];
+    T v[2][3];
 };
 
 #endif
@@ -111,8 +111,8 @@ class PT_GFX_API BasicTransform {
         inline void shearX(T deg, bool replaceInsteadOfCombine = false);
         inline void shearY(T deg, bool replaceInsteadOfCombine = false);
 
-        inline void getRaw(T m[3][3]) const;
-        inline void setRaw(const T m[3][3]);
+        inline void getRaw(T m[2][3]) const;
+        inline void setRaw(const T m[2][3]);
 
         inline const BasicTransform& operator=(const BasicTransform& m);
         inline const BasicTransform operator*(const BasicTransform& rhs) const;
@@ -183,17 +183,13 @@ inline void BasicTransform<T>::updateMatrix(const MatrixData& n, bool replaceIns
     const MatrixData* r = &_mdata;
           MatrixData  o;
 
-    o.v[0][0] = l->v[0][0] * r->v[0][0] + l->v[0][1] * r->v[1][0] + l->v[0][2] * r->v[2][0];
-    o.v[0][1] = l->v[0][0] * r->v[0][1] + l->v[0][1] * r->v[1][1] + l->v[0][2] * r->v[2][1];
-    o.v[0][2] = l->v[0][0] * r->v[0][2] + l->v[0][1] * r->v[1][2] + l->v[0][2] * r->v[2][2];
+    o.v[0][0] = l->v[0][0] * r->v[0][0] + l->v[0][1] * r->v[1][0] + l->v[0][2] * 0;
+    o.v[0][1] = l->v[0][0] * r->v[0][1] + l->v[0][1] * r->v[1][1] + l->v[0][2] * 0;
+    o.v[0][2] = l->v[0][0] * r->v[0][2] + l->v[0][1] * r->v[1][2] + l->v[0][2] * 1;
 
-    o.v[1][0] = l->v[1][0] * r->v[0][0] + l->v[1][1] * r->v[1][0] + l->v[1][2] * r->v[2][0];
-    o.v[1][1] = l->v[1][0] * r->v[0][1] + l->v[1][1] * r->v[1][1] + l->v[1][2] * r->v[2][1];
-    o.v[1][2] = l->v[1][0] * r->v[0][2] + l->v[1][1] * r->v[1][2] + l->v[1][2] * r->v[2][2];
-
-    o.v[2][0] = l->v[2][0] * r->v[0][0] + l->v[2][1] * r->v[1][0] + l->v[2][2] * r->v[2][0];
-    o.v[2][1] = l->v[2][0] * r->v[0][1] + l->v[2][1] * r->v[1][1] + l->v[2][2] * r->v[2][1];
-    o.v[2][2] = l->v[2][0] * r->v[0][2] + l->v[2][1] * r->v[1][2] + l->v[2][2] * r->v[2][2];
+    o.v[1][0] = l->v[1][0] * r->v[0][0] + l->v[1][1] * r->v[1][0] + l->v[1][2] * 0;
+    o.v[1][1] = l->v[1][0] * r->v[0][1] + l->v[1][1] * r->v[1][1] + l->v[1][2] * 0;
+    o.v[1][2] = l->v[1][0] * r->v[0][2] + l->v[1][1] * r->v[1][2] + l->v[1][2] * 1;
 
     _mdata = o;
 }
@@ -209,7 +205,8 @@ inline BasicTransform<T>::BasicTransform()
     identity();
 
 #if defined(PT_GFX_USE_AVX1) || defined(PT_GFX_USE_NEON)
-    _mdata.v[0][3] = 0; _mdata.v[1][3] = 0; _mdata.v[2][3] = 0;
+    _mdata.v[0][3] = 0;
+    _mdata.v[1][3] = 0;
 #endif
 }
 
@@ -241,7 +238,6 @@ inline void BasicTransform<T>::identity()
 {
     _mdata.v[0][0] = 1; _mdata.v[0][1] = 0; _mdata.v[0][2] = 0;
     _mdata.v[1][0] = 0; _mdata.v[1][1] = 1; _mdata.v[1][2] = 0;
-    _mdata.v[2][0] = 0; _mdata.v[2][1] = 0; _mdata.v[2][2] = 1;
 
     _isIdentity = true;
 }
@@ -255,7 +251,6 @@ inline void BasicTransform<T>::translate(T x, T y, bool replaceInsteadOfCombine)
 
     n.v[0][0] = 1; n.v[0][1] = 0; n.v[0][2] = x;
     n.v[1][0] = 0; n.v[1][1] = 1; n.v[1][2] = y;
-    n.v[2][0] = 0; n.v[2][1] = 0; n.v[2][2] = 1;
 
     updateMatrix(n, replaceInsteadOfCombine);
     _isIdentity = false;
@@ -270,7 +265,6 @@ inline void BasicTransform<T>::scale(T x, T y, bool replaceInsteadOfCombine)
 
     n.v[0][0] = x; n.v[0][1] = 0; n.v[0][2] = 0;
     n.v[1][0] = 0; n.v[1][1] = y; n.v[1][2] = 0;
-    n.v[2][0] = 0; n.v[2][1] = 0; n.v[2][2] = 1;
 
     updateMatrix(n, replaceInsteadOfCombine);
     _isIdentity = false;
@@ -289,7 +283,6 @@ inline void BasicTransform<T>::rotate(T deg, bool replaceInsteadOfCombine)
 
     n.v[0][0] =  c; n.v[0][1] = s; n.v[0][2] = 0;
     n.v[1][0] = -s; n.v[1][1] = c; n.v[1][2] = 0;
-    n.v[2][0] =  0; n.v[2][1] = 0; n.v[2][2] = 1;
 
     updateMatrix(n, replaceInsteadOfCombine);
     _isIdentity = false;
@@ -307,7 +300,6 @@ inline void BasicTransform<T>::shearX(T deg, bool replaceInsteadOfCombine)
 
     n.v[0][0] = 1; n.v[0][1] = t; n.v[0][2] = 0;
     n.v[1][0] = 0; n.v[1][1] = 1; n.v[1][2] = 0;
-    n.v[2][0] = 0; n.v[2][1] = 0; n.v[2][2] = 1;
 
     updateMatrix(n, replaceInsteadOfCombine);
     _isIdentity = false;
@@ -325,27 +317,24 @@ inline void BasicTransform<T>::shearY(T deg, bool replaceInsteadOfCombine)
 
     n.v[0][0] = 1; n.v[0][1] = 0; n.v[0][2] = 0;
     n.v[1][0] = t; n.v[1][1] = 1; n.v[1][2] = 0;
-    n.v[2][0] = 0; n.v[2][1] = 0; n.v[2][2] = 1;
 
     updateMatrix(n, replaceInsteadOfCombine);
     _isIdentity = false;
 }
 
 template <typename T>
-inline void BasicTransform<T>::getRaw(T m[3][3]) const
+inline void BasicTransform<T>::getRaw(T m[2][3]) const
 {
     m[0][0] = _mdata.v[0][0]; m[0][1] = _mdata.v[0][1]; m[0][2] = _mdata.v[0][2];
     m[1][0] = _mdata.v[1][0]; m[1][1] = _mdata.v[1][1]; m[1][2] = _mdata.v[1][2];
-    m[2][0] = _mdata.v[2][0]; m[2][1] = _mdata.v[2][1]; m[2][2] = _mdata.v[2][2];
 }
 
 template <typename T>
-inline void BasicTransform<T>::setRaw(const T m[3][3])
+inline void BasicTransform<T>::setRaw(const T m[2][3])
 {
     // Check if the given raw matrix is an identity matrix
     if( m[0][0] == 1 && m[0][1] == 0 && m[0][2] == 0 &&
-        m[1][0] == 0 && m[1][1] == 1 && m[1][2] == 0 &&
-        m[2][0] == 0 && m[2][1] == 0 && m[2][2] == 1
+        m[1][0] == 0 && m[1][1] == 1 && m[1][2] == 0
     ) {
         this->identity();
         return;
@@ -353,7 +342,6 @@ inline void BasicTransform<T>::setRaw(const T m[3][3])
 
     _mdata.v[0][0] = m[0][0]; _mdata.v[0][1] = m[0][1]; _mdata.v[0][2] = m[0][2];
     _mdata.v[1][0] = m[1][0]; _mdata.v[1][1] = m[1][1]; _mdata.v[1][2] = m[1][2];
-    _mdata.v[2][0] = m[2][0]; _mdata.v[2][1] = m[2][1]; _mdata.v[2][2] = m[2][2];
     _isIdentity = false;
 }
 
@@ -386,13 +374,6 @@ inline const BasicTransform<T>& BasicTransform<T>::operator=(const BasicTransfor
     this->_mdata.v[1][2] = m._mdata.v[1][2];
 #if defined(PT_GFX_USE_AVX1) || defined(PT_GFX_USE_NEON)
     this->_mdata.v[1][3] = m._mdata.v[1][3];
-#endif
-
-    this->_mdata.v[2][0] = m._mdata.v[2][0];
-    this->_mdata.v[2][1] = m._mdata.v[2][1];
-    this->_mdata.v[2][2] = m._mdata.v[2][2];
-#if defined(PT_GFX_USE_AVX1) || defined(PT_GFX_USE_NEON)
-    this->_mdata.v[2][3] = m._mdata.v[2][3];
 #endif
 
     return *this;
@@ -652,7 +633,6 @@ inline void BasicTransform<float>::rotate(float deg, bool replaceInsteadOfCombin
 
     n.v[0][0] =  c; n.v[0][1] = s; n.v[0][2] = 0;
     n.v[1][0] = -s; n.v[1][1] = c; n.v[1][2] = 0;
-    n.v[2][0] =  0; n.v[2][1] = 0; n.v[2][2] = 1;
 
     updateMatrix(n, replaceInsteadOfCombine);
     _isIdentity = false;
@@ -670,7 +650,6 @@ inline void BasicTransform<float>::shearX(float deg, bool replaceInsteadOfCombin
 
     n.v[0][0] = 1; n.v[0][1] = t; n.v[0][2] = 0;
     n.v[1][0] = 0; n.v[1][1] = 1; n.v[1][2] = 0;
-    n.v[2][0] = 0; n.v[2][1] = 0; n.v[2][2] = 1;
 
     updateMatrix(n, replaceInsteadOfCombine);
     _isIdentity = false;
@@ -688,7 +667,6 @@ inline void BasicTransform<float>::shearY(float deg, bool replaceInsteadOfCombin
 
     n.v[0][0] = 1; n.v[0][1] = 0; n.v[0][2] = 0;
     n.v[1][0] = t; n.v[1][1] = 1; n.v[1][2] = 0;
-    n.v[2][0] = 0; n.v[2][1] = 0; n.v[2][2] = 1;
 
     updateMatrix(n, replaceInsteadOfCombine);
     _isIdentity = false;

@@ -373,12 +373,11 @@ static void benchMathFunctions()
 template <typename T>
 static void dumpTransformMatrix(const BasicTransform<T>& transform)
 {
-    T r[3][3];
+    T r[2][3];
     transform.getRaw(r);
 
     printf("    | %7.3f %7.3f %7.3f |\n", r[0][0], r[0][1], r[0][2]);
     printf("    | %7.3f %7.3f %7.3f |\n", r[1][0], r[1][1], r[1][2]);
-    printf("    | %7.3f %7.3f %7.3f |\n", r[2][0], r[2][1], r[2][2]);
 }
 
 template <typename T>
