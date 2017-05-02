@@ -49,9 +49,11 @@ class BasicClipShape {
 
         static inline bool insideXRange(T v, const Rect& clippingArea)
         { return ( v >= clippingArea.left() && v <= clippingArea.right() ); }
+        //{ return (size_t) ( v - clippingArea.left() ) <= (size_t) ( clippingArea.right() - clippingArea.left() ); }
 
         static inline bool insideYRange(T v, const Rect& clippingArea)
         { return ( v >= clippingArea.top() && v <= clippingArea.bottom() ); }
+        //{ return (size_t) ( v - clippingArea.top() ) <= (size_t) ( clippingArea.bottom() - clippingArea.top() ); }
 
         static inline bool insideXYRange(T x, T y, const Rect& clippingArea)
         { return insideXRange(x, clippingArea) && insideYRange(y, clippingArea); }

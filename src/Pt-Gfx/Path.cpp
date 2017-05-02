@@ -282,14 +282,16 @@ struct Path::PathData {
 
 Path::Path()
 : _pathData( new PathData() )
+, _clipPath( new Path() )
 {}
 
 Path::Path(const Path& p)
 : _pathData( 0 )
+, _clipPath( new Path() )
 { this->operator=(p); }
 
 Path::~Path()
-{}
+{ delete _clipPath; }
 
 const Path& Path::operator=(const Path& p)
 {
@@ -637,6 +639,16 @@ void Path::relGenericNBezierTo(Pt::int32_t controlPointCount, const double* cxy,
 
 // --- Generate points ---
 
+void Path::generatePoints(std::vector<PointF>& dst, float smoothness)
+{
+    // ### TODO ###
+}
+
+void Path::generatePointsWithClipping(std::vector<PointF>& dst, float smoothness)
+{
+    // ### TODO ###
+}
+
 /*
 void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
 {
@@ -864,6 +876,11 @@ void Path::decomposeAndStore_arcTo(double x1, double y1, double x2, double y2, d
     const double c2x3 = c2x4 - nxrx * od;
     const double c2y3 = c2y4 + nyry * od;
     _pathData->add(PathData::IT_CubicBezierTo, c2x2, c2y2, c2x3, c2y3, c2x4, c2y4);
+}
+
+void Path::getTransformedPathData(std::vector<double> dst)
+{
+    // ### TODO ###
 }
 
 

@@ -39,6 +39,7 @@
 #include <Pt/Gfx/ArcMode.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Transform.h>
 
 
 namespace Pt{
@@ -94,6 +95,17 @@ class PT_GFX_API PathInvalidContext : public PathError {
   */
 class PT_GFX_API Path {
     public:
+        //
+        // Polygon clipper
+        //
+
+        enum ClipMode {
+            Intersection, Union, Difference, Xor
+        };
+
+        static void clipPolygon(std::vector<PointF>& result, const std::vector<PointF>& subject, const std::vector<PointF>& clipRegion, ClipMode cm);
+
+    public:
         Path();
 
         Path(const Path& p);
@@ -147,42 +159,55 @@ class PT_GFX_API Path {
         void relGenericNBezierTo(Pt::int32_t controlPointCount, const double* cxy, double x, double y);
 
         //
-        // Arc, chord, and pie placement (does not change the current drawing coordinate)
+        // Transform and clipping
         //
+        inline void setTransform(const Transform& transform)
+        { _transform = transform; }
 
-        void putArc(double rx, double ry, double degBegin, double degEnd, const ArcMode& arcMode);
+        inline const Transform& transform() const
+        { return _transform; }
+
+        inline void setClipPath(const Path& clipPath)
+        { *_clipPath = clipPath; }
+
+        inline const Path& clipPath() const
+        { return *_clipPath; }
+
+        inline void setClipMode(ClipMode clipMode)
+        {_clipMode = clipMode; }
+
+        inline ClipMode clipMode() const
+        { return _clipMode; }
 
         //
         // Generators
         //
 
+        // NOTE: * If you enlarge (scale-up) the shape, you may need to increase the "smoothness" factor as needed
+        //       * If the "smoothness" factor is too large, the anti-aliasing will become less effective
+        void generatePoints(std::vector<PointF>& dst, float smoothness = 1);
+
+        // NOTE: * If you enlarge (scale-up) the shape, you may need to increase the "smoothness" factor as needed
+        //       * If the "smoothness" factor is too large, the anti-aliasing will become less effective
+        void generatePointsWithClipping(std::vector<PointF>& dst, float smoothness = 1);
+
         /*
         // NOTE: * If you enlarge (scale-up) the shape, you may need to increase the "smoothness" factor as needed
         //       * If the "smoothness" factor is too large, the anti-aliasing will become less effective
         void generatePoints(std::vector<PointF>& dst, float smoothness = 1.0f) const;
-
-        // ### TODO: Add generator function(s) that can also takes transformation(s)! ###
         */
-
-    public:
-        //
-        // Polygon clipper
-        //
-
-        enum ClipMode {
-            Intersection, Union, Difference, Xor
-        };
-
-        static void clipPolygon(std::vector<PointF>& result, const std::vector<PointF>& subject, const std::vector<PointF>& clipRegion, ClipMode cm);
 
     private:
         struct PathData;
 
     private:
-        SmartPtr<PathData>  _pathData;
+        SmartPtr<PathData> _pathData;
+        Transform          _transform;
+        Path*              _clipPath;
+        ClipMode           _clipMode;
 
         void decomposeAndStore_arcTo(double x1, double y1, double x2, double y2, double r);
-
+        void getTransformedPathData(std::vector<double> dst);
 };
 
 
