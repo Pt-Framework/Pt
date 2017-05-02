@@ -282,20 +282,29 @@ struct Path::PathData {
 
 Path::Path()
 : _pathData( new PathData() )
-, _clipPath( new Path() )
+, _clipPath( new Path(true) )
 {}
 
 Path::Path(const Path& p)
 : _pathData( 0 )
-, _clipPath( new Path() )
+, _clipPath( new Path(true) )
 { this->operator=(p); }
+
+Path::Path(bool forClipPath)
+: _pathData( 0 )
+, _clipPath( 0 )
+{}
 
 Path::~Path()
 { delete _clipPath; }
 
 const Path& Path::operator=(const Path& p)
 {
-    _pathData = p._pathData;
+    _pathData  =  p._pathData;
+
+    _transform =  p._transform;
+   *_clipPath  = *p._clipPath;
+    _clipMode  =  p._clipMode;
 
     return *this;
 }

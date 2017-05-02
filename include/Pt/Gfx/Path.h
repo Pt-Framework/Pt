@@ -200,6 +200,8 @@ class PT_GFX_API Path {
     private:
         struct PathData;
 
+        Path(bool forClipPath);
+
     private:
         SmartPtr<PathData> _pathData;
         Transform          _transform;

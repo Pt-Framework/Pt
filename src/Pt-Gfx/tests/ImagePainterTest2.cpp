@@ -89,7 +89,7 @@ using namespace Pt::Gfx;
 #define TEST_SOURCECOPY                         1
 #define TEST_SOURCEOVER                         0
 
-#define TEST_DRAW_SOLID_LINE_AND_TEXT           1 // (including bezier)
+#define TEST_DRAW_SOLID_LINE_AND_TEXT           0 // (including bezier)
 #define TEST_DRAW_PATTERNED_LINE                0 // (including bezier)
 #define TEST_DRAW_SOLID_THICK_LINE              0 // (including bezier)
 #define TEST_DRAW_PATTERNED_THICK_LINE          0 // (including bezier)
@@ -109,7 +109,7 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS 0
 #define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  0
 
-#define TEST_DRAW_PATH                          0 // (including thick and filled)
+#define TEST_DRAW_PATH                          1 // (including thick and filled)
 #define TEST_DRAW_PATH_CLIPPING                 0 // (including path-based text)
 #define TEST_DRAW_EXTRA                         0 // (including path-based n-bezier)
 
@@ -122,13 +122,13 @@ using namespace Pt::Gfx;
 #define BENCHMARK_CHECK_RESULTING_IMAGE     0
 
 #define BENCHMARK_IMAGE_SIZE                Size(1280, 800)
-#define BENCHMARK_LOOP_COUNT                ( 5000 * (BENCHMARK_RESULT_HTML ? 10 : 1) )
+#define BENCHMARK_LOOP_COUNT                ( 500 * (BENCHMARK_RESULT_HTML ? 10 : 1) )
 
 #define BENCHMARK_TEXT                      0
 #define BENCHMARK_ROTATED_TEXT              0
 
-#define BENCHMARK_SOLID_LINE                1
-#define BENCHMARK_PATTERNED_LINE            1
+#define BENCHMARK_SOLID_LINE                0
+#define BENCHMARK_PATTERNED_LINE            0
 #define BENCHMARK_SOLID_THICK_LINE          0
 #define BENCHMARK_PATTERNED_THICK_LINE      0
 
@@ -157,7 +157,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_GRADIENT_FILLED_ARC       0
 #define BENCHMARK_TEXTURE_FILLED_ARC        0
 
-#define BENCHMARK_PATH                      0
+#define BENCHMARK_PATH                      1
 #define BENCHMARK_IMAGE_OPERATION           0
 
 // Configurations and objects
@@ -563,8 +563,10 @@ int main(int argc, char* args[])
         if(!BENCHMARK_RESULT_HTML || !BENCHMARK_RESULT_HTML_SIDE_BY_SIDE) std::clog << "Pt::Gfx - CompositionMode::SourceCopy" << std::endl;
         doBenchmark(CompositionMode::SourceCopy);
 
-        if(!BENCHMARK_RESULT_HTML || !BENCHMARK_RESULT_HTML_SIDE_BY_SIDE) std::clog << "Pt::Gfx - Image Operation" << std::endl;
-        doBenchmarkImageOperation();
+        if(BENCHMARK_RESULT_HTML || BENCHMARK_IMAGE_OPERATION) {
+            if(!BENCHMARK_RESULT_HTML || !BENCHMARK_RESULT_HTML_SIDE_BY_SIDE) std::clog << "Pt::Gfx - Image Operation" << std::endl;
+            doBenchmarkImageOperation();
+        }
 
         if(BENCHMARK_RESULT_HTML && BENCHMARK_RESULT_HTML_SIDE_BY_SIDE) {
             std::clog << "    </td><td>&nbsp;&nbsp;&nbsp;</td>" << std::endl;
@@ -575,8 +577,10 @@ int main(int argc, char* args[])
         if(!BENCHMARK_RESULT_HTML || !BENCHMARK_RESULT_HTML_SIDE_BY_SIDE) std::clog << "Pt::Gfx - CompositionMode::SourceOver" << std::endl;
         doBenchmark(CompositionMode::SourceOver);
 
-        if(!BENCHMARK_RESULT_HTML || !BENCHMARK_RESULT_HTML_SIDE_BY_SIDE) std::clog << "Pt::Gfx - Image Operation" << std::endl;
-        doBenchmarkImageOperation();
+        if(BENCHMARK_RESULT_HTML || BENCHMARK_IMAGE_OPERATION) {
+            if(!BENCHMARK_RESULT_HTML || !BENCHMARK_RESULT_HTML_SIDE_BY_SIDE) std::clog << "Pt::Gfx - Image Operation" << std::endl;
+            doBenchmarkImageOperation();
+        }
 
         if(BENCHMARK_RESULT_HTML && BENCHMARK_RESULT_HTML_SIDE_BY_SIDE) {
             std::clog << "    </td><td>&nbsp;&nbsp;&nbsp;</td>" << std::endl;

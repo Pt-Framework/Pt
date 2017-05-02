@@ -81,6 +81,7 @@ static void testDrawPath_drawCol(
 
 static void testDrawPath(const char* title, Image& image, Painter& painter, const Brush& brush1, const Brush& brush2)
 {
+    return;
     resetImage(image);
 
     Pen penThinSolid ( Pen(Color::fromRgb8(255, 191, 127, 175), 1, Pen::Solid, Pen::RoundCap, Pen::BevelJoin ) );

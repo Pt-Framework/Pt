@@ -175,7 +175,7 @@ static size_t benchDrawPath(int loopCount, const Brush& brush1, const Brush& bru
 
     for(int i = 0; i < loopCount; ++i) {
         Transform transform;
-        Path            path;
+        Path      path;
 
         Pt::int32_t row = 0, col = 0;
 
