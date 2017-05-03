@@ -168,8 +168,10 @@ class PT_GFX_API Path {
         inline void setTransform(const BasicTransform<T>& transform)
         { _transform = transform; }
 
-        template <typename T>
-        inline const BasicTransform<T>& transform() const
+        inline TransformT& transform()
+        { return _transform; }
+
+        inline const TransformT& transform() const
         { return _transform; }
 
         inline void setClipPath(const Path& clipPath)
@@ -190,11 +192,11 @@ class PT_GFX_API Path {
 
         // NOTE: * If you enlarge (scale-up) the shape, you may need to increase the "smoothness" factor as needed
         //       * If the "smoothness" factor is too large, the anti-aliasing will become less effective
-        void generatePoints(std::vector<PointF>& dst, float smoothness = 1);
+        void generatePoints(std::vector<PointF>& dst, float smoothness = 1) const;
 
         // NOTE: * If you enlarge (scale-up) the shape, you may need to increase the "smoothness" factor as needed
         //       * If the "smoothness" factor is too large, the anti-aliasing will become less effective
-        void generatePointsWithClipping(std::vector<PointF>& dst, float smoothness = 1);
+        void generatePointsWithClipping(std::vector<PointF>& dst, float smoothness = 1) const;
 
     private:
         struct PathData;
@@ -208,7 +210,9 @@ class PT_GFX_API Path {
         ClipMode           _clipMode;
 
         void decomposeAndStore_arcTo(double x1, double y1, double x2, double y2, double r);
-        void getTransformedPathData(PathData& dst);
+        void getTransformedPathData(PathData& dst) const;
+
+        static void generatePoints_impl(std::vector<PointF>& dst, const PathData& pd, float smoothness);
 };
 
 

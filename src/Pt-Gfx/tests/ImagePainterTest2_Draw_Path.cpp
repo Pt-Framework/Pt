@@ -4,55 +4,46 @@ static void testDrawPath_drawRow(
     const Brush& brush1, const Brush& brush2
 )
 {
-    TransformStack tstack;
-
     transform.rotate(15);
-    tstack.push(transform);
-    transform.translate(60 + 110 * col, 60 + 110 * row);
-    ip2->setPen(penThinSolid);
     path.setTransform(transform);
-    //ip2->drawPath(path, transform, false);
-    transform = tstack.pop();
+    path.transform().translate(60 + 110 * col, 60 + 110 * row);
+    ip2->setPen(penThinSolid);
+    ip2->drawPath(path, false);
     ++col;
 
     transform.rotate(15);
-    tstack.push(transform);
-    transform.translate(60 + 110 * col, 60 + 110 * row);
+    path.setTransform(transform);
+    path.transform().translate(60 + 110 * col, 60 + 110 * row);
     ip2->setPen(penThinDot);
-    //ip2->drawPath(path, transform, false);
-    transform = tstack.pop();
+    ip2->drawPath(path, false);
     ++col;
 
     transform.rotate(15);
-    tstack.push(transform);
-    transform.translate(60 + 110 * col, 60 + 110 * row);
+    path.setTransform(transform);
+    path.transform().translate(60 + 110 * col, 60 + 110 * row);
     ip2->setPen(penThickSolid);
-    //ip2->drawPath(path, transform, false);
-    transform = tstack.pop();
+    ip2->drawPath(path, false);
     ++col;
 
     transform.rotate(15);
-    tstack.push(transform);
-    transform.translate(60 + 110 * col, 60 + 110 * row);
+    path.setTransform(transform);
+    path.transform().translate(60 + 110 * col, 60 + 110 * row);
     ip2->setPen(penThickDot);
-    //ip2->drawPath(path, transform, false);
-    transform = tstack.pop();
+    ip2->drawPath(path, false);
     ++col;
 
     transform.rotate(15);
-    tstack.push(transform);
-    transform.translate(60 + 110 * col, 60 + 110 * row);
+    path.setTransform(transform);
+    path.transform().translate(60 + 110 * col, 60 + 110 * row);
     ip2->setBrush(brush1);
-    //ip2->fillPath(path, transform);
-    transform = tstack.pop();
+    ip2->fillPath(path);
     ++col;
 
     transform.rotate(15);
-    tstack.push(transform);
-    transform.translate(60 + 110 * col, 60 + 110 * row);
+    path.setTransform(transform);
+    path.transform().translate(60 + 110 * col, 60 + 110 * row);
     ip2->setBrush(brush2);
-    //ip2->fillPath(path, transform);
-    transform = tstack.pop();
+    ip2->fillPath(path);
     col = 0;
     ++row;
 }
@@ -62,22 +53,19 @@ static void testDrawPath_drawCol(
     const Pen& penThinSolid, const Pen& penThickSolid
 )
 {
-    TransformStack tstack;
-
     transform.rotate(15);
-    tstack.push(transform);
-    transform.translate(60 + 120 * col, 60 + 120 * row);
+    path.setTransform(transform);
+    path.transform().translate(60 + 120 * col, 60 + 120 * row);
     ip2->setPen(penThinSolid);
-    //ip2->drawPath(path, transform, false);
-    transform = tstack.pop();
+    ip2->drawPath(path, false);
     ++col;
 
     transform.rotate(15);
-    tstack.push(transform);
-    transform.translate(60 + 120 * col, 60 + 120 * row);
+    path.setTransform(transform);
+    path.transform().translate(60 + 120 * col, 60 + 120 * row);
     ip2->setPen(penThickSolid);
-    //ip2->drawPath(path, transform, false);
-    transform = tstack.pop();
+    ip2->drawPath(path, false);
+    ++col;
 }
 
 static void testDrawPath(const char* title, Image& image, Painter& painter, const Brush& brush1, const Brush& brush2)
@@ -96,9 +84,8 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
 
     Pt::int32_t row = 0, col = 0;
 
-    TransformStack tstack;
-    Transform      transform;
-    Path           path;
+    Transform transform;
+    Path      path;
 
     //
     // Various shapes (top left part of the image)
@@ -218,14 +205,13 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     transform.rotate(-25);
     transform.scale(2.5, 2.5);
 
-#define DRAW_CB(PEN)                                    \
-    do {                                                \
-        tstack.push(transform);                         \
-        transform.translate(90 + 160 * col, 140 * row); \
-        ip2->setPen(PEN);                               \
-        /*ip2->drawPath(path, transform, false, 2);*/   \
-        transform = tstack.pop();                       \
-        ++col;                                          \
+#define DRAW_CB(PEN)                                           \
+    do {                                                       \
+        path.setTransform(transform);                          \
+        path.transform().translate(90 + 160 * col, 140 * row); \
+        ip2->setPen(PEN);                                      \
+        ip2->drawPath(path, false);                            \
+        ++col;                                                 \
     } while(false)
     DRAW_CB(penThinSolid );
     DRAW_CB(penThinDot   );
@@ -252,20 +238,18 @@ static void testDrawPath(const char* title, Image& image, Painter& painter, cons
     transform.translate(-5.0, -2.5);
     transform.scale(25, 25);
 
-    tstack.push(transform);
-    transform.translate(60 + 130 * col, 150 * row);
+    path.setTransform(transform);
+    path.transform().translate(60 + 130 * col, 150 * row);
     ip2->setPen( Color::fromRgb8(255, 255, 255, 175) );
-    //ip2->fillPath(path, transform, 1);
-    //ip2->drawPath(path, transform, false, 1);
-    transform = tstack.pop();
+    //ip2->fillPath(path, 0.05);
+    ip2->drawPath(path, false, 0.05f);
     ++row;
 
-    tstack.push(transform);
-    transform.translate(60 + 130 * col, 150 * row);
+    path.setTransform(transform);
+    path.transform().translate(60 + 130 * col, 150 * row);
     ip2->setPen( Color::fromRgb8(255, 255, 255, 175) );
-    //ip2->fillPath(path, transform, 20);
-    //ip2->drawPath(path, transform, false, 20);
-    transform = tstack.pop();
+    //ip2->fillPath(path, 1);
+    ip2->drawPath(path, false, 1);
 
     //ip2->setPen(Color::fromRgb8(255, 0, 0, 255));
     //ip2->drawEllipse( PointF (60 + 130 * col - 2.5 * 25, 150 * row -0.5 * 25 - 125), SizeF(5 * 25, 2 * 5 * 25) );

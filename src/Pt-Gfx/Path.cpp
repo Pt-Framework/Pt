@@ -648,91 +648,19 @@ void Path::relGenericNBezierTo(Pt::int32_t controlPointCount, const double* cxy,
 
 // --- Generate points ---
 
-void Path::generatePoints(std::vector<PointF>& dst, float smoothness)
-{
-    // ### TODO ###
-
-    //_clipPath
-}
-
-void Path::generatePointsWithClipping(std::vector<PointF>& dst, float smoothness)
-{
-    // ### TODO ###
-}
-
-/*
 void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
 {
-    // Check if this function call is valid in the current context
-    if( _pathData->empty() || !_pathData->lastInstructionMatch(PathData::IT_End) )
-        throw PathInvalidContext(PT_SOURCEINFO_STR);
+    PathData pd;
+    getTransformedPathData(pd);
 
-    // For convenience
-    typedef std::vector<PathData::Instruction>::const_iterator PDIIterator;
-
-    // State variables
-    double curX = 0.0;
-    double curY = 0.0;
-
-    // Walk through the instructions
-    for(PDIIterator it = _pathData->inss.begin(); it != _pathData->inss.end(); ++it) {
-        // Get the instruction
-        const PathData::Instruction& ins = *it;
-        // Act based on the type of the instruction
-        switch(ins.type) {
-            case PathData::IT_Begin:
-                if(!dst.empty()) dst.push_back(Painter::PolygonSeparatorPointF);
-                break;
-
-            case PathData::IT_End:
-                // Nothing to do here!
-                break;
-
-            case PathData::IT_MoveTo:
-                curX = ins.pxy[0];
-                curY = ins.pxy[1];
-                break;
-
-            case PathData::IT_LineTo:
-                if(dst.empty()) dst.push_back( PointF(curX, curY) );
-                curX = ins.pxy[0];
-                curY = ins.pxy[1];
-                dst.push_back( PointF(curX, curY) );
-                break;
-
-            case PathData::IT_QuadBezierTo:
-                generateQuadraticBezierPoints(dst, curX, curY, ins.pxy[0], ins.pxy[1], ins.pxy[2], ins.pxy[3], smoothness);
-                curX = ins.pxy[2];
-                curY = ins.pxy[3];
-                break;
-
-            case PathData::IT_CubicBezierTo:
-                generateCubicBezierPoints(dst, curX, curY, ins.pxy[0], ins.pxy[1], ins.pxy[2], ins.pxy[3], ins.pxy[4], ins.pxy[5], smoothness);
-                curX = ins.pxy[4];
-                curY = ins.pxy[5];
-                break;
-
-            case PathData::IT_GenNBezierTo:
-                generateGenericNBezierPoints(dst, curX, curY, ins.pxy, smoothness);
-                curX = ins.pxy[ins.pxy.size() - 2];
-                curY = ins.pxy[ins.pxy.size() - 1];
-                break;
-
-            default:
-                throw PathError("Invalid Path instruction type");
-                break;
-        }
-    }
-
-    // Remove dangling separator point as needed
-    if(!dst.empty() && dst.back().x() > Painter::MaximumCoordinateF && dst.back().y() > Painter::MaximumCoordinateF)
-        dst.pop_back();
-
-    //for(size_t i = 0; i < dst.size(); ++i)
-    //    printf("GenPts: %5.1f, %5.1f\n", dst[i].x(), dst[i].y());
-    //printf("\n");
+    generatePoints_impl(dst, pd, smoothness);
 }
-*/
+
+void Path::generatePointsWithClipping(std::vector<PointF>& dst, float smoothness) const
+{
+    // ### TODO ###
+    //_clipPath
+}
 
 
 // ======================================================================================
@@ -889,7 +817,7 @@ void Path::decomposeAndStore_arcTo(double x1, double y1, double x2, double y2, d
     _pathData->add(PathData::IT_CubicBezierTo, c2x2, c2y2, c2x3, c2y3, c2x4, c2y4);
 }
 
-void Path::getTransformedPathData(PathData& dst)
+void Path::getTransformedPathData(PathData& dst) const
 {
     dst = *_pathData;
     if(_transform.isIdentity()) return;
@@ -897,6 +825,77 @@ void Path::getTransformedPathData(PathData& dst)
     for(size_t i = 0; i < dst.inss.size(); ++i) {
         _transform.transformPoints(dst.inss[i].pxy.data(), dst.inss[i].pxy.size() / 2);
     }
+}
+
+void Path::generatePoints_impl(std::vector<PointF>& dst, const PathData& pd, float smoothness)
+{
+    if( pd.empty() || !pd.lastInstructionMatch(PathData::IT_End) )
+        throw PathInvalidContext(PT_SOURCEINFO_STR);
+
+    // For convenience
+    typedef std::vector<PathData::Instruction>::const_iterator PDIIterator;
+
+    // State variables
+    double curX = 0.0;
+    double curY = 0.0;
+
+    // Walk through the instructions
+    for(PDIIterator it = pd.inss.begin(); it != pd.inss.end(); ++it) {
+        // Get the instruction
+        const PathData::Instruction& ins = *it;
+        // Act based on the type of the instruction
+        switch(ins.type) {
+            case PathData::IT_Begin:
+                if(!dst.empty()) dst.push_back(Painter::PolygonSeparatorPointF);
+                break;
+
+            case PathData::IT_End:
+                // Nothing to do here!
+                break;
+
+            case PathData::IT_MoveTo:
+                curX = ins.pxy[0];
+                curY = ins.pxy[1];
+                break;
+
+            case PathData::IT_LineTo:
+                if(dst.empty()) dst.push_back( PointF(curX, curY) );
+                curX = ins.pxy[0];
+                curY = ins.pxy[1];
+                dst.push_back( PointF(curX, curY) );
+                break;
+
+            case PathData::IT_QuadBezierTo:
+                generateQuadraticBezierPoints(dst, curX, curY, ins.pxy[0], ins.pxy[1], ins.pxy[2], ins.pxy[3], smoothness);
+                curX = ins.pxy[2];
+                curY = ins.pxy[3];
+                break;
+
+            case PathData::IT_CubicBezierTo:
+                generateCubicBezierPoints(dst, curX, curY, ins.pxy[0], ins.pxy[1], ins.pxy[2], ins.pxy[3], ins.pxy[4], ins.pxy[5], smoothness);
+                curX = ins.pxy[4];
+                curY = ins.pxy[5];
+                break;
+
+            case PathData::IT_GenNBezierTo:
+                generateGenericNBezierPoints(dst, curX, curY, ins.pxy, smoothness);
+                curX = ins.pxy[ins.pxy.size() - 2];
+                curY = ins.pxy[ins.pxy.size() - 1];
+                break;
+
+            default:
+                throw PathError("Invalid Path instruction type");
+                break;
+        }
+    }
+
+    // Remove dangling separator point as needed
+    if(!dst.empty() && dst.back().x() > Painter::MaximumCoordinateF && dst.back().y() > Painter::MaximumCoordinateF)
+        dst.pop_back();
+
+    //for(size_t i = 0; i < dst.size(); ++i)
+    //    printf("GenPts: %5.1f, %5.1f\n", dst[i].x(), dst[i].y());
+    //printf("\n");
 }
 
 

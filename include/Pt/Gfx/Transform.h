@@ -365,16 +365,12 @@ inline const BasicTransform<T>& BasicTransform<T>::operator=(const BasicTransfor
     this->_mdata.v[0][0] = m._mdata.v[0][0];
     this->_mdata.v[0][1] = m._mdata.v[0][1];
     this->_mdata.v[0][2] = m._mdata.v[0][2];
-#if defined(PT_GFX_USE_AVX1) || defined(PT_GFX_USE_NEON)
-    this->_mdata.v[0][3] = m._mdata.v[0][3];
-#endif
 
     this->_mdata.v[1][0] = m._mdata.v[1][0];
     this->_mdata.v[1][1] = m._mdata.v[1][1];
     this->_mdata.v[1][2] = m._mdata.v[1][2];
-#if defined(PT_GFX_USE_AVX1) || defined(PT_GFX_USE_NEON)
-    this->_mdata.v[1][3] = m._mdata.v[1][3];
-#endif
+
+    this->_isIdentity    = m._isIdentity;
 
     return *this;
 }

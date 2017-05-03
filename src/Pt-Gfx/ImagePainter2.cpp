@@ -1264,34 +1264,19 @@ void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float deg
 
 void ImagePainter2::drawPath(const Path& path, bool autoClose, float smoothness)
 {
-    // ### TODO ###
+    // Convert the path to polyline points
+    std::vector<PointF> pointsF;
+    path.generatePoints(pointsF, smoothness);
+
+    // Draw the polyline
+    drawPolyline(pointsF.data(), pointsF.size(), autoClose);
 }
 
 void ImagePainter2::fillPath(const Path& path, float smoothness)
 {
-    // ### TODO ###
-}
-
-/*
-void ImagePainter2::drawPath(const Path& path2d, const Transform& transform, bool autoClose, float smoothness)
-{
-    // Convert the path to points and perform transformation
+    // Convert the path to polygon points
     std::vector<PointF> pointsF;
-
-    path2d.generatePoints(pointsF, smoothness);
-    transform.transformPoints(pointsF.data(), pointsF.size());
-
-    // Draw the path
-    drawPolyline(pointsF.data(), pointsF.size(), autoClose);
-}
-
-void ImagePainter2::fillPath(const Path& path2d, const Transform& transform, float smoothness)
-{
-    // Convert the path to points and perform transformation
-    std::vector<PointF> pointsF;
-
-    path2d.generatePoints(pointsF, smoothness);
-    transform.transformPoints(pointsF.data(), pointsF.size());
+    path.generatePoints(pointsF, smoothness);
 
     // Use anti-aliasing
     if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Default) {
@@ -1311,7 +1296,6 @@ void ImagePainter2::fillPath(const Path& path2d, const Transform& transform, flo
         _rasterizer->fillPolygon(points.data(), points.size());
     }
 }
-*/
 
 
 // ======================================================================================
