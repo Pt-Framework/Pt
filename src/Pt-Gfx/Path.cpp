@@ -301,16 +301,18 @@ Path::~Path()
 const Path& Path::operator=(const Path& p)
 {
     _pathData  =  p._pathData;
-
     _transform =  p._transform;
-   *_clipPath  = *p._clipPath;
-    _clipMode  =  p._clipMode;
+
+    if(_clipPath) {
+       *_clipPath  = *p._clipPath;
+        _clipMode  =  p._clipMode;
+    }
 
     return *this;
 }
 
 bool Path::isNull() const
-{ return _pathData->empty(); }
+{ return !_pathData || _pathData->empty(); }
 
 void Path::clear()
 {
@@ -650,16 +652,23 @@ void Path::relGenericNBezierTo(Pt::int32_t controlPointCount, const double* cxy,
 
 void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
 {
-    PathData pd;
-    getTransformedPathData(pd);
+    // Generate points for the path
+    PathData pdPath;
+    getTransformedPathData(pdPath);
 
-    generatePoints_impl(dst, pd, smoothness);
-}
+    generatePoints_impl(dst, pdPath, smoothness);
 
-void Path::generatePointsWithClipping(std::vector<PointF>& dst, float smoothness) const
-{
-    // ### TODO ###
-    //_clipPath
+    // Exit here if the clip-path is null
+    if(_clipPath->isNull()) return;
+
+    // Generate points for the clip-path
+    _clipPath->getTransformedPathData(pdPath);
+
+    std::vector<PointF> crg;
+    generatePoints_impl(crg, pdPath, smoothness);
+
+    // Perform path clipping
+    clipPolygon(dst, dst, crg, _clipMode);
 }
 
 

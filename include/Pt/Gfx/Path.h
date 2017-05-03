@@ -194,10 +194,6 @@ class PT_GFX_API Path {
         //       * If the "smoothness" factor is too large, the anti-aliasing will become less effective
         void generatePoints(std::vector<PointF>& dst, float smoothness = 1) const;
 
-        // NOTE: * If you enlarge (scale-up) the shape, you may need to increase the "smoothness" factor as needed
-        //       * If the "smoothness" factor is too large, the anti-aliasing will become less effective
-        void generatePointsWithClipping(std::vector<PointF>& dst, float smoothness = 1) const;
-
     private:
         struct PathData;
 

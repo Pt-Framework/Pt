@@ -21,17 +21,18 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
     transform.scale(-1, 1);
     transform.translate(970, 280);
 
-    path.clear              ();
-    path.beginPath          ();
-    path.moveTo             (  0,    0); // CW
-    path.lineTo             ( 55, -180);
-    path.lineTo             (115,  -45);
-    path.lineTo             (170, -135);
-    path.lineTo             (230,  -90);
-    path.lineTo             (170,  -45);
-    path.endPath            ();
+    path.clear       ();
+    path.beginPath   ();
+    path.moveTo      (  0,    0); // CW
+    path.lineTo      ( 55, -180);
+    path.lineTo      (115,  -45);
+    path.lineTo      (170, -135);
+    path.lineTo      (230,  -90);
+    path.lineTo      (170,  -45);
+    path.endPath     ();
+    path.setTransform(transform);
     ip2->setPen( Pen(Color::fromRgb8(255, 0, 255, 175), 3, Pen::Solid, Pen::ButtCap, Pen::MiterJoin) );
-    //ip2->drawPath(path, transform, false);
+    ip2->drawPath(path, false);
 
     const double cxy[] = { // CW
           55, -180,
@@ -44,8 +45,9 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
     path.moveTo             (0, 0);
     path.relGenericNBezierTo(sizeof(cxy) / sizeof(cxy[0]) / 2, cxy, 170, -45);
     path.endPath            ();
+    path.setTransform       (transform);
     ip2->setPen( Pen(Color::fromRgb8(127, 255, 255, 175), 3, Pen::Solid, Pen::ButtCap, Pen::MiterJoin) );
-    //ip2->drawPath(path, transform, false);
+    ip2->drawPath(path, false);
 
     // Round-Hole caps
     ip2->setFont( Pt::Gfx::Font(FONT_SPEC_S) );

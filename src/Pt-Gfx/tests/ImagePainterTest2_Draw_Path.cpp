@@ -270,98 +270,89 @@ static void testDrawPathClipping(const char* title, Image& image, Painter& paint
 
     Pt::int32_t row = 0, col = 0;
 
-    TransformStack tstack;
-    Transform      transform;
-    Path           path;
-
-    std::vector<PointF> cregPointsF;
-    std::vector<PointF> subjPointsF;
-    std::vector<PointF> clipPointsF;
+    std::vector<PointF> points;
+    Transform           transform;
+    Path                clipPath;
+    Path                drawPath;
 
     // Create a new clip-region path
-    path.clear    ();
-    path.beginPath();
-    path.moveTo   (  0, 50); // CCW
-    path.lineTo   ( 50, 80);
-    path.lineTo   (100, 50);
-    path.lineTo   ( 30,  0);
-    path.endPath  ();
+    clipPath.clear    ();
+    clipPath.beginPath();
+    clipPath.moveTo   (  0, 50); // CCW
+    clipPath.lineTo   ( 50, 80);
+    clipPath.lineTo   (100, 50);
+    clipPath.lineTo   ( 30,  0);
+    clipPath.endPath  ();
 
-    /*
-    cregPointsF.clear();
-    path.generatePoints(cregPointsF, 1);
-    tstack.push(transform);
-    transform.scale(2, 2);
-    transform.translate(50, 70);
-    transform.transformPoints(cregPointsF.data(), cregPointsF.size());
-    transform = tstack.pop();
-    */
+    clipPath.setTransform(transform);
+    clipPath.transform().scale(2, 2);
+    clipPath.transform().translate(50, 70);
 
     // Create a subject path
-    path.clear    ();
-    path.beginPath();
-    path.moveTo   (  0,  50   ); // CCW
-    path.arcTo    (100, 50, 50);
-    path.arcTo    (  0, 50, 50);
-    path.endPath  ();
+    drawPath.clear    ();
+    drawPath.beginPath();
+    drawPath.moveTo   (  0,  50   ); // CCW
+    drawPath.arcTo    (100, 50, 50);
+    drawPath.arcTo    (  0, 50, 50);
+    drawPath.endPath  ();
 
-    /*
-    subjPointsF.clear();
-    path.generatePoints(subjPointsF, 3);
-    tstack.push(transform);
-    transform.scale(2, 2);
-    transform.transformPoints(subjPointsF.data(), subjPointsF.size());
-    transform = tstack.pop();
-    */
+    drawPath.setTransform(transform);
+    drawPath.transform().scale(2, 2);
 
     // Draw the clip-region and subject polygons
-    tstack.push(transform);
-    transform.translate(10 + 250 * col, 10 + 250 * row);
-    transform.transformPoints(cregPointsF.data(), cregPointsF.size());
-    transform.transformPoints(subjPointsF.data(), subjPointsF.size());
-    transform = tstack.pop();
+    transform.translate(10 + 300 * col, 10 + 300 * row, true);
+
+    drawPath.generatePoints(points);
+    transform.transformPoints(points.data(), points.size());
     ip2->setBrush(brush1);
-    ip2->fillPolygon(subjPointsF.data(), subjPointsF.size());
+    ip2->fillPolygon(points.data(), points.size());
+    points.clear();
+
+    clipPath.generatePoints(points);
+    transform.transformPoints(points.data(), points.size());
     ip2->setBrush(brush2);
-    ip2->fillPolygon(cregPointsF.data(), cregPointsF.size());
+    ip2->fillPolygon(points.data(), points.size());
+    points.clear();
+
     ++col;
 
     // Perform clipping and draw the resulting polygon
-    Path::clipPolygon(clipPointsF, subjPointsF, cregPointsF, Path::Intersection);
-    tstack.push(transform);
-    transform.translate(10 + 250 * col, 10 + 250 * row);
-    transform.transformPoints(clipPointsF.data(), clipPointsF.size());
-    transform = tstack.pop();
+    drawPath.setClipPath(clipPath);
+    drawPath.setClipMode(Path::Intersection);
+    drawPath.generatePoints(points);
+    transform.translate(10 + 250 * col, 10 + 250 * row, true);
+    transform.transformPoints(points.data(), points.size());
     ip2->setBrush(brush1);
-    ip2->fillPolygon(clipPointsF.data(), clipPointsF.size());
+    ip2->fillPolygon(points.data(), points.size());
+    points.clear();
     ++col;
 
-    Path::clipPolygon(clipPointsF, subjPointsF, cregPointsF, Path::Union);
-    tstack.push(transform);
-    transform.translate(10 + 250 * col, 10 + 250 * row);
-    transform.transformPoints(clipPointsF.data(), clipPointsF.size());
-    transform = tstack.pop();
+    drawPath.setClipMode(Path::Union);
+    drawPath.generatePoints(points);
+    transform.translate(10 + 250 * col, 10 + 250 * row, true);
+    transform.transformPoints(points.data(), points.size());
     ip2->setBrush(brush1);
-    ip2->fillPolygon(clipPointsF.data(), clipPointsF.size());
+    ip2->fillPolygon(points.data(), points.size());
+    points.clear();
     ++row;
     col = 1;
 
-    Path::clipPolygon(clipPointsF, subjPointsF, cregPointsF, Path::Difference);
-    tstack.push(transform);
-    transform.translate(10 + 250 * col, 10 + 250 * row);
-    transform.transformPoints(clipPointsF.data(), clipPointsF.size());
-    transform = tstack.pop();
+    drawPath.setClipMode(Path::Difference);
+    drawPath.generatePoints(points);
+    transform.translate(10 + 250 * col, 10 + 250 * row, true);
+    transform.transformPoints(points.data(), points.size());
     ip2->setBrush(brush1);
-    ip2->fillPolygon(clipPointsF.data(), clipPointsF.size());
+    ip2->fillPolygon(points.data(), points.size());
+    points.clear();
     ++col;
 
-    Path::clipPolygon(clipPointsF, subjPointsF, cregPointsF, Path::Xor);
-    tstack.push(transform);
-    transform.translate(10 + 250 * col, 10 + 250 * row);
-    transform.transformPoints(clipPointsF.data(), clipPointsF.size());
-    transform = tstack.pop();
+    drawPath.setClipMode(Path::Xor);
+    drawPath.generatePoints(points);
+    transform.translate(10 + 250 * col, 10 + 250 * row, true);
+    transform.transformPoints(points.data(), points.size());
     ip2->setBrush(brush1);
-    ip2->fillPolygon(clipPointsF.data(), clipPointsF.size());
+    ip2->fillPolygon(points.data(), points.size());
+    points.clear();
 
     // Testing Hmi window buttons' icons
     col = 0;
