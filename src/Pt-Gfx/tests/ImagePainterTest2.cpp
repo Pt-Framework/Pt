@@ -109,9 +109,9 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS 0
 #define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  0
 
-#define TEST_DRAW_PATH                          1 // (including thick and filled)
+#define TEST_DRAW_PATH                          0 // (including thick and filled)
 #define TEST_DRAW_PATH_CLIPPING                 1 // (including path-based text)
-#define TEST_DRAW_EXTRA                         1 // (including path-based n-bezier)
+#define TEST_DRAW_EXTRA                         0 // (including path-based n-bezier)
 
 #define TEST_IMAGE_OPERATION                    0
 
