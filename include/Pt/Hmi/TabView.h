@@ -117,6 +117,8 @@ class PT_HMI_API TabBar : public Control
     protected:
         virtual bool onMouseEvent(const MouseEvent& ev);
 
+        virtual void onTouchEvent(const TouchEvent& ev);
+
     private:
         Pt::Signal<std::size_t> _currentChanged;
         std::vector<TabItem>    _tabs;

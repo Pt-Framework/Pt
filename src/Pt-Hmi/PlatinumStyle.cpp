@@ -1192,7 +1192,7 @@ Gfx::SizeF PlatinumTabViewRenderer::onMeasureTabs(const std::vector<TabItem>& ta
     Spacing spacing(font.size() / 2, font.size() / 2 );
 
     Gfx::SizeF s;
-    s.setHeight(font.size() * 2);
+    s.setHeight(font.size() * 2.4);
 
     std::vector<TabItem>::const_iterator it;
     for(it = tabs.begin(); it != tabs.end(); ++it)

@@ -196,12 +196,14 @@ bool TabBar::onMouseEvent(const MouseEvent& ev)
         {
             if(n != _current)
             {
-                _tabs.at(_current).setPressed(false);
+                if(_current < _tabs.size() )
+                    _tabs.at(_current).setPressed(false);
+                
                 t.setPressed(true);
 
+                _current = n;
                 invalidate();
 
-                _current = n;
                 _currentChanged.send(_current);
             }
 
@@ -210,6 +212,39 @@ bool TabBar::onMouseEvent(const MouseEvent& ev)
     }
 
     return true;
+}
+
+
+void TabBar::onTouchEvent(const TouchEvent& ev)
+{
+    Base::onTouchEvent(ev);
+
+    if( ! ev.isPress() )
+        return;
+
+    std::vector<TabItem>::iterator it;
+    for(std::size_t n = 0; n != _tabs.size(); ++n)
+    {
+        TabItem& t = _tabs[n];
+        
+        if( t.geometry().contains( ev.position() ) )
+        {
+            if(n != _current)
+            {
+                if(_current < _tabs.size() )
+                    _tabs.at(_current).setPressed(false);
+                
+                t.setPressed(true);
+
+                _current = n;
+                invalidate();
+
+                _currentChanged.send(_current);
+            }
+
+            break;
+        }
+    }
 }
 
 //////////////////////////////////////////////////////////////////////////
