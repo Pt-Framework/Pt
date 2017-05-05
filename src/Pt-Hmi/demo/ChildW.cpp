@@ -184,7 +184,7 @@ ChildW::ChildW(const std::string& title)
     _childWindow2.setContent(&_childView);
     add( _childWindow2 );
 
-    //_childWindow2.show(true); // Child A/B
+    _childWindow2.show(true); // Child A/B
 }
 
 

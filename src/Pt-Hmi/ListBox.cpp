@@ -43,6 +43,9 @@ ListBoxItem::ListBoxItem()
 , _isSelected(false)
 {
     setPadding(8);
+
+    // onMeasure can be called before onInvalidate
+    _font = Gfx::Font(font(), fontSize(), fontStyle());
 }
 
 

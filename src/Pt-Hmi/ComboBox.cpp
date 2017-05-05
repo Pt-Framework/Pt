@@ -139,6 +139,8 @@ void ComboBox::showPopup()
 
     _popup.show();
     _popup.activate();
+
+    std::clog << "POPUP HEIGHT: " << popupSize.height() << std::endl;
 }
 
 
