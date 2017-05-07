@@ -51,6 +51,14 @@ namespace Gfx {
 
 
 // ======================================================================================
+// ===== Default Font (Built-in) ========================================================
+// ======================================================================================
+
+#define BUILT_IN_FONT_FACE_NAME "DejaVu Sans"
+#define BUILT_IN_FONT_FACE_ID   ( (FTC_FaceID) -1 )
+
+
+// ======================================================================================
 // ===== Public Member Functions ========================================================
 // ======================================================================================
 
@@ -371,7 +379,7 @@ void FreeType2::setFontDir(const System::Path& path)
 const std::vector<std::string> FreeType2::fontNames()
 {
     std::vector<std::string> names;
-    names.push_back("DejaVu Sans");
+    names.push_back(BUILT_IN_FONT_FACE_NAME);
 
     System::MutexLock lock(FreeType2::_mutex);
 
@@ -388,7 +396,7 @@ void FreeType2::setDefaultFont( const std::string& font )
 {
     System::MutexLock lock(FreeType2::_mutex);
 
-    FreeType2::_defaultFont = font.empty() ? "DejaVu Sans" : font;
+    FreeType2::_defaultFont = font.empty() ? BUILT_IN_FONT_FACE_NAME : font;
 }
 
 const std::string FreeType2::defaultFont()
@@ -405,7 +413,7 @@ FTC_FaceID FreeType2::findFaceId(const Font& font)
     System::MutexLock lock(FreeType2::_mutex);
 
     Fonts::iterator it = FreeType2::_fonts.find(font);
-    if(it == FreeType2::_fonts.end()) return 0;
+    if(it == FreeType2::_fonts.end()) return BUILT_IN_FONT_FACE_ID;
 
     return reinterpret_cast<FTC_FaceID>(&it->second);
 }
@@ -586,7 +594,7 @@ FT_Error FreeType2::onFontRequest(FTC_FaceID faceId, FT_Face* face)
     // fontRequest() function, which is called by the FTC_Manager instance, which
     // in turn is being used by other functions that already locked the mutex
 
-    if(faceId == 0)
+    if(faceId == BUILT_IN_FONT_FACE_ID)
         return FT_New_Memory_Face(FreeType2::_ft, DejaVuSans, DejaVuSansSize, 0, face);
 
     // Check if path is still valid

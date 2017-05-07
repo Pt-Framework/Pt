@@ -56,7 +56,7 @@ DrawText2::DrawText2()
     if(FreeType2::defaultFont().empty()) FreeType2::setDefaultFont("");
 
     // Set the initial font to the default font with size 12
-    setFont(Font("", 12));
+    setFont( Font("", 12) );
 }
 
 DrawText2::~DrawText2()
