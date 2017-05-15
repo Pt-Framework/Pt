@@ -161,6 +161,13 @@ OutIterT formatFloat(OutIterT it, T d, const FormatT& fmt, int precision);
 template <typename OutIterT, typename T>
 OutIterT formatFloat(OutIterT it, T d);
 
+/** @brief Formats a floating point value in default format.
+
+    @ingroup Utilities
+*/
+template <typename OutIterT, typename T>
+OutIterT formatFloat(OutIterT it, T d, int precision);
+
 
 /** @brief Parses an integer value in a given format.
 
@@ -224,8 +231,6 @@ T parseInt(InIter it, InIter end)
 
     return n;
 }
-    
-
 
 
 /** @brief Parses a floating point value in a given format.
@@ -801,6 +806,14 @@ template <typename OutIterT, typename T>
 inline OutIterT formatFloat(OutIterT it, T d)
 {
     const int precision = std::numeric_limits<T>::digits10;
+    FloatFormat<char> fmt;
+    return formatFloat(it, d, fmt, precision);
+}
+
+
+template <typename OutIterT, typename T>
+OutIterT formatFloat(OutIterT it, T d, int precision)
+{
     FloatFormat<char> fmt;
     return formatFloat(it, d, fmt, precision);
 }
