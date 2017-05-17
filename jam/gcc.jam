@@ -150,7 +150,11 @@ rule Gcc-CheckCc
         CCFLAGS += -fPIC ;
     }
 
-    if $(WITH_DEBUG)
+    if $(WITH_DEBUG) && $(WITH_OPTIM)
+    {
+        CCFLAGS += -DNDEBUG -g ;
+    }
+    else if $(WITH_DEBUG)
     {
         CCFLAGS += -DDEBUG -g ;
     }
@@ -205,7 +209,11 @@ rule Gcc-CheckC++
         C++FLAGS += -fPIC ;
     }
 
-    if $(WITH_DEBUG)
+    if $(WITH_DEBUG) && $(WITH_OPTIM)
+    {
+        C++FLAGS += -DNDEBUG -g ;
+    }
+    else if $(WITH_DEBUG)
     {
         C++FLAGS += -DDEBUG -g ;
     }

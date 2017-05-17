@@ -68,6 +68,8 @@ if configure in $(ARGV)
     ConfigureTarget ;
     ConfigureToolset ;
 
+    # TODO: set NDEBUG here for all toolsets
+
     # Project specific configuration
     ConfigureLog "\n[ Jamconfigure ]" ;
     include Jamconfigure ;
