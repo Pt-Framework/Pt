@@ -78,8 +78,12 @@ void Control::onPaintEvent(const PaintEvent& ev)
 {
     Widget::onPaintEvent(ev);
 
+    Window* w = this->window();
+    if( ! w )
+        return;
+
     Gfx::PointF winpos = toWindow( Gfx::PointF(0,0) );
-    PaintSurface& windowSurface = this->window()->surface();
+    PaintSurface& windowSurface = w->surface();
 
     Gfx::RectF paintRect(winpos, size());
     PaintRegion region(windowSurface, paintRect);

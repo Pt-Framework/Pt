@@ -459,8 +459,7 @@ MenuShell* MenuBar::onFindMenu(const Gfx::PointF& screenPos)
     if( ! isVisible() )
         return 0;
 
-    Gfx::PointF pos = this->window()->fromScreen(screenPos);
-    pos = this->fromWindow(pos);
+    Gfx::PointF pos = this->fromScreen(screenPos);
 
     Gfx::RectF rect( Gfx::PointF(0,0), size() );
     if( rect.contains( pos ) )

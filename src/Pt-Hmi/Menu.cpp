@@ -175,8 +175,7 @@ void Menu::onMenuTriggered(MenuItem& item)
     if( ! menu->isVisible() )
     {
         Gfx::PointF topRight(item.size().width(), 0);
-        Gfx::PointF wpos = item.toWindow(topRight);
-        Gfx::PointF menuPos = item.window()->toScreen(wpos);
+        Gfx::PointF menuPos = item.toScreen(topRight);
 
         menu->show(menuPos);
     }
