@@ -201,6 +201,9 @@ void Widget::setWindow(Window* window)
 
     // this serves as the initial invalidate
     invalidate();
+
+    // previous relayouts did not work without parent window
+    relayout();
 }
 
 
