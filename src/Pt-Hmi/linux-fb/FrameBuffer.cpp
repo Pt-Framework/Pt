@@ -174,9 +174,6 @@ size_t FrameBuffer::height() const
 
 void FrameBuffer::output( const Pt::uint8_t* frame, const Gfx::Rect& areaIn )
 {
-    Pt::System::Clock clock;
-    clock.start();
-
     switch( _rotation)
     {
       case Rotation0Degree:
