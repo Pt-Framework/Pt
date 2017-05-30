@@ -240,21 +240,24 @@ FontMetrics FreeType::fontMetrics(const String& text,
 
     for( String::const_iterator it = text.begin(); it != text.end(); ++it )
     {
-        FTC_Node  node;
-        FT_UInt glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, it->value());
-
+        FT_UInt glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId,
+                                                   charMapIndex, it->value());
         if( ! glyph_index )
             continue;
 
-        if( FT_HAS_KERNING( face ) && previous )
-        {
-            FT_Get_Kerning( face, previous, glyph_index, FT_KERNING_DEFAULT, &delta );
-            pen_x += delta.x; // << 16;
-            pen_y -= delta.y; // << 16;
-        }
-
+        FTC_Node node;
         if( FTC_ImageCache_Lookup(_imageCache, imageType, glyph_index, &glyph, &node) )
             continue;
+
+        if( FT_HAS_KERNING(face) && previous )
+        {
+            FT_Get_Kerning( face, previous, glyph_index, FT_KERNING_DEFAULT, &delta );
+            if(delta.x < glyph->advance.x && delta.y < glyph->advance.y) 
+            {
+              pen_x += delta.x;
+              pen_y -= delta.y;
+            }
+        }
 
         FT_Glyph_Get_CBox(glyph, FT_GLYPH_BBOX_PIXELS, &gbbox);
 
@@ -269,6 +272,10 @@ FontMetrics FreeType::fontMetrics(const String& text,
 
         previous = glyph_index;
     }
+
+    // text width with left bearing
+    if( ! text.empty() )
+      tbbox.xMin = 0;
 
     return FontMetrics( size->metrics.ascender >> 6,
                        (-size->metrics.descender) >> 6,
@@ -319,7 +326,6 @@ void FreeType::draw(Image& image, const Color& color, Pt::ssize_t fontAngle,
 
     glyphPos.x = (int) pos.x() << 16;
     glyphPos.y = (int) pos.y() << 16;
-
 
     for( String::const_iterator it = text.begin(); it != text.end(); ++it )
     {
