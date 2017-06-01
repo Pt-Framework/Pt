@@ -27,744 +27,118 @@
   02110-1301 USA
 */
 
-#include <Pt/SourceInfo.h>
-
 #include <Pt/Gfx/Path.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/Gfx/Math.h>
-
-#include "DrawText2.h"
-
-#include "clipper_aj/clipper.hpp"
+#include <Pt/SourceInfo.h>
 
 
 namespace Pt {
 namespace Gfx {
 
-
-// ======================================================================================
-// ===== Internal Helper Functions - Generator (Drawing) Functions ======================
-// ======================================================================================
-
-// Based on: How do I implement a Bézier curve in C++?
-//           http://stackoverflow.com/questions/785097/how-do-i-implement-a-bézier-curve-in-c
-//           Answer by iforce2d, 2014 (permalink: http://stackoverflow.com/a/21642962)
-static inline void getGenericNBezierPoint(double& x, double& y, const std::vector<double>& points, double t)
-{
-    std::vector<double> tmp = points;
-
-    size_t i = points.size() / 2 - 1;
-
-    while(i > 0) {
-        for(size_t k = 0; k < i; ++k) {
-            const size_t cidx =  k      * 2;
-            const size_t nidx = (k + 1) * 2;
-            tmp[cidx + 0] = tmp[cidx + 0] + t * ( tmp[nidx + 0] - tmp[cidx + 0] ); // X
-            tmp[cidx + 1] = tmp[cidx + 1] + t * ( tmp[nidx + 1] - tmp[cidx + 1] ); // Y
-        }
-        --i;
-    }
-
-    x = tmp[0];
-    y = tmp[1];
-}
-
-static inline void generateGenericNBezierPoints(std::vector<PointF>& dst, double x1, double y1, const std::vector<double>& points, double smoothness)
-{
-    // Add the start coordinate to the point
-    std::vector<double> pts;
-    pts.reserve(points.size() + 2);
-
-    pts.push_back(x1);
-    pts.push_back(y1);
-
-    pts.insert(pts.end(), points.begin(), points.end());
-
-    // Calculate the approximate length of the curve
-    double clen = 0.0;
-    for(size_t i = 0; i < (points.size() / 2 - 1); ++i) {
-        const size_t cidx =  i      * 2;
-        const size_t nidx = (i + 1) * 2;
-        const double x1   = pts[cidx + 0];
-        const double y1   = pts[cidx + 1];
-        const double x2   = pts[nidx + 0];
-        const double y2   = pts[nidx + 1];
-        const double dx   = x2 - x1;
-        const double dy   = y2 - y1;
-        clen += ::sqrt(dx * dx + dy * dy);
-    }
-
-    // Determine the number of segments
-    const Pt::int32_t nSegs = Gfx::Math::zrint(clen * abs(smoothness) / 20) + (pts.size() / 2 + 1 + 1);
-
-    // Calculate the inverse multiplication factor
-    const double nSegs1i = 1.0 / (nSegs - 1);
-
-    // Generate the points
-    for(Pt::int32_t i = 0; i < nSegs; ++i) {
-        // Calculate the coordinates
-        const double t  = i * nSegs1i;
-              double x;
-              double y;
-        getGenericNBezierPoint(x, y, pts, t);
-        // Store the coordinate as needed
-        if(i || dst.empty()) dst.push_back( PointF(x, y) );
-    }
-}
-
-static inline void generateCubicBezierPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double smoothness)
-{
-    // Calculate the approximate length of the curve
-    const double dx43 = x4 - x3;
-    const double dy43 = y4 - y3;
-    const double dx32 = x3 - x2;
-    const double dy32 = y3 - y2;
-    const double dx12 = x1 - x2;
-    const double dy12 = y1 - y2;
-    const double l43  = ::sqrt(dx43 * dx43 + dy43 * dy43);
-    const double l32  = ::sqrt(dx32 * dx32 + dy32 * dy32);
-    const double l12  = ::sqrt(dx12 * dx12 + dy12 * dy12);
-    const double lb   = l43 + l32 + l12;
-
-    // Determine the number of segments
-    const Pt::int32_t nSegs = Gfx::Math::zrint(lb * abs(smoothness) / 20) + 4 + 1;
-
-    // Calculate the inverse multiplication factor
-    const double nSegs1i = 1.0 / (nSegs - 1);
-
-    // Generate the points
-    // PB = (1 - t) * (1 - t) * (1 - t) * P1 + 3 * t * (1 - t) * (1 - t) * P2 + 3 * t * t * (1 - t) * P3 + t * t * t * P4
-    //      ---------------------------        -------------------------        -------------------        ---------
-    //      a                                  b                                c                          d
-    for(Pt::int32_t i = 0; i < nSegs; ++i) {
-        // Calculate the coordinates
-        const double t  = i * nSegs1i;
-        const double it = 1.0 - t;
-        const double a  = it * it * it;
-        const double b  = 3.0 * t * it * it;
-        const double c  = 3.0 * t * t * it;
-        const double d  = t * t * t;
-        const double x  = a * x1 + b * x2 + c * x3 + d * x4;
-        const double y  = a * y1 + b * y2 + c * y3 + d * y4;
-        // Store the coordinate as needed
-        if(i || dst.empty()) dst.push_back( PointF(x, y) );
-    }
-}
-
-static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double x3, double y3, double smoothness)
-{
-    //lprintf("(%5.1f, %5.1f) (%5.1f, %5.1f) (%5.1f, %5.1f)\n", x1, y1, x2, y2, x3, y3);
-    //lprintf("(%5.1f, %5.1f) (%5.1f, %5.1f)\n", curX, curY, ins.p[0], ins.p[1]);
-
-    // Check if the points actually specify a straight line
-    const double dx32 = x3 - x2;
-    const double dy32 = y3 - y2;
-    const double dx12 = x1 - x2;
-    const double dy12 = y1 - y2;
-
-    if( !(dx12 * dy32 - dy12 * dx32) ) { // Curvature
-        if(dst.empty()) dst.push_back( PointF(x1, y1) );
-        dst.push_back( PointF(x3, y3) );
-        return;
-    }
-
-    // Calculate the approximate length of the curve
-    const double l32 = ::sqrt(dx32 * dx32 + dy32 * dy32);
-    const double l12 = ::sqrt(dx12 * dx12 + dy12 * dy12);
-    const double lb  = l32 + l12;
-
-    // Determine the number of segments
-    const Pt::int32_t nSegs = Gfx::Math::zrint(lb * abs(smoothness) / 20) + 3 + 1;
-
-    // Calculate the inverse multiplication factor
-    const double nSegs1i = 1.0 / (nSegs - 1);
-
-    // Generate the points
-    // PB = (1 - t) * (1 - t) * P1 + 2 * t * (1 - t) * P2 + t * t * P3
-    //      -----------------        ---------------        -----
-    //      a                        b                      c
-    for(Pt::int32_t i = 0; i < nSegs; ++i) {
-        // Calculate the coordinates
-        const double t  = i * nSegs1i;
-        const double it = 1.0 - t;
-        const double a  = it * it;
-        const double b  = 2.0 * t * it;
-        const double c  = t * t;
-        const double x  = a * x1 + b * x2 + c * x3;
-        const double y  = a * y1 + b * y2 + c * y3;
-        // Store the coordinate as needed
-        if(i || dst.empty()) dst.push_back( PointF(x, y) );
-    }
-}
-
-
-// ======================================================================================
-// ===== Path::PathData Implementation ==================================================
-// ======================================================================================
-
-struct Path::PathData {
-    // Instruction type
-    enum InsType {
-        IT_Begin, IT_End,
-        IT_MoveTo, IT_LineTo, IT_QuadBezierTo, IT_CubicBezierTo, IT_GenNBezierTo,
-    };
-
-    // Instruction structure
-    struct Instruction {
-        InsType             type;
-        std::vector<double> pxy;
-
-        inline Instruction(InsType type_)
-        : type(type_)
-        {}
-
-        inline Instruction(InsType type_, double x0, double y0)
-        : type(type_), pxy(2)
-        { pxy[0] = x0; pxy[1] = y0; }
-
-        inline Instruction(InsType type_, double x0, double y0, double x1, double y1)
-        : type(type_), pxy(4)
-        { pxy[0] = x0; pxy[1] = y0; pxy[2] = x1; pxy[3] = y1; }
-
-        inline Instruction(InsType type_, double x0, double y0, double x1, double y1, double x2, double y2)
-        : type(type_), pxy(6)
-        { pxy[0] = x0; pxy[1] = y0; pxy[2] = x1; pxy[3] = y1; pxy[4] = x2; pxy[5] = y2; }
-
-        inline Instruction(InsType type_, const std::vector<double>& pxy_)
-        : type(type_), pxy(pxy_)
-        {}
-    };
-
-    typedef std::vector<Instruction> Instructions;
-
-    // Data
-    double       curX, curY;
-    Instructions inss;
-
-    // Member functions
-    inline PathData()
-    : curX(0.0), curY(0.0)
-    {}
-
-    inline void clear()
-    {
-        curX = 0.0;
-        curY = 0.0;
-        inss.clear();
-    }
-
-    inline bool empty() const
-    { return inss.empty(); }
-
-    inline bool lastInstructionMatch(InsType type) const
-    { return inss.back().type == type; }
-
-    inline void add(InsType type)
-    { inss.push_back( Instruction(type) ); }
-
-    inline void add(InsType type, double x0, double y0)
-    { inss.push_back( Instruction(type, x0, y0) ); }
-
-    inline void add(InsType type, double x0, double y0, double x1, double y1)
-    { inss.push_back( Instruction(type, x0, y0, x1, y1) ); }
-
-    inline void add(InsType type, double x0, double y0, double x1, double y1, double x2, double y2)
-    { inss.push_back( Instruction(type, x0, y0, x1, y1, x2, y2 ) ); }
-
-    inline void add(InsType type, const std::vector<double>& xy)
-    { inss.push_back( Instruction(type, xy) ); }
-};
-
-
-// ======================================================================================
-// ===== Public Member Functions ========================================================
-// ======================================================================================
-
 Path::Path()
-: _pathData( new PathData() )
-, _clipPath( new Path(true) )
-{}
+: _curX(0)
+, _curY(0)
+{
+}
 
-Path::Path(const Path& p)
-: _pathData( 0 )
-, _clipPath( new Path(true) )
-{ this->operator=(p); }
 
-Path::Path(bool forClipPath)
-: _pathData( 0 )
-, _clipPath( 0 )
-{}
 
 Path::~Path()
-{ delete _clipPath; }
+{ 
+
+}
+
 
 const Path& Path::operator=(const Path& p)
 {
-    _pathData  =  p._pathData;
-    _transform =  p._transform;
-
-    if(_clipPath) {
-       *_clipPath  = *p._clipPath;
-        _clipMode  =  p._clipMode;
-    }
 
     return *this;
 }
 
-bool Path::isNull() const
-{ return !_pathData || _pathData->empty(); }
+
+bool Path::isEmpty() const
+{
+   return _elements.empty();
+}
+
 
 void Path::clear()
 {
-    // COW
-    if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData( new PathData() );
-        *pathData = *_pathData;
-        _pathData = pathData;
-    }
-
-    // Clear the path data
-    _pathData->clear();
+  return _elements.clear();    
 }
 
-// --- Path management ---
 
-void Path::beginPath()
+void Path::addPath(const Path& p)
 {
-    // Check if this function call is valid in the current context
-    if( !_pathData->empty() && !_pathData->lastInstructionMatch(PathData::IT_End) )
-        throw PathInvalidContext(PT_SOURCEINFO_STR);
+  closeSubpath();
 
-    // COW
-    if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData( new PathData() );
-        *pathData = *_pathData;
-        _pathData = pathData;
-    }
-
-    // Store the instruction
-    _pathData->add(PathData::IT_Begin);
+  insertPath(p);
 }
 
-void Path::endPath()
+
+void Path::insertPath(const Path& p)
 {
-    // Check if this function call is valid in the current context
-    if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_Begin) || _pathData->lastInstructionMatch(PathData::IT_End) )
-        throw PathInvalidContext(PT_SOURCEINFO_STR);
+  ElementVector::const_iterator it = p._elements.begin();
 
-    // COW
-    if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData( new PathData() );
-        *pathData = *_pathData;
-        _pathData = pathData;
-    }
-
-    // Store the instruction
-    _pathData->add(PathData::IT_End);
+  for( ; it != p._elements.end(); ++it)
+    _elements.push_back( *it);
 }
 
-// --- Absolute coordinate ---
 
-void Path::moveTo(double x, double y)
+void Path::closeSubpath()
 {
-    // Check if this function call is valid in the current context
-    if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) || _pathData->lastInstructionMatch(PathData::IT_MoveTo) )
-        throw PathInvalidContext(PT_SOURCEINFO_STR);
-
-    // COW
-    if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData( new PathData() );
-        *pathData = *_pathData;
-        _pathData = pathData;
-    }
-
-    // Store the instruction
-    _pathData->add(PathData::IT_MoveTo, x, y);
-
-    // Update the current coordinate
-    _pathData->curX = x;
-    _pathData->curY = y;
+  Element elem(Element::IT_Close);
+  _elements.push_back(elem);
 }
 
-void Path::lineTo(double x, double y)
+
+RectF Path::boundingRect() const
+{//TODO: 
+  RectF result;
+  assert(false);
+  return result;
+}
+
+
+const PointF& Path::currentPosition() const
 {
-    // Check if this function call is valid in the current context
-    if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
-        throw PathInvalidContext(PT_SOURCEINFO_STR);
-
-    // COW
-    if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData( new PathData() );
-        *pathData = *_pathData;
-        _pathData = pathData;
-    }
-
-    // Store the instruction
-    _pathData->add(PathData::IT_LineTo, x, y);
-
-    // Update the current coordinate
-    _pathData->curX = x;
-    _pathData->curY = y;
+  return PointF(_curX,_curY);
 }
 
-void Path::arcTo(double x, double y, double r)
+
+void Path::moveTo(const PointF& p)
 {
-    // Check if this function call is valid in the current context
-    if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
-        throw PathInvalidContext(PT_SOURCEINFO_STR);
+    Element elem(Element::IT_MoveTo, p.x() , p.y());
 
-    // COW
-    if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData( new PathData() );
-        *pathData = *_pathData;
-        _pathData = pathData;
-    }
+    _elements.push_back(elem);
 
-    // Decompose and store the instruction
-    decomposeAndStore_arcTo(_pathData->curX, _pathData->curY, x, y, r);
-
-    // Update the current coordinate
-    _pathData->curX = x;
-    _pathData->curY = y;
+    _curX = p.x();
+    _curY = p.y();
 }
 
-void Path::quadraticBezierTo(double cx, double cy, double x, double y)
+
+void Path::lineTo(const PointF& p)
 {
-    // Check if this function call is valid in the current context
-    if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
-        throw PathInvalidContext(PT_SOURCEINFO_STR);
+    Element elem(Element::IT_LineTo, p.x() , p.y());
 
-    // COW
-    if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData( new PathData() );
-        *pathData = *_pathData;
-        _pathData = pathData;
-    }
+    _elements.push_back(elem);
 
-    // Store the instruction
-    _pathData->add(PathData::IT_QuadBezierTo, cx, cy, x, y);
-
-    // Update the current coordinate
-    _pathData->curX = x;
-    _pathData->curY = y;
+    _curX = p.x();
+    _curY = p.y();
 }
 
-void Path::cubicBezierTo(double cx1, double cy1, double cx2, double cy2, double x, double y)
+
+void Path::arcTo(const PointF& p, double r)
 {
-    // Check if this function call is valid in the current context
-    if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
-        throw PathInvalidContext(PT_SOURCEINFO_STR);
+    decomposeArcTo(_curX, _curY, p.x(), p.y(), r);
 
-    // COW
-    if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData( new PathData() );
-        *pathData = *_pathData;
-        _pathData = pathData;
-    }
-
-    // Store the instruction
-    _pathData->add(PathData::IT_CubicBezierTo, cx1, cy1, cx2, cy2, x, y);
-
-    // Update the current coordinate
-    _pathData->curX = x;
-    _pathData->curY = y;
-}
-
-void Path::genericNBezierTo(Pt::int32_t controlPointCount, const double* cxy, double x, double y)
-{
-    // Check if this function call is valid in the current context
-    if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
-        throw PathInvalidContext(PT_SOURCEINFO_STR);
-
-    // Points buffer
-    std::vector<double> points;
-
-    // Extract and store the control coordinates
-    if(controlPointCount < 3) throw PathError("A generic N-bezier must have at least 3 control points");
-
-    for(Pt::int32_t i = 0; i < controlPointCount * 2; ++i) {
-        points.push_back(cxy[i]);
-    }
-
-    // Store the end coordinate
-    points.push_back(x);
-    points.push_back(y);
-
-    // COW
-    if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData( new PathData() );
-        *pathData = *_pathData;
-        _pathData = pathData;
-    }
-
-    // Store the instruction
-    _pathData->add(PathData::IT_GenNBezierTo, points);
-
-    // Update the current coordinate
-    _pathData->curX = x;
-    _pathData->curY = y;
-}
-
-// --- Relative coordinate ---
-
-void Path::relMoveTo(double x, double y)
-{
-    // Check if this function call is valid in the current context
-    if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) || _pathData->lastInstructionMatch(PathData::IT_MoveTo) )
-        throw PathInvalidContext(PT_SOURCEINFO_STR);
-
-    // COW
-    if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData( new PathData() );
-        *pathData = *_pathData;
-        _pathData = pathData;
-    }
-
-    // Store the instruction
-    _pathData->add(PathData::IT_MoveTo, _pathData->curX + x, _pathData->curY + y);
-
-    // Update the current coordinate
-    _pathData->curX += x;
-    _pathData->curY += y;
-}
-
-void Path::relLineTo(double x, double y)
-{
-    // Check if this function call is valid in the current context
-    if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
-        throw PathInvalidContext(PT_SOURCEINFO_STR);
-
-    // COW
-    if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData( new PathData() );
-        *pathData = *_pathData;
-        _pathData = pathData;
-    }
-
-    // Store the instruction
-    _pathData->add(PathData::IT_LineTo, _pathData->curX + x, _pathData->curY + y);
-
-    // Update the current coordinate
-    _pathData->curX += x;
-    _pathData->curY += y;
-}
-
-void Path::relArcTo(double x, double y, double r)
-{
-    // Check if this function call is valid in the current context
-    if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
-        throw PathInvalidContext(PT_SOURCEINFO_STR);
-
-    // COW
-    if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData( new PathData() );
-        *pathData = *_pathData;
-        _pathData = pathData;
-    }
-
-    // Decompose and store the instruction
-    decomposeAndStore_arcTo(_pathData->curX, _pathData->curY, _pathData->curX + x, _pathData->curY + y, r);
-
-    // Update the current coordinate
-    _pathData->curX += x;
-    _pathData->curY += y;
-}
-
-void Path::relQuadraticBezierTo(double cx, double cy, double x, double y)
-{
-    // Check if this function call is valid in the current context
-    if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
-        throw PathInvalidContext(PT_SOURCEINFO_STR);
-
-    // COW
-    if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData( new PathData() );
-        *pathData = *_pathData;
-        _pathData = pathData;
-    }
-
-    // Store the instruction
-    _pathData->add(PathData::IT_QuadBezierTo, _pathData->curX + cx, _pathData->curY + cy, _pathData->curX + x, _pathData->curY + y);
-
-    // Update the current coordinate
-    _pathData->curX += x;
-    _pathData->curY += y;
-}
-
-void Path::relCubicBezierTo(double cx1, double cy1, double cx2, double cy2, double x, double y)
-{
-    // Check if this function call is valid in the current context
-    if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
-        throw PathInvalidContext(PT_SOURCEINFO_STR);
-
-    // COW
-    if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData( new PathData() );
-        *pathData = *_pathData;
-        _pathData = pathData;
-    }
-
-    // Store the instruction
-    _pathData->add(PathData::IT_CubicBezierTo, _pathData->curX + cx1, _pathData->curY + cy1, _pathData->curX + cx2, _pathData->curY + cy2, _pathData->curX + x, _pathData->curY + y);
-
-    // Update the current coordinate
-    _pathData->curX += x;
-    _pathData->curY += y;
-}
-
-void Path::relGenericNBezierTo(Pt::int32_t controlPointCount, const double* cxy, double x, double y)
-{
-    // Check if this function call is valid in the current context
-    if( _pathData->empty() || _pathData->lastInstructionMatch(PathData::IT_End) )
-        throw PathInvalidContext(PT_SOURCEINFO_STR);
-
-    // Points buffer
-    std::vector<double> points;
-
-    // Extract and store the control coordinates
-    if(controlPointCount < 3) throw PathError("A generic N-bezier must have at least 3 control points");
-
-    for(Pt::int32_t i = 0; i < controlPointCount * 2; ++i) {
-        if(i % 2) points.push_back(cxy[i] + _pathData->curY); // Odd  -> Y
-        else      points.push_back(cxy[i] + _pathData->curX); // Even -> X
-    }
-
-    // Store the end coordinate
-    points.push_back(_pathData->curX + x);
-    points.push_back(_pathData->curY + y);
-
-    // COW
-    if(_pathData.refs() > 1) {
-        SmartPtr<PathData> pathData( new PathData() );
-        *pathData = *_pathData;
-        _pathData = pathData;
-    }
-
-    // Store the instruction
-    _pathData->add(PathData::IT_GenNBezierTo, points);
-
-    // Update the current coordinate
-    _pathData->curX += x;
-    _pathData->curY += y;
-}
-
-// --- Generate points ---
-
-void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
-{
-    // Generate points for the path
-    PathData pdPath;
-    getTransformedPathData(pdPath);
-
-    generatePoints_impl(dst, pdPath, smoothness);
-
-    // Exit here if the clip-path is null
-    if(_clipPath->isNull()) return;
-
-    // Generate points for the clip-path
-    _clipPath->getTransformedPathData(pdPath);
-
-    std::vector<PointF> crg;
-    generatePoints_impl(crg, pdPath, smoothness);
-
-    // Perform path clipping
-    clipPolygon(dst, dst, crg, _clipMode);
+    _curX = p.x();
+    _curY = p.y();
 }
 
 
-// ======================================================================================
-// ===== Static Public Member Functions =================================================
-// ======================================================================================
-
-void Path::clipPolygon(std::vector<PointF>& result, const std::vector<PointF>& subject, const std::vector<PointF>& clipRegion, ClipMode cm)
-{
-    // Working variables
-    ClipperLib::Clipper clipper;
-    ClipperLib::Path    cpath;
-    ClipperLib::Paths   cpresult;
-    size_t              startIndex;
-
-    // Separate and append the clipper polygons
-    startIndex = 0;
-    for(size_t i = 0; i <= clipRegion.size(); ++i) {
-        // Search for the end and/or separator points
-        if( i == clipRegion.size() || (clipRegion[i].x() > Painter::MaximumCoordinateF && clipRegion[i].y() > Painter::MaximumCoordinateF) ) {
-            // Calculate the number of points for this polygon
-            const size_t curPC = i - startIndex;
-            // Append the polygon to the clipper
-            cpath.resize(curPC);
-            for(size_t j = 0; j < curPC; ++j) {
-                cpath[j].X = Gfx::Math::zrint( clipRegion[startIndex + j].x() * Gfx::Math::VecResScaleUp );
-                cpath[j].Y = Gfx::Math::zrint( clipRegion[startIndex + j].y() * Gfx::Math::VecResScaleUp );
-            }
-            clipper.AddPath(cpath, ClipperLib::ptClip, true);
-            // Increment the start index
-            startIndex += curPC + 1;
-        }
-    }
-
-    // Separate and append the subject polygons
-    startIndex = 0;
-    for(size_t i = 0; i <= subject.size(); ++i) {
-        // Search for the end and/or separator points
-        if( i == subject.size() || (subject[i].x() > Painter::MaximumCoordinateF && subject[i].y() > Painter::MaximumCoordinateF) ) {
-            // Calculate the number of points for this polygon
-            const size_t curPC = i - startIndex;
-            // Append the polygon to the clipper
-            cpath.resize(curPC);
-            for(size_t j = 0; j < curPC; ++j) {
-                cpath[j].X = Gfx::Math::zrint( subject[startIndex + j].x() * Gfx::Math::VecResScaleUp );
-                cpath[j].Y = Gfx::Math::zrint( subject[startIndex + j].y() * Gfx::Math::VecResScaleUp );
-            }
-            clipper.AddPath(cpath, ClipperLib::ptSubject, cpath[0] == cpath.back());
-            // Increment the start index
-            startIndex += curPC + 1;
-        }
-    }
-
-    // Perform clipping
-    result.clear();
-
-    switch(cm) {
-        case Intersection:
-            clipper.Execute(ClipperLib::ctIntersection, cpresult, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
-            break;
-
-        case Union:
-            clipper.Execute(ClipperLib::ctUnion,        cpresult, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
-            break;
-
-        case Difference:
-            clipper.Execute(ClipperLib::ctDifference,   cpresult, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
-            break;
-
-        case Xor:
-            clipper.Execute(ClipperLib::ctXor,          cpresult, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
-            break;
-
-        default:
-            return;
-    }
-
-    // Combine back the result polygons
-    for(size_t i = 0; i < cpresult.size(); ++i) {
-        const ClipperLib::Path& curPath = cpresult[i];
-        if(!result.empty()) result.push_back(Painter::PolygonSeparatorPointF);
-        for(size_t j = 0; j < curPath.size(); ++j) {
-            result.push_back( PointF(
-                curPath[j].X * Gfx::Math::VecResScaleDn,
-                curPath[j].Y * Gfx::Math::VecResScaleDn
-            ) );
-        }
-    }
-}
-
-
-// ======================================================================================
-// ===== Private Member Functions =======================================================
-// ======================================================================================
-
-void Path::decomposeAndStore_arcTo(double x1, double y1, double x2, double y2, double r)
+void Path::decomposeArcTo(double x1, double y1, double x2, double y2, double r)
 {
     // Based on How to create circle with Bézier curves?
     //          http://stackoverflow.com/questions/1734745/how-to-create-circle-with-bézier-curves
@@ -812,7 +186,9 @@ void Path::decomposeAndStore_arcTo(double x1, double y1, double x2, double y2, d
     const double c1y2 = c1y1 + nyry * od;
     const double c1x3 = c1x4 - nyrx * od;
     const double c1y3 = c1y4 - nxry * od;
-    _pathData->add(PathData::IT_CubicBezierTo, c1x2, c1y2, c1x3, c1y3, c1x4, c1y4);
+    Element elem1(Element::IT_CubicBezierTo, c1x2, c1y2, c1x3, c1y3, c1x4, c1y4);
+
+    _elements.push_back(elem1);
 
     // Curve #2
     const double c2x1 = xm   + nxrx;
@@ -823,77 +199,113 @@ void Path::decomposeAndStore_arcTo(double x1, double y1, double x2, double y2, d
     const double c2y2 = c2y1 - nxry * od;
     const double c2x3 = c2x4 - nxrx * od;
     const double c2y3 = c2y4 + nyry * od;
-    _pathData->add(PathData::IT_CubicBezierTo, c2x2, c2y2, c2x3, c2y3, c2x4, c2y4);
+
+    Element elem2(Element::IT_CubicBezierTo, c2x2, c2y2, c2x3, c2y3, c2x4, c2y4);
+
+     _elements.push_back(elem2);
 }
 
-void Path::getTransformedPathData(PathData& dst) const
-{
-    dst = *_pathData;
-    if(_transform.isIdentity()) return;
 
-    for(size_t i = 0; i < dst.inss.size(); ++i) {
-        _transform.transformPoints(dst.inss[i].pxy.data(), dst.inss[i].pxy.size() / 2);
+void Path::quadraticBezierTo(const PointF &c, const PointF& to)
+{
+    Element elem(Element::IT_QuadBezierTo, c.x() , c.y(), to.x(), to.y());
+
+    _elements.push_back(elem);
+
+    _curX = to.x();
+    _curY = to.y();
+}
+
+
+void Path::cubicBezierTo(const PointF &c1, const PointF &c2, const PointF& to)
+{   
+    Element elem(Element::IT_CubicBezierTo, c1.x() , c1.y(), c2.x(), c2.y(), to.x(), to.y());
+
+    _elements.push_back(elem);
+
+    _curX = to.x();
+    _curY = to.y();
+}
+
+
+void Path::bezierTo(const PointF* cxy, size_t controlPointCount, const PointF& to)
+{    
+    std::vector<double> points;
+
+    for(size_t i = 0; i < controlPointCount; ++i)
+    {
+        points.push_back(cxy[i].x());
+           points.push_back(cxy[i].y());
     }
+        
+    points.push_back(to.x());
+    points.push_back(to.y());
+
+
+    Element elem(Element::IT_GenNBezierTo, points);
+
+    _elements.push_back(elem);
+
+    _curX = to.x();
+    _curY = to.y();
 }
 
-void Path::generatePoints_impl(std::vector<PointF>& dst, const PathData& pd, float smoothness)
-{
-    if( pd.empty() || !pd.lastInstructionMatch(PathData::IT_End) )
-        throw PathInvalidContext(PT_SOURCEINFO_STR);
 
+
+void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
+{
     // For convenience
-    typedef std::vector<PathData::Instruction>::const_iterator PDIIterator;
+    typedef ElementVector::const_iterator PDIIterator;
 
     // State variables
     double curX = 0.0;
     double curY = 0.0;
 
     // Walk through the instructions
-    for(PDIIterator it = pd.inss.begin(); it != pd.inss.end(); ++it) {
+    for(PDIIterator it = _elements.begin(); it != _elements.end(); ++it) 
+    {
         // Get the instruction
-        const PathData::Instruction& ins = *it;
+        const Element& ins = *it;
+
         // Act based on the type of the instruction
-        switch(ins.type) {
-            case PathData::IT_Begin:
-                if(!dst.empty()) dst.push_back(Painter::PolygonSeparatorPointF);
-                break;
+        switch(ins.type) 
+        {
+            case Element::IT_Close:
+                if(!dst.empty()) 
+                   dst.push_back(Painter::PolygonSeparatorPointF);
+            break;
 
-            case PathData::IT_End:
-                // Nothing to do here!
-                break;
-
-            case PathData::IT_MoveTo:
+            case Element::IT_MoveTo:
                 curX = ins.pxy[0];
                 curY = ins.pxy[1];
                 break;
 
-            case PathData::IT_LineTo:
+            case Element::IT_LineTo:
                 if(dst.empty()) dst.push_back( PointF(curX, curY) );
                 curX = ins.pxy[0];
                 curY = ins.pxy[1];
                 dst.push_back( PointF(curX, curY) );
                 break;
 
-            case PathData::IT_QuadBezierTo:
+            case Element::IT_QuadBezierTo:
                 generateQuadraticBezierPoints(dst, curX, curY, ins.pxy[0], ins.pxy[1], ins.pxy[2], ins.pxy[3], smoothness);
                 curX = ins.pxy[2];
                 curY = ins.pxy[3];
                 break;
 
-            case PathData::IT_CubicBezierTo:
+            case Element::IT_CubicBezierTo:
                 generateCubicBezierPoints(dst, curX, curY, ins.pxy[0], ins.pxy[1], ins.pxy[2], ins.pxy[3], ins.pxy[4], ins.pxy[5], smoothness);
                 curX = ins.pxy[4];
                 curY = ins.pxy[5];
                 break;
 
-            case PathData::IT_GenNBezierTo:
+            case Element::IT_GenNBezierTo:
                 generateGenericNBezierPoints(dst, curX, curY, ins.pxy, smoothness);
                 curX = ins.pxy[ins.pxy.size() - 2];
                 curY = ins.pxy[ins.pxy.size() - 1];
                 break;
 
             default:
-                throw PathError("Invalid Path instruction type");
                 break;
         }
     }
@@ -901,10 +313,6 @@ void Path::generatePoints_impl(std::vector<PointF>& dst, const PathData& pd, flo
     // Remove dangling separator point as needed
     if(!dst.empty() && dst.back().x() > Painter::MaximumCoordinateF && dst.back().y() > Painter::MaximumCoordinateF)
         dst.pop_back();
-
-    //for(size_t i = 0; i < dst.size(); ++i)
-    //    printf("GenPts: %5.1f, %5.1f\n", dst[i].x(), dst[i].y());
-    //printf("\n");
 }
 
 

@@ -30,7 +30,6 @@
 
 #include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/ImagePainter2.h>
-
 #include "FreeType2.h"
 #include "Rasterizer2.h"
 
@@ -39,644 +38,329 @@ namespace Pt {
 namespace Gfx {
 
 
-// ======================================================================================
-// ===== Internal Helper Functions - Implementation of Geometric Equations ==============
-// ======================================================================================
-
-static inline void calculateLineParams(float& wh, float& dx, float& dy, float& nx, float& ny, float x1, float y1, float x2, float y2, size_t w)
+void ImagePainter2::drawThickPolyline_impl(const PointF* ps, const size_t pointCount, bool autoClose, const int32_t* segmentIndexMarker)
 {
-    // Line equation : 0 = aX + By + c
-    // Normal        : n = ai + bj
-    const float a = y2 - y1;
-    const float b = x1 - x2;
-  //const float c = -(x1 * y2 - x2 * y1);
+    // Check if there is no actual point
+    if(!pointCount) return;
 
-    // Inverse line length
-    // NOTE: Gfx::Math::fastInvSqrt() will produce artifacts!
-    const float il = 1.0f / ::sqrtf(a * a + b * b);
+    // Prepare the buffer
+    std::vector<PointF> pointsF, pointsT;
+    pointsF.reserve( pointCount * _rasterizer->pen().size() );
 
-    // Half line width
-    wh = (float) w * 0.5f;
+    // Is the pen solid?
+    const bool solidPen = (_rasterizer->pen().style() == Pen::Solid);
 
-    // Direction vector
-    dx = -b * il * wh;
-    dy =  a * il * wh;
+    // Separate the polygons convert them and recombine them
+    size_t startIndex = 0;
 
-    // Normal vector
-    nx =  a * il * wh;
-    ny =  b * il * wh;
-}
-
-static inline bool intersectLine(bool& inLine, PointF& intersect, const PointF& line1a, const PointF& line1b, const PointF& line2a, const PointF& line2b, size_t penSize)
-{
-    // The first line
-    const float x11   = line1a.x();
-    const float y11   = line1a.y();
-    const float x12   = line1b.x();
-    const float y12   = line1b.y();
-    const float minX1 = std::min(x11, x12);
-    const float minY1 = std::min(y11, y12);
-    const float maxX1 = std::max(x11, x12);
-    const float maxY1 = std::max(y11, y12);
-    const float a1    = y12 - y11;
-    const float b1    = x11 - x12;
-    const float c1    = -(x11 * y12 - x12 * y11);
-
-    // The second line
-    const float x21   = line2a.x();
-    const float y21   = line2a.y();
-    const float x22   = line2b.x();
-    const float y22   = line2b.y();
-    const float minX2 = std::min(x21, x22);
-    const float minY2 = std::min(y21, y22);
-    const float maxX2 = std::max(x21, x22);
-    const float maxY2 = std::max(y21, y22);
-    const float a2    = y22 - y21;
-    const float b2    = x21 - x22;
-    const float c2    = -(x21 * y22 - x22 * y21);
-
-    // Check if the line is parallel
-    const float denom = a1 * b2 - a2 * b1;
-    if(denom == 0.0f) {
-        // Check for special cases
-        if(y11 == y12 && y11 == y21 && y11 == y22 && x12 == x21) {
-            intersect.set(x12, y11);
-            inLine = true;
-            return true;
+    for(size_t i = 0; i <= pointCount; ++i) {
+        // Search for the end and/or separator points
+        if( i == pointCount || (ps[i].x() > MAXIMUM_COORD && ps[i].y() > MAXIMUM_COORD) ) {
+            // Get the base pointer and the number of points for this polygon
+            const PointF* basePtr = ps + startIndex;
+                  size_t  curPCnt = i - startIndex;
+            // Update the start index
+            startIndex = i + 1;
+            // Determine if this polygon is a closed polygon
+            bool closedPolygon = autoClose;
+            // Thicken polygon with solid line
+            if(solidPen) {
+                if(basePtr[0] == basePtr[curPCnt - 1]) {
+                    closedPolygon = true;
+                    --curPCnt;
+                }
+                if(closedPolygon) {
+                    if(!thickenSolidClosedPolygon(pointsF, basePtr, curPCnt, segmentIndexMarker)) return;
+                }
+                else {
+                    if(!thickenSolidOpenPolygon(pointsF, basePtr, curPCnt, segmentIndexMarker)) return;
+                }
+            }
+            // Thicken polygon with patterned line
+            else {
+                if(closedPolygon && basePtr[0] != basePtr[curPCnt - 1]) {
+                    pointsT.clear();
+                    for(size_t j = 0; j < curPCnt; ++j) pointsT.push_back(*(basePtr + j));
+                    pointsT.push_back(*basePtr);
+                    thickenPatternedPolygon(pointsF, pointsT.data(), pointsT.size());
+                }
+                else {
+                    thickenPatternedPolygon(pointsF, basePtr, curPCnt);
+                }
+            }
+            // Use anti-aliasing
+            if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Default) {
+                // Remove duplicates
+                std::vector<PointF> points;
+                deduplicatePointsF(points, pointsF.data(), pointsF.size());
+                // Rasterize the polygon
+                if(solidPen && closedPolygon) _rasterizer->penFillPolygon        (points.data(), points.size());
+                else                          _rasterizer->penFillPolygonSeparate(points.data(), points.size());
+            }
+            // Do not use use anti-aliasing
+            else {
+                // Round the points and remove duplicates
+                std::vector<Point> points;
+                cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
+                // Rasterize the polygon
+                if(solidPen && closedPolygon) _rasterizer->penFillPolygon        (points.data(), points.size());
+                else                          _rasterizer->penFillPolygonSeparate(points.data(), points.size());
+            }
         }
-        if(x11 == x12 && x11 == x21 && x11 == x22 && y12 == y21) {
-            intersect.set(x11, y12);
-            inLine = true;
-            return true;
-        }
-        // No intersection
-        return false;
     }
-
-    // Calculate the intersection point
-    const float idenom = 1.0f / denom;
-          float ipX    = (b1 * c2 - b2 * c1) * idenom;
-          float ipY    = (a2 * c1 - a1 * c2) * idenom;
-
-    // Check and fix the coordinate of the intersection point
-    // (for very steep lines, the coordinate of the intersection point can be incorrectly calculated)
-    const size_t pzf = FIXED_POINT_TO_INT(penSize * FIXED_POINT_CONSTANT_SQRT2);
-         if(ipX < minX1 - pzf && ipX < minX2 - pzf) ipX = (minX1 + minX2) * 0.5f;
-    else if(ipX > maxX1 + pzf && ipX > maxX2 + pzf) ipX = (maxX1 + maxX2) * 0.5f;
-         if(ipY < minY1 - pzf && ipY < minY2 - pzf) ipY = (minY1 + minY2) * 0.5f;
-    else if(ipY > maxY1 + pzf && ipY > maxY2 + pzf) ipY = (maxY1 + maxY2) * 0.5f;
-
-    // Store the intersection point
-    intersect.set(ipX, ipY);
-
-    // Determine if the intersection point is inside the line
-    inLine = (ipX >= minX1 && ipX <= maxX1 && ipY >= minY1 && ipY <= maxY1)
-           | (ipX >= minX2 && ipX <= maxX2 && ipY >= minY2 && ipY <= maxY2);
-
-    // Done
-    //lprintf("Line 1       : (%7.3f, %7.3f) - (%7.3f, %7.3f)\n", x11, y11, x12, y12);
-    //lprintf("Line 2       : (%7.3f, %7.3f) - (%7.3f, %7.3f)\n", x21, y21, x22, y22);
-    //lprintf("Intersection : (%7.3f, %7.3f) - %s \n", ipX, ipY, inLine ? "inline" : "outline");
-    //lprintf("\n");
-    return true;
 }
 
-// Based on: Collision Detection Using the Separating Axis Theorem
-//           https://gamedevelopment.tutsplus.com/tutorials/collision-detection-using-the-separating-axis-theorem--gamedev-169
-//           http://cdn.tutsplus.com/gamedev/uploads/legacy/008_separatingAxisTheorem/SeparatingAxisTheorem.zip
-//           Article and original code by Kah Shiu Chong, 2012
-static inline void satDPIProjMinMax(float& min, float& max, const PointF* points, size_t pointCount, float px, float py)
-{
-    min =  Painter::MaximumCoordinate;
-    max = -Painter::MaximumCoordinate;
 
+void ImagePainter2::generateSolidLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, bool openingCap, bool closingCap)
+{
+    // Calculate the line's parameters
+    float wh, dx, dy, nx, ny;
+
+    calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, _rasterizer->pen().size());
+
+    // Generate points (CCW)
+    // --- Begin point ---
+    if(openingCap) {
+        switch(_rasterizer->pen().capStyle()) {
+            case Pen::SquareCap        : generateLineSquareCap       (dst, x1, y1,     dx, dy, nx, ny); break;
+            case Pen::RoundCap         : generateLineRoundCap        (dst, x1, y1, wh, dx, dy, nx, ny); break;
+            case Pen::TriangularOutCap : generateLineTriangularOutCap(dst, x1, y1,     dx, dy, nx, ny); break;
+            case Pen::TriangularInCap  : generateLineTriangularInCap (dst, x1, y1,     dx, dy, nx, ny); break;
+            case Pen::RoundHoleCap     : generateLineRoundHoleCap    (dst, x1, y1, wh, dx, dy, nx, ny); break;
+            case Pen::Arrow1Cap        : generateLineArrow1Cap       (dst, x1, y1,     dx, dy, nx, ny); break;
+            case Pen::Arrow2Cap        : generateLineArrow2Cap       (dst, x1, y1,     dx, dy, nx, ny); break;
+            default                    : openingCap = false;
+        }
+    }
+    if(!openingCap) generateLineButtCap(dst, x1, y1, nx, ny);
+    // --- End point ---
+    if(closingCap) {
+        switch(_rasterizer->pen().capStyle()) {
+            case Pen::SquareCap        : generateLineSquareCap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
+            case Pen::RoundCap         : generateLineRoundCap        (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
+            case Pen::TriangularOutCap : generateLineTriangularOutCap(dst, x2, y2,     -dx, -dy, -nx, -ny); break;
+            case Pen::TriangularInCap  : generateLineTriangularInCap (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
+            case Pen::RoundHoleCap     : generateLineRoundHoleCap    (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
+            case Pen::Arrow1Cap        : generateLineArrow1Cap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
+            case Pen::Arrow2Cap        : generateLineArrow2Cap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
+            default                    : closingCap = false;
+        }
+    }
+    if(!closingCap) generateLineButtCap(dst, x2, y2, -nx, -ny);
+}
+
+void ImagePainter2::deduplicatePointsF(std::vector<PointF>& dst, const PointF* src, const size_t pointCount)
+{
+    // Check if there is no actual point
+    if(!pointCount) return;
+
+    // Prepare the buffer
+    const size_t ofs = dst.size();
+    dst.resize(ofs + pointCount);
+
+    // Process the coordinates
+    size_t putCnt = 0;
     for(size_t i = 0; i < pointCount; ++i) {
-        const float val = points[i].x() * px + points[i].y() * py;
-        if(val > max) max = val;
-        if(val < min) min = val;
+        // Round the coordinates
+        const double x = std::floor(src[i].x() * Gfx::Math::VecResScaleUp + 0.5);
+        const double y = std::floor(src[i].y() * Gfx::Math::VecResScaleUp + 0.5);
+        // Skip duplicated coordinates
+        if( ofs + putCnt >= 1 && dst[ofs + putCnt - 1].x() == x && dst[ofs + putCnt - 1].y() == y ) continue;
+        // Store the coordinate and increment the "put" counter
+        dst[ofs + putCnt].set(x, y);
+        ++putCnt;
+    }
+
+    // Discard the last point if it has the same coordinate with the first point
+    if(dst[ofs] == dst[ofs + putCnt - 1]) --putCnt;
+
+    // Resize the buffer to discard unused elements
+    dst.resize(ofs + putCnt);
+
+    // Scale back the coordinates
+    for(size_t i = 0; i < dst.size(); ++i) {
+        dst[i].set(
+            dst[i].x() * Gfx::Math::VecResScaleDn,
+            dst[i].y() * Gfx::Math::VecResScaleDn
+        );
     }
 }
 
-// Based on: Collision Detection Using the Separating Axis Theorem
-//           https://gamedevelopment.tutsplus.com/tutorials/collision-detection-using-the-separating-axis-theorem--gamedev-169
-//           http://cdn.tutsplus.com/gamedev/uploads/legacy/008_separatingAxisTheorem/SeparatingAxisTheorem.zip
-//           Article and original code by Kah Shiu Chong, 2012
-static inline bool satDetectPolygonCollision(const PointF* poly1, size_t poly1Count, const PointF* poly2, size_t poly2Count)
+
+
+void ImagePainter2::generatePatternedSingleLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, Pt::int32_t& piCtrInOut)
 {
-    // Evaluate using the first polygon's normals
-    for(size_t i = poly1Count; i >= 1; --i) {
-        // Calculate the indexes
-        const size_t idx1 =                               (i - 1);
-        const size_t idx2 = (i == 1) ? (poly1Count - 1) : (i - 2);
-        // Calculate the normals
-        const float dx = poly1[idx2].x() - poly1[idx1].x();
-        const float dy = poly1[idx2].y() - poly1[idx1].y();
-        const float nx =  dy;
-        const float ny = -dx;
-        // Get the minimum and maximum projection values
-        float min1, max1, min2, max2;
-        satDPIProjMinMax(min1, max1, poly1, poly1Count, nx, ny);
-        satDPIProjMinMax(min2, max2, poly2, poly2Count, nx, ny);
-        // Check if the polygon is separated
-        //lprintf("A: %+7.1f , %+7.1f --- %+7.1f , %+7.1f ### %d ### %+7.1f , %+7.1f\n", max1, min2, max2, min1, (max1 < min2 || max2 < min1), nx, ny);
-        if(max1 < min2 || max2 < min1) return false;
-        if(fabs( (min2 - max1) / max1 ) <= 0.003f || fabs( (min1 - max2) / max2 ) <= 0.003f) return false;
-    }
+    // Calculate the line's parameters
+    float wh, dx, dy, nx, ny;
 
-    // Calculate the second polygon's normals
-    for(size_t i = poly2Count; i >= 1; --i) {
-        // Calculate the indexes
-        const size_t idx1 =                               (i - 1);
-        const size_t idx2 = (i == 1) ? (poly2Count - 1) : (i - 2);
-        // Calculate the normals
-        const float dx = poly2[idx2].x() - poly2[idx1].x();
-        const float dy = poly2[idx2].y() - poly2[idx1].y();
-        const float nx =  dy;
-        const float ny = -dx;
-        // Get the minimum and maximum projection values
-        float min1, max1, min2, max2;
-        satDPIProjMinMax(min1, max1, poly1, poly1Count, nx, ny);
-        satDPIProjMinMax(min2, max2, poly2, poly2Count, nx, ny);
-        // Check if the polygon is separated
-        //lprintf("B: %+7.1f , %+7.1f --- %+7.1f , %+7.1f ### %d ### %+7.1f , %+7.1f\n", max1, min2, max2, min1, (max1 < min2 || max2 < min1), nx, ny);
-        if(max1 < min2 || max2 < min1) return false;
-        if(fabs( (min2 - max1) / max1 ) <= 0.003f || fabs( (min1 - max2) / max2 ) <= 0.003f) return false;
-    }
+    calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, _rasterizer->pen().size());
 
-    // There is a collision
-    return true;
-}
+    // Get the pattern buffer and calculate the number of "pattern" segments
+    const Pt::uint8_t* pBuff = _rasterizer->patternBufferMP64();
+    const float        xLen  = (x2 > x1) ? (x2 - x1) : (x1 - x2);
+    const float        yLen  = (y2 > y1) ? (y2 - y1) : (y1 - y2);
+    const float        lLen  = Gfx::Math::fastSqrt(xLen * xLen + yLen * yLen);
+    const size_t       nSegs = (size_t) Gfx::Math::zrint(lLen / wh) * 2;
+    const float        xInc  = (x2 - x1) / nSegs;
+    const float        yInc  = (y2 - y1) / nSegs;
 
-
-// ======================================================================================
-// ===== Internal Helper Functions - Generator (Drawing) Functions ======================
-// ======================================================================================
-
-// Based on: Bitmap/Bézier curves/Quadratic
-//           https://rosettacode.org/wiki/Bitmap/B%C3%A9zier_curves/Quadratic#C
-//           Last modified on February 17, 2017
-static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, float x3, float y3, Pt::int32_t nSegs)
-{
-    // Check if the points actually specify a straight line
-    const float sx = x3 - x2;
-    const float sy = y3 - y2;
-    const float xx = x1 - x2;
-    const float yy = y1 - y2;
-
-    if( !(xx * sy - yy * sx) ) { // Curvature
-        if( dst.empty() || dst.back().x() != x1 || dst.back().y() != y1 ) dst.push_back( PointF(x1, y1) );
-        if( dst.empty() || dst.back().x() != x3 || dst.back().y() != y3 ) dst.push_back( PointF(x3, y3) );
-        return;
-    }
-
-    // Ensure that the number of segments are not too few
-    if(nSegs < 4) nSegs = 4;
-
-    // Calculate the inverse multiplication factor
-    const float nSegs1i = 1.0f / (nSegs - 1);
-
-    for(Pt::int32_t i = 0; i < nSegs; ++i) {
-        // Calculate the coordinates
-        const float t  = i * nSegs1i;
-        const float it = 1.0f - t;
-        const float a  = it * it;
-        const float b  = 2.0f * t  * it;
-        const float c  = t * t;
-        const float x  = a * x1 + b * x2 + c * x3;
-        const float y  = a * y1 + b * y2 + c * y3;
-        // Check if the coordinate is the same with the previous one
-        if( !dst.empty() && ( dst.back().x() == x && dst.back().y() == y ) ) continue;
-        // Store the coordinate
-        dst.push_back( PointF(x, y) );
-    }
-}
-
-static inline void generateEllipsePoints(std::vector<PointF>& dst, Pt::int32_t radiusX, Pt::int32_t radiusY, Pt::int32_t centerX, Pt::int32_t centerY, size_t penSize)
-{
-    // Calculate the ellipse's parameters
-    const Pt::int32_t circFac = Gfx::Math::zrint(
-                                    Gfx::Math::fastSqrt( 0.5f * (radiusX * radiusX + radiusY * radiusY) ) /
-                                    ( (penSize > 4) ? (penSize * 0.25f) : 1.0f )
-                                );
-    const Pt::int32_t circSeg = (circFac / 16) * 20 + 1;
-    const Pt::int32_t nSegs   = (circSeg <  9) ?  9 : circSeg;
-    const float       nSegs1i = 1.0f / (nSegs - 1);
-
-    // Generate a polygon that approximates the ellipse
-    for(Pt::int32_t i = 0; i < nSegs; ++i) {
-        const float angle = Gfx::Math::PiMul2 * i * nSegs1i;
-        // Calculate the coordinate
-        const float x = centerX + radiusX * Gfx::Math::fastCos(angle);
-        const float y = centerY - radiusY * Gfx::Math::fastSin(angle); // Sign inversion due to differences between cartesian and computer coordinate systems
-        // Store the coordinate only if it is different with the previous one
-        if( !dst.empty() && dst.back().x() == x && dst.back().y() == y ) continue;
-        dst.push_back( PointF(x, y) );
-    }
-
-    // Discard the last point if it has the same coordinate with the first one
-    if(dst.back() == dst[0]) dst.pop_back();
-}
-
-static inline void generateArcPoints(std::vector<PointF>& dst, Pt::int32_t radiusX, Pt::int32_t radiusY, Pt::int32_t centerX, Pt::int32_t centerY, float degBegin, float degEnd, size_t penSize)
-{
-    // Calculate the arc's parameters
-    const float       degDlt  = degEnd - degBegin;
-    const float       degFac  = degDlt / 360.0f;
-    const Pt::int32_t circFac = Gfx::Math::zrint(
-                                    degFac *
-                                    Gfx::Math::fastSqrt( 0.5f * (radiusX * radiusX + radiusY * radiusY) ) /
-                                    ( (penSize > 4) ? (penSize * 0.25f) : 1.0f )
-                                );
-    const Pt::int32_t circSeg = (circFac / 16) * 20 + 1;
-    const Pt::int32_t nSegs   = (circSeg <  9) ?  9 : circSeg;
-    const float       nSegs1i = 1.0f / (nSegs - 1);
-
-    // Generate a polygon that approximates the arc
-    const float fdegInc = (degDlt   * Gfx::Math::DegToRad) * nSegs1i;
-          float angle   =  degBegin * Gfx::Math::DegToRad;
-
-    for(Pt::int32_t i = 0; i < nSegs; ++i) {
-        // Calculate the coordinate
-        const float x = centerX + radiusX * Gfx::Math::fastCos(angle);
-        const float y = centerY - radiusY * Gfx::Math::fastSin(angle); // Sign inversion due to differences between cartesian and computer coordinate systems
-        // Update the angle
-        angle += fdegInc;
-        // Store the coordinate only if it is different with the previous one
-        if( !dst.empty() && dst.back().x() == x && dst.back().y() == y ) continue;
-        dst.push_back( PointF(x, y) );
-    }
-
-    // Discard the last point if it has the same coordinate with the first one
-    if(dst.back() == dst[0]) dst.pop_back();
-}
-
-static inline void generateRoundRectPoints(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, float radius, Pt::int32_t nSegs)
-{
-    // CCW
-
-    // --- Bottom left ---
-    generateQuadraticBezierPoints(
-        dst,
-        x1         , y2 - radius,
-        x1         , y2         ,
-        x1 + radius, y2         ,
-        nSegs
-    );
-
-    // --- Bottom middle ---
-    dst.push_back( PointF((x1 + x2) * 0.5f, y2) );
-
-    // --- Bottom left ---
-    generateQuadraticBezierPoints(
-        dst,
-        x2 - radius, y2         ,
-        x2,          y2         ,
-        x2,          y2 - radius,
-        nSegs
-    );
-
-    // --- Center right ---
-    dst.push_back( PointF(x2, (y1 + y2) * 0.5f) );
-
-    // --- Top right ---
-    generateQuadraticBezierPoints(
-        dst,
-        x2,          y1 + radius,
-        x2,          y1         ,
-        x2 - radius, y1         ,
-        nSegs
-    );
-
-    // --- Top middle ---
-    dst.push_back( PointF((x1 + x2) * 0.5f, y1) );
-
-    // --- Top left ---
-    generateQuadraticBezierPoints(
-        dst,
-        x1 + radius, y1         ,
-        x1,          y1         ,
-        x1,          y1 + radius,
-        nSegs
-    );
-
-    // --- Center left ---
-    dst.push_back( PointF(x1, (y1 + y2) * 0.5f) );
-}
-
-static inline void generateLineButtCap(std::vector<PointF>& dst, float x, float y, float nx, float ny)
-{
-    dst.push_back( PointF(x + nx, y + ny) );
-    dst.push_back( PointF(x - nx, y - ny) );
-}
-
-static inline void generateLineSquareCap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
-{
-    dst.push_back( PointF(x - dx + nx, y - dy + ny) );
-    dst.push_back( PointF(x - dx - nx, y - dy - ny) );
-}
-
-static inline void generateLineRoundCap(std::vector<PointF>& dst, float x, float y, float wh, float dx, float dy, float nx, float ny)
-{
-#if 0
-    generateQuadraticBezierPoints(
-        dst,
-        Gfx::Math::zrint(x + nx     ), Gfx::Math::zrint(y + ny     ),
-        Gfx::Math::zrint(x + nx - dx), Gfx::Math::zrint(y + ny - dy),
-        Gfx::Math::zrint(x      - dx), Gfx::Math::zrint(y      - dy),
-        Gfx::Math::zcint(wh * 0.5f)
-    );
-    generateQuadraticBezierPoints(
-        dst,
-        Gfx::Math::zrint(x      - dx), Gfx::Math::zrint(y      - dy),
-        Gfx::Math::zrint(x - nx - dx), Gfx::Math::zrint(y - ny - dy),
-        Gfx::Math::zrint(x - nx     ), Gfx::Math::zrint(y - ny     ),
-        Gfx::Math::zcint(wh * 0.5f)
-    );
-#else
-    generateQuadraticBezierPoints(
-        dst,
-        Gfx::Math::zrint(x + nx       ), Gfx::Math::zrint(y + ny       ),
-        Gfx::Math::zrint(x - dx * 2.0f), Gfx::Math::zrint(y - dy * 2.0f),
-        Gfx::Math::zrint(x - nx       ), Gfx::Math::zrint(y - ny       ),
-        Gfx::Math::zcint(wh) - 1
-    );
-#endif
-}
-
-static inline void generateLineTriangularOutCap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
-{
-    dst.push_back( PointF(x + nx, y + ny) );
-    dst.push_back( PointF(x - dx, y - dy) );
-    dst.push_back( PointF(x - nx, y - ny) );
-}
-
-static inline void generateLineTriangularInCap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
-{
-    dst.push_back( PointF(x + nx - dx, y + ny - dy) );
-    dst.push_back( PointF(x,           y          ) );
-    dst.push_back( PointF(x - nx - dx, y - ny - dy) );
-}
-
-static inline void generateLineRoundHoleCap(std::vector<PointF>& dst, float x, float y, float wh, float dx, float dy, float nx, float ny)
-{
-#if 0
-    generateQuadraticBezierPoints(
-        dst,
-        Gfx::Math::zrint(x + nx - dx), Gfx::Math::zrint(y + ny - dy),
-        Gfx::Math::zrint(x + nx     ), Gfx::Math::zrint(y + ny     ),
-        Gfx::Math::zrint(x          ), Gfx::Math::zrint(y          ),
-        Gfx::Math::zcint(wh * 0.5f)
-    );
-    generateQuadraticBezierPoints(
-        dst,
-        Gfx::Math::zrint(x          ), Gfx::Math::zrint(y          ),
-        Gfx::Math::zrint(x - nx     ), Gfx::Math::zrint(y - ny     ),
-        Gfx::Math::zrint(x - nx - dx), Gfx::Math::zrint(y - ny - dy),
-        Gfx::Math::zcint(wh * 0.5f)
-    );
-#else
-    generateQuadraticBezierPoints(
-        dst,
-        Gfx::Math::zrint(x + nx - dx), Gfx::Math::zrint(y + ny - dy),
-        Gfx::Math::zrint(x      + dx), Gfx::Math::zrint(y      + dy),
-        Gfx::Math::zrint(x - nx - dx), Gfx::Math::zrint(y - ny - dy),
-        Gfx::Math::zcint(wh) - 1
-    );
-#endif
-}
-
-static inline void generateLineArrow1Cap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
-{
-    dst.push_back( PointF(x + nx,        y + ny       ) );
-    dst.push_back( PointF(x + nx * 2.0f, y + ny * 2.0f) );
-    dst.push_back( PointF(x - dx,        y - dy       ) );
-    dst.push_back( PointF(x - nx * 2.0f, y - ny * 2.0f) );
-    dst.push_back( PointF(x - nx,        y - ny       ) );
-}
-
-static inline void generateLineArrow2Cap(std::vector<PointF>& dst, float x, float y, float dx, float dy, float nx, float ny)
-{
-    dst.push_back( PointF(x + dx * 0.5f + nx,        y + dy * 0.5f + ny       ) );
-    dst.push_back( PointF(x + dx        + nx * 2.0f, y + dy        + ny * 2.0f) );
-    dst.push_back( PointF(x - dx,                    y - dy                   ) );
-    dst.push_back( PointF(x + dx        - nx * 2.0f, y + dy        - ny * 2.0f) );
-    dst.push_back( PointF(x + dx * 0.5f - nx,        y + dy * 0.5f - ny       ) );
-}
-
-static inline void combineLinePointsAndAddCaps(std::vector<PointF>& dst, const std::vector<PointF>& inner, const std::vector<PointF>& outer, Pen::CapStyle begCap, Pen::CapStyle endCap, size_t penSize)
-{
-    // Calculate the end lines' parameters
-    const Pt::int32_t ox2a = outer[outer.size() - 1].x();
-    const Pt::int32_t oy2a = outer[outer.size() - 1].y();
-    const Pt::int32_t ox2b = outer[outer.size() - 2].x();
-    const Pt::int32_t oy2b = outer[outer.size() - 2].y();
-    const Pt::int32_t ix2a = inner[inner.size() - 1].x();
-    const Pt::int32_t iy2a = inner[inner.size() - 1].y();
-    const Pt::int32_t ix2b = inner[inner.size() - 2].x();
-    const Pt::int32_t iy2b = inner[inner.size() - 2].y();
-    const float       x2a  = (float) (ox2a + ix2a) * 0.5f;
-    const float       y2a  = (float) (oy2a + iy2a) * 0.5f;
-    const float       x2b  = (float) (ox2b + ix2b) * 0.5f;
-    const float       y2b  = (float) (oy2b + iy2b) * 0.5f;
-
-    // Calculate the line parameters
-    float wh2, dx2, dy2, nx2, ny2;
-    calculateLineParams(wh2, dx2, dy2, nx2, ny2, x2a, y2a, x2b, y2b, penSize);
-
-    // Generate the end cap
-    switch(endCap) {
-        case Pen::SquareCap:
-            dst.push_back( PointF( ix2a - dx2, iy2a - dy2 ) );
-            dst.push_back( PointF( ox2a - dx2, oy2a - dy2 ) );
-            break;
-
-        case Pen::RoundCap: {
-            std::vector<PointF> tmp;
-            generateQuadraticBezierPoints(tmp, ix2a, iy2a, x2a - dx2 * 2.0f, y2a - dy2 * 2.0f, ox2a, oy2a, Gfx::Math::zcint(penSize * 0.5f) - 1);
-            if(tmp.size() <= 2) break;
-            for(size_t i = 1; i < tmp.size() - 1; ++i) {
-                dst.push_back( PointF( tmp[i].x(), tmp[i].y() ) );
-            }
-            break;
+    // Generate the segments
+    Pt::uint8_t prvPat = 0;
+    float       xs     = x1;
+    float       ys     = y1;
+    for(size_t i = 0; i <= nSegs; ++i) {
+        // Get the pattern
+        const Pt::uint8_t curPat = pBuff[piCtrInOut++];
+        if(piCtrInOut >= PATTERN_BUFFER_COUNTER_MAXMP) piCtrInOut -= PATTERN_BUFFER_COUNTER_MAXMP;
+        // Determine whether we should draw this segment as well as its coordinate
+        const bool draw = (!curPat && prvPat);
+        if(curPat && !prvPat) {
+            x1 = xs;
+            y1 = ys;
         }
-
-        case Pen::TriangularOutCap:
-            dst.push_back( PointF( x2a - dx2, y2a - dy2 ) );
-            break;
-
-        case Pen::TriangularInCap:
-            dst.push_back( PointF( x2a + dx2, y2a + dy2 ) );
-            break;
-
-        case Pen::RoundHoleCap: {
-            // Calculate additional line parameters
-            float wh2i, dx2i, dy2i, nx2i, ny2i;
-            float wh2o, dx2o, dy2o, nx2o, ny2o;
-            calculateLineParams(wh2i, dx2i, dy2i, nx2i, ny2i, ix2a, iy2a, ix2b, iy2b, penSize);
-            calculateLineParams(wh2o, dx2o, dy2o, nx2o, ny2o, ox2a, oy2a, ox2b, oy2b, penSize);
-            // Generate the points
-            std::vector<PointF> tmp;
-            generateQuadraticBezierPoints(tmp, ix2a - dx2i, iy2a - dy2i, x2a + dx2, y2a + dy2, ox2a - dx2o, oy2a - dy2o, penSize);
-            if(tmp.size() <= 2) break;
-            for(size_t i = 1; i < tmp.size() - 1; ++i) {
-                dst.push_back( PointF( tmp[i].x(), tmp[i].y() ) );
+        else if(draw) {
+            x2 = xs;
+            y2 = ys;
+            if(_rasterizer->pen().capStyle() == Pen::ButtCap) {
+                x2 += xInc;
+                y2 += yInc;
             }
-            break;
         }
-
-        case Pen::Arrow1Cap:
-            dst.push_back( PointF( x2a - nx2 * 2.0f, y2a - ny2 * 2.0f ) );
-            dst.push_back( PointF( x2a - dx2       , y2a - dy2        ) );
-            dst.push_back( PointF( x2a + nx2 * 2.0f, y2a + ny2 * 2.0f ) );
-            break;
-
-        case Pen::Arrow2Cap:
-            dst.push_back( PointF( x2a - dx2 * 0.5f - nx2       , y2a - dy2 * 0.5f - ny2        ) );
-            dst.push_back( PointF( x2a              - nx2 * 2.0f, y2a              - ny2 * 2.0f ) );
-            dst.push_back( PointF( x2a - dx2 * 2.0f             , y2a - dy2 * 2.0f              ) );
-            dst.push_back( PointF( x2a              + nx2 * 2.0f, y2a              + ny2 * 2.0f ) );
-            dst.push_back( PointF( x2a - dx2 * 0.5f + nx2       , y2a - dy2 * 0.5f + ny2        ) );
-            break;
-
-        default:
-            break;
+        prvPat = curPat;
+        // Update the coordinates
+        xs += xInc;
+        ys += yInc;
+        // Skip if we are not going to draw this segment
+        if(!draw) continue;
+        // Add polygon separator point as needed
+        if(!dst.empty()) dst.push_back(Painter::PolygonSeparatorPointF);
+        // Generate points (CCW)
+        // --- Begin point ---
+        switch(_rasterizer->pen().capStyle()) {
+            case Pen::SquareCap        : generateLineSquareCap       (dst, x1, y1,     dx, dy, nx, ny); break;
+            case Pen::RoundCap         : generateLineRoundCap        (dst, x1, y1, wh, dx, dy, nx, ny); break;
+            case Pen::TriangularOutCap : generateLineTriangularOutCap(dst, x1, y1,     dx, dy, nx, ny); break;
+            case Pen::TriangularInCap  : generateLineTriangularInCap (dst, x1, y1,     dx, dy, nx, ny); break;
+            case Pen::RoundHoleCap     : generateLineRoundHoleCap    (dst, x1, y1, wh, dx, dy, nx, ny); break;
+            case Pen::Arrow1Cap        : generateLineArrow1Cap       (dst, x1, y1,     dx, dy, nx, ny); break;
+            case Pen::Arrow2Cap        : generateLineArrow2Cap       (dst, x1, y1,     dx, dy, nx, ny); break;
+            default                    : generateLineButtCap         (dst, x1, y1,             nx, ny); break;
+        }
+        // --- End point ---
+        switch(_rasterizer->pen().capStyle()) {
+            case Pen::SquareCap        : generateLineSquareCap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
+            case Pen::RoundCap         : generateLineRoundCap        (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
+            case Pen::TriangularOutCap : generateLineTriangularOutCap(dst, x2, y2,     -dx, -dy, -nx, -ny); break;
+            case Pen::TriangularInCap  : generateLineTriangularInCap (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
+            case Pen::RoundHoleCap     : generateLineRoundHoleCap    (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
+            case Pen::Arrow1Cap        : generateLineArrow1Cap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
+            case Pen::Arrow2Cap        : generateLineArrow2Cap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
+            default                    : generateLineButtCap         (dst, x2, y2,               -nx, -ny); break;
+        }
     }
-
-    // Store the "outside" points
-    dst.insert(dst.end(), outer.rbegin(), outer.rend());
-
-    // Calculate the begin lines' parameters
-    const Pt::int32_t ox1a = outer[0].x();
-    const Pt::int32_t oy1a = outer[0].y();
-    const Pt::int32_t ox1b = outer[1].x();
-    const Pt::int32_t oy1b = outer[1].y();
-    const Pt::int32_t ix1a = inner[0].x();
-    const Pt::int32_t iy1a = inner[0].y();
-    const Pt::int32_t ix1b = inner[1].x();
-    const Pt::int32_t iy1b = inner[1].y();
-    const float       x1a  = (float) (ox1a + ix1a) * 0.5f;
-    const float       y1a  = (float) (oy1a + iy1a) * 0.5f;
-    const float       x1b  = (float) (ox1b + ix1b) * 0.5f;
-    const float       y1b  = (float) (oy1b + iy1b) * 0.5f;
-
-    // Intersect the begin lines
-    float wh1, dx1, dy1, nx1, ny1;
-    calculateLineParams(wh1, dx1, dy1, nx1, ny1, x1b, y1b, x1a, y1a, penSize);
-
-    // Generate the begin cap
-    switch(begCap) {
-        case Pen::SquareCap:
-            dst.push_back( PointF( ox1a + dx1, oy1a + dy1 ) );
-            dst.push_back( PointF( ix1a + dx1, iy1a + dy1 ) );
-            break;
-
-        case Pen::RoundCap: {
-            std::vector<PointF> tmp;
-            generateQuadraticBezierPoints(tmp, ox1a, oy1a, x1a + dx1 * 2.0f, y1a + dy1 * 2.0f, ix1a, iy1a, Gfx::Math::zcint(penSize * 0.5f) - 1);
-            if(tmp.size() <= 2) break;
-            for(size_t i = 1; i < tmp.size() - 1; ++i) {
-                dst.push_back( PointF( tmp[i].x(), tmp[i].y() ) );
-            }
-            break;
-        }
-
-        case Pen::TriangularOutCap:
-            dst.push_back( PointF( x1a + dx1, y1a + dy1 ) );
-            break;
-
-        case Pen::TriangularInCap:
-            dst.push_back( PointF( x1a - dx1, y1a - dy1 ) );
-            break;
-
-        case Pen::RoundHoleCap: {
-            /*
-            // Calculate additional line parameters
-            float wh1i, dx1i, dy1i, nx1i, ny1i;
-            float wh1o, dx1o, dy1o, nx1o, ny1o;
-            calculateLineParams(wh1i, dx1i, dy1i, nx1i, ny1i, ix1a, iy1a, ix1b, iy1b, penSize);
-            calculateLineParams(wh1o, dx1o, dy1o, nx1o, ny1o, ox1a, oy1a, ox1b, oy1b, penSize);
-            // Generate the points
-            */
-            std::vector<PointF> tmp;
-            generateQuadraticBezierPoints(tmp, ox1a + dx1, oy1a + dy1, x1a - dx1, y1a - dy1, ix1a + dx1, iy1a + dy1, penSize);
-            if(tmp.size() <= 2) break;
-            for(size_t i = 1; i < tmp.size() - 1; ++i) {
-                dst.push_back( PointF( tmp[i].x(), tmp[i].y() ) );
-            }
-            break;
-        }
-
-        case Pen::Arrow1Cap:
-            dst.push_back( PointF( x1a + nx1 * 2.0f, y1a + ny1 * 2.0f ) );
-            dst.push_back( PointF( x1a + dx1       , y1a + dy1        ) );
-            dst.push_back( PointF( x1a - nx1 * 2.0f, y1a - ny1 * 2.0f ) );
-            break;
-
-        case Pen::Arrow2Cap:
-            dst.push_back( PointF( x1a + dx1 * 0.5f + nx1       , y1a + dy1 * 0.5f + ny1        ) );
-            dst.push_back( PointF( x1a              + nx1 * 2.0f, y1a              + ny1 * 2.0f ) );
-            dst.push_back( PointF( x1a + dx1 * 2.0f             , y1a + dy1 * 2.0f              ) );
-            dst.push_back( PointF( x1a              - nx1 * 2.0f, y1a              - ny1 * 2.0f ) );
-            dst.push_back( PointF( x1a + dx1 * 0.5f - nx1       , y1a + dy1 * 0.5f - ny1        ) );
-            break;
-
-        default:
-            break;
-    }
-
-    // Store the "inside" points
-    dst.insert(dst.end(), inner. begin(), inner. end());
 }
 
 
-// ======================================================================================
-// ===== Static Public Member Functions =================================================
-// ======================================================================================
+void ImagePainter2::cnvPointsFToPointsDeduplicate(std::vector<Point>& dst, const PointF* src, const size_t pointCount)
+{
+    // Check if there is no actual point
+    if(!pointCount) return;
+
+    // Prepare the buffer
+    const size_t ofs = dst.size();
+    dst.resize(ofs + pointCount);
+
+    // Process the coordinates
+    size_t putCnt = 0;
+    for(size_t i = 0; i < pointCount; ++i) {
+        // Round the coordinates
+        const Pt::int32_t x = Gfx::Math::zrint(src[i].x());
+        const Pt::int32_t y = Gfx::Math::zrint(src[i].y());
+        // Skip duplicated coordinates
+        if( ofs + putCnt >= 1 && dst[ofs + putCnt - 1].x() == x && dst[ofs + putCnt - 1].y() == y ) continue;
+        // Store the coordinate and increment the "put" counter
+        dst[ofs + putCnt].set(x, y);
+        ++putCnt;
+    }
+
+    // Discard the last point if it has the same coordinate with the first point
+    if(dst[ofs] == dst[ofs + putCnt - 1]) --putCnt;
+
+    // Resize the buffer to discard unused elements
+    dst.resize(ofs + putCnt);
+}
+
 
 void ImagePainter2::setFontDir(const Pt::System::Path& path)
-{ FreeType2::instance().setFontDir(path); }
+{ 
+  FreeType2::instance().setFontDir(path); 
+}
+
 
 void ImagePainter2::setDefaultFont(const std::string& f)
-{ FreeType2::instance().setDefaultFont(f); }
+{ 
+  FreeType2::instance().setDefaultFont(f); 
+}
+
 
 std::string ImagePainter2::defaultFont()
-{ return FreeType2::instance().defaultFont(); }
+{ 
+  return FreeType2::instance().defaultFont(); 
+}
 
 std::vector<std::string> ImagePainter2::fontNames()
-{ return FreeType2::instance().fontNames(); }
+{ 
+  return FreeType2::instance().fontNames(); 
+}
 
 FontMetrics ImagePainter2::fontMetrics( const Font& font, const Pt::String& text )
-{ return Rasterizer2::fontMetrics(font, text); }
+{ 
+  return Rasterizer2::fontMetrics(font, text); 
+}
 
-
-// ======================================================================================
-// ===== Public Member Functions ========================================================
-// ======================================================================================
 
 ImagePainter2::ImagePainter2(Image& image)
 : _rasterizer( new Rasterizer2(image) )
 {
-    /* Call the setter to enable the default anti-aliasing mode */
-    setAntiAliasingMode();
+    setAntialiasing(true);
 }
 
-ImagePainter2::~ImagePainter2()
-{ delete _rasterizer; }
 
-void ImagePainter2::setAntiAliasingMode(AntiAliasingMode mode)
-{ _rasterizer->setAntiAliasingMode(mode); }
+ImagePainter2::~ImagePainter2()
+{ 
+  delete _rasterizer; 
+}
+
+
+void ImagePainter2::setAntialiasing(bool on)
+{ 
+  _rasterizer->setAntiAliasingMode(on); 
+}
+
 
 void ImagePainter2::setImage(Image& image)
-{ _rasterizer->setImage(image); }
+{ 
+  _rasterizer->setImage(image); 
+}
+
 
 const ImageFormat& ImagePainter2::format() const
-{ return _rasterizer->format(); }
+{ 
+  return _rasterizer->format(); 
+}
+
 
 void ImagePainter2::setCompositionMode(const CompositionMode& mode)
-{ _rasterizer->setCompositionMode(mode); }
+{ 
+  _rasterizer->setCompositionMode(mode); 
+}
+
 
 const CompositionMode& ImagePainter2::compositionMode() const
-{ return _rasterizer->compositionMode(); }
+{ 
+  return _rasterizer->compositionMode(); 
+}
+
 
 void ImagePainter2::setClip( const RectF& clip )
 {
@@ -689,29 +373,50 @@ void ImagePainter2::setClip( const RectF& clip )
     _clip = clip;
 }
 
+
 const Gfx::RectF& ImagePainter2::clip() const
-{ return _clip; }
+{ 
+  return _clip; 
+}
+
 
 void ImagePainter2::setPen( const Pen& pen )
-{ _rasterizer->setPen(pen) ; }
+{ 
+  _rasterizer->setPen(pen) ; 
+}
+
 
 const Pen& ImagePainter2::pen() const
-{ return _rasterizer->pen(); }
+{ 
+  return _rasterizer->pen(); 
+}
+
 
 void ImagePainter2::setBrush(const Brush& brush)
-{ _rasterizer->setBrush(brush); }
+{ 
+  _rasterizer->setBrush(brush); 
+}
+
 
 const Brush& ImagePainter2::brush() const
-{ return _rasterizer->brush(); }
+{ 
+  return _rasterizer->brush(); 
+}
 
 void ImagePainter2::setFont(const Font& font)
-{ _rasterizer->setFont( font ); }
+{ 
+  _rasterizer->setFont( font ); 
+}
 
 const Font& ImagePainter2::font() const
-{ return _rasterizer->font(); }
+{ 
+  return _rasterizer->font(); 
+}
 
 FontMetrics ImagePainter2::fontMetrics(const String& text) const
-{ return _rasterizer->fontMetrics( text ); }
+{ 
+  return _rasterizer->fontMetrics( text ); 
+}
 
 void ImagePainter2::drawImage( const PointF& to, const Image& image )
 {
@@ -740,6 +445,7 @@ void ImagePainter2::drawText( const PointF& to, const String& text )
     _rasterizer->strokeText(to_, text);
 }
 
+
 void ImagePainter2::drawLine( const PointF& from, const PointF& to )
 {
     // Rasterize one-pixel line
@@ -755,25 +461,28 @@ void ImagePainter2::drawLine( const PointF& from, const PointF& to )
     // Generate a polygon that represents the thick line
     std::vector<PointF> pointsF;
 
-    if(_rasterizer->pen().style() == Pen::Solid) {
+    if(_rasterizer->pen().style() == Pen::Solid) 
+    {
         generateSolidLineSegment(pointsF, from.x(), from.y(), to.x(), to.y(), true, true);
     }
-    else {
+    else 
+    {
         Pt::int32_t piCtrInOut = 0;
         generatePatternedSingleLineSegment(pointsF, from.x(), from.y(), to.x(), to.y(), piCtrInOut);
     }
 
     // Use anti-aliasing
-    if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Default) {
+    if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Default) 
+    {
         // Remove duplicates
         std::vector<PointF> points;
         deduplicatePointsF(points, pointsF.data(), pointsF.size());
         // Rasterize the polygon
         _rasterizer->penFillPolygonSeparate(points.data(), points.size());
     }
-
     // Do not use use anti-aliasing
-    else {
+    else 
+    {
         // Round the points and remove duplicates
         std::vector<Point> points;
         cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
@@ -799,7 +508,7 @@ void ImagePainter2::drawRect( const RectF& rect )
         rect.bottomLeft(), rect.bottomRight(), rect.topRight(), rect.topLeft()
     };
 
-    drawPolyline(pointsF, 4, true);
+    drawPolyline(pointsF, 4);
 }
 
 void ImagePainter2::fillRect( const RectF& rect )
@@ -812,7 +521,7 @@ void ImagePainter2::fillRect( const RectF& rect )
     _rasterizer->fillRect(tl, br);
 }
 
-void ImagePainter2::drawRoundRect( const RectF& rect, float radius )
+void ImagePainter2::drawRoundedRect( const RectF& rect, float radius )
 {
     // Extract the coordinates
     const float x1 = rect.topLeft    ().x();
@@ -850,7 +559,9 @@ void ImagePainter2::drawRoundRect( const RectF& rect, float radius )
             PointF(x1, (y1 + y2) * 0.5f)
         };
         // Draw the quadratic polybezier
-        drawQuadraticPolybezier(pbz, sizeof(pbz) / sizeof(pbz[0]), true);
+        const size_t count = sizeof(pbz) / sizeof(pbz[0]);
+
+        drawQuadraticPolybezier(pbz[0], pbz[count -1], &pbz[1], count - 2);
         return;
     }
 
@@ -901,8 +612,10 @@ void ImagePainter2::fillRoundRect( const RectF& rect, float radius )
     }
 }
 
-void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount, bool autoClose )
+void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount)
 {
+    bool autoClose  = false;
+
     // Rasterize one-pixel polyline
     if(_rasterizer->pen().size() == 1) {
         // Use anti-aliasing
@@ -951,8 +664,21 @@ void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
     }
 }
 
-void ImagePainter2::drawQuadraticPolybezier(const PointF* ps, const size_t pointCount, bool autoClose)
+void ImagePainter2::drawQuadraticPolybezier(const PointF& from, const PointF& to, 
+                                             const PointF* controls, const size_t n)
 {
+    //TODO: to close
+    bool autoClose = false; 
+    std::vector<PointF> ps;
+    size_t pointCount = n + 2;
+
+   ps.push_back(from);
+
+   for( size_t i = 0; i < n; ++i)
+      ps.push_back(controls[i]);
+
+   ps.push_back(to);
+
     // Check the number of points
     if(  autoClose && (pointCount < 4 ||  (pointCount & 1)) ) return; // The number of points must be >= 4 and even
     if( !autoClose && (pointCount < 3 || !(pointCount & 1)) ) return; // The number of points must be >= 3 and odd
@@ -961,7 +687,7 @@ void ImagePainter2::drawQuadraticPolybezier(const PointF* ps, const size_t point
     if(_rasterizer->pen().size() == 1) {
         // Round the points and remove duplicates
         std::vector<Point> points;
-        cnvPointsFToPointsDeduplicate(points, ps, pointCount);
+        cnvPointsFToPointsDeduplicate(points, &ps[0], pointCount);
         if(autoClose && points.back() != points[0]) points.push_back(points[0]);
         // Rasterize the bezier
         _rasterizer->strokeOnePixelQuadraticPolybezierOutline(points.data(), points.size());
@@ -1098,7 +824,25 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
     _rasterizer->fillEllipse(tl, sz);
 }
 
-void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode )
+void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
+{
+     drawArc(topLeft, size, degBegin, degEnd, ArcMode::Open);
+}
+
+
+void ImagePainter2::drawChord(const PointF& topLeft, const SizeF& size,  float degBegin, float degEnd)
+{
+  drawArc(topLeft, size, degBegin, degEnd, ArcMode::Chord);
+}
+
+
+void ImagePainter2::drawPie(const PointF& topLeft, const SizeF& size,  float degBegin, float degEnd)
+{
+  drawArc(topLeft, size, degBegin, degEnd, ArcMode::Pie);
+}
+
+
+void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode)
 {
     // Rasterize one-pixel arc
     if(_rasterizer->pen().size() == 1) {
@@ -1252,25 +996,35 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
     }
 }
 
-void ImagePainter2::fillArc( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode )
-{
-    // Convert the points
-    const Point tl( Gfx::Math::zrint(topLeft.x    ()), Gfx::Math::zrint(topLeft.y     ()) );
-    const Size  sz( Gfx::Math::zrint(size   .width()), Gfx::Math::zrint(size   .height()) );
 
-    // Rasterize the arc
-    _rasterizer->fillArc(tl, sz, degBegin, degEnd, arcMode);
+void ImagePainter2::fillPie( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
+{  
+     Point tl( Gfx::Math::zrint(topLeft.x()), Gfx::Math::zrint(topLeft.y()) );
+    Size  sz( Gfx::Math::zrint(size.width()), Gfx::Math::zrint(size.height()) );
+
+    
+     _rasterizer->fillArc(tl, sz, degBegin, degEnd, ArcMode::Pie);
 }
 
-void ImagePainter2::drawPath(const Path& path, bool autoClose, float smoothness)
+void ImagePainter2::fillChord( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
+{  
+    const Point tl( Gfx::Math::zrint(topLeft.x    ()), Gfx::Math::zrint(topLeft.y()) );
+    const Size  sz( Gfx::Math::zrint(size   .width()), Gfx::Math::zrint(size.height()) );
+
+     _rasterizer->fillArc(tl, sz, degBegin, degEnd, ArcMode::Chord);
+}
+
+
+void ImagePainter2::drawPath(const Path& path, float smoothness)
 {
     // Convert the path to polyline points
     std::vector<PointF> pointsF;
     path.generatePoints(pointsF, smoothness);
 
     // Draw the polyline
-    drawPolyline(pointsF.data(), pointsF.size(), autoClose);
+    drawPolyline(pointsF.data(), pointsF.size());
 }
+
 
 void ImagePainter2::fillPath(const Path& path, float smoothness)
 {
@@ -1298,124 +1052,6 @@ void ImagePainter2::fillPath(const Path& path, float smoothness)
 }
 
 
-// ======================================================================================
-// ===== Private Member Functions ======================================================
-// ======================================================================================
-
-// --- Drawing Function ---
-
-void ImagePainter2::drawThickPolyline_impl(const PointF* ps, const size_t pointCount, bool autoClose, const int32_t* segmentIndexMarker)
-{
-    // Check if there is no actual point
-    if(!pointCount) return;
-
-    // Prepare the buffer
-    std::vector<PointF> pointsF, pointsT;
-    pointsF.reserve( pointCount * _rasterizer->pen().size() );
-
-    // Is the pen solid?
-    const bool solidPen = (_rasterizer->pen().style() == Pen::Solid);
-
-    // Separate the polygons convert them and recombine them
-    size_t startIndex = 0;
-
-    for(size_t i = 0; i <= pointCount; ++i) {
-        // Search for the end and/or separator points
-        if( i == pointCount || (ps[i].x() > MAXIMUM_COORD && ps[i].y() > MAXIMUM_COORD) ) {
-            // Get the base pointer and the number of points for this polygon
-            const PointF* basePtr = ps + startIndex;
-                  size_t  curPCnt = i - startIndex;
-            // Update the start index
-            startIndex = i + 1;
-            // Determine if this polygon is a closed polygon
-            bool closedPolygon = autoClose;
-            // Thicken polygon with solid line
-            if(solidPen) {
-                if(basePtr[0] == basePtr[curPCnt - 1]) {
-                    closedPolygon = true;
-                    --curPCnt;
-                }
-                if(closedPolygon) {
-                    if(!thickenSolidClosedPolygon(pointsF, basePtr, curPCnt, segmentIndexMarker)) return;
-                }
-                else {
-                    if(!thickenSolidOpenPolygon(pointsF, basePtr, curPCnt, segmentIndexMarker)) return;
-                }
-            }
-            // Thicken polygon with patterned line
-            else {
-                if(closedPolygon && basePtr[0] != basePtr[curPCnt - 1]) {
-                    pointsT.clear();
-                    for(size_t j = 0; j < curPCnt; ++j) pointsT.push_back(*(basePtr + j));
-                    pointsT.push_back(*basePtr);
-                    thickenPatternedPolygon(pointsF, pointsT.data(), pointsT.size());
-                }
-                else {
-                    thickenPatternedPolygon(pointsF, basePtr, curPCnt);
-                }
-            }
-            // Use anti-aliasing
-            if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Default) {
-                // Remove duplicates
-                std::vector<PointF> points;
-                deduplicatePointsF(points, pointsF.data(), pointsF.size());
-                // Rasterize the polygon
-                if(solidPen && closedPolygon) _rasterizer->penFillPolygon        (points.data(), points.size());
-                else                          _rasterizer->penFillPolygonSeparate(points.data(), points.size());
-            }
-            // Do not use use anti-aliasing
-            else {
-                // Round the points and remove duplicates
-                std::vector<Point> points;
-                cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
-                // Rasterize the polygon
-                if(solidPen && closedPolygon) _rasterizer->penFillPolygon        (points.data(), points.size());
-                else                          _rasterizer->penFillPolygonSeparate(points.data(), points.size());
-            }
-        }
-    }
-}
-
-// --- Solid Line Thickener ---
-
-void ImagePainter2::generateSolidLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, bool openingCap, bool closingCap)
-{
-    // Calculate the line's parameters
-    float wh, dx, dy, nx, ny;
-
-    calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, _rasterizer->pen().size());
-
-    // Generate points (CCW)
-    // --- Begin point ---
-    if(openingCap) {
-        switch(_rasterizer->pen().capStyle()) {
-            case Pen::SquareCap        : generateLineSquareCap       (dst, x1, y1,     dx, dy, nx, ny); break;
-            case Pen::RoundCap         : generateLineRoundCap        (dst, x1, y1, wh, dx, dy, nx, ny); break;
-            case Pen::TriangularOutCap : generateLineTriangularOutCap(dst, x1, y1,     dx, dy, nx, ny); break;
-            case Pen::TriangularInCap  : generateLineTriangularInCap (dst, x1, y1,     dx, dy, nx, ny); break;
-            case Pen::RoundHoleCap     : generateLineRoundHoleCap    (dst, x1, y1, wh, dx, dy, nx, ny); break;
-            case Pen::Arrow1Cap        : generateLineArrow1Cap       (dst, x1, y1,     dx, dy, nx, ny); break;
-            case Pen::Arrow2Cap        : generateLineArrow2Cap       (dst, x1, y1,     dx, dy, nx, ny); break;
-            default                    : openingCap = false;
-        }
-    }
-    if(!openingCap) generateLineButtCap(dst, x1, y1, nx, ny);
-    // --- End point ---
-    if(closingCap) {
-        switch(_rasterizer->pen().capStyle()) {
-            case Pen::SquareCap        : generateLineSquareCap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
-            case Pen::RoundCap         : generateLineRoundCap        (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
-            case Pen::TriangularOutCap : generateLineTriangularOutCap(dst, x2, y2,     -dx, -dy, -nx, -ny); break;
-            case Pen::TriangularInCap  : generateLineTriangularInCap (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
-            case Pen::RoundHoleCap     : generateLineRoundHoleCap    (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
-            case Pen::Arrow1Cap        : generateLineArrow1Cap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
-            case Pen::Arrow2Cap        : generateLineArrow2Cap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
-            default                    : closingCap = false;
-        }
-    }
-    if(!closingCap) generateLineButtCap(dst, x2, y2, -nx, -ny);
-}
-
 bool ImagePainter2::thickenSolidOpenPolygon(std::vector<PointF>& pointsF, const PointF* basePtr, size_t curPCnt, const int32_t* segmentIndexMarker)
 {
     // Prepare the buffers
@@ -1439,8 +1075,10 @@ bool ImagePainter2::thickenSolidOpenPolygon(std::vector<PointF>& pointsF, const 
         // Get the coordinates
         const PointF& from = *basePtr++;
         const PointF& to   = *basePtr;
+
         // Check if the "to" point belongs to the same segment
         bool inSameSegment = !!segmentIndexMarker;
+
         if(inSameSegment && *segmentIndexMarker < (Pt::int32_t) (i + 1)) {
             inSameSegment = false;
             ++segmentIndexMarker;
@@ -1788,7 +1426,7 @@ bool ImagePainter2::combineLineSegmentForSolidClosedPolygon(std::vector<PointF>&
 
 // --- Patterned Line Thickener ---
 
-struct ImagePainter2::SAGOpState {
+struct SAGOpState {
     std::vector<PointF>& dstPoints;  // Destination vector
     size_t               dstPStart;  // Start index of the previous polygon in the above vector
     size_t               dstPCount;  // The number of points of the previous polygon in the above vector
@@ -1819,77 +1457,7 @@ struct ImagePainter2::SAGOpState {
     {}
 };
 
-void ImagePainter2::generatePatternedSingleLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, Pt::int32_t& piCtrInOut)
-{
-    // Calculate the line's parameters
-    float wh, dx, dy, nx, ny;
 
-    calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, _rasterizer->pen().size());
-
-    // Get the pattern buffer and calculate the number of "pattern" segments
-    const Pt::uint8_t* pBuff = _rasterizer->patternBufferMP64();
-    const float        xLen  = (x2 > x1) ? (x2 - x1) : (x1 - x2);
-    const float        yLen  = (y2 > y1) ? (y2 - y1) : (y1 - y2);
-    const float        lLen  = Gfx::Math::fastSqrt(xLen * xLen + yLen * yLen);
-    const size_t       nSegs = (size_t) Gfx::Math::zrint(lLen / wh) * 2;
-    const float        xInc  = (x2 - x1) / nSegs;
-    const float        yInc  = (y2 - y1) / nSegs;
-
-    // Generate the segments
-    Pt::uint8_t prvPat = 0;
-    float       xs     = x1;
-    float       ys     = y1;
-    for(size_t i = 0; i <= nSegs; ++i) {
-        // Get the pattern
-        const Pt::uint8_t curPat = pBuff[piCtrInOut++];
-        if(piCtrInOut >= PATTERN_BUFFER_COUNTER_MAXMP) piCtrInOut -= PATTERN_BUFFER_COUNTER_MAXMP;
-        // Determine whether we should draw this segment as well as its coordinate
-        const bool draw = (!curPat && prvPat);
-        if(curPat && !prvPat) {
-            x1 = xs;
-            y1 = ys;
-        }
-        else if(draw) {
-            x2 = xs;
-            y2 = ys;
-            if(_rasterizer->pen().capStyle() == Pen::ButtCap) {
-                x2 += xInc;
-                y2 += yInc;
-            }
-        }
-        prvPat = curPat;
-        // Update the coordinates
-        xs += xInc;
-        ys += yInc;
-        // Skip if we are not going to draw this segment
-        if(!draw) continue;
-        // Add polygon separator point as needed
-        if(!dst.empty()) dst.push_back(Painter::PolygonSeparatorPointF);
-        // Generate points (CCW)
-        // --- Begin point ---
-        switch(_rasterizer->pen().capStyle()) {
-            case Pen::SquareCap        : generateLineSquareCap       (dst, x1, y1,     dx, dy, nx, ny); break;
-            case Pen::RoundCap         : generateLineRoundCap        (dst, x1, y1, wh, dx, dy, nx, ny); break;
-            case Pen::TriangularOutCap : generateLineTriangularOutCap(dst, x1, y1,     dx, dy, nx, ny); break;
-            case Pen::TriangularInCap  : generateLineTriangularInCap (dst, x1, y1,     dx, dy, nx, ny); break;
-            case Pen::RoundHoleCap     : generateLineRoundHoleCap    (dst, x1, y1, wh, dx, dy, nx, ny); break;
-            case Pen::Arrow1Cap        : generateLineArrow1Cap       (dst, x1, y1,     dx, dy, nx, ny); break;
-            case Pen::Arrow2Cap        : generateLineArrow2Cap       (dst, x1, y1,     dx, dy, nx, ny); break;
-            default                    : generateLineButtCap         (dst, x1, y1,             nx, ny); break;
-        }
-        // --- End point ---
-        switch(_rasterizer->pen().capStyle()) {
-            case Pen::SquareCap        : generateLineSquareCap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
-            case Pen::RoundCap         : generateLineRoundCap        (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
-            case Pen::TriangularOutCap : generateLineTriangularOutCap(dst, x2, y2,     -dx, -dy, -nx, -ny); break;
-            case Pen::TriangularInCap  : generateLineTriangularInCap (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
-            case Pen::RoundHoleCap     : generateLineRoundHoleCap    (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
-            case Pen::Arrow1Cap        : generateLineArrow1Cap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
-            case Pen::Arrow2Cap        : generateLineArrow2Cap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
-            default                    : generateLineButtCap         (dst, x2, y2,               -nx, -ny); break;
-        }
-    }
-}
 
 void ImagePainter2::thickenPatternedPolygon(std::vector<PointF>& pointsF, const PointF* src, size_t pointCount)
 {
@@ -2179,6 +1747,95 @@ void ImagePainter2::sagGeneratePolyLineSegment(SAGOpState& state)
     state.dstPoints.insert(state.dstPoints.end(), pointsF.begin(), pointsF.end());
 }
 
+
+bool ImagePainter2::isAntialiasing() const
+{
+ return _rasterizer->antiAliasingMode();
+}
+
+const Gfx::Transform& ImagePainter2::transform() const
+{
+ return _transform;
+}
+
+void ImagePainter2::setTransform(const const Gfx::Transform& t)
+{
+  _transform = t;
+}
+
+bool ImagePainter2::intersectLine(bool& inLine, PointF& intersect, const PointF& line1a, const PointF& line1b, const PointF& line2a, const PointF& line2b, size_t penSize)
+{
+    // The first line
+    const float x11   = line1a.x();
+    const float y11   = line1a.y();
+    const float x12   = line1b.x();
+    const float y12   = line1b.y();
+    const float minX1 = std::min(x11, x12);
+    const float minY1 = std::min(y11, y12);
+    const float maxX1 = std::max(x11, x12);
+    const float maxY1 = std::max(y11, y12);
+    const float a1    = y12 - y11;
+    const float b1    = x11 - x12;
+    const float c1    = -(x11 * y12 - x12 * y11);
+
+    // The second line
+    const float x21   = line2a.x();
+    const float y21   = line2a.y();
+    const float x22   = line2b.x();
+    const float y22   = line2b.y();
+    const float minX2 = std::min(x21, x22);
+    const float minY2 = std::min(y21, y22);
+    const float maxX2 = std::max(x21, x22);
+    const float maxY2 = std::max(y21, y22);
+    const float a2    = y22 - y21;
+    const float b2    = x21 - x22;
+    const float c2    = -(x21 * y22 - x22 * y21);
+
+    // Check if the line is parallel
+    const float denom = a1 * b2 - a2 * b1;
+    if(denom == 0.0f) {
+        // Check for special cases
+        if(y11 == y12 && y11 == y21 && y11 == y22 && x12 == x21) {
+            intersect.set(x12, y11);
+            inLine = true;
+            return true;
+        }
+        if(x11 == x12 && x11 == x21 && x11 == x22 && y12 == y21) {
+            intersect.set(x11, y12);
+            inLine = true;
+            return true;
+        }
+        // No intersection
+        return false;
+    }
+
+    // Calculate the intersection point
+    const float idenom = 1.0f / denom;
+          float ipX    = (b1 * c2 - b2 * c1) * idenom;
+          float ipY    = (a2 * c1 - a1 * c2) * idenom;
+
+    // Check and fix the coordinate of the intersection point
+    // (for very steep lines, the coordinate of the intersection point can be incorrectly calculated)
+    const size_t pzf = FIXED_POINT_TO_INT(penSize * FIXED_POINT_CONSTANT_SQRT2);
+          if(ipX < minX1 - pzf && ipX < minX2 - pzf) ipX = (minX1 + minX2) * 0.5f;
+    else if(ipX > maxX1 + pzf && ipX > maxX2 + pzf) ipX = (maxX1 + maxX2) * 0.5f;
+          if(ipY < minY1 - pzf && ipY < minY2 - pzf) ipY = (minY1 + minY2) * 0.5f;
+    else if(ipY > maxY1 + pzf && ipY > maxY2 + pzf) ipY = (maxY1 + maxY2) * 0.5f;
+
+    // Store the intersection point
+    intersect.set(ipX, ipY);
+
+    // Determine if the intersection point is inside the line
+    inLine = (ipX >= minX1 && ipX <= maxX1 && ipY >= minY1 && ipY <= maxY1)
+            | (ipX >= minX2 && ipX <= maxX2 && ipY >= minY2 && ipY <= maxY2);
+
+    // Done
+    //lprintf("Line 1       : (%7.3f, %7.3f) - (%7.3f, %7.3f)\n", x11, y11, x12, y12);
+    //lprintf("Line 2       : (%7.3f, %7.3f) - (%7.3f, %7.3f)\n", x21, y21, x22, y22);
+    //lprintf("Intersection : (%7.3f, %7.3f) - %s \n", ipX, ipY, inLine ? "inline" : "outline");
+    //lprintf("\n");
+    return true;
+}
 
 } // namespace
 } // namespace

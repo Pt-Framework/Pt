@@ -1,0 +1,225 @@
+/* Copyright (C) 2006-2015 Marc Boris Duerner
+   Copyright (C) 2017-2017 Aloysius Indrayanto
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+  MA 02110-1301 USA
+*/
+#include <Pt/Gfx/Transform.h>
+
+
+namespace Pt{
+namespace Gfx{
+
+
+Transform::Transform()
+{
+    reset();
+}
+
+
+Transform::~Transform()
+{
+}
+
+
+void Transform::reset()
+{
+    _mdata[0][0] = 1; 
+    _mdata[0][1] = 0; 
+    _mdata[0][2] = 0;
+    _mdata[1][0] = 0; 
+    _mdata[1][1] = 1; 
+    _mdata[1][2] = 0;
+    _isIdentity = true;
+}
+    
+    
+void Transform::translate(double x, double y)
+{
+    MatrixData n;
+
+    n[0][0] = 1; n[0][1] = 0; n[0][2] = x;
+    n[1][0] = 0; n[1][1] = 1; n[1][2] = y;
+
+    updateMatrix(n);
+    _isIdentity = false;
+}
+        
+        
+void Transform::scale(double x, double y)
+{
+    if(x == 1 && y == 1) 
+      return;
+
+    MatrixData n;
+
+    n[0][0] = x; n[0][1] = 0; n[0][2] = 0;
+    n[1][0] = 0; n[1][1] = y; n[1][2] = 0;
+
+    updateMatrix(n);
+    _isIdentity = false;
+}
+
+
+void Transform::rotateDeg(double angle)
+{
+    MatrixData n;
+
+    const double r = angle * (Pi / 180);
+    const double s = ::sin(r);
+    const double c = ::cos(r);
+
+    n[0][0] =  c; n[0][1] = s; n[0][2] = 0;
+    n[1][0] = -s; n[1][1] = c; n[1][2] = 0;
+
+    updateMatrix(n);
+    _isIdentity = false;
+}
+
+
+void Transform::rotateRad(double r)
+{ 
+    MatrixData n;
+
+    const double s = ::sin(r);
+    const double c = ::cos(r);
+
+    n[0][0] =  c; n[0][1] = s; n[0][2] = 0;
+    n[1][0] = -s; n[1][1] = c; n[1][2] = 0;
+
+    updateMatrix(n);
+    _isIdentity = false;
+}
+
+
+void Transform::shear(double sh, double sv)
+{//TODO: optimize this
+  shearX(sh);
+  shearY(sv); 
+}
+
+
+void Transform::shearX(double deg)
+{
+    MatrixData n;
+
+    const double r = deg * (Pi / 180);
+    const double t = ::sin(r) / ::cos(r);
+
+    n[0][0] = 1; n[0][1] = t; n[0][2] = 0;
+    n[1][0] = 0; n[1][1] = 1; n[1][2] = 0;
+
+    updateMatrix(n);
+    _isIdentity = false;
+}
+
+
+void Transform::shearY(double deg)
+{
+    MatrixData n;
+
+    const double r = deg * (Pi / 180);
+    const double t = ::sin(r) / ::cos(r);
+
+    n[0][0] = 1; n[0][1] = 0; n[0][2] = 0;
+    n[1][0] = t; n[1][1] = 1; n[1][2] = 0;
+
+    updateMatrix(n);
+    _isIdentity = false;
+}
+
+
+Transform Transform::operator*(const Transform& rhs) const
+{
+    // Multiply the matrix and return the result
+    Transform result = rhs;
+    result.updateMatrix(_mdata);
+    return result;
+}
+
+
+        
+PointF Transform::operator*(const PointF& p) const
+{
+    PointF result;
+
+    result.setX( _mdata[0][0] * p.x() + _mdata[0][1] * p.y() + _mdata[0][2] );
+    result.setY( _mdata[1][0] * p.x() + _mdata[1][1] * p.y() + _mdata[1][2] );
+
+    return result;
+}
+
+
+bool Transform::operator==(const Transform& m) const
+{ 
+    return memcmp(&_mdata, &m._mdata, sizeof(_mdata)) == 0; 
+}
+
+
+bool Transform::operator!=(const Transform& m) const
+{
+   return memcmp(&_mdata, &m._mdata, sizeof(_mdata)) != 0; 
+}
+
+        
+SizeF Transform::operator*(const SizeF& sz) const
+{
+    SizeF result;
+    PointF za(sz.width(), 0);
+    PointF zb(sz.height(), 0);
+    PointF r(0, 0);
+
+    za = (*this) * za;
+    zb = (*this) * zb;
+    r  = (*this) * r;
+    
+    const double dxa = za.x() - r.x();
+    const double dya = za.y() - r.y();
+    const double dxb = zb.x() - r.x();
+    const double dyb = zb.y() - r.y();
+
+    result.setWidth( ::sqrt(dxa * dxa + dya * dya) );
+    result.setHeight( ::sqrt(dxb * dxb + dyb * dyb) );
+    return result;
+}
+
+
+void Transform::updateMatrix(const MatrixData& n)
+{
+    MatrixData  result;
+
+    result[0][0] = n[0][0] * _mdata[0][0] + n[0][1] * _mdata[1][0] + n[0][2] * 0;
+    result[0][1] = n[0][0] * _mdata[0][1] + n[0][1] * _mdata[1][1] + n[0][2] * 0;
+    result[0][2] = n[0][0] * _mdata[0][2] + n[0][1] * _mdata[1][2] + n[0][2] * 1;
+
+    result[1][0] = n[1][0] * _mdata[0][0] + n[1][1] * _mdata[1][0] + n[1][2] * 0;
+    result[1][1] = n[1][0] * _mdata[0][1] + n[1][1] * _mdata[1][1] + n[1][2] * 0;
+    result[1][2] = n[1][0] * _mdata[0][2] + n[1][1] * _mdata[1][2] + n[1][2] * 1;
+
+    memcpy(_mdata, result, sizeof(MatrixData));
+}
+
+} // namespace
+} // namespace

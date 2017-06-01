@@ -1473,6 +1473,15 @@
     <ClInclude Include="..\..\include\Pt\Hmi\StackLayout.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Transform.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\Path.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Gfx\ImagePainter2.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -1517,7 +1526,6 @@
     <None Include="..\..\jam.bat" />
     <None Include="..\..\Jambase" />
     <None Include="..\..\Jamconfigure" />
-    <None Include="..\..\Jamfile" />
     <None Include="..\..\src\Pt-Unit\Jamfile">
       <Filter>Pt-Unit</Filter>
     </None>
@@ -1614,6 +1622,7 @@
     <None Include="..\..\src\Pt-Gfx\tests\Jamfile">
       <Filter>Pt-Gfx\tests</Filter>
     </None>
+    <None Include="..\..\Jamfile" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Pt\Atomicity.cpp">
@@ -2725,6 +2734,15 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Hmi\StackLayout.cpp">
       <Filter>Pt-Hmi</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Gfx\Transform.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Gfx\Path.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Gfx\ImagePainter2.cpp">
+      <Filter>Pt-Gfx</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

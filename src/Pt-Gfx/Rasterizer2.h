@@ -111,13 +111,13 @@ class Rasterizer2
 
         ~Rasterizer2();
 
-        void setAntiAliasingMode(AntiAliasingMode mode)
+        void setAntiAliasingMode(bool on)
         {
-            _aaMode = mode;
+            _aaMode = on;
             updatePenPattern();
         }
 
-        const AntiAliasingMode& antiAliasingMode() const
+        bool antiAliasingMode() const
         { return _aaMode; }
 
         void setImage(Image& image);
@@ -328,7 +328,7 @@ class Rasterizer2
         void arcUtil_rasterClosingXWLine(const FilledArcInfo& fai, const ArcXWLineData& xwLine, Point maskInOut[4]);
 
     private:
-        AntiAliasingMode _aaMode;
+        bool _aaMode;
 
         Image*           _image;
         DrawText2*       _text;

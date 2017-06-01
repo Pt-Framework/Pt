@@ -46,9 +46,11 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Image.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\ImageFormat.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\ImagePainter.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\ImagePainter2.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\ImageView.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\JpegReader.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Painter.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\Path.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Pen.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\PngReader.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Point.h" />
@@ -56,6 +58,7 @@
     <ClInclude Include="..\..\include\Pt\Gfx\Rgb16Format.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Rgb32Format.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Size.h" />
+    <ClInclude Include="..\..\include\Pt\Gfx\Transform.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Yuv12Format.h" />
     <ClInclude Include="..\..\include\Pt\Gfx\Yuv12Image.h" />
     <ClInclude Include="..\..\include\Pt\Hmi\ActivateEvent.h" />
@@ -520,7 +523,9 @@
     <ClCompile Include="..\..\src\Pt-Gfx\Image.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\ImageFormat.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\ImagePainter.cpp" />
+    <ClCompile Include="..\..\src\Pt-Gfx\ImagePainter2.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\JpegReader.cpp" />
+    <ClCompile Include="..\..\src\Pt-Gfx\Path.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Pen.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\PngReader.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Rasterizer.cpp" />
@@ -531,6 +536,7 @@
     <ClCompile Include="..\..\src\Pt-Gfx\tests\ImagePainterTest.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\tests\Pt-Gfx-test.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\tests\Yuv12Test.cpp" />
+    <ClCompile Include="..\..\src\Pt-Gfx\Transform.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Yuv12Format.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Application.cpp" />
     <ClCompile Include="..\..\src\Pt-Hmi\Button.cpp" />

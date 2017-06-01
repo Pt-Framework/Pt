@@ -33,12 +33,13 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-
 #include <Pt/SmartPtr.h>
-
+#include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/ArcMode.h>
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Point.h>
+#include <Pt/Gfx/Math.h>
+#include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/Transform.h>
 
 
@@ -46,68 +47,46 @@ namespace Pt{
 namespace Gfx{
 
 
-class DrawText2;
+struct Element
+{
+    enum ElementType 
+    {
+      IT_Close,
+      IT_MoveTo, 
+      IT_LineTo, 
+      IT_QuadBezierTo, 
+      IT_CubicBezierTo, 
+      IT_GenNBezierTo,
+    };
 
 
-/** @brief Indicates invalid/erroneous usage of the Path API.
-  * @ingroup Utilities
-  */
-class PT_GFX_API PathError : public std::runtime_error {
-    public:
-        //! @brief Construct with error message.
-        explicit PathError(const std::string& msg)
-        : std::runtime_error(msg)
-        {}
 
-        //! @brief Construct with error message.
-        explicit PathError(const char* msg)
-        : std::runtime_error(msg)
-        {}
+    inline Element(ElementType type_)
+    : type(type_)
+    {}
 
-        //! @brief Destructor.
-        inline ~PathError() throw()
-        {}
+    inline Element(ElementType type_, double x0, double y0)
+    : type(type_), pxy(2)
+    { pxy[0] = x0; pxy[1] = y0; }
+
+    inline Element(ElementType type_, double x0, double y0, double x1, double y1)
+    : type(type_), pxy(4)
+    { pxy[0] = x0; pxy[1] = y0; pxy[2] = x1; pxy[3] = y1; }
+
+    inline Element(ElementType type_, double x0, double y0, double x1, double y1, double x2, double y2)
+    : type(type_), pxy(6)
+    { pxy[0] = x0; pxy[1] = y0; pxy[2] = x1; pxy[3] = y1; pxy[4] = x2; pxy[5] = y2; }
+
+    inline Element(ElementType type_, const std::vector<double>& pxy_)
+    : type(type_), pxy(pxy_)
+    {}
+
+    ElementType      type;
+    std::vector<double> pxy;
 };
 
-
-/** @brief Indicates that the Path API has been used in an invalid context.
-  * @ingroup Utilities
-  */
-class PT_GFX_API PathInvalidContext : public PathError {
-    public:
-        //! @brief Construct with error message prefix.
-        explicit PathInvalidContext(const std::string& msg)
-        : PathError(msg + ": cannot call this function in the current context")
-        {}
-
-        //! @brief Construct with error message prefix.
-        explicit PathInvalidContext(const char* msg)
-        : PathError(std::string(msg) + ": cannot call this function in the current context")
-        {}
-
-        //! @brief Destructor.
-        inline ~PathInvalidContext() throw()
-        {}
-};
-
-
-/** @brief 2D path builder.
-  */
-class PT_GFX_API Path {
-    public:
-        typedef BasicTransform<double> TransformT;
-
-    public:
-        //
-        // Polygon clipper
-        //
-
-        enum ClipMode {
-            Intersection, Union, Difference, Xor
-        };
-
-        static void clipPolygon(std::vector<PointF>& result, const std::vector<PointF>& subject, const std::vector<PointF>& clipRegion, ClipMode cm);
-
+class PT_GFX_API Path 
+{
     public:
         Path();
 
@@ -117,98 +96,211 @@ class PT_GFX_API Path {
 
         const Path& operator=(const Path& p);
 
-        bool isNull() const;
+        std::size_t size();
+
+        const Element& at(std::size_t n) const;
+
+        bool isEmpty() const;
 
         void clear();
 
-        //
-        // Path management - call them multiple times to create multi-path (e.g. path with holes)
-        //
+        // adds a closed subpath
+        void addPath(const Path& p);
 
-        void beginPath();
+        // adds the elements to this path, connecting the last point with the 
+        // first point of the inserted path
+        void insertPath(const Path& p);
 
-        void endPath();
+        // ads a LineTo to the begin of the subpath and adds a moveTo(0,0)
+        void closeSubpath();
 
-        //
-        // Absolute coordinate
-        //
+        RectF boundingRect() const;
 
-        void moveTo(double x, double y);
+        const PointF& currentPosition() const;
 
-        void lineTo(double x, double y);
+        void moveTo(const PointF& p);
 
-        void arcTo(double x, double y, double r);
+        void lineTo(const PointF& p);
 
-        void quadraticBezierTo(double cx, double cy, double x, double y);
+        void arcTo(const PointF& p, double r);
 
-        void cubicBezierTo(double cx1, double cy1, double cx2, double cy2, double x, double y);
+        void quadraticBezierTo(const PointF &c, const PointF& to);
 
-        void genericNBezierTo(Pt::int32_t controlPointCount, const double* cxy, double x, double y);
+        void cubicBezierTo(const PointF &c1, const PointF &c2, const PointF& to);
 
-        //
-        // Relative coordinate
-        //
+        void bezierTo(const PointF* controlPoints, size_t n, const PointF& to);
 
-        void relMoveTo(double x, double y);
+        // Apply the tranformation to the points in the path
+        void transform(const Transform& transform);
 
-        void relLineTo(double x, double y);
-
-        void relArcTo(double x, double y, double r);
-
-        void relQuadraticBezierTo(double cx, double cy, double x, double y);
-
-        void relCubicBezierTo(double cx1, double cy1, double cx2, double cy2, double x, double y);
-
-        void relGenericNBezierTo(Pt::int32_t controlPointCount, const double* cxy, double x, double y);
-
-        //
-        // Transform and clipping
-        //
-        template <typename T>
-        inline void setTransform(const BasicTransform<T>& transform)
-        { _transform = transform; }
-
-        inline TransformT& transform()
-        { return _transform; }
-
-        inline const TransformT& transform() const
-        { return _transform; }
-
-        inline void setClipPath(const Path& clipPath)
-        { *_clipPath = clipPath; }
-
-        inline const Path& clipPath() const
-        { return *_clipPath; }
-
-        inline void setClipMode(ClipMode clipMode)
-        {_clipMode = clipMode; }
-
-        inline ClipMode clipMode() const
-        { return _clipMode; }
-
-        //
-        // Generators
-        //
-
-        // NOTE: * If you enlarge (scale-up) the shape, you may need to increase the "smoothness" factor as needed
-        //       * If the "smoothness" factor is too large, the anti-aliasing will become less effective
-        void generatePoints(std::vector<PointF>& dst, float smoothness = 1) const;
+        void generatePoints(std::vector<PointF>& dst, float smoothness = 1) const;  
 
     private:
-        struct PathData;
+       void decomposeArcTo(double x1, double y1, double x2, double y2, double r);
 
-        Path(bool forClipPath);
 
     private:
-        SmartPtr<PathData> _pathData;
-        TransformT         _transform;
-        Path*              _clipPath;
-        ClipMode           _clipMode;
+      static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double x3, double y3, double smoothness)
+      {
+          //lprintf("(%5.1f, %5.1f) (%5.1f, %5.1f) (%5.1f, %5.1f)\n", x1, y1, x2, y2, x3, y3);
+          //lprintf("(%5.1f, %5.1f) (%5.1f, %5.1f)\n", curX, curY, ins.p[0], ins.p[1]);
 
-        void decomposeAndStore_arcTo(double x1, double y1, double x2, double y2, double r);
-        void getTransformedPathData(PathData& dst) const;
+          // Check if the points actually specify a straight line
+          const double dx32 = x3 - x2;
+          const double dy32 = y3 - y2;
+          const double dx12 = x1 - x2;
+          const double dy12 = y1 - y2;
 
-        static void generatePoints_impl(std::vector<PointF>& dst, const PathData& pd, float smoothness);
+          if( !(dx12 * dy32 - dy12 * dx32) ) { // Curvature
+              if(dst.empty()) dst.push_back( PointF(x1, y1) );
+              dst.push_back( PointF(x3, y3) );
+              return;
+          }
+
+          // Calculate the approximate length of the curve
+          const double l32 = ::sqrt(dx32 * dx32 + dy32 * dy32);
+          const double l12 = ::sqrt(dx12 * dx12 + dy12 * dy12);
+          const double lb  = l32 + l12;
+
+          // Determine the number of segments
+          const Pt::int32_t nSegs = Gfx::Math::zrint(lb * abs(smoothness) / 20) + 3 + 1;
+
+          // Calculate the inverse multiplication factor
+          const double nSegs1i = 1.0 / (nSegs - 1);
+
+          // Generate the points
+          // PB = (1 - t) * (1 - t) * P1 + 2 * t * (1 - t) * P2 + t * t * P3
+          //      -----------------        ---------------        -----
+          //      a                        b                      c
+          for(Pt::int32_t i = 0; i < nSegs; ++i) {
+              // Calculate the coordinates
+              const double t  = i * nSegs1i;
+              const double it = 1.0 - t;
+              const double a  = it * it;
+              const double b  = 2.0 * t * it;
+              const double c  = t * t;
+              const double x  = a * x1 + b * x2 + c * x3;
+              const double y  = a * y1 + b * y2 + c * y3;
+              // Store the coordinate as needed
+              if(i || dst.empty()) dst.push_back( PointF(x, y) );
+          }
+      }
+
+
+        static inline void generateCubicBezierPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double x3, double y3, double x4, double y4, double smoothness)
+        {
+            // Calculate the approximate length of the curve
+            const double dx43 = x4 - x3;
+            const double dy43 = y4 - y3;
+            const double dx32 = x3 - x2;
+            const double dy32 = y3 - y2;
+            const double dx12 = x1 - x2;
+            const double dy12 = y1 - y2;
+            const double l43  = ::sqrt(dx43 * dx43 + dy43 * dy43);
+            const double l32  = ::sqrt(dx32 * dx32 + dy32 * dy32);
+            const double l12  = ::sqrt(dx12 * dx12 + dy12 * dy12);
+            const double lb   = l43 + l32 + l12;
+
+            // Determine the number of segments
+            const Pt::int32_t nSegs = Gfx::Math::zrint(lb * abs(smoothness) / 20) + 4 + 1;
+
+            // Calculate the inverse multiplication factor
+            const double nSegs1i = 1.0 / (nSegs - 1);
+
+            // Generate the points
+            // PB = (1 - t) * (1 - t) * (1 - t) * P1 + 3 * t * (1 - t) * (1 - t) * P2 + 3 * t * t * (1 - t) * P3 + t * t * t * P4
+            //      ---------------------------        -------------------------        -------------------        ---------
+            //      a                                  b                                c                          d
+            for(Pt::int32_t i = 0; i < nSegs; ++i) {
+                // Calculate the coordinates
+                const double t  = i * nSegs1i;
+                const double it = 1.0 - t;
+                const double a  = it * it * it;
+                const double b  = 3.0 * t * it * it;
+                const double c  = 3.0 * t * t * it;
+                const double d  = t * t * t;
+                const double x  = a * x1 + b * x2 + c * x3 + d * x4;
+                const double y  = a * y1 + b * y2 + c * y3 + d * y4;
+                // Store the coordinate as needed
+                if(i || dst.empty()) dst.push_back( PointF(x, y) );
+            }
+        }
+
+
+        static inline void generateGenericNBezierPoints(std::vector<PointF>& dst, double x1, double y1, const std::vector<double>& points, double smoothness)
+        {
+            // Add the start coordinate to the point
+            std::vector<double> pts;
+            pts.reserve(points.size() + 2);
+
+            pts.push_back(x1);
+            pts.push_back(y1);
+
+            pts.insert(pts.end(), points.begin(), points.end());
+
+            // Calculate the approximate length of the curve
+            double clen = 0.0;
+            for(size_t i = 0; i < (points.size() / 2 - 1); ++i) {
+                const size_t cidx =  i      * 2;
+                const size_t nidx = (i + 1) * 2;
+                const double x1   = pts[cidx + 0];
+                const double y1   = pts[cidx + 1];
+                const double x2   = pts[nidx + 0];
+                const double y2   = pts[nidx + 1];
+                const double dx   = x2 - x1;
+                const double dy   = y2 - y1;
+                clen += ::sqrt(dx * dx + dy * dy);
+            }
+
+            // Determine the number of segments
+            const Pt::int32_t nSegs = Gfx::Math::zrint(clen * abs(smoothness) / 20) + (pts.size() / 2 + 1 + 1);
+
+            // Calculate the inverse multiplication factor
+            const double nSegs1i = 1.0 / (nSegs - 1);
+
+            // Generate the points
+            for(Pt::int32_t i = 0; i < nSegs; ++i) {
+                // Calculate the coordinates
+                const double t  = i * nSegs1i;
+                      double x;
+                      double y;
+                getGenericNBezierPoint(x, y, pts, t);
+                // Store the coordinate as needed
+                if(i || dst.empty()) dst.push_back( PointF(x, y) );
+            }
+        }
+
+      
+
+      // Based on: How do I implement a Bézier curve in C++?
+      //           http://stackoverflow.com/questions/785097/how-do-i-implement-a-bézier-curve-in-c
+      //           Answer by iforce2d, 2014 (permalink: http://stackoverflow.com/a/21642962)
+      static inline void getGenericNBezierPoint(double& x, double& y, const std::vector<double>& points, double t)
+      {
+          std::vector<double> tmp = points;
+
+          size_t i = points.size() / 2 - 1;
+
+          while(i > 0) {
+              for(size_t k = 0; k < i; ++k) {
+                  const size_t cidx =  k      * 2;
+                  const size_t nidx = (k + 1) * 2;
+                  tmp[cidx + 0] = tmp[cidx + 0] + t * ( tmp[nidx + 0] - tmp[cidx + 0] ); // X
+                  tmp[cidx + 1] = tmp[cidx + 1] + t * ( tmp[nidx + 1] - tmp[cidx + 1] ); // Y
+              }
+              --i;
+          }
+
+          x = tmp[0];
+          y = tmp[1];
+      }
+
+    private:
+      typedef std::vector<Element> ElementVector;
+
+    private:
+      ElementVector _elements;
+      double       _curX, _curY;
 };
 
 

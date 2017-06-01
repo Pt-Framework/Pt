@@ -9,11 +9,7 @@ class Transform
         // contruct with identity matrix
         Transform();
         
-        Transform(const Transform& t);
-
         ~Transform();
-
-        Transform& operator=(const Transform& t);
 
         // returns true if the matrix is the identity matrix
         bool isIdentity() const;

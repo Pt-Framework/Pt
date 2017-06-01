@@ -28,6 +28,7 @@
 
 #include <stdexcept>
 
+#include <Pt/Gfx/Brush.h>
 #include <Pt/Gfx/ImagePainter_ORIGINAL.h>
 
 #include <Pt/Gfx/ImageOperation2.h>
