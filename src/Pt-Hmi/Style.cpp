@@ -792,6 +792,77 @@ void ComboBoxRenderer::renderText(const ComboBox& cb,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
+// SpinBoxRenderer
+///////////////////////////////////////////////////////////////////////////////
+
+SpinBoxRenderer::SpinBoxRenderer(std::size_t refs)
+: Style::Facet( typeid(SpinBoxRenderer), refs )
+{
+}
+
+
+SpinBoxRenderer::~SpinBoxRenderer()
+{
+}
+
+
+void SpinBoxRenderer::prepare(const SpinBox& sb, 
+                              const StyleOptions& options,
+                              Gfx::Brush& background,
+                              Gfx::Brush& foreground,
+                              Gfx::Pen& contour,
+                              Gfx::Font& font,
+                              Gfx::Pen& textPen) const
+{
+    onPrepare(sb, options, background, foreground, contour, font, textPen);
+}
+
+
+void SpinBoxRenderer::prepareLayout(const SpinBox& sb,
+                                    Gfx::RectF& downButton,
+                                    Gfx::RectF& upButton,
+                                    Gfx::RectF& textBox) const
+{
+    return onPrepareLayout(sb, downButton, upButton, textBox);
+}
+
+
+void SpinBoxRenderer::renderBackground(const SpinBox& sb, 
+                                       const StyleOptions& options,
+                                       Painter& painter, 
+                                       const Gfx::RectF& rect,
+                                       const Gfx::Pen& contour,
+                                       const Gfx::Brush& brush) const
+{
+    onRenderBackground(sb, options, painter, rect, contour, brush);
+}
+
+
+void SpinBoxRenderer::renderButton(const SpinBox& sb, 
+                                   const StyleOptions& options,
+                                   Painter& painter, 
+                                   const Gfx::RectF& rect,
+                                   const Gfx::Pen& contour,
+                                   const Gfx::Brush& foreground) const
+{
+    onRenderButton(sb, options, painter, rect, contour, foreground);
+}
+
+
+void SpinBoxRenderer::renderText(const SpinBox& sb,
+                                 const StyleOptions& options,
+                                 Painter& painter, 
+                                 const Gfx::RectF& rect,
+                                 const String& text,
+                                 const Gfx::PointF& textPos,
+                                 const Gfx::Font& font, 
+                                 const Gfx::Pen& textPen,
+                                 const Gfx::RectF& cursor) const
+{
+    onRenderText(sb, options, painter, rect, text, textPos, font, textPen, cursor);
+}
+
+///////////////////////////////////////////////////////////////////////////////
 // TabViewRenderer
 ///////////////////////////////////////////////////////////////////////////////
 

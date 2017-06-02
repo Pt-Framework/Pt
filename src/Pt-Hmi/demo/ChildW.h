@@ -17,6 +17,7 @@
 #include <Pt/Hmi/Application.h>
 #include <Pt/Hmi/ProgressBar.h>
 #include <Pt/Hmi/Slider.h>
+#include <Pt/Hmi/SpinBox.h>
 
 namespace Pt {
 
@@ -72,6 +73,7 @@ class ChildW : public Hmi::Window
         DockingLayout  _buttonBar;
         ProgressBar    _progressBar;
         Slider         _slider;
+        SpinBox        _spinBox;
 };
 
 } // namespace

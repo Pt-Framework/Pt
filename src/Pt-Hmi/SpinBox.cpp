@@ -27,18 +27,17 @@
   MA 02110-1301 USA
 */
 
-#include <Pt/Hmi/LineEdit.h>
+#include <Pt/Hmi/SpinBox.h>
 #include <Pt/Hmi/Painter.h>
 
 namespace Pt {
 
 namespace Hmi {
 
-LineEdit::LineEdit()
+SpinBox::SpinBox()
 : _isEditable(true)
 , _isAccepted(true)
 , _isTextChanged(false)
-, _echoMode(Normal)
 , _spacing(0)
 , _hasRenderer(false)
 {
@@ -47,18 +46,18 @@ LineEdit::LineEdit()
 }
 
 
-LineEdit::~LineEdit()
+SpinBox::~SpinBox()
 {
 }
 
 
-bool LineEdit::isEditable() const
+bool SpinBox::isEditable() const
 {
     return _isEditable;
 }
 
 
-void LineEdit::setEditable(bool e)
+void SpinBox::setEditable(bool e)
 {
     _isEditable = e;
     setTextInput(_isEditable);
@@ -67,13 +66,13 @@ void LineEdit::setEditable(bool e)
 }
 
 
-const Pt::String& LineEdit::text() const
+const Pt::String& SpinBox::text() const
 {
     return _editor.text();
 }
 
 
-void LineEdit::setText(const Pt::String& str)
+void SpinBox::setText(const Pt::String& str)
 {
     _editor.setText(str);
     invalidate();
@@ -82,79 +81,45 @@ void LineEdit::setText(const Pt::String& str)
 }
 
 
-bool LineEdit::isEmpty() const
+bool SpinBox::isEmpty() const
 {
     return _editor.isEmpty();
 }
 
 
-const Pt::String& LineEdit::displayText() const
-{   
-    return _editor.displayText();
-}
-
-
-const Pt::String& LineEdit::placeholderText() const
-{
-    return _placeholderText;
-}
-
-
-void LineEdit::setPlaceholderText(const Pt::String& s)
-{
-    _placeholderText = s;
-    invalidate();
-}
-
-
-LineEdit::EchoMode LineEdit::echoMode() const
-{
-    return _echoMode;
-}
-
-
-void LineEdit::setEchoMode(LineEdit::EchoMode mode)
-{
-    _echoMode = mode;   
-    _editor.setMasked(_echoMode == Masked);
-
-    invalidate();
-}
-
-
-Adjustment LineEdit::textAdjustment() const
+Adjustment SpinBox::textAdjustment() const
 {
     return _editor.adjustment();
 }
 
 
-void LineEdit::setTextAdjustment(Adjustment a)
+void SpinBox::setTextAdjustment(Adjustment a)
 {
     _editor.setAdjustment(a);
     invalidate();
 }
 
 
-std::size_t LineEdit::cursorPosition() const
+std::size_t SpinBox::cursorPosition() const
 {
     return _editor.cursorPosition();
 }
 
 
-void LineEdit::setCursorPosition(std::size_t n)
+void SpinBox::setCursorPosition(std::size_t n)
 {
     _editor.setCursorPosition(n);
     invalidate();
 }
 
 
-bool LineEdit::isAccepted() const
+bool SpinBox::isAccepted() const
 {
     return _isAccepted;
 }
 
 
-void LineEdit::setAccepted(bool a)
+void SpinBox::setAccepted(bool a)
 {
     _isAccepted = a;
     
@@ -169,81 +134,95 @@ void LineEdit::setAccepted(bool a)
 }
 
 
-Pt::Signal<const Pt::String&>& LineEdit::textEdited()
+Pt::Signal<const Pt::String&>& SpinBox::textEdited()
 {
     return _textEdited;
 }
 
 
-Pt::Signal<const Pt::String&>& LineEdit::returnPressed()
+Pt::Signal<const Pt::String&>& SpinBox::returnPressed()
 {
     return _returnPressed;
 }
 
 
-Pt::Signal<const Pt::String&>& LineEdit::editingFinished()
+Pt::Signal<const Pt::String&>& SpinBox::editingFinished()
 {
     return _editingFinished;
 }
 
 
-const Gfx::Brush& LineEdit::background() const
+const Gfx::Brush& SpinBox::background() const
 {
     return _background ? *_background
                        : Application::instance().styleOptions().textBackground();
 }
 
 
-void LineEdit::setBackground(const Gfx::Brush& b)
+void SpinBox::setBackground(const Gfx::Brush& b)
 {
     _background.reset( new Gfx::Brush(b) );
     invalidate();
 }
 
 
-const Gfx::Pen& LineEdit::contour() const
+const Gfx::Brush& SpinBox::foreground() const
+{
+    return _foreground ? *_foreground
+                       : Application::instance().styleOptions().foreground();
+}
+
+
+void SpinBox::setForeground(const Gfx::Brush& b)
+{
+    _foreground.reset( new Gfx::Brush(b) );
+    invalidate();
+}
+
+
+const Gfx::Pen& SpinBox::contour() const
 {
     return _contour ? *_contour
                     : Application::instance().styleOptions().contour();
 }
 
 
-void LineEdit::setContour(const Gfx::Pen& p)
+void SpinBox::setContour(const Gfx::Pen& p)
 {
     _contour.reset( new Gfx::Pen(p) );
     invalidate();
 }
 
 
-const Gfx::Color& LineEdit::textColor() const
+const Gfx::Color& SpinBox::textColor() const
 {
     return _textColor ? *_textColor
                       : Application::instance().styleOptions().textColor();
 }
 
 
-void LineEdit::setTextColor(const Gfx::Color& color)
+void SpinBox::setTextColor(const Gfx::Color& color)
 {
     _textColor.reset( new Gfx::Color(color) );
     invalidate();
 }
 
 
-const std::string& LineEdit::font() const
+const std::string& SpinBox::font() const
 {
     return _fontName ? *_fontName
                      : Application::instance().styleOptions().font().name();
 }
 
 
-void LineEdit::setFont(const std::string& fontName)
+void SpinBox::setFont(const std::string& fontName)
 {
     _fontName.reset( new std::string(fontName) );
     invalidate();
 }
 
 
-std::size_t LineEdit::fontSize() const
+std::size_t SpinBox::fontSize() const
 {
 
     return _fontSize ? *_fontSize
@@ -251,28 +230,28 @@ std::size_t LineEdit::fontSize() const
 }
 
 
-void LineEdit::setFontSize(const std::size_t s)
+void SpinBox::setFontSize(const std::size_t s)
 {
     _fontSize.reset( new std::size_t(s) );
     invalidate();
 }
 
 
-Gfx::Font::Style LineEdit::fontStyle() const
+Gfx::Font::Style SpinBox::fontStyle() const
 {
     return _fontStyle ? *_fontStyle
                       : Application::instance().styleOptions().font().style();
 }
 
 
-void LineEdit::setFontStyle(Gfx::Font::Style style)
+void SpinBox::setFontStyle(Gfx::Font::Style style)
 {
     _fontStyle.reset( new Gfx::Font::Style(style) );
     invalidate();
 }
 
 
-void LineEdit::setRenderer(LineEditRenderer* renderer)
+void SpinBox::setRenderer(SpinBoxRenderer* renderer)
 {
     _renderer.reset(renderer);
     _hasRenderer = renderer != 0;
@@ -281,7 +260,7 @@ void LineEdit::setRenderer(LineEditRenderer* renderer)
 }
 
 
-Gfx::SizeF LineEdit::onMeasure(const SizePolicy& policy)
+Gfx::SizeF SpinBox::onMeasure(const SizePolicy& policy)
 {
     double itemsWidth = policy.width();
     double itemsHeight = _font.size() * 2;
@@ -291,36 +270,39 @@ Gfx::SizeF LineEdit::onMeasure(const SizePolicy& policy)
 }
 
 
-void LineEdit::onInvalidate()
+void SpinBox::onLayout(const Gfx::RectF& rect)
+{
+}
+
+
+void SpinBox::onInvalidate()
 {
     Base::onInvalidate();
 
     const StyleOptions& options = Application::instance().styleOptions();
     const Style& style = Application::instance().style();
 
-    _brush = background();
+    _backgroundBrush = background();
+    _foregroundBrush = foreground();
     _pen = contour();
     _textPen = textColor();
     _font = Gfx::Font(font(), fontSize(), fontStyle());
 
     if( ! _hasRenderer )
-        _renderer.reset( style.get<LineEditRenderer>() );
+        _renderer.reset( style.get<SpinBoxRenderer>() );
     
     if( ! _renderer )
         return;
 
-    _renderer->prepare(*this, options, _brush, _pen, _font, _textPen);
+    _renderer->prepare(*this, options, _backgroundBrush, _foregroundBrush, 
+                       _pen, _font, _textPen);
 
     _editor.setFont(_font);
-
-    if( _editor.isEmpty() && ! hasFocus() )
-        _editor.layout(_placeholderText, _line);
-    else
-        _editor.layout(_line);
+    _editor.layout(_line);
 }
 
 
-void LineEdit::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
+void SpinBox::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 {
     const StyleOptions& options = Application::instance().styleOptions();
 
@@ -329,81 +311,73 @@ void LineEdit::onPaint(PaintSurface& surface, const Gfx::RectF& rect)
 
     Painter painter(surface);
     painter.setClip(rect);
-    
+
     //
-    // text box
+    // spin box
     //
 
     _renderer->renderBackground( *this, options, painter, rect,
-                                 _pen, _brush );
+                                 _pen, _backgroundBrush );
+
+    _renderer->renderButton( *this, options, painter, rect,
+                             _pen, _foregroundBrush );
 
     //
     // text with cursor
     //
     
     Gfx::RectF cursorRect;
-
-    Gfx::PointF clipPos = _editor.position();
-    Gfx::SizeF clipSize = _editor.size();
-    clipSize.addWidth(_spacing); // cursor
+    double cursorWidth = 5; // TODO: cursor
 
     if( _isEditable && hasFocus() )
     {
         double cursorX = _line.cursorToX( _editor.cursorPosition() );
         cursorX += _line.position().x();
         
-        double cursorWidth = 1;
-
         cursorRect.set(Gfx::PointF( cursorX, _line.position().y() ),
                        Gfx::SizeF( cursorWidth, _line.maxHeight() ) );           
     }
 
+    Gfx::PointF clipPos = _editor.position();
+    Gfx::SizeF clipSize = _editor.size();
+    clipSize.addWidth(cursorWidth);  // TODO: cursor
+    
     Gfx::RectF clipRect(clipPos, clipSize);
     painter.setClip( Gfx::RectF(clipPos, clipSize) );
 
     Gfx::PointF textPos = _line.position();
     textPos.addY( _line.ascent() );
 
-    // TODO: renderer prepare can set placeholder color
-
-    if( _editor.isEmpty() && ! hasFocus() )
-    {
-        _renderer->renderText(*this, options, painter, rect, 
-                              _placeholderText, textPos, _font, _textPen);
-    }
-    else
-    {
-        _renderer->renderText(*this, options, painter, rect, 
-                              _editor.displayText(), textPos, _font, _textPen);
-
-        _renderer->renderCursor(*this, options, painter, rect, cursorRect);
-    }
+    _renderer->renderText(*this, options, painter, rect, 
+                          _editor.text(), textPos, _font, _textPen, cursorRect);
 }
 
 
-void LineEdit::onResizeEvent(const ResizeEvent& ev)
+void SpinBox::onResizeEvent(const ResizeEvent& ev)
 {
     Base::onResizeEvent(ev);
     
-    _spacing = ev.size().height() / 5;
-    if(_spacing < 2)
-        _spacing = 2;
+    if( ! _renderer )
+    {
+        const Style& style = Application::instance().style();
+        _renderer.reset( style.get<SpinBoxRenderer>() );
+    }
 
-    Gfx::PointF editPosition(_spacing, 0);
-    _editor.setPosition(editPosition);
+    if( ! _renderer )
+        return;
 
-    Gfx::SizeF editSize = ev.size();
-    editSize.addWidth(-3 * _spacing);
-    _editor.setSize(editSize);
+    _renderer->prepareLayout(*this, _downButton, _upButton, _textBox);
 
-    if( _editor.isEmpty() && ! hasFocus() )
-        _editor.layout(_placeholderText, _line);
-    else
-        _editor.layout(_line);
+    Gfx::SizeF editSize = _textBox.size();
+    editSize.subWidth(5);  // TODO: cursor
+
+    _editor.setPosition( _textBox.topLeft() );
+    _editor.setSize( _textBox.size() );
+    _editor.layout(_line);
 }
 
 
-void LineEdit::onKeyEvent(const KeyEvent& ev)
+void SpinBox::onKeyEvent(const KeyEvent& ev)
 {  
     Base::onKeyEvent(ev);
 
@@ -458,51 +432,57 @@ void LineEdit::onKeyEvent(const KeyEvent& ev)
 }
 
 
-bool LineEdit::onMouseEvent(const MouseEvent& mev)
+bool SpinBox::onMouseEvent(const MouseEvent& ev)
 {
-    Base::onMouseEvent(mev);
+    Base::onMouseEvent(ev);
 
-    if(_echoMode == Hidden)
+    if( ! ev.isPress() )
         return true;
 
-    if( ! mev.isPress() )
-        return true;
+    //double buttonX = size().width() - _buttonSize.width();
+    //    
+    //if( ev.position().x() > buttonX )
+    //{
+    //    showPopup();
+    //}
+    //else if(_isEditable)
+    //{
+    //    std::size_t n = _line.xToCursor( ev.x() );
+    //    _editor.setCursorPosition(n);
+    //    update();
+    //        
+    //    Application::instance().inputMethod().begin(*this);
+    //}
 
-    if(_isEditable)
-    {
-        std::size_t n = _line.xToCursor( mev.x() );
-        _editor.setCursorPosition(n);
-        update();
-
-        Application::instance().inputMethod().begin(*this);
-    }
-    
     return true;
 }
 
 
-void LineEdit::onTouchEvent(const TouchEvent& tev)
+void SpinBox::onTouchEvent(const TouchEvent& ev)
 {
-    Base::onTouchEvent(tev);
+    Base::onTouchEvent(ev);
 
-    if(_echoMode == Hidden)
+    if( ! ev.isPress() )
         return;
 
-    if( ! tev.isPress() )
-        return;
+    //double buttonX = size().width() - _buttonSize.width();
 
-    if(_isEditable)
-    {
-        std::size_t n = _line.xToCursor( tev.x() );
-        _editor.setCursorPosition(n);
-        update();
+    //if( ev.position().x() > buttonX )
+    //{
+    //    showPopup();
+    //}
+    //else if(_isEditable)
+    //{
+    //    std::size_t n = _line.xToCursor( ev.x() );
+    //    _editor.setCursorPosition(n);
+    //    update();
 
-        Application::instance().inputMethod().begin(*this);
-    }
+    //    Application::instance().inputMethod().begin(*this);
+    //}
 }
 
 
-void LineEdit::onFocusEvent(const FocusEvent& ev)
+void SpinBox::onFocusEvent(const FocusEvent& ev)
 {
     Base::onFocusEvent(ev);
 

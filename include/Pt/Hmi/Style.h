@@ -62,6 +62,7 @@ class MenuBar;
 class MenuBarItem;
 class ScrollBar;
 class Slider;
+class SpinBox;
 class ProgressBar;
 class ListBox;
 class ListBoxItem;
@@ -941,6 +942,90 @@ class PT_HMI_API ComboBoxRenderer : public Style::Facet
                                     const Gfx::Brush& foreground) const = 0;
 
         virtual void onRenderText(const ComboBox& cb,
+                                  const StyleOptions& options,
+                                  Painter& painter, 
+                                  const Gfx::RectF& rect,
+                                  const String& text,
+                                  const Gfx::PointF& textPos,
+                                  const Gfx::Font& font, 
+                                  const Gfx::Pen& textPen,
+                                  const Gfx::RectF& cursor) const = 0;
+};
+
+
+class PT_HMI_API SpinBoxRenderer : public Style::Facet
+{
+    public:
+        SpinBoxRenderer(std::size_t refs = 0);
+
+        virtual ~SpinBoxRenderer();
+
+        void prepare(const SpinBox& sb, 
+                     const StyleOptions& options,
+                     Gfx::Brush& background,
+                     Gfx::Brush& foreground,
+                     Gfx::Pen& contour,
+                     Gfx::Font& font,
+                     Gfx::Pen& textPen) const;
+        
+        void prepareLayout(const SpinBox& sb,
+                           Gfx::RectF& downButton,
+                           Gfx::RectF& upButton,
+                           Gfx::RectF& textBox) const;
+        
+        void renderBackground(const SpinBox& sb, 
+                              const StyleOptions& options,
+                              Painter& painter, 
+                              const Gfx::RectF& rect,
+                              const Gfx::Pen& contour,
+                              const Gfx::Brush& brush) const;
+
+        void renderButton(const SpinBox& sb, 
+                          const StyleOptions& options,
+                          Painter& painter, 
+                          const Gfx::RectF& rect,
+                          const Gfx::Pen& contour,
+                          const Gfx::Brush& foreground) const;
+
+        void renderText(const SpinBox& sb,
+                        const StyleOptions& options,
+                        Painter& painter, 
+                        const Gfx::RectF& rect,
+                        const String& text,
+                        const Gfx::PointF& textPos,
+                        const Gfx::Font& font, 
+                        const Gfx::Pen& textPen,
+                        const Gfx::RectF& cursor) const;
+    
+    protected:
+        virtual void onPrepare(const SpinBox& sb, 
+                               const StyleOptions& options,
+                               Gfx::Brush& background,
+                               Gfx::Brush& foreground,
+                               Gfx::Pen& contour,
+                               Gfx::Font& font,
+                               Gfx::Pen& textPen) const = 0;
+
+        virtual void onPrepareLayout(const SpinBox& sb,
+                                     Gfx::RectF& downButton,
+                                     Gfx::RectF& upButton,
+                                     Gfx::RectF& textBox) const = 0;
+
+        virtual void onRenderBackground(const SpinBox& sb, 
+                                        const StyleOptions& options,
+                                        Painter& painter, 
+                                        const Gfx::RectF& rect,
+                                        const Gfx::Pen& contour,
+                                        const Gfx::Brush& brush) const = 0;
+
+        virtual void onRenderButton(const SpinBox& sb, 
+                                    const StyleOptions& options,
+                                    Painter& painter, 
+                                    const Gfx::RectF& rect,
+                                    const Gfx::Pen& contour,
+                                    const Gfx::Brush& foreground) const = 0;
+
+        virtual void onRenderText(const SpinBox& sb,
                                   const StyleOptions& options,
                                   Painter& painter, 
                                   const Gfx::RectF& rect,

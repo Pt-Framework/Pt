@@ -524,6 +524,53 @@ class PT_HMI_API PlatinumComboBoxRenderer : public ComboBoxRenderer
 };
 
 
+class PT_HMI_API PlatinumSpinBoxRenderer : public SpinBoxRenderer
+{
+    public:
+        PlatinumSpinBoxRenderer(std::size_t refs = 0);
+
+        virtual ~PlatinumSpinBoxRenderer();
+
+    protected:
+        virtual void onPrepare(const SpinBox& cb, 
+                               const StyleOptions& options,
+                               Gfx::Brush& background,
+                               Gfx::Brush& foreground,
+                               Gfx::Pen& contour,
+                               Gfx::Font& font,
+                               Gfx::Pen& textPen) const;
+        
+        virtual void onPrepareLayout(const SpinBox& cb,
+                                     Gfx::RectF& downButton,
+                                     Gfx::RectF& upButton,
+                                     Gfx::RectF& textBox) const;
+        
+        virtual void onRenderBackground(const SpinBox& cb, 
+                                        const StyleOptions& options,
+                                        Painter& painter, 
+                                        const Gfx::RectF& rect,
+                                        const Gfx::Pen& contour,
+                                        const Gfx::Brush& brush) const;
+
+        virtual void onRenderButton(const SpinBox& cb, 
+                                    const StyleOptions& options,
+                                    Painter& painter, 
+                                    const Gfx::RectF& rect,
+                                    const Gfx::Pen& contour,
+                                    const Gfx::Brush& foreground) const;
+
+        virtual void onRenderText(const SpinBox& cb,
+                                  const StyleOptions& options,
+                                  Painter& painter, 
+                                  const Gfx::RectF& rect,
+                                  const String& text,
+                                  const Gfx::PointF& textPos,
+                                  const Gfx::Font& font, 
+                                  const Gfx::Pen& textPen,
+                                  const Gfx::RectF& cursor) const;
+};
+
+
 class PT_HMI_API PlatinumTabViewRenderer : public TabViewRenderer
 {
     public:

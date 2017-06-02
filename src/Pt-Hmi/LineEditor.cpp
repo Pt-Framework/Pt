@@ -263,6 +263,8 @@ void LineEditor::layout(const Pt::String& text, TextLine& line)
 
         lineX = - _scrollOffset;
     }
+    else
+      _scrollOffset = 0;
 
     line.setPosition( lineX + _position.x(), 
                       lineY + _position.y());

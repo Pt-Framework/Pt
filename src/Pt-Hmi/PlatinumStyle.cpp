@@ -46,6 +46,7 @@
 #include <Pt/Hmi/Slider.h>
 #include <Pt/Hmi/ListBox.h>
 #include <Pt/Hmi/ComboBox.h>
+#include <Pt/Hmi/SpinBox.h>
 #include <Pt/Hmi/TabView.h>
 
 namespace {
@@ -1152,7 +1153,142 @@ void PlatinumComboBoxRenderer::onRenderText(const ComboBox& cb,
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-// PlatinumComboBoxRenderer
+// PlatinumSpinBoxRenderer
+///////////////////////////////////////////////////////////////////////////////
+
+PlatinumSpinBoxRenderer::PlatinumSpinBoxRenderer(std::size_t refs)
+: SpinBoxRenderer(refs)
+{
+}
+
+    
+PlatinumSpinBoxRenderer::~PlatinumSpinBoxRenderer()
+{
+}
+
+
+void PlatinumSpinBoxRenderer::onPrepare(const SpinBox& sb, 
+                                        const StyleOptions& options,
+                                        Gfx::Brush& background,
+                                        Gfx::Brush& foreground,
+                                        Gfx::Pen& contour,
+                                        Gfx::Font& font,
+                                        Gfx::Pen& textPen) const
+{
+    if( sb.isEnabled() )
+    {
+        if( sb.isHighlighted() || sb.hasFocus() )
+        {
+            contour = Gfx::Pen( options.accentColor(), 
+                                contour.size(), contour.style(), 
+                                contour.capStyle(), contour.joinStyle() );
+        }
+    }
+
+    foreground = contour.color();
+}
+
+
+void PlatinumSpinBoxRenderer::onRenderBackground(const SpinBox& sb, 
+                                                 const StyleOptions& options,
+                                                 Painter& painter, 
+                                                 const Gfx::RectF& rect,
+                                                 const Gfx::Pen& contour,
+                                                 const Gfx::Brush& background) const
+{
+    double buttonWidth = sb.size().height();
+    double boxWidth = sb.size().width() - 2 * buttonWidth;
+
+    Gfx::RectF boxRect( Gfx::PointF(buttonWidth, 0), 
+                        Gfx::SizeF(boxWidth, sb.size().height()) );
+
+    painter.setBrush(background);
+    painter.fillRect(boxRect);
+
+    painter.setPen(contour);
+    painter.drawRect(boxRect);
+}
+
+
+void PlatinumSpinBoxRenderer::onPrepareLayout(const SpinBox& sb,
+                                              Gfx::RectF& downButton,
+                                              Gfx::RectF& upButton,
+                                              Gfx::RectF& textBox) const
+{   
+    double cursorWidth = 5; // TODO: cursor
+
+    textBox.setOrigin( Gfx::PointF(sb.size().height() + 5, 0) );
+
+    textBox.setSize( Gfx::SizeF(sb.size().width() - 2 * sb.size().height() - 2* cursorWidth, 
+                                sb.size().height()) );
+}
+
+
+void PlatinumSpinBoxRenderer::onRenderButton(const SpinBox& sb, 
+                                             const StyleOptions& options,
+                                             Painter& painter, 
+                                             const Gfx::RectF& rect,
+                                             const Gfx::Pen& contour,
+                                             const Gfx::Brush& foreground) const
+{
+    int indicatorWidth = static_cast<int>(sb.size().height()) / 3;
+    if(indicatorWidth % 2 == 0)
+        ++indicatorWidth;
+    
+    int indicatorHeight = indicatorWidth / 2 + 1;
+
+    double x =  sb.size().height() / 2 - indicatorWidth / 2;
+    double y = (sb.size().height() - indicatorHeight) / 2 + 1;
+
+    Gfx::PointF leftIndicator[3] = { Gfx::PointF(x, y),
+                                     Gfx::PointF(x + indicatorWidth, y),
+                                     Gfx::PointF(x + indicatorHeight - 1, 
+                                                 y + indicatorHeight) };
+
+    painter.setBrush(foreground);
+    painter.fillPolygon(leftIndicator, 3);
+
+    x = sb.size().width() - x - indicatorWidth;
+    y = sb.size().height() / 2 - indicatorHeight / 2;
+
+    Gfx::PointF rightIndicator[3] = { Gfx::PointF(x + indicatorHeight, y - 1),
+                                      Gfx::PointF(x + indicatorWidth + 1, y + indicatorHeight),
+                                      Gfx::PointF(x, y + indicatorHeight) };
+
+    painter.setBrush(foreground);
+    painter.fillPolygon(rightIndicator, 3);
+}
+
+
+void PlatinumSpinBoxRenderer::onRenderText(const SpinBox& sb,
+                                           const StyleOptions& options,
+                                           Painter& painter, 
+                                           const Gfx::RectF& rect,
+                                           const String& text,
+                                           const Gfx::PointF& textPos,
+                                           const Gfx::Font& font, 
+                                           const Gfx::Pen& textPen,
+                                           const Gfx::RectF& cursor) const
+{
+    //
+    // text
+    //
+    painter.setPen(textPen);
+    painter.setFont(font);
+    painter.drawText(textPos, text);
+
+    //
+    // cursor
+    //
+    if( sb.isEditable() && sb.hasFocus() )
+    {
+        painter.drawLine( cursor.topLeft(),
+                          cursor.bottomLeft() );
+    }
+}
+
+///////////////////////////////////////////////////////////////////////////////
+// PlatinumTabViewRenderer
 ///////////////////////////////////////////////////////////////////////////////
 
 PlatinumTabViewRenderer::PlatinumTabViewRenderer(std::size_t refs)
@@ -1303,6 +1439,7 @@ PlatinumStyle::PlatinumStyle()
     set(new PlatinumSliderRenderer);
     set(new PlatinumListBoxRenderer);
     set(new PlatinumComboBoxRenderer);
+    set(new PlatinumSpinBoxRenderer);
     set(new PlatinumTabViewRenderer);
 }
 

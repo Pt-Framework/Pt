@@ -160,6 +160,10 @@ ChildW::ChildW(const std::string& title)
     _slider.setPosition(100);
     _slider.positionChanged() += Pt::slot(_progressBar, &ProgressBar::setValue);
 
+    _spinBox.setName("SpinBox"); 
+    _spinBox.move( Gfx::PointF(0, 0) );
+    _spinBox.setMargin(5);
+
     _buttonBar.setName("ButtonBar");
     _buttonBar.setPadding(5);
     _buttonBar.addItem(_comboBox, DockingLayout::Bottom);
@@ -170,6 +174,7 @@ ChildW::ChildW(const std::string& title)
     _buttonBar.addItem(_toggleButton, DockingLayout::Bottom);
     _buttonBar.addItem(_progressBar, DockingLayout::Bottom);
     _buttonBar.addItem(_slider, DockingLayout::Bottom);
+    _buttonBar.addItem(_spinBox, DockingLayout::Bottom);
  
     _childView.move( Gfx::PointF(1,1) );
     _childView.setName("MainPanel");
