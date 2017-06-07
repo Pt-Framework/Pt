@@ -32,7 +32,7 @@
 #include <Pt/Gfx/ImagePainter2.h>
 #include "FreeType2.h"
 #include "Rasterizer2.h"
-
+#include "clipper_aj/clipper.hpp"
 
 namespace Pt {
 namespace Gfx {
@@ -744,8 +744,21 @@ void ImagePainter2::drawQuadraticPolybezier(const PointF& from, const PointF& to
     drawThickPolyline_impl(pointsF.data(), pointsF.size(), false, segmentIndexMarker.data());
 }
 
-void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
+void ImagePainter2::drawEllipse(const PointF& topLeft, const SizeF& size)
 {
+    if( ! _transform.isIdentity() || ! _clipPath.isEmpty() )
+    {
+        Path path;
+
+        path.moveTo(topLeft);
+        path.addEllipse( size);
+        path.transform( _transform);
+
+        //TODO: helper otherwise transform is applied twice
+        drawPathImpl(path);
+        return;
+    }
+
     // Rasterize one-pixel ellipse
     if(_rasterizer->pen().size() == 1) {
         // Convert the points
@@ -815,10 +828,32 @@ void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
     }
 }
 
+
+void ImagePainter2::drawPathImpl(const Path& path, float smoothness)
+{
+    // Convert the path to polyline points
+    std::vector<PointF> pointsF;
+    path.generatePoints(pointsF, smoothness);
+
+    if( ! _clipPath.isEmpty() )
+    {
+        std::vector<PointF> clipPoints;
+        _clipPath.generatePoints(clipPoints, smoothness);
+
+        std::vector<PointF> result;
+        clipPolygon(result, pointsF, clipPoints);
+        pointsF = result;
+    }
+
+    // Draw the polyline
+    drawPolyline(pointsF.data(), pointsF.size());
+}
+
+
 void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
 {
 
-  if( _transform.isIdentity() /*&& ! _clipPath.isEmpty()*/ )
+  if( _transform.isIdentity() && _clipPath.isEmpty() )
   {
     // Convert the points
     const Point tl( Gfx::Math::zrint(topLeft.x    ()), Gfx::Math::zrint(topLeft.y     ()) );
@@ -835,14 +870,139 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
     path.addEllipse( size);
     path.transform( _transform);
 
-    //if( ! _clipPath.isEmpty() )
-    //{
-    //}
-
     //TODO: helper otherwise transform is applied twice
-    fillPath(path);
+    fillPathImpl(path);
   }
 }
+
+
+void ImagePainter2::fillPathImpl(const Path& path, float smoothness)
+{
+    // Convert the path to polygon points
+    std::vector<PointF> pointsF;
+    path.generatePoints(pointsF, smoothness);
+
+    if( ! _clipPath.isEmpty() )
+    {
+        std::vector<PointF> clipPoints;
+        _clipPath.generatePoints(clipPoints, smoothness);
+
+        std::vector<PointF> result;
+        clipPolygon(result, pointsF, clipPoints);
+        pointsF = result;
+    }
+
+    // Use anti-aliasing
+    if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Default) {
+        // Remove duplicates
+        std::vector<PointF> points;
+        deduplicatePointsF(points, pointsF.data(), pointsF.size());
+        // Draw the path as a filled polygon
+        _rasterizer->fillPolygon(points.data(), points.size());
+    }
+
+    // Do not use use anti-aliasing
+    else {
+        // Round the points and remove duplicates
+        std::vector<Point> points;
+        cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
+        // Draw the path as a filled polygon
+        _rasterizer->fillPolygon(points.data(), points.size());
+    }
+}
+
+
+enum ClipMode
+{
+  Intersection, Union, Difference, Xor
+};
+
+
+void ImagePainter2::clipPolygon(std::vector<PointF>& result, const std::vector<PointF>& subject, const std::vector<PointF>& clipRegion)
+{
+    ClipMode cm = Intersection;
+
+    // Working variables
+    ClipperLib::Clipper clipper;
+    ClipperLib::Path    cpath;
+    ClipperLib::Paths   cpresult;
+    size_t              startIndex;
+
+    // Separate and append the clipper polygons
+    startIndex = 0;
+    for(size_t i = 0; i <= clipRegion.size(); ++i) {
+        // Search for the end and/or separator points
+        if( i == clipRegion.size() || (clipRegion[i].x() > Painter::MaximumCoordinateF && clipRegion[i].y() > Painter::MaximumCoordinateF) ) {
+            // Calculate the number of points for this polygon
+            const size_t curPC = i - startIndex;
+            // Append the polygon to the clipper
+            cpath.resize(curPC);
+            for(size_t j = 0; j < curPC; ++j) {
+                cpath[j].X = Gfx::Math::zrint( clipRegion[startIndex + j].x() * Gfx::Math::VecResScaleUp );
+                cpath[j].Y = Gfx::Math::zrint( clipRegion[startIndex + j].y() * Gfx::Math::VecResScaleUp );
+            }
+            clipper.AddPath(cpath, ClipperLib::ptClip, true);
+            // Increment the start index
+            startIndex += curPC + 1;
+        }
+    }
+
+    // Separate and append the subject polygons
+    startIndex = 0;
+    for(size_t i = 0; i <= subject.size(); ++i) {
+        // Search for the end and/or separator points
+        if( i == subject.size() || (subject[i].x() > Painter::MaximumCoordinateF && subject[i].y() > Painter::MaximumCoordinateF) ) {
+            // Calculate the number of points for this polygon
+            const size_t curPC = i - startIndex;
+            // Append the polygon to the clipper
+            cpath.resize(curPC);
+            for(size_t j = 0; j < curPC; ++j) {
+                cpath[j].X = Gfx::Math::zrint( subject[startIndex + j].x() * Gfx::Math::VecResScaleUp );
+                cpath[j].Y = Gfx::Math::zrint( subject[startIndex + j].y() * Gfx::Math::VecResScaleUp );
+            }
+            clipper.AddPath(cpath, ClipperLib::ptSubject, cpath[0] == cpath.back());
+            // Increment the start index
+            startIndex += curPC + 1;
+        }
+    }
+
+    // Perform clipping
+    result.clear();
+
+    switch(cm) {
+        case Intersection:
+            clipper.Execute(ClipperLib::ctIntersection, cpresult, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
+            break;
+
+        case Union:
+            clipper.Execute(ClipperLib::ctUnion,        cpresult, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
+            break;
+
+        case Difference:
+            clipper.Execute(ClipperLib::ctDifference,   cpresult, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
+            break;
+
+        case Xor:
+            clipper.Execute(ClipperLib::ctXor,          cpresult, ClipperLib::pftEvenOdd, ClipperLib::pftEvenOdd);
+            break;
+
+        default:
+            return;
+    }
+
+    // Combine back the result polygons
+    for(size_t i = 0; i < cpresult.size(); ++i) {
+        const ClipperLib::Path& curPath = cpresult[i];
+        if(!result.empty()) result.push_back(Painter::PolygonSeparatorPointF);
+        for(size_t j = 0; j < curPath.size(); ++j) {
+            result.push_back( PointF(
+                curPath[j].X * Gfx::Math::VecResScaleDn,
+                curPath[j].Y * Gfx::Math::VecResScaleDn
+            ) );
+        }
+    }
+}
+
 
 void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
 {

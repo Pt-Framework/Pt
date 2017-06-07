@@ -78,6 +78,11 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual void setClip(const RectF& clip);
 
+        void setClip(const Path& clip)
+        {
+            _clipPath = clip;
+        }
+
         // Apply transformations to all draw and fill functions except
         // drawImage. Also setPen, setBrush, setFont, setClip do not depend on
         // the current transform
@@ -98,9 +103,7 @@ class PT_GFX_API ImagePainter2 : public Painter
         
         virtual void setFont(const Font& font);
 
-
         virtual FontMetrics fontMetrics(const Pt::String& text) const;
-
 
         // DO NOT APPLY TRANSFORMATIONS TO IMAGES
         virtual void drawImage(const PointF& to, const Image& image);
@@ -110,6 +113,8 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         // TRANSFORM: use 2x2 FT_Matrix with freetype and add dy, dy separatly
         virtual void drawText(const PointF& to, const Pt::String& text);
+
+        //virtual void drawText(const PointF& to, const Pt::String& text, const Transform& t);
 
         virtual void drawLine(const PointF& from, const PointF& to);
 
@@ -175,6 +180,10 @@ class PT_GFX_API ImagePainter2 : public Painter
         static FontMetrics fontMetrics(const Font& font, const Pt::String& text);
 
     private:
+        void drawPathImpl(const Path& path, float smoothness = 1.0f);
+        void fillPathImpl(const Path& path, float smoothness = 1.0f);
+        void clipPolygon(std::vector<PointF>& result, const std::vector<PointF>& subject, const std::vector<PointF>& clipRegion);
+
         void generateSolidLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, bool openingCap, bool closingCap);        
         void generatePatternedSingleLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, Pt::int32_t& piCtrInOut);
         void deduplicatePointsF(std::vector<PointF>& dst, const PointF* src, const size_t pointCount);
@@ -711,7 +720,7 @@ class PT_GFX_API ImagePainter2 : public Painter
 
     private:
       RectF        _clip;
-      //Path         _clipPath;
+      Path         _clipPath;
       Gfx::Transform _transform;
       Rasterizer2* _rasterizer;
 };

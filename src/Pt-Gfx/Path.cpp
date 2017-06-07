@@ -50,13 +50,6 @@ Path::~Path()
 }
 
 
-const Path& Path::operator=(const Path& p)
-{
-
-    return *this;
-}
-
-
 bool Path::isEmpty() const
 {
    return _elements.empty();

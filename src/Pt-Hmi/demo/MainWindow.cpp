@@ -278,31 +278,35 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     //imagePainter.fillPolygon(&concave2[0],concave2.size());
 
     Pt::Gfx::Path path;
-
     path.moveTo(Pt::Gfx::PointF(100,100));
     path.addEllipse(Pt::Gfx::SizeF(50,100));
 
-     Pt::Gfx::Transform trans;
+    Pt::Gfx::Transform trans;
+    trans.translate(-125, -150);     
+    trans.rotateDeg(45);
+    trans.translate(125, 150);
+    path.transform(trans);
 
-     
-     trans.translate(-125, -150);     
-     trans.rotateDeg(45);
-     trans.translate(125, 150);
-     
-       
-     path.transform(trans);
+    Pt::Gfx::Path clipPath;
+    clipPath.moveTo( Pt::Gfx::PointF(100, 150) );
+    clipPath.lineTo(Pt::Gfx::PointF(155, 150) );
+    clipPath.lineTo(Pt::Gfx::PointF(155, 200) );
+    clipPath.lineTo(Pt::Gfx::PointF(100, 200) );
+    clipPath.lineTo(Pt::Gfx::PointF(100, 150) );
+    imagePainter.setClip(clipPath);
 
-     imagePainter.setFont(Pt::Gfx::Font("", 24));
-     imagePainter.setPen( Gfx::Pen( Gfx::Color::fromRgb8(0,0,255) ) );
-     imagePainter.setBrush(  Gfx::Color::fromRgb8(255,0,0)  );
+    imagePainter.setFont(Pt::Gfx::Font("", 24));
+    imagePainter.setPen( Gfx::Pen( Gfx::Color::fromRgb8(150,150,255) ) );
+    imagePainter.setBrush(  Gfx::Color::fromRgb8(255,0,0)  );
 
-      imagePainter.setTransform( trans);
-      //imagePainter.fillPath(path);
+    imagePainter.fillPath(clipPath);
+    //imagePainter.setTransform( trans);
+    //imagePainter.fillPath(path);
       
-      imagePainter.fillEllipse(Pt::Gfx::PointF(100,100), Pt::Gfx::SizeF(50,100));
-      imagePainter.drawText(Pt::Gfx::PointF(100,100), "Hallo");
+    imagePainter.drawEllipse(Pt::Gfx::PointF(100,100), Pt::Gfx::SizeF(50,100));
+    //imagePainter.drawText(Pt::Gfx::PointF(100,100), "Hallo");
 
-      painter.drawImage(Gfx::PointF(0, 0), image);
+    painter.drawImage(Gfx::PointF(0, 0), image);
 
 }
 

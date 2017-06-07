@@ -59,8 +59,6 @@ struct Element
       IT_GenNBezierTo,
     };
 
-
-
     inline Element(ElementType type_)
     : type(type_)
     {}
@@ -81,7 +79,7 @@ struct Element
     : type(type_), pxy(pxy_)
     {}
 
-    ElementType      type;
+    ElementType         type;
     std::vector<double> pxy;
 };
 
@@ -90,11 +88,7 @@ class PT_GFX_API Path
     public:
         Path();
 
-        Path(const Path& p);
-
         ~Path();
-
-        const Path& operator=(const Path& p);
 
         std::size_t size();
 
