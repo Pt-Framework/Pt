@@ -1,5 +1,5 @@
-/* Copyright (C) 2006-2015 Marc Boris Duerner
-   Copyright (C) 2017-2017 Aloysius Indrayanto
+/* Copyright (C) 2017 Marc Boris Duerner
+   Copyright (C) 2017 Aloysius Indrayanto
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -30,15 +30,14 @@
 #ifndef PT_GFX_TRANSFORM_H
 #define PT_GFX_TRANSFORM_H
 
-#include <cstring>
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 
-namespace Pt{
-namespace Gfx{
+namespace Pt {
 
+namespace Gfx {
 
-/** @brief A transform class for performing 2D transformation on points.
+/** @brief 2D transformation matrix.
   */
 class PT_GFX_API Transform 
 {
@@ -47,84 +46,45 @@ class PT_GFX_API Transform
 
         ~Transform();
 
-        bool isIdentity() const
-        {
-         return _isIdentity ;
-        }
+        bool isIdentity() const;
 
-        // reset the matrix to the identity matrix
+        double m11() const;
+
+        double m12() const;
+
+        double m21() const;
+
+        double m22() const;
+
+        double dx() const;
+
+        double dy() const;
+
         void reset();
 
-        // set the translation factors in the _matrix 
+        void set(double m11, double m12,
+                 double m21, double m22,
+                 double dx, double dy);
+
         void translate(double x, double y);
-        
-        // set the sacling factors in the _matrix
+
         void scale(double x, double y);
 
-        // set the rotaion factors in the _matrix 
-        // This uses an angle in degree.
-        //
-        // angle = 30.0;
-        // radians = angle * PI/180;
         void rotateDeg(double angle);
 
-        // set the rotaion factors in the _matrix 
-        // This uses an angle in radians.
         void rotateRad(double angle);
 
-        // set the horizontal and vertical shear factors in the _matrix 
         void shear(double sh, double sv);
 
         void shearX(double sh);
 
         void shearY(double sh);
 
-        double m11() const
-        {
-          return _mdata[0][0];
-        }
+        bool operator==(const Transform& t) const;
 
-        double m12() const
-        {
-          return _mdata[0][1];
-        }
+        bool operator!=(const Transform& t) const;
 
-        double m21() const
-        {
-          return _mdata[1][0];
-        }
-
-        double m22() const
-        {
-          return _mdata[1][1];
-        }
-
-        double dx() const
-        {
-          return _mdata[0][2];
-        }
-
-        double dy() const
-        {
-          return _mdata[1][2];
-        }
-
-        
-        // sets the matrix fields
-        void set( double m11, double m12, double m21, double m22,
-                  double dx, double dy )
-        {
-
-          _mdata[0][0] = m11; 
-          _mdata[0][1] = m12; 
-          _mdata[0][2] = dx;
-          _mdata[1][0] = m21; 
-          _mdata[1][1] = m22; 
-          _mdata[1][2] = dy;            
-            
-          _isIdentity = ( _mdata[0][0] == 1 && _mdata[0][1] == 0 && _mdata[0][2] == 0 &&
-              _mdata[1][0] == 0 && _mdata[1][1] == 1 && _mdata[1][2] == 0);
-        }
+        Transform& operator*=(const Transform& t);
 
         Transform operator*(const Transform& t) const;
         
@@ -132,25 +92,18 @@ class PT_GFX_API Transform
         
         SizeF operator*(const SizeF& p) const;
 
-        Transform& operator*=(const Transform& t);
-
-        bool operator==(const Transform& t) const;
-
-        bool operator!=(const Transform& t) const;
-
     private:
       typedef double MatrixData[2][3];
 
       void updateMatrix(const MatrixData& n);
   
     private:
-        MatrixData  _mdata;
-        bool    _isIdentity;
+        MatrixData _mdata;
+        bool       _isIdentity;
 };
 
-
-
 } // namespace
+
 } // namespace
 
 #endif

@@ -1,5 +1,5 @@
-/* Copyright (C) 2006-2015 Marc Boris Duerner
-   Copyright (C) 2017-2017 Aloysius Indrayanto
+/* Copyright (C) 2017 Marc Boris Duerner
+   Copyright (C) 2017 Aloysius Indrayanto
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -30,9 +30,6 @@
 #ifndef PT_GFX_PATH_H
 #define PT_GFX_PATH_H
 
-#include <stdexcept>
-#include <string>
-#include <vector>
 #include <Pt/SmartPtr.h>
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/ArcMode.h>
@@ -41,11 +38,13 @@
 #include <Pt/Gfx/Math.h>
 #include <Pt/Gfx/Rect.h>
 #include <Pt/Gfx/Transform.h>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
+namespace Pt {
 
-namespace Pt{
-namespace Gfx{
-
+namespace Gfx {
 
 struct Element
 {
@@ -126,7 +125,6 @@ class PT_GFX_API Path
 
         void addEllipse(const SizeF& size);
 
-        // Apply the tranformation to the points in the path
         void transform(const Transform& transform);
 
         void generatePoints(std::vector<PointF>& dst, float smoothness = 1) const;  
@@ -299,8 +297,8 @@ class PT_GFX_API Path
       double       _curX, _curY;
 };
 
-
 } // namespace
+
 } // namespace
 
 #endif

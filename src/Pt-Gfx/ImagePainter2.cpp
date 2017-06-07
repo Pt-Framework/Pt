@@ -749,12 +749,10 @@ void ImagePainter2::drawEllipse(const PointF& topLeft, const SizeF& size)
     if( ! _transform.isIdentity() || ! _clipPath.isEmpty() )
     {
         Path path;
-
         path.moveTo(topLeft);
         path.addEllipse( size);
         path.transform( _transform);
 
-        //TODO: helper otherwise transform is applied twice
         drawPathImpl(path);
         return;
     }
@@ -865,12 +863,10 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
   else
   {
     Path path;
-
     path.moveTo(topLeft);
     path.addEllipse( size);
     path.transform( _transform);
 
-    //TODO: helper otherwise transform is applied twice
     fillPathImpl(path);
   }
 }

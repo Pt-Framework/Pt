@@ -1,5 +1,5 @@
-/* Copyright (C) 2006-2015 Marc Boris Duerner
-   Copyright (C) 2017-2017 Aloysius Indrayanto
+/* Copyright (C) 2017 Marc Boris Duerner
+   Copyright (C) 2017 Aloysius Indrayanto
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -26,12 +26,13 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
   MA 02110-1301 USA
 */
+
 #include <Pt/Gfx/Transform.h>
+#include <cstring>
 
+namespace Pt {
 
-namespace Pt{
-namespace Gfx{
-
+namespace Gfx {
 
 Transform::Transform()
 {
@@ -41,6 +42,48 @@ Transform::Transform()
 
 Transform::~Transform()
 {
+}
+
+
+bool Transform::isIdentity() const
+{
+    return _isIdentity;
+}
+
+
+double Transform::m11() const
+{
+    return _mdata[0][0];
+}
+
+
+double Transform::m12() const
+{
+    return _mdata[0][1];
+}
+
+
+double Transform::m21() const
+{
+    return _mdata[1][0];
+}
+
+
+double Transform::m22() const
+{
+    return _mdata[1][1];
+}
+
+
+double Transform::dx() const
+{
+    return _mdata[0][2];
+}
+
+
+double Transform::dy() const
+{
+    return _mdata[1][2];
 }
 
 
@@ -54,8 +97,24 @@ void Transform::reset()
     _mdata[1][2] = 0;
     _isIdentity = true;
 }
-    
-    
+
+
+void Transform::set(double m11, double m12,
+                    double m21, double m22,
+                    double dx, double dy)
+{
+    _mdata[0][0] = m11; 
+    _mdata[0][1] = m12; 
+    _mdata[0][2] = dx;
+    _mdata[1][0] = m21; 
+    _mdata[1][1] = m22; 
+    _mdata[1][2] = dy;            
+            
+    _isIdentity = _mdata[0][0] == 1 && _mdata[0][1] == 0 && _mdata[0][2] == 0 && 
+                    _mdata[1][0] == 0 && _mdata[1][1] == 1 && _mdata[1][2] == 0;
+}
+
+
 void Transform::translate(double x, double y)
 {
     MatrixData n;
@@ -115,9 +174,10 @@ void Transform::rotateRad(double r)
 
 
 void Transform::shear(double sh, double sv)
-{//TODO: optimize this
-  shearX(sh);
-  shearY(sv); 
+{
+    //TODO: optimize this
+    shearX(sh);
+    shearY(sv); 
 }
 
 
@@ -151,27 +211,6 @@ void Transform::shearY(double deg)
 }
 
 
-Transform Transform::operator*(const Transform& rhs) const
-{
-    // Multiply the matrix and return the result
-    Transform result = rhs;
-    result.updateMatrix(_mdata);
-    return result;
-}
-
-
-        
-PointF Transform::operator*(const PointF& p) const
-{
-    PointF result;
-
-    result.setX( _mdata[0][0] * p.x() + _mdata[0][1] * p.y() + _mdata[0][2] );
-    result.setY( _mdata[1][0] * p.x() + _mdata[1][1] * p.y() + _mdata[1][2] );
-
-    return result;
-}
-
-
 bool Transform::operator==(const Transform& m) const
 { 
     return memcmp(&_mdata, &m._mdata, sizeof(_mdata)) == 0; 
@@ -183,6 +222,32 @@ bool Transform::operator!=(const Transform& m) const
    return memcmp(&_mdata, &m._mdata, sizeof(_mdata)) != 0; 
 }
 
+
+Transform& Transform::operator*=(const Transform& rhs)
+{
+    updateMatrix(rhs._mdata);
+    return *this;
+}
+
+
+Transform Transform::operator*(const Transform& rhs) const
+{
+    Transform result = rhs;
+    result.updateMatrix(_mdata);
+    return result;
+}
+
+
+PointF Transform::operator*(const PointF& p) const
+{
+    PointF result;
+
+    result.setX( _mdata[0][0] * p.x() + _mdata[0][1] * p.y() + _mdata[0][2] );
+    result.setY( _mdata[1][0] * p.x() + _mdata[1][1] * p.y() + _mdata[1][2] );
+
+    return result;
+}
+
         
 SizeF Transform::operator*(const SizeF& sz) const
 {
@@ -191,9 +256,9 @@ SizeF Transform::operator*(const SizeF& sz) const
     PointF zb(sz.height(), 0);
     PointF r(0, 0);
 
-    za = (*this) * za;
-    zb = (*this) * zb;
-    r  = (*this) * r;
+    za = *this * za;
+    zb = *this * zb;
+    r  = *this * r;
     
     const double dxa = za.x() - r.x();
     const double dya = za.y() - r.y();
@@ -208,7 +273,7 @@ SizeF Transform::operator*(const SizeF& sz) const
 
 void Transform::updateMatrix(const MatrixData& n)
 {
-    MatrixData  result;
+    MatrixData result;
 
     result[0][0] = n[0][0] * _mdata[0][0] + n[0][1] * _mdata[1][0] + n[0][2] * 0;
     result[0][1] = n[0][0] * _mdata[0][1] + n[0][1] * _mdata[1][1] + n[0][2] * 0;
@@ -222,4 +287,5 @@ void Transform::updateMatrix(const MatrixData& n)
 }
 
 } // namespace
+
 } // namespace

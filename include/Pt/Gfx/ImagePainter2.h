@@ -39,10 +39,9 @@
 #include <Pt/Gfx/Painter.h>
 #include <Pt/System/Path.h>
 
-
 namespace Pt {
-namespace Gfx {
 
+namespace Gfx {
 
 class Rasterizer2;
 struct SAGOpState;
@@ -54,27 +53,19 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual ~ImagePainter2();
 
-
         void setImage(Image& image);
-
 
         virtual const ImageFormat& format() const;
 
-
         virtual bool isAntialiasing() const;
-
 
         virtual void setAntialiasing(bool on);
 
-
         virtual const CompositionMode& compositionMode() const;
-
 
         virtual void setCompositionMode(const CompositionMode& mode);
 
-        
         virtual const Gfx::RectF& clip() const;
-
 
         virtual void setClip(const RectF& clip);
 
@@ -89,7 +80,6 @@ class PT_GFX_API ImagePainter2 : public Painter
         virtual const Gfx::Transform& transform() const;
 
         virtual void setTransform(const const Gfx::Transform& t);
-
 
         virtual const Pen& pen() const;
         
