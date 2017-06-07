@@ -34,7 +34,7 @@
 
 #include <Pt/Gfx/Font.h>
 #include <Pt/Gfx/Math.h>
-
+#include <Pt/Gfx/Transform.h>
 #include "DrawText2.h"
 
 
@@ -44,14 +44,7 @@ namespace Gfx {
 
 DrawText2::DrawText2()
 : _faceId   (0)
-, _fontAngle(0)
 {
-    // Setup the rotation matrix
-    _matrix.xx = 0;
-    _matrix.xy = 0;
-    _matrix.yx = 0;
-    _matrix.yy = 0;
-
     // Set the default font as needed
     if(FreeType2::defaultFont().empty()) FreeType2::setDefaultFont("");
 
@@ -92,7 +85,7 @@ void DrawText2::setFont(const Font& font)
     _imageType.flags   = FT_LOAD_DEFAULT;
 
     // Setup the rotation matrix
-    _fontAngle = font.angle() % 3600;
+/*    _fontAngle = font.angle() % 3600;
 
     if(_fontAngle < 0) _fontAngle += 3600;
 
@@ -103,7 +96,7 @@ void DrawText2::setFont(const Font& font)
     _matrix.xx = (FT_Fixed) ( cosinus);
     _matrix.xy = (FT_Fixed) (-sinus  );
     _matrix.yx = (FT_Fixed) ( sinus  );
-    _matrix.yy = (FT_Fixed) ( cosinus);
+    _matrix.yy = (FT_Fixed) ( cosinus); */
 }
 
 const FontMetrics DrawText2::fontMetrics(const String& text)
@@ -131,18 +124,14 @@ void DrawText2::pathFromChar(std::vector<PointF>& points, std::vector<Pt::uint8_
     );
 }
 
-void DrawText2::draw(Image& image, const Color& color, const Point& pos, const String& text, const CompositionMode& mode)
+void DrawText2::draw(Image& image, const Color& color, const Point& pos, const String& text, const CompositionMode& mode, const Transform& t)
 {
-    return FreeType2::instance(_faceId).draw(
-        image, _clip, pos, color, _fontAngle, mode, text, _matrix, _faceId, &_imageType, false
-    );
+    return FreeType2::instance(_faceId).draw( image, _clip, pos, color, mode, text, _faceId, &_imageType, false, t);
 }
 
-void DrawText2::drawMono(Image& image, const Color& color, const Point& pos, const String& text, const CompositionMode& mode)
+void DrawText2::drawMono(Image& image, const Color& color, const Point& pos, const String& text, const CompositionMode& mode, const Transform& t)
 {
-    return FreeType2::instance(_faceId).draw(
-        image, _clip, pos, color, _fontAngle, mode, text, _matrix, _faceId, &_imageType, true
-    );
+    return FreeType2::instance(_faceId).draw( image, _clip, pos, color,  mode, text, _faceId, &_imageType, true, t);
 }
 
 

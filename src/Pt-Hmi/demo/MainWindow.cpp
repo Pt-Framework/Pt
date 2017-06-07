@@ -34,6 +34,7 @@
 #include <Pt/Gfx/JpegReader.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/ImagePainter.h>
+#include <Pt/Gfx/ImagePainter2.h>
 #include <Pt/Gfx/Argb32Format.h>
 #include <Pt/Gfx/Algorithm.h>
 #include <sstream>
@@ -210,79 +211,99 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 {
     Window::onPaintBackground(rect);
 
-    //Painter painter( surface() );
+    Painter painter( surface() );
 
-    //Gfx::Image image( painter.format(), Gfx::Size(210, 40) );
-    //Gfx::ImagePainter imagePainter(image);
+    Gfx::Image image( painter.format(), Gfx::Size(300, 400) );
+    Gfx::ImagePainter2 imagePainter(image);
 
-    //Gfx::ImagePainter::setDefaultFont("DejaVu Sans");
-    //imagePainter.setBrush( Gfx::Brush( Gfx::Color::fromRgb8(200, 200, 200)));
+    Gfx::ImagePainter::setDefaultFont("DejaVu Sans");
+    imagePainter.setBrush( Gfx::Brush( Gfx::Color::fromRgb8(200, 200, 200)));
 
-    //Pt::Gfx::RectF borderRect(Pt::Gfx::PointF(0,0), 
-    //                          Pt::Gfx::SizeF(image.size().width() - 10, 
-    //                                         image.size().height() -10));
+    Pt::Gfx::RectF borderRect(Pt::Gfx::PointF(0,0), 
+                              Pt::Gfx::SizeF(image.size().width() - 10, 
+                                             image.size().height() -10));
 
-    ////const double corner = 7;
+    //const double corner = 7;
 
-    ////Pt::Gfx::PointF outline[9] = {};
+    //Pt::Gfx::PointF outline[9] = {};
 
-    ////// top left
-    ////outline[0].setX(0);
-    ////outline[0].setY(corner);
+    //// top left
+    //outline[0].setX(0);
+    //outline[0].setY(corner);
 
-    ////outline[1].setX(corner);
-    ////outline[1].setY(0);
+    //outline[1].setX(corner);
+    //outline[1].setY(0);
 
-    ////// top right
-    ////outline[2].setX(borderRect.width() - corner);
-    ////outline[2].setY(0);
+    //// top right
+    //outline[2].setX(borderRect.width() - corner);
+    //outline[2].setY(0);
 
-    ////outline[3].setX(borderRect.width());
-    ////outline[3].setY(corner);
+    //outline[3].setX(borderRect.width());
+    //outline[3].setY(corner);
 
-    ////// bottom right
-    ////outline[4].setX(borderRect.width());
-    ////outline[4].setY(borderRect.height() - corner);
+    //// bottom right
+    //outline[4].setX(borderRect.width());
+    //outline[4].setY(borderRect.height() - corner);
 
-    ////outline[5].setX(borderRect.width() - corner);
-    ////outline[5].setY(borderRect.height());
+    //outline[5].setX(borderRect.width() - corner);
+    //outline[5].setY(borderRect.height());
 
-    ////// bottom left
-    ////outline[6].setX(corner);
-    ////outline[6].setY(borderRect.height());
+    //// bottom left
+    //outline[6].setX(corner);
+    //outline[6].setY(borderRect.height());
 
-    ////outline[7].setX(0);
-    ////outline[7].setY(borderRect.height() - corner);
-    ////        
-    ////outline[8] = outline[0];
-    ////imagePainter.fillPolygon(&outline[0],9);
+    //outline[7].setX(0);
+    //outline[7].setY(borderRect.height() - corner);
+    //        
+    //outline[8] = outline[0];
+    //imagePainter.fillPolygon(&outline[0],9);
 
-    ////std::vector<Pt::Gfx::PointF> concave;
-    ////concave.push_back(Pt::Gfx::PointF(5,0));
-    ////concave.push_back(Pt::Gfx::PointF(10,5));
-    ////concave.push_back(Pt::Gfx::PointF(5,10));
-    ////concave.push_back(Pt::Gfx::PointF(0,5));
-    ////concave.push_back(Pt::Gfx::PointF(5,0));
-    ////imagePainter.fillPolygon(&concave[0],concave.size());
+    //std::vector<Pt::Gfx::PointF> concave;
+    //concave.push_back(Pt::Gfx::PointF(5,0));
+    //concave.push_back(Pt::Gfx::PointF(10,5));
+    //concave.push_back(Pt::Gfx::PointF(5,10));
+    //concave.push_back(Pt::Gfx::PointF(0,5));
+    //concave.push_back(Pt::Gfx::PointF(5,0));
+    //imagePainter.fillPolygon(&concave[0],concave.size());
 
-    ////std::vector<Pt::Gfx::PointF> concave2;
-    ////concave2.push_back(Pt::Gfx::PointF(0,5));
-    ////concave2.push_back(Pt::Gfx::PointF(5,0));
-    ////concave2.push_back(Pt::Gfx::PointF(10,18));
-    ////concave2.push_back(Pt::Gfx::PointF(15,0));
-    ////concave2.push_back(Pt::Gfx::PointF(20,5));
-    ////concave2.push_back(Pt::Gfx::PointF(20,20));
-    ////concave2.push_back(Pt::Gfx::PointF(0,20));
-    ////concave2.push_back(Pt::Gfx::PointF(0,5));
-    ////imagePainter.fillPolygon(&concave2[0],concave2.size());
+    //std::vector<Pt::Gfx::PointF> concave2;
+    //concave2.push_back(Pt::Gfx::PointF(0,5));
+    //concave2.push_back(Pt::Gfx::PointF(5,0));
+    //concave2.push_back(Pt::Gfx::PointF(10,18));
+    //concave2.push_back(Pt::Gfx::PointF(15,0));
+    //concave2.push_back(Pt::Gfx::PointF(20,5));
+    //concave2.push_back(Pt::Gfx::PointF(20,20));
+    //concave2.push_back(Pt::Gfx::PointF(0,20));
+    //concave2.push_back(Pt::Gfx::PointF(0,5));
+    //imagePainter.fillPolygon(&concave2[0],concave2.size());
 
-    //imagePainter.setFont(Pt::Gfx::Font("", 24));
-    //imagePainter.setPen( Gfx::Pen( Gfx::Color::fromRgb8(255,0,0) ) );
-    //imagePainter.drawText( Gfx::PointF(30, 25), "Hello World!");
-    ////imagePainter.drawImage(Gfx::PointF(0, 0), _icon);
+    Pt::Gfx::Path path;
 
-    //painter.drawImage(Gfx::PointF(0, 0), image);
-    ////painter.drawPicture(Gfx::PointF(0,0), _picture);
+    path.moveTo(Pt::Gfx::PointF(100,100));
+    path.addEllipse(Pt::Gfx::SizeF(50,100));
+
+     Pt::Gfx::Transform trans;
+
+     
+     trans.translate(-125, -150);     
+     trans.rotateDeg(45);
+     trans.translate(125, 150);
+     
+       
+     path.transform(trans);
+
+     imagePainter.setFont(Pt::Gfx::Font("", 24));
+     imagePainter.setPen( Gfx::Pen( Gfx::Color::fromRgb8(0,0,255) ) );
+     imagePainter.setBrush(  Gfx::Color::fromRgb8(255,0,0)  );
+
+      imagePainter.setTransform( trans);
+      //imagePainter.fillPath(path);
+      
+      imagePainter.fillEllipse(Pt::Gfx::PointF(100,100), Pt::Gfx::SizeF(50,100));
+      imagePainter.drawText(Pt::Gfx::PointF(100,100), "Hallo");
+
+      painter.drawImage(Gfx::PointF(0, 0), image);
+
 }
 
 

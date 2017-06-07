@@ -58,7 +58,7 @@ namespace Gfx {
 class Color;
 class Image;
 class CompositionMode;
-
+class Transform;
 
 class FreeType2 {
     public:
@@ -76,9 +76,10 @@ class FreeType2 {
             const Char& chr, FTC_FaceID faceId
         );
 
+
         void draw(
-            Image& image, const Rect& clip, const Point& pos, const Color& color, Pt::ssize_t fontAngle, const CompositionMode& mode,
-            const String& text, FT_Matrix& matrix, FTC_FaceID faceId, FTC_ImageType imageType, bool mono
+            Image& image, const Rect& clip, const Point& pos, const Color& color, const CompositionMode& mode,
+            const String& text, FTC_FaceID faceId, FTC_ImageType imageType, bool mono, const Transform& t
         );
 
         static void setFontDir(const System::Path& path);

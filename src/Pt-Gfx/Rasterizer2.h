@@ -92,7 +92,7 @@ namespace Gfx {
 
 class DrawText2;
 class Image;
-
+class Transform;
 
 class Rasterizer2
 {
@@ -157,7 +157,7 @@ class Rasterizer2
         void blitImage(const Point& to, const Image& image);
         void blitImage(const Point& to, const Image& image, const Rect& imageRect);
 
-        void strokeText(const Point& to, const Pt::String& text);
+        void strokeText(const Point& to, const Pt::String& text, const Transform& t);
         void strokeOnePixelLine(const Point& a, const Point& b, DrawLineMask* maskInOut);
         void strokeOnePixelRect(const Point& tl, const Point& br);
         void strokeOnePixelQuadraticPolybezierOutline(const Point* points, size_t pointCount);

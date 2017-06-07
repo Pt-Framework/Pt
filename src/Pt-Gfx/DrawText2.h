@@ -37,6 +37,7 @@
 namespace Pt{
 namespace Gfx{
 
+class Transform;
 
 class DrawText2 {
     public:
@@ -54,8 +55,8 @@ class DrawText2 {
         void getCharSpacing(Pt::int32_t& x, Pt::int32_t& y, const Char& from, const Char& to);
         void pathFromChar(std::vector<PointF>& points, std::vector<Pt::uint8_t>& tags, std::vector<Pt::int32_t>& contours, const Char& chr);
 
-        void draw(Image& image, const Color& color, const Point& pos, const String& text, const CompositionMode& mode);
-        void drawMono(Image& image, const Color& color, const Point& pos, const String& text, const CompositionMode& mode);
+        void draw(Image& image, const Color& color, const Point& pos, const String& text, const CompositionMode& mode, const Transform& t);
+        void drawMono(Image& image, const Color& color, const Point& pos, const String& text, const CompositionMode& mode, const Transform& t);
 
     private:
         void drawGlyph(Image& image, const Color& color, int xpos, int ypos, int bmPitch, int height, int width, const unsigned char* buffer);
@@ -63,9 +64,6 @@ class DrawText2 {
     private:
         FTC_FaceID       _faceId;
         FTC_ImageTypeRec _imageType;
-        FT_Matrix        _matrix;
-
-        Pt::ssize_t      _fontAngle;
         Rect             _clip;
 };
 

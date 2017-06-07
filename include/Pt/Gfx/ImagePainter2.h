@@ -711,6 +711,7 @@ class PT_GFX_API ImagePainter2 : public Painter
 
     private:
       RectF        _clip;
+      //Path         _clipPath;
       Gfx::Transform _transform;
       Rasterizer2* _rasterizer;
 };

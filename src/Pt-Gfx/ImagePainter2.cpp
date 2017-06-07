@@ -440,9 +440,10 @@ void ImagePainter2::drawImage( const PointF& to, const Image& image, const RectF
 
 void ImagePainter2::drawText( const PointF& to, const String& text )
 {
-    const Point to_( Gfx::Math::zrint(to.x()), Gfx::Math::zrint(to.y()) );
 
-    _rasterizer->strokeText(to_, text);
+    Point to_( Gfx::Math::zrint(to.x()), Gfx::Math::zrint(to.y()) );
+    
+    _rasterizer->strokeText(to_, text, _transform);
 }
 
 
@@ -816,12 +817,31 @@ void ImagePainter2::drawEllipse( const PointF& topLeft, const SizeF& size )
 
 void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
 {
+
+  if( _transform.isIdentity() /*&& ! _clipPath.isEmpty()*/ )
+  {
     // Convert the points
     const Point tl( Gfx::Math::zrint(topLeft.x    ()), Gfx::Math::zrint(topLeft.y     ()) );
     const Size  sz( Gfx::Math::zrint(size   .width()), Gfx::Math::zrint(size   .height()) );
 
     // Rasterize the ellipse
     _rasterizer->fillEllipse(tl, sz);
+  }
+  else
+  {
+    Path path;
+
+    path.moveTo(topLeft);
+    path.addEllipse( size);
+    path.transform( _transform);
+
+    //if( ! _clipPath.isEmpty() )
+    //{
+    //}
+
+    //TODO: helper otherwise transform is applied twice
+    fillPath(path);
+  }
 }
 
 void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
@@ -1021,6 +1041,7 @@ void ImagePainter2::drawPath(const Path& path, float smoothness)
     std::vector<PointF> pointsF;
     path.generatePoints(pointsF, smoothness);
 
+
     // Draw the polyline
     drawPolyline(pointsF.data(), pointsF.size());
 }
@@ -1031,6 +1052,7 @@ void ImagePainter2::fillPath(const Path& path, float smoothness)
     // Convert the path to polygon points
     std::vector<PointF> pointsF;
     path.generatePoints(pointsF, smoothness);
+
 
     // Use anti-aliasing
     if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Default) {

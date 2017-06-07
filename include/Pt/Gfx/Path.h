@@ -130,6 +130,8 @@ class PT_GFX_API Path
 
         void bezierTo(const PointF* controlPoints, size_t n, const PointF& to);
 
+        void addEllipse(const SizeF& size);
+
         // Apply the tranformation to the points in the path
         void transform(const Transform& transform);
 

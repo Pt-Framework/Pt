@@ -37,6 +37,7 @@
 
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Math.h>
+#include <Pt/Gfx/Transform.h>
 
 #include "FreeType2.h"
 
@@ -234,11 +235,34 @@ void FreeType2::pathFromChar(
 }
 
 void FreeType2::draw(
-    Image& image, const Rect& clip, const Point& pos, const Color& color, Pt::ssize_t fontAngle, const CompositionMode& mode,
-    const String& text, FT_Matrix& matrix, FTC_FaceID faceId, FTC_ImageType imageType, bool mono
+    Image& image, const Rect& clip, const Point& pos_, const Color& color,const CompositionMode& mode,
+    const String& text, FTC_FaceID faceId, FTC_ImageType imageType, bool mono, const Transform& t
 )
 {
     System::MutexLock lock(FreeType2::_mutex);
+
+
+    //TODO: round ????
+    PointF posF(pos_.x(), pos_.y());
+    posF = t * posF;
+    Point pos((int) posF.x(), (int) posF.y());
+
+    FT_Matrix matrix;
+
+
+  //  const float angle   = 450.0 / 10.0f * Gfx::Math::DegToRad;
+//    const float cosinus = Gfx::Math::fastCos( angle ) * 0x10000L;
+//    const float sinus   = Gfx::Math::fastSin( angle ) * 0x10000L;
+
+//    matrix.xx = (FT_Fixed) ( cosinus);
+//    matrix.xy = (FT_Fixed) (-sinus  );
+//    matrix.yx = (FT_Fixed) ( sinus  );
+//    matrix.yy = (FT_Fixed) ( cosinus);
+    
+    matrix.xx = t.m11() * 0x10000L;
+    matrix.xy = t.m12() * 0x10000L;
+    matrix.yx = t.m21() * 0x10000L;;
+    matrix.yy = t.m22() * 0x10000L;; 
 
     FT_Face  face = 0;
     FT_Error ferr = FTC_Manager_LookupFace(_manager, faceId, &face);
@@ -279,7 +303,8 @@ void FreeType2::draw(
         FT_UInt glyph_index = FTC_CMapCache_Lookup(_charMapCache, faceId, charMapIndex, it->value());
         if(!glyph_index) continue;
 
-        if(!fontAngle) {
+        if(t.isIdentity()) 
+        {
             if(mono) imageType->flags = FT_LOAD_RENDER | FT_LOAD_TARGET_MONO;
             else     imageType->flags = FT_LOAD_RENDER | FT_LOAD_TARGET_NORMAL;
             if(FTC_SBitCache_Lookup(_bitmapCache, imageType, glyph_index, &smalGlyphBitmap, &node))

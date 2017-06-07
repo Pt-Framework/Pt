@@ -251,6 +251,23 @@ void Path::bezierTo(const PointF* cxy, size_t controlPointCount, const PointF& t
 }
 
 
+void Path::addEllipse(const SizeF& size)
+{
+  const Pt::Gfx::PointF p1(_curX, _curY+  size.height() / 2);
+  const Pt::Gfx::PointF p2(_curX + size.width(), _curY + size.height() / 2);
+
+
+  moveTo(p1);
+  
+  arcTo( p2, size.height()/2 );   
+
+
+  moveTo(p2);
+  
+  arcTo( p1, size.height()/2 );   
+
+}
+
 
 void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
 {
@@ -313,6 +330,84 @@ void Path::generatePoints(std::vector<PointF>& dst, float smoothness) const
     // Remove dangling separator point as needed
     if(!dst.empty() && dst.back().x() > Painter::MaximumCoordinateF && dst.back().y() > Painter::MaximumCoordinateF)
         dst.pop_back();
+}
+
+
+void Path::transform(const Transform& transform)
+{
+   // For convenience
+    typedef ElementVector::iterator PDIIterator;
+
+    // Walk through the instructions
+    for(PDIIterator it = _elements.begin(); it != _elements.end(); ++it) 
+    {
+        // Get the instruction
+        Element& elem = *it;
+
+        // Act based on the type of the instruction
+        switch(elem.type) 
+        {
+            case Element::IT_Close:
+            break;
+
+            case Element::IT_MoveTo:
+            case Element::IT_LineTo:            
+            {
+                Pt::Gfx::PointF p( elem.pxy[0], elem.pxy[1] );
+                p = transform * p;
+
+                elem.pxy[0] = p.x();
+                elem.pxy[1] = p.y();
+            }
+             break;
+
+            case Element::IT_QuadBezierTo:
+            {
+                Pt::Gfx::PointF p1( elem.pxy[0], elem.pxy[1] );
+                p1 = transform * p1;
+
+                elem.pxy[0] = p1.x();
+                elem.pxy[1] = p1.y();
+
+                Pt::Gfx::PointF p2( elem.pxy[2], elem.pxy[3] );
+                p2 = transform * p2;
+
+                elem.pxy[2] = p2.x();
+                elem.pxy[3] = p2.y();
+            }
+            break;
+
+            case Element::IT_CubicBezierTo:
+            {
+                Pt::Gfx::PointF p1( elem.pxy[0], elem.pxy[1] );
+                p1 = transform * p1;
+
+                elem.pxy[0] = p1.x();
+                elem.pxy[1] = p1.y();
+
+                Pt::Gfx::PointF p2( elem.pxy[2], elem.pxy[3] );
+                p2 = transform * p2;
+
+                elem.pxy[2] = p2.x();
+                elem.pxy[3] = p2.y();
+
+
+
+                Pt::Gfx::PointF p3( elem.pxy[4], elem.pxy[5] );
+                p3 = transform * p3;
+
+                elem.pxy[4] = p3.x();
+                elem.pxy[5] = p3.y();
+              }
+              break;
+
+            case Element::IT_GenNBezierTo:
+             break;
+
+            default:
+                break;
+        }
+      }
 }
 
 

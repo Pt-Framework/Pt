@@ -1482,6 +1482,9 @@
     <ClInclude Include="..\..\include\Pt\Gfx\ImagePainter2.h">
       <Filter>Pt-Gfx</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\include\Pt\Hmi\SpinBox.h">
+      <Filter>Pt-Hmi</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2743,6 +2746,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt-Gfx\ImagePainter2.cpp">
       <Filter>Pt-Gfx</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Hmi\SpinBox.cpp">
+      <Filter>Pt-Hmi</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

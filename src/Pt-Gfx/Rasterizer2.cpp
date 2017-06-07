@@ -30,7 +30,7 @@
 
 #include "DrawText2.h"
 #include "Rasterizer2.h"
-
+#include <Pt/Gfx/Transform.h>
 
 namespace Pt {
 namespace Gfx {
@@ -209,14 +209,14 @@ void Rasterizer2::blitImage(const Point& to, const Image& from, const Rect& from
     _image->format().copy(_image->view(), toClip, from.view(), fromClip, _compositionMode);
 }
 
-void Rasterizer2::strokeText( const Point& to, const Pt::String& text )
+void Rasterizer2::strokeText( const Point& to, const Pt::String& text, const Transform& t )
 {
     _text->setClip(_currentClip);
 
     if(_aaMode == AntiAliasingMode::None)
-        _text->drawMono( *_image, _pen.color(), to, text, _compositionMode );
+        _text->drawMono( *_image, _pen.color(), to, text, _compositionMode, t );
     else
-        _text->draw( *_image, _pen.color(), to, text, _compositionMode );
+        _text->draw( *_image, _pen.color(), to, text, _compositionMode, t );
 }
 
 
