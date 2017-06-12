@@ -63,6 +63,7 @@ class MenuBarItem;
 class ScrollBar;
 class Slider;
 class SpinBox;
+class SpinBoxButton;
 class ProgressBar;
 class ListBox;
 class ListBoxItem;
@@ -968,10 +969,15 @@ class PT_HMI_API SpinBoxRenderer : public Style::Facet
                      Gfx::Font& font,
                      Gfx::Pen& textPen) const;
         
-        void prepareLayout(const SpinBox& sb,
-                           Gfx::RectF& downButton,
-                           Gfx::RectF& upButton,
-                           Gfx::RectF& textBox) const;
+        void prepareButton(const SpinBoxButton& sb, 
+                           const StyleOptions& options,
+                           Gfx::Brush& foreground,
+                           Gfx::Pen& contour) const;
+
+        void layout(const SpinBox& sb,
+                    Gfx::RectF& downButton,
+                    Gfx::RectF& upButton,
+                    Gfx::RectF& textBox) const;
         
         void renderBackground(const SpinBox& sb, 
                               const StyleOptions& options,
@@ -980,12 +986,12 @@ class PT_HMI_API SpinBoxRenderer : public Style::Facet
                               const Gfx::Pen& contour,
                               const Gfx::Brush& brush) const;
 
-        void renderButton(const SpinBox& sb, 
+        void renderButton(const SpinBoxButton& sb, 
                           const StyleOptions& options,
                           Painter& painter, 
                           const Gfx::RectF& rect,
-                          const Gfx::Pen& contour,
-                          const Gfx::Brush& foreground) const;
+                          const Gfx::Brush& foreground,
+                          const Gfx::Pen& contour) const;
 
         void renderText(const SpinBox& sb,
                         const StyleOptions& options,
@@ -1006,10 +1012,15 @@ class PT_HMI_API SpinBoxRenderer : public Style::Facet
                                Gfx::Font& font,
                                Gfx::Pen& textPen) const = 0;
 
-        virtual void onPrepareLayout(const SpinBox& sb,
-                                     Gfx::RectF& downButton,
-                                     Gfx::RectF& upButton,
-                                     Gfx::RectF& textBox) const = 0;
+        virtual void onPrepareButton(const SpinBoxButton& sb, 
+                                     const StyleOptions& options,
+                                     Gfx::Brush& foreground,
+                                     Gfx::Pen& contour) const = 0;
+
+        virtual void onLayout(const SpinBox& sb,
+                              Gfx::RectF& downButton,
+                              Gfx::RectF& upButton,
+                              Gfx::RectF& textBox) const = 0;
 
         virtual void onRenderBackground(const SpinBox& sb, 
                                         const StyleOptions& options,
@@ -1018,12 +1029,12 @@ class PT_HMI_API SpinBoxRenderer : public Style::Facet
                                         const Gfx::Pen& contour,
                                         const Gfx::Brush& brush) const = 0;
 
-        virtual void onRenderButton(const SpinBox& sb, 
+        virtual void onRenderButton(const SpinBoxButton& sb, 
                                     const StyleOptions& options,
                                     Painter& painter, 
                                     const Gfx::RectF& rect,
-                                    const Gfx::Pen& contour,
-                                    const Gfx::Brush& foreground) const = 0;
+                                    const Gfx::Brush& foreground,
+                                    const Gfx::Pen& contour) const = 0;
 
         virtual void onRenderText(const SpinBox& sb,
                                   const StyleOptions& options,

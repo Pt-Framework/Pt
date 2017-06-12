@@ -1189,6 +1189,46 @@ void PlatinumSpinBoxRenderer::onPrepare(const SpinBox& sb,
 }
 
 
+void PlatinumSpinBoxRenderer::onPrepareButton(const SpinBoxButton& sb, 
+                                              const StyleOptions& options,
+                                              Gfx::Brush& foreground,
+                                              Gfx::Pen& contour) const
+{
+    if( sb.isEnabled() )
+    {
+        if( sb.isHighlighted() || sb.hasFocus() )
+        {
+            contour = Gfx::Pen( options.accentColor(), 
+                                contour.size(), contour.style(), 
+                                contour.capStyle(), contour.joinStyle() );
+        }
+    }
+
+    foreground = contour.color();
+}
+
+
+void PlatinumSpinBoxRenderer::onLayout(const SpinBox& sb,
+                                       Gfx::RectF& downButton,
+                                       Gfx::RectF& upButton,
+                                       Gfx::RectF& textBox) const
+{   
+    double cursorWidth = 5; // TODO: cursor
+    double buttonWidth = sb.size().height();
+
+    textBox.setOrigin( Gfx::PointF(buttonWidth + cursorWidth, 0) );
+
+    textBox.setSize( Gfx::SizeF(sb.size().width() - 2 * buttonWidth - 2 * cursorWidth, 
+                                sb.size().height()) );
+
+    downButton.setOrigin( Gfx::PointF(0, 0) );
+    downButton.setSize( Gfx::SizeF(buttonWidth, buttonWidth) );
+
+    upButton.setOrigin( Gfx::PointF(sb.size().width() - buttonWidth, 0) );
+    upButton.setSize( Gfx::SizeF(buttonWidth, buttonWidth) );
+}
+
+
 void PlatinumSpinBoxRenderer::onRenderBackground(const SpinBox& sb, 
                                                  const StyleOptions& options,
                                                  Painter& painter, 
@@ -1210,28 +1250,14 @@ void PlatinumSpinBoxRenderer::onRenderBackground(const SpinBox& sb,
 }
 
 
-void PlatinumSpinBoxRenderer::onPrepareLayout(const SpinBox& sb,
-                                              Gfx::RectF& downButton,
-                                              Gfx::RectF& upButton,
-                                              Gfx::RectF& textBox) const
-{   
-    double cursorWidth = 5; // TODO: cursor
-
-    textBox.setOrigin( Gfx::PointF(sb.size().height() + 5, 0) );
-
-    textBox.setSize( Gfx::SizeF(sb.size().width() - 2 * sb.size().height() - 2* cursorWidth, 
-                                sb.size().height()) );
-}
-
-
-void PlatinumSpinBoxRenderer::onRenderButton(const SpinBox& sb, 
+void PlatinumSpinBoxRenderer::onRenderButton(const SpinBoxButton& sb, 
                                              const StyleOptions& options,
                                              Painter& painter, 
                                              const Gfx::RectF& rect,
-                                             const Gfx::Pen& contour,
-                                             const Gfx::Brush& foreground) const
+                                             const Gfx::Brush& foreground,
+                                             const Gfx::Pen& contour) const
 {
-    int indicatorWidth = static_cast<int>(sb.size().height()) / 3;
+    int indicatorWidth = static_cast<int>( sb.size().height() ) / 3;
     if(indicatorWidth % 2 == 0)
         ++indicatorWidth;
     
@@ -1240,23 +1266,24 @@ void PlatinumSpinBoxRenderer::onRenderButton(const SpinBox& sb,
     double x =  sb.size().height() / 2 - indicatorWidth / 2;
     double y = (sb.size().height() - indicatorHeight) / 2 + 1;
 
-    Gfx::PointF leftIndicator[3] = { Gfx::PointF(x, y),
-                                     Gfx::PointF(x + indicatorWidth, y),
-                                     Gfx::PointF(x + indicatorHeight - 1, 
-                                                 y + indicatorHeight) };
+    Gfx::PointF indicator[3];
+
+    if( sb.type() == sb.Down)
+    {
+        indicator[0] = Gfx::PointF(x, y);
+        indicator[1] = Gfx::PointF(x + indicatorWidth, y);
+        indicator[2] =  Gfx::PointF(x + indicatorHeight - 1, 
+                                    y + indicatorHeight);
+    }
+    else
+    {
+        indicator[0] = Gfx::PointF(x + indicatorHeight, y - 1);
+        indicator[1] = Gfx::PointF(x + indicatorWidth + 1, y + indicatorHeight);
+        indicator[2] = Gfx::PointF(x, y + indicatorHeight);
+    }
 
     painter.setBrush(foreground);
-    painter.fillPolygon(leftIndicator, 3);
-
-    x = sb.size().width() - x - indicatorWidth;
-    y = sb.size().height() / 2 - indicatorHeight / 2;
-
-    Gfx::PointF rightIndicator[3] = { Gfx::PointF(x + indicatorHeight, y - 1),
-                                      Gfx::PointF(x + indicatorWidth + 1, y + indicatorHeight),
-                                      Gfx::PointF(x, y + indicatorHeight) };
-
-    painter.setBrush(foreground);
-    painter.fillPolygon(rightIndicator, 3);
+    painter.fillPolygon(indicator, 3);
 }
 
 

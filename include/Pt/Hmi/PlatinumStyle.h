@@ -540,10 +540,15 @@ class PT_HMI_API PlatinumSpinBoxRenderer : public SpinBoxRenderer
                                Gfx::Font& font,
                                Gfx::Pen& textPen) const;
         
-        virtual void onPrepareLayout(const SpinBox& cb,
-                                     Gfx::RectF& downButton,
-                                     Gfx::RectF& upButton,
-                                     Gfx::RectF& textBox) const;
+        virtual void onPrepareButton(const SpinBoxButton& sb, 
+                                     const StyleOptions& options,
+                                     Gfx::Brush& foreground,
+                                     Gfx::Pen& contour) const;
+        
+        virtual void onLayout(const SpinBox& cb,
+                              Gfx::RectF& downButton,
+                              Gfx::RectF& upButton,
+                              Gfx::RectF& textBox) const;
         
         virtual void onRenderBackground(const SpinBox& cb, 
                                         const StyleOptions& options,
@@ -552,12 +557,12 @@ class PT_HMI_API PlatinumSpinBoxRenderer : public SpinBoxRenderer
                                         const Gfx::Pen& contour,
                                         const Gfx::Brush& brush) const;
 
-        virtual void onRenderButton(const SpinBox& cb, 
+        virtual void onRenderButton(const SpinBoxButton& sb, 
                                     const StyleOptions& options,
                                     Painter& painter, 
                                     const Gfx::RectF& rect,
-                                    const Gfx::Pen& contour,
-                                    const Gfx::Brush& foreground) const;
+                                    const Gfx::Brush& foreground,
+                                    const Gfx::Pen& contour) const;
 
         virtual void onRenderText(const SpinBox& cb,
                                   const StyleOptions& options,

@@ -818,12 +818,21 @@ void SpinBoxRenderer::prepare(const SpinBox& sb,
 }
 
 
-void SpinBoxRenderer::prepareLayout(const SpinBox& sb,
-                                    Gfx::RectF& downButton,
-                                    Gfx::RectF& upButton,
-                                    Gfx::RectF& textBox) const
+void SpinBoxRenderer::prepareButton(const SpinBoxButton& sb, 
+                                    const StyleOptions& options,
+                                    Gfx::Brush& foreground,
+                                    Gfx::Pen& contour) const
 {
-    return onPrepareLayout(sb, downButton, upButton, textBox);
+    onPrepareButton(sb, options, foreground, contour);
+}
+
+
+void SpinBoxRenderer::layout(const SpinBox& sb,
+                             Gfx::RectF& downButton,
+                             Gfx::RectF& upButton,
+                             Gfx::RectF& textBox) const
+{
+    return onLayout(sb, downButton, upButton, textBox);
 }
 
 
@@ -838,14 +847,14 @@ void SpinBoxRenderer::renderBackground(const SpinBox& sb,
 }
 
 
-void SpinBoxRenderer::renderButton(const SpinBox& sb, 
+void SpinBoxRenderer::renderButton(const SpinBoxButton& sb, 
                                    const StyleOptions& options,
                                    Painter& painter, 
                                    const Gfx::RectF& rect,
-                                   const Gfx::Pen& contour,
-                                   const Gfx::Brush& foreground) const
+                                   const Gfx::Brush& foreground,
+                                   const Gfx::Pen& contour) const
 {
-    onRenderButton(sb, options, painter, rect, contour, foreground);
+    onRenderButton(sb, options, painter, rect, foreground, contour);
 }
 
 

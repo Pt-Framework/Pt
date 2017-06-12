@@ -30,6 +30,8 @@
 #define PT_HMI_SPINBOX_H
 
 #include <Pt/Hmi/Control.h>
+#include <Pt/Hmi/Button.h>
+#include <Pt/Hmi/PushButton.h>
 #include <Pt/Hmi/LineEditor.h>
 #include <Pt/Hmi/Adjustment.h>
 #include <Pt/SmartPtr.h>
@@ -38,6 +40,61 @@
 namespace Pt {
 
 namespace Hmi {
+
+class PT_HMI_API SpinBoxButton : public Button
+{
+    public:
+        typedef Button Base;
+
+    public:
+        enum Type
+        {
+          Up, 
+          Down
+        };
+
+    public:
+        SpinBoxButton(Type type);
+
+        ~SpinBoxButton();
+
+        Type type() const;
+
+        const Gfx::Brush& foreground() const;
+
+        void setForeground(const Gfx::Brush& b);
+
+        const Gfx::Pen& contour() const;
+
+        void setContour(const Gfx::Pen& p);
+
+        void setRenderer(SpinBoxRenderer* renderer);
+
+    protected:
+        virtual void onPressed();
+
+        virtual void onReleased();
+
+        virtual void onCanceled();
+
+    protected:
+        virtual void onInvalidate();
+
+        virtual void onPaint(PaintSurface& surface, const Gfx::RectF& rect);
+
+    private:
+        Type                      _type;
+        
+        FacetPtr<SpinBoxRenderer> _renderer;
+        bool                      _hasRenderer;
+
+        AutoPtr<Gfx::Brush>       _foreground;
+        AutoPtr<Gfx::Pen>         _contour;
+
+        Gfx::Brush                _brush;
+        Gfx::Pen                  _pen;
+};
+
 
 class PT_HMI_API SpinBox : public Control
 {
@@ -53,11 +110,21 @@ class PT_HMI_API SpinBox : public Control
 
         void setEditable(bool e);
 
+
+        int minimum() const;
+
+        int maximum() const;
+
+        void setRange(int min, int max);
+
+        int value() const;
+
+        void setValue(int n);
+
         const Pt::String& text() const;
 
-        void setText(const Pt::String& str);
-
         bool isEmpty() const;
+
 
         Adjustment textAdjustment() const;
 
@@ -109,6 +176,15 @@ class PT_HMI_API SpinBox : public Control
         void setRenderer(SpinBoxRenderer* renderer);
 
     protected:
+        virtual Pt::String toText(int n) const;
+
+        virtual int toValue(const Pt::String& str, bool& ok) const;
+
+        void onUp();
+
+        void onDown();
+
+    protected:
         virtual Gfx::SizeF onMeasure(const SizePolicy& policy);
 
         virtual void onLayout(const Gfx::RectF& rect);
@@ -124,8 +200,6 @@ class PT_HMI_API SpinBox : public Control
 
         virtual void onTouchEvent(const TouchEvent& ev);
 
-        virtual void onResizeEvent(const ResizeEvent& ev);
-
         virtual void onFocusEvent(const FocusEvent& ev);
 
     private:
@@ -138,9 +212,12 @@ class PT_HMI_API SpinBox : public Control
         bool                          _isEditable;
         bool                          _isAccepted;
         bool                          _isTextChanged;
+        int                           _value;
+        int                           _minimum;
+        int                           _maximum;
 
-        Gfx::RectF                    _downButton;
-        Gfx::RectF                    _upButton;
+        SpinBoxButton                 _downButton;
+        SpinBoxButton                 _upButton;
         Gfx::RectF                    _textBox;
         Gfx::SizeF                    _buttonSize;
         double                        _spacing;

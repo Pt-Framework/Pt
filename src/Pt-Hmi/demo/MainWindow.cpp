@@ -210,6 +210,7 @@ MainWindow::~MainWindow()
 void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 {
     Window::onPaintBackground(rect);
+    return;
 
     Painter painter( surface() );
 
