@@ -20,6 +20,17 @@ void ChildW::checkInput(const Pt::String& s)
 }
 
 
+void ChildW::checkSpinBox(int value)
+{
+    _spinBox.setAccepted( _spinBox.value() % 2 == 0);
+
+    if( ! _spinBox.isAccepted() )
+        _spinBox.setTextColor( Gfx::Color::fromRgb8(255,0,0));
+    else
+        _spinBox.setTextColor( Gfx::Color::fromRgb8(0,0,0));
+}
+
+
 ChildW::ChildW(const std::string& title)
 {
     _fileMenu.setName("FileMenu");
@@ -163,6 +174,7 @@ ChildW::ChildW(const std::string& title)
     _spinBox.setName("SpinBox"); 
     _spinBox.move( Gfx::PointF(0, 0) );
     _spinBox.setMargin(5);
+    _spinBox.valueEdited() += Pt::slot(*this, &ChildW::checkSpinBox);
 
     _buttonBar.setName("ButtonBar");
     _buttonBar.setPadding(5);

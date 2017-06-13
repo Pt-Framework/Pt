@@ -45,6 +45,8 @@ class ChildW : public Hmi::Window
         
         void checkInput(const Pt::String& s);
 
+        void checkSpinBox(int value);
+
     private:
         FlowLayout _mainLayout;
         MenuBar _menuBar;

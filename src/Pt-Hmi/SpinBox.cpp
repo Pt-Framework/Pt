@@ -249,7 +249,7 @@ void SpinBox::setValue(int n)
     update();
     relayout();
 
-    _valueChanged.send(_value);
+    _valueEdited.send(_value);
 }
 
 
@@ -273,14 +273,14 @@ Pt::String SpinBox::toText(int n) const
 }
 
 
-int SpinBox::toValue(const Pt::String& str) const
+bool SpinBox::toValue(const Pt::String& str, int& n) const
 {
     if( str == "-" || str == "+" || str.empty() )
-        return 0;
+        return false;
 
-    int n = 0;
-    Pt::parseInt(str.begin(), str.end(), n);
-    return n;
+    bool ok = false;
+    Pt::String::const_iterator it = Pt::parseInt(str.begin(), str.end(), n, ok);
+    return it == str.end() && ok;
 }
 
 
@@ -292,19 +292,26 @@ bool SpinBox::onInput(const Pt::String& str) const
     int n = 0;
     bool ok = false;
     Pt::String::const_iterator it = Pt::parseInt(str.begin(), str.end(), n, ok);
-    return it == str.end() && ok && n >= _minimum && n <= _maximum;
+    return it == str.end() && ok;
 }
 
 
-bool SpinBox::onValidate(const Pt::String& str) const
+bool SpinBox::setInput(const Pt::String& str)
 {
-    if( str == "-" || str == "+" || str.empty() )
-        return false;
+    bool accepted = onInput(str);
+    if(accepted)
+    {
+        int n = 0;
+        bool valid = toValue(str, n);
 
-    int n = 0;
-    bool ok = false;
-    Pt::String::const_iterator it = Pt::parseInt(str.begin(), str.end(), n, ok);
-    return it == str.end() && ok;
+        if(n < _minimum || n > _maximum)
+            return false;
+
+        if(valid)
+            _value = n;
+    }
+
+    return accepted;
 }
 
 
@@ -324,25 +331,7 @@ void SpinBox::onStep(int n)
     update();
     relayout();
 
-    _valueChanged.send(_value);
-}
-
-
-void SpinBox::setText(const Pt::String& str)
-{
-    _isTextChanged = true;
-
-    bool isValid = onValidate(str);
-    if( isValid && isAccepted() )
-        _value = toValue(str);
-
-    update();
-    relayout();
-
-    if( isValid && isAccepted() )
-        _valueChanged.send(_value);
-    else
-        _textEdited.send(str);
+    _valueEdited.send(_value);
 }
 
 
@@ -409,15 +398,9 @@ void SpinBox::setAccepted(bool a)
 }
 
 
-Pt::Signal<int>& SpinBox::valueChanged()
+Pt::Signal<int>& SpinBox::valueEdited()
 {
-    return _valueChanged;
-}
-
-
-Pt::Signal<const Pt::String&>& SpinBox::textEdited()
-{
-    return _textEdited;
+    return _valueEdited;
 }
 
 
@@ -701,28 +684,38 @@ void SpinBox::onKeyEvent(const KeyEvent& ev)
         Pt::String str = _editor.text();
         str.erase(cursorPosition, 1);
 
-        bool ok = onInput(str);
-        if(ok)
+        bool ok = setInput(str);
+        if( ok )
         {
+            _isTextChanged = true;
             _editor.del();
-            setText(str);
+            
+            update();
+            relayout();
+            
+            _valueEdited.send(_value);
         }
     }
     else if( ev.key().code() == Pt::Hmi::Key::Backspace )
     {
         std::size_t cursorPosition = _editor.cursorPosition();
 
-        if( _editor.text().empty() || cursorPosition == 0 )
+        if( --cursorPosition >= _editor.text().size() )
             return;
 
         Pt::String str = _editor.text();
-        str.erase(--cursorPosition, 1);
+        str.erase(cursorPosition, 1);
 
-        bool ok = onInput(str);
-        if(ok)
+        bool ok = setInput(str);
+        if( ok )
         {
+            _isTextChanged = true;
             _editor.backspace();
-            setText(str);
+            
+            update();
+            relayout();
+            
+            _valueEdited.send(_value);
         }
     }
     else
@@ -734,11 +727,16 @@ void SpinBox::onKeyEvent(const KeyEvent& ev)
             Pt::String str = _editor.text();
             str.insert(cursorPosition, 1, ch);
 
-            bool ok = onInput(str);
-            if(ok)
+            bool ok = setInput(str);
+            if( ok )
             {
+                _isTextChanged = true;
                 _editor.insert(ch);
-                setText(str);
+
+                update();
+                relayout();
+
+                _valueEdited.send(_value);
             }
         }
     }

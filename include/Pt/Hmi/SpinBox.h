@@ -110,7 +110,6 @@ class PT_HMI_API SpinBox : public Control
 
         void setEditable(bool e);
 
-
         int minimum() const;
 
         int maximum() const;
@@ -125,7 +124,6 @@ class PT_HMI_API SpinBox : public Control
 
         bool isEmpty() const;
 
-
         Adjustment textAdjustment() const;
 
         void setTextAdjustment(Adjustment a);
@@ -138,9 +136,7 @@ class PT_HMI_API SpinBox : public Control
 
         void setAccepted(bool a);
 
-        Pt::Signal<int>& valueChanged();
-
-        Pt::Signal<const Pt::String&>& textEdited();
+        Pt::Signal<int>& valueEdited();
 
         Pt::Signal<const Pt::String&>& returnPressed();
 
@@ -180,16 +176,14 @@ class PT_HMI_API SpinBox : public Control
     protected:
         virtual Pt::String toText(int n) const;
 
-        virtual int toValue(const Pt::String& str) const;
+        virtual bool toValue(const Pt::String& str, int& n) const;
 
         virtual bool onInput(const Pt::String& str) const;
-
-        virtual bool onValidate(const Pt::String& str) const;
 
         virtual void onStep(int n);
 
     private:
-        void setText(const Pt::String& str);
+        bool setInput(const Pt::String& str);
 
         void onUp();
 
@@ -214,8 +208,7 @@ class PT_HMI_API SpinBox : public Control
         virtual void onFocusEvent(const FocusEvent& ev);
 
     private:
-        Pt::Signal<int>               _valueChanged; 
-        Pt::Signal<const Pt::String&> _textEdited;
+        Pt::Signal<int>               _valueEdited; 
         Pt::Signal<const Pt::String&> _returnPressed;
         Pt::Signal<const Pt::String&> _editingFinished;
 
