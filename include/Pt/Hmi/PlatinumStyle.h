@@ -535,7 +535,6 @@ class PT_HMI_API PlatinumSpinBoxRenderer : public SpinBoxRenderer
         virtual void onPrepare(const SpinBox& cb, 
                                const StyleOptions& options,
                                Gfx::Brush& background,
-                               Gfx::Brush& foreground,
                                Gfx::Pen& contour,
                                Gfx::Font& font,
                                Gfx::Pen& textPen) const;

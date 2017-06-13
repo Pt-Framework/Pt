@@ -964,7 +964,6 @@ class PT_HMI_API SpinBoxRenderer : public Style::Facet
         void prepare(const SpinBox& sb, 
                      const StyleOptions& options,
                      Gfx::Brush& background,
-                     Gfx::Brush& foreground,
                      Gfx::Pen& contour,
                      Gfx::Font& font,
                      Gfx::Pen& textPen) const;
@@ -1007,7 +1006,6 @@ class PT_HMI_API SpinBoxRenderer : public Style::Facet
         virtual void onPrepare(const SpinBox& sb, 
                                const StyleOptions& options,
                                Gfx::Brush& background,
-                               Gfx::Brush& foreground,
                                Gfx::Pen& contour,
                                Gfx::Font& font,
                                Gfx::Pen& textPen) const = 0;

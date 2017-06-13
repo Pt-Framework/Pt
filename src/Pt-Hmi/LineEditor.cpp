@@ -113,8 +113,11 @@ void LineEditor::setText(const Pt::String& s)
     if(_isMasked)
         _displayText.assign(_text.size(), maskChar);
     
-    _cursorPosition = 0;
-    _scrollOffset = 0;
+    if( _cursorPosition > _text.size() )
+        _cursorPosition = _text.size();
+
+    //_cursorPosition = 0;
+    //_scrollOffset = 0;
 }
 
 

@@ -1,5 +1,4 @@
-/* Copyright (C) 2015 Marc Boris Duerner 
-   Copyright (C) 2015 Laurentiu-Gheorghe Crisan
+/* Copyright (C) 2017 Marc Boris Duerner 
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -161,7 +160,7 @@ SpinBox::SpinBox()
 , _isAccepted(true)
 , _isTextChanged(false)
 , _value(0)
-, _minimum(-10000)
+, _minimum(-20000)
 , _maximum(10000)
 , _downButton(SpinBoxButton::Down)
 , _upButton(SpinBoxButton::Up)
@@ -250,7 +249,7 @@ void SpinBox::setValue(int n)
     update();
     relayout();
 
-    _textEdited.send( _editor.text() );
+    _valueChanged.send(_value);
 }
 
 
@@ -268,40 +267,55 @@ bool SpinBox::isEmpty() const
 
 Pt::String SpinBox::toText(int n) const
 {
-  Pt::String s;
-  Pt::formatInt( std::back_inserter(s), n);
-  return s;
+    Pt::String s;
+    Pt::formatInt(std::back_inserter(s), n);
+    return s;
 }
 
 
-int SpinBox::toValue(const Pt::String& str, bool& ok) const
+int SpinBox::toValue(const Pt::String& str) const
 {
+    if( str == "-" || str == "+" || str.empty() )
+        return 0;
+
     int n = 0;
-    Pt::String::const_iterator it = Pt::parseInt(str.begin(), str.end(), n, ok);
-    
-    ok = it == str.end();
+    Pt::parseInt(str.begin(), str.end(), n);
     return n;
 }
 
 
-void SpinBox::onUp()
+bool SpinBox::onInput(const Pt::String& str) const
 {
-    if( ++_value > _maximum )
-        _value = _maximum;
+    if( str == "-" || str == "+" || str.empty() )
+        return true;
 
-    Pt::String str = toText(_value);
-    _editor.setText(str);
-    
-    update();
-    relayout();
-
-    _textEdited.send( _editor.text() );
+    int n = 0;
+    bool ok = false;
+    Pt::String::const_iterator it = Pt::parseInt(str.begin(), str.end(), n, ok);
+    return it == str.end() && ok && n >= _minimum && n <= _maximum;
 }
 
 
-void SpinBox::onDown()
+bool SpinBox::onValidate(const Pt::String& str) const
 {
-    if( --_value < _minimum )
+    if( str == "-" || str == "+" || str.empty() )
+        return false;
+
+    int n = 0;
+    bool ok = false;
+    Pt::String::const_iterator it = Pt::parseInt(str.begin(), str.end(), n, ok);
+    return it == str.end() && ok;
+}
+
+
+void SpinBox::onStep(int n)
+{
+    _value += n;
+
+    if( _value > _maximum )
+        _value = _maximum;
+
+    if( _value < _minimum )
         _value = _minimum;
 
     Pt::String str = toText(_value);
@@ -310,7 +324,37 @@ void SpinBox::onDown()
     update();
     relayout();
 
-    _textEdited.send( _editor.text() );
+    _valueChanged.send(_value);
+}
+
+
+void SpinBox::setText(const Pt::String& str)
+{
+    _isTextChanged = true;
+
+    bool isValid = onValidate(str);
+    if( isValid && isAccepted() )
+        _value = toValue(str);
+
+    update();
+    relayout();
+
+    if( isValid && isAccepted() )
+        _valueChanged.send(_value);
+    else
+        _textEdited.send(str);
+}
+
+
+void SpinBox::onUp()
+{
+    onStep(1);
+}
+
+
+void SpinBox::onDown()
+{
+    onStep(-1);
 }
 
 
@@ -365,6 +409,12 @@ void SpinBox::setAccepted(bool a)
 }
 
 
+Pt::Signal<int>& SpinBox::valueChanged()
+{
+    return _valueChanged;
+}
+
+
 Pt::Signal<const Pt::String&>& SpinBox::textEdited()
 {
     return _textEdited;
@@ -399,15 +449,12 @@ void SpinBox::setBackground(const Gfx::Brush& b)
 
 const Gfx::Brush& SpinBox::foreground() const
 {
-    return _foreground ? *_foreground
-                       : Application::instance().styleOptions().foreground();
+    return _downButton.foreground();
 }
 
 
 void SpinBox::setForeground(const Gfx::Brush& b)
 {
-    _foreground.reset( new Gfx::Brush(b) );
-
     _downButton.setForeground(b);
     _upButton.setForeground(b);
 
@@ -553,7 +600,6 @@ void SpinBox::onInvalidate()
     const Style& style = Application::instance().style();
 
     _backgroundBrush = background();
-    _foregroundBrush = foreground();
     _pen = contour();
     _textPen = textColor();
     _font = Gfx::Font(font(), fontSize(), fontStyle());
@@ -564,8 +610,7 @@ void SpinBox::onInvalidate()
     if( ! _renderer )
         return;
 
-    _renderer->prepare(*this, options, _backgroundBrush, _foregroundBrush, 
-                       _pen, _font, _textPen);
+    _renderer->prepare(*this, options, _backgroundBrush, _pen, _font, _textPen);
 }
 
 
@@ -648,43 +693,52 @@ void SpinBox::onKeyEvent(const KeyEvent& ev)
     }
     else if( ev.key().code() == Pt::Hmi::Key::Delete )
     {
-        _isTextChanged = true;
-        _editor.del();
-        
-        update();
-        relayout();
+        std::size_t cursorPosition = _editor.cursorPosition();
 
-        _textEdited.send( _editor.text() );
+        if( cursorPosition >= _editor.text().size() )
+            return;
+
+        Pt::String str = _editor.text();
+        str.erase(cursorPosition, 1);
+
+        bool ok = onInput(str);
+        if(ok)
+        {
+            _editor.del();
+            setText(str);
+        }
     }
     else if( ev.key().code() == Pt::Hmi::Key::Backspace )
     {
-        _isTextChanged = true;
-        _editor.backspace();
-        
-        update();
-        relayout();
+        std::size_t cursorPosition = _editor.cursorPosition();
 
-        _textEdited.send( _editor.text() );
+        if( _editor.text().empty() || cursorPosition == 0 )
+            return;
+
+        Pt::String str = _editor.text();
+        str.erase(--cursorPosition, 1);
+
+        bool ok = onInput(str);
+        if(ok)
+        {
+            _editor.backspace();
+            setText(str);
+        }
     }
     else
     {
         Pt::Char ch = ev.unicode();
         if( Pt::isprint(ch) )
         {
-            _isTextChanged = true;
-
             std::size_t cursorPosition = _editor.cursorPosition();
             Pt::String str = _editor.text();
             str.insert(cursorPosition, 1, ch);
 
-            bool ok = false;
-            int n = toValue(str, ok);
+            bool ok = onInput(str);
             if(ok)
             {
-                _value = n;
                 _editor.insert(ch);
-                update();
-                relayout();
+                setText(str);
             }
         }
     }
@@ -735,8 +789,14 @@ void SpinBox::onFocusEvent(const FocusEvent& ev)
 
     if( ! ev.isFocused() )
     {
-        if( isAccepted() && _isTextChanged)
+        if( isAccepted() && _isTextChanged )
         {
+            Pt::String str = toText(_value);
+            _editor.setText(str);
+    
+            update();
+            relayout();
+
             _isTextChanged = false;
             _editingFinished.send( _editor.text() );
         }

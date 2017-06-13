@@ -809,12 +809,11 @@ SpinBoxRenderer::~SpinBoxRenderer()
 void SpinBoxRenderer::prepare(const SpinBox& sb, 
                               const StyleOptions& options,
                               Gfx::Brush& background,
-                              Gfx::Brush& foreground,
                               Gfx::Pen& contour,
                               Gfx::Font& font,
                               Gfx::Pen& textPen) const
 {
-    onPrepare(sb, options, background, foreground, contour, font, textPen);
+    onPrepare(sb, options, background, contour, font, textPen);
 }
 
 

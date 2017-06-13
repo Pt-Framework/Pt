@@ -138,6 +138,8 @@ class PT_HMI_API SpinBox : public Control
 
         void setAccepted(bool a);
 
+        Pt::Signal<int>& valueChanged();
+
         Pt::Signal<const Pt::String&>& textEdited();
 
         Pt::Signal<const Pt::String&>& returnPressed();
@@ -178,7 +180,16 @@ class PT_HMI_API SpinBox : public Control
     protected:
         virtual Pt::String toText(int n) const;
 
-        virtual int toValue(const Pt::String& str, bool& ok) const;
+        virtual int toValue(const Pt::String& str) const;
+
+        virtual bool onInput(const Pt::String& str) const;
+
+        virtual bool onValidate(const Pt::String& str) const;
+
+        virtual void onStep(int n);
+
+    private:
+        void setText(const Pt::String& str);
 
         void onUp();
 
@@ -203,6 +214,7 @@ class PT_HMI_API SpinBox : public Control
         virtual void onFocusEvent(const FocusEvent& ev);
 
     private:
+        Pt::Signal<int>               _valueChanged; 
         Pt::Signal<const Pt::String&> _textEdited;
         Pt::Signal<const Pt::String&> _returnPressed;
         Pt::Signal<const Pt::String&> _editingFinished;
@@ -226,7 +238,6 @@ class PT_HMI_API SpinBox : public Control
         bool                          _hasRenderer;
 
         AutoPtr<Gfx::Brush>           _background;
-        AutoPtr<Gfx::Brush>           _foreground;
         AutoPtr<Gfx::Pen>             _contour;
         AutoPtr<Gfx::Color>           _textColor;
         AutoPtr<std::string>          _fontName;
@@ -234,7 +245,6 @@ class PT_HMI_API SpinBox : public Control
         AutoPtr<Gfx::Font::Style>     _fontStyle;
 
         Gfx::Brush                    _backgroundBrush;
-        Gfx::Brush                    _foregroundBrush;
         Gfx::Pen                      _pen;
         Gfx::Pen                      _textPen;
         Gfx::Font                     _font;

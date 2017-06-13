@@ -1170,7 +1170,6 @@ PlatinumSpinBoxRenderer::~PlatinumSpinBoxRenderer()
 void PlatinumSpinBoxRenderer::onPrepare(const SpinBox& sb, 
                                         const StyleOptions& options,
                                         Gfx::Brush& background,
-                                        Gfx::Brush& foreground,
                                         Gfx::Pen& contour,
                                         Gfx::Font& font,
                                         Gfx::Pen& textPen) const
@@ -1184,8 +1183,6 @@ void PlatinumSpinBoxRenderer::onPrepare(const SpinBox& sb,
                                 contour.capStyle(), contour.joinStyle() );
         }
     }
-
-    foreground = contour.color();
 }
 
 
