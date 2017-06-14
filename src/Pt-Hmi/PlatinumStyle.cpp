@@ -1193,7 +1193,7 @@ void PlatinumSpinBoxRenderer::onPrepareButton(const SpinBoxButton& sb,
 {
     if( sb.isEnabled() )
     {
-        if( sb.isHighlighted() || sb.hasFocus() )
+        if( sb.isHighlighted() )
         {
             contour = Gfx::Pen( options.accentColor(), 
                                 contour.size(), contour.style(), 

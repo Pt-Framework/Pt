@@ -40,6 +40,7 @@ namespace Hmi {
 
 SpinBoxButton::SpinBoxButton(Type type)
 : _type(type)
+, _hasRenderer(false)
 {
 }
 
