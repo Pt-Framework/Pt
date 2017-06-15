@@ -243,22 +243,63 @@ void Path::bezierTo(const PointF* cxy, size_t controlPointCount, const PointF& t
     _curY = to.y();
 }
 
+void Path::addRect(const SizeF& size)
+{    
+    const double x = _curX;
+    const double y = _curY;
+
+    lineTo(Pt::Gfx::PointF(x, y+ size.height()));
+    lineTo(Pt::Gfx::PointF(x + size.width(), y+ size.height()));
+    lineTo(Pt::Gfx::PointF(x + size.width(), y));
+    lineTo(Pt::Gfx::PointF(x, y));   
+}
+
+
+void Path::addRoundRect(const SizeF& size, float radius)
+{
+    const double x = _curX;
+    const double y = _curY;
+
+    moveTo(Pt::Gfx::PointF( x, y +  radius));
+    quadraticBezierTo(Pt::Gfx::PointF( x, y), Pt::Gfx::PointF(x + radius, y));     
+
+
+    lineTo(Pt::Gfx::PointF(x +  size.width() - radius, y));
+    quadraticBezierTo(Pt::Gfx::PointF(x + size.width(), y), Pt::Gfx::PointF(x + size.width(), y + radius));
+
+    lineTo(Pt::Gfx::PointF(x +  size.width(), y + size.height() - radius));
+    quadraticBezierTo(Pt::Gfx::PointF(x + size.width(), y+ size.height() ), Pt::Gfx::PointF(x + size.width() - radius, y + size.height()));
+
+    lineTo(Pt::Gfx::PointF(x +  radius, y + size.height()));
+    quadraticBezierTo(Pt::Gfx::PointF(x, y + size.height()), Pt::Gfx::PointF(x, y + size.height() - radius));
+
+    lineTo(Pt::Gfx::PointF(x, y + radius));
+}
+ 
+                
+void Path::addPie(const SizeF& size, float degBegin, float degEnd)
+{
+  //Todo: decompose in 4 quadrants and use Trigonometry sin/ cos to calculate the point coordinates
+   
+}
+
+
+void Path::addChord(const SizeF& size,  float degBegin, float degEnd)
+{
+//Todo: decompose in 4 quadrants and use Trigonometry sin/ cos to calculate the point coordinates
+}
+
 
 void Path::addEllipse(const SizeF& size)
 {
   const Pt::Gfx::PointF p1(_curX, _curY+  size.height() / 2);
   const Pt::Gfx::PointF p2(_curX + size.width(), _curY + size.height() / 2);
 
-
   moveTo(p1);
-  
   arcTo( p2, size.height()/2 );   
 
-
   moveTo(p2);
-  
   arcTo( p1, size.height()/2 );   
-
 }
 
 
@@ -403,6 +444,6 @@ void Path::transform(const Transform& transform)
       }
 }
 
-
 } // namespace
+
 } // namespace

@@ -39,6 +39,7 @@
 #include <Pt/Gfx/FontMetrics.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Brush.h>
+#include <Pt/Gfx/Transform.h>
 #include <Pt/String.h>
 #include <Pt/Types.h>
 #include <cstddef>

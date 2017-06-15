@@ -125,13 +125,20 @@ class PT_GFX_API Path
 
         void addEllipse(const SizeF& size);
 
+        void addRect(const SizeF& size);
+
+        void addRoundRect(const SizeF& size, float radius);
+                
+        void addPie(const SizeF& size, float degBegin, float degEnd);
+
+        void addChord(const SizeF& size,  float degBegin, float degEnd);
+
         void transform(const Transform& transform);
 
         void generatePoints(std::vector<PointF>& dst, float smoothness = 1) const;  
 
     private:
        void decomposeArcTo(double x1, double y1, double x2, double y2, double r);
-
 
     private:
       static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, double x1, double y1, double x2, double y2, double x3, double y3, double smoothness)

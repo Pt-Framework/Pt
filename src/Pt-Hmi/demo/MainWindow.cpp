@@ -210,41 +210,37 @@ MainWindow::~MainWindow()
 void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 {
     Window::onPaintBackground(rect);
-    return;
-
+    
     Painter painter( surface() );
 
     Gfx::ImagePainter::setDefaultFont("DejaVu Sans");
 
-    Gfx::Image image( painter.format(), Gfx::Size(300, 400) );
+    Gfx::Image image( painter.format(), Gfx::Size(800, 800) );
     Gfx::ImagePainter2 imagePainter(image);
 
     Pt::Gfx::Transform trans;
     trans.translate(-125, -150);     
     trans.rotateDeg(45);
     trans.translate(125, 150);
-    imagePainter.setTransform(trans);
 
-    Pt::Gfx::Path clipPath;
-    clipPath.moveTo( Pt::Gfx::PointF(100, 150) );
-    clipPath.lineTo(Pt::Gfx::PointF(155, 150) );
-    clipPath.lineTo(Pt::Gfx::PointF(155, 200) );
-    clipPath.lineTo(Pt::Gfx::PointF(100, 200) );
-    clipPath.lineTo(Pt::Gfx::PointF(100, 150) );
-    //imagePainter.setClip(clipPath);
 
-    Pt::Gfx::Path path;
+    Pt::Gfx::Path path;    
     path.moveTo( Pt::Gfx::PointF(100, 100) );
-    path.addEllipse( Pt::Gfx::SizeF(50, 100) );
+    //path.addEllipse( Pt::Gfx::SizeF(50, 100) );
+    path.addRoundRect(Pt::Gfx::SizeF(50,50), 10);
+    //path.transform(trans);
 
+    imagePainter.setPen(Gfx::Color::fromRgb8(255, 0, 0)  );
     imagePainter.setBrush( Gfx::Color::fromRgb8(255, 0, 0)  );
     imagePainter.fillPath(path);
-      
-    imagePainter.setPen( Gfx::Color::fromRgb8(150, 150, 255) );
-    imagePainter.drawEllipse(Pt::Gfx::PointF(100, 100), Pt::Gfx::SizeF(50, 100));
 
-    imagePainter.setFont( Pt::Gfx::Font("", 24) );
-    imagePainter.drawText(Pt::Gfx::PointF(115, 120), "Hello");
+    imagePainter.fillRoundRect( Pt::Gfx::RectF(Pt::Gfx::PointF(150, 150), Pt::Gfx::SizeF(50,50)), 10);
+      
+    //imagePainter.setPen( Gfx::Color::fromRgb8(150, 150, 255) );
+    //imagePainter.drawEllipse(Pt::Gfx::PointF(100, 100), Pt::Gfx::SizeF(50, 100));
+
+//    imagePainter.setFont( Pt::Gfx::Font("", 24) );
+//    imagePainter.drawText(Pt::Gfx::PointF(115, 120), "Hello");
 
     painter.drawImage(Gfx::PointF(0, 0), image);
 }

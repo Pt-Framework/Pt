@@ -442,8 +442,8 @@ void ImagePainter2::drawText( const PointF& to, const String& text )
 {
 
     Point to_( Gfx::Math::zrint(to.x()), Gfx::Math::zrint(to.y()) );
-    
-    _rasterizer->strokeText(to_, text, _transform);
+    Transform identity;
+    _rasterizer->strokeText(to_, text, identity);
 }
 
 
@@ -582,7 +582,7 @@ void ImagePainter2::drawRoundedRect( const RectF& rect, float radius )
     _rasterizer->setPen(orgPen);
 }
 
-void ImagePainter2::fillRoundRect( const RectF& rect, float radius )
+void ImagePainter2::fillRoundedRect( const RectF& rect, float radius )
 {
     // Extract the coordinates
     const float x1 = rect.topLeft    ().x();
@@ -746,17 +746,6 @@ void ImagePainter2::drawQuadraticPolybezier(const PointF& from, const PointF& to
 
 void ImagePainter2::drawEllipse(const PointF& topLeft, const SizeF& size)
 {
-    if( ! _transform.isIdentity() || ! _clipPath.isEmpty() )
-    {
-        Path path;
-        path.moveTo(topLeft);
-        path.addEllipse( size);
-        path.transform( _transform);
-
-        drawPathImpl(path);
-        return;
-    }
-
     // Rasterize one-pixel ellipse
     if(_rasterizer->pen().size() == 1) {
         // Convert the points
@@ -826,85 +815,15 @@ void ImagePainter2::drawEllipse(const PointF& topLeft, const SizeF& size)
     }
 }
 
-
-void ImagePainter2::drawPathImpl(const Path& path, float smoothness)
-{
-    // Convert the path to polyline points
-    std::vector<PointF> pointsF;
-    path.generatePoints(pointsF, smoothness);
-
-    if( ! _clipPath.isEmpty() )
-    {
-        std::vector<PointF> clipPoints;
-        _clipPath.generatePoints(clipPoints, smoothness);
-
-        std::vector<PointF> result;
-        clipPolygon(result, pointsF, clipPoints);
-        pointsF = result;
-    }
-
-    // Draw the polyline
-    drawPolyline(pointsF.data(), pointsF.size());
-}
-
-
 void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
 {
 
-  if( _transform.isIdentity() && _clipPath.isEmpty() )
-  {
     // Convert the points
     const Point tl( Gfx::Math::zrint(topLeft.x    ()), Gfx::Math::zrint(topLeft.y     ()) );
     const Size  sz( Gfx::Math::zrint(size   .width()), Gfx::Math::zrint(size   .height()) );
 
     // Rasterize the ellipse
     _rasterizer->fillEllipse(tl, sz);
-  }
-  else
-  {
-    Path path;
-    path.moveTo(topLeft);
-    path.addEllipse( size);
-    path.transform( _transform);
-
-    fillPathImpl(path);
-  }
-}
-
-
-void ImagePainter2::fillPathImpl(const Path& path, float smoothness)
-{
-    // Convert the path to polygon points
-    std::vector<PointF> pointsF;
-    path.generatePoints(pointsF, smoothness);
-
-    if( ! _clipPath.isEmpty() )
-    {
-        std::vector<PointF> clipPoints;
-        _clipPath.generatePoints(clipPoints, smoothness);
-
-        std::vector<PointF> result;
-        clipPolygon(result, pointsF, clipPoints);
-        pointsF = result;
-    }
-
-    // Use anti-aliasing
-    if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Default) {
-        // Remove duplicates
-        std::vector<PointF> points;
-        deduplicatePointsF(points, pointsF.data(), pointsF.size());
-        // Draw the path as a filled polygon
-        _rasterizer->fillPolygon(points.data(), points.size());
-    }
-
-    // Do not use use anti-aliasing
-    else {
-        // Round the points and remove duplicates
-        std::vector<Point> points;
-        cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
-        // Draw the path as a filled polygon
-        _rasterizer->fillPolygon(points.data(), points.size());
-    }
 }
 
 
@@ -1931,15 +1850,6 @@ bool ImagePainter2::isAntialiasing() const
  return _rasterizer->antiAliasingMode();
 }
 
-const Gfx::Transform& ImagePainter2::transform() const
-{
- return _transform;
-}
-
-void ImagePainter2::setTransform(const const Gfx::Transform& t)
-{
-  _transform = t;
-}
 
 bool ImagePainter2::intersectLine(bool& inLine, PointF& intersect, const PointF& line1a, const PointF& line1b, const PointF& line2a, const PointF& line2b, size_t penSize)
 {
