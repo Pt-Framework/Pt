@@ -222,7 +222,7 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     trans.translate(-125, -150);     
     trans.rotateDeg(45);
     trans.translate(125, 150);
-
+    
 
     Pt::Gfx::Path path;    
     path.moveTo( Pt::Gfx::PointF(100, 100) );
@@ -234,7 +234,7 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     imagePainter.setBrush( Gfx::Color::fromRgb8(255, 0, 0)  );
     imagePainter.fillPath(path);
 
-    imagePainter.fillRoundRect( Pt::Gfx::RectF(Pt::Gfx::PointF(150, 150), Pt::Gfx::SizeF(50,50)), 10);
+    imagePainter.fillRoundedRect( Pt::Gfx::RectF(Pt::Gfx::PointF(150, 150), Pt::Gfx::SizeF(50,50)), 10);
       
     //imagePainter.setPen( Gfx::Color::fromRgb8(150, 150, 255) );
     //imagePainter.drawEllipse(Pt::Gfx::PointF(100, 100), Pt::Gfx::SizeF(50, 100));
@@ -242,7 +242,7 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 //    imagePainter.setFont( Pt::Gfx::Font("", 24) );
 //    imagePainter.drawText(Pt::Gfx::PointF(115, 120), "Hello");
 
-    painter.drawImage(Gfx::PointF(0, 0), image);
+    //painter.drawImage(Gfx::PointF(0, 0), image);
 }
 
 
