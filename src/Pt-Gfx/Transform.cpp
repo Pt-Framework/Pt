@@ -35,6 +35,7 @@ namespace Pt {
 namespace Gfx {
 
 Transform::Transform()
+: _isIdentity(true)
 {
     reset();
 }
@@ -103,15 +104,15 @@ void Transform::set(double m11, double m12,
                     double m21, double m22,
                     double dx, double dy)
 {
-    _mdata[0][0] = m11; 
-    _mdata[0][1] = m12; 
+    _mdata[0][0] = m11;
+    _mdata[0][1] = m12;
     _mdata[0][2] = dx;
-    _mdata[1][0] = m21; 
-    _mdata[1][1] = m22; 
-    _mdata[1][2] = dy;            
+    _mdata[1][0] = m21;
+    _mdata[1][1] = m22;
+    _mdata[1][2] = dy;
             
     _isIdentity = _mdata[0][0] == 1 && _mdata[0][1] == 0 && _mdata[0][2] == 0 && 
-                    _mdata[1][0] == 0 && _mdata[1][1] == 1 && _mdata[1][2] == 0;
+                  _mdata[1][0] == 0 && _mdata[1][1] == 1 && _mdata[1][2] == 0;
 }
 
 
@@ -271,17 +272,17 @@ SizeF Transform::operator*(const SizeF& sz) const
 }
 
 
-void Transform::updateMatrix(const MatrixData& n)
+void Transform::updateMatrix(const MatrixData& m)
 {
     MatrixData result;
 
-    result[0][0] = n[0][0] * _mdata[0][0] + n[0][1] * _mdata[1][0] + n[0][2] * 0;
-    result[0][1] = n[0][0] * _mdata[0][1] + n[0][1] * _mdata[1][1] + n[0][2] * 0;
-    result[0][2] = n[0][0] * _mdata[0][2] + n[0][1] * _mdata[1][2] + n[0][2] * 1;
+    result[0][0] = m[0][0] * _mdata[0][0] + m[0][1] * _mdata[1][0] + m[0][2] * 0;
+    result[0][1] = m[0][0] * _mdata[0][1] + m[0][1] * _mdata[1][1] + m[0][2] * 0;
+    result[0][2] = m[0][0] * _mdata[0][2] + m[0][1] * _mdata[1][2] + m[0][2] * 1;
 
-    result[1][0] = n[1][0] * _mdata[0][0] + n[1][1] * _mdata[1][0] + n[1][2] * 0;
-    result[1][1] = n[1][0] * _mdata[0][1] + n[1][1] * _mdata[1][1] + n[1][2] * 0;
-    result[1][2] = n[1][0] * _mdata[0][2] + n[1][1] * _mdata[1][2] + n[1][2] * 1;
+    result[1][0] = m[1][0] * _mdata[0][0] + m[1][1] * _mdata[1][0] + m[1][2] * 0;
+    result[1][1] = m[1][0] * _mdata[0][1] + m[1][1] * _mdata[1][1] + m[1][2] * 0;
+    result[1][2] = m[1][0] * _mdata[0][2] + m[1][1] * _mdata[1][2] + m[1][2] * 1;
 
     memcpy(_mdata, result, sizeof(MatrixData));
 }

@@ -215,7 +215,7 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 
     Gfx::ImagePainter::setDefaultFont("DejaVu Sans");
 
-    Gfx::Image image( painter.format(), Gfx::Size(800, 800) );
+    Gfx::Image image( painter.format(), Gfx::Size(600, 800) );
     Gfx::ImagePainter2 imagePainter(image);
 
     Pt::Gfx::Transform trans;
@@ -242,7 +242,8 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 //    imagePainter.setFont( Pt::Gfx::Font("", 24) );
 //    imagePainter.drawText(Pt::Gfx::PointF(115, 120), "Hello");
 
-    //painter.drawImage(Gfx::PointF(0, 0), image);
+    painter.setClip(rect);
+    painter.drawImage(Gfx::PointF(0, 0), image);
 }
 
 

@@ -95,7 +95,7 @@ class PT_GFX_API Transform
     private:
       typedef double MatrixData[2][3];
 
-      void updateMatrix(const MatrixData& n);
+      void updateMatrix(const MatrixData& m);
   
     private:
         MatrixData _mdata;
