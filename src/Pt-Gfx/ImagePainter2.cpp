@@ -38,10 +38,12 @@ namespace Pt {
 namespace Gfx {
 
 
-void ImagePainter2::drawThickPolyline_impl(const PointF* ps, const size_t pointCount, bool autoClose, const int32_t* segmentIndexMarker)
+void ImagePainter2::drawThickPolyline_impl(const PointF* ps, const size_t pointCount, 
+                                           bool autoClose, const int32_t* segmentIndexMarker)
 {
     // Check if there is no actual point
-    if(!pointCount) return;
+    if( ! pointCount) 
+        return;
 
     // Prepare the buffer
     std::vector<PointF> pointsF, pointsT;
@@ -53,58 +55,85 @@ void ImagePainter2::drawThickPolyline_impl(const PointF* ps, const size_t pointC
     // Separate the polygons convert them and recombine them
     size_t startIndex = 0;
 
-    for(size_t i = 0; i <= pointCount; ++i) {
+    for(size_t i = 0; i <= pointCount; ++i) 
+    {
         // Search for the end and/or separator points
-        if( i == pointCount || (ps[i].x() > MAXIMUM_COORD && ps[i].y() > MAXIMUM_COORD) ) {
+        if( i == pointCount || (ps[i].x() > MAXIMUM_COORD && ps[i].y() > MAXIMUM_COORD) ) 
+        {
             // Get the base pointer and the number of points for this polygon
             const PointF* basePtr = ps + startIndex;
                   size_t  curPCnt = i - startIndex;
+            
             // Update the start index
             startIndex = i + 1;
+            
             // Determine if this polygon is a closed polygon
             bool closedPolygon = autoClose;
+            
             // Thicken polygon with solid line
-            if(solidPen) {
-                if(basePtr[0] == basePtr[curPCnt - 1]) {
+            if(solidPen) 
+            {
+                if(basePtr[0] == basePtr[curPCnt - 1]) 
+                {
                     closedPolygon = true;
                     --curPCnt;
                 }
-                if(closedPolygon) {
-                    if(!thickenSolidClosedPolygon(pointsF, basePtr, curPCnt, segmentIndexMarker)) return;
+                if(closedPolygon) 
+                {
+                    if( ! thickenSolidClosedPolygon(pointsF, basePtr, 
+                                                    curPCnt, segmentIndexMarker) ) 
+                        return;
                 }
-                else {
-                    if(!thickenSolidOpenPolygon(pointsF, basePtr, curPCnt, segmentIndexMarker)) return;
+                else 
+                {
+                    if( ! thickenSolidOpenPolygon(pointsF, basePtr, 
+                                                  curPCnt, segmentIndexMarker) ) 
+                        return;
                 }
             }
             // Thicken polygon with patterned line
-            else {
-                if(closedPolygon && basePtr[0] != basePtr[curPCnt - 1]) {
+            else 
+            {
+                if(closedPolygon && basePtr[0] != basePtr[curPCnt - 1]) 
+                {
                     pointsT.clear();
+                    
                     for(size_t j = 0; j < curPCnt; ++j) pointsT.push_back(*(basePtr + j));
-                    pointsT.push_back(*basePtr);
+                        pointsT.push_back(*basePtr);
+                    
                     thickenPatternedPolygon(pointsF, pointsT.data(), pointsT.size());
                 }
-                else {
+                else 
+                {
                     thickenPatternedPolygon(pointsF, basePtr, curPCnt);
                 }
             }
+            
             // Use anti-aliasing
-            if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Default) {
+            if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Default) 
+            {
                 // Remove duplicates
                 std::vector<PointF> points;
                 deduplicatePointsF(points, pointsF.data(), pointsF.size());
+                
                 // Rasterize the polygon
-                if(solidPen && closedPolygon) _rasterizer->penFillPolygon        (points.data(), points.size());
-                else                          _rasterizer->penFillPolygonSeparate(points.data(), points.size());
+                if(solidPen && closedPolygon) 
+                    _rasterizer->penFillPolygon( points.data(), points.size() );
+                else                          
+                    _rasterizer->penFillPolygonSeparate( points.data(), points.size() );
             }
             // Do not use use anti-aliasing
-            else {
+            else 
+            {
                 // Round the points and remove duplicates
                 std::vector<Point> points;
                 cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
+                
                 // Rasterize the polygon
-                if(solidPen && closedPolygon) _rasterizer->penFillPolygon        (points.data(), points.size());
-                else                          _rasterizer->penFillPolygonSeparate(points.data(), points.size());
+                if(solidPen && closedPolygon) 
+                    _rasterizer->penFillPolygon(points.data(), points.size());
+                else                          
+                    _rasterizer->penFillPolygonSeparate(points.data(), points.size());
             }
         }
     }
