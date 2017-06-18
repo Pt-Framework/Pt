@@ -1143,8 +1143,7 @@ void ImagePainter2::drawPath(const Path& path, float smoothness)
 {
     // Convert the path to polyline points
     std::vector<PointF> pointsF;
-    path.generatePoints(pointsF, smoothness);
-
+    path.toPoints(pointsF, smoothness);
 
     // Draw the polyline
     drawPolyline(pointsF.data(), pointsF.size());
@@ -1155,8 +1154,7 @@ void ImagePainter2::fillPath(const Path& path, float smoothness)
 {
     // Convert the path to polygon points
     std::vector<PointF> pointsF;
-    path.generatePoints(pointsF, smoothness);
-
+    path.toPoints(pointsF, smoothness);
 
     // Use anti-aliasing
     if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Default) {
