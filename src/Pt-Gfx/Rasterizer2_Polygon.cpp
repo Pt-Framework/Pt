@@ -150,10 +150,10 @@ void Rasterizer2::rasterPolygonAreaXWAA(const PointF* points, const size_t* poin
     std::vector<float> nodeX(totalPointCount * 2, 0);
 
     // Calculate the scaled Y coordinates
-    const Pt::int32_t minX = Pt::Gfx::Math::zfint(minX_);
-  //const Pt::int32_t maxX = Pt::Gfx::Math::zcint(maxX_);
-    const Pt::int32_t minY = Pt::Gfx::Math::zfint(minY_);
-    const Pt::int32_t maxY = Pt::Gfx::Math::zcint(maxY_);
+    const Pt::int32_t minX = Pt::lround(floor(minX_));
+  //const Pt::int32_t maxX = Pt::lround(floor(maxX_));
+    const Pt::int32_t minY = Pt::lround(floor(minY_));
+    const Pt::int32_t maxY = Pt::lround(floor(maxY_));
 
     // List of polygon scanlines
     PolygonScanlines scanlines;
@@ -202,8 +202,8 @@ void Rasterizer2::rasterPolygonAreaXWAA(const PointF* points, const size_t* poin
         // Fill the pixels between the node pairs
         for(Pt::int32_t i = 0; i < nodes; i += 2) {
             // Calculate the coordinate
-            const Pt::int32_t from = Gfx::Math::zcint(nodeX[i    ]);
-            const Pt::int32_t to   = Gfx::Math::zfint(nodeX[i + 1]);
+            const Pt::int32_t from = Pt::lround( ceil(nodeX[i]) );
+            const Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1]) );
             if(to < from) continue;
             // Store the scanline coordinate as needed
             if(_compositionMode != CompositionMode::SourceCopy) {
