@@ -28,7 +28,6 @@
 */
 
 #include <Pt/Gfx/Path.h>
-#include <Pt/Gfx/Math.h>
 #include <Pt/Gfx/Painter.h>
 
 namespace {
@@ -61,7 +60,7 @@ void quadraticBezierToPoints(std::vector<Pt::Gfx::PointF>& dst,
     const double lb  = l32 + l12;
 
     // determine the number of segments
-    const Pt::int32_t nSegs = Pt::Gfx::Math::zrint(lb * abs(smoothness) / 20) + 3 + 1;
+    const Pt::int32_t nSegs = Pt::lround(lb * abs(smoothness) / 20) + 3 + 1;
 
     // calculate the inverse multiplication factor
     const double nSegs1i = 1.0 / (nSegs - 1);
@@ -106,7 +105,7 @@ void cubicBezierToPoints(std::vector<Pt::Gfx::PointF>& dst,
     const double lb   = l43 + l32 + l12;
 
     // Determine the number of segments
-    const Pt::int32_t nSegs = Pt::Gfx::Math::zrint(lb * abs(smoothness) / 20) + 4 + 1;
+    const Pt::int32_t nSegs = Pt::lround(lb * abs(smoothness) / 20) + 4 + 1;
 
     // Calculate the inverse multiplication factor
     const double nSegs1i = 1.0 / (nSegs - 1);
@@ -193,7 +192,7 @@ void bezierToPoints(std::vector<Pt::Gfx::PointF>& dst,
     }
 
     // Determine the number of segments
-    const Pt::int32_t nSegs = Pt::Gfx::Math::zrint(clen * abs(smoothness) / 20) + (pts.size() / 2 + 1 + 1);
+    const Pt::int32_t nSegs = Pt::lround(clen * abs(smoothness) / 20) + (pts.size() / 2 + 1 + 1);
 
     // Calculate the inverse multiplication factor
     const double nSegs1i = 1.0 / (nSegs - 1);
@@ -313,7 +312,7 @@ void Path::arcTo(const PointF& p, double r)
     const double ym = (y1 + y2) * 0.5;
 
     // Radius
-    const double ab = Gfx::Math::fastSqrt(a * a + b * b);
+    const double ab = sqrt(a * a + b * b);
     const double rx = ab * 0.5f;
     const double ry = r;
 

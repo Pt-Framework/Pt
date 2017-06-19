@@ -89,30 +89,30 @@ void Rasterizer2::strokeOnePixelEllipseArc(const Point& topLeft, const Size& siz
         while(degEnd < -360) degEnd += 360;
         while(degEnd >  360) degEnd -= 360;
         // Calculate the approximate coordinate of the point which is located at the begin angle
-        const float rBeg = degBegin * Gfx::Math::DegToRad;
-        bx = Gfx::Math::zrint(ctrX + radX * Gfx::Math::fastCos(rBeg));
-        by = Gfx::Math::zrint(ctrY - radY * Gfx::Math::fastSin(rBeg)); // Sign inversion due to differences between cartesian and computer coordinate systems
+        const float rBeg = degToRad(degBegin);
+        bx = lround(ctrX + radX * fastCos(rBeg));
+        by = lround(ctrY - radY * fastSin(rBeg)); // Sign inversion due to differences between cartesian and computer coordinate systems
         // Calculate the approximate coordinate of the point which is located at the end angle
-        const float rEnd = degEnd * Gfx::Math::DegToRad;
-        ex = Gfx::Math::zrint(ctrX + radX * Gfx::Math::fastCos(rEnd));
-        ey = Gfx::Math::zrint(ctrY - radY * Gfx::Math::fastSin(rEnd)); // Sign inversion due to differences between cartesian and computer coordinate systems
+        const float rEnd = degToRad(degEnd);
+        ex = lround(ctrX + radX * fastCos(rEnd));
+        ey = lround(ctrY - radY * fastSin(rEnd)); // Sign inversion due to differences between cartesian and computer coordinate systems
     }
 
     // Top and bottom halves
-    const Pt::int32_t quartersX = Gfx::Math::zrint( radX2 * Gfx::Math::fastInvSqrt(radX2 + radY2) );
+    const Pt::int32_t quartersX = Pt::lround( radX2 * invSqrtf(radX2 + radY2) );
 
     for(Pt::int32_t x = 0; x <= quartersX; ++x) {
         // Calculate the coordinate and alpha
-        const float       y     = radY * Gfx::Math::fastSqrt(1 - (float) x * x / radX2);
+        const float       y     = radY * sqrt(1 - (float) x * x / radX2);
         const float       error = y - floor(y);
-        const Pt::uint8_t alpha = Gfx::Math::zrint(error * 255);
+        const Pt::uint8_t alpha = lround(error * 255);
         // Without anti-aliasing
         if(_aaMode == AntiAliasingMode::None) {
             // Calculate the coordinates
             const Pt::int32_t xl = ctrX - x;
             const Pt::int32_t xr = ctrX + x;
-            const Pt::int32_t yt = ctrY - Gfx::Math::zrint(y);
-            const Pt::int32_t yb = ctrY + Gfx::Math::zrint(y);
+            const Pt::int32_t yt = ctrY - lround(y);
+            const Pt::int32_t yb = ctrY + lround(y);
             // Arc
             if(drawArc) {
                 // Draw the pixels
@@ -158,10 +158,10 @@ void Rasterizer2::strokeOnePixelEllipseArc(const Point& topLeft, const Size& siz
             // Calculate the coordinates
             const Pt::int32_t xl  = ctrX - x;
             const Pt::int32_t xr  = ctrX + x;
-            const Pt::int32_t yt0 = ctrY - Gfx::Math::zfint(y);
-            const Pt::int32_t yb0 = ctrY + Gfx::Math::zfint(y);
-            const Pt::int32_t yt1 = ctrY - Gfx::Math::zfint(y) - 1;
-            const Pt::int32_t yb1 = ctrY + Gfx::Math::zfint(y) + 1;
+            const Pt::int32_t yt0 = ctrY - Pt::lround(floor(y));
+            const Pt::int32_t yb0 = ctrY + Pt::lround(floor(y));
+            const Pt::int32_t yt1 = ctrY - Pt::lround(floor(y)) - 1;
+            const Pt::int32_t yb1 = ctrY + Pt::lround(floor(y)) + 1;
             // Arc
             if(drawArc) {
                 // Draw the pixels
@@ -225,18 +225,18 @@ void Rasterizer2::strokeOnePixelEllipseArc(const Point& topLeft, const Size& siz
     }
 
     // Left and right halves
-    const Pt::int32_t quartersY = Gfx::Math::zrint( radY2 * Gfx::Math::fastInvSqrt(radX2 + radY2) );
+    const Pt::int32_t quartersY = Pt::lround( radY2 * invSqrtf(radX2 + radY2) );
 
     for(Pt::int32_t y = 0; y <= quartersY; ++y) {
         // Calculate the coordinate and alpha
-        const float       x     = radX * Gfx::Math::fastSqrt(1 - (float) y * y / radY2);
+        const float       x     = radX * sqrt(1 - (float) y * y / radY2);
         const float       error = x - floor(x);
-        const Pt::uint8_t alpha = Gfx::Math::zrint(error * 255);
+        const Pt::uint8_t alpha = lround(error * 255);
         // Without anti-aliasing
         if(_aaMode == AntiAliasingMode::None) {
             // Calculate the coordinates
-            const Pt::int32_t xl = ctrX - Gfx::Math::zrint(x);
-            const Pt::int32_t xr = ctrX + Gfx::Math::zrint(x);
+            const Pt::int32_t xl = ctrX - lround(x);
+            const Pt::int32_t xr = ctrX + lround(x);
             const Pt::int32_t yt = ctrY - y;
             const Pt::int32_t yb = ctrY + y;
             // Arc
@@ -282,10 +282,10 @@ void Rasterizer2::strokeOnePixelEllipseArc(const Point& topLeft, const Size& siz
         // With anti-aliasing
         else {
             // Calculate the coordinates
-            const Pt::int32_t xl0 = ctrX - Gfx::Math::zfint(x);
-            const Pt::int32_t xr0 = ctrX + Gfx::Math::zfint(x);
-            const Pt::int32_t xl1 = ctrX - Gfx::Math::zfint(x) - 1;
-            const Pt::int32_t xr1 = ctrX + Gfx::Math::zfint(x) + 1;
+            const Pt::int32_t xl0 = ctrX - Pt::lround(floor(x));
+            const Pt::int32_t xr0 = ctrX + Pt::lround(floor(x));
+            const Pt::int32_t xl1 = ctrX - Pt::lround(floor(x)) - 1;
+            const Pt::int32_t xr1 = ctrX + Pt::lround(floor(x)) + 1;
             const Pt::int32_t yt  = ctrY - y;
             const Pt::int32_t yb  = ctrY + y;
             // Arc
@@ -404,12 +404,12 @@ void Rasterizer2::fillEllipse(const Point& topLeft, const Size& size)
     EAScanlines scanlines(radY * 2 + 2);
 
     // Top and bottom halves
-    const Pt::int32_t quartersX = Gfx::Math::zrint( radX2 * Gfx::Math::fastInvSqrt(radX2 + radY2) );
+    const Pt::int32_t quartersX = Pt::lround( radX2 * invSqrtf(radX2 + radY2) );
 
     for(Pt::int32_t x = 0; x <= quartersX; ++x) {
         // Calculate the coordinates
-        const float       y   = radY * Gfx::Math::fastSqrt(1 - (float) x * x / radX2);
-        const Pt::int32_t fly = Gfx::Math::zfint(y);
+        const float       y   = radY * sqrt(1 - (float) x * x / radX2);
+        const Pt::int32_t fly = Pt::lround(floor(y));
         const Pt::int32_t x1  = ctrX - x;
         const Pt::int32_t x2  = ctrX + x;
         const Pt::int32_t y1  = ctrY - fly - minY + 1;
@@ -434,12 +434,12 @@ void Rasterizer2::fillEllipse(const Point& topLeft, const Size& size)
     }
 
     // Left and right halves
-    const Pt::int32_t quartersY = Gfx::Math::zrint( radY2 * Gfx::Math::fastInvSqrt(radX2 + radY2) );
+    const Pt::int32_t quartersY = Pt::lround( radY2 * invSqrtf(radX2 + radY2) );
 
     for(Pt::int32_t y = 0; y <= quartersY; ++y) {
         // Calculate the coordinates
-        const float       x   = radX * Gfx::Math::fastSqrt(1 - (float) y * y / radY2);
-        const Pt::int32_t flx = Gfx::Math::zfint(x);
+        const float       x   = radX * sqrt(1 - (float) y * y / radY2);
+        const Pt::int32_t flx = Pt::lround(floor(x));
         const Pt::int32_t x1  = ctrX - flx;
         const Pt::int32_t x2  = ctrX + flx;
         const Pt::int32_t y1  = ctrY - y - minY + 1;
@@ -477,10 +477,10 @@ void Rasterizer2::fillEllipse(const Point& topLeft, const Size& size)
     // Top and bottom halves
     for(Pt::int32_t x = 0; x <= quartersX; ++x) {
         // Calculate the Y coordinate and alpha
-        const float       y     = radY * Gfx::Math::fastSqrt(1 - (float) x * x / radX2);
-        const Pt::int32_t fly   = Gfx::Math::zfint(y);
+        const float       y     = radY * sqrt(1 - (float) x * x / radX2);
+        const Pt::int32_t fly   = Pt::lround(floor(y));
         const float       error = y - fly;
-        const Pt::uint8_t alpha = Gfx::Math::zrint(error * 255);
+        const Pt::uint8_t alpha = lround(error * 255);
         // Draw the pixels
         const Pt::int32_t x1 = ctrX - x;
         const Pt::int32_t x2 = ctrX + x;
@@ -492,10 +492,10 @@ void Rasterizer2::fillEllipse(const Point& topLeft, const Size& size)
     // Left and right halves
     for(Pt::int32_t y = 0; y <= quartersY; ++y) {
         // Calculate the X coordinate and alpha
-        const float       x     = radX * Gfx::Math::fastSqrt(1 - (float) y * y / radY2);
-        const Pt::int32_t flx   = Gfx::Math::zfint(x);
+        const float       x     = radX * sqrt(1 - (float) y * y / radY2);
+        const Pt::int32_t flx   = Pt::lround(floor(x));
         const float       error = x - flx;
-        const Pt::uint8_t alpha = Gfx::Math::zrint(error * 255);
+        const Pt::uint8_t alpha = lround(error * 255);
         // Draw the pixels
         const Pt::int32_t x1 = ctrX - flx - 1;
         const Pt::int32_t x2 = ctrX + flx + 1;

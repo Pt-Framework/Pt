@@ -32,7 +32,6 @@
 #define PT_GFX_RASTERIZER_2_H
 
 #include <Pt/Gfx/Algorithm.h>
-#include <Pt/Gfx/Math.h>
 
 #include <Pt/Gfx/ArcMode.h>
 #include <Pt/Gfx/AntiAliasingMode.h>

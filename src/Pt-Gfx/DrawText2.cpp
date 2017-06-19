@@ -33,7 +33,6 @@
 #include <Pt/String.h>
 
 #include <Pt/Gfx/Font.h>
-#include <Pt/Gfx/Math.h>
 #include <Pt/Gfx/Transform.h>
 #include "DrawText2.h"
 

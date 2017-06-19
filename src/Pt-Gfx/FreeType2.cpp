@@ -36,7 +36,6 @@
 #include <Pt/System/FileInfo.h>
 
 #include <Pt/Gfx/Image.h>
-#include <Pt/Gfx/Math.h>
 #include <Pt/Gfx/Transform.h>
 
 #include "FreeType2.h"
@@ -218,8 +217,8 @@ void FreeType2::pathFromChar(
     points.resize(glyph->outline.n_points);
     for(Pt::int32_t i = 0; i < glyph->outline.n_points; ++i) {
         points[i].set(
-             glyph->outline.points[i].x * Gfx::Math::VecResScaleDn,
-            -glyph->outline.points[i].y * Gfx::Math::VecResScaleDn
+             glyph->outline.points[i].x * VecResScaleDn,
+            -glyph->outline.points[i].y * VecResScaleDn
         );
     }
 

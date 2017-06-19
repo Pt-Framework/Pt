@@ -147,7 +147,7 @@ void Transform::rotateDeg(double angle)
 {
     MatrixData n;
 
-    const double r = angle * (Pi / 180);
+    const double r = angle * (Pi<double>::full() / 180);
     const double s = ::sin(r);
     const double c = ::cos(r);
 
@@ -186,7 +186,7 @@ void Transform::shearX(double deg)
 {
     MatrixData n;
 
-    const double r = deg * (Pi / 180);
+    const double r = degToRad(deg);
     const double t = ::sin(r) / ::cos(r);
 
     n[0][0] = 1; n[0][1] = t; n[0][2] = 0;
@@ -201,7 +201,7 @@ void Transform::shearY(double deg)
 {
     MatrixData n;
 
-    const double r = deg * (Pi / 180);
+    const double r = degToRad(deg);
     const double t = ::sin(r) / ::cos(r);
 
     n[0][0] = 1; n[0][1] = 0; n[0][2] = 0;

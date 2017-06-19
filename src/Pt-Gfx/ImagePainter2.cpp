@@ -191,8 +191,8 @@ void ImagePainter2::deduplicatePointsF(std::vector<PointF>& dst, const PointF* s
     size_t putCnt = 0;
     for(size_t i = 0; i < pointCount; ++i) {
         // Round the coordinates
-        const double x = std::floor(src[i].x() * Gfx::Math::VecResScaleUp + 0.5);
-        const double y = std::floor(src[i].y() * Gfx::Math::VecResScaleUp + 0.5);
+        const double x = std::floor(src[i].x() * VecResScaleUp + 0.5);
+        const double y = std::floor(src[i].y() * VecResScaleUp + 0.5);
         // Skip duplicated coordinates
         if( ofs + putCnt >= 1 && dst[ofs + putCnt - 1].x() == x && dst[ofs + putCnt - 1].y() == y ) continue;
         // Store the coordinate and increment the "put" counter
@@ -209,8 +209,8 @@ void ImagePainter2::deduplicatePointsF(std::vector<PointF>& dst, const PointF* s
     // Scale back the coordinates
     for(size_t i = 0; i < dst.size(); ++i) {
         dst[i].set(
-            dst[i].x() * Gfx::Math::VecResScaleDn,
-            dst[i].y() * Gfx::Math::VecResScaleDn
+            dst[i].x() * VecResScaleDn,
+            dst[i].y() * VecResScaleDn
         );
     }
 }
@@ -228,8 +228,8 @@ void ImagePainter2::generatePatternedSingleLineSegment(std::vector<PointF>& dst,
     const Pt::uint8_t* pBuff = _rasterizer->patternBufferMP64();
     const float        xLen  = (x2 > x1) ? (x2 - x1) : (x1 - x2);
     const float        yLen  = (y2 > y1) ? (y2 - y1) : (y1 - y2);
-    const float        lLen  = Gfx::Math::fastSqrt(xLen * xLen + yLen * yLen);
-    const size_t       nSegs = (size_t) Gfx::Math::zrint(lLen / wh) * 2;
+    const float        lLen  = sqrt(xLen * xLen + yLen * yLen);
+    const size_t       nSegs = (size_t) lround(lLen / wh) * 2;
     const float        xInc  = (x2 - x1) / nSegs;
     const float        yInc  = (y2 - y1) / nSegs;
 
@@ -303,8 +303,8 @@ void ImagePainter2::cnvPointsFToPointsDeduplicate(std::vector<Point>& dst, const
     size_t putCnt = 0;
     for(size_t i = 0; i < pointCount; ++i) {
         // Round the coordinates
-        const Pt::int32_t x = Gfx::Math::zrint(src[i].x());
-        const Pt::int32_t y = Gfx::Math::zrint(src[i].y());
+        const Pt::int32_t x = lround(src[i].x());
+        const Pt::int32_t y = lround(src[i].y());
         // Skip duplicated coordinates
         if( ofs + putCnt >= 1 && dst[ofs + putCnt - 1].x() == x && dst[ofs + putCnt - 1].y() == y ) continue;
         // Store the coordinate and increment the "put" counter
@@ -394,8 +394,8 @@ const CompositionMode& ImagePainter2::compositionMode() const
 void ImagePainter2::setClip( const RectF& clip )
 {
     const Rect clip_(
-        Point( Gfx::Math::zrint(clip.x    ()), Gfx::Math::zrint(clip.y     ()) ),
-        Size ( Gfx::Math::zrint(clip.width()), Gfx::Math::zrint(clip.height()) )
+        Point( lround(clip.x    ()), lround(clip.y     ()) ),
+        Size ( lround(clip.width()), lround(clip.height()) )
     );
 
     _rasterizer->setClip(clip_);
@@ -449,7 +449,7 @@ FontMetrics ImagePainter2::fontMetrics(const String& text) const
 
 void ImagePainter2::drawImage( const PointF& to, const Image& image )
 {
-    const Point to_( Gfx::Math::zrint(to.x()), Gfx::Math::zrint(to.y()) );
+    const Point to_( lround(to.x()), lround(to.y()) );
 
     _rasterizer->blitImage(to_, image);
 
@@ -457,10 +457,10 @@ void ImagePainter2::drawImage( const PointF& to, const Image& image )
 
 void ImagePainter2::drawImage( const PointF& to, const Image& image, const RectF& imageRect )
 {
-    const Point to_( Gfx::Math::zrint(to.x()), Gfx::Math::zrint(to.y()) );
+    const Point to_( lround(to.x()), lround(to.y()) );
     const Rect  ir_(
-        Point( Gfx::Math::zrint(imageRect.    x()), Gfx::Math::zrint(imageRect.     y()) ),
-        Size ( Gfx::Math::zrint(imageRect.width()), Gfx::Math::zrint(imageRect.height()) )
+        Point( lround(imageRect.    x()), lround(imageRect.     y()) ),
+        Size ( lround(imageRect.width()), lround(imageRect.height()) )
     );
 
     _rasterizer->blitImage(to_, image, ir_);
@@ -470,7 +470,7 @@ void ImagePainter2::drawImage( const PointF& to, const Image& image, const RectF
 void ImagePainter2::drawText( const PointF& to, const String& text )
 {
 
-    Point to_( Gfx::Math::zrint(to.x()), Gfx::Math::zrint(to.y()) );
+    Point to_( lround(to.x()), lround(to.y()) );
     Transform identity;
     _rasterizer->strokeText(to_, text, identity);
 }
@@ -481,8 +481,8 @@ void ImagePainter2::drawLine( const PointF& from, const PointF& to )
     // Rasterize one-pixel line
     if(_rasterizer->pen().size() == 1) {
         // Convert the points
-        const Point a( Gfx::Math::zrint(from.x()), Gfx::Math::zrint(from.y()) );
-        const Point b( Gfx::Math::zrint(to  .x()), Gfx::Math::zrint(to  .y()) );
+        const Point a( lround(from.x()), lround(from.y()) );
+        const Point b( lround(to  .x()), lround(to  .y()) );
         // Rasterize the line
         _rasterizer->strokeOnePixelLine(a, b, 0);
         return;
@@ -526,8 +526,8 @@ void ImagePainter2::drawRect( const RectF& rect )
     // Rasterize one-pixel rectangle
     if(_rasterizer->pen().size() == 1) {
         // Convert the points
-        const Point tl( Gfx::Math::zrint(rect.topLeft    ().x()), Gfx::Math::zrint(rect.topLeft    ().y()) );
-        const Point br( Gfx::Math::zrint(rect.bottomRight().x()), Gfx::Math::zrint(rect.bottomRight().y()) );
+        const Point tl( lround(rect.topLeft    ().x()), lround(rect.topLeft    ().y()) );
+        const Point br( lround(rect.bottomRight().x()), lround(rect.bottomRight().y()) );
         // Rasterize the rectangle
         _rasterizer->strokeOnePixelRect(tl, br);
         return;
@@ -544,8 +544,8 @@ void ImagePainter2::drawRect( const RectF& rect )
 void ImagePainter2::fillRect( const RectF& rect )
 {
     // Convert the points
-    const Point tl( Gfx::Math::zrint(rect.topLeft    ().x()), Gfx::Math::zrint(rect.topLeft    ().y()) );
-    const Point br( Gfx::Math::zrint(rect.bottomRight().x()), Gfx::Math::zrint(rect.bottomRight().y()) );
+    const Point tl( lround(rect.topLeft    ().x()), lround(rect.topLeft    ().y()) );
+    const Point br( lround(rect.bottomRight().x()), lround(rect.bottomRight().y()) );
 
     // Rasterize the rectangle
     _rasterizer->fillRect(tl, br);
@@ -597,7 +597,7 @@ void ImagePainter2::drawRoundedRect( const RectF& rect, float radius )
 
     // Generate a polygon that represents the rounded-rectangle
     std::vector<PointF> pointsF;
-    generateRoundRectPoints(pointsF, x1, y1, x2, y2, radius, Gfx::Math::zcint(_rasterizer->pen().size() * 0.5f));
+    generateRoundRectPoints(pointsF, x1, y1, x2, y2, radius, Pt::lround(ceil(_rasterizer->pen().size() * 0.5f)));
 
     // Save the original pen and create a new pen with bevel join
     const Pen orgPen = _rasterizer->pen();
@@ -621,7 +621,7 @@ void ImagePainter2::fillRoundedRect( const RectF& rect, float radius )
 
     // Generate a polygon that represents the rounded-rectangle
     std::vector<PointF> pointsF;
-    generateRoundRectPoints(pointsF, x1, y1, x2, y2, radius, Gfx::Math::zcint(_rasterizer->pen().size() * 0.5f));
+    generateRoundRectPoints(pointsF, x1, y1, x2, y2, radius, Pt::lround(ceil(_rasterizer->pen().size() * 0.5f)));
 
     // Use anti-aliasing
     if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Default) {
@@ -745,11 +745,11 @@ void ImagePainter2::drawQuadraticPolybezier(const PointF& from, const PointF& to
         const float dy32 = y3 - y2;
         const float dx21 = x2 - x1;
         const float dy21 = y2 - y1;
-        const float l32  = Gfx::Math::fastSqrt(dx32 * dx32 + dy32 * dy32);
-        const float l21  = Gfx::Math::fastSqrt(dx21 * dx21 + dy21 * dy21);
+        const float l32  = sqrt(dx32 * dx32 + dy32 * dy32);
+        const float l21  = sqrt(dx21 * dx21 + dy21 * dy21);
         const float l31  = l32 + l21;
         // Determine the number of segments
-        const Pt::int32_t nSegs = Gfx::Math::zrint(l31 / 20) + 3 + 1;
+        const Pt::int32_t nSegs = lround(l31 / 20) + 3 + 1;
         // Generate points for one quadratic bezier curve
         pointsFTmp.clear();
         generateQuadraticBezierPoints(pointsFTmp, x1, y1, x2, y2, x3, y3, nSegs);
@@ -759,7 +759,7 @@ void ImagePainter2::drawQuadraticPolybezier(const PointF& from, const PointF& to
             if(!pointsF.empty()) {
                 const float dx = ::fabs( pointsF.back().x() - pointsFTmp[j].x() );
                 const float dy = ::fabs( pointsF.back().y() - pointsFTmp[j].y() );
-                if(dx <= Gfx::Math::VecResScaleDn && dy <= Gfx::Math::VecResScaleDn) continue;
+                if(dx <= VecResScaleDn && dy <= VecResScaleDn) continue;
             }
             // Store the points
             pointsF.push_back(pointsFTmp[j]);
@@ -778,8 +778,8 @@ void ImagePainter2::drawEllipse(const PointF& topLeft, const SizeF& size)
     // Rasterize one-pixel ellipse
     if(_rasterizer->pen().size() == 1) {
         // Convert the points
-        const Point tl( Gfx::Math::zrint(topLeft.x    ()), Gfx::Math::zrint(topLeft.y     ()) );
-        const Size  sz( Gfx::Math::zrint(size   .width()), Gfx::Math::zrint(size   .height()) );
+        const Point tl( lround(topLeft.x    ()), lround(topLeft.y     ()) );
+        const Size  sz( lround(size   .width()), lround(size   .height()) );
         // Rasterize the ellipse
         _rasterizer->strokeOnePixelEllipseArc(tl, sz, 0, 0, ArcMode::Open);
         return;
@@ -848,8 +848,8 @@ void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
 {
 
     // Convert the points
-    const Point tl( Gfx::Math::zrint(topLeft.x    ()), Gfx::Math::zrint(topLeft.y     ()) );
-    const Size  sz( Gfx::Math::zrint(size   .width()), Gfx::Math::zrint(size   .height()) );
+    const Point tl( lround(topLeft.x    ()), lround(topLeft.y     ()) );
+    const Size  sz( lround(size   .width()), lround(size   .height()) );
 
     // Rasterize the ellipse
     _rasterizer->fillEllipse(tl, sz);
@@ -882,8 +882,8 @@ void ImagePainter2::clipPolygon(std::vector<PointF>& result, const std::vector<P
             // Append the polygon to the clipper
             cpath.resize(curPC);
             for(size_t j = 0; j < curPC; ++j) {
-                cpath[j].X = Gfx::Math::zrint( clipRegion[startIndex + j].x() * Gfx::Math::VecResScaleUp );
-                cpath[j].Y = Gfx::Math::zrint( clipRegion[startIndex + j].y() * Gfx::Math::VecResScaleUp );
+                cpath[j].X = lround( clipRegion[startIndex + j].x() * VecResScaleUp );
+                cpath[j].Y = lround( clipRegion[startIndex + j].y() * VecResScaleUp );
             }
             clipper.AddPath(cpath, ClipperLib::ptClip, true);
             // Increment the start index
@@ -901,8 +901,8 @@ void ImagePainter2::clipPolygon(std::vector<PointF>& result, const std::vector<P
             // Append the polygon to the clipper
             cpath.resize(curPC);
             for(size_t j = 0; j < curPC; ++j) {
-                cpath[j].X = Gfx::Math::zrint( subject[startIndex + j].x() * Gfx::Math::VecResScaleUp );
-                cpath[j].Y = Gfx::Math::zrint( subject[startIndex + j].y() * Gfx::Math::VecResScaleUp );
+                cpath[j].X = lround( subject[startIndex + j].x() * VecResScaleUp );
+                cpath[j].Y = lround( subject[startIndex + j].y() * VecResScaleUp );
             }
             clipper.AddPath(cpath, ClipperLib::ptSubject, cpath[0] == cpath.back());
             // Increment the start index
@@ -940,8 +940,8 @@ void ImagePainter2::clipPolygon(std::vector<PointF>& result, const std::vector<P
         if(!result.empty()) result.push_back(Painter::PolygonSeparatorPointF);
         for(size_t j = 0; j < curPath.size(); ++j) {
             result.push_back( PointF(
-                curPath[j].X * Gfx::Math::VecResScaleDn,
-                curPath[j].Y * Gfx::Math::VecResScaleDn
+                curPath[j].X * VecResScaleDn,
+                curPath[j].Y * VecResScaleDn
             ) );
         }
     }
@@ -971,8 +971,8 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
     // Rasterize one-pixel arc
     if(_rasterizer->pen().size() == 1) {
         // Convert the points
-        const Point tl( Gfx::Math::zrint(topLeft.x    ()), Gfx::Math::zrint(topLeft.y     ()) );
-        const Size  sz( Gfx::Math::zrint(size   .width()), Gfx::Math::zrint(size   .height()) );
+        const Point tl( lround(topLeft.x    ()), lround(topLeft.y     ()) );
+        const Size  sz( lround(size   .width()), lround(size   .height()) );
         // Rasterize the arc
         _rasterizer->strokeOnePixelEllipseArc(tl, sz, degBegin, degEnd, arcMode);
         return;
@@ -989,16 +989,16 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
     // Calculate the coordinate shift
     const size_t penSize  = _rasterizer->pen().size();
     const size_t penSize2 = penSize / 2;
-    const float  degMid   = (degBegin + degEnd) / 2.0f * Gfx::Math::DegToRad;
-    const float  shiftX   = Gfx::Math::fastCos(degMid);
-    const float  shiftY   = Gfx::Math::fastSin(degMid);
+    const float  degMid   = (degBegin + degEnd) / 2.0f * DegToRadF;
+    const float  shiftX   = fastCos(degMid);
+    const float  shiftY   = fastSin(degMid);
     const float  shiftXps = shiftX * penSize2;
     const float  shiftYps = shiftY * penSize2;
 
     // Calculate the angle adjustment factor
     const float aafa = size.width () / 2.0f;
     const float aafb = size.height() / 2.0f;
-    const float aafc = Gfx::Math::PiMul2 * Gfx::Math::fastSqrt( (aafa * aafa + aafb * aafb) / 2.0f );
+    const float aafc = Pi<float>::doubled() * sqrt( (aafa * aafa + aafb * aafb) / 2.0f );
     const float aafd = 360.0f * penSize2 / aafc;
 
     // Calculate the arc's parameters
@@ -1020,10 +1020,10 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
         const Pt::int32_t radiusYo   = ( size.height() + penSize ) / 2;
         const Pt::int32_t radiusXi   = ( size.width () - penSize ) / 2;
         const Pt::int32_t radiusYi   = ( size.height() - penSize ) / 2;
-        const Pt::int32_t centerXsub = Gfx::Math::zrint(centerX - shiftXps);
-        const Pt::int32_t centerYsub = Gfx::Math::zrint(centerY - shiftYps);
-        const Pt::int32_t centerXadd = Gfx::Math::zrint(centerX + shiftXps);
-        const Pt::int32_t centerYadd = Gfx::Math::zrint(centerY + shiftYps);
+        const Pt::int32_t centerXsub = lround(centerX - shiftXps);
+        const Pt::int32_t centerYsub = lround(centerY - shiftYps);
+        const Pt::int32_t centerXadd = lround(centerX + shiftXps);
+        const Pt::int32_t centerYadd = lround(centerY + shiftYps);
         // The arc's points
         std::vector<PointF> pointsF;
         // Generate a polygon that approximates the arc
@@ -1123,8 +1123,8 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
 
 void ImagePainter2::fillPie( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
 {  
-     Point tl( Gfx::Math::zrint(topLeft.x()), Gfx::Math::zrint(topLeft.y()) );
-    Size  sz( Gfx::Math::zrint(size.width()), Gfx::Math::zrint(size.height()) );
+     Point tl( lround(topLeft.x()), lround(topLeft.y()) );
+    Size  sz( lround(size.width()), lround(size.height()) );
 
     
      _rasterizer->fillArc(tl, sz, degBegin, degEnd, ArcMode::Pie);
@@ -1132,8 +1132,8 @@ void ImagePainter2::fillPie( const PointF& topLeft, const SizeF& size, float deg
 
 void ImagePainter2::fillChord( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
 {  
-    const Point tl( Gfx::Math::zrint(topLeft.x    ()), Gfx::Math::zrint(topLeft.y()) );
-    const Size  sz( Gfx::Math::zrint(size   .width()), Gfx::Math::zrint(size.height()) );
+    const Point tl( lround(topLeft.x    ()), lround(topLeft.y()) );
+    const Size  sz( lround(size   .width()), lround(size.height()) );
 
      _rasterizer->fillArc(tl, sz, degBegin, degEnd, ArcMode::Chord);
 }
@@ -1353,9 +1353,9 @@ bool ImagePainter2::combineLineSegmentForSolidOpenPolygon(std::vector<PointF>& p
         case Pen::RoundJoin:
             generateQuadraticBezierPoints(
                 polygon,
-                Gfx::Math::zrint(oline1b  .x()), Gfx::Math::zrint(oline1b  .y()),
-                Gfx::Math::zrint(intersect.x()), Gfx::Math::zrint(intersect.y()),
-                Gfx::Math::zrint(oline2a  .x()), Gfx::Math::zrint(oline2a  .y()),
+                lround(oline1b  .x()), lround(oline1b  .y()),
+                lround(intersect.x()), lround(intersect.y()),
+                lround(oline2a  .x()), lround(oline2a  .y()),
                 penSize / 2 + 2
             );
             break;
@@ -1407,9 +1407,9 @@ bool ImagePainter2::combineLineSegmentForSolidOpenPolygon(std::vector<PointF>& p
         case Pen::RoundJoin:
             generateQuadraticBezierPoints(
                 inner,
-                Gfx::Math::zrint(iline1b  .x()), Gfx::Math::zrint(iline1b  .y()),
-                Gfx::Math::zrint(intersect.x()), Gfx::Math::zrint(intersect.y()),
-                Gfx::Math::zrint(iline2a  .x()), Gfx::Math::zrint(iline2a  .y()),
+                lround(iline1b  .x()), lround(iline1b  .y()),
+                lround(intersect.x()), lround(intersect.y()),
+                lround(iline2a  .x()), lround(iline2a  .y()),
                 penSize / 2 + 2
             );
             break;
@@ -1479,9 +1479,9 @@ bool ImagePainter2::combineLineSegmentForSolidClosedPolygon(std::vector<PointF>&
         case Pen::RoundJoin:
             generateQuadraticBezierPoints(
                 outer,
-                Gfx::Math::zrint(oline1b  .x()), Gfx::Math::zrint(oline1b  .y()),
-                Gfx::Math::zrint(intersect.x()), Gfx::Math::zrint(intersect.y()),
-                Gfx::Math::zrint(oline2a  .x()), Gfx::Math::zrint(oline2a  .y()),
+                lround(oline1b  .x()), lround(oline1b  .y()),
+                lround(intersect.x()), lround(intersect.y()),
+                lround(oline2a  .x()), lround(oline2a  .y()),
                 penSize / 2 + 2
             );
             break;
@@ -1532,9 +1532,9 @@ bool ImagePainter2::combineLineSegmentForSolidClosedPolygon(std::vector<PointF>&
         case Pen::RoundJoin:
             generateQuadraticBezierPoints(
                 inner,
-                Gfx::Math::zrint(iline1b  .x()), Gfx::Math::zrint(iline1b  .y()),
-                Gfx::Math::zrint(intersect.x()), Gfx::Math::zrint(intersect.y()),
-                Gfx::Math::zrint(iline2a  .x()), Gfx::Math::zrint(iline2a  .y()),
+                lround(iline1b  .x()), lround(iline1b  .y()),
+                lround(intersect.x()), lround(intersect.y()),
+                lround(iline2a  .x()), lround(iline2a  .y()),
                 penSize / 2 + 2
             );
             break;
@@ -1641,7 +1641,7 @@ bool ImagePainter2::sagPolygonPoints(SAGOpState& state, bool draw)
             const float y2 = state.srcPoints[state.idx1 + 1].y();
             const float vx = x2 - x1;
             const float vy = y2 - y1;
-            const float vz = Gfx::Math::fastSqrt(vx * vx + vy * vy);
+            const float vz = sqrt(vx * vx + vy * vy);
             // Initialize some part of the operational state
             state.px     = x1;
             state.py     = y1;

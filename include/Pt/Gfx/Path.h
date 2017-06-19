@@ -34,7 +34,6 @@
 #include <Pt/Gfx/Point.h>
 #include <Pt/Gfx/Size.h>
 #include <Pt/Gfx/Rect.h>
-#include <Pt/Gfx/Math.h>
 #include <Pt/Gfx/Transform.h>
 #include <vector>
 

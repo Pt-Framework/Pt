@@ -28,7 +28,6 @@
 */
 
 
-#include <Pt/Gfx/Math.h>
 #include <Pt/Gfx/SIMDConfig.h>
 
 #include <Pt/Gfx/ImageOperation2.h>

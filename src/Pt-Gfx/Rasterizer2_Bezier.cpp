@@ -202,11 +202,11 @@ void Rasterizer2::rasterOnePixelQuadraticBezierCurve(Pt::int32_t x1, Pt::int32_t
         const Pt::int32_t dx32 = abs(x3 - x2) + 1;
         const Pt::int32_t dy32 = abs(y3 - y2) + 1;
         const Pt::int32_t s32  = dx32 + dy32;
-        const Pt::int32_t l32  = Gfx::Math::fastSqrt(dx32 * dx32 + dy32 * dy32);
+        const Pt::int32_t l32  = sqrtf(dx32 * dx32 + dy32 * dy32);
         const Pt::int32_t dx21 = abs(x2 - x1) + 1;
         const Pt::int32_t dy21 = abs(y2 - y1) + 1;
         const Pt::int32_t s21  = dx21 + dy21;
-        const Pt::int32_t l21  = Gfx::Math::fastSqrt(dx21 * dx21 + dy21 * dy21);
+        const Pt::int32_t l21  = sqrtf(dx21 * dx21 + dy21 * dy21);
         const Pt::int32_t s321 = s32 + s21;
         const Pt::int32_t l321 = l32 + l21;
         fpiCtrInc = FIXED_POINT_FROM_INT(PATTERN_BUFFER_SCALE_FACTOR * s321) / l321;

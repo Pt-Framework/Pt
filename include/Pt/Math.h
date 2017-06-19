@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2006-2011 Marc Duerner
- * Copyright (C) 2010 Aloysius Indrayanto
+ * Copyright (C) 2006-2017 Marc Duerner
+ * Copyright (C) 2010-2017 Aloysius Indrayanto
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -34,71 +34,187 @@
 #include <Pt/Api.h>
 #include <cmath>
 #include <cassert>
-#include <math.h> // hypot is not in cmath
+#include <math.h> // hypot
 
 namespace Pt {
 
-static const double Pi      = 3.14159265358979323846;
-static const double PiDouble    = 6.28318530717958647692;
-static const double PiHalf = 1.57079632679489661923;
-static const double PiQuart = 0.78539816339744830961;
-static const double Pi180  = 0.01745329251994329576;
-static const double PiSqr  = 9.86960440108935861883449099987615114f;
+template <typename T>
+struct Pi;
+
+template <>
+struct Pi<float>
+{
+    static const float full()
+    { return 3.14159265f; }
+
+    static const float doubled()
+    { return 6.28318531f; }
+
+    static const float half()
+    { return 1.57079633f; }
+
+    static const float quart()
+    { return 0.78539816f; }
+
+    static const float squared()
+    { return 9.86960440f; }
+
+};
+
+template <>
+struct Pi<double>
+{
+    static const double full()
+    { return 3.14159265358979323846; }
+
+    static const double doubled()
+    { return 6.28318530717958647692; }
+
+    static const double half()
+    { return 1.57079632679489661923; }
+
+    static const double quart()
+    { return 0.78539816339744830961; }
+
+    static const double squared()
+    { return 9.86960440108935861883449099987615114; }
+};
+
+
+static const float DegToRadF = 0.01745329f;
+static const float RadToDegF = 57.2957795f;
+
+static const double DegToRad = 0.0174532925199432957692;
+static const double RadToDeg = 57.295779513082320876846364344191;
+
+
+inline float degToRad(float deg)
+{
+    return deg * DegToRadF;
+}
+
+
+inline double degToRad(double deg)
+{
+    return deg * DegToRad;
+}
+
+
+inline float radToDeg(float rad)
+{ 
+    return rad * RadToDegF; 
+}
+
+
+inline double radToDeg(double rad)
+{ 
+    return rad * RadToDeg; 
+}
+
 
 /** @brief Fast, but less precise sine calculation.
 
     The @a theta is required in rad [0, 2*Pi]. In the range [0, 2*Pi], the
-    max. abs error in fast accurate mode is 0.0015. In the range [0, 2*Pi],
-    the max. abs error in fast mode is 0.06.
+    max. abs error is 0.0015.
 */
-template <typename T, bool accurate>
+template <typename T>
 T fastSin(const T& theta)
 {
-    assert(theta <= PiDouble);
+    assert(theta <= Pi<T>::doubled());
     assert(theta >= 0);
+    
     T localTheta = theta;
 
-    if (localTheta > Pi)
+    if(localTheta > Pi<T>::full())
     {
-        localTheta -= PiDouble;
+        localTheta -= Pi<T>::doubled();
     }
 
-    const T B = 4 / Pi;
-    const T C = -4 / PiSqr;
-
+    const T B = 4 / Pi<T>::full();
+    const T C = -4 / Pi<T>::squared();
+    //const float Q = 0.775;
+    const T P = static_cast<T>(0.225);
+    
     T y = B * localTheta + C * localTheta * ::fabs(localTheta);
-
-    if (accurate)
-    {
-        //  const float Q = 0.775;
-            const T P = 0.225;
-
-            y = P * (y * ::fabs(y) - y) + y;   // Q * y + P * y * abs(y)
-    }
-
+    y = P * (y * std::fabs(y) - y) + y;   // Q * y + P * y * abs(y)
     return y;
 }
 
 /** @brief Fast, less precise cosine calculation.
 
     The @a theta is required in rad [0, 2*Pi]. In the range [0, 2*Pi], the
-    max. abs error in fast accurate mode is 0.0015. In the range [0, 2*Pi],
-    the max. abs error in fast mode is 0.06.
+    max. abs error is 0.0015.
 */
-template <typename T, bool accurate>
+template <typename T>
 T fastCos(const T& theta)
 {
-    assert(theta <= PiDouble);
+    assert(theta <= Pi<T>::doubled());
     assert(theta >= 0);
 
-    T sinTheta = theta + PiHalf;
+    T sinTheta = theta + Pi<T>::half();
 
-    if (sinTheta > PiDouble)     // Original x > pi/2
+    if(sinTheta > Pi<T>::doubled())     // Original x > pi/2
     {
-        sinTheta -= PiDouble;   // Wrap: cos(x) = cos(x - 2 pi)
+        sinTheta -= Pi<T>::doubled();   // Wrap: cos(x) = cos(x - 2 pi)
     }
 
-    return fastSin<T, accurate>(sinTheta);
+    return fastSin(sinTheta);
+}
+
+/** @brief Fast, but less precise atan2 calculation.
+*/
+template <typename T>
+T fastAtan2(T y, T x)
+{
+    if(x == 0.0) 
+    {
+        if(y >  0) return Pi<T>::half();
+        if(y == 0) return 0;
+        return -Pi<T>::half();
+    }
+
+    const T z = y / x;
+    T atan = 0.0;
+
+    if(std::fabs(z) < 1.0) 
+    {
+        atan = z / (static_cast<T>(1.0) + static_cast<T>(0.28) * z * z);
+        
+        if(x < 0.0) 
+        {
+            return y < 0 ? atan - Pi<T>::full()
+                         : atan + Pi<T>::full();
+        }
+    }
+    else 
+    {
+        atan = Pi<T>::half() - z / (z * z + static_cast<T>(0.28));
+        if(y < 0.0) 
+            return atan - Pi<T>::full();
+    }
+
+    return atan;
+}
+
+inline float toPolar(float x, float y)
+{
+    // Quadrant I and II
+    if(y >= 0)
+        return radToDeg( fastAtan2(y, x) );
+
+    // Quadrant III and IV
+    return radToDeg( fastAtan2(y, x) ) + 360.0f;
+}
+
+template <typename T>
+T invSqrt(T x)
+{
+    return static_cast<T>(1.0) / std::sqrt(x);
+}
+
+inline float invSqrtf(float x)
+{
+    return 1.0f / std::sqrt(x);
 }
 
 /** @brief Return the euclidean distance of the given values.
@@ -106,7 +222,7 @@ T fastCos(const T& theta)
 inline double hypot(double x, double y)
 {
 #if __cplusplus == 201103L
-  return std::hypot(x, y);
+    return std::hypot(x, y);
 #elif defined(_MSC_VER) || defined(_WIN32_WCE) || defined(_WIN32)
     return _hypot(x, y);
 #else
@@ -116,14 +232,27 @@ inline double hypot(double x, double y)
 
 /** @brief Rounds to nearest integer value.
 */
+inline int lround(float x)
+{
+#if __cplusplus == 201103L
+    return std::lround(x);
+#else
+    int tmp = static_cast<int>(x);
+    tmp += (x - tmp >= 0.5) - (x - tmp <= -0.5);
+    return tmp;
+#endif
+}
+
+/** @brief Rounds to nearest integer value.
+*/
 inline long int lround(double x)
 {
 #if __cplusplus == 201103L
-  return std::lround(x);
+    return std::lround(x);
 #else
-  long int tmp = static_cast<long int>(x);
-  tmp += (x - tmp >= 0.5) - (x - tmp <= -0.5);
-  return tmp;
+    long int tmp = static_cast<long int>(x);
+    tmp += (x - tmp >= 0.5) - (x - tmp <= -0.5);
+    return tmp;
 #endif
 }
 

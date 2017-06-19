@@ -28,8 +28,6 @@
 */
 
 
-#include <Pt/Gfx/Math.h>
-
 #include <Pt/Gfx/ImageOperation2.h>
 
 
@@ -119,11 +117,11 @@ static inline void bblRotate4_implFP(
     const Pt::int32_t FmidY = 32768 * srcH;
 
     // Calculate the sine and cosine values
-    const double      r  = -deg * (Pi / 180);
+    const double      r  = -deg * (Pi<double>::full()  / 180);
     const double      s  = ::sin(r);
     const double      c  = ::cos(r);
-    const Pt::int32_t Fs = Pt::Gfx::Math::zrint(512 * s);
-    const Pt::int32_t Fc = Pt::Gfx::Math::zrint(512 * c);
+    const Pt::int32_t Fs = lround(512 * s);
+    const Pt::int32_t Fc = lround(512 * c);
 
     // Walk through the row pixels
     Pt::int32_t FitrY = 0;

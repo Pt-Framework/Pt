@@ -384,12 +384,12 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentXWAA_F(float x1, float y1, 
 
     // Handle the gradient, starting point, and ending point
     const float       grad  = (fy2 - fy1) / (fx2 - fx1);
-    const Pt::int32_t xpxl1 = Gfx::Math::zrint(fx1);
-    const Pt::int32_t xpxl2 = Gfx::Math::zrint(fx2);
+    const Pt::int32_t xpxl1 = lround(fx1);
+    const Pt::int32_t xpxl2 = lround(fx2);
     const float       ypxl  = fy1 + grad * (xpxl1 - fx1);
 
     // Draw the pixels
-    Pt::int32_t from  = Gfx::Math::zrint(fx1);
+    Pt::int32_t from  = lround(fx1);
     Pt::int32_t to    = xpxl2;
     float       ypxli = ypxl;
 
@@ -417,8 +417,8 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentXWAA_F(float x1, float y1, 
                 if(fpiCtrInOut >= PATTERN_BUFFER_COUNTER_MAX1P) fpiCtrInOut -= PATTERN_BUFFER_COUNTER_MAX1P;
             }
             // Draw the pixels
-            const Pt::int32_t fypxli = Pt::Gfx::Math::zfint(ypxli);
-            const Pt::int32_t fpart  = Pt::Gfx::Math::zrint( (ypxli - fypxli) * 255.0f );
+            const Pt::int32_t fypxli = Pt::lround(floor(ypxli));
+            const Pt::int32_t fpart  = Pt::lround( (ypxli - fypxli) * 255.0f );
             const Pt::int32_t rfpart = 255 - fpart;
             const Pt::uint8_t a1     = Rasterizer2::XWAA_WFILTER[ fpart];
             const Pt::uint8_t a2     = Rasterizer2::XWAA_WFILTER[rfpart];
@@ -428,10 +428,10 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentXWAA_F(float x1, float y1, 
         }
         // Store back the start and end coordinates to the mask as needed
         if(maskInOut) {
-            (*maskInOut)[swapDir ? 2 : 0].set(Pt::Gfx::Math::zfint(ypxl )    , from);
-            (*maskInOut)[swapDir ? 3 : 1].set(Pt::Gfx::Math::zfint(ypxl ) + 1, from);
-            (*maskInOut)[swapDir ? 0 : 2].set(Pt::Gfx::Math::zfint(ypxli)    , to  );
-            (*maskInOut)[swapDir ? 1 : 3].set(Pt::Gfx::Math::zfint(ypxli) + 1, to  );
+            (*maskInOut)[swapDir ? 2 : 0].set(Pt::lround(floor(ypxl ))    , from);
+            (*maskInOut)[swapDir ? 3 : 1].set(Pt::lround(floor(ypxl )) + 1, from);
+            (*maskInOut)[swapDir ? 0 : 2].set(Pt::lround(floor(ypxli))    , to  );
+            (*maskInOut)[swapDir ? 1 : 3].set(Pt::lround(floor(ypxli)) + 1, to  );
         }
     }
     else {
@@ -448,8 +448,8 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentXWAA_F(float x1, float y1, 
                 if(fpiCtrInOut >= PATTERN_BUFFER_COUNTER_MAX1P) fpiCtrInOut -= PATTERN_BUFFER_COUNTER_MAX1P;
             }
             // Draw the pixels
-            const Pt::int32_t fypxli = Pt::Gfx::Math::zfint(ypxli);
-            const Pt::int32_t fpart  = Pt::Gfx::Math::zrint( (ypxli - fypxli) * 255.0f );
+            const Pt::int32_t fypxli = Pt::lround(floor(ypxli));
+            const Pt::int32_t fpart  = Pt::lround( (ypxli - fypxli) * 255.0f );
             const Pt::int32_t rfpart = 255 - fpart;
             const Pt::uint8_t a1     = Rasterizer2::XWAA_WFILTER[ fpart];
             const Pt::uint8_t a2     = Rasterizer2::XWAA_WFILTER[rfpart];
@@ -459,10 +459,10 @@ void Rasterizer2::rasterOnePixelPatternedGLineSegmentXWAA_F(float x1, float y1, 
         }
         // Store back the start and end coordinates to the mask as needed
         if(maskInOut) {
-            (*maskInOut)[swapDir ? 2 : 0].set(from, Pt::Gfx::Math::zfint(ypxl )    );
-            (*maskInOut)[swapDir ? 3 : 1].set(from, Pt::Gfx::Math::zfint(ypxl ) + 1);
-            (*maskInOut)[swapDir ? 0 : 2].set(to,   Pt::Gfx::Math::zfint(ypxli)    );
-            (*maskInOut)[swapDir ? 1 : 3].set(to,   Pt::Gfx::Math::zfint(ypxli) + 1);
+            (*maskInOut)[swapDir ? 2 : 0].set(from, Pt::lround(floor(ypxl ))    );
+            (*maskInOut)[swapDir ? 3 : 1].set(from, Pt::lround(floor(ypxl )) + 1);
+            (*maskInOut)[swapDir ? 0 : 2].set(to,   Pt::lround(floor(ypxli))    );
+            (*maskInOut)[swapDir ? 1 : 3].set(to,   Pt::lround(floor(ypxli)) + 1);
         }
     }
 

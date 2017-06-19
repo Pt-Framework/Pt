@@ -35,7 +35,6 @@
 #include <Pt/Gfx/AntiAliasingMode.h>
 #include <Pt/Gfx/ArcMode.h>
 #include <Pt/Gfx/Path.h>
-#include <Pt/Gfx/Math.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/System/Path.h>
 
@@ -191,25 +190,25 @@ class PT_GFX_API ImagePainter2 : public Painter
         #if 0
             generateQuadraticBezierPoints(
                 dst,
-                Gfx::Math::zrint(x + nx     ), Gfx::Math::zrint(y + ny     ),
-                Gfx::Math::zrint(x + nx - dx), Gfx::Math::zrint(y + ny - dy),
-                Gfx::Math::zrint(x      - dx), Gfx::Math::zrint(y      - dy),
+                lround(x + nx     ), lround(y + ny     ),
+                lround(x + nx - dx), lround(y + ny - dy),
+                lround(x      - dx), lround(y      - dy),
                 Gfx::Math::zcint(wh * 0.5f)
             );
             generateQuadraticBezierPoints(
                 dst,
-                Gfx::Math::zrint(x      - dx), Gfx::Math::zrint(y      - dy),
-                Gfx::Math::zrint(x - nx - dx), Gfx::Math::zrint(y - ny - dy),
-                Gfx::Math::zrint(x - nx     ), Gfx::Math::zrint(y - ny     ),
+                lround(x      - dx), lround(y      - dy),
+                lround(x - nx - dx), lround(y - ny - dy),
+                lround(x - nx     ), lround(y - ny     ),
                 Gfx::Math::zcint(wh * 0.5f)
             );
         #else
             generateQuadraticBezierPoints(
                 dst,
-                Gfx::Math::zrint(x + nx       ), Gfx::Math::zrint(y + ny       ),
-                Gfx::Math::zrint(x - dx * 2.0f), Gfx::Math::zrint(y - dy * 2.0f),
-                Gfx::Math::zrint(x - nx       ), Gfx::Math::zrint(y - ny       ),
-                Gfx::Math::zcint(wh) - 1
+                lround(x + nx       ), lround(y + ny       ),
+                lround(x - dx * 2.0f), lround(y - dy * 2.0f),
+                lround(x - nx       ), lround(y - ny       ),
+                Pt::lround(ceil(wh)) - 1
             );
         #endif
         }
@@ -233,25 +232,25 @@ class PT_GFX_API ImagePainter2 : public Painter
         #if 0
             generateQuadraticBezierPoints(
                 dst,
-                Gfx::Math::zrint(x + nx - dx), Gfx::Math::zrint(y + ny - dy),
-                Gfx::Math::zrint(x + nx     ), Gfx::Math::zrint(y + ny     ),
-                Gfx::Math::zrint(x          ), Gfx::Math::zrint(y          ),
+                lround(x + nx - dx), lround(y + ny - dy),
+                lround(x + nx     ), lround(y + ny     ),
+                lround(x          ), lround(y          ),
                 Gfx::Math::zcint(wh * 0.5f)
             );
             generateQuadraticBezierPoints(
                 dst,
-                Gfx::Math::zrint(x          ), Gfx::Math::zrint(y          ),
-                Gfx::Math::zrint(x - nx     ), Gfx::Math::zrint(y - ny     ),
-                Gfx::Math::zrint(x - nx - dx), Gfx::Math::zrint(y - ny - dy),
+                lround(x          ), lround(y          ),
+                lround(x - nx     ), lround(y - ny     ),
+                lround(x - nx - dx), lround(y - ny - dy),
                 Gfx::Math::zcint(wh * 0.5f)
             );
         #else
             generateQuadraticBezierPoints(
                 dst,
-                Gfx::Math::zrint(x + nx - dx), Gfx::Math::zrint(y + ny - dy),
-                Gfx::Math::zrint(x      + dx), Gfx::Math::zrint(y      + dy),
-                Gfx::Math::zrint(x - nx - dx), Gfx::Math::zrint(y - ny - dy),
-                Gfx::Math::zcint(wh) - 1
+                lround(x + nx - dx), lround(y + ny - dy),
+                lround(x      + dx), lround(y      + dy),
+                lround(x - nx - dx), lround(y - ny - dy),
+                Pt::lround(ceil(wh)) - 1
             );
         #endif
         }
@@ -317,8 +316,8 @@ class PT_GFX_API ImagePainter2 : public Painter
         static inline void generateEllipsePoints(std::vector<PointF>& dst, Pt::int32_t radiusX, Pt::int32_t radiusY, Pt::int32_t centerX, Pt::int32_t centerY, size_t penSize)
         {
             // Calculate the ellipse's parameters
-            const Pt::int32_t circFac = Gfx::Math::zrint(
-                                            Gfx::Math::fastSqrt( 0.5f * (radiusX * radiusX + radiusY * radiusY) ) /
+            const Pt::int32_t circFac = lround(
+                                            sqrt( 0.5f * (radiusX * radiusX + radiusY * radiusY) ) /
                                             ( (penSize > 4) ? (penSize * 0.25f) : 1.0f )
                                         );
             const Pt::int32_t circSeg = (circFac / 16) * 20 + 1;
@@ -327,10 +326,10 @@ class PT_GFX_API ImagePainter2 : public Painter
 
             // Generate a polygon that approximates the ellipse
             for(Pt::int32_t i = 0; i < nSegs; ++i) {
-                const float angle = Gfx::Math::PiMul2 * i * nSegs1i;
+                const float angle = Pi<float>::doubled() * i * nSegs1i;
                 // Calculate the coordinate
-                const float x = centerX + radiusX * Gfx::Math::fastCos(angle);
-                const float y = centerY - radiusY * Gfx::Math::fastSin(angle); // Sign inversion due to differences between cartesian and computer coordinate systems
+                const float x = centerX + radiusX * fastCos(angle);
+                const float y = centerY - radiusY * fastSin(angle); // Sign inversion due to differences between cartesian and computer coordinate systems
                 // Store the coordinate only if it is different with the previous one
                 if( !dst.empty() && dst.back().x() == x && dst.back().y() == y ) continue;
                 dst.push_back( PointF(x, y) );
@@ -346,9 +345,9 @@ class PT_GFX_API ImagePainter2 : public Painter
             // Calculate the arc's parameters
             const float       degDlt  = degEnd - degBegin;
             const float       degFac  = degDlt / 360.0f;
-            const Pt::int32_t circFac = Gfx::Math::zrint(
+            const Pt::int32_t circFac = lround(
                                             degFac *
-                                            Gfx::Math::fastSqrt( 0.5f * (radiusX * radiusX + radiusY * radiusY) ) /
+                                            sqrt( 0.5f * (radiusX * radiusX + radiusY * radiusY) ) /
                                             ( (penSize > 4) ? (penSize * 0.25f) : 1.0f )
                                         );
             const Pt::int32_t circSeg = (circFac / 16) * 20 + 1;
@@ -356,13 +355,13 @@ class PT_GFX_API ImagePainter2 : public Painter
             const float       nSegs1i = 1.0f / (nSegs - 1);
 
             // Generate a polygon that approximates the arc
-            const float fdegInc = (degDlt   * Gfx::Math::DegToRad) * nSegs1i;
-                  float angle   =  degBegin * Gfx::Math::DegToRad;
+            const float fdegInc = (degDlt   * DegToRadF) * nSegs1i;
+                  float angle   =  degBegin * DegToRadF;
 
             for(Pt::int32_t i = 0; i < nSegs; ++i) {
                 // Calculate the coordinate
-                const float x = centerX + radiusX * Gfx::Math::fastCos(angle);
-                const float y = centerY - radiusY * Gfx::Math::fastSin(angle); // Sign inversion due to differences between cartesian and computer coordinate systems
+                const float x = centerX + radiusX * fastCos(angle);
+                const float y = centerY - radiusY * fastSin(angle); // Sign inversion due to differences between cartesian and computer coordinate systems
                 // Update the angle
                 angle += fdegInc;
                 // Store the coordinate only if it is different with the previous one
@@ -458,7 +457,7 @@ class PT_GFX_API ImagePainter2 : public Painter
 
               case Pen::RoundCap: {
                   std::vector<PointF> tmp;
-                  generateQuadraticBezierPoints(tmp, ix2a, iy2a, x2a - dx2 * 2.0f, y2a - dy2 * 2.0f, ox2a, oy2a, Gfx::Math::zcint(penSize * 0.5f) - 1);
+                  generateQuadraticBezierPoints(tmp, ix2a, iy2a, x2a - dx2 * 2.0f, y2a - dy2 * 2.0f, ox2a, oy2a, Pt::lround(ceil(penSize * 0.5f)) - 1);
                   if(tmp.size() <= 2) break;
                   for(size_t i = 1; i < tmp.size() - 1; ++i) {
                       dst.push_back( PointF( tmp[i].x(), tmp[i].y() ) );
@@ -538,7 +537,7 @@ class PT_GFX_API ImagePainter2 : public Painter
 
               case Pen::RoundCap: {
                   std::vector<PointF> tmp;
-                  generateQuadraticBezierPoints(tmp, ox1a, oy1a, x1a + dx1 * 2.0f, y1a + dy1 * 2.0f, ix1a, iy1a, Gfx::Math::zcint(penSize * 0.5f) - 1);
+                  generateQuadraticBezierPoints(tmp, ox1a, oy1a, x1a + dx1 * 2.0f, y1a + dy1 * 2.0f, ix1a, iy1a, Pt::lround(ceil(penSize * 0.5f)) - 1);
                   if(tmp.size() <= 2) break;
                   for(size_t i = 1; i < tmp.size() - 1; ++i) {
                       dst.push_back( PointF( tmp[i].x(), tmp[i].y() ) );

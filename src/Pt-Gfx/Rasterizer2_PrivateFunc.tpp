@@ -28,7 +28,6 @@
   02110-1301 USA
 */
 
-
 //
 // Line rasterization functions
 //
@@ -73,7 +72,7 @@ inline void Rasterizer2::rasterOnePixelPatternedLine(Pt::int32_t x1, Pt::int32_t
     const Pt::int32_t sizeX = abs(x2 - x1);
     const Pt::int32_t sizeY = abs(y2 - y1);
     const Pt::int32_t sizeS = sizeX + sizeY;
-    const Pt::int32_t sizeL = Gfx::Math::fastSqrt(sizeX * sizeX + sizeY * sizeY);
+    const Pt::int32_t sizeL = sqrtf(sizeX * sizeX + sizeY * sizeY);
 
     // Calculate the incremental factor of the pattern indexing counter
     const Pt::int32_t fpiCtrInc = FIXED_POINT_CONSTANT_ISQRT2 * PATTERN_BUFFER_SCALE_FACTOR * sizeS / sizeL;
@@ -100,10 +99,10 @@ inline void Rasterizer2::rasterOnePixelPatternedLine_F(float x1, float y1, float
     const float sizeX = ::fabs(x2 - x1);
     const float sizeY = ::fabs(y2 - y1);
     const float sizeS = sizeX + sizeY;
-    const float sizeL = Gfx::Math::fastSqrt(sizeX * sizeX + sizeY * sizeY);
+    const float sizeL = sqrt(sizeX * sizeX + sizeY * sizeY);
 
     // Calculate the incremental factor of the pattern indexing counter
-    const Pt::int32_t fpiCtrInc = Pt::Gfx::Math::zrint(FIXED_POINT_CONSTANT_ISQRT2 * PATTERN_BUFFER_SCALE_FACTOR * sizeS / sizeL);
+    const Pt::int32_t fpiCtrInc = lround(FIXED_POINT_CONSTANT_ISQRT2 * PATTERN_BUFFER_SCALE_FACTOR * sizeS / sizeL);
 
     // Rasterize line
     rasterOnePixelPatternedGLineSegmentXWAA_F(x1, y1, x2, y2, color, fpiCtrInc, fpiCtrInOut, maskInOut);
@@ -151,11 +150,11 @@ inline Pt::uint8_t Rasterizer2::patternBuffer1PAlpha(Pt::int32_t idx) const
 { return _patternBuffer1P[ idx % FIXED_POINT_TO_INT(PATTERN_BUFFER_COUNTER_MAX1P) ]; }
 
 inline Pt::uint8_t Rasterizer2::patternBuffer1PAlphaPolar(Pt::int32_t x, Pt::int32_t y, float scale) const
-{ return patternBuffer1PAlpha(Gfx::Math::convertCartesianToPolarCoordinate(x, y) * scale); }
+{ return patternBuffer1PAlpha( toPolar(x, y) * scale); }
 
 inline Pt::uint8_t Rasterizer2::patternBuffer1PAlphaPolar(Pt::int32_t x, Pt::int32_t y, float scale, float xyRat) const
 {
-    const float angle = Gfx::Math::convertCartesianToPolarCoordinate(x, y);
+    const float angle = toPolar(x, y);
 
     if(xyRat >= 1.0 && angle >= 45) scale /= xyRat;
     if(xyRat <  1.0 && angle <  45) scale *= xyRat;
@@ -170,11 +169,11 @@ inline void Rasterizer2::patternBuffer1PAlpha(Pt::uint8_t& a0, Pt::uint8_t& a1, 
 }
 
 inline void Rasterizer2::patternBuffer1PAlphaPolar(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t x, Pt::int32_t y, float scale, Pt::uint8_t alpha0, Pt::uint8_t alpha1) const
-{ patternBuffer1PAlpha(a0, a1, Gfx::Math::convertCartesianToPolarCoordinate(x, y) * scale, alpha0, alpha1); }
+{ patternBuffer1PAlpha(a0, a1, toPolar(x, y) * scale, alpha0, alpha1); }
 
 inline void Rasterizer2::patternBuffer1PAlphaPolar(Pt::uint8_t& a0, Pt::uint8_t& a1, Pt::int32_t x, Pt::int32_t y, float scale, float xyRat, Pt::uint8_t alpha0, Pt::uint8_t alpha1) const
 {
-    const float angle = Gfx::Math::convertCartesianToPolarCoordinate(x, y);
+    const float angle = toPolar(x, y);
 
     if(xyRat >= 1.0 && angle >= 45) scale /= xyRat;
     if(xyRat <  1.0 && angle <  45) scale *= xyRat;
@@ -332,7 +331,7 @@ inline bool Rasterizer2::arcUtil_pointIsInsideDegRange(Pt::int32_t x, Pt::int32_
     //     * The movement from begin angle to end angle must be in counter-clockwise (CCW), otherwise
     //       something wrong will be drawn.
 
-    const float angle = Gfx::Math::convertCartesianToPolarCoordinate( (x - ctrX), -(y - ctrY) * xyRatio );
+    const float angle = toPolar( (x - ctrX), -(y - ctrY) * xyRatio );
 
     // Both begin and end angle are negative
     if(degBegin < 0 && degEnd < 0) {
@@ -363,7 +362,7 @@ inline Pt::uint8_t Rasterizer2::arcUtil_pointIsInsideDegRange(Pt::int32_t x, Pt:
     const float relX  = x - ctrX;
     const float relY  = y - ctrY;
     const float relM  = std::max( ::fabs(relX), ::fabs(relY) );
-    const float angle = Gfx::Math::convertCartesianToPolarCoordinate(relX, -relY * xyRatio);
+    const float angle = toPolar(relX, -relY * xyRatio);
     const float limit = 100.0f / relM;
 
     // Both begin and end angle are negative
