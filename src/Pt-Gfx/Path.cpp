@@ -220,8 +220,6 @@ namespace Pt {
 namespace Gfx {
 
 Path::Path()
-: _curX(0)
-, _curY(0)
 {
 }
 
@@ -266,7 +264,7 @@ RectF Path::boundingRect() const
 
 const PointF& Path::currentPosition() const
 {
-    return PointF(_curX,_curY);
+    return _position;
 }
 
 
@@ -275,8 +273,7 @@ void Path::moveTo(const PointF& p)
     Element elem(Element::IT_MoveTo, p.x() , p.y());
     _elements.push_back(elem);
 
-    _curX = p.x();
-    _curY = p.y();
+    _position = p;
 }
 
 
@@ -285,15 +282,14 @@ void Path::lineTo(const PointF& p)
     Element elem(Element::IT_LineTo, p.x() , p.y());
     _elements.push_back(elem);
 
-    _curX = p.x();
-    _curY = p.y();
+    _position = p;
 }
 
 
 void Path::arcTo(const PointF& p, double r)
 {
-    double x1 = _curX;
-    double y1 = _curY;
+    double x1 = _position.x();
+    double y1 = _position.y();
     double x2 = p.x();
     double y2 = p.y();
 
@@ -360,8 +356,7 @@ void Path::arcTo(const PointF& p, double r)
     Element elem2(Element::IT_CubicBezierTo, c2x2, c2y2, c2x3, c2y3, c2x4, c2y4);
     _elements.push_back(elem2);
 
-    _curX = p.x();
-    _curY = p.y();
+    _position = p;
 }
 
 
@@ -370,8 +365,8 @@ void Path::quadraticBezierTo(const PointF &c, const PointF& to)
     Element elem(Element::IT_QuadBezierTo, c.x() , c.y(), to.x(), to.y());
     _elements.push_back(elem);
 
-    _curX = to.x();
-    _curY = to.y();
+    _position = to;
+
 }
 
 
@@ -383,8 +378,7 @@ void Path::cubicBezierTo(const PointF &c1, const PointF &c2, const PointF& to)
                  to.x(), to.y());
     _elements.push_back(elem);
 
-    _curX = to.x();
-    _curY = to.y();
+    _position = to;
 }
 
 
@@ -404,8 +398,7 @@ void Path::bezierTo(const PointF* cxy, size_t controlPointCount, const PointF& t
     Element elem(Element::IT_GenNBezierTo, points);
     _elements.push_back(elem);
 
-    _curX = to.x();
-    _curY = to.y();
+    _position = to;
 }
 
 
@@ -434,10 +427,10 @@ void Path::insertPath(const Path& p)
 
 void Path::addRect(const SizeF& size)
 {    
-    const double x = _curX;
-    const double y = _curY;
+    const double x = _position.x();
+    const double y = _position.y();
 
-    lineTo(Pt::Gfx::PointF(x, y+ size.height()));
+    lineTo(Pt::Gfx::PointF(x, y + size.height()));
     lineTo(Pt::Gfx::PointF(x + size.width(), y+ size.height()));
     lineTo(Pt::Gfx::PointF(x + size.width(), y));
     lineTo(Pt::Gfx::PointF(x, y));   
@@ -446,8 +439,8 @@ void Path::addRect(const SizeF& size)
 
 void Path::addRoundRect(const SizeF& size, float radius)
 {
-    const double x = _curX;
-    const double y = _curY;
+    const double x = _position.x();
+    const double y = _position.y();
 
     moveTo(Pt::Gfx::PointF(x, y +  radius));
     quadraticBezierTo(Pt::Gfx::PointF(x, y), Pt::Gfx::PointF(x + radius, y));     
@@ -470,8 +463,8 @@ void Path::addRoundRect(const SizeF& size, float radius)
 
 void Path::addEllipse(const SizeF& size)
 {
-  const Pt::Gfx::PointF p1(_curX, _curY+  size.height() / 2);
-  const Pt::Gfx::PointF p2(_curX + size.width(), _curY + size.height() / 2);
+  const Pt::Gfx::PointF p1(_position.x(), _position.y() +  size.height() / 2);
+  const Pt::Gfx::PointF p2(_position.x() + size.width(), _position.y() + size.height() / 2);
 
   moveTo(p1);
   arcTo( p2, size.height()/2 );   

@@ -140,8 +140,7 @@ class PT_GFX_API Path
 
     private:
         ElementVector _elements;
-        double        _curX;
-        double        _curY;
+        PointF        _position;
 };
 
 } // namespace
