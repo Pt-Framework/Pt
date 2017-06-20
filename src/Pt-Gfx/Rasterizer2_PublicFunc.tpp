@@ -151,7 +151,8 @@ template <typename PointT>
 inline void Rasterizer2::fillPolygon(const BasicPoint<PointT>* points, size_t pointCount)
 {
     // Check if there are too few points
-    if(pointCount < 3) return;
+    if(pointCount < 3) 
+        return;
 
     // Separate the polygons and clip their coordinates
     typename CnvValueT<PointT>::T minX, minY, maxX, maxY;
@@ -172,4 +173,49 @@ inline void Rasterizer2::fillPolygon(const BasicPoint<PointT>* points, size_t po
         clippedCounts.size(), clippedPoints.size(),
         _brush.color(), minX, minY, maxX, maxY
     );
+}
+
+inline void Rasterizer2::fillPolygons(const std::vector<Polygon>& polygons)
+{
+    Pt::int32_t minX =  MAXIMUM_COORD;
+    Pt::int32_t minY =  MAXIMUM_COORD;
+    Pt::int32_t maxX = -MAXIMUM_COORD;
+    Pt::int32_t maxY = -MAXIMUM_COORD;
+
+    std::vector<Polygon> clippedPolygons = polygons;
+
+    for(size_t i = 0; i < clippedPolygons.size(); ++i)
+    {
+        Polygon& polygon = clippedPolygons[i];
+
+        BasicClipShape<double>::clipPolygon(polygon.points(), _currentClip);
+
+        for(size_t j = 0; j < polygon.size(); ++j) 
+        {
+            const double x = polygon.at(j).x();
+            const double y = polygon.at(j).y();
+
+            if( ! this->antiAliasingMode() )
+            {
+                // rounding should not violate the _currentClip
+
+                polygon.at(j).setX( lround(x) );
+                polygon.at(j).setY( lround(y) );
+            }
+
+            if(x < minX) minX = x;
+            if(y < minY) minY = y;
+            if(x > maxX) maxX = x;
+            if(y > maxY) maxY = y;
+        }
+    }
+
+    if( this->antiAliasingMode() )
+    {
+        rasterPolygonsXWAA(clippedPolygons, _brush.color(), minX, minY, maxX, maxY);
+    }
+    else
+    {
+        rasterPolygonsNoAA(clippedPolygons, _brush.color(), minX, minY, maxX, maxY);
+    }
 }

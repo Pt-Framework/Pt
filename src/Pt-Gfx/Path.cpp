@@ -433,11 +433,12 @@ void Path::addRect(const SizeF& size)
     lineTo(Pt::Gfx::PointF(x, y + size.height()));
     lineTo(Pt::Gfx::PointF(x + size.width(), y+ size.height()));
     lineTo(Pt::Gfx::PointF(x + size.width(), y));
-    lineTo(Pt::Gfx::PointF(x, y));   
+    lineTo(Pt::Gfx::PointF(x, y));
+    close();  
 }
 
 
-void Path::addRoundRect(const SizeF& size, float radius)
+void Path::addRoundedRect(const SizeF& size, float radius)
 {
     const double x = _position.x();
     const double y = _position.y();
@@ -458,6 +459,8 @@ void Path::addRoundRect(const SizeF& size, float radius)
                       Pt::Gfx::PointF(x, y + size.height() - radius));
 
     lineTo(Pt::Gfx::PointF(x, y + radius));
+
+    close();
 }
  
 
@@ -470,7 +473,9 @@ void Path::addEllipse(const SizeF& size)
   arcTo( p2, size.height()/2 );   
 
   moveTo(p2);
-  arcTo( p1, size.height()/2 );   
+  arcTo( p1, size.height()/2 );
+
+  close();
 }
 
                
@@ -626,6 +631,70 @@ void Path::toPoints(std::vector<PointF>& dst, float smoothness) const
     {
         dst.pop_back();
     }
+}
+
+
+void Path::toPolygons(std::vector<Polygon>& polygons, float smoothness) const
+{
+    // State variables
+    double curX = 0.0;
+    double curY = 0.0;
+
+    Polygon polygon;
+
+    ElementVector::const_iterator it;
+    for(it = _elements.begin(); it != _elements.end(); ++it) 
+    {
+        // Get the instruction
+        const Element& ins = *it;
+
+        // Act based on the type of the instruction
+        switch(ins.type) 
+        {
+            case Element::IT_Close:
+                polygons.push_back(polygon);
+                polygon.clear();
+                break;
+
+            case Element::IT_MoveTo:
+                curX = ins.pxy[0];
+                curY = ins.pxy[1];
+                break;
+
+            case Element::IT_LineTo:
+                if( polygon.empty() ) 
+                    polygon.push_back( PointF(curX, curY) );
+                
+                curX = ins.pxy[0];
+                curY = ins.pxy[1];
+                polygon.push_back( PointF(curX, curY) );
+                break;
+
+            case Element::IT_QuadBezierTo:
+                quadraticBezierToPoints(polygon.points(), curX, curY, ins.pxy[0], ins.pxy[1], ins.pxy[2], ins.pxy[3], smoothness);
+                curX = ins.pxy[2];
+                curY = ins.pxy[3];
+                break;
+
+            case Element::IT_CubicBezierTo:
+                cubicBezierToPoints(polygon.points(), curX, curY, ins.pxy[0], ins.pxy[1], ins.pxy[2], ins.pxy[3], ins.pxy[4], ins.pxy[5], smoothness);
+                curX = ins.pxy[4];
+                curY = ins.pxy[5];
+                break;
+
+            case Element::IT_GenNBezierTo:
+                bezierToPoints(polygon.points(), curX, curY, ins.pxy, smoothness);
+                curX = ins.pxy[ins.pxy.size() - 2];
+                curY = ins.pxy[ins.pxy.size() - 1];
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    if( ! polygon.empty() )
+        polygon.push_back( polygon.at(0) );
 }
 
 } // namespace

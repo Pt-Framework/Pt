@@ -1153,30 +1153,44 @@ void ImagePainter2::drawPath(const Path& path, float smoothness)
 void ImagePainter2::fillPath(const Path& path, float smoothness)
 {
     // Convert the path to polygon points
+    std::vector<Polygon> polygons;
+    path.toPolygons(polygons, smoothness);
+
+    _rasterizer->fillPolygons(polygons);
+    return;
+
+
+    //
+    // OLD CODE FOR COMPARISON:
+    //
+
     std::vector<PointF> pointsF;
-    path.toPoints(pointsF, smoothness);
+    path.toPoints(pointsF);
 
     // Use anti-aliasing
-    if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Default) {
+    if(_rasterizer->antiAliasingMode() == AntiAliasingMode::Default) 
+    {
         // Remove duplicates
         std::vector<PointF> points;
         deduplicatePointsF(points, pointsF.data(), pointsF.size());
+        
         // Draw the path as a filled polygon
-        _rasterizer->fillPolygon(points.data(), points.size());
+        _rasterizer->fillPolygon( points.data(), points.size() );
     }
-
-    // Do not use use anti-aliasing
-    else {
+    else // Do not use use anti-aliasing
+    {
         // Round the points and remove duplicates
         std::vector<Point> points;
         cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
+        
         // Draw the path as a filled polygon
-        _rasterizer->fillPolygon(points.data(), points.size());
+        _rasterizer->fillPolygon( points.data(), points.size() );
     }
 }
 
 
-bool ImagePainter2::thickenSolidOpenPolygon(std::vector<PointF>& pointsF, const PointF* basePtr, size_t curPCnt, const int32_t* segmentIndexMarker)
+bool ImagePainter2::thickenSolidOpenPolygon(std::vector<PointF>& pointsF, const PointF* basePtr, 
+                                            size_t curPCnt, const int32_t* segmentIndexMarker)
 {
     // Prepare the buffers
     std::vector<PointF> pointsFPolygon;

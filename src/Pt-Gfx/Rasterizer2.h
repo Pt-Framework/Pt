@@ -32,7 +32,7 @@
 #define PT_GFX_RASTERIZER_2_H
 
 #include <Pt/Gfx/Algorithm.h>
-
+#include <Pt/Gfx/Path.h>
 #include <Pt/Gfx/ArcMode.h>
 #include <Pt/Gfx/AntiAliasingMode.h>
 #include <Pt/Gfx/Painter.h>
@@ -172,7 +172,19 @@ class Rasterizer2
         inline void penFillPolygonSeparate(const BasicPoint<PointT>* points, size_t pointCount);
 
         template <typename PointT>
-        inline void fillPolygon(const BasicPoint<PointT>* points, size_t pointCount);
+        void fillPolygon(const BasicPoint<PointT>* points, size_t pointCount);
+
+        void fillPolygons(const std::vector<Polygon>& polygons);
+
+        void rasterPolygonsNoAA(const std::vector<Polygon>& polygons, 
+                                const Color& color, 
+                                Pt::int32_t minX, Pt::int32_t minY, 
+                                Pt::int32_t maxX, Pt::int32_t maxY);
+
+        void rasterPolygonsXWAA(const std::vector<Polygon>& polygons, 
+                                const Color& color, 
+                                Pt::int32_t minX, Pt::int32_t minY, 
+                                Pt::int32_t maxX, Pt::int32_t maxY);
 
         void fillRect(const Point& tl, const Point& br);
         void fillEllipse(const Point& topLeft, const Size& size);
@@ -234,11 +246,29 @@ class Rasterizer2
         void rasterOnePixelPolygonOutline(const Point* points, size_t pointCount, const Color& color);
         void rasterOnePixelPolygonOutline(const PointF* points, size_t pointCount, const Color& color);
 
-        inline void rasterPolygonArea(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
-        inline void rasterPolygonArea(const PointF* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, float minX, float minY, float maxX, float maxY);
+        inline void rasterPolygonArea(const Point* points, const size_t* pointCount, 
+                                      size_t polyCount, size_t totalPointCount, 
+                                      const Color& color, 
+                                      Pt::int32_t minX, Pt::int32_t minY, 
+                                      Pt::int32_t maxX, Pt::int32_t maxY);
+       
+        inline void rasterPolygonArea(const PointF* points, const size_t* pointCount, 
+                                      size_t polyCount, size_t totalPointCount, 
+                                      const Color& color, 
+                                      float minX, float minY, 
+                                      float maxX, float maxY);
 
-        void rasterPolygonAreaNoAA(const Point* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, Pt::int32_t minX, Pt::int32_t minY, Pt::int32_t maxX, Pt::int32_t maxY);
-        void rasterPolygonAreaXWAA(const PointF* points, const size_t* pointCount, size_t polyCount, size_t totalPointCount, const Color& color, float minX, float minY, float maxX, float maxY);
+        void rasterPolygonAreaNoAA(const Point* points, const size_t* pointCount, 
+                                   size_t polyCount, size_t totalPointCount, 
+                                   const Color& color, 
+                                   Pt::int32_t minX, Pt::int32_t minY, 
+                                   Pt::int32_t maxX, Pt::int32_t maxY);
+        
+        void rasterPolygonAreaXWAA(const PointF* points, const size_t* pointCount, 
+                                   size_t polyCount, size_t totalPointCount, 
+                                   const Color& color, 
+                                   float minX, float minY, 
+                                   float maxX, float maxY);
 
         void rasterOnePixelQuadraticBezierCurve(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t x3, Pt::int32_t y3, const Color& color, Pt::int32_t* fpiCtrInOut, DrawLineMask* maskInOut);
 

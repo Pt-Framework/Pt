@@ -290,3 +290,86 @@ void Transform::updateMatrix(const MatrixData& m)
 } // namespace
 
 } // namespace
+
+
+/*
+void Rasterizer2::rasterPolygonsNoAA(const std::vector<Polygon>& polygons, 
+                                     const Color& color, 
+                                     Pt::int32_t minX, Pt::int32_t minY, 
+                                     Pt::int32_t maxX, Pt::int32_t maxY)
+{
+    std::size_t totalPointCount = 0;
+
+    for(std::vector<Polygon>::const_iterator it = polygons.begin();
+        it != polygons.end(); ++it)
+    {
+        totalPointCount += polygons.size();
+    }
+
+    // List of nodes that define the horizontal spans
+    std::vector<Pt::int32_t> nodeX(totalPointCount * 2, 0);
+
+    // Loop through the rows of the image
+    for(Pt::int32_t y = minY; y <= maxY; ++y) 
+    {
+        // Build a list of nodes using all the polygons
+        Pt::int32_t nodes = 0;
+        
+        for(size_t p = 0; p < polygons.size(); ++p) 
+        {
+            const Polygon* polygon = &polygons[p];
+
+            if( polygon->empty() )
+                continue;
+            
+            // loop through the points
+            Pt::int32_t j = polygon->size() - 1;
+            
+            for(size_t i = 0; i < polygon->size(); ++i) 
+            {
+                // Get the coordinates
+                const Pt::int32_t curXi = polygon->at(i).x();
+                const Pt::int32_t curYi = polygon->at(i).y();
+                const Pt::int32_t curXj = polygon->at(j).x();
+                const Pt::int32_t curYj = polygon->at(j).y();
+                
+                // Calculate the node's coordinate
+                if( ( y >= curYi && y < curYj ) || ( y >= curYj && y < curYi ) ) 
+                {
+                    // Bail out if we have produced too many nodes
+                    if((size_t) nodes >= nodeX.size()) 
+                        return;
+                    
+                    // Calculate the node's coordinate
+                    const Pt::int32_t deltaYp = y - curYi;
+                    const Pt::int32_t deltaYj = curYj  - curYi;
+                    const Pt::int32_t deltaXj = curXj  - curXi;
+                    const Pt::int32_t interXf = FIXED_POINT_FROM_INT(curXi)
+                                              + ( (FIXED_POINT_FROM_INT(deltaYp) + FIXED_POINT_CONSTANT_HALF) /
+                                                  deltaYj * deltaXj
+                                                );
+                    nodeX[nodes++] = FIXED_POINT_TO_INT(interXf);
+                }
+                
+                // Update the searching index
+                j = i;
+            }
+        }
+        
+        // Skip if there is no node
+        if( ! nodes ) 
+            continue;
+        
+        // Sort the nodes
+        bubbleSortAscending(nodeX, nodes);
+        
+        // Fill the pixels between the node pairs
+        for(Pt::int32_t i = 0; i < nodes; i += 2) 
+        {
+            const Pt::int32_t from = nodeX[i    ];
+            const Pt::int32_t to   = nodeX[i + 1];
+            rasterScanline(from - minX, to - minX, y - minY, minX, minY, color);
+        }
+    }
+}
+*/

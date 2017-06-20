@@ -225,16 +225,23 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     
 
     Pt::Gfx::Path path;    
+    
     path.moveTo( Pt::Gfx::PointF(100, 100) );
+    path.addRoundedRect(Pt::Gfx::SizeF(50, 50), 10);
+
+    path.moveTo( Pt::Gfx::PointF(110, 110) );
+    path.addRoundedRect(Pt::Gfx::SizeF(30, 30), 10);
+
     //path.addEllipse( Pt::Gfx::SizeF(50, 100) );
-    path.addRoundRect(Pt::Gfx::SizeF(50,50), 10);
+
     //path.transform(trans);
 
     imagePainter.setPen(Gfx::Color::fromRgb8(255, 0, 0)  );
     imagePainter.setBrush( Gfx::Color::fromRgb8(255, 0, 0)  );
     imagePainter.fillPath(path);
 
-    imagePainter.fillRoundedRect( Pt::Gfx::RectF(Pt::Gfx::PointF(150, 150), Pt::Gfx::SizeF(50,50)), 10);
+    imagePainter.fillRoundedRect( Pt::Gfx::RectF(Pt::Gfx::PointF(150, 150), 
+                                                 Pt::Gfx::SizeF(50, 50)), 10);
       
     //imagePainter.setPen( Gfx::Color::fromRgb8(150, 150, 255) );
     //imagePainter.drawEllipse(Pt::Gfx::PointF(100, 100), Pt::Gfx::SizeF(50, 100));

@@ -232,14 +232,18 @@ inline void Rasterizer2::fillPixel(Pt::int32_t x, Pt::int32_t y, Pt::int32_t min
 //
 
 template <typename PointT, typename ValueT>
-inline void Rasterizer2::getPolygonRectMinMax(const BasicPoint<PointT>* points, size_t pointCount, ValueT& minX, ValueT& minY, ValueT& maxX, ValueT& maxY) const
+inline void Rasterizer2::getPolygonRectMinMax(const BasicPoint<PointT>* points, 
+                                              size_t pointCount, 
+                                              ValueT& minX, ValueT& minY, 
+                                              ValueT& maxX, ValueT& maxY) const
 {
     minX =  MAXIMUM_COORD;
     minY =  MAXIMUM_COORD;
     maxX = -MAXIMUM_COORD;
     maxY = -MAXIMUM_COORD;
 
-    for(size_t i = 0; i < pointCount; ++i) {
+    for(size_t i = 0; i < pointCount; ++i) 
+    {
         const ValueT x = points[i].x();
         const ValueT y = points[i].y();
         if(x < minX) minX = x;
@@ -250,7 +254,10 @@ inline void Rasterizer2::getPolygonRectMinMax(const BasicPoint<PointT>* points, 
 }
 
 template <typename PointT>
-inline void Rasterizer2::genClippedPolygonPoints(std::vector< BasicPoint<PointT> >& dst, const BasicPoint<PointT>* src, const size_t pointCount, bool forPolygonOutline) const
+inline void Rasterizer2::genClippedPolygonPoints(std::vector< BasicPoint<PointT> >& dst, 
+                                                 const BasicPoint<PointT>* src, 
+                                                 const size_t pointCount, 
+                                                 bool forPolygonOutline) const
 {
     for(size_t i = 0; i < pointCount; ++i)
         dst.push_back( BasicPoint<PointT>( src[i].x(), src[i].y() ) );
@@ -260,7 +267,11 @@ inline void Rasterizer2::genClippedPolygonPoints(std::vector< BasicPoint<PointT>
 }
 
 template <typename PointT, typename ValueT>
-inline void Rasterizer2::separateAndClipPolygons(ValueT& minX, ValueT& maxX, ValueT& minY, ValueT& maxY, std::vector< BasicPoint<PointT> >& clippedPoints, std::vector<size_t>& clippedCounts, const BasicPoint<PointT>* points, size_t pointCount) const
+inline void Rasterizer2::separateAndClipPolygons(ValueT& minX, ValueT& maxX, 
+                                                 ValueT& minY, ValueT& maxY, 
+                                                 std::vector< BasicPoint<PointT> >& clippedPoints, 
+                                                 std::vector<size_t>& clippedCounts, 
+                                                 const BasicPoint<PointT>* points, size_t pointCount) const
 {
     // Minimum and maximum coordinate values for all the polygons
     minX =  MAXIMUM_COORD;
@@ -270,17 +281,24 @@ inline void Rasterizer2::separateAndClipPolygons(ValueT& minX, ValueT& maxX, Val
 
     // Separate the polygons and clip their coordinates
     size_t startIndex = 0;
-    for(size_t i = 0; i <= pointCount; ++i) {
+    for(size_t i = 0; i <= pointCount; ++i) 
+    {
         // Search for the end and/or separator points
-        if( i == pointCount || (points[i].x() > MAXIMUM_COORD && points[i].y() > MAXIMUM_COORD) ) {
+        if( i == pointCount || (points[i].x() > MAXIMUM_COORD && points[i].y() > MAXIMUM_COORD) ) 
+        {
             // Calculate the number of points for this polygon
             const size_t curPC = i - startIndex;
+            
             // Clip the coordinates
             std::vector< BasicPoint<PointT> > clipped;
             genClippedPolygonPoints(clipped, points + startIndex, curPC, false);
-            if(clipped.empty()) continue;
+            
+            if( clipped.empty() ) 
+              continue;
+            
             // Increment the start index
             startIndex += curPC + 1;
+            
             // Calculate the minimum and maximum coordinate values
             ValueT curMinX, curMinY, curMaxX, curMaxY;
             getPolygonRectMinMax(clipped.data(), clipped.size(), curMinX, curMinY, curMaxX, curMaxY);
@@ -288,8 +306,10 @@ inline void Rasterizer2::separateAndClipPolygons(ValueT& minX, ValueT& maxX, Val
             if(curMinY < minY) minY = curMinY;
             if(curMaxX > maxX) maxX = curMaxX;
             if(curMaxY > maxY) maxY = curMaxY;
+            
             // Store the clipped points
             clippedPoints.insert(clippedPoints.end(), clipped.begin(), clipped.end());
+            
             // Store the number of points
             clippedCounts.push_back(clipped.size());
         }

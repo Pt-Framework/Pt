@@ -41,6 +41,52 @@ namespace Pt {
 
 namespace Gfx {
 
+class Polygon
+{
+    public:
+        Polygon()
+        {
+        }
+
+        const PointF& at(std::size_t n) const
+        {
+            return _points.at(n);
+        }
+
+        PointF& at(std::size_t n)
+        {
+            return _points.at(n);
+        }
+
+        void clear()
+        {
+            _points.clear();
+        }
+
+        bool empty() const
+        {
+            return _points.empty();
+        }
+        
+        std::size_t size() const
+        {
+            return _points.size();
+        }
+
+        void push_back(const PointF& p)
+        {
+            _points.push_back(p);
+        }
+
+        std::vector<PointF>& points()
+        {
+            return _points;
+        }
+
+    private:
+        std::vector<PointF> _points;
+};
+
 struct Element
 {
     enum ElementType 
@@ -123,7 +169,7 @@ class PT_GFX_API Path
 
         void addRect(const SizeF& size);
 
-        void addRoundRect(const SizeF& size, float radius);
+        void addRoundedRect(const SizeF& size, float radius);
 
         void addEllipse(const SizeF& size);
 
@@ -133,7 +179,9 @@ class PT_GFX_API Path
 
         void transform(const Transform& transform);
 
-        void toPoints(std::vector<PointF>& dst, float smoothness = 1) const;  
+        void toPoints(std::vector<PointF>& dst, float smoothness = 1) const; 
+        
+        void toPolygons(std::vector<Polygon>& polygons, float smoothness = 1) const; 
 
     private:
         typedef std::vector<Element> ElementVector;
