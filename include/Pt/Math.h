@@ -38,53 +38,100 @@
 
 namespace Pt {
 
-template <typename T>
-struct Pi;
+/** @brief The constant pi.
+*/
+template<typename T> 
+T pi();
 
-template <>
-struct Pi<float>
-{
-    static const float full()
-    { return 3.14159265f; }
+/** @brief The constant pi*2.
+*/
+template<typename T> 
+T piDouble();
 
-    static const float doubled()
-    { return 6.28318531f; }
+/** @brief The constant pi/2.
+*/
+template<typename T> 
+T piHalf();
 
-    static const float half()
-    { return 1.57079633f; }
+/** @brief The constant pi/4.
+*/
+template<typename T> 
+T piQuart();
 
-    static const float quart()
-    { return 0.78539816f; }
+/** @brief The constant pi^2.
+*/
+template<typename T> 
+T piSquare();
 
-    static const float squared()
-    { return 9.86960440f; }
 
-};
+template<> 
+inline float pi<float>()
+{ 
+  return 3.14159265f; 
+}
+   
+template<> 
+inline float piDouble<float>()
+{ 
+  return 6.28318531f; 
+}
 
-template <>
-struct Pi<double>
-{
-    static const double full()
-    { return 3.14159265358979323846; }
+template<> 
+inline float piHalf<float>()
+{ 
+  return 1.57079633f; 
+}
 
-    static const double doubled()
-    { return 6.28318530717958647692; }
+template<> 
+inline float piQuart<float>()
+{ 
+  return 0.78539816f; 
+}
 
-    static const double half()
-    { return 1.57079632679489661923; }
+template<> 
+inline float piSquare<float>()
+{ 
+  return 9.86960440f; 
+}
 
-    static const double quart()
-    { return 0.78539816339744830961; }
 
-    static const double squared()
-    { return 9.86960440108935861883449099987615114; }
-};
+template<> 
+inline double pi<double>()
+{ 
+  return 3.14159265358979323846; 
+}
+   
+template<> 
+inline double piDouble<double>()
+{ 
+  return 6.28318530717958647692; 
+}
+
+template<> 
+inline double piHalf<double>()
+{ 
+  return 1.57079632679489661923; 
+}
+
+template<> 
+inline double piQuart<double>()
+{ 
+  return 0.78539816339744830961; 
+}
+
+template<> 
+inline double piSquare<double>()
+{ 
+  return 9.86960440108935861883449099987615114; 
+}
 
 
 static const float DegToRadF = 0.01745329f;
+
 static const float RadToDegF = 57.2957795f;
 
 static const double DegToRad = 0.0174532925199432957692;
+
 static const double RadToDeg = 57.295779513082320876846364344191;
 
 
@@ -92,7 +139,6 @@ inline float degToRad(float deg)
 {
     return deg * DegToRadF;
 }
-
 
 inline double degToRad(double deg)
 {
@@ -104,7 +150,6 @@ inline float radToDeg(float rad)
 { 
     return rad * RadToDegF; 
 }
-
 
 inline double radToDeg(double rad)
 { 
@@ -120,18 +165,18 @@ inline double radToDeg(double rad)
 template <typename T>
 T fastSin(const T& theta)
 {
-    assert(theta <= Pi<T>::doubled());
+    assert(theta <= piDouble<T>());
     assert(theta >= 0);
     
     T localTheta = theta;
 
-    if(localTheta > Pi<T>::full())
+    if(localTheta > pi<T>())
     {
-        localTheta -= Pi<T>::doubled();
+        localTheta -= piDouble<T>();
     }
 
-    const T B = 4 / Pi<T>::full();
-    const T C = -4 / Pi<T>::squared();
+    const T B = 4 / pi<T>();
+    const T C = -4 / piSquare<T>();
     //const float Q = 0.775;
     const T P = static_cast<T>(0.225);
     
@@ -148,14 +193,14 @@ T fastSin(const T& theta)
 template <typename T>
 T fastCos(const T& theta)
 {
-    assert(theta <= Pi<T>::doubled());
+    assert(theta <= piDouble<T>());
     assert(theta >= 0);
 
-    T sinTheta = theta + Pi<T>::half();
+    T sinTheta = theta + piHalf<T>();
 
-    if(sinTheta > Pi<T>::doubled())     // Original x > pi/2
+    if(sinTheta > piDouble<T>())     // Original x > pi/2
     {
-        sinTheta -= Pi<T>::doubled();   // Wrap: cos(x) = cos(x - 2 pi)
+        sinTheta -= piDouble<T>();   // Wrap: cos(x) = cos(x - 2 pi)
     }
 
     return fastSin(sinTheta);
@@ -168,9 +213,9 @@ T fastAtan2(T y, T x)
 {
     if(x == 0.0) 
     {
-        if(y >  0) return Pi<T>::half();
+        if(y >  0) return piHalf<T>();
         if(y == 0) return 0;
-        return -Pi<T>::half();
+        return -piHalf<T>();
     }
 
     const T z = y / x;
@@ -182,15 +227,15 @@ T fastAtan2(T y, T x)
         
         if(x < 0.0) 
         {
-            return y < 0 ? atan - Pi<T>::full()
-                         : atan + Pi<T>::full();
+            return y < 0 ? atan - pi<T>()
+                         : atan + pi<T>();
         }
     }
     else 
     {
-        atan = Pi<T>::half() - z / (z * z + static_cast<T>(0.28));
+        atan = piHalf<T>() - z / (z * z + static_cast<T>(0.28));
         if(y < 0.0) 
-            return atan - Pi<T>::full();
+            return atan - pi<T>();
     }
 
     return atan;

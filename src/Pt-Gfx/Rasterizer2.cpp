@@ -418,7 +418,7 @@ void Rasterizer2::updateGradientBrush_gen2DLinearGradient(Pt::int32_t width, Pt:
 
     // Calculate the rotation
     const float angl = angle + 0.001f;
-    const float rad  = angl * DegToRadF - Pi<float>::quart();
+    const float rad  = angl * DegToRadF - piQuart<float>();
     const float sval = ::sin(rad); // Gfx::Math::fastSin(rad);
     const float cval = ::cos(rad); // Gfx::Math::fastCos(rad);
 
@@ -595,7 +595,7 @@ void Rasterizer2::updateGradientBrush_gen2DConicalGradient(Pt::int32_t width, Pt
 #endif
 
     // Calculate the rotation
-    const float rad  = angle * DegToRadF - Pi<float>::half();
+    const float rad  = angle * DegToRadF - piHalf<float>();
     const float sval = ::sin(rad); // Gfx::Math::fastSin(rad);
     const float cval = ::cos(rad); // Gfx::Math::fastCos(rad);
 
@@ -612,7 +612,7 @@ void Rasterizer2::updateGradientBrush_gen2DConicalGradient(Pt::int32_t width, Pt
             const float ry = (-sval * dx + cval * dy);
             const float rx = ( cval * dx + sval * dy);
             // Calculate the distance
-            float dist = (fastAtan2(ry, rx) + Pi<float>::full()) / Pi<float>::doubled() / scale;
+            float dist = (fastAtan2(ry, rx) + pi<float>()) / piDouble<float>() / scale;
                  if(dist < 0.0f) dist = 0.0f;
             else if(dist > 1.0f) dist = 1.0f;
 #ifdef CONICAL_GRADIENT_USE_SMOOTH_TRANSITION

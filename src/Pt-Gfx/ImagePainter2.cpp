@@ -998,7 +998,7 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float deg
     // Calculate the angle adjustment factor
     const float aafa = size.width () / 2.0f;
     const float aafb = size.height() / 2.0f;
-    const float aafc = Pi<float>::doubled() * sqrt( (aafa * aafa + aafb * aafb) / 2.0f );
+    const float aafc = Pt::piDouble<float>() * sqrt( (aafa * aafa + aafb * aafb) / 2.0f );
     const float aafd = 360.0f * penSize2 / aafc;
 
     // Calculate the arc's parameters

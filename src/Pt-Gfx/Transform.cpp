@@ -147,7 +147,7 @@ void Transform::rotateDeg(double angle)
 {
     MatrixData n;
 
-    const double r = angle * (Pi<double>::full() / 180);
+    const double r = angle * (pi<double>() / 180);
     const double s = ::sin(r);
     const double c = ::cos(r);
 

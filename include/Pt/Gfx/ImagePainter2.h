@@ -326,7 +326,7 @@ class PT_GFX_API ImagePainter2 : public Painter
 
             // Generate a polygon that approximates the ellipse
             for(Pt::int32_t i = 0; i < nSegs; ++i) {
-                const float angle = Pi<float>::doubled() * i * nSegs1i;
+                const float angle = piDouble<float>() * i * nSegs1i;
                 // Calculate the coordinate
                 const float x = centerX + radiusX * fastCos(angle);
                 const float y = centerY - radiusY * fastSin(angle); // Sign inversion due to differences between cartesian and computer coordinate systems
