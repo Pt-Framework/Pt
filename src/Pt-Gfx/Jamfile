@@ -18,11 +18,6 @@ if $(FREETYPE_INCLUDES)
     SubDirHdrs $(FREETYPE_INCLUDES) ;
 }
 
-if $(WITH_NEW_RASTERIZER)
-{
-    SubDirC++Flags [ FDefines WITH_NEW_RASTERIZER ] ;
-}
-
 if $(WITH_EXPERIMENTAL_GFX)
 {
     rule FGeneric

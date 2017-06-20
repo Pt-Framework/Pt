@@ -2,11 +2,6 @@ SubDir PT_TOP src Pt-Gfx tests ;
 SubDirHdrs $(PT_TOP)/include ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Gfx ;
 
-if $(WITH_NEW_RASTERIZER)
-{
-    SubDirC++Flags [ FDefines WITH_NEW_RASTERIZER ] ;
-}
-
 Main Pt-Gfx-test : Pt-Gfx-test.cpp
                    BlockScaleTest.cpp
                    Argb32Test.cpp
@@ -49,12 +44,10 @@ if $(WITH_EXPERIMENTAL_GFX)
     SubDirC++Flags [ FDefines WITH_EXPERIMENTAL_GFX ] ;
     SubDirC++Flags [ FDefines 'lprintf(...)'='fprintf(stderr,__VA_ARGS__)' ] ;
 
-    SubDirC++Flags [ FIncludes "/usr/include/cairo" ] ;
-
     Main ImagePainterTest2 : ImagePainterTest2.cpp ;
     LinkSharedLibraries ImagePainterTest2 : Pt Pt-Gfx Pt-System ;
     MakeLocate ImagePainterTest2 : $(PT_OUTPUT_TARGET) ;
-    LinkFlags ImagePainterTest2 : -lcairo -lSDL2 -lX11 ;
+    LinkFlags ImagePainterTest2 : -lSDL2 -lX11 ;
 
     if $(WITH_BUILTIN_LIBPNG)
     {
@@ -68,6 +61,3 @@ if $(WITH_EXPERIMENTAL_GFX)
 
 # pkg-config --cflags sdl2
 # pkg-config --libs sdl2
-
-# pkg-config --cflags cairo
-# pkg-config --libs cairo

@@ -427,15 +427,8 @@ if ! $(PRELIB)
 Configure ZLIB ;
 
 #############################################################################
-# Build rasterizer2
+# Build rasterizer2 with experimental Gfx
 #############################################################################
-
-if --with-new-rasterizer in $(ARGV)
-{
-    WITH_NEW_RASTERIZER = yes ;
-    Configure WITH_NEW_RASTERIZER ;
-    EchoOption WITH_NEW_RASTERIZER : "NewRasterizer" ;
-}
 
 if --with-experimental-gfx in $(ARGV)
 {

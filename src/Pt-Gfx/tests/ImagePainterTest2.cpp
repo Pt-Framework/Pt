@@ -1,9 +1,9 @@
 // Use the buillt-in FreeType engine and libpng included with Pt:
-//     ./jam.sh configure --with-new-rasterizer --with-experimental-gfx --with-hmi -sGUI=linux-fb -sOPTIM=-O2 --with-freetype --with-libpng
+//     ./jam.sh configure --with-experimental-gfx --with-hmi -sGUI=linux-fb -sOPTIM=-O2 --with-freetype --with-libpng
 //
 //
 // Enable debugging information for use with Valgrind:
-//     ./jam.sh configure --with-new-rasterizer --with-experimental-gfx --with-hmi -sGUI=linux-fb -sOPTIM=-g --with-freetype --with-libpng
+//     ./jam.sh configure --with-experimental-gfx --with-hmi -sGUI=linux-fb -sOPTIM=-g --with-freetype --with-libpng
 //
 // Generate Valgrind suppression list:
 //     valgrind --leak-check=full --show-leak-kinds=all --gen-suppressions=yes --demangle=no --suppressions=../src/Pt-Gfx/tests/ImagePainterTest2.supp ./ImagePainterTest2
@@ -53,8 +53,6 @@
 #include <cxxabi.h>
 #endif
 
-#include <cairo.h>
-
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_syswm.h>
 
@@ -76,10 +74,6 @@ using namespace Pt::Gfx;
 
 // Benchmark 2D transform operations only
 #define DO_TRANSFORM_BENCHMARKING_ONLY 0
-
-// Comparison with Cairo (solid-filled polygons and ellipses only)
-#define DO_BENCHMARKING_CAIRO                 0
-#define BENCHMARK_CAIRO_CHECK_RESULTING_IMAGE 0
 
 // General settings for Pt-Gfx
 #define DO_TEST_DRAW    1
@@ -115,8 +109,8 @@ using namespace Pt::Gfx;
 
 #define TEST_IMAGE_OPERATION                    0
 
-// Detailed-test benchmark settings for Pt-Gfx and some for Cairo
-#define BENCHMARK_RESULT_HTML               0 // (automatically disabling test drawing and enabling Cairo comparison)
+// Detailed-test benchmark settings for Pt-Gfx
+#define BENCHMARK_RESULT_HTML               0 // (automatically disabling test drawing
 #define BENCHMARK_RESULT_HTML_SIDE_BY_SIDE  1
 
 #define BENCHMARK_CHECK_RESULTING_IMAGE     0
@@ -194,7 +188,6 @@ static const char* sfileDirXPrefix = "";
 #include "ImagePainterTest2_ImageOperation.cpp"
 
 #include "ImagePainterTest2_Benchmark.cpp"
-#include "ImagePainterTest2_Cairo.cpp"
 
 
 //
@@ -505,7 +498,6 @@ int main(int argc, char* args[])
             std::clog << "<tr>" << std::endl;
             std::clog << "    <td><i><b>Pt::Gfx - CompositionMode::SourceCopy</b></i></td><td>&nbsp;&nbsp;&nbsp;</td>" << std::endl;
             std::clog << "    <td><i><b>Pt::Gfx - CompositionMode::SourceOver</b></i></td><td>&nbsp;&nbsp;&nbsp;</td>" << std::endl;
-            std::clog << "    <td><i><b>Comparison with Cairo</b></i></td>" << std::endl;
             std::clog << "</tr>" << std::endl;
             std::clog << "<tr>" << std::endl;
             std::clog << "    <!-- Pt::Gfx - CompositionMode::SourceCopy -->" << std::endl;
@@ -549,27 +541,11 @@ int main(int argc, char* args[])
 
         if(BENCHMARK_RESULT_HTML && BENCHMARK_RESULT_HTML_SIDE_BY_SIDE) {
             std::clog << "    </td><td>&nbsp;&nbsp;&nbsp;</td>" << std::endl;
-            std::clog << "    <!-- Comparison with Cairo -->" << std::endl;
-            std::clog << "    <td>" << std::endl;
         }
-    }
-
-    if(DO_BENCHMARKING_CAIRO || (DO_BENCHMARKING && BENCHMARK_RESULT_HTML)) {
-        std::clog << std::fixed << std::setprecision(0);
-        if(!BENCHMARK_RESULT_HTML) std::clog << std::endl;
-
-        std::clog << "Cairo - CompositionMode::SourceCopy" << std::endl;
-        cairoBenchmark(CompositionMode::SourceCopy);
-        std::clog << std::endl;
-
-        std::clog << "Cairo - CompositionMode::SourceOver" << std::endl;
-        cairoBenchmark(CompositionMode::SourceOver);
-        if(!BENCHMARK_RESULT_HTML) std::clog << std::endl;
     }
 
     if(DO_BENCHMARKING && BENCHMARK_RESULT_HTML) {
         if(BENCHMARK_RESULT_HTML_SIDE_BY_SIDE) {
-            std::clog << "    </td>" << std::endl;
             std::clog << "</tr>" << std::endl;
             std::clog << "</table>" << std::endl;
             std::clog << "</div></pre><br/>" << std::endl;
