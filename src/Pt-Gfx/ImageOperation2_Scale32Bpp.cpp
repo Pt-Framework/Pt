@@ -29,11 +29,10 @@
 
 
 #include "SIMDConfig.h"
-
-#include <Pt/Gfx/ImageOperation2.h>
-
+#include "ImageOperation2.h"
 
 namespace Pt {
+
 namespace Gfx {
 
 

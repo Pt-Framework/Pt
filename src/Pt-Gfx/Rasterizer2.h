@@ -31,9 +31,9 @@
 #ifndef PT_GFX_RASTERIZER_2_H
 #define PT_GFX_RASTERIZER_2_H
 
+#include "ArcMode.h"
 #include <Pt/Gfx/Algorithm.h>
 #include <Pt/Gfx/Path.h>
-#include <Pt/Gfx/ArcMode.h>
 #include <Pt/Gfx/Painter.h>
 
 #include "ClipShape.h"
@@ -186,7 +186,9 @@ class Rasterizer2
                                 Pt::int32_t maxX, Pt::int32_t maxY);
 
         void fillRect(const Point& tl, const Point& br);
+
         void fillEllipse(const Point& topLeft, const Size& size);
+
         void fillArc(const Point& topLeft, const Size& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
     public:

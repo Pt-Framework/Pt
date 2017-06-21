@@ -32,7 +32,6 @@
 #define PT_GFX_IMAGEPAINTER_2_H
 
 #include <Pt/Gfx/Transform.h>
-#include <Pt/Gfx/ArcMode.h>
 #include <Pt/Gfx/Path.h>
 #include <Pt/Gfx/Painter.h>
 #include <Pt/System/Path.h>
@@ -41,6 +40,7 @@ namespace Pt {
 
 namespace Gfx {
 
+class ArcMode;
 class Rasterizer2;
 struct SAGOpState;
 

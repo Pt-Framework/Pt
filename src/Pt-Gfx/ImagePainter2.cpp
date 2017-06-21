@@ -28,10 +28,11 @@
   02110-1301 USA
 */
 
+#include "FreeType2.h"
+#include "ArcMode.h"
+#include "Rasterizer2.h"
 #include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/ImagePainter2.h>
-#include "FreeType2.h"
-#include "Rasterizer2.h"
 #include "clipper_aj/clipper.hpp"
 
 namespace Pt {
@@ -966,7 +967,8 @@ void ImagePainter2::drawPie(const PointF& topLeft, const SizeF& size,  float deg
 }
 
 
-void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd, const ArcMode& arcMode)
+void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, 
+                             float degBegin, float degEnd, const ArcMode& arcMode)
 {
     // Rasterize one-pixel arc
     if(_rasterizer->pen().size() == 1) {
