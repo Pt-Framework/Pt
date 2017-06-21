@@ -19,7 +19,7 @@ static void testDrawThickLine_impl(
 
     /*
     painter.setFont( Pt::Gfx::Font(FONT_SPEC_S) );
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
+    if(ip2) ip2->setAntiAliasing(false);
     painter.setPen(penOCapBJoin);
     painter.drawLine( PointF( 100, 100), PointF(300, 100) );
     //painter.drawLine( PointF( 300, 100), PointF(100, 100) );
@@ -53,7 +53,7 @@ static void testDrawThickLine_impl(
     //*/
 
     // Test anti-aliasing
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
+    if(ip2) ip2->setAntiAliasing(false);
     painter.setPen(penBCapBJoin);
     painter.drawLine( PointF( 20,  20), PointF(200, 120) );
     painter.drawLine( PointF( 20, 240), PointF(200, 140) );
@@ -64,7 +64,7 @@ static void testDrawThickLine_impl(
     }
     painter.setPen(penText); painter.drawText( PointF( 20, 135), "NOAA" );
 
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Default);
+    if(ip2) ip2->setAntiAliasing(true);
     painter.setPen(penBCapBJoin);
     painter.drawLine( PointF(220,  20), PointF(400, 120) );
     painter.drawLine( PointF(220, 240), PointF(400, 140) );
@@ -77,7 +77,7 @@ static void testDrawThickLine_impl(
 
     // Test caps
     painter.setFont( Pt::Gfx::Font(FONT_SPEC_S) );
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Default);
+    if(ip2) ip2->setAntiAliasing(true);
 
     painter.setPen(penBCapBJoin);
     painter.drawLine( PointF( 20, 300 - 30), PointF(100, 350 - 30) );
@@ -137,12 +137,12 @@ static void testDrawThickLine_impl(
         PointF(800 + 10, 130),
         PointF(650 + 10,  20)
     };
-    if(ip2) ip2->drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]), false );
+    if(ip2) ip2->drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]) );
     else painter.drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]) );
     if(true) {
         //penRef.setStyle(painter.pen().style());
         painter.setPen(penRef);
-        if(ip2) ip2->drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]), false );
+        if(ip2) ip2->drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]) );
         else painter.drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]) );
     }
 
@@ -153,11 +153,11 @@ static void testDrawThickLine_impl(
         PointF(800 + 170, 130),
         PointF(650 + 170,  20)
     };
-    if(ip2) ip2->drawPolyline( poly1b, sizeof(poly1b) / sizeof(poly1b[0]), true );
+    if(ip2) ip2->drawPolyline( poly1b, sizeof(poly1b) / sizeof(poly1b[0]) );
     else painter.drawPolyline( poly1b, sizeof(poly1b) / sizeof(poly1b[0]) );
     if(true) {
         painter.setPen(penRef);
-        if(ip2) ip2->drawPolyline( poly1b, sizeof(poly1b) / sizeof(poly1b[0]), true );
+        if(ip2) ip2->drawPolyline( poly1b, sizeof(poly1b) / sizeof(poly1b[0]) );
         else painter.drawPolyline( poly1b, sizeof(poly1b) / sizeof(poly1b[0]) );
     }
 
@@ -170,11 +170,11 @@ static void testDrawThickLine_impl(
         PointF(800 + 10, 130 + 200),
         PointF(650 + 10,  20 + 200)
     };
-    if(ip2) ip2->drawPolyline( poly2a, sizeof(poly2a) / sizeof(poly2a[0]), false );
+    if(ip2) ip2->drawPolyline( poly2a, sizeof(poly2a) / sizeof(poly2a[0]) );
     else painter.drawPolyline( poly2a, sizeof(poly2a) / sizeof(poly2a[0]) );
     if(true) {
         painter.setPen(penRef);
-        if(ip2) ip2->drawPolyline( poly2a, sizeof(poly2a) / sizeof(poly2a[0]), false );
+        if(ip2) ip2->drawPolyline( poly2a, sizeof(poly2a) / sizeof(poly2a[0]) );
         else painter.drawPolyline( poly2a, sizeof(poly2a) / sizeof(poly2a[0]) );
     }
 
@@ -185,11 +185,11 @@ static void testDrawThickLine_impl(
         PointF(800 + 170, 130 + 200),
         PointF(650 + 170,  20 + 200)
     };
-    if(ip2) ip2->drawPolyline( poly2b, sizeof(poly2b) / sizeof(poly2b[0]), true );
+    if(ip2) ip2->drawPolyline( poly2b, sizeof(poly2b) / sizeof(poly2b[0]) );
     else painter.drawPolyline( poly2b, sizeof(poly2b) / sizeof(poly2b[0]) );
     if(true) {
         painter.setPen(penRef);
-        if(ip2) ip2->drawPolyline( poly2b, sizeof(poly2b) / sizeof(poly2b[0]), true );
+        if(ip2) ip2->drawPolyline( poly2b, sizeof(poly2b) / sizeof(poly2b[0]) );
         else painter.drawPolyline( poly2b, sizeof(poly2b) / sizeof(poly2b[0]) );
     }
 
@@ -202,11 +202,11 @@ static void testDrawThickLine_impl(
         PointF(800 + 10, 130 + 400),
         PointF(650 + 10,  20 + 400)
     };
-    if(ip2) ip2->drawPolyline( poly3a, sizeof(poly3a) / sizeof(poly3a[0]), false );
+    if(ip2) ip2->drawPolyline( poly3a, sizeof(poly3a) / sizeof(poly3a[0]) );
     else painter.drawPolyline( poly3a, sizeof(poly3a) / sizeof(poly3a[0]) );
     if(true) {
         painter.setPen(penRef);
-        if(ip2) ip2->drawPolyline( poly3a, sizeof(poly3a) / sizeof(poly3a[0]), false );
+        if(ip2) ip2->drawPolyline( poly3a, sizeof(poly3a) / sizeof(poly3a[0]) );
         else painter.drawPolyline( poly3a, sizeof(poly3a) / sizeof(poly3a[0]) );
     }
 
@@ -217,11 +217,11 @@ static void testDrawThickLine_impl(
         PointF(800 + 170, 130 + 400),
         PointF(650 + 170,  20 + 400)
     };
-    if(ip2) ip2->drawPolyline( poly3b, sizeof(poly3b) / sizeof(poly3b[0]), true );
+    if(ip2) ip2->drawPolyline( poly3b, sizeof(poly3b) / sizeof(poly3b[0]) );
     else painter.drawPolyline( poly3b, sizeof(poly3b) / sizeof(poly3b[0]) );
     if(true) {
         painter.setPen(penRef);
-        if(ip2) ip2->drawPolyline( poly3b, sizeof(poly3b) / sizeof(poly3b[0]), true );
+        if(ip2) ip2->drawPolyline( poly3b, sizeof(poly3b) / sizeof(poly3b[0]) );
         else painter.drawPolyline( poly3b, sizeof(poly3b) / sizeof(poly3b[0]) );
     }
 
@@ -235,10 +235,10 @@ static void testDrawThickLine_impl(
             PointF(800 - 600 - 30, 130 + 400),
             PointF(650 - 600 - 30,  20 + 400)
         };
-        ip2->drawPolyline( poly4a, sizeof(poly4a) / sizeof(poly4a[0]), false );
+        ip2->drawPolyline( poly4a, sizeof(poly4a) / sizeof(poly4a[0]) );
         if(true) {
             painter.setPen(penRef);
-            ip2->drawPolyline( poly4a, sizeof(poly4a) / sizeof(poly4a[0]), false );
+            ip2->drawPolyline( poly4a, sizeof(poly4a) / sizeof(poly4a[0]) );
         }
 
         ip2->setPen(penOCapNJoin);
@@ -248,10 +248,10 @@ static void testDrawThickLine_impl(
             PointF(800 - 430 - 40, 130 + 400),
             PointF(650 - 430 - 40,  20 + 400)
         };
-        ip2->drawPolyline( poly4b, sizeof(poly4b) / sizeof(poly4b[0]), true );
+        ip2->drawPolyline( poly4b, sizeof(poly4b) / sizeof(poly4b[0]) );
         if(true) {
             ip2->setPen(penRef);
-            ip2->drawPolyline( poly4b, sizeof(poly4b) / sizeof(poly4b[0]), true );
+            ip2->drawPolyline( poly4b, sizeof(poly4b) / sizeof(poly4b[0]) );
         }
 
         ip2->setPen(penText); painter.drawText( PointF(650 - 600 - 20, 100 + 400), "None" );
@@ -266,10 +266,10 @@ static void testDrawThickLine_impl(
             PointF(100 + 310, 100 + 330)
         };
         ip2->setPen(penSCapBJoin);
-        ip2->drawQuadraticPolybezier( bezier1a, sizeof(bezier1a) / sizeof(bezier1a[0]), false );
+        //ip2->drawQuadraticPolybezier( bezier1a, sizeof(bezier1a) / sizeof(bezier1a[0]), false );
         if(true) {
             ip2->setPen(penRef);
-            ip2->drawQuadraticPolybezier( bezier1a, sizeof(bezier1a) / sizeof(bezier1a[0]), false );
+            //ip2->drawQuadraticPolybezier( bezier1a, sizeof(bezier1a) / sizeof(bezier1a[0]), false );
         }
 
         const PointF bezier1b[] = { // CCW
@@ -278,10 +278,10 @@ static void testDrawThickLine_impl(
             PointF(150 + 280, 150 + 340)
         };
         ip2->setPen(penRCapBJoin);
-        ip2->drawQuadraticPolybezier( bezier1b, sizeof(bezier1b) / sizeof(bezier1b[0]), false );
+        //ip2->drawQuadraticPolybezier( bezier1b, sizeof(bezier1b) / sizeof(bezier1b[0]), false );
         if(true) {
             ip2->setPen(penRef);
-            ip2->drawQuadraticPolybezier( bezier1b, sizeof(bezier1b) / sizeof(bezier1b[0]), false );
+            //ip2->drawQuadraticPolybezier( bezier1b, sizeof(bezier1b) / sizeof(bezier1b[0]), false );
         }
 
         const PointF bezier1c[] = { // CCW
@@ -290,10 +290,10 @@ static void testDrawThickLine_impl(
             PointF(100 + 310, 100 + 420)
         };
         ip2->setPen(penICapBJoin);
-        ip2->drawQuadraticPolybezier( bezier1c, sizeof(bezier1c) / sizeof(bezier1c[0]), false );
+        //ip2->drawQuadraticPolybezier( bezier1c, sizeof(bezier1c) / sizeof(bezier1c[0]), false );
         if(true) {
             ip2->setPen(penRef);
-            ip2->drawQuadraticPolybezier( bezier1c, sizeof(bezier1c) / sizeof(bezier1c[0]), false );
+            //ip2->drawQuadraticPolybezier( bezier1c, sizeof(bezier1c) / sizeof(bezier1c[0]), false );
         }
 
         const PointF bezier1d[] = { // CCW
@@ -302,10 +302,10 @@ static void testDrawThickLine_impl(
             PointF(150 + 280, 150 + 430)
         };
         ip2->setPen(penOCapBJoin);
-        ip2->drawQuadraticPolybezier( bezier1d, sizeof(bezier1d) / sizeof(bezier1d[0]), false );
+        //ip2->drawQuadraticPolybezier( bezier1d, sizeof(bezier1d) / sizeof(bezier1d[0]), false );
         if(true) {
             ip2->setPen(penRef);
-            ip2->drawQuadraticPolybezier( bezier1d, sizeof(bezier1d) / sizeof(bezier1d[0]), false );
+            //ip2->drawQuadraticPolybezier( bezier1d, sizeof(bezier1d) / sizeof(bezier1d[0]), false );
         }
 
         // Test joins
@@ -316,10 +316,10 @@ static void testDrawThickLine_impl(
             PointF(150 + 390, 100 + 330)
         };
         ip2->setPen(penOCapBJoin);
-        ip2->drawQuadraticPolybezier( bezier2a, sizeof(bezier2a) / sizeof(bezier2a[0]), true );
+        //ip2->drawQuadraticPolybezier( bezier2a, sizeof(bezier2a) / sizeof(bezier2a[0]), true );
         if(true) {
             ip2->setPen(penRef);
-            ip2->drawQuadraticPolybezier( bezier2a, sizeof(bezier2a) / sizeof(bezier2a[0]), true );
+            //ip2->drawQuadraticPolybezier( bezier2a, sizeof(bezier2a) / sizeof(bezier2a[0]), true );
         }
 
         const PointF bezier2b[] = { // CCW
@@ -329,10 +329,10 @@ static void testDrawThickLine_impl(
             PointF(150 + 390, 100 + 430)
         };
         ip2->setPen(penOCapMJoin);
-        ip2->drawQuadraticPolybezier( bezier2b, sizeof(bezier2b) / sizeof(bezier2b[0]), true );
+        //ip2->drawQuadraticPolybezier( bezier2b, sizeof(bezier2b) / sizeof(bezier2b[0]), true );
         if(true) {
             ip2->setPen(penRef);
-            ip2->drawQuadraticPolybezier( bezier2b, sizeof(bezier2b) / sizeof(bezier2b[0]), true );
+            //ip2->drawQuadraticPolybezier( bezier2b, sizeof(bezier2b) / sizeof(bezier2b[0]), true );
         }
 
         const PointF bezier2c[] = { // CCW
@@ -342,10 +342,10 @@ static void testDrawThickLine_impl(
             PointF(150 + 470, 100 + 330)
         };
         ip2->setPen(penOCapRJoin);
-        ip2->drawQuadraticPolybezier( bezier2c, sizeof(bezier2c) / sizeof(bezier2c[0]), true );
+        //ip2->drawQuadraticPolybezier( bezier2c, sizeof(bezier2c) / sizeof(bezier2c[0]), true );
         if(true) {
             ip2->setPen(penRef);
-            ip2->drawQuadraticPolybezier( bezier2c, sizeof(bezier2c) / sizeof(bezier2c[0]), true );
+            //ip2->drawQuadraticPolybezier( bezier2c, sizeof(bezier2c) / sizeof(bezier2c[0]), true );
         }
 
         const PointF bezier2d[] = { // CCW
@@ -355,10 +355,10 @@ static void testDrawThickLine_impl(
             PointF(150 + 470, 100 + 430)
         };
         ip2->setPen(penOCapNJoin);
-        ip2->drawQuadraticPolybezier( bezier2d, sizeof(bezier2d) / sizeof(bezier2d[0]), true );
+        //ip2->drawQuadraticPolybezier( bezier2d, sizeof(bezier2d) / sizeof(bezier2d[0]), true );
         if(true) {
             ip2->setPen(penRef);
-            ip2->drawQuadraticPolybezier( bezier2d, sizeof(bezier2d) / sizeof(bezier2d[0]), true );
+            //ip2->drawQuadraticPolybezier( bezier2d, sizeof(bezier2d) / sizeof(bezier2d[0]), true );
         }
     }
 
@@ -442,7 +442,7 @@ static void testDrawThickEllipseArc_impl(
     painter.fillRect( RectF( PointF(0, 80 + 400), SizeF(image.width(), 60) ) );
 
     /*
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Default);
+    if(ip2) ip2->setAntiAliasing(true);
     painter.setPen(drawI); painter.drawEllipse( PointF (30, 50 + 400), SizeF(67, 135) );
     painter.setCompositionMode(CompositionMode::SourceOver);
     painter.setPen(vref ); painter.drawEllipse( PointF (30, 50 + 400), SizeF(67, 135) );
@@ -452,14 +452,14 @@ static void testDrawThickEllipseArc_impl(
     //*/
 
     // First row
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
+    if(ip2) ip2->setAntiAliasing(false);
     painter.setPen(drawB); painter.drawEllipse( PointF (30, 50), SizeF(135, 135) );
     painter.setPen(text ); painter.drawText( PointF(30, 30), "NOAA" );
     painter.setCompositionMode(CompositionMode::SourceOver);
     painter.setPen(vref ); painter.drawEllipse( PointF (30, 50), SizeF(135, 135) );
     painter.setCompositionMode(cm);
 
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Default);
+    if(ip2) ip2->setAntiAliasing(true);
     painter.setPen(drawB); painter.drawEllipse( PointF (30 + 200, 50), SizeF(135, 135) );
     painter.setPen(text ); painter.drawText( PointF(30 + 200, 30), "XWAA" );
     painter.setCompositionMode(CompositionMode::SourceOver);
@@ -467,41 +467,41 @@ static void testDrawThickEllipseArc_impl(
     painter.setCompositionMode(cm);
 
     if(ip2) {
-        ip2->setAntiAliasingMode(AntiAliasingMode::None);
-        painter.setPen(drawB); ip2->drawArc( PointF (30 + 400,  50), SizeF(135, 135), 0, 135, ArcMode::Open );
-        painter.setPen(drawS); ip2->drawArc( PointF (30 + 400, 120), SizeF(135, 135), 0, 135, ArcMode::Open );
+        ip2->setAntiAliasing(false);
+        painter.setPen(drawB); ip2->drawArc( PointF (30 + 400,  50), SizeF(135, 135), 0, 135 );
+        painter.setPen(drawS); ip2->drawArc( PointF (30 + 400, 120), SizeF(135, 135), 0, 135 );
         painter.setPen(text ); ip2->drawText( PointF(30 + 400,  30), "NOAA" );
         painter.setCompositionMode(CompositionMode::SourceOver);
-        painter.setPen(vref ); ip2->drawArc( PointF (30 + 400,  50), SizeF(135, 135), 0, 135, ArcMode::Open );
-                               ip2->drawArc( PointF (30 + 400, 120), SizeF(135, 135), 0, 135, ArcMode::Open );
+        painter.setPen(vref ); ip2->drawArc( PointF (30 + 400,  50), SizeF(135, 135), 0, 135 );
+                               ip2->drawArc( PointF (30 + 400, 120), SizeF(135, 135), 0, 135 );
         painter.setCompositionMode(cm);
 
-        ip2->setAntiAliasingMode(AntiAliasingMode::Default);
-        painter.setPen(drawB); ip2->drawArc( PointF (30 + 600,  50), SizeF(135, 135), 0, 135, ArcMode::Open );
-        painter.setPen(drawS); ip2->drawArc( PointF (30 + 600, 120), SizeF(135, 135), 0, 135, ArcMode::Open );
+        ip2->setAntiAliasing(true);
+        painter.setPen(drawB); ip2->drawArc( PointF (30 + 600,  50), SizeF(135, 135), 0, 135 );
+        painter.setPen(drawS); ip2->drawArc( PointF (30 + 600, 120), SizeF(135, 135), 0, 135 );
         painter.setPen(text ); ip2->drawText( PointF(30 + 600,  30), "XWAA" );
         painter.setCompositionMode(CompositionMode::SourceOver);
-        painter.setPen(vref ); ip2->drawArc( PointF (30 + 600,  50), SizeF(135, 135), 0, 135, ArcMode::Open );
-                               ip2->drawArc( PointF (30 + 600, 120), SizeF(135, 135), 0, 135, ArcMode::Open );
+        painter.setPen(vref ); ip2->drawArc( PointF (30 + 600,  50), SizeF(135, 135), 0, 135 );
+                               ip2->drawArc( PointF (30 + 600, 120), SizeF(135, 135), 0, 135 );
         painter.setCompositionMode(cm);
 
-        ip2->setAntiAliasingMode(AntiAliasingMode::Default);
-        painter.setPen(drawR); ip2->drawArc( PointF (30 + 800, 50), SizeF(135, 135), -135, 135, ArcMode::Open );
+        ip2->setAntiAliasing(true);
+        painter.setPen(drawR); ip2->drawArc( PointF (30 + 800, 50), SizeF(135, 135), -135, 135 );
         painter.setPen(text ); ip2->drawText( PointF(30 + 800, 30), "XWAA" );
         painter.setCompositionMode(CompositionMode::SourceOver);
-        painter.setPen(vref ); ip2->drawArc( PointF (30 + 800, 50), SizeF(135, 135), -135, 135, ArcMode::Open );
+        painter.setPen(vref ); ip2->drawArc( PointF (30 + 800, 50), SizeF(135, 135), -135, 135 );
         painter.setCompositionMode(cm);
     }
 
     // Second row
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
+    if(ip2) ip2->setAntiAliasing(false);
     painter.setPen(drawO); painter.drawEllipse( PointF (30, 50 + 200), SizeF(135, 67) );
     painter.setPen(text ); painter.drawText( PointF(30, 30 + 200), "NOAA" );
     painter.setCompositionMode(CompositionMode::SourceOver);
     painter.setPen(vref ); painter.drawEllipse( PointF (30, 50 + 200), SizeF(135, 67) );
     painter.setCompositionMode(cm);
 
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Default);
+    if(ip2) ip2->setAntiAliasing(true);
     painter.setPen(drawO); painter.drawEllipse( PointF (30 + 200, 50 + 200), SizeF(135, 67) );
     painter.setPen(text ); painter.drawText( PointF(30 + 200, 30 + 200), "XWAA" );
     painter.setCompositionMode(CompositionMode::SourceOver);
@@ -509,37 +509,37 @@ static void testDrawThickEllipseArc_impl(
     painter.setCompositionMode(cm);
 
     if(ip2) {
-        ip2->setAntiAliasingMode(AntiAliasingMode::None);
-        painter.setPen(drawO); ip2->drawArc( PointF (30 + 400, 50 + 200), SizeF(135, 135), 120, 330, ArcMode::Open );
+        ip2->setAntiAliasing(false);
+        painter.setPen(drawO); ip2->drawArc( PointF (30 + 400, 50 + 200), SizeF(135, 135), 120, 330 );
         painter.setPen(text ); ip2->drawText( PointF(30 + 400, 30 + 200), "NOAA" );
         painter.setCompositionMode(CompositionMode::SourceOver);
-        painter.setPen(vref ); ip2->drawArc( PointF (30 + 400, 50 + 200), SizeF(135, 135), 120, 330, ArcMode::Open );
+        painter.setPen(vref ); ip2->drawArc( PointF (30 + 400, 50 + 200), SizeF(135, 135), 120, 330 );
         painter.setCompositionMode(cm);
 
-        ip2->setAntiAliasingMode(AntiAliasingMode::Default);
-        painter.setPen(drawO); ip2->drawArc( PointF (30 + 600, 50 + 200), SizeF(135, 135), 120, 330, ArcMode::Open );
+        ip2->setAntiAliasing(true);
+        painter.setPen(drawO); ip2->drawArc( PointF (30 + 600, 50 + 200), SizeF(135, 135), 120, 330 );
         painter.setPen(text ); ip2->drawText( PointF(30 + 600, 30 + 200), "XWAA" );
         painter.setCompositionMode(CompositionMode::SourceOver);
-        painter.setPen(vref ); ip2->drawArc( PointF (30 + 600, 50 + 200), SizeF(135, 135), 120, 330, ArcMode::Open );
+        painter.setPen(vref ); ip2->drawArc( PointF (30 + 600, 50 + 200), SizeF(135, 135), 120, 330 );
         painter.setCompositionMode(cm);
 
-        ip2->setAntiAliasingMode(AntiAliasingMode::Default);
-        painter.setPen(drawO); ip2->drawArc( PointF (30 + 800, 50 + 200), SizeF(135, 135), -135, 135, ArcMode::Chord );
+        ip2->setAntiAliasing(true);
+        painter.setPen(drawO); ip2->drawArc( PointF (30 + 800, 50 + 200), SizeF(135, 135), -135, 135 );
         painter.setPen(text ); ip2->drawText( PointF(30 + 800, 30 + 200), "XWAA" );
         painter.setCompositionMode(CompositionMode::SourceOver);
-        painter.setPen(vref ); ip2->drawArc( PointF (30 + 800, 50 + 200), SizeF(135, 135), -135, 135, ArcMode::Chord );
+        painter.setPen(vref ); ip2->drawChord( PointF (30 + 800, 50 + 200), SizeF(135, 135), -135, 135 );
         painter.setCompositionMode(cm);
     }
 
     // Third row
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
+    if(ip2) ip2->setAntiAliasing(false);
     painter.setPen(drawI); painter.drawEllipse( PointF (30, 50 + 400), SizeF(67, 135) );
     painter.setPen(text ); painter.drawText( PointF(30, 30 + 400), "NOAA" );
     painter.setCompositionMode(CompositionMode::SourceOver);
     painter.setPen(vref ); painter.drawEllipse( PointF (30, 50 + 400), SizeF(67, 135) );
     painter.setCompositionMode(cm);
 
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Default);
+    if(ip2) ip2->setAntiAliasing(true);
     painter.setPen(drawI); painter.drawEllipse( PointF (30 + 200, 50 + 400), SizeF(67, 135) );
     painter.setPen(text ); painter.drawText( PointF(30 + 200, 30 + 400), "XWAA" );
     painter.setCompositionMode(CompositionMode::SourceOver);
@@ -547,25 +547,25 @@ static void testDrawThickEllipseArc_impl(
     painter.setCompositionMode(cm);
 
     if(ip2) {
-        ip2->setAntiAliasingMode(AntiAliasingMode::None);
-        painter.setPen(drawI); ip2->drawArc( PointF (30 + 400, 50 + 400), SizeF(135, 135), -150, 30, ArcMode::Open );
+        ip2->setAntiAliasing(false);
+        painter.setPen(drawI); ip2->drawArc( PointF (30 + 400, 50 + 400), SizeF(135, 135), -150, 30 );
         painter.setPen(text ); ip2->drawText( PointF(30 + 400, 30 + 400), "NOAA" );
         painter.setCompositionMode(CompositionMode::SourceOver);
-        painter.setPen(vref ); ip2->drawArc( PointF (30 + 400, 50 + 400), SizeF(135, 135), -150, 30, ArcMode::Open );
+        painter.setPen(vref ); ip2->drawArc( PointF (30 + 400, 50 + 400), SizeF(135, 135), -150, 30 );
         painter.setCompositionMode(cm);
 
-        ip2->setAntiAliasingMode(AntiAliasingMode::Default);
-        painter.setPen(drawI); ip2->drawArc( PointF (30 + 600, 50 + 400), SizeF(135, 135), -150, 30, ArcMode::Open );
+        ip2->setAntiAliasing(true);
+        painter.setPen(drawI); ip2->drawArc( PointF (30 + 600, 50 + 400), SizeF(135, 135), -150, 30 );
         painter.setPen(text ); ip2->drawText( PointF(30 + 600, 30 + 400), "XWAA" );
         painter.setCompositionMode(CompositionMode::SourceOver);
-        painter.setPen(vref ); ip2->drawArc( PointF (30 + 600, 50 + 400), SizeF(135, 135), -150, 30, ArcMode::Open );
+        painter.setPen(vref ); ip2->drawArc( PointF (30 + 600, 50 + 400), SizeF(135, 135), -150, 30 );
         painter.setCompositionMode(cm);
 
-        ip2->setAntiAliasingMode(AntiAliasingMode::Default);
-        painter.setPen(drawI); ip2->drawArc( PointF (30 + 800, 50 + 400), SizeF(135, 135), -135, 135, ArcMode::Pie );
+        ip2->setAntiAliasing(true);
+        painter.setPen(drawI); ip2->drawPie( PointF (30 + 800, 50 + 400), SizeF(135, 135), -135, 135 );
         painter.setPen(text ); ip2->drawText( PointF(30 + 800, 30 + 400), "XWAA" );
         painter.setCompositionMode(CompositionMode::SourceOver);
-        painter.setPen(vref ); ip2->drawArc( PointF (30 + 800, 50 + 400), SizeF(135, 135), -135, 135, ArcMode::Pie );
+        painter.setPen(vref ); ip2->drawPie( PointF (30 + 800, 50 + 400), SizeF(135, 135), -135, 135 );
         painter.setCompositionMode(cm);
     }
 

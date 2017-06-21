@@ -29,42 +29,34 @@
 // svn propset svn:mime-type text/plain etc/images/*.svg
 //
 
+#include <Pt/Gfx/Argb32Image.h>
+#include <Pt/Gfx/BlockScale.h>
+#include <Pt/Gfx/ImagePainter2.h>
+#include <Pt/Gfx/PngReader.h>
+#include <Pt/System/Logger.h>
+#include <Pt/System/Clock.h>
+#include <Pt/Math.h>
+#include <Pt/Types.h>
+
 #include <ctime>
 #include <fstream>
 #include <iomanip>
-
-#include <unistd.h>
-
-#include <Pt/Math.h>
-
-#include <Pt/Gfx/TransformStack.h>
-
-#include <Pt/Gfx/Argb32Image.h>
-#include <Pt/Gfx/BlockScale.h>
-#include <Pt/Gfx/ImageOperation2.h>
-#include <Pt/Gfx/ImagePainter2.h>
-
-#include <Pt/Gfx/PngReader.h>
-
-#include <Pt/System/Logger.h>
-#include <Pt/System/Clock.h>
 
 #if defined(PT_GFX_USE_GNU_STYLE_COMPILER)
 #include <cxxabi.h>
 #endif
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_syswm.h>
+#include <png.h>
 
-#ifdef WITH_BUILTIN_LIBPNG
-    #include "../../libpng/png.h"
-#else
-    #include <png.h>
-#endif
+#if defined(WITH_EXPERIMENTAL_GFX)
+    #include <SDL2/SDL.h>
+    #include <SDL2/SDL_syswm.h>
+    #include <unistd.h>
 
-// Grmph ..., macro from X11 is interfering with us ;)
-#ifdef None
-#undef None
+    // Grmph ..., macro from X11 is interfering with us ;)
+    #ifdef None
+    #undef None
+    #endif
 #endif
 
 using namespace Pt::Gfx;
@@ -183,9 +175,9 @@ static const char* sfileDirXPrefix = "";
 #include "ImagePainterTest2_Draw_Outline.cpp"
 #include "ImagePainterTest2_Draw_Filled.cpp"
 #include "ImagePainterTest2_Draw_Thick.cpp"
-#include "ImagePainterTest2_Draw_Path.cpp"
+//#include "ImagePainterTest2_Draw_Path.cpp"
 #include "ImagePainterTest2_Draw_Extra.cpp"
-#include "ImagePainterTest2_ImageOperation.cpp"
+//#include "ImagePainterTest2_ImageOperation.cpp"
 
 #include "ImagePainterTest2_Benchmark.cpp"
 
@@ -202,12 +194,12 @@ int main(int argc, char* args[])
         return 0;
     }
 
-    // Benchmark 2D transform operations only
-    if(DO_TRANSFORM_BENCHMARKING_ONLY) {
-        printf("<float>\n" ); bench2DTransOps<float >();
-        printf("<double>\n"); bench2DTransOps<double>();
-        return 0;
-    }
+    //// Benchmark 2D transform operations only
+    //if(DO_TRANSFORM_BENCHMARKING_ONLY) {
+    //    printf("<float>\n" ); bench2DTransOps<float >();
+    //    printf("<double>\n"); bench2DTransOps<double>();
+    //    return 0;
+    //}
 
     // Determine the exact locations of the support files and directories
     const char* texFileTransBgr;
@@ -430,26 +422,26 @@ int main(int argc, char* args[])
     }
 
     // Path (including thick and filled)
-    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_PATH) {
-        painter2->setCompositionMode(CompositionMode::SourceCopy);
-        testDrawPath("Path - ImagePainter2 [SourceCopy]", image, *painter2, brushGradient2, brushTexture1);
-    }
+    //if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_PATH) {
+    //    painter2->setCompositionMode(CompositionMode::SourceCopy);
+    //    testDrawPath("Path - ImagePainter2 [SourceCopy]", image, *painter2, brushGradient2, brushTexture1);
+    //}
 
-    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_PATH) {
-        painter2->setCompositionMode(CompositionMode::SourceOver);
-        testDrawPath("Path - ImagePainter2 [SourceOver]", image, *painter2, brushGradient2, brushTexture1);
-    }
+    //if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_PATH) {
+    //    painter2->setCompositionMode(CompositionMode::SourceOver);
+    //    testDrawPath("Path - ImagePainter2 [SourceOver]", image, *painter2, brushGradient2, brushTexture1);
+    //}
 
     // Path clipping
-    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_PATH_CLIPPING) {
-        painter2->setCompositionMode(CompositionMode::SourceCopy);
-        testDrawPathClipping("Path Clipping - ImagePainter2 [SourceCopy]", image, *painter2, brushGradient1, brushGradient2);
-    }
+    //if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_PATH_CLIPPING) {
+    //    painter2->setCompositionMode(CompositionMode::SourceCopy);
+    //    testDrawPathClipping("Path Clipping - ImagePainter2 [SourceCopy]", image, *painter2, brushGradient1, brushGradient2);
+    //}
 
-    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_PATH_CLIPPING) {
-        painter2->setCompositionMode(CompositionMode::SourceOver);
-        testDrawPathClipping("Path Clipping - ImagePainter2 [SourceOver]", image, *painter2, brushGradient1, brushGradient2);
-    }
+    //if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCEOVER && TEST_DRAW_PATH_CLIPPING) {
+    //    painter2->setCompositionMode(CompositionMode::SourceOver);
+    //    testDrawPathClipping("Path Clipping - ImagePainter2 [SourceOver]", image, *painter2, brushGradient1, brushGradient2);
+    //}
 
     // Extra features
     if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_EXTRA) {
@@ -463,10 +455,10 @@ int main(int argc, char* args[])
     }
 
     // Image operations
-    if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && (TEST_SOURCECOPY || TEST_SOURCEOVER) && TEST_IMAGE_OPERATION) {
-        painter2->setCompositionMode(CompositionMode::SourceCopy);
-        testImageOperation("Image Operation - ImagePainter2", image, *painter2);
-    }
+    //if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && (TEST_SOURCECOPY || TEST_SOURCEOVER) && TEST_IMAGE_OPERATION) {
+    //    painter2->setCompositionMode(CompositionMode::SourceCopy);
+    //    testImageOperation("Image Operation - ImagePainter2", image, *painter2);
+    //}
 
     // Create the brushes used for benchmarking
     bmBrushSolid     = Brush(Color::fromRgb8(255, 255, 255, 175));

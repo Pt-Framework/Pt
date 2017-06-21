@@ -352,7 +352,7 @@ FontMetrics ImagePainter2::fontMetrics( const Font& font, const Pt::String& text
 ImagePainter2::ImagePainter2(Image& image)
 : _rasterizer( new Rasterizer2(image) )
 {
-    setAntialiasing(true);
+    setAntiAliasing(true);
 }
 
 
@@ -362,7 +362,7 @@ ImagePainter2::~ImagePainter2()
 }
 
 
-void ImagePainter2::setAntialiasing(bool on)
+void ImagePainter2::setAntiAliasing(bool on)
 { 
   _rasterizer->setAntiAliasingMode(on); 
 }

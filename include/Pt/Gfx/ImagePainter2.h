@@ -57,7 +57,7 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual bool isAntialiasing() const;
 
-        virtual void setAntialiasing(bool on);
+        virtual void setAntiAliasing(bool on);
 
         virtual const CompositionMode& compositionMode() const;
 

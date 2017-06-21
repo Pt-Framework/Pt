@@ -4,42 +4,42 @@ static void testDrawPath_drawRow(
     const Brush& brush1, const Brush& brush2
 )
 {
-    transform.rotate(15);
+    transform.rotateDeg(15);
     path.setTransform(transform);
     path.transform().translate(60 + 110 * col, 60 + 110 * row);
     ip2->setPen(penThinSolid);
     ip2->drawPath(path, false);
     ++col;
 
-    transform.rotate(15);
+    transform.rotateDeg(15);
     path.setTransform(transform);
     path.transform().translate(60 + 110 * col, 60 + 110 * row);
     ip2->setPen(penThinDot);
     ip2->drawPath(path, false);
     ++col;
 
-    transform.rotate(15);
+    transform.rotateDeg(15);
     path.setTransform(transform);
     path.transform().translate(60 + 110 * col, 60 + 110 * row);
     ip2->setPen(penThickSolid);
     ip2->drawPath(path, false);
     ++col;
 
-    transform.rotate(15);
+    transform.rotateDeg(15);
     path.setTransform(transform);
     path.transform().translate(60 + 110 * col, 60 + 110 * row);
     ip2->setPen(penThickDot);
     ip2->drawPath(path, false);
     ++col;
 
-    transform.rotate(15);
+    transform.rotateDeg(15);
     path.setTransform(transform);
     path.transform().translate(60 + 110 * col, 60 + 110 * row);
     ip2->setBrush(brush1);
     ip2->fillPath(path);
     ++col;
 
-    transform.rotate(15);
+    transform.rotateDeg(15);
     path.setTransform(transform);
     path.transform().translate(60 + 110 * col, 60 + 110 * row);
     ip2->setBrush(brush2);
@@ -53,14 +53,14 @@ static void testDrawPath_drawCol(
     const Pen& penThinSolid, const Pen& penThickSolid
 )
 {
-    transform.rotate(15);
+    transform.rotateDeg(15);
     path.setTransform(transform);
     path.transform().translate(60 + 120 * col, 60 + 120 * row);
     ip2->setPen(penThinSolid);
     ip2->drawPath(path, false);
     ++col;
 
-    transform.rotate(15);
+    transform.rotateDeg(15);
     path.setTransform(transform);
     path.transform().translate(60 + 120 * col, 60 + 120 * row);
     ip2->setPen(penThickSolid);

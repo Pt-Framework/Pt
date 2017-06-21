@@ -3,7 +3,7 @@ static void testDrawSolidLine(const char* title, Image& image, Painter& painter)
     resetImage(image);
 
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Default);
+    if(ip2) ip2->setAntiAliasing(true);
 
 #if 1
     painter.setClip( RectF (20, image.width() - 20, 20, image.height() - 20) );
@@ -48,25 +48,25 @@ static void testDrawSolidLine(const char* title, Image& image, Painter& painter)
     painter.setPen( Color::fromRgb8(0, 255, 255, 255) ); painter.drawText( PointF(100, 175), "Hello world!" );
     painter.setPen( Color::fromRgb8(0, 255, 255, 175) ); painter.drawText( PointF(100, 225), "Hello world!" );
 
-    if(ip2) {
-        const PointF bezier1a[] = { // CCW
-            PointF(300, 100),
-            PointF(265,  65),
-            PointF(200,  50)
-        };
-        ip2->setAntiAliasingMode(AntiAliasingMode::None);
-        ip2->setPen( Pen( Color::fromRgb8(255, 127, 255, 175), 1, Pen::Solid ) );
-        ip2->drawQuadraticPolybezier( bezier1a, sizeof(bezier1a) / sizeof(bezier1a[0]), false );
+    //if(ip2) {
+    //    const PointF bezier1a[] = { // CCW
+    //        PointF(300, 100),
+    //        PointF(265,  65),
+    //        PointF(200,  50)
+    //    };
+    //    ip2->setAntiAliasing(false);
+    //    ip2->setPen( Pen( Color::fromRgb8(255, 127, 255, 175), 1, Pen::Solid ) );
+    //    ip2->drawQuadraticPolybezier( bezier1a, sizeof(bezier1a) / sizeof(bezier1a[0]), false );
 
-        const PointF bezier1b[] = { // CCW
-            PointF(300 + 100, 100),
-            PointF(265 + 100,  65),
-            PointF(200 + 100,  50)
-        };
-        ip2->setAntiAliasingMode(AntiAliasingMode::Default);
-        ip2->setPen( Pen( Color::fromRgb8(255, 127, 255, 175), 1, Pen::Solid ) );
-        ip2->drawQuadraticPolybezier( bezier1b, sizeof(bezier1b) / sizeof(bezier1b[0]), false );
-    }
+    //    const PointF bezier1b[] = { // CCW
+    //        PointF(300 + 100, 100),
+    //        PointF(265 + 100,  65),
+    //        PointF(200 + 100,  50)
+    //    };
+    //    ip2->setAntiAliasing(true);
+    //    ip2->setPen( Pen( Color::fromRgb8(255, 127, 255, 175), 1, Pen::Solid ) );
+    //    ip2->drawQuadraticPolybezier( bezier1b, sizeof(bezier1b) / sizeof(bezier1b[0]), false );
+    //}
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
 }
@@ -79,11 +79,11 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
 
     painter.setClip( RectF (20, image.width() - 20, 20, image.height() - 20) );
     painter.setPen( Pen( Color::fromRgb8(0, 255, 0, 175), 1, Pen::Dash ) );
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None    ); painter.drawLine( PointF(  0, -30), PointF(999, 599 - 30) );
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Default); painter.drawLine( PointF(  0,  30), PointF(999, 599 + 30) );
+    if(ip2) ip2->setAntiAliasing(false); painter.drawLine( PointF(  0, -30), PointF(999, 599 - 30) );
+    if(ip2) ip2->setAntiAliasing(true); painter.drawLine( PointF(  0,  30), PointF(999, 599 + 30) );
     painter.setClip( RectF (0, image.width() - 1, 0, image.height() - 1) );
 
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Default);
+    if(ip2) ip2->setAntiAliasing(true);
 
     painter.setPen( Pen( Color::fromRgb8(255, 0, 0, 175), 1, Pen::DotDash ) );
     painter.drawLine( PointF(  5,   5), PointF(994,   5) );
@@ -115,7 +115,7 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
     painter.drawLine( PointF( 10, 440), PointF(781, 440) );
     painter.drawLine( PointF(781, 452), PointF( 10, 450) );
 
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Default);
+    if(ip2) ip2->setAntiAliasing(true);
     painter.setPen( Pen( Color::fromRgb8(0, 255, 255, 175), 1, Pen::Dash ) );
 
     const PointF poly[] = { // CCW
@@ -124,79 +124,84 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
         PointF(210 - 0, 310 - 70),
         PointF(140 - 0, 260 - 70)
     };
-    if(ip2) ip2->drawPolyline( poly, sizeof(poly) / sizeof(poly[0]), true );
-    else painter.drawPolyline( poly, sizeof(poly) / sizeof(poly[0]) );
+    
+    if(ip2) 
+      ip2->drawPolyline( poly, sizeof(poly) / sizeof(poly[0]) );
+    else 
+      painter.drawPolyline( poly, sizeof(poly) / sizeof(poly[0]) );
 
     painter.drawRect( RectF(PointF(550, 170), SizeF(100, 50)) );
 
     painter.drawEllipse( PointF (730,  50), SizeF(95, 95) );
-    if(ip2) ip2->drawArc( PointF (730, 170), SizeF(95, 43), 30, 330, ArcMode::Chord );
-    if(ip2) ip2->drawArc( PointF (753, 243), SizeF(43, 95), 30, 330, ArcMode::Pie );
+    if(ip2) 
+      ip2->drawChord( PointF (730, 170), SizeF(95, 43), 30, 330);
+    if(ip2) 
+      ip2->drawPie( PointF (753, 243), SizeF(43, 95), 30, 330 );
 
     painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, 0xB38F0F83F03F8000 ) ); // 1011001110001111000011111000001111110000001111111000000000000000
     painter.drawRect( RectF(PointF(260, 20), SizeF(180, 80)) );
 
-    if(ip2) {
-        const PointF bezier1a[] = { // CCW
-            // Bottom left
-            PointF(400 - 350,  90 + 300),
-            PointF(400 - 350, 110 + 300),
-            PointF(420 - 350, 110 + 300),
-            // Bottom middle
-            PointF(450 - 350, 110 + 300),
-            // Bottom right
-            PointF(480 - 350, 110 + 300),
-            PointF(500 - 350, 110 + 300),
-            PointF(500 - 350,  90 + 300),
-            // Center right
-            PointF(500 - 350,  70 + 300),
-            // Top right
-            PointF(500 - 350,  50 + 300),
-            PointF(500 - 350,  30 + 300),
-            PointF(480 - 350,  30 + 300),
-            // Top middle
-            PointF(450 - 350,  30 + 300),
-            // Top left
-            PointF(420 - 350,  30 + 300),
-            PointF(400 - 350,  30 + 300),
-            PointF(400 - 350,  50 + 300),
-            // Center left
-            PointF(400 - 350,  70 + 300)
-        };
-        ip2->setAntiAliasingMode(AntiAliasingMode::None);
-        ip2->setPen( Pen( Color::fromRgb8(255, 127, 255, 175), 1, Pen::Dash ) );
-        ip2->drawQuadraticPolybezier( bezier1a, sizeof(bezier1a) / sizeof(bezier1a[0]), true );
+    //if(ip2) {
+    //    const PointF bezier1a[] = { // CCW
+    //        // Bottom left
+    //        PointF(400 - 350,  90 + 300),
+    //        PointF(400 - 350, 110 + 300),
+    //        PointF(420 - 350, 110 + 300),
+    //        // Bottom middle
+    //        PointF(450 - 350, 110 + 300),
+    //        // Bottom right
+    //        PointF(480 - 350, 110 + 300),
+    //        PointF(500 - 350, 110 + 300),
+    //        PointF(500 - 350,  90 + 300),
+    //        // Center right
+    //        PointF(500 - 350,  70 + 300),
+    //        // Top right
+    //        PointF(500 - 350,  50 + 300),
+    //        PointF(500 - 350,  30 + 300),
+    //        PointF(480 - 350,  30 + 300),
+    //        // Top middle
+    //        PointF(450 - 350,  30 + 300),
+    //        // Top left
+    //        PointF(420 - 350,  30 + 300),
+    //        PointF(400 - 350,  30 + 300),
+    //        PointF(400 - 350,  50 + 300),
+    //        // Center left
+    //        PointF(400 - 350,  70 + 300)
+    //    };
+    //    ip2->setAntiAliasing(false);
+    //    ip2->setPen( Pen( Color::fromRgb8(255, 127, 255, 175), 1, Pen::Dash ) );
+    //    ip2->drawQuadraticPolybezier( bezier1a, sizeof(bezier1a) / sizeof(bezier1a[0]), true );
 
-        const PointF bezier1b[] = { // CCW
-            // Bottom left
-            PointF(400 - 200,  90 + 300),
-            PointF(400 - 200, 110 + 300),
-            PointF(420 - 200, 110 + 300),
-            // Bottom middle
-            PointF(450 - 200, 110 + 300),
-            // Bottom right
-            PointF(480 - 200, 110 + 300),
-            PointF(500 - 200, 110 + 300),
-            PointF(500 - 200,  90 + 300),
-            // Center right
-            PointF(500 - 200,  70 + 300),
-            // Top right
-            PointF(500 - 200,  50 + 300),
-            PointF(500 - 200,  30 + 300),
-            PointF(480 - 200,  30 + 300),
-            // Top middle
-            PointF(450 - 200,  30 + 300),
-            // Top left
-            PointF(420 - 200,  30 + 300),
-            PointF(400 - 200,  30 + 300),
-            PointF(400 - 200,  50 + 300),
-            // Center left
-            PointF(400 - 200,  70 + 300)
-        };
-        ip2->setAntiAliasingMode(AntiAliasingMode::Default);
-        ip2->setPen( Pen( Color::fromRgb8(255, 127, 255, 175), 1, Pen::Dash ) );
-        ip2->drawQuadraticPolybezier( bezier1b, sizeof(bezier1b) / sizeof(bezier1b[0]), true );
-    }
+    //    const PointF bezier1b[] = { // CCW
+    //        // Bottom left
+    //        PointF(400 - 200,  90 + 300),
+    //        PointF(400 - 200, 110 + 300),
+    //        PointF(420 - 200, 110 + 300),
+    //        // Bottom middle
+    //        PointF(450 - 200, 110 + 300),
+    //        // Bottom right
+    //        PointF(480 - 200, 110 + 300),
+    //        PointF(500 - 200, 110 + 300),
+    //        PointF(500 - 200,  90 + 300),
+    //        // Center right
+    //        PointF(500 - 200,  70 + 300),
+    //        // Top right
+    //        PointF(500 - 200,  50 + 300),
+    //        PointF(500 - 200,  30 + 300),
+    //        PointF(480 - 200,  30 + 300),
+    //        // Top middle
+    //        PointF(450 - 200,  30 + 300),
+    //        // Top left
+    //        PointF(420 - 200,  30 + 300),
+    //        PointF(400 - 200,  30 + 300),
+    //        PointF(400 - 200,  50 + 300),
+    //        // Center left
+    //        PointF(400 - 200,  70 + 300)
+    //    };
+    //    ip2->setAntiAliasing(true);
+    //    ip2->setPen( Pen( Color::fromRgb8(255, 127, 255, 175), 1, Pen::Dash ) );
+    //    ip2->drawQuadraticPolybezier( bezier1b, sizeof(bezier1b) / sizeof(bezier1b[0]), true );
+    //}
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
 }
@@ -206,7 +211,7 @@ static void testDrawRect(const char* title, Image& image, Painter& painter)
     resetImage(image);
 
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Default);
+    if(ip2) ip2->setAntiAliasing(true);
 
 #if 1
 
@@ -315,58 +320,58 @@ static void testDrawRoundRect(const char* title, Image& image, Painter& painter)
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
     if(!ip2) return;
 
-    ip2->setAntiAliasingMode(AntiAliasingMode::Default);
+    ip2->setAntiAliasing(true);
 
     // Solid
     ip2->setBrush( Color::fromRgb8(255,   0, 255, 175) );
-    ip2->fillRoundRect( RectF(PointF( 20,  20), SizeF(200, 100)), 10 );
+    ip2->fillRoundedRect( RectF(PointF( 20,  20), SizeF(200, 100)), 10 );
 
     ip2->setBrush( Color::fromRgb8(255, 255,   0, 175) );
-    ip2->fillRoundRect( RectF(PointF(240,  20), SizeF(200, 100)), 10 );
+    ip2->fillRoundedRect( RectF(PointF(240,  20), SizeF(200, 100)), 10 );
 
     // Gradient
     ip2->setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Horizontal) );
-    ip2->fillRoundRect( RectF(PointF( 20, 160), SizeF(200, 100)), 10 );
+    ip2->fillRoundedRect( RectF(PointF( 20, 160), SizeF(200, 100)), 10 );
 
     ip2->setBrush( Brush(Color::fromRgb8(255, 0, 0, 175), Color::fromRgb8(0, 255, 0, 175), Brush::Vertical) );
-    ip2->fillRoundRect( RectF(PointF(240, 160), SizeF(200, 100)), 10 );
+    ip2->fillRoundedRect( RectF(PointF(240, 160), SizeF(200, 100)), 10 );
 
     // Texture
     ip2->setBrush( Brush(textureWithWhiteBackground) );
-    ip2->fillRoundRect( RectF(PointF( 20, 290), SizeF(200, 100)), 10 );
+    ip2->fillRoundedRect( RectF(PointF( 20, 290), SizeF(200, 100)), 10 );
 
     ip2->setBrush( Brush(textureWithTransBackground) );
-    ip2->fillRoundRect( RectF(PointF(240, 290), SizeF(200, 100)), 10 );
+    ip2->fillRoundedRect( RectF(PointF(240, 290), SizeF(200, 100)), 10 );
 
     // Outline - thin
     ip2->setPen( Pen(Color::fromRgb8(0, 255, 0, 175), 1, Pen::Solid ) );
-    ip2->drawRoundRect( RectF(PointF(480,  20), SizeF(200, 100)), 10 );
+    ip2->drawRoundedRect( RectF(PointF(480,  20), SizeF(200, 100)), 10 );
 
     // Outline - thick
     ip2->setPen( Pen(Color::fromRgb8(0, 255, 0, 175), 12, Pen::Solid ));
-    ip2->drawRoundRect( RectF(PointF(480, 160), SizeF(200, 100)), 10 );
+    ip2->drawRoundedRect( RectF(PointF(480, 160), SizeF(200, 100)), 10 );
 
     ip2->setPen( Pen(Color::fromRgb8(0, 255, 0, 175), 12, Pen::Solid ));
-    ip2->drawRoundRect( RectF(PointF(480, 290), SizeF(200, 100)), 25 );
+    ip2->drawRoundedRect( RectF(PointF(480, 290), SizeF(200, 100)), 25 );
 
     ip2->setPen( Color::fromRgb8(255, 127, 127, 127) );
-    ip2->drawRoundRect( RectF(PointF(480, 160), SizeF(200, 100)), 10 );
-    ip2->drawRoundRect( RectF(PointF(480, 290), SizeF(200, 100)), 25 );
+    ip2->drawRoundedRect( RectF(PointF(480, 160), SizeF(200, 100)), 10 );
+    ip2->drawRoundedRect( RectF(PointF(480, 290), SizeF(200, 100)), 25 );
 
     // Outline - thin - patterned
     ip2->setPen( Pen(Color::fromRgb8(0, 255, 0, 175), 1, Pen::DotDash, Pen::RoundCap, Pen::MiterJoin ) );
-    ip2->drawRoundRect( RectF(PointF(712,  20), SizeF(200, 100)), 10 );
+    ip2->drawRoundedRect( RectF(PointF(712,  20), SizeF(200, 100)), 10 );
 
     // Outline - thick - patterned
     ip2->setPen( Pen(Color::fromRgb8(0, 255, 0, 175), 12, Pen::DotDash, Pen::RoundCap, Pen::MiterJoin ));
-    ip2->drawRoundRect( RectF(PointF(712, 160), SizeF(200, 100)), 10 );
+    ip2->drawRoundedRect( RectF(PointF(712, 160), SizeF(200, 100)), 10 );
 
     ip2->setPen( Pen(Color::fromRgb8(0, 255, 0, 175), 12, Pen::DotDash, Pen::RoundCap, Pen::MiterJoin ));
-    ip2->drawRoundRect( RectF(PointF(712, 290), SizeF(200, 100)), 25 );
+    ip2->drawRoundedRect( RectF(PointF(712, 290), SizeF(200, 100)), 25 );
 
     ip2->setPen( Color::fromRgb8(255, 127, 127, 127) );
-    ip2->drawRoundRect( RectF(PointF(712, 160), SizeF(200, 100)), 10 );
-    ip2->drawRoundRect( RectF(PointF(712, 290), SizeF(200, 100)), 25 );
+    ip2->drawRoundedRect( RectF(PointF(712, 160), SizeF(200, 100)), 10 );
+    ip2->drawRoundedRect( RectF(PointF(712, 290), SizeF(200, 100)), 25 );
 
     sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
 }
@@ -386,71 +391,71 @@ static void testDrawEllipseArc(const char* title, Image& image, Painter& painter
     painter.fillRect( RectF( PointF(0, 80 + 400), SizeF(image.width(), 60) ) );
 
     // First row
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
+    if(ip2) ip2->setAntiAliasing(false);
     painter.setPen(draw); painter.drawEllipse( PointF (30, 50), SizeF(135, 135) );
     painter.setPen(text); painter.drawText( PointF(30, 30), "NOAA" );
 
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Default);
+    if(ip2) ip2->setAntiAliasing(true);
     painter.setPen(draw); painter.drawEllipse( PointF (30 + 200, 50), SizeF(135, 135) );
     painter.setPen(text); painter.drawText( PointF(30 + 200, 30), "XWAA" );
 
     if(ip2) {
-        ip2->setAntiAliasingMode(AntiAliasingMode::None);
-        painter.setPen(draw); ip2->drawArc( PointF (30 + 400, 50), SizeF(135, 135), 0, 135, ArcMode::Open );
+        ip2->setAntiAliasing(false);
+        painter.setPen(draw); ip2->drawArc( PointF (30 + 400, 50), SizeF(135, 135), 0, 135);
         painter.setPen(text); ip2->drawText( PointF(30 + 400, 30), "NOAA" );
 
-        ip2->setAntiAliasingMode(AntiAliasingMode::Default);
-        painter.setPen(draw); ip2->drawArc( PointF (30 + 600, 50), SizeF(135, 135), 0, 135, ArcMode::Open );
+        ip2->setAntiAliasing(true);
+        painter.setPen(draw); ip2->drawArc( PointF (30 + 600, 50), SizeF(135, 135), 0, 135);
         painter.setPen(text); ip2->drawText( PointF(30 + 600, 30), "XWAA" );
 
-        ip2->setAntiAliasingMode(AntiAliasingMode::Default);
-        painter.setPen(draw); ip2->drawArc( PointF (30 + 800, 50), SizeF(135, 135), -135, 135, ArcMode::Open );
+        ip2->setAntiAliasing(true);
+        painter.setPen(draw); ip2->drawArc( PointF (30 + 800, 50), SizeF(135, 135), -135, 135);
         painter.setPen(text); ip2->drawText( PointF(30 + 800, 30), "XWAA" );
     }
 
     // Second row
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
+    if(ip2) ip2->setAntiAliasing(false);
     painter.setPen(draw); painter.drawEllipse( PointF (30, 50 + 200), SizeF(135, 67) );
     painter.setPen(text); painter.drawText( PointF(30, 30 + 200), "NOAA" );
 
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Default);
+    if(ip2) ip2->setAntiAliasing(true);
     painter.setPen(draw); painter.drawEllipse( PointF (30 + 200, 50 + 200), SizeF(135, 67) );
     painter.setPen(text); painter.drawText( PointF(30 + 200, 30 + 200), "XWAA" );
 
     if(ip2) {
-        ip2->setAntiAliasingMode(AntiAliasingMode::None);
-        painter.setPen(draw); ip2->drawArc( PointF (30 + 400, 50 + 200), SizeF(135, 135), 120, 330, ArcMode::Open );
+        ip2->setAntiAliasing(false);
+        painter.setPen(draw); ip2->drawArc( PointF (30 + 400, 50 + 200), SizeF(135, 135), 120, 330);
         painter.setPen(text); ip2->drawText( PointF(30 + 400, 30 + 200), "NOAA" );
 
-        ip2->setAntiAliasingMode(AntiAliasingMode::Default);
-        painter.setPen(draw); ip2->drawArc( PointF (30 + 600, 50 + 200), SizeF(135, 135), 120, 330, ArcMode::Open );
+        ip2->setAntiAliasing(true);
+        painter.setPen(draw); ip2->drawArc( PointF (30 + 600, 50 + 200), SizeF(135, 135), 120, 330);
         painter.setPen(text); ip2->drawText( PointF(30 + 600, 30 + 200), "XWAA" );
 
-        ip2->setAntiAliasingMode(AntiAliasingMode::Default);
-        painter.setPen(draw); ip2->drawArc( PointF (30 + 800, 50 + 200), SizeF(135, 135), -135, 135, ArcMode::Chord );
+        ip2->setAntiAliasing(true);
+        painter.setPen(draw); ip2->drawChord( PointF (30 + 800, 50 + 200), SizeF(135, 135), -135, 135);
         painter.setPen(text); ip2->drawText( PointF(30 + 800, 30 + 200), "XWAA" );
     }
 
     // Third row
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::None);
+    if(ip2) ip2->setAntiAliasing(false);
     painter.setPen(draw); painter.drawEllipse( PointF (30, 50 + 400), SizeF(67, 135) );
     painter.setPen(text); painter.drawText( PointF(30, 30 + 400), "NOAA" );
 
-    if(ip2) ip2->setAntiAliasingMode(AntiAliasingMode::Default);
+    if(ip2) ip2->setAntiAliasing(true);
     painter.setPen(draw); painter.drawEllipse( PointF (30 + 200, 50 + 400), SizeF(67, 135) );
     painter.setPen(text); painter.drawText( PointF(30 + 200, 30 + 400), "XWAA" );
 
     if(ip2) {
-        ip2->setAntiAliasingMode(AntiAliasingMode::None);
-        painter.setPen(draw); ip2->drawArc( PointF (30 + 400, 50 + 400), SizeF(135, 135), -150, 30, ArcMode::Open );
+        ip2->setAntiAliasing(true);
+        painter.setPen(draw); ip2->drawArc( PointF (30 + 400, 50 + 400), SizeF(135, 135), -150, 30);
         painter.setPen(text); ip2->drawText( PointF(30 + 400, 30 + 400), "NOAA" );
 
-        ip2->setAntiAliasingMode(AntiAliasingMode::Default);
-        painter.setPen(draw); ip2->drawArc( PointF (30 + 600, 50 + 400), SizeF(135, 135), -150, 30, ArcMode::Open );
+        ip2->setAntiAliasing(true);
+        painter.setPen(draw); ip2->drawArc( PointF (30 + 600, 50 + 400), SizeF(135, 135), -150, 30);
         painter.setPen(text); ip2->drawText( PointF(30 + 600, 30 + 400), "XWAA" );
 
-        ip2->setAntiAliasingMode(AntiAliasingMode::Default);
-        painter.setPen(draw); ip2->drawArc( PointF (30 + 800, 50 + 400), SizeF(135, 135), -135, 135, ArcMode::Pie );
+        ip2->setAntiAliasing(true);
+        painter.setPen(draw); ip2->drawPie( PointF (30 + 800, 50 + 400), SizeF(135, 135), -135, 135);
         painter.setPen(text); ip2->drawText( PointF(30 + 800, 30 + 400), "XWAA" );
     }
 

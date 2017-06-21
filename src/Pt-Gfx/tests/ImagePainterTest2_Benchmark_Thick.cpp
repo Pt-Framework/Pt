@@ -1,5 +1,5 @@
 template <typename PainterT>
-static size_t benchDrawSolidThickLineSimple(int loopCount, CompositionMode cm, AntiAliasingMode antiAliasingMode)
+static size_t benchDrawSolidThickLineSimple(int loopCount, CompositionMode cm, bool antiAliasingMode)
 {
     Pen penBCapBJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Solid, Pen::ButtCap,   Pen::BevelJoin);
     Pen penSCapBJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Solid, Pen::SquareCap, Pen::BevelJoin);
@@ -69,7 +69,7 @@ static size_t benchDrawSolidThickLineSimple(int loopCount, CompositionMode cm, A
 
 template <typename PainterT>
 static size_t benchDrawThickLine_impl(
-    int loopCount, CompositionMode cm, AntiAliasingMode antiAliasingMode,
+    int loopCount, CompositionMode cm, bool antiAliasingMode,
     const Pen& penRCapBJoin,
     const Pen& penSCapBJoin,
     const Pen& penBCapBJoin,
@@ -90,7 +90,7 @@ static size_t benchDrawThickLine_impl(
         Pt::System::Clock clock;
         clock.start();
 
-        if(ip2) ip2->setAntiAliasingMode(antiAliasingMode);
+        if(ip2) ip2->setAntiAliasing(antiAliasingMode);
 
         painter.setPen(penRCapBJoin);
         painter.drawLine( PointF( 20, 300 - 30), PointF(100, 350 - 30) );
@@ -111,7 +111,7 @@ static size_t benchDrawThickLine_impl(
             PointF(800 + 10, 130),
             PointF(650 + 10,  20)
         };
-        if(ip2) ip2->drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]), false );
+        if(ip2) ip2->drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]) );
         else painter.drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]) );
 
         const PointF poly1b[] = { // CCW
@@ -120,7 +120,7 @@ static size_t benchDrawThickLine_impl(
             PointF(800 + 170, 130),
             PointF(650 + 170,  20)
         };
-        if(ip2) ip2->drawPolyline( poly1b, sizeof(poly1b) / sizeof(poly1b[0]), true );
+        if(ip2) ip2->drawPolyline( poly1b, sizeof(poly1b) / sizeof(poly1b[0]) );
         else painter.drawPolyline( poly1b, sizeof(poly1b) / sizeof(poly1b[0]) );
 
         painter.setPen(penBCapMJoin);
@@ -130,7 +130,7 @@ static size_t benchDrawThickLine_impl(
             PointF(800 + 10, 130 + 200),
             PointF(650 + 10,  20 + 200)
         };
-        if(ip2) ip2->drawPolyline( poly2a, sizeof(poly2a) / sizeof(poly2a[0]), false );
+        if(ip2) ip2->drawPolyline( poly2a, sizeof(poly2a) / sizeof(poly2a[0]) );
         else painter.drawPolyline( poly2a, sizeof(poly2a) / sizeof(poly2a[0]) );
 
         const PointF poly2b[] = { // CCW
@@ -139,7 +139,7 @@ static size_t benchDrawThickLine_impl(
             PointF(800 + 170, 130 + 200),
             PointF(650 + 170,  20 + 200)
         };
-        if(ip2) ip2->drawPolyline( poly2b, sizeof(poly2b) / sizeof(poly2b[0]), true );
+        if(ip2) ip2->drawPolyline( poly2b, sizeof(poly2b) / sizeof(poly2b[0]) );
         else painter.drawPolyline( poly2b, sizeof(poly2b) / sizeof(poly2b[0]) );
 
         painter.setPen(penBCapRJoin);
@@ -149,7 +149,7 @@ static size_t benchDrawThickLine_impl(
             PointF(800 + 10, 130 + 400),
             PointF(650 + 10,  20 + 400)
         };
-        if(ip2) ip2->drawPolyline( poly3a, sizeof(poly3a) / sizeof(poly3a[0]), false );
+        if(ip2) ip2->drawPolyline( poly3a, sizeof(poly3a) / sizeof(poly3a[0]) );
         else painter.drawPolyline( poly3a, sizeof(poly3a) / sizeof(poly3a[0]) );
 
         const PointF poly3b[] = { // CCW
@@ -158,7 +158,7 @@ static size_t benchDrawThickLine_impl(
             PointF(800 + 170, 130 + 400),
             PointF(650 + 170,  20 + 400)
         };
-        if(ip2) ip2->drawPolyline( poly3b, sizeof(poly3b) / sizeof(poly3b[0]), true );
+        if(ip2) ip2->drawPolyline( poly3b, sizeof(poly3b) / sizeof(poly3b[0]) );
         else painter.drawPolyline( poly3b, sizeof(poly3b) / sizeof(poly3b[0]) );
 
         sum += clock.stop().toUSecs();
@@ -171,7 +171,7 @@ static size_t benchDrawThickLine_impl(
 }
 
 template <typename PainterT>
-static size_t benchDrawSolidThickLine(int loopCount, CompositionMode cm, AntiAliasingMode antiAliasingMode)
+static size_t benchDrawSolidThickLine(int loopCount, CompositionMode cm, bool antiAliasingMode)
 {
     Pen penRCapBJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Solid, Pen::RoundCap,  Pen::BevelJoin);
     Pen penSCapBJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Solid, Pen::SquareCap, Pen::BevelJoin);
@@ -190,7 +190,7 @@ static size_t benchDrawSolidThickLine(int loopCount, CompositionMode cm, AntiAli
 }
 
 template <typename PainterT>
-static size_t benchDrawPatternedThickLine(int loopCount, CompositionMode cm, AntiAliasingMode antiAliasingMode)
+static size_t benchDrawPatternedThickLine(int loopCount, CompositionMode cm, bool antiAliasingMode)
 {
     Pen penRCapBJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Dash, Pen::RoundCap,  Pen::BevelJoin);
     Pen penSCapBJoin(Color::fromRgb8(255, 255, 255, 175), 12, Pen::Dash, Pen::SquareCap, Pen::BevelJoin);
@@ -209,5 +209,5 @@ static size_t benchDrawPatternedThickLine(int loopCount, CompositionMode cm, Ant
 }
 
 template <typename PainterT>
-static size_t benchDrawThickQuadBezier(int loopCount, Pen::Style style, CompositionMode cm, AntiAliasingMode antiAliasingMode)
+static size_t benchDrawThickQuadBezier(int loopCount, Pen::Style style, CompositionMode cm, bool antiAliasingMode)
 { return benchDrawQuadBezier<PainterT>(loopCount, style, cm, antiAliasingMode, 12); }

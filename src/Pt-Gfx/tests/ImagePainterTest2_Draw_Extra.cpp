@@ -12,42 +12,44 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
     if(!ip2) return;
 
-    ip2->setAntiAliasingMode(AntiAliasingMode::Default);
+    ip2->setAntiAliasing(true);
 
     // Generic N-bezier
-    Transform transform;
     Path      path;
 
+    Transform transform;
     transform.scale(-1, 1);
     transform.translate(970, 280);
 
     path.clear       ();
-    path.beginPath   ();
     path.moveTo      (  0,    0); // CW
     path.lineTo      ( 55, -180);
     path.lineTo      (115,  -45);
     path.lineTo      (170, -135);
     path.lineTo      (230,  -90);
     path.lineTo      (170,  -45);
-    path.endPath     ();
-    path.setTransform(transform);
-    ip2->setPen( Pen(Color::fromRgb8(255, 0, 255, 175), 3, Pen::Solid, Pen::ButtCap, Pen::MiterJoin) );
-    ip2->drawPath(path, false);
+    path.close     ();
 
-    const double cxy[] = { // CW
-          55, -180,
-         115,   45,
-         170, -135,
-         230,  -90
+    path.transform(transform);
+
+    ip2->setPen( Pen(Color::fromRgb8(255, 0, 255, 175), 3, Pen::Solid, Pen::ButtCap, Pen::MiterJoin) );
+    ip2->drawPath(path);
+
+    const PointF cxy[] = { // CW
+          PointF(55, -180),
+         PointF(115,   45),
+         PointF(170, -135),
+         PointF(230,  -90)
     };
-    path.clear              ();
-    path.beginPath          ();
-    path.moveTo             (0, 0);
-    path.relGenericNBezierTo(sizeof(cxy) / sizeof(cxy[0]) / 2, cxy, 170, -45);
-    path.endPath            ();
-    path.setTransform       (transform);
+    
+    path.clear();
+    path.moveTo(0, 0);
+    path.bezierTo(cxy, 4, PointF(170, -45));
+    path.close();
+    path.transform(transform);
+    
     ip2->setPen( Pen(Color::fromRgb8(127, 255, 255, 175), 3, Pen::Solid, Pen::ButtCap, Pen::MiterJoin) );
-    ip2->drawPath(path, false);
+    ip2->drawPath(path);
 
     // Round-Hole caps
     ip2->setFont( Pt::Gfx::Font(FONT_SPEC_S) );
@@ -60,9 +62,9 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
     ip2->drawLine( PointF( 20, 170), PointF(100, 120) );
 
     ip2->setPen(penHRCapBJoin);
-    ip2->drawArc( PointF (150, 20), SizeF(100, 100), 60, 300, ArcMode::Open );
+    ip2->drawArc( PointF (150, 20), SizeF(100, 100), 60, 300 );
     ip2->setPen(penRef);
-    ip2->drawArc( PointF (150, 20), SizeF(100, 100), 60, 300, ArcMode::Open );
+    ip2->drawArc( PointF (150, 20), SizeF(100, 100), 60, 300 );
 
     ip2->setPen(penText);
     ip2->drawText( PointF(70, 180), "Round-Hole" );
@@ -78,9 +80,9 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
     ip2->drawLine( PointF( 20 + 300, 170), PointF(100 + 300, 120) );
 
     ip2->setPen(penA1CapBJoin);
-    ip2->drawArc( PointF (150 + 300, 20), SizeF(100, 100), 60, 300, ArcMode::Open );
+    ip2->drawArc( PointF (150 + 300, 20), SizeF(100, 100), 60, 300 );
     ip2->setPen(penRef);
-    ip2->drawArc( PointF (150 + 300, 20), SizeF(100, 100), 60, 300, ArcMode::Open );
+    ip2->drawArc( PointF (150 + 300, 20), SizeF(100, 100), 60, 300 );
 
     ip2->setPen(penText);
     ip2->drawText( PointF(70 + 300, 180), "Arrow-1" );
@@ -96,9 +98,9 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
     ip2->drawLine( PointF( 20 + 600, 170), PointF(100 + 600, 120) );
 
     ip2->setPen(penA2CapBJoin);
-    ip2->drawArc( PointF (150 + 600, 20), SizeF(100, 100), 60, 300, ArcMode::Open );
+    ip2->drawArc( PointF (150 + 600, 20), SizeF(100, 100), 60, 300 );
     ip2->setPen(penRef);
-    ip2->drawArc( PointF (150 + 600, 20), SizeF(100, 100), 60, 300, ArcMode::Open );
+    ip2->drawArc( PointF (150 + 600, 20), SizeF(100, 100), 60, 300 );
 
     ip2->setPen(penText);
     ip2->drawText( PointF(70 + 600, 180), "Arrow-2" );

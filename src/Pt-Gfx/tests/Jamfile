@@ -2,6 +2,11 @@ SubDir PT_TOP src Pt-Gfx tests ;
 SubDirHdrs $(PT_TOP)/include ;
 SubDirObjects $(PT_OUTPUT_OBJECT) Pt-Gfx ;
 
+if $(PNG_INCLUDES)
+{
+    SubDirHdrs $(PNG_INCLUDES) ;
+}
+
 Main Pt-Gfx-test : Pt-Gfx-test.cpp
                    BlockScaleTest.cpp
                    Argb32Test.cpp
@@ -32,31 +37,29 @@ if $(WITH_EXPERIMENTAL_GFX)
        #CPU_FLAGS = -msse -mno-sse2 -mno-sse3 -mno-ssse3 -mno-sse4.1 -mno-sse4.2 -mno-avx -mno-avx2 -mno-fma ;
     }
 
-    if $(WITH_BUILTIN_LIBPNG)
-    {
-        SubDirCcFlags  [ FDefines WITH_BUILTIN_LIBPNG ] ;
-        SubDirC++Flags [ FDefines WITH_BUILTIN_LIBPNG ] ;
-    }
-
     SubDirCcFlags  [ FGeneric $(CPU_FLAGS) ] ;
     SubDirC++Flags [ FGeneric $(CPU_FLAGS) ] ;
 
     SubDirC++Flags [ FDefines WITH_EXPERIMENTAL_GFX ] ;
     SubDirC++Flags [ FDefines 'lprintf(...)'='fprintf(stderr,__VA_ARGS__)' ] ;
+}
 
-    Main ImagePainterTest2 : ImagePainterTest2.cpp ;
-    LinkSharedLibraries ImagePainterTest2 : Pt Pt-Gfx Pt-System ;
-    MakeLocate ImagePainterTest2 : $(PT_OUTPUT_TARGET) ;
+Main ImagePainterTest2 : ImagePainterTest2.cpp ;
+LinkSharedLibraries ImagePainterTest2 : Pt Pt-Gfx Pt-System ;
+MakeLocate ImagePainterTest2 : $(PT_OUTPUT_TARGET) ;
+
+if $(WITH_EXPERIMENTAL_GFX)
+{
     LinkFlags ImagePainterTest2 : -lSDL2 -lX11 ;
+}
 
-    if $(WITH_BUILTIN_LIBPNG)
-    {
-        LinkLibraries ImagePainterTest2 : png ;
-    }
-    else
-    {
-        LinkFlags ImagePainterTest2 : -lpng ;
-    }
+if $(WITH_BUILTIN_LIBPNG)
+{
+    LinkLibraries ImagePainterTest2 : png ;
+}
+else
+{
+    LinkFlags ImagePainterTest2 : -lpng ;
 }
 
 # pkg-config --cflags sdl2

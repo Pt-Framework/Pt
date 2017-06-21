@@ -1,5 +1,5 @@
 template <typename PainterT>
-static size_t benchDrawText(int loopCount, bool rotated, CompositionMode cm, AntiAliasingMode antiAliasingMode)
+static size_t benchDrawText(int loopCount, bool rotated, CompositionMode cm, bool antiAliasingMode)
 {
     size_t sum = 0;
 
@@ -16,7 +16,7 @@ static size_t benchDrawText(int loopCount, bool rotated, CompositionMode cm, Ant
     else        painter.setFont( Pt::Gfx::Font(FONT_SPEC_N) );
 
     ImagePainter2* ip2 = dynamic_cast<ImagePainter2*>(dynamic_cast<Painter*>(&painter));
-    if(ip2) ip2->setAntiAliasingMode(antiAliasingMode);
+    if(ip2) ip2->setAntiAliasing(antiAliasingMode);
 
     for(int i = 0; i < loopCount; ++i) {
         Pt::System::Clock clock;
@@ -35,7 +35,7 @@ static size_t benchDrawText(int loopCount, bool rotated, CompositionMode cm, Ant
 }
 
 template <typename PainterT>
-static size_t benchDrawSolidLine(int loopCount, CompositionMode cm, AntiAliasingMode antiAliasingMode)
+static size_t benchDrawSolidLine(int loopCount, CompositionMode cm, bool antiAliasingMode)
 {
     size_t sum = 0;
 
@@ -53,7 +53,7 @@ static size_t benchDrawSolidLine(int loopCount, CompositionMode cm, AntiAliasing
         Pt::System::Clock clock;
         clock.start();
 
-        if(ip2) ip2->setAntiAliasingMode(antiAliasingMode);
+        if(ip2) ip2->setAntiAliasing(antiAliasingMode);
         painter.drawLine( PointF( 10,  10), PointF(789, 110) );
         painter.drawLine( PointF(789, 489), PointF( 10, 589) );
 
@@ -67,7 +67,7 @@ static size_t benchDrawSolidLine(int loopCount, CompositionMode cm, AntiAliasing
 }
 
 template <typename PainterT>
-static size_t benchDrawPatternedLine(int loopCount, CompositionMode cm, AntiAliasingMode antiAliasingMode)
+static size_t benchDrawPatternedLine(int loopCount, CompositionMode cm, bool antiAliasingMode)
 {
     size_t sum = 0;
 
@@ -85,7 +85,7 @@ static size_t benchDrawPatternedLine(int loopCount, CompositionMode cm, AntiAlia
         Pt::System::Clock clock;
         clock.start();
 
-        if(ip2) ip2->setAntiAliasingMode(antiAliasingMode);
+        if(ip2) ip2->setAntiAliasing(antiAliasingMode);
 
         painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, Pen::Dash )  );
         painter.drawLine( PointF( 10,  10), PointF(789, 110) );
@@ -135,7 +135,7 @@ static size_t benchDrawRect(int loopCount, CompositionMode cm)
 }
 
 template <typename PainterT>
-static size_t benchDrawEllipse(int loopCount, CompositionMode cm, AntiAliasingMode antiAliasingMode)
+static size_t benchDrawEllipse(int loopCount, CompositionMode cm, bool antiAliasingMode)
 {
     size_t sum = 0;
 
@@ -153,10 +153,10 @@ static size_t benchDrawEllipse(int loopCount, CompositionMode cm, AntiAliasingMo
         Pt::System::Clock clock;
         clock.start();
 
-        if(ip2) ip2->setAntiAliasingMode(antiAliasingMode);
+        if(ip2) ip2->setAntiAliasing(antiAliasingMode);
         painter.drawEllipse( PointF (30, 60), SizeF(120, 60) );
 
-        if(ip2) ip2->setAntiAliasingMode(antiAliasingMode);
+        if(ip2) ip2->setAntiAliasing(antiAliasingMode);
         painter.drawEllipse( PointF (230, 60), SizeF(60, 120) );
 
         sum += clock.stop().toUSecs();
@@ -169,7 +169,7 @@ static size_t benchDrawEllipse(int loopCount, CompositionMode cm, AntiAliasingMo
 }
 
 template <typename PainterT>
-static size_t benchDrawArc(int loopCount, CompositionMode cm, AntiAliasingMode antiAliasingMode)
+static size_t benchDrawArc(int loopCount, CompositionMode cm, bool antiAliasingMode)
 {
     size_t sum = 0;
 
@@ -188,11 +188,11 @@ static size_t benchDrawArc(int loopCount, CompositionMode cm, AntiAliasingMode a
         Pt::System::Clock clock;
         clock.start();
 
-        ip2->setAntiAliasingMode(antiAliasingMode);
-        ip2->drawArc( PointF (30, 60), SizeF(120, 60), 30, 330, ArcMode::Open );
+        ip2->setAntiAliasing(antiAliasingMode);
+        ip2->drawArc( PointF (30, 60), SizeF(120, 60), 30, 330 );
 
-        ip2->setAntiAliasingMode(antiAliasingMode);
-        ip2->drawArc( PointF (230, 60), SizeF(60, 120), -150, 150, ArcMode::Open );
+        ip2->setAntiAliasing(antiAliasingMode);
+        ip2->drawArc( PointF (230, 60), SizeF(60, 120), -150, 150 );
 
         sum += clock.stop().toUSecs();
 
@@ -204,7 +204,7 @@ static size_t benchDrawArc(int loopCount, CompositionMode cm, AntiAliasingMode a
 }
 
 template <typename PainterT>
-static size_t benchDrawQuadBezier(int loopCount, Pen::Style style, CompositionMode cm, AntiAliasingMode antiAliasingMode, size_t penSize = 1)
+static size_t benchDrawQuadBezier(int loopCount, Pen::Style style, CompositionMode cm, bool antiAliasingMode, size_t penSize = 1)
 {
     size_t sum = 0;
 
@@ -223,14 +223,14 @@ static size_t benchDrawQuadBezier(int loopCount, Pen::Style style, CompositionMo
         Pt::System::Clock clock;
         clock.start();
 
-        ip2->setAntiAliasingMode(antiAliasingMode);
+        ip2->setAntiAliasing(antiAliasingMode);
 
         const PointF bezier1[] = { // CCW
             PointF(300 + 100, 100),
             PointF(265 + 100,  65),
             PointF(200 + 100,  50)
         };
-        ip2->drawQuadraticPolybezier( bezier1, sizeof(bezier1) / sizeof(bezier1[0]), false );
+        //ip2->drawQuadraticPolybezier( bezier1, sizeof(bezier1) / sizeof(bezier1[0]) );
 
         const PointF bezier2[] = { // CCW
             // Bottom left
@@ -258,7 +258,7 @@ static size_t benchDrawQuadBezier(int loopCount, Pen::Style style, CompositionMo
             // Center left
             PointF(400 - 350,  70 + 300)
         };
-        ip2->drawQuadraticPolybezier( bezier2, sizeof(bezier2) / sizeof(bezier2[0]), true );
+        //ip2->drawQuadraticPolybezier( bezier2, sizeof(bezier2) / sizeof(bezier2[0]), true );
 
         sum += clock.stop().toUSecs();
 

@@ -2,7 +2,7 @@ template <bool WITH_RASTERISATION>
 static void benchDrawPath_drawRow(
     ImagePainter2* ip2, Transform& transform, Path& path, Pt::int32_t& row, Pt::int32_t& col,
     const Pen& penThinSolid, const Pen& penThinDot, const Pen& penThickSolid, const Pen& penThickDot,
-    const Brush& brush1, const Brush& brush2, AntiAliasingMode antiAliasingMode
+    const Brush& brush1, const Brush& brush2, bool antiAliasingMode
 )
 {
     std::vector<PointF> pointsF;
@@ -84,7 +84,7 @@ static void benchDrawPath_drawRow(
 template <bool WITH_RASTERISATION>
 static void benchDrawPath_drawCol(
     ImagePainter2* ip2, Transform& transform, Path& path, Pt::int32_t& row, Pt::int32_t& col,
-    const Pen& penThinSolid, const Pen& penThickSolid, AntiAliasingMode antiAliasingMode
+    const Pen& penThinSolid, const Pen& penThickSolid, bool antiAliasingMode
 )
 {
     std::vector<PointF> pointsF;
@@ -122,7 +122,7 @@ static void benchDrawPath_drawCol(
 //#endif
 
 template <typename PainterT, bool WITH_RASTERISATION>
-static size_t benchDrawPath(int loopCount, const Brush& brush1, const Brush& brush2, CompositionMode cm, AntiAliasingMode antiAliasingMode)
+static size_t benchDrawPath(int loopCount, const Brush& brush1, const Brush& brush2, CompositionMode cm, bool antiAliasingMode)
 {
     size_t sum = 0;
 
@@ -150,12 +150,11 @@ static size_t benchDrawPath(int loopCount, const Brush& brush1, const Brush& bru
 
         // Create a new path
         path.clear    ();
-        path.beginPath();
         path.moveTo   (  0, 50); // CCW
         path.lineTo   ( 50, 80);
         path.lineTo   (100, 50);
         path.lineTo   ( 30,  0);
-        path.endPath  ();
+        path.close  ();
 
         transform.translate(-50, -40);
 
@@ -167,16 +166,15 @@ static size_t benchDrawPath(int loopCount, const Brush& brush1, const Brush& bru
 
         // Create a new path
         path.clear            ();
-        path.beginPath        ();
         path.moveTo           (       120, 70); // CCW
         path.lineTo           (       100, 50);
         path.lineTo           (        75, 50);
-        path.quadraticBezierTo(50, 0,  25, 50);
+        path.quadraticBezierTo( PointF(50, 0),  PointF(25, 50));
         path.lineTo           (         0, 50);
         path.lineTo           (       -20, 70);
-        path.endPath          ();
+        path.close          ();
 
-        transform.identity();
+        transform.reset();
         transform.translate(-50, -35);
         transform.scale(0.75f, 1.0f);
 
@@ -185,14 +183,13 @@ static size_t benchDrawPath(int loopCount, const Brush& brush1, const Brush& bru
 
         // Create a new path
         path.clear            ();
-        path.beginPath        ();
         path.moveTo           (        120,  0); // CCW
         path.lineTo           (        100, 20);
         path.lineTo           (         75, 20);
-        path.quadraticBezierTo(50, 50,  25, 20);
+        path.quadraticBezierTo(PointF(50, 50),  PointF(25, 20));
         path.lineTo           (          0, 20);
         path.lineTo           (        -20,  0);
-        path.endPath          ();
+        path.close          ();
 
         // Fourth row
         benchDrawPath_drawRow<WITH_RASTERISATION>(ip2, transform, path, row, col, penThinSolid, penThinDot, penThickSolid, penThickDot, brush1, brush2, antiAliasingMode);
@@ -203,16 +200,15 @@ static size_t benchDrawPath(int loopCount, const Brush& brush1, const Brush& bru
 
         // Create a new path
         path.clear    ();
-        path.beginPath();
         path.moveTo   (120, 70    ); // CCW
         path.lineTo   (100, 50    );
         path.lineTo   ( 75, 50    );
-        path.arcTo    ( 25, 50, 50);
+        path.arcTo    ( PointF(25, 50), 50);
         path.lineTo   ( 0,  50    );
         path.lineTo   (-20, 70    );
-        path.endPath  ();
+        path.close  ();
 
-        transform.identity();
+        transform.reset();
         transform.translate(-50, -25);
         transform.scale(0.75f, 1.0f);
 
@@ -220,16 +216,15 @@ static size_t benchDrawPath(int loopCount, const Brush& brush1, const Brush& bru
 
         // Create a new path
         path.clear    ();
-        path.beginPath();
         path.moveTo   (120,  0     ); // CCW
         path.lineTo   (100, 20     );
         path.lineTo   ( 75, 20     );
-        path.arcTo    ( 25, 20, -50);
+        path.arcTo    ( PointF(25, 20), -50);
         path.lineTo   ( 0,  20     );
         path.lineTo   (-20,  0     );
-        path.endPath  ();
+        path.close  ();
 
-        transform.identity();
+        transform.reset();
         transform.translate(-50, -25);
         transform.scale(0.75f, 1.0f);
 
@@ -244,7 +239,7 @@ static size_t benchDrawPath(int loopCount, const Brush& brush1, const Brush& bru
     return sum;
 }
 
-static size_t benchDrawPathSimple(int loopCount, CompositionMode cm, AntiAliasingMode antiAliasingMode)
+static size_t benchDrawPathSimple(int loopCount, CompositionMode cm, bool antiAliasingMode)
 {
     size_t sum = 0;
 
@@ -259,25 +254,15 @@ static size_t benchDrawPathSimple(int loopCount, CompositionMode cm, AntiAliasin
     for(int i = 0; i < loopCount; ++i) {
         Pt::System::Clock clock;
         clock.start();
+        
+        Path path;
+        path.moveTo (400, 200); // CCW
+        path.cubicBezierTo( PointF(300, 150), PointF(150, 350), PointF(100, 500));
+        path.close();
 
-        Transform transform;
-        Path      path;
-
-        std::vector<PointF> pointsF;
-
-        path.clear        ();
-        path.beginPath    ();
-        path.moveTo       (                    400, 200); // CCW
-        path.cubicBezierTo(300, 150, 150, 350, 100, 500);
-        path.endPath      ();
-
-        path.setTransform(transform);
-        pointsF.clear();
-        path.generatePoints(pointsF, 1);
-
-        ip2->setAntiAliasingMode(antiAliasingMode);
-        ip2->setPen(Color::fromRgb8(255, 255, 255, 175));
-        ip2->drawPolyline(pointsF.data(), pointsF.size(), false);
+        ip2->setAntiAliasing(antiAliasingMode);
+        ip2->setPen( Color::fromRgb8(255, 255, 255, 175) );
+        ip2->drawPath( path );
 
         sum += clock.stop().toUSecs();
 
