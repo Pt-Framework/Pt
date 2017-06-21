@@ -21,14 +21,14 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
     transform.scale(-1, 1);
     transform.translate(970, 280);
 
-    path.clear       ();
-    path.moveTo      (  0,    0); // CW
-    path.lineTo      ( 55, -180);
-    path.lineTo      (115,  -45);
-    path.lineTo      (170, -135);
-    path.lineTo      (230,  -90);
-    path.lineTo      (170,  -45);
-    path.close     ();
+    path.clear();
+    path.moveTo( PointF(0, 0) ); // CW
+    path.lineTo( PointF(55, -180 ) );
+    path.lineTo( PointF(115,  -45) );
+    path.lineTo( PointF(170, -135) );
+    path.lineTo( PointF(230,  -90) );
+    path.lineTo( PointF(170,  -45) );
+    path.close();
 
     path.transform(transform);
 
@@ -36,14 +36,14 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
     ip2->drawPath(path);
 
     const PointF cxy[] = { // CW
-          PointF(55, -180),
-         PointF(115,   45),
+         PointF(55, -180),
+         PointF(115, 45),
          PointF(170, -135),
-         PointF(230,  -90)
+         PointF(230, -90)
     };
     
     path.clear();
-    path.moveTo(0, 0);
+    path.moveTo( PointF(0, 0) );
     path.bezierTo(cxy, 4, PointF(170, -45));
     path.close();
     path.transform(transform);

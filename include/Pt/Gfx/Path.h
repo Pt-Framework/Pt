@@ -145,13 +145,7 @@ class PT_GFX_API Path
 
         void moveTo(const PointF& p);
 
-        void moveTo(double x, double y)
-        { moveTo( PointF(x, y) ); }
-
         void lineTo(const PointF& p);
-
-        void lineTo(double x, double y)
-        { lineTo( PointF(x, y) ); }
 
         void arcTo(const PointF& p, double r);
 
