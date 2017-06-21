@@ -308,10 +308,10 @@ void Rasterizer2::rasterPolygonsNoAA(const std::vector<Polygon>& polygons,
             for(size_t i = 0; i < polygon->size(); ++i) 
             {
                 // Get the coordinates
-                const Pt::int32_t curXi = polygon->at(i).x();
-                const Pt::int32_t curYi = polygon->at(i).y();
-                const Pt::int32_t curXj = polygon->at(j).x();
-                const Pt::int32_t curYj = polygon->at(j).y();
+                const Pt::int32_t curXi = lround( polygon->at(i).x() );
+                const Pt::int32_t curYi = lround( polygon->at(i).y() );
+                const Pt::int32_t curXj = lround( polygon->at(j).x() );
+                const Pt::int32_t curYj = lround( polygon->at(j).y() );
                 
                 // Calculate the node's coordinate
                 if( ( y >= curYi && y < curYj ) || ( y >= curYj && y < curYi ) ) 

@@ -196,14 +196,6 @@ inline void Rasterizer2::fillPolygons(const std::vector<Polygon>& polygons)
             const double x = polygon.at(j).x();
             const double y = polygon.at(j).y();
 
-            if( ! this->antiAliasingMode() )
-            {
-                // rounding should not violate the _currentClip
-
-                polygon.at(j).setX( lround(x) );
-                polygon.at(j).setY( lround(y) );
-            }
-
             if(x < minX) minX = x;
             if(y < minY) minY = y;
             if(x > maxX) maxX = x;
