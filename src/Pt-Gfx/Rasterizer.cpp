@@ -36,7 +36,7 @@
 #include "DrawText.h"
 
 #include "Rasterizer.h"
-#include <Pt/Gfx/ImagePainter_ORIGINAL.h>
+#include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Algorithm.h>
 #include <Pt/Math.h>

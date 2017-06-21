@@ -28,7 +28,7 @@
 */
 
 #include <Pt/Math.h>
-#include <Pt/Gfx/ImagePainter_ORIGINAL.h>
+#include <Pt/Gfx/ImagePainter.h>
 #include <Pt/Gfx/Image.h>
 #include <Pt/Gfx/Pen.h>
 #include <Pt/Gfx/Point.h>

@@ -29,7 +29,7 @@
 
 #include "ImageOperation2.h"
 #include <Pt/Gfx/Brush.h>
-#include <Pt/Gfx/ImagePainter_ORIGINAL.h>
+#include <Pt/Gfx/ImagePainter.h>
 #include <stdexcept>
 
 namespace Pt {
