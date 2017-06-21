@@ -30,17 +30,14 @@
 #ifndef PT_GFX_BRUSH_H
 #define PT_GFX_BRUSH_H
 
+#include <Pt/Gfx/Image.h>
 #include <Pt/SmartPtr.h>
 
-#include <Pt/Gfx/Image.h>
-
-
 namespace Pt {
+
 namespace Gfx {
 
-
 class BrushData;
-
 
 class PT_GFX_API Brush
 {
@@ -76,8 +73,6 @@ class PT_GFX_API Brush
             BilinearNoCrop,
             BilinearFit
         };
-
-        typedef ImageView::ConstPixel ConstPixel;
 
     public:
         /** @brief Contructs a null brush.
@@ -253,8 +248,8 @@ class BrushData
         Image            _textureOrig;
 };
 
-
 } // namespace
+
 } // namespace
 
 #endif

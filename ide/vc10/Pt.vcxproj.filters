@@ -2753,5 +2753,8 @@
     <ClCompile Include="..\..\src\Pt-Gfx\Argb32Image.cpp">
       <Filter>Pt-Gfx</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Gfx\tests\ImagePainterTest2.cpp">
+      <Filter>Pt-Gfx\tests</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -1,61 +1,66 @@
-/* Copyright (C) 2006-2015 Laurentiu-Gheorghe Crisan
- * Copyright (C) 2006-2015 Marc Boris Duerner
- * Copyright (C) 2017-2017 Aloysius Indrayanto
- *
- * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Lesser General Public
- * License as published by the Free Software Foundation; either
- * version 2.1 of the License, or (at your option) any later version.
- *
- * As a special exception, you may use this file as part of a free
- * software library without restriction. Specifically, if other files
- * instantiate templates or use macros or inline functions from this
- * file, or you compile this file and link it with other files to
- * produce an executable, this file does not by itself cause the
- * resulting executable to be covered by the GNU General Public
- * License. This exception does not however invalidate any other
- * reasons why the executable file might be covered by the GNU Library
- * General Public License.
- *
- * This library is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public
- * License along with this library; if not, write to the Free Software
- * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA*/
+/* Copyright (C) 2006-2016 Marc Boris Duerner
+   Copyright (C) 2017-2017 Aloysius Indrayanto
 
-#include <stdexcept>
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
 
-#include <Pt/Gfx/Brush.h>
-#include <Pt/Gfx/ImagePainter_ORIGINAL.h>
+  As a special exception, you may use this file as part of a free
+  software library without restriction. Specifically, if other files
+  instantiate templates or use macros or inline functions from this
+  file, or you compile this file and link it with other files to
+  produce an executable, this file does not by itself cause the
+  resulting executable to be covered by the GNU General Public
+  License. This exception does not however invalidate any other
+  reasons why the executable file might be covered by the GNU Library
+  General Public License.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+  MA 02110-1301 USA
+*/
 
 #include "ImageOperation2.h"
-
+#include <Pt/Gfx/Brush.h>
+#include <Pt/Gfx/ImagePainter_ORIGINAL.h>
+#include <stdexcept>
 
 namespace Pt {
-namespace Gfx {
 
+namespace Gfx {
 
 Brush::Brush()
 : _brushData( new BrushData() )
 {}
 
+
 Brush::Brush(const Color& color)
 : _brushData( new BrushData(color) )
 {}
+
 
 Brush::Brush(const Image& texture, Pt::int32_t offsetX, Pt::int32_t offsetY, float rotDeg, const Color& colorFill, TextureRotationMode mode)
 : _brushData( new BrushData(texture, offsetX, offsetY, rotDeg, colorFill, mode) )
 {}
 
+
 Brush::Brush(const Color& from, const Color& to, GradientDirection g, float rotDeg, float scale, Pt::int32_t ofsX, Pt::int32_t ofsY)
 : _brushData( new BrushData(from, to, g, rotDeg, scale, ofsX, ofsY) )
 {}
 
+
 Brush::FillStyle Brush::fillStyle() const
-{ return _brushData->fillStyle(); }
+{ 
+    return _brushData->fillStyle(); 
+}
+
 
 void Brush::setSolidColor(const Color& color)
 {
@@ -69,8 +74,12 @@ void Brush::setSolidColor(const Color& color)
     _brushData->setSolidColor(color);
 }
 
+
 const Color& Brush::color() const
-{ return _brushData->color(); }
+{ 
+    return _brushData->color(); 
+}
+
 
 void Brush::setGradient(const Color& from, const Color& to, GradientDirection g, float rotDeg, float scale, Pt::int32_t ofsX, Pt::int32_t ofsY)
 {
@@ -83,6 +92,7 @@ void Brush::setGradient(const Color& from, const Color& to, GradientDirection g,
 
     _brushData->setGradient(from, to, g, rotDeg, scale, ofsX, ofsY);
 }
+
 
 void Brush::setGradientRotation(float rotDeg)
 {
@@ -98,6 +108,7 @@ void Brush::setGradientRotation(float rotDeg)
     _brushData->setGradientRotation(rotDeg);
 }
 
+
 void Brush::setGradientScale(float scale)
 {
     if(!_brushData->isGradient2D()) throw std::logic_error("brush error: not a 2D gradient");
@@ -111,6 +122,7 @@ void Brush::setGradientScale(float scale)
 
     _brushData->setGradientScale(scale);
 }
+
 
 void Brush::setGradientOffset(Pt::int32_t ofsX, Pt::int32_t ofsY)
 {
@@ -126,8 +138,12 @@ void Brush::setGradientOffset(Pt::int32_t ofsX, Pt::int32_t ofsY)
     _brushData->setGradientOffset(ofsX, ofsY);
 }
 
+
 const Color& Brush::gradientColor() const
-{ return _brushData->gradientColor(); }
+{ 
+    return _brushData->gradientColor(); 
+}
+
 
 void Brush::setTexture(const Image& texture, Pt::int32_t offsetX, Pt::int32_t offsetY, float rotDeg, const Color& colorFill, TextureRotationMode mode)
 {
@@ -140,6 +156,7 @@ void Brush::setTexture(const Image& texture, Pt::int32_t offsetX, Pt::int32_t of
 
     _brushData->setTexture(texture, offsetX, offsetY, rotDeg, colorFill, mode);
 }
+
 
 void Brush::setTextureRotation(float rotDeg, const Color& colorFill, TextureRotationMode mode)
 {
@@ -155,35 +172,65 @@ void Brush::setTextureRotation(float rotDeg, const Color& colorFill, TextureRota
     _brushData->setTextureRotation(rotDeg, colorFill, mode);
 }
 
+
 const Image& Brush::texture() const
-{ return _brushData->texture(); }
+{ 
+    return _brushData->texture(); 
+}
+
 
 float Brush::rotation() const
-{ return _brushData->rotation(); }
+{ 
+    return _brushData->rotation(); 
+}
+
 
 float Brush::scale() const
-{ return _brushData->scale(); }
+{ 
+    return _brushData->scale(); 
+}
+
 
 Pt::int32_t Brush::offsetX() const
-{ return _brushData->offsetX(); }
+{ 
+    return _brushData->offsetX(); 
+}
+
 
 Pt::int32_t Brush::offsetY() const
-{ return _brushData->offsetY(); }
+{ 
+    return _brushData->offsetY(); 
+}
+
 
 bool Brush::isGradient() const
-{ return _brushData->isGradient(); }
+{ 
+    return _brushData->isGradient(); 
+}
+
 
 bool Brush::isGradient1D() const
-{ return _brushData->isGradient1D(); }
+{ 
+    return _brushData->isGradient1D(); 
+}
+
 
 bool Brush::isGradient2D() const
-{ return _brushData->isGradient2D(); }
+{ 
+    return _brushData->isGradient2D(); 
+}
+
 
 bool Brush::isTexture() const
-{ return _brushData->isTexture(); }
+{ 
+    return _brushData->isTexture(); 
+}
+
 
 bool Brush::isNull() const
-{ return _brushData->isNull(); }
+{ 
+    return _brushData->isNull(); 
+}
 
 
 

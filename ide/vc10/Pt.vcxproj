@@ -536,6 +536,7 @@
     <ClCompile Include="..\..\src\Pt-Gfx\tests\Argb32Test.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\tests\BlockscaleTest.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\tests\ImagePainterTest.cpp" />
+    <ClCompile Include="..\..\src\Pt-Gfx\tests\ImagePainterTest2.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\tests\Pt-Gfx-test.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\tests\Yuv12Test.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Transform.cpp" />
