@@ -31,20 +31,16 @@
 #ifndef PT_GFX_PEN_H
 #define PT_GFX_PEN_H
 
-#include <cstddef>
-
-#include <Pt/SmartPtr.h>
-
 #include <Pt/Gfx/Api.h>
 #include <Pt/Gfx/Color.h>
-
+#include <Pt/SmartPtr.h>
+#include <cstddef>
 
 namespace Pt {
+
 namespace Gfx {
 
-
 class PenData;
-
 
 /** @brief Attributs for the drawing of outlines.
 
@@ -223,20 +219,6 @@ class PT_GFX_API PenData
       Pen::JoinStyle joinStyle() const
       { return _joinStyle; }
 
-      bool operator==(const PenData& pd) const
-      {
-          return _color       == pd._color       &&
-                 _size        == pd._size        &&
-                 _style       == pd._style       &&
-                 _userPattern == pd._userPattern &&
-                 _capStyle    == pd._capStyle    &&
-                 _joinStyle   == pd._joinStyle;
-      }
-
-  private:
-      inline PenData() {} // Does nothing
-      friend class Pen;
-
   private:
       Color          _color;
       std::size_t    _size;
@@ -246,8 +228,8 @@ class PT_GFX_API PenData
       Pen::JoinStyle _joinStyle;
 };
 
-
 } // namespace
+
 } // namespace
 
 #endif
