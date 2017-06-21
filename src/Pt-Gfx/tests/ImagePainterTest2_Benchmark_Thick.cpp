@@ -20,7 +20,7 @@ static size_t benchDrawSolidThickLineSimple(int loopCount, CompositionMode cm, b
         Pt::System::Clock clock;
         clock.start();
 
-        if(ip2) ip2->setAntiAliasingMode(antiAliasingMode);
+        if(ip2) ip2->setAntiAliasing(antiAliasingMode);
 
         painter.setPen(penBCapBJoin);
         painter.drawLine( PointF(100, 100), PointF(300, 200) );
@@ -37,8 +37,8 @@ static size_t benchDrawSolidThickLineSimple(int loopCount, CompositionMode cm, b
             PointF(300 + 400, 200),
             PointF(200 + 400, 300)
         };
-        if(ip2) ip2->drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]), false );
-        else painter.drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]) );
+        if(ip2) ip2->drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]), false ); // open
+        else painter.drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]), false );
 
         painter.setPen(penRCapMJoin);
         const PointF poly1b[] = { // CCW
@@ -46,7 +46,7 @@ static size_t benchDrawSolidThickLineSimple(int loopCount, CompositionMode cm, b
             PointF(300 + 400, 200 + 200),
             PointF(200 + 400, 300 + 200)
         };
-        if(ip2) ip2->drawPolyline( poly1b, sizeof(poly1b) / sizeof(poly1b[0]), false );
+        if(ip2) ip2->drawPolyline( poly1b, sizeof(poly1b) / sizeof(poly1b[0]) ); // open
         else painter.drawPolyline( poly1b, sizeof(poly1b) / sizeof(poly1b[0]) );
 
         painter.setPen(penRCapRJoin);
@@ -55,7 +55,7 @@ static size_t benchDrawSolidThickLineSimple(int loopCount, CompositionMode cm, b
             PointF(300 + 400, 200 + 400),
             PointF(200 + 400, 300 + 400)
         };
-        if(ip2) ip2->drawPolyline( poly1c, sizeof(poly1c) / sizeof(poly1c[0]), false );
+        if(ip2) ip2->drawPolyline( poly1c, sizeof(poly1c) / sizeof(poly1c[0]), ); // open
         else painter.drawPolyline( poly1c, sizeof(poly1c) / sizeof(poly1c[0]) );
 
         sum += clock.stop().toUSecs();
