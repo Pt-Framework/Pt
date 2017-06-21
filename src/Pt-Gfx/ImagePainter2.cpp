@@ -111,7 +111,7 @@ void ImagePainter2::drawThickPolyline_impl(const PointF* ps, const size_t pointC
             }
             
             // Use anti-aliasing
-            if( _rasterizer->antiAliasingMode() ) 
+            if( _rasterizer->isAntiAliasing() ) 
             {
                 // Remove duplicates
                 std::vector<PointF> points;
@@ -364,7 +364,7 @@ ImagePainter2::~ImagePainter2()
 
 void ImagePainter2::setAntiAliasing(bool on)
 { 
-  _rasterizer->setAntiAliasingMode(on); 
+  _rasterizer->setAntiAliasing(on); 
 }
 
 
@@ -503,7 +503,7 @@ void ImagePainter2::drawLine( const PointF& from, const PointF& to )
     }
 
     // Use anti-aliasing
-    if( _rasterizer->antiAliasingMode() ) 
+    if( _rasterizer->isAntiAliasing() ) 
     {
         // Remove duplicates
         std::vector<PointF> points;
@@ -625,7 +625,7 @@ void ImagePainter2::fillRoundedRect( const RectF& rect, float radius )
     generateRoundRectPoints(pointsF, x1, y1, x2, y2, radius, Pt::lround(ceil(_rasterizer->pen().size() * 0.5f)));
 
     // Use anti-aliasing
-    if( _rasterizer->antiAliasingMode() ) {
+    if( _rasterizer->isAntiAliasing() ) {
         // Remove duplicates
         std::vector<PointF> points;
         deduplicatePointsF(points, pointsF.data(), pointsF.size());
@@ -650,7 +650,7 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount)
     // Rasterize one-pixel polyline
     if(_rasterizer->pen().size() == 1) {
         // Use anti-aliasing
-        if( _rasterizer->antiAliasingMode() ) {
+        if( _rasterizer->isAntiAliasing() ) {
             // Remove duplicates
             std::vector<PointF> pointsF;
             deduplicatePointsF(pointsF, ps, pointCount);
@@ -677,7 +677,7 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount)
 void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
 {
     // Use anti-aliasing
-    if( _rasterizer->antiAliasingMode() ) {
+    if( _rasterizer->isAntiAliasing() ) {
         // Remove duplicates
         std::vector<PointF> pointsF;
         deduplicatePointsF(pointsF, ps, pointCount);
@@ -812,7 +812,7 @@ void ImagePainter2::drawEllipse(const PointF& topLeft, const SizeF& size)
         pointsF.push_back(Painter::PolygonSeparatorPointF);
         generateEllipsePoints(pointsF, radiusXi, radiusYi, centerX, centerY, 0);
         // Use anti-aliasing
-        if( _rasterizer->antiAliasingMode() ) {
+        if( _rasterizer->isAntiAliasing() ) {
             // Remove duplicates
             std::vector<PointF> points;
             deduplicatePointsF(points, pointsF.data(), pointsF.size());
@@ -1069,7 +1069,7 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size,
             combineLinePointsAndAddCaps(pointsF, inner, outer, newPen.capStyle(), newPen.capStyle(), penSize);
         }
         // Use anti-aliasing
-        if( _rasterizer->antiAliasingMode() ) {
+        if( _rasterizer->isAntiAliasing() ) {
             // Remove duplicates
             std::vector<PointF> points;
             deduplicatePointsF(points, pointsF.data(), pointsF.size());
@@ -1170,7 +1170,7 @@ void ImagePainter2::fillPath(const Path& path, float smoothness)
     path.toPoints(pointsF);
 
     // Use anti-aliasing
-    if( _rasterizer->antiAliasingMode() ) 
+    if( _rasterizer->isAntiAliasing() ) 
     {
         // Remove duplicates
         std::vector<PointF> points;
@@ -1888,9 +1888,9 @@ void ImagePainter2::sagGeneratePolyLineSegment(SAGOpState& state)
 }
 
 
-bool ImagePainter2::isAntialiasing() const
+bool ImagePainter2::isAntiAliasing() const
 {
- return _rasterizer->antiAliasingMode();
+ return _rasterizer->isAntiAliasing();
 }
 
 

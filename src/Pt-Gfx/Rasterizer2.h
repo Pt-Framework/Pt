@@ -109,13 +109,13 @@ class Rasterizer2
 
         ~Rasterizer2();
 
-        void setAntiAliasingMode(bool on)
+        void setAntiAliasing(bool on)
         {
             _aaMode = on;
             updatePenPattern();
         }
 
-        bool antiAliasingMode() const
+        bool isAntiAliasing() const
         { return _aaMode; }
 
         void setImage(Image& image);

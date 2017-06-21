@@ -203,7 +203,7 @@ inline void Rasterizer2::fillPolygons(const std::vector<Polygon>& polygons)
         }
     }
 
-    if( this->antiAliasingMode() )
+    if( this->isAntiAliasing() )
     {
         rasterPolygonsXWAA(clippedPolygons, _brush.color(), minX, minY, maxX, maxY);
     }

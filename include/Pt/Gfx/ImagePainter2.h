@@ -55,7 +55,7 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual const ImageFormat& format() const;
 
-        virtual bool isAntialiasing() const;
+        virtual bool isAntiAliasing() const;
 
         virtual void setAntiAliasing(bool on);
 
