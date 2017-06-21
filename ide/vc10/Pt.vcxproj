@@ -514,6 +514,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\src\Pt-Gfx\Argb32Format.cpp" />
+    <ClCompile Include="..\..\src\Pt-Gfx\Argb32Image.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Brush.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\ClipPolygon.cpp" />
     <ClCompile Include="..\..\src\Pt-Gfx\Color.cpp" />

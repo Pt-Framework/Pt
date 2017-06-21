@@ -30,14 +30,14 @@
 #ifndef PT_GFX_ARGB32IMAGE_SIMDOPERATIONS_H
 #define PT_GFX_ARGB32IMAGE_SIMDOPERATIONS_H
 
-
+#include "SIMDConfig.h"
+#include <Pt/Types.h>
 #include <cstring>
 
-#include <Pt/Gfx/SIMDConfig.h>
-
-
 namespace Pt {
+
 namespace Gfx {
+
 namespace Argb32 {
 
 

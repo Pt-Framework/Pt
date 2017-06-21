@@ -107,7 +107,7 @@ void Rasterizer2::strokeOnePixelEllipseArc(const Point& topLeft, const Size& siz
         const float       error = y - floor(y);
         const Pt::uint8_t alpha = lround(error * 255);
         // Without anti-aliasing
-        if(_aaMode == AntiAliasingMode::None) {
+        if( ! _aaMode ) {
             // Calculate the coordinates
             const Pt::int32_t xl = ctrX - x;
             const Pt::int32_t xr = ctrX + x;
@@ -233,7 +233,7 @@ void Rasterizer2::strokeOnePixelEllipseArc(const Point& topLeft, const Size& siz
         const float       error = x - floor(x);
         const Pt::uint8_t alpha = lround(error * 255);
         // Without anti-aliasing
-        if(_aaMode == AntiAliasingMode::None) {
+        if( ! _aaMode ) {
             // Calculate the coordinates
             const Pt::int32_t xl = ctrX - lround(x);
             const Pt::int32_t xr = ctrX + lround(x);
@@ -375,7 +375,7 @@ void Rasterizer2::strokeOnePixelEllipseArc(const Point& topLeft, const Size& siz
 void Rasterizer2::fillEllipse(const Point& topLeft, const Size& size)
 {
     // Call the fast non-AA rasterizer as needed
-    if(_aaMode == AntiAliasingMode::None) {
+    if( ! _aaMode ) {
         // Update the gradient as needed
         if(_isGradient)
             updateGradientBrush(size.width(), size.height());

@@ -213,7 +213,7 @@ void Rasterizer2::strokeText( const Point& to, const Pt::String& text, const Tra
 {
     _text->setClip(_currentClip);
 
-    if(_aaMode == AntiAliasingMode::None)
+    if( ! _aaMode )
         _text->drawMono( *_image, _pen.color(), to, text, _compositionMode, t );
     else
         _text->draw( *_image, _pen.color(), to, text, _compositionMode, t );
@@ -297,7 +297,7 @@ void Rasterizer2::updatePenPattern()
     }
 
     // Transfom the pattern - without anti-aliasing
-    if(_aaMode == AntiAliasingMode::None) {
+    if( ! _aaMode ) {
         for(size_t i = 0; i < gctr1P; ++i) {
             if(_patternBuffer1P[i] > 127) _patternBuffer1P[i] = 255;
             else                          _patternBuffer1P[i] = 0;

@@ -34,7 +34,6 @@
 #include <Pt/Gfx/Algorithm.h>
 #include <Pt/Gfx/Path.h>
 #include <Pt/Gfx/ArcMode.h>
-#include <Pt/Gfx/AntiAliasingMode.h>
 #include <Pt/Gfx/Painter.h>
 
 #include "ClipShape.h"

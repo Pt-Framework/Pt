@@ -28,6 +28,7 @@
   02110-1301 USA
 */
 
+#include "Argb32SIMDOps.h"
 #include <Pt/Gfx/Argb32Format.h>
 #include <Pt/Gfx/Argb32Image.h>
 #include <Pt/Gfx/ImageView.h>

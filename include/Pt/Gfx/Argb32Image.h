@@ -33,7 +33,6 @@
 #include <Pt/Types.h>
 
 #include <Pt/Gfx/Api.h>
-#include <Pt/Gfx/Argb32SIMDOps.h>
 #include <Pt/Gfx/Color.h>
 #include <Pt/Gfx/CompositionMode.h>
 #include <Pt/Gfx/BasicImage.h>
@@ -203,55 +202,10 @@ class Argb32Model
         }
 
         static void assign(Pt::uint8_t* to, const Color& c, size_t length,
-                           CompositionMode mode)
-        {
-            switch(mode) {
-                default:
-                case CompositionMode::SourceCopy: {
-                    const Pt::uint32_t src = ( Pt::uint32_t(c.alpha() & 0xFF00) << 16 ) |
-                                             ( Pt::uint32_t(c.red  () & 0xFF00) <<  8 ) |
-                                             ( Pt::uint32_t(c.green() & 0xFF00)       ) |
-                                             ( Pt::uint32_t(c.blue ()         ) >>  8 );
-                    Argb32::pixelOps_SourceCopy(to, src, length);
-                    break;
-                }
-
-                case CompositionMode::SourceOver: {
-                    const Pt::uint32_t blend    = c.alpha() >> 8;
-                    const Pt::uint32_t blendInv = 255 - blend;
-                    const Pt::uint32_t srcR     = (Pt::uint32_t) (c.red  () >> 8) * blend;
-                    const Pt::uint32_t srcG     = (Pt::uint32_t) (c.green() >> 8) * blend;
-                    const Pt::uint32_t srcB     = (Pt::uint32_t) (c.blue () >> 8) * blend;
-                    const Pt::uint32_t srcA     = blend * blend;
-                    Argb32::pixelOps_SourceOver(to, srcA, srcR, srcG, srcB, blendInv, length);
-                    break;
-                }
-            }
-        }
+                           CompositionMode mode);
 
         static void assign(Pt::uint8_t* to, const Pt::uint8_t* from, size_t length,
-                           CompositionMode mode)
-        {
-            switch(mode) {
-                default:
-                case CompositionMode::SourceCopy: {
-                    const Pt::uint32_t src = *reinterpret_cast<const Pt::uint32_t*>(from);
-                    Argb32::pixelOps_SourceCopy(to, src, length);
-                    break;
-                }
-
-                case CompositionMode::SourceOver: {
-                    const Pt::uint32_t blend    = from[3];
-                    const Pt::uint32_t blendInv = 255 - blend;
-                    const Pt::uint32_t srcR     = from[2] * blend;
-                    const Pt::uint32_t srcG     = from[1] * blend;
-                    const Pt::uint32_t srcB     = from[0] * blend;
-                    const Pt::uint32_t srcA     = blend   * blend;
-                    Argb32::pixelOps_SourceOver(to, srcA, srcR, srcG, srcB, blendInv, length);
-                    break;
-                }
-            }
-        }
+                           CompositionMode mode);
 
         template <typename T>
         static void advance(T*& p, Pt::ssize_t& xpos, Pt::ssize_t& ypos,

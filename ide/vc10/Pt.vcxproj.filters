@@ -2750,5 +2750,8 @@
     <ClCompile Include="..\..\src\Pt-Hmi\SpinBox.cpp">
       <Filter>Pt-Hmi</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Gfx\Argb32Image.cpp">
+      <Filter>Pt-Gfx</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

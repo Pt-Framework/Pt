@@ -191,7 +191,7 @@ void Rasterizer2::rasterOnePixelSolidXLineSegment(Pt::int32_t x1, Pt::int32_t y1
             Pixel pixel(_image->view(), x, y);
             _image->format().setPixel(pixel, color, _compositionMode);
             // Draw the secondary pixels as needed
-            if( _aaMode != AntiAliasingMode::None && ((x * y) & 1) ) {
+            if( _aaMode && ((x * y) & 1) ) {
                 Pixel pixel1(_image->view(), x + 1, y);
                 Pixel pixel2(_image->view(), x - 1, y);
                 _image->format().setPixel(pixel1, color, _compositionMode, 63);

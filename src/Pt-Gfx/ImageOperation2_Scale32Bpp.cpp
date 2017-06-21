@@ -28,7 +28,7 @@
 */
 
 
-#include <Pt/Gfx/SIMDConfig.h>
+#include "SIMDConfig.h"
 
 #include <Pt/Gfx/ImageOperation2.h>
 

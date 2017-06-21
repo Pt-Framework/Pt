@@ -53,7 +53,7 @@ inline void Rasterizer2::rasterOnePixelSolidLine(Pt::int32_t x1, Pt::int32_t y1,
     }
 
     // Generic line
-    if(_aaMode == AntiAliasingMode::None) {
+    if( ! _aaMode) {
         // Raster the line without using anti-aliasing
         rasterOnePixelSolidGLineSegmentNoAA(x1, y1, x2, y2, color, maskInOut);
     }
@@ -85,7 +85,7 @@ inline void Rasterizer2::rasterOnePixelPatternedLine(Pt::int32_t x1, Pt::int32_t
     // Generic line
     else {
         // Without anti-aliasing
-        if(_aaMode == AntiAliasingMode::None)
+        if( ! _aaMode)
             rasterOnePixelPatternedGLineSegmentNoAA(x1, y1, x2, y2, color, fpiCtrInc, fpiCtrInOut, maskInOut);
         // With anti-aliasing
         else

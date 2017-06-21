@@ -127,7 +127,7 @@ void Rasterizer2::rasterOnePixelQuadraticBezierCurve(Pt::int32_t x1, Pt::int32_t
         } while(false)
 
     // Use anti-aliasing?
-    const bool useAA = (_aaMode != AntiAliasingMode::None);
+    const bool useAA = _aaMode;
 
     // Get the steps
     Pt::int32_t sx = x3 - x2;

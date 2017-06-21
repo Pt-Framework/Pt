@@ -56,7 +56,7 @@ void Rasterizer2::fillArc(const Point& topLeft, const Size& size, float degBegin
     // Calculate the general arc's parameters
     FilledArcInfo fai;
 
-    fai.antiAlias = (_aaMode != AntiAliasingMode::None);
+    fai.antiAlias = _aaMode;
 
     fai.degBegin  = degBegin;
     fai.degEnd    = degEnd;
