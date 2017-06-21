@@ -175,6 +175,7 @@ inline void Rasterizer2::fillPolygon(const BasicPoint<PointT>* points, size_t po
     );
 }
 
+
 inline void Rasterizer2::fillPolygons(const std::vector<Polygon>& polygons)
 {
     Pt::int32_t minX =  MAXIMUM_COORD;
