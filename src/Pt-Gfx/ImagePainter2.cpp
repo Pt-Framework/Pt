@@ -39,11 +39,11 @@ namespace Pt {
 namespace Gfx {
 
 
-void ImagePainter2::drawThickPolyline_impl(const PointF* ps, const size_t pointCount, 
+void ImagePainter2::drawThickPolyline_impl(const PointF* ps, const size_t pointCount,
                                            bool autoClose, const int32_t* segmentIndexMarker)
 {
     // Check if there is no actual point
-    if( ! pointCount) 
+    if( ! pointCount)
         return;
 
     // Prepare the buffer
@@ -56,84 +56,84 @@ void ImagePainter2::drawThickPolyline_impl(const PointF* ps, const size_t pointC
     // Separate the polygons convert them and recombine them
     size_t startIndex = 0;
 
-    for(size_t i = 0; i <= pointCount; ++i) 
+    for(size_t i = 0; i <= pointCount; ++i)
     {
         // Search for the end and/or separator points
-        if( i == pointCount || (ps[i].x() > MAXIMUM_COORD && ps[i].y() > MAXIMUM_COORD) ) 
+        if( i == pointCount || (ps[i].x() > MAXIMUM_COORD && ps[i].y() > MAXIMUM_COORD) )
         {
             // Get the base pointer and the number of points for this polygon
             const PointF* basePtr = ps + startIndex;
                   size_t  curPCnt = i - startIndex;
-            
+
             // Update the start index
             startIndex = i + 1;
-            
+
             // Determine if this polygon is a closed polygon
             bool closedPolygon = autoClose;
-            
+
             // Thicken polygon with solid line
-            if(solidPen) 
+            if(solidPen)
             {
-                if(basePtr[0] == basePtr[curPCnt - 1]) 
+                if(basePtr[0] == basePtr[curPCnt - 1])
                 {
                     closedPolygon = true;
                     --curPCnt;
                 }
-                if(closedPolygon) 
+                if(closedPolygon)
                 {
-                    if( ! thickenSolidClosedPolygon(pointsF, basePtr, 
-                                                    curPCnt, segmentIndexMarker) ) 
+                    if( ! thickenSolidClosedPolygon(pointsF, basePtr,
+                                                    curPCnt, segmentIndexMarker) )
                         return;
                 }
-                else 
+                else
                 {
-                    if( ! thickenSolidOpenPolygon(pointsF, basePtr, 
-                                                  curPCnt, segmentIndexMarker) ) 
+                    if( ! thickenSolidOpenPolygon(pointsF, basePtr,
+                                                  curPCnt, segmentIndexMarker) )
                         return;
                 }
             }
             // Thicken polygon with patterned line
-            else 
+            else
             {
-                if(closedPolygon && basePtr[0] != basePtr[curPCnt - 1]) 
+                if(closedPolygon && basePtr[0] != basePtr[curPCnt - 1])
                 {
                     pointsT.clear();
-                    
+
                     for(size_t j = 0; j < curPCnt; ++j) pointsT.push_back(*(basePtr + j));
                         pointsT.push_back(*basePtr);
-                    
+
                     thickenPatternedPolygon(pointsF, pointsT.data(), pointsT.size());
                 }
-                else 
+                else
                 {
                     thickenPatternedPolygon(pointsF, basePtr, curPCnt);
                 }
             }
-            
+
             // Use anti-aliasing
-            if( _rasterizer->isAntiAliasing() ) 
+            if( _rasterizer->isAntiAliasing() )
             {
                 // Remove duplicates
                 std::vector<PointF> points;
                 deduplicatePointsF(points, pointsF.data(), pointsF.size());
-                
+
                 // Rasterize the polygon
-                if(solidPen && closedPolygon) 
+                if(solidPen && closedPolygon)
                     _rasterizer->penFillPolygon( points.data(), points.size() );
-                else                          
+                else
                     _rasterizer->penFillPolygonSeparate( points.data(), points.size() );
             }
             // Do not use use anti-aliasing
-            else 
+            else
             {
                 // Round the points and remove duplicates
                 std::vector<Point> points;
                 cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
-                
+
                 // Rasterize the polygon
-                if(solidPen && closedPolygon) 
+                if(solidPen && closedPolygon)
                     _rasterizer->penFillPolygon(points.data(), points.size());
-                else                          
+                else
                     _rasterizer->penFillPolygonSeparate(points.data(), points.size());
             }
         }
@@ -322,30 +322,30 @@ void ImagePainter2::cnvPointsFToPointsDeduplicate(std::vector<Point>& dst, const
 
 
 void ImagePainter2::setFontDir(const Pt::System::Path& path)
-{ 
-  FreeType2::instance().setFontDir(path); 
+{
+  FreeType2::instance().setFontDir(path);
 }
 
 
 void ImagePainter2::setDefaultFont(const std::string& f)
-{ 
-  FreeType2::instance().setDefaultFont(f); 
+{
+  FreeType2::instance().setDefaultFont(f);
 }
 
 
 std::string ImagePainter2::defaultFont()
-{ 
-  return FreeType2::instance().defaultFont(); 
+{
+  return FreeType2::instance().defaultFont();
 }
 
 std::vector<std::string> ImagePainter2::fontNames()
-{ 
-  return FreeType2::instance().fontNames(); 
+{
+  return FreeType2::instance().fontNames();
 }
 
 FontMetrics ImagePainter2::fontMetrics( const Font& font, const Pt::String& text )
-{ 
-  return Rasterizer2::fontMetrics(font, text); 
+{
+  return Rasterizer2::fontMetrics(font, text);
 }
 
 
@@ -357,38 +357,38 @@ ImagePainter2::ImagePainter2(Image& image)
 
 
 ImagePainter2::~ImagePainter2()
-{ 
-  delete _rasterizer; 
+{
+  delete _rasterizer;
 }
 
 
 void ImagePainter2::setAntiAliasing(bool on)
-{ 
-  _rasterizer->setAntiAliasing(on); 
+{
+  _rasterizer->setAntiAliasing(on);
 }
 
 
 void ImagePainter2::setImage(Image& image)
-{ 
-  _rasterizer->setImage(image); 
+{
+  _rasterizer->setImage(image);
 }
 
 
 const ImageFormat& ImagePainter2::format() const
-{ 
-  return _rasterizer->format(); 
+{
+  return _rasterizer->format();
 }
 
 
 void ImagePainter2::setCompositionMode(const CompositionMode& mode)
-{ 
-  _rasterizer->setCompositionMode(mode); 
+{
+  _rasterizer->setCompositionMode(mode);
 }
 
 
 const CompositionMode& ImagePainter2::compositionMode() const
-{ 
-  return _rasterizer->compositionMode(); 
+{
+  return _rasterizer->compositionMode();
 }
 
 
@@ -405,47 +405,47 @@ void ImagePainter2::setClip( const RectF& clip )
 
 
 const Gfx::RectF& ImagePainter2::clip() const
-{ 
-  return _clip; 
+{
+  return _clip;
 }
 
 
 void ImagePainter2::setPen( const Pen& pen )
-{ 
-  _rasterizer->setPen(pen) ; 
+{
+  _rasterizer->setPen(pen) ;
 }
 
 
 const Pen& ImagePainter2::pen() const
-{ 
-  return _rasterizer->pen(); 
+{
+  return _rasterizer->pen();
 }
 
 
 void ImagePainter2::setBrush(const Brush& brush)
-{ 
-  _rasterizer->setBrush(brush); 
+{
+  _rasterizer->setBrush(brush);
 }
 
 
 const Brush& ImagePainter2::brush() const
-{ 
-  return _rasterizer->brush(); 
+{
+  return _rasterizer->brush();
 }
 
 void ImagePainter2::setFont(const Font& font)
-{ 
-  _rasterizer->setFont( font ); 
+{
+  _rasterizer->setFont( font );
 }
 
 const Font& ImagePainter2::font() const
-{ 
-  return _rasterizer->font(); 
+{
+  return _rasterizer->font();
 }
 
 FontMetrics ImagePainter2::fontMetrics(const String& text) const
-{ 
-  return _rasterizer->fontMetrics( text ); 
+{
+  return _rasterizer->fontMetrics( text );
 }
 
 void ImagePainter2::drawImage( const PointF& to, const Image& image )
@@ -492,18 +492,18 @@ void ImagePainter2::drawLine( const PointF& from, const PointF& to )
     // Generate a polygon that represents the thick line
     std::vector<PointF> pointsF;
 
-    if(_rasterizer->pen().style() == Pen::Solid) 
+    if(_rasterizer->pen().style() == Pen::Solid)
     {
         generateSolidLineSegment(pointsF, from.x(), from.y(), to.x(), to.y(), true, true);
     }
-    else 
+    else
     {
         Pt::int32_t piCtrInOut = 0;
         generatePatternedSingleLineSegment(pointsF, from.x(), from.y(), to.x(), to.y(), piCtrInOut);
     }
 
     // Use anti-aliasing
-    if( _rasterizer->isAntiAliasing() ) 
+    if( _rasterizer->isAntiAliasing() )
     {
         // Remove duplicates
         std::vector<PointF> points;
@@ -512,7 +512,7 @@ void ImagePainter2::drawLine( const PointF& from, const PointF& to )
         _rasterizer->penFillPolygonSeparate(points.data(), points.size());
     }
     // Do not use use anti-aliasing
-    else 
+    else
     {
         // Round the points and remove duplicates
         std::vector<Point> points;
@@ -535,11 +535,11 @@ void ImagePainter2::drawRect( const RectF& rect )
     }
 
     // Generate and draw a polyline that represents the rectangle
-    const PointF pointsF[4] = {
-        rect.bottomLeft(), rect.bottomRight(), rect.topRight(), rect.topLeft()
+    const PointF pointsF[5] = {
+        rect.bottomLeft(), rect.bottomRight(), rect.topRight(), rect.topLeft(), rect.bottomLeft()
     };
 
-    drawPolyline(pointsF, 4);
+    drawPolyline(pointsF, 5);
 }
 
 void ImagePainter2::fillRect( const RectF& rect )
@@ -592,7 +592,10 @@ void ImagePainter2::drawRoundedRect( const RectF& rect, float radius )
         // Draw the quadratic polybezier
         const size_t count = sizeof(pbz) / sizeof(pbz[0]);
 
-        drawQuadraticPolybezier(pbz[0], pbz[count -1], &pbz[1], count - 2);
+        //drawQuadraticPolybezier(pbz[0], pbz[count -1], &pbz[1], count - 2);
+
+        /// NOTE: This is the correct one :D
+        drawQuadraticPolybezier(pbz[0], pbz[0], &pbz[1], count - 1);
         return;
     }
 
@@ -695,11 +698,11 @@ void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
     }
 }
 
-void ImagePainter2::drawQuadraticPolybezier(const PointF& from, const PointF& to, 
+void ImagePainter2::drawQuadraticPolybezier(const PointF& from, const PointF& to,
                                              const PointF* controls, const size_t n)
 {
     //TODO: to close
-    bool autoClose = false; 
+    bool autoClose = false;
     std::vector<PointF> ps;
     size_t pointCount = n + 2;
 
@@ -967,7 +970,7 @@ void ImagePainter2::drawPie(const PointF& topLeft, const SizeF& size,  float deg
 }
 
 
-void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, 
+void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size,
                              float degBegin, float degEnd, const ArcMode& arcMode)
 {
     // Rasterize one-pixel arc
@@ -1124,16 +1127,16 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size,
 
 
 void ImagePainter2::fillPie( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
-{  
+{
      Point tl( lround(topLeft.x()), lround(topLeft.y()) );
     Size  sz( lround(size.width()), lround(size.height()) );
 
-    
+
      _rasterizer->fillArc(tl, sz, degBegin, degEnd, ArcMode::Pie);
 }
 
 void ImagePainter2::fillChord( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
-{  
+{
     const Point tl( lround(topLeft.x    ()), lround(topLeft.y()) );
     const Size  sz( lround(size   .width()), lround(size.height()) );
 
@@ -1170,12 +1173,12 @@ void ImagePainter2::fillPath(const Path& path, float smoothness)
     path.toPoints(pointsF);
 
     // Use anti-aliasing
-    if( _rasterizer->isAntiAliasing() ) 
+    if( _rasterizer->isAntiAliasing() )
     {
         // Remove duplicates
         std::vector<PointF> points;
         deduplicatePointsF(points, pointsF.data(), pointsF.size());
-        
+
         // Draw the path as a filled polygon
         _rasterizer->fillPolygon( points.data(), points.size() );
     }
@@ -1184,14 +1187,14 @@ void ImagePainter2::fillPath(const Path& path, float smoothness)
         // Round the points and remove duplicates
         std::vector<Point> points;
         cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
-        
+
         // Draw the path as a filled polygon
         _rasterizer->fillPolygon( points.data(), points.size() );
     }
 }
 
 
-bool ImagePainter2::thickenSolidOpenPolygon(std::vector<PointF>& pointsF, const PointF* basePtr, 
+bool ImagePainter2::thickenSolidOpenPolygon(std::vector<PointF>& pointsF, const PointF* basePtr,
                                             size_t curPCnt, const int32_t* segmentIndexMarker)
 {
     // Prepare the buffers
