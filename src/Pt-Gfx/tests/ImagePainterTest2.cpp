@@ -61,14 +61,8 @@
 
 using namespace Pt::Gfx;
 
-// Benchmark mathematical functions only
-#define DO_MATH_BENCHMARKING_ONLY 0
-
-// Benchmark 2D transform operations only
-#define DO_TRANSFORM_BENCHMARKING_ONLY 0
-
 // General settings for Pt-Gfx
-#define DO_TEST_DRAW    1
+#define DO_TEST_DRAW    0
 #define DO_BENCHMARKING 1
 
 // Detailed-test enable settings for Pt-Gfx
@@ -76,7 +70,7 @@ using namespace Pt::Gfx;
 #define TEST_SOURCEOVER                         0
 
 #define TEST_DRAW_SOLID_LINE_AND_TEXT           0 // (including bezier)
-#define TEST_DRAW_PATTERNED_LINE                0 // (including bezier)
+#define TEST_DRAW_PATTERNED_LINE                1 // (including bezier)
 #define TEST_DRAW_SOLID_THICK_LINE              0 // (including bezier)
 #define TEST_DRAW_PATTERNED_THICK_LINE          0 // (including bezier)
 
@@ -95,23 +89,23 @@ using namespace Pt::Gfx;
 #define TEST_DRAW_GRADIENT_FILLED_ELLIPSES_ARCS 0
 #define TEST_DRAW_TEXTURE_FILLED_ELLIPSES_ARCS  0
 
-#define TEST_DRAW_PATH                          0 // (including thick and filled)
-#define TEST_DRAW_PATH_CLIPPING                 1 // (including path-based text)
+//#define TEST_DRAW_PATH                          0 // (including thick and filled)
+//#define TEST_DRAW_PATH_CLIPPING                 0 // (including path-based text)
 #define TEST_DRAW_EXTRA                         0 // (including path-based n-bezier)
 
-#define TEST_IMAGE_OPERATION                    0
+//#define TEST_IMAGE_OPERATION                    0
 
 // Detailed-test benchmark settings for Pt-Gfx
 #define BENCHMARK_RESULT_HTML               0 // (automatically disabling test drawing
 #define BENCHMARK_RESULT_HTML_SIDE_BY_SIDE  1
 
-#define BENCHMARK_CHECK_RESULTING_IMAGE     0
+#define BENCHMARK_CHECK_RESULTING_IMAGE     1
 
 #define BENCHMARK_IMAGE_SIZE                Size(1280, 800)
 #define BENCHMARK_LOOP_COUNT                ( 500 * (BENCHMARK_RESULT_HTML ? 10 : 1) )
 
-#define BENCHMARK_TEXT                      0
-#define BENCHMARK_ROTATED_TEXT              0
+#define BENCHMARK_TEXT                      1
+#define BENCHMARK_ROTATED_TEXT              0 // XXX
 
 #define BENCHMARK_SOLID_LINE                0
 #define BENCHMARK_PATTERNED_LINE            0
@@ -131,7 +125,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_GRADIENT_FILLED_RECTANGLE 0
 #define BENCHMARK_TEXTURE_FILLED_RECTANGLE  0
 
-#define BENCHMARK_SOLID_FILLED_POLYGON      0
+#define BENCHMARK_SOLID_FILLED_POLYGON      1
 #define BENCHMARK_GRADIENT_FILLED_POLYGON   0
 #define BENCHMARK_TEXTURE_FILLED_POLYGON    0
 
@@ -188,19 +182,6 @@ static const char* sfileDirXPrefix = "";
 
 int main(int argc, char* args[])
 {
-    // Benchmark some mathematical functions only
-    if(DO_MATH_BENCHMARKING_ONLY) {
-        benchMathFunctions();
-        return 0;
-    }
-
-    //// Benchmark 2D transform operations only
-    //if(DO_TRANSFORM_BENCHMARKING_ONLY) {
-    //    printf("<float>\n" ); bench2DTransOps<float >();
-    //    printf("<double>\n"); bench2DTransOps<double>();
-    //    return 0;
-    //}
-
     // Determine the exact locations of the support files and directories
     const char* texFileTransBgr;
     const char* texFileWhiteBgr;

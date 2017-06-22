@@ -122,20 +122,21 @@ static void testDrawPatternedLine(const char* title, Image& image, Painter& pain
         PointF(110 - 0, 310 - 70),
         PointF(160 - 0, 340 - 70),
         PointF(210 - 0, 310 - 70),
-        PointF(140 - 0, 260 - 70)
+        PointF(140 - 0, 260 - 70),
+        PointF(110 - 0, 310 - 70)
     };
-    
-    if(ip2) 
+
+    if(ip2)
       ip2->drawPolyline( poly, sizeof(poly) / sizeof(poly[0]) );
-    else 
+    else
       painter.drawPolyline( poly, sizeof(poly) / sizeof(poly[0]) );
 
     painter.drawRect( RectF(PointF(550, 170), SizeF(100, 50)) );
 
     painter.drawEllipse( PointF (730,  50), SizeF(95, 95) );
-    if(ip2) 
+    if(ip2)
       ip2->drawChord( PointF (730, 170), SizeF(95, 43), 30, 330);
-    if(ip2) 
+    if(ip2)
       ip2->drawPie( PointF (753, 243), SizeF(43, 95), 30, 330 );
 
     painter.setPen( Pen( Color::fromRgb8(255, 255, 255, 175), 1, 0xB38F0F83F03F8000 ) ); // 1011001110001111000011111000001111110000001111111000000000000000

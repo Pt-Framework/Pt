@@ -37,8 +37,8 @@ static size_t benchDrawSolidThickLineSimple(int loopCount, CompositionMode cm, b
             PointF(300 + 400, 200),
             PointF(200 + 400, 300)
         };
-        if(ip2) ip2->drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]), false ); // open
-        else painter.drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]), false );
+        if(ip2) ip2->drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]) ); // open
+        else painter.drawPolyline( poly1a, sizeof(poly1a) / sizeof(poly1a[0]) );
 
         painter.setPen(penRCapMJoin);
         const PointF poly1b[] = { // CCW
@@ -55,7 +55,7 @@ static size_t benchDrawSolidThickLineSimple(int loopCount, CompositionMode cm, b
             PointF(300 + 400, 200 + 400),
             PointF(200 + 400, 300 + 400)
         };
-        if(ip2) ip2->drawPolyline( poly1c, sizeof(poly1c) / sizeof(poly1c[0]), ); // open
+        if(ip2) ip2->drawPolyline( poly1c, sizeof(poly1c) / sizeof(poly1c[0]) ); // open
         else painter.drawPolyline( poly1c, sizeof(poly1c) / sizeof(poly1c[0]) );
 
         sum += clock.stop().toUSecs();

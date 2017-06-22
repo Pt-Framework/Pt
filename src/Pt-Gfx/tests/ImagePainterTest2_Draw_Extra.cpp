@@ -14,43 +14,6 @@ static void testDrawExtra(const char* title, Image& image, Painter& painter)
 
     ip2->setAntiAliasing(true);
 
-    // Generic N-bezier
-    Path      path;
-
-    Transform transform;
-    transform.scale(-1, 1);
-    transform.translate(970, 280);
-
-    path.clear();
-    path.moveTo( PointF(0, 0) ); // CW
-    path.lineTo( PointF(55, -180 ) );
-    path.lineTo( PointF(115,  -45) );
-    path.lineTo( PointF(170, -135) );
-    path.lineTo( PointF(230,  -90) );
-    path.lineTo( PointF(170,  -45) );
-    path.close();
-
-    path.transform(transform);
-
-    ip2->setPen( Pen(Color::fromRgb8(255, 0, 255, 175), 3, Pen::Solid, Pen::ButtCap, Pen::MiterJoin) );
-    ip2->drawPath(path);
-
-    const PointF cxy[] = { // CW
-         PointF(55, -180),
-         PointF(115, 45),
-         PointF(170, -135),
-         PointF(230, -90)
-    };
-    
-    path.clear();
-    path.moveTo( PointF(0, 0) );
-    path.bezierTo(cxy, 4, PointF(170, -45));
-    path.close();
-    path.transform(transform);
-    
-    ip2->setPen( Pen(Color::fromRgb8(127, 255, 255, 175), 3, Pen::Solid, Pen::ButtCap, Pen::MiterJoin) );
-    ip2->drawPath(path);
-
     // Round-Hole caps
     ip2->setFont( Pt::Gfx::Font(FONT_SPEC_S) );
 
