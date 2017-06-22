@@ -63,7 +63,7 @@ using namespace Pt::Gfx;
 
 // General settings for Pt-Gfx
 #define DO_TEST_DRAW    1
-#define DO_BENCHMARKING 0
+#define DO_BENCHMARKING 1
 
 // Detailed-test enable settings for Pt-Gfx
 #define TEST_SOURCECOPY                         1
@@ -141,7 +141,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_IMAGE_OPERATION           0
 
 // Configurations and objects
-#define FONT_DIR    "../src/Pt-Gfx/fonts"
+Pt::System::Path FONT_DIR;
 #define FONT_SPEC_S "DejaVu Sans"  ,  12, Pt::Gfx::Font::BoldItalic,    0
 #define FONT_SPEC_N "DejaVu Sans"  ,  24, Pt::Gfx::Font::BoldItalic,    0
 #define FONT_SPEC_R "DejaVu Sans"  ,  24, Pt::Gfx::Font::BoldItalic, -150
@@ -150,8 +150,8 @@ using namespace Pt::Gfx;
 #define FONT_SPEC_Q "QumpellkaNo12",  64, Pt::Gfx::Font::Normal    ,    0 /* OTF */
 #define FONT_SPEC_C "Charakterny"  , 116, Pt::Gfx::Font::Italic    ,    0 /* OTF */
 
-#define TEX_FILE_TRANS_BGR "../etc/images/bleech-200x200-tbgr.png"
-#define TEX_FILE_WHITE_BGR "../etc/images/bleech-200x200-wbgr.png"
+//#define TEX_FILE_TRANS_BGR "../etc/images/bleech-200x200-tbgr.png"
+//#define TEX_FILE_WHITE_BGR "../etc/images/bleech-200x200-wbgr.png"
 
 static Image textureWithTransBackground;
 static Image textureWithWhiteBackground;
@@ -182,48 +182,50 @@ static const char* sfileDirXPrefix = "";
 
 int main(int argc, char* args[])
 {
-    // Determine the exact locations of the support files and directories
-    const char* texFileTransBgr;
-    const char* texFileWhiteBgr;
-    const char* ffilesDirectory;
+    // Determine fonts dir
 
-    std::ifstream checkIfs(TEX_FILE_TRANS_BGR);
-
-    if(checkIfs.is_open()) {
-        checkIfs.close();
-        texFileTransBgr = TEX_FILE_TRANS_BGR;
-        texFileWhiteBgr = TEX_FILE_WHITE_BGR;
-        ffilesDirectory = FONT_DIR;
-    }
-    else {
-        checkIfs.open("../" TEX_FILE_TRANS_BGR);
-        if(!checkIfs.is_open()) {
-            std::clog << std::endl << "Cannot determine the exact locations of the support files and directories!" << std::endl << std::endl;
-            exit(-1);
-        }
-        checkIfs.close();
-        texFileTransBgr = "../" TEX_FILE_TRANS_BGR;
-        texFileWhiteBgr = "../" TEX_FILE_WHITE_BGR;
-        ffilesDirectory = "../" FONT_DIR;
-        sfileDirXPrefix = "../";
-    }
+    FONT_DIR = args[0];
+    FONT_DIR = FONT_DIR.dirName();
+    FONT_DIR /= Pt::System::Path::updir();
+    FONT_DIR /= Pt::System::Path::updir();
+    FONT_DIR /= "src";
+    FONT_DIR /= "Pt-Gfx";
+    FONT_DIR /= "fonts";
 
     // Load the textures
-    std::ifstream tbgrIfs(texFileTransBgr);
+
+    Pt::System::Path etcPath( args[0] );
+    etcPath = etcPath.dirName();
+    etcPath /= Pt::System::Path::updir();
+    etcPath /= Pt::System::Path::updir();
+    etcPath /= "etc";
+    
+    Pt::System::Path TEX_FILE_TRANS_BGR = etcPath;
+    TEX_FILE_TRANS_BGR /= "images";
+    TEX_FILE_TRANS_BGR /= "bleech-200x200-tbgr.png";
+
+    Pt::System::Path TEX_FILE_WHITE_BGR = etcPath;
+    TEX_FILE_WHITE_BGR /= "images";
+    TEX_FILE_WHITE_BGR /= "bleech-200x200-wbgr.png";
+
+    std::string localPath = TEX_FILE_TRANS_BGR.toLocal();
+    std::ifstream tbgrIfs( localPath.c_str(), std::ios::in|std::ios::binary );
     PngReader     tbgrPng(tbgrIfs, textureWithTransBackground);
     tbgrPng.get();
     tbgrIfs.close();
 
-    std::ifstream wbgrIfs(texFileWhiteBgr);
+    localPath = TEX_FILE_WHITE_BGR.toLocal();
+    std::ifstream wbgrIfs( localPath.c_str(), std::ios::in|std::ios::binary );
     PngReader     wbgrPng(wbgrIfs, textureWithWhiteBackground);
     wbgrPng.get();
     wbgrIfs.close();
 
     // Prepare the images and painters
+
     Image         image( ImageFormat::argb32(), Size(1000, 600) );
     ImagePainter2 painter2obj(image);
 
-    painter2obj.setFontDir( Pt::System::Path(ffilesDirectory) );
+    painter2obj.setFontDir( FONT_DIR );
     painter2obj.setFont( Pt::Gfx::Font(FONT_SPEC_N) );
 
     Painter* painter2 = dynamic_cast<Painter*>(&painter2obj);

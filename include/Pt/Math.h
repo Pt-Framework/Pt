@@ -280,11 +280,44 @@ inline double hypot(double x, double y)
 inline int lround(float x)
 {
 #if __cplusplus == 201103L
+    
     return std::lround(x);
+
+#elif defined(_MSC_VER) && defined (_M_IX86) 
+    
+    int tmp;
+    __asm fld x   
+    __asm fistp tmp
+    return tmp;
+
+#elif ( defined(__GNUC__) || defined(__clang__) ) && \
+      ( defined(__i386) || defined(__x86_64__) )
+    
+    int tmp;
+    __asm__ __volatile__ (
+        "fld   %1\n\t"
+        "fistp %0    "
+        : "=m"(tmp)
+        :  "m"(x)
+        : "memory"
+    );
+    return tmp;
+
+#elif ( defined(__GNUC__) || defined(__clang__) ) && \
+        defined(__arm__)
+
+    float tmp;
+    int res;
+    __asm__ __volatile__ ( "ftosis %0, %1" : "=w" (tmp) : "w" (x) );
+    __asm__ __volatile__ ( "fmrs   %0, %1" : "=r" (res) : "w" (tmp) );
+    return res;
+
 #else
+
     int tmp = static_cast<int>(x);
     tmp += (x - tmp >= 0.5) - (x - tmp <= -0.5);
     return tmp;
+
 #endif
 }
 
@@ -293,11 +326,43 @@ inline int lround(float x)
 inline long int lround(double x)
 {
 #if __cplusplus == 201103L
+
     return std::lround(x);
+
+#elif defined(_MSC_VER) || defined (_M_IX86)
+
+    long int tmp;
+    __asm fld x   
+    __asm fistp tmp
+
+#elif ( defined(__GNUC__) || defined(__clang__) ) && \
+      ( defined(__i386) || defined(__x86_64__) )
+
+    long int tmp;
+    __asm__ __volatile__ (
+        "fld   %1\n\t"
+        "fistp %0    "
+        : "=m"(tmp)
+        :  "m"(x)
+        : "memory"
+    );
+    return tmp;
+
+#elif ( defined(__GNUC__) || defined(__clang__) ) && \
+        defined(__arm__)
+    
+    float       tmp;
+    Pt::ssize_t res;
+    __asm__ __volatile__ ( "ftosid %0, %P1" : "=w" (tmp) : "w" (x) );
+    __asm__ __volatile__ ( "fmrs   %0, %1"  : "=r" (res) : "w" (tmp) );
+    return res;
+
 #else
+
     long int tmp = static_cast<long int>(x);
     tmp += (x - tmp >= 0.5) - (x - tmp <= -0.5);
     return tmp;
+
 #endif
 }
 

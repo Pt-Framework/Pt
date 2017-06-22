@@ -11,7 +11,7 @@ static size_t benchDrawText(int loopCount, bool rotated, CompositionMode cm, boo
     Pen pen( Color::fromRgb8(255, 255, 255, 175) );
     painter.setPen(pen);
 
-    painter.setFontDir( Pt::System::Path(FONT_DIR) );
+    painter.setFontDir(FONT_DIR);
     if(rotated) painter.setFont( Pt::Gfx::Font(FONT_SPEC_R) );
     else        painter.setFont( Pt::Gfx::Font(FONT_SPEC_N) );
 
