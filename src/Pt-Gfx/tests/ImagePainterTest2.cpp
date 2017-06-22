@@ -63,19 +63,19 @@ using namespace Pt::Gfx;
 
 // General settings for Pt-Gfx
 #define DO_TEST_DRAW    1
-#define DO_BENCHMARKING 1
+#define DO_BENCHMARKING 0
 
 // Detailed-test enable settings for Pt-Gfx
 #define TEST_SOURCECOPY                         1
 #define TEST_SOURCEOVER                         0
 
-#define TEST_DRAW_SOLID_LINE_AND_TEXT           0 // (including bezier)
+#define TEST_DRAW_SOLID_LINE_AND_TEXT           1 // (including bezier)
 #define TEST_DRAW_PATTERNED_LINE                0 // (including bezier)
 #define TEST_DRAW_SOLID_THICK_LINE              0 // (including bezier)
 #define TEST_DRAW_PATTERNED_THICK_LINE          0 // (including bezier)
 
 #define TEST_DRAW_OMPF_RECTANGLES               0 // (including thick and filled)
-#define TEST_DRAW_ROUND_OMPF_RECTANGLES         1 // (including thick and filled)
+#define TEST_DRAW_ROUND_OMPF_RECTANGLES         0 // (including thick and filled)
 
 #define TEST_DRAW_ELLIPSES_ARCS                 0
 #define TEST_DRAW_SOLID_THICK_ELLIPSES_ARCS     0
@@ -125,7 +125,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_GRADIENT_FILLED_RECTANGLE 0
 #define BENCHMARK_TEXTURE_FILLED_RECTANGLE  0
 
-#define BENCHMARK_SOLID_FILLED_POLYGON      1
+#define BENCHMARK_SOLID_FILLED_POLYGON      0
 #define BENCHMARK_GRADIENT_FILLED_POLYGON   0
 #define BENCHMARK_TEXTURE_FILLED_POLYGON    0
 
@@ -137,7 +137,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_GRADIENT_FILLED_ARC       0
 #define BENCHMARK_TEXTURE_FILLED_ARC        0
 
-#define BENCHMARK_PATH                      1
+#define BENCHMARK_PATH                      0
 #define BENCHMARK_IMAGE_OPERATION           0
 
 // Configurations and objects
@@ -183,23 +183,22 @@ static const char* sfileDirXPrefix = "";
 int main(int argc, char* args[])
 {
     // Determine fonts dir
-
     FONT_DIR = args[0];
     FONT_DIR = FONT_DIR.dirName();
     FONT_DIR /= Pt::System::Path::updir();
-    FONT_DIR /= Pt::System::Path::updir();
+  //FONT_DIR /= Pt::System::Path::updir();
     FONT_DIR /= "src";
     FONT_DIR /= "Pt-Gfx";
     FONT_DIR /= "fonts";
 
-    // Load the textures
 
+    // Load the textures
     Pt::System::Path etcPath( args[0] );
     etcPath = etcPath.dirName();
     etcPath /= Pt::System::Path::updir();
-    etcPath /= Pt::System::Path::updir();
+  //etcPath /= Pt::System::Path::updir();
     etcPath /= "etc";
-    
+
     Pt::System::Path TEX_FILE_TRANS_BGR = etcPath;
     TEX_FILE_TRANS_BGR /= "images";
     TEX_FILE_TRANS_BGR /= "bleech-200x200-tbgr.png";

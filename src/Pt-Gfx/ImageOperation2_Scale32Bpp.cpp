@@ -53,8 +53,8 @@ static const __m128 sseFour256 = _mm_set1_ps(256);
 static inline Pt::uint32_t bsGetPixel32Bpp_implSIMD(const Pt::uint8_t* img, Pt::ssize_t imgS, Pt::ssize_t imgW, Pt::ssize_t imgH, float x, float y)
 {
     // Floor and limit the coordinates
-    Pt::int32_t px = Pt::Gfx::Math::zfint(x);
-    Pt::int32_t py = Pt::Gfx::Math::zfint(y);
+    Pt::int32_t px = lround(floor(x));
+    Pt::int32_t py = lround(floor(y));
 
     if(px + 1 >= imgW) {
         px = imgW - 2;

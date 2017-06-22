@@ -561,7 +561,7 @@ void ImagePainter2::drawRoundedRect( const RectF& rect, float radius )
     const float y2 = rect.bottomRight().y();
 
     // Rasterize one-pixel round rectangle
-    if(_rasterizer->pen().size() == 1) 
+    if(_rasterizer->pen().size() == 1)
     {
         //
         // NOTE: enable the next lines to use another internal API to
