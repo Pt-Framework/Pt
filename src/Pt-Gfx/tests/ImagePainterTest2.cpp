@@ -186,7 +186,7 @@ int main(int argc, char* args[])
     FONT_DIR = args[0];
     FONT_DIR = FONT_DIR.dirName();
     FONT_DIR /= Pt::System::Path::updir();
-  //FONT_DIR /= Pt::System::Path::updir();
+    FONT_DIR /= Pt::System::Path::updir();
     FONT_DIR /= "src";
     FONT_DIR /= "Pt-Gfx";
     FONT_DIR /= "fonts";
@@ -196,7 +196,7 @@ int main(int argc, char* args[])
     Pt::System::Path etcPath( args[0] );
     etcPath = etcPath.dirName();
     etcPath /= Pt::System::Path::updir();
-  //etcPath /= Pt::System::Path::updir();
+    etcPath /= Pt::System::Path::updir();
     etcPath /= "etc";
 
     Pt::System::Path TEX_FILE_TRANS_BGR = etcPath;
