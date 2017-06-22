@@ -690,6 +690,7 @@ void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount)
         // Remove duplicates
         std::vector<PointF> pointsF;
         deduplicatePointsF(pointsF, ps, pointCount);
+
         // Rasterize the polygon
         _rasterizer->fillPolygon(pointsF.data(), pointsF.size());
     }

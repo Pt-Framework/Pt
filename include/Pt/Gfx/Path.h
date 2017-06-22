@@ -88,6 +88,11 @@ class Polygon
             return _points;
         }
 
+        const std::vector<PointF>& points() const
+        {
+            return _points;
+        }
+
     private:
         std::vector<PointF> _points;
 };
