@@ -88,7 +88,12 @@ void Rasterizer2::strokeOnePixelQuadraticPolybezierOutline(const Point* points, 
 // Based on: The Beauty of Bresenham's Algorithm
 //           http://members.chello.at/easyfilter/bresenham.html
 //           Original code by Alois Zingl, 2016
-void Rasterizer2::rasterOnePixelQuadraticBezierCurve(Pt::int32_t x1, Pt::int32_t y1, Pt::int32_t x2, Pt::int32_t y2, Pt::int32_t x3, Pt::int32_t y3, const Color& color, Pt::int32_t* fpiCtrInOut, DrawLineMask* maskInOut)
+void Rasterizer2::rasterOnePixelQuadraticBezierCurve(Pt::int32_t x1, Pt::int32_t y1, 
+                                                     Pt::int32_t x2, Pt::int32_t y2, 
+                                                     Pt::int32_t x3, Pt::int32_t y3, 
+                                                     const Color& color, 
+                                                     Pt::int32_t* fpiCtrInOut, 
+                                                     DrawLineMask* maskInOut)
 {
     // Get the mask's coordinates as needed
     Pt::int32_t mx[4] = { MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD, MAXIMUM_COORD };
