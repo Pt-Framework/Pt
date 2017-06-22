@@ -44,18 +44,23 @@ namespace Gfx {
 class Polygon
 {
     public:
+        Polygon(const PointF* ps, std::size_t n)
+        : _points(ps, ps+n)
+        {
+        }
+
         Polygon()
         {
         }
 
         const PointF& at(std::size_t n) const
         {
-            return _points.at(n);
+            return _points[n];
         }
 
         PointF& at(std::size_t n)
         {
-            return _points.at(n);
+            return _points[n];
         }
 
         void clear()

@@ -173,12 +173,19 @@ class Rasterizer2
         template <typename PointT>
         void fillPolygon(const BasicPoint<PointT>* points, size_t pointCount);
 
+        void fillPolygon2( const PointF* ps, std::size_t n );
+
         void fillPolygons(const std::vector<Polygon>& polygons);
 
         void rasterPolygonsNoAA(const std::vector<Polygon>& polygons, 
                                 const Color& color, 
                                 Pt::int32_t minX, Pt::int32_t minY, 
                                 Pt::int32_t maxX, Pt::int32_t maxY);
+
+        void rasterPolygonXWAA(const PointF* ps, std::size_t pointCount, 
+                               const Color& color, 
+                               Pt::int32_t minX_, Pt::int32_t minY_, 
+                               Pt::int32_t maxX_, Pt::int32_t maxY_);
 
         void rasterPolygonsXWAA(const std::vector<Polygon>& polygons, 
                                 const Color& color, 

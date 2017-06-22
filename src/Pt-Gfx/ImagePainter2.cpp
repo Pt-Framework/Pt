@@ -677,8 +677,14 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount)
     drawThickPolyline_impl(ps, pointCount, autoClose, 0);
 }
 
-void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount )
+void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount)
 {
+    // NOTE: enable the next two lines to use another internal API of the
+    //       polygon rasterizer
+
+    //_rasterizer->fillPolygon2(ps, pointCount);
+    //return;
+
     // Use anti-aliasing
     if( _rasterizer->isAntiAliasing() ) {
         // Remove duplicates

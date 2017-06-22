@@ -354,6 +354,131 @@ void Rasterizer2::rasterPolygonsNoAA(const std::vector<Polygon>& polygons,
 }
 
 
+
+// Inspired by: Efficient Polygon Fill Algorithm With C Code Sample
+//              http://alienryderflex.com/polygon_fill
+//              Public-domain code by Darel Rex Finley, 2007
+void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount, 
+                                    const Color& color, 
+                                    Pt::int32_t minX_, Pt::int32_t minY_, 
+                                    Pt::int32_t maxX_, Pt::int32_t maxY_)
+{
+    std::size_t totalPointCount = pointCount;
+
+    // List of nodes that define the horizontal spans
+    std::vector<float> nodeX(totalPointCount * 2, 0);
+
+    const Pt::int32_t minX = minX_;
+    const Pt::int32_t minY = minY_;
+    const Pt::int32_t maxY = maxY_;
+
+    // List of polygon scanlines
+    PolygonScanlines scanlines;
+
+    if(_compositionMode != CompositionMode::SourceCopy)
+        scanlines.resize( (maxY - minY) + 1 + 2 );
+
+    // Loop through the rows of the image
+    for(Pt::int32_t y = minY; y <= maxY; ++y) 
+    {     
+        // Build a list of nodes using all the polygons
+        std::size_t nodes = 0;
+        
+        // Loop through the points
+        Pt::int32_t j = pointCount - 1;
+
+        for(size_t i = 0; i < pointCount; ++i) 
+        {
+            // Get the coordinates
+            const float curXi = points[i].x();
+            const float curYi = points[i].y();
+            const float curXj = points[j].x();
+            const float curYj = points[j].y();
+                
+            // Calculate the node's coordinate
+            if( ( y >= curYi && y < curYj ) || ( y >= curYj && y < curYi ) )
+            {
+                // Bail out if we have produced too many nodes
+                if( nodes >= nodeX.size() ) 
+                    return;
+                    
+                // Calculate the node's coordinate
+                const float deltaYp = y - curYi;
+                const float deltaYj = curYj  - curYi;
+                const float deltaXj = curXj  - curXi;
+                const float interXf = curXi  + (deltaYp) / deltaYj * deltaXj;
+                    
+                nodeX[nodes++] = interXf;
+            }
+                
+            // Update the searching index
+            j = i;
+        }
+
+        // Skip if there is no node
+        if( ! nodes ) 
+            continue;
+        
+        // Sort the nodes
+        bubbleSortAscending(nodeX, nodes);
+        
+        // Fill the pixels between the node pairs
+        for(Pt::int32_t i = 0; i < nodes; i += 2) 
+        {
+            // Calculate the coordinate
+            const Pt::int32_t from = Pt::lround( ceil(nodeX[i]) );
+            const Pt::int32_t to   = Pt::lround( floor(nodeX[i + 1]) );
+            
+            if(to < from) 
+                continue;
+            
+            // Store the scanline coordinate as needed
+            if(_compositionMode != CompositionMode::SourceCopy) 
+            {
+                scanlines[y - minY + 1].push_back(ScanlineElement16(from, to));
+            }
+            
+            // Draw the scanline
+            rasterScanline(from - minX, to - minX, y - minY, minX, minY, color);
+        }
+    }
+
+    // Raster the anti-aliased outline
+
+    // Mask
+    DrawLineMask mask_zero;
+    DrawLineMask mask_nnp1;
+    memcpy(mask_zero, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
+    memcpy(mask_nnp1, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
+        
+    // From point N to point (N + 1), successively
+    const size_t pc1 = pointCount - 1;
+        
+    for(size_t i = 0; i < pc1; ++i) 
+    {
+        rasterOnePixelAreaGLineSegmentXWAA_F(
+            points[i].x(),     points[i].y(),
+            points[i + 1].x(), points[i + 1].y(),
+            color, minX, minY_ - 1, scanlines, mask_nnp1 );
+            
+        if( ! i ) 
+            memcpy(&mask_zero, &mask_nnp1, sizeof(mask_zero));
+    }
+        
+    // From the last point to the first point
+    mask_zero[2] = mask_zero[0];
+    mask_zero[3] = mask_zero[1];
+    mask_zero[0] = mask_nnp1[2];
+    mask_zero[1] = mask_nnp1[3];
+        
+    rasterOnePixelAreaGLineSegmentXWAA_F(
+          points[pc1].x(), points[pc1].y(),
+          points[0].x(),   points[0].y(),
+          color, minX, minY_ - 1, scanlines, mask_zero );
+
+}
+
+
 // Inspired by: Efficient Polygon Fill Algorithm With C Code Sample
 //              http://alienryderflex.com/polygon_fill
 //              Public-domain code by Darel Rex Finley, 2007
