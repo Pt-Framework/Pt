@@ -99,7 +99,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_RESULT_HTML               0 // (automatically disabling test drawing
 #define BENCHMARK_RESULT_HTML_SIDE_BY_SIDE  1
 
-#define BENCHMARK_CHECK_RESULTING_IMAGE     1
+#define BENCHMARK_CHECK_RESULTING_IMAGE     0
 
 #define BENCHMARK_IMAGE_SIZE                Size(1280, 800)
 #define BENCHMARK_LOOP_COUNT                ( 500 * (BENCHMARK_RESULT_HTML ? 10 : 1) )
