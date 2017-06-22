@@ -32,6 +32,7 @@
 
 #include <Pt/Types.h>
 #include <Pt/Api.h>
+#include <iostream>
 #include <cmath>
 #include <cassert>
 #include <math.h> // hypot
@@ -334,6 +335,7 @@ inline long int lround(double x)
     long int tmp;
     __asm fld x   
     __asm fistp tmp
+    return tmp;
 
 #elif ( defined(__GNUC__) || defined(__clang__) ) && \
       ( defined(__i386) || defined(__x86_64__) )

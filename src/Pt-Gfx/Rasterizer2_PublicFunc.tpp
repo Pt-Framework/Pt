@@ -203,6 +203,9 @@ inline void Rasterizer2::fillPolygons(const std::vector<Polygon>& polygons)
         }
     }
 
+    if(_isGradient)
+        updateGradientBrush(maxX - minX + 1, maxY - minY + 1);
+
     if( this->isAntiAliasing() )
     {
         rasterPolygonsXWAA(clippedPolygons, _brush.color(), minX, minY, maxX, maxY);
