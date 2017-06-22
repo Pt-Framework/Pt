@@ -561,7 +561,22 @@ void ImagePainter2::drawRoundedRect( const RectF& rect, float radius )
     const float y2 = rect.bottomRight().y();
 
     // Rasterize one-pixel round rectangle
-    if(_rasterizer->pen().size() == 1) {
+    if(_rasterizer->pen().size() == 1) 
+    {
+        //
+        // NOTE: enable the next lines to use another internal API to
+        //       stroke a rounded rect
+        //
+
+        //std::vector<PointF> pointsF;
+        //generateRoundRectPoints(pointsF, x1, y1, x2, y2, radius, 4);
+
+        //if( ! pointsF.empty() )
+        //    pointsF.push_back( pointsF.front() );
+
+        //drawPolyline( pointsF.data(), pointsF.size() );
+        //return;
+
         // Generate a quadratic polybezier that represents the rounded-rectangle
         const PointF pbz[] = { // CCW
             // Bottom left

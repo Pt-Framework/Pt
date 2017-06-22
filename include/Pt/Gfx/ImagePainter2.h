@@ -374,57 +374,57 @@ class PT_GFX_API ImagePainter2 : public Painter
 
 
         static inline void generateRoundRectPoints(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, float radius, Pt::int32_t nSegs)
-    {
-        // CCW
+        {
+            // CCW
 
-        // --- Bottom left ---
-        generateQuadraticBezierPoints(
-            dst,
-            x1         , y2 - radius,
-            x1         , y2         ,
-            x1 + radius, y2         ,
-            nSegs
-        );
+            // --- Bottom left ---
+            generateQuadraticBezierPoints(
+                dst,
+                x1         , y2 - radius,
+                x1         , y2         ,
+                x1 + radius, y2         ,
+                nSegs
+            );
 
-        // --- Bottom middle ---
-        dst.push_back( PointF((x1 + x2) * 0.5f, y2) );
+            // --- Bottom middle ---
+            dst.push_back( PointF((x1 + x2) * 0.5f, y2) );
 
-        // --- Bottom left ---
-        generateQuadraticBezierPoints(
-            dst,
-            x2 - radius, y2         ,
-            x2,          y2         ,
-            x2,          y2 - radius,
-            nSegs
-        );
+            // --- Bottom left ---
+            generateQuadraticBezierPoints(
+                dst,
+                x2 - radius, y2         ,
+                x2,          y2         ,
+                x2,          y2 - radius,
+                nSegs
+            );
 
-        // --- Center right ---
-        dst.push_back( PointF(x2, (y1 + y2) * 0.5f) );
+            // --- Center right ---
+            dst.push_back( PointF(x2, (y1 + y2) * 0.5f) );
 
-        // --- Top right ---
-        generateQuadraticBezierPoints(
-            dst,
-            x2,          y1 + radius,
-            x2,          y1         ,
-            x2 - radius, y1         ,
-            nSegs
-        );
+            // --- Top right ---
+            generateQuadraticBezierPoints(
+                dst,
+                x2,          y1 + radius,
+                x2,          y1         ,
+                x2 - radius, y1         ,
+                nSegs
+            );
 
-        // --- Top middle ---
-        dst.push_back( PointF((x1 + x2) * 0.5f, y1) );
+            // --- Top middle ---
+            dst.push_back( PointF((x1 + x2) * 0.5f, y1) );
 
-        // --- Top left ---
-        generateQuadraticBezierPoints(
-            dst,
-            x1 + radius, y1         ,
-            x1,          y1         ,
-            x1,          y1 + radius,
-            nSegs
-        );
+            // --- Top left ---
+            generateQuadraticBezierPoints(
+                dst,
+                x1 + radius, y1         ,
+                x1,          y1         ,
+                x1,          y1 + radius,
+                nSegs
+            );
 
-        // --- Center left ---
-        dst.push_back( PointF(x1, (y1 + y2) * 0.5f) );
-    }
+            // --- Center left ---
+            dst.push_back( PointF(x1, (y1 + y2) * 0.5f) );
+        }
     
         
         static inline void combineLinePointsAndAddCaps(std::vector<PointF>& dst, const std::vector<PointF>& inner, const std::vector<PointF>& outer, Pen::CapStyle begCap, Pen::CapStyle endCap, size_t penSize)
