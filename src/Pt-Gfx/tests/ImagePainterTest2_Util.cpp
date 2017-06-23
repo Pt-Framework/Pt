@@ -128,14 +128,23 @@ static const std::string formatCaption(const Painter& painter, CompositionMode c
 
 static void sdlPreviewRGB888Buffer(const std::string& title, const Pt::uint8_t* argb8888Buff, int sizeX, int sizeY, bool saveImageAsPNG)
 {
-#if defined(WITH_EXPERIMENTAL_GFX)
     // Save the image as a PNG file
     if(saveImageAsPNG) {
         std::string eraseStr = " - ImagePainter2";
-        std::string fileName = std::string(sfileDirXPrefix) + "../src/Pt-Gfx/TEMPORARY/IPT2 - " + title + ".png";
+        std::string fileName = std::string("IPT2 - ") + title + ".png";
         fileName.erase(fileName.find(eraseStr), eraseStr.length());
-        if(writePNG(fileName.c_str(), sizeX, sizeY, argb8888Buff) < 0) return;
+
+        Pt::System::Path pp = buildDir;
+        pp /= Pt::System::Path::updir();
+        pp /= "src";
+        pp /= "Pt-Gfx";
+        pp /= "TEMPORARY";
+        pp /= fileName.c_str();
+
+        if(writePNG(pp.toLocal().c_str(), sizeX, sizeY, argb8888Buff) < 0) return;
     }
+
+#if defined(WITH_EXPERIMENTAL_GFX)
 
     // Initialise SDL
     if(SDL_Init(SDL_INIT_VIDEO) < 0) return;

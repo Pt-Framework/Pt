@@ -162,7 +162,7 @@ static Brush bmBrushGradientV;
 static Brush bmBrushTextureT;
 static Brush bmBrushTextureW;
 
-static const char* sfileDirXPrefix = "";
+Pt::System::Path buildDir;
 
 // Include the other source files
 #include "ImagePainterTest2_Util.cpp"
@@ -182,7 +182,7 @@ static const char* sfileDirXPrefix = "";
 
 int main(int argc, char* args[])
 {
-    Pt::System::Path buildDir( args[0] );
+    buildDir = args[0];
     buildDir = buildDir.dirName();
     if(buildDir.baseName() != "build")
       buildDir = buildDir.dirName();

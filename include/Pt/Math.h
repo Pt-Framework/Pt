@@ -37,93 +37,96 @@
 #include <cassert>
 #include <math.h> // hypot
 
+//#include <x86intrin.h>
+
+
 namespace Pt {
 
 /** @brief The constant pi.
 */
-template<typename T> 
+template<typename T>
 T pi();
 
 /** @brief The constant pi*2.
 */
-template<typename T> 
+template<typename T>
 T piDouble();
 
 /** @brief The constant pi/2.
 */
-template<typename T> 
+template<typename T>
 T piHalf();
 
 /** @brief The constant pi/4.
 */
-template<typename T> 
+template<typename T>
 T piQuart();
 
 /** @brief The constant pi^2.
 */
-template<typename T> 
+template<typename T>
 T piSquare();
 
 
-template<> 
+template<>
 inline float pi<float>()
-{ 
-  return 3.14159265f; 
+{
+  return 3.14159265f;
 }
-   
-template<> 
+
+template<>
 inline float piDouble<float>()
-{ 
-  return 6.28318531f; 
+{
+  return 6.28318531f;
 }
 
-template<> 
+template<>
 inline float piHalf<float>()
-{ 
-  return 1.57079633f; 
+{
+  return 1.57079633f;
 }
 
-template<> 
+template<>
 inline float piQuart<float>()
-{ 
-  return 0.78539816f; 
+{
+  return 0.78539816f;
 }
 
-template<> 
+template<>
 inline float piSquare<float>()
-{ 
-  return 9.86960440f; 
+{
+  return 9.86960440f;
 }
 
 
-template<> 
+template<>
 inline double pi<double>()
-{ 
-  return 3.14159265358979323846; 
+{
+  return 3.14159265358979323846;
 }
-   
-template<> 
+
+template<>
 inline double piDouble<double>()
-{ 
-  return 6.28318530717958647692; 
+{
+  return 6.28318530717958647692;
 }
 
-template<> 
+template<>
 inline double piHalf<double>()
-{ 
-  return 1.57079632679489661923; 
+{
+  return 1.57079632679489661923;
 }
 
-template<> 
+template<>
 inline double piQuart<double>()
-{ 
-  return 0.78539816339744830961; 
+{
+  return 0.78539816339744830961;
 }
 
-template<> 
+template<>
 inline double piSquare<double>()
-{ 
-  return 9.86960440108935861883449099987615114; 
+{
+  return 9.86960440108935861883449099987615114;
 }
 
 
@@ -148,13 +151,13 @@ inline double degToRad(double deg)
 
 
 inline float radToDeg(float rad)
-{ 
-    return rad * RadToDegF; 
+{
+    return rad * RadToDegF;
 }
 
 inline double radToDeg(double rad)
-{ 
-    return rad * RadToDeg; 
+{
+    return rad * RadToDeg;
 }
 
 
@@ -168,7 +171,7 @@ T fastSin(const T& theta)
 {
     assert(theta <= piDouble<T>());
     assert(theta >= 0);
-    
+
     T localTheta = theta;
 
     if(localTheta > pi<T>())
@@ -180,7 +183,7 @@ T fastSin(const T& theta)
     const T C = -4 / piSquare<T>();
     //const float Q = 0.775;
     const T P = static_cast<T>(0.225);
-    
+
     T y = B * localTheta + C * localTheta * ::fabs(localTheta);
     y = P * (y * std::fabs(y) - y) + y;   // Q * y + P * y * abs(y)
     return y;
@@ -212,7 +215,7 @@ T fastCos(const T& theta)
 template <typename T>
 T fastAtan2(T y, T x)
 {
-    if(x == 0.0) 
+    if(x == 0.0)
     {
         if(y >  0) return piHalf<T>();
         if(y == 0) return 0;
@@ -222,20 +225,20 @@ T fastAtan2(T y, T x)
     const T z = y / x;
     T atan = 0.0;
 
-    if(std::fabs(z) < 1.0) 
+    if(std::fabs(z) < 1.0)
     {
         atan = z / (static_cast<T>(1.0) + static_cast<T>(0.28) * z * z);
-        
-        if(x < 0.0) 
+
+        if(x < 0.0)
         {
             return y < 0 ? atan - pi<T>()
                          : atan + pi<T>();
         }
     }
-    else 
+    else
     {
         atan = piHalf<T>() - z / (z * z + static_cast<T>(0.28));
-        if(y < 0.0) 
+        if(y < 0.0)
             return atan - pi<T>();
     }
 
@@ -280,29 +283,32 @@ inline double hypot(double x, double y)
 */
 inline int lround(float x)
 {
-#if __cplusplus == 201103L
-    
-    return std::lround(x);
+    //return _mm_cvtss_si64(_mm_load_ss(&x));
 
-#elif defined(_MSC_VER) && defined (_M_IX86) 
-    
+#if __cplusplus == 201103L
+
+   return std::lround(x);
+
+#elif defined(_MSC_VER) && defined (_M_IX86)
+
     int tmp;
-    __asm fld x   
+    __asm fld x
     __asm fistp tmp
     return tmp;
 
 #elif ( defined(__GNUC__) || defined(__clang__) ) && \
       ( defined(__i386) || defined(__x86_64__) )
-    
+
     int tmp;
     __asm__ __volatile__ (
-        "fld   %1\n\t"
-        "fistp %0    "
+        "flds   %1\n\t"
+        "fistpq %0    "
         : "=m"(tmp)
         :  "m"(x)
         : "memory"
     );
     return tmp;
+
 
 #elif ( defined(__GNUC__) || defined(__clang__) ) && \
         defined(__arm__)
@@ -326,6 +332,8 @@ inline int lround(float x)
 */
 inline long int lround(double x)
 {
+    //return _mm_cvtsd_si64(_mm_load_sd(&x));
+
 #if __cplusplus == 201103L
 
     return std::lround(x);
@@ -333,7 +341,7 @@ inline long int lround(double x)
 #elif defined(_MSC_VER) || defined (_M_IX86)
 
     long int tmp;
-    __asm fld x   
+    __asm fld x
     __asm fistp tmp
     return tmp;
 
@@ -342,8 +350,8 @@ inline long int lround(double x)
 
     long int tmp;
     __asm__ __volatile__ (
-        "fld   %1\n\t"
-        "fistp %0    "
+        "fldl   %1\n\t"
+        "fistpq %0    "
         : "=m"(tmp)
         :  "m"(x)
         : "memory"
@@ -352,7 +360,7 @@ inline long int lround(double x)
 
 #elif ( defined(__GNUC__) || defined(__clang__) ) && \
         defined(__arm__)
-    
+
     float       tmp;
     Pt::ssize_t res;
     __asm__ __volatile__ ( "ftosid %0, %P1" : "=w" (tmp) : "w" (x) );

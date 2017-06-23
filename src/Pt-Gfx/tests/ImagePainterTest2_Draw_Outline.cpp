@@ -11,8 +11,6 @@ static void testDrawSolidLine(const char* title, Image& image, Painter& painter)
     painter.drawLine( PointF(  0,   0), PointF(999, 599) );
     painter.setClip( RectF (0, image.width() - 1, 0, image.height() - 1) );
 #endif
-    //sdlPreviewRGB888Buffer(title, image.data(), image.width(), image.height(), !!dynamic_cast<ImagePainter2*>(&painter));
-    return;
 
     painter.drawImage(PointF(image.width() - textureWithWhiteBackground.width(),   0), textureWithWhiteBackground);
     painter.drawImage(PointF(image.width() - textureWithWhiteBackground.width(), 300), textureWithWhiteBackground, RectF(20, 70, 20, 70));
