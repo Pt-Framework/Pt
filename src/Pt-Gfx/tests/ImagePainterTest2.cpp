@@ -182,20 +182,20 @@ static const char* sfileDirXPrefix = "";
 
 int main(int argc, char* args[])
 {
+    Pt::System::Path buildDir( args[0] );
+    buildDir = buildDir.dirName();
+    if(buildDir.baseName() != "build")
+      buildDir = buildDir.dirName();
+
     // Determine fonts dir
-    FONT_DIR = args[0];
-    FONT_DIR = FONT_DIR.dirName();
-    FONT_DIR /= Pt::System::Path::updir();
+    FONT_DIR = buildDir;
     FONT_DIR /= Pt::System::Path::updir();
     FONT_DIR /= "src";
     FONT_DIR /= "Pt-Gfx";
     FONT_DIR /= "fonts";
 
-
     // Load the textures
-    Pt::System::Path etcPath( args[0] );
-    etcPath = etcPath.dirName();
-    etcPath /= Pt::System::Path::updir();
+    Pt::System::Path etcPath = buildDir;
     etcPath /= Pt::System::Path::updir();
     etcPath /= "etc";
 
