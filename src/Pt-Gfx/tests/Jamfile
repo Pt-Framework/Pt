@@ -62,5 +62,15 @@ else
     LinkFlags ImagePainterTest2 : -lpng ;
 }
 
+if $(WITH_BUILTIN_ZLIB)
+{
+    LinkLibraries ImagePainterTest2 : $(ZLIB) ;
+}
+else
+{
+    LinkFlags ImagePainterTest2 : $(ZLIB_LINKFLAGS) ;
+    LinkLibs ImagePainterTest2 : $(ZLIB_LINKLIBS) ;
+}
+
 # pkg-config --cflags sdl2
 # pkg-config --libs sdl2

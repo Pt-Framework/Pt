@@ -37,6 +37,104 @@ inline const Pt::uint8_t* Rasterizer2::patternBufferMP64() const
 { return _patternBufferMP; }
 
 
+inline void Rasterizer2::strokeNarrowRoundedRect(const RectF& rect, float radius)
+{
+    const float x1 = rect.topLeft().x();
+    const float y1 = rect.topLeft().y();
+    const float x2 = rect.bottomRight().x();
+    const float y2 = rect.bottomRight().y();
+
+    // line end masks
+    DrawLineMask mask_zero;
+    memcpy(mask_zero, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
+
+    DrawLineMask mask_nnp1;
+    memcpy(mask_nnp1, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
+
+    // pattern state
+    Pt::int32_t fpiCtrInOut = PATTERN_BUFFER_COUNTER_START;
+
+    // bottom left corner
+    rasterOnePixelQuadraticBezierCurve(
+        x1 + radius, y2,
+        x1         , y2,
+        x1         , y2 - radius,
+        _pen.color(),  
+        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut, 
+        &mask_nnp1
+    );
+
+    // left staight line
+    rasterOnePixelQuadraticBezierCurve(
+        x1, y2 - radius,
+        x1, y1 + rect.height() / 2,
+        x1, y1 + radius,        
+        _pen.color(),  
+        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut, 
+        &mask_nnp1
+    );
+
+    // top left corner
+    rasterOnePixelQuadraticBezierCurve(
+        x1        , y1 + radius,
+        x1        , y1,
+        x1 + radius, y1,
+        _pen.color(),  
+        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut, 
+        &mask_nnp1
+    );
+
+    // top straight line
+    rasterOnePixelQuadraticBezierCurve(
+        x1 + radius          , y1,
+        x1 + rect.width() / 2, y1,
+        x2 - radius          , y1,
+        _pen.color(),  
+        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut, 
+        &mask_nnp1
+    );
+
+    // top right corner
+    rasterOnePixelQuadraticBezierCurve(
+        x2 - radius, y1,
+        x2         , y1,
+        x2         , y1 + radius,
+        _pen.color(),  
+        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut, 
+        &mask_nnp1
+    );
+
+    // right straight line
+    rasterOnePixelQuadraticBezierCurve(
+        x2, y1 + radius,
+        x2, y1 + rect.height() / 2,
+        x2, y2 - radius,
+        _pen.color(),  
+        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut, 
+        &mask_nnp1
+    );
+
+    // bottom right corner
+    rasterOnePixelQuadraticBezierCurve(
+        x2         , y2 - radius,
+        x2         , y2,
+        x2 - radius, y2,
+        _pen.color(),  
+        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut, 
+        &mask_nnp1
+    );
+
+    // bottom straight line
+    rasterOnePixelQuadraticBezierCurve(
+        x2 - radius          , y2,
+        x1 + rect.width() / 2, y2,
+        x1 + radius          , y2,
+        _pen.color(),  
+        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut, 
+        &mask_nnp1
+    );
+}
+
 //
 // Stroke polygon outline
 //

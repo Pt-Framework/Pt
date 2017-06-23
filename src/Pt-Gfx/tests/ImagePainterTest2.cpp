@@ -176,6 +176,28 @@ Pt::System::Path buildDir;
 #include "ImagePainterTest2_Benchmark.cpp"
 
 
+void benchmarkNarrowRoundedRect()
+{
+    Pt::Gfx::Image image( Pt::Gfx::ImageFormat::argb32(), Pt::Gfx::Size(400, 400) );
+    
+    Pt::Gfx::ImagePainter2 imagePainter(image);
+    imagePainter.setAntiAliasing(true);
+    imagePainter.setPen( Pt::Gfx::Color::fromRgb8(255, 0, 0)  );
+    imagePainter.setBrush( Pt::Gfx::Color::fromRgb8(0, 0, 255)  );
+
+    Pt::System::Clock clock;
+    clock.start();
+    for(int n = 0; n < 30000; ++n)
+    {
+        imagePainter.drawRoundedRect( Pt::Gfx::RectF(Pt::Gfx::PointF(150, 150), 
+                                                     Pt::Gfx::SizeF(50, 50)), 10);
+
+    }
+
+    long long time = clock.stop().toUSecs();
+    std::clog << "ROUNDED RECT TIME: " << time << std::endl;
+}
+
 //
 // Main program
 //
@@ -237,6 +259,9 @@ int main(int argc, char* args[])
     const Brush brushSolid2   (Color::fromRgb8(0, 255, 255, 175));
     const Brush brushGradient2(Color::fromRgb8(0, 255, 255, 175), Color::fromRgb8(0, 0, 0, 175), Brush::Horizontal);
     const Brush brushTexture2 (textureWithWhiteBackground);
+
+    // roundedRect
+    // benchmarkNarrowRoundedRect();
 
     // Solid lines
     if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_SOLID_LINE_AND_TEXT) {

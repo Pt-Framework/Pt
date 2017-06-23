@@ -161,6 +161,8 @@ class Rasterizer2
         void strokeOnePixelQuadraticPolybezierOutline(const Point* points, size_t pointCount);
         void strokeOnePixelEllipseArc(const Point& topLeft, const Size& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
+        void strokeNarrowRoundedRect(const RectF& rect, float radius);
+
         template <typename PointT>
         inline void strokeOnePixelPolygonOutline(const BasicPoint<PointT>* points, size_t pointCount, bool autoClose);
 

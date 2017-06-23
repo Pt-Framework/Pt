@@ -563,6 +563,10 @@ void ImagePainter2::drawRoundedRect( const RectF& rect, float radius )
     // Rasterize one-pixel round rectangle
     if(_rasterizer->pen().size() == 1)
     {
+        _rasterizer->strokeNarrowRoundedRect(rect, radius);
+        return;
+
+
         //
         // NOTE: enable the next lines to use another internal API to
         //       stroke a rounded rect
@@ -577,41 +581,42 @@ void ImagePainter2::drawRoundedRect( const RectF& rect, float radius )
         //drawPolyline( pointsF.data(), pointsF.size() );
         //return;
 
-        // Generate a quadratic polybezier that represents the rounded-rectangle
-        const PointF pbz[] = { // CCW
-            // Bottom left
-            PointF(x1         , y2 - radius),
-            PointF(x1         , y2         ),
-            PointF(x1 + radius, y2         ),
-            // Bottom middle
-            PointF((x1 + x2) * 0.5f, y2),
-            // Bottom right
-            PointF(x2 - radius, y2         ),
-            PointF(x2         , y2         ),
-            PointF(x2         , y2 - radius),
-            // Center right
-            PointF(x2, (y1 + y2) * 0.5f),
-            // Top right
-            PointF(x2         , y1 + radius),
-            PointF(x2         , y1         ),
-            PointF(x2 - radius, y1         ),
-            // Top middle
-            PointF((x1 + x2) * 0.5f, y1),
-            // Top left
-            PointF(x1 + radius, y1         ),
-            PointF(x1         , y1         ),
-            PointF(x1         , y1 + radius),
-            // Center left
-            PointF(x1, (y1 + y2) * 0.5f)
-        };
-        // Draw the quadratic polybezier
-        const size_t count = sizeof(pbz) / sizeof(pbz[0]);
 
-        //drawQuadraticPolybezier(pbz[0], pbz[count -1], &pbz[1], count - 2);
+        //// Generate a quadratic polybezier that represents the rounded-rectangle
+        //const PointF pbz[] = { // CCW
+        //    // Bottom left
+        //    PointF(x1         , y2 - radius),
+        //    PointF(x1         , y2         ),
+        //    PointF(x1 + radius, y2         ),
+        //    // Bottom middle
+        //    PointF((x1 + x2) * 0.5f, y2),
+        //    // Bottom right
+        //    PointF(x2 - radius, y2         ),
+        //    PointF(x2         , y2         ),
+        //    PointF(x2         , y2 - radius),
+        //    // Center right
+        //    PointF(x2, (y1 + y2) * 0.5f),
+        //    // Top right
+        //    PointF(x2         , y1 + radius),
+        //    PointF(x2         , y1         ),
+        //    PointF(x2 - radius, y1         ),
+        //    // Top middle
+        //    PointF((x1 + x2) * 0.5f, y1),
+        //    // Top left
+        //    PointF(x1 + radius, y1         ),
+        //    PointF(x1         , y1         ),
+        //    PointF(x1         , y1 + radius),
+        //    // Center left
+        //    PointF(x1, (y1 + y2) * 0.5f)
+        //};
+        //// Draw the quadratic polybezier
+        //const size_t count = sizeof(pbz) / sizeof(pbz[0]);
 
-        /// NOTE: This is the correct one :D
-        drawQuadraticPolybezier(pbz[0], pbz[0], &pbz[1], count - 1);
-        return;
+        ////drawQuadraticPolybezier(pbz[0], pbz[count -1], &pbz[1], count - 2);
+
+        ///// NOTE: This is the correct one :D
+        //drawQuadraticPolybezier(pbz[0], pbz[0], &pbz[1], count - 1);
+        //return;
     }
 
     // Generate a polygon that represents the rounded-rectangle
@@ -697,27 +702,27 @@ void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount)
     // NOTE: enable the next two lines to use another internal API of the
     //       polygon rasterizer
 
-    //_rasterizer->fillPolygon2(ps, pointCount);
-    //return;
+    _rasterizer->fillPolygon2(ps, pointCount);
+    return;
 
-    // Use anti-aliasing
-    if( _rasterizer->isAntiAliasing() ) {
-        // Remove duplicates
-        std::vector<PointF> pointsF;
-        deduplicatePointsF(pointsF, ps, pointCount);
+    //// Use anti-aliasing
+    //if( _rasterizer->isAntiAliasing() ) {
+    //    // Remove duplicates
+    //    std::vector<PointF> pointsF;
+    //    deduplicatePointsF(pointsF, ps, pointCount);
 
-        // Rasterize the polygon
-        _rasterizer->fillPolygon(pointsF.data(), pointsF.size());
-    }
+    //    // Rasterize the polygon
+    //    _rasterizer->fillPolygon(pointsF.data(), pointsF.size());
+    //}
 
-    // Do not use use anti-aliasing
-    else {
-        // Round the points and remove duplicates
-        std::vector<Point> points;
-        cnvPointsFToPointsDeduplicate(points, ps, pointCount);
-        // Rasterize the polygon
-        _rasterizer->fillPolygon(points.data(), points.size());
-    }
+    //// Do not use use anti-aliasing
+    //else {
+    //    // Round the points and remove duplicates
+    //    std::vector<Point> points;
+    //    cnvPointsFToPointsDeduplicate(points, ps, pointCount);
+    //    // Rasterize the polygon
+    //    _rasterizer->fillPolygon(points.data(), points.size());
+    //}
 }
 
 void ImagePainter2::drawQuadraticPolybezier(const PointF& from, const PointF& to,

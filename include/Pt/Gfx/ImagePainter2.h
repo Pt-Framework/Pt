@@ -275,7 +275,11 @@ class PT_GFX_API ImagePainter2 : public Painter
         // Based on: Bitmap/Bézier curves/Quadratic
         //           https://rosettacode.org/wiki/Bitmap/B%C3%A9zier_curves/Quadratic#C
         //           Last modified on February 17, 2017
-        static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, float x3, float y3, Pt::int32_t nSegs)
+        static inline void generateQuadraticBezierPoints(std::vector<PointF>& dst, 
+                                                         float x1, float y1, 
+                                                         float x2, float y2, 
+                                                         float x3, float y3, 
+                                                         Pt::int32_t nSegs)
         {
             // Check if the points actually specify a straight line
             const float sx = x3 - x2;
