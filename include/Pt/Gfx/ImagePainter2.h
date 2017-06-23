@@ -79,8 +79,6 @@ class PT_GFX_API ImagePainter2 : public Painter
         
         virtual void setFont(const Font& font);
 
-        virtual FontMetrics fontMetrics(const Pt::String& text) const;
-
         virtual void drawImage(const PointF& to, const Image& image);
 
         virtual void drawImage(const PointF& to, const Image& image, const RectF& imageRect);
@@ -88,6 +86,11 @@ class PT_GFX_API ImagePainter2 : public Painter
         virtual void drawText(const PointF& to, const Pt::String& text);
 
         //virtual void drawText(const PointF& to, const Pt::String& text, const Transform& t);
+
+        virtual FontMetrics fontMetrics(const Pt::String& text) const;
+
+        static FontMetrics fontMetrics(const Font& font, const Pt::String& text);
+
 
         virtual void drawLine(const PointF& from, const PointF& to);
 
@@ -113,17 +116,6 @@ class PT_GFX_API ImagePainter2 : public Painter
 
         virtual void drawEllipse(const PointF& topLeft, const SizeF& size);
 
-
-        void drawQuadraticBezier(const PointF& from, const PointF& to, 
-                                 const PointF& c);
-
-        void drawCubicBezier(const PointF& from, const PointF& to, 
-                            const PointF &c1, const PointF &c2);
-
-        virtual void drawQuadraticPolybezier(const PointF& from, const PointF& to, 
-                                             const PointF* controls, const size_t n);
-
-        
         // maybe better have ImagePainter::setSmoothness
         virtual void drawPath(const Path& path, float smoothness = 1.0f);
 
@@ -150,7 +142,6 @@ class PT_GFX_API ImagePainter2 : public Painter
         static void setDefaultFont(const std::string& name);
         static std::string defaultFont();
         static std::vector<std::string> fontNames();
-        static FontMetrics fontMetrics(const Font& font, const Pt::String& text);
 
     private:
         void clipPolygon(std::vector<PointF>& result, const std::vector<PointF>& subject, const std::vector<PointF>& clipRegion);
@@ -694,12 +685,12 @@ class PT_GFX_API ImagePainter2 : public Painter
          static bool intersectLine(bool& inLine, PointF& intersect, const PointF& line1a, const PointF& line1b, const PointF& line2a, const PointF& line2b, size_t penSize);
 
     private:
-      RectF        _clip;
       Rasterizer2* _rasterizer;
+      RectF        _clip;
 };
 
-
 } // namespace
+
 } // namespace
 
 #endif

@@ -280,11 +280,28 @@ void Rasterizer2::rasterPolygonsNoAA(const std::vector<Polygon>& polygons,
                                      Pt::int32_t maxX, Pt::int32_t maxY)
 {
     std::size_t totalPointCount = 0;
+    std::vector< std::vector<Point> > polygonPoints;
+    polygonPoints.reserve( polygons.size() );
 
-    for(std::vector<Polygon>::const_iterator it = polygons.begin();
-        it != polygons.end(); ++it)
-    {
-        totalPointCount += polygons.size();
+    std::vector<Polygon>::const_iterator it;
+    for(it = polygons.begin(); it != polygons.end(); ++it)
+    {           
+        if( it->size() < 3 )
+            continue;
+
+        polygonPoints.push_back( std::vector<Point>() );
+        polygonPoints.back().reserve( it->size() );
+
+        for(size_t i = 0; i < it->size(); ++i) 
+        {
+            const PointF& pf = it->at(i);
+            const Pt::int32_t x = lround( pf.x() );
+            const Pt::int32_t y = lround( pf.y() );
+
+            polygonPoints.back().push_back( Point(x, y) );
+        }
+
+        totalPointCount += polygonPoints.back().size();
     }
 
     // List of nodes that define the horizontal spans
@@ -294,44 +311,40 @@ void Rasterizer2::rasterPolygonsNoAA(const std::vector<Polygon>& polygons,
     for(Pt::int32_t y = minY; y <= maxY; ++y) 
     {
         // Build a list of nodes using all the polygons
-        Pt::int32_t nodes = 0;
-        for(size_t p = 0; p < polygons.size(); ++p) 
+        std::size_t nodes = 0;
+        for(size_t p = 0; p < polygonPoints.size(); ++p) 
         {
-            const Polygon* polygon = &polygons[p];
-
-            if( polygon->size() < 2 )
-                continue;
+            const std::vector<Point>& polygon = polygonPoints[p];
             
             // loop through the points
-            Pt::int32_t j = polygon->size() - 1;
+            Pt::int32_t j = polygon.size() - 1;
             
-            for(size_t i = 0; i < polygon->size(); ++i) 
+            for(size_t i = 0; i < polygon.size(); ++i) 
             {
                 // Get the coordinates
-                const Pt::int32_t curXi = lround( polygon->at(i).x() );
-                const Pt::int32_t curYi = lround( polygon->at(i).y() );
-                const Pt::int32_t curXj = lround( polygon->at(j).x() );
-                const Pt::int32_t curYj = lround( polygon->at(j).y() );
+                const Pt::int32_t curXi = polygon[i].x();
+                const Pt::int32_t curYi = polygon[i].y();
+                const Pt::int32_t curXj = polygon[j].x();
+                const Pt::int32_t curYj = polygon[j].y();
                 
                 // Calculate the node's coordinate
                 if( ( y >= curYi && y < curYj ) || ( y >= curYj && y < curYi ) ) 
                 {
                     // Bail out if we have produced too many nodes
-                    if((size_t) nodes >= nodeX.size()) 
+                    if(nodes >= nodeX.size()) 
                         return;
                     
                     // Calculate the node's coordinate
                     const Pt::int32_t deltaYp = y - curYi;
                     const Pt::int32_t deltaYj = curYj  - curYi;
                     const Pt::int32_t deltaXj = curXj  - curXi;
-                    const Pt::int32_t interXf = FIXED_POINT_FROM_INT(curXi)
-                                              + ( (FIXED_POINT_FROM_INT(deltaYp) + FIXED_POINT_CONSTANT_HALF) /
-                                                  deltaYj * deltaXj
-                                                );
+                    const Pt::int32_t interXf = FIXED_POINT_FROM_INT(curXi) +
+                                                ( (FIXED_POINT_FROM_INT(deltaYp) + 
+                                                   FIXED_POINT_CONSTANT_HALF) /
+                                                 deltaYj * deltaXj );
                     nodeX[nodes++] = FIXED_POINT_TO_INT(interXf);
                 }
                 
-                // Update the searching index
                 j = i;
             }
         }

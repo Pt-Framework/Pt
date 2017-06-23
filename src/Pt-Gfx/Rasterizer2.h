@@ -137,10 +137,6 @@ class Rasterizer2
         const Font& font() const
         { return _font; }
 
-        FontMetrics fontMetrics( const String& text ) const;
-
-        static FontMetrics fontMetrics( const Font& font, const Pt::String& text );
-
         void setClip( const Rect& clip );
 
         const Rect& clip() const
@@ -152,13 +148,20 @@ class Rasterizer2
         const CompositionMode& compositionMode() const
         { return _compositionMode; }
 
-        void blitImage(const Point& to, const Image& image);
-        void blitImage(const Point& to, const Image& image, const Rect& imageRect);
+        void drawImage(const Point& to, const Image& image);
 
-        void strokeText(const Point& to, const Pt::String& text, const Transform& t);
+        void drawImage(const Point& to, const Image& image, const Rect& imageRect);
+
+        void drawText(const Point& to, const Pt::String& text, const Transform& t);
+
+        FontMetrics fontMetrics( const String& text ) const;
+
+        static FontMetrics fontMetrics( const Font& font, const Pt::String& text );
+
+
         void strokeOnePixelLine(const Point& a, const Point& b, DrawLineMask* maskInOut);
         void strokeOnePixelRect(const Point& tl, const Point& br);
-        void strokeOnePixelQuadraticPolybezierOutline(const Point* points, size_t pointCount);
+        //void strokeOnePixelQuadraticPolybezierOutline(const Point* points, size_t pointCount);
         void strokeOnePixelEllipseArc(const Point& topLeft, const Size& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
         void strokeNarrowRoundedRect(const RectF& rect, float radius);

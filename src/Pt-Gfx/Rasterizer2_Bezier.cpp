@@ -38,47 +38,47 @@ namespace Gfx {
 // ===== Public Member Functions ========================================================
 // ======================================================================================
 
-void Rasterizer2::strokeOnePixelQuadraticPolybezierOutline(const Point* points, size_t pointCount)
-{
-    // Check if there are too few points
-    if(pointCount < 3) return;
-
-    // Mask
-    DrawLineMask mask_zero;
-    memcpy(mask_zero, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
-
-    DrawLineMask mask_nnp1;
-    memcpy(mask_nnp1, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
-
-    // Counter for pattern buffer
-    Pt::int32_t fpiCtrInOut = PATTERN_BUFFER_COUNTER_START;
-
-    // Draw the curves
-    for(size_t i = 0; i < (pointCount - 1); i += 2) {
-        // Adjust the current mask for the last curve as needed
-        if(i == pointCount - 3) {
-            // Rearrange
-            mask_zero[2] = mask_zero[0];
-            mask_zero[3] = mask_zero[1];
-            mask_zero[0] = mask_nnp1[2];
-            mask_zero[1] = mask_nnp1[3];
-            // Swap
-            mask_nnp1[0] = mask_zero[0];
-            mask_nnp1[1] = mask_zero[1];
-            mask_nnp1[2] = mask_zero[2];
-            mask_nnp1[3] = mask_zero[3];
-        }
-        // Draw one curve
-        rasterOnePixelQuadraticBezierCurve(
-            points[i    ].x(), points[i    ].y(),
-            points[i + 1].x(), points[i + 1].y(),
-            points[i + 2].x(), points[i + 2].y(),
-            _pen.color(), ( (_pen.style() == Pen::Solid) ? 0 : &fpiCtrInOut ), &mask_nnp1
-        );
-        // Save the zeroth mask
-        if(!i) memcpy(&mask_zero, &mask_nnp1, sizeof(mask_zero));
-    }
-}
+//void Rasterizer2::strokeOnePixelQuadraticPolybezierOutline(const Point* points, size_t pointCount)
+//{
+//    // Check if there are too few points
+//    if(pointCount < 3) return;
+//
+//    // Mask
+//    DrawLineMask mask_zero;
+//    memcpy(mask_zero, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
+//
+//    DrawLineMask mask_nnp1;
+//    memcpy(mask_nnp1, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
+//
+//    // Counter for pattern buffer
+//    Pt::int32_t fpiCtrInOut = PATTERN_BUFFER_COUNTER_START;
+//
+//    // Draw the curves
+//    for(size_t i = 0; i < (pointCount - 1); i += 2) {
+//        // Adjust the current mask for the last curve as needed
+//        if(i == pointCount - 3) {
+//            // Rearrange
+//            mask_zero[2] = mask_zero[0];
+//            mask_zero[3] = mask_zero[1];
+//            mask_zero[0] = mask_nnp1[2];
+//            mask_zero[1] = mask_nnp1[3];
+//            // Swap
+//            mask_nnp1[0] = mask_zero[0];
+//            mask_nnp1[1] = mask_zero[1];
+//            mask_nnp1[2] = mask_zero[2];
+//            mask_nnp1[3] = mask_zero[3];
+//        }
+//        // Draw one curve
+//        rasterOnePixelQuadraticBezierCurve(
+//            points[i    ].x(), points[i    ].y(),
+//            points[i + 1].x(), points[i + 1].y(),
+//            points[i + 2].x(), points[i + 2].y(),
+//            _pen.color(), ( (_pen.style() == Pen::Solid) ? 0 : &fpiCtrInOut ), &mask_nnp1
+//        );
+//        // Save the zeroth mask
+//        if(!i) memcpy(&mask_zero, &mask_nnp1, sizeof(mask_zero));
+//    }
+//}
 
 
 // ======================================================================================

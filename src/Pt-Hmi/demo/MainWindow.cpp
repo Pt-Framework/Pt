@@ -219,23 +219,18 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     Gfx::ImagePainter2 imagePainter(image);
     imagePainter.setAntiAliasing(true);
 
-
     Pt::Gfx::Transform trans;
     trans.translate(-125, -150);     
     trans.rotateDeg(45);
     trans.translate(125, 150);
     
-
     Pt::Gfx::Path path;    
-    
     path.moveTo( Pt::Gfx::PointF(100, 100) );
     path.addRoundedRect(Pt::Gfx::SizeF(50, 50), 10);
 
     //path.moveTo( Pt::Gfx::PointF(110, 110) );
     //path.addRoundedRect(Pt::Gfx::SizeF(30, 30), 10);
-
     //path.addEllipse( Pt::Gfx::SizeF(50, 100) );
-
     //path.transform(trans);
 
     imagePainter.setPen(Gfx::Color::fromRgb8(255, 0, 0)  );
@@ -244,18 +239,6 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 
     imagePainter.drawRoundedRect( Pt::Gfx::RectF(Pt::Gfx::PointF(150, 150), 
                                                   Pt::Gfx::SizeF(50, 50)), 10);
-
-    //Pt::System::Clock clock;
-    //clock.start();
-    //for(int n = 0; n < 10000; ++n)
-    //{
-    //    imagePainter.drawRoundedRect( Pt::Gfx::RectF(Pt::Gfx::PointF(150, 150), 
-    //                                                 Pt::Gfx::SizeF(50, 50)), 10);
-
-    //}
-
-    //long long time = clock.stop().toUSecs();
-    //std::ofstream("time") << "TIME: " << time << std::endl;
 
     //imagePainter.setPen( Gfx::Color::fromRgb8(150, 150, 255) );
     //imagePainter.drawEllipse(Pt::Gfx::PointF(100, 100), Pt::Gfx::SizeF(50, 100));

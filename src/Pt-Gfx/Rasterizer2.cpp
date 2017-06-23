@@ -75,14 +75,6 @@ const Rasterizer2::DrawLineMask Rasterizer2::NullLineMask = {
     MAXIMUM_POINT, MAXIMUM_POINT, MAXIMUM_POINT, MAXIMUM_POINT
 };
 
-FontMetrics Rasterizer2::fontMetrics( const Font& font, const Pt::String& text )
-{
-    DrawText2 textRender;
-    textRender.setFont(font);
-
-    return textRender.fontMetrics(text);
-}
-
 
 // ======================================================================================
 // ===== Public Member Functions ========================================================
@@ -99,10 +91,12 @@ Rasterizer2::Rasterizer2(Image& image)
     updateClip();
 }
 
+
 Rasterizer2::~Rasterizer2()
 {
     delete _text;
 }
+
 
 void Rasterizer2::setImage( Image& image )
 {
@@ -112,7 +106,10 @@ void Rasterizer2::setImage( Image& image )
 }
 
 const ImageFormat& Rasterizer2::format() const
-{ return _image->format(); }
+{ 
+    return _image->format(); 
+}
+
 
 void Rasterizer2::setPen( const Pen& pen )
 {
@@ -124,6 +121,7 @@ void Rasterizer2::setPen( const Pen& pen )
 
     updatePenPattern();
 }
+
 
 void Rasterizer2::setBrush( const Brush& brush )
 {
@@ -169,16 +167,13 @@ void Rasterizer2::setBrush( const Brush& brush )
     _brushPixel.reset(_brushImage->view(), 0, 0);
 }
 
+
 void Rasterizer2::setFont(const Font& font)
 {
     _font = font;
     _text->setFont(_font);
 }
 
-FontMetrics Rasterizer2::fontMetrics( const String& text ) const
-{
-    return _text->fontMetrics( text );
-}
 
 void Rasterizer2::setClip( const Rect& clip )
 {
@@ -186,13 +181,15 @@ void Rasterizer2::setClip( const Rect& clip )
     updateClip();
 }
 
-void Rasterizer2::blitImage(const Point& to, const Image& img)
+
+void Rasterizer2::drawImage(const Point& to, const Image& img)
 {
     const Rect imageRect( Point(0,0), img.size() );
-    blitImage( to, img, imageRect );
+    drawImage( to, img, imageRect );
 }
 
-void Rasterizer2::blitImage(const Point& to, const Image& from, const Rect& fromRect)
+
+void Rasterizer2::drawImage(const Point& to, const Image& from, const Rect& fromRect)
 {
     // Clip fromRect to fit into the clip/image rect
     const Point d       = _currentClip.topLeft() - to;
@@ -201,7 +198,8 @@ void Rasterizer2::blitImage(const Point& to, const Image& from, const Rect& from
     Rect fromClip(fromPos, _currentClip.size());
     fromClip = fromRect.intersect(fromClip);
 
-    if( fromClip.isNull() ) return;
+    if( fromClip.isNull() ) 
+        return;
 
     // Take account for smaller fromRect
     const Point toClip = to + (fromClip.topLeft() - fromRect.topLeft());
@@ -209,7 +207,8 @@ void Rasterizer2::blitImage(const Point& to, const Image& from, const Rect& from
     _image->format().copy(_image->view(), toClip, from.view(), fromClip, _compositionMode);
 }
 
-void Rasterizer2::strokeText( const Point& to, const Pt::String& text, const Transform& t )
+
+void Rasterizer2::drawText( const Point& to, const Pt::String& text, const Transform& t )
 {
     _text->setClip(_currentClip);
 
@@ -217,6 +216,21 @@ void Rasterizer2::strokeText( const Point& to, const Pt::String& text, const Tra
         _text->drawMono( *_image, _pen.color(), to, text, _compositionMode, t );
     else
         _text->draw( *_image, _pen.color(), to, text, _compositionMode, t );
+}
+
+
+FontMetrics Rasterizer2::fontMetrics( const String& text ) const
+{
+    return _text->fontMetrics( text );
+}
+
+
+FontMetrics Rasterizer2::fontMetrics( const Font& font, const Pt::String& text )
+{
+    DrawText2 textRender;
+    textRender.setFont(font);
+
+    return textRender.fontMetrics(text);
 }
 
 

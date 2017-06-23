@@ -343,12 +343,6 @@ std::vector<std::string> ImagePainter2::fontNames()
   return FreeType2::instance().fontNames();
 }
 
-FontMetrics ImagePainter2::fontMetrics( const Font& font, const Pt::String& text )
-{
-  return Rasterizer2::fontMetrics(font, text);
-}
-
-
 ImagePainter2::ImagePainter2(Image& image)
 : _rasterizer( new Rasterizer2(image) )
 {
@@ -392,14 +386,15 @@ const CompositionMode& ImagePainter2::compositionMode() const
 }
 
 
-void ImagePainter2::setClip( const RectF& clip )
+void ImagePainter2::setClip(const RectF& clip)
 {
-    const Rect clip_(
-        Point( lround(clip.x    ()), lround(clip.y     ()) ),
-        Size ( lround(clip.width()), lround(clip.height()) )
-    );
+    Rect roundedClip( Point( lround( clip.x() ), 
+                             lround( clip.y() ) ),
+                      Size( lround( clip.width() ), 
+                             lround( clip.height() ) ) );
 
-    _rasterizer->setClip(clip_);
+    _rasterizer->setClip(roundedClip);
+    
     _clip = clip;
 }
 
@@ -443,16 +438,12 @@ const Font& ImagePainter2::font() const
   return _rasterizer->font();
 }
 
-FontMetrics ImagePainter2::fontMetrics(const String& text) const
-{
-  return _rasterizer->fontMetrics( text );
-}
 
 void ImagePainter2::drawImage( const PointF& to, const Image& image )
 {
     const Point to_( lround(to.x()), lround(to.y()) );
 
-    _rasterizer->blitImage(to_, image);
+    _rasterizer->drawImage(to_, image);
 
 }
 
@@ -464,7 +455,7 @@ void ImagePainter2::drawImage( const PointF& to, const Image& image, const RectF
         Size ( lround(imageRect.width()), lround(imageRect.height()) )
     );
 
-    _rasterizer->blitImage(to_, image, ir_);
+    _rasterizer->drawImage(to_, image, ir_);
 
 }
 
@@ -473,17 +464,32 @@ void ImagePainter2::drawText( const PointF& to, const String& text )
 
     Point to_( lround(to.x()), lround(to.y()) );
     Transform identity;
-    _rasterizer->strokeText(to_, text, identity);
+    _rasterizer->drawText(to_, text, identity);
 }
+
+
+FontMetrics ImagePainter2::fontMetrics(const String& text) const
+{
+  return _rasterizer->fontMetrics( text );
+}
+
+
+FontMetrics ImagePainter2::fontMetrics( const Font& font, const Pt::String& text )
+{
+  return Rasterizer2::fontMetrics(font, text);
+}
+
 
 
 void ImagePainter2::drawLine( const PointF& from, const PointF& to )
 {
     // Rasterize one-pixel line
-    if(_rasterizer->pen().size() == 1) {
+    if(_rasterizer->pen().size() == 1) 
+    {
         // Convert the points
         const Point a( lround(from.x()), lround(from.y()) );
         const Point b( lround(to  .x()), lround(to  .y()) );
+        
         // Rasterize the line
         _rasterizer->strokeOnePixelLine(a, b, 0);
         return;
@@ -521,6 +527,7 @@ void ImagePainter2::drawLine( const PointF& from, const PointF& to )
         _rasterizer->penFillPolygonSeparate(points.data(), points.size());
     }
 }
+
 
 void ImagePainter2::drawRect( const RectF& rect )
 {
@@ -565,58 +572,6 @@ void ImagePainter2::drawRoundedRect( const RectF& rect, float radius )
     {
         _rasterizer->strokeNarrowRoundedRect(rect, radius);
         return;
-
-
-        //
-        // NOTE: enable the next lines to use another internal API to
-        //       stroke a rounded rect
-        //
-
-        //std::vector<PointF> pointsF;
-        //generateRoundRectPoints(pointsF, x1, y1, x2, y2, radius, 4);
-
-        //if( ! pointsF.empty() )
-        //    pointsF.push_back( pointsF.front() );
-
-        //drawPolyline( pointsF.data(), pointsF.size() );
-        //return;
-
-
-        //// Generate a quadratic polybezier that represents the rounded-rectangle
-        //const PointF pbz[] = { // CCW
-        //    // Bottom left
-        //    PointF(x1         , y2 - radius),
-        //    PointF(x1         , y2         ),
-        //    PointF(x1 + radius, y2         ),
-        //    // Bottom middle
-        //    PointF((x1 + x2) * 0.5f, y2),
-        //    // Bottom right
-        //    PointF(x2 - radius, y2         ),
-        //    PointF(x2         , y2         ),
-        //    PointF(x2         , y2 - radius),
-        //    // Center right
-        //    PointF(x2, (y1 + y2) * 0.5f),
-        //    // Top right
-        //    PointF(x2         , y1 + radius),
-        //    PointF(x2         , y1         ),
-        //    PointF(x2 - radius, y1         ),
-        //    // Top middle
-        //    PointF((x1 + x2) * 0.5f, y1),
-        //    // Top left
-        //    PointF(x1 + radius, y1         ),
-        //    PointF(x1         , y1         ),
-        //    PointF(x1         , y1 + radius),
-        //    // Center left
-        //    PointF(x1, (y1 + y2) * 0.5f)
-        //};
-        //// Draw the quadratic polybezier
-        //const size_t count = sizeof(pbz) / sizeof(pbz[0]);
-
-        ////drawQuadraticPolybezier(pbz[0], pbz[count -1], &pbz[1], count - 2);
-
-        ///// NOTE: This is the correct one :D
-        //drawQuadraticPolybezier(pbz[0], pbz[0], &pbz[1], count - 1);
-        //return;
     }
 
     // Generate a polygon that represents the rounded-rectangle
@@ -725,84 +680,6 @@ void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount)
     //}
 }
 
-void ImagePainter2::drawQuadraticPolybezier(const PointF& from, const PointF& to,
-                                             const PointF* controls, const size_t n)
-{
-    //TODO: to close
-    bool autoClose = false;
-    std::vector<PointF> ps;
-    size_t pointCount = n + 2;
-
-   ps.push_back(from);
-
-   for( size_t i = 0; i < n; ++i)
-      ps.push_back(controls[i]);
-
-   ps.push_back(to);
-
-    // Check the number of points
-    if(  autoClose && (pointCount < 4 ||  (pointCount & 1)) ) return; // The number of points must be >= 4 and even
-    if( !autoClose && (pointCount < 3 || !(pointCount & 1)) ) return; // The number of points must be >= 3 and odd
-
-    // Rasterize one-pixel polybezier
-    if(_rasterizer->pen().size() == 1) {
-        // Round the points and remove duplicates
-        std::vector<Point> points;
-        cnvPointsFToPointsDeduplicate(points, &ps[0], pointCount);
-        if(autoClose && points.back() != points[0]) points.push_back(points[0]);
-        // Rasterize the bezier
-        _rasterizer->strokeOnePixelQuadraticPolybezierOutline(points.data(), points.size());
-        return;
-    }
-
-    // Check if there is no actual point
-    if(!pointCount) return;
-
-    // Generate a polygon that approximates the polybezier
-    const size_t         adjPC = autoClose ? pointCount : (pointCount - 1);
-    std::vector<PointF>  pointsF, pointsFTmp;
-    std::vector<int32_t> segmentIndexMarker;
-
-    for(size_t i = 0; i < adjPC; i += 2) {
-        // Calculate the coordinates and length
-        const bool  lp   = ( autoClose && i == (adjPC - 2) );
-        const float x1   = ps[           i      ].x();
-        const float y1   = ps[           i      ].y();
-        const float x2   = ps[           i + 1  ].x();
-        const float y2   = ps[           i + 1  ].y();
-        const float x3   = ps[ lp ? 0 : (i + 2) ].x();
-        const float y3   = ps[ lp ? 0 : (i + 2) ].y();
-        const float dx32 = x3 - x2;
-        const float dy32 = y3 - y2;
-        const float dx21 = x2 - x1;
-        const float dy21 = y2 - y1;
-        const float l32  = sqrt(dx32 * dx32 + dy32 * dy32);
-        const float l21  = sqrt(dx21 * dx21 + dy21 * dy21);
-        const float l31  = l32 + l21;
-        // Determine the number of segments
-        const Pt::int32_t nSegs = lround(l31 / 20) + 3 + 1;
-        // Generate points for one quadratic bezier curve
-        pointsFTmp.clear();
-        generateQuadraticBezierPoints(pointsFTmp, x1, y1, x2, y2, x3, y3, nSegs);
-        // Concat the points
-        for(size_t j = 0; j < pointsFTmp.size(); ++j) {
-            // Skip similar points
-            if(!pointsF.empty()) {
-                const float dx = ::fabs( pointsF.back().x() - pointsFTmp[j].x() );
-                const float dy = ::fabs( pointsF.back().y() - pointsFTmp[j].y() );
-                if(dx <= VecResScaleDn && dy <= VecResScaleDn) continue;
-            }
-            // Store the points
-            pointsF.push_back(pointsFTmp[j]);
-        }
-        // Put the segment index marker
-        segmentIndexMarker.push_back(pointsF.size() - 1);
-    }
-    segmentIndexMarker.push_back(-1);
-
-    // Rasterize the polygon
-    drawThickPolyline_impl(pointsF.data(), pointsF.size(), false, segmentIndexMarker.data());
-}
 
 void ImagePainter2::drawEllipse(const PointF& topLeft, const SizeF& size)
 {
