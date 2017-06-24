@@ -285,7 +285,7 @@ inline void Rasterizer2::fillPolygon2(const PointF* ps, std::size_t n)
 
     std::vector<Polygon> clippedPolygons;
     clippedPolygons.resize(1);
-    clippedPolygons[0] = Polygon(ps, n);
+    clippedPolygons[0].assign(ps, n);
 
     Polygon& polygon = clippedPolygons[0];
 

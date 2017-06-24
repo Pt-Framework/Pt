@@ -122,13 +122,13 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(960 - 200, 110),
         PointF(880 - 200, 230),
         PointF(760 - 200, 150),
-        Painter::PolygonSeparatorPointF,
+        //Painter::PolygonSeparatorPointF,
         // Hole 1
         PointF(860 - 200 - 40 +  0, 130 - 20     ),
         PointF(860 - 200 - 40 + 30, 130 - 20 + 15),
         PointF(860 - 200 - 40 -  0, 130 - 20 + 40),
         PointF(860 - 200 - 40 - 20, 130 - 20 + 20),
-        Painter::PolygonSeparatorPointF,
+        //Painter::PolygonSeparatorPointF,
         // Hole 2
         PointF(860 - 200 + 40 +  0, 130 - 20     ),
         PointF(860 - 200 + 40 + 20, 130 - 20 + 20),
@@ -153,13 +153,13 @@ static void testDrawFillPolygon(const char* title, Image& image, Painter& painte
         PointF(960, 110),
         PointF(880, 230),
         PointF(760, 150),
-        Painter::PolygonSeparatorPointF,
+        //Painter::PolygonSeparatorPointF,
         // Hole 1
         PointF(860 - 40 +  0, 130 - 20     ),
         PointF(860 - 40 + 30, 130 - 20 + 15),
         PointF(860 - 40 -  0, 130 - 20 + 40),
         PointF(860 - 40 - 20, 130 - 20 + 20),
-        Painter::PolygonSeparatorPointF,
+        //Painter::PolygonSeparatorPointF,
         // Hole 2
         PointF(860 + 40 +  0, 130 - 20     ),
         PointF(860 + 40 + 20, 130 - 20 + 20),

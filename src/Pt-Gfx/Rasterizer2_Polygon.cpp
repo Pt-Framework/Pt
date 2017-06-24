@@ -505,7 +505,7 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
     for(std::vector<Polygon>::const_iterator it = polygons.begin();
         it != polygons.end(); ++it)
     {
-        totalPointCount += polygons.size();
+        totalPointCount += it->size();
     }
 
     // List of nodes that define the horizontal spans

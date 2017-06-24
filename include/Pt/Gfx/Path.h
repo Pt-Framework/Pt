@@ -53,6 +53,11 @@ class Polygon
         {
         }
 
+        void assign(const PointF* ps, std::size_t n)
+        {
+            _points.assign(ps, ps+n);
+        }
+
         const PointF& at(std::size_t n) const
         {
             return _points[n];
