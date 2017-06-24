@@ -59,8 +59,8 @@ inline void Rasterizer2::strokeNarrowRoundedRect(const RectF& rect, float radius
         x1 + radius, y2,
         x1         , y2,
         x1         , y2 - radius,
-        _pen.color(),  
-        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut, 
+        _pen.color(),
+        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut,
         &mask_nnp1
     );
 
@@ -68,9 +68,9 @@ inline void Rasterizer2::strokeNarrowRoundedRect(const RectF& rect, float radius
     rasterOnePixelQuadraticBezierCurve(
         x1, y2 - radius,
         x1, y1 + rect.height() / 2,
-        x1, y1 + radius,        
-        _pen.color(),  
-        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut, 
+        x1, y1 + radius,
+        _pen.color(),
+        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut,
         &mask_nnp1
     );
 
@@ -79,8 +79,8 @@ inline void Rasterizer2::strokeNarrowRoundedRect(const RectF& rect, float radius
         x1        , y1 + radius,
         x1        , y1,
         x1 + radius, y1,
-        _pen.color(),  
-        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut, 
+        _pen.color(),
+        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut,
         &mask_nnp1
     );
 
@@ -89,8 +89,8 @@ inline void Rasterizer2::strokeNarrowRoundedRect(const RectF& rect, float radius
         x1 + radius          , y1,
         x1 + rect.width() / 2, y1,
         x2 - radius          , y1,
-        _pen.color(),  
-        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut, 
+        _pen.color(),
+        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut,
         &mask_nnp1
     );
 
@@ -99,8 +99,8 @@ inline void Rasterizer2::strokeNarrowRoundedRect(const RectF& rect, float radius
         x2 - radius, y1,
         x2         , y1,
         x2         , y1 + radius,
-        _pen.color(),  
-        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut, 
+        _pen.color(),
+        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut,
         &mask_nnp1
     );
 
@@ -109,8 +109,8 @@ inline void Rasterizer2::strokeNarrowRoundedRect(const RectF& rect, float radius
         x2, y1 + radius,
         x2, y1 + rect.height() / 2,
         x2, y2 - radius,
-        _pen.color(),  
-        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut, 
+        _pen.color(),
+        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut,
         &mask_nnp1
     );
 
@@ -119,8 +119,8 @@ inline void Rasterizer2::strokeNarrowRoundedRect(const RectF& rect, float radius
         x2         , y2 - radius,
         x2         , y2,
         x2 - radius, y2,
-        _pen.color(),  
-        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut, 
+        _pen.color(),
+        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut,
         &mask_nnp1
     );
 
@@ -129,8 +129,8 @@ inline void Rasterizer2::strokeNarrowRoundedRect(const RectF& rect, float radius
         x2 - radius          , y2,
         x1 + rect.width() / 2, y2,
         x1 + radius          , y2,
-        _pen.color(),  
-        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut, 
+        _pen.color(),
+        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut,
         &mask_nnp1
     );
 }
@@ -249,7 +249,7 @@ template <typename PointT>
 inline void Rasterizer2::fillPolygon(const BasicPoint<PointT>* points, size_t pointCount)
 {
     // Check if there are too few points
-    if(pointCount < 3) 
+    if(pointCount < 3)
         return;
 
     // Separate the polygons and clip their coordinates
@@ -258,9 +258,9 @@ inline void Rasterizer2::fillPolygon(const BasicPoint<PointT>* points, size_t po
     std::vector< BasicPoint<PointT> > clippedPoints;
     std::vector< size_t             > clippedCounts;
 
-    separateAndClipPolygons(minX, maxX, minY, maxY, 
+    separateAndClipPolygons(minX, maxX, minY, maxY,
                             clippedPoints, clippedCounts, points, pointCount);
-    if( clippedPoints.empty() ) 
+    if( clippedPoints.empty() )
         return;
 
     // Update the gradient as needed
@@ -291,7 +291,7 @@ inline void Rasterizer2::fillPolygon2(const PointF* ps, std::size_t n)
 
     BasicClipShape<double>::clipPolygon(polygon.points(), _currentClip);
 
-    for(size_t j = 0; j < polygon.size(); ++j) 
+    for(size_t j = 0; j < polygon.size(); ++j)
     {
         const double x = polygon.at(j).x();
         const double y = polygon.at(j).y();
@@ -327,7 +327,7 @@ inline void Rasterizer2::fillPolygon2(const PointF* ps, std::size_t n)
 //
 //    BasicClipShape<double>::clipPolygon(clippedPolygon, _currentClip);
 //
-//    for(size_t j = 0; j < clippedPolygon.size(); ++j) 
+//    for(size_t j = 0; j < clippedPolygon.size(); ++j)
 //    {
 //        const double x = clippedPolygon[j].x();
 //        const double y = clippedPolygon[j].y();
@@ -367,7 +367,7 @@ inline void Rasterizer2::fillPolygons(const std::vector<Polygon>& polygons)
 
         BasicClipShape<double>::clipPolygon(polygon.points(), _currentClip);
 
-        for(size_t j = 0; j < polygon.size(); ++j) 
+        for(size_t j = 0; j < polygon.size(); ++j)
         {
             const double x = polygon.at(j).x();
             const double y = polygon.at(j).y();

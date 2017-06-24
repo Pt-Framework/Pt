@@ -281,9 +281,9 @@ inline double hypot(double x, double y)
 
 /** @brief Rounds to nearest integer value.
 */
-inline int lround(float x)
+inline Pt::int32_t lround(float x)
 {
-    //return _mm_cvtss_si64(_mm_load_ss(&x));
+    //return _mm_cvtss_si32(_mm_load_ss(&val));
 
 #if __cplusplus == 201103L
 
@@ -291,7 +291,7 @@ inline int lround(float x)
 
 #elif defined(_MSC_VER) && defined (_M_IX86)
 
-    int tmp;
+    Pt::int32_t tmp;
     __asm fld x
     __asm fistp tmp
     return tmp;
@@ -299,10 +299,10 @@ inline int lround(float x)
 #elif ( defined(__GNUC__) || defined(__clang__) ) && \
       ( defined(__i386) || defined(__x86_64__) )
 
-    int tmp;
+    Pt::int32_t tmp;
     __asm__ __volatile__ (
         "flds   %1\n\t"
-        "fistpq %0    "
+        "fistpl %0    "
         : "=m"(tmp)
         :  "m"(x)
         : "memory"
@@ -313,15 +313,15 @@ inline int lround(float x)
 #elif ( defined(__GNUC__) || defined(__clang__) ) && \
         defined(__arm__)
 
-    float tmp;
-    int res;
+    float       tmp;
+    Pt::int32_t res;
     __asm__ __volatile__ ( "ftosis %0, %1" : "=w" (tmp) : "w" (x) );
     __asm__ __volatile__ ( "fmrs   %0, %1" : "=r" (res) : "w" (tmp) );
     return res;
 
 #else
 
-    int tmp = static_cast<int>(x);
+    Pt::int32_t tmp = static_cast<Pt::int32_t>(x);
     tmp += (x - tmp >= 0.5) - (x - tmp <= -0.5);
     return tmp;
 
@@ -330,9 +330,9 @@ inline int lround(float x)
 
 /** @brief Rounds to nearest integer value.
 */
-inline long int lround(double x)
+inline Pt::int32_t lround(double x)
 {
-    //return _mm_cvtsd_si64(_mm_load_sd(&x));
+    //return _mm_cvtsd_si32(_mm_load_sd(&val));
 
 #if __cplusplus == 201103L
 
@@ -340,7 +340,7 @@ inline long int lround(double x)
 
 #elif defined(_MSC_VER) || defined (_M_IX86)
 
-    long int tmp;
+    Pt::int32_t tmp;
     __asm fld x
     __asm fistp tmp
     return tmp;
@@ -348,10 +348,10 @@ inline long int lround(double x)
 #elif ( defined(__GNUC__) || defined(__clang__) ) && \
       ( defined(__i386) || defined(__x86_64__) )
 
-    long int tmp;
+    Pt::int32_t tmp;
     __asm__ __volatile__ (
         "fldl   %1\n\t"
-        "fistpq %0    "
+        "fistpl %0    "
         : "=m"(tmp)
         :  "m"(x)
         : "memory"
@@ -362,14 +362,14 @@ inline long int lround(double x)
         defined(__arm__)
 
     float       tmp;
-    Pt::ssize_t res;
+    Pt::int32_t res;
     __asm__ __volatile__ ( "ftosid %0, %P1" : "=w" (tmp) : "w" (x) );
     __asm__ __volatile__ ( "fmrs   %0, %1"  : "=r" (res) : "w" (tmp) );
     return res;
 
 #else
 
-    long int tmp = static_cast<long int>(x);
+    Pt::int32_t tmp = static_cast<Pt::int32_t>(x);
     tmp += (x - tmp >= 0.5) - (x - tmp <= -0.5);
     return tmp;
 

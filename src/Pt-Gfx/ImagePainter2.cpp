@@ -119,9 +119,10 @@ void ImagePainter2::drawThickPolyline_impl(const PointF* ps, const size_t pointC
 
                 // Rasterize the polygon
                 if(solidPen && closedPolygon)
-                    _rasterizer->penFillPolygon( points.data(), points.size() );
-                else
-                    _rasterizer->penFillPolygonSeparate( points.data(), points.size() );
+                    _rasterizer->penFillPolygon(points.data(), points.size());
+                else {
+                    _rasterizer->penFillPolygonSeparate(points.data(), points.size());
+                }
             }
             // Do not use use anti-aliasing
             else
@@ -388,13 +389,13 @@ const CompositionMode& ImagePainter2::compositionMode() const
 
 void ImagePainter2::setClip(const RectF& clip)
 {
-    Rect roundedClip( Point( lround( clip.x() ), 
+    Rect roundedClip( Point( lround( clip.x() ),
                              lround( clip.y() ) ),
-                      Size( lround( clip.width() ), 
+                      Size( lround( clip.width() ),
                              lround( clip.height() ) ) );
 
     _rasterizer->setClip(roundedClip);
-    
+
     _clip = clip;
 }
 
@@ -484,12 +485,12 @@ FontMetrics ImagePainter2::fontMetrics( const Font& font, const Pt::String& text
 void ImagePainter2::drawLine( const PointF& from, const PointF& to )
 {
     // Rasterize one-pixel line
-    if(_rasterizer->pen().size() == 1) 
+    if(_rasterizer->pen().size() == 1)
     {
         // Convert the points
         const Point a( lround(from.x()), lround(from.y()) );
         const Point b( lround(to  .x()), lround(to  .y()) );
-        
+
         // Rasterize the line
         _rasterizer->strokeOnePixelLine(a, b, 0);
         return;
@@ -657,27 +658,31 @@ void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount)
     // NOTE: enable the next two lines to use another internal API of the
     //       polygon rasterizer
 
+#if 1
+
     _rasterizer->fillPolygon2(ps, pointCount);
-    return;
 
-    //// Use anti-aliasing
-    //if( _rasterizer->isAntiAliasing() ) {
-    //    // Remove duplicates
-    //    std::vector<PointF> pointsF;
-    //    deduplicatePointsF(pointsF, ps, pointCount);
+#else
 
-    //    // Rasterize the polygon
-    //    _rasterizer->fillPolygon(pointsF.data(), pointsF.size());
-    //}
+    // Use anti-aliasing
+    if( _rasterizer->isAntiAliasing() ) {
+        // Remove duplicates
+        std::vector<PointF> pointsF;
+        deduplicatePointsF(pointsF, ps, pointCount);
 
-    //// Do not use use anti-aliasing
-    //else {
-    //    // Round the points and remove duplicates
-    //    std::vector<Point> points;
-    //    cnvPointsFToPointsDeduplicate(points, ps, pointCount);
-    //    // Rasterize the polygon
-    //    _rasterizer->fillPolygon(points.data(), points.size());
-    //}
+        // Rasterize the polygon
+        _rasterizer->fillPolygon(pointsF.data(), pointsF.size());
+    }
+
+    // Do not use use anti-aliasing
+    else {
+        // Round the points and remove duplicates
+        std::vector<Point> points;
+        cnvPointsFToPointsDeduplicate(points, ps, pointCount);
+        // Rasterize the polygon
+        _rasterizer->fillPolygon(points.data(), points.size());
+    }
+#endif
 }
 
 
@@ -754,7 +759,6 @@ void ImagePainter2::drawEllipse(const PointF& topLeft, const SizeF& size)
 
 void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
 {
-
     // Convert the points
     const Point tl( lround(topLeft.x    ()), lround(topLeft.y     ()) );
     const Size  sz( lround(size   .width()), lround(size   .height()) );
@@ -858,19 +862,19 @@ void ImagePainter2::clipPolygon(std::vector<PointF>& result, const std::vector<P
 
 void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
 {
-     drawArc(topLeft, size, degBegin, degEnd, ArcMode::Open);
+    drawArc(topLeft, size, degBegin, degEnd, ArcMode::Open);
 }
 
 
 void ImagePainter2::drawChord(const PointF& topLeft, const SizeF& size,  float degBegin, float degEnd)
 {
-  drawArc(topLeft, size, degBegin, degEnd, ArcMode::Chord);
+    drawArc(topLeft, size, degBegin, degEnd, ArcMode::Chord);
 }
 
 
 void ImagePainter2::drawPie(const PointF& topLeft, const SizeF& size,  float degBegin, float degEnd)
 {
-  drawArc(topLeft, size, degBegin, degEnd, ArcMode::Pie);
+    drawArc(topLeft, size, degBegin, degEnd, ArcMode::Pie);
 }
 
 
@@ -939,9 +943,12 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size,
         if(arcMode == ArcMode::Chord) {
             // The arc's "outside" lines
             generateArcPoints(pointsF, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd, 0);
+            pointsF.push_back(pointsF[0]);
             // The arc's "inside" lines
             pointsF.push_back(Painter::PolygonSeparatorPointF);
+            const size_t fp = pointsF.size();
             generateArcPoints(pointsF, radiusXi, radiusYi, centerX + shiftX, centerY + shiftY, degBegin, degEnd, 0);
+            pointsF.push_back(pointsF[fp]);
         }
         else if(arcMode == ArcMode::Pie) {
             // Calculate the adjusted angle
@@ -952,10 +959,13 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size,
             // The arc's "outside" lines
             generateArcPoints(pointsF, radiusXo, radiusYo, centerX, centerY, odegBegin, odegEnd, 0);
             pointsF.push_back(PointF(centerXsub, centerYsub));
+            pointsF.push_back(pointsF[0]);
             // The arc's "inside" lines
             pointsF.push_back(Painter::PolygonSeparatorPointF);
+            const size_t fp = pointsF.size();
             generateArcPoints(pointsF, radiusXi, radiusYi, centerX, centerY, idegBegin, idegEnd, 0);
             pointsF.push_back(PointF(centerXadd, centerYadd));
+            pointsF.push_back(pointsF[fp]);
         }
         else { // ArcMode::Open
             // The arc's "inside" and "outside" lines
@@ -1033,11 +1043,11 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size,
 void ImagePainter2::fillPie( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
 {
      Point tl( lround(topLeft.x()), lround(topLeft.y()) );
-    Size  sz( lround(size.width()), lround(size.height()) );
-
+     Size  sz( lround(size.width()), lround(size.height()) );
 
      _rasterizer->fillArc(tl, sz, degBegin, degEnd, ArcMode::Pie);
 }
+
 
 void ImagePainter2::fillChord( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
 {

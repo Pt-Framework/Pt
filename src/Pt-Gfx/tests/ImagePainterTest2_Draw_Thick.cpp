@@ -524,7 +524,7 @@ static void testDrawThickEllipseArc_impl(
         painter.setCompositionMode(cm);
 
         ip2->setAntiAliasing(true);
-        painter.setPen(drawO); ip2->drawArc( PointF (30 + 800, 50 + 200), SizeF(135, 135), -135, 135 );
+        painter.setPen(drawO); ip2->drawChord( PointF (30 + 800, 50 + 200), SizeF(135, 135), -135, 135 );
         painter.setPen(text ); ip2->drawText( PointF(30 + 800, 30 + 200), "XWAA" );
         painter.setCompositionMode(CompositionMode::SourceOver);
         painter.setPen(vref ); ip2->drawChord( PointF (30 + 800, 50 + 200), SizeF(135, 135), -135, 135 );
