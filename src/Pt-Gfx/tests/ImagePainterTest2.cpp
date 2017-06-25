@@ -63,7 +63,7 @@ using namespace Pt::Gfx;
 
 // General settings for Pt-Gfx
 #define DO_TEST_DRAW    1
-#define DO_BENCHMARKING 0
+#define DO_BENCHMARKING 1
 
 // Detailed-test enable settings for Pt-Gfx
 #define TEST_SOURCECOPY                         1
@@ -79,7 +79,7 @@ using namespace Pt::Gfx;
 
 #define TEST_DRAW_ELLIPSES_ARCS                 0
 #define TEST_DRAW_SOLID_THICK_ELLIPSES_ARCS     0
-#define TEST_DRAW_PATTERNED_THICK_ELLIPSES_ARCS 1 
+#define TEST_DRAW_PATTERNED_THICK_ELLIPSES_ARCS 1
 
 #define TEST_DRAW_SOLID_FILLED_POLYGONS         0
 #define TEST_DRAW_GRADIENT_FILLED_POLYGONS      0
@@ -96,10 +96,10 @@ using namespace Pt::Gfx;
 #define TEST_IMAGE_OPERATION                    0
 
 // Detailed-test benchmark settings for Pt-Gfx
-#define BENCHMARK_RESULT_HTML               0 // (automatically disabling test drawing
+#define BENCHMARK_RESULT_HTML               0 // (automatically disabling test drawing)
 #define BENCHMARK_RESULT_HTML_SIDE_BY_SIDE  1
 
-#define BENCHMARK_CHECK_RESULTING_IMAGE     1
+#define BENCHMARK_CHECK_RESULTING_IMAGE     0
 
 #define BENCHMARK_IMAGE_SIZE                Size(1280, 800)
 #define BENCHMARK_LOOP_COUNT                ( 500 * (BENCHMARK_RESULT_HTML ? 10 : 1) )
@@ -113,8 +113,8 @@ using namespace Pt::Gfx;
 #define BENCHMARK_PATTERNED_THICK_LINE      0
 
 #define BENCHMARK_RECTANGLE                 0
-#define BENCHMARK_ELLIPSE                   0
-#define BENCHMARK_ARC                       0
+#define BENCHMARK_ELLIPSE                   1
+#define BENCHMARK_ARC                       1
 
 #define BENCHMARK_SOLID_BEZIER              0
 #define BENCHMARK_PATTERNED_BEZIER          0

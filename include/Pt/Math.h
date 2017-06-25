@@ -283,7 +283,8 @@ inline double hypot(double x, double y)
 */
 inline Pt::int32_t lround(float x)
 {
-    //return _mm_cvtss_si32(_mm_load_ss(&val));
+    //return ::lround(x);
+    //return _mm_cvtss_si32(_mm_load_ss(&x));
 
 #if __cplusplus == 201103L
 
@@ -332,7 +333,8 @@ inline Pt::int32_t lround(float x)
 */
 inline Pt::int32_t lround(double x)
 {
-    //return _mm_cvtsd_si32(_mm_load_sd(&val));
+    //return ::lround(x);
+    //return _mm_cvtsd_si32(_mm_load_sd(&x));
 
 #if __cplusplus == 201103L
 
