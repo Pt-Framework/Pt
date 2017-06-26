@@ -144,7 +144,13 @@ class PT_GFX_API ImagePainter2 : public Painter
         static std::vector<std::string> fontNames();
 
     private:
-        void clipPolygon(std::vector<PointF>& result, const std::vector<PointF>& subject, const std::vector<PointF>& clipRegion);
+        void drawWidePolyline(const PointF* ps, const size_t pointCount,
+                              bool autoClose, const int32_t* segmentIndexMarker);
+
+        // USUSED
+        void clipPolygonXXX(std::vector<PointF>& result, 
+                            const std::vector<PointF>& subject, 
+                            const std::vector<PointF>& clipRegion);
 
         void generateSolidLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, bool openingCap, bool closingCap);        
         void generatePatternedSingleLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, Pt::int32_t& piCtrInOut);

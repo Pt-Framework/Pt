@@ -63,7 +63,8 @@ void Rasterizer2::rasterOnePixelPolygonOutline(const Point* points, size_t point
 void Rasterizer2::rasterOnePixelPolygonOutline(const PointF* points, size_t pointCount, const Color& color)
 {
     // Check if there are too few points
-    if(pointCount < 2) return;
+    if(pointCount < 2) 
+        return;
 
     // Mask
     DrawLineMask mask_nnp1;

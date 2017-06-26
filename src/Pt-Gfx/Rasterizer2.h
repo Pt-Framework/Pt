@@ -167,7 +167,7 @@ class Rasterizer2
         void strokeNarrowRoundedRect(const RectF& rect, float radius);
 
         template <typename PointT>
-        inline void strokeOnePixelPolygonOutline(const BasicPoint<PointT>* points, size_t pointCount, bool autoClose);
+        inline void drawNarrowPolyline(const BasicPoint<PointT>* points, size_t pointCount, bool autoClose);
 
         template <typename PointT>
         inline void penFillPolygon(const BasicPoint<PointT>* points, size_t pointCount);

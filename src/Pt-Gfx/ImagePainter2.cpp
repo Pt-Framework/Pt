@@ -56,9 +56,11 @@ void ImagePainter2::drawThickPolyline_impl(const PointF* ps, const size_t pointC
     // Separate the polygons convert them and recombine them
     size_t startIndex = 0;
 
-    for(size_t i = 0; i <= pointCount; ++i) {
+    for(size_t i = 0; i <= pointCount; ++i) 
+    {
         // Search for the end and/or separator points
-        if( i == pointCount || (ps[i].x() > MAXIMUM_COORD && ps[i].y() > MAXIMUM_COORD) ) {
+        if( i == pointCount || (ps[i].x() > MAXIMUM_COORD && ps[i].y() > MAXIMUM_COORD) ) 
+        {
             // Get the base pointer and the number of points for this polygon
             const PointF* basePtr = ps + startIndex;
                   size_t  curPCnt = i - startIndex;
@@ -70,7 +72,8 @@ void ImagePainter2::drawThickPolyline_impl(const PointF* ps, const size_t pointC
             bool closedPolygon = autoClose;
 
             // Thicken polygon with solid line
-            if(solidPen) {
+            if(solidPen) 
+            {
                 if(basePtr[0] == basePtr[curPCnt - 1]) {
                     closedPolygon = true;
                     --curPCnt;
@@ -102,7 +105,8 @@ void ImagePainter2::drawThickPolyline_impl(const PointF* ps, const size_t pointC
             }
 
             // Use anti-aliasing
-            if( _rasterizer->isAntiAliasing() ) {
+            if( _rasterizer->isAntiAliasing() ) 
+            {
                 // Remove duplicates
                 std::vector<PointF> points;
                 deduplicatePointsF(points, pointsF.data(), pointsF.size());
@@ -132,6 +136,72 @@ void ImagePainter2::drawThickPolyline_impl(const PointF* ps, const size_t pointC
         }
     }
 }
+
+
+void ImagePainter2::drawWidePolyline(const PointF* points, const size_t pointCount,
+                                     bool autoClose, const int32_t* segmentIndexMarker)
+{
+    // Check if there is no actual point
+    if( pointCount < 2 )
+        return;
+
+    std::vector<PointF> pointsF;
+    pointsF.reserve( pointCount * _rasterizer->pen().size() );
+
+    bool solidPen = _rasterizer->pen().style() == Pen::Solid;
+    bool closedPolygon =  points[0] == points[pointCount - 1];
+
+    if(solidPen) // solid line
+    {       
+        if(closedPolygon) 
+        {
+            if( ! thickenSolidClosedPolygon(pointsF, points, pointCount - 1, segmentIndexMarker) )
+                return;
+        }
+        else 
+        {
+            if( ! thickenSolidOpenPolygon(pointsF, points, pointCount, segmentIndexMarker) )
+                return;
+        }
+    }
+    else // dashed line
+    {
+        thickenPatternedPolygon(pointsF, points, pointCount);
+    }
+
+    // Use anti-aliasing
+    if( _rasterizer->isAntiAliasing() ) 
+    {
+        // Remove duplicates
+        std::vector<PointF> points;
+        deduplicatePointsF(points, pointsF.data(), pointsF.size());
+
+        // Rasterize the polygon
+        if(solidPen && closedPolygon) {
+            _rasterizer->penFillPolygon(points.data(), points.size());
+        }
+        else 
+        {
+            _rasterizer->penFillPolygonSeparate(points.data(), points.size());
+        }
+    }
+    // Do not use use anti-aliasing
+    else {
+        // Round the points and remove duplicates
+        std::vector<Point> points;
+        cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
+
+        // Rasterize the polygon
+        if(solidPen && closedPolygon) {
+            _rasterizer->penFillPolygon(points.data(), points.size());
+        }
+        else {
+            _rasterizer->penFillPolygonSeparate(points.data(), points.size());
+        }
+    }
+}
+
+
 
 
 void ImagePainter2::generateSolidLineSegment(std::vector<PointF>& dst, float x1, float y1, float x2, float y2, bool openingCap, bool closingCap)
@@ -300,7 +370,11 @@ void ImagePainter2::cnvPointsFToPointsDeduplicate(std::vector<Point>& dst, const
         const Pt::int32_t x = lround(src[i].x());
         const Pt::int32_t y = lround(src[i].y());
         // Skip duplicated coordinates
-        if( ofs + putCnt >= 1 && dst[ofs + putCnt - 1].x() == x && dst[ofs + putCnt - 1].y() == y ) continue;
+        if( ofs + putCnt >= 1 && dst[ofs + putCnt - 1].x() == x && dst[ofs + putCnt - 1].y() == y ) 
+        {
+            std::cerr << '.' << std::endl;
+            continue;
+        }
         // Store the coordinate and increment the "put" counter
         dst[ofs + putCnt].set(x, y);
         ++putCnt;
@@ -622,15 +696,17 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount)
     bool autoClose = false;
 
     // Rasterize one-pixel polyline
-    if(_rasterizer->pen().size() == 1) {
+    if(_rasterizer->pen().size() == 1) 
+    {
         // Use anti-aliasing
-        if( _rasterizer->isAntiAliasing() ) {
+        if( _rasterizer->isAntiAliasing() ) 
+        {
             // Remove duplicates
             std::vector<PointF> pointsF;
             deduplicatePointsF(pointsF, ps, pointCount);
             // Rasterize the polygon
             if(ps[0] == ps[pointCount - 1]) autoClose = true;
-            _rasterizer->strokeOnePixelPolygonOutline(pointsF.data(), pointsF.size(), autoClose);
+            _rasterizer->drawNarrowPolyline(pointsF.data(), pointsF.size(), autoClose);
         }
         // Do not use use anti-aliasing
         else {
@@ -639,8 +715,9 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount)
             cnvPointsFToPointsDeduplicate(points, ps, pointCount);
             // Rasterize the polygon
             if(ps[0] == ps[pointCount - 1]) autoClose = true;
-            _rasterizer->strokeOnePixelPolygonOutline(points.data(), points.size(), autoClose);
+            _rasterizer->drawNarrowPolyline(points.data(), points.size(), autoClose);
         }
+        
         return;
     }
 
@@ -769,7 +846,7 @@ enum ClipMode
 };
 
 
-void ImagePainter2::clipPolygon(std::vector<PointF>& result, const std::vector<PointF>& subject, const std::vector<PointF>& clipRegion)
+void ImagePainter2::clipPolygonXXX(std::vector<PointF>& result, const std::vector<PointF>& subject, const std::vector<PointF>& clipRegion)
 {
     ClipMode cm = Intersection;
 
@@ -1123,7 +1200,8 @@ bool ImagePainter2::thickenSolidOpenPolygon(std::vector<PointF>& pointsF, const 
     const size_t curPC2 = curPCnt - 2;
 
     // Walk through the polygon's lines
-    for(size_t i = 0; i < curPC1; ++i) {
+    for(size_t i = 0; i < curPC1; ++i) 
+    {
         // Get the coordinates
         const PointF& from = *basePtr++;
         const PointF& to   = *basePtr;
@@ -1135,6 +1213,7 @@ bool ImagePainter2::thickenSolidOpenPolygon(std::vector<PointF>& pointsF, const 
             inSameSegment = false;
             ++segmentIndexMarker;
         }
+        
         // Generate and combine line segments
         pointsFSegment.clear();
         generateSolidLineSegment(pointsFSegment, from.x(), from.y(), to.x(), to.y(), i == 0, i == curPC2);
@@ -1154,7 +1233,9 @@ bool ImagePainter2::thickenSolidOpenPolygon(std::vector<PointF>& pointsF, const 
     return true;
 }
 
-bool ImagePainter2::thickenSolidClosedPolygon(std::vector<PointF>& pointsF, const PointF* basePtr, size_t curPCnt, const int32_t* segmentIndexMarker)
+bool ImagePainter2::thickenSolidClosedPolygon(std::vector<PointF>& pointsF, 
+                                              const PointF* basePtr, size_t curPCnt, 
+                                              const int32_t* segmentIndexMarker)
 {
     // Prepare the buffers
     std::vector<PointF> pointsFOuter;
@@ -1175,16 +1256,20 @@ bool ImagePainter2::thickenSolidClosedPolygon(std::vector<PointF>& pointsF, cons
     const PointF* ptrZero = basePtr;
 
     // Walk through the polygon's lines
-    for(size_t i = 0; i <= curPC1; ++i) {
+    for(size_t i = 0; i <= curPC1; ++i) 
+    {
         // Get the coordinates
         const PointF& from = *basePtr++;
         const PointF& to   = (i == curPC1) ? *ptrZero : *basePtr;
+
         // Check if the "to" point belongs to the same segment
         bool inSameSegment = !!segmentIndexMarker && (i != curPC1);
+
         if(inSameSegment && *segmentIndexMarker < (Pt::int32_t) (i + 1)) {
             inSameSegment = false;
             ++segmentIndexMarker;
         }
+        
         // Generate and combine line segments
         pointsFSegment.clear();
         generateSolidLineSegment(pointsFSegment, from.x(), from.y(), to.x(), to.y(), false, false);
@@ -1209,7 +1294,9 @@ bool ImagePainter2::thickenSolidClosedPolygon(std::vector<PointF>& pointsF, cons
     // Combine the polygon data
     if(pointsFOuter.empty() || pointsFInner.empty()) return false;
 
-    if(!pointsF.empty()) pointsF.push_back(Painter::PolygonSeparatorPointF);
+    if( ! pointsF.empty() ) 
+        pointsF.push_back(Painter::PolygonSeparatorPointF);
+
     pointsF.insert(pointsF.end(), pointsFOuter.begin(), pointsFOuter.end());
 
     if(!pointsF.empty()) pointsF.push_back(Painter::PolygonSeparatorPointF);
