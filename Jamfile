@@ -110,6 +110,12 @@ PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
 PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
 InstallFile [ FDirName $(PT_INSTALL_INCLUDEDIR) Pt Db ] : $(PT_INSTALL_INCLUDES:BS) ;
 
+SubDir PT_TOP include Pt Gfx ;
+PT_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt Gfx ] ;
+PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
+PT_INSTALL_INCLUDES += [ GLOB $(PT_INCLUDES_SUBDIR) : *.tpp  ] ;
+InstallFile [ FDirName $(PT_INSTALL_INCLUDEDIR) Pt Gfx ] : $(PT_INSTALL_INCLUDES:BS) ;
+
 SubDir PT_TOP include Pt Mfc ;
 PT_INCLUDES_SUBDIR = [ FDirName $(PT_TOP) include Pt Mfc ] ;
 PT_INSTALL_INCLUDES = [ GLOB $(PT_INCLUDES_SUBDIR) : *.h  ] ;
@@ -152,6 +158,7 @@ if $(PT_SYSTEM)
     SubInclude PT_TOP src Pt-XmlRpc ;
     SubInclude PT_TOP src Pt-Soap ;
     SubInclude PT_TOP src Pt-Ssl ;
+    SubInclude PT_TOP src Pt-Gfx ;
 
 	if $(WITH_EGL_TEST)
 	{
@@ -170,7 +177,6 @@ if $(PT_SYSTEM)
             SubInclude PT_TOP src freetype src ;
         }
 
-		SubInclude PT_TOP src Pt-Gfx ;
 		SubInclude PT_TOP src Pt-Hmi egl-test ;
 	}
 
@@ -211,7 +217,6 @@ if $(PT_SYSTEM)
             SubInclude PT_TOP src freetype src ;
         }
 
-        SubInclude PT_TOP src Pt-Gfx ;
         SubInclude PT_TOP src Pt-Hmi ;		
     }
 }
@@ -266,6 +271,8 @@ LsbPackageAdd Pt-devel : $(PT_LSB_PACKAGE_ROOTDIR)/include/Pt/Soap : [ GLOB $(PT
 PT_INCLUDES_SUBDIRS = [ FDirName $(PT_TOP) include Pt XmlRpc ] ;
 LsbPackageAdd Pt-devel : $(PT_LSB_PACKAGE_ROOTDIR)/include/Pt/XmlRpc : [ GLOB $(PT_INCLUDES_SUBDIRS) : *.h *.tpp ] ;
 
+PT_INCLUDES_SUBDIRS = [ FDirName $(PT_TOP) include Pt Gfx ] ;
+LsbPackageAdd Pt-devel : $(PT_LSB_PACKAGE_ROOTDIR)/include/Pt/Gfx : [ GLOB $(PT_INCLUDES_SUBDIRS) : *.h *.tpp ] ;
 
 LsbPackage Pt : --license 'extended LGPL' 
                 --version 1.0.1 --release 1 
@@ -284,4 +291,5 @@ LsbPackageAdd Pt : $(PT_LSB_PACKAGE_LIBDIR) : $(PRELIB)Pt$(SUFDLL)
                                               $(PRELIB)Pt-Xml$(SUFDLL)
                                               $(PRELIB)Pt-Remoting$(SUFDLL)
                                               $(PRELIB)Pt-Soap$(SUFDLL)
-                                              $(PRELIB)Pt-XmlRpc$(SUFDLL) ;
+                                              $(PRELIB)Pt-XmlRpc$(SUFDLL)
+                                              $(PRELIB)Pt-Gfx$(SUFDLL) ;

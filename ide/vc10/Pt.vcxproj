@@ -821,6 +821,7 @@
     <ClCompile Include="..\..\src\Pt\Atomicity.cw.x86.cpp" />
     <ClCompile Include="..\..\src\Pt\Atomicity.gcc.arm.cpp" />
     <ClCompile Include="..\..\src\Pt\Atomicity.gcc.avr32.cpp" />
+    <ClCompile Include="..\..\src\Pt\Atomicity.gcc.builtin.cpp" />
     <ClCompile Include="..\..\src\Pt\Atomicity.gcc.mips.cpp" />
     <ClCompile Include="..\..\src\Pt\Atomicity.gcc.ppc.cpp" />
     <ClCompile Include="..\..\src\Pt\Atomicity.gcc.sparc.cpp" />

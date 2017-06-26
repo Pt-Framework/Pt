@@ -2756,5 +2756,8 @@
     <ClCompile Include="..\..\src\Pt-Gfx\tests\ImagePainterTest2.cpp">
       <Filter>Pt-Gfx\tests</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\src\Pt\Atomicity.gcc.builtin.cpp">
+      <Filter>Pt</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

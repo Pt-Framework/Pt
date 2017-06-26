@@ -595,23 +595,26 @@ void ImagePainter2::fillRoundedRect( const RectF& rect, float radius )
     std::vector<PointF> pointsF;
     generateRoundRectPoints(pointsF, x1, y1, x2, y2, radius, Pt::lround(ceil(_rasterizer->pen().size() * 0.5f)));
 
-    // Use anti-aliasing
-    if( _rasterizer->isAntiAliasing() ) {
-        // Remove duplicates
-        std::vector<PointF> points;
-        deduplicatePointsF(points, pointsF.data(), pointsF.size());
-        // Draw the polygon
-        _rasterizer->fillPolygon(points.data(), points.size());
-    }
+    _rasterizer->fillPolygon2( &pointsF[0], pointsF.size() );
+    return;
 
-    // Do not use use anti-aliasing
-    else {
-        // Round the points and remove duplicates
-        std::vector<Point> points;
-        cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
-        // Draw the polygon
-        _rasterizer->fillPolygon(points.data(), points.size());
-    }
+    //// Use anti-aliasing
+    //if( _rasterizer->isAntiAliasing() ) {
+    //    // Remove duplicates
+    //    std::vector<PointF> points;
+    //    deduplicatePointsF(points, pointsF.data(), pointsF.size());
+    //    // Draw the polygon
+    //    _rasterizer->fillPolygon(points.data(), points.size());
+    //}
+
+    //// Do not use use anti-aliasing
+    //else {
+    //    // Round the points and remove duplicates
+    //    std::vector<Point> points;
+    //    cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
+    //    // Draw the polygon
+    //    _rasterizer->fillPolygon(points.data(), points.size());
+    //}
 }
 
 void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount)
@@ -1075,28 +1078,28 @@ void ImagePainter2::fillPath(const Path& path, float smoothness)
     // OLD CODE FOR COMPARISON:
     //
 
-    std::vector<PointF> pointsF;
-    path.toPoints(pointsF);
+    //std::vector<PointF> pointsF;
+    //path.toPoints(pointsF);
 
-    // Use anti-aliasing
-    if( _rasterizer->isAntiAliasing() )
-    {
-        // Remove duplicates
-        std::vector<PointF> points;
-        deduplicatePointsF(points, pointsF.data(), pointsF.size());
+    //// Use anti-aliasing
+    //if( _rasterizer->isAntiAliasing() )
+    //{
+    //    // Remove duplicates
+    //    std::vector<PointF> points;
+    //    deduplicatePointsF(points, pointsF.data(), pointsF.size());
 
-        // Draw the path as a filled polygon
-        _rasterizer->fillPolygon( points.data(), points.size() );
-    }
-    else // Do not use use anti-aliasing
-    {
-        // Round the points and remove duplicates
-        std::vector<Point> points;
-        cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
+    //    // Draw the path as a filled polygon
+    //    _rasterizer->fillPolygon( points.data(), points.size() );
+    //}
+    //else // Do not use use anti-aliasing
+    //{
+    //    // Round the points and remove duplicates
+    //    std::vector<Point> points;
+    //    cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
 
-        // Draw the path as a filled polygon
-        _rasterizer->fillPolygon( points.data(), points.size() );
-    }
+    //    // Draw the path as a filled polygon
+    //    _rasterizer->fillPolygon( points.data(), points.size() );
+    //}
 }
 
 

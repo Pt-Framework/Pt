@@ -288,7 +288,11 @@ inline Pt::int32_t lround(float x)
 
 #if __cplusplus == 201103L
 
-   return std::lround(x);
+    return std::lround(x);
+
+#elif (__STDC_VERSION__ >= 199409L)
+
+    return lround(x);
 
 #elif defined(_MSC_VER) && defined (_M_IX86)
 
@@ -339,6 +343,10 @@ inline Pt::int32_t lround(double x)
 #if __cplusplus == 201103L
 
     return std::lround(x);
+
+#elif (__STDC_VERSION__ >= 199409L)
+
+    return lround(x);
 
 #elif defined(_MSC_VER) || defined (_M_IX86)
 
