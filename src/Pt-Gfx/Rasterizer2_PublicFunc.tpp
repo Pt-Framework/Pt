@@ -276,46 +276,6 @@ inline void Rasterizer2::fillPolygon(const BasicPoint<PointT>* points, size_t po
 }
 
 
-inline void Rasterizer2::fillPolygon2(const PointF* ps, std::size_t n)
-{
-    Pt::int32_t minX =  MAXIMUM_COORD;
-    Pt::int32_t minY =  MAXIMUM_COORD;
-    Pt::int32_t maxX = -MAXIMUM_COORD;
-    Pt::int32_t maxY = -MAXIMUM_COORD;
-
-    std::vector<Polygon> clippedPolygons;
-    clippedPolygons.resize(1);
-    clippedPolygons[0].assign(ps, n);
-
-    Polygon& polygon = clippedPolygons[0];
-
-    BasicClipShape<double>::clipPolygon(polygon.points(), _currentClip);
-
-    for(size_t j = 0; j < polygon.size(); ++j)
-    {
-        const double x = polygon.at(j).x();
-        const double y = polygon.at(j).y();
-
-        if(x < minX) minX = x;
-        if(y < minY) minY = y;
-        if(x > maxX) maxX = x;
-        if(y > maxY) maxY = y;
-    }
-
-    if(_isGradient)
-        updateGradientBrush(maxX - minX + 1, maxY - minY + 1);
-
-    if( this->isAntiAliasing() )
-    {
-        rasterPolygonsXWAA(clippedPolygons, _brush.color(), minX, minY, maxX, maxY);
-    }
-    else
-    {
-        rasterPolygonsNoAA(clippedPolygons, _brush.color(), minX, minY, maxX, maxY);
-    }
-}
-
-
 //inline void Rasterizer2::fillPolygon2(const PointF* ps, std::size_t n)
 //{
 //    Pt::int32_t minX =  MAXIMUM_COORD;
@@ -323,14 +283,18 @@ inline void Rasterizer2::fillPolygon2(const PointF* ps, std::size_t n)
 //    Pt::int32_t maxX = -MAXIMUM_COORD;
 //    Pt::int32_t maxY = -MAXIMUM_COORD;
 //
-//    std::vector<PointF> clippedPolygon(ps, ps + n);
+//    std::vector<Polygon> clippedPolygons;
+//    clippedPolygons.resize(1);
+//    clippedPolygons[0].assign(ps, n);
 //
-//    BasicClipShape<double>::clipPolygon(clippedPolygon, _currentClip);
+//    Polygon& polygon = clippedPolygons[0];
 //
-//    for(size_t j = 0; j < clippedPolygon.size(); ++j)
+//    BasicClipShape<double>::clipPolygon(polygon.points(), _currentClip);
+//
+//    for(size_t j = 0; j < polygon.size(); ++j)
 //    {
-//        const double x = clippedPolygon[j].x();
-//        const double y = clippedPolygon[j].y();
+//        const double x = polygon.at(j).x();
+//        const double y = polygon.at(j).y();
 //
 //        if(x < minX) minX = x;
 //        if(y < minY) minY = y;
@@ -343,14 +307,51 @@ inline void Rasterizer2::fillPolygon2(const PointF* ps, std::size_t n)
 //
 //    if( this->isAntiAliasing() )
 //    {
-//        rasterPolygonXWAA(&clippedPolygon[0], clippedPolygon.size(),
-//                           _brush.color(), minX, minY, maxX, maxY);
+//        rasterPolygonsXWAA(clippedPolygons, _brush.color(), minX, minY, maxX, maxY);
 //    }
 //    else
 //    {
-//        //rasterPolygonsNoAA(clippedPolygons, _brush.color(), minX, minY, maxX, maxY);
+//        rasterPolygonsNoAA(clippedPolygons, _brush.color(), minX, minY, maxX, maxY);
 //    }
 //}
+
+
+inline void Rasterizer2::fillPolygon2(const PointF* ps, std::size_t n)
+{
+    Pt::int32_t minX =  MAXIMUM_COORD;
+    Pt::int32_t minY =  MAXIMUM_COORD;
+    Pt::int32_t maxX = -MAXIMUM_COORD;
+    Pt::int32_t maxY = -MAXIMUM_COORD;
+
+    std::vector<PointF> clippedPolygon(ps, ps + n);
+
+    BasicClipShape<double>::clipPolygon(clippedPolygon, _currentClip);
+
+    for(size_t j = 0; j < clippedPolygon.size(); ++j)
+    {
+        const double x = clippedPolygon[j].x();
+        const double y = clippedPolygon[j].y();
+
+        if(x < minX) minX = x;
+        if(y < minY) minY = y;
+        if(x > maxX) maxX = x;
+        if(y > maxY) maxY = y;
+    }
+
+    if(_isGradient)
+        updateGradientBrush(maxX - minX + 1, maxY - minY + 1);
+
+    if( this->isAntiAliasing() )
+    {
+        rasterPolygonXWAA(&clippedPolygon[0], clippedPolygon.size(),
+                           _brush.color(), minX, minY, maxX, maxY);
+    }
+    else
+    {
+        rasterPolygonNoAA(&clippedPolygon[0], clippedPolygon.size(),
+                           _brush.color(), minX, minY, maxX, maxY);
+    }
+}
 
 inline void Rasterizer2::fillPolygons(const std::vector<Polygon>& polygons)
 {

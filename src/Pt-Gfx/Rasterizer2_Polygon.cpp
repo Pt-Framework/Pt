@@ -274,6 +274,92 @@ void Rasterizer2::rasterPolygonAreaXWAA(const PointF* points, const size_t* poin
     }
 }
 
+
+//
+// Inspired by: Efficient Polygon Fill Algorithm With C Code Sample
+//              http://alienryderflex.com/polygon_fill
+//              Public-domain code by Darel Rex Finley, 2007
+//
+void Rasterizer2::rasterPolygonNoAA(const PointF* points, std::size_t pointCount,
+                                     const Color& color,
+                                     Pt::int32_t minX, Pt::int32_t minY,
+                                     Pt::int32_t maxX, Pt::int32_t maxY)
+{
+    if( pointCount < 3 )
+        return;
+
+    std::vector<Point> polygon;
+    polygon.reserve( pointCount );
+
+    for(size_t i = 0; i < pointCount; ++i)
+    {
+        const PointF& pf = points[i];
+        const Pt::int32_t x = Pt::lround( pf.x() );
+        const Pt::int32_t y = Pt::lround( pf.y() );
+
+        polygon.push_back( Point(x, y) );
+    }
+
+    // List of nodes that define the horizontal spans
+    std::vector<Pt::int32_t> nodeX(pointCount * 2, 0);
+
+    // Loop through the rows of the image
+    for(Pt::int32_t y = minY; y <= maxY; ++y)
+    {
+        // Build a list of nodes using all the polygons
+        std::size_t nodes = 0;
+
+        // loop through the points
+        Pt::int32_t j = pointCount - 1;
+
+        for(size_t i = 0; i < pointCount; ++i)
+        {
+            // Get the coordinates
+            const Pt::int32_t curXi = polygon[i].x();
+            const Pt::int32_t curYi = polygon[i].y();
+            const Pt::int32_t curXj = polygon[j].x();
+            const Pt::int32_t curYj = polygon[j].y();
+
+            // Calculate the node's coordinate
+            if( ( y >= curYi && y < curYj ) || ( y >= curYj && y < curYi ) )
+            {
+                // Bail out if we have produced too many nodes
+                if(nodes >= nodeX.size())
+                    return;
+
+                // Calculate the node's coordinate
+                const Pt::int32_t deltaYp = y - curYi;
+                const Pt::int32_t deltaYj = curYj  - curYi;
+                const Pt::int32_t deltaXj = curXj  - curXi;
+                const Pt::int32_t interXf = FIXED_POINT_FROM_INT(curXi) +
+                                            ( (FIXED_POINT_FROM_INT(deltaYp) +
+                                                FIXED_POINT_CONSTANT_HALF) /
+                                              deltaYj * deltaXj );
+                nodeX[nodes++] = FIXED_POINT_TO_INT(interXf);
+            }
+
+            j = i;
+        }
+
+
+        // Skip if there is no node
+        if( ! nodes )
+            continue;
+
+        // Sort the nodes
+        bubbleSortAscending(nodeX, nodes);
+
+        // Fill the pixels between the node pairs
+        for(Pt::int32_t i = 0; i < nodes; i += 2)
+        {
+            const Pt::int32_t from = nodeX[i    ];
+            const Pt::int32_t to   = nodeX[i + 1];
+            rasterScanline(from - minX, to - minX, y - minY, minX, minY, color);
+        }
+    }
+}
+
+
 //
 // Inspired by: Efficient Polygon Fill Algorithm With C Code Sample
 //              http://alienryderflex.com/polygon_fill

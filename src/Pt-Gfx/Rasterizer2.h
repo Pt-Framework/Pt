@@ -182,6 +182,11 @@ class Rasterizer2
 
         void fillPolygons(const std::vector<Polygon>& polygons);
 
+        void rasterPolygonNoAA(const PointF* points, std::size_t pointCount,
+                               const Color& color,
+                               Pt::int32_t minX, Pt::int32_t minY,
+                               Pt::int32_t maxX, Pt::int32_t maxY);
+
         void rasterPolygonsNoAA(const std::vector<Polygon>& polygons, 
                                 const Color& color, 
                                 Pt::int32_t minX, Pt::int32_t minY, 
