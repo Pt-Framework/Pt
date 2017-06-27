@@ -258,7 +258,8 @@ void Rasterizer2::updatePenPattern()
     // Select the pattern
     Pt::uint64_t patternSel;
 
-    switch(_pen.style()) {
+    switch( _pen.style() ) 
+    {
         default:
         case Pen::Dot         : patternSel = patternDot;              break;
         case Pen::DoubleDot   : patternSel = patternDoubleDot;        break;
@@ -274,7 +275,8 @@ void Rasterizer2::updatePenPattern()
 
     // Generate the pattern
     bool previous = 0;
-    for(Pt::int8_t p = 0; p < 64; ++p) { // The pattern has 64 points
+    for(Pt::int8_t p = 0; p < 64; ++p) 
+    { // The pattern has 64 points
         // Get the pattern cell value
         const bool current = patternSel & ((Pt::uint64_t) 1 << p);
         // --- Multi-pixel pattern ---

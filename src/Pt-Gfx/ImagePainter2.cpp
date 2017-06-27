@@ -142,15 +142,15 @@ void ImagePainter2::drawThickPolyline_impl(const PointF* ps, const size_t pointC
 void ImagePainter2::drawWidePolyline(const PointF* points, const size_t pointCount,
                                      bool autoClose, const int32_t* segmentIndexMarker)
 {
-    //std::vector<Polygon> polygons;
+    std::vector<Polygon> polygons;
 
-    //LineRenderer lr;
-    //lr.renderWidePolyline( polygons, points, pointCount, _rasterizer->pen() );
+    LineRenderer lr;
+    lr.renderWidePolyline( polygons, points, pointCount, _rasterizer->pen() );
 
-    //if( ! polygons.empty() )
-    //    _rasterizer->fillPolygons(polygons);
-    //
-    //return;
+    if( ! polygons.empty() )
+        _rasterizer->fillPolygons(polygons);
+    
+    return;
 
     // Check if there is no actual point
     if( pointCount < 2 )
@@ -1578,36 +1578,36 @@ bool ImagePainter2::combineLineSegmentForSolidClosedPolygon(std::vector<PointF>&
 
 // --- Patterned Line Thickener ---
 
-struct SAGOpState {
-    std::vector<PointF>& dstPoints;  // Destination vector
-    size_t               dstPStart;  // Start index of the previous polygon in the above vector
-    size_t               dstPCount;  // The number of points of the previous polygon in the above vector
-    size_t               dstPCount0; // The number of points of the first polygon in the above vector
-
-    const PointF*        srcPoints;  // Source points
-    size_t               srcCount;   // The number of source points
-
-    float                cellSize;   // Cell size
-    float                patSegLen;  // Length of the currently processed "pattern" segment
-
-    size_t               idx1;       // Index to the first point which is currently being processed;
-                                     // the index to the second point is always (idx1 + 1)
-
-    float                px, py;     // Current interpolation coordinate (in-between the two points)
-    float                ex, ey;     // Current end coordinate (coordinate of the the second point)
-    float                uvx, uvy;   // Unit vector from the first point to the second point
-    float                cvx, cvy;   // Cell vector from the first point to the second point
-    float                remLen;     // Remaining length between the two points that has not been "consumed" by the "pattern" segment(s)
-
-    std::vector<PointF>  gather;     // Gathered polygon points
-    float                gatherLen;  // Length of the gathered points
-
-    inline SAGOpState(std::vector<PointF>& pointsF, const PointF* src, size_t pointCount, size_t penSize)
-    : dstPoints(pointsF), dstPStart(0), dstPCount(0), dstPCount0(0),
-      srcPoints(src), srcCount(pointCount), cellSize(penSize * 0.25f),
-      idx1(0), remLen(-1.0f), gatherLen(0.0f)
-    {}
-};
+//struct SAGOpState {
+//    std::vector<PointF>& dstPoints;  // Destination vector
+//    size_t               dstPStart;  // Start index of the previous polygon in the above vector
+//    size_t               dstPCount;  // The number of points of the previous polygon in the above vector
+//    size_t               dstPCount0; // The number of points of the first polygon in the above vector
+//
+//    const PointF*        srcPoints;  // Source points
+//    size_t               srcCount;   // The number of source points
+//
+//    float                cellSize;   // Cell size
+//    float                patSegLen;  // Length of the currently processed "pattern" segment
+//
+//    size_t               idx1;       // Index to the first point which is currently being processed;
+//                                     // the index to the second point is always (idx1 + 1)
+//
+//    float                px, py;     // Current interpolation coordinate (in-between the two points)
+//    float                ex, ey;     // Current end coordinate (coordinate of the the second point)
+//    float                uvx, uvy;   // Unit vector from the first point to the second point
+//    float                cvx, cvy;   // Cell vector from the first point to the second point
+//    float                remLen;     // Remaining length between the two points that has not been "consumed" by the "pattern" segment(s)
+//
+//    std::vector<PointF>  gather;     // Gathered polygon points
+//    float                gatherLen;  // Length of the gathered points
+//
+//    inline SAGOpState(std::vector<PointF>& pointsF, const PointF* src, size_t pointCount, size_t penSize)
+//    : dstPoints(pointsF), dstPStart(0), dstPCount(0), dstPCount0(0),
+//      srcPoints(src), srcCount(pointCount), cellSize(penSize * 0.25f),
+//      idx1(0), remLen(-1.0f), gatherLen(0.0f)
+//    {}
+//};
 
 
 

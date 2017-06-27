@@ -217,7 +217,7 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 
     Gfx::Image image( painter.format(), Gfx::Size(600, 800) );
     Gfx::ImagePainter2 imagePainter(image);
-    imagePainter.setAntiAliasing(false);
+    imagePainter.setAntiAliasing(true);
 
     Pt::Gfx::Transform trans;
     trans.translate(-125, -150);     

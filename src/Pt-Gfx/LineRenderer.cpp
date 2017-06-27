@@ -64,7 +64,7 @@ void LineRenderer::renderWidePolyline(std::vector<Polygon>& polygons,
     }
     else // dashed line
     {
-        //renderDashedWidePolyLine(pointsF, points, pointCount);
+        renderDashedWidePolyLine(polygons, points, n, pen);
     }
 }
 
@@ -219,8 +219,53 @@ void LineRenderer::renderSolidOpenWidePolyline(std::vector<Polygon>& polygons,
 }
 
 
-void LineRenderer::renderDashedWidePolyLine()
+void LineRenderer::renderDashedWidePolyLine(std::vector<Polygon>& polygons, //pointsF
+                                            const PointF* src, size_t pointCount,
+                                            const Pen& pen)
 {
+    //// Initialize the operational state
+    //SAGOpState state(pointsF, src, pointCount, _rasterizer->pen().size());
+
+    //// The pattern buffer and its counter
+    //const Pt::uint8_t* pBuff      = _rasterizer->patternBufferMP64();
+    //      Pt::int32_t  piCtrInOut = 0;
+
+    //// Loop until all the polygon's points are processed
+    //bool done = false;
+    //while( ! done ) 
+    //{
+    //    // Calculate the "pattern" segment length
+    //    const Pt::uint8_t refPat = pBuff[piCtrInOut];
+    //    state.patSegLen = 0.0f;
+    //    for(;;) 
+    //    {
+    //        // Get and compare the pattern bit
+    //        const Pt::uint8_t curPat = pBuff[piCtrInOut++];
+    //        
+    //        if(piCtrInOut >= PATTERN_BUFFER_COUNTER_MAXMP) 
+    //            piCtrInOut -= PATTERN_BUFFER_COUNTER_MAXMP;
+    //        
+    //        if(curPat == refPat) 
+    //        {
+    //            state.patSegLen += state.cellSize;
+    //            continue;
+    //        }
+    //        
+    //        // We have got a different pattern bit, exit to process the "pattern" segment
+    //        --piCtrInOut;
+    //        if(piCtrInOut < 0) 
+    //            piCtrInOut += PATTERN_BUFFER_COUNTER_MAXMP;
+    //        
+    //        break;
+    //    }
+    //    
+    //    // Bail out if the "pattern" segment is shorter than the cell size
+    //    if(state.patSegLen < state.cellSize) 
+    //        return;
+    //    
+    //    // Process the "pattern" segment
+    //    done = sagPolygonPoints(state, !!refPat);
+    //}
 }
 
 
