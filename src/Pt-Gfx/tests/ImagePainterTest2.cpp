@@ -176,6 +176,32 @@ Pt::System::Path buildDir;
 #include "ImagePainterTest2_Benchmark.cpp"
 
 
+void benchmarkWideLines()
+{
+    Pt::Gfx::Image image( Pt::Gfx::ImageFormat::argb32(), Pt::Gfx::Size(400, 400) );
+
+    Pt::Gfx::ImagePainter2 imagePainter(image);
+    imagePainter.setAntiAliasing(true);
+    imagePainter.setPen( Pen( Pt::Gfx::Color::fromRgb8(255, 0, 0), 8 )  );
+
+    std::vector<PointF> polyline;
+    polyline.push_back( Pt::Gfx::PointF(50, 50) );
+    polyline.push_back( Pt::Gfx::PointF(320, 30) );
+    polyline.push_back( Pt::Gfx::PointF(300, 290) );
+    polyline.push_back( Pt::Gfx::PointF(60, 70) );
+
+    Pt::System::Clock clock;
+    clock.start();
+    for(int n = 0; n < 1000; ++n)
+    {
+        imagePainter.drawPolyline( &polyline[0], polyline.size() );
+    }
+
+    long long time = clock.stop().toUSecs();
+    std::clog << "AA LINES: " << time << std::endl;
+}
+
+
 void benchmarkNarrowRoundedRect()
 {
     Pt::Gfx::Image image( Pt::Gfx::ImageFormat::argb32(), Pt::Gfx::Size(400, 400) );
@@ -262,6 +288,8 @@ int main(int argc, char* args[])
 
     // roundedRect
     // benchmarkNarrowRoundedRect();
+
+      benchmarkWideLines();
 
     // Solid lines
     if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_SOLID_LINE_AND_TEXT) {

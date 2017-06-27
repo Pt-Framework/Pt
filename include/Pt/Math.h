@@ -169,6 +169,8 @@ inline double radToDeg(double rad)
 template <typename T>
 T fastSin(const T& theta)
 {
+    //return sin(theta);
+
     assert(theta <= piDouble<T>());
     assert(theta >= 0);
 
@@ -197,6 +199,8 @@ T fastSin(const T& theta)
 template <typename T>
 T fastCos(const T& theta)
 {
+    //return cos(theta);
+
     assert(theta <= piDouble<T>());
     assert(theta >= 0);
 
@@ -214,7 +218,7 @@ T fastCos(const T& theta)
 */
 template <typename T>
 T fastAtan2(T y, T x)
-{
+{ 
     if(x == 0.0)
     {
         if(y >  0) return piHalf<T>();

@@ -217,7 +217,7 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 
     Gfx::Image image( painter.format(), Gfx::Size(600, 800) );
     Gfx::ImagePainter2 imagePainter(image);
-    imagePainter.setAntiAliasing(true);
+    imagePainter.setAntiAliasing(false);
 
     Pt::Gfx::Transform trans;
     trans.translate(-125, -150);     
@@ -233,12 +233,21 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     //path.addEllipse( Pt::Gfx::SizeF(50, 100) );
     //path.transform(trans);
 
-    imagePainter.setPen(Gfx::Color::fromRgb8(255, 0, 0)  );
+    imagePainter.setPen( Gfx::Pen( Gfx::Color::fromRgb8(255, 0, 0), 10) );
     imagePainter.setBrush( Gfx::Color::fromRgb8(255, 0, 0)  );
-    imagePainter.fillPath(path);
+    //imagePainter.fillPath(path);
 
-    imagePainter.drawRoundedRect( Pt::Gfx::RectF(Pt::Gfx::PointF(150, 150), 
-                                                  Pt::Gfx::SizeF(50, 50)), 10);
+    //imagePainter.drawRoundedRect( Pt::Gfx::RectF(Pt::Gfx::PointF(150, 150), 
+    //                                              Pt::Gfx::SizeF(50, 50)), 10);
+
+    std::vector<Gfx::PointF> polyline;
+    polyline.push_back( Pt::Gfx::PointF(40, 40) );
+    polyline.push_back( Pt::Gfx::PointF(300, 50) );
+    polyline.push_back( Pt::Gfx::PointF(50, 300) );
+    polyline.push_back( Pt::Gfx::PointF(300, 300) );
+    polyline.push_back( Pt::Gfx::PointF(50, 50) );
+
+    imagePainter.drawPolyline( &polyline[0], polyline.size() );
 
     //imagePainter.setPen( Gfx::Color::fromRgb8(150, 150, 255) );
     //imagePainter.drawEllipse(Pt::Gfx::PointF(100, 100), Pt::Gfx::SizeF(50, 100));

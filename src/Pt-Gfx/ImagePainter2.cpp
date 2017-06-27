@@ -31,6 +31,7 @@
 #include "FreeType2.h"
 #include "ArcMode.h"
 #include "Rasterizer2.h"
+#include "LineRenderer.h"
 #include <Pt/Gfx/Transform.h>
 #include <Pt/Gfx/ImagePainter2.h>
 #include "clipper_aj/clipper.hpp"
@@ -141,6 +142,16 @@ void ImagePainter2::drawThickPolyline_impl(const PointF* ps, const size_t pointC
 void ImagePainter2::drawWidePolyline(const PointF* points, const size_t pointCount,
                                      bool autoClose, const int32_t* segmentIndexMarker)
 {
+    //std::vector<Polygon> polygons;
+
+    //LineRenderer lr;
+    //lr.renderWidePolyline( polygons, points, pointCount, _rasterizer->pen() );
+
+    //if( ! polygons.empty() )
+    //    _rasterizer->fillPolygons(polygons);
+    //
+    //return;
+
     // Check if there is no actual point
     if( pointCount < 2 )
         return;
@@ -372,7 +383,6 @@ void ImagePainter2::cnvPointsFToPointsDeduplicate(std::vector<Point>& dst, const
         // Skip duplicated coordinates
         if( ofs + putCnt >= 1 && dst[ofs + putCnt - 1].x() == x && dst[ofs + putCnt - 1].y() == y ) 
         {
-            std::cerr << '.' << std::endl;
             continue;
         }
         // Store the coordinate and increment the "put" counter
@@ -721,8 +731,11 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount)
         return;
     }
 
-    // Rasterize thick polyline
+#if 0
+    drawWidePolyline(ps, pointCount, autoClose, 0);
+#else
     drawThickPolyline_impl(ps, pointCount, autoClose, 0);
+#endif
 }
 
 void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount)

@@ -1485,6 +1485,9 @@
     <ClInclude Include="..\..\include\Pt\Hmi\SpinBox.h">
       <Filter>Pt-Hmi</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\src\Pt-Gfx\LineRenderer.h">
+      <Filter>Pt-Gfx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\..\include\Pt\Callable.tpp">
@@ -2758,6 +2761,9 @@
     </ClCompile>
     <ClCompile Include="..\..\src\Pt\Atomicity.gcc.builtin.cpp">
       <Filter>Pt</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\src\Pt-Gfx\LineRenderer.cpp">
+      <Filter>Pt-Gfx</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
