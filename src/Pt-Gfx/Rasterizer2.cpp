@@ -313,15 +313,16 @@ void Rasterizer2::updatePenPattern()
     }
 
     // Transfom the pattern - without anti-aliasing
-    if( ! _aaMode ) {
+    if( ! _aaMode )
+    {
         for(size_t i = 0; i < gctr1P; ++i) {
             if(_patternBuffer1P[i] > 127) _patternBuffer1P[i] = 255;
             else                          _patternBuffer1P[i] = 0;
         }
     }
-
     // Transfom the pattern - with anti-aliasing
-    else {
+    else 
+    {
         for(size_t i = 0; i < gctr1P; ++i) {
             _patternBuffer1P[i] = XWAA_WFILTER[ 255 - _patternBuffer1P[i] ];
         }
@@ -628,7 +629,7 @@ void Rasterizer2::updateGradientBrush_gen2DConicalGradient(Pt::int32_t width, Pt
             const float ry = (-sval * dx + cval * dy);
             const float rx = ( cval * dx + sval * dy);
             // Calculate the distance
-            float dist = (fastAtan2(ry, rx) + pi<float>()) / piDouble<float>() / scale;
+            float dist = (std::atan2(ry, rx) + pi<float>()) / piDouble<float>() / scale;
                  if(dist < 0.0f) dist = 0.0f;
             else if(dist > 1.0f) dist = 1.0f;
 #ifdef CONICAL_GRADIENT_USE_SMOOTH_TRANSITION
@@ -678,7 +679,7 @@ void Rasterizer2::updateGradientBrush_gen2DConicalGradient(Pt::int32_t width, Pt
                         const float dys = -(y + j - ijm2 - ctrY) * xyRat; // Sign inversion due to differences between cartesian and computer coordinate systems
                         const float rxs = ( cval * dxs + sval * dys);
                         const float rys = (-sval * dxs + cval * dys);
-                        dist += (Gfx::Math::fastAtan2(rys, rxs) + Gfx::Math::Pi) / Gfx::Math::PiMul2;
+                        dist += (std::atan2(rys, rxs) + Gfx::Math::Pi) / Gfx::Math::PiMul2;
                     }
                 }
                 dist /= (ijm * ijm);

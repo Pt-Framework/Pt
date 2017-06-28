@@ -90,12 +90,12 @@ void Rasterizer2::strokeOnePixelEllipseArc(const Point& topLeft, const Size& siz
         while(degEnd >  360) degEnd -= 360;
         // Calculate the approximate coordinate of the point which is located at the begin angle
         const float rBeg = degToRad(degBegin);
-        bx = lround(ctrX + radX * fastCos(rBeg));
-        by = lround(ctrY - radY * fastSin(rBeg)); // Sign inversion due to differences between cartesian and computer coordinate systems
+        bx = lround(ctrX + radX * std::cos(rBeg));
+        by = lround(ctrY - radY * std::sin(rBeg)); // Sign inversion due to differences between cartesian and computer coordinate systems
         // Calculate the approximate coordinate of the point which is located at the end angle
         const float rEnd = degToRad(degEnd);
-        ex = lround(ctrX + radX * fastCos(rEnd));
-        ey = lround(ctrY - radY * fastSin(rEnd)); // Sign inversion due to differences between cartesian and computer coordinate systems
+        ex = lround(ctrX + radX * std::cos(rEnd));
+        ey = lround(ctrY - radY * std::sin(rEnd)); // Sign inversion due to differences between cartesian and computer coordinate systems
     }
 
     // Top and bottom halves

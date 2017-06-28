@@ -988,8 +988,8 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size,
     const size_t penSize  = _rasterizer->pen().size();
     const size_t penSize2 = penSize / 2;
     const float  degMid   = (degBegin + degEnd) / 2.0f * DegToRadF;
-    const float  shiftX   = fastCos(degMid);
-    const float  shiftY   = fastSin(degMid);
+    const float  shiftX   = std::cos(degMid);
+    const float  shiftY   = std::sin(degMid);
     const float  shiftXps = shiftX * penSize2;
     const float  shiftYps = shiftY * penSize2;
 

@@ -243,9 +243,9 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 
     std::vector<Gfx::PointF> polyline;
     polyline.push_back( Pt::Gfx::PointF(40, 40) );
-    polyline.push_back( Pt::Gfx::PointF(300, 50) );
+    polyline.push_back( Pt::Gfx::PointF(300, 100) );
     polyline.push_back( Pt::Gfx::PointF(50, 300) );
-    polyline.push_back( Pt::Gfx::PointF(300, 300) );
+    polyline.push_back( Pt::Gfx::PointF(300, 250) );
     polyline.push_back( Pt::Gfx::PointF(50, 50) );
 
     imagePainter.drawPolyline( &polyline[0], polyline.size() );
