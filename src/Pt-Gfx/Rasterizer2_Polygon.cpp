@@ -480,8 +480,12 @@ void Rasterizer2::rasterPolygonXWAA(const PointF* points, std::size_t pointCount
     // List of polygon scanlines
     PolygonScanlines scanlines;
 
+    // REVIEW +2 or +4?
+    //if(_compositionMode != CompositionMode::SourceCopy)
+    //    scanlines.resize( (maxY - minY) + 1 + 2 );
+
     if(_compositionMode != CompositionMode::SourceCopy)
-        scanlines.resize( (maxY - minY) + 1 + 2 );
+        scanlines.resize( (maxY - minY) + 1 + 4 );
 
     // Loop through the rows of the image
     for(Pt::int32_t y = minY; y <= maxY; ++y)
@@ -616,8 +620,12 @@ void Rasterizer2::rasterPolygonsXWAA(const std::vector<Polygon>& polygons,
     // List of polygon scanlines
     PolygonScanlines scanlines;
 
+    // REVIEW +2 or +4?
+    //if(_compositionMode != CompositionMode::SourceCopy)
+    //    scanlines.resize( (maxY - minY) + 1 + 2 );
+
     if(_compositionMode != CompositionMode::SourceCopy)
-        scanlines.resize( (maxY - minY) + 1 + 2 );
+        scanlines.resize( (maxY - minY) + 1 + 4 );
 
     // Loop through the rows of the image
     for(Pt::int32_t y = minY; y <= maxY; ++y)

@@ -244,6 +244,7 @@ inline void Rasterizer2::penFillPolygonSeparate(const BasicPoint<PointT>* points
     _isGradient = isGradient;
 }
 
+// OBSOLETE
 template <typename PointT>
 inline void Rasterizer2::fillPolygon(const BasicPoint<PointT>* points, size_t pointCount)
 {
@@ -272,6 +273,55 @@ inline void Rasterizer2::fillPolygon(const BasicPoint<PointT>* points, size_t po
         clippedCounts.size(), clippedPoints.size(),
         _brush.color(), minX, minY, maxX, maxY
     );
+}
+
+
+inline void Rasterizer2::fillPolyline(const std::vector<Polygon>& polygons)
+{
+    Pt::int32_t minX =  MAXIMUM_COORD;
+    Pt::int32_t minY =  MAXIMUM_COORD;
+    Pt::int32_t maxX = -MAXIMUM_COORD;
+    Pt::int32_t maxY = -MAXIMUM_COORD;
+
+    std::vector<Polygon> clippedPolygons = polygons;
+
+    for(size_t i = 0; i < clippedPolygons.size(); ++i)
+    {
+        Polygon& polygon = clippedPolygons[i];
+
+        BasicClipShape<double>::clipPolygon(polygon.points(), _currentClip);
+
+        for(size_t j = 0; j < polygon.size(); ++j)
+        {
+            const double x = polygon.at(j).x();
+            const double y = polygon.at(j).y();
+
+            if(x < minX) minX = x;
+            if(y < minY) minY = y;
+            if(x > maxX) maxX = x;
+            if(y > maxY) maxY = y;
+        }
+    }
+
+    // Disable texture and gradient
+    const bool isTexture  = _isTexture;
+    const bool isGradient = _isGradient;
+
+    _isTexture  = false;
+    _isGradient = false;
+
+    if( this->isAntiAliasing() )
+    {
+        rasterPolygonsXWAA(clippedPolygons, _pen.color(), minX, minY, maxX, maxY);
+    }
+    else
+    {
+        rasterPolygonsNoAA(clippedPolygons, _pen.color(), minX, minY, maxX, maxY);
+    }
+
+    // Restore texture and gradient
+    _isTexture  = isTexture;
+    _isGradient = isGradient;
 }
 
 

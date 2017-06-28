@@ -86,6 +86,10 @@ class LineRenderer
                                 const PointF* points, const std::size_t n,
                                 const Pen& pen);
 
+        void renderWideLine(std::vector<Polygon>& polygons,
+                            const PointF& from, const PointF& to,
+                            const Pen& pen);
+
         void setPattern(const Pen::Style& style);
 
     private:
@@ -102,7 +106,6 @@ class LineRenderer
                                       const Pen& pen);
 
         void renderDashedWidePolyLine();
-
 
         bool sagPolygonPoints(PatternState& state, bool draw, const Pen& pen);
 
@@ -123,6 +126,12 @@ class LineRenderer
         void renderSolidLineSegment(std::vector<PointF>& dst, 
                                     float x1, float y1, float x2, float y2, 
                                     const Pen& pen, bool openingCap, bool closingCap);
+
+        void renderPatternedSingleLineSegment(std::vector<Polygon>& polygons, 
+                                              float x1, float y1, 
+                                              float x2, float y2, 
+                                              Pt::int32_t& piCtrInOut,
+                                              const Pen& pen);
 
         bool joinClosedWidePolyline(std::vector<PointF>& outer, 
                                     std::vector<PointF>& inner, 

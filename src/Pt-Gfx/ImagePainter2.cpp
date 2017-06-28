@@ -145,71 +145,15 @@ void ImagePainter2::drawWidePolyline(const PointF* points, const size_t pointCou
     std::vector<Polygon> polygons;
 
     LineRenderer lr;
+
+    // TODO: set pattern only once
+    if( _rasterizer->pen().style() != Pen::Solid )
+        lr.setPattern( _rasterizer->pen().style() );
+    
     lr.renderWidePolyline( polygons, points, pointCount, _rasterizer->pen() );
 
     if( ! polygons.empty() )
-        _rasterizer->fillPolygons(polygons);
-    
-    return;
-
-    // Check if there is no actual point
-    if( pointCount < 2 )
-        return;
-
-    std::vector<PointF> pointsF;
-    pointsF.reserve( pointCount * _rasterizer->pen().size() );
-
-    bool solidPen = _rasterizer->pen().style() == Pen::Solid;
-    bool closedPolygon =  points[0] == points[pointCount - 1];
-
-    if(solidPen) // solid line
-    {       
-        if(closedPolygon) 
-        {
-            if( ! thickenSolidClosedPolygon(pointsF, points, pointCount - 1, segmentIndexMarker) )
-                return;
-        }
-        else 
-        {
-            if( ! thickenSolidOpenPolygon(pointsF, points, pointCount, segmentIndexMarker) )
-                return;
-        }
-    }
-    else // dashed line
-    {
-        thickenPatternedPolygon(pointsF, points, pointCount);
-    }
-
-    // Use anti-aliasing
-    if( _rasterizer->isAntiAliasing() ) 
-    {
-        // Remove duplicates
-        std::vector<PointF> points;
-        deduplicatePointsF(points, pointsF.data(), pointsF.size());
-
-        // Rasterize the polygon
-        if(solidPen && closedPolygon) {
-            _rasterizer->penFillPolygon(points.data(), points.size());
-        }
-        else 
-        {
-            _rasterizer->penFillPolygonSeparate(points.data(), points.size());
-        }
-    }
-    // Do not use use anti-aliasing
-    else {
-        // Round the points and remove duplicates
-        std::vector<Point> points;
-        cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
-
-        // Rasterize the polygon
-        if(solidPen && closedPolygon) {
-            _rasterizer->penFillPolygon(points.data(), points.size());
-        }
-        else {
-            _rasterizer->penFillPolygonSeparate(points.data(), points.size());
-        }
-    }
+        _rasterizer->fillPolyline(polygons);
 }
 
 
@@ -557,7 +501,6 @@ FontMetrics ImagePainter2::fontMetrics( const Font& font, const Pt::String& text
 }
 
 
-
 void ImagePainter2::drawLine( const PointF& from, const PointF& to )
 {
     // Rasterize one-pixel line
@@ -571,6 +514,30 @@ void ImagePainter2::drawLine( const PointF& from, const PointF& to )
         _rasterizer->strokeOnePixelLine(a, b, 0);
         return;
     }
+
+#if 1
+    std::vector<Polygon> polygons;
+
+    LineRenderer lr;
+
+    // TODO: set pattern only once
+    if( _rasterizer->pen().style() != Pen::Solid )
+        lr.setPattern( _rasterizer->pen().style() );
+    
+    PointF points[2] = { from, to };
+
+    lr.renderWidePolyline( polygons, points, 2, _rasterizer->pen() );
+
+    // no performance benefit to use renderWideLine
+    //lr.renderWideLine( polygons, from, to, _rasterizer->pen() );
+
+    if( ! polygons.empty() )
+    {
+        _rasterizer->fillPolyline(polygons);
+    }
+    
+    return;
+#endif
 
     // Generate a polygon that represents the thick line
     std::vector<PointF> pointsF;

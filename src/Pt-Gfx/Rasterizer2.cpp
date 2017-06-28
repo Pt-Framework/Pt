@@ -87,6 +87,9 @@ Rasterizer2::Rasterizer2(Image& image)
 , _compositionMode( CompositionMode::SourceCopy )
 , _penPixel       ( _image->view(), 0, 0 )
 , _brushPixel     ( _image->view(), 0, 0 )
+, _brushImage(0)
+, _isGradient(false)
+, _isTexture(false)
 {
     updateClip();
 }

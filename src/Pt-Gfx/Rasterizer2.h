@@ -178,6 +178,8 @@ class Rasterizer2
         template <typename PointT>
         void fillPolygon(const BasicPoint<PointT>* points, size_t pointCount);
 
+        void fillPolyline(const std::vector<Polygon>& polygons);
+
         void fillPolygon2( const PointF* ps, std::size_t n );
 
         void fillPolygons(const std::vector<Polygon>& polygons);

@@ -111,6 +111,33 @@ void LineRenderer::renderWidePolyline(std::vector<Polygon>& polygons,
 }
 
 
+//
+// Just as fast as calling renderWidePolyline with just two points...
+//
+void LineRenderer::renderWideLine(std::vector<Polygon>& polygons,
+                                  const PointF& from, const PointF& to,
+                                  const Pen& pen)
+{
+    bool isSolid = pen.style() == Pen::Solid;
+
+    if(isSolid)
+    {
+        polygons.resize( polygons.size() + 1 );
+        std::vector<PointF>& pointsF = polygons.back().points();
+
+        renderSolidLineSegment(pointsF, from.x(), from.y(), to.x(), to.y(), 
+                               pen, true, true);
+    }
+    else
+    {
+        Pt::int32_t piCtrInOut = 0;
+        renderPatternedSingleLineSegment(polygons, 
+                                         from.x(), from.y(), 
+                                         to.x(), to.y(), piCtrInOut, pen);
+    }
+}
+
+
 void LineRenderer::renderSolidClosedWidePolyline(std::vector<Polygon>& polygons, 
                                                  const PointF* basePtr, size_t curPCnt,
                                                  const Pen& pen)
@@ -752,6 +779,92 @@ void LineRenderer::renderSolidLineSegment(std::vector<PointF>& dst,
     
     if( ! closingCap ) 
         renderLineButtCap(dst, x2, y2, -nx, -ny);
+}
+
+
+void LineRenderer::renderPatternedSingleLineSegment(std::vector<Polygon>& polygons, 
+                                                    float x1, float y1, 
+                                                    float x2, float y2, 
+                                                    Pt::int32_t& piCtrInOut,
+                                                    const Pen& pen)
+{
+    
+
+    // Calculate the line's parameters
+    float wh, dx, dy, nx, ny;
+
+    calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, pen.size());
+
+    // Get the pattern buffer and calculate the number of "pattern" segments
+    const Pt::uint8_t* pBuff = _patternBufferMP;
+    const float        xLen  = (x2 > x1) ? (x2 - x1) : (x1 - x2);
+    const float        yLen  = (y2 > y1) ? (y2 - y1) : (y1 - y2);
+    const float        lLen  = sqrt(xLen * xLen + yLen * yLen);
+    const size_t       nSegs = (size_t) lround(lLen / wh) * 2;
+    const float        xInc  = (x2 - x1) / nSegs;
+    const float        yInc  = (y2 - y1) / nSegs;
+
+    // Generate the segments
+    Pt::uint8_t prvPat = 0;
+    float       xs     = x1;
+    float       ys     = y1;
+    for(size_t i = 0; i <= nSegs; ++i) 
+    {
+        // Get the pattern
+        const Pt::uint8_t curPat = pBuff[piCtrInOut++];
+        if(piCtrInOut >= PATTERN_BUFFER_COUNTER_MAXMP) piCtrInOut -= PATTERN_BUFFER_COUNTER_MAXMP;
+        // Determine whether we should draw this segment as well as its coordinate
+        const bool draw = (!curPat && prvPat);
+        if(curPat && !prvPat) {
+            x1 = xs;
+            y1 = ys;
+        }
+        else if(draw) {
+            x2 = xs;
+            y2 = ys;
+            if(pen.capStyle() == Pen::ButtCap) {
+                x2 += xInc;
+                y2 += yInc;
+            }
+        }
+        prvPat = curPat;
+        // Update the coordinates
+        xs += xInc;
+        ys += yInc;
+        
+        // Skip if we are not going to draw this segment
+        if( ! draw) 
+            continue;
+                
+        polygons.resize( polygons.size() + 1 );
+        std::vector<PointF>& dst = polygons.back().points();
+
+        // Generate points (CCW)
+        
+        // --- Begin point ---
+        switch(pen.capStyle()) {
+            case Pen::SquareCap        : renderLineSquareCap       (dst, x1, y1,     dx, dy, nx, ny); break;
+            case Pen::RoundCap         : renderLineRoundCap        (dst, x1, y1, wh, dx, dy, nx, ny); break;
+            case Pen::TriangularOutCap : renderLineTriangularOutCap(dst, x1, y1,     dx, dy, nx, ny); break;
+            case Pen::TriangularInCap  : renderLineTriangularInCap (dst, x1, y1,     dx, dy, nx, ny); break;
+            case Pen::RoundHoleCap     : renderLineRoundHoleCap    (dst, x1, y1, wh, dx, dy, nx, ny); break;
+            case Pen::Arrow1Cap        : renderLineArrow1Cap       (dst, x1, y1,     dx, dy, nx, ny); break;
+            case Pen::Arrow2Cap        : renderLineArrow2Cap       (dst, x1, y1,     dx, dy, nx, ny); break;
+            default                    : renderLineButtCap         (dst, x1, y1,             nx, ny); break;
+        }
+        
+        // --- End point ---
+        switch(pen.capStyle()) {
+            case Pen::SquareCap        : renderLineSquareCap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
+            case Pen::RoundCap         : renderLineRoundCap        (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
+            case Pen::TriangularOutCap : renderLineTriangularOutCap(dst, x2, y2,     -dx, -dy, -nx, -ny); break;
+            case Pen::TriangularInCap  : renderLineTriangularInCap (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
+            case Pen::RoundHoleCap     : renderLineRoundHoleCap    (dst, x2, y2, wh, -dx, -dy, -nx, -ny); break;
+            case Pen::Arrow1Cap        : renderLineArrow1Cap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
+            case Pen::Arrow2Cap        : renderLineArrow2Cap       (dst, x2, y2,     -dx, -dy, -nx, -ny); break;
+            default                    : renderLineButtCap         (dst, x2, y2,               -nx, -ny); break;
+        }
+    }
 }
 
 

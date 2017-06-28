@@ -360,8 +360,8 @@ class PT_GFX_API ImagePainter2 : public Painter
 
             for(Pt::int32_t i = 0; i < nSegs; ++i) {
                 // Calculate the coordinate
-                const float x = centerX + radiusX * fastCos(angle);
-                const float y = centerY - radiusY * fastSin(angle); // Sign inversion due to differences between cartesian and computer coordinate systems
+                const float x = centerX + radiusX * std::cos(angle);
+                const float y = centerY - radiusY * std::sin(angle); // Sign inversion due to differences between cartesian and computer coordinate systems
                 // Update the angle
                 angle += fdegInc;
                 // Store the coordinate only if it is different with the previous one
