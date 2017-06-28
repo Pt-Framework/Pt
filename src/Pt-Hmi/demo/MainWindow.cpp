@@ -234,6 +234,7 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     //path.transform(trans);
 
     imagePainter.setPen( Gfx::Pen( Gfx::Color::fromRgb8(255, 0, 0), 10) );
+    imagePainter.setPen( Gfx::Pen( Gfx::Color::fromRgb8(255, 0, 0), 10, Gfx::Pen::Dash) );
     imagePainter.setBrush( Gfx::Color::fromRgb8(255, 0, 0)  );
     //imagePainter.fillPath(path);
 

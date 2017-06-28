@@ -38,6 +38,48 @@ LineRenderer::LineRenderer()
 {
 }
 
+void LineRenderer::setPattern(const Pen::Style& style)
+{
+    // Predefined patterns
+    static const Pt::uint64_t patternDot        = 0x8080808080808080; // 1000000010000000100000001000000010000000100000001000000010000000
+    static const Pt::uint64_t patternDoubleDot  = 0x8400840084008400; // 1000010000000000100001000000000010000100000000001000010000000000
+    static const Pt::uint64_t patternDash       = 0xFF00FF00FF00FF00; // 1111111100000000111111110000000011111111000000001111111100000000
+    static const Pt::uint64_t patternDoubleDash = 0xFF07F800FF07F800; // 1111111100000111111110000000000011111111000001111111100000000000
+    static const Pt::uint64_t patternDotDash    = 0x800FF000800FF000; // 1000000000001111111100000000000010000000000011111111000000000000
+
+    // Select the pattern
+    Pt::uint64_t patternSel;
+
+    switch(style) 
+    {
+        default:
+        case Pen::Dot         : patternSel = patternDot;              break;
+        case Pen::DoubleDot   : patternSel = patternDoubleDot;        break;
+        case Pen::Dash        : patternSel = patternDash;             break;
+        case Pen::DoubleDash  : patternSel = patternDoubleDash;       break;
+        case Pen::DotDash     : patternSel = patternDotDash;          break;
+        //case Pen::UserDefined : patternSel = _pen.styleUserPattern(); break;
+    }
+
+    // Counter for generating the patterns
+    size_t gctr1P = 0;
+    size_t gctrMP = 0;
+
+    // Generate the pattern
+    bool previous = 0;
+    for(Pt::int8_t p = 0; p < PatternCells; ++p) 
+    { 
+        // The pattern has 64 points
+        
+        // Get the pattern cell value
+        const bool current = patternSel & ((Pt::uint64_t) 1 << p);
+
+        // It is a simple expanded copy of the pattern above
+        _patternBufferMP[PATTERN_BUFFER_NUM_OF_CELLS - gctrMP - 1] = current ? 1 : 0;
+        ++gctrMP;
+    }
+}
+
 
 void LineRenderer::renderWidePolyline(std::vector<Polygon>& polygons,
                                       const PointF* points, const std::size_t n,
@@ -223,49 +265,442 @@ void LineRenderer::renderDashedWidePolyLine(std::vector<Polygon>& polygons, //po
                                             const PointF* src, size_t pointCount,
                                             const Pen& pen)
 {
-    //// Initialize the operational state
-    //SAGOpState state(pointsF, src, pointCount, _rasterizer->pen().size());
+    // Initialize the operational state
+    PatternState state(polygons, src, pointCount, pen.size());
 
-    //// The pattern buffer and its counter
-    //const Pt::uint8_t* pBuff      = _rasterizer->patternBufferMP64();
-    //      Pt::int32_t  piCtrInOut = 0;
+    // The pattern buffer and its counter
+    const Pt::uint8_t* pBuff      = _patternBufferMP;
+          Pt::int32_t  piCtrInOut = 0;
 
-    //// Loop until all the polygon's points are processed
-    //bool done = false;
-    //while( ! done ) 
+    // Loop until all the polygon's points are processed
+    bool done = false;
+    while( ! done ) 
+    {
+        // Calculate the "pattern" segment length
+        const Pt::uint8_t refPat = pBuff[piCtrInOut];
+        state.patSegLen = 0.0f;
+        for(;;) 
+        {
+            // Get and compare the pattern bit
+            const Pt::uint8_t curPat = pBuff[piCtrInOut++];
+            
+            if(piCtrInOut >= PatternCells) 
+                piCtrInOut -= PatternCells;
+            
+            if(curPat == refPat) 
+            {
+                state.patSegLen += state.cellSize;
+                continue;
+            }
+            
+            // We have got a different pattern bit, exit to process the "pattern" segment
+            --piCtrInOut;
+            if(piCtrInOut < 0) 
+                piCtrInOut += PatternCells;
+            
+            break;
+        }
+        
+        // Bail out if the "pattern" segment is shorter than the cell size
+        if(state.patSegLen < state.cellSize) 
+            return;
+        
+        // Process the "pattern" segment
+        done = sagPolygonPoints(state, !!refPat, pen);
+    }
+}
+
+
+bool LineRenderer::sagPolygonPoints(PatternState& state, bool draw, const Pen& pen)
+{
+    // Temporary buffer for the generated points
+    std::vector<PointF> pointsF;
+
+    // Loop until the current "pattern" segment is completely processed
+    while(state.patSegLen > 0.0f) {
+
+        // (Re-)initialize some part of the operational state as needed
+        if(state.remLen <= 0.0f) {
+            // Check if all polygon's points have been processed
+            if(state.idx1 + 1 >= state.srcCount) {
+                state.gather.clear();
+                state.gatherLen = 0.0f;
+                return true;
+            }
+            // Calculate the vector, size, and coordinates
+            const float x1 = state.srcPoints[state.idx1    ].x();
+            const float y1 = state.srcPoints[state.idx1    ].y();
+            const float x2 = state.srcPoints[state.idx1 + 1].x();
+            const float y2 = state.srcPoints[state.idx1 + 1].y();
+            const float vx = x2 - x1;
+            const float vy = y2 - y1;
+            const float vz = sqrt(vx * vx + vy * vy);
+            // Initialize some part of the operational state
+            state.px     = x1;
+            state.py     = y1;
+            state.ex     = x2;
+            state.ey     = y2;
+            state.uvx    = vx / vz;
+            state.uvy    = vy / vz;
+            state.cvx    = state.uvx * state.cellSize;
+            state.cvy    = state.uvy * state.cellSize;
+            state.remLen = vz;
+        }
+
+        // If we have the complete length from the gathered points, process them into a thick polygon
+        if(state.gatherLen >= state.patSegLen) {
+            // Generate one solid polygon segment as needed
+            if(draw) {
+                if(pen.capStyle() == Pen::ButtCap) {
+                    state.gather.back().set(
+                        state.gather.back().x() + state.cvx,
+                        state.gather.back().y() + state.cvy
+                    );
+                }
+                sagGeneratePolyLineSegment(state, pen);
+            }
+            // Reset the "pattern" segment length
+            state.patSegLen = 0.0f;
+            // Reset the gather buffer
+            state.gather.clear();
+            state.gatherLen = 0.0f;
+            continue;
+        }
+
+        // If we have enough remainder length, process the polygon's edge as a simple line segment
+        if(state.gather.empty() && state.remLen >= state.patSegLen) {
+            // Generate a simple line segment as needed
+            if(draw) {
+                if(pen.capStyle() == Pen::ButtCap) {
+                    sagGenerateSimpleLineSegment(
+                        state,
+                        state.px,
+                        state.py,
+                        state.px + state.cvx + state.uvx * state.patSegLen,
+                        state.py + state.cvy + state.uvy * state.patSegLen,
+                        pen
+                    );
+
+                }
+                else {
+                    sagGenerateSimpleLineSegment(
+                        state,
+                        state.px,
+                        state.py,
+                        state.px + state.uvx * state.patSegLen,
+                        state.py + state.uvy * state.patSegLen,
+                        pen
+                    );
+                }
+            }
+            // Substract the remainder length
+            state.remLen -= state.patSegLen;
+            // Reset the "pattern" segment length
+            state.patSegLen = 0.0f;
+            // Process excess length (if any)
+            if(state.remLen > 0.0f) {
+                // Update the interpolation coordinate
+                state.px = state.ex - state.uvx * state.remLen;
+                state.py = state.ey - state.uvy * state.remLen;
+            }
+            else {
+                // Reset the remainder length and increment the point index so that the next time
+                // this loop is running, the next point within the polygon will be processed
+                state.remLen = -1.0f;
+                ++state.idx1;
+            }
+            continue;
+        }
+
+        // ------------------------------------------
+        // If we got herem it means:
+        //     1. The remainder  length is not enough
+        //     2. The "gathered" length is not enough
+        // ------------------------------------------
+
+        // Store the current interpolation coordinate to the "gather" buffer as needed
+        if(state.gather.empty() || state.gather.back().x() != state.px || state.gather.back().y() != state.py) {
+            state.gather.push_back(PointF(state.px, state.py));
+        }
+        // If the combined length is less than or equal to the "pattern" segment length, simply store the end coordinate
+        if(state.gatherLen + state.remLen <= state.patSegLen) {
+            // Store the end coordinate
+            state.gather.push_back(PointF(state.ex, state.ey));
+            state.gatherLen += state.remLen;
+            // Reset the remainder length and increment the point index so that the next time
+            // this loop is running, the next point within the polygon will be processed
+            state.remLen = -1.0f;
+            ++state.idx1;
+        }
+        // Otherwise, store the in-between coordinate
+        else {
+            // Calculate the needed length
+            const float nl = state.patSegLen - state.gatherLen;
+            // Update the interpolation coordinate
+            state.px += state.uvx * nl;
+            state.py += state.uvy * nl;
+            // Store the in-between coordinate (the updated interpolation coordinate)
+            state.gather.push_back(PointF(state.px, state.py));
+            state.gatherLen += nl;
+            // Substract and check the remainder length
+            state.remLen -= nl;
+            if(state.remLen <= 0.0f) {
+                // Reset the remainder length and increment the point index so that the next time
+                // this loop is running, the next point within the polygon will be processed
+                state.remLen = -1.0f;
+                ++state.idx1;
+            }
+        }
+
+    } // while()
+
+    // Indicate that the current "pattern" segment are completely processed,
+    // but there are still unprocessed polygon's points
+    return false;
+}
+
+void LineRenderer::sagGenerateSimpleLineSegment(PatternState& state, 
+                                                float x1, float y1, 
+                                                float x2, float y2,
+                                                const Pen& pen)
+{
+    // Temporary buffer for the generated points
+    std::vector<PointF> pointsF;
+
+    // Calculate the line's parameters
+    float wh, dx, dy, nx, ny;
+
+    calculateLineParams(wh, dx, dy, nx, ny, x1, y1, x2, y2, pen.size());
+
+    // Generate points (CCW)
+    // --- Begin point ---
+    switch(pen.capStyle()) {
+        case Pen::SquareCap        : renderLineSquareCap       (pointsF, x1, y1,     dx, dy, nx, ny); break;
+        case Pen::RoundCap         : renderLineRoundCap        (pointsF, x1, y1, wh, dx, dy, nx, ny); break;
+        case Pen::TriangularOutCap : renderLineTriangularOutCap(pointsF, x1, y1,     dx, dy, nx, ny); break;
+        case Pen::TriangularInCap  : renderLineTriangularInCap (pointsF, x1, y1,     dx, dy, nx, ny); break;
+        case Pen::RoundHoleCap     : renderLineRoundHoleCap    (pointsF, x1, y1, wh, dx, dy, nx, ny); break;
+        case Pen::Arrow1Cap        : renderLineArrow1Cap       (pointsF, x1, y1,     dx, dy, nx, ny); break;
+        case Pen::Arrow2Cap        : renderLineArrow2Cap       (pointsF, x1, y1,     dx, dy, nx, ny); break;
+        default                    : renderLineButtCap         (pointsF, x1, y1,             nx, ny); break;
+    }
+    // --- End point ---
+    switch(pen.capStyle()) {
+        case Pen::SquareCap        : renderLineSquareCap       (pointsF, x2, y2,     -dx, -dy, -nx, -ny); break;
+        case Pen::RoundCap         : renderLineRoundCap        (pointsF, x2, y2, wh, -dx, -dy, -nx, -ny); break;
+        case Pen::TriangularOutCap : renderLineTriangularOutCap(pointsF, x2, y2,     -dx, -dy, -nx, -ny); break;
+        case Pen::TriangularInCap  : renderLineTriangularInCap (pointsF, x2, y2,     -dx, -dy, -nx, -ny); break;
+        case Pen::RoundHoleCap     : renderLineRoundHoleCap    (pointsF, x2, y2, wh, -dx, -dy, -nx, -ny); break;
+        case Pen::Arrow1Cap        : renderLineArrow1Cap       (pointsF, x2, y2,     -dx, -dy, -nx, -ny); break;
+        case Pen::Arrow2Cap        : renderLineArrow2Cap       (pointsF, x2, y2,     -dx, -dy, -nx, -ny); break;
+        default                    : renderLineButtCap         (pointsF, x2, y2,               -nx, -ny); break;
+    }
+
+    // Check for intersection with the first polygons in the final destination buffer
+    if( ! state.dstPolygons.empty() ) 
+    {
+        // REVIEW
+        //bool r = satDetectPolygonCollision( &state.dstPoints[0], 
+        //                                    state.dstPCount0, 
+        //                                    pointsF.data(), pointsF.size() );
+
+        const std::vector<PointF>& firstPolygon = state.dstPolygons[0].points();
+        bool r = satDetectPolygonCollision( &firstPolygon[0], 
+                                            firstPolygon.size(), 
+                                            pointsF.data(), pointsF.size() );
+        if(r) 
+            return;
+    }
+    // REVIEW
+    //else  
     //{
-    //    // Calculate the "pattern" segment length
-    //    const Pt::uint8_t refPat = pBuff[piCtrInOut];
-    //    state.patSegLen = 0.0f;
-    //    for(;;) 
-    //    {
-    //        // Get and compare the pattern bit
-    //        const Pt::uint8_t curPat = pBuff[piCtrInOut++];
-    //        
-    //        if(piCtrInOut >= PATTERN_BUFFER_COUNTER_MAXMP) 
-    //            piCtrInOut -= PATTERN_BUFFER_COUNTER_MAXMP;
-    //        
-    //        if(curPat == refPat) 
-    //        {
-    //            state.patSegLen += state.cellSize;
-    //            continue;
-    //        }
-    //        
-    //        // We have got a different pattern bit, exit to process the "pattern" segment
-    //        --piCtrInOut;
-    //        if(piCtrInOut < 0) 
-    //            piCtrInOut += PATTERN_BUFFER_COUNTER_MAXMP;
-    //        
-    //        break;
-    //    }
-    //    
-    //    // Bail out if the "pattern" segment is shorter than the cell size
-    //    if(state.patSegLen < state.cellSize) 
-    //        return;
-    //    
-    //    // Process the "pattern" segment
-    //    done = sagPolygonPoints(state, !!refPat);
+    //    state.dstPCount0 = pointsF.size();
     //}
+
+    // Check for intersection with the previous polygons in the final destination buffer
+    
+    // REVIEW
+    //if(state.dstPCount && state.dstPStart) 
+    if(state.dstPolygons.size() > 1) 
+    {
+        // REVIEW
+        //const bool r = satDetectPolygonCollision(&state.dstPoints[state.dstPStart], 
+        //                                         state.dstPCount, 
+        //                                         pointsF.data(), pointsF.size() );
+        
+        const std::vector<PointF>& previousPolygon = state.dstPolygons.back().points();
+
+        const bool r = satDetectPolygonCollision(&previousPolygon[0], 
+                                                 previousPolygon.size(),
+                                                 pointsF.data(), pointsF.size() );
+        if(r) 
+            return;
+    }
+    
+    // REVIEW
+    //state.dstPStart = state.dstPoints.size();
+    //state.dstPCount = pointsF.size();
+
+    //// Add polygon separator point as needed
+    //if( ! state.dstPoints.empty() ) 
+    //{
+    //    state.dstPoints.push_back(Painter::PolygonSeparatorPointF);
+    //    ++state.dstPStart;
+    //}
+
+    // Copy the points
+    //state.dstPoints.insert(state.dstPoints.end(), pointsF.begin(), pointsF.end());
+
+    // append line segment polygon
+    state.dstPolygons.resize(state.dstPolygons.size() + 1);
+    state.dstPolygons.back().assign( &pointsF[0], pointsF.size());
+}
+
+
+bool LineRenderer::satDetectPolygonCollision(const PointF* poly1, size_t poly1Count, 
+                                             const PointF* poly2, size_t poly2Count)
+{
+    // Evaluate using the first polygon's normals
+    for(size_t i = poly1Count; i >= 1; --i) {
+        // Calculate the indexes
+        const size_t idx1 =                               (i - 1);
+        const size_t idx2 = (i == 1) ? (poly1Count - 1) : (i - 2);
+        // Calculate the normals
+        const float dx = poly1[idx2].x() - poly1[idx1].x();
+        const float dy = poly1[idx2].y() - poly1[idx1].y();
+        const float nx =  dy;
+        const float ny = -dx;
+        // Get the minimum and maximum projection values
+        float min1, max1, min2, max2;
+        satDPIProjMinMax(min1, max1, poly1, poly1Count, nx, ny);
+        satDPIProjMinMax(min2, max2, poly2, poly2Count, nx, ny);
+        // Check if the polygon is separated
+        //lprintf("A: %+7.1f , %+7.1f --- %+7.1f , %+7.1f ### %d ### %+7.1f , %+7.1f\n", max1, min2, max2, min1, (max1 < min2 || max2 < min1), nx, ny);
+        if(max1 < min2 || max2 < min1) return false;
+        if(fabs( (min2 - max1) / max1 ) <= 0.003f || fabs( (min1 - max2) / max2 ) <= 0.003f) return false;
+    }
+
+    // Calculate the second polygon's normals
+    for(size_t i = poly2Count; i >= 1; --i) {
+        // Calculate the indexes
+        const size_t idx1 =                               (i - 1);
+        const size_t idx2 = (i == 1) ? (poly2Count - 1) : (i - 2);
+        // Calculate the normals
+        const float dx = poly2[idx2].x() - poly2[idx1].x();
+        const float dy = poly2[idx2].y() - poly2[idx1].y();
+        const float nx =  dy;
+        const float ny = -dx;
+        // Get the minimum and maximum projection values
+        float min1, max1, min2, max2;
+        satDPIProjMinMax(min1, max1, poly1, poly1Count, nx, ny);
+        satDPIProjMinMax(min2, max2, poly2, poly2Count, nx, ny);
+        // Check if the polygon is separated
+        //lprintf("B: %+7.1f , %+7.1f --- %+7.1f , %+7.1f ### %d ### %+7.1f , %+7.1f\n", max1, min2, max2, min1, (max1 < min2 || max2 < min1), nx, ny);
+        if(max1 < min2 || max2 < min1) return false;
+        if(fabs( (min2 - max1) / max1 ) <= 0.003f || fabs( (min1 - max2) / max2 ) <= 0.003f) return false;
+    }
+
+    // There is a collision
+    return true;
+}
+
+
+// Based on: Collision Detection Using the Separating Axis Theorem
+//           https://gamedevelopment.tutsplus.com/tutorials/collision-detection-using-the-separating-axis-theorem--gamedev-169
+//           http://cdn.tutsplus.com/gamedev/uploads/legacy/008_separatingAxisTheorem/SeparatingAxisTheorem.zip
+//           Article and original code by Kah Shiu Chong, 2012
+void LineRenderer::satDPIProjMinMax(float& min, float& max, 
+                                    const PointF* points, size_t pointCount, 
+                                    float px, float py)
+{
+    min =  Painter::MaximumCoordinate;
+    max = -Painter::MaximumCoordinate;
+
+    for(size_t i = 0; i < pointCount; ++i) {
+        const float val = points[i].x() * px + points[i].y() * py;
+        if(val > max) max = val;
+        if(val < min) min = val;
+    }
+}
+
+
+void LineRenderer::sagGeneratePolyLineSegment(PatternState& state, const Pen& pen)
+{
+    // Generate a new thick polygon
+    std::vector<Polygon> polygons;
+    renderSolidOpenWidePolyline(polygons, state.gather.data(), state.gather.size(), pen);
+
+    // Exit here if the generated polygon does not actually have a meaningful number of points
+    
+    // REVIEW: should this be size <= 2?
+    //if(pointsF.size() < 2) return;
+    if(polygons.empty() || polygons[0].size() < 2) 
+        return;
+
+    std::vector<PointF>& pointsF = polygons[0].points();
+
+    // Check for intersection with the first polygons in the final destination buffer
+    
+    // REVIEW
+    //if(state.dstPCount0) 
+    if( ! state.dstPolygons.empty() ) 
+    {
+        // REVIEW
+        //bool r = satDetectPolygonCollision( &state.dstPoints[0], 
+        //                                    state.dstPCount0, 
+        //                                    pointsF.data(), pointsF.size() );
+        
+        const std::vector<PointF>& firstPolygon = state.dstPolygons[0].points();
+        bool r = satDetectPolygonCollision( &firstPolygon[0], 
+                                            firstPolygon.size(), 
+                                            pointsF.data(), pointsF.size() );
+        if(r) 
+            return;
+    }
+
+    // REVIEW
+    //else 
+    //{
+    //    state.dstPCount0 = pointsF.size();
+    //}
+
+    // Check for intersection with the previous polygons in the final destination buffer
+    
+    // REVIEW
+    //if(state.dstPCount && state.dstPStart) 
+    if(state.dstPolygons.size() > 1) 
+    {
+        // REVIEW
+        //bool r = satDetectPolygonCollision( &state.dstPoints[state.dstPStart], 
+        //                                    state.dstPCount, 
+        //                                    pointsF.data(), pointsF.size() );
+
+        const std::vector<PointF>& previousPolygon = state.dstPolygons.back().points();
+
+        bool r = satDetectPolygonCollision( &previousPolygon[0], 
+                                            previousPolygon.size(),
+                                            pointsF.data(), pointsF.size() );
+        if(r) 
+            return;
+    }
+    
+    // REVIEW
+    //state.dstPStart = state.dstPoints.size();
+    //state.dstPCount = pointsF.size();
+
+    // Add polygon separator point as needed
+    //if( ! state.dstPoints.empty() ) 
+    //{
+    //    state.dstPoints.push_back(Painter::PolygonSeparatorPointF);
+    //    ++state.dstPStart;
+    //}
+
+    // REVIEW
+    //state.dstPoints.insert(state.dstPoints.end(), pointsF.begin(), pointsF.end());
+    
+    // append line segment polygon
+    state.dstPolygons.resize(state.dstPolygons.size() + 1);
+    state.dstPolygons.back().assign( &pointsF[0], pointsF.size());
 }
 
 

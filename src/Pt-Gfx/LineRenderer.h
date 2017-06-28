@@ -38,37 +38,37 @@ namespace Pt {
 
 namespace Gfx { 
 
-struct SAGOpState 
+struct PatternState 
 {
-    std::vector<PointF>& dstPoints;  // Destination vector
-    size_t               dstPStart;  // Start index of the previous polygon in the above vector
-    size_t               dstPCount;  // The number of points of the previous polygon in the above vector
-    size_t               dstPCount0; // The number of points of the first polygon in the above vector
+    std::vector<Polygon>& dstPolygons;  // Destination vector
+    //size_t                dstPStart;  // Start index of the previous polygon in the above vector
+    //size_t                dstPCount;  // The number of points of the previous polygon in the above vector
+    //size_t                dstPCount0; // The number of points of the first polygon in the above vector
+                          
+    const PointF*         srcPoints;  // Source points
+    size_t                srcCount;   // The number of source points
+                          
+    float                 cellSize;   // Cell size
+    float                 patSegLen;  // Length of the currently processed "pattern" segment
+                          
+    size_t                idx1;       // Index to the first point which is currently being processed;
+                                      // the index to the second point is always (idx1 + 1)
+                          
+    float                 px, py;     // Current interpolation coordinate (in-between the two points)
+    float                 ex, ey;     // Current end coordinate (coordinate of the the second point)
+    float                 uvx, uvy;   // Unit vector from the first point to the second point
+    float                 cvx, cvy;   // Cell vector from the first point to the second point
+    float                 remLen;     // Remaining length between the two points that has not been "consumed" by the "pattern" segment(s)
+                          
+    std::vector<PointF>   gather;     // Gathered polygon points
+    float                 gatherLen;  // Length of the gathered points
 
-    const PointF*        srcPoints;  // Source points
-    size_t               srcCount;   // The number of source points
-
-    float                cellSize;   // Cell size
-    float                patSegLen;  // Length of the currently processed "pattern" segment
-
-    size_t               idx1;       // Index to the first point which is currently being processed;
-                                     // the index to the second point is always (idx1 + 1)
-
-    float                px, py;     // Current interpolation coordinate (in-between the two points)
-    float                ex, ey;     // Current end coordinate (coordinate of the the second point)
-    float                uvx, uvy;   // Unit vector from the first point to the second point
-    float                cvx, cvy;   // Cell vector from the first point to the second point
-    float                remLen;     // Remaining length between the two points that has not been "consumed" by the "pattern" segment(s)
-
-    std::vector<PointF>  gather;     // Gathered polygon points
-    float                gatherLen;  // Length of the gathered points
-
-    SAGOpState(std::vector<PointF>& pointsF, 
-               const PointF* src, size_t pointCount, size_t penSize)
-    : dstPoints(pointsF)
-    , dstPStart(0)
-    , dstPCount(0)
-    , dstPCount0(0)
+    PatternState(std::vector<Polygon>& polygons, 
+                 const PointF* src, size_t pointCount, size_t penSize)
+    : dstPolygons(polygons)
+    //, dstPStart(0)
+    //, dstPCount(0)
+    //, dstPCount0(0)
     , srcPoints(src)
     , srcCount(pointCount), cellSize(penSize * 0.25f)
     , idx1(0)
@@ -86,6 +86,8 @@ class LineRenderer
                                 const PointF* points, const std::size_t n,
                                 const Pen& pen);
 
+        void setPattern(const Pen::Style& style);
+
     private:
         void renderSolidClosedWidePolyline(std::vector<Polygon>& polygons, 
                                            const PointF* basePtr, size_t curPCnt,
@@ -100,6 +102,23 @@ class LineRenderer
                                       const Pen& pen);
 
         void renderDashedWidePolyLine();
+
+
+        bool sagPolygonPoints(PatternState& state, bool draw, const Pen& pen);
+
+        void sagGenerateSimpleLineSegment(PatternState& state, 
+                                          float x1, float y1, 
+                                          float x2, float y2,
+                                          const Pen& pen);
+
+        bool satDetectPolygonCollision(const PointF* poly1, size_t poly1Count, 
+                                       const PointF* poly2, size_t poly2Count);
+
+        void satDPIProjMinMax(float& min, float& max, 
+                              const PointF* points, size_t pointCount, 
+                              float px, float py);
+
+        void sagGeneratePolyLineSegment(PatternState& state, const Pen& pen);
 
         void renderSolidLineSegment(std::vector<PointF>& dst, 
                                     float x1, float y1, float x2, float y2, 
@@ -161,6 +180,10 @@ class LineRenderer
         bool intersectLine(bool& inLine, PointF& intersect, 
                            const PointF& line1a, const PointF& line1b, 
                            const PointF& line2a, const PointF& line2b, size_t penSize);
+
+    private:
+        static const int PatternCells = 64;
+        Pt::uint8_t _patternBufferMP[PatternCells]; 
 };
 
 } //namespace
