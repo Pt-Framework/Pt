@@ -180,6 +180,10 @@ class Rasterizer2
 
         void fillLine(const PointF* ps, std::size_t n);
 
+        void fillPolyline(const std::vector<Polygon>& polygons);
+
+        void drawNarrowPolyline2(const PointF* points, size_t pointCount);
+
         void fillPolygon2( const PointF* ps, std::size_t n );
 
         void fillPolygons(const std::vector<Polygon>& polygons);

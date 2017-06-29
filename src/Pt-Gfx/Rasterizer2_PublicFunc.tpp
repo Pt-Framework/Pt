@@ -148,9 +148,11 @@ inline void Rasterizer2::drawNarrowPolyline(const BasicPoint<PointT>* points, si
     // Separate the polygons, clip their coordinates, and raster them
     size_t startIndex = 0;
 
-    for(size_t i = 0; i <= pointCount; ++i) {
+    for(size_t i = 0; i <= pointCount; ++i) 
+    {
         // Search for the end and/or separator points
-        if( i == pointCount || (points[i].x() > MAXIMUM_COORD && points[i].y() > MAXIMUM_COORD) ) {
+        if( i == pointCount || (points[i].x() > MAXIMUM_COORD && points[i].y() > MAXIMUM_COORD) ) 
+        {
             // Calculate the number of points for this polygon
             const size_t curPC = i - startIndex;
             // Clip the coordinates
@@ -159,10 +161,17 @@ inline void Rasterizer2::drawNarrowPolyline(const BasicPoint<PointT>* points, si
             if(autoClose && clipped.back() != clipped[0]) clipped.push_back(points[0]);
             // Increment the start index
             startIndex += curPC + 1;
+            
             // Draw the polygon
             rasterOnePixelPolygonOutline(clipped.data(), clipped.size(), _pen.color());
         }
     }
+}
+
+
+inline void Rasterizer2::drawNarrowPolyline2(const PointF* points, size_t pointCount)
+{
+  // TODO
 }
 
 //
@@ -317,6 +326,58 @@ inline void Rasterizer2::fillLine(const PointF* ps, std::size_t n)
     {
         rasterPolygonNoAA(&clippedPolygon[0], clippedPolygon.size(),
                            _pen.color(), minX, minY, maxX, maxY);
+    }
+
+    // Restore texture and gradient
+    _isTexture  = isTexture;
+    _isGradient = isGradient;
+}
+
+//
+// Same as fillPolygons, just uses pen and temporarily turns off gradient
+// and texture filling
+//
+inline void Rasterizer2::fillPolyline(const std::vector<Polygon>& polygons)
+{
+    Pt::int32_t minX =  MAXIMUM_COORD;
+    Pt::int32_t minY =  MAXIMUM_COORD;
+    Pt::int32_t maxX = -MAXIMUM_COORD;
+    Pt::int32_t maxY = -MAXIMUM_COORD;
+
+    std::vector<Polygon> clippedPolygons = polygons;
+
+    for(size_t i = 0; i < clippedPolygons.size(); ++i)
+    {
+        Polygon& polygon = clippedPolygons[i];
+
+        BasicClipShape<double>::clipPolygon(polygon.points(), _currentClip);
+
+        for(size_t j = 0; j < polygon.size(); ++j)
+        {
+            const double x = polygon.at(j).x();
+            const double y = polygon.at(j).y();
+
+            if(x < minX) minX = x;
+            if(y < minY) minY = y;
+            if(x > maxX) maxX = x;
+            if(y > maxY) maxY = y;
+        }
+    }
+
+    // Disable texture and gradient
+    const bool isTexture  = _isTexture;
+    const bool isGradient = _isGradient;
+
+    _isTexture  = false;
+    _isGradient = false;
+
+    if( this->isAntiAliasing() )
+    {
+        rasterPolygonsXWAA(clippedPolygons, _pen.color(), minX, minY, maxX, maxY);
+    }
+    else
+    {
+        rasterPolygonsNoAA(clippedPolygons, _pen.color(), minX, minY, maxX, maxY);
     }
 
     // Restore texture and gradient

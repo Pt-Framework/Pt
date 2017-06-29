@@ -313,20 +313,21 @@ class PT_GFX_API ImagePainter2 : public Painter
             }
         }
 
-
-        static inline void generateEllipsePoints(std::vector<PointF>& dst, Pt::int32_t radiusX, Pt::int32_t radiusY, Pt::int32_t centerX, Pt::int32_t centerY, size_t penSize)
+        static inline void generateEllipsePoints(std::vector<PointF>& dst, 
+                                                 Pt::int32_t radiusX, Pt::int32_t radiusY, 
+                                                 Pt::int32_t centerX, Pt::int32_t centerY, 
+                                                 size_t penSize)
         {
             // Calculate the ellipse's parameters
-            const Pt::int32_t circFac = lround(
-                                            sqrt( 0.5f * (radiusX * radiusX + radiusY * radiusY) ) /
-                                            ( (penSize > 4) ? (penSize * 0.25f) : 1.0f )
-                                        );
+            Pt::int32_t circFac = Pt::lround( sqrt(0.5f * (radiusX * radiusX + radiusY * radiusY) ) /
+                                              ( (penSize > 4) ? (penSize * 0.25f) : 1.0f ) );
             const Pt::int32_t circSeg = (circFac / 16) * 20 + 1;
             const Pt::int32_t nSegs   = (circSeg <  9) ?  9 : circSeg;
             const float       nSegs1i = 1.0f / (nSegs - 1);
 
             // Generate a polygon that approximates the ellipse
-            for(Pt::int32_t i = 0; i < nSegs; ++i) {
+            for(Pt::int32_t i = 0; i < nSegs; ++i) 
+            {
                 const float angle = piDouble<float>() * i * nSegs1i;
                 // Calculate the coordinate
                 const float x = centerX + radiusX * fastCos(angle);
@@ -339,7 +340,6 @@ class PT_GFX_API ImagePainter2 : public Painter
             // Discard the last point if it has the same coordinate with the first one
             if(dst.back() == dst[0]) dst.pop_back();
         }
-
 
         static inline void generateArcPoints(std::vector<PointF>& dst, Pt::int32_t radiusX, Pt::int32_t radiusY, Pt::int32_t centerX, Pt::int32_t centerY, float degBegin, float degEnd, size_t penSize)
         {

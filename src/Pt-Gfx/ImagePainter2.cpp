@@ -694,8 +694,8 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount)
             if(ps[0] == ps[pointCount - 1]) autoClose = true;
             _rasterizer->drawNarrowPolyline(pointsF.data(), pointsF.size(), autoClose);
         }
-        // Do not use use anti-aliasing
-        else {
+        else // Do not use use anti-aliasing
+        {
             // Round the points and remove duplicates
             std::vector<Point> points;
             cnvPointsFToPointsDeduplicate(points, ps, pointCount);
@@ -746,11 +746,72 @@ void ImagePainter2::fillPolygon( const PointF* ps, const size_t pointCount)
 #endif
 }
 
+#if 1
 
 void ImagePainter2::drawEllipse(const PointF& topLeft, const SizeF& size)
 {
     // Rasterize one-pixel ellipse
-    if(_rasterizer->pen().size() == 1) {
+    if(_rasterizer->pen().size() == 1) 
+    {
+        // Convert the points
+        const Point tl( lround(topLeft.x    ()), lround(topLeft.y     ()) );
+        const Size  sz( lround(size   .width()), lround(size   .height()) );
+        
+        // Rasterize the ellipse
+        _rasterizer->strokeOnePixelEllipseArc(tl, sz, 0, 0, ArcMode::Open);
+        return;
+    }
+
+    // Calculate the ellipse's parameters
+    const size_t      penSize  = _rasterizer->pen().size();
+    const Pt::int32_t radiusX  = size.width () / 2;
+    const Pt::int32_t radiusY  = size.height() / 2;
+    const Pt::int32_t centerX  = topLeft.x() + radiusX;
+    const Pt::int32_t centerY  = topLeft.y() + radiusY;
+
+    // Save the original pen and create a new pen with bevel join
+    Pen orgPen = _rasterizer->pen();
+
+    Pen newPen = orgPen;
+    newPen.setJoinStyle(Pen::BevelJoin);
+
+    if(_rasterizer->pen().style() == Pen::Solid) 
+    {
+        // Calculate the additional ellipse's parameters
+        const Pt::int32_t radiusXo = ( size.width () + penSize ) / 2;
+        const Pt::int32_t radiusYo = ( size.height() + penSize ) / 2;
+        const Pt::int32_t radiusXi = ( size.width () - penSize ) / 2;
+        const Pt::int32_t radiusYi = ( size.height() - penSize ) / 2;
+        
+        // Generate a polygon that approximates the ellipse
+        std::vector<Polygon> polygons(2);
+        generateEllipsePoints(polygons[0].points(), radiusXo, radiusYo, centerX, centerY, 0);
+        generateEllipsePoints(polygons[1].points(), radiusXi, radiusYi, centerX, centerY, 0);
+        
+        _rasterizer->setPen(newPen);
+        _rasterizer->fillPolyline(polygons);
+        _rasterizer->setPen(orgPen);
+    }
+    else // Patterned
+    {
+        // Generate a polygon that approximates the ellipse
+        std::vector<PointF> pointsF;
+        generateEllipsePoints(pointsF, radiusX, radiusY, centerX, centerY, newPen.size());
+        
+        // Rasterize the polygon
+        _rasterizer->setPen(newPen);
+        drawWidePolyline(pointsF.data(), pointsF.size(), false, 0);
+        _rasterizer->setPen(orgPen);
+    }
+}
+
+#else // old code
+
+void ImagePainter2::drawEllipse(const PointF& topLeft, const SizeF& size)
+{
+    // Rasterize one-pixel ellipse
+    if(_rasterizer->pen().size() == 1) 
+    {
         // Convert the points
         const Point tl( lround(topLeft.x    ()), lround(topLeft.y     ()) );
         const Size  sz( lround(size   .width()), lround(size   .height()) );
@@ -772,18 +833,21 @@ void ImagePainter2::drawEllipse(const PointF& topLeft, const SizeF& size)
     Pen newPen = orgPen;
     newPen.setJoinStyle(Pen::BevelJoin);
 
-    // Solid
-    if(_rasterizer->pen().style() == Pen::Solid) {
+    if(_rasterizer->pen().style() == Pen::Solid) 
+    {
         // Calculate the additional ellipse's parameters
         const Pt::int32_t radiusXo = ( size.width () + penSize ) / 2;
         const Pt::int32_t radiusYo = ( size.height() + penSize ) / 2;
         const Pt::int32_t radiusXi = ( size.width () - penSize ) / 2;
         const Pt::int32_t radiusYi = ( size.height() - penSize ) / 2;
+        
         // Generate a polygon that approximates the ellipse
         std::vector<PointF> pointsF;
         generateEllipsePoints(pointsF, radiusXo, radiusYo, centerX, centerY, 0);
+        
         pointsF.push_back(Painter::PolygonSeparatorPointF);
         generateEllipsePoints(pointsF, radiusXi, radiusYi, centerX, centerY, 0);
+        
         // Use anti-aliasing
         if( _rasterizer->isAntiAliasing() ) {
             // Remove duplicates
@@ -795,28 +859,32 @@ void ImagePainter2::drawEllipse(const PointF& topLeft, const SizeF& size)
             _rasterizer->setPen(orgPen);
         }
         // Do not use use anti-aliasing
-        else {
+        else 
+        {
             // Round the points and remove duplicates
             std::vector<Point> points;
             cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
+            
             // Rasterize the polygon
             _rasterizer->setPen(newPen);
             _rasterizer->penFillPolygon(points.data(), points.size());
             _rasterizer->setPen(orgPen);
         }
     }
-
-    // Patterned
-    else {
+    else // Patterned
+    {
         // Generate a polygon that approximates the ellipse
         std::vector<PointF> pointsF;
         generateEllipsePoints(pointsF, radiusX, radiusY, centerX, centerY, newPen.size());
+        
         // Rasterize the polygon
         _rasterizer->setPen(newPen);
         drawThickPolyline_impl(pointsF.data(), pointsF.size(), false, 0);
         _rasterizer->setPen(orgPen);
     }
 }
+
+#endif
 
 void ImagePainter2::fillEllipse( const PointF& topLeft, const SizeF& size )
 {
@@ -938,12 +1006,14 @@ void ImagePainter2::drawPie(const PointF& topLeft, const SizeF& size,  float deg
     drawArc(topLeft, size, degBegin, degEnd, ArcMode::Pie);
 }
 
+#if 1
 
 void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size,
                              float degBegin, float degEnd, const ArcMode& arcMode)
 {
     // Rasterize one-pixel arc
-    if(_rasterizer->pen().size() == 1) {
+    if(_rasterizer->pen().size() == 1) 
+    {
         // Convert the points
         const Point tl( lround(topLeft.x    ()), lround(topLeft.y     ()) );
         const Size  sz( lround(size   .width()), lround(size   .height()) );
@@ -988,7 +1058,8 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size,
     newPen.setJoinStyle(Pen::BevelJoin);
 
     // Solid
-    if(newPen.style() == Pen::Solid) {
+    if(newPen.style() == Pen::Solid) 
+    {
         // Calculate the additional arc's parameters
         const Pt::int32_t radiusXo   = ( size.width () + penSize ) / 2;
         const Pt::int32_t radiusYo   = ( size.height() + penSize ) / 2;
@@ -998,37 +1069,225 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size,
         const Pt::int32_t centerYsub = lround(centerY - shiftYps);
         const Pt::int32_t centerXadd = lround(centerX + shiftXps);
         const Pt::int32_t centerYadd = lround(centerY + shiftYps);
+        
         // The arc's points
-        std::vector<PointF> pointsF;
+        std::vector<Polygon> polygons;
+        
         // Generate a polygon that approximates the arc
-        if(arcMode == ArcMode::Chord) {
+        if(arcMode == ArcMode::Chord) 
+        {
             // The arc's "outside" lines
-            generateArcPoints(pointsF, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd, 0);
-            pointsF.push_back(pointsF[0]);
+            polygons.resize(polygons.size() + 1);
+            std::vector<PointF>& pointsOuter = polygons.back().points();
+            
+            generateArcPoints(pointsOuter, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd, 0);
+            pointsOuter.push_back( pointsOuter.front() );
+            
             // The arc's "inside" lines
-            pointsF.push_back(Painter::PolygonSeparatorPointF);
-            const size_t fp = pointsF.size();
-            generateArcPoints(pointsF, radiusXi, radiusYi, centerX + shiftX, centerY + shiftY, degBegin, degEnd, 0);
-            pointsF.push_back(pointsF[fp]);
+            polygons.resize(polygons.size() + 1);
+            std::vector<PointF>& pointsInner = polygons.back().points();
+
+            generateArcPoints(pointsInner, radiusXi, radiusYi, centerX + shiftX, centerY + shiftY, degBegin, degEnd, 0);
+            pointsInner.push_back( pointsInner.front() );
         }
-        else if(arcMode == ArcMode::Pie) {
+        else if(arcMode == ArcMode::Pie) 
+        {
             // Calculate the adjusted angle
             const float odegBegin = (degBegin < 0) ? (degBegin - aafd) : (degBegin + aafd);
             const float odegEnd   = (degEnd   < 0) ? (degEnd   - aafd) : (degEnd   + aafd);
             const float idegBegin = (degBegin < 0) ? (degBegin + aafd) : (degBegin - aafd);
             const float idegEnd   = (degEnd   < 0) ? (degEnd   + aafd) : (degEnd   - aafd);
+            
+            // The arc's "outside" lines
+            polygons.resize(polygons.size() + 1);
+            std::vector<PointF>& pointsOuter = polygons.back().points();
+
+            generateArcPoints(pointsOuter, radiusXo, radiusYo, centerX, centerY, odegBegin, odegEnd, 0);
+            pointsOuter.push_back(PointF(centerXsub, centerYsub));
+            pointsOuter.push_back( pointsOuter.front() );
+            
+            // The arc's "inside" lines
+            polygons.resize(polygons.size() + 1);
+            std::vector<PointF>& pointsInner = polygons.back().points();
+            
+            generateArcPoints(pointsInner, radiusXi, radiusYi, centerX, centerY, idegBegin, idegEnd, 0);
+            pointsInner.push_back(PointF(centerXadd, centerYadd));
+            pointsInner.push_back( pointsInner.front() );
+        }
+        else // ArcMode::Open
+        { 
+            // The arc's "inside" and "outside" lines
+            std::vector<PointF> inner, outer;
+            if(newPen.capStyle() == Pen::Arrow2Cap) 
+            {
+                // Calculate the adjusted angle
+                const float adegBegin = (degBegin < 0) ? (degBegin - aafd) : (degBegin + aafd);
+                const float adegEnd   = (degEnd   < 0) ? (degEnd   + aafd) : (degEnd   - aafd);
+                
+                // Generate the points
+                generateArcPoints(inner, radiusXi, radiusYi, centerX, centerY, adegBegin, adegEnd, 0);
+                generateArcPoints(outer, radiusXo, radiusYo, centerX, centerY, adegBegin, adegEnd, 0);
+            }
+            else 
+            {
+                generateArcPoints(inner, radiusXi, radiusYi, centerX, centerY, degBegin, degEnd, 0);
+                generateArcPoints(outer, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd, 0);
+            }
+            
+            // Combine the arc's lines and add caps
+            polygons.resize(polygons.size() + 1);
+            std::vector<PointF>& pointsF = polygons.back().points();
+            
+            combineLinePointsAndAddCaps(pointsF, inner, outer, newPen.capStyle(), newPen.capStyle(), penSize);
+        }
+        
+        _rasterizer->setPen(newPen);
+        _rasterizer->fillPolyline(polygons);
+        _rasterizer->setPen(orgPen);
+    }
+    else // Patterned
+    {
+        // Generate a polygon that approximates the arc
+        std::vector<PointF> pointsF;
+
+        if(arcMode == ArcMode::Chord) 
+        {
+            generateArcPoints(pointsF, radiusX, radiusY, centerX, centerY, degBegin, degEnd, newPen.size());
+            pointsF.push_back( pointsF[0] );
+        }
+        else if(arcMode == ArcMode::Pie) 
+        {
+            pointsF.push_back( PointF(centerX, centerY) );
+            generateArcPoints(pointsF, radiusX, radiusY, centerX, centerY, degBegin, degEnd, newPen.size());
+            pointsF.push_back( PointF(centerX, centerY) );
+        }
+        else // ArcMode::Open
+        { 
+            if(newPen.capStyle() == Pen::Arrow2Cap) 
+            {
+                // Calculate the adjusted angle
+                const float adegBegin = (degBegin < 0) ? (degBegin - aafd) : (degBegin + aafd);
+                const float adegEnd   = (degEnd   < 0) ? (degEnd   + aafd) : (degEnd   - aafd);
+                
+                // Generate the points
+                generateArcPoints(pointsF, radiusX, radiusY, centerX, centerY, adegBegin, adegEnd, newPen.size());
+            }
+            else {
+                generateArcPoints(pointsF, radiusX, radiusY, centerX, centerY, degBegin, degEnd, newPen.size());
+            }
+        }
+        
+        // Rasterize the polygon
+        _rasterizer->setPen(newPen);
+        drawWidePolyline(pointsF.data(), pointsF.size(), false, 0);
+        _rasterizer->setPen(orgPen);
+    }
+}
+
+#else // old code
+
+void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size,
+                             float degBegin, float degEnd, const ArcMode& arcMode)
+{
+    // Rasterize one-pixel arc
+    if(_rasterizer->pen().size() == 1) 
+    {
+        // Convert the points
+        const Point tl( lround(topLeft.x    ()), lround(topLeft.y     ()) );
+        const Size  sz( lround(size   .width()), lround(size   .height()) );
+        // Rasterize the arc
+        _rasterizer->strokeOnePixelEllipseArc(tl, sz, degBegin, degEnd, arcMode);
+        return;
+    }
+
+    // Ensure that the begin angle is within the acceptable range
+    while(degBegin < -360.0f) degBegin += 360.0f;
+    while(degBegin >  360.0f) degBegin -= 360.0f;
+
+    // Ensure that the end angle is within the acceptable range
+    while(degEnd < -360.0f) degEnd += 360.0f;
+    while(degEnd >  360.0f) degEnd -= 360.0f;
+
+    // Calculate the coordinate shift
+    const size_t penSize  = _rasterizer->pen().size();
+    const size_t penSize2 = penSize / 2;
+    const float  degMid   = (degBegin + degEnd) / 2.0f * DegToRadF;
+    const float  shiftX   = std::cos(degMid);
+    const float  shiftY   = std::sin(degMid);
+    const float  shiftXps = shiftX * penSize2;
+    const float  shiftYps = shiftY * penSize2;
+
+    // Calculate the angle adjustment factor
+    const float aafa = size.width () / 2.0f;
+    const float aafb = size.height() / 2.0f;
+    const float aafc = Pt::piDouble<float>() * sqrt( (aafa * aafa + aafb * aafb) / 2.0f );
+    const float aafd = 360.0f * penSize2 / aafc;
+
+    // Calculate the arc's parameters
+    const Pt::int32_t radiusX = size.width () / 2;
+    const Pt::int32_t radiusY = size.height() / 2;
+    const Pt::int32_t centerX = topLeft.x() + radiusX;
+    const Pt::int32_t centerY = topLeft.y() + radiusY;
+
+    // Save the original pen and create a new pen with bevel join
+    const Pen orgPen = _rasterizer->pen();
+
+    Pen newPen = orgPen;
+    newPen.setJoinStyle(Pen::BevelJoin);
+
+    // Solid
+    if(newPen.style() == Pen::Solid) 
+    {
+        // Calculate the additional arc's parameters
+        const Pt::int32_t radiusXo   = ( size.width () + penSize ) / 2;
+        const Pt::int32_t radiusYo   = ( size.height() + penSize ) / 2;
+        const Pt::int32_t radiusXi   = ( size.width () - penSize ) / 2;
+        const Pt::int32_t radiusYi   = ( size.height() - penSize ) / 2;
+        const Pt::int32_t centerXsub = lround(centerX - shiftXps);
+        const Pt::int32_t centerYsub = lround(centerY - shiftYps);
+        const Pt::int32_t centerXadd = lround(centerX + shiftXps);
+        const Pt::int32_t centerYadd = lround(centerY + shiftYps);
+        
+        // The arc's points
+        std::vector<PointF> pointsF;
+        
+        // Generate a polygon that approximates the arc
+        if(arcMode == ArcMode::Chord) 
+        {
+            // The arc's "outside" lines
+            generateArcPoints(pointsF, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd, 0);
+            pointsF.push_back(pointsF[0]);
+            
+            // The arc's "inside" lines
+            pointsF.push_back(Painter::PolygonSeparatorPointF);
+            
+            const size_t fp = pointsF.size();
+            generateArcPoints(pointsF, radiusXi, radiusYi, centerX + shiftX, centerY + shiftY, degBegin, degEnd, 0);
+            pointsF.push_back(pointsF[fp]);
+        }
+        else if(arcMode == ArcMode::Pie) 
+        {
+            // Calculate the adjusted angle
+            const float odegBegin = (degBegin < 0) ? (degBegin - aafd) : (degBegin + aafd);
+            const float odegEnd   = (degEnd   < 0) ? (degEnd   - aafd) : (degEnd   + aafd);
+            const float idegBegin = (degBegin < 0) ? (degBegin + aafd) : (degBegin - aafd);
+            const float idegEnd   = (degEnd   < 0) ? (degEnd   + aafd) : (degEnd   - aafd);
+            
             // The arc's "outside" lines
             generateArcPoints(pointsF, radiusXo, radiusYo, centerX, centerY, odegBegin, odegEnd, 0);
             pointsF.push_back(PointF(centerXsub, centerYsub));
             pointsF.push_back(pointsF[0]);
+            
             // The arc's "inside" lines
             pointsF.push_back(Painter::PolygonSeparatorPointF);
+            
             const size_t fp = pointsF.size();
             generateArcPoints(pointsF, radiusXi, radiusYi, centerX, centerY, idegBegin, idegEnd, 0);
             pointsF.push_back(PointF(centerXadd, centerYadd));
             pointsF.push_back(pointsF[fp]);
         }
-        else { // ArcMode::Open
+        else // ArcMode::Open
+        { 
             // The arc's "inside" and "outside" lines
             std::vector<PointF> inner, outer;
             if(newPen.capStyle() == Pen::Arrow2Cap) {
@@ -1043,45 +1302,52 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size,
                 generateArcPoints(inner, radiusXi, radiusYi, centerX, centerY, degBegin, degEnd, 0);
                 generateArcPoints(outer, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd, 0);
             }
+            
             // Combine the arc's lines and add caps
             combineLinePointsAndAddCaps(pointsF, inner, outer, newPen.capStyle(), newPen.capStyle(), penSize);
         }
+        
         // Use anti-aliasing
-        if( _rasterizer->isAntiAliasing() ) {
+        if( _rasterizer->isAntiAliasing() )
+        {
             // Remove duplicates
             std::vector<PointF> points;
             deduplicatePointsF(points, pointsF.data(), pointsF.size());
+            
             // Rasterize the polygon
             _rasterizer->setPen(newPen);
             _rasterizer->penFillPolygon(points.data(), points.size());
             _rasterizer->setPen(orgPen);
         }
-        // Do not use use anti-aliasing
-        else {
+        else // Do not use use anti-aliasing
+        {
             // Round the points and remove duplicates
             std::vector<Point> points;
             cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
+            
             // Rasterize the polygon
             _rasterizer->setPen(newPen);
             _rasterizer->penFillPolygon(points.data(), points.size());
             _rasterizer->setPen(orgPen);
         }
     }
-
-    // Patterned
-    else {
+    else // Patterned
+    {
         // Generate a polygon that approximates the arc
         std::vector<PointF> pointsF;
-        if(arcMode == ArcMode::Chord) {
+        if(arcMode == ArcMode::Chord) 
+        {
             generateArcPoints(pointsF, radiusX, radiusY, centerX, centerY, degBegin, degEnd, newPen.size());
             pointsF.push_back( pointsF[0] );
         }
-        else if(arcMode == ArcMode::Pie) {
+        else if(arcMode == ArcMode::Pie) 
+        {
             pointsF.push_back( PointF(centerX, centerY) );
             generateArcPoints(pointsF, radiusX, radiusY, centerX, centerY, degBegin, degEnd, newPen.size());
             pointsF.push_back( PointF(centerX, centerY) );
         }
-        else { // ArcMode::Open
+        else // ArcMode::Open
+        { 
             if(newPen.capStyle() == Pen::Arrow2Cap) {
                 // Calculate the adjusted angle
                 const float adegBegin = (degBegin < 0) ? (degBegin - aafd) : (degBegin + aafd);
@@ -1093,6 +1359,7 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size,
                 generateArcPoints(pointsF, radiusX, radiusY, centerX, centerY, degBegin, degEnd, newPen.size());
             }
         }
+        
         // Rasterize the polygon
         _rasterizer->setPen(newPen);
         drawThickPolyline_impl(pointsF.data(), pointsF.size(), false, 0);
@@ -1100,6 +1367,7 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size,
     }
 }
 
+#endif
 
 void ImagePainter2::fillPie( const PointF& topLeft, const SizeF& size, float degBegin, float degEnd)
 {
