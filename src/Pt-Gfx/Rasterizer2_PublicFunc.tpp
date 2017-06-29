@@ -275,32 +275,30 @@ inline void Rasterizer2::fillPolygon(const BasicPoint<PointT>* points, size_t po
     );
 }
 
-
-inline void Rasterizer2::fillPolyline(const std::vector<Polygon>& polygons)
+//
+// Same as fillPolygon2, just uses pen and temporarily turns off gradient
+// and texture filling
+//
+inline void Rasterizer2::fillLine(const PointF* ps, std::size_t n)
 {
     Pt::int32_t minX =  MAXIMUM_COORD;
     Pt::int32_t minY =  MAXIMUM_COORD;
     Pt::int32_t maxX = -MAXIMUM_COORD;
     Pt::int32_t maxY = -MAXIMUM_COORD;
 
-    std::vector<Polygon> clippedPolygons = polygons;
+    std::vector<PointF> clippedPolygon(ps, ps + n);
 
-    for(size_t i = 0; i < clippedPolygons.size(); ++i)
+    BasicClipShape<double>::clipPolygon(clippedPolygon, _currentClip);
+
+    for(size_t j = 0; j < clippedPolygon.size(); ++j)
     {
-        Polygon& polygon = clippedPolygons[i];
+        const double x = clippedPolygon[j].x();
+        const double y = clippedPolygon[j].y();
 
-        BasicClipShape<double>::clipPolygon(polygon.points(), _currentClip);
-
-        for(size_t j = 0; j < polygon.size(); ++j)
-        {
-            const double x = polygon.at(j).x();
-            const double y = polygon.at(j).y();
-
-            if(x < minX) minX = x;
-            if(y < minY) minY = y;
-            if(x > maxX) maxX = x;
-            if(y > maxY) maxY = y;
-        }
+        if(x < minX) minX = x;
+        if(y < minY) minY = y;
+        if(x > maxX) maxX = x;
+        if(y > maxY) maxY = y;
     }
 
     // Disable texture and gradient
@@ -312,11 +310,13 @@ inline void Rasterizer2::fillPolyline(const std::vector<Polygon>& polygons)
 
     if( this->isAntiAliasing() )
     {
-        rasterPolygonsXWAA(clippedPolygons, _pen.color(), minX, minY, maxX, maxY);
+        rasterPolygonXWAA(&clippedPolygon[0], clippedPolygon.size(),
+                           _pen.color(), minX, minY, maxX, maxY);
     }
     else
     {
-        rasterPolygonsNoAA(clippedPolygons, _pen.color(), minX, minY, maxX, maxY);
+        rasterPolygonNoAA(&clippedPolygon[0], clippedPolygon.size(),
+                           _pen.color(), minX, minY, maxX, maxY);
     }
 
     // Restore texture and gradient

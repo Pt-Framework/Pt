@@ -144,16 +144,19 @@ void ImagePainter2::drawWidePolyline(const PointF* points, const size_t pointCou
 {
     std::vector<Polygon> polygons;
 
-    LineRenderer lr;
+    //LineRenderer lr;
 
     // TODO: set pattern only once
-    if( _rasterizer->pen().style() != Pen::Solid )
-        lr.setPattern( _rasterizer->pen().style() );
+    //if( _rasterizer->pen().style() != Pen::Solid )
+    //    lr.setPattern( _rasterizer->pen().style() );
     
-    lr.renderWidePolyline( polygons, points, pointCount, _rasterizer->pen() );
+    _lr->renderWidePolyline( polygons, points, pointCount, _rasterizer->pen() );
 
-    if( ! polygons.empty() )
-        _rasterizer->fillPolyline(polygons);
+    for(std::size_t n = 0; n < polygons.size(); ++n)
+    {
+        const std::vector<PointF>& pp = polygons[n].points();
+        _rasterizer->fillLine( &pp[0], pp.size() );
+    }
 }
 
 
@@ -366,6 +369,7 @@ std::vector<std::string> ImagePainter2::fontNames()
 
 ImagePainter2::ImagePainter2(Image& image)
 : _rasterizer( new Rasterizer2(image) )
+, _lr( new LineRenderer )
 {
     setAntiAliasing(true);
 }
@@ -374,6 +378,7 @@ ImagePainter2::ImagePainter2(Image& image)
 ImagePainter2::~ImagePainter2()
 {
   delete _rasterizer;
+  delete _lr;
 }
 
 
@@ -428,7 +433,10 @@ const Gfx::RectF& ImagePainter2::clip() const
 
 void ImagePainter2::setPen( const Pen& pen )
 {
-  _rasterizer->setPen(pen) ;
+  _rasterizer->setPen(pen);
+
+  if( pen.style() != Pen::Solid )
+      _lr->setPattern( pen.style() );
 }
 
 
@@ -518,22 +526,23 @@ void ImagePainter2::drawLine( const PointF& from, const PointF& to )
 #if 1
     std::vector<Polygon> polygons;
 
-    LineRenderer lr;
+    //LineRenderer lr;
 
     // TODO: set pattern only once
-    if( _rasterizer->pen().style() != Pen::Solid )
-        lr.setPattern( _rasterizer->pen().style() );
+    //if( _rasterizer->pen().style() != Pen::Solid )
+    //    lr.setPattern( _rasterizer->pen().style() );
     
     PointF points[2] = { from, to };
 
-    lr.renderWidePolyline( polygons, points, 2, _rasterizer->pen() );
+    _lr->renderWidePolyline( polygons, points, 2, _rasterizer->pen() );
 
     // no performance benefit to use renderWideLine
     //lr.renderWideLine( polygons, from, to, _rasterizer->pen() );
 
-    if( ! polygons.empty() )
+    for(std::size_t n = 0; n < polygons.size(); ++n)
     {
-        _rasterizer->fillPolyline(polygons);
+        const std::vector<PointF>& pp = polygons[n].points();
+        _rasterizer->fillLine( &pp[0], pp.size() );
     }
     
     return;

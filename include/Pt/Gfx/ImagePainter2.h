@@ -42,6 +42,7 @@ namespace Gfx {
 
 class ArcMode;
 class Rasterizer2;
+class LineRenderer;
 struct SAGOpState;
 
 class PT_GFX_API ImagePainter2 : public Painter
@@ -693,6 +694,7 @@ class PT_GFX_API ImagePainter2 : public Painter
     private:
       Rasterizer2* _rasterizer;
       RectF        _clip;
+      LineRenderer* _lr;
 };
 
 } // namespace

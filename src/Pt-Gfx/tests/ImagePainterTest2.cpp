@@ -109,12 +109,12 @@ using namespace Pt::Gfx;
 
 #define BENCHMARK_SOLID_LINE                0
 #define BENCHMARK_PATTERNED_LINE            0
-#define BENCHMARK_SOLID_THICK_LINE          0
-#define BENCHMARK_PATTERNED_THICK_LINE      0
+#define BENCHMARK_SOLID_THICK_LINE          1
+#define BENCHMARK_PATTERNED_THICK_LINE      1
 
 #define BENCHMARK_RECTANGLE                 0
-#define BENCHMARK_ELLIPSE                   1
-#define BENCHMARK_ARC                       1
+#define BENCHMARK_ELLIPSE                   0
+#define BENCHMARK_ARC                       0
 
 #define BENCHMARK_SOLID_BEZIER              0
 #define BENCHMARK_PATTERNED_BEZIER          0
@@ -125,7 +125,7 @@ using namespace Pt::Gfx;
 #define BENCHMARK_GRADIENT_FILLED_RECTANGLE 0
 #define BENCHMARK_TEXTURE_FILLED_RECTANGLE  0
 
-#define BENCHMARK_SOLID_FILLED_POLYGON      1
+#define BENCHMARK_SOLID_FILLED_POLYGON      0
 #define BENCHMARK_GRADIENT_FILLED_POLYGON   0
 #define BENCHMARK_TEXTURE_FILLED_POLYGON    0
 
@@ -182,7 +182,7 @@ void benchmarkWideLines()
 
     Pt::Gfx::ImagePainter2 imagePainter(image);
     imagePainter.setAntiAliasing(true);
-    imagePainter.setPen( Pen( Pt::Gfx::Color::fromRgb8(255, 0, 0), 8 )  );
+    imagePainter.setPen( Pen( Pt::Gfx::Color::fromRgb8(255, 0, 0), 8, Pen::Dash )  );
 
     std::vector<PointF> polyline;
     polyline.push_back( Pt::Gfx::PointF(50, 50) );
@@ -192,13 +192,15 @@ void benchmarkWideLines()
 
     Pt::System::Clock clock;
     clock.start();
-    for(int n = 0; n < 1000; ++n)
+    for(int n = 0; n < 2000; ++n)
     {
         imagePainter.drawPolyline( &polyline[0], polyline.size() );
+
+        //imagePainter.drawLine( Pt::Gfx::PointF(50, 50), Pt::Gfx::PointF(300, 290) );
     }
 
     long long time = clock.stop().toUSecs();
-    std::clog << "AA LINES: " << time << std::endl;
+    std::clog << "AA WIDE LINES: " << time << std::endl;
 }
 
 
@@ -286,10 +288,8 @@ int main(int argc, char* args[])
     const Brush brushGradient2(Color::fromRgb8(0, 255, 255, 175), Color::fromRgb8(0, 0, 0, 175), Brush::Horizontal);
     const Brush brushTexture2 (textureWithWhiteBackground);
 
-    // roundedRect
     // benchmarkNarrowRoundedRect();
-
-      benchmarkWideLines();
+    // benchmarkWideLines();
 
     // Solid lines
     if((!DO_BENCHMARKING || !BENCHMARK_RESULT_HTML) && DO_TEST_DRAW && TEST_SOURCECOPY && TEST_DRAW_SOLID_LINE_AND_TEXT) {
