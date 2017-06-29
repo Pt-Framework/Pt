@@ -107,14 +107,14 @@ using namespace Pt::Gfx;
 #define BENCHMARK_TEXT                      0
 #define BENCHMARK_ROTATED_TEXT              0 // XXX
 
-#define BENCHMARK_SOLID_LINE                0
-#define BENCHMARK_PATTERNED_LINE            0
-#define BENCHMARK_SOLID_THICK_LINE          1
-#define BENCHMARK_PATTERNED_THICK_LINE      1
+#define BENCHMARK_SOLID_LINE                1
+#define BENCHMARK_PATTERNED_LINE            1
+#define BENCHMARK_SOLID_THICK_LINE          0
+#define BENCHMARK_PATTERNED_THICK_LINE      0
 
 #define BENCHMARK_RECTANGLE                 0
 #define BENCHMARK_ELLIPSE                   0
-#define BENCHMARK_ARC                       0
+#define BENCHMARK_ARC                       1
 
 #define BENCHMARK_SOLID_BEZIER              0
 #define BENCHMARK_PATTERNED_BEZIER          0
@@ -182,7 +182,9 @@ void benchmarkWideLines()
 
     Pt::Gfx::ImagePainter2 imagePainter(image);
     imagePainter.setAntiAliasing(true);
-    imagePainter.setPen( Pen( Pt::Gfx::Color::fromRgb8(255, 0, 0), 8, Pen::Dash )  );
+
+    imagePainter.setPen( Pen( Pt::Gfx::Color::fromRgb8(255, 0, 0), 1 )  );
+    //imagePainter.setPen( Pen( Pt::Gfx::Color::fromRgb8(255, 0, 0), 8, Pen::Dash )  );
 
     std::vector<PointF> polyline;
     polyline.push_back( Pt::Gfx::PointF(50, 50) );

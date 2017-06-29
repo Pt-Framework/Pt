@@ -677,8 +677,27 @@ void ImagePainter2::fillRoundedRect( const RectF& rect, float radius )
     //}
 }
 
-void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount)
+void ImagePainter2::drawPolyline(const PointF* ps, const size_t pointCount)
 {
+#if 1
+    // Rasterize one-pixel polyline
+    if(_rasterizer->pen().size() == 1) 
+    {
+        // Round the points and remove duplicates
+        std::vector<Point> points;
+        cnvPointsFToPointsDeduplicate(points, ps, pointCount);
+            
+        // Rasterize the polygon
+        bool autoClose = ps[0] == ps[pointCount - 1];
+           
+        _rasterizer->drawNarrowPolyline(points.data(), points.size(), autoClose);
+        return;
+    }
+
+    bool autoClose = ps[0] == ps[pointCount - 1];
+
+    drawWidePolyline(ps, pointCount, autoClose, 0);
+#else
     bool autoClose = false;
 
     // Rasterize one-pixel polyline
@@ -690,26 +709,28 @@ void ImagePainter2::drawPolyline( const PointF* ps, const size_t pointCount)
             // Remove duplicates
             std::vector<PointF> pointsF;
             deduplicatePointsF(pointsF, ps, pointCount);
+            
             // Rasterize the polygon
             if(ps[0] == ps[pointCount - 1]) autoClose = true;
-            _rasterizer->drawNarrowPolyline(pointsF.data(), pointsF.size(), autoClose);
+            
+            _rasterizer->drawNarrowPolyline(ps, pointCount, autoClose);
         }
         else // Do not use use anti-aliasing
         {
             // Round the points and remove duplicates
             std::vector<Point> points;
             cnvPointsFToPointsDeduplicate(points, ps, pointCount);
+            
             // Rasterize the polygon
-            if(ps[0] == ps[pointCount - 1]) autoClose = true;
+            if(ps[0] == ps[pointCount - 1]) 
+                autoClose = true;
+            
             _rasterizer->drawNarrowPolyline(points.data(), points.size(), autoClose);
         }
         
         return;
     }
 
-#if 1
-    drawWidePolyline(ps, pointCount, autoClose, 0);
-#else
     drawThickPolyline_impl(ps, pointCount, autoClose, 0);
 #endif
 }

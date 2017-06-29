@@ -140,7 +140,8 @@ inline void Rasterizer2::strokeNarrowRoundedRect(const RectF& rect, float radius
 //
 
 template <typename PointT>
-inline void Rasterizer2::drawNarrowPolyline(const BasicPoint<PointT>* points, size_t pointCount, bool autoClose)
+inline void Rasterizer2::drawNarrowPolyline(const BasicPoint<PointT>* points, 
+                                            size_t pointCount, bool autoClose)
 {
     // Check if there are too few points
     if(pointCount < 2) return;
@@ -171,7 +172,7 @@ inline void Rasterizer2::drawNarrowPolyline(const BasicPoint<PointT>* points, si
 
 inline void Rasterizer2::drawNarrowPolyline2(const PointF* points, size_t pointCount)
 {
-  // TODO
+
 }
 
 //

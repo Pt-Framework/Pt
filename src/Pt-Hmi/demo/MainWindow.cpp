@@ -255,7 +255,7 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     //imagePainter.drawLine(  Pt::Gfx::PointF(50, 50), Pt::Gfx::PointF(300, 290)  );
 
     //imagePainter.setPen( Gfx::Color::fromRgb8(150, 150, 255) );
-    //imagePainter.drawEllipse(Pt::Gfx::PointF(100, 100), Pt::Gfx::SizeF(50, 100));
+    imagePainter.drawEllipse(Pt::Gfx::PointF(100, 100), Pt::Gfx::SizeF(50, 1000));
 
     //imagePainter.drawPie(Pt::Gfx::PointF(50, 50), Pt::Gfx::SizeF(50, 100), 20, 200);
 
