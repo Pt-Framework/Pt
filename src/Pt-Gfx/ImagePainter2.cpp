@@ -556,8 +556,7 @@ void ImagePainter2::drawLine( const PointF& from, const PointF& to )
         _rasterizer->fillLine( &pp[0], pp.size() );
     }
     
-    return;
-#endif
+#else
 
     // Generate a polygon that represents the thick line
     std::vector<PointF> pointsF;
@@ -590,6 +589,7 @@ void ImagePainter2::drawLine( const PointF& from, const PointF& to )
         // Rasterize the polygon
         _rasterizer->penFillPolygonSeparate(points.data(), points.size());
     }
+#endif
 }
 
 
@@ -657,7 +657,11 @@ void ImagePainter2::drawRect( const RectF& rect )
 
     // Generate and draw a polyline that represents the rectangle
     const PointF pointsF[5] = {
-        rect.bottomLeft(), rect.bottomRight(), rect.topRight(), rect.topLeft(), rect.bottomLeft()
+        rect.bottomLeft(), 
+        rect.bottomRight(), 
+        rect.topRight(), 
+        rect.topLeft(), 
+        rect.bottomLeft()
     };
 
     drawPolyline(pointsF, 5);
@@ -678,6 +682,24 @@ void ImagePainter2::drawRoundedRect( const RectF& rect, float radius )
         _rasterizer->strokeNarrowRoundedRect(rect, radius);
         return;
     }
+    
+#if 1
+    // Save the original pen and create a new pen with bevel join
+    const Pen orgPen = _rasterizer->pen();
+    Pen newPen = orgPen;
+    newPen.setJoinStyle(Pen::BevelJoin);
+
+    std::vector<Polygon> polygons;
+    _lr->renderRoundedRect(polygons, rect, radius, newPen);
+
+    // Draw the polygon
+    //_rasterizer->setPen(newPen);
+
+    _rasterizer->fillPolyline( polygons );
+
+    //_rasterizer->setPen(orgPen);
+
+#else
 
     // Generate a polygon that represents the rounded-rectangle
     std::vector<PointF> pointsF;
@@ -691,15 +713,12 @@ void ImagePainter2::drawRoundedRect( const RectF& rect, float radius )
 
     // Draw the polygon
     _rasterizer->setPen(newPen);
-    
-    //drawThickPolyline_impl(pointsF.data(), pointsF.size(), true, 0);
 
-    if( ! pointsF.empty() )
-        pointsF.push_back( pointsF.front() );
+    drawThickPolyline_impl(pointsF.data(), pointsF.size(), true, 0);
 
-    drawWidePolyline( pointsF.data(), pointsF.size() );
-    
     _rasterizer->setPen(orgPen);
+
+#endif
 }
 
 
@@ -719,47 +738,32 @@ void ImagePainter2::drawEllipse(const PointF& topLeft, const SizeF& size)
         return;
     }
 
-    // Calculate the ellipse's parameters
-    const size_t      penSize  = _rasterizer->pen().size();
-    const Pt::int32_t radiusX  = size.width () / 2;
-    const Pt::int32_t radiusY  = size.height() / 2;
-    const Pt::int32_t centerX  = topLeft.x() + radiusX;
-    const Pt::int32_t centerY  = topLeft.y() + radiusY;
-
     // Save the original pen and create a new pen with bevel join
     Pen orgPen = _rasterizer->pen();
-
     Pen newPen = orgPen;
     newPen.setJoinStyle(Pen::BevelJoin);
 
-    if(_rasterizer->pen().style() == Pen::Solid) 
+    std::vector<Polygon> polygons;
+    _lr->renderEllipse(polygons, topLeft, size, newPen);
+
+    //_rasterizer->setPen(newPen);
+
+    bool isSolid = _rasterizer->pen().style() == Pen::Solid;
+
+    if( isSolid )
     {
-        // Calculate the additional ellipse's parameters
-        const Pt::int32_t radiusXo = ( size.width () + penSize ) / 2;
-        const Pt::int32_t radiusYo = ( size.height() + penSize ) / 2;
-        const Pt::int32_t radiusXi = ( size.width () - penSize ) / 2;
-        const Pt::int32_t radiusYi = ( size.height() - penSize ) / 2;
-        
-        // Generate a polygon that approximates the ellipse
-        std::vector<Polygon> polygons(2);
-        generateEllipsePoints(polygons[0].points(), radiusXo, radiusYo, centerX, centerY, 0);
-        generateEllipsePoints(polygons[1].points(), radiusXi, radiusYi, centerX, centerY, 0);
-        
-        _rasterizer->setPen(newPen);
-        _rasterizer->fillPolyline(polygons);
-        _rasterizer->setPen(orgPen);
+        _rasterizer->fillPolyline( polygons );
     }
-    else // Patterned
+    else
     {
-        // Generate a polygon that approximates the ellipse
-        std::vector<PointF> pointsF;
-        generateEllipsePoints(pointsF, radiusX, radiusY, centerX, centerY, newPen.size());
-        
-        // Rasterize the polygon
-        _rasterizer->setPen(newPen);
-        drawWidePolyline(pointsF.data(), pointsF.size());
-        _rasterizer->setPen(orgPen);
+        for(std::size_t n = 0; n < polygons.size(); ++n)
+        {
+            const std::vector<PointF>& pp = polygons[n].points();
+            _rasterizer->fillLine( &pp[0], pp.size() );
+        }
     }
+
+    //_rasterizer->setPen(orgPen);
 }
 
 #else // old code
@@ -877,166 +881,32 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size,
         return;
     }
 
-    // Ensure that the begin angle is within the acceptable range
-    while(degBegin < -360.0f) degBegin += 360.0f;
-    while(degBegin >  360.0f) degBegin -= 360.0f;
-
-    // Ensure that the end angle is within the acceptable range
-    while(degEnd < -360.0f) degEnd += 360.0f;
-    while(degEnd >  360.0f) degEnd -= 360.0f;
-
-    // Calculate the coordinate shift
-    const size_t penSize  = _rasterizer->pen().size();
-    const size_t penSize2 = penSize / 2;
-    const float  degMid   = (degBegin + degEnd) / 2.0f * DegToRadF;
-    const float  shiftX   = std::cos(degMid);
-    const float  shiftY   = std::sin(degMid);
-    const float  shiftXps = shiftX * penSize2;
-    const float  shiftYps = shiftY * penSize2;
-
-    // Calculate the angle adjustment factor
-    const float aafa = size.width () / 2.0f;
-    const float aafb = size.height() / 2.0f;
-    const float aafc = Pt::piDouble<float>() * sqrt( (aafa * aafa + aafb * aafb) / 2.0f );
-    const float aafd = 360.0f * penSize2 / aafc;
-
-    // Calculate the arc's parameters
-    const Pt::int32_t radiusX = size.width () / 2;
-    const Pt::int32_t radiusY = size.height() / 2;
-    const Pt::int32_t centerX = topLeft.x() + radiusX;
-    const Pt::int32_t centerY = topLeft.y() + radiusY;
-
     // Save the original pen and create a new pen with bevel join
     const Pen orgPen = _rasterizer->pen();
-
     Pen newPen = orgPen;
-    newPen.setJoinStyle(Pen::BevelJoin);
+    //newPen.setJoinStyle(Pen::BevelJoin);
+    //_rasterizer->setPen(newPen);
 
-    // Solid
-    if(newPen.style() == Pen::Solid) 
+    std::vector<Polygon> polygons;
+    _lr->renderArc(polygons, arcMode, topLeft, size, degBegin, degEnd, newPen);
+
+    bool isSolid = _rasterizer->pen().style() == Pen::Solid;
+    bool isClosed = arcMode != ArcMode::Open;
+
+    if( isSolid && isClosed )
     {
-        // Calculate the additional arc's parameters
-        const Pt::int32_t radiusXo   = ( size.width () + penSize ) / 2;
-        const Pt::int32_t radiusYo   = ( size.height() + penSize ) / 2;
-        const Pt::int32_t radiusXi   = ( size.width () - penSize ) / 2;
-        const Pt::int32_t radiusYi   = ( size.height() - penSize ) / 2;
-        const Pt::int32_t centerXsub = lround(centerX - shiftXps);
-        const Pt::int32_t centerYsub = lround(centerY - shiftYps);
-        const Pt::int32_t centerXadd = lround(centerX + shiftXps);
-        const Pt::int32_t centerYadd = lround(centerY + shiftYps);
-        
-        // The arc's points
-        std::vector<Polygon> polygons;
-        
-        // Generate a polygon that approximates the arc
-        if(arcMode == ArcMode::Chord) 
-        {
-            // The arc's "outside" lines
-            polygons.resize(polygons.size() + 1);
-            std::vector<PointF>& pointsOuter = polygons.back().points();
-            
-            generateArcPoints(pointsOuter, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd, 0);
-            pointsOuter.push_back( pointsOuter.front() );
-            
-            // The arc's "inside" lines
-            polygons.resize(polygons.size() + 1);
-            std::vector<PointF>& pointsInner = polygons.back().points();
-
-            generateArcPoints(pointsInner, radiusXi, radiusYi, centerX + shiftX, centerY + shiftY, degBegin, degEnd, 0);
-            pointsInner.push_back( pointsInner.front() );
-        }
-        else if(arcMode == ArcMode::Pie) 
-        {
-            // Calculate the adjusted angle
-            const float odegBegin = (degBegin < 0) ? (degBegin - aafd) : (degBegin + aafd);
-            const float odegEnd   = (degEnd   < 0) ? (degEnd   - aafd) : (degEnd   + aafd);
-            const float idegBegin = (degBegin < 0) ? (degBegin + aafd) : (degBegin - aafd);
-            const float idegEnd   = (degEnd   < 0) ? (degEnd   + aafd) : (degEnd   - aafd);
-            
-            // The arc's "outside" lines
-            polygons.resize(polygons.size() + 1);
-            std::vector<PointF>& pointsOuter = polygons.back().points();
-
-            generateArcPoints(pointsOuter, radiusXo, radiusYo, centerX, centerY, odegBegin, odegEnd, 0);
-            pointsOuter.push_back(PointF(centerXsub, centerYsub));
-            pointsOuter.push_back( pointsOuter.front() );
-            
-            // The arc's "inside" lines
-            polygons.resize(polygons.size() + 1);
-            std::vector<PointF>& pointsInner = polygons.back().points();
-            
-            generateArcPoints(pointsInner, radiusXi, radiusYi, centerX, centerY, idegBegin, idegEnd, 0);
-            pointsInner.push_back(PointF(centerXadd, centerYadd));
-            pointsInner.push_back( pointsInner.front() );
-        }
-        else // ArcMode::Open
-        { 
-            // The arc's "inside" and "outside" lines
-            std::vector<PointF> inner, outer;
-            if(newPen.capStyle() == Pen::Arrow2Cap) 
-            {
-                // Calculate the adjusted angle
-                const float adegBegin = (degBegin < 0) ? (degBegin - aafd) : (degBegin + aafd);
-                const float adegEnd   = (degEnd   < 0) ? (degEnd   + aafd) : (degEnd   - aafd);
-                
-                // Generate the points
-                generateArcPoints(inner, radiusXi, radiusYi, centerX, centerY, adegBegin, adegEnd, 0);
-                generateArcPoints(outer, radiusXo, radiusYo, centerX, centerY, adegBegin, adegEnd, 0);
-            }
-            else 
-            {
-                generateArcPoints(inner, radiusXi, radiusYi, centerX, centerY, degBegin, degEnd, 0);
-                generateArcPoints(outer, radiusXo, radiusYo, centerX, centerY, degBegin, degEnd, 0);
-            }
-            
-            // Combine the arc's lines and add caps
-            polygons.resize(polygons.size() + 1);
-            std::vector<PointF>& pointsF = polygons.back().points();
-            
-            combineLinePointsAndAddCaps(pointsF, inner, outer, newPen.capStyle(), newPen.capStyle(), penSize);
-        }
-        
-        _rasterizer->setPen(newPen);
-        _rasterizer->fillPolyline(polygons);
-        _rasterizer->setPen(orgPen);
+        _rasterizer->fillPolyline( polygons );
     }
-    else // Patterned
+    else
     {
-        // Generate a polygon that approximates the arc
-        std::vector<PointF> pointsF;
-
-        if(arcMode == ArcMode::Chord) 
+        for(std::size_t n = 0; n < polygons.size(); ++n)
         {
-            generateArcPoints(pointsF, radiusX, radiusY, centerX, centerY, degBegin, degEnd, newPen.size());
-            pointsF.push_back( pointsF[0] );
+            const std::vector<PointF>& pp = polygons[n].points();
+            _rasterizer->fillLine( &pp[0], pp.size() );
         }
-        else if(arcMode == ArcMode::Pie) 
-        {
-            pointsF.push_back( PointF(centerX, centerY) );
-            generateArcPoints(pointsF, radiusX, radiusY, centerX, centerY, degBegin, degEnd, newPen.size());
-            pointsF.push_back( PointF(centerX, centerY) );
-        }
-        else // ArcMode::Open
-        { 
-            if(newPen.capStyle() == Pen::Arrow2Cap) 
-            {
-                // Calculate the adjusted angle
-                const float adegBegin = (degBegin < 0) ? (degBegin - aafd) : (degBegin + aafd);
-                const float adegEnd   = (degEnd   < 0) ? (degEnd   + aafd) : (degEnd   - aafd);
-                
-                // Generate the points
-                generateArcPoints(pointsF, radiusX, radiusY, centerX, centerY, adegBegin, adegEnd, newPen.size());
-            }
-            else {
-                generateArcPoints(pointsF, radiusX, radiusY, centerX, centerY, degBegin, degEnd, newPen.size());
-            }
-        }
-        
-        // Rasterize the polygon
-        _rasterizer->setPen(newPen);
-        drawWidePolyline(pointsF.data(), pointsF.size());
-        _rasterizer->setPen(orgPen);
     }
+
+    //_rasterizer->setPen(orgPen);
 }
 
 #else // old code
@@ -1227,17 +1097,21 @@ void ImagePainter2::drawArc( const PointF& topLeft, const SizeF& size,
 
 void ImagePainter2::drawPath(const Path& path, float smoothness)
 {
-    // Convert the path to polyline points
-    std::vector<PointF> pointsF;
-    path.toPoints(pointsF, smoothness);
+    std::vector<Polygon> polygons;
+    path.toPolygons(polygons, smoothness);
 
-    if(_rasterizer->pen().size() == 1) 
-    {          
-        _rasterizer->drawNarrowPath( &pointsF[0], pointsF.size() );
-    }
-    else
+    for(std::size_t n = 0; n < polygons.size(); ++n)
     {
-        drawWidePolyline( &pointsF[0], pointsF.size() );
+        const std::vector<PointF>& pointsF = polygons[n].points();
+
+        if(_rasterizer->pen().size() == 1) 
+        {          
+            _rasterizer->drawNarrowPath( &pointsF[0], pointsF.size() );
+        }
+        else
+        {
+            drawWidePolyline( &pointsF[0], pointsF.size() );
+        }
     }
 }
 
@@ -1288,36 +1162,10 @@ void ImagePainter2::fillRect( const RectF& rect )
 
 void ImagePainter2::fillRoundedRect( const RectF& rect, float radius )
 {
-    // Extract the coordinates
-    const float x1 = rect.topLeft    ().x();
-    const float y1 = rect.topLeft    ().y();
-    const float x2 = rect.bottomRight().x();
-    const float y2 = rect.bottomRight().y();
-
-    // Generate a polygon that represents the rounded-rectangle
     std::vector<PointF> pointsF;
-    generateRoundRectPoints(pointsF, x1, y1, x2, y2, radius, Pt::lround(ceil(_rasterizer->pen().size() * 0.5f)));
+    _lr->fillRoundedRect(pointsF, rect, radius);
 
     _rasterizer->fillPolygon2( &pointsF[0], pointsF.size() );
-    return;
-
-    //// Use anti-aliasing
-    //if( _rasterizer->isAntiAliasing() ) {
-    //    // Remove duplicates
-    //    std::vector<PointF> points;
-    //    deduplicatePointsF(points, pointsF.data(), pointsF.size());
-    //    // Draw the polygon
-    //    _rasterizer->fillPolygon(points.data(), points.size());
-    //}
-
-    //// Do not use use anti-aliasing
-    //else {
-    //    // Round the points and remove duplicates
-    //    std::vector<Point> points;
-    //    cnvPointsFToPointsDeduplicate(points, pointsF.data(), pointsF.size());
-    //    // Draw the polygon
-    //    _rasterizer->fillPolygon(points.data(), points.size());
-    //}
 }
 
 

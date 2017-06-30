@@ -107,14 +107,14 @@ using namespace Pt::Gfx;
 #define BENCHMARK_TEXT                      0
 #define BENCHMARK_ROTATED_TEXT              0 // XXX
 
-#define BENCHMARK_SOLID_LINE                1
-#define BENCHMARK_PATTERNED_LINE            1
+#define BENCHMARK_SOLID_LINE                0
+#define BENCHMARK_PATTERNED_LINE            0
 #define BENCHMARK_SOLID_THICK_LINE          0
 #define BENCHMARK_PATTERNED_THICK_LINE      0
 
 #define BENCHMARK_RECTANGLE                 0
-#define BENCHMARK_ELLIPSE                   0
-#define BENCHMARK_ARC                       1
+#define BENCHMARK_ELLIPSE                   1
+#define BENCHMARK_ARC                       0
 
 #define BENCHMARK_SOLID_BEZIER              0
 #define BENCHMARK_PATTERNED_BEZIER          0
@@ -129,9 +129,9 @@ using namespace Pt::Gfx;
 #define BENCHMARK_GRADIENT_FILLED_POLYGON   0
 #define BENCHMARK_TEXTURE_FILLED_POLYGON    0
 
-#define BENCHMARK_SOLID_FILLED_ELLIPSE      0
-#define BENCHMARK_GRADIENT_FILLED_ELLIPSE   0
-#define BENCHMARK_TEXTURE_FILLED_ELLIPSE    0
+#define BENCHMARK_SOLID_FILLED_ELLIPSE      1
+#define BENCHMARK_GRADIENT_FILLED_ELLIPSE   1
+#define BENCHMARK_TEXTURE_FILLED_ELLIPSE    1
 
 #define BENCHMARK_SOLID_FILLED_ARC          0
 #define BENCHMARK_GRADIENT_FILLED_ARC       0
@@ -213,7 +213,7 @@ void benchmarkNarrowRoundedRect()
 
     Pt::Gfx::ImagePainter2 imagePainter(image);
     imagePainter.setAntiAliasing(true);
-    imagePainter.setPen( Pt::Gfx::Color::fromRgb8(255, 0, 0)  );
+    imagePainter.setPen( Pt::Gfx::Pen( Pt::Gfx::Color::fromRgb8(255, 0, 0) ) );
     imagePainter.setBrush( Pt::Gfx::Color::fromRgb8(0, 0, 255)  );
 
     Pt::System::Clock clock;

@@ -38,6 +38,8 @@ namespace Pt {
 
 namespace Gfx { 
 
+class ArcMode;
+
 struct PatternState 
 {
     std::vector<Polygon>& dstPolygons;  // Destination vector
@@ -81,6 +83,22 @@ class LineRenderer
 {
     public:
         LineRenderer();
+        
+        void setPattern(const Pen::Style& style);
+
+        void renderRoundedRect(std::vector<Polygon>& polygons, 
+                               const RectF& rect, float radius, const Pen& pen);
+
+        void fillRoundedRect(std::vector<PointF>& points, 
+                             const RectF& rect, float radius);
+
+        void renderEllipse(std::vector<Polygon>& polygons,
+                           const PointF& topLeft, const SizeF& size, 
+                           const Pen& pen);
+
+        void renderArc(std::vector<Polygon>& dst, const ArcMode& mode,
+                       const PointF& topLeft, const SizeF& size, 
+                       float degBegin, float degEnd, const Pen& pen);
 
         void renderWidePolyline(std::vector<Polygon>& polygons,
                                 const PointF* points, const std::size_t n,
@@ -90,9 +108,21 @@ class LineRenderer
                             const PointF& from, const PointF& to,
                             const Pen& pen);
 
-        void setPattern(const Pen::Style& style);
-
     private:
+        void renderRoundedRectPoints(std::vector<PointF>& dst, 
+                                     const RectF& rect, float radius, 
+                                     std::size_t penSize);
+
+        void renderEllipsePoints(std::vector<PointF>& dst, 
+                                 Pt::int32_t radiusX, Pt::int32_t radiusY, 
+                                 Pt::int32_t centerX, Pt::int32_t centerY, 
+                                 size_t penSize);
+
+        void renderArcPoints(std::vector<PointF>& dst, 
+                             Pt::int32_t radiusX, Pt::int32_t radiusY, 
+                             Pt::int32_t centerX, Pt::int32_t centerY, 
+                             float degBegin, float degEnd, size_t penSize);
+
         void renderSolidClosedWidePolyline(std::vector<Polygon>& polygons, 
                                            const PointF* basePtr, size_t curPCnt,
                                            const Pen& pen);
@@ -145,6 +175,13 @@ class LineRenderer
                                   const PointF& origMeetingPoint, const Pen& pen,
                                   bool inSameSegment);
 
+        void combineLinePointsAndAddCaps(std::vector<PointF>& dst, 
+                                         const std::vector<PointF>& inner, 
+                                         const std::vector<PointF>& outer, 
+                                         Pen::CapStyle begCap, 
+                                         Pen::CapStyle endCap, 
+                                         size_t penSize);
+
         void renderLineButtCap(std::vector<PointF>& dst, 
                               float x, float y, float nx, float ny);
 
@@ -177,10 +214,10 @@ class LineRenderer
                                  float nx, float ny);
 
         void renderQuadraticBezierPoints(std::vector<PointF>& dst, 
-                                           float x1, float y1, 
-                                           float x2, float y2, 
-                                           float x3, float y3, 
-                                           Pt::int32_t nSegs);
+                                         float x1, float y1, 
+                                         float x2, float y2, 
+                                         float x3, float y3, 
+                                         Pt::int32_t nSegs);
 
         void calculateLineParams(float& wh, float& dx, float& dy, 
                                  float& nx, float& ny, float x1, float y1, 

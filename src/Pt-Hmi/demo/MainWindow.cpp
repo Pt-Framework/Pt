@@ -230,17 +230,18 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
 
     //path.moveTo( Pt::Gfx::PointF(110, 110) );
     //path.addRoundedRect(Pt::Gfx::SizeF(30, 30), 10);
-    //path.addEllipse( Pt::Gfx::SizeF(50, 100) );
+    //path.addEllipse( Pt::Gfx::SizeF(50, 150) );
     //path.transform(trans);
 
     //imagePainter.setPen( Gfx::Pen( Gfx::Color::fromRgb8(0, 255, 0) ) );
-    //imagePainter.setPen( Gfx::Pen( Gfx::Color::fromRgb8(0, 255, 0), 10) );
-    imagePainter.setPen( Gfx::Pen( Gfx::Color::fromRgb8(0, 255, 0), 10, Gfx::Pen::Dash) );
+    imagePainter.setPen( Gfx::Pen( Gfx::Color::fromRgb8(0, 255, 0), 10) );
+    //imagePainter.setPen( Gfx::Pen( Gfx::Color::fromRgb8(0, 255, 0), 10, Gfx::Pen::Dash) );
     imagePainter.setBrush( Gfx::Color::fromRgb8(255, 0, 0)  );
-    //imagePainter.fillPath(path);
+    
+    imagePainter.fillPath(path);
     //imagePainter.drawPath(path);
 
-    imagePainter.drawRoundedRect( Pt::Gfx::RectF(Pt::Gfx::PointF(150, 150), 
+    imagePainter.fillRoundedRect( Pt::Gfx::RectF(Pt::Gfx::PointF(150, 150), 
                                                  Pt::Gfx::SizeF(50, 50)), 10);
 
     std::vector<Gfx::PointF> polyline;
@@ -256,9 +257,9 @@ void MainWindow::onPaintBackground(const Gfx::RectF& rect)
     //imagePainter.drawLine(  Pt::Gfx::PointF(50, 50), Pt::Gfx::PointF(300, 290)  );
 
     //imagePainter.setPen( Gfx::Color::fromRgb8(150, 150, 255) );
-    //imagePainter.drawEllipse(Pt::Gfx::PointF(100, 100), Pt::Gfx::SizeF(50, 1000));
+    //imagePainter.drawEllipse(Pt::Gfx::PointF(200, 100), Pt::Gfx::SizeF(50, 150));
 
-    //imagePainter.drawPie(Pt::Gfx::PointF(50, 50), Pt::Gfx::SizeF(50, 100), 20, 200);
+    //imagePainter.drawArc(Pt::Gfx::PointF(50, 50), Pt::Gfx::SizeF(50, 100), 20, 200);
 
 //    imagePainter.setFont( Pt::Gfx::Font("", 24) );
 //    imagePainter.drawText(Pt::Gfx::PointF(115, 120), "Hello");
