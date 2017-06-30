@@ -122,6 +122,9 @@ void Rasterizer2::setPen( const Pen& pen )
 
     _penPixel.reset(_penBuffer.view(), 0, 0);
 
+    if( pen.style() != Pen::Solid )
+        _polygonizer.setPattern( pen.style() );
+
     updatePenPattern();
 }
 
@@ -234,6 +237,229 @@ FontMetrics Rasterizer2::fontMetrics( const Font& font, const Pt::String& text )
     textRender.setFont(font);
 
     return textRender.fontMetrics(text);
+}
+
+
+void Rasterizer2::drawLine(const PointF& from, const PointF& to)
+{
+    if(_pen.size() == 1)
+    {
+        Point a( lround(from.x()), lround(from.y()) );
+        Point b( lround(to  .x()), lround(to  .y()) );
+
+        strokeOnePixelLine(a, b, 0);
+        return;
+    }
+
+    PointF points[2] = { from, to };
+
+    std::vector<Polygon> polygons;
+    _polygonizer.renderWidePolyline(polygons, points, 2, _pen);
+
+    // no performance benefit to use renderWideLine
+    //_polygonizer.renderWideLine( polygons, from, to, _rasterizer->pen() );
+
+    for(std::size_t n = 0; n < polygons.size(); ++n)
+    {
+        const std::vector<PointF>& polygon = polygons[n].points();
+        fillLine( &polygon[0], polygon.size() );
+    }
+}
+
+
+void Rasterizer2::drawPolyline(const PointF* ps, const size_t pointCount)
+{
+    if(_pen.size() == 1) 
+    {          
+        drawNarrowPolyline2(ps, pointCount);
+    }
+    else
+    {
+        drawWidePolyline(ps, pointCount);
+    }
+}
+
+
+void Rasterizer2::drawWidePolyline(const PointF* points, const size_t pointCount)
+{   
+    std::vector<Polygon> polygons;
+    _polygonizer.renderWidePolyline(polygons, points, pointCount, _pen);
+
+    bool isSolid = _pen.style() == Pen::Solid;
+    bool isClosed = points[0] == points[pointCount - 1];
+
+    if( isSolid && isClosed )
+    {
+        fillPolyline(polygons);
+    }
+    else
+    {
+        for(std::size_t n = 0; n < polygons.size(); ++n)
+        {
+            const std::vector<PointF>& polygon = polygons[n].points();
+            fillLine( &polygon[0], polygon.size() );
+        }
+    }
+}
+
+
+void Rasterizer2::drawRect(const RectF& rect)
+{
+    if(_pen.size() == 1) 
+    {
+        const Point tl( Pt::lround(rect.topLeft().x()), 
+                        Pt::lround(rect.topLeft().y()) );
+        const Point br( Pt::lround(rect.bottomRight().x()), 
+                        Pt::lround(rect.bottomRight().y()) );
+
+        strokeOnePixelRect(tl, br);
+        return;
+    }
+
+    const PointF pointsF[5] = {
+        rect.bottomLeft(), 
+        rect.bottomRight(), 
+        rect.topRight(), 
+        rect.topLeft(), 
+        rect.bottomLeft()
+    };
+
+    drawPolyline(pointsF, 5);
+}
+
+
+void Rasterizer2::drawRoundedRect(const RectF& rect, float radius)
+{
+    if(_pen.size() == 1)
+    {
+        strokeNarrowRoundedRect(rect, radius);
+        return;
+    }
+    
+    // use a new pen with bevel join
+    Pen newPen = _pen;
+    newPen.setJoinStyle(Pen::BevelJoin);
+
+    std::vector<Polygon> polygons;
+    _polygonizer.renderRoundedRect(polygons, rect, radius, newPen);
+
+    fillPolyline(polygons);
+}
+
+
+void Rasterizer2::drawEllipse(const PointF& topLeft, const SizeF& size)
+{
+    if(_pen.size() == 1) 
+    {
+
+        const Point tl( Pt::lround(topLeft.x()), 
+                        Pt::lround(topLeft.y()) );
+        const Size  sz( Pt::lround(size.width()), 
+                        Pt::lround(size.height()) );
+
+        strokeOnePixelEllipseArc(tl, sz, 0, 0, ArcMode::Open);
+        return;
+    }
+
+    // use a new pen with bevel join
+    Pen newPen = _pen;
+    newPen.setJoinStyle(Pen::BevelJoin);
+
+    std::vector<Polygon> polygons;
+    _polygonizer.renderEllipse(polygons, topLeft, size, newPen);
+
+    bool isSolid = _pen.style() == Pen::Solid;
+    
+    if( isSolid )
+    {
+        fillPolyline(polygons);
+    }
+    else
+    {
+        for(std::size_t n = 0; n < polygons.size(); ++n)
+        {
+            const std::vector<PointF>& polygon = polygons[n].points();
+            fillLine( &polygon[0], polygon.size() );
+        }
+    }
+}
+
+
+void Rasterizer2::drawArc(const PointF& topLeft, const SizeF& size,
+                          float degBegin, float degEnd, const ArcMode& arcMode)
+{
+    if(_pen.size() == 1) 
+    {
+        const Point tl( Pt::lround(topLeft.x()), 
+                        Pt::lround(topLeft.y ()) );
+        const Size  sz( Pt::lround(size.width()), 
+                        Pt::lround(size.height()) );
+
+        strokeOnePixelEllipseArc(tl, sz, degBegin, degEnd, arcMode);
+        return;
+    }
+
+    // use a new pen with bevel join
+    const Pen orgPen = _pen;
+    Pen newPen = orgPen;
+    newPen.setJoinStyle(Pen::BevelJoin);
+
+    std::vector<Polygon> polygons;
+    _polygonizer.renderArc(polygons, arcMode, topLeft, size, degBegin, degEnd, newPen);
+
+    bool isSolid = _pen.style() == Pen::Solid;
+    bool isClosed = arcMode != ArcMode::Open;
+
+    if( isSolid && isClosed )
+    {
+        fillPolyline(polygons);
+    }
+    else
+    {
+        for(std::size_t n = 0; n < polygons.size(); ++n)
+        {
+            const std::vector<PointF>& polygon = polygons[n].points();
+            fillLine( &polygon[0], polygon.size() );
+        }
+    }
+}
+
+
+void Rasterizer2::drawPath(const Path& path, float smoothness)
+{
+    std::vector<Polygon> polygons;
+    path.toPolygons(polygons, smoothness);
+
+    for(std::size_t n = 0; n < polygons.size(); ++n)
+    {
+        const std::vector<PointF>& pointsF = polygons[n].points();
+
+        if(_pen.size() == 1) 
+        {          
+            drawNarrowPath( &pointsF[0], pointsF.size() );
+        }
+        else
+        {
+            drawWidePolyline( &pointsF[0], pointsF.size() );
+        }
+    }
+}
+
+
+void Rasterizer2::fillPolygon(const PointF* ps, const size_t pointCount)
+{
+    fillPolygon2(ps, pointCount);
+}
+
+
+void Rasterizer2::fillRect(const RectF& rect)
+{
+    const Point tl( Pt::lround(rect.topLeft().x()), 
+                    Pt::lround(rect.topLeft().y()) );
+    const Point br( Pt::lround(rect.bottomRight().x()), 
+                    Pt::lround(rect.bottomRight().y()) );
+
+    fillRect(tl, br);
 }
 
 

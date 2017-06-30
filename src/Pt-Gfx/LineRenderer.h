@@ -39,45 +39,7 @@ namespace Pt {
 namespace Gfx { 
 
 class ArcMode;
-
-struct PatternState 
-{
-    std::vector<Polygon>& dstPolygons;  // Destination vector
-    //size_t                dstPStart;  // Start index of the previous polygon in the above vector
-    //size_t                dstPCount;  // The number of points of the previous polygon in the above vector
-    //size_t                dstPCount0; // The number of points of the first polygon in the above vector
-                          
-    const PointF*         srcPoints;  // Source points
-    size_t                srcCount;   // The number of source points
-                          
-    float                 cellSize;   // Cell size
-    float                 patSegLen;  // Length of the currently processed "pattern" segment
-                          
-    size_t                idx1;       // Index to the first point which is currently being processed;
-                                      // the index to the second point is always (idx1 + 1)
-                          
-    float                 px, py;     // Current interpolation coordinate (in-between the two points)
-    float                 ex, ey;     // Current end coordinate (coordinate of the the second point)
-    float                 uvx, uvy;   // Unit vector from the first point to the second point
-    float                 cvx, cvy;   // Cell vector from the first point to the second point
-    float                 remLen;     // Remaining length between the two points that has not been "consumed" by the "pattern" segment(s)
-                          
-    std::vector<PointF>   gather;     // Gathered polygon points
-    float                 gatherLen;  // Length of the gathered points
-
-    PatternState(std::vector<Polygon>& polygons, 
-                 const PointF* src, size_t pointCount, size_t penSize)
-    : dstPolygons(polygons)
-    //, dstPStart(0)
-    //, dstPCount(0)
-    //, dstPCount0(0)
-    , srcPoints(src)
-    , srcCount(pointCount), cellSize(penSize * 0.25f)
-    , idx1(0)
-    , remLen(-1.0f)
-    , gatherLen(0.0f)
-    {}
-};
+class PatternState;
 
 class LineRenderer
 {
@@ -86,11 +48,14 @@ class LineRenderer
         
         void setPattern(const Pen::Style& style);
 
+
         void renderRoundedRect(std::vector<Polygon>& polygons, 
-                               const RectF& rect, float radius, const Pen& pen);
+                               const RectF& rect, float radius, 
+                               const Pen& pen);
 
         void fillRoundedRect(std::vector<PointF>& points, 
                              const RectF& rect, float radius);
+
 
         void renderEllipse(std::vector<Polygon>& polygons,
                            const PointF& topLeft, const SizeF& size, 

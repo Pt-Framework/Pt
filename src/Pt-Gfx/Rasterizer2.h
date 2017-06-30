@@ -1,5 +1,5 @@
 /* Copyright (C) 2017-2017 Aloysius Indrayanto
-   Copyright (C) 2006-2015 Marc Boris Duerner
+   Copyright (C) 2006-2017 Marc Boris Duerner
    Copyright (C) 2006-2015 Laurentiu-Gheorghe Crisan
 
   This library is free software; you can redistribute it and/or
@@ -32,11 +32,12 @@
 #define PT_GFX_RASTERIZER_2_H
 
 #include "ArcMode.h"
+#include "LineRenderer.h"
+#include "ClipShape.h"
+
 #include <Pt/Gfx/Algorithm.h>
 #include <Pt/Gfx/Path.h>
 #include <Pt/Gfx/Painter.h>
-
-#include "ClipShape.h"
 
 // ======================================================================================
 // ===== Configurations and Macros ======================================================
@@ -85,8 +86,8 @@
 
 
 namespace Pt {
-namespace Gfx {
 
+namespace Gfx {
 
 class DrawText2;
 class Image;
@@ -158,10 +159,35 @@ class Rasterizer2
 
         static FontMetrics fontMetrics( const Font& font, const Pt::String& text );
 
+        void drawLine(const PointF& from, const PointF& to);
+
+        void drawPolyline(const PointF* ps, const size_t pointCount);
+
+        void drawRect(const RectF& rect);
+
+        void drawRoundedRect(const RectF& rect, float radius);
+
+        void drawEllipse(const PointF& topLeft, const SizeF& size);
+
+        void drawArc(const PointF& topLeft, const SizeF& size,
+                     float degBegin, float degEnd, const ArcMode& arcMode);
+
+        void drawPath(const Path& path, float smoothness);
+
+
+        void fillPolygon(const PointF* ps, const size_t pointCount);
+
+        void fillRect(const RectF& rect);
+
+
+
 
         void strokeOnePixelLine(const Point& a, const Point& b, DrawLineMask* maskInOut);
+        
         void strokeOnePixelRect(const Point& tl, const Point& br);
+        
         //void strokeOnePixelQuadraticPolybezierOutline(const Point* points, size_t pointCount);
+        
         void strokeOnePixelEllipseArc(const Point& topLeft, const Size& size, float degBegin, float degEnd, const ArcMode& arcMode);
 
         void strokeNarrowRoundedRect(const RectF& rect, float radius);
@@ -183,6 +209,8 @@ class Rasterizer2
         void fillPolyline(const std::vector<Polygon>& polygons);
 
         void drawNarrowPolyline2(const PointF* points, size_t pointCount);
+
+        void drawWidePolyline(const PointF* points, const size_t pointCount);
 
         void drawNarrowPath(const PointF* pointsF, size_t pointCount);
 
@@ -405,6 +433,8 @@ class Rasterizer2
 
         Rect             _clip;
         Rect             _currentClip;
+
+        LineRenderer     _polygonizer;
 };
 
 

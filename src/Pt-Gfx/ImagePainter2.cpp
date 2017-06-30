@@ -439,7 +439,7 @@ const Gfx::RectF& ImagePainter2::clip() const
 }
 
 
-void ImagePainter2::setPen( const Pen& pen )
+void ImagePainter2::setPen(const Pen& pen)
 {
     _rasterizer->setPen(pen);
 
