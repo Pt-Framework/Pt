@@ -110,14 +110,9 @@ class Rasterizer2
 
         ~Rasterizer2();
 
-        void setAntiAliasing(bool on)
-        {
-            _aaMode = on;
-            updatePenPattern();
-        }
+        bool isAntiAliasing() const;
 
-        bool isAntiAliasing() const
-        { return _aaMode; }
+        void setAntiAliasing(bool on);
 
         void setImage(Image& image);
 
@@ -174,13 +169,23 @@ class Rasterizer2
 
         void drawPath(const Path& path, float smoothness);
 
-
         void fillPolygon(const PointF* ps, const size_t pointCount);
 
         void fillRect(const RectF& rect);
 
+        void fillRoundedRect(const RectF& rect, float radius);
 
+        void fillEllipse(const PointF& topLeft, const SizeF& size);
 
+        void fillPie(const PointF& topLeft, const SizeF& size, 
+                     float degBegin, float degEnd);
+
+        void fillChord(const PointF& topLeft, const SizeF& size, 
+                        float degBegin, float degEnd);
+
+        void fillPath(const Path& path, float smoothness);
+
+    //private:
 
         void strokeOnePixelLine(const Point& a, const Point& b, DrawLineMask* maskInOut);
         
@@ -242,10 +247,11 @@ class Rasterizer2
 
         void fillEllipse(const Point& topLeft, const Size& size);
 
-        void fillArc(const Point& topLeft, const Size& size, float degBegin, float degEnd, const ArcMode& arcMode);
+        void fillArc(const Point& topLeft, const Size& size, 
+                     float degBegin, float degEnd, const ArcMode& arcMode);
 
     public:
-        inline const Pt::uint8_t* patternBufferMP64() const;
+        const Pt::uint8_t* patternBufferMP64() const;
 
     private:
         // Scanline element

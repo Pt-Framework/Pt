@@ -33,12 +33,8 @@
 #include <Pt/Gfx/Transform.h>
 
 namespace Pt {
+
 namespace Gfx {
-
-
-// ======================================================================================
-// ===== Static Public Member Functions =================================================
-// ======================================================================================
 
 // Weighting filter for Xiaolin Wu's anti-aliasing algorithm
 // Inspired by http://www.crbond.com/papers/anti_alias.pdf
@@ -58,35 +54,31 @@ const Pt::uint8_t Rasterizer2::XWAA_WFILTER[256] = {
      61,  60,  58,  56,  55,  53,  51,  50,  48,  46,  44,  43,  41,  39,  38,  36,  34,  32,  31,  29,
      27,  25,  23,  22,  20,  18,  16,  14,  13,  11,   9,   7,   5,   3,   1,   0
 };
-/*
+
 // Use this code to regenerate the above LUT
-lprintf("    static const Pt::uint8_t aaLUT[256] = {\n        ");
-for(int c = 0, i = 0; i <= 255; ++i) {
-    const double n = (float) i / 255.0;
-    const double q = 1.0 - pow(n, 1.88);
-    const int    a = q * 255.0; ++c;
-    lprintf("%3d%c ", (a > 255) ? 255 : a, (i == 255) ? ' ' : ',');
-    if(c >= 20) { c = 0; lprintf("\n        "); }
-}
-lprintf("\n    };\n\n"); exit(0);
-*/
+
+//lprintf("    static const Pt::uint8_t aaLUT[256] = {\n        ");
+//for(int c = 0, i = 0; i <= 255; ++i) {
+//    const double n = (float) i / 255.0;
+//    const double q = 1.0 - pow(n, 1.88);
+//    const int    a = q * 255.0; ++c;
+//    lprintf("%3d%c ", (a > 255) ? 255 : a, (i == 255) ? ' ' : ',');
+//    if(c >= 20) { c = 0; lprintf("\n        "); }
+//}
+//lprintf("\n    };\n\n"); exit(0);
 
 const Rasterizer2::DrawLineMask Rasterizer2::NullLineMask = {
     MAXIMUM_POINT, MAXIMUM_POINT, MAXIMUM_POINT, MAXIMUM_POINT
 };
 
 
-// ======================================================================================
-// ===== Public Member Functions ========================================================
-// ======================================================================================
-
 Rasterizer2::Rasterizer2(Image& image)
-: _image          ( &image )
-, _text           ( new DrawText2() )
-, _font           ( )
+: _image( &image )
+, _text( new DrawText2() )
+, _font( )
 , _compositionMode( CompositionMode::SourceCopy )
-, _penPixel       ( _image->view(), 0, 0 )
-, _brushPixel     ( _image->view(), 0, 0 )
+, _penPixel( _image->view(), 0, 0 )
+, _brushPixel( _image->view(), 0, 0 )
 , _brushImage(0)
 , _isGradient(false)
 , _isTexture(false)
@@ -98,6 +90,19 @@ Rasterizer2::Rasterizer2(Image& image)
 Rasterizer2::~Rasterizer2()
 {
     delete _text;
+}
+
+
+bool Rasterizer2::isAntiAliasing() const
+{ 
+    return _aaMode; 
+}
+
+
+void Rasterizer2::setAntiAliasing(bool on)
+{
+    _aaMode = on;
+    updatePenPattern();
 }
 
 
@@ -128,352 +133,6 @@ void Rasterizer2::setPen( const Pen& pen )
     updatePenPattern();
 }
 
-
-void Rasterizer2::setBrush( const Brush& brush )
-{
-    _brush      = brush;
-    _isGradient = false;
-    _isTexture  = false;
-
-    switch( brush.fillStyle() ) {
-        case Brush::Solid:
-            _brushBuffer.reset( _image->format(), Size(64, 1) );
-            Gfx::fill(_brushBuffer.begin(), _brushBuffer.end(), brush.color());
-            _brushImage = &_brushBuffer;
-            break;
-
-        case Brush::Texture:
-            if( brush.texture().format() != _image->format() ) {
-                _brushBuffer.reset( _image->format(), brush.texture().size() );
-                Gfx::copy( brush.texture().begin(), brush.texture().end(), _brushBuffer.begin() );
-                _brushImage = &_brushBuffer;
-            }
-            else {
-                _brushImage = &_brush.texture();
-            }
-            _isTexture = true;
-            break;
-
-        case Brush::HorizontalGradient : /* Fallthrough */
-        case Brush::VerticalGradient   :
-            _isGradient = true;
-            _brushImage = &_brushBuffer;
-            break;
-
-        case Brush::LinearGradient      : /* Fallthrough */
-        case Brush::RectangularGradient : /* Fallthrough */
-        case Brush::RadialGradient      : /* Fallthrough */
-        case Brush::ConicalGradient     :
-            _isGradient = true;
-            _isTexture  = true;
-            _brushImage = &_brushBuffer;
-            break;
-    }
-
-    _brushPixel.reset(_brushImage->view(), 0, 0);
-}
-
-
-void Rasterizer2::setFont(const Font& font)
-{
-    _font = font;
-    _text->setFont(_font);
-}
-
-
-void Rasterizer2::setClip( const Rect& clip )
-{
-    _clip = clip;
-    updateClip();
-}
-
-
-void Rasterizer2::drawImage(const Point& to, const Image& img)
-{
-    const Rect imageRect( Point(0,0), img.size() );
-    drawImage( to, img, imageRect );
-}
-
-
-void Rasterizer2::drawImage(const Point& to, const Image& from, const Rect& fromRect)
-{
-    // Clip fromRect to fit into the clip/image rect
-    const Point d       = _currentClip.topLeft() - to;
-    const Point fromPos = fromRect.topLeft() + d;
-
-    Rect fromClip(fromPos, _currentClip.size());
-    fromClip = fromRect.intersect(fromClip);
-
-    if( fromClip.isNull() ) 
-        return;
-
-    // Take account for smaller fromRect
-    const Point toClip = to + (fromClip.topLeft() - fromRect.topLeft());
-
-    _image->format().copy(_image->view(), toClip, from.view(), fromClip, _compositionMode);
-}
-
-
-void Rasterizer2::drawText( const Point& to, const Pt::String& text, const Transform& t )
-{
-    _text->setClip(_currentClip);
-
-    if( ! _aaMode )
-        _text->drawMono( *_image, _pen.color(), to, text, _compositionMode, t );
-    else
-        _text->draw( *_image, _pen.color(), to, text, _compositionMode, t );
-}
-
-
-FontMetrics Rasterizer2::fontMetrics( const String& text ) const
-{
-    return _text->fontMetrics( text );
-}
-
-
-FontMetrics Rasterizer2::fontMetrics( const Font& font, const Pt::String& text )
-{
-    DrawText2 textRender;
-    textRender.setFont(font);
-
-    return textRender.fontMetrics(text);
-}
-
-
-void Rasterizer2::drawLine(const PointF& from, const PointF& to)
-{
-    if(_pen.size() == 1)
-    {
-        Point a( lround(from.x()), lround(from.y()) );
-        Point b( lround(to  .x()), lround(to  .y()) );
-
-        strokeOnePixelLine(a, b, 0);
-        return;
-    }
-
-    PointF points[2] = { from, to };
-
-    std::vector<Polygon> polygons;
-    _polygonizer.renderWidePolyline(polygons, points, 2, _pen);
-
-    // no performance benefit to use renderWideLine
-    //_polygonizer.renderWideLine( polygons, from, to, _rasterizer->pen() );
-
-    for(std::size_t n = 0; n < polygons.size(); ++n)
-    {
-        const std::vector<PointF>& polygon = polygons[n].points();
-        fillLine( &polygon[0], polygon.size() );
-    }
-}
-
-
-void Rasterizer2::drawPolyline(const PointF* ps, const size_t pointCount)
-{
-    if(_pen.size() == 1) 
-    {          
-        drawNarrowPolyline2(ps, pointCount);
-    }
-    else
-    {
-        drawWidePolyline(ps, pointCount);
-    }
-}
-
-
-void Rasterizer2::drawWidePolyline(const PointF* points, const size_t pointCount)
-{   
-    std::vector<Polygon> polygons;
-    _polygonizer.renderWidePolyline(polygons, points, pointCount, _pen);
-
-    bool isSolid = _pen.style() == Pen::Solid;
-    bool isClosed = points[0] == points[pointCount - 1];
-
-    if( isSolid && isClosed )
-    {
-        fillPolyline(polygons);
-    }
-    else
-    {
-        for(std::size_t n = 0; n < polygons.size(); ++n)
-        {
-            const std::vector<PointF>& polygon = polygons[n].points();
-            fillLine( &polygon[0], polygon.size() );
-        }
-    }
-}
-
-
-void Rasterizer2::drawRect(const RectF& rect)
-{
-    if(_pen.size() == 1) 
-    {
-        const Point tl( Pt::lround(rect.topLeft().x()), 
-                        Pt::lround(rect.topLeft().y()) );
-        const Point br( Pt::lround(rect.bottomRight().x()), 
-                        Pt::lround(rect.bottomRight().y()) );
-
-        strokeOnePixelRect(tl, br);
-        return;
-    }
-
-    const PointF pointsF[5] = {
-        rect.bottomLeft(), 
-        rect.bottomRight(), 
-        rect.topRight(), 
-        rect.topLeft(), 
-        rect.bottomLeft()
-    };
-
-    drawPolyline(pointsF, 5);
-}
-
-
-void Rasterizer2::drawRoundedRect(const RectF& rect, float radius)
-{
-    if(_pen.size() == 1)
-    {
-        strokeNarrowRoundedRect(rect, radius);
-        return;
-    }
-    
-    // use a new pen with bevel join
-    Pen newPen = _pen;
-    newPen.setJoinStyle(Pen::BevelJoin);
-
-    std::vector<Polygon> polygons;
-    _polygonizer.renderRoundedRect(polygons, rect, radius, newPen);
-
-    fillPolyline(polygons);
-}
-
-
-void Rasterizer2::drawEllipse(const PointF& topLeft, const SizeF& size)
-{
-    if(_pen.size() == 1) 
-    {
-
-        const Point tl( Pt::lround(topLeft.x()), 
-                        Pt::lround(topLeft.y()) );
-        const Size  sz( Pt::lround(size.width()), 
-                        Pt::lround(size.height()) );
-
-        strokeOnePixelEllipseArc(tl, sz, 0, 0, ArcMode::Open);
-        return;
-    }
-
-    // use a new pen with bevel join
-    Pen newPen = _pen;
-    newPen.setJoinStyle(Pen::BevelJoin);
-
-    std::vector<Polygon> polygons;
-    _polygonizer.renderEllipse(polygons, topLeft, size, newPen);
-
-    bool isSolid = _pen.style() == Pen::Solid;
-    
-    if( isSolid )
-    {
-        fillPolyline(polygons);
-    }
-    else
-    {
-        for(std::size_t n = 0; n < polygons.size(); ++n)
-        {
-            const std::vector<PointF>& polygon = polygons[n].points();
-            fillLine( &polygon[0], polygon.size() );
-        }
-    }
-}
-
-
-void Rasterizer2::drawArc(const PointF& topLeft, const SizeF& size,
-                          float degBegin, float degEnd, const ArcMode& arcMode)
-{
-    if(_pen.size() == 1) 
-    {
-        const Point tl( Pt::lround(topLeft.x()), 
-                        Pt::lround(topLeft.y ()) );
-        const Size  sz( Pt::lround(size.width()), 
-                        Pt::lround(size.height()) );
-
-        strokeOnePixelEllipseArc(tl, sz, degBegin, degEnd, arcMode);
-        return;
-    }
-
-    // use a new pen with bevel join
-    const Pen orgPen = _pen;
-    Pen newPen = orgPen;
-    newPen.setJoinStyle(Pen::BevelJoin);
-
-    std::vector<Polygon> polygons;
-    _polygonizer.renderArc(polygons, arcMode, topLeft, size, degBegin, degEnd, newPen);
-
-    bool isSolid = _pen.style() == Pen::Solid;
-    bool isClosed = arcMode != ArcMode::Open;
-
-    if( isSolid && isClosed )
-    {
-        fillPolyline(polygons);
-    }
-    else
-    {
-        for(std::size_t n = 0; n < polygons.size(); ++n)
-        {
-            const std::vector<PointF>& polygon = polygons[n].points();
-            fillLine( &polygon[0], polygon.size() );
-        }
-    }
-}
-
-
-void Rasterizer2::drawPath(const Path& path, float smoothness)
-{
-    std::vector<Polygon> polygons;
-    path.toPolygons(polygons, smoothness);
-
-    for(std::size_t n = 0; n < polygons.size(); ++n)
-    {
-        const std::vector<PointF>& pointsF = polygons[n].points();
-
-        if(_pen.size() == 1) 
-        {          
-            drawNarrowPath( &pointsF[0], pointsF.size() );
-        }
-        else
-        {
-            drawWidePolyline( &pointsF[0], pointsF.size() );
-        }
-    }
-}
-
-
-void Rasterizer2::fillPolygon(const PointF* ps, const size_t pointCount)
-{
-    fillPolygon2(ps, pointCount);
-}
-
-
-void Rasterizer2::fillRect(const RectF& rect)
-{
-    const Point tl( Pt::lround(rect.topLeft().x()), 
-                    Pt::lround(rect.topLeft().y()) );
-    const Point br( Pt::lround(rect.bottomRight().x()), 
-                    Pt::lround(rect.bottomRight().y()) );
-
-    fillRect(tl, br);
-}
-
-
-// ======================================================================================
-// ===== Private Member Functions =======================================================
-// ======================================================================================
-
-void Rasterizer2::updateClip()
-{
-    const Rect imageRect( Point(0,0) , _image->size() );
-    _currentClip = _clip.isNull() ? imageRect : _clip.intersect( imageRect );
-
-    _text->setClip(_currentClip);
-}
 
 void Rasterizer2::updatePenPattern()
 {
@@ -557,6 +216,52 @@ void Rasterizer2::updatePenPattern()
         }
     }
 }
+
+
+void Rasterizer2::setBrush( const Brush& brush )
+{
+    _brush      = brush;
+    _isGradient = false;
+    _isTexture  = false;
+
+    switch( brush.fillStyle() ) {
+        case Brush::Solid:
+            _brushBuffer.reset( _image->format(), Size(64, 1) );
+            Gfx::fill(_brushBuffer.begin(), _brushBuffer.end(), brush.color());
+            _brushImage = &_brushBuffer;
+            break;
+
+        case Brush::Texture:
+            if( brush.texture().format() != _image->format() ) {
+                _brushBuffer.reset( _image->format(), brush.texture().size() );
+                Gfx::copy( brush.texture().begin(), brush.texture().end(), _brushBuffer.begin() );
+                _brushImage = &_brushBuffer;
+            }
+            else {
+                _brushImage = &_brush.texture();
+            }
+            _isTexture = true;
+            break;
+
+        case Brush::HorizontalGradient : /* Fallthrough */
+        case Brush::VerticalGradient   :
+            _isGradient = true;
+            _brushImage = &_brushBuffer;
+            break;
+
+        case Brush::LinearGradient      : /* Fallthrough */
+        case Brush::RectangularGradient : /* Fallthrough */
+        case Brush::RadialGradient      : /* Fallthrough */
+        case Brush::ConicalGradient     :
+            _isGradient = true;
+            _isTexture  = true;
+            _brushImage = &_brushBuffer;
+            break;
+    }
+
+    _brushPixel.reset(_brushImage->view(), 0, 0);
+}
+
 
 void Rasterizer2::updateGradientBrush(Pt::int32_t width, Pt::int32_t height)
 {
@@ -929,5 +634,714 @@ void Rasterizer2::updateGradientBrush_gen2DConicalGradient(Pt::int32_t width, Pt
 }
 
 
+void Rasterizer2::setFont(const Font& font)
+{
+    _font = font;
+    _text->setFont(_font);
+}
+
+
+void Rasterizer2::setClip( const Rect& clip )
+{
+    _clip = clip;
+    updateClip();
+}
+
+
+void Rasterizer2::updateClip()
+{
+    const Rect imageRect( Point(0,0) , _image->size() );
+    _currentClip = _clip.isNull() ? imageRect : _clip.intersect( imageRect );
+
+    _text->setClip(_currentClip);
+}
+
+
+void Rasterizer2::drawImage(const Point& to, const Image& img)
+{
+    const Rect imageRect( Point(0,0), img.size() );
+    drawImage( to, img, imageRect );
+}
+
+
+void Rasterizer2::drawImage(const Point& to, const Image& from, const Rect& fromRect)
+{
+    // Clip fromRect to fit into the clip/image rect
+    const Point d       = _currentClip.topLeft() - to;
+    const Point fromPos = fromRect.topLeft() + d;
+
+    Rect fromClip(fromPos, _currentClip.size());
+    fromClip = fromRect.intersect(fromClip);
+
+    if( fromClip.isNull() ) 
+        return;
+
+    // Take account for smaller fromRect
+    const Point toClip = to + (fromClip.topLeft() - fromRect.topLeft());
+
+    _image->format().copy(_image->view(), toClip, from.view(), fromClip, _compositionMode);
+}
+
+
+void Rasterizer2::drawText(const Point& to, const Pt::String& text, const Transform& t)
+{
+    _text->setClip(_currentClip);
+
+    if( ! _aaMode )
+        _text->drawMono( *_image, _pen.color(), to, text, _compositionMode, t );
+    else
+        _text->draw( *_image, _pen.color(), to, text, _compositionMode, t );
+}
+
+
+FontMetrics Rasterizer2::fontMetrics(const String& text) const
+{
+    return _text->fontMetrics( text );
+}
+
+
+FontMetrics Rasterizer2::fontMetrics(const Font& font, const Pt::String& text)
+{
+    DrawText2 textRender;
+    textRender.setFont(font);
+
+    return textRender.fontMetrics(text);
+}
+
+
+void Rasterizer2::drawLine(const PointF& from, const PointF& to)
+{
+    if(_pen.size() == 1)
+    {
+        Point a( lround(from.x()), lround(from.y()) );
+        Point b( lround(to  .x()), lround(to  .y()) );
+
+        strokeOnePixelLine(a, b, 0);
+        return;
+    }
+
+    PointF points[2] = { from, to };
+
+    std::vector<Polygon> polygons;
+    _polygonizer.renderWidePolyline(polygons, points, 2, _pen);
+
+    // no performance benefit to use renderWideLine
+    //_polygonizer.renderWideLine( polygons, from, to, _rasterizer->pen() );
+
+    for(std::size_t n = 0; n < polygons.size(); ++n)
+    {
+        const std::vector<PointF>& polygon = polygons[n].points();
+        fillLine( &polygon[0], polygon.size() );
+    }
+}
+
+
+void Rasterizer2::drawPolyline(const PointF* ps, const size_t pointCount)
+{
+    if(_pen.size() == 1) 
+    {          
+        drawNarrowPolyline2(ps, pointCount);
+    }
+    else
+    {
+        drawWidePolyline(ps, pointCount);
+    }
+}
+
+
+void Rasterizer2::drawRect(const RectF& rect)
+{
+    if(_pen.size() == 1) 
+    {
+        const Point tl( Pt::lround(rect.topLeft().x()), 
+                        Pt::lround(rect.topLeft().y()) );
+        const Point br( Pt::lround(rect.bottomRight().x()), 
+                        Pt::lround(rect.bottomRight().y()) );
+
+        strokeOnePixelRect(tl, br);
+        return;
+    }
+
+    const PointF pointsF[5] = {
+        rect.bottomLeft(), 
+        rect.bottomRight(), 
+        rect.topRight(), 
+        rect.topLeft(), 
+        rect.bottomLeft()
+    };
+
+    drawPolyline(pointsF, 5);
+}
+
+
+void Rasterizer2::drawRoundedRect(const RectF& rect, float radius)
+{
+    if(_pen.size() == 1)
+    {
+        strokeNarrowRoundedRect(rect, radius);
+        return;
+    }
+    
+    // use a new pen with bevel join
+    Pen newPen = _pen;
+    newPen.setJoinStyle(Pen::BevelJoin);
+
+    std::vector<Polygon> polygons;
+    _polygonizer.renderRoundedRect(polygons, rect, radius, newPen);
+
+    fillPolyline(polygons);
+}
+
+
+void Rasterizer2::drawEllipse(const PointF& topLeft, const SizeF& size)
+{
+    if(_pen.size() == 1) 
+    {
+
+        const Point tl( Pt::lround(topLeft.x()), 
+                        Pt::lround(topLeft.y()) );
+        const Size  sz( Pt::lround(size.width()), 
+                        Pt::lround(size.height()) );
+
+        strokeOnePixelEllipseArc(tl, sz, 0, 0, ArcMode::Open);
+        return;
+    }
+
+    // use a new pen with bevel join
+    Pen newPen = _pen;
+    newPen.setJoinStyle(Pen::BevelJoin);
+
+    std::vector<Polygon> polygons;
+    _polygonizer.renderEllipse(polygons, topLeft, size, newPen);
+
+    bool isSolid = _pen.style() == Pen::Solid;
+    
+    if( isSolid )
+    {
+        fillPolyline(polygons);
+    }
+    else
+    {
+        for(std::size_t n = 0; n < polygons.size(); ++n)
+        {
+            const std::vector<PointF>& polygon = polygons[n].points();
+            fillLine( &polygon[0], polygon.size() );
+        }
+    }
+}
+
+
+void Rasterizer2::drawArc(const PointF& topLeft, const SizeF& size,
+                          float degBegin, float degEnd, const ArcMode& arcMode)
+{
+    if(_pen.size() == 1) 
+    {
+        const Point tl( Pt::lround(topLeft.x()), 
+                        Pt::lround(topLeft.y ()) );
+        const Size  sz( Pt::lround(size.width()), 
+                        Pt::lround(size.height()) );
+
+        strokeOnePixelEllipseArc(tl, sz, degBegin, degEnd, arcMode);
+        return;
+    }
+
+    // use a new pen with bevel join
+    const Pen orgPen = _pen;
+    Pen newPen = orgPen;
+    newPen.setJoinStyle(Pen::BevelJoin);
+
+    std::vector<Polygon> polygons;
+    _polygonizer.renderArc(polygons, arcMode, topLeft, size, degBegin, degEnd, newPen);
+
+    bool isSolid = _pen.style() == Pen::Solid;
+    bool isClosed = arcMode != ArcMode::Open;
+
+    if( isSolid && isClosed )
+    {
+        fillPolyline(polygons);
+    }
+    else
+    {
+        for(std::size_t n = 0; n < polygons.size(); ++n)
+        {
+            const std::vector<PointF>& polygon = polygons[n].points();
+            fillLine( &polygon[0], polygon.size() );
+        }
+    }
+}
+
+
+void Rasterizer2::drawPath(const Path& path, float smoothness)
+{
+    std::vector<Polygon> polygons;
+    path.toPolygons(polygons, smoothness);
+
+    for(std::size_t n = 0; n < polygons.size(); ++n)
+    {
+        const std::vector<PointF>& pointsF = polygons[n].points();
+
+        if(_pen.size() == 1) 
+        {          
+            drawNarrowPath( &pointsF[0], pointsF.size() );
+        }
+        else
+        {
+            drawWidePolyline( &pointsF[0], pointsF.size() );
+        }
+    }
+}
+
+
+void Rasterizer2::fillPolygon(const PointF* ps, const size_t pointCount)
+{
+    fillPolygon2(ps, pointCount);
+}
+
+
+void Rasterizer2::fillRect(const RectF& rect)
+{
+    const Point tl( Pt::lround(rect.topLeft().x()), 
+                    Pt::lround(rect.topLeft().y()) );
+    const Point br( Pt::lround(rect.bottomRight().x()), 
+                    Pt::lround(rect.bottomRight().y()) );
+
+    fillRect(tl, br);
+}
+
+
+void Rasterizer2::fillRoundedRect(const RectF& rect, float radius)
+{
+    std::vector<PointF> pointsF;
+    _polygonizer.fillRoundedRect(pointsF, rect, radius);
+
+    fillPolygon2( &pointsF[0], pointsF.size() );
+}
+
+
+void Rasterizer2::fillEllipse(const PointF& topLeft, const SizeF& size)
+{
+    const Point tl( Pt::lround(topLeft.x()), 
+                    Pt::lround(topLeft.y ()) );
+    const Size  sz( Pt::lround(size.width()), 
+                    Pt::lround(size.height()) );
+
+    fillEllipse(tl, sz);
+}
+
+
+void Rasterizer2::fillPie(const PointF& topLeft, const SizeF& size, 
+                          float degBegin, float degEnd)
+{
+     Point tl( Pt::lround(topLeft.x()), 
+               Pt::lround(topLeft.y()) );
+     Size  sz( Pt::lround(size.width()), 
+               Pt::lround(size.height()) );
+
+     fillArc(tl, sz, degBegin, degEnd, ArcMode::Pie);
+}
+
+
+void Rasterizer2::fillChord( const PointF& topLeft, const SizeF& size, 
+                             float degBegin, float degEnd)
+{
+    const Point tl( Pt::lround(topLeft.x()), 
+                    Pt::lround(topLeft.y()) );
+    const Size  sz( Pt::lround(size.width()), 
+                    Pt::lround(size.height()) );
+
+     fillArc(tl, sz, degBegin, degEnd, ArcMode::Chord);
+}
+
+
+void Rasterizer2::fillPath(const Path& path, float smoothness)
+{
+    std::vector<Polygon> polygons;
+    path.toPolygons(polygons, smoothness);
+
+    fillPolygons(polygons);
+    return;
+}
+
+
+const Pt::uint8_t* Rasterizer2::patternBufferMP64() const
+{ 
+    return _patternBufferMP; 
+}
+
+
+void Rasterizer2::drawNarrowPolyline2(const PointF* pointsF, size_t pointCount)
+{
+    std::vector<PointF> clipped(pointsF, pointsF + pointCount);
+    BasicClipShape<double>::clipPolyline(clipped, _currentClip);
+
+    std::vector<Point> points;
+    for(std::size_t i = 0; i < clipped.size(); ++i)
+    {
+        const PointF& pf = clipped[i];
+        const Pt::int32_t x = Pt::lround( pf.x() );
+        const Pt::int32_t y = Pt::lround( pf.y() );
+        points.push_back( Point(x, y) );
+    }
+
+    if(points.size() < 2) 
+        return;
+
+    DrawLineMask mask_nnp1;
+    memcpy(mask_nnp1, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
+
+    bool solid = _pen.style() == Pen::Solid;
+    Pt::int32_t fpiCtrInOut = PATTERN_BUFFER_COUNTER_START;
+
+    // From point N to point (N + 1), successively
+    std::size_t pc1 = points.size() - 1;
+
+    for(std::size_t i = 0; i < pc1; ++i) 
+    {
+        if(solid) 
+            rasterOnePixelSolidLine(points[i].x(), points[i].y(), 
+                                    points[i + 1].x(), points[i + 1].y(), 
+                                    _pen.color(), &mask_nnp1);
+        else      
+            rasterOnePixelPatternedLine(points[i].x(), points[i].y(), 
+                                        points[i + 1].x(), points[i + 1].y(), 
+                                        _pen.color(), fpiCtrInOut, &mask_nnp1);
+    }
+}
+
+
+void Rasterizer2::drawNarrowPath(const PointF* pointsF, size_t pointCount)
+{
+    std::vector<PointF> clipped(pointsF, pointsF + pointCount);
+    BasicClipShape<double>::clipPolyline(clipped, _currentClip);
+
+    if(clipped.size() < 2) 
+        return;
+
+    DrawLineMask mask_nnp1;
+    memcpy(mask_nnp1, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
+
+    bool solid = _pen.style() == Pen::Solid;
+    Pt::int32_t fpiCtrInOut = PATTERN_BUFFER_COUNTER_START;
+
+    // From point N to point (N + 1), successively
+    std::size_t pc1 = clipped.size() - 1;
+
+    for(std::size_t i = 0; i < pc1; ++i) 
+    {
+        if(solid) 
+            rasterOnePixelSolidLine_F(clipped[i].x(), clipped[i].y(), 
+                                      clipped[i + 1].x(), clipped[i + 1].y(), 
+                                      _pen.color(), &mask_nnp1);
+        else      
+            rasterOnePixelPatternedLine_F(clipped[i].x(), clipped[i].y(), 
+                                          clipped[i + 1].x(), clipped[i + 1].y(), 
+                                          _pen.color(), fpiCtrInOut, &mask_nnp1);
+    }
+}
+
+
+void Rasterizer2::drawWidePolyline(const PointF* points, const size_t pointCount)
+{   
+    std::vector<Polygon> polygons;
+    _polygonizer.renderWidePolyline(polygons, points, pointCount, _pen);
+
+    bool isSolid = _pen.style() == Pen::Solid;
+    bool isClosed = points[0] == points[pointCount - 1];
+
+    if( isSolid && isClosed )
+    {
+        fillPolyline(polygons);
+    }
+    else
+    {
+        for(std::size_t n = 0; n < polygons.size(); ++n)
+        {
+            const std::vector<PointF>& polygon = polygons[n].points();
+            fillLine( &polygon[0], polygon.size() );
+        }
+    }
+}
+
+
+void Rasterizer2::strokeNarrowRoundedRect(const RectF& rect, float radius)
+{
+    const float x1 = rect.topLeft().x();
+    const float y1 = rect.topLeft().y();
+    const float x2 = rect.bottomRight().x();
+    const float y2 = rect.bottomRight().y();
+
+    // line end masks
+    DrawLineMask mask_zero;
+    memcpy(mask_zero, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
+
+    DrawLineMask mask_nnp1;
+    memcpy(mask_nnp1, Rasterizer2::NullLineMask, sizeof(DrawLineMask));
+
+    // pattern state
+    Pt::int32_t fpiCtrInOut = PATTERN_BUFFER_COUNTER_START;
+
+    // bottom left corner
+    rasterOnePixelQuadraticBezierCurve(
+        x1 + radius, y2,
+        x1         , y2,
+        x1         , y2 - radius,
+        _pen.color(),
+        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut,
+        &mask_nnp1
+    );
+
+    // left staight line
+    rasterOnePixelQuadraticBezierCurve(
+        x1, y2 - radius,
+        x1, y1 + rect.height() / 2,
+        x1, y1 + radius,
+        _pen.color(),
+        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut,
+        &mask_nnp1
+    );
+
+    // top left corner
+    rasterOnePixelQuadraticBezierCurve(
+        x1        , y1 + radius,
+        x1        , y1,
+        x1 + radius, y1,
+        _pen.color(),
+        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut,
+        &mask_nnp1
+    );
+
+    // top straight line
+    rasterOnePixelQuadraticBezierCurve(
+        x1 + radius          , y1,
+        x1 + rect.width() / 2, y1,
+        x2 - radius          , y1,
+        _pen.color(),
+        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut,
+        &mask_nnp1
+    );
+
+    // top right corner
+    rasterOnePixelQuadraticBezierCurve(
+        x2 - radius, y1,
+        x2         , y1,
+        x2         , y1 + radius,
+        _pen.color(),
+        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut,
+        &mask_nnp1
+    );
+
+    // right straight line
+    rasterOnePixelQuadraticBezierCurve(
+        x2, y1 + radius,
+        x2, y1 + rect.height() / 2,
+        x2, y2 - radius,
+        _pen.color(),
+        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut,
+        &mask_nnp1
+    );
+
+    // bottom right corner
+    rasterOnePixelQuadraticBezierCurve(
+        x2         , y2 - radius,
+        x2         , y2,
+        x2 - radius, y2,
+        _pen.color(),
+        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut,
+        &mask_nnp1
+    );
+
+    // bottom straight line
+    rasterOnePixelQuadraticBezierCurve(
+        x2 - radius          , y2,
+        x1 + rect.width() / 2, y2,
+        x1 + radius          , y2,
+        _pen.color(),
+        _pen.style() == Pen::Solid ? 0 : &fpiCtrInOut,
+        &mask_nnp1
+    );
+}
+
+
+//
+// Same as fillPolygon2, just uses pen and temporarily turns off gradient
+// and texture filling
+//
+void Rasterizer2::fillLine(const PointF* ps, std::size_t n)
+{
+    Pt::int32_t minX =  MAXIMUM_COORD;
+    Pt::int32_t minY =  MAXIMUM_COORD;
+    Pt::int32_t maxX = -MAXIMUM_COORD;
+    Pt::int32_t maxY = -MAXIMUM_COORD;
+
+    std::vector<PointF> clippedPolygon(ps, ps + n);
+
+    BasicClipShape<double>::clipPolygon(clippedPolygon, _currentClip);
+
+    for(size_t j = 0; j < clippedPolygon.size(); ++j)
+    {
+        const double x = clippedPolygon[j].x();
+        const double y = clippedPolygon[j].y();
+
+        if(x < minX) minX = x;
+        if(y < minY) minY = y;
+        if(x > maxX) maxX = x;
+        if(y > maxY) maxY = y;
+    }
+
+    // Disable texture and gradient
+    const bool isTexture  = _isTexture;
+    const bool isGradient = _isGradient;
+
+    _isTexture  = false;
+    _isGradient = false;
+
+    if( this->isAntiAliasing() )
+    {
+        rasterPolygonXWAA(&clippedPolygon[0], clippedPolygon.size(),
+                           _pen.color(), minX, minY, maxX, maxY);
+    }
+    else
+    {
+        rasterPolygonNoAA(&clippedPolygon[0], clippedPolygon.size(),
+                           _pen.color(), minX, minY, maxX, maxY);
+    }
+
+    // Restore texture and gradient
+    _isTexture  = isTexture;
+    _isGradient = isGradient;
+}
+
+//
+// Same as fillPolygons, just uses pen and temporarily turns off gradient
+// and texture filling
+//
+void Rasterizer2::fillPolyline(const std::vector<Polygon>& polygons)
+{
+    Pt::int32_t minX =  MAXIMUM_COORD;
+    Pt::int32_t minY =  MAXIMUM_COORD;
+    Pt::int32_t maxX = -MAXIMUM_COORD;
+    Pt::int32_t maxY = -MAXIMUM_COORD;
+
+    std::vector<Polygon> clippedPolygons = polygons;
+
+    for(size_t i = 0; i < clippedPolygons.size(); ++i)
+    {
+        Polygon& polygon = clippedPolygons[i];
+
+        BasicClipShape<double>::clipPolygon(polygon.points(), _currentClip);
+
+        for(size_t j = 0; j < polygon.size(); ++j)
+        {
+            const double x = polygon.at(j).x();
+            const double y = polygon.at(j).y();
+
+            if(x < minX) minX = x;
+            if(y < minY) minY = y;
+            if(x > maxX) maxX = x;
+            if(y > maxY) maxY = y;
+        }
+    }
+
+    // Disable texture and gradient
+    const bool isTexture  = _isTexture;
+    const bool isGradient = _isGradient;
+
+    _isTexture  = false;
+    _isGradient = false;
+
+    if( this->isAntiAliasing() )
+    {
+        rasterPolygonsXWAA(clippedPolygons, _pen.color(), minX, minY, maxX, maxY);
+    }
+    else
+    {
+        rasterPolygonsNoAA(clippedPolygons, _pen.color(), minX, minY, maxX, maxY);
+    }
+
+    // Restore texture and gradient
+    _isTexture  = isTexture;
+    _isGradient = isGradient;
+}
+
+
+void Rasterizer2::fillPolygon2(const PointF* ps, std::size_t n)
+{
+    Pt::int32_t minX =  MAXIMUM_COORD;
+    Pt::int32_t minY =  MAXIMUM_COORD;
+    Pt::int32_t maxX = -MAXIMUM_COORD;
+    Pt::int32_t maxY = -MAXIMUM_COORD;
+
+    std::vector<PointF> clippedPolygon(ps, ps + n);
+
+    BasicClipShape<double>::clipPolygon(clippedPolygon, _currentClip);
+
+    for(size_t j = 0; j < clippedPolygon.size(); ++j)
+    {
+        const double x = clippedPolygon[j].x();
+        const double y = clippedPolygon[j].y();
+
+        if(x < minX) minX = x;
+        if(y < minY) minY = y;
+        if(x > maxX) maxX = x;
+        if(y > maxY) maxY = y;
+    }
+
+    if(_isGradient)
+        updateGradientBrush(maxX - minX + 1, maxY - minY + 1);
+
+    if( this->isAntiAliasing() )
+    {
+        rasterPolygonXWAA(&clippedPolygon[0], clippedPolygon.size(),
+                           _brush.color(), minX, minY, maxX, maxY);
+    }
+    else
+    {
+        rasterPolygonNoAA(&clippedPolygon[0], clippedPolygon.size(),
+                           _brush.color(), minX, minY, maxX, maxY);
+    }
+}
+
+
+void Rasterizer2::fillPolygons(const std::vector<Polygon>& polygons)
+{
+    Pt::int32_t minX =  MAXIMUM_COORD;
+    Pt::int32_t minY =  MAXIMUM_COORD;
+    Pt::int32_t maxX = -MAXIMUM_COORD;
+    Pt::int32_t maxY = -MAXIMUM_COORD;
+
+    std::vector<Polygon> clippedPolygons = polygons;
+
+    for(size_t i = 0; i < clippedPolygons.size(); ++i)
+    {
+        Polygon& polygon = clippedPolygons[i];
+
+        BasicClipShape<double>::clipPolygon(polygon.points(), _currentClip);
+
+        for(size_t j = 0; j < polygon.size(); ++j)
+        {
+            const double x = polygon.at(j).x();
+            const double y = polygon.at(j).y();
+
+            if(x < minX) minX = x;
+            if(y < minY) minY = y;
+            if(x > maxX) maxX = x;
+            if(y > maxY) maxY = y;
+        }
+    }
+
+    if(_isGradient)
+        updateGradientBrush(maxX - minX + 1, maxY - minY + 1);
+
+    if( this->isAntiAliasing() )
+    {
+        rasterPolygonsXWAA(clippedPolygons, _brush.color(), minX, minY, maxX, maxY);
+    }
+    else
+    {
+        rasterPolygonsNoAA(clippedPolygons, _brush.color(), minX, minY, maxX, maxY);
+    }
+}
+
 } // namespace
+
 } // namespace
